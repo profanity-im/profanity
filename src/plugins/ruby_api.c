@@ -53,7 +53,7 @@ ruby_api_cons_show(VALUE self, VALUE v_message)
 {
     char *message = STR2CSTR(v_message);
 
-    if (message != NULL) {
+    if (message) {
         api_cons_show(message);
     }
     return Qnil;
@@ -134,7 +134,7 @@ static VALUE
 ruby_api_get_current_recipient(VALUE self)
 {
     char *recipient = api_get_current_recipient();
-    if (recipient != NULL) {
+    if (recipient) {
         return rb_str_new2(recipient);
     } else {
         return Qnil;
@@ -145,7 +145,7 @@ static VALUE
 ruby_api_get_current_muc(VALUE self)
 {
     char *room = api_get_current_muc();
-    if (room != NULL) {
+    if (room) {
         return rb_str_new2(room);
     } else {
         return Qnil;
@@ -157,7 +157,7 @@ ruby_api_log_debug(VALUE self, VALUE v_message)
 {
     char *message = STR2CSTR(v_message);
 
-    if (message != NULL) {
+    if (message) {
         api_log_debug(message);
     }
     return Qnil;
@@ -168,7 +168,7 @@ ruby_api_log_info(VALUE self, VALUE v_message)
 {
     char *message = STR2CSTR(v_message);
 
-    if (message != NULL) {
+    if (message) {
         api_log_info(message);
     }
     return Qnil;
@@ -179,7 +179,7 @@ ruby_api_log_warning(VALUE self, VALUE v_message)
 {
     char *message = STR2CSTR(v_message);
 
-    if (message != NULL) {
+    if (message) {
         api_log_warning(message);
     }
     return Qnil;
@@ -190,7 +190,7 @@ ruby_api_log_error(VALUE self, VALUE v_message)
 {
     char *message = STR2CSTR(v_message);
 
-    if (message != NULL) {
+    if (message) {
         api_log_error(message);
     }
     return Qnil;
