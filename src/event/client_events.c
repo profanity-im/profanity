@@ -76,9 +76,9 @@ cl_ev_send_msg(ProfChatWin *chatwin, const char * const msg)
 }
 
 void
-cl_ev_send_muc_msg(const char * const roomjid, const char * const msg)
+cl_ev_send_muc_msg(ProfMucWin *mucwin, const char * const msg)
 {
-    message_send_groupchat(roomjid, msg);
+    message_send_groupchat(mucwin->roomjid, msg);
 }
 
 void
