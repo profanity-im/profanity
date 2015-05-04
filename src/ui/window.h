@@ -99,6 +99,11 @@ typedef enum {
     WIN_XML
 } win_type_t;
 
+typedef enum {
+    PROF_ENC_NONE,
+    PROF_ENC_OTR
+} prof_enc_t;
+
 typedef struct prof_win_t {
     win_type_t type;
     ProfLayout *layout;
@@ -113,7 +118,7 @@ typedef struct prof_chat_win_t {
     char *barejid;
     int unread;
     ChatState *state;
-    gboolean is_otr;
+    prof_enc_t enc_mode;
     gboolean is_trusted;
     char *resource_override;
     gboolean history_shown;
