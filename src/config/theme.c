@@ -160,7 +160,7 @@ _theme_load_file(const char * const theme_name)
 {
     // use default theme
     if (theme_name == NULL || strcmp(theme_name, "default") == 0) {
-        if (theme != NULL) {
+        if (theme) {
             g_key_file_free(theme);
         }
         theme = g_key_file_new();
@@ -173,12 +173,12 @@ _theme_load_file(const char * const theme_name)
             return FALSE;
         }
 
-        if (theme_loc != NULL) {
+        if (theme_loc) {
             g_string_free(theme_loc, TRUE);
         }
         theme_loc = new_theme_file;
         log_info("Loading theme \"%s\"", theme_name);
-        if (theme != NULL) {
+        if (theme) {
             g_key_file_free(theme);
         }
         theme = g_key_file_new();
@@ -205,10 +205,10 @@ theme_list(void)
 void
 theme_close(void)
 {
-    if (theme != NULL) {
+    if (theme) {
         g_key_file_free(theme);
     }
-    if (theme_loc != NULL) {
+    if (theme_loc) {
         g_string_free(theme_loc, TRUE);
     }
     if (bold_items) {
@@ -476,9 +476,9 @@ void
 _theme_list_dir(const gchar * const dir, GSList **result)
 {
     GDir *themes = g_dir_open(dir, 0, NULL);
-    if (themes != NULL) {
+    if (themes) {
         const gchar *theme = g_dir_read_name(themes);
-        while (theme != NULL) {
+        while (theme) {
             *result = g_slist_append(*result, strdup(theme));
             theme = g_dir_read_name(themes);
         }
@@ -492,7 +492,7 @@ _theme_find(const char * const theme_name)
     GString *path = NULL;
     gchar *themes_dir = _get_themes_dir();
 
-    if (themes_dir != NULL) {
+    if (themes_dir) {
         path = g_string_new(themes_dir);
         g_free(themes_dir);
         g_string_append(path, "/");

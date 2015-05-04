@@ -95,7 +95,7 @@ create_status_bar(void)
     mvwprintw(status_bar, 0, cols - 34 + ((current - 1) * 3), bracket);
     wattroff(status_bar, bracket_attrs);
 
-    if (last_time != NULL) {
+    if (last_time) {
         g_date_time_unref(last_time);
     }
     last_time = g_date_time_new_now_local();
@@ -127,7 +127,7 @@ status_bar_resize(void)
     mvwprintw(status_bar, 0, cols - 34 + ((current - 1) * 3), bracket);
     wattroff(status_bar, bracket_attrs);
 
-    if (message != NULL) {
+    if (message) {
         char *time_pref = prefs_get_string(PREF_TIME_STATUSBAR);
         if (g_strcmp0(time_pref, "minutes") == 0) {
             mvwprintw(status_bar, 0, 10, message);
@@ -137,7 +137,7 @@ status_bar_resize(void)
             mvwprintw(status_bar, 0, 1, message);
         }
     }
-    if (last_time != NULL) {
+    if (last_time) {
         g_date_time_unref(last_time);
     }
     last_time = g_date_time_new_now_local();
@@ -297,7 +297,7 @@ status_bar_print_message(const char * const msg)
 {
     werase(status_bar);
 
-    if (message != NULL) {
+    if (message) {
         free(message);
     }
     message = strdup(msg);
@@ -325,7 +325,7 @@ status_bar_print_message(const char * const msg)
 void
 status_bar_clear(void)
 {
-    if (message != NULL) {
+    if (message) {
         free(message);
         message = NULL;
     }
@@ -346,7 +346,7 @@ status_bar_clear(void)
 void
 status_bar_clear_message(void)
 {
-    if (message != NULL) {
+    if (message) {
         free(message);
         message = NULL;
     }
@@ -428,7 +428,7 @@ _mark_inactive(int num)
 static void
 _status_bar_draw(void)
 {
-    if (last_time != NULL) {
+    if (last_time) {
         g_date_time_unref(last_time);
     }
     last_time = g_date_time_new_now_local();

@@ -87,7 +87,7 @@ otrlib_end_session(OtrlUserState user_state, const char * const recipient, char 
     ConnContext *context = otrl_context_find(user_state, recipient, jid, "xmpp",
         0, NULL, NULL, NULL);
 
-    if (context != NULL) {
+    if (context) {
         otrl_message_disconnect(user_state, ops, NULL, jid, "xmpp", recipient);
     }
 }
@@ -171,7 +171,7 @@ otrlib_handle_tlvs(OtrlUserState user_state, OtrlMessageAppOps *ops, ConnContext
         } else {
             context->smstate->nextExpected = OTRL_SMP_EXPECT1;
             if (context->smstate->received_question == 0) {
-                if ((context->active_fingerprint->trust != NULL) && (context->active_fingerprint->trust[0] != '\0')) {
+                if (context->active_fingerprint->trust && (context->active_fingerprint->trust[0] != '\0')) {
                     ui_smp_successful(context->username);
                     ui_trust(context->username);
                 } else {
@@ -193,7 +193,7 @@ otrlib_handle_tlvs(OtrlUserState user_state, OtrlMessageAppOps *ops, ConnContext
             otrl_message_abort_smp(user_state, ops, NULL, context);
         } else {
             context->smstate->nextExpected = OTRL_SMP_EXPECT1;
-            if ((context->active_fingerprint->trust != NULL) && (context->active_fingerprint->trust[0] != '\0')) {
+            if (context->active_fingerprint->trust && (context->active_fingerprint->trust[0] != '\0')) {
                 ui_smp_successful(context->username);
                 ui_trust(context->username);
             } else {

@@ -84,7 +84,7 @@ wins_get_chat(const char * const barejid)
     GList *values = g_hash_table_get_values(windows);
     GList *curr = values;
 
-    while (curr != NULL) {
+    while (curr) {
         ProfWin *window = curr->data;
         if (window->type == WIN_CHAT) {
             ProfChatWin *chatwin = (ProfChatWin*)window;
@@ -106,7 +106,7 @@ wins_get_muc_conf(const char * const roomjid)
     GList *values = g_hash_table_get_values(windows);
     GList *curr = values;
 
-    while (curr != NULL) {
+    while (curr) {
         ProfWin *window = curr->data;
         if (window->type == WIN_MUC_CONFIG) {
             ProfMucConfWin *confwin = (ProfMucConfWin*)window;
@@ -128,7 +128,7 @@ wins_get_muc(const char * const roomjid)
     GList *values = g_hash_table_get_values(windows);
     GList *curr = values;
 
-    while (curr != NULL) {
+    while (curr) {
         ProfWin *window = curr->data;
         if (window->type == WIN_MUC) {
             ProfMucWin *mucwin = (ProfMucWin*)window;
@@ -150,7 +150,7 @@ wins_get_private(const char * const fulljid)
     GList *values = g_hash_table_get_values(windows);
     GList *curr = values;
 
-    while (curr != NULL) {
+    while (curr) {
         ProfWin *window = curr->data;
         if (window->type == WIN_PRIVATE) {
             ProfPrivateWin *privatewin = (ProfPrivateWin*)window;
@@ -190,7 +190,7 @@ wins_get_plugin(const char * const tag)
 ProfWin *
 wins_get_current(void)
 {
-    if (windows != NULL) {
+    if (windows) {
         return g_hash_table_lookup(windows, GINT_TO_POINTER(current));
     } else {
         return NULL;
@@ -307,7 +307,7 @@ wins_get_next(void)
     GList *curr = keys;
 
     // find our place in the list
-    while (curr != NULL) {
+    while (curr) {
         if (current == GPOINTER_TO_INT(curr->data)) {
             break;
         }
@@ -316,7 +316,7 @@ wins_get_next(void)
 
     // if there is a next window return it
     curr = g_list_next(curr);
-    if (curr != NULL) {
+    if (curr) {
         int next = GPOINTER_TO_INT(curr->data);
         g_list_free(keys);
         return wins_get_by_num(next);
@@ -336,7 +336,7 @@ wins_get_previous(void)
     GList *curr = keys;
 
     // find our place in the list
-    while (curr != NULL) {
+    while (curr) {
         if (current == GPOINTER_TO_INT(curr->data)) {
             break;
         }
@@ -345,7 +345,7 @@ wins_get_previous(void)
 
     // if there is a previous window return it
     curr = g_list_previous(curr);
-    if (curr != NULL) {
+    if (curr) {
         int previous = GPOINTER_TO_INT(curr->data);
         g_list_free(keys);
         return wins_get_by_num(previous);
@@ -363,7 +363,7 @@ wins_get_num(ProfWin *window)
     GList *keys = g_hash_table_get_keys(windows);
     GList *curr = keys;
 
-    while (curr != NULL) {
+    while (curr) {
         gconstpointer num_p = curr->data;
         ProfWin *curr_win = g_hash_table_lookup(windows, num_p);
         if (curr_win == window) {
@@ -500,7 +500,7 @@ wins_get_total_unread(void)
     GList *values = g_hash_table_get_values(windows);
     GList *curr = values;
 
-    while (curr != NULL) {
+    while (curr) {
         ProfWin *window = curr->data;
         result += win_unread(window);
         curr = g_list_next(curr);
@@ -516,7 +516,7 @@ wins_resize_all(void)
 
     GList *values = g_hash_table_get_values(windows);
     GList *curr = values;
-    while (curr != NULL) {
+    while (curr) {
         ProfWin *window = curr->data;
         int subwin_cols = 0;
 
@@ -596,7 +596,7 @@ wins_get_xmlconsole(void)
     GList *values = g_hash_table_get_values(windows);
     GList *curr = values;
 
-    while (curr != NULL) {
+    while (curr) {
         ProfWin *window = curr->data;
         if (window->type == WIN_XML) {
             ProfXMLWin *xmlwin = (ProfXMLWin*)window;
@@ -618,7 +618,7 @@ wins_get_chat_recipients(void)
     GList *values = g_hash_table_get_values(windows);
     GList *curr = values;
 
-    while (curr != NULL) {
+    while (curr) {
         ProfWin *window = curr->data;
         if (window->type == WIN_CHAT) {
             ProfChatWin *chatwin = (ProfChatWin*)window;
@@ -637,7 +637,7 @@ wins_get_prune_wins(void)
     GList *values = g_hash_table_get_values(windows);
     GList *curr = values;
 
-    while (curr != NULL) {
+    while (curr) {
         ProfWin *window = curr->data;
         if (win_unread(window) == 0 &&
                 window->type != WIN_MUC &&
@@ -658,7 +658,7 @@ wins_lost_connection(void)
     GList *values = g_hash_table_get_values(windows);
     GList *curr = values;
 
-    while (curr != NULL) {
+    while (curr) {
         ProfWin *window = curr->data;
         if (window->type != WIN_CONSOLE) {
             win_print(window, '-', NULL, 0, THEME_ERROR, "", "Lost connection.");
@@ -751,7 +751,7 @@ wins_tidy(void)
 
         int num = 1;
         GList *curr = keys;
-        while (curr != NULL) {
+        while (curr) {
             ProfWin *window = g_hash_table_lookup(windows, curr->data);
             if (num == 10) {
                 g_hash_table_insert(new_windows, GINT_TO_POINTER(0), window);
@@ -793,7 +793,7 @@ wins_create_summary(void)
     keys = g_list_sort(keys, cmp_win_num);
     GList *curr = keys;
 
-    while (curr != NULL) {
+    while (curr) {
         ProfWin *window = g_hash_table_lookup(windows, curr->data);
         int ui_index = GPOINTER_TO_INT(curr->data);
 

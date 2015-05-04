@@ -211,7 +211,7 @@ form_create(xmpp_stanza_t * const form_stanza)
 
             field->var = _get_attr(field_stanza, "var");
 
-            if (field->type_t != FIELD_HIDDEN && field->var != NULL) {
+            if (field->type_t != FIELD_HIDDEN && field->var) {
                 GString *tag = g_string_new("");
                 g_string_printf(tag, "field%d", tag_num++);
                 g_hash_table_insert(form->var_to_tag, strdup(field->var), strdup(tag->str));

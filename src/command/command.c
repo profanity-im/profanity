@@ -1256,7 +1256,7 @@ cmd_init(void)
     // load aliases
     GList *aliases = prefs_get_aliases();
     GList *curr = aliases;
-    while (curr != NULL) {
+    while (curr) {
         ProfAlias *alias = curr->data;
         GString *ac_alias = g_string_new("/");
         g_string_append(ac_alias, alias->name);
@@ -1654,7 +1654,7 @@ cmd_exists(char *cmd)
 void
 cmd_autocomplete_add(const char * const value)
 {
-    if (commands_ac != NULL) {
+    if (commands_ac) {
         autocomplete_add(commands_ac, value);
     }
 }
@@ -1696,7 +1696,7 @@ cmd_autocomplete_remove_form_fields(DataForm *form)
 void
 cmd_autocomplete_remove(const char * const value)
 {
-    if (commands_ac != NULL) {
+    if (commands_ac) {
         autocomplete_remove(commands_ac, value);
     }
 }
@@ -1704,7 +1704,7 @@ cmd_autocomplete_remove(const char * const value)
 void
 cmd_alias_add(char *value)
 {
-    if (aliases_ac != NULL) {
+    if (aliases_ac) {
         autocomplete_add(aliases_ac, value);
     }
 }
@@ -1712,7 +1712,7 @@ cmd_alias_add(char *value)
 void
 cmd_alias_remove(char *value)
 {
-    if (aliases_ac != NULL) {
+    if (aliases_ac) {
         autocomplete_remove(aliases_ac, value);
     }
 }
@@ -1725,7 +1725,7 @@ cmd_autocomplete(const char * const input)
     if ((strncmp(input, "/", 1) == 0) && (!str_contains(input, strlen(input), ' '))) {
         char *found = NULL;
         found = autocomplete_complete(commands_ac, input, TRUE);
-        if (found != NULL) {
+        if (found) {
             return found;
         }
 
@@ -1765,7 +1765,7 @@ cmd_reset_autocomplete()
     autocomplete_reset(autoaway_mode_ac);
     autocomplete_reset(autoconnect_ac);
     autocomplete_reset(theme_ac);
-    if (theme_load_ac != NULL) {
+    if (theme_load_ac) {
         autocomplete_free(theme_load_ac);
         theme_load_ac = NULL;
     }
@@ -1897,7 +1897,7 @@ _cmd_execute(const char * const command, const char * const inp)
     Command *cmd = g_hash_table_lookup(commands, command);
     gboolean result = FALSE;
 
-    if (cmd != NULL) {
+    if (cmd) {
         gchar **args = cmd->parser(inp, cmd->min_args, cmd->max_args, &result);
         if (result == FALSE) {
             ui_invalid_command_usage(cmd->help.usage, cmd->setting_func);
@@ -2046,7 +2046,7 @@ _cmd_complete_parameters(const char * const input)
     parsed[i] = '\0';
 
     char * (*ac_func)(const char * const) = g_hash_table_lookup(ac_funcs, parsed);
-    if (ac_func != NULL) {
+    if (ac_func) {
         result = ac_func(input);
         if (result) {
             g_hash_table_destroy(ac_funcs);
@@ -2077,15 +2077,15 @@ _sub_autocomplete(const char * const input)
 {
     char *result = NULL;
     result = autocomplete_param_with_func(input, "/sub allow", presence_sub_request_find);
-    if (result != NULL) {
+    if (result) {
         return result;
     }
     result = autocomplete_param_with_func(input, "/sub deny", presence_sub_request_find);
-    if (result != NULL) {
+    if (result) {
         return result;
     }
     result = autocomplete_param_with_ac(input, "/sub", sub_ac, TRUE);
-    if (result != NULL) {
+    if (result) {
         return result;
     }
 
@@ -2100,7 +2100,7 @@ _who_autocomplete(const char * const input)
 
     if (win_type == WIN_MUC) {
         result = autocomplete_param_with_ac(input, "/who", who_room_ac, TRUE);
-        if (result != NULL) {
+        if (result) {
             return result;
         }
     } else {
@@ -2111,13 +2111,13 @@ _who_autocomplete(const char * const input)
 
         for (i = 0; i < ARRAY_SIZE(group_commands); i++) {
             result = autocomplete_param_with_func(input, group_commands[i], roster_group_autocomplete);
-            if (result != NULL) {
+            if (result) {
                 return result;
             }
         }
 
         result = autocomplete_param_with_ac(input, "/who", who_roster_ac, TRUE);
-        if (result != NULL) {
+        if (result) {
             return result;
         }
     }
@@ -2130,31 +2130,31 @@ _roster_autocomplete(const char * const input)
 {
     char *result = NULL;
     result = autocomplete_param_with_func(input, "/roster nick", roster_barejid_autocomplete);
-    if (result != NULL) {
+    if (result) {
         return result;
     }
     result = autocomplete_param_with_func(input, "/roster clearnick", roster_barejid_autocomplete);
-    if (result != NULL) {
+    if (result) {
         return result;
     }
     result = autocomplete_param_with_func(input, "/roster remove", roster_barejid_autocomplete);
-    if (result != NULL) {
+    if (result) {
         return result;
     }
     result = autocomplete_param_with_ac(input, "/roster show", roster_option_ac, TRUE);
-    if (result != NULL) {
+    if (result) {
         return result;
     }
     result = autocomplete_param_with_ac(input, "/roster hide", roster_option_ac, TRUE);
-    if (result != NULL) {
+    if (result) {
         return result;
     }
     result = autocomplete_param_with_ac(input, "/roster by", roster_by_ac, TRUE);
-    if (result != NULL) {
+    if (result) {
         return result;
     }
     result = autocomplete_param_with_ac(input, "/roster", roster_ac, TRUE);
-    if (result != NULL) {
+    if (result) {
         return result;
     }
 
@@ -2166,28 +2166,28 @@ _group_autocomplete(const char * const input)
 {
     char *result = NULL;
     result = autocomplete_param_with_func(input, "/group show", roster_group_autocomplete);
-    if (result != NULL) {
+    if (result) {
         return result;
     }
 
     result = autocomplete_param_no_with_func(input, "/group add", 4, roster_contact_autocomplete);
-    if (result != NULL) {
+    if (result) {
         return result;
     }
     result = autocomplete_param_no_with_func(input, "/group remove", 4, roster_contact_autocomplete);
-    if (result != NULL) {
+    if (result) {
         return result;
     }
     result = autocomplete_param_with_func(input, "/group add", roster_group_autocomplete);
-    if (result != NULL) {
+    if (result) {
         return result;
     }
     result = autocomplete_param_with_func(input, "/group remove", roster_group_autocomplete);
-    if (result != NULL) {
+    if (result) {
         return result;
     }
     result = autocomplete_param_with_ac(input, "/group", group_ac, TRUE);
-    if (result != NULL) {
+    if (result) {
         return result;
     }
 
@@ -2248,7 +2248,7 @@ _bookmark_autocomplete(const char * const input)
             found = autocomplete_param_with_ac(input, beginning->str, bookmark_property_ac, TRUE);
         }
         g_string_free(beginning, TRUE);
-        if (found != NULL) {
+        if (found) {
             g_strfreev(args);
             return found;
         }
@@ -2257,15 +2257,15 @@ _bookmark_autocomplete(const char * const input)
     g_strfreev(args);
 
     found = autocomplete_param_with_func(input, "/bookmark remove", bookmark_find);
-    if (found != NULL) {
+    if (found) {
         return found;
     }
     found = autocomplete_param_with_func(input, "/bookmark join", bookmark_find);
-    if (found != NULL) {
+    if (found) {
         return found;
     }
     found = autocomplete_param_with_func(input, "/bookmark update", bookmark_find);
-    if (found != NULL) {
+    if (found) {
         return found;
     }
 
@@ -2280,42 +2280,42 @@ _notify_autocomplete(const char * const input)
     char *result = NULL;
 
     result = autocomplete_param_with_func(input, "/notify room current", prefs_autocomplete_boolean_choice);
-    if (result != NULL) {
+    if (result) {
         return result;
     }
 
     result = autocomplete_param_with_func(input, "/notify message current", prefs_autocomplete_boolean_choice);
-    if (result != NULL) {
+    if (result) {
         return result;
     }
 
     result = autocomplete_param_with_func(input, "/notify typing current", prefs_autocomplete_boolean_choice);
-    if (result != NULL) {
+    if (result) {
         return result;
     }
 
     result = autocomplete_param_with_func(input, "/notify room text", prefs_autocomplete_boolean_choice);
-    if (result != NULL) {
+    if (result) {
         return result;
     }
 
     result = autocomplete_param_with_func(input, "/notify message text", prefs_autocomplete_boolean_choice);
-    if (result != NULL) {
+    if (result) {
         return result;
     }
 
     result = autocomplete_param_with_ac(input, "/notify room", notify_room_ac, TRUE);
-    if (result != NULL) {
+    if (result) {
         return result;
     }
 
     result = autocomplete_param_with_ac(input, "/notify message", notify_message_ac, TRUE);
-    if (result != NULL) {
+    if (result) {
         return result;
     }
 
     result = autocomplete_param_with_ac(input, "/notify typing", notify_typing_ac, TRUE);
-    if (result != NULL) {
+    if (result) {
         return result;
     }
 
@@ -2323,13 +2323,13 @@ _notify_autocomplete(const char * const input)
     for (i = 0; i < ARRAY_SIZE(boolean_choices); i++) {
         result = autocomplete_param_with_func(input, boolean_choices[i],
             prefs_autocomplete_boolean_choice);
-        if (result != NULL) {
+        if (result) {
             return result;
         }
     }
 
     result = autocomplete_param_with_ac(input, "/notify", notify_ac, TRUE);
-    if (result != NULL) {
+    if (result) {
         return result;
     }
 
@@ -2342,16 +2342,16 @@ _autoaway_autocomplete(const char * const input)
     char *result = NULL;
 
     result = autocomplete_param_with_ac(input, "/autoaway mode", autoaway_mode_ac, TRUE);
-    if (result != NULL) {
+    if (result) {
         return result;
     }
     result = autocomplete_param_with_func(input, "/autoaway check",
         prefs_autocomplete_boolean_choice);
-    if (result != NULL) {
+    if (result) {
         return result;
     }
     result = autocomplete_param_with_ac(input, "/autoaway", autoaway_ac, TRUE);
-    if (result != NULL) {
+    if (result) {
         return result;
     }
 
@@ -2365,16 +2365,16 @@ _log_autocomplete(const char * const input)
 
     result = autocomplete_param_with_func(input, "/log rotate",
         prefs_autocomplete_boolean_choice);
-    if (result != NULL) {
+    if (result) {
         return result;
     }
     result = autocomplete_param_with_func(input, "/log shared",
         prefs_autocomplete_boolean_choice);
-    if (result != NULL) {
+    if (result) {
         return result;
     }
     result = autocomplete_param_with_ac(input, "/log", log_ac, TRUE);
-    if (result != NULL) {
+    if (result) {
         return result;
     }
 
@@ -2387,12 +2387,12 @@ _autoconnect_autocomplete(const char * const input)
     char *result = NULL;
 
     result = autocomplete_param_with_func(input, "/autoconnect set", accounts_find_enabled);
-    if (result != NULL) {
+    if (result) {
         return result;
     }
 
     result = autocomplete_param_with_ac(input, "/autoconnect", autoconnect_ac, TRUE);
-    if (result != NULL) {
+    if (result) {
         return result;
     }
 
@@ -2405,12 +2405,12 @@ _otr_autocomplete(const char * const input)
     char *found = NULL;
 
     found = autocomplete_param_with_func(input, "/otr start", roster_contact_autocomplete);
-    if (found != NULL) {
+    if (found) {
         return found;
     }
 
     found = autocomplete_param_with_ac(input, "/otr log", otr_log_ac, TRUE);
-    if (found != NULL) {
+    if (found) {
         return found;
     }
 
@@ -2425,7 +2425,7 @@ _otr_autocomplete(const char * const input)
 
         found = autocomplete_param_with_func(input, beginning->str, roster_contact_autocomplete);
         g_string_free(beginning, TRUE);
-        if (found != NULL) {
+        if (found) {
             g_strfreev(args);
             return found;
         }
@@ -2434,18 +2434,18 @@ _otr_autocomplete(const char * const input)
     g_strfreev(args);
 
     found = autocomplete_param_with_ac(input, "/otr policy", otr_policy_ac, TRUE);
-    if (found != NULL) {
+    if (found) {
         return found;
     }
 
     found = autocomplete_param_with_func(input, "/otr warn",
         prefs_autocomplete_boolean_choice);
-    if (found != NULL) {
+    if (found) {
         return found;
     }
 
     found = autocomplete_param_with_ac(input, "/otr", otr_ac, TRUE);
-    if (found != NULL) {
+    if (found) {
         return found;
     }
 
@@ -2461,7 +2461,7 @@ _theme_autocomplete(const char * const input)
             theme_load_ac = autocomplete_new();
             GSList *themes = theme_list();
             GSList *curr = themes;
-            while (curr != NULL) {
+            while (curr) {
                 autocomplete_add(theme_load_ac, curr->data);
                 curr = g_slist_next(curr);
             }
@@ -2469,12 +2469,12 @@ _theme_autocomplete(const char * const input)
             autocomplete_add(theme_load_ac, "default");
         }
         result = autocomplete_param_with_ac(input, "/theme load", theme_load_ac, TRUE);
-        if (result != NULL) {
+        if (result) {
             return result;
         }
     }
     result = autocomplete_param_with_ac(input, "/theme", theme_ac, TRUE);
-    if (result != NULL) {
+    if (result) {
         return result;
     }
 
@@ -2493,24 +2493,24 @@ _resource_autocomplete(const char * const input)
         if (contact) {
             Autocomplete ac = p_contact_resource_ac(contact);
             found = autocomplete_param_with_ac(input, "/resource set", ac, FALSE);
-            if (found != NULL) {
+            if (found) {
                 return found;
             }
         }
     }
 
     found = autocomplete_param_with_func(input, "/resource title", prefs_autocomplete_boolean_choice);
-    if (found != NULL) {
+    if (found) {
         return found;
     }
 
     found = autocomplete_param_with_func(input, "/resource message", prefs_autocomplete_boolean_choice);
-    if (found != NULL) {
+    if (found) {
         return found;
     }
 
     found = autocomplete_param_with_ac(input, "/resource", resource_ac, FALSE);
-    if (found != NULL) {
+    if (found) {
         return found;
     }
 
@@ -2523,17 +2523,17 @@ _titlebar_autocomplete(const char * const input)
     char *found = NULL;
 
     found = autocomplete_param_with_func(input, "/titlebar show", prefs_autocomplete_boolean_choice);
-    if (found != NULL) {
+    if (found) {
         return found;
     }
 
     found = autocomplete_param_with_func(input, "/titlebar goodbye", prefs_autocomplete_boolean_choice);
-    if (found != NULL) {
+    if (found) {
         return found;
     }
 
     found = autocomplete_param_with_ac(input, "/titlebar", titlebar_ac, FALSE);
-    if (found != NULL) {
+    if (found) {
         return found;
     }
 
@@ -2546,12 +2546,12 @@ _inpblock_autocomplete(const char * const input)
     char *found = NULL;
 
     found = autocomplete_param_with_func(input, "/inpblock dynamic", prefs_autocomplete_boolean_choice);
-    if (found != NULL) {
+    if (found) {
         return found;
     }
 
     found = autocomplete_param_with_ac(input, "/inpblock", inpblock_ac, FALSE);
-    if (found != NULL) {
+    if (found) {
         return found;
     }
 
@@ -2572,13 +2572,13 @@ _form_autocomplete(const char * const input)
     DataForm *form = confwin->form;
     if (form) {
         found = autocomplete_param_with_ac(input, "/form help", form->tag_ac, TRUE);
-        if (found != NULL) {
+        if (found) {
             return found;
         }
     }
 
     found = autocomplete_param_with_ac(input, "/form", form_ac, TRUE);
-    if (found != NULL) {
+    if (found) {
         return found;
     }
 
@@ -2662,32 +2662,32 @@ _occupants_autocomplete(const char * const input)
     char *found = NULL;
 
     found = autocomplete_param_with_ac(input, "/occupants default show", occupants_show_ac, TRUE);
-    if (found != NULL) {
+    if (found) {
         return found;
     }
 
     found = autocomplete_param_with_ac(input, "/occupants default hide", occupants_show_ac, TRUE);
-    if (found != NULL) {
+    if (found) {
         return found;
     }
 
     found = autocomplete_param_with_ac(input, "/occupants default", occupants_default_ac, TRUE);
-    if (found != NULL) {
+    if (found) {
         return found;
     }
 
     found = autocomplete_param_with_ac(input, "/occupants show", occupants_show_ac, TRUE);
-    if (found != NULL) {
+    if (found) {
         return found;
     }
 
     found = autocomplete_param_with_ac(input, "/occupants hide", occupants_show_ac, TRUE);
-    if (found != NULL) {
+    if (found) {
         return found;
     }
 
     found = autocomplete_param_with_ac(input, "/occupants", occupants_ac, TRUE);
-    if (found != NULL) {
+    if (found) {
         return found;
     }
 
@@ -2700,12 +2700,12 @@ _time_autocomplete(const char * const input)
     char *found = NULL;
 
     found = autocomplete_param_with_ac(input, "/time statusbar", time_statusbar_ac, TRUE);
-    if (found != NULL) {
+    if (found) {
         return found;
     }
 
     found = autocomplete_param_with_ac(input, "/time", time_ac, TRUE);
-    if (found != NULL) {
+    if (found) {
         return found;
     }
 
@@ -2721,9 +2721,9 @@ _kick_autocomplete(const char * const input)
         ProfMucWin *mucwin = wins_get_current_muc();
         Autocomplete nick_ac = muc_roster_ac(mucwin->roomjid);
 
-        if (nick_ac != NULL) {
+        if (nick_ac) {
             result = autocomplete_param_with_ac(input, "/kick", nick_ac, TRUE);
-            if (result != NULL) {
+            if (result) {
                 return result;
             }
         }
@@ -2741,9 +2741,9 @@ _ban_autocomplete(const char * const input)
         ProfMucWin *mucwin = wins_get_current_muc();
         Autocomplete jid_ac = muc_roster_jid_ac(mucwin->roomjid);
 
-        if (jid_ac != NULL) {
+        if (jid_ac) {
             result = autocomplete_param_with_ac(input, "/ban", jid_ac, TRUE);
-            if (result != NULL) {
+            if (result) {
                 return result;
             }
         }
@@ -2772,7 +2772,7 @@ _affiliation_autocomplete(const char * const input)
 
             result = autocomplete_param_with_ac(input, beginning->str, jid_ac, TRUE);
             g_string_free(beginning, TRUE);
-            if (result != NULL) {
+            if (result) {
                 g_strfreev(args);
                 return result;
             }
@@ -2782,17 +2782,17 @@ _affiliation_autocomplete(const char * const input)
     }
 
     result = autocomplete_param_with_ac(input, "/affiliation set", affiliation_ac, TRUE);
-    if (result != NULL) {
+    if (result) {
         return result;
     }
 
     result = autocomplete_param_with_ac(input, "/affiliation list", affiliation_ac, TRUE);
-    if (result != NULL) {
+    if (result) {
         return result;
     }
 
     result = autocomplete_param_with_ac(input, "/affiliation", privilege_cmd_ac, TRUE);
-    if (result != NULL) {
+    if (result) {
         return result;
     }
 
@@ -2819,7 +2819,7 @@ _role_autocomplete(const char * const input)
 
             result = autocomplete_param_with_ac(input, beginning->str, nick_ac, TRUE);
             g_string_free(beginning, TRUE);
-            if (result != NULL) {
+            if (result) {
                 g_strfreev(args);
                 return result;
             }
@@ -2829,17 +2829,17 @@ _role_autocomplete(const char * const input)
     }
 
     result = autocomplete_param_with_ac(input, "/role set", role_ac, TRUE);
-    if (result != NULL) {
+    if (result) {
         return result;
     }
 
     result = autocomplete_param_with_ac(input, "/role list", role_ac, TRUE);
-    if (result != NULL) {
+    if (result) {
         return result;
     }
 
     result = autocomplete_param_with_ac(input, "/role", privilege_cmd_ac, TRUE);
-    if (result != NULL) {
+    if (result) {
         return result;
     }
 
@@ -2852,22 +2852,22 @@ _statuses_autocomplete(const char * const input)
     char *result = NULL;
 
     result = autocomplete_param_with_ac(input, "/statuses console", statuses_setting_ac, TRUE);
-    if (result != NULL) {
+    if (result) {
         return result;
     }
 
     result = autocomplete_param_with_ac(input, "/statuses chat", statuses_setting_ac, TRUE);
-    if (result != NULL) {
+    if (result) {
         return result;
     }
 
     result = autocomplete_param_with_ac(input, "/statuses muc", statuses_setting_ac, TRUE);
-    if (result != NULL) {
+    if (result) {
         return result;
     }
 
     result = autocomplete_param_with_ac(input, "/statuses", statuses_ac, TRUE);
-    if (result != NULL) {
+    if (result) {
         return result;
     }
 
@@ -2880,17 +2880,17 @@ _receipts_autocomplete(const char * const input)
     char *result = NULL;
 
     result = autocomplete_param_with_func(input, "/receipts send", prefs_autocomplete_boolean_choice);
-    if (result != NULL) {
+    if (result) {
         return result;
     }
 
     result = autocomplete_param_with_func(input, "/receipts request", prefs_autocomplete_boolean_choice);
-    if (result != NULL) {
+    if (result) {
         return result;
     }
 
     result = autocomplete_param_with_ac(input, "/receipts", receipts_ac, TRUE);
-    if (result != NULL) {
+    if (result) {
         return result;
     }
 
@@ -2903,12 +2903,12 @@ _alias_autocomplete(const char * const input)
     char *result = NULL;
 
     result = autocomplete_param_with_ac(input, "/alias remove", aliases_ac, TRUE);
-    if (result != NULL) {
+    if (result) {
         return result;
     }
 
     result = autocomplete_param_with_ac(input, "/alias", alias_ac, TRUE);
-    if (result != NULL) {
+    if (result) {
         return result;
     }
 
@@ -2926,7 +2926,7 @@ _connect_autocomplete(const char * const input)
     if ((strncmp(input, "/connect", 8) == 0) && (result == TRUE)) {
         GString *beginning = g_string_new("/connect ");
         g_string_append(beginning, args[0]);
-        if (args[1] != NULL && args[2] != NULL) {
+        if (args[1] && args[2]) {
             g_string_append(beginning, " ");
             g_string_append(beginning, args[1]);
             g_string_append(beginning, " ");
@@ -2934,7 +2934,7 @@ _connect_autocomplete(const char * const input)
         }
         found = autocomplete_param_with_ac(input, beginning->str, connect_property_ac, TRUE);
         g_string_free(beginning, TRUE);
-        if (found != NULL) {
+        if (found) {
             g_strfreev(args);
             return found;
         }
@@ -2943,7 +2943,7 @@ _connect_autocomplete(const char * const input)
     g_strfreev(args);
 
     found = autocomplete_param_with_func(input, "/connect", accounts_find_enabled);
-    if (found != NULL) {
+    if (found) {
         return found;
     }
 
@@ -2957,7 +2957,7 @@ _join_autocomplete(const char * const input)
     gboolean result = FALSE;
 
     found = autocomplete_param_with_func(input, "/join", bookmark_find);
-    if (found != NULL) {
+    if (found) {
         return found;
     }
 
@@ -2966,7 +2966,7 @@ _join_autocomplete(const char * const input)
     if ((strncmp(input, "/join", 5) == 0) && (result == TRUE)) {
         GString *beginning = g_string_new("/join ");
         g_string_append(beginning, args[0]);
-        if (args[1] != NULL && args[2] != NULL) {
+        if (args[1] && args[2]) {
             g_string_append(beginning, " ");
             g_string_append(beginning, args[1]);
             g_string_append(beginning, " ");
@@ -2974,7 +2974,7 @@ _join_autocomplete(const char * const input)
         }
         found = autocomplete_param_with_ac(input, beginning->str, join_property_ac, TRUE);
         g_string_free(beginning, TRUE);
-        if (found != NULL) {
+        if (found) {
             g_strfreev(args);
             return found;
         }
@@ -3001,14 +3001,14 @@ _account_autocomplete(const char * const input)
             g_string_append(beginning, args[2]);
             found = autocomplete_param_with_ac(input, beginning->str, otr_policy_ac, TRUE);
             g_string_free(beginning, TRUE);
-            if (found != NULL) {
+            if (found) {
                 g_strfreev(args);
                 return found;
             }
         } else {
             found = autocomplete_param_with_ac(input, beginning->str, account_set_ac, TRUE);
             g_string_free(beginning, TRUE);
-            if (found != NULL) {
+            if (found) {
                 g_strfreev(args);
                 return found;
             }
@@ -3020,7 +3020,7 @@ _account_autocomplete(const char * const input)
         g_string_append(beginning, args[1]);
         found = autocomplete_param_with_ac(input, beginning->str, account_clear_ac, TRUE);
         g_string_free(beginning, TRUE);
-        if (found != NULL) {
+        if (found) {
             g_strfreev(args);
             return found;
         }
@@ -3040,7 +3040,7 @@ _account_autocomplete(const char * const input)
 
     for (i = 0; i < ARRAY_SIZE(account_choice); i++) {
         found = autocomplete_param_with_func(input, account_choice[i], accounts_find_all);
-        if (found != NULL) {
+        if (found) {
             return found;
         }
     }
@@ -3085,7 +3085,7 @@ command_docgen(void)
         fputs("<p>Details:</p>\n", main_fragment);
         fputs("<p><pre><code>", main_fragment);
         int i = 2;
-        while (pcmd->help.long_help[i] != NULL) {
+        while (pcmd->help.long_help[i]) {
             fprintf(main_fragment, "%s\n", pcmd->help.long_help[i++]);
         }
         fputs("</code></pre></p>\n<a href=\"#top\"><h5>back to top</h5></a><br><hr>\n", main_fragment);

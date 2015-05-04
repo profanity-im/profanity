@@ -253,7 +253,7 @@ otrlib_end_session(OtrlUserState user_state, const char * const recipient, char 
     ConnContext *context = otrl_context_find(user_state, recipient, jid, "xmpp",
         OTRL_INSTAG_MASTER, 0, NULL, NULL, NULL);
 
-    if (context != NULL) {
+    if (context) {
         otrl_message_disconnect(user_state, ops, NULL, jid, "xmpp", recipient, 0);
     }
 }

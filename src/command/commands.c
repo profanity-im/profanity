@@ -412,7 +412,7 @@ cmd_account(gchar **args, struct cmd_help_t help)
                     } else {
                         accounts_set_jid(account_name, jid->barejid);
                         cons_show("Updated jid for account %s: %s", account_name, jid->barejid);
-                        if (jid->resourcepart != NULL) {
+                        if (jid->resourcepart) {
                             accounts_set_resource(account_name, jid->resourcepart);
                             cons_show("Updated resource for account %s: %s", account_name, jid->resourcepart);
                         }
@@ -442,7 +442,7 @@ cmd_account(gchar **args, struct cmd_help_t help)
                     cons_show("Updated resource for account %s: %s", account_name, value);
                     cons_show("");
                 } else if (strcmp(property, "password") == 0) {
-                    if(accounts_get_account(account_name)->eval_password != NULL) {
+                    if(accounts_get_account(account_name)->eval_password) {
                         cons_show("Cannot set password when eval_password is set.");
                     } else {
                         accounts_set_password(account_name, value);
@@ -450,7 +450,7 @@ cmd_account(gchar **args, struct cmd_help_t help)
                         cons_show("");
                     }
                 } else if (strcmp(property, "eval_password") == 0) {
-                    if(accounts_get_account(account_name)->password != NULL) {
+                    if(accounts_get_account(account_name)->password) {
                         cons_show("Cannot set eval_password when password is set.");
                     } else {
                         accounts_set_eval_password(account_name, value);
@@ -763,7 +763,7 @@ cmd_help(gchar **args, struct cmd_help_t help)
         }
 
         GList *curr = ordered_commands;
-        while (curr != NULL) {
+        while (curr) {
             Command *cmd = curr->data;
             cons_show("%-12s: %s", cmd->cmd, cmd->help.short_help);
             curr = g_list_next(curr);
@@ -825,12 +825,12 @@ cmd_help(gchar **args, struct cmd_help_t help)
         const gchar **help_text = NULL;
         Command *command = g_hash_table_lookup(commands, cmd_with_slash);
 
-        if (command != NULL) {
+        if (command) {
             help_text = command->help.long_help;
         }
 
         cons_show("");
-        if (help_text != NULL) {
+        if (help_text) {
             ProfWin *console = wins_get_console();
             ui_show_lines(console, help_text);
         } else {
@@ -936,13 +936,13 @@ cmd_theme(gchar **args, struct cmd_help_t help)
 static void
 _who_room(gchar **args, struct cmd_help_t help)
 {
-    if ((g_strv_length(args) == 2) && (args[1] != NULL)) {
+    if ((g_strv_length(args) == 2) && args[1]) {
         cons_show("Argument group is not applicable to chat rooms.");
         return;
     }
 
     // bad arg
-    if (args[0] != NULL &&
+    if (args[0] &&
             (g_strcmp0(args[0], "online") != 0) &&
             (g_strcmp0(args[0], "available") != 0) &&
             (g_strcmp0(args[0], "unavailable") != 0) &&
@@ -986,7 +986,7 @@ _who_room(gchar **args, struct cmd_help_t help)
         } else if (strcmp("available", presence) == 0) {
             GList *filtered = NULL;
 
-            while (occupants != NULL) {
+            while (occupants) {
                 Occupant *occupant = occupants->data;
                 if (muc_occupant_available(occupant)) {
                     filtered = g_list_append(filtered, occupant);
@@ -1000,7 +1000,7 @@ _who_room(gchar **args, struct cmd_help_t help)
         } else if (strcmp("unavailable", presence) == 0) {
             GList *filtered = NULL;
 
-            while (occupants != NULL) {
+            while (occupants) {
                 Occupant *occupant = occupants->data;
                 if (!muc_occupant_available(occupant)) {
                     filtered = g_list_append(filtered, occupant);
@@ -1014,7 +1014,7 @@ _who_room(gchar **args, struct cmd_help_t help)
         } else {
             GList *filtered = NULL;
 
-            while (occupants != NULL) {
+            while (occupants) {
                 Occupant *occupant = occupants->data;
                 const char *presence_str = string_from_resource_presence(occupant->presence);
                 if (strcmp(presence_str, presence) == 0) {
@@ -1068,7 +1068,7 @@ _who_roster(gchar **args, struct cmd_help_t help)
     char *presence = args[0];
 
     // bad arg
-    if ((presence != NULL)
+    if (presence
             && (strcmp(presence, "online") != 0)
             && (strcmp(presence, "available") != 0)
             && (strcmp(presence, "unavailable") != 0)
@@ -1083,13 +1083,13 @@ _who_roster(gchar **args, struct cmd_help_t help)
     }
 
     char *group = NULL;
-    if ((g_strv_length(args) == 2) && (args[1] != NULL)) {
+    if ((g_strv_length(args) == 2) && args[1]) {
         group = args[1];
     }
 
     cons_show("");
     GSList *list = NULL;
-    if (group != NULL) {
+    if (group) {
         list = roster_get_group(group);
         if (list == NULL) {
             cons_show("No such group: %s.", group);
@@ -1105,7 +1105,7 @@ _who_roster(gchar **args, struct cmd_help_t help)
 
     // no arg, show all contacts
     if ((presence == NULL) || (g_strcmp0(presence, "any") == 0)) {
-        if (group != NULL) {
+        if (group) {
             if (list == NULL) {
                 cons_show("No contacts in group %s.", group);
             } else {
@@ -1126,7 +1126,7 @@ _who_roster(gchar **args, struct cmd_help_t help)
         GSList *filtered = NULL;
 
         GSList *curr = list;
-        while (curr != NULL) {
+        while (curr) {
             PContact contact = curr->data;
             if (p_contact_is_available(contact)) {
                 filtered = g_slist_append(filtered, contact);
@@ -1134,7 +1134,7 @@ _who_roster(gchar **args, struct cmd_help_t help)
             curr = g_slist_next(curr);
         }
 
-        if (group != NULL) {
+        if (group) {
             if (filtered == NULL) {
                 cons_show("No contacts in group %s are %s.", group, presence);
             } else {
@@ -1156,7 +1156,7 @@ _who_roster(gchar **args, struct cmd_help_t help)
         GSList *filtered = NULL;
 
         GSList *curr = list;
-        while (curr != NULL) {
+        while (curr) {
             PContact contact = curr->data;
             if (!p_contact_is_available(contact)) {
                 filtered = g_slist_append(filtered, contact);
@@ -1164,7 +1164,7 @@ _who_roster(gchar **args, struct cmd_help_t help)
             curr = g_slist_next(curr);
         }
 
-        if (group != NULL) {
+        if (group) {
             if (filtered == NULL) {
                 cons_show("No contacts in group %s are %s.", group, presence);
             } else {
@@ -1186,7 +1186,7 @@ _who_roster(gchar **args, struct cmd_help_t help)
         GSList *filtered = NULL;
 
         GSList *curr = list;
-        while (curr != NULL) {
+        while (curr) {
             PContact contact = curr->data;
             if (p_contact_has_available_resource(contact)) {
                 filtered = g_slist_append(filtered, contact);
@@ -1194,7 +1194,7 @@ _who_roster(gchar **args, struct cmd_help_t help)
             curr = g_slist_next(curr);
         }
 
-        if (group != NULL) {
+        if (group) {
             if (filtered == NULL) {
                 cons_show("No contacts in group %s are %s.", group, presence);
             } else {
@@ -1216,7 +1216,7 @@ _who_roster(gchar **args, struct cmd_help_t help)
         GSList *filtered = NULL;
 
         GSList *curr = list;
-        while (curr != NULL) {
+        while (curr) {
             PContact contact = curr->data;
             if (!p_contact_has_available_resource(contact)) {
                 filtered = g_slist_append(filtered, contact);
@@ -1224,7 +1224,7 @@ _who_roster(gchar **args, struct cmd_help_t help)
             curr = g_slist_next(curr);
         }
 
-        if (group != NULL) {
+        if (group) {
             if (filtered == NULL) {
                 cons_show("No contacts in group %s are %s.", group, presence);
             } else {
@@ -1246,7 +1246,7 @@ _who_roster(gchar **args, struct cmd_help_t help)
         GSList *filtered = NULL;
 
         GSList *curr = list;
-        while (curr != NULL) {
+        while (curr) {
             PContact contact = curr->data;
             if (strcmp(p_contact_presence(contact), presence) == 0) {
                 filtered = g_slist_append(filtered, contact);
@@ -1254,7 +1254,7 @@ _who_roster(gchar **args, struct cmd_help_t help)
             curr = g_slist_next(curr);
         }
 
-        if (group != NULL) {
+        if (group) {
             if (filtered == NULL) {
                 cons_show("No contacts in group %s are %s.", group, presence);
             } else {
@@ -1377,9 +1377,9 @@ cmd_group(gchar **args, struct cmd_help_t help)
     if (args[0] == NULL) {
         GSList *groups = roster_get_groups();
         GSList *curr = groups;
-        if (curr != NULL) {
+        if (curr) {
             cons_show("Groups:");
-            while (curr != NULL) {
+            while (curr) {
                 cons_show("  %s", curr->data);
                 curr = g_slist_next(curr);
             }
@@ -1747,7 +1747,7 @@ cmd_status(gchar **args, struct cmd_help_t help)
     switch (win_type)
     {
         case WIN_MUC:
-            if (usr != NULL) {
+            if (usr) {
                 ProfMucWin *mucwin = wins_get_current_muc();
                 ProfWin *window = (ProfWin*) mucwin;
                 Occupant *occupant = muc_roster_item(mucwin->roomjid, usr);
@@ -1761,13 +1761,13 @@ cmd_status(gchar **args, struct cmd_help_t help)
             }
             break;
         case WIN_CHAT:
-            if (usr != NULL) {
+            if (usr) {
                 ui_current_print_line("No parameter required when in chat.");
             } else {
                 ProfChatWin *chatwin = wins_get_current_chat();
                 ProfWin *window = (ProfWin*) chatwin;
                 PContact pcontact = roster_get_contact(chatwin->barejid);
-                if (pcontact != NULL) {
+                if (pcontact) {
                     win_show_contact(window, pcontact);
                 } else {
                     win_println(window, "Error getting contact info.");
@@ -1775,7 +1775,7 @@ cmd_status(gchar **args, struct cmd_help_t help)
             }
             break;
         case WIN_PRIVATE:
-            if (usr != NULL) {
+            if (usr) {
                 ui_current_print_line("No parameter required when in chat.");
             } else {
                 ProfPrivateWin *privatewin = wins_get_current_private();
@@ -1791,7 +1791,7 @@ cmd_status(gchar **args, struct cmd_help_t help)
             }
             break;
         case WIN_CONSOLE:
-            if (usr != NULL) {
+            if (usr) {
                 char *usr_jid = roster_barejid_from_name(usr);
                 if (usr_jid == NULL) {
                     usr_jid = usr;
@@ -1848,7 +1848,7 @@ cmd_info(gchar **args, struct cmd_help_t help)
                 ProfChatWin *chatwin = wins_get_current_chat();
                 ProfWin *window = (ProfWin*) chatwin;
                 PContact pcontact = roster_get_contact(chatwin->barejid);
-                if (pcontact != NULL) {
+                if (pcontact) {
                     win_show_info(window, pcontact);
                 } else {
                     win_println(window, "Error getting contact info.");
@@ -1878,7 +1878,7 @@ cmd_info(gchar **args, struct cmd_help_t help)
                     usr_jid = usr;
                 }
                 pcontact = roster_get_contact(usr_jid);
-                if (pcontact != NULL) {
+                if (pcontact) {
                     cons_show_info(pcontact);
                 } else {
                     cons_show("No such contact \"%s\" in roster.", usr);
@@ -1910,7 +1910,7 @@ cmd_caps(gchar **args, struct cmd_help_t help)
     switch (win_type)
     {
         case WIN_MUC:
-            if (args[0] != NULL) {
+            if (args[0]) {
                 ProfMucWin *mucwin = wins_get_current_muc();
                 occupant = muc_roster_item(mucwin->roomjid, args[0]);
                 if (occupant) {
@@ -1926,7 +1926,7 @@ cmd_caps(gchar **args, struct cmd_help_t help)
             break;
         case WIN_CHAT:
         case WIN_CONSOLE:
-            if (args[0] != NULL) {
+            if (args[0]) {
                 Jid *jid = jid_create(args[0]);
 
                 if (jid->fulljid == NULL) {
@@ -1950,7 +1950,7 @@ cmd_caps(gchar **args, struct cmd_help_t help)
             }
             break;
         case WIN_PRIVATE:
-            if (args[0] != NULL) {
+            if (args[0]) {
                 cons_show("No parameter needed to /caps when in private chat.");
             } else {
                 ProfPrivateWin *privatewin = wins_get_current_private();
@@ -1985,7 +1985,7 @@ cmd_software(gchar **args, struct cmd_help_t help)
     switch (win_type)
     {
         case WIN_MUC:
-            if (args[0] != NULL) {
+            if (args[0]) {
                 ProfMucWin *mucwin = wins_get_current_muc();
                 occupant = muc_roster_item(mucwin->roomjid, args[0]);
                 if (occupant) {
@@ -2001,7 +2001,7 @@ cmd_software(gchar **args, struct cmd_help_t help)
             break;
         case WIN_CHAT:
         case WIN_CONSOLE:
-            if (args[0] != NULL) {
+            if (args[0]) {
                 Jid *jid = jid_create(args[0]);
 
                 if (jid == NULL || jid->fulljid == NULL) {
@@ -2015,7 +2015,7 @@ cmd_software(gchar **args, struct cmd_help_t help)
             }
             break;
         case WIN_PRIVATE:
-            if (args[0] != NULL) {
+            if (args[0]) {
                 cons_show("No parameter needed to /software when in private chat.");
             } else {
                 ProfPrivateWin *privatewin = wins_get_current_private();
@@ -2075,7 +2075,7 @@ cmd_join(gchar **args, struct cmd_help_t help)
     ProfAccount *account = accounts_get_account(account_name);
 
     // full room jid supplied (room@server)
-    if (room_arg->localpart != NULL) {
+    if (room_arg->localpart) {
         room = args[0];
 
     // server not supplied (room), use account preference
@@ -2150,7 +2150,7 @@ cmd_invite(gchar **args, struct cmd_help_t help)
 
     ProfMucWin *mucwin = wins_get_current_muc();
     message_send_invite(mucwin->roomjid, usr_jid, reason);
-    if (reason != NULL) {
+    if (reason) {
         cons_show("Room invite sent, contact: %s, room: %s, reason: \"%s\".",
             contact, mucwin->roomjid, reason);
     } else {
@@ -2435,7 +2435,7 @@ cmd_form(gchar **args, struct cmd_help_t help)
 
     if (g_strcmp0(args[0], "help") == 0) {
         char *tag = args[1];
-        if (tag != NULL) {
+        if (tag) {
             ui_show_form_field_help(confwin, tag);
         } else {
             ui_show_form_help(confwin);
@@ -2443,7 +2443,7 @@ cmd_form(gchar **args, struct cmd_help_t help)
             const gchar **help_text = NULL;
             Command *command = g_hash_table_lookup(commands, "/form");
 
-            if (command != NULL) {
+            if (command) {
                 help_text = command->help.long_help;
             }
 
@@ -2609,7 +2609,7 @@ cmd_affiliation(gchar **args, struct cmd_help_t help)
     }
 
     char *affiliation = args[1];
-    if ((affiliation != NULL) &&
+    if (affiliation &&
             (g_strcmp0(affiliation, "owner") != 0) &&
             (g_strcmp0(affiliation, "admin") != 0) &&
             (g_strcmp0(affiliation, "member") != 0) &&
@@ -2679,7 +2679,7 @@ cmd_role(gchar **args, struct cmd_help_t help)
     }
 
     char *role = args[1];
-    if ((role != NULL ) &&
+    if (role &&
             (g_strcmp0(role, "visitor") != 0) &&
             (g_strcmp0(role, "participant") != 0) &&
             (g_strcmp0(role, "moderator") != 0) &&
@@ -2969,7 +2969,7 @@ cmd_bookmark(gchar **args, struct cmd_help_t help)
             char *password = g_hash_table_lookup(options, "password");
             char *autojoin = g_hash_table_lookup(options, "autojoin");
 
-            if (autojoin != NULL) {
+            if (autojoin) {
                 if ((strcmp(autojoin, "on") != 0) && (strcmp(autojoin, "off") != 0)) {
                     cons_show("Usage: %s", help.usage);
                     cons_show("");
@@ -3017,7 +3017,7 @@ cmd_disco(gchar **args, struct cmd_help_t help)
     }
 
     GString *jid = g_string_new("");
-    if (args[1] != NULL) {
+    if (args[1]) {
         jid = g_string_append(jid, args[1]);
     } else {
         Jid *jidp = jid_create(jabber_get_fulljid());
@@ -4193,7 +4193,7 @@ cmd_otr(gchar **args, struct cmd_help_t help)
         return TRUE;
 
     } else if (strcmp(args[0], "start") == 0) {
-        if (args[1] != NULL) {
+        if (args[1]) {
             char *contact = args[1];
             char *barejid = roster_barejid_from_name(contact);
             if (barejid == NULL) {
@@ -4412,7 +4412,7 @@ _cmd_show_filtered_help(char *heading, gchar *cmd_filter[], int filter_size)
     }
 
     GList *curr = ordered_commands;
-    while (curr != NULL) {
+    while (curr) {
         Command *cmd = curr->data;
         cons_show("%-12s: %s", cmd->cmd, cmd->help.short_help);
         curr = g_list_next(curr);

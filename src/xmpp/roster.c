@@ -133,7 +133,7 @@ roster_send_add_to_group(const char * const group, PContact contact)
 {
     GSList *groups = p_contact_groups(contact);
     GSList *new_groups = NULL;
-    while (groups != NULL) {
+    while (groups) {
         new_groups = g_slist_append(new_groups, strdup(groups->data));
         groups = g_slist_next(groups);
     }
@@ -143,7 +143,7 @@ roster_send_add_to_group(const char * const group, PContact contact)
     char *unique_id = create_unique_id(NULL);
     GroupData *data = malloc(sizeof(GroupData));
     data->group = strdup(group);
-    if (p_contact_name(contact) != NULL) {
+    if (p_contact_name(contact)) {
         data->name = strdup(p_contact_name(contact));
     } else {
         data->name = strdup(p_contact_barejid(contact));
@@ -163,7 +163,7 @@ static int
 _group_add_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
     void * const userdata)
 {
-    if (userdata != NULL) {
+    if (userdata) {
         GroupData *data = userdata;
         ui_group_added(data->name, data->group);
         free(data->name);
@@ -178,7 +178,7 @@ roster_send_remove_from_group(const char * const group, PContact contact)
 {
     GSList *groups = p_contact_groups(contact);
     GSList *new_groups = NULL;
-    while (groups != NULL) {
+    while (groups) {
         if (strcmp(groups->data, group) != 0) {
             new_groups = g_slist_append(new_groups, strdup(groups->data));
         }
@@ -192,7 +192,7 @@ roster_send_remove_from_group(const char * const group, PContact contact)
     char *unique_id = create_unique_id(NULL);
     GroupData *data = malloc(sizeof(GroupData));
     data->group = strdup(group);
-    if (p_contact_name(contact) != NULL) {
+    if (p_contact_name(contact)) {
         data->name = strdup(p_contact_name(contact));
     } else {
         data->name = strdup(p_contact_barejid(contact));
@@ -210,7 +210,7 @@ static int
 _group_remove_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
     void * const userdata)
 {
-    if (userdata != NULL) {
+    if (userdata) {
         GroupData *data = userdata;
         ui_group_removed(data->name, data->group);
         free(data->name);
@@ -236,7 +236,7 @@ _roster_set_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
     // if from attribute exists and it is not current users barejid, ignore push
     Jid *my_jid = jid_create(jabber_get_fulljid());
     const char *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
-    if ((from != NULL) && (strcmp(from, my_jid->barejid) != 0)) {
+    if (from && (strcmp(from, my_jid->barejid) != 0)) {
         jid_destroy(my_jid);
         return 1;
     }
@@ -267,7 +267,7 @@ _roster_set_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
 
         // check for pending out subscriptions
         gboolean pending_out = FALSE;
-        if ((ask != NULL) && (strcmp(ask, "subscribe") == 0)) {
+        if (ask && (strcmp(ask, "subscribe") == 0)) {
             pending_out = TRUE;
         }
 
@@ -301,7 +301,7 @@ _roster_result_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
         xmpp_stanza_t *query = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_QUERY);
         xmpp_stanza_t *item = xmpp_stanza_get_children(query);
 
-        while (item != NULL) {
+        while (item) {
             const char *barejid = xmpp_stanza_get_attribute(item, STANZA_ATTR_JID);
             gchar *barejid_lower = g_utf8_strdown(barejid, -1);
             const char *name = xmpp_stanza_get_attribute(item, STANZA_ATTR_NAME);
@@ -350,10 +350,10 @@ _get_groups_from_item(xmpp_stanza_t *item)
     GSList *groups = NULL;
     xmpp_stanza_t *group_element = xmpp_stanza_get_children(item);
 
-    while (group_element != NULL) {
+    while (group_element) {
         if (strcmp(xmpp_stanza_get_name(group_element), STANZA_NAME_GROUP) == 0) {
             char *groupname = xmpp_stanza_get_text(group_element);
-            if (groupname != NULL) {
+            if (groupname) {
                 groups = g_slist_append(groups, groupname);
             }
         }

@@ -130,11 +130,11 @@ jabber_connect_with_account(const ProfAccount * const account)
     log_info("Connecting using account: %s", account->name);
 
     // save account name and password for reconnect
-    if (saved_account.name != NULL) {
+    if (saved_account.name) {
         free(saved_account.name);
     }
     saved_account.name = strdup(account->name);
-    if (saved_account.passwd != NULL) {
+    if (saved_account.passwd) {
         free(saved_account.passwd);
     }
     saved_account.passwd = strdup(account->password);
@@ -158,7 +158,7 @@ jabber_connect_with_details(const char * const jid,
     // save details for reconnect, remember name for account creating on success
     saved_details.name = strdup(jid);
     saved_details.passwd = strdup(passwd);
-    if (altdomain != NULL) {
+    if (altdomain) {
         saved_details.altdomain = strdup(altdomain);
     } else {
         saved_details.altdomain = NULL;
@@ -203,11 +203,11 @@ jabber_disconnect(void)
         _connection_free_saved_account();
         _connection_free_saved_details();
         _connection_free_session_data();
-        if (jabber_conn.conn != NULL) {
+        if (jabber_conn.conn) {
             xmpp_conn_release(jabber_conn.conn);
             jabber_conn.conn = NULL;
         }
-        if (jabber_conn.ctx != NULL) {
+        if (jabber_conn.ctx) {
             xmpp_ctx_free(jabber_conn.ctx);
             jabber_conn.ctx = NULL;
         }
@@ -242,7 +242,7 @@ jabber_process_events(void)
             break;
         case JABBER_DISCONNECTED:
             reconnect_sec = prefs_get_reconnect();
-            if ((reconnect_sec != 0) && (reconnect_timer != NULL)) {
+            if ((reconnect_sec != 0) && reconnect_timer) {
                 int elapsed_sec = g_timer_elapsed(reconnect_timer, NULL);
                 if (elapsed_sec > reconnect_sec) {
                     _jabber_reconnect();
@@ -306,7 +306,7 @@ void
 connection_set_presence_message(const char * const message)
 {
     FREE_SET_NULL(jabber_conn.presence_message);
-    if (message != NULL) {
+    if (message) {
         jabber_conn.presence_message = strdup(message);
     }
 }
@@ -375,15 +375,15 @@ _jabber_connect(const char * const fulljid, const char * const passwd,
     jid_destroy(jid);
 
     log_info("Connecting as %s", fulljid);
-    if (jabber_conn.log != NULL) {
+    if (jabber_conn.log) {
         free(jabber_conn.log);
     }
     jabber_conn.log = _xmpp_get_file_logger();
 
-    if (jabber_conn.conn != NULL) {
+    if (jabber_conn.conn) {
         xmpp_conn_release(jabber_conn.conn);
     }
-    if (jabber_conn.ctx != NULL) {
+    if (jabber_conn.ctx) {
         xmpp_ctx_free(jabber_conn.ctx);
     }
     jabber_conn.ctx = xmpp_ctx_new(NULL, jabber_conn.log);
@@ -440,7 +440,7 @@ _connection_handler(xmpp_conn_t * const conn,
         log_debug("Connection handler: XMPP_CONN_CONNECT");
 
         // logged in with account
-        if (saved_account.name != NULL) {
+        if (saved_account.name) {
             log_debug("Connection handler: logged in with account name: %s", saved_account.name);
             sv_ev_login_account_success(saved_account.name);
 
@@ -478,7 +478,7 @@ _connection_handler(xmpp_conn_t * const conn,
         jabber_conn.conn_status = JABBER_CONNECTED;
 
         if (prefs_get_reconnect() != 0) {
-            if (reconnect_timer != NULL) {
+            if (reconnect_timer) {
                 g_timer_destroy(reconnect_timer);
                 reconnect_timer = NULL;
             }

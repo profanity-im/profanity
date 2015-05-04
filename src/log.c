@@ -166,7 +166,7 @@ log_close(void)
 {
     g_string_free(mainlogfile, TRUE);
     g_time_zone_unref(tz);
-    if (logp != NULL) {
+    if (logp) {
         fclose(logp);
     }
 }
@@ -174,7 +174,7 @@ log_close(void)
 void
 log_msg(log_level_t level, const char * const area, const char * const msg)
 {
-    if (level >= level_filter && logp != NULL) {
+    if (level >= level_filter && logp) {
         dt = g_date_time_new_now(tz);
 
         char *level_str = _log_string_from_level(level);
@@ -347,7 +347,7 @@ _chat_log_chat(const char * const login, const char * const other,
 
     FILE *logp = fopen(dated_log->filename, "a");
     g_chmod(dated_log->filename, S_IRUSR | S_IWUSR);
-    if (logp != NULL) {
+    if (logp) {
         if (direction == PROF_IN_LOG) {
             if (strncmp(msg, "/me ", 4) == 0) {
                 fprintf(logp, "%s - *%s %s\n", date_fmt, other, msg + 4);
@@ -396,7 +396,7 @@ groupchat_log_chat(const gchar * const login, const gchar * const room,
 
     FILE *logp = fopen(dated_log->filename, "a");
     g_chmod(dated_log->filename, S_IRUSR | S_IWUSR);
-    if (logp != NULL) {
+    if (logp) {
         if (strncmp(msg, "/me ", 4) == 0) {
             fprintf(logp, "%s - *%s %s\n", date_fmt, nick, msg + 4);
         } else {
@@ -433,7 +433,7 @@ chat_log_get_previous(const gchar * const login, const gchar * const recipient)
         char *filename = _get_log_filename(recipient, login, log_date, FALSE);
 
         FILE *logp = fopen(filename, "r");
-        if (logp != NULL) {
+        if (logp) {
             GString *header = g_string_new("");
             g_string_append_printf(header, "%d/%d/%d:",
                 g_date_time_get_day_of_month(log_date),
@@ -518,12 +518,12 @@ _log_roll_needed(struct dated_chat_log *dated_log)
 static void
 _free_chat_log(struct dated_chat_log *dated_log)
 {
-    if (dated_log != NULL) {
-        if (dated_log->filename != NULL) {
+    if (dated_log) {
+        if (dated_log->filename) {
             g_free(dated_log->filename);
             dated_log->filename = NULL;
         }
-        if (dated_log->date != NULL) {
+        if (dated_log->date) {
             g_date_time_unref(dated_log->date);
             dated_log->date = NULL;
         }

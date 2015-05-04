@@ -592,7 +592,7 @@ win_show_contact(ProfWin *window, PContact contact)
 
     theme_item_t presence_colour = theme_main_presence_attrs(presence);
 
-    if (name != NULL) {
+    if (name) {
         win_print(window, '-', NULL, NO_EOL, presence_colour, "", name);
     } else {
         win_print(window, '-', NULL, NO_EOL, presence_colour, "", barejid);
@@ -600,7 +600,7 @@ win_show_contact(ProfWin *window, PContact contact)
 
     win_vprint(window, '-', NULL, NO_DATE | NO_EOL, presence_colour, "", " is %s", presence);
 
-    if (last_activity != NULL) {
+    if (last_activity) {
         GDateTime *now = g_date_time_new_now_local();
         GTimeSpan span = g_date_time_difference(now, last_activity);
 
@@ -618,7 +618,7 @@ win_show_contact(ProfWin *window, PContact contact)
         }
     }
 
-    if (status != NULL) {
+    if (status) {
         win_vprint(window, '-', NULL, NO_DATE | NO_EOL, presence_colour, "", ", \"%s\"", p_contact_status(contact));
     }
 
@@ -656,41 +656,41 @@ win_show_occupant_info(ProfWin *window, const char * const room, Occupant *occup
 
     if (caps) {
         // show identity
-        if ((caps->category != NULL) || (caps->type != NULL) || (caps->name != NULL)) {
+        if (caps->category || caps->type || caps->name) {
             win_print(window, '!', NULL, NO_EOL, 0, "", "  Identity: ");
-            if (caps->name != NULL) {
+            if (caps->name) {
                 win_print(window, '!', NULL, NO_DATE | NO_EOL, 0, "", caps->name);
-                if ((caps->category != NULL) || (caps->type != NULL)) {
+                if (caps->category || caps->type) {
                     win_print(window, '-', NULL, NO_DATE | NO_EOL, 0, "", " ");
                 }
             }
-            if (caps->type != NULL) {
+            if (caps->type) {
                 win_print(window, '!', NULL, NO_DATE | NO_EOL, 0, "", caps->type);
-                if (caps->category != NULL) {
+                if (caps->category) {
                     win_print(window, '!', NULL, NO_DATE | NO_EOL, 0, "", " ");
                 }
             }
-            if (caps->category != NULL) {
+            if (caps->category) {
                 win_print(window, '!', NULL, NO_DATE | NO_EOL, 0, "", caps->category);
             }
             win_newline(window);
         }
-        if (caps->software != NULL) {
+        if (caps->software) {
             win_vprint(window, '!', NULL, NO_EOL, 0, "", "  Software: %s", caps->software);
         }
-        if (caps->software_version != NULL) {
+        if (caps->software_version) {
             win_vprint(window, '!', NULL, NO_DATE | NO_EOL, 0, "", ", %s", caps->software_version);
         }
-        if ((caps->software != NULL) || (caps->software_version != NULL)) {
+        if (caps->software || caps->software_version) {
             win_newline(window);
         }
-        if (caps->os != NULL) {
+        if (caps->os) {
             win_vprint(window, '!', NULL, NO_EOL, 0, "", "  OS: %s", caps->os);
         }
-        if (caps->os_version != NULL) {
+        if (caps->os_version) {
             win_vprint(window, '!', NULL, NO_DATE | NO_EOL, 0, "", ", %s", caps->os_version);
         }
-        if ((caps->os != NULL) || (caps->os_version != NULL)) {
+        if (caps->os || caps->os_version) {
             win_newline(window);
         }
         caps_destroy(caps);
@@ -712,16 +712,16 @@ win_show_info(ProfWin *window, PContact contact)
 
     win_print(window, '-', NULL, 0, 0, "", "");
     win_print(window, '-', NULL, NO_EOL, presence_colour, "", barejid);
-    if (name != NULL) {
+    if (name) {
         win_vprint(window, '-', NULL, NO_DATE | NO_EOL, presence_colour, "", " (%s)", name);
     }
     win_print(window, '-', NULL, NO_DATE, 0, "", ":");
 
-    if (sub != NULL) {
+    if (sub) {
         win_vprint(window, '-', NULL, 0, 0, "", "Subscription: %s", sub);
     }
 
-    if (last_activity != NULL) {
+    if (last_activity) {
         GDateTime *now = g_date_time_new_now_local();
         GTimeSpan span = g_date_time_difference(now, last_activity);
 
@@ -743,12 +743,12 @@ win_show_info(ProfWin *window, PContact contact)
 
     GList *resources = p_contact_get_available_resources(contact);
     GList *ordered_resources = NULL;
-    if (resources != NULL) {
+    if (resources) {
         win_print(window, '-', NULL, 0, 0, "", "Resources:");
 
         // sort in order of availability
         GList *curr = resources;
-        while (curr != NULL) {
+        while (curr) {
             Resource *resource = curr->data;
             ordered_resources = g_list_insert_sorted(ordered_resources,
                 resource, (GCompareFunc)resource_compare_availability);
@@ -758,12 +758,12 @@ win_show_info(ProfWin *window, PContact contact)
     g_list_free(resources);
 
     GList *curr = ordered_resources;
-    while (curr != NULL) {
+    while (curr) {
         Resource *resource = curr->data;
         const char *resource_presence = string_from_resource_presence(resource->presence);
         theme_item_t presence_colour = theme_main_presence_attrs(resource_presence);
         win_vprint(window, '-', NULL, NO_EOL, presence_colour, "", "  %s (%d), %s", resource->name, resource->priority, resource_presence);
-        if (resource->status != NULL) {
+        if (resource->status) {
             win_vprint(window, '-', NULL, NO_DATE | NO_EOL, presence_colour, "", ", \"%s\"", resource->status);
         }
         win_newline(window);
@@ -774,41 +774,41 @@ win_show_info(ProfWin *window, PContact contact)
 
         if (caps) {
             // show identity
-            if ((caps->category != NULL) || (caps->type != NULL) || (caps->name != NULL)) {
+            if (caps->category || caps->type || caps->name) {
                 win_print(window, '-', NULL, NO_EOL, 0, "", "    Identity: ");
-                if (caps->name != NULL) {
+                if (caps->name) {
                     win_print(window, '-', NULL, NO_DATE | NO_EOL, 0, "", caps->name);
-                    if ((caps->category != NULL) || (caps->type != NULL)) {
+                    if (caps->category || caps->type) {
                         win_print(window, '-', NULL, NO_DATE | NO_EOL, 0, "", " ");
                     }
                 }
-                if (caps->type != NULL) {
+                if (caps->type) {
                     win_print(window, '-', NULL, NO_DATE | NO_EOL, 0, "", caps->type);
-                    if (caps->category != NULL) {
+                    if (caps->category) {
                         win_print(window, '-', NULL, NO_DATE | NO_EOL, 0, "", " ");
                     }
                 }
-                if (caps->category != NULL) {
+                if (caps->category) {
                     win_print(window, '-', NULL, NO_DATE | NO_EOL, 0, "", caps->category);
                 }
                 win_newline(window);
             }
-            if (caps->software != NULL) {
+            if (caps->software) {
                 win_vprint(window, '-', NULL, NO_EOL, 0, "", "    Software: %s", caps->software);
             }
-            if (caps->software_version != NULL) {
+            if (caps->software_version) {
                 win_vprint(window, '-', NULL, NO_DATE | NO_EOL, 0, "", ", %s", caps->software_version);
             }
-            if ((caps->software != NULL) || (caps->software_version != NULL)) {
+            if (caps->software || caps->software_version) {
                 win_newline(window);
             }
-            if (caps->os != NULL) {
+            if (caps->os) {
                 win_vprint(window, '-', NULL, NO_EOL, 0, "", "    OS: %s", caps->os);
             }
-            if (caps->os_version != NULL) {
+            if (caps->os_version) {
                 win_vprint(window, '-', NULL, NO_DATE | NO_EOL, 0, "", ", %s", caps->os_version);
             }
-            if ((caps->os != NULL) || (caps->os_version != NULL)) {
+            if (caps->os || caps->os_version) {
                 win_newline(window);
             }
             caps_destroy(caps);
@@ -827,7 +827,7 @@ win_show_status_string(ProfWin *window, const char * const from,
 {
     theme_item_t presence_colour;
 
-    if (show != NULL) {
+    if (show) {
         presence_colour = theme_main_presence_attrs(show);
     } else if (strcmp(default_show, "online") == 0) {
         presence_colour = THEME_ONLINE;
@@ -838,12 +838,12 @@ win_show_status_string(ProfWin *window, const char * const from,
 
     win_vprint(window, '-', NULL, NO_EOL, presence_colour, "", "%s %s", pre, from);
 
-    if (show != NULL)
+    if (show)
         win_vprint(window, '-', NULL, NO_DATE | NO_EOL, presence_colour, "", " is %s", show);
     else
         win_vprint(window, '-', NULL, NO_DATE | NO_EOL, presence_colour, "", " is %s", default_show);
 
-    if (last_activity != NULL) {
+    if (last_activity) {
         GDateTime *now = g_date_time_new_now_local();
         GTimeSpan span = g_date_time_difference(now, last_activity);
         g_date_time_unref(now);
@@ -862,7 +862,7 @@ win_show_status_string(ProfWin *window, const char * const from,
         }
     }
 
-    if (status != NULL)
+    if (status)
         win_vprint(window, '-', NULL, NO_DATE | NO_EOL, presence_colour, "", ", \"%s\"", status);
 
     win_print(window, '-', NULL, NO_DATE, presence_colour, "", "");

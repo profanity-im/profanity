@@ -168,13 +168,13 @@ ui_get_idle_time(void)
 // if compiled with libxss, get the x sessions idle time
 #ifdef PROF_HAVE_LIBXSS
     XScreenSaverInfo *info = XScreenSaverAllocInfo();
-    if (info != NULL && display != NULL) {
+    if (info && display) {
         XScreenSaverQueryInfo(display, DefaultRootWindow(display), info);
         unsigned long result = info->idle;
         XFree(info);
         return result;
     }
-    if (info != NULL) {
+    if (info) {
         XFree(info);
     }
 // if no libxss or xss idle time failed, use profanity idle time
@@ -352,7 +352,7 @@ ui_contact_typing(const char * const barejid, const char * const resource)
         if ( !is_current || (is_current && prefs_get_boolean(PREF_NOTIFY_TYPING_CURRENT)) ) {
             PContact contact = roster_get_contact(barejid);
             char const *display_usr = NULL;
-            if (p_contact_name(contact) != NULL) {
+            if (p_contact_name(contact)) {
                 display_usr = p_contact_name(contact);
             } else {
                 display_usr = barejid;
@@ -425,9 +425,9 @@ ui_incoming_msg(const char * const barejid, const char * const resource, const c
         }
 
         // show users status first, when receiving message via delayed delivery
-        if ((tv_stamp != NULL) && (win_created)) {
+        if (tv_stamp && (win_created)) {
             PContact pcontact = roster_get_contact(barejid);
-            if (pcontact != NULL) {
+            if (pcontact) {
                 win_show_contact(window, pcontact);
             }
         }
@@ -520,7 +520,7 @@ ui_incoming_private_msg(const char * const fulljid, const char * const message, 
 void
 ui_roster_add(const char * const barejid, const char * const name)
 {
-    if (name != NULL) {
+    if (name) {
         cons_show("Roster item added: %s (%s)", barejid, name);
     } else {
         cons_show("Roster item added: %s", barejid);
@@ -567,7 +567,7 @@ void
 ui_auto_away(void)
 {
     char *pref_autoaway_message = prefs_get_string(PREF_AUTOAWAY_MESSAGE);
-    if (pref_autoaway_message != NULL) {
+    if (pref_autoaway_message) {
         int pri =
             accounts_get_priority_for_presence_type(jabber_get_account_name(),
                 RESOURCE_AWAY);
@@ -623,7 +623,7 @@ ui_update_presence(const resource_presence_t resource_presence,
     contact_presence_t contact_presence = contact_presence_from_resource_presence(resource_presence);
     title_bar_set_presence(contact_presence);
     gint priority = accounts_get_priority_for_presence_type(jabber_get_account_name(), resource_presence);
-    if (message != NULL) {
+    if (message) {
         cons_show("Status set to %s (priority %d), \"%s\".", show, priority, message);
     } else {
         cons_show("Status set to %s (priority %d).", show, priority);
@@ -681,7 +681,7 @@ ui_handle_error(const char * const err_msg)
 void
 ui_invalid_command_usage(const char * const usage, void (*setting_func)(void))
 {
-    if (setting_func != NULL) {
+    if (setting_func) {
         cons_show("");
         (*setting_func)();
         cons_show("Usage: %s", usage);
@@ -738,7 +738,7 @@ ui_close_all_wins(void)
     GList *win_nums = wins_get_nums();
     GList *curr = win_nums;
 
-    while (curr != NULL) {
+    while (curr) {
         int num = GPOINTER_TO_INT(curr->data);
         if ((num != 1) && (!ui_win_has_unsaved_form(num))) {
             if (conn_status == JABBER_CONNECTED) {
@@ -765,7 +765,7 @@ ui_close_read_wins(void)
     GList *win_nums = wins_get_nums();
     GList *curr = win_nums;
 
-    while (curr != NULL) {
+    while (curr) {
         int num = GPOINTER_TO_INT(curr->data);
         if ((num != 1) && (ui_win_unread(num) == 0) && (!ui_win_has_unsaved_form(num))) {
             if (conn_status == JABBER_CONNECTED) {
@@ -789,7 +789,7 @@ ui_redraw_all_room_rosters(void)
     GList *win_nums = wins_get_nums();
     GList *curr = win_nums;
 
-    while (curr != NULL) {
+    while (curr) {
         int num = GPOINTER_TO_INT(curr->data);
         ProfWin *window = wins_get_by_num(num);
         if (window->type == WIN_MUC && win_has_active_subwin(window)) {
@@ -810,7 +810,7 @@ ui_hide_all_room_rosters(void)
     GList *win_nums = wins_get_nums();
     GList *curr = win_nums;
 
-    while (curr != NULL) {
+    while (curr) {
         int num = GPOINTER_TO_INT(curr->data);
         ProfWin *window = wins_get_by_num(num);
         if (window->type == WIN_MUC && win_has_active_subwin(window)) {
@@ -831,7 +831,7 @@ ui_show_all_room_rosters(void)
     GList *win_nums = wins_get_nums();
     GList *curr = win_nums;
 
-    while (curr != NULL) {
+    while (curr) {
         int num = GPOINTER_TO_INT(curr->data);
         ProfWin *window = wins_get_by_num(num);
         if (window->type == WIN_MUC && !win_has_active_subwin(window)) {
@@ -1117,12 +1117,12 @@ ui_prune_wins(void)
     gboolean pruned = FALSE;
 
     GSList *wins = wins_get_prune_wins();
-    if (wins != NULL) {
+    if (wins) {
         pruned = TRUE;
     }
 
     GSList *curr = wins;
-    while (curr != NULL) {
+    while (curr) {
         ProfWin *window = curr->data;
         if (window->type == WIN_CHAT) {
             if (conn_status == JABBER_CONNECTED) {
@@ -1137,7 +1137,7 @@ ui_prune_wins(void)
         curr = g_slist_next(curr);
     }
 
-    if (wins != NULL) {
+    if (wins) {
         g_slist_free(wins);
     }
 
@@ -1231,7 +1231,7 @@ ui_print_system_msg_from_recipient(const char * const barejid, const char *messa
     if (window == NULL) {
         int num = 0;
         window = wins_new_chat(barejid);
-        if (window != NULL) {
+        if (window) {
             num = wins_get_num(window);
             status_bar_active(num);
         } else {
@@ -1263,8 +1263,8 @@ ui_recipient_gone(const char * const barejid, const char * const resource)
         if (show_message) {
             const char * display_usr = NULL;
             PContact contact = roster_get_contact(barejid);
-            if (contact != NULL) {
-                if (p_contact_name(contact) != NULL) {
+            if (contact) {
+                if (p_contact_name(contact)) {
                     display_usr = p_contact_name(contact);
                 } else {
                     display_usr = barejid;
@@ -1511,23 +1511,23 @@ ui_show_room_disco_info(const char * const roomjid, GSList *identities, GSList *
 {
     ProfWin *window = (ProfWin*)wins_get_muc(roomjid);
     if (window) {
-        if (((identities != NULL) && (g_slist_length(identities) > 0)) ||
-            ((features != NULL) && (g_slist_length(features) > 0))) {
-            if (identities != NULL) {
+        if ((identities && (g_slist_length(identities) > 0)) ||
+            (features && (g_slist_length(features) > 0))) {
+            if (identities) {
                 win_print(window, '!', NULL, 0, 0, "", "Identities:");
             }
-            while (identities != NULL) {
+            while (identities) {
                 DiscoIdentity *identity = identities->data;  // anme trpe, cat
                 GString *identity_str = g_string_new("  ");
-                if (identity->name != NULL) {
+                if (identity->name) {
                     identity_str = g_string_append(identity_str, identity->name);
                     identity_str = g_string_append(identity_str, " ");
                 }
-                if (identity->type != NULL) {
+                if (identity->type) {
                     identity_str = g_string_append(identity_str, identity->type);
                     identity_str = g_string_append(identity_str, " ");
                 }
-                if (identity->category != NULL) {
+                if (identity->category) {
                     identity_str = g_string_append(identity_str, identity->category);
                 }
                 win_print(window, '!', NULL, 0, 0, "", identity_str->str);
@@ -1535,10 +1535,10 @@ ui_show_room_disco_info(const char * const roomjid, GSList *identities, GSList *
                 identities = g_slist_next(identities);
             }
 
-            if (features != NULL) {
+            if (features) {
                 win_print(window, '!', NULL, 0, 0, "", "Features:");
             }
-            while (features != NULL) {
+            while (features) {
                 win_vprint(window, '!', NULL, 0, 0, "", "  %s", features->data);
                 features = g_slist_next(features);
             }
@@ -1568,14 +1568,14 @@ ui_room_roster(const char * const roomjid, GList *roster, const char * const pre
                 win_vprint(window, '!', NULL, NO_EOL, THEME_ROOMINFO, "", "%d %s: ", length, presence);
             }
 
-            while (roster != NULL) {
+            while (roster) {
                 Occupant *occupant = roster->data;
                 const char *presence_str = string_from_resource_presence(occupant->presence);
 
                 theme_item_t presence_colour = theme_main_presence_attrs(presence_str);
                 win_vprint(window, '!', NULL, NO_DATE | NO_EOL, presence_colour, "", "%s", occupant->nick);
 
-                if (roster->next != NULL) {
+                if (roster->next) {
                     win_print(window, '!', NULL, NO_DATE | NO_EOL, 0, "", ", ");
                 }
 
@@ -1747,7 +1747,7 @@ ui_room_message(const char * const roomjid, const char * const nick,
         char *my_nick = muc_nick(roomjid);
 
         if (g_strcmp0(nick, my_nick) != 0) {
-            if (g_strrstr(message, my_nick) != NULL) {
+            if (g_strrstr(message, my_nick)) {
                 win_print(window, '-', NULL, NO_ME, THEME_ROOMMENTION, nick, message);
             } else {
                 win_print(window, '-', NULL, NO_ME, THEME_TEXT_THEM, nick, message);
@@ -1792,7 +1792,7 @@ ui_room_message(const char * const roomjid, const char * const nick,
             if (g_strcmp0(room_setting, "mention") == 0) {
                 char *message_lower = g_utf8_strdown(message, -1);
                 char *nick_lower = g_utf8_strdown(nick, -1);
-                if (g_strrstr(message_lower, nick_lower) != NULL) {
+                if (g_strrstr(message_lower, nick_lower)) {
                     notify = TRUE;
                 }
                 g_free(message_lower);
@@ -2126,7 +2126,7 @@ int
 ui_win_unread(int index)
 {
     ProfWin *window = wins_get_by_num(index);
-    if (window != NULL) {
+    if (window) {
         return win_unread(window);
     } else {
         return 0;
@@ -2149,7 +2149,7 @@ ui_chat_win_contact_online(PContact contact, Resource *resource, GDateTime *last
     const char *barejid = p_contact_barejid(contact);
 
     ProfWin *window = (ProfWin*)wins_get_chat(barejid);
-    if (window != NULL) {
+    if (window) {
         win_show_status_string(window, display_str, show, resource->status,
             last_activity, "++", "online");
 
@@ -2165,7 +2165,7 @@ ui_chat_win_contact_offline(PContact contact, char *resource, char *status)
     const char *barejid = p_contact_barejid(contact);
 
     ProfWin *window = (ProfWin*)wins_get_chat(barejid);
-    if (window != NULL) {
+    if (window) {
         win_show_status_string(window, display_str, "offline", status, NULL, "--",
             "offline");
     }
@@ -2180,7 +2180,7 @@ ui_contact_offline(char *barejid, char *resource, char *status)
     char *show_chat_win = prefs_get_string(PREF_STATUSES_CHAT);
     Jid *jid = jid_create_from_bare_and_resource(barejid, resource);
     PContact contact = roster_get_contact(barejid);
-    if (p_contact_subscription(contact) != NULL) {
+    if (p_contact_subscription(contact)) {
         if (strcmp(p_contact_subscription(contact), "none") != 0) {
 
             // show in console if "all"
@@ -2261,7 +2261,7 @@ _ui_draw_term_title(void)
         if (res == -1) {
             log_error("Error writing terminal window title.");
         }
-        if (win_title != NULL) {
+        if (win_title) {
             free(win_title);
         }
         win_title = strdup(new_win_title);
@@ -2413,9 +2413,9 @@ _ui_handle_form_field(ProfWin *window, char *tag, FormField *field)
     case FIELD_HIDDEN:
         break;
     case FIELD_TEXT_SINGLE:
-        if (curr_value != NULL) {
+        if (curr_value) {
             char *value = curr_value->data;
-            if (value != NULL) {
+            if (value) {
                 if (g_strcmp0(field->var, "muc#roomconfig_roomsecret") == 0) {
                     win_print(window, '-', NULL, NO_DATE | NO_EOL, THEME_ONLINE, "", "[hidden]");
                 } else {
@@ -2426,9 +2426,9 @@ _ui_handle_form_field(ProfWin *window, char *tag, FormField *field)
         win_newline(window);
         break;
     case FIELD_TEXT_PRIVATE:
-        if (curr_value != NULL) {
+        if (curr_value) {
             char *value = curr_value->data;
-            if (value != NULL) {
+            if (value) {
                 win_print(window, '-', NULL, NO_DATE | NO_EOL, THEME_ONLINE, "", "[hidden]");
             }
         }
@@ -2437,7 +2437,7 @@ _ui_handle_form_field(ProfWin *window, char *tag, FormField *field)
     case FIELD_TEXT_MULTI:
         win_newline(window);
         int index = 1;
-        while (curr_value != NULL) {
+        while (curr_value) {
             char *value = curr_value->data;
             GString *val_tag = g_string_new("");
             g_string_printf(val_tag, "val%d", index++);
@@ -2463,12 +2463,12 @@ _ui_handle_form_field(ProfWin *window, char *tag, FormField *field)
         }
         break;
     case FIELD_LIST_SINGLE:
-        if (curr_value != NULL) {
+        if (curr_value) {
             win_newline(window);
             char *value = curr_value->data;
             GSList *options = field->options;
             GSList *curr_option = options;
-            while (curr_option != NULL) {
+            while (curr_option) {
                 FormOption *option = curr_option->data;
                 if (g_strcmp0(option->value, value) == 0) {
                     win_vprint(window, '-', NULL, 0, THEME_ONLINE, "", "  [%s] %s", option->value, option->label);
@@ -2480,13 +2480,13 @@ _ui_handle_form_field(ProfWin *window, char *tag, FormField *field)
         }
         break;
     case FIELD_LIST_MULTI:
-        if (curr_value != NULL) {
+        if (curr_value) {
             win_newline(window);
             GSList *options = field->options;
             GSList *curr_option = options;
-            while (curr_option != NULL) {
+            while (curr_option) {
                 FormOption *option = curr_option->data;
-                if (g_slist_find_custom(curr_value, option->value, (GCompareFunc)g_strcmp0) != NULL) {
+                if (g_slist_find_custom(curr_value, option->value, (GCompareFunc)g_strcmp0)) {
                     win_vprint(window, '-', NULL, 0, THEME_ONLINE, "", "  [%s] %s", option->value, option->label);
                 } else {
                     win_vprint(window, '-', NULL, 0, THEME_OFFLINE, "", "  [%s] %s", option->value, option->label);
@@ -2496,9 +2496,9 @@ _ui_handle_form_field(ProfWin *window, char *tag, FormField *field)
         }
         break;
     case FIELD_JID_SINGLE:
-        if (curr_value != NULL) {
+        if (curr_value) {
             char *value = curr_value->data;
-            if (value != NULL) {
+            if (value) {
                 win_print(window, '-', NULL, NO_DATE | NO_EOL, THEME_ONLINE, "", value);
             }
         }
@@ -2506,16 +2506,16 @@ _ui_handle_form_field(ProfWin *window, char *tag, FormField *field)
         break;
     case FIELD_JID_MULTI:
         win_newline(window);
-        while (curr_value != NULL) {
+        while (curr_value) {
             char *value = curr_value->data;
             win_vprint(window, '-', NULL, 0, THEME_ONLINE, "", "  %s", value);
             curr_value = g_slist_next(curr_value);
         }
         break;
     case FIELD_FIXED:
-        if (curr_value != NULL) {
+        if (curr_value) {
             char *value = curr_value->data;
-            if (value != NULL) {
+            if (value) {
                 win_print(window, '-', NULL, NO_DATE | NO_EOL, 0, "", value);
             }
         }
@@ -2530,7 +2530,7 @@ void
 ui_show_form(ProfMucConfWin *confwin)
 {
     ProfWin *window = (ProfWin*) confwin;
-    if (confwin->form->title != NULL) {
+    if (confwin->form->title) {
         win_print(window, '-', NULL, NO_EOL, 0, "", "Form title: ");
         win_print(window, '-', NULL, NO_DATE, 0, "", confwin->form->title);
     } else {
@@ -2542,7 +2542,7 @@ ui_show_form(ProfMucConfWin *confwin)
 
     GSList *fields = confwin->form->fields;
     GSList *curr_field = fields;
-    while (curr_field != NULL) {
+    while (curr_field) {
         FormField *field = curr_field->data;
 
         if ((g_strcmp0(field->type, "fixed") == 0) && field->values) {
@@ -2685,14 +2685,14 @@ ui_show_form_field_help(ProfMucConfWin *confwin, char *tag)
 {
     ProfWin *window = (ProfWin*) confwin;
     FormField *field = form_get_field_by_tag(confwin->form, tag);
-    if (field != NULL) {
+    if (field) {
         win_print(window, '-', NULL, NO_EOL, 0, "", field->label);
         if (field->required) {
             win_print(window, '-', NULL, NO_DATE, 0, "", " (Required):");
         } else {
             win_print(window, '-', NULL, NO_DATE, 0, "", ":");
         }
-        if (field->description != NULL) {
+        if (field->description) {
             win_vprint(window, '-', NULL, 0, 0, "", "  Description : %s", field->description);
         }
         win_vprint(window, '-', NULL, 0, 0, "", "  Type        : %s", field->type);
@@ -2724,7 +2724,7 @@ ui_show_form_field_help(ProfMucConfWin *confwin, char *tag)
             win_vprint(window, '-', NULL, 0, 0, "", "  Set         : /%s <value>", tag);
             win_print(window, '-', NULL, 0, 0, "", "  Where       : <value> is one of");
             curr_option = field->options;
-            while (curr_option != NULL) {
+            while (curr_option) {
                 option = curr_option->data;
                 win_vprint(window, '-', NULL, 0, 0, "", "                  %s", option->value);
                 curr_option = g_slist_next(curr_option);
@@ -2735,7 +2735,7 @@ ui_show_form_field_help(ProfMucConfWin *confwin, char *tag)
             win_vprint(window, '-', NULL, 0, 0, "", "  Remove      : /%s remove <value>", tag);
             win_print(window, '-', NULL, 0, 0, "", "  Where       : <value> is one of");
             curr_option = field->options;
-            while (curr_option != NULL) {
+            while (curr_option) {
                 option = curr_option->data;
                 win_vprint(window, '-', NULL, 0, 0, "", "                  %s", option->value);
                 curr_option = g_slist_next(curr_option);
@@ -2764,7 +2764,7 @@ ui_show_form_field_help(ProfMucConfWin *confwin, char *tag)
 void
 ui_show_form_help(ProfMucConfWin *confwin)
 {
-    if (confwin->form->instructions != NULL) {
+    if (confwin->form->instructions) {
         ProfWin *window = (ProfWin*) confwin;
         win_print(window, '-', NULL, 0, 0, "", "Supplied instructions:");
         win_print(window, '-', NULL, 0, 0, "", confwin->form->instructions);
@@ -2775,7 +2775,7 @@ ui_show_form_help(ProfMucConfWin *confwin)
 void
 ui_show_lines(ProfWin *window, const gchar** lines)
 {
-    if (lines != NULL) {
+    if (lines) {
         int i;
         for (i = 0; lines[i] != NULL; i++) {
             win_print(window, '-', NULL, 0, 0, "", lines[i]);
@@ -2838,7 +2838,7 @@ _win_show_history(ProfChatWin *chatwin, const char * const contact)
         GSList *history = chat_log_get_previous(jid->barejid, contact);
         jid_destroy(jid);
         GSList *curr = history;
-        while (curr != NULL) {
+        while (curr) {
             char *line = curr->data;
             // entry
             if (line[2] == ':') {

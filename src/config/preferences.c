@@ -95,7 +95,7 @@ prefs_load(void)
 
     err = NULL;
     log_maxsize = g_key_file_get_integer(prefs, PREF_GROUP_LOGGING, "maxsize", &err);
-    if (err != NULL) {
+    if (err) {
         log_maxsize = 0;
         g_error_free(err);
     }
@@ -180,7 +180,7 @@ prefs_get_string(preference_t pref)
     char *result = g_key_file_get_string(prefs, group, key, NULL);
 
     if (result == NULL) {
-        if (def != NULL) {
+        if (def) {
             return strdup(def);
         } else {
             return NULL;
@@ -193,7 +193,7 @@ prefs_get_string(preference_t pref)
 void
 prefs_free_string(char *pref)
 {
-    if (pref != NULL) {
+    if (pref) {
         free(pref);
     }
     pref = NULL;
@@ -432,7 +432,7 @@ prefs_get_aliases(void)
             char *name = keys[i];
             char *value = g_key_file_get_string(prefs, PREF_GROUP_ALIAS, name, NULL);
 
-            if (value != NULL) {
+            if (value) {
                 ProfAlias *alias = malloc(sizeof(struct prof_alias_t));
                 alias->name = strdup(name);
                 alias->value = strdup(value);

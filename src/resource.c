@@ -46,7 +46,7 @@ Resource * resource_new(const char * const name, resource_presence_t presence,
     Resource *new_resource = malloc(sizeof(struct resource_t));
     new_resource->name = strdup(name);
     new_resource->presence = presence;
-    if (status != NULL) {
+    if (status) {
         new_resource->status = strdup(status);
     } else {
         new_resource->status = NULL;
@@ -88,7 +88,7 @@ resource_compare_availability(Resource *first, Resource *second)
 
 void resource_destroy(Resource *resource)
 {
-    if (resource != NULL) {
+    if (resource) {
         free(resource->name);
         free(resource->status);
         free(resource);
