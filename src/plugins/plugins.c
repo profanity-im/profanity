@@ -88,7 +88,7 @@ plugins_init(void)
 
     // load plugins
     gchar **plugins_load = prefs_get_plugins();
-    if (plugins_load != NULL) {
+    if (plugins_load) {
         int i;
         for (i = 0; i < g_strv_length(plugins_load); i++)
         {
@@ -97,7 +97,7 @@ plugins_init(void)
 #ifdef PROF_HAVE_PYTHON
             if (g_str_has_suffix(filename, ".py")) {
                 ProfPlugin *plugin = python_plugin_create(filename);
-                if (plugin != NULL) {
+                if (plugin) {
                     plugins = g_slist_append(plugins, plugin);
                     loaded = TRUE;
                 }
@@ -106,7 +106,7 @@ plugins_init(void)
 #ifdef PROF_HAVE_RUBY
             if (g_str_has_suffix(filename, ".rb")) {
                 ProfPlugin *plugin = ruby_plugin_create(filename);
-                if (plugin != NULL) {
+                if (plugin) {
                     plugins = g_slist_append(plugins, plugin);
                     loaded = TRUE;
                 }
@@ -115,7 +115,7 @@ plugins_init(void)
 #ifdef PROF_HAVE_LUA
             if (g_str_has_suffix(filename, ".lua")) {
                 ProfPlugin *plugin = lua_plugin_create(filename);
-                if (plugin != NULL) {
+                if (plugin) {
                     plugins = g_slist_append(plugins, plugin);
                     loaded = TRUE;
                 }
@@ -124,7 +124,7 @@ plugins_init(void)
 #ifdef PROF_HAVE_C
             if (g_str_has_suffix(filename, ".so")) {
                 ProfPlugin *plugin = c_plugin_create(filename);
-                if (plugin != NULL) {
+                if (plugin) {
                     plugins = g_slist_append(plugins, plugin);
                     loaded = TRUE;
                 }
@@ -137,7 +137,7 @@ plugins_init(void)
 
         // initialise plugins
         GSList *curr = plugins;
-        while (curr != NULL) {
+        while (curr) {
             ProfPlugin *plugin = curr->data;
             plugin->init_func(plugin, PROF_PACKAGE_VERSION, PROF_PACKAGE_STATUS);
             curr = g_slist_next(curr);
@@ -194,7 +194,7 @@ void
 plugins_on_start(void)
 {
     GSList *curr = plugins;
-    while (curr != NULL) {
+    while (curr) {
         ProfPlugin *plugin = curr->data;
         plugin->on_start_func(plugin);
         curr = g_slist_next(curr);
@@ -205,7 +205,7 @@ void
 plugins_on_shutdown(void)
 {
     GSList *curr = plugins;
-    while (curr != NULL) {
+    while (curr) {
         ProfPlugin *plugin = curr->data;
         plugin->on_shutdown_func(plugin);
         curr = g_slist_next(curr);
@@ -216,7 +216,7 @@ void
 plugins_on_connect(const char * const account_name, const char * const fulljid)
 {
     GSList *curr = plugins;
-    while (curr != NULL) {
+    while (curr) {
         ProfPlugin *plugin = curr->data;
         plugin->on_connect_func(plugin, account_name, fulljid);
         curr = g_slist_next(curr);
@@ -227,7 +227,7 @@ void
 plugins_on_disconnect(const char * const account_name, const char * const fulljid)
 {
     GSList *curr = plugins;
-    while (curr != NULL) {
+    while (curr) {
         ProfPlugin *plugin = curr->data;
         plugin->on_disconnect_func(plugin, account_name, fulljid);
         curr = g_slist_next(curr);
@@ -241,10 +241,10 @@ plugins_pre_chat_message_display(const char * const jid, const char *message)
     char *curr_message = strdup(message);
 
     GSList *curr = plugins;
-    while (curr != NULL) {
+    while (curr) {
         ProfPlugin *plugin = curr->data;
         new_message = plugin->pre_chat_message_display(plugin, jid, curr_message);
-        if (new_message != NULL) {
+        if (new_message) {
             free(curr_message);
             curr_message = strdup(new_message);
             free(new_message);
@@ -259,7 +259,7 @@ void
 plugins_post_chat_message_display(const char * const jid, const char *message)
 {
     GSList *curr = plugins;
-    while (curr != NULL) {
+    while (curr) {
         ProfPlugin *plugin = curr->data;
         plugin->post_chat_message_display(plugin, jid, message);
         curr = g_slist_next(curr);
@@ -273,10 +273,10 @@ plugins_pre_chat_message_send(const char * const jid, const char *message)
     char *curr_message = strdup(message);
 
     GSList *curr = plugins;
-    while (curr != NULL) {
+    while (curr) {
         ProfPlugin *plugin = curr->data;
         new_message = plugin->pre_chat_message_send(plugin, jid, curr_message);
-        if (new_message != NULL) {
+        if (new_message) {
             free(curr_message);
             curr_message = strdup(new_message);
             free(new_message);
@@ -291,7 +291,7 @@ void
 plugins_post_chat_message_send(const char * const jid, const char *message)
 {
     GSList *curr = plugins;
-    while (curr != NULL) {
+    while (curr) {
         ProfPlugin *plugin = curr->data;
         plugin->post_chat_message_send(plugin, jid, message);
         curr = g_slist_next(curr);
@@ -305,10 +305,10 @@ plugins_pre_room_message_display(const char * const room, const char * const nic
     char *curr_message = strdup(message);
 
     GSList *curr = plugins;
-    while (curr != NULL) {
+    while (curr) {
         ProfPlugin *plugin = curr->data;
         new_message = plugin->pre_room_message_display(plugin, room, nick, curr_message);
-        if (new_message != NULL) {
+        if (new_message) {
             free(curr_message);
             curr_message = strdup(new_message);
             free(new_message);
@@ -323,7 +323,7 @@ void
 plugins_post_room_message_display(const char * const room, const char * const nick, const char *message)
 {
     GSList *curr = plugins;
-    while (curr != NULL) {
+    while (curr) {
         ProfPlugin *plugin = curr->data;
         plugin->post_room_message_display(plugin, room, nick, message);
         curr = g_slist_next(curr);
@@ -337,10 +337,10 @@ plugins_pre_room_message_send(const char * const room, const char *message)
     char *curr_message = strdup(message);
 
     GSList *curr = plugins;
-    while (curr != NULL) {
+    while (curr) {
         ProfPlugin *plugin = curr->data;
         new_message = plugin->pre_room_message_send(plugin, room, curr_message);
-        if (new_message != NULL) {
+        if (new_message) {
             free(curr_message);
             curr_message = strdup(new_message);
             free(new_message);
@@ -355,7 +355,7 @@ void
 plugins_post_room_message_send(const char * const room, const char *message)
 {
     GSList *curr = plugins;
-    while (curr != NULL) {
+    while (curr) {
         ProfPlugin *plugin = curr->data;
         plugin->post_room_message_send(plugin, room, message);
         curr = g_slist_next(curr);
@@ -370,10 +370,10 @@ plugins_pre_priv_message_display(const char * const jid, const char *message)
     char *curr_message = strdup(message);
 
     GSList *curr = plugins;
-    while (curr != NULL) {
+    while (curr) {
         ProfPlugin *plugin = curr->data;
         new_message = plugin->pre_priv_message_display(plugin, jidp->barejid, jidp->resourcepart, curr_message);
-        if (new_message != NULL) {
+        if (new_message) {
             free(curr_message);
             curr_message = strdup(new_message);
             free(new_message);
@@ -391,7 +391,7 @@ plugins_post_priv_message_display(const char * const jid, const char *message)
     Jid *jidp = jid_create(jid);
 
     GSList *curr = plugins;
-    while (curr != NULL) {
+    while (curr) {
         ProfPlugin *plugin = curr->data;
         plugin->post_priv_message_display(plugin, jidp->barejid, jidp->resourcepart, message);
         curr = g_slist_next(curr);
@@ -408,10 +408,10 @@ plugins_pre_priv_message_send(const char * const jid, const char * const message
     char *curr_message = strdup(message);
 
     GSList *curr = plugins;
-    while (curr != NULL) {
+    while (curr) {
         ProfPlugin *plugin = curr->data;
         new_message = plugin->pre_priv_message_send(plugin, jidp->barejid, jidp->resourcepart, curr_message);
-        if (new_message != NULL) {
+        if (new_message) {
             free(curr_message);
             curr_message = strdup(new_message);
             free(new_message);
@@ -429,7 +429,7 @@ plugins_post_priv_message_send(const char * const jid, const char * const messag
     Jid *jidp = jid_create(jid);
 
     GSList *curr = plugins;
-    while (curr != NULL) {
+    while (curr) {
         ProfPlugin *plugin = curr->data;
         plugin->post_priv_message_send(plugin, jidp->barejid, jidp->resourcepart, message);
         curr = g_slist_next(curr);
@@ -443,7 +443,7 @@ plugins_shutdown(void)
 {
     GSList *curr = plugins;
 
-    while (curr != NULL) {
+    while (curr) {
 #ifdef PROF_HAVE_PYTHON
         if (((ProfPlugin *)curr->data)->lang == LANG_PYTHON) {
             python_plugin_destroy(curr->data);
