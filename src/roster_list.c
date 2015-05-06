@@ -507,24 +507,18 @@ gint _compare_contacts(PContact a, PContact b)
     const char * utf8_str_a = NULL;
     const char * utf8_str_b = NULL;
 
-    if (p_contact_name(a)) {
-        utf8_str_a = p_contact_name(a);
+    if (p_contact_name_collate_key(a)) {
+        utf8_str_a = p_contact_name_collate_key(a);
     } else {
-        utf8_str_a = p_contact_barejid(a);
+        utf8_str_a = p_contact_barejid_collate_key(a);
     }
-    if (p_contact_name(b)) {
-        utf8_str_b = p_contact_name(b);
+    if (p_contact_name_collate_key(b)) {
+        utf8_str_b = p_contact_name_collate_key(b);
     } else {
-        utf8_str_b = p_contact_barejid(b);
+        utf8_str_b = p_contact_barejid_collate_key(b);
     }
 
-    gchar *key_a = g_utf8_collate_key(utf8_str_a, -1);
-    gchar *key_b = g_utf8_collate_key(utf8_str_b, -1);
-
-    gint result = g_strcmp0(key_a, key_b);
-
-    g_free(key_a);
-    g_free(key_b);
+    gint result = g_strcmp0(utf8_str_a, utf8_str_b);
 
     return result;
 }

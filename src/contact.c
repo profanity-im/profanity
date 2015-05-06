@@ -45,7 +45,9 @@
 
 struct p_contact_t {
     char *barejid;
+    gchar *barejid_collate_key;
     char *name;
+    gchar *name_collate_key;
     GSList *groups;
     char *subscription;
     char *offline_message;
@@ -62,11 +64,14 @@ p_contact_new(const char * const barejid, const char * const name,
 {
     PContact contact = malloc(sizeof(struct p_contact_t));
     contact->barejid = strdup(barejid);
+    contact->barejid_collate_key = g_utf8_collate_key(contact->barejid, -1);
 
     if (name) {
         contact->name = strdup(name);
+        contact->name_collate_key = g_utf8_collate_key(contact->name, -1);
     } else {
         contact->name = NULL;
+        contact->name_collate_key = NULL;
     }
 
     contact->groups = groups;
@@ -96,8 +101,10 @@ void
 p_contact_set_name(const PContact contact, const char * const name)
 {
     FREE_SET_NULL(contact->name);
+    FREE_SET_NULL(contact->name_collate_key);
     if (name) {
         contact->name = strdup(name);
+        contact->name_collate_key = g_utf8_collate_key(contact->name, -1);
     }
 }
 
@@ -146,7 +153,9 @@ p_contact_free(PContact contact)
 {
     if (contact) {
         free(contact->barejid);
+        free(contact->barejid_collate_key);
         free(contact->name);
+        free(contact->name_collate_key);
         free(contact->subscription);
         free(contact->offline_message);
 
@@ -171,9 +180,21 @@ p_contact_barejid(const PContact contact)
 }
 
 const char *
+p_contact_barejid_collate_key(const PContact contact)
+{
+    return contact->barejid_collate_key;
+}
+
+const char *
 p_contact_name(const PContact contact)
 {
     return contact->name;
+}
+
+const char *
+p_contact_name_collate_key(const PContact contact)
+{
+    return contact->name_collate_key;
 }
 
 const char *
