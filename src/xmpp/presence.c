@@ -472,6 +472,8 @@ static int
 _unavailable_handler(xmpp_conn_t * const conn,
     xmpp_stanza_t * const stanza, void * const userdata)
 {
+    ui_input_nonblocking(TRUE);
+
     const char *jid = xmpp_conn_get_jid(conn);
     char *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
     log_debug("Unavailable presence handler fired for %s", from);
@@ -547,6 +549,8 @@ static int
 _available_handler(xmpp_conn_t * const conn,
     xmpp_stanza_t * const stanza, void * const userdata)
 {
+    ui_input_nonblocking(TRUE);
+
     // handler still fires if error
     if (g_strcmp0(xmpp_stanza_get_type(stanza), STANZA_TYPE_ERROR) == 0) {
         return 1;
@@ -637,6 +641,8 @@ _send_caps_request(char *node, char *caps_key, char *id, char *from)
 static int
 _muc_user_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, void * const userdata)
 {
+    ui_input_nonblocking(TRUE);
+
     char *type = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_TYPE);
     char *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
 
