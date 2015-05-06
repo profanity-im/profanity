@@ -64,6 +64,7 @@ typedef enum {
 
 typedef struct _muc_occupant_t {
     char *nick;
+    gchar *nick_collate_key;
     char *jid;
     muc_role_t role;
     muc_affiliation_t affiliation;

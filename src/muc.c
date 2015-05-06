@@ -832,16 +832,10 @@ _free_room(ChatRoom *room)
 static
 gint _compare_occupants(Occupant *a, Occupant *b)
 {
-    const char * utf8_str_a = a->nick;
-    const char * utf8_str_b = b->nick;
+    const char * utf8_str_a = a->nick_collate_key;
+    const char * utf8_str_b = b->nick_collate_key;
 
-    gchar *key_a = g_utf8_collate_key(utf8_str_a, -1);
-    gchar *key_b = g_utf8_collate_key(utf8_str_b, -1);
-
-    gint result = g_strcmp0(key_a, key_b);
-
-    g_free(key_a);
-    g_free(key_b);
+    gint result = g_strcmp0(utf8_str_a, utf8_str_b);
 
     return result;
 }
@@ -947,8 +941,10 @@ _muc_occupant_new(const char *const nick, const char * const jid, muc_role_t rol
 
     if (nick) {
         occupant->nick = strdup(nick);
+        occupant->nick_collate_key = g_utf8_collate_key(occupant->nick, -1);
     } else {
         occupant->nick = NULL;
+        occupant->nick_collate_key = NULL;
     }
 
     if (jid) {
@@ -976,6 +972,7 @@ _occupant_free(Occupant *occupant)
 {
     if (occupant) {
         free(occupant->nick);
+        free(occupant->nick_collate_key);
         free(occupant->jid);
         free(occupant->status);
         free(occupant);
