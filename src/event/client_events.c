@@ -61,6 +61,12 @@ cl_ev_connect_account(ProfAccount *account)
 }
 
 void
+cl_ev_presence_send(const resource_presence_t presence_type, const char * const msg, const int idle)
+{
+    presence_send(presence_type, msg, idle);
+}
+
+void
 cl_ev_send_msg(ProfChatWin *chatwin, const char * const msg)
 {
     chat_state_active(chatwin->state);
