@@ -47,6 +47,9 @@
 #ifdef HAVE_LIBOTR
 #include "otr/otr.h"
 #endif
+#ifdef HAVE_LIBGPGME
+#include "pgp/gpg.h"
+#endif
 
 #include "ui/ui.h"
 
@@ -280,13 +283,19 @@ sv_ev_contact_offline(char *barejid, char *resource, char *status)
 }
 
 void
-sv_ev_contact_online(char *barejid, Resource *resource, GDateTime *last_activity)
+sv_ev_contact_online(char *barejid, Resource *resource, GDateTime *last_activity, char *pgpsig)
 {
     gboolean updated = roster_update_presence(barejid, resource, last_activity);
 
     if (updated) {
         ui_contact_online(barejid, resource, last_activity);
     }
+
+#ifdef HAVE_LIBGPGME
+    if (pgpsig) {
+        p_gpg_verify(barejid, pgpsig);
+    }
+#endif
 
     rosterwin_roster();
     chat_session_remove(barejid);

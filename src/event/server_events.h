@@ -62,8 +62,7 @@ void sv_ev_gone(const char * const barejid, const char * const resource);
 void sv_ev_subscription(const char *from, jabber_subscr_t type);
 void sv_ev_message_receipt(char *barejid, char *id);
 void sv_ev_contact_offline(char *contact, char *resource, char *status);
-void sv_ev_contact_online(char *contact, Resource *resource,
-    GDateTime *last_activity);
+void sv_ev_contact_online(char *contact, Resource *resource, GDateTime *last_activity, char *pgpkey);
 void sv_ev_leave_room(const char * const room);
 void sv_ev_room_destroy(const char * const room);
 void sv_ev_room_occupant_offline(const char * const room, const char * const nick,

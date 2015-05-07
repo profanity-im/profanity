@@ -619,16 +619,6 @@ _available_handler(xmpp_conn_t * const conn,
         log_debug("Presence available handler fired for: %s", jid);
     }
 
-#ifdef HAVE_LIBGPGME
-    xmpp_stanza_t *x = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_SIGNED);
-    if (x) {
-        char *sign = xmpp_stanza_get_text(x);
-        if (sign) {
-            p_gpg_verify(xmpp_presence->jid->barejid, sign);
-        }
-    }
-#endif
-
     const char *my_jid_str = xmpp_conn_get_jid(conn);
     Jid *my_jid = jid_create(my_jid_str);
 
@@ -645,7 +635,14 @@ _available_handler(xmpp_conn_t * const conn,
     if (g_strcmp0(xmpp_presence->jid->barejid, my_jid->barejid) == 0) {
         connection_add_available_resource(resource);
     } else {
-        sv_ev_contact_online(xmpp_presence->jid->barejid, resource, xmpp_presence->last_activity);
+        char *pgpsig = NULL;
+        xmpp_stanza_t *x = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_SIGNED);
+        if (x) {
+            pgpsig = xmpp_stanza_get_text(x);
+        }
+        sv_ev_contact_online(xmpp_presence->jid->barejid, resource, xmpp_presence->last_activity, pgpsig);
+        xmpp_ctx_t *ctx = connection_get_ctx();
+        xmpp_free(ctx, pgpsig);
     }
 
     jid_destroy(my_jid);
