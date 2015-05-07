@@ -291,55 +291,53 @@ _roster_set_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
 }
 
 static int
-_roster_result_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
-    void * const userdata)
+_roster_result_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, void * const userdata)
 {
     const char *id = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_ID);
 
+    if (g_strcmp0(id, "roster") != 0) {
+        return 1;
+    }
+
     // handle initial roster response
-    if (g_strcmp0(id, "roster") == 0) {
-        xmpp_stanza_t *query = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_QUERY);
-        xmpp_stanza_t *item = xmpp_stanza_get_children(query);
+    xmpp_stanza_t *query = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_QUERY);
+    xmpp_stanza_t *item = xmpp_stanza_get_children(query);
 
-        while (item) {
-            const char *barejid = xmpp_stanza_get_attribute(item, STANZA_ATTR_JID);
-            gchar *barejid_lower = g_utf8_strdown(barejid, -1);
-            const char *name = xmpp_stanza_get_attribute(item, STANZA_ATTR_NAME);
-            const char *sub = xmpp_stanza_get_attribute(item, STANZA_ATTR_SUBSCRIPTION);
+    while (item) {
+        const char *barejid = xmpp_stanza_get_attribute(item, STANZA_ATTR_JID);
+        gchar *barejid_lower = g_utf8_strdown(barejid, -1);
+        const char *name = xmpp_stanza_get_attribute(item, STANZA_ATTR_NAME);
+        const char *sub = xmpp_stanza_get_attribute(item, STANZA_ATTR_SUBSCRIPTION);
 
-            // do not set nickname to empty string, set to NULL instead
-            if (name && (strlen(name) == 0)) {
-                name = NULL;
-            }
+        // do not set nickname to empty string, set to NULL instead
+        if (name && (strlen(name) == 0)) name = NULL;
 
-            gboolean pending_out = FALSE;
-            const char *ask = xmpp_stanza_get_attribute(item, STANZA_ATTR_ASK);
-            if (g_strcmp0(ask, "subscribe") == 0) {
-                pending_out = TRUE;
-            }
-
-            GSList *groups = _get_groups_from_item(item);
-
-            gboolean added = roster_add(barejid_lower, name, groups, sub, pending_out);
-
-            if (!added) {
-                log_warning("Attempt to add contact twice: %s", barejid_lower);
-            }
-
-            g_free(barejid_lower);
-            item = xmpp_stanza_get_next(item);
+        gboolean pending_out = FALSE;
+        const char *ask = xmpp_stanza_get_attribute(item, STANZA_ATTR_ASK);
+        if (g_strcmp0(ask, "subscribe") == 0) {
+            pending_out = TRUE;
         }
 
-        sv_ev_roster_received();
+        GSList *groups = _get_groups_from_item(item);
 
-        char *account_name = jabber_get_account_name();
-        const char *fulljid = jabber_get_fulljid();
+        gboolean added = roster_add(barejid_lower, name, groups, sub, pending_out);
+        if (!added) {
+            log_warning("Attempt to add contact twice: %s", barejid_lower);
+        }
 
-        resource_presence_t conn_presence = accounts_get_login_presence(account_name);
-        presence_update(conn_presence, NULL, 0);
-
-        plugins_on_connect(account_name, fulljid);
+        g_free(barejid_lower);
+        item = xmpp_stanza_get_next(item);
     }
+
+    sv_ev_roster_received();
+
+    char *account_name = jabber_get_account_name();
+    const char *fulljid = jabber_get_fulljid();
+
+    resource_presence_t conn_presence = accounts_get_login_presence(account_name);
+    presence_update(conn_presence, NULL, 0);
+
+    plugins_on_connect(account_name, fulljid);
 
     return 1;
 }
