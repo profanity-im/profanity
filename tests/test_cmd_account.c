@@ -941,9 +941,9 @@ void cmd_account_set_priority_updates_presence_when_account_connected_with_prese
 
     will_return(jabber_get_presence_message, "Free to chat");
 
-    expect_value(presence_update, status, RESOURCE_ONLINE);
-    expect_string(presence_update, msg, "Free to chat");
-    expect_value(presence_update, idle, 0);
+    expect_value(presence_send, status, RESOURCE_ONLINE);
+    expect_string(presence_send, msg, "Free to chat");
+    expect_value(presence_send, idle, 0);
 
     expect_cons_show("Updated online priority for account a_account: 10");
     expect_cons_show("");

@@ -193,8 +193,7 @@ presence_reset_sub_request_search(void)
 }
 
 void
-presence_update(const resource_presence_t presence_type, const char * const msg,
-    const int idle)
+presence_send(const resource_presence_t presence_type, const char * const msg, const int idle)
 {
     if (jabber_get_connection_status() != JABBER_CONNECTED) {
         log_warning("Error setting presence, not connected.");
@@ -202,18 +201,14 @@ presence_update(const resource_presence_t presence_type, const char * const msg,
     }
 
     if (msg) {
-        log_debug("Updating presence: %s, \"%s\"",
-            string_from_resource_presence(presence_type), msg);
+        log_debug("Updating presence: %s, \"%s\"", string_from_resource_presence(presence_type), msg);
     } else {
-        log_debug("Updating presence: %s",
-            string_from_resource_presence(presence_type));
+        log_debug("Updating presence: %s", string_from_resource_presence(presence_type));
     }
 
     xmpp_ctx_t * const ctx = connection_get_ctx();
     xmpp_conn_t * const conn = connection_get_conn();
-    const int pri =
-        accounts_get_priority_for_presence_type(jabber_get_account_name(),
-                                                presence_type);
+    const int pri = accounts_get_priority_for_presence_type(jabber_get_account_name(), presence_type);
     const char *show = stanza_get_presence_string_from_type(presence_type);
 
     connection_set_presence_message(msg);
