@@ -43,6 +43,7 @@
 #include "profanity.h"
 #include "ui/ui.h"
 #include "event/server_events.h"
+#include "event/client_events.h"
 #include "tools/autocomplete.h"
 #include "xmpp/connection.h"
 #include "xmpp/roster.h"
@@ -331,7 +332,7 @@ _roster_result_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, v
     sv_ev_roster_received();
 
     resource_presence_t conn_presence = accounts_get_login_presence(jabber_get_account_name());
-    presence_send(conn_presence, NULL, 0);
+    cl_ev_presence_send(conn_presence, NULL, 0);
 
     return 1;
 }
