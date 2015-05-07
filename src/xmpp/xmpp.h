@@ -168,7 +168,7 @@ char * presence_sub_request_find(const char * const search_str);
 void presence_join_room(char *room, char *nick, char * passwd);
 void presence_change_room_nick(const char * const room, const char * const nick);
 void presence_leave_chat_room(const char * const room_jid);
-void presence_update(resource_presence_t status, const char * const msg,
+void presence_send(resource_presence_t status, const char * const msg,
     int idle);
 gboolean presence_sub_request_exists(const char * const bare_jid);
 
