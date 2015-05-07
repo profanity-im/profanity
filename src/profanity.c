@@ -175,12 +175,12 @@ _check_autoaway()
 
                 // handle away mode
                 if (strcmp(pref_autoaway_mode, "away") == 0) {
-                    presence_update(RESOURCE_AWAY, pref_autoaway_message, 0);
+                    presence_send(RESOURCE_AWAY, pref_autoaway_message, 0);
                     ui_auto_away();
 
                 // handle idle mode
                 } else if (strcmp(pref_autoaway_mode, "idle") == 0) {
-                    presence_update(RESOURCE_ONLINE, pref_autoaway_message, idle_ms / 1000);
+                    presence_send(RESOURCE_ONLINE, pref_autoaway_message, idle_ms / 1000);
                 }
 
                 prefs_free_string(pref_autoaway_message);
@@ -194,10 +194,10 @@ _check_autoaway()
             // handle check
             if (prefs_get_boolean(PREF_AUTOAWAY_CHECK)) {
                 if (strcmp(pref_autoaway_mode, "away") == 0) {
-                    presence_update(RESOURCE_ONLINE, NULL, 0);
+                    presence_send(RESOURCE_ONLINE, NULL, 0);
                     ui_end_auto_away();
                 } else if (strcmp(pref_autoaway_mode, "idle") == 0) {
-                    presence_update(RESOURCE_ONLINE, NULL, 0);
+                    presence_send(RESOURCE_ONLINE, NULL, 0);
                     ui_titlebar_presence(CONTACT_ONLINE);
                 }
             }
