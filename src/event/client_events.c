@@ -42,6 +42,9 @@
 #ifdef HAVE_LIBOTR
 #include "otr/otr.h"
 #endif
+#ifdef HAVE_LIBGPGME
+#include "pgp/gpg.h"
+#endif
 
 jabber_conn_status_t
 cl_ev_connect_jid(const char * const jid, const char * const passwd, const char * const altdomain, const int port)
@@ -63,7 +66,19 @@ cl_ev_connect_account(ProfAccount *account)
 void
 cl_ev_presence_send(const resource_presence_t presence_type, const char * const msg, const int idle)
 {
-    presence_send(presence_type, msg, idle);
+    char *signed_status = NULL;
+
+#ifdef HAVE_LIBGPGME
+    char *account_name = jabber_get_account_name();
+    ProfAccount *account = accounts_get_account(account_name);
+    if (account->pgp_keyid) {
+        signed_status = p_gpg_sign(msg, account->pgp_keyid);
+    }
+#endif
+
+    presence_send(presence_type, msg, idle, signed_status);
+
+    free(signed_status);
 }
 
 void

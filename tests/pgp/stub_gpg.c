@@ -24,3 +24,9 @@ const char* p_gpg_libver(void)
 void p_gpg_free_key(ProfPGPKey *key) {}
 
 void p_gpg_verify(const char * const barejid, const char *const sign) {}
+
+char* p_gpg_sign(const char * const str, const char * const fp)
+{
+    return NULL;
+}
+

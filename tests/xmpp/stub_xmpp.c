@@ -114,11 +114,12 @@ void presence_join_room(char *room, char *nick, char * passwd)
 void presence_change_room_nick(const char * const room, const char * const nick) {}
 void presence_leave_chat_room(const char * const room_jid) {}
 
-void presence_send(resource_presence_t status, const char * const msg, int idle)
+void presence_send(resource_presence_t status, const char * const msg, int idle, char *signed_status)
 {
     check_expected(status);
     check_expected(msg);
     check_expected(idle);
+    check_expected(signed_status);
 }
 
 gboolean presence_sub_request_exists(const char * const bare_jid)

@@ -196,7 +196,7 @@ presence_reset_sub_request_search(void)
 }
 
 void
-presence_send(const resource_presence_t presence_type, const char * const msg, const int idle)
+presence_send(const resource_presence_t presence_type, const char * const msg, const int idle, char *signed_status)
 {
     if (jabber_get_connection_status() != JABBER_CONNECTED) {
         log_warning("Error setting presence, not connected.");
@@ -224,27 +224,17 @@ presence_send(const resource_presence_t presence_type, const char * const msg, c
 
     stanza_attach_status(ctx, presence, msg);
 
-#ifdef HAVE_LIBGPGME
-    char *account_name = jabber_get_account_name();
-    ProfAccount *account = accounts_get_account(account_name);
-    if (account->pgp_keyid) {
-        char *signed_status = p_gpg_sign(msg, account->pgp_keyid);
-
-        if (signed_status) {
-            xmpp_stanza_t *x = xmpp_stanza_new(ctx);
-            xmpp_stanza_set_name(x, STANZA_NAME_X);
-            xmpp_stanza_set_ns(x, STANZA_NS_SIGNED);
-            xmpp_stanza_t *signed_text = xmpp_stanza_new(ctx);
-            xmpp_stanza_set_text(signed_text, signed_status);
-            xmpp_stanza_add_child(x, signed_text);
-            xmpp_stanza_release(signed_text);
-            xmpp_stanza_add_child(presence, x);
-            xmpp_stanza_release(x);
-
-            free(signed_status);
-        }
+    if (signed_status) {
+        xmpp_stanza_t *x = xmpp_stanza_new(ctx);
+        xmpp_stanza_set_name(x, STANZA_NAME_X);
+        xmpp_stanza_set_ns(x, STANZA_NS_SIGNED);
+        xmpp_stanza_t *signed_text = xmpp_stanza_new(ctx);
+        xmpp_stanza_set_text(signed_text, signed_status);
+        xmpp_stanza_add_child(x, signed_text);
+        xmpp_stanza_release(signed_text);
+        xmpp_stanza_add_child(presence, x);
+        xmpp_stanza_release(x);
     }
-#endif
 
     stanza_attach_priority(ctx, presence, pri);
     stanza_attach_last_activity(ctx, presence, idle);
