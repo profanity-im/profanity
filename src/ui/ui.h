@@ -112,6 +112,7 @@ char * ui_ask_password(void);
 void ui_handle_stanza(const char * const msg);
 
 // ui events
+void ui_contact_online(char *barejid, Resource *resource, GDateTime *last_activity);
 void ui_contact_typing(const char * const barejid, const char * const resource);
 void ui_incoming_msg(const char * const from, const char * const resource,  const char * const message, GTimeVal *tv_stamp);
 void ui_incoming_private_msg(const char * const fulljid, const char * const message, GTimeVal *tv_stamp);
