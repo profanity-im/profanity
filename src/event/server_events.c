@@ -296,42 +296,12 @@ sv_ev_contact_offline(char *barejid, char *resource, char *status)
 }
 
 void
-sv_ev_contact_online(char *barejid, Resource *resource,
-    GDateTime *last_activity)
+sv_ev_contact_online(char *barejid, Resource *resource, GDateTime *last_activity)
 {
     gboolean updated = roster_update_presence(barejid, resource, last_activity);
 
     if (updated) {
-        char *show_console = prefs_get_string(PREF_STATUSES_CONSOLE);
-        char *show_chat_win = prefs_get_string(PREF_STATUSES_CHAT);
-        PContact contact = roster_get_contact(barejid);
-        if (p_contact_subscription(contact)) {
-            if (strcmp(p_contact_subscription(contact), "none") != 0) {
-
-                // show in console if "all"
-                if (g_strcmp0(show_console, "all") == 0) {
-                    cons_show_contact_online(contact, resource, last_activity);
-
-                // show in console of "online" and presence online
-                } else if (g_strcmp0(show_console, "online") == 0 &&
-                        resource->presence == RESOURCE_ONLINE) {
-                    cons_show_contact_online(contact, resource, last_activity);
-
-                }
-
-                // show in chat win if "all"
-                if (g_strcmp0(show_chat_win, "all") == 0) {
-                    ui_chat_win_contact_online(contact, resource, last_activity);
-
-                // show in char win if "online" and presence online
-                } else if (g_strcmp0(show_chat_win, "online") == 0 &&
-                        resource->presence == RESOURCE_ONLINE) {
-                    ui_chat_win_contact_online(contact, resource, last_activity);
-                }
-            }
-        }
-        prefs_free_string(show_console);
-        prefs_free_string(show_chat_win);
+        ui_contact_online(barejid, resource, last_activity);
     }
 
     rosterwin_roster();
