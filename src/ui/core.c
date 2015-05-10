@@ -473,20 +473,8 @@ ui_incoming_msg(const char * const barejid, const char * const resource, const c
         beep();
     }
 
-    int ui_index = num;
-    if (ui_index == 10) {
-        ui_index = 0;
-    }
-
     if (prefs_get_boolean(PREF_NOTIFY_MESSAGE)) {
-        gboolean is_current = wins_is_current(window);
-        if ( !is_current || (is_current && prefs_get_boolean(PREF_NOTIFY_MESSAGE_CURRENT)) ) {
-            if (prefs_get_boolean(PREF_NOTIFY_MESSAGE_TEXT)) {
-                notify_message(display_name, ui_index, message);
-            } else {
-                notify_message(display_name, ui_index, NULL);
-            }
-        }
+        notify_message(window, display_name, message);
     }
 
     free(display_name);
@@ -525,24 +513,12 @@ ui_incoming_private_msg(const char * const fulljid, const char * const message, 
         }
     }
 
-    int ui_index = num;
-    if (ui_index == 10) {
-        ui_index = 0;
-    }
-
     if (prefs_get_boolean(PREF_BEEP)) {
         beep();
     }
 
     if (prefs_get_boolean(PREF_NOTIFY_MESSAGE)) {
-        gboolean is_current = wins_is_current(window);
-        if ( !is_current || (is_current && prefs_get_boolean(PREF_NOTIFY_MESSAGE_CURRENT)) ) {
-            if (prefs_get_boolean(PREF_NOTIFY_MESSAGE_TEXT)) {
-                notify_message(display_from, ui_index, message);
-            } else {
-                notify_message(display_from, ui_index, NULL);
-            }
-        }
+        notify_message(window, display_from, message);
     }
 
     free(display_from);
