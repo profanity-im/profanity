@@ -342,7 +342,7 @@ void notifier_initialise(void);
 void notifier_uninit(void);
 
 void notify_typing(const char * const handle);
-void notify_message(const char * const handle, int win, const char * const text);
+void notify_message(ProfWin *window, const char * const name, const char * const text);
 void notify_room_message(const char * const handle, const char * const room,
     int win, const char * const text);
 void notify_remind(void);
