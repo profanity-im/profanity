@@ -50,9 +50,6 @@
 #include "xmpp/connection.h"
 #include "xmpp/stanza.h"
 #include "xmpp/xmpp.h"
-#ifdef HAVE_LIBGPGME
-#include "pgp/gpg.h"
-#endif
 
 static Autocomplete sub_requests_ac;
 
