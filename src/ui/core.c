@@ -1748,77 +1748,79 @@ ui_room_message(const char * const roomjid, const char * const nick,
     ProfMucWin *mucwin = wins_get_muc(roomjid);
     if (mucwin == NULL) {
         log_error("Room message received from %s, but no window open for %s", nick, roomjid);
+        return;
+    }
+
+    ProfWin *window = (ProfWin*) mucwin;
+    int num = wins_get_num(window);
+    char *my_nick = muc_nick(roomjid);
+
+    if (g_strcmp0(nick, my_nick) != 0) {
+        if (g_strrstr(message, my_nick)) {
+            win_print(window, '-', NULL, NO_ME, THEME_ROOMMENTION, nick, message);
+        } else {
+            win_print(window, '-', NULL, NO_ME, THEME_TEXT_THEM, nick, message);
+        }
     } else {
-        ProfWin *window = (ProfWin*) mucwin;
-        int num = wins_get_num(window);
-        char *my_nick = muc_nick(roomjid);
+        win_print(window, '-', NULL, 0, THEME_TEXT_ME, nick, message);
+    }
 
-        if (g_strcmp0(nick, my_nick) != 0) {
-            if (g_strrstr(message, my_nick)) {
-                win_print(window, '-', NULL, NO_ME, THEME_ROOMMENTION, nick, message);
+    // currently in groupchat window
+    if (wins_is_current(window)) {
+        status_bar_active(num);
+
+    // not currently on groupchat window
+    } else {
+        status_bar_new(num);
+        cons_show_incoming_message(nick, num);
+
+        if (prefs_get_boolean(PREF_FLASH) && (strcmp(nick, my_nick) != 0)) {
+            flash();
+        }
+
+        mucwin->unread++;
+    }
+
+    int ui_index = num;
+    if (ui_index == 10) {
+        ui_index = 0;
+    }
+
+    // don't notify self messages
+    if (strcmp(nick, my_nick) == 0) {
+        return;
+    }
+
+    if (prefs_get_boolean(PREF_BEEP)) {
+        beep();
+    }
+
+    gboolean notify = FALSE;
+    char *room_setting = prefs_get_string(PREF_NOTIFY_ROOM);
+    if (g_strcmp0(room_setting, "on") == 0) {
+        notify = TRUE;
+    }
+    if (g_strcmp0(room_setting, "mention") == 0) {
+        char *message_lower = g_utf8_strdown(message, -1);
+        char *nick_lower = g_utf8_strdown(nick, -1);
+        if (g_strrstr(message_lower, nick_lower)) {
+            notify = TRUE;
+        }
+        g_free(message_lower);
+        g_free(nick_lower);
+    }
+    prefs_free_string(room_setting);
+
+    if (notify) {
+        gboolean is_current = wins_is_current(window);
+        if ( !is_current || (is_current && prefs_get_boolean(PREF_NOTIFY_ROOM_CURRENT)) ) {
+            Jid *jidp = jid_create(roomjid);
+            if (prefs_get_boolean(PREF_NOTIFY_ROOM_TEXT)) {
+                notify_room_message(nick, jidp->localpart, ui_index, message);
             } else {
-                win_print(window, '-', NULL, NO_ME, THEME_TEXT_THEM, nick, message);
+                notify_room_message(nick, jidp->localpart, ui_index, NULL);
             }
-        } else {
-            win_print(window, '-', NULL, 0, THEME_TEXT_ME, nick, message);
-        }
-
-        // currently in groupchat window
-        if (wins_is_current(window)) {
-            status_bar_active(num);
-
-        // not currently on groupchat window
-        } else {
-            status_bar_new(num);
-            cons_show_incoming_message(nick, num);
-
-            if (strcmp(nick, my_nick) != 0) {
-                if (prefs_get_boolean(PREF_FLASH)) {
-                    flash();
-                }
-            }
-
-            mucwin->unread++;
-        }
-
-        int ui_index = num;
-        if (ui_index == 10) {
-            ui_index = 0;
-        }
-
-        if (strcmp(nick, muc_nick(roomjid)) != 0) {
-            if (prefs_get_boolean(PREF_BEEP)) {
-                beep();
-            }
-
-            gboolean notify = FALSE;
-            char *room_setting = prefs_get_string(PREF_NOTIFY_ROOM);
-            if (g_strcmp0(room_setting, "on") == 0) {
-                notify = TRUE;
-            }
-            if (g_strcmp0(room_setting, "mention") == 0) {
-                char *message_lower = g_utf8_strdown(message, -1);
-                char *nick_lower = g_utf8_strdown(nick, -1);
-                if (g_strrstr(message_lower, nick_lower)) {
-                    notify = TRUE;
-                }
-                g_free(message_lower);
-                g_free(nick_lower);
-            }
-            prefs_free_string(room_setting);
-
-            if (notify) {
-                gboolean is_current = wins_is_current(window);
-                if ( !is_current || (is_current && prefs_get_boolean(PREF_NOTIFY_ROOM_CURRENT)) ) {
-                    Jid *jidp = jid_create(roomjid);
-                    if (prefs_get_boolean(PREF_NOTIFY_ROOM_TEXT)) {
-                        notify_room_message(nick, jidp->localpart, ui_index, message);
-                    } else {
-                        notify_room_message(nick, jidp->localpart, ui_index, NULL);
-                    }
-                    jid_destroy(jidp);
-                }
-            }
+            jid_destroy(jidp);
         }
     }
 }
