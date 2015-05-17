@@ -3988,23 +3988,21 @@ cmd_history(gchar **args, struct cmd_help_t help)
 gboolean
 cmd_carbons(gchar **args, struct cmd_help_t help)
 {
-    jabber_conn_status_t conn_status = jabber_get_connection_status();
-
-    if (conn_status != JABBER_CONNECTED) {
-        cons_show("You are not currently connected.");
-        return TRUE;
-    }
-
     gboolean result = _cmd_set_boolean_preference(args[0], help,
         "Message carbons preference", PREF_CARBONS);
 
-    // enable carbons
-    if (strcmp(args[0], "on") == 0) {
-        iq_enable_carbons();
+    jabber_conn_status_t conn_status = jabber_get_connection_status();
+
+    if (conn_status == JABBER_CONNECTED) {
+        // enable carbons
+        if (strcmp(args[0], "on") == 0) {
+            iq_enable_carbons();
+        }
+        else if (strcmp(args[0], "off") == 0){
+            iq_disable_carbons();
+        }
     }
-    else if (strcmp(args[0], "off") == 0){
-        iq_disable_carbons();
-    }
+
     return result;
 }
 
