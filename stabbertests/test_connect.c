@@ -34,6 +34,4 @@ connect_with_jid(void **state)
 
     jabber_conn_status_t status = jabber_get_connection_status();
     assert_true(status == JABBER_CONNECTED);
-
-    stbbr_stop();
 }
