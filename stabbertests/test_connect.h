@@ -1,1 +1,1 @@
-void connect_with_no_jid(void **state);
+void connect_with_jid(void **state);

@@ -194,7 +194,7 @@ jabber_disconnect(void)
         xmpp_disconnect(jabber_conn.conn);
 
         while (jabber_get_connection_status() == JABBER_DISCONNECTING) {
-            jabber_process_events();
+            jabber_process_events(10);
         }
         _connection_free_saved_account();
         _connection_free_saved_details();
@@ -222,10 +222,11 @@ jabber_shutdown(void)
     _connection_free_session_data();
     xmpp_shutdown();
     free(jabber_conn.log);
+    jabber_conn.log = NULL;
 }
 
 void
-jabber_process_events(void)
+jabber_process_events(int millis)
 {
     int reconnect_sec;
 
@@ -234,7 +235,7 @@ jabber_process_events(void)
         case JABBER_CONNECTED:
         case JABBER_CONNECTING:
         case JABBER_DISCONNECTING:
-            xmpp_run_once(jabber_conn.ctx, 10);
+            xmpp_run_once(jabber_conn.ctx, millis);
             break;
         case JABBER_DISCONNECTED:
             reconnect_sec = prefs_get_reconnect();

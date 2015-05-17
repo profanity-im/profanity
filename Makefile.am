@@ -179,7 +179,7 @@ check_PROGRAMS = tests/testsuite stabbertests/testsuite
 tests_testsuite_SOURCES = $(test_sources)
 tests_testsuite_LDADD = -lcmocka
 stabbertests_testsuite_SOURCES = $(stabbertest_sources)
-stabbertests_testsuite_LDADD = -lcmocka -lstabber
+stabbertests_testsuite_LDADD = -lcmocka -lstabber -lpthread
 
 man_MANS = $(man_sources)
 

@@ -82,7 +82,7 @@ prefs_load(void)
 {
     GError *err;
 
-    log_info("Loading preferences");
+//    log_info("Loading preferences");
     prefs_loc = _get_preferences_file();
 
     if (g_file_test(prefs_loc, G_FILE_TEST_EXISTS)) {

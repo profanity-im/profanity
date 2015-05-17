@@ -25,9 +25,18 @@
 #include "otr/otr.h"
 #endif
 
-
 #define XDG_CONFIG_HOME "./stabbertests/files/xdg_config_home"
 #define XDG_DATA_HOME   "./stabbertests/files/xdg_data_home"
+
+void
+prof_process_xmpp(void)
+{
+    int i = 0;
+    while (i < 20) {
+        jabber_process_events(10);
+        i++;
+    }
+}
 
 gboolean
 _create_dir(char *name)
