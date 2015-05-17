@@ -8,6 +8,7 @@
 #include <cmocka.h>
 #include <stdio.h>
 #include <unistd.h>
+#include <errno.h>
 
 #include "config.h"
 
@@ -131,7 +132,10 @@ _create_logs_dir(void)
 void
 _cleanup_dirs(void)
 {
-    system("rm -rf ./stabbertests/files");
+    int res = system("rm -rf ./stabbertests/files");
+    if (res == -1) {
+        assert_true(FALSE);
+    }
 }
 
 void
