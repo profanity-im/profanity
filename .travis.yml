@@ -21,5 +21,13 @@ install:
     - sudo make install
     - cd ../..
     - rm -rf cmocka-1.0.0
+    - git clone git://github.com/boothj5/stabber.git
+    - cd stabber
+    - ./bootstrap.sh
+    - ./configure --prefix=/usr
+    - make
+    - sudo make install
+    - cd ..
+    - rm -rf stabber
     - ./bootstrap.sh
 script: ./configure && make && make check
