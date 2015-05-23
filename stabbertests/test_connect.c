@@ -14,15 +14,10 @@
 #include "command/command.h"
 
 void
-connect_with_jid(void **state)
+connect_jid(void **state)
 {
     char *connect = "/connect stabber@localhost port 5230";
     char *password = "password";
-
-    if (stbbr_start(5230) != 0) {
-        assert_true(FALSE);
-        return;
-    }
 
     stbbr_auth_passwd(password);
     will_return(ui_ask_password, strdup(password));
@@ -34,4 +29,22 @@ connect_with_jid(void **state)
 
     jabber_conn_status_t status = jabber_get_connection_status();
     assert_true(status == JABBER_CONNECTED);
+}
+
+void
+connect_bad_password(void **state)
+{
+    char *connect = "/connect stabber@localhost port 5230";
+
+    stbbr_auth_passwd("password");
+    will_return(ui_ask_password, strdup("badpassword"));
+
+    expect_cons_show("Connecting as stabber@localhost");
+    expect_cons_show_error("Login failed.");
+
+    cmd_process_input(strdup(connect));
+    prof_process_xmpp();
+
+    jabber_conn_status_t status = jabber_get_connection_status();
+    assert_true(status == JABBER_DISCONNECTED);
 }

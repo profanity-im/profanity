@@ -10,6 +10,8 @@
 #include <unistd.h>
 #include <errno.h>
 
+#include <stabber.h>
+
 #include "config.h"
 
 #include "config/preferences.h"
@@ -28,6 +30,9 @@
 
 #define XDG_CONFIG_HOME "./stabbertests/files/xdg_config_home"
 #define XDG_DATA_HOME   "./stabbertests/files/xdg_data_home"
+
+char *config_orig;
+char *data_orig;
 
 void
 prof_process_xmpp(void)
@@ -141,6 +146,14 @@ _cleanup_dirs(void)
 void
 init_prof_test(void **state)
 {
+    if (stbbr_start(5230) != 0) {
+        assert_true(FALSE);
+        return;
+    }
+
+    config_orig = getenv("XDG_CONFIG_HOME");
+    data_orig = getenv("XDG_DATA_HOME");
+
     setenv("XDG_CONFIG_HOME", XDG_CONFIG_HOME, 1);
     setenv("XDG_DATA_HOME", XDG_DATA_HOME, 1);
 
@@ -196,4 +209,9 @@ close_prof_test(void **state)
     log_close();
 
     _cleanup_dirs();
+
+    setenv("XDG_CONFIG_HOME", config_orig, 1);
+    setenv("XDG_DATA_HOME", data_orig, 1);
+
+    stbbr_stop();
 }

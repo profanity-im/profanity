@@ -163,6 +163,8 @@ otr_init(void)
     log_info("Initialising OTR");
     OTRL_INIT;
 
+    jid = NULL;
+
     ops.policy = cb_policy;
     ops.is_logged_in = cb_is_logged_in;
     ops.inject_message = cb_inject_message;
@@ -181,6 +183,7 @@ otr_shutdown(void)
 {
     if (jid) {
         free(jid);
+        jid = NULL;
     }
 }
 
