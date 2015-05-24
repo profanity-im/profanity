@@ -53,6 +53,15 @@ sends_rooms_iq(void **state)
     cmd_process_input(strdup("/connect stabber@localhost port 5230"));
     prof_process_xmpp();
 
+    stbbr_for("confreq",
+        "<iq id=\"confreq\" type=\"result\" to=\"stabber@localhost/profanity\" from=\"conference.localhost\">"
+            "<query xmlns=\"http://jabber.org/protocol/disco#items\">"
+                "<item jid=\"chatroom@conference.localhost\" name=\"A chat room\"/>"
+                "<item jid=\"hangout@conference.localhost\" name=\"Another chat room\"/>"
+            "</query>"
+        "</iq>"
+    );
+
     cmd_process_input(strdup("/rooms"));
     prof_process_xmpp();
 
