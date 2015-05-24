@@ -166,3 +166,25 @@ multiple_pings(void **state)
         "</iq>"
     ));
 }
+
+void
+responds_to_ping(void **state)
+{
+    will_return(ui_ask_password, strdup("password"));
+
+    expect_any_cons_show();
+
+    cmd_process_input(strdup("/connect stabber@localhost port 5230"));
+    prof_process_xmpp(20);
+
+    stbbr_send(
+        "<iq id=\"ping1\" type=\"get\" to=\"stabber@localhost\" from=\"localhost\">"
+            "<ping xmlns=\"urn:xmpp:ping\"/>"
+        "</iq>");
+
+    prof_process_xmpp(20);
+
+    assert_true(stbbr_verify(
+        "<iq id=\"ping1\" type=\"result\" from=\"stabber@localhost\" to=\"localhost\"/>"
+    ));
+}
