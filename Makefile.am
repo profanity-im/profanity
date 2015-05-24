@@ -131,7 +131,7 @@ stabbertest_sources = \
 	stabbertests/ui/stub_ui.c \
 	stabbertests/proftest.c stabbertests/proftest.h \
 	stabbertests/test_connect.c stabbertests/test_connect.h \
-	stabbertests/testsuite.c
+	stabbertests/stabbertestsuite.c
 
 main_source = src/main.c
 
@@ -174,12 +174,12 @@ if INCLUDE_GIT_VERSION
 BUILT_SOURCES = $(git_include)
 endif
 
-TESTS = tests/testsuite stabbertests/testsuite
-check_PROGRAMS = tests/testsuite stabbertests/testsuite
+TESTS = tests/testsuite stabbertests/stabbertestsuite
+check_PROGRAMS = tests/testsuite stabbertests/stabbertestsuite
 tests_testsuite_SOURCES = $(test_sources)
 tests_testsuite_LDADD = -lcmocka
-stabbertests_testsuite_SOURCES = $(stabbertest_sources)
-stabbertests_testsuite_LDADD = -lcmocka -lstabber -lpthread
+stabbertests_stabbertestsuite_SOURCES = $(stabbertest_sources)
+stabbertests_stabbertestsuite_LDADD = -lcmocka -lstabber -lpthread
 
 man_MANS = $(man_sources)
 

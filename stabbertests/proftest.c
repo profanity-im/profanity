@@ -212,6 +212,7 @@ close_prof_test(void **state)
     accounts_close();
     cmd_uninit();
     log_close();
+    reset_unique_id();
 
     _cleanup_dirs();
 
