@@ -24,6 +24,9 @@ int main(int argc, char* argv[]) {
         unit_test_setup_teardown(sends_rooms_iq,
             init_prof_test,
             close_prof_test),
+        unit_test_setup_teardown(multiple_pings,
+            init_prof_test,
+            close_prof_test),
     };
 
     return run_tests(all_tests);

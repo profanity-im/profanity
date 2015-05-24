@@ -36,10 +36,10 @@ char *config_orig;
 char *data_orig;
 
 void
-prof_process_xmpp(void)
+prof_process_xmpp(int loops)
 {
     int i = 0;
-    while (i < 20) {
+    while (i < loops) {
         jabber_process_events(10);
         i++;
     }
@@ -198,7 +198,7 @@ void
 close_prof_test(void **state)
 {
     jabber_disconnect();
-    prof_process_xmpp();
+    prof_process_xmpp(20);
     jabber_shutdown();
     roster_free();
     muc_close();

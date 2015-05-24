@@ -22,7 +22,7 @@ connect_jid(void **state)
     expect_cons_show("Connecting as stabber@localhost");
 
     cmd_process_input(strdup("/connect stabber@localhost port 5230"));
-    prof_process_xmpp();
+    prof_process_xmpp(20);
 
     jabber_conn_status_t status = jabber_get_connection_status();
     assert_true(status == JABBER_CONNECTED);
@@ -37,7 +37,7 @@ connect_bad_password(void **state)
     expect_cons_show_error("Login failed.");
 
     cmd_process_input(strdup("/connect stabber@localhost port 5230"));
-    prof_process_xmpp();
+    prof_process_xmpp(20);
 
     jabber_conn_status_t status = jabber_get_connection_status();
     assert_true(status == JABBER_DISCONNECTED);
@@ -51,7 +51,7 @@ sends_rooms_iq(void **state)
     expect_any_cons_show();
 
     cmd_process_input(strdup("/connect stabber@localhost port 5230"));
-    prof_process_xmpp();
+    prof_process_xmpp(20);
 
     stbbr_for("confreq",
         "<iq id=\"confreq\" type=\"result\" to=\"stabber@localhost/profanity\" from=\"conference.localhost\">"
@@ -63,11 +63,50 @@ sends_rooms_iq(void **state)
     );
 
     cmd_process_input(strdup("/rooms"));
-    prof_process_xmpp();
+    prof_process_xmpp(20);
 
     assert_true(stbbr_verify_last(
         "<iq id=\"confreq\" to=\"conference.localhost\" type=\"get\">"
             "<query xmlns=\"http://jabber.org/protocol/disco#items\"/>"
+        "</iq>"
+    ));
+}
+
+void
+multiple_pings(void **state)
+{
+    will_return(ui_ask_password, strdup("password"));
+
+    expect_any_cons_show();
+
+    cmd_process_input(strdup("/connect stabber@localhost port 5230"));
+    prof_process_xmpp(20);
+
+    expect_cons_show("Pinged server...");
+    expect_any_cons_show();
+    expect_cons_show("Pinged server...");
+    expect_any_cons_show();
+
+    stbbr_for("prof_ping_1",
+        "<iq id=\"prof_ping_1\" type=\"result\" to=\"stabber@localhost/profanity\"/>"
+    );
+    stbbr_for("prof_ping_2",
+        "<iq id=\"prof_ping_2\" type=\"result\" to=\"stabber@localhost/profanity\"/>"
+    );
+
+    cmd_process_input(strdup("/ping"));
+    prof_process_xmpp(20);
+    cmd_process_input(strdup("/ping"));
+    prof_process_xmpp(20);
+
+    assert_true(stbbr_verify(
+        "<iq id=\"prof_ping_1\" type=\"get\">"
+            "<ping xmlns=\"urn:xmpp:ping\"/>"
+        "</iq>"
+    ));
+    assert_true(stbbr_verify(
+        "<iq id=\"prof_ping_2\" type=\"get\">"
+            "<ping xmlns=\"urn:xmpp:ping\"/>"
         "</iq>"
     ));
 }
