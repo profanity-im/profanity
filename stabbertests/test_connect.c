@@ -178,13 +178,14 @@ responds_to_ping(void **state)
     prof_process_xmpp(20);
 
     stbbr_send(
-        "<iq id=\"ping1\" type=\"get\" to=\"stabber@localhost\" from=\"localhost\">"
+        "<iq id=\"ping1\" type=\"get\" to=\"stabber@localhost/profanity\" from=\"localhost\">"
             "<ping xmlns=\"urn:xmpp:ping\"/>"
-        "</iq>");
+        "</iq>"
+    );
 
     prof_process_xmpp(20);
 
     assert_true(stbbr_verify(
-        "<iq id=\"ping1\" type=\"result\" from=\"stabber@localhost\" to=\"localhost\"/>"
+        "<iq id=\"ping1\" type=\"result\" from=\"stabber@localhost/profanity\" to=\"localhost\"/>"
     ));
 }
