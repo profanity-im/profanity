@@ -55,4 +55,10 @@ sends_rooms_iq(void **state)
 
     cmd_process_input(strdup("/rooms"));
     prof_process_xmpp();
+
+    assert_true(stbbr_verify_last(
+        "<iq id=\"confreq\" to=\"conference.localhost\" type=\"get\">"
+            "<query xmlns=\"http://jabber.org/protocol/disco#items\"/>"
+        "</iq>"
+    ));
 }
