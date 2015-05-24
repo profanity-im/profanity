@@ -645,7 +645,8 @@ otr_get_their_fingerprint(const char * const recipient)
 prof_otrpolicy_t
 otr_get_policy(const char * const recipient)
 {
-    ProfAccount *account = accounts_get_account(jabber_get_account_name());
+    char *account_name = jabber_get_account_name();
+    ProfAccount *account = accounts_get_account(account_name);
     // check contact specific setting
     if (g_list_find_custom(account->otr_manual, recipient, (GCompareFunc)g_strcmp0)) {
         account_free(account);

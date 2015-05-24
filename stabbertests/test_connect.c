@@ -11,20 +11,17 @@
 #include "proftest.h"
 #include "xmpp/xmpp.h"
 #include "ui/stub_ui.h"
+#include "ui/window.h"
 #include "command/command.h"
 
 void
 connect_jid(void **state)
 {
-    char *connect = "/connect stabber@localhost port 5230";
-    char *password = "password";
-
-    stbbr_auth_passwd(password);
-    will_return(ui_ask_password, strdup(password));
+    will_return(ui_ask_password, strdup("password"));
 
     expect_cons_show("Connecting as stabber@localhost");
 
-    cmd_process_input(strdup(connect));
+    cmd_process_input(strdup("/connect stabber@localhost port 5230"));
     prof_process_xmpp();
 
     jabber_conn_status_t status = jabber_get_connection_status();
@@ -34,17 +31,28 @@ connect_jid(void **state)
 void
 connect_bad_password(void **state)
 {
-    char *connect = "/connect stabber@localhost port 5230";
-
-    stbbr_auth_passwd("password");
     will_return(ui_ask_password, strdup("badpassword"));
 
     expect_cons_show("Connecting as stabber@localhost");
     expect_cons_show_error("Login failed.");
 
-    cmd_process_input(strdup(connect));
+    cmd_process_input(strdup("/connect stabber@localhost port 5230"));
     prof_process_xmpp();
 
     jabber_conn_status_t status = jabber_get_connection_status();
     assert_true(status == JABBER_DISCONNECTED);
+}
+
+void
+sends_rooms_iq(void **state)
+{
+    will_return(ui_ask_password, strdup("password"));
+
+    expect_any_cons_show();
+
+    cmd_process_input(strdup("/connect stabber@localhost port 5230"));
+    prof_process_xmpp();
+
+    cmd_process_input(strdup("/rooms"));
+    prof_process_xmpp();
 }

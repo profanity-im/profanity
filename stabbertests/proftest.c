@@ -19,6 +19,7 @@
 #include "xmpp/xmpp.h"
 #include "command/command.h"
 #include "roster_list.h"
+#include "ui/windows.h"
 
 #ifdef HAVE_GIT_VERSION
 #include "gitversion.h"
@@ -157,6 +158,8 @@ init_prof_test(void **state)
     setenv("XDG_CONFIG_HOME", XDG_CONFIG_HOME, 1);
     setenv("XDG_DATA_HOME", XDG_DATA_HOME, 1);
 
+    _cleanup_dirs();
+
     _create_config_dir();
     _create_data_dir();
     _create_chatlogs_dir();
@@ -188,12 +191,14 @@ init_prof_test(void **state)
 #ifdef HAVE_LIBOTR
     otr_init();
 #endif
+    wins_init();
 }
 
 void
 close_prof_test(void **state)
 {
     jabber_disconnect();
+    prof_process_xmpp();
     jabber_shutdown();
     roster_free();
     muc_close();
