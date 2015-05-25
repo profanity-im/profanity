@@ -1046,7 +1046,7 @@ ui_handle_otr_error(const char * const barejid, const char * const message)
     if (chatwin) {
         win_print((ProfWin*)chatwin, '!', NULL, 0, THEME_ERROR, "", message);
     } else {
-        cons_show_error(message);
+        cons_show_error("%s - %s", barejid, message);
     }
 }
 
