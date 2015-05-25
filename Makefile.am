@@ -130,6 +130,7 @@ stabbertest_sources = \
 	src/config/theme.c src/config/theme.h \
 	stabbertests/ui/stub_ui.c \
 	stabbertests/proftest.c stabbertests/proftest.h \
+	stabbertests/checkers/checkers.c stabbertests/checkers/checkers.h \
 	stabbertests/test_connect.c stabbertests/test_connect.h \
 	stabbertests/stabbertestsuite.c
 
