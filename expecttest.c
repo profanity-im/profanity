@@ -52,8 +52,6 @@ int main(void)
         "</presence>"
     ));
 
-    stbbr_send();
-    
     write(fd, QUIT_CMD, strlen(QUIT_CMD));
     sleep(1);
     

@@ -95,42 +95,7 @@ test_sources = \
 	tests/testsuite.c
 
 stabbertest_sources = \
-	src/contact.c src/contact.h src/log.c src/common.c \
-	src/log.h src/profanity.c src/common.h \
-	src/profanity.h src/chat_session.c \
-	src/chat_session.h src/muc.c src/muc.h src/jid.h src/jid.c \
-	src/chat_state.h src/chat_state.c \
-	src/resource.c src/resource.h \
-	src/roster_list.c src/roster_list.h \
-	src/xmpp/xmpp.h src/xmpp/capabilities.c src/xmpp/connection.c \
-	src/xmpp/iq.c src/xmpp/message.c src/xmpp/presence.c src/xmpp/stanza.c \
-	src/xmpp/stanza.h src/xmpp/message.h src/xmpp/iq.h src/xmpp/presence.h \
-	src/xmpp/capabilities.h src/xmpp/connection.h \
-	src/xmpp/roster.c src/xmpp/roster.h \
-	src/xmpp/bookmark.c src/xmpp/bookmark.h \
-	src/xmpp/form.c src/xmpp/form.h \
-	src/event/server_events.c src/event/server_events.h \
-	src/event/client_events.c src/event/client_events.h \
-	src/event/ui_events.c src/event/ui_events.h \
-	src/ui/ui.h src/ui/window.c src/ui/window.h \
-	src/ui/windows.c src/ui/windows.h \
-	src/ui/buffer.c src/ui/buffer.h \
-	src/ui/statusbar.c src/ui/statusbar.h \
-	src/ui/inputwin.c src/ui/inputwin.h \
-	src/command/command.h src/command/command.c \
-	src/command/commands.h src/command/commands.c \
-	src/tools/parser.c \
-	src/tools/parser.h \
-	src/tools/p_sha1.h src/tools/p_sha1.c \
-	src/tools/autocomplete.c src/tools/autocomplete.h \
-	src/tools/tinyurl.c src/tools/tinyurl.h \
-	src/config/accounts.c src/config/accounts.h \
-	src/config/account.c src/config/account.h \
-	src/config/preferences.c src/config/preferences.h \
-	src/config/theme.c src/config/theme.h \
-	stabbertests/ui/stub_ui.c \
 	stabbertests/proftest.c stabbertests/proftest.h \
-	stabbertests/checkers/checkers.c stabbertests/checkers/checkers.h \
 	stabbertests/test_connect.c stabbertests/test_connect.h \
 	stabbertests/stabbertestsuite.c
 
@@ -157,11 +122,9 @@ if BUILD_OTR
 test_sources += $(otr_test_sources)
 if BUILD_OTR3
 core_sources += $(otr3_sources)
-stabbertest_sources += $(otr3_sources)
 endif
 if BUILD_OTR4
 core_sources += $(otr4_sources)
-stabbertest_sources += $(otr4_sources)
 endif
 endif
 
@@ -180,7 +143,8 @@ check_PROGRAMS = tests/testsuite stabbertests/stabbertestsuite
 tests_testsuite_SOURCES = $(test_sources)
 tests_testsuite_LDADD = -lcmocka
 stabbertests_stabbertestsuite_SOURCES = $(stabbertest_sources)
-stabbertests_stabbertestsuite_LDADD = -lcmocka -lstabber -lpthread
+stabbertests_stabbertestsuite_CFLAGS = -I/usr/include/tcl8.6
+stabbertests_stabbertestsuite_LDADD = -lcmocka -lstabber -lexpect -ltcl
 
 man_MANS = $(man_sources)
 

@@ -9,41 +9,16 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <errno.h>
+#include <string.h>
 
 #include <stabber.h>
-
-#include "config.h"
-
-#include "config/preferences.h"
-#include "log.h"
-#include "xmpp/xmpp.h"
-#include "command/command.h"
-#include "roster_list.h"
-#include "ui/windows.h"
-
-#ifdef HAVE_GIT_VERSION
-#include "gitversion.h"
-#endif
-
-#ifdef HAVE_LIBOTR
-#include "otr/otr.h"
-#endif
+#include <expect.h>
 
 #define XDG_CONFIG_HOME "./stabbertests/files/xdg_config_home"
 #define XDG_DATA_HOME   "./stabbertests/files/xdg_data_home"
 
 char *config_orig;
 char *data_orig;
-
-void
-prof_process_xmpp(int loops)
-{
-    int i = 0;
-    while (i < loops) {
-        jabber_process_events(10);
-        i++;
-    }
-}
 
 gboolean
 _create_dir(char *name)
@@ -72,7 +47,7 @@ _mkdir_recursive(const char *dir)
     for (i = 1; i <= strlen(dir); i++) {
         if (dir[i] == '/' || dir[i] == '\0') {
             gchar *next_dir = g_strndup(dir, i);
-            result = create_dir(next_dir);
+            result = _create_dir(next_dir);
             g_free(next_dir);
             if (!result) {
                 break;
@@ -147,6 +122,8 @@ _cleanup_dirs(void)
 void
 init_prof_test(void **state)
 {
+    exp_timeout = 2;
+
     if (stbbr_start(5230) != 0) {
         assert_true(FALSE);
         return;
@@ -164,56 +141,11 @@ init_prof_test(void **state)
     _create_data_dir();
     _create_chatlogs_dir();
     _create_logs_dir();
-
-    log_level_t prof_log_level = log_level_from_string("DEBUG");
-    prefs_load();
-    log_init(prof_log_level);
-    if (strcmp(PACKAGE_STATUS, "development") == 0) {
-#ifdef HAVE_GIT_VERSION
-            log_info("Starting Profanity (%sdev.%s.%s)...", PACKAGE_VERSION, PROF_GIT_BRANCH, PROF_GIT_REVISION);
-#else
-            log_info("Starting Profanity (%sdev)...", PACKAGE_VERSION);
-#endif
-    } else {
-        log_info("Starting Profanity (%s)...", PACKAGE_VERSION);
-    }
-    chat_log_init();
-    groupchat_log_init();
-    accounts_load();
-    char *theme = prefs_get_string(PREF_THEME);
-    theme_init(theme);
-    prefs_free_string(theme);
-    jabber_init(FALSE);
-    cmd_init();
-    log_info("Initialising contact list");
-    roster_init();
-    muc_init();
-#ifdef HAVE_LIBOTR
-    otr_init();
-#endif
-    wins_init();
 }
 
 void
 close_prof_test(void **state)
 {
-    jabber_disconnect();
-    prof_process_xmpp(20);
-    jabber_shutdown();
-    roster_free();
-    muc_close();
-    caps_close();
-#ifdef HAVE_LIBOTR
-    otr_shutdown();
-#endif
-    chat_log_close();
-    prefs_close();
-    theme_close();
-    accounts_close();
-    cmd_uninit();
-    log_close();
-    reset_unique_id();
-
     _cleanup_dirs();
 
     setenv("XDG_CONFIG_HOME", config_orig, 1);
