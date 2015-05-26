@@ -143,7 +143,7 @@ check_PROGRAMS = tests/testsuite stabbertests/stabbertestsuite
 tests_testsuite_SOURCES = $(test_sources)
 tests_testsuite_LDADD = -lcmocka
 stabbertests_stabbertestsuite_SOURCES = $(stabbertest_sources)
-stabbertests_stabbertestsuite_CFLAGS = -I/usr/include/tcl8.6
+stabbertests_stabbertestsuite_CFLAGS = -I/usr/include/tcl8.6 -I/usr/include/tcl8.5
 stabbertests_stabbertestsuite_LDADD = -lcmocka -lstabber -lexpect -ltcl
 
 man_MANS = $(man_sources)
