@@ -20,6 +20,8 @@
 char *config_orig;
 char *data_orig;
 
+int fd = 0;
+
 gboolean
 _create_dir(char *name)
 {
@@ -141,6 +143,8 @@ init_prof_test(void **state)
     _create_data_dir();
     _create_chatlogs_dir();
     _create_logs_dir();
+
+    prof_start();
 }
 
 void
@@ -152,4 +156,32 @@ close_prof_test(void **state)
     setenv("XDG_DATA_HOME", data_orig, 1);
 
     stbbr_stop();
+}
+
+void
+prof_start(void)
+{
+    fd = exp_spawnl("./profanity", NULL);
+    FILE *fp = fdopen(fd, "r+");
+
+    if (fp == NULL) {
+        assert_true(FALSE);
+    }
+
+    setbuf(fp, (char *)0);
+}
+
+void
+prof_input(char *input)
+{
+    GString *inp_str = g_string_new(input);
+    g_string_append(inp_str, "\r");
+    write(fd, inp_str->str, inp_str->len);
+    g_string_free(inp_str, TRUE);
+}
+
+int
+prof_output(char *text)
+{
+    return (1 == exp_expectl(fd, exp_exact, text, 1, exp_end));
 }

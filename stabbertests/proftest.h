@@ -7,4 +7,8 @@
 void init_prof_test(void **state);
 void close_prof_test(void **state);
 
+void prof_start(void);
+void prof_input(char *input);
+int prof_output(char *text);
+
 #endif
