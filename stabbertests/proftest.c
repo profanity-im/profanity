@@ -124,8 +124,6 @@ _cleanup_dirs(void)
 void
 init_prof_test(void **state)
 {
-    exp_timeout = 2;
-
     if (stbbr_start(5230) != 0) {
         assert_true(FALSE);
         return;

@@ -27,8 +27,6 @@ connect_jid_requests_roster(void **state)
     prof_input("/connect stabber@localhost port 5230");
     prof_input("password");
 
-    sleep(1);
-
     assert_true(stbbr_verify(
         "<iq id=\"*\" type=\"get\"><query xmlns=\"jabber:iq:roster\"/></iq>"
     ));
@@ -49,8 +47,6 @@ connect_jid_sends_presence_after_receiving_roster(void **state)
     prof_input("/connect stabber@localhost port 5230");
     prof_input("password");
 
-    sleep(1);
-
     assert_true(stbbr_verify(
         "<presence id=\"*\">"
             "<c hash=\"sha-1\" xmlns=\"http://jabber.org/protocol/caps\" ver=\"*\" node=\"http://www.profanity.im\"/>"
@@ -63,8 +59,6 @@ connect_jid_requests_bookmarks(void **state)
 {
     prof_input("/connect stabber@localhost port 5230");
     prof_input("password");
-
-    sleep(1);
 
     assert_true(stbbr_verify(
         "<iq id=\"*\" type=\"get\">"
@@ -96,11 +90,7 @@ show_presence_updates(void **state)
         "</iq>"
     );
 
-    prof_input("/connect stabber@localhost port 5230");
-    prof_input("password");
-    assert_true(prof_output("stabber@localhost logged in successfully"));
-
-    stbbr_send(
+    stbbr_for("prof_presence_1",
         "<presence to=\"stabber@localhost\" from=\"buddy1@localhost/mobile\">"
             "<show>dnd</show>"
             "<status>busy!</status>"
@@ -115,97 +105,91 @@ show_presence_updates(void **state)
         "</presence>"
     );
 
+    prof_input("/connect stabber@localhost port 5230");
+    prof_input("password");
+
     assert_true(prof_output("Buddy1 (mobile) is dnd"));
     assert_true(prof_output("Buddy1 (laptop) is chat"));
     assert_true(prof_output("Buddy2 (work) is away"));
+
+    stbbr_send(
+        "<presence to=\"stabber@localhost\" from=\"buddy1@localhost/mobile\">"
+            "<show>xa</show>"
+            "<status>Gone :(</status>"
+        "</presence>"
+    );
+
+    assert_true(prof_output("Buddy1 (mobile) is xa"));
 }
-//
-//void
-//sends_rooms_iq(void **state)
-//{
-//    will_return(ui_ask_password, strdup("password"));
-//
-//    expect_any_cons_show();
-//
-//    cmd_process_input(strdup("/connect stabber@localhost port 5230"));
-//    prof_process_xmpp(20);
-//
-//    stbbr_for("confreq",
-//        "<iq id=\"confreq\" type=\"result\" to=\"stabber@localhost/profanity\" from=\"conference.localhost\">"
-//            "<query xmlns=\"http://jabber.org/protocol/disco#items\">"
-//                "<item jid=\"chatroom@conference.localhost\" name=\"A chat room\"/>"
-//                "<item jid=\"hangout@conference.localhost\" name=\"Another chat room\"/>"
-//            "</query>"
-//        "</iq>"
-//    );
-//
-//    cmd_process_input(strdup("/rooms"));
-//    prof_process_xmpp(20);
-//
-//    assert_true(stbbr_verify_last(
-//        "<iq id=\"confreq\" to=\"conference.localhost\" type=\"get\">"
-//            "<query xmlns=\"http://jabber.org/protocol/disco#items\"/>"
-//        "</iq>"
-//    ));
-//}
-//
-//void
-//multiple_pings(void **state)
-//{
-//    will_return(ui_ask_password, strdup("password"));
-//
-//    expect_any_cons_show();
-//
-//    cmd_process_input(strdup("/connect stabber@localhost port 5230"));
-//    prof_process_xmpp(20);
-//
-//    expect_cons_show("Pinged server...");
-//    expect_any_cons_show();
-//    expect_cons_show("Pinged server...");
-//    expect_any_cons_show();
-//
-//    stbbr_for("prof_ping_1",
-//        "<iq id=\"prof_ping_1\" type=\"result\" to=\"stabber@localhost/profanity\"/>"
-//    );
-//    stbbr_for("prof_ping_2",
-//        "<iq id=\"prof_ping_2\" type=\"result\" to=\"stabber@localhost/profanity\"/>"
-//    );
-//
-//    cmd_process_input(strdup("/ping"));
-//    prof_process_xmpp(20);
-//    cmd_process_input(strdup("/ping"));
-//    prof_process_xmpp(20);
-//
-//    assert_true(stbbr_verify(
-//        "<iq id=\"prof_ping_1\" type=\"get\">"
-//            "<ping xmlns=\"urn:xmpp:ping\"/>"
-//        "</iq>"
-//    ));
-//    assert_true(stbbr_verify(
-//        "<iq id=\"prof_ping_2\" type=\"get\">"
-//            "<ping xmlns=\"urn:xmpp:ping\"/>"
-//        "</iq>"
-//    ));
-//}
-//
-//void
-//responds_to_ping(void **state)
-//{
-//    will_return(ui_ask_password, strdup("password"));
-//
-//    expect_any_cons_show();
-//
-//    cmd_process_input(strdup("/connect stabber@localhost port 5230"));
-//    prof_process_xmpp(20);
-//
-//    stbbr_send(
-//        "<iq id=\"ping1\" type=\"get\" to=\"stabber@localhost/profanity\" from=\"localhost\">"
-//            "<ping xmlns=\"urn:xmpp:ping\"/>"
-//        "</iq>"
-//    );
-//    prof_process_xmpp(20);
-//
-//    assert_true(stbbr_verify(
-//        "<iq id=\"ping1\" type=\"result\" from=\"stabber@localhost/profanity\" to=\"localhost\"/>"
-//    ));
-//}
+
+void
+sends_rooms_iq(void **state)
+{
+    stbbr_for("confreq",
+        "<iq id=\"confreq\" type=\"result\" to=\"stabber@localhost/profanity\" from=\"conference.localhost\">"
+            "<query xmlns=\"http://jabber.org/protocol/disco#items\">"
+                "<item jid=\"chatroom@conference.localhost\" name=\"A chat room\"/>"
+                "<item jid=\"hangout@conference.localhost\" name=\"Another chat room\"/>"
+            "</query>"
+        "</iq>"
+    );
+
+    prof_input("/connect stabber@localhost port 5230");
+    prof_input("password");
+    prof_input("/rooms");
+
+    assert_true(stbbr_verify_last(
+        "<iq id=\"confreq\" to=\"conference.localhost\" type=\"get\">"
+            "<query xmlns=\"http://jabber.org/protocol/disco#items\"/>"
+        "</iq>"
+    ));
+}
+
+void
+multiple_pings(void **state)
+{
+    stbbr_for("prof_ping_1",
+        "<iq id=\"prof_ping_1\" type=\"result\" to=\"stabber@localhost/profanity\"/>"
+    );
+    stbbr_for("prof_ping_2",
+        "<iq id=\"prof_ping_2\" type=\"result\" to=\"stabber@localhost/profanity\"/>"
+    );
+
+    prof_input("/connect stabber@localhost port 5230");
+    prof_input("password");
+
+    prof_input("/ping");
+    assert_true(stbbr_verify(
+        "<iq id=\"prof_ping_1\" type=\"get\">"
+            "<ping xmlns=\"urn:xmpp:ping\"/>"
+        "</iq>"
+    ));
+    assert_true(prof_output("Ping response from server"));
+
+    prof_input("/ping");
+    assert_true(stbbr_verify(
+        "<iq id=\"prof_ping_2\" type=\"get\">"
+            "<ping xmlns=\"urn:xmpp:ping\"/>"
+        "</iq>"
+    ));
+    assert_true(prof_output("Ping response from server"));
+}
+
+void
+responds_to_ping(void **state)
+{
+    prof_input("/connect stabber@localhost port 5230");
+    prof_input("password");
+
+    assert_true(prof_output("stabber@localhost logged in successfully"));
+
+    stbbr_send(
+        "<iq id=\"ping1\" type=\"get\" to=\"stabber@localhost/profanity\" from=\"localhost\">"
+            "<ping xmlns=\"urn:xmpp:ping\"/>"
+        "</iq>"
+    );
+
+    assert_true(stbbr_verify(
+        "<iq id=\"ping1\" type=\"result\" from=\"stabber@localhost/profanity\" to=\"localhost\"/>"
+    ));
+}
