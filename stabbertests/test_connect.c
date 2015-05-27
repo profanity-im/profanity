@@ -184,12 +184,12 @@ responds_to_ping(void **state)
     assert_true(prof_output("stabber@localhost logged in successfully"));
 
     stbbr_send(
-        "<iq id=\"ping1\" type=\"get\" to=\"stabber@localhost/profanity\" from=\"localhost\">"
+        "<iq id=\"pingtest1\" type=\"get\" to=\"stabber@localhost/profanity\" from=\"localhost\">"
             "<ping xmlns=\"urn:xmpp:ping\"/>"
         "</iq>"
     );
 
     assert_true(stbbr_received(
-        "<iq id=\"ping1\" type=\"result\" from=\"stabber@localhost/profanity\" to=\"localhost\"/>"
+        "<iq id=\"pingtest1\" type=\"result\" from=\"stabber@localhost/profanity\" to=\"localhost\"/>"
     ));
 }
