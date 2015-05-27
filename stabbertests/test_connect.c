@@ -27,7 +27,7 @@ connect_jid_requests_roster(void **state)
     prof_input("/connect stabber@localhost port 5230");
     prof_input("password");
 
-    assert_true(stbbr_verify(
+    assert_true(stbbr_received(
         "<iq id=\"*\" type=\"get\"><query xmlns=\"jabber:iq:roster\"/></iq>"
     ));
 }
@@ -47,7 +47,7 @@ connect_jid_sends_presence_after_receiving_roster(void **state)
     prof_input("/connect stabber@localhost port 5230");
     prof_input("password");
 
-    assert_true(stbbr_verify(
+    assert_true(stbbr_received(
         "<presence id=\"*\">"
             "<c hash=\"sha-1\" xmlns=\"http://jabber.org/protocol/caps\" ver=\"*\" node=\"http://www.profanity.im\"/>"
         "</presence>"
@@ -60,7 +60,7 @@ connect_jid_requests_bookmarks(void **state)
     prof_input("/connect stabber@localhost port 5230");
     prof_input("password");
 
-    assert_true(stbbr_verify(
+    assert_true(stbbr_received(
         "<iq id=\"*\" type=\"get\">"
             "<query xmlns=\"jabber:iq:private\">"
                 "<storage xmlns=\"storage:bookmarks\"/>"
@@ -138,7 +138,7 @@ sends_rooms_iq(void **state)
     prof_input("password");
     prof_input("/rooms");
 
-    assert_true(stbbr_verify_last(
+    assert_true(stbbr_last_received(
         "<iq id=\"confreq\" to=\"conference.localhost\" type=\"get\">"
             "<query xmlns=\"http://jabber.org/protocol/disco#items\"/>"
         "</iq>"
@@ -159,7 +159,7 @@ multiple_pings(void **state)
     prof_input("password");
 
     prof_input("/ping");
-    assert_true(stbbr_verify(
+    assert_true(stbbr_received(
         "<iq id=\"prof_ping_1\" type=\"get\">"
             "<ping xmlns=\"urn:xmpp:ping\"/>"
         "</iq>"
@@ -167,7 +167,7 @@ multiple_pings(void **state)
     assert_true(prof_output("Ping response from server"));
 
     prof_input("/ping");
-    assert_true(stbbr_verify(
+    assert_true(stbbr_received(
         "<iq id=\"prof_ping_2\" type=\"get\">"
             "<ping xmlns=\"urn:xmpp:ping\"/>"
         "</iq>"
@@ -189,7 +189,7 @@ responds_to_ping(void **state)
         "</iq>"
     );
 
-    assert_true(stbbr_verify(
+    assert_true(stbbr_received(
         "<iq id=\"ping1\" type=\"result\" from=\"stabber@localhost/profanity\" to=\"localhost\"/>"
     ));
 }
