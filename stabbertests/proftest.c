@@ -122,6 +122,19 @@ _cleanup_dirs(void)
 }
 
 void
+prof_start(void)
+{
+    fd = exp_spawnl("./profanity", NULL);
+    FILE *fp = fdopen(fd, "r+");
+
+    if (fp == NULL) {
+        assert_true(FALSE);
+    }
+
+    setbuf(fp, (char *)0);
+}
+
+void
 init_prof_test(void **state)
 {
     if (stbbr_start(5230) != 0) {
@@ -154,19 +167,6 @@ close_prof_test(void **state)
     setenv("XDG_DATA_HOME", data_orig, 1);
 
     stbbr_stop();
-}
-
-void
-prof_start(void)
-{
-    fd = exp_spawnl("./profanity", NULL);
-    FILE *fp = fdopen(fd, "r+");
-
-    if (fp == NULL) {
-        assert_true(FALSE);
-    }
-
-    setbuf(fp, (char *)0);
 }
 
 void
