@@ -14,8 +14,7 @@
 #include <stabber.h>
 #include <expect.h>
 
-#define XDG_CONFIG_HOME "./stabbertests/files/xdg_config_home"
-#define XDG_DATA_HOME   "./stabbertests/files/xdg_data_home"
+#include "proftest.h"
 
 char *config_orig;
 char *data_orig;
@@ -115,7 +114,7 @@ _create_logs_dir(void)
 void
 _cleanup_dirs(void)
 {
-    int res = system("rm -rf ./stabbertests/files");
+    int res = system("rm -rf ./functionaltests/files");
     if (res == -1) {
         assert_true(FALSE);
     }
