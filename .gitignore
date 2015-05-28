@@ -69,7 +69,8 @@ callgrind.out.*
 gen_docs.sh
 main_fragment.html
 toc_fragment.html
-stabbertests/stabbertestsuite
-stabbertests/stabbertestsuite.trs
 unittests/unittests
 unittests/unittests.trs
+functionaltests/functionaltests
+functionaltests/functionaltests.trs
+

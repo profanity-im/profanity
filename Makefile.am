@@ -94,10 +94,10 @@ unittest_sources = \
 	unittests/test_chat_session.c unittests/test_chat_session.h \
 	unittests/unittests.c
 
-stabbertest_sources = \
-	stabbertests/proftest.c stabbertests/proftest.h \
-	stabbertests/test_connect.c stabbertests/test_connect.h \
-	stabbertests/stabbertestsuite.c
+functionaltest_sources = \
+	functionaltests/proftest.c functionaltests/proftest.h \
+	functionaltests/test_connect.c functionaltests/test_connect.h \
+	functionaltests/functionaltests.c
 
 main_source = src/main.c
 
@@ -138,13 +138,13 @@ if INCLUDE_GIT_VERSION
 BUILT_SOURCES = $(git_include)
 endif
 
-TESTS = unittests/unittests stabbertests/stabbertestsuite
-check_PROGRAMS = unittests/unittests stabbertests/stabbertestsuite
+TESTS = unittests/unittests functionaltests/functionaltests
+check_PROGRAMS = unittests/unittests functionaltests/functionaltests
 unittests_unittests_SOURCES = $(unittest_sources)
 unittests_unittests_LDADD = -lcmocka
-stabbertests_stabbertestsuite_SOURCES = $(stabbertest_sources)
-stabbertests_stabbertestsuite_CFLAGS = -I/usr/include/tcl8.6 -I/usr/include/tcl8.5
-stabbertests_stabbertestsuite_LDADD = -lcmocka -lstabber -lexpect -ltcl
+functionaltests_functionaltests_SOURCES = $(functionaltest_sources)
+functionaltests_functionaltests_CFLAGS = -I/usr/include/tcl8.6 -I/usr/include/tcl8.5
+functionaltests_functionaltests_LDADD = -lcmocka -lstabber -lexpect -ltcl
 
 man_MANS = $(man_sources)
 
