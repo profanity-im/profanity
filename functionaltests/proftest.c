@@ -182,3 +182,15 @@ prof_output(char *text)
 {
     return (1 == exp_expectl(fd, exp_exact, text, 1, exp_end));
 }
+
+void
+prof_connect(char *jid, char *password)
+{
+    GString *connect_cmd = g_string_new("/connect ");
+    g_string_append(connect_cmd, jid);
+    g_string_append(connect_cmd, " port 5230");
+    prof_input(connect_cmd->str);
+    g_string_free(connect_cmd, TRUE);
+
+    prof_input(password);
+}

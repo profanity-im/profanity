@@ -11,6 +11,8 @@
 
 #include "proftest.h"
 #include "test_connect.h"
+#include "test_ping.h"
+#include "test_rooms.h"
 
 int main(int argc, char* argv[]) {
 
@@ -31,16 +33,18 @@ int main(int argc, char* argv[]) {
         unit_test_setup_teardown(connect_bad_password,
             init_prof_test,
             close_prof_test),
-        unit_test_setup_teardown(show_presence_updates,
+        unit_test_setup_teardown(connect_shows_presence_updates,
             init_prof_test,
             close_prof_test),
-        unit_test_setup_teardown(sends_rooms_iq,
+
+        unit_test_setup_teardown(ping_multiple,
             init_prof_test,
             close_prof_test),
-        unit_test_setup_teardown(multiple_pings,
+        unit_test_setup_teardown(ping_responds,
             init_prof_test,
             close_prof_test),
-        unit_test_setup_teardown(responds_to_ping,
+
+        unit_test_setup_teardown(rooms_query,
             init_prof_test,
             close_prof_test),
     };

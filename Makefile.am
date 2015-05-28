@@ -97,6 +97,8 @@ unittest_sources = \
 functionaltest_sources = \
 	functionaltests/proftest.c functionaltests/proftest.h \
 	functionaltests/test_connect.c functionaltests/test_connect.h \
+	functionaltests/test_ping.c functionaltests/test_ping.h \
+	functionaltests/test_rooms.c functionaltests/test_rooms.h \
 	functionaltests/functionaltests.c
 
 main_source = src/main.c
