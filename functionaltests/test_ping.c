@@ -29,7 +29,7 @@ ping_multiple(void **state)
             "<ping xmlns=\"urn:xmpp:ping\"/>"
         "</iq>"
     ));
-    assert_true(prof_output("Ping response from server"));
+    assert_true(prof_output_exact("Ping response from server"));
 
     prof_input("/ping");
     assert_true(stbbr_received(
@@ -37,7 +37,7 @@ ping_multiple(void **state)
             "<ping xmlns=\"urn:xmpp:ping\"/>"
         "</iq>"
     ));
-    assert_true(prof_output("Ping response from server"));
+    assert_true(prof_output_exact("Ping response from server"));
 }
 
 void
@@ -45,7 +45,7 @@ ping_responds(void **state)
 {
     prof_connect("stabber@localhost", "password");
 
-    assert_true(prof_output("stabber@localhost logged in successfully"));
+    assert_true(prof_output_exact("stabber@localhost logged in successfully"));
 
     stbbr_send(
         "<iq id=\"pingtest1\" type=\"get\" to=\"stabber@localhost/profanity\" from=\"localhost\">"

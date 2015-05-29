@@ -33,6 +33,6 @@ rooms_query(void **state)
         "</iq>"
     ));
 
-    assert_true(prof_output("chatroom@conference.localhost, (A chat room)"));
-    assert_true(prof_output("hangout@conference.localhost, (Another chat room)"));
+    assert_true(prof_output_exact("chatroom@conference.localhost, (A chat room)"));
+    assert_true(prof_output_exact("hangout@conference.localhost, (Another chat room)"));
 }

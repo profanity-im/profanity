@@ -99,6 +99,7 @@ functionaltest_sources = \
 	functionaltests/test_connect.c functionaltests/test_connect.h \
 	functionaltests/test_ping.c functionaltests/test_ping.h \
 	functionaltests/test_rooms.c functionaltests/test_rooms.h \
+	functionaltests/test_presence.c functionaltests/test_presence.h \
 	functionaltests/functionaltests.c
 
 main_source = src/main.c

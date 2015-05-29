@@ -16,8 +16,8 @@ connect_jid(void **state)
 {
     prof_connect("stabber@localhost", "password");
 
-    assert_true(prof_output("Connecting as stabber@localhost"));
-    assert_true(prof_output("stabber@localhost logged in successfully"));
+    assert_true(prof_output_exact("Connecting as stabber@localhost"));
+    assert_true(prof_output_regex("stabber@localhost logged in successfully, .+online.+ \\(priority 0\\)\\."));
 }
 
 void
@@ -70,7 +70,7 @@ connect_bad_password(void **state)
 {
     prof_connect("stabber@localhost", "badpassword");
 
-    assert_true(prof_output("Login failed."));
+    assert_true(prof_output_exact("Login failed."));
 }
 
 void
@@ -102,9 +102,9 @@ connect_shows_presence_updates(void **state)
 
     prof_connect("stabber@localhost", "password");
 
-    assert_true(prof_output("Buddy1 (mobile) is dnd, \"busy!\""));
-    assert_true(prof_output("Buddy1 (laptop) is chat, \"Talk to me!\""));
-    assert_true(prof_output("Buddy2 (work) is away, \"Out of office\""));
+    assert_true(prof_output_exact("Buddy1 (mobile) is dnd, \"busy!\""));
+    assert_true(prof_output_exact("Buddy1 (laptop) is chat, \"Talk to me!\""));
+    assert_true(prof_output_exact("Buddy2 (work) is away, \"Out of office\""));
 
     stbbr_send(
         "<presence to=\"stabber@localhost\" from=\"buddy1@localhost/mobile\">"
@@ -113,5 +113,5 @@ connect_shows_presence_updates(void **state)
         "</presence>"
     );
 
-    assert_true(prof_output("Buddy1 (mobile) is xa, \"Gone :(\""));
+    assert_true(prof_output_exact("Buddy1 (mobile) is xa, \"Gone :(\""));
 }

@@ -178,9 +178,15 @@ prof_input(char *input)
 }
 
 int
-prof_output(char *text)
+prof_output_exact(char *text)
 {
     return (1 == exp_expectl(fd, exp_exact, text, 1, exp_end));
+}
+
+int
+prof_output_regex(char *text)
+{
+    return (1 == exp_expectl(fd, exp_regexp, text, 1, exp_end));
 }
 
 void
