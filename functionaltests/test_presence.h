@@ -1,2 +1,10 @@
 void presence_away(void **state);
 void presence_away_with_message(void **state);
+void presence_online(void **state);
+void presence_online_with_message(void **state);
+void presence_xa(void **state);
+void presence_xa_with_message(void **state);
+void presence_dnd(void **state);
+void presence_dnd_with_message(void **state);
+void presence_chat(void **state);
+void presence_chat_with_message(void **state);
