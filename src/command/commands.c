@@ -719,6 +719,16 @@ cmd_wins(gchar **args, struct cmd_help_t help)
 }
 
 gboolean
+cmd_winstidy(gchar **args, struct cmd_help_t help)
+{
+    gboolean result = _cmd_set_boolean_preference(args[0], help, "Wins Auto Tidy", PREF_WINS_AUTO_TIDY);
+
+    wins_resize_all();
+
+    return result;
+}
+
+gboolean
 cmd_win(gchar **args, struct cmd_help_t help)
 {
     int num = atoi(args[0]);
@@ -804,7 +814,7 @@ cmd_help(gchar **args, struct cmd_help_t help)
             "/carbons", "/chlog", "/flash", "/gone", "/grlog", "/history", "/intype",
             "/log", "/mouse", "/notify", "/outtype", "/prefs", "/priority",
             "/reconnect", "/roster", "/splash", "/states", "/statuses", "/theme",
-            "/titlebar", "/vercheck", "/privileges", "/occupants", "/presence", "/wrap" };
+            "/titlebar", "/vercheck", "/privileges", "/occupants", "/presence", "/wrap", "/winstidy" };
         _cmd_show_filtered_help("Settings commands", filter, ARRAY_SIZE(filter));
 
     } else if (strcmp(args[0], "navigation") == 0) {
@@ -3241,6 +3251,11 @@ cmd_close(gchar **args, struct cmd_help_t help)
     // close the window
     ui_close_win(index);
     cons_show("Closed window %d", index);
+
+    // Tidy up the window list.
+    if (prefs_get_boolean(PREF_WINS_AUTO_TIDY)) {
+        ui_tidy_wins();
+    }
 
     return TRUE;
 }
