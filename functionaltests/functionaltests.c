@@ -79,6 +79,12 @@ int main(int argc, char* argv[]) {
         unit_test_setup_teardown(presence_chat_with_message,
             init_prof_test,
             close_prof_test),
+        unit_test_setup_teardown(presence_set_priority,
+            init_prof_test,
+            close_prof_test),
+        unit_test_setup_teardown(presence_includes_priority,
+            init_prof_test,
+            close_prof_test),
     };
 
     return run_tests(all_tests);

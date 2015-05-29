@@ -8,3 +8,5 @@ void presence_dnd(void **state);
 void presence_dnd_with_message(void **state);
 void presence_chat(void **state);
 void presence_chat_with_message(void **state);
+void presence_set_priority(void **state);
+void presence_includes_priority(void **state);
