@@ -226,3 +226,28 @@ presence_includes_priority(void **state)
     ));
     assert_true(prof_output_exact("Status set to chat (priority 25), \"Free to talk\"."));
 }
+
+void
+presence_received(void **state)
+{
+    stbbr_for("roster",
+        "<iq id=\"roster\" type=\"result\" to=\"stabber@localhost/profanity\">"
+            "<query xmlns=\"jabber:iq:roster\" ver=\"362\">"
+                "<item jid=\"buddy1@localhost\" subscription=\"both\" name=\"Buddy1\"/>"
+                "<item jid=\"buddy2@localhost\" subscription=\"both\" name=\"Buddy2\"/>"
+            "</query>"
+        "</iq>"
+    );
+
+    prof_connect("stabber@localhost", "password");
+    stbbr_wait_for("prof_presence_1");
+
+    stbbr_send(
+        "<presence to=\"stabber@localhost\" from=\"buddy1@localhost/mobile\">"
+            "<priority>10</priority>"
+            "<status>I'm here</status>"
+        "</presence>"
+    );
+
+    assert_true(prof_output_exact("Buddy1 (mobile) is online, \"I'm here\""));
+}
