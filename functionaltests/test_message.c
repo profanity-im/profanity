@@ -43,7 +43,7 @@ message_receive(void **state)
     stbbr_wait_for("prof_presence_1");
 
     stbbr_send(
-        "<message id=\"*\" to=\"stabber@localhost\" from=\"someuser@chatserv.org/laptop\" type=\"chat\">"
+        "<message id=\"message1\" to=\"stabber@localhost\" from=\"someuser@chatserv.org/laptop\" type=\"chat\">"
             "<body>How are you?</body>"
         "</message>"
     );
