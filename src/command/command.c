@@ -1201,7 +1201,7 @@ static Autocomplete occupants_ac;
 static Autocomplete occupants_default_ac;
 static Autocomplete occupants_show_ac;
 static Autocomplete time_ac;
-static Autocomplete time_statusbar_ac;
+static Autocomplete time_format_ac;
 static Autocomplete resource_ac;
 static Autocomplete inpblock_ac;
 static Autocomplete receipts_ac;
@@ -1546,15 +1546,12 @@ cmd_init(void)
     autocomplete_add(occupants_show_ac, "jid");
 
     time_ac = autocomplete_new();
-    autocomplete_add(time_ac, "minutes");
-    autocomplete_add(time_ac, "seconds");
-    autocomplete_add(time_ac, "off");
+    autocomplete_add(time_ac, "main");
     autocomplete_add(time_ac, "statusbar");
 
-    time_statusbar_ac = autocomplete_new();
-    autocomplete_add(time_statusbar_ac, "minutes");
-    autocomplete_add(time_statusbar_ac, "seconds");
-    autocomplete_add(time_statusbar_ac, "off");
+    time_format_ac = autocomplete_new();
+    autocomplete_add(time_format_ac, "set");
+    autocomplete_add(time_format_ac, "off");
 
     resource_ac = autocomplete_new();
     autocomplete_add(resource_ac, "set");
@@ -1624,7 +1621,7 @@ cmd_uninit(void)
     autocomplete_free(occupants_default_ac);
     autocomplete_free(occupants_show_ac);
     autocomplete_free(time_ac);
-    autocomplete_free(time_statusbar_ac);
+    autocomplete_free(time_format_ac);
     autocomplete_free(resource_ac);
     autocomplete_free(inpblock_ac);
     autocomplete_free(receipts_ac);
@@ -1796,7 +1793,7 @@ cmd_reset_autocomplete()
     autocomplete_reset(occupants_default_ac);
     autocomplete_reset(occupants_show_ac);
     autocomplete_reset(time_ac);
-    autocomplete_reset(time_statusbar_ac);
+    autocomplete_reset(time_format_ac);
     autocomplete_reset(resource_ac);
     autocomplete_reset(inpblock_ac);
     autocomplete_reset(receipts_ac);
@@ -2682,7 +2679,12 @@ _time_autocomplete(const char * const input)
 {
     char *found = NULL;
 
-    found = autocomplete_param_with_ac(input, "/time statusbar", time_statusbar_ac, TRUE);
+    found = autocomplete_param_with_ac(input, "/time statusbar", time_format_ac, TRUE);
+    if (found) {
+        return found;
+    }
+
+    found = autocomplete_param_with_ac(input, "/time main", time_format_ac, TRUE);
     if (found) {
         return found;
     }
