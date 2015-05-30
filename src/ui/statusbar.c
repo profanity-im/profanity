@@ -132,6 +132,7 @@ status_bar_resize(void)
         gchar *date_fmt = g_date_time_format(last_time, time_pref);
         assert(date_fmt != NULL);
         size_t len = strlen(date_fmt);
+        g_free(date_fmt);
         if (g_strcmp0(time_pref, "") != 0) {
             /* 01234567890123456
              *  [HH:MM]  message */
@@ -309,6 +310,7 @@ status_bar_print_message(const char * const msg)
     gchar *date_fmt = g_date_time_format(last_time, time_pref);
     assert(date_fmt != NULL);
     size_t len = strlen(date_fmt);
+    g_free(date_fmt);
     if (g_strcmp0(time_pref, "") != 0) {
         mvwprintw(status_bar, 0, 5 + len, message);
     } else {
