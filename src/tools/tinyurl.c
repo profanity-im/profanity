@@ -1,7 +1,7 @@
 /*
  * tinyurl.c
  *
- * Copyright (C) 2012 - 2014 James Booth <boothj5@gmail.com>
+ * Copyright (C) 2012 - 2015 James Booth <boothj5@gmail.com>
  *
  * This file is part of Profanity.
  *
@@ -74,7 +74,7 @@ tinyurl_get(char *url)
 
     g_string_free(full_url, TRUE);
 
-    if (output.buffer != NULL) {
+    if (output.buffer) {
         output.buffer[output.size++] = '\0';
         return output.buffer;
     } else {

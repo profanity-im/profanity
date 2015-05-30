@@ -64,15 +64,7 @@ GSList* ui_get_chat_recipients(void)
     return NULL;
 }
 
-gboolean ui_switch_win(const int i)
-{
-    check_expected(i);
-    return (gboolean)mock();
-    return FALSE;
-}
-
-void ui_next_win(void) {}
-void ui_previous_win(void) {}
+void ui_switch_win(ProfWin *win) {}
 
 void ui_gone_secure(const char * const barejid, gboolean trusted) {}
 void ui_gone_insecure(const char * const barejid) {}
@@ -91,6 +83,7 @@ void ui_smp_answer_failure(const char * const barejid) {}
 
 void ui_otr_authenticating(const char * const barejid) {}
 void ui_otr_authetication_waiting(const char * const recipient) {}
+void ui_sigwinch_handler(int sig) {}
 
 unsigned long ui_get_idle_time(void)
 {
@@ -98,8 +91,16 @@ unsigned long ui_get_idle_time(void)
 }
 
 void ui_reset_idle_time(void) {}
-void ui_new_chat_win(const char * const barejid) {}
-void ui_new_private_win(const char * const fulljid) {}
+ProfPrivateWin* ui_new_private_win(const char * const fulljid)
+{
+    return NULL;
+}
+
+ProfChatWin* ui_new_chat_win(const char * const barejid)
+{
+    return NULL;
+}
+
 void ui_print_system_msg_from_recipient(const char * const barejid, const char *message) {}
 gint ui_unread(void)
 {
@@ -123,11 +124,6 @@ void ui_clear_current(void) {}
 win_type_t ui_current_win_type(void)
 {
     return (win_type_t)mock();
-}
-
-int ui_current_win_index(void)
-{
-    return 0;
 }
 
 gboolean ui_current_win_is_otr(void)
@@ -161,6 +157,8 @@ void ui_current_print_formatted_line(const char show_char, int attrs, const char
 }
 
 void ui_current_error_line(const char * const msg) {}
+void ui_win_error_line(ProfWin *window, const char * const msg) {}
+
 
 win_type_t ui_win_type(int index)
 {
@@ -168,15 +166,16 @@ win_type_t ui_win_type(int index)
 }
 
 void ui_close_win(int index) {}
-gboolean ui_win_exists(int index)
-{
-    return FALSE;
-}
 
 int ui_win_unread(int index)
 {
     return 0;
 }
+
+void ui_page_up(void) {}
+void ui_page_down(void) {}
+void ui_subwin_page_up(void) {}
+void ui_subwin_page_down(void) {}
 
 char * ui_ask_password(void)
 {
@@ -186,17 +185,25 @@ char * ui_ask_password(void)
 void ui_handle_stanza(const char * const msg) {}
 
 // ui events
+void ui_contact_online(char *barejid, Resource *resource, GDateTime *last_activity)
+{
+    check_expected(barejid);
+    check_expected(resource);
+    check_expected(last_activity);
+}
+
 void ui_contact_typing(const char * const barejid, const char * const resource) {}
 void ui_incoming_msg(const char * const from, const char * const resource, const char * const message, GTimeVal *tv_stamp) {}
+void ui_message_receipt(const char * const barejid, const char * const id) {}
+
 void ui_incoming_private_msg(const char * const fulljid, const char * const message, GTimeVal *tv_stamp) {}
 
 void ui_disconnected(void) {}
 void ui_recipient_gone(const char * const barejid, const char * const resource) {}
 
-void ui_outgoing_chat_msg(const char * const from, const char * const barejid,
-    const char * const message) {}
-void ui_outgoing_private_msg(const char * const from, const char * const fulljid,
-    const char * const message) {}
+void ui_outgoing_chat_msg(ProfChatWin *chatwin, const char * const message, char *id) {}
+void ui_outgoing_chat_msg_carbon(const char * const barejid, const char * const message) {}
+void ui_outgoing_private_msg(ProfPrivateWin *privwin, const char * const message) {}
 
 void ui_room_join(const char * const roomjid, gboolean focus) {}
 void ui_switch_to_room(const char * const roomjid) {}
@@ -245,6 +252,7 @@ void ui_room_member_nick_change(const char * const roomjid,
 void ui_room_nick_change(const char * const roomjid, const char * const nick) {}
 void ui_room_member_presence(const char * const roomjid,
     const char * const nick, const char * const show, const char * const status) {}
+void ui_room_update_occupants(const char * const roomjid) {}
 void ui_room_show_occupants(const char * const roomjid) {}
 void ui_room_hide_occupants(const char * const roomjid) {}
 void ui_show_roster(void) {}
@@ -323,7 +331,7 @@ void ui_update_presence(const resource_presence_t resource_presence,
 void ui_about(void) {}
 void ui_statusbar_new(const int win) {}
 
-char * ui_readline(void)
+char*  ui_readline(void)
 {
     return NULL;
 }
@@ -347,6 +355,9 @@ gboolean ui_win_has_unsaved_form(int num)
 {
     return FALSE;
 }
+
+void
+ui_write(char *line, int offset) {}
 
 // console window actions
 
@@ -457,6 +468,8 @@ void cons_outtype_setting(void) {}
 void cons_intype_setting(void) {}
 void cons_gone_setting(void) {}
 void cons_history_setting(void) {}
+void cons_carbons_setting(void) {}
+void cons_receipts_setting(void) {}
 void cons_log_setting(void) {}
 void cons_chlog_setting(void) {}
 void cons_grlog_setting(void) {}
@@ -487,7 +500,7 @@ void occupantswin_occupants(const char * const room) {}
 void notifier_uninit(void) {}
 
 void notify_typing(const char * const handle) {}
-void notify_message(const char * const handle, int win, const char * const text) {}
+void notify_message(ProfWin *window, const char * const name, const char * const text) {}
 void notify_room_message(const char * const handle, const char * const room,
     int win, const char * const text) {}
 void notify_remind(void) {}

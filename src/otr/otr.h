@@ -1,7 +1,7 @@
 /*
  * otr.h
  *
- * Copyright (C) 2012 - 2014 James Booth <boothj5@gmail.com>
+ * Copyright (C) 2012 - 2015 James Booth <boothj5@gmail.com>
  *
  * This file is part of Profanity.
  *
@@ -39,6 +39,7 @@
 #include <libotr/message.h>
 
 #include "config/accounts.h"
+#include "ui/window.h"
 
 typedef enum {
     PROF_OTRPOLICY_MANUAL,
@@ -56,7 +57,13 @@ char* otr_libotr_version(void);
 char* otr_start_query(void);
 void otr_poll(void);
 void otr_on_connect(ProfAccount *account);
+
+void otr_on_message_recv(const char * const barejid, const char * const resource, const char * const message);
+void otr_on_message_send(ProfChatWin *chatwin, const char * const message);
+
 void otr_keygen(ProfAccount *account);
+
+char* otr_tag_message(const char * const msg);
 
 gboolean otr_key_loaded(void);
 gboolean otr_is_secure(const char * const recipient);

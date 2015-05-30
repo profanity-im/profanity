@@ -1,7 +1,7 @@
 /*
  * jid.c
  *
- * Copyright (C) 2012 -2014 James Booth <boothj5@gmail.com>
+ * Copyright (C) 2012 - 2015 James Booth <boothj5@gmail.com>
  *
  * This file is part of Profanity.
  *
@@ -80,19 +80,20 @@ jid_create(const gchar * const str)
     gchar *domain_start = trimmed;
 
 
-    if (atp != NULL) {
+    if (atp) {
         result->localpart = g_utf8_substring(trimmed, 0, g_utf8_pointer_to_offset(trimmed, atp));
         domain_start = atp + 1;
     }
 
-    if (slashp != NULL) {
+    if (slashp) {
         result->resourcepart = g_strdup(slashp + 1);
         result->domainpart = g_utf8_substring(domain_start, 0, g_utf8_pointer_to_offset(domain_start, slashp));
-        result->barejid = g_utf8_substring(trimmed, 0, g_utf8_pointer_to_offset(trimmed, slashp));
+        char *barejidraw = g_utf8_substring(trimmed, 0, g_utf8_pointer_to_offset(trimmed, slashp));
+        result->barejid = g_utf8_strdown(barejidraw, -1);
         result->fulljid = g_strdup(trimmed);
     } else {
         result->domainpart = g_strdup(domain_start);
-        result->barejid = g_strdup(trimmed);
+        result->barejid = g_utf8_strdown(trimmed, -1);
     }
 
     if (result->domainpart == NULL) {
@@ -119,7 +120,7 @@ jid_create_from_bare_and_resource(const char * const room, const char * const ni
 void
 jid_destroy(Jid *jid)
 {
-    if (jid != NULL) {
+    if (jid) {
         g_free(jid->str);
         g_free(jid->localpart);
         g_free(jid->domainpart);
@@ -144,7 +145,9 @@ jid_is_valid_room_form(Jid *jid)
 char *
 create_fulljid(const char * const barejid, const char * const resource)
 {
-    GString *full_jid = g_string_new(barejid);
+    gchar *barejidlower = g_utf8_strdown(barejid, -1);
+    GString *full_jid = g_string_new(barejidlower);
+    g_free(barejidlower);
     g_string_append(full_jid, "/");
     g_string_append(full_jid, resource);
 
@@ -166,8 +169,8 @@ get_nick_from_full_jid(const char * const full_room_jid)
     char **tokens = g_strsplit(full_room_jid, "/", 0);
     char *nick_part = NULL;
 
-    if (tokens != NULL) {
-        if (tokens[0] != NULL && tokens[1] != NULL) {
+    if (tokens) {
+        if (tokens[0] && tokens[1]) {
             nick_part = strdup(tokens[1]);
         }
 

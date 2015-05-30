@@ -1,7 +1,7 @@
 /*
  * common.h
  *
- * Copyright (C) 2012 - 2014 James Booth <boothj5@gmail.com>
+ * Copyright (C) 2012 - 2015 James Booth <boothj5@gmail.com>
  *
  * This file is part of Profanity.
  *
@@ -36,6 +36,13 @@
 #define COMMON_H
 
 #include <stdio.h>
+#include <wchar.h>
+
+#ifdef HAVE_NCURSESW_NCURSES_H
+#include <ncursesw/ncurses.h>
+#elif HAVE_NCURSES_H
+#include <ncurses.h>
+#endif
 
 #include <glib.h>
 
@@ -104,7 +111,9 @@ gboolean mkdir_recursive(const char *dir);
 char * str_replace(const char *string, const char *substr,
     const char *replacement);
 int str_contains(const char str[], int size, char ch);
+gboolean strtoi_range(char *str, int *saveptr, int min, int max, char **err_msg);
 int utf8_display_len(const char * const str);
+gboolean utf8_is_printable(const wint_t ch);
 char * prof_getline(FILE *stream);
 char* release_get_latest(void);
 gboolean release_is_new(char *found_version);
@@ -123,5 +132,6 @@ int cmp_win_num(gconstpointer a, gconstpointer b);
 int get_next_available_win_num(GList *used);
 
 char* get_file_or_linked(char *loc, char *basedir);
+char * strip_arg_quotes(const char * const input);
 
 #endif

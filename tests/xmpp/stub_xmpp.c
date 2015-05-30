@@ -58,10 +58,18 @@ GList * jabber_get_available_resources(void)
 }
 
 // message functions
-void message_send_chat(const char * const barejid, const char * const msg)
+char* message_send_chat(const char * const barejid, const char * const msg)
 {
     check_expected(barejid);
     check_expected(msg);
+    return NULL;
+}
+
+char* message_send_chat_encrypted(const char * const barejid, const char * const msg)
+{
+    check_expected(barejid);
+    check_expected(msg);
+    return NULL;
 }
 
 void message_send_private(const char * const fulljid, const char * const msg) {}
@@ -106,7 +114,7 @@ void presence_join_room(char *room, char *nick, char * passwd)
 void presence_change_room_nick(const char * const room, const char * const nick) {}
 void presence_leave_chat_room(const char * const room_jid) {}
 
-void presence_update(resource_presence_t status, const char * const msg, int idle)
+void presence_send(resource_presence_t status, const char * const msg, int idle)
 {
     check_expected(status);
     check_expected(msg);
@@ -119,6 +127,8 @@ gboolean presence_sub_request_exists(const char * const bare_jid)
 }
 
 // iq functions
+void iq_disable_carbons() {};
+void iq_enable_carbons() {};
 void iq_send_software_version(const char * const fulljid) {}
 
 void iq_room_list_request(gchar *conferencejid)
@@ -141,7 +151,7 @@ void iq_send_caps_request_for_jid(const char * const to, const char * const id,
     const char * const node, const char * const ver) {}
 void iq_send_caps_request_legacy(const char * const to, const char * const id,
     const char * const node, const char * const ver) {}
-void iq_room_info_request(gchar *room) {}
+void iq_room_info_request(const char * const room, gboolean display) {}
 void iq_room_affiliation_list(const char * const room, char *affiliation) {}
 void iq_room_affiliation_set(const char * const room, const char * const jid, char *affiliation,
     const char * const reason) {}

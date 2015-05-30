@@ -1,7 +1,7 @@
 /*
  * theme.h
  *
- * Copyright (C) 2012 - 2014 James Booth <boothj5@gmail.com>
+ * Copyright (C) 2012 - 2015 James Booth <boothj5@gmail.com>
  *
  * This file is part of Profanity.
  *
@@ -90,6 +90,7 @@ typedef enum {
     THEME_OTR_UNTRUSTED,
     THEME_OCCUPANTS_HEADER,
     THEME_ROSTER_HEADER,
+    THEME_RECEIPT_SENT,
     THEME_NONE,
     THEME_WHITE,
     THEME_WHITE_BOLD,

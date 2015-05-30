@@ -1,7 +1,7 @@
 /*
  * contact.c
  *
- * Copyright (C) 2012 - 2014 James Booth <boothj5@gmail.com>
+ * Copyright (C) 2012 - 2015 James Booth <boothj5@gmail.com>
  *
  * This file is part of Profanity.
  *
@@ -45,7 +45,9 @@
 
 struct p_contact_t {
     char *barejid;
+    gchar *barejid_collate_key;
     char *name;
+    gchar *name_collate_key;
     GSList *groups;
     char *subscription;
     char *offline_message;
@@ -62,21 +64,24 @@ p_contact_new(const char * const barejid, const char * const name,
 {
     PContact contact = malloc(sizeof(struct p_contact_t));
     contact->barejid = strdup(barejid);
+    contact->barejid_collate_key = g_utf8_collate_key(contact->barejid, -1);
 
-    if (name != NULL) {
+    if (name) {
         contact->name = strdup(name);
+        contact->name_collate_key = g_utf8_collate_key(contact->name, -1);
     } else {
         contact->name = NULL;
+        contact->name_collate_key = NULL;
     }
 
     contact->groups = groups;
 
-    if (subscription != NULL)
+    if (subscription)
         contact->subscription = strdup(subscription);
     else
         contact->subscription = strdup("none");
 
-    if (offline_message != NULL)
+    if (offline_message)
         contact->offline_message = strdup(offline_message);
     else
         contact->offline_message = NULL;
@@ -96,15 +101,17 @@ void
 p_contact_set_name(const PContact contact, const char * const name)
 {
     FREE_SET_NULL(contact->name);
-    if (name != NULL) {
+    FREE_SET_NULL(contact->name_collate_key);
+    if (name) {
         contact->name = strdup(name);
+        contact->name_collate_key = g_utf8_collate_key(contact->name, -1);
     }
 }
 
 void
 p_contact_set_groups(const PContact contact, GSList *groups)
 {
-    if (contact->groups != NULL) {
+    if (contact->groups) {
         g_slist_free_full(contact->groups, g_free);
         contact->groups = NULL;
     }
@@ -116,7 +123,7 @@ gboolean
 p_contact_in_group(const PContact contact, const char * const group)
 {
     GSList *groups = contact->groups;
-    while (groups != NULL) {
+    while (groups) {
         if (strcmp(groups->data, group) == 0) {
             return TRUE;
         }
@@ -144,17 +151,19 @@ p_contact_remove_resource(PContact contact, const char * const resource)
 void
 p_contact_free(PContact contact)
 {
-    if (contact != NULL) {
+    if (contact) {
         free(contact->barejid);
+        free(contact->barejid_collate_key);
         free(contact->name);
+        free(contact->name_collate_key);
         free(contact->subscription);
         free(contact->offline_message);
 
-        if (contact->groups != NULL) {
+        if (contact->groups) {
             g_slist_free_full(contact->groups, g_free);
         }
 
-        if (contact->last_activity != NULL) {
+        if (contact->last_activity) {
             g_date_time_unref(contact->last_activity);
         }
 
@@ -171,15 +180,27 @@ p_contact_barejid(const PContact contact)
 }
 
 const char *
+p_contact_barejid_collate_key(const PContact contact)
+{
+    return contact->barejid_collate_key;
+}
+
+const char *
 p_contact_name(const PContact contact)
 {
     return contact->name;
 }
 
 const char *
+p_contact_name_collate_key(const PContact contact)
+{
+    return contact->name_collate_key;
+}
+
+const char *
 p_contact_name_or_jid(const PContact contact)
 {
-    if (contact->name != NULL) {
+    if (contact->name) {
         return contact->name;
     } else {
         return contact->barejid;
@@ -247,7 +268,7 @@ _get_most_available_resource(PContact contact)
     Resource *current = curr->data;
     Resource *highest = current;
     curr = g_list_next(curr);
-    while (curr != NULL) {
+    while (curr) {
         current = curr->data;
 
         // priority is same as current highest, choose presence
@@ -381,14 +402,14 @@ void
 p_contact_set_presence(const PContact contact, Resource *resource)
 {
     g_hash_table_replace(contact->available_resources, strdup(resource->name), resource);
-    autocomplete_add(contact->resource_ac, strdup(resource->name));
+    autocomplete_add(contact->resource_ac, resource->name);
 }
 
 void
 p_contact_set_subscription(const PContact contact, const char * const subscription)
 {
     FREE_SET_NULL(contact->subscription);
-    if (subscription != NULL) {
+    if (subscription) {
         contact->subscription = strdup(subscription);
     }
 }
@@ -402,12 +423,12 @@ p_contact_set_pending_out(const PContact contact, gboolean pending_out)
 void
 p_contact_set_last_activity(const PContact contact, GDateTime *last_activity)
 {
-    if (contact->last_activity != NULL) {
+    if (contact->last_activity) {
         g_date_time_unref(contact->last_activity);
         contact->last_activity = NULL;
     }
 
-    if (last_activity != NULL) {
+    if (last_activity) {
         contact->last_activity = g_date_time_ref(last_activity);
     }
 }

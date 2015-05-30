@@ -1,7 +1,7 @@
 /*
  * stanza.h
  *
- * Copyright (C) 2012 - 2014 James Booth <boothj5@gmail.com>
+ * Copyright (C) 2012 - 2015 James Booth <boothj5@gmail.com>
  *
  * This file is part of Profanity.
  *
@@ -77,6 +77,8 @@
 #define STANZA_NAME_VALUE "value"
 #define STANZA_NAME_DESTROY "destroy"
 #define STANZA_NAME_ACTOR "actor"
+#define STANZA_NAME_ENABLE "enable"
+#define STANZA_NAME_DISABLE "disable"
 
 // error conditions
 #define STANZA_NAME_BAD_REQUEST "bad-request"
@@ -133,6 +135,7 @@
 #define STANZA_ATTR_CATEGORY "category"
 #define STANZA_ATTR_REASON "reason"
 #define STANZA_ATTR_AUTOJOIN "autojoin"
+#define STANZA_ATTR_PASSWORD "password"
 
 #define STANZA_TEXT_AWAY "away"
 #define STANZA_TEXT_DND "dnd"
@@ -154,6 +157,9 @@
 #define STANZA_NS_CONFERENCE "jabber:x:conference"
 #define STANZA_NS_CAPTCHA "urn:xmpp:captcha"
 #define STANZA_NS_PUBSUB "http://jabber.org/protocol/pubsub"
+#define STANZA_NS_CARBONS "urn:xmpp:carbons:2"
+#define STANZA_NS_FORWARD "urn:xmpp:forward:0"
+#define STANZA_NS_RECEIPTS "urn:xmpp:receipts"
 
 #define STANZA_DATAFORM_SOFTWARE "urn:xmpp:dataforms:softwareinfo"
 
@@ -178,12 +184,19 @@ typedef enum {
 
 xmpp_stanza_t* stanza_create_bookmarks_storage_request(xmpp_ctx_t *ctx);
 
+xmpp_stanza_t * stanza_enable_carbons(xmpp_ctx_t *ctx);
+
+xmpp_stanza_t * stanza_disable_carbons(xmpp_ctx_t *ctx);
+
 xmpp_stanza_t* stanza_create_chat_state(xmpp_ctx_t *ctx,
     const char * const fulljid, const char * const state);
 
-xmpp_stanza_t* stanza_create_message(xmpp_ctx_t *ctx,
-    const char * const recipient, const char * const type,
-    const char * const message, const char * const state);
+xmpp_stanza_t * stanza_attach_state(xmpp_ctx_t *ctx, xmpp_stanza_t *stanza, const char * const state);
+xmpp_stanza_t * stanza_attach_carbons_private(xmpp_ctx_t *ctx, xmpp_stanza_t *stanza);
+xmpp_stanza_t * stanza_attach_receipt_request(xmpp_ctx_t *ctx, xmpp_stanza_t *stanza);
+
+xmpp_stanza_t* stanza_create_message(xmpp_ctx_t *ctx, char *id,
+    const char * const recipient, const char * const type, const char * const message);
 
 xmpp_stanza_t* stanza_create_room_join_presence(xmpp_ctx_t * const ctx,
     const char * const full_room_jid, const char * const passwd);
@@ -202,6 +215,8 @@ xmpp_stanza_t* stanza_create_disco_info_iq(xmpp_ctx_t *ctx, const char * const i
     const char * const to, const char * const node);
 
 xmpp_stanza_t* stanza_create_invite(xmpp_ctx_t *ctx, const char * const room,
+    const char * const contact, const char * const reason, const char * const password);
+xmpp_stanza_t* stanza_create_mediated_invite(xmpp_ctx_t *ctx, const char * const room,
     const char * const contact, const char * const reason);
 
 gboolean stanza_contains_chat_state(xmpp_stanza_t *stanza);

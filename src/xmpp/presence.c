@@ -1,7 +1,7 @@
 /*
  * presence.c
  *
- * Copyright (C) 2012 - 2014 James Booth <boothj5@gmail.com>
+ * Copyright (C) 2012 - 2015 James Booth <boothj5@gmail.com>
  *
  * This file is part of Profanity.
  *
@@ -44,7 +44,8 @@
 #include "log.h"
 #include "muc.h"
 #include "profanity.h"
-#include "server_events.h"
+#include "ui/ui.h"
+#include "event/server_events.h"
 #include "xmpp/capabilities.h"
 #include "xmpp/connection.h"
 #include "xmpp/stanza.h"
@@ -170,7 +171,7 @@ presence_sub_request_exists(const char * const bare_jid)
     GSList *requests_p = autocomplete_create_list(sub_requests_ac);
     GSList *requests = requests_p;
 
-    while (requests != NULL) {
+    while (requests) {
         if (strcmp(requests->data, bare_jid) == 0) {
             result = TRUE;
             break;
@@ -178,7 +179,7 @@ presence_sub_request_exists(const char * const bare_jid)
         requests = g_slist_next(requests);
     }
 
-    if (requests_p != NULL) {
+    if (requests_p) {
         g_slist_free_full(requests_p, free);
     }
 
@@ -192,27 +193,22 @@ presence_reset_sub_request_search(void)
 }
 
 void
-presence_update(const resource_presence_t presence_type, const char * const msg,
-    const int idle)
+presence_send(const resource_presence_t presence_type, const char * const msg, const int idle)
 {
     if (jabber_get_connection_status() != JABBER_CONNECTED) {
         log_warning("Error setting presence, not connected.");
         return;
     }
 
-    if (msg != NULL) {
-        log_debug("Updating presence: %s, \"%s\"",
-            string_from_resource_presence(presence_type), msg);
+    if (msg) {
+        log_debug("Updating presence: %s, \"%s\"", string_from_resource_presence(presence_type), msg);
     } else {
-        log_debug("Updating presence: %s",
-            string_from_resource_presence(presence_type));
+        log_debug("Updating presence: %s", string_from_resource_presence(presence_type));
     }
 
     xmpp_ctx_t * const ctx = connection_get_ctx();
     xmpp_conn_t * const conn = connection_get_conn();
-    const int pri =
-        accounts_get_priority_for_presence_type(jabber_get_account_name(),
-                                                presence_type);
+    const int pri = accounts_get_priority_for_presence_type(jabber_get_account_name(), presence_type);
     const char *show = stanza_get_presence_string_from_type(presence_type);
 
     connection_set_presence_message(msg);
@@ -245,11 +241,11 @@ _send_room_presence(xmpp_conn_t *conn, xmpp_stanza_t *presence)
     GList *rooms_p = muc_rooms();
     GList *rooms = rooms_p;
 
-    while (rooms != NULL) {
+    while (rooms) {
         const char *room = rooms->data;
         const char *nick = muc_nick(room);
 
-        if (nick != NULL) {
+        if (nick) {
             char *full_room_jid = create_fulljid(room, nick);
 
             xmpp_stanza_set_attribute(presence, STANZA_ATTR_TO, full_room_jid);
@@ -261,7 +257,7 @@ _send_room_presence(xmpp_conn_t *conn, xmpp_stanza_t *presence)
         rooms = g_list_next(rooms);
     }
 
-    if (rooms_p != NULL) {
+    if (rooms_p) {
         g_list_free(rooms_p);
     }
 }
@@ -333,7 +329,7 @@ presence_leave_chat_room(const char * const room_jid)
     xmpp_conn_t *conn = connection_get_conn();
     char *nick = muc_nick(room_jid);
 
-    if (nick != NULL) {
+    if (nick) {
         xmpp_stanza_t *presence = stanza_create_room_leave_presence(ctx, room_jid,
             nick);
         xmpp_send(conn, presence);
@@ -350,11 +346,11 @@ _presence_error_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
     xmpp_stanza_t *error_stanza = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_ERROR);
     xmpp_stanza_t *x = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_X);
     char *xmlns = NULL;
-    if (x != NULL) {
+    if (x) {
         xmlns = xmpp_stanza_get_ns(x);
     }
     char *type = NULL;
-    if (error_stanza != NULL) {
+    if (error_stanza) {
         type = xmpp_stanza_get_attribute(error_stanza, STANZA_ATTR_TYPE);
     }
 
@@ -364,7 +360,7 @@ _presence_error_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
 
         char *error_cond = NULL;
         xmpp_stanza_t *reason_st = xmpp_stanza_get_child_by_ns(error_stanza, STANZA_NS_STANZAS);
-        if (reason_st != NULL) {
+        if (reason_st) {
             error_cond = xmpp_stanza_get_name(reason_st);
         }
         if (error_cond == NULL) {
@@ -372,7 +368,10 @@ _presence_error_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
         }
 
         log_info("Error joining room: %s, reason: %s", fulljid->barejid, error_cond);
-        handle_room_join_error(fulljid->barejid, error_cond);
+        if (muc_active(fulljid->barejid)) {
+            muc_leave(fulljid->barejid);
+        }
+        ui_handle_room_join_error(fulljid->barejid, error_cond);
         jid_destroy(fulljid);
         return 1;
     }
@@ -381,15 +380,15 @@ _presence_error_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
     char *err_msg = stanza_get_error_message(stanza);
 
     GString *log_msg = g_string_new("presence stanza error received");
-    if (id != NULL) {
+    if (id) {
         g_string_append(log_msg, " id=");
         g_string_append(log_msg, id);
     }
-    if (from != NULL) {
+    if (from) {
         g_string_append(log_msg, " from=");
         g_string_append(log_msg, from);
     }
-    if (type != NULL) {
+    if (type) {
         g_string_append(log_msg, " type=");
         g_string_append(log_msg, type);
     }
@@ -400,7 +399,11 @@ _presence_error_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
 
     g_string_free(log_msg, TRUE);
 
-    handle_presence_error(from, type, err_msg);
+    if (from) {
+        ui_handle_recipient_error(from, err_msg);
+    } else {
+        ui_handle_error(err_msg);
+    }
 
     free(err_msg);
 
@@ -416,7 +419,7 @@ _unsubscribed_handler(xmpp_conn_t * const conn,
     Jid *from_jid = jid_create(from);
     log_debug("Unsubscribed presence handler fired for %s", from);
 
-    handle_subscription(from_jid->barejid, PRESENCE_UNSUBSCRIBED);
+    sv_ev_subscription(from_jid->barejid, PRESENCE_UNSUBSCRIBED);
     autocomplete_remove(sub_requests_ac, from_jid->barejid);
 
     jid_destroy(from_jid);
@@ -432,7 +435,7 @@ _subscribed_handler(xmpp_conn_t * const conn,
     Jid *from_jid = jid_create(from);
     log_debug("Subscribed presence handler fired for %s", from);
 
-    handle_subscription(from_jid->barejid, PRESENCE_SUBSCRIBED);
+    sv_ev_subscription(from_jid->barejid, PRESENCE_SUBSCRIBED);
     autocomplete_remove(sub_requests_ac, from_jid->barejid);
 
     jid_destroy(from_jid);
@@ -452,7 +455,7 @@ _subscribe_handler(xmpp_conn_t * const conn,
         return 1;
     }
 
-    handle_subscription(from_jid->barejid, PRESENCE_SUBSCRIBE);
+    sv_ev_subscription(from_jid->barejid, PRESENCE_SUBSCRIBE);
     autocomplete_add(sub_requests_ac, from_jid->barejid);
 
     jid_destroy(from_jid);
@@ -464,6 +467,8 @@ static int
 _unavailable_handler(xmpp_conn_t * const conn,
     xmpp_stanza_t * const stanza, void * const userdata)
 {
+    ui_input_nonblocking(TRUE);
+
     const char *jid = xmpp_conn_get_jid(conn);
     char *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
     log_debug("Unavailable presence handler fired for %s", from);
@@ -479,15 +484,15 @@ _unavailable_handler(xmpp_conn_t * const conn,
     char *status_str = stanza_get_status(stanza, NULL);
 
     if (strcmp(my_jid->barejid, from_jid->barejid) !=0) {
-        if (from_jid->resourcepart != NULL) {
-            handle_contact_offline(from_jid->barejid, from_jid->resourcepart, status_str);
+        if (from_jid->resourcepart) {
+            sv_ev_contact_offline(from_jid->barejid, from_jid->resourcepart, status_str);
 
         // hack for servers that do not send full jid with unavailable presence
         } else {
-            handle_contact_offline(from_jid->barejid, "__prof_default", status_str);
+            sv_ev_contact_offline(from_jid->barejid, "__prof_default", status_str);
         }
     } else {
-        if (from_jid->resourcepart != NULL) {
+        if (from_jid->resourcepart) {
             connection_remove_available_resource(from_jid->resourcepart);
         }
     }
@@ -517,7 +522,7 @@ _handle_caps(char *jid, XMPPCaps *caps)
             }
         }
 
-    // unsupported hash, xep-0115, assoiciate with JID, no cache
+    // unsupported hash, xep-0115, associate with JID, no cache
     } else if (caps->hash) {
         log_info("Hash %s not supported: %s, sending service discovery request", caps->hash, jid);
         char *id = create_unique_id("caps");
@@ -539,6 +544,8 @@ static int
 _available_handler(xmpp_conn_t * const conn,
     xmpp_stanza_t * const stanza, void * const userdata)
 {
+    ui_input_nonblocking(TRUE);
+
     // handler still fires if error
     if (g_strcmp0(xmpp_stanza_get_type(stanza), STANZA_TYPE_ERROR) == 0) {
         return 1;
@@ -596,7 +603,7 @@ _available_handler(xmpp_conn_t * const conn,
     if (g_strcmp0(xmpp_presence->jid->barejid, my_jid->barejid) == 0) {
         connection_add_available_resource(resource);
     } else {
-        handle_contact_online(xmpp_presence->jid->barejid, resource, xmpp_presence->last_activity);
+        sv_ev_contact_online(xmpp_presence->jid->barejid, resource, xmpp_presence->last_activity);
     }
 
     jid_destroy(my_jid);
@@ -611,7 +618,7 @@ _send_caps_request(char *node, char *caps_key, char *id, char *from)
     xmpp_ctx_t *ctx = connection_get_ctx();
     xmpp_conn_t *conn = connection_get_conn();
 
-    if (node != NULL) {
+    if (node) {
         log_debug("Node string: %s.", node);
         if (!caps_contains(caps_key)) {
             log_debug("Capabilities not cached for '%s', sending discovery IQ.", from);
@@ -629,6 +636,8 @@ _send_caps_request(char *node, char *caps_key, char *id, char *from)
 static int
 _muc_user_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, void * const userdata)
 {
+    ui_input_nonblocking(TRUE);
+
     char *type = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_TYPE);
     char *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
 
@@ -682,27 +691,27 @@ _muc_user_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, void *
                     char *new_jid = stanza_get_muc_destroy_alternative_room(stanza);
                     char *password = stanza_get_muc_destroy_alternative_password(stanza);
                     char *reason = stanza_get_muc_destroy_reason(stanza);
-                    handle_room_destroyed(room, new_jid, password, reason);
+                    sv_ev_room_destroyed(room, new_jid, password, reason);
                     free(password);
                     free(reason);
 
                 // kicked from room
-                } else if (g_slist_find_custom(status_codes, "307", (GCompareFunc)g_strcmp0) != NULL) {
+                } else if (g_slist_find_custom(status_codes, "307", (GCompareFunc)g_strcmp0)) {
                     char *actor = stanza_get_actor(stanza);
                     char *reason = stanza_get_reason(stanza);
-                    handle_room_kicked(room, actor, reason);
+                    sv_ev_room_kicked(room, actor, reason);
                     free(reason);
 
                 // banned from room
-                } else if (g_slist_find_custom(status_codes, "301", (GCompareFunc)g_strcmp0) != NULL) {
+                } else if (g_slist_find_custom(status_codes, "301", (GCompareFunc)g_strcmp0)) {
                     char *actor = stanza_get_actor(stanza);
                     char *reason = stanza_get_reason(stanza);
-                    handle_room_banned(room, actor, reason);
+                    sv_ev_room_banned(room, actor, reason);
                     free(reason);
 
                 // normal exit
                 } else {
-                    handle_leave_room(room);
+                    sv_ev_leave_room(room);
                 }
 
                 g_slist_free_full(status_codes, free);
@@ -713,7 +722,7 @@ _muc_user_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, void *
             gboolean config_required = stanza_muc_requires_config(stanza);
             char *actor = stanza_get_actor(stanza);
             char *reason = stanza_get_reason(stanza);
-            handle_muc_self_online(room, nick, config_required, role, affiliation, actor, reason, jid, show_str, status_str);
+            sv_ev_muc_self_online(room, nick, config_required, role, affiliation, actor, reason, jid, show_str, status_str);
         }
 
     // handle presence from room members
@@ -732,22 +741,22 @@ _muc_user_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, void *
                 GSList *status_codes = stanza_get_status_codes_by_ns(stanza, STANZA_NS_MUC_USER);
 
                 // kicked from room
-                if (g_slist_find_custom(status_codes, "307", (GCompareFunc)g_strcmp0) != NULL) {
+                if (g_slist_find_custom(status_codes, "307", (GCompareFunc)g_strcmp0)) {
                     char *actor = stanza_get_actor(stanza);
                     char *reason = stanza_get_reason(stanza);
-                    handle_room_occupent_kicked(room, nick, actor, reason);
+                    sv_ev_room_occupent_kicked(room, nick, actor, reason);
                     free(reason);
 
                 // banned from room
-                } else if (g_slist_find_custom(status_codes, "301", (GCompareFunc)g_strcmp0) != NULL) {
+                } else if (g_slist_find_custom(status_codes, "301", (GCompareFunc)g_strcmp0)) {
                     char *actor = stanza_get_actor(stanza);
                     char *reason = stanza_get_reason(stanza);
-                    handle_room_occupent_banned(room, nick, actor, reason);
+                    sv_ev_room_occupent_banned(room, nick, actor, reason);
                     free(reason);
 
                 // normal exit
                 } else {
-                    handle_room_occupant_offline(room, nick, "offline", status_str);
+                    sv_ev_room_occupant_offline(room, nick, "offline", status_str);
                 }
 
                 g_slist_free_full(status_codes, free);
@@ -765,7 +774,7 @@ _muc_user_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, void *
 
             char *actor = stanza_get_actor(stanza);
             char *reason = stanza_get_reason(stanza);
-            handle_muc_occupant_online(room, nick, jid, role, affiliation, actor, reason, show_str, status_str);
+            sv_ev_muc_occupant_online(room, nick, jid, role, affiliation, actor, reason, show_str, status_str);
         }
     }
 

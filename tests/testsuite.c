@@ -21,7 +21,6 @@
 #include "test_cmd_sub.h"
 #include "test_cmd_statuses.h"
 #include "test_cmd_otr.h"
-#include "test_history.h"
 #include "test_jid.h"
 #include "test_parser.h"
 #include "test_roster_list.h"
@@ -32,7 +31,6 @@
 #include "test_cmd_join.h"
 #include "test_muc.h"
 #include "test_cmd_roster.h"
-#include "test_cmd_win.h"
 #include "test_cmd_disconnect.h"
 #include "test_form.h"
 
@@ -91,6 +89,10 @@ int main(int argc, char* argv[]) {
         unit_test(utf8_display_len_non_wide),
         unit_test(utf8_display_len_wide),
         unit_test(utf8_display_len_all_wide),
+        unit_test(strip_quotes_does_nothing_when_no_quoted),
+        unit_test(strip_quotes_strips_first),
+        unit_test(strip_quotes_strips_last),
+        unit_test(strip_quotes_strips_both),
 
         unit_test(clear_empty),
         unit_test(reset_after_create),
@@ -102,20 +104,6 @@ int main(int argc, char* argv[]) {
         unit_test(add_two_adds_two),
         unit_test(add_two_same_adds_one),
         unit_test(add_two_same_updates),
-
-        unit_test(previous_on_empty_returns_null),
-        unit_test(next_on_empty_returns_null),
-        unit_test(previous_once_returns_last),
-        unit_test(previous_twice_when_one_returns_first),
-        unit_test(previous_always_stops_at_first),
-        unit_test(previous_goes_to_correct_element),
-        unit_test(prev_then_next_returns_empty),
-        unit_test(prev_with_val_then_next_returns_val),
-        unit_test(prev_with_val_then_next_twice_returns_null),
-        unit_test(navigate_then_append_new),
-        unit_test(edit_item_mid_history),
-        unit_test(edit_previous_and_append),
-        unit_test(start_session_add_new_submit_previous),
 
         unit_test(create_jid_from_null_returns_null),
         unit_test(create_jid_from_empty_string_returns_null),
@@ -342,9 +330,11 @@ int main(int argc, char* argv[]) {
         unit_test(cmd_account_set_eval_password_when_password_set),
         unit_test(cmd_account_set_muc_sets_muc),
         unit_test(cmd_account_set_nick_sets_nick),
+#ifdef HAVE_LIBOTR
         unit_test(cmd_account_show_message_for_missing_otr_policy),
         unit_test(cmd_account_show_message_for_invalid_otr_policy),
         unit_test(cmd_account_set_otr_sets_otr),
+#endif
         unit_test(cmd_account_set_status_shows_message_when_invalid_status),
         unit_test(cmd_account_set_status_sets_status_when_valid),
         unit_test(cmd_account_set_status_sets_status_when_last),
@@ -435,34 +425,15 @@ int main(int argc, char* argv[]) {
             load_preferences,
             close_preferences),
 
-        unit_test_setup_teardown(console_doesnt_show_online_presence_when_set_none,
-            load_preferences,
-            close_preferences),
         unit_test_setup_teardown(console_shows_online_presence_when_set_online,
             load_preferences,
             close_preferences),
         unit_test_setup_teardown(console_shows_online_presence_when_set_all,
             load_preferences,
             close_preferences),
-        unit_test_setup_teardown(console_doesnt_show_dnd_presence_when_set_none,
-            load_preferences,
-            close_preferences),
-        unit_test_setup_teardown(console_doesnt_show_dnd_presence_when_set_online,
-            load_preferences,
-            close_preferences),
         unit_test_setup_teardown(console_shows_dnd_presence_when_set_all,
             load_preferences,
             close_preferences),
-        unit_test(handle_message_error_when_no_recipient),
-        unit_test_setup_teardown(handle_message_error_when_recipient_cancel,
-            load_preferences,
-            close_preferences),
-        unit_test_setup_teardown(handle_message_error_when_recipient_cancel_disables_chat_session,
-            load_preferences,
-            close_preferences),
-        unit_test(handle_message_error_when_recipient_and_no_type),
-        unit_test(handle_presence_error_when_no_recipient),
-        unit_test(handle_presence_error_when_from_recipient),
         unit_test(handle_offline_removes_chat_session),
         unit_test(lost_connection_clears_chat_sessions),
 
@@ -572,7 +543,6 @@ int main(int argc, char* argv[]) {
         unit_test(cmd_join_shows_message_when_connecting),
         unit_test(cmd_join_shows_message_when_disconnected),
         unit_test(cmd_join_shows_message_when_undefined),
-        unit_test(cmd_join_shows_usage_when_no_args),
         unit_test(cmd_join_shows_error_message_when_invalid_room_jid),
         unit_test(cmd_join_uses_account_mucservice_when_no_service_specified),
         unit_test(cmd_join_uses_supplied_nick),
@@ -595,9 +565,6 @@ int main(int argc, char* argv[]) {
         unit_test(cmd_roster_clearnick_shows_message_when_no_jid),
         unit_test(cmd_roster_clearnick_shows_message_when_no_contact_exists),
         unit_test(cmd_roster_clearnick_sends_name_change_request_with_empty_nick),
-
-        unit_test(cmd_win_shows_message_when_win_doesnt_exist),
-        unit_test(cmd_win_switches_to_given_win_when_exists),
 
         unit_test(get_form_type_field_returns_null_no_fields),
         unit_test(get_form_type_field_returns_null_when_not_present),

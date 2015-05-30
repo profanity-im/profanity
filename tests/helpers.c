@@ -85,6 +85,24 @@ void close_chat_sessions(void **state)
     close_preferences(NULL);
 }
 
+int
+utf8_pos_to_col(char *str, int utf8_pos)
+{
+    int col = 0;
+
+    int i = 0;
+    for (i = 0; i<utf8_pos; i++) {
+        col++;
+        gchar *ch = g_utf8_offset_to_pointer(str, i);
+        gunichar uni = g_utf8_get_char(ch);
+        if (g_unichar_iswide(uni)) {
+            col++;
+        }
+    }
+
+    return col;
+}
+
 static GCompareFunc cmp_func;
 
 void

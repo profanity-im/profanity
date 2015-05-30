@@ -1,7 +1,7 @@
 /*
  * preferences.h
  *
- * Copyright (C) 2012 - 2014 James Booth <boothj5@gmail.com>
+ * Copyright (C) 2012 - 2015 James Booth <boothj5@gmail.com>
  *
  * This file is part of Profanity.
  *
@@ -59,9 +59,13 @@ typedef enum {
     PREF_FLASH,
     PREF_INTYPE,
     PREF_HISTORY,
+    PREF_CARBONS,
+    PREF_RECEIPTS_SEND,
+    PREF_RECEIPTS_REQUEST,
     PREF_MOUSE,
     PREF_OCCUPANTS,
     PREF_OCCUPANTS_SIZE,
+    PREF_OCCUPANTS_JID,
     PREF_ROSTER,
     PREF_ROSTER_SIZE,
     PREF_ROSTER_OFFLINE,
@@ -71,6 +75,7 @@ typedef enum {
     PREF_PRESENCE,
     PREF_WRAP,
     PREF_TIME,
+    PREF_TIME_STATUSBAR,
     PREF_STATUSES,
     PREF_STATUSES_CONSOLE,
     PREF_STATUSES_CHAT,

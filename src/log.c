@@ -1,7 +1,7 @@
 /*
  * log.c
  *
- * Copyright (C) 2012 - 2014 James Booth <boothj5@gmail.com>
+ * Copyright (C) 2012 - 2015 James Booth <boothj5@gmail.com>
  *
  * This file is part of Profanity.
  *
@@ -46,6 +46,7 @@
 
 #include "common.h"
 #include "config/preferences.h"
+#include "xmpp/xmpp.h"
 
 #define PROF "prof"
 
@@ -66,7 +67,7 @@ struct dated_chat_log {
 };
 
 static gboolean _log_roll_needed(struct dated_chat_log *dated_log);
-static struct dated_chat_log * _create_log(char *other, const  char * const login);
+static struct dated_chat_log * _create_log(const char * const other, const  char * const login);
 static struct dated_chat_log * _create_groupchat_log(char *room, const char * const login);
 static void _free_chat_log(struct dated_chat_log *dated_log);
 static gboolean _key_equals(void *key1, void *key2);
@@ -78,6 +79,8 @@ static gchar * _get_chatlog_dir(void);
 static gchar * _get_main_log_file(void);
 static void _rotate_log_file(void);
 static char* _log_string_from_level(log_level_t level);
+static void _chat_log_chat(const char * const login, const char * const other,
+    const gchar * const msg, chat_log_direction_t direction, GTimeVal *tv_stamp);
 
 void
 log_debug(const char * const msg, ...)
@@ -163,7 +166,7 @@ log_close(void)
 {
     g_string_free(mainlogfile, TRUE);
     g_time_zone_unref(tz);
-    if (logp != NULL) {
+    if (logp) {
         fclose(logp);
     }
 }
@@ -171,7 +174,7 @@ log_close(void)
 void
 log_msg(log_level_t level, const char * const area, const char * const msg)
 {
-    if (level >= level_filter && logp != NULL) {
+    if (level >= level_filter && logp) {
         dt = g_date_time_new_now(tz);
 
         char *level_str = _log_string_from_level(level);
@@ -236,7 +239,7 @@ chat_log_init(void)
 {
     session_started = g_date_time_new_now_local();
     log_info("Initialising chat logs");
-    logs = g_hash_table_new_full(g_str_hash, (GEqualFunc) _key_equals, g_free,
+    logs = g_hash_table_new_full(g_str_hash, (GEqualFunc) _key_equals, free,
         (GDestroyNotify)_free_chat_log);
 }
 
@@ -244,13 +247,80 @@ void
 groupchat_log_init(void)
 {
     log_info("Initialising groupchat logs");
-    groupchat_logs = g_hash_table_new_full(g_str_hash, (GEqualFunc) _key_equals, g_free,
+    groupchat_logs = g_hash_table_new_full(g_str_hash, (GEqualFunc) _key_equals, free,
         (GDestroyNotify)_free_chat_log);
 }
 
 void
-chat_log_chat(const gchar * const login, gchar *other,
-    const gchar * const msg, chat_log_direction_t direction, GTimeVal *tv_stamp)
+chat_log_msg_out(const char * const barejid, const char * const msg)
+{
+    if (prefs_get_boolean(PREF_CHLOG)) {
+        const char *jid = jabber_get_fulljid();
+        Jid *jidp = jid_create(jid);
+        _chat_log_chat(jidp->barejid, barejid, msg, PROF_OUT_LOG, NULL);
+        jid_destroy(jidp);
+    }
+}
+
+void
+chat_log_otr_msg_out(const char * const barejid, const char * const msg)
+{
+    if (prefs_get_boolean(PREF_CHLOG)) {
+        const char *jid = jabber_get_fulljid();
+        Jid *jidp = jid_create(jid);
+        char *pref_otr_log = prefs_get_string(PREF_OTR_LOG);
+        if (strcmp(pref_otr_log, "on") == 0) {
+            _chat_log_chat(jidp->barejid, barejid, msg, PROF_OUT_LOG, NULL);
+        } else if (strcmp(pref_otr_log, "redact") == 0) {
+            _chat_log_chat(jidp->barejid, barejid, "[redacted]", PROF_OUT_LOG, NULL);
+        }
+        prefs_free_string(pref_otr_log);
+        jid_destroy(jidp);
+    }
+}
+
+void
+chat_log_otr_msg_in(const char * const barejid, const char * const msg, gboolean was_decrypted)
+{
+    if (prefs_get_boolean(PREF_CHLOG)) {
+        const char *jid = jabber_get_fulljid();
+        Jid *jidp = jid_create(jid);
+        char *pref_otr_log = prefs_get_string(PREF_OTR_LOG);
+        if (!was_decrypted || (strcmp(pref_otr_log, "on") == 0)) {
+            _chat_log_chat(jidp->barejid, barejid, msg, PROF_IN_LOG, NULL);
+        } else if (strcmp(pref_otr_log, "redact") == 0) {
+            _chat_log_chat(jidp->barejid, barejid, "[redacted]", PROF_IN_LOG, NULL);
+        }
+        prefs_free_string(pref_otr_log);
+        jid_destroy(jidp);
+    }
+}
+
+void
+chat_log_msg_in(const char * const barejid, const char * const msg)
+{
+    if (prefs_get_boolean(PREF_CHLOG)) {
+        const char *jid = jabber_get_fulljid();
+        Jid *jidp = jid_create(jid);
+        _chat_log_chat(jidp->barejid, barejid, msg, PROF_IN_LOG, NULL);
+        jid_destroy(jidp);
+    }
+}
+
+void
+chat_log_msg_in_delayed(const char * const barejid, const char * msg, GTimeVal *tv_stamp)
+{
+    if (prefs_get_boolean(PREF_CHLOG)) {
+        const char *jid = jabber_get_fulljid();
+        Jid *jidp = jid_create(jid);
+        _chat_log_chat(jidp->barejid, barejid, msg, PROF_IN_LOG, tv_stamp);
+        jid_destroy(jidp);
+    }
+}
+
+static void
+_chat_log_chat(const char * const login, const char * const other,
+    const char * const msg, chat_log_direction_t direction, GTimeVal *tv_stamp)
 {
     struct dated_chat_log *dated_log = g_hash_table_lookup(logs, other);
 
@@ -277,7 +347,7 @@ chat_log_chat(const gchar * const login, gchar *other,
 
     FILE *logp = fopen(dated_log->filename, "a");
     g_chmod(dated_log->filename, S_IRUSR | S_IWUSR);
-    if (logp != NULL) {
+    if (logp) {
         if (direction == PROF_IN_LOG) {
             if (strncmp(msg, "/me ", 4) == 0) {
                 fprintf(logp, "%s - *%s %s\n", date_fmt, other, msg + 4);
@@ -326,7 +396,7 @@ groupchat_log_chat(const gchar * const login, const gchar * const room,
 
     FILE *logp = fopen(dated_log->filename, "a");
     g_chmod(dated_log->filename, S_IRUSR | S_IWUSR);
-    if (logp != NULL) {
+    if (logp) {
         if (strncmp(msg, "/me ", 4) == 0) {
             fprintf(logp, "%s - *%s %s\n", date_fmt, nick, msg + 4);
         } else {
@@ -363,7 +433,7 @@ chat_log_get_previous(const gchar * const login, const gchar * const recipient)
         char *filename = _get_log_filename(recipient, login, log_date, FALSE);
 
         FILE *logp = fopen(filename, "r");
-        if (logp != NULL) {
+        if (logp) {
             GString *header = g_string_new("");
             g_string_append_printf(header, "%d/%d/%d:",
                 g_date_time_get_day_of_month(log_date),
@@ -396,13 +466,13 @@ chat_log_get_previous(const gchar * const login, const gchar * const recipient)
 void
 chat_log_close(void)
 {
-    g_hash_table_remove_all(logs);
-    g_hash_table_remove_all(groupchat_logs);
+    g_hash_table_destroy(logs);
+    g_hash_table_destroy(groupchat_logs);
     g_date_time_unref(session_started);
 }
 
 static struct dated_chat_log *
-_create_log(char *other, const char * const login)
+_create_log(const char * const other, const char * const login)
 {
     GDateTime *now = g_date_time_new_now_local();
     char *filename = _get_log_filename(other, login, now, TRUE);
@@ -448,12 +518,12 @@ _log_roll_needed(struct dated_chat_log *dated_log)
 static void
 _free_chat_log(struct dated_chat_log *dated_log)
 {
-    if (dated_log != NULL) {
-        if (dated_log->filename != NULL) {
+    if (dated_log) {
+        if (dated_log->filename) {
             g_free(dated_log->filename);
             dated_log->filename = NULL;
         }
-        if (dated_log->date != NULL) {
+        if (dated_log->date) {
             g_date_time_unref(dated_log->date);
             dated_log->date = NULL;
         }

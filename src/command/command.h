@@ -1,7 +1,7 @@
 /*
  * command.h
  *
- * Copyright (C) 2012 - 2014 James Booth <boothj5@gmail.com>
+ * Copyright (C) 2012 - 2015 James Booth <boothj5@gmail.com>
  *
  * This file is part of Profanity.
  *
@@ -65,5 +65,7 @@ GSList * cmd_get_presence_help(void);
 void cmd_history_append(char *inp);
 char *cmd_history_previous(char *inp);
 char *cmd_history_next(char *inp);
+
+void command_docgen(void);
 
 #endif

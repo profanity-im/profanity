@@ -13,7 +13,9 @@ core_sources = \
 	src/xmpp/roster.c src/xmpp/roster.h \
 	src/xmpp/bookmark.c src/xmpp/bookmark.h \
 	src/xmpp/form.c src/xmpp/form.h \
-	src/server_events.c src/server_events.h \
+	src/event/server_events.c src/event/server_events.h \
+	src/event/client_events.c src/event/client_events.h \
+	src/event/ui_events.c src/event/ui_events.h \
 	src/ui/ui.h src/ui/window.c src/ui/window.h src/ui/core.c \
 	src/ui/titlebar.c src/ui/statusbar.c src/ui/inputwin.c \
 	src/ui/titlebar.h src/ui/statusbar.h src/ui/inputwin.h \
@@ -27,7 +29,6 @@ core_sources = \
 	src/tools/parser.h \
 	src/tools/p_sha1.h src/tools/p_sha1.c \
 	src/tools/autocomplete.c src/tools/autocomplete.h \
-	src/tools/history.c src/tools/history.h \
 	src/tools/tinyurl.c src/tools/tinyurl.h \
 	src/config/accounts.c src/config/accounts.h \
 	src/config/account.c src/config/account.h \
@@ -44,13 +45,13 @@ tests_sources = \
 	src/roster_list.c src/roster_list.h \
 	src/xmpp/xmpp.h src/xmpp/form.c \
 	src/ui/ui.h \
+	src/otr/otr.h \
 	src/command/command.h src/command/command.c \
 	src/command/commands.h src/command/commands.c \
 	src/tools/parser.c \
 	src/tools/parser.h \
 	src/tools/p_sha1.h src/tools/p_sha1.c \
 	src/tools/autocomplete.c src/tools/autocomplete.h \
-	src/tools/history.c src/tools/history.h \
 	src/tools/tinyurl.c src/tools/tinyurl.h \
 	src/config/accounts.h \
 	src/config/account.c src/config/account.h \
@@ -61,9 +62,10 @@ tests_sources = \
 	src/ui/buffer.c \
 	src/ui/titlebar.c src/ui/statusbar.c src/ui/inputwin.c \
 	src/ui/titlebar.h src/ui/statusbar.h src/ui/inputwin.h \
-	src/server_events.c src/server_events.h \
+	src/event/server_events.c src/event/server_events.h \
+	src/event/client_events.c src/event/client_events.h \
+	src/event/ui_events.c src/event/ui_events.h \
 	tests/xmpp/stub_xmpp.c \
-	tests/otr/stub_otr.c \
 	tests/ui/stub_ui.c \
 	tests/log/stub_log.c \
 	tests/config/stub_accounts.c \
@@ -78,12 +80,10 @@ tests_sources = \
 	tests/test_cmd_roster.c tests/test_cmd_roster.h \
 	tests/test_cmd_statuses.c tests/test_cmd_statuses.h \
 	tests/test_cmd_sub.c tests/test_cmd_sub.h \
-	tests/test_cmd_win.c tests/test_cmd_win.h \
 	tests/test_cmd_disconnect.c tests/test_cmd_disconnect.h \
 	tests/test_common.c tests/test_common.h \
 	tests/test_contact.c tests/test_contact.h \
 	tests/test_form.c tests/test_form.h \
-	tests/test_history.c tests/test_history.h \
 	tests/test_jid.c tests/test_jid.h \
 	tests/test_muc.c tests/test_muc.h \
 	tests/test_parser.c tests/test_parser.h \
@@ -104,6 +104,9 @@ otr3_sources = \
 otr4_sources = \
 	src/otr/otrlib.h src/otr/otrlibv4.c src/otr/otr.h src/otr/otr.c
 
+otr_test_sources = \
+	tests/otr/stub_otr.c
+
 themes_sources = themes/*
 
 script_sources = bootstrap.sh configure-debug install-all.sh
@@ -111,6 +114,7 @@ script_sources = bootstrap.sh configure-debug install-all.sh
 man_sources = docs/profanity.1
 
 if BUILD_OTR
+tests_sources += $(otr_test_sources)
 if BUILD_OTR3
 core_sources += $(otr3_sources)
 endif

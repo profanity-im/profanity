@@ -1,7 +1,7 @@
 /*
  * titlebar.c
  *
- * Copyright (C) 2012 - 2014 James Booth <boothj5@gmail.com>
+ * Copyright (C) 2012 - 2015 James Booth <boothj5@gmail.com>
  *
  * This file is part of Profanity.
  *
@@ -80,7 +80,7 @@ title_bar_update_virtual(void)
 {
     ProfWin *window = wins_get_current();
     if (window->type != WIN_CONSOLE) {
-        if (typing_elapsed != NULL) {
+        if (typing_elapsed) {
             gdouble seconds = g_timer_elapsed(typing_elapsed, NULL);
 
             if (seconds >= 10) {
@@ -109,8 +109,11 @@ void
 title_bar_console(void)
 {
     werase(win);
-    typing = FALSE;
+    if (typing_elapsed) {
+        g_timer_destroy(typing_elapsed);
+    }
     typing_elapsed = NULL;
+    typing = FALSE;
 
     _title_bar_draw();
 }
@@ -125,7 +128,7 @@ title_bar_set_presence(contact_presence_t presence)
 void
 title_bar_switch(void)
 {
-    if (typing_elapsed != NULL) {
+    if (typing_elapsed) {
         g_timer_destroy(typing_elapsed);
         typing_elapsed = NULL;
         typing = FALSE;
@@ -138,7 +141,7 @@ void
 title_bar_set_typing(gboolean is_typing)
 {
     if (is_typing) {
-        if (typing_elapsed != NULL) {
+        if (typing_elapsed) {
             g_timer_start(typing_elapsed);
         } else {
             typing_elapsed = g_timer_new();
@@ -249,7 +252,7 @@ _show_privacy(ProfChatWin *chatwin)
 {
     int bracket_attrs = theme_attrs(THEME_TITLE_BRACKET);
 
-    if (!chatwin->is_otr) {
+    if (chatwin->enc_mode == PROF_ENC_NONE) {
         if (prefs_get_boolean(PREF_OTR_WARN)) {
             int unencrypted_attrs = theme_attrs(THEME_TITLE_UNENCRYPTED);
             wprintw(win, " ");

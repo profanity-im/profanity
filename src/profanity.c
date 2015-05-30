@@ -1,7 +1,7 @@
 /*
  * profanity.c
  *
- * Copyright (C) 2012 - 2014 James Booth <boothj5@gmail.com>
+ * Copyright (C) 2012 - 2015 James Booth <boothj5@gmail.com>
  *
  * This file is part of Profanity.
  *
@@ -63,6 +63,7 @@
 #include "xmpp/xmpp.h"
 #include "ui/ui.h"
 #include "ui/windows.h"
+#include "event/client_events.h"
 
 static void _check_autoaway(void);
 static void _init(const int disable_tls, char *log_level);
@@ -71,6 +72,7 @@ static void _create_directories(void);
 static void _connect_default(const char * const account);
 
 static gboolean idle = FALSE;
+static gboolean cont = TRUE;
 
 void
 prof_run(const int disable_tls, char *log_level, char *account_name)
@@ -79,25 +81,27 @@ prof_run(const int disable_tls, char *log_level, char *account_name)
     _connect_default(account_name);
     ui_update();
 
-    char *line = NULL;
-    gboolean cmd_result = TRUE;
-
     log_info("Starting main event loop");
 
-    while(cmd_result) {
-        while(!line) {
-            _check_autoaway();
-            line = ui_readline();
-#ifdef HAVE_LIBOTR
-            otr_poll();
-#endif
-            notify_remind();
-            jabber_process_events();
-            ui_update();
+    char *line = NULL;
+    while(cont) {
+        _check_autoaway();
+
+        line = ui_readline();
+        if (line) {
+            cont = cmd_process_input(line);
+            free(line);
+            line = NULL;
+        } else {
+            cont = TRUE;
         }
-        cmd_result = cmd_process_input(line);
-        ui_input_clear();
-        FREE_SET_NULL(line);
+
+#ifdef HAVE_LIBOTR
+        otr_poll();
+#endif
+        notify_remind();
+        jabber_process_events();
+        ui_update();
     }
 }
 
@@ -109,14 +113,14 @@ prof_handle_idle(void)
         GSList *recipients = ui_get_chat_recipients();
         GSList *curr = recipients;
 
-        while (curr != NULL) {
+        while (curr) {
             char *barejid = curr->data;
             ProfChatWin *chatwin = wins_get_chat(barejid);
             chat_state_handle_idle(chatwin->barejid, chatwin->state);
             curr = g_slist_next(curr);
         }
 
-        if (recipients != NULL) {
+        if (recipients) {
             g_slist_free(recipients);
         }
     }
@@ -169,12 +173,12 @@ _check_autoaway()
 
                 // handle away mode
                 if (strcmp(pref_autoaway_mode, "away") == 0) {
-                    presence_update(RESOURCE_AWAY, pref_autoaway_message, 0);
+                    cl_ev_presence_send(RESOURCE_AWAY, pref_autoaway_message, 0);
                     ui_auto_away();
 
                 // handle idle mode
                 } else if (strcmp(pref_autoaway_mode, "idle") == 0) {
-                    presence_update(RESOURCE_ONLINE, pref_autoaway_message, idle_ms / 1000);
+                    cl_ev_presence_send(RESOURCE_ONLINE, pref_autoaway_message, idle_ms / 1000);
                 }
 
                 prefs_free_string(pref_autoaway_message);
@@ -188,10 +192,10 @@ _check_autoaway()
             // handle check
             if (prefs_get_boolean(PREF_AUTOAWAY_CHECK)) {
                 if (strcmp(pref_autoaway_mode, "away") == 0) {
-                    presence_update(RESOURCE_ONLINE, NULL, 0);
+                    cl_ev_presence_send(RESOURCE_ONLINE, NULL, 0);
                     ui_end_auto_away();
                 } else if (strcmp(pref_autoaway_mode, "idle") == 0) {
-                    presence_update(RESOURCE_ONLINE, NULL, 0);
+                    cl_ev_presence_send(RESOURCE_ONLINE, NULL, 0);
                     ui_titlebar_presence(CONTACT_ONLINE);
                 }
             }
@@ -209,6 +213,7 @@ _init(const int disable_tls, char *log_level)
     signal(SIGPIPE, SIG_IGN);
     signal(SIGINT, SIG_IGN);
     signal(SIGTSTP, SIG_IGN);
+    signal(SIGWINCH, ui_sigwinch_handler);
     _create_directories();
     log_level_t prof_log_level = log_level_from_string(log_level);
     prefs_load();

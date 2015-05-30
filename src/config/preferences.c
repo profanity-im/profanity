@@ -1,7 +1,7 @@
 /*
  * preferences.c
  *
- * Copyright (C) 2012 - 2014 James Booth <boothj5@gmail.com>
+ * Copyright (C) 2012 - 2015 James Booth <boothj5@gmail.com>
  *
  * This file is part of Profanity.
  *
@@ -62,7 +62,7 @@
 #define PREF_GROUP_ALIAS "alias"
 #define PREF_GROUP_OTR "otr"
 
-#define INPBLOCK_DEFAULT 20
+#define INPBLOCK_DEFAULT 1000
 
 static gchar *prefs_loc;
 static GKeyFile *prefs;
@@ -95,35 +95,17 @@ prefs_load(void)
 
     err = NULL;
     log_maxsize = g_key_file_get_integer(prefs, PREF_GROUP_LOGGING, "maxsize", &err);
-    if (err != NULL) {
+    if (err) {
         log_maxsize = 0;
         g_error_free(err);
     }
 
-    // move pre 0.4.1 OTR preferences to [otr] group
+    // move pre 0.4.6 OTR warn preferences to [ui] group
     err = NULL;
-    gboolean ui_otr_warn = g_key_file_get_boolean(prefs, PREF_GROUP_UI, "otr.warn", &err);
+    gboolean otr_warn = g_key_file_get_boolean(prefs, PREF_GROUP_OTR, "warn", &err);
     if (err == NULL) {
-        g_key_file_set_boolean(prefs, PREF_GROUP_OTR, _get_key(PREF_OTR_WARN), ui_otr_warn);
-        g_key_file_remove_key(prefs, PREF_GROUP_UI, "otr.warn", NULL);
-    } else {
-        g_error_free(err);
-    }
-
-    err = NULL;
-    gchar *ui_otr_log = g_key_file_get_string(prefs, PREF_GROUP_LOGGING, "otr", &err);
-    if (err == NULL) {
-        g_key_file_set_string(prefs, PREF_GROUP_OTR, _get_key(PREF_OTR_LOG), ui_otr_log);
-        g_key_file_remove_key(prefs, PREF_GROUP_LOGGING, "otr", NULL);
-    } else {
-        g_error_free(err);
-    }
-
-    err = NULL;
-    gchar *ui_otr_policy = g_key_file_get_string(prefs, "policy", "otr.policy", &err);
-    if (err == NULL) {
-        g_key_file_set_string(prefs, PREF_GROUP_OTR, _get_key(PREF_OTR_POLICY), ui_otr_policy);
-        g_key_file_remove_group(prefs, "policy", NULL);
+        g_key_file_set_boolean(prefs, PREF_GROUP_UI, _get_key(PREF_OTR_WARN), otr_warn);
+        g_key_file_remove_key(prefs, PREF_GROUP_OTR, "warn", NULL);
     } else {
         g_error_free(err);
     }
@@ -198,7 +180,7 @@ prefs_get_string(preference_t pref)
     char *result = g_key_file_get_string(prefs, group, key, NULL);
 
     if (result == NULL) {
-        if (def != NULL) {
+        if (def) {
             return strdup(def);
         } else {
             return NULL;
@@ -211,7 +193,7 @@ prefs_get_string(preference_t pref)
 void
 prefs_free_string(char *pref)
 {
-    if (pref != NULL) {
+    if (pref) {
         free(pref);
     }
     pref = NULL;
@@ -358,7 +340,7 @@ prefs_get_occupants_size(void)
     gint result = g_key_file_get_integer(prefs, PREF_GROUP_UI, "occupants.size", NULL);
 
     if (result > 99 || result < 1) {
-        return 20;
+        return 15;
     } else {
         return result;
     }
@@ -377,7 +359,7 @@ prefs_get_roster_size(void)
     gint result = g_key_file_get_integer(prefs, PREF_GROUP_UI, "roster.size", NULL);
 
     if (result > 99 || result < 1) {
-        return 20;
+        return 25;
     } else {
         return result;
     }
@@ -437,7 +419,7 @@ prefs_get_aliases(void)
             char *name = keys[i];
             char *value = g_key_file_get_string(prefs, PREF_GROUP_ALIAS, name, NULL);
 
-            if (value != NULL) {
+            if (value) {
                 ProfAlias *alias = malloc(sizeof(struct prof_alias_t));
                 alias->name = strdup(name);
                 alias->value = strdup(value);
@@ -517,6 +499,7 @@ _get_group(preference_t pref)
         case PREF_HISTORY:
         case PREF_MOUSE:
         case PREF_OCCUPANTS:
+        case PREF_OCCUPANTS_JID:
         case PREF_STATUSES:
         case PREF_STATUSES_CONSOLE:
         case PREF_STATUSES_CHAT:
@@ -525,12 +508,14 @@ _get_group(preference_t pref)
         case PREF_PRESENCE:
         case PREF_WRAP:
         case PREF_TIME:
+        case PREF_TIME_STATUSBAR:
         case PREF_ROSTER:
         case PREF_ROSTER_OFFLINE:
         case PREF_ROSTER_RESOURCE:
         case PREF_ROSTER_BY:
         case PREF_RESOURCE_TITLE:
         case PREF_RESOURCE_MESSAGE:
+        case PREF_OTR_WARN:
         case PREF_INPBLOCK_DYNAMIC:
             return PREF_GROUP_UI;
         case PREF_STATES:
@@ -558,8 +543,10 @@ _get_group(preference_t pref)
             return PREF_GROUP_PRESENCE;
         case PREF_CONNECT_ACCOUNT:
         case PREF_DEFAULT_ACCOUNT:
+        case PREF_CARBONS:
+        case PREF_RECEIPTS_SEND:
+        case PREF_RECEIPTS_REQUEST:
             return PREF_GROUP_CONNECTION;
-        case PREF_OTR_WARN:
         case PREF_OTR_LOG:
         case PREF_OTR_POLICY:
             return PREF_GROUP_OTR;
@@ -593,10 +580,18 @@ _get_key(preference_t pref)
             return "intype";
         case PREF_HISTORY:
             return "history";
+        case PREF_CARBONS:
+            return "carbons";
+        case PREF_RECEIPTS_SEND:
+            return "receipts.send";
+        case PREF_RECEIPTS_REQUEST:
+            return "receipts.request";
         case PREF_MOUSE:
             return "mouse";
         case PREF_OCCUPANTS:
             return "occupants";
+        case PREF_OCCUPANTS_JID:
+            return "occupants.jid";
         case PREF_MUC_PRIVILEGES:
             return "privileges";
         case PREF_STATUSES:
@@ -648,7 +643,7 @@ _get_key(preference_t pref)
         case PREF_OTR_LOG:
             return "log";
         case PREF_OTR_WARN:
-            return "warn";
+            return "otr.warn";
         case PREF_OTR_POLICY:
             return "policy";
         case PREF_LOG_ROTATE:
@@ -661,6 +656,8 @@ _get_key(preference_t pref)
             return "wrap";
         case PREF_TIME:
             return "time";
+        case PREF_TIME_STATUSBAR:
+            return "time.statusbar";
         case PREF_ROSTER:
             return "roster";
         case PREF_ROSTER_OFFLINE:
@@ -691,15 +688,24 @@ _get_default_boolean(preference_t pref)
         case PREF_AUTOAWAY_CHECK:
         case PREF_LOG_ROTATE:
         case PREF_LOG_SHARED:
+        case PREF_NOTIFY_MESSAGE:
         case PREF_NOTIFY_MESSAGE_CURRENT:
         case PREF_NOTIFY_ROOM_CURRENT:
+        case PREF_NOTIFY_TYPING:
         case PREF_NOTIFY_TYPING_CURRENT:
+        case PREF_NOTIFY_SUB:
+        case PREF_NOTIFY_INVITE:
         case PREF_SPLASH:
         case PREF_OCCUPANTS:
         case PREF_MUC_PRIVILEGES:
         case PREF_PRESENCE:
         case PREF_WRAP:
         case PREF_INPBLOCK_DYNAMIC:
+        case PREF_RESOURCE_TITLE:
+        case PREF_RESOURCE_MESSAGE:
+        case PREF_ROSTER:
+        case PREF_ROSTER_OFFLINE:
+        case PREF_ROSTER_RESOURCE:
             return TRUE;
         default:
             return FALSE;
@@ -715,7 +721,7 @@ _get_default_string(preference_t pref)
     {
         case PREF_AUTOAWAY_MODE:
         case PREF_NOTIFY_ROOM:
-            return "off";
+            return "on";
         case PREF_OTR_LOG:
             return "redact";
         case PREF_OTR_POLICY:
@@ -725,9 +731,11 @@ _get_default_string(preference_t pref)
         case PREF_STATUSES_MUC:
             return "all";
         case PREF_ROSTER_BY:
-            return "none";
+            return "presence";
         case PREF_TIME:
             return "%H:%M:%S";
+        case PREF_TIME_STATUSBAR:
+            return "%H:%M";
         default:
             return NULL;
     }

@@ -1,7 +1,7 @@
 /*
  * otrlibv4.c
  *
- * Copyright (C) 2012 - 2014 James Booth <boothj5@gmail.com>
+ * Copyright (C) 2012 - 2015 James Booth <boothj5@gmail.com>
  *
  * This file is part of Profanity.
  *
@@ -113,12 +113,57 @@ cb_handle_msg_event(void *opdata, OtrlMessageEvent msg_event,
     ConnContext *context, const char *message,
     gcry_error_t err)
 {
-    if (err != 0) {
-        if (message != NULL) {
-            cons_show_error("%s", message);
-        } else {
-            cons_show_error("OTR error event with no message.");
-        }
+    GString *err_msg;
+    switch (msg_event)
+    {
+        case OTRL_MSGEVENT_ENCRYPTION_REQUIRED:
+            ui_handle_otr_error(context->username, "OTR: Policy requires encryption, but attempting to send an unencrypted message.");
+            break;
+        case OTRL_MSGEVENT_ENCRYPTION_ERROR:
+             ui_handle_otr_error(context->username, "OTR: Error occured while encrypting a message, message not sent.");
+            break;
+        case OTRL_MSGEVENT_CONNECTION_ENDED:
+            ui_handle_otr_error(context->username, "OTR: Message not sent because contact has ended the private conversation.");
+            break;
+        case OTRL_MSGEVENT_SETUP_ERROR:
+            ui_handle_otr_error(context->username, "OTR: A private conversation could not be set up.");
+            break;
+        case OTRL_MSGEVENT_MSG_REFLECTED:
+            ui_handle_otr_error(context->username, "OTR: Received our own OTR message.");
+            break;
+        case OTRL_MSGEVENT_MSG_RESENT:
+            ui_handle_otr_error(context->username, "OTR: The previous message was resent.");
+            break;
+        case OTRL_MSGEVENT_RCVDMSG_NOT_IN_PRIVATE:
+            ui_handle_otr_error(context->username, "OTR: Received an encrypted message but no private connection established.");
+            break;
+        case OTRL_MSGEVENT_RCVDMSG_UNREADABLE:
+            ui_handle_otr_error(context->username, "OTR: Cannot read the received message.");
+            break;
+        case OTRL_MSGEVENT_RCVDMSG_MALFORMED:
+            ui_handle_otr_error(context->username, "OTR: The message received contains malformed data.");
+            break;
+        case OTRL_MSGEVENT_RCVDMSG_GENERAL_ERR:
+            err_msg = g_string_new("OTR: Received error: ");
+            g_string_append(err_msg, message);
+            g_string_append(err_msg, ".");
+            ui_handle_otr_error(context->username, err_msg->str);
+            g_string_free(err_msg, TRUE);
+            break;
+        case OTRL_MSGEVENT_RCVDMSG_UNENCRYPTED:
+            err_msg = g_string_new("OTR: Received an unencrypted message: ");
+            g_string_append(err_msg, message);
+            ui_handle_otr_error(context->username, err_msg->str);
+            g_string_free(err_msg, TRUE);
+            break;
+        case OTRL_MSGEVENT_RCVDMSG_UNRECOGNIZED:
+            ui_handle_otr_error(context->username, "OTR: Cannot recognize the type of message received.");
+            break;
+        case OTRL_MSGEVENT_RCVDMSG_FOR_OTHER_INSTANCE:
+            ui_handle_otr_error(context->username, "OTR: Received and discarded a message intended for another instance.");
+            break;
+        default:
+            break;
     }
 }
 
@@ -208,7 +253,7 @@ otrlib_end_session(OtrlUserState user_state, const char * const recipient, char 
     ConnContext *context = otrl_context_find(user_state, recipient, jid, "xmpp",
         OTRL_INSTAG_MASTER, 0, NULL, NULL, NULL);
 
-    if (context != NULL) {
+    if (context) {
         otrl_message_disconnect(user_state, ops, NULL, jid, "xmpp", recipient, 0);
     }
 }

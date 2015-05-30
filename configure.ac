@@ -1,7 +1,7 @@
 #                                               -*- Autoconf -*-
 # Process this file with autoconf to produce a configure script.
 
-AC_INIT([profanity], [0.4.6], [boothj5web@gmail.com])
+AC_INIT([profanity], [0.4.7], [boothj5web@gmail.com])
 AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_SRCDIR([src/main.c])
 AC_CONFIG_HEADERS([src/config.h])
@@ -34,6 +34,8 @@ AC_DEFINE_UNQUOTED([PACKAGE_STATUS], ["$PACKAGE_STATUS"], [Status of this build]
 
 AS_IF([test "x$PLATFORM" = xcygwin],
     [AC_DEFINE([PLATFORM_CYGWIN], [1], [Cygwin])])
+AS_IF([test "x$PLATFORM" = xosx],
+    [AC_DEFINE([PLATFORM_OSX], [1], [OSx])])
 
 ### Options
 AC_ARG_ENABLE([notifications],
@@ -134,10 +136,23 @@ PKG_CHECK_MODULES([glib], [glib-2.0 >= 2.26], [],
 PKG_CHECK_MODULES([curl], [libcurl], [],
     [AC_MSG_ERROR([libcurl is required for profanity])])
 
+AS_IF([test "x$PLATFORM" != xosx],
+    [AC_CHECK_LIB([readline], [main], [],
+        [AC_MSG_ERROR([libreadline is required for profanity])])],
+    [AC_CHECK_FILE([/usr/local/opt/readline/lib],
+        [LIBS="-lreadline $LIBS"
+            AM_CPPFLAGS="-I/usr/local/opt/readline/include $AM_CPPFLAGS"
+            AM_LDFLAGS="-L/usr/local/opt/readline/lib $AM_LDFLAGS"
+            AC_SUBST(AM_LDFLAGS)],
+        [AC_MSG_ERROR([libreadline is required for profanity])])])
+
+AC_CHECK_LIB([uuid], [uuid_generate], [],
+    [AC_MSG_ERROR([libuuid is required for profanity])])
+
 AS_IF([test "x$PLATFORM" = xosx], [LIBS="-lcurl $LIBS"])
 
 ### Check for desktop notification support
-### Linux requires libnotify
+### Linux/FreeBSD require libnotify
 ### Windows uses native OS calls
 ### OSX requires terminal-notifier
 
@@ -150,7 +165,7 @@ AS_IF([test "x$PLATFORM" = xosx],
                     [AC_MSG_ERROR([terminal-notifier not found, required for desktop notifications.])],
                     [AC_MSG_NOTICE([Desktop notifications not supported.])])],
                 [AC_DEFINE([HAVE_OSXNOTIFY], [1], [terminal notifier])])])],
-    [test "x$PLATFORM" = xnix],
+    [test "x$PLATFORM" = xnix -o "x$PLATFORM" = xfreebsd],
         [AS_IF([test "x$enable_notifications" != xno],
             [PKG_CHECK_MODULES([libnotify], [libnotify],
                 [AC_DEFINE([HAVE_LIBNOTIFY], [1], [libnotify module])],

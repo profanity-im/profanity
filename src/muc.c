@@ -1,7 +1,7 @@
 /*
  * muc.c
  *
- * Copyright (C) 2012 - 2014 James Booth <boothj5@gmail.com>
+ * Copyright (C) 2012 - 2015 James Booth <boothj5@gmail.com>
  *
  * This file is part of Profanity.
  *
@@ -62,9 +62,11 @@ typedef struct _muc_room_t {
     Autocomplete jid_ac;
     GHashTable *nick_changes;
     gboolean roster_received;
+    muc_member_type_t member_type;
 } ChatRoom;
 
 GHashTable *rooms = NULL;
+GHashTable *invite_passwords = NULL;
 Autocomplete invite_ac;
 
 static void _free_room(ChatRoom *room);
@@ -82,6 +84,7 @@ muc_init(void)
 {
     invite_ac = autocomplete_new();
     rooms = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, (GDestroyNotify)_free_room);
+    invite_passwords = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, g_free);
 }
 
 void
@@ -89,19 +92,25 @@ muc_close(void)
 {
     autocomplete_free(invite_ac);
     g_hash_table_destroy(rooms);
+    g_hash_table_destroy(invite_passwords);
     rooms = NULL;
+    invite_passwords = NULL;
 }
 
 void
-muc_invites_add(const char * const room)
+muc_invites_add(const char * const room, const char * const password)
 {
     autocomplete_add(invite_ac, room);
+    if (password) {
+        g_hash_table_replace(invite_passwords, strdup(room), strdup(password));
+    }
 }
 
 void
 muc_invites_remove(const char * const room)
 {
     autocomplete_remove(invite_ac, room);
+    g_hash_table_remove(invite_passwords, room);
 }
 
 gint
@@ -114,6 +123,12 @@ GSList *
 muc_invites(void)
 {
     return autocomplete_create_list(invite_ac);
+}
+
+char *
+muc_invite_password(const char * const room)
+{
+    return g_hash_table_lookup(invite_passwords, room);
 }
 
 gboolean
@@ -150,6 +165,7 @@ void
 muc_invites_clear(void)
 {
     autocomplete_clear(invite_ac);
+    g_hash_table_remove_all(invite_passwords);
 }
 
 void
@@ -177,6 +193,7 @@ muc_join(const char * const room, const char * const nick,
     new_room->roster_received = FALSE;
     new_room->pending_nick_change = FALSE;
     new_room->autojoin = autojoin;
+    new_room->member_type = MUC_MEMBER_TYPE_UNKNOWN;
 
     g_hash_table_insert(rooms, strdup(room), new_room);
 }
@@ -205,6 +222,19 @@ muc_set_requires_config(const char * const room, gboolean val)
     ChatRoom *chat_room = g_hash_table_lookup(rooms, room);
     if (chat_room) {
         chat_room->pending_config = val;
+    }
+}
+
+void
+muc_set_features(const char * const room, GSList *features)
+{
+    ChatRoom *chat_room = g_hash_table_lookup(rooms, room);
+    if (chat_room && features) {
+        if (g_slist_find_custom(features, "muc_membersonly", (GCompareFunc)g_strcmp0)) {
+            chat_room->member_type = MUC_MEMBER_TYPE_MEMBERS_ONLY;
+        } else {
+            chat_room->member_type = MUC_MEMBER_TYPE_PUBLIC;
+        }
     }
 }
 
@@ -315,7 +345,7 @@ muc_nick_change_pending(const char * const room)
 }
 
 /*
- * Change the current nuck name for the room, call once
+ * Change the current nick name for the room, call once
  * the service has responded
  */
 void
@@ -763,6 +793,18 @@ muc_set_affiliation(const char * const room, const char * const affiliation)
     }
 }
 
+muc_member_type_t
+muc_member_type(const char * const room)
+{
+    ChatRoom *chat_room = g_hash_table_lookup(rooms, room);
+    if (chat_room) {
+        return chat_room->member_type;
+    } else {
+        return MUC_MEMBER_TYPE_UNKNOWN;
+    }
+}
+
+
 static void
 _free_room(ChatRoom *room)
 {
@@ -790,16 +832,10 @@ _free_room(ChatRoom *room)
 static
 gint _compare_occupants(Occupant *a, Occupant *b)
 {
-    const char * utf8_str_a = a->nick;
-    const char * utf8_str_b = b->nick;
+    const char * utf8_str_a = a->nick_collate_key;
+    const char * utf8_str_b = b->nick_collate_key;
 
-    gchar *key_a = g_utf8_collate_key(utf8_str_a, -1);
-    gchar *key_b = g_utf8_collate_key(utf8_str_b, -1);
-
-    gint result = g_strcmp0(key_a, key_b);
-
-    g_free(key_a);
-    g_free(key_b);
+    gint result = g_strcmp0(utf8_str_a, utf8_str_b);
 
     return result;
 }
@@ -905,8 +941,10 @@ _muc_occupant_new(const char *const nick, const char * const jid, muc_role_t rol
 
     if (nick) {
         occupant->nick = strdup(nick);
+        occupant->nick_collate_key = g_utf8_collate_key(occupant->nick, -1);
     } else {
         occupant->nick = NULL;
+        occupant->nick_collate_key = NULL;
     }
 
     if (jid) {
@@ -934,6 +972,7 @@ _occupant_free(Occupant *occupant)
 {
     if (occupant) {
         free(occupant->nick);
+        free(occupant->nick_collate_key);
         free(occupant->jid);
         free(occupant->status);
         free(occupant);

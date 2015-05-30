@@ -1,7 +1,7 @@
 /*
  * chat_session.c
  *
- * Copyright (C) 2012 - 2014 James Booth <boothj5@gmail.com>
+ * Copyright (C) 2012 - 2015 James Booth <boothj5@gmail.com>
  *
  * This file is part of Profanity.
  *
@@ -64,7 +64,7 @@ _chat_session_new(const char * const barejid, const char * const resource,
 static void
 _chat_session_free(ChatSession *session)
 {
-    if (session != NULL) {
+    if (session) {
         free(session->barejid);
         free(session->resource);
         free(session);
@@ -81,7 +81,7 @@ chat_sessions_init(void)
 void
 chat_sessions_clear(void)
 {
-    if (sessions != NULL)
+    if (sessions)
         g_hash_table_remove_all(sessions);
 }
 
@@ -141,7 +141,7 @@ chat_session_recipient_active(const char * const barejid, const char * const res
         // session exists with resource, update chat_states
         if (g_strcmp0(session->resource, resource) == 0) {
             session->send_states = send_states;
-        // session exists with differet resource and no override, replace
+        // session exists with different resource and no override, replace
         } else if (!session->resource_override) {
             _chat_session_new(barejid, resource, FALSE, send_states);
         }

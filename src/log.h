@@ -1,7 +1,7 @@
 /*
  * log.h
  *
- * Copyright (C) 2012 - 2014 James Booth <boothj5@gmail.com>
+ * Copyright (C) 2012 - 2015 James Booth <boothj5@gmail.com>
  *
  * This file is part of Profanity.
  *
@@ -64,8 +64,14 @@ void log_msg(log_level_t level, const char * const area,
 log_level_t log_level_from_string(char *log_level);
 
 void chat_log_init(void);
-void chat_log_chat(const gchar * const login, gchar *other,
-    const gchar * const msg, chat_log_direction_t direction, GTimeVal *tv_stamp);
+
+void chat_log_msg_out(const char * const barejid, const char * const msg);
+void chat_log_otr_msg_out(const char * const barejid, const char * const msg);
+
+void chat_log_msg_in(const char * const barejid, const char * const msg);
+void chat_log_msg_in_delayed(const char * const barejid, const char * msg, GTimeVal *tv_stamp);
+void chat_log_otr_msg_in(const char * const barejid, const char * const msg, gboolean was_decrypted);
+
 void chat_log_close(void);
 GSList * chat_log_get_previous(const gchar * const login,
     const gchar * const recipient);

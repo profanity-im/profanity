@@ -1,7 +1,7 @@
 /*
  * statusbar.c
  *
- * Copyright (C) 2012 - 2014 James Booth <boothj5@gmail.com>
+ * Copyright (C) 2012 - 2015 James Booth <boothj5@gmail.com>
  *
  * This file is part of Profanity.
  *
@@ -48,6 +48,7 @@
 #include "ui/ui.h"
 #include "ui/statusbar.h"
 #include "ui/inputwin.h"
+#include "config/preferences.h"
 
 #define TIME_CHECK 60000000
 
@@ -94,7 +95,7 @@ create_status_bar(void)
     mvwprintw(status_bar, 0, cols - 34 + ((current - 1) * 3), bracket);
     wattroff(status_bar, bracket_attrs);
 
-    if (last_time != NULL) {
+    if (last_time) {
         g_date_time_unref(last_time);
     }
     last_time = g_date_time_new_now_local();
@@ -126,10 +127,17 @@ status_bar_resize(void)
     mvwprintw(status_bar, 0, cols - 34 + ((current - 1) * 3), bracket);
     wattroff(status_bar, bracket_attrs);
 
-    if (message != NULL) {
-        mvwprintw(status_bar, 0, 10, message);
+    if (message) {
+        char *time_pref = prefs_get_string(PREF_TIME_STATUSBAR);
+        if (g_strcmp0(time_pref, "minutes") == 0) {
+            mvwprintw(status_bar, 0, 10, message);
+        } else if (g_strcmp0(time_pref, "seconds") == 0) {
+            mvwprintw(status_bar, 0, 13, message);
+        } else {
+            mvwprintw(status_bar, 0, 1, message);
+        }
     }
-    if (last_time != NULL) {
+    if (last_time) {
         g_date_time_unref(last_time);
     }
     last_time = g_date_time_new_now_local();
@@ -192,7 +200,7 @@ status_bar_inactive(const int win)
             is_new[11] = TRUE;
             _mark_new(11);
 
-        // still have active winsows
+        // still have active windows
         } else if (g_hash_table_size(remaining_active) != 0) {
             is_active[11] = TRUE;
             is_new[11] = FALSE;
@@ -241,7 +249,7 @@ status_bar_active(const int win)
             _mark_active(11);
         }
 
-    // visible winsow indicators
+    // visible window indicators
     } else {
         is_active[true_win] = TRUE;
         is_new[true_win] = FALSE;
@@ -289,11 +297,19 @@ status_bar_print_message(const char * const msg)
 {
     werase(status_bar);
 
-    if (message != NULL) {
+    if (message) {
         free(message);
     }
     message = strdup(msg);
-    mvwprintw(status_bar, 0, 10, message);
+
+    char *time_pref = prefs_get_string(PREF_TIME_STATUSBAR);
+    if (g_strcmp0(time_pref, "minutes") == 0) {
+        mvwprintw(status_bar, 0, 10, message);
+    } else if (g_strcmp0(time_pref, "seconds") == 0) {
+        mvwprintw(status_bar, 0, 13, message);
+    } else {
+        mvwprintw(status_bar, 0, 1, message);
+    }
 
     int cols = getmaxx(stdscr);
     int bracket_attrs = theme_attrs(THEME_STATUS_BRACKET);
@@ -309,7 +325,7 @@ status_bar_print_message(const char * const msg)
 void
 status_bar_clear(void)
 {
-    if (message != NULL) {
+    if (message) {
         free(message);
         message = NULL;
     }
@@ -330,7 +346,7 @@ status_bar_clear(void)
 void
 status_bar_clear_message(void)
 {
-    if (message != NULL) {
+    if (message) {
         free(message);
         message = NULL;
     }
@@ -412,23 +428,37 @@ _mark_inactive(int num)
 static void
 _status_bar_draw(void)
 {
-    if (last_time != NULL) {
+    if (last_time) {
         g_date_time_unref(last_time);
     }
     last_time = g_date_time_new_now_local();
-    gchar *date_fmt = g_date_time_format(last_time, "%H:%M");
-    assert(date_fmt != NULL);
 
     int bracket_attrs = theme_attrs(THEME_STATUS_BRACKET);
 
-    wattron(status_bar, bracket_attrs);
-    mvwaddch(status_bar, 0, 1, '[');
-    wattroff(status_bar, bracket_attrs);
-    mvwprintw(status_bar, 0, 2, date_fmt);
-    wattron(status_bar, bracket_attrs);
-    mvwaddch(status_bar, 0, 7, ']');
-    wattroff(status_bar, bracket_attrs);
-    g_free(date_fmt);
+    char *time_pref = prefs_get_string(PREF_TIME_STATUSBAR);
+    if (g_strcmp0(time_pref, "minutes") == 0) {
+        gchar *date_fmt = g_date_time_format(last_time, "%H:%M");
+        assert(date_fmt != NULL);
+        wattron(status_bar, bracket_attrs);
+        mvwaddch(status_bar, 0, 1, '[');
+        wattroff(status_bar, bracket_attrs);
+        mvwprintw(status_bar, 0, 2, date_fmt);
+        wattron(status_bar, bracket_attrs);
+        mvwaddch(status_bar, 0, 7, ']');
+        wattroff(status_bar, bracket_attrs);
+        g_free(date_fmt);
+    } else if (g_strcmp0(time_pref, "seconds") == 0) {
+        gchar *date_fmt = g_date_time_format(last_time, "%H:%M:%S");
+        assert(date_fmt != NULL);
+        wattron(status_bar, bracket_attrs);
+        mvwaddch(status_bar, 0, 1, '[');
+        wattroff(status_bar, bracket_attrs);
+        mvwprintw(status_bar, 0, 2, date_fmt);
+        wattron(status_bar, bracket_attrs);
+        mvwaddch(status_bar, 0, 10, ']');
+        wattroff(status_bar, bracket_attrs);
+        g_free(date_fmt);
+    }
 
     _update_win_statuses();
     wnoutrefresh(status_bar);

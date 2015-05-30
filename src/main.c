@@ -1,7 +1,7 @@
 /*
  * main.c
  *
- * Copyright (C) 2012 - 2014 James Booth <boothj5@gmail.com>
+ * Copyright (C) 2012 - 2015 James Booth <boothj5@gmail.com>
  *
  * This file is part of Profanity.
  *
@@ -40,13 +40,7 @@
 #endif
 
 #include "profanity.h"
-
-#ifdef HAVE_LIBOTR
-#include "otr/otr.h"
-#endif
-#include "xmpp/xmpp.h"
-
-#include "ui/ui.h"
+#include "command/command.h"
 
 static gboolean disable_tls = FALSE;
 static gboolean version = FALSE;
@@ -56,6 +50,11 @@ static char *account_name = NULL;
 int
 main(int argc, char **argv)
 {
+    if (argc == 2 && g_strcmp0(argv[1], "docgen") == 0 && g_strcmp0(PACKAGE_STATUS, "development") == 0) {
+        command_docgen();
+        return 0;
+    }
+
     static GOptionEntry entries[] =
     {
         { "version", 'v', 0, G_OPTION_ARG_NONE, &version, "Show version information", NULL },
@@ -90,7 +89,7 @@ main(int argc, char **argv)
             g_print("Profanity, version %s\n", PACKAGE_VERSION);
         }
 
-        g_print("Copyright (C) 2012 - 2014 James Booth <%s>.\n", PACKAGE_BUGREPORT);
+        g_print("Copyright (C) 2012 - 2015 James Booth <%s>.\n", PACKAGE_BUGREPORT);
         g_print("License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>\n");
         g_print("\n");
         g_print("This is free software; you are free to change and redistribute it.\n");

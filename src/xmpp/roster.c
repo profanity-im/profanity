@@ -1,7 +1,7 @@
 /*
  * roster.c
  *
- * Copyright (C) 2012 - 2014 James Booth <boothj5@gmail.com>
+ * Copyright (C) 2012 - 2015 James Booth <boothj5@gmail.com>
  *
  * This file is part of Profanity.
  *
@@ -41,7 +41,9 @@
 
 #include "log.h"
 #include "profanity.h"
-#include "server_events.h"
+#include "ui/ui.h"
+#include "event/server_events.h"
+#include "event/client_events.h"
 #include "tools/autocomplete.h"
 #include "xmpp/connection.h"
 #include "xmpp/roster.h"
@@ -131,7 +133,7 @@ roster_send_add_to_group(const char * const group, PContact contact)
 {
     GSList *groups = p_contact_groups(contact);
     GSList *new_groups = NULL;
-    while (groups != NULL) {
+    while (groups) {
         new_groups = g_slist_append(new_groups, strdup(groups->data));
         groups = g_slist_next(groups);
     }
@@ -141,7 +143,7 @@ roster_send_add_to_group(const char * const group, PContact contact)
     char *unique_id = create_unique_id(NULL);
     GroupData *data = malloc(sizeof(GroupData));
     data->group = strdup(group);
-    if (p_contact_name(contact) != NULL) {
+    if (p_contact_name(contact)) {
         data->name = strdup(p_contact_name(contact));
     } else {
         data->name = strdup(p_contact_barejid(contact));
@@ -161,9 +163,9 @@ static int
 _group_add_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
     void * const userdata)
 {
-    if (userdata != NULL) {
+    if (userdata) {
         GroupData *data = userdata;
-        handle_group_add(data->name, data->group);
+        ui_group_added(data->name, data->group);
         free(data->name);
         free(data->group);
         free(userdata);
@@ -176,7 +178,7 @@ roster_send_remove_from_group(const char * const group, PContact contact)
 {
     GSList *groups = p_contact_groups(contact);
     GSList *new_groups = NULL;
-    while (groups != NULL) {
+    while (groups) {
         if (strcmp(groups->data, group) != 0) {
             new_groups = g_slist_append(new_groups, strdup(groups->data));
         }
@@ -190,7 +192,7 @@ roster_send_remove_from_group(const char * const group, PContact contact)
     char *unique_id = create_unique_id(NULL);
     GroupData *data = malloc(sizeof(GroupData));
     data->group = strdup(group);
-    if (p_contact_name(contact) != NULL) {
+    if (p_contact_name(contact)) {
         data->name = strdup(p_contact_name(contact));
     } else {
         data->name = strdup(p_contact_barejid(contact));
@@ -208,9 +210,9 @@ static int
 _group_remove_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
     void * const userdata)
 {
-    if (userdata != NULL) {
+    if (userdata) {
         GroupData *data = userdata;
-        handle_group_remove(data->name, data->group);
+        ui_group_removed(data->name, data->group);
         free(data->name);
         free(data->group);
         free(userdata);
@@ -234,13 +236,14 @@ _roster_set_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
     // if from attribute exists and it is not current users barejid, ignore push
     Jid *my_jid = jid_create(jabber_get_fulljid());
     const char *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
-    if ((from != NULL) && (strcmp(from, my_jid->barejid) != 0)) {
+    if (from && (strcmp(from, my_jid->barejid) != 0)) {
         jid_destroy(my_jid);
         return 1;
     }
     jid_destroy(my_jid);
 
     const char *barejid = xmpp_stanza_get_attribute(item, STANZA_ATTR_JID);
+    gchar *barejid_lower = g_utf8_strdown(barejid, -1);
     const char *name = xmpp_stanza_get_attribute(item, STANZA_ATTR_NAME);
     const char *sub = xmpp_stanza_get_attribute(item, STANZA_ATTR_SUBSCRIPTION);
     const char *ask = xmpp_stanza_get_attribute(item, STANZA_ATTR_ASK);
@@ -254,82 +257,82 @@ _roster_set_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
     if (g_strcmp0(sub, "remove") == 0) {
         // remove barejid and name
         if (name == NULL) {
-            name = barejid;
+            name = barejid_lower;
         }
-
-        roster_remove(name, barejid);
-
-        handle_roster_remove(barejid);
+        roster_remove(name, barejid_lower);
+        ui_roster_remove(barejid_lower);
 
     // otherwise update local roster
     } else {
 
         // check for pending out subscriptions
         gboolean pending_out = FALSE;
-        if ((ask != NULL) && (strcmp(ask, "subscribe") == 0)) {
+        if (ask && (strcmp(ask, "subscribe") == 0)) {
             pending_out = TRUE;
         }
 
         GSList *groups = _get_groups_from_item(item);
 
         // update the local roster
-        PContact contact = roster_get_contact(barejid);
+        PContact contact = roster_get_contact(barejid_lower);
         if (contact == NULL) {
-            gboolean added = roster_add(barejid, name, groups, sub, pending_out);
+            gboolean added = roster_add(barejid_lower, name, groups, sub, pending_out);
             if (added) {
-                handle_roster_add(barejid, name);
+                ui_roster_add(barejid_lower, name);
             }
         } else {
-            handle_roster_update(barejid, name, groups, sub, pending_out);
+            sv_ev_roster_update(barejid_lower, name, groups, sub, pending_out);
         }
     }
+
+    g_free(barejid_lower);
 
     return 1;
 }
 
 static int
-_roster_result_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
-    void * const userdata)
+_roster_result_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, void * const userdata)
 {
     const char *id = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_ID);
 
+    if (g_strcmp0(id, "roster") != 0) {
+        return 1;
+    }
+
     // handle initial roster response
-    if (g_strcmp0(id, "roster") == 0) {
-        xmpp_stanza_t *query = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_QUERY);
-        xmpp_stanza_t *item = xmpp_stanza_get_children(query);
+    xmpp_stanza_t *query = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_QUERY);
+    xmpp_stanza_t *item = xmpp_stanza_get_children(query);
 
-        while (item != NULL) {
-            const char *barejid = xmpp_stanza_get_attribute(item, STANZA_ATTR_JID);
-            const char *name = xmpp_stanza_get_attribute(item, STANZA_ATTR_NAME);
-            const char *sub = xmpp_stanza_get_attribute(item, STANZA_ATTR_SUBSCRIPTION);
+    while (item) {
+        const char *barejid = xmpp_stanza_get_attribute(item, STANZA_ATTR_JID);
+        gchar *barejid_lower = g_utf8_strdown(barejid, -1);
+        const char *name = xmpp_stanza_get_attribute(item, STANZA_ATTR_NAME);
+        const char *sub = xmpp_stanza_get_attribute(item, STANZA_ATTR_SUBSCRIPTION);
 
-            // do not set nickname to empty string, set to NULL instead
-            if (name && (strlen(name) == 0)) {
-                name = NULL;
-            }
+        // do not set nickname to empty string, set to NULL instead
+        if (name && (strlen(name) == 0)) name = NULL;
 
-            gboolean pending_out = FALSE;
-            const char *ask = xmpp_stanza_get_attribute(item, STANZA_ATTR_ASK);
-            if (g_strcmp0(ask, "subscribe") == 0) {
-                pending_out = TRUE;
-            }
-
-            GSList *groups = _get_groups_from_item(item);
-
-            gboolean added = roster_add(barejid, name, groups, sub, pending_out);
-
-            if (!added) {
-                log_warning("Attempt to add contact twice: %s", barejid);
-            }
-
-            item = xmpp_stanza_get_next(item);
+        gboolean pending_out = FALSE;
+        const char *ask = xmpp_stanza_get_attribute(item, STANZA_ATTR_ASK);
+        if (g_strcmp0(ask, "subscribe") == 0) {
+            pending_out = TRUE;
         }
 
-        handle_roster_received();
+        GSList *groups = _get_groups_from_item(item);
 
-        resource_presence_t conn_presence = accounts_get_login_presence(jabber_get_account_name());
-        presence_update(conn_presence, NULL, 0);
+        gboolean added = roster_add(barejid_lower, name, groups, sub, pending_out);
+        if (!added) {
+            log_warning("Attempt to add contact twice: %s", barejid_lower);
+        }
+
+        g_free(barejid_lower);
+        item = xmpp_stanza_get_next(item);
     }
+
+    sv_ev_roster_received();
+
+    resource_presence_t conn_presence = accounts_get_login_presence(jabber_get_account_name());
+    cl_ev_presence_send(conn_presence, NULL, 0);
 
     return 1;
 }
@@ -340,10 +343,10 @@ _get_groups_from_item(xmpp_stanza_t *item)
     GSList *groups = NULL;
     xmpp_stanza_t *group_element = xmpp_stanza_get_children(item);
 
-    while (group_element != NULL) {
+    while (group_element) {
         if (strcmp(xmpp_stanza_get_name(group_element), STANZA_NAME_GROUP) == 0) {
             char *groupname = xmpp_stanza_get_text(group_element);
-            if (groupname != NULL) {
+            if (groupname) {
                 groups = g_slist_append(groups, groupname);
             }
         }
