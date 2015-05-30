@@ -14,6 +14,7 @@
 #include "test_ping.h"
 #include "test_rooms.h"
 #include "test_presence.h"
+#include "test_message.h"
 
 int main(int argc, char* argv[]) {
 
@@ -86,6 +87,13 @@ int main(int argc, char* argv[]) {
             init_prof_test,
             close_prof_test),
         unit_test_setup_teardown(presence_received,
+            init_prof_test,
+            close_prof_test),
+
+        unit_test_setup_teardown(message_send,
+            init_prof_test,
+            close_prof_test),
+        unit_test_setup_teardown(message_receive,
             init_prof_test,
             close_prof_test),
     };
