@@ -23,6 +23,7 @@ install:
     - sudo make install
     - cd ../..
     - rm -rf cmocka-1.0.0
+    - sudo apt-get install libmicrohttpd-dev
     - git clone git://github.com/boothj5/stabber.git
     - cd stabber
     - ./bootstrap.sh
