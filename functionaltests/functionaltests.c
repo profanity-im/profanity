@@ -95,7 +95,7 @@ int main(int argc, char* argv[]) {
             close_prof_test),
         unit_test_setup_teardown(message_receive,
             init_prof_test,
-            close_prof_test),
+            close_prof_test)
     };
 
     return run_tests(all_tests);
