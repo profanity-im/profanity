@@ -33,7 +33,7 @@ connect_jid_requests_roster(void **state)
 void
 connect_jid_sends_presence_after_receiving_roster(void **state)
 {
-    stbbr_for("roster",
+    stbbr_for_id("roster",
         "<iq id=\"roster\" type=\"result\" to=\"stabber@localhost/profanity\">"
             "<query xmlns=\"jabber:iq:roster\" ver=\"362\">"
                 "<item jid=\"buddy1@localhost\" subscription=\"both\" name=\"Buddy1\"/>"
@@ -76,7 +76,7 @@ connect_bad_password(void **state)
 void
 connect_shows_presence_updates(void **state)
 {
-    stbbr_for("roster",
+    stbbr_for_id("roster",
         "<iq id=\"roster\" type=\"result\" to=\"stabber@localhost/profanity\">"
             "<query xmlns=\"jabber:iq:roster\" ver=\"362\">"
                 "<item jid=\"buddy1@localhost\" subscription=\"both\" name=\"Buddy1\"/>"
@@ -85,7 +85,7 @@ connect_shows_presence_updates(void **state)
         "</iq>"
     );
 
-    stbbr_for("prof_presence_1",
+    stbbr_for_id("prof_presence_1",
         "<presence to=\"stabber@localhost\" from=\"buddy1@localhost/mobile\">"
             "<show>dnd</show>"
             "<status>busy!</status>"

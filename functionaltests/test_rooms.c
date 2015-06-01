@@ -14,7 +14,7 @@
 void
 rooms_query(void **state)
 {
-    stbbr_for("confreq",
+    stbbr_for_id("confreq",
         "<iq id=\"confreq\" type=\"result\" to=\"stabber@localhost/profanity\" from=\"conference.localhost\">"
             "<query xmlns=\"http://jabber.org/protocol/disco#items\">"
                 "<item jid=\"chatroom@conference.localhost\" name=\"A chat room\"/>"

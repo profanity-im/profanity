@@ -230,7 +230,7 @@ presence_includes_priority(void **state)
 void
 presence_received(void **state)
 {
-    stbbr_for("roster",
+    stbbr_for_id("roster",
         "<iq id=\"roster\" type=\"result\" to=\"stabber@localhost/profanity\">"
             "<query xmlns=\"jabber:iq:roster\" ver=\"362\">"
                 "<item jid=\"buddy1@localhost\" subscription=\"both\" name=\"Buddy1\"/>"

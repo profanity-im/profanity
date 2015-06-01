@@ -14,10 +14,10 @@
 void
 ping_multiple(void **state)
 {
-    stbbr_for("prof_ping_1",
+    stbbr_for_id("prof_ping_1",
         "<iq id=\"prof_ping_1\" type=\"result\" to=\"stabber@localhost/profanity\"/>"
     );
-    stbbr_for("prof_ping_2",
+    stbbr_for_id("prof_ping_2",
         "<iq id=\"prof_ping_2\" type=\"result\" to=\"stabber@localhost/profanity\"/>"
     );
 
