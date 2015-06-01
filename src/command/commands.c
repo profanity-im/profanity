@@ -689,7 +689,11 @@ cmd_wins(gchar **args, struct cmd_help_t help)
     if (args[0] == NULL) {
         cons_show_wins();
     } else if (strcmp(args[0], "tidy") == 0) {
-        ui_tidy_wins();
+        if ( ui_tidy_wins() ) {
+            cons_show("Windows tidied.");
+        } else {
+            cons_show("No tidy needed.");
+        }
     } else if (strcmp(args[0], "prune") == 0) {
         ui_prune_wins();
     } else if (strcmp(args[0], "swap") == 0) {
@@ -722,8 +726,6 @@ gboolean
 cmd_winstidy(gchar **args, struct cmd_help_t help)
 {
     gboolean result = _cmd_set_boolean_preference(args[0], help, "Wins Auto Tidy", PREF_WINS_AUTO_TIDY);
-
-    wins_resize_all();
 
     return result;
 }
@@ -3254,6 +3256,7 @@ cmd_close(gchar **args, struct cmd_help_t help)
 
     // Tidy up the window list.
     if (prefs_get_boolean(PREF_WINS_AUTO_TIDY)) {
+        // TODO: Any benefit of checking the return value?
         ui_tidy_wins();
     }
 

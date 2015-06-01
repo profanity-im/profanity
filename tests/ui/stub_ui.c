@@ -315,7 +315,10 @@ void ui_redraw_all_room_rosters(void) {}
 void ui_show_all_room_rosters(void) {}
 void ui_hide_all_room_rosters(void) {}
 
-void ui_tidy_wins(void) {}
+gboolean ui_tidy_wins(void) {
+    // TODO: I'm assuming it should return true, but lack knowledge about the tests.
+    return TRUE; 
+}
 void ui_prune_wins(void) {}
 gboolean ui_swap_wins(int source_win, int target_win)
 {

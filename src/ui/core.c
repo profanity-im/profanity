@@ -1105,16 +1105,10 @@ ui_close_win(int index)
     status_bar_active(1);
 }
 
-void
+gboolean
 ui_tidy_wins(void)
 {
-    gboolean tidied = wins_tidy();
-
-    if (tidied) {
-        cons_show("Windows tidied.");
-    } else {
-        cons_show("No tidy needed.");
-    }
+     return wins_tidy();
 }
 
 void

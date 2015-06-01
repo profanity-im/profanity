@@ -688,7 +688,7 @@ static struct cmd_t command_defs[] =
         cmd_winstidy, parse_args, 1, 1, &cons_winstidy_setting,
         { "/winstidy on|off", "Auto tidy windows.",
         { "/winstidy on|off",
-          "------------",
+          "---------------",
           "Enable or disable auto window tidy.",
           NULL } } },
 
