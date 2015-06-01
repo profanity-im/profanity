@@ -727,6 +727,10 @@ cmd_winstidy(gchar **args, struct cmd_help_t help)
 {
     gboolean result = _cmd_set_boolean_preference(args[0], help, "Wins Auto Tidy", PREF_WINS_AUTO_TIDY);
 
+    if( result ) {
+        ui_tidy_wins();
+    }
+
     return result;
 }
 
