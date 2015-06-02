@@ -689,7 +689,11 @@ cmd_wins(gchar **args, struct cmd_help_t help)
     if (args[0] == NULL) {
         cons_show_wins();
     } else if (strcmp(args[0], "tidy") == 0) {
-        ui_tidy_wins();
+        if (ui_tidy_wins()) {
+            cons_show("Windows tidied.");
+        } else {
+            cons_show("No tidy needed.");
+        }
     } else if (strcmp(args[0], "prune") == 0) {
         ui_prune_wins();
     } else if (strcmp(args[0], "swap") == 0) {
@@ -716,6 +720,18 @@ cmd_wins(gchar **args, struct cmd_help_t help)
     }
 
     return TRUE;
+}
+
+gboolean
+cmd_winstidy(gchar **args, struct cmd_help_t help)
+{
+    gboolean result = _cmd_set_boolean_preference(args[0], help, "Wins Auto Tidy", PREF_WINS_AUTO_TIDY);
+
+    if (result && g_strcmp0(args[0], "on") == 0) {
+        ui_tidy_wins();
+    }
+
+    return result;
 }
 
 gboolean
@@ -804,7 +820,7 @@ cmd_help(gchar **args, struct cmd_help_t help)
             "/carbons", "/chlog", "/flash", "/gone", "/grlog", "/history", "/intype",
             "/log", "/mouse", "/notify", "/outtype", "/prefs", "/priority",
             "/reconnect", "/roster", "/splash", "/states", "/statuses", "/theme",
-            "/titlebar", "/vercheck", "/privileges", "/occupants", "/presence", "/wrap" };
+            "/titlebar", "/vercheck", "/privileges", "/occupants", "/presence", "/wrap", "/winstidy" };
         _cmd_show_filtered_help("Settings commands", filter, ARRAY_SIZE(filter));
 
     } else if (strcmp(args[0], "navigation") == 0) {
@@ -3241,6 +3257,11 @@ cmd_close(gchar **args, struct cmd_help_t help)
     // close the window
     ui_close_win(index);
     cons_show("Closed window %d", index);
+
+    // Tidy up the window list.
+    if (prefs_get_boolean(PREF_WINS_AUTO_TIDY)) {
+        ui_tidy_wins();
+    }
 
     return TRUE;
 }

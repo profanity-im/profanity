@@ -21,3 +21,4 @@ privileges=false
 presence=false
 intype=false
 otr.warn=false
+wins.autotidy=false

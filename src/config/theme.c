@@ -431,6 +431,7 @@ _load_preferences(void)
     _set_boolean_preference("flash", PREF_FLASH);
     _set_boolean_preference("splash", PREF_SPLASH);
     _set_boolean_preference("wrap", PREF_WRAP);
+    _set_boolean_preference("wins.autotidy", PREF_WINS_AUTO_TIDY);
     _set_string_preference("time", PREF_TIME);
     _set_string_preference("time.statusbar", PREF_TIME_STATUSBAR);
 
