@@ -876,6 +876,15 @@ cons_wrap_setting(void)
 }
 
 void
+cons_winstidy_setting(void)
+{
+    if (prefs_get_boolean(PREF_WINS_AUTO_TIDY))
+        cons_show("Window Auto Tidy (/winstidy)  : ON");
+    else
+        cons_show("Window Auto Tidy (/winstidy)  : OFF");
+}
+
+void
 cons_presence_setting(void)
 {
     if (prefs_get_boolean(PREF_PRESENCE))
@@ -1039,6 +1048,7 @@ cons_show_ui_prefs(void)
     cons_flash_setting();
     cons_splash_setting();
     cons_wrap_setting();
+    cons_winstidy_setting();
     cons_time_setting();
     cons_resource_setting();
     cons_vercheck_setting();
