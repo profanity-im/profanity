@@ -315,7 +315,9 @@ void ui_redraw_all_room_rosters(void) {}
 void ui_show_all_room_rosters(void) {}
 void ui_hide_all_room_rosters(void) {}
 
-void ui_tidy_wins(void) {}
+gboolean ui_tidy_wins(void) {
+    return TRUE;
+}
 void ui_prune_wins(void) {}
 gboolean ui_swap_wins(int source_win, int target_win)
 {
@@ -460,6 +462,7 @@ void cons_occupants_setting(void) {}
 void cons_roster_setting(void) {}
 void cons_presence_setting(void) {}
 void cons_wrap_setting(void) {}
+void cons_winstidy_setting(void) {}
 void cons_time_setting(void) {}
 void cons_mouse_setting(void) {}
 void cons_statuses_setting(void) {}

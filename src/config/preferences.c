@@ -520,6 +520,7 @@ _get_group(preference_t pref)
         case PREF_MUC_PRIVILEGES:
         case PREF_PRESENCE:
         case PREF_WRAP:
+        case PREF_WINS_AUTO_TIDY:
         case PREF_TIME:
         case PREF_TIME_STATUSBAR:
         case PREF_ROSTER:
@@ -667,6 +668,8 @@ _get_key(preference_t pref)
             return "presence";
         case PREF_WRAP:
             return "wrap";
+        case PREF_WINS_AUTO_TIDY:
+            return "wins.autotidy";
         case PREF_TIME:
             return "time";
         case PREF_TIME_STATUSBAR:
@@ -713,6 +716,7 @@ _get_default_boolean(preference_t pref)
         case PREF_MUC_PRIVILEGES:
         case PREF_PRESENCE:
         case PREF_WRAP:
+        case PREF_WINS_AUTO_TIDY:
         case PREF_INPBLOCK_DYNAMIC:
         case PREF_RESOURCE_TITLE:
         case PREF_RESOURCE_MESSAGE:
