@@ -104,7 +104,7 @@ prof_run(const int disable_tls, char *log_level, char *account_name)
 #endif
         plugins_run_timed();
         notify_remind();
-        jabber_process_events();
+        jabber_process_events(10);
         ui_update();
     }
 }

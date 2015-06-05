@@ -207,12 +207,15 @@ theme_close(void)
 {
     if (theme) {
         g_key_file_free(theme);
+        theme = NULL;
     }
     if (theme_loc) {
         g_string_free(theme_loc, TRUE);
+        theme_loc = NULL;
     }
     if (bold_items) {
         g_hash_table_destroy(bold_items);
+        bold_items = NULL;
     }
 }
 

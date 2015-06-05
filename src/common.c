@@ -63,6 +63,8 @@ struct curl_data_t
     size_t size;
 };
 
+static unsigned long unique_id = 0;
+
 static size_t _data_callback(void *ptr, size_t size, size_t nmemb, void *data);
 
 // taken from glib 2.30.3
@@ -475,7 +477,6 @@ xdg_get_data_home(void)
 char *
 create_unique_id(char *prefix)
 {
-    static unsigned long unique_id;
     char *result = NULL;
     GString *result_str = g_string_new("");
 
@@ -489,6 +490,12 @@ create_unique_id(char *prefix)
     g_string_free(result_str, FALSE);
 
     return result;
+}
+
+void
+reset_unique_id(void)
+{
+    unique_id = 0;
 }
 
 char *

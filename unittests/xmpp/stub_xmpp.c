@@ -26,7 +26,7 @@ jabber_conn_status_t jabber_connect_with_account(const ProfAccount * const accou
 
 void jabber_disconnect(void) {}
 void jabber_shutdown(void) {}
-void jabber_process_events(void) {}
+void jabber_process_events(int millis) {}
 const char * jabber_get_fulljid(void)
 {
     return (char *)mock();

@@ -40,7 +40,7 @@ core_sources = \
 	src/plugins/autocompleters.c src/plugins/autocompleters.h
 
 
-tests_sources = \
+unittest_sources = \
 	src/contact.c src/contact.h src/common.c \
 	src/log.h src/profanity.c src/common.h \
 	src/profanity.h src/chat_session.c \
@@ -73,34 +73,43 @@ tests_sources = \
     src/event/server_events.c src/event/server_events.h \
 	src/event/client_events.c src/event/client_events.h \
 	src/event/ui_events.c src/event/ui_events.h \
-	tests/xmpp/stub_xmpp.c \
-	tests/ui/stub_ui.c \
-	tests/log/stub_log.c \
-	tests/config/stub_accounts.c \
-	tests/helpers.c tests/helpers.h \
-	tests/test_cmd_account.c tests/test_cmd_account.h \
-	tests/test_cmd_alias.c tests/test_cmd_alias.h \
-	tests/test_cmd_bookmark.c tests/test_cmd_bookmark.h \
-	tests/test_cmd_connect.c tests/test_cmd_connect.h \
-	tests/test_cmd_join.c tests/test_cmd_join.h \
-	tests/test_cmd_otr.c tests/test_cmd_otr.h \
-	tests/test_cmd_rooms.c tests/test_cmd_rooms.h \
-	tests/test_cmd_roster.c tests/test_cmd_roster.h \
-	tests/test_cmd_statuses.c tests/test_cmd_statuses.h \
-	tests/test_cmd_sub.c tests/test_cmd_sub.h \
-	tests/test_cmd_disconnect.c tests/test_cmd_disconnect.h \
-	tests/test_common.c tests/test_common.h \
-	tests/test_contact.c tests/test_contact.h \
-	tests/test_form.c tests/test_form.h \
-	tests/test_jid.c tests/test_jid.h \
-	tests/test_muc.c tests/test_muc.h \
-	tests/test_parser.c tests/test_parser.h \
-	tests/test_preferences.c tests/test_preferences.h \
-	tests/test_roster_list.c tests/test_roster_list.h \
-	tests/test_server_events.c tests/test_server_events.h \
-	tests/test_autocomplete.c tests/test_autocomplete.h \
-	tests/test_chat_session.c tests/test_chat_session.h \
-	tests/testsuite.c
+	unittests/xmpp/stub_xmpp.c \
+	unittests/ui/stub_ui.c \
+	unittests/log/stub_log.c \
+	unittests/config/stub_accounts.c \
+	unittests/helpers.c unittests/helpers.h \
+	unittests/test_cmd_account.c unittests/test_cmd_account.h \
+	unittests/test_cmd_alias.c unittests/test_cmd_alias.h \
+	unittests/test_cmd_bookmark.c unittests/test_cmd_bookmark.h \
+	unittests/test_cmd_connect.c unittests/test_cmd_connect.h \
+	unittests/test_cmd_join.c unittests/test_cmd_join.h \
+	unittests/test_cmd_otr.c unittests/test_cmd_otr.h \
+	unittests/test_cmd_rooms.c unittests/test_cmd_rooms.h \
+	unittests/test_cmd_roster.c unittests/test_cmd_roster.h \
+	unittests/test_cmd_statuses.c unittests/test_cmd_statuses.h \
+	unittests/test_cmd_sub.c unittests/test_cmd_sub.h \
+	unittests/test_cmd_disconnect.c unittests/test_cmd_disconnect.h \
+	unittests/test_common.c unittests/test_common.h \
+	unittests/test_contact.c unittests/test_contact.h \
+	unittests/test_form.c unittests/test_form.h \
+	unittests/test_jid.c unittests/test_jid.h \
+	unittests/test_muc.c unittests/test_muc.h \
+	unittests/test_parser.c unittests/test_parser.h \
+	unittests/test_preferences.c unittests/test_preferences.h \
+	unittests/test_roster_list.c unittests/test_roster_list.h \
+	unittests/test_server_events.c unittests/test_server_events.h \
+	unittests/test_autocomplete.c unittests/test_autocomplete.h \
+	unittests/test_chat_session.c unittests/test_chat_session.h \
+	unittests/unittests.c
+
+functionaltest_sources = \
+	functionaltests/proftest.c functionaltests/proftest.h \
+	functionaltests/test_connect.c functionaltests/test_connect.h \
+	functionaltests/test_ping.c functionaltests/test_ping.h \
+	functionaltests/test_rooms.c functionaltests/test_rooms.h \
+	functionaltests/test_presence.c functionaltests/test_presence.h \
+	functionaltests/test_message.c functionaltests/test_message.h \
+	functionaltests/functionaltests.c
 
 main_source = src/main.c
 
@@ -130,26 +139,26 @@ otr4_sources = \
 
 if BUILD_PYTHON_API
 core_sources += $(python_sources)
-tests_sources += $(python_sources)
+unittest_sources += $(python_sources)
 endif
 
 if BUILD_RUBY_API
 core_sources += $(ruby_sources)
-tests_sources += $(ruby_sources)
+unittest_sources += $(ruby_sources)
 endif
 
 if BUILD_LUA_API
 core_sources += $(lua_sources)
-tests_sources += $(lua_sources)
+unittest_sources += $(lua_sources)
 endif
 
 if BUILD_C_API
 core_sources += $(c_sources)
-tests_sources += $(c_sources)
+unittest_sources += $(c_sources)
 endif
 
-otr_test_sources = \
-	tests/otr/stub_otr.c
+otr_unittest_sources = \
+	unittests/otr/stub_otr.c
 
 themes_sources = themes/*
 
@@ -158,7 +167,7 @@ script_sources = bootstrap.sh configure-debug install-all.sh
 man_sources = docs/profanity.1
 
 if BUILD_OTR
-tests_sources += $(otr_test_sources)
+unittest_sources += $(otr_unittest_sources)
 if BUILD_OTR3
 core_sources += $(otr3_sources)
 endif
@@ -186,10 +195,13 @@ library_includedir=$(includedir)
 library_include_HEADERS = src/plugins/profapi.h
 endif
 
-TESTS = tests/testsuite
-check_PROGRAMS = tests/testsuite
-tests_testsuite_SOURCES = $(tests_sources)
-tests_testsuite_LDADD = -lcmocka
+TESTS = unittests/unittests functionaltests/functionaltests
+check_PROGRAMS = unittests/unittests functionaltests/functionaltests
+unittests_unittests_SOURCES = $(unittest_sources)
+unittests_unittests_LDADD = -lcmocka
+functionaltests_functionaltests_SOURCES = $(functionaltest_sources)
+functionaltests_functionaltests_CFLAGS = -I/usr/include/tcl8.6 -I/usr/include/tcl8.5
+functionaltests_functionaltests_LDADD = -lcmocka -lstabber -lexpect -ltcl
 
 man_MANS = $(man_sources)
 
