@@ -1,7 +1,9 @@
 language: c
 install:
+    - lsb_release -a
+    - uname -a
     - sudo apt-get update
-    - sudo apt-get -y install libssl-dev libexpat1-dev libncursesw5-dev libglib2.0-dev libnotify-dev libcurl3-dev libxss-dev libotr2-dev libgpgme11-dev uuid-dev
+    - sudo apt-get -y install libssl-dev libexpat1-dev libncursesw5-dev libglib2.0-dev libnotify-dev libcurl3-dev libxss-dev libotr2-dev libgpgme11-dev uuid-dev expect-dev tcl-dev
     - git clone git://github.com/strophe/libstrophe.git
     - cd libstrophe
     - mkdir m4
@@ -21,5 +23,14 @@ install:
     - sudo make install
     - cd ../..
     - rm -rf cmocka-1.0.0
+    - sudo apt-get install libmicrohttpd-dev
+    - git clone git://github.com/boothj5/stabber.git
+    - cd stabber
+    - ./bootstrap.sh
+    - ./configure --prefix=/usr
+    - make
+    - sudo make install
+    - cd ..
+    - rm -rf stabber
     - ./bootstrap.sh
 script: ./configure && make && make check

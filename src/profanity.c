@@ -103,7 +103,7 @@ prof_run(const int disable_tls, char *log_level, char *account_name)
         otr_poll();
 #endif
         notify_remind();
-        jabber_process_events();
+        jabber_process_events(10);
         ui_update();
     }
 }

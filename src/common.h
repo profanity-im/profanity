@@ -127,6 +127,7 @@ contact_presence_t contact_presence_from_resource_presence(resource_presence_t r
 
 char * p_sha1_hash(char *str);
 char * create_unique_id(char *prefix);
+void reset_unique_id(void);
 
 int cmp_win_num(gconstpointer a, gconstpointer b);
 int get_next_available_win_num(GList *used);

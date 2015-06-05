@@ -7,7 +7,7 @@
 #include "ui/window.h"
 #include "ui/ui.h"
 
-#include "tests/ui/stub_ui.h"
+#include "unittests/ui/stub_ui.h"
 
 // mock state
 

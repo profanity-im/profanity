@@ -35,6 +35,8 @@
 #ifndef UI_WINDOWS_H
 #define UI_WINDOWS_H
 
+#include "ui/window.h"
+
 void wins_init(void);
 
 ProfWin * wins_new_xmlconsole(void);
