@@ -15,6 +15,7 @@
 #include "test_rooms.h"
 #include "test_presence.h"
 #include "test_message.h"
+#include "test_chat_session.h"
 
 int main(int argc, char* argv[]) {
 
@@ -95,7 +96,26 @@ int main(int argc, char* argv[]) {
             close_prof_test),
         unit_test_setup_teardown(message_receive,
             init_prof_test,
-            close_prof_test)
+            close_prof_test),
+
+        unit_test_setup_teardown(sends_message_to_barejid_when_contact_offline,
+            init_prof_test,
+            close_prof_test),
+        unit_test_setup_teardown(sends_message_to_barejid_when_contact_online,
+            init_prof_test,
+            close_prof_test),
+        unit_test_setup_teardown(sends_message_to_fulljid_when_received_from_fulljid,
+            init_prof_test,
+            close_prof_test),
+        unit_test_setup_teardown(sends_subsequent_messages_to_fulljid,
+            init_prof_test,
+            close_prof_test),
+        unit_test_setup_teardown(resets_to_barejid_after_presence_received,
+            init_prof_test,
+            close_prof_test),
+        unit_test_setup_teardown(new_session_when_message_received_from_different_fulljid,
+            init_prof_test,
+            close_prof_test),
     };
 
     return run_tests(all_tests);
