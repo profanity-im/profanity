@@ -155,6 +155,11 @@ init_prof_test(void **state)
     _create_logs_dir();
 
     prof_start();
+    prof_output_exact("Profanity");
+
+    prof_input("/inpblock timeout 5");
+    prof_input("/inpblock dynamic off");
+    prof_output_exact("Dynamic input blocking disabled");
 }
 
 void
