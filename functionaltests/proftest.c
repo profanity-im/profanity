@@ -136,7 +136,7 @@ prof_start(void)
 void
 init_prof_test(void **state)
 {
-    if (stbbr_start(5230, 0) != 0) {
+    if (stbbr_start(STBBR_LOGINFO ,5230, 0) != 0) {
         assert_true(FALSE);
         return;
     }
