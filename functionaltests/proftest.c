@@ -158,8 +158,12 @@ init_prof_test(void **state)
     prof_output_exact("Profanity");
 
     prof_input("/inpblock timeout 5");
+    prof_output_exact("Input blocking set to 5 milliseconds");
     prof_input("/inpblock dynamic off");
     prof_output_exact("Dynamic input blocking disabled");
+
+    prof_input("/notify message off");
+    prof_output_exact("Message notifications disabled");
 }
 
 void
