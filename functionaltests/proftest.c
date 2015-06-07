@@ -162,12 +162,12 @@ close_prof_test(void **state)
 {
     prof_input("/quit");
     waitpid(exp_pid, NULL, 0);
-    stbbr_stop();
     _cleanup_dirs();
 
     setenv("XDG_CONFIG_HOME", config_orig, 1);
     setenv("XDG_DATA_HOME", data_orig, 1);
 
+    stbbr_stop();
 }
 
 void
