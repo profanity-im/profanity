@@ -136,7 +136,7 @@ prof_start(void)
 void
 init_prof_test(void **state)
 {
-    if (stbbr_start(5230, 0) != 0) {
+    if (stbbr_start(STBBR_LOGINFO ,5230, 0) != 0) {
         assert_true(FALSE);
         return;
     }
@@ -155,6 +155,15 @@ init_prof_test(void **state)
     _create_logs_dir();
 
     prof_start();
+    prof_output_exact("Profanity");
+
+    prof_input("/inpblock timeout 5");
+    prof_output_exact("Input blocking set to 5 milliseconds");
+    prof_input("/inpblock dynamic off");
+    prof_output_exact("Dynamic input blocking disabled");
+
+    prof_input("/notify message off");
+    prof_output_exact("Message notifications disabled");
 }
 
 void
