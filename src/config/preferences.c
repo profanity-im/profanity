@@ -724,6 +724,7 @@ _get_default_string(preference_t pref)
     switch (pref)
     {
         case PREF_AUTOAWAY_MODE:
+            return "off";
         case PREF_NOTIFY_ROOM:
             return "on";
         case PREF_OTR_LOG:
