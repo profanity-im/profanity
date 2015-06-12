@@ -60,7 +60,6 @@ p_gpg_init(void)
     log_debug("GPG: Found gpgme version: %s", libversion);
     gpgme_set_locale(NULL, LC_CTYPE, setlocale(LC_CTYPE, NULL));
 
-    // TODO add close function to clean up
     fingerprints = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, g_free);
 }
 
