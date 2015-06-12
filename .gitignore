@@ -41,12 +41,12 @@ profanity
 **/*.o
 
 # test output
-functionaltests/functionaltests
-functionaltests/functionaltests.log
-functionaltests/functionaltests.trs
-unittests/unittests
-unittests/unittests.log
-unittests/unittests.trs
+tests/functionaltests/functionaltests
+tests/functionaltests/functionaltests.log
+tests/functionaltests/functionaltests.trs
+tests/unittests/unittests
+tests/unittests/unittests.log
+tests/unittests/unittests.trs
 test-suite.log
 
 # local scripts
