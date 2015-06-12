@@ -10,6 +10,7 @@
 profanity.mk
 profanity.project
 profanity.workspace
+compile_commands.json
 
 # autotools
 .libs/
