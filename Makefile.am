@@ -113,7 +113,7 @@ pgp_sources = \
 	src/pgp/gpg.h src/pgp/gpg.c
 
 pgp_unittest_sources = \
-	unittests/pgp/stub_gpg.c
+	tests/unittests/pgp/stub_gpg.c
 
 otr3_sources = \
 	src/otr/otrlib.h src/otr/otrlibv3.c src/otr/otr.h src/otr/otr.c
