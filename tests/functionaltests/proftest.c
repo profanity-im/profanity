@@ -123,12 +123,16 @@ _cleanup_dirs(void)
 void
 prof_start(void)
 {
-    fd = exp_spawnl("./profanity", "./profanity", "-l", "DEBUG", NULL);
+    // helper script sets terminal columns, avoids assertions failing
+    // based on the test runner terminal size
+    fd = exp_spawnl("sh",
+        "sh",
+        "-c",
+        "./tests/functionaltests/start_profanity.sh",
+        NULL);
     FILE *fp = fdopen(fd, "r+");
 
-    if (fp == NULL) {
-        assert_true(FALSE);
-    }
+    assert_true(fp != NULL);
 
     setbuf(fp, (char *)0);
 }
@@ -155,15 +159,20 @@ init_prof_test(void **state)
     _create_logs_dir();
 
     prof_start();
-    prof_output_exact("Profanity");
+    assert_true(prof_output_exact("Profanity"));
 
+    // set UI options to make expect assertions faster and more reliable
     prof_input("/inpblock timeout 5");
-    prof_output_exact("Input blocking set to 5 milliseconds");
+    assert_true(prof_output_exact("Input blocking set to 5 milliseconds"));
     prof_input("/inpblock dynamic off");
-    prof_output_exact("Dynamic input blocking disabled");
-
+    assert_true(prof_output_exact("Dynamic input blocking disabled"));
     prof_input("/notify message off");
-    prof_output_exact("Message notifications disabled");
+    assert_true(prof_output_exact("Message notifications disabled"));
+    prof_input("/wrap off");
+    assert_true(prof_output_exact("Word wrap disabled"));
+    prof_input("/roster hide");
+    assert_true(prof_output_exact("Roster disabled"));
+    prof_input("/time off");
 }
 
 void

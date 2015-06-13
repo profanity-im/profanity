@@ -1483,13 +1483,13 @@ cmd_roster(gchar **args, struct cmd_help_t help)
 {
     jabber_conn_status_t conn_status = jabber_get_connection_status();
 
-    if (conn_status != JABBER_CONNECTED) {
-        cons_show("You are not currently connected.");
-        return TRUE;
-    }
-
     // show roster
     if (args[0] == NULL) {
+        if (conn_status != JABBER_CONNECTED) {
+            cons_show("You are not currently connected.");
+            return TRUE;
+        }
+
         GSList *list = roster_get_contacts();
         cons_show_roster(list);
         g_slist_free(list);
@@ -1497,6 +1497,11 @@ cmd_roster(gchar **args, struct cmd_help_t help)
 
     // show roster, only online contacts
     } else if(g_strcmp0(args[0], "online") == 0){
+        if (conn_status != JABBER_CONNECTED) {
+            cons_show("You are not currently connected.");
+            return TRUE;
+        }
+
         GSList *list = roster_get_contacts_online();
         cons_show_roster(list);
         g_slist_free(list);
@@ -1514,7 +1519,7 @@ cmd_roster(gchar **args, struct cmd_help_t help)
         if (res) {
             prefs_set_roster_size(intval);
             cons_show("Roster screen size set to: %d%%", intval);
-            if (prefs_get_boolean(PREF_ROSTER)) {
+            if (conn_status == JABBER_CONNECTED && prefs_get_boolean(PREF_ROSTER)) {
                 wins_resize_all();
             }
             return TRUE;
@@ -1529,17 +1534,23 @@ cmd_roster(gchar **args, struct cmd_help_t help)
         if (args[1] == NULL) {
             cons_show("Roster enabled.");
             prefs_set_boolean(PREF_ROSTER, TRUE);
-            ui_show_roster();
+            if (conn_status == JABBER_CONNECTED) {
+                ui_show_roster();
+            }
             return TRUE;
         } else if (g_strcmp0(args[1], "offline") == 0) {
             cons_show("Roster offline enabled");
             prefs_set_boolean(PREF_ROSTER_OFFLINE, TRUE);
-            rosterwin_roster();
+            if (conn_status == JABBER_CONNECTED) {
+                rosterwin_roster();
+            }
             return TRUE;
         } else if (g_strcmp0(args[1], "resource") == 0) {
             cons_show("Roster resource enabled");
             prefs_set_boolean(PREF_ROSTER_RESOURCE, TRUE);
-            rosterwin_roster();
+            if (conn_status == JABBER_CONNECTED) {
+                rosterwin_roster();
+            }
             return TRUE;
         } else {
             cons_show("Usage: %s", help.usage);
@@ -1549,17 +1560,23 @@ cmd_roster(gchar **args, struct cmd_help_t help)
         if (args[1] == NULL) {
             cons_show("Roster disabled.");
             prefs_set_boolean(PREF_ROSTER, FALSE);
-            ui_hide_roster();
+            if (conn_status == JABBER_CONNECTED) {
+                ui_hide_roster();
+            }
             return TRUE;
         } else if (g_strcmp0(args[1], "offline") == 0) {
             cons_show("Roster offline disabled");
             prefs_set_boolean(PREF_ROSTER_OFFLINE, FALSE);
-            rosterwin_roster();
+            if (conn_status == JABBER_CONNECTED) {
+                rosterwin_roster();
+            }
             return TRUE;
         } else if (g_strcmp0(args[1], "resource") == 0) {
             cons_show("Roster resource disabled");
             prefs_set_boolean(PREF_ROSTER_RESOURCE, FALSE);
-            rosterwin_roster();
+            if (conn_status == JABBER_CONNECTED) {
+                rosterwin_roster();
+            }
             return TRUE;
         } else {
             cons_show("Usage: %s", help.usage);
@@ -1570,17 +1587,23 @@ cmd_roster(gchar **args, struct cmd_help_t help)
         if (g_strcmp0(args[1], "group") == 0) {
             cons_show("Grouping roster by roster group");
             prefs_set_string(PREF_ROSTER_BY, "group");
-            rosterwin_roster();
+            if (conn_status == JABBER_CONNECTED) {
+                rosterwin_roster();
+            }
             return TRUE;
         } else if (g_strcmp0(args[1], "presence") == 0) {
             cons_show("Grouping roster by presence");
             prefs_set_string(PREF_ROSTER_BY, "presence");
-            rosterwin_roster();
+            if (conn_status == JABBER_CONNECTED) {
+                rosterwin_roster();
+            }
             return TRUE;
         } else if (g_strcmp0(args[1], "none") == 0) {
             cons_show("Roster grouping disabled");
             prefs_set_string(PREF_ROSTER_BY, "none");
-            rosterwin_roster();
+            if (conn_status == JABBER_CONNECTED) {
+                rosterwin_roster();
+            }
             return TRUE;
         } else {
             cons_show("Usage: %s", help.usage);
@@ -1588,6 +1611,10 @@ cmd_roster(gchar **args, struct cmd_help_t help)
         }
     // add contact
     } else if (strcmp(args[0], "add") == 0) {
+        if (conn_status != JABBER_CONNECTED) {
+            cons_show("You are not currently connected.");
+            return TRUE;
+        }
         char *jid = args[1];
         if (jid == NULL) {
             cons_show("Usage: %s", help.usage);
@@ -1599,6 +1626,10 @@ cmd_roster(gchar **args, struct cmd_help_t help)
 
     // remove contact
     } else if (strcmp(args[0], "remove") == 0) {
+        if (conn_status != JABBER_CONNECTED) {
+            cons_show("You are not currently connected.");
+            return TRUE;
+        }
         char *jid = args[1];
         if (jid == NULL) {
             cons_show("Usage: %s", help.usage);
@@ -1609,6 +1640,10 @@ cmd_roster(gchar **args, struct cmd_help_t help)
 
     // change nickname
     } else if (strcmp(args[0], "nick") == 0) {
+        if (conn_status != JABBER_CONNECTED) {
+            cons_show("You are not currently connected.");
+            return TRUE;
+        }
         char *jid = args[1];
         if (jid == NULL) {
             cons_show("Usage: %s", help.usage);
@@ -1639,6 +1674,10 @@ cmd_roster(gchar **args, struct cmd_help_t help)
 
     // remove nickname
     } else if (strcmp(args[0], "clearnick") == 0) {
+        if (conn_status != JABBER_CONNECTED) {
+            cons_show("You are not currently connected.");
+            return TRUE;
+        }
         char *jid = args[1];
         if (jid == NULL) {
             cons_show("Usage: %s", help.usage);
