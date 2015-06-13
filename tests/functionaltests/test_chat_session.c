@@ -14,16 +14,7 @@
 void
 sends_message_to_barejid_when_contact_offline(void **state)
 {
-    stbbr_for_id("roster",
-        "<iq id=\"roster\" type=\"result\" to=\"stabber@localhost/profanity\">"
-            "<query xmlns=\"jabber:iq:roster\" ver=\"362\">"
-                "<item jid=\"buddy1@localhost\" subscription=\"both\"/>"
-            "</query>"
-        "</iq>"
-    );
-
-    prof_connect("stabber@localhost", "password");
-    stbbr_wait_for("prof_presence_1");
+    prof_connect();
 
     prof_input("/msg buddy1@localhost Hi there");
 
@@ -37,23 +28,14 @@ sends_message_to_barejid_when_contact_offline(void **state)
 void
 sends_message_to_barejid_when_contact_online(void **state)
 {
-    stbbr_for_id("roster",
-        "<iq id=\"roster\" type=\"result\" to=\"stabber@localhost/profanity\">"
-            "<query xmlns=\"jabber:iq:roster\" ver=\"362\">"
-                "<item jid=\"buddy1@localhost\" subscription=\"both\"/>"
-            "</query>"
-        "</iq>"
-    );
-
-    prof_connect("stabber@localhost", "password");
-    stbbr_wait_for("prof_presence_1");
+    prof_connect();
 
     stbbr_send(
-        "<presence to=\"stabber@localhost\" from=\"buddy1@localhost/mobile\">"
+        "<presence to=\"stabber@localhost/profanity\" from=\"buddy1@localhost/mobile\">"
             "<priority>10</priority>"
         "</presence>"
     );
-    prof_output_exact("buddy1@localhost (mobile) is online");
+    assert_true(prof_output_exact("Buddy1 (mobile) is online"));
 
     prof_input("/msg buddy1@localhost Hi there");
 
@@ -67,30 +49,21 @@ sends_message_to_barejid_when_contact_online(void **state)
 void
 sends_message_to_fulljid_when_received_from_fulljid(void **state)
 {
-    stbbr_for_id("roster",
-        "<iq id=\"roster\" type=\"result\" to=\"stabber@localhost/profanity\">"
-            "<query xmlns=\"jabber:iq:roster\" ver=\"362\">"
-                "<item jid=\"buddy1@localhost\" subscription=\"both\"/>"
-            "</query>"
-        "</iq>"
-    );
-
-    prof_connect("stabber@localhost", "password");
-    stbbr_wait_for("prof_presence_1");
+    prof_connect();
 
     stbbr_send(
         "<presence to=\"stabber@localhost\" from=\"buddy1@localhost/mobile\">"
             "<priority>10</priority>"
         "</presence>"
     );
-    prof_output_exact("buddy1@localhost (mobile) is online");
+    assert_true(prof_output_exact("Buddy1 (mobile) is online"));
 
     stbbr_send(
         "<message id=\"message1\" to=\"stabber@localhost\" from=\"buddy1@localhost/mobile\" type=\"chat\">"
             "<body>First message</body>"
         "</message>"
     );
-    prof_output_exact("<< incoming from buddy1@localhost/mobile (2)");
+    assert_true(prof_output_exact("<< incoming from Buddy1/mobile (2)"));
 
     prof_input("/msg buddy1@localhost Hi there");
 
@@ -104,45 +77,37 @@ sends_message_to_fulljid_when_received_from_fulljid(void **state)
 void
 sends_subsequent_messages_to_fulljid(void **state)
 {
-    stbbr_for_id("roster",
-        "<iq id=\"roster\" type=\"result\" to=\"stabber@localhost/profanity\">"
-            "<query xmlns=\"jabber:iq:roster\" ver=\"362\">"
-                "<item jid=\"buddy1@localhost\" subscription=\"both\"/>"
-            "</query>"
-        "</iq>"
-    );
-
-    prof_connect("stabber@localhost", "password");
-    stbbr_wait_for("prof_presence_1");
+    prof_connect();
 
     stbbr_send(
         "<presence to=\"stabber@localhost\" from=\"buddy1@localhost/mobile\">"
             "<priority>10</priority>"
         "</presence>"
     );
-    prof_output_exact("buddy1@localhost (mobile) is online");
+    assert_true(prof_output_exact("Buddy1 (mobile) is online"));
 
     stbbr_send(
         "<message id=\"message1\" to=\"stabber@localhost\" from=\"buddy1@localhost/mobile\" type=\"chat\">"
             "<body>First message</body>"
         "</message>"
     );
-    prof_output_exact("<< incoming from buddy1@localhost/mobile (2)");
+    assert_true(prof_output_exact("<< incoming from Buddy1/mobile (2)"));
 
     prof_input("/msg buddy1@localhost Outgoing 1");
-    prof_input("/msg buddy1@localhost Outgoing 2");
-    prof_input("/msg buddy1@localhost Outgoing 3");
-
     assert_true(stbbr_received(
         "<message id=\"*\" to=\"buddy1@localhost/mobile\" type=\"chat\">"
             "<body>Outgoing 1</body>"
         "</message>"
     ));
+
+    prof_input("/msg buddy1@localhost Outgoing 2");
     assert_true(stbbr_received(
         "<message id=\"*\" to=\"buddy1@localhost/mobile\" type=\"chat\">"
             "<body>Outgoing 2</body>"
         "</message>"
     ));
+
+    prof_input("/msg buddy1@localhost Outgoing 3");
     assert_true(stbbr_received(
         "<message id=\"*\" to=\"buddy1@localhost/mobile\" type=\"chat\">"
             "<body>Outgoing 3</body>"
@@ -153,33 +118,23 @@ sends_subsequent_messages_to_fulljid(void **state)
 void
 resets_to_barejid_after_presence_received(void **state)
 {
-    stbbr_for_id("roster",
-        "<iq id=\"roster\" type=\"result\" to=\"stabber@localhost/profanity\">"
-            "<query xmlns=\"jabber:iq:roster\" ver=\"362\">"
-                "<item jid=\"buddy1@localhost\" subscription=\"both\"/>"
-            "</query>"
-        "</iq>"
-    );
-
-    prof_connect("stabber@localhost", "password");
-    stbbr_wait_for("prof_presence_1");
+    prof_connect();
 
     stbbr_send(
         "<presence to=\"stabber@localhost\" from=\"buddy1@localhost/mobile\">"
             "<priority>10</priority>"
         "</presence>"
     );
-    prof_output_exact("buddy1@localhost (mobile) is online");
+    assert_true(prof_output_exact("Buddy1 (mobile) is online"));
 
     stbbr_send(
         "<message id=\"message1\" to=\"stabber@localhost\" from=\"buddy1@localhost/mobile\" type=\"chat\">"
             "<body>First message</body>"
         "</message>"
     );
-    prof_output_exact("<< incoming from buddy1@localhost/mobile (2)");
+    assert_true(prof_output_exact("<< incoming from Buddy1/mobile (2)"));
 
     prof_input("/msg buddy1@localhost Outgoing 1");
-
     assert_true(stbbr_received(
         "<message id=\"*\" to=\"buddy1@localhost/mobile\" type=\"chat\">"
             "<body>Outgoing 1</body>"
@@ -192,10 +147,9 @@ resets_to_barejid_after_presence_received(void **state)
             "<show>dnd</show>"
         "</presence>"
     );
-    prof_output_exact("buddy1@localhost (laptop) is dnd");
+    assert_true(prof_output_exact("Buddy1 (laptop) is dnd"));
 
     prof_input("/msg buddy1@localhost Outgoing 2");
-
     assert_true(stbbr_received(
         "<message id=\"*\" to=\"buddy1@localhost\" type=\"chat\">"
             "<body>Outgoing 2</body>"
@@ -206,23 +160,14 @@ resets_to_barejid_after_presence_received(void **state)
 void
 new_session_when_message_received_from_different_fulljid(void **state)
 {
-    stbbr_for_id("roster",
-        "<iq id=\"roster\" type=\"result\" to=\"stabber@localhost/profanity\">"
-            "<query xmlns=\"jabber:iq:roster\" ver=\"362\">"
-                "<item jid=\"buddy1@localhost\" subscription=\"both\"/>"
-            "</query>"
-        "</iq>"
-    );
-
-    prof_connect("stabber@localhost", "password");
-    stbbr_wait_for("prof_presence_1");
+    prof_connect();
 
     stbbr_send(
         "<presence to=\"stabber@localhost\" from=\"buddy1@localhost/mobile\">"
             "<priority>10</priority>"
         "</presence>"
     );
-    prof_output_exact("buddy1@localhost (mobile) is online");
+    assert_true(prof_output_exact("Buddy1 (mobile) is online"));
 
     stbbr_send(
         "<presence to=\"stabber@localhost\" from=\"buddy1@localhost/laptop\">"
@@ -230,17 +175,16 @@ new_session_when_message_received_from_different_fulljid(void **state)
             "<show>away</show>"
         "</presence>"
     );
-    prof_output_exact("buddy1@localhost (laptop) is away");
+    assert_true(prof_output_exact("Buddy1 (laptop) is away"));
 
     stbbr_send(
         "<message id=\"message1\" to=\"stabber@localhost\" from=\"buddy1@localhost/mobile\" type=\"chat\">"
             "<body>From first resource</body>"
         "</message>"
     );
-    prof_output_exact("<< incoming from buddy1@localhost/mobile (2)");
+    assert_true(prof_output_exact("<< incoming from Buddy1/mobile (2)"));
 
     prof_input("/msg buddy1@localhost Outgoing 1");
-
     assert_true(stbbr_received(
         "<message id=\"*\" to=\"buddy1@localhost/mobile\" type=\"chat\">"
             "<body>Outgoing 1</body>"
@@ -252,10 +196,9 @@ new_session_when_message_received_from_different_fulljid(void **state)
             "<body>From second resource</body>"
         "</message>"
     );
-    prof_output_regex("buddy1@localhost/laptop:.+From second resource");
+    assert_true(prof_output_regex("Buddy1/laptop:.+From second resource"));
 
     prof_input("/msg buddy1@localhost Outgoing 2");
-
     assert_true(stbbr_received(
         "<message id=\"*\" to=\"buddy1@localhost/laptop\" type=\"chat\">"
             "<body>Outgoing 2</body>"

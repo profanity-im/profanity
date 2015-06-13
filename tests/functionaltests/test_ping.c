@@ -14,18 +14,18 @@
 void
 ping_multiple(void **state)
 {
-    stbbr_for_id("prof_ping_1",
-        "<iq id=\"prof_ping_1\" type=\"result\" to=\"stabber@localhost/profanity\"/>"
-    );
     stbbr_for_id("prof_ping_2",
         "<iq id=\"prof_ping_2\" type=\"result\" to=\"stabber@localhost/profanity\"/>"
     );
+    stbbr_for_id("prof_ping_3",
+        "<iq id=\"prof_ping_3\" type=\"result\" to=\"stabber@localhost/profanity\"/>"
+    );
 
-    prof_connect("stabber@localhost", "password");
+    prof_connect();
 
     prof_input("/ping");
     assert_true(stbbr_received(
-        "<iq id=\"prof_ping_1\" type=\"get\">"
+        "<iq id=\"prof_ping_2\" type=\"get\">"
             "<ping xmlns=\"urn:xmpp:ping\"/>"
         "</iq>"
     ));
@@ -33,7 +33,7 @@ ping_multiple(void **state)
 
     prof_input("/ping");
     assert_true(stbbr_received(
-        "<iq id=\"prof_ping_2\" type=\"get\">"
+        "<iq id=\"prof_ping_3\" type=\"get\">"
             "<ping xmlns=\"urn:xmpp:ping\"/>"
         "</iq>"
     ));
@@ -43,9 +43,7 @@ ping_multiple(void **state)
 void
 ping_responds(void **state)
 {
-    prof_connect("stabber@localhost", "password");
-
-    assert_true(prof_output_exact("stabber@localhost logged in successfully"));
+    prof_connect();
 
     stbbr_send(
         "<iq id=\"pingtest1\" type=\"get\" to=\"stabber@localhost/profanity\" from=\"localhost\">"
