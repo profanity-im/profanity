@@ -16,12 +16,13 @@
 static void test_with_connection_status(jabber_conn_status_t status)
 {
     CommandHelp *help = malloc(sizeof(CommandHelp));
+    gchar *args[] = { NULL };
 
     will_return(jabber_get_connection_status, status);
 
     expect_cons_show("You are not currently connected.");
 
-    gboolean result = cmd_roster(NULL, *help);
+    gboolean result = cmd_roster(args, *help);
     assert_true(result);
 
     free(help);
