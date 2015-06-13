@@ -33,4 +33,4 @@ install:
     - cd ..
     - rm -rf stabber
     - ./bootstrap.sh
-script: ./configure && make && make check
+script: ./configure && make && make check && cat test-suite.log
