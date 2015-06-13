@@ -4100,21 +4100,26 @@ cmd_pgp(gchar **args, struct cmd_help_t help)
         }
         g_slist_free_full(keys, (GDestroyNotify)p_gpg_free_key);
     } else if (g_strcmp0(args[0], "fps") == 0) {
-        GHashTable *fingerprints = p_gpg_fingerprints();
-        GList *jids = g_hash_table_get_keys(fingerprints);
-        if (jids) {
-            cons_show("Received PGP fingerprints:");
-            GList *curr = jids;
-            while (curr) {
-                char *jid = curr->data;
-                char *fingerprint = g_hash_table_lookup(fingerprints, jid);
-                cons_show("  %s: %s", jid, fingerprint);
-                curr = g_list_next(curr);
-            }
+        jabber_conn_status_t conn_status = jabber_get_connection_status();
+        if (conn_status != JABBER_CONNECTED) {
+            cons_show("You are not currently connected.");
         } else {
-            cons_show("No PGP fingerprints received.");
+            GHashTable *fingerprints = p_gpg_fingerprints();
+            GList *jids = g_hash_table_get_keys(fingerprints);
+            if (jids) {
+                cons_show("Received PGP fingerprints:");
+                GList *curr = jids;
+                while (curr) {
+                    char *jid = curr->data;
+                    char *fingerprint = g_hash_table_lookup(fingerprints, jid);
+                    cons_show("  %s: %s", jid, fingerprint);
+                    curr = g_list_next(curr);
+                }
+            } else {
+                cons_show("No PGP fingerprints received.");
+            }
+            g_list_free(jids);
         }
-        g_list_free(jids);
     } else if (g_strcmp0(args[0], "libver") == 0) {
         const char *libver = p_gpg_libver();
         if (libver) {
