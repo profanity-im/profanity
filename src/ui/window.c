@@ -135,7 +135,7 @@ win_create_chat(const char * const barejid)
     new_win->barejid = strdup(barejid);
     new_win->resource_override = NULL;
     new_win->enc_mode = PROF_ENC_NONE;
-    new_win->is_trusted = FALSE;
+    new_win->otr_is_trusted = FALSE;
     new_win->history_shown = FALSE;
     new_win->unread = 0;
     new_win->state = chat_state_new();

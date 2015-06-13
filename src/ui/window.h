@@ -119,7 +119,7 @@ typedef struct prof_chat_win_t {
     int unread;
     ChatState *state;
     prof_enc_t enc_mode;
-    gboolean is_trusted;
+    gboolean otr_is_trusted;
     char *resource_override;
     gboolean history_shown;
     unsigned long memcheck;
