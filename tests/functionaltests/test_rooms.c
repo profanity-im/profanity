@@ -27,8 +27,11 @@ rooms_query(void **state)
 
     prof_input("/rooms");
 
-    assert_true(prof_output_exact("chatroom@conference.localhost, (A chat room)"));
-    assert_true(prof_output_exact("hangout@conference.localhost, (Another chat room)"));
+    assert_true(prof_output_regex(
+        "chatroom@conference.localhost, \\(A chat room\\)"
+        ".+"
+        "hangout@conference.localhost, \\(Another chat room\\)"
+    ));
 
     assert_true(stbbr_last_received(
         "<iq id=\"confreq\" to=\"conference.localhost\" type=\"get\">"
