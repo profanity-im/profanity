@@ -14,7 +14,7 @@
 void
 message_send(void **state)
 {
-    prof_connect("stabber@localhost", "password");
+    prof_connect();
 
     prof_input("/msg somejid@someserver.com Hi there");
 
@@ -30,17 +30,7 @@ message_send(void **state)
 void
 message_receive(void **state)
 {
-    stbbr_for_id("roster",
-        "<iq id=\"roster\" type=\"result\" to=\"stabber@localhost/profanity\">"
-            "<query xmlns=\"jabber:iq:roster\" ver=\"362\">"
-                "<item jid=\"buddy1@localhost\" subscription=\"both\" name=\"Buddy1\"/>"
-                "<item jid=\"buddy2@localhost\" subscription=\"both\" name=\"Buddy2\"/>"
-            "</query>"
-        "</iq>"
-    );
-
-    prof_connect("stabber@localhost", "password");
-    stbbr_wait_for("prof_presence_1");
+    prof_connect();
 
     stbbr_send(
         "<message id=\"message1\" to=\"stabber@localhost\" from=\"someuser@chatserv.org/laptop\" type=\"chat\">"

@@ -114,7 +114,7 @@ _create_logs_dir(void)
 void
 _cleanup_dirs(void)
 {
-    int res = system("rm -rf ./functionaltests/files");
+    int res = system("rm -rf ./tests/functionaltests/files");
     if (res == -1) {
         assert_true(FALSE);
     }
@@ -123,7 +123,7 @@ _cleanup_dirs(void)
 void
 prof_start(void)
 {
-    fd = exp_spawnl("./profanity", NULL);
+    fd = exp_spawnl("./profanity", "./profanity", "-l", "DEBUG", NULL);
     FILE *fp = fdopen(fd, "r+");
 
     if (fp == NULL) {
@@ -201,13 +201,26 @@ prof_output_regex(char *text)
 }
 
 void
-prof_connect(char *jid, char *password)
+prof_connect(void)
 {
-    GString *connect_cmd = g_string_new("/connect ");
-    g_string_append(connect_cmd, jid);
-    g_string_append(connect_cmd, " port 5230");
-    prof_input(connect_cmd->str);
-    g_string_free(connect_cmd, TRUE);
+    stbbr_for_query("jabber:iq:roster",
+        "<iq type=\"result\" to=\"stabber@localhost/profanity\">"
+            "<query xmlns=\"jabber:iq:roster\" ver=\"362\">"
+                "<item jid=\"buddy1@localhost\" subscription=\"both\" name=\"Buddy1\"/>"
+                "<item jid=\"buddy2@localhost\" subscription=\"both\" name=\"Buddy2\"/>"
+            "</query>"
+        "</iq>"
+    );
+    stbbr_for_id("prof_presence_1",
+        "<presence id=\"prof_presence_1\" lang=\"en\" to=\"stabber@localhost/profanity\" from=\"stabber@localhost/profanity\">"
+            "<priority>0</priority>"
+            "<c hash=\"sha-1\" xmlns=\"http://jabber.org/protocol/caps\" node=\"http://www.profanity.im\" ver=\"f8mrtdyAmhnj8Ca+630bThSL718=\"/>"
+        "</presence>"
+    );
 
-    prof_input(password);
+    prof_input("/connect stabber@localhost port 5230");
+    prof_input("password");
+
+    assert_true(prof_output_regex("stabber@localhost logged in successfully, .+online.+ \\(priority 0\\)\\."));
+    stbbr_wait_for("prof_presence_1");
 }
