@@ -23,7 +23,7 @@ rooms_query(void **state)
         "</iq>"
     );
 
-    prof_connect("stabber@localhost", "password");
+    prof_connect();
 
     prof_input("/rooms");
 

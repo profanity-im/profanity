@@ -21,9 +21,6 @@ int main(int argc, char* argv[]) {
 
     const UnitTest all_tests[] = {
 
-        unit_test_setup_teardown(connect_jid,
-            init_prof_test,
-            close_prof_test),
         unit_test_setup_teardown(connect_jid_requests_roster,
             init_prof_test,
             close_prof_test),
