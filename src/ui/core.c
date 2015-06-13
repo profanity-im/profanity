@@ -914,7 +914,7 @@ ui_gone_secure(const char * const barejid, gboolean trusted)
     }
 
     chatwin->enc_mode = PROF_ENC_OTR;
-    chatwin->is_trusted = trusted;
+    chatwin->otr_is_trusted = trusted;
     if (trusted) {
         win_print(window, '!', NULL, 0, THEME_OTR_STARTED_TRUSTED, "", "OTR session started (trusted).");
     } else {
@@ -942,7 +942,7 @@ ui_gone_insecure(const char * const barejid)
     ProfChatWin *chatwin = wins_get_chat(barejid);
     if (chatwin) {
         chatwin->enc_mode = PROF_ENC_NONE;
-        chatwin->is_trusted = FALSE;
+        chatwin->otr_is_trusted = FALSE;
 
         ProfWin *window = (ProfWin*)chatwin;
         win_print(window, '!', NULL, 0, THEME_OTR_ENDED, "", "OTR session ended.");
@@ -1061,7 +1061,7 @@ ui_trust(const char * const barejid)
     ProfChatWin *chatwin = wins_get_chat(barejid);
     if (chatwin) {
         chatwin->enc_mode = PROF_ENC_OTR;
-        chatwin->is_trusted = TRUE;
+        chatwin->otr_is_trusted = TRUE;
 
         ProfWin *window = (ProfWin*)chatwin;
         win_print(window, '!', NULL, 0, THEME_OTR_TRUSTED, "", "OTR session trusted.");
@@ -1077,7 +1077,7 @@ ui_untrust(const char * const barejid)
     ProfChatWin *chatwin = wins_get_chat(barejid);
     if (chatwin) {
         chatwin->enc_mode = PROF_ENC_OTR;
-        chatwin->is_trusted = FALSE;
+        chatwin->otr_is_trusted = FALSE;
 
         ProfWin *window = (ProfWin*)chatwin;
         win_print(window, '!', NULL, 0, THEME_OTR_UNTRUSTED, "", "OTR session untrusted.");

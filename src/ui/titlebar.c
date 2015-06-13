@@ -278,7 +278,7 @@ _show_privacy(ProfChatWin *chatwin)
         wattron(win, bracket_attrs);
         wprintw(win, "]");
         wattroff(win, bracket_attrs);
-        if (chatwin->is_trusted) {
+        if (chatwin->otr_is_trusted) {
             int trusted_attrs = theme_attrs(THEME_TITLE_TRUSTED);
             wprintw(win, " ");
             wattron(win, bracket_attrs);
