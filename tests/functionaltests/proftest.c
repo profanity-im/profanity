@@ -221,6 +221,9 @@ prof_connect(void)
     prof_input("/connect stabber@localhost port 5230");
     prof_input("password");
 
+    // Allow time for profanity to connect
+    exp_timeout = 30;
     assert_true(prof_output_regex("stabber@localhost logged in successfully, .+online.+ \\(priority 0\\)\\."));
+    exp_timeout = 10;
     stbbr_wait_for("prof_presence_1");
 }
