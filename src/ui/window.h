@@ -195,6 +195,9 @@ gboolean win_has_active_subwin(ProfWin *window);
 void win_clear(ProfWin *window);
 void win_resize(ProfWin *window);
 
+void win_refresh_without_subwin(ProfWin *window);
+void win_refresh_with_subwin(ProfWin *window);
+
 void win_page_up(ProfWin *window);
 void win_page_down(ProfWin *window);
 void win_sub_page_down(ProfWin *window);

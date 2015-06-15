@@ -480,38 +480,19 @@ wins_resize_all(void)
 void
 wins_hide_subwin(ProfWin *window)
 {
-    int rows, cols;
-    getmaxyx(stdscr, rows, cols);
-
     win_hide_subwin(window);
 
     ProfWin *current_win = wins_get_current();
-    if ((current_win->type == WIN_MUC) || (current_win->type == WIN_CONSOLE)) {
-        pnoutrefresh(current_win->layout->win, current_win->layout->y_pos, 0, 1, 0, rows-3, cols-1);
-    }
+    win_refresh_without_subwin(current_win);
 }
 
 void
 wins_show_subwin(ProfWin *window)
 {
-    int rows, cols;
-    getmaxyx(stdscr, rows, cols);
-    int subwin_cols = 0;
-
     win_show_subwin(window);
 
     ProfWin *current_win = wins_get_current();
-    if (current_win->type == WIN_MUC) {
-        ProfLayoutSplit *layout = (ProfLayoutSplit*)current_win->layout;
-        subwin_cols = win_occpuants_cols();
-        pnoutrefresh(layout->base.win, layout->base.y_pos, 0, 1, 0, rows-3, (cols-subwin_cols)-1);
-        pnoutrefresh(layout->subwin, layout->sub_y_pos, 0, 1, (cols-subwin_cols), rows-3, cols-1);
-    } else if (current_win->type == WIN_CONSOLE) {
-        ProfLayoutSplit *layout = (ProfLayoutSplit*)current_win->layout;
-        subwin_cols = win_roster_cols();
-        pnoutrefresh(layout->base.win, layout->base.y_pos, 0, 1, 0, rows-3, (cols-subwin_cols)-1);
-        pnoutrefresh(layout->subwin, layout->sub_y_pos, 0, 1, (cols-subwin_cols), rows-3, cols-1);
-    }
+    win_refresh_with_subwin(current_win);
 }
 
 ProfXMLWin *
