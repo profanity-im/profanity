@@ -20,7 +20,7 @@ core_sources = \
 	src/ui/titlebar.c src/ui/statusbar.c src/ui/inputwin.c \
 	src/ui/titlebar.h src/ui/statusbar.h src/ui/inputwin.h \
 	src/ui/console.c src/ui/notifier.c \
-	src/ui/windows.c src/ui/windows.h \
+	src/window_list.c src/window_list.h \
 	src/ui/rosterwin.c src/ui/occupantswin.c \
 	src/ui/buffer.c src/ui/buffer.h \
 	src/command/command.h src/command/command.c \
@@ -57,7 +57,7 @@ unittest_sources = \
 	src/config/account.c src/config/account.h \
 	src/config/preferences.c src/config/preferences.h \
 	src/config/theme.c src/config/theme.h \
-	src/ui/windows.c src/ui/windows.h \
+	src/window_list.c src/window_list.h \
 	src/ui/window.c src/ui/window.h \
 	src/ui/buffer.c \
 	src/ui/titlebar.c src/ui/statusbar.c src/ui/inputwin.c \

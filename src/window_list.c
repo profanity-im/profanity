@@ -1,5 +1,5 @@
 /*
- * windows.c
+ * window_list.c
  *
  * Copyright (C) 2012 - 2015 James Booth <boothj5@gmail.com>
  *
@@ -46,7 +46,7 @@
 #include "ui/ui.h"
 #include "ui/statusbar.h"
 #include "ui/window.h"
-#include "ui/windows.h"
+#include "window_list.h"
 #include "event/ui_events.h"
 
 static GHashTable *windows;

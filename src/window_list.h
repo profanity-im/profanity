@@ -1,5 +1,5 @@
 /*
- * windows.h
+ * window_list.h
  *
  * Copyright (C) 2012 - 2015 James Booth <boothj5@gmail.com>
  *
@@ -32,8 +32,8 @@
  *
  */
 
-#ifndef UI_WINDOWS_H
-#define UI_WINDOWS_H
+#ifndef WINDOW_LIST_H
+#define WINDOW_LIST_H
 
 #include "ui/window.h"
 

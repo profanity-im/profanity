@@ -36,7 +36,7 @@
 
 #include "ui/ui.h"
 #include "ui/window.h"
-#include "ui/windows.h"
+#include "window_list.h"
 #include "config/preferences.h"
 
 static void

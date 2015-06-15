@@ -37,7 +37,7 @@
 #include "config.h"
 #include "log.h"
 #include "ui/ui.h"
-#include "ui/windows.h"
+#include "window_list.h"
 #include "xmpp/xmpp.h"
 #ifdef HAVE_LIBOTR
 #include "otr/otr.h"

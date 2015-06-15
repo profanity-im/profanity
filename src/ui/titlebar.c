@@ -44,7 +44,7 @@
 #include "ui/ui.h"
 #include "ui/titlebar.h"
 #include "ui/inputwin.h"
-#include "ui/windows.h"
+#include "window_list.h"
 #include "ui/window.h"
 #include "roster_list.h"
 #include "chat_session.h"

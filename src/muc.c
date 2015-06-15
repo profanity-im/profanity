@@ -42,7 +42,7 @@
 #include "jid.h"
 #include "tools/autocomplete.h"
 #include "ui/ui.h"
-#include "ui/windows.h"
+#include "window_list.h"
 #include "muc.h"
 
 typedef struct _muc_room_t {

@@ -72,7 +72,7 @@
 #include "ui/statusbar.h"
 #include "ui/inputwin.h"
 #include "ui/window.h"
-#include "ui/windows.h"
+#include "window_list.h"
 #include "xmpp/xmpp.h"
 #include "event/ui_events.h"
 
