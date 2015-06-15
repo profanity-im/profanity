@@ -1156,19 +1156,6 @@ ui_current_win_type(void)
     return current->type;
 }
 
-gboolean
-ui_current_win_is_otr(void)
-{
-    ProfWin *current = wins_get_current();
-    if (current->type == WIN_CHAT) {
-        ProfChatWin *chatwin = (ProfChatWin*)current;
-        assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
-        return chatwin->enc_mode == PROF_ENC_OTR;
-    } else {
-        return FALSE;
-    }
-}
-
 win_type_t
 ui_win_type(int index)
 {
