@@ -186,3 +186,6 @@ $(git_include): $(git_include).in
 clean-local:
 	rm -f $(git_include) $(git_include).in
 endif
+
+check-unit: tests/unittests/unittests
+	tests/unittests/unittests
