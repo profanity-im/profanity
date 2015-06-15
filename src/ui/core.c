@@ -2217,6 +2217,12 @@ ui_clear_win_title(void)
 }
 
 void
+ui_clear_win(ProfWin *window)
+{
+    win_clear(window);
+}
+
+void
 ui_goodbye_title(void)
 {
     int result = system("/bin/echo -ne \"\033]0;Thanks for using Profanity\007\"");

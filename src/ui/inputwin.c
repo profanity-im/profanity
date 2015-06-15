@@ -62,6 +62,7 @@
 #include "ui/ui.h"
 #include "ui/statusbar.h"
 #include "ui/inputwin.h"
+#include "ui/window.h"
 #include "window_list.h"
 #include "event/ui_events.h"
 #include "xmpp/xmpp.h"

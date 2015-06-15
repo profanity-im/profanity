@@ -45,7 +45,6 @@
 #include "config/theme.h"
 #include "ui/ui.h"
 #include "ui/statusbar.h"
-#include "ui/window.h"
 #include "window_list.h"
 #include "event/ui_events.h"
 

@@ -35,7 +35,7 @@
 #ifndef WINDOW_LIST_H
 #define WINDOW_LIST_H
 
-#include "ui/window.h"
+#include "ui/ui.h"
 
 void wins_init(void);
 

@@ -58,10 +58,6 @@ unittest_sources = \
 	src/config/preferences.c src/config/preferences.h \
 	src/config/theme.c src/config/theme.h \
 	src/window_list.c src/window_list.h \
-	src/ui/window.c src/ui/window.h \
-	src/ui/buffer.c \
-	src/ui/titlebar.c src/ui/statusbar.c src/ui/inputwin.c \
-	src/ui/titlebar.h src/ui/statusbar.h src/ui/inputwin.h \
 	src/event/server_events.c src/event/server_events.h \
 	src/event/client_events.c src/event/client_events.h \
 	src/event/ui_events.c src/event/ui_events.h \

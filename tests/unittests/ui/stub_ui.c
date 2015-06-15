@@ -176,6 +176,7 @@ void ui_page_up(void) {}
 void ui_page_down(void) {}
 void ui_subwin_page_up(void) {}
 void ui_subwin_page_down(void) {}
+void ui_clear_win(ProfWin *window) {}
 
 char * ui_ask_password(void)
 {
@@ -493,11 +494,67 @@ void cons_show_contact_online(PContact contact, Resource *resource, GDateTime *l
 void cons_show_contact_offline(PContact contact, char *resource, char *status) {}
 void cons_theme_colours(void) {}
 
+// status bar
+void status_bar_inactive(const int win) {}
+void status_bar_active(const int win) {}
+void status_bar_new(const int win) {}
+void status_bar_set_all_inactive(void) {}
+
 // roster window
 void rosterwin_roster(void) {}
 
 // occupants window
 void occupantswin_occupants(const char * const room) {}
+
+// window interface
+ProfWin* win_create_console(void)
+{
+    return NULL;
+}
+ProfWin* win_create_xmlconsole(void)
+{
+    return NULL;
+}
+ProfWin* win_create_chat(const char * const barejid)
+{
+    return NULL;
+}
+ProfWin* win_create_muc(const char * const roomjid)
+{
+    return NULL;
+}
+ProfWin* win_create_muc_config(const char * const title, DataForm *form)
+{
+    return NULL;
+}
+ProfWin* win_create_private(const char * const fulljid)
+{
+    return NULL;
+}
+
+void win_update_virtual(ProfWin *window) {}
+void win_free(ProfWin *window) {}
+int win_unread(ProfWin *window)
+{
+    return 0;
+}
+
+void win_resize(ProfWin *window) {}
+void win_hide_subwin(ProfWin *window) {}
+void win_show_subwin(ProfWin *window) {}
+void win_refresh_without_subwin(ProfWin *window) {}
+void win_refresh_with_subwin(ProfWin *window) {}
+void win_print(ProfWin *window, const char show_char, GTimeVal *tstamp, int flags, theme_item_t theme_item, const char * const from, const char * const message) {}
+void win_vprint(ProfWin *window, const char show_char, GTimeVal *tstamp, int flags, theme_item_t theme_item, const char * const from, const char * const message, ...) {}
+char* win_get_title(ProfWin *window)
+{
+    return NULL;
+}
+void win_show_occupant(ProfWin *window, Occupant *occupant) {}
+void win_show_occupant_info(ProfWin *window, const char * const room, Occupant *occupant) {}
+void win_show_contact(ProfWin *window, PContact contact) {}
+void win_show_info(ProfWin *window, PContact contact) {}
+void win_println(ProfWin *window, const char * const message) {}
 
 // desktop notifier actions
 void notifier_uninit(void) {}

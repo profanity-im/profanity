@@ -3230,7 +3230,7 @@ gboolean
 cmd_clear(gchar **args, struct cmd_help_t help)
 {
     ProfWin *win = wins_get_current();
-    win_clear(win);
+    ui_clear_win(win);
     return TRUE;
 }
 
