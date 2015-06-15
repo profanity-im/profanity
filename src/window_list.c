@@ -1,5 +1,5 @@
 /*
- * windows.c
+ * window_list.c
  *
  * Copyright (C) 2012 - 2015 James Booth <boothj5@gmail.com>
  *
@@ -40,24 +40,16 @@
 
 #include <glib.h>
 
-#ifdef HAVE_NCURSESW_NCURSES_H
-#include <ncursesw/ncurses.h>
-#elif HAVE_NCURSES_H
-#include <ncurses.h>
-#endif
-
 #include "common.h"
 #include "roster_list.h"
 #include "config/theme.h"
 #include "ui/ui.h"
 #include "ui/statusbar.h"
-#include "ui/window.h"
-#include "ui/windows.h"
+#include "window_list.h"
 #include "event/ui_events.h"
 
 static GHashTable *windows;
 static int current;
-static int max_cols;
 
 void
 wins_init(void)
@@ -65,7 +57,6 @@ wins_init(void)
     windows = g_hash_table_new_full(g_direct_hash, g_direct_equal, NULL,
         (GDestroyNotify)win_free);
 
-    max_cols = getmaxx(stdscr);
     ProfWin *console = win_create_console();
     g_hash_table_insert(windows, GINT_TO_POINTER(1), console);
 
@@ -386,14 +377,6 @@ wins_close_by_num(int i)
     }
 }
 
-void
-wins_clear_current(void)
-{
-    ProfWin *window = wins_get_current();
-    werase(window->layout->win);
-    win_update_virtual(window);
-}
-
 gboolean
 wins_is_current(ProfWin *window)
 {
@@ -480,39 +463,11 @@ wins_get_total_unread(void)
 void
 wins_resize_all(void)
 {
-    int cols = getmaxx(stdscr);
-
     GList *values = g_hash_table_get_values(windows);
     GList *curr = values;
     while (curr) {
         ProfWin *window = curr->data;
-        int subwin_cols = 0;
-
-        if (window->layout->type == LAYOUT_SPLIT) {
-            ProfLayoutSplit *layout = (ProfLayoutSplit*)window->layout;
-            if (layout->subwin) {
-                if (window->type == WIN_CONSOLE) {
-                    subwin_cols = win_roster_cols();
-                } else if (window->type == WIN_MUC) {
-                    subwin_cols = win_occpuants_cols();
-                }
-                wresize(layout->base.win, PAD_SIZE, cols - subwin_cols);
-                wresize(layout->subwin, PAD_SIZE, subwin_cols);
-                if (window->type == WIN_CONSOLE) {
-                    rosterwin_roster();
-                } else if (window->type == WIN_MUC) {
-                    ProfMucWin *mucwin = (ProfMucWin *)window;
-                    assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
-                    occupantswin_occupants(mucwin->roomjid);
-                }
-            } else {
-                wresize(layout->base.win, PAD_SIZE, cols);
-            }
-        } else {
-            wresize(window->layout->win, PAD_SIZE, cols);
-        }
-
-        win_redraw(window);
+        win_resize(window);
         curr = g_list_next(curr);
     }
     g_list_free(values);
@@ -524,38 +479,19 @@ wins_resize_all(void)
 void
 wins_hide_subwin(ProfWin *window)
 {
-    int rows, cols;
-    getmaxyx(stdscr, rows, cols);
-
     win_hide_subwin(window);
 
     ProfWin *current_win = wins_get_current();
-    if ((current_win->type == WIN_MUC) || (current_win->type == WIN_CONSOLE)) {
-        pnoutrefresh(current_win->layout->win, current_win->layout->y_pos, 0, 1, 0, rows-3, cols-1);
-    }
+    win_refresh_without_subwin(current_win);
 }
 
 void
 wins_show_subwin(ProfWin *window)
 {
-    int rows, cols;
-    getmaxyx(stdscr, rows, cols);
-    int subwin_cols = 0;
-
     win_show_subwin(window);
 
     ProfWin *current_win = wins_get_current();
-    if (current_win->type == WIN_MUC) {
-        ProfLayoutSplit *layout = (ProfLayoutSplit*)current_win->layout;
-        subwin_cols = win_occpuants_cols();
-        pnoutrefresh(layout->base.win, layout->base.y_pos, 0, 1, 0, rows-3, (cols-subwin_cols)-1);
-        pnoutrefresh(layout->subwin, layout->sub_y_pos, 0, 1, (cols-subwin_cols), rows-3, cols-1);
-    } else if (current_win->type == WIN_CONSOLE) {
-        ProfLayoutSplit *layout = (ProfLayoutSplit*)current_win->layout;
-        subwin_cols = win_roster_cols();
-        pnoutrefresh(layout->base.win, layout->base.y_pos, 0, 1, 0, rows-3, (cols-subwin_cols)-1);
-        pnoutrefresh(layout->subwin, layout->sub_y_pos, 0, 1, (cols-subwin_cols), rows-3, cols-1);
-    }
+    win_refresh_with_subwin(current_win);
 }
 
 ProfXMLWin *

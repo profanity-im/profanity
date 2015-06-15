@@ -38,7 +38,7 @@
 #include "contact.h"
 #include "ui/ui.h"
 #include "ui/window.h"
-#include "ui/windows.h"
+#include "window_list.h"
 #include "config/preferences.h"
 #include "roster_list.h"
 

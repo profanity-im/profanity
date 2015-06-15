@@ -459,6 +459,46 @@ win_sub_page_up(ProfWin *window)
 }
 
 void
+win_clear(ProfWin *window)
+{
+    werase(window->layout->win);
+    win_update_virtual(window);
+}
+
+void
+win_resize(ProfWin *window)
+{
+    int subwin_cols = 0;
+    int cols = getmaxx(stdscr);
+
+    if (window->layout->type == LAYOUT_SPLIT) {
+        ProfLayoutSplit *layout = (ProfLayoutSplit*)window->layout;
+        if (layout->subwin) {
+            if (window->type == WIN_CONSOLE) {
+                subwin_cols = win_roster_cols();
+            } else if (window->type == WIN_MUC) {
+                subwin_cols = win_occpuants_cols();
+            }
+            wresize(layout->base.win, PAD_SIZE, cols - subwin_cols);
+            wresize(layout->subwin, PAD_SIZE, subwin_cols);
+            if (window->type == WIN_CONSOLE) {
+                rosterwin_roster();
+            } else if (window->type == WIN_MUC) {
+                ProfMucWin *mucwin = (ProfMucWin *)window;
+                assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
+                occupantswin_occupants(mucwin->roomjid);
+            }
+        } else {
+            wresize(layout->base.win, PAD_SIZE, cols);
+        }
+    } else {
+        wresize(window->layout->win, PAD_SIZE, cols);
+    }
+
+    win_redraw(window);
+}
+
+void
 win_mouse(ProfWin *window, const wint_t ch, const int result)
 {
     int rows = getmaxy(stdscr);
@@ -527,6 +567,37 @@ win_update_virtual(ProfWin *window)
         }
     } else {
         pnoutrefresh(window->layout->win, window->layout->y_pos, 0, 1, 0, rows-3, cols-1);
+    }
+}
+
+void
+win_refresh_without_subwin(ProfWin *window)
+{
+    int rows, cols;
+    getmaxyx(stdscr, rows, cols);
+
+    if ((window->type == WIN_MUC) || (window->type == WIN_CONSOLE)) {
+        pnoutrefresh(window->layout->win, window->layout->y_pos, 0, 1, 0, rows-3, cols-1);
+    }
+}
+
+void
+win_refresh_with_subwin(ProfWin *window)
+{
+    int rows, cols;
+    getmaxyx(stdscr, rows, cols);
+    int subwin_cols = 0;
+
+    if (window->type == WIN_MUC) {
+        ProfLayoutSplit *layout = (ProfLayoutSplit*)window->layout;
+        subwin_cols = win_occpuants_cols();
+        pnoutrefresh(layout->base.win, layout->base.y_pos, 0, 1, 0, rows-3, (cols-subwin_cols)-1);
+        pnoutrefresh(layout->subwin, layout->sub_y_pos, 0, 1, (cols-subwin_cols), rows-3, cols-1);
+    } else if (window->type == WIN_CONSOLE) {
+        ProfLayoutSplit *layout = (ProfLayoutSplit*)window->layout;
+        subwin_cols = win_roster_cols();
+        pnoutrefresh(layout->base.win, layout->base.y_pos, 0, 1, 0, rows-3, (cols-subwin_cols)-1);
+        pnoutrefresh(layout->subwin, layout->sub_y_pos, 0, 1, (cols-subwin_cols), rows-3, cols-1);
     }
 }
 

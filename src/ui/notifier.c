@@ -48,7 +48,7 @@
 #include "log.h"
 #include "muc.h"
 #include "ui/ui.h"
-#include "ui/windows.h"
+#include "window_list.h"
 #include "config/preferences.h"
 
 static void _notify(const char * const message, int timeout, const char * const category);

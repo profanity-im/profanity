@@ -38,7 +38,6 @@
 #include "config.h"
 
 #include <wchar.h>
-
 #include <glib.h>
 #ifdef HAVE_NCURSESW_NCURSES_H
 #include <ncursesw/ncurses.h>
@@ -48,8 +47,109 @@
 
 #include "contact.h"
 #include "jid.h"
-#include "ui/window.h"
 #include "xmpp/xmpp.h"
+#include "ui/buffer.h"
+#include "chat_state.h"
+#include "muc.h"
+
+#define LAYOUT_SPLIT_MEMCHECK       12345671
+#define PROFCHATWIN_MEMCHECK        22374522
+#define PROFMUCWIN_MEMCHECK         52345276
+#define PROFPRIVATEWIN_MEMCHECK     77437483
+#define PROFCONFWIN_MEMCHECK        64334685
+#define PROFXMLWIN_MEMCHECK         87333463
+
+#define NO_ME           1
+#define NO_DATE         2
+#define NO_EOL          4
+#define NO_COLOUR_FROM  8
+#define NO_COLOUR_DATE  16
+
+typedef enum {
+    LAYOUT_SIMPLE,
+    LAYOUT_SPLIT
+} layout_type_t;
+
+typedef struct prof_layout_t {
+    layout_type_t type;
+    WINDOW *win;
+    ProfBuff buffer;
+    int y_pos;
+    int paged;
+} ProfLayout;
+
+typedef struct prof_layout_simple_t {
+    ProfLayout base;
+} ProfLayoutSimple;
+
+typedef struct prof_layout_split_t {
+    ProfLayout base;
+    WINDOW *subwin;
+    int sub_y_pos;
+    unsigned long memcheck;
+} ProfLayoutSplit;
+
+typedef enum {
+    WIN_CONSOLE,
+    WIN_CHAT,
+    WIN_MUC,
+    WIN_MUC_CONFIG,
+    WIN_PRIVATE,
+    WIN_XML
+} win_type_t;
+
+typedef enum {
+    PROF_ENC_NONE,
+    PROF_ENC_OTR
+} prof_enc_t;
+
+typedef struct prof_win_t {
+    win_type_t type;
+    ProfLayout *layout;
+} ProfWin;
+
+typedef struct prof_console_win_t {
+    ProfWin window;
+} ProfConsoleWin;
+
+typedef struct prof_chat_win_t {
+    ProfWin window;
+    char *barejid;
+    int unread;
+    ChatState *state;
+    prof_enc_t enc_mode;
+    gboolean otr_is_trusted;
+    char *resource_override;
+    gboolean history_shown;
+    unsigned long memcheck;
+} ProfChatWin;
+
+typedef struct prof_muc_win_t {
+    ProfWin window;
+    char *roomjid;
+    int unread;
+    gboolean showjid;
+    unsigned long memcheck;
+} ProfMucWin;
+
+typedef struct prof_mucconf_win_t {
+    ProfWin window;
+    char *roomjid;
+    DataForm *form;
+    unsigned long memcheck;
+} ProfMucConfWin;
+
+typedef struct prof_private_win_t {
+    ProfWin window;
+    char *fulljid;
+    int unread;
+    unsigned long memcheck;
+} ProfPrivateWin;
+
+typedef struct prof_xml_win_t {
+    ProfWin window;
+    unsigned long memcheck;
+} ProfXMLWin;
 
 // ui startup and control
 void ui_init(void);
@@ -93,7 +193,6 @@ int ui_close_all_wins(void);
 int ui_close_read_wins(void);
 
 // current window actions
-void ui_clear_current(void);
 win_type_t ui_current_win_type(void);
 gboolean ui_current_win_is_otr(void);
 
@@ -224,6 +323,7 @@ void ui_page_up(void);
 void ui_page_down(void);
 void ui_subwin_page_up(void);
 void ui_subwin_page_down(void);
+void ui_clear_win(ProfWin *window);
 
 void ui_auto_away(void);
 void ui_end_auto_away(void);
@@ -332,11 +432,42 @@ void cons_show_contact_online(PContact contact, Resource *resource, GDateTime *l
 void cons_show_contact_offline(PContact contact, char *resource, char *status);
 void cons_theme_colours(void);
 
+// status bar
+void status_bar_inactive(const int win);
+void status_bar_active(const int win);
+void status_bar_new(const int win);
+void status_bar_set_all_inactive(void);
+
 // roster window
 void rosterwin_roster(void);
 
 // occupants window
 void occupantswin_occupants(const char * const room);
+
+// window interface
+ProfWin* win_create_console(void);
+ProfWin* win_create_xmlconsole(void);
+ProfWin* win_create_chat(const char * const barejid);
+ProfWin* win_create_muc(const char * const roomjid);
+ProfWin* win_create_muc_config(const char * const title, DataForm *form);
+ProfWin* win_create_private(const char * const fulljid);
+
+void win_update_virtual(ProfWin *window);
+void win_free(ProfWin *window);
+int win_unread(ProfWin *window);
+void win_resize(ProfWin *window);
+void win_hide_subwin(ProfWin *window);
+void win_show_subwin(ProfWin *window);
+void win_refresh_without_subwin(ProfWin *window);
+void win_refresh_with_subwin(ProfWin *window);
+void win_print(ProfWin *window, const char show_char, GTimeVal *tstamp, int flags, theme_item_t theme_item, const char * const from, const char * const message);
+void win_vprint(ProfWin *window, const char show_char, GTimeVal *tstamp, int flags, theme_item_t theme_item, const char * const from, const char * const message, ...);
+char* win_get_title(ProfWin *window);
+void win_show_occupant(ProfWin *window, Occupant *occupant);
+void win_show_occupant_info(ProfWin *window, const char * const room, Occupant *occupant);
+void win_show_contact(ProfWin *window, PContact contact);
+void win_show_info(ProfWin *window, PContact contact);
+void win_println(ProfWin *window, const char * const message);
 
 // desktop notifier actions
 void notifier_initialise(void);

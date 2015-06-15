@@ -50,7 +50,7 @@
 #include "config/preferences.h"
 #include "config/theme.h"
 #include "ui/window.h"
-#include "ui/windows.h"
+#include "window_list.h"
 #include "ui/ui.h"
 #include "ui/statusbar.h"
 #include "xmpp/xmpp.h"

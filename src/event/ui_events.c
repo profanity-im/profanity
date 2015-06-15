@@ -33,7 +33,7 @@
  */
 
 #include "ui/ui.h"
-#include "ui/windows.h"
+#include "window_list.h"
 
 void
 ui_ev_focus_win(ProfWin *win)

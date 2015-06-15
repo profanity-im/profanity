@@ -62,7 +62,8 @@
 #include "ui/ui.h"
 #include "ui/statusbar.h"
 #include "ui/inputwin.h"
-#include "ui/windows.h"
+#include "ui/window.h"
+#include "window_list.h"
 #include "event/ui_events.h"
 #include "xmpp/xmpp.h"
 
@@ -422,7 +423,8 @@ _inp_rl_getc(FILE *stream)
 static int
 _inp_rl_clear_handler(int count, int key)
 {
-    ui_clear_current();
+    ProfWin *win = wins_get_current();
+    win_clear(win);
     return 0;
 }
 
