@@ -131,11 +131,6 @@ gboolean ui_current_win_is_otr(void)
     return (gboolean)mock();
 }
 
-ProfChatWin *ui_get_current_chat(void)
-{
-    return (ProfChatWin*)mock();
-}
-
 void ui_current_print_line(const char * const msg, ...)
 {
     va_list args;
@@ -519,7 +514,7 @@ ProfWin* win_create_xmlconsole(void)
 }
 ProfWin* win_create_chat(const char * const barejid)
 {
-    return NULL;
+    return (ProfWin*)mock();
 }
 ProfWin* win_create_muc(const char * const roomjid)
 {

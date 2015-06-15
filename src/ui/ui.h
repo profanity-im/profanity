@@ -204,8 +204,6 @@ int ui_close_read_wins(void);
 win_type_t ui_current_win_type(void);
 gboolean ui_current_win_is_otr(void);
 
-ProfChatWin *ui_get_current_chat(void);
-
 void ui_current_print_line(const char * const msg, ...);
 void ui_current_print_formatted_line(const char show_char, int attrs, const char * const msg, ...);
 void ui_current_error_line(const char * const msg);

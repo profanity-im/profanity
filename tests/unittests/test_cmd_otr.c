@@ -17,6 +17,7 @@
 
 #include "command/command.h"
 #include "command/commands.h"
+#include "window_list.h"
 
 #include "ui/ui.h"
 #include "ui/stub_ui.h"
@@ -442,15 +443,21 @@ void cmd_otr_theirfp_shows_fingerprint(void **state)
     char *fingerprint = "AAAAAAAA BBBBBBBB CCCCCCCC DDDDDDDD EEEEEEEE";
     CommandHelp *help = malloc(sizeof(CommandHelp));
     gchar *args[] = { "theirfp", NULL };
-    ProfChatWin *chatwin = malloc(sizeof(ProfChatWin));
-    chatwin->barejid = strdup(recipient);
-    GString *message = g_string_new(chatwin->barejid);
+    GString *message = g_string_new(recipient);
     g_string_append(message, "'s OTR fingerprint: ");
     g_string_append(message, fingerprint);
 
+    ProfChatWin *chatwin = malloc(sizeof(ProfChatWin));
+    chatwin->barejid = strdup(recipient);
+    chatwin->memcheck = PROFCHATWIN_MEMCHECK;
+    will_return(win_create_chat, &chatwin->window);
+
+    wins_init();
+    wins_new_chat(recipient);
+    wins_set_current_by_num(2);
+
     will_return(jabber_get_connection_status, JABBER_CONNECTED);
     will_return(ui_current_win_type, WIN_CHAT);
-    will_return(ui_get_current_chat, chatwin);
     will_return(ui_current_win_is_otr, TRUE);
 
     expect_string(otr_get_their_fingerprint, recipient, chatwin->barejid);
@@ -463,8 +470,7 @@ void cmd_otr_theirfp_shows_fingerprint(void **state)
 
     g_string_free(message, TRUE);
     free(help);
-    free(chatwin->barejid);
-    free(chatwin);
+    wins_close_current();
 }
 
 static void
@@ -538,15 +544,21 @@ void
 cmd_otr_start_sends_otr_query_message_to_current_recipeint(void **state)
 {
     char *recipient = "buddy@chat.com";
-    ProfChatWin *chatwin = malloc(sizeof(ProfChatWin));
-    chatwin->barejid = strdup(recipient);
     char *query_message = "?OTR?";
     CommandHelp *help = malloc(sizeof(CommandHelp));
     gchar *args[] = { "start", NULL };
 
+    ProfChatWin *chatwin = malloc(sizeof(ProfChatWin));
+    chatwin->barejid = strdup(recipient);
+    chatwin->memcheck = PROFCHATWIN_MEMCHECK;
+    will_return(win_create_chat, &chatwin->window);
+
+    wins_init();
+    wins_new_chat(recipient);
+    wins_set_current_by_num(2);
+
     will_return(jabber_get_connection_status, JABBER_CONNECTED);
     will_return(ui_current_win_type, WIN_CHAT);
-    will_return(ui_get_current_chat, chatwin);
     will_return(ui_current_win_is_otr, FALSE);
     will_return(otr_key_loaded, TRUE);
     will_return(otr_start_query, query_message);
@@ -558,8 +570,7 @@ cmd_otr_start_sends_otr_query_message_to_current_recipeint(void **state)
     assert_true(result);
 
     free(help);
-    free(chatwin->barejid);
-    free(chatwin);
+    wins_close_current();
 }
 
 #else

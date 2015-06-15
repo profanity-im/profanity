@@ -405,12 +405,6 @@ ui_get_chat_recipients(void)
     return recipients;
 }
 
-ProfChatWin *
-ui_get_current_chat(void)
-{
-    return wins_get_current_chat();
-}
-
 void
 ui_message_receipt(const char * const barejid, const char * const id)
 {
