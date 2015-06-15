@@ -464,39 +464,11 @@ wins_get_total_unread(void)
 void
 wins_resize_all(void)
 {
-    int cols = getmaxx(stdscr);
-
     GList *values = g_hash_table_get_values(windows);
     GList *curr = values;
     while (curr) {
         ProfWin *window = curr->data;
-        int subwin_cols = 0;
-
-        if (window->layout->type == LAYOUT_SPLIT) {
-            ProfLayoutSplit *layout = (ProfLayoutSplit*)window->layout;
-            if (layout->subwin) {
-                if (window->type == WIN_CONSOLE) {
-                    subwin_cols = win_roster_cols();
-                } else if (window->type == WIN_MUC) {
-                    subwin_cols = win_occpuants_cols();
-                }
-                wresize(layout->base.win, PAD_SIZE, cols - subwin_cols);
-                wresize(layout->subwin, PAD_SIZE, subwin_cols);
-                if (window->type == WIN_CONSOLE) {
-                    rosterwin_roster();
-                } else if (window->type == WIN_MUC) {
-                    ProfMucWin *mucwin = (ProfMucWin *)window;
-                    assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
-                    occupantswin_occupants(mucwin->roomjid);
-                }
-            } else {
-                wresize(layout->base.win, PAD_SIZE, cols);
-            }
-        } else {
-            wresize(window->layout->win, PAD_SIZE, cols);
-        }
-
-        win_redraw(window);
+        win_resize(window);
         curr = g_list_next(curr);
     }
     g_list_free(values);

@@ -466,6 +466,39 @@ win_clear(ProfWin *window)
 }
 
 void
+win_resize(ProfWin *window)
+{
+    int subwin_cols = 0;
+    int cols = getmaxx(stdscr);
+
+    if (window->layout->type == LAYOUT_SPLIT) {
+        ProfLayoutSplit *layout = (ProfLayoutSplit*)window->layout;
+        if (layout->subwin) {
+            if (window->type == WIN_CONSOLE) {
+                subwin_cols = win_roster_cols();
+            } else if (window->type == WIN_MUC) {
+                subwin_cols = win_occpuants_cols();
+            }
+            wresize(layout->base.win, PAD_SIZE, cols - subwin_cols);
+            wresize(layout->subwin, PAD_SIZE, subwin_cols);
+            if (window->type == WIN_CONSOLE) {
+                rosterwin_roster();
+            } else if (window->type == WIN_MUC) {
+                ProfMucWin *mucwin = (ProfMucWin *)window;
+                assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
+                occupantswin_occupants(mucwin->roomjid);
+            }
+        } else {
+            wresize(layout->base.win, PAD_SIZE, cols);
+        }
+    } else {
+        wresize(window->layout->win, PAD_SIZE, cols);
+    }
+
+    win_redraw(window);
+}
+
+void
 win_mouse(ProfWin *window, const wint_t ch, const int result)
 {
     int rows = getmaxy(stdscr);
