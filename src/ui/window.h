@@ -39,17 +39,17 @@
 
 #include <wchar.h>
 
-#ifdef HAVE_NCURSESW_NCURSES_H
-#include <ncursesw/ncurses.h>
-#elif HAVE_NCURSES_H
-#include <ncurses.h>
-#endif
-
 #include "contact.h"
 #include "muc.h"
 #include "ui/buffer.h"
 #include "xmpp/xmpp.h"
 #include "chat_state.h"
+
+#ifdef HAVE_NCURSESW_NCURSES_H
+#include <ncursesw/ncurses.h>
+#elif HAVE_NCURSES_H
+#include <ncurses.h>
+#endif
 
 #define NO_ME           1
 #define NO_DATE         2

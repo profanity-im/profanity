@@ -38,11 +38,6 @@
 #include "config.h"
 
 #include <glib.h>
-#ifdef HAVE_NCURSESW_NCURSES_H
-#include <ncursesw/ncurses.h>
-#elif HAVE_NCURSES_H
-#include <ncurses.h>
-#endif
 
 #define PREFS_MIN_LOG_SIZE 64
 #define PREFS_MAX_LOG_SIZE 1048580
