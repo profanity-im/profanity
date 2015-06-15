@@ -3229,7 +3229,8 @@ cmd_tiny(gchar **args, struct cmd_help_t help)
 gboolean
 cmd_clear(gchar **args, struct cmd_help_t help)
 {
-    ui_clear_current();
+    ProfWin *win = wins_get_current();
+    win_clear(win);
     return TRUE;
 }
 

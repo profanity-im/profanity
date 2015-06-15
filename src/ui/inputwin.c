@@ -422,7 +422,8 @@ _inp_rl_getc(FILE *stream)
 static int
 _inp_rl_clear_handler(int count, int key)
 {
-    ui_clear_current();
+    ProfWin *win = wins_get_current();
+    win_clear(win);
     return 0;
 }
 

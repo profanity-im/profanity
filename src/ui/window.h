@@ -192,6 +192,8 @@ void win_mark_received(ProfWin *window, const char * const id);
 int win_unread(ProfWin *window);
 gboolean win_has_active_subwin(ProfWin *window);
 
+void win_clear(ProfWin *window);
+
 void win_page_up(ProfWin *window);
 void win_page_down(ProfWin *window);
 void win_sub_page_down(ProfWin *window);

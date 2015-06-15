@@ -68,7 +68,6 @@ int wins_get_num(ProfWin *window);
 int wins_get_current_num(void);
 void wins_close_current(void);
 void wins_close_by_num(int i);
-void wins_clear_current(void);
 gboolean wins_is_current(ProfWin *window);
 int wins_get_total_unread(void);
 void wins_resize_all(void);

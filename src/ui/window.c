@@ -459,6 +459,13 @@ win_sub_page_up(ProfWin *window)
 }
 
 void
+win_clear(ProfWin *window)
+{
+    werase(window->layout->win);
+    win_update_virtual(window);
+}
+
+void
 win_mouse(ProfWin *window, const wint_t ch, const int result)
 {
     int rows = getmaxy(stdscr);

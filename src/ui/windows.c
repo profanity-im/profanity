@@ -378,14 +378,6 @@ wins_close_by_num(int i)
     }
 }
 
-void
-wins_clear_current(void)
-{
-    ProfWin *window = wins_get_current();
-    werase(window->layout->win);
-    win_update_virtual(window);
-}
-
 gboolean
 wins_is_current(ProfWin *window)
 {

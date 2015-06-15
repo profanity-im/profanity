@@ -1083,12 +1083,6 @@ ui_untrust(const char * const barejid)
 }
 
 void
-ui_clear_current(void)
-{
-    wins_clear_current();
-}
-
-void
 ui_close_win(int index)
 {
     ProfWin *window = wins_get_by_num(index);
