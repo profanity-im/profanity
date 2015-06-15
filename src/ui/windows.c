@@ -51,7 +51,6 @@
 
 static GHashTable *windows;
 static int current;
-static int max_cols;
 
 void
 wins_init(void)
@@ -59,7 +58,6 @@ wins_init(void)
     windows = g_hash_table_new_full(g_direct_hash, g_direct_equal, NULL,
         (GDestroyNotify)win_free);
 
-    max_cols = getmaxx(stdscr);
     ProfWin *console = win_create_console();
     g_hash_table_insert(windows, GINT_TO_POINTER(1), console);
 
