@@ -4200,29 +4200,34 @@ cmd_otr(gchar **args, struct cmd_help_t help)
     } else if (strcmp(args[0], "myfp") == 0) {
         if (!otr_key_loaded()) {
             ui_current_print_formatted_line('!', 0, "You have not generated or loaded a private key, use '/otr gen'");
-        } else {
-            char *fingerprint = otr_get_my_fingerprint();
-            ui_current_print_formatted_line('!', 0, "Your OTR fingerprint: %s", fingerprint);
-            free(fingerprint);
+            return TRUE;
         }
+
+        char *fingerprint = otr_get_my_fingerprint();
+        ui_current_print_formatted_line('!', 0, "Your OTR fingerprint: %s", fingerprint);
+        free(fingerprint);
         return TRUE;
 
     } else if (strcmp(args[0], "theirfp") == 0) {
         win_type_t win_type = ui_current_win_type();
-
         if (win_type != WIN_CHAT) {
             ui_current_print_line("You must be in a regular chat window to view a recipient's fingerprint.");
-        } else if (!ui_current_win_is_otr()) {
-            ui_current_print_formatted_line('!', 0, "You are not currently in an OTR session.");
-        } else {
-            ProfChatWin *chatwin = wins_get_current_chat();
-            char *fingerprint = otr_get_their_fingerprint(chatwin->barejid);
-            ui_current_print_formatted_line('!', 0, "%s's OTR fingerprint: %s", chatwin->barejid, fingerprint);
-            free(fingerprint);
+            return TRUE;
         }
+
+        ProfChatWin *chatwin = wins_get_current_chat();
+        if (chatwin->enc_mode != PROF_ENC_OTR) {
+            ui_current_print_formatted_line('!', 0, "You are not currently in an OTR session.");
+            return TRUE;
+        }
+
+        char *fingerprint = otr_get_their_fingerprint(chatwin->barejid);
+        ui_current_print_formatted_line('!', 0, "%s's OTR fingerprint: %s", chatwin->barejid, fingerprint);
+        free(fingerprint);
         return TRUE;
 
     } else if (strcmp(args[0], "start") == 0) {
+        // recipient supplied
         if (args[1]) {
             char *contact = args[1];
             char *barejid = roster_barejid_from_name(contact);
@@ -4236,131 +4241,165 @@ cmd_otr(gchar **args, struct cmd_help_t help)
             }
             ui_ev_focus_win((ProfWin*)chatwin);
 
-            if (ui_current_win_is_otr()) {
+            if (chatwin->enc_mode == PROF_ENC_OTR) {
                 ui_current_print_formatted_line('!', 0, "You are already in an OTR session.");
-            } else {
-                if (!otr_key_loaded()) {
-                    ui_current_print_formatted_line('!', 0, "You have not generated or loaded a private key, use '/otr gen'");
-                } else if (!otr_is_secure(barejid)) {
-                    char *otr_query_message = otr_start_query();
-                    message_send_chat_encrypted(barejid, otr_query_message);
-                } else {
-                    ui_gone_secure(barejid, otr_is_trusted(barejid));
-                }
+                return TRUE;
             }
+
+            if (!otr_key_loaded()) {
+                ui_current_print_formatted_line('!', 0, "You have not generated or loaded a private key, use '/otr gen'");
+                return TRUE;
+            }
+
+            if (!otr_is_secure(barejid)) {
+                char *otr_query_message = otr_start_query();
+                message_send_chat_encrypted(barejid, otr_query_message);
+                return TRUE;
+            }
+
+            ui_gone_secure(barejid, otr_is_trusted(barejid));
+            return TRUE;
+
+        // no recipient, use current chat
         } else {
             win_type_t win_type = ui_current_win_type();
-
             if (win_type != WIN_CHAT) {
                 ui_current_print_line("You must be in a regular chat window to start an OTR session.");
-            } else if (ui_current_win_is_otr()) {
-                ui_current_print_formatted_line('!', 0, "You are already in an OTR session.");
-            } else {
-                if (!otr_key_loaded()) {
-                    ui_current_print_formatted_line('!', 0, "You have not generated or loaded a private key, use '/otr gen'");
-                } else {
-                    ProfChatWin *chatwin = wins_get_current_chat();
-                    char *otr_query_message = otr_start_query();
-                    message_send_chat_encrypted(chatwin->barejid, otr_query_message);
-                }
+                return TRUE;
             }
+
+            ProfChatWin *chatwin = wins_get_current_chat();
+            if (chatwin->enc_mode == PROF_ENC_OTR) {
+                ui_current_print_formatted_line('!', 0, "You are already in an OTR session.");
+                return TRUE;
+            }
+
+            if (!otr_key_loaded()) {
+                ui_current_print_formatted_line('!', 0, "You have not generated or loaded a private key, use '/otr gen'");
+                return TRUE;
+            }
+
+            char *otr_query_message = otr_start_query();
+            message_send_chat_encrypted(chatwin->barejid, otr_query_message);
+            return TRUE;
         }
-        return TRUE;
 
     } else if (strcmp(args[0], "end") == 0) {
         win_type_t win_type = ui_current_win_type();
-
         if (win_type != WIN_CHAT) {
             ui_current_print_line("You must be in a regular chat window to use OTR.");
-        } else if (!ui_current_win_is_otr()) {
-            ui_current_print_formatted_line('!', 0, "You are not currently in an OTR session.");
-        } else {
-            ProfChatWin *chatwin = wins_get_current_chat();
-            ui_gone_insecure(chatwin->barejid);
-            otr_end_session(chatwin->barejid);
+            return TRUE;
         }
+
+        ProfChatWin *chatwin = wins_get_current_chat();
+        if (chatwin->enc_mode != PROF_ENC_OTR) {
+            ui_current_print_formatted_line('!', 0, "You are not currently in an OTR session.");
+            return TRUE;
+        }
+
+        ui_gone_insecure(chatwin->barejid);
+        otr_end_session(chatwin->barejid);
         return TRUE;
 
     } else if (strcmp(args[0], "trust") == 0) {
         win_type_t win_type = ui_current_win_type();
-
         if (win_type != WIN_CHAT) {
             ui_current_print_line("You must be in an OTR session to trust a recipient.");
-        } else if (!ui_current_win_is_otr()) {
-            ui_current_print_formatted_line('!', 0, "You are not currently in an OTR session.");
-        } else {
-            ProfChatWin *chatwin = wins_get_current_chat();
-            ui_trust(chatwin->barejid);
-            otr_trust(chatwin->barejid);
+            return TRUE;
         }
+
+        ProfChatWin *chatwin = wins_get_current_chat();
+        if (chatwin->enc_mode != PROF_ENC_OTR) {
+            ui_current_print_formatted_line('!', 0, "You are not currently in an OTR session.");
+            return TRUE;
+        }
+
+        ui_trust(chatwin->barejid);
+        otr_trust(chatwin->barejid);
         return TRUE;
 
     } else if (strcmp(args[0], "untrust") == 0) {
         win_type_t win_type = ui_current_win_type();
-
         if (win_type != WIN_CHAT) {
             ui_current_print_line("You must be in an OTR session to untrust a recipient.");
-        } else if (!ui_current_win_is_otr()) {
-            ui_current_print_formatted_line('!', 0, "You are not currently in an OTR session.");
-        } else {
-            ProfChatWin *chatwin = wins_get_current_chat();
-            ui_untrust(chatwin->barejid);
-            otr_untrust(chatwin->barejid);
+            return TRUE;
         }
+
+        ProfChatWin *chatwin = wins_get_current_chat();
+        if (chatwin->enc_mode != PROF_ENC_OTR) {
+            ui_current_print_formatted_line('!', 0, "You are not currently in an OTR session.");
+            return TRUE;
+        }
+
+        ui_untrust(chatwin->barejid);
+        otr_untrust(chatwin->barejid);
         return TRUE;
 
     } else if (strcmp(args[0], "secret") == 0) {
         win_type_t win_type = ui_current_win_type();
         if (win_type != WIN_CHAT) {
             ui_current_print_line("You must be in an OTR session to trust a recipient.");
-        } else if (!ui_current_win_is_otr()) {
-            ui_current_print_formatted_line('!', 0, "You are not currently in an OTR session.");
-        } else {
-            char *secret = args[1];
-            if (secret == NULL) {
-                cons_show("Usage: %s", help.usage);
-            } else {
-                ProfChatWin *chatwin = wins_get_current_chat();
-                otr_smp_secret(chatwin->barejid, secret);
-            }
+            return TRUE;
         }
+
+        ProfChatWin *chatwin = wins_get_current_chat();
+        if (chatwin->enc_mode != PROF_ENC_OTR) {
+            ui_current_print_formatted_line('!', 0, "You are not currently in an OTR session.");
+            return TRUE;
+        }
+
+        char *secret = args[1];
+        if (secret == NULL) {
+            cons_show("Usage: %s", help.usage);
+            return TRUE;
+        }
+
+        otr_smp_secret(chatwin->barejid, secret);
         return TRUE;
 
     } else if (strcmp(args[0], "question") == 0) {
         char *question = args[1];
         char *answer = args[2];
-
         if (question == NULL || answer == NULL) {
             cons_show("Usage: %s", help.usage);
             return TRUE;
-        } else {
-            win_type_t win_type = ui_current_win_type();
-            if (win_type != WIN_CHAT) {
-                ui_current_print_line("You must be in an OTR session to trust a recipient.");
-            } else if (!ui_current_win_is_otr()) {
-                ui_current_print_formatted_line('!', 0, "You are not currently in an OTR session.");
-            } else {
-                ProfChatWin *chatwin = wins_get_current_chat();
-                otr_smp_question(chatwin->barejid, question, answer);
-            }
+        }
+
+        win_type_t win_type = ui_current_win_type();
+        if (win_type != WIN_CHAT) {
+            ui_current_print_line("You must be in an OTR session to trust a recipient.");
             return TRUE;
         }
+
+        ProfChatWin *chatwin = wins_get_current_chat();
+        if (chatwin->enc_mode != PROF_ENC_OTR) {
+            ui_current_print_formatted_line('!', 0, "You are not currently in an OTR session.");
+            return TRUE;
+        }
+
+        otr_smp_question(chatwin->barejid, question, answer);
+        return TRUE;
 
     } else if (strcmp(args[0], "answer") == 0) {
         win_type_t win_type = ui_current_win_type();
         if (win_type != WIN_CHAT) {
             ui_current_print_line("You must be in an OTR session to trust a recipient.");
-        } else if (!ui_current_win_is_otr()) {
-            ui_current_print_formatted_line('!', 0, "You are not currently in an OTR session.");
-        } else {
-            char *answer = args[1];
-            if (answer == NULL) {
-                cons_show("Usage: %s", help.usage);
-            } else {
-                ProfChatWin *chatwin = wins_get_current_chat();
-                otr_smp_answer(chatwin->barejid, answer);
-            }
+            return TRUE;
         }
+
+        ProfChatWin *chatwin = wins_get_current_chat();
+        if (chatwin->enc_mode != PROF_ENC_OTR) {
+            ui_current_print_formatted_line('!', 0, "You are not currently in an OTR session.");
+            return TRUE;
+        }
+
+        char *answer = args[1];
+        if (answer == NULL) {
+            cons_show("Usage: %s", help.usage);
+            return TRUE;
+        }
+
+        otr_smp_answer(chatwin->barejid, answer);
         return TRUE;
 
     } else {

@@ -126,11 +126,6 @@ win_type_t ui_current_win_type(void)
     return (win_type_t)mock();
 }
 
-gboolean ui_current_win_is_otr(void)
-{
-    return (gboolean)mock();
-}
-
 void ui_current_print_line(const char * const msg, ...)
 {
     va_list args;

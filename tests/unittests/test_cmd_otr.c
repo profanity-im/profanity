@@ -422,12 +422,21 @@ void cmd_otr_theirfp_shows_message_when_in_private(void **state)
 
 void cmd_otr_theirfp_shows_message_when_non_otr_chat_window(void **state)
 {
+    char *recipient = "someuser@someserver.com";
     CommandHelp *help = malloc(sizeof(CommandHelp));
     gchar *args[] = { "theirfp", NULL };
 
     will_return(jabber_get_connection_status, JABBER_CONNECTED);
     will_return(ui_current_win_type, WIN_CHAT);
-    will_return(ui_current_win_is_otr, FALSE);
+
+    ProfChatWin *chatwin = malloc(sizeof(ProfChatWin));
+    chatwin->barejid = strdup(recipient);
+    chatwin->memcheck = PROFCHATWIN_MEMCHECK;
+    will_return(win_create_chat, &chatwin->window);
+
+    wins_init();
+    wins_new_chat(recipient);
+    wins_set_current_by_num(2);
 
     expect_ui_current_print_formatted_line('!', 0, "You are not currently in an OTR session.");
 
@@ -435,6 +444,7 @@ void cmd_otr_theirfp_shows_message_when_non_otr_chat_window(void **state)
     assert_true(result);
 
     free(help);
+    wins_close_current();
 }
 
 void cmd_otr_theirfp_shows_fingerprint(void **state)
@@ -450,6 +460,7 @@ void cmd_otr_theirfp_shows_fingerprint(void **state)
     ProfChatWin *chatwin = malloc(sizeof(ProfChatWin));
     chatwin->barejid = strdup(recipient);
     chatwin->memcheck = PROFCHATWIN_MEMCHECK;
+    chatwin->enc_mode = PROF_ENC_OTR;
     will_return(win_create_chat, &chatwin->window);
 
     wins_init();
@@ -458,7 +469,6 @@ void cmd_otr_theirfp_shows_fingerprint(void **state)
 
     will_return(jabber_get_connection_status, JABBER_CONNECTED);
     will_return(ui_current_win_type, WIN_CHAT);
-    will_return(ui_current_win_is_otr, TRUE);
 
     expect_string(otr_get_their_fingerprint, recipient, chatwin->barejid);
     will_return(otr_get_their_fingerprint, strdup(fingerprint));
@@ -507,12 +517,22 @@ void cmd_otr_start_shows_message_when_in_private(void **state)
 
 void cmd_otr_start_shows_message_when_already_started(void **state)
 {
+    char *recipient = "someone@server.org";
     CommandHelp *help = malloc(sizeof(CommandHelp));
     gchar *args[] = { "start", NULL };
 
     will_return(jabber_get_connection_status, JABBER_CONNECTED);
     will_return(ui_current_win_type, WIN_CHAT);
-    will_return(ui_current_win_is_otr, TRUE);
+
+    ProfChatWin *chatwin = malloc(sizeof(ProfChatWin));
+    chatwin->barejid = strdup(recipient);
+    chatwin->memcheck = PROFCHATWIN_MEMCHECK;
+    chatwin->enc_mode = PROF_ENC_OTR;
+    will_return(win_create_chat, &chatwin->window);
+
+    wins_init();
+    wins_new_chat(recipient);
+    wins_set_current_by_num(2);
 
     expect_ui_current_print_formatted_line('!', 0, "You are already in an OTR session.");
 
@@ -520,17 +540,28 @@ void cmd_otr_start_shows_message_when_already_started(void **state)
     assert_true(result);
 
     free(help);
+    wins_close_current();
 }
 
 void cmd_otr_start_shows_message_when_no_key(void **state)
 {
+    char *recipient = "someone@server.org";
     CommandHelp *help = malloc(sizeof(CommandHelp));
     gchar *args[] = { "start", NULL };
 
     will_return(jabber_get_connection_status, JABBER_CONNECTED);
     will_return(ui_current_win_type, WIN_CHAT);
-    will_return(ui_current_win_is_otr, FALSE);
     will_return(otr_key_loaded, FALSE);
+
+    ProfChatWin *chatwin = malloc(sizeof(ProfChatWin));
+    chatwin->barejid = strdup(recipient);
+    chatwin->memcheck = PROFCHATWIN_MEMCHECK;
+    chatwin->enc_mode = PROF_ENC_NONE;
+    will_return(win_create_chat, &chatwin->window);
+
+    wins_init();
+    wins_new_chat(recipient);
+    wins_set_current_by_num(2);
 
     expect_ui_current_print_formatted_line('!', 0, "You have not generated or loaded a private key, use '/otr gen'");
 
@@ -538,6 +569,7 @@ void cmd_otr_start_shows_message_when_no_key(void **state)
     assert_true(result);
 
     free(help);
+    wins_close_current();
 }
 
 void
@@ -559,7 +591,6 @@ cmd_otr_start_sends_otr_query_message_to_current_recipeint(void **state)
 
     will_return(jabber_get_connection_status, JABBER_CONNECTED);
     will_return(ui_current_win_type, WIN_CHAT);
-    will_return(ui_current_win_is_otr, FALSE);
     will_return(otr_key_loaded, TRUE);
     will_return(otr_start_query, query_message);
 
