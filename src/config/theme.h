@@ -38,11 +38,6 @@
 #include "prof_config.h"
 
 #include <glib.h>
-#ifdef PROF_HAVE_NCURSESW_NCURSES_H
-#include <ncursesw/ncurses.h>
-#elif PROF_HAVE_NCURSES_H
-#include <ncurses.h>
-#endif
 
 typedef enum {
     THEME_TEXT,

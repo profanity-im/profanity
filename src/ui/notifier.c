@@ -48,7 +48,7 @@
 #include "log.h"
 #include "muc.h"
 #include "ui/ui.h"
-#include "ui/windows.h"
+#include "window_list.h"
 #include "config/preferences.h"
 
 static GTimer *remind_timer;

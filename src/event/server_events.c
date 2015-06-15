@@ -45,8 +45,6 @@
 #include "roster_list.h"
 #include "plugins/plugins.h"
 
-#include "ui/windows.h"
-
 #ifdef PROF_HAVE_LIBOTR
 #include "otr/otr.h"
 #endif

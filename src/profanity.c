@@ -63,7 +63,7 @@
 #include "resource.h"
 #include "xmpp/xmpp.h"
 #include "ui/ui.h"
-#include "ui/windows.h"
+#include "window_list.h"
 #include "event/client_events.h"
 
 static void _check_autoaway(void);

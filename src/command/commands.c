@@ -65,7 +65,7 @@
 #include "xmpp/xmpp.h"
 #include "xmpp/bookmark.h"
 #include "ui/ui.h"
-#include "ui/windows.h"
+#include "window_list.h"
 #include "event/client_events.h"
 #include "event/ui_events.h"
 
@@ -3237,7 +3237,8 @@ cmd_tiny(gchar **args, struct cmd_help_t help)
 gboolean
 cmd_clear(gchar **args, struct cmd_help_t help)
 {
-    ui_clear_current();
+    ProfWin *win = wins_get_current();
+    ui_clear_win(win);
     return TRUE;
 }
 

@@ -67,7 +67,7 @@
 #include "xmpp/xmpp.h"
 #include "xmpp/bookmark.h"
 #include "ui/ui.h"
-#include "ui/windows.h"
+#include "window_list.h"
 
 typedef char*(*autocompleter)(char*, int*);
 

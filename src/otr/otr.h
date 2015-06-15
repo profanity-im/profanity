@@ -39,7 +39,7 @@
 #include <libotr/message.h>
 
 #include "config/accounts.h"
-#include "ui/window.h"
+#include "ui/ui.h"
 
 typedef enum {
     PROF_OTRPOLICY_MANUAL,

@@ -72,7 +72,7 @@
 #include "ui/statusbar.h"
 #include "ui/inputwin.h"
 #include "ui/window.h"
-#include "ui/windows.h"
+#include "window_list.h"
 #include "xmpp/xmpp.h"
 #include "plugins/plugins.h"
 #include "event/ui_events.h"
@@ -1085,12 +1085,6 @@ ui_untrust(const char * const barejid)
             title_bar_switch();
         }
     }
-}
-
-void
-ui_clear_current(void)
-{
-    wins_clear_current();
 }
 
 void
@@ -2225,6 +2219,12 @@ void
 ui_clear_win_title(void)
 {
     printf("%c]0;%c", '\033', '\007');
+}
+
+void
+ui_clear_win(ProfWin *window)
+{
+    win_clear(window);
 }
 
 void

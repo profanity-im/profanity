@@ -1,5 +1,5 @@
 /*
- * windows.h
+ * window_list.h
  *
  * Copyright (C) 2012 - 2015 James Booth <boothj5@gmail.com>
  *
@@ -32,10 +32,10 @@
  *
  */
 
-#ifndef UI_WINDOWS_H
-#define UI_WINDOWS_H
+#ifndef WINDOW_LIST_H
+#define WINDOW_LIST_H
 
-#include "ui/window.h"
+#include "ui/ui.h"
 
 void wins_init(void);
 
@@ -70,7 +70,6 @@ int wins_get_num(ProfWin *window);
 int wins_get_current_num(void);
 void wins_close_current(void);
 void wins_close_by_num(int i);
-void wins_clear_current(void);
 gboolean wins_is_current(ProfWin *window);
 int wins_get_total_unread(void);
 void wins_resize_all(void);

@@ -41,12 +41,6 @@
 #include <glib.h>
 #include <glib/gstdio.h>
 
-#ifdef PROF_HAVE_NCURSESW_NCURSES_H
-#include <ncursesw/ncurses.h>
-#elif PROF_HAVE_NCURSES_H
-#include <ncurses.h>
-#endif
-
 #include "common.h"
 #include "log.h"
 #include "preferences.h"

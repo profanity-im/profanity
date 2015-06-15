@@ -40,11 +40,11 @@
 #include "plugins/callbacks.h"
 #include "plugins/autocompleters.h"
 #include "profanity.h"
-#include "ui/windows.h"
 #include "ui/ui.h"
 #include "config/theme.h"
 #include "command/command.h"
 #include "event/ui_events.h"
+#include "window_list.h"
 
 void
 api_cons_alert(void)
@@ -176,7 +176,7 @@ api_win_create(const char *tag, void *callback,
     // set status bar active
     ProfPluginWin *pluginwin = wins_get_plugin(tag);
     int num = wins_get_num((ProfWin*)pluginwin);
-    ui_status_bar_active(num);
+    status_bar_active(num);
 }
 
 void

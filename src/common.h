@@ -38,12 +38,6 @@
 #include <stdio.h>
 #include <wchar.h>
 
-#ifdef HAVE_NCURSESW_NCURSES_H
-#include <ncursesw/ncurses.h>
-#elif HAVE_NCURSES_H
-#include <ncurses.h>
-#endif
-
 #include <glib.h>
 
 #if !GLIB_CHECK_VERSION(2,28,0)
@@ -113,7 +107,6 @@ char * str_replace(const char *string, const char *substr,
 int str_contains(const char str[], int size, char ch);
 gboolean strtoi_range(char *str, int *saveptr, int min, int max, char **err_msg);
 int utf8_display_len(const char * const str);
-gboolean utf8_is_printable(const wint_t ch);
 char * prof_getline(FILE *stream);
 char* release_get_latest(void);
 gboolean release_is_new(char *found_version);
