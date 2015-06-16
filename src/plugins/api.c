@@ -106,14 +106,15 @@ api_notify(const char *message, const char *category, int timeout_ms)
 void
 api_send_line(char *line)
 {
-    cmd_process_input(line);
+    ProfWin *current = wins_get_current();
+    cmd_process_input(current, line);
 }
 
 char *
 api_get_current_recipient(void)
 {
-    win_type_t win_type = ui_current_win_type();
-    if (win_type == WIN_CHAT) {
+    ProfWin *current = wins_get_current();
+    if (current->type == WIN_CHAT) {
         ProfChatWin *chatwin = wins_get_current_chat();
         return chatwin->barejid;
     } else {
@@ -124,8 +125,8 @@ api_get_current_recipient(void)
 char *
 api_get_current_muc(void)
 {
-    win_type_t win_type = ui_current_win_type();
-    if (win_type == WIN_MUC) {
+    ProfWin *current = wins_get_current();
+    if (current->type == WIN_MUC) {
         ProfMucWin *mucwin = wins_get_current_muc();
         return mucwin->roomjid;
     } else {

@@ -22,7 +22,7 @@ static void test_with_connection_status(jabber_conn_status_t status)
 
     expect_cons_show("You are either connected already, or a login is in process.");
 
-    gboolean result = cmd_connect(NULL, *help);
+    gboolean result = cmd_connect(NULL, NULL, *help);
     assert_true(result);
 
     free(help);
@@ -59,7 +59,7 @@ void cmd_connect_shows_usage_when_no_server_value(void **state)
     expect_cons_show("Usage: some usage");
     expect_cons_show("");
 
-    gboolean result = cmd_connect(args, *help);
+    gboolean result = cmd_connect(NULL, args, *help);
     assert_true(result);
 
     free(help);
@@ -76,7 +76,7 @@ void cmd_connect_shows_usage_when_server_no_port_value(void **state)
     expect_cons_show("Usage: some usage");
     expect_cons_show("");
 
-    gboolean result = cmd_connect(args, *help);
+    gboolean result = cmd_connect(NULL, args, *help);
     assert_true(result);
 
     free(help);
@@ -93,7 +93,7 @@ void cmd_connect_shows_usage_when_no_port_value(void **state)
     expect_cons_show("Usage: some usage");
     expect_cons_show("");
 
-    gboolean result = cmd_connect(args, *help);
+    gboolean result = cmd_connect(NULL, args, *help);
     assert_true(result);
 
     free(help);
@@ -110,7 +110,7 @@ void cmd_connect_shows_usage_when_port_no_server_value(void **state)
     expect_cons_show("Usage: some usage");
     expect_cons_show("");
 
-    gboolean result = cmd_connect(args, *help);
+    gboolean result = cmd_connect(NULL, args, *help);
     assert_true(result);
 
     free(help);
@@ -126,7 +126,7 @@ void cmd_connect_shows_message_when_port_0(void **state)
     expect_cons_show("Value 0 out of range. Must be in 1..65535.");
     expect_cons_show("");
 
-    gboolean result = cmd_connect(args, *help);
+    gboolean result = cmd_connect(NULL, args, *help);
     assert_true(result);
 
     free(help);
@@ -142,7 +142,7 @@ void cmd_connect_shows_message_when_port_minus1(void **state)
     expect_cons_show("Value -1 out of range. Must be in 1..65535.");
     expect_cons_show("");
 
-    gboolean result = cmd_connect(args, *help);
+    gboolean result = cmd_connect(NULL, args, *help);
     assert_true(result);
 
     free(help);
@@ -158,7 +158,7 @@ void cmd_connect_shows_message_when_port_65536(void **state)
     expect_cons_show("Value 65536 out of range. Must be in 1..65535.");
     expect_cons_show("");
 
-    gboolean result = cmd_connect(args, *help);
+    gboolean result = cmd_connect(NULL, args, *help);
     assert_true(result);
 
     free(help);
@@ -174,7 +174,7 @@ void cmd_connect_shows_message_when_port_contains_chars(void **state)
     expect_cons_show("Could not convert \"52f66\" to a number.");
     expect_cons_show("");
 
-    gboolean result = cmd_connect(args, *help);
+    gboolean result = cmd_connect(NULL, args, *help);
     assert_true(result);
 
     free(help);
@@ -191,7 +191,7 @@ void cmd_connect_shows_usage_when_server_provided_twice(void **state)
     expect_cons_show("Usage: some usage");
     expect_cons_show("");
 
-    gboolean result = cmd_connect(args, *help);
+    gboolean result = cmd_connect(NULL, args, *help);
     assert_true(result);
 
     free(help);
@@ -208,7 +208,7 @@ void cmd_connect_shows_usage_when_port_provided_twice(void **state)
     expect_cons_show("Usage: some usage");
     expect_cons_show("");
 
-    gboolean result = cmd_connect(args, *help);
+    gboolean result = cmd_connect(NULL, args, *help);
     assert_true(result);
 
     free(help);
@@ -225,7 +225,7 @@ void cmd_connect_shows_usage_when_invalid_first_property(void **state)
     expect_cons_show("Usage: some usage");
     expect_cons_show("");
 
-    gboolean result = cmd_connect(args, *help);
+    gboolean result = cmd_connect(NULL, args, *help);
     assert_true(result);
 
     free(help);
@@ -242,7 +242,7 @@ void cmd_connect_shows_usage_when_invalid_second_property(void **state)
     expect_cons_show("Usage: some usage");
     expect_cons_show("");
 
-    gboolean result = cmd_connect(args, *help);
+    gboolean result = cmd_connect(NULL, args, *help);
     assert_true(result);
 
     free(help);
@@ -268,7 +268,7 @@ void cmd_connect_when_no_account(void **state)
     expect_value(jabber_connect_with_details, port, 0);
     will_return(jabber_connect_with_details, JABBER_CONNECTING);
 
-    gboolean result = cmd_connect(args, *help);
+    gboolean result = cmd_connect(NULL, args, *help);
     assert_true(result);
 
     free(help);
@@ -294,7 +294,7 @@ void cmd_connect_with_server_when_provided(void **state)
     expect_value(jabber_connect_with_details, port, 0);
     will_return(jabber_connect_with_details, JABBER_CONNECTING);
 
-    gboolean result = cmd_connect(args, *help);
+    gboolean result = cmd_connect(NULL, args, *help);
     assert_true(result);
 
     free(help);
@@ -320,7 +320,7 @@ void cmd_connect_with_port_when_provided(void **state)
     expect_value(jabber_connect_with_details, port, 5432);
     will_return(jabber_connect_with_details, JABBER_CONNECTING);
 
-    gboolean result = cmd_connect(args, *help);
+    gboolean result = cmd_connect(NULL, args, *help);
     assert_true(result);
 
     free(help);
@@ -346,7 +346,7 @@ void cmd_connect_with_server_and_port_when_provided(void **state)
     expect_value(jabber_connect_with_details, port, 5432);
     will_return(jabber_connect_with_details, JABBER_CONNECTING);
 
-    gboolean result = cmd_connect(args, *help);
+    gboolean result = cmd_connect(NULL, args, *help);
     assert_true(result);
 
     free(help);
@@ -374,7 +374,7 @@ void cmd_connect_fail_message(void **state)
 
     expect_cons_show_error("Connection attempt for user@server.org failed.");
 
-    gboolean result = cmd_connect(args, *help);
+    gboolean result = cmd_connect(NULL, args, *help);
     assert_true(result);
 
     free(help);
@@ -400,7 +400,7 @@ void cmd_connect_lowercases_argument(void **state)
     expect_any(jabber_connect_with_details, port);
     will_return(jabber_connect_with_details, JABBER_CONNECTING);
 
-    gboolean result = cmd_connect(args, *help);
+    gboolean result = cmd_connect(NULL, args, *help);
     assert_true(result);
 
     free(help);
@@ -425,7 +425,7 @@ void cmd_connect_asks_password_when_not_in_account(void **state)
     expect_any(jabber_connect_with_account, account);
     will_return(jabber_connect_with_account, JABBER_CONNECTING);
 
-    gboolean result = cmd_connect(args, *help);
+    gboolean result = cmd_connect(NULL, args, *help);
     assert_true(result);
 
     free(help);
@@ -448,7 +448,7 @@ void cmd_connect_shows_message_when_connecting_with_account(void **state)
     expect_any(jabber_connect_with_account, account);
     will_return(jabber_connect_with_account, JABBER_CONNECTING);
 
-    gboolean result = cmd_connect(args, *help);
+    gboolean result = cmd_connect(NULL, args, *help);
     assert_true(result);
 
     free(help);
@@ -471,7 +471,7 @@ void cmd_connect_connects_with_account(void **state)
     expect_memory(jabber_connect_with_account, account, account, sizeof(account));
     will_return(jabber_connect_with_account, JABBER_CONNECTING);
 
-    gboolean result = cmd_connect(args, *help);
+    gboolean result = cmd_connect(NULL, args, *help);
     assert_true(result);
 
     free(help);

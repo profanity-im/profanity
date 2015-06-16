@@ -69,40 +69,38 @@
 #include "ui/ui.h"
 #include "window_list.h"
 
-typedef char*(*autocompleter)(char*, int*);
+static gboolean _cmd_execute(ProfWin *window, const char * const command, const char * const inp);
 
-static gboolean _cmd_execute(const char * const command, const char * const inp);
+static char * _cmd_complete_parameters(ProfWin *window, const char * const input);
 
-static char * _cmd_complete_parameters(const char * const input);
-
-static char * _sub_autocomplete(const char * const input);
-static char * _notify_autocomplete(const char * const input);
-static char * _theme_autocomplete(const char * const input);
-static char * _autoaway_autocomplete(const char * const input);
-static char * _autoconnect_autocomplete(const char * const input);
-static char * _account_autocomplete(const char * const input);
-static char * _who_autocomplete(const char * const input);
-static char * _roster_autocomplete(const char * const input);
-static char * _group_autocomplete(const char * const input);
-static char * _bookmark_autocomplete(const char * const input);
-static char * _otr_autocomplete(const char * const input);
-static char * _connect_autocomplete(const char * const input);
-static char * _statuses_autocomplete(const char * const input);
-static char * _alias_autocomplete(const char * const input);
-static char * _join_autocomplete(const char * const input);
-static char * _log_autocomplete(const char * const input);
-static char * _form_autocomplete(const char * const input);
-static char * _form_field_autocomplete(const char * const input);
-static char * _occupants_autocomplete(const char * const input);
-static char * _kick_autocomplete(const char * const input);
-static char * _ban_autocomplete(const char * const input);
-static char * _affiliation_autocomplete(const char * const input);
-static char * _role_autocomplete(const char * const input);
-static char * _resource_autocomplete(const char * const input);
-static char * _titlebar_autocomplete(const char * const input);
-static char * _inpblock_autocomplete(const char * const input);
-static char * _time_autocomplete(const char * const input);
-static char * _receipts_autocomplete(const char * const input);
+static char * _sub_autocomplete(ProfWin *window, const char * const input);
+static char * _notify_autocomplete(ProfWin *window, const char * const input);
+static char * _theme_autocomplete(ProfWin *window, const char * const input);
+static char * _autoaway_autocomplete(ProfWin *window, const char * const input);
+static char * _autoconnect_autocomplete(ProfWin *window, const char * const input);
+static char * _account_autocomplete(ProfWin *window, const char * const input);
+static char * _who_autocomplete(ProfWin *window, const char * const input);
+static char * _roster_autocomplete(ProfWin *window, const char * const input);
+static char * _group_autocomplete(ProfWin *window, const char * const input);
+static char * _bookmark_autocomplete(ProfWin *window, const char * const input);
+static char * _otr_autocomplete(ProfWin *window, const char * const input);
+static char * _connect_autocomplete(ProfWin *window, const char * const input);
+static char * _statuses_autocomplete(ProfWin *window, const char * const input);
+static char * _alias_autocomplete(ProfWin *window, const char * const input);
+static char * _join_autocomplete(ProfWin *window, const char * const input);
+static char * _log_autocomplete(ProfWin *window, const char * const input);
+static char * _form_autocomplete(ProfWin *window, const char * const input);
+static char * _form_field_autocomplete(ProfWin *window, const char * const input);
+static char * _occupants_autocomplete(ProfWin *window, const char * const input);
+static char * _kick_autocomplete(ProfWin *window, const char * const input);
+static char * _ban_autocomplete(ProfWin *window, const char * const input);
+static char * _affiliation_autocomplete(ProfWin *window, const char * const input);
+static char * _role_autocomplete(ProfWin *window, const char * const input);
+static char * _resource_autocomplete(ProfWin *window, const char * const input);
+static char * _titlebar_autocomplete(ProfWin *window, const char * const input);
+static char * _inpblock_autocomplete(ProfWin *window, const char * const input);
+static char * _time_autocomplete(ProfWin *window, const char * const input);
+static char * _receipts_autocomplete(ProfWin *window, const char * const input);
 
 GHashTable *commands = NULL;
 
@@ -1731,7 +1729,7 @@ cmd_alias_remove(char *value)
 
 // Command autocompletion functions
 char*
-cmd_autocomplete(const char * const input)
+cmd_autocomplete(ProfWin *window, const char * const input)
 {
     // autocomplete command
     if ((strncmp(input, "/", 1) == 0) && (!str_contains(input, strlen(input), ' '))) {
@@ -1743,7 +1741,7 @@ cmd_autocomplete(const char * const input)
 
     // autocomplete parameters
     } else {
-        char *found = _cmd_complete_parameters(input);
+        char *found = _cmd_complete_parameters(window, input);
         if (found) {
             return found;
         }
@@ -1753,7 +1751,7 @@ cmd_autocomplete(const char * const input)
 }
 
 void
-cmd_reset_autocomplete()
+cmd_reset_autocomplete(ProfWin *window)
 {
     roster_reset_search_attempts();
     muc_invites_reset_ac();
@@ -1820,7 +1818,7 @@ cmd_reset_autocomplete()
     autocomplete_reset(inpblock_ac);
     autocomplete_reset(receipts_ac);
 
-    if (ui_current_win_type() == WIN_CHAT) {
+    if (window->type == WIN_CHAT) {
         ProfChatWin *chatwin = wins_get_current_chat();
         PContact contact = roster_get_contact(chatwin->barejid);
         if (contact) {
@@ -1828,13 +1826,13 @@ cmd_reset_autocomplete()
         }
     }
 
-    if (ui_current_win_type() == WIN_MUC) {
+    if (window->type == WIN_MUC) {
         ProfMucWin *mucwin = wins_get_current_muc();
         muc_autocomplete_reset(mucwin->roomjid);
         muc_jid_autocomplete_reset(mucwin->roomjid);
     }
 
-    if (ui_current_win_type() == WIN_MUC_CONFIG) {
+    if (window->type == WIN_MUC_CONFIG) {
         ProfMucConfWin *confwin = wins_get_current_muc_conf();
         if (confwin->form) {
             form_reset_autocompleters(confwin->form);
@@ -1850,7 +1848,7 @@ cmd_reset_autocomplete()
  * continue, FALSE otherwise
  */
 gboolean
-cmd_process_input(char *inp)
+cmd_process_input(ProfWin *window, char *inp)
 {
     log_debug("Input received: %s", inp);
     gboolean result = FALSE;
@@ -1864,12 +1862,12 @@ cmd_process_input(char *inp)
     } else if (inp[0] == '/') {
         char *inp_cpy = strdup(inp);
         char *command = strtok(inp_cpy, " ");
-        result = _cmd_execute(command, inp);
+        result = _cmd_execute(window, command, inp);
         free(inp_cpy);
 
     // call a default handler if input didn't start with '/'
     } else {
-        result = cmd_execute_default(inp);
+        result = cmd_execute_default(window, inp);
     }
 
     return result;
@@ -1878,18 +1876,18 @@ cmd_process_input(char *inp)
 // Command execution
 
 void
-cmd_execute_connect(const char * const account)
+cmd_execute_connect(ProfWin *window, const char * const account)
 {
     GString *command = g_string_new("/connect ");
     g_string_append(command, account);
-    cmd_process_input(command->str);
+    cmd_process_input(window, command->str);
     g_string_free(command, TRUE);
 }
 
 static gboolean
-_cmd_execute(const char * const command, const char * const inp)
+_cmd_execute(ProfWin *window, const char * const command, const char * const inp)
 {
-    if (g_str_has_prefix(command, "/field") && ui_current_win_type() == WIN_MUC_CONFIG) {
+    if (g_str_has_prefix(command, "/field") && window->type == WIN_MUC_CONFIG) {
         gboolean result = FALSE;
         gchar **args = parse_args_with_freetext(inp, 1, 2, &result);
         if (!result) {
@@ -1898,7 +1896,7 @@ _cmd_execute(const char * const command, const char * const inp)
         } else {
             gchar **tokens = g_strsplit(inp, " ", 2);
             char *field = tokens[0] + 1;
-            result = cmd_form_field(field, args);
+            result = cmd_form_field(window, field, args);
             g_strfreev(tokens);
         }
 
@@ -1915,7 +1913,7 @@ _cmd_execute(const char * const command, const char * const inp)
             ui_invalid_command_usage(cmd->help.usage, cmd->setting_func);
             return TRUE;
         } else {
-            gboolean result = cmd->func(args, cmd->help);
+            gboolean result = cmd->func(window, args, cmd->help);
             g_strfreev(args);
             return result;
         }
@@ -1923,9 +1921,9 @@ _cmd_execute(const char * const command, const char * const inp)
         return TRUE;
     } else {
         gboolean ran_alias = FALSE;
-        gboolean alias_result = cmd_execute_alias(inp, &ran_alias);
+        gboolean alias_result = cmd_execute_alias(window, inp, &ran_alias);
         if (!ran_alias) {
-            return cmd_execute_default(inp);
+            return cmd_execute_default(window, inp);
         } else {
             return alias_result;
         }
@@ -1933,7 +1931,7 @@ _cmd_execute(const char * const command, const char * const inp)
 }
 
 static char *
-_cmd_complete_parameters(const char * const input)
+_cmd_complete_parameters(ProfWin *window, const char * const input)
 {
     int i;
     char *result = NULL;
@@ -1951,7 +1949,7 @@ _cmd_complete_parameters(const char * const input)
     }
 
     // autocomplete nickname in chat rooms
-    if (ui_current_win_type() == WIN_MUC) {
+    if (window->type == WIN_MUC) {
         ProfMucWin *mucwin = wins_get_current_muc();
         Autocomplete nick_ac = muc_roster_ac(mucwin->roomjid);
         if (nick_ac) {
@@ -2057,9 +2055,9 @@ _cmd_complete_parameters(const char * const input)
     }
     parsed[i] = '\0';
 
-    char * (*ac_func)(const char * const) = g_hash_table_lookup(ac_funcs, parsed);
+    char * (*ac_func)(ProfWin*, const char * const) = g_hash_table_lookup(ac_funcs, parsed);
     if (ac_func) {
-        result = ac_func(input);
+        result = ac_func(window, input);
         if (result) {
             g_hash_table_destroy(ac_funcs);
             return result;
@@ -2075,7 +2073,7 @@ _cmd_complete_parameters(const char * const input)
     }
 
     if (g_str_has_prefix(input, "/field")) {
-        result = _form_field_autocomplete(input);
+        result = _form_field_autocomplete(window, input);
         if (result) {
             return result;
         }
@@ -2085,7 +2083,7 @@ _cmd_complete_parameters(const char * const input)
 }
 
 static char *
-_sub_autocomplete(const char * const input)
+_sub_autocomplete(ProfWin *window, const char * const input)
 {
     char *result = NULL;
     result = autocomplete_param_with_func(input, "/sub allow", presence_sub_request_find);
@@ -2105,12 +2103,11 @@ _sub_autocomplete(const char * const input)
 }
 
 static char *
-_who_autocomplete(const char * const input)
+_who_autocomplete(ProfWin *window, const char * const input)
 {
     char *result = NULL;
-    win_type_t win_type = ui_current_win_type();
 
-    if (win_type == WIN_MUC) {
+    if (window->type == WIN_MUC) {
         result = autocomplete_param_with_ac(input, "/who", who_room_ac, TRUE);
         if (result) {
             return result;
@@ -2138,7 +2135,7 @@ _who_autocomplete(const char * const input)
 }
 
 static char *
-_roster_autocomplete(const char * const input)
+_roster_autocomplete(ProfWin *window, const char * const input)
 {
     char *result = NULL;
     result = autocomplete_param_with_func(input, "/roster nick", roster_barejid_autocomplete);
@@ -2174,7 +2171,7 @@ _roster_autocomplete(const char * const input)
 }
 
 static char *
-_group_autocomplete(const char * const input)
+_group_autocomplete(ProfWin *window, const char * const input)
 {
     char *result = NULL;
     result = autocomplete_param_with_func(input, "/group show", roster_group_autocomplete);
@@ -2207,7 +2204,7 @@ _group_autocomplete(const char * const input)
 }
 
 static char *
-_bookmark_autocomplete(const char * const input)
+_bookmark_autocomplete(ProfWin *window, const char * const input)
 {
     char *found = NULL;
 
@@ -2286,7 +2283,7 @@ _bookmark_autocomplete(const char * const input)
 }
 
 static char *
-_notify_autocomplete(const char * const input)
+_notify_autocomplete(ProfWin *window, const char * const input)
 {
     int i = 0;
     char *result = NULL;
@@ -2349,7 +2346,7 @@ _notify_autocomplete(const char * const input)
 }
 
 static char *
-_autoaway_autocomplete(const char * const input)
+_autoaway_autocomplete(ProfWin *window, const char * const input)
 {
     char *result = NULL;
 
@@ -2371,7 +2368,7 @@ _autoaway_autocomplete(const char * const input)
 }
 
 static char *
-_log_autocomplete(const char * const input)
+_log_autocomplete(ProfWin *window, const char * const input)
 {
     char *result = NULL;
 
@@ -2394,7 +2391,7 @@ _log_autocomplete(const char * const input)
 }
 
 static char *
-_autoconnect_autocomplete(const char * const input)
+_autoconnect_autocomplete(ProfWin *window, const char * const input)
 {
     char *result = NULL;
 
@@ -2412,7 +2409,7 @@ _autoconnect_autocomplete(const char * const input)
 }
 
 static char *
-_otr_autocomplete(const char * const input)
+_otr_autocomplete(ProfWin *window, const char * const input)
 {
     char *found = NULL;
 
@@ -2465,7 +2462,7 @@ _otr_autocomplete(const char * const input)
 }
 
 static char *
-_theme_autocomplete(const char * const input)
+_theme_autocomplete(ProfWin *window, const char * const input)
 {
     char *result = NULL;
     if ((strncmp(input, "/theme load ", 12) == 0) && (strlen(input) > 12)) {
@@ -2494,12 +2491,11 @@ _theme_autocomplete(const char * const input)
 }
 
 static char *
-_resource_autocomplete(const char * const input)
+_resource_autocomplete(ProfWin *window, const char * const input)
 {
     char *found = NULL;
 
-    ProfWin *current = wins_get_current();
-    if (current && current->type == WIN_CHAT) {
+    if (window->type == WIN_CHAT) {
         ProfChatWin *chatwin = wins_get_current_chat();
         PContact contact = roster_get_contact(chatwin->barejid);
         if (contact) {
@@ -2530,7 +2526,7 @@ _resource_autocomplete(const char * const input)
 }
 
 static char *
-_titlebar_autocomplete(const char * const input)
+_titlebar_autocomplete(ProfWin *window, const char * const input)
 {
     char *found = NULL;
 
@@ -2553,7 +2549,7 @@ _titlebar_autocomplete(const char * const input)
 }
 
 static char *
-_inpblock_autocomplete(const char * const input)
+_inpblock_autocomplete(ProfWin *window, const char * const input)
 {
     char *found = NULL;
 
@@ -2571,16 +2567,15 @@ _inpblock_autocomplete(const char * const input)
 }
 
 static char *
-_form_autocomplete(const char * const input)
+_form_autocomplete(ProfWin *window, const char * const input)
 {
-    ProfWin *current = wins_get_current();
-    if (current->type != WIN_MUC_CONFIG) {
+    if (window->type != WIN_MUC_CONFIG) {
         return NULL;
     }
 
     char *found = NULL;
 
-    ProfMucConfWin *confwin = (ProfMucConfWin*)current;
+    ProfMucConfWin *confwin = (ProfMucConfWin*)window;
     DataForm *form = confwin->form;
     if (form) {
         found = autocomplete_param_with_ac(input, "/form help", form->tag_ac, TRUE);
@@ -2598,16 +2593,15 @@ _form_autocomplete(const char * const input)
 }
 
 static char *
-_form_field_autocomplete(const char * const input)
+_form_field_autocomplete(ProfWin *window, const char * const input)
 {
-    ProfWin *current = wins_get_current();
-    if (current->type != WIN_MUC_CONFIG) {
+    if (window->type != WIN_MUC_CONFIG) {
         return NULL;
     }
 
     char *found = NULL;
 
-    ProfMucConfWin *confwin = (ProfMucConfWin*)current;
+    ProfMucConfWin *confwin = (ProfMucConfWin*)window;
     DataForm *form = confwin->form;
     if (form == NULL) {
         return NULL;
@@ -2669,7 +2663,7 @@ _form_field_autocomplete(const char * const input)
 }
 
 static char *
-_occupants_autocomplete(const char * const input)
+_occupants_autocomplete(ProfWin *window, const char * const input)
 {
     char *found = NULL;
 
@@ -2707,7 +2701,7 @@ _occupants_autocomplete(const char * const input)
 }
 
 static char *
-_time_autocomplete(const char * const input)
+_time_autocomplete(ProfWin *window, const char * const input)
 {
     char *found = NULL;
 
@@ -2725,11 +2719,11 @@ _time_autocomplete(const char * const input)
 }
 
 static char *
-_kick_autocomplete(const char * const input)
+_kick_autocomplete(ProfWin *window, const char * const input)
 {
     char *result = NULL;
 
-    if (ui_current_win_type() == WIN_MUC) {
+    if (window->type == WIN_MUC) {
         ProfMucWin *mucwin = wins_get_current_muc();
         Autocomplete nick_ac = muc_roster_ac(mucwin->roomjid);
 
@@ -2745,11 +2739,11 @@ _kick_autocomplete(const char * const input)
 }
 
 static char *
-_ban_autocomplete(const char * const input)
+_ban_autocomplete(ProfWin *window, const char * const input)
 {
     char *result = NULL;
 
-    if (ui_current_win_type() == WIN_MUC) {
+    if (window->type == WIN_MUC) {
         ProfMucWin *mucwin = wins_get_current_muc();
         Autocomplete jid_ac = muc_roster_jid_ac(mucwin->roomjid);
 
@@ -2765,11 +2759,11 @@ _ban_autocomplete(const char * const input)
 }
 
 static char *
-_affiliation_autocomplete(const char * const input)
+_affiliation_autocomplete(ProfWin *window, const char * const input)
 {
     char *result = NULL;
 
-    if (ui_current_win_type() == WIN_MUC) {
+    if (window->type == WIN_MUC) {
         ProfMucWin *mucwin = wins_get_current_muc();
         gboolean parse_result;
         Autocomplete jid_ac = muc_roster_jid_ac(mucwin->roomjid);
@@ -2812,11 +2806,11 @@ _affiliation_autocomplete(const char * const input)
 }
 
 static char *
-_role_autocomplete(const char * const input)
+_role_autocomplete(ProfWin *window, const char * const input)
 {
     char *result = NULL;
 
-    if (ui_current_win_type() == WIN_MUC) {
+    if (window->type == WIN_MUC) {
         ProfMucWin *mucwin = wins_get_current_muc();
         gboolean parse_result;
         Autocomplete nick_ac = muc_roster_ac(mucwin->roomjid);
@@ -2859,7 +2853,7 @@ _role_autocomplete(const char * const input)
 }
 
 static char *
-_statuses_autocomplete(const char * const input)
+_statuses_autocomplete(ProfWin *window, const char * const input)
 {
     char *result = NULL;
 
@@ -2887,7 +2881,7 @@ _statuses_autocomplete(const char * const input)
 }
 
 static char *
-_receipts_autocomplete(const char * const input)
+_receipts_autocomplete(ProfWin *window, const char * const input)
 {
     char *result = NULL;
 
@@ -2910,7 +2904,7 @@ _receipts_autocomplete(const char * const input)
 }
 
 static char *
-_alias_autocomplete(const char * const input)
+_alias_autocomplete(ProfWin *window, const char * const input)
 {
     char *result = NULL;
 
@@ -2928,7 +2922,7 @@ _alias_autocomplete(const char * const input)
 }
 
 static char *
-_connect_autocomplete(const char * const input)
+_connect_autocomplete(ProfWin *window, const char * const input)
 {
     char *found = NULL;
     gboolean result = FALSE;
@@ -2963,7 +2957,7 @@ _connect_autocomplete(const char * const input)
 }
 
 static char *
-_join_autocomplete(const char * const input)
+_join_autocomplete(ProfWin *window, const char * const input)
 {
     char *found = NULL;
     gboolean result = FALSE;
@@ -2998,7 +2992,7 @@ _join_autocomplete(const char * const input)
 }
 
 static char *
-_account_autocomplete(const char * const input)
+_account_autocomplete(ProfWin *window, const char * const input)
 {
     char *found = NULL;
     gboolean result = FALSE;

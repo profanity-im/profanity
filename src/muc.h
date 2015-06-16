@@ -40,6 +40,7 @@
 #include "contact.h"
 #include "jid.h"
 #include "tools/autocomplete.h"
+#include "ui/win_types.h"
 
 typedef enum {
     MUC_ROLE_NONE,
@@ -133,7 +134,7 @@ char* muc_subject(const char * const room);
 void muc_pending_broadcasts_add(const char * const room, const char * const message);
 GList * muc_pending_broadcasts(const char * const room);
 
-char* muc_autocomplete(const char * const input);
+char* muc_autocomplete(ProfWin *window, const char * const input);
 void muc_autocomplete_reset(const char * const room);
 
 gboolean muc_requires_config(const char * const room);
