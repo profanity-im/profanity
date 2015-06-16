@@ -68,8 +68,6 @@
 #include "ui/ui.h"
 #include "window_list.h"
 
-typedef char*(*autocompleter)(char*, int*);
-
 static gboolean _cmd_execute(ProfWin *window, const char * const command, const char * const inp);
 
 static char * _cmd_complete_parameters(ProfWin *window, const char * const input);
