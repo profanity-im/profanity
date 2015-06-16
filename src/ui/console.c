@@ -1564,7 +1564,8 @@ cons_show_contacts(GSList *list)
 void
 cons_alert(void)
 {
-    if (ui_current_win_type() != WIN_CONSOLE) {
+    ProfWin *current = wins_get_current();
+    if (current->type != WIN_CONSOLE) {
         status_bar_new(1);
     }
 }

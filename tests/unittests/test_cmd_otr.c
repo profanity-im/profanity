@@ -31,7 +31,7 @@ void cmd_otr_shows_usage_when_no_args(void **state)
 
     expect_cons_show("Usage: Some usage");
 
-    gboolean result = cmd_otr(args, *help);
+    gboolean result = cmd_otr(NULL, args, *help);
     assert_true(result);
 
     free(help);
@@ -47,7 +47,7 @@ void cmd_otr_shows_usage_when_invalid_subcommand(void **state)
 
     expect_cons_show("Usage: Some usage");
 
-    gboolean result = cmd_otr(args, *help);
+    gboolean result = cmd_otr(NULL, args, *help);
     assert_true(result);
 
     free(help);
@@ -61,7 +61,7 @@ void cmd_otr_log_shows_usage_when_no_args(void **state)
 
     expect_cons_show("Usage: Some usage");
 
-    gboolean result = cmd_otr(args, *help);
+    gboolean result = cmd_otr(NULL, args, *help);
     assert_true(result);
 
     free(help);
@@ -75,7 +75,7 @@ void cmd_otr_log_shows_usage_when_invalid_subcommand(void **state)
 
     expect_cons_show("Usage: Some usage");
 
-    gboolean result = cmd_otr(args, *help);
+    gboolean result = cmd_otr(NULL, args, *help);
     assert_true(result);
 
     free(help);
@@ -90,7 +90,7 @@ void cmd_otr_log_on_enables_logging(void **state)
 
     expect_cons_show("OTR messages will be logged as plaintext.");
 
-    gboolean result = cmd_otr(args, *help);
+    gboolean result = cmd_otr(NULL, args, *help);
     char *pref_otr_log = prefs_get_string(PREF_OTR_LOG);
 
     assert_true(result);
@@ -109,7 +109,7 @@ void cmd_otr_log_on_shows_warning_when_chlog_disabled(void **state)
     expect_cons_show("OTR messages will be logged as plaintext.");
     expect_cons_show("Chat logging is currently disabled, use '/chlog on' to enable.");
 
-    gboolean result = cmd_otr(args, *help);
+    gboolean result = cmd_otr(NULL, args, *help);
     assert_true(result);
 
     free(help);
@@ -124,7 +124,7 @@ void cmd_otr_log_off_disables_logging(void **state)
 
     expect_cons_show("OTR message logging disabled.");
 
-    gboolean result = cmd_otr(args, *help);
+    gboolean result = cmd_otr(NULL, args, *help);
     char *pref_otr_log = prefs_get_string(PREF_OTR_LOG);
 
     assert_true(result);
@@ -142,7 +142,7 @@ void cmd_otr_redact_redacts_logging(void **state)
 
     expect_cons_show("OTR messages will be logged as '[redacted]'.");
 
-    gboolean result = cmd_otr(args, *help);
+    gboolean result = cmd_otr(NULL, args, *help);
     char *pref_otr_log = prefs_get_string(PREF_OTR_LOG);
 
     assert_true(result);
@@ -161,7 +161,7 @@ void cmd_otr_log_redact_shows_warning_when_chlog_disabled(void **state)
     expect_cons_show("OTR messages will be logged as '[redacted]'.");
     expect_cons_show("Chat logging is currently disabled, use '/chlog on' to enable.");
 
-    gboolean result = cmd_otr(args, *help);
+    gboolean result = cmd_otr(NULL, args, *help);
     assert_true(result);
 
     free(help);
@@ -175,7 +175,7 @@ void cmd_otr_warn_shows_usage_when_no_args(void **state)
 
     expect_cons_show("Usage: Some usage");
 
-    gboolean result = cmd_otr(args, *help);
+    gboolean result = cmd_otr(NULL, args, *help);
     assert_true(result);
 
     free(help);
@@ -189,7 +189,7 @@ void cmd_otr_warn_shows_usage_when_invalid_arg(void **state)
 
     expect_cons_show("Usage: Some usage");
 
-    gboolean result = cmd_otr(args, *help);
+    gboolean result = cmd_otr(NULL, args, *help);
     assert_true(result);
 
     free(help);
@@ -203,7 +203,7 @@ void cmd_otr_warn_on_enables_unencrypted_warning(void **state)
 
     expect_cons_show("OTR warning message enabled.");
 
-    gboolean result = cmd_otr(args, *help);
+    gboolean result = cmd_otr(NULL, args, *help);
     gboolean otr_warn_enabled = prefs_get_boolean(PREF_OTR_WARN);
 
     assert_true(result);
@@ -220,7 +220,7 @@ void cmd_otr_warn_off_disables_unencrypted_warning(void **state)
 
     expect_cons_show("OTR warning message disabled.");
 
-    gboolean result = cmd_otr(args, *help);
+    gboolean result = cmd_otr(NULL, args, *help);
     gboolean otr_warn_enabled = prefs_get_boolean(PREF_OTR_WARN);
 
     assert_true(result);
@@ -241,7 +241,7 @@ void cmd_otr_libver_shows_libotr_version(void **state)
 
     expect_cons_show(message->str);
 
-    gboolean result = cmd_otr(args, *help);
+    gboolean result = cmd_otr(NULL, args, *help);
     assert_true(result);
 
     g_string_free(message, TRUE);
@@ -257,7 +257,7 @@ void cmd_otr_gen_shows_message_when_not_connected(void **state)
 
     expect_cons_show("You must be connected with an account to load OTR information.");
 
-    gboolean result = cmd_otr(args, *help);
+    gboolean result = cmd_otr(NULL, args, *help);
     assert_true(result);
 
     free(help);
@@ -272,7 +272,7 @@ static void test_with_command_and_connection_status(char *command, jabber_conn_s
 
     expect_cons_show("You must be connected with an account to load OTR information.");
 
-    gboolean result = cmd_otr(args, *help);
+    gboolean result = cmd_otr(NULL, args, *help);
     assert_true(result);
 
     free(help);
@@ -320,7 +320,7 @@ void cmd_otr_gen_generates_key_for_connected_account(void **state)
 
     expect_memory(otr_keygen, account, account, sizeof(ProfAccount));
 
-    gboolean result = cmd_otr(args, *help);
+    gboolean result = cmd_otr(NULL, args, *help);
     assert_true(result);
 
     free(help);
@@ -361,7 +361,7 @@ void cmd_otr_myfp_shows_message_when_no_key(void **state)
 
     expect_ui_current_print_formatted_line('!', 0, "You have not generated or loaded a private key, use '/otr gen'");
 
-    gboolean result = cmd_otr(args, *help);
+    gboolean result = cmd_otr(NULL, args, *help);
     assert_true(result);
 
     free(help);
@@ -381,7 +381,7 @@ void cmd_otr_myfp_shows_my_fingerprint(void **state)
 
     expect_ui_current_print_formatted_line('!', 0, message->str);
 
-    gboolean result = cmd_otr(args, *help);
+    gboolean result = cmd_otr(NULL, args, *help);
     assert_true(result);
 
     g_string_free(message, TRUE);
@@ -393,13 +393,14 @@ test_cmd_otr_theirfp_from_wintype(win_type_t wintype)
 {
     CommandHelp *help = malloc(sizeof(CommandHelp));
     gchar *args[] = { "theirfp", NULL };
+    ProfWin window;
+    window.type = wintype;
 
     will_return(jabber_get_connection_status, JABBER_CONNECTED);
-    will_return(ui_current_win_type, wintype);
 
     expect_ui_current_print_line("You must be in a regular chat window to view a recipient's fingerprint.");
 
-    gboolean result = cmd_otr(args, *help);
+    gboolean result = cmd_otr(&window, args, *help);
     assert_true(result);
 
     free(help);
@@ -425,9 +426,10 @@ void cmd_otr_theirfp_shows_message_when_non_otr_chat_window(void **state)
     char *recipient = "someuser@someserver.com";
     CommandHelp *help = malloc(sizeof(CommandHelp));
     gchar *args[] = { "theirfp", NULL };
+    ProfWin window;
+    window.type = WIN_CHAT;
 
     will_return(jabber_get_connection_status, JABBER_CONNECTED);
-    will_return(ui_current_win_type, WIN_CHAT);
 
     ProfChatWin *chatwin = malloc(sizeof(ProfChatWin));
     chatwin->barejid = strdup(recipient);
@@ -440,7 +442,7 @@ void cmd_otr_theirfp_shows_message_when_non_otr_chat_window(void **state)
 
     expect_ui_current_print_formatted_line('!', 0, "You are not currently in an OTR session.");
 
-    gboolean result = cmd_otr(args, *help);
+    gboolean result = cmd_otr(&window, args, *help);
     assert_true(result);
 
     free(help);
@@ -456,6 +458,8 @@ void cmd_otr_theirfp_shows_fingerprint(void **state)
     GString *message = g_string_new(recipient);
     g_string_append(message, "'s OTR fingerprint: ");
     g_string_append(message, fingerprint);
+    ProfWin window;
+    window.type = WIN_CHAT;
 
     ProfChatWin *chatwin = malloc(sizeof(ProfChatWin));
     chatwin->barejid = strdup(recipient);
@@ -468,14 +472,13 @@ void cmd_otr_theirfp_shows_fingerprint(void **state)
     wins_set_current_by_num(2);
 
     will_return(jabber_get_connection_status, JABBER_CONNECTED);
-    will_return(ui_current_win_type, WIN_CHAT);
 
     expect_string(otr_get_their_fingerprint, recipient, chatwin->barejid);
     will_return(otr_get_their_fingerprint, strdup(fingerprint));
 
     expect_ui_current_print_formatted_line('!', 0, message->str);
 
-    gboolean result = cmd_otr(args, *help);
+    gboolean result = cmd_otr(&window, args, *help);
     assert_true(result);
 
     g_string_free(message, TRUE);
@@ -488,13 +491,14 @@ test_cmd_otr_start_from_wintype(win_type_t wintype)
 {
     CommandHelp *help = malloc(sizeof(CommandHelp));
     gchar *args[] = { "start", NULL };
+    ProfWin window;
+    window.type = wintype;
 
     will_return(jabber_get_connection_status, JABBER_CONNECTED);
-    will_return(ui_current_win_type, wintype);
 
     expect_ui_current_print_line("You must be in a regular chat window to start an OTR session.");
 
-    gboolean result = cmd_otr(args, *help);
+    gboolean result = cmd_otr(&window, args, *help);
     assert_true(result);
 
     free(help);
@@ -520,9 +524,10 @@ void cmd_otr_start_shows_message_when_already_started(void **state)
     char *recipient = "someone@server.org";
     CommandHelp *help = malloc(sizeof(CommandHelp));
     gchar *args[] = { "start", NULL };
+    ProfWin window;
+    window.type = WIN_CHAT;
 
     will_return(jabber_get_connection_status, JABBER_CONNECTED);
-    will_return(ui_current_win_type, WIN_CHAT);
 
     ProfChatWin *chatwin = malloc(sizeof(ProfChatWin));
     chatwin->barejid = strdup(recipient);
@@ -536,7 +541,7 @@ void cmd_otr_start_shows_message_when_already_started(void **state)
 
     expect_ui_current_print_formatted_line('!', 0, "You are already in an OTR session.");
 
-    gboolean result = cmd_otr(args, *help);
+    gboolean result = cmd_otr(&window, args, *help);
     assert_true(result);
 
     free(help);
@@ -548,9 +553,10 @@ void cmd_otr_start_shows_message_when_no_key(void **state)
     char *recipient = "someone@server.org";
     CommandHelp *help = malloc(sizeof(CommandHelp));
     gchar *args[] = { "start", NULL };
+    ProfWin window;
+    window.type = WIN_CHAT;
 
     will_return(jabber_get_connection_status, JABBER_CONNECTED);
-    will_return(ui_current_win_type, WIN_CHAT);
     will_return(otr_key_loaded, FALSE);
 
     ProfChatWin *chatwin = malloc(sizeof(ProfChatWin));
@@ -565,7 +571,7 @@ void cmd_otr_start_shows_message_when_no_key(void **state)
 
     expect_ui_current_print_formatted_line('!', 0, "You have not generated or loaded a private key, use '/otr gen'");
 
-    gboolean result = cmd_otr(args, *help);
+    gboolean result = cmd_otr(&window, args, *help);
     assert_true(result);
 
     free(help);
@@ -579,6 +585,8 @@ cmd_otr_start_sends_otr_query_message_to_current_recipeint(void **state)
     char *query_message = "?OTR?";
     CommandHelp *help = malloc(sizeof(CommandHelp));
     gchar *args[] = { "start", NULL };
+    ProfWin window;
+    window.type = WIN_CHAT;
 
     ProfChatWin *chatwin = malloc(sizeof(ProfChatWin));
     chatwin->barejid = strdup(recipient);
@@ -590,14 +598,13 @@ cmd_otr_start_sends_otr_query_message_to_current_recipeint(void **state)
     wins_set_current_by_num(2);
 
     will_return(jabber_get_connection_status, JABBER_CONNECTED);
-    will_return(ui_current_win_type, WIN_CHAT);
     will_return(otr_key_loaded, TRUE);
     will_return(otr_start_query, query_message);
 
     expect_string(message_send_chat_encrypted, barejid, chatwin->barejid);
     expect_string(message_send_chat_encrypted, msg, query_message);
 
-    gboolean result = cmd_otr(args, *help);
+    gboolean result = cmd_otr(&window, args, *help);
     assert_true(result);
 
     free(help);
@@ -612,7 +619,7 @@ void cmd_otr_shows_message_when_otr_unsupported(void **state)
 
     expect_cons_show("This version of Profanity has not been built with OTR support enabled");
 
-    gboolean result = cmd_otr(args, *help);
+    gboolean result = cmd_otr(NULL, args, *help);
     assert_true(result);
 
     free(help);

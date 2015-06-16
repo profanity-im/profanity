@@ -663,10 +663,9 @@ muc_roster_nick_change_complete(const char * const room,
 }
 
 char *
-muc_autocomplete(const char * const input)
+muc_autocomplete(ProfWin *window, const char * const input)
 {
-    win_type_t wintype = ui_current_win_type();
-    if (wintype == WIN_MUC) {
+    if (window->type == WIN_MUC) {
         ProfMucWin *mucwin = wins_get_current_muc();
         ChatRoom *chat_room = g_hash_table_lookup(rooms, mucwin->roomjid);
 

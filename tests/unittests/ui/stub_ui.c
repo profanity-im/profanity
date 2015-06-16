@@ -121,11 +121,6 @@ int ui_close_read_wins(void)
 // current window actions
 void ui_clear_current(void) {}
 
-win_type_t ui_current_win_type(void)
-{
-    return (win_type_t)mock();
-}
-
 void ui_current_print_line(const char * const msg, ...)
 {
     va_list args;
