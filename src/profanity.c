@@ -130,10 +130,10 @@ prof_handle_idle(void)
 void
 prof_handle_activity(void)
 {
-    win_type_t win_type = ui_current_win_type();
     jabber_conn_status_t status = jabber_get_connection_status();
+    ProfWin *current = wins_get_current();
 
-    if ((status == JABBER_CONNECTED) && (win_type == WIN_CHAT)) {
+    if ((status == JABBER_CONNECTED) && (current->type == WIN_CHAT)) {
         ProfChatWin *chatwin = wins_get_current_chat();
         chat_state_handle_typing(chatwin->barejid, chatwin->state);
     }

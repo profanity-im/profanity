@@ -689,7 +689,8 @@ ui_invalid_command_usage(const char * const usage, void (*setting_func)(void))
     } else {
         cons_show("");
         cons_show("Usage: %s", usage);
-        if (ui_current_win_type() == WIN_CHAT) {
+        ProfWin *current = wins_get_current();
+        if (current->type == WIN_CHAT) {
             char usage_cpy[strlen(usage) + 8];
             sprintf(usage_cpy, "Usage: %s", usage);
             ui_current_print_line(usage_cpy);
@@ -1142,13 +1143,6 @@ gboolean
 ui_swap_wins(int source_win, int target_win)
 {
     return wins_swap(source_win, target_win);
-}
-
-win_type_t
-ui_current_win_type(void)
-{
-    ProfWin *current = wins_get_current();
-    return current->type;
 }
 
 win_type_t

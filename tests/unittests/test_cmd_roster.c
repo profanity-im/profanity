@@ -22,7 +22,7 @@ static void test_with_connection_status(jabber_conn_status_t status)
 
     expect_cons_show("You are not currently connected.");
 
-    gboolean result = cmd_roster(args, *help);
+    gboolean result = cmd_roster(NULL, args, *help);
     assert_true(result);
 
     free(help);
@@ -61,7 +61,7 @@ void cmd_roster_shows_roster_when_no_args(void **state)
 
     expect_memory(cons_show_roster, list, roster, sizeof(roster));
 
-    gboolean result = cmd_roster(args, *help);
+    gboolean result = cmd_roster(NULL, args, *help);
     assert_true(result);
 
     free(help);
@@ -78,7 +78,7 @@ void cmd_roster_add_shows_message_when_no_jid(void **state)
 
     expect_cons_show("Usage: some usage");
 
-    gboolean result = cmd_roster(args, *help);
+    gboolean result = cmd_roster(NULL, args, *help);
     assert_true(result);
 
     free(help);
@@ -96,7 +96,7 @@ void cmd_roster_add_sends_roster_add_request(void **state)
     expect_string(roster_send_add_new, barejid, jid);
     expect_string(roster_send_add_new, name, nick);
 
-    gboolean result = cmd_roster(args, *help);
+    gboolean result = cmd_roster(NULL, args, *help);
     assert_true(result);
 
     free(help);
@@ -112,7 +112,7 @@ void cmd_roster_remove_shows_message_when_no_jid(void **state)
 
     expect_cons_show("Usage: some usage");
 
-    gboolean result = cmd_roster(args, *help);
+    gboolean result = cmd_roster(NULL, args, *help);
     assert_true(result);
 
     free(help);
@@ -128,7 +128,7 @@ void cmd_roster_remove_sends_roster_remove_request(void **state)
 
     expect_string(roster_send_remove, barejid, jid);
 
-    gboolean result = cmd_roster(args, *help);
+    gboolean result = cmd_roster(NULL, args, *help);
     assert_true(result);
 
     free(help);
@@ -144,7 +144,7 @@ void cmd_roster_nick_shows_message_when_no_jid(void **state)
 
     expect_cons_show("Usage: some usage");
 
-    gboolean result = cmd_roster(args, *help);
+    gboolean result = cmd_roster(NULL, args, *help);
     assert_true(result);
 
     free(help);
@@ -160,7 +160,7 @@ void cmd_roster_nick_shows_message_when_no_nick(void **state)
 
     expect_cons_show("Usage: some usage");
 
-    gboolean result = cmd_roster(args, *help);
+    gboolean result = cmd_roster(NULL, args, *help);
     assert_true(result);
 
     free(help);
@@ -178,7 +178,7 @@ void cmd_roster_nick_shows_message_when_no_contact_exists(void **state)
 
     expect_cons_show("Contact not found in roster: bob@server.org");
 
-    gboolean result = cmd_roster(args, *help);
+    gboolean result = cmd_roster(NULL, args, *help);
     assert_true(result);
 
     free(help);
@@ -205,7 +205,7 @@ void cmd_roster_nick_sends_name_change_request(void **state)
 
     expect_cons_show("Nickname for bob@server.org set to: bobster.");
 
-    gboolean result = cmd_roster(args, *help);
+    gboolean result = cmd_roster(NULL, args, *help);
     assert_true(result);
 
     PContact contact = roster_get_contact(jid);
@@ -225,7 +225,7 @@ void cmd_roster_clearnick_shows_message_when_no_jid(void **state)
 
     expect_cons_show("Usage: some usage");
 
-    gboolean result = cmd_roster(args, *help);
+    gboolean result = cmd_roster(NULL, args, *help);
     assert_true(result);
 
     free(help);
@@ -243,7 +243,7 @@ void cmd_roster_clearnick_shows_message_when_no_contact_exists(void **state)
 
     expect_cons_show("Contact not found in roster: bob@server.org");
 
-    gboolean result = cmd_roster(args, *help);
+    gboolean result = cmd_roster(NULL, args, *help);
     assert_true(result);
 
     free(help);
@@ -269,7 +269,7 @@ void cmd_roster_clearnick_sends_name_change_request_with_empty_nick(void **state
 
     expect_cons_show("Nickname for bob@server.org removed.");
 
-    gboolean result = cmd_roster(args, *help);
+    gboolean result = cmd_roster(NULL, args, *help);
     assert_true(result);
 
     PContact contact = roster_get_contact(jid);

@@ -24,7 +24,7 @@ void cmd_alias_add_shows_usage_when_no_args(void **state)
 
     expect_cons_show("Usage: some usage");
 
-    gboolean result = cmd_alias(args, *help);
+    gboolean result = cmd_alias(NULL, args, *help);
     assert_true(result);
 
     free(help);
@@ -38,7 +38,7 @@ void cmd_alias_add_shows_usage_when_no_value(void **state)
 
     expect_cons_show("Usage: some usage");
 
-    gboolean result = cmd_alias(args, *help);
+    gboolean result = cmd_alias(NULL, args, *help);
     assert_true(result);
 
     free(help);
@@ -52,7 +52,7 @@ void cmd_alias_remove_shows_usage_when_no_args(void **state)
 
     expect_cons_show("Usage: some usage");
 
-    gboolean result = cmd_alias(args, *help);
+    gboolean result = cmd_alias(NULL, args, *help);
     assert_true(result);
 
     free(help);
@@ -66,7 +66,7 @@ void cmd_alias_show_usage_when_invalid_subcmd(void **state)
 
     expect_cons_show("Usage: some usage");
 
-    gboolean result = cmd_alias(args, *help);
+    gboolean result = cmd_alias(NULL, args, *help);
     assert_true(result);
 
     free(help);
@@ -79,7 +79,7 @@ void cmd_alias_add_adds_alias(void **state)
 
     expect_cons_show("Command alias added /hc -> /help commands");
 
-    gboolean result = cmd_alias(args, *help);
+    gboolean result = cmd_alias(NULL, args, *help);
 
     char *returned_val = prefs_get_alias("hc");
 
@@ -100,7 +100,7 @@ void cmd_alias_add_shows_message_when_exists(void **state)
 
     expect_cons_show("Command or alias '/hc' already exists.");
 
-    gboolean result = cmd_alias(args, *help);
+    gboolean result = cmd_alias(NULL, args, *help);
     assert_true(result);
 
     free(help);
@@ -115,7 +115,7 @@ void cmd_alias_remove_removes_alias(void **state)
 
     expect_cons_show("Command alias removed -> /hn");
 
-    gboolean result = cmd_alias(args, *help);
+    gboolean result = cmd_alias(NULL, args, *help);
 
     char *returned_val = prefs_get_alias("hn");
 
@@ -132,7 +132,7 @@ void cmd_alias_remove_shows_message_when_no_alias(void **state)
 
     expect_cons_show("No such command alias /hn");
 
-    gboolean result = cmd_alias(args, *help);
+    gboolean result = cmd_alias(NULL, args, *help);
     assert_true(result);
 
     free(help);
@@ -152,7 +152,7 @@ void cmd_alias_list_shows_all_aliases(void **state)
     // write a custom checker to check the correct list is passed
     expect_any(cons_show_aliases, aliases);
 
-    gboolean result = cmd_alias(args, *help);
+    gboolean result = cmd_alias(NULL, args, *help);
     assert_true(result);
 
     free(help);

@@ -25,7 +25,7 @@ void clears_chat_sessions(void **state)
     will_return(jabber_get_fulljid, "myjid@myserver.com");
     expect_any_cons_show();
 
-    gboolean result = cmd_disconnect(NULL, *help);
+    gboolean result = cmd_disconnect(NULL, NULL, *help);
 
     assert_true(result);
 

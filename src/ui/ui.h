@@ -35,121 +35,14 @@
 #ifndef UI_UI_H
 #define UI_UI_H
 
-#include "config.h"
-
-#include <wchar.h>
-#include <glib.h>
-#ifdef HAVE_NCURSESW_NCURSES_H
-#include <ncursesw/ncurses.h>
-#elif HAVE_NCURSES_H
-#include <ncurses.h>
-#endif
-
-#include "contact.h"
-#include "jid.h"
-#include "xmpp/xmpp.h"
-#include "ui/buffer.h"
-#include "chat_state.h"
+#include "ui/win_types.h"
 #include "muc.h"
-
-#define LAYOUT_SPLIT_MEMCHECK       12345671
-#define PROFCHATWIN_MEMCHECK        22374522
-#define PROFMUCWIN_MEMCHECK         52345276
-#define PROFPRIVATEWIN_MEMCHECK     77437483
-#define PROFCONFWIN_MEMCHECK        64334685
-#define PROFXMLWIN_MEMCHECK         87333463
 
 #define NO_ME           1
 #define NO_DATE         2
 #define NO_EOL          4
 #define NO_COLOUR_FROM  8
 #define NO_COLOUR_DATE  16
-
-typedef enum {
-    LAYOUT_SIMPLE,
-    LAYOUT_SPLIT
-} layout_type_t;
-
-typedef struct prof_layout_t {
-    layout_type_t type;
-    WINDOW *win;
-    ProfBuff buffer;
-    int y_pos;
-    int paged;
-} ProfLayout;
-
-typedef struct prof_layout_simple_t {
-    ProfLayout base;
-} ProfLayoutSimple;
-
-typedef struct prof_layout_split_t {
-    ProfLayout base;
-    WINDOW *subwin;
-    int sub_y_pos;
-    unsigned long memcheck;
-} ProfLayoutSplit;
-
-typedef enum {
-    WIN_CONSOLE,
-    WIN_CHAT,
-    WIN_MUC,
-    WIN_MUC_CONFIG,
-    WIN_PRIVATE,
-    WIN_XML
-} win_type_t;
-
-typedef enum {
-    PROF_ENC_NONE,
-    PROF_ENC_OTR
-} prof_enc_t;
-
-typedef struct prof_win_t {
-    win_type_t type;
-    ProfLayout *layout;
-} ProfWin;
-
-typedef struct prof_console_win_t {
-    ProfWin window;
-} ProfConsoleWin;
-
-typedef struct prof_chat_win_t {
-    ProfWin window;
-    char *barejid;
-    int unread;
-    ChatState *state;
-    prof_enc_t enc_mode;
-    gboolean otr_is_trusted;
-    char *resource_override;
-    gboolean history_shown;
-    unsigned long memcheck;
-} ProfChatWin;
-
-typedef struct prof_muc_win_t {
-    ProfWin window;
-    char *roomjid;
-    int unread;
-    gboolean showjid;
-    unsigned long memcheck;
-} ProfMucWin;
-
-typedef struct prof_mucconf_win_t {
-    ProfWin window;
-    char *roomjid;
-    DataForm *form;
-    unsigned long memcheck;
-} ProfMucConfWin;
-
-typedef struct prof_private_win_t {
-    ProfWin window;
-    char *fulljid;
-    int unread;
-    unsigned long memcheck;
-} ProfPrivateWin;
-
-typedef struct prof_xml_win_t {
-    ProfWin window;
-    unsigned long memcheck;
-} ProfXMLWin;
 
 // ui startup and control
 void ui_init(void);
@@ -193,8 +86,6 @@ int ui_close_all_wins(void);
 int ui_close_read_wins(void);
 
 // current window actions
-win_type_t ui_current_win_type(void);
-
 void ui_current_print_line(const char * const msg, ...);
 void ui_current_print_formatted_line(const char show_char, int attrs, const char * const msg, ...);
 void ui_current_error_line(const char * const msg);

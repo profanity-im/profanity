@@ -1859,7 +1859,7 @@ cmd_process_input(ProfWin *window, char *inp)
 
     // call a default handler if input didn't start with '/'
     } else {
-        result = cmd_execute_default(inp);
+        result = cmd_execute_default(window, inp);
     }
 
     return result;
@@ -1888,7 +1888,7 @@ _cmd_execute(ProfWin *window, const char * const command, const char * const inp
         } else {
             gchar **tokens = g_strsplit(inp, " ", 2);
             char *field = tokens[0] + 1;
-            result = cmd_form_field(field, args);
+            result = cmd_form_field(window, field, args);
             g_strfreev(tokens);
         }
 
@@ -1905,7 +1905,7 @@ _cmd_execute(ProfWin *window, const char * const command, const char * const inp
             ui_invalid_command_usage(cmd->help.usage, cmd->setting_func);
             return TRUE;
         } else {
-            gboolean result = cmd->func(args, cmd->help);
+            gboolean result = cmd->func(window, args, cmd->help);
             g_strfreev(args);
             return result;
         }
@@ -1913,7 +1913,7 @@ _cmd_execute(ProfWin *window, const char * const command, const char * const inp
         gboolean ran_alias = FALSE;
         gboolean alias_result = cmd_execute_alias(window, inp, &ran_alias);
         if (!ran_alias) {
-            return cmd_execute_default(inp);
+            return cmd_execute_default(window, inp);
         } else {
             return alias_result;
         }

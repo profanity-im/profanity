@@ -436,8 +436,9 @@ _inp_rl_tab_handler(int count, int key)
         return 0;
     }
 
-    if ((strncmp(rl_line_buffer, "/", 1) != 0) && (ui_current_win_type() == WIN_MUC)) {
-        char *result = muc_autocomplete(rl_line_buffer);
+    ProfWin *current = wins_get_current();
+    if ((strncmp(rl_line_buffer, "/", 1) != 0) && (current->type == WIN_MUC)) {
+        char *result = muc_autocomplete(current, rl_line_buffer);
         if (result) {
             rl_replace_line(result, 0);
             rl_point = rl_end;

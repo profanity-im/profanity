@@ -22,7 +22,7 @@ static void test_with_connection_status(jabber_conn_status_t status)
 
     expect_cons_show("You are not currently connected.");
 
-    gboolean result = cmd_rooms(NULL, *help);
+    gboolean result = cmd_rooms(NULL, NULL, *help);
     assert_true(result);
 
     free(help);
@@ -80,7 +80,7 @@ void cmd_rooms_uses_account_default_when_no_arg(void **state)
 
     expect_string(iq_room_list_request, conferencejid, "default_conf_server");
 
-    gboolean result = cmd_rooms(args, *help);
+    gboolean result = cmd_rooms(NULL, args, *help);
 
     assert_true(result);
 
@@ -96,7 +96,7 @@ void cmd_rooms_arg_used_when_passed(void **state)
 
     expect_string(iq_room_list_request, conferencejid, "conf_server_arg");
 
-    gboolean result = cmd_rooms(args, *help);
+    gboolean result = cmd_rooms(NULL, args, *help);
 
     assert_true(result);
 
