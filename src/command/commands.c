@@ -133,7 +133,7 @@ cmd_execute_default(const char * inp)
 }
 
 gboolean
-cmd_execute_alias(const char * const inp, gboolean *ran)
+cmd_execute_alias(ProfWin *window, const char * const inp, gboolean *ran)
 {
     if (inp[0] != '/') {
         ran = FALSE;
@@ -145,7 +145,7 @@ cmd_execute_alias(const char * const inp, gboolean *ran)
     free(alias);
     if (value) {
         *ran = TRUE;
-        return cmd_process_input(value);
+        return cmd_process_input(window, value);
     }
 
     *ran = FALSE;

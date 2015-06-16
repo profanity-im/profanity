@@ -415,7 +415,8 @@ _inp_rl_getc(FILE *stream)
 {
     int ch = rl_getc(stream);
     if (_inp_printable(ch)) {
-        cmd_reset_autocomplete();
+        ProfWin *window = wins_get_current();
+        cmd_reset_autocomplete(window);
     }
     return ch;
 }
@@ -442,7 +443,8 @@ _inp_rl_tab_handler(int count, int key)
             rl_point = rl_end;
         }
     } else if (strncmp(rl_line_buffer, "/", 1) == 0) {
-        char *result = cmd_autocomplete(rl_line_buffer);
+        ProfWin *window = wins_get_current();
+        char *result = cmd_autocomplete(window, rl_line_buffer);
         if (result) {
             rl_replace_line(result, 0);
             rl_point = rl_end;

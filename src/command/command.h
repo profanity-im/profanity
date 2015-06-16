@@ -38,14 +38,15 @@
 #include <glib.h>
 
 #include "xmpp/form.h"
+#include "ui/ui.h"
 
 GHashTable *commands;
 
 void cmd_init(void);
 void cmd_uninit(void);
 
-char* cmd_autocomplete(const char * const input);
-void cmd_reset_autocomplete(void);
+char* cmd_autocomplete(ProfWin *window, const char * const input);
+void cmd_reset_autocomplete(ProfWin *window);
 void cmd_autocomplete_add(char *value);
 void cmd_autocomplete_remove(char *value);
 void cmd_autocomplete_add_form_fields(DataForm *form);
@@ -53,8 +54,8 @@ void cmd_autocomplete_remove_form_fields(DataForm *form);
 void cmd_alias_add(char *value);
 void cmd_alias_remove(char *value);
 
-gboolean cmd_process_input(char *inp);
-void cmd_execute_connect(const char * const account);
+gboolean cmd_process_input(ProfWin *window, char *inp);
+void cmd_execute_connect(ProfWin *window, const char * const account);
 
 gboolean cmd_exists(char *cmd);
 

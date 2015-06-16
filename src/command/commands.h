@@ -35,6 +35,8 @@
 #ifndef COMMANDS_H
 #define COMMANDS_H
 
+#include "ui/ui.h"
+
 // Command help strings
 typedef struct cmd_help_t {
     const gchar *usage;
@@ -62,7 +64,7 @@ typedef struct cmd_t {
     CommandHelp help;
 } Command;
 
-gboolean cmd_execute_alias(const char * const inp, gboolean *ran);
+gboolean cmd_execute_alias(ProfWin *window, const char * const inp, gboolean *ran);
 gboolean cmd_execute_default(const char * inp);
 
 gboolean cmd_about(gchar **args, struct cmd_help_t help);

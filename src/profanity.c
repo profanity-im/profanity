@@ -89,7 +89,8 @@ prof_run(const int disable_tls, char *log_level, char *account_name)
 
         line = ui_readline();
         if (line) {
-            cont = cmd_process_input(line);
+            ProfWin *window = wins_get_current();
+            cont = cmd_process_input(window, line);
             free(line);
             line = NULL;
         } else {
@@ -141,12 +142,13 @@ prof_handle_activity(void)
 static void
 _connect_default(const char * const account)
 {
+    ProfWin *window = wins_get_current();
     if (account) {
-        cmd_execute_connect(account);
+        cmd_execute_connect(window, account);
     } else {
         char *pref_connect_account = prefs_get_string(PREF_CONNECT_ACCOUNT);
         if (pref_connect_account) {
-            cmd_execute_connect(pref_connect_account);
+            cmd_execute_connect(window, pref_connect_account);
             prefs_free_string(pref_connect_account);
         }
     }
