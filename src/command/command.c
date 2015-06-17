@@ -1845,7 +1845,7 @@ cmd_process_input(ProfWin *window, char *inp)
 {
     log_debug("Input received: %s", inp);
     gboolean result = FALSE;
-    g_strstrip(inp);
+    g_strchomp(inp);
 
     // just carry on if no input
     if (strlen(inp) == 0) {
