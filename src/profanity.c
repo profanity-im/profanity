@@ -41,6 +41,7 @@
 #include <signal.h>
 #include <stdlib.h>
 #include <string.h>
+#include <assert.h>
 
 #include <glib.h>
 
@@ -134,7 +135,8 @@ prof_handle_activity(void)
     ProfWin *current = wins_get_current();
 
     if ((status == JABBER_CONNECTED) && (current->type == WIN_CHAT)) {
-        ProfChatWin *chatwin = wins_get_current_chat();
+        ProfChatWin *chatwin = (ProfChatWin*)current;
+        assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
         chat_state_handle_typing(chatwin->barejid, chatwin->state);
     }
 }

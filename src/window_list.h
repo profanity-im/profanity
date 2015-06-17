@@ -53,10 +53,6 @@ ProfPrivateWin *wins_get_private(const char * const fulljid);
 ProfXMLWin * wins_get_xmlconsole(void);
 
 ProfWin * wins_get_current(void);
-ProfChatWin * wins_get_current_chat(void);
-ProfMucWin * wins_get_current_muc(void);
-ProfPrivateWin * wins_get_current_private(void);
-ProfMucConfWin * wins_get_current_muc_conf(void);
 
 void wins_set_current_by_num(int i);
 

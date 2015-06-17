@@ -34,6 +34,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <assert.h>
 
 #include <glib.h>
 
@@ -666,7 +667,8 @@ char *
 muc_autocomplete(ProfWin *window, const char * const input)
 {
     if (window->type == WIN_MUC) {
-        ProfMucWin *mucwin = wins_get_current_muc();
+        ProfMucWin *mucwin = (ProfMucWin*)window;
+        assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
         ChatRoom *chat_room = g_hash_table_lookup(rooms, mucwin->roomjid);
 
         if (chat_room && chat_room->nick_ac) {
