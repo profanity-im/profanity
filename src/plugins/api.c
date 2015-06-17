@@ -33,6 +33,7 @@
  */
 
 #include <stdlib.h>
+#include <assert.h>
 
 #include <glib.h>
 
@@ -115,7 +116,8 @@ api_get_current_recipient(void)
 {
     ProfWin *current = wins_get_current();
     if (current->type == WIN_CHAT) {
-        ProfChatWin *chatwin = wins_get_current_chat();
+        ProfChatWin *chatwin = (ProfChatWin*)current;
+        assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
         return chatwin->barejid;
     } else {
         return NULL;
@@ -127,7 +129,8 @@ api_get_current_muc(void)
 {
     ProfWin *current = wins_get_current();
     if (current->type == WIN_MUC) {
-        ProfMucWin *mucwin = wins_get_current_muc();
+        ProfMucWin *mucwin = (ProfMucWin*)current;
+        assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
         return mucwin->roomjid;
     } else {
         return NULL;
