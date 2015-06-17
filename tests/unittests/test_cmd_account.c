@@ -926,8 +926,7 @@ void cmd_account_set_priority_updates_presence_when_account_connected_with_prese
 {
     CommandHelp *help = malloc(sizeof(CommandHelp));
     gchar *args[] = { "set", "a_account", "online", "10", NULL };
-    ProfAccount *account = account_new("a_account", "a_jid", NULL, NULL, TRUE, NULL, 5222, "a_resource",
-        NULL, NULL, 10, 10, 10, 10, 10, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+
 
     expect_any(accounts_account_exists, account_name);
     will_return(accounts_account_exists, TRUE);
@@ -941,10 +940,15 @@ void cmd_account_set_priority_updates_presence_when_account_connected_with_prese
     will_return(accounts_get_last_presence, RESOURCE_ONLINE);
 
     will_return(jabber_get_account_name, "a_account");
-    will_return(jabber_get_account_name, "a_account");
 
+#ifdef HAVE_LIBGPGME
+    ProfAccount *account = account_new("a_account", "a_jid", NULL, NULL, TRUE, NULL, 5222, "a_resource",
+        NULL, NULL, 10, 10, 10, 10, 10, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+
+    will_return(jabber_get_account_name, "a_account");
     expect_any(accounts_get_account, name);
     will_return(accounts_get_account, account);
+#endif
 
     will_return(jabber_get_presence_message, "Free to chat");
 

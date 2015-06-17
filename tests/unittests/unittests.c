@@ -21,6 +21,7 @@
 #include "test_cmd_sub.h"
 #include "test_cmd_statuses.h"
 #include "test_cmd_otr.h"
+#include "test_cmd_pgp.h"
 #include "test_jid.h"
 #include "test_parser.h"
 #include "test_roster_list.h"
@@ -537,6 +538,12 @@ int main(int argc, char* argv[]) {
             close_preferences),
 #else
         unit_test(cmd_otr_shows_message_when_otr_unsupported),
+#endif
+
+#ifdef HAVE_LIBGPGME
+        unit_test(cmd_pgp_shows_usage_when_no_args),
+#else
+        unit_test(cmd_pgp_shows_message_when_pgp_unsupported),
 #endif
 
         unit_test(cmd_join_shows_message_when_disconnecting),

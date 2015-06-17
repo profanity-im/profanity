@@ -74,6 +74,7 @@ unittest_sources = \
 	tests/unittests/test_cmd_connect.c tests/unittests/test_cmd_connect.h \
 	tests/unittests/test_cmd_join.c tests/unittests/test_cmd_join.h \
 	tests/unittests/test_cmd_otr.c tests/unittests/test_cmd_otr.h \
+	tests/unittests/test_cmd_pgp.c tests/unittests/test_cmd_pgp.h \
 	tests/unittests/test_cmd_rooms.c tests/unittests/test_cmd_rooms.h \
 	tests/unittests/test_cmd_roster.c tests/unittests/test_cmd_roster.h \
 	tests/unittests/test_cmd_statuses.c tests/unittests/test_cmd_statuses.h \

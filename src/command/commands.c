@@ -4123,7 +4123,10 @@ gboolean
 cmd_pgp(ProfWin *window, gchar **args, struct cmd_help_t help)
 {
 #ifdef HAVE_LIBGPGME
-    if (g_strcmp0(args[0], "keys") == 0) {
+    if (args[0] == NULL) {
+        cons_show("Usage: %s", help.usage);
+        return TRUE;
+    } else if (g_strcmp0(args[0], "keys") == 0) {
         GSList *keys = p_gpg_list_keys();
         if (keys) {
             cons_show("PGP keys:");
