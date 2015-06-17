@@ -111,19 +111,22 @@ cmd_execute_default(ProfWin *window, const char * inp)
     switch (window->type) {
     case WIN_CHAT:
     {
-        ProfChatWin *chatwin = wins_get_current_chat();
+        ProfChatWin *chatwin = (ProfChatWin*)window;
+        assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
         cl_ev_send_msg(chatwin, inp);
         break;
     }
     case WIN_PRIVATE:
     {
-        ProfPrivateWin *privatewin = wins_get_current_private();
+        ProfPrivateWin *privatewin = (ProfPrivateWin*)window;
+        assert(privatewin->memcheck == PROFPRIVATEWIN_MEMCHECK);
         cl_ev_send_priv_msg(privatewin, inp);
         break;
     }
     case WIN_MUC:
     {
-        ProfMucWin *mucwin = wins_get_current_muc();
+        ProfMucWin *mucwin = (ProfMucWin*)window;
+        assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
         cl_ev_send_muc_msg(mucwin, inp);
         break;
     }
@@ -611,7 +614,8 @@ cmd_sub(ProfWin *window, gchar **args, struct cmd_help_t help)
     }
 
     if (jid == NULL) {
-        ProfChatWin *chatwin = wins_get_current_chat();
+        ProfChatWin *chatwin = (ProfChatWin*)window;
+        assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
         jid = chatwin->barejid;
     }
 
@@ -979,7 +983,8 @@ _who_room(ProfWin *window, gchar **args, struct cmd_help_t help)
         return;
     }
 
-    ProfMucWin *mucwin = wins_get_current_muc();
+    ProfMucWin *mucwin = (ProfMucWin*)window;
+    assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
 
     // presence filter
     if (args[0] == NULL ||
@@ -1327,7 +1332,8 @@ cmd_msg(ProfWin *window, gchar **args, struct cmd_help_t help)
 
     // send private message when in MUC room
     if (window->type == WIN_MUC) {
-        ProfMucWin *mucwin = wins_get_current_muc();
+        ProfMucWin *mucwin = (ProfMucWin*)window;
+        assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
         if (muc_roster_contains_nick(mucwin->roomjid, usr)) {
             GString *full_jid = g_string_new(mucwin->roomjid);
             g_string_append(full_jid, "/");
@@ -1800,7 +1806,8 @@ cmd_status(ProfWin *window, gchar **args, struct cmd_help_t help)
     {
         case WIN_MUC:
             if (usr) {
-                ProfMucWin *mucwin = wins_get_current_muc();
+                ProfMucWin *mucwin = (ProfMucWin*)window;
+                assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
                 Occupant *occupant = muc_roster_item(mucwin->roomjid, usr);
                 if (occupant) {
                     win_show_occupant(window, occupant);
@@ -1815,7 +1822,8 @@ cmd_status(ProfWin *window, gchar **args, struct cmd_help_t help)
             if (usr) {
                 ui_current_print_line("No parameter required when in chat.");
             } else {
-                ProfChatWin *chatwin = wins_get_current_chat();
+                ProfChatWin *chatwin = (ProfChatWin*)window;
+                assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
                 PContact pcontact = roster_get_contact(chatwin->barejid);
                 if (pcontact) {
                     win_show_contact(window, pcontact);
@@ -1828,7 +1836,8 @@ cmd_status(ProfWin *window, gchar **args, struct cmd_help_t help)
             if (usr) {
                 ui_current_print_line("No parameter required when in chat.");
             } else {
-                ProfPrivateWin *privatewin = wins_get_current_private();
+                ProfPrivateWin *privatewin = (ProfPrivateWin*)window;
+                assert(privatewin->memcheck == PROFPRIVATEWIN_MEMCHECK);
                 Jid *jid = jid_create(privatewin->fulljid);
                 Occupant *occupant = muc_roster_item(jid->barejid, jid->resourcepart);
                 if (occupant) {
@@ -1874,7 +1883,8 @@ cmd_info(ProfWin *window, gchar **args, struct cmd_help_t help)
     {
         case WIN_MUC:
             if (usr) {
-                ProfMucWin *mucwin = wins_get_current_muc();
+                ProfMucWin *mucwin = (ProfMucWin*)window;
+                assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
                 Occupant *occupant = muc_roster_item(mucwin->roomjid, usr);
                 if (occupant) {
                     win_show_occupant_info(window, mucwin->roomjid, occupant);
@@ -1882,7 +1892,8 @@ cmd_info(ProfWin *window, gchar **args, struct cmd_help_t help)
                     ui_current_print_line("No such occupant \"%s\" in room.", usr);
                 }
             } else {
-                ProfMucWin *mucwin = wins_get_current_muc();
+                ProfMucWin *mucwin = (ProfMucWin*)window;
+                assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
                 iq_room_info_request(mucwin->roomjid, TRUE);
                 ui_show_room_info(mucwin);
                 return TRUE;
@@ -1892,7 +1903,8 @@ cmd_info(ProfWin *window, gchar **args, struct cmd_help_t help)
             if (usr) {
                 ui_current_print_line("No parameter required when in chat.");
             } else {
-                ProfChatWin *chatwin = wins_get_current_chat();
+                ProfChatWin *chatwin = (ProfChatWin*)window;
+                assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
                 PContact pcontact = roster_get_contact(chatwin->barejid);
                 if (pcontact) {
                     win_show_info(window, pcontact);
@@ -1905,7 +1917,8 @@ cmd_info(ProfWin *window, gchar **args, struct cmd_help_t help)
             if (usr) {
                 ui_current_print_line("No parameter required when in chat.");
             } else {
-                ProfPrivateWin *privatewin = wins_get_current_private();
+                ProfPrivateWin *privatewin = (ProfPrivateWin*)window;
+                assert(privatewin->memcheck == PROFPRIVATEWIN_MEMCHECK);
                 Jid *jid = jid_create(privatewin->fulljid);
                 Occupant *occupant = muc_roster_item(jid->barejid, jid->resourcepart);
                 if (occupant) {
@@ -1955,7 +1968,8 @@ cmd_caps(ProfWin *window, gchar **args, struct cmd_help_t help)
     {
         case WIN_MUC:
             if (args[0]) {
-                ProfMucWin *mucwin = wins_get_current_muc();
+                ProfMucWin *mucwin = (ProfMucWin*)window;
+                assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
                 occupant = muc_roster_item(mucwin->roomjid, args[0]);
                 if (occupant) {
                     Jid *jidp = jid_create_from_bare_and_resource(mucwin->roomjid, args[0]);
@@ -1997,7 +2011,8 @@ cmd_caps(ProfWin *window, gchar **args, struct cmd_help_t help)
             if (args[0]) {
                 cons_show("No parameter needed to /caps when in private chat.");
             } else {
-                ProfPrivateWin *privatewin = wins_get_current_private();
+                ProfPrivateWin *privatewin = (ProfPrivateWin*)window;
+                assert(privatewin->memcheck == PROFPRIVATEWIN_MEMCHECK);
                 Jid *jid = jid_create(privatewin->fulljid);
                 if (jid) {
                     occupant = muc_roster_item(jid->barejid, jid->resourcepart);
@@ -2029,7 +2044,8 @@ cmd_software(ProfWin *window, gchar **args, struct cmd_help_t help)
     {
         case WIN_MUC:
             if (args[0]) {
-                ProfMucWin *mucwin = wins_get_current_muc();
+                ProfMucWin *mucwin = (ProfMucWin*)window;
+                assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
                 occupant = muc_roster_item(mucwin->roomjid, args[0]);
                 if (occupant) {
                     Jid *jid = jid_create_from_bare_and_resource(mucwin->roomjid, args[0]);
@@ -2061,7 +2077,8 @@ cmd_software(ProfWin *window, gchar **args, struct cmd_help_t help)
             if (args[0]) {
                 cons_show("No parameter needed to /software when in private chat.");
             } else {
-                ProfPrivateWin *privatewin = wins_get_current_private();
+                ProfPrivateWin *privatewin = (ProfPrivateWin*)window;
+                assert(privatewin->memcheck == PROFPRIVATEWIN_MEMCHECK);
                 iq_send_software_version(privatewin->fulljid);
             }
             break;
@@ -2191,7 +2208,8 @@ cmd_invite(ProfWin *window, gchar **args, struct cmd_help_t help)
         usr_jid = contact;
     }
 
-    ProfMucWin *mucwin = wins_get_current_muc();
+    ProfMucWin *mucwin = (ProfMucWin*)window;
+    assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
     message_send_invite(mucwin->roomjid, usr_jid, reason);
     if (reason) {
         cons_show("Room invite sent, contact: %s, room: %s, reason: \"%s\".",
@@ -2467,7 +2485,8 @@ cmd_form(ProfWin *window, gchar **args, struct cmd_help_t help)
         return TRUE;
     }
 
-    ProfMucConfWin *confwin = wins_get_current_muc_conf();
+    ProfMucConfWin *confwin = (ProfMucConfWin*)window;
+    assert(confwin->memcheck == PROFCONFWIN_MEMCHECK);
 
     if (g_strcmp0(args[0], "show") == 0) {
         ui_show_form(confwin);
@@ -2532,7 +2551,8 @@ cmd_kick(ProfWin *window, gchar **args, struct cmd_help_t help)
         return TRUE;
     }
 
-    ProfMucWin *mucwin = wins_get_current_muc();
+    ProfMucWin *mucwin = (ProfMucWin*)window;
+    assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
 
     char *nick = args[0];
     if (nick) {
@@ -2564,7 +2584,8 @@ cmd_ban(ProfWin *window, gchar **args, struct cmd_help_t help)
         return TRUE;
     }
 
-    ProfMucWin *mucwin = wins_get_current_muc();
+    ProfMucWin *mucwin = (ProfMucWin*)window;
+    assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
 
     char *jid = args[0];
     if (jid) {
@@ -2591,7 +2612,8 @@ cmd_subject(ProfWin *window, gchar **args, struct cmd_help_t help)
         return TRUE;
     }
 
-    ProfMucWin *mucwin = wins_get_current_muc();
+    ProfMucWin *mucwin = (ProfMucWin*)window;
+    assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
 
     if (args[0] == NULL) {
         char *subject = muc_subject(mucwin->roomjid);
@@ -2654,7 +2676,8 @@ cmd_affiliation(ProfWin *window, gchar **args, struct cmd_help_t help)
         return TRUE;
     }
 
-    ProfMucWin *mucwin = wins_get_current_muc();
+    ProfMucWin *mucwin = (ProfMucWin*)window;
+    assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
 
     if (g_strcmp0(cmd, "list") == 0) {
         if (!affiliation) {
@@ -2722,7 +2745,8 @@ cmd_role(ProfWin *window, gchar **args, struct cmd_help_t help)
         return TRUE;
     }
 
-    ProfMucWin *mucwin = wins_get_current_muc();
+    ProfMucWin *mucwin = (ProfMucWin*)window;
+    assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
 
     if (g_strcmp0(cmd, "list") == 0) {
         if (!role) {
@@ -2780,7 +2804,8 @@ cmd_room(ProfWin *window, gchar **args, struct cmd_help_t help)
         return TRUE;
     }
 
-    ProfMucWin *mucwin = wins_get_current_muc();
+    ProfMucWin *mucwin = (ProfMucWin*)window;
+    assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
     int num = wins_get_num(window);
 
     int ui_index = num;
@@ -2881,7 +2906,8 @@ cmd_occupants(ProfWin *window, gchar **args, struct cmd_help_t help)
         return TRUE;
     }
 
-    ProfMucWin *mucwin = wins_get_current_muc();
+    ProfMucWin *mucwin = (ProfMucWin*)window;
+    assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
 
     if (g_strcmp0(args[0], "show") == 0) {
         if (g_strcmp0(args[1], "jid") == 0) {
@@ -2938,7 +2964,8 @@ cmd_bookmark(ProfWin *window, gchar **args, struct cmd_help_t help)
     gchar *cmd = args[0];
     if (window->type == WIN_MUC && cmd == NULL) {
         // default to current nickname, password, and autojoin "on"
-        ProfMucWin *mucwin = wins_get_current_muc();
+        ProfMucWin *mucwin = (ProfMucWin*)window;
+        assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
         char *nick = muc_nick(mucwin->roomjid);
         char *password = muc_password(mucwin->roomjid);
         gboolean added = bookmark_add(mucwin->roomjid, nick, password, "on");
@@ -3079,7 +3106,8 @@ cmd_nick(ProfWin *window, gchar **args, struct cmd_help_t help)
         return TRUE;
     }
 
-    ProfMucWin *mucwin = wins_get_current_muc();
+    ProfMucWin *mucwin = (ProfMucWin*)window;
+    assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
     char *nick = args[0];
     presence_change_room_nick(mucwin->roomjid, nick);
 
@@ -3182,19 +3210,22 @@ cmd_tiny(ProfWin *window, gchar **args, struct cmd_help_t help)
     switch (window->type){
     case WIN_CHAT:
     {
-        ProfChatWin *chatwin = wins_get_current_chat();
+        ProfChatWin *chatwin = (ProfChatWin*)window;
+        assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
         cl_ev_send_msg(chatwin, tiny);
         break;
     }
     case WIN_PRIVATE:
     {
-        ProfPrivateWin *privatewin = wins_get_current_private();
+        ProfPrivateWin *privatewin = (ProfPrivateWin*)window;
+        assert(privatewin->memcheck == PROFPRIVATEWIN_MEMCHECK);
         cl_ev_send_priv_msg(privatewin, tiny);
         break;
     }
     case WIN_MUC:
     {
-        ProfMucWin *mucwin = wins_get_current_muc();
+        ProfMucWin *mucwin = (ProfMucWin*)window;
+        assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
         cl_ev_send_muc_msg(mucwin, tiny);
         break;
     }
@@ -4253,7 +4284,8 @@ cmd_otr(ProfWin *window, gchar **args, struct cmd_help_t help)
             return TRUE;
         }
 
-        ProfChatWin *chatwin = wins_get_current_chat();
+        ProfChatWin *chatwin = (ProfChatWin*)window;
+        assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
         if (chatwin->enc_mode != PROF_ENC_OTR) {
             ui_current_print_formatted_line('!', 0, "You are not currently in an OTR session.");
             return TRUE;
@@ -4305,7 +4337,8 @@ cmd_otr(ProfWin *window, gchar **args, struct cmd_help_t help)
                 return TRUE;
             }
 
-            ProfChatWin *chatwin = wins_get_current_chat();
+            ProfChatWin *chatwin = (ProfChatWin*)window;
+            assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
             if (chatwin->enc_mode == PROF_ENC_OTR) {
                 ui_current_print_formatted_line('!', 0, "You are already in an OTR session.");
                 return TRUE;
@@ -4327,7 +4360,8 @@ cmd_otr(ProfWin *window, gchar **args, struct cmd_help_t help)
             return TRUE;
         }
 
-        ProfChatWin *chatwin = wins_get_current_chat();
+        ProfChatWin *chatwin = (ProfChatWin*)window;
+        assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
         if (chatwin->enc_mode != PROF_ENC_OTR) {
             ui_current_print_formatted_line('!', 0, "You are not currently in an OTR session.");
             return TRUE;
@@ -4343,7 +4377,8 @@ cmd_otr(ProfWin *window, gchar **args, struct cmd_help_t help)
             return TRUE;
         }
 
-        ProfChatWin *chatwin = wins_get_current_chat();
+        ProfChatWin *chatwin = (ProfChatWin*)window;
+        assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
         if (chatwin->enc_mode != PROF_ENC_OTR) {
             ui_current_print_formatted_line('!', 0, "You are not currently in an OTR session.");
             return TRUE;
@@ -4359,7 +4394,8 @@ cmd_otr(ProfWin *window, gchar **args, struct cmd_help_t help)
             return TRUE;
         }
 
-        ProfChatWin *chatwin = wins_get_current_chat();
+        ProfChatWin *chatwin = (ProfChatWin*)window;
+        assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
         if (chatwin->enc_mode != PROF_ENC_OTR) {
             ui_current_print_formatted_line('!', 0, "You are not currently in an OTR session.");
             return TRUE;
@@ -4375,7 +4411,8 @@ cmd_otr(ProfWin *window, gchar **args, struct cmd_help_t help)
             return TRUE;
         }
 
-        ProfChatWin *chatwin = wins_get_current_chat();
+        ProfChatWin *chatwin = (ProfChatWin*)window;
+        assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
         if (chatwin->enc_mode != PROF_ENC_OTR) {
             ui_current_print_formatted_line('!', 0, "You are not currently in an OTR session.");
             return TRUE;
@@ -4403,7 +4440,8 @@ cmd_otr(ProfWin *window, gchar **args, struct cmd_help_t help)
             return TRUE;
         }
 
-        ProfChatWin *chatwin = wins_get_current_chat();
+        ProfChatWin *chatwin = (ProfChatWin*)window;
+        assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
         if (chatwin->enc_mode != PROF_ENC_OTR) {
             ui_current_print_formatted_line('!', 0, "You are not currently in an OTR session.");
             return TRUE;
@@ -4418,7 +4456,8 @@ cmd_otr(ProfWin *window, gchar **args, struct cmd_help_t help)
             return TRUE;
         }
 
-        ProfChatWin *chatwin = wins_get_current_chat();
+        ProfChatWin *chatwin = (ProfChatWin*)window;
+        assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
         if (chatwin->enc_mode != PROF_ENC_OTR) {
             ui_current_print_formatted_line('!', 0, "You are not currently in an OTR session.");
             return TRUE;
