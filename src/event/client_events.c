@@ -32,6 +32,7 @@
  *
  */
 
+#include <stdlib.h>
 #include <glib.h>
 
 #include "config.h"
