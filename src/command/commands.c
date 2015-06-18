@@ -4172,6 +4172,13 @@ cmd_pgp(ProfWin *window, gchar **args, struct cmd_help_t help)
         } else {
             cons_show("Could not get libgpgme version");
         }
+    } else if (g_strcmp0(args[0], "start") == 0) {
+        jabber_conn_status_t conn_status = jabber_get_connection_status();
+        if (conn_status != JABBER_CONNECTED) {
+            cons_show("You must be connected to start PGP encrpytion.");
+        } else if (window->type != WIN_CHAT && args[1] == NULL) {
+            cons_show("You must be in a regular chat window to start PGP encrpytion.");
+        }
     }
 
     return TRUE;

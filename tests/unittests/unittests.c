@@ -542,6 +542,16 @@ int main(int argc, char* argv[]) {
 
 #ifdef HAVE_LIBGPGME
         unit_test(cmd_pgp_shows_usage_when_no_args),
+        unit_test(cmd_pgp_start_shows_message_when_disconnected),
+        unit_test(cmd_pgp_start_shows_message_when_disconnecting),
+        unit_test(cmd_pgp_start_shows_message_when_connecting),
+        unit_test(cmd_pgp_start_shows_message_when_undefined),
+        unit_test(cmd_pgp_start_shows_message_when_started),
+        unit_test(cmd_pgp_start_shows_message_when_no_arg_in_console),
+        unit_test(cmd_pgp_start_shows_message_when_no_arg_in_muc),
+        unit_test(cmd_pgp_start_shows_message_when_no_arg_in_mucconf),
+        unit_test(cmd_pgp_start_shows_message_when_no_arg_in_private),
+        unit_test(cmd_pgp_start_shows_message_when_no_arg_in_xmlconsole),
 #else
         unit_test(cmd_pgp_shows_message_when_pgp_unsupported),
 #endif
