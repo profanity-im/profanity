@@ -205,6 +205,7 @@ static struct cmd_t command_defs[] =
           "size           : Percentage of the screen taken up by the roster (1-99).",
           "add jid [nick] : Add a new item to the roster.",
           "remove jid     : Removes an item from the roster.",
+          "empty          : Remove all items from roster."
           "nick jid nick  : Change a contacts nickname.",
           "clearnick jid  : Removes the current nickname.",
           "",
@@ -1405,6 +1406,7 @@ cmd_init(void)
     autocomplete_add(roster_ac, "nick");
     autocomplete_add(roster_ac, "clearnick");
     autocomplete_add(roster_ac, "remove");
+    autocomplete_add(roster_ac, "empty");
     autocomplete_add(roster_ac, "show");
     autocomplete_add(roster_ac, "hide");
     autocomplete_add(roster_ac, "by");

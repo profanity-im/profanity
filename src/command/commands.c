@@ -1648,6 +1648,23 @@ cmd_roster(ProfWin *window, gchar **args, struct cmd_help_t help)
         }
         return TRUE;
 
+    } else if (strcmp(args[0], "empty") == 0) {
+        if (conn_status != JABBER_CONNECTED) {
+            cons_show("You are not currently connected.");
+            return TRUE;
+        }
+
+        GSList *all = roster_get_contacts();
+        GSList *curr = all;
+        while (curr) {
+            PContact contact = curr->data;
+            roster_send_remove(p_contact_barejid(contact));
+            curr = g_slist_next(curr);
+        }
+
+        g_slist_free(all);
+        return TRUE;
+
     // change nickname
     } else if (strcmp(args[0], "nick") == 0) {
         if (conn_status != JABBER_CONNECTED) {
