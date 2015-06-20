@@ -45,6 +45,7 @@ void p_gpg_init(void);
 void p_gpg_close(void);
 GSList* p_gpg_list_keys(void);
 GHashTable* p_gpg_fingerprints(void);
+gboolean p_gpg_available(const char * const barejid);
 const char* p_gpg_libver(void);
 void p_gpg_free_key(ProfPGPKey *key);
 char* p_gpg_sign(const char * const str, const char * const fp);

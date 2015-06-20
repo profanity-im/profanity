@@ -30,3 +30,8 @@ char* p_gpg_sign(const char * const str, const char * const fp)
     return NULL;
 }
 
+gboolean p_gpg_available(const char * const barejid)
+{
+    return FALSE;
+}
+

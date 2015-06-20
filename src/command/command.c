@@ -83,6 +83,7 @@ static char * _roster_autocomplete(ProfWin *window, const char * const input);
 static char * _group_autocomplete(ProfWin *window, const char * const input);
 static char * _bookmark_autocomplete(ProfWin *window, const char * const input);
 static char * _otr_autocomplete(ProfWin *window, const char * const input);
+static char * _pgp_autocomplete(ProfWin *window, const char * const input);
 static char * _connect_autocomplete(ProfWin *window, const char * const input);
 static char * _statuses_autocomplete(ProfWin *window, const char * const input);
 static char * _alias_autocomplete(ProfWin *window, const char * const input);
@@ -860,13 +861,15 @@ static struct cmd_t command_defs[] =
           NULL } } },
 
     { "/pgp",
-        cmd_pgp, parse_args, 1, 1, NULL,
-        { "/pgp keys|libver", "Open PGP.",
-        { "/pgp keys|libver",
-          "----------------",
+        cmd_pgp, parse_args, 1, 3, NULL,
+        { "/pgp keys|libver|fps|start [contact]", "Open PGP.",
+        { "/pgp keys|libver|fps|start [contact]",
+          "------------------------------------",
           "Open PGP.",
-          "keys   : List private keys."
-          "libver : Show which version of the libgpgme library is being used.",
+          "keys            : List private keys."
+          "libver          : Show which version of the libgpgme library is being used.",
+          "fps             : Show received fingerprints.",
+          "start [contact] : Start PGP encrypted chat, current contact will be used if not specified.",
           NULL } } },
 
     { "/otr",
@@ -1597,6 +1600,7 @@ cmd_init(void)
     autocomplete_add(pgp_ac, "keys");
     autocomplete_add(pgp_ac, "fps");
     autocomplete_add(pgp_ac, "libver");
+    autocomplete_add(pgp_ac, "start");
 }
 
 void
@@ -2017,8 +2021,8 @@ _cmd_complete_parameters(ProfWin *window, const char * const input)
         }
     }
 
-    gchar *cmds[] = { "/help", "/prefs", "/disco", "/close", "/wins", "/subject", "/room", "/pgp" };
-    Autocomplete completers[] = { help_ac, prefs_ac, disco_ac, close_ac, wins_ac, subject_ac, room_ac, pgp_ac };
+    gchar *cmds[] = { "/help", "/prefs", "/disco", "/close", "/wins", "/subject", "/room" };
+    Autocomplete completers[] = { help_ac, prefs_ac, disco_ac, close_ac, wins_ac, subject_ac, room_ac };
 
     for (i = 0; i < ARRAY_SIZE(cmds); i++) {
         result = autocomplete_param_with_ac(input, cmds[i], completers[i], TRUE);
@@ -2040,6 +2044,7 @@ _cmd_complete_parameters(ProfWin *window, const char * const input)
     g_hash_table_insert(ac_funcs, "/bookmark",      _bookmark_autocomplete);
     g_hash_table_insert(ac_funcs, "/autoconnect",   _autoconnect_autocomplete);
     g_hash_table_insert(ac_funcs, "/otr",           _otr_autocomplete);
+    g_hash_table_insert(ac_funcs, "/pgp",           _pgp_autocomplete);
     g_hash_table_insert(ac_funcs, "/connect",       _connect_autocomplete);
     g_hash_table_insert(ac_funcs, "/statuses",      _statuses_autocomplete);
     g_hash_table_insert(ac_funcs, "/alias",         _alias_autocomplete);
@@ -2461,6 +2466,24 @@ _otr_autocomplete(ProfWin *window, const char * const input)
     }
 
     found = autocomplete_param_with_ac(input, "/otr", otr_ac, TRUE);
+    if (found) {
+        return found;
+    }
+
+    return NULL;
+}
+
+static char *
+_pgp_autocomplete(ProfWin *window, const char * const input)
+{
+    char *found = NULL;
+
+    found = autocomplete_param_with_func(input, "/pgp start", roster_contact_autocomplete);
+    if (found) {
+        return found;
+    }
+
+    found = autocomplete_param_with_ac(input, "/pgp", pgp_ac, TRUE);
     if (found) {
         return found;
     }

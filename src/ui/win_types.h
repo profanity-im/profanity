@@ -91,7 +91,8 @@ typedef enum {
 
 typedef enum {
     PROF_ENC_NONE,
-    PROF_ENC_OTR
+    PROF_ENC_OTR,
+    PROF_ENC_PGP
 } prof_enc_t;
 
 typedef struct prof_win_t {

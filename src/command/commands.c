@@ -4143,59 +4143,124 @@ cmd_pgp(ProfWin *window, gchar **args, struct cmd_help_t help)
     if (args[0] == NULL) {
         cons_show("Usage: %s", help.usage);
         return TRUE;
-    } else if (g_strcmp0(args[0], "keys") == 0) {
+    }
+
+    if (g_strcmp0(args[0], "keys") == 0) {
         GSList *keys = p_gpg_list_keys();
-        if (keys) {
-            cons_show("PGP keys:");
-            while (keys) {
-                ProfPGPKey *key = keys->data;
-                cons_show("  %s", key->name);
-                cons_show("    ID          : %s", key->id);
-                cons_show("    Fingerprint : %s", key->fp);
-                keys = g_slist_next(keys);
-            }
-        } else {
+        if (!keys) {
             cons_show("No keys found");
+            return TRUE;
+        }
+
+        cons_show("PGP keys:");
+        GSList *curr = keys;
+        while (curr) {
+            ProfPGPKey *key = curr->data;
+            cons_show("  %s", key->name);
+            cons_show("    ID          : %s", key->id);
+            cons_show("    Fingerprint : %s", key->fp);
+            curr = g_slist_next(curr);
         }
         g_slist_free_full(keys, (GDestroyNotify)p_gpg_free_key);
-    } else if (g_strcmp0(args[0], "fps") == 0) {
+        return TRUE;
+    }
+
+    if (g_strcmp0(args[0], "fps") == 0) {
         jabber_conn_status_t conn_status = jabber_get_connection_status();
         if (conn_status != JABBER_CONNECTED) {
             cons_show("You are not currently connected.");
-        } else {
-            GHashTable *fingerprints = p_gpg_fingerprints();
-            GList *jids = g_hash_table_get_keys(fingerprints);
-            if (jids) {
-                cons_show("Received PGP fingerprints:");
-                GList *curr = jids;
-                while (curr) {
-                    char *jid = curr->data;
-                    char *fingerprint = g_hash_table_lookup(fingerprints, jid);
-                    cons_show("  %s: %s", jid, fingerprint);
-                    curr = g_list_next(curr);
-                }
-            } else {
-                cons_show("No PGP fingerprints received.");
-            }
-            g_list_free(jids);
+            return TRUE;
         }
-    } else if (g_strcmp0(args[0], "libver") == 0) {
+        GHashTable *fingerprints = p_gpg_fingerprints();
+        GList *jids = g_hash_table_get_keys(fingerprints);
+        if (!jids) {
+            cons_show("No PGP fingerprints received.");
+            return TRUE;
+        }
+
+        cons_show("Received PGP fingerprints:");
+        GList *curr = jids;
+        while (curr) {
+            char *jid = curr->data;
+            char *fingerprint = g_hash_table_lookup(fingerprints, jid);
+            cons_show("  %s: %s", jid, fingerprint);
+            curr = g_list_next(curr);
+        }
+        g_list_free(jids);
+        return TRUE;
+    }
+
+    if (g_strcmp0(args[0], "libver") == 0) {
         const char *libver = p_gpg_libver();
-        if (libver) {
-            GString *fullstr = g_string_new("Using libgpgme version ");
-            g_string_append(fullstr, libver);
-            cons_show("%s", fullstr->str);
-            g_string_free(fullstr, TRUE);
-        } else {
+        if (!libver) {
             cons_show("Could not get libgpgme version");
+            return TRUE;
         }
-    } else if (g_strcmp0(args[0], "start") == 0) {
+
+        GString *fullstr = g_string_new("Using libgpgme version ");
+        g_string_append(fullstr, libver);
+        cons_show("%s", fullstr->str);
+        g_string_free(fullstr, TRUE);
+
+        return TRUE;
+    }
+
+    if (g_strcmp0(args[0], "start") == 0) {
         jabber_conn_status_t conn_status = jabber_get_connection_status();
         if (conn_status != JABBER_CONNECTED) {
             cons_show("You must be connected to start PGP encrpytion.");
-        } else if (window->type != WIN_CHAT && args[1] == NULL) {
-            cons_show("You must be in a regular chat window to start PGP encrpytion.");
+            return TRUE;
         }
+
+        if (window->type != WIN_CHAT && args[1] == NULL) {
+            cons_show("You must be in a regular chat window to start PGP encrpytion.");
+            return TRUE;
+        }
+
+        ProfChatWin *chatwin = NULL;
+
+        if (args[1]) {
+            char *contact = args[1];
+            char *barejid = roster_barejid_from_name(contact);
+            if (barejid == NULL) {
+                barejid = contact;
+            }
+
+            chatwin = wins_get_chat(barejid);
+            if (!chatwin) {
+                chatwin = ui_ev_new_chat_win(barejid);
+            }
+            ui_ev_focus_win((ProfWin*)chatwin);
+        } else {
+            chatwin = (ProfChatWin*)window;
+            assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
+        }
+
+        if (chatwin->enc_mode == PROF_ENC_OTR) {
+            ui_current_print_formatted_line('!', 0, "You must end the OTR session to start PGP encryption.");
+            return TRUE;
+        }
+
+        if (chatwin->enc_mode == PROF_ENC_PGP) {
+            ui_current_print_formatted_line('!', 0, "You have already started PGP encryption.");
+            return TRUE;
+        }
+
+        ProfAccount *account = accounts_get_account(jabber_get_account_name());
+        if (!account->pgp_keyid) {
+            ui_current_print_formatted_line('!', 0, "You must specify a PGP key ID for this account to start PGP encryption.");
+            account_free(account);
+            return TRUE;
+        }
+        account_free(account);
+
+        if (!p_gpg_available(chatwin->barejid)) {
+            ui_current_print_formatted_line('!', 0, "No PGP key found for %s.", chatwin->barejid);
+            return TRUE;
+        }
+
+        chatwin->enc_mode = PROF_ENC_PGP;
+        ui_current_print_formatted_line('!', 0, "PGP encyption enabled.");
     }
 
     return TRUE;

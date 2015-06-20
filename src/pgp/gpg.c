@@ -132,6 +132,13 @@ p_gpg_free_key(ProfPGPKey *key)
     }
 }
 
+gboolean
+p_gpg_available(const char * const barejid)
+{
+    char *fp = g_hash_table_lookup(fingerprints, barejid);
+    return (fp != NULL);
+}
+
 void
 p_gpg_verify(const char * const barejid, const char *const sign)
 {

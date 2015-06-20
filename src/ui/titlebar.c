@@ -174,10 +174,7 @@ _title_bar_draw(void)
         ProfChatWin *chatwin = (ProfChatWin*) current;
         assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
         _show_contact_presence(chatwin);
-
-#ifdef HAVE_LIBOTR
         _show_privacy(chatwin);
-#endif
 
         if (typing) {
             wprintw(win, " (typing...)");
@@ -246,66 +243,82 @@ _show_self_presence(void)
     wattroff(win, bracket_attrs);
 }
 
-#ifdef HAVE_LIBOTR
 static void
 _show_privacy(ProfChatWin *chatwin)
 {
     int bracket_attrs = theme_attrs(THEME_TITLE_BRACKET);
+    int encrypted_attrs = theme_attrs(THEME_TITLE_ENCRYPTED);
+    int unencrypted_attrs = theme_attrs(THEME_TITLE_UNENCRYPTED);
+    int trusted_attrs = theme_attrs(THEME_TITLE_TRUSTED);
+    int untrusted_attrs = theme_attrs(THEME_TITLE_UNTRUSTED);
 
-    if (chatwin->enc_mode == PROF_ENC_NONE) {
-        if (prefs_get_boolean(PREF_OTR_WARN)) {
-            int unencrypted_attrs = theme_attrs(THEME_TITLE_UNENCRYPTED);
+    switch (chatwin->enc_mode) {
+        case PROF_ENC_NONE:
+            // TODO generalise to PROF_ENC_WARN
+            if (prefs_get_boolean(PREF_OTR_WARN)) {
+                wprintw(win, " ");
+                wattron(win, bracket_attrs);
+                wprintw(win, "[");
+                wattroff(win, bracket_attrs);
+                wattron(win, unencrypted_attrs);
+                wprintw(win, "unencrypted");
+                wattroff(win, unencrypted_attrs);
+                wattron(win, bracket_attrs);
+                wprintw(win, "]");
+                wattroff(win, bracket_attrs);
+            }
+            break;
+
+        case PROF_ENC_OTR:
             wprintw(win, " ");
             wattron(win, bracket_attrs);
             wprintw(win, "[");
             wattroff(win, bracket_attrs);
-            wattron(win, unencrypted_attrs);
-            wprintw(win, "unencrypted");
-            wattroff(win, unencrypted_attrs);
+            wattron(win, encrypted_attrs);
+            wprintw(win, "OTR");
+            wattroff(win, encrypted_attrs);
             wattron(win, bracket_attrs);
             wprintw(win, "]");
             wattroff(win, bracket_attrs);
-        }
-    } else {
-        int encrypted_attrs = theme_attrs(THEME_TITLE_ENCRYPTED);
-        wprintw(win, " ");
-        wattron(win, bracket_attrs);
-        wprintw(win, "[");
-        wattroff(win, bracket_attrs);
-        wattron(win, encrypted_attrs);
-        wprintw(win, "OTR");
-        wattroff(win, encrypted_attrs);
-        wattron(win, bracket_attrs);
-        wprintw(win, "]");
-        wattroff(win, bracket_attrs);
-        if (chatwin->otr_is_trusted) {
-            int trusted_attrs = theme_attrs(THEME_TITLE_TRUSTED);
+            if (chatwin->otr_is_trusted) {
+                wprintw(win, " ");
+                wattron(win, bracket_attrs);
+                wprintw(win, "[");
+                wattroff(win, bracket_attrs);
+                wattron(win, trusted_attrs);
+                wprintw(win, "trusted");
+                wattroff(win, trusted_attrs);
+                wattron(win, bracket_attrs);
+                wprintw(win, "]");
+                wattroff(win, bracket_attrs);
+            } else {
+                wprintw(win, " ");
+                wattron(win, bracket_attrs);
+                wprintw(win, "[");
+                wattroff(win, bracket_attrs);
+                wattron(win, untrusted_attrs);
+                wprintw(win, "untrusted");
+                wattroff(win, untrusted_attrs);
+                wattron(win, bracket_attrs);
+                wprintw(win, "]");
+                wattroff(win, bracket_attrs);
+            }
+            break;
+
+        case PROF_ENC_PGP:
             wprintw(win, " ");
             wattron(win, bracket_attrs);
             wprintw(win, "[");
             wattroff(win, bracket_attrs);
-            wattron(win, trusted_attrs);
-            wprintw(win, "trusted");
-            wattroff(win, trusted_attrs);
+            wattron(win, encrypted_attrs);
+            wprintw(win, "PGP");
+            wattroff(win, encrypted_attrs);
             wattron(win, bracket_attrs);
             wprintw(win, "]");
             wattroff(win, bracket_attrs);
-        } else {
-            int untrusted_attrs = theme_attrs(THEME_TITLE_UNTRUSTED);
-            wprintw(win, " ");
-            wattron(win, bracket_attrs);
-            wprintw(win, "[");
-            wattroff(win, bracket_attrs);
-            wattron(win, untrusted_attrs);
-            wprintw(win, "untrusted");
-            wattroff(win, untrusted_attrs);
-            wattron(win, bracket_attrs);
-            wprintw(win, "]");
-            wattroff(win, bracket_attrs);
-        }
+            break;
     }
 }
-#endif
 
 static void
 _show_contact_presence(ProfChatWin *chatwin)
