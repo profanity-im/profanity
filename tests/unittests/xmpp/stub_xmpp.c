@@ -65,10 +65,15 @@ char* message_send_chat(const char * const barejid, const char * const msg)
     return NULL;
 }
 
-char* message_send_chat_encrypted(const char * const barejid, const char * const msg)
+char* message_send_chat_otr(const char * const barejid, const char * const msg)
 {
     check_expected(barejid);
     check_expected(msg);
+    return NULL;
+}
+
+char* message_send_chat_pgp(const char * const barejid, const char * const msg)
+{
     return NULL;
 }
 

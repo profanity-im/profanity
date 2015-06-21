@@ -4415,7 +4415,7 @@ cmd_otr(ProfWin *window, gchar **args, struct cmd_help_t help)
 
             if (!otr_is_secure(barejid)) {
                 char *otr_query_message = otr_start_query();
-                message_send_chat_encrypted(barejid, otr_query_message);
+                message_send_chat_otr(barejid, otr_query_message);
                 return TRUE;
             }
 
@@ -4442,7 +4442,7 @@ cmd_otr(ProfWin *window, gchar **args, struct cmd_help_t help)
             }
 
             char *otr_query_message = otr_start_query();
-            message_send_chat_encrypted(chatwin->barejid, otr_query_message);
+            message_send_chat_otr(chatwin->barejid, otr_query_message);
             return TRUE;
         }
 

@@ -146,7 +146,8 @@ GList * jabber_get_available_resources(void);
 
 // message functions
 char* message_send_chat(const char * const barejid, const char * const msg);
-char* message_send_chat_encrypted(const char * const barejid, const char * const msg);
+char* message_send_chat_otr(const char * const barejid, const char * const msg);
+char* message_send_chat_pgp(const char * const barejid, const char * const msg);
 void message_send_private(const char * const fulljid, const char * const msg);
 void message_send_groupchat(const char * const roomjid, const char * const msg);
 void message_send_groupchat_subject(const char * const roomjid, const char * const subject);
