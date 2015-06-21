@@ -43,6 +43,7 @@
 #include "config/preferences.h"
 #include "config/account.h"
 #include "roster_list.h"
+#include "window_list.h"
 
 #ifdef HAVE_LIBOTR
 #include "otr/otr.h"
@@ -171,16 +172,24 @@ sv_ev_carbon(char *barejid, char *message)
 void
 sv_ev_incoming_message(char *barejid, char *resource, char *message)
 {
+    gboolean new_win = FALSE;
+    ProfChatWin *chatwin = wins_get_chat(barejid);
+    if (!chatwin) {
+        ProfWin *window = wins_new_chat(barejid);
+        chatwin = (ProfChatWin*)window;
+        new_win = TRUE;
+    }
+
 #ifdef HAVE_LIBOTR
     gboolean decrypted = FALSE;
     char *otr_res = otr_on_message_recv(barejid, resource, message, &decrypted);
     if (otr_res) {
-        ui_incoming_msg(barejid, resource, otr_res, NULL);
+        ui_incoming_msg(chatwin, resource, otr_res, NULL, new_win);
         chat_log_otr_msg_in(barejid, otr_res, decrypted);
         otr_free_message(otr_res);
     }
 #else
-    ui_incoming_msg(barejid, resource, message, NULL);
+    ui_incoming_msg(chatwin, resource, message, NULL, new_win);
     chat_log_msg_in(barejid, message);
 #endif
 }
@@ -194,7 +203,15 @@ sv_ev_delayed_private_message(const char * const fulljid, char *message, GTimeVa
 void
 sv_ev_delayed_message(char *barejid, char *message, GTimeVal tv_stamp)
 {
-    ui_incoming_msg(barejid, NULL, message, &tv_stamp);
+    gboolean new_win = FALSE;
+    ProfChatWin *chatwin = wins_get_chat(barejid);
+    if (!chatwin) {
+        ProfWin *window = wins_new_chat(barejid);
+        chatwin = (ProfChatWin*)window;
+        new_win = TRUE;
+    }
+
+    ui_incoming_msg(chatwin, NULL, message, &tv_stamp, new_win);
     chat_log_msg_in_delayed(barejid, message, &tv_stamp);
 }
 

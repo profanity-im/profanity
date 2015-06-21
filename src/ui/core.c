@@ -416,21 +416,12 @@ ui_message_receipt(const char * const barejid, const char * const id)
 }
 
 void
-ui_incoming_msg(const char * const barejid, const char * const resource, const char * const message, GTimeVal *tv_stamp)
+ui_incoming_msg(ProfChatWin *chatwin, const char * const resource, const char * const message, GTimeVal *tv_stamp, gboolean win_created)
 {
-    gboolean win_created = FALSE;
-
-    ProfChatWin *chatwin = wins_get_chat(barejid);
-    if (chatwin == NULL) {
-        ProfWin *window = wins_new_chat(barejid);
-        chatwin = (ProfChatWin*)window;
-        win_created = TRUE;
-    }
-
-    ProfWin *window = (ProfWin*) chatwin;
+    ProfWin *window = (ProfWin*)chatwin;
     int num = wins_get_num(window);
 
-    char *display_name = roster_get_msg_display_name(barejid, resource);
+    char *display_name = roster_get_msg_display_name(chatwin->barejid, resource);
 
     // currently viewing chat window with sender
     if (wins_is_current(window)) {
@@ -449,12 +440,12 @@ ui_incoming_msg(const char * const barejid, const char * const resource, const c
 
         chatwin->unread++;
         if (prefs_get_boolean(PREF_CHLOG) && prefs_get_boolean(PREF_HISTORY)) {
-            _win_show_history(chatwin, barejid);
+            _win_show_history(chatwin, chatwin->barejid);
         }
 
         // show users status first, when receiving message via delayed delivery
-        if (tv_stamp && (win_created)) {
-            PContact pcontact = roster_get_contact(barejid);
+        if (tv_stamp && win_created) {
+            PContact pcontact = roster_get_contact(chatwin->barejid);
             if (pcontact) {
                 win_show_contact(window, pcontact);
             }
@@ -1276,12 +1267,6 @@ ui_new_chat_win(const char * const barejid)
 {
     ProfWin *window = wins_new_chat(barejid);
     ProfChatWin *chatwin = (ProfChatWin *)window;
-
-#ifdef HAVE_LIBOTR
-    if (otr_is_secure(barejid)) {
-        chatwin->enc_mode = PROF_ENC_OTR;
-    }
-#endif
 
     if (prefs_get_boolean(PREF_CHLOG) && prefs_get_boolean(PREF_HISTORY)) {
         _win_show_history(chatwin, barejid);
