@@ -4261,6 +4261,30 @@ cmd_pgp(ProfWin *window, gchar **args, struct cmd_help_t help)
 
         chatwin->enc_mode = PROF_ENC_PGP;
         ui_current_print_formatted_line('!', 0, "PGP encyption enabled.");
+        return TRUE;
+    }
+
+    if (g_strcmp0(args[0], "end") == 0) {
+        jabber_conn_status_t conn_status = jabber_get_connection_status();
+        if (conn_status != JABBER_CONNECTED) {
+            cons_show("You are not currently connected.");
+            return TRUE;
+        }
+
+        if (window->type != WIN_CHAT) {
+            cons_show("You must be in a regular chat window to end PGP encrpytion.");
+            return TRUE;
+        }
+
+        ProfChatWin *chatwin = (ProfChatWin*)window;
+        if (chatwin->enc_mode != PROF_ENC_PGP) {
+            ui_current_print_formatted_line('!', 0, "PGP encryption is not currently enabled.");
+            return TRUE;
+        }
+
+        chatwin->enc_mode = PROF_ENC_NONE;
+        ui_current_print_formatted_line('!', 0, "PGP encyption disabled.");
+        return TRUE;
     }
 
     return TRUE;

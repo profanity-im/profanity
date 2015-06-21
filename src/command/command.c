@@ -1601,6 +1601,7 @@ cmd_init(void)
     autocomplete_add(pgp_ac, "fps");
     autocomplete_add(pgp_ac, "libver");
     autocomplete_add(pgp_ac, "start");
+    autocomplete_add(pgp_ac, "end");
 }
 
 void
