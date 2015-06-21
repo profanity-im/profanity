@@ -875,7 +875,7 @@ static struct cmd_t command_defs[] =
           "---------------------",
           "Open PGP commands.",
           "",
-          "keys              : List private keys."
+          "keys              : List private keys.",
           "libver            : Show which version of the libgpgme library is being used.",
           "fps               : Show received fingerprints.",
           "start [contact]   : Start PGP encrypted chat, current contact will be used if not specified.",
