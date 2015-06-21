@@ -705,11 +705,11 @@ _handle_carbons(xmpp_stanza_t * const stanza)
             if (message) {
                 // if we are the recipient, treat as standard incoming message
                 if(g_strcmp0(my_jid->barejid, jid_to->barejid) == 0){
-                    sv_ev_incoming_message(jid_from->barejid, jid_from->resourcepart, message);
+                    sv_ev_incoming_carbon(jid_from->barejid, jid_from->resourcepart, message);
                 }
                 // else treat as a sent message
                 else{
-                    sv_ev_carbon(jid_to->barejid, message);
+                    sv_ev_outgoing_carbon(jid_to->barejid, message);
                 }
                 xmpp_free(ctx, message);
             }
@@ -768,23 +768,12 @@ _chat_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, void * con
             if (delayed) {
                 sv_ev_delayed_message(jid->barejid, message, tv_stamp);
             } else {
-#ifdef HAVE_LIBGPGME
-                gboolean handled = FALSE;
+                char *enc_message = NULL;
                 xmpp_stanza_t *x = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_ENCRYPTED);
                 if (x) {
-                    char *enc_message = xmpp_stanza_get_text(x);
-                    char *decrypted = p_gpg_decrypt(jid->barejid, enc_message);
-                    if (decrypted) {
-                        sv_ev_incoming_message(jid->barejid, jid->resourcepart, decrypted);
-                        handled = TRUE;
-                    }
+                    enc_message = xmpp_stanza_get_text(x);
                 }
-                if (!handled) {
-                    sv_ev_incoming_message(jid->barejid, jid->resourcepart, message);
-                }
-#else
-                sv_ev_incoming_message(jid->barejid, jid->resourcepart, message);
-#endif
+                sv_ev_incoming_message(jid->barejid, jid->resourcepart, message, enc_message);
             }
 
             _receipt_request_handler(stanza);
