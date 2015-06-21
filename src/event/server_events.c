@@ -172,7 +172,13 @@ void
 sv_ev_incoming_message(char *barejid, char *resource, char *message)
 {
 #ifdef HAVE_LIBOTR
-    otr_on_message_recv(barejid, resource, message);
+    gboolean decrypted = FALSE;
+    char *otr_res = otr_on_message_recv(barejid, resource, message, &decrypted);
+    if (otr_res) {
+        ui_incoming_msg(barejid, resource, otr_res, NULL);
+        chat_log_otr_msg_in(barejid, otr_res, decrypted);
+        otr_free_message(otr_res);
+    }
 #else
     ui_incoming_msg(barejid, resource, message, NULL);
     chat_log_msg_in(barejid, message);

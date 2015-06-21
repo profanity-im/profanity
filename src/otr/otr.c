@@ -272,12 +272,9 @@ otr_on_connect(ProfAccount *account)
     return;
 }
 
-void
-otr_on_message_recv(const char * const barejid, const char * const resource, const char * const message)
+char*
+otr_on_message_recv(const char * const barejid, const char * const resource, const char * const message, gboolean *was_decrypted)
 {
-    gboolean was_decrypted = FALSE;
-    char *decrypted;
-
     prof_otrpolicy_t policy = otr_get_policy(barejid);
     char *whitespace_base = strstr(message, OTRL_MESSAGE_TAG_BASE);
 
@@ -298,22 +295,19 @@ otr_on_message_recv(const char * const barejid, const char * const resource, con
             }
         }
     }
-    decrypted = otr_decrypt_message(barejid, message, &was_decrypted);
 
-    // internal OTR message
-    if (decrypted == NULL) {
-        return;
+    char *decrypted = otr_decrypt_message(barejid, message, was_decrypted);
+    if (!decrypted) { // internal OTR message
+        return NULL;
     }
 
-    if (policy == PROF_OTRPOLICY_ALWAYS && !was_decrypted && !whitespace_base) {
+    if (policy == PROF_OTRPOLICY_ALWAYS && *was_decrypted == FALSE && !whitespace_base) {
         char *otr_query_message = otr_start_query();
         cons_show("Attempting to start OTR session...");
         message_send_chat_otr(barejid, otr_query_message);
     }
 
-    ui_incoming_msg(barejid, resource, decrypted, NULL);
-    chat_log_otr_msg_in(barejid, decrypted, was_decrypted);
-    otr_free_message(decrypted);
+    return decrypted;
 }
 
 gboolean
