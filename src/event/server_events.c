@@ -201,7 +201,7 @@ sv_ev_incoming_message(char *barejid, char *resource, char *message, char *enc_m
     prof_enc_t enc_mode = chatwin->enc_mode;
     if (enc_message) {
         if (enc_mode == PROF_ENC_OTR) {
-            // TODO show error
+            win_println((ProfWin*)chatwin, "PGP encrypted message received whilst in OTR session.");
         } else { // PROF_ENC_NONE, PROF_ENC_PGP
             char *decrypted = p_gpg_decrypt(barejid, enc_message);
             if (decrypted) {

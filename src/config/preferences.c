@@ -94,22 +94,12 @@ prefs_load(void)
         g_error_free(err);
     }
 
-    // move pre 0.4.6 OTR warn preferences to [ui] group
+    // move pre 0.4.7 enc.warn to enc.warn
     err = NULL;
-    gboolean otr_warn = g_key_file_get_boolean(prefs, PREF_GROUP_OTR, "warn", &err);
+    gboolean otr_warn = g_key_file_get_boolean(prefs, PREF_GROUP_UI, "otr.warn", &err);
     if (err == NULL) {
-        g_key_file_set_boolean(prefs, PREF_GROUP_UI, _get_key(PREF_OTR_WARN), otr_warn);
-        g_key_file_remove_key(prefs, PREF_GROUP_OTR, "warn", NULL);
-    } else {
-        g_error_free(err);
-    }
-
-    // move pre 0.4.6 titlebar preference
-    err = NULL;
-    gchar *old_titlebar = g_key_file_get_string(prefs, PREF_GROUP_UI, "titlebar", &err);
-    if (err == NULL) {
-        g_key_file_set_string(prefs, PREF_GROUP_UI, _get_key(PREF_TITLEBAR_SHOW), old_titlebar);
-        g_key_file_remove_key(prefs, PREF_GROUP_UI, "titlebar", NULL);
+        g_key_file_set_boolean(prefs, PREF_GROUP_UI, _get_key(PREF_ENC_WARN), otr_warn);
+        g_key_file_remove_key(prefs, PREF_GROUP_UI, "otr.warn", NULL);
     } else {
         g_error_free(err);
     }
@@ -510,7 +500,7 @@ _get_group(preference_t pref)
         case PREF_ROSTER_BY:
         case PREF_RESOURCE_TITLE:
         case PREF_RESOURCE_MESSAGE:
-        case PREF_OTR_WARN:
+        case PREF_ENC_WARN:
         case PREF_INPBLOCK_DYNAMIC:
             return PREF_GROUP_UI;
         case PREF_STATES:
@@ -637,8 +627,6 @@ _get_key(preference_t pref)
             return "defaccount";
         case PREF_OTR_LOG:
             return "log";
-        case PREF_OTR_WARN:
-            return "otr.warn";
         case PREF_OTR_POLICY:
             return "policy";
         case PREF_LOG_ROTATE:
@@ -669,6 +657,8 @@ _get_key(preference_t pref)
             return "resource.message";
         case PREF_INPBLOCK_DYNAMIC:
             return "inpblock.dynamic";
+        case PREF_ENC_WARN:
+            return "enc.warn";
         default:
             return NULL;
     }
@@ -681,7 +671,7 @@ _get_default_boolean(preference_t pref)
 {
     switch (pref)
     {
-        case PREF_OTR_WARN:
+        case PREF_ENC_WARN:
         case PREF_AUTOAWAY_CHECK:
         case PREF_LOG_ROTATE:
         case PREF_LOG_SHARED:

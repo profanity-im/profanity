@@ -668,6 +668,14 @@ static struct cmd_t command_defs[] =
           "If the terminal does not support sounds, it may attempt to flash the screen instead.",
           NULL } } },
 
+    { "/encwarn",
+        cmd_encwarn, parse_args, 1, 1, &cons_encwarn_setting,
+        { "/encwarn on|off", "Titlebar encryption warning.",
+        { "/encwarn on|off",
+          "---------------",
+          "Enabled or disable the unencrypted warning message in the titlebar.",
+          NULL } } },
+
     { "/presence",
         cmd_presence, parse_args, 1, 1, &cons_presence_setting,
         { "/presence on|off", "Show the contacts presence in the titlebar.",
@@ -1483,7 +1491,6 @@ cmd_init(void)
     autocomplete_add(otr_ac, "untrust");
     autocomplete_add(otr_ac, "secret");
     autocomplete_add(otr_ac, "log");
-    autocomplete_add(otr_ac, "warn");
     autocomplete_add(otr_ac, "libver");
     autocomplete_add(otr_ac, "policy");
     autocomplete_add(otr_ac, "question");
@@ -1957,7 +1964,7 @@ _cmd_complete_parameters(ProfWin *window, const char * const input)
     // autocomplete boolean settings
     gchar *boolean_choices[] = { "/beep", "/intype", "/states", "/outtype",
         "/flash", "/splash", "/chlog", "/grlog", "/mouse", "/history",
-        "/vercheck", "/privileges", "/presence", "/wrap", "/winstidy", "/carbons" };
+        "/vercheck", "/privileges", "/presence", "/wrap", "/winstidy", "/carbons", "/encwarn" };
 
     for (i = 0; i < ARRAY_SIZE(boolean_choices); i++) {
         result = autocomplete_param_with_func(input, boolean_choices[i], prefs_autocomplete_boolean_choice);
@@ -2456,12 +2463,6 @@ _otr_autocomplete(ProfWin *window, const char * const input)
     g_strfreev(args);
 
     found = autocomplete_param_with_ac(input, "/otr policy", otr_policy_ac, TRUE);
-    if (found) {
-        return found;
-    }
-
-    found = autocomplete_param_with_func(input, "/otr warn",
-        prefs_autocomplete_boolean_choice);
     if (found) {
         return found;
     }

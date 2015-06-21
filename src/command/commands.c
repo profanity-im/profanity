@@ -4326,11 +4326,6 @@ cmd_otr(ProfWin *window, gchar **args, struct cmd_help_t help)
         }
         return TRUE;
 
-    } else if (strcmp(args[0], "warn") == 0) {
-        gboolean result =  _cmd_set_boolean_preference(args[1], help,
-            "OTR warning message", PREF_OTR_WARN);
-        return result;
-
     } else if (strcmp(args[0], "libver") == 0) {
         char *version = otr_libotr_version();
         cons_show("Using libotr version %s", version);
@@ -4606,6 +4601,12 @@ cmd_otr(ProfWin *window, gchar **args, struct cmd_help_t help)
     cons_show("This version of Profanity has not been built with OTR support enabled");
     return TRUE;
 #endif
+}
+
+gboolean
+cmd_encwarn(ProfWin *window, gchar **args, struct cmd_help_t help)
+{
+    return _cmd_set_boolean_preference(args[0], help, "Encryption warning message", PREF_ENC_WARN);
 }
 
 // helper function for status change commands

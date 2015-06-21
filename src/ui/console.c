@@ -885,6 +885,16 @@ cons_winstidy_setting(void)
 }
 
 void
+cons_encwarn_setting(void)
+{
+    if (prefs_get_boolean(PREF_ENC_WARN)) {
+        cons_show("Warn unencrypted (/encwarn)   : ON");
+    } else {
+        cons_show("Warn unencrypted (/encwarn)   : OFF");
+    }
+}
+
+void
 cons_presence_setting(void)
 {
     if (prefs_get_boolean(PREF_PRESENCE))
@@ -1058,6 +1068,7 @@ cons_show_ui_prefs(void)
     cons_roster_setting();
     cons_privileges_setting();
     cons_titlebar_setting();
+    cons_encwarn_setting();
     cons_presence_setting();
     cons_inpblock_setting();
 
@@ -1397,12 +1408,6 @@ cons_show_otr_prefs(void)
     char *policy_value = prefs_get_string(PREF_OTR_POLICY);
     cons_show("OTR policy (/otr policy) : %s", policy_value);
     prefs_free_string(policy_value);
-
-    if (prefs_get_boolean(PREF_OTR_WARN)) {
-        cons_show("Warn non-OTR (/otr warn) : ON");
-    } else {
-        cons_show("Warn non-OTR (/otr warn) : OFF");
-    }
 
     char *log_value = prefs_get_string(PREF_OTR_LOG);
     if (strcmp(log_value, "on") == 0) {

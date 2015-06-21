@@ -463,7 +463,7 @@ _load_preferences(void)
     _set_boolean_preference("presence", PREF_PRESENCE);
     _set_boolean_preference("intype", PREF_INTYPE);
 
-    _set_boolean_preference("otr.warn", PREF_OTR_WARN);
+    _set_boolean_preference("enc.warn", PREF_ENC_WARN);
 }
 
 static gchar *

@@ -167,68 +167,6 @@ void cmd_otr_log_redact_shows_warning_when_chlog_disabled(void **state)
     free(help);
 }
 
-void cmd_otr_warn_shows_usage_when_no_args(void **state)
-{
-    CommandHelp *help = malloc(sizeof(CommandHelp));
-    help->usage = "Some usage";
-    gchar *args[] = { "warn", NULL };
-
-    expect_cons_show("Usage: Some usage");
-
-    gboolean result = cmd_otr(NULL, args, *help);
-    assert_true(result);
-
-    free(help);
-}
-
-void cmd_otr_warn_shows_usage_when_invalid_arg(void **state)
-{
-    CommandHelp *help = malloc(sizeof(CommandHelp));
-    help->usage = "Some usage";
-    gchar *args[] = { "warn", "badarg", NULL };
-
-    expect_cons_show("Usage: Some usage");
-
-    gboolean result = cmd_otr(NULL, args, *help);
-    assert_true(result);
-
-    free(help);
-}
-
-void cmd_otr_warn_on_enables_unencrypted_warning(void **state)
-{
-    CommandHelp *help = malloc(sizeof(CommandHelp));
-    gchar *args[] = { "warn", "on", NULL };
-    prefs_set_boolean(PREF_OTR_WARN, FALSE);
-
-    expect_cons_show("OTR warning message enabled.");
-
-    gboolean result = cmd_otr(NULL, args, *help);
-    gboolean otr_warn_enabled = prefs_get_boolean(PREF_OTR_WARN);
-
-    assert_true(result);
-    assert_true(otr_warn_enabled);
-
-    free(help);
-}
-
-void cmd_otr_warn_off_disables_unencrypted_warning(void **state)
-{
-    CommandHelp *help = malloc(sizeof(CommandHelp));
-    gchar *args[] = { "warn", "off", NULL };
-    prefs_set_boolean(PREF_OTR_WARN, TRUE);
-
-    expect_cons_show("OTR warning message disabled.");
-
-    gboolean result = cmd_otr(NULL, args, *help);
-    gboolean otr_warn_enabled = prefs_get_boolean(PREF_OTR_WARN);
-
-    assert_true(result);
-    assert_false(otr_warn_enabled);
-
-    free(help);
-}
-
 void cmd_otr_libver_shows_libotr_version(void **state)
 {
     CommandHelp *help = malloc(sizeof(CommandHelp));

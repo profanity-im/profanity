@@ -252,8 +252,7 @@ _show_privacy(ProfChatWin *chatwin)
 
     switch (chatwin->enc_mode) {
         case PROF_ENC_NONE:
-            // TODO generalise to PROF_ENC_WARN
-            if (prefs_get_boolean(PREF_OTR_WARN)) {
+            if (prefs_get_boolean(PREF_ENC_WARN)) {
                 wprintw(win, " ");
                 wattron(win, bracket_attrs);
                 wprintw(win, "[");

@@ -98,11 +98,11 @@ typedef enum {
     PREF_LOG_ROTATE,
     PREF_LOG_SHARED,
     PREF_OTR_LOG,
-    PREF_OTR_WARN,
     PREF_OTR_POLICY,
     PREF_RESOURCE_TITLE,
     PREF_RESOURCE_MESSAGE,
-    PREF_INPBLOCK_DYNAMIC
+    PREF_INPBLOCK_DYNAMIC,
+    PREF_ENC_WARN,
 } preference_t;
 
 typedef struct prof_alias_t {
