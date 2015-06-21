@@ -4403,6 +4403,11 @@ cmd_otr(ProfWin *window, gchar **args, struct cmd_help_t help)
             }
             ui_ev_focus_win((ProfWin*)chatwin);
 
+            if (chatwin->enc_mode == PROF_ENC_PGP) {
+                ui_current_print_formatted_line('!', 0, "You must disable PGP encryption before starting an OTR session.");
+                return TRUE;
+            }
+
             if (chatwin->enc_mode == PROF_ENC_OTR) {
                 ui_current_print_formatted_line('!', 0, "You are already in an OTR session.");
                 return TRUE;
@@ -4431,6 +4436,11 @@ cmd_otr(ProfWin *window, gchar **args, struct cmd_help_t help)
 
             ProfChatWin *chatwin = (ProfChatWin*)window;
             assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
+            if (chatwin->enc_mode == PROF_ENC_PGP) {
+                ui_current_print_formatted_line('!', 0, "You must disable PGP encryption before starting an OTR session.");
+                return TRUE;
+            }
+
             if (chatwin->enc_mode == PROF_ENC_OTR) {
                 ui_current_print_formatted_line('!', 0, "You are already in an OTR session.");
                 return TRUE;
