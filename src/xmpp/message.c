@@ -77,39 +77,57 @@ message_add_handlers(void)
     HANDLE(STANZA_NS_RECEIPTS,   NULL,                   _receipt_received_handler);
 }
 
+static char*
+_session_jid(const char * const barejid)
+{
+    ChatSession *session = chat_session_get(barejid);
+    char *jid = NULL;
+    if (session) {
+        Jid *jidp = jid_create_from_bare_and_resource(session->barejid, session->resource);
+        jid = strdup(jidp->fulljid);
+        jid_destroy(jidp);
+    } else {
+        jid = strdup(barejid);
+    }
+
+    return jid;
+}
+
+static char*
+_session_state(const char * const barejid)
+{
+    ChatSession *session = chat_session_get(barejid);
+    char *state = NULL;
+    if (session) {
+        if (prefs_get_boolean(PREF_STATES) && session->send_states) {
+            state = STANZA_NAME_ACTIVE;
+        }
+    } else {
+        if (prefs_get_boolean(PREF_STATES)) {
+            state = STANZA_NAME_ACTIVE;
+        }
+    }
+
+    return state;
+}
+
 char *
 message_send_chat(const char * const barejid, const char * const msg)
 {
     xmpp_conn_t * const conn = connection_get_conn();
     xmpp_ctx_t * const ctx = connection_get_ctx();
 
-    ChatSession *session = chat_session_get(barejid);
-    char *state = NULL;
-    char *jid = NULL;
-    if (session) {
-        if (prefs_get_boolean(PREF_STATES) && session->send_states) {
-            state = STANZA_NAME_ACTIVE;
-        }
-        Jid *jidp = jid_create_from_bare_and_resource(session->barejid, session->resource);
-        jid = strdup(jidp->fulljid);
-        jid_destroy(jidp);
-
-    } else {
-        if (prefs_get_boolean(PREF_STATES)) {
-            state = STANZA_NAME_ACTIVE;
-        }
-        jid = strdup(barejid);
-    }
-
+    char *state = _session_state(barejid);
+    char *jid = _session_jid(barejid);
     char *id = create_unique_id("msg");
-    xmpp_stanza_t *message = NULL;
-    message = stanza_create_message(ctx, id, jid, STANZA_TYPE_CHAT, msg);
 
+    xmpp_stanza_t *message = stanza_create_message(ctx, id, jid, STANZA_TYPE_CHAT, msg);
     free(jid);
 
     if (state) {
         stanza_attach_state(ctx, message, state);
     }
+
     if (prefs_get_boolean(PREF_RECEIPTS_REQUEST)) {
         stanza_attach_receipt_request(ctx, message);
     }
@@ -126,27 +144,11 @@ message_send_chat_pgp(const char * const barejid, const char * const msg)
     xmpp_conn_t * const conn = connection_get_conn();
     xmpp_ctx_t * const ctx = connection_get_ctx();
 
-    ChatSession *session = chat_session_get(barejid);
-    char *state = NULL;
-    char *jid = NULL;
-    if (session) {
-        if (prefs_get_boolean(PREF_STATES) && session->send_states) {
-            state = STANZA_NAME_ACTIVE;
-        }
-        Jid *jidp = jid_create_from_bare_and_resource(session->barejid, session->resource);
-        jid = strdup(jidp->fulljid);
-        jid_destroy(jidp);
-
-    } else {
-        if (prefs_get_boolean(PREF_STATES)) {
-            state = STANZA_NAME_ACTIVE;
-        }
-        jid = strdup(barejid);
-    }
-
+    char *state = _session_state(barejid);
+    char *jid = _session_jid(barejid);
     char *id = create_unique_id("msg");
-    xmpp_stanza_t *message = NULL;
 
+    xmpp_stanza_t *message = NULL;
 #ifdef HAVE_LIBGPGME
     char *account_name = jabber_get_account_name();
     ProfAccount *account = accounts_get_account(account_name);
@@ -174,13 +176,14 @@ message_send_chat_pgp(const char * const barejid, const char * const msg)
 #else
     message = stanza_create_message(ctx, id, jid, STANZA_TYPE_CHAT, msg);
 #endif
-
     free(jid);
 
     if (state) {
         stanza_attach_state(ctx, message, state);
     }
+
     stanza_attach_carbons_private(ctx, message);
+
     if (prefs_get_boolean(PREF_RECEIPTS_REQUEST)) {
         stanza_attach_receipt_request(ctx, message);
     }
@@ -197,31 +200,19 @@ message_send_chat_otr(const char * const barejid, const char * const msg)
     xmpp_conn_t * const conn = connection_get_conn();
     xmpp_ctx_t * const ctx = connection_get_ctx();
 
-    ChatSession *session = chat_session_get(barejid);
-    char *state = NULL;
-    char *jid = NULL;
-    if (session) {
-        if (prefs_get_boolean(PREF_STATES) && session->send_states) {
-            state = STANZA_NAME_ACTIVE;
-        }
-        Jid *jidp = jid_create_from_bare_and_resource(session->barejid, session->resource);
-        jid = strdup(jidp->fulljid);
-        jid_destroy(jidp);
-    } else {
-        if (prefs_get_boolean(PREF_STATES)) {
-            state = STANZA_NAME_ACTIVE;
-        }
-        jid = strdup(barejid);
-    }
-
+    char *state = _session_state(barejid);
+    char *jid = _session_jid(barejid);
     char *id = create_unique_id("msg");
+
     xmpp_stanza_t *message = stanza_create_message(ctx, id, barejid, STANZA_TYPE_CHAT, msg);
     free(jid);
 
     if (state) {
         stanza_attach_state(ctx, message, state);
     }
+
     stanza_attach_carbons_private(ctx, message);
+
     if (prefs_get_boolean(PREF_RECEIPTS_REQUEST)) {
         stanza_attach_receipt_request(ctx, message);
     }
