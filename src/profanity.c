@@ -61,6 +61,9 @@
 #ifdef PROF_HAVE_LIBOTR
 #include "otr/otr.h"
 #endif
+#ifdef PROF_HAVE_LIBGPGME
+#include "pgp/gpg.h"
+#endif
 #include "resource.h"
 #include "xmpp/xmpp.h"
 #include "ui/ui.h"
@@ -250,6 +253,9 @@ _init(const int disable_tls, char *log_level)
 #ifdef PROF_HAVE_LIBOTR
     otr_init();
 #endif
+#ifdef PROF_HAVE_LIBGPGME
+    p_gpg_init();
+#endif
     atexit(_shutdown);
     plugins_init();
     ui_input_nonblocking(TRUE);
@@ -275,6 +281,9 @@ _shutdown(void)
     ui_close();
 #ifdef PROF_HAVE_LIBOTR
     otr_shutdown();
+#endif
+#ifdef PROF_HAVE_LIBGPGME
+    p_gpg_close();
 #endif
     chat_log_close();
     prefs_close();

@@ -20,5 +20,5 @@ roster.size=25
 privileges=false
 presence=false
 intype=false
-otr.warn=false
+enc.warn=false
 wins.autotidy=false

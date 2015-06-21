@@ -55,6 +55,7 @@
 #define PREF_GROUP_CONNECTION "connection"
 #define PREF_GROUP_ALIAS "alias"
 #define PREF_GROUP_OTR "otr"
+#define PREF_GROUP_PGP "pgp"
 
 #define INPBLOCK_DEFAULT 1000
 
@@ -75,8 +76,6 @@ void
 prefs_load(void)
 {
     GError *err;
-
-//    log_info("Loading preferences");
     prefs_loc = _get_preferences_file();
 
     if (g_file_test(prefs_loc, G_FILE_TEST_EXISTS)) {
@@ -94,22 +93,12 @@ prefs_load(void)
         g_error_free(err);
     }
 
-    // move pre 0.4.6 OTR warn preferences to [ui] group
+    // move pre 0.4.7 otr.warn to enc.warn
     err = NULL;
-    gboolean otr_warn = g_key_file_get_boolean(prefs, PREF_GROUP_OTR, "warn", &err);
+    gboolean otr_warn = g_key_file_get_boolean(prefs, PREF_GROUP_UI, "otr.warn", &err);
     if (err == NULL) {
-        g_key_file_set_boolean(prefs, PREF_GROUP_UI, _get_key(PREF_OTR_WARN), otr_warn);
-        g_key_file_remove_key(prefs, PREF_GROUP_OTR, "warn", NULL);
-    } else {
-        g_error_free(err);
-    }
-
-    // move pre 0.4.6 titlebar preference
-    err = NULL;
-    gchar *old_titlebar = g_key_file_get_string(prefs, PREF_GROUP_UI, "titlebar", &err);
-    if (err == NULL) {
-        g_key_file_set_string(prefs, PREF_GROUP_UI, _get_key(PREF_TITLEBAR_SHOW), old_titlebar);
-        g_key_file_remove_key(prefs, PREF_GROUP_UI, "titlebar", NULL);
+        g_key_file_set_boolean(prefs, PREF_GROUP_UI, _get_key(PREF_ENC_WARN), otr_warn);
+        g_key_file_remove_key(prefs, PREF_GROUP_UI, "otr.warn", NULL);
     } else {
         g_error_free(err);
     }
@@ -523,7 +512,7 @@ _get_group(preference_t pref)
         case PREF_ROSTER_BY:
         case PREF_RESOURCE_TITLE:
         case PREF_RESOURCE_MESSAGE:
-        case PREF_OTR_WARN:
+        case PREF_ENC_WARN:
         case PREF_INPBLOCK_DYNAMIC:
             return PREF_GROUP_UI;
         case PREF_STATES:
@@ -558,6 +547,8 @@ _get_group(preference_t pref)
         case PREF_OTR_LOG:
         case PREF_OTR_POLICY:
             return PREF_GROUP_OTR;
+        case PREF_PGP_LOG:
+            return PREF_GROUP_PGP;
         default:
             return NULL;
     }
@@ -650,8 +641,6 @@ _get_key(preference_t pref)
             return "defaccount";
         case PREF_OTR_LOG:
             return "log";
-        case PREF_OTR_WARN:
-            return "otr.warn";
         case PREF_OTR_POLICY:
             return "policy";
         case PREF_LOG_ROTATE:
@@ -682,6 +671,10 @@ _get_key(preference_t pref)
             return "resource.message";
         case PREF_INPBLOCK_DYNAMIC:
             return "inpblock.dynamic";
+        case PREF_ENC_WARN:
+            return "enc.warn";
+        case PREF_PGP_LOG:
+            return "log";
         default:
             return NULL;
     }
@@ -694,7 +687,7 @@ _get_default_boolean(preference_t pref)
 {
     switch (pref)
     {
-        case PREF_OTR_WARN:
+        case PREF_ENC_WARN:
         case PREF_AUTOAWAY_CHECK:
         case PREF_LOG_ROTATE:
         case PREF_LOG_SHARED:
@@ -748,6 +741,8 @@ _get_default_string(preference_t pref)
             return "seconds";
         case PREF_TIME_STATUSBAR:
             return "minutes";
+        case PREF_PGP_LOG:
+            return "redact";
         default:
             return NULL;
     }

@@ -20,6 +20,7 @@
 #include "test_cmd_sub.h"
 #include "test_cmd_statuses.h"
 #include "test_cmd_otr.h"
+#include "test_cmd_pgp.h"
 #include "test_jid.h"
 #include "test_parser.h"
 #include "test_roster_list.h"
@@ -498,14 +499,6 @@ int main(int argc, char* argv[]) {
         unit_test_setup_teardown(cmd_otr_log_redact_shows_warning_when_chlog_disabled,
             load_preferences,
             close_preferences),
-        unit_test(cmd_otr_warn_shows_usage_when_no_args),
-        unit_test(cmd_otr_warn_shows_usage_when_invalid_arg),
-        unit_test_setup_teardown(cmd_otr_warn_on_enables_unencrypted_warning,
-            load_preferences,
-            close_preferences),
-        unit_test_setup_teardown(cmd_otr_warn_off_disables_unencrypted_warning,
-            load_preferences,
-            close_preferences),
         unit_test(cmd_otr_libver_shows_libotr_version),
         unit_test(cmd_otr_gen_shows_message_when_not_connected),
         unit_test(cmd_otr_gen_generates_key_for_connected_account),
@@ -536,6 +529,22 @@ int main(int argc, char* argv[]) {
             close_preferences),
 #else
         unit_test(cmd_otr_shows_message_when_otr_unsupported),
+#endif
+
+#ifdef PROF_HAVE_LIBGPGME
+        unit_test(cmd_pgp_shows_usage_when_no_args),
+        unit_test(cmd_pgp_start_shows_message_when_disconnected),
+        unit_test(cmd_pgp_start_shows_message_when_disconnecting),
+        unit_test(cmd_pgp_start_shows_message_when_connecting),
+        unit_test(cmd_pgp_start_shows_message_when_undefined),
+        unit_test(cmd_pgp_start_shows_message_when_started),
+        unit_test(cmd_pgp_start_shows_message_when_no_arg_in_console),
+        unit_test(cmd_pgp_start_shows_message_when_no_arg_in_muc),
+        unit_test(cmd_pgp_start_shows_message_when_no_arg_in_mucconf),
+        unit_test(cmd_pgp_start_shows_message_when_no_arg_in_private),
+        unit_test(cmd_pgp_start_shows_message_when_no_arg_in_xmlconsole),
+#else
+        unit_test(cmd_pgp_shows_message_when_pgp_unsupported),
 #endif
 
         unit_test(cmd_join_shows_message_when_disconnecting),

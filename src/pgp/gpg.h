@@ -1,5 +1,5 @@
 /*
- * account.h
+ * gpg.h
  *
  * Copyright (C) 2012 - 2015 James Booth <boothj5@gmail.com>
  *
@@ -32,46 +32,25 @@
  *
  */
 
-#ifndef ACCOUNT_H
-#define ACCOUNT_H
+#ifndef GPG_H
+#define GPG_H
 
-#include "common.h"
+typedef struct pgp_key_t {
+    char *id;
+    char *name;
+    char *fp;
+} ProfPGPKey;
 
-typedef struct prof_account_t {
-    gchar *name;
-    gchar *jid;
-    gchar *password;
-    gchar *eval_password;
-    gchar *resource;
-    gchar *server;
-    int port;
-    gchar *last_presence;
-    gchar *login_presence;
-    gint priority_online;
-    gint priority_chat;
-    gint priority_away;
-    gint priority_xa;
-    gint priority_dnd;
-    gchar *muc_service;
-    gchar *muc_nick;
-    gboolean enabled;
-    gchar *otr_policy;
-    GList *otr_manual;
-    GList *otr_opportunistic;
-    GList *otr_always;
-    gchar *pgp_keyid;
-} ProfAccount;
-
-ProfAccount* account_new(const gchar * const name, const gchar * const jid,
-    const gchar * const passord, const gchar * eval_password, gboolean enabled, const gchar * const server,
-    int port, const gchar * const resource, const gchar * const last_presence,
-    const gchar * const login_presence, int priority_online, int priority_chat,
-    int priority_away, int priority_xa, int priority_dnd,
-    const gchar * const muc_service, const gchar * const muc_nick,
-    const gchar * const otr_policy, GList *otr_manual, GList *otr_opportunistic,
-    GList *otr_always, const gchar * const pgp_keyid);
-char* account_create_full_jid(ProfAccount *account);
-gboolean account_eval_password(ProfAccount *account);
-void account_free(ProfAccount *account);
+void p_gpg_init(void);
+void p_gpg_close(void);
+GSList* p_gpg_list_keys(void);
+GHashTable* p_gpg_fingerprints(void);
+gboolean p_gpg_available(const char * const barejid);
+const char* p_gpg_libver(void);
+void p_gpg_free_key(ProfPGPKey *key);
+char* p_gpg_sign(const char * const str, const char * const fp);
+void p_gpg_verify(const char * const barejid, const char *const sign);
+char* p_gpg_encrypt(const char * const barejid, const char * const message);
+char* p_gpg_decrypt(const char * const barejid, const char * const cipher);
 
 #endif

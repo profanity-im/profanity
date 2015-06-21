@@ -167,68 +167,6 @@ void cmd_otr_log_redact_shows_warning_when_chlog_disabled(void **state)
     free(help);
 }
 
-void cmd_otr_warn_shows_usage_when_no_args(void **state)
-{
-    CommandHelp *help = malloc(sizeof(CommandHelp));
-    help->usage = "Some usage";
-    gchar *args[] = { "warn", NULL };
-
-    expect_cons_show("Usage: Some usage");
-
-    gboolean result = cmd_otr(NULL, args, *help);
-    assert_true(result);
-
-    free(help);
-}
-
-void cmd_otr_warn_shows_usage_when_invalid_arg(void **state)
-{
-    CommandHelp *help = malloc(sizeof(CommandHelp));
-    help->usage = "Some usage";
-    gchar *args[] = { "warn", "badarg", NULL };
-
-    expect_cons_show("Usage: Some usage");
-
-    gboolean result = cmd_otr(NULL, args, *help);
-    assert_true(result);
-
-    free(help);
-}
-
-void cmd_otr_warn_on_enables_unencrypted_warning(void **state)
-{
-    CommandHelp *help = malloc(sizeof(CommandHelp));
-    gchar *args[] = { "warn", "on", NULL };
-    prefs_set_boolean(PREF_OTR_WARN, FALSE);
-
-    expect_cons_show("OTR warning message enabled.");
-
-    gboolean result = cmd_otr(NULL, args, *help);
-    gboolean otr_warn_enabled = prefs_get_boolean(PREF_OTR_WARN);
-
-    assert_true(result);
-    assert_true(otr_warn_enabled);
-
-    free(help);
-}
-
-void cmd_otr_warn_off_disables_unencrypted_warning(void **state)
-{
-    CommandHelp *help = malloc(sizeof(CommandHelp));
-    gchar *args[] = { "warn", "off", NULL };
-    prefs_set_boolean(PREF_OTR_WARN, TRUE);
-
-    expect_cons_show("OTR warning message disabled.");
-
-    gboolean result = cmd_otr(NULL, args, *help);
-    gboolean otr_warn_enabled = prefs_get_boolean(PREF_OTR_WARN);
-
-    assert_true(result);
-    assert_false(otr_warn_enabled);
-
-    free(help);
-}
-
 void cmd_otr_libver_shows_libotr_version(void **state)
 {
     CommandHelp *help = malloc(sizeof(CommandHelp));
@@ -309,7 +247,7 @@ void cmd_otr_gen_generates_key_for_connected_account(void **state)
     gchar *args[] = { "gen", NULL };
     char *account_name = "myaccount";
     ProfAccount *account = account_new(account_name, "me@jabber.org", NULL, NULL,
-        TRUE, NULL, 0, NULL, NULL, NULL, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL);
+        TRUE, NULL, 0, NULL, NULL, NULL, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
 
     will_return(jabber_get_connection_status, JABBER_CONNECTED);
     will_return(jabber_get_account_name, account_name);
@@ -576,8 +514,8 @@ cmd_otr_start_sends_otr_query_message_to_current_recipeint(void **state)
     will_return(otr_key_loaded, TRUE);
     will_return(otr_start_query, query_message);
 
-    expect_string(message_send_chat_encrypted, barejid, recipient);
-    expect_string(message_send_chat_encrypted, msg, query_message);
+    expect_string(message_send_chat_otr, barejid, recipient);
+    expect_string(message_send_chat_otr, msg, query_message);
 
     gboolean result = cmd_otr((ProfWin*)&chatwin, args, *help);
     assert_true(result);

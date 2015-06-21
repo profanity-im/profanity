@@ -179,7 +179,7 @@ void ui_contact_online(char *barejid, Resource *resource, GDateTime *last_activi
 }
 
 void ui_contact_typing(const char * const barejid, const char * const resource) {}
-void ui_incoming_msg(const char * const from, const char * const resource, const char * const message, GTimeVal *tv_stamp) {}
+void ui_incoming_msg(ProfChatWin *chatwin, const char * const resource, const char * const message, GTimeVal *tv_stamp, gboolean win_created) {}
 void ui_message_receipt(const char * const barejid, const char * const id) {}
 
 void ui_incoming_private_msg(const char * const fulljid, const char * const message, GTimeVal *tv_stamp) {}
@@ -449,6 +449,7 @@ void cons_roster_setting(void) {}
 void cons_presence_setting(void) {}
 void cons_wrap_setting(void) {}
 void cons_winstidy_setting(void) {}
+void cons_encwarn_setting(void) {}
 void cons_time_setting(void) {}
 void cons_mouse_setting(void) {}
 void cons_statuses_setting(void) {}

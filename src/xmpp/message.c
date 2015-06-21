@@ -50,6 +50,7 @@
 #include "roster_list.h"
 #include "xmpp/stanza.h"
 #include "xmpp/xmpp.h"
+#include "pgp/gpg.h"
 
 #define HANDLE(ns, type, func) xmpp_handler_add(conn, func, ns, STANZA_NAME_MESSAGE, type, ctx)
 
@@ -76,37 +77,57 @@ message_add_handlers(void)
     HANDLE(STANZA_NS_RECEIPTS,   NULL,                   _receipt_received_handler);
 }
 
+static char*
+_session_jid(const char * const barejid)
+{
+    ChatSession *session = chat_session_get(barejid);
+    char *jid = NULL;
+    if (session) {
+        Jid *jidp = jid_create_from_bare_and_resource(session->barejid, session->resource);
+        jid = strdup(jidp->fulljid);
+        jid_destroy(jidp);
+    } else {
+        jid = strdup(barejid);
+    }
+
+    return jid;
+}
+
+static char*
+_session_state(const char * const barejid)
+{
+    ChatSession *session = chat_session_get(barejid);
+    char *state = NULL;
+    if (session) {
+        if (prefs_get_boolean(PREF_STATES) && session->send_states) {
+            state = STANZA_NAME_ACTIVE;
+        }
+    } else {
+        if (prefs_get_boolean(PREF_STATES)) {
+            state = STANZA_NAME_ACTIVE;
+        }
+    }
+
+    return state;
+}
+
 char *
 message_send_chat(const char * const barejid, const char * const msg)
 {
     xmpp_conn_t * const conn = connection_get_conn();
     xmpp_ctx_t * const ctx = connection_get_ctx();
 
-    ChatSession *session = chat_session_get(barejid);
-    char *state = NULL;
-    char *jid = NULL;
-    if (session) {
-        if (prefs_get_boolean(PREF_STATES) && session->send_states) {
-            state = STANZA_NAME_ACTIVE;
-        }
-        Jid *jidp = jid_create_from_bare_and_resource(session->barejid, session->resource);
-        jid = strdup(jidp->fulljid);
-        jid_destroy(jidp);
-
-    } else {
-        if (prefs_get_boolean(PREF_STATES)) {
-            state = STANZA_NAME_ACTIVE;
-        }
-        jid = strdup(barejid);
-    }
-
+    char *state = _session_state(barejid);
+    char *jid = _session_jid(barejid);
     char *id = create_unique_id("msg");
+
     xmpp_stanza_t *message = stanza_create_message(ctx, id, jid, STANZA_TYPE_CHAT, msg);
     free(jid);
 
     if (state) {
         stanza_attach_state(ctx, message, state);
     }
+
     if (prefs_get_boolean(PREF_RECEIPTS_REQUEST)) {
         stanza_attach_receipt_request(ctx, message);
     }
@@ -118,36 +139,80 @@ message_send_chat(const char * const barejid, const char * const msg)
 }
 
 char *
-message_send_chat_encrypted(const char * const barejid, const char * const msg)
+message_send_chat_pgp(const char * const barejid, const char * const msg)
 {
     xmpp_conn_t * const conn = connection_get_conn();
     xmpp_ctx_t * const ctx = connection_get_ctx();
 
-    ChatSession *session = chat_session_get(barejid);
-    char *state = NULL;
-    char *jid = NULL;
-    if (session) {
-        if (prefs_get_boolean(PREF_STATES) && session->send_states) {
-            state = STANZA_NAME_ACTIVE;
+    char *state = _session_state(barejid);
+    char *jid = _session_jid(barejid);
+    char *id = create_unique_id("msg");
+
+    xmpp_stanza_t *message = NULL;
+#ifdef PROF_HAVE_LIBGPGME
+    char *account_name = jabber_get_account_name();
+    ProfAccount *account = accounts_get_account(account_name);
+    if (account->pgp_keyid) {
+        Jid *jidp = jid_create(jid);
+        char *encrypted = p_gpg_encrypt(jidp->barejid, msg);
+        if (encrypted) {
+            message = stanza_create_message(ctx, id, jid, STANZA_TYPE_CHAT, "This message is encrypted.");
+            xmpp_stanza_t *x = xmpp_stanza_new(ctx);
+            xmpp_stanza_set_name(x, STANZA_NAME_X);
+            xmpp_stanza_set_ns(x, STANZA_NS_ENCRYPTED);
+            xmpp_stanza_t *enc_st = xmpp_stanza_new(ctx);
+            xmpp_stanza_set_text(enc_st, encrypted);
+            xmpp_stanza_add_child(x, enc_st);
+            xmpp_stanza_release(enc_st);
+            xmpp_stanza_add_child(message, x);
+            xmpp_stanza_release(x);
+            free(encrypted);
+        } else {
+            message = stanza_create_message(ctx, id, jid, STANZA_TYPE_CHAT, msg);
         }
-        Jid *jidp = jid_create_from_bare_and_resource(session->barejid, session->resource);
-        jid = strdup(jidp->fulljid);
-        jid_destroy(jidp);
     } else {
-        if (prefs_get_boolean(PREF_STATES)) {
-            state = STANZA_NAME_ACTIVE;
-        }
-        jid = strdup(barejid);
+        message = stanza_create_message(ctx, id, jid, STANZA_TYPE_CHAT, msg);
+    }
+#else
+    message = stanza_create_message(ctx, id, jid, STANZA_TYPE_CHAT, msg);
+#endif
+    free(jid);
+
+    if (state) {
+        stanza_attach_state(ctx, message, state);
     }
 
+    stanza_attach_carbons_private(ctx, message);
+
+    if (prefs_get_boolean(PREF_RECEIPTS_REQUEST)) {
+        stanza_attach_receipt_request(ctx, message);
+    }
+
+    xmpp_send(conn, message);
+    xmpp_stanza_release(message);
+
+    return id;
+}
+
+char *
+message_send_chat_otr(const char * const barejid, const char * const msg)
+{
+    xmpp_conn_t * const conn = connection_get_conn();
+    xmpp_ctx_t * const ctx = connection_get_ctx();
+
+    char *state = _session_state(barejid);
+    char *jid = _session_jid(barejid);
     char *id = create_unique_id("msg");
+
     xmpp_stanza_t *message = stanza_create_message(ctx, id, barejid, STANZA_TYPE_CHAT, msg);
     free(jid);
 
     if (state) {
         stanza_attach_state(ctx, message, state);
     }
+
     stanza_attach_carbons_private(ctx, message);
+
     if (prefs_get_boolean(PREF_RECEIPTS_REQUEST)) {
         stanza_attach_receipt_request(ctx, message);
     }
@@ -640,11 +705,11 @@ _handle_carbons(xmpp_stanza_t * const stanza)
             if (message) {
                 // if we are the recipient, treat as standard incoming message
                 if(g_strcmp0(my_jid->barejid, jid_to->barejid) == 0){
-                    sv_ev_incoming_message(jid_from->barejid, jid_from->resourcepart, message);
+                    sv_ev_incoming_carbon(jid_from->barejid, jid_from->resourcepart, message);
                 }
                 // else treat as a sent message
                 else{
-                    sv_ev_carbon(jid_to->barejid, message);
+                    sv_ev_outgoing_carbon(jid_to->barejid, message);
                 }
                 xmpp_free(ctx, message);
             }
@@ -703,7 +768,12 @@ _chat_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, void * con
             if (delayed) {
                 sv_ev_delayed_message(jid->barejid, message, tv_stamp);
             } else {
-                sv_ev_incoming_message(jid->barejid, jid->resourcepart, message);
+                char *enc_message = NULL;
+                xmpp_stanza_t *x = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_ENCRYPTED);
+                if (x) {
+                    enc_message = xmpp_stanza_get_text(x);
+                }
+                sv_ev_incoming_message(jid->barejid, jid->resourcepart, message, enc_message);
             }
 
             _receipt_request_handler(stanza);

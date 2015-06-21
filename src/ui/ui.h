@@ -101,7 +101,7 @@ void ui_handle_stanza(const char * const msg);
 // ui events
 void ui_contact_online(char *barejid, Resource *resource, GDateTime *last_activity);
 void ui_contact_typing(const char * const barejid, const char * const resource);
-void ui_incoming_msg(const char * const from, const char * const resource,  const char * const message, GTimeVal *tv_stamp);
+void ui_incoming_msg(ProfChatWin *chatwin, const char * const resource,  const char * const message, GTimeVal *tv_stamp, gboolean win_created);
 void ui_incoming_private_msg(const char * const fulljid, const char * const message, GTimeVal *tv_stamp);
 void ui_message_receipt(const char * const barejid, const char * const id);
 
@@ -288,6 +288,7 @@ void cons_privileges_setting(void);
 void cons_beep_setting(void);
 void cons_flash_setting(void);
 void cons_splash_setting(void);
+void cons_encwarn_setting(void);
 void cons_vercheck_setting(void);
 void cons_occupants_setting(void);
 void cons_roster_setting(void);

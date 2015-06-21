@@ -193,7 +193,7 @@ presence_reset_sub_request_search(void)
 }
 
 void
-presence_send(const resource_presence_t presence_type, const char * const msg, const int idle)
+presence_send(const resource_presence_t presence_type, const char * const msg, const int idle, char *signed_status)
 {
     if (jabber_get_connection_status() != JABBER_CONNECTED) {
         log_warning("Error setting presence, not connected.");
@@ -218,7 +218,21 @@ presence_send(const resource_presence_t presence_type, const char * const msg, c
     char *id = create_unique_id("presence");
     xmpp_stanza_set_id(presence, id);
     stanza_attach_show(ctx, presence, show);
+
     stanza_attach_status(ctx, presence, msg);
+
+    if (signed_status) {
+        xmpp_stanza_t *x = xmpp_stanza_new(ctx);
+        xmpp_stanza_set_name(x, STANZA_NAME_X);
+        xmpp_stanza_set_ns(x, STANZA_NS_SIGNED);
+        xmpp_stanza_t *signed_text = xmpp_stanza_new(ctx);
+        xmpp_stanza_set_text(signed_text, signed_status);
+        xmpp_stanza_add_child(x, signed_text);
+        xmpp_stanza_release(signed_text);
+        xmpp_stanza_add_child(presence, x);
+        xmpp_stanza_release(x);
+    }
+
     stanza_attach_priority(ctx, presence, pri);
     stanza_attach_last_activity(ctx, presence, idle);
     stanza_attach_caps(ctx, presence);
@@ -603,7 +617,14 @@ _available_handler(xmpp_conn_t * const conn,
     if (g_strcmp0(xmpp_presence->jid->barejid, my_jid->barejid) == 0) {
         connection_add_available_resource(resource);
     } else {
-        sv_ev_contact_online(xmpp_presence->jid->barejid, resource, xmpp_presence->last_activity);
+        char *pgpsig = NULL;
+        xmpp_stanza_t *x = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_SIGNED);
+        if (x) {
+            pgpsig = xmpp_stanza_get_text(x);
+        }
+        sv_ev_contact_online(xmpp_presence->jid->barejid, resource, xmpp_presence->last_activity, pgpsig);
+        xmpp_ctx_t *ctx = connection_get_ctx();
+        xmpp_free(ctx, pgpsig);
     }
 
     jid_destroy(my_jid);

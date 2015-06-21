@@ -26,7 +26,7 @@ void console_shows_online_presence_when_set_online(void **state)
     expect_memory(ui_contact_online, resource, resource, sizeof(resource));
     expect_value(ui_contact_online, last_activity, NULL);
 
-    sv_ev_contact_online(barejid, resource, NULL);
+    sv_ev_contact_online(barejid, resource, NULL, NULL);
 
     roster_clear();
 }
@@ -43,7 +43,7 @@ void console_shows_online_presence_when_set_all(void **state)
     expect_memory(ui_contact_online, resource, resource, sizeof(resource));
     expect_value(ui_contact_online, last_activity, NULL);
 
-    sv_ev_contact_online(barejid, resource, NULL);
+    sv_ev_contact_online(barejid, resource, NULL, NULL);
 
     roster_clear();
 }
@@ -60,7 +60,7 @@ void console_shows_dnd_presence_when_set_all(void **state)
     expect_memory(ui_contact_online, resource, resource, sizeof(resource));
     expect_value(ui_contact_online, last_activity, NULL);
 
-    sv_ev_contact_online(barejid, resource, NULL);
+    sv_ev_contact_online(barejid, resource, NULL, NULL);
 
     roster_clear();
 }

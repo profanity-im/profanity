@@ -84,6 +84,7 @@ static char * _roster_autocomplete(ProfWin *window, const char * const input);
 static char * _group_autocomplete(ProfWin *window, const char * const input);
 static char * _bookmark_autocomplete(ProfWin *window, const char * const input);
 static char * _otr_autocomplete(ProfWin *window, const char * const input);
+static char * _pgp_autocomplete(ProfWin *window, const char * const input);
 static char * _connect_autocomplete(ProfWin *window, const char * const input);
 static char * _statuses_autocomplete(ProfWin *window, const char * const input);
 static char * _alias_autocomplete(ProfWin *window, const char * const input);
@@ -668,6 +669,14 @@ static struct cmd_t command_defs[] =
           "If the terminal does not support sounds, it may attempt to flash the screen instead.",
           NULL } } },
 
+    { "/encwarn",
+        cmd_encwarn, parse_args, 1, 1, &cons_encwarn_setting,
+        { "/encwarn on|off", "Titlebar encryption warning.",
+        { "/encwarn on|off",
+          "---------------",
+          "Enabled or disable the unencrypted warning message in the titlebar.",
+          NULL } } },
+
     { "/presence",
         cmd_presence, parse_args, 1, 1, &cons_presence_setting,
         { "/presence on|off", "Show the contacts presence in the titlebar.",
@@ -858,6 +867,21 @@ static struct cmd_t command_defs[] =
         { "/states on|off",
           "--------------",
           "Send chat state notifications during chat sessions.",
+          NULL } } },
+
+    { "/pgp",
+        cmd_pgp, parse_args, 1, 2, NULL,
+        { "/pgp command [args..]", "Open PGP commands.",
+        { "/pgp command [args..]",
+          "---------------------",
+          "Open PGP commands.",
+          "",
+          "keys              : List private keys.",
+          "libver            : Show which version of the libgpgme library is being used.",
+          "fps               : Show received fingerprints.",
+          "start [contact]   : Start PGP encrypted chat, current contact will be used if not specified.",
+          "end               : End PGP encrypted chat with the current recipient.",
+          "log on|off|redact : PGP message logging, default: redact.",
           NULL } } },
 
     { "/otr",
@@ -1223,6 +1247,8 @@ static Autocomplete time_statusbar_ac;
 static Autocomplete resource_ac;
 static Autocomplete inpblock_ac;
 static Autocomplete receipts_ac;
+static Autocomplete pgp_ac;
+static Autocomplete pgp_log_ac;
 
 /*
  * Initialise command autocompleter and history
@@ -1379,6 +1405,7 @@ cmd_init(void)
     autocomplete_add(account_set_ac, "muc");
     autocomplete_add(account_set_ac, "nick");
     autocomplete_add(account_set_ac, "otr");
+    autocomplete_add(account_set_ac, "pgpkeyid");
 
     account_clear_ac = autocomplete_new();
     autocomplete_add(account_clear_ac, "password");
@@ -1386,6 +1413,7 @@ cmd_init(void)
     autocomplete_add(account_clear_ac, "server");
     autocomplete_add(account_clear_ac, "port");
     autocomplete_add(account_clear_ac, "otr");
+    autocomplete_add(account_clear_ac, "pgpkeyid");
 
     account_default_ac = autocomplete_new();
     autocomplete_add(account_default_ac, "set");
@@ -1476,7 +1504,6 @@ cmd_init(void)
     autocomplete_add(otr_ac, "untrust");
     autocomplete_add(otr_ac, "secret");
     autocomplete_add(otr_ac, "log");
-    autocomplete_add(otr_ac, "warn");
     autocomplete_add(otr_ac, "libver");
     autocomplete_add(otr_ac, "policy");
     autocomplete_add(otr_ac, "question");
@@ -1588,6 +1615,19 @@ cmd_init(void)
     receipts_ac = autocomplete_new();
     autocomplete_add(receipts_ac, "send");
     autocomplete_add(receipts_ac, "request");
+
+    pgp_ac = autocomplete_new();
+    autocomplete_add(pgp_ac, "keys");
+    autocomplete_add(pgp_ac, "fps");
+    autocomplete_add(pgp_ac, "libver");
+    autocomplete_add(pgp_ac, "start");
+    autocomplete_add(pgp_ac, "end");
+    autocomplete_add(pgp_ac, "log");
+
+    pgp_log_ac = autocomplete_new();
+    autocomplete_add(pgp_log_ac, "on");
+    autocomplete_add(pgp_log_ac, "off");
+    autocomplete_add(pgp_log_ac, "redact");
 }
 
 void
@@ -1647,6 +1687,8 @@ cmd_uninit(void)
     autocomplete_free(resource_ac);
     autocomplete_free(inpblock_ac);
     autocomplete_free(receipts_ac);
+    autocomplete_free(pgp_ac);
+    autocomplete_free(pgp_log_ac);
 }
 
 gboolean
@@ -1819,6 +1861,8 @@ cmd_reset_autocomplete(ProfWin *window)
     autocomplete_reset(resource_ac);
     autocomplete_reset(inpblock_ac);
     autocomplete_reset(receipts_ac);
+    autocomplete_reset(pgp_ac);
+    autocomplete_reset(pgp_log_ac);
 
     if (window->type == WIN_CHAT) {
         ProfChatWin *chatwin = (ProfChatWin*)window;
@@ -1944,7 +1988,7 @@ _cmd_complete_parameters(ProfWin *window, const char * const input)
     // autocomplete boolean settings
     gchar *boolean_choices[] = { "/beep", "/intype", "/states", "/outtype",
         "/flash", "/splash", "/chlog", "/grlog", "/mouse", "/history",
-        "/vercheck", "/privileges", "/presence", "/wrap", "/winstidy", "/carbons" };
+        "/vercheck", "/privileges", "/presence", "/wrap", "/winstidy", "/carbons", "/encwarn" };
 
     for (i = 0; i < ARRAY_SIZE(boolean_choices); i++) {
         result = autocomplete_param_with_func(input, boolean_choices[i], prefs_autocomplete_boolean_choice);
@@ -2032,6 +2076,7 @@ _cmd_complete_parameters(ProfWin *window, const char * const input)
     g_hash_table_insert(ac_funcs, "/bookmark",      _bookmark_autocomplete);
     g_hash_table_insert(ac_funcs, "/autoconnect",   _autoconnect_autocomplete);
     g_hash_table_insert(ac_funcs, "/otr",           _otr_autocomplete);
+    g_hash_table_insert(ac_funcs, "/pgp",           _pgp_autocomplete);
     g_hash_table_insert(ac_funcs, "/connect",       _connect_autocomplete);
     g_hash_table_insert(ac_funcs, "/statuses",      _statuses_autocomplete);
     g_hash_table_insert(ac_funcs, "/alias",         _alias_autocomplete);
@@ -2453,13 +2498,30 @@ _otr_autocomplete(ProfWin *window, const char * const input)
         return found;
     }
 
-    found = autocomplete_param_with_func(input, "/otr warn",
-        prefs_autocomplete_boolean_choice);
+    found = autocomplete_param_with_ac(input, "/otr", otr_ac, TRUE);
     if (found) {
         return found;
     }
 
-    found = autocomplete_param_with_ac(input, "/otr", otr_ac, TRUE);
+    return NULL;
+}
+
+static char *
+_pgp_autocomplete(ProfWin *window, const char * const input)
+{
+    char *found = NULL;
+
+    found = autocomplete_param_with_func(input, "/pgp start", roster_contact_autocomplete);
+    if (found) {
+        return found;
+    }
+
+    found = autocomplete_param_with_ac(input, "/pgp log", pgp_log_ac, TRUE);
+    if (found) {
+        return found;
+    }
+
+    found = autocomplete_param_with_ac(input, "/pgp", pgp_ac, TRUE);
     if (found) {
         return found;
     }

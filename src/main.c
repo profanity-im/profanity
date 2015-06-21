@@ -121,6 +121,12 @@ main(int argc, char **argv)
         g_print("OTR support: Disabled\n");
 #endif
 
+#ifdef PROF_HAVE_LIBGPGME
+        g_print("PGP support: Enabled\n");
+#else
+        g_print("PGP support: Disabled\n");
+#endif
+
         return 0;
     }
 

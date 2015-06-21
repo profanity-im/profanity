@@ -110,7 +110,7 @@ static void
 cb_inject_message(void *opdata, const char *accountname,
     const char *protocol, const char *recipient, const char *message)
 {
-    message_send_chat_encrypted(recipient, message);
+    message_send_chat_otr(recipient, message);
 }
 
 static void
@@ -272,12 +272,9 @@ otr_on_connect(ProfAccount *account)
     return;
 }
 
-void
-otr_on_message_recv(const char * const barejid, const char * const resource, const char * const message)
+char*
+otr_on_message_recv(const char * const barejid, const char * const resource, const char * const message, gboolean *was_decrypted)
 {
-    gboolean was_decrypted = FALSE;
-    char *decrypted;
-
     prof_otrpolicy_t policy = otr_get_policy(barejid);
     char *whitespace_base = strstr(message, OTRL_MESSAGE_TAG_BASE);
 
@@ -294,65 +291,65 @@ otr_on_message_recv(const char * const barejid, const char * const resource, con
                 memmove(whitespace_base, whitespace_base+tag_length, tag_length);
                 char *otr_query_message = otr_start_query();
                 cons_show("OTR Whitespace pattern detected. Attempting to start OTR session...");
-                message_send_chat_encrypted(barejid, otr_query_message);
+                message_send_chat_otr(barejid, otr_query_message);
             }
         }
     }
-    decrypted = otr_decrypt_message(barejid, message, &was_decrypted);
 
-    // internal OTR message
-    if (decrypted == NULL) {
-        return;
+    char *decrypted = otr_decrypt_message(barejid, message, was_decrypted);
+    if (!decrypted) { // internal OTR message
+        return NULL;
     }
 
-    if (policy == PROF_OTRPOLICY_ALWAYS && !was_decrypted && !whitespace_base) {
+    if (policy == PROF_OTRPOLICY_ALWAYS && *was_decrypted == FALSE && !whitespace_base) {
         char *otr_query_message = otr_start_query();
         cons_show("Attempting to start OTR session...");
-        message_send_chat_encrypted(barejid, otr_query_message);
+        message_send_chat_otr(barejid, otr_query_message);
     }
 
-    ui_incoming_msg(barejid, resource, decrypted, NULL);
-    chat_log_otr_msg_in(barejid, decrypted, was_decrypted);
-    otr_free_message(decrypted);
+    return decrypted;
 }
 
-void
+gboolean
 otr_on_message_send(ProfChatWin *chatwin, const char * const message)
 {
     char *id = NULL;
-
     prof_otrpolicy_t policy = otr_get_policy(chatwin->barejid);
 
+    // Send encrypted message
     if (otr_is_secure(chatwin->barejid)) {
         char *encrypted = otr_encrypt_message(chatwin->barejid, message);
         if (encrypted) {
-            id = message_send_chat_encrypted(chatwin->barejid, encrypted);
+            id = message_send_chat_otr(chatwin->barejid, encrypted);
             chat_log_otr_msg_out(chatwin->barejid, message);
             ui_outgoing_chat_msg(chatwin, message, id);
             otr_free_message(encrypted);
+            free(id);
+            return TRUE;
         } else {
             ui_win_error_line((ProfWin*)chatwin, "Failed to encrypt and send message.");
-            return;
+            return TRUE;
         }
+    }
 
-    } else if (policy == PROF_OTRPOLICY_ALWAYS) {
+    // show error if not secure and policy always
+    if (policy == PROF_OTRPOLICY_ALWAYS) {
         ui_win_error_line((ProfWin*)chatwin, "Failed to send message. OTR policy set to: always");
-        return;
+        return TRUE;
+    }
 
-    } else if (policy == PROF_OTRPOLICY_OPPORTUNISTIC) {
+    // tag and send for policy opportunistic
+    if (policy == PROF_OTRPOLICY_OPPORTUNISTIC) {
         char *otr_tagged_msg = otr_tag_message(message);
-        id = message_send_chat_encrypted(chatwin->barejid, otr_tagged_msg);
+        id = message_send_chat_otr(chatwin->barejid, otr_tagged_msg);
         ui_outgoing_chat_msg(chatwin, message, id);
         chat_log_msg_out(chatwin->barejid, message);
         free(otr_tagged_msg);
-
-    } else {
-        id = message_send_chat(chatwin->barejid, message);
-        ui_outgoing_chat_msg(chatwin, message, id);
-        chat_log_msg_out(chatwin->barejid, message);
+        free(id);
+        return TRUE;
     }
 
-    free(id);
+    return FALSE;
 }
 
 void

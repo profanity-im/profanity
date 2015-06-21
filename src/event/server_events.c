@@ -44,9 +44,13 @@
 #include "config/account.h"
 #include "roster_list.h"
 #include "plugins/plugins.h"
+#include "window_list.h"
 
 #ifdef PROF_HAVE_LIBOTR
 #include "otr/otr.h"
+#endif
+#ifdef PROF_HAVE_LIBGPGME
+#include "pgp/gpg.h"
 #endif
 
 #include "ui/ui.h"
@@ -170,19 +174,125 @@ sv_ev_incoming_private_message(const char * const fulljid, char *message)
 }
 
 void
-sv_ev_carbon(char *barejid, char *message)
+sv_ev_outgoing_carbon(char *barejid, char *message)
 {
     ui_outgoing_chat_msg_carbon(barejid, message);
 }
 
 void
-sv_ev_incoming_message(char *barejid, char *resource, char *message)
+sv_ev_incoming_carbon(char *barejid, char *resource, char *message)
 {
+    gboolean new_win = FALSE;
+    ProfChatWin *chatwin = wins_get_chat(barejid);
+    if (!chatwin) {
+        ProfWin *window = wins_new_chat(barejid);
+        chatwin = (ProfChatWin*)window;
+        new_win = TRUE;
+    }
+
+    ui_incoming_msg(chatwin, resource, message, NULL, new_win);
+    chat_log_msg_in(barejid, message);
+}
+
+void
+sv_ev_incoming_message(char *barejid, char *resource, char *message, char *enc_message)
+{
+    gboolean new_win = FALSE;
+    ProfChatWin *chatwin = wins_get_chat(barejid);
+    if (!chatwin) {
+        ProfWin *window = wins_new_chat(barejid);
+        chatwin = (ProfChatWin*)window;
+        new_win = TRUE;
+    }
+
+// OTR suported, PGP supported
 #ifdef PROF_HAVE_LIBOTR
-    otr_on_message_recv(barejid, resource, message);
-#else
-    ui_incoming_msg(barejid, resource, newmessage, NULL);
-    chat_log_msg_in(barejid, newmessage);
+#ifdef PROF_HAVE_LIBGPGME
+    prof_enc_t enc_mode = chatwin->enc_mode;
+    if (enc_message) {
+        if (enc_mode == PROF_ENC_OTR) {
+            win_println((ProfWin*)chatwin, "PGP encrypted message received whilst in OTR session.");
+        } else { // PROF_ENC_NONE, PROF_ENC_PGP
+            char *decrypted = p_gpg_decrypt(barejid, enc_message);
+            if (decrypted) {
+                if (enc_mode == PROF_ENC_NONE) {
+                    win_println((ProfWin*)chatwin, "PGP encryption enabled.");
+                }
+                ui_incoming_msg(chatwin, resource, decrypted, NULL, new_win);
+                chat_log_pgp_msg_in(barejid, decrypted);
+                chatwin->enc_mode = PROF_ENC_PGP;
+            } else {
+                ui_incoming_msg(chatwin, resource, message, NULL, new_win);
+                chat_log_msg_in(barejid, message);
+                chatwin->enc_mode = PROF_ENC_NONE;
+            }
+        }
+    } else {
+        if (enc_mode == PROF_ENC_PGP) {
+            win_println((ProfWin*)chatwin, "PGP encryption disabled.");
+            ui_incoming_msg(chatwin, resource, message, NULL, new_win);
+            chat_log_msg_in(barejid, message);
+            chatwin->enc_mode = PROF_ENC_NONE;
+        } else {
+            gboolean decrypted = FALSE;
+            char *otr_res = otr_on_message_recv(barejid, resource, message, &decrypted);
+            if (otr_res) {
+                ui_incoming_msg(chatwin, resource, otr_res, NULL, new_win);
+                chat_log_otr_msg_in(barejid, otr_res, decrypted);
+                otr_free_message(otr_res);
+            }
+        }
+    }
+    return;
+#endif
+#endif
+
+// OTR supported, PGP unsupported
+#ifdef PROF_HAVE_LIBOTR
+#ifndef PROF_HAVE_LIBGPGME
+    gboolean decrypted = FALSE;
+    char *otr_res = otr_on_message_recv(barejid, resource, message, &decrypted);
+    if (otr_res) {
+        ui_incoming_msg(chatwin, resource, otr_res, NULL, new_win);
+        chat_log_otr_msg_in(barejid, otr_res, decrypted);
+        otr_free_message(otr_res);
+    }
+    return;
+#endif
+#endif
+
+// OTR unsupported, PGP supported
+#ifndef PROF_HAVE_LIBOTR
+#ifdef PROF_HAVE_LIBGPGME
+    prof_enc_t enc_mode = chatwin->enc_mode;
+    if (enc_message) {
+        char *decrypted = p_gpg_decrypt(jid->barejid, enc_message);
+        if (decrypted) {
+            ui_incoming_msg(chatwin, resource, decrypted, NULL, new_win);
+            chat_log_pgp_msg_in(barejid, decrypted);
+            chatwin->enc_mode = PROF_ENC_PGP;
+        } else {
+            ui_incoming_msg(chatwin, resource, message, NULL, new_win);
+            chat_log_msg_in(barejid, message);
+            chatwin->enc_mode = PROF_ENC_NONE;
+        }
+    } else {
+        ui_incoming_msg(chatwin, resource, message, NULL, new_win);
+        chat_log_msg_in(barejid, message);
+        chatwin->enc_mode = PROF_ENC_NONE;
+    }
+    return;
+#endif
+#endif
+
+// OTR unsupported, PGP unsupported
+#ifndef PROF_HAVE_LIBOTR
+#ifndef PROF_HAVE_LIBGPGME
+    ui_incoming_msg(chatwin, resource, message, NULL, new_win);
+    chat_log_msg_in(barejid, message);
+    chatwin->enc_mode = PROF_ENC_NONE;
+    return;
+#endif
 #endif
 }
 
@@ -199,7 +309,15 @@ sv_ev_delayed_private_message(const char * const fulljid, char *message, GTimeVa
 void
 sv_ev_delayed_message(char *barejid, char *message, GTimeVal tv_stamp)
 {
-    ui_incoming_msg(barejid, NULL, message, &tv_stamp);
+    gboolean new_win = FALSE;
+    ProfChatWin *chatwin = wins_get_chat(barejid);
+    if (!chatwin) {
+        ProfWin *window = wins_new_chat(barejid);
+        chatwin = (ProfChatWin*)window;
+        new_win = TRUE;
+    }
+
+    ui_incoming_msg(chatwin, NULL, message, &tv_stamp, new_win);
     chat_log_msg_in_delayed(barejid, message, &tv_stamp);
 }
 
@@ -294,13 +412,19 @@ sv_ev_contact_offline(char *barejid, char *resource, char *status)
 }
 
 void
-sv_ev_contact_online(char *barejid, Resource *resource, GDateTime *last_activity)
+sv_ev_contact_online(char *barejid, Resource *resource, GDateTime *last_activity, char *pgpsig)
 {
     gboolean updated = roster_update_presence(barejid, resource, last_activity);
 
     if (updated) {
         ui_contact_online(barejid, resource, last_activity);
     }
+
+#ifdef PROF_HAVE_LIBGPGME
+    if (pgpsig) {
+        p_gpg_verify(barejid, pgpsig);
+    }
+#endif
 
     rosterwin_roster();
     chat_session_remove(barejid);

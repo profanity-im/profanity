@@ -35,13 +35,13 @@
 #ifndef UI_WIN_TYPES_H
 #define UI_WIN_TYPES_H
 
-#include "config.h"
+#include "prof_config.h"
 
 #include <wchar.h>
 #include <glib.h>
-#ifdef HAVE_NCURSESW_NCURSES_H
+#ifdef PROF_HAVE_NCURSESW_NCURSES_H
 #include <ncursesw/ncurses.h>
-#elif HAVE_NCURSES_H
+#elif PROF_HAVE_NCURSES_H
 #include <ncurses.h>
 #endif
 
@@ -93,7 +93,8 @@ typedef enum {
 
 typedef enum {
     PROF_ENC_NONE,
-    PROF_ENC_OTR
+    PROF_ENC_OTR,
+    PROF_ENC_PGP
 } prof_enc_t;
 
 typedef struct prof_win_t {

@@ -105,6 +105,7 @@ gboolean cmd_nick(ProfWin *window, gchar **args, struct cmd_help_t help);
 gboolean cmd_notify(ProfWin *window, gchar **args, struct cmd_help_t help);
 gboolean cmd_online(ProfWin *window, gchar **args, struct cmd_help_t help);
 gboolean cmd_otr(ProfWin *window, gchar **args, struct cmd_help_t help);
+gboolean cmd_pgp(ProfWin *window, gchar **args, struct cmd_help_t help);
 gboolean cmd_outtype(ProfWin *window, gchar **args, struct cmd_help_t help);
 gboolean cmd_plugins(ProfWin *window, gchar **args, struct cmd_help_t help);
 gboolean cmd_prefs(ProfWin *window, gchar **args, struct cmd_help_t help);
@@ -146,6 +147,7 @@ gboolean cmd_wrap(ProfWin *window, gchar **args, struct cmd_help_t help);
 gboolean cmd_time(ProfWin *window, gchar **args, struct cmd_help_t help);
 gboolean cmd_resource(ProfWin *window, gchar **args, struct cmd_help_t help);
 gboolean cmd_inpblock(ProfWin *window, gchar **args, struct cmd_help_t help);
+gboolean cmd_encwarn(ProfWin *window, gchar **args, struct cmd_help_t help);
 
 gboolean cmd_form_field(ProfWin *window, char *tag, gchar **args);
 

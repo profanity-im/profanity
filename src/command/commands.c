@@ -57,6 +57,9 @@
 #ifdef PROF_HAVE_LIBOTR
 #include "otr/otr.h"
 #endif
+#ifdef PROF_HAVE_LIBGPGME
+#include "pgp/gpg.h"
+#endif
 #include "profanity.h"
 #include "plugins/plugins.h"
 #include "tools/autocomplete.h"
@@ -485,6 +488,10 @@ cmd_account(ProfWin *window, gchar **args, struct cmd_help_t help)
                         cons_show("Updated login status for account %s: %s", account_name, value);
                     }
                     cons_show("");
+                } else if (strcmp(property, "pgpkeyid") == 0) {
+                    accounts_set_pgp_keyid(account_name, value);
+                    cons_show("Updated PGP key ID for account %s: %s", account_name, value);
+                    cons_show("");
                 } else if (valid_resource_presence_string(property)) {
                     int intval;
                     char *err_msg = NULL;
@@ -562,6 +569,10 @@ cmd_account(ProfWin *window, gchar **args, struct cmd_help_t help)
                 } else if (strcmp(property, "otr") == 0) {
                     accounts_clear_otr(account_name);
                     cons_show("OTR policy removed for account %s", account_name);
+                    cons_show("");
+                } else if (strcmp(property, "pgpkeyid") == 0) {
+                    accounts_clear_pgp_keyid(account_name);
+                    cons_show("Removed PGP key ID for account %s", account_name);
                     cons_show("");
                 } else {
                     cons_show("Invalid property: %s", property);
@@ -4155,6 +4166,187 @@ cmd_plugins(ProfWin *window, gchar **args, struct cmd_help_t help)
 }
 
 gboolean
+cmd_pgp(ProfWin *window, gchar **args, struct cmd_help_t help)
+{
+#ifdef PROF_HAVE_LIBGPGME
+    if (args[0] == NULL) {
+        cons_show("Usage: %s", help.usage);
+        return TRUE;
+    }
+
+    if (g_strcmp0(args[0], "log") == 0) {
+        char *choice = args[1];
+        if (g_strcmp0(choice, "on") == 0) {
+            prefs_set_string(PREF_PGP_LOG, "on");
+            cons_show("PGP messages will be logged as plaintext.");
+            if (!prefs_get_boolean(PREF_CHLOG)) {
+                cons_show("Chat logging is currently disabled, use '/chlog on' to enable.");
+            }
+        } else if (g_strcmp0(choice, "off") == 0) {
+            prefs_set_string(PREF_PGP_LOG, "off");
+            cons_show("PGP message logging disabled.");
+        } else if (g_strcmp0(choice, "redact") == 0) {
+            prefs_set_string(PREF_PGP_LOG, "redact");
+            cons_show("PGP messages will be logged as '[redacted]'.");
+            if (!prefs_get_boolean(PREF_CHLOG)) {
+                cons_show("Chat logging is currently disabled, use '/chlog on' to enable.");
+            }
+        } else {
+            cons_show("Usage: %s", help.usage);
+        }
+        return TRUE;
+    }
+
+    if (g_strcmp0(args[0], "keys") == 0) {
+        GSList *keys = p_gpg_list_keys();
+        if (!keys) {
+            cons_show("No keys found");
+            return TRUE;
+        }
+
+        cons_show("PGP keys:");
+        GSList *curr = keys;
+        while (curr) {
+            ProfPGPKey *key = curr->data;
+            cons_show("  %s", key->name);
+            cons_show("    ID          : %s", key->id);
+            cons_show("    Fingerprint : %s", key->fp);
+            curr = g_slist_next(curr);
+        }
+        g_slist_free_full(keys, (GDestroyNotify)p_gpg_free_key);
+        return TRUE;
+    }
+
+    if (g_strcmp0(args[0], "fps") == 0) {
+        jabber_conn_status_t conn_status = jabber_get_connection_status();
+        if (conn_status != JABBER_CONNECTED) {
+            cons_show("You are not currently connected.");
+            return TRUE;
+        }
+        GHashTable *fingerprints = p_gpg_fingerprints();
+        GList *jids = g_hash_table_get_keys(fingerprints);
+        if (!jids) {
+            cons_show("No PGP fingerprints received.");
+            return TRUE;
+        }
+
+        cons_show("Received PGP fingerprints:");
+        GList *curr = jids;
+        while (curr) {
+            char *jid = curr->data;
+            char *fingerprint = g_hash_table_lookup(fingerprints, jid);
+            cons_show("  %s: %s", jid, fingerprint);
+            curr = g_list_next(curr);
+        }
+        g_list_free(jids);
+        return TRUE;
+    }
+
+    if (g_strcmp0(args[0], "libver") == 0) {
+        const char *libver = p_gpg_libver();
+        if (!libver) {
+            cons_show("Could not get libgpgme version");
+            return TRUE;
+        }
+
+        GString *fullstr = g_string_new("Using libgpgme version ");
+        g_string_append(fullstr, libver);
+        cons_show("%s", fullstr->str);
+        g_string_free(fullstr, TRUE);
+
+        return TRUE;
+    }
+
+    if (g_strcmp0(args[0], "start") == 0) {
+        jabber_conn_status_t conn_status = jabber_get_connection_status();
+        if (conn_status != JABBER_CONNECTED) {
+            cons_show("You must be connected to start PGP encrpytion.");
+            return TRUE;
+        }
+
+        if (window->type != WIN_CHAT && args[1] == NULL) {
+            cons_show("You must be in a regular chat window to start PGP encrpytion.");
+            return TRUE;
+        }
+
+        ProfChatWin *chatwin = NULL;
+
+        if (args[1]) {
+            char *contact = args[1];
+            char *barejid = roster_barejid_from_name(contact);
+            if (barejid == NULL) {
+                barejid = contact;
+            }
+
+            chatwin = wins_get_chat(barejid);
+            if (!chatwin) {
+                chatwin = ui_ev_new_chat_win(barejid);
+            }
+            ui_ev_focus_win((ProfWin*)chatwin);
+        } else {
+            chatwin = (ProfChatWin*)window;
+            assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
+        }
+
+        if (chatwin->enc_mode == PROF_ENC_OTR) {
+            ui_current_print_formatted_line('!', 0, "You must end the OTR session to start PGP encryption.");
+            return TRUE;
+        }
+
+        if (chatwin->enc_mode == PROF_ENC_PGP) {
+            ui_current_print_formatted_line('!', 0, "You have already started PGP encryption.");
+            return TRUE;
+        }
+
+        ProfAccount *account = accounts_get_account(jabber_get_account_name());
+        if (!account->pgp_keyid) {
+            ui_current_print_formatted_line('!', 0, "You must specify a PGP key ID for this account to start PGP encryption.");
+            account_free(account);
+            return TRUE;
+        }
+        account_free(account);
+
+        if (!p_gpg_available(chatwin->barejid)) {
+            ui_current_print_formatted_line('!', 0, "No PGP key found for %s.", chatwin->barejid);
+            return TRUE;
+        }
+
+        chatwin->enc_mode = PROF_ENC_PGP;
+        ui_current_print_formatted_line('!', 0, "PGP encyption enabled.");
+        return TRUE;
+    }
+
+    if (g_strcmp0(args[0], "end") == 0) {
+        jabber_conn_status_t conn_status = jabber_get_connection_status();
+        if (conn_status != JABBER_CONNECTED) {
+            cons_show("You are not currently connected.");
+            return TRUE;
+        }
+
+        if (window->type != WIN_CHAT) {
+            cons_show("You must be in a regular chat window to end PGP encrpytion.");
+            return TRUE;
+        }
+
+        ProfChatWin *chatwin = (ProfChatWin*)window;
+        if (chatwin->enc_mode != PROF_ENC_PGP) {
+            ui_current_print_formatted_line('!', 0, "PGP encryption is not currently enabled.");
+            return TRUE;
+        }
+
+        chatwin->enc_mode = PROF_ENC_NONE;
+        ui_current_print_formatted_line('!', 0, "PGP encyption disabled.");
+        return TRUE;
+    }
+
+    return TRUE;
+#else
+    cons_show("This version of Profanity has not been built with PGP support enabled");
+    return TRUE;
+#endif
+}
+
+gboolean
 cmd_otr(ProfWin *window, gchar **args, struct cmd_help_t help)
 {
 #ifdef PROF_HAVE_LIBOTR
@@ -4184,11 +4376,6 @@ cmd_otr(ProfWin *window, gchar **args, struct cmd_help_t help)
             cons_show("Usage: %s", help.usage);
         }
         return TRUE;
-
-    } else if (strcmp(args[0], "warn") == 0) {
-        gboolean result =  _cmd_set_boolean_preference(args[1], help,
-            "OTR warning message", PREF_OTR_WARN);
-        return result;
 
     } else if (strcmp(args[0], "libver") == 0) {
         char *version = otr_libotr_version();
@@ -4286,6 +4473,11 @@ cmd_otr(ProfWin *window, gchar **args, struct cmd_help_t help)
             }
             ui_ev_focus_win((ProfWin*)chatwin);
 
+            if (chatwin->enc_mode == PROF_ENC_PGP) {
+                ui_current_print_formatted_line('!', 0, "You must disable PGP encryption before starting an OTR session.");
+                return TRUE;
+            }
+
             if (chatwin->enc_mode == PROF_ENC_OTR) {
                 ui_current_print_formatted_line('!', 0, "You are already in an OTR session.");
                 return TRUE;
@@ -4298,7 +4490,7 @@ cmd_otr(ProfWin *window, gchar **args, struct cmd_help_t help)
 
             if (!otr_is_secure(barejid)) {
                 char *otr_query_message = otr_start_query();
-                message_send_chat_encrypted(barejid, otr_query_message);
+                message_send_chat_otr(barejid, otr_query_message);
                 return TRUE;
             }
 
@@ -4314,6 +4506,11 @@ cmd_otr(ProfWin *window, gchar **args, struct cmd_help_t help)
 
             ProfChatWin *chatwin = (ProfChatWin*)window;
             assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
+            if (chatwin->enc_mode == PROF_ENC_PGP) {
+                ui_current_print_formatted_line('!', 0, "You must disable PGP encryption before starting an OTR session.");
+                return TRUE;
+            }
+
             if (chatwin->enc_mode == PROF_ENC_OTR) {
                 ui_current_print_formatted_line('!', 0, "You are already in an OTR session.");
                 return TRUE;
@@ -4325,7 +4522,7 @@ cmd_otr(ProfWin *window, gchar **args, struct cmd_help_t help)
             }
 
             char *otr_query_message = otr_start_query();
-            message_send_chat_encrypted(chatwin->barejid, otr_query_message);
+            message_send_chat_otr(chatwin->barejid, otr_query_message);
             return TRUE;
         }
 
@@ -4455,6 +4652,12 @@ cmd_otr(ProfWin *window, gchar **args, struct cmd_help_t help)
     cons_show("This version of Profanity has not been built with OTR support enabled");
     return TRUE;
 #endif
+}
+
+gboolean
+cmd_encwarn(ProfWin *window, gchar **args, struct cmd_help_t help)
+{
+    return _cmd_set_boolean_preference(args[0], help, "Encryption warning message", PREF_ENC_WARN);
 }
 
 // helper function for status change commands

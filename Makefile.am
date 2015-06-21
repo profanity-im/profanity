@@ -52,6 +52,7 @@ unittest_sources = \
 	src/xmpp/xmpp.h src/xmpp/form.c \
 	src/ui/ui.h \
 	src/otr/otr.h \
+	src/pgp/gpg.h \
 	src/command/command.h src/command/command.c \
 	src/command/commands.h src/command/commands.c \
 	src/tools/parser.c \
@@ -82,6 +83,7 @@ unittest_sources = \
 	tests/unittests/test_cmd_connect.c tests/unittests/test_cmd_connect.h \
 	tests/unittests/test_cmd_join.c tests/unittests/test_cmd_join.h \
 	tests/unittests/test_cmd_otr.c tests/unittests/test_cmd_otr.h \
+	tests/unittests/test_cmd_pgp.c tests/unittests/test_cmd_pgp.h \
 	tests/unittests/test_cmd_rooms.c tests/unittests/test_cmd_rooms.h \
 	tests/unittests/test_cmd_roster.c tests/unittests/test_cmd_roster.h \
 	tests/unittests/test_cmd_statuses.c tests/unittests/test_cmd_statuses.h \
@@ -130,6 +132,12 @@ c_sources = \
 
 git_include = src/gitversion.h
 
+pgp_sources = \
+	src/pgp/gpg.h src/pgp/gpg.c
+
+pgp_unittest_sources = \
+	tests/unittests/pgp/stub_gpg.c
+
 otr3_sources = \
 	src/otr/otrlib.h src/otr/otrlibv3.c src/otr/otr.h src/otr/otr.c
 
@@ -164,6 +172,11 @@ themes_sources = themes/*
 script_sources = bootstrap.sh configure-debug install-all.sh
 
 man_sources = docs/profanity.1
+
+if BUILD_PGP
+core_sources += $(pgp_sources)
+unittest_sources += $(pgp_unittest_sources)
+endif
 
 if BUILD_OTR
 unittest_sources += $(otr_unittest_sources)

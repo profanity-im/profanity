@@ -710,6 +710,10 @@ cons_show_account(ProfAccount *account)
         g_string_free(always, TRUE);
     }
 
+    if (account->pgp_keyid) {
+        cons_show   ("PGP Key ID        : %s", account->pgp_keyid);
+    }
+
     cons_show       ("Priority          : chat:%d, online:%d, away:%d, xa:%d, dnd:%d",
         account->priority_chat, account->priority_online, account->priority_away,
         account->priority_xa, account->priority_dnd);
@@ -878,6 +882,16 @@ cons_winstidy_setting(void)
         cons_show("Window Auto Tidy (/winstidy)  : ON");
     else
         cons_show("Window Auto Tidy (/winstidy)  : OFF");
+}
+
+void
+cons_encwarn_setting(void)
+{
+    if (prefs_get_boolean(PREF_ENC_WARN)) {
+        cons_show("Warn unencrypted (/encwarn)   : ON");
+    } else {
+        cons_show("Warn unencrypted (/encwarn)   : OFF");
+    }
 }
 
 void
@@ -1054,6 +1068,7 @@ cons_show_ui_prefs(void)
     cons_roster_setting();
     cons_privileges_setting();
     cons_titlebar_setting();
+    cons_encwarn_setting();
     cons_presence_setting();
     cons_inpblock_setting();
 
@@ -1064,13 +1079,13 @@ void
 cons_notify_setting(void)
 {
     gboolean notify_enabled = FALSE;
-#ifdef HAVE_OSXNOTIFY
+#ifdef PROF_HAVE_OSXNOTIFY
     notify_enabled = TRUE;
 #endif
-#ifdef HAVE_LIBNOTIFY
+#ifdef PROF_HAVE_LIBNOTIFY
     notify_enabled = TRUE;
 #endif
-#ifdef PLATFORM_CYGWIN
+#ifdef PROF_PLATFORM_CYGWIN
     notify_enabled = TRUE;
 #endif
 
@@ -1393,12 +1408,6 @@ cons_show_otr_prefs(void)
     char *policy_value = prefs_get_string(PREF_OTR_POLICY);
     cons_show("OTR policy (/otr policy) : %s", policy_value);
     prefs_free_string(policy_value);
-
-    if (prefs_get_boolean(PREF_OTR_WARN)) {
-        cons_show("Warn non-OTR (/otr warn) : ON");
-    } else {
-        cons_show("Warn non-OTR (/otr warn) : OFF");
-    }
 
     char *log_value = prefs_get_string(PREF_OTR_LOG);
     if (strcmp(log_value, "on") == 0) {

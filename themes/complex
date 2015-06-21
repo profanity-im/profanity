@@ -21,4 +21,4 @@ roster.size=25
 privileges=true
 presence=true
 intype=true
-otr.warn=true
+enc.warn=true

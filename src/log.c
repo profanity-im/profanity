@@ -280,6 +280,23 @@ chat_log_otr_msg_out(const char * const barejid, const char * const msg)
 }
 
 void
+chat_log_pgp_msg_out(const char * const barejid, const char * const msg)
+{
+    if (prefs_get_boolean(PREF_CHLOG)) {
+        const char *jid = jabber_get_fulljid();
+        Jid *jidp = jid_create(jid);
+        char *pref_pgp_log = prefs_get_string(PREF_PGP_LOG);
+        if (strcmp(pref_pgp_log, "on") == 0) {
+            _chat_log_chat(jidp->barejid, barejid, msg, PROF_OUT_LOG, NULL);
+        } else if (strcmp(pref_pgp_log, "redact") == 0) {
+            _chat_log_chat(jidp->barejid, barejid, "[redacted]", PROF_OUT_LOG, NULL);
+        }
+        prefs_free_string(pref_pgp_log);
+        jid_destroy(jidp);
+    }
+}
+
+void
 chat_log_otr_msg_in(const char * const barejid, const char * const msg, gboolean was_decrypted)
 {
     if (prefs_get_boolean(PREF_CHLOG)) {
@@ -292,6 +309,23 @@ chat_log_otr_msg_in(const char * const barejid, const char * const msg, gboolean
             _chat_log_chat(jidp->barejid, barejid, "[redacted]", PROF_IN_LOG, NULL);
         }
         prefs_free_string(pref_otr_log);
+        jid_destroy(jidp);
+    }
+}
+
+void
+chat_log_pgp_msg_in(const char * const barejid, const char * const msg)
+{
+    if (prefs_get_boolean(PREF_CHLOG)) {
+        const char *jid = jabber_get_fulljid();
+        Jid *jidp = jid_create(jid);
+        char *pref_pgp_log = prefs_get_string(PREF_PGP_LOG);
+        if (strcmp(pref_pgp_log, "on") == 0) {
+            _chat_log_chat(jidp->barejid, barejid, msg, PROF_IN_LOG, NULL);
+        } else if (strcmp(pref_pgp_log, "redact") == 0) {
+            _chat_log_chat(jidp->barejid, barejid, "[redacted]", PROF_IN_LOG, NULL);
+        }
+        prefs_free_string(pref_pgp_log);
         jid_destroy(jidp);
     }
 }
