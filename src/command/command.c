@@ -880,7 +880,7 @@ static struct cmd_t command_defs[] =
           "fps               : Show received fingerprints.",
           "start [contact]   : Start PGP encrypted chat, current contact will be used if not specified.",
           "end               : End PGP encrypted chat with the current recipient.",
-          "log on|off|redact : OTR message logging, default: redact.",
+          "log on|off|redact : PGP message logging, default: redact.",
           NULL } } },
 
     { "/otr",
