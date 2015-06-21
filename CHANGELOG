@@ -2,6 +2,7 @@
 =====
 
 - GNU Readline
+- OpenPGP support
 - Message Carbons (xep-0280)
 - Message Delivery Receipts (xep-0184)
 - MUC Mediated Invitation support
