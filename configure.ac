@@ -189,7 +189,7 @@ fi
 AM_CONDITIONAL([BUILD_OTR], [false])
 AM_CONDITIONAL([BUILD_OTR3], [false])
 AM_CONDITIONAL([BUILD_OTR4], [false])
-if test "x$enable_otr" = xyes; then
+if test "x$enable_otr" != xno; then
     AC_SEARCH_LIBS([otrl_init], [otr],
         [AC_COMPILE_IFELSE(
             [AC_LANG_PROGRAM([[
@@ -203,22 +203,9 @@ if test "x$enable_otr" = xyes; then
             ]])],
             [AM_CONDITIONAL([BUILD_OTR], [true]) AM_CONDITIONAL([BUILD_OTR4], [true]) AC_DEFINE([HAVE_LIBOTR], [1], [Have libotr])],
             [AM_CONDITIONAL([BUILD_OTR], [true]) AM_CONDITIONAL([BUILD_OTR3], [true]) AC_DEFINE([HAVE_LIBOTR], [1], [Have libotr])])],
-        [AC_MSG_ERROR([libotr is required for otr encryption support])])
-elif test "x$enable_otr" = x; then
-    AC_SEARCH_LIBS([otrl_init], [otr],
-        [AC_COMPILE_IFELSE(
-            [AC_LANG_PROGRAM([[
-            #include <libotr/version.h>
-            ]],[[
-            #if OTRL_VERSION_MAJOR == 4
-            // OK
-            #else
-            # assume version 3
-            #endif
-            ]])],
-            [AM_CONDITIONAL([BUILD_OTR], [true]) AM_CONDITIONAL([BUILD_OTR4], [true]) AC_DEFINE([HAVE_LIBOTR], [1], [Have libotr])],
-            [AM_CONDITIONAL([BUILD_OTR], [true]) AM_CONDITIONAL([BUILD_OTR3], [true]) AC_DEFINE([HAVE_LIBOTR], [1], [Have libotr])])],
-        [AC_MSG_NOTICE([libotr not found, otr encryption support not enabled])])
+        [AS_IF([test "x$enable_otr" = xyes],
+            [AC_MSG_ERROR([libotr is required for otr encryption support])],
+            [AC_MSG_NOTICE([libotr not found, otr encryption support not enabled])])])
 fi
 
 AS_IF([test "x$with_themes" = xno],
