@@ -58,9 +58,7 @@ static GTimer *typing_elapsed;
 static void _title_bar_draw(void);
 static void _show_self_presence(void);
 static void _show_contact_presence(ProfChatWin *chatwin);
-#ifdef HAVE_LIBOTR
 static void _show_privacy(ProfChatWin *chatwin);
-#endif
 
 void
 create_title_bar(void)

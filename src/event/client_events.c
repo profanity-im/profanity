@@ -87,8 +87,11 @@ cl_ev_send_msg(ProfChatWin *chatwin, const char * const msg)
 {
     chat_state_active(chatwin->state);
 
+// OTR suported, PGP supported
 #ifdef HAVE_LIBOTR
-    if (chatwin->enc_mode == PROF_ENC_NONE || chatwin->enc_mode == PROF_ENC_OTR) {
+#ifdef HAVE_LIBGPGME
+    prof_enc_t enc_mode = chatwin->enc_mode;
+    if (enc_mode == PROF_ENC_NONE || enc_mode == PROF_ENC_OTR) {
         gboolean handled = otr_on_message_send(chatwin, msg);
         if (!handled) {
             char *id = message_send_chat(chatwin->barejid, msg);
@@ -96,44 +99,61 @@ cl_ev_send_msg(ProfChatWin *chatwin, const char * const msg)
             ui_outgoing_chat_msg(chatwin, msg, id);
             free(id);
         }
-        return;
-    }
-#ifdef HAVE_LIBGPGME
-    if (chatwin->enc_mode == PROF_ENC_PGP) {
+    } else { // enc_mode = PROF_ENC_PGP
         char *id = message_send_chat_pgp(chatwin->barejid, msg);
         // TODO pgp message logger
         chat_log_msg_out(chatwin->barejid, msg);
         ui_outgoing_chat_msg(chatwin, msg, id);
         free(id);
-        return;
     }
-#endif // HAVE_LIBGPGME
+    return;
+#endif
+#endif
 
-#else // HAVE_LIBOTR
-
-#ifdef HAVE_LIBGPGME
-    if (chatwin->enc_mode == PROF_ENC_PGP) {
-        char *id = message_send_chat_pgp(chatwin->barejid, msg);
+// OTR supported, PGP unsupported
+#ifdef HAVE_LIBOTR
+#ifndef HAVE_LIBGPGME
+    gboolean handled = otr_on_message_send(chatwin, msg);
+    if (!handled) {
+        char *id = message_send_chat(chatwin->barejid, msg);
         chat_log_msg_out(chatwin->barejid, msg);
         ui_outgoing_chat_msg(chatwin, msg, id);
         free(id);
-        return;
     }
+    return;
+#endif
+#endif
 
+// OTR unsupported, PGP supported
+#ifndef HAVE_LIBOTR
+#ifdef HAVE_LIBGPGME
+    prof_enc_t enc_mode = chatwin->enc_mode;
+    if (enc_mode == PROF_ENC_NONE) {
+        char *id = message_send_chat(chatwin->barejid, msg);
+        chat_log_msg_out(chatwin->barejid, msg);
+        ui_outgoing_chat_msg(chatwin, msg, id);
+        free(id);
+    } else if (enc_mode == PROF_ENC_PGP) {
+        char *id = message_send_chat_pgp(chatwin->barejid, msg);
+        // TODO pgp message logger
+        chat_log_msg_out(chatwin->barejid, msg);
+        ui_outgoing_chat_msg(chatwin, msg, id);
+        free(id);
+    }
+    return;
+#endif
+#endif
+
+// OTR unsupported, PGP unsupported
+#ifndef HAVE_LIBOTR
+#ifndef HAVE_LIBGPGME
     char *id = message_send_chat(chatwin->barejid, msg);
     chat_log_msg_out(chatwin->barejid, msg);
     ui_outgoing_chat_msg(chatwin, msg, id);
     free(id);
     return;
-#else // HAVE_LIBGPGME
-    char *id = message_send_chat(chatwin->barejid, msg);
-    chat_log_msg_out(chatwin->barejid, msg);
-    ui_outgoing_chat_msg(chatwin, msg, id);
-    free(id);
-    return;
-#endif // HAVE_LIBGPGME
-
-#endif // HAVE_LIBOTR
+#endif
+#endif
 }
 
 void
