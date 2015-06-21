@@ -55,6 +55,7 @@
 #define PREF_GROUP_CONNECTION "connection"
 #define PREF_GROUP_ALIAS "alias"
 #define PREF_GROUP_OTR "otr"
+#define PREF_GROUP_PGP "pgp"
 
 #define INPBLOCK_DEFAULT 1000
 
@@ -75,8 +76,6 @@ void
 prefs_load(void)
 {
     GError *err;
-
-//    log_info("Loading preferences");
     prefs_loc = _get_preferences_file();
 
     if (g_file_test(prefs_loc, G_FILE_TEST_EXISTS)) {
@@ -94,7 +93,7 @@ prefs_load(void)
         g_error_free(err);
     }
 
-    // move pre 0.4.7 enc.warn to enc.warn
+    // move pre 0.4.7 otr.warn to enc.warn
     err = NULL;
     gboolean otr_warn = g_key_file_get_boolean(prefs, PREF_GROUP_UI, "otr.warn", &err);
     if (err == NULL) {
@@ -535,6 +534,8 @@ _get_group(preference_t pref)
         case PREF_OTR_LOG:
         case PREF_OTR_POLICY:
             return PREF_GROUP_OTR;
+        case PREF_PGP_LOG:
+            return PREF_GROUP_PGP;
         default:
             return NULL;
     }
@@ -659,6 +660,8 @@ _get_key(preference_t pref)
             return "inpblock.dynamic";
         case PREF_ENC_WARN:
             return "enc.warn";
+        case PREF_PGP_LOG:
+            return "log";
         default:
             return NULL;
     }
@@ -725,6 +728,8 @@ _get_default_string(preference_t pref)
             return "seconds";
         case PREF_TIME_STATUSBAR:
             return "minutes";
+        case PREF_PGP_LOG:
+            return "redact";
         default:
             return NULL;
     }

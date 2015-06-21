@@ -869,15 +869,18 @@ static struct cmd_t command_defs[] =
           NULL } } },
 
     { "/pgp",
-        cmd_pgp, parse_args, 1, 3, NULL,
-        { "/pgp keys|libver|fps|start [contact]", "Open PGP.",
-        { "/pgp keys|libver|fps|start [contact]",
-          "------------------------------------",
-          "Open PGP.",
-          "keys            : List private keys."
-          "libver          : Show which version of the libgpgme library is being used.",
-          "fps             : Show received fingerprints.",
-          "start [contact] : Start PGP encrypted chat, current contact will be used if not specified.",
+        cmd_pgp, parse_args, 1, 2, NULL,
+        { "/pgp command [args..]", "Open PGP commands.",
+        { "/pgp command [args..]",
+          "---------------------",
+          "Open PGP commands.",
+          "",
+          "keys              : List private keys."
+          "libver            : Show which version of the libgpgme library is being used.",
+          "fps               : Show received fingerprints.",
+          "start [contact]   : Start PGP encrypted chat, current contact will be used if not specified.",
+          "end               : End PGP encrypted chat with the current recipient.",
+          "log on|off|redact : OTR message logging, default: redact.",
           NULL } } },
 
     { "/otr",
@@ -1236,6 +1239,7 @@ static Autocomplete resource_ac;
 static Autocomplete inpblock_ac;
 static Autocomplete receipts_ac;
 static Autocomplete pgp_ac;
+static Autocomplete pgp_log_ac;
 
 /*
  * Initialise command autocompleter and history
@@ -1609,6 +1613,12 @@ cmd_init(void)
     autocomplete_add(pgp_ac, "libver");
     autocomplete_add(pgp_ac, "start");
     autocomplete_add(pgp_ac, "end");
+    autocomplete_add(pgp_ac, "log");
+
+    pgp_log_ac = autocomplete_new();
+    autocomplete_add(pgp_log_ac, "on");
+    autocomplete_add(pgp_log_ac, "off");
+    autocomplete_add(pgp_log_ac, "redact");
 }
 
 void
@@ -1669,6 +1679,7 @@ cmd_uninit(void)
     autocomplete_free(inpblock_ac);
     autocomplete_free(receipts_ac);
     autocomplete_free(pgp_ac);
+    autocomplete_free(pgp_log_ac);
 }
 
 gboolean
@@ -1842,6 +1853,7 @@ cmd_reset_autocomplete(ProfWin *window)
     autocomplete_reset(inpblock_ac);
     autocomplete_reset(receipts_ac);
     autocomplete_reset(pgp_ac);
+    autocomplete_reset(pgp_log_ac);
 
     if (window->type == WIN_CHAT) {
         ProfChatWin *chatwin = (ProfChatWin*)window;
@@ -2481,6 +2493,11 @@ _pgp_autocomplete(ProfWin *window, const char * const input)
     char *found = NULL;
 
     found = autocomplete_param_with_func(input, "/pgp start", roster_contact_autocomplete);
+    if (found) {
+        return found;
+    }
+
+    found = autocomplete_param_with_ac(input, "/pgp log", pgp_log_ac, TRUE);
     if (found) {
         return found;
     }

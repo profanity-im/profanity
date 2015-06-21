@@ -101,8 +101,7 @@ cl_ev_send_msg(ProfChatWin *chatwin, const char * const msg)
         }
     } else { // enc_mode = PROF_ENC_PGP
         char *id = message_send_chat_pgp(chatwin->barejid, msg);
-        // TODO pgp message logger
-        chat_log_msg_out(chatwin->barejid, msg);
+        chat_log_pgp_msg_out(chatwin->barejid, msg);
         ui_outgoing_chat_msg(chatwin, msg, id);
         free(id);
     }
@@ -135,8 +134,7 @@ cl_ev_send_msg(ProfChatWin *chatwin, const char * const msg)
         free(id);
     } else if (enc_mode == PROF_ENC_PGP) {
         char *id = message_send_chat_pgp(chatwin->barejid, msg);
-        // TODO pgp message logger
-        chat_log_msg_out(chatwin->barejid, msg);
+        chat_log_pgp_msg_out(chatwin->barejid, msg);
         ui_outgoing_chat_msg(chatwin, msg, id);
         free(id);
     }

@@ -4145,6 +4145,29 @@ cmd_pgp(ProfWin *window, gchar **args, struct cmd_help_t help)
         return TRUE;
     }
 
+    if (g_strcmp0(args[0], "log") == 0) {
+        char *choice = args[1];
+        if (g_strcmp0(choice, "on") == 0) {
+            prefs_set_string(PREF_PGP_LOG, "on");
+            cons_show("PGP messages will be logged as plaintext.");
+            if (!prefs_get_boolean(PREF_CHLOG)) {
+                cons_show("Chat logging is currently disabled, use '/chlog on' to enable.");
+            }
+        } else if (g_strcmp0(choice, "off") == 0) {
+            prefs_set_string(PREF_PGP_LOG, "off");
+            cons_show("PGP message logging disabled.");
+        } else if (g_strcmp0(choice, "redact") == 0) {
+            prefs_set_string(PREF_PGP_LOG, "redact");
+            cons_show("PGP messages will be logged as '[redacted]'.");
+            if (!prefs_get_boolean(PREF_CHLOG)) {
+                cons_show("Chat logging is currently disabled, use '/chlog on' to enable.");
+            }
+        } else {
+            cons_show("Usage: %s", help.usage);
+        }
+        return TRUE;
+    }
+
     if (g_strcmp0(args[0], "keys") == 0) {
         GSList *keys = p_gpg_list_keys();
         if (!keys) {

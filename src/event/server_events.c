@@ -209,8 +209,7 @@ sv_ev_incoming_message(char *barejid, char *resource, char *message, char *enc_m
                     win_println((ProfWin*)chatwin, "PGP encryption enabled.");
                 }
                 ui_incoming_msg(chatwin, resource, decrypted, NULL, new_win);
-                // TODO pgp message logger
-                chat_log_msg_in(barejid, decrypted);
+                chat_log_pgp_msg_in(barejid, decrypted);
                 chatwin->enc_mode = PROF_ENC_PGP;
             } else {
                 ui_incoming_msg(chatwin, resource, message, NULL, new_win);
@@ -260,8 +259,7 @@ sv_ev_incoming_message(char *barejid, char *resource, char *message, char *enc_m
         char *decrypted = p_gpg_decrypt(jid->barejid, enc_message);
         if (decrypted) {
             ui_incoming_msg(chatwin, resource, decrypted, NULL, new_win);
-            // TODO pgp message logger
-            chat_log_msg_in(barejid, decrypted);
+            chat_log_pgp_msg_in(barejid, decrypted);
             chatwin->enc_mode = PROF_ENC_PGP;
         } else {
             ui_incoming_msg(chatwin, resource, message, NULL, new_win);
