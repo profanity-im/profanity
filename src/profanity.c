@@ -280,11 +280,11 @@ _shutdown(void)
     p_gpg_close();
 #endif
     chat_log_close();
-    prefs_close();
     theme_close();
     accounts_close();
     cmd_uninit();
     log_close();
+    prefs_close();
 }
 
 static void
