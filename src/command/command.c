@@ -1308,6 +1308,7 @@ cmd_init(void)
     autocomplete_add(prefs_ac, "conn");
     autocomplete_add(prefs_ac, "presence");
     autocomplete_add(prefs_ac, "otr");
+    autocomplete_add(prefs_ac, "pgp");
 
     notify_ac = autocomplete_new();
     autocomplete_add(notify_ac, "message");

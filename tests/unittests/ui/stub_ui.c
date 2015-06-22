@@ -371,6 +371,7 @@ void cons_show_log_prefs(void) {}
 void cons_show_presence_prefs(void) {}
 void cons_show_connection_prefs(void) {}
 void cons_show_otr_prefs(void) {}
+void cons_show_pgp_prefs(void) {}
 
 void cons_show_account(ProfAccount *account)
 {
