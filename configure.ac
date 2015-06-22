@@ -189,14 +189,12 @@ elif test "x$with_xscreensaver" = x; then
 fi
 
 AM_CONDITIONAL([BUILD_PGP], [false])
-if test "x$enable_pgp" = xyes; then
+if test "x$enable_pgp" != xno; then
     AC_CHECK_LIB([gpgme], [main],
         [AM_CONDITIONAL([BUILD_PGP], [true]) LIBS="-lgpgme $LIBS" AC_DEFINE([HAVE_LIBGPGME], [1], [Have libgpgme])],
-        [AC_MSG_ERROR([libgpgme is required for profanity])])
-elif test "x$enable_pgp" = x; then
-    AC_CHECK_LIB([gpgme], [main],
-        [AM_CONDITIONAL([BUILD_PGP], [true]) LIBS="-lgpgme $LIBS" AC_DEFINE([HAVE_LIBGPGME], [1], [Have libgpgme])],
-        [AC_MSG_NOTICE([libgpgme not found, pgp support not included.])])
+        [AS_IF([test "x$enable_pgp" = xyes],
+            [AC_MSG_ERROR([libgpgme is required for pgp support])],
+            [AC_MSG_NOTICE([libgpgme not found, pgp support not enabled])])])
 fi
 
 AM_CONDITIONAL([BUILD_OTR], [false])
