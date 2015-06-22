@@ -34,6 +34,7 @@
 
 #include <assert.h>
 #include <errno.h>
+#include <fcntl.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -60,6 +61,16 @@ static log_level_t level_filter;
 static GHashTable *logs;
 static GHashTable *groupchat_logs;
 static GDateTime *session_started;
+
+enum {
+    STDERR_BUFSIZE = 4000,
+    STDERR_RETRY_NR = 5,
+};
+static int stderr_inited;
+static log_level_t stderr_level;
+static int stderr_pipe[2];
+static char *stderr_buf;
+static GString *stderr_msg;
 
 struct dated_chat_log {
     gchar *filename;
@@ -689,4 +700,96 @@ _log_string_from_level(log_level_t level)
         default:
             return "LOG";
     }
+}
+
+void
+log_stderr_handler(void)
+{
+    GString * const s = stderr_msg;
+    char * const buf = stderr_buf;
+    ssize_t size;
+    int retry = 0;
+    int i;
+
+    if (!stderr_inited)
+        return;
+
+    do {
+        size = read(stderr_pipe[0], buf, STDERR_BUFSIZE);
+        if (size == -1 && errno == EINTR && retry++ < STDERR_RETRY_NR)
+            continue;
+        if (size <= 0 || retry++ >= STDERR_RETRY_NR)
+            break;
+
+        for (i = 0; i < size; ++i) {
+            if (buf[i] == '\n') {
+                log_msg(stderr_level, "stderr", s->str);
+                g_string_assign(s, "");
+            } else
+                g_string_append_c(s, buf[i]);
+        }
+    } while (1);
+
+    if (s->len > 0 && s->str[0] != '\0') {
+        log_msg(stderr_level, "stderr", s->str);
+        g_string_assign(s, "");
+    }
+}
+
+void
+log_stderr_init(log_level_t level)
+{
+    int rc;
+    int flags;
+
+    rc = pipe(stderr_pipe);
+    if (rc != 0)
+        goto err;
+
+    flags = fcntl(stderr_pipe[0], F_GETFL);
+    rc = fcntl(stderr_pipe[0], F_SETFL, flags | O_NONBLOCK);
+    if (rc != 0)
+        goto err_close;
+
+    close(STDERR_FILENO);
+    rc = dup2(stderr_pipe[1], STDERR_FILENO);
+    if (rc < 0)
+        goto err_close;
+
+    stderr_buf = malloc(STDERR_BUFSIZE);
+    stderr_msg = g_string_sized_new(STDERR_BUFSIZE);
+    stderr_level = level;
+    stderr_inited = 1;
+
+    if (stderr_buf == NULL || stderr_msg == NULL) {
+        errno = ENOMEM;
+        goto err_free;
+    }
+    return;
+
+err_free:
+    if (stderr_msg != NULL)
+        g_string_free(stderr_msg, TRUE);
+    free(stderr_buf);
+err_close:
+    close(stderr_pipe[0]);
+    close(stderr_pipe[1]);
+err:
+    stderr_inited = 0;
+    log_error("Unable to init stderr log handler: %s", strerror(errno));
+}
+
+void
+log_stderr_close(void)
+{
+    if (!stderr_inited)
+        return;
+
+    /* handle remaining logs before close */
+    log_stderr_handler();
+    stderr_inited = 0;
+    free(stderr_buf);
+    g_string_free(stderr_msg, TRUE);
+    close(stderr_pipe[0]);
+    close(stderr_pipe[1]);
 }
