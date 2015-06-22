@@ -191,7 +191,12 @@ fi
 AM_CONDITIONAL([BUILD_PGP], [false])
 if test "x$enable_pgp" != xno; then
     AC_CHECK_LIB([gpgme], [main],
-        [AM_CONDITIONAL([BUILD_PGP], [true]) LIBS="-lgpgme $LIBS" AC_DEFINE([HAVE_LIBGPGME], [1], [Have libgpgme])],
+        [AM_CONDITIONAL([BUILD_PGP], [true])
+         AC_DEFINE([HAVE_LIBGPGME], [1], [Have libgpgme])
+         AC_PATH_PROG([GPGME_CONFIG], [gpgme-config], ["failed"])
+         AS_IF([test "x$GPGME_CONFIG" = xfailed],
+            [LIBS="-lgpgme $LIBS"],
+            [LIBS="`$GPGME_CONFIG --libs` $LIBS" CFLAGS="`$GPGME_CONFIG --cflags` $CFLAGS"])],
         [AS_IF([test "x$enable_pgp" = xyes],
             [AC_MSG_ERROR([libgpgme is required for pgp support])],
             [AC_MSG_NOTICE([libgpgme not found, pgp support not enabled])])])
