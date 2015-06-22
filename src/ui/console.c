@@ -1423,6 +1423,25 @@ cons_show_otr_prefs(void)
 }
 
 void
+cons_show_pgp_prefs(void)
+{
+    cons_show("PGP preferences:");
+    cons_show("");
+
+    char *log_value = prefs_get_string(PREF_PGP_LOG);
+    if (strcmp(log_value, "on") == 0) {
+        cons_show("PGP logging (/pgp log)   : ON");
+    } else if (strcmp(log_value, "off") == 0) {
+        cons_show("PGP logging (/pgp log)   : OFF");
+    } else {
+        cons_show("PGP logging (/pgp log)   : Redacted");
+    }
+    prefs_free_string(log_value);
+
+    cons_alert();
+}
+
+void
 cons_show_themes(GSList *themes)
 {
     cons_show("");
@@ -1457,6 +1476,8 @@ cons_prefs(void)
     cons_show_connection_prefs();
     cons_show("");
     cons_show_otr_prefs();
+    cons_show("");
+    cons_show_pgp_prefs();
     cons_show("");
 
     cons_alert();

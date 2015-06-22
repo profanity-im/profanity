@@ -905,6 +905,10 @@ cmd_prefs(ProfWin *window, gchar **args, struct cmd_help_t help)
         cons_show("");
         cons_show_otr_prefs();
         cons_show("");
+    } else if (strcmp(args[0], "pgp") == 0) {
+        cons_show("");
+        cons_show_pgp_prefs();
+        cons_show("");
     } else {
         cons_show("Usage: %s", help.usage);
     }
