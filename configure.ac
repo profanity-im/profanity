@@ -322,7 +322,7 @@ if test "x$enable_pgp" != xno; then
          AC_PATH_PROG([GPGME_CONFIG], [gpgme-config], ["failed"])
          AS_IF([test "x$GPGME_CONFIG" = xfailed],
             [LIBS="-lgpgme $LIBS"],
-            [LIBS="`$GPGME_CONFIG --libs` $LIBS" CFLAGS="`$GPGME_CONFIG --cflags` $CFLAGS"])],
+            [LIBS="`$GPGME_CONFIG --libs` $LIBS" AM_CPPFLAGS="`$GPGME_CONFIG --cflags` $AM_CPPFLAGS"])],
         [AS_IF([test "x$enable_pgp" = xyes],
             [AC_MSG_ERROR([libgpgme is required for pgp support])],
             [AC_MSG_NOTICE([libgpgme not found, pgp support not enabled])])])
