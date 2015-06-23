@@ -63,6 +63,10 @@ sv_ev_login_account_success(char *account_name)
     otr_on_connect(account);
 #endif
 
+#ifdef HAVE_LIBGPGME
+    p_gpg_on_connect(account->jid);
+#endif
+
     ui_handle_login_account_success(account);
 
     // attempt to rejoin rooms with passwords
@@ -97,6 +101,9 @@ sv_ev_lost_connection(void)
     muc_invites_clear();
     chat_sessions_clear();
     ui_disconnected();
+#ifdef HAVE_LIBGPGME
+    p_gpg_on_disconnect();
+#endif
 }
 
 void

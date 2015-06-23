@@ -869,18 +869,19 @@ static struct cmd_t command_defs[] =
           NULL } } },
 
     { "/pgp",
-        cmd_pgp, parse_args, 1, 2, NULL,
+        cmd_pgp, parse_args, 1, 3, NULL,
         { "/pgp command [args..]", "Open PGP commands.",
         { "/pgp command [args..]",
           "---------------------",
           "Open PGP commands.",
           "",
-          "keys              : List private keys.",
-          "libver            : Show which version of the libgpgme library is being used.",
-          "fps               : Show received fingerprints.",
-          "start [contact]   : Start PGP encrypted chat, current contact will be used if not specified.",
-          "end               : End PGP encrypted chat with the current recipient.",
-          "log on|off|redact : PGP message logging, default: redact.",
+          "keys                 : List all keys.",
+          "libver               : Show which version of the libgpgme library is being used.",
+          "fps                  : Show known fingerprints.",
+          "setkey contact keyid : Manually associate a key ID with a JID.",
+          "start [contact]      : Start PGP encrypted chat, current contact will be used if not specified.",
+          "end                  : End PGP encrypted chat with the current recipient.",
+          "log on|off|redact    : PGP message logging, default: redact.",
           NULL } } },
 
     { "/otr",
@@ -1611,6 +1612,7 @@ cmd_init(void)
     pgp_ac = autocomplete_new();
     autocomplete_add(pgp_ac, "keys");
     autocomplete_add(pgp_ac, "fps");
+    autocomplete_add(pgp_ac, "setkey");
     autocomplete_add(pgp_ac, "libver");
     autocomplete_add(pgp_ac, "start");
     autocomplete_add(pgp_ac, "end");
@@ -2499,6 +2501,11 @@ _pgp_autocomplete(ProfWin *window, const char * const input)
     }
 
     found = autocomplete_param_with_ac(input, "/pgp log", pgp_log_ac, TRUE);
+    if (found) {
+        return found;
+    }
+
+    found = autocomplete_param_with_func(input, "/pgp setkey", roster_barejid_autocomplete);
     if (found) {
         return found;
     }

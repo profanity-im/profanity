@@ -680,6 +680,9 @@ cmd_disconnect(ProfWin *window, gchar **args, struct cmd_help_t help)
         muc_invites_clear();
         chat_sessions_clear();
         ui_disconnected();
+#ifdef HAVE_LIBGPGME
+        p_gpg_on_disconnect();
+#endif
         free(jid);
     } else {
         cons_show("You are not currently connected.");
@@ -4192,6 +4195,35 @@ cmd_pgp(ProfWin *window, gchar **args, struct cmd_help_t help)
         return TRUE;
     }
 
+    if (g_strcmp0(args[0], "setkey") == 0) {
+        jabber_conn_status_t conn_status = jabber_get_connection_status();
+        if (conn_status != JABBER_CONNECTED) {
+            cons_show("You are not currently connected.");
+            return TRUE;
+        }
+
+        char *jid = args[1];
+        if (!args[1]) {
+            cons_show("Usage: %s", help.usage);
+            return TRUE;
+        }
+
+        char *keyid = args[2];
+        if (!args[2]) {
+            cons_show("Usage: %s", help.usage);
+            return TRUE;
+        }
+
+        gboolean res = p_gpg_addkey(jid, keyid);
+        if (!res) {
+            cons_show("Key ID not found.");
+        } else {
+            cons_show("Key %s set for %s.", keyid, jid);
+        }
+
+        return TRUE;
+    }
+
     if (g_strcmp0(args[0], "fps") == 0) {
         jabber_conn_status_t conn_status = jabber_get_connection_status();
         if (conn_status != JABBER_CONNECTED) {
@@ -4201,11 +4233,11 @@ cmd_pgp(ProfWin *window, gchar **args, struct cmd_help_t help)
         GHashTable *fingerprints = p_gpg_fingerprints();
         GList *jids = g_hash_table_get_keys(fingerprints);
         if (!jids) {
-            cons_show("No PGP fingerprints received.");
+            cons_show("No PGP fingerprints available.");
             return TRUE;
         }
 
-        cons_show("Received PGP fingerprints:");
+        cons_show("Known PGP fingerprints:");
         GList *curr = jids;
         while (curr) {
             char *jid = curr->data;
@@ -4314,6 +4346,7 @@ cmd_pgp(ProfWin *window, gchar **args, struct cmd_help_t help)
         return TRUE;
     }
 
+    cons_show("Usage: %s", help.usage);
     return TRUE;
 #else
     cons_show("This version of Profanity has not been built with PGP support enabled");
