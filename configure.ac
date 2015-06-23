@@ -11,6 +11,9 @@ AM_INIT_AUTOMAKE([foreign subdir-objects])
 ### Checks for programs.
 AC_PROG_CC
 
+## Check for LFS
+AC_SYS_LARGEFILE
+
 ### Get canonical host
 AC_CANONICAL_HOST
 PLATFORM="unknown"
