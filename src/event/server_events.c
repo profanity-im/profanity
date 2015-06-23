@@ -254,9 +254,8 @@ sv_ev_incoming_message(char *barejid, char *resource, char *message, char *enc_m
 // OTR unsupported, PGP supported
 #ifndef HAVE_LIBOTR
 #ifdef HAVE_LIBGPGME
-    prof_enc_t enc_mode = chatwin->enc_mode;
     if (enc_message) {
-        char *decrypted = p_gpg_decrypt(jid->barejid, enc_message);
+        char *decrypted = p_gpg_decrypt(barejid, enc_message);
         if (decrypted) {
             ui_incoming_msg(chatwin, resource, decrypted, NULL, new_win);
             chat_log_pgp_msg_in(barejid, decrypted);
