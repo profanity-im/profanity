@@ -241,7 +241,7 @@ AM_CONDITIONAL([THEMES_INSTALL], "$THEMES_INSTALL")
 PKG_CHECK_MODULES([cmocka], [cmocka], [],
     [AC_MSG_NOTICE([cmocka is not found, will not be able to run tests])])
 
-AC_CHECK_LIB([stabber], [stbbr_start], [],
+AC_CHECK_LIB([stabber], [stbbr_start], [LIBS="$LIBS"],
     [AC_MSG_NOTICE([stabber not found, will not be able to run functional tests])])
 
 ### Check for ncursesw/ncurses.h first, Arch linux uses ncurses.h for ncursesw
