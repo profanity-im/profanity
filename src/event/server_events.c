@@ -63,6 +63,10 @@ sv_ev_login_account_success(char *account_name)
     otr_on_connect(account);
 #endif
 
+#ifdef PROF_HAVE_LIBGPGME
+    p_gpg_on_connect(account->jid);
+#endif
+
     ui_handle_login_account_success(account);
 
     // attempt to rejoin rooms with passwords
@@ -97,6 +101,9 @@ sv_ev_lost_connection(void)
     muc_invites_clear();
     chat_sessions_clear();
     ui_disconnected();
+#ifdef HAVE_LIBGPGME
+    p_gpg_on_disconnect();
+#endif
 }
 
 void
@@ -264,9 +271,8 @@ sv_ev_incoming_message(char *barejid, char *resource, char *message, char *enc_m
 // OTR unsupported, PGP supported
 #ifndef PROF_HAVE_LIBOTR
 #ifdef PROF_HAVE_LIBGPGME
-    prof_enc_t enc_mode = chatwin->enc_mode;
     if (enc_message) {
-        char *decrypted = p_gpg_decrypt(jid->barejid, enc_message);
+        char *decrypted = p_gpg_decrypt(barejid, enc_message);
         if (decrypted) {
             ui_incoming_msg(chatwin, resource, decrypted, NULL, new_win);
             chat_log_pgp_msg_in(barejid, decrypted);

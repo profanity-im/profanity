@@ -254,7 +254,7 @@ ui_resize(void)
     resizeterm(w.ws_row, w.ws_col);
     refresh();
 
-    log_info("Resizing UI");
+    log_debug("Resizing UI");
     title_bar_resize();
     wins_resize_all();
     status_bar_resize();

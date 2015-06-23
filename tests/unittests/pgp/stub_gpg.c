@@ -38,3 +38,12 @@ char * p_gpg_decrypt(const char * const barejid, const char * const cipher)
 {
     return NULL;
 }
+
+void p_gpg_on_connect(const char * const barejid) {}
+void p_gpg_on_disconnect(void) {}
+
+gboolean p_gpg_addkey(const char * const jid, const char * const keyid)
+{
+    return TRUE;
+}
+

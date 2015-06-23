@@ -35,12 +35,16 @@
 #include <locale.h>
 #include <string.h>
 #include <stdlib.h>
+#include <errno.h>
+#include <sys/stat.h>
 
 #include <glib.h>
+#include <glib/gstdio.h>
 #include <gpgme.h>
 
 #include "pgp/gpg.h"
 #include "log.h"
+#include "common.h"
 
 #define PGP_SIGNATURE_HEADER "-----BEGIN PGP SIGNATURE-----"
 #define PGP_SIGNATURE_FOOTER "-----END PGP SIGNATURE-----"
@@ -50,8 +54,12 @@
 static const char *libversion;
 static GHashTable *fingerprints;
 
+static gchar *fpsloc;
+static GKeyFile *fpskeyfile;
+
 static char* _remove_header_footer(char *str, const char * const footer);
 static char* _add_header_footer(const char * const str, const char * const header, const char * const footer);
+static void _save_fps(void);
 
 void
 p_gpg_init(void)
@@ -67,6 +75,135 @@ void
 p_gpg_close(void)
 {
     g_hash_table_destroy(fingerprints);
+    fingerprints = NULL;
+
+    g_key_file_free(fpskeyfile);
+    fpskeyfile = NULL;
+
+    free(fpsloc);
+    fpsloc = NULL;
+}
+
+void
+p_gpg_on_connect(const char * const barejid)
+{
+    gchar *data_home = xdg_get_data_home();
+    GString *fpsfile = g_string_new(data_home);
+    free(data_home);
+
+    gchar *account_dir = str_replace(barejid, "@", "_at_");
+    g_string_append(fpsfile, "/profanity/pgp/");
+    g_string_append(fpsfile, account_dir);
+    free(account_dir);
+
+    // mkdir if doesn't exist for account
+    errno = 0;
+    int res = g_mkdir_with_parents(fpsfile->str, S_IRWXU);
+    if (res == -1) {
+        char *errmsg = strerror(errno);
+        if (errmsg) {
+            log_error("Error creating directory: %s, %s", fpsfile->str, errmsg);
+        } else {
+            log_error("Error creating directory: %s", fpsfile->str);
+        }
+    }
+
+    // create or read fingerprints keyfile
+    g_string_append(fpsfile, "/fingerprints");
+    fpsloc = fpsfile->str;
+    g_string_free(fpsfile, FALSE);
+
+    if (g_file_test(fpsloc, G_FILE_TEST_EXISTS)) {
+        g_chmod(fpsloc, S_IRUSR | S_IWUSR);
+    }
+
+    fpskeyfile = g_key_file_new();
+    g_key_file_load_from_file(fpskeyfile, fpsloc, G_KEY_FILE_KEEP_COMMENTS, NULL);
+
+    // load each keyid
+    gsize len = 0;
+    gchar **jids = g_key_file_get_groups(fpskeyfile, &len);
+
+    gpgme_ctx_t ctx;
+    gpgme_error_t error = gpgme_new(&ctx);
+    if (error) {
+        log_error("GPG: Failed to create gpgme context. %s %s", gpgme_strsource(error), gpgme_strerror(error));
+        g_strfreev(jids);
+        return;
+    }
+
+    int i = 0;
+    for (i = 0; i < len; i++) {
+        GError *gerr = NULL;
+        gchar *jid = jids[i];
+        gchar *keyid = g_key_file_get_string(fpskeyfile, jid, "keyid", &gerr);
+        if (gerr) {
+            log_error("Error loading PGP key id for %s", jid);
+            g_error_free(gerr);
+        } else {
+            gpgme_key_t key = NULL;
+            error = gpgme_get_key(ctx, keyid, &key, 1);
+            if (error || key == NULL) {
+                log_error("GPG: Failed to get key. %s %s", gpgme_strsource(error), gpgme_strerror(error));
+                continue;
+            }
+
+            g_hash_table_replace(fingerprints, strdup(jid), strdup(key->subkeys->fpr));
+            gpgme_key_release(key);
+        }
+    }
+
+    gpgme_release(ctx);
+    g_strfreev(jids);
+
+    _save_fps();
+}
+
+void
+p_gpg_on_disconnect(void)
+{
+    if (fingerprints) {
+        g_hash_table_destroy(fingerprints);
+        fingerprints = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, g_free);
+    }
+
+    if (fpskeyfile) {
+        g_key_file_free(fpskeyfile);
+        fpskeyfile = NULL;
+    }
+
+    if (fpsloc) {
+        free(fpsloc);
+        fpsloc = NULL;
+    }
+}
+
+gboolean
+p_gpg_addkey(const char * const jid, const char * const keyid)
+{
+    gpgme_ctx_t ctx;
+    gpgme_error_t error = gpgme_new(&ctx);
+    if (error) {
+        log_error("GPG: Failed to create gpgme context. %s %s", gpgme_strsource(error), gpgme_strerror(error));
+        return FALSE;
+    }
+
+    gpgme_key_t key = NULL;
+    error = gpgme_get_key(ctx, keyid, &key, 1);
+    if (error || key == NULL) {
+        log_error("GPG: Failed to get key. %s %s", gpgme_strsource(error), gpgme_strerror(error));
+        return FALSE;
+    }
+
+    // save to ID keyfile
+    g_key_file_set_string(fpskeyfile, jid, "keyid", keyid);
+    _save_fps();
+
+    // update in memory fingerprint list
+    g_hash_table_replace(fingerprints, strdup(jid), strdup(key->subkeys->fpr));
+    gpgme_key_release(key);
+
+    return TRUE;
 }
 
 GSList *
@@ -377,4 +514,14 @@ _add_header_footer(const char * const str, const char * const header, const char
     g_string_free(result_str, FALSE);
 
     return result;
+}
+
+static void
+_save_fps(void)
+{
+    gsize g_data_size;
+    gchar *g_fps_data = g_key_file_to_data(fpskeyfile, &g_data_size, NULL);
+    g_file_set_contents(fpsloc, g_fps_data, g_data_size, NULL);
+    g_chmod(fpsloc, S_IRUSR | S_IWUSR);
+    g_free(g_fps_data);
 }
