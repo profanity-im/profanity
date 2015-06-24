@@ -446,7 +446,11 @@ cmd_account(ProfWin *window, gchar **args, struct cmd_help_t help)
                     }
                 } else if (strcmp(property, "resource") == 0) {
                     accounts_set_resource(account_name, value);
-                    cons_show("Updated resource for account %s: %s", account_name, value);
+                    if (jabber_get_connection_status() == JABBER_CONNECTED) {
+                        cons_show("Updated resource for account %s: %s, you will need to reconnect to pick up the change.", account_name, value);
+                    } else {
+                        cons_show("Updated resource for account %s: %s", account_name, value);
+                    }
                     cons_show("");
                 } else if (strcmp(property, "password") == 0) {
                     if(accounts_get_account(account_name)->eval_password) {
