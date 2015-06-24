@@ -84,10 +84,8 @@ p_gpg_close(void)
         fpskeyfile = NULL;
     }
 
-    if (fpsloc) {
-        free(fpsloc);
-        fpsloc = NULL;
-    }
+    free(fpsloc);
+    fpsloc = NULL;
 }
 
 void
@@ -178,10 +176,8 @@ p_gpg_on_disconnect(void)
         fpskeyfile = NULL;
     }
 
-    if (fpsloc) {
-        free(fpsloc);
-        fpsloc = NULL;
-    }
+    free(fpsloc);
+    fpsloc = NULL;
 }
 
 gboolean
