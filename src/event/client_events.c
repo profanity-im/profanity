@@ -75,6 +75,7 @@ cl_ev_presence_send(const resource_presence_t presence_type, const char * const 
     if (account->pgp_keyid) {
         signed_status = p_gpg_sign(msg, account->pgp_keyid);
     }
+    account_free(account);
 #endif
 
     presence_send(presence_type, msg, idle, signed_status);
