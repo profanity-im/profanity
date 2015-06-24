@@ -164,7 +164,7 @@ prefs_get_string(preference_t pref)
 
     if (result == NULL) {
         if (def) {
-            return strdup(def);
+            return g_strdup(def);
         } else {
             return NULL;
         }
@@ -177,7 +177,7 @@ void
 prefs_free_string(char *pref)
 {
     if (pref) {
-        free(pref);
+        g_free(pref);
     }
     pref = NULL;
 }
