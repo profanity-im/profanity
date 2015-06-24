@@ -91,6 +91,7 @@ jid_create(const gchar * const str)
         char *barejidraw = g_utf8_substring(trimmed, 0, g_utf8_pointer_to_offset(trimmed, slashp));
         result->barejid = g_utf8_strdown(barejidraw, -1);
         result->fulljid = g_strdup(trimmed);
+        g_free(barejidraw);
     } else {
         result->domainpart = g_strdup(domain_start);
         result->barejid = g_utf8_strdown(trimmed, -1);
