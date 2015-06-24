@@ -92,6 +92,7 @@ prof_run(const int disable_tls, char *log_level, char *account_name)
 
     char *line = NULL;
     while(cont) {
+        log_stderr_handler();
         _check_autoaway();
 
         line = ui_readline();
@@ -229,6 +230,7 @@ _init(const int disable_tls, char *log_level)
     log_level_t prof_log_level = log_level_from_string(log_level);
     prefs_load();
     log_init(prof_log_level);
+    log_stderr_init(PROF_LEVEL_ERROR);
     if (strcmp(PROF_PACKAGE_STATUS, "development") == 0) {
 #ifdef PROF_HAVE_GIT_VERSION
             log_info("Starting Profanity (%sdev.%s.%s)...", PROF_PACKAGE_VERSION, PROF_GIT_BRANCH, PROF_GIT_REVISION);
@@ -289,6 +291,7 @@ _shutdown(void)
     theme_close();
     accounts_close();
     cmd_uninit();
+    log_stderr_close();
     log_close();
     plugins_shutdown();
     prefs_close();
