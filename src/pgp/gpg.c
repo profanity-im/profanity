@@ -77,8 +77,10 @@ p_gpg_close(void)
     g_hash_table_destroy(fingerprints);
     fingerprints = NULL;
 
-    g_key_file_free(fpskeyfile);
-    fpskeyfile = NULL;
+    if (fpskeyfile) {
+        g_key_file_free(fpskeyfile);
+        fpskeyfile = NULL;
+    }
 
     free(fpsloc);
     fpsloc = NULL;
