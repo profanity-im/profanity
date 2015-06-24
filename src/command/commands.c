@@ -238,6 +238,7 @@ cmd_connect(ProfWin *window, gchar **args, struct cmd_help_t help)
         }
 
         jid = account_create_full_jid(account);
+        account_free(account);
 
     // connect with JID
     } else {
