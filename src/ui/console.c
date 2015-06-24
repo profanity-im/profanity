@@ -1043,6 +1043,7 @@ cons_roster_setting(void)
 
     char *by = prefs_get_string(PREF_ROSTER_BY);
     cons_show("Roster by (/roster)           : %s", by);
+    prefs_free_string(by);
 
     int size = prefs_get_roster_size();
     cons_show("Roster size (/roster)         : %d", size);

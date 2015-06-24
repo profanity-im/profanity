@@ -136,6 +136,7 @@ status_bar_resize(void)
         } else {
             mvwprintw(status_bar, 0, 1, message);
         }
+        prefs_free_string(time_pref);
     }
     if (last_time) {
         g_date_time_unref(last_time);
@@ -310,6 +311,7 @@ status_bar_print_message(const char * const msg)
     } else {
         mvwprintw(status_bar, 0, 1, message);
     }
+    prefs_free_string(time_pref);
 
     int cols = getmaxx(stdscr);
     int bracket_attrs = theme_attrs(THEME_STATUS_BRACKET);
@@ -459,6 +461,7 @@ _status_bar_draw(void)
         wattroff(status_bar, bracket_attrs);
         g_free(date_fmt);
     }
+    prefs_free_string(time_pref);
 
     _update_win_statuses();
     wnoutrefresh(status_bar);
