@@ -234,6 +234,7 @@ cmd_connect(ProfWin *window, gchar **args, struct cmd_help_t help)
             } else {
                 cons_show("Error evaluating password, see logs for details.");
                 g_free(lower);
+                account_free(account);
                 return TRUE;
             }
 
@@ -246,6 +247,7 @@ cmd_connect(ProfWin *window, gchar **args, struct cmd_help_t help)
         }
 
         jid = account_create_full_jid(account);
+        account_free(account);
 
     // connect with JID
     } else {
@@ -2186,6 +2188,7 @@ cmd_join(ProfWin *window, gchar **args, struct cmd_help_t help)
     if (!parsed) {
         cons_show("Usage: %s", help.usage);
         cons_show("");
+        jid_destroy(room_arg);
         return TRUE;
     }
 

@@ -442,6 +442,7 @@ _inp_rl_tab_handler(int count, int key)
         if (result) {
             rl_replace_line(result, 0);
             rl_point = rl_end;
+            free(result);
         }
     } else if (strncmp(rl_line_buffer, "/", 1) == 0) {
         ProfWin *window = wins_get_current();

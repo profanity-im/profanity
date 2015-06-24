@@ -170,6 +170,7 @@ message_send_chat_pgp(const char * const barejid, const char * const msg)
         } else {
             message = stanza_create_message(ctx, id, jid, STANZA_TYPE_CHAT, msg);
         }
+        jid_destroy(jidp);
     } else {
         message = stanza_create_message(ctx, id, jid, STANZA_TYPE_CHAT, msg);
     }
@@ -449,6 +450,7 @@ _conference_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, void
     // XEP-0249
     char *room = xmpp_stanza_get_attribute(xns_conference, STANZA_ATTR_JID);
     if (!room) {
+        jid_destroy(jidp);
         return 1;
     }
 
@@ -754,6 +756,7 @@ _chat_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, void * con
     // private message from chat room use full jid (room/nick)
     if (muc_active(jid->barejid)) {
         _private_chat_handler(stanza, jid->fulljid);
+        jid_destroy(jid);
         return 1;
     }
 
