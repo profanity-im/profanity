@@ -246,15 +246,8 @@ inp_get_password(void)
     get_password = TRUE;
     while (!password) {
         password = inp_readline();
-        ui_update();
-        werase(inp_win);
-        wmove(inp_win, 0, 0);
-        pad_start = 0;
-        _inp_win_update_virtual();
-        doupdate();
     }
     get_password = FALSE;
-
     status_bar_clear();
     return password;
 }
