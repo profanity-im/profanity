@@ -366,6 +366,7 @@ _jabber_connect(const char * const fulljid, const char * const passwd,
     } else if (jid->fulljid == NULL) {
         log_error("Full JID required to connect, received: %s", fulljid);
         jabber_conn.conn_status = JABBER_DISCONNECTED;
+        jid_destroy(jid);
         return jabber_conn.conn_status;
     }
 

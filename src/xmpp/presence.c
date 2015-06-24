@@ -670,6 +670,7 @@ _muc_user_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, void *
     // invalid from attribute
     Jid *from_jid = jid_create(from);
     if (from_jid == NULL || from_jid->resourcepart == NULL) {
+        jid_destroy(from_jid);
         return 1;
     }
 

@@ -411,6 +411,8 @@ accounts_set_jid(const char * const account_name, const char * const value)
 
             _save_accounts();
         }
+
+        jid_destroy(jid);
     }
 }
 
