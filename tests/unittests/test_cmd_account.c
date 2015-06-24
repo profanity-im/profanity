@@ -458,6 +458,8 @@ void cmd_account_set_resource_sets_resource(void **state)
     CommandHelp *help = malloc(sizeof(CommandHelp));
     gchar *args[] = { "set", "a_account", "resource", "a_resource", NULL };
 
+    will_return(jabber_get_connection_status, JABBER_DISCONNECTED);
+
     expect_any(accounts_account_exists, account_name);
     will_return(accounts_account_exists, TRUE);
 
@@ -465,6 +467,28 @@ void cmd_account_set_resource_sets_resource(void **state)
     expect_string(accounts_set_resource, value, "a_resource");
 
     expect_cons_show("Updated resource for account a_account: a_resource");
+    expect_cons_show("");
+
+    gboolean result = cmd_account(NULL, args, *help);
+    assert_true(result);
+
+    free(help);
+}
+
+void cmd_account_set_resource_sets_resource_with_online_message(void **state)
+{
+    CommandHelp *help = malloc(sizeof(CommandHelp));
+    gchar *args[] = { "set", "a_account", "resource", "a_resource", NULL };
+
+    will_return(jabber_get_connection_status, JABBER_CONNECTED);
+
+    expect_any(accounts_account_exists, account_name);
+    will_return(accounts_account_exists, TRUE);
+
+    expect_string(accounts_set_resource, account_name, "a_account");
+    expect_string(accounts_set_resource, value, "a_resource");
+
+    expect_cons_show("Updated resource for account a_account: a_resource, you will need to reconnect to pick up the change.");
     expect_cons_show("");
 
     gboolean result = cmd_account(NULL, args, *help);

@@ -325,6 +325,7 @@ int main(int argc, char* argv[]) {
         unit_test(cmd_account_set_jid_sets_resource),
         unit_test(cmd_account_set_server_sets_server),
         unit_test(cmd_account_set_resource_sets_resource),
+        unit_test(cmd_account_set_resource_sets_resource_with_online_message),
         unit_test(cmd_account_set_password_sets_password),
         unit_test(cmd_account_set_eval_password_sets_eval_password),
         unit_test(cmd_account_set_password_when_eval_password_set),

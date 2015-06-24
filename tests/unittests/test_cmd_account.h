@@ -25,6 +25,7 @@ void cmd_account_set_jid_sets_barejid(void **state);
 void cmd_account_set_jid_sets_resource(void **state);
 void cmd_account_set_server_sets_server(void **state);
 void cmd_account_set_resource_sets_resource(void **state);
+void cmd_account_set_resource_sets_resource_with_online_message(void **state);
 void cmd_account_set_password_sets_password(void **state);
 void cmd_account_set_eval_password_sets_eval_password(void **state);
 void cmd_account_set_password_when_eval_password_set(void **state);
