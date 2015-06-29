@@ -416,7 +416,7 @@ ui_message_receipt(const char * const barejid, const char * const id)
 }
 
 void
-ui_incoming_msg(ProfChatWin *chatwin, const char * const resource, const char * const message, GTimeVal *tv_stamp, gboolean win_created)
+ui_incoming_msg(ProfChatWin *chatwin, const char * const resource, const char * const message, GDateTime *timestamp, gboolean win_created)
 {
     ProfWin *window = (ProfWin*)chatwin;
     int num = wins_get_num(window);
@@ -425,7 +425,7 @@ ui_incoming_msg(ProfChatWin *chatwin, const char * const resource, const char * 
 
     // currently viewing chat window with sender
     if (wins_is_current(window)) {
-        win_print_incoming_message(window, tv_stamp, display_name, message);
+        win_print_incoming_message(window, timestamp, display_name, message);
         title_bar_set_typing(FALSE);
         status_bar_active(num);
 
@@ -444,14 +444,14 @@ ui_incoming_msg(ProfChatWin *chatwin, const char * const resource, const char * 
         }
 
         // show users status first, when receiving message via delayed delivery
-        if (tv_stamp && win_created) {
+        if (timestamp && win_created) {
             PContact pcontact = roster_get_contact(chatwin->barejid);
             if (pcontact) {
                 win_show_contact(window, pcontact);
             }
         }
 
-        win_print_incoming_message(window, tv_stamp, display_name, message);
+        win_print_incoming_message(window, timestamp, display_name, message);
     }
 
     if (prefs_get_boolean(PREF_BEEP)) {
@@ -466,7 +466,7 @@ ui_incoming_msg(ProfChatWin *chatwin, const char * const resource, const char * 
 }
 
 void
-ui_incoming_private_msg(const char * const fulljid, const char * const message, GTimeVal *tv_stamp)
+ui_incoming_private_msg(const char * const fulljid, const char * const message, GDateTime *timestamp)
 {
     char *display_from = NULL;
     display_from = get_nick_from_full_jid(fulljid);
@@ -482,7 +482,7 @@ ui_incoming_private_msg(const char * const fulljid, const char * const message, 
 
     // currently viewing chat window with sender
     if (wins_is_current(window)) {
-        win_print_incoming_message(window, tv_stamp, display_from, message);
+        win_print_incoming_message(window, timestamp, display_from, message);
         title_bar_set_typing(FALSE);
         status_bar_active(num);
 
@@ -491,7 +491,7 @@ ui_incoming_private_msg(const char * const fulljid, const char * const message, 
         privatewin->unread++;
         status_bar_new(num);
         cons_show_incoming_message(display_from, num);
-        win_print_incoming_message(window, tv_stamp, display_from, message);
+        win_print_incoming_message(window, timestamp, display_from, message);
 
         if (prefs_get_boolean(PREF_FLASH)) {
             flash();
@@ -1665,7 +1665,7 @@ ui_room_nick_change(const char * const roomjid, const char * const nick)
 
 void
 ui_room_history(const char * const roomjid, const char * const nick,
-    GTimeVal tv_stamp, const char * const message)
+    GDateTime *timestamp, const char * const message)
 {
     ProfWin *window = (ProfWin*)wins_get_muc(roomjid);
     if (window == NULL) {
@@ -1684,7 +1684,7 @@ ui_room_history(const char * const roomjid, const char * const nick,
             g_string_append(line, message);
         }
 
-        win_print(window, '-', &tv_stamp, NO_COLOUR_DATE, 0, "", line->str);
+        win_print(window, '-', timestamp, NO_COLOUR_DATE, 0, "", line->str);
         g_string_free(line, TRUE);
     }
 }
@@ -2808,11 +2808,9 @@ _win_show_history(ProfChatWin *chatwin, const char * const contact)
                 char hh[3]; memcpy(hh, &line[0], 2); hh[2] = '\0'; int ihh = atoi(hh);
                 char mm[3]; memcpy(mm, &line[3], 2); mm[2] = '\0'; int imm = atoi(mm);
                 char ss[3]; memcpy(ss, &line[6], 2); ss[2] = '\0'; int iss = atoi(ss);
-                GDateTime *time = g_date_time_new_local(2000, 1, 1, ihh, imm, iss);
-                GTimeVal tv;
-                g_date_time_to_timeval(time, &tv);
-                win_print((ProfWin*)chatwin, '-', &tv, NO_COLOUR_DATE, 0, "", curr->data+11);
-                g_date_time_unref(time);
+                GDateTime *timestamp = g_date_time_new_local(2000, 1, 1, ihh, imm, iss);
+                win_print((ProfWin*)chatwin, '-', timestamp, NO_COLOUR_DATE, 0, "", curr->data+11);
+                g_date_time_unref(timestamp);
             // header
             } else {
                 win_print((ProfWin*)chatwin, '-', NULL, 0, 0, "", curr->data);

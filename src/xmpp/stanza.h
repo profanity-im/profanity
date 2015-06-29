@@ -223,7 +223,7 @@ xmpp_stanza_t* stanza_create_mediated_invite(xmpp_ctx_t *ctx, const char * const
 
 gboolean stanza_contains_chat_state(xmpp_stanza_t *stanza);
 
-gboolean stanza_get_delay(xmpp_stanza_t * const stanza, GTimeVal *tv_stamp);
+GDateTime* stanza_get_delay(xmpp_stanza_t * const stanza);
 
 gboolean stanza_is_muc_presence(xmpp_stanza_t * const stanza);
 gboolean stanza_is_muc_self_presence(xmpp_stanza_t * const stanza,

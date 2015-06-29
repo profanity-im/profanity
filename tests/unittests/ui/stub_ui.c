@@ -179,10 +179,10 @@ void ui_contact_online(char *barejid, Resource *resource, GDateTime *last_activi
 }
 
 void ui_contact_typing(const char * const barejid, const char * const resource) {}
-void ui_incoming_msg(ProfChatWin *chatwin, const char * const resource, const char * const message, GTimeVal *tv_stamp, gboolean win_created) {}
+void ui_incoming_msg(ProfChatWin *chatwin, const char * const resource, const char * const message, GDateTime *timestamp, gboolean win_created) {}
 void ui_message_receipt(const char * const barejid, const char * const id) {}
 
-void ui_incoming_private_msg(const char * const fulljid, const char * const message, GTimeVal *tv_stamp) {}
+void ui_incoming_private_msg(const char * const fulljid, const char * const message, GDateTime *timestamp) {}
 
 void ui_disconnected(void) {}
 void ui_recipient_gone(const char * const barejid, const char * const resource) {}
@@ -208,7 +208,7 @@ void ui_room_occupant_role_and_affiliation_change(const char * const roomjid, co
     const char * const affiliation, const char * const actor, const char * const reason) {}
 void ui_room_roster(const char * const roomjid, GList *occupants, const char * const presence) {}
 void ui_room_history(const char * const roomjid, const char * const nick,
-    GTimeVal tv_stamp, const char * const message) {}
+    GDateTime *timestamp, const char * const message) {}
 void ui_room_message(const char * const roomjid, const char * const nick,
     const char * const message) {}
 void ui_room_subject(const char * const roomjid, const char * const nick, const char * const subject) {}
@@ -531,8 +531,8 @@ void win_hide_subwin(ProfWin *window) {}
 void win_show_subwin(ProfWin *window) {}
 void win_refresh_without_subwin(ProfWin *window) {}
 void win_refresh_with_subwin(ProfWin *window) {}
-void win_print(ProfWin *window, const char show_char, GTimeVal *tstamp, int flags, theme_item_t theme_item, const char * const from, const char * const message) {}
-void win_vprint(ProfWin *window, const char show_char, GTimeVal *tstamp, int flags, theme_item_t theme_item, const char * const from, const char * const message, ...) {}
+void win_print(ProfWin *window, const char show_char, GDateTime *timestamp, int flags, theme_item_t theme_item, const char * const from, const char * const message) {}
+void win_vprint(ProfWin *window, const char show_char, GDateTime *timestamp, int flags, theme_item_t theme_item, const char * const from, const char * const message, ...) {}
 char* win_get_title(ProfWin *window)
 {
     return NULL;
