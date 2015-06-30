@@ -562,6 +562,7 @@ _groupchat_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, void 
     GDateTime *timestamp = stanza_get_delay(stanza);
     if (timestamp) {
         sv_ev_room_history(jid->barejid, jid->resourcepart, timestamp, message);
+        g_date_time_unref(timestamp);
     } else {
         sv_ev_room_message(jid->barejid, jid->resourcepart, message);
     }
@@ -665,6 +666,7 @@ _private_chat_handler(xmpp_stanza_t * const stanza, const char * const fulljid)
     GDateTime *timestamp = stanza_get_delay(stanza);
     if (timestamp) {
         sv_ev_delayed_private_message(fulljid, message, timestamp);
+        g_date_time_unref(timestamp);
     } else {
         sv_ev_incoming_private_message(fulljid, message);
     }
@@ -803,6 +805,7 @@ _chat_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, void * con
         }
     }
 
+    if (timestamp) g_date_time_unref(timestamp);
     jid_destroy(jid);
     return 1;
 }

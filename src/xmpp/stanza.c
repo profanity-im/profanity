@@ -995,6 +995,7 @@ stanza_get_delay(xmpp_stanza_t * const stanza)
             if (stamp && (g_time_val_from_iso8601(stamp, &utc_stamp))) {
                 GDateTime *utc_datetime = g_date_time_new_from_timeval_utc(&utc_stamp);
                 GDateTime *local_datetime = g_date_time_to_local(utc_datetime);
+                g_date_time_unref(utc_datetime);
                 return local_datetime;
             }
         }
@@ -1010,6 +1011,7 @@ stanza_get_delay(xmpp_stanza_t * const stanza)
             if (stamp && (g_time_val_from_iso8601(stamp, &utc_stamp))) {
                 GDateTime *utc_datetime = g_date_time_new_from_timeval_utc(&utc_stamp);
                 GDateTime *local_datetime = g_date_time_to_local(utc_datetime);
+                g_date_time_unref(utc_datetime);
                 return local_datetime;
             }
         }
