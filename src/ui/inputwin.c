@@ -159,7 +159,9 @@ inp_readline(void)
         }
 
         ui_reset_idle_time();
-        _inp_write(rl_line_buffer, rl_point);
+        if (!get_password) {
+            _inp_write(rl_line_buffer, rl_point);
+        }
         inp_nonblocking(TRUE);
     } else {
         inp_nonblocking(FALSE);
