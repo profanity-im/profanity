@@ -55,6 +55,7 @@ flash=
 splash=
 wrap=
 time=
+time.statusbar=
 privileges=
 presence=
 intype=
