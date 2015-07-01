@@ -213,6 +213,8 @@ message_send_chat_otr(const char * const barejid, const char * const msg)
     }
 
     stanza_attach_carbons_private(ctx, message);
+    stanza_attach_hints_no_copy(ctx, message);
+    stanza_attach_hints_no_store(ctx, message);
 
     if (prefs_get_boolean(PREF_RECEIPTS_REQUEST)) {
         stanza_attach_receipt_request(ctx, message);
