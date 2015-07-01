@@ -36,6 +36,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 #include <assert.h>
 #include <wchar.h>
 
@@ -60,7 +61,7 @@
 
 static void _win_print(ProfWin *window, const char show_char, GDateTime *time,
     int flags, theme_item_t theme_item, const char * const from, const char * const message, DeliveryReceipt *receipt);
-static void _win_print_wrapped(WINDOW *win, const char * const message);
+static void _win_print_wrapped(WINDOW *win, const char * const message, size_t indent);
 
 int
 win_roster_cols(void)
@@ -941,14 +942,14 @@ win_show_status_string(ProfWin *window, const char * const from,
 }
 
 void
-win_print_incoming_message(ProfWin *window, GTimeVal *tv_stamp,
+win_print_incoming_message(ProfWin *window, GDateTime *timestamp,
     const char * const from, const char * const message)
 {
     switch (window->type)
     {
         case WIN_CHAT:
         case WIN_PRIVATE:
-            win_print(window, '-', tv_stamp, NO_ME, THEME_TEXT_THEM, from, message);
+            win_print(window, '-', timestamp, NO_ME, THEME_TEXT_THEM, from, message);
             break;
         default:
             assert(FALSE);
@@ -957,31 +958,25 @@ win_print_incoming_message(ProfWin *window, GTimeVal *tv_stamp,
 }
 
 void
-win_vprint(ProfWin *window, const char show_char, GTimeVal *tstamp,
+win_vprint(ProfWin *window, const char show_char, GDateTime *timestamp,
     int flags, theme_item_t theme_item, const char * const from, const char * const message, ...)
 {
     va_list arg;
     va_start(arg, message);
     GString *fmt_msg = g_string_new(NULL);
     g_string_vprintf(fmt_msg, message, arg);
-    win_print(window, show_char, tstamp, flags, theme_item, from, fmt_msg->str);
+    win_print(window, show_char, timestamp, flags, theme_item, from, fmt_msg->str);
     g_string_free(fmt_msg, TRUE);
 }
 
 void
-win_print(ProfWin *window, const char show_char, GTimeVal *tstamp,
+win_print(ProfWin *window, const char show_char, GDateTime *timestamp,
     int flags, theme_item_t theme_item, const char * const from, const char * const message)
 {
-    GDateTime *time;
+    if (timestamp == NULL) timestamp = g_date_time_new_now_local();
 
-    if (tstamp == NULL) {
-        time = g_date_time_new_now_local();
-    } else {
-        time = g_date_time_new_from_timeval_utc(tstamp);
-    }
-
-    buffer_push(window->layout->buffer, show_char, time, flags, theme_item, from, message, NULL);
-    _win_print(window, show_char, time, flags, theme_item, from, message, NULL);
+    buffer_push(window->layout->buffer, show_char, timestamp, flags, theme_item, from, message, NULL);
+    _win_print(window, show_char, timestamp, flags, theme_item, from, message, NULL);
     // TODO: cross-reference.. this should be replaced by a real event-based system
     ui_input_nonblocking(TRUE);
 }
@@ -1041,18 +1036,20 @@ _win_print(ProfWin *window, const char show_char, GDateTime *time,
     gboolean me_message = FALSE;
     int offset = 0;
     int colour = theme_attrs(THEME_ME);
+    size_t indent = 0;
+
+    gchar *date_fmt = NULL;
+    char *time_pref = prefs_get_string(PREF_TIME);
+    date_fmt = g_date_time_format(time, time_pref);
+    free(time_pref);
+    assert(date_fmt != NULL);
+
+    if(strlen(date_fmt) != 0){
+        indent = 3 + strlen(date_fmt);
+    }
 
     if ((flags & NO_DATE) == 0) {
-        gchar *date_fmt = NULL;
-        char *time_pref = prefs_get_string(PREF_TIME);
-        if (g_strcmp0(time_pref, "minutes") == 0) {
-            date_fmt = g_date_time_format(time, "%H:%M");
-        } else if (g_strcmp0(time_pref, "seconds") == 0) {
-            date_fmt = g_date_time_format(time, "%H:%M:%S");
-        }
-        free(time_pref);
-
-        if (date_fmt) {
+        if (date_fmt && strlen(date_fmt)) {
             if ((flags & NO_COLOUR_DATE) == 0) {
                 wattron(window->layout->win, theme_attrs(THEME_TIME));
             }
@@ -1097,7 +1094,7 @@ _win_print(ProfWin *window, const char show_char, GDateTime *time,
     }
 
     if (prefs_get_boolean(PREF_WRAP)) {
-        _win_print_wrapped(window->layout->win, message+offset);
+        _win_print_wrapped(window->layout->win, message+offset, indent);
     } else {
         wprintw(window->layout->win, "%s", message+offset);
     }
@@ -1127,19 +1124,10 @@ _win_indent(WINDOW *win, int size)
 }
 
 static void
-_win_print_wrapped(WINDOW *win, const char * const message)
+_win_print_wrapped(WINDOW *win, const char * const message, size_t indent)
 {
     int wordi = 0;
     char *word = malloc(strlen(message) + 1);
-
-    char *time_pref = prefs_get_string(PREF_TIME);
-    int indent = 0;
-    if (g_strcmp0(time_pref, "minutes") == 0) {
-        indent = 8;
-    } else if (g_strcmp0(time_pref, "seconds") == 0) {
-        indent = 11;
-    }
-    free(time_pref);
 
     gchar *curr_ch = g_utf8_offset_to_pointer(message, 0);
 

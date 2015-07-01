@@ -129,10 +129,14 @@ status_bar_resize(void)
 
     if (message) {
         char *time_pref = prefs_get_string(PREF_TIME_STATUSBAR);
-        if (g_strcmp0(time_pref, "minutes") == 0) {
-            mvwprintw(status_bar, 0, 10, message);
-        } else if (g_strcmp0(time_pref, "seconds") == 0) {
-            mvwprintw(status_bar, 0, 13, message);
+        gchar *date_fmt = g_date_time_format(last_time, time_pref);
+        assert(date_fmt != NULL);
+        size_t len = strlen(date_fmt);
+        g_free(date_fmt);
+        if (g_strcmp0(time_pref, "") != 0) {
+            /* 01234567890123456
+             *  [HH:MM]  message */
+            mvwprintw(status_bar, 0, 5 + len, message);
         } else {
             mvwprintw(status_bar, 0, 1, message);
         }
@@ -304,10 +308,12 @@ status_bar_print_message(const char * const msg)
     message = strdup(msg);
 
     char *time_pref = prefs_get_string(PREF_TIME_STATUSBAR);
-    if (g_strcmp0(time_pref, "minutes") == 0) {
-        mvwprintw(status_bar, 0, 10, message);
-    } else if (g_strcmp0(time_pref, "seconds") == 0) {
-        mvwprintw(status_bar, 0, 13, message);
+    gchar *date_fmt = g_date_time_format(last_time, time_pref);
+    assert(date_fmt != NULL);
+    size_t len = strlen(date_fmt);
+    g_free(date_fmt);
+    if (g_strcmp0(time_pref, "") != 0) {
+        mvwprintw(status_bar, 0, 5 + len, message);
     } else {
         mvwprintw(status_bar, 0, 1, message);
     }
@@ -438,26 +444,16 @@ _status_bar_draw(void)
     int bracket_attrs = theme_attrs(THEME_STATUS_BRACKET);
 
     char *time_pref = prefs_get_string(PREF_TIME_STATUSBAR);
-    if (g_strcmp0(time_pref, "minutes") == 0) {
-        gchar *date_fmt = g_date_time_format(last_time, "%H:%M");
+    if (g_strcmp0(time_pref, "") != 0) {
+        gchar *date_fmt = g_date_time_format(last_time, time_pref);
         assert(date_fmt != NULL);
+        size_t len = strlen(date_fmt);
         wattron(status_bar, bracket_attrs);
         mvwaddch(status_bar, 0, 1, '[');
         wattroff(status_bar, bracket_attrs);
         mvwprintw(status_bar, 0, 2, date_fmt);
         wattron(status_bar, bracket_attrs);
-        mvwaddch(status_bar, 0, 7, ']');
-        wattroff(status_bar, bracket_attrs);
-        g_free(date_fmt);
-    } else if (g_strcmp0(time_pref, "seconds") == 0) {
-        gchar *date_fmt = g_date_time_format(last_time, "%H:%M:%S");
-        assert(date_fmt != NULL);
-        wattron(status_bar, bracket_attrs);
-        mvwaddch(status_bar, 0, 1, '[');
-        wattroff(status_bar, bracket_attrs);
-        mvwprintw(status_bar, 0, 2, date_fmt);
-        wattron(status_bar, bracket_attrs);
-        mvwaddch(status_bar, 0, 10, ']');
+        mvwaddch(status_bar, 0, 2 + len, ']');
         wattroff(status_bar, bracket_attrs);
         g_free(date_fmt);
     }

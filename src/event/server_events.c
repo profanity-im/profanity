@@ -146,10 +146,10 @@ sv_ev_room_subject(const char * const room, const char * const nick, const char 
 
 void
 sv_ev_room_history(const char * const room_jid, const char * const nick,
-    GTimeVal tv_stamp, const char * const message)
+    GDateTime *timestamp, const char * const message)
 {
     char *new_message = plugins_pre_room_message_display(room_jid, nick, message);
-    ui_room_history(room_jid, nick, tv_stamp, new_message);
+    ui_room_history(room_jid, nick, timestamp, new_message);
     plugins_post_room_message_display(room_jid, nick, new_message);
 }
 
@@ -303,17 +303,17 @@ sv_ev_incoming_message(char *barejid, char *resource, char *message, char *enc_m
 }
 
 void
-sv_ev_delayed_private_message(const char * const fulljid, char *message, GTimeVal tv_stamp)
+sv_ev_delayed_private_message(const char * const fulljid, char *message, GDateTime *timestamp)
 {
     char *new_message = plugins_pre_priv_message_display(fulljid, message);
-    ui_incoming_private_msg(fulljid, new_message, &tv_stamp);
+    ui_incoming_private_msg(fulljid, new_message, timestamp);
     plugins_post_priv_message_display(fulljid, new_message);
 
     free(new_message);
 }
 
 void
-sv_ev_delayed_message(char *barejid, char *message, GTimeVal tv_stamp)
+sv_ev_delayed_message(char *barejid, char *message, GDateTime *timestamp)
 {
     gboolean new_win = FALSE;
     ProfChatWin *chatwin = wins_get_chat(barejid);
@@ -323,8 +323,8 @@ sv_ev_delayed_message(char *barejid, char *message, GTimeVal tv_stamp)
         new_win = TRUE;
     }
 
-    ui_incoming_msg(chatwin, NULL, message, &tv_stamp, new_win);
-    chat_log_msg_in_delayed(barejid, message, &tv_stamp);
+    ui_incoming_msg(chatwin, NULL, message, timestamp, new_win);
+    chat_log_msg_in_delayed(barejid, message, timestamp);
 }
 
 void

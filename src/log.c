@@ -91,7 +91,7 @@ static gchar * _get_main_log_file(void);
 static void _rotate_log_file(void);
 static char* _log_string_from_level(log_level_t level);
 static void _chat_log_chat(const char * const login, const char * const other,
-    const gchar * const msg, chat_log_direction_t direction, GTimeVal *tv_stamp);
+    const gchar * const msg, chat_log_direction_t direction, GDateTime *timestamp);
 
 void
 log_debug(const char * const msg, ...)
@@ -353,19 +353,19 @@ chat_log_msg_in(const char * const barejid, const char * const msg)
 }
 
 void
-chat_log_msg_in_delayed(const char * const barejid, const char * msg, GTimeVal *tv_stamp)
+chat_log_msg_in_delayed(const char * const barejid, const char * msg, GDateTime *timestamp)
 {
     if (prefs_get_boolean(PREF_CHLOG)) {
         const char *jid = jabber_get_fulljid();
         Jid *jidp = jid_create(jid);
-        _chat_log_chat(jidp->barejid, barejid, msg, PROF_IN_LOG, tv_stamp);
+        _chat_log_chat(jidp->barejid, barejid, msg, PROF_IN_LOG, timestamp);
         jid_destroy(jidp);
     }
 }
 
 static void
 _chat_log_chat(const char * const login, const char * const other,
-    const char * const msg, chat_log_direction_t direction, GTimeVal *tv_stamp)
+    const char * const msg, chat_log_direction_t direction, GDateTime *timestamp)
 {
     struct dated_chat_log *dated_log = g_hash_table_lookup(logs, other);
 
@@ -380,16 +380,9 @@ _chat_log_chat(const char * const login, const char * const other,
         g_hash_table_replace(logs, strdup(other), dated_log);
     }
 
-    gchar *date_fmt = NULL;
-    GDateTime *dt = NULL;
-    if (tv_stamp == NULL) {
-        dt = g_date_time_new_now_local();
-    } else {
-        dt = g_date_time_new_from_timeval_utc(tv_stamp);
-    }
+    if (timestamp == NULL) timestamp = g_date_time_new_now_local();
 
-    date_fmt = g_date_time_format(dt, "%H:%M:%S");
-
+    gchar *date_fmt = g_date_time_format(timestamp, "%H:%M:%S");
     FILE *logp = fopen(dated_log->filename, "a");
     g_chmod(dated_log->filename, S_IRUSR | S_IWUSR);
     if (logp) {
@@ -414,7 +407,6 @@ _chat_log_chat(const char * const login, const char * const other,
     }
 
     g_free(date_fmt);
-    g_date_time_unref(dt);
 }
 
 void
