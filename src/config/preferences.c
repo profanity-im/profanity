@@ -725,9 +725,9 @@ _get_default_string(preference_t pref)
         case PREF_ROSTER_BY:
             return "presence";
         case PREF_TIME:
-            return "seconds";
+            return "%H:%M:%S";
         case PREF_TIME_STATUSBAR:
-            return "minutes";
+            return "%H:%M";
         case PREF_PGP_LOG:
             return "redact";
         default:

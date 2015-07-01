@@ -3407,18 +3407,16 @@ gboolean
 cmd_time(ProfWin *window, gchar **args, struct cmd_help_t help)
 {
     if (g_strcmp0(args[0], "statusbar") == 0) {
-        if (g_strcmp0(args[1], "minutes") == 0) {
-            prefs_set_string(PREF_TIME_STATUSBAR, "minutes");
-            cons_show("Status bar time precision set to minutes.");
-            ui_redraw();
+        if (args[1] == NULL) {
+            cons_show("Current status bar time format is '%s'.", prefs_get_string(PREF_TIME_STATUSBAR));
             return TRUE;
-        } else if (g_strcmp0(args[1], "seconds") == 0) {
-            prefs_set_string(PREF_TIME_STATUSBAR, "seconds");
-            cons_show("Status bar time precision set to seconds.");
+        } else if (g_strcmp0(args[1], "set") == 0 && args[2] != NULL) {
+            prefs_set_string(PREF_TIME_STATUSBAR, args[2]);
+            cons_show("Status bar time format set to '%s'.", args[2]);
             ui_redraw();
             return TRUE;
         } else if (g_strcmp0(args[1], "off") == 0) {
-            prefs_set_string(PREF_TIME_STATUSBAR, "off");
+            prefs_set_string(PREF_TIME_STATUSBAR, "");
             cons_show("Status bar time display disabled.");
             ui_redraw();
             return TRUE;
@@ -3426,19 +3424,17 @@ cmd_time(ProfWin *window, gchar **args, struct cmd_help_t help)
             cons_show("Usage: %s", help.usage);
             return TRUE;
         }
-    } else {
-        if (g_strcmp0(args[0], "minutes") == 0) {
-            prefs_set_string(PREF_TIME, "minutes");
-            cons_show("Time precision set to minutes.");
+    } else if (g_strcmp0(args[0], "main") == 0) {
+        if (args[1] == NULL) {
+            cons_show("Current time format is '%s'.", prefs_get_string(PREF_TIME));
+            return TRUE;
+        } else if (g_strcmp0(args[1], "set") == 0 && args[2] != NULL) {
+            prefs_set_string(PREF_TIME, args[2]);
+            cons_show("Time format set to '%s'.", args[2]);
             wins_resize_all();
             return TRUE;
-        } else if (g_strcmp0(args[0], "seconds") == 0) {
-            prefs_set_string(PREF_TIME, "seconds");
-            cons_show("Time precision set to seconds.");
-            wins_resize_all();
-            return TRUE;
-        } else if (g_strcmp0(args[0], "off") == 0) {
-            prefs_set_string(PREF_TIME, "off");
+        } else if (g_strcmp0(args[1], "off") == 0) {
+            prefs_set_string(PREF_TIME, "");
             cons_show("Time display disabled.");
             wins_resize_all();
             return TRUE;
@@ -3446,6 +3442,9 @@ cmd_time(ProfWin *window, gchar **args, struct cmd_help_t help)
             cons_show("Usage: %s", help.usage);
             return TRUE;
         }
+    } else {
+        cons_show("Usage: %s", help.usage);
+        return TRUE;
     }
 }
 

@@ -701,18 +701,21 @@ static struct cmd_t command_defs[] =
           NULL } } },
 
     { "/time",
-        cmd_time, parse_args, 1, 2, &cons_time_setting,
-        { "/time setting|statusbar [setting]", "Time display.",
-        { "/time setting|statusbar [setting]",
-          "---------------------------------",
+        cmd_time, parse_args, 1, 3, &cons_time_setting,
+        { "/time main|statusbar set|off [format]", "Time display.",
+        { "/time main|statusbar set|off [format]",
+          "-------------------------------------",
           "Configure time display preferences.",
           "",
-          "minutes           : Use minutes precision in main window.",
-          "seconds           : Use seconds precision in main window.",
-          "off               : Do not show time in main window.",
-          "statusbar minutes : Show minutes precision in status bar.",
-          "statusbar seconds : Show seconds precision in status bar.",
-          "statusbar off     : Do not show time in status bar.",
+          "main set <format>      : Change time format to <format> in main window.",
+          "main off               : Do not show time in main window.",
+          "statusbar set <format> : Change time format to <format> in statusbar.",
+          "statusbar off          : Do not show time in status bar.",
+          "",
+          "Time formats are strings supported by g_date_time_format.",
+          "See https://developer.gnome.org/glib/stable/glib-GDateTime.html#g-date-time-format for more details.",
+          "Example: /time main set %H:%M (main time will be set to HH:MM)",
+          "Example: /time statusbar set yolo (statusbar time will all be changed to a static yolo)",
           NULL } } },
 
     { "/inpblock",
@@ -1235,7 +1238,7 @@ static Autocomplete occupants_ac;
 static Autocomplete occupants_default_ac;
 static Autocomplete occupants_show_ac;
 static Autocomplete time_ac;
-static Autocomplete time_statusbar_ac;
+static Autocomplete time_format_ac;
 static Autocomplete resource_ac;
 static Autocomplete inpblock_ac;
 static Autocomplete receipts_ac;
@@ -1585,15 +1588,12 @@ cmd_init(void)
     autocomplete_add(occupants_show_ac, "jid");
 
     time_ac = autocomplete_new();
-    autocomplete_add(time_ac, "minutes");
-    autocomplete_add(time_ac, "seconds");
-    autocomplete_add(time_ac, "off");
+    autocomplete_add(time_ac, "main");
     autocomplete_add(time_ac, "statusbar");
 
-    time_statusbar_ac = autocomplete_new();
-    autocomplete_add(time_statusbar_ac, "minutes");
-    autocomplete_add(time_statusbar_ac, "seconds");
-    autocomplete_add(time_statusbar_ac, "off");
+    time_format_ac = autocomplete_new();
+    autocomplete_add(time_format_ac, "set");
+    autocomplete_add(time_format_ac, "off");
 
     resource_ac = autocomplete_new();
     autocomplete_add(resource_ac, "set");
@@ -1677,7 +1677,7 @@ cmd_uninit(void)
     autocomplete_free(occupants_default_ac);
     autocomplete_free(occupants_show_ac);
     autocomplete_free(time_ac);
-    autocomplete_free(time_statusbar_ac);
+    autocomplete_free(time_format_ac);
     autocomplete_free(resource_ac);
     autocomplete_free(inpblock_ac);
     autocomplete_free(receipts_ac);
@@ -1851,7 +1851,7 @@ cmd_reset_autocomplete(ProfWin *window)
     autocomplete_reset(occupants_default_ac);
     autocomplete_reset(occupants_show_ac);
     autocomplete_reset(time_ac);
-    autocomplete_reset(time_statusbar_ac);
+    autocomplete_reset(time_format_ac);
     autocomplete_reset(resource_ac);
     autocomplete_reset(inpblock_ac);
     autocomplete_reset(receipts_ac);
@@ -2763,7 +2763,12 @@ _time_autocomplete(ProfWin *window, const char * const input)
 {
     char *found = NULL;
 
-    found = autocomplete_param_with_ac(input, "/time statusbar", time_statusbar_ac, TRUE);
+    found = autocomplete_param_with_ac(input, "/time statusbar", time_format_ac, TRUE);
+    if (found) {
+        return found;
+    }
+
+    found = autocomplete_param_with_ac(input, "/time main", time_format_ac, TRUE);
     if (found) {
         return found;
     }

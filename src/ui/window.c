@@ -36,6 +36,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 #include <assert.h>
 #include <wchar.h>
 
@@ -60,7 +61,7 @@
 
 static void _win_print(ProfWin *window, const char show_char, GDateTime *time,
     int flags, theme_item_t theme_item, const char * const from, const char * const message, DeliveryReceipt *receipt);
-static void _win_print_wrapped(WINDOW *win, const char * const message);
+static void _win_print_wrapped(WINDOW *win, const char * const message, size_t indent);
 
 int
 win_roster_cols(void)
@@ -1016,18 +1017,20 @@ _win_print(ProfWin *window, const char show_char, GDateTime *time,
     gboolean me_message = FALSE;
     int offset = 0;
     int colour = theme_attrs(THEME_ME);
+    size_t indent = 0;
+
+    gchar *date_fmt = NULL;
+    char *time_pref = prefs_get_string(PREF_TIME);
+    date_fmt = g_date_time_format(time, time_pref);
+    free(time_pref);
+    assert(date_fmt != NULL);
+
+    if(strlen(date_fmt) != 0){
+        indent = 3 + strlen(date_fmt);
+    }
 
     if ((flags & NO_DATE) == 0) {
-        gchar *date_fmt = NULL;
-        char *time_pref = prefs_get_string(PREF_TIME);
-        if (g_strcmp0(time_pref, "minutes") == 0) {
-            date_fmt = g_date_time_format(time, "%H:%M");
-        } else if (g_strcmp0(time_pref, "seconds") == 0) {
-            date_fmt = g_date_time_format(time, "%H:%M:%S");
-        }
-        free(time_pref);
-
-        if (date_fmt) {
+        if (date_fmt && strlen(date_fmt)) {
             if ((flags & NO_COLOUR_DATE) == 0) {
                 wattron(window->layout->win, theme_attrs(THEME_TIME));
             }
@@ -1072,7 +1075,7 @@ _win_print(ProfWin *window, const char show_char, GDateTime *time,
     }
 
     if (prefs_get_boolean(PREF_WRAP)) {
-        _win_print_wrapped(window->layout->win, message+offset);
+        _win_print_wrapped(window->layout->win, message+offset, indent);
     } else {
         wprintw(window->layout->win, "%s", message+offset);
     }
@@ -1102,19 +1105,10 @@ _win_indent(WINDOW *win, int size)
 }
 
 static void
-_win_print_wrapped(WINDOW *win, const char * const message)
+_win_print_wrapped(WINDOW *win, const char * const message, size_t indent)
 {
     int wordi = 0;
     char *word = malloc(strlen(message) + 1);
-
-    char *time_pref = prefs_get_string(PREF_TIME);
-    int indent = 0;
-    if (g_strcmp0(time_pref, "minutes") == 0) {
-        indent = 8;
-    } else if (g_strcmp0(time_pref, "seconds") == 0) {
-        indent = 11;
-    }
-    free(time_pref);
 
     gchar *curr_ch = g_utf8_offset_to_pointer(message, 0);
 
