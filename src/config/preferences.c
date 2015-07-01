@@ -281,7 +281,11 @@ prefs_set_reconnect(gint value)
 gint
 prefs_get_autoping(void)
 {
-    return g_key_file_get_integer(prefs, PREF_GROUP_CONNECTION, "autoping", NULL);
+    if (!g_key_file_has_key(prefs, PREF_GROUP_CONNECTION, "autoping", NULL)) {
+        return 60;
+    } else {
+        return g_key_file_get_integer(prefs, PREF_GROUP_CONNECTION, "autoping", NULL);
+    }
 }
 
 void
