@@ -71,6 +71,7 @@ static WINDOW *inp_win;
 static int pad_start = 0;
 
 static struct timeval p_rl_timeout;
+/* Timeout in ms. Shows how long select() may block. */
 static gint inp_timeout = 0;
 static gint no_input_count = 0;
 
@@ -115,14 +116,6 @@ create_input_window(void)
 #else
     ESCDELAY = 25;
 #endif
-    if (inp_timeout == 1000) {
-        p_rl_timeout.tv_sec = 1;
-        p_rl_timeout.tv_usec = 0;
-    } else {
-        p_rl_timeout.tv_sec = 0;
-        p_rl_timeout.tv_usec = inp_timeout * 1000;
-    }
-
     rl_readline_name = "profanity";
     rl_getc_function = _inp_rl_getc;
     rl_startup_hook = _inp_rl_startup_hook;
@@ -141,13 +134,17 @@ inp_readline(void)
 {
     free(inp_line);
     inp_line = NULL;
+    p_rl_timeout.tv_sec = inp_timeout / 1000;
+    p_rl_timeout.tv_usec = inp_timeout % 1000 * 1000;
     FD_ZERO(&fds);
     FD_SET(fileno(rl_instream), &fds);
     errno = 0;
     r = select(FD_SETSIZE, &fds, NULL, NULL, &p_rl_timeout);
     if (r < 0) {
-        char *err_msg = strerror(errno);
-        log_error("Readline failed: %s", err_msg);
+        if (errno != EINTR) {
+            char *err_msg = strerror(errno);
+            log_error("Readline failed: %s", err_msg);
+        }
         return NULL;
     }
 
@@ -167,14 +164,6 @@ inp_readline(void)
     } else {
         inp_nonblocking(FALSE);
         prof_handle_idle();
-    }
-
-    if (inp_timeout == 1000) {
-        p_rl_timeout.tv_sec = 1;
-        p_rl_timeout.tv_usec = 0;
-    } else {
-        p_rl_timeout.tv_sec = 0;
-        p_rl_timeout.tv_usec = inp_timeout * 1000;
     }
 
     if (inp_line) {
