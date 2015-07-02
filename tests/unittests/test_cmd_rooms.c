@@ -71,6 +71,7 @@ void cmd_rooms_uses_account_default_when_no_arg(void **state)
     account->otr_manual = NULL;
     account->otr_opportunistic = NULL;
     account->otr_always = NULL;
+    account->pgp_keyid = NULL;
     account->muc_service = strdup("default_conf_server");
 
     will_return(jabber_get_connection_status, JABBER_CONNECTED);
