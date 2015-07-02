@@ -103,6 +103,28 @@ prefs_load(void)
         g_error_free(err);
     }
 
+    // migrate pre 0.4.7 time settings format
+    if (g_key_file_has_key(prefs, PREF_GROUP_UI, "time", NULL)) {
+        char *time = g_key_file_get_string(prefs, PREF_GROUP_UI, "time", NULL);
+        if (g_strcmp0(time, "minutes") == 0) {
+            g_key_file_set_string(prefs, PREF_GROUP_UI, "time", "%H:%M");
+        } else if (g_strcmp0(time, "seconds") == 0) {
+            g_key_file_set_string(prefs, PREF_GROUP_UI, "time", "%H:%M:%S");
+        } else if (g_strcmp0(time, "off") == 0) {
+            g_key_file_set_string(prefs, PREF_GROUP_UI, "time", "");
+        }
+    }
+    if (g_key_file_has_key(prefs, PREF_GROUP_UI, "time.statusbar", NULL)) {
+        char *time = g_key_file_get_string(prefs, PREF_GROUP_UI, "time.statusbar", NULL);
+        if (g_strcmp0(time, "minutes") == 0) {
+            g_key_file_set_string(prefs, PREF_GROUP_UI, "time.statusbar", "%H:%M");
+        } else if (g_strcmp0(time, "seconds") == 0) {
+            g_key_file_set_string(prefs, PREF_GROUP_UI, "time.statusbar", "%H:%M:%S");
+        } else if (g_strcmp0(time, "off") == 0) {
+            g_key_file_set_string(prefs, PREF_GROUP_UI, "time.statusbar", "");
+        }
+    }
+
     _save_prefs();
 
     boolean_choice_ac = autocomplete_new();
