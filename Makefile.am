@@ -156,6 +156,7 @@ endif
 TESTS = tests/unittests/unittests tests/functionaltests/functionaltests
 check_PROGRAMS = tests/unittests/unittests tests/functionaltests/functionaltests
 tests_unittests_unittests_SOURCES = $(unittest_sources)
+tests_unittests_unittests_CFLAGS = -w
 tests_unittests_unittests_LDADD = -lcmocka
 tests_functionaltests_functionaltests_SOURCES = $(functionaltest_sources)
 tests_functionaltests_functionaltests_CFLAGS = -I/usr/include/tcl8.6 -I/usr/include/tcl8.5
