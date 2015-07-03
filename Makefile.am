@@ -153,14 +153,19 @@ if INCLUDE_GIT_VERSION
 BUILT_SOURCES = $(git_include)
 endif
 
-TESTS = tests/unittests/unittests tests/functionaltests/functionaltests
-check_PROGRAMS = tests/unittests/unittests tests/functionaltests/functionaltests
+TESTS = tests/unittests/unittests
+check_PROGRAMS = tests/unittests/unittests
 tests_unittests_unittests_SOURCES = $(unittest_sources)
 tests_unittests_unittests_CFLAGS = -w
 tests_unittests_unittests_LDADD = -lcmocka
+
+if HAVE_STABBER
+TESTS += tests/functionaltests/functionaltests
+check_PROGRAMS += tests/functionaltests/functionaltests
 tests_functionaltests_functionaltests_SOURCES = $(functionaltest_sources)
 tests_functionaltests_functionaltests_CFLAGS = -I/usr/include/tcl8.6 -I/usr/include/tcl8.5
 tests_functionaltests_functionaltests_LDADD = -lcmocka -lstabber -lexpect -ltcl
+endif
 
 man_MANS = $(man_sources)
 
