@@ -15,6 +15,7 @@
 #include "test_rooms.h"
 #include "test_presence.h"
 #include "test_message.h"
+#include "test_carbons.h"
 #include "test_chat_session.h"
 
 int main(int argc, char* argv[]) {
@@ -111,6 +112,10 @@ int main(int argc, char* argv[]) {
             init_prof_test,
             close_prof_test),
         unit_test_setup_teardown(new_session_when_message_received_from_different_fulljid,
+            init_prof_test,
+            close_prof_test),
+
+        unit_test_setup_teardown(send_enable_carbons,
             init_prof_test,
             close_prof_test),
     };
