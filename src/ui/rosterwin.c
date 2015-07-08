@@ -84,11 +84,15 @@ _rosterwin_contact(ProfLayoutSplit *layout, PContact contact)
 static void
 _rosterwin_contacts_by_presence(ProfLayoutSplit *layout, const char * const presence, char *title)
 {
-    wattron(layout->subwin, theme_attrs(THEME_ROSTER_HEADER));
-    win_printline_nowrap(layout->subwin, title);
-    wattroff(layout->subwin, theme_attrs(THEME_ROSTER_HEADER));
-
     GSList *contacts = roster_get_contacts_by_presence(presence);
+
+    // if this group has contacts, or if we want to show empty groups
+    if (contacts || prefs_get_boolean(PREF_ROSTER_EMPTY)) {
+        wattron(layout->subwin, theme_attrs(THEME_ROSTER_HEADER));
+        win_printline_nowrap(layout->subwin, title);
+        wattroff(layout->subwin, theme_attrs(THEME_ROSTER_HEADER));
+    }
+
     if (contacts) {
         GSList *curr_contact = contacts;
         while (curr_contact) {

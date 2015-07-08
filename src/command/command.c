@@ -196,9 +196,11 @@ static struct cmd_t command_defs[] =
           "show           : Show the roster panel.",
           "show offline   : Show offline contacts in the roster panel.",
           "show resource  : Show contact's connected resources in the roster panel.",
+          "show empty     : When grouping by presence, show empty presence groups",
           "hide           : Hide the roster panel.",
           "hide offline   : Hide offline contacts in the roster panel.",
           "hide resource  : Hide contact's connected resources in the roster panel.",
+          "hide empty     : When grouping by presence, hide empty presence groups",
           "by group       : Group contacts in the roster panel by roster group.",
           "by presence    : Group contacts in the roster panel by presence.",
           "by none        : No grouping in the roster panel.",
@@ -1439,6 +1441,7 @@ cmd_init(void)
     roster_option_ac = autocomplete_new();
     autocomplete_add(roster_option_ac, "offline");
     autocomplete_add(roster_option_ac, "resource");
+    autocomplete_add(roster_option_ac, "empty");
 
     roster_by_ac = autocomplete_new();
     autocomplete_add(roster_by_ac, "group");

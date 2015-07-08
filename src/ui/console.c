@@ -1039,6 +1039,11 @@ cons_roster_setting(void)
     else
         cons_show("Roster resource (/roster)     : hide");
 
+    if (prefs_get_boolean(PREF_ROSTER_EMPTY))
+        cons_show("Roster empty (/roster)        : show");
+    else
+        cons_show("Roster empty (/roster)        : hide");
+
     char *by = prefs_get_string(PREF_ROSTER_BY);
     cons_show("Roster by (/roster)           : %s", by);
     prefs_free_string(by);

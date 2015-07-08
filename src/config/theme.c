@@ -452,6 +452,7 @@ _load_preferences(void)
     _set_boolean_preference("roster", PREF_ROSTER);
     _set_boolean_preference("roster.offline", PREF_ROSTER_OFFLINE);
     _set_boolean_preference("roster.resource", PREF_ROSTER_RESOURCE);
+    _set_boolean_preference("roster.empty", PREF_ROSTER_EMPTY);
     _set_string_preference("roster.by", PREF_ROSTER_BY);
     if (g_key_file_has_key(theme, "ui", "roster.size", NULL)) {
         gint roster_size = g_key_file_get_integer(theme, "ui", "roster.size", NULL);
