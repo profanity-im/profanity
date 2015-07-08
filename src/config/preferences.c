@@ -535,6 +535,7 @@ _get_group(preference_t pref)
         case PREF_ROSTER:
         case PREF_ROSTER_OFFLINE:
         case PREF_ROSTER_RESOURCE:
+        case PREF_ROSTER_EMPTY:
         case PREF_ROSTER_BY:
         case PREF_RESOURCE_TITLE:
         case PREF_RESOURCE_MESSAGE:
@@ -689,6 +690,8 @@ _get_key(preference_t pref)
             return "roster.offline";
         case PREF_ROSTER_RESOURCE:
             return "roster.resource";
+        case PREF_ROSTER_EMPTY:
+            return "roster.empty";
         case PREF_ROSTER_BY:
             return "roster.by";
         case PREF_RESOURCE_TITLE:
@@ -736,6 +739,7 @@ _get_default_boolean(preference_t pref)
         case PREF_ROSTER:
         case PREF_ROSTER_OFFLINE:
         case PREF_ROSTER_RESOURCE:
+        case PREF_ROSTER_EMPTY:
             return TRUE;
         default:
             return FALSE;

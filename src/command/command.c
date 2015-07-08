@@ -191,24 +191,26 @@ static struct cmd_t command_defs[] =
           "--------------------------",
           "Manage your roster, and roster display settings.",
           "",
-          "command - online|show|hide|by|size|add|remove|nick|clearnick",
+          "command - online|show|hide|by|size|add|remove|remove_all|nick|clearnick",
           "",
-          "online         : Show all online contacts in your roster.",
-          "show           : Show the roster panel.",
-          "show offline   : Show offline contacts in the roster panel.",
-          "show resource  : Show contact's connected resources in the roster panel.",
-          "hide           : Hide the roster panel.",
-          "hide offline   : Hide offline contacts in the roster panel.",
-          "hide resource  : Hide contact's connected resources in the roster panel.",
-          "by group       : Group contacts in the roster panel by roster group.",
-          "by presence    : Group contacts in the roster panel by presence.",
-          "by none        : No grouping in the roster panel.",
-          "size           : Percentage of the screen taken up by the roster (1-99).",
-          "add jid [nick] : Add a new item to the roster.",
-          "remove jid     : Removes an item from the roster.",
-          "empty          : Remove all items from roster."
-          "nick jid nick  : Change a contacts nickname.",
-          "clearnick jid  : Removes the current nickname.",
+          "online              : Show all online contacts in your roster.",
+          "show                : Show the roster panel.",
+          "show offline        : Show offline contacts in the roster panel.",
+          "show resource       : Show contact's connected resources in the roster panel.",
+          "show empty          : When grouping by presence, show empty presence groups",
+          "hide                : Hide the roster panel.",
+          "hide offline        : Hide offline contacts in the roster panel.",
+          "hide resource       : Hide contact's connected resources in the roster panel.",
+          "hide empty          : When grouping by presence, hide empty presence groups",
+          "by group            : Group contacts in the roster panel by roster group.",
+          "by presence         : Group contacts in the roster panel by presence.",
+          "by none             : No grouping in the roster panel.",
+          "size                : Percentage of the screen taken up by the roster (1-99).",
+          "add jid [nick]      : Add a new item to the roster.",
+          "remove jid          : Removes an item from the roster.",
+          "remove_all contacts : Remove all items from roster.",
+          "nick jid nick       : Change a contacts nickname.",
+          "clearnick jid       : Removes the current nickname.",
           "",
           "Passing no arguments lists all contacts in your roster.",
           "",
@@ -1224,6 +1226,7 @@ static Autocomplete wins_ac;
 static Autocomplete roster_ac;
 static Autocomplete roster_option_ac;
 static Autocomplete roster_by_ac;
+static Autocomplete roster_remove_all_ac;
 static Autocomplete group_ac;
 static Autocomplete bookmark_ac;
 static Autocomplete bookmark_property_ac;
@@ -1439,6 +1442,7 @@ cmd_init(void)
     autocomplete_add(roster_ac, "nick");
     autocomplete_add(roster_ac, "clearnick");
     autocomplete_add(roster_ac, "remove");
+    autocomplete_add(roster_ac, "remove_all");
     autocomplete_add(roster_ac, "empty");
     autocomplete_add(roster_ac, "show");
     autocomplete_add(roster_ac, "hide");
@@ -1448,11 +1452,15 @@ cmd_init(void)
     roster_option_ac = autocomplete_new();
     autocomplete_add(roster_option_ac, "offline");
     autocomplete_add(roster_option_ac, "resource");
+    autocomplete_add(roster_option_ac, "empty");
 
     roster_by_ac = autocomplete_new();
     autocomplete_add(roster_by_ac, "group");
     autocomplete_add(roster_by_ac, "presence");
     autocomplete_add(roster_by_ac, "none");
+
+    roster_remove_all_ac = autocomplete_new();
+    autocomplete_add(roster_remove_all_ac, "contacts");
 
     group_ac = autocomplete_new();
     autocomplete_add(group_ac, "show");
@@ -1663,6 +1671,7 @@ cmd_uninit(void)
     autocomplete_free(roster_ac);
     autocomplete_free(roster_option_ac);
     autocomplete_free(roster_by_ac);
+    autocomplete_free(roster_remove_all_ac);
     autocomplete_free(group_ac);
     autocomplete_free(bookmark_ac);
     autocomplete_free(bookmark_property_ac);
@@ -1836,6 +1845,7 @@ cmd_reset_autocomplete(ProfWin *window)
     autocomplete_reset(roster_ac);
     autocomplete_reset(roster_option_ac);
     autocomplete_reset(roster_by_ac);
+    autocomplete_reset(roster_remove_all_ac);
     autocomplete_reset(group_ac);
     autocomplete_reset(titlebar_ac);
     autocomplete_reset(bookmark_ac);
@@ -2201,6 +2211,10 @@ _roster_autocomplete(ProfWin *window, const char * const input)
         return result;
     }
     result = autocomplete_param_with_func(input, "/roster remove", roster_barejid_autocomplete);
+    if (result) {
+        return result;
+    }
+    result = autocomplete_param_with_ac(input, "/roster remove_all", roster_remove_all_ac, TRUE);
     if (result) {
         return result;
     }

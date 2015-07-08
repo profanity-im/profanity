@@ -1586,6 +1586,13 @@ cmd_roster(ProfWin *window, gchar **args, struct cmd_help_t help)
                 rosterwin_roster();
             }
             return TRUE;
+        } else if (g_strcmp0(args[1], "empty") == 0) {
+            cons_show("Roster empty enabled");
+            prefs_set_boolean(PREF_ROSTER_EMPTY, TRUE);
+            if (conn_status == JABBER_CONNECTED) {
+                rosterwin_roster();
+            }
+            return TRUE;
         } else {
             cons_show("Usage: %s", help.usage);
             return TRUE;
@@ -1608,6 +1615,13 @@ cmd_roster(ProfWin *window, gchar **args, struct cmd_help_t help)
         } else if (g_strcmp0(args[1], "resource") == 0) {
             cons_show("Roster resource disabled");
             prefs_set_boolean(PREF_ROSTER_RESOURCE, FALSE);
+            if (conn_status == JABBER_CONNECTED) {
+                rosterwin_roster();
+            }
+            return TRUE;
+        } else if (g_strcmp0(args[1], "empty") == 0) {
+            cons_show("Roster empty disabled");
+            prefs_set_boolean(PREF_ROSTER_EMPTY, FALSE);
             if (conn_status == JABBER_CONNECTED) {
                 rosterwin_roster();
             }
@@ -1672,7 +1686,11 @@ cmd_roster(ProfWin *window, gchar **args, struct cmd_help_t help)
         }
         return TRUE;
 
-    } else if (strcmp(args[0], "empty") == 0) {
+    } else if (strcmp(args[0], "remove_all") == 0) {
+        if (g_strcmp0(args[1], "contacts") != 0) {
+            cons_show("Usage: %s", help.usage);
+            return TRUE;
+        }
         if (conn_status != JABBER_CONNECTED) {
             cons_show("You are not currently connected.");
             return TRUE;
