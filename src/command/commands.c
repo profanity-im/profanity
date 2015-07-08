@@ -1678,7 +1678,11 @@ cmd_roster(ProfWin *window, gchar **args, struct cmd_help_t help)
         }
         return TRUE;
 
-    } else if (strcmp(args[0], "empty") == 0) {
+    } else if (strcmp(args[0], "remove_all") == 0) {
+        if (g_strcmp0(args[1], "contacts") != 0) {
+            cons_show("Usage: %s", help.usage);
+            return TRUE;
+        }
         if (conn_status != JABBER_CONNECTED) {
             cons_show("You are not currently connected.");
             return TRUE;
