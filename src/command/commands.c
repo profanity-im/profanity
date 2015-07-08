@@ -2117,13 +2117,17 @@ cmd_software(ProfWin *window, gchar **args, struct cmd_help_t help)
         case WIN_CHAT:
         case WIN_CONSOLE:
             if (args[0]) {
+                Jid *myJid = jid_create(jabber_get_fulljid());
                 Jid *jid = jid_create(args[0]);
 
                 if (jid == NULL || jid->fulljid == NULL) {
                     cons_show("You must provide a full jid to the /software command.");
+                } else if (g_strcmp0(jid->barejid, myJid->barejid) == 0) {
+                    cons_show("Cannot request software version for yourself.");
                 } else {
                     iq_send_software_version(jid->fulljid);
                 }
+                jid_destroy(myJid);
                 jid_destroy(jid);
             } else {
                 cons_show("You must provide a jid to the /software command.");
