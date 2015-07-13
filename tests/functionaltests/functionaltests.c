@@ -21,13 +21,13 @@
 int main(int argc, char* argv[]) {
 
     const UnitTest all_tests[] = {
-
         unit_test_setup_teardown(connect_jid_requests_roster,
             init_prof_test,
             close_prof_test),
         unit_test_setup_teardown(connect_jid_sends_presence_after_receiving_roster,
             init_prof_test,
             close_prof_test),
+/*
         unit_test_setup_teardown(connect_jid_requests_bookmarks,
             init_prof_test,
             close_prof_test),
@@ -118,6 +118,7 @@ int main(int argc, char* argv[]) {
         unit_test_setup_teardown(send_enable_carbons,
             init_prof_test,
             close_prof_test),
+*/
     };
 
     return run_tests(all_tests);

@@ -13,5 +13,6 @@ void prof_input(char *input);
 
 int prof_output_exact(char *text);
 int prof_output_regex(char *text);
+int prof_output_glob(char *text);
 
 #endif

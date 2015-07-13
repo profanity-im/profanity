@@ -24,7 +24,7 @@ message_send(void **state)
         "</message>"
     ));
 
-    assert_true(prof_output_regex("me: .+Hi there"));
+    assert_true(prof_output_glob("me: *Hi there"));
 }
 
 void

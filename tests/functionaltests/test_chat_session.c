@@ -196,7 +196,7 @@ new_session_when_message_received_from_different_fulljid(void **state)
             "<body>From second resource</body>"
         "</message>"
     );
-    assert_true(prof_output_regex("Buddy1/laptop:.+From second resource"));
+    assert_true(prof_output_glob("Buddy1/laptop:*From second resource"));
 
     prof_input("/msg buddy1@localhost Outgoing 2");
     assert_true(stbbr_received(

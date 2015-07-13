@@ -164,8 +164,7 @@ if HAVE_STABBER
 TESTS += tests/functionaltests/functionaltests
 check_PROGRAMS += tests/functionaltests/functionaltests
 tests_functionaltests_functionaltests_SOURCES = $(functionaltest_sources)
-tests_functionaltests_functionaltests_CFLAGS = -I/usr/include/tcl8.6 -I/usr/include/tcl8.5
-tests_functionaltests_functionaltests_LDADD = -lcmocka -lstabber -lexpect -ltcl
+tests_functionaltests_functionaltests_LDADD = -lcmocka -lstabber -lexpect5.45 -ltcl
 endif
 
 man_MANS = $(man_sources)

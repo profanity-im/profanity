@@ -12,7 +12,10 @@
 #include <string.h>
 
 #include <stabber.h>
+#include <tcl.h>
 #include <expect.h>
+#include <expect_tcl.h>
+
 
 #include "proftest.h"
 
@@ -123,6 +126,11 @@ _cleanup_dirs(void)
 void
 prof_start(void)
 {
+    /* initialise expect and tcl */
+    Tcl_Interp *interp = Tcl_CreateInterp();
+    Tcl_Init(interp);
+    Expect_Init(interp);
+
     // helper script sets terminal columns, avoids assertions failing
     // based on the test runner terminal size
     fd = exp_spawnl("sh",
@@ -140,10 +148,11 @@ prof_start(void)
 void
 init_prof_test(void **state)
 {
-    if (stbbr_start(STBBR_LOGDEBUG ,5230, 0) != 0) {
-        assert_true(FALSE);
-        return;
-    }
+    stbbr_start(STBBR_LOGDEBUG ,5230, 0);
+//    if (stbbr_start(STBBR_LOGDEBUG ,5230, 0) != 0) {
+//        assert_true(FALSE);
+//        return;
+//    }
 
     config_orig = getenv("XDG_CONFIG_HOME");
     data_orig = getenv("XDG_DATA_HOME");
@@ -178,12 +187,18 @@ init_prof_test(void **state)
 void
 close_prof_test(void **state)
 {
-    prof_input("/quit");
-    waitpid(exp_pid, NULL, 0);
+//    prof_input("/quit");
+//    waitpid(exp_pid, NULL, 0);
+    kill(exp_pid, SIGKILL);
+
     _cleanup_dirs();
 
-    setenv("XDG_CONFIG_HOME", config_orig, 1);
-    setenv("XDG_DATA_HOME", data_orig, 1);
+    if (config_orig) {
+        setenv("XDG_CONFIG_HOME", config_orig, 1);
+    }
+    if (data_orig) {
+        setenv("XDG_DATA_HOME", data_orig, 1);
+    }
 
     stbbr_stop();
 }
@@ -209,6 +224,12 @@ prof_output_regex(char *text)
     return (1 == exp_expectl(fd, exp_regexp, text, 1, exp_end));
 }
 
+int
+prof_output_glob(char *text)
+{
+    return (1 == exp_expectl(fd, exp_glob, text, 1, exp_end));
+}
+
 void
 prof_connect(void)
 {
@@ -232,7 +253,7 @@ prof_connect(void)
 
     // Allow time for profanity to connect
     exp_timeout = 30;
-    assert_true(prof_output_regex("stabber@localhost logged in successfully, .+online.+ \\(priority 0\\)\\."));
+    assert_true(prof_output_glob("stabber@localhost logged in successfully, *online* (priority 0)."));
     exp_timeout = 10;
     stbbr_wait_for("prof_presence_1");
 }
