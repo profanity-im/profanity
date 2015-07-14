@@ -118,6 +118,12 @@ int main(int argc, char* argv[]) {
         unit_test_setup_teardown(send_enable_carbons,
             init_prof_test,
             close_prof_test),
+        unit_test_setup_teardown(connect_with_carbons_enabled,
+            init_prof_test,
+            close_prof_test),
+        unit_test_setup_teardown(send_disable_carbons,
+            init_prof_test,
+            close_prof_test),
     };
 
     return run_tests(all_tests);
