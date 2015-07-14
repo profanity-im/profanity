@@ -16,7 +16,6 @@
 #include <expect.h>
 #include <expect_tcl.h>
 
-
 #include "proftest.h"
 
 char *config_orig;
@@ -148,11 +147,10 @@ prof_start(void)
 void
 init_prof_test(void **state)
 {
-    stbbr_start(STBBR_LOGDEBUG ,5230, 0);
-//    if (stbbr_start(STBBR_LOGDEBUG ,5230, 0) != 0) {
-//        assert_true(FALSE);
-//        return;
-//    }
+    if (stbbr_start(STBBR_LOGDEBUG ,5230, 0) != 0) {
+        assert_true(FALSE);
+        return;
+    }
 
     config_orig = getenv("XDG_CONFIG_HOME");
     data_orig = getenv("XDG_DATA_HOME");
@@ -187,9 +185,8 @@ init_prof_test(void **state)
 void
 close_prof_test(void **state)
 {
-//    prof_input("/quit");
-//    waitpid(exp_pid, NULL, 0);
-    kill(exp_pid, SIGKILL);
+    prof_input("/quit");
+    waitpid(exp_pid, NULL, 0);
 
     _cleanup_dirs();
 
