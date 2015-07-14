@@ -22,3 +22,29 @@ send_enable_carbons(void **state)
         "<iq id=\"*\" type=\"set\"><enable xmlns=\"urn:xmpp:carbons:2\"/></iq>"
     ));
 }
+
+void
+connect_with_carbons_enabled(void **state)
+{
+    prof_input("/carbons on");
+
+    prof_connect();
+
+    assert_true(stbbr_received(
+        "<iq id=\"*\" type=\"set\"><enable xmlns=\"urn:xmpp:carbons:2\"/></iq>"
+    ));
+}
+
+void
+send_disable_carbons(void **state)
+{
+    prof_input("/carbons on");
+
+    prof_connect();
+
+    prof_input("/carbons off");
+
+    assert_true(stbbr_received(
+        "<iq id=\"*\" type=\"set\"><disable xmlns=\"urn:xmpp:carbons:2\"/></iq>"
+    ));
+}
