@@ -1434,7 +1434,6 @@ cmd_init(void)
     autocomplete_add(roster_ac, "clearnick");
     autocomplete_add(roster_ac, "remove");
     autocomplete_add(roster_ac, "remove_all");
-    autocomplete_add(roster_ac, "empty");
     autocomplete_add(roster_ac, "show");
     autocomplete_add(roster_ac, "hide");
     autocomplete_add(roster_ac, "by");
