@@ -1,5 +1,6 @@
 #include <sys/stat.h>
 #include <glib.h>
+#include "glib/gstdio.h"
 
 #include <setjmp.h>
 #include <stdarg.h>
@@ -130,6 +131,10 @@ prof_start(void)
     Tcl_Init(interp);
     Expect_Init(interp);
 
+    FILE *logp = fopen("./expout.log", "a");
+    g_chmod("./expout.log", S_IRUSR | S_IWUSR);
+    exp_debugfile = logp;
+
     // helper script sets terminal columns, avoids assertions failing
     // based on the test runner terminal size
     fd = exp_spawnl("sh",
@@ -137,6 +142,7 @@ prof_start(void)
         "-c",
         "./tests/functionaltests/start_profanity.sh",
         NULL);
+
     FILE *fp = fdopen(fd, "r+");
 
     assert_true(fp != NULL);
@@ -179,7 +185,10 @@ init_prof_test(void **state)
     assert_true(prof_output_exact("Word wrap disabled"));
     prof_input("/roster hide");
     assert_true(prof_output_exact("Roster disabled"));
-    prof_input("/time off");
+    prof_input("/time statusbar off");
+    assert_true(prof_output_exact("Status bar time display disabled"));
+    prof_input("/time main off");
+    assert_true(prof_output_exact("Time display disabled"));
 }
 
 void
@@ -203,10 +212,18 @@ close_prof_test(void **state)
 void
 prof_input(char *input)
 {
-    GString *inp_str = g_string_new(input);
-    g_string_append(inp_str, "\r");
-    write(fd, inp_str->str, inp_str->len);
-    g_string_free(inp_str, TRUE);
+    int i = 0;
+    for (i = 0; i < strlen(input); i++) {
+        write(fd, &input[i], 1);
+    }
+    prof_output_exact(input);
+    char *newline = "\r";
+    write(fd, newline, 1);
+
+//    GString *inp_str = g_string_new(input);
+//    g_string_append(inp_str, "\r");
+//    write(fd, inp_str->str, inp_str->len);
+//    g_string_free(inp_str, TRUE);
 }
 
 int

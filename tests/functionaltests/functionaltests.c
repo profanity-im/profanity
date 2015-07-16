@@ -57,10 +57,12 @@ int main(int argc, char* argv[]) {
             init_prof_test,
             close_prof_test),
 */
+        unit_test(expect_test),
+/*
+
         unit_test_setup_teardown(presence_online,
             init_prof_test,
             close_prof_test),
-/*
         unit_test_setup_teardown(presence_online_with_message,
             init_prof_test,
             close_prof_test),
@@ -117,7 +119,7 @@ int main(int argc, char* argv[]) {
         unit_test_setup_teardown(new_session_when_message_received_from_different_fulljid,
             init_prof_test,
             close_prof_test),
-*/
+
         unit_test_setup_teardown(send_enable_carbons,
             init_prof_test,
             close_prof_test),
@@ -127,6 +129,7 @@ int main(int argc, char* argv[]) {
         unit_test_setup_teardown(send_disable_carbons,
             init_prof_test,
             close_prof_test),
+*/
     };
 
     return run_tests(all_tests);
