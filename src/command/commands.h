@@ -99,7 +99,6 @@ gboolean cmd_invites(ProfWin *window, gchar **args, struct cmd_help_t help);
 gboolean cmd_join(ProfWin *window, gchar **args, struct cmd_help_t help);
 gboolean cmd_leave(ProfWin *window, gchar **args, struct cmd_help_t help);
 gboolean cmd_log(ProfWin *window, gchar **args, struct cmd_help_t help);
-gboolean cmd_mouse(ProfWin *window, gchar **args, struct cmd_help_t help);
 gboolean cmd_msg(ProfWin *window, gchar **args, struct cmd_help_t help);
 gboolean cmd_nick(ProfWin *window, gchar **args, struct cmd_help_t help);
 gboolean cmd_notify(ProfWin *window, gchar **args, struct cmd_help_t help);

@@ -982,15 +982,6 @@ cons_vercheck_setting(void)
 }
 
 void
-cons_mouse_setting(void)
-{
-    if (prefs_get_boolean(PREF_MOUSE))
-        cons_show("Mouse handling (/mouse)       : ON");
-    else
-        cons_show("Mouse handling (/mouse)       : OFF");
-}
-
-void
 cons_statuses_setting(void)
 {
     char *console = prefs_get_string(PREF_STATUSES_CONSOLE);
@@ -1066,7 +1057,6 @@ cons_show_ui_prefs(void)
     cons_time_setting();
     cons_resource_setting();
     cons_vercheck_setting();
-    cons_mouse_setting();
     cons_statuses_setting();
     cons_occupants_setting();
     cons_roster_setting();

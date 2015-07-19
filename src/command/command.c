@@ -817,14 +817,6 @@ static struct cmd_t command_defs[] =
           "goodbye : Show a message in the title when exiting profanity.",
           NULL  } } },
 
-    { "/mouse",
-        cmd_mouse, parse_args, 1, 1, &cons_mouse_setting,
-        { "/mouse on|off", "Use profanity mouse handling.",
-        { "/mouse on|off",
-          "-------------",
-          "This feature is experimental, default is 'off'.",
-          NULL } } },
-
     { "/alias",
         cmd_alias, parse_args_with_freetext, 1, 3, NULL,
         { "/alias add|remove|list [name value]", "Add your own command aliases.",
@@ -1987,8 +1979,8 @@ _cmd_complete_parameters(ProfWin *window, const char * const input)
 
     // autocomplete boolean settings
     gchar *boolean_choices[] = { "/beep", "/intype", "/states", "/outtype",
-        "/flash", "/splash", "/chlog", "/grlog", "/mouse", "/history",
-        "/vercheck", "/privileges", "/presence", "/wrap", "/winstidy", "/carbons", "/encwarn" };
+        "/flash", "/splash", "/chlog", "/grlog", "/history", "/vercheck",
+        "/privileges", "/presence", "/wrap", "/winstidy", "/carbons", "/encwarn" };
 
     for (i = 0; i < ARRAY_SIZE(boolean_choices); i++) {
         result = autocomplete_param_with_func(input, boolean_choices[i], prefs_autocomplete_boolean_choice);
