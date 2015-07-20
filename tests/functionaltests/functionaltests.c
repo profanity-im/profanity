@@ -67,6 +67,7 @@ int main(int argc, char* argv[]) {
         PROF_FUNC_TEST(receive_self_carbon),
 
         PROF_FUNC_TEST(send_receipt_request),
+        PROF_FUNC_TEST(send_receipt_on_request),
     };
 
     return run_tests(all_tests);
