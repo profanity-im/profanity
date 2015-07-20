@@ -17,6 +17,7 @@
 #include "test_message.h"
 #include "test_carbons.h"
 #include "test_chat_session.h"
+#include "test_receipts.h"
 
 #define PROF_FUNC_TEST(test) unit_test_setup_teardown(test, init_prof_test, close_prof_test)
 
@@ -63,7 +64,10 @@ int main(int argc, char* argv[]) {
         PROF_FUNC_TEST(connect_with_carbons_enabled),
         PROF_FUNC_TEST(send_disable_carbons),
         PROF_FUNC_TEST(receive_carbon),
-        PROF_FUNC_TEST(receive_self_carbon)
+        PROF_FUNC_TEST(receive_self_carbon),
+
+        PROF_FUNC_TEST(send_receipt_request),
+        PROF_FUNC_TEST(send_receipt_on_request),
     };
 
     return run_tests(all_tests);
