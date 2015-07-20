@@ -167,10 +167,10 @@ if [ "${OS}" = "Linux" ]; then
         DIST=fedora
     elif [ -f /etc/debian_version ]; then
         DIST=debian
-    elif [ -f /etc/os-release ]; then
-        DIST=opensuse
     elif [ -f /etc/centos-release ]; then
         DIST=centos
+    elif [ -f /etc/os-release ]; then
+        DIST=opensuse
     fi
 else
     echo $OS | grep -i cygwin
