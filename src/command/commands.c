@@ -840,9 +840,9 @@ cmd_help(ProfWin *window, gchar **args, struct cmd_help_t help)
     } else if (strcmp(args[0], "settings") == 0) {
         gchar *filter[] = { "/account", "/autoaway", "/autoping", "/autoconnect", "/beep",
             "/carbons", "/chlog", "/flash", "/gone", "/grlog", "/history", "/intype",
-            "/log", "/mouse", "/notify", "/outtype", "/prefs", "/priority",
-            "/reconnect", "/roster", "/splash", "/states", "/statuses", "/theme",
-            "/titlebar", "/vercheck", "/privileges", "/occupants", "/presence", "/wrap", "/winstidy" };
+            "/log", "/notify", "/outtype", "/prefs", "/priority", "/reconnect", "/roster",
+            "/splash", "/states", "/statuses", "/theme", "/titlebar", "/vercheck",
+            "/privileges", "/occupants", "/presence", "/wrap", "/winstidy" };
         _cmd_show_filtered_help("Settings commands", filter, ARRAY_SIZE(filter));
 
     } else if (strcmp(args[0], "navigation") == 0) {
@@ -4077,13 +4077,6 @@ cmd_grlog(ProfWin *window, gchar **args, struct cmd_help_t help)
         "Groupchat logging", PREF_GRLOG);
 
     return result;
-}
-
-gboolean
-cmd_mouse(ProfWin *window, gchar **args, struct cmd_help_t help)
-{
-    return _cmd_set_boolean_preference(args[0], help,
-        "Mouse handling", PREF_MOUSE);
 }
 
 gboolean

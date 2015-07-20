@@ -506,7 +506,6 @@ _get_group(preference_t pref)
         case PREF_FLASH:
         case PREF_INTYPE:
         case PREF_HISTORY:
-        case PREF_MOUSE:
         case PREF_OCCUPANTS:
         case PREF_OCCUPANTS_JID:
         case PREF_STATUSES:
@@ -599,8 +598,6 @@ _get_key(preference_t pref)
             return "receipts.send";
         case PREF_RECEIPTS_REQUEST:
             return "receipts.request";
-        case PREF_MOUSE:
-            return "mouse";
         case PREF_OCCUPANTS:
             return "occupants";
         case PREF_OCCUPANTS_JID:
