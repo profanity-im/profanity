@@ -162,10 +162,12 @@ tests_unittests_unittests_CFLAGS = -w
 tests_unittests_unittests_LDADD = -lcmocka
 
 if HAVE_STABBER
+if HAVE_EXPECT
 TESTS += tests/functionaltests/functionaltests
 check_PROGRAMS += tests/functionaltests/functionaltests
 tests_functionaltests_functionaltests_SOURCES = $(functionaltest_sources)
 tests_functionaltests_functionaltests_LDADD = -lcmocka -lstabber -lexpect5.45 -ltcl
+endif
 endif
 
 man_MANS = $(man_sources)
