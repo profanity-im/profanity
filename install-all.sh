@@ -47,6 +47,18 @@ opensuse_prepare()
     sudo zypper -n in gcc git automake make autoconf libopenssl-devel expat libexpat-devel ncurses-devel glib2-devel libnotify-devel libcurl-devel libXScrnSaver-devel libotr-devel readline-devel libtool libuuid-devel
 }
 
+centos_prepare()
+{
+    echo
+    echo Profanity installer...installing dependencies
+    echo
+
+    sudo yum -y install epel-release
+    sudo yum -y install git
+    sudo yum -y install gcc autoconf automake cmake
+    sudo yum -y install openssl-devel expat-devel ncurses-devel glib2-devel libnotify-devel libcurl-devel libXScrnSaver-devel libotr-devel readline-devel libtool libuuid-devel gpgme-devel
+}
+
 cygwin_prepare()
 {
     echo
@@ -155,6 +167,8 @@ if [ "${OS}" = "Linux" ]; then
         DIST=fedora
     elif [ -f /etc/debian_version ]; then
         DIST=debian
+    elif [ -f /etc/centos-release ]; then
+        DIST=centos
     elif [ -f /etc/os-release ]; then
         DIST=opensuse
     fi
@@ -181,6 +195,11 @@ debian)     debian_prepare
 opensuse)   opensuse_prepare
             install_lib_strophe /usr/local
             sudo /sbin/ldconfig
+            install_profanity
+            ;;
+centos)     centos_prepare
+            install_lib_strophe /usr
+            sudo ldconfig
             install_profanity
             ;;
 cygwin)     cygwin_prepare
