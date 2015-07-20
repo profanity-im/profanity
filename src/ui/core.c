@@ -101,10 +101,6 @@ ui_init(void)
     cbreak();
     noecho();
     keypad(stdscr, TRUE);
-    if (prefs_get_boolean(PREF_MOUSE)) {
-        mousemask(ALL_MOUSE_EVENTS, NULL);
-        mouseinterval(5);
-    }
     ui_load_colours();
     refresh();
     create_title_bar();

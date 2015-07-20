@@ -955,20 +955,16 @@ cons_time_setting(void)
 {
     char *pref_time = prefs_get_string(PREF_TIME);
     if (g_strcmp0(pref_time, "off") == 0)
-        cons_show("Time (/time)                  : OFF");
+        cons_show("Time main (/time)             : OFF");
     else
-        cons_show("Time (/time)                  : %s", pref_time);
-
+        cons_show("Time main (/time)             : %s", pref_time);
     prefs_free_string(pref_time);
 
     char *pref_time_statusbar = prefs_get_string(PREF_TIME_STATUSBAR);
-    if (g_strcmp0(pref_time_statusbar, "minutes") == 0)
-        cons_show("Time statusbar (/time)        : minutes");
-    else if (g_strcmp0(pref_time_statusbar, "off") == 0)
+    if (g_strcmp0(pref_time_statusbar, "off") == 0)
         cons_show("Time statusbar (/time)        : OFF");
     else
-        cons_show("Time statusbar (/time)        : seconds");
-
+        cons_show("Time statusbar (/time)        : %s", pref_time_statusbar);
     prefs_free_string(pref_time_statusbar);
 }
 
@@ -979,15 +975,6 @@ cons_vercheck_setting(void)
         cons_show("Version checking (/vercheck)  : ON");
     else
         cons_show("Version checking (/vercheck)  : OFF");
-}
-
-void
-cons_mouse_setting(void)
-{
-    if (prefs_get_boolean(PREF_MOUSE))
-        cons_show("Mouse handling (/mouse)       : ON");
-    else
-        cons_show("Mouse handling (/mouse)       : OFF");
 }
 
 void
@@ -1066,7 +1053,6 @@ cons_show_ui_prefs(void)
     cons_time_setting();
     cons_resource_setting();
     cons_vercheck_setting();
-    cons_mouse_setting();
     cons_statuses_setting();
     cons_occupants_setting();
     cons_roster_setting();

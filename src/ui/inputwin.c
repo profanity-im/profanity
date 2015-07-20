@@ -286,7 +286,7 @@ _inp_printable(const wint_t ch)
     bytes[utf_len] = '\0';
     gunichar unichar = g_utf8_get_char(bytes);
 
-    return g_unichar_isprint(unichar) && (ch != KEY_MOUSE);
+    return g_unichar_isprint(unichar);
 }
 
 static int
