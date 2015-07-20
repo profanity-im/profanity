@@ -7,8 +7,8 @@
 - Message Delivery Receipts (xep-0184)
 - MUC Mediated Invitation support
 - Configurable time formatting
-- Show JIDs in roster
-- Hide empty groups in roster
+- Option to show JIDs in roster
+- Option to hide empty groups in roster
 - Generate UUID for unnamed new MUC rooms
 
 0.4.6
