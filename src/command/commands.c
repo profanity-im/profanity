@@ -795,7 +795,7 @@ cmd_help(ProfWin *window, gchar **args, struct cmd_help_t help)
         GList *curr = ordered_commands;
         while (curr) {
             Command *cmd = curr->data;
-            cons_show("%-12s: %s", cmd->cmd, cmd->help.short_help);
+            cons_show("%-13s: %s", cmd->cmd, cmd->help.short_help);
             curr = g_list_next(curr);
         }
         g_list_free(ordered_commands);
