@@ -373,6 +373,10 @@ stanza_create_roster_remove_set(xmpp_ctx_t *ctx, const char * const barejid)
     xmpp_stanza_set_name(iq, STANZA_NAME_IQ);
     xmpp_stanza_set_type(iq, STANZA_TYPE_SET);
 
+    char *id = create_unique_id("roster");
+    xmpp_stanza_set_id(iq, id);
+    free(id);
+
     xmpp_stanza_t *query = xmpp_stanza_new(ctx);
     xmpp_stanza_set_name(query, STANZA_NAME_QUERY);
     xmpp_stanza_set_ns(query, XMPP_NS_ROSTER);
