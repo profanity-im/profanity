@@ -67,12 +67,8 @@ void
 sends_remove_item(void **state)
 {
     prof_connect_with_roster(
-        "<iq type=\"result\" to=\"stabber@localhost/profanity\">"
-            "<query xmlns=\"jabber:iq:roster\" ver=\"362\">"
-                "<item jid=\"buddy1@localhost\" subscription=\"both\"/>"
-                "<item jid=\"buddy2@localhost\" subscription=\"both\"/>"
-            "</query>"
-        "</iq>"
+        "<item jid=\"buddy1@localhost\" subscription=\"both\"/>"
+        "<item jid=\"buddy2@localhost\" subscription=\"both\"/>"
     );
 
     stbbr_for_query("jabber:iq:roster",
@@ -100,11 +96,7 @@ void
 sends_nick_change(void **state)
 {
     prof_connect_with_roster(
-        "<iq type=\"result\" to=\"stabber@localhost/profanity\">"
-            "<query xmlns=\"jabber:iq:roster\" ver=\"362\">"
-                "<item jid=\"buddy1@localhost\" subscription=\"both\"/>"
-            "</query>"
-        "</iq>"
+        "<item jid=\"buddy1@localhost\" subscription=\"both\"/>"
     );
 
     prof_input("/roster nick buddy1@localhost Buddy1");
