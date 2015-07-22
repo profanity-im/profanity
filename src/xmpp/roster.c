@@ -102,7 +102,9 @@ roster_send_add_new(const char * const barejid, const char * const name)
 {
     xmpp_conn_t * const conn = connection_get_conn();
     xmpp_ctx_t * const ctx = connection_get_ctx();
-    xmpp_stanza_t *iq = stanza_create_roster_set(ctx, NULL, barejid, name, NULL);
+    char *id = create_unique_id("roster");
+    xmpp_stanza_t *iq = stanza_create_roster_set(ctx, id, barejid, name, NULL);
+    free(id);
     xmpp_send(conn, iq);
     xmpp_stanza_release(iq);
 }
@@ -122,8 +124,9 @@ roster_send_name_change(const char * const barejid, const char * const new_name,
 {
     xmpp_conn_t * const conn = connection_get_conn();
     xmpp_ctx_t * const ctx = connection_get_ctx();
-    xmpp_stanza_t *iq = stanza_create_roster_set(ctx, NULL, barejid, new_name,
-        groups);
+    char *id = create_unique_id("roster");
+    xmpp_stanza_t *iq = stanza_create_roster_set(ctx, id, barejid, new_name, groups);
+    free(id);
     xmpp_send(conn, iq);
     xmpp_stanza_release(iq);
 }
