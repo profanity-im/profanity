@@ -212,7 +212,18 @@ prof_output_regex(char *text)
 void
 prof_connect_with_roster(char *roster)
 {
-    stbbr_for_query("jabber:iq:roster", roster);
+    GString *roster_str = g_string_new(
+        "<iq type=\"result\" to=\"stabber@localhost/profanity\">"
+            "<query xmlns=\"jabber:iq:roster\" ver=\"362\">"
+    );
+    g_string_append(roster_str, roster);
+    g_string_append(roster_str,
+            "</query>"
+        "</iq>"
+    );
+
+    stbbr_for_query("jabber:iq:roster", roster_str->str);
+    g_string_free(roster_str, TRUE);
 
     stbbr_for_id("prof_presence_1",
         "<presence id=\"prof_presence_1\" lang=\"en\" to=\"stabber@localhost/profanity\" from=\"stabber@localhost/profanity\">"
@@ -235,11 +246,7 @@ void
 prof_connect(void)
 {
     prof_connect_with_roster(
-        "<iq type=\"result\" to=\"stabber@localhost/profanity\">"
-            "<query xmlns=\"jabber:iq:roster\" ver=\"362\">"
-                "<item jid=\"buddy1@localhost\" subscription=\"both\" name=\"Buddy1\"/>"
-                "<item jid=\"buddy2@localhost\" subscription=\"both\" name=\"Buddy2\"/>"
-            "</query>"
-        "</iq>"
+        "<item jid=\"buddy1@localhost\" subscription=\"both\" name=\"Buddy1\"/>"
+        "<item jid=\"buddy2@localhost\" subscription=\"both\" name=\"Buddy2\"/>"
     );
 }
