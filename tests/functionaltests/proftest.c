@@ -210,16 +210,10 @@ prof_output_regex(char *text)
 }
 
 void
-prof_connect(void)
+prof_connect_with_roster(char *roster)
 {
-    stbbr_for_query("jabber:iq:roster",
-        "<iq type=\"result\" to=\"stabber@localhost/profanity\">"
-            "<query xmlns=\"jabber:iq:roster\" ver=\"362\">"
-                "<item jid=\"buddy1@localhost\" subscription=\"both\" name=\"Buddy1\"/>"
-                "<item jid=\"buddy2@localhost\" subscription=\"both\" name=\"Buddy2\"/>"
-            "</query>"
-        "</iq>"
-    );
+    stbbr_for_query("jabber:iq:roster", roster);
+
     stbbr_for_id("prof_presence_1",
         "<presence id=\"prof_presence_1\" lang=\"en\" to=\"stabber@localhost/profanity\" from=\"stabber@localhost/profanity\">"
             "<priority>0</priority>"
@@ -235,4 +229,17 @@ prof_connect(void)
     assert_true(prof_output_regex("stabber@localhost logged in successfully, .+online.+ \\(priority 0\\)\\."));
     exp_timeout = 10;
     stbbr_wait_for("prof_presence_*");
+}
+
+void
+prof_connect(void)
+{
+    prof_connect_with_roster(
+        "<iq type=\"result\" to=\"stabber@localhost/profanity\">"
+            "<query xmlns=\"jabber:iq:roster\" ver=\"362\">"
+                "<item jid=\"buddy1@localhost\" subscription=\"both\" name=\"Buddy1\"/>"
+                "<item jid=\"buddy2@localhost\" subscription=\"both\" name=\"Buddy2\"/>"
+            "</query>"
+        "</iq>"
+    );
 }
