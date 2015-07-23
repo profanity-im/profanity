@@ -172,37 +172,48 @@ static struct cmd_t command_defs[] =
             NULL } }
         },
 
-    // OLD STYLE
-
     { "/disconnect",
         cmd_disconnect, parse_args, 0, 0, NULL,
-        { "/disconnect", "Logout of current session.",
-        { "/disconnect",
-          "-----------",
-          "Disconnect from the current chat service.",
-          NULL,
-          NULL, NULL, NULL, NULL } } },
+        { NULL, NULL, { NULL },
+        {
+            "/disconnect",
+            NULL
+        },
+            "Disconnect from the current chat service.",
+        {
+            END_ARGS },
+        {
+            NULL } }
+        },
 
     { "/msg",
         cmd_msg, parse_args_with_freetext, 1, 2, NULL,
-        { "/msg contact|nick [message]", "Start chat with a user.",
-        { "/msg contact|nick [message]",
-          "---------------------------",
-          "Send a one to one chat message, or a private message to a chat room occupant.",
-          "",
-          "contact : The contact's JID, or nickname if one has been set in your roster.",
-          "nick    : A chat room occupant, to whom you wish to send a private message.",
-          "message : The message to send",
-          "",
-          "If the message is omitted, a new chat window will be opened without sending a message.",
-          "Use quotes if the nickname includes spaces.",
-          "",
-          "Example: /msg myfriend@server.com Hey, here's a message!",
-          "Example: /msg otherfriend@server.com",
-          "Example: /msg Bob Here is a private message",
-          "Example: /msg \"My Friend\" Hi, how are you?",
-          NULL,
-          NULL, NULL, NULL, NULL } } },
+        { NULL, NULL, { NULL },
+        {
+            "/msg <contact> [<message>]",
+            "/msg <nick> [<message>]",
+            NULL
+        },
+            "Send a one to one chat message, or a private message to a chat room occupant. "
+            "If the message is omitted, a new chat window will be opened without sending a message. "
+            "Use quotes if the nickname includes spaces.",
+        {
+            { "<contact>", "Open chat window with contact, by JID or nickname." },
+            { "<contact> [<message>]", "Send message to contact, by JID or nickname." },
+            { "<nick>", "Open private chat window with chat room occupant." },
+            { "<nick> [<message>]", "Send a private message to a chat room occupant." },
+            END_ARGS },
+        {
+            "/msg myfriend@server.com Hey, here's a message!",
+            "/msg otherfriend@server.com",
+            "/msg Bob Here is a private message",
+            "/msg \"My Friend\" Hi, how are you?",
+            NULL } }
+        },
+
+    // OLD STYLE
+
+
 
     { "/roster",
         cmd_roster, parse_args_with_freetext, 0, 3, NULL,
