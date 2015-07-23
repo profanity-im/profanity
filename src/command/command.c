@@ -104,68 +104,75 @@ static char * _receipts_autocomplete(ProfWin *window, const char * const input);
 
 GHashTable *commands = NULL;
 
+#define END_ARGS { NULL, NULL }
+
+
+
 /*
  * Command list
  */
 static struct cmd_t command_defs[] =
 {
     // NEW STYLE
-    { "/help", cmd_help, parse_args, 0, 1, NULL,
-    { NULL, NULL, { NULL },
-    {
-        "/help [<area>|<command>]",
-        NULL },
+    { "/help",
+        cmd_help, parse_args, 0, 1, NULL,
+        { NULL, NULL, { NULL },
+        {
+            "/help [<area>|<command>]",
+            NULL
+        },
+            "Help on using Profanity. Passing no arguments list help areas.",
+        {
+            { "area",    "Summary help for commands in a certain area of functionality." },
+            { "command", "Full help for a specific command, for example '/help connect'." },
+            END_ARGS },
+        {
+            "/help commands",
+            "/help presence",
+            "/help who",
+            NULL } }
+        },
 
-    "Help on using Profanity. Passing no arguments list help areas.",
-
-    {
-        { "area", "Summary help for commands in a certain area of functionality." },
-        { "command", "Full help for a specific command, for example '/help connect'." },
-        { NULL, NULL } },
-
-    {
-        "/help commands",
-        "/help presence",
-        "/help who",
-        NULL } } },
-
-    { "/about", cmd_about, parse_args, 0, 0, NULL,
-    { NULL, NULL, { NULL },
-    {
-        "/about",
-        NULL },
-
-    "Show version and license information.",
-
-    {
-        { NULL, NULL } },
-
-    {
-        NULL } } },
-
-    // OLD STYLE
+    { "/about",
+        cmd_about, parse_args, 0, 0, NULL,
+        { NULL, NULL, { NULL },
+        {
+            "/about",
+            NULL
+        },
+            "Show version and license information.",
+        {
+            END_ARGS },
+        {
+            NULL } }
+        },
 
     { "/connect",
         cmd_connect, parse_args, 0, 5, NULL,
-        { "/connect [account] [server value] [port value]", "Account login.",
-        { "/connect [account] [server value] [port value]",
-          "----------------------------------------------",
-          "Login to a chat service.",
-          "",
-          "account      : The local account you wish to connect with, or a JID if connecting for the first time.",
-          "server value : Supply a server if it is different to the domain part of your JID.",
-          "port value   : The port to use if different to the default (5222, or 5223 for SSL).",
-          "",
-          "If no account is specified, the default is used if one is configured.",
-          "A local account is created with the JID as it's name if it doesn't already exist.",
-          "",
-          "Example: /connect",
-          "Example: /connect myuser@gmail.com",
-          "Example: /connect myuser@mycompany.com server talk.google.com",
-          "Example: /connect bob@someplace port 5678",
-          "Example: /connect me@chatty server chatty.com port 5443",
-          NULL,
-          NULL, NULL, NULL, NULL } } },
+        { NULL, NULL, { NULL },
+        {
+            "/connect [<account>]",
+            "/connect <account> [server <server>] [port <port>]",
+            NULL
+        },
+            "Login to a chat service. "
+            "If no account is specified, the default is used if one is configured. "
+            "A local account is created with the JID as it's name if it doesn't already exist.",
+        {
+            { "account",         "The local account you wish to connect with, or a JID if connecting for the first time." },
+            { "server <server>", "Supply a server if it is different to the domain part of your JID." },
+            { "port <port>",     "The port to use if different to the default (5222, or 5223 for SSL)." },
+            END_ARGS },
+        {
+            "/connect",
+            "/connect myuser@gmail.com",
+            "/connect myuser@mycompany.com server talk.google.com",
+            "/connect bob@someplace port 5678",
+            "/connect me@chatty server chatty.com port 5443",
+            NULL } }
+        },
+
+    // OLD STYLE
 
     { "/disconnect",
         cmd_disconnect, parse_args, 0, 0, NULL,

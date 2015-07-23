@@ -112,11 +112,11 @@ cons_show_help(Command *command)
 
     cons_show("");
 
-    cons_show("Synopsis:");
+    win_print(console, '-', NULL, 0, THEME_WHITE_BOLD, "", "Synopsis");
     ui_show_lines(console, command->help.synopsis);
     cons_show("");
 
-    cons_show("Description:");
+    win_print(console, '-', NULL, 0, THEME_WHITE_BOLD, "", "Description");
     win_println(console, command->help.desc);
 
     int i;
@@ -128,7 +128,7 @@ cons_show_help(Command *command)
 
     if (i > 0) {
         cons_show("");
-        cons_show("Arguments:");
+        win_print(console, '-', NULL, 0, THEME_WHITE_BOLD, "", "Arguments");
         for (i = 0; command->help.args[i][0] != NULL; i++) {
             win_vprint(console, '-', NULL, 0, 0, "", "%-*s: %s", maxlen + 1, command->help.args[i][0], command->help.args[i][1]);
         }
@@ -136,7 +136,7 @@ cons_show_help(Command *command)
 
     if (g_strv_length((gchar**)command->help.examples) > 0) {
         cons_show("");
-        cons_show("Examples:");
+        win_print(console, '-', NULL, 0, THEME_WHITE_BOLD, "", "Examples");
         ui_show_lines(console, command->help.examples);
     }
 }
