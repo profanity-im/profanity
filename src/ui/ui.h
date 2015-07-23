@@ -35,6 +35,7 @@
 #ifndef UI_UI_H
 #define UI_UI_H
 
+#include "command/commands.h"
 #include "ui/win_types.h"
 #include "muc.h"
 
@@ -241,6 +242,7 @@ void ui_inp_history_append(char *inp);
 void cons_show(const char * const msg, ...);
 void cons_about(void);
 void cons_help(void);
+void cons_show_help(Command *command);
 void cons_navigation_help(void);
 void cons_prefs(void);
 void cons_show_ui_prefs(void);

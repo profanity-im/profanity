@@ -852,21 +852,22 @@ cmd_help(ProfWin *window, gchar **args, struct cmd_help_t help)
         char cmd_with_slash[1 + strlen(cmd) + 1];
         sprintf(cmd_with_slash, "/%s", cmd);
 
-        const gchar **help_text = NULL;
         Command *command = g_hash_table_lookup(commands, cmd_with_slash);
-
         if (command) {
-            help_text = command->help.long_help;
-        }
+            // old
+            if (command->help.usage) {
+                const gchar **help_text = command->help.long_help;
+                ProfWin *console = wins_get_console();
+                cons_show("");
+                ui_show_lines(console, help_text);
 
-        cons_show("");
-        if (help_text) {
-            ProfWin *console = wins_get_console();
-            ui_show_lines(console, help_text);
+            // new
+            } else {
+                cons_show_help(command);
+            }
         } else {
             cons_show("No such command.");
         }
-
         cons_show("");
     }
 

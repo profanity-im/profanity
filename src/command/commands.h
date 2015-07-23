@@ -35,13 +35,18 @@
 #ifndef COMMANDS_H
 #define COMMANDS_H
 
-#include "ui/ui.h"
+#include "ui/win_types.h"
 
 // Command help strings
 typedef struct cmd_help_t {
     const gchar *usage;
     const gchar *short_help;
     const gchar *long_help[50];
+
+    const gchar *synopsis[50];
+    const gchar *desc;
+    const gchar *args[50][2];
+    const gchar *examples[10];
 } CommandHelp;
 
 /*

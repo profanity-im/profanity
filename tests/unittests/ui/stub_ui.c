@@ -358,6 +358,8 @@ void cons_show(const char * const msg, ...)
     va_end(args);
 }
 
+void cons_show_help(Command *command) {}
+
 void cons_about(void) {}
 void cons_help(void) {}
 void cons_navigation_help(void) {}

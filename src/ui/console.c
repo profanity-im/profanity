@@ -106,6 +106,42 @@ cons_show(const char * const msg, ...)
 }
 
 void
+cons_show_help(Command *command)
+{
+    ProfWin *console = wins_get_console();
+
+    cons_show("");
+
+    cons_show("Synopsis:");
+    ui_show_lines(console, command->help.synopsis);
+    cons_show("");
+
+    cons_show("Description:");
+    win_println(console, command->help.desc);
+
+    int i;
+    int maxlen = 0;
+    for (i = 0; command->help.args[i][0] != NULL; i++) {
+        if (strlen(command->help.args[i][0]) > maxlen)
+            maxlen = strlen(command->help.args[i][0]);
+    }
+
+    if (i > 0) {
+        cons_show("");
+        cons_show("Arguments:");
+        for (i = 0; command->help.args[i][0] != NULL; i++) {
+            win_vprint(console, '-', NULL, 0, 0, "", "%-*s: %s", maxlen + 1, command->help.args[i][0], command->help.args[i][1]);
+        }
+    }
+
+    if (g_strv_length((gchar**)command->help.examples) > 0) {
+        cons_show("");
+        cons_show("Examples:");
+        ui_show_lines(console, command->help.examples);
+    }
+}
+
+void
 cons_show_error(const char * const msg, ...)
 {
     ProfWin *console = wins_get_console();

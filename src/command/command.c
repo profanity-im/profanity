@@ -109,30 +109,41 @@ GHashTable *commands = NULL;
  */
 static struct cmd_t command_defs[] =
 {
-    { "/help",
-        cmd_help, parse_args, 0, 1, NULL,
-        { "/help [area|command]", "Help on using Profanity.",
-        { "/help [area|command]",
-          "--------------------",
-          "Help on using Profanity.",
-          "",
-          "area    : Summary help for commands in a certain area of functionality.",
-          "command : Full help for a specific command, for example '/help connect'.",
-          "",
-          "Use with no arguments to see a list of areas.",
-          "",
-          "Example: /help commands",
-          "Example: /help presence",
-          "Example: /help who",
-          NULL } } },
+    // NEW STYLE
+    { "/help", cmd_help, parse_args, 0, 1, NULL,
+    { NULL, NULL, { NULL },
+    {
+        "/help [<area>|<command>]",
+        NULL },
 
-    { "/about",
-        cmd_about, parse_args, 0, 0, NULL,
-        { "/about", "About Profanity.",
-        { "/about",
-          "------",
-          "Show version and license information.",
-          NULL  } } },
+    "Help on using Profanity. Passing no arguments list help areas.",
+
+    {
+        { "area", "Summary help for commands in a certain area of functionality." },
+        { "command", "Full help for a specific command, for example '/help connect'." },
+        { NULL, NULL } },
+
+    {
+        "/help commands",
+        "/help presence",
+        "/help who",
+        NULL } } },
+
+    { "/about", cmd_about, parse_args, 0, 0, NULL,
+    { NULL, NULL, { NULL },
+    {
+        "/about",
+        NULL },
+
+    "Show version and license information.",
+
+    {
+        { NULL, NULL } },
+
+    {
+        NULL } } },
+
+    // OLD STYLE
 
     { "/connect",
         cmd_connect, parse_args, 0, 5, NULL,
@@ -153,7 +164,8 @@ static struct cmd_t command_defs[] =
           "Example: /connect myuser@mycompany.com server talk.google.com",
           "Example: /connect bob@someplace port 5678",
           "Example: /connect me@chatty server chatty.com port 5443",
-          NULL  } } },
+          NULL,
+          NULL, NULL, NULL, NULL } } },
 
     { "/disconnect",
         cmd_disconnect, parse_args, 0, 0, NULL,
@@ -161,7 +173,8 @@ static struct cmd_t command_defs[] =
         { "/disconnect",
           "-----------",
           "Disconnect from the current chat service.",
-          NULL  } } },
+          NULL,
+          NULL, NULL, NULL, NULL } } },
 
     { "/msg",
         cmd_msg, parse_args_with_freetext, 1, 2, NULL,
@@ -181,7 +194,8 @@ static struct cmd_t command_defs[] =
           "Example: /msg otherfriend@server.com",
           "Example: /msg Bob Here is a private message",
           "Example: /msg \"My Friend\" Hi, how are you?",
-          NULL } } },
+          NULL,
+          NULL, NULL, NULL, NULL } } },
 
     { "/roster",
         cmd_roster, parse_args_with_freetext, 0, 3, NULL,
@@ -219,7 +233,8 @@ static struct cmd_t command_defs[] =
           "Example: /roster remove someone@contacts.org (remove the contact)",
           "Example: /roster nick myfriend@chat.org My Friend",
           "Example: /roster clearnick kai@server.com (clears nickname)",
-          NULL } } },
+          NULL,
+          NULL, NULL, NULL, NULL } } },
 
     { "/group",
         cmd_group, parse_args_with_freetext, 0, 3, NULL,
@@ -239,7 +254,8 @@ static struct cmd_t command_defs[] =
           "Example: /group add friends newfriend@server.org",
           "Example: /group add family Brother (using contacts nickname)",
           "Example: /group remove colleagues boss@work.com",
-          NULL } } },
+          NULL,
+          NULL, NULL, NULL, NULL } } },
 
     { "/info",
         cmd_info, parse_args, 0, 1, NULL,
@@ -256,7 +272,8 @@ static struct cmd_t command_defs[] =
           "",
           "Example: /info mybuddy@chat.server.org",
           "Example: /info kai",
-          NULL } } },
+          NULL,
+          NULL, NULL, NULL, NULL } } },
 
     { "/caps",
         cmd_caps, parse_args, 0, 1, NULL,
@@ -273,7 +290,8 @@ static struct cmd_t command_defs[] =
           "Example: /caps mybuddy@chat.server.org/laptop (contact's laptop resource)",
           "Example: /caps mybuddy@chat.server.org/phone (contact's phone resource)",
           "Example: /caps bruce (room member)",
-          NULL } } },
+          NULL,
+          NULL, NULL, NULL, NULL } } },
 
     { "/software",
         cmd_software, parse_args, 0, 1, NULL,
@@ -291,7 +309,8 @@ static struct cmd_t command_defs[] =
           "Example: /software mybuddy@chat.server.org/laptop (contact's laptop resource)",
           "Example: /software mybuddy@chat.server.org/phone (contact's phone resource)",
           "Example: /software bruce (room member)",
-          NULL } } },
+          NULL,
+          NULL, NULL, NULL, NULL } } },
 
     { "/status",
         cmd_status, parse_args, 0, 1, NULL,
@@ -307,7 +326,8 @@ static struct cmd_t command_defs[] =
           "",
           "Example: /status buddy@server.com",
           "Example: /status jon",
-          NULL } } },
+          NULL,
+          NULL, NULL, NULL, NULL } } },
 
     { "/resource",
         cmd_resource, parse_args, 1, 2, &cons_resource_setting,
@@ -320,7 +340,8 @@ static struct cmd_t command_defs[] =
           "off            : Let the server choose which resource to route messages to.",
           "title on|off   : Show or hide the current resource in the titlebar.",
           "message on|off : Show or hide the resource when showing an incoming message.",
-          NULL } } },
+          NULL,
+          NULL, NULL, NULL, NULL } } },
 
     { "/join",
         cmd_join, parse_args, 0, 5, NULL,
@@ -342,7 +363,8 @@ static struct cmd_t command_defs[] =
           "Example: /join jdev@conference.jabber.org nick mynick",
           "Example: /join private@conference.jabber.org nick mynick password mypassword",
           "Example: /join jdev (as user@jabber.org will join jdev@conference.jabber.org)",
-          NULL } } },
+          NULL,
+          NULL, NULL, NULL, NULL } } },
 
     { "/leave",
         cmd_leave, parse_args, 0, 0, NULL,
@@ -350,7 +372,8 @@ static struct cmd_t command_defs[] =
         { "/leave",
           "------",
           "Leave the current chat room.",
-          NULL } } },
+          NULL,
+          NULL, NULL, NULL, NULL } } },
 
     { "/invite",
         cmd_invite, parse_args_with_freetext, 1, 2, NULL,
@@ -361,7 +384,8 @@ static struct cmd_t command_defs[] =
           "",
           "contact : The contact you wish to invite",
           "message : An optional message to send with the invite.",
-          NULL } } },
+          NULL,
+          NULL, NULL, NULL, NULL } } },
 
     { "/invites",
         cmd_invites, parse_args_with_freetext, 0, 0, NULL,
@@ -369,7 +393,8 @@ static struct cmd_t command_defs[] =
         { "/invites",
           "--------",
           "Show all rooms that you have been invited to, and not accepted or declined.",
-          NULL } } },
+          NULL,
+          NULL, NULL, NULL, NULL } } },
 
     { "/decline",
         cmd_decline, parse_args_with_freetext, 1, 1, NULL,
@@ -379,7 +404,8 @@ static struct cmd_t command_defs[] =
           "Decline a chat room invitation.",
           "",
           "room : The room for the invite you wish to decline.",
-          NULL } } },
+          NULL,
+          NULL, NULL, NULL, NULL } } },
 
     { "/room",
         cmd_room, parse_args, 1, 1, NULL,
@@ -391,7 +417,8 @@ static struct cmd_t command_defs[] =
           "accept  : Accept default room configuration.",
           "destroy : Reject default room configuration.",
           "config  : Edit room configuration.",
-          NULL } } },
+          NULL,
+          NULL, NULL, NULL, NULL } } },
 
     { "/kick",
         cmd_kick, parse_args_with_freetext, 1, 2, NULL,
@@ -402,7 +429,8 @@ static struct cmd_t command_defs[] =
           "",
           "nick   : Nickname of the occupant to kick from the room.",
           "reason : Optional reason for kicking the occupant.",
-          NULL } } },
+          NULL,
+          NULL, NULL, NULL, NULL } } },
 
     { "/ban",
         cmd_ban, parse_args_with_freetext, 1, 2, NULL,
@@ -413,7 +441,8 @@ static struct cmd_t command_defs[] =
           "",
           "jid    : Bare JID of the user to ban from the room.",
           "reason : Optional reason for banning the user.",
-          NULL } } },
+          NULL,
+          NULL, NULL, NULL, NULL } } },
 
     { "/subject",
         cmd_subject, parse_args_with_freetext, 0, 2, NULL,
@@ -424,7 +453,8 @@ static struct cmd_t command_defs[] =
           "",
           "set subject  : Set the room subject.",
           "clear        : Clear the room subject.",
-          NULL } } },
+          NULL,
+          NULL, NULL, NULL, NULL } } },
 
     { "/affiliation",
         cmd_affiliation, parse_args_with_freetext, 1, 4, NULL,
@@ -437,7 +467,8 @@ static struct cmd_t command_defs[] =
           "list [affiliation]          : List all users with the specified affiliation, or all if none specified.",
           "",
           "The affiliation may be one of owner, admin, member, outcast or none.",
-          NULL } } },
+          NULL,
+          NULL, NULL, NULL, NULL } } },
 
     { "/role",
         cmd_role, parse_args_with_freetext, 1, 4, NULL,
@@ -450,7 +481,8 @@ static struct cmd_t command_defs[] =
           "list [role]            : List all occupants with the specified role, or all if none specified.",
           "",
           "The role may be one of moderator, participant, visitor or none.",
-          NULL } } },
+          NULL,
+          NULL, NULL, NULL, NULL } } },
 
     { "/occupants",
         cmd_occupants, parse_args, 1, 3, cons_occupants_setting,
@@ -466,7 +498,8 @@ static struct cmd_t command_defs[] =
           "default show|hide       : Whether occupants are shown by default in new rooms.",
           "default show|hide jid   : Whether occupants jids are shown by default in new rooms.",
           "size percent            : Percentage of the screen taken by the occupants list in rooms (1-99).",
-          NULL } } },
+          NULL,
+          NULL, NULL, NULL, NULL } } },
 
     { "/form",
         cmd_form, parse_args, 1, 2, NULL,
@@ -479,7 +512,8 @@ static struct cmd_t command_defs[] =
           "submit           : Submit the current form.",
           "cancel           : Cancel changes to the current form.",
           "help [tag]       : Display help for form, or a specific field.",
-          NULL } } },
+          NULL,
+          NULL, NULL, NULL, NULL } } },
 
     { "/rooms",
         cmd_rooms, parse_args, 0, 1, NULL,
@@ -494,7 +528,8 @@ static struct cmd_t command_defs[] =
           "",
           "Example: /rooms conference.jabber.org",
           "Example: /rooms (if logged in as me@server.org, is equivalent to /rooms conference.server.org)",
-          NULL } } },
+          NULL,
+          NULL, NULL, NULL, NULL } } },
 
     { "/bookmark",
         cmd_bookmark, parse_args, 0, 8, NULL,
@@ -515,7 +550,8 @@ static struct cmd_t command_defs[] =
           "join room@server                  : Join room using the properties associated with the bookmark.",
           "",
           "In a chat room, /bookmark with no arguments will bookmark the current room, setting autojoin to \"on\".",
-          NULL } } },
+          NULL,
+          NULL, NULL, NULL, NULL } } },
 
     { "/disco",
         cmd_disco, parse_args, 1, 2, NULL,
@@ -532,7 +568,8 @@ static struct cmd_t command_defs[] =
           "Example: /disco items myserver.org",
           "Example: /disco items conference.jabber.org",
           "Example: /disco info myfriend@server.com/laptop",
-          NULL } } },
+          NULL,
+          NULL, NULL, NULL, NULL } } },
 
     { "/nick",
         cmd_nick, parse_args_with_freetext, 1, 1, NULL,
@@ -545,7 +582,8 @@ static struct cmd_t command_defs[] =
           "",
           "Example: /nick kai hansen",
           "Example: /nick bob",
-          NULL } } },
+          NULL,
+          NULL, NULL, NULL, NULL } } },
 
     { "/win",
         cmd_win, parse_args, 1, 1, NULL,
@@ -555,7 +593,8 @@ static struct cmd_t command_defs[] =
           "Show the contents of a specific window in the main window area.",
           "",
           "num - Window number to display.",
-          NULL } } },
+          NULL,
+          NULL, NULL, NULL, NULL } } },
 
     { "/wins",
         cmd_wins, parse_args, 0, 3, NULL,
@@ -569,7 +608,8 @@ static struct cmd_t command_defs[] =
           "swap source target : Swap windows, target may be an empty position.",
           "",
           "Passing no argument will list all currently active windows and information about their usage.",
-          NULL } } },
+          NULL,
+          NULL, NULL, NULL, NULL } } },
 
     { "/sub",
         cmd_sub, parse_args, 1, 2, NULL,
@@ -591,7 +631,8 @@ static struct cmd_t command_defs[] =
           "Example: /sub allow myfriend@jabber.org",
           "Example: /sub request (whilst in chat with contact)",
           "Example: /sub sent",
-          NULL  } } },
+          NULL,
+          NULL, NULL, NULL, NULL } } },
 
     { "/tiny",
         cmd_tiny, parse_args, 1, 1, NULL,
@@ -603,7 +644,8 @@ static struct cmd_t command_defs[] =
           "url : The url to make tiny.",
           "",
           "Example: /tiny http://www.profanity.im",
-          NULL } } },
+          NULL,
+          NULL, NULL, NULL, NULL } } },
 
     { "/who",
         cmd_who, parse_args, 0, 2, NULL,
@@ -620,7 +662,8 @@ static struct cmd_t command_defs[] =
           "role        : moderator|participant|visitor",
           "affiliation : owner|admin|member",
           "group       : Filter the results by the specified group.",
-          NULL } } },
+          NULL,
+          NULL, NULL, NULL, NULL } } },
 
     { "/close",
         cmd_close, parse_args, 0, 1, NULL,
@@ -634,7 +677,8 @@ static struct cmd_t command_defs[] =
           "read : Close all windows that have no new messages.",
           "",
           "Passing no argument will close the current window.",
-          NULL } } },
+          NULL,
+          NULL, NULL, NULL, NULL } } },
 
     { "/clear",
         cmd_clear, parse_args, 0, 0, NULL,
@@ -642,7 +686,8 @@ static struct cmd_t command_defs[] =
         { "/clear",
           "------",
           "Clear the current window.",
-          NULL } } },
+          NULL,
+          NULL, NULL, NULL, NULL } } },
 
     { "/quit",
         cmd_quit, parse_args, 0, 0, NULL,
@@ -650,7 +695,8 @@ static struct cmd_t command_defs[] =
         { "/quit",
           "-----",
           "Logout of any current session, and quit Profanity.",
-          NULL } } },
+          NULL,
+          NULL, NULL, NULL, NULL } } },
 
     { "/privileges",
         cmd_privileges, parse_args, 1, 1, &cons_privileges_setting,
@@ -658,7 +704,8 @@ static struct cmd_t command_defs[] =
         { "/privileges on|off",
           "------------------",
           "If enabled the room occupants panel will be grouped by role, and role information will be shown in the room.",
-          NULL } } },
+          NULL,
+          NULL, NULL, NULL, NULL } } },
 
     { "/beep",
         cmd_beep, parse_args, 1, 1, &cons_beep_setting,
@@ -668,7 +715,8 @@ static struct cmd_t command_defs[] =
           "Switch the terminal bell on or off.",
           "The bell will sound when incoming messages are received.",
           "If the terminal does not support sounds, it may attempt to flash the screen instead.",
-          NULL } } },
+          NULL,
+          NULL, NULL, NULL, NULL } } },
 
     { "/encwarn",
         cmd_encwarn, parse_args, 1, 1, &cons_encwarn_setting,
@@ -676,7 +724,8 @@ static struct cmd_t command_defs[] =
         { "/encwarn on|off",
           "---------------",
           "Enabled or disable the unencrypted warning message in the titlebar.",
-          NULL } } },
+          NULL,
+          NULL, NULL, NULL, NULL } } },
 
     { "/presence",
         cmd_presence, parse_args, 1, 1, &cons_presence_setting,
@@ -684,7 +733,8 @@ static struct cmd_t command_defs[] =
         { "/presence on|off",
           "----------------",
           "Switch display of the contacts presence in the titlebar on or off.",
-          NULL } } },
+          NULL,
+          NULL, NULL, NULL, NULL } } },
 
     { "/wrap",
         cmd_wrap, parse_args, 1, 1, &cons_wrap_setting,
@@ -692,7 +742,8 @@ static struct cmd_t command_defs[] =
         { "/wrap on|off",
           "------------",
           "Enable or disable word wrapping in the main window.",
-          NULL } } },
+          NULL,
+          NULL, NULL, NULL, NULL } } },
 
     { "/winstidy",
         cmd_winstidy, parse_args, 1, 1, &cons_winstidy_setting,
@@ -700,7 +751,8 @@ static struct cmd_t command_defs[] =
         { "/winstidy on|off",
           "----------------",
           "Enable or disable auto window tidy.",
-          NULL } } },
+          NULL,
+          NULL, NULL, NULL, NULL } } },
 
     { "/time",
         cmd_time, parse_args, 1, 3, &cons_time_setting,
@@ -718,7 +770,8 @@ static struct cmd_t command_defs[] =
           "See https://developer.gnome.org/glib/stable/glib-GDateTime.html#g-date-time-format for more details.",
           "Example: /time main set %H:%M (main time will be set to HH:MM)",
           "Example: /time statusbar set yolo (statusbar time will all be changed to a static yolo)",
-          NULL } } },
+          NULL,
+          NULL, NULL, NULL, NULL } } },
 
     { "/inpblock",
         cmd_inpblock, parse_args, 2, 2, &cons_inpblock_setting,
@@ -729,7 +782,8 @@ static struct cmd_t command_defs[] =
           "",
           "timeout millis : Time to wait (1-1000) in milliseconds before reading input from the terminal buffer, default: 1000.",
           "dynamic on|off : Start with 0 millis and dynamically increase up to timeout when no activity, default: on.",
-          NULL } } },
+          NULL,
+          NULL, NULL, NULL, NULL } } },
 
     { "/notify",
         cmd_notify, parse_args, 2, 3, &cons_notify_setting,
@@ -759,7 +813,8 @@ static struct cmd_t command_defs[] =
           "Example: /notify remind 0 (switch off reminders)",
           "Example: /notify typing on (enable typing notifications)",
           "Example: /notify invite on (enable chat room invite notifications)",
-          NULL } } },
+          NULL,
+          NULL, NULL, NULL, NULL } } },
 
     { "/flash",
         cmd_flash, parse_args, 1, 1, &cons_flash_setting,
@@ -768,7 +823,8 @@ static struct cmd_t command_defs[] =
           "-------------",
           "Make the terminal flash when incoming messages are received in another window.",
           "If the terminal doesn't support flashing, it may attempt to beep.",
-          NULL } } },
+          NULL,
+          NULL, NULL, NULL, NULL } } },
 
     { "/intype",
         cmd_intype, parse_args, 1, 1, &cons_intype_setting,
@@ -776,7 +832,8 @@ static struct cmd_t command_defs[] =
         { "/intype on|off",
           "--------------",
           "Show when a contact is typing in the console, and in active message window.",
-          NULL } } },
+          NULL,
+          NULL, NULL, NULL, NULL } } },
 
     { "/splash",
         cmd_splash, parse_args, 1, 1, &cons_splash_setting,
@@ -784,7 +841,8 @@ static struct cmd_t command_defs[] =
         { "/splash on|off",
           "--------------",
           "Switch on or off the ascii logo on start up and when the /about command is called.",
-          NULL } } },
+          NULL,
+          NULL, NULL, NULL, NULL } } },
 
     { "/autoconnect",
         cmd_autoconnect, parse_args, 1, 2, &cons_autoconnect_setting,
@@ -796,7 +854,8 @@ static struct cmd_t command_defs[] =
           "",
           "Example: /autoconnect set jc@stuntteam.org (autoconnect with the specified account).",
           "Example: /autoconnect off (disable autoconnect).",
-          NULL } } },
+          NULL,
+          NULL, NULL, NULL, NULL } } },
 
     { "/vercheck",
         cmd_vercheck, parse_args, 0, 1, NULL,
@@ -804,7 +863,8 @@ static struct cmd_t command_defs[] =
         { "/vercheck [on|off]",
           "------------------",
           "Enable/disable a version check when Profanity starts, and each time the /about command is run.",
-          NULL  } } },
+          NULL,
+          NULL, NULL, NULL, NULL } } },
 
     { "/titlebar",
         cmd_titlebar, parse_args, 2, 2, &cons_titlebar_setting,
@@ -815,7 +875,8 @@ static struct cmd_t command_defs[] =
           "",
           "show    : Show current logged in user, and unread messages in the title.",
           "goodbye : Show a message in the title when exiting profanity.",
-          NULL  } } },
+          NULL,
+          NULL, NULL, NULL, NULL } } },
 
     { "/alias",
         cmd_alias, parse_args_with_freetext, 1, 3, NULL,
@@ -835,7 +896,8 @@ static struct cmd_t command_defs[] =
           "Example: /alias list",
           "",
           "The above aliases will be available as /friends and /a",
-          NULL } } },
+          NULL,
+          NULL, NULL, NULL, NULL } } },
 
     { "/chlog",
         cmd_chlog, parse_args, 1, 1, &cons_chlog_setting,
@@ -846,7 +908,8 @@ static struct cmd_t command_defs[] =
           "This setting will be enabled if /history is set to on.",
           "When disabling this option, /history will also be disabled.",
           "See the /grlog setting for enabling logging of chat room (groupchat) messages.",
-          NULL } } },
+          NULL,
+          NULL, NULL, NULL, NULL } } },
 
     { "/grlog",
         cmd_grlog, parse_args, 1, 1, &cons_grlog_setting,
@@ -855,7 +918,8 @@ static struct cmd_t command_defs[] =
           "-------------",
           "Switch chat room logging on or off.",
           "See the /chlog setting for enabling logging of one to one chat.",
-          NULL } } },
+          NULL,
+          NULL, NULL, NULL, NULL } } },
 
     { "/states",
         cmd_states, parse_args, 1, 1, &cons_states_setting,
@@ -863,7 +927,8 @@ static struct cmd_t command_defs[] =
         { "/states on|off",
           "--------------",
           "Send chat state notifications during chat sessions.",
-          NULL } } },
+          NULL,
+          NULL, NULL, NULL, NULL } } },
 
     { "/pgp",
         cmd_pgp, parse_args, 1, 3, NULL,
@@ -879,7 +944,8 @@ static struct cmd_t command_defs[] =
           "start [contact]      : Start PGP encrypted chat, current contact will be used if not specified.",
           "end                  : End PGP encrypted chat with the current recipient.",
           "log on|off|redact    : PGP message logging, default: redact.",
-          NULL } } },
+          NULL,
+          NULL, NULL, NULL, NULL } } },
 
     { "/otr",
         cmd_otr, parse_args, 1, 3, NULL,
@@ -902,7 +968,8 @@ static struct cmd_t command_defs[] =
           "secret [secret]                    : Verify a contacts identity using a shared secret.",
           "question [question] [answer]       : Verify a contacts identity using a question and expected answer.",
           "answer [answer]                    : Respond to a question answer verification request with your answer.",
-          NULL } } },
+          NULL,
+          NULL, NULL, NULL, NULL } } },
 
     { "/outtype",
         cmd_outtype, parse_args, 1, 1, &cons_outtype_setting,
@@ -910,7 +977,8 @@ static struct cmd_t command_defs[] =
         { "/outtype on|off",
           "---------------",
           "Send typing notifications, chat states (/states) will be enabled if this setting is set.",
-          NULL } } },
+          NULL,
+          NULL, NULL, NULL, NULL } } },
 
     { "/gone",
         cmd_gone, parse_args, 1, 1, &cons_gone_setting,
@@ -920,7 +988,8 @@ static struct cmd_t command_defs[] =
           "Send a 'gone' state to the recipient after the specified number of minutes.",
           "A value of 0 will disable sending this chat state.",
           "Chat states (/states) will be enabled if this setting is set.",
-          NULL } } },
+          NULL,
+          NULL, NULL, NULL, NULL } } },
 
     { "/history",
         cmd_history, parse_args, 1, 1, &cons_history_setting,
@@ -929,7 +998,8 @@ static struct cmd_t command_defs[] =
           "---------------",
           "Switch chat history on or off, /chlog will automatically be enabled when this setting is on.",
           "When history is enabled, previous messages are shown in chat windows.",
-          NULL } } },
+          NULL,
+          NULL, NULL, NULL, NULL } } },
 
     { "/log",
         cmd_log, parse_args, 1, 2, &cons_log_setting,
@@ -942,7 +1012,8 @@ static struct cmd_t command_defs[] =
           "rotate on|off : Rotate log, default on.",
           "maxsize bytes : With rotate enabled, specifies the max log size, defaults to 1048580 (1MB).",
           "shared on|off : Share logs between all instances, default: on.",
-          NULL } } },
+          NULL,
+          NULL, NULL, NULL, NULL } } },
 
     { "/carbons",
       cmd_carbons, parse_args, 1, 1, &cons_carbons_setting,
@@ -951,7 +1022,8 @@ static struct cmd_t command_defs[] =
         "---------------",
         "Enable or disable message carbons.",
         "The message carbons feature ensures that both sides of all conversations are shared with all the user's clients that implement this protocol.",
-        NULL  } } },
+          NULL,
+          NULL, NULL, NULL, NULL } } },
 
     { "/receipts",
       cmd_receipts, parse_args, 2, 2, &cons_receipts_setting,
@@ -962,7 +1034,8 @@ static struct cmd_t command_defs[] =
         "",
         "send on|off    : Enable or disable sending of delivery receipts.",
         "request on|off : Enable or disable sending of delivery receipt requests.",
-        NULL  } } },
+          NULL,
+          NULL, NULL, NULL, NULL } } },
 
     { "/reconnect",
         cmd_reconnect, parse_args, 1, 1, &cons_reconnect_setting,
@@ -971,7 +1044,8 @@ static struct cmd_t command_defs[] =
           "------------------",
           "Set the reconnect attempt interval in seconds for when the connection is lost.",
           "A value of 0 will switch off reconnect attempts.",
-          NULL } } },
+          NULL,
+          NULL, NULL, NULL, NULL } } },
 
     { "/autoping",
         cmd_autoping, parse_args, 1, 1, &cons_autoping_setting,
@@ -980,7 +1054,8 @@ static struct cmd_t command_defs[] =
           "-----------------",
           "Set the number of seconds between server pings, so ensure connection kept alive.",
           "A value of 0 will switch off autopinging the server.",
-          NULL } } },
+          NULL,
+          NULL, NULL, NULL, NULL } } },
 
     { "/ping",
         cmd_ping, parse_args, 0, 1, NULL,
@@ -989,7 +1064,8 @@ static struct cmd_t command_defs[] =
           "--------------",
           "Sends an IQ ping stanza to the specified target.",
           "If no target is supplied, your chat server will be pinged.",
-          NULL } } },
+          NULL,
+          NULL, NULL, NULL, NULL } } },
 
     { "/autoaway",
         cmd_autoaway, parse_args_with_freetext, 2, 2, &cons_autoaway_setting,
@@ -1009,7 +1085,8 @@ static struct cmd_t command_defs[] =
           "Example: /autoaway time 30",
           "Example: /autoaway message I'm not really doing much",
           "Example: /autoaway check off",
-          NULL } } },
+          NULL,
+          NULL, NULL, NULL, NULL } } },
 
     { "/priority",
         cmd_priority, parse_args, 1, 1, &cons_priority_setting,
@@ -1021,7 +1098,8 @@ static struct cmd_t command_defs[] =
           "value : Number between -128 and 127, default: 0.",
           "",
           "See the /account command for specific priority settings per presence status.",
-          NULL } } },
+          NULL,
+          NULL, NULL, NULL, NULL } } },
 
     { "/account",
         cmd_account, parse_args, 0, 4, NULL,
@@ -1064,7 +1142,8 @@ static struct cmd_t command_defs[] =
           "Example: /account set me status dnd",
           "Example: /account set me dnd -1",
           "Example: /account rename me gtalk",
-          NULL  } } },
+          NULL,
+          NULL, NULL, NULL, NULL } } },
 
     { "/prefs",
         cmd_prefs, parse_args, 0, 1, NULL,
@@ -1081,7 +1160,8 @@ static struct cmd_t command_defs[] =
           "presence : Chat presence preferences.",
           "",
           "No argument shows all preferences.",
-          NULL } } },
+          NULL,
+          NULL, NULL, NULL, NULL } } },
 
     { "/theme",
         cmd_theme, parse_args, 1, 2, &cons_theme_setting,
@@ -1096,8 +1176,8 @@ static struct cmd_t command_defs[] =
           "",
           "Example: /theme list",
           "Example: /theme load mycooltheme",
-          NULL } } },
-
+          NULL,
+          NULL, NULL, NULL, NULL } } },
 
     { "/statuses",
         cmd_statuses, parse_args, 2, 2, &cons_statuses_setting,
@@ -1121,7 +1201,8 @@ static struct cmd_t command_defs[] =
           "Example: /statuses console none",
           "Example: /statuses chat online",
           "Example: /statuses muc all",
-          NULL } } },
+          NULL,
+          NULL, NULL, NULL, NULL } } },
 
     { "/xmlconsole",
         cmd_xmlconsole, parse_args, 0, 0, NULL,
@@ -1129,7 +1210,8 @@ static struct cmd_t command_defs[] =
         { "/xmlconsole",
           "-----------",
           "Open the XML console to view incoming and outgoing XMPP traffic.",
-          NULL } } },
+          NULL,
+          NULL, NULL, NULL, NULL } } },
 
     { "/away",
         cmd_away, parse_args_with_freetext, 0, 1, NULL,
@@ -1139,7 +1221,8 @@ static struct cmd_t command_defs[] =
           "Set your status to 'away' with the optional message.",
           "",
           "Example: /away Gone for lunch",
-          NULL } } },
+          NULL,
+          NULL, NULL, NULL, NULL } } },
 
     { "/chat",
         cmd_chat, parse_args_with_freetext, 0, 1, NULL,
@@ -1149,7 +1232,8 @@ static struct cmd_t command_defs[] =
           "Set your status to 'chat', meaning 'available for chat', with the optional message.",
           "",
           "Example: /chat Please talk to me!",
-          NULL } } },
+          NULL,
+          NULL, NULL, NULL, NULL } } },
 
     { "/dnd",
         cmd_dnd, parse_args_with_freetext, 0, 1, NULL,
@@ -1159,7 +1243,8 @@ static struct cmd_t command_defs[] =
           "Set your status to 'dnd', meaning 'do not disturb', with the optional message.",
           "",
           "Example: /dnd I'm in the zone",
-          NULL } } },
+          NULL,
+          NULL, NULL, NULL, NULL } } },
 
     { "/online",
         cmd_online, parse_args_with_freetext, 0, 1, NULL,
@@ -1169,7 +1254,8 @@ static struct cmd_t command_defs[] =
           "Set your status to 'online' with the optional message.",
           "",
           "Example: /online Up the Irons!",
-          NULL } } },
+          NULL,
+          NULL, NULL, NULL, NULL } } },
 
     { "/xa",
         cmd_xa, parse_args_with_freetext, 0, 1, NULL,
@@ -1179,7 +1265,8 @@ static struct cmd_t command_defs[] =
           "Set your status to 'xa', meaning 'extended away', with the optional message.",
           "",
           "Example: /xa This meeting is going to be a long one",
-          NULL } } },
+          NULL,
+          NULL, NULL, NULL, NULL } } },
 };
 
 static Autocomplete commands_ac;
