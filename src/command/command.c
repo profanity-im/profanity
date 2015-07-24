@@ -198,10 +198,10 @@ static struct cmd_t command_defs[] =
             "If the message is omitted, a new chat window will be opened without sending a message. "
             "Use quotes if the nickname includes spaces.",
         {
-            { "<contact>", "Open chat window with contact, by JID or nickname." },
+            { "<contact>",             "Open chat window with contact, by JID or nickname." },
             { "<contact> [<message>]", "Send message to contact, by JID or nickname." },
-            { "<nick>", "Open private chat window with chat room occupant." },
-            { "<nick> [<message>]", "Send a private message to a chat room occupant." },
+            { "<nick>",                "Open private chat window with chat room occupant." },
+            { "<nick> [<message>]",    "Send a private message to a chat room occupant." },
             END_ARGS },
         {
             "/msg myfriend@server.com Hey, here's a message!",
@@ -211,48 +211,60 @@ static struct cmd_t command_defs[] =
             NULL } }
         },
 
-    // OLD STYLE
-
-
-
     { "/roster",
         cmd_roster, parse_args_with_freetext, 0, 3, NULL,
-        { "/roster [command] [args..]", "Manage your roster.",
-        { "/roster [command] [args..]",
-          "--------------------------",
-          "Manage your roster, and roster display settings.",
-          "",
-          "command - online|show|hide|by|size|add|remove|remove_all|nick|clearnick",
-          "",
-          "online              : Show all online contacts in your roster.",
-          "show                : Show the roster panel.",
-          "show offline        : Show offline contacts in the roster panel.",
-          "show resource       : Show contact's connected resources in the roster panel.",
-          "show empty          : When grouping by presence, show empty presence groups",
-          "hide                : Hide the roster panel.",
-          "hide offline        : Hide offline contacts in the roster panel.",
-          "hide resource       : Hide contact's connected resources in the roster panel.",
-          "hide empty          : When grouping by presence, hide empty presence groups",
-          "by group            : Group contacts in the roster panel by roster group.",
-          "by presence         : Group contacts in the roster panel by presence.",
-          "by none             : No grouping in the roster panel.",
-          "size                : Percentage of the screen taken up by the roster (1-99).",
-          "add jid [nick]      : Add a new item to the roster.",
-          "remove jid          : Removes an item from the roster.",
-          "remove_all contacts : Remove all items from roster.",
-          "nick jid nick       : Change a contacts nickname.",
-          "clearnick jid       : Removes the current nickname.",
-          "",
+        { NULL, NULL, { NULL },
+        {
+            "/roster",
+            "/roster online",
+            "/roster show [offline|resource|empty]",
+            "/roster hide [offline|resource|empty]",
+            "/roster by group|presence|none",
+            "/roster size <percent>",
+            "/roster add <jid> [<nick>]",
+            "/roster remove <jid>",
+            "/roster remove_all contacts",
+            "/roster nick <jid> <nick>",
+            "/roster clearnick <jid>",
+            NULL
+        },
+          "Manage your roster, and roster display settings. "
           "Passing no arguments lists all contacts in your roster.",
-          "",
-          "Example: /roster (show your roster)",
-          "Example: /roster add someone@contacts.org (add the contact)",
-          "Example: /roster add someone@contacts.org Buddy (add the contact with nickname 'Buddy')",
-          "Example: /roster remove someone@contacts.org (remove the contact)",
-          "Example: /roster nick myfriend@chat.org My Friend",
-          "Example: /roster clearnick kai@server.com (clears nickname)",
-          NULL,
-          NULL, NULL, NULL, NULL } } },
+        {
+            { "online",              "Show all online contacts in your roster." },
+            { "show",                "Show the roster panel." },
+            { "show offline",        "Show offline contacts in the roster panel." },
+            { "show resource",       "Show contact's connected resources in the roster panel." },
+            { "show empty",          "When grouping by presence, show empty presence groups." },
+            { "show empty",          "When grouping by presence, show empty presence groups." },
+            { "hide",                "Hide the roster panel." },
+            { "hide offline",        "Hide offline contacts in the roster panel." },
+            { "hide resource",       "Hide contact's connected resources in the roster panel." },
+            { "hide empty",          "When grouping by presence, hide empty presence groups." },
+            { "by group",            "Group contacts in the roster panel by roster group." },
+            { "by presence",         "Group contacts in the roster panel by presence." },
+            { "by none",             "No grouping in the roster panel." },
+            { "size <precent>",      "Percentage of the screen taken up by the roster (1-99)." },
+            { "add <jid> [<nick>]",  "Add a new item to the roster." },
+            { "remove <jid>",        "Removes an item from the roster." },
+            { "remove_all contacts", "Remove all items from roster." },
+            { "nick <jid> <nick>",   "Change a contacts nickname." },
+            { "clearnick <jid>",     "Removes the current nickname." },
+            END_ARGS },
+        {
+            "/roster",
+            "/roster add someone@contacts.org",
+            "/roster add someone@contacts.org Buddy",
+            "/roster remove someone@contacts.org",
+            "/roster nick myfriend@chat.org My Friend",
+            "/roster clearnick kai@server.com",
+            "/roster size 15",
+            NULL } }
+        },
+
+
+    // OLD STYLE
+
 
     { "/group",
         cmd_group, parse_args_with_freetext, 0, 3, NULL,
