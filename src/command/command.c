@@ -262,651 +262,891 @@ static struct cmd_t command_defs[] =
             NULL } }
         },
 
-
-    // OLD STYLE
-
-
     { "/group",
         cmd_group, parse_args_with_freetext, 0, 3, NULL,
-        { "/group [show|add|remove] [group] [contact]", "Manage roster groups.",
-        { "/group [show|add|remove] [group] [contact]",
-          "------------------------------------------",
-          "View, add to, and remove from roster groups.",
-          "",
-          "show group           : List all roster items a group.",
-          "add group contact    : Added a contact to a group.",
-          "remove group contact : Remove a contact from a group.",
-          "",
+        { NULL, NULL, { NULL },
+        {
+            "/group",
+            "/group show <group>",
+            "/group remove <group> <contact>",
+            NULL
+        },
+          "View, add to, and remove from roster groups. "
           "Passing no argument will list all roster groups.",
-          "",
-          "Example: /group",
-          "Example: /group show friends",
-          "Example: /group add friends newfriend@server.org",
-          "Example: /group add family Brother (using contacts nickname)",
-          "Example: /group remove colleagues boss@work.com",
-          NULL,
-          NULL, NULL, NULL, NULL } } },
+        {
+            { "show <group>",             "List all roster items a group." },
+            { "add <group> <contact>",    "Add a contact to a group." },
+            { "remove <group> <contact>", "Remove a contact from a group." },
+            END_ARGS },
+        {
+            "/group",
+            "/group show friends",
+            "/group add friends newfriend@server.org",
+            "/group add family Brother",
+            "/group remove colleagues boss@work.com",
+            NULL } }
+        },
 
     { "/info",
         cmd_info, parse_args, 0, 1, NULL,
-        { "/info [contact|nick]", "Show information about a contact, room, or room member.",
-        { "/info [contact|nick]",
-          "--------------------",
-          "Show information about a contact, room, or room member.",
-          "",
-          "contact : The contact you wish to view information about.",
-          "nick    : When in a chat room, the occupant you wish to view information about.",
-          "",
-          "Passing no argument in a chat window will use the current recipient.",
+        { NULL, NULL, { NULL },
+        {
+            "/info",
+            "/info <contact>|<nick>",
+            NULL
+        },
+          "Show information about a contact, room, or room member. "
+          "Passing no argument in a chat window will use the current recipient. "
           "Passing no argument in a chat room will display information about the room.",
-          "",
-          "Example: /info mybuddy@chat.server.org",
-          "Example: /info kai",
-          NULL,
-          NULL, NULL, NULL, NULL } } },
+        {
+            { "contact", "The contact you wish to view information about." },
+            { "nick",    "When in a chat room, the occupant you wish to view information about." },
+            END_ARGS },
+        {
+            "/info mybuddy@chat.server.org",
+            "/info kai",
+            NULL } }
+        },
 
     { "/caps",
         cmd_caps, parse_args, 0, 1, NULL,
-        { "/caps [fulljid|nick]", "Find out a contacts client software capabilities.",
-        { "/caps [fulljid|nick]",
-          "--------------------",
-          "Find out a contacts, or room members client software capabilities.",
-          "",
-          "fulljid : If in the console or a chat window, the full JID for which you wish to see capabilities.",
-          "nick    : If in a chat room, nickname for which you wish to see capabilities.",
-          "",
-          "If in private chat initiated from a chat room, no parameter is required.",
-          "",
-          "Example: /caps mybuddy@chat.server.org/laptop (contact's laptop resource)",
-          "Example: /caps mybuddy@chat.server.org/phone (contact's phone resource)",
-          "Example: /caps bruce (room member)",
-          NULL,
-          NULL, NULL, NULL, NULL } } },
+        { NULL, NULL, { NULL },
+        {
+            "/caps",
+            "/caps <fulljid>|<nick>",
+            NULL
+        },
+            "Find out a contacts, or room members client software capabilities. "
+            "If in private chat initiated from a chat room, no parameter is required.",
+        {
+            { "fulljid", "If in the console or a chat window, the full JID for which you wish to see capabilities." },
+            { "nick",    "If in a chat room, nickname for which you wish to see capabilities." },
+            END_ARGS },
+        {
+            "/caps mybuddy@chat.server.org/laptop",
+            "/caps mybuddy@chat.server.org/phone",
+            "/caps bruce",
+            NULL } }
+        },
 
     { "/software",
         cmd_software, parse_args, 0, 1, NULL,
-        { "/software [fulljid|nick]", "Find out software version information about a contacts resource.",
-        { "/software [fulljid|nick]",
-          "------------------------",
-          "Find out a contact, or room members software version information.",
-          "",
-          "fulljid : If in the console or a chat window, the full JID for which you wish to see software information.",
-          "nick    : If in a chat room, nickname for which you wish to see software information.",
-          "",
-          "If in private chat initiated from a chat room, no parameter is required.",
+        { NULL, NULL, { NULL },
+        {
+            "/software",
+            "/software <fulljid>|<nick>",
+            NULL
+        },
+          "Find out a contact, or room members software version information. "
+          "If in private chat initiated from a chat room, no parameter is required. "
           "If the contact's software does not support software version requests, nothing will be displayed.",
-          "",
-          "Example: /software mybuddy@chat.server.org/laptop (contact's laptop resource)",
-          "Example: /software mybuddy@chat.server.org/phone (contact's phone resource)",
-          "Example: /software bruce (room member)",
-          NULL,
-          NULL, NULL, NULL, NULL } } },
+        {
+            { "fulljid", "If in the console or a chat window, the full JID for which you wish to see software information." },
+            { "nick",    "If in a chat room, nickname for which you wish to see software information." },
+            END_ARGS },
+        {
+            "/software mybuddy@chat.server.org/laptop",
+            "/software mybuddy@chat.server.org/phone",
+            "/software bruce",
+            NULL } }
+        },
 
     { "/status",
         cmd_status, parse_args, 0, 1, NULL,
-        { "/status [contact|nick]", "Find out a contacts presence information.",
-        { "/status [contact|nick]",
-          "----------------------",
-          "Find out a contact, or room members presence information.",
-          "",
-          "contact : The contact who's presence you which to see.",
-          "nick    : If in a chat room, the occupant who's presence you wish to see.",
-          "",
+        { NULL, NULL, { NULL },
+        {
+            "/status",
+            "/status <contact>|<nick>",
+            NULL
+        },
+          "Find out a contact, or room members presence information. "
           "If in a chat window the parameter is not required, the current recipient will be used.",
-          "",
-          "Example: /status buddy@server.com",
-          "Example: /status jon",
-          NULL,
-          NULL, NULL, NULL, NULL } } },
+        {
+            { "contact", "The contact who's presence you which to see." },
+            { "nick",    "If in a chat room, the occupant who's presence you wish to see." },
+            END_ARGS },
+        {
+            "/status buddy@server.com",
+            "/status jon",
+            NULL } }
+        },
 
     { "/resource",
         cmd_resource, parse_args, 1, 2, &cons_resource_setting,
-        { "/resource set|off|title|message [resource]", "Set the contact's resource, display settings.",
-        { "/resource set|off|title|message [resource]",
-          "------------------------------------------",
-          "Override chat session resource, and manage resource display settings.",
-          "",
-          "set resource   : Set the resource to which messages will be sent.",
-          "off            : Let the server choose which resource to route messages to.",
-          "title on|off   : Show or hide the current resource in the titlebar.",
-          "message on|off : Show or hide the resource when showing an incoming message.",
-          NULL,
-          NULL, NULL, NULL, NULL } } },
+        { NULL, NULL, { NULL },
+        {
+            "/resource set <resource>",
+            "/resource off",
+            "/resource title on|off",
+            "/resource message on|off",
+            NULL
+        },
+            "Override chat session resource, and manage resource display settings.",
+        {
+            { "set <resource>", "Set the resource to which messages will be sent." },
+            { "off",            "Let the server choose which resource to route messages to." },
+            { "title on|off",   "Show or hide the current resource in the titlebar." },
+            { "message on|off", "Show or hide the resource when showing an incoming message." },
+            END_ARGS },
+        {
+            NULL } }
+        },
 
     { "/join",
         cmd_join, parse_args, 0, 5, NULL,
-        { "/join [room] [nick value] [password value]", "Join a chat room.",
-        { "/join [room] [nick value] [password value]",
-          "-----------------------------------------",
-          "Join a chat room at the conference server.",
-          "",
-          "room           : Bare room JID (the chat server is determined by the 'muc.service' account property) or full room jid."
-          "nick value     : Nickname to use in the room",
-          "password value : Password if the room requires it.",
-          "",
-          "If no room is supplied, a generated name will be used with the format private-chat-[UUID].",
-          "If no nickname is specified the account preference 'muc.nick' will be used which by default is the localpart of your JID.",
-          "If the room doesn't exist, and the server allows it, a new one will be created.",
-          "",
-          "Example: /join",
-          "Example: /join jdev@conference.jabber.org",
-          "Example: /join jdev@conference.jabber.org nick mynick",
-          "Example: /join private@conference.jabber.org nick mynick password mypassword",
-          "Example: /join jdev (as user@jabber.org will join jdev@conference.jabber.org)",
-          NULL,
-          NULL, NULL, NULL, NULL } } },
+        { NULL, NULL, { NULL },
+        {
+            "/join",
+            "/join <room> [nick <nick>] [password <password>]",
+            NULL
+        },
+            "Join a chat room at the conference server. "
+            "If no room is supplied, a generated name will be used with the format private-chat-[UUID]. "
+            "If the domain part is not included in the room name, the account preference 'muc.service' will be used. "
+            "If no nickname is specified the account preference 'muc.nick' will be used which by default is the localpart of your JID. "
+            "If the room doesn't exist, and the server allows it, a new one will be created.",
+        {
+            { "<room>",                "The chat room to join." },
+            { "nick <nick>",         "Nickname to use in the room." },
+            { "password <password>", "Password if the room requires one." },
+            END_ARGS },
+        {
+            "/join",
+            "/join jdev@conference.jabber.org",
+            "/join jdev@conference.jabber.org nick mynick",
+            "/join private@conference.jabber.org nick mynick password mypassword",
+            "/join jdev",
+            NULL } }
+        },
 
     { "/leave",
         cmd_leave, parse_args, 0, 0, NULL,
-        { "/leave", "Leave a chat room.",
-        { "/leave",
-          "------",
-          "Leave the current chat room.",
-          NULL,
-          NULL, NULL, NULL, NULL } } },
+        { NULL, NULL, { NULL },
+        {
+            "/leave",
+            NULL
+        },
+            "Leave the current chat room.",
+        {
+            END_ARGS },
+        {
+            NULL } }
+        },
 
     { "/invite",
         cmd_invite, parse_args_with_freetext, 1, 2, NULL,
-        { "/invite contact [message]", "Invite contact to chat room.",
-        { "/invite contact [message]",
-          "-------------------------",
-          "Send a direct invite to the current chat room.",
-          "",
-          "contact : The contact you wish to invite",
-          "message : An optional message to send with the invite.",
-          NULL,
-          NULL, NULL, NULL, NULL } } },
+        { NULL, NULL, { NULL },
+        {
+            "/invite <contact> [<message>]",
+            NULL
+        },
+            "Send an invite to a contact for the current chat room.",
+        {
+            { "<contact>", "The contact you wish to invite." },
+            { "<message>", "An optional message to send with the invite." },
+            END_ARGS },
+        {
+            NULL } }
+        },
 
     { "/invites",
         cmd_invites, parse_args_with_freetext, 0, 0, NULL,
-        { "/invites", "Show outstanding chat room invites.",
-        { "/invites",
-          "--------",
-          "Show all rooms that you have been invited to, and not accepted or declined.",
-          NULL,
-          NULL, NULL, NULL, NULL } } },
+        { NULL, NULL, { NULL },
+        {
+            "/invites",
+            NULL
+        },
+            "Show all rooms that you have been invited to, and not accepted or declined.",
+        {
+            END_ARGS },
+        {
+            NULL } }
+        },
 
     { "/decline",
         cmd_decline, parse_args_with_freetext, 1, 1, NULL,
-        { "/decline room", "Decline a chat room invite.",
-        { "/decline room",
-          "-------------",
-          "Decline a chat room invitation.",
-          "",
-          "room : The room for the invite you wish to decline.",
-          NULL,
-          NULL, NULL, NULL, NULL } } },
+        { NULL, NULL, { NULL },
+        {
+            "/decline <room>",
+            NULL
+        },
+            "Decline a chat room invitation.",
+        {
+            { "<room>", "The room for the invite you wish to decline." },
+            END_ARGS },
+        {
+            NULL } }
+        },
 
     { "/room",
         cmd_room, parse_args, 1, 1, NULL,
-        { "/room accept|destroy|config", "Room configuration.",
-        { "/room accept|destroy|config",
-          "---------------------------",
-          "Chat room configuration.",
-          "",
-          "accept  : Accept default room configuration.",
-          "destroy : Reject default room configuration.",
-          "config  : Edit room configuration.",
-          NULL,
-          NULL, NULL, NULL, NULL } } },
+        { NULL, NULL, { NULL },
+        {
+            "/room accept|destroy|config",
+            NULL
+        },
+            "Chat room configuration.",
+        {
+            { "accept",  "Accept default room configuration." },
+            { "destroy", "Reject default room configuration, and destroy the room." },
+            { "config",  "Edit room configuration." },
+            END_ARGS },
+        {
+            NULL } }
+        },
 
     { "/kick",
         cmd_kick, parse_args_with_freetext, 1, 2, NULL,
-        { "/kick nick [reason]", "Kick occupants from chat rooms.",
-        { "/kick nick [reason]",
-          "-------------------",
-          "Kick occupants from chat rooms.",
-          "",
-          "nick   : Nickname of the occupant to kick from the room.",
-          "reason : Optional reason for kicking the occupant.",
-          NULL,
-          NULL, NULL, NULL, NULL } } },
+        { NULL, NULL, { NULL },
+        {
+            "/kick <nick> [<reason>]",
+            NULL
+        },
+            "Kick occupant from chat room.",
+        {
+            { "<nick>",   "Nickname of the occupant to kick from the room." },
+            { "<reason>", "Optional reason for kicking the occupant." },
+            END_ARGS },
+        {
+            NULL } }
+        },
 
     { "/ban",
         cmd_ban, parse_args_with_freetext, 1, 2, NULL,
-        { "/ban jid [reason]", "Ban users from chat rooms.",
-        { "/ban jid [reason]",
-          "-----------------",
-          "Ban users from chat rooms.",
-          "",
-          "jid    : Bare JID of the user to ban from the room.",
-          "reason : Optional reason for banning the user.",
-          NULL,
-          NULL, NULL, NULL, NULL } } },
+        { NULL, NULL, { NULL },
+        {
+            "/ban <jid> [<reason>]",
+            NULL
+        },
+            "Ban user from chat room.",
+        {
+            { "<jid>",    "Bare JID of the user to ban from the room." },
+            { "<reason>", "Optional reason for banning the user." },
+            END_ARGS },
+        {
+            NULL } }
+        },
 
     { "/subject",
         cmd_subject, parse_args_with_freetext, 0, 2, NULL,
-        { "/subject set|clear [subject]", "Set or clear room subject.",
-        { "/subject set|clear [subject]",
-          "----------------------------",
-          "Set or clear room subject.",
-          "",
-          "set subject  : Set the room subject.",
-          "clear        : Clear the room subject.",
-          NULL,
-          NULL, NULL, NULL, NULL } } },
+        { NULL, NULL, { NULL },
+        {
+            "/subject set <subject>",
+            "/subject clear",
+            NULL
+        },
+            "Set or clear room subject.",
+        {
+            { "set <subject>", "Set the room subject." },
+            { "clear",         "Clear the room subject." },
+            END_ARGS },
+        {
+            NULL } }
+        },
 
     { "/affiliation",
         cmd_affiliation, parse_args_with_freetext, 1, 4, NULL,
-        { "/affiliation set|list [affiliation] [jid] [reason]", "Manage room affiliations.",
-        { "/affiliation set|list [affiliation] [jid] [reason]",
-          "--------------------------------------------------",
-          "Manage room affiliations.",
-          "",
-          "set affiliation jid [reason]: Set the affiliation of user with jid, with an optional reason.",
-          "list [affiliation]          : List all users with the specified affiliation, or all if none specified.",
-          "",
-          "The affiliation may be one of owner, admin, member, outcast or none.",
-          NULL,
-          NULL, NULL, NULL, NULL } } },
+        { NULL, NULL, { NULL },
+        {
+            "/affiliation set <affiliation> <jid> [<reason>]",
+            "/list [<affiliation>]",
+            NULL
+        },
+            "Manage room affiliations. "
+            "Affiliation may be one of owner, admin, member, outcast or none.",
+        {
+            { "set <affiliation> <jid> [<reason>]", "Set the affiliation of user with jid, with an optional reason." },
+            { "list [<affiliation>]",               "List all users with the specified affiliation, or all if none specified." },
+            END_ARGS },
+        {
+            NULL } }
+        },
 
     { "/role",
         cmd_role, parse_args_with_freetext, 1, 4, NULL,
-        { "/role set|list [role] [nick] [reason]", "Manage room roles.",
-        { "/role set|list [role] [nick] [reason]",
-          "-------------------------------------",
-          "Manage room roles.",
-          "",
-          "set role nick [reason] : Set the role of occupant with nick, with an optional reason.",
-          "list [role]            : List all occupants with the specified role, or all if none specified.",
-          "",
-          "The role may be one of moderator, participant, visitor or none.",
-          NULL,
-          NULL, NULL, NULL, NULL } } },
+        { NULL, NULL, { NULL },
+        {
+            "/role set <role> <nick> [<reason>]",
+            "/list [<role>]",
+            NULL
+        },
+            "Manage room roles. "
+            "Role may be one of moderator, participant, visitor or none.",
+        {
+            { "set <role> <nick> [<reason>]", "Set the role of occupant with nick, with an optional reason." },
+            { "list [<role>]",                "List all occupants with the specified role, or all if none specified." },
+            END_ARGS },
+        {
+            NULL } }
+        },
 
     { "/occupants",
         cmd_occupants, parse_args, 1, 3, cons_occupants_setting,
-        { "/occupants show|hide|default|size [jid|show|hide|percent] [jid]", "Show or hide room occupants.",
-        { "/occupants show|hide|default|size [jid|show|hide|percent] [jid]",
-          "---------------------------------------------------------------",
-          "Show or hide room occupants, and occupants panel display settings.",
-          "",
-          "show                    : Show the occupants panel in current room.",
-          "hide                    : Hide the occupants panel in current room.",
-          "show jid                : Show jid in the occupants panel in current room.",
-          "hide jid                : Hide jid in the occupants panel in current room.",
-          "default show|hide       : Whether occupants are shown by default in new rooms.",
-          "default show|hide jid   : Whether occupants jids are shown by default in new rooms.",
-          "size percent            : Percentage of the screen taken by the occupants list in rooms (1-99).",
-          NULL,
-          NULL, NULL, NULL, NULL } } },
+        { NULL, NULL, { NULL },
+        {
+            "/occupants show|hide [jid]",
+            "/occupants default show|hide [jid]",
+            "/occupants size [<percent>]",
+            NULL
+        },
+            "Show or hide room occupants, and occupants panel display settings.",
+        {
+            { "show",                  "Show the occupants panel in current room." },
+            { "hide",                  "Hide the occupants panel in current room." },
+            { "show jid",              "Show jid in the occupants panel in current room." },
+            { "hide jid",              "Hide jid in the occupants panel in current room." },
+            { "default show|hide",     "Whether occupants are shown by default in new rooms." },
+            { "default show|hide jid", "Whether occupants jids are shown by default in new rooms." },
+            { "size <percent>",        "Percentage of the screen taken by the occupants list in rooms (1-99)." },
+            END_ARGS },
+        {
+            NULL } }
+        },
 
     { "/form",
         cmd_form, parse_args, 1, 2, NULL,
-        { "/form show|submit|cancel|help [tag]", "Form handling.",
-        { "/form show|submit|cancel|help [tag]",
-          "-----------------------------------",
-          "Form configuration.",
-          "",
-          "show             : Show the current form.",
-          "submit           : Submit the current form.",
-          "cancel           : Cancel changes to the current form.",
-          "help [tag]       : Display help for form, or a specific field.",
-          NULL,
-          NULL, NULL, NULL, NULL } } },
+        { NULL, NULL, { NULL },
+        {
+            "/form show",
+            "/form submit",
+            "/form cancel",
+            "/form help [<tag>]",
+            NULL
+        },
+            "Form configuration.",
+        {
+            { "show",         "Show the current form." },
+            { "submit",       "Submit the current form." },
+            { "cancel",       "Cancel changes to the current form." },
+            { "help [<tag>]", "Display help for form, or a specific field." },
+            END_ARGS },
+        {
+            NULL } }
+        },
 
     { "/rooms",
         cmd_rooms, parse_args, 0, 1, NULL,
-        { "/rooms [conference-service]", "List chat rooms.",
-        { "/rooms [conference-service]",
-          "---------------------------",
-          "List the chat rooms available at the specified conference service",
-          "",
-          "conference-service : The conference service to query.",
-          "",
-          "If no argument is supplied, the account preference 'muc.service' is used, 'conference.<domain-part>' by default.",
-          "",
-          "Example: /rooms conference.jabber.org",
-          "Example: /rooms (if logged in as me@server.org, is equivalent to /rooms conference.server.org)",
-          NULL,
-          NULL, NULL, NULL, NULL } } },
+        { NULL, NULL, { NULL },
+        {
+            "/rooms [<service>]",
+            NULL
+        },
+            "List the chat rooms available at the specified conference service. "
+            "If no argument is supplied, the account preference 'muc.service' is used, 'conference.<domain-part>' by default.",
+        {
+            { "<service>", "The conference service to query." },
+            END_ARGS },
+        {
+            "/rooms conference.jabber.org",
+            NULL } }
+        },
 
     { "/bookmark",
         cmd_bookmark, parse_args, 0, 8, NULL,
-        { "/bookmark [command] [args..]", "Manage bookmarks.",
-        { "/bookmark [command] [args..]",
-          "----------------------------",
-          "Manage bookmarks and join bookmarked rooms.",
-          "",
-          "command : list|add|update|remove|join",
-          "",
-          "list                              : List all bookmarks.",
-          "add room@server [prop value..]    : Add a bookmark for room@server with the following optional properties:",
-          "  nick value                      : Nickname used in the chat room",
-          "  password value                  : Password if required, may be stored in plaintext on your server",
-          "  autojoin on|off                 : Whether to join the room automatically on login.",
-          "update room@server [prop value..] : Update any of the above properties associated with the bookmark.",
-          "remove room@server                : Remove the bookmark for room@server.",
-          "join room@server                  : Join room using the properties associated with the bookmark.",
-          "",
-          "In a chat room, /bookmark with no arguments will bookmark the current room, setting autojoin to \"on\".",
-          NULL,
-          NULL, NULL, NULL, NULL } } },
+        { NULL, NULL, { NULL },
+        {
+            "/bookmark",
+            "/bookmark list",
+            "/bookmark add <room> [nick <nick>] [password <password>] [autojoin on|off]",
+            "/bookmark update <room> [nick <nick>] [password <password>] [autojoin on|off]",
+            "/bookmark remove <room>",
+            "/bookmark join <room>",
+            NULL
+        },
+            "Manage bookmarks and join bookmarked rooms. "
+            "In a chat room, no arguments will bookmark the current room, setting autojoin to \"on\".",
+        {
+            { "list", "List all bookmarks." },
+            { "add <room>", "Add a bookmark." },
+            { "remove <room>", "Remove a bookmark." },
+            { "update <room>", "Update the properties associated with a bookmark." },
+            { "nick <nick>", "Nickname used in the chat room." },
+            { "password <password>", "Password if required, may be stored in plaintext on your server." },
+            { "autojoin on|off", "Whether to join the room automatically on login." },
+            { "join <room>", "Join room using the properties associated with the bookmark." },
+            END_ARGS },
+        {
+            NULL } }
+        },
 
     { "/disco",
         cmd_disco, parse_args, 1, 2, NULL,
-        { "/disco info|items entity", "Service discovery.",
-        { "/disco info|items entity",
-          "---------------------",
-          "Find out information about an entities supported services.",
-          "",
-          "info   : List protocols and features supported by an entity.",
-          "items  : List items associated with an entity.",
-          "entity : Jabber ID.",
-          "",
-          "Example: /disco info myserver.org",
-          "Example: /disco items myserver.org",
-          "Example: /disco items conference.jabber.org",
-          "Example: /disco info myfriend@server.com/laptop",
-          NULL,
-          NULL, NULL, NULL, NULL } } },
+        { NULL, NULL, { NULL },
+        {
+            "/disco info [<jid>]",
+            "/disco items [<jid>]",
+            NULL
+        },
+            "Find out information about an entities supported services. "
+            "Calling with no arguments will query the server you are currently connected to.",
+        {
+            { "info [<jid>]", "List protocols and features supported by an entity." },
+            { "items [<jid>]", "List items associated with an entity." },
+            END_ARGS },
+        {
+            "/disco info",
+            "/disco items myserver.org",
+            "/disco items conference.jabber.org",
+            "/disco info myfriend@server.com/laptop",
+            NULL } }
+        },
 
     { "/nick",
         cmd_nick, parse_args_with_freetext, 1, 1, NULL,
-        { "/nick nickname", "Change nickname in chat room.",
-        { "/nick nickname",
-          "--------------",
-          "Change the name by which other members of a chat room see you.",
-          "",
-          "nickname : The new nickname.",
-          "",
-          "Example: /nick kai hansen",
-          "Example: /nick bob",
-          NULL,
-          NULL, NULL, NULL, NULL } } },
+        { NULL, NULL, { NULL },
+        {
+            "/nick <nickname>",
+            NULL
+        },
+            "Change your nickname in the current chat room.",
+        {
+            { "<nickname>", "Your new nickname." },
+            END_ARGS },
+        {
+            NULL } }
+        },
 
     { "/win",
         cmd_win, parse_args, 1, 1, NULL,
-        { "/win num", "View a window.",
-        { "/win num",
-          "--------",
-          "Show the contents of a specific window in the main window area.",
-          "",
-          "num - Window number to display.",
-          NULL,
-          NULL, NULL, NULL, NULL } } },
+        { NULL, NULL, { NULL },
+        {
+            "/win <num>",
+            NULL
+        },
+            "Move to the specified window.",
+        {
+            { "<num>", "Window number to display." },
+            END_ARGS },
+        {
+            NULL } }
+        },
 
     { "/wins",
         cmd_wins, parse_args, 0, 3, NULL,
-        { "/wins [tidy|prune|swap] [source target]", "List or tidy active windows.",
-        { "/wins [tidy|prune|swap] [source target]",
-          "---------------------------------------",
-          "Show a list of windows, or tidy or swap.",
-          "",
-          "tidy               : Move windows so there are no gaps.",
-          "prune              : Close all windows with no unread messages, and then tidy as above.",
-          "swap source target : Swap windows, target may be an empty position.",
-          "",
-          "Passing no argument will list all currently active windows and information about their usage.",
-          NULL,
-          NULL, NULL, NULL, NULL } } },
+        { NULL, NULL, { NULL },
+        {
+            "/wins tidy",
+            "/wins prune",
+            "/wins swap <source> <target>",
+            NULL
+        },
+            "Manage windows. "
+            "Passing no argument will list all currently active windows and information about their usage.",
+        {
+            { "tidy", "Move windows so there are no gaps." },
+            { "prune", "Close all windows with no unread messages, and then tidy so there are no gaps." },
+            { "swap <source> <target>", "Swap windows, target may be an empty position." },
+            END_ARGS },
+        {
+            NULL } }
+        },
 
     { "/sub",
         cmd_sub, parse_args, 1, 2, NULL,
-        { "/sub request|allow|deny|show|sent|received [jid]", "Manage subscriptions.",
-        { "/sub request|allow|deny|show|sent|received [jid]",
-          "------------------------------------------------",
-          "Manage subscriptions to contact presence.",
-          "",
-          "request [jid] : Send a subscription request to the user.",
-          "allow [jid]   : Approve a contact's subscription request.",
-          "deny [jid]    : Remove subscription for a contact, or deny a request",
-          "show [jid]    : Show subscription status for a contact.",
-          "sent          : Show all sent subscription requests pending a response.",
-          "received      : Show all received subscription requests awaiting your response.",
-          "",
-          "If jid is omitted, the contact of the current window is used.",
-          "",
-          "Example: /sub request myfriend@jabber.org",
-          "Example: /sub allow myfriend@jabber.org",
-          "Example: /sub request (whilst in chat with contact)",
-          "Example: /sub sent",
-          NULL,
-          NULL, NULL, NULL, NULL } } },
+        { NULL, NULL, { NULL },
+        {
+            "/sub request [<jid>]",
+            "/sub allow [<jid>]",
+            "/sub deny [<jid>]",
+            "/sub show [<jid>]",
+            "/sub sent",
+            "/sub received",
+            NULL
+        },
+            "Manage subscriptions to contact presence. "
+            "If jid is omitted, the contact of the current window is used.",
+        {
+            { "request [<jid>]", "Send a subscription request to the user." },
+            { "allow [<jid>]",   "Approve a contact's subscription request." },
+            { "deny [<jid>]",    "Remove subscription for a contact, or deny a request." },
+            { "show [<jid>]",    "Show subscription status for a contact." },
+            { "sent",            "Show all sent subscription requests pending a response." },
+            { "received",        "Show all received subscription requests awaiting your response." },
+            END_ARGS },
+        {
+            "/sub request myfriend@jabber.org",
+            "/sub allow myfriend@jabber.org",
+            "/sub request",
+            "/sub sent",
+            NULL } }
+        },
 
     { "/tiny",
         cmd_tiny, parse_args, 1, 1, NULL,
-        { "/tiny url", "Send url as tinyurl in current chat.",
-        { "/tiny url",
-          "---------",
-          "Send url as tinyurl in current chat.",
-          "",
-          "url : The url to make tiny.",
-          "",
-          "Example: /tiny http://www.profanity.im",
-          NULL,
-          NULL, NULL, NULL, NULL } } },
+        { NULL, NULL, { NULL },
+        {
+            "/tiny <url>",
+            NULL
+        },
+            "Send url as tinyurl in current chat.",
+        {
+            { "<url>", "The url to make tiny." },
+            END_ARGS },
+        {
+            "Example: /tiny http://www.profanity.im",
+            NULL } }
+        },
 
     { "/who",
         cmd_who, parse_args, 0, 2, NULL,
-        { "/who [status|role|affiliation] [group]", "Show contacts/room occupants with chosen status, role or affiliation",
-        { "/who [status|role|affiliation] [group]",
-          "--------------------------------------",
-          "Show contacts/room occupants with chosen status, role or affiliation",
-          "",
-          "status : online|offline|away|dnd|xa|chat|available|unavailable|any",
-          "  online      : Contacts that are online, chat, away, xa, dnd",
-          "  available   : Contacts that are available for chat - online, chat.",
-          "  unavailable : Contacts that are not available for chat - offline, away, xa, dnd.",
-          "  any         : Contacts with any status (same as calling with no argument).",
-          "role        : moderator|participant|visitor",
-          "affiliation : owner|admin|member",
-          "group       : Filter the results by the specified group.",
-          NULL,
-          NULL, NULL, NULL, NULL } } },
+        { NULL, NULL, { NULL },
+        {
+            "/who",
+            "/who online|offline|away|dnd|xa|chat|available|unavailable|any [<group>]",
+            "/who moderator|participant|visitor",
+            "/who owner|admin|member",
+            NULL
+        },
+            "Show contacts or room occupants with chosen status, role or affiliation",
+        {
+            { "offline|away|dnd|xa|chat", "Show contacts or room occupants with specified presence." },
+            { "online", "Contacts that are online, chat, away, xa, dnd." },
+            { "available", "Contacts that are available for chat - online, chat." },
+            { "unavailable", "Contacts that are not available for chat - offline, away, xa, dnd." },
+            { "any", "Contacts with any status (same as calling with no argument)." },
+            { "<group>", "Filter the results by the specified roster group, not applicable in chat rooms." },
+            { "moderator|participant|visitor", "Room occupants with the specified role." },
+            { "owner|admin|member", "Room occupants with the specified affiliation." },
+            END_ARGS },
+        {
+            "/who",
+            "/who xa",
+            "/who online friends",
+            "/who any family",
+            "/who particpant",
+            "/who admin",
+            NULL } }
+        },
 
     { "/close",
         cmd_close, parse_args, 0, 1, NULL,
-        { "/close [num|read|all]", "Close windows.",
-        { "/close [num|read|all]",
-          "---------------------",
-          "Close the current window, or a number of windows.",
-          "",
-          "num  : Close the specified window.",
-          "all  : Close all windows.",
-          "read : Close all windows that have no new messages.",
-          "",
-          "Passing no argument will close the current window.",
-          NULL,
-          NULL, NULL, NULL, NULL } } },
+        { NULL, NULL, { NULL },
+        {
+            "/close [<num>]",
+            "/close all|read",
+            NULL
+        },
+            "Close windows. "
+            "Passing no argument closes the current window.",
+        {
+            { "<num>", "Close the specified window." },
+            { "all", "Close all windows." },
+            { "read", "Close all windows that have no unread messages." },
+            END_ARGS },
+        {
+            NULL } }
+        },
 
     { "/clear",
         cmd_clear, parse_args, 0, 0, NULL,
-        { "/clear", "Clear current window.",
-        { "/clear",
-          "------",
-          "Clear the current window.",
-          NULL,
-          NULL, NULL, NULL, NULL } } },
+        { NULL, NULL, { NULL },
+        {
+            "/clear",
+            NULL
+        },
+            "Clear the current window.",
+        {
+            END_ARGS },
+        {
+            NULL } }
+        },
 
     { "/quit",
         cmd_quit, parse_args, 0, 0, NULL,
-        { "/quit", "Quit Profanity.",
-        { "/quit",
-          "-----",
-          "Logout of any current session, and quit Profanity.",
-          NULL,
-          NULL, NULL, NULL, NULL } } },
+        { NULL, NULL, { NULL },
+        {
+            "/quit",
+            NULL
+        },
+            "Logout of any current session, and quit Profanity.",
+        {
+            END_ARGS },
+        {
+            NULL } }
+        },
 
     { "/privileges",
         cmd_privileges, parse_args, 1, 1, &cons_privileges_setting,
-        { "/privileges on|off", "Show occupant privileges in chat rooms.",
-        { "/privileges on|off",
-          "------------------",
-          "If enabled the room occupants panel will be grouped by role, and role information will be shown in the room.",
-          NULL,
-          NULL, NULL, NULL, NULL } } },
+        { NULL, NULL, { NULL },
+        {
+            "/privileges on|off",
+            NULL
+        },
+            "Group occupants panel by role, and show role information in chat rooms.",
+        {
+            { "on|off", "Enable or disable privilege information." },
+            END_ARGS },
+        {
+            NULL } }
+        },
 
     { "/beep",
         cmd_beep, parse_args, 1, 1, &cons_beep_setting,
-        { "/beep on|off", "Terminal beep on new messages.",
-        { "/beep on|off",
-          "------------",
-          "Switch the terminal bell on or off.",
-          "The bell will sound when incoming messages are received.",
-          "If the terminal does not support sounds, it may attempt to flash the screen instead.",
-          NULL,
-          NULL, NULL, NULL, NULL } } },
+        { NULL, NULL, { NULL },
+        {
+            "/beep on|off",
+            NULL
+        },
+            "Switch the terminal bell on or off. "
+            "The bell will sound when incoming messages are received. "
+            "If the terminal does not support sounds, it may attempt to flash the screen instead.",
+        {
+            { "on|off", "Enable or disable terminal bell." },
+            END_ARGS },
+        {
+            NULL } }
+        },
 
     { "/encwarn",
         cmd_encwarn, parse_args, 1, 1, &cons_encwarn_setting,
-        { "/encwarn on|off", "Titlebar encryption warning.",
-        { "/encwarn on|off",
-          "---------------",
-          "Enabled or disable the unencrypted warning message in the titlebar.",
-          NULL,
-          NULL, NULL, NULL, NULL } } },
+        { NULL, NULL, { NULL },
+        {
+            "/encwarn on|off",
+            NULL
+        },
+            "Titlebar encryption warning.",
+        {
+            { "on|off", "Enabled or disable the unencrypted warning message in the titlebar." },
+            END_ARGS },
+        {
+            NULL } }
+        },
 
     { "/presence",
         cmd_presence, parse_args, 1, 1, &cons_presence_setting,
-        { "/presence on|off", "Show the contacts presence in the titlebar.",
-        { "/presence on|off",
-          "----------------",
-          "Switch display of the contacts presence in the titlebar on or off.",
-          NULL,
-          NULL, NULL, NULL, NULL } } },
+        { NULL, NULL, { NULL },
+        {
+            "/presence on|off",
+            NULL
+        },
+            "Show the contacts presence in the titlebar.",
+        {
+            { "on|off", "Switch display of the contacts presence in the titlebar on or off." },
+            END_ARGS },
+        {
+            NULL } }
+        },
 
     { "/wrap",
         cmd_wrap, parse_args, 1, 1, &cons_wrap_setting,
-        { "/wrap on|off", "Word wrapping.",
-        { "/wrap on|off",
-          "------------",
-          "Enable or disable word wrapping in the main window.",
-          NULL,
-          NULL, NULL, NULL, NULL } } },
+        { NULL, NULL, { NULL },
+        {
+            "/wrap on|off",
+            NULL
+        },
+            "Word wrapping.",
+        {
+            { "on|off", "Enable or disable word wrapping in the main window." },
+            END_ARGS },
+        {
+            NULL } }
+        },
 
     { "/winstidy",
         cmd_winstidy, parse_args, 1, 1, &cons_winstidy_setting,
-        { "/winstidy on|off", "Auto tidy windows.",
-        { "/winstidy on|off",
-          "----------------",
-          "Enable or disable auto window tidy.",
-          NULL,
-          NULL, NULL, NULL, NULL } } },
+        { NULL, NULL, { NULL },
+        {
+            "/winstidy on|off",
+            NULL
+        },
+            "Auto tidy windows, when a window is closed, windows will be moved to fill the gap.",
+        {
+            { "on|off", "Enable or disable auto window tidy." },
+            END_ARGS },
+        {
+            NULL } }
+        },
 
     { "/time",
         cmd_time, parse_args, 1, 3, &cons_time_setting,
-        { "/time main|statusbar set|off [format]", "Time display.",
-        { "/time main|statusbar set|off [format]",
-          "-------------------------------------",
-          "Configure time display preferences.",
-          "",
-          "main set <format>      : Change time format to <format> in main window.",
-          "main off               : Do not show time in main window.",
-          "statusbar set <format> : Change time format to <format> in statusbar.",
-          "statusbar off          : Do not show time in status bar.",
-          "",
-          "Time formats are strings supported by g_date_time_format.",
-          "See https://developer.gnome.org/glib/stable/glib-GDateTime.html#g-date-time-format for more details.",
-          "Example: /time main set %H:%M (main time will be set to HH:MM)",
-          "Example: /time statusbar set yolo (statusbar time will all be changed to a static yolo)",
-          NULL,
-          NULL, NULL, NULL, NULL } } },
+        { NULL, NULL, { NULL },
+        {
+            "/time main set <format>",
+            "/time main off",
+            "/time statusbar set <format>",
+            "/time statusbar off",
+            NULL
+        },
+            "Configure time display preferences. "
+            "Time formats are strings supported by g_date_time_format. "
+            "See https://developer.gnome.org/glib/stable/glib-GDateTime.html#g-date-time-format for more details. "
+            "Setting the format to an unsupported string, will display the string. "
+            "If the format contains spaces, it must be surrounded with double quotes.",
+        {
+            { "main set <format>", "Change time format in main window." },
+            { "main off", "Do not show time in main window." },
+            { "statusbar set <format>", "Change time format in statusbar." },
+            { "statusbar off", "Change time format in status bar." },
+            END_ARGS },
+        {
+            "/time main set \"%d-%m-%y %H:%M\"",
+            "/time main off",
+            "/time statusbar set %H:%M",
+            NULL } }
+        },
 
     { "/inpblock",
         cmd_inpblock, parse_args, 2, 2, &cons_inpblock_setting,
-        { "/inpblock timeout|dynamic [millis|on|off]", "Configure input blocking.",
-        { "/inpblock timeout|dynamic [millis|on|off]",
-          "-----------------------------------------",
-          "How long to wait for input before checking for new messages or checking for state changes such as 'idle'.",
-          "",
-          "timeout millis : Time to wait (1-1000) in milliseconds before reading input from the terminal buffer, default: 1000.",
-          "dynamic on|off : Start with 0 millis and dynamically increase up to timeout when no activity, default: on.",
-          NULL,
-          NULL, NULL, NULL, NULL } } },
+        { NULL, NULL, { NULL },
+        {
+            "/inpblock timeout <millis>",
+            "/inpblock dynamic on|off",
+            NULL
+        },
+            "How long to wait for keyboard input before checking for new messages or checking for state changes such as 'idle'.",
+        {
+            { "timeout <millis>", "Time to wait (1-1000) in milliseconds before reading input from the terminal buffer, default: 1000." },
+            { "dynamic on|off", "Start with 0 millis and dynamically increase up to timeout when no activity, default: on." },
+            END_ARGS },
+        {
+            NULL } }
+        },
 
     { "/notify",
         cmd_notify, parse_args, 2, 3, &cons_notify_setting,
-        { "/notify [type value]|[type setting value]", "Control various desktop notifications.",
-        { "/notify [type value]|[type setting value]",
-          "-----------------------------------------",
-          "Settings for various kinds of desktop notifications.",
-          "",
-          "message on|off         : Notifications for regular messages.",
-          "message current on|off : Whether messages in the current window trigger notifications.",
-          "message text on|off    : Show message text in message notifications.",
-          "room on|off|mention    : Notifications for chat room messages.",
-          "room current on|off    : Whether chat room messages in the current window trigger notifications.",
-          "room text on|off       : Show message text in chat room message notifications.",
-          "remind seconds         : Notification reminder period for unread messages, use 0 to disable.",
-          "typing on|off          : Notifications when contacts are typing.",
-          "typing current of|off  : Whether typing notifications are triggered for the current window.",
-          "invite on|off          : Notifications for chat room invites.",
-          "sub on|off             : Notifications for subscription requests.",
-          "",
-          "Example: /notify message on (enable message notifications)",
-          "Example: /notify message text on (show message text in notifications)",
-          "Example: /notify room mention (enable chat room notifications only on mention)",
-          "Example: /notify room current off (disable room message notifications when window visible)",
-          "Example: /notify room text off (do not show message text in chat room notifications)",
-          "Example: /notify remind 10 (remind every 10 seconds)",
-          "Example: /notify remind 0 (switch off reminders)",
-          "Example: /notify typing on (enable typing notifications)",
-          "Example: /notify invite on (enable chat room invite notifications)",
-          NULL,
-          NULL, NULL, NULL, NULL } } },
+        { NULL, NULL, { NULL },
+        {
+            "/notify message on|off",
+            "/notify message current on|off",
+            "/notify message text on|off",
+            "/notify room on|off|mention",
+            "/notify room current on|off",
+            "/notify room text on|off",
+            "/notify remind <seconds>",
+            "/notify typing on|off",
+            "/notify typing current on|off",
+            "/notify invite on|off",
+            "/notify sub on|off",
+            NULL
+        },
+            "Settings for various kinds of desktop notifications.",
+        {
+            { "message on|off", "Notifications for regular chat messages." },
+            { "message current on|off", "Whether messages in the current window trigger notifications." },
+            { "message text on|off", "Show message text in regular message notifications." },
+            { "room on|off|mention", "Notifications for chat room messages, mention triggers notifications only when your nick is mentioned." },
+            { "room current on|off", "Whether chat room messages in the current window trigger notifications." },
+            { "room text on|off", "Show message text in chat room message notifications." },
+            { "remind <seconds>", "Notification reminder period for unread messages, use 0 to disable." },
+            { "typing on|off", "Notifications when contacts are typing." },
+            { "typing current on|off", "Whether typing notifications are triggered for the current window." },
+            { "invite on|off", "Notifications for chat room invites." },
+            { "sub on|off", "Notifications for subscription requests." },
+            END_ARGS },
+        {
+            "/notify message on",
+            "/notify message text on",
+            "/notify room mention",
+            "/notify room current off",
+            "/notify room text off",
+            "/notify remind 10",
+            "/notify typing on",
+            "/notify invite on",
+            NULL } }
+        },
 
     { "/flash",
         cmd_flash, parse_args, 1, 1, &cons_flash_setting,
-        { "/flash on|off", "Terminal flash on new messages.",
-        { "/flash on|off",
-          "-------------",
-          "Make the terminal flash when incoming messages are received in another window.",
-          "If the terminal doesn't support flashing, it may attempt to beep.",
-          NULL,
-          NULL, NULL, NULL, NULL } } },
+        { NULL, NULL, { NULL },
+        {
+            "/flash on|off",
+            NULL
+        },
+            "Make the terminal flash when incoming messages are received in another window. "
+            "If the terminal doesn't support flashing, it may attempt to beep.",
+        {
+            { "on|off", "Enable or disable terminal flash." },
+            END_ARGS },
+        {
+            NULL } }
+        },
 
     { "/intype",
         cmd_intype, parse_args, 1, 1, &cons_intype_setting,
-        { "/intype on|off", "Show when contact is typing.",
-        { "/intype on|off",
-          "--------------",
-          "Show when a contact is typing in the console, and in active message window.",
-          NULL,
-          NULL, NULL, NULL, NULL } } },
+        { NULL, NULL, { NULL },
+        {
+            "/intype on|off",
+            NULL
+        },
+            "Show when a contact is typing in the console, and in active message window.",
+        {
+            { "on|off", "Enable or disable contact typing messages." },
+            END_ARGS },
+        {
+            NULL } }
+        },
+
 
     { "/splash",
         cmd_splash, parse_args, 1, 1, &cons_splash_setting,
-        { "/splash on|off", "Splash logo on startup and /about command.",
-        { "/splash on|off",
-          "--------------",
-          "Switch on or off the ascii logo on start up and when the /about command is called.",
-          NULL,
-          NULL, NULL, NULL, NULL } } },
+        { NULL, NULL, { NULL },
+        {
+            "/splash on|off",
+            NULL
+        },
+            "Switch on or off the ascii logo on start up and when the /about command is called.",
+        {
+            { "on|off", "Enable or disable splash logo." },
+            END_ARGS },
+        {
+            NULL } }
+        },
 
     { "/autoconnect",
         cmd_autoconnect, parse_args, 1, 2, &cons_autoconnect_setting,
-        { "/autoconnect set|off [account]", "Set account to autoconnect with.",
-        { "/autoconnect set|off [account]",
-          "------------------------------",
-          "Enable or disable autoconnect on start up.",
-          "The setting can be overridden by the -a (--account) command line option.",
-          "",
-          "Example: /autoconnect set jc@stuntteam.org (autoconnect with the specified account).",
-          "Example: /autoconnect off (disable autoconnect).",
-          NULL,
-          NULL, NULL, NULL, NULL } } },
+        { NULL, NULL, { NULL },
+        {
+            "/autoconnect set <account>",
+            "/autoconnect off",
+            NULL
+        },
+            "Enable or disable autoconnect on start up. "
+            "The setting can be overridden by the -a (--account) command line option.",
+        {
+            { "set <account>", "Connect with account on start up." },
+            { "off", "Disable autoconnect." },
+            END_ARGS },
+        {
+            "/autoconnect set jc@stuntteam.org",
+            "/autoconnect off",
+            NULL } }
+        },
 
     { "/vercheck",
         cmd_vercheck, parse_args, 0, 1, NULL,
-        { "/vercheck [on|off]", "Check for a new release.",
-        { "/vercheck [on|off]",
-          "------------------",
-          "Enable/disable a version check when Profanity starts, and each time the /about command is run.",
-          NULL,
-          NULL, NULL, NULL, NULL } } },
+        { NULL, NULL, { NULL },
+        {
+            "/vercheck on|off",
+            NULL
+        },
+            "Check for new versions when Profanity starts, and when the /about command is run.",
+        {
+            { "on|off", "Enable or disable the version check." },
+            END_ARGS },
+        {
+            NULL } }
+        },
 
     { "/titlebar",
         cmd_titlebar, parse_args, 2, 2, &cons_titlebar_setting,
-        { "/titlebar show|goodbye on|off", "Manage the terminal window title.",
-        { "/titlebar show|goodbye on|off",
-          "-----------------------------",
-          "Show or hide a title and exit message in the terminal window title.",
-          "",
-          "show    : Show current logged in user, and unread messages in the title.",
-          "goodbye : Show a message in the title when exiting profanity.",
-          NULL,
-          NULL, NULL, NULL, NULL } } },
+        { NULL, NULL, { NULL },
+        {
+            "/titlebar show on|off",
+            "/titlebar goodbye on|off",
+            NULL
+        },
+            "Allow Profanity to modify the window title bar.",
+        {
+            { "show on|off",    "Show current logged in user, and unread messages as the window title." },
+            { "goodbye on|off", "Show a message in the title when exiting profanity." },
+            END_ARGS },
+        {
+            NULL } }
+        },
+
+
+    // OLD STYLE
+
 
     { "/alias",
         cmd_alias, parse_args_with_freetext, 1, 3, NULL,
