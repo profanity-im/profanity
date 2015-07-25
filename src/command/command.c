@@ -1144,399 +1144,591 @@ static struct cmd_t command_defs[] =
             NULL } }
         },
 
-
-    // OLD STYLE
-
-
     { "/alias",
         cmd_alias, parse_args_with_freetext, 1, 3, NULL,
-        { "/alias add|remove|list [name value]", "Add your own command aliases.",
-        { "/alias add|remove|list [name value]",
-          "-----------------------------------",
-          "Add, remove or show command aliases.",
-          "",
-          "add name value : Add a new command alias.",
-          "remove name    : Remove a command alias.",
-          "list           : List all aliases.",
-          "",
-          "Example: /alias add friends /who online friends",
-          "Example: /alias add /q /quit",
-          "Example: /alias a /away \"I'm in a meeting.\"",
-          "Example: /alias remove q",
-          "Example: /alias list",
-          "",
-          "The above aliases will be available as /friends and /a",
-          NULL,
-          NULL, NULL, NULL, NULL } } },
+        { NULL, NULL, { NULL },
+        {
+            "/alias list",
+            "/alias add <name> <value>",
+            "/alias remove <name>",
+            NULL
+        },
+            "Add, remove or list command aliases.",
+        {
+            { "list",               "List all aliases." },
+            { "add <name> <value>", "Add a new command alias." },
+            { "remove <name>",      "Remove a command alias." },
+            END_ARGS },
+        {
+            "/alias add friends /who online friends",
+            "/alias add /q /quit",
+            "/alias a /away \"I'm in a meeting.\"",
+            "/alias remove q",
+            "/alias list",
+            NULL } }
+        },
 
     { "/chlog",
         cmd_chlog, parse_args, 1, 1, &cons_chlog_setting,
-        { "/chlog on|off", "Chat logging to file.",
-        { "/chlog on|off",
-          "-------------",
-          "Switch chat logging on or off.",
-          "This setting will be enabled if /history is set to on.",
-          "When disabling this option, /history will also be disabled.",
-          "See the /grlog setting for enabling logging of chat room (groupchat) messages.",
-          NULL,
-          NULL, NULL, NULL, NULL } } },
+        { NULL, NULL, { NULL },
+        {
+            "/chlog on|off",
+            NULL
+        },
+            "Switch chat logging on or off. "
+            "This setting will be enabled if /history is set to on. "
+            "When disabling this option, /history will also be disabled. "
+            "See the /grlog setting for enabling logging of chat room (groupchat) messages.",
+        {
+            { "on|off", "Enable or disable chat logging." },
+            END_ARGS },
+        {
+            NULL } }
+        },
 
     { "/grlog",
         cmd_grlog, parse_args, 1, 1, &cons_grlog_setting,
-        { "/grlog on|off", "Chat logging of chat rooms to file.",
-        { "/grlog on|off",
-          "-------------",
-          "Switch chat room logging on or off.",
-          "See the /chlog setting for enabling logging of one to one chat.",
-          NULL,
-          NULL, NULL, NULL, NULL } } },
+        { NULL, NULL, { NULL },
+        {
+            "/grlog on|off",
+            NULL
+        },
+            "Switch chat room logging on or off. "
+            "See the /chlog setting for enabling logging of one to one chat.",
+        {
+            { "on|off", "Enable or disable chat room logging." },
+            END_ARGS },
+        {
+            NULL } }
+        },
 
     { "/states",
         cmd_states, parse_args, 1, 1, &cons_states_setting,
-        { "/states on|off", "Send chat states during a chat session.",
-        { "/states on|off",
-          "--------------",
-          "Send chat state notifications during chat sessions.",
-          NULL,
-          NULL, NULL, NULL, NULL } } },
+        { NULL, NULL, { NULL },
+        {
+            "/states on|off",
+            NULL
+        },
+            "Send chat state notifications to recipient during chat sessions, such as typing, paused, active, gone.",
+        {
+            { "on|off", "Enable or disable sending of chat state notifications." },
+            END_ARGS },
+        {
+            NULL } }
+        },
 
     { "/pgp",
         cmd_pgp, parse_args, 1, 3, NULL,
-        { "/pgp command [args..]", "Open PGP commands.",
-        { "/pgp command [args..]",
-          "---------------------",
-          "Open PGP commands.",
-          "",
-          "keys                 : List all keys.",
-          "libver               : Show which version of the libgpgme library is being used.",
-          "fps                  : Show known fingerprints.",
-          "setkey contact keyid : Manually associate a key ID with a JID.",
-          "start [contact]      : Start PGP encrypted chat, current contact will be used if not specified.",
-          "end                  : End PGP encrypted chat with the current recipient.",
-          "log on|off|redact    : PGP message logging, default: redact.",
-          NULL,
-          NULL, NULL, NULL, NULL } } },
+        { NULL, NULL, { NULL },
+        {
+            "/pgp libver",
+            "/pgp keys",
+            "/pgp fps",
+            "/pgp setkey <contact> <keyid>",
+            "/pgp start [<contact>]",
+            "/pgp end",
+            "/pgp log on|off|redact",
+            NULL
+        },
+            "Open PGP commands to manage keys, and perform PGP encryption during chat sessions. "
+            "See the /account command to set your own PGP key.",
+        {
+            { "libver",                   "Show which version of the libgpgme library is being used." },
+            { "keys",                     "List all keys." },
+            { "fps",                      "Show known fingerprints." },
+            { "setkey <contact> <keyid>", "Manually associate a key ID with a JID." },
+            { "start [<contact>]",        "Start PGP encrypted chat, current contact will be used if not specified." },
+            { "end",                      "End PGP encrypted chat with the current recipient." },
+            { "log on|off",               "Enable or disable plaintext logging of PGP encrypted messages." },
+            { "log redact",               "Log PGP encrypted messages, but replace the contents with [redacted]. This is the default." },
+            END_ARGS },
+        {
+            "/pgp log off",
+            "/pgp setkey buddy@buddychat.org BA19CACE5A9592C5",
+            "/pgp start buddy@buddychat.org",
+            "/pgp end",
+            NULL } }
+        },
 
     { "/otr",
         cmd_otr, parse_args, 1, 3, NULL,
-        { "/otr command [args..]", "Off The Record encryption commands.",
-        { "/otr command [args..]",
-          "---------------------",
-          "Off The Record encryption commands.",
-          "",
-          "gen                                : Generate your private key.",
-          "myfp                               : Show your fingerprint.",
-          "theirfp                            : Show contacts fingerprint.",
-          "start [contact]                    : Start an OTR session with contact, or current recipient if omitted.",
-          "end                                : End the current OTR session,",
-          "trust                              : Indicate that you have verified the contact's fingerprint.",
-          "untrust                            : Indicate the the contact's fingerprint is not verified,",
-          "log on|off|redact                  : OTR message logging, default: redact.",
-          "warn on|off                        : Show in the titlebar when unencrypted messaging is being used.",
-          "libver                             : Show which version of the libotr library is being used.",
-          "policy manual|opportunistic|always : Set the global OTR policy.",
-          "secret [secret]                    : Verify a contacts identity using a shared secret.",
-          "question [question] [answer]       : Verify a contacts identity using a question and expected answer.",
-          "answer [answer]                    : Respond to a question answer verification request with your answer.",
-          NULL,
-          NULL, NULL, NULL, NULL } } },
+        { NULL, NULL, { NULL },
+        {
+            "/otr libver",
+            "/otr gen",
+            "/otr myfp|theirfp",
+            "/otr start [<contact>]",
+            "/otr end",
+            "/otr trust|untrust",
+            "/otr secret <secret>",
+            "/otr question <question> <answer>",
+            "/otr answer <answer>",
+            "/otr policy manual|opportunistic|always",
+            "/otr log on|off|redact",
+            NULL
+        },
+            "Off The Record (OTR) commands to manage keys, and perform OTR encryption during chat sessions.",
+        {
+            { "libver",                       "Show which version of the libotr library is being used." },
+            { "gen",                          "Generate your private key." },
+            { "myfp",                         "Show your fingerprint." },
+            { "theirfp",                      "Show contacts fingerprint." },
+            { "start [<contact>]",            "Start an OTR session with contact, or current recipient if omitted." },
+            { "end",                          "End the current OTR session," },
+            { "trust|untrust",                "Indicate whether or not you trust the contact's fingerprint." },
+            { "secret <secret>",              "Verify a contact's identity using a shared secret." },
+            { "question <question> <answer>", "Verify a contact's identity using a question and expected answer." },
+            { "answer <answer>",              "Respond to a question answer verification request with your answer." },
+            { "policy manual",                "Set the global OTR policy to manual, OTR sessions must be started manually." },
+            { "policy opportunistic",         "Set the global OTR policy to opportunistic, and OTR sessions will be attempted upon starting a conversation." },
+            { "policy always",                "Set the global OTR policy to always, an error will be displayed if an OTR session cannot be initiated upon starting a conversation." },
+            { "log on|off",                   "Enable or disable plaintext logging of OTR encrypted messages." },
+            { "log redact",                   "Log OTR encrypted messages, but replace the contents with [redacted]. This is the default." },
+            END_ARGS },
+        {
+            "/otr log off",
+            "/otr policy manual",
+            "/otr gen",
+            "/otr start buddy@buddychat.org",
+            "/otr myfp",
+            "/otr theirfp",
+            "/otr question \"What is the name of my rabbit?\" fiffi",
+            "/otr end",
+            NULL } }
+        },
 
     { "/outtype",
         cmd_outtype, parse_args, 1, 1, &cons_outtype_setting,
-        { "/outtype on|off", "Send typing notification to recipient.",
-        { "/outtype on|off",
-          "---------------",
-          "Send typing notifications, chat states (/states) will be enabled if this setting is set.",
-          NULL,
-          NULL, NULL, NULL, NULL } } },
+        { NULL, NULL, { NULL },
+        {
+            "/outtype on|off",
+            NULL
+        },
+            "Send typing notifications, chat states (/states) will be enabled if this setting is enabled.",
+        {
+            { "on|off", "Enable or disable sending typing notifications." },
+            END_ARGS },
+        {
+            NULL } }
+        },
 
     { "/gone",
         cmd_gone, parse_args, 1, 1, &cons_gone_setting,
-        { "/gone minutes", "Send 'gone' state to recipient after a period.",
-        { "/gone minutes",
-          "-------------",
-          "Send a 'gone' state to the recipient after the specified number of minutes.",
-          "A value of 0 will disable sending this chat state.",
-          "Chat states (/states) will be enabled if this setting is set.",
-          NULL,
-          NULL, NULL, NULL, NULL } } },
+        { NULL, NULL, { NULL },
+        {
+            "/gone <minutes>",
+            NULL
+        },
+            "Send a 'gone' state to the recipient after the specified number of minutes. "
+            "Chat states (/states) will be enabled if this setting is set.",
+        {
+            { "<minutes>", "Number of minutes of inactivity before sending the 'gone' state, a value of 0 will disable sending this state." },
+            END_ARGS },
+        {
+            NULL } }
+        },
 
     { "/history",
         cmd_history, parse_args, 1, 1, &cons_history_setting,
-        { "/history on|off", "Chat history in message windows.",
-        { "/history on|off",
-          "---------------",
-          "Switch chat history on or off, /chlog will automatically be enabled when this setting is on.",
-          "When history is enabled, previous messages are shown in chat windows.",
-          NULL,
-          NULL, NULL, NULL, NULL } } },
+        { NULL, NULL, { NULL },
+        {
+            "/history on|off",
+            NULL
+        },
+            "Switch chat history on or off, /chlog will automatically be enabled when this setting is on. "
+            "When history is enabled, previous messages are shown in chat windows.",
+        {
+            { "on|off", "Enable or disable showing chat history." },
+            END_ARGS },
+        {
+            NULL } }
+        },
 
     { "/log",
         cmd_log, parse_args, 1, 2, &cons_log_setting,
-        { "/log where|rotate|maxsize|shared [value]", "Manage system logging settings.",
-        { "/log where|rotate|maxsize|shared [value]",
-          "----------------------------------------",
-          "Manage profanity logging settings.",
-          "",
-          "where         : Show the current log file location.",
-          "rotate on|off : Rotate log, default on.",
-          "maxsize bytes : With rotate enabled, specifies the max log size, defaults to 1048580 (1MB).",
-          "shared on|off : Share logs between all instances, default: on.",
-          NULL,
-          NULL, NULL, NULL, NULL } } },
+        { NULL, NULL, { NULL },
+        {
+            "/log where",
+            "/log rotate on|off",
+            "/log maxsize <bytes>",
+            "/log shared on|off",
+            NULL
+        },
+            "Manage profanity log settings.",
+        {
+            { "where",           "Show the current log file location." },
+            { "rotate on|off",   "Rotate log, default on." },
+            { "maxsize <bytes>", "With rotate enabled, specifies the max log size, defaults to 1048580 (1MB)." },
+            { "shared on|off",   "Share logs between all instances, default: on. When off, the process id will be included in the log." },
+            END_ARGS },
+        {
+            NULL } }
+        },
 
     { "/carbons",
-      cmd_carbons, parse_args, 1, 1, &cons_carbons_setting,
-      { "/carbons on|off", "Message carbons.",
-      { "/carbons on|off",
-        "---------------",
-        "Enable or disable message carbons.",
-        "The message carbons feature ensures that both sides of all conversations are shared with all the user's clients that implement this protocol.",
-          NULL,
-          NULL, NULL, NULL, NULL } } },
+        cmd_carbons, parse_args, 1, 1, &cons_carbons_setting,
+        { NULL, NULL, { NULL },
+        {
+            "/carbons on|off",
+            NULL
+        },
+            "Enable or disable message carbons. "
+            "Message carbons ensure that both sides of all conversations are shared with all the user's clients that implement this protocol.",
+        {
+            { "on|off", "Enable or disable message carbons." },
+            END_ARGS },
+        {
+            NULL } }
+        },
 
     { "/receipts",
-      cmd_receipts, parse_args, 2, 2, &cons_receipts_setting,
-      { "/receipts send|request on|off", "Message delivery receipts.",
-      { "/receipts send|request on|off",
-        "-----------------------------",
-        "Enable or disable message delivery receipts. The interface will indicate when a message has been received.",
-        "",
-        "send on|off    : Enable or disable sending of delivery receipts.",
-        "request on|off : Enable or disable sending of delivery receipt requests.",
-          NULL,
-          NULL, NULL, NULL, NULL } } },
+        cmd_receipts, parse_args, 2, 2, &cons_receipts_setting,
+        { NULL, NULL, { NULL },
+        {
+            "/receipts request on|off",
+            "/receipts send on|off",
+            NULL
+        },
+            "Enable or disable message delivery receipts. The interface will indicate when a message has been received.",
+        {
+            { "request on|off", "Whether or not to request a receipt upon sending a message." },
+            { "send on|off",    "Whether or not to send a receipt if one has been requested with a received message." },
+            END_ARGS },
+        {
+            NULL } }
+        },
 
     { "/reconnect",
         cmd_reconnect, parse_args, 1, 1, &cons_reconnect_setting,
-        { "/reconnect seconds", "Set reconnect interval.",
-        { "/reconnect seconds",
-          "------------------",
-          "Set the reconnect attempt interval in seconds for when the connection is lost.",
-          "A value of 0 will switch off reconnect attempts.",
-          NULL,
-          NULL, NULL, NULL, NULL } } },
+        { NULL, NULL, { NULL },
+        {
+            "/reconnect <seconds>",
+            NULL
+        },
+            "Set the reconnect attempt interval for when the connection is lost.",
+        {
+            { "<seconds>", "Number of seconds before attempting to reconnect, a value of 0 disables reconnect." },
+            END_ARGS },
+        {
+            NULL } }
+        },
 
     { "/autoping",
         cmd_autoping, parse_args, 1, 1, &cons_autoping_setting,
-        { "/autoping seconds", "Server ping interval.",
-        { "/autoping seconds",
-          "-----------------",
-          "Set the number of seconds between server pings, so ensure connection kept alive.",
-          "A value of 0 will switch off autopinging the server.",
-          NULL,
-          NULL, NULL, NULL, NULL } } },
+        { NULL, NULL, { NULL },
+        {
+            "/autoping <seconds>",
+            NULL
+        },
+            "Set the interval between sending ping requests to the server to ensure the connection is kept alive.",
+        {
+            { "<seconds>", "Number of seconds between sending pings, a value of 0 disables autoping." },
+            END_ARGS },
+        {
+            NULL } }
+        },
 
     { "/ping",
         cmd_ping, parse_args, 0, 1, NULL,
-        { "/ping [target]", "Send ping IQ request.",
-        { "/ping [target]",
-          "--------------",
-          "Sends an IQ ping stanza to the specified target.",
-          "If no target is supplied, your chat server will be pinged.",
-          NULL,
-          NULL, NULL, NULL, NULL } } },
+        { NULL, NULL, { NULL },
+        {
+            "/ping [<jid>]",
+            NULL
+        },
+            "Sends an IQ ping stanza to the specified JID. "
+            "If no JID is supplied, your chat server will be pinged.",
+        {
+            { "<jid>", "The Jabber ID to send the ping request to." },
+            END_ARGS },
+        {
+            NULL } }
+        },
 
     { "/autoaway",
         cmd_autoaway, parse_args_with_freetext, 2, 2, &cons_autoaway_setting,
-        { "/autoaway mode|time|message|check value", "Set auto idle/away properties.",
-        { "/autoaway mode|time|message|check value",
-          "---------------------------------------",
-          "Manage autoway properties.",
-          "",
-          "mode idle        : Sends idle time, status remains online.",
-          "mode away        : Sends an away presence.",
-          "mode off         : Disabled (default).",
-          "time minutes     : Number of minutes before the presence change is sent, default: 15.",
-          "message text|off : Optional message to send with the presence change, default: off (disabled).",
-          "check on|off     : When enabled, checks for activity and sends online presence, default: on.",
-          "",
-          "Example: /autoaway mode idle",
-          "Example: /autoaway time 30",
-          "Example: /autoaway message I'm not really doing much",
-          "Example: /autoaway check off",
-          NULL,
-          NULL, NULL, NULL, NULL } } },
+        { NULL, NULL, { NULL },
+        {
+            "/autoaway mode idle|away|off",
+            "/autoaway time <minutes>",
+            "/autoaway message <message>|off",
+            "/autoaway check on|off",
+            NULL
+        },
+            "Manage autoway settings for idle time.",
+        {
+            { "mode idle",         "Sends idle time, status remains online." },
+            { "mode away",         "Sends an away presence." },
+            { "mode off",          "Disabled (default)." },
+            { "time <minutes>",    "Number of minutes before the presence change is sent, default: 15." },
+            { "message <message>", "Optional message to send with the presence change, default: off (disabled)." },
+            { "message off",       "Send no message with autoaway presence." },
+            { "check on|off",      "When enabled, checks for activity and sends online presence, default: on." },
+            END_ARGS },
+        {
+            "/autoaway mode idle",
+            "/autoaway time 30",
+            "/autoaway message I'm not really doing much",
+            "/autoaway check off",
+            NULL } }
+        },
 
     { "/priority",
         cmd_priority, parse_args, 1, 1, &cons_priority_setting,
-        { "/priority value", "Set priority for the current account.",
-        { "/priority value",
-          "---------------",
-          "Set priority for the current account.",
-          "",
-          "value : Number between -128 and 127, default: 0.",
-          "",
-          "See the /account command for specific priority settings per presence status.",
-          NULL,
-          NULL, NULL, NULL, NULL } } },
+        { NULL, NULL, { NULL },
+        {
+            "/priority <priority>",
+            NULL
+        },
+            "Set priority for the current account. "
+            "See the /account command for specific priority settings per presence status.",
+        {
+            { "<priority>", "Number between -128 and 127, default: 0." },
+            END_ARGS },
+        {
+            NULL } }
+        },
 
     { "/account",
         cmd_account, parse_args, 0, 4, NULL,
-        { "/account [command] [account] [property] [value]", "Manage accounts.",
-        { "/account [command] [account] [property] [value]",
-          "-----------------------------------------------",
-          "Commands for creating and managing accounts.",
-          "",
-          "list                         : List all accounts.",
-          "show account                 : Show information about an account.",
-          "enable account               : Enable the account, it will be used for autocomplete.",
-          "disable account              : Disable the account.",
-          "default [set|off] [account]  : Set the default account.",
-          "add account                  : Create a new account.",
-          "remove account               : Remove an account.",
-          "rename account newname       : Rename account to newname.",
-          "set account property value   : Set 'property' of 'account' to 'value'.",
-          "clear account property value : Clear 'property' of 'account'.",
-          "",
-          "Account properties.",
-          "",
-          "jid                     : The Jabber ID of the account, account name will be used if not set.",
-          "server                  : The chat server, if different to the domainpart of the JID.",
-          "port                    : The port used for connecting if not the default (5222, or 5223 for SSL).",
-          "status                  : The presence status to use on login, use 'last' to use your last status before logging out.",
-          "online|chat|away|xa|dnd : Priority for the specified presence.",
-          "resource                : The resource to be used.",
-          "password                : Password for the account, note this is currently stored in plaintext if set.",
-          "eval_password           : Shell command evaluated to retrieve password for the account. Can be used to retrieve password from keyring.",
-          "muc                     : The default MUC chat service to use.",
-          "nick                    : The default nickname to use when joining chat rooms.",
-          "otr                     : Override global OTR policy for this account: manual, opportunistic or always.",
-          "",
-          "Example: /account add me",
-          "Example: /account set me jid me@chatty",
-          "Example: /account set me server talk.chat.com",
-          "Example: /account set me port 5111",
-          "Example: /account set me muc chatservice.mycompany.com",
-          "Example: /account set me nick dennis",
-          "Example: /account set me status dnd",
-          "Example: /account set me dnd -1",
-          "Example: /account rename me gtalk",
-          NULL,
-          NULL, NULL, NULL, NULL } } },
+        { NULL, NULL, { NULL },
+        {
+            "/account",
+            "/account list",
+            "/account show <account>",
+            "/account enable|disable <account>",
+            "/account default set <account>",
+            "/account default off",
+            "/account add <account>",
+            "/account remove <account>",
+            "/account rename <account> <newaccount>",
+            "/account set <account> jid <jid>",
+            "/account set <account> server <server>",
+            "/account set <account> port <port>",
+            "/account set <account> status <status>",
+            "/account set <account> online|chat|away|xa|dnd <priority>",
+            "/account set <account> resource <resource>",
+            "/account set <account> password <password>",
+            "/account set <account> eval_password <command>",
+            "/account set <account> muc <service>",
+            "/account set <account> nick <nick>",
+            "/account set <account> otr manual|opportunistic|always",
+            "/account set <account> pgpkeyid <pgpkeyid>",
+            "/account clear <account> password",
+            "/account clear <account> eval_password",
+            "/account clear <account> server",
+            "/account clear <account> port",
+            "/account clear <account> otr",
+            "/account clear <account> pgpkeyid",
+            NULL
+        },
+            "Commands for creating and managing accounts. "
+            "Calling with no arguments will display information for the current account.",
+        {
+            { "list",                                             "List all accounts." },
+            { "show <account>",                                   "Show details for the specified account." },
+            { "enable <account>",                                 "Enable the account, it will be used for autocompletion." },
+            { "disable <account>",                                "Disable the account." },
+            { "default set <account>",                            "Set the default account, used when no argument passed to the /connect command." },
+            { "default off",                                      "Clear the default account setting." },
+            { "add <account>",                                    "Create a new account." },
+            { "remove <account>",                                 "Remove an account." },
+            { "rename <account> <newaccount>",                    "Rename 'account' to 'newaccount'." },
+            { "set <account> jid <jid>",                          "Set the Jabber ID for the account, account name will be used if not set." },
+            { "set <account> server <server>",                    "The chat server, if different to the domainpart of the JID." },
+            { "set <account> port <port>",                        "The port used for connecting if not the default (5222, or 5223 for SSL)." },
+            { "set <account> status <status>",                    "The presence status to use on login, use 'last' to use your last status before logging out." },
+            { "set <account> online|chat|away|xa|dnd <priority>", "Set the priority (-128..127) to use for the specified presence." },
+            { "set <account> resource <resource>",                "The resource to be used for this account." },
+            { "set <account> password <password>",                "Password for the account, note this is currently stored in plaintext if set." },
+            { "set <account> eval_password <command>",            "Shell command evaluated to retrieve password for the account. Can be used to retrieve password from keyring." },
+            { "set <account> muc <service>",                      "The default MUC chat service to use, defaults to 'conference.<domainpart>' where the domain part is from the account JID." },
+            { "set <account> nick <nick>",                        "The default nickname to use when joining chat rooms." },
+            { "set <account> otr manual|opportunistic|always",    "Override global OTR policy for this account, see /otr." },
+            { "set <account> pgpkeyid <pgpkeyid>",                "Set the ID of the PGP key for this account, see /pgp." },
+            { "clear <account> server",                           "Remove the server setting for this account." },
+            { "clear <account> port",                             "Remove the port setting for this account." },
+            { "clear <account> password",                         "Remove the password setting for this account." },
+            { "clear <account> eval_password",                    "Remove the eval_password setting for this account." },
+            { "clear <account> otr",                              "Remove the OTR policy setting for this account." },
+            { "clear <account> pgpkeyid",                         "Remove pgpkeyid associated with this account." },
+            END_ARGS },
+        {
+            "/account add me",
+            "/account set me jid me@chatty",
+            "/account set me server talk.chat.com",
+            "/account set me port 5111",
+            "/account set me muc chatservice.mycompany.com",
+            "/account set me nick dennis",
+            "/account set me status dnd",
+            "/account set me dnd -1",
+            "/account rename me gtalk",
+            NULL } }
+        },
 
     { "/prefs",
         cmd_prefs, parse_args, 0, 1, NULL,
-        { "/prefs [ui|desktop|chat|log|conn|presence]", "Show configuration.",
-        { "/prefs [ui|desktop|chat|log|conn|presence]",
-          "------------------------------------------",
-          "Show preferences for different areas of functionality.",
-          "",
-          "ui       : User interface preferences.",
-          "desktop  : Desktop notification preferences.",
-          "chat     : Chat state preferences.",
-          "log      : Logging preferences.",
-          "conn     : Connection handling preferences.",
-          "presence : Chat presence preferences.",
-          "",
-          "No argument shows all preferences.",
-          NULL,
-          NULL, NULL, NULL, NULL } } },
+        { NULL, NULL, { NULL },
+        {
+            "/prefs [ui|desktop|chat|log|conn|presence]",
+            NULL
+        },
+            "Show preferences for different areas of functionality. "
+            "Passing no arguments shows all preferences.",
+        {
+            { "ui",       "User interface preferences." },
+            { "desktop",  "Desktop notification preferences." },
+            { "chat",     "Chat state preferences." },
+            { "log",      "Logging preferences." },
+            { "conn",     "Connection handling preferences." },
+            { "presence", "Chat presence preferences." },
+            END_ARGS },
+        {
+            NULL } }
+        },
 
     { "/theme",
         cmd_theme, parse_args, 1, 2, &cons_theme_setting,
-        { "/theme list|load|colours [theme-name]", "Change colour theme.",
-        { "/theme list|load|colours [theme-name]",
-          "-------------------------------------",
-          "Load a theme, includes colours and UI options.",
-          "",
-          "list            : List all available themes.",
-          "load theme-name : Load the named theme. 'default' will reset to the default theme.",
-          "colours         : Show the colour values as rendered by the terminal.",
-          "",
-          "Example: /theme list",
-          "Example: /theme load mycooltheme",
-          NULL,
-          NULL, NULL, NULL, NULL } } },
+        { NULL, NULL, { NULL },
+        {
+            "/theme list",
+            "/theme load <theme>",
+            "/theme colours",
+            NULL
+        },
+            "Load a theme, includes colours and UI options.",
+        {
+            { "list", "List all available themes." },
+            { "load <theme>", "Load the specified theme. 'default' will reset to the default theme." },
+            { "colours", "Show the colour values as rendered by the terminal." },
+            END_ARGS },
+        {
+            "/theme list",
+            "/theme load forest",
+            NULL } }
+        },
 
     { "/statuses",
         cmd_statuses, parse_args, 2, 2, &cons_statuses_setting,
-        { "/statuses console|chat|muc setting", "Set preferences for presence change messages.",
-        { "/statuses console|chat|muc setting",
-          "----------------------------------",
-          "Configure which presence changes are displayed in various windows.",
-          "",
-          "console : Configure what is displayed in the console window.",
-          "chat    : Configure what is displayed in chat windows.",
-          "muc     : Configure what is displayed in chat room windows.",
-          "",
-          "Available options are:",
-          "",
-          "all    : Show all presence changes.",
-          "online : Show only online/offline changes.",
-          "none   : Don't show any presence changes.",
-          "",
-          "The default is 'all' for all windows.",
-          "",
-          "Example: /statuses console none",
-          "Example: /statuses chat online",
-          "Example: /statuses muc all",
-          NULL,
-          NULL, NULL, NULL, NULL } } },
+        { NULL, NULL, { NULL },
+        {
+            "/statuses console|chat|muc all|online|none",
+            NULL
+        },
+            "Configure which presence changes are displayed in various windows. "
+            "The default is 'all' for all windows.",
+        {
+            { "console", "Configure what is displayed in the console window." },
+            { "chat",    "Configure what is displayed in chat windows." },
+            { "muc",     "Configure what is displayed in chat room windows." },
+            { "all",     "Show all presence changes." },
+            { "online",  "Show only online/offline changes." },
+            { "none",    "Don't show any presence changes." },
+            END_ARGS },
+        {
+            "/statuses console none",
+            "/statuses chat online",
+            "/statuses muc all",
+            NULL } }
+        },
 
     { "/xmlconsole",
         cmd_xmlconsole, parse_args, 0, 0, NULL,
-        { "/xmlconsole", "Open the XML console",
-        { "/xmlconsole",
-          "-----------",
-          "Open the XML console to view incoming and outgoing XMPP traffic.",
-          NULL,
-          NULL, NULL, NULL, NULL } } },
+        { NULL, NULL, { NULL },
+        {
+            "/xmlconsole",
+            NULL
+        },
+            "Open the XML console to view incoming and outgoing XMPP traffic.",
+        {
+            END_ARGS },
+        {
+            NULL } }
+        },
 
     { "/away",
         cmd_away, parse_args_with_freetext, 0, 1, NULL,
-        { "/away [message]", "Set status to away.",
-        { "/away [message]",
-          "---------------",
-          "Set your status to 'away' with the optional message.",
-          "",
-          "Example: /away Gone for lunch",
-          NULL,
-          NULL, NULL, NULL, NULL } } },
+        { NULL, NULL, { NULL },
+        {
+            "/away [<message>]",
+            NULL
+        },
+            "Set your status to 'away'.",
+        {
+            { "<message>",  "Optional message to use with the status." },
+            END_ARGS },
+        {
+            "/away",
+            "/away Gone for lunch",
+            NULL } }
+        },
 
     { "/chat",
         cmd_chat, parse_args_with_freetext, 0, 1, NULL,
-        { "/chat [message]", "Set status to chat (available for chat).",
-        { "/chat [message]",
-          "---------------",
-          "Set your status to 'chat', meaning 'available for chat', with the optional message.",
-          "",
-          "Example: /chat Please talk to me!",
-          NULL,
-          NULL, NULL, NULL, NULL } } },
+        { NULL, NULL, { NULL },
+        {
+            "/chat [<message>]",
+            NULL
+        },
+            "Set your status to 'chat' (available for chat).",
+        {
+            { "<message>",  "Optional message to use with the status." },
+            END_ARGS },
+        {
+            "/chat",
+            "/chat Please talk to me!",
+            NULL } }
+        },
 
     { "/dnd",
         cmd_dnd, parse_args_with_freetext, 0, 1, NULL,
-        { "/dnd [message]", "Set status to dnd (do not disturb).",
-        { "/dnd [message]",
-          "--------------",
-          "Set your status to 'dnd', meaning 'do not disturb', with the optional message.",
-          "",
-          "Example: /dnd I'm in the zone",
-          NULL,
-          NULL, NULL, NULL, NULL } } },
+        { NULL, NULL, { NULL },
+        {
+            "/dnd [<message>]",
+            NULL
+        },
+            "Set your status to 'dnd' (do not disturb).",
+        {
+            { "<message>",  "Optional message to use with the status." },
+            END_ARGS },
+        {
+            "/dnd",
+            "/dnd I'm in the zone",
+            NULL } }
+        },
 
     { "/online",
         cmd_online, parse_args_with_freetext, 0, 1, NULL,
-        { "/online [message]", "Set status to online.",
-        { "/online [message]",
-          "-----------------",
-          "Set your status to 'online' with the optional message.",
-          "",
-          "Example: /online Up the Irons!",
-          NULL,
-          NULL, NULL, NULL, NULL } } },
+        { NULL, NULL, { NULL },
+        {
+            "/online [<message>]",
+            NULL
+        },
+            "Set your status to 'online'.",
+        {
+            { "<message>",  "Optional message to use with the status." },
+            END_ARGS },
+        {
+            "/online",
+            "/online Up the Irons!",
+            NULL } }
+        },
 
     { "/xa",
         cmd_xa, parse_args_with_freetext, 0, 1, NULL,
-        { "/xa [message]", "Set status to xa (extended away).",
-        { "/xa [message]",
-          "-------------",
-          "Set your status to 'xa', meaning 'extended away', with the optional message.",
-          "",
-          "Example: /xa This meeting is going to be a long one",
-          NULL,
-          NULL, NULL, NULL, NULL } } },
+        { NULL, NULL, { NULL },
+        {
+            "/xa [<message>]",
+            NULL
+        },
+            "Set your status to 'xa' (extended away).",
+        {
+            { "<message>",  "Optional message to use with the status." },
+            END_ARGS },
+        {
+            "/xa",
+            "/xa This meeting is going to be a long one",
+            NULL } }
+        },
 };
 
 static Autocomplete commands_ac;
