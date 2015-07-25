@@ -123,8 +123,8 @@ static struct cmd_t command_defs[] =
         },
             "Help on using Profanity. Passing no arguments list help areas.",
         {
-            { "area",    "Summary help for commands in a certain area of functionality." },
-            { "command", "Full help for a specific command, for example '/help connect'." },
+            { "<area>",    "Summary help for commands in a certain area of functionality." },
+            { "<command>", "Full help for a specific command, for example '/help connect'." },
             END_ARGS },
         {
             "/help commands",
@@ -159,9 +159,9 @@ static struct cmd_t command_defs[] =
             "If no account is specified, the default is used if one is configured. "
             "A local account is created with the JID as it's name if it doesn't already exist.",
         {
-            { "account",         "The local account you wish to connect with, or a JID if connecting for the first time." },
-            { "server <server>", "Supply a server if it is different to the domain part of your JID." },
-            { "port <port>",     "The port to use if different to the default (5222, or 5223 for SSL)." },
+            { "<account>",         "The local account you wish to connect with, or a JID if connecting for the first time." },
+            { "server <server>",   "Supply a server if it is different to the domain part of your JID." },
+            { "port <port>",       "The port to use if different to the default (5222, or 5223 for SSL)." },
             END_ARGS },
         {
             "/connect",
@@ -299,8 +299,8 @@ static struct cmd_t command_defs[] =
           "Passing no argument in a chat window will use the current recipient. "
           "Passing no argument in a chat room will display information about the room.",
         {
-            { "contact", "The contact you wish to view information about." },
-            { "nick",    "When in a chat room, the occupant you wish to view information about." },
+            { "<contact>", "The contact you wish to view information about." },
+            { "<nick>",    "When in a chat room, the occupant you wish to view information about." },
             END_ARGS },
         {
             "/info mybuddy@chat.server.org",
@@ -319,8 +319,8 @@ static struct cmd_t command_defs[] =
             "Find out a contacts, or room members client software capabilities. "
             "If in private chat initiated from a chat room, no parameter is required.",
         {
-            { "fulljid", "If in the console or a chat window, the full JID for which you wish to see capabilities." },
-            { "nick",    "If in a chat room, nickname for which you wish to see capabilities." },
+            { "<fulljid>", "If in the console or a chat window, the full JID for which you wish to see capabilities." },
+            { "<nick>",    "If in a chat room, nickname for which you wish to see capabilities." },
             END_ARGS },
         {
             "/caps mybuddy@chat.server.org/laptop",
@@ -341,8 +341,8 @@ static struct cmd_t command_defs[] =
           "If in private chat initiated from a chat room, no parameter is required. "
           "If the contact's software does not support software version requests, nothing will be displayed.",
         {
-            { "fulljid", "If in the console or a chat window, the full JID for which you wish to see software information." },
-            { "nick",    "If in a chat room, nickname for which you wish to see software information." },
+            { "<fulljid>", "If in the console or a chat window, the full JID for which you wish to see software information." },
+            { "<nick>",    "If in a chat room, nickname for which you wish to see software information." },
             END_ARGS },
         {
             "/software mybuddy@chat.server.org/laptop",
@@ -362,8 +362,8 @@ static struct cmd_t command_defs[] =
           "Find out a contact, or room members presence information. "
           "If in a chat window the parameter is not required, the current recipient will be used.",
         {
-            { "contact", "The contact who's presence you which to see." },
-            { "nick",    "If in a chat room, the occupant who's presence you wish to see." },
+            { "<contact>", "The contact who's presence you which to see." },
+            { "<nick>",    "If in a chat room, the occupant who's presence you wish to see." },
             END_ARGS },
         {
             "/status buddy@server.com",
@@ -813,7 +813,7 @@ static struct cmd_t command_defs[] =
             "/who xa",
             "/who online friends",
             "/who any family",
-            "/who particpant",
+            "/who participant",
             "/who admin",
             NULL } }
         },
@@ -1104,7 +1104,7 @@ static struct cmd_t command_defs[] =
             "The setting can be overridden by the -a (--account) command line option.",
         {
             { "set <account>", "Connect with account on start up." },
-            { "off", "Disable autoconnect." },
+            { "off",           "Disable autoconnect." },
             END_ARGS },
         {
             "/autoconnect set jc@stuntteam.org",
