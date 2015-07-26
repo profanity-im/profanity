@@ -739,6 +739,8 @@ cmd_wins(ProfWin *window, gchar **args, const char * const command)
                 cons_show("Same source and target window supplied.");
             }
         }
+    } else {
+        cons_bad_cmd_usage(command);
     }
 
     return TRUE;
