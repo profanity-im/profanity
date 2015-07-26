@@ -76,7 +76,6 @@ static void _update_presence(const resource_presence_t presence,
 static gboolean _cmd_set_boolean_preference(gchar *arg, struct cmd_help_t help,
     const char * const display, preference_t pref);
 static void _cmd_show_filtered_help(char *heading, gchar *cmd_filter[], int filter_size);
-static gint _compare_commands(Command *a, Command *b);
 static void _who_room(ProfWin *window, gchar **args, struct cmd_help_t help);
 static void _who_roster(ProfWin *window, gchar **args, struct cmd_help_t help);
 
@@ -779,8 +778,8 @@ cmd_help(ProfWin *window, gchar **args, struct cmd_help_t help)
         cons_help();
     } else if (strcmp(args[0], "commands") == 0) {
         cons_show("");
-        cons_show("All commands");
-        cons_show("");
+        ProfWin *console = wins_get_console();
+        win_print(console, '-', NULL, 0, THEME_WHITE_BOLD, "", "All commands");
 
         GList *ordered_commands = NULL;
         GHashTableIter iter;
@@ -789,15 +788,36 @@ cmd_help(ProfWin *window, gchar **args, struct cmd_help_t help)
 
         g_hash_table_iter_init(&iter, commands);
         while (g_hash_table_iter_next(&iter, &key, &value)) {
-            ordered_commands = g_list_insert_sorted(ordered_commands, value, (GCompareFunc)_compare_commands);
+            Command *pcmd = (Command *)value;
+            ordered_commands = g_list_insert_sorted(ordered_commands, pcmd->cmd, (GCompareFunc)g_strcmp0);
         }
 
+        int maxlen = 0;
         GList *curr = ordered_commands;
         while (curr) {
-            Command *cmd = curr->data;
-            cons_show("%-13s: %s", cmd->cmd, cmd->help.short_help);
+            gchar *cmd = curr->data;
+            int len = strlen(cmd);
+            if (len > maxlen) maxlen = len;
             curr = g_list_next(curr);
         }
+
+        GString *cmds = g_string_new("");
+        curr = ordered_commands;
+        int count = 0;
+        while (curr) {
+            gchar *cmd = curr->data;
+            if (count == 5) {
+                cons_show(cmds->str);
+                g_string_free(cmds, TRUE);
+                cmds = g_string_new("");
+                count = 0;
+            }
+            g_string_append_printf(cmds, "%-*s", maxlen + 1, cmd);
+            curr = g_list_next(curr);
+            count++;
+        }
+        cons_show(cmds->str);
+        g_string_free(cmds, TRUE);
         g_list_free(ordered_commands);
         g_list_free(curr);
 
@@ -4748,44 +4768,47 @@ _cmd_set_boolean_preference(gchar *arg, struct cmd_help_t help,
 static void
 _cmd_show_filtered_help(char *heading, gchar *cmd_filter[], int filter_size)
 {
+    ProfWin *console = wins_get_console();
     cons_show("");
-    cons_show("%s", heading);
-    cons_show("");
+    win_print(console, '-', NULL, 0, THEME_WHITE_BOLD, "", heading);
 
     GList *ordered_commands = NULL;
     int i;
     for (i = 0; i < filter_size; i++) {
-        Command *cmd = g_hash_table_lookup(commands, cmd_filter[i]);
-        ordered_commands = g_list_insert_sorted(ordered_commands, cmd, (GCompareFunc)_compare_commands);
+        Command *pcmd = g_hash_table_lookup(commands, cmd_filter[i]);
+        ordered_commands = g_list_insert_sorted(ordered_commands, pcmd->cmd, (GCompareFunc)g_strcmp0);
     }
 
+    int maxlen = 0;
     GList *curr = ordered_commands;
     while (curr) {
-        Command *cmd = curr->data;
-        cons_show("%-12s: %s", cmd->cmd, cmd->help.short_help);
+        gchar *cmd = curr->data;
+        int len = strlen(cmd);
+        if (len > maxlen) maxlen = len;
         curr = g_list_next(curr);
     }
+
+    GString *cmds = g_string_new("");
+    curr = ordered_commands;
+    int count = 0;
+    while (curr) {
+        gchar *cmd = curr->data;
+        if (count == 5) {
+            cons_show(cmds->str);
+            g_string_free(cmds, TRUE);
+            cmds = g_string_new("");
+            count = 0;
+        }
+        g_string_append_printf(cmds, "%-*s", maxlen + 1, cmd);
+        curr = g_list_next(curr);
+        count++;
+    }
+    cons_show(cmds->str);
+    g_string_free(cmds, TRUE);
     g_list_free(ordered_commands);
     g_list_free(curr);
 
     cons_show("");
     cons_show("Use /help [command] without the leading slash, for help on a specific command");
     cons_show("");
-}
-
-static
-gint _compare_commands(Command *a, Command *b)
-{
-    const char * utf8_str_a = a->cmd;
-    const char * utf8_str_b = b->cmd;
-
-    gchar *key_a = g_utf8_collate_key(utf8_str_a, -1);
-    gchar *key_b = g_utf8_collate_key(utf8_str_b, -1);
-
-    gint result = g_strcmp0(key_a, key_b);
-
-    g_free(key_a);
-    g_free(key_b);
-
-    return result;
 }

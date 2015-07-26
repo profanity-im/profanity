@@ -3702,80 +3702,60 @@ command_docgen(void)
     while (curr) {
         Command *pcmd = curr->data;
 
+        fprintf(toc_fragment, "<a href=\"#%s\">%s</a>,\n", &pcmd->cmd[1], pcmd->cmd);
+        fprintf(main_fragment, "<a name=\"%s\"></a>\n", &pcmd->cmd[1]);
+        fprintf(main_fragment, "<h4>%s</h4>\n", pcmd->cmd);
 
-        // old style
-        if (pcmd->help.usage) {
-//            fprintf(toc_fragment, "<a href=\"#%s\">%s</a>,\n", &pcmd->cmd[1], pcmd->cmd);
-//            fprintf(main_fragment, "<a name=\"%s\"></a>\n", &pcmd->cmd[1]);
-//            fprintf(main_fragment, "<h4>%s</h4>\n", pcmd->cmd);
-//            fputs("<p>Usage:</p>\n", main_fragment);
-//            fprintf(main_fragment, "<p><pre><code>%s</code></pre></p>\n", pcmd->help.usage);
-//
-//            fputs("<p>Details:</p>\n", main_fragment);
-//            fputs("<p><pre><code>", main_fragment);
-//            int i = 2;
-//            while (pcmd->help.long_help[i]) {
-//                fprintf(main_fragment, "%s\n", pcmd->help.long_help[i++]);
-//            }
-//            fputs("</code></pre></p>\n<a href=\"#top\"><h5>back to top</h5></a><br><hr>\n", main_fragment);
-//            fputs("\n", main_fragment);
+        fputs("<p><b>Synopsis</b></p>\n", main_fragment);
+        fputs("<p><pre><code>", main_fragment);
+        int i = 0;
+        while (pcmd->help.synopsis[i]) {
+            char *str1 = str_replace(pcmd->help.synopsis[i], "<", "&lt;");
+            char *str2 = str_replace(str1, ">", "&gt;");
+            fprintf(main_fragment, "%s\n", str2);
+            i++;
+        }
+        fputs("</code></pre></p>\n", main_fragment);
 
-        // new style
-        } else {
-            fprintf(toc_fragment, "<a href=\"#%s\">%s</a>,\n", &pcmd->cmd[1], pcmd->cmd);
-            fprintf(main_fragment, "<a name=\"%s\"></a>\n", &pcmd->cmd[1]);
-            fprintf(main_fragment, "<h4>%s</h4>\n", pcmd->cmd);
+        fputs("<p><b>Description</b></p>\n", main_fragment);
+        fputs("<p>", main_fragment);
+        fprintf(main_fragment, "%s\n", pcmd->help.desc);
+        fputs("</p>\n", main_fragment);
 
-            fputs("<p><b>Synopsis</b></p>\n", main_fragment);
+        if (pcmd->help.args[0][0] != NULL) {
+            fputs("<p><b>Arguments</b></p>\n", main_fragment);
+            fputs("<table>", main_fragment);
+            for (i = 0; pcmd->help.args[i][0] != NULL; i++) {
+                fputs("<tr>", main_fragment);
+                fputs("<td>", main_fragment);
+                fputs("<code>", main_fragment);
+                char *str1 = str_replace(pcmd->help.args[i][0], "<", "&lt;");
+                char *str2 = str_replace(str1, ">", "&gt;");
+                fprintf(main_fragment, "%s", str2);
+                fputs("</code>", main_fragment);
+                fputs("</td>", main_fragment);
+                fputs("<td>", main_fragment);
+                fprintf(main_fragment, "%s", pcmd->help.args[i][1]);
+                fputs("</td>", main_fragment);
+                fputs("</tr>", main_fragment);
+            }
+            fputs("</table>\n", main_fragment);
+        }
+
+        if (pcmd->help.examples[0] != NULL) {
+            fputs("<p><b>Examples</b></p>\n", main_fragment);
             fputs("<p><pre><code>", main_fragment);
             int i = 0;
-            while (pcmd->help.synopsis[i]) {
-                char *str1 = str_replace(pcmd->help.synopsis[i], "<", "&lt;");
-                char *str2 = str_replace(str1, ">", "&gt;");
-                fprintf(main_fragment, "%s\n", str2);
+            while (pcmd->help.examples[i]) {
+                fprintf(main_fragment, "%s\n", pcmd->help.examples[i]);
                 i++;
             }
             fputs("</code></pre></p>\n", main_fragment);
-
-            fputs("<p><b>Description</b></p>\n", main_fragment);
-            fputs("<p>", main_fragment);
-            fprintf(main_fragment, "%s\n", pcmd->help.desc);
-            fputs("</p>\n", main_fragment);
-
-            if (pcmd->help.args[0][0] != NULL) {
-                fputs("<p><b>Arguments</b></p>\n", main_fragment);
-                fputs("<table>", main_fragment);
-                for (i = 0; pcmd->help.args[i][0] != NULL; i++) {
-                    fputs("<tr>", main_fragment);
-                    fputs("<td>", main_fragment);
-                    fputs("<code>", main_fragment);
-                    char *str1 = str_replace(pcmd->help.args[i][0], "<", "&lt;");
-                    char *str2 = str_replace(str1, ">", "&gt;");
-                    fprintf(main_fragment, "%s", str2);
-                    fputs("</code>", main_fragment);
-                    fputs("</td>", main_fragment);
-                    fputs("<td>", main_fragment);
-                    fprintf(main_fragment, "%s", pcmd->help.args[i][1]);
-                    fputs("</td>", main_fragment);
-                    fputs("</tr>", main_fragment);
-                }
-                fputs("</table>\n", main_fragment);
-            }
-
-            if (pcmd->help.examples[0] != NULL) {
-                fputs("<p><b>Examples</b></p>\n", main_fragment);
-                fputs("<p><pre><code>", main_fragment);
-                int i = 0;
-                while (pcmd->help.examples[i]) {
-                    fprintf(main_fragment, "%s\n", pcmd->help.examples[i]);
-                    i++;
-                }
-                fputs("</code></pre></p>\n", main_fragment);
-            }
-
-            fputs("<a href=\"#top\"><h5>back to top</h5></a><br><hr>\n", main_fragment);
-            fputs("\n", main_fragment);
         }
+
+        fputs("<a href=\"#top\"><h5>back to top</h5></a><br><hr>\n", main_fragment);
+        fputs("\n", main_fragment);
+
         curr = g_list_next(curr);
     }
 
@@ -3783,5 +3763,6 @@ command_docgen(void)
 
     fclose(toc_fragment);
     fclose(main_fragment);
+    printf("\nProcessed %d commands.\n\n", g_list_length(cmds));
     g_list_free(cmds);
 }

@@ -1533,9 +1533,9 @@ cons_help(void)
 void
 cons_navigation_help(void)
 {
+    ProfWin *console = wins_get_console();
     cons_show("");
-    cons_show("Navigation:");
-    cons_show("");
+    win_print(console, '-', NULL, 0, THEME_WHITE_BOLD, "", "Navigation");
     cons_show("Alt-1..Alt-0, F1..F10            : Choose window.");
     cons_show("Alt-LEFT, Alt-RIGHT              : Previous/next chat window");
     cons_show("PAGEUP, PAGEDOWN                 : Page the main window.");
