@@ -104,117 +104,100 @@ static char * _receipts_autocomplete(ProfWin *window, const char * const input);
 
 GHashTable *commands = NULL;
 
+#define CMD_SYN(...)        { { __VA_ARGS__, NULL },
+#define CMD_DESC(desc)      desc,
+#define CMD_NOARGS()        { { NULL, NULL } },
+#define CMD_ARGS(...)       { __VA_ARGS__, { NULL, NULL } },
+#define CMD_NOEXAMPLES()    { NULL } }
+#define CMD_EXAMPLES(...)   { __VA_ARGS__, NULL } }
+
 #define END_ARGS { NULL, NULL }
-
-
 
 /*
  * Command list
  */
 static struct cmd_t command_defs[] =
 {
-    // NEW STYLE
     { "/help",
         cmd_help, parse_args, 0, 1, NULL,
-        {
-        {
-            "/help [<area>|<command>]",
-            NULL
-        },
-            "Help on using Profanity. Passing no arguments list help areas.",
-        {
+        CMD_SYN(
+            "/help [<area>|<command>]")
+        CMD_DESC(
+            "Help on using Profanity. Passing no arguments list help areas.")
+        CMD_ARGS(
             { "<area>",    "Summary help for commands in a certain area of functionality." },
-            { "<command>", "Full help for a specific command, for example '/help connect'." },
-            END_ARGS },
-        {
+            { "<command>", "Full help for a specific command, for example '/help connect'." })
+        CMD_EXAMPLES(
             "/help commands",
             "/help presence",
-            "/help who",
-            NULL } }
-        },
+            "/help who")
+    },
 
     { "/about",
         cmd_about, parse_args, 0, 0, NULL,
-        {
-        {
-            "/about",
-            NULL
-        },
-            "Show version and license information.",
-        {
-            END_ARGS },
-        {
-            NULL } }
-        },
+        CMD_SYN(
+            "/about")
+        CMD_DESC(
+            "Show version and license information.")
+        CMD_NOARGS()
+        CMD_NOEXAMPLES()
+    },
 
     { "/connect",
         cmd_connect, parse_args, 0, 5, NULL,
-        {
-        {
+        CMD_SYN(
             "/connect [<account>]",
-            "/connect <account> [server <server>] [port <port>]",
-            NULL
-        },
+            "/connect <account> [server <server>] [port <port>]")
+        CMD_DESC(
             "Login to a chat service. "
             "If no account is specified, the default is used if one is configured. "
-            "A local account is created with the JID as it's name if it doesn't already exist.",
-        {
+            "A local account is created with the JID as it's name if it doesn't already exist.")
+        CMD_ARGS(
             { "<account>",         "The local account you wish to connect with, or a JID if connecting for the first time." },
             { "server <server>",   "Supply a server if it is different to the domain part of your JID." },
-            { "port <port>",       "The port to use if different to the default (5222, or 5223 for SSL)." },
-            END_ARGS },
-        {
+            { "port <port>",       "The port to use if different to the default (5222, or 5223 for SSL)." })
+        CMD_EXAMPLES(
             "/connect",
             "/connect myuser@gmail.com",
             "/connect myuser@mycompany.com server talk.google.com",
             "/connect bob@someplace port 5678",
-            "/connect me@chatty server chatty.com port 5443",
-            NULL } }
+            "/connect me@chatty server chatty.com port 5443")
         },
 
     { "/disconnect",
         cmd_disconnect, parse_args, 0, 0, NULL,
-        {
-        {
-            "/disconnect",
-            NULL
-        },
-            "Disconnect from the current chat service.",
-        {
-            END_ARGS },
-        {
-            NULL } }
-        },
+        CMD_SYN(
+            "/disconnect")
+        CMD_DESC(
+            "Disconnect from the current chat service.")
+        CMD_NOARGS()
+        CMD_NOEXAMPLES()
+    },
 
     { "/msg",
         cmd_msg, parse_args_with_freetext, 1, 2, NULL,
-        {
-        {
+        CMD_SYN(
             "/msg <contact> [<message>]",
-            "/msg <nick> [<message>]",
-            NULL
-        },
+            "/msg <nick> [<message>]")
+        CMD_DESC(
             "Send a one to one chat message, or a private message to a chat room occupant. "
             "If the message is omitted, a new chat window will be opened without sending a message. "
-            "Use quotes if the nickname includes spaces.",
-        {
+            "Use quotes if the nickname includes spaces.")
+        CMD_ARGS(
             { "<contact>",             "Open chat window with contact, by JID or nickname." },
             { "<contact> [<message>]", "Send message to contact, by JID or nickname." },
             { "<nick>",                "Open private chat window with chat room occupant." },
-            { "<nick> [<message>]",    "Send a private message to a chat room occupant." },
-            END_ARGS },
-        {
+            { "<nick> [<message>]",    "Send a private message to a chat room occupant." })
+        CMD_EXAMPLES(
             "/msg myfriend@server.com Hey, here's a message!",
             "/msg otherfriend@server.com",
             "/msg Bob Here is a private message",
-            "/msg \"My Friend\" Hi, how are you?",
-            NULL } }
-        },
+            "/msg \"My Friend\" Hi, how are you?")
+    },
 
     { "/roster",
         cmd_roster, parse_args_with_freetext, 0, 3, NULL,
-        {
-        {
+        CMD_SYN(
             "/roster",
             "/roster online",
             "/roster show [offline|resource|empty]",
@@ -225,12 +208,11 @@ static struct cmd_t command_defs[] =
             "/roster remove <jid>",
             "/roster remove_all contacts",
             "/roster nick <jid> <nick>",
-            "/roster clearnick <jid>",
-            NULL
-        },
-          "Manage your roster, and roster display settings. "
-          "Passing no arguments lists all contacts in your roster.",
-        {
+            "/roster clearnick <jid>")
+        CMD_DESC(
+            "Manage your roster, and roster display settings. "
+            "Passing no arguments lists all contacts in your roster.")
+        CMD_ARGS(
             { "online",              "Show all online contacts in your roster." },
             { "show",                "Show the roster panel." },
             { "show offline",        "Show offline contacts in the roster panel." },
@@ -249,397 +231,315 @@ static struct cmd_t command_defs[] =
             { "remove <jid>",        "Removes an item from the roster." },
             { "remove_all contacts", "Remove all items from roster." },
             { "nick <jid> <nick>",   "Change a contacts nickname." },
-            { "clearnick <jid>",     "Removes the current nickname." },
-            END_ARGS },
-        {
+            { "clearnick <jid>",     "Removes the current nickname." })
+        CMD_EXAMPLES(
             "/roster",
             "/roster add someone@contacts.org",
             "/roster add someone@contacts.org Buddy",
             "/roster remove someone@contacts.org",
             "/roster nick myfriend@chat.org My Friend",
             "/roster clearnick kai@server.com",
-            "/roster size 15",
-            NULL } }
-        },
+            "/roster size 15")
+    },
 
     { "/group",
         cmd_group, parse_args_with_freetext, 0, 3, NULL,
-        {
-        {
+        CMD_SYN(
             "/group",
             "/group show <group>",
-            "/group remove <group> <contact>",
-            NULL
-        },
-          "View, add to, and remove from roster groups. "
-          "Passing no argument will list all roster groups.",
-        {
+            "/group remove <group> <contact>")
+        CMD_DESC(
+            "View, add to, and remove from roster groups. "
+            "Passing no argument will list all roster groups.")
+        CMD_ARGS(
             { "show <group>",             "List all roster items a group." },
             { "add <group> <contact>",    "Add a contact to a group." },
-            { "remove <group> <contact>", "Remove a contact from a group." },
-            END_ARGS },
-        {
+            { "remove <group> <contact>", "Remove a contact from a group." })
+        CMD_EXAMPLES(
             "/group",
             "/group show friends",
             "/group add friends newfriend@server.org",
             "/group add family Brother",
-            "/group remove colleagues boss@work.com",
-            NULL } }
-        },
+            "/group remove colleagues boss@work.com")
+    },
 
     { "/info",
         cmd_info, parse_args, 0, 1, NULL,
-        {
-        {
+        CMD_SYN(
             "/info",
-            "/info <contact>|<nick>",
-            NULL
-        },
-          "Show information about a contact, room, or room member. "
-          "Passing no argument in a chat window will use the current recipient. "
-          "Passing no argument in a chat room will display information about the room.",
-        {
+            "/info <contact>|<nick>")
+        CMD_DESC(
+            "Show information about a contact, room, or room member. "
+            "Passing no argument in a chat window will use the current recipient. "
+            "Passing no argument in a chat room will display information about the room.")
+        CMD_ARGS(
             { "<contact>", "The contact you wish to view information about." },
-            { "<nick>",    "When in a chat room, the occupant you wish to view information about." },
-            END_ARGS },
-        {
+            { "<nick>",    "When in a chat room, the occupant you wish to view information about." })
+        CMD_EXAMPLES(
             "/info mybuddy@chat.server.org",
-            "/info kai",
-            NULL } }
-        },
+            "/info kai")
+    },
 
     { "/caps",
         cmd_caps, parse_args, 0, 1, NULL,
-        {
-        {
+        CMD_SYN(
             "/caps",
-            "/caps <fulljid>|<nick>",
-            NULL
-        },
+            "/caps <fulljid>|<nick>")
+        CMD_DESC(
             "Find out a contacts, or room members client software capabilities. "
-            "If in private chat initiated from a chat room, no parameter is required.",
-        {
+            "If in private chat initiated from a chat room, no parameter is required.")
+        CMD_ARGS(
             { "<fulljid>", "If in the console or a chat window, the full JID for which you wish to see capabilities." },
-            { "<nick>",    "If in a chat room, nickname for which you wish to see capabilities." },
-            END_ARGS },
-        {
+            { "<nick>",    "If in a chat room, nickname for which you wish to see capabilities." })
+        CMD_EXAMPLES(
             "/caps mybuddy@chat.server.org/laptop",
             "/caps mybuddy@chat.server.org/phone",
-            "/caps bruce",
-            NULL } }
-        },
+            "/caps bruce")
+    },
 
     { "/software",
         cmd_software, parse_args, 0, 1, NULL,
-        {
-        {
+        CMD_SYN(
             "/software",
-            "/software <fulljid>|<nick>",
-            NULL
-        },
-          "Find out a contact, or room members software version information. "
-          "If in private chat initiated from a chat room, no parameter is required. "
-          "If the contact's software does not support software version requests, nothing will be displayed.",
-        {
+            "/software <fulljid>|<nick>")
+        CMD_DESC(
+            "Find out a contact, or room members software version information. "
+            "If in private chat initiated from a chat room, no parameter is required. "
+            "If the contact's software does not support software version requests, nothing will be displayed.")
+        CMD_ARGS(
             { "<fulljid>", "If in the console or a chat window, the full JID for which you wish to see software information." },
-            { "<nick>",    "If in a chat room, nickname for which you wish to see software information." },
-            END_ARGS },
-        {
+            { "<nick>",    "If in a chat room, nickname for which you wish to see software information." })
+        CMD_EXAMPLES(
             "/software mybuddy@chat.server.org/laptop",
             "/software mybuddy@chat.server.org/phone",
-            "/software bruce",
-            NULL } }
-        },
+            "/software bruce")
+    },
 
     { "/status",
         cmd_status, parse_args, 0, 1, NULL,
-        {
-        {
+        CMD_SYN(
             "/status",
-            "/status <contact>|<nick>",
-            NULL
-        },
-          "Find out a contact, or room members presence information. "
-          "If in a chat window the parameter is not required, the current recipient will be used.",
-        {
+            "/status <contact>|<nick>")
+        CMD_DESC(
+            "Find out a contact, or room members presence information. "
+            "If in a chat window the parameter is not required, the current recipient will be used.")
+        CMD_ARGS(
             { "<contact>", "The contact who's presence you which to see." },
-            { "<nick>",    "If in a chat room, the occupant who's presence you wish to see." },
-            END_ARGS },
-        {
+            { "<nick>",    "If in a chat room, the occupant who's presence you wish to see." })
+        CMD_EXAMPLES(
             "/status buddy@server.com",
-            "/status jon",
-            NULL } }
-        },
+            "/status jon")
+    },
 
     { "/resource",
         cmd_resource, parse_args, 1, 2, &cons_resource_setting,
-        {
-        {
+        CMD_SYN(
             "/resource set <resource>",
             "/resource off",
             "/resource title on|off",
-            "/resource message on|off",
-            NULL
-        },
-            "Override chat session resource, and manage resource display settings.",
-        {
+            "/resource message on|off")
+        CMD_DESC(
+            "Override chat session resource, and manage resource display settings.")
+        CMD_ARGS(
             { "set <resource>", "Set the resource to which messages will be sent." },
             { "off",            "Let the server choose which resource to route messages to." },
             { "title on|off",   "Show or hide the current resource in the titlebar." },
-            { "message on|off", "Show or hide the resource when showing an incoming message." },
-            END_ARGS },
-        {
-            NULL } }
-        },
+            { "message on|off", "Show or hide the resource when showing an incoming message." })
+        CMD_NOEXAMPLES()
+    },
 
     { "/join",
         cmd_join, parse_args, 0, 5, NULL,
-        {
-        {
+        CMD_SYN(
             "/join",
-            "/join <room> [nick <nick>] [password <password>]",
-            NULL
-        },
+            "/join <room> [nick <nick>] [password <password>]")
+        CMD_DESC(
             "Join a chat room at the conference server. "
             "If no room is supplied, a generated name will be used with the format private-chat-[UUID]. "
             "If the domain part is not included in the room name, the account preference 'muc.service' will be used. "
             "If no nickname is specified the account preference 'muc.nick' will be used which by default is the localpart of your JID. "
-            "If the room doesn't exist, and the server allows it, a new one will be created.",
-        {
-            { "<room>",                "The chat room to join." },
+            "If the room doesn't exist, and the server allows it, a new one will be created.")
+        CMD_ARGS(
+            { "<room>",              "The chat room to join." },
             { "nick <nick>",         "Nickname to use in the room." },
-            { "password <password>", "Password if the room requires one." },
-            END_ARGS },
-        {
+            { "password <password>", "Password if the room requires one." })
+        CMD_EXAMPLES(
             "/join",
             "/join jdev@conference.jabber.org",
             "/join jdev@conference.jabber.org nick mynick",
             "/join private@conference.jabber.org nick mynick password mypassword",
-            "/join jdev",
-            NULL } }
-        },
+            "/join jdev")
+    },
 
     { "/leave",
         cmd_leave, parse_args, 0, 0, NULL,
-        {
-        {
-            "/leave",
-            NULL
-        },
-            "Leave the current chat room.",
-        {
-            END_ARGS },
-        {
-            NULL } }
-        },
+        CMD_SYN(
+            "/leave")
+        CMD_DESC(
+            "Leave the current chat room.")
+        CMD_NOARGS()
+        CMD_NOEXAMPLES()
+    },
 
     { "/invite",
         cmd_invite, parse_args_with_freetext, 1, 2, NULL,
-        {
-        {
-            "/invite <contact> [<message>]",
-            NULL
-        },
-            "Send an invite to a contact for the current chat room.",
-        {
+        CMD_SYN(
+            "/invite <contact> [<message>]")
+        CMD_DESC(
+            "Send an invite to a contact for the current chat room.")
+        CMD_ARGS(
             { "<contact>", "The contact you wish to invite." },
-            { "<message>", "An optional message to send with the invite." },
-            END_ARGS },
-        {
-            NULL } }
-        },
+            { "<message>", "An optional message to send with the invite." })
+        CMD_NOEXAMPLES()
+    },
 
     { "/invites",
         cmd_invites, parse_args_with_freetext, 0, 0, NULL,
-        {
-        {
-            "/invites",
-            NULL
-        },
-            "Show all rooms that you have been invited to, and not accepted or declined.",
-        {
-            END_ARGS },
-        {
-            NULL } }
-        },
+        CMD_SYN(
+            "/invites")
+        CMD_DESC(
+            "Show all rooms that you have been invited to, and not accepted or declined.")
+        CMD_NOARGS()
+        CMD_NOEXAMPLES()
+    },
 
     { "/decline",
         cmd_decline, parse_args_with_freetext, 1, 1, NULL,
-        {
-        {
-            "/decline <room>",
-            NULL
-        },
-            "Decline a chat room invitation.",
-        {
-            { "<room>", "The room for the invite you wish to decline." },
-            END_ARGS },
-        {
-            NULL } }
-        },
+        CMD_SYN(
+            "/decline <room>")
+        CMD_DESC(
+            "Decline a chat room invitation.")
+        CMD_ARGS(
+            { "<room>", "The room for the invite you wish to decline." })
+        CMD_NOEXAMPLES()
+    },
 
     { "/room",
         cmd_room, parse_args, 1, 1, NULL,
-        {
-        {
-            "/room accept|destroy|config",
-            NULL
-        },
-            "Chat room configuration.",
-        {
+        CMD_SYN(
+            "/room accept|destroy|config")
+        CMD_DESC(
+            "Chat room configuration.")
+        CMD_ARGS(
             { "accept",  "Accept default room configuration." },
             { "destroy", "Reject default room configuration, and destroy the room." },
-            { "config",  "Edit room configuration." },
-            END_ARGS },
-        {
-            NULL } }
-        },
+            { "config",  "Edit room configuration." })
+        CMD_NOEXAMPLES()
+    },
 
     { "/kick",
         cmd_kick, parse_args_with_freetext, 1, 2, NULL,
-        {
-        {
-            "/kick <nick> [<reason>]",
-            NULL
-        },
-            "Kick occupant from chat room.",
-        {
+        CMD_SYN(
+            "/kick <nick> [<reason>]")
+        CMD_DESC(
+            "Kick occupant from chat room.")
+        CMD_ARGS(
             { "<nick>",   "Nickname of the occupant to kick from the room." },
-            { "<reason>", "Optional reason for kicking the occupant." },
-            END_ARGS },
-        {
-            NULL } }
-        },
+            { "<reason>", "Optional reason for kicking the occupant." })
+        CMD_NOEXAMPLES()
+    },
 
     { "/ban",
         cmd_ban, parse_args_with_freetext, 1, 2, NULL,
-        {
-        {
-            "/ban <jid> [<reason>]",
-            NULL
-        },
-            "Ban user from chat room.",
-        {
+        CMD_SYN(
+            "/ban <jid> [<reason>]")
+        CMD_DESC(
+            "Ban user from chat room.")
+        CMD_ARGS(
             { "<jid>",    "Bare JID of the user to ban from the room." },
-            { "<reason>", "Optional reason for banning the user." },
-            END_ARGS },
-        {
-            NULL } }
-        },
+            { "<reason>", "Optional reason for banning the user." })
+        CMD_NOEXAMPLES()
+    },
 
     { "/subject",
         cmd_subject, parse_args_with_freetext, 0, 2, NULL,
-        {
-        {
+        CMD_SYN(
             "/subject set <subject>",
-            "/subject clear",
-            NULL
-        },
-            "Set or clear room subject.",
-        {
+            "/subject clear")
+        CMD_DESC(
+            "Set or clear room subject.")
+        CMD_ARGS(
             { "set <subject>", "Set the room subject." },
-            { "clear",         "Clear the room subject." },
-            END_ARGS },
-        {
-            NULL } }
-        },
+            { "clear",         "Clear the room subject." })
+        CMD_NOEXAMPLES()
+    },
 
     { "/affiliation",
         cmd_affiliation, parse_args_with_freetext, 1, 4, NULL,
-        {
-        {
+        CMD_SYN(
             "/affiliation set <affiliation> <jid> [<reason>]",
-            "/list [<affiliation>]",
-            NULL
-        },
+            "/list [<affiliation>]")
+        CMD_DESC(
             "Manage room affiliations. "
-            "Affiliation may be one of owner, admin, member, outcast or none.",
-        {
+            "Affiliation may be one of owner, admin, member, outcast or none.")
+        CMD_ARGS(
             { "set <affiliation> <jid> [<reason>]", "Set the affiliation of user with jid, with an optional reason." },
-            { "list [<affiliation>]",               "List all users with the specified affiliation, or all if none specified." },
-            END_ARGS },
-        {
-            NULL } }
-        },
+            { "list [<affiliation>]",               "List all users with the specified affiliation, or all if none specified." })
+        CMD_NOEXAMPLES()
+    },
 
     { "/role",
         cmd_role, parse_args_with_freetext, 1, 4, NULL,
-        {
-        {
+        CMD_SYN(
             "/role set <role> <nick> [<reason>]",
-            "/list [<role>]",
-            NULL
-        },
+            "/list [<role>]")
+        CMD_DESC(
             "Manage room roles. "
-            "Role may be one of moderator, participant, visitor or none.",
-        {
+            "Role may be one of moderator, participant, visitor or none.")
+        CMD_ARGS(
             { "set <role> <nick> [<reason>]", "Set the role of occupant with nick, with an optional reason." },
-            { "list [<role>]",                "List all occupants with the specified role, or all if none specified." },
-            END_ARGS },
-        {
-            NULL } }
-        },
+            { "list [<role>]",                "List all occupants with the specified role, or all if none specified." })
+        CMD_NOEXAMPLES()
+    },
 
     { "/occupants",
         cmd_occupants, parse_args, 1, 3, cons_occupants_setting,
-        {
-        {
+        CMD_SYN(
             "/occupants show|hide [jid]",
             "/occupants default show|hide [jid]",
-            "/occupants size [<percent>]",
-            NULL
-        },
-            "Show or hide room occupants, and occupants panel display settings.",
-        {
+            "/occupants size [<percent>]")
+        CMD_DESC(
+            "Show or hide room occupants, and occupants panel display settings.")
+        CMD_ARGS(
             { "show",                  "Show the occupants panel in current room." },
             { "hide",                  "Hide the occupants panel in current room." },
             { "show jid",              "Show jid in the occupants panel in current room." },
             { "hide jid",              "Hide jid in the occupants panel in current room." },
             { "default show|hide",     "Whether occupants are shown by default in new rooms." },
             { "default show|hide jid", "Whether occupants jids are shown by default in new rooms." },
-            { "size <percent>",        "Percentage of the screen taken by the occupants list in rooms (1-99)." },
-            END_ARGS },
-        {
-            NULL } }
-        },
+            { "size <percent>",        "Percentage of the screen taken by the occupants list in rooms (1-99)." })
+        CMD_NOEXAMPLES()
+    },
 
     { "/form",
         cmd_form, parse_args, 1, 2, NULL,
-        {
-        {
+        CMD_SYN(
             "/form show",
             "/form submit",
             "/form cancel",
-            "/form help [<tag>]",
-            NULL
-        },
-            "Form configuration.",
-        {
+            "/form help [<tag>]")
+        CMD_DESC(
+            "Form configuration.")
+        CMD_ARGS(
             { "show",         "Show the current form." },
             { "submit",       "Submit the current form." },
             { "cancel",       "Cancel changes to the current form." },
-            { "help [<tag>]", "Display help for form, or a specific field." },
-            END_ARGS },
-        {
-            NULL } }
-        },
+            { "help [<tag>]", "Display help for form, or a specific field." })
+        CMD_NOEXAMPLES()
+    },
 
     { "/rooms",
         cmd_rooms, parse_args, 0, 1, NULL,
-        {
-        {
-            "/rooms [<service>]",
-            NULL
-        },
+        CMD_SYN(
+            "/rooms [<service>]")
+        CMD_DESC(
             "List the chat rooms available at the specified conference service. "
-            "If no argument is supplied, the account preference 'muc.service' is used, 'conference.<domain-part>' by default.",
-        {
-            { "<service>", "The conference service to query." },
-            END_ARGS },
-        {
-            "/rooms conference.jabber.org",
-            NULL } }
-        },
+            "If no argument is supplied, the account preference 'muc.service' is used, 'conference.<domain-part>' by default.")
+        CMD_ARGS(
+            { "<service>", "The conference service to query." })
+        CMD_EXAMPLES(
+            "/rooms conference.jabber.org")
+    },
 
     { "/bookmark",
         cmd_bookmark, parse_args, 0, 8, NULL,
