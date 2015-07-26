@@ -111,6 +111,14 @@ cons_show_help(Command *command)
     ProfWin *console = wins_get_console();
 
     cons_show("");
+    win_vprint(console, '-', NULL, 0, THEME_WHITE_BOLD, "", "%s", &command->cmd[1]);
+    win_print(console, '-', NULL, NO_EOL, THEME_WHITE_BOLD, "", "");
+    int i;
+    for (i = 0; i < strlen(command->cmd) - 1 ; i++) {
+        win_print(console, '-', NULL, NO_EOL | NO_DATE, THEME_WHITE_BOLD, "", "-");
+    }
+    win_print(console, '-', NULL, NO_DATE, THEME_WHITE_BOLD, "", "");
+    cons_show("");
 
     win_print(console, '-', NULL, 0, THEME_WHITE_BOLD, "", "Synopsis");
     ui_show_lines(console, command->help.synopsis);
@@ -119,7 +127,6 @@ cons_show_help(Command *command)
     win_print(console, '-', NULL, 0, THEME_WHITE_BOLD, "", "Description");
     win_println(console, command->help.desc);
 
-    int i;
     int maxlen = 0;
     for (i = 0; command->help.args[i][0] != NULL; i++) {
         if (strlen(command->help.args[i][0]) > maxlen)
