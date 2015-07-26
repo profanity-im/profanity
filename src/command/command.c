@@ -2505,7 +2505,7 @@ _cmd_execute(ProfWin *window, const char * const command, const char * const inp
             ui_invalid_command_usage(cmd->cmd, cmd->setting_func);
             return TRUE;
         } else {
-            gboolean result = cmd->func(window, args, command);
+            gboolean result = cmd->func(window, command, args);
             g_strfreev(args);
             return result;
         }
