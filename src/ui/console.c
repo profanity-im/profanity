@@ -142,6 +142,18 @@ cons_show_help(Command *command)
 }
 
 void
+cons_bad_cmd_usage(const char * const cmd)
+{
+    GString *msg = g_string_new("");
+    g_string_printf(msg, "Invalid usage, see '/help %s' for details.", &cmd[1]);
+
+    cons_show("");
+    cons_show(msg->str);
+
+    g_string_free(msg, TRUE);
+}
+
+void
 cons_show_error(const char * const msg, ...)
 {
     ProfWin *console = wins_get_console();

@@ -228,7 +228,7 @@ void ui_input_clear(void);
 void ui_input_nonblocking(gboolean);
 void ui_write(char *line, int offset);
 
-void ui_invalid_command_usage(const char * const usage, void (*setting_func)(void));
+void ui_invalid_command_usage(const char * const cmd, void (*setting_func)(void));
 
 void ui_create_xmlconsole_win(void);
 gboolean ui_xmlconsole_exists(void);
@@ -243,6 +243,7 @@ void cons_show(const char * const msg, ...);
 void cons_about(void);
 void cons_help(void);
 void cons_show_help(Command *command);
+void cons_bad_cmd_usage(const char * const cmd);
 void cons_navigation_help(void);
 void cons_prefs(void);
 void cons_show_ui_prefs(void);

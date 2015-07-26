@@ -667,22 +667,25 @@ ui_handle_error(const char * const err_msg)
 }
 
 void
-ui_invalid_command_usage(const char * const usage, void (*setting_func)(void))
+ui_invalid_command_usage(const char * const cmd, void (*setting_func)(void))
 {
+    GString *msg = g_string_new("");
+    g_string_printf(msg, "Invalid usage, see '/help %s' for details.", &cmd[1]);
+
     if (setting_func) {
         cons_show("");
         (*setting_func)();
-        cons_show("Usage: %s", usage);
+        cons_show(msg->str);
     } else {
         cons_show("");
-        cons_show("Usage: %s", usage);
+        cons_show(msg->str);
         ProfWin *current = wins_get_current();
         if (current->type == WIN_CHAT) {
-            char usage_cpy[strlen(usage) + 8];
-            sprintf(usage_cpy, "Usage: %s", usage);
-            ui_current_print_line(usage_cpy);
+            ui_current_print_line(msg->str);
         }
     }
+
+    g_string_free(msg, TRUE);
 }
 
 void
