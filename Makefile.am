@@ -68,29 +68,29 @@ unittest_sources = \
 	tests/unittests/log/stub_log.c \
 	tests/unittests/config/stub_accounts.c \
 	tests/unittests/helpers.c tests/unittests/helpers.h \
-	tests/unittests/test_cmd_account.c tests/unittests/test_cmd_account.h \
+	tests/unittests/test_form.c tests/unittests/test_form.h \
+	tests/unittests/test_common.c tests/unittests/test_common.h \
+	tests/unittests/test_autocomplete.c tests/unittests/test_autocomplete.h \
+	tests/unittests/test_jid.c tests/unittests/test_jid.h \
+	tests/unittests/test_parser.c tests/unittests/test_parser.h \
+	tests/unittests/test_roster_list.c tests/unittests/test_roster_list.h \
+	tests/unittests/test_chat_session.c tests/unittests/test_chat_session.h \
+	tests/unittests/test_contact.c tests/unittests/test_contact.h \
+	tests/unittests/test_preferences.c tests/unittests/test_preferences.h \
+	tests/unittests/test_server_events.c tests/unittests/test_server_events.h \
+	tests/unittests/test_muc.c tests/unittests/test_muc.h \
+	tests/unittests/test_cmd_statuses.c tests/unittests/test_cmd_statuses.h \
 	tests/unittests/test_cmd_alias.c tests/unittests/test_cmd_alias.h \
-	tests/unittests/test_cmd_bookmark.c tests/unittests/test_cmd_bookmark.h \
 	tests/unittests/test_cmd_connect.c tests/unittests/test_cmd_connect.h \
-	tests/unittests/test_cmd_join.c tests/unittests/test_cmd_join.h \
+	tests/unittests/test_cmd_rooms.c tests/unittests/test_cmd_rooms.h \
+	tests/unittests/test_cmd_account.c tests/unittests/test_cmd_account.h \
+	tests/unittests/test_cmd_sub.c tests/unittests/test_cmd_sub.h \
+	tests/unittests/test_cmd_bookmark.c tests/unittests/test_cmd_bookmark.h \
 	tests/unittests/test_cmd_otr.c tests/unittests/test_cmd_otr.h \
 	tests/unittests/test_cmd_pgp.c tests/unittests/test_cmd_pgp.h \
-	tests/unittests/test_cmd_rooms.c tests/unittests/test_cmd_rooms.h \
+	tests/unittests/test_cmd_join.c tests/unittests/test_cmd_join.h \
 	tests/unittests/test_cmd_roster.c tests/unittests/test_cmd_roster.h \
-	tests/unittests/test_cmd_statuses.c tests/unittests/test_cmd_statuses.h \
-	tests/unittests/test_cmd_sub.c tests/unittests/test_cmd_sub.h \
 	tests/unittests/test_cmd_disconnect.c tests/unittests/test_cmd_disconnect.h \
-	tests/unittests/test_common.c tests/unittests/test_common.h \
-	tests/unittests/test_contact.c tests/unittests/test_contact.h \
-	tests/unittests/test_form.c tests/unittests/test_form.h \
-	tests/unittests/test_jid.c tests/unittests/test_jid.h \
-	tests/unittests/test_muc.c tests/unittests/test_muc.h \
-	tests/unittests/test_parser.c tests/unittests/test_parser.h \
-	tests/unittests/test_preferences.c tests/unittests/test_preferences.h \
-	tests/unittests/test_roster_list.c tests/unittests/test_roster_list.h \
-	tests/unittests/test_server_events.c tests/unittests/test_server_events.h \
-	tests/unittests/test_autocomplete.c tests/unittests/test_autocomplete.h \
-	tests/unittests/test_chat_session.c tests/unittests/test_chat_session.h \
 	tests/unittests/unittests.c
 
 functionaltest_sources = \

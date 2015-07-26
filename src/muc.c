@@ -166,7 +166,9 @@ void
 muc_invites_clear(void)
 {
     autocomplete_clear(invite_ac);
-    g_hash_table_remove_all(invite_passwords);
+    if (invite_passwords) {
+        g_hash_table_remove_all(invite_passwords);
+    }
 }
 
 void

@@ -398,6 +398,12 @@ void cons_show_roster(GSList * list)
     check_expected(list);
 }
 
+void
+cons_bad_cmd_usage(const char * const cmd)
+{
+    check_expected(cmd);
+}
+
 void cons_show_roster_group(const char * const group, GSList * list) {}
 void cons_show_wins(void) {}
 void cons_show_status(const char * const barejid) {}

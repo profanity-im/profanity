@@ -37,6 +37,7 @@
 
 int main(int argc, char* argv[]) {
     const UnitTest all_tests[] = {
+
         unit_test(replace_one_substr),
         unit_test(replace_one_substr_beginning),
         unit_test(replace_one_substr_end),
@@ -214,6 +215,7 @@ int main(int argc, char* argv[]) {
         unit_test_setup_teardown(removes_chat_session,
             init_chat_sessions,
             close_chat_sessions),
+
         unit_test_setup_teardown(cmd_connect_shows_message_when_disconnecting,
             load_preferences,
             close_preferences),
@@ -238,13 +240,13 @@ int main(int argc, char* argv[]) {
         unit_test_setup_teardown(cmd_connect_asks_password_when_not_in_account,
             load_preferences,
             close_preferences),
+        unit_test_setup_teardown(cmd_connect_shows_usage_when_no_server_value,
+            load_preferences,
+            close_preferences),
         unit_test_setup_teardown(cmd_connect_shows_message_when_connecting_with_account,
             load_preferences,
             close_preferences),
         unit_test_setup_teardown(cmd_connect_connects_with_account,
-            load_preferences,
-            close_preferences),
-        unit_test_setup_teardown(cmd_connect_shows_usage_when_no_server_value,
             load_preferences,
             close_preferences),
         unit_test_setup_teardown(cmd_connect_shows_usage_when_server_no_port_value,
