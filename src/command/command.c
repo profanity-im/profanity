@@ -106,12 +106,10 @@ GHashTable *commands = NULL;
 
 #define CMD_SYN(...)        { { __VA_ARGS__, NULL },
 #define CMD_DESC(desc)      desc,
-#define CMD_NOARGS()        { { NULL, NULL } },
+#define CMD_NOARGS        { { NULL, NULL } },
 #define CMD_ARGS(...)       { __VA_ARGS__, { NULL, NULL } },
-#define CMD_NOEXAMPLES()    { NULL } }
+#define CMD_NOEXAMPLES    { NULL } }
 #define CMD_EXAMPLES(...)   { __VA_ARGS__, NULL } }
-
-#define END_ARGS { NULL, NULL }
 
 /*
  * Command list
@@ -139,8 +137,8 @@ static struct cmd_t command_defs[] =
             "/about")
         CMD_DESC(
             "Show version and license information.")
-        CMD_NOARGS()
-        CMD_NOEXAMPLES()
+        CMD_NOARGS
+        CMD_NOEXAMPLES
     },
 
     { "/connect",
@@ -170,8 +168,8 @@ static struct cmd_t command_defs[] =
             "/disconnect")
         CMD_DESC(
             "Disconnect from the current chat service.")
-        CMD_NOARGS()
-        CMD_NOEXAMPLES()
+        CMD_NOARGS
+        CMD_NOEXAMPLES
     },
 
     { "/msg",
@@ -345,7 +343,7 @@ static struct cmd_t command_defs[] =
             { "off",            "Let the server choose which resource to route messages to." },
             { "title on|off",   "Show or hide the current resource in the titlebar." },
             { "message on|off", "Show or hide the resource when showing an incoming message." })
-        CMD_NOEXAMPLES()
+        CMD_NOEXAMPLES
     },
 
     { "/join",
@@ -377,8 +375,8 @@ static struct cmd_t command_defs[] =
             "/leave")
         CMD_DESC(
             "Leave the current chat room.")
-        CMD_NOARGS()
-        CMD_NOEXAMPLES()
+        CMD_NOARGS
+        CMD_NOEXAMPLES
     },
 
     { "/invite",
@@ -390,7 +388,7 @@ static struct cmd_t command_defs[] =
         CMD_ARGS(
             { "<contact>", "The contact you wish to invite." },
             { "<message>", "An optional message to send with the invite." })
-        CMD_NOEXAMPLES()
+        CMD_NOEXAMPLES
     },
 
     { "/invites",
@@ -399,8 +397,8 @@ static struct cmd_t command_defs[] =
             "/invites")
         CMD_DESC(
             "Show all rooms that you have been invited to, and not accepted or declined.")
-        CMD_NOARGS()
-        CMD_NOEXAMPLES()
+        CMD_NOARGS
+        CMD_NOEXAMPLES
     },
 
     { "/decline",
@@ -411,7 +409,7 @@ static struct cmd_t command_defs[] =
             "Decline a chat room invitation.")
         CMD_ARGS(
             { "<room>", "The room for the invite you wish to decline." })
-        CMD_NOEXAMPLES()
+        CMD_NOEXAMPLES
     },
 
     { "/room",
@@ -424,7 +422,7 @@ static struct cmd_t command_defs[] =
             { "accept",  "Accept default room configuration." },
             { "destroy", "Reject default room configuration, and destroy the room." },
             { "config",  "Edit room configuration." })
-        CMD_NOEXAMPLES()
+        CMD_NOEXAMPLES
     },
 
     { "/kick",
@@ -436,7 +434,7 @@ static struct cmd_t command_defs[] =
         CMD_ARGS(
             { "<nick>",   "Nickname of the occupant to kick from the room." },
             { "<reason>", "Optional reason for kicking the occupant." })
-        CMD_NOEXAMPLES()
+        CMD_NOEXAMPLES
     },
 
     { "/ban",
@@ -448,7 +446,7 @@ static struct cmd_t command_defs[] =
         CMD_ARGS(
             { "<jid>",    "Bare JID of the user to ban from the room." },
             { "<reason>", "Optional reason for banning the user." })
-        CMD_NOEXAMPLES()
+        CMD_NOEXAMPLES
     },
 
     { "/subject",
@@ -461,7 +459,7 @@ static struct cmd_t command_defs[] =
         CMD_ARGS(
             { "set <subject>", "Set the room subject." },
             { "clear",         "Clear the room subject." })
-        CMD_NOEXAMPLES()
+        CMD_NOEXAMPLES
     },
 
     { "/affiliation",
@@ -475,7 +473,7 @@ static struct cmd_t command_defs[] =
         CMD_ARGS(
             { "set <affiliation> <jid> [<reason>]", "Set the affiliation of user with jid, with an optional reason." },
             { "list [<affiliation>]",               "List all users with the specified affiliation, or all if none specified." })
-        CMD_NOEXAMPLES()
+        CMD_NOEXAMPLES
     },
 
     { "/role",
@@ -489,7 +487,7 @@ static struct cmd_t command_defs[] =
         CMD_ARGS(
             { "set <role> <nick> [<reason>]", "Set the role of occupant with nick, with an optional reason." },
             { "list [<role>]",                "List all occupants with the specified role, or all if none specified." })
-        CMD_NOEXAMPLES()
+        CMD_NOEXAMPLES
     },
 
     { "/occupants",
@@ -508,7 +506,7 @@ static struct cmd_t command_defs[] =
             { "default show|hide",     "Whether occupants are shown by default in new rooms." },
             { "default show|hide jid", "Whether occupants jids are shown by default in new rooms." },
             { "size <percent>",        "Percentage of the screen taken by the occupants list in rooms (1-99)." })
-        CMD_NOEXAMPLES()
+        CMD_NOEXAMPLES
     },
 
     { "/form",
@@ -525,7 +523,7 @@ static struct cmd_t command_defs[] =
             { "submit",       "Submit the current form." },
             { "cancel",       "Cancel changes to the current form." },
             { "help [<tag>]", "Display help for form, or a specific field." })
-        CMD_NOEXAMPLES()
+        CMD_NOEXAMPLES
     },
 
     { "/rooms",
@@ -543,19 +541,17 @@ static struct cmd_t command_defs[] =
 
     { "/bookmark",
         cmd_bookmark, parse_args, 0, 8, NULL,
-        {
-        {
+        CMD_SYN(
             "/bookmark",
             "/bookmark list",
             "/bookmark add <room> [nick <nick>] [password <password>] [autojoin on|off]",
             "/bookmark update <room> [nick <nick>] [password <password>] [autojoin on|off]",
             "/bookmark remove <room>",
-            "/bookmark join <room>",
-            NULL
-        },
+            "/bookmark join <room>")
+        CMD_DESC(
             "Manage bookmarks and join bookmarked rooms. "
-            "In a chat room, no arguments will bookmark the current room, setting autojoin to \"on\".",
-        {
+            "In a chat room, no arguments will bookmark the current room, setting autojoin to \"on\".")
+        CMD_ARGS(
             { "list", "List all bookmarks." },
             { "add <room>", "Add a bookmark." },
             { "remove <room>", "Remove a bookmark." },
@@ -563,142 +559,114 @@ static struct cmd_t command_defs[] =
             { "nick <nick>", "Nickname used in the chat room." },
             { "password <password>", "Password if required, may be stored in plaintext on your server." },
             { "autojoin on|off", "Whether to join the room automatically on login." },
-            { "join <room>", "Join room using the properties associated with the bookmark." },
-            END_ARGS },
-        {
-            NULL } }
-        },
+            { "join <room>", "Join room using the properties associated with the bookmark." })
+        CMD_NOEXAMPLES
+    },
 
     { "/disco",
         cmd_disco, parse_args, 1, 2, NULL,
-        {
-        {
+        CMD_SYN(
             "/disco info [<jid>]",
-            "/disco items [<jid>]",
-            NULL
-        },
+            "/disco items [<jid>]")
+        CMD_DESC(
             "Find out information about an entities supported services. "
-            "Calling with no arguments will query the server you are currently connected to.",
-        {
+            "Calling with no arguments will query the server you are currently connected to.")
+        CMD_ARGS(
             { "info [<jid>]", "List protocols and features supported by an entity." },
-            { "items [<jid>]", "List items associated with an entity." },
-            END_ARGS },
-        {
+            { "items [<jid>]", "List items associated with an entity." })
+        CMD_EXAMPLES(
             "/disco info",
             "/disco items myserver.org",
             "/disco items conference.jabber.org",
-            "/disco info myfriend@server.com/laptop",
-            NULL } }
-        },
+            "/disco info myfriend@server.com/laptop")
+    },
 
     { "/nick",
         cmd_nick, parse_args_with_freetext, 1, 1, NULL,
-        {
-        {
-            "/nick <nickname>",
-            NULL
-        },
-            "Change your nickname in the current chat room.",
-        {
-            { "<nickname>", "Your new nickname." },
-            END_ARGS },
-        {
-            NULL } }
-        },
+        CMD_SYN(
+            "/nick <nickname>")
+        CMD_DESC(
+            "Change your nickname in the current chat room.")
+        CMD_ARGS(
+            { "<nickname>", "Your new nickname." })
+        CMD_NOEXAMPLES
+    },
 
     { "/win",
         cmd_win, parse_args, 1, 1, NULL,
-        {
-        {
-            "/win <num>",
-            NULL
-        },
-            "Move to the specified window.",
-        {
-            { "<num>", "Window number to display." },
-            END_ARGS },
-        {
-            NULL } }
-        },
+        CMD_SYN(
+            "/win <num>")
+        CMD_DESC(
+            "Move to the specified window.")
+        CMD_ARGS(
+            { "<num>", "Window number to display." })
+        CMD_NOEXAMPLES
+    },
 
     { "/wins",
         cmd_wins, parse_args, 0, 3, NULL,
-        {
-        {
+        CMD_SYN(
             "/wins tidy",
             "/wins prune",
-            "/wins swap <source> <target>",
-            NULL
-        },
+            "/wins swap <source> <target>")
+        CMD_DESC(
             "Manage windows. "
-            "Passing no argument will list all currently active windows and information about their usage.",
-        {
+            "Passing no argument will list all currently active windows and information about their usage.")
+        CMD_ARGS(
             { "tidy", "Move windows so there are no gaps." },
             { "prune", "Close all windows with no unread messages, and then tidy so there are no gaps." },
-            { "swap <source> <target>", "Swap windows, target may be an empty position." },
-            END_ARGS },
-        {
-            NULL } }
-        },
+            { "swap <source> <target>", "Swap windows, target may be an empty position." })
+        CMD_NOEXAMPLES
+    },
 
     { "/sub",
         cmd_sub, parse_args, 1, 2, NULL,
-        {
-        {
+        CMD_SYN(
             "/sub request [<jid>]",
             "/sub allow [<jid>]",
             "/sub deny [<jid>]",
             "/sub show [<jid>]",
             "/sub sent",
-            "/sub received",
-            NULL
-        },
+            "/sub received")
+        CMD_DESC(
             "Manage subscriptions to contact presence. "
-            "If jid is omitted, the contact of the current window is used.",
-        {
+            "If jid is omitted, the contact of the current window is used.")
+        CMD_ARGS(
             { "request [<jid>]", "Send a subscription request to the user." },
             { "allow [<jid>]",   "Approve a contact's subscription request." },
             { "deny [<jid>]",    "Remove subscription for a contact, or deny a request." },
             { "show [<jid>]",    "Show subscription status for a contact." },
             { "sent",            "Show all sent subscription requests pending a response." },
-            { "received",        "Show all received subscription requests awaiting your response." },
-            END_ARGS },
-        {
+            { "received",        "Show all received subscription requests awaiting your response." })
+        CMD_EXAMPLES(
             "/sub request myfriend@jabber.org",
             "/sub allow myfriend@jabber.org",
             "/sub request",
-            "/sub sent",
-            NULL } }
-        },
+            "/sub sent")
+    },
 
     { "/tiny",
         cmd_tiny, parse_args, 1, 1, NULL,
-        {
-        {
-            "/tiny <url>",
-            NULL
-        },
-            "Send url as tinyurl in current chat.",
-        {
-            { "<url>", "The url to make tiny." },
-            END_ARGS },
-        {
-            "Example: /tiny http://www.profanity.im",
-            NULL } }
-        },
+        CMD_SYN(
+            "/tiny <url>")
+        CMD_DESC(
+            "Send url as tinyurl in current chat.")
+        CMD_ARGS(
+            { "<url>", "The url to make tiny." })
+        CMD_EXAMPLES(
+            "Example: /tiny http://www.profanity.im")
+    },
 
     { "/who",
         cmd_who, parse_args, 0, 2, NULL,
-        {
-        {
+        CMD_SYN(
             "/who",
             "/who online|offline|away|dnd|xa|chat|available|unavailable|any [<group>]",
             "/who moderator|participant|visitor",
-            "/who owner|admin|member",
-            NULL
-        },
-            "Show contacts or room occupants with chosen status, role or affiliation",
-        {
+            "/who owner|admin|member")
+        CMD_DESC(
+            "Show contacts or room occupants with chosen status, role or affiliation")
+        CMD_ARGS(
             { "offline|away|dnd|xa|chat", "Show contacts or room occupants with specified presence." },
             { "online", "Contacts that are online, chat, away, xa, dnd." },
             { "available", "Contacts that are available for chat - online, chat." },
@@ -706,206 +674,159 @@ static struct cmd_t command_defs[] =
             { "any", "Contacts with any status (same as calling with no argument)." },
             { "<group>", "Filter the results by the specified roster group, not applicable in chat rooms." },
             { "moderator|participant|visitor", "Room occupants with the specified role." },
-            { "owner|admin|member", "Room occupants with the specified affiliation." },
-            END_ARGS },
-        {
+            { "owner|admin|member", "Room occupants with the specified affiliation." })
+        CMD_EXAMPLES(
             "/who",
             "/who xa",
             "/who online friends",
             "/who any family",
             "/who participant",
-            "/who admin",
-            NULL } }
-        },
+            "/who admin")
+    },
 
     { "/close",
         cmd_close, parse_args, 0, 1, NULL,
-        {
-        {
+        CMD_SYN(
             "/close [<num>]",
-            "/close all|read",
-            NULL
-        },
+            "/close all|read")
+        CMD_DESC(
             "Close windows. "
-            "Passing no argument closes the current window.",
-        {
+            "Passing no argument closes the current window.")
+        CMD_ARGS(
             { "<num>", "Close the specified window." },
             { "all", "Close all windows." },
-            { "read", "Close all windows that have no unread messages." },
-            END_ARGS },
-        {
-            NULL } }
-        },
+            { "read", "Close all windows that have no unread messages." })
+        CMD_NOEXAMPLES
+    },
 
     { "/clear",
         cmd_clear, parse_args, 0, 0, NULL,
-        {
-        {
-            "/clear",
-            NULL
-        },
-            "Clear the current window.",
-        {
-            END_ARGS },
-        {
-            NULL } }
-        },
+        CMD_SYN(
+            "/clear")
+        CMD_DESC(
+            "Clear the current window.")
+        CMD_NOARGS
+        CMD_NOEXAMPLES
+    },
 
     { "/quit",
         cmd_quit, parse_args, 0, 0, NULL,
-        {
-        {
-            "/quit",
-            NULL
-        },
-            "Logout of any current session, and quit Profanity.",
-        {
-            END_ARGS },
-        {
-            NULL } }
-        },
+        CMD_SYN(
+            "/quit")
+        CMD_DESC(
+            "Logout of any current session, and quit Profanity.")
+        CMD_NOARGS
+        CMD_NOEXAMPLES
+    },
 
     { "/privileges",
         cmd_privileges, parse_args, 1, 1, &cons_privileges_setting,
-        {
-        {
-            "/privileges on|off",
-            NULL
-        },
-            "Group occupants panel by role, and show role information in chat rooms.",
-        {
-            { "on|off", "Enable or disable privilege information." },
-            END_ARGS },
-        {
-            NULL } }
-        },
+        CMD_SYN(
+            "/privileges on|off")
+        CMD_DESC(
+            "Group occupants panel by role, and show role information in chat rooms.")
+        CMD_ARGS(
+            { "on|off", "Enable or disable privilege information." })
+        CMD_NOEXAMPLES
+    },
 
     { "/beep",
         cmd_beep, parse_args, 1, 1, &cons_beep_setting,
-        {
-        {
-            "/beep on|off",
-            NULL
-        },
+        CMD_SYN(
+            "/beep on|off")
+        CMD_DESC(
             "Switch the terminal bell on or off. "
             "The bell will sound when incoming messages are received. "
-            "If the terminal does not support sounds, it may attempt to flash the screen instead.",
-        {
-            { "on|off", "Enable or disable terminal bell." },
-            END_ARGS },
-        {
-            NULL } }
-        },
+            "If the terminal does not support sounds, it may attempt to flash the screen instead.")
+        CMD_ARGS(
+            { "on|off", "Enable or disable terminal bell." })
+        CMD_NOEXAMPLES
+    },
 
     { "/encwarn",
         cmd_encwarn, parse_args, 1, 1, &cons_encwarn_setting,
-        {
-        {
-            "/encwarn on|off",
-            NULL
-        },
-            "Titlebar encryption warning.",
-        {
-            { "on|off", "Enabled or disable the unencrypted warning message in the titlebar." },
-            END_ARGS },
-        {
-            NULL } }
-        },
+        CMD_SYN(
+            "/encwarn on|off")
+        CMD_DESC(
+            "Titlebar encryption warning.")
+        CMD_ARGS(
+            { "on|off", "Enabled or disable the unencrypted warning message in the titlebar." })
+        CMD_NOEXAMPLES
+    },
 
     { "/presence",
         cmd_presence, parse_args, 1, 1, &cons_presence_setting,
-        {
-        {
-            "/presence on|off",
-            NULL
-        },
-            "Show the contacts presence in the titlebar.",
-        {
-            { "on|off", "Switch display of the contacts presence in the titlebar on or off." },
-            END_ARGS },
-        {
-            NULL } }
-        },
+        CMD_SYN(
+            "/presence on|off")
+        CMD_DESC(
+            "Show the contacts presence in the titlebar.")
+        CMD_ARGS(
+            { "on|off", "Switch display of the contacts presence in the titlebar on or off." })
+        CMD_NOEXAMPLES
+    },
 
     { "/wrap",
         cmd_wrap, parse_args, 1, 1, &cons_wrap_setting,
-        {
-        {
-            "/wrap on|off",
-            NULL
-        },
-            "Word wrapping.",
-        {
-            { "on|off", "Enable or disable word wrapping in the main window." },
-            END_ARGS },
-        {
-            NULL } }
-        },
+        CMD_SYN(
+            "/wrap on|off")
+        CMD_DESC(
+            "Word wrapping.")
+        CMD_ARGS(
+            { "on|off", "Enable or disable word wrapping in the main window." })
+        CMD_NOEXAMPLES
+    },
 
     { "/winstidy",
         cmd_winstidy, parse_args, 1, 1, &cons_winstidy_setting,
-        {
-        {
-            "/winstidy on|off",
-            NULL
-        },
-            "Auto tidy windows, when a window is closed, windows will be moved to fill the gap.",
-        {
-            { "on|off", "Enable or disable auto window tidy." },
-            END_ARGS },
-        {
-            NULL } }
-        },
+        CMD_SYN(
+            "/winstidy on|off")
+        CMD_DESC(
+            "Auto tidy windows, when a window is closed, windows will be moved to fill the gap.")
+        CMD_ARGS(
+            { "on|off", "Enable or disable auto window tidy." })
+        CMD_NOEXAMPLES
+    },
 
     { "/time",
         cmd_time, parse_args, 1, 3, &cons_time_setting,
-        {
-        {
+        CMD_SYN(
             "/time main set <format>",
             "/time main off",
             "/time statusbar set <format>",
-            "/time statusbar off",
-            NULL
-        },
+            "/time statusbar off")
+        CMD_DESC(
             "Configure time display preferences. "
             "Time formats are strings supported by g_date_time_format. "
             "See https://developer.gnome.org/glib/stable/glib-GDateTime.html#g-date-time-format for more details. "
             "Setting the format to an unsupported string, will display the string. "
-            "If the format contains spaces, it must be surrounded with double quotes.",
-        {
+            "If the format contains spaces, it must be surrounded with double quotes.")
+        CMD_ARGS(
             { "main set <format>", "Change time format in main window." },
             { "main off", "Do not show time in main window." },
             { "statusbar set <format>", "Change time format in statusbar." },
-            { "statusbar off", "Change time format in status bar." },
-            END_ARGS },
-        {
+            { "statusbar off", "Change time format in status bar." })
+        CMD_EXAMPLES(
             "/time main set \"%d-%m-%y %H:%M\"",
             "/time main off",
-            "/time statusbar set %H:%M",
-            NULL } }
-        },
+            "/time statusbar set %H:%M")
+    },
 
     { "/inpblock",
         cmd_inpblock, parse_args, 2, 2, &cons_inpblock_setting,
-        {
-        {
+        CMD_SYN(
             "/inpblock timeout <millis>",
-            "/inpblock dynamic on|off",
-            NULL
-        },
-            "How long to wait for keyboard input before checking for new messages or checking for state changes such as 'idle'.",
-        {
+            "/inpblock dynamic on|off")
+        CMD_DESC(
+            "How long to wait for keyboard input before checking for new messages or checking for state changes such as 'idle'.")
+        CMD_ARGS(
             { "timeout <millis>", "Time to wait (1-1000) in milliseconds before reading input from the terminal buffer, default: 1000." },
-            { "dynamic on|off", "Start with 0 millis and dynamically increase up to timeout when no activity, default: on." },
-            END_ARGS },
-        {
-            NULL } }
-        },
+            { "dynamic on|off", "Start with 0 millis and dynamically increase up to timeout when no activity, default: on." })
+        CMD_NOEXAMPLES
+    },
 
     { "/notify",
         cmd_notify, parse_args, 2, 3, &cons_notify_setting,
-        {
-        {
+        CMD_SYN(
             "/notify message on|off",
             "/notify message current on|off",
             "/notify message text on|off",
@@ -916,11 +837,10 @@ static struct cmd_t command_defs[] =
             "/notify typing on|off",
             "/notify typing current on|off",
             "/notify invite on|off",
-            "/notify sub on|off",
-            NULL
-        },
-            "Settings for various kinds of desktop notifications.",
-        {
+            "/notify sub on|off")
+        CMD_DESC(
+            "Settings for various kinds of desktop notifications.")
+        CMD_ARGS(
             { "message on|off", "Notifications for regular chat messages." },
             { "message current on|off", "Whether messages in the current window trigger notifications." },
             { "message text on|off", "Show message text in regular message notifications." },
@@ -931,9 +851,8 @@ static struct cmd_t command_defs[] =
             { "typing on|off", "Notifications when contacts are typing." },
             { "typing current on|off", "Whether typing notifications are triggered for the current window." },
             { "invite on|off", "Notifications for chat room invites." },
-            { "sub on|off", "Notifications for subscription requests." },
-            END_ARGS },
-        {
+            { "sub on|off", "Notifications for subscription requests." })
+        CMD_EXAMPLES(
             "/notify message on",
             "/notify message text on",
             "/notify room mention",
@@ -941,198 +860,154 @@ static struct cmd_t command_defs[] =
             "/notify room text off",
             "/notify remind 10",
             "/notify typing on",
-            "/notify invite on",
-            NULL } }
-        },
+            "/notify invite on")
+    },
 
     { "/flash",
         cmd_flash, parse_args, 1, 1, &cons_flash_setting,
-        {
-        {
-            "/flash on|off",
-            NULL
-        },
+        CMD_SYN(
+            "/flash on|off")
+        CMD_DESC(
             "Make the terminal flash when incoming messages are received in another window. "
-            "If the terminal doesn't support flashing, it may attempt to beep.",
-        {
-            { "on|off", "Enable or disable terminal flash." },
-            END_ARGS },
-        {
-            NULL } }
-        },
+            "If the terminal doesn't support flashing, it may attempt to beep.")
+        CMD_ARGS(
+            { "on|off", "Enable or disable terminal flash." })
+        CMD_NOEXAMPLES
+    },
 
     { "/intype",
         cmd_intype, parse_args, 1, 1, &cons_intype_setting,
-        {
-        {
-            "/intype on|off",
-            NULL
-        },
-            "Show when a contact is typing in the console, and in active message window.",
-        {
-            { "on|off", "Enable or disable contact typing messages." },
-            END_ARGS },
-        {
-            NULL } }
-        },
-
+        CMD_SYN(
+            "/intype on|off")
+        CMD_DESC(
+            "Show when a contact is typing in the console, and in active message window.")
+        CMD_ARGS(
+            { "on|off", "Enable or disable contact typing messages." })
+        CMD_NOEXAMPLES
+    },
 
     { "/splash",
         cmd_splash, parse_args, 1, 1, &cons_splash_setting,
-        {
-        {
-            "/splash on|off",
-            NULL
-        },
-            "Switch on or off the ascii logo on start up and when the /about command is called.",
-        {
-            { "on|off", "Enable or disable splash logo." },
-            END_ARGS },
-        {
-            NULL } }
-        },
+        CMD_SYN(
+            "/splash on|off")
+        CMD_DESC(
+            "Switch on or off the ascii logo on start up and when the /about command is called.")
+        CMD_ARGS(
+            { "on|off", "Enable or disable splash logo." })
+        CMD_NOEXAMPLES
+    },
 
     { "/autoconnect",
         cmd_autoconnect, parse_args, 1, 2, &cons_autoconnect_setting,
-        {
-        {
+        CMD_SYN(
             "/autoconnect set <account>",
-            "/autoconnect off",
-            NULL
-        },
+            "/autoconnect off")
+        CMD_DESC(
             "Enable or disable autoconnect on start up. "
-            "The setting can be overridden by the -a (--account) command line option.",
-        {
+            "The setting can be overridden by the -a (--account) command line option.")
+        CMD_ARGS(
             { "set <account>", "Connect with account on start up." },
-            { "off",           "Disable autoconnect." },
-            END_ARGS },
-        {
+            { "off",           "Disable autoconnect." })
+        CMD_EXAMPLES(
             "/autoconnect set jc@stuntteam.org",
-            "/autoconnect off",
-            NULL } }
-        },
+            "/autoconnect off")
+    },
 
     { "/vercheck",
         cmd_vercheck, parse_args, 0, 1, NULL,
-        {
-        {
-            "/vercheck on|off",
-            NULL
-        },
-            "Check for new versions when Profanity starts, and when the /about command is run.",
-        {
-            { "on|off", "Enable or disable the version check." },
-            END_ARGS },
-        {
-            NULL } }
-        },
+        CMD_SYN(
+            "/vercheck on|off")
+        CMD_DESC(
+            "Check for new versions when Profanity starts, and when the /about command is run.")
+        CMD_ARGS(
+            { "on|off", "Enable or disable the version check." })
+        CMD_NOEXAMPLES
+    },
 
     { "/titlebar",
         cmd_titlebar, parse_args, 2, 2, &cons_titlebar_setting,
-        {
-        {
+        CMD_SYN(
             "/titlebar show on|off",
-            "/titlebar goodbye on|off",
-            NULL
-        },
-            "Allow Profanity to modify the window title bar.",
-        {
+            "/titlebar goodbye on|off")
+        CMD_DESC(
+            "Allow Profanity to modify the window title bar.")
+        CMD_ARGS(
             { "show on|off",    "Show current logged in user, and unread messages as the window title." },
-            { "goodbye on|off", "Show a message in the title when exiting profanity." },
-            END_ARGS },
-        {
-            NULL } }
-        },
+            { "goodbye on|off", "Show a message in the title when exiting profanity." })
+        CMD_NOEXAMPLES
+    },
 
     { "/alias",
         cmd_alias, parse_args_with_freetext, 1, 3, NULL,
-        {
-        {
+        CMD_SYN(
             "/alias list",
             "/alias add <name> <value>",
-            "/alias remove <name>",
-            NULL
-        },
-            "Add, remove or list command aliases.",
-        {
+            "/alias remove <name>")
+        CMD_DESC(
+            "Add, remove or list command aliases.")
+        CMD_ARGS(
             { "list",               "List all aliases." },
             { "add <name> <value>", "Add a new command alias." },
-            { "remove <name>",      "Remove a command alias." },
-            END_ARGS },
-        {
+            { "remove <name>",      "Remove a command alias." })
+        CMD_EXAMPLES(
             "/alias add friends /who online friends",
             "/alias add /q /quit",
             "/alias a /away \"I'm in a meeting.\"",
             "/alias remove q",
-            "/alias list",
-            NULL } }
-        },
+            "/alias list")
+    },
 
     { "/chlog",
         cmd_chlog, parse_args, 1, 1, &cons_chlog_setting,
-        {
-        {
-            "/chlog on|off",
-            NULL
-        },
+        CMD_SYN(
+            "/chlog on|off")
+        CMD_DESC(
             "Switch chat logging on or off. "
             "This setting will be enabled if /history is set to on. "
             "When disabling this option, /history will also be disabled. "
-            "See the /grlog setting for enabling logging of chat room (groupchat) messages.",
-        {
-            { "on|off", "Enable or disable chat logging." },
-            END_ARGS },
-        {
-            NULL } }
-        },
+            "See the /grlog setting for enabling logging of chat room (groupchat) messages.")
+        CMD_ARGS(
+            { "on|off", "Enable or disable chat logging." })
+        CMD_NOEXAMPLES
+    },
 
     { "/grlog",
         cmd_grlog, parse_args, 1, 1, &cons_grlog_setting,
-        {
-        {
-            "/grlog on|off",
-            NULL
-        },
+        CMD_SYN(
+            "/grlog on|off")
+        CMD_DESC(
             "Switch chat room logging on or off. "
-            "See the /chlog setting for enabling logging of one to one chat.",
-        {
-            { "on|off", "Enable or disable chat room logging." },
-            END_ARGS },
-        {
-            NULL } }
-        },
+            "See the /chlog setting for enabling logging of one to one chat.")
+        CMD_ARGS(
+            { "on|off", "Enable or disable chat room logging." })
+        CMD_NOEXAMPLES
+    },
 
     { "/states",
         cmd_states, parse_args, 1, 1, &cons_states_setting,
-        {
-        {
-            "/states on|off",
-            NULL
-        },
-            "Send chat state notifications to recipient during chat sessions, such as typing, paused, active, gone.",
-        {
-            { "on|off", "Enable or disable sending of chat state notifications." },
-            END_ARGS },
-        {
-            NULL } }
-        },
+        CMD_SYN(
+            "/states on|off")
+        CMD_DESC(
+            "Send chat state notifications to recipient during chat sessions, such as typing, paused, active, gone.")
+        CMD_ARGS(
+            { "on|off", "Enable or disable sending of chat state notifications." })
+        CMD_NOEXAMPLES
+    },
 
     { "/pgp",
         cmd_pgp, parse_args, 1, 3, NULL,
-        {
-        {
+        CMD_SYN(
             "/pgp libver",
             "/pgp keys",
             "/pgp fps",
             "/pgp setkey <contact> <keyid>",
             "/pgp start [<contact>]",
             "/pgp end",
-            "/pgp log on|off|redact",
-            NULL
-        },
+            "/pgp log on|off|redact")
+        CMD_DESC(
             "Open PGP commands to manage keys, and perform PGP encryption during chat sessions. "
-            "See the /account command to set your own PGP key.",
-        {
+            "See the /account command to set your own PGP key.")
+        CMD_ARGS(
             { "libver",                   "Show which version of the libgpgme library is being used." },
             { "keys",                     "List all keys." },
             { "fps",                      "Show known fingerprints." },
@@ -1140,20 +1015,17 @@ static struct cmd_t command_defs[] =
             { "start [<contact>]",        "Start PGP encrypted chat, current contact will be used if not specified." },
             { "end",                      "End PGP encrypted chat with the current recipient." },
             { "log on|off",               "Enable or disable plaintext logging of PGP encrypted messages." },
-            { "log redact",               "Log PGP encrypted messages, but replace the contents with [redacted]. This is the default." },
-            END_ARGS },
-        {
+            { "log redact",               "Log PGP encrypted messages, but replace the contents with [redacted]. This is the default." })
+        CMD_EXAMPLES(
             "/pgp log off",
             "/pgp setkey buddy@buddychat.org BA19CACE5A9592C5",
             "/pgp start buddy@buddychat.org",
-            "/pgp end",
-            NULL } }
-        },
+            "/pgp end")
+    },
 
     { "/otr",
         cmd_otr, parse_args, 1, 3, NULL,
-        {
-        {
+        CMD_SYN(
             "/otr libver",
             "/otr gen",
             "/otr myfp|theirfp",
@@ -1164,11 +1036,10 @@ static struct cmd_t command_defs[] =
             "/otr question <question> <answer>",
             "/otr answer <answer>",
             "/otr policy manual|opportunistic|always",
-            "/otr log on|off|redact",
-            NULL
-        },
-            "Off The Record (OTR) commands to manage keys, and perform OTR encryption during chat sessions.",
-        {
+            "/otr log on|off|redact")
+        CMD_DESC(
+            "Off The Record (OTR) commands to manage keys, and perform OTR encryption during chat sessions.")
+        CMD_ARGS(
             { "libver",                       "Show which version of the libotr library is being used." },
             { "gen",                          "Generate your private key." },
             { "myfp",                         "Show your fingerprint." },
@@ -1183,9 +1054,8 @@ static struct cmd_t command_defs[] =
             { "policy opportunistic",         "Set the global OTR policy to opportunistic, and OTR sessions will be attempted upon starting a conversation." },
             { "policy always",                "Set the global OTR policy to always, an error will be displayed if an OTR session cannot be initiated upon starting a conversation." },
             { "log on|off",                   "Enable or disable plaintext logging of OTR encrypted messages." },
-            { "log redact",                   "Log OTR encrypted messages, but replace the contents with [redacted]. This is the default." },
-            END_ARGS },
-        {
+            { "log redact",                   "Log OTR encrypted messages, but replace the contents with [redacted]. This is the default." })
+        CMD_EXAMPLES(
             "/otr log off",
             "/otr policy manual",
             "/otr gen",
@@ -1193,205 +1063,159 @@ static struct cmd_t command_defs[] =
             "/otr myfp",
             "/otr theirfp",
             "/otr question \"What is the name of my rabbit?\" fiffi",
-            "/otr end",
-            NULL } }
-        },
+            "/otr end")
+    },
 
     { "/outtype",
         cmd_outtype, parse_args, 1, 1, &cons_outtype_setting,
-        {
-        {
-            "/outtype on|off",
-            NULL
-        },
-            "Send typing notifications, chat states (/states) will be enabled if this setting is enabled.",
-        {
-            { "on|off", "Enable or disable sending typing notifications." },
-            END_ARGS },
-        {
-            NULL } }
-        },
+        CMD_SYN(
+            "/outtype on|off")
+        CMD_DESC(
+            "Send typing notifications, chat states (/states) will be enabled if this setting is enabled.")
+        CMD_ARGS(
+            { "on|off", "Enable or disable sending typing notifications." })
+        CMD_NOEXAMPLES
+    },
 
     { "/gone",
         cmd_gone, parse_args, 1, 1, &cons_gone_setting,
-        {
-        {
-            "/gone <minutes>",
-            NULL
-        },
+        CMD_SYN(
+            "/gone <minutes>")
+        CMD_DESC(
             "Send a 'gone' state to the recipient after the specified number of minutes. "
-            "Chat states (/states) will be enabled if this setting is set.",
-        {
-            { "<minutes>", "Number of minutes of inactivity before sending the 'gone' state, a value of 0 will disable sending this state." },
-            END_ARGS },
-        {
-            NULL } }
-        },
+            "Chat states (/states) will be enabled if this setting is set.")
+        CMD_ARGS(
+            { "<minutes>", "Number of minutes of inactivity before sending the 'gone' state, a value of 0 will disable sending this state." })
+        CMD_NOEXAMPLES
+    },
 
     { "/history",
         cmd_history, parse_args, 1, 1, &cons_history_setting,
-        {
-        {
-            "/history on|off",
-            NULL
-        },
+        CMD_SYN(
+            "/history on|off")
+        CMD_DESC(
             "Switch chat history on or off, /chlog will automatically be enabled when this setting is on. "
-            "When history is enabled, previous messages are shown in chat windows.",
-        {
-            { "on|off", "Enable or disable showing chat history." },
-            END_ARGS },
-        {
-            NULL } }
-        },
+            "When history is enabled, previous messages are shown in chat windows.")
+        CMD_ARGS(
+            { "on|off", "Enable or disable showing chat history." })
+        CMD_NOEXAMPLES
+    },
 
     { "/log",
         cmd_log, parse_args, 1, 2, &cons_log_setting,
-        {
-        {
+        CMD_SYN(
             "/log where",
             "/log rotate on|off",
             "/log maxsize <bytes>",
-            "/log shared on|off",
-            NULL
-        },
-            "Manage profanity log settings.",
-        {
+            "/log shared on|off")
+        CMD_DESC(
+            "Manage profanity log settings.")
+        CMD_ARGS(
             { "where",           "Show the current log file location." },
             { "rotate on|off",   "Rotate log, default on." },
             { "maxsize <bytes>", "With rotate enabled, specifies the max log size, defaults to 1048580 (1MB)." },
-            { "shared on|off",   "Share logs between all instances, default: on. When off, the process id will be included in the log." },
-            END_ARGS },
-        {
-            NULL } }
-        },
+            { "shared on|off",   "Share logs between all instances, default: on. When off, the process id will be included in the log." })
+        CMD_NOEXAMPLES
+    },
 
     { "/carbons",
         cmd_carbons, parse_args, 1, 1, &cons_carbons_setting,
-        {
-        {
-            "/carbons on|off",
-            NULL
-        },
+        CMD_SYN(
+            "/carbons on|off")
+        CMD_DESC(
             "Enable or disable message carbons. "
-            "Message carbons ensure that both sides of all conversations are shared with all the user's clients that implement this protocol.",
-        {
-            { "on|off", "Enable or disable message carbons." },
-            END_ARGS },
-        {
-            NULL } }
-        },
+            "Message carbons ensure that both sides of all conversations are shared with all the user's clients that implement this protocol.")
+        CMD_ARGS(
+            { "on|off", "Enable or disable message carbons." })
+        CMD_NOEXAMPLES
+    },
 
     { "/receipts",
         cmd_receipts, parse_args, 2, 2, &cons_receipts_setting,
-        {
-        {
+        CMD_SYN(
             "/receipts request on|off",
-            "/receipts send on|off",
-            NULL
-        },
-            "Enable or disable message delivery receipts. The interface will indicate when a message has been received.",
-        {
+            "/receipts send on|off")
+        CMD_DESC(
+            "Enable or disable message delivery receipts. The interface will indicate when a message has been received.")
+        CMD_ARGS(
             { "request on|off", "Whether or not to request a receipt upon sending a message." },
-            { "send on|off",    "Whether or not to send a receipt if one has been requested with a received message." },
-            END_ARGS },
-        {
-            NULL } }
-        },
+            { "send on|off",    "Whether or not to send a receipt if one has been requested with a received message." })
+        CMD_NOEXAMPLES
+    },
 
     { "/reconnect",
         cmd_reconnect, parse_args, 1, 1, &cons_reconnect_setting,
-        {
-        {
-            "/reconnect <seconds>",
-            NULL
-        },
-            "Set the reconnect attempt interval for when the connection is lost.",
-        {
-            { "<seconds>", "Number of seconds before attempting to reconnect, a value of 0 disables reconnect." },
-            END_ARGS },
-        {
-            NULL } }
-        },
+        CMD_SYN(
+            "/reconnect <seconds>")
+        CMD_DESC(
+            "Set the reconnect attempt interval for when the connection is lost.")
+        CMD_ARGS(
+            { "<seconds>", "Number of seconds before attempting to reconnect, a value of 0 disables reconnect." })
+        CMD_NOEXAMPLES
+    },
 
     { "/autoping",
         cmd_autoping, parse_args, 1, 1, &cons_autoping_setting,
-        {
-        {
-            "/autoping <seconds>",
-            NULL
-        },
-            "Set the interval between sending ping requests to the server to ensure the connection is kept alive.",
-        {
-            { "<seconds>", "Number of seconds between sending pings, a value of 0 disables autoping." },
-            END_ARGS },
-        {
-            NULL } }
-        },
+        CMD_SYN(
+            "/autoping <seconds>")
+        CMD_DESC(
+            "Set the interval between sending ping requests to the server to ensure the connection is kept alive.")
+        CMD_ARGS(
+            { "<seconds>", "Number of seconds between sending pings, a value of 0 disables autoping." })
+        CMD_NOEXAMPLES
+    },
 
     { "/ping",
         cmd_ping, parse_args, 0, 1, NULL,
-        {
-        {
-            "/ping [<jid>]",
-            NULL
-        },
+        CMD_SYN(
+            "/ping [<jid>]")
+        CMD_DESC(
             "Sends an IQ ping stanza to the specified JID. "
-            "If no JID is supplied, your chat server will be pinged.",
-        {
-            { "<jid>", "The Jabber ID to send the ping request to." },
-            END_ARGS },
-        {
-            NULL } }
-        },
+            "If no JID is supplied, your chat server will be pinged.")
+        CMD_ARGS(
+            { "<jid>", "The Jabber ID to send the ping request to." })
+        CMD_NOEXAMPLES
+    },
 
     { "/autoaway",
         cmd_autoaway, parse_args_with_freetext, 2, 2, &cons_autoaway_setting,
-        {
-        {
+        CMD_SYN(
             "/autoaway mode idle|away|off",
             "/autoaway time <minutes>",
             "/autoaway message <message>|off",
-            "/autoaway check on|off",
-            NULL
-        },
-            "Manage autoway settings for idle time.",
-        {
+            "/autoaway check on|off")
+        CMD_DESC(
+            "Manage autoway settings for idle time.")
+        CMD_ARGS(
             { "mode idle",         "Sends idle time, status remains online." },
             { "mode away",         "Sends an away presence." },
             { "mode off",          "Disabled (default)." },
             { "time <minutes>",    "Number of minutes before the presence change is sent, default: 15." },
             { "message <message>", "Optional message to send with the presence change, default: off (disabled)." },
             { "message off",       "Send no message with autoaway presence." },
-            { "check on|off",      "When enabled, checks for activity and sends online presence, default: on." },
-            END_ARGS },
-        {
+            { "check on|off",      "When enabled, checks for activity and sends online presence, default: on." })
+        CMD_EXAMPLES(
             "/autoaway mode idle",
             "/autoaway time 30",
             "/autoaway message I'm not really doing much",
-            "/autoaway check off",
-            NULL } }
-        },
+            "/autoaway check off")
+    },
 
     { "/priority",
         cmd_priority, parse_args, 1, 1, &cons_priority_setting,
-        {
-        {
-            "/priority <priority>",
-            NULL
-        },
+        CMD_SYN(
+            "/priority <priority>")
+        CMD_DESC(
             "Set priority for the current account. "
-            "See the /account command for specific priority settings per presence status.",
-        {
-            { "<priority>", "Number between -128 and 127, default: 0." },
-            END_ARGS },
-        {
-            NULL } }
-        },
+            "See the /account command for specific priority settings per presence status.")
+        CMD_ARGS(
+            { "<priority>", "Number between -128 and 127, default: 0." })
+        CMD_NOEXAMPLES
+    },
 
     { "/account",
         cmd_account, parse_args, 0, 4, NULL,
-        {
-        {
+        CMD_SYN(
             "/account",
             "/account list",
             "/account show <account>",
@@ -1418,12 +1242,11 @@ static struct cmd_t command_defs[] =
             "/account clear <account> server",
             "/account clear <account> port",
             "/account clear <account> otr",
-            "/account clear <account> pgpkeyid",
-            NULL
-        },
+            "/account clear <account> pgpkeyid")
+        CMD_DESC(
             "Commands for creating and managing accounts. "
-            "Calling with no arguments will display information for the current account.",
-        {
+            "Calling with no arguments will display information for the current account.")
+        CMD_ARGS(
             { "list",                                             "List all accounts." },
             { "show <account>",                                   "Show details for the specified account." },
             { "enable <account>",                                 "Enable the account, it will be used for autocompletion." },
@@ -1450,9 +1273,8 @@ static struct cmd_t command_defs[] =
             { "clear <account> password",                         "Remove the password setting for this account." },
             { "clear <account> eval_password",                    "Remove the eval_password setting for this account." },
             { "clear <account> otr",                              "Remove the OTR policy setting for this account." },
-            { "clear <account> pgpkeyid",                         "Remove pgpkeyid associated with this account." },
-            END_ARGS },
-        {
+            { "clear <account> pgpkeyid",                         "Remove pgpkeyid associated with this account." })
+        CMD_EXAMPLES(
             "/account add me",
             "/account set me jid me@chatty",
             "/account set me server talk.chat.com",
@@ -1461,174 +1283,137 @@ static struct cmd_t command_defs[] =
             "/account set me nick dennis",
             "/account set me status dnd",
             "/account set me dnd -1",
-            "/account rename me gtalk",
-            NULL } }
-        },
+            "/account rename me gtalk")
+    },
 
     { "/prefs",
         cmd_prefs, parse_args, 0, 1, NULL,
-        {
-        {
-            "/prefs [ui|desktop|chat|log|conn|presence]",
-            NULL
-        },
+        CMD_SYN(
+            "/prefs [ui|desktop|chat|log|conn|presence]")
+        CMD_DESC(
             "Show preferences for different areas of functionality. "
-            "Passing no arguments shows all preferences.",
-        {
+            "Passing no arguments shows all preferences.")
+        CMD_ARGS(
             { "ui",       "User interface preferences." },
             { "desktop",  "Desktop notification preferences." },
             { "chat",     "Chat state preferences." },
             { "log",      "Logging preferences." },
             { "conn",     "Connection handling preferences." },
-            { "presence", "Chat presence preferences." },
-            END_ARGS },
-        {
-            NULL } }
-        },
+            { "presence", "Chat presence preferences." })
+        CMD_NOEXAMPLES
+    },
 
     { "/theme",
         cmd_theme, parse_args, 1, 2, &cons_theme_setting,
-        {
-        {
+        CMD_SYN(
             "/theme list",
             "/theme load <theme>",
-            "/theme colours",
-            NULL
-        },
-            "Load a theme, includes colours and UI options.",
-        {
+            "/theme colours")
+        CMD_DESC(
+            "Load a theme, includes colours and UI options.")
+        CMD_ARGS(
             { "list", "List all available themes." },
             { "load <theme>", "Load the specified theme. 'default' will reset to the default theme." },
-            { "colours", "Show the colour values as rendered by the terminal." },
-            END_ARGS },
-        {
+            { "colours", "Show the colour values as rendered by the terminal." })
+        CMD_EXAMPLES(
             "/theme list",
-            "/theme load forest",
-            NULL } }
-        },
+            "/theme load forest")
+    },
 
     { "/statuses",
         cmd_statuses, parse_args, 2, 2, &cons_statuses_setting,
-        {
-        {
-            "/statuses console|chat|muc all|online|none",
-            NULL
-        },
+        CMD_SYN(
+            "/statuses console|chat|muc all|online|none")
+        CMD_DESC(
             "Configure which presence changes are displayed in various windows. "
-            "The default is 'all' for all windows.",
-        {
+            "The default is 'all' for all windows.")
+        CMD_ARGS(
             { "console", "Configure what is displayed in the console window." },
             { "chat",    "Configure what is displayed in chat windows." },
             { "muc",     "Configure what is displayed in chat room windows." },
             { "all",     "Show all presence changes." },
             { "online",  "Show only online/offline changes." },
-            { "none",    "Don't show any presence changes." },
-            END_ARGS },
-        {
+            { "none",    "Don't show any presence changes." })
+        CMD_EXAMPLES(
             "/statuses console none",
             "/statuses chat online",
-            "/statuses muc all",
-            NULL } }
-        },
+            "/statuses muc all")
+    },
 
     { "/xmlconsole",
         cmd_xmlconsole, parse_args, 0, 0, NULL,
-        {
-        {
-            "/xmlconsole",
-            NULL
-        },
-            "Open the XML console to view incoming and outgoing XMPP traffic.",
-        {
-            END_ARGS },
-        {
-            NULL } }
-        },
+        CMD_SYN(
+            "/xmlconsole")
+        CMD_DESC(
+            "Open the XML console to view incoming and outgoing XMPP traffic.")
+        CMD_NOARGS
+        CMD_NOEXAMPLES
+    },
 
     { "/away",
         cmd_away, parse_args_with_freetext, 0, 1, NULL,
-        {
-        {
-            "/away [<message>]",
-            NULL
-        },
-            "Set your status to 'away'.",
-        {
-            { "<message>",  "Optional message to use with the status." },
-            END_ARGS },
-        {
+        CMD_SYN(
+            "/away [<message>]")
+        CMD_DESC(
+            "Set your status to 'away'.")
+        CMD_ARGS(
+            { "<message>",  "Optional message to use with the status." })
+        CMD_EXAMPLES(
             "/away",
-            "/away Gone for lunch",
-            NULL } }
-        },
+            "/away Gone for lunch")
+    },
 
     { "/chat",
         cmd_chat, parse_args_with_freetext, 0, 1, NULL,
-        {
-        {
-            "/chat [<message>]",
-            NULL
-        },
-            "Set your status to 'chat' (available for chat).",
-        {
-            { "<message>",  "Optional message to use with the status." },
-            END_ARGS },
-        {
+        CMD_SYN(
+            "/chat [<message>]")
+        CMD_DESC(
+            "Set your status to 'chat' (available for chat).")
+        CMD_ARGS(
+            { "<message>",  "Optional message to use with the status." })
+        CMD_EXAMPLES(
             "/chat",
-            "/chat Please talk to me!",
-            NULL } }
-        },
+            "/chat Please talk to me!")
+    },
 
     { "/dnd",
         cmd_dnd, parse_args_with_freetext, 0, 1, NULL,
-        {
-        {
-            "/dnd [<message>]",
-            NULL
-        },
-            "Set your status to 'dnd' (do not disturb).",
-        {
-            { "<message>",  "Optional message to use with the status." },
-            END_ARGS },
-        {
+        CMD_SYN(
+            "/dnd [<message>]")
+        CMD_DESC(
+            "Set your status to 'dnd' (do not disturb).")
+        CMD_ARGS(
+            { "<message>",  "Optional message to use with the status." })
+        CMD_EXAMPLES(
             "/dnd",
-            "/dnd I'm in the zone",
-            NULL } }
-        },
+            "/dnd I'm in the zone")
+    },
 
     { "/online",
         cmd_online, parse_args_with_freetext, 0, 1, NULL,
-        {
-        {
-            "/online [<message>]",
-            NULL
-        },
-            "Set your status to 'online'.",
-        {
-            { "<message>",  "Optional message to use with the status." },
-            END_ARGS },
-        {
+        CMD_SYN(
+            "/online [<message>]")
+        CMD_DESC(
+            "Set your status to 'online'.")
+        CMD_ARGS(
+            { "<message>",  "Optional message to use with the status." })
+        CMD_EXAMPLES(
             "/online",
-            "/online Up the Irons!",
-            NULL } }
-        },
+            "/online Up the Irons!")
+    },
 
     { "/xa",
         cmd_xa, parse_args_with_freetext, 0, 1, NULL,
-        {
-        {
-            "/xa [<message>]",
-            NULL
-        },
-            "Set your status to 'xa' (extended away).",
-        {
-            { "<message>",  "Optional message to use with the status." },
-            END_ARGS },
-        {
+        CMD_SYN(
+            "/xa [<message>]")
+        CMD_DESC(
+            "Set your status to 'xa' (extended away).")
+        CMD_ARGS(
+            { "<message>",  "Optional message to use with the status." })
+        CMD_EXAMPLES(
             "/xa",
-            "/xa This meeting is going to be a long one",
-            NULL } }
-        },
+            "/xa This meeting is going to be a long one")
+    },
 };
 
 static Autocomplete commands_ac;
