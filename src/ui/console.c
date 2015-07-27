@@ -1542,6 +1542,7 @@ cons_help(void)
     cons_show("/help contacts   - List commands for manipulating your roster.");
     cons_show("/help service    - List service discovery commands.");
     cons_show("/help settings   - List commands for changing settings.");
+    cons_show("/help ui         - List commands for configuring the user interface.");
     cons_show("/help navigation - How to navigate around Profanity.");
     cons_show("/help [command]  - Detailed help on a specific command.");
     cons_show("");

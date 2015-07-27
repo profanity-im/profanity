@@ -75,7 +75,7 @@ static void _update_presence(const resource_presence_t presence,
     const char * const show, gchar **args);
 static gboolean _cmd_set_boolean_preference(gchar *arg, const char * const command,
     const char * const display, preference_t pref);
-static void _cmd_show_filtered_help(char *heading, gchar *cmd_filter[], int filter_size);
+//static void _cmd_show_filtered_help(char *heading, gchar *cmd_filter[], int filter_size);
 static void _who_room(ProfWin *window, const char * const command, gchar **args);
 static void _who_roster(ProfWin *window, const char * const command, gchar **args);
 
@@ -828,46 +828,96 @@ cmd_help(ProfWin *window, const char * const command, gchar **args)
         cons_show("Use /help [command] without the leading slash, for help on a specific command");
         cons_show("");
 
-    } else if (strcmp(args[0], "basic") == 0) {
-        gchar *filter[] = { "/about", "/clear", "/close", "/connect",
-            "/disconnect", "/help", "/msg", "/join", "/quit", "/vercheck",
-            "/wins", "/ping" };
-        _cmd_show_filtered_help("Basic commands", filter, ARRAY_SIZE(filter));
+//    } else if (strcmp(args[0], "basic") == 0) {
+//        gchar *filter[] = { "/about", "/clear", "/close", "/connect",
+//            "/disconnect", "/help", "/msg", "/join", "/quit", "/vercheck",
+//            "/wins", "/ping" };
+//        _cmd_show_filtered_help("Basic commands", filter, ARRAY_SIZE(filter));
+//
+//    } else if (strcmp(args[0], "chatting") == 0) {
+//        gchar *filter[] = { "/chlog", "/otr", "/gone", "/history",
+//            "/info", "/intype", "/msg", "/notify", "/outtype", "/status",
+//            "/close", "/clear", "/tiny" };
+//        _cmd_show_filtered_help("Chat commands", filter, ARRAY_SIZE(filter));
+//
+//    } else if (strcmp(args[0], "groupchat") == 0) {
+//        gchar *filter[] = { "/close", "/clear", "/decline", "/grlog",
+//            "/invite", "/invites", "/join", "/leave", "/notify", "/msg", "/room",
+//            "/rooms", "/tiny", "/who", "/nick", "/privileges", "/info", "/occupants" };
+//        _cmd_show_filtered_help("Groupchat commands", filter, ARRAY_SIZE(filter));
+//
+//    } else if (strcmp(args[0], "presences") == 0) {
+//        gchar *filter[] = { "/autoaway", "/away", "/chat", "/dnd",
+//            "/online", "/priority", "/account", "/status", "/statuses", "/who",
+//            "/xa" };
+//        _cmd_show_filtered_help("Presence commands", filter, ARRAY_SIZE(filter));
+//
+//    } else if (strcmp(args[0], "contacts") == 0) {
+//        gchar *filter[] = { "/group", "/roster", "/sub", "/who" };
+//        _cmd_show_filtered_help("Roster commands", filter, ARRAY_SIZE(filter));
+//
+//    } else if (strcmp(args[0], "service") == 0) {
+//        gchar *filter[] = { "/caps", "/disco", "/info", "/software", "/rooms" };
+//        _cmd_show_filtered_help("Service discovery commands", filter, ARRAY_SIZE(filter));
+//
+//    } else if (strcmp(args[0], "settings") == 0) {
+//        gchar *filter[] = { "/account", "/autoaway", "/autoping", "/autoconnect", "/beep",
+//            "/carbons", "/chlog", "/flash", "/gone", "/grlog", "/history", "/intype",
+//            "/log", "/notify", "/outtype", "/prefs", "/priority", "/reconnect", "/roster",
+//            "/splash", "/states", "/statuses", "/theme", "/titlebar", "/vercheck",
+//            "/privileges", "/occupants", "/presence", "/wrap", "/winstidy" };
+//        _cmd_show_filtered_help("Settings commands", filter, ARRAY_SIZE(filter));
+//
+    } else if (cmd_is_tag(args[0])) {
+        cons_show("");
+        ProfWin *console = wins_get_console();
+        win_vprint(console, '-', NULL, 0, THEME_WHITE_BOLD, "", "%s commands", args[0]);
 
-    } else if (strcmp(args[0], "chatting") == 0) {
-        gchar *filter[] = { "/chlog", "/otr", "/gone", "/history",
-            "/info", "/intype", "/msg", "/notify", "/outtype", "/status",
-            "/close", "/clear", "/tiny" };
-        _cmd_show_filtered_help("Chat commands", filter, ARRAY_SIZE(filter));
+        GList *ordered_commands = NULL;
+        GHashTableIter iter;
+        gpointer key;
+        gpointer value;
 
-    } else if (strcmp(args[0], "groupchat") == 0) {
-        gchar *filter[] = { "/close", "/clear", "/decline", "/grlog",
-            "/invite", "/invites", "/join", "/leave", "/notify", "/msg", "/room",
-            "/rooms", "/tiny", "/who", "/nick", "/privileges", "/info", "/occupants" };
-        _cmd_show_filtered_help("Groupchat commands", filter, ARRAY_SIZE(filter));
+        g_hash_table_iter_init(&iter, commands);
+        while (g_hash_table_iter_next(&iter, &key, &value)) {
+            Command *pcmd = (Command *)value;
+            if (cmd_has_tag(pcmd, args[0])) {
+                ordered_commands = g_list_insert_sorted(ordered_commands, pcmd->cmd, (GCompareFunc)g_strcmp0);
+            }
+        }
 
-    } else if (strcmp(args[0], "presences") == 0) {
-        gchar *filter[] = { "/autoaway", "/away", "/chat", "/dnd",
-            "/online", "/priority", "/account", "/status", "/statuses", "/who",
-            "/xa" };
-        _cmd_show_filtered_help("Presence commands", filter, ARRAY_SIZE(filter));
+        int maxlen = 0;
+        GList *curr = ordered_commands;
+        while (curr) {
+            gchar *cmd = curr->data;
+            int len = strlen(cmd);
+            if (len > maxlen) maxlen = len;
+            curr = g_list_next(curr);
+        }
 
-    } else if (strcmp(args[0], "contacts") == 0) {
-        gchar *filter[] = { "/group", "/roster", "/sub", "/who" };
-        _cmd_show_filtered_help("Roster commands", filter, ARRAY_SIZE(filter));
+        GString *cmds = g_string_new("");
+        curr = ordered_commands;
+        int count = 0;
+        while (curr) {
+            gchar *cmd = curr->data;
+            if (count == 5) {
+                cons_show(cmds->str);
+                g_string_free(cmds, TRUE);
+                cmds = g_string_new("");
+                count = 0;
+            }
+            g_string_append_printf(cmds, "%-*s", maxlen + 1, cmd);
+            curr = g_list_next(curr);
+            count++;
+        }
+        cons_show(cmds->str);
+        g_string_free(cmds, TRUE);
+        g_list_free(ordered_commands);
+        g_list_free(curr);
 
-    } else if (strcmp(args[0], "service") == 0) {
-        gchar *filter[] = { "/caps", "/disco", "/info", "/software", "/rooms" };
-        _cmd_show_filtered_help("Service discovery commands", filter, ARRAY_SIZE(filter));
-
-    } else if (strcmp(args[0], "settings") == 0) {
-        gchar *filter[] = { "/account", "/autoaway", "/autoping", "/autoconnect", "/beep",
-            "/carbons", "/chlog", "/flash", "/gone", "/grlog", "/history", "/intype",
-            "/log", "/notify", "/outtype", "/prefs", "/priority", "/reconnect", "/roster",
-            "/splash", "/states", "/statuses", "/theme", "/titlebar", "/vercheck",
-            "/privileges", "/occupants", "/presence", "/wrap", "/winstidy" };
-        _cmd_show_filtered_help("Settings commands", filter, ARRAY_SIZE(filter));
-
+        cons_show("");
+        cons_show("Use /help [command] without the leading slash, for help on a specific command");
+        cons_show("");
     } else if (strcmp(args[0], "navigation") == 0) {
         cons_navigation_help();
     } else {
@@ -4743,50 +4793,50 @@ _cmd_set_boolean_preference(gchar *arg, const char * const command,
     return TRUE;
 }
 
-static void
-_cmd_show_filtered_help(char *heading, gchar *cmd_filter[], int filter_size)
-{
-    ProfWin *console = wins_get_console();
-    cons_show("");
-    win_print(console, '-', NULL, 0, THEME_WHITE_BOLD, "", heading);
-
-    GList *ordered_commands = NULL;
-    int i;
-    for (i = 0; i < filter_size; i++) {
-        Command *pcmd = g_hash_table_lookup(commands, cmd_filter[i]);
-        ordered_commands = g_list_insert_sorted(ordered_commands, pcmd->cmd, (GCompareFunc)g_strcmp0);
-    }
-
-    int maxlen = 0;
-    GList *curr = ordered_commands;
-    while (curr) {
-        gchar *cmd = curr->data;
-        int len = strlen(cmd);
-        if (len > maxlen) maxlen = len;
-        curr = g_list_next(curr);
-    }
-
-    GString *cmds = g_string_new("");
-    curr = ordered_commands;
-    int count = 0;
-    while (curr) {
-        gchar *cmd = curr->data;
-        if (count == 5) {
-            cons_show(cmds->str);
-            g_string_free(cmds, TRUE);
-            cmds = g_string_new("");
-            count = 0;
-        }
-        g_string_append_printf(cmds, "%-*s", maxlen + 1, cmd);
-        curr = g_list_next(curr);
-        count++;
-    }
-    cons_show(cmds->str);
-    g_string_free(cmds, TRUE);
-    g_list_free(ordered_commands);
-    g_list_free(curr);
-
-    cons_show("");
-    cons_show("Use /help [command] without the leading slash, for help on a specific command");
-    cons_show("");
-}
+//static void
+//_cmd_show_filtered_help(char *heading, gchar *cmd_filter[], int filter_size)
+//{
+//    ProfWin *console = wins_get_console();
+//    cons_show("");
+//    win_print(console, '-', NULL, 0, THEME_WHITE_BOLD, "", heading);
+//
+//    GList *ordered_commands = NULL;
+//    int i;
+//    for (i = 0; i < filter_size; i++) {
+//        Command *pcmd = g_hash_table_lookup(commands, cmd_filter[i]);
+//        ordered_commands = g_list_insert_sorted(ordered_commands, pcmd->cmd, (GCompareFunc)g_strcmp0);
+//    }
+//
+//    int maxlen = 0;
+//    GList *curr = ordered_commands;
+//    while (curr) {
+//        gchar *cmd = curr->data;
+//        int len = strlen(cmd);
+//        if (len > maxlen) maxlen = len;
+//        curr = g_list_next(curr);
+//    }
+//
+//    GString *cmds = g_string_new("");
+//    curr = ordered_commands;
+//    int count = 0;
+//    while (curr) {
+//        gchar *cmd = curr->data;
+//        if (count == 5) {
+//            cons_show(cmds->str);
+//            g_string_free(cmds, TRUE);
+//            cmds = g_string_new("");
+//            count = 0;
+//        }
+//        g_string_append_printf(cmds, "%-*s", maxlen + 1, cmd);
+//        curr = g_list_next(curr);
+//        count++;
+//    }
+//    cons_show(cmds->str);
+//    g_string_free(cmds, TRUE);
+//    g_list_free(ordered_commands);
+//    g_list_free(curr);
+//
+//    cons_show("");
+//    cons_show("Use /help [command] without the leading slash, for help on a specific command");
+//    cons_show("");
+//}
