@@ -773,6 +773,68 @@ cmd_win(ProfWin *window, const char * const command, gchar **args)
     return TRUE;
 }
 
+static void
+_cmd_help_cmd_list(const char * const tag)
+{
+    cons_show("");
+    ProfWin *console = wins_get_console();
+    if (tag) {
+        win_vprint(console, '-', NULL, 0, THEME_WHITE_BOLD, "", "%s commands", tag);
+    } else {
+        win_print(console, '-', NULL, 0, THEME_WHITE_BOLD, "", "All commands");
+    }
+
+    GList *ordered_commands = NULL;
+    GHashTableIter iter;
+    gpointer key;
+    gpointer value;
+
+    g_hash_table_iter_init(&iter, commands);
+    while (g_hash_table_iter_next(&iter, &key, &value)) {
+        Command *pcmd = (Command *)value;
+        if (tag) {
+            if (cmd_has_tag(pcmd, tag)) {
+                ordered_commands = g_list_insert_sorted(ordered_commands, pcmd->cmd, (GCompareFunc)g_strcmp0);
+            }
+        } else {
+            ordered_commands = g_list_insert_sorted(ordered_commands, pcmd->cmd, (GCompareFunc)g_strcmp0);
+        }
+    }
+
+    int maxlen = 0;
+    GList *curr = ordered_commands;
+    while (curr) {
+        gchar *cmd = curr->data;
+        int len = strlen(cmd);
+        if (len > maxlen) maxlen = len;
+        curr = g_list_next(curr);
+    }
+
+    GString *cmds = g_string_new("");
+    curr = ordered_commands;
+    int count = 0;
+    while (curr) {
+        gchar *cmd = curr->data;
+        if (count == 5) {
+            cons_show(cmds->str);
+            g_string_free(cmds, TRUE);
+            cmds = g_string_new("");
+            count = 0;
+        }
+        g_string_append_printf(cmds, "%-*s", maxlen + 1, cmd);
+        curr = g_list_next(curr);
+        count++;
+    }
+    cons_show(cmds->str);
+    g_string_free(cmds, TRUE);
+    g_list_free(ordered_commands);
+    g_list_free(curr);
+
+    cons_show("");
+    cons_show("Use /help [command] without the leading slash, for help on a specific command");
+    cons_show("");
+}
+
 gboolean
 cmd_help(ProfWin *window, const char * const command, gchar **args)
 {
@@ -783,106 +845,11 @@ cmd_help(ProfWin *window, const char * const command, gchar **args)
         if (args[1]) {
             if (!cmd_valid_tag(args[1])) {
                 cons_bad_cmd_usage(command);
-                return TRUE;
+            } else {
+                _cmd_help_cmd_list(args[1]);
             }
-
-            cons_show("");
-            ProfWin *console = wins_get_console();
-            win_vprint(console, '-', NULL, 0, THEME_WHITE_BOLD, "", "%s commands", args[1]);
-
-            GList *ordered_commands = NULL;
-            GHashTableIter iter;
-            gpointer key;
-            gpointer value;
-
-            g_hash_table_iter_init(&iter, commands);
-            while (g_hash_table_iter_next(&iter, &key, &value)) {
-                Command *pcmd = (Command *)value;
-                if (cmd_has_tag(pcmd, args[1])) {
-                    ordered_commands = g_list_insert_sorted(ordered_commands, pcmd->cmd, (GCompareFunc)g_strcmp0);
-                }
-            }
-
-            int maxlen = 0;
-            GList *curr = ordered_commands;
-            while (curr) {
-                gchar *cmd = curr->data;
-                int len = strlen(cmd);
-                if (len > maxlen) maxlen = len;
-                curr = g_list_next(curr);
-            }
-
-            GString *cmds = g_string_new("");
-            curr = ordered_commands;
-            int count = 0;
-            while (curr) {
-                gchar *cmd = curr->data;
-                if (count == 5) {
-                    cons_show(cmds->str);
-                    g_string_free(cmds, TRUE);
-                    cmds = g_string_new("");
-                    count = 0;
-                }
-                g_string_append_printf(cmds, "%-*s", maxlen + 1, cmd);
-                curr = g_list_next(curr);
-                count++;
-            }
-            cons_show(cmds->str);
-            g_string_free(cmds, TRUE);
-            g_list_free(ordered_commands);
-            g_list_free(curr);
-
-            cons_show("");
-            cons_show("Use /help [command] without the leading slash, for help on a specific command");
-            cons_show("");
         } else {
-            cons_show("");
-            ProfWin *console = wins_get_console();
-            win_print(console, '-', NULL, 0, THEME_WHITE_BOLD, "", "All commands");
-
-            GList *ordered_commands = NULL;
-            GHashTableIter iter;
-            gpointer key;
-            gpointer value;
-
-            g_hash_table_iter_init(&iter, commands);
-            while (g_hash_table_iter_next(&iter, &key, &value)) {
-                Command *pcmd = (Command *)value;
-                ordered_commands = g_list_insert_sorted(ordered_commands, pcmd->cmd, (GCompareFunc)g_strcmp0);
-            }
-
-            int maxlen = 0;
-            GList *curr = ordered_commands;
-            while (curr) {
-                gchar *cmd = curr->data;
-                int len = strlen(cmd);
-                if (len > maxlen) maxlen = len;
-                curr = g_list_next(curr);
-            }
-
-            GString *cmds = g_string_new("");
-            curr = ordered_commands;
-            int count = 0;
-            while (curr) {
-                gchar *cmd = curr->data;
-                if (count == 5) {
-                    cons_show(cmds->str);
-                    g_string_free(cmds, TRUE);
-                    cmds = g_string_new("");
-                    count = 0;
-                }
-                g_string_append_printf(cmds, "%-*s", maxlen + 1, cmd);
-                curr = g_list_next(curr);
-                count++;
-            }
-            cons_show(cmds->str);
-            g_string_free(cmds, TRUE);
-            g_list_free(ordered_commands);
-            g_list_free(curr);
-
-            cons_show("");
-            cons_show("Use /help [command] without the leading slash, for help on a specific command");
-            cons_show("");
+            _cmd_help_cmd_list(NULL);
         }
     } else if (strcmp(args[0], "navigation") == 0) {
         cons_navigation_help();
