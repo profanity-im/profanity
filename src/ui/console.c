@@ -1534,17 +1534,16 @@ cons_help(void)
     cons_show("");
     cons_show("Choose a help option:");
     cons_show("");
-    cons_show("/help commands   - List all commands.");
-    cons_show("/help basic      - List basic commands for getting started.");
-    cons_show("/help chatting   - List chat commands.");
-    cons_show("/help groupchat  - List groupchat commands.");
-    cons_show("/help presences  - List commands to change presence.");
-    cons_show("/help contacts   - List commands for manipulating your roster.");
-    cons_show("/help service    - List service discovery commands.");
-    cons_show("/help settings   - List commands for changing settings.");
-    cons_show("/help ui         - List commands for configuring the user interface.");
-    cons_show("/help navigation - How to navigate around Profanity.");
-    cons_show("/help [command]  - Detailed help on a specific command.");
+    cons_show("/help commands            - List all commands.");
+    cons_show("/help commands chat       - List chat commands.");
+    cons_show("/help commands groupchat  - List groupchat commands.");
+    cons_show("/help commands roster     - List commands for manipulating your roster.");
+    cons_show("/help commands presence   - List commands to change your presence.");
+    cons_show("/help commands discovery  - List service discovery commands.");
+    cons_show("/help commands connection - List commands related to managing your connection.");
+    cons_show("/help commands ui         - List commands for manipulating the user interface.");
+    cons_show("/help [command]           - Detailed help on a specific command.");
+    cons_show("/help navigation          - How to navigate around Profanity.");
     cons_show("");
 
     cons_alert();

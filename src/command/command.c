@@ -101,16 +101,16 @@ static char * _titlebar_autocomplete(ProfWin *window, const char * const input);
 static char * _inpblock_autocomplete(ProfWin *window, const char * const input);
 static char * _time_autocomplete(ProfWin *window, const char * const input);
 static char * _receipts_autocomplete(ProfWin *window, const char * const input);
+static char * _help_autocomplete(ProfWin *window, const char * const input);
 
 GHashTable *commands = NULL;
 
-#define CMD_TAG_BASIC       "basic"
-#define CMD_TAG_CHATTING    "chatting"
+#define CMD_TAG_CHAT        "chat"
 #define CMD_TAG_GROUPCHAT   "groupchat"
-#define CMD_TAG_PRESENCES   "presences"
-#define CMD_TAG_CONTACTS    "contacts"
-#define CMD_TAG_SERVICE     "service"
-#define CMD_TAG_SETTINGS    "settings"
+#define CMD_TAG_ROSTER      "roster"
+#define CMD_TAG_PRESENCE    "presence"
+#define CMD_TAG_CONNECTION  "connection"
+#define CMD_TAG_DISCOVERY   "discovery"
 #define CMD_TAG_UI          "ui"
 
 #define CMD_NOTAGS          { { NULL },
@@ -128,7 +128,7 @@ GHashTable *commands = NULL;
 static struct cmd_t command_defs[] =
 {
     { "/help",
-        cmd_help, parse_args, 0, 1, NULL,
+        cmd_help, parse_args, 0, 2, NULL,
         CMD_NOTAGS
         CMD_SYN(
             "/help [<area>|<command>]")
@@ -157,7 +157,7 @@ static struct cmd_t command_defs[] =
     { "/connect",
         cmd_connect, parse_args, 0, 5, NULL,
         CMD_TAGS(
-            CMD_TAG_BASIC)
+            CMD_TAG_CONNECTION)
         CMD_SYN(
             "/connect [<account>]",
             "/connect <account> [server <server>] [port <port>]")
@@ -180,7 +180,7 @@ static struct cmd_t command_defs[] =
     { "/disconnect",
         cmd_disconnect, parse_args, 0, 0, NULL,
         CMD_TAGS(
-            CMD_TAG_BASIC)
+            CMD_TAG_CONNECTION)
         CMD_SYN(
             "/disconnect")
         CMD_DESC(
@@ -192,9 +192,7 @@ static struct cmd_t command_defs[] =
     { "/msg",
         cmd_msg, parse_args_with_freetext, 1, 2, NULL,
         CMD_TAGS(
-            CMD_TAG_BASIC,
-            CMD_TAG_CHATTING,
-            CMD_TAG_GROUPCHAT)
+            CMD_TAG_CHAT)
         CMD_SYN(
             "/msg <contact> [<message>]",
             "/msg <nick> [<message>]")
@@ -217,7 +215,7 @@ static struct cmd_t command_defs[] =
     { "/roster",
         cmd_roster, parse_args_with_freetext, 0, 3, NULL,
         CMD_TAGS(
-            CMD_TAG_CONTACTS,
+            CMD_TAG_ROSTER,
             CMD_TAG_UI)
         CMD_SYN(
             "/roster",
@@ -267,7 +265,8 @@ static struct cmd_t command_defs[] =
     { "/group",
         cmd_group, parse_args_with_freetext, 0, 3, NULL,
         CMD_TAGS(
-            CMD_TAG_CONTACTS)
+            CMD_TAG_ROSTER,
+            CMD_TAG_UI)
         CMD_SYN(
             "/group",
             "/group show <group>",
@@ -290,7 +289,10 @@ static struct cmd_t command_defs[] =
 
     { "/info",
         cmd_info, parse_args, 0, 1, NULL,
-        CMD_NOTAGS
+        CMD_TAGS(
+            CMD_TAG_ROSTER,
+            CMD_TAG_CHAT,
+            CMD_TAG_GROUPCHAT)
         CMD_SYN(
             "/info",
             "/info <contact>|<nick>")
@@ -309,7 +311,9 @@ static struct cmd_t command_defs[] =
     { "/caps",
         cmd_caps, parse_args, 0, 1, NULL,
         CMD_TAGS(
-            CMD_TAG_SERVICE)
+            CMD_TAG_DISCOVERY,
+            CMD_TAG_CHAT,
+            CMD_TAG_GROUPCHAT)
         CMD_SYN(
             "/caps",
             "/caps <fulljid>|<nick>")
@@ -328,7 +332,9 @@ static struct cmd_t command_defs[] =
     { "/software",
         cmd_software, parse_args, 0, 1, NULL,
         CMD_TAGS(
-            CMD_TAG_SERVICE)
+            CMD_TAG_DISCOVERY,
+            CMD_TAG_CHAT,
+            CMD_TAG_GROUPCHAT)
         CMD_SYN(
             "/software",
             "/software <fulljid>|<nick>")
@@ -347,7 +353,9 @@ static struct cmd_t command_defs[] =
 
     { "/status",
         cmd_status, parse_args, 0, 1, NULL,
-        CMD_NOTAGS
+        CMD_TAGS(
+            CMD_TAG_CHAT,
+            CMD_TAG_GROUPCHAT)
         CMD_SYN(
             "/status",
             "/status <contact>|<nick>")
@@ -365,6 +373,7 @@ static struct cmd_t command_defs[] =
     { "/resource",
         cmd_resource, parse_args, 1, 2, &cons_resource_setting,
         CMD_TAGS(
+            CMD_TAG_CHAT,
             CMD_TAG_UI)
         CMD_SYN(
             "/resource set <resource>",
@@ -384,7 +393,6 @@ static struct cmd_t command_defs[] =
     { "/join",
         cmd_join, parse_args, 0, 5, NULL,
         CMD_TAGS(
-            CMD_TAG_BASIC,
             CMD_TAG_GROUPCHAT)
         CMD_SYN(
             "/join",
@@ -410,7 +418,6 @@ static struct cmd_t command_defs[] =
     { "/leave",
         cmd_leave, parse_args, 0, 0, NULL,
         CMD_TAGS(
-            CMD_TAG_BASIC,
             CMD_TAG_GROUPCHAT)
         CMD_SYN(
             "/leave")
@@ -552,6 +559,7 @@ static struct cmd_t command_defs[] =
     { "/occupants",
         cmd_occupants, parse_args, 1, 3, cons_occupants_setting,
         CMD_TAGS(
+            CMD_TAG_GROUPCHAT,
             CMD_TAG_UI)
         CMD_SYN(
             "/occupants show|hide [jid]",
@@ -633,7 +641,7 @@ static struct cmd_t command_defs[] =
     { "/disco",
         cmd_disco, parse_args, 1, 2, NULL,
         CMD_TAGS(
-            CMD_TAG_SERVICE)
+            CMD_TAG_DISCOVERY)
         CMD_SYN(
             "/disco info [<jid>]",
             "/disco items [<jid>]")
@@ -653,7 +661,6 @@ static struct cmd_t command_defs[] =
     { "/nick",
         cmd_nick, parse_args_with_freetext, 1, 1, NULL,
         CMD_TAGS(
-            CMD_TAG_BASIC,
             CMD_TAG_GROUPCHAT)
         CMD_SYN(
             "/nick <nickname>")
@@ -667,7 +674,6 @@ static struct cmd_t command_defs[] =
     { "/win",
         cmd_win, parse_args, 1, 1, NULL,
         CMD_TAGS(
-            CMD_TAG_BASIC,
             CMD_TAG_UI)
         CMD_SYN(
             "/win <num>")
@@ -681,7 +687,6 @@ static struct cmd_t command_defs[] =
     { "/wins",
         cmd_wins, parse_args, 0, 3, NULL,
         CMD_TAGS(
-            CMD_TAG_BASIC,
             CMD_TAG_UI)
         CMD_SYN(
             "/wins tidy",
@@ -700,8 +705,7 @@ static struct cmd_t command_defs[] =
     { "/sub",
         cmd_sub, parse_args, 1, 2, NULL,
         CMD_TAGS(
-            CMD_TAG_BASIC,
-            CMD_TAG_CONTACTS)
+            CMD_TAG_ROSTER)
         CMD_SYN(
             "/sub request [<jid>]",
             "/sub allow [<jid>]",
@@ -729,7 +733,8 @@ static struct cmd_t command_defs[] =
     { "/tiny",
         cmd_tiny, parse_args, 1, 1, NULL,
         CMD_TAGS(
-            CMD_TAG_CHATTING)
+            CMD_TAG_CHAT,
+            CMD_TAG_GROUPCHAT)
         CMD_SYN(
             "/tiny <url>")
         CMD_DESC(
@@ -743,8 +748,9 @@ static struct cmd_t command_defs[] =
     { "/who",
         cmd_who, parse_args, 0, 2, NULL,
         CMD_TAGS(
-            CMD_TAG_BASIC,
-            CMD_TAG_CONTACTS)
+            CMD_TAG_CHAT,
+            CMD_TAG_GROUPCHAT,
+            CMD_TAG_ROSTER)
         CMD_SYN(
             "/who",
             "/who online|offline|away|dnd|xa|chat|available|unavailable|any [<group>]",
@@ -773,8 +779,7 @@ static struct cmd_t command_defs[] =
     { "/close",
         cmd_close, parse_args, 0, 1, NULL,
         CMD_TAGS(
-            CMD_TAG_BASIC,
-            CMD_TAG_CHATTING)
+            CMD_TAG_UI)
         CMD_SYN(
             "/close [<num>]",
             "/close all|read")
@@ -790,7 +795,8 @@ static struct cmd_t command_defs[] =
 
     { "/clear",
         cmd_clear, parse_args, 0, 0, NULL,
-        CMD_NOTAGS
+        CMD_TAGS(
+            CMD_TAG_UI)
         CMD_SYN(
             "/clear")
         CMD_DESC(
@@ -801,8 +807,7 @@ static struct cmd_t command_defs[] =
 
     { "/quit",
         cmd_quit, parse_args, 0, 0, NULL,
-        CMD_TAGS(
-            CMD_TAG_BASIC)
+        CMD_NOTAGS
         CMD_SYN(
             "/quit")
         CMD_DESC(
@@ -814,6 +819,7 @@ static struct cmd_t command_defs[] =
     { "/privileges",
         cmd_privileges, parse_args, 1, 1, &cons_privileges_setting,
         CMD_TAGS(
+            CMD_TAG_GROUPCHAT,
             CMD_TAG_UI)
         CMD_SYN(
             "/privileges on|off")
@@ -842,7 +848,7 @@ static struct cmd_t command_defs[] =
     { "/encwarn",
         cmd_encwarn, parse_args, 1, 1, &cons_encwarn_setting,
         CMD_TAGS(
-            CMD_TAG_CHATTING,
+            CMD_TAG_CHAT,
             CMD_TAG_UI)
         CMD_SYN(
             "/encwarn on|off")
@@ -856,7 +862,8 @@ static struct cmd_t command_defs[] =
     { "/presence",
         cmd_presence, parse_args, 1, 1, &cons_presence_setting,
         CMD_TAGS(
-            CMD_TAG_UI)
+            CMD_TAG_UI,
+            CMD_TAG_CHAT)
         CMD_SYN(
             "/presence on|off")
         CMD_DESC(
@@ -936,7 +943,9 @@ static struct cmd_t command_defs[] =
     { "/notify",
         cmd_notify, parse_args, 2, 3, &cons_notify_setting,
         CMD_TAGS(
-            CMD_TAG_UI)
+            CMD_TAG_UI,
+            CMD_TAG_CHAT,
+            CMD_TAG_GROUPCHAT)
         CMD_SYN(
             "/notify message on|off",
             "/notify message current on|off",
@@ -991,7 +1000,8 @@ static struct cmd_t command_defs[] =
     { "/intype",
         cmd_intype, parse_args, 1, 1, &cons_intype_setting,
         CMD_TAGS(
-            CMD_TAG_UI)
+            CMD_TAG_UI,
+            CMD_TAG_CHAT)
         CMD_SYN(
             "/intype on|off")
         CMD_DESC(
@@ -1017,7 +1027,7 @@ static struct cmd_t command_defs[] =
     { "/autoconnect",
         cmd_autoconnect, parse_args, 1, 2, &cons_autoconnect_setting,
         CMD_TAGS(
-            CMD_TAG_SETTINGS)
+            CMD_TAG_CONNECTION)
         CMD_SYN(
             "/autoconnect set <account>",
             "/autoconnect off")
@@ -1035,7 +1045,6 @@ static struct cmd_t command_defs[] =
     { "/vercheck",
         cmd_vercheck, parse_args, 0, 1, NULL,
         CMD_TAGS(
-            CMD_TAG_SETTINGS,
             CMD_TAG_UI)
         CMD_SYN(
             "/vercheck on|off")
@@ -1063,8 +1072,7 @@ static struct cmd_t command_defs[] =
 
     { "/alias",
         cmd_alias, parse_args_with_freetext, 1, 3, NULL,
-        CMD_TAGS(
-            CMD_TAG_SETTINGS)
+        CMD_NOTAGS
         CMD_SYN(
             "/alias list",
             "/alias add <name> <value>",
@@ -1086,8 +1094,7 @@ static struct cmd_t command_defs[] =
     { "/chlog",
         cmd_chlog, parse_args, 1, 1, &cons_chlog_setting,
         CMD_TAGS(
-            CMD_TAG_CHATTING,
-            CMD_TAG_SETTINGS)
+            CMD_TAG_CHAT)
         CMD_SYN(
             "/chlog on|off")
         CMD_DESC(
@@ -1103,8 +1110,7 @@ static struct cmd_t command_defs[] =
     { "/grlog",
         cmd_grlog, parse_args, 1, 1, &cons_grlog_setting,
         CMD_TAGS(
-            CMD_TAG_GROUPCHAT,
-            CMD_TAG_SETTINGS)
+            CMD_TAG_GROUPCHAT)
         CMD_SYN(
             "/grlog on|off")
         CMD_DESC(
@@ -1118,7 +1124,7 @@ static struct cmd_t command_defs[] =
     { "/states",
         cmd_states, parse_args, 1, 1, &cons_states_setting,
         CMD_TAGS(
-            CMD_TAG_SETTINGS)
+            CMD_TAG_CHAT)
         CMD_SYN(
             "/states on|off")
         CMD_DESC(
@@ -1131,7 +1137,7 @@ static struct cmd_t command_defs[] =
     { "/pgp",
         cmd_pgp, parse_args, 1, 3, NULL,
         CMD_TAGS(
-            CMD_TAG_CHATTING)
+            CMD_TAG_CHAT)
         CMD_SYN(
             "/pgp libver",
             "/pgp keys",
@@ -1162,7 +1168,7 @@ static struct cmd_t command_defs[] =
     { "/otr",
         cmd_otr, parse_args, 1, 3, NULL,
         CMD_TAGS(
-            CMD_TAG_CHATTING)
+            CMD_TAG_CHAT)
         CMD_SYN(
             "/otr libver",
             "/otr gen",
@@ -1207,7 +1213,7 @@ static struct cmd_t command_defs[] =
     { "/outtype",
         cmd_outtype, parse_args, 1, 1, &cons_outtype_setting,
         CMD_TAGS(
-            CMD_TAG_SETTINGS)
+            CMD_TAG_CHAT)
         CMD_SYN(
             "/outtype on|off")
         CMD_DESC(
@@ -1220,7 +1226,7 @@ static struct cmd_t command_defs[] =
     { "/gone",
         cmd_gone, parse_args, 1, 1, &cons_gone_setting,
         CMD_TAGS(
-            CMD_TAG_SETTINGS)
+            CMD_TAG_CHAT)
         CMD_SYN(
             "/gone <minutes>")
         CMD_DESC(
@@ -1234,9 +1240,8 @@ static struct cmd_t command_defs[] =
     { "/history",
         cmd_history, parse_args, 1, 1, &cons_history_setting,
         CMD_TAGS(
-            CMD_TAG_CHATTING,
-            CMD_TAG_SETTINGS,
-            CMD_TAG_UI)
+            CMD_TAG_UI,
+            CMD_TAG_CHAT)
         CMD_SYN(
             "/history on|off")
         CMD_DESC(
@@ -1249,8 +1254,7 @@ static struct cmd_t command_defs[] =
 
     { "/log",
         cmd_log, parse_args, 1, 2, &cons_log_setting,
-        CMD_TAGS(
-            CMD_TAG_SETTINGS)
+        CMD_NOTAGS
         CMD_SYN(
             "/log where",
             "/log rotate on|off",
@@ -1269,8 +1273,7 @@ static struct cmd_t command_defs[] =
     { "/carbons",
         cmd_carbons, parse_args, 1, 1, &cons_carbons_setting,
         CMD_TAGS(
-            CMD_TAG_CHATTING,
-            CMD_TAG_SETTINGS)
+            CMD_TAG_CHAT)
         CMD_SYN(
             "/carbons on|off")
         CMD_DESC(
@@ -1284,8 +1287,7 @@ static struct cmd_t command_defs[] =
     { "/receipts",
         cmd_receipts, parse_args, 2, 2, &cons_receipts_setting,
         CMD_TAGS(
-            CMD_TAG_CHATTING,
-            CMD_TAG_SETTINGS)
+            CMD_TAG_CHAT)
         CMD_SYN(
             "/receipts request on|off",
             "/receipts send on|off")
@@ -1300,7 +1302,7 @@ static struct cmd_t command_defs[] =
     { "/reconnect",
         cmd_reconnect, parse_args, 1, 1, &cons_reconnect_setting,
         CMD_TAGS(
-            CMD_TAG_SETTINGS)
+            CMD_TAG_CONNECTION)
         CMD_SYN(
             "/reconnect <seconds>")
         CMD_DESC(
@@ -1313,7 +1315,7 @@ static struct cmd_t command_defs[] =
     { "/autoping",
         cmd_autoping, parse_args, 1, 1, &cons_autoping_setting,
         CMD_TAGS(
-            CMD_TAG_SETTINGS)
+            CMD_TAG_CONNECTION)
         CMD_SYN(
             "/autoping <seconds>")
         CMD_DESC(
@@ -1325,7 +1327,8 @@ static struct cmd_t command_defs[] =
 
     { "/ping",
         cmd_ping, parse_args, 0, 1, NULL,
-        CMD_NOTAGS
+        CMD_TAGS(
+            CMD_TAG_CONNECTION)
         CMD_SYN(
             "/ping [<jid>]")
         CMD_DESC(
@@ -1339,8 +1342,7 @@ static struct cmd_t command_defs[] =
     { "/autoaway",
         cmd_autoaway, parse_args_with_freetext, 2, 2, &cons_autoaway_setting,
         CMD_TAGS(
-            CMD_TAG_PRESENCES,
-            CMD_TAG_SETTINGS)
+            CMD_TAG_PRESENCE)
         CMD_SYN(
             "/autoaway mode idle|away|off",
             "/autoaway time <minutes>",
@@ -1366,7 +1368,7 @@ static struct cmd_t command_defs[] =
     { "/priority",
         cmd_priority, parse_args, 1, 1, &cons_priority_setting,
         CMD_TAGS(
-            CMD_TAG_PRESENCES)
+            CMD_TAG_PRESENCE)
         CMD_SYN(
             "/priority <priority>")
         CMD_DESC(
@@ -1380,7 +1382,10 @@ static struct cmd_t command_defs[] =
     { "/account",
         cmd_account, parse_args, 0, 4, NULL,
         CMD_TAGS(
-            CMD_TAG_SETTINGS)
+            CMD_TAG_CONNECTION
+            CMD_TAG_PRESENCE,
+            CMD_TAG_CHAT,
+            CMD_TAG_GROUPCHAT)
         CMD_SYN(
             "/account",
             "/account list",
@@ -1454,9 +1459,7 @@ static struct cmd_t command_defs[] =
 
     { "/prefs",
         cmd_prefs, parse_args, 0, 1, NULL,
-        CMD_TAGS(
-            CMD_TAG_SETTINGS,
-            CMD_TAG_UI)
+        CMD_NOTAGS
         CMD_SYN(
             "/prefs [ui|desktop|chat|log|conn|presence]")
         CMD_DESC(
@@ -1494,7 +1497,9 @@ static struct cmd_t command_defs[] =
     { "/statuses",
         cmd_statuses, parse_args, 2, 2, &cons_statuses_setting,
         CMD_TAGS(
-            CMD_TAG_UI)
+            CMD_TAG_UI,
+            CMD_TAG_CHAT,
+            CMD_TAG_GROUPCHAT)
         CMD_SYN(
             "/statuses console|chat|muc all|online|none")
         CMD_DESC(
@@ -1528,8 +1533,7 @@ static struct cmd_t command_defs[] =
     { "/away",
         cmd_away, parse_args_with_freetext, 0, 1, NULL,
         CMD_TAGS(
-            CMD_TAG_BASIC,
-            CMD_TAG_PRESENCES)
+            CMD_TAG_PRESENCE)
         CMD_SYN(
             "/away [<message>]")
         CMD_DESC(
@@ -1544,8 +1548,7 @@ static struct cmd_t command_defs[] =
     { "/chat",
         cmd_chat, parse_args_with_freetext, 0, 1, NULL,
         CMD_TAGS(
-            CMD_TAG_BASIC,
-            CMD_TAG_PRESENCES)
+            CMD_TAG_PRESENCE)
         CMD_SYN(
             "/chat [<message>]")
         CMD_DESC(
@@ -1560,8 +1563,7 @@ static struct cmd_t command_defs[] =
     { "/dnd",
         cmd_dnd, parse_args_with_freetext, 0, 1, NULL,
         CMD_TAGS(
-            CMD_TAG_BASIC,
-            CMD_TAG_PRESENCES)
+            CMD_TAG_PRESENCE)
         CMD_SYN(
             "/dnd [<message>]")
         CMD_DESC(
@@ -1576,8 +1578,7 @@ static struct cmd_t command_defs[] =
     { "/online",
         cmd_online, parse_args_with_freetext, 0, 1, NULL,
         CMD_TAGS(
-            CMD_TAG_BASIC,
-            CMD_TAG_PRESENCES)
+            CMD_TAG_PRESENCE)
         CMD_SYN(
             "/online [<message>]")
         CMD_DESC(
@@ -1592,8 +1593,7 @@ static struct cmd_t command_defs[] =
     { "/xa",
         cmd_xa, parse_args_with_freetext, 0, 1, NULL,
         CMD_TAGS(
-            CMD_TAG_BASIC,
-            CMD_TAG_PRESENCES)
+            CMD_TAG_PRESENCE)
         CMD_SYN(
             "/xa [<message>]")
         CMD_DESC(
@@ -1610,6 +1610,7 @@ static Autocomplete commands_ac;
 static Autocomplete who_room_ac;
 static Autocomplete who_roster_ac;
 static Autocomplete help_ac;
+static Autocomplete help_commands_ac;
 static Autocomplete notify_ac;
 static Autocomplete notify_room_ac;
 static Autocomplete notify_message_ac;
@@ -1677,14 +1678,6 @@ cmd_init(void)
 
     help_ac = autocomplete_new();
     autocomplete_add(help_ac, "commands");
-    autocomplete_add(help_ac, "basic");
-    autocomplete_add(help_ac, "chatting");
-    autocomplete_add(help_ac, "groupchat");
-    autocomplete_add(help_ac, "presences");
-    autocomplete_add(help_ac, "contacts");
-    autocomplete_add(help_ac, "service");
-    autocomplete_add(help_ac, "settings");
-    autocomplete_add(help_ac, "ui");
     autocomplete_add(help_ac, "navigation");
 
     // load command defs into hash table
@@ -1714,6 +1707,15 @@ cmd_init(void)
         curr = g_list_next(curr);
     }
     prefs_free_aliases(aliases);
+
+    help_commands_ac = autocomplete_new();
+    autocomplete_add(help_commands_ac, "chat");
+    autocomplete_add(help_commands_ac, "groupchat");
+    autocomplete_add(help_commands_ac, "roster");
+    autocomplete_add(help_commands_ac, "presence");
+    autocomplete_add(help_commands_ac, "discovery");
+    autocomplete_add(help_commands_ac, "connection");
+    autocomplete_add(help_commands_ac, "ui");
 
     prefs_ac = autocomplete_new();
     autocomplete_add(prefs_ac, "ui");
@@ -2055,6 +2057,7 @@ cmd_uninit(void)
     autocomplete_free(who_room_ac);
     autocomplete_free(who_roster_ac);
     autocomplete_free(help_ac);
+    autocomplete_free(help_commands_ac);
     autocomplete_free(notify_ac);
     autocomplete_free(notify_message_ac);
     autocomplete_free(notify_room_ac);
@@ -2223,6 +2226,7 @@ cmd_reset_autocomplete(ProfWin *window)
     prefs_reset_boolean_choice();
     presence_reset_sub_request_search();
     autocomplete_reset(help_ac);
+    autocomplete_reset(help_commands_ac);
     autocomplete_reset(notify_ac);
     autocomplete_reset(notify_message_ac);
     autocomplete_reset(notify_room_ac);
@@ -2312,16 +2316,15 @@ cmd_reset_autocomplete(ProfWin *window)
 }
 
 gboolean
-cmd_is_tag(const char * const str)
+cmd_valid_tag(const char * const str)
 {
-    return ((g_strcmp0(str, CMD_TAG_BASIC) == 0) ||
-        (g_strcmp0(str, CMD_TAG_CHATTING) == 0) ||
-        (g_strcmp0(str, CMD_TAG_CONTACTS) == 0) ||
+    return ((g_strcmp0(str, CMD_TAG_CHAT) == 0) ||
         (g_strcmp0(str, CMD_TAG_GROUPCHAT) == 0) ||
-        (g_strcmp0(str, CMD_TAG_PRESENCES) == 0) ||
-        (g_strcmp0(str, CMD_TAG_SERVICE) == 0) ||
-        (g_strcmp0(str, CMD_TAG_UI) == 0) ||
-        (g_strcmp0(str, CMD_TAG_SETTINGS) == 0));
+        (g_strcmp0(str, CMD_TAG_PRESENCE) == 0) ||
+        (g_strcmp0(str, CMD_TAG_ROSTER) == 0) ||
+        (g_strcmp0(str, CMD_TAG_DISCOVERY) == 0) ||
+        (g_strcmp0(str, CMD_TAG_CONNECTION) == 0) ||
+        (g_strcmp0(str, CMD_TAG_UI) == 0));
 }
 
 gboolean
@@ -2496,8 +2499,8 @@ _cmd_complete_parameters(ProfWin *window, const char * const input)
         }
     }
 
-    gchar *cmds[] = { "/help", "/prefs", "/disco", "/close", "/wins", "/subject", "/room" };
-    Autocomplete completers[] = { help_ac, prefs_ac, disco_ac, close_ac, wins_ac, subject_ac, room_ac };
+    gchar *cmds[] = { "/prefs", "/disco", "/close", "/wins", "/subject", "/room" };
+    Autocomplete completers[] = { prefs_ac, disco_ac, close_ac, wins_ac, subject_ac, room_ac };
 
     for (i = 0; i < ARRAY_SIZE(cmds); i++) {
         result = autocomplete_param_with_ac(input, cmds[i], completers[i], TRUE);
@@ -2507,6 +2510,7 @@ _cmd_complete_parameters(ProfWin *window, const char * const input)
     }
 
     GHashTable *ac_funcs = g_hash_table_new(g_str_hash, g_str_equal);
+    g_hash_table_insert(ac_funcs, "/help",          _help_autocomplete);
     g_hash_table_insert(ac_funcs, "/who",           _who_autocomplete);
     g_hash_table_insert(ac_funcs, "/sub",           _sub_autocomplete);
     g_hash_table_insert(ac_funcs, "/notify",        _notify_autocomplete);
@@ -3474,6 +3478,24 @@ _connect_autocomplete(ProfWin *window, const char * const input)
     found = autocomplete_param_with_func(input, "/connect", accounts_find_enabled);
     if (found) {
         return found;
+    }
+
+    return NULL;
+}
+
+static char *
+_help_autocomplete(ProfWin *window, const char * const input)
+{
+    char *result = NULL;
+
+    result = autocomplete_param_with_ac(input, "/help commands", help_commands_ac, TRUE);
+    if (result) {
+        return result;
+    }
+
+    result = autocomplete_param_with_ac(input, "/help", help_ac, TRUE);
+    if (result) {
+        return result;
     }
 
     return NULL;
