@@ -947,9 +947,9 @@ win_mark_received(ProfWin *window, const char * const id)
 }
 
 void
-win_println(ProfWin *window, const char * const message)
+win_println(ProfWin *window, int pad, const char * const message)
 {
-    win_print(window, '-', 0, NULL, 0, 0, "", message);
+    win_print(window, '-', pad, NULL, 0, 0, "", message);
 }
 
 void

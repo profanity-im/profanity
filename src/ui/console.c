@@ -86,7 +86,7 @@ cons_debug(const char * const msg, ...)
         va_start(arg, msg);
         GString *fmt_msg = g_string_new(NULL);
         g_string_vprintf(fmt_msg, msg, arg);
-        win_println(console, fmt_msg->str);
+        win_println(console, 0, fmt_msg->str);
         g_string_free(fmt_msg, TRUE);
         va_end(arg);
     }
@@ -100,7 +100,20 @@ cons_show(const char * const msg, ...)
     va_start(arg, msg);
     GString *fmt_msg = g_string_new(NULL);
     g_string_vprintf(fmt_msg, msg, arg);
-    win_println(console, fmt_msg->str);
+    win_println(console, 0, fmt_msg->str);
+    g_string_free(fmt_msg, TRUE);
+    va_end(arg);
+}
+
+void
+cons_show_padded(int pad, const char * const msg, ...)
+{
+    ProfWin *console = wins_get_console();
+    va_list arg;
+    va_start(arg, msg);
+    GString *fmt_msg = g_string_new(NULL);
+    g_string_vprintf(fmt_msg, msg, arg);
+    win_println(console, pad, fmt_msg->str);
     g_string_free(fmt_msg, TRUE);
     va_end(arg);
 }
@@ -125,7 +138,7 @@ cons_show_help(Command *command)
     cons_show("");
 
     win_print(console, '-', 0, NULL, 0, THEME_WHITE_BOLD, "", "Description");
-    win_println(console, command->help.desc);
+    win_println(console, 0, command->help.desc);
 
     int maxlen = 0;
     for (i = 0; command->help.args[i][0] != NULL; i++) {
@@ -232,13 +245,13 @@ cons_about(void)
     }
 
     win_vprint(console, '-', 0, NULL, 0, 0, "", "Copyright (C) 2012 - 2015 James Booth <%s>.", PACKAGE_BUGREPORT);
-    win_println(console, "License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>");
-    win_println(console, "");
-    win_println(console, "This is free software; you are free to change and redistribute it.");
-    win_println(console, "There is NO WARRANTY, to the extent permitted by law.");
-    win_println(console, "");
-    win_println(console, "Type '/help' to show complete help.");
-    win_println(console, "");
+    win_println(console, 0, "License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>");
+    win_println(console, 0, "");
+    win_println(console, 0, "This is free software; you are free to change and redistribute it.");
+    win_println(console, 0, "There is NO WARRANTY, to the extent permitted by law.");
+    win_println(console, 0, "");
+    win_println(console, 0, "Type '/help' to show complete help.");
+    win_println(console, 0, "");
 
     if (prefs_get_boolean(PREF_VERCHECK)) {
         cons_check_version(FALSE);
@@ -261,12 +274,12 @@ cons_check_version(gboolean not_available_msg)
         if (relase_valid) {
             if (release_is_new(latest_release)) {
                 win_vprint(console, '-', 0, NULL, 0, 0, "", "A new version of Profanity is available: %s", latest_release);
-                win_println(console, "Check <http://www.profanity.im> for details.");
-                win_println(console, "");
+                win_println(console, 0, "Check <http://www.profanity.im> for details.");
+                win_println(console, 0, "");
             } else {
                 if (not_available_msg) {
-                    win_println(console, "No new version available.");
-                    win_println(console, "");
+                    win_println(console, 0, "No new version available.");
+                    win_println(console, 0, "");
                 }
             }
 
@@ -303,7 +316,7 @@ cons_show_wins(void)
 
     GSList *curr = window_strings;
     while (curr) {
-        win_println(console, curr->data);
+        win_println(console, 0, curr->data);
         curr = g_slist_next(curr);
     }
     g_slist_free_full(window_strings, free);
@@ -392,7 +405,7 @@ cons_show_caps(const char * const fulljid, resource_presence_t presence)
         }
 
         if (caps->features) {
-            win_println(console, "Features:");
+            win_println(console, 0, "Features:");
             GSList *feature = caps->features;
             while (feature) {
                 win_vprint(console, '-', 0, NULL, 0, 0, "", " %s", feature->data);
@@ -780,7 +793,7 @@ cons_show_account(ProfAccount *account)
 
         GList *curr = resources;
         if (curr) {
-            win_println(console, "Resources:");
+            win_println(console, 0, "Resources:");
 
             // sort in order of availability
             while (curr) {
@@ -1531,19 +1544,21 @@ cons_prefs(void)
 void
 cons_help(void)
 {
+    int pad = strlen("/help commands connection") + 3;
+
     cons_show("");
     cons_show("Choose a help option:");
     cons_show("");
-    cons_show("/help commands            - List all commands.");
-    cons_show("/help commands chat       - List chat commands.");
-    cons_show("/help commands groupchat  - List groupchat commands.");
-    cons_show("/help commands roster     - List commands for manipulating your roster.");
-    cons_show("/help commands presence   - List commands to change your presence.");
-    cons_show("/help commands discovery  - List service discovery commands.");
-    cons_show("/help commands connection - List commands related to managing your connection.");
-    cons_show("/help commands ui         - List commands for manipulating the user interface.");
-    cons_show("/help [command]           - Detailed help on a specific command.");
-    cons_show("/help navigation          - How to navigate around Profanity.");
+    cons_show_padded(pad, "/help commands            : List all commands.");
+    cons_show_padded(pad, "/help commands chat       : List chat commands.");
+    cons_show_padded(pad, "/help commands groupchat  : List groupchat commands.");
+    cons_show_padded(pad, "/help commands roster     : List commands for manipulating your roster.");
+    cons_show_padded(pad, "/help commands presence   : List commands to change your presence.");
+    cons_show_padded(pad, "/help commands discovery  : List service discovery commands.");
+    cons_show_padded(pad, "/help commands connection : List commands related to managing your connection.");
+    cons_show_padded(pad, "/help commands ui         : List commands for manipulating the user interface.");
+    cons_show_padded(pad, "/help [command]           : Detailed help on a specific command.");
+    cons_show_padded(pad, "/help navigation          : How to navigate around Profanity.");
     cons_show("");
 
     cons_alert();
@@ -1552,13 +1567,14 @@ cons_help(void)
 void
 cons_navigation_help(void)
 {
+    int pad = strlen("Alt-PAGEUP, Alt-PAGEDOWN") + 3;
     ProfWin *console = wins_get_console();
     cons_show("");
     win_print(console, '-', 0, NULL, 0, THEME_WHITE_BOLD, "", "Navigation");
-    cons_show("Alt-1..Alt-0, F1..F10            : Choose window.");
-    cons_show("Alt-LEFT, Alt-RIGHT              : Previous/next chat window");
-    cons_show("PAGEUP, PAGEDOWN                 : Page the main window.");
-    cons_show("Alt-PAGEUP, Alt-PAGEDOWN         : Page occupants/roster panel.");
+    cons_show_padded(pad, "Alt-1..Alt-0, F1..F10    : Choose window.");
+    cons_show_padded(pad, "Alt-LEFT, Alt-RIGHT      : Previous/next chat window");
+    cons_show_padded(pad, "PAGEUP, PAGEDOWN         : Page the main window.");
+    cons_show_padded(pad, "Alt-PAGEUP, Alt-PAGEDOWN : Page occupants/roster panel.");
     cons_show("");
 
     cons_alert();
@@ -1682,7 +1698,7 @@ static void
 _cons_splash_logo(void)
 {
     ProfWin *console = wins_get_console();
-    win_println(console, "Welcome to");
+    win_println(console, 0, "Welcome to");
 
     win_print(console, '-', 0, NULL, 0, THEME_SPLASH, "", "                   ___            _           ");
     win_print(console, '-', 0, NULL, 0, THEME_SPLASH, "", "                  / __)          (_)_         ");

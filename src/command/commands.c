@@ -1873,7 +1873,7 @@ cmd_status(ProfWin *window, const char * const command, gchar **args)
                 if (pcontact) {
                     win_show_contact(window, pcontact);
                 } else {
-                    win_println(window, "Error getting contact info.");
+                    win_println(window, 0, "Error getting contact info.");
                 }
             }
             break;
@@ -1888,7 +1888,7 @@ cmd_status(ProfWin *window, const char * const command, gchar **args)
                 if (occupant) {
                     win_show_occupant(window, occupant);
                 } else {
-                    win_println(window, "Error getting contact info.");
+                    win_println(window, 0, "Error getting contact info.");
                 }
                 jid_destroy(jid);
             }
@@ -1954,7 +1954,7 @@ cmd_info(ProfWin *window, const char * const command, gchar **args)
                 if (pcontact) {
                     win_show_info(window, pcontact);
                 } else {
-                    win_println(window, "Error getting contact info.");
+                    win_println(window, 0, "Error getting contact info.");
                 }
             }
             break;
@@ -1969,7 +1969,7 @@ cmd_info(ProfWin *window, const char * const command, gchar **args)
                 if (occupant) {
                     win_show_occupant_info(window, jid->barejid, occupant);
                 } else {
-                    win_println(window, "Error getting contact info.");
+                    win_println(window, 0, "Error getting contact info.");
                 }
                 jid_destroy(jid);
             }

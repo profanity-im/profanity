@@ -1150,7 +1150,7 @@ ui_current_print_line(const char * const msg, ...)
     va_start(arg, msg);
     GString *fmt_msg = g_string_new(NULL);
     g_string_vprintf(fmt_msg, msg, arg);
-    win_println(window, fmt_msg->str);
+    win_println(window, 0, fmt_msg->str);
     va_end(arg);
     g_string_free(fmt_msg, TRUE);
 }
@@ -2526,7 +2526,7 @@ ui_show_form_field(ProfWin *window, DataForm *form, char *tag)
 {
     FormField *field = form_get_field_by_tag(form, tag);
     _ui_handle_form_field(window, tag, field);
-    win_println(window, "");
+    win_println(window, 0, "");
 }
 
 void
