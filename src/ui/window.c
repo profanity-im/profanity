@@ -1034,7 +1034,10 @@ _win_print(ProfWin *window, const char show_char, int pad_indent, GDateTime *tim
     }
 
     if ((flags & NO_EOL) == 0) {
-        wprintw(window->layout->win, "\n");
+        int curx = getcurx(window->layout->win);
+        if (curx != 0) {
+            wprintw(window->layout->win, "\n");
+        }
     }
 
     if (me_message) {
