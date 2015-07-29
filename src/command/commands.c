@@ -779,9 +779,9 @@ _cmd_help_cmd_list(const char * const tag)
     cons_show("");
     ProfWin *console = wins_get_console();
     if (tag) {
-        win_vprint(console, '-', NULL, 0, THEME_WHITE_BOLD, "", "%s commands", tag);
+        win_vprint(console, '-', 0, NULL, 0, THEME_WHITE_BOLD, "", "%s commands", tag);
     } else {
-        win_print(console, '-', NULL, 0, THEME_WHITE_BOLD, "", "All commands");
+        win_print(console, '-', 0, NULL, 0, THEME_WHITE_BOLD, "", "All commands");
     }
 
     GList *ordered_commands = NULL;
@@ -1857,7 +1857,7 @@ cmd_status(ProfWin *window, const char * const command, gchar **args)
                 if (occupant) {
                     win_show_occupant(window, occupant);
                 } else {
-                    win_vprint(window, '-', NULL, 0, 0, "", "No such participant \"%s\" in room.", usr);
+                    win_vprint(window, '-', 0, NULL, 0, 0, "", "No such participant \"%s\" in room.", usr);
                 }
             } else {
                 ui_current_print_line("You must specify a nickname.");
@@ -2610,7 +2610,7 @@ cmd_kick(ProfWin *window, const char * const command, gchar **args)
             char *reason = args[1];
             iq_room_kick_occupant(mucwin->roomjid, nick, reason);
         } else {
-            win_vprint((ProfWin*) mucwin, '!', NULL, 0, 0, "", "Occupant does not exist: %s", nick);
+            win_vprint((ProfWin*) mucwin, '!', 0, NULL, 0, 0, "", "Occupant does not exist: %s", nick);
         }
     } else {
         cons_bad_cmd_usage(command);
@@ -2668,10 +2668,10 @@ cmd_subject(ProfWin *window, const char * const command, gchar **args)
     if (args[0] == NULL) {
         char *subject = muc_subject(mucwin->roomjid);
         if (subject) {
-            win_vprint(window, '!', NULL, NO_EOL, THEME_ROOMINFO, "", "Room subject: ");
-            win_vprint(window, '!', NULL, NO_DATE, 0, "", "%s", subject);
+            win_vprint(window, '!', 0, NULL, NO_EOL, THEME_ROOMINFO, "", "Room subject: ");
+            win_vprint(window, '!', 0, NULL, NO_DATE, 0, "", "%s", subject);
         } else {
-            win_print(window, '!', NULL, 0, THEME_ROOMINFO, "", "Room has no subject");
+            win_print(window, '!', 0, NULL, 0, THEME_ROOMINFO, "", "Room has no subject");
         }
         return TRUE;
     }
@@ -2736,7 +2736,7 @@ cmd_affiliation(ProfWin *window, const char * const command, gchar **args)
             iq_room_affiliation_list(mucwin->roomjid, "member");
             iq_room_affiliation_list(mucwin->roomjid, "outcast");
         } else if (g_strcmp0(affiliation, "none") == 0) {
-            win_print((ProfWin*) mucwin, '!', NULL, 0, 0, "", "Cannot list users with no affiliation.");
+            win_print((ProfWin*) mucwin, '!', 0, NULL, 0, 0, "", "Cannot list users with no affiliation.");
         } else {
             iq_room_affiliation_list(mucwin->roomjid, affiliation);
         }
@@ -2804,7 +2804,7 @@ cmd_role(ProfWin *window, const char * const command, gchar **args)
             iq_room_role_list(mucwin->roomjid, "participant");
             iq_room_role_list(mucwin->roomjid, "visitor");
         } else if (g_strcmp0(role, "none") == 0) {
-            win_print((ProfWin*) mucwin, '!', NULL, 0, 0, "", "Cannot list users with no role.");
+            win_print((ProfWin*) mucwin, '!', 0, NULL, 0, 0, "", "Cannot list users with no role.");
         } else {
             iq_room_role_list(mucwin->roomjid, role);
         }
@@ -2866,12 +2866,12 @@ cmd_room(ProfWin *window, const char * const command, gchar **args)
     if (g_strcmp0(args[0], "accept") == 0) {
         gboolean requires_config = muc_requires_config(mucwin->roomjid);
         if (!requires_config) {
-            win_print(window, '!', NULL, 0, THEME_ROOMINFO, "", "Current room does not require configuration.");
+            win_print(window, '!', 0, NULL, 0, THEME_ROOMINFO, "", "Current room does not require configuration.");
             return TRUE;
         } else {
             iq_confirm_instant_room(mucwin->roomjid);
             muc_set_requires_config(mucwin->roomjid, FALSE);
-            win_print(window, '!', NULL, 0, THEME_ROOMINFO, "", "Room unlocked.");
+            win_print(window, '!', 0, NULL, 0, THEME_ROOMINFO, "", "Room unlocked.");
             return TRUE;
         }
     }
@@ -3247,13 +3247,13 @@ cmd_tiny(ProfWin *window, const char * const command, gchar **args)
     }
 
     if (!tinyurl_valid(url)) {
-        win_vprint(window, '-', NULL, 0, THEME_ERROR, "", "/tiny, badly formed URL: %s", url);
+        win_vprint(window, '-', 0, NULL, 0, THEME_ERROR, "", "/tiny, badly formed URL: %s", url);
         return TRUE;
     }
 
     char *tiny = tinyurl_get(url);
     if (!tiny) {
-        win_print(window, '-', NULL, 0, THEME_ERROR, "", "Couldn't create tinyurl.");
+        win_print(window, '-', 0, NULL, 0, THEME_ERROR, "", "Couldn't create tinyurl.");
         return TRUE;
     }
 
