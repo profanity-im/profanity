@@ -1085,6 +1085,7 @@ _win_print_wrapped(WINDOW *win, const char * const message, size_t indent, int p
         // handle word
         } else {
             wordi = 0;
+            int wordlen = 0;
             while (*curr_ch != ' ' && *curr_ch != '\n' && *curr_ch != '\0') {
                 size_t ch_len = mbrlen(curr_ch, 4, NULL);
                 int offset = 0;
@@ -1094,21 +1095,44 @@ _win_print_wrapped(WINDOW *win, const char * const message, size_t indent, int p
                 curr_ch = g_utf8_next_char(curr_ch);
             }
             word[wordi] = '\0';
+            wordlen = utf8_display_len(word);
 
             int curx = getcurx(win);
             int cury = getcury(win);
             int maxx = getmaxx(win);
-            gboolean firstline = (cury == starty);
 
-            // word larger than line
-            if ((firstline && (utf8_display_len(word) > (maxx - indent))) ||
-                (!firstline && (utf8_display_len(word) > (maxx - (indent + pad_indent))))) {
+            // wrap required
+            if (curx + wordlen > maxx) {
+                int linelen = maxx - (indent + pad_indent);
 
-                gchar *word_ch = g_utf8_offset_to_pointer(word, 0);
-                while(*word_ch != '\0') {
+                // word larger than line
+                if (wordlen > linelen) {
+                    gchar *word_ch = g_utf8_offset_to_pointer(word, 0);
+                    while(*word_ch != '\0') {
+                        curx = getcurx(win);
+                        cury = getcury(win);
+                        gboolean firstline = cury == starty;
+
+                        if (firstline && curx < indent) {
+                            _win_indent(win, indent);
+                        }
+                        if (!firstline && curx < (indent + pad_indent)) {
+                            _win_indent(win, indent + pad_indent);
+                        }
+
+                        gchar copy[wordi+1];
+                        g_utf8_strncpy(copy, word_ch, 1);
+                        waddstr(win, copy);
+
+                        word_ch = g_utf8_next_char(word_ch);
+                    }
+
+                // newline and print word
+                } else {
+                    waddch(win, '\n');
                     curx = getcurx(win);
                     cury = getcury(win);
-                    firstline = cury == starty;
+                    gboolean firstline = cury == starty;
 
                     if (firstline && curx < indent) {
                         _win_indent(win, indent);
@@ -1116,30 +1140,22 @@ _win_print_wrapped(WINDOW *win, const char * const message, size_t indent, int p
                     if (!firstline && curx < (indent + pad_indent)) {
                         _win_indent(win, indent + pad_indent);
                     }
-
-                    gchar copy[wordi++];
-                    g_utf8_strncpy(copy, word_ch, 1);
-
-                    if (curx + utf8_display_len(copy) > maxx) {
-                        waddch(win, '\n');
-                        _win_indent(win, indent + pad_indent);
-                    }
-                    waddstr(win, copy);
-
-                    word_ch = g_utf8_next_char(word_ch);
+                    waddstr(win, word);
                 }
+
+            // no wrap required
             } else {
-                if (curx + utf8_display_len(word) > maxx) {
-                    waddch(win, '\n');
-                    _win_indent(win, indent + pad_indent);
-                }
+                curx = getcurx(win);
+                cury = getcury(win);
+                gboolean firstline = cury == starty;
+
                 if (firstline && curx < indent) {
                     _win_indent(win, indent);
                 }
                 if (!firstline && curx < (indent + pad_indent)) {
                     _win_indent(win, indent + pad_indent);
                 }
-                wprintw(win, "%s", word);
+                waddstr(win, word);
             }
         }
 
