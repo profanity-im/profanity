@@ -54,6 +54,9 @@ void cmd_autocomplete_remove_form_fields(DataForm *form);
 void cmd_alias_add(char *value);
 void cmd_alias_remove(char *value);
 
+gboolean cmd_valid_tag(const char * const str);
+gboolean cmd_has_tag(Command *pcmd, const char * const tag);
+
 gboolean cmd_process_input(ProfWin *window, char *inp);
 void cmd_execute_connect(ProfWin *window, const char * const account);
 

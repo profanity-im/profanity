@@ -13,19 +13,18 @@
 #include "roster_list.h"
 #include "command/commands.h"
 
+#define CMD_ROSTER "/roster"
+
 static void test_with_connection_status(jabber_conn_status_t status)
 {
-    CommandHelp *help = malloc(sizeof(CommandHelp));
     gchar *args[] = { NULL };
 
     will_return(jabber_get_connection_status, status);
 
     expect_cons_show("You are not currently connected.");
 
-    gboolean result = cmd_roster(NULL, args, *help);
+    gboolean result = cmd_roster(NULL, CMD_ROSTER, args);
     assert_true(result);
-
-    free(help);
 }
 
 void cmd_roster_shows_message_when_disconnecting(void **state)
@@ -50,7 +49,6 @@ void cmd_roster_shows_message_when_undefined(void **state)
 
 void cmd_roster_shows_roster_when_no_args(void **state)
 {
-    CommandHelp *help = malloc(sizeof(CommandHelp));
     gchar *args[] = { NULL };
 
     will_return(jabber_get_connection_status, JABBER_CONNECTED);
@@ -61,34 +59,28 @@ void cmd_roster_shows_roster_when_no_args(void **state)
 
     expect_memory(cons_show_roster, list, roster, sizeof(roster));
 
-    gboolean result = cmd_roster(NULL, args, *help);
+    gboolean result = cmd_roster(NULL, CMD_ROSTER, args);
     assert_true(result);
 
-    free(help);
     roster_free();
 }
 
 void cmd_roster_add_shows_message_when_no_jid(void **state)
 {
-    CommandHelp *help = malloc(sizeof(CommandHelp));
-    help->usage = "some usage";
     gchar *args[] = { "add", NULL };
 
     will_return(jabber_get_connection_status, JABBER_CONNECTED);
 
-    expect_cons_show("Usage: some usage");
+    expect_string(cons_bad_cmd_usage, cmd, CMD_ROSTER);
 
-    gboolean result = cmd_roster(NULL, args, *help);
+    gboolean result = cmd_roster(NULL, CMD_ROSTER, args);
     assert_true(result);
-
-    free(help);
 }
 
 void cmd_roster_add_sends_roster_add_request(void **state)
 {
     char *jid = "bob@server.org";
     char *nick = "bob";
-    CommandHelp *help = malloc(sizeof(CommandHelp));
     gchar *args[] = { "add", jid, nick, NULL };
 
     will_return(jabber_get_connection_status, JABBER_CONNECTED);
@@ -96,80 +88,61 @@ void cmd_roster_add_sends_roster_add_request(void **state)
     expect_string(roster_send_add_new, barejid, jid);
     expect_string(roster_send_add_new, name, nick);
 
-    gboolean result = cmd_roster(NULL, args, *help);
+    gboolean result = cmd_roster(NULL, CMD_ROSTER, args);
     assert_true(result);
-
-    free(help);
 }
 
 void cmd_roster_remove_shows_message_when_no_jid(void **state)
 {
-    CommandHelp *help = malloc(sizeof(CommandHelp));
-    help->usage = "some usage";
     gchar *args[] = { "remove", NULL };
 
     will_return(jabber_get_connection_status, JABBER_CONNECTED);
 
-    expect_cons_show("Usage: some usage");
+    expect_string(cons_bad_cmd_usage, cmd, CMD_ROSTER);
 
-    gboolean result = cmd_roster(NULL, args, *help);
+    gboolean result = cmd_roster(NULL, CMD_ROSTER, args);
     assert_true(result);
-
-    free(help);
 }
 
 void cmd_roster_remove_sends_roster_remove_request(void **state)
 {
     char *jid = "bob@server.org";
-    CommandHelp *help = malloc(sizeof(CommandHelp));
     gchar *args[] = { "remove", jid, NULL };
 
     will_return(jabber_get_connection_status, JABBER_CONNECTED);
 
     expect_string(roster_send_remove, barejid, jid);
 
-    gboolean result = cmd_roster(NULL, args, *help);
+    gboolean result = cmd_roster(NULL, CMD_ROSTER, args);
     assert_true(result);
-
-    free(help);
 }
 
 void cmd_roster_nick_shows_message_when_no_jid(void **state)
 {
-    CommandHelp *help = malloc(sizeof(CommandHelp));
-    help->usage = "some usage";
     gchar *args[] = { "nick", NULL };
 
     will_return(jabber_get_connection_status, JABBER_CONNECTED);
 
-    expect_cons_show("Usage: some usage");
+    expect_string(cons_bad_cmd_usage, cmd, CMD_ROSTER);
 
-    gboolean result = cmd_roster(NULL, args, *help);
+    gboolean result = cmd_roster(NULL, CMD_ROSTER, args);
     assert_true(result);
-
-    free(help);
 }
 
 void cmd_roster_nick_shows_message_when_no_nick(void **state)
 {
-    CommandHelp *help = malloc(sizeof(CommandHelp));
-    help->usage = "some usage";
     gchar *args[] = { "nick", "bob@server.org", NULL };
 
     will_return(jabber_get_connection_status, JABBER_CONNECTED);
 
-    expect_cons_show("Usage: some usage");
+    expect_string(cons_bad_cmd_usage, cmd, CMD_ROSTER);
 
-    gboolean result = cmd_roster(NULL, args, *help);
+    gboolean result = cmd_roster(NULL, CMD_ROSTER, args);
     assert_true(result);
-
-    free(help);
 }
 
 void cmd_roster_nick_shows_message_when_no_contact_exists(void **state)
 {
-    CommandHelp *help = malloc(sizeof(CommandHelp));
-    help->usage = "some usage";
     gchar *args[] = { "nick", "bob@server.org", "bobster", NULL };
 
     roster_init();
@@ -178,10 +151,9 @@ void cmd_roster_nick_shows_message_when_no_contact_exists(void **state)
 
     expect_cons_show("Contact not found in roster: bob@server.org");
 
-    gboolean result = cmd_roster(NULL, args, *help);
+    gboolean result = cmd_roster(NULL, CMD_ROSTER, args);
     assert_true(result);
 
-    free(help);
     roster_free();
 }
 
@@ -189,7 +161,6 @@ void cmd_roster_nick_sends_name_change_request(void **state)
 {
     char *jid = "bob@server.org";
     char *nick = "bobster";
-    CommandHelp *help = malloc(sizeof(CommandHelp));
     gchar *args[] = { "nick", jid, nick, NULL };
 
     roster_init();
@@ -205,36 +176,28 @@ void cmd_roster_nick_sends_name_change_request(void **state)
 
     expect_cons_show("Nickname for bob@server.org set to: bobster.");
 
-    gboolean result = cmd_roster(NULL, args, *help);
+    gboolean result = cmd_roster(NULL, CMD_ROSTER, args);
     assert_true(result);
 
     PContact contact = roster_get_contact(jid);
     assert_string_equal(p_contact_name(contact), nick);
-
-    free(help);
     roster_free();
 }
 
 void cmd_roster_clearnick_shows_message_when_no_jid(void **state)
 {
-    CommandHelp *help = malloc(sizeof(CommandHelp));
-    help->usage = "some usage";
     gchar *args[] = { "clearnick", NULL };
 
     will_return(jabber_get_connection_status, JABBER_CONNECTED);
 
-    expect_cons_show("Usage: some usage");
+    expect_string(cons_bad_cmd_usage, cmd, CMD_ROSTER);
 
-    gboolean result = cmd_roster(NULL, args, *help);
+    gboolean result = cmd_roster(NULL, CMD_ROSTER, args);
     assert_true(result);
-
-    free(help);
 }
 
 void cmd_roster_clearnick_shows_message_when_no_contact_exists(void **state)
 {
-    CommandHelp *help = malloc(sizeof(CommandHelp));
-    help->usage = "some usage";
     gchar *args[] = { "clearnick", "bob@server.org", NULL };
 
     roster_init();
@@ -243,17 +206,15 @@ void cmd_roster_clearnick_shows_message_when_no_contact_exists(void **state)
 
     expect_cons_show("Contact not found in roster: bob@server.org");
 
-    gboolean result = cmd_roster(NULL, args, *help);
+    gboolean result = cmd_roster(NULL, CMD_ROSTER, args);
     assert_true(result);
 
-    free(help);
     roster_free();
 }
 
 void cmd_roster_clearnick_sends_name_change_request_with_empty_nick(void **state)
 {
     char *jid = "bob@server.org";
-    CommandHelp *help = malloc(sizeof(CommandHelp));
     gchar *args[] = { "clearnick", jid, NULL };
 
     roster_init();
@@ -269,12 +230,11 @@ void cmd_roster_clearnick_sends_name_change_request_with_empty_nick(void **state
 
     expect_cons_show("Nickname for bob@server.org removed.");
 
-    gboolean result = cmd_roster(NULL, args, *help);
+    gboolean result = cmd_roster(NULL, CMD_ROSTER, args);
     assert_true(result);
 
     PContact contact = roster_get_contact(jid);
     assert_null(p_contact_name(contact));
 
-    free(help);
     roster_free();
 }

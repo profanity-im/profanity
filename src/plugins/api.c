@@ -195,7 +195,7 @@ api_win_show(const char *tag, const char *line)
 {
     ProfPluginWin *pluginwin = wins_get_plugin(tag);
     ProfWin *window = (ProfWin*)pluginwin;
-    win_print(window, '!', NULL, 0, 0, "", line);
+    win_print(window, '!', 0, NULL, 0, 0, "", line);
 }
 
 void
@@ -203,7 +203,7 @@ api_win_show_green(const char *tag, const char *line)
 {
     ProfPluginWin *pluginwin = wins_get_plugin(tag);
     ProfWin *window = (ProfWin*)pluginwin;
-    win_print(window, '!', NULL, 0, THEME_GREEN, "", line);
+    win_print(window, '!', 0, NULL, 0, THEME_GREEN, "", line);
 }
 
 void
@@ -211,7 +211,7 @@ api_win_show_red(const char *tag, const char *line)
 {
     ProfPluginWin *pluginwin = wins_get_plugin(tag);
     ProfWin *window = (ProfWin*)pluginwin;
-    win_print(window, '!', NULL, 0, THEME_RED, "", line);
+    win_print(window, '!', 0, NULL, 0, THEME_RED, "", line);
 }
 
 void
@@ -219,7 +219,7 @@ api_win_show_cyan(const char *tag, const char *line)
 {
     ProfPluginWin *pluginwin = wins_get_plugin(tag);
     ProfWin *window = (ProfWin*)pluginwin;
-    win_print(window, '!', NULL, 0, THEME_CYAN, "", line);
+    win_print(window, '!', 0, NULL, 0, THEME_CYAN, "", line);
 }
 
 void
@@ -227,5 +227,5 @@ api_win_show_yellow(const char *tag, const char *line)
 {
     ProfPluginWin *pluginwin = wins_get_plugin(tag);
     ProfWin *window = (ProfWin*)pluginwin;
-    win_print(window, '!', NULL, 0, THEME_YELLOW, "", line);
+    win_print(window, '!', 0, NULL, 0, THEME_YELLOW, "", line);
 }

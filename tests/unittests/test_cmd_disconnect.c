@@ -12,10 +12,10 @@
 
 #include "ui/stub_ui.h"
 
+#define CMD_DISCONNECT "/disconnect"
+
 void clears_chat_sessions(void **state)
 {
-    CommandHelp *help = malloc(sizeof(CommandHelp));
-
     chat_sessions_init();
     roster_init();
     chat_session_recipient_active("bob@server.org", "laptop", FALSE);
@@ -25,7 +25,7 @@ void clears_chat_sessions(void **state)
     will_return(jabber_get_fulljid, "myjid@myserver.com");
     expect_any_cons_show();
 
-    gboolean result = cmd_disconnect(NULL, NULL, *help);
+    gboolean result = cmd_disconnect(NULL, CMD_DISCONNECT, NULL);
 
     assert_true(result);
 
@@ -33,5 +33,4 @@ void clears_chat_sessions(void **state)
     ChatSession *session2 = chat_session_get("mike@server.org");
     assert_null(session1);
     assert_null(session2);
-    free(help);
 }
