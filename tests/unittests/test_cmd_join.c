@@ -16,18 +16,16 @@
 #include "command/commands.h"
 #include "muc.h"
 
+#define CMD_JOIN "/join"
+
 static void test_with_connection_status(jabber_conn_status_t status)
 {
-    CommandHelp *help = malloc(sizeof(CommandHelp));
-
     will_return(jabber_get_connection_status, status);
 
     expect_cons_show("You are not currently connected.");
 
-    gboolean result = cmd_join(NULL, NULL, *help);
+    gboolean result = cmd_join(NULL, CMD_JOIN, NULL);
     assert_true(result);
-
-    free(help);
 }
 
 void cmd_join_shows_message_when_disconnecting(void **state)
@@ -52,7 +50,6 @@ void cmd_join_shows_message_when_undefined(void **state)
 
 void cmd_join_shows_error_message_when_invalid_room_jid(void **state)
 {
-    CommandHelp *help = malloc(sizeof(CommandHelp));
     gchar *args[] = { "//@@/", NULL };
 
     will_return(jabber_get_connection_status, JABBER_CONNECTED);
@@ -60,10 +57,8 @@ void cmd_join_shows_error_message_when_invalid_room_jid(void **state)
     expect_cons_show_error("Specified room has incorrect format.");
     expect_cons_show("");
 
-    gboolean result = cmd_join(NULL, args, *help);
+    gboolean result = cmd_join(NULL, CMD_JOIN, args);
     assert_true(result);
-
-    free(help);
 }
 
 void cmd_join_uses_account_mucservice_when_no_service_specified(void **state)
@@ -73,7 +68,6 @@ void cmd_join_uses_account_mucservice_when_no_service_specified(void **state)
     char *nick = "bob";
     char *account_service = "conference.server.org";
     char *expected_room = "room@conference.server.org";
-    CommandHelp *help = malloc(sizeof(CommandHelp));
     gchar *args[] = { room, "nick", nick, NULL };
     ProfAccount *account = account_new(account_name, "user@server.org", NULL, NULL,
         TRUE, NULL, 0, "laptop", NULL, NULL, 0, 0, 0, 0, 0, account_service, NULL, NULL, NULL, NULL, NULL, NULL);
@@ -90,10 +84,8 @@ void cmd_join_uses_account_mucservice_when_no_service_specified(void **state)
     expect_string(presence_join_room, nick, nick);
     expect_value(presence_join_room, passwd, NULL);
 
-    gboolean result = cmd_join(NULL, args, *help);
+    gboolean result = cmd_join(NULL, CMD_JOIN, args);
     assert_true(result);
-
-    free(help);
 }
 
 void cmd_join_uses_supplied_nick(void **state)
@@ -101,7 +93,6 @@ void cmd_join_uses_supplied_nick(void **state)
     char *account_name = "an_account";
     char *room = "room@conf.server.org";
     char *nick = "bob";
-    CommandHelp *help = malloc(sizeof(CommandHelp));
     gchar *args[] = { room, "nick", nick, NULL };
     ProfAccount *account = account_new(account_name, "user@server.org", NULL, NULL,
         TRUE, NULL, 0, "laptop", NULL, NULL, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
@@ -118,10 +109,8 @@ void cmd_join_uses_supplied_nick(void **state)
     expect_string(presence_join_room, nick, nick);
     expect_value(presence_join_room, passwd, NULL);
 
-    gboolean result = cmd_join(NULL, args, *help);
+    gboolean result = cmd_join(NULL, CMD_JOIN, args);
     assert_true(result);
-
-    free(help);
 }
 
 void cmd_join_uses_account_nick_when_not_supplied(void **state)
@@ -129,7 +118,6 @@ void cmd_join_uses_account_nick_when_not_supplied(void **state)
     char *account_name = "an_account";
     char *room = "room2@conf.server.org";
     char *account_nick = "a_nick";
-    CommandHelp *help = malloc(sizeof(CommandHelp));
     gchar *args[] = { room, NULL };
     ProfAccount *account = account_new(account_name, "user@server.org", NULL, NULL,
         TRUE, NULL, 0, "laptop", NULL, NULL, 0, 0, 0, 0, 0, NULL, account_nick, NULL, NULL, NULL, NULL, NULL);
@@ -146,10 +134,8 @@ void cmd_join_uses_account_nick_when_not_supplied(void **state)
     expect_string(presence_join_room, nick, account_nick);
     expect_value(presence_join_room, passwd, NULL);
 
-    gboolean result = cmd_join(NULL, args, *help);
+    gboolean result = cmd_join(NULL, CMD_JOIN, args);
     assert_true(result);
-
-    free(help);
 }
 
 void cmd_join_uses_password_when_supplied(void **state)
@@ -160,7 +146,6 @@ void cmd_join_uses_password_when_supplied(void **state)
     char *account_nick = "a_nick";
     char *account_service = "a_service";
     char *expected_room = "room@a_service";
-    CommandHelp *help = malloc(sizeof(CommandHelp));
     gchar *args[] = { room, "password", password, NULL };
     ProfAccount *account = account_new(account_name, "user@server.org", NULL, NULL,
         TRUE, NULL, 0, "laptop", NULL, NULL, 0, 0, 0, 0, 0, account_service, account_nick, NULL, NULL, NULL, NULL, NULL);
@@ -177,8 +162,6 @@ void cmd_join_uses_password_when_supplied(void **state)
     expect_string(presence_join_room, nick, account_nick);
     expect_value(presence_join_room, passwd, password);
 
-    gboolean result = cmd_join(NULL, args, *help);
+    gboolean result = cmd_join(NULL, CMD_JOIN, args);
     assert_true(result);
-
-    free(help);
 }

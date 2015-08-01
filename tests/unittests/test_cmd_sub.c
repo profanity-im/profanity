@@ -13,33 +13,28 @@
 
 #include "command/commands.h"
 
+#define CMD_SUB "/sub"
+
 void cmd_sub_shows_message_when_not_connected(void **state)
 {
-    CommandHelp *help = malloc(sizeof(CommandHelp));
     gchar *args[] = { NULL };
 
     will_return(jabber_get_connection_status, JABBER_DISCONNECTED);
 
     expect_cons_show("You are currently not connected.");
 
-    gboolean result = cmd_sub(NULL, args, *help);
+    gboolean result = cmd_sub(NULL, CMD_SUB, args);
     assert_true(result);
-
-    free(help);
 }
 
 void cmd_sub_shows_usage_when_no_arg(void **state)
 {
-    CommandHelp *help = malloc(sizeof(CommandHelp));
-    help->usage = "Some usage";
     gchar *args[] = { NULL };
 
     will_return(jabber_get_connection_status, JABBER_CONNECTED);
 
-    expect_cons_show("Usage: Some usage");
+    expect_string(cons_bad_cmd_usage, cmd, CMD_SUB);
 
-    gboolean result = cmd_sub(NULL, args, *help);
+    gboolean result = cmd_sub(NULL, CMD_SUB, args);
     assert_true(result);
-
-    free(help);
 }

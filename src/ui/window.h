@@ -61,7 +61,7 @@ void win_show_status_string(ProfWin *window, const char * const from,
     const char * const default_show);
 void win_print_incoming_message(ProfWin *window, GDateTime *timestamp,
     const char * const from, const char * const message);
-void win_print_with_receipt(ProfWin *window, const char show_char, GTimeVal *tstamp, int flags,
+void win_print_with_receipt(ProfWin *window, const char show_char, int pad_indent, GTimeVal *tstamp, int flags,
     theme_item_t theme_item, const char * const from, const char * const message, char *id);
 void win_newline(ProfWin *window);
 void win_redraw(ProfWin *window);

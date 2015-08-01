@@ -80,11 +80,12 @@ buffer_free(ProfBuff buffer)
 }
 
 void
-buffer_push(ProfBuff buffer, const char show_char, GDateTime *time,
+buffer_push(ProfBuff buffer, const char show_char, int pad_indent, GDateTime *time,
     int flags, theme_item_t theme_item, const char * const from, const char * const message, DeliveryReceipt *receipt)
 {
     ProfBuffEntry *e = malloc(sizeof(struct prof_buff_entry_t));
     e->show_char = show_char;
+    e->pad_indent = pad_indent;
     e->flags = flags;
     e->theme_item = theme_item;
     e->time = g_date_time_ref(time);

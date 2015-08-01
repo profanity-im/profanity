@@ -35,6 +35,7 @@
 #ifndef UI_UI_H
 #define UI_UI_H
 
+#include "command/commands.h"
 #include "ui/win_types.h"
 #include "muc.h"
 
@@ -227,7 +228,7 @@ void ui_input_clear(void);
 void ui_input_nonblocking(gboolean);
 void ui_write(char *line, int offset);
 
-void ui_invalid_command_usage(const char * const usage, void (*setting_func)(void));
+void ui_invalid_command_usage(const char * const cmd, void (*setting_func)(void));
 
 void ui_create_xmlconsole_win(void);
 gboolean ui_xmlconsole_exists(void);
@@ -239,8 +240,11 @@ void ui_inp_history_append(char *inp);
 
 // console window actions
 void cons_show(const char * const msg, ...);
+void cons_show_padded(int pad, const char * const msg, ...);
 void cons_about(void);
 void cons_help(void);
+void cons_show_help(Command *command);
+void cons_bad_cmd_usage(const char * const cmd);
 void cons_navigation_help(void);
 void cons_prefs(void);
 void cons_show_ui_prefs(void);
@@ -349,14 +353,14 @@ void win_hide_subwin(ProfWin *window);
 void win_show_subwin(ProfWin *window);
 void win_refresh_without_subwin(ProfWin *window);
 void win_refresh_with_subwin(ProfWin *window);
-void win_print(ProfWin *window, const char show_char, GDateTime *timestamp, int flags, theme_item_t theme_item, const char * const from, const char * const message);
-void win_vprint(ProfWin *window, const char show_char, GDateTime *timestamp, int flags, theme_item_t theme_item, const char * const from, const char * const message, ...);
+void win_print(ProfWin *window, const char show_char, int pad_indent, GDateTime *timestamp, int flags, theme_item_t theme_item, const char * const from, const char * const message);
+void win_vprint(ProfWin *window, const char show_char, int pad_indent, GDateTime *timestamp, int flags, theme_item_t theme_item, const char * const from, const char * const message, ...);
 char* win_get_title(ProfWin *window);
 void win_show_occupant(ProfWin *window, Occupant *occupant);
 void win_show_occupant_info(ProfWin *window, const char * const room, Occupant *occupant);
 void win_show_contact(ProfWin *window, PContact contact);
 void win_show_info(ProfWin *window, PContact contact);
-void win_println(ProfWin *window, const char * const message);
+void win_println(ProfWin *window, int pad, const char * const message);
 
 // desktop notifier actions
 void notifier_initialise(void);

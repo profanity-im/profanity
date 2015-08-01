@@ -14,18 +14,16 @@
 #include "config/accounts.h"
 #include "command/commands.h"
 
+#define CMD_ROOMS "/rooms"
+
 static void test_with_connection_status(jabber_conn_status_t status)
 {
-    CommandHelp *help = malloc(sizeof(CommandHelp));
-
     will_return(jabber_get_connection_status, status);
 
     expect_cons_show("You are not currently connected.");
 
-    gboolean result = cmd_rooms(NULL, NULL, *help);
+    gboolean result = cmd_rooms(NULL, CMD_ROOMS, NULL);
     assert_true(result);
-
-    free(help);
 }
 
 void cmd_rooms_shows_message_when_disconnected(void **state)
@@ -55,7 +53,6 @@ void cmd_rooms_shows_message_when_undefined(void **state)
 
 void cmd_rooms_uses_account_default_when_no_arg(void **state)
 {
-    CommandHelp *help = malloc(sizeof(CommandHelp));
     gchar *args[] = { NULL };
     ProfAccount *account = malloc(sizeof(ProfAccount));
     account->name = NULL;
@@ -81,25 +78,18 @@ void cmd_rooms_uses_account_default_when_no_arg(void **state)
 
     expect_string(iq_room_list_request, conferencejid, "default_conf_server");
 
-    gboolean result = cmd_rooms(NULL, args, *help);
-
+    gboolean result = cmd_rooms(NULL, CMD_ROOMS, args);
     assert_true(result);
-
-    free(help);
 }
 
 void cmd_rooms_arg_used_when_passed(void **state)
 {
-    CommandHelp *help = malloc(sizeof(CommandHelp));
     gchar *args[] = { "conf_server_arg" };
 
     will_return(jabber_get_connection_status, JABBER_CONNECTED);
 
     expect_string(iq_room_list_request, conferencejid, "conf_server_arg");
 
-    gboolean result = cmd_rooms(NULL, args, *help);
-
+    gboolean result = cmd_rooms(NULL, CMD_ROOMS, args);
     assert_true(result);
-
-    free(help);
 }

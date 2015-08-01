@@ -12,25 +12,21 @@
 
 #include "ui/stub_ui.h"
 
+#define CMD_PGP "/pgp"
+
 #ifdef HAVE_LIBGPGME
 void cmd_pgp_shows_usage_when_no_args(void **state)
 {
-    CommandHelp *help = malloc(sizeof(CommandHelp));
-    help->usage = "Some usage";
     gchar *args[] = { NULL };
 
-    expect_cons_show("Usage: Some usage");
+    expect_string(cons_bad_cmd_usage, cmd, CMD_PGP);
 
-    gboolean result = cmd_pgp(NULL, args, *help);
+    gboolean result = cmd_pgp(NULL, CMD_PGP, args);
     assert_true(result);
-
-    free(help);
 }
 
 void cmd_pgp_start_shows_message_when_connection(jabber_conn_status_t conn_status)
 {
-    CommandHelp *help = malloc(sizeof(CommandHelp));
-    help->usage = "Some usage";
     gchar *args[] = { "start", NULL };
     ProfWin window;
     window.type = WIN_CHAT;
@@ -39,10 +35,8 @@ void cmd_pgp_start_shows_message_when_connection(jabber_conn_status_t conn_statu
 
     expect_cons_show("You must be connected to start PGP encrpytion.");
 
-    gboolean result = cmd_pgp(&window, args, *help);
+    gboolean result = cmd_pgp(&window, CMD_PGP, args);
     assert_true(result);
-
-    free(help);
 }
 
 void cmd_pgp_start_shows_message_when_disconnected(void **state)
@@ -72,8 +66,6 @@ void cmd_pgp_start_shows_message_when_started(void **state)
 
 void cmd_pgp_start_shows_message_when_no_arg_in_wintype(win_type_t wintype)
 {
-    CommandHelp *help = malloc(sizeof(CommandHelp));
-    help->usage = "Some usage";
     gchar *args[] = { "start", NULL };
     ProfWin window;
     window.type = wintype;
@@ -82,10 +74,8 @@ void cmd_pgp_start_shows_message_when_no_arg_in_wintype(win_type_t wintype)
 
     expect_cons_show("You must be in a regular chat window to start PGP encrpytion.");
 
-    gboolean result = cmd_pgp(&window, args, *help);
+    gboolean result = cmd_pgp(&window, CMD_PGP, args);
     assert_true(result);
-
-    free(help);
 }
 
 void cmd_pgp_start_shows_message_when_no_arg_in_console(void **state)
@@ -116,14 +106,11 @@ void cmd_pgp_start_shows_message_when_no_arg_in_xmlconsole(void **state)
 #else
 void cmd_pgp_shows_message_when_pgp_unsupported(void **state)
 {
-    CommandHelp *help = malloc(sizeof(CommandHelp));
     gchar *args[] = { "gen", NULL };
 
     expect_cons_show("This version of Profanity has not been built with PGP support enabled");
 
-    gboolean result = cmd_pgp(NULL, args, *help);
+    gboolean result = cmd_pgp(NULL, CMD_PGP, args);
     assert_true(result);
-
-    free(help);
 }
 #endif
