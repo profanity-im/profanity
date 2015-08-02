@@ -1628,6 +1628,7 @@ static Autocomplete account_ac;
 static Autocomplete account_set_ac;
 static Autocomplete account_clear_ac;
 static Autocomplete account_default_ac;
+static Autocomplete account_status_ac;
 static Autocomplete disco_ac;
 static Autocomplete close_ac;
 static Autocomplete wins_ac;
@@ -1836,6 +1837,14 @@ cmd_init(void)
     account_default_ac = autocomplete_new();
     autocomplete_add(account_default_ac, "set");
     autocomplete_add(account_default_ac, "off");
+
+    account_status_ac = autocomplete_new();
+    autocomplete_add(account_status_ac, "online");
+    autocomplete_add(account_status_ac, "chat");
+    autocomplete_add(account_status_ac, "away");
+    autocomplete_add(account_status_ac, "xa");
+    autocomplete_add(account_status_ac, "dnd");
+    autocomplete_add(account_status_ac, "last");
 
     close_ac = autocomplete_new();
     autocomplete_add(close_ac, "read");
@@ -2075,6 +2084,7 @@ cmd_uninit(void)
     autocomplete_free(account_set_ac);
     autocomplete_free(account_clear_ac);
     autocomplete_free(account_default_ac);
+    autocomplete_free(account_status_ac);
     autocomplete_free(disco_ac);
     autocomplete_free(close_ac);
     autocomplete_free(wins_ac);
@@ -2250,6 +2260,7 @@ cmd_reset_autocomplete(ProfWin *window)
     autocomplete_reset(account_set_ac);
     autocomplete_reset(account_clear_ac);
     autocomplete_reset(account_default_ac);
+    autocomplete_reset(account_status_ac);
     autocomplete_reset(disco_ac);
     autocomplete_reset(close_ac);
     autocomplete_reset(wins_ac);
@@ -3551,6 +3562,15 @@ _account_autocomplete(ProfWin *window, const char * const input)
             g_string_append(beginning, " ");
             g_string_append(beginning, args[2]);
             found = autocomplete_param_with_ac(input, beginning->str, otr_policy_ac, TRUE);
+            g_string_free(beginning, TRUE);
+            if (found) {
+                g_strfreev(args);
+                return found;
+            }
+        } else if ((g_strv_length(args) > 3) && (g_strcmp0(args[2], "status")) == 0) {
+            g_string_append(beginning, " ");
+            g_string_append(beginning, args[2]);
+            found = autocomplete_param_with_ac(input, beginning->str, account_status_ac, TRUE);
             g_string_free(beginning, TRUE);
             if (found) {
                 g_strfreev(args);
