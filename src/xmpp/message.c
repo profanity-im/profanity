@@ -746,9 +746,17 @@ _chat_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, void * con
 
     // ignore handled namespaces
     xmpp_stanza_t *conf = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_CONFERENCE);
-    xmpp_stanza_t *mucuser = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_MUC_USER);
     xmpp_stanza_t *captcha = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_CAPTCHA);
-    if (conf || mucuser || captcha) {
+    if (conf || captcha) {
+        return 1;
+    }
+
+    // some clients send the mucuser namespace with private messages
+    // if the namespace exists, and the stanza contains a body element, assume its a private message
+    // otherwise exit the handler
+    xmpp_stanza_t *mucuser = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_MUC_USER);
+    xmpp_stanza_t *body = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_BODY);
+    if (mucuser && body == NULL) {
         return 1;
     }
 
@@ -764,7 +772,6 @@ _chat_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, void * con
 
     // standard chat message, use jid without resource
     GDateTime *timestamp = stanza_get_delay(stanza);
-    xmpp_stanza_t *body = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_BODY);
     if (body) {
         char *message = xmpp_stanza_get_text(body);
         if (message) {
