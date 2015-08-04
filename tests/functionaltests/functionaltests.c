@@ -19,6 +19,7 @@
 #include "test_chat_session.h"
 #include "test_receipts.h"
 #include "test_roster.h"
+#include "test_software.h"
 
 #define PROF_FUNC_TEST(test) unit_test_setup_teardown(test, init_prof_test, close_prof_test)
 
@@ -75,6 +76,9 @@ int main(int argc, char* argv[]) {
         PROF_FUNC_TEST(sends_new_item_nick),
         PROF_FUNC_TEST(sends_remove_item),
         PROF_FUNC_TEST(sends_nick_change),
+
+        PROF_FUNC_TEST(send_software_version_request),
+        PROF_FUNC_TEST(display_software_version_result),
     };
 
     return run_tests(all_tests);

@@ -104,6 +104,7 @@ functionaltest_sources = \
 	tests/functionaltests/test_carbons.c tests/functionaltests/test_carbons.h \
 	tests/functionaltests/test_receipts.c tests/functionaltests/test_receipts.h \
 	tests/functionaltests/test_roster.c tests/functionaltests/test_roster.h \
+	tests/functionaltests/test_software.c tests/functionaltests/test_software.h \
 	tests/functionaltests/functionaltests.c
 
 main_source = src/main.c
