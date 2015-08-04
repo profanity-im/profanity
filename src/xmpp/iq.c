@@ -67,10 +67,10 @@ typedef struct p_room_info_data_t {
 static int _error_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, void * const userdata);
 static int _ping_get_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, void * const userdata);
 static int _version_get_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, void * const userdata);
+static int _version_result_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, void * const userdata);
 static int _disco_info_get_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, void * const userdata);
 static int _disco_info_response_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, void * const userdata);
 static int _room_info_response_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, void * const userdata);
-static int _version_result_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, void * const userdata);
 static int _disco_items_result_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, void * const userdata);
 static int _disco_items_get_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, void * const userdata);
 static int _destroy_room_result_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, void * const userdata);
@@ -103,7 +103,6 @@ iq_add_handlers(void)
     HANDLE(XMPP_NS_DISCO_ITEMS, STANZA_TYPE_RESULT, _disco_items_result_handler);
 
     HANDLE(STANZA_NS_VERSION,   STANZA_TYPE_GET,    _version_get_handler);
-    HANDLE(STANZA_NS_VERSION,   STANZA_TYPE_RESULT, _version_result_handler);
 
     HANDLE(STANZA_NS_PING,      STANZA_TYPE_GET,    _ping_get_handler);
 
@@ -301,6 +300,10 @@ iq_send_software_version(const char * const fulljid)
     xmpp_conn_t * const conn = connection_get_conn();
     xmpp_ctx_t * const ctx = connection_get_ctx();
     xmpp_stanza_t *iq = stanza_create_software_version_iq(ctx, fulljid);
+
+    char *id = xmpp_stanza_get_id(iq);
+    xmpp_id_handler_add(conn, _version_result_handler, id, NULL);
+
     xmpp_send(conn, iq);
     xmpp_stanza_release(iq);
 }
@@ -836,16 +839,34 @@ _version_result_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
         log_debug("IQ version result handler fired.");
     }
 
+    char *type = xmpp_stanza_get_type(stanza);
+    char *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
+
+    if (g_strcmp0(type, STANZA_TYPE_RESULT) != 0) {
+        if (g_strcmp0(type, STANZA_TYPE_ERROR) == 0) {
+            char *error_message = stanza_get_error_message(stanza);
+            ui_handle_software_version_error(from, error_message);
+            free(error_message);
+        } else {
+            ui_handle_software_version_error(from, "unknown error");
+            log_error("Software version result with unrecognised type attribute.");
+        }
+
+        return 0;
+    }
+
     const char *jid = xmpp_stanza_get_attribute(stanza, "from");
 
     xmpp_stanza_t *query = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_QUERY);
     if (query == NULL) {
-        return 1;
+        log_error("Software version result recieved with no query element.");
+        return 0;
     }
 
     char *ns = xmpp_stanza_get_ns(query);
     if (g_strcmp0(ns, STANZA_NS_VERSION) != 0) {
-        return 1;
+        log_error("Software version result recieved without namespace.");
+        return 0;
     }
 
     char *name_str = NULL;
@@ -880,7 +901,7 @@ _version_result_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
 
     jid_destroy(jidp);
 
-    return 1;
+    return 0;
 }
 
 static int

@@ -2792,6 +2792,24 @@ ui_hide_roster(void)
     }
 }
 
+void
+ui_handle_software_version_error(const char * const roomjid, const char * const message)
+{
+    GString *message_str = g_string_new("");
+
+    ProfWin *window = wins_get_console();
+    g_string_printf(message_str, "Could not get software version");
+
+    if (message) {
+        g_string_append(message_str, ": ");
+        g_string_append(message_str, message);
+    }
+
+    win_print(window, '-', 0, NULL, 0, THEME_ERROR, "", message_str->str);
+
+    g_string_free(message_str, TRUE);
+}
+
 static void
 _win_show_history(ProfChatWin *chatwin, const char * const contact)
 {

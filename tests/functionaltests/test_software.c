@@ -57,3 +57,28 @@ display_software_version_result(void **state)
     prof_output_exact("Name    : Profanity");
     prof_output_exact("Version : 0.4.7dev.master.2cb2f83");
 }
+
+void
+shows_message_when_software_version_error(void **state)
+{
+    prof_connect();
+    stbbr_send(
+        "<presence to=\"stabber@localhost\" from=\"buddy1@localhost/mobile\">"
+            "<priority>10</priority>"
+            "<status>I'm here</status>"
+        "</presence>"
+    );
+    prof_output_exact("Buddy1 (mobile) is online, \"I'm here\"");
+
+    stbbr_for_query("jabber:iq:version",
+        "<iq id=\"*\" lang=\"en\" type=\"error\" to=\"stabber@localhost/profanity\" from=\"buddy1@localhost/laptop\">"
+            "<query xmlns=\"jabber:iq:version\"/>"
+            "<error code=\"503\" type=\"cancel\">"
+                "<service-unavailable xmlns=\"urn:ietf:params:xml:ns:xmpp-stanzas\"/>"
+            "</error>"
+        "</iq>"
+    );
+    prof_input("/software buddy1@localhost/laptop");
+
+    prof_output_exact("Could not get software version: service-unavailable");
+}

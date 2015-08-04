@@ -79,6 +79,7 @@ int main(int argc, char* argv[]) {
 
         PROF_FUNC_TEST(send_software_version_request),
         PROF_FUNC_TEST(display_software_version_result),
+        PROF_FUNC_TEST(shows_message_when_software_version_error),
     };
 
     return run_tests(all_tests);

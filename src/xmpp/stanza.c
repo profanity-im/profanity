@@ -877,7 +877,11 @@ stanza_create_software_version_iq(xmpp_ctx_t *ctx, const char * const fulljid)
     xmpp_stanza_t *iq = xmpp_stanza_new(ctx);
     xmpp_stanza_set_name(iq, STANZA_NAME_IQ);
     xmpp_stanza_set_type(iq, STANZA_TYPE_GET);
-    xmpp_stanza_set_id(iq, "sv");
+
+    char *id = create_unique_id("sv");
+    xmpp_stanza_set_id(iq, id);
+    free(id);
+
     xmpp_stanza_set_attribute(iq, "to", fulljid);
 
     xmpp_stanza_t *query = xmpp_stanza_new(ctx);
