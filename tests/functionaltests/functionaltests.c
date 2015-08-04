@@ -50,6 +50,7 @@ int main(int argc, char* argv[]) {
         PROF_FUNC_TEST(presence_set_priority),
         PROF_FUNC_TEST(presence_includes_priority),
         PROF_FUNC_TEST(presence_received),
+        PROF_FUNC_TEST(presence_missing_resource_defaults),
 
         PROF_FUNC_TEST(message_send),
         PROF_FUNC_TEST(message_receive),
