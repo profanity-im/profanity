@@ -302,7 +302,7 @@ iq_send_software_version(const char * const fulljid)
     xmpp_stanza_t *iq = stanza_create_software_version_iq(ctx, fulljid);
 
     char *id = xmpp_stanza_get_id(iq);
-    xmpp_id_handler_add(conn, _version_result_handler, id, NULL);
+    xmpp_id_handler_add(conn, _version_result_handler, id, strdup(fulljid));
 
     xmpp_send(conn, iq);
     xmpp_stanza_release(iq);
@@ -893,13 +893,19 @@ _version_result_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
         presence = string_from_resource_presence(occupant->presence);
     } else {
         PContact contact = roster_get_contact(jidp->barejid);
+        if (!contact) {
+            jid_destroy(jidp);
+            jidp = jid_create((char*)userdata);
+            contact = roster_get_contact(jidp->barejid);
+        }
         Resource *resource = p_contact_get_resource(contact, jidp->resourcepart);
         presence = string_from_resource_presence(resource->presence);
     }
 
-    cons_show_software_version(jid, presence, name_str, version_str, os_str);
+    cons_show_software_version(jidp->fulljid, presence, name_str, version_str, os_str);
 
     jid_destroy(jidp);
+    free(userdata);
 
     return 0;
 }

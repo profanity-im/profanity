@@ -82,3 +82,31 @@ shows_message_when_software_version_error(void **state)
 
     prof_output_exact("Could not get software version: service-unavailable");
 }
+
+// Typical use case for gateways that don't support resources
+void
+display_software_version_result_when_from_domainpart(void **state)
+{
+    prof_connect();
+    stbbr_send(
+        "<presence to=\"stabber@localhost\" from=\"buddy1@localhost\">"
+            "<priority>10</priority>"
+            "<status>I'm here</status>"
+        "</presence>"
+    );
+    prof_output_exact("Buddy1 is online, \"I'm here\"");
+
+    stbbr_for_query("jabber:iq:version",
+        "<iq id=\"*\" type=\"result\" lang=\"en\" to=\"stabber@localhost/profanity\" from=\"localhost\">"
+            "<query xmlns=\"jabber:iq:version\">"
+                "<name>Some Gateway</name>"
+                "<version>1.0</version>"
+            "</query>"
+        "</iq>"
+    );
+    prof_input("/software buddy1@localhost/__prof_default");
+
+    prof_output_exact("buddy1@localhost/__prof_default:");
+    prof_output_exact("Name    : Some Gateway");
+    prof_output_exact("Version : 1.0");
+}
