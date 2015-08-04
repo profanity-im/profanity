@@ -1399,14 +1399,15 @@ static struct cmd_t command_defs[] =
             "/account set <account> jid <jid>",
             "/account set <account> server <server>",
             "/account set <account> port <port>",
-            "/account set <account> status <status>",
-            "/account set <account> online|chat|away|xa|dnd <priority>",
+            "/account set <account> status <presence>",
+            "/account set <account> status last",
+            "/account set <account> <presence> <priority>",
             "/account set <account> resource <resource>",
             "/account set <account> password <password>",
             "/account set <account> eval_password <command>",
             "/account set <account> muc <service>",
             "/account set <account> nick <nick>",
-            "/account set <account> otr manual|opportunistic|always",
+            "/account set <account> otr <policy>",
             "/account set <account> pgpkeyid <pgpkeyid>",
             "/account clear <account> password",
             "/account clear <account> eval_password",
@@ -1418,33 +1419,34 @@ static struct cmd_t command_defs[] =
             "Commands for creating and managing accounts. "
             "Calling with no arguments will display information for the current account.")
         CMD_ARGS(
-            { "list",                                             "List all accounts." },
-            { "show <account>",                                   "Show details for the specified account." },
-            { "enable <account>",                                 "Enable the account, it will be used for autocompletion." },
-            { "disable <account>",                                "Disable the account." },
-            { "default set <account>",                            "Set the default account, used when no argument passed to the /connect command." },
-            { "default off",                                      "Clear the default account setting." },
-            { "add <account>",                                    "Create a new account." },
-            { "remove <account>",                                 "Remove an account." },
-            { "rename <account> <newaccount>",                    "Rename 'account' to 'newaccount'." },
-            { "set <account> jid <jid>",                          "Set the Jabber ID for the account, account name will be used if not set." },
-            { "set <account> server <server>",                    "The chat server, if different to the domainpart of the JID." },
-            { "set <account> port <port>",                        "The port used for connecting if not the default (5222, or 5223 for SSL)." },
-            { "set <account> status <status>",                    "The presence status to use on login, use 'last' to use your last status before logging out." },
-            { "set <account> online|chat|away|xa|dnd <priority>", "Set the priority (-128..127) to use for the specified presence." },
-            { "set <account> resource <resource>",                "The resource to be used for this account." },
-            { "set <account> password <password>",                "Password for the account, note this is currently stored in plaintext if set." },
-            { "set <account> eval_password <command>",            "Shell command evaluated to retrieve password for the account. Can be used to retrieve password from keyring." },
-            { "set <account> muc <service>",                      "The default MUC chat service to use, defaults to 'conference.<domainpart>' where the domain part is from the account JID." },
-            { "set <account> nick <nick>",                        "The default nickname to use when joining chat rooms." },
-            { "set <account> otr manual|opportunistic|always",    "Override global OTR policy for this account, see /otr." },
-            { "set <account> pgpkeyid <pgpkeyid>",                "Set the ID of the PGP key for this account, see /pgp." },
-            { "clear <account> server",                           "Remove the server setting for this account." },
-            { "clear <account> port",                             "Remove the port setting for this account." },
-            { "clear <account> password",                         "Remove the password setting for this account." },
-            { "clear <account> eval_password",                    "Remove the eval_password setting for this account." },
-            { "clear <account> otr",                              "Remove the OTR policy setting for this account." },
-            { "clear <account> pgpkeyid",                         "Remove pgpkeyid associated with this account." })
+            { "list",                                   "List all accounts." },
+            { "enable <account>",                       "Enable the account, it will be used for autocompletion." },
+            { "show <account>",                         "Show details for the specified account." },
+            { "disable <account>",                      "Disable the account." },
+            { "default set <account>",                  "Set the default account, used when no argument passed to the /connect command." },
+            { "default off",                            "Clear the default account setting." },
+            { "add <account>",                          "Create a new account." },
+            { "remove <account>",                       "Remove an account." },
+            { "rename <account> <newaccount>",          "Rename 'account' to 'newaccount'." },
+            { "set <account> jid <jid>",                "Set the Jabber ID for the account, account name will be used if not set." },
+            { "set <account> server <server>",          "The chat server, if different to the domainpart of the JID." },
+            { "set <account> port <port>",              "The port used for connecting if not the default (5222, or 5223 for SSL)." },
+            { "set <account> status <presence>",        "The presence status to use on login." },
+            { "set <account> status last",              "Use your last status before logging out, when logging in." },
+            { "set <account> <presence> <priority>",    "Set the priority (-128..127) to use for the specified presence." },
+            { "set <account> resource <resource>",      "The resource to be used for this account." },
+            { "set <account> password <password>",      "Password for the account, note this is currently stored in plaintext if set." },
+            { "set <account> eval_password <command>",  "Shell command evaluated to retrieve password for the account. Can be used to retrieve password from keyring." },
+            { "set <account> muc <service>",            "The default MUC chat service to use, defaults to 'conference.<domainpart>' where the domain part is from the account JID." },
+            { "set <account> nick <nick>",              "The default nickname to use when joining chat rooms." },
+            { "set <account> otr <policy>",             "Override global OTR policy for this account, see /otr." },
+            { "set <account> pgpkeyid <pgpkeyid>",      "Set the ID of the PGP key for this account, see /pgp." },
+            { "clear <account> server",                 "Remove the server setting for this account." },
+            { "clear <account> port",                   "Remove the port setting for this account." },
+            { "clear <account> password",               "Remove the password setting for this account." },
+            { "clear <account> eval_password",          "Remove the eval_password setting for this account." },
+            { "clear <account> otr",                    "Remove the OTR policy setting for this account." },
+            { "clear <account> pgpkeyid",               "Remove pgpkeyid associated with this account." })
         CMD_EXAMPLES(
             "/account add me",
             "/account set me jid me@chatty",
@@ -1628,6 +1630,7 @@ static Autocomplete account_ac;
 static Autocomplete account_set_ac;
 static Autocomplete account_clear_ac;
 static Autocomplete account_default_ac;
+static Autocomplete account_status_ac;
 static Autocomplete disco_ac;
 static Autocomplete close_ac;
 static Autocomplete wins_ac;
@@ -1836,6 +1839,14 @@ cmd_init(void)
     account_default_ac = autocomplete_new();
     autocomplete_add(account_default_ac, "set");
     autocomplete_add(account_default_ac, "off");
+
+    account_status_ac = autocomplete_new();
+    autocomplete_add(account_status_ac, "online");
+    autocomplete_add(account_status_ac, "chat");
+    autocomplete_add(account_status_ac, "away");
+    autocomplete_add(account_status_ac, "xa");
+    autocomplete_add(account_status_ac, "dnd");
+    autocomplete_add(account_status_ac, "last");
 
     close_ac = autocomplete_new();
     autocomplete_add(close_ac, "read");
@@ -2075,6 +2086,7 @@ cmd_uninit(void)
     autocomplete_free(account_set_ac);
     autocomplete_free(account_clear_ac);
     autocomplete_free(account_default_ac);
+    autocomplete_free(account_status_ac);
     autocomplete_free(disco_ac);
     autocomplete_free(close_ac);
     autocomplete_free(wins_ac);
@@ -2250,6 +2262,7 @@ cmd_reset_autocomplete(ProfWin *window)
     autocomplete_reset(account_set_ac);
     autocomplete_reset(account_clear_ac);
     autocomplete_reset(account_default_ac);
+    autocomplete_reset(account_status_ac);
     autocomplete_reset(disco_ac);
     autocomplete_reset(close_ac);
     autocomplete_reset(wins_ac);
@@ -3551,6 +3564,15 @@ _account_autocomplete(ProfWin *window, const char * const input)
             g_string_append(beginning, " ");
             g_string_append(beginning, args[2]);
             found = autocomplete_param_with_ac(input, beginning->str, otr_policy_ac, TRUE);
+            g_string_free(beginning, TRUE);
+            if (found) {
+                g_strfreev(args);
+                return found;
+            }
+        } else if ((g_strv_length(args) > 3) && (g_strcmp0(args[2], "status")) == 0) {
+            g_string_append(beginning, " ");
+            g_string_append(beginning, args[2]);
+            found = autocomplete_param_with_ac(input, beginning->str, account_status_ac, TRUE);
             g_string_free(beginning, TRUE);
             if (found) {
                 g_strfreev(args);
