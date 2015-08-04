@@ -241,3 +241,22 @@ presence_received(void **state)
 
     assert_true(prof_output_exact("Buddy1 (mobile) is online, \"I'm here\""));
 }
+
+void
+presence_missing_resource_defaults(void **state)
+{
+    prof_connect();
+
+    stbbr_send(
+        "<presence to=\"stabber@localhost\" from=\"buddy1@localhost\">"
+            "<priority>15</priority>"
+            "<status>My status</status>"
+        "</presence>"
+    );
+
+    assert_true(prof_output_exact("Buddy1 is online, \"My status\""));
+
+    prof_input("/info Buddy1");
+
+    assert_true(prof_output_exact("__prof_default (15), online"));
+}

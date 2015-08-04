@@ -11,3 +11,4 @@ void presence_chat_with_message(void **state);
 void presence_set_priority(void **state);
 void presence_includes_priority(void **state);
 void presence_received(void **state);
+void presence_missing_resource_defaults(void **state);
