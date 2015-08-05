@@ -898,6 +898,10 @@ _version_result_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
     } else {
         PContact contact = roster_get_contact(jidp->barejid);
         Resource *resource = p_contact_get_resource(contact, jidp->resourcepart);
+        if (!resource) {
+            ui_handle_software_version_error(jidp->fulljid, "Unknown resource");
+            return 0;
+        }
         presence = string_from_resource_presence(resource->presence);
     }
 
