@@ -558,7 +558,7 @@ cons_show_disco_info(const char *jid, GSList *identities, GSList *features)
     if ((identities && (g_slist_length(identities) > 0)) ||
         (features && (g_slist_length(features) > 0))) {
         cons_show("");
-        cons_show("Service disovery info for %s", jid);
+        cons_show("Service discovery info for %s", jid);
 
         if (identities) {
             cons_show("  Identities");
