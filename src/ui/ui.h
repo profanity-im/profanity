@@ -203,6 +203,7 @@ void ui_redraw_all_room_rosters(void);
 void ui_show_all_room_rosters(void);
 void ui_hide_all_room_rosters(void);
 gboolean ui_chat_win_exists(const char * const barejid);
+void ui_handle_software_version_error(const char * const roomjid, const char * const message);
 
 gboolean ui_tidy_wins(void);
 void ui_prune_wins(void);

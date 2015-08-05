@@ -242,6 +242,7 @@ presence_received(void **state)
     assert_true(prof_output_exact("Buddy1 (mobile) is online, \"I'm here\""));
 }
 
+// Typical use case for gateways that don't support resources
 void
 presence_missing_resource_defaults(void **state)
 {
