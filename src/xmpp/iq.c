@@ -886,18 +886,17 @@ _version_result_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
         os_str = xmpp_stanza_get_text(os);
     }
 
-    Jid *jidp = jid_create(jid);
+    if (g_strcmp0(jid, (char*)userdata) != 0) {
+        log_warning("From attribute specified different JID, using original JID.");
+    }
+
+    Jid *jidp = jid_create((char*)userdata);
     const char *presence = NULL;
     if (muc_active(jidp->barejid)) {
         Occupant *occupant = muc_roster_item(jidp->barejid, jidp->resourcepart);
         presence = string_from_resource_presence(occupant->presence);
     } else {
         PContact contact = roster_get_contact(jidp->barejid);
-        if (!contact) {
-            jid_destroy(jidp);
-            jidp = jid_create((char*)userdata);
-            contact = roster_get_contact(jidp->barejid);
-        }
         Resource *resource = p_contact_get_resource(contact, jidp->resourcepart);
         presence = string_from_resource_presence(resource->presence);
     }
