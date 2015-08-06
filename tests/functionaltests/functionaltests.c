@@ -71,7 +71,6 @@ int main(int argc, char* argv[]) {
 
         PROF_FUNC_TEST(send_receipt_request),
         PROF_FUNC_TEST(send_receipt_on_request),
-
         PROF_FUNC_TEST(sends_new_item),
         PROF_FUNC_TEST(sends_new_item_nick),
         PROF_FUNC_TEST(sends_remove_item),
@@ -81,6 +80,8 @@ int main(int argc, char* argv[]) {
         PROF_FUNC_TEST(display_software_version_result),
         PROF_FUNC_TEST(shows_message_when_software_version_error),
         PROF_FUNC_TEST(display_software_version_result_when_from_domainpart),
+        PROF_FUNC_TEST(show_message_in_chat_window_when_no_resource),
+        PROF_FUNC_TEST(display_software_version_result_in_chat),
     };
 
     return run_tests(all_tests);
