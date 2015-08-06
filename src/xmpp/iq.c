@@ -905,7 +905,7 @@ _version_result_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
         presence = string_from_resource_presence(resource->presence);
     }
 
-    cons_show_software_version(jidp->fulljid, presence, name_str, version_str, os_str);
+    ui_show_software_version(jidp->fulljid, presence, name_str, version_str, os_str);
 
     jid_destroy(jidp);
     free(userdata);
