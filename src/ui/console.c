@@ -422,30 +422,6 @@ cons_show_caps(const char * const fulljid, resource_presence_t presence)
 }
 
 void
-cons_show_software_version(const char * const jid, const char * const  presence,
-    const char * const name, const char * const version, const char * const os)
-{
-    ProfWin *console = wins_get_console();
-    if (name || version || os) {
-        cons_show("");
-        theme_item_t presence_colour = theme_main_presence_attrs(presence);
-        win_vprint(console, '-', 0, NULL, NO_EOL, presence_colour, "", "%s", jid);
-        win_print(console, '-', 0, NULL, NO_DATE, 0, "", ":");
-    }
-    if (name) {
-        cons_show("Name    : %s", name);
-    }
-    if (version) {
-        cons_show("Version : %s", version);
-    }
-    if (os) {
-        cons_show("OS      : %s", os);
-    }
-
-    cons_alert();
-}
-
-void
 cons_show_received_subs(void)
 {
     GSList *received = presence_get_subscription_requests();
@@ -558,7 +534,7 @@ cons_show_disco_info(const char *jid, GSList *identities, GSList *features)
     if ((identities && (g_slist_length(identities) > 0)) ||
         (features && (g_slist_length(features) > 0))) {
         cons_show("");
-        cons_show("Service disovery info for %s", jid);
+        cons_show("Service discovery info for %s", jid);
 
         if (identities) {
             cons_show("  Identities");

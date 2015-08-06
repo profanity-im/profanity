@@ -2104,6 +2104,30 @@ cmd_software(ProfWin *window, const char * const command, gchar **args)
             }
             break;
         case WIN_CHAT:
+            if (args[0]) {
+                cons_show("No parameter needed to /software when in chat.");
+            } else {
+                ProfChatWin *chatwin = (ProfChatWin*)window;
+                assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
+
+                char *resource = NULL;
+                ChatSession *session = chat_session_get(chatwin->barejid);
+                if (chatwin->resource_override) {
+                    resource = chatwin->resource_override;
+                } else if (session && session->resource) {
+                    resource = session->resource;
+                }
+
+                if (resource) {
+                    GString *fulljid = g_string_new(chatwin->barejid);
+                    g_string_append_printf(fulljid, "/%s", resource);
+                    iq_send_software_version(fulljid->str);
+                    g_string_free(fulljid, TRUE);
+                } else {
+                    win_println(window, 0, "Unknown resource for /software command.");
+                }
+            }
+            break;
         case WIN_CONSOLE:
             if (args[0]) {
                 Jid *myJid = jid_create(jabber_get_fulljid());

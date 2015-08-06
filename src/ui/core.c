@@ -2810,6 +2810,57 @@ ui_handle_software_version_error(const char * const roomjid, const char * const 
     g_string_free(message_str, TRUE);
 }
 
+void
+ui_show_software_version(const char * const jid, const char * const  presence,
+    const char * const name, const char * const version, const char * const os)
+{
+    Jid *jidp = jid_create(jid);
+    ProfWin *window = NULL;
+    ProfWin *chatwin = (ProfWin*)wins_get_chat(jidp->barejid);
+    ProfWin *mucwin = (ProfWin*)wins_get_muc(jidp->barejid);
+    ProfWin *privwin = (ProfWin*)wins_get_private(jidp->fulljid);
+    ProfWin *console = wins_get_console();
+    jid_destroy(jidp);
+
+    if (chatwin) {
+        if (wins_is_current(chatwin)) {
+            window = chatwin;
+        } else {
+            window = console;
+        }
+    } else if (privwin) {
+        if (wins_is_current(privwin)) {
+            window = privwin;
+        } else {
+            window = console;
+        }
+    } else if (mucwin) {
+        if (wins_is_current(mucwin)) {
+            window = mucwin;
+        } else {
+            window = console;
+        }
+    } else {
+        window = console;
+    }
+
+    if (name || version || os) {
+        win_println(window, 0, "");
+        theme_item_t presence_colour = theme_main_presence_attrs(presence);
+        win_vprint(window, '-', 0, NULL, NO_EOL, presence_colour, "", "%s", jid);
+        win_print(window, '-', 0, NULL, NO_DATE, 0, "", ":");
+    }
+    if (name) {
+        win_vprint(window, '-', 0, NULL, 0, 0, "", "Name    : %s", name);
+    }
+    if (version) {
+        win_vprint(window, '-', 0, NULL, 0, 0, "", "Version : %s", version);
+    }
+    if (os) {
+        win_vprint(window, '-', 0, NULL, 0, 0, "", "OS      : %s", os);
+    }
+}
+
 static void
 _win_show_history(ProfChatWin *chatwin, const char * const contact)
 {
