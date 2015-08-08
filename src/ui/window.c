@@ -907,12 +907,17 @@ void
 win_print(ProfWin *window, const char show_char, int pad_indent, GDateTime *timestamp,
     int flags, theme_item_t theme_item, const char * const from, const char * const message)
 {
-    if (timestamp == NULL) timestamp = g_date_time_new_now_local();
+    if (timestamp == NULL) {
+        timestamp = g_date_time_new_now_local();
+    } else {
+        g_date_time_ref(timestamp);
+    }
 
     buffer_push(window->layout->buffer, show_char, pad_indent, timestamp, flags, theme_item, from, message, NULL);
     _win_print(window, show_char, pad_indent, timestamp, flags, theme_item, from, message, NULL);
     // TODO: cross-reference.. this should be replaced by a real event-based system
     ui_input_nonblocking(TRUE);
+    g_date_time_unref(timestamp);
 }
 
 void
@@ -975,7 +980,7 @@ _win_print(ProfWin *window, const char show_char, int pad_indent, GDateTime *tim
     gchar *date_fmt = NULL;
     char *time_pref = prefs_get_string(PREF_TIME);
     date_fmt = g_date_time_format(time, time_pref);
-    free(time_pref);
+    prefs_free_string(time_pref);
     assert(date_fmt != NULL);
 
     if(strlen(date_fmt) != 0){
@@ -992,7 +997,6 @@ _win_print(ProfWin *window, const char show_char, int pad_indent, GDateTime *tim
                 wattroff(window->layout->win, theme_attrs(THEME_TIME));
             }
         }
-        g_free(date_fmt);
     }
 
     if (strlen(from) > 0) {
@@ -1049,6 +1053,8 @@ _win_print(ProfWin *window, const char show_char, int pad_indent, GDateTime *tim
             wattroff(window->layout->win, theme_attrs(theme_item));
         }
     }
+
+    g_free(date_fmt);
 }
 
 static void
