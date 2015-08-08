@@ -333,12 +333,16 @@ p_gpg_sign(const char * const str, const char * const fp)
     error = gpgme_get_key(ctx, fp, &key, 1);
     if (error || key == NULL) {
         log_error("GPG: Failed to get key. %s %s", gpgme_strsource(error), gpgme_strerror(error));
-        gpgme_release (ctx);
+        gpgme_release(ctx);
+        if (key) {
+            gpgme_key_unref(key);
+        }
         return NULL;
     }
 
     gpgme_signers_clear(ctx);
     error = gpgme_signers_add(ctx, key);
+    gpgme_key_unref(key);
     if (error) {
         log_error("GPG: Failed to load signer. %s %s", gpgme_strsource(error), gpgme_strerror(error));
         gpgme_release(ctx);

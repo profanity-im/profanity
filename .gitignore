@@ -11,6 +11,8 @@ profanity.mk
 profanity.project
 profanity.workspace
 compile_commands.json
+.tern-port
+.tern-project
 
 # autotools
 .libs/
@@ -56,3 +58,6 @@ gitpushall.sh
 # website files
 main_fragment.html
 toc_fragment.html
+
+# valgrind files
+valgrind.out
