@@ -113,6 +113,7 @@ prefs_load(void)
         } else if (g_strcmp0(time, "off") == 0) {
             g_key_file_set_string(prefs, PREF_GROUP_UI, "time", "");
         }
+        prefs_free_string(time);
     }
     if (g_key_file_has_key(prefs, PREF_GROUP_UI, "time.statusbar", NULL)) {
         char *time = g_key_file_get_string(prefs, PREF_GROUP_UI, "time.statusbar", NULL);
@@ -123,6 +124,7 @@ prefs_load(void)
         } else if (g_strcmp0(time, "off") == 0) {
             g_key_file_set_string(prefs, PREF_GROUP_UI, "time.statusbar", "");
         }
+        prefs_free_string(time);
     }
 
     _save_prefs();

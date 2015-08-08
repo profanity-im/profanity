@@ -746,6 +746,7 @@ _enable_carbons_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, 
         char *error_message = stanza_get_error_message(stanza);
         cons_show_error("Server error enabling message carbons: %s", error_message);
         log_debug("Error enabling carbons: %s", error_message);
+        free(error_message);
     } else {
         log_debug("Message carbons enabled.");
     }
@@ -761,6 +762,7 @@ _disable_carbons_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
         char *error_message = stanza_get_error_message(stanza);
         cons_show_error("Server error disabling message carbons: %s", error_message);
         log_debug("Error disabling carbons: %s", error_message);
+        free(error_message);
     } else {
         log_debug("Message carbons disabled.");
     }

@@ -213,6 +213,7 @@ stanza_enable_carbons(xmpp_ctx_t *ctx){
     xmpp_stanza_set_ns(carbons_enable, STANZA_NS_CARBONS);
 
     xmpp_stanza_add_child(iq, carbons_enable);
+    xmpp_stanza_release(carbons_enable);
 
     return iq;
 }
@@ -232,6 +233,7 @@ stanza_disable_carbons(xmpp_ctx_t *ctx){
     xmpp_stanza_set_ns(carbons_disable, STANZA_NS_CARBONS);
 
     xmpp_stanza_add_child(iq, carbons_disable);
+    xmpp_stanza_release(carbons_disable);
 
     return iq;
 }
