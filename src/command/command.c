@@ -133,7 +133,12 @@ static struct cmd_t command_defs[] =
         CMD_SYN(
             "/help [<area>|<command>]")
         CMD_DESC(
-            "Help on using Profanity. Passing no arguments list help areas.")
+            "Help on using Profanity. Passing no arguments list help areas. "
+            "For command help, optional arguments are shown using square brackets e.g. [argument], "
+            "arguments representing variables rather than a literal name are surrounded by angle brackets "
+            "e.g. <argument>. "
+            "Arguments that may be one of a number of values are separated by a pipe "
+            "e.g. val1|val2|val3.")
         CMD_ARGS(
             { "<area>",    "Summary help for commands in a certain area of functionality." },
             { "<command>", "Full help for a specific command, for example '/help connect'." })
