@@ -892,6 +892,8 @@ _version_result_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
         log_warning("From attribute specified different JID, using original JID.");
     }
 
+    xmpp_ctx_t *ctx = xmpp_conn_get_context(conn);
+
     Jid *jidp = jid_create((char*)userdata);
     const char *presence = NULL;
     if (muc_active(jidp->barejid)) {
@@ -902,6 +904,9 @@ _version_result_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
         Resource *resource = p_contact_get_resource(contact, jidp->resourcepart);
         if (!resource) {
             ui_handle_software_version_error(jidp->fulljid, "Unknown resource");
+            if (name_str) xmpp_free(ctx, name_str);
+            if (version_str) xmpp_free(ctx, version_str);
+            if (os_str) xmpp_free(ctx, os_str);
             return 0;
         }
         presence = string_from_resource_presence(resource->presence);
@@ -911,6 +916,10 @@ _version_result_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
 
     jid_destroy(jidp);
     free(userdata);
+
+    if (name_str) xmpp_free(ctx, name_str);
+    if (version_str) xmpp_free(ctx, version_str);
+    if (os_str) xmpp_free(ctx, os_str);
 
     return 0;
 }
