@@ -940,6 +940,7 @@ win_print_with_receipt(ProfWin *window, const char show_char, int pad_indent, GT
     _win_print(window, show_char, pad_indent, time, flags, theme_item, from, message, receipt);
     // TODO: cross-reference.. this should be replaced by a real event-based system
     ui_input_nonblocking(TRUE);
+    g_date_time_unref(time);
 }
 
 void
