@@ -317,6 +317,8 @@ p_gpg_verify(const char * const barejid, const char *const sign)
 
     gpgme_data_release(sign_data);
     gpgme_data_release(plain_data);
+    gpgme_release(ctx);
+    free(sign_with_header_footer);
 }
 
 char*
