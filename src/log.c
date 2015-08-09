@@ -380,7 +380,11 @@ _chat_log_chat(const char * const login, const char * const other,
         g_hash_table_replace(logs, strdup(other), dated_log);
     }
 
-    if (timestamp == NULL) timestamp = g_date_time_new_now_local();
+    if (timestamp == NULL) {
+        timestamp = g_date_time_new_now_local();
+    } else {
+        g_date_time_ref(timestamp);
+    }
 
     gchar *date_fmt = g_date_time_format(timestamp, "%H:%M:%S");
     FILE *logp = fopen(dated_log->filename, "a");
@@ -407,6 +411,7 @@ _chat_log_chat(const char * const login, const char * const other,
     }
 
     g_free(date_fmt);
+    g_date_time_unref(timestamp);
 }
 
 void
