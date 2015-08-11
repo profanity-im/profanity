@@ -27,28 +27,12 @@
   ...
 }
 
-# Ignore history module, needs to be rewritten
+# glib
 
 {
-  history_next
+  glib
   Memcheck:Leak
   ...
-  fun:history_next
-  ...
-}
-
-{
-  history_previous
-  Memcheck:Leak
-  ...
-  fun:history_previous
-  ...
-}
-
-{
-  history_append
-  Memcheck:Leak
-  ...
-  fun:history_append
-  ...
+  fun:start_thread
+  fun:clone
 }
