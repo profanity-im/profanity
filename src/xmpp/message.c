@@ -174,6 +174,7 @@ message_send_chat_pgp(const char * const barejid, const char * const msg)
     } else {
         message = stanza_create_message(ctx, id, jid, STANZA_TYPE_CHAT, msg);
     }
+    account_free(account);
 #else
     message = stanza_create_message(ctx, id, jid, STANZA_TYPE_CHAT, msg);
 #endif
@@ -772,6 +773,7 @@ _chat_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, void * con
     }
 
     // standard chat message, use jid without resource
+    xmpp_ctx_t *ctx = connection_get_ctx();
     GDateTime *timestamp = stanza_get_delay(stanza);
     if (body) {
         char *message = xmpp_stanza_get_text(body);
@@ -785,11 +787,11 @@ _chat_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, void * con
                     enc_message = xmpp_stanza_get_text(x);
                 }
                 sv_ev_incoming_message(jid->barejid, jid->resourcepart, message, enc_message);
+                xmpp_free(ctx, enc_message);
             }
 
             _receipt_request_handler(stanza);
 
-            xmpp_ctx_t *ctx = connection_get_ctx();
             xmpp_free(ctx, message);
         }
     }

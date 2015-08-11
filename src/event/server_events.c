@@ -218,6 +218,7 @@ sv_ev_incoming_message(char *barejid, char *resource, char *message, char *enc_m
                 ui_incoming_msg(chatwin, resource, decrypted, NULL, new_win);
                 chat_log_pgp_msg_in(barejid, decrypted);
                 chatwin->enc_mode = PROF_ENC_PGP;
+                p_gpg_free_decrypted(decrypted);
             } else {
                 ui_incoming_msg(chatwin, resource, message, NULL, new_win);
                 chat_log_msg_in(barejid, message);
@@ -267,6 +268,7 @@ sv_ev_incoming_message(char *barejid, char *resource, char *message, char *enc_m
             ui_incoming_msg(chatwin, resource, decrypted, NULL, new_win);
             chat_log_pgp_msg_in(barejid, decrypted);
             chatwin->enc_mode = PROF_ENC_PGP;
+            p_gpg_free_decrypted(decrypted);
         } else {
             ui_incoming_msg(chatwin, resource, message, NULL, new_win);
             chat_log_msg_in(barejid, message);

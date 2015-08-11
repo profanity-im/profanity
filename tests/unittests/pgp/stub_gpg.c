@@ -47,3 +47,5 @@ gboolean p_gpg_addkey(const char * const jid, const char * const keyid)
     return TRUE;
 }
 
+void p_gpg_free_decrypted(char *decrypted) {}
+

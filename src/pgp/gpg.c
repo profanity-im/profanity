@@ -132,6 +132,7 @@ p_gpg_on_connect(const char * const barejid)
 
     gpgme_ctx_t ctx;
     gpgme_error_t error = gpgme_new(&ctx);
+
     if (error) {
         log_error("GPG: Failed to create gpgme context. %s %s", gpgme_strsource(error), gpgme_strerror(error));
         g_strfreev(jids);
@@ -146,16 +147,18 @@ p_gpg_on_connect(const char * const barejid)
         if (gerr) {
             log_error("Error loading PGP key id for %s", jid);
             g_error_free(gerr);
+            g_free(keyid);
         } else {
             gpgme_key_t key = NULL;
             error = gpgme_get_key(ctx, keyid, &key, 1);
+            g_free(keyid);
             if (error || key == NULL) {
                 log_error("GPG: Failed to get key. %s %s", gpgme_strsource(error), gpgme_strerror(error));
                 continue;
             }
 
             g_hash_table_replace(fingerprints, strdup(jid), strdup(key->subkeys->fpr));
-            gpgme_key_release(key);
+            gpgme_key_unref(key);
         }
     }
 
@@ -194,6 +197,8 @@ p_gpg_addkey(const char * const jid, const char * const keyid)
 
     gpgme_key_t key = NULL;
     error = gpgme_get_key(ctx, keyid, &key, 1);
+    gpgme_release(ctx);
+
     if (error || key == NULL) {
         log_error("GPG: Failed to get key. %s %s", gpgme_strsource(error), gpgme_strerror(error));
         return FALSE;
@@ -205,7 +210,7 @@ p_gpg_addkey(const char * const jid, const char * const keyid)
 
     // update in memory fingerprint list
     g_hash_table_replace(fingerprints, strdup(jid), strdup(key->subkeys->fpr));
-    gpgme_key_release(key);
+    gpgme_key_unref(key);
 
     return TRUE;
 }
@@ -214,11 +219,11 @@ GSList *
 p_gpg_list_keys(void)
 {
     gpgme_error_t error;
-    gpgme_ctx_t ctx;
-    gpgme_key_t key;
     GSList *result = NULL;
 
+    gpgme_ctx_t ctx;
     error = gpgme_new(&ctx);
+
     if (error) {
         log_error("GPG: Could not list keys. %s %s", gpgme_strsource(error), gpgme_strerror(error));
         return NULL;
@@ -227,7 +232,9 @@ p_gpg_list_keys(void)
     error = gpgme_op_keylist_start(ctx, NULL, 1);
     if (error == GPG_ERR_NO_ERROR) {
         while (!error) {
+            gpgme_key_t key;
             error = gpgme_op_keylist_next(ctx, &key);
+
             if (error) {
                 break;
             }
@@ -239,7 +246,7 @@ p_gpg_list_keys(void)
 
             result = g_slist_append(result, p_pgpkey);
 
-            gpgme_key_release(key);
+            gpgme_key_unref(key);
         }
     } else {
         log_error("GPG: Could not list keys. %s %s", gpgme_strsource(error), gpgme_strerror(error));
@@ -289,18 +296,24 @@ p_gpg_verify(const char * const barejid, const char *const sign)
 
     gpgme_ctx_t ctx;
     gpgme_error_t error = gpgme_new(&ctx);
+
     if (error) {
         log_error("GPG: Failed to create gpgme context. %s %s", gpgme_strsource(error), gpgme_strerror(error));
         return;
     }
 
-    gpgme_data_t sign_data;
-    gpgme_data_t plain_data;
     char *sign_with_header_footer = _add_header_footer(sign, PGP_SIGNATURE_HEADER, PGP_SIGNATURE_FOOTER);
+    gpgme_data_t sign_data;
     gpgme_data_new_from_mem(&sign_data, sign_with_header_footer, strlen(sign_with_header_footer), 1);
+    free(sign_with_header_footer);
+
+    gpgme_data_t plain_data;
     gpgme_data_new(&plain_data);
 
     error = gpgme_op_verify(ctx, sign_data, NULL, plain_data);
+    gpgme_data_release(sign_data);
+    gpgme_data_release(plain_data);
+
     if (error) {
         log_error("GPG: Failed to verify. %s %s", gpgme_strsource(error), gpgme_strerror(error));
         gpgme_release(ctx);
@@ -315,10 +328,7 @@ p_gpg_verify(const char * const barejid, const char *const sign)
         }
     }
 
-    gpgme_data_release(sign_data);
-    gpgme_data_release(plain_data);
     gpgme_release(ctx);
-    free(sign_with_header_footer);
 }
 
 char*
@@ -333,55 +343,58 @@ p_gpg_sign(const char * const str, const char * const fp)
 
     gpgme_key_t key = NULL;
     error = gpgme_get_key(ctx, fp, &key, 1);
+
     if (error || key == NULL) {
         log_error("GPG: Failed to get key. %s %s", gpgme_strsource(error), gpgme_strerror(error));
         gpgme_release(ctx);
-        if (key) {
-            gpgme_key_unref(key);
-        }
         return NULL;
     }
 
     gpgme_signers_clear(ctx);
     error = gpgme_signers_add(ctx, key);
     gpgme_key_unref(key);
+
     if (error) {
         log_error("GPG: Failed to load signer. %s %s", gpgme_strsource(error), gpgme_strerror(error));
         gpgme_release(ctx);
         return NULL;
     }
 
-    gpgme_data_t str_data;
-    gpgme_data_t signed_data;
     char *str_or_empty = NULL;
     if (str) {
         str_or_empty = strdup(str);
     } else {
         str_or_empty = strdup("");
     }
+    gpgme_data_t str_data;
     gpgme_data_new_from_mem(&str_data, str_or_empty, strlen(str_or_empty), 1);
+    free(str_or_empty);
+
+    gpgme_data_t signed_data;
     gpgme_data_new(&signed_data);
 
     gpgme_set_armor(ctx,1);
-    error = gpgme_op_sign(ctx,str_data,signed_data,GPGME_SIG_MODE_DETACH);
+    error = gpgme_op_sign(ctx, str_data, signed_data, GPGME_SIG_MODE_DETACH);
+    gpgme_data_release(str_data);
+    gpgme_release(ctx);
+
     if (error) {
         log_error("GPG: Failed to sign string. %s %s", gpgme_strsource(error), gpgme_strerror(error));
-        gpgme_release(ctx);
+        gpgme_data_release(signed_data);
         return NULL;
     }
 
     char *result = NULL;
-    gpgme_data_release(str_data);
 
     size_t len = 0;
     char *signed_str = gpgme_data_release_and_get_mem(signed_data, &len);
     if (signed_str) {
-        signed_str[len] = 0;
-        result = _remove_header_footer(signed_str, PGP_SIGNATURE_FOOTER);
+        GString *signed_gstr = g_string_new("");
+        g_string_append_len(signed_gstr, signed_str, len);
+        result = _remove_header_footer(signed_gstr->str, PGP_SIGNATURE_FOOTER);
+        g_string_free(signed_gstr, TRUE);
+        gpgme_free(signed_str);
     }
-    gpgme_free(signed_str);
-    gpgme_release(ctx);
-    free(str_or_empty);
 
     return result;
 }
@@ -409,6 +422,7 @@ p_gpg_encrypt(const char * const barejid, const char * const message)
 
     gpgme_key_t key;
     error = gpgme_get_key(ctx, fp, &key, 0);
+
     if (error || key == NULL) {
         log_error("GPG: Failed to get key. %s %s", gpgme_strsource(error), gpgme_strerror(error));
         gpgme_release(ctx);
@@ -418,29 +432,33 @@ p_gpg_encrypt(const char * const barejid, const char * const message)
     keys[0] = key;
 
     gpgme_data_t plain;
-    gpgme_data_t cipher;
     gpgme_data_new_from_mem(&plain, message, strlen(message), 1);
+
+    gpgme_data_t cipher;
     gpgme_data_new(&cipher);
 
     gpgme_set_armor(ctx, 1);
     error = gpgme_op_encrypt(ctx, keys, GPGME_ENCRYPT_ALWAYS_TRUST, plain, cipher);
+    gpgme_data_release(plain);
+    gpgme_release(ctx);
+    gpgme_key_unref(key);
+
     if (error) {
         log_error("GPG: Failed to encrypt message. %s %s", gpgme_strsource(error), gpgme_strerror(error));
-        gpgme_release(ctx);
         return NULL;
     }
-    gpgme_data_release(plain);
 
-    char *cipher_str = NULL;
-    char *result = NULL;
     size_t len;
-    cipher_str = gpgme_data_release_and_get_mem(cipher, &len);
-    if (cipher_str) {
-        result = _remove_header_footer(cipher_str, PGP_MESSAGE_FOOTER);
-    }
+    char *cipher_str = gpgme_data_release_and_get_mem(cipher, &len);
 
-    gpgme_free(cipher_str);
-    gpgme_release(ctx);
+    char *result = NULL;
+    if (cipher_str) {
+        GString *cipher_gstr = g_string_new("");
+        g_string_append_len(cipher_gstr, cipher_str, len);
+        result = _remove_header_footer(cipher_gstr->str, PGP_MESSAGE_FOOTER);
+        g_string_free(cipher_gstr, TRUE);
+        gpgme_free(cipher_str);
+    }
 
     return result;
 }
@@ -448,28 +466,31 @@ p_gpg_encrypt(const char * const barejid, const char * const message)
 char *
 p_gpg_decrypt(const char * const barejid, const char * const cipher)
 {
-    char *cipher_with_headers = _add_header_footer(cipher, PGP_MESSAGE_HEADER, PGP_MESSAGE_FOOTER);
-
     gpgme_ctx_t ctx;
     gpgme_error_t error = gpgme_new(&ctx);
+
     if (error) {
         log_error("GPG: Failed to create gpgme context. %s %s", gpgme_strsource(error), gpgme_strerror(error));
         return NULL;
     }
 
-    gpgme_data_t plain_data;
+    char *cipher_with_headers = _add_header_footer(cipher, PGP_MESSAGE_HEADER, PGP_MESSAGE_FOOTER);
     gpgme_data_t cipher_data;
-    gpgme_data_new_from_mem (&cipher_data, cipher_with_headers, strlen(cipher_with_headers), 1);
+    gpgme_data_new_from_mem(&cipher_data, cipher_with_headers, strlen(cipher_with_headers), 1);
+    free(cipher_with_headers);
+
+    gpgme_data_t plain_data;
     gpgme_data_new(&plain_data);
 
     error = gpgme_op_decrypt(ctx, cipher_data, plain_data);
+    gpgme_data_release(cipher_data);
+    gpgme_release(ctx);
+
     if (error) {
         log_error("GPG: Failed to encrypt message. %s %s", gpgme_strsource(error), gpgme_strerror(error));
-        gpgme_release(ctx);
+        gpgme_data_release(plain_data);
         return NULL;
     }
-
-    gpgme_data_release(cipher_data);
 
     size_t len = 0;
     char *plain_str = gpgme_data_release_and_get_mem(plain_data, &len);
@@ -480,9 +501,13 @@ p_gpg_decrypt(const char * const barejid, const char * const cipher)
     }
     gpgme_free(plain_str);
 
-    gpgme_release(ctx);
-
     return result;
+}
+
+void
+p_gpg_free_decrypted(char *decrypted)
+{
+    g_free(decrypted);
 }
 
 static char*
