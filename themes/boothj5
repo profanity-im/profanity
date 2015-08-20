@@ -70,6 +70,7 @@ roster.offline=true
 roster.resource=false
 roster.by=presence
 roster.size=25
+roster.empty=true
 occupants=true
 occupants.size=15
 occupants.jid=false
