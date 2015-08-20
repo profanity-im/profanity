@@ -17,6 +17,7 @@ roster.offline=false
 roster.resource=false
 roster.by=presence
 roster.size=25
+roster.empty=false
 privileges=false
 presence=false
 intype=false

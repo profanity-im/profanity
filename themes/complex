@@ -18,6 +18,7 @@ roster.offline=true
 roster.resource=true
 roster.by=presence
 roster.size=25
+roster.empty=true
 privileges=true
 presence=true
 intype=true

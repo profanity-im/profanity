@@ -70,6 +70,7 @@ roster.offline=
 roster.resource=
 roster.by=
 roster.size=
+roster.empty=
 occupants=
 occupants.size=
 occupants.jid=
