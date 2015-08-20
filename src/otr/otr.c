@@ -110,7 +110,8 @@ static void
 cb_inject_message(void *opdata, const char *accountname,
     const char *protocol, const char *recipient, const char *message)
 {
-    message_send_chat_otr(recipient, message);
+    char *id = message_send_chat_otr(recipient, message);
+    free(id);
 }
 
 static void
@@ -291,7 +292,8 @@ otr_on_message_recv(const char * const barejid, const char * const resource, con
                 memmove(whitespace_base, whitespace_base+tag_length, tag_length);
                 char *otr_query_message = otr_start_query();
                 cons_show("OTR Whitespace pattern detected. Attempting to start OTR session...");
-                message_send_chat_otr(barejid, otr_query_message);
+                char *id = message_send_chat_otr(barejid, otr_query_message);
+                free(id);
             }
         }
     }
@@ -304,7 +306,8 @@ otr_on_message_recv(const char * const barejid, const char * const resource, con
     if (policy == PROF_OTRPOLICY_ALWAYS && *was_decrypted == FALSE && !whitespace_base) {
         char *otr_query_message = otr_start_query();
         cons_show("Attempting to start OTR session...");
-        message_send_chat_otr(barejid, otr_query_message);
+        char *id = message_send_chat_otr(barejid, otr_query_message);
+        free(id);
     }
 
     return decrypted;
@@ -705,6 +708,14 @@ otr_encrypt_message(const char * const to, const char * const message)
     }
 }
 
+static void
+_otr_tlv_free(OtrlTLV *tlvs)
+{
+    if (tlvs) {
+        otrl_tlv_free(tlvs);
+    }
+}
+
 char *
 otr_decrypt_message(const char * const from, const char * const message, gboolean *was_decrypted)
 {
@@ -720,7 +731,6 @@ otr_decrypt_message(const char * const from, const char * const message, gboolea
         // common tlv handling
         OtrlTLV *tlv = otrl_tlv_find(tlvs, OTRL_TLV_DISCONNECTED);
         if (tlv) {
-
             if (context) {
                 otrl_context_force_plaintext(context);
                 ui_gone_insecure(from);
@@ -729,16 +739,19 @@ otr_decrypt_message(const char * const from, const char * const message, gboolea
 
         // library version specific tlv handling
         otrlib_handle_tlvs(user_state, &ops, context, tlvs, smp_initiators);
+        _otr_tlv_free(tlvs);
 
         return NULL;
 
     // message was decrypted, return to user
     } else if (decrypted) {
+        _otr_tlv_free(tlvs);
         *was_decrypted = TRUE;
         return decrypted;
 
     // normal non OTR message
     } else {
+        _otr_tlv_free(tlvs);
         *was_decrypted = FALSE;
         return strdup(message);
     }
