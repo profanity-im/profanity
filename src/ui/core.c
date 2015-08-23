@@ -707,6 +707,8 @@ ui_close_connected_win(int index)
             ProfMucWin *mucwin = (ProfMucWin*) window;
             assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
             presence_leave_chat_room(mucwin->roomjid);
+            muc_leave(mucwin->roomjid);
+            ui_leave_room(mucwin->roomjid);
         } else if (window->type == WIN_CHAT) {
             ProfChatWin *chatwin = (ProfChatWin*) window;
             assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
