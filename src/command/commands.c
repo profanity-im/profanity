@@ -486,8 +486,12 @@ cmd_account(ProfWin *window, const char * const command, gchar **args)
                     }
                     cons_show("");
                 } else if (strcmp(property, "pgpkeyid") == 0) {
-                    accounts_set_pgp_keyid(account_name, value);
-                    cons_show("Updated PGP key ID for account %s: %s", account_name, value);
+                    if (!p_gpg_valid_key(value)) {
+                        cons_show("Invalid PGP key ID specified, see /pgp keys");
+                    } else {
+                        accounts_set_pgp_keyid(account_name, value);
+                        cons_show("Updated PGP key ID for account %s: %s", account_name, value);
+                    }
                     cons_show("");
                 } else if (valid_resource_presence_string(property)) {
                     int intval;
