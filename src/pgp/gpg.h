@@ -48,6 +48,7 @@ void p_gpg_on_disconnect(void);
 GSList* p_gpg_list_keys(void);
 gboolean p_gpg_addkey(const char * const jid, const char * const keyid);
 GHashTable* p_gpg_fingerprints(void);
+gboolean p_gpg_valid_key(const char * const keyid);
 gboolean p_gpg_available(const char * const barejid);
 const char* p_gpg_libver(void);
 void p_gpg_free_key(ProfPGPKey *key);

@@ -281,6 +281,35 @@ p_gpg_free_key(ProfPGPKey *key)
 }
 
 gboolean
+p_gpg_valid_key(const char * const keyid)
+{
+    gpgme_ctx_t ctx;
+    gpgme_error_t error = gpgme_new(&ctx);
+    if (error) {
+        log_error("GPG: Failed to create gpgme context. %s %s", gpgme_strsource(error), gpgme_strerror(error));
+        return FALSE;
+    }
+
+    gpgme_key_t key = NULL;
+    error = gpgme_get_key(ctx, keyid, &key, 1);
+
+    if (error || key == NULL) {
+        log_error("GPG: Failed to get key. %s %s", gpgme_strsource(error), gpgme_strerror(error));
+        gpgme_release(ctx);
+        return FALSE;
+    }
+
+    if (key) {
+        gpgme_release(ctx);
+        gpgme_key_unref(key);
+        return TRUE;
+    }
+
+    gpgme_release(ctx);
+    return FALSE;
+}
+
+gboolean
 p_gpg_available(const char * const barejid)
 {
     char *fp = g_hash_table_lookup(fingerprints, barejid);

@@ -4337,8 +4337,8 @@ cmd_pgp(ProfWin *window, const char * const command, gchar **args)
         }
 
         ProfAccount *account = accounts_get_account(jabber_get_account_name());
-        if (!account->pgp_keyid) {
-            ui_current_print_formatted_line('!', 0, "You must specify a PGP key ID for this account to start PGP encryption.");
+        if (!p_gpg_valid_key(account->pgp_keyid)) {
+            ui_current_print_formatted_line('!', 0, "You must specify a valid PGP key ID for this account to start PGP encryption.");
             account_free(account);
             return TRUE;
         }
