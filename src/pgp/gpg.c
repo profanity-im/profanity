@@ -484,13 +484,31 @@ p_gpg_decrypt(const char * const barejid, const char * const cipher)
 
     error = gpgme_op_decrypt(ctx, cipher_data, plain_data);
     gpgme_data_release(cipher_data);
-    gpgme_release(ctx);
 
     if (error) {
         log_error("GPG: Failed to encrypt message. %s %s", gpgme_strsource(error), gpgme_strerror(error));
         gpgme_data_release(plain_data);
+        gpgme_release(ctx);
         return NULL;
     }
+
+    gpgme_decrypt_result_t res = gpgme_op_decrypt_result(ctx);
+    if (res) {
+        gpgme_recipient_t recipient = res->recipients;
+        if (recipient) {
+            gpgme_key_t key;
+            error = gpgme_get_key(ctx, recipient->keyid, &key, 0);
+
+            if (!error && key) {
+                const char *addr = gpgme_key_get_string_attr(key, GPGME_ATTR_EMAIL, NULL, 0);
+                if (addr) {
+                    log_debug("GPG: Decrypted message for recipient: %s", addr);
+                }
+                gpgme_key_unref(key);
+            }
+        }
+    }
+    gpgme_release(ctx);
 
     size_t len = 0;
     char *plain_str = gpgme_data_release_and_get_mem(plain_data, &len);
