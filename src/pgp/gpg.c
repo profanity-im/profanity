@@ -493,7 +493,7 @@ p_gpg_encrypt(const char * const barejid, const char * const message)
 }
 
 char *
-p_gpg_decrypt(const char * const barejid, const char * const cipher)
+p_gpg_decrypt(const char * const cipher)
 {
     gpgme_ctx_t ctx;
     gpgme_error_t error = gpgme_new(&ctx);
