@@ -486,8 +486,12 @@ cmd_account(ProfWin *window, const char * const command, gchar **args)
                     }
                     cons_show("");
                 } else if (strcmp(property, "pgpkeyid") == 0) {
-                    accounts_set_pgp_keyid(account_name, value);
-                    cons_show("Updated PGP key ID for account %s: %s", account_name, value);
+                    if (!p_gpg_valid_key(value)) {
+                        cons_show("Invalid PGP key ID specified, see /pgp keys");
+                    } else {
+                        accounts_set_pgp_keyid(account_name, value);
+                        cons_show("Updated PGP key ID for account %s: %s", account_name, value);
+                    }
                     cons_show("");
                 } else if (valid_resource_presence_string(property)) {
                     int intval;
@@ -4337,8 +4341,8 @@ cmd_pgp(ProfWin *window, const char * const command, gchar **args)
         }
 
         ProfAccount *account = accounts_get_account(jabber_get_account_name());
-        if (!account->pgp_keyid) {
-            ui_current_print_formatted_line('!', 0, "You must specify a PGP key ID for this account to start PGP encryption.");
+        if (!p_gpg_valid_key(account->pgp_keyid)) {
+            ui_current_print_formatted_line('!', 0, "You must specify a valid PGP key ID for this account to start PGP encryption.");
             account_free(account);
             return TRUE;
         }
