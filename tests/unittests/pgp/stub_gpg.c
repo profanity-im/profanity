@@ -39,7 +39,7 @@ gboolean p_gpg_available(const char * const barejid)
 {
     return FALSE;
 }
-char * p_gpg_decrypt(const char * const barejid, const char * const cipher)
+char * p_gpg_decrypt(const char * const cipher)
 {
     return NULL;
 }

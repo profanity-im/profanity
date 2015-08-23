@@ -210,7 +210,7 @@ sv_ev_incoming_message(char *barejid, char *resource, char *message, char *enc_m
         if (enc_mode == PROF_ENC_OTR) {
             win_println((ProfWin*)chatwin, 0, "PGP encrypted message received whilst in OTR session.");
         } else { // PROF_ENC_NONE, PROF_ENC_PGP
-            char *decrypted = p_gpg_decrypt(barejid, enc_message);
+            char *decrypted = p_gpg_decrypt(enc_message);
             if (decrypted) {
                 if (enc_mode == PROF_ENC_NONE) {
                     win_println((ProfWin*)chatwin, 0, "PGP encryption enabled.");
@@ -263,7 +263,7 @@ sv_ev_incoming_message(char *barejid, char *resource, char *message, char *enc_m
 #ifndef HAVE_LIBOTR
 #ifdef HAVE_LIBGPGME
     if (enc_message) {
-        char *decrypted = p_gpg_decrypt(barejid, enc_message);
+        char *decrypted = p_gpg_decrypt(enc_message);
         if (decrypted) {
             ui_incoming_msg(chatwin, resource, decrypted, NULL, new_win);
             chat_log_pgp_msg_in(barejid, decrypted);
