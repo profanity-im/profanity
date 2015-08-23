@@ -153,7 +153,7 @@ p_gpg_on_connect(const char * const barejid)
             error = gpgme_get_key(ctx, keyid, &key, 1);
             g_free(keyid);
             if (error || key == NULL) {
-                log_error("GPG: Failed to get key. %s %s", gpgme_strsource(error), gpgme_strerror(error));
+                log_warning("GPG: Failed to get key for %s: %s %s", jid, gpgme_strsource(error), gpgme_strerror(error));
                 continue;
             }
 
