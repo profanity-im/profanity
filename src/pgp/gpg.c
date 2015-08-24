@@ -215,11 +215,38 @@ p_gpg_addkey(const char * const jid, const char * const keyid)
     return TRUE;
 }
 
-GSList *
+static ProfPGPKey *
+_p_gpg_key_new(void)
+{
+    ProfPGPKey *p_pgpkey = malloc(sizeof(ProfPGPKey));
+    p_pgpkey->id = NULL;
+    p_pgpkey->name = NULL;
+    p_pgpkey->fp = NULL;
+    p_pgpkey->encrypt = FALSE;
+    p_pgpkey->sign = FALSE;
+    p_pgpkey->certify = FALSE;
+    p_pgpkey->authenticate = FALSE;
+    p_pgpkey->secret = FALSE;
+
+    return p_pgpkey;
+}
+
+static void
+_p_gpg_free_key(ProfPGPKey *key)
+{
+    if (key) {
+        free(key->id);
+        free(key->name);
+        free(key->fp);
+        free(key);
+    }
+}
+
+GHashTable *
 p_gpg_list_keys(void)
 {
     gpgme_error_t error;
-    GSList *result = NULL;
+    GHashTable *result = g_hash_table_new_full(g_str_hash, g_str_equal, free, (GDestroyNotify)_p_gpg_free_key);
 
     gpgme_ctx_t ctx;
     error = gpgme_new(&ctx);
@@ -229,33 +256,71 @@ p_gpg_list_keys(void)
         return NULL;
     }
 
-    error = gpgme_op_keylist_start(ctx, NULL, 1);
+    error = gpgme_op_keylist_start(ctx, NULL, 0);
     if (error == GPG_ERR_NO_ERROR) {
+        gpgme_key_t key;
+        error = gpgme_op_keylist_next(ctx, &key);
         while (!error) {
-            gpgme_key_t key;
-            error = gpgme_op_keylist_next(ctx, &key);
+            gpgme_subkey_t sub = key->subkeys;
 
-            if (error) {
-                break;
+            ProfPGPKey *p_pgpkey = _p_gpg_key_new();
+            p_pgpkey->id = strdup(sub->keyid);
+            p_pgpkey->name = strdup(key->uids->uid);
+            p_pgpkey->fp = strdup(sub->fpr);
+            if (sub->can_encrypt) p_pgpkey->encrypt = TRUE;
+            if (sub->can_authenticate) p_pgpkey->authenticate = TRUE;
+            if (sub->can_certify) p_pgpkey->certify = TRUE;
+            if (sub->can_sign) p_pgpkey->sign = TRUE;
+
+            sub = sub->next;
+            while (sub) {
+                if (sub->can_encrypt) p_pgpkey->encrypt = TRUE;
+                if (sub->can_authenticate) p_pgpkey->authenticate = TRUE;
+                if (sub->can_certify) p_pgpkey->certify = TRUE;
+                if (sub->can_sign) p_pgpkey->sign = TRUE;
+
+                sub = sub->next;
             }
 
-            ProfPGPKey *p_pgpkey = malloc(sizeof(ProfPGPKey));
-            p_pgpkey->id = strdup(key->subkeys->keyid);
-            p_pgpkey->name = strdup(key->uids->uid);
-            p_pgpkey->fp = strdup(key->subkeys->fpr);
-
-            result = g_slist_append(result, p_pgpkey);
+            g_hash_table_insert(result, strdup(p_pgpkey->name), p_pgpkey);
 
             gpgme_key_unref(key);
+            error = gpgme_op_keylist_next(ctx, &key);
         }
-    } else {
-        log_error("GPG: Could not list keys. %s %s", gpgme_strsource(error), gpgme_strerror(error));
+    }
+
+    error = gpgme_op_keylist_start(ctx, NULL, 1);
+    if (error == GPG_ERR_NO_ERROR) {
+        gpgme_key_t key;
+        error = gpgme_op_keylist_next(ctx, &key);
+        while (!error) {
+            gpgme_subkey_t sub = key->subkeys;
+            while (sub) {
+                if (sub->secret) {
+                    ProfPGPKey *p_pgpkey = g_hash_table_lookup(result, key->uids->uid);
+                    if (p_pgpkey) {
+                        p_pgpkey->secret = TRUE;
+                    }
+                }
+                sub = sub->next;
+            }
+
+            gpgme_key_unref(key);
+            error = gpgme_op_keylist_next(ctx, &key);
+        }
     }
 
     gpgme_release(ctx);
 
     return result;
 }
+
+void
+p_gpg_free_keys(GHashTable *keys)
+{
+    g_hash_table_destroy(keys);
+}
+
 
 GHashTable *
 p_gpg_fingerprints(void)
@@ -267,17 +332,6 @@ const char*
 p_gpg_libver(void)
 {
     return libversion;
-}
-
-void
-p_gpg_free_key(ProfPGPKey *key)
-{
-    if (key) {
-        free(key->id);
-        free(key->name);
-        free(key->fp);
-        free(key);
-    }
 }
 
 gboolean
