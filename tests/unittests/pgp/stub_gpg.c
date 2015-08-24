@@ -5,7 +5,7 @@
 void p_gpg_init(void) {}
 void p_gpg_close(void) {}
 
-GSList* p_gpg_list_keys(void)
+GHashTable* p_gpg_list_keys(void)
 {
     return NULL;
 }
@@ -20,8 +20,6 @@ const char* p_gpg_libver(void)
 {
     return NULL;
 }
-
-void p_gpg_free_key(ProfPGPKey *key) {}
 
 void p_gpg_verify(const char * const barejid, const char *const sign) {}
 
@@ -53,4 +51,6 @@ gboolean p_gpg_addkey(const char * const jid, const char * const keyid)
 }
 
 void p_gpg_free_decrypted(char *decrypted) {}
+
+void p_gpg_free_keys(GHashTable *keys) {}
 
