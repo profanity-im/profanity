@@ -4211,22 +4211,29 @@ cmd_pgp(ProfWin *window, const char * const command, gchar **args)
     }
 
     if (g_strcmp0(args[0], "keys") == 0) {
-        GSList *keys = p_gpg_list_keys();
-        if (!keys) {
+        GHashTable *keys = p_gpg_list_keys();
+        if (!keys || g_hash_table_size(keys) == 0) {
             cons_show("No keys found");
             return TRUE;
         }
 
         cons_show("PGP keys:");
-        GSList *curr = keys;
+        GList *keylist = g_hash_table_get_keys(keys);
+        GList *curr = keylist;
         while (curr) {
-            ProfPGPKey *key = curr->data;
+            ProfPGPKey *key = g_hash_table_lookup(keys, curr->data);
             cons_show("  %s", key->name);
             cons_show("    ID          : %s", key->id);
             cons_show("    Fingerprint : %s", key->fp);
-            curr = g_slist_next(curr);
+            if (key->secret) {
+                cons_show("    Type        : PUBLIC, PRIVATE");
+            } else {
+                cons_show("    Type        : PUBLIC");
+            }
+            curr = g_list_next(curr);
         }
-        g_slist_free_full(keys, (GDestroyNotify)p_gpg_free_key);
+        g_list_free(keylist);
+        p_gpg_free_keys(keys);
         return TRUE;
     }
 
