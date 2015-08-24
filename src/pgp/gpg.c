@@ -229,7 +229,7 @@ p_gpg_list_keys(void)
         return NULL;
     }
 
-    error = gpgme_op_keylist_start(ctx, NULL, 1);
+    error = gpgme_op_keylist_start(ctx, NULL, 0);
     if (error == GPG_ERR_NO_ERROR) {
         while (!error) {
             gpgme_key_t key;
