@@ -60,7 +60,7 @@ void win_show_status_string(ProfWin *window, const char * const from,
     GDateTime *last_activity, const char * const pre,
     const char * const default_show);
 void win_print_incoming_message(ProfWin *window, GDateTime *timestamp,
-    const char * const from, const char * const message);
+    const char * const from, const char * const message, prof_enc_t enc_mode);
 void win_print_with_receipt(ProfWin *window, const char show_char, int pad_indent, GTimeVal *tstamp, int flags,
     theme_item_t theme_item, const char * const from, const char * const message, char *id);
 void win_newline(ProfWin *window);
