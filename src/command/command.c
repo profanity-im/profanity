@@ -3609,6 +3609,15 @@ _account_autocomplete(ProfWin *window, const char * const input)
                 g_strfreev(args);
                 return found;
             }
+        } else if ((g_strv_length(args) > 3) && (g_strcmp0(args[2], "pgpkeyid")) == 0) {
+            g_string_append(beginning, " ");
+            g_string_append(beginning, args[2]);
+            found = autocomplete_param_with_func(input, beginning->str, p_gpg_autocomplete_key);
+            g_string_free(beginning, TRUE);
+            if (found) {
+                g_strfreev(args);
+                return found;
+            }
         } else {
             found = autocomplete_param_with_ac(input, beginning->str, account_set_ac, TRUE);
             g_string_free(beginning, TRUE);
