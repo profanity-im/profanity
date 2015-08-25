@@ -59,6 +59,9 @@
 #ifdef HAVE_LIBOTR
 #include "otr/otr.h"
 #endif
+#ifdef HAVE_LIBGPGME
+#include "pgp/gpg.h"
+#endif
 #include "profanity.h"
 #include "tools/autocomplete.h"
 #include "tools/parser.h"
@@ -2242,6 +2245,9 @@ cmd_reset_autocomplete(ProfWin *window)
     accounts_reset_enabled_search();
     prefs_reset_boolean_choice();
     presence_reset_sub_request_search();
+#ifdef HAVE_LIBGPGME
+    p_gpg_autocomplete_key_reset();
+#endif
     autocomplete_reset(help_ac);
     autocomplete_reset(help_commands_ac);
     autocomplete_reset(notify_ac);
@@ -2982,6 +2988,26 @@ _pgp_autocomplete(ProfWin *window, const char * const input)
     if (found) {
         return found;
     }
+
+#ifdef HAVE_LIBGPGME
+    gboolean result;
+    gchar **args = parse_args(input, 2, 3, &result);
+    if ((strncmp(input, "/pgp", 4) == 0) && (result == TRUE)) {
+        GString *beginning = g_string_new("/pgp ");
+        g_string_append(beginning, args[0]);
+        if (args[1]) {
+            g_string_append(beginning, " ");
+            g_string_append(beginning, args[1]);
+        }
+        found = autocomplete_param_with_func(input, beginning->str, p_gpg_autocomplete_key);
+        g_string_free(beginning, TRUE);
+        if (found) {
+            g_strfreev(args);
+            return found;
+        }
+    }
+    g_strfreev(args);
+#endif
 
     found = autocomplete_param_with_func(input, "/pgp setkey", roster_barejid_autocomplete);
     if (found) {

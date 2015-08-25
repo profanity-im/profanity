@@ -47,6 +47,7 @@
 #include "pgp/gpg.h"
 #include "log.h"
 #include "common.h"
+#include "tools/autocomplete.h"
 
 #define PGP_SIGNATURE_HEADER "-----BEGIN PGP SIGNATURE-----"
 #define PGP_SIGNATURE_FOOTER "-----END PGP SIGNATURE-----"
@@ -58,6 +59,8 @@ static GHashTable *pubkeys;
 
 static gchar *pubsloc;
 static GKeyFile *pubkeyfile;
+
+static Autocomplete key_ac;
 
 static char* _remove_header_footer(char *str, const char * const footer);
 static char* _add_header_footer(const char * const str, const char * const header, const char * const footer);
@@ -80,6 +83,10 @@ p_gpg_init(void)
     gpgme_set_locale(NULL, LC_CTYPE, setlocale(LC_CTYPE, NULL));
 
     pubkeys = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, (GDestroyNotify)_p_gpg_free_pubkeyid);
+
+    key_ac = autocomplete_new();
+    GHashTable *keys = p_gpg_list_keys();
+    p_gpg_free_keys(keys);
 }
 
 void
@@ -97,6 +104,9 @@ p_gpg_close(void)
 
     free(pubsloc);
     pubsloc = NULL;
+
+    autocomplete_free(key_ac);
+    key_ac = NULL;
 }
 
 void
@@ -326,6 +336,16 @@ p_gpg_list_keys(void)
     }
 
     gpgme_release(ctx);
+
+    autocomplete_clear(key_ac);
+    GList *ids = g_hash_table_get_keys(result);
+    GList *curr = ids;
+    while (curr) {
+        ProfPGPKey *key = g_hash_table_lookup(result, curr->data);
+        autocomplete_add(key_ac, key->id);
+        curr = curr->next;
+    }
+    g_list_free(ids);
 
     return result;
 }
@@ -637,6 +657,18 @@ void
 p_gpg_free_decrypted(char *decrypted)
 {
     g_free(decrypted);
+}
+
+char *
+p_gpg_autocomplete_key(const char * const search_str)
+{
+    return autocomplete_complete(key_ac, search_str, TRUE);
+}
+
+void
+p_gpg_autocomplete_key_reset(void)
+{
+    autocomplete_reset(key_ac);
 }
 
 static char*
