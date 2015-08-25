@@ -196,7 +196,7 @@ p_gpg_addkey(const char * const jid, const char * const keyid)
     }
 
     gpgme_key_t key = NULL;
-    error = gpgme_get_key(ctx, keyid, &key, 1);
+    error = gpgme_get_key(ctx, keyid, &key, 0);
     gpgme_release(ctx);
 
     if (error || key == NULL) {
@@ -406,8 +406,16 @@ p_gpg_verify(const char * const barejid, const char *const sign)
     gpgme_verify_result_t result = gpgme_op_verify_result(ctx);
     if (result) {
         if (result->signatures) {
-            log_debug("Fingerprint found for %s: %s ", barejid, result->signatures->fpr);
-            g_hash_table_replace(fingerprints, strdup(barejid), strdup(result->signatures->fpr));
+            gpgme_key_t key = NULL;
+            error = gpgme_get_key(ctx, result->signatures->fpr, &key, 0);
+            if (error) {
+                log_debug("Could not find PGP key with ID %s for %s", result->signatures->fpr, barejid);
+            } else {
+                log_debug("Fingerprint found for %s: %s ", barejid, key->subkeys->fpr);
+                g_hash_table_replace(fingerprints, strdup(barejid), strdup(key->subkeys->fpr));
+            }
+
+            gpgme_key_unref(key);
         }
     }
 
