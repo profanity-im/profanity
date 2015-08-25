@@ -4287,8 +4287,12 @@ cmd_pgp(ProfWin *window, const char * const command, gchar **args)
         GList *curr = jids;
         while (curr) {
             char *jid = curr->data;
-            char *pubkey = g_hash_table_lookup(pubkeys, jid);
-            cons_show("  %s: %s", jid, pubkey);
+            ProfPGPPubKeyId *pubkeyid = g_hash_table_lookup(pubkeys, jid);
+            if (pubkeyid->received) {
+                cons_show("  %s: %s (received)", jid, pubkeyid->id);
+            } else {
+                cons_show("  %s: %s (stored)", jid, pubkeyid->id);
+            }
             curr = g_list_next(curr);
         }
         g_list_free(jids);

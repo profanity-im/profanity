@@ -46,6 +46,11 @@ typedef struct pgp_key_t {
     gboolean secret;
 } ProfPGPKey;
 
+typedef struct pgp_pubkeyid_t {
+    char *id;
+    gboolean received;
+} ProfPGPPubKeyId;
+
 void p_gpg_init(void);
 void p_gpg_close(void);
 void p_gpg_on_connect(const char * const barejid);

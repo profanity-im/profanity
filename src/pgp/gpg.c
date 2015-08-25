@@ -64,13 +64,22 @@ static char* _add_header_footer(const char * const str, const char * const heade
 static void _save_pubkeys(void);
 
 void
+_p_gpg_free_pubkeyid(ProfPGPPubKeyId *pubkeyid)
+{
+    if (pubkeyid) {
+        free(pubkeyid->id);
+    }
+    free(pubkeyid);
+}
+
+void
 p_gpg_init(void)
 {
     libversion = gpgme_check_version(NULL);
     log_debug("GPG: Found gpgme version: %s", libversion);
     gpgme_set_locale(NULL, LC_CTYPE, setlocale(LC_CTYPE, NULL));
 
-    pubkeys = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, g_free);
+    pubkeys = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, (GDestroyNotify)_p_gpg_free_pubkeyid);
 }
 
 void
@@ -156,7 +165,10 @@ p_gpg_on_connect(const char * const barejid)
                 continue;
             }
 
-            g_hash_table_replace(pubkeys, strdup(jid), strdup(keyid));
+            ProfPGPPubKeyId *pubkeyid = malloc(sizeof(ProfPGPPubKeyId));
+            pubkeyid->id = strdup(keyid);
+            pubkeyid->received = FALSE;
+            g_hash_table_replace(pubkeys, strdup(jid), pubkeyid);
             g_free(keyid);
             gpgme_key_unref(key);
         }
@@ -173,7 +185,7 @@ p_gpg_on_disconnect(void)
 {
     if (pubkeys) {
         g_hash_table_destroy(pubkeys);
-        pubkeys = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, g_free);
+        pubkeys = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, (GDestroyNotify)_p_gpg_free_pubkeyid);
     }
 
     if (pubkeyfile) {
@@ -209,7 +221,10 @@ p_gpg_addkey(const char * const jid, const char * const keyid)
     _save_pubkeys();
 
     // update in memory pubkeys list
-    g_hash_table_replace(pubkeys, strdup(jid), strdup(keyid));
+    ProfPGPPubKeyId *pubkeyid = malloc(sizeof(ProfPGPPubKeyId));
+    pubkeyid->id = strdup(keyid);
+    pubkeyid->received = FALSE;
+    g_hash_table_replace(pubkeys, strdup(jid), pubkeyid);
     gpgme_key_unref(key);
 
     return TRUE;
@@ -412,7 +427,10 @@ p_gpg_verify(const char * const barejid, const char *const sign)
                 log_debug("Could not find PGP key with ID %s for %s", result->signatures->fpr, barejid);
             } else {
                 log_debug("Fingerprint found for %s: %s ", barejid, key->subkeys->fpr);
-                g_hash_table_replace(pubkeys, strdup(barejid), strdup(key->subkeys->keyid));
+                ProfPGPPubKeyId *pubkeyid = malloc(sizeof(ProfPGPPubKeyId));
+                pubkeyid->id = strdup(key->subkeys->keyid);
+                pubkeyid->received = TRUE;
+                g_hash_table_replace(pubkeys, strdup(barejid), pubkeyid);
             }
 
             gpgme_key_unref(key);
@@ -493,9 +511,11 @@ p_gpg_sign(const char * const str, const char * const fp)
 char *
 p_gpg_encrypt(const char * const barejid, const char * const message)
 {
-    char *keyid = g_hash_table_lookup(pubkeys, barejid);
-
-    if (!keyid) {
+    ProfPGPPubKeyId *pubkeyid = g_hash_table_lookup(pubkeys, barejid);
+    if (!pubkeyid) {
+        return NULL;
+    }
+    if (!pubkeyid->id) {
         return NULL;
     }
 
@@ -512,7 +532,7 @@ p_gpg_encrypt(const char * const barejid, const char * const message)
     }
 
     gpgme_key_t key;
-    error = gpgme_get_key(ctx, keyid, &key, 0);
+    error = gpgme_get_key(ctx, pubkeyid->id, &key, 0);
 
     if (error || key == NULL) {
         log_error("GPG: Failed to get key. %s %s", gpgme_strsource(error), gpgme_strerror(error));
