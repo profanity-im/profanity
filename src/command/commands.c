@@ -486,12 +486,16 @@ cmd_account(ProfWin *window, const char * const command, gchar **args)
                     }
                     cons_show("");
                 } else if (strcmp(property, "pgpkeyid") == 0) {
+#ifdef HAVE_LIBGPGME
                     if (!p_gpg_valid_key(value)) {
                         cons_show("Invalid PGP key ID specified, see /pgp keys");
                     } else {
                         accounts_set_pgp_keyid(account_name, value);
                         cons_show("Updated PGP key ID for account %s: %s", account_name, value);
                     }
+#else
+                    cons_show("PGP support is not included in this build.");
+#endif
                     cons_show("");
                 } else if (valid_resource_presence_string(property)) {
                     int intval;
