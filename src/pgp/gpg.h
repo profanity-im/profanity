@@ -53,7 +53,7 @@ void p_gpg_on_disconnect(void);
 GHashTable* p_gpg_list_keys(void);
 void p_gpg_free_keys(GHashTable *keys);
 gboolean p_gpg_addkey(const char * const jid, const char * const keyid);
-GHashTable* p_gpg_fingerprints(void);
+GHashTable* p_gpg_pubkeys(void);
 gboolean p_gpg_valid_key(const char * const keyid);
 gboolean p_gpg_available(const char * const barejid);
 const char* p_gpg_libver(void);

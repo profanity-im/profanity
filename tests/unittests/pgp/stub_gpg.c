@@ -11,7 +11,7 @@ GHashTable* p_gpg_list_keys(void)
 }
 
 GHashTable*
-p_gpg_fingerprints(void)
+p_gpg_pubkeys(void)
 {
     return NULL;
 }

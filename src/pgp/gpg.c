@@ -54,14 +54,14 @@
 #define PGP_MESSAGE_FOOTER "-----END PGP MESSAGE-----"
 
 static const char *libversion;
-static GHashTable *fingerprints;
+static GHashTable *pubkeys;
 
-static gchar *fpsloc;
-static GKeyFile *fpskeyfile;
+static gchar *pubsloc;
+static GKeyFile *pubkeyfile;
 
 static char* _remove_header_footer(char *str, const char * const footer);
 static char* _add_header_footer(const char * const str, const char * const header, const char * const footer);
-static void _save_fps(void);
+static void _save_pubkeys(void);
 
 void
 p_gpg_init(void)
@@ -70,65 +70,65 @@ p_gpg_init(void)
     log_debug("GPG: Found gpgme version: %s", libversion);
     gpgme_set_locale(NULL, LC_CTYPE, setlocale(LC_CTYPE, NULL));
 
-    fingerprints = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, g_free);
+    pubkeys = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, g_free);
 }
 
 void
 p_gpg_close(void)
 {
-    if (fingerprints) {
-        g_hash_table_destroy(fingerprints);
-        fingerprints = NULL;
+    if (pubkeys) {
+        g_hash_table_destroy(pubkeys);
+        pubkeys = NULL;
     }
 
-    if (fpskeyfile) {
-        g_key_file_free(fpskeyfile);
-        fpskeyfile = NULL;
+    if (pubkeyfile) {
+        g_key_file_free(pubkeyfile);
+        pubkeyfile = NULL;
     }
 
-    free(fpsloc);
-    fpsloc = NULL;
+    free(pubsloc);
+    pubsloc = NULL;
 }
 
 void
 p_gpg_on_connect(const char * const barejid)
 {
     gchar *data_home = xdg_get_data_home();
-    GString *fpsfile = g_string_new(data_home);
+    GString *pubsfile = g_string_new(data_home);
     free(data_home);
 
     gchar *account_dir = str_replace(barejid, "@", "_at_");
-    g_string_append(fpsfile, "/profanity/pgp/");
-    g_string_append(fpsfile, account_dir);
+    g_string_append(pubsfile, "/profanity/pgp/");
+    g_string_append(pubsfile, account_dir);
     free(account_dir);
 
     // mkdir if doesn't exist for account
     errno = 0;
-    int res = g_mkdir_with_parents(fpsfile->str, S_IRWXU);
+    int res = g_mkdir_with_parents(pubsfile->str, S_IRWXU);
     if (res == -1) {
         char *errmsg = strerror(errno);
         if (errmsg) {
-            log_error("Error creating directory: %s, %s", fpsfile->str, errmsg);
+            log_error("Error creating directory: %s, %s", pubsfile->str, errmsg);
         } else {
-            log_error("Error creating directory: %s", fpsfile->str);
+            log_error("Error creating directory: %s", pubsfile->str);
         }
     }
 
-    // create or read fingerprints keyfile
-    g_string_append(fpsfile, "/fingerprints");
-    fpsloc = fpsfile->str;
-    g_string_free(fpsfile, FALSE);
+    // create or read publickeys
+    g_string_append(pubsfile, "/pubkeys");
+    pubsloc = pubsfile->str;
+    g_string_free(pubsfile, FALSE);
 
-    if (g_file_test(fpsloc, G_FILE_TEST_EXISTS)) {
-        g_chmod(fpsloc, S_IRUSR | S_IWUSR);
+    if (g_file_test(pubsloc, G_FILE_TEST_EXISTS)) {
+        g_chmod(pubsloc, S_IRUSR | S_IWUSR);
     }
 
-    fpskeyfile = g_key_file_new();
-    g_key_file_load_from_file(fpskeyfile, fpsloc, G_KEY_FILE_KEEP_COMMENTS, NULL);
+    pubkeyfile = g_key_file_new();
+    g_key_file_load_from_file(pubkeyfile, pubsloc, G_KEY_FILE_KEEP_COMMENTS, NULL);
 
     // load each keyid
     gsize len = 0;
-    gchar **jids = g_key_file_get_groups(fpskeyfile, &len);
+    gchar **jids = g_key_file_get_groups(pubkeyfile, &len);
 
     gpgme_ctx_t ctx;
     gpgme_error_t error = gpgme_new(&ctx);
@@ -143,21 +143,21 @@ p_gpg_on_connect(const char * const barejid)
     for (i = 0; i < len; i++) {
         GError *gerr = NULL;
         gchar *jid = jids[i];
-        gchar *keyid = g_key_file_get_string(fpskeyfile, jid, "keyid", &gerr);
+        gchar *keyid = g_key_file_get_string(pubkeyfile, jid, "keyid", &gerr);
         if (gerr) {
             log_error("Error loading PGP key id for %s", jid);
             g_error_free(gerr);
             g_free(keyid);
         } else {
             gpgme_key_t key = NULL;
-            error = gpgme_get_key(ctx, keyid, &key, 1);
-            g_free(keyid);
+            error = gpgme_get_key(ctx, keyid, &key, 0);
             if (error || key == NULL) {
                 log_warning("GPG: Failed to get key for %s: %s %s", jid, gpgme_strsource(error), gpgme_strerror(error));
                 continue;
             }
 
-            g_hash_table_replace(fingerprints, strdup(jid), strdup(key->subkeys->fpr));
+            g_hash_table_replace(pubkeys, strdup(jid), strdup(keyid));
+            g_free(keyid);
             gpgme_key_unref(key);
         }
     }
@@ -165,24 +165,24 @@ p_gpg_on_connect(const char * const barejid)
     gpgme_release(ctx);
     g_strfreev(jids);
 
-    _save_fps();
+    _save_pubkeys();
 }
 
 void
 p_gpg_on_disconnect(void)
 {
-    if (fingerprints) {
-        g_hash_table_destroy(fingerprints);
-        fingerprints = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, g_free);
+    if (pubkeys) {
+        g_hash_table_destroy(pubkeys);
+        pubkeys = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, g_free);
     }
 
-    if (fpskeyfile) {
-        g_key_file_free(fpskeyfile);
-        fpskeyfile = NULL;
+    if (pubkeyfile) {
+        g_key_file_free(pubkeyfile);
+        pubkeyfile = NULL;
     }
 
-    free(fpsloc);
-    fpsloc = NULL;
+    free(pubsloc);
+    pubsloc = NULL;
 }
 
 gboolean
@@ -204,12 +204,12 @@ p_gpg_addkey(const char * const jid, const char * const keyid)
         return FALSE;
     }
 
-    // save to ID keyfile
-    g_key_file_set_string(fpskeyfile, jid, "keyid", keyid);
-    _save_fps();
+    // save to public key file
+    g_key_file_set_string(pubkeyfile, jid, "keyid", keyid);
+    _save_pubkeys();
 
-    // update in memory fingerprint list
-    g_hash_table_replace(fingerprints, strdup(jid), strdup(key->subkeys->fpr));
+    // update in memory pubkeys list
+    g_hash_table_replace(pubkeys, strdup(jid), strdup(keyid));
     gpgme_key_unref(key);
 
     return TRUE;
@@ -323,9 +323,9 @@ p_gpg_free_keys(GHashTable *keys)
 
 
 GHashTable *
-p_gpg_fingerprints(void)
+p_gpg_pubkeys(void)
 {
-    return fingerprints;
+    return pubkeys;
 }
 
 const char*
@@ -366,8 +366,8 @@ p_gpg_valid_key(const char * const keyid)
 gboolean
 p_gpg_available(const char * const barejid)
 {
-    char *fp = g_hash_table_lookup(fingerprints, barejid);
-    return (fp != NULL);
+    char *pubkey = g_hash_table_lookup(pubkeys, barejid);
+    return (pubkey != NULL);
 }
 
 void
@@ -412,7 +412,7 @@ p_gpg_verify(const char * const barejid, const char *const sign)
                 log_debug("Could not find PGP key with ID %s for %s", result->signatures->fpr, barejid);
             } else {
                 log_debug("Fingerprint found for %s: %s ", barejid, key->subkeys->fpr);
-                g_hash_table_replace(fingerprints, strdup(barejid), strdup(key->subkeys->fpr));
+                g_hash_table_replace(pubkeys, strdup(barejid), strdup(key->subkeys->keyid));
             }
 
             gpgme_key_unref(key);
@@ -493,9 +493,9 @@ p_gpg_sign(const char * const str, const char * const fp)
 char *
 p_gpg_encrypt(const char * const barejid, const char * const message)
 {
-    char *fp = g_hash_table_lookup(fingerprints, barejid);
+    char *keyid = g_hash_table_lookup(pubkeys, barejid);
 
-    if (!fp) {
+    if (!keyid) {
         return NULL;
     }
 
@@ -512,7 +512,7 @@ p_gpg_encrypt(const char * const barejid, const char * const message)
     }
 
     gpgme_key_t key;
-    error = gpgme_get_key(ctx, fp, &key, 0);
+    error = gpgme_get_key(ctx, keyid, &key, 0);
 
     if (error || key == NULL) {
         log_error("GPG: Failed to get key. %s %s", gpgme_strsource(error), gpgme_strerror(error));
@@ -588,7 +588,7 @@ p_gpg_decrypt(const char * const cipher)
         gpgme_recipient_t recipient = res->recipients;
         if (recipient) {
             gpgme_key_t key;
-            error = gpgme_get_key(ctx, recipient->keyid, &key, 0);
+            error = gpgme_get_key(ctx, recipient->keyid, &key, 1);
 
             if (!error && key) {
                 const char *addr = gpgme_key_get_string_attr(key, GPGME_ATTR_EMAIL, NULL, 0);
@@ -661,11 +661,11 @@ _add_header_footer(const char * const str, const char * const header, const char
 }
 
 static void
-_save_fps(void)
+_save_pubkeys(void)
 {
     gsize g_data_size;
-    gchar *g_fps_data = g_key_file_to_data(fpskeyfile, &g_data_size, NULL);
-    g_file_set_contents(fpsloc, g_fps_data, g_data_size, NULL);
-    g_chmod(fpsloc, S_IRUSR | S_IWUSR);
-    g_free(g_fps_data);
+    gchar *g_pubkeys_data = g_key_file_to_data(pubkeyfile, &g_data_size, NULL);
+    g_file_set_contents(pubsloc, g_pubkeys_data, g_data_size, NULL);
+    g_chmod(pubsloc, S_IRUSR | S_IWUSR);
+    g_free(g_pubkeys_data);
 }

@@ -4270,25 +4270,25 @@ cmd_pgp(ProfWin *window, const char * const command, gchar **args)
         return TRUE;
     }
 
-    if (g_strcmp0(args[0], "fps") == 0) {
+    if (g_strcmp0(args[0], "contacts") == 0) {
         jabber_conn_status_t conn_status = jabber_get_connection_status();
         if (conn_status != JABBER_CONNECTED) {
             cons_show("You are not currently connected.");
             return TRUE;
         }
-        GHashTable *fingerprints = p_gpg_fingerprints();
-        GList *jids = g_hash_table_get_keys(fingerprints);
+        GHashTable *pubkeys = p_gpg_pubkeys();
+        GList *jids = g_hash_table_get_keys(pubkeys);
         if (!jids) {
-            cons_show("No PGP fingerprints available.");
+            cons_show("No contacts found with PGP public keys assigned.");
             return TRUE;
         }
 
-        cons_show("Known PGP fingerprints:");
+        cons_show("Assigned PGP public keys:");
         GList *curr = jids;
         while (curr) {
             char *jid = curr->data;
-            char *fingerprint = g_hash_table_lookup(fingerprints, jid);
-            cons_show("  %s: %s", jid, fingerprint);
+            char *pubkey = g_hash_table_lookup(pubkeys, jid);
+            cons_show("  %s: %s", jid, pubkey);
             curr = g_list_next(curr);
         }
         g_list_free(jids);

@@ -1146,7 +1146,7 @@ static struct cmd_t command_defs[] =
         CMD_SYN(
             "/pgp libver",
             "/pgp keys",
-            "/pgp fps",
+            "/pgp contacts",
             "/pgp setkey <contact> <keyid>",
             "/pgp start [<contact>]",
             "/pgp end",
@@ -1156,8 +1156,8 @@ static struct cmd_t command_defs[] =
             "See the /account command to set your own PGP key.")
         CMD_ARGS(
             { "libver",                   "Show which version of the libgpgme library is being used." },
-            { "keys",                     "List all keys." },
-            { "fps",                      "Show known fingerprints." },
+            { "keys",                     "List all keys known to the system." },
+            { "contacts",                      "Show contacts with assigned public keys." },
             { "setkey <contact> <keyid>", "Manually associate a key ID with a JID." },
             { "start [<contact>]",        "Start PGP encrypted chat, current contact will be used if not specified." },
             { "end",                      "End PGP encrypted chat with the current recipient." },
@@ -2053,7 +2053,7 @@ cmd_init(void)
 
     pgp_ac = autocomplete_new();
     autocomplete_add(pgp_ac, "keys");
-    autocomplete_add(pgp_ac, "fps");
+    autocomplete_add(pgp_ac, "contacts");
     autocomplete_add(pgp_ac, "setkey");
     autocomplete_add(pgp_ac, "libver");
     autocomplete_add(pgp_ac, "start");
