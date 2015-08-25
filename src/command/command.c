@@ -3609,6 +3609,7 @@ _account_autocomplete(ProfWin *window, const char * const input)
                 g_strfreev(args);
                 return found;
             }
+#ifdef HAVE_LIBGPGME
         } else if ((g_strv_length(args) > 3) && (g_strcmp0(args[2], "pgpkeyid")) == 0) {
             g_string_append(beginning, " ");
             g_string_append(beginning, args[2]);
@@ -3618,6 +3619,7 @@ _account_autocomplete(ProfWin *window, const char * const input)
                 g_strfreev(args);
                 return found;
             }
+#endif
         } else {
             found = autocomplete_param_with_ac(input, beginning->str, account_set_ac, TRUE);
             g_string_free(beginning, TRUE);
