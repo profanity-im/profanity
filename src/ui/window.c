@@ -885,9 +885,9 @@ win_print_incoming_message(ProfWin *window, GDateTime *timestamp,
     {
         case WIN_CHAT:
             if (enc_mode == PROF_ENC_OTR) {
-                enc_char = 'O';
+                enc_char = prefs_get_otr_char();
             } else if (enc_mode == PROF_ENC_PGP) {
-                enc_char = 'P';
+                enc_char = prefs_get_pgp_char();
             }
             win_print(window, enc_char, 0, timestamp, NO_ME, THEME_TEXT_THEM, from, message);
             break;

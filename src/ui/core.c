@@ -1291,9 +1291,9 @@ ui_outgoing_chat_msg(ProfChatWin *chatwin, const char * const message, char *id,
 {
     char enc_char = '-';
     if (enc_mode == PROF_ENC_OTR) {
-        enc_char = 'O';
+        enc_char = prefs_get_otr_char();
     } else if (enc_mode == PROF_ENC_PGP) {
-        enc_char = 'P';
+        enc_char = prefs_get_pgp_char();
     }
 
     if (prefs_get_boolean(PREF_RECEIPTS_REQUEST) && id) {

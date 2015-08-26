@@ -376,6 +376,60 @@ prefs_get_roster_size(void)
     }
 }
 
+char
+prefs_get_otr_char(void)
+{
+    char result = '~';
+
+    char *resultstr = g_key_file_get_string(prefs, PREF_GROUP_OTR, "otr.char", NULL);
+    if (!resultstr) {
+        result =  '~';
+    } else {
+        result = resultstr[0];
+    }
+    free(resultstr);
+
+    return result;
+}
+
+void
+prefs_set_otr_char(char ch)
+{
+    char str[2];
+    str[0] = ch;
+    str[1] = '\0';
+
+    g_key_file_set_string(prefs, PREF_GROUP_OTR, "otr.char", str);
+    _save_prefs();
+}
+
+char
+prefs_get_pgp_char(void)
+{
+    char result = '~';
+
+    char *resultstr = g_key_file_get_string(prefs, PREF_GROUP_PGP, "pgp.char", NULL);
+    if (!resultstr) {
+        result =  '~';
+    } else {
+        result = resultstr[0];
+    }
+    free(resultstr);
+
+    return result;
+}
+
+void
+prefs_set_pgp_char(char ch)
+{
+    char str[2];
+    str[0] = ch;
+    str[1] = '\0';
+
+    g_key_file_set_string(prefs, PREF_GROUP_PGP, "pgp.char", str);
+    _save_prefs();
+}
+
 gboolean
 prefs_add_alias(const char * const name, const char * const value)
 {
