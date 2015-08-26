@@ -193,9 +193,9 @@ sv_ev_incoming_carbon(char *barejid, char *resource, char *message)
 
 #ifdef HAVE_LIBGPGME
 static void
-_sv_ev_incoming_pgp(ProfChatWin *chatwin, gboolean new_win, char *barejid, char *resource, char *message, char *enc_message)
+_sv_ev_incoming_pgp(ProfChatWin *chatwin, gboolean new_win, char *barejid, char *resource, char *message, char *pgp_message)
 {
-    char *decrypted = p_gpg_decrypt(enc_message);
+    char *decrypted = p_gpg_decrypt(pgp_message);
     if (decrypted) {
         if (chatwin->enc_mode == PROF_ENC_NONE) {
             win_println((ProfWin*)chatwin, 0, "PGP encryption enabled.");
@@ -239,7 +239,7 @@ _sv_ev_incoming_plain(ProfChatWin *chatwin, gboolean new_win, char *barejid, cha
 }
 
 void
-sv_ev_incoming_message(char *barejid, char *resource, char *message, char *enc_message)
+sv_ev_incoming_message(char *barejid, char *resource, char *message, char *pgp_message)
 {
     gboolean new_win = FALSE;
     ProfChatWin *chatwin = wins_get_chat(barejid);
@@ -252,11 +252,11 @@ sv_ev_incoming_message(char *barejid, char *resource, char *message, char *enc_m
 // OTR suported, PGP supported
 #ifdef HAVE_LIBOTR
 #ifdef HAVE_LIBGPGME
-    if (enc_message) {
+    if (pgp_message) {
         if (chatwin->enc_mode == PROF_ENC_OTR) {
             win_println((ProfWin*)chatwin, 0, "PGP encrypted message received whilst in OTR session.");
         } else { // PROF_ENC_NONE, PROF_ENC_PGP
-            _sv_ev_incoming_pgp(chatwin, new_win, barejid, resource, message, enc_message);
+            _sv_ev_incoming_pgp(chatwin, new_win, barejid, resource, message, pgp_message);
         }
     } else {
         if (chatwin->enc_mode == PROF_ENC_PGP) {
@@ -281,8 +281,8 @@ sv_ev_incoming_message(char *barejid, char *resource, char *message, char *enc_m
 // OTR unsupported, PGP supported
 #ifndef HAVE_LIBOTR
 #ifdef HAVE_LIBGPGME
-    if (enc_message) {
-        _sv_ev_incoming_pgp(chatwin, new_win, barejid, resource, message, enc_message);
+    if (pgp_message) {
+        _sv_ev_incoming_pgp(chatwin, new_win, barejid, resource, message, pgp_message);
     } else {
         _sv_ev_incoming_plain(chatwin, new_win, barejid, resource, message);
     }
