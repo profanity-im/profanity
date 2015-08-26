@@ -465,6 +465,21 @@ _load_preferences(void)
     _set_boolean_preference("intype", PREF_INTYPE);
 
     _set_boolean_preference("enc.warn", PREF_ENC_WARN);
+
+    if (g_key_file_has_key(theme, "ui", "otr.char", NULL)) {
+        gchar *ch = g_key_file_get_string(theme, "ui", "otr.char", NULL);
+        if (ch && strlen(ch) > 0) {
+            prefs_set_otr_char(ch[0]);
+            g_free(ch);
+        }
+    }
+    if (g_key_file_has_key(theme, "ui", "pgp.char", NULL)) {
+        gchar *ch = g_key_file_get_string(theme, "ui", "pgp.char", NULL);
+        if (ch && strlen(ch) > 0) {
+            prefs_set_pgp_char(ch[0]);
+            g_free(ch);
+        }
+    }
 }
 
 static gchar *
