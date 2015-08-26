@@ -1145,7 +1145,8 @@ static struct cmd_t command_defs[] =
     { "/pgp",
         cmd_pgp, parse_args, 1, 3, NULL,
         CMD_TAGS(
-            CMD_TAG_CHAT)
+            CMD_TAG_CHAT,
+            CMD_TAG_UI)
         CMD_SYN(
             "/pgp libver",
             "/pgp keys",
@@ -1153,7 +1154,8 @@ static struct cmd_t command_defs[] =
             "/pgp setkey <contact> <keyid>",
             "/pgp start [<contact>]",
             "/pgp end",
-            "/pgp log on|off|redact")
+            "/pgp log on|off|redact",
+            "/pgp char <char>")
         CMD_DESC(
             "Open PGP commands to manage keys, and perform PGP encryption during chat sessions. "
             "See the /account command to set your own PGP key.")
@@ -1165,18 +1167,21 @@ static struct cmd_t command_defs[] =
             { "start [<contact>]",        "Start PGP encrypted chat, current contact will be used if not specified." },
             { "end",                      "End PGP encrypted chat with the current recipient." },
             { "log on|off",               "Enable or disable plaintext logging of PGP encrypted messages." },
-            { "log redact",               "Log PGP encrypted messages, but replace the contents with [redacted]. This is the default." })
+            { "log redact",               "Log PGP encrypted messages, but replace the contents with [redacted]. This is the default." },
+            { "char <char>",              "Set the character to be displayed next to PGP encrypted messages." })
         CMD_EXAMPLES(
             "/pgp log off",
             "/pgp setkey buddy@buddychat.org BA19CACE5A9592C5",
             "/pgp start buddy@buddychat.org",
-            "/pgp end")
+            "/pgp end",
+            "/pgp char P")
     },
 
     { "/otr",
         cmd_otr, parse_args, 1, 3, NULL,
         CMD_TAGS(
-            CMD_TAG_CHAT)
+            CMD_TAG_CHAT,
+            CMD_TAG_UI)
         CMD_SYN(
             "/otr libver",
             "/otr gen",
@@ -1188,7 +1193,8 @@ static struct cmd_t command_defs[] =
             "/otr question <question> <answer>",
             "/otr answer <answer>",
             "/otr policy manual|opportunistic|always",
-            "/otr log on|off|redact")
+            "/otr log on|off|redact",
+            "/otr char <char>")
         CMD_DESC(
             "Off The Record (OTR) commands to manage keys, and perform OTR encryption during chat sessions.")
         CMD_ARGS(
@@ -1206,7 +1212,8 @@ static struct cmd_t command_defs[] =
             { "policy opportunistic",         "Set the global OTR policy to opportunistic, and OTR sessions will be attempted upon starting a conversation." },
             { "policy always",                "Set the global OTR policy to always, an error will be displayed if an OTR session cannot be initiated upon starting a conversation." },
             { "log on|off",                   "Enable or disable plaintext logging of OTR encrypted messages." },
-            { "log redact",                   "Log OTR encrypted messages, but replace the contents with [redacted]. This is the default." })
+            { "log redact",                   "Log OTR encrypted messages, but replace the contents with [redacted]. This is the default." },
+            { "char <char>",                  "Set the character to be displayed next to OTR encrypted messages." })
         CMD_EXAMPLES(
             "/otr log off",
             "/otr policy manual",
@@ -1215,7 +1222,8 @@ static struct cmd_t command_defs[] =
             "/otr myfp",
             "/otr theirfp",
             "/otr question \"What is the name of my rabbit?\" fiffi",
-            "/otr end")
+            "/otr end",
+            "/otr char *")
     },
 
     { "/outtype",
@@ -1949,6 +1957,7 @@ cmd_init(void)
     autocomplete_add(otr_ac, "policy");
     autocomplete_add(otr_ac, "question");
     autocomplete_add(otr_ac, "answer");
+    autocomplete_add(otr_ac, "char");
 
     otr_log_ac = autocomplete_new();
     autocomplete_add(otr_log_ac, "on");
@@ -2062,6 +2071,7 @@ cmd_init(void)
     autocomplete_add(pgp_ac, "start");
     autocomplete_add(pgp_ac, "end");
     autocomplete_add(pgp_ac, "log");
+    autocomplete_add(pgp_ac, "char");
 
     pgp_log_ac = autocomplete_new();
     autocomplete_add(pgp_log_ac, "on");

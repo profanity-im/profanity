@@ -4191,7 +4191,17 @@ cmd_pgp(ProfWin *window, const char * const command, gchar **args)
         return TRUE;
     }
 
-    if (g_strcmp0(args[0], "log") == 0) {
+    if (strcmp(args[0], "char") == 0) {
+        if (args[1] == NULL) {
+            cons_bad_cmd_usage(command);
+        } else if (strlen(args[1]) != 1) {
+            cons_bad_cmd_usage(command);
+        } else {
+            prefs_set_pgp_char(args[1][0]);
+            cons_show("PGP char set to %c.", args[1][0]);
+        }
+        return TRUE;
+    } else if (g_strcmp0(args[0], "log") == 0) {
         char *choice = args[1];
         if (g_strcmp0(choice, "on") == 0) {
             prefs_set_string(PREF_PGP_LOG, "on");
@@ -4414,7 +4424,17 @@ cmd_otr(ProfWin *window, const char * const command, gchar **args)
         return TRUE;
     }
 
-    if (strcmp(args[0], "log") == 0) {
+    if (strcmp(args[0], "char") == 0) {
+        if (args[1] == NULL) {
+            cons_bad_cmd_usage(command);
+        } else if (strlen(args[1]) != 1) {
+            cons_bad_cmd_usage(command);
+        } else {
+            prefs_set_otr_char(args[1][0]);
+            cons_show("OTR char set to %c.", args[1][0]);
+        }
+        return TRUE;
+    } else if (strcmp(args[0], "log") == 0) {
         char *choice = args[1];
         if (g_strcmp0(choice, "on") == 0) {
             prefs_set_string(PREF_OTR_LOG, "on");
