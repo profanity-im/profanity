@@ -235,7 +235,7 @@ sv_ev_incoming_message(char *barejid, char *resource, char *message, char *enc_m
             gboolean decrypted = FALSE;
             char *otr_res = otr_on_message_recv(barejid, resource, message, &decrypted);
             if (otr_res) {
-                if (decrypted && g_strrstr(message, otr_res) == NULL) {
+                if (decrypted && g_strrstr(otr_res, message) == NULL) {
                     ui_incoming_msg(chatwin, resource, otr_res, NULL, new_win, PROF_ENC_OTR);
                 } else {
                     ui_incoming_msg(chatwin, resource, otr_res, NULL, new_win, PROF_ENC_NONE);
@@ -255,7 +255,7 @@ sv_ev_incoming_message(char *barejid, char *resource, char *message, char *enc_m
     gboolean decrypted = FALSE;
     char *otr_res = otr_on_message_recv(barejid, resource, message, &decrypted);
     if (otr_res) {
-        if (decrypted && g_strrstr(message, otr_res) == NULL) {
+        if (decrypted && g_strrstr(otr_res, message) == NULL) {
             ui_incoming_msg(chatwin, resource, otr_res, NULL, new_win, PROF_ENC_OTR);
         } else {
             ui_incoming_msg(chatwin, resource, otr_res, NULL, new_win, PROF_ENC_NONE);
