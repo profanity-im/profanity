@@ -148,7 +148,7 @@ cl_ev_send_msg(ProfChatWin *chatwin, const char * const msg)
 #ifndef HAVE_LIBGPGME
     char *id = message_send_chat(chatwin->barejid, msg);
     chat_log_msg_out(chatwin->barejid, msg);
-    ui_outgoing_chat_msg(chatwin, msg, id, PROF_ENC_NONE;
+    ui_outgoing_chat_msg(chatwin, msg, id, PROF_ENC_NONE);
     free(id);
     return;
 #endif
