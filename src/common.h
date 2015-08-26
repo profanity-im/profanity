@@ -104,6 +104,7 @@ gboolean create_dir(char *name);
 gboolean mkdir_recursive(const char *dir);
 char * str_replace(const char *string, const char *substr,
     const char *replacement);
+gboolean str_contains_str(const char *  const searchstr, const char * const substr);
 int str_contains(const char str[], int size, char ch);
 gboolean strtoi_range(char *str, int *saveptr, int min, int max, char **err_msg);
 int utf8_display_len(const char * const str);

@@ -192,6 +192,12 @@ str_replace(const char *string, const char *substr,
     return newstr;
 }
 
+gboolean
+str_contains_str(const char *  const searchstr, const char * const substr)
+{
+    return g_strrstr(searchstr, substr) != NULL;
+}
+
 int
 str_contains(const char str[], int size, char ch)
 {

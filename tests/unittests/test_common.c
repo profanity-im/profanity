@@ -631,3 +631,66 @@ void strip_quotes_strips_both(void **state)
     free(result);
 }
 
+void str_not_contains_str(void **state)
+{
+    char *main = "somestring";
+    char *occur = "not";
+
+    assert_false(str_contains_str(main, occur));
+}
+
+void str_contains_str_at_start(void **state)
+{
+    char *main = "somestring";
+    char *occur = "some";
+
+    assert_true(str_contains_str(main, occur));
+}
+
+void str_contains_str_at_end(void **state)
+{
+    char *main = "somestring";
+    char *occur = "string";
+
+    assert_true(str_contains_str(main, occur));
+}
+
+void str_contains_str_in_middle(void **state)
+{
+    char *main = "somestring";
+    char *occur = "str";
+
+    assert_true(str_contains_str(main, occur));
+}
+
+void str_contains_str_whole(void **state)
+{
+    char *main = "somestring";
+    char *occur = "somestring";
+
+    assert_true(str_contains_str(main, occur));
+}
+
+void str_empty_not_contains_str(void **state)
+{
+    char *main = NULL;
+    char *occur = "str";
+
+    assert_false(str_contains_str(main, occur));
+}
+
+void str_not_contains_str_empty(void **state)
+{
+    char *main = "somestring";
+    char *occur = NULL;
+
+    assert_false(str_contains_str(main, occur));
+}
+
+void str_empty_not_contains_str_empty(void **state)
+{
+    char *main = NULL;
+    char *occur = NULL;
+
+    assert_false(str_contains_str(main, occur));
+}
