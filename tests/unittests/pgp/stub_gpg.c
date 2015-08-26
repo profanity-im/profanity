@@ -11,7 +11,7 @@ GHashTable* p_gpg_list_keys(void)
 }
 
 GHashTable*
-p_gpg_fingerprints(void)
+p_gpg_pubkeys(void)
 {
     return NULL;
 }
@@ -53,4 +53,11 @@ gboolean p_gpg_addkey(const char * const jid, const char * const keyid)
 void p_gpg_free_decrypted(char *decrypted) {}
 
 void p_gpg_free_keys(GHashTable *keys) {}
+
+void p_gpg_autocomplete_key_reset(void) {}
+
+char * p_gpg_autocomplete_key(const char * const search_str)
+{
+    return NULL;
+}
 

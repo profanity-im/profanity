@@ -143,6 +143,11 @@ gint prefs_get_roster_size(void);
 gint prefs_get_autoaway_time(void);
 void prefs_set_autoaway_time(gint value);
 
+char prefs_get_otr_char(void);
+void prefs_set_otr_char(char ch);
+char prefs_get_pgp_char(void);
+void prefs_set_pgp_char(char ch);
+
 void prefs_add_login(const char *jid);
 
 gboolean prefs_add_alias(const char * const name, const char * const value);

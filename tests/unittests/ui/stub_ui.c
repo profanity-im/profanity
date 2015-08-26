@@ -179,7 +179,7 @@ void ui_contact_online(char *barejid, Resource *resource, GDateTime *last_activi
 }
 
 void ui_contact_typing(const char * const barejid, const char * const resource) {}
-void ui_incoming_msg(ProfChatWin *chatwin, const char * const resource, const char * const message, GDateTime *timestamp, gboolean win_created) {}
+void ui_incoming_msg(ProfChatWin *chatwin, const char * const resource, const char * const message, GDateTime *timestamp, gboolean win_created, prof_enc_t enc_mode) {}
 void ui_message_receipt(const char * const barejid, const char * const id) {}
 
 void ui_incoming_private_msg(const char * const fulljid, const char * const message, GDateTime *timestamp) {}
@@ -187,7 +187,7 @@ void ui_incoming_private_msg(const char * const fulljid, const char * const mess
 void ui_disconnected(void) {}
 void ui_recipient_gone(const char * const barejid, const char * const resource) {}
 
-void ui_outgoing_chat_msg(ProfChatWin *chatwin, const char * const message, char *id) {}
+void ui_outgoing_chat_msg(ProfChatWin *chatwin, const char * const message, char *id, prof_enc_t enc_mode) {}
 void ui_outgoing_chat_msg_carbon(const char * const barejid, const char * const message) {}
 void ui_outgoing_private_msg(ProfPrivateWin *privwin, const char * const message) {}
 

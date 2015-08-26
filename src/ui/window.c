@@ -877,11 +877,20 @@ win_show_status_string(ProfWin *window, const char * const from,
 
 void
 win_print_incoming_message(ProfWin *window, GDateTime *timestamp,
-    const char * const from, const char * const message)
+    const char * const from, const char * const message, prof_enc_t enc_mode)
 {
+    char enc_char = '-';
+
     switch (window->type)
     {
         case WIN_CHAT:
+            if (enc_mode == PROF_ENC_OTR) {
+                enc_char = prefs_get_otr_char();
+            } else if (enc_mode == PROF_ENC_PGP) {
+                enc_char = prefs_get_pgp_char();
+            }
+            win_print(window, enc_char, 0, timestamp, NO_ME, THEME_TEXT_THEM, from, message);
+            break;
         case WIN_PRIVATE:
             win_print(window, '-', 0, timestamp, NO_ME, THEME_TEXT_THEM, from, message);
             break;

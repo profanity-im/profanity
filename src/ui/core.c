@@ -412,7 +412,7 @@ ui_message_receipt(const char * const barejid, const char * const id)
 }
 
 void
-ui_incoming_msg(ProfChatWin *chatwin, const char * const resource, const char * const message, GDateTime *timestamp, gboolean win_created)
+ui_incoming_msg(ProfChatWin *chatwin, const char * const resource, const char * const message, GDateTime *timestamp, gboolean win_created, prof_enc_t enc_mode)
 {
     ProfWin *window = (ProfWin*)chatwin;
     int num = wins_get_num(window);
@@ -421,7 +421,7 @@ ui_incoming_msg(ProfChatWin *chatwin, const char * const resource, const char * 
 
     // currently viewing chat window with sender
     if (wins_is_current(window)) {
-        win_print_incoming_message(window, timestamp, display_name, message);
+        win_print_incoming_message(window, timestamp, display_name, message, enc_mode);
         title_bar_set_typing(FALSE);
         status_bar_active(num);
 
@@ -447,7 +447,7 @@ ui_incoming_msg(ProfChatWin *chatwin, const char * const resource, const char * 
             }
         }
 
-        win_print_incoming_message(window, timestamp, display_name, message);
+        win_print_incoming_message(window, timestamp, display_name, message, enc_mode);
     }
 
     if (prefs_get_boolean(PREF_BEEP)) {
@@ -478,7 +478,7 @@ ui_incoming_private_msg(const char * const fulljid, const char * const message, 
 
     // currently viewing chat window with sender
     if (wins_is_current(window)) {
-        win_print_incoming_message(window, timestamp, display_from, message);
+        win_print_incoming_message(window, timestamp, display_from, message, PROF_ENC_NONE);
         title_bar_set_typing(FALSE);
         status_bar_active(num);
 
@@ -487,7 +487,7 @@ ui_incoming_private_msg(const char * const fulljid, const char * const message, 
         privatewin->unread++;
         status_bar_new(num);
         cons_show_incoming_message(display_from, num);
-        win_print_incoming_message(window, timestamp, display_from, message);
+        win_print_incoming_message(window, timestamp, display_from, message, PROF_ENC_NONE);
 
         if (prefs_get_boolean(PREF_FLASH)) {
             flash();
@@ -1287,12 +1287,19 @@ ui_new_chat_win(const char * const barejid)
 }
 
 void
-ui_outgoing_chat_msg(ProfChatWin *chatwin, const char * const message, char *id)
+ui_outgoing_chat_msg(ProfChatWin *chatwin, const char * const message, char *id, prof_enc_t enc_mode)
 {
+    char enc_char = '-';
+    if (enc_mode == PROF_ENC_OTR) {
+        enc_char = prefs_get_otr_char();
+    } else if (enc_mode == PROF_ENC_PGP) {
+        enc_char = prefs_get_pgp_char();
+    }
+
     if (prefs_get_boolean(PREF_RECEIPTS_REQUEST) && id) {
-        win_print_with_receipt((ProfWin*)chatwin, '-', 0, NULL, 0, THEME_TEXT_ME, "me", message, id);
+        win_print_with_receipt((ProfWin*)chatwin, enc_char, 0, NULL, 0, THEME_TEXT_ME, "me", message, id);
     } else {
-        win_print((ProfWin*)chatwin, '-', 0, NULL, 0, THEME_TEXT_ME, "me", message);
+        win_print((ProfWin*)chatwin, enc_char, 0, NULL, 0, THEME_TEXT_ME, "me", message);
     }
 }
 

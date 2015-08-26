@@ -4191,7 +4191,17 @@ cmd_pgp(ProfWin *window, const char * const command, gchar **args)
         return TRUE;
     }
 
-    if (g_strcmp0(args[0], "log") == 0) {
+    if (strcmp(args[0], "char") == 0) {
+        if (args[1] == NULL) {
+            cons_bad_cmd_usage(command);
+        } else if (strlen(args[1]) != 1) {
+            cons_bad_cmd_usage(command);
+        } else {
+            prefs_set_pgp_char(args[1][0]);
+            cons_show("PGP char set to %c.", args[1][0]);
+        }
+        return TRUE;
+    } else if (g_strcmp0(args[0], "log") == 0) {
         char *choice = args[1];
         if (g_strcmp0(choice, "on") == 0) {
             prefs_set_string(PREF_PGP_LOG, "on");
@@ -4270,25 +4280,29 @@ cmd_pgp(ProfWin *window, const char * const command, gchar **args)
         return TRUE;
     }
 
-    if (g_strcmp0(args[0], "fps") == 0) {
+    if (g_strcmp0(args[0], "contacts") == 0) {
         jabber_conn_status_t conn_status = jabber_get_connection_status();
         if (conn_status != JABBER_CONNECTED) {
             cons_show("You are not currently connected.");
             return TRUE;
         }
-        GHashTable *fingerprints = p_gpg_fingerprints();
-        GList *jids = g_hash_table_get_keys(fingerprints);
+        GHashTable *pubkeys = p_gpg_pubkeys();
+        GList *jids = g_hash_table_get_keys(pubkeys);
         if (!jids) {
-            cons_show("No PGP fingerprints available.");
+            cons_show("No contacts found with PGP public keys assigned.");
             return TRUE;
         }
 
-        cons_show("Known PGP fingerprints:");
+        cons_show("Assigned PGP public keys:");
         GList *curr = jids;
         while (curr) {
             char *jid = curr->data;
-            char *fingerprint = g_hash_table_lookup(fingerprints, jid);
-            cons_show("  %s: %s", jid, fingerprint);
+            ProfPGPPubKeyId *pubkeyid = g_hash_table_lookup(pubkeys, jid);
+            if (pubkeyid->received) {
+                cons_show("  %s: %s (received)", jid, pubkeyid->id);
+            } else {
+                cons_show("  %s: %s (stored)", jid, pubkeyid->id);
+            }
             curr = g_list_next(curr);
         }
         g_list_free(jids);
@@ -4410,7 +4424,17 @@ cmd_otr(ProfWin *window, const char * const command, gchar **args)
         return TRUE;
     }
 
-    if (strcmp(args[0], "log") == 0) {
+    if (strcmp(args[0], "char") == 0) {
+        if (args[1] == NULL) {
+            cons_bad_cmd_usage(command);
+        } else if (strlen(args[1]) != 1) {
+            cons_bad_cmd_usage(command);
+        } else {
+            prefs_set_otr_char(args[1][0]);
+            cons_show("OTR char set to %c.", args[1][0]);
+        }
+        return TRUE;
+    } else if (strcmp(args[0], "log") == 0) {
         char *choice = args[1];
         if (g_strcmp0(choice, "on") == 0) {
             prefs_set_string(PREF_OTR_LOG, "on");

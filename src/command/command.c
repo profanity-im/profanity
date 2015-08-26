@@ -59,6 +59,9 @@
 #ifdef HAVE_LIBOTR
 #include "otr/otr.h"
 #endif
+#ifdef HAVE_LIBGPGME
+#include "pgp/gpg.h"
+#endif
 #include "profanity.h"
 #include "tools/autocomplete.h"
 #include "tools/parser.h"
@@ -1142,38 +1145,43 @@ static struct cmd_t command_defs[] =
     { "/pgp",
         cmd_pgp, parse_args, 1, 3, NULL,
         CMD_TAGS(
-            CMD_TAG_CHAT)
+            CMD_TAG_CHAT,
+            CMD_TAG_UI)
         CMD_SYN(
             "/pgp libver",
             "/pgp keys",
-            "/pgp fps",
+            "/pgp contacts",
             "/pgp setkey <contact> <keyid>",
             "/pgp start [<contact>]",
             "/pgp end",
-            "/pgp log on|off|redact")
+            "/pgp log on|off|redact",
+            "/pgp char <char>")
         CMD_DESC(
             "Open PGP commands to manage keys, and perform PGP encryption during chat sessions. "
             "See the /account command to set your own PGP key.")
         CMD_ARGS(
             { "libver",                   "Show which version of the libgpgme library is being used." },
-            { "keys",                     "List all keys." },
-            { "fps",                      "Show known fingerprints." },
-            { "setkey <contact> <keyid>", "Manually associate a key ID with a JID." },
+            { "keys",                     "List all keys known to the system." },
+            { "contacts",                 "Show contacts with assigned public keys." },
+            { "setkey <contact> <keyid>", "Manually associate a contact with a public key." },
             { "start [<contact>]",        "Start PGP encrypted chat, current contact will be used if not specified." },
             { "end",                      "End PGP encrypted chat with the current recipient." },
             { "log on|off",               "Enable or disable plaintext logging of PGP encrypted messages." },
-            { "log redact",               "Log PGP encrypted messages, but replace the contents with [redacted]. This is the default." })
+            { "log redact",               "Log PGP encrypted messages, but replace the contents with [redacted]. This is the default." },
+            { "char <char>",              "Set the character to be displayed next to PGP encrypted messages." })
         CMD_EXAMPLES(
             "/pgp log off",
             "/pgp setkey buddy@buddychat.org BA19CACE5A9592C5",
             "/pgp start buddy@buddychat.org",
-            "/pgp end")
+            "/pgp end",
+            "/pgp char P")
     },
 
     { "/otr",
         cmd_otr, parse_args, 1, 3, NULL,
         CMD_TAGS(
-            CMD_TAG_CHAT)
+            CMD_TAG_CHAT,
+            CMD_TAG_UI)
         CMD_SYN(
             "/otr libver",
             "/otr gen",
@@ -1185,7 +1193,8 @@ static struct cmd_t command_defs[] =
             "/otr question <question> <answer>",
             "/otr answer <answer>",
             "/otr policy manual|opportunistic|always",
-            "/otr log on|off|redact")
+            "/otr log on|off|redact",
+            "/otr char <char>")
         CMD_DESC(
             "Off The Record (OTR) commands to manage keys, and perform OTR encryption during chat sessions.")
         CMD_ARGS(
@@ -1203,7 +1212,8 @@ static struct cmd_t command_defs[] =
             { "policy opportunistic",         "Set the global OTR policy to opportunistic, and OTR sessions will be attempted upon starting a conversation." },
             { "policy always",                "Set the global OTR policy to always, an error will be displayed if an OTR session cannot be initiated upon starting a conversation." },
             { "log on|off",                   "Enable or disable plaintext logging of OTR encrypted messages." },
-            { "log redact",                   "Log OTR encrypted messages, but replace the contents with [redacted]. This is the default." })
+            { "log redact",                   "Log OTR encrypted messages, but replace the contents with [redacted]. This is the default." },
+            { "char <char>",                  "Set the character to be displayed next to OTR encrypted messages." })
         CMD_EXAMPLES(
             "/otr log off",
             "/otr policy manual",
@@ -1212,7 +1222,8 @@ static struct cmd_t command_defs[] =
             "/otr myfp",
             "/otr theirfp",
             "/otr question \"What is the name of my rabbit?\" fiffi",
-            "/otr end")
+            "/otr end",
+            "/otr char *")
     },
 
     { "/outtype",
@@ -1946,6 +1957,7 @@ cmd_init(void)
     autocomplete_add(otr_ac, "policy");
     autocomplete_add(otr_ac, "question");
     autocomplete_add(otr_ac, "answer");
+    autocomplete_add(otr_ac, "char");
 
     otr_log_ac = autocomplete_new();
     autocomplete_add(otr_log_ac, "on");
@@ -2053,12 +2065,13 @@ cmd_init(void)
 
     pgp_ac = autocomplete_new();
     autocomplete_add(pgp_ac, "keys");
-    autocomplete_add(pgp_ac, "fps");
+    autocomplete_add(pgp_ac, "contacts");
     autocomplete_add(pgp_ac, "setkey");
     autocomplete_add(pgp_ac, "libver");
     autocomplete_add(pgp_ac, "start");
     autocomplete_add(pgp_ac, "end");
     autocomplete_add(pgp_ac, "log");
+    autocomplete_add(pgp_ac, "char");
 
     pgp_log_ac = autocomplete_new();
     autocomplete_add(pgp_log_ac, "on");
@@ -2242,6 +2255,9 @@ cmd_reset_autocomplete(ProfWin *window)
     accounts_reset_enabled_search();
     prefs_reset_boolean_choice();
     presence_reset_sub_request_search();
+#ifdef HAVE_LIBGPGME
+    p_gpg_autocomplete_key_reset();
+#endif
     autocomplete_reset(help_ac);
     autocomplete_reset(help_commands_ac);
     autocomplete_reset(notify_ac);
@@ -2983,6 +2999,26 @@ _pgp_autocomplete(ProfWin *window, const char * const input)
         return found;
     }
 
+#ifdef HAVE_LIBGPGME
+    gboolean result;
+    gchar **args = parse_args(input, 2, 3, &result);
+    if ((strncmp(input, "/pgp", 4) == 0) && (result == TRUE)) {
+        GString *beginning = g_string_new("/pgp ");
+        g_string_append(beginning, args[0]);
+        if (args[1]) {
+            g_string_append(beginning, " ");
+            g_string_append(beginning, args[1]);
+        }
+        found = autocomplete_param_with_func(input, beginning->str, p_gpg_autocomplete_key);
+        g_string_free(beginning, TRUE);
+        if (found) {
+            g_strfreev(args);
+            return found;
+        }
+    }
+    g_strfreev(args);
+#endif
+
     found = autocomplete_param_with_func(input, "/pgp setkey", roster_barejid_autocomplete);
     if (found) {
         return found;
@@ -3583,6 +3619,17 @@ _account_autocomplete(ProfWin *window, const char * const input)
                 g_strfreev(args);
                 return found;
             }
+#ifdef HAVE_LIBGPGME
+        } else if ((g_strv_length(args) > 3) && (g_strcmp0(args[2], "pgpkeyid")) == 0) {
+            g_string_append(beginning, " ");
+            g_string_append(beginning, args[2]);
+            found = autocomplete_param_with_func(input, beginning->str, p_gpg_autocomplete_key);
+            g_string_free(beginning, TRUE);
+            if (found) {
+                g_strfreev(args);
+                return found;
+            }
+#endif
         } else {
             found = autocomplete_param_with_ac(input, beginning->str, account_set_ac, TRUE);
             g_string_free(beginning, TRUE);

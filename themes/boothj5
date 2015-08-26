@@ -75,3 +75,5 @@ occupants=true
 occupants.size=15
 occupants.jid=false
 wins.autotidy=true
+otr.char=@
+pgp.char=%
