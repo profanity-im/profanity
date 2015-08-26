@@ -274,7 +274,7 @@ otr_on_connect(ProfAccount *account)
 }
 
 char*
-otr_on_message_recv(const char * const barejid, const char * const resource, const char * const message, gboolean *was_decrypted)
+otr_on_message_recv(const char * const barejid, const char * const resource, const char * const message, gboolean *decrypted)
 {
     prof_otrpolicy_t policy = otr_get_policy(barejid);
     char *whitespace_base = strstr(message, OTRL_MESSAGE_TAG_BASE);
@@ -298,19 +298,19 @@ otr_on_message_recv(const char * const barejid, const char * const resource, con
         }
     }
 
-    char *decrypted = otr_decrypt_message(barejid, message, was_decrypted);
-    if (!decrypted) { // internal OTR message
+    char *newmessage = otr_decrypt_message(barejid, message, decrypted);
+    if (!newmessage) { // internal OTR message
         return NULL;
     }
 
-    if (policy == PROF_OTRPOLICY_ALWAYS && *was_decrypted == FALSE && !whitespace_base) {
+    if (policy == PROF_OTRPOLICY_ALWAYS && *decrypted == FALSE && !whitespace_base) {
         char *otr_query_message = otr_start_query();
         cons_show("Attempting to start OTR session...");
         char *id = message_send_chat_otr(barejid, otr_query_message);
         free(id);
     }
 
-    return decrypted;
+    return newmessage;
 }
 
 gboolean
@@ -717,12 +717,12 @@ _otr_tlv_free(OtrlTLV *tlvs)
 }
 
 char *
-otr_decrypt_message(const char * const from, const char * const message, gboolean *was_decrypted)
+otr_decrypt_message(const char * const from, const char * const message, gboolean *decrypted)
 {
-    char *decrypted = NULL;
+    char *newmessage = NULL;
     OtrlTLV *tlvs = NULL;
 
-    int result = otrlib_decrypt_message(user_state, &ops, jid, from, message, &decrypted, &tlvs);
+    int result = otrlib_decrypt_message(user_state, &ops, jid, from, message, &newmessage, &tlvs);
 
     // internal libotr message
     if (result == 1) {
@@ -743,16 +743,18 @@ otr_decrypt_message(const char * const from, const char * const message, gboolea
 
         return NULL;
 
-    // message was decrypted, return to user
-    } else if (decrypted) {
+    // message was processed, return to user
+    } else if (newmessage) {
         _otr_tlv_free(tlvs);
-        *was_decrypted = TRUE;
-        return decrypted;
+        if (g_str_has_prefix(message, "?OTR:")) {
+            *decrypted = TRUE;
+        }
+        return newmessage;
 
     // normal non OTR message
     } else {
         _otr_tlv_free(tlvs);
-        *was_decrypted = FALSE;
+        *decrypted = FALSE;
         return strdup(message);
     }
 }

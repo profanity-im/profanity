@@ -58,7 +58,7 @@ char* otr_start_query(void);
 void otr_poll(void);
 void otr_on_connect(ProfAccount *account);
 
-char* otr_on_message_recv(const char * const barejid, const char * const resource, const char * const message, gboolean *was_decrypted);
+char* otr_on_message_recv(const char * const barejid, const char * const resource, const char * const message, gboolean *decrypted);
 gboolean otr_on_message_send(ProfChatWin *chatwin, const char * const message);
 
 void otr_keygen(ProfAccount *account);
@@ -83,7 +83,7 @@ char * otr_get_their_fingerprint(const char * const recipient);
 
 char * otr_encrypt_message(const char * const to, const char * const message);
 char * otr_decrypt_message(const char * const from, const char * const message,
-    gboolean *was_decrypted);
+    gboolean *decrypted);
 
 void otr_free_message(char *message);
 
