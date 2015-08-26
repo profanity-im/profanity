@@ -193,7 +193,7 @@ str_replace(const char *string, const char *substr,
 }
 
 gboolean
-str_contains_str(char *searchstr, char *substr)
+str_contains_str(const char *  const searchstr, const char * const substr)
 {
     return g_strrstr(searchstr, substr) != NULL;
 }

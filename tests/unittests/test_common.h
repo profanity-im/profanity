@@ -60,6 +60,7 @@ void str_not_contains_str(void **state);
 void str_contains_str_at_start(void **state);
 void str_contains_str_at_end(void **state);
 void str_contains_str_in_middle(void **state);
+void str_contains_str_whole(void **state);
 void str_empty_not_contains_str(void **state);
 void str_not_contains_str_empty(void **state);
 void str_empty_not_contains_str_empty(void **state);

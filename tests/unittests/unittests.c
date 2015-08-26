@@ -99,6 +99,7 @@ int main(int argc, char* argv[]) {
         unit_test(str_contains_str_at_start),
         unit_test(str_contains_str_at_end),
         unit_test(str_contains_str_in_middle),
+        unit_test(str_contains_str_whole),
         unit_test(str_empty_not_contains_str),
         unit_test(str_not_contains_str_empty),
         unit_test(str_empty_not_contains_str_empty),

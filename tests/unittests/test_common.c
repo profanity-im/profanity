@@ -663,6 +663,14 @@ void str_contains_str_in_middle(void **state)
     assert_true(str_contains_str(main, occur));
 }
 
+void str_contains_str_whole(void **state)
+{
+    char *main = "somestring";
+    char *occur = "somestring";
+
+    assert_true(str_contains_str(main, occur));
+}
+
 void str_empty_not_contains_str(void **state)
 {
     char *main = NULL;

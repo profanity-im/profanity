@@ -219,7 +219,7 @@ _sv_ev_incoming_otr(ProfChatWin *chatwin, gboolean new_win, char *barejid, char 
     gboolean decrypted = FALSE;
     char *otr_res = otr_on_message_recv(barejid, resource, message, &decrypted);
     if (otr_res) {
-        if (decrypted && g_strrstr(otr_res, message) == NULL) {
+        if (decrypted) {
             ui_incoming_msg(chatwin, resource, otr_res, NULL, new_win, PROF_ENC_OTR);
         } else {
             ui_incoming_msg(chatwin, resource, otr_res, NULL, new_win, PROF_ENC_NONE);
