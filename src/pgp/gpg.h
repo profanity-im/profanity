@@ -46,6 +46,11 @@ typedef struct pgp_key_t {
     gboolean secret;
 } ProfPGPKey;
 
+typedef struct pgp_pubkeyid_t {
+    char *id;
+    gboolean received;
+} ProfPGPPubKeyId;
+
 void p_gpg_init(void);
 void p_gpg_close(void);
 void p_gpg_on_connect(const char * const barejid);
@@ -53,7 +58,7 @@ void p_gpg_on_disconnect(void);
 GHashTable* p_gpg_list_keys(void);
 void p_gpg_free_keys(GHashTable *keys);
 gboolean p_gpg_addkey(const char * const jid, const char * const keyid);
-GHashTable* p_gpg_fingerprints(void);
+GHashTable* p_gpg_pubkeys(void);
 gboolean p_gpg_valid_key(const char * const keyid);
 gboolean p_gpg_available(const char * const barejid);
 const char* p_gpg_libver(void);
@@ -62,5 +67,7 @@ void p_gpg_verify(const char * const barejid, const char *const sign);
 char* p_gpg_encrypt(const char * const barejid, const char * const message);
 char* p_gpg_decrypt(const char * const cipher);
 void p_gpg_free_decrypted(char *decrypted);
+char* p_gpg_autocomplete_key(const char * const search_str);
+void p_gpg_autocomplete_key_reset(void);
 
 #endif

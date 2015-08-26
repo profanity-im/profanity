@@ -99,13 +99,13 @@ cl_ev_send_msg(ProfChatWin *chatwin, const char * const msg)
         if (!handled) {
             char *id = message_send_chat(chatwin->barejid, plugin_msg);
             chat_log_msg_out(chatwin->barejid, plugin_msg);
-            ui_outgoing_chat_msg(chatwin, plugin_msg, id);
+            ui_outgoing_chat_msg(chatwin, plugin_msg, id, PROF_ENC_NONE);
             free(id);
         }
     } else { // enc_mode = PROF_ENC_PGP
         char *id = message_send_chat_pgp(chatwin->barejid, plugin_msg);
         chat_log_pgp_msg_out(chatwin->barejid, plugin_msg);
-        ui_outgoing_chat_msg(chatwin, plugin_msg, id);
+        ui_outgoing_chat_msg(chatwin, plugin_msg, id, PROF_ENC_PGP);
         free(id);
     }
     return;
@@ -119,7 +119,7 @@ cl_ev_send_msg(ProfChatWin *chatwin, const char * const msg)
     if (!handled) {
         char *id = message_send_chat(chatwin->barejid, plugin_msg);
         chat_log_msg_out(chatwin->barejid, plugin_msg);
-        ui_outgoing_chat_msg(chatwin, plugin_msg, id);
+        ui_outgoing_chat_msg(chatwin, plugin_msg, id, PROF_ENC_NONE);
         free(id);
     }
     return;
@@ -133,12 +133,12 @@ cl_ev_send_msg(ProfChatWin *chatwin, const char * const msg)
     if (enc_mode == PROF_ENC_NONE) {
         char *id = message_send_chat(chatwin->barejid, plugin_msg);
         chat_log_msg_out(chatwin->barejid, plugin_msg);
-        ui_outgoing_chat_msg(chatwin, plugin_msg, id);
+        ui_outgoing_chat_msg(chatwin, plugin_msg, id, PROF_ENC_NONE);
         free(id);
     } else if (enc_mode == PROF_ENC_PGP) {
         char *id = message_send_chat_pgp(chatwin->barejid, plugin_msg);
         chat_log_pgp_msg_out(chatwin->barejid, plugin_msg);
-        ui_outgoing_chat_msg(chatwin, plugin_msg, id);
+        ui_outgoing_chat_msg(chatwin, plugin_msg, id, PROF_ENC_PGP);
         free(id);
     }
     return;
@@ -150,7 +150,7 @@ cl_ev_send_msg(ProfChatWin *chatwin, const char * const msg)
 #ifndef PROF_HAVE_LIBGPGME
     char *id = message_send_chat(chatwin->barejid, plugin_msg);
     chat_log_msg_out(chatwin->barejid, plugin_msg);
-    ui_outgoing_chat_msg(chatwin, plugin_msg, id);
+    ui_outgoing_chat_msg(chatwin, plugin_msg, id, PROF_ENC_NONE);
     free(id);
     return;
 #endif

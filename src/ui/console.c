@@ -1453,6 +1453,9 @@ cons_show_otr_prefs(void)
     }
     prefs_free_string(log_value);
 
+    char ch = prefs_get_otr_char();
+    cons_show("OTR char (/otr char)     : %c", ch);
+
     cons_alert();
 }
 
@@ -1471,6 +1474,9 @@ cons_show_pgp_prefs(void)
         cons_show("PGP logging (/pgp log)   : Redacted");
     }
     prefs_free_string(log_value);
+
+    char ch = prefs_get_pgp_char();
+    cons_show("PGP char (/pgp char)     : %c", ch);
 
     cons_alert();
 }
