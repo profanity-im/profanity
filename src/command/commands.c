@@ -4238,7 +4238,9 @@ cmd_pgp(ProfWin *window, const char * const command, gchar **args)
             ProfPGPKey *key = g_hash_table_lookup(keys, curr->data);
             cons_show("  %s", key->name);
             cons_show("    ID          : %s", key->id);
-            cons_show("    Fingerprint : %s", key->fp);
+            char *format_fp = p_gpg_format_fp_str(key->fp);
+            cons_show("    Fingerprint : %s", format_fp);
+            free(format_fp);
             if (key->secret) {
                 cons_show("    Type        : PUBLIC, PRIVATE");
             } else {
