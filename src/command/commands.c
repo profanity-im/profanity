@@ -4384,12 +4384,12 @@ cmd_pgp(ProfWin *window, const char * const command, gchar **args)
             assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
         }
 
-        if (chatwin->enc_mode == PROF_ENC_OTR) {
+        if (chatwin->is_otr) {
             ui_current_print_formatted_line('!', 0, "You must end the OTR session to start PGP encryption.");
             return TRUE;
         }
 
-        if (chatwin->enc_mode == PROF_ENC_PGP) {
+        if (chatwin->pgp_send) {
             ui_current_print_formatted_line('!', 0, "You have already started PGP encryption.");
             return TRUE;
         }
@@ -4407,7 +4407,7 @@ cmd_pgp(ProfWin *window, const char * const command, gchar **args)
             return TRUE;
         }
 
-        chatwin->enc_mode = PROF_ENC_PGP;
+        chatwin->pgp_send = TRUE;
         ui_current_print_formatted_line('!', 0, "PGP encyption enabled.");
         return TRUE;
     }
@@ -4425,12 +4425,12 @@ cmd_pgp(ProfWin *window, const char * const command, gchar **args)
         }
 
         ProfChatWin *chatwin = (ProfChatWin*)window;
-        if (chatwin->enc_mode != PROF_ENC_PGP) {
+        if (chatwin->pgp_send == FALSE) {
             ui_current_print_formatted_line('!', 0, "PGP encryption is not currently enabled.");
             return TRUE;
         }
 
-        chatwin->enc_mode = PROF_ENC_NONE;
+        chatwin->pgp_send = FALSE;
         ui_current_print_formatted_line('!', 0, "PGP encyption disabled.");
         return TRUE;
     }
@@ -4555,7 +4555,7 @@ cmd_otr(ProfWin *window, const char * const command, gchar **args)
 
         ProfChatWin *chatwin = (ProfChatWin*)window;
         assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
-        if (chatwin->enc_mode != PROF_ENC_OTR) {
+        if (chatwin->is_otr == FALSE) {
             ui_current_print_formatted_line('!', 0, "You are not currently in an OTR session.");
             return TRUE;
         }
@@ -4580,12 +4580,12 @@ cmd_otr(ProfWin *window, const char * const command, gchar **args)
             }
             ui_ev_focus_win((ProfWin*)chatwin);
 
-            if (chatwin->enc_mode == PROF_ENC_PGP) {
+            if (chatwin->pgp_send) {
                 ui_current_print_formatted_line('!', 0, "You must disable PGP encryption before starting an OTR session.");
                 return TRUE;
             }
 
-            if (chatwin->enc_mode == PROF_ENC_OTR) {
+            if (chatwin->is_otr) {
                 ui_current_print_formatted_line('!', 0, "You are already in an OTR session.");
                 return TRUE;
             }
@@ -4614,12 +4614,12 @@ cmd_otr(ProfWin *window, const char * const command, gchar **args)
 
             ProfChatWin *chatwin = (ProfChatWin*)window;
             assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
-            if (chatwin->enc_mode == PROF_ENC_PGP) {
+            if (chatwin->pgp_send) {
                 ui_current_print_formatted_line('!', 0, "You must disable PGP encryption before starting an OTR session.");
                 return TRUE;
             }
 
-            if (chatwin->enc_mode == PROF_ENC_OTR) {
+            if (chatwin->is_otr) {
                 ui_current_print_formatted_line('!', 0, "You are already in an OTR session.");
                 return TRUE;
             }
@@ -4643,7 +4643,7 @@ cmd_otr(ProfWin *window, const char * const command, gchar **args)
 
         ProfChatWin *chatwin = (ProfChatWin*)window;
         assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
-        if (chatwin->enc_mode != PROF_ENC_OTR) {
+        if (chatwin->is_otr == FALSE) {
             ui_current_print_formatted_line('!', 0, "You are not currently in an OTR session.");
             return TRUE;
         }
@@ -4660,7 +4660,7 @@ cmd_otr(ProfWin *window, const char * const command, gchar **args)
 
         ProfChatWin *chatwin = (ProfChatWin*)window;
         assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
-        if (chatwin->enc_mode != PROF_ENC_OTR) {
+        if (chatwin->is_otr == FALSE) {
             ui_current_print_formatted_line('!', 0, "You are not currently in an OTR session.");
             return TRUE;
         }
@@ -4677,7 +4677,7 @@ cmd_otr(ProfWin *window, const char * const command, gchar **args)
 
         ProfChatWin *chatwin = (ProfChatWin*)window;
         assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
-        if (chatwin->enc_mode != PROF_ENC_OTR) {
+        if (chatwin->is_otr == FALSE) {
             ui_current_print_formatted_line('!', 0, "You are not currently in an OTR session.");
             return TRUE;
         }
@@ -4694,7 +4694,7 @@ cmd_otr(ProfWin *window, const char * const command, gchar **args)
 
         ProfChatWin *chatwin = (ProfChatWin*)window;
         assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
-        if (chatwin->enc_mode != PROF_ENC_OTR) {
+        if (chatwin->is_otr == FALSE) {
             ui_current_print_formatted_line('!', 0, "You are not currently in an OTR session.");
             return TRUE;
         }
@@ -4723,7 +4723,7 @@ cmd_otr(ProfWin *window, const char * const command, gchar **args)
 
         ProfChatWin *chatwin = (ProfChatWin*)window;
         assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
-        if (chatwin->enc_mode != PROF_ENC_OTR) {
+        if (chatwin->is_otr == FALSE) {
             ui_current_print_formatted_line('!', 0, "You are not currently in an OTR session.");
             return TRUE;
         }
@@ -4739,7 +4739,7 @@ cmd_otr(ProfWin *window, const char * const command, gchar **args)
 
         ProfChatWin *chatwin = (ProfChatWin*)window;
         assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
-        if (chatwin->enc_mode != PROF_ENC_OTR) {
+        if (chatwin->is_otr == FALSE) {
             ui_current_print_formatted_line('!', 0, "You are not currently in an OTR session.");
             return TRUE;
         }

@@ -321,6 +321,8 @@ void cmd_otr_theirfp_shows_message_when_non_otr_chat_window(void **state)
     ProfChatWin chatwin;
     chatwin.window = window;
     chatwin.memcheck = PROFCHATWIN_MEMCHECK;
+    chatwin.pgp_send = FALSE;
+    chatwin.is_otr = FALSE;
 
     will_return(jabber_get_connection_status, JABBER_CONNECTED);
 
@@ -346,7 +348,8 @@ void cmd_otr_theirfp_shows_fingerprint(void **state)
     chatwin.window = window;
     chatwin.barejid = recipient;
     chatwin.memcheck = PROFCHATWIN_MEMCHECK;
-    chatwin.enc_mode = PROF_ENC_OTR;
+    chatwin.pgp_send = FALSE;
+    chatwin.is_otr = TRUE;
 
     will_return(jabber_get_connection_status, JABBER_CONNECTED);
 
@@ -404,7 +407,8 @@ void cmd_otr_start_shows_message_when_already_started(void **state)
     chatwin.window = window;
     chatwin.barejid = recipient;
     chatwin.memcheck = PROFCHATWIN_MEMCHECK;
-    chatwin.enc_mode = PROF_ENC_OTR;
+    chatwin.pgp_send = FALSE;
+    chatwin.is_otr = TRUE;
 
     expect_ui_current_print_formatted_line('!', 0, "You are already in an OTR session.");
 
@@ -426,7 +430,8 @@ void cmd_otr_start_shows_message_when_no_key(void **state)
     chatwin.window = window;
     chatwin.barejid = recipient;
     chatwin.memcheck = PROFCHATWIN_MEMCHECK;
-    chatwin.enc_mode = PROF_ENC_NONE;
+    chatwin.pgp_send = FALSE;
+    chatwin.is_otr = FALSE;
 
     expect_ui_current_print_formatted_line('!', 0, "You have not generated or loaded a private key, use '/otr gen'");
 
@@ -447,7 +452,8 @@ cmd_otr_start_sends_otr_query_message_to_current_recipeint(void **state)
     chatwin.window = window;
     chatwin.barejid = recipient;
     chatwin.memcheck = PROFCHATWIN_MEMCHECK;
-    chatwin.enc_mode = PROF_ENC_NONE;
+    chatwin.pgp_send = FALSE;
+    chatwin.is_otr = FALSE;
 
     will_return(jabber_get_connection_status, JABBER_CONNECTED);
     will_return(otr_key_loaded, TRUE);

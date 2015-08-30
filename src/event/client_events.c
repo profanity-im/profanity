@@ -93,20 +93,19 @@ cl_ev_send_msg(ProfChatWin *chatwin, const char * const msg)
 // OTR suported, PGP supported
 #ifdef PROF_HAVE_LIBOTR
 #ifdef PROF_HAVE_LIBGPGME
-    prof_enc_t enc_mode = chatwin->enc_mode;
-    if (enc_mode == PROF_ENC_NONE || enc_mode == PROF_ENC_OTR) {
+    if (chatwin->pgp_send) {
+        char *id = message_send_chat_pgp(chatwin->barejid, plugin_msg);
+        chat_log_pgp_msg_out(chatwin->barejid, plugin_msg);
+        ui_outgoing_chat_msg(chatwin, plugin_msg, id, PROF_MSG_PGP);
+        free(id);
+    } else {
         gboolean handled = otr_on_message_send(chatwin, plugin_msg);
         if (!handled) {
             char *id = message_send_chat(chatwin->barejid, plugin_msg);
             chat_log_msg_out(chatwin->barejid, plugin_msg);
-            ui_outgoing_chat_msg(chatwin, plugin_msg, id, PROF_ENC_NONE);
+            ui_outgoing_chat_msg(chatwin, plugin_msg, id, PROF_MSG_PLAIN);
             free(id);
         }
-    } else { // enc_mode = PROF_ENC_PGP
-        char *id = message_send_chat_pgp(chatwin->barejid, plugin_msg);
-        chat_log_pgp_msg_out(chatwin->barejid, plugin_msg);
-        ui_outgoing_chat_msg(chatwin, plugin_msg, id, PROF_ENC_PGP);
-        free(id);
     }
     return;
 #endif
@@ -119,7 +118,7 @@ cl_ev_send_msg(ProfChatWin *chatwin, const char * const msg)
     if (!handled) {
         char *id = message_send_chat(chatwin->barejid, plugin_msg);
         chat_log_msg_out(chatwin->barejid, plugin_msg);
-        ui_outgoing_chat_msg(chatwin, plugin_msg, id, PROF_ENC_NONE);
+        ui_outgoing_chat_msg(chatwin, plugin_msg, id, PROF_MSG_PLAIN);
         free(id);
     }
     return;
@@ -129,16 +128,15 @@ cl_ev_send_msg(ProfChatWin *chatwin, const char * const msg)
 // OTR unsupported, PGP supported
 #ifndef PROF_HAVE_LIBOTR
 #ifdef PROF_HAVE_LIBGPGME
-    prof_enc_t enc_mode = chatwin->enc_mode;
-    if (enc_mode == PROF_ENC_NONE) {
-        char *id = message_send_chat(chatwin->barejid, plugin_msg);
-        chat_log_msg_out(chatwin->barejid, plugin_msg);
-        ui_outgoing_chat_msg(chatwin, plugin_msg, id, PROF_ENC_NONE);
-        free(id);
-    } else if (enc_mode == PROF_ENC_PGP) {
+    if (chatwin->pgp_send) {
         char *id = message_send_chat_pgp(chatwin->barejid, plugin_msg);
         chat_log_pgp_msg_out(chatwin->barejid, plugin_msg);
-        ui_outgoing_chat_msg(chatwin, plugin_msg, id, PROF_ENC_PGP);
+        ui_outgoing_chat_msg(chatwin, plugin_msg, id, PROF_MSG_PGP);
+        free(id);
+    } else {
+        char *id = message_send_chat(chatwin->barejid, plugin_msg);
+        chat_log_msg_out(chatwin->barejid, plugin_msg);
+        ui_outgoing_chat_msg(chatwin, plugin_msg, id, PROF_MSG_PLAIN);
         free(id);
     }
     return;
@@ -150,7 +148,7 @@ cl_ev_send_msg(ProfChatWin *chatwin, const char * const msg)
 #ifndef PROF_HAVE_LIBGPGME
     char *id = message_send_chat(chatwin->barejid, plugin_msg);
     chat_log_msg_out(chatwin->barejid, plugin_msg);
-    ui_outgoing_chat_msg(chatwin, plugin_msg, id, PROF_ENC_NONE);
+    ui_outgoing_chat_msg(chatwin, plugin_msg, id, PROF_MSG_PLAIN);
     free(id);
     return;
 #endif

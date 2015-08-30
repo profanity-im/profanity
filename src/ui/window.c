@@ -135,8 +135,10 @@ win_create_chat(const char * const barejid)
 
     new_win->barejid = strdup(barejid);
     new_win->resource_override = NULL;
-    new_win->enc_mode = PROF_ENC_NONE;
+    new_win->is_otr = FALSE;
     new_win->otr_is_trusted = FALSE;
+    new_win->pgp_recv = FALSE;
+    new_win->pgp_send = FALSE;
     new_win->history_shown = FALSE;
     new_win->unread = 0;
     new_win->state = chat_state_new();
@@ -903,9 +905,9 @@ win_print_incoming_message(ProfWin *window, GDateTime *timestamp,
     switch (window->type)
     {
         case WIN_CHAT:
-            if (enc_mode == PROF_ENC_OTR) {
+            if (enc_mode == PROF_MSG_OTR) {
                 enc_char = prefs_get_otr_char();
-            } else if (enc_mode == PROF_ENC_PGP) {
+            } else if (enc_mode == PROF_MSG_PGP) {
                 enc_char = prefs_get_pgp_char();
             }
             win_print(window, enc_char, 0, timestamp, NO_ME, THEME_TEXT_THEM, from, message);
