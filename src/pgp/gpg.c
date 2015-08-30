@@ -671,6 +671,29 @@ p_gpg_autocomplete_key_reset(void)
     autocomplete_reset(key_ac);
 }
 
+char *
+p_gpg_format_fp_str(char *fp)
+{
+    if (!fp) {
+        return NULL;
+    }
+
+    GString *format = g_string_new("");
+    int i;
+    int len = strlen(fp);
+    for (i = 0; i < len; i++) {
+        g_string_append_c(format, fp[i]);
+        if (((i+1) % 4 == 0) && (i+1 < len)) {
+            g_string_append_c(format, ' ');
+        }
+    }
+
+    char *result = format->str;
+    g_string_free(format, FALSE);
+
+    return result;
+}
+
 static char*
 _remove_header_footer(char *str, const char * const footer)
 {

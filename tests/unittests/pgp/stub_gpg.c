@@ -61,3 +61,9 @@ char * p_gpg_autocomplete_key(const char * const search_str)
     return NULL;
 }
 
+char *
+p_gpg_format_fp_str(char *fp)
+{
+    return NULL;
+}
+
