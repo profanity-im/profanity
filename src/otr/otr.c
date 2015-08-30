@@ -325,7 +325,7 @@ otr_on_message_send(ProfChatWin *chatwin, const char * const message)
         if (encrypted) {
             id = message_send_chat_otr(chatwin->barejid, encrypted);
             chat_log_otr_msg_out(chatwin->barejid, message);
-            ui_outgoing_chat_msg(chatwin, message, id, PROF_ENC_OTR);
+            ui_outgoing_chat_msg(chatwin, message, id, PROF_MSG_OTR);
             otr_free_message(encrypted);
             free(id);
             return TRUE;
@@ -345,7 +345,7 @@ otr_on_message_send(ProfChatWin *chatwin, const char * const message)
     if (policy == PROF_OTRPOLICY_OPPORTUNISTIC) {
         char *otr_tagged_msg = otr_tag_message(message);
         id = message_send_chat_otr(chatwin->barejid, otr_tagged_msg);
-        ui_outgoing_chat_msg(chatwin, message, id, PROF_ENC_NONE);
+        ui_outgoing_chat_msg(chatwin, message, id, PROF_MSG_PLAIN);
         chat_log_msg_out(chatwin->barejid, message);
         free(otr_tagged_msg);
         free(id);

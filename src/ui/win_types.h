@@ -89,12 +89,6 @@ typedef enum {
     WIN_XML
 } win_type_t;
 
-typedef enum {
-    PROF_ENC_NONE,
-    PROF_ENC_OTR,
-    PROF_ENC_PGP
-} prof_enc_t;
-
 typedef struct prof_win_t {
     win_type_t type;
     ProfLayout *layout;
@@ -109,8 +103,10 @@ typedef struct prof_chat_win_t {
     char *barejid;
     int unread;
     ChatState *state;
-    prof_enc_t enc_mode;
+    gboolean is_otr;
     gboolean otr_is_trusted;
+    gboolean pgp_send;
+    gboolean pgp_recv;
     char *resource_override;
     gboolean history_shown;
     unsigned long memcheck;

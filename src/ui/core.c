@@ -478,7 +478,7 @@ ui_incoming_private_msg(const char * const fulljid, const char * const message, 
 
     // currently viewing chat window with sender
     if (wins_is_current(window)) {
-        win_print_incoming_message(window, timestamp, display_from, message, PROF_ENC_NONE);
+        win_print_incoming_message(window, timestamp, display_from, message, PROF_MSG_PLAIN);
         title_bar_set_typing(FALSE);
         status_bar_active(num);
 
@@ -487,7 +487,7 @@ ui_incoming_private_msg(const char * const fulljid, const char * const message, 
         privatewin->unread++;
         status_bar_new(num);
         cons_show_incoming_message(display_from, num);
-        win_print_incoming_message(window, timestamp, display_from, message, PROF_ENC_NONE);
+        win_print_incoming_message(window, timestamp, display_from, message, PROF_MSG_PLAIN);
 
         if (prefs_get_boolean(PREF_FLASH)) {
             flash();
@@ -713,7 +713,7 @@ ui_close_connected_win(int index)
             ProfChatWin *chatwin = (ProfChatWin*) window;
             assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
 #ifdef HAVE_LIBOTR
-            if (chatwin->enc_mode == PROF_ENC_OTR) {
+            if (chatwin->is_otr) {
                 otr_end_session(chatwin->barejid);
             }
 #endif
@@ -895,7 +895,7 @@ ui_gone_secure(const char * const barejid, gboolean trusted)
         chatwin = (ProfChatWin*)window;
     }
 
-    chatwin->enc_mode = PROF_ENC_OTR;
+    chatwin->is_otr = TRUE;
     chatwin->otr_is_trusted = trusted;
     if (trusted) {
         win_print(window, '!', 0, NULL, 0, THEME_OTR_STARTED_TRUSTED, "", "OTR session started (trusted).");
@@ -923,7 +923,7 @@ ui_gone_insecure(const char * const barejid)
 {
     ProfChatWin *chatwin = wins_get_chat(barejid);
     if (chatwin) {
-        chatwin->enc_mode = PROF_ENC_NONE;
+        chatwin->is_otr = FALSE;
         chatwin->otr_is_trusted = FALSE;
 
         ProfWin *window = (ProfWin*)chatwin;
@@ -1042,7 +1042,7 @@ ui_trust(const char * const barejid)
 {
     ProfChatWin *chatwin = wins_get_chat(barejid);
     if (chatwin) {
-        chatwin->enc_mode = PROF_ENC_OTR;
+        chatwin->is_otr = TRUE;
         chatwin->otr_is_trusted = TRUE;
 
         ProfWin *window = (ProfWin*)chatwin;
@@ -1058,7 +1058,7 @@ ui_untrust(const char * const barejid)
 {
     ProfChatWin *chatwin = wins_get_chat(barejid);
     if (chatwin) {
-        chatwin->enc_mode = PROF_ENC_OTR;
+        chatwin->is_otr = TRUE;
         chatwin->otr_is_trusted = FALSE;
 
         ProfWin *window = (ProfWin*)chatwin;
@@ -1290,9 +1290,9 @@ void
 ui_outgoing_chat_msg(ProfChatWin *chatwin, const char * const message, char *id, prof_enc_t enc_mode)
 {
     char enc_char = '-';
-    if (enc_mode == PROF_ENC_OTR) {
+    if (enc_mode == PROF_MSG_OTR) {
         enc_char = prefs_get_otr_char();
-    } else if (enc_mode == PROF_ENC_PGP) {
+    } else if (enc_mode == PROF_MSG_PGP) {
         enc_char = prefs_get_pgp_char();
     }
 
