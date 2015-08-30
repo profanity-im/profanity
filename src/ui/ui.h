@@ -45,6 +45,12 @@
 #define NO_COLOUR_FROM  8
 #define NO_COLOUR_DATE  16
 
+typedef enum {
+    PROF_MSG_PLAIN,
+    PROF_MSG_OTR,
+    PROF_MSG_PGP
+} prof_enc_t;
+
 // ui startup and control
 void ui_init(void);
 void ui_load_colours(void);
