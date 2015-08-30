@@ -239,7 +239,7 @@ _sv_ev_incoming_otr(ProfChatWin *chatwin, gboolean new_win, char *barejid, char 
 }
 #endif
 
-#ifndef HAVE_LIBOTR
+#ifndef PROF_HAVE_LIBOTR
 static void
 _sv_ev_incoming_plain(ProfChatWin *chatwin, gboolean new_win, char *barejid, char *resource, char *message)
 {
