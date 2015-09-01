@@ -581,7 +581,9 @@ p_gpg_sign(const char * const str, const char * const fp)
         gpgme_free(signed_str);
     }
 
-    passphrase = strdup(passphrase_attempt);
+    if (passphrase_attempt) {
+        passphrase = strdup(passphrase_attempt);
+    }
 
     return result;
 }
@@ -710,7 +712,9 @@ p_gpg_decrypt(const char * const cipher)
     }
     gpgme_free(plain_str);
 
-    passphrase = strdup(passphrase_attempt);
+    if (passphrase_attempt) {
+        passphrase = strdup(passphrase_attempt);
+    }
 
     return result;
 }
