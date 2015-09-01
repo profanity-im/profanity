@@ -83,7 +83,7 @@ static gpgme_error_t *
 _p_gpg_passphrase_cb(void *hook, const char *uid_hint, const char *passphrase_info, int prev_was_bad, int fd)
 {
     if (passphrase) {
-        gpgme_io_writen(fd, passphrase, strlen(passphrase));
+        gpgme_io_write(fd, passphrase, strlen(passphrase));
     } else {
         GString *pass_term = g_string_new("");
 
