@@ -2112,13 +2112,13 @@ ui_ask_pgp_passphrase(const char *hint, int prev_fail)
     ProfWin *current = wins_get_current();
 
     if (prev_fail) {
-        win_print(current, '!', 0, NULL, 0, 0, NULL, "Incorrect passphrase");
+        win_print(current, '!', 0, NULL, 0, 0, "", "Incorrect passphrase");
     }
 
     if (hint) {
-        win_vprint(current, '!', 0, NULL, 0, 0, NULL, "Enter PGP key passphrase for %s", hint);
+        win_vprint(current, '!', 0, NULL, 0, 0, "", "Enter PGP key passphrase for %s", hint);
     } else {
-        win_print(current, '!', 0, NULL, 0, 0, NULL, "Enter PGP key passphrase");
+        win_print(current, '!', 0, NULL, 0, 0, "", "Enter PGP key passphrase");
     }
 
     status_bar_get_password();
