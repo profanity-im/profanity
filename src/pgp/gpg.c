@@ -48,6 +48,7 @@
 #include "log.h"
 #include "common.h"
 #include "tools/autocomplete.h"
+#include "ui/ui.h"
 
 #define PGP_SIGNATURE_HEADER "-----BEGIN PGP SIGNATURE-----"
 #define PGP_SIGNATURE_FOOTER "-----END PGP SIGNATURE-----"
@@ -59,6 +60,9 @@ static GHashTable *pubkeys;
 
 static gchar *pubsloc;
 static GKeyFile *pubkeyfile;
+
+static char *passphrase;
+static char *passphrase_attempt;
 
 static Autocomplete key_ac;
 
@@ -75,6 +79,33 @@ _p_gpg_free_pubkeyid(ProfPGPPubKeyId *pubkeyid)
     free(pubkeyid);
 }
 
+static gpgme_error_t *
+_p_gpg_passphrase_cb(void *hook, const char *uid_hint, const char *passphrase_info, int prev_was_bad, int fd)
+{
+    if (passphrase) {
+        gpgme_io_writen(fd, passphrase, strlen(passphrase));
+    } else {
+        GString *pass_term = g_string_new("");
+
+        char *password = ui_ask_pgp_passphrase(uid_hint, prev_was_bad);
+        if (password) {
+            g_string_append(pass_term, password);
+            free(password);
+        }
+
+        g_string_append(pass_term, "\n");
+        if (passphrase_attempt) {
+            free(passphrase_attempt);
+        }
+        passphrase_attempt = pass_term->str;
+        g_string_free(pass_term, FALSE);
+
+        gpgme_io_writen(fd, passphrase_attempt, strlen(passphrase_attempt));
+    }
+
+    return 0;
+}
+
 void
 p_gpg_init(void)
 {
@@ -87,6 +118,9 @@ p_gpg_init(void)
     key_ac = autocomplete_new();
     GHashTable *keys = p_gpg_list_keys();
     p_gpg_free_keys(keys);
+
+    passphrase = NULL;
+    passphrase_attempt = NULL;
 }
 
 void
@@ -107,6 +141,16 @@ p_gpg_close(void)
 
     autocomplete_free(key_ac);
     key_ac = NULL;
+
+    if (passphrase) {
+        free(passphrase);
+        passphrase = NULL;
+    }
+
+    if (passphrase_attempt) {
+        free(passphrase_attempt);
+        passphrase_attempt = NULL;
+    }
 }
 
 void
@@ -205,6 +249,16 @@ p_gpg_on_disconnect(void)
 
     free(pubsloc);
     pubsloc = NULL;
+
+    if (passphrase) {
+        free(passphrase);
+        passphrase = NULL;
+    }
+
+    if (passphrase_attempt) {
+        free(passphrase_attempt);
+        passphrase_attempt = NULL;
+    }
 }
 
 gboolean
@@ -470,6 +524,8 @@ p_gpg_sign(const char * const str, const char * const fp)
         return NULL;
     }
 
+    gpgme_set_passphrase_cb(ctx, (gpgme_passphrase_cb_t)_p_gpg_passphrase_cb, NULL);
+
     gpgme_key_t key = NULL;
     error = gpgme_get_key(ctx, fp, &key, 1);
 
@@ -523,6 +579,10 @@ p_gpg_sign(const char * const str, const char * const fp)
         result = _remove_header_footer(signed_gstr->str, PGP_SIGNATURE_FOOTER);
         g_string_free(signed_gstr, TRUE);
         gpgme_free(signed_str);
+    }
+
+    if (passphrase_attempt) {
+        passphrase = strdup(passphrase_attempt);
     }
 
     return result;
@@ -605,6 +665,8 @@ p_gpg_decrypt(const char * const cipher)
         return NULL;
     }
 
+    gpgme_set_passphrase_cb(ctx, (gpgme_passphrase_cb_t)_p_gpg_passphrase_cb, NULL);
+
     char *cipher_with_headers = _add_header_footer(cipher, PGP_MESSAGE_HEADER, PGP_MESSAGE_FOOTER);
     gpgme_data_t cipher_data;
     gpgme_data_new_from_mem(&cipher_data, cipher_with_headers, strlen(cipher_with_headers), 1);
@@ -649,6 +711,10 @@ p_gpg_decrypt(const char * const cipher)
         result = g_strdup(plain_str);
     }
     gpgme_free(plain_str);
+
+    if (passphrase_attempt) {
+        passphrase = strdup(passphrase_attempt);
+    }
 
     return result;
 }
