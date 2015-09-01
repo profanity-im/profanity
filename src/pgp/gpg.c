@@ -100,7 +100,7 @@ _p_gpg_passphrase_cb(void *hook, const char *uid_hint, const char *passphrase_in
         passphrase_attempt = pass_term->str;
         g_string_free(pass_term, FALSE);
 
-        gpgme_io_writen(fd, passphrase_attempt, strlen(passphrase_attempt));
+        gpgme_io_write(fd, passphrase_attempt, strlen(passphrase_attempt));
     }
 
     return 0;
