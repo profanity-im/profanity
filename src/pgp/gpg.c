@@ -48,6 +48,7 @@
 #include "log.h"
 #include "common.h"
 #include "tools/autocomplete.h"
+#include "ui/ui.h"
 
 #define PGP_SIGNATURE_HEADER "-----BEGIN PGP SIGNATURE-----"
 #define PGP_SIGNATURE_FOOTER "-----END PGP SIGNATURE-----"
@@ -73,6 +74,23 @@ _p_gpg_free_pubkeyid(ProfPGPPubKeyId *pubkeyid)
         free(pubkeyid->id);
     }
     free(pubkeyid);
+}
+
+static gpgme_error_t *
+_p_gpg_passphrase_cb(void *hook, const char *uid_hint, const char *passphrase_info, int prev_was_bad, int fd)
+{
+    cons_show("Passphrase callback");
+    if (uid_hint) {
+        cons_show("  uid_hind: %s", uid_hint);
+    }
+    if (passphrase_info) {
+        cons_show("  passphrase_info: %s", passphrase_info);
+    }
+    if (prev_was_bad) {
+        cons_show("  prev_was_bad");
+    }
+    gpgme_io_writen(fd, "password\n", strlen("password\n"));
+    return 0;
 }
 
 void
@@ -158,6 +176,8 @@ p_gpg_on_connect(const char * const barejid)
         return;
     }
 
+    gpgme_set_passphrase_cb(ctx, (gpgme_passphrase_cb_t)_p_gpg_passphrase_cb, NULL);
+
     int i = 0;
     for (i = 0; i < len; i++) {
         GError *gerr = NULL;
@@ -216,6 +236,8 @@ p_gpg_addkey(const char * const jid, const char * const keyid)
         log_error("GPG: Failed to create gpgme context. %s %s", gpgme_strsource(error), gpgme_strerror(error));
         return FALSE;
     }
+
+    gpgme_set_passphrase_cb(ctx, (gpgme_passphrase_cb_t)_p_gpg_passphrase_cb, NULL);
 
     gpgme_key_t key = NULL;
     error = gpgme_get_key(ctx, keyid, &key, 0);
@@ -280,6 +302,8 @@ p_gpg_list_keys(void)
         log_error("GPG: Could not list keys. %s %s", gpgme_strsource(error), gpgme_strerror(error));
         return NULL;
     }
+
+    gpgme_set_passphrase_cb(ctx, (gpgme_passphrase_cb_t)_p_gpg_passphrase_cb, NULL);
 
     error = gpgme_op_keylist_start(ctx, NULL, 0);
     if (error == GPG_ERR_NO_ERROR) {
@@ -379,6 +403,8 @@ p_gpg_valid_key(const char * const keyid)
         return FALSE;
     }
 
+    gpgme_set_passphrase_cb(ctx, (gpgme_passphrase_cb_t)_p_gpg_passphrase_cb, NULL);
+
     gpgme_key_t key = NULL;
     error = gpgme_get_key(ctx, keyid, &key, 1);
 
@@ -419,6 +445,8 @@ p_gpg_verify(const char * const barejid, const char *const sign)
         log_error("GPG: Failed to create gpgme context. %s %s", gpgme_strsource(error), gpgme_strerror(error));
         return;
     }
+
+    gpgme_set_passphrase_cb(ctx, (gpgme_passphrase_cb_t)_p_gpg_passphrase_cb, NULL);
 
     char *sign_with_header_footer = _add_header_footer(sign, PGP_SIGNATURE_HEADER, PGP_SIGNATURE_FOOTER);
     gpgme_data_t sign_data;
@@ -469,6 +497,8 @@ p_gpg_sign(const char * const str, const char * const fp)
         log_error("GPG: Failed to create gpgme context. %s %s", gpgme_strsource(error), gpgme_strerror(error));
         return NULL;
     }
+
+    gpgme_set_passphrase_cb(ctx, (gpgme_passphrase_cb_t)_p_gpg_passphrase_cb, NULL);
 
     gpgme_key_t key = NULL;
     error = gpgme_get_key(ctx, fp, &key, 1);
@@ -551,6 +581,8 @@ p_gpg_encrypt(const char * const barejid, const char * const message)
         return NULL;
     }
 
+    gpgme_set_passphrase_cb(ctx, (gpgme_passphrase_cb_t)_p_gpg_passphrase_cb, NULL);
+
     gpgme_key_t key;
     error = gpgme_get_key(ctx, pubkeyid->id, &key, 0);
 
@@ -604,6 +636,8 @@ p_gpg_decrypt(const char * const cipher)
         log_error("GPG: Failed to create gpgme context. %s %s", gpgme_strsource(error), gpgme_strerror(error));
         return NULL;
     }
+
+    gpgme_set_passphrase_cb(ctx, (gpgme_passphrase_cb_t)_p_gpg_passphrase_cb, NULL);
 
     char *cipher_with_headers = _add_header_footer(cipher, PGP_MESSAGE_HEADER, PGP_MESSAGE_FOOTER);
     gpgme_data_t cipher_data;
