@@ -79,17 +79,20 @@ _p_gpg_free_pubkeyid(ProfPGPPubKeyId *pubkeyid)
 static gpgme_error_t *
 _p_gpg_passphrase_cb(void *hook, const char *uid_hint, const char *passphrase_info, int prev_was_bad, int fd)
 {
-    cons_show("Passphrase callback");
-    if (uid_hint) {
-        cons_show("  uid_hind: %s", uid_hint);
+    GString *pass_term = g_string_new("");
+
+    char *password = ui_ask_pgp_passphrase(uid_hint, prev_was_bad);
+    if (password) {
+        g_string_append(pass_term, password);
+        free(password);
     }
-    if (passphrase_info) {
-        cons_show("  passphrase_info: %s", passphrase_info);
-    }
-    if (prev_was_bad) {
-        cons_show("  prev_was_bad");
-    }
-    gpgme_io_writen(fd, "password\n", strlen("password\n"));
+
+    g_string_append(pass_term, "\n");
+
+    gpgme_io_writen(fd, pass_term->str, pass_term->len);
+
+    g_string_free(pass_term, TRUE);
+
     return 0;
 }
 
