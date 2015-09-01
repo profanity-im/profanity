@@ -61,6 +61,9 @@ static GHashTable *pubkeys;
 static gchar *pubsloc;
 static GKeyFile *pubkeyfile;
 
+static char *passphrase;
+static char *passphrase_attempt;
+
 static Autocomplete key_ac;
 
 static char* _remove_header_footer(char *str, const char * const footer);
@@ -79,19 +82,26 @@ _p_gpg_free_pubkeyid(ProfPGPPubKeyId *pubkeyid)
 static gpgme_error_t *
 _p_gpg_passphrase_cb(void *hook, const char *uid_hint, const char *passphrase_info, int prev_was_bad, int fd)
 {
-    GString *pass_term = g_string_new("");
+    if (passphrase) {
+        gpgme_io_writen(fd, passphrase, strlen(passphrase));
+    } else {
+        GString *pass_term = g_string_new("");
 
-    char *password = ui_ask_pgp_passphrase(uid_hint, prev_was_bad);
-    if (password) {
-        g_string_append(pass_term, password);
-        free(password);
+        char *password = ui_ask_pgp_passphrase(uid_hint, prev_was_bad);
+        if (password) {
+            g_string_append(pass_term, password);
+            free(password);
+        }
+
+        g_string_append(pass_term, "\n");
+        if (passphrase_attempt) {
+            free(passphrase_attempt);
+        }
+        passphrase_attempt = pass_term->str;
+        g_string_free(pass_term, FALSE);
+
+        gpgme_io_writen(fd, passphrase_attempt, strlen(passphrase_attempt));
     }
-
-    g_string_append(pass_term, "\n");
-
-    gpgme_io_writen(fd, pass_term->str, pass_term->len);
-
-    g_string_free(pass_term, TRUE);
 
     return 0;
 }
@@ -108,6 +118,9 @@ p_gpg_init(void)
     key_ac = autocomplete_new();
     GHashTable *keys = p_gpg_list_keys();
     p_gpg_free_keys(keys);
+
+    passphrase = NULL;
+    passphrase_attempt = NULL;
 }
 
 void
@@ -128,6 +141,16 @@ p_gpg_close(void)
 
     autocomplete_free(key_ac);
     key_ac = NULL;
+
+    if (passphrase) {
+        free(passphrase);
+        passphrase = NULL;
+    }
+
+    if (passphrase_attempt) {
+        free(passphrase_attempt);
+        passphrase_attempt = NULL;
+    }
 }
 
 void
@@ -179,8 +202,6 @@ p_gpg_on_connect(const char * const barejid)
         return;
     }
 
-    gpgme_set_passphrase_cb(ctx, (gpgme_passphrase_cb_t)_p_gpg_passphrase_cb, NULL);
-
     int i = 0;
     for (i = 0; i < len; i++) {
         GError *gerr = NULL;
@@ -228,6 +249,16 @@ p_gpg_on_disconnect(void)
 
     free(pubsloc);
     pubsloc = NULL;
+
+    if (passphrase) {
+        free(passphrase);
+        passphrase = NULL;
+    }
+
+    if (passphrase_attempt) {
+        free(passphrase_attempt);
+        passphrase_attempt = NULL;
+    }
 }
 
 gboolean
@@ -239,8 +270,6 @@ p_gpg_addkey(const char * const jid, const char * const keyid)
         log_error("GPG: Failed to create gpgme context. %s %s", gpgme_strsource(error), gpgme_strerror(error));
         return FALSE;
     }
-
-    gpgme_set_passphrase_cb(ctx, (gpgme_passphrase_cb_t)_p_gpg_passphrase_cb, NULL);
 
     gpgme_key_t key = NULL;
     error = gpgme_get_key(ctx, keyid, &key, 0);
@@ -305,8 +334,6 @@ p_gpg_list_keys(void)
         log_error("GPG: Could not list keys. %s %s", gpgme_strsource(error), gpgme_strerror(error));
         return NULL;
     }
-
-    gpgme_set_passphrase_cb(ctx, (gpgme_passphrase_cb_t)_p_gpg_passphrase_cb, NULL);
 
     error = gpgme_op_keylist_start(ctx, NULL, 0);
     if (error == GPG_ERR_NO_ERROR) {
@@ -406,8 +433,6 @@ p_gpg_valid_key(const char * const keyid)
         return FALSE;
     }
 
-    gpgme_set_passphrase_cb(ctx, (gpgme_passphrase_cb_t)_p_gpg_passphrase_cb, NULL);
-
     gpgme_key_t key = NULL;
     error = gpgme_get_key(ctx, keyid, &key, 1);
 
@@ -448,8 +473,6 @@ p_gpg_verify(const char * const barejid, const char *const sign)
         log_error("GPG: Failed to create gpgme context. %s %s", gpgme_strsource(error), gpgme_strerror(error));
         return;
     }
-
-    gpgme_set_passphrase_cb(ctx, (gpgme_passphrase_cb_t)_p_gpg_passphrase_cb, NULL);
 
     char *sign_with_header_footer = _add_header_footer(sign, PGP_SIGNATURE_HEADER, PGP_SIGNATURE_FOOTER);
     gpgme_data_t sign_data;
@@ -558,6 +581,8 @@ p_gpg_sign(const char * const str, const char * const fp)
         gpgme_free(signed_str);
     }
 
+    passphrase = strdup(passphrase_attempt);
+
     return result;
 }
 
@@ -583,8 +608,6 @@ p_gpg_encrypt(const char * const barejid, const char * const message)
         log_error("GPG: Failed to create gpgme context. %s %s", gpgme_strsource(error), gpgme_strerror(error));
         return NULL;
     }
-
-    gpgme_set_passphrase_cb(ctx, (gpgme_passphrase_cb_t)_p_gpg_passphrase_cb, NULL);
 
     gpgme_key_t key;
     error = gpgme_get_key(ctx, pubkeyid->id, &key, 0);
@@ -686,6 +709,8 @@ p_gpg_decrypt(const char * const cipher)
         result = g_strdup(plain_str);
     }
     gpgme_free(plain_str);
+
+    passphrase = strdup(passphrase_attempt);
 
     return result;
 }
