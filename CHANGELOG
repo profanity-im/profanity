@@ -10,6 +10,8 @@
 - Option to show JIDs in roster
 - Option to hide empty groups in roster
 - Generate UUID for unnamed new MUC rooms
+- Reformatted help
+- devel: Added functional tests using libexpect and libstabber
 
 0.4.6
 =====
