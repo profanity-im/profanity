@@ -46,6 +46,7 @@
 #include "command/command.h"
 #include "event/ui_events.h"
 #include "window_list.h"
+#include "common.h"
 
 void
 api_cons_alert(void)
@@ -57,7 +58,9 @@ void
 api_cons_show(const char * const message)
 {
     if (message) {
-        cons_show("%s", message);
+        char *parsed = str_replace(message, "\r\n", "\n");
+        cons_show("%s", parsed);
+        free(parsed);
     }
 }
 
