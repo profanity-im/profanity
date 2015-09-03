@@ -34,9 +34,7 @@ fedora_prepare()
     echo Profanity installer... installing dependencies
     echo
 
-    ARCH=`arch`
-
-    sudo yum -y install gcc git autoconf automake openssl-devel.$ARCH expat-devel.$ARCH ncurses-devel.$ARCH  glib2-devel.$ARCH libnotify-devel.$ARCH libcurl-devel.$ARCH libXScrnSaver-devel.$ARCH libotr3-devel.$ARCH readline-devel.$ARCH libtool uuid-devel.$ARCH
+    sudo dnf -y install gcc git autoconf automake openssl-devel expat-devel ncurses-devel glib2-devel libnotify-devel libcurl-devel libXScrnSaver-devel libotr3-devel readline-devel libtool libuuid-devel gpgme-devel
 }
 
 opensuse_prepare()
