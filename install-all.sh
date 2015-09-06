@@ -42,7 +42,7 @@ opensuse_prepare()
     echo
     echo Profanity installer...installing dependencies
     echo
-    sudo zypper -n in gcc git automake make autoconf libopenssl-devel expat libexpat-devel ncurses-devel glib2-devel libnotify-devel libcurl-devel libXScrnSaver-devel libotr-devel readline-devel libtool libuuid-devel
+    sudo zypper -n in gcc git automake make autoconf libopenssl-devel expat libexpat-devel ncurses-devel glib2-devel libnotify-devel libcurl-devel libXScrnSaver-devel libotr-devel readline-devel libtool libuuid-devel libgpgme-devel
 }
 
 centos_prepare()
