@@ -198,22 +198,22 @@ sv_ev_incoming_carbon(char *barejid, char *resource, char *message)
     }
 
     ui_incoming_msg(chatwin, resource, message, NULL, new_win, PROF_MSG_PLAIN);
-    chat_log_msg_in(barejid, message);
+    chat_log_msg_in(barejid, message, NULL);
 }
 
 #ifdef PROF_HAVE_LIBGPGME
 static void
-_sv_ev_incoming_pgp(ProfChatWin *chatwin, gboolean new_win, char *barejid, char *resource, char *message, char *pgp_message)
+_sv_ev_incoming_pgp(ProfChatWin *chatwin, gboolean new_win, char *barejid, char *resource, char *message, char *pgp_message, GDateTime *timestamp)
 {
     char *decrypted = p_gpg_decrypt(pgp_message);
     if (decrypted) {
-        ui_incoming_msg(chatwin, resource, decrypted, NULL, new_win, PROF_MSG_PGP);
-        chat_log_pgp_msg_in(barejid, decrypted);
+        ui_incoming_msg(chatwin, resource, decrypted, timestamp, new_win, PROF_MSG_PGP);
+        chat_log_pgp_msg_in(barejid, decrypted, timestamp);
         chatwin->pgp_recv = TRUE;
         p_gpg_free_decrypted(decrypted);
     } else {
-        ui_incoming_msg(chatwin, resource, message, NULL, new_win, PROF_MSG_PLAIN);
-        chat_log_msg_in(barejid, message);
+        ui_incoming_msg(chatwin, resource, message, timestamp, new_win, PROF_MSG_PLAIN);
+        chat_log_msg_in(barejid, message, timestamp);
         chatwin->pgp_recv = FALSE;
     }
 }
@@ -221,18 +221,18 @@ _sv_ev_incoming_pgp(ProfChatWin *chatwin, gboolean new_win, char *barejid, char 
 
 #ifdef PROF_HAVE_LIBOTR
 static void
-_sv_ev_incoming_otr(ProfChatWin *chatwin, gboolean new_win, char *barejid, char *resource, char *message)
+_sv_ev_incoming_otr(ProfChatWin *chatwin, gboolean new_win, char *barejid, char *resource, char *message, GDateTime *timestamp)
 {
     gboolean decrypted = FALSE;
     char *otr_res = otr_on_message_recv(barejid, resource, message, &decrypted);
     if (otr_res) {
         if (decrypted) {
-            ui_incoming_msg(chatwin, resource, otr_res, NULL, new_win, PROF_MSG_OTR);
+            ui_incoming_msg(chatwin, resource, otr_res, timestamp, new_win, PROF_MSG_OTR);
             chatwin->pgp_send = FALSE;
         } else {
-            ui_incoming_msg(chatwin, resource, otr_res, NULL, new_win, PROF_MSG_PLAIN);
+            ui_incoming_msg(chatwin, resource, otr_res, timestamp, new_win, PROF_MSG_PLAIN);
         }
-        chat_log_otr_msg_in(barejid, otr_res, decrypted);
+        chat_log_otr_msg_in(barejid, otr_res, decrypted, timestamp);
         otr_free_message(otr_res);
         chatwin->pgp_recv = FALSE;
     }
@@ -241,16 +241,16 @@ _sv_ev_incoming_otr(ProfChatWin *chatwin, gboolean new_win, char *barejid, char 
 
 #ifndef PROF_HAVE_LIBOTR
 static void
-_sv_ev_incoming_plain(ProfChatWin *chatwin, gboolean new_win, char *barejid, char *resource, char *message)
+_sv_ev_incoming_plain(ProfChatWin *chatwin, gboolean new_win, char *barejid, char *resource, char *message, GDateTime *timestamp)
 {
-    ui_incoming_msg(chatwin, resource, message, NULL, new_win, PROF_MSG_PLAIN);
-    chat_log_msg_in(barejid, message);
+    ui_incoming_msg(chatwin, resource, message, timestamp, new_win, PROF_MSG_PLAIN);
+    chat_log_msg_in(barejid, message, timestamp);
     chatwin->pgp_recv = FALSE;
 }
 #endif
 
 void
-sv_ev_incoming_message(char *barejid, char *resource, char *message, char *pgp_message)
+sv_ev_incoming_message(char *barejid, char *resource, char *message, char *pgp_message, GDateTime *timestamp)
 {
     gboolean new_win = FALSE;
     ProfChatWin *chatwin = wins_get_chat(barejid);
@@ -267,10 +267,10 @@ sv_ev_incoming_message(char *barejid, char *resource, char *message, char *pgp_m
         if (chatwin->is_otr) {
             win_println((ProfWin*)chatwin, 0, "PGP encrypted message received whilst in OTR session.");
         } else { // PROF_ENC_NONE, PROF_ENC_PGP
-            _sv_ev_incoming_pgp(chatwin, new_win, barejid, resource, message, pgp_message);
+            _sv_ev_incoming_pgp(chatwin, new_win, barejid, resource, message, pgp_message, timestamp);
         }
     } else {
-        _sv_ev_incoming_otr(chatwin, new_win, barejid, resource, message);
+        _sv_ev_incoming_otr(chatwin, new_win, barejid, resource, message, timestamp);
     }
     return;
 #endif
@@ -279,7 +279,7 @@ sv_ev_incoming_message(char *barejid, char *resource, char *message, char *pgp_m
 // OTR supported, PGP unsupported
 #ifdef PROF_HAVE_LIBOTR
 #ifndef PROF_HAVE_LIBGPGME
-    _sv_ev_incoming_otr(chatwin, new_win, barejid, resource, message);
+    _sv_ev_incoming_otr(chatwin, new_win, barejid, resource, message, timestamp);
     return;
 #endif
 #endif
@@ -288,9 +288,9 @@ sv_ev_incoming_message(char *barejid, char *resource, char *message, char *pgp_m
 #ifndef PROF_HAVE_LIBOTR
 #ifdef PROF_HAVE_LIBGPGME
     if (pgp_message) {
-        _sv_ev_incoming_pgp(chatwin, new_win, barejid, resource, message, pgp_message);
+        _sv_ev_incoming_pgp(chatwin, new_win, barejid, resource, message, pgp_message, timestamp);
     } else {
-        _sv_ev_incoming_plain(chatwin, new_win, barejid, resource, message);
+        _sv_ev_incoming_plain(chatwin, new_win, barejid, resource, message, timestamp);
     }
     return;
 #endif
@@ -299,7 +299,7 @@ sv_ev_incoming_message(char *barejid, char *resource, char *message, char *pgp_m
 // OTR unsupported, PGP unsupported
 #ifndef PROF_HAVE_LIBOTR
 #ifndef PROF_HAVE_LIBGPGME
-    _sv_ev_incoming_plain(chatwin, new_win, barejid, resource, message);
+    _sv_ev_incoming_plain(chatwin, new_win, barejid, resource, message, timestamp);
     return;
 #endif
 #endif
@@ -313,21 +313,6 @@ sv_ev_delayed_private_message(const char * const fulljid, char *message, GDateTi
     plugins_post_priv_message_display(fulljid, new_message);
 
     free(new_message);
-}
-
-void
-sv_ev_delayed_message(char *barejid, char *message, GDateTime *timestamp)
-{
-    gboolean new_win = FALSE;
-    ProfChatWin *chatwin = wins_get_chat(barejid);
-    if (!chatwin) {
-        ProfWin *window = wins_new_chat(barejid);
-        chatwin = (ProfChatWin*)window;
-        new_win = TRUE;
-    }
-
-    ui_incoming_msg(chatwin, NULL, message, timestamp, new_win, PROF_MSG_PLAIN);
-    chat_log_msg_in_delayed(barejid, message, timestamp);
 }
 
 void

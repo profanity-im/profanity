@@ -778,17 +778,13 @@ _chat_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, void * con
     if (body) {
         char *message = xmpp_stanza_get_text(body);
         if (message) {
-            if (timestamp) {
-                sv_ev_delayed_message(jid->barejid, message, timestamp);
-            } else {
-                char *enc_message = NULL;
-                xmpp_stanza_t *x = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_ENCRYPTED);
-                if (x) {
-                    enc_message = xmpp_stanza_get_text(x);
-                }
-                sv_ev_incoming_message(jid->barejid, jid->resourcepart, message, enc_message);
-                xmpp_free(ctx, enc_message);
+            char *enc_message = NULL;
+            xmpp_stanza_t *x = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_ENCRYPTED);
+            if (x) {
+                enc_message = xmpp_stanza_get_text(x);
             }
+            sv_ev_incoming_message(jid->barejid, jid->resourcepart, message, enc_message, timestamp);
+            xmpp_free(ctx, enc_message);
 
             _receipt_request_handler(stanza);
 

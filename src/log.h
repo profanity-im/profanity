@@ -73,10 +73,9 @@ void chat_log_msg_out(const char * const barejid, const char * const msg);
 void chat_log_otr_msg_out(const char * const barejid, const char * const msg);
 void chat_log_pgp_msg_out(const char * const barejid, const char * const msg);
 
-void chat_log_msg_in(const char * const barejid, const char * const msg);
-void chat_log_msg_in_delayed(const char * const barejid, const char * msg, GDateTime *timestamp);
-void chat_log_otr_msg_in(const char * const barejid, const char * const msg, gboolean was_decrypted);
-void chat_log_pgp_msg_in(const char * const barejid, const char * const msg);
+void chat_log_msg_in(const char * const barejid, const char * const msg, GDateTime *timestamp);
+void chat_log_otr_msg_in(const char * const barejid, const char * const msg, gboolean was_decrypted, GDateTime *timestamp);
+void chat_log_pgp_msg_in(const char * const barejid, const char * const msg, GDateTime *timestamp);
 
 void chat_log_close(void);
 GSList * chat_log_get_previous(const gchar * const login,
