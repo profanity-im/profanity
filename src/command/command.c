@@ -1490,7 +1490,7 @@ static struct cmd_t command_defs[] =
         cmd_prefs, parse_args, 0, 1, NULL,
         CMD_NOTAGS
         CMD_SYN(
-            "/prefs [ui|desktop|chat|log|conn|presence]")
+            "/prefs [ui|desktop|chat|log|conn|presence|otr|pgp]")
         CMD_DESC(
             "Show preferences for different areas of functionality. "
             "Passing no arguments shows all preferences.")
@@ -1500,7 +1500,9 @@ static struct cmd_t command_defs[] =
             { "chat",     "Chat state preferences." },
             { "log",      "Logging preferences." },
             { "conn",     "Connection handling preferences." },
-            { "presence", "Chat presence preferences." })
+            { "presence", "Chat presence preferences." },
+            { "otr",      "Off The Record preferences." },
+            { "pgp",      "OpenPGP preferences." })
         CMD_NOEXAMPLES
     },
 
