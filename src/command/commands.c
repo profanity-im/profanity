@@ -4140,7 +4140,7 @@ cmd_receipts(ProfWin *window, const char * const command, gchar **args)
     if (g_strcmp0(args[0], "send") == 0) {
         return _cmd_set_boolean_preference(args[1], command, "Send delivery receipts", PREF_RECEIPTS_SEND);
     } else if (g_strcmp0(args[0], "request") == 0) {
-        return _cmd_set_boolean_preference(args[1], command, "Request delivery receipets", PREF_RECEIPTS_REQUEST);
+        return _cmd_set_boolean_preference(args[1], command, "Request delivery receipts", PREF_RECEIPTS_REQUEST);
     } else {
         cons_bad_cmd_usage(command);
         return TRUE;
