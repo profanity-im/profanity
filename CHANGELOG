@@ -10,6 +10,7 @@
 - Option to show JIDs in roster
 - Option to hide empty groups in roster
 - Generate UUID for unnamed new MUC rooms
+- Themable UI preference to indicate OTR and PGP messages
 - Reformatted help
 - devel: Added functional tests using libexpect and libstabber
 
