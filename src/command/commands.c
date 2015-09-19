@@ -755,23 +755,22 @@ cmd_wins(ProfWin *window, const char * const command, gchar **args)
                 cons_show("Same source and target window supplied.");
             }
         }
+    } else if (strcmp(args[0], "autotidy") == 0) {
+        if (g_strcmp0(args[1], "on") == 0) {
+            cons_show("Window autotidy enabled");
+            prefs_set_boolean(PREF_WINS_AUTO_TIDY, TRUE);
+            ui_tidy_wins();
+        } else if (g_strcmp0(args[1], "off") == 0) {
+            cons_show("Window autotidy disabled");
+            prefs_set_boolean(PREF_WINS_AUTO_TIDY, FALSE);
+        } else {
+            cons_bad_cmd_usage(command);
+        }
     } else {
         cons_bad_cmd_usage(command);
     }
 
     return TRUE;
-}
-
-gboolean
-cmd_winstidy(ProfWin *window, const char * const command, gchar **args)
-{
-    gboolean result = _cmd_set_boolean_preference(args[0], command, "Wins Auto Tidy", PREF_WINS_AUTO_TIDY);
-
-    if (result && g_strcmp0(args[0], "on") == 0) {
-        ui_tidy_wins();
-    }
-
-    return result;
 }
 
 gboolean

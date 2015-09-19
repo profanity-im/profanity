@@ -130,7 +130,6 @@ gboolean cmd_vercheck(ProfWin *window, const char * const command, gchar **args)
 gboolean cmd_who(ProfWin *window, const char * const command, gchar **args);
 gboolean cmd_win(ProfWin *window, const char * const command, gchar **args);
 gboolean cmd_wins(ProfWin *window, const char * const command, gchar **args);
-gboolean cmd_winstidy(ProfWin *window, const char * const command, gchar **args);
 gboolean cmd_xa(ProfWin *window, const char * const command, gchar **args);
 gboolean cmd_alias(ProfWin *window, const char * const command, gchar **args);
 gboolean cmd_xmlconsole(ProfWin *window, const char * const command, gchar **args);
