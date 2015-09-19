@@ -105,6 +105,7 @@ static char * _inpblock_autocomplete(ProfWin *window, const char * const input);
 static char * _time_autocomplete(ProfWin *window, const char * const input);
 static char * _receipts_autocomplete(ProfWin *window, const char * const input);
 static char * _help_autocomplete(ProfWin *window, const char * const input);
+static char * _wins_autocomplete(ProfWin *window, const char * const input);
 
 GHashTable *commands = NULL;
 
@@ -697,14 +698,16 @@ static struct cmd_t command_defs[] =
             CMD_TAG_UI)
         CMD_SYN(
             "/wins tidy",
+            "/wins autotidy on|off",
             "/wins prune",
             "/wins swap <source> <target>")
         CMD_DESC(
             "Manage windows. "
             "Passing no argument will list all currently active windows and information about their usage.")
         CMD_ARGS(
-            { "tidy", "Move windows so there are no gaps." },
-            { "prune", "Close all windows with no unread messages, and then tidy so there are no gaps." },
+            { "tidy",                   "Move windows so there are no gaps." },
+            { "autotidy on|off",        "Automatically remove gaps when closing windows." },
+            { "prune",                  "Close all windows with no unread messages, and then tidy so there are no gaps." },
             { "swap <source> <target>", "Swap windows, target may be an empty position." })
         CMD_NOEXAMPLES
     },
@@ -890,19 +893,6 @@ static struct cmd_t command_defs[] =
             "Word wrapping.")
         CMD_ARGS(
             { "on|off", "Enable or disable word wrapping in the main window." })
-        CMD_NOEXAMPLES
-    },
-
-    { "/winstidy",
-        cmd_winstidy, parse_args, 1, 1, &cons_winstidy_setting,
-        CMD_TAGS(
-            CMD_TAG_UI)
-        CMD_SYN(
-            "/winstidy on|off")
-        CMD_DESC(
-            "Auto tidy windows, when a window is closed, windows will be moved to fill the gap.")
-        CMD_ARGS(
-            { "on|off", "Enable or disable auto window tidy." })
         CMD_NOEXAMPLES
     },
 
@@ -1872,6 +1862,7 @@ cmd_init(void)
     wins_ac = autocomplete_new();
     autocomplete_add(wins_ac, "prune");
     autocomplete_add(wins_ac, "tidy");
+    autocomplete_add(wins_ac, "autotidy");
     autocomplete_add(wins_ac, "swap");
 
     roster_ac = autocomplete_new();
@@ -2534,8 +2525,8 @@ _cmd_complete_parameters(ProfWin *window, const char * const input)
         }
     }
 
-    gchar *cmds[] = { "/prefs", "/disco", "/close", "/wins", "/subject", "/room" };
-    Autocomplete completers[] = { prefs_ac, disco_ac, close_ac, wins_ac, subject_ac, room_ac };
+    gchar *cmds[] = { "/prefs", "/disco", "/close", "/subject", "/room" };
+    Autocomplete completers[] = { prefs_ac, disco_ac, close_ac, subject_ac, room_ac };
 
     for (i = 0; i < ARRAY_SIZE(cmds); i++) {
         result = autocomplete_param_with_ac(input, cmds[i], completers[i], TRUE);
@@ -2574,6 +2565,7 @@ _cmd_complete_parameters(ProfWin *window, const char * const input)
     g_hash_table_insert(ac_funcs, "/inpblock",      _inpblock_autocomplete);
     g_hash_table_insert(ac_funcs, "/time",          _time_autocomplete);
     g_hash_table_insert(ac_funcs, "/receipts",      _receipts_autocomplete);
+    g_hash_table_insert(ac_funcs, "/wins",          _wins_autocomplete);
 
     int len = strlen(input);
     char parsed[len+1];
@@ -3455,6 +3447,24 @@ _statuses_autocomplete(ProfWin *window, const char * const input)
     }
 
     result = autocomplete_param_with_ac(input, "/statuses", statuses_ac, TRUE);
+    if (result) {
+        return result;
+    }
+
+    return NULL;
+}
+
+static char *
+_wins_autocomplete(ProfWin *window, const char * const input)
+{
+    char *result = NULL;
+
+    result = autocomplete_param_with_func(input, "/wins autotidy", prefs_autocomplete_boolean_choice);
+    if (result) {
+        return result;
+    }
+
+    result = autocomplete_param_with_ac(input, "/wins", wins_ac, TRUE);
     if (result) {
         return result;
     }
