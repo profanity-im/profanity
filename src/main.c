@@ -98,6 +98,13 @@ main(int argc, char **argv)
 
         g_print("Build information:\n");
 
+#ifdef PROF_HAVE_LIBMESODE
+        g_print("XMPP library: libmesode\n");
+#endif
+#ifdef PROF_HAVE_LIBSTROPHE
+        g_print("XMPP library: libstrophe\n");
+#endif
+
         gboolean notify_enabled = FALSE;
 
 #ifdef PROF_HAVE_OSXNOTIFY

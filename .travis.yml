@@ -5,15 +5,15 @@ install:
     - sudo apt-get update
     - sudo apt-get -y install libssl-dev libexpat1-dev libncursesw5-dev libglib2.0-dev libnotify-dev libcurl3-dev libxss-dev libotr2-dev libgpgme11-dev autoconf-archive uuid-dev expect-dev tcl-dev
     - sudo apt-get -y install libtool python-dev lua5.2 liblua5.2-dev ruby-dev
-    - git clone git://github.com/strophe/libstrophe.git
-    - cd libstrophe
+    - git clone git://github.com/boothj5/libmesode.git
+    - cd libmesode
     - mkdir m4
     - ./bootstrap.sh
     - ./configure --prefix=/usr
     - make
     - sudo make install
     - cd ..
-    - rm -rf libstrophe
+    - rm -rf libmesode
     - wget https://cmocka.org/files/1.0/cmocka-1.0.0.tar.xz
     - tar -xvf cmocka-1.0.0.tar.xz
     - cd cmocka-1.0.0

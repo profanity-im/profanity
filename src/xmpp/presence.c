@@ -32,12 +32,21 @@
  *
  */
 
+#include "prof_config.h"
+
 #include <assert.h>
 #include <stdlib.h>
 #include <string.h>
 
 #include <glib.h>
 #include <glib/gprintf.h>
+
+#ifdef PROF_HAVE_LIBMESODE
+#include <mesode.h>
+#endif
+#ifdef PROF_HAVE_LIBSTROPHE
+#include <strophe.h>
+#endif
 
 #include "common.h"
 #include "config/preferences.h"
