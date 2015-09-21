@@ -77,13 +77,13 @@ cygwin_prepare()
     fi
 }
 
-install_lib_strophe()
+install_lib_mesode()
 {
     echo
-    echo Profanity installer... installing libstrophe
+    echo Profanity installer... installing libmesode
     echo
-    git clone git://github.com/strophe/libstrophe.git
-    cd libstrophe
+    git clone git@github.com:boothj5/libmesode.git
+    cd libmesode
     ./bootstrap.sh
     ./configure --prefix=$1
     make
@@ -105,13 +105,13 @@ install_profanity()
     sudo make install
 }
 
-cyg_install_lib_strophe()
+cyg_install_lib_mesode()
 {
     echo
-    echo Profanity installer... installing libstrophe
+    echo Profanity installer... installing libmesode
     echo
-    git clone git://github.com/strophe/libstrophe.git
-    cd libstrophe
+    git clone git@github.com:boothj5/libmesode.git
+    cd libmesode
     ./bootstrap.sh
     ./bootstrap.sh # second call seems to fix problem on cygwin
     ./configure --prefix=/usr
@@ -140,8 +140,8 @@ cleanup()
     echo Profanity installer... cleaning up
     echo
 
-    echo Removing libstrophe repository...
-    rm -rf libstrophe
+    echo Removing libmesode repository...
+    rm -rf libmesode
 
     echo
     echo Profanity installer... complete!
@@ -183,25 +183,25 @@ unknown)    echo The install script will not work on this OS.
             exit
             ;;
 fedora)     fedora_prepare
-            install_lib_strophe /usr
+            install_lib_mesode /usr
             install_profanity
             ;;
 debian)     debian_prepare
-            install_lib_strophe /usr
+            install_lib_mesode /usr
             install_profanity
             ;;
 opensuse)   opensuse_prepare
-            install_lib_strophe /usr/local
+            install_lib_mesode /usr/local
             sudo /sbin/ldconfig
             install_profanity
             ;;
 centos)     centos_prepare
-            install_lib_strophe /usr
+            install_lib_mesode /usr
             sudo ldconfig
             install_profanity
             ;;
 cygwin)     cygwin_prepare
-            cyg_install_lib_strophe
+            cyg_install_lib_mesode
             cyg_install_profanity
             ;;
 esac

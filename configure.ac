@@ -47,62 +47,17 @@ AC_ARG_ENABLE([otr],
     [AS_HELP_STRING([--enable-otr], [enable otr encryption])])
 AC_ARG_ENABLE([pgp],
     [AS_HELP_STRING([--enable-pgp], [enable pgp])])
-AC_ARG_WITH([libxml2],
-    [AS_HELP_STRING([--with-libxml2], [link with libxml2 instead of expat])])
 AC_ARG_WITH([xscreensaver],
     [AS_HELP_STRING([--with-xscreensaver], [use libXScrnSaver to determine idle time])])
 AC_ARG_WITH([themes],
     [AS_HELP_STRING([--with-themes[[=PATH]]], [install themes (default yes)])])
 
-# Use the CFLAGS and libs provided by libstrophe.pc if libstrophe has pkg-config support.
-PKG_CHECK_MODULES([libstrophe], [libstrophe], [LIBS="$libstrophe_LIBS $LIBS"],
-        [
-	 if test "x$PLATFORM" != xfreebsd; then
-		AC_CHECK_LIB([resolv], [res_query], [],
-		    [AC_CHECK_LIB([resolv], [__res_query], [],
-			[AC_MSG_ERROR([libresolv not found; libresolv required for profanity])])])
-	 else
-		AC_MSG_NOTICE([skipping libresolv checks for freebsd])
-	 fi
-
-         ### Check for libstrophe dependencies
-         ### Select first existing xml library among expat and libxml2
-         PARSER=""
-         PARSER_LIBS=""
-         PARSER_CFLAGS=""
-         AS_IF([test "x$with_libxml2" != xyes],
-             [PKG_CHECK_MODULES([expat], [expat],
-                 [PARSER_CFLAGS="$expat_CFLAGS"; PARSER_LIBS="$expat_LIBS"; PARSER="expat"],
-                 [AC_CHECK_LIB([expat], [XML_ParserCreate],
-                     [PARSER_LIBS="-lexpat"; PARSER="expat"],
-                     AS_IF([test "x$with_libxml2" = xno],
-                         [AC_MSG_ERROR([expat is required but does not exist])]))])
-             ])
-
-         AS_IF([test "x$PARSER" = x -a "x$with_libxml2" != xno],
-             [PKG_CHECK_MODULES([libxml2], [libxml-2.0],
-                 [PARSER_CFLAGS="$libxml2_CFLAGS"; PARSER_LIBS="$libxml2_LIBS"; PARSER="libxml2"],
-                 AS_IF([test "x$with_libxml2" = xyes],
-                     [AC_MSG_ERROR([libxml2 is required but does not exist])]))
-             ])
-
-         AS_IF([test "x$PARSER" = x],
-             [AC_MSG_ERROR([either expat or libxml2 is required for profanity])])
-         AM_CPPFLAGS="$AM_CPPFLAGS $PARSER_CFLAGS"
-         LIBS="$PARSER_LIBS $LIBS"
-
-         PKG_CHECK_MODULES([openssl], [openssl], [],
-                 [AC_CHECK_HEADER(openssl/ssl.h, [openssl_LIBS="-lssl -lcrypto"], [AC_MSG_ERROR([openssl not found; openssl required for profanity])])])
-         AM_CPPFLAGS="$AM_CPPFLAGS $openssl_CFLAGS"
-         LIBS="$openssl_LIBS $LIBS"
-
-         CFLAGS_RESTORE="$CFLAGS"
-         CFLAGS="$CFLAGS $AM_CPPFLAGS"
-         AC_CHECK_LIB([strophe], [xmpp_ctx_new], [LIBS="-lstrophe $LIBS"; listrophe_CFLAGS=""],
-                [AC_MSG_ERROR([libstrophe linked with $PARSER is required for profanity])])
-         CFLAGS="$CFLAGS_RESTORE"
-        ])
-CFLAGS="$CFLAGS $libstrophe_CFLAGS"
+### Check for libmesode, fall back to libstrophe
+PKG_CHECK_MODULES([libmesode], [libmesode],
+    [LIBS="$libmesode_LIBS $LIBS" CFLAGS="$CFLAGS $libmesode_CFLAGS" AC_DEFINE([HAVE_LIBMESODE], [1], [libmesode])],
+    [PKG_CHECK_MODULES([libstrophe], [libstrophe],
+        [LIBS="$libstrophe_LIBS $LIBS" CFLAGS="$CFLAGS $libstrophe_CFLAGS" AC_DEFINE([HAVE_LIBSTROPHE], [1], [libstrophe])],
+        [AC_MSG_ERROR([Neither libmesode or libstrophe found, either is required for profanity])])])
 
 ### Check for ncurses library
 PKG_CHECK_MODULES([ncursesw], [ncursesw],

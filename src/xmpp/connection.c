@@ -32,11 +32,18 @@
  *
  */
 
+#include "config.h"
+
 #include <assert.h>
 #include <string.h>
 #include <stdlib.h>
 
+#ifdef HAVE_LIBMESODE
+#include <mesode.h>
+#endif
+#ifdef HAVE_LIBSTROPHE
 #include <strophe.h>
+#endif
 
 #include "chat_session.h"
 #include "common.h"

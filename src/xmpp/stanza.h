@@ -35,7 +35,15 @@
 #ifndef XMPP_STANZA_H
 #define XMPP_STANZA_H
 
+#include "config.h"
+
+#ifdef HAVE_LIBMESODE
+#include <mesode.h>
+#endif
+#ifdef HAVE_LIBSTROPHE
 #include <strophe.h>
+#endif
+
 #include <xmpp/xmpp.h>
 
 #define STANZA_NAME_ACTIVE "active"
