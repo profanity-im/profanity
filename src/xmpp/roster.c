@@ -32,12 +32,20 @@
  *
  */
 
+#include "config.h"
+
 #include <assert.h>
 #include <stdlib.h>
 #include <string.h>
 
 #include <glib.h>
+
+#ifdef HAVE_LIBMESODE
+#include <mesode.h>
+#endif
+#ifdef HAVE_LIBSTROPHE
 #include <strophe.h>
+#endif
 
 #include "log.h"
 #include "profanity.h"
