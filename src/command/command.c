@@ -192,12 +192,14 @@ static struct cmd_t command_defs[] =
             CMD_TAG_CONNECTION)
         CMD_SYN(
             "/tls allow",
+            "/tls always",
             "/tls deny")
         CMD_DESC(
             "Handle TLS certificates. ")
         CMD_ARGS(
-            { "allow", "Allow connection using invalid TLS certificate." },
-            { "deny",  "Allow connection using invalid TLS certificate." })
+            { "allow",  "Allow connection to continue with an invalid TLS certificate." },
+            { "always", "Always allow connections with this invalid TLS certificate." },
+            { "deny",   "Terminate TLS connection." })
         CMD_NOEXAMPLES
     },
 
@@ -2088,6 +2090,7 @@ cmd_init(void)
 
     tls_ac = autocomplete_new();
     autocomplete_add(tls_ac, "allow");
+    autocomplete_add(tls_ac, "always");
     autocomplete_add(tls_ac, "deny");
 }
 

@@ -643,6 +643,13 @@ int
 sv_ev_certfail(const char * const errormsg, const char * const certname, const char * const certfp,
     const char * const notbefore, const char * const notafter)
 {
+    GList *trusted = prefs_get_trusted_certs();
+    if (g_list_find_custom(trusted, certfp, (GCompareFunc)g_strcmp0)) {
+        prefs_free_trusted_certs(trusted);
+        return 1;
+    }
+    prefs_free_trusted_certs(trusted);
+
     cons_show("");
     cons_show_error("TLS certficiate verification failed: %s", errormsg);
     cons_show("  Issuer      : %s", certname);
@@ -651,14 +658,18 @@ sv_ev_certfail(const char * const errormsg, const char * const certname, const c
     cons_show("  End         : %s", notafter);
     cons_show("");
     cons_show("Use '/tls allow' to accept this certificate");
+    cons_show("Use '/tls always' to accept this certificate permanently");
     cons_show("Use '/tls deny' to reject this certificate");
     cons_show("");
     ui_update();
 
     char *cmd = ui_get_line();
 
-    while ((g_strcmp0(cmd, "/tls allow") != 0) && (g_strcmp0(cmd, "/tls deny") != 0)) {
+    while ((g_strcmp0(cmd, "/tls allow") != 0)
+                && (g_strcmp0(cmd, "/tls always") != 0)
+                && (g_strcmp0(cmd, "/tls deny") != 0)) {
         cons_show("Use '/tls allow' to accept this certificate");
+        cons_show("Use '/tls always' to accept this certificate permanently");
         cons_show("Use '/tls deny' to reject this certificate");
         cons_show("");
         ui_update();
@@ -667,6 +678,10 @@ sv_ev_certfail(const char * const errormsg, const char * const certname, const c
     }
 
     if (g_strcmp0(cmd, "/tls allow") == 0) {
+        free(cmd);
+        return 1;
+    } else if (g_strcmp0(cmd, "/tls always") == 0) {
+        prefs_add_trusted_cert(certfp);
         free(cmd);
         return 1;
     } else {

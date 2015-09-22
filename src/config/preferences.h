@@ -162,4 +162,8 @@ char * prefs_get_string(preference_t pref);
 void prefs_free_string(char *pref);
 void prefs_set_string(preference_t pref, char *value);
 
+GList* prefs_get_trusted_certs(void);
+void prefs_free_trusted_certs(GList *certs);
+void prefs_add_trusted_cert(const char * const fp);
+
 #endif
