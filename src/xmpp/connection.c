@@ -360,12 +360,14 @@ _connection_free_session_data(void)
     presence_clear_sub_requests();
 }
 
+#ifdef HAVE_LIBMESODE
 static int
 _connection_certfail_cb(const char * const certname, const char * const certfp,
     char * const notbefore, const char * const notafter, const char * const errormsg)
 {
     return sv_ev_certfail(errormsg, certname, certfp, notbefore, notafter);
 }
+#endif
 
 static jabber_conn_status_t
 _jabber_connect(const char * const fulljid, const char * const passwd,
@@ -417,8 +419,13 @@ _jabber_connect(const char * const fulljid, const char * const passwd,
         xmpp_conn_disable_tls(jabber_conn.conn);
     }
 
+#ifdef HAVE_LIBMESODE
     int connect_status = xmpp_connect_client(jabber_conn.conn, altdomain, port,
         _connection_certfail_cb, _connection_handler, jabber_conn.ctx);
+#else
+    int connect_status = xmpp_connect_client(jabber_conn.conn, altdomain, port,
+        _connection_handler, jabber_conn.ctx);
+#endif
 
     if (connect_status == 0)
         jabber_conn.conn_status = JABBER_CONNECTING;
