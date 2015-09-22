@@ -650,6 +650,27 @@ sv_ev_certfail(const char * const errormsg, const char * const certname, const c
     cons_show("  Start       : %s", notbefore);
     cons_show("  End         : %s", notafter);
     cons_show("");
+    cons_show("Use '/tls allow' to accept this certificate");
+    cons_show("Use '/tls deny' to reject this certificate");
+    cons_show("");
+    ui_update();
 
-    return 1;
+    char *cmd = ui_get_line();
+
+    while ((g_strcmp0(cmd, "/tls allow") != 0) && (g_strcmp0(cmd, "/tls deny") != 0)) {
+        cons_show("Use '/tls allow' to accept this certificate");
+        cons_show("Use '/tls deny' to reject this certificate");
+        cons_show("");
+        ui_update();
+        free(cmd);
+        cmd = ui_get_line();
+    }
+
+    if (g_strcmp0(cmd, "/tls allow") == 0) {
+        free(cmd);
+        return 1;
+    } else {
+        free(cmd);
+        return 0;
+    }
 }

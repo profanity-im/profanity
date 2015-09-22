@@ -186,6 +186,21 @@ static struct cmd_t command_defs[] =
             "/connect me@chatty server chatty.com port 5443")
         },
 
+    { "/tls",
+        cmd_tls, parse_args, 0, 0, NULL,
+        CMD_TAGS(
+            CMD_TAG_CONNECTION)
+        CMD_SYN(
+            "/tls allow",
+            "/tls deny")
+        CMD_DESC(
+            "Handle TLS certificates. ")
+        CMD_ARGS(
+            { "allow", "Allow connection using invalid TLS certificate." },
+            { "deny",  "Allow connection using invalid TLS certificate." })
+        CMD_NOEXAMPLES
+    },
+
     { "/disconnect",
         cmd_disconnect, parse_args, 0, 0, NULL,
         CMD_TAGS(
@@ -1674,6 +1689,7 @@ static Autocomplete inpblock_ac;
 static Autocomplete receipts_ac;
 static Autocomplete pgp_ac;
 static Autocomplete pgp_log_ac;
+static Autocomplete tls_ac;
 
 /*
  * Initialise command autocompleter and history
@@ -2069,6 +2085,10 @@ cmd_init(void)
     autocomplete_add(pgp_log_ac, "on");
     autocomplete_add(pgp_log_ac, "off");
     autocomplete_add(pgp_log_ac, "redact");
+
+    tls_ac = autocomplete_new();
+    autocomplete_add(tls_ac, "allow");
+    autocomplete_add(tls_ac, "deny");
 }
 
 void
@@ -2133,6 +2153,7 @@ cmd_uninit(void)
     autocomplete_free(receipts_ac);
     autocomplete_free(pgp_ac);
     autocomplete_free(pgp_log_ac);
+    autocomplete_free(tls_ac);
 }
 
 gboolean
@@ -2313,6 +2334,7 @@ cmd_reset_autocomplete(ProfWin *window)
     autocomplete_reset(receipts_ac);
     autocomplete_reset(pgp_ac);
     autocomplete_reset(pgp_log_ac);
+    autocomplete_reset(tls_ac);
 
     if (window->type == WIN_CHAT) {
         ProfChatWin *chatwin = (ProfChatWin*)window;
@@ -2525,8 +2547,8 @@ _cmd_complete_parameters(ProfWin *window, const char * const input)
         }
     }
 
-    gchar *cmds[] = { "/prefs", "/disco", "/close", "/subject", "/room" };
-    Autocomplete completers[] = { prefs_ac, disco_ac, close_ac, subject_ac, room_ac };
+    gchar *cmds[] = { "/prefs", "/disco", "/close", "/subject", "/room", "/tls" };
+    Autocomplete completers[] = { prefs_ac, disco_ac, close_ac, subject_ac, room_ac, tls_ac };
 
     for (i = 0; i < ARRAY_SIZE(cmds); i++) {
         result = autocomplete_param_with_ac(input, cmds[i], completers[i], TRUE);

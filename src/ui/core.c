@@ -2107,6 +2107,13 @@ ui_ask_password(void)
 }
 
 char *
+ui_get_line(void)
+{
+    status_bar_update_virtual();
+    return inp_get_line();
+}
+
+char *
 ui_ask_pgp_passphrase(const char *hint, int prev_fail)
 {
     ProfWin *current = wins_get_current();

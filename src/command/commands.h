@@ -82,6 +82,7 @@ gboolean cmd_chlog(ProfWin *window, const char * const command, gchar **args);
 gboolean cmd_clear(ProfWin *window, const char * const command, gchar **args);
 gboolean cmd_close(ProfWin *window, const char * const command, gchar **args);
 gboolean cmd_connect(ProfWin *window, const char * const command, gchar **args);
+gboolean cmd_tls(ProfWin *window, const char * const command, gchar **args);
 gboolean cmd_decline(ProfWin *window, const char * const command, gchar **args);
 gboolean cmd_disco(ProfWin *window, const char * const command, gchar **args);
 gboolean cmd_disconnect(ProfWin *window, const char * const command, gchar **args);

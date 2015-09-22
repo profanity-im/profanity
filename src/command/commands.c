@@ -157,6 +157,13 @@ cmd_execute_alias(ProfWin *window, const char * const inp, gboolean *ran)
 }
 
 gboolean
+cmd_tls(ProfWin *window, const char * const command, gchar **args)
+{
+    cons_bad_cmd_usage(command);
+    return TRUE;
+}
+
+gboolean
 cmd_connect(ProfWin *window, const char * const command, gchar **args)
 {
     jabber_conn_status_t conn_status = jabber_get_connection_status();
