@@ -638,3 +638,18 @@ sv_ev_muc_occupant_online(const char * const room, const char * const nick, cons
         occupantswin_occupants(room);
     }
 }
+
+int
+sv_ev_certfail(const char * const errormsg, const char * const certname, const char * const certfp,
+    const char * const notbefore, const char * const notafter)
+{
+    cons_show("");
+    cons_show_error("TLS certficiate verification failed: %s", errormsg);
+    cons_show("  Issuer      : %s", certname);
+    cons_show("  Fingerprint : %s", certfp);
+    cons_show("  Start       : %s", notbefore);
+    cons_show("  End         : %s", notafter);
+    cons_show("");
+
+    return 1;
+}

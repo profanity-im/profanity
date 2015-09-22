@@ -94,13 +94,16 @@ static GTimer *reconnect_timer;
 
 static log_level_t _get_log_level(xmpp_log_level_t xmpp_level);
 static xmpp_log_level_t _get_xmpp_log_level();
+
 static void _xmpp_file_logger(void * const userdata,
     const xmpp_log_level_t level, const char * const area,
     const char * const msg);
+
 static xmpp_log_t * _xmpp_get_file_logger();
 
 static jabber_conn_status_t _jabber_connect(const char * const fulljid,
     const char * const passwd, const char * const altdomain, int port);
+
 static void _jabber_reconnect(void);
 
 static void _connection_handler(xmpp_conn_t * const conn,
@@ -357,6 +360,13 @@ _connection_free_session_data(void)
     presence_clear_sub_requests();
 }
 
+static int
+_connection_certfail_cb(const char * const certname, const char * const certfp,
+    char * const notbefore, const char * const notafter, const char * const errormsg)
+{
+    return sv_ev_certfail(errormsg, certname, certfp, notbefore, notafter);
+}
+
 static jabber_conn_status_t
 _jabber_connect(const char * const fulljid, const char * const passwd,
     const char * const altdomain, int port)
@@ -408,7 +418,7 @@ _jabber_connect(const char * const fulljid, const char * const passwd,
     }
 
     int connect_status = xmpp_connect_client(jabber_conn.conn, altdomain, port,
-        _connection_handler, jabber_conn.ctx);
+        _connection_certfail_cb, _connection_handler, jabber_conn.ctx);
 
     if (connect_status == 0)
         jabber_conn.conn_status = JABBER_CONNECTING;
