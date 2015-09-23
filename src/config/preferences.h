@@ -103,7 +103,8 @@ typedef enum {
     PREF_RESOURCE_MESSAGE,
     PREF_INPBLOCK_DYNAMIC,
     PREF_ENC_WARN,
-    PREF_PGP_LOG
+    PREF_PGP_LOG,
+    PREF_CERT_PATH,
 } preference_t;
 
 typedef struct prof_alias_t {

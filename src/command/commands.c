@@ -159,8 +159,36 @@ cmd_execute_alias(ProfWin *window, const char * const inp, gboolean *ran)
 gboolean
 cmd_tls(ProfWin *window, const char * const command, gchar **args)
 {
-    cons_bad_cmd_usage(command);
-    return TRUE;
+    if (g_strcmp0(args[0], "certpath") == 0) {
+        if (g_strcmp0(args[1], "set") == 0) {
+            if (args[2] == NULL) {
+                cons_bad_cmd_usage(command);
+                return TRUE;
+            }
+            prefs_set_string(PREF_CERT_PATH, args[2]);
+            cons_show("Certificate path set to: %s", args[2]);
+            return TRUE;
+        } else if (g_strcmp0(args[1], "clear") == 0) {
+            prefs_set_string(PREF_CERT_PATH, NULL);
+            cons_show("Certificate path cleared");
+            return TRUE;
+        } else if (args[1] == NULL) {
+            char *path = prefs_get_string(PREF_CERT_PATH);
+            if (path) {
+                cons_show("Trusted certificate path: %s", path);
+                prefs_free_string(path);
+            } else {
+                cons_show("No trusted certificate path set.");
+            }
+            return TRUE;
+        } else {
+            cons_bad_cmd_usage(command);
+            return TRUE;
+        }
+    } else {
+        cons_bad_cmd_usage(command);
+        return TRUE;
+    }
 }
 
 gboolean

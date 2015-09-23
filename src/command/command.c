@@ -106,6 +106,7 @@ static char * _time_autocomplete(ProfWin *window, const char * const input);
 static char * _receipts_autocomplete(ProfWin *window, const char * const input);
 static char * _help_autocomplete(ProfWin *window, const char * const input);
 static char * _wins_autocomplete(ProfWin *window, const char * const input);
+static char * _tls_autocomplete(ProfWin *window, const char * const input);
 
 GHashTable *commands = NULL;
 
@@ -187,19 +188,25 @@ static struct cmd_t command_defs[] =
         },
 
     { "/tls",
-        cmd_tls, parse_args, 0, 0, NULL,
+        cmd_tls, parse_args, 1, 3, NULL,
         CMD_TAGS(
             CMD_TAG_CONNECTION)
         CMD_SYN(
             "/tls allow",
             "/tls always",
-            "/tls deny")
+            "/tls deny",
+            "/tls certpath",
+            "/tls certpath set <path>",
+            "/tls certpath clear")
         CMD_DESC(
             "Handle TLS certificates. ")
         CMD_ARGS(
-            { "allow",  "Allow connection to continue with an invalid TLS certificate." },
-            { "always", "Always allow connections with this invalid TLS certificate." },
-            { "deny",   "Terminate TLS connection." })
+            { "allow",               "Allow connection to continue with an invalid TLS certificate." },
+            { "always",              "Always allow connections with this invalid TLS certificate." },
+            { "deny",                "Terminate TLS connection." },
+            { "certpath",            "Show the trusted certificate path." },
+            { "certpath set <path>", "Specify filesystem path containing trusted certificates." },
+            { "certpath clear",      "Clear the trusted certificate path." })
         CMD_NOEXAMPLES
     },
 
@@ -1692,6 +1699,7 @@ static Autocomplete receipts_ac;
 static Autocomplete pgp_ac;
 static Autocomplete pgp_log_ac;
 static Autocomplete tls_ac;
+static Autocomplete tls_certpath_ac;
 
 /*
  * Initialise command autocompleter and history
@@ -2092,6 +2100,11 @@ cmd_init(void)
     autocomplete_add(tls_ac, "allow");
     autocomplete_add(tls_ac, "always");
     autocomplete_add(tls_ac, "deny");
+    autocomplete_add(tls_ac, "certpath");
+
+    tls_certpath_ac = autocomplete_new();
+    autocomplete_add(tls_certpath_ac, "set");
+    autocomplete_add(tls_certpath_ac, "clear");
 }
 
 void
@@ -2157,6 +2170,7 @@ cmd_uninit(void)
     autocomplete_free(pgp_ac);
     autocomplete_free(pgp_log_ac);
     autocomplete_free(tls_ac);
+    autocomplete_free(tls_certpath_ac);
 }
 
 gboolean
@@ -2338,6 +2352,7 @@ cmd_reset_autocomplete(ProfWin *window)
     autocomplete_reset(pgp_ac);
     autocomplete_reset(pgp_log_ac);
     autocomplete_reset(tls_ac);
+    autocomplete_reset(tls_certpath_ac);
 
     if (window->type == WIN_CHAT) {
         ProfChatWin *chatwin = (ProfChatWin*)window;
@@ -2550,8 +2565,8 @@ _cmd_complete_parameters(ProfWin *window, const char * const input)
         }
     }
 
-    gchar *cmds[] = { "/prefs", "/disco", "/close", "/subject", "/room", "/tls" };
-    Autocomplete completers[] = { prefs_ac, disco_ac, close_ac, subject_ac, room_ac, tls_ac };
+    gchar *cmds[] = { "/prefs", "/disco", "/close", "/subject", "/room" };
+    Autocomplete completers[] = { prefs_ac, disco_ac, close_ac, subject_ac, room_ac };
 
     for (i = 0; i < ARRAY_SIZE(cmds); i++) {
         result = autocomplete_param_with_ac(input, cmds[i], completers[i], TRUE);
@@ -2591,6 +2606,7 @@ _cmd_complete_parameters(ProfWin *window, const char * const input)
     g_hash_table_insert(ac_funcs, "/time",          _time_autocomplete);
     g_hash_table_insert(ac_funcs, "/receipts",      _receipts_autocomplete);
     g_hash_table_insert(ac_funcs, "/wins",          _wins_autocomplete);
+    g_hash_table_insert(ac_funcs, "/tls",           _tls_autocomplete);
 
     int len = strlen(input);
     char parsed[len+1];
@@ -3495,6 +3511,24 @@ _wins_autocomplete(ProfWin *window, const char * const input)
     }
 
     return NULL;
+}
+
+static char *
+_tls_autocomplete(ProfWin *window, const char * const input)
+{
+    char *result = NULL;
+
+    result = autocomplete_param_with_ac(input, "/tls certpath", tls_certpath_ac, TRUE);
+    if (result) {
+        return result;
+    }
+
+    result = autocomplete_param_with_ac(input, "/tls", tls_ac, TRUE);
+    if (result) {
+        return result;
+    }
+
+    return result;
 }
 
 static char *
