@@ -651,7 +651,7 @@ sv_ev_certfail(const char * const errormsg, const char * const certname, const c
     prefs_free_trusted_certs(trusted);
 
     cons_show("");
-    cons_show_error("TLS certficiate verification failed: %s", errormsg);
+    cons_show_error("TLS certificate verification failed: %s", errormsg);
     cons_show("  Subject     : %s", certname);
     cons_show("  Fingerprint : %s", certfp);
     cons_show("  Start       : %s", notbefore);
