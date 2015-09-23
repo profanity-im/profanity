@@ -44,6 +44,7 @@
 #include "config/account.h"
 #include "roster_list.h"
 #include "window_list.h"
+#include "config/tlscerts.h"
 
 #ifdef HAVE_LIBOTR
 #include "otr/otr.h"
@@ -643,12 +644,9 @@ int
 sv_ev_certfail(const char * const errormsg, const char * const certname, const char * const certfp,
     const char * const notbefore, const char * const notafter)
 {
-    GList *trusted = prefs_get_trusted_certs();
-    if (g_list_find_custom(trusted, certfp, (GCompareFunc)g_strcmp0)) {
-        prefs_free_trusted_certs(trusted);
+    if (tlscerts_exists(certfp)) {
         return 1;
     }
-    prefs_free_trusted_certs(trusted);
 
     char *domain = NULL;
     char *org = NULL;
@@ -676,15 +674,12 @@ sv_ev_certfail(const char * const errormsg, const char * const certname, const c
     cons_show_error("TLS certificate verification failed: %s", errormsg);
     if (domain) {
         cons_show("  Domain       : %s", domain);
-        free(domain);
     }
     if (org) {
         cons_show("  Organisation : %s", org);
-        free(org);
     }
     if (email) {
         cons_show("  Email        : %s", email);
-        free(email);
     }
     cons_show("  Fingerprint  : %s", certfp);
     cons_show("  Start        : %s", notbefore);
@@ -712,13 +707,26 @@ sv_ev_certfail(const char * const errormsg, const char * const certname, const c
 
     if (g_strcmp0(cmd, "/tls allow") == 0) {
         free(cmd);
+        free(domain);
+        free(org);
+        free(email);
         return 1;
     } else if (g_strcmp0(cmd, "/tls always") == 0) {
-        prefs_add_trusted_cert(certfp);
+        if (!tlscerts_exists(certfp)) {
+            TLSCertificate *cert = tlscerts_new(certfp, domain, org, email, notbefore, notafter);
+            tlscerts_add(cert);
+            tlscerts_free(cert);
+        }
         free(cmd);
+        free(domain);
+        free(org);
+        free(email);
         return 1;
     } else {
         free(cmd);
+        free(domain);
+        free(org);
+        free(email);
         return 0;
     }
 }

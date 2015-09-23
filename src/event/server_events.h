@@ -89,5 +89,4 @@ void sv_ev_roster_received(void);
 int sv_ev_certfail(const char * const errormsg, const char * const certname, const char * const certfp,
     const char * const notbefore, const char * const notafter);
 
-
 #endif
