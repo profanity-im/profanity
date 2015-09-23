@@ -56,6 +56,8 @@ void tlscerts_add(TLSCertificate *cert);
 
 void tlscerts_free(TLSCertificate *cert);
 
+GList* tlscerts_list(void);
+
 void tlscerts_close(void);
 
 #endif

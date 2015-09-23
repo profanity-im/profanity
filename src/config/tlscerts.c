@@ -68,6 +68,34 @@ tlscerts_exists(const char * const fingerprint)
     return g_key_file_has_group(tlscerts, fingerprint);
 }
 
+GList*
+tlscerts_list(void)
+{
+    GList *res = NULL;
+    gsize len = 0;
+    gchar **groups = g_key_file_get_groups(tlscerts, &len);
+
+    int i = 0;
+    for (i = 0; i < g_strv_length(groups); i++) {
+        char *fingerprint = strdup(groups[i]);
+        char *domain = g_key_file_get_string(tlscerts, fingerprint, "domain", NULL);
+        char *organisation = g_key_file_get_string(tlscerts, fingerprint, "organisation", NULL);
+        char *email = g_key_file_get_string(tlscerts, fingerprint, "email", NULL);
+        char *notbefore = g_key_file_get_string(tlscerts, fingerprint, "start", NULL);
+        char *notafter = g_key_file_get_string(tlscerts, fingerprint, "end", NULL);
+
+        TLSCertificate *cert = tlscerts_new(fingerprint, domain, organisation, email, notbefore, notafter);
+
+        res = g_list_append(res, cert);
+    }
+
+    if (groups) {
+        g_strfreev(groups);
+    }
+
+    return res;
+}
+
 TLSCertificate*
 tlscerts_new(const char * const fingerprint, const char * const domain, const char * const organisation,
     const char * const email, const char * const notbefore, const char * const notafter)

@@ -49,6 +49,7 @@
 #include "config/account.h"
 #include "config/preferences.h"
 #include "config/theme.h"
+#include "config/tlscerts.h"
 #include "contact.h"
 #include "roster_list.h"
 #include "jid.h"
@@ -190,6 +191,39 @@ cmd_tls(ProfWin *window, const char * const command, gchar **args)
             cons_bad_cmd_usage(command);
             return TRUE;
         }
+    } else if (g_strcmp0(args[0], "trusted") == 0) {
+        GList *certs = tlscerts_list();
+        GList *curr = certs;
+
+        if (curr) {
+            cons_show("Trusted certificates:");
+            cons_show("");
+        }
+        while (curr) {
+            TLSCertificate *cert = curr->data;
+            if (cert->domain) {
+                cons_show("Domain       : %s", cert->domain);
+            }
+            if (cert->organisation) {
+                cons_show("Organisation : %s", cert->organisation);
+            }
+            if (cert->email) {
+                cons_show("Email        : %s", cert->email);
+            }
+            if (cert->notbefore) {
+                cons_show("Start        : %s", cert->notbefore);
+            }
+            if (cert->notafter) {
+                cons_show("End          : %s", cert->notafter);
+            }
+            if (cert->fingerprint) {
+                cons_show("Fingerprint  : %s", cert->fingerprint);
+            }
+            cons_show("");
+            curr = g_list_next(curr);
+        }
+        g_list_free_full(certs, (GDestroyNotify)tlscerts_free);
+        return TRUE;
     } else {
         cons_bad_cmd_usage(command);
         return TRUE;
