@@ -650,12 +650,45 @@ sv_ev_certfail(const char * const errormsg, const char * const certname, const c
     }
     prefs_free_trusted_certs(trusted);
 
+    char *domain = NULL;
+    char *org = NULL;
+    char *email = NULL;
+    gchar** fields = g_strsplit(certname, "/", 0);
+    int i = 0;
+    for (i = 0; i < g_strv_length(fields); i++) {
+        gchar** keyval = g_strsplit(fields[i], "=", 2);
+        if (g_strv_length(keyval) == 2) {
+            if (g_strcmp0(keyval[0], "CN") == 0) {
+                domain = strdup(keyval[1]);
+            }
+            if (g_strcmp0(keyval[0], "O") == 0) {
+                org = strdup(keyval[1]);
+            }
+            if (g_strcmp0(keyval[0], "emailAddress") == 0) {
+                email = strdup(keyval[1]);
+            }
+        }
+        g_strfreev(keyval);
+    }
+    g_strfreev(fields);
+
     cons_show("");
     cons_show_error("TLS certificate verification failed: %s", errormsg);
-    cons_show("  Subject     : %s", certname);
-    cons_show("  Fingerprint : %s", certfp);
-    cons_show("  Start       : %s", notbefore);
-    cons_show("  End         : %s", notafter);
+    if (domain) {
+        cons_show("  Domain       : %s", domain);
+        free(domain);
+    }
+    if (org) {
+        cons_show("  Organisation : %s", org);
+        free(org);
+    }
+    if (email) {
+        cons_show("  Email        : %s", email);
+        free(email);
+    }
+    cons_show("  Fingerprint  : %s", certfp);
+    cons_show("  Start        : %s", notbefore);
+    cons_show("  End          : %s", notafter);
     cons_show("");
     cons_show("Use '/tls allow' to accept this certificate");
     cons_show("Use '/tls always' to accept this certificate permanently");
