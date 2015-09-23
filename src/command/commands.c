@@ -201,6 +201,9 @@ cmd_tls(ProfWin *window, const char * const command, gchar **args)
         }
         while (curr) {
             TLSCertificate *cert = curr->data;
+            if (cert->fingerprint) {
+                cons_show("Fingerprint  : %s", cert->fingerprint);
+            }
             if (cert->domain) {
                 cons_show("Domain       : %s", cert->domain);
             }
@@ -215,9 +218,6 @@ cmd_tls(ProfWin *window, const char * const command, gchar **args)
             }
             if (cert->notafter) {
                 cons_show("End          : %s", cert->notafter);
-            }
-            if (cert->fingerprint) {
-                cons_show("Fingerprint  : %s", cert->fingerprint);
             }
             cons_show("");
             curr = g_list_next(curr);
