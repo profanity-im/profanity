@@ -762,6 +762,23 @@ accounts_set_last_presence(const char * const account_name, const char * const v
 }
 
 void
+accounts_set_last_activity(const char * const account_name)
+{
+    if (accounts_account_exists(account_name)) {
+        GDateTime *nowdt = g_date_time_new_now_utc();
+        GTimeVal nowtv;
+        gboolean res = g_date_time_to_timeval(nowdt, &nowtv);
+        g_date_time_unref(nowdt);
+
+        if (res) {
+            char *timestr = g_time_val_to_iso8601(&nowtv);
+            g_key_file_set_string(accounts, account_name, "last.activity", timestr);
+            _save_accounts();
+        }
+    }
+}
+
+void
 accounts_set_login_presence(const char * const account_name, const char * const value)
 {
     if (accounts_account_exists(account_name)) {

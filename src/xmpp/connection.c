@@ -200,6 +200,7 @@ jabber_disconnect(void)
     // if connected, send end stream and wait for response
     if (jabber_conn.conn_status == JABBER_CONNECTED) {
         log_info("Closing connection");
+        accounts_set_last_activity(jabber_get_account_name());
         jabber_conn.conn_status = JABBER_DISCONNECTING;
         xmpp_disconnect(jabber_conn.conn);
 
