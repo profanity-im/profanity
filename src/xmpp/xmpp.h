@@ -35,7 +35,7 @@
 #ifndef XMPP_XMPP_H
 #define XMPP_XMPP_H
 
-#include "config.h"
+#include "prof_config.h"
 
 #ifdef PROF_HAVE_LIBMESODE
 #include <mesode.h>
