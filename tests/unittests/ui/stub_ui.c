@@ -168,6 +168,11 @@ char * ui_ask_password(void)
     return mock_ptr_type(char *);
 }
 
+char *ui_get_line(void)
+{
+    return NULL;
+}
+
 void ui_handle_stanza(const char * const msg) {}
 
 // ui events

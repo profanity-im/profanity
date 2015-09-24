@@ -102,6 +102,7 @@ win_type_t ui_win_type(int index);
 void ui_close_win(int index);
 int ui_win_unread(int index);
 char * ui_ask_password(void);
+char * ui_get_line(void);
 char * ui_ask_pgp_passphrase(const char *hint, int prev_fail);
 
 void ui_handle_stanza(const char * const msg);

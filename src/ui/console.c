@@ -923,9 +923,9 @@ void
 cons_winstidy_setting(void)
 {
     if (prefs_get_boolean(PREF_WINS_AUTO_TIDY))
-        cons_show("Window Auto Tidy (/winstidy)  : ON");
+        cons_show("Window Auto Tidy (/wins)      : ON");
     else
-        cons_show("Window Auto Tidy (/winstidy)  : OFF");
+        cons_show("Window Auto Tidy (/wins)      : OFF");
 }
 
 void

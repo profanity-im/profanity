@@ -49,6 +49,7 @@
 #include "config/account.h"
 #include "config/preferences.h"
 #include "config/theme.h"
+#include "config/tlscerts.h"
 #include "contact.h"
 #include "roster_list.h"
 #include "jid.h"
@@ -162,6 +163,93 @@ cmd_execute_alias(ProfWin *window, const char * const inp, gboolean *ran)
 
     *ran = FALSE;
     return TRUE;
+}
+
+gboolean
+cmd_tls(ProfWin *window, const char * const command, gchar **args)
+{
+    if (g_strcmp0(args[0], "certpath") == 0) {
+        if (g_strcmp0(args[1], "set") == 0) {
+            if (args[2] == NULL) {
+                cons_bad_cmd_usage(command);
+                return TRUE;
+            }
+
+            if (g_file_test(args[2], G_FILE_TEST_IS_DIR)) {
+                prefs_set_string(PREF_CERT_PATH, args[2]);
+                cons_show("Certificate path set to: %s", args[2]);
+            } else {
+                cons_show("Directory %s does not exist.", args[2]);
+            }
+            return TRUE;
+        } else if (g_strcmp0(args[1], "clear") == 0) {
+            prefs_set_string(PREF_CERT_PATH, NULL);
+            cons_show("Certificate path cleared");
+            return TRUE;
+        } else if (args[1] == NULL) {
+            char *path = prefs_get_string(PREF_CERT_PATH);
+            if (path) {
+                cons_show("Trusted certificate path: %s", path);
+                prefs_free_string(path);
+            } else {
+                cons_show("No trusted certificate path set.");
+            }
+            return TRUE;
+        } else {
+            cons_bad_cmd_usage(command);
+            return TRUE;
+        }
+    } else if (g_strcmp0(args[0], "trusted") == 0) {
+        GList *certs = tlscerts_list();
+        GList *curr = certs;
+
+        if (curr) {
+            cons_show("Trusted certificates:");
+            cons_show("");
+        } else {
+            cons_show("No trustes certificates found.");
+        }
+        while (curr) {
+            TLSCertificate *cert = curr->data;
+            if (cert->fingerprint) {
+                cons_show("Fingerprint  : %s", cert->fingerprint);
+            }
+            if (cert->domain) {
+                cons_show("Domain       : %s", cert->domain);
+            }
+            if (cert->organisation) {
+                cons_show("Organisation : %s", cert->organisation);
+            }
+            if (cert->email) {
+                cons_show("Email        : %s", cert->email);
+            }
+            if (cert->notbefore) {
+                cons_show("Start        : %s", cert->notbefore);
+            }
+            if (cert->notafter) {
+                cons_show("End          : %s", cert->notafter);
+            }
+            cons_show("");
+            curr = g_list_next(curr);
+        }
+        g_list_free_full(certs, (GDestroyNotify)tlscerts_free);
+        return TRUE;
+    } else if (g_strcmp0(args[0], "revoke") == 0) {
+        if (args[1] == NULL) {
+            cons_bad_cmd_usage(command);
+        } else {
+            gboolean res = tlscerts_revoke(args[1]);
+            if (res) {
+                cons_show("Trusted certificate revoked: %s", args[1]);
+            } else {
+                cons_show("Could not find certificate: %s", args[0]);
+            }
+        }
+        return TRUE;
+    } else {
+        cons_bad_cmd_usage(command);
+        return TRUE;
+    }
 }
 
 gboolean
@@ -755,23 +843,22 @@ cmd_wins(ProfWin *window, const char * const command, gchar **args)
                 cons_show("Same source and target window supplied.");
             }
         }
+    } else if (strcmp(args[0], "autotidy") == 0) {
+        if (g_strcmp0(args[1], "on") == 0) {
+            cons_show("Window autotidy enabled");
+            prefs_set_boolean(PREF_WINS_AUTO_TIDY, TRUE);
+            ui_tidy_wins();
+        } else if (g_strcmp0(args[1], "off") == 0) {
+            cons_show("Window autotidy disabled");
+            prefs_set_boolean(PREF_WINS_AUTO_TIDY, FALSE);
+        } else {
+            cons_bad_cmd_usage(command);
+        }
     } else {
         cons_bad_cmd_usage(command);
     }
 
     return TRUE;
-}
-
-gboolean
-cmd_winstidy(ProfWin *window, const char * const command, gchar **args)
-{
-    gboolean result = _cmd_set_boolean_preference(args[0], command, "Wins Auto Tidy", PREF_WINS_AUTO_TIDY);
-
-    if (result && g_strcmp0(args[0], "on") == 0) {
-        ui_tidy_wins();
-    }
-
-    return result;
 }
 
 gboolean

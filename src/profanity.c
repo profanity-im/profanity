@@ -55,6 +55,7 @@
 #include "common.h"
 #include "contact.h"
 #include "roster_list.h"
+#include "config/tlscerts.h"
 #include "log.h"
 #include "muc.h"
 #include "plugins/plugins.h"
@@ -69,6 +70,7 @@
 #include "ui/ui.h"
 #include "window_list.h"
 #include "event/client_events.h"
+#include "config/tlscerts.h"
 
 static void _check_autoaway(void);
 static void _init(const int disable_tls, char *log_level);
@@ -252,6 +254,7 @@ _init(const int disable_tls, char *log_level)
     log_info("Initialising contact list");
     roster_init();
     muc_init();
+    tlscerts_init();
 #ifdef PROF_HAVE_LIBOTR
     otr_init();
 #endif
@@ -290,6 +293,7 @@ _shutdown(void)
     chat_log_close();
     theme_close();
     accounts_close();
+    tlscerts_close();
     cmd_uninit();
     log_stderr_close();
     log_close();

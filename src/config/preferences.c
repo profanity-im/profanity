@@ -625,6 +625,7 @@ _get_group(preference_t pref)
         case PREF_CARBONS:
         case PREF_RECEIPTS_SEND:
         case PREF_RECEIPTS_REQUEST:
+        case PREF_CERT_PATH:
             return PREF_GROUP_CONNECTION;
         case PREF_OTR_LOG:
         case PREF_OTR_POLICY:
@@ -757,6 +758,8 @@ _get_key(preference_t pref)
             return "enc.warn";
         case PREF_PGP_LOG:
             return "log";
+        case PREF_CERT_PATH:
+            return "certpath";
         default:
             return NULL;
     }

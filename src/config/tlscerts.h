@@ -1,5 +1,5 @@
 /*
- * capabilities.h
+ * tlscerts.h
  *
  * Copyright (C) 2012 - 2015 James Booth <boothj5@gmail.com>
  *
@@ -32,30 +32,38 @@
  *
  */
 
-#ifndef XMPP_CAPABILITIES_H
-#define XMPP_CAPABILITIES_H
+#ifndef TLSCERTS_H
+#define TLSCERTS_H
 
-#include "config.h"
+typedef struct tls_cert_t {
+    char *fingerprint;
+    char *domain;
+    char *organisation;
+    char *email;
+    char *notbefore;
+    char *notafter;
+} TLSCertificate;
 
-#ifdef PROF_HAVE_LIBMESODE
-#include <mesode.h>
-#endif
-#ifdef PROF_HAVE_LIBSTROPHE
-#include <strophe.h>
-#endif
+void tlscerts_init(void);
 
-#include "xmpp/xmpp.h"
+TLSCertificate *tlscerts_new(const char * const fingerprint, const char * const domain,
+    const char * const organisation, const char * const email,
+    const char * const notbefore, const char * const notafter);
 
-void caps_init(void);
+gboolean tlscerts_exists(const char * const fingerprint);
 
-void caps_add_by_ver(const char * const ver, Capabilities *caps);
-void caps_add_by_jid(const char * const jid, Capabilities *caps);
-void caps_map_jid_to_ver(const char * const jid, const char * const ver);
-gboolean caps_contains(const char * const ver);
+void tlscerts_add(TLSCertificate *cert);
 
-char* caps_create_sha1_str(xmpp_stanza_t * const query);
-xmpp_stanza_t* caps_create_query_response_stanza(xmpp_ctx_t * const ctx);
-Capabilities* caps_create(xmpp_stanza_t *query);
-char* caps_get_my_sha1(xmpp_ctx_t * const ctx);
+gboolean tlscerts_revoke(const char * const fingerprint);
+
+void tlscerts_free(TLSCertificate *cert);
+
+GList* tlscerts_list(void);
+
+char* tlscerts_complete(const char * const prefix);
+
+void tlscerts_reset_ac(void);
+
+void tlscerts_close(void);
 
 #endif

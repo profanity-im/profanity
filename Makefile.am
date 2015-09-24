@@ -32,6 +32,7 @@ core_sources = \
 	src/tools/autocomplete.c src/tools/autocomplete.h \
 	src/tools/tinyurl.c src/tools/tinyurl.h \
 	src/config/accounts.c src/config/accounts.h \
+	src/config/tlscerts.c src/config/tlscerts.h \
 	src/config/account.c src/config/account.h \
 	src/config/preferences.c src/config/preferences.h \
 	src/config/theme.c src/config/theme.h \
@@ -62,6 +63,7 @@ unittest_sources = \
 	src/tools/tinyurl.c src/tools/tinyurl.h \
 	src/config/accounts.h \
 	src/config/account.c src/config/account.h \
+	src/config/tlscerts.c src/config/tlscerts.h \
 	src/config/preferences.c src/config/preferences.h \
 	src/config/theme.c src/config/theme.h \
     src/plugins/plugins.h src/plugins/plugins.c \
