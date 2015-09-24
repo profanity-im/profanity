@@ -1,3 +1,9 @@
+0.4.8
+=====
+
+- Build against libmesode if available
+- Handle invalid SSL certificates (requires libmesode)
+
 0.4.7
 =====
 
