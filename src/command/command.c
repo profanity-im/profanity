@@ -204,14 +204,14 @@ static struct cmd_t command_defs[] =
         CMD_DESC(
             "Handle TLS certificates. ")
         CMD_ARGS(
-            { "allow",               "Allow connection to continue with an invalid TLS certificate." },
-            { "always",              "Always allow connections with this invalid TLS certificate." },
-            { "deny",                "Terminate TLS connection." },
-            { "trusted",             "List manually trusted certificates (with /tls always)." },
-            { "revoke",              "Remove a manually trusted certificate." },
-            { "certpath",            "Show the trusted certificate path." },
-            { "certpath set <path>", "Specify filesystem path containing trusted certificates." },
-            { "certpath clear",      "Clear the trusted certificate path." })
+            { "allow",                "Allow connection to continue with an invalid TLS certificate." },
+            { "always",               "Always allow connections with this invalid TLS certificate." },
+            { "deny",                 "Terminate TLS connection." },
+            { "trusted",              "List manually trusted certificates (with /tls always)." },
+            { "revoke <fingerprint>", "Remove a manually trusted certificate." },
+            { "certpath",             "Show the trusted certificate path." },
+            { "certpath set <path>",  "Specify filesystem path containing trusted certificates." },
+            { "certpath clear",       "Clear the trusted certificate path." })
         CMD_NOEXAMPLES
     },
 
