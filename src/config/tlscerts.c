@@ -41,12 +41,15 @@
 #include "config/tlscerts.h"
 #include "log.h"
 #include "common.h"
+#include "tools/autocomplete.h"
 
 static gchar *tlscerts_loc;
 static GKeyFile *tlscerts;
 
 static gchar* _get_tlscerts_file(void);
 static void _save_tlscerts(void);
+
+static Autocomplete certs_ac;
 
 void
 tlscerts_init(void)
@@ -60,6 +63,16 @@ tlscerts_init(void)
 
     tlscerts = g_key_file_new();
     g_key_file_load_from_file(tlscerts, tlscerts_loc, G_KEY_FILE_KEEP_COMMENTS, NULL);
+
+    certs_ac = autocomplete_new();
+    gsize len = 0;
+    gchar **groups = g_key_file_get_groups(tlscerts, &len);
+
+    int i = 0;
+    for (i = 0; i < g_strv_length(groups); i++) {
+        autocomplete_add(certs_ac, groups[i]);
+    }
+    g_strfreev(groups);
 }
 
 gboolean
@@ -146,6 +159,8 @@ tlscerts_add(TLSCertificate *cert)
         return;
     }
 
+    autocomplete_add(certs_ac, cert->fingerprint);
+
     if (cert->domain) {
         g_key_file_set_string(tlscerts, cert->fingerprint, "domain", cert->domain);
     }
@@ -163,6 +178,31 @@ tlscerts_add(TLSCertificate *cert)
     }
 
     _save_tlscerts();
+}
+
+gboolean
+tlscerts_revoke(const char * const fingerprint)
+{
+    gboolean result =  g_key_file_remove_group(tlscerts, fingerprint, NULL);
+    if (result) {
+        autocomplete_remove(certs_ac, fingerprint);
+    }
+
+    _save_tlscerts();
+
+    return result;
+}
+
+char *
+tlscerts_complete(const char * const prefix)
+{
+    return autocomplete_complete(certs_ac, prefix, TRUE);
+}
+
+void
+tlscerts_reset_ac(void)
+{
+    autocomplete_reset(certs_ac);
 }
 
 void
@@ -183,6 +223,7 @@ tlscerts_close(void)
 {
     g_key_file_free(tlscerts);
     tlscerts = NULL;
+    autocomplete_free(certs_ac);
 }
 
 static gchar *

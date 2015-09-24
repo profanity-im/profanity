@@ -54,9 +54,15 @@ gboolean tlscerts_exists(const char * const fingerprint);
 
 void tlscerts_add(TLSCertificate *cert);
 
+gboolean tlscerts_revoke(const char * const fingerprint);
+
 void tlscerts_free(TLSCertificate *cert);
 
 GList* tlscerts_list(void);
+
+char* tlscerts_complete(const char * const prefix);
+
+void tlscerts_reset_ac(void);
 
 void tlscerts_close(void);
 

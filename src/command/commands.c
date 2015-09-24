@@ -198,6 +198,8 @@ cmd_tls(ProfWin *window, const char * const command, gchar **args)
         if (curr) {
             cons_show("Trusted certificates:");
             cons_show("");
+        } else {
+            cons_show("No trustes certificates found.");
         }
         while (curr) {
             TLSCertificate *cert = curr->data;
@@ -223,6 +225,18 @@ cmd_tls(ProfWin *window, const char * const command, gchar **args)
             curr = g_list_next(curr);
         }
         g_list_free_full(certs, (GDestroyNotify)tlscerts_free);
+        return TRUE;
+    } else if (g_strcmp0(args[0], "revoke") == 0) {
+        if (args[1] == NULL) {
+            cons_bad_cmd_usage(command);
+        } else {
+            gboolean res = tlscerts_revoke(args[1]);
+            if (res) {
+                cons_show("Trusted certificate revoked: %s", args[1]);
+            } else {
+                cons_show("Could not find certificate: %s", args[0]);
+            }
+        }
         return TRUE;
     } else {
         cons_bad_cmd_usage(command);

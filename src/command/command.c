@@ -50,6 +50,7 @@
 #include "config/accounts.h"
 #include "config/preferences.h"
 #include "config/theme.h"
+#include "config/tlscerts.h"
 #include "contact.h"
 #include "roster_list.h"
 #include "jid.h"
@@ -196,6 +197,7 @@ static struct cmd_t command_defs[] =
             "/tls always",
             "/tls deny",
             "/tls trusted",
+            "/tls revoke <fingerprint>",
             "/tls certpath",
             "/tls certpath set <path>",
             "/tls certpath clear")
@@ -205,7 +207,8 @@ static struct cmd_t command_defs[] =
             { "allow",               "Allow connection to continue with an invalid TLS certificate." },
             { "always",              "Always allow connections with this invalid TLS certificate." },
             { "deny",                "Terminate TLS connection." },
-            { "trusted",             "List manually trusted certificates." },
+            { "trusted",             "List manually trusted certificates (with /tls always)." },
+            { "revoke",              "Remove a manually trusted certificate." },
             { "certpath",            "Show the trusted certificate path." },
             { "certpath set <path>", "Specify filesystem path containing trusted certificates." },
             { "certpath clear",      "Clear the trusted certificate path." })
@@ -2103,6 +2106,7 @@ cmd_init(void)
     autocomplete_add(tls_ac, "always");
     autocomplete_add(tls_ac, "deny");
     autocomplete_add(tls_ac, "trusted");
+    autocomplete_add(tls_ac, "revoke");
     autocomplete_add(tls_ac, "certpath");
 
     tls_certpath_ac = autocomplete_new();
@@ -2286,6 +2290,7 @@ cmd_reset_autocomplete(ProfWin *window)
     muc_invites_reset_ac();
     accounts_reset_all_search();
     accounts_reset_enabled_search();
+    tlscerts_reset_ac();
     prefs_reset_boolean_choice();
     presence_reset_sub_request_search();
 #ifdef HAVE_LIBGPGME
@@ -3520,6 +3525,11 @@ static char *
 _tls_autocomplete(ProfWin *window, const char * const input)
 {
     char *result = NULL;
+
+    result = autocomplete_param_with_func(input, "/tls revoke", tlscerts_complete);
+    if (result) {
+        return result;
+    }
 
     result = autocomplete_param_with_ac(input, "/tls certpath", tls_certpath_ac, TRUE);
     if (result) {
