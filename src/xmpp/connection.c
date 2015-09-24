@@ -419,10 +419,12 @@ _jabber_connect(const char * const fulljid, const char * const passwd,
         xmpp_conn_disable_tls(jabber_conn.conn);
     }
 
+#ifdef HAVE_LIBMESODE
     char *cert_path = prefs_get_string(PREF_CERT_PATH);
     if (cert_path) {
         xmpp_conn_tlscert_path(jabber_conn.conn, cert_path);
     }
+#endif
 
 #ifdef HAVE_LIBMESODE
     int connect_status = xmpp_connect_client(jabber_conn.conn, altdomain, port,
