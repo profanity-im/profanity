@@ -204,6 +204,7 @@ jabber_disconnect(void)
         const char *fulljid = jabber_get_fulljid();
         plugins_on_disconnect(account_name, fulljid);
         log_info("Closing connection");
+        accounts_set_last_activity(jabber_get_account_name());
         jabber_conn.conn_status = JABBER_DISCONNECTING;
         xmpp_disconnect(jabber_conn.conn);
 
