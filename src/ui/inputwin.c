@@ -225,6 +225,21 @@ inp_close(void)
     rl_callback_handler_remove();
 }
 
+char *
+inp_get_line(void)
+{
+    werase(inp_win);
+    wmove(inp_win, 0, 0);
+    _inp_win_update_virtual();
+    doupdate();
+    char *line = NULL;
+    while (!line) {
+        line = inp_readline();
+    }
+    status_bar_clear();
+    return line;
+}
+
 char*
 inp_get_password(void)
 {
@@ -275,6 +290,7 @@ _inp_write(char *line, int offset)
     _inp_win_handle_scroll();
 
     _inp_win_update_virtual();
+    doupdate();
 }
 
 static int

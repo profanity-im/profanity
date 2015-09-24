@@ -50,6 +50,7 @@
 #include "config/accounts.h"
 #include "config/preferences.h"
 #include "config/theme.h"
+#include "config/tlscerts.h"
 #include "contact.h"
 #include "roster_list.h"
 #include "jid.h"
@@ -106,6 +107,7 @@ static char * _time_autocomplete(ProfWin *window, const char * const input);
 static char * _receipts_autocomplete(ProfWin *window, const char * const input);
 static char * _help_autocomplete(ProfWin *window, const char * const input);
 static char * _wins_autocomplete(ProfWin *window, const char * const input);
+static char * _tls_autocomplete(ProfWin *window, const char * const input);
 
 GHashTable *commands = NULL;
 
@@ -185,6 +187,33 @@ static struct cmd_t command_defs[] =
             "/connect bob@someplace port 5678",
             "/connect me@chatty server chatty.com port 5443")
         },
+
+    { "/tls",
+        cmd_tls, parse_args, 1, 3, NULL,
+        CMD_TAGS(
+            CMD_TAG_CONNECTION)
+        CMD_SYN(
+            "/tls allow",
+            "/tls always",
+            "/tls deny",
+            "/tls trusted",
+            "/tls revoke <fingerprint>",
+            "/tls certpath",
+            "/tls certpath set <path>",
+            "/tls certpath clear")
+        CMD_DESC(
+            "Handle TLS certificates. ")
+        CMD_ARGS(
+            { "allow",                "Allow connection to continue with an invalid TLS certificate." },
+            { "always",               "Always allow connections with this invalid TLS certificate." },
+            { "deny",                 "Terminate TLS connection." },
+            { "trusted",              "List manually trusted certificates (with /tls always)." },
+            { "revoke <fingerprint>", "Remove a manually trusted certificate." },
+            { "certpath",             "Show the trusted certificate path." },
+            { "certpath set <path>",  "Specify filesystem path containing trusted certificates." },
+            { "certpath clear",       "Clear the trusted certificate path." })
+        CMD_NOEXAMPLES
+    },
 
     { "/disconnect",
         cmd_disconnect, parse_args, 0, 0, NULL,
@@ -1674,6 +1703,8 @@ static Autocomplete inpblock_ac;
 static Autocomplete receipts_ac;
 static Autocomplete pgp_ac;
 static Autocomplete pgp_log_ac;
+static Autocomplete tls_ac;
+static Autocomplete tls_certpath_ac;
 
 /*
  * Initialise command autocompleter and history
@@ -2069,6 +2100,18 @@ cmd_init(void)
     autocomplete_add(pgp_log_ac, "on");
     autocomplete_add(pgp_log_ac, "off");
     autocomplete_add(pgp_log_ac, "redact");
+
+    tls_ac = autocomplete_new();
+    autocomplete_add(tls_ac, "allow");
+    autocomplete_add(tls_ac, "always");
+    autocomplete_add(tls_ac, "deny");
+    autocomplete_add(tls_ac, "trusted");
+    autocomplete_add(tls_ac, "revoke");
+    autocomplete_add(tls_ac, "certpath");
+
+    tls_certpath_ac = autocomplete_new();
+    autocomplete_add(tls_certpath_ac, "set");
+    autocomplete_add(tls_certpath_ac, "clear");
 }
 
 void
@@ -2133,6 +2176,8 @@ cmd_uninit(void)
     autocomplete_free(receipts_ac);
     autocomplete_free(pgp_ac);
     autocomplete_free(pgp_log_ac);
+    autocomplete_free(tls_ac);
+    autocomplete_free(tls_certpath_ac);
 }
 
 gboolean
@@ -2245,6 +2290,7 @@ cmd_reset_autocomplete(ProfWin *window)
     muc_invites_reset_ac();
     accounts_reset_all_search();
     accounts_reset_enabled_search();
+    tlscerts_reset_ac();
     prefs_reset_boolean_choice();
     presence_reset_sub_request_search();
 #ifdef HAVE_LIBGPGME
@@ -2313,6 +2359,8 @@ cmd_reset_autocomplete(ProfWin *window)
     autocomplete_reset(receipts_ac);
     autocomplete_reset(pgp_ac);
     autocomplete_reset(pgp_log_ac);
+    autocomplete_reset(tls_ac);
+    autocomplete_reset(tls_certpath_ac);
 
     if (window->type == WIN_CHAT) {
         ProfChatWin *chatwin = (ProfChatWin*)window;
@@ -2566,6 +2614,7 @@ _cmd_complete_parameters(ProfWin *window, const char * const input)
     g_hash_table_insert(ac_funcs, "/time",          _time_autocomplete);
     g_hash_table_insert(ac_funcs, "/receipts",      _receipts_autocomplete);
     g_hash_table_insert(ac_funcs, "/wins",          _wins_autocomplete);
+    g_hash_table_insert(ac_funcs, "/tls",           _tls_autocomplete);
 
     int len = strlen(input);
     char parsed[len+1];
@@ -3470,6 +3519,29 @@ _wins_autocomplete(ProfWin *window, const char * const input)
     }
 
     return NULL;
+}
+
+static char *
+_tls_autocomplete(ProfWin *window, const char * const input)
+{
+    char *result = NULL;
+
+    result = autocomplete_param_with_func(input, "/tls revoke", tlscerts_complete);
+    if (result) {
+        return result;
+    }
+
+    result = autocomplete_param_with_ac(input, "/tls certpath", tls_certpath_ac, TRUE);
+    if (result) {
+        return result;
+    }
+
+    result = autocomplete_param_with_ac(input, "/tls", tls_ac, TRUE);
+    if (result) {
+        return result;
+    }
+
+    return result;
 }
 
 static char *

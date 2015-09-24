@@ -1,5 +1,5 @@
 /*
- * inputwin.c
+ * tlscerts.h
  *
  * Copyright (C) 2012 - 2015 James Booth <boothj5@gmail.com>
  *
@@ -32,21 +32,38 @@
  *
  */
 
-#ifndef UI_INPUTWIN_H
-#define UI_INPUTWIN_H
+#ifndef TLSCERTS_H
+#define TLSCERTS_H
 
-#include <glib.h>
+typedef struct tls_cert_t {
+    char *fingerprint;
+    char *domain;
+    char *organisation;
+    char *email;
+    char *notbefore;
+    char *notafter;
+} TLSCertificate;
 
-#define INP_WIN_MAX 1000
+void tlscerts_init(void);
 
-void create_input_window(void);
-char* inp_readline(void);
-void inp_nonblocking(gboolean reset);
-void inp_close(void);
-void inp_win_clear(void);
-void inp_win_resize(void);
-void inp_put_back(void);
-char* inp_get_password(void);
-char * inp_get_line(void);
+TLSCertificate *tlscerts_new(const char * const fingerprint, const char * const domain,
+    const char * const organisation, const char * const email,
+    const char * const notbefore, const char * const notafter);
+
+gboolean tlscerts_exists(const char * const fingerprint);
+
+void tlscerts_add(TLSCertificate *cert);
+
+gboolean tlscerts_revoke(const char * const fingerprint);
+
+void tlscerts_free(TLSCertificate *cert);
+
+GList* tlscerts_list(void);
+
+char* tlscerts_complete(const char * const prefix);
+
+void tlscerts_reset_ac(void);
+
+void tlscerts_close(void);
 
 #endif
