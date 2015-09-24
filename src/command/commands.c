@@ -777,7 +777,6 @@ cmd_disconnect(ProfWin *window, const char * const command, gchar **args)
     if (jabber_get_connection_status() == JABBER_CONNECTED) {
         char *jid = strdup(jabber_get_fulljid());
         cons_show("%s logged out successfully.", jid);
-        accounts_set_last_activity(jabber_get_account_name());
         jabber_disconnect();
         roster_clear();
         muc_invites_clear();
