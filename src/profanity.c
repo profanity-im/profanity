@@ -183,7 +183,7 @@ _check_autoaway()
 
                 // handle away mode
                 if (strcmp(pref_autoaway_mode, "away") == 0) {
-                    cl_ev_presence_send(RESOURCE_AWAY, pref_autoaway_message, 0);
+                    cl_ev_presence_send(RESOURCE_AWAY, pref_autoaway_message, idle_ms / 1000);
                     ui_auto_away();
 
                 // handle idle mode
