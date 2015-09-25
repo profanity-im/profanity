@@ -574,12 +574,11 @@ ui_auto_away(void)
 }
 
 void
-ui_end_auto_away(void)
+ui_end_auto_away(resource_presence_t presence)
 {
-    int pri =
-        accounts_get_priority_for_presence_type(jabber_get_account_name(), RESOURCE_ONLINE);
+    int pri = accounts_get_priority_for_presence_type(jabber_get_account_name(), presence);
     cons_show("No longer idle, status set to online (priority %d).", pri);
-    title_bar_set_presence(CONTACT_ONLINE);
+    title_bar_set_presence(contact_presence_from_resource_presence(presence));
 }
 
 void

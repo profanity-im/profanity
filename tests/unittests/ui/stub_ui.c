@@ -316,7 +316,7 @@ gboolean ui_swap_wins(int source_win, int target_win)
 }
 
 void ui_auto_away(void) {}
-void ui_end_auto_away(void) {}
+void ui_end_auto_away(resource_presence_t presence) {}
 void ui_titlebar_presence(contact_presence_t presence) {}
 void ui_handle_login_account_success(ProfAccount *account) {}
 void ui_update_presence(const resource_presence_t resource_presence,

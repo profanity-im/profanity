@@ -78,6 +78,8 @@ static void _create_directories(void);
 static void _connect_default(const char * const account);
 
 static gboolean idle = FALSE;
+resource_presence_t autoaway_pre_presence;
+
 static gboolean cont = TRUE;
 
 void
@@ -174,8 +176,10 @@ _check_autoaway()
     unsigned long idle_ms = ui_get_idle_time();
     char *pref_autoaway_mode = prefs_get_string(PREF_AUTOAWAY_MODE);
 
+
     if (!idle) {
         resource_presence_t current_presence = accounts_get_last_presence(jabber_get_account_name());
+        autoaway_pre_presence = current_presence;
         if ((current_presence == RESOURCE_ONLINE) || (current_presence == RESOURCE_CHAT)) {
             if (idle_ms >= prefs_time) {
                 idle = TRUE;
@@ -202,11 +206,11 @@ _check_autoaway()
             // handle check
             if (prefs_get_boolean(PREF_AUTOAWAY_CHECK)) {
                 if (strcmp(pref_autoaway_mode, "away") == 0) {
-                    cl_ev_presence_send(RESOURCE_ONLINE, NULL, 0);
-                    ui_end_auto_away();
+                    cl_ev_presence_send(autoaway_pre_presence, NULL, 0);
+                    ui_end_auto_away(autoaway_pre_presence);
                 } else if (strcmp(pref_autoaway_mode, "idle") == 0) {
-                    cl_ev_presence_send(RESOURCE_ONLINE, NULL, 0);
-                    ui_titlebar_presence(CONTACT_ONLINE);
+                    cl_ev_presence_send(autoaway_pre_presence, NULL, 0);
+                    ui_titlebar_presence(contact_presence_from_resource_presence(autoaway_pre_presence));
                 }
             }
         }
