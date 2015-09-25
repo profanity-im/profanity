@@ -172,19 +172,35 @@ _check_autoaway()
         return;
     }
 
-    gint prefs_time = prefs_get_autoaway_time() * 60000;
+    gint autoaway_time = prefs_get_autoaway_time() * 60000;
     unsigned long idle_ms = ui_get_idle_time();
     char *pref_autoaway_mode = prefs_get_string(PREF_AUTOAWAY_MODE);
 
+    if (idle) {
+        if (idle_ms < autoaway_time) {
+            idle = FALSE;
 
-    if (!idle) {
-        resource_presence_t current_presence = accounts_get_last_presence(jabber_get_account_name());
+            // handle check
+            if (prefs_get_boolean(PREF_AUTOAWAY_CHECK)) {
+                if (strcmp(pref_autoaway_mode, "away") == 0) {
+                    cl_ev_presence_send(autoaway_pre_presence, NULL, 0);
+                    ui_end_auto_away(autoaway_pre_presence);
+                } else if (strcmp(pref_autoaway_mode, "idle") == 0) {
+                    cl_ev_presence_send(autoaway_pre_presence, NULL, 0);
+                    contact_presence_t contact_presence = contact_presence_from_resource_presence(autoaway_pre_presence);
+                    ui_titlebar_presence(contact_presence);
+                }
+            }
+        }
+    } else {
+        char *account_name = jabber_get_account_name();
+        resource_presence_t current_presence = accounts_get_last_presence(account_name);
         autoaway_pre_presence = current_presence;
         if ((current_presence == RESOURCE_ONLINE)
                 || (current_presence == RESOURCE_CHAT)
                 || (current_presence == RESOURCE_DND)) {
 
-            if (idle_ms >= prefs_time) {
+            if (idle_ms >= autoaway_time) {
                 idle = TRUE;
                 char *pref_autoaway_message = prefs_get_string(PREF_AUTOAWAY_MESSAGE);
 
@@ -196,24 +212,6 @@ _check_autoaway()
                 // handle idle mode
                 } else if (strcmp(pref_autoaway_mode, "idle") == 0) {
                     cl_ev_presence_send(current_presence, pref_autoaway_message, idle_ms / 1000);
-                }
-
-                prefs_free_string(pref_autoaway_message);
-            }
-        }
-
-    } else {
-        if (idle_ms < prefs_time) {
-            idle = FALSE;
-
-            // handle check
-            if (prefs_get_boolean(PREF_AUTOAWAY_CHECK)) {
-                if (strcmp(pref_autoaway_mode, "away") == 0) {
-                    cl_ev_presence_send(autoaway_pre_presence, NULL, 0);
-                    ui_end_auto_away(autoaway_pre_presence);
-                } else if (strcmp(pref_autoaway_mode, "idle") == 0) {
-                    cl_ev_presence_send(autoaway_pre_presence, NULL, 0);
-                    ui_titlebar_presence(contact_presence_from_resource_presence(autoaway_pre_presence));
                 }
             }
         }
