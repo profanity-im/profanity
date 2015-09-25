@@ -180,7 +180,10 @@ _check_autoaway()
     if (!idle) {
         resource_presence_t current_presence = accounts_get_last_presence(jabber_get_account_name());
         autoaway_pre_presence = current_presence;
-        if ((current_presence == RESOURCE_ONLINE) || (current_presence == RESOURCE_CHAT)) {
+        if ((current_presence == RESOURCE_ONLINE)
+                || (current_presence == RESOURCE_CHAT)
+                || (current_presence == RESOURCE_DND)) {
+
             if (idle_ms >= prefs_time) {
                 idle = TRUE;
                 char *pref_autoaway_message = prefs_get_string(PREF_AUTOAWAY_MESSAGE);
