@@ -188,7 +188,7 @@ _check_autoaway()
 
                 // handle idle mode
                 } else if (strcmp(pref_autoaway_mode, "idle") == 0) {
-                    cl_ev_presence_send(RESOURCE_ONLINE, pref_autoaway_message, idle_ms / 1000);
+                    cl_ev_presence_send(current_presence, pref_autoaway_message, idle_ms / 1000);
                 }
 
                 prefs_free_string(pref_autoaway_message);
