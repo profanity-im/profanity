@@ -77,8 +77,16 @@ static void _shutdown(void);
 static void _create_directories(void);
 static void _connect_default(const char * const account);
 
-static gboolean idle = FALSE;
-resource_presence_t autoaway_pre_presence;
+typedef enum {
+    ACTIVITY_ST_ACTIVE,
+    ACTIVITY_ST_IDLE,
+    ACTIVITY_ST_AWAY,
+    ACTIVITY_ST_XA,
+} activity_state_t;
+
+activity_state_t activity_state;
+resource_presence_t saved_presence;
+char *saved_status;
 
 static gboolean cont = TRUE;
 
@@ -90,6 +98,9 @@ prof_run(const int disable_tls, char *log_level, char *account_name)
     ui_update();
 
     log_info("Starting main event loop");
+
+    activity_state = ACTIVITY_ST_ACTIVE;
+    saved_status = NULL;
 
     char *line = NULL;
     while(cont) {
@@ -172,52 +183,108 @@ _check_autoaway()
         return;
     }
 
-    gint autoaway_time = prefs_get_autoaway_time() * 60000;
+    char *mode = prefs_get_string(PREF_AUTOAWAY_MODE);
+    gboolean check = prefs_get_boolean(PREF_AUTOAWAY_CHECK);
+    gint away_time = prefs_get_autoaway_time();
+    gint xa_time = prefs_get_autoxa_time();
+    int away_time_ms = away_time * 60000;
+    int xa_time_ms = xa_time * 60000;
+
+    char *account = jabber_get_account_name();
+    resource_presence_t curr_presence = accounts_get_last_presence(account);
+    char *curr_status = accounts_get_last_status(account);
+
     unsigned long idle_ms = ui_get_idle_time();
-    char *pref_autoaway_mode = prefs_get_string(PREF_AUTOAWAY_MODE);
 
-    if (idle) {
-        if (idle_ms < autoaway_time) {
-            idle = FALSE;
+    switch (activity_state) {
+    case ACTIVITY_ST_ACTIVE:
+        if (idle_ms >= away_time_ms) {
+            if (g_strcmp0(mode, "away") == 0) {
+                if ((curr_presence == RESOURCE_ONLINE) || (curr_presence == RESOURCE_CHAT) || (curr_presence == RESOURCE_DND)) {
+                    activity_state = ACTIVITY_ST_AWAY;
 
-            // handle check
-            if (prefs_get_boolean(PREF_AUTOAWAY_CHECK)) {
-                if (strcmp(pref_autoaway_mode, "away") == 0) {
-                    cl_ev_presence_send(autoaway_pre_presence, NULL, 0);
-                    ui_end_auto_away(autoaway_pre_presence);
-                } else if (strcmp(pref_autoaway_mode, "idle") == 0) {
-                    cl_ev_presence_send(autoaway_pre_presence, NULL, 0);
-                    contact_presence_t contact_presence = contact_presence_from_resource_presence(autoaway_pre_presence);
-                    ui_titlebar_presence(contact_presence);
+                    // save current presence
+                    saved_presence = curr_presence;
+                    if (saved_status) {
+                        free(saved_status);
+                    }
+                    saved_status = curr_status;
+
+                    // send away presence with last activity
+                    char *message = prefs_get_string(PREF_AUTOAWAY_MESSAGE);
+                    cl_ev_presence_send(RESOURCE_AWAY, message, idle_ms / 1000);
+
+                    int pri = accounts_get_priority_for_presence_type(account, RESOURCE_AWAY);
+                    if (message) {
+                        cons_show("Idle for %d minutes, status set to away (priority %d), \"%s\".", away_time, pri, message);
+                    } else {
+                        cons_show("Idle for %d minutes, status set to away (priority %d).", away_time, pri);
+                    }
+                    prefs_free_string(message);
+
+                    ui_titlebar_presence(CONTACT_AWAY);
                 }
+            } else if (g_strcmp0(mode, "idle") == 0) {
+                activity_state = ACTIVITY_ST_IDLE;
+
+                // send current presence with last activity
+                cl_ev_presence_send(curr_presence, curr_status, idle_ms / 1000);
             }
         }
-    } else {
-        char *account_name = jabber_get_account_name();
-        resource_presence_t current_presence = accounts_get_last_presence(account_name);
-        autoaway_pre_presence = current_presence;
-        if ((current_presence == RESOURCE_ONLINE)
-                || (current_presence == RESOURCE_CHAT)
-                || (current_presence == RESOURCE_DND)) {
+        break;
+    case ACTIVITY_ST_IDLE:
+        if (check && (idle_ms < away_time_ms)) {
+            activity_state = ACTIVITY_ST_ACTIVE;
 
-            if (idle_ms >= autoaway_time) {
-                idle = TRUE;
-                char *pref_autoaway_message = prefs_get_string(PREF_AUTOAWAY_MESSAGE);
+            cons_show("No longer idle.");
 
-                // handle away mode
-                if (strcmp(pref_autoaway_mode, "away") == 0) {
-                    cl_ev_presence_send(RESOURCE_AWAY, pref_autoaway_message, idle_ms / 1000);
-                    ui_auto_away();
-
-                // handle idle mode
-                } else if (strcmp(pref_autoaway_mode, "idle") == 0) {
-                    cl_ev_presence_send(current_presence, pref_autoaway_message, idle_ms / 1000);
-                }
-            }
+            // send current presence without last activity
+            cl_ev_presence_send(curr_presence, curr_status, 0);
         }
+        break;
+    case ACTIVITY_ST_AWAY:
+        if (xa_time_ms > 0 && (idle_ms >= xa_time_ms)) {
+            activity_state = ACTIVITY_ST_XA;
+
+            // send extended away presence with last activity
+            char *message = prefs_get_string(PREF_AUTOXA_MESSAGE);
+            cl_ev_presence_send(RESOURCE_XA, message, idle_ms / 1000);
+
+            int pri = accounts_get_priority_for_presence_type(account, RESOURCE_XA);
+            if (message) {
+                cons_show("Idle for %d minutes, status set to xa (priority %d), \"%s\".", xa_time, pri, message);
+            } else {
+                cons_show("Idle for %d minutes, status set to xa (priority %d).", xa_time, pri);
+            }
+            prefs_free_string(message);
+
+            ui_titlebar_presence(CONTACT_XA);
+        } else if (check && (idle_ms < away_time_ms)) {
+            activity_state = ACTIVITY_ST_ACTIVE;
+
+            cons_show("No longer idle.");
+
+            // send saved presence without last activity
+            cl_ev_presence_send(saved_presence, saved_status, 0);
+            contact_presence_t contact_pres = contact_presence_from_resource_presence(saved_presence);
+            ui_titlebar_presence(contact_pres);
+        }
+        break;
+    case ACTIVITY_ST_XA:
+        if (check && (idle_ms < away_time_ms)) {
+            activity_state = ACTIVITY_ST_ACTIVE;
+
+            cons_show("No longer idle.");
+
+            // send saved presence without last activity
+            cl_ev_presence_send(saved_presence, saved_status, 0);
+            contact_presence_t contact_pres = contact_presence_from_resource_presence(saved_presence);
+            ui_titlebar_presence(contact_pres);
+        }
+        break;
     }
 
-    prefs_free_string(pref_autoaway_mode);
+    prefs_free_string(mode);
 }
 
 static void
@@ -297,6 +364,9 @@ _shutdown(void)
     log_stderr_close();
     log_close();
     prefs_close();
+    if (saved_status) {
+        free(saved_status);
+    }
 }
 
 static void

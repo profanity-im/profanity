@@ -552,36 +552,6 @@ ui_group_removed(const char * const contact, const char * const group)
 }
 
 void
-ui_auto_away(void)
-{
-    char *pref_autoaway_message = prefs_get_string(PREF_AUTOAWAY_MESSAGE);
-    if (pref_autoaway_message) {
-        int pri =
-            accounts_get_priority_for_presence_type(jabber_get_account_name(),
-                RESOURCE_AWAY);
-        cons_show("Idle for %d minutes, status set to away (priority %d), \"%s\".",
-            prefs_get_autoaway_time(), pri, pref_autoaway_message);
-        title_bar_set_presence(CONTACT_AWAY);
-    } else {
-        int pri =
-            accounts_get_priority_for_presence_type(jabber_get_account_name(),
-                RESOURCE_AWAY);
-        cons_show("Idle for %d minutes, status set to away (priority %d).",
-            prefs_get_autoaway_time(), pri);
-        title_bar_set_presence(CONTACT_AWAY);
-    }
-    prefs_free_string(pref_autoaway_message);
-}
-
-void
-ui_end_auto_away(resource_presence_t presence)
-{
-    int pri = accounts_get_priority_for_presence_type(jabber_get_account_name(), presence);
-    cons_show("No longer idle, status set to online (priority %d).", pri);
-    title_bar_set_presence(contact_presence_from_resource_presence(presence));
-}
-
-void
 ui_titlebar_presence(contact_presence_t presence)
 {
     title_bar_set_presence(presence);

@@ -762,6 +762,19 @@ accounts_set_last_presence(const char * const account_name, const char * const v
 }
 
 void
+accounts_set_last_status(const char * const account_name, const char * const value)
+{
+    if (accounts_account_exists(account_name)) {
+        if (value) {
+            g_key_file_set_string(accounts, account_name, "presence.laststatus", value);
+        } else {
+            g_key_file_remove_key(accounts, account_name, "presence.laststatus", NULL);
+        }
+        _save_accounts();
+    }
+}
+
+void
 accounts_set_last_activity(const char * const account_name)
 {
     if (accounts_account_exists(account_name)) {
@@ -813,6 +826,12 @@ accounts_get_last_presence(const char * const account_name)
         g_free(setting);
     }
     return result;
+}
+
+char *
+accounts_get_last_status(const char * const account_name)
+{
+    return g_key_file_get_string(accounts, account_name, "presence.laststatus", NULL);
 }
 
 resource_presence_t
