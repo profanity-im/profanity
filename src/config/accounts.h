@@ -68,6 +68,7 @@ void accounts_set_otr_policy(const char * const account_name, const char * const
 void accounts_set_last_presence(const char * const account_name, const char * const value);
 void accounts_set_last_status(const char * const account_name, const char * const value);
 void accounts_set_last_activity(const char * const account_name);
+char * accounts_get_last_activity(const char * const account_name);
 void accounts_set_login_presence(const char * const account_name, const char * const value);
 resource_presence_t accounts_get_login_presence(const char * const account_name);
 char * accounts_get_last_status(const char * const account_name);

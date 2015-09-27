@@ -786,8 +786,19 @@ accounts_set_last_activity(const char * const account_name)
         if (res) {
             char *timestr = g_time_val_to_iso8601(&nowtv);
             g_key_file_set_string(accounts, account_name, "last.activity", timestr);
+            free(timestr);
             _save_accounts();
         }
+    }
+}
+
+char *
+accounts_get_last_activity(const char * const account_name)
+{
+    if (accounts_account_exists(account_name)) {
+        return g_key_file_get_string(accounts, account_name, "last.activity", NULL);
+    } else {
+        return NULL;
     }
 }
 
