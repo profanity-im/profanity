@@ -1354,27 +1354,48 @@ cons_autoaway_setting(void)
 {
     char *pref_autoaway_mode = prefs_get_string(PREF_AUTOAWAY_MODE);
     if (strcmp(pref_autoaway_mode, "off") == 0) {
-        cons_show("Autoaway (/autoaway mode)            : OFF");
+        cons_show("Autoaway (/autoaway mode)                 : OFF");
     } else {
-        cons_show("Autoaway (/autoaway mode)            : %s", pref_autoaway_mode);
+        cons_show("Autoaway (/autoaway mode)                 : %s", pref_autoaway_mode);
     }
     prefs_free_string(pref_autoaway_mode);
 
-    cons_show("Autoaway minutes (/autoaway time)    : %d minutes", prefs_get_autoaway_time());
+    int away_time = prefs_get_autoaway_time();
+    if (away_time == 1) {
+        cons_show("Autoaway away minutes (/autoaway time)    : 1 minute");
+    } else {
+        cons_show("Autoaway away minutes (/autoaway time)    : %d minutes", away_time);
+    }
+
+    int xa_time = prefs_get_autoxa_time();
+    if (xa_time == 0) {
+        cons_show("Autoaway xa minutes (/autoaway time)      : OFF");
+    } else if (xa_time == 1) {
+        cons_show("Autoaway xa minutes (/autoaway time)      : 1 minute");
+    } else {
+        cons_show("Autoaway xa minutes (/autoaway time)      : %d minutes", xa_time);
+    }
 
     char *pref_autoaway_message = prefs_get_string(PREF_AUTOAWAY_MESSAGE);
-    if ((pref_autoaway_message == NULL) ||
-            (strcmp(pref_autoaway_message, "") == 0)) {
-        cons_show("Autoaway message (/autoaway message) : OFF");
+    if ((pref_autoaway_message == NULL) || (strcmp(pref_autoaway_message, "") == 0)) {
+        cons_show("Autoaway away message (/autoaway message) : OFF");
     } else {
-        cons_show("Autoaway message (/autoaway message) : \"%s\"", pref_autoaway_message);
+        cons_show("Autoaway away message (/autoaway message) : \"%s\"", pref_autoaway_message);
     }
     prefs_free_string(pref_autoaway_message);
 
-    if (prefs_get_boolean(PREF_AUTOAWAY_CHECK)) {
-        cons_show("Autoaway check (/autoaway check)     : ON");
+    char *pref_autoxa_message = prefs_get_string(PREF_AUTOXA_MESSAGE);
+    if ((pref_autoxa_message == NULL) || (strcmp(pref_autoxa_message, "") == 0)) {
+        cons_show("Autoaway xa message (/autoaway message)   : OFF");
     } else {
-        cons_show("Autoaway check (/autoaway check)     : OFF");
+        cons_show("Autoaway xa message (/autoaway message)   : \"%s\"", pref_autoxa_message);
+    }
+    prefs_free_string(pref_autoxa_message);
+
+    if (prefs_get_boolean(PREF_AUTOAWAY_CHECK)) {
+        cons_show("Autoaway check (/autoaway check)          : ON");
+    } else {
+        cons_show("Autoaway check (/autoaway check)          : OFF");
     }
 }
 

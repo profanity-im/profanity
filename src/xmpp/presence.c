@@ -254,7 +254,9 @@ presence_send(const resource_presence_t presence_type, const char * const msg, c
     if (last == NULL) {
         last = STANZA_TEXT_ONLINE;
     }
-    accounts_set_last_presence(jabber_get_account_name(), last);
+    char *account = jabber_get_account_name();
+    accounts_set_last_presence(account, last);
+    accounts_set_last_status(account, msg);
     free(id);
 }
 
