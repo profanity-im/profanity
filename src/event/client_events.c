@@ -66,7 +66,7 @@ cl_ev_connect_account(ProfAccount *account)
 }
 
 void
-cl_ev_presence_send(const resource_presence_t presence_type, const char * const msg, const int idle)
+cl_ev_presence_send(const resource_presence_t presence_type, const char * const msg, const int idle_secs)
 {
     char *signed_status = NULL;
 
@@ -79,7 +79,7 @@ cl_ev_presence_send(const resource_presence_t presence_type, const char * const 
     account_free(account);
 #endif
 
-    presence_send(presence_type, msg, idle, signed_status);
+    presence_send(presence_type, msg, idle_secs, signed_status);
 
     free(signed_status);
 }
