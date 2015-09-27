@@ -867,13 +867,13 @@ _version_result_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
 
     xmpp_stanza_t *query = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_QUERY);
     if (query == NULL) {
-        log_error("Software version result recieved with no query element.");
+        log_error("Software version result received with no query element.");
         return 0;
     }
 
     char *ns = xmpp_stanza_get_ns(query);
     if (g_strcmp0(ns, STANZA_NS_VERSION) != 0) {
-        log_error("Software version result recieved without namespace.");
+        log_error("Software version result received without namespace.");
         return 0;
     }
 
