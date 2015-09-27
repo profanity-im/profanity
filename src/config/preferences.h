@@ -93,6 +93,7 @@ typedef enum {
     PREF_AUTOAWAY_CHECK,
     PREF_AUTOAWAY_MODE,
     PREF_AUTOAWAY_MESSAGE,
+    PREF_AUTOXA_MESSAGE,
     PREF_CONNECT_ACCOUNT,
     PREF_DEFAULT_ACCOUNT,
     PREF_LOG_ROTATE,
@@ -143,6 +144,8 @@ gint prefs_get_roster_size(void);
 
 gint prefs_get_autoaway_time(void);
 void prefs_set_autoaway_time(gint value);
+gint prefs_get_autoxa_time(void);
+void prefs_set_autoxa_time(gint value);
 
 gchar** prefs_get_plugins(void);
 

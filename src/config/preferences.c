@@ -93,6 +93,21 @@ prefs_load(void)
         g_error_free(err);
     }
 
+    // move pre 0.4.8 autoaway.time to autoaway.awaytime
+    if (g_key_file_has_key(prefs, PREF_GROUP_PRESENCE, "autoaway.time", NULL)) {
+        gint time = g_key_file_get_integer(prefs, PREF_GROUP_PRESENCE, "autoaway.time", NULL);
+        g_key_file_set_integer(prefs, PREF_GROUP_PRESENCE, "autoaway.awaytime", time);
+        g_key_file_remove_key(prefs, PREF_GROUP_PRESENCE, "autoaway.time", NULL);
+    }
+
+    // move pre 0.4.8 autoaway.message to autoaway.awaymessage
+    if (g_key_file_has_key(prefs, PREF_GROUP_PRESENCE, "autoaway.message", NULL)) {
+        char *message = g_key_file_get_string(prefs, PREF_GROUP_PRESENCE, "autoaway.message", NULL);
+        g_key_file_set_string(prefs, PREF_GROUP_PRESENCE, "autoaway.awaymessage", message);
+        g_key_file_remove_key(prefs, PREF_GROUP_PRESENCE, "autoaway.message", NULL);
+        prefs_free_string(message);
+    }
+
     // move pre 0.4.7 otr.warn to enc.warn
     err = NULL;
     gboolean otr_warn = g_key_file_get_boolean(prefs, PREF_GROUP_UI, "otr.warn", &err);
@@ -322,7 +337,7 @@ prefs_set_autoping(gint value)
 gint
 prefs_get_autoaway_time(void)
 {
-    gint result = g_key_file_get_integer(prefs, PREF_GROUP_PRESENCE, "autoaway.time", NULL);
+    gint result = g_key_file_get_integer(prefs, PREF_GROUP_PRESENCE, "autoaway.awaytime", NULL);
 
     if (result == 0) {
         return 15;
@@ -331,10 +346,23 @@ prefs_get_autoaway_time(void)
     }
 }
 
+gint
+prefs_get_autoxa_time(void)
+{
+    return g_key_file_get_integer(prefs, PREF_GROUP_PRESENCE, "autoaway.xatime", NULL);
+}
+
 void
 prefs_set_autoaway_time(gint value)
 {
-    g_key_file_set_integer(prefs, PREF_GROUP_PRESENCE, "autoaway.time", value);
+    g_key_file_set_integer(prefs, PREF_GROUP_PRESENCE, "autoaway.awaytime", value);
+    _save_prefs();
+}
+
+void
+prefs_set_autoxa_time(gint value)
+{
+    g_key_file_set_integer(prefs, PREF_GROUP_PRESENCE, "autoaway.xatime", value);
     _save_prefs();
 }
 
@@ -619,6 +647,7 @@ _get_group(preference_t pref)
         case PREF_AUTOAWAY_CHECK:
         case PREF_AUTOAWAY_MODE:
         case PREF_AUTOAWAY_MESSAGE:
+        case PREF_AUTOXA_MESSAGE:
             return PREF_GROUP_PRESENCE;
         case PREF_CONNECT_ACCOUNT:
         case PREF_DEFAULT_ACCOUNT:
@@ -715,7 +744,9 @@ _get_key(preference_t pref)
         case PREF_AUTOAWAY_MODE:
             return "autoaway.mode";
         case PREF_AUTOAWAY_MESSAGE:
-            return "autoaway.message";
+            return "autoaway.awaymessage";
+        case PREF_AUTOXA_MESSAGE:
+            return "autoaway.xamessage";
         case PREF_CONNECT_ACCOUNT:
             return "account";
         case PREF_DEFAULT_ACCOUNT:

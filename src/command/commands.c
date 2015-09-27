@@ -3981,56 +3981,101 @@ cmd_ping(ProfWin *window, const char * const command, gchar **args)
 gboolean
 cmd_autoaway(ProfWin *window, const char * const command, gchar **args)
 {
-    char *setting = args[0];
-    char *value = args[1];
-
-    if ((strcmp(setting, "mode") != 0) && (strcmp(setting, "time") != 0) &&
-            (strcmp(setting, "message") != 0) && (strcmp(setting, "check") != 0)) {
+    if ((strcmp(args[0], "mode") != 0) && (strcmp(args[0], "time") != 0) &&
+            (strcmp(args[0], "message") != 0) && (strcmp(args[0], "check") != 0)) {
         cons_show("Setting must be one of 'mode', 'time', 'message' or 'check'");
         return TRUE;
     }
 
-    if (strcmp(setting, "mode") == 0) {
-        if ((strcmp(value, "idle") != 0) && (strcmp(value, "away") != 0) &&
-                (strcmp(value, "off") != 0)) {
+    if (strcmp(args[0], "mode") == 0) {
+        if ((strcmp(args[1], "idle") != 0) && (strcmp(args[1], "away") != 0) &&
+                (strcmp(args[1], "off") != 0)) {
             cons_show("Mode must be one of 'idle', 'away' or 'off'");
         } else {
-            prefs_set_string(PREF_AUTOAWAY_MODE, value);
-            cons_show("Auto away mode set to: %s.", value);
+            prefs_set_string(PREF_AUTOAWAY_MODE, args[1]);
+            cons_show("Auto away mode set to: %s.", args[1]);
         }
 
         return TRUE;
     }
 
-    if (strcmp(setting, "time") == 0) {
-        int minutesval = 0;
-        char *err_msg = NULL;
-        gboolean res = strtoi_range(value, &minutesval, 1, INT_MAX, &err_msg);
-        if (res) {
-            prefs_set_autoaway_time(minutesval);
-            cons_show("Auto away time set to: %d minutes.", minutesval);
+    if (strcmp(args[0], "time") == 0) {
+        if (g_strcmp0(args[1], "away") == 0) {
+            int minutesval = 0;
+            char *err_msg = NULL;
+            gboolean res = strtoi_range(args[2], &minutesval, 1, INT_MAX, &err_msg);
+            if (res) {
+                prefs_set_autoaway_time(minutesval);
+                if (minutesval == 1) {
+                    cons_show("Auto away time set to: 1 minute.");
+                } else {
+                    cons_show("Auto away time set to: %d minutes.", minutesval);
+                }
+            } else {
+                cons_show(err_msg);
+                free(err_msg);
+            }
+
+            return TRUE;
+        } else if (g_strcmp0(args[1], "xa") == 0) {
+            int minutesval = 0;
+            char *err_msg = NULL;
+            gboolean res = strtoi_range(args[2], &minutesval, 0, INT_MAX, &err_msg);
+            if (res) {
+                int away_time = prefs_get_autoaway_time();
+                if (minutesval != 0 && minutesval <= away_time) {
+                    cons_show("Auto xa time must be larger than auto away time.");
+                } else {
+                    prefs_set_autoxa_time(minutesval);
+                    if (minutesval == 0) {
+                        cons_show("Auto xa time disabled.");
+                    } else if (minutesval == 1) {
+                        cons_show("Auto xa time set to: 1 minute.");
+                    } else {
+                        cons_show("Auto xa time set to: %d minutes.", minutesval);
+                    }
+                }
+            } else {
+                cons_show(err_msg);
+                free(err_msg);
+            }
+
+            return TRUE;
         } else {
-            cons_show(err_msg);
-            free(err_msg);
+            cons_bad_cmd_usage(command);
+            return TRUE;
         }
-
-        return TRUE;
     }
 
-    if (strcmp(setting, "message") == 0) {
-        if (strcmp(value, "off") == 0) {
-            prefs_set_string(PREF_AUTOAWAY_MESSAGE, NULL);
-            cons_show("Auto away message cleared.");
+    if (strcmp(args[0], "message") == 0) {
+        if (g_strcmp0(args[1], "away") == 0) {
+            if (strcmp(args[2], "off") == 0) {
+                prefs_set_string(PREF_AUTOAWAY_MESSAGE, NULL);
+                cons_show("Auto away message cleared.");
+            } else {
+                prefs_set_string(PREF_AUTOAWAY_MESSAGE, args[2]);
+                cons_show("Auto away message set to: \"%s\".", args[2]);
+            }
+
+            return TRUE;
+        } else if (g_strcmp0(args[1], "xa") == 0) {
+            if (strcmp(args[2], "off") == 0) {
+                prefs_set_string(PREF_AUTOXA_MESSAGE, NULL);
+                cons_show("Auto xa message cleared.");
+            } else {
+                prefs_set_string(PREF_AUTOXA_MESSAGE, args[2]);
+                cons_show("Auto xa message set to: \"%s\".", args[2]);
+            }
+
+            return TRUE;
         } else {
-            prefs_set_string(PREF_AUTOAWAY_MESSAGE, value);
-            cons_show("Auto away message set to: \"%s\".", value);
+            cons_bad_cmd_usage(command);
+            return TRUE;
         }
-
-        return TRUE;
     }
 
-    if (strcmp(setting, "check") == 0) {
-        return _cmd_set_boolean_preference(value, command, "Online check", PREF_AUTOAWAY_CHECK);
+    if (strcmp(args[0], "check") == 0) {
+        return _cmd_set_boolean_preference(args[1], command, "Online check", PREF_AUTOAWAY_CHECK);
     }
 
     return TRUE;
@@ -4907,51 +4952,3 @@ _cmd_set_boolean_preference(gchar *arg, const char * const command,
 
     return TRUE;
 }
-
-//static void
-//_cmd_show_filtered_help(char *heading, gchar *cmd_filter[], int filter_size)
-//{
-//    ProfWin *console = wins_get_console();
-//    cons_show("");
-//    win_print(console, '-', NULL, 0, THEME_WHITE_BOLD, "", heading);
-//
-//    GList *ordered_commands = NULL;
-//    int i;
-//    for (i = 0; i < filter_size; i++) {
-//        Command *pcmd = g_hash_table_lookup(commands, cmd_filter[i]);
-//        ordered_commands = g_list_insert_sorted(ordered_commands, pcmd->cmd, (GCompareFunc)g_strcmp0);
-//    }
-//
-//    int maxlen = 0;
-//    GList *curr = ordered_commands;
-//    while (curr) {
-//        gchar *cmd = curr->data;
-//        int len = strlen(cmd);
-//        if (len > maxlen) maxlen = len;
-//        curr = g_list_next(curr);
-//    }
-//
-//    GString *cmds = g_string_new("");
-//    curr = ordered_commands;
-//    int count = 0;
-//    while (curr) {
-//        gchar *cmd = curr->data;
-//        if (count == 5) {
-//            cons_show(cmds->str);
-//            g_string_free(cmds, TRUE);
-//            cmds = g_string_new("");
-//            count = 0;
-//        }
-//        g_string_append_printf(cmds, "%-*s", maxlen + 1, cmd);
-//        curr = g_list_next(curr);
-//        count++;
-//    }
-//    cons_show(cmds->str);
-//    g_string_free(cmds, TRUE);
-//    g_list_free(ordered_commands);
-//    g_list_free(curr);
-//
-//    cons_show("");
-//    cons_show("Use /help [command] without the leading slash, for help on a specific command");
-//    cons_show("");
-//}

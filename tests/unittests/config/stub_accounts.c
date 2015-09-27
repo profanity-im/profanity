@@ -122,6 +122,7 @@ void accounts_set_otr_policy(const char * const account_name, const char * const
 }
 
 void accounts_set_last_presence(const char * const account_name, const char * const value) {}
+void accounts_set_last_status(const char * const account_name, const char * const value) {}
 void accounts_set_last_activity(const char * const account_name) {}
 void accounts_set_pgp_keyid(const char * const account_name, const char * const value) {}
 
@@ -134,6 +135,11 @@ void accounts_set_login_presence(const char * const account_name, const char * c
 resource_presence_t accounts_get_login_presence(const char * const account_name)
 {
     return RESOURCE_ONLINE;
+}
+
+char * accounts_get_last_status(const char * const account_name)
+{
+    return NULL;
 }
 
 resource_presence_t accounts_get_last_presence(const char * const account_name)

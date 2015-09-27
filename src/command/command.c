@@ -1375,28 +1375,33 @@ static struct cmd_t command_defs[] =
     },
 
     { "/autoaway",
-        cmd_autoaway, parse_args_with_freetext, 2, 2, &cons_autoaway_setting,
+        cmd_autoaway, parse_args_with_freetext, 2, 3, &cons_autoaway_setting,
         CMD_TAGS(
             CMD_TAG_PRESENCE)
         CMD_SYN(
             "/autoaway mode idle|away|off",
-            "/autoaway time <minutes>",
-            "/autoaway message <message>|off",
+            "/autoaway time away|xa <minutes>",
+            "/autoaway message away|xa <message>|off",
             "/autoaway check on|off")
         CMD_DESC(
             "Manage autoway settings for idle time.")
         CMD_ARGS(
-            { "mode idle",         "Sends idle time, status remains online." },
-            { "mode away",         "Sends an away presence." },
-            { "mode off",          "Disabled (default)." },
-            { "time <minutes>",    "Number of minutes before the presence change is sent, default: 15." },
-            { "message <message>", "Optional message to send with the presence change, default: off (disabled)." },
-            { "message off",       "Send no message with autoaway presence." },
-            { "check on|off",      "When enabled, checks for activity and sends online presence, default: on." })
+            { "mode idle",              "Sends idle time, status remains online." },
+            { "mode away",              "Sends away and xa presence as well as idle time." },
+            { "mode off",               "Disabled (default)." },
+            { "time away <minutes>",    "Number of minutes before the away presence is sent, default: 15." },
+            { "time xa <minutes>",      "Number of minutes before the xa presence is sent, default: 0 (disabled)." },
+            { "message away <message>", "Optional message to send with the away presence, default: off (disabled)." },
+            { "message xa <message>",   "Optional message to send with the xa presence, default: off (disabled)." },
+            { "message away off",       "Send no message with away presence." },
+            { "message xa off",         "Send no message with xa presence." },
+            { "check on|off",           "When enabled, checks for activity and sends online presence, default: on." })
         CMD_EXAMPLES(
-            "/autoaway mode idle",
-            "/autoaway time 30",
-            "/autoaway message I'm not really doing much",
+            "/autoaway mode away",
+            "/autoaway time away 30",
+            "/autoaway message away Away from computer for a while",
+            "/autoaway time xa 120",
+            "/autoaway message xa Away from computer for a very long time",
             "/autoaway check off")
     },
 
@@ -1670,6 +1675,7 @@ static Autocomplete sub_ac;
 static Autocomplete log_ac;
 static Autocomplete autoaway_ac;
 static Autocomplete autoaway_mode_ac;
+static Autocomplete autoaway_presence_ac;
 static Autocomplete autoconnect_ac;
 static Autocomplete titlebar_ac;
 static Autocomplete theme_ac;
@@ -1834,6 +1840,10 @@ cmd_init(void)
     autocomplete_add(autoaway_mode_ac, "away");
     autocomplete_add(autoaway_mode_ac, "idle");
     autocomplete_add(autoaway_mode_ac, "off");
+
+    autoaway_presence_ac = autocomplete_new();
+    autocomplete_add(autoaway_presence_ac, "away");
+    autocomplete_add(autoaway_presence_ac, "xa");
 
     autoconnect_ac = autocomplete_new();
     autocomplete_add(autoconnect_ac, "set");
@@ -2144,6 +2154,7 @@ cmd_uninit(void)
     autocomplete_free(prefs_ac);
     autocomplete_free(autoaway_ac);
     autocomplete_free(autoaway_mode_ac);
+    autocomplete_free(autoaway_presence_ac);
     autocomplete_free(autoconnect_ac);
     autocomplete_free(theme_ac);
     autocomplete_free(theme_load_ac);
@@ -2323,6 +2334,7 @@ cmd_reset_autocomplete(ProfWin *window)
     autocomplete_reset(commands_ac);
     autocomplete_reset(autoaway_ac);
     autocomplete_reset(autoaway_mode_ac);
+    autocomplete_reset(autoaway_presence_ac);
     autocomplete_reset(autoconnect_ac);
     autocomplete_reset(theme_ac);
     if (theme_load_ac) {
@@ -2947,8 +2959,18 @@ _autoaway_autocomplete(ProfWin *window, const char * const input)
     if (result) {
         return result;
     }
-    result = autocomplete_param_with_func(input, "/autoaway check",
-        prefs_autocomplete_boolean_choice);
+
+    result = autocomplete_param_with_ac(input, "/autoaway time", autoaway_presence_ac, TRUE);
+    if (result) {
+        return result;
+    }
+
+    result = autocomplete_param_with_ac(input, "/autoaway message", autoaway_presence_ac, TRUE);
+    if (result) {
+        return result;
+    }
+
+    result = autocomplete_param_with_func(input, "/autoaway check", prefs_autocomplete_boolean_choice);
     if (result) {
         return result;
     }
