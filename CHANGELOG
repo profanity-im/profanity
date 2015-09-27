@@ -3,6 +3,7 @@
 
 - Build against libmesode if available
 - Handle invalid SSL certificates (requires libmesode)
+- Allow auto extended away
 - Include last acitvity in initial presence (xep-0256)
 
 0.4.7
