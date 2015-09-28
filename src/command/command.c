@@ -695,6 +695,23 @@ static struct cmd_t command_defs[] =
             "/disco info myfriend@server.com/laptop")
     },
 
+    { "/lastactivity",
+        cmd_lastactivity, parse_args, 0, 1, NULL,
+        CMD_TAGS(
+            CMD_TAG_PRESENCE)
+        CMD_SYN(
+            "/lastactivity [<jid>]")
+        CMD_DESC(
+            "Send a last activity query to the supplied JID, omitting the JID will send the query to your server.")
+        CMD_ARGS(
+            { "<jid>", "The JID of the entity to which the query will be sent." })
+        CMD_EXAMPLES(
+            "/lastactivity",
+            "/lastactivity alice@securechat.org",
+            "/lastactivity alice@securechat.org/laptop",
+            "/lastactivity someserver.com")
+    },
+
     { "/nick",
         cmd_nick, parse_args_with_freetext, 1, 1, NULL,
         CMD_TAGS(

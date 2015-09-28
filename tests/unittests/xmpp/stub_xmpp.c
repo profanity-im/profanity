@@ -165,6 +165,7 @@ void iq_room_kick_occupant(const char * const room, const char * const nick, con
 void iq_room_role_set(const char * const room, const char * const nick, char *role,
     const char * const reason) {}
 void iq_room_role_list(const char * const room, char *role) {}
+void iq_last_activity_request(gchar *jid) {}
 
 // caps functions
 Capabilities* caps_lookup(const char * const jid)

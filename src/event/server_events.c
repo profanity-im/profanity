@@ -730,3 +730,28 @@ sv_ev_certfail(const char * const errormsg, const char * const certname, const c
         return 0;
     }
 }
+
+void
+sv_ev_lastactivity_response(const char * const from, const int seconds, const char * const msg)
+{
+    Jid *jidp = jid_create(from);
+
+    if (!jidp) {
+        return;
+    }
+
+    // full jid or bare jid
+    if (jidp->resourcepart || jidp->localpart) {
+        if (msg) {
+            cons_show("%s last active %d, status: %s", from, seconds, msg);
+        } else {
+            cons_show("%s last active %d", from, seconds);
+        }
+
+    // domain only
+    } else {
+        cons_show("%s uptime %d seconds", from, seconds);
+    }
+
+    jid_destroy(jidp);
+}
