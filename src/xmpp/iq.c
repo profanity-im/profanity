@@ -1091,17 +1091,8 @@ static int
 _last_activity_get_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
     void * const userdata)
 {
-    xmpp_ctx_t *ctx = (xmpp_ctx_t *)userdata;
+    xmpp_ctx_t *ctx = connection_get_ctx();
     const char *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
-
-    /*
-<iq from='juliet@capulet.com/balcony'
-    id='last2'
-    to='romeo@montague.net/orchard'
-    type='result'>
-  <query xmlns='jabber:iq:last' seconds='123'/>
-</iq>
-     */
 
     if (from) {
         int idls_secs = ui_get_idle_time() / 1000;
@@ -1115,10 +1106,12 @@ _last_activity_get_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanz
         xmpp_stanza_set_type(response, STANZA_TYPE_RESULT);
 
         xmpp_stanza_t *query = xmpp_stanza_new(ctx);
+        xmpp_stanza_set_name(query, STANZA_NAME_QUERY);
         xmpp_stanza_set_attribute(query, STANZA_ATTR_XMLNS, "jabber:iq:last");
         xmpp_stanza_set_attribute(query, "seconds", str);
 
         xmpp_stanza_add_child(response, query);
+
         xmpp_send(conn, response);
 
         xmpp_stanza_release(query);

@@ -757,9 +757,9 @@ sv_ev_lastactivity_response(const char * const from, const int seconds, const ch
     // full jid or bare jid
     if (jidp->resourcepart || jidp->localpart) {
         if (msg) {
-            cons_show("%s last active %d, status: %s", from, seconds, msg);
+            cons_show("%s last active %d seconds ago, status: %s", from, seconds, msg);
         } else {
-            cons_show("%s last active %d", from, seconds);
+            cons_show("%s last active %d seconds ago.", from, seconds);
         }
 
     // domain only
