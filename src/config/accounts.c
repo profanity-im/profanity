@@ -53,21 +53,6 @@ static GKeyFile *accounts;
 static Autocomplete all_ac;
 static Autocomplete enabled_ac;
 
-// used to rename account (copies properties to new account)
-static gchar *string_keys[] = {
-    "jid",
-    "server",
-    "port",
-    "resource",
-    "password",
-    "eval_password",
-    "presence.last",
-    "presence.login",
-    "muc.service",
-    "muc.nick",
-    "otr.policy"
-};
-
 static void _save_accounts(void);
 static gchar * _get_accounts_file(void);
 static void _remove_from_list(GKeyFile *accounts, const char * const account_name, const char * const key, const char * const contact_jid);
@@ -338,21 +323,33 @@ accounts_rename(const char * const account_name, const char * const new_name)
         return FALSE;
     }
 
-    g_key_file_set_boolean(accounts, new_name, "enabled",
-        g_key_file_get_boolean(accounts, account_name, "enabled", NULL));
+    // treat all properties as strings for copy
+    gchar *string_keys[] = {
+        "enabled",
+        "jid",
+        "server",
+        "port",
+        "resource",
+        "password",
+        "eval_password",
+        "presence.last",
+        "presence.laststatus",
+        "presence.login",
+        "priority.online",
+        "priority.chat",
+        "priority.away",
+        "priority.xa",
+        "priority.dnd",
+        "muc.service",
+        "muc.nick",
+        "otr.policy",
+        "otr.manual",
+        "otr.opportunistic",
+        "otr.always",
+        "pgp.keyid",
+        "last.activity"
+    };
 
-    g_key_file_set_integer(accounts, new_name, "priority.online",
-        g_key_file_get_integer(accounts, account_name, "priority.online", NULL));
-    g_key_file_set_integer(accounts, new_name, "priority.chat",
-        g_key_file_get_integer(accounts, account_name, "priority.chat", NULL));
-    g_key_file_set_integer(accounts, new_name, "priority.away",
-        g_key_file_get_integer(accounts, account_name, "priority.away", NULL));
-    g_key_file_set_integer(accounts, new_name, "priority.xa",
-        g_key_file_get_integer(accounts, account_name, "priority.xa", NULL));
-    g_key_file_set_integer(accounts, new_name, "priority.dnd",
-        g_key_file_get_integer(accounts, account_name, "priority.dnd", NULL));
-
-    // copy other string properties
     int i;
     for (i = 0; i < ARRAY_SIZE(string_keys); i++) {
         char *value = g_key_file_get_string(accounts, account_name, string_keys[i], NULL);
