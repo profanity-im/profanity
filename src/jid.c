@@ -79,7 +79,6 @@ jid_create(const gchar * const str)
     gchar *slashp = g_utf8_strchr(trimmed, -1, '/');
     gchar *domain_start = trimmed;
 
-
     if (atp) {
         result->localpart = g_utf8_substring(trimmed, 0, g_utf8_pointer_to_offset(trimmed, atp));
         domain_start = atp + 1;

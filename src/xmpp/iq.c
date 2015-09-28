@@ -40,7 +40,7 @@
 
 #include <stdlib.h>
 #include <string.h>
-
+#include <stdio.h>
 #include <glib.h>
 
 #ifdef PROF_HAVE_LIBMESODE
@@ -76,6 +76,8 @@ static int _version_get_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const 
 static int _version_result_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, void * const userdata);
 static int _disco_info_get_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, void * const userdata);
 static int _disco_info_response_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, void * const userdata);
+static int _last_activity_get_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, void * const userdata);
+static int _last_activity_response_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, void * const userdata);
 static int _room_info_response_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, void * const userdata);
 static int _disco_items_result_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, void * const userdata);
 static int _disco_items_get_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, void * const userdata);
@@ -107,6 +109,8 @@ iq_add_handlers(void)
 
     HANDLE(XMPP_NS_DISCO_ITEMS, STANZA_TYPE_GET,    _disco_items_get_handler);
     HANDLE(XMPP_NS_DISCO_ITEMS, STANZA_TYPE_RESULT, _disco_items_result_handler);
+
+    HANDLE("jabber:iq:last",    STANZA_TYPE_GET,    _last_activity_get_handler);
 
     HANDLE(STANZA_NS_VERSION,   STANZA_TYPE_GET,    _version_get_handler);
 
@@ -190,6 +194,22 @@ iq_disco_info_request(gchar *jid)
 }
 
 void
+iq_last_activity_request(gchar *jid)
+{
+    xmpp_conn_t * const conn = connection_get_conn();
+    xmpp_ctx_t * const ctx = connection_get_ctx();
+    char *id = create_unique_id("lastactivity");
+    xmpp_stanza_t *iq = stanza_create_last_activity_iq(ctx, id, jid);
+
+    xmpp_id_handler_add(conn, _last_activity_response_handler, id, NULL);
+
+    free(id);
+
+    xmpp_send(conn, iq);
+    xmpp_stanza_release(iq);
+}
+
+void
 iq_room_info_request(const char * const room, gboolean display_result)
 {
     xmpp_conn_t * const conn = connection_get_conn();
@@ -208,6 +228,8 @@ iq_room_info_request(const char * const room, gboolean display_result)
     xmpp_send(conn, iq);
     xmpp_stanza_release(iq);
 }
+
+
 
 void
 iq_send_caps_request_for_jid(const char * const to, const char * const id,
@@ -1065,6 +1087,46 @@ _disco_items_get_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
     return 1;
 }
 
+static int
+_last_activity_get_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
+    void * const userdata)
+{
+    xmpp_ctx_t *ctx = (xmpp_ctx_t *)userdata;
+    const char *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
+
+    /*
+<iq from='juliet@capulet.com/balcony'
+    id='last2'
+    to='romeo@montague.net/orchard'
+    type='result'>
+  <query xmlns='jabber:iq:last' seconds='123'/>
+</iq>
+     */
+
+    if (from) {
+        int idls_secs = ui_get_idle_time() / 1000;
+        char str[50];
+        sprintf(str, "%d", idls_secs);
+
+        xmpp_stanza_t *response = xmpp_stanza_new(ctx);
+        xmpp_stanza_set_name(response, STANZA_NAME_IQ);
+        xmpp_stanza_set_id(response, xmpp_stanza_get_id(stanza));
+        xmpp_stanza_set_attribute(response, STANZA_ATTR_TO, from);
+        xmpp_stanza_set_type(response, STANZA_TYPE_RESULT);
+
+        xmpp_stanza_t *query = xmpp_stanza_new(ctx);
+        xmpp_stanza_set_attribute(query, STANZA_ATTR_XMLNS, "jabber:iq:last");
+        xmpp_stanza_set_attribute(query, "seconds", str);
+
+        xmpp_stanza_add_child(response, query);
+        xmpp_send(conn, response);
+
+        xmpp_stanza_release(query);
+        xmpp_stanza_release(response);
+    }
+
+    return 1;
+}
 
 static int
 _disco_info_get_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
@@ -1486,6 +1548,61 @@ _room_info_response_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stan
     free(cb_data->room);
     free(cb_data);
 
+    return 0;
+}
+
+static int
+_last_activity_response_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
+    void * const userdata)
+{
+    const char *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
+    if (!from) {
+        cons_show_error("Invalid last activity response received.");
+        log_info("Received last activity response with no from attribute.");
+        return 0;
+    }
+
+    const char *type = xmpp_stanza_get_type(stanza);
+
+    // handle error responses
+    if (g_strcmp0(type, STANZA_TYPE_ERROR) == 0) {
+        char *error_message = stanza_get_error_message(stanza);
+        if (from) {
+            cons_show_error("Last activity request failed for %s: %s", from, error_message);
+        } else {
+            cons_show_error("Last activity request failed: %s", error_message);
+        }
+        free(error_message);
+        return 0;
+    }
+
+    xmpp_stanza_t *query = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_QUERY);
+
+    if (!query) {
+        cons_show_error("Invalid last activity response received.");
+        log_info("Received last activity response with no query element.");
+        return 0;
+    }
+
+    char *seconds_str = xmpp_stanza_get_attribute(query, "seconds");
+    if (!seconds_str) {
+        cons_show_error("Invalid last activity response received.");
+        log_info("Received last activity response with no seconds attribute.");
+        return 0;
+    }
+
+    int seconds = atoi(seconds_str);
+    if (seconds < 0) {
+        cons_show_error("Invalid last activity response received.");
+        log_info("Received last activity response with negative value.");
+        return 0;
+    }
+
+    char *msg = xmpp_stanza_get_text(query);
+
+    sv_ev_lastactivity_response(from, seconds, msg);
+
+    xmpp_free(connection_get_ctx(), msg);
     return 0;
 }
 

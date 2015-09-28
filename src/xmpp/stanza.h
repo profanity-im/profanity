@@ -227,6 +227,9 @@ xmpp_stanza_t* stanza_create_ping_iq(xmpp_ctx_t *ctx, const char * const target)
 xmpp_stanza_t* stanza_create_disco_info_iq(xmpp_ctx_t *ctx, const char * const id,
     const char * const to, const char * const node);
 
+xmpp_stanza_t* stanza_create_last_activity_iq(xmpp_ctx_t *ctx, const char * const id,
+    const char * const to);
+
 xmpp_stanza_t* stanza_create_invite(xmpp_ctx_t *ctx, const char * const room,
     const char * const contact, const char * const reason, const char * const password);
 xmpp_stanza_t* stanza_create_mediated_invite(xmpp_ctx_t *ctx, const char * const room,

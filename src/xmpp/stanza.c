@@ -966,6 +966,25 @@ stanza_create_disco_items_iq(xmpp_ctx_t *ctx, const char * const id,
 }
 
 xmpp_stanza_t *
+stanza_create_last_activity_iq(xmpp_ctx_t *ctx, const char * const id, const char * const to)
+{
+    xmpp_stanza_t *iq = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(iq, STANZA_NAME_IQ);
+    xmpp_stanza_set_type(iq, STANZA_TYPE_GET);
+    xmpp_stanza_set_attribute(iq, STANZA_ATTR_TO, to);
+    xmpp_stanza_set_id(iq, id);
+
+    xmpp_stanza_t *query = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(query, STANZA_NAME_QUERY);
+    xmpp_stanza_set_ns(query, "jabber:iq:last");
+
+    xmpp_stanza_add_child(iq, query);
+    xmpp_stanza_release(query);
+
+    return iq;
+}
+
+xmpp_stanza_t *
 stanza_create_room_config_submit_iq(xmpp_ctx_t *ctx, const char * const room, DataForm *form)
 {
     xmpp_stanza_t *iq = xmpp_stanza_new(ctx);
