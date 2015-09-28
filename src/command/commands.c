@@ -3262,6 +3262,31 @@ cmd_disco(ProfWin *window, const char * const command, gchar **args)
 }
 
 gboolean
+cmd_lastactivity(ProfWin *window, const char * const command, gchar **args)
+{
+    jabber_conn_status_t conn_status = jabber_get_connection_status();
+
+    if (conn_status != JABBER_CONNECTED) {
+        cons_show("You are not currenlty connected.");
+        return TRUE;
+    }
+
+    if (args[0] == NULL) {
+        Jid *jidp = jid_create(jabber_get_fulljid());
+        GString *jid = g_string_new(jidp->domainpart);
+
+        iq_last_activity_request(jid->str);
+
+        g_string_free(jid, TRUE);
+        jid_destroy(jidp);
+    } else {
+        iq_last_activity_request(args[0]);
+    }
+
+    return TRUE;
+}
+
+gboolean
 cmd_nick(ProfWin *window, const char * const command, gchar **args)
 {
     jabber_conn_status_t conn_status = jabber_get_connection_status();
