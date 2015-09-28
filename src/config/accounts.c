@@ -53,26 +53,9 @@ static GKeyFile *accounts;
 static Autocomplete all_ac;
 static Autocomplete enabled_ac;
 
-// used to rename account (copies properties to new account)
-static gchar *string_keys[] = {
-    "jid",
-    "server",
-    "port",
-    "resource",
-    "password",
-    "eval_password",
-    "presence.last",
-    "presence.login",
-    "muc.service",
-    "muc.nick",
-    "otr.policy"
-};
-
-static void _fix_legacy_accounts(const char * const account_name);
 static void _save_accounts(void);
 static gchar * _get_accounts_file(void);
 static void _remove_from_list(GKeyFile *accounts, const char * const account_name, const char * const key, const char * const contact_jid);
-
 
 void
 accounts_load(void)
@@ -87,13 +70,11 @@ accounts_load(void)
     }
 
     accounts = g_key_file_new();
-    g_key_file_load_from_file(accounts, accounts_loc, G_KEY_FILE_KEEP_COMMENTS,
-        NULL);
+    g_key_file_load_from_file(accounts, accounts_loc, G_KEY_FILE_KEEP_COMMENTS, NULL);
 
     // create the logins searchable list for autocompletion
     gsize naccounts;
-    gchar **account_names =
-        g_key_file_get_groups(accounts, &naccounts);
+    gchar **account_names = g_key_file_get_groups(accounts, &naccounts);
 
     gsize i;
     for (i = 0; i < naccounts; i++) {
@@ -101,8 +82,6 @@ accounts_load(void)
         if (g_key_file_get_boolean(accounts, account_names[i], "enabled", NULL)) {
             autocomplete_add(enabled_ac, account_names[i]);
         }
-
-        _fix_legacy_accounts(account_names[i]);
     }
 
     g_strfreev(account_names);
@@ -344,21 +323,33 @@ accounts_rename(const char * const account_name, const char * const new_name)
         return FALSE;
     }
 
-    g_key_file_set_boolean(accounts, new_name, "enabled",
-        g_key_file_get_boolean(accounts, account_name, "enabled", NULL));
+    // treat all properties as strings for copy
+    gchar *string_keys[] = {
+        "enabled",
+        "jid",
+        "server",
+        "port",
+        "resource",
+        "password",
+        "eval_password",
+        "presence.last",
+        "presence.laststatus",
+        "presence.login",
+        "priority.online",
+        "priority.chat",
+        "priority.away",
+        "priority.xa",
+        "priority.dnd",
+        "muc.service",
+        "muc.nick",
+        "otr.policy",
+        "otr.manual",
+        "otr.opportunistic",
+        "otr.always",
+        "pgp.keyid",
+        "last.activity"
+    };
 
-    g_key_file_set_integer(accounts, new_name, "priority.online",
-        g_key_file_get_integer(accounts, account_name, "priority.online", NULL));
-    g_key_file_set_integer(accounts, new_name, "priority.chat",
-        g_key_file_get_integer(accounts, account_name, "priority.chat", NULL));
-    g_key_file_set_integer(accounts, new_name, "priority.away",
-        g_key_file_get_integer(accounts, account_name, "priority.away", NULL));
-    g_key_file_set_integer(accounts, new_name, "priority.xa",
-        g_key_file_get_integer(accounts, account_name, "priority.xa", NULL));
-    g_key_file_set_integer(accounts, new_name, "priority.dnd",
-        g_key_file_get_integer(accounts, account_name, "priority.dnd", NULL));
-
-    // copy other string properties
     int i;
     for (i = 0; i < ARRAY_SIZE(string_keys); i++) {
         char *value = g_key_file_get_string(accounts, account_name, string_keys[i], NULL);
@@ -873,56 +864,6 @@ accounts_get_login_presence(const char * const account_name)
         g_free(setting);
     }
     return result;
-}
-
-static void
-_fix_legacy_accounts(const char * const account_name)
-{
-    // set barejid and resource
-    const char *barejid = account_name;
-    const char *resource = "profanity";
-    Jid *jid = jid_create(account_name);
-    if (jid) {
-        barejid = jid->barejid;
-        if (jid->resourcepart) {
-            resource = jid->resourcepart;
-        }
-    }
-
-    // accounts with no jid property
-    if (!g_key_file_has_key(accounts, account_name, "jid", NULL)) {
-        g_key_file_set_string(accounts, account_name, "jid", barejid);
-        _save_accounts();
-    }
-
-    // accounts with no resource, property
-    if (!g_key_file_has_key(accounts, account_name, "resource", NULL)) {
-        g_key_file_set_string(accounts, account_name, "resource", resource);
-        _save_accounts();
-    }
-
-    // accounts with no muc service or nick
-    if (!g_key_file_has_key(accounts, account_name, "muc.service", NULL)) {
-        gchar *account_jid = g_key_file_get_string(accounts, account_name, "jid", NULL);
-        Jid *jidp = jid_create(account_jid);
-        GString *muc_service = g_string_new("conference.");
-        g_string_append(muc_service, jidp->domainpart);
-        g_key_file_set_string(accounts, account_name, "muc.service", muc_service->str);
-        g_string_free(muc_service, TRUE);
-        jid_destroy(jidp);
-    }
-    if (!g_key_file_has_key(accounts, account_name, "muc.nick", NULL)) {
-        gchar *account_jid = g_key_file_get_string(accounts, account_name, "jid", NULL);
-        Jid *jidp = jid_create(account_jid);
-        if (jidp->localpart == NULL) {
-            g_key_file_set_string(accounts, account_name, "muc.nick", jidp->domainpart);
-        } else {
-            g_key_file_set_string(accounts, account_name, "muc.nick", jidp->localpart);
-        }
-        jid_destroy(jidp);
-    }
-
-    jid_destroy(jid);
 }
 
 static void
