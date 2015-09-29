@@ -34,6 +34,7 @@
 
 #include <string.h>
 #include <stdlib.h>
+#include <assert.h>
 
 #include "config.h"
 
@@ -740,19 +741,28 @@ sv_ev_lastactivity_response(const char * const from, const int seconds, const ch
         return;
     }
 
+    GDateTime *now = g_date_time_new_now_local();
+    GDateTime *active = g_date_time_add_seconds(now, 0 - seconds);
+
+    gchar *date_fmt = NULL;
+    char *time_pref = prefs_get_string(PREF_TIME_LASTACTIVITY);
+    date_fmt = g_date_time_format(active, time_pref);
+    prefs_free_string(time_pref);
+    assert(date_fmt != NULL);
+
     // full jid - last activity
     if (jidp->resourcepart) {
         if (seconds == 0) {
             if (msg) {
                 cons_show("%s currently active, status: %s", from, msg);
             } else {
-                cons_show("%s currently active.", from);
+                cons_show("%s currently active", from);
             }
         } else {
             if (msg) {
-                cons_show("%s last active %d seconds ago, status: %s", from, seconds, msg);
+                cons_show("%s last active %s, status: %s", from, date_fmt, msg);
             } else {
-                cons_show("%s last active %d seconds ago.", from, seconds);
+                cons_show("%s last active %s", from, date_fmt);
             }
         }
 
@@ -762,20 +772,32 @@ sv_ev_lastactivity_response(const char * const from, const int seconds, const ch
             if (msg) {
                 cons_show("%s currently logged in, status: %s", from, msg);
             } else {
-                cons_show("%s currently loggrd in.", from);
+                cons_show("%s currently loggrd in", from);
             }
         } else {
             if (msg) {
-                cons_show("%s last logged in %d seconds ago, status: %s", from, seconds, msg);
+                cons_show("%s last logged in %s, status: %s", from, date_fmt, msg);
             } else {
-                cons_show("%s last logged in %d seconds ago.", from, seconds);
+                cons_show("%s last logged in %s", from, date_fmt);
             }
         }
 
     // domain only - uptime
     } else {
-        cons_show("%s uptime %d seconds", from, seconds);
+        int left = seconds;
+        int days = seconds / 86400;
+        left = left - days * 86400;
+        int hours = left / 3600;
+        left = left - hours * 3600;
+        int minutes = left / 60;
+        left = left - minutes * 60;
+        int seconds = left;
+
+        cons_show("%s up since %s, uptime %d days, %d hrs, %d mins, %d secs", from, date_fmt, days, hours, minutes, seconds);
     }
 
+    g_date_time_unref(now);
+    g_date_time_unref(active);
+    g_free(date_fmt);
     jid_destroy(jidp);
 }

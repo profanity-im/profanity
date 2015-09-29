@@ -1010,6 +1010,10 @@ cons_time_setting(void)
     else
         cons_show("Time statusbar (/time)        : %s", pref_time_statusbar);
     prefs_free_string(pref_time_statusbar);
+
+    char *pref_time_lastactivity = prefs_get_string(PREF_TIME_LASTACTIVITY);
+    cons_show("Time last activity (/time)    : %s", pref_time_lastactivity);
+    prefs_free_string(pref_time_lastactivity);
 }
 
 void

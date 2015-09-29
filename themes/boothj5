@@ -56,6 +56,7 @@ splash=true
 wrap=true
 time=%d-%m-%y %H:%M
 time.statusbar=%H:%M:%S
+time.lastactivity=%d/%m/%y %H:%M:%S
 privileges=true
 presence=true
 intype=true
