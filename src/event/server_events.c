@@ -740,15 +740,39 @@ sv_ev_lastactivity_response(const char * const from, const int seconds, const ch
         return;
     }
 
-    // full jid or bare jid
-    if (jidp->resourcepart || jidp->localpart) {
-        if (msg) {
-            cons_show("%s last active %d seconds ago, status: %s", from, seconds, msg);
+    // full jid - last activity
+    if (jidp->resourcepart) {
+        if (seconds == 0) {
+            if (msg) {
+                cons_show("%s currently active, status: %s", from, msg);
+            } else {
+                cons_show("%s currently active.", from);
+            }
         } else {
-            cons_show("%s last active %d seconds ago.", from, seconds);
+            if (msg) {
+                cons_show("%s last active %d seconds ago, status: %s", from, seconds, msg);
+            } else {
+                cons_show("%s last active %d seconds ago.", from, seconds);
+            }
         }
 
-    // domain only
+    // barejid - last logged in
+    } else if (jidp->localpart) {
+        if (seconds == 0) {
+            if (msg) {
+                cons_show("%s currently logged in, status: %s", from, msg);
+            } else {
+                cons_show("%s currently loggrd in.", from);
+            }
+        } else {
+            if (msg) {
+                cons_show("%s last logged in %d seconds ago, status: %s", from, seconds, msg);
+            } else {
+                cons_show("%s last logged in %d seconds ago.", from, seconds);
+            }
+        }
+
+    // domain only - uptime
     } else {
         cons_show("%s uptime %d seconds", from, seconds);
     }
