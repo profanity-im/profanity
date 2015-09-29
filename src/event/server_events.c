@@ -772,7 +772,7 @@ sv_ev_lastactivity_response(const char * const from, const int seconds, const ch
             if (msg) {
                 cons_show("%s currently logged in, status: %s", from, msg);
             } else {
-                cons_show("%s currently loggrd in", from);
+                cons_show("%s currently logged in", from);
             }
         } else {
             if (msg) {
