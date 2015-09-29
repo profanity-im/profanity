@@ -434,6 +434,7 @@ _load_preferences(void)
     _set_boolean_preference("wins.autotidy", PREF_WINS_AUTO_TIDY);
     _set_string_preference("time", PREF_TIME);
     _set_string_preference("time.statusbar", PREF_TIME_STATUSBAR);
+    _set_string_preference("time.lastactivity", PREF_TIME_LASTACTIVITY);
 
     _set_boolean_preference("resource.title", PREF_RESOURCE_TITLE);
     _set_boolean_preference("resource.message", PREF_RESOURCE_MESSAGE);

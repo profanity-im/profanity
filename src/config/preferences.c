@@ -615,6 +615,7 @@ _get_group(preference_t pref)
         case PREF_WINS_AUTO_TIDY:
         case PREF_TIME:
         case PREF_TIME_STATUSBAR:
+        case PREF_TIME_LASTACTIVITY:
         case PREF_ROSTER:
         case PREF_ROSTER_OFFLINE:
         case PREF_ROSTER_RESOURCE:
@@ -769,6 +770,8 @@ _get_key(preference_t pref)
             return "time";
         case PREF_TIME_STATUSBAR:
             return "time.statusbar";
+        case PREF_TIME_LASTACTIVITY:
+            return "time.lastactivity";
         case PREF_ROSTER:
             return "roster";
         case PREF_ROSTER_OFFLINE:
@@ -858,6 +861,8 @@ _get_default_string(preference_t pref)
             return "%H:%M:%S";
         case PREF_TIME_STATUSBAR:
             return "%H:%M";
+        case PREF_TIME_LASTACTIVITY:
+            return "%d-%m-%y %H:%M:%S";
         case PREF_PGP_LOG:
             return "redact";
         default:

@@ -871,22 +871,15 @@ win_show_status_string(ProfWin *window, const char * const from,
         win_vprint(window, '-', 0, NULL, NO_DATE | NO_EOL, presence_colour, "", " is %s", default_show);
 
     if (last_activity) {
-        GDateTime *now = g_date_time_new_now_local();
-        GTimeSpan span = g_date_time_difference(now, last_activity);
-        g_date_time_unref(now);
+        gchar *date_fmt = NULL;
+        char *time_pref = prefs_get_string(PREF_TIME_LASTACTIVITY);
+        date_fmt = g_date_time_format(last_activity, time_pref);
+        prefs_free_string(time_pref);
+        assert(date_fmt != NULL);
 
-        int hours = span / G_TIME_SPAN_HOUR;
-        span = span - hours * G_TIME_SPAN_HOUR;
-        int minutes = span / G_TIME_SPAN_MINUTE;
-        span = span - minutes * G_TIME_SPAN_MINUTE;
-        int seconds = span / G_TIME_SPAN_SECOND;
+        win_vprint(window, '-', 0, NULL, NO_DATE | NO_EOL, presence_colour, "", ", last activity: %s", date_fmt);
 
-        if (hours > 0) {
-          win_vprint(window, '-', 0, NULL, NO_DATE | NO_EOL, presence_colour, "", ", idle %dh%dm%ds", hours, minutes, seconds);
-        }
-        else {
-          win_vprint(window, '-', 0, NULL, NO_DATE | NO_EOL, presence_colour, "", ", idle %dm%ds", minutes, seconds);
-        }
+        g_free(date_fmt);
     }
 
     if (status)

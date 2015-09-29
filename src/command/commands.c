@@ -3577,7 +3577,24 @@ cmd_wrap(ProfWin *window, const char * const command, gchar **args)
 gboolean
 cmd_time(ProfWin *window, const char * const command, gchar **args)
 {
-    if (g_strcmp0(args[0], "statusbar") == 0) {
+    if (g_strcmp0(args[0], "lastactivity") == 0) {
+        if (args[1] == NULL) {
+            cons_show("Current last activity time format is '%s'.", prefs_get_string(PREF_TIME_LASTACTIVITY));
+            return TRUE;
+        } else if (g_strcmp0(args[1], "set") == 0 && args[2] != NULL) {
+            prefs_set_string(PREF_TIME_LASTACTIVITY, args[2]);
+            cons_show("Last activity time format set to '%s'.", args[2]);
+            ui_redraw();
+            return TRUE;
+        } else if (g_strcmp0(args[1], "off") == 0) {
+            cons_show("Last activity time cannot be disabled.");
+            ui_redraw();
+            return TRUE;
+        } else {
+            cons_bad_cmd_usage(command);
+            return TRUE;
+        }
+    } else if (g_strcmp0(args[0], "statusbar") == 0) {
         if (args[1] == NULL) {
             cons_show("Current status bar time format is '%s'.", prefs_get_string(PREF_TIME_STATUSBAR));
             return TRUE;
