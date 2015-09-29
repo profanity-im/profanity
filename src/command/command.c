@@ -950,7 +950,8 @@ static struct cmd_t command_defs[] =
             "/time main set <format>",
             "/time main off",
             "/time statusbar set <format>",
-            "/time statusbar off")
+            "/time statusbar off",
+            "/time lastactivity set <format>")
         CMD_DESC(
             "Configure time display preferences. "
             "Time formats are strings supported by g_date_time_format. "
@@ -958,14 +959,16 @@ static struct cmd_t command_defs[] =
             "Setting the format to an unsupported string, will display the string. "
             "If the format contains spaces, it must be surrounded with double quotes.")
         CMD_ARGS(
-            { "main set <format>", "Change time format in main window." },
-            { "main off", "Do not show time in main window." },
-            { "statusbar set <format>", "Change time format in statusbar." },
-            { "statusbar off", "Change time format in status bar." })
+            { "main set <format>",         "Change time format in main window." },
+            { "main off",                  "Do not show time in main window." },
+            { "statusbar set <format>",    "Change time format in statusbar." },
+            { "statusbar off",             "Do not show time in status bar." },
+            { "lastactivity set <format>", "Change time format for last activity." })
         CMD_EXAMPLES(
             "/time main set \"%d-%m-%y %H:%M\"",
             "/time main off",
-            "/time statusbar set %H:%M")
+            "/time statusbar set %H:%M",
+            "/time lastactivity set \"%d-%m-%y %H:%M\"")
     },
 
     { "/inpblock",
@@ -2098,6 +2101,7 @@ cmd_init(void)
     time_ac = autocomplete_new();
     autocomplete_add(time_ac, "main");
     autocomplete_add(time_ac, "statusbar");
+    autocomplete_add(time_ac, "lastactivity");
 
     time_format_ac = autocomplete_new();
     autocomplete_add(time_format_ac, "set");
@@ -3363,6 +3367,11 @@ _time_autocomplete(ProfWin *window, const char * const input)
     char *found = NULL;
 
     found = autocomplete_param_with_ac(input, "/time statusbar", time_format_ac, TRUE);
+    if (found) {
+        return found;
+    }
+
+    found = autocomplete_param_with_ac(input, "/time lastactivity", time_format_ac, TRUE);
     if (found) {
         return found;
     }
