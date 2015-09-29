@@ -103,18 +103,18 @@ iq_add_handlers(void)
     xmpp_conn_t * const conn = connection_get_conn();
     xmpp_ctx_t * const ctx = connection_get_ctx();
 
-    HANDLE(NULL,                STANZA_TYPE_ERROR,  _error_handler);
+    HANDLE(NULL,                    STANZA_TYPE_ERROR,  _error_handler);
 
-    HANDLE(XMPP_NS_DISCO_INFO,  STANZA_TYPE_GET,    _disco_info_get_handler);
+    HANDLE(XMPP_NS_DISCO_INFO,      STANZA_TYPE_GET,    _disco_info_get_handler);
 
-    HANDLE(XMPP_NS_DISCO_ITEMS, STANZA_TYPE_GET,    _disco_items_get_handler);
-    HANDLE(XMPP_NS_DISCO_ITEMS, STANZA_TYPE_RESULT, _disco_items_result_handler);
+    HANDLE(XMPP_NS_DISCO_ITEMS,     STANZA_TYPE_GET,    _disco_items_get_handler);
+    HANDLE(XMPP_NS_DISCO_ITEMS,     STANZA_TYPE_RESULT, _disco_items_result_handler);
 
-    HANDLE("jabber:iq:last",    STANZA_TYPE_GET,    _last_activity_get_handler);
+    HANDLE(STANZA_NS_LASTACTIVITY,  STANZA_TYPE_GET,    _last_activity_get_handler);
 
-    HANDLE(STANZA_NS_VERSION,   STANZA_TYPE_GET,    _version_get_handler);
+    HANDLE(STANZA_NS_VERSION,       STANZA_TYPE_GET,    _version_get_handler);
 
-    HANDLE(STANZA_NS_PING,      STANZA_TYPE_GET,    _ping_get_handler);
+    HANDLE(STANZA_NS_PING,          STANZA_TYPE_GET,    _ping_get_handler);
 
     if (prefs_get_autoping() != 0) {
         int millis = prefs_get_autoping() * 1000;
@@ -1107,7 +1107,7 @@ _last_activity_get_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanz
 
         xmpp_stanza_t *query = xmpp_stanza_new(ctx);
         xmpp_stanza_set_name(query, STANZA_NAME_QUERY);
-        xmpp_stanza_set_attribute(query, STANZA_ATTR_XMLNS, "jabber:iq:last");
+        xmpp_stanza_set_attribute(query, STANZA_ATTR_XMLNS, STANZA_NS_LASTACTIVITY);
         xmpp_stanza_set_attribute(query, "seconds", str);
 
         xmpp_stanza_add_child(response, query);
