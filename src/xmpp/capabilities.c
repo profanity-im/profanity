@@ -615,6 +615,10 @@ caps_create_query_response_stanza(xmpp_ctx_t * const ctx)
     xmpp_stanza_set_name(feature_receipts, STANZA_NAME_FEATURE);
     xmpp_stanza_set_attribute(feature_receipts, STANZA_ATTR_VAR, STANZA_NS_RECEIPTS);
 
+    xmpp_stanza_t *feature_last = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(feature_last, STANZA_NAME_FEATURE);
+    xmpp_stanza_set_attribute(feature_last, STANZA_ATTR_VAR, STANZA_NS_LASTACTIVITY);
+
     xmpp_stanza_add_child(query, identity);
 
     xmpp_stanza_add_child(query, feature_caps);
@@ -622,15 +626,17 @@ caps_create_query_response_stanza(xmpp_ctx_t * const ctx)
     xmpp_stanza_add_child(query, feature_discoinfo);
     xmpp_stanza_add_child(query, feature_discoitems);
     xmpp_stanza_add_child(query, feature_muc);
-    xmpp_stanza_add_child(query, feature_conference);
     xmpp_stanza_add_child(query, feature_version);
+    xmpp_stanza_add_child(query, feature_last);
+    xmpp_stanza_add_child(query, feature_conference);
     xmpp_stanza_add_child(query, feature_ping);
     xmpp_stanza_add_child(query, feature_receipts);
 
     xmpp_stanza_release(feature_receipts);
     xmpp_stanza_release(feature_ping);
-    xmpp_stanza_release(feature_version);
     xmpp_stanza_release(feature_conference);
+    xmpp_stanza_release(feature_last);
+    xmpp_stanza_release(feature_version);
     xmpp_stanza_release(feature_muc);
     xmpp_stanza_release(feature_discoitems);
     xmpp_stanza_release(feature_discoinfo);

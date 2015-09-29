@@ -976,7 +976,7 @@ stanza_create_last_activity_iq(xmpp_ctx_t *ctx, const char * const id, const cha
 
     xmpp_stanza_t *query = xmpp_stanza_new(ctx);
     xmpp_stanza_set_name(query, STANZA_NAME_QUERY);
-    xmpp_stanza_set_ns(query, "jabber:iq:last");
+    xmpp_stanza_set_ns(query, STANZA_NS_LASTACTIVITY);
 
     xmpp_stanza_add_child(iq, query);
     xmpp_stanza_release(query);
