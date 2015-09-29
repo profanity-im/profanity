@@ -395,6 +395,9 @@ _inp_rl_startup_hook(void)
     rl_bind_key('\t', _inp_rl_tab_handler);
     rl_bind_key(CTRL('L'), _inp_rl_clear_handler);
 
+    // unbind unwanted mappings
+    rl_bind_keyseq("\\e=", NULL);
+
     return 0;
 }
 
