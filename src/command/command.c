@@ -947,8 +947,8 @@ static struct cmd_t command_defs[] =
         CMD_TAGS(
             CMD_TAG_UI)
         CMD_SYN(
-            "/time main set <format>",
-            "/time main off",
+            "/time console|chat|muc|mucconfig|private|xml set <format>",
+            "/time console|chat|muc|mucconfig|private|xml off",
             "/time statusbar set <format>",
             "/time statusbar off",
             "/time lastactivity set <format>")
@@ -959,8 +959,18 @@ static struct cmd_t command_defs[] =
             "Setting the format to an unsupported string, will display the string. "
             "If the format contains spaces, it must be surrounded with double quotes.")
         CMD_ARGS(
-            { "main set <format>",         "Change time format in main window." },
-            { "main off",                  "Do not show time in main window." },
+            { "console set <format>",      "Set time format for console window." },
+            { "console off",               "Do not show time in console window." },
+            { "chat set <format>",         "Set time format for chat windows." },
+            { "chat off",                  "Do not show time in chat windows." },
+            { "muc set <format>",          "Set time format for chat room windows." },
+            { "muc off",                   "Do not show time in chat room windows." },
+            { "mucconfig set <format>",    "Set time format for chat room config windows." },
+            { "mucconfig off",             "Do not show time in chat room config windows." },
+            { "private set <format>",      "Set time format for private chat windows." },
+            { "private off",               "Do not show time in private chat windows." },
+            { "xml set <format>",          "Set time format for XML console window." },
+            { "xml off",                   "Do not show time in XML console window." },
             { "statusbar set <format>",    "Change time format in statusbar." },
             { "statusbar off",             "Do not show time in status bar." },
             { "lastactivity set <format>", "Change time format for last activity." })
@@ -2099,7 +2109,12 @@ cmd_init(void)
     autocomplete_add(occupants_show_ac, "jid");
 
     time_ac = autocomplete_new();
-    autocomplete_add(time_ac, "main");
+    autocomplete_add(time_ac, "console");
+    autocomplete_add(time_ac, "chat");
+    autocomplete_add(time_ac, "muc");
+    autocomplete_add(time_ac, "mucconfig");
+    autocomplete_add(time_ac, "private");
+    autocomplete_add(time_ac, "xml");
     autocomplete_add(time_ac, "statusbar");
     autocomplete_add(time_ac, "lastactivity");
 
@@ -3376,7 +3391,32 @@ _time_autocomplete(ProfWin *window, const char * const input)
         return found;
     }
 
-    found = autocomplete_param_with_ac(input, "/time main", time_format_ac, TRUE);
+    found = autocomplete_param_with_ac(input, "/time console", time_format_ac, TRUE);
+    if (found) {
+        return found;
+    }
+
+    found = autocomplete_param_with_ac(input, "/time chat", time_format_ac, TRUE);
+    if (found) {
+        return found;
+    }
+
+    found = autocomplete_param_with_ac(input, "/time muc", time_format_ac, TRUE);
+    if (found) {
+        return found;
+    }
+
+    found = autocomplete_param_with_ac(input, "/time mucconfig", time_format_ac, TRUE);
+    if (found) {
+        return found;
+    }
+
+    found = autocomplete_param_with_ac(input, "/time private", time_format_ac, TRUE);
+    if (found) {
+        return found;
+    }
+
+    found = autocomplete_param_with_ac(input, "/time xml", time_format_ac, TRUE);
     if (found) {
         return found;
     }

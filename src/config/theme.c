@@ -432,7 +432,12 @@ _load_preferences(void)
     _set_boolean_preference("splash", PREF_SPLASH);
     _set_boolean_preference("wrap", PREF_WRAP);
     _set_boolean_preference("wins.autotidy", PREF_WINS_AUTO_TIDY);
-    _set_string_preference("time", PREF_TIME);
+    _set_string_preference("time.console", PREF_TIME_CONSOLE);
+    _set_string_preference("time.chat", PREF_TIME_CHAT);
+    _set_string_preference("time.muc", PREF_TIME_MUC);
+    _set_string_preference("time.mucconfig", PREF_TIME_MUCCONFIG);
+    _set_string_preference("time.private", PREF_TIME_PRIVATE);
+    _set_string_preference("time.xmlconsole", PREF_TIME_XMLCONSOLE);
     _set_string_preference("time.statusbar", PREF_TIME_STATUSBAR);
     _set_string_preference("time.lastactivity", PREF_TIME_LASTACTIVITY);
 

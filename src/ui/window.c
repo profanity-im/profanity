@@ -982,9 +982,34 @@ _win_print(ProfWin *window, const char show_char, int pad_indent, GDateTime *tim
     int colour = theme_attrs(THEME_ME);
     size_t indent = 0;
 
+    char *time_pref = NULL;
+    switch (window->type) {
+        case WIN_CHAT:
+            time_pref = prefs_get_string(PREF_TIME_CHAT);
+            break;
+        case WIN_MUC:
+            time_pref = prefs_get_string(PREF_TIME_MUC);
+            break;
+        case WIN_MUC_CONFIG:
+            time_pref = prefs_get_string(PREF_TIME_MUCCONFIG);
+            break;
+        case WIN_PRIVATE:
+            time_pref = prefs_get_string(PREF_TIME_PRIVATE);
+            break;
+        case WIN_XML:
+            time_pref = prefs_get_string(PREF_TIME_XMLCONSOLE);
+            break;
+        default:
+            time_pref = prefs_get_string(PREF_TIME_CONSOLE);
+            break;
+    }
+
     gchar *date_fmt = NULL;
-    char *time_pref = prefs_get_string(PREF_TIME);
-    date_fmt = g_date_time_format(time, time_pref);
+    if (g_strcmp0(time_pref, "off") == 0) {
+        date_fmt = g_strdup("");
+    } else {
+        date_fmt = g_date_time_format(time, time_pref);
+    }
     prefs_free_string(time_pref);
     assert(date_fmt != NULL);
 
