@@ -997,12 +997,47 @@ cons_autoconnect_setting(void)
 void
 cons_time_setting(void)
 {
-    char *pref_time = prefs_get_string(PREF_TIME);
-    if (g_strcmp0(pref_time, "off") == 0)
-        cons_show("Time main (/time)             : OFF");
+    char *pref_time_console = prefs_get_string(PREF_TIME_CONSOLE);
+    if (g_strcmp0(pref_time_console, "off") == 0)
+        cons_show("Time console (/time)          : OFF");
     else
-        cons_show("Time main (/time)             : %s", pref_time);
-    prefs_free_string(pref_time);
+        cons_show("Time console (/time)          : %s", pref_time_console);
+    prefs_free_string(pref_time_console);
+
+    char *pref_time_chat = prefs_get_string(PREF_TIME_CHAT);
+    if (g_strcmp0(pref_time_chat, "off") == 0)
+        cons_show("Time chat (/time)             : OFF");
+    else
+        cons_show("Time chat (/time)             : %s", pref_time_chat);
+    prefs_free_string(pref_time_chat);
+
+    char *pref_time_muc = prefs_get_string(PREF_TIME_MUC);
+    if (g_strcmp0(pref_time_muc, "off") == 0)
+        cons_show("Time MUC (/time)              : OFF");
+    else
+        cons_show("Time MUC (/time)              : %s", pref_time_muc);
+    prefs_free_string(pref_time_muc);
+
+    char *pref_time_mucconf = prefs_get_string(PREF_TIME_MUCCONFIG);
+    if (g_strcmp0(pref_time_mucconf, "off") == 0)
+        cons_show("Time MUC config (/time)       : OFF");
+    else
+        cons_show("Time MUC config (/time)       : %s", pref_time_mucconf);
+    prefs_free_string(pref_time_mucconf);
+
+    char *pref_time_private = prefs_get_string(PREF_TIME_PRIVATE);
+    if (g_strcmp0(pref_time_private, "off") == 0)
+        cons_show("Time private (/time)          : OFF");
+    else
+        cons_show("Time private (/time)          : %s", pref_time_private);
+    prefs_free_string(pref_time_private);
+
+    char *pref_time_xml = prefs_get_string(PREF_TIME_XMLCONSOLE);
+    if (g_strcmp0(pref_time_xml, "off") == 0)
+        cons_show("Time XML Console (/time)      : OFF");
+    else
+        cons_show("Time XML Console (/time)      : %s", pref_time_xml);
+    prefs_free_string(pref_time_xml);
 
     char *pref_time_statusbar = prefs_get_string(PREF_TIME_STATUSBAR);
     if (g_strcmp0(pref_time_statusbar, "off") == 0)

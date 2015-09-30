@@ -108,37 +108,22 @@ prefs_load(void)
         prefs_free_string(message);
     }
 
-    // move pre 0.4.7 otr.warn to enc.warn
-    err = NULL;
-    gboolean otr_warn = g_key_file_get_boolean(prefs, PREF_GROUP_UI, "otr.warn", &err);
-    if (err == NULL) {
-        g_key_file_set_boolean(prefs, PREF_GROUP_UI, _get_key(PREF_ENC_WARN), otr_warn);
-        g_key_file_remove_key(prefs, PREF_GROUP_UI, "otr.warn", NULL);
-    } else {
-        g_error_free(err);
-    }
-
-    // migrate pre 0.4.7 time settings format
+    // migrate pre 0.4.8 time settings
     if (g_key_file_has_key(prefs, PREF_GROUP_UI, "time", NULL)) {
         char *time = g_key_file_get_string(prefs, PREF_GROUP_UI, "time", NULL);
-        if (g_strcmp0(time, "minutes") == 0) {
-            g_key_file_set_string(prefs, PREF_GROUP_UI, "time", "%H:%M");
-        } else if (g_strcmp0(time, "seconds") == 0) {
-            g_key_file_set_string(prefs, PREF_GROUP_UI, "time", "%H:%M:%S");
-        } else if (g_strcmp0(time, "off") == 0) {
-            g_key_file_set_string(prefs, PREF_GROUP_UI, "time", "");
+        char *val = NULL;
+        if (time) {
+            val = time;
+        } else {
+            val = "off";
         }
-        prefs_free_string(time);
-    }
-    if (g_key_file_has_key(prefs, PREF_GROUP_UI, "time.statusbar", NULL)) {
-        char *time = g_key_file_get_string(prefs, PREF_GROUP_UI, "time.statusbar", NULL);
-        if (g_strcmp0(time, "minutes") == 0) {
-            g_key_file_set_string(prefs, PREF_GROUP_UI, "time.statusbar", "%H:%M");
-        } else if (g_strcmp0(time, "seconds") == 0) {
-            g_key_file_set_string(prefs, PREF_GROUP_UI, "time.statusbar", "%H:%M:%S");
-        } else if (g_strcmp0(time, "off") == 0) {
-            g_key_file_set_string(prefs, PREF_GROUP_UI, "time.statusbar", "");
-        }
+        g_key_file_set_string(prefs, PREF_GROUP_UI, "time.console", val);
+        g_key_file_set_string(prefs, PREF_GROUP_UI, "time.chat", val);
+        g_key_file_set_string(prefs, PREF_GROUP_UI, "time.muc", val);
+        g_key_file_set_string(prefs, PREF_GROUP_UI, "time.mucconfig", val);
+        g_key_file_set_string(prefs, PREF_GROUP_UI, "time.private", val);
+        g_key_file_set_string(prefs, PREF_GROUP_UI, "time.xmlconsole", val);
+        g_key_file_remove_key(prefs, PREF_GROUP_UI, "time", NULL);
         prefs_free_string(time);
     }
 
@@ -613,7 +598,12 @@ _get_group(preference_t pref)
         case PREF_PRESENCE:
         case PREF_WRAP:
         case PREF_WINS_AUTO_TIDY:
-        case PREF_TIME:
+        case PREF_TIME_CONSOLE:
+        case PREF_TIME_CHAT:
+        case PREF_TIME_MUC:
+        case PREF_TIME_MUCCONFIG:
+        case PREF_TIME_PRIVATE:
+        case PREF_TIME_XMLCONSOLE:
         case PREF_TIME_STATUSBAR:
         case PREF_TIME_LASTACTIVITY:
         case PREF_ROSTER:
@@ -766,8 +756,18 @@ _get_key(preference_t pref)
             return "wrap";
         case PREF_WINS_AUTO_TIDY:
             return "wins.autotidy";
-        case PREF_TIME:
-            return "time";
+        case PREF_TIME_CONSOLE:
+            return "time.console";
+        case PREF_TIME_CHAT:
+            return "time.chat";
+        case PREF_TIME_MUC:
+            return "time.muc";
+        case PREF_TIME_MUCCONFIG:
+            return "time.mucconfig";
+        case PREF_TIME_PRIVATE:
+            return "time.private";
+        case PREF_TIME_XMLCONSOLE:
+            return "time.xmlconsole";
         case PREF_TIME_STATUSBAR:
             return "time.statusbar";
         case PREF_TIME_LASTACTIVITY:
@@ -857,7 +857,13 @@ _get_default_string(preference_t pref)
             return "all";
         case PREF_ROSTER_BY:
             return "presence";
-        case PREF_TIME:
+        case PREF_TIME_CONSOLE:
+            return "%H:%M:%S";
+        case PREF_TIME_CHAT:
+            return "%H:%M:%S";
+        case PREF_TIME_MUC:
+            return "%H:%M:%S";
+        case PREF_TIME_XMLCONSOLE:
             return "%H:%M:%S";
         case PREF_TIME_STATUSBAR:
             return "%H:%M";

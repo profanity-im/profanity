@@ -172,9 +172,19 @@ init_prof_test(void **state)
     assert_true(prof_output_exact("Word wrap disabled"));
     prof_input("/roster hide");
     assert_true(prof_output_exact("Roster disabled"));
-    prof_input("/time main off");
-    prof_input("/time main off");
-    assert_true(prof_output_exact("Time display disabled"));
+    prof_input("/time console off");
+    prof_input("/time console off");
+    assert_true(prof_output_exact("Console time display disabled."));
+    prof_input("/time chat off");
+    assert_true(prof_output_exact("Chat time display disabled."));
+    prof_input("/time muc off");
+    assert_true(prof_output_exact("MUC time display disabled."));
+    prof_input("/time mucconfig off");
+    assert_true(prof_output_exact("MUC config time display disabled."));
+    prof_input("/time private off");
+    assert_true(prof_output_exact("Private chat time display disabled."));
+    prof_input("/time xml off");
+    assert_true(prof_output_exact("XML Console time display disabled."));
 }
 
 void
