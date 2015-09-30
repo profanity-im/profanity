@@ -868,7 +868,7 @@ _get_default_string(preference_t pref)
         case PREF_TIME_STATUSBAR:
             return "%H:%M";
         case PREF_TIME_LASTACTIVITY:
-            return "%d-%m-%y %H:%M:%S";
+            return "%d/%m/%y %H:%M:%S";
         case PREF_PGP_LOG:
             return "redact";
         default:
