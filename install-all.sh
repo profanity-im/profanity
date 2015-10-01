@@ -82,7 +82,7 @@ install_lib_mesode()
     echo
     echo Profanity installer... installing libmesode
     echo
-    git clone git@github.com:boothj5/libmesode.git
+    git clone https://github.com/boothj5/libmesode.git
     cd libmesode
     ./bootstrap.sh
     ./configure --prefix=$1
@@ -110,7 +110,7 @@ cyg_install_lib_mesode()
     echo
     echo Profanity installer... installing libmesode
     echo
-    git clone git@github.com:boothj5/libmesode.git
+    git clone https://github.com/boothj5/libmesode.git
     cd libmesode
     ./bootstrap.sh
     ./bootstrap.sh # second call seems to fix problem on cygwin
