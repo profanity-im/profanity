@@ -63,12 +63,7 @@ cygwin_prepare()
     echo Profanity installer... installing dependencies
     echo
 
-    wget https://raw.githubusercontent.com/transcode-open/apt-cyg/master/apt-cyg
-    #wget --no-check-certificate https://raw.github.com/boothj5/apt-cyg/master/apt-cyg
-    #wget http://apt-cyg.googlecode.com/svn/trunk/apt-cyg
-    chmod +x apt-cyg
-    mv apt-cyg /usr/local/bin/
-
+    if ! command -v apt-cyg &>/dev/null; then cyg_install_apt_cyg; fi
     if [ -n "$CYG_MIRROR" ]; then
         apt-cyg -m $CYG_MIRROR install git make gcc-core m4 automake autoconf pkg-config openssl-devel libexpat-devel zlib-devel libncursesw-devel libglib2.0-devel libcurl-devel libidn-devel libssh2-devel libkrb5-devel openldap-devel libgcrypt-devel libreadline-devel libgpgme-devel libtool libuuid-devel
     else
@@ -105,6 +100,18 @@ install_profanity()
     sudo make install
 }
 
+cyg_install_apt_cyg()
+{
+    echo
+    echo Profanity installer... installing apt-cyg
+    echo
+    wget https://raw.githubusercontent.com/transcode-open/apt-cyg/master/apt-cyg
+    #wget --no-check-certificate https://raw.github.com/boothj5/apt-cyg/master/apt-cyg
+    #wget http://apt-cyg.googlecode.com/svn/trunk/apt-cyg
+    chmod +x apt-cyg
+    mv apt-cyg /usr/local/bin/
+
+}
 cyg_install_lib_mesode()
 {
     echo
