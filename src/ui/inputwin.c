@@ -235,6 +235,7 @@ inp_get_line(void)
     char *line = NULL;
     while (!line) {
         line = inp_readline();
+        ui_update();
     }
     status_bar_clear();
     return line;
@@ -251,6 +252,7 @@ inp_get_password(void)
     get_password = TRUE;
     while (!password) {
         password = inp_readline();
+        ui_update();
     }
     get_password = FALSE;
     status_bar_clear();
