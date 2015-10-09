@@ -605,7 +605,7 @@ void strip_quotes_strips_first(void **state)
     char *result = strip_arg_quotes(input);
 
     assert_string_equal("/cmd test string", result);
-    
+
     free(result);
 }
 
