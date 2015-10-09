@@ -53,9 +53,9 @@ typedef struct prof_chat_state_t {
 ChatState* chat_state_new(void);
 void chat_state_free(ChatState *state);
 
-void chat_state_handle_idle(const char * const barejid, ChatState *state);
-void chat_state_handle_typing(const char * const barejid, ChatState *state);
+void chat_state_handle_idle(const char *const barejid, ChatState *state);
+void chat_state_handle_typing(const char *const barejid, ChatState *state);
 void chat_state_active(ChatState *state);
-void chat_state_gone(const char * const barejid, ChatState *state);
+void chat_state_gone(const char *const barejid, ChatState *state);
 
 #endif
