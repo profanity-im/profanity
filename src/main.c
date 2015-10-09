@@ -40,6 +40,7 @@
 #endif
 
 #include "profanity.h"
+#include "common.h"
 #include "command/command.h"
 
 static gboolean disable_tls = FALSE;
@@ -105,18 +106,7 @@ main(int argc, char **argv)
         g_print("XMPP library: libstrophe\n");
 #endif
 
-        gboolean notify_enabled = FALSE;
-
-#ifdef HAVE_OSXNOTIFY
-        notify_enabled = TRUE;
-#endif
-#ifdef HAVE_LIBNOTIFY
-        notify_enabled = TRUE;
-#endif
-#ifdef PLATFORM_CYGWIN
-        notify_enabled = TRUE;
-#endif
-        if (notify_enabled) {
+        if (is_notify_enabled()) {
             g_print("Desktop notification support: Enabled\n");
         } else {
             g_print("Desktop notification support: Disabled\n");

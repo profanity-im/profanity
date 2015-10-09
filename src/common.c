@@ -644,3 +644,21 @@ strip_arg_quotes(const char * const input)
 
     return unquoted;
 }
+
+gboolean
+is_notify_enabled(void)
+{
+    gboolean notify_enabled = FALSE;
+
+#ifdef HAVE_OSXNOTIFY
+    notify_enabled = TRUE;
+#endif
+#ifdef HAVE_LIBNOTIFY
+    notify_enabled = TRUE;
+#endif
+#ifdef PLATFORM_CYGWIN
+    notify_enabled = TRUE;
+#endif
+
+    return notify_enabled;
+}
