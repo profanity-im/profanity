@@ -2012,7 +2012,6 @@ cmd_info(ProfWin *window, const char * const command, gchar **args)
     char *usr = args[0];
 
     jabber_conn_status_t conn_status = jabber_get_connection_status();
-    PContact pcontact = NULL;
 
     if (conn_status != JABBER_CONNECTED) {
         cons_show("You are not currently connected.");
@@ -2075,7 +2074,7 @@ cmd_info(ProfWin *window, const char * const command, gchar **args)
                 if (usr_jid == NULL) {
                     usr_jid = usr;
                 }
-                pcontact = roster_get_contact(usr_jid);
+                PContact pcontact = roster_get_contact(usr_jid);
                 if (pcontact) {
                     cons_show_info(pcontact);
                 } else {
@@ -2096,7 +2095,6 @@ gboolean
 cmd_caps(ProfWin *window, const char * const command, gchar **args)
 {
     jabber_conn_status_t conn_status = jabber_get_connection_status();
-    PContact pcontact = NULL;
     Occupant *occupant = NULL;
 
     if (conn_status != JABBER_CONNECTED) {
@@ -2130,7 +2128,7 @@ cmd_caps(ProfWin *window, const char * const command, gchar **args)
                 if (jid->fulljid == NULL) {
                     cons_show("You must provide a full jid to the /caps command.");
                 } else {
-                    pcontact = roster_get_contact(jid->barejid);
+                    PContact pcontact = roster_get_contact(jid->barejid);
                     if (pcontact == NULL) {
                         cons_show("Contact not found in roster: %s", jid->barejid);
                     } else {
@@ -2173,7 +2171,6 @@ gboolean
 cmd_software(ProfWin *window, const char * const command, gchar **args)
 {
     jabber_conn_status_t conn_status = jabber_get_connection_status();
-    Occupant *occupant = NULL;
 
     if (conn_status != JABBER_CONNECTED) {
         cons_show("You are not currently connected.");
@@ -2186,7 +2183,7 @@ cmd_software(ProfWin *window, const char * const command, gchar **args)
             if (args[0]) {
                 ProfMucWin *mucwin = (ProfMucWin*)window;
                 assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
-                occupant = muc_roster_item(mucwin->roomjid, args[0]);
+                Occupant *occupant = muc_roster_item(mucwin->roomjid, args[0]);
                 if (occupant) {
                     Jid *jid = jid_create_from_bare_and_resource(mucwin->roomjid, args[0]);
                     iq_send_software_version(jid->fulljid);
