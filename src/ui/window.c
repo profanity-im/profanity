@@ -905,6 +905,7 @@ win_vprint(ProfWin *window, const char show_char, int pad_indent, GDateTime *tim
     g_string_vprintf(fmt_msg, message, arg);
     win_print(window, show_char, pad_indent, timestamp, flags, theme_item, from, fmt_msg->str);
     g_string_free(fmt_msg, TRUE);
+    va_end(arg);
 }
 
 void
