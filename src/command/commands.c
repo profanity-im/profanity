@@ -38,7 +38,6 @@
 #include <stdlib.h>
 #include <errno.h>
 #include <assert.h>
-#include <uuid/uuid.h>
 #include <glib.h>
 
 #include "chat_session.h"
@@ -2267,22 +2266,18 @@ cmd_join(ProfWin *window, const char * const command, gchar **args)
     }
 
     if (args[0] == NULL) {
-        uuid_t uuid;
-        uuid_generate(uuid);
-        char *uuid_str = malloc(sizeof(char) * 37);
-        uuid_unparse_lower(uuid, uuid_str);
-
         char *account_name = jabber_get_account_name();
         ProfAccount *account = accounts_get_account(account_name);
 
         GString *room_str = g_string_new("");
-        g_string_append_printf(room_str, "private-chat-%s@%s", uuid_str, account->muc_service);
+        char *uuid = jabber_create_uuid();
+        g_string_append_printf(room_str, "private-chat-%s@%s", uuid, account->muc_service);
+        jabber_free_uuid(uuid);
 
         presence_join_room(room_str->str, account->muc_nick, NULL);
         muc_join(room_str->str, account->muc_nick, NULL, FALSE);
 
         g_string_free(room_str, TRUE);
-        free(uuid_str);
         account_free(account);
 
         return TRUE;

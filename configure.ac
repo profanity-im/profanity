@@ -106,9 +106,6 @@ AS_IF([test "x$PLATFORM" != xosx],
             AC_SUBST(AM_LDFLAGS)],
         [AC_MSG_ERROR([libreadline is required for profanity])])])
 
-AC_CHECK_LIB([uuid], [uuid_generate], [],
-    [AC_MSG_ERROR([libuuid is required for profanity])])
-
 AS_IF([test "x$PLATFORM" = xosx], [LIBS="-lcurl $LIBS"])
 
 ### Check for desktop notification support
