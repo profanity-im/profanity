@@ -310,6 +310,20 @@ jabber_get_account_name(void)
     return saved_account.name;
 }
 
+char*
+jabber_create_uuid(void)
+{
+    return xmpp_uuid_gen(jabber_conn.ctx);
+}
+
+void
+jabber_free_uuid(char *uuid)
+{
+    if (uuid) {
+        xmpp_free(jabber_conn.ctx, uuid);
+    }
+}
+
 void
 connection_set_presence_message(const char * const message)
 {
