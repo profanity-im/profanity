@@ -150,6 +150,8 @@ jabber_conn_status_t jabber_get_connection_status(void);
 char * jabber_get_presence_message(void);
 char* jabber_get_account_name(void);
 GList * jabber_get_available_resources(void);
+char* jabber_create_uuid(void);
+void jabber_free_uuid(char *uuid);
 
 // message functions
 char* message_send_chat(const char * const barejid, const char * const msg);
