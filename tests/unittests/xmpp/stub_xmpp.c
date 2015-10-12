@@ -37,6 +37,13 @@ const char * jabber_get_domain(void)
     return NULL;
 }
 
+char* jabber_create_uuid(void)
+{
+    return NULL;
+}
+
+void jabber_free_uuid(char * uuid) {}
+
 jabber_conn_status_t jabber_get_connection_status(void)
 {
     return (jabber_conn_status_t)mock();
