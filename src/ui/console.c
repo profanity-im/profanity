@@ -942,6 +942,16 @@ cons_encwarn_setting(void)
 }
 
 void
+cons_tlsshow_setting(void)
+{
+    if (prefs_get_boolean(PREF_TLS_SHOW)) {
+        cons_show("TLS show (/tls)               : ON");
+    } else {
+        cons_show("TLS show (/tls)               : OFF");
+    }
+}
+
+void
 cons_presence_setting(void)
 {
     if (prefs_get_boolean(PREF_PRESENCE))
@@ -1147,6 +1157,7 @@ cons_show_ui_prefs(void)
     cons_encwarn_setting();
     cons_presence_setting();
     cons_inpblock_setting();
+    cons_tlsshow_setting();
 
     cons_alert();
 }

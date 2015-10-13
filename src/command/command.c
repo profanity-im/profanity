@@ -191,7 +191,8 @@ static struct cmd_t command_defs[] =
     { "/tls",
         cmd_tls, parse_args, 1, 3, NULL,
         CMD_TAGS(
-            CMD_TAG_CONNECTION)
+            CMD_TAG_CONNECTION,
+            CMD_TAG_UI)
         CMD_SYN(
             "/tls allow",
             "/tls always",
