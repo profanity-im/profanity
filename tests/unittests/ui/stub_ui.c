@@ -316,7 +316,7 @@ gboolean ui_swap_wins(int source_win, int target_win)
 }
 
 void ui_titlebar_presence(contact_presence_t presence) {}
-void ui_handle_login_account_success(ProfAccount *account) {}
+void ui_handle_login_account_success(ProfAccount *account, int secured) {}
 void ui_update_presence(const resource_presence_t resource_presence,
     const char * const message, const char * const show) {}
 void ui_about(void) {}
@@ -421,7 +421,7 @@ void cons_show_aliases(GList *aliases)
     check_expected(aliases);
 }
 
-void cons_show_login_success(ProfAccount *account) {}
+void cons_show_login_success(ProfAccount *account, int secured) {}
 void cons_show_software_version(const char * const jid,
     const char * const presence, const char * const name,
     const char * const version, const char * const os) {}

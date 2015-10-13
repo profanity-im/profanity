@@ -558,12 +558,14 @@ ui_titlebar_presence(contact_presence_t presence)
 }
 
 void
-ui_handle_login_account_success(ProfAccount *account)
+ui_handle_login_account_success(ProfAccount *account, int secured)
 {
     resource_presence_t resource_presence = accounts_get_login_presence(account->name);
     contact_presence_t contact_presence = contact_presence_from_resource_presence(resource_presence);
-    cons_show_login_success(account);
+    cons_show_login_success(account, secured);
     title_bar_set_presence(contact_presence);
+    title_bar_set_connected(TRUE);
+    title_bar_set_tls(secured ? TRUE : FALSE);
 
     GString *fulljid = g_string_new(account->jid);
     g_string_append(fulljid, "/");
@@ -661,6 +663,8 @@ void
 ui_disconnected(void)
 {
     wins_lost_connection();
+    title_bar_set_connected(FALSE);
+    title_bar_set_tls(FALSE);
     title_bar_set_presence(CONTACT_OFFLINE);
     status_bar_clear_message();
     status_bar_update_virtual();

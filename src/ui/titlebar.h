@@ -40,6 +40,8 @@ void title_bar_update_virtual(void);
 void title_bar_resize(void);
 void title_bar_console(void);
 void title_bar_set_presence(contact_presence_t presence);
+void title_bar_set_connected(gboolean connected);
+void title_bar_set_tls(gboolean secured);
 void title_bar_switch(void);
 void title_bar_set_typing(gboolean is_typing);
 
