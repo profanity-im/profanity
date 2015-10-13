@@ -2689,12 +2689,15 @@ cmd_form(ProfWin *window, const char * const command, gchar **args)
         if (confwin->form) {
             cmd_autocomplete_remove_form_fields(confwin->form);
         }
-        wins_close_current();
+
+        int num = wins_get_num(window);
+
         ProfWin *new_current = (ProfWin*)wins_get_muc(confwin->roomjid);
         if (!new_current) {
             new_current = wins_get_console();
         }
         ui_ev_focus_win(new_current);
+        wins_close_by_num(num);
     }
 
     return TRUE;
