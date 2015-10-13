@@ -486,11 +486,12 @@ _connection_handler(xmpp_conn_t * const conn,
     // login success
     if (status == XMPP_CONN_CONNECT) {
         log_debug("Connection handler: XMPP_CONN_CONNECT");
+        int secured = xmpp_conn_is_secured(jabber_conn.conn);
 
         // logged in with account
         if (saved_account.name) {
             log_debug("Connection handler: logged in with account name: %s", saved_account.name);
-            sv_ev_login_account_success(saved_account.name);
+            sv_ev_login_account_success(saved_account.name, secured);
 
         // logged in without account, use details to create new account
         } else {
@@ -498,7 +499,7 @@ _connection_handler(xmpp_conn_t * const conn,
             accounts_add(saved_details.name, saved_details.altdomain, saved_details.port);
             accounts_set_jid(saved_details.name, saved_details.jid);
 
-            sv_ev_login_account_success(saved_details.name);
+            sv_ev_login_account_success(saved_details.name, secured);
             saved_account.name = strdup(saved_details.name);
             saved_account.passwd = strdup(saved_details.passwd);
 

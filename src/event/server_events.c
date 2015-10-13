@@ -58,7 +58,7 @@
 #include "ui/ui.h"
 
 void
-sv_ev_login_account_success(char *account_name)
+sv_ev_login_account_success(char *account_name, int secured)
 {
     ProfAccount *account = accounts_get_account(account_name);
 #ifdef PROF_HAVE_LIBOTR
@@ -69,7 +69,7 @@ sv_ev_login_account_success(char *account_name)
     p_gpg_on_connect(account->jid);
 #endif
 
-    ui_handle_login_account_success(account);
+    ui_handle_login_account_success(account, secured);
 
     // attempt to rejoin rooms with passwords
     GList *curr = muc_rooms();

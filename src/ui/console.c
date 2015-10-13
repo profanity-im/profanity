@@ -290,7 +290,7 @@ cons_check_version(gboolean not_available_msg)
 }
 
 void
-cons_show_login_success(ProfAccount *account)
+cons_show_login_success(ProfAccount *account, int secured)
 {
     ProfWin *console = wins_get_console();
     win_vprint(console, '-', 0, NULL, NO_EOL, 0, "", "%s logged in successfully, ", account->jid);
@@ -303,6 +303,9 @@ cons_show_login_success(ProfAccount *account)
     win_vprint(console, '-', 0, NULL, NO_DATE | NO_EOL, 0, "", " (priority %d)",
         accounts_get_priority_for_presence_type(account->name, presence));
     win_print(console, '-', 0, NULL, NO_DATE, 0, "", ".");
+    if (!secured) {
+        cons_show_error("TLS connection not established");
+    }
     cons_alert();
 }
 
