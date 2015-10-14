@@ -1094,7 +1094,11 @@ _last_activity_get_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanz
     xmpp_ctx_t *ctx = connection_get_ctx();
     const char *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
 
-    if (from) {
+    if (!from) {
+        return 1;
+    }
+
+    if (prefs_get_boolean(PREF_LASTACTIVITY)) {
         int idls_secs = ui_get_idle_time() / 1000;
         char str[50];
         sprintf(str, "%d", idls_secs);
@@ -1111,10 +1115,34 @@ _last_activity_get_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanz
         xmpp_stanza_set_attribute(query, "seconds", str);
 
         xmpp_stanza_add_child(response, query);
+        xmpp_stanza_release(query);
 
         xmpp_send(conn, response);
 
-        xmpp_stanza_release(query);
+        xmpp_stanza_release(response);
+    } else {
+        xmpp_stanza_t *response = xmpp_stanza_new(ctx);
+        xmpp_stanza_set_name(response, STANZA_NAME_IQ);
+        xmpp_stanza_set_id(response, xmpp_stanza_get_id(stanza));
+        xmpp_stanza_set_attribute(response, STANZA_ATTR_TO, from);
+        xmpp_stanza_set_type(response, STANZA_TYPE_ERROR);
+
+        xmpp_stanza_t *error = xmpp_stanza_new(ctx);
+        xmpp_stanza_set_name(error, STANZA_NAME_ERROR);
+        xmpp_stanza_set_type(error, "cancel");
+
+        xmpp_stanza_t *service_unavailable = xmpp_stanza_new(ctx);
+        xmpp_stanza_set_name(service_unavailable, "service-unavailable");
+        xmpp_stanza_set_ns(service_unavailable, "urn:ietf:params:xml:ns:xmpp-stanzas");
+
+        xmpp_stanza_add_child(error, service_unavailable);
+        xmpp_stanza_release(service_unavailable);
+
+        xmpp_stanza_add_child(response, error);
+        xmpp_stanza_release(error);
+
+        xmpp_send(conn, response);
+
         xmpp_stanza_release(response);
     }
 
