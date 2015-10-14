@@ -113,6 +113,7 @@ typedef enum {
     PREF_PGP_LOG,
     PREF_CERT_PATH,
     PREF_TLS_SHOW,
+    PREF_LASTACTIVITY,
 } preference_t;
 
 typedef struct prof_alias_t {

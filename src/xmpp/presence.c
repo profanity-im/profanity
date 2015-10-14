@@ -243,7 +243,9 @@ presence_send(const resource_presence_t presence_type, const char * const msg, c
     }
 
     stanza_attach_priority(ctx, presence, pri);
-    stanza_attach_last_activity(ctx, presence, idle);
+    if (idle > 0) {
+        stanza_attach_last_activity(ctx, presence, idle);
+    }
     stanza_attach_caps(ctx, presence);
     xmpp_send(conn, presence);
     _send_room_presence(conn, presence);

@@ -1662,16 +1662,14 @@ void
 stanza_attach_last_activity(xmpp_ctx_t * const ctx,
     xmpp_stanza_t * const presence, const int idle)
 {
-    if (idle > 0) {
-        xmpp_stanza_t *query = xmpp_stanza_new(ctx);
-        xmpp_stanza_set_name(query, STANZA_NAME_QUERY);
-        xmpp_stanza_set_ns(query, STANZA_NS_LASTACTIVITY);
-        char idle_str[10];
-        snprintf(idle_str, sizeof(idle_str), "%d", idle);
-        xmpp_stanza_set_attribute(query, STANZA_ATTR_SECONDS, idle_str);
-        xmpp_stanza_add_child(presence, query);
-        xmpp_stanza_release(query);
-    }
+    xmpp_stanza_t *query = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(query, STANZA_NAME_QUERY);
+    xmpp_stanza_set_ns(query, STANZA_NS_LASTACTIVITY);
+    char idle_str[10];
+    snprintf(idle_str, sizeof(idle_str), "%d", idle);
+    xmpp_stanza_set_attribute(query, STANZA_ATTR_SECONDS, idle_str);
+    xmpp_stanza_add_child(presence, query);
+    xmpp_stanza_release(query);
 }
 
 void

@@ -1459,6 +1459,12 @@ cons_show_presence_prefs(void)
     cons_show("");
     cons_autoaway_setting();
 
+    if (prefs_get_boolean(PREF_LASTACTIVITY)) {
+        cons_show("Send last activity (/lastactivity)        : ON");
+    } else {
+        cons_show("Send last activity (/lastactivity)        : OFF");
+    }
+
     cons_alert();
 }
 

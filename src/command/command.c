@@ -704,13 +704,16 @@ static struct cmd_t command_defs[] =
         CMD_TAGS(
             CMD_TAG_PRESENCE)
         CMD_SYN(
+            "/lastactivity on|off",
             "/lastactivity [<jid>]")
         CMD_DESC(
-            "Send a last activity query to the supplied JID, omitting the JID will send the query to your server.")
+            "Enable/disable sending last activity, and send last activity requests.")
         CMD_ARGS(
-            { "<jid>", "The JID of the entity to which the query will be sent." })
+            { "on|off", "Enable or disable sending of last activity." },
+            { "<jid>",  "The JID of the entity to query, omitting the JID will query your server." })
         CMD_EXAMPLES(
             "/lastactivity",
+            "/lastactivity off",
             "/lastactivity alice@securechat.org",
             "/lastactivity alice@securechat.org/laptop",
             "/lastactivity someserver.com")
@@ -2579,7 +2582,7 @@ _cmd_complete_parameters(ProfWin *window, const char * const input)
     // autocomplete boolean settings
     gchar *boolean_choices[] = { "/beep", "/intype", "/states", "/outtype",
         "/flash", "/splash", "/chlog", "/grlog", "/history", "/vercheck",
-        "/privileges", "/presence", "/wrap", "/winstidy", "/carbons", "/encwarn" };
+        "/privileges", "/presence", "/wrap", "/winstidy", "/carbons", "/encwarn", "/lastactivity" };
 
     for (i = 0; i < ARRAY_SIZE(boolean_choices); i++) {
         result = autocomplete_param_with_func(input, boolean_choices[i], prefs_autocomplete_boolean_choice);

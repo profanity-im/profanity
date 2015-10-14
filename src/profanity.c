@@ -216,7 +216,11 @@ _check_autoaway(void)
 
                     // send away presence with last activity
                     char *message = prefs_get_string(PREF_AUTOAWAY_MESSAGE);
-                    cl_ev_presence_send(RESOURCE_AWAY, message, idle_ms / 1000);
+                    if (prefs_get_boolean(PREF_LASTACTIVITY)) {
+                        cl_ev_presence_send(RESOURCE_AWAY, message, idle_ms / 1000);
+                    } else {
+                        cl_ev_presence_send(RESOURCE_AWAY, message, 0);
+                    }
 
                     int pri = accounts_get_priority_for_presence_type(account, RESOURCE_AWAY);
                     if (message) {
@@ -252,7 +256,11 @@ _check_autoaway(void)
 
             // send extended away presence with last activity
             char *message = prefs_get_string(PREF_AUTOXA_MESSAGE);
-            cl_ev_presence_send(RESOURCE_XA, message, idle_ms / 1000);
+            if (prefs_get_boolean(PREF_LASTACTIVITY)) {
+                cl_ev_presence_send(RESOURCE_XA, message, idle_ms / 1000);
+            } else {
+                cl_ev_presence_send(RESOURCE_XA, message, 0);
+            }
 
             int pri = accounts_get_priority_for_presence_type(account, RESOURCE_XA);
             if (message) {
