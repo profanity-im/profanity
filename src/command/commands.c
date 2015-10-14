@@ -3279,11 +3279,16 @@ cmd_lastactivity(ProfWin *window, const char * const command, gchar **args)
 
         g_string_free(jid, TRUE);
         jid_destroy(jidp);
+
+        return TRUE;
+
+    } else if ((g_strcmp0(args[0], "on") == 0) || (g_strcmp0(args[0], "off") == 0)) {
+        return _cmd_set_boolean_preference(args[0], command, "Last activity responses", PREF_LASTACTIVITY);
+
     } else {
         iq_last_activity_request(args[0]);
+        return TRUE;
     }
-
-    return TRUE;
 }
 
 gboolean
