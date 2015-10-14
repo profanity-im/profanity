@@ -53,6 +53,7 @@
 #include "event/server_events.h"
 #include "event/client_events.h"
 #include "tools/autocomplete.h"
+#include "config/preferences.h"
 #include "xmpp/connection.h"
 #include "xmpp/roster.h"
 #include "roster_list.h"
@@ -355,7 +356,11 @@ _roster_result_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, v
             GDateTime *lastdt = g_date_time_new_from_timeval_utc(&lasttv);
             GTimeSpan diff_micros = g_date_time_difference(nowdt, lastdt);
             int diff_secs = (diff_micros / 1000) / 1000;
-            cl_ev_presence_send(conn_presence, NULL, diff_secs);
+            if (prefs_get_boolean(PREF_LASTACTIVITY)) {
+                cl_ev_presence_send(conn_presence, NULL, diff_secs);
+            } else {
+                cl_ev_presence_send(conn_presence, NULL, 0);
+            }
             g_date_time_unref(lastdt);
         } else {
             cl_ev_presence_send(conn_presence, NULL, 0);

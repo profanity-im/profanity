@@ -627,6 +627,7 @@ _get_group(preference_t pref)
         case PREF_AUTOAWAY_MODE:
         case PREF_AUTOAWAY_MESSAGE:
         case PREF_AUTOXA_MESSAGE:
+        case PREF_LASTACTIVITY:
             return PREF_GROUP_PRESENCE;
         case PREF_CONNECT_ACCOUNT:
         case PREF_DEFAULT_ACCOUNT:
@@ -784,6 +785,8 @@ _get_key(preference_t pref)
             return "certpath";
         case PREF_TLS_SHOW:
             return "tls.show";
+        case PREF_LASTACTIVITY:
+            return "lastactivity";
         default:
             return NULL;
     }
@@ -821,6 +824,7 @@ _get_default_boolean(preference_t pref)
         case PREF_ROSTER_RESOURCE:
         case PREF_ROSTER_EMPTY:
         case PREF_TLS_SHOW:
+        case PREF_LASTACTIVITY:
             return TRUE;
         default:
             return FALSE;
