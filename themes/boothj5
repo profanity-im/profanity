@@ -83,3 +83,4 @@ occupants.jid=false
 wins.autotidy=true
 otr.char=@
 pgp.char=%
+tls.show=true

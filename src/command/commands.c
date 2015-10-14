@@ -237,6 +237,8 @@ cmd_tls(ProfWin *window, const char * const command, gchar **args)
             }
         }
         return TRUE;
+    } else if (g_strcmp0(args[0], "show") == 0) {
+        return _cmd_set_boolean_preference(args[1], command, "TLS titlebar indicator", PREF_TLS_SHOW);
     } else {
         cons_bad_cmd_usage(command);
         return TRUE;

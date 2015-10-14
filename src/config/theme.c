@@ -471,6 +471,7 @@ _load_preferences(void)
     _set_boolean_preference("intype", PREF_INTYPE);
 
     _set_boolean_preference("enc.warn", PREF_ENC_WARN);
+    _set_boolean_preference("tls.show", PREF_TLS_SHOW);
 
     if (g_key_file_has_key(theme, "ui", "otr.char", NULL)) {
         gchar *ch = g_key_file_get_string(theme, "ui", "otr.char", NULL);
