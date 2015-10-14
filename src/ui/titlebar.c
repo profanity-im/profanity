@@ -282,7 +282,7 @@ _show_self_presence(void)
     mvwaddch(win, 0, cols - 2, ']');
     wattroff(win, bracket_attrs);
 
-    if (is_connected) {
+    if (is_connected && prefs_get_boolean(PREF_TLS_SHOW)) {
         wattron(win, bracket_attrs);
         mvwaddch(win, 0, cols - tls_start, '[');
         wattroff(win, bracket_attrs);

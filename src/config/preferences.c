@@ -615,6 +615,7 @@ _get_group(preference_t pref)
         case PREF_RESOURCE_MESSAGE:
         case PREF_ENC_WARN:
         case PREF_INPBLOCK_DYNAMIC:
+        case PREF_TLS_SHOW:
             return PREF_GROUP_UI;
         case PREF_STATES:
         case PREF_OUTTYPE:
@@ -794,6 +795,8 @@ _get_key(preference_t pref)
             return "log";
         case PREF_CERT_PATH:
             return "certpath";
+        case PREF_TLS_SHOW:
+            return "tls.show";
         default:
             return NULL;
     }
@@ -830,6 +833,7 @@ _get_default_boolean(preference_t pref)
         case PREF_ROSTER_OFFLINE:
         case PREF_ROSTER_RESOURCE:
         case PREF_ROSTER_EMPTY:
+        case PREF_TLS_SHOW:
             return TRUE;
         default:
             return FALSE;

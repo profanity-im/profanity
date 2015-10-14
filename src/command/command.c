@@ -192,7 +192,8 @@ static struct cmd_t command_defs[] =
     { "/tls",
         cmd_tls, parse_args, 1, 3, NULL,
         CMD_TAGS(
-            CMD_TAG_CONNECTION)
+            CMD_TAG_CONNECTION,
+            CMD_TAG_UI)
         CMD_SYN(
             "/tls allow",
             "/tls always",
@@ -201,7 +202,8 @@ static struct cmd_t command_defs[] =
             "/tls revoke <fingerprint>",
             "/tls certpath",
             "/tls certpath set <path>",
-            "/tls certpath clear")
+            "/tls certpath clear",
+            "/tls show on|off")
         CMD_DESC(
             "Handle TLS certificates. ")
         CMD_ARGS(
@@ -212,7 +214,8 @@ static struct cmd_t command_defs[] =
             { "revoke <fingerprint>", "Remove a manually trusted certificate." },
             { "certpath",             "Show the trusted certificate path." },
             { "certpath set <path>",  "Specify filesystem path containing trusted certificates." },
-            { "certpath clear",       "Clear the trusted certificate path." })
+            { "certpath clear",       "Clear the trusted certificate path." },
+            { "show on|off",          "Show or hide the TLS indicator in the titlebar." })
         CMD_NOEXAMPLES
     },
 
@@ -2170,6 +2173,7 @@ cmd_init(void)
     autocomplete_add(tls_ac, "trusted");
     autocomplete_add(tls_ac, "revoke");
     autocomplete_add(tls_ac, "certpath");
+    autocomplete_add(tls_ac, "show");
 
     tls_certpath_ac = autocomplete_new();
     autocomplete_add(tls_certpath_ac, "set");
@@ -3646,6 +3650,11 @@ _tls_autocomplete(ProfWin *window, const char * const input)
     }
 
     result = autocomplete_param_with_ac(input, "/tls certpath", tls_certpath_ac, TRUE);
+    if (result) {
+        return result;
+    }
+
+    result = autocomplete_param_with_func(input, "/tls show", prefs_autocomplete_boolean_choice);
     if (result) {
         return result;
     }
