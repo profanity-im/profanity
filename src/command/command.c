@@ -1488,12 +1488,14 @@ static struct cmd_t command_defs[] =
             "/account set <account> nick <nick>",
             "/account set <account> otr <policy>",
             "/account set <account> pgpkeyid <pgpkeyid>",
+            "/account set <account> startscript <script>",
             "/account clear <account> password",
             "/account clear <account> eval_password",
             "/account clear <account> server",
             "/account clear <account> port",
             "/account clear <account> otr",
-            "/account clear <account> pgpkeyid")
+            "/account clear <account> pgpkeyid",
+            "/account clear <account> startscript")
         CMD_DESC(
             "Commands for creating and managing accounts. "
             "Calling with no arguments will display information for the current account.")
@@ -1520,12 +1522,14 @@ static struct cmd_t command_defs[] =
             { "set <account> nick <nick>",              "The default nickname to use when joining chat rooms." },
             { "set <account> otr <policy>",             "Override global OTR policy for this account, see /otr." },
             { "set <account> pgpkeyid <pgpkeyid>",      "Set the ID of the PGP key for this account, see /pgp." },
+            { "set <account> startscript <script>",     "Set the script to execute after connecting." },
             { "clear <account> server",                 "Remove the server setting for this account." },
             { "clear <account> port",                   "Remove the port setting for this account." },
             { "clear <account> password",               "Remove the password setting for this account." },
             { "clear <account> eval_password",          "Remove the eval_password setting for this account." },
             { "clear <account> otr",                    "Remove the OTR policy setting for this account." },
-            { "clear <account> pgpkeyid",               "Remove pgpkeyid associated with this account." })
+            { "clear <account> pgpkeyid",               "Remove pgpkeyid associated with this account." },
+            { "clear <account> startscript",            "Remove startscript associated with this account." })
         CMD_EXAMPLES(
             "/account add me",
             "/account set me jid me@chatty",
@@ -1915,6 +1919,7 @@ cmd_init(void)
     autocomplete_add(account_set_ac, "nick");
     autocomplete_add(account_set_ac, "otr");
     autocomplete_add(account_set_ac, "pgpkeyid");
+    autocomplete_add(account_set_ac, "startscript");
 
     account_clear_ac = autocomplete_new();
     autocomplete_add(account_clear_ac, "password");
@@ -1923,6 +1928,7 @@ cmd_init(void)
     autocomplete_add(account_clear_ac, "port");
     autocomplete_add(account_clear_ac, "otr");
     autocomplete_add(account_clear_ac, "pgpkeyid");
+    autocomplete_add(account_clear_ac, "startscript");
 
     account_default_ac = autocomplete_new();
     autocomplete_add(account_default_ac, "set");

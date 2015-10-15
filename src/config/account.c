@@ -51,7 +51,7 @@ account_new(const gchar * const name, const gchar * const jid,
     int priority_away, int priority_xa, int priority_dnd,
     const gchar * const muc_service, const gchar * const muc_nick,
     const gchar * const otr_policy, GList *otr_manual, GList *otr_opportunistic,
-    GList *otr_always, const gchar * const pgp_keyid)
+    GList *otr_always, const gchar * const pgp_keyid, const char *const startscript)
 {
     ProfAccount *new_account = malloc(sizeof(ProfAccount));
 
@@ -150,6 +150,12 @@ account_new(const gchar * const name, const gchar * const jid,
         new_account->pgp_keyid = NULL;
     }
 
+    if (startscript != NULL) {
+        new_account->startscript = strdup(startscript);
+    } else {
+        new_account->startscript = NULL;
+    }
+
     return new_account;
 }
 
@@ -217,6 +223,7 @@ account_free(ProfAccount *account)
         free(account->muc_nick);
         free(account->otr_policy);
         free(account->pgp_keyid);
+        free(account->startscript);
         g_list_free_full(account->otr_manual, g_free);
         g_list_free_full(account->otr_opportunistic, g_free);
         g_list_free_full(account->otr_always, g_free);

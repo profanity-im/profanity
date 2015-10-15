@@ -586,6 +586,9 @@ cmd_account(ProfWin *window, const char * const command, gchar **args)
                     cons_show("PGP support is not included in this build.");
 #endif
                     cons_show("");
+                } else if (strcmp(property, "startscript") == 0) {
+                    accounts_set_script_start(account_name, value);
+                    cons_show("Updated start script for account %s: %s", account_name, value);
                 } else if (valid_resource_presence_string(property)) {
                     int intval;
                     char *err_msg = NULL;
@@ -667,6 +670,10 @@ cmd_account(ProfWin *window, const char * const command, gchar **args)
                 } else if (strcmp(property, "pgpkeyid") == 0) {
                     accounts_clear_pgp_keyid(account_name);
                     cons_show("Removed PGP key ID for account %s", account_name);
+                    cons_show("");
+                } else if (strcmp(property, "startscript") == 0) {
+                    accounts_clear_script_start(account_name);
+                    cons_show("Removed start script for account %s", account_name);
                     cons_show("");
                 } else {
                     cons_show("Invalid property: %s", property);

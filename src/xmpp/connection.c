@@ -482,6 +482,8 @@ _connection_handler(xmpp_conn_t * const conn,
     // login success
     if (status == XMPP_CONN_CONNECT) {
         log_debug("Connection handler: XMPP_CONN_CONNECT");
+        jabber_conn.conn_status = JABBER_CONNECTED;
+
         int secured = xmpp_conn_is_secured(jabber_conn.conn);
 
         // logged in with account
@@ -519,8 +521,6 @@ _connection_handler(xmpp_conn_t * const conn,
         if (prefs_get_boolean(PREF_CARBONS)){
             iq_enable_carbons();
         }
-
-        jabber_conn.conn_status = JABBER_CONNECTED;
 
         if (prefs_get_reconnect() != 0) {
             if (reconnect_timer) {

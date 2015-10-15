@@ -713,7 +713,9 @@ cons_show_account(ProfAccount *account)
     if (account->login_presence) {
         cons_show   ("Login presence    : %s", account->login_presence);
     }
-
+    if (account->startscript) {
+        cons_show   ("Start script      : %s", account->startscript);
+    }
     if (account->otr_policy) {
         cons_show   ("OTR policy        : %s", account->otr_policy);
     }
