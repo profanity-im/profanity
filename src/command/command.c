@@ -1691,6 +1691,28 @@ static struct cmd_t command_defs[] =
             "/xa",
             "/xa This meeting is going to be a long one")
     },
+
+    { "/script",
+        cmd_script, parse_args, 2, 2, NULL,
+        CMD_NOTAGS
+        CMD_SYN(
+            "/script run <script>",
+            "/script remove <script>",
+            "/script list",
+            "/script show <script>")
+        CMD_DESC(
+            "Manage and run command scripts. "
+            "Scripts are stored in $XDG_DATA_HOME/profanity/scripts/ which is usually $HOME/.local/share/profanity/scripts/.")
+        CMD_ARGS(
+            { "script run <script>",    "Execute a script." },
+            { "script remove <script>", "Remove a script TODO." },
+            { "script list",            "List all scripts TODO." },
+            { "script show <script>",   "Show the commands in script TODO." })
+        CMD_EXAMPLES(
+            "/script list",
+            "/script run myscript",
+            "/script show somescript")
+    },
 };
 
 static Autocomplete commands_ac;
@@ -1755,6 +1777,7 @@ static Autocomplete pgp_ac;
 static Autocomplete pgp_log_ac;
 static Autocomplete tls_ac;
 static Autocomplete tls_certpath_ac;
+static Autocomplete script_ac;
 
 /*
  * Initialise command autocompleter and history
@@ -2175,6 +2198,12 @@ cmd_init(void)
     tls_certpath_ac = autocomplete_new();
     autocomplete_add(tls_certpath_ac, "set");
     autocomplete_add(tls_certpath_ac, "clear");
+
+    script_ac = autocomplete_new();
+    autocomplete_add(script_ac, "run");
+    autocomplete_add(script_ac, "list");
+    autocomplete_add(script_ac, "remove");
+    autocomplete_add(script_ac, "show");
 }
 
 void
@@ -2242,6 +2271,7 @@ cmd_uninit(void)
     autocomplete_free(pgp_log_ac);
     autocomplete_free(tls_ac);
     autocomplete_free(tls_certpath_ac);
+    autocomplete_free(script_ac);
 }
 
 gboolean
@@ -2426,6 +2456,7 @@ cmd_reset_autocomplete(ProfWin *window)
     autocomplete_reset(pgp_log_ac);
     autocomplete_reset(tls_ac);
     autocomplete_reset(tls_certpath_ac);
+    autocomplete_reset(script_ac);
 
     if (window->type == WIN_CHAT) {
         ProfChatWin *chatwin = (ProfChatWin*)window;
@@ -2638,8 +2669,8 @@ _cmd_complete_parameters(ProfWin *window, const char * const input)
         }
     }
 
-    gchar *cmds[] = { "/prefs", "/disco", "/close", "/subject", "/room" };
-    Autocomplete completers[] = { prefs_ac, disco_ac, close_ac, subject_ac, room_ac };
+    gchar *cmds[] = { "/prefs", "/disco", "/close", "/subject", "/room", "/script" };
+    Autocomplete completers[] = { prefs_ac, disco_ac, close_ac, subject_ac, room_ac, script_ac };
 
     for (i = 0; i < ARRAY_SIZE(cmds); i++) {
         result = autocomplete_param_with_ac(input, cmds[i], completers[i], TRUE);

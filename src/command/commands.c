@@ -49,6 +49,7 @@
 #include "config/preferences.h"
 #include "config/theme.h"
 #include "config/tlscerts.h"
+#include "config/scripts.h"
 #include "contact.h"
 #include "roster_list.h"
 #include "jid.h"
@@ -684,6 +685,21 @@ cmd_account(ProfWin *window, const char * const command, gchar **args)
     } else {
         cons_bad_cmd_usage(command);
         cons_show("");
+    }
+
+    return TRUE;
+}
+
+gboolean
+cmd_script(ProfWin *window, const char * const command, gchar **args)
+{
+    if ((g_strcmp0(args[0], "run") == 0) && args[1]) {
+        gboolean res = scripts_exec(args[1]);
+        if (!res) {
+            cons_show("Could not find script %s", args[1]);
+        }
+    } else {
+        cons_bad_cmd_usage(command);
     }
 
     return TRUE;
