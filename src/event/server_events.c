@@ -43,6 +43,7 @@
 #include "muc.h"
 #include "config/preferences.h"
 #include "config/account.h"
+#include "config/scripts.h"
 #include "roster_list.h"
 #include "window_list.h"
 #include "config/tlscerts.h"
@@ -84,6 +85,11 @@ sv_ev_login_account_success(char *account_name, int secured)
     g_list_free(curr);
 
     log_info("%s logged in successfully", account->jid);
+
+    if (account->startscript) {
+        scripts_exec(account->startscript);
+    }
+
     account_free(account);
 }
 

@@ -35,7 +35,8 @@ core_sources = \
 	src/config/tlscerts.c src/config/tlscerts.h \
 	src/config/account.c src/config/account.h \
 	src/config/preferences.c src/config/preferences.h \
-	src/config/theme.c src/config/theme.h
+	src/config/theme.c src/config/theme.h \
+	src/config/scripts.c src/config/scripts.h
 
 unittest_sources = \
 	src/contact.c src/contact.h src/common.c \
@@ -61,6 +62,7 @@ unittest_sources = \
 	src/config/tlscerts.c src/config/tlscerts.h \
 	src/config/preferences.c src/config/preferences.h \
 	src/config/theme.c src/config/theme.h \
+	src/config/scripts.c src/config/scripts.h \
 	src/window_list.c src/window_list.h \
 	src/event/server_events.c src/event/server_events.h \
 	src/event/client_events.c src/event/client_events.h \
