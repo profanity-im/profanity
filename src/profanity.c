@@ -51,6 +51,7 @@
 #include "config/accounts.h"
 #include "config/preferences.h"
 #include "config/theme.h"
+#include "config/scripts.h"
 #include "command/command.h"
 #include "common.h"
 #include "contact.h"
@@ -335,6 +336,7 @@ _init(const int disable_tls, char *log_level)
     roster_init();
     muc_init();
     tlscerts_init();
+    scripts_init();
 #ifdef PROF_HAVE_LIBOTR
     otr_init();
 #endif

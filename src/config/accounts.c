@@ -264,11 +264,16 @@ accounts_get_account(const char * const name)
             pgp_keyid = g_key_file_get_string(accounts, name, "pgp.keyid", NULL);
         }
 
+        gchar *startscript = NULL;
+        if (g_key_file_has_key(accounts, name, "script.start", NULL)) {
+            startscript = g_key_file_get_string(accounts, name, "script.start", NULL);
+        }
+
         ProfAccount *new_account = account_new(name, jid, password, eval_password, enabled,
             server, port, resource, last_presence, login_presence,
             priority_online, priority_chat, priority_away, priority_xa,
             priority_dnd, muc_service, muc_nick, otr_policy, otr_manual,
-            otr_opportunistic, otr_always, pgp_keyid);
+            otr_opportunistic, otr_always, pgp_keyid, startscript);
 
         g_free(jid);
         g_free(password);
@@ -281,6 +286,7 @@ accounts_get_account(const char * const name)
         g_free(muc_nick);
         g_free(otr_policy);
         g_free(pgp_keyid);
+        g_free(startscript);
 
         return new_account;
     }
@@ -347,7 +353,8 @@ accounts_rename(const char * const account_name, const char * const new_name)
         "otr.opportunistic",
         "otr.always",
         "pgp.keyid",
-        "last.activity"
+        "last.activity",
+        "script.start"
     };
 
     int i;
@@ -462,6 +469,15 @@ accounts_set_pgp_keyid(const char * const account_name, const char * const value
 }
 
 void
+accounts_set_script_start(const char * const account_name, const char * const value)
+{
+    if (accounts_account_exists(account_name)) {
+        g_key_file_set_string(accounts, account_name, "script.start", value);
+        _save_accounts();
+    }
+}
+
+void
 accounts_clear_password(const char * const account_name)
 {
     if (accounts_account_exists(account_name)) {
@@ -506,6 +522,14 @@ accounts_clear_pgp_keyid(const char * const account_name)
     }
 }
 
+void
+accounts_clear_script_start(const char * const account_name)
+{
+    if (accounts_account_exists(account_name)) {
+        g_key_file_remove_key(accounts, account_name, "script.start", NULL);
+        _save_accounts();
+    }
+}
 void
 accounts_clear_otr(const char * const account_name)
 {

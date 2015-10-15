@@ -1,5 +1,5 @@
 /*
- * account.h
+ * scripts.h
  *
  * Copyright (C) 2012 - 2015 James Booth <boothj5@gmail.com>
  *
@@ -32,47 +32,7 @@
  *
  */
 
-#ifndef ACCOUNT_H
-#define ACCOUNT_H
+#include <glib.h>
 
-#include "common.h"
-
-typedef struct prof_account_t {
-    gchar *name;
-    gchar *jid;
-    gchar *password;
-    gchar *eval_password;
-    gchar *resource;
-    gchar *server;
-    int port;
-    gchar *last_presence;
-    gchar *login_presence;
-    gint priority_online;
-    gint priority_chat;
-    gint priority_away;
-    gint priority_xa;
-    gint priority_dnd;
-    gchar *muc_service;
-    gchar *muc_nick;
-    gboolean enabled;
-    gchar *otr_policy;
-    GList *otr_manual;
-    GList *otr_opportunistic;
-    GList *otr_always;
-    gchar *pgp_keyid;
-    gchar *startscript;
-} ProfAccount;
-
-ProfAccount* account_new(const gchar * const name, const gchar * const jid,
-    const gchar * const passord, const gchar * eval_password, gboolean enabled, const gchar * const server,
-    int port, const gchar * const resource, const gchar * const last_presence,
-    const gchar * const login_presence, int priority_online, int priority_chat,
-    int priority_away, int priority_xa, int priority_dnd,
-    const gchar * const muc_service, const gchar * const muc_nick,
-    const gchar * const otr_policy, GList *otr_manual, GList *otr_opportunistic,
-    GList *otr_always, const gchar * const pgp_keyid, const char *const startscript);
-char* account_create_full_jid(ProfAccount *account);
-gboolean account_eval_password(ProfAccount *account);
-void account_free(ProfAccount *account);
-
-#endif
+void scripts_init(void);
+gboolean scripts_exec(const char *const script);

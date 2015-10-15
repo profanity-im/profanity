@@ -36,11 +36,11 @@ core_sources = \
 	src/config/account.c src/config/account.h \
 	src/config/preferences.c src/config/preferences.h \
 	src/config/theme.c src/config/theme.h \
+	src/config/scripts.c src/config/scripts.h \
 	src/plugins/plugins.h src/plugins/plugins.c \
 	src/plugins/api.h src/plugins/api.c \
 	src/plugins/callbacks.h src/plugins/callbacks.c \
 	src/plugins/autocompleters.c src/plugins/autocompleters.h
-
 
 unittest_sources = \
 	src/contact.c src/contact.h src/common.c \
@@ -66,6 +66,7 @@ unittest_sources = \
 	src/config/tlscerts.c src/config/tlscerts.h \
 	src/config/preferences.c src/config/preferences.h \
 	src/config/theme.c src/config/theme.h \
+	src/config/scripts.c src/config/scripts.h \
     src/plugins/plugins.h src/plugins/plugins.c \
     src/plugins/api.h src/plugins/api.c \
     src/plugins/callbacks.h src/plugins/callbacks.c \
