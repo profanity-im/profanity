@@ -66,6 +66,70 @@ scripts_init(void)
             log_error("Error creating directory: %s", scriptsdir->str);
         }
     }
+
+    g_string_free(scriptsdir, TRUE);
+}
+
+GSList*
+scripts_list(void)
+{
+    gchar *data_home = xdg_get_data_home();
+    GString *scriptsdir = g_string_new(data_home);
+    free(data_home);
+    g_string_append(scriptsdir, "/profanity/scripts");
+
+    GSList *result = NULL;
+    GDir *scripts = g_dir_open(scriptsdir->str, 0, NULL);
+    g_string_free(scriptsdir, TRUE);
+
+    if (scripts) {
+        const gchar *script = g_dir_read_name(scripts);
+        while (script) {
+            result = g_slist_append(result, strdup(script));
+            script = g_dir_read_name(scripts);
+        }
+        g_dir_close(scripts);
+    }
+
+    return result;
+}
+
+GSList*
+scripts_read(const char *const script)
+{
+    gchar *data_home = xdg_get_data_home();
+    GString *scriptpath = g_string_new(data_home);
+    free(data_home);
+
+    g_string_append(scriptpath, "/profanity/scripts/");
+    g_string_append(scriptpath, script);
+
+    FILE *scriptfile = g_fopen(scriptpath->str, "r");
+    if (!scriptfile) {
+        log_info("Script not found: %s", scriptpath->str);
+        g_string_free(scriptpath, TRUE);
+        return NULL;
+    }
+
+    g_string_free(scriptpath, TRUE);
+
+    char *line = NULL;
+    size_t len = 0;
+    ssize_t read;
+    GSList *result = NULL;
+
+    while ((read = getline(&line, &len, scriptfile)) != -1) {
+        if (g_str_has_suffix(line, "\n")) {
+            result = g_slist_append(result, g_strndup(line, strlen(line) -1));
+        } else {
+            result = g_slist_append(result, strdup(line));
+        }
+    }
+
+    fclose(scriptfile);
+    if (line) free(line);
+
+    return result;
 }
 
 gboolean
@@ -87,7 +151,7 @@ scripts_exec(const char *const script)
 
     g_string_free(scriptpath, TRUE);
 
-    char * line = NULL;
+    char *line = NULL;
     size_t len = 0;
     ssize_t read;
 
