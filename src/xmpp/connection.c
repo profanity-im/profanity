@@ -70,7 +70,6 @@ static struct _jabber_conn_t {
     jabber_conn_status_t conn_status;
     char *presence_message;
     int priority;
-    int tls_disabled;
     char *domain;
 } jabber_conn;
 
@@ -115,14 +114,13 @@ void _connection_free_saved_details(void);
 void _connection_free_session_data(void);
 
 void
-jabber_init(const int disable_tls)
+jabber_init(void)
 {
     log_info("Initialising XMPP");
     jabber_conn.conn_status = JABBER_STARTED;
     jabber_conn.presence_message = NULL;
     jabber_conn.conn = NULL;
     jabber_conn.ctx = NULL;
-    jabber_conn.tls_disabled = disable_tls;
     jabber_conn.domain = NULL;
     presence_sub_requests_init();
     caps_init();
@@ -430,9 +428,6 @@ _jabber_connect(const char * const fulljid, const char * const passwd,
     }
     xmpp_conn_set_jid(jabber_conn.conn, fulljid);
     xmpp_conn_set_pass(jabber_conn.conn, passwd);
-    if (jabber_conn.tls_disabled) {
-        xmpp_conn_disable_tls(jabber_conn.conn);
-    }
 
 #ifdef HAVE_LIBMESODE
     char *cert_path = prefs_get_string(PREF_TLS_CERTPATH);
