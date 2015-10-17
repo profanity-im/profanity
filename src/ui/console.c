@@ -1582,6 +1582,42 @@ cons_show_themes(GSList *themes)
 }
 
 void
+cons_show_scripts(GSList *scripts)
+{
+    cons_show("");
+
+    if (scripts == NULL) {
+        cons_show("No scripts available.");
+    } else {
+        cons_show("Scripts:");
+        while (scripts) {
+            cons_show(scripts->data);
+            scripts = g_slist_next(scripts);
+        }
+    }
+
+    cons_alert();
+}
+
+void
+cons_show_script(const char *const script, GSList *commands)
+{
+    cons_show("");
+
+    if (commands == NULL) {
+        cons_show("Script not found: %s", script);
+    } else {
+        cons_show("%s:", script);
+        while (commands) {
+            cons_show("  %s", commands->data);
+            commands = g_slist_next(commands);
+        }
+    }
+
+    cons_alert();
+}
+
+void
 cons_prefs(void)
 {
     cons_show("");
