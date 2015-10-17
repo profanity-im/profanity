@@ -51,6 +51,7 @@
 #include "config/preferences.h"
 #include "config/theme.h"
 #include "config/tlscerts.h"
+#include "config/scripts.h"
 #include "contact.h"
 #include "roster_list.h"
 #include "jid.h"
@@ -108,6 +109,7 @@ static char * _receipts_autocomplete(ProfWin *window, const char * const input);
 static char * _help_autocomplete(ProfWin *window, const char * const input);
 static char * _wins_autocomplete(ProfWin *window, const char * const input);
 static char * _tls_autocomplete(ProfWin *window, const char * const input);
+static char * _script_autocomplete(ProfWin *window, const char * const input);
 
 GHashTable *commands = NULL;
 
@@ -1776,6 +1778,7 @@ static Autocomplete pgp_log_ac;
 static Autocomplete tls_ac;
 static Autocomplete tls_certpath_ac;
 static Autocomplete script_ac;
+static Autocomplete script_show_ac;
 
 /*
  * Initialise command autocompleter and history
@@ -2201,6 +2204,8 @@ cmd_init(void)
     autocomplete_add(script_ac, "run");
     autocomplete_add(script_ac, "list");
     autocomplete_add(script_ac, "show");
+
+    script_show_ac = NULL;
 }
 
 void
@@ -2269,6 +2274,7 @@ cmd_uninit(void)
     autocomplete_free(tls_ac);
     autocomplete_free(tls_certpath_ac);
     autocomplete_free(script_ac);
+    autocomplete_free(script_show_ac);
 }
 
 gboolean
@@ -2454,6 +2460,10 @@ cmd_reset_autocomplete(ProfWin *window)
     autocomplete_reset(tls_ac);
     autocomplete_reset(tls_certpath_ac);
     autocomplete_reset(script_ac);
+    if (script_show_ac) {
+        autocomplete_free(script_show_ac);
+        script_show_ac = NULL;
+    }
 
     if (window->type == WIN_CHAT) {
         ProfChatWin *chatwin = (ProfChatWin*)window;
@@ -2666,8 +2676,8 @@ _cmd_complete_parameters(ProfWin *window, const char * const input)
         }
     }
 
-    gchar *cmds[] = { "/prefs", "/disco", "/close", "/subject", "/room", "/script" };
-    Autocomplete completers[] = { prefs_ac, disco_ac, close_ac, subject_ac, room_ac, script_ac };
+    gchar *cmds[] = { "/prefs", "/disco", "/close", "/subject", "/room" };
+    Autocomplete completers[] = { prefs_ac, disco_ac, close_ac, subject_ac, room_ac };
 
     for (i = 0; i < ARRAY_SIZE(cmds); i++) {
         result = autocomplete_param_with_ac(input, cmds[i], completers[i], TRUE);
@@ -2708,6 +2718,7 @@ _cmd_complete_parameters(ProfWin *window, const char * const input)
     g_hash_table_insert(ac_funcs, "/receipts",      _receipts_autocomplete);
     g_hash_table_insert(ac_funcs, "/wins",          _wins_autocomplete);
     g_hash_table_insert(ac_funcs, "/tls",           _tls_autocomplete);
+    g_hash_table_insert(ac_funcs, "/script",        _script_autocomplete);
 
     int len = strlen(input);
     char parsed[len+1];
@@ -3199,6 +3210,52 @@ _theme_autocomplete(ProfWin *window, const char * const input)
         }
     }
     result = autocomplete_param_with_ac(input, "/theme", theme_ac, TRUE);
+    if (result) {
+        return result;
+    }
+
+    return NULL;
+}
+
+static char *
+_script_autocomplete(ProfWin *window, const char * const input)
+{
+    char *result = NULL;
+    if ((strncmp(input, "/script show ", 13) == 0) && (strlen(input) > 13)) {
+        if (script_show_ac == NULL) {
+            script_show_ac = autocomplete_new();
+            GSList *scripts = scripts_list();
+            GSList *curr = scripts;
+            while (curr) {
+                autocomplete_add(script_show_ac, curr->data);
+                curr = g_slist_next(curr);
+            }
+            g_slist_free_full(scripts, g_free);
+        }
+        result = autocomplete_param_with_ac(input, "/script show", script_show_ac, TRUE);
+        if (result) {
+            return result;
+        }
+    }
+
+    if ((strncmp(input, "/script run ", 12) == 0) && (strlen(input) > 12)) {
+        if (script_show_ac == NULL) {
+            script_show_ac = autocomplete_new();
+            GSList *scripts = scripts_list();
+            GSList *curr = scripts;
+            while (curr) {
+                autocomplete_add(script_show_ac, curr->data);
+                curr = g_slist_next(curr);
+            }
+            g_slist_free_full(scripts, g_free);
+        }
+        result = autocomplete_param_with_ac(input, "/script run", script_show_ac, TRUE);
+        if (result) {
+            return result;
+        }
+    }
+
+    result = autocomplete_param_with_ac(input, "/script", script_ac, TRUE);
     if (result) {
         return result;
     }
