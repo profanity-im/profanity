@@ -1693,19 +1693,17 @@ static struct cmd_t command_defs[] =
     },
 
     { "/script",
-        cmd_script, parse_args, 2, 2, NULL,
+        cmd_script, parse_args, 1, 2, NULL,
         CMD_NOTAGS
         CMD_SYN(
             "/script run <script>",
-            "/script remove <script>",
             "/script list",
             "/script show <script>")
         CMD_DESC(
-            "Manage and run command scripts. "
+            "Run command scripts. "
             "Scripts are stored in $XDG_DATA_HOME/profanity/scripts/ which is usually $HOME/.local/share/profanity/scripts/.")
         CMD_ARGS(
             { "script run <script>",    "Execute a script." },
-            { "script remove <script>", "Remove a script TODO." },
             { "script list",            "List all scripts TODO." },
             { "script show <script>",   "Show the commands in script TODO." })
         CMD_EXAMPLES(
@@ -2202,7 +2200,6 @@ cmd_init(void)
     script_ac = autocomplete_new();
     autocomplete_add(script_ac, "run");
     autocomplete_add(script_ac, "list");
-    autocomplete_add(script_ac, "remove");
     autocomplete_add(script_ac, "show");
 }
 

@@ -1582,6 +1582,24 @@ cons_show_themes(GSList *themes)
 }
 
 void
+cons_show_scripts(GSList *scripts)
+{
+    cons_show("");
+
+    if (scripts == NULL) {
+        cons_show("No scripts available.");
+    } else {
+        cons_show("Scripts:");
+        while (scripts) {
+            cons_show(scripts->data);
+            scripts = g_slist_next(scripts);
+        }
+    }
+
+    cons_alert();
+}
+
+void
 cons_prefs(void)
 {
     cons_show("");

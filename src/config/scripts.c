@@ -66,6 +66,32 @@ scripts_init(void)
             log_error("Error creating directory: %s", scriptsdir->str);
         }
     }
+
+    g_string_free(scriptsdir, TRUE);
+}
+
+GSList*
+scripts_list(void)
+{
+    gchar *data_home = xdg_get_data_home();
+    GString *scriptsdir = g_string_new(data_home);
+    free(data_home);
+    g_string_append(scriptsdir, "/profanity/scripts");
+
+    GSList *result = NULL;
+    GDir *scripts = g_dir_open(scriptsdir->str, 0, NULL);
+    g_string_free(scriptsdir, TRUE);
+
+    if (scripts) {
+        const gchar *script = g_dir_read_name(scripts);
+        while (script) {
+            result = g_slist_append(result, strdup(script));
+            script = g_dir_read_name(scripts);
+        }
+        g_dir_close(scripts);
+    }
+
+    return result;
 }
 
 gboolean

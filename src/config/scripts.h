@@ -35,4 +35,5 @@
 #include <glib.h>
 
 void scripts_init(void);
+GSList* scripts_list(void);
 gboolean scripts_exec(const char *const script);

@@ -415,6 +415,7 @@ void cons_show_status(const char * const barejid) {}
 void cons_show_info(PContact pcontact) {}
 void cons_show_caps(const char * const fulljid, resource_presence_t presence) {}
 void cons_show_themes(GSList *themes) {}
+void cons_show_scripts(GSList *scripts) {}
 
 void cons_show_aliases(GList *aliases)
 {
