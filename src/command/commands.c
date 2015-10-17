@@ -168,18 +168,18 @@ cmd_tls(ProfWin *window, const char * const command, gchar **args)
             }
 
             if (g_file_test(args[2], G_FILE_TEST_IS_DIR)) {
-                prefs_set_string(PREF_CERT_PATH, args[2]);
+                prefs_set_string(PREF_TLS_CERTPATH, args[2]);
                 cons_show("Certificate path set to: %s", args[2]);
             } else {
                 cons_show("Directory %s does not exist.", args[2]);
             }
             return TRUE;
         } else if (g_strcmp0(args[1], "clear") == 0) {
-            prefs_set_string(PREF_CERT_PATH, NULL);
+            prefs_set_string(PREF_TLS_CERTPATH, NULL);
             cons_show("Certificate path cleared");
             return TRUE;
         } else if (args[1] == NULL) {
-            char *path = prefs_get_string(PREF_CERT_PATH);
+            char *path = prefs_get_string(PREF_TLS_CERTPATH);
             if (path) {
                 cons_show("Trusted certificate path: %s", path);
                 prefs_free_string(path);

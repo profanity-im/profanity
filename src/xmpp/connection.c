@@ -435,7 +435,7 @@ _jabber_connect(const char * const fulljid, const char * const passwd,
     }
 
 #ifdef HAVE_LIBMESODE
-    char *cert_path = prefs_get_string(PREF_CERT_PATH);
+    char *cert_path = prefs_get_string(PREF_TLS_CERTPATH);
     if (cert_path) {
         xmpp_conn_tlscert_path(jabber_conn.conn, cert_path);
     }

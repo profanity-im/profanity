@@ -111,7 +111,7 @@ typedef enum {
     PREF_INPBLOCK_DYNAMIC,
     PREF_ENC_WARN,
     PREF_PGP_LOG,
-    PREF_CERT_PATH,
+    PREF_TLS_CERTPATH,
     PREF_TLS_SHOW,
     PREF_LASTACTIVITY,
 } preference_t;
