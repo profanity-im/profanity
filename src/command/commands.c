@@ -702,6 +702,10 @@ cmd_script(ProfWin *window, const char * const command, gchar **args)
         GSList *scripts = scripts_list();
         cons_show_scripts(scripts);
         g_slist_free_full(scripts, g_free);
+    } else if ((g_strcmp0(args[0], "show") == 0) && args[1]) {
+        GSList *commands = scripts_read(args[1]);
+        cons_show_script(args[1], commands);
+        g_slist_free_full(commands, g_free);
     } else {
         cons_bad_cmd_usage(command);
     }
