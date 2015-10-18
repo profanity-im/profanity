@@ -87,6 +87,7 @@ static struct {
     char *passwd;
     char *altdomain;
     int port;
+    char *tls_policy;
 } saved_details;
 
 static GTimer *reconnect_timer;
@@ -101,7 +102,7 @@ static void _xmpp_file_logger(void * const userdata,
 static xmpp_log_t * _xmpp_get_file_logger();
 
 static jabber_conn_status_t _jabber_connect(const char * const fulljid,
-    const char * const passwd, const char * const altdomain, int port);
+    const char * const passwd, const char * const altdomain, int port, const char *const tls_policy);
 
 static void _jabber_reconnect(void);
 
@@ -149,7 +150,7 @@ jabber_connect_with_account(const ProfAccount * const account)
     // connect with fulljid
     Jid *jidp = jid_create_from_bare_and_resource(account->jid, account->resource);
     jabber_conn_status_t result =
-      _jabber_connect(jidp->fulljid, account->password, account->server, account->port);
+      _jabber_connect(jidp->fulljid, account->password, account->server, account->port, account->tls_policy);
     jid_destroy(jidp);
 
     return result;
@@ -157,7 +158,7 @@ jabber_connect_with_account(const ProfAccount * const account)
 
 jabber_conn_status_t
 jabber_connect_with_details(const char * const jid,
-    const char * const passwd, const char * const altdomain, const int port)
+    const char * const passwd, const char * const altdomain, const int port, const char *const tls_policy)
 {
     assert(jid != NULL);
     assert(passwd != NULL);
@@ -175,6 +176,11 @@ jabber_connect_with_details(const char * const jid,
     } else {
         saved_details.port = 0;
     }
+    if (tls_policy) {
+        saved_details.tls_policy = strdup(tls_policy);
+    } else {
+        saved_details.tls_policy = NULL;
+    }
 
     // use 'profanity' when no resourcepart in provided jid
     Jid *jidp = jid_create(jid);
@@ -189,7 +195,12 @@ jabber_connect_with_details(const char * const jid,
 
     // connect with fulljid
     log_info("Connecting without account, JID: %s", saved_details.jid);
-    return _jabber_connect(saved_details.jid, passwd, saved_details.altdomain, saved_details.port);
+    return _jabber_connect(
+        saved_details.jid,
+        passwd,
+        saved_details.altdomain,
+        saved_details.port,
+        saved_details.tls_policy);
 }
 
 void
@@ -363,6 +374,7 @@ _connection_free_saved_details(void)
     FREE_SET_NULL(saved_details.jid);
     FREE_SET_NULL(saved_details.passwd);
     FREE_SET_NULL(saved_details.altdomain);
+    FREE_SET_NULL(saved_details.tls_policy);
 }
 
 void
@@ -384,7 +396,7 @@ _connection_certfail_cb(const char * const certname, const char * const certfp,
 
 static jabber_conn_status_t
 _jabber_connect(const char * const fulljid, const char * const passwd,
-    const char * const altdomain, int port)
+    const char * const altdomain, int port, const char *const tls_policy)
 {
     assert(fulljid != NULL);
     assert(passwd != NULL);
@@ -429,6 +441,12 @@ _jabber_connect(const char * const fulljid, const char * const passwd,
     xmpp_conn_set_jid(jabber_conn.conn, fulljid);
     xmpp_conn_set_pass(jabber_conn.conn, passwd);
 
+    if (!tls_policy || (g_strcmp0(tls_policy, "force") == 0)) {
+        xmpp_conn_set_flags(jabber_conn.conn, XMPP_CONN_FLAG_MANDATORY_TLS);
+    } else if (g_strcmp0(tls_policy, "disable") == 0) {
+        xmpp_conn_set_flags(jabber_conn.conn, XMPP_CONN_FLAG_DISABLE_TLS);
+    }
+
 #ifdef HAVE_LIBMESODE
     char *cert_path = prefs_get_string(PREF_TLS_CERTPATH);
     if (cert_path) {
@@ -463,7 +481,7 @@ _jabber_reconnect(void)
     } else {
         char *fulljid = create_fulljid(account->jid, account->resource);
         log_debug("Attempting reconnect with account %s", account->name);
-        _jabber_connect(fulljid, saved_account.passwd, account->server, account->port);
+        _jabber_connect(fulljid, saved_account.passwd, account->server, account->port, account->tls_policy);
         free(fulljid);
         g_timer_start(reconnect_timer);
     }
@@ -489,7 +507,7 @@ _connection_handler(xmpp_conn_t * const conn,
         // logged in without account, use details to create new account
         } else {
             log_debug("Connection handler: logged in with jid: %s", saved_details.name);
-            accounts_add(saved_details.name, saved_details.altdomain, saved_details.port);
+            accounts_add(saved_details.name, saved_details.altdomain, saved_details.port, saved_details.tls_policy);
             accounts_set_jid(saved_details.name, saved_details.jid);
 
             sv_ev_login_account_success(saved_details.name, secured);

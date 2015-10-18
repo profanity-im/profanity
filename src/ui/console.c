@@ -707,6 +707,9 @@ cons_show_account(ProfAccount *account)
     if (account->muc_nick) {
         cons_show   ("muc nick          : %s", account->muc_nick);
     }
+    if (account->tls_policy) {
+        cons_show   ("TLS policy        : %s", account->tls_policy);
+    }
     if (account->last_presence) {
         cons_show   ("Last presence     : %s", account->last_presence);
     }

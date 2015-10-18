@@ -126,6 +126,7 @@ void accounts_set_last_status(const char * const account_name, const char * cons
 void accounts_set_last_activity(const char * const account_name) {}
 void accounts_set_pgp_keyid(const char * const account_name, const char * const value) {}
 void accounts_set_script_start(const char * const account_name, const char * const value) {}
+void accounts_set_tls_policy(const char * const account_name, const char * const value) {}
 
 void accounts_set_login_presence(const char * const account_name, const char * const value)
 {

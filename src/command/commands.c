@@ -255,7 +255,7 @@ cmd_connect(ProfWin *window, const char * const command, gchar **args)
         return TRUE;
     }
 
-    gchar *opt_keys[] = { "server", "port", NULL };
+    gchar *opt_keys[] = { "server", "port", "tls", NULL };
     gboolean parsed;
 
     GHashTable *options = parse_options(&args[args[0] ? 1 : 0], opt_keys, &parsed);
@@ -266,6 +266,16 @@ cmd_connect(ProfWin *window, const char * const command, gchar **args)
     }
 
     char *altdomain = g_hash_table_lookup(options, "server");
+
+    char *tls_policy = g_hash_table_lookup(options, "tls");
+    if (tls_policy &&
+            (g_strcmp0(tls_policy, "force") != 0) &&
+            (g_strcmp0(tls_policy, "allow") != 0) &&
+            (g_strcmp0(tls_policy, "disable") != 0)) {
+        cons_bad_cmd_usage(command);
+        cons_show("");
+        return TRUE;
+    }
 
     int port = 0;
     if (g_hash_table_contains(options, "port")) {
@@ -334,7 +344,7 @@ cmd_connect(ProfWin *window, const char * const command, gchar **args)
     } else {
         jid = strdup(lower);
         char *passwd = ui_ask_password();
-        conn_status = cl_ev_connect_jid(jid, passwd, altdomain, port);
+        conn_status = cl_ev_connect_jid(jid, passwd, altdomain, port, tls_policy);
         free(passwd);
     }
 
@@ -386,7 +396,7 @@ cmd_account(ProfWin *window, const char * const command, gchar **args)
         if (account_name == NULL) {
             cons_bad_cmd_usage(command);
         } else {
-            accounts_add(account_name, NULL, 0);
+            accounts_add(account_name, NULL, 0, NULL);
             cons_show("Account created.");
             cons_show("");
         }
@@ -590,6 +600,16 @@ cmd_account(ProfWin *window, const char * const command, gchar **args)
                 } else if (strcmp(property, "startscript") == 0) {
                     accounts_set_script_start(account_name, value);
                     cons_show("Updated start script for account %s: %s", account_name, value);
+                } else if (strcmp(property, "tls") == 0) {
+                    if ((g_strcmp0(value, "force") != 0)
+                            && (g_strcmp0(value, "allow") != 0)
+                            && (g_strcmp0(value, "disable") != 0)) {
+                        cons_show("TLS policy must be one of: force, allow or disable.");
+                    } else {
+                        accounts_set_tls_policy(account_name, value);
+                        cons_show("Updated TLS policy for account %s: %s", account_name, value);
+                        cons_show("");
+                    }
                 } else if (valid_resource_presence_string(property)) {
                     int intval;
                     char *err_msg = NULL;

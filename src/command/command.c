@@ -168,12 +168,12 @@ static struct cmd_t command_defs[] =
     },
 
     { "/connect",
-        cmd_connect, parse_args, 0, 5, NULL,
+        cmd_connect, parse_args, 0, 7, NULL,
         CMD_TAGS(
             CMD_TAG_CONNECTION)
         CMD_SYN(
             "/connect [<account>]",
-            "/connect <account> [server <server>] [port <port>]")
+            "/connect <account> [server <server>] [port <port>] [tls force|allow|disable]")
         CMD_DESC(
             "Login to a chat service. "
             "If no account is specified, the default is used if one is configured. "
@@ -181,12 +181,16 @@ static struct cmd_t command_defs[] =
         CMD_ARGS(
             { "<account>",         "The local account you wish to connect with, or a JID if connecting for the first time." },
             { "server <server>",   "Supply a server if it is different to the domain part of your JID." },
-            { "port <port>",       "The port to use if different to the default (5222, or 5223 for SSL)." })
+            { "port <port>",       "The port to use if different to the default (5222, or 5223 for SSL)." },
+            { "tls force",         "Force TLS connection, and fail if one cannot be established, this is default behaviour." },
+            { "tls allow",         "Use TLS for the connection if it is available." },
+            { "tls disable",       "Disable TLS for the connection." })
         CMD_EXAMPLES(
             "/connect",
             "/connect myuser@gmail.com",
             "/connect myuser@mycompany.com server talk.google.com",
             "/connect bob@someplace port 5678",
+            "/connect me@localhost.test.org server 127.0.0.1 tls disable",
             "/connect me@chatty server chatty.com port 5443")
         },
 
@@ -1491,6 +1495,7 @@ static struct cmd_t command_defs[] =
             "/account set <account> otr <policy>",
             "/account set <account> pgpkeyid <pgpkeyid>",
             "/account set <account> startscript <script>",
+            "/account set <account> tls force|allow|disable",
             "/account clear <account> password",
             "/account clear <account> eval_password",
             "/account clear <account> server",
@@ -1525,6 +1530,9 @@ static struct cmd_t command_defs[] =
             { "set <account> otr <policy>",             "Override global OTR policy for this account, see /otr." },
             { "set <account> pgpkeyid <pgpkeyid>",      "Set the ID of the PGP key for this account, see /pgp." },
             { "set <account> startscript <script>",     "Set the script to execute after connecting." },
+            { "set <account> tls force",                "Force TLS connection, and fail if one cannot be established, this is default behaviour." },
+            { "set <account> tls allow",                "Use TLS for the connection if it is available." },
+            { "set <account> tls disable",              "Disable TLS for the connection." },
             { "clear <account> server",                 "Remove the server setting for this account." },
             { "clear <account> port",                   "Remove the port setting for this account." },
             { "clear <account> password",               "Remove the password setting for this account." },
@@ -1753,6 +1761,7 @@ static Autocomplete otr_ac;
 static Autocomplete otr_log_ac;
 static Autocomplete otr_policy_ac;
 static Autocomplete connect_property_ac;
+static Autocomplete tls_property_ac;
 static Autocomplete statuses_ac;
 static Autocomplete statuses_setting_ac;
 static Autocomplete alias_ac;
@@ -1944,6 +1953,7 @@ cmd_init(void)
     autocomplete_add(account_set_ac, "otr");
     autocomplete_add(account_set_ac, "pgpkeyid");
     autocomplete_add(account_set_ac, "startscript");
+    autocomplete_add(account_set_ac, "tls");
 
     account_clear_ac = autocomplete_new();
     autocomplete_add(account_clear_ac, "password");
@@ -2075,6 +2085,12 @@ cmd_init(void)
     connect_property_ac = autocomplete_new();
     autocomplete_add(connect_property_ac, "server");
     autocomplete_add(connect_property_ac, "port");
+    autocomplete_add(connect_property_ac, "tls");
+
+    tls_property_ac = autocomplete_new();
+    autocomplete_add(tls_property_ac, "force");
+    autocomplete_add(tls_property_ac, "allow");
+    autocomplete_add(tls_property_ac, "disable");
 
     join_property_ac = autocomplete_new();
     autocomplete_add(join_property_ac, "nick");
@@ -2249,6 +2265,7 @@ cmd_uninit(void)
     autocomplete_free(otr_log_ac);
     autocomplete_free(otr_policy_ac);
     autocomplete_free(connect_property_ac);
+    autocomplete_free(tls_property_ac);
     autocomplete_free(statuses_ac);
     autocomplete_free(statuses_setting_ac);
     autocomplete_free(alias_ac);
@@ -2435,6 +2452,7 @@ cmd_reset_autocomplete(ProfWin *window)
     autocomplete_reset(otr_log_ac);
     autocomplete_reset(otr_policy_ac);
     autocomplete_reset(connect_property_ac);
+    autocomplete_reset(tls_property_ac);
     autocomplete_reset(statuses_ac);
     autocomplete_reset(statuses_setting_ac);
     autocomplete_reset(alias_ac);
@@ -3786,7 +3804,7 @@ _connect_autocomplete(ProfWin *window, const char * const input)
     char *found = NULL;
     gboolean result = FALSE;
 
-    gchar **args = parse_args(input, 2, 4, &result);
+    gchar **args = parse_args(input, 2, 6, &result);
 
     if ((strncmp(input, "/connect", 8) == 0) && (result == TRUE)) {
         GString *beginning = g_string_new("/connect ");
@@ -3796,12 +3814,58 @@ _connect_autocomplete(ProfWin *window, const char * const input)
             g_string_append(beginning, args[1]);
             g_string_append(beginning, " ");
             g_string_append(beginning, args[2]);
+            if (args[3] && args[4]) {
+                g_string_append(beginning, " ");
+                g_string_append(beginning, args[3]);
+                g_string_append(beginning, " ");
+                g_string_append(beginning, args[4]);
+            }
         }
         found = autocomplete_param_with_ac(input, beginning->str, connect_property_ac, TRUE);
         g_string_free(beginning, TRUE);
         if (found) {
             g_strfreev(args);
             return found;
+        }
+    }
+
+    g_strfreev(args);
+
+    result = FALSE;
+    args = parse_args(input, 2, 7, &result);
+
+    if ((strncmp(input, "/connect", 8) == 0) && (result == TRUE)) {
+        GString *beginning = g_string_new("/connect ");
+        g_string_append(beginning, args[0]);
+        int curr = 0;
+        if (args[1]) {
+            g_string_append(beginning, " ");
+            g_string_append(beginning, args[1]);
+            curr = 1;
+            if (args[2] && args[3]) {
+                g_string_append(beginning, " ");
+                g_string_append(beginning, args[2]);
+                g_string_append(beginning, " ");
+                g_string_append(beginning, args[3]);
+                curr = 3;
+                if (args[4] && args[5]) {
+                    g_string_append(beginning, " ");
+                    g_string_append(beginning, args[4]);
+                    g_string_append(beginning, " ");
+                    g_string_append(beginning, args[5]);
+                    curr = 5;
+                }
+            }
+        }
+        if (curr != 0 && (g_strcmp0(args[curr], "tls") == 0)) {
+            found = autocomplete_param_with_ac(input, beginning->str, tls_property_ac, TRUE);
+            g_string_free(beginning, TRUE);
+            if (found) {
+                g_strfreev(args);
+                return found;
+            }
+        } else {
+            g_string_free(beginning, TRUE);
         }
     }
 
@@ -3892,6 +3956,15 @@ _account_autocomplete(ProfWin *window, const char * const input)
             g_string_append(beginning, " ");
             g_string_append(beginning, args[2]);
             found = autocomplete_param_with_ac(input, beginning->str, account_status_ac, TRUE);
+            g_string_free(beginning, TRUE);
+            if (found) {
+                g_strfreev(args);
+                return found;
+            }
+        } else if ((g_strv_length(args) > 3) && (g_strcmp0(args[2], "tls")) == 0) {
+            g_string_append(beginning, " ");
+            g_string_append(beginning, args[2]);
+            found = autocomplete_param_with_ac(input, beginning->str, tls_property_ac, TRUE);
             g_string_free(beginning, TRUE);
             if (found) {
                 g_strfreev(args);
