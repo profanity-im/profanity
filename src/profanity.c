@@ -74,7 +74,7 @@
 #include "config/tlscerts.h"
 
 static void _check_autoaway(void);
-static void _init(const int disable_tls, char *log_level);
+static void _init(char *log_level);
 static void _shutdown(void);
 static void _create_directories(void);
 static void _connect_default(const char * const account);
@@ -93,9 +93,9 @@ char *saved_status;
 static gboolean cont = TRUE;
 
 void
-prof_run(const int disable_tls, char *log_level, char *account_name)
+prof_run(char *log_level, char *account_name)
 {
-    _init(disable_tls, log_level);
+    _init(log_level);
     plugins_on_start();
     _connect_default(account_name);
 
@@ -301,7 +301,7 @@ _check_autoaway(void)
 }
 
 static void
-_init(const int disable_tls, char *log_level)
+_init(char *log_level)
 {
     setlocale(LC_ALL, "");
     // ignore SIGPIPE
@@ -330,7 +330,7 @@ _init(const int disable_tls, char *log_level)
     theme_init(theme);
     prefs_free_string(theme);
     ui_init();
-    jabber_init(disable_tls);
+    jabber_init();
     cmd_init();
     log_info("Initialising contact list");
     roster_init();

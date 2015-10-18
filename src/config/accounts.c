@@ -120,7 +120,7 @@ accounts_reset_enabled_search(void)
 }
 
 void
-accounts_add(const char *account_name, const char *altdomain, const int port)
+accounts_add(const char *account_name, const char *altdomain, const int port, const char *const tls_policy)
 {
     // set account name and resource
     const char *barejid = account_name;
@@ -143,6 +143,9 @@ accounts_add(const char *account_name, const char *altdomain, const int port)
         }
         if (port != 0) {
             g_key_file_set_integer(accounts, account_name, "port", port);
+        }
+        if (tls_policy) {
+            g_key_file_set_string(accounts, account_name, "tls.policy", tls_policy);
         }
 
         Jid *jidp = jid_create(barejid);
@@ -269,11 +272,19 @@ accounts_get_account(const char * const name)
             startscript = g_key_file_get_string(accounts, name, "script.start", NULL);
         }
 
+        gchar *tls_policy = g_key_file_get_string(accounts, name, "tls.policy", NULL);
+        if (tls_policy && ((g_strcmp0(tls_policy, "force") != 0) &&
+                (g_strcmp0(tls_policy, "allow") != 0) &&
+                (g_strcmp0(tls_policy, "disable") != 0))) {
+            g_free(tls_policy);
+            tls_policy = NULL;
+        }
+
         ProfAccount *new_account = account_new(name, jid, password, eval_password, enabled,
             server, port, resource, last_presence, login_presence,
             priority_online, priority_chat, priority_away, priority_xa,
             priority_dnd, muc_service, muc_nick, otr_policy, otr_manual,
-            otr_opportunistic, otr_always, pgp_keyid, startscript);
+            otr_opportunistic, otr_always, pgp_keyid, startscript, tls_policy);
 
         g_free(jid);
         g_free(password);
@@ -287,6 +298,7 @@ accounts_get_account(const char * const name)
         g_free(otr_policy);
         g_free(pgp_keyid);
         g_free(startscript);
+        g_free(tls_policy);
 
         return new_account;
     }
@@ -354,7 +366,8 @@ accounts_rename(const char * const account_name, const char * const new_name)
         "otr.always",
         "pgp.keyid",
         "last.activity",
-        "script.start"
+        "script.start",
+        "tls.policy"
     };
 
     int i;
@@ -674,6 +687,15 @@ accounts_set_otr_policy(const char * const account_name, const char * const valu
 {
     if (accounts_account_exists(account_name)) {
         g_key_file_set_string(accounts, account_name, "otr.policy", value);
+        _save_accounts();
+    }
+}
+
+void
+accounts_set_tls_policy(const char * const account_name, const char * const value)
+{
+    if (accounts_account_exists(account_name)) {
+        g_key_file_set_string(accounts, account_name, "tls.policy", value);
         _save_accounts();
     }
 }
