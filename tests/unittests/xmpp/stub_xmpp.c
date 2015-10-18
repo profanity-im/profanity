@@ -6,10 +6,10 @@
 #include "xmpp/xmpp.h"
 
 // connection functions
-void jabber_init(const int disable_tls) {}
+void jabber_init(void) {}
 
 jabber_conn_status_t jabber_connect_with_details(const char * const jid,
-    const char * const passwd, const char * const altdomain, const int port)
+    const char * const passwd, const char * const altdomain, const int port, const char *const tls_policy)
 {
     check_expected(jid);
     check_expected(passwd);

@@ -47,7 +47,7 @@ char * accounts_find_all(const char * const prefix);
 char * accounts_find_enabled(const char * const prefix);
 void accounts_reset_all_search(void);
 void accounts_reset_enabled_search(void);
-void accounts_add(const char *jid, const char *altdomain, const int port);
+void accounts_add(const char *jid, const char *altdomain, const int port, const char *const tls_policy);
 int  accounts_remove(const char *jid);
 gchar** accounts_get_list(void);
 ProfAccount* accounts_get_account(const char * const name);
@@ -65,6 +65,7 @@ void accounts_set_eval_password(const char * const account_name, const char * co
 void accounts_set_muc_service(const char * const account_name, const char * const value);
 void accounts_set_muc_nick(const char * const account_name, const char * const value);
 void accounts_set_otr_policy(const char * const account_name, const char * const value);
+void accounts_set_tls_policy(const char * const account_name, const char * const value);
 void accounts_set_last_presence(const char * const account_name, const char * const value);
 void accounts_set_last_status(const char * const account_name, const char * const value);
 void accounts_set_last_activity(const char * const account_name);
