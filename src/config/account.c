@@ -44,14 +44,14 @@
 #include "log.h"
 
 ProfAccount*
-account_new(const gchar * const name, const gchar * const jid,
-    const gchar * const password, const gchar * eval_password, gboolean enabled, const gchar * const server,
-    int port, const gchar * const resource, const gchar * const last_presence,
-    const gchar * const login_presence, int priority_online, int priority_chat,
+account_new(const gchar *const name, const gchar *const jid,
+    const gchar *const password, const gchar *eval_password, gboolean enabled, const gchar *const server,
+    int port, const gchar *const resource, const gchar *const last_presence,
+    const gchar *const login_presence, int priority_online, int priority_chat,
     int priority_away, int priority_xa, int priority_dnd,
-    const gchar * const muc_service, const gchar * const muc_nick,
-    const gchar * const otr_policy, GList *otr_manual, GList *otr_opportunistic,
-    GList *otr_always, const gchar * const pgp_keyid, const char *const startscript,
+    const gchar *const muc_service, const gchar *const muc_nick,
+    const gchar *const otr_policy, GList *otr_manual, GList *otr_opportunistic,
+    GList *otr_always, const gchar *const pgp_keyid, const char *const startscript,
     gchar *tls_policy)
 {
     ProfAccount *new_account = malloc(sizeof(ProfAccount));
@@ -166,7 +166,7 @@ account_new(const gchar * const name, const gchar * const jid,
     return new_account;
 }
 
-char *
+char*
 account_create_full_jid(ProfAccount *account)
 {
     if (account->resource) {
