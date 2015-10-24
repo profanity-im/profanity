@@ -1170,18 +1170,7 @@ cons_show_ui_prefs(void)
 void
 cons_notify_setting(void)
 {
-    gboolean notify_enabled = FALSE;
-#ifdef HAVE_OSXNOTIFY
-    notify_enabled = TRUE;
-#endif
-#ifdef HAVE_LIBNOTIFY
-    notify_enabled = TRUE;
-#endif
-#ifdef PLATFORM_CYGWIN
-    notify_enabled = TRUE;
-#endif
-
-    if (notify_enabled) {
+    if (is_notify_enabled()) {
         if (prefs_get_boolean(PREF_NOTIFY_MESSAGE))
             cons_show("Messages (/notify message)          : ON");
         else

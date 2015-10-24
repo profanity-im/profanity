@@ -471,12 +471,12 @@ win_clear(ProfWin *window)
 void
 win_resize(ProfWin *window)
 {
-    int subwin_cols = 0;
     int cols = getmaxx(stdscr);
 
     if (window->layout->type == LAYOUT_SPLIT) {
         ProfLayoutSplit *layout = (ProfLayoutSplit*)window->layout;
         if (layout->subwin) {
+            int subwin_cols = 0;
             if (window->type == WIN_CONSOLE) {
                 subwin_cols = win_roster_cols();
             } else if (window->type == WIN_MUC) {
@@ -506,11 +506,11 @@ win_update_virtual(ProfWin *window)
 {
     int rows, cols;
     getmaxyx(stdscr, rows, cols);
-    int subwin_cols = 0;
 
     if (window->layout->type == LAYOUT_SPLIT) {
         ProfLayoutSplit *layout = (ProfLayoutSplit*)window->layout;
         if (layout->subwin) {
+            int subwin_cols = 0;
             if (window->type == WIN_MUC) {
                 subwin_cols = win_occpuants_cols();
             } else {
@@ -905,6 +905,7 @@ win_vprint(ProfWin *window, const char show_char, int pad_indent, GDateTime *tim
     g_string_vprintf(fmt_msg, message, arg);
     win_print(window, show_char, pad_indent, timestamp, flags, theme_item, from, fmt_msg->str);
     g_string_free(fmt_msg, TRUE);
+    va_end(arg);
 }
 
 void

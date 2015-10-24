@@ -2586,12 +2586,9 @@ ui_handle_room_configuration_form_error(const char * const roomjid, const char *
 void
 ui_handle_room_config_submit_result(const char * const roomjid)
 {
-    ProfWin *muc_window = NULL;
-    ProfWin *form_window = NULL;
-    int num;
-
     if (roomjid) {
-        muc_window = (ProfWin*)wins_get_muc(roomjid);
+        ProfWin *form_window = NULL;
+        ProfWin *muc_window = (ProfWin*)wins_get_muc(roomjid);
 
         GString *form_recipient = g_string_new(roomjid);
         g_string_append(form_recipient, " config");
@@ -2599,7 +2596,7 @@ ui_handle_room_config_submit_result(const char * const roomjid)
         g_string_free(form_recipient, TRUE);
 
         if (form_window) {
-            num = wins_get_num(form_window);
+            int num = wins_get_num(form_window);
             wins_close_by_num(num);
         }
 
@@ -2620,10 +2617,9 @@ void
 ui_handle_room_config_submit_result_error(const char * const roomjid, const char * const message)
 {
     ProfWin *console = wins_get_console();
-    ProfWin *muc_window = NULL;
-    ProfWin *form_window = NULL;
-
     if (roomjid) {
+        ProfWin *muc_window = NULL;
+        ProfWin *form_window = NULL;
         muc_window = (ProfWin*)wins_get_muc(roomjid);
 
         GString *form_recipient = g_string_new(roomjid);
