@@ -55,7 +55,7 @@ otrlib_poll(void)
 {
 }
 
-char *
+char*
 otrlib_start_query(void)
 {
     return "?OTR?v2? This user has requested an Off-the-Record private conversation. However, you do not have a plugin to support that. See http://otr.cypherpunks.ca/ for more information.";
@@ -75,14 +75,14 @@ otrlib_init_ops(OtrlMessageAppOps *ops)
     ops->display_otr_message = cb_display_otr_message;
 }
 
-ConnContext *
-otrlib_context_find(OtrlUserState user_state, const char * const recipient, char *jid)
+ConnContext*
+otrlib_context_find(OtrlUserState user_state, const char *const recipient, char *jid)
 {
     return otrl_context_find(user_state, recipient, jid, "xmpp", 0, NULL, NULL, NULL);
 }
 
 void
-otrlib_end_session(OtrlUserState user_state, const char * const recipient, char *jid, OtrlMessageAppOps *ops)
+otrlib_end_session(OtrlUserState user_state, const char *const recipient, char *jid, OtrlMessageAppOps *ops)
 {
     ConnContext *context = otrl_context_find(user_state, recipient, jid, "xmpp",
         0, NULL, NULL, NULL);
@@ -93,8 +93,8 @@ otrlib_end_session(OtrlUserState user_state, const char * const recipient, char 
 }
 
 gcry_error_t
-otrlib_encrypt_message(OtrlUserState user_state, OtrlMessageAppOps *ops, char *jid, const char * const to,
-    const char * const message, char **newmessage)
+otrlib_encrypt_message(OtrlUserState user_state, OtrlMessageAppOps *ops, char *jid, const char *const to,
+    const char *const message, char **newmessage)
 {
     gcry_error_t err;
     err = otrl_message_sending(
@@ -114,8 +114,8 @@ otrlib_encrypt_message(OtrlUserState user_state, OtrlMessageAppOps *ops, char *j
 }
 
 int
-otrlib_decrypt_message(OtrlUserState user_state, OtrlMessageAppOps *ops, char *jid, const char * const from,
-    const char * const message, char **decrypted, OtrlTLV **tlvs)
+otrlib_decrypt_message(OtrlUserState user_state, OtrlMessageAppOps *ops, char *jid, const char *const from,
+    const char *const message, char **decrypted, OtrlTLV **tlvs)
 {
     return otrl_message_receiving(
         user_state,
