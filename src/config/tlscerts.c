@@ -76,7 +76,7 @@ tlscerts_init(void)
 }
 
 gboolean
-tlscerts_exists(const char * const fingerprint)
+tlscerts_exists(const char *const fingerprint)
 {
     return g_key_file_has_group(tlscerts, fingerprint);
 }
@@ -110,8 +110,8 @@ tlscerts_list(void)
 }
 
 TLSCertificate*
-tlscerts_new(const char * const fingerprint, const char * const domain, const char * const organisation,
-    const char * const email, const char * const notbefore, const char * const notafter)
+tlscerts_new(const char *const fingerprint, const char *const domain, const char *const organisation,
+    const char *const email, const char *const notbefore, const char *const notafter)
 {
     TLSCertificate *cert = malloc(sizeof(TLSCertificate));
     if (fingerprint) {
@@ -181,7 +181,7 @@ tlscerts_add(TLSCertificate *cert)
 }
 
 gboolean
-tlscerts_revoke(const char * const fingerprint)
+tlscerts_revoke(const char *const fingerprint)
 {
     gboolean result =  g_key_file_remove_group(tlscerts, fingerprint, NULL);
     if (result) {
@@ -193,8 +193,8 @@ tlscerts_revoke(const char * const fingerprint)
     return result;
 }
 
-char *
-tlscerts_complete(const char * const prefix)
+char*
+tlscerts_complete(const char *const prefix)
 {
     return autocomplete_complete(certs_ac, prefix, TRUE);
 }
@@ -226,7 +226,7 @@ tlscerts_close(void)
     autocomplete_free(certs_ac);
 }
 
-static gchar *
+static gchar*
 _get_tlscerts_file(void)
 {
     gchar *xdg_data = xdg_get_data_home();
