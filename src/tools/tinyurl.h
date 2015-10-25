@@ -38,6 +38,6 @@
 #include <glib.h>
 
 gboolean tinyurl_valid(char *url);
-char * tinyurl_get(char *url);
+char* tinyurl_get(char *url);
 
 #endif

@@ -61,8 +61,8 @@
  * { "arg1", "arg2", NULL }
  *
  */
-gchar **
-parse_args(const char * const inp, int min, int max, gboolean *result)
+gchar**
+parse_args(const char *const inp, int min, int max, gboolean *result)
 {
     if (inp == NULL) {
         *result = FALSE;
@@ -195,8 +195,8 @@ parse_args(const char * const inp, int min, int max, gboolean *result)
  * { "arg1", "arg2", "some free text", NULL }
  *
  */
-gchar **
-parse_args_with_freetext(const char * const inp, int min, int max, gboolean *result)
+gchar**
+parse_args_with_freetext(const char *const inp, int min, int max, gboolean *result)
 {
     if (inp == NULL) {
         *result = FALSE;
@@ -316,7 +316,7 @@ parse_args_with_freetext(const char * const inp, int min, int max, gboolean *res
 }
 
 int
-count_tokens(const char * const string)
+count_tokens(const char *const string)
 {
     int length = g_utf8_strlen(string, -1);
     gboolean in_quotes = FALSE;
@@ -346,8 +346,8 @@ count_tokens(const char * const string)
     return num_tokens;
 }
 
-char *
-get_start(const char * const string, int tokens)
+char*
+get_start(const char *const string, int tokens)
 {
     GString *result = g_string_new("");
     int length = g_utf8_strlen(string, -1);
@@ -388,7 +388,7 @@ get_start(const char * const string, int tokens)
     return result_str;
 }
 
-GHashTable *
+GHashTable*
 parse_options(gchar **args, gchar **opt_keys, gboolean *res)
 {
     GList *keys = NULL;
