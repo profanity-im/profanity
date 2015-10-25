@@ -44,13 +44,13 @@ ui_ev_focus_win(ProfWin *win)
 }
 
 ProfChatWin*
-ui_ev_new_chat_win(const char * const barejid)
+ui_ev_new_chat_win(const char *const barejid)
 {
     return ui_new_chat_win(barejid);
 }
 
 ProfPrivateWin*
-ui_ev_new_private_win(const char * const fulljid)
+ui_ev_new_private_win(const char *const fulljid)
 {
     return ui_new_private_win(fulljid);
 }
