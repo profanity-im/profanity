@@ -4939,7 +4939,7 @@ cmd_otr(ProfWin *window, const char *const command, gchar **args)
             return TRUE;
         }
 
-        ui_gone_insecure(chatwin->barejid);
+        ui_gone_insecure(chatwin);
         otr_end_session(chatwin->barejid);
         return TRUE;
 

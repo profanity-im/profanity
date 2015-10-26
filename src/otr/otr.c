@@ -739,7 +739,10 @@ otr_decrypt_message(const char *const from, const char *const message, gboolean 
         if (tlv) {
             if (context) {
                 otrl_context_force_plaintext(context);
-                ui_gone_insecure(from);
+                ProfChatWin *chatwin = wins_get_chat(from);
+                if (chatwin) {
+                    ui_gone_insecure(chatwin);
+                }
             }
         }
 

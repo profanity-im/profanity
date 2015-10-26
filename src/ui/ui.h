@@ -63,7 +63,7 @@ void ui_switch_win(ProfWin *window);
 void ui_sigwinch_handler(int sig);
 
 void ui_gone_secure(ProfChatWin *chatwin, gboolean trusted);
-void ui_gone_insecure(const char *const barejid);
+void ui_gone_insecure(ProfChatWin *chatwin);
 void ui_trust(const char *const barejid);
 void ui_untrust(const char *const barejid);
 void ui_smp_recipient_initiated(const char *const barejid);

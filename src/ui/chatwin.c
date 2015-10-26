@@ -82,18 +82,15 @@ ui_gone_secure(ProfChatWin *chatwin, gboolean trusted)
 }
 
 void
-ui_gone_insecure(const char *const barejid)
+ui_gone_insecure(ProfChatWin *chatwin)
 {
-    ProfChatWin *chatwin = wins_get_chat(barejid);
-    if (chatwin) {
-        chatwin->is_otr = FALSE;
-        chatwin->otr_is_trusted = FALSE;
+    chatwin->is_otr = FALSE;
+    chatwin->otr_is_trusted = FALSE;
 
-        ProfWin *window = (ProfWin*)chatwin;
-        win_print(window, '!', 0, NULL, 0, THEME_OTR_ENDED, "", "OTR session ended.");
-        if (wins_is_current(window)) {
-            title_bar_switch();
-        }
+    ProfWin *window = (ProfWin*)chatwin;
+    win_print(window, '!', 0, NULL, 0, THEME_OTR_ENDED, "", "OTR session ended.");
+    if (wins_is_current(window)) {
+        title_bar_switch();
     }
 }
 
