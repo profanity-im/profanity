@@ -64,14 +64,14 @@ typedef struct prof_account_t {
     gchar *tls_policy;
 } ProfAccount;
 
-ProfAccount* account_new(const gchar * const name, const gchar * const jid,
-    const gchar * const passord, const gchar * eval_password, gboolean enabled, const gchar * const server,
-    int port, const gchar * const resource, const gchar * const last_presence,
-    const gchar * const login_presence, int priority_online, int priority_chat,
+ProfAccount* account_new(const gchar *const name, const gchar *const jid,
+    const gchar *const passord, const gchar *eval_password, gboolean enabled, const gchar *const server,
+    int port, const gchar *const resource, const gchar *const last_presence,
+    const gchar *const login_presence, int priority_online, int priority_chat,
     int priority_away, int priority_xa, int priority_dnd,
-    const gchar * const muc_service, const gchar * const muc_nick,
-    const gchar * const otr_policy, GList *otr_manual, GList *otr_opportunistic,
-    GList *otr_always, const gchar * const pgp_keyid, const char *const startscript,
+    const gchar *const muc_service, const gchar *const muc_nick,
+    const gchar *const otr_policy, GList *otr_manual, GList *otr_opportunistic,
+    GList *otr_always, const gchar *const pgp_keyid, const char *const startscript,
     gchar *tls_policy);
 char* account_create_full_jid(ProfAccount *account);
 gboolean account_eval_password(ProfAccount *account);

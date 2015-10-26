@@ -129,7 +129,7 @@ create_input_window(void)
     _inp_win_update_virtual();
 }
 
-char *
+char*
 inp_readline(void)
 {
     free(inp_line);
@@ -225,7 +225,7 @@ inp_close(void)
     rl_callback_handler_remove();
 }
 
-char *
+char*
 inp_get_line(void)
 {
     werase(inp_win);

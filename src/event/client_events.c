@@ -49,7 +49,7 @@
 #endif
 
 jabber_conn_status_t
-cl_ev_connect_jid(const char * const jid, const char * const passwd, const char * const altdomain, const int port, const char *const tls_policy)
+cl_ev_connect_jid(const char *const jid, const char *const passwd, const char *const altdomain, const int port, const char *const tls_policy)
 {
     cons_show("Connecting as %s", jid);
     return jabber_connect_with_details(jid, passwd, altdomain, port, tls_policy);
@@ -66,7 +66,7 @@ cl_ev_connect_account(ProfAccount *account)
 }
 
 void
-cl_ev_presence_send(const resource_presence_t presence_type, const char * const msg, const int idle_secs)
+cl_ev_presence_send(const resource_presence_t presence_type, const char *const msg, const int idle_secs)
 {
     char *signed_status = NULL;
 
@@ -85,7 +85,7 @@ cl_ev_presence_send(const resource_presence_t presence_type, const char * const 
 }
 
 void
-cl_ev_send_msg(ProfChatWin *chatwin, const char * const msg)
+cl_ev_send_msg(ProfChatWin *chatwin, const char *const msg)
 {
     chat_state_active(chatwin->state);
     char *plugin_msg = plugins_pre_chat_message_send(chatwin->barejid, msg);
@@ -159,7 +159,7 @@ cl_ev_send_msg(ProfChatWin *chatwin, const char * const msg)
 }
 
 void
-cl_ev_send_muc_msg(ProfMucWin *mucwin, const char * const msg)
+cl_ev_send_muc_msg(ProfMucWin *mucwin, const char *const msg)
 {
     char *plugin_msg = plugins_pre_room_message_send(mucwin->roomjid, msg);
 
@@ -170,7 +170,7 @@ cl_ev_send_muc_msg(ProfMucWin *mucwin, const char * const msg)
 }
 
 void
-cl_ev_send_priv_msg(ProfPrivateWin *privwin, const char * const msg)
+cl_ev_send_priv_msg(ProfPrivateWin *privwin, const char *const msg)
 {
     char *plugin_msg = plugins_pre_priv_message_send(privwin->fulljid, msg);
 

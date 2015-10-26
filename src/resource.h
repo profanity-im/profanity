@@ -44,10 +44,9 @@ typedef struct resource_t {
     int priority;
 } Resource;
 
-Resource * resource_new(const char * const name, resource_presence_t presence,
-    const char * const status, const int priority);
+Resource* resource_new(const char *const name, resource_presence_t presence, const char *const status,
+    const int priority);
 void resource_destroy(Resource *resource);
-
 int resource_compare_availability(Resource *first, Resource *second);
 
 #endif

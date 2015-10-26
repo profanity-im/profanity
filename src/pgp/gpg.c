@@ -66,8 +66,8 @@ static char *passphrase_attempt;
 
 static Autocomplete key_ac;
 
-static char* _remove_header_footer(char *str, const char * const footer);
-static char* _add_header_footer(const char * const str, const char * const header, const char * const footer);
+static char* _remove_header_footer(char *str, const char *const footer);
+static char* _add_header_footer(const char *const str, const char *const header, const char *const footer);
 static void _save_pubkeys(void);
 
 void
@@ -79,7 +79,7 @@ _p_gpg_free_pubkeyid(ProfPGPPubKeyId *pubkeyid)
     free(pubkeyid);
 }
 
-static gpgme_error_t *
+static gpgme_error_t*
 _p_gpg_passphrase_cb(void *hook, const char *uid_hint, const char *passphrase_info, int prev_was_bad, int fd)
 {
     if (passphrase) {
@@ -154,7 +154,7 @@ p_gpg_close(void)
 }
 
 void
-p_gpg_on_connect(const char * const barejid)
+p_gpg_on_connect(const char *const barejid)
 {
     gchar *data_home = xdg_get_data_home();
     GString *pubsfile = g_string_new(data_home);
@@ -262,7 +262,7 @@ p_gpg_on_disconnect(void)
 }
 
 gboolean
-p_gpg_addkey(const char * const jid, const char * const keyid)
+p_gpg_addkey(const char *const jid, const char *const keyid)
 {
     gpgme_ctx_t ctx;
     gpgme_error_t error = gpgme_new(&ctx);
@@ -294,7 +294,7 @@ p_gpg_addkey(const char * const jid, const char * const keyid)
     return TRUE;
 }
 
-static ProfPGPKey *
+static ProfPGPKey*
 _p_gpg_key_new(void)
 {
     ProfPGPKey *p_pgpkey = malloc(sizeof(ProfPGPKey));
@@ -321,7 +321,7 @@ _p_gpg_free_key(ProfPGPKey *key)
     }
 }
 
-GHashTable *
+GHashTable*
 p_gpg_list_keys(void)
 {
     gpgme_error_t error;
@@ -411,7 +411,7 @@ p_gpg_free_keys(GHashTable *keys)
 }
 
 
-GHashTable *
+GHashTable*
 p_gpg_pubkeys(void)
 {
     return pubkeys;
@@ -424,7 +424,7 @@ p_gpg_libver(void)
 }
 
 gboolean
-p_gpg_valid_key(const char * const keyid)
+p_gpg_valid_key(const char *const keyid)
 {
     gpgme_ctx_t ctx;
     gpgme_error_t error = gpgme_new(&ctx);
@@ -453,14 +453,14 @@ p_gpg_valid_key(const char * const keyid)
 }
 
 gboolean
-p_gpg_available(const char * const barejid)
+p_gpg_available(const char *const barejid)
 {
     char *pubkey = g_hash_table_lookup(pubkeys, barejid);
     return (pubkey != NULL);
 }
 
 void
-p_gpg_verify(const char * const barejid, const char *const sign)
+p_gpg_verify(const char *const barejid, const char *const sign)
 {
     if (!sign) {
         return;
@@ -515,7 +515,7 @@ p_gpg_verify(const char * const barejid, const char *const sign)
 }
 
 char*
-p_gpg_sign(const char * const str, const char * const fp)
+p_gpg_sign(const char *const str, const char *const fp)
 {
     gpgme_ctx_t ctx;
     gpgme_error_t error = gpgme_new(&ctx);
@@ -588,8 +588,8 @@ p_gpg_sign(const char * const str, const char * const fp)
     return result;
 }
 
-char *
-p_gpg_encrypt(const char * const barejid, const char * const message)
+char*
+p_gpg_encrypt(const char *const barejid, const char *const message)
 {
     ProfPGPPubKeyId *pubkeyid = g_hash_table_lookup(pubkeys, barejid);
     if (!pubkeyid) {
@@ -654,8 +654,8 @@ p_gpg_encrypt(const char * const barejid, const char * const message)
     return result;
 }
 
-char *
-p_gpg_decrypt(const char * const cipher)
+char*
+p_gpg_decrypt(const char *const cipher)
 {
     gpgme_ctx_t ctx;
     gpgme_error_t error = gpgme_new(&ctx);
@@ -725,8 +725,8 @@ p_gpg_free_decrypted(char *decrypted)
     g_free(decrypted);
 }
 
-char *
-p_gpg_autocomplete_key(const char * const search_str)
+char*
+p_gpg_autocomplete_key(const char *const search_str)
 {
     return autocomplete_complete(key_ac, search_str, TRUE);
 }
@@ -737,7 +737,7 @@ p_gpg_autocomplete_key_reset(void)
     autocomplete_reset(key_ac);
 }
 
-char *
+char*
 p_gpg_format_fp_str(char *fp)
 {
     if (!fp) {
@@ -761,7 +761,7 @@ p_gpg_format_fp_str(char *fp)
 }
 
 static char*
-_remove_header_footer(char *str, const char * const footer)
+_remove_header_footer(char *str, const char *const footer)
 {
     int pos = 0;
     int newlines = 0;
@@ -785,7 +785,7 @@ _remove_header_footer(char *str, const char * const footer)
 }
 
 static char*
-_add_header_footer(const char * const str, const char * const header, const char * const footer)
+_add_header_footer(const char *const str, const char *const header, const char *const footer)
 {
     GString *result_str = g_string_new("");
 

@@ -62,23 +62,15 @@
 
 static Autocomplete sub_requests_ac;
 
-#define HANDLE(ns, type, func) xmpp_handler_add(conn, func, ns, \
-                                                STANZA_NAME_PRESENCE, type, ctx)
+#define HANDLE(ns, type, func) xmpp_handler_add(conn, func, ns, STANZA_NAME_PRESENCE, type, ctx)
 
-static int _unavailable_handler(xmpp_conn_t * const conn,
-    xmpp_stanza_t * const stanza, void * const userdata);
-static int _subscribe_handler(xmpp_conn_t * const conn,
-    xmpp_stanza_t * const stanza, void * const userdata);
-static int _subscribed_handler(xmpp_conn_t * const conn,
-    xmpp_stanza_t * const stanza, void * const userdata);
-static int _unsubscribed_handler(xmpp_conn_t * const conn,
-    xmpp_stanza_t * const stanza, void * const userdata);
-static int _available_handler(xmpp_conn_t * const conn,
-    xmpp_stanza_t * const stanza, void * const userdata);
-static int _muc_user_handler(xmpp_conn_t * const conn,
-    xmpp_stanza_t * const stanza, void * const userdata);
-static int _presence_error_handler(xmpp_conn_t * const conn,
-    xmpp_stanza_t * const stanza, void * const userdata);
+static int _unavailable_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza, void *const userdata);
+static int _subscribe_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza, void *const userdata);
+static int _subscribed_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza, void *const userdata);
+static int _unsubscribed_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza, void *const userdata);
+static int _available_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza, void *const userdata);
+static int _muc_user_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza, void *const userdata);
+static int _presence_error_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza, void *const userdata);
 
 void _send_caps_request(char *node, char *caps_key, char *id, char *from);
 static void _send_room_presence(xmpp_conn_t *conn, xmpp_stanza_t *presence);
@@ -105,7 +97,7 @@ presence_add_handlers(void)
 }
 
 void
-presence_subscription(const char * const jid, const jabber_subscr_t action)
+presence_subscription(const char *const jid, const jabber_subscr_t action)
 {
     assert(jid != NULL);
 
@@ -149,7 +141,7 @@ presence_subscription(const char * const jid, const jabber_subscr_t action)
     free(id);
 }
 
-GSList *
+GSList*
 presence_get_subscription_requests(void)
 {
     return autocomplete_create_list(sub_requests_ac);
@@ -167,14 +159,14 @@ presence_clear_sub_requests(void)
     autocomplete_clear(sub_requests_ac);
 }
 
-char *
-presence_sub_request_find(const char * const search_str)
+char*
+presence_sub_request_find(const char *const search_str)
 {
     return autocomplete_complete(sub_requests_ac, search_str, TRUE);
 }
 
 gboolean
-presence_sub_request_exists(const char * const bare_jid)
+presence_sub_request_exists(const char *const bare_jid)
 {
     gboolean result = FALSE;
     GSList *requests_p = autocomplete_create_list(sub_requests_ac);
@@ -202,7 +194,7 @@ presence_reset_sub_request_search(void)
 }
 
 void
-presence_send(const resource_presence_t presence_type, const char * const msg, const int idle, char *signed_status)
+presence_send(const resource_presence_t presence_type, const char *const msg, const int idle, char *signed_status)
 {
     if (jabber_get_connection_status() != JABBER_CONNECTED) {
         log_warning("Error setting presence, not connected.");
@@ -317,7 +309,7 @@ presence_join_room(char *room, char *nick, char * passwd)
 }
 
 void
-presence_change_room_nick(const char * const room, const char * const nick)
+presence_change_room_nick(const char *const room, const char *const nick)
 {
     assert(room != NULL);
     assert(nick != NULL);
@@ -347,7 +339,7 @@ presence_change_room_nick(const char * const room, const char * const nick)
 }
 
 void
-presence_leave_chat_room(const char * const room_jid)
+presence_leave_chat_room(const char *const room_jid)
 {
     assert(room_jid != NULL);
 
@@ -365,8 +357,8 @@ presence_leave_chat_room(const char * const room_jid)
 }
 
 static int
-_presence_error_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
-    void * const userdata)
+_presence_error_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza,
+    void *const userdata)
 {
     char *id = xmpp_stanza_get_id(stanza);
     char *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
@@ -439,8 +431,8 @@ _presence_error_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
 
 
 static int
-_unsubscribed_handler(xmpp_conn_t * const conn,
-    xmpp_stanza_t * const stanza, void * const userdata)
+_unsubscribed_handler(xmpp_conn_t *const conn,
+    xmpp_stanza_t *const stanza, void *const userdata)
 {
     char *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
     Jid *from_jid = jid_create(from);
@@ -455,8 +447,8 @@ _unsubscribed_handler(xmpp_conn_t * const conn,
 }
 
 static int
-_subscribed_handler(xmpp_conn_t * const conn,
-    xmpp_stanza_t * const stanza, void * const userdata)
+_subscribed_handler(xmpp_conn_t *const conn,
+    xmpp_stanza_t *const stanza, void *const userdata)
 {
     char *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
     Jid *from_jid = jid_create(from);
@@ -471,8 +463,8 @@ _subscribed_handler(xmpp_conn_t * const conn,
 }
 
 static int
-_subscribe_handler(xmpp_conn_t * const conn,
-    xmpp_stanza_t * const stanza, void * const userdata)
+_subscribe_handler(xmpp_conn_t *const conn,
+    xmpp_stanza_t *const stanza, void *const userdata)
 {
     char *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
     log_debug("Subscribe presence handler fired for %s", from);
@@ -491,8 +483,8 @@ _subscribe_handler(xmpp_conn_t * const conn,
 }
 
 static int
-_unavailable_handler(xmpp_conn_t * const conn,
-    xmpp_stanza_t * const stanza, void * const userdata)
+_unavailable_handler(xmpp_conn_t *const conn,
+    xmpp_stanza_t *const stanza, void *const userdata)
 {
     ui_input_nonblocking(TRUE);
 
@@ -568,8 +560,8 @@ _handle_caps(char *jid, XMPPCaps *caps)
 }
 
 static int
-_available_handler(xmpp_conn_t * const conn,
-    xmpp_stanza_t * const stanza, void * const userdata)
+_available_handler(xmpp_conn_t *const conn,
+    xmpp_stanza_t *const stanza, void *const userdata)
 {
     ui_input_nonblocking(TRUE);
 
@@ -668,7 +660,7 @@ _send_caps_request(char *node, char *caps_key, char *id, char *from)
 }
 
 static int
-_muc_user_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, void * const userdata)
+_muc_user_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza, void *const userdata)
 {
     ui_input_nonblocking(TRUE);
 

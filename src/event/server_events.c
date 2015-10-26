@@ -123,8 +123,8 @@ sv_ev_failed_login(void)
 
 void
 sv_ev_room_invite(jabber_invite_t invite_type,
-    const char * const invitor, const char * const room,
-    const char * const reason, const char * const password)
+    const char *const invitor, const char *const room,
+    const char *const reason, const char *const password)
 {
     if (!muc_active(room) && !muc_invites_contain(room)) {
         cons_show_room_invite(invitor, room, reason);
@@ -133,8 +133,7 @@ sv_ev_room_invite(jabber_invite_t invite_type,
 }
 
 void
-sv_ev_room_broadcast(const char *const room_jid,
-    const char * const message)
+sv_ev_room_broadcast(const char *const room_jid, const char *const message)
 {
     if (muc_roster_complete(room_jid)) {
         ui_room_broadcast(room_jid, message);
@@ -144,7 +143,7 @@ sv_ev_room_broadcast(const char *const room_jid,
 }
 
 void
-sv_ev_room_subject(const char * const room, const char * const nick, const char * const subject)
+sv_ev_room_subject(const char *const room, const char *const nick, const char *const subject)
 {
     muc_set_subject(room, subject);
     if (muc_roster_complete(room)) {
@@ -153,8 +152,8 @@ sv_ev_room_subject(const char * const room, const char * const nick, const char 
 }
 
 void
-sv_ev_room_history(const char * const room_jid, const char * const nick,
-    GDateTime *timestamp, const char * const message)
+sv_ev_room_history(const char *const room_jid, const char *const nick,
+    GDateTime *timestamp, const char *const message)
 {
     char *new_message = plugins_pre_room_message_display(room_jid, nick, message);
     ui_room_history(room_jid, nick, timestamp, new_message);
@@ -162,8 +161,8 @@ sv_ev_room_history(const char * const room_jid, const char * const nick,
 }
 
 void
-sv_ev_room_message(const char * const room_jid, const char * const nick,
-    const char * const message)
+sv_ev_room_message(const char *const room_jid, const char *const nick,
+    const char *const message)
 {
     char *new_message = plugins_pre_room_message_display(room_jid, nick, message);
     ui_room_message(room_jid, nick, new_message);
@@ -179,7 +178,7 @@ sv_ev_room_message(const char * const room_jid, const char * const nick,
 }
 
 void
-sv_ev_incoming_private_message(const char * const fulljid, char *message)
+sv_ev_incoming_private_message(const char *const fulljid, char *message)
 {
     char *plugin_message =  plugins_pre_priv_message_display(fulljid, message);
     ui_incoming_private_msg(fulljid, plugin_message, NULL);
@@ -314,7 +313,7 @@ sv_ev_incoming_message(char *barejid, char *resource, char *message, char *pgp_m
 }
 
 void
-sv_ev_delayed_private_message(const char * const fulljid, char *message, GDateTime *timestamp)
+sv_ev_delayed_private_message(const char *const fulljid, char *message, GDateTime *timestamp)
 {
     char *new_message = plugins_pre_priv_message_display(fulljid, message);
     ui_incoming_private_msg(fulljid, new_message, timestamp);
@@ -355,7 +354,7 @@ sv_ev_inactive(char *barejid, char *resource)
 }
 
 void
-sv_ev_gone(const char * const barejid, const char * const resource)
+sv_ev_gone(const char *const barejid, const char *const resource)
 {
     ui_recipient_gone(barejid, resource);
     if (ui_chat_win_exists(barejid)) {
@@ -364,7 +363,7 @@ sv_ev_gone(const char * const barejid, const char * const resource)
 }
 
 void
-sv_ev_activity(const char * const barejid, const char * const resource, gboolean send_states)
+sv_ev_activity(const char *const barejid, const char *const resource, gboolean send_states)
 {
     if (ui_chat_win_exists(barejid)) {
         chat_session_recipient_active(barejid, resource, send_states);
@@ -433,44 +432,44 @@ sv_ev_contact_online(char *barejid, Resource *resource, GDateTime *last_activity
 }
 
 void
-sv_ev_leave_room(const char * const room)
+sv_ev_leave_room(const char *const room)
 {
     muc_leave(room);
     ui_leave_room(room);
 }
 
 void
-sv_ev_room_destroy(const char * const room)
+sv_ev_room_destroy(const char *const room)
 {
     muc_leave(room);
     ui_room_destroy(room);
 }
 
 void
-sv_ev_room_destroyed(const char * const room, const char * const new_jid, const char * const password,
-    const char * const reason)
+sv_ev_room_destroyed(const char *const room, const char *const new_jid, const char *const password,
+    const char *const reason)
 {
     muc_leave(room);
     ui_room_destroyed(room, reason, new_jid, password);
 }
 
 void
-sv_ev_room_kicked(const char * const room, const char * const actor, const char * const reason)
+sv_ev_room_kicked(const char *const room, const char *const actor, const char *const reason)
 {
     muc_leave(room);
     ui_room_kicked(room, actor, reason);
 }
 
 void
-sv_ev_room_banned(const char * const room, const char * const actor, const char * const reason)
+sv_ev_room_banned(const char *const room, const char *const actor, const char *const reason)
 {
     muc_leave(room);
     ui_room_banned(room, actor, reason);
 }
 
 void
-sv_ev_room_occupant_offline(const char * const room, const char * const nick,
-    const char * const show, const char * const status)
+sv_ev_room_occupant_offline(const char *const room, const char *const nick,
+    const char *const show, const char *const status)
 {
     muc_roster_remove(room, nick);
 
@@ -483,8 +482,8 @@ sv_ev_room_occupant_offline(const char * const room, const char * const nick,
 }
 
 void
-sv_ev_room_occupent_kicked(const char * const room, const char * const nick, const char * const actor,
-    const char * const reason)
+sv_ev_room_occupent_kicked(const char *const room, const char *const nick, const char *const actor,
+    const char *const reason)
 {
     muc_roster_remove(room, nick);
     ui_room_member_kicked(room, nick, actor, reason);
@@ -492,8 +491,8 @@ sv_ev_room_occupent_kicked(const char * const room, const char * const nick, con
 }
 
 void
-sv_ev_room_occupent_banned(const char * const room, const char * const nick, const char * const actor,
-    const char * const reason)
+sv_ev_room_occupent_banned(const char *const room, const char *const nick, const char *const actor,
+    const char *const reason)
 {
     muc_roster_remove(room, nick);
     ui_room_member_banned(room, nick, actor, reason);
@@ -501,23 +500,23 @@ sv_ev_room_occupent_banned(const char * const room, const char * const nick, con
 }
 
 void
-sv_ev_roster_update(const char * const barejid, const char * const name,
-    GSList *groups, const char * const subscription, gboolean pending_out)
+sv_ev_roster_update(const char *const barejid, const char *const name,
+    GSList *groups, const char *const subscription, gboolean pending_out)
 {
     roster_update(barejid, name, groups, subscription, pending_out);
     rosterwin_roster();
 }
 
 void
-sv_ev_xmpp_stanza(const char * const msg)
+sv_ev_xmpp_stanza(const char *const msg)
 {
     ui_handle_stanza(msg);
 }
 
 void
-sv_ev_muc_self_online(const char * const room, const char * const nick, gboolean config_required,
-    const char * const role, const char * const affiliation, const char * const actor, const char * const reason,
-    const char * const jid, const char * const show, const char * const status)
+sv_ev_muc_self_online(const char *const room, const char *const nick, gboolean config_required,
+    const char *const role, const char *const affiliation, const char *const actor, const char *const reason,
+    const char *const jid, const char *const show, const char *const status)
 {
     muc_roster_add(room, nick, jid, role, affiliation, show, status);
     char *old_role = muc_role_str(room);
@@ -592,9 +591,9 @@ sv_ev_muc_self_online(const char * const room, const char * const nick, gboolean
 }
 
 void
-sv_ev_muc_occupant_online(const char * const room, const char * const nick, const char * const jid,
-    const char * const role, const char * const affiliation, const char * const actor, const char * const reason,
-    const char * const show, const char * const status)
+sv_ev_muc_occupant_online(const char *const room, const char *const nick, const char *const jid,
+    const char *const role, const char *const affiliation, const char *const actor, const char *const reason,
+    const char *const show, const char *const status)
 {
     Occupant *occupant = muc_roster_item(room, nick);
 
@@ -662,8 +661,8 @@ sv_ev_muc_occupant_online(const char * const room, const char * const nick, cons
 }
 
 int
-sv_ev_certfail(const char * const errormsg, const char * const certname, const char * const certfp,
-    const char * const notbefore, const char * const notafter)
+sv_ev_certfail(const char *const errormsg, const char *const certname, const char *const certfp,
+    const char *const notbefore, const char *const notafter)
 {
     if (tlscerts_exists(certfp)) {
         return 1;
@@ -753,7 +752,7 @@ sv_ev_certfail(const char * const errormsg, const char * const certname, const c
 }
 
 void
-sv_ev_lastactivity_response(const char * const from, const int seconds, const char * const msg)
+sv_ev_lastactivity_response(const char *const from, const int seconds, const char *const msg)
 {
     Jid *jidp = jid_create(from);
 

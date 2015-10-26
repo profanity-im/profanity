@@ -304,7 +304,7 @@ status_bar_get_password(void)
 }
 
 void
-status_bar_print_message(const char * const msg)
+status_bar_print_message(const char *const msg)
 {
     werase(status_bar);
 

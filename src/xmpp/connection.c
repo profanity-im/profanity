@@ -96,20 +96,20 @@ static GTimer *reconnect_timer;
 static log_level_t _get_log_level(xmpp_log_level_t xmpp_level);
 static xmpp_log_level_t _get_xmpp_log_level(void);
 
-static void _xmpp_file_logger(void * const userdata,
-    const xmpp_log_level_t level, const char * const area,
-    const char * const msg);
+static void _xmpp_file_logger(void *const userdata,
+    const xmpp_log_level_t level, const char *const area,
+    const char *const msg);
 
-static xmpp_log_t * _xmpp_get_file_logger(void);
+static xmpp_log_t* _xmpp_get_file_logger(void);
 
-static jabber_conn_status_t _jabber_connect(const char * const fulljid,
-    const char * const passwd, const char * const altdomain, int port, const char *const tls_policy);
+static jabber_conn_status_t _jabber_connect(const char *const fulljid,
+    const char *const passwd, const char *const altdomain, int port, const char *const tls_policy);
 
 static void _jabber_reconnect(void);
 
-static void _connection_handler(xmpp_conn_t * const conn,
+static void _connection_handler(xmpp_conn_t *const conn,
     const xmpp_conn_event_t status, const int error,
-    xmpp_stream_error_t * const stream_error, void * const userdata);
+    xmpp_stream_error_t *const stream_error, void *const userdata);
 
 void _connection_free_saved_account(void);
 void _connection_free_saved_details(void);
@@ -132,7 +132,7 @@ jabber_init(void)
 }
 
 jabber_conn_status_t
-jabber_connect_with_account(const ProfAccount * const account)
+jabber_connect_with_account(const ProfAccount *const account)
 {
     assert(account != NULL);
 
@@ -158,8 +158,8 @@ jabber_connect_with_account(const ProfAccount * const account)
 }
 
 jabber_conn_status_t
-jabber_connect_with_details(const char * const jid,
-    const char * const passwd, const char * const altdomain, const int port, const char *const tls_policy)
+jabber_connect_with_details(const char *const jid,
+    const char *const passwd, const char *const altdomain, const int port, const char *const tls_policy)
 {
     assert(jid != NULL);
     assert(passwd != NULL);
@@ -275,7 +275,7 @@ jabber_process_events(int millis)
     }
 }
 
-GList *
+GList*
 jabber_get_available_resources(void)
 {
     return g_hash_table_get_values(available_resources);
@@ -287,37 +287,37 @@ jabber_get_connection_status(void)
     return (jabber_conn.conn_status);
 }
 
-xmpp_conn_t *
+xmpp_conn_t*
 connection_get_conn(void)
 {
     return jabber_conn.conn;
 }
 
-xmpp_ctx_t *
+xmpp_ctx_t*
 connection_get_ctx(void)
 {
     return jabber_conn.ctx;
 }
 
-const char *
+const char*
 jabber_get_fulljid(void)
 {
     return xmpp_conn_get_jid(jabber_conn.conn);
 }
 
-const char *
+const char*
 jabber_get_domain(void)
 {
     return jabber_conn.domain;
 }
 
-char *
+char*
 jabber_get_presence_message(void)
 {
     return jabber_conn.presence_message;
 }
 
-char *
+char*
 jabber_get_account_name(void)
 {
     return saved_account.name;
@@ -338,7 +338,7 @@ jabber_free_uuid(char *uuid)
 }
 
 void
-connection_set_presence_message(const char * const message)
+connection_set_presence_message(const char *const message)
 {
     FREE_SET_NULL(jabber_conn.presence_message);
     if (message) {
@@ -359,7 +359,7 @@ connection_add_available_resource(Resource *resource)
 }
 
 void
-connection_remove_available_resource(const char * const resource)
+connection_remove_available_resource(const char *const resource)
 {
     g_hash_table_remove(available_resources, resource);
 }
@@ -391,16 +391,16 @@ _connection_free_session_data(void)
 
 #ifdef PROF_HAVE_LIBMESODE
 static int
-_connection_certfail_cb(const char * const certname, const char * const certfp,
-    char * const notbefore, const char * const notafter, const char * const errormsg)
+_connection_certfail_cb(const char *const certname, const char *const certfp,
+    char *const notbefore, const char *const notafter, const char *const errormsg)
 {
     return sv_ev_certfail(errormsg, certname, certfp, notbefore, notafter);
 }
 #endif
 
 static jabber_conn_status_t
-_jabber_connect(const char * const fulljid, const char * const passwd,
-    const char * const altdomain, int port, const char *const tls_policy)
+_jabber_connect(const char *const fulljid, const char *const passwd,
+    const char *const altdomain, int port, const char *const tls_policy)
 {
     assert(fulljid != NULL);
     assert(passwd != NULL);
@@ -492,9 +492,9 @@ _jabber_reconnect(void)
 }
 
 static void
-_connection_handler(xmpp_conn_t * const conn,
+_connection_handler(xmpp_conn_t *const conn,
     const xmpp_conn_event_t status, const int error,
-    xmpp_stream_error_t * const stream_error, void * const userdata)
+    xmpp_stream_error_t *const stream_error, void *const userdata)
 {
     // login success
     if (status == XMPP_CONN_CONNECT) {
@@ -626,8 +626,8 @@ _get_xmpp_log_level()
 }
 
 static void
-_xmpp_file_logger(void * const userdata, const xmpp_log_level_t level,
-    const char * const area, const char * const msg)
+_xmpp_file_logger(void *const userdata, const xmpp_log_level_t level,
+    const char *const area, const char *const msg)
 {
     log_level_t prof_level = _get_log_level(level);
     log_msg(prof_level, area, msg);
@@ -636,7 +636,7 @@ _xmpp_file_logger(void * const userdata, const xmpp_log_level_t level,
     }
 }
 
-static xmpp_log_t *
+static xmpp_log_t*
 _xmpp_get_file_logger()
 {
     xmpp_log_level_t level = _get_xmpp_log_level();

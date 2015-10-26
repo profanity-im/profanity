@@ -166,7 +166,7 @@ prof_handle_activity(void)
 }
 
 static void
-_connect_default(const char * const account)
+_connect_default(const char *const account)
 {
     ProfWin *window = wins_get_current();
     if (account) {

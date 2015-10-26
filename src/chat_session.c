@@ -46,8 +46,8 @@
 static GHashTable *sessions;
 
 static void
-_chat_session_new(const char * const barejid, const char * const resource,
-    gboolean resource_override, gboolean send_states)
+_chat_session_new(const char *const barejid, const char *const resource, gboolean resource_override,
+    gboolean send_states)
 {
     assert(barejid != NULL);
     assert(resource != NULL);
@@ -86,19 +86,19 @@ chat_sessions_clear(void)
 }
 
 void
-chat_session_resource_override(const char * const barejid, const char * const resource)
+chat_session_resource_override(const char *const barejid, const char *const resource)
 {
     _chat_session_new(barejid, resource, TRUE, TRUE);
 }
 
 ChatSession*
-chat_session_get(const char * const barejid)
+chat_session_get(const char *const barejid)
 {
     return g_hash_table_lookup(sessions, barejid);
 }
 
 void
-chat_session_recipient_gone(const char * const barejid, const char * const resource)
+chat_session_recipient_gone(const char *const barejid, const char *const resource)
 {
     assert(barejid != NULL);
     assert(resource != NULL);
@@ -112,25 +112,25 @@ chat_session_recipient_gone(const char * const barejid, const char * const resou
 }
 
 void
-chat_session_recipient_typing(const char * const barejid, const char * const resource)
+chat_session_recipient_typing(const char *const barejid, const char *const resource)
 {
     chat_session_recipient_active(barejid, resource, TRUE);
 }
 
 void
-chat_session_recipient_paused(const char * const barejid, const char * const resource)
+chat_session_recipient_paused(const char *const barejid, const char *const resource)
 {
     chat_session_recipient_active(barejid, resource, TRUE);
 }
 
 void
-chat_session_recipient_inactive(const char * const barejid, const char * const resource)
+chat_session_recipient_inactive(const char *const barejid, const char *const resource)
 {
     chat_session_recipient_active(barejid, resource, TRUE);
 }
 
 void
-chat_session_recipient_active(const char * const barejid, const char * const resource,
+chat_session_recipient_active(const char *const barejid, const char *const resource,
     gboolean send_states)
 {
     assert(barejid != NULL);
@@ -153,7 +153,7 @@ chat_session_recipient_active(const char * const barejid, const char * const res
 }
 
 void
-chat_session_remove(const char * const barejid)
+chat_session_remove(const char *const barejid)
 {
     g_hash_table_remove(sessions, barejid);
 }

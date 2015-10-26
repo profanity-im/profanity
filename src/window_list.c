@@ -63,14 +63,14 @@ wins_init(void)
     current = 1;
 }
 
-ProfWin *
+ProfWin*
 wins_get_console(void)
 {
     return g_hash_table_lookup(windows, GINT_TO_POINTER(1));
 }
 
-ProfChatWin *
-wins_get_chat(const char * const barejid)
+ProfChatWin*
+wins_get_chat(const char *const barejid)
 {
     GList *values = g_hash_table_get_values(windows);
     GList *curr = values;
@@ -91,8 +91,8 @@ wins_get_chat(const char * const barejid)
     return NULL;
 }
 
-ProfMucConfWin *
-wins_get_muc_conf(const char * const roomjid)
+ProfMucConfWin*
+wins_get_muc_conf(const char *const roomjid)
 {
     GList *values = g_hash_table_get_values(windows);
     GList *curr = values;
@@ -113,8 +113,8 @@ wins_get_muc_conf(const char * const roomjid)
     return NULL;
 }
 
-ProfMucWin *
-wins_get_muc(const char * const roomjid)
+ProfMucWin*
+wins_get_muc(const char *const roomjid)
 {
     GList *values = g_hash_table_get_values(windows);
     GList *curr = values;
@@ -135,8 +135,8 @@ wins_get_muc(const char * const roomjid)
     return NULL;
 }
 
-ProfPrivateWin *
-wins_get_private(const char * const fulljid)
+ProfPrivateWin*
+wins_get_private(const char *const fulljid)
 {
     GList *values = g_hash_table_get_values(windows);
     GList *curr = values;
@@ -157,8 +157,8 @@ wins_get_private(const char * const fulljid)
     return NULL;
 }
 
-ProfPluginWin *
-wins_get_plugin(const char * const tag)
+ProfPluginWin*
+wins_get_plugin(const char *const tag)
 {
     GList *values = g_hash_table_get_values(windows);
     GList *curr = values;
@@ -178,7 +178,7 @@ wins_get_plugin(const char * const tag)
     return NULL;
 }
 
-ProfWin *
+ProfWin*
 wins_get_current(void)
 {
     if (windows) {
@@ -188,7 +188,7 @@ wins_get_current(void)
     }
 }
 
-GList *
+GList*
 wins_get_nums(void)
 {
     return g_hash_table_get_keys(windows);
@@ -215,13 +215,13 @@ wins_set_current_by_num(int i)
     }
 }
 
-ProfWin *
+ProfWin*
 wins_get_by_num(int i)
 {
     return g_hash_table_lookup(windows, GINT_TO_POINTER(i));
 }
 
-ProfWin *
+ProfWin*
 wins_get_next(void)
 {
     // get and sort win nums
@@ -250,7 +250,7 @@ wins_get_next(void)
     }
 }
 
-ProfWin *
+ProfWin*
 wins_get_previous(void)
 {
     // get and sort win nums
@@ -342,7 +342,7 @@ wins_is_current(ProfWin *window)
     }
 }
 
-ProfWin *
+ProfWin*
 wins_new_xmlconsole(void)
 {
     GList *keys = g_hash_table_get_keys(windows);
@@ -353,8 +353,8 @@ wins_new_xmlconsole(void)
     return newwin;
 }
 
-ProfWin *
-wins_new_chat(const char * const barejid)
+ProfWin*
+wins_new_chat(const char *const barejid)
 {
     GList *keys = g_hash_table_get_keys(windows);
     int result = get_next_available_win_num(keys);
@@ -364,8 +364,8 @@ wins_new_chat(const char * const barejid)
     return newwin;
 }
 
-ProfWin *
-wins_new_muc(const char * const roomjid)
+ProfWin*
+wins_new_muc(const char *const roomjid)
 {
     GList *keys = g_hash_table_get_keys(windows);
     int result = get_next_available_win_num(keys);
@@ -375,8 +375,8 @@ wins_new_muc(const char * const roomjid)
     return newwin;
 }
 
-ProfWin *
-wins_new_muc_config(const char * const roomjid, DataForm *form)
+ProfWin*
+wins_new_muc_config(const char *const roomjid, DataForm *form)
 {
     GList *keys = g_hash_table_get_keys(windows);
     int result = get_next_available_win_num(keys);
@@ -386,8 +386,8 @@ wins_new_muc_config(const char * const roomjid, DataForm *form)
     return newwin;
 }
 
-ProfWin *
-wins_new_private(const char * const fulljid)
+ProfWin*
+wins_new_private(const char *const fulljid)
 {
     GList *keys = g_hash_table_get_keys(windows);
     int result = get_next_available_win_num(keys);
@@ -458,7 +458,7 @@ wins_show_subwin(ProfWin *window)
     win_refresh_with_subwin(current_win);
 }
 
-ProfXMLWin *
+ProfXMLWin*
 wins_get_xmlconsole(void)
 {
     GList *values = g_hash_table_get_values(windows);
@@ -479,7 +479,7 @@ wins_get_xmlconsole(void)
     return NULL;
 }
 
-GSList *
+GSList*
 wins_get_chat_recipients(void)
 {
     GSList *result = NULL;
@@ -498,7 +498,7 @@ wins_get_chat_recipients(void)
     return result;
 }
 
-GSList *
+GSList*
 wins_get_prune_wins(void)
 {
     GSList *result = NULL;
@@ -652,7 +652,7 @@ wins_tidy(void)
     }
 }
 
-GSList *
+GSList*
 wins_create_summary(void)
 {
     GSList *result = NULL;
