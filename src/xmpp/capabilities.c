@@ -68,9 +68,9 @@ static char *my_sha1;
 
 static gchar* _get_cache_file(void);
 static void _save_cache(void);
-static Capabilities * _caps_by_ver(const char * const ver);
-static Capabilities * _caps_by_jid(const char * const jid);
-Capabilities * _caps_copy(Capabilities *caps);
+static Capabilities* _caps_by_ver(const char *const ver);
+static Capabilities* _caps_by_jid(const char *const jid);
+Capabilities* _caps_copy(Capabilities *caps);
 
 void
 caps_init(void)
@@ -93,7 +93,7 @@ caps_init(void)
 }
 
 void
-caps_add_by_ver(const char * const ver, Capabilities *caps)
+caps_add_by_ver(const char *const ver, Capabilities *caps)
 {
     gboolean cached = g_key_file_has_group(cache, ver);
     if (!cached) {
@@ -135,25 +135,25 @@ caps_add_by_ver(const char * const ver, Capabilities *caps)
 }
 
 void
-caps_add_by_jid(const char * const jid, Capabilities *caps)
+caps_add_by_jid(const char *const jid, Capabilities *caps)
 {
     g_hash_table_insert(jid_to_caps, strdup(jid), caps);
 }
 
 void
-caps_map_jid_to_ver(const char * const jid, const char * const ver)
+caps_map_jid_to_ver(const char *const jid, const char *const ver)
 {
     g_hash_table_insert(jid_to_ver, strdup(jid), strdup(ver));
 }
 
 gboolean
-caps_contains(const char * const ver)
+caps_contains(const char *const ver)
 {
     return (g_key_file_has_group(cache, ver));
 }
 
-static Capabilities *
-_caps_by_ver(const char * const ver)
+static Capabilities*
+_caps_by_ver(const char *const ver)
 {
     if (g_key_file_has_group(cache, ver)) {
         Capabilities *new_caps = malloc(sizeof(struct capabilities_t));
@@ -226,14 +226,14 @@ _caps_by_ver(const char * const ver)
     }
 }
 
-static Capabilities *
-_caps_by_jid(const char * const jid)
+static Capabilities*
+_caps_by_jid(const char *const jid)
 {
     return g_hash_table_lookup(jid_to_caps, jid);
 }
 
-Capabilities *
-caps_lookup(const char * const jid)
+Capabilities*
+caps_lookup(const char *const jid)
 {
     char *ver = g_hash_table_lookup(jid_to_ver, jid);
     if (ver) {
@@ -254,7 +254,7 @@ caps_lookup(const char * const jid)
     return NULL;
 }
 
-Capabilities *
+Capabilities*
 _caps_copy(Capabilities *caps)
 {
     if (!caps) {
@@ -280,8 +280,8 @@ _caps_copy(Capabilities *caps)
     }
 }
 
-char *
-caps_create_sha1_str(xmpp_stanza_t * const query)
+char*
+caps_create_sha1_str(xmpp_stanza_t *const query)
 {
     char *category = NULL;
     char *type = NULL;
@@ -388,7 +388,7 @@ caps_create_sha1_str(xmpp_stanza_t * const query)
     return result;
 }
 
-Capabilities *
+Capabilities*
 caps_create(xmpp_stanza_t *query)
 {
     char *category = NULL;
@@ -541,7 +541,7 @@ caps_create(xmpp_stanza_t *query)
 }
 
 char*
-caps_get_my_sha1(xmpp_ctx_t * const ctx)
+caps_get_my_sha1(xmpp_ctx_t *const ctx)
 {
     if (my_sha1 == NULL) {
         xmpp_stanza_t *query = caps_create_query_response_stanza(ctx);
@@ -552,8 +552,8 @@ caps_get_my_sha1(xmpp_ctx_t * const ctx)
     return my_sha1;
 }
 
-xmpp_stanza_t *
-caps_create_query_response_stanza(xmpp_ctx_t * const ctx)
+xmpp_stanza_t*
+caps_create_query_response_stanza(xmpp_ctx_t *const ctx)
 {
     xmpp_stanza_t *query = xmpp_stanza_new(ctx);
     xmpp_stanza_set_name(query, STANZA_NAME_QUERY);
@@ -674,7 +674,7 @@ caps_destroy(Capabilities *caps)
     }
 }
 
-static gchar *
+static gchar*
 _get_cache_file(void)
 {
     gchar *xdg_data = xdg_get_data_home();

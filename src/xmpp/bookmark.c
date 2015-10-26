@@ -62,10 +62,10 @@
 static Autocomplete bookmark_ac;
 static GList *bookmark_list;
 
-static int _bookmark_handle_result(xmpp_conn_t * const conn,
-    xmpp_stanza_t * const stanza, void * const userdata);
-static int _bookmark_handle_delete(xmpp_conn_t * const conn,
-    void * const userdata);
+static int _bookmark_handle_result(xmpp_conn_t *const conn,
+    xmpp_stanza_t *const stanza, void *const userdata);
+static int _bookmark_handle_delete(xmpp_conn_t *const conn,
+    void *const userdata);
 static void _bookmark_item_destroy(gpointer item);
 static int _match_bookmark_by_jid(gconstpointer a, gconstpointer b);
 static void _send_bookmarks(void);
@@ -221,14 +221,14 @@ bookmark_remove(const char *jid)
     }
 }
 
-const GList *
+const GList*
 bookmark_get_list(void)
 {
     return bookmark_list;
 }
 
-char *
-bookmark_find(const char * const search_str)
+char*
+bookmark_find(const char *const search_str)
 {
     return autocomplete_complete(bookmark_ac, search_str, TRUE);
 }
@@ -242,8 +242,8 @@ bookmark_autocomplete_reset(void)
 }
 
 static int
-_bookmark_handle_result(xmpp_conn_t * const conn,
-    xmpp_stanza_t * const stanza, void * const userdata)
+_bookmark_handle_result(xmpp_conn_t *const conn,
+    xmpp_stanza_t *const stanza, void *const userdata)
 {
     xmpp_ctx_t *ctx = connection_get_ctx();
     char *id = (char *)userdata;
@@ -360,8 +360,8 @@ _bookmark_handle_result(xmpp_conn_t * const conn,
 }
 
 static int
-_bookmark_handle_delete(xmpp_conn_t * const conn,
-    void * const userdata)
+_bookmark_handle_delete(xmpp_conn_t *const conn,
+    void *const userdata)
 {
     char *id = (char *)userdata;
 
