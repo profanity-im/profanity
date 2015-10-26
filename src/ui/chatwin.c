@@ -47,13 +47,10 @@
 static void _win_show_history(ProfChatWin *chatwin, const char *const contact);
 
 void
-ui_message_receipt(const char *const barejid, const char *const id)
+ui_message_receipt(ProfChatWin *chatwin, const char *const id)
 {
-    ProfChatWin *chatwin = wins_get_chat(barejid);
-    if (chatwin) {
-        ProfWin *win = (ProfWin*) chatwin;
-        win_mark_received(win, id);
-    }
+    ProfWin *win = (ProfWin*) chatwin;
+    win_mark_received(win, id);
 }
 
 void

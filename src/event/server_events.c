@@ -311,7 +311,11 @@ sv_ev_delayed_private_message(const char *const fulljid, char *message, GDateTim
 void
 sv_ev_message_receipt(char *barejid, char *id)
 {
-    ui_message_receipt(barejid, id);
+    ProfChatWin *chatwin = wins_get_chat(barejid);
+    if (!chatwin)
+        return;
+
+    ui_message_receipt(chatwin, id);
 }
 
 void
