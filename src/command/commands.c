@@ -206,7 +206,7 @@ cmd_tls(ProfWin *window, const char *const command, gchar **args)
             cons_show("Trusted certificates:");
             cons_show("");
         } else {
-            cons_show("No trustes certificates found.");
+            cons_show("No trusted certificates found.");
         }
         while (curr) {
             TLSCertificate *cert = curr->data;
