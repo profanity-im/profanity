@@ -189,7 +189,9 @@ cb_handle_smp_event(void *opdata, OtrlSMPEvent smp_event,
             break;
 
         case OTRL_SMPEVENT_ASK_FOR_ANSWER:
-            ui_smp_recipient_initiated_q(context->username, question);
+            if (chatwin) {
+                ui_smp_recipient_initiated_q(chatwin, question);
+            }
             break;
 
         case OTRL_SMPEVENT_SUCCESS:

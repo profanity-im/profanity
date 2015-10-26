@@ -110,14 +110,13 @@ ui_smp_recipient_initiated(ProfChatWin *chatwin)
 }
 
 void
-ui_smp_recipient_initiated_q(const char *const barejid, const char *question)
+ui_smp_recipient_initiated_q(ProfChatWin *chatwin, const char *question)
 {
-    ProfChatWin *chatwin = wins_get_chat(barejid);
-    if (chatwin) {
-        win_vprint((ProfWin*)chatwin, '!', 0, NULL, 0, 0, "", "%s wants to authenticate your identity with the following question:", barejid);
-        win_vprint((ProfWin*)chatwin, '!', 0, NULL, 0, 0, "", "  %s", question);
-        win_print((ProfWin*)chatwin, '!', 0, NULL, 0, 0, "", "use '/otr answer <answer>'.");
-    }
+    assert(chatwin != NULL);
+
+    win_vprint((ProfWin*)chatwin, '!', 0, NULL, 0, 0, "", "%s wants to authenticate your identity with the following question:", chatwin->barejid);
+    win_vprint((ProfWin*)chatwin, '!', 0, NULL, 0, 0, "", "  %s", question);
+    win_print((ProfWin*)chatwin, '!', 0, NULL, 0, 0, "", "use '/otr answer <answer>'.");
 }
 
 void

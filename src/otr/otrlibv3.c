@@ -152,10 +152,13 @@ otrlib_handle_tlvs(OtrlUserState user_state, OtrlMessageAppOps *ops, ConnContext
         if (nextMsg != OTRL_SMP_EXPECT1) {
             otrl_message_abort_smp(user_state, ops, NULL, context);
         } else {
-            char *question = (char *)tlv->data;
-            char *eoq = memchr(question, '\0', tlv->len);
-            if (eoq) {
-                ui_smp_recipient_initiated_q(context->username, question);
+            ProfChatWin *chatwin = wins_get_chat(context->username);
+            if (chatwin) {
+                char *question = (char *)tlv->data;
+                char *eoq = memchr(question, '\0', tlv->len);
+                if (eoq) {
+                    ui_smp_recipient_initiated_q(chatwin, question);
+                }
             }
         }
     }
