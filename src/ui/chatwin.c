@@ -131,12 +131,12 @@ ui_smp_unsuccessful_sender(ProfChatWin *chatwin)
 }
 
 void
-ui_smp_unsuccessful_receiver(const char *const barejid)
+ui_smp_unsuccessful_receiver(ProfChatWin *chatwin)
 {
-    ProfChatWin *chatwin = wins_get_chat(barejid);
-    if (chatwin) {
-        win_vprint((ProfWin*)chatwin, '!', 0, NULL, 0, 0, "", "Authentication failed, the secret entered by %s does not match yours.", barejid);
-    }
+    assert(chatwin != NULL);
+
+    win_vprint((ProfWin*)chatwin, '!', 0, NULL, 0, 0, "",
+        "Authentication failed, the secret entered by %s does not match yours.", chatwin->barejid);
 }
 
 void

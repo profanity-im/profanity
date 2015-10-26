@@ -210,7 +210,9 @@ cb_handle_smp_event(void *opdata, OtrlSMPEvent smp_event,
                         ui_smp_unsuccessful_sender(chatwin);
                     }
                 } else if (nextMsg == OTRL_SMP_EXPECT4) {
-                    ui_smp_unsuccessful_receiver(context->username);
+                    if (chatwin) {
+                        ui_smp_unsuccessful_receiver(chatwin);
+                    }
                 }
                 ui_untrust(context->username);
             } else {

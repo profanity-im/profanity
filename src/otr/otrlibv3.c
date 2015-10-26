@@ -206,7 +206,10 @@ otrlib_handle_tlvs(OtrlUserState user_state, OtrlMessageAppOps *ops, ConnContext
                 ui_smp_successful(context->username);
                 ui_trust(context->username);
             } else {
-                ui_smp_unsuccessful_receiver(context->username);
+                ProfChatWin *chatwin = wins_get_chat(context->username);
+                if (chatwin) {
+                    ui_smp_unsuccessful_receiver(chatwin);
+                }
                 ui_untrust(context->username);
             }
         }

@@ -75,7 +75,7 @@ void ui_smp_recipient_initiated_q(ProfChatWin *chatwin, const char *question) {}
 
 void ui_smp_successful(const char * const barejid) {}
 void ui_smp_unsuccessful_sender(ProfChatWin *chatwin) {}
-void ui_smp_unsuccessful_receiver(const char * const barejid) {}
+void ui_smp_unsuccessful_receiver(ProfChatWin *chatwin) {}
 void ui_smp_aborted(const char * const barejid) {}
 
 void ui_smp_answer_success(const char * const barejid) {}
