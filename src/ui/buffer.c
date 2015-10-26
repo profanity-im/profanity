@@ -76,7 +76,6 @@ buffer_free(ProfBuff buffer)
 {
     g_slist_free_full(buffer->entries, (GDestroyNotify)_free_entry);
     free(buffer);
-    buffer = NULL;
 }
 
 void

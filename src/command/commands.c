@@ -1027,7 +1027,8 @@ cmd_help(ProfWin *window, const char *const command, gchar **args)
 gboolean
 cmd_about(ProfWin *window, const char *const command, gchar **args)
 {
-    ui_about();
+    cons_show("");
+    cons_about();
     return TRUE;
 }
 
