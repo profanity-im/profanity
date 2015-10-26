@@ -319,7 +319,6 @@ void ui_titlebar_presence(contact_presence_t presence) {}
 void ui_handle_login_account_success(ProfAccount *account, int secured) {}
 void ui_update_presence(const resource_presence_t resource_presence,
     const char * const message, const char * const show) {}
-void ui_about(void) {}
 void ui_statusbar_new(const int win) {}
 
 char*  ui_readline(void)
