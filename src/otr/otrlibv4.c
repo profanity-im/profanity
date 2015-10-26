@@ -206,7 +206,9 @@ cb_handle_smp_event(void *opdata, OtrlSMPEvent smp_event,
         case OTRL_SMPEVENT_FAILURE:
             if (context->smstate->received_question == 0) {
                 if (nextMsg == OTRL_SMP_EXPECT3) {
-                    ui_smp_unsuccessful_sender(context->username);
+                    if (chatwin) {
+                        ui_smp_unsuccessful_sender(chatwin);
+                    }
                 } else if (nextMsg == OTRL_SMP_EXPECT4) {
                     ui_smp_unsuccessful_receiver(context->username);
                 }

@@ -106,7 +106,8 @@ ui_smp_recipient_initiated(ProfChatWin *chatwin)
 {
     assert(chatwin != NULL);
 
-    win_vprint((ProfWin*)chatwin, '!', 0, NULL, 0, 0, "", "%s wants to authenticate your identity, use '/otr secret <secret>'.", chatwin->barejid);
+    win_vprint((ProfWin*)chatwin, '!', 0, NULL, 0, 0, "",
+        "%s wants to authenticate your identity, use '/otr secret <secret>'.", chatwin->barejid);
 }
 
 void
@@ -114,18 +115,19 @@ ui_smp_recipient_initiated_q(ProfChatWin *chatwin, const char *question)
 {
     assert(chatwin != NULL);
 
-    win_vprint((ProfWin*)chatwin, '!', 0, NULL, 0, 0, "", "%s wants to authenticate your identity with the following question:", chatwin->barejid);
+    win_vprint((ProfWin*)chatwin, '!', 0, NULL, 0, 0, "",
+        "%s wants to authenticate your identity with the following question:", chatwin->barejid);
     win_vprint((ProfWin*)chatwin, '!', 0, NULL, 0, 0, "", "  %s", question);
     win_print((ProfWin*)chatwin, '!', 0, NULL, 0, 0, "", "use '/otr answer <answer>'.");
 }
 
 void
-ui_smp_unsuccessful_sender(const char *const barejid)
+ui_smp_unsuccessful_sender(ProfChatWin *chatwin)
 {
-    ProfChatWin *chatwin = wins_get_chat(barejid);
-    if (chatwin) {
-        win_vprint((ProfWin*)chatwin, '!', 0, NULL, 0, 0, "", "Authentication failed, the secret you entered does not match the secret entered by %s.", barejid);
-    }
+    assert(chatwin != NULL);
+
+    win_vprint((ProfWin*)chatwin, '!', 0, NULL, 0, 0, "",
+        "Authentication failed, the secret you entered does not match the secret entered by %s.", chatwin->barejid);
 }
 
 void
