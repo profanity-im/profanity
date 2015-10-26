@@ -217,7 +217,10 @@ otrlib_handle_tlvs(OtrlUserState user_state, OtrlMessageAppOps *ops, ConnContext
     tlv = otrl_tlv_find(tlvs, OTRL_TLV_SMP_ABORT);
     if (tlv) {
         context->smstate->nextExpected = OTRL_SMP_EXPECT1;
-        ui_smp_aborted(context->username);
+        ProfChatWin *chatwin = wins_get_chat(context->username);
+        if (chatwin) {
+            ui_smp_aborted(chatwin);
+        }
         ui_untrust(context->username);
         otr_untrust(context->username);
     }

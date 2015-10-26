@@ -229,7 +229,9 @@ cb_handle_smp_event(void *opdata, OtrlSMPEvent smp_event,
             break;
 
         case OTRL_SMPEVENT_ABORT:
-            ui_smp_aborted(context->username);
+            if (chatwin) {
+                ui_smp_aborted(chatwin);
+            }
             ui_untrust(context->username);
             break;
 
