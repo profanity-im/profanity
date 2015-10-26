@@ -976,6 +976,5 @@ _occupant_free(Occupant *occupant)
         free(occupant->jid);
         free(occupant->status);
         free(occupant);
-        occupant = NULL;
     }
 }

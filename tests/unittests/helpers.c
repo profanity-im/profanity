@@ -63,6 +63,7 @@ void load_preferences(void **state)
     if (f) {
         prefs_load();
     }
+    fclose(f);
 }
 
 void close_preferences(void **state)

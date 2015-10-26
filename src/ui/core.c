@@ -151,13 +151,6 @@ ui_update(void)
     }
 }
 
-void
-ui_about(void)
-{
-    cons_show("");
-    cons_about();
-}
-
 unsigned long
 ui_get_idle_time(void)
 {
