@@ -34,6 +34,7 @@
 
 #include <string.h>
 #include <stdlib.h>
+#include <assert.h>
 
 #include "chat_session.h"
 #include "window_list.h"
@@ -49,6 +50,8 @@ static void _win_show_history(ProfChatWin *chatwin, const char *const contact);
 void
 ui_message_receipt(ProfChatWin *chatwin, const char *const id)
 {
+    assert(chatwin != NULL);
+
     ProfWin *win = (ProfWin*) chatwin;
     win_mark_received(win, id);
 }
@@ -56,6 +59,8 @@ ui_message_receipt(ProfChatWin *chatwin, const char *const id)
 void
 ui_gone_secure(ProfChatWin *chatwin, gboolean trusted)
 {
+    assert(chatwin != NULL);
+
     chatwin->is_otr = TRUE;
     chatwin->otr_is_trusted = trusted;
 
@@ -84,6 +89,8 @@ ui_gone_secure(ProfChatWin *chatwin, gboolean trusted)
 void
 ui_gone_insecure(ProfChatWin *chatwin)
 {
+    assert(chatwin != NULL);
+
     chatwin->is_otr = FALSE;
     chatwin->otr_is_trusted = FALSE;
 
