@@ -1532,7 +1532,7 @@ cmd_msg(ProfWin *window, const char *const command, gchar **args)
         } else {
 #ifdef HAVE_LIBOTR
             if (otr_is_secure(barejid)) {
-                ui_gone_secure(barejid, otr_is_trusted(barejid));
+                ui_gone_secure(chatwin, otr_is_trusted(barejid));
             }
 #endif
         }
@@ -4893,7 +4893,7 @@ cmd_otr(ProfWin *window, const char *const command, gchar **args)
                 return TRUE;
             }
 
-            ui_gone_secure(barejid, otr_is_trusted(barejid));
+            ui_gone_secure(chatwin, otr_is_trusted(barejid));
             return TRUE;
 
         // no recipient, use current chat

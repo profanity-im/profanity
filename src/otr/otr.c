@@ -42,6 +42,7 @@
 #include "otr/otrlib.h"
 #include "log.h"
 #include "roster_list.h"
+#include "window_list.h"
 #include "contact.h"
 #include "ui/ui.h"
 #include "config/preferences.h"
@@ -143,7 +144,12 @@ cb_write_fingerprints(void *opdata)
 static void
 cb_gone_secure(void *opdata, ConnContext *context)
 {
-    ui_gone_secure(context->username, otr_is_trusted(context->username));
+    ProfChatWin *chatwin = wins_get_chat(context->username);
+    if (!chatwin) {
+        chatwin = (ProfChatWin*) wins_new_chat(context->username);
+    }
+
+    ui_gone_secure(chatwin, otr_is_trusted(context->username));
 }
 
 char*

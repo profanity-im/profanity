@@ -54,20 +54,12 @@ ui_message_receipt(ProfChatWin *chatwin, const char *const id)
 }
 
 void
-ui_gone_secure(const char *const barejid, gboolean trusted)
+ui_gone_secure(ProfChatWin *chatwin, gboolean trusted)
 {
-    ProfWin *window = NULL;
-
-    ProfChatWin *chatwin = wins_get_chat(barejid);
-    if (chatwin) {
-        window = (ProfWin*)chatwin;
-    } else {
-        window = wins_new_chat(barejid);
-        chatwin = (ProfChatWin*)window;
-    }
-
     chatwin->is_otr = TRUE;
     chatwin->otr_is_trusted = trusted;
+
+    ProfWin *window = (ProfWin*) chatwin;
     if (trusted) {
         win_print(window, '!', 0, NULL, 0, THEME_OTR_STARTED_TRUSTED, "", "OTR session started (trusted).");
     } else {
@@ -84,7 +76,7 @@ ui_gone_secure(const char *const barejid, gboolean trusted)
         if (ui_index == 10) {
             ui_index = 0;
         }
-        cons_show("%s started an OTR session (%d).", barejid, ui_index);
+        cons_show("%s started an OTR session (%d).", chatwin->barejid, ui_index);
         cons_alert();
     }
 }
