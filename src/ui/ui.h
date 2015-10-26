@@ -69,7 +69,7 @@ void ui_untrust(const char *const barejid);
 void ui_smp_recipient_initiated(ProfChatWin *chatwin);
 void ui_smp_recipient_initiated_q(ProfChatWin *chatwin, const char *question);
 
-void ui_smp_successful(const char *const barejid);
+void ui_smp_successful(ProfChatWin *chatwin);
 void ui_smp_unsuccessful_sender(ProfChatWin *chatwin);
 void ui_smp_unsuccessful_receiver(ProfChatWin *chatwin);
 void ui_smp_aborted(ProfChatWin *chatwin);

@@ -196,7 +196,9 @@ cb_handle_smp_event(void *opdata, OtrlSMPEvent smp_event,
 
         case OTRL_SMPEVENT_SUCCESS:
             if (context->smstate->received_question == 0) {
-                ui_smp_successful(context->username);
+                if (chatwin) {
+                    ui_smp_successful(chatwin);
+                }
                 ui_trust(context->username);
             } else {
                 ui_smp_answer_success(context->username);

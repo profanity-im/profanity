@@ -148,12 +148,11 @@ ui_smp_aborted(ProfChatWin *chatwin)
 }
 
 void
-ui_smp_successful(const char *const barejid)
+ui_smp_successful(ProfChatWin *chatwin)
 {
-    ProfChatWin *chatwin = wins_get_chat(barejid);
-    if (chatwin) {
-        win_print((ProfWin*)chatwin, '!', 0, NULL, 0, 0, "", "Authentication successful.");
-    }
+    assert(chatwin != NULL);
+
+    win_print((ProfWin*)chatwin, '!', 0, NULL, 0, 0, "", "Authentication successful.");
 }
 
 void
