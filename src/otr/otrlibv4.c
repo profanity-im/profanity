@@ -37,6 +37,7 @@
 #include <libotr/message.h>
 
 #include "ui/ui.h"
+#include "window_list.h"
 #include "log.h"
 #include "otr/otr.h"
 #include "otr/otrlib.h"
@@ -176,10 +177,14 @@ cb_handle_smp_event(void *opdata, OtrlSMPEvent smp_event,
     OtrlMessageAppOps *ops = otr_messageops();
     GHashTable *smp_initiators = otr_smpinitators();
 
+    ProfChatWin *chatwin = wins_get_chat(context->username);
+
     switch(smp_event)
     {
         case OTRL_SMPEVENT_ASK_FOR_SECRET:
-            ui_smp_recipient_initiated(context->username);
+            if (chatwin) {
+                ui_smp_recipient_initiated(chatwin);
+            }
             g_hash_table_insert(smp_initiators, strdup(context->username), strdup(context->username));
             break;
 

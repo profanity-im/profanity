@@ -102,12 +102,11 @@ ui_gone_insecure(ProfChatWin *chatwin)
 }
 
 void
-ui_smp_recipient_initiated(const char *const barejid)
+ui_smp_recipient_initiated(ProfChatWin *chatwin)
 {
-    ProfChatWin *chatwin = wins_get_chat(barejid);
-    if (chatwin) {
-        win_vprint((ProfWin*)chatwin, '!', 0, NULL, 0, 0, "", "%s wants to authenticate your identity, use '/otr secret <secret>'.", barejid);
-    }
+    assert(chatwin != NULL);
+
+    win_vprint((ProfWin*)chatwin, '!', 0, NULL, 0, 0, "", "%s wants to authenticate your identity, use '/otr secret <secret>'.", chatwin->barejid);
 }
 
 void
