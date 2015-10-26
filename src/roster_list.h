@@ -41,20 +41,18 @@
 #include "contact.h"
 
 void roster_clear(void);
-gboolean roster_update_presence(const char *const barejid, Resource *resource,
-    GDateTime *last_activity);
+gboolean roster_update_presence(const char *const barejid, Resource *resource, GDateTime *last_activity);
 PContact roster_get_contact(const char *const barejid);
-gboolean roster_contact_offline(const char *const barejid,
-    const char *const resource, const char *const status);
+gboolean roster_contact_offline(const char *const barejid, const char *const resource, const char *const status);
 void roster_reset_search_attempts(void);
 void roster_init(void);
 void roster_free(void);
 void roster_change_name(PContact contact, const char *const new_name);
 void roster_remove(const char *const name, const char *const barejid);
-void roster_update(const char *const barejid, const char *const name,
-    GSList *groups, const char *const subscription, gboolean pending_out);
-gboolean roster_add(const char *const barejid, const char *const name, GSList *groups,
-    const char *const subscription, gboolean pending_out);
+void roster_update(const char *const barejid, const char *const name, GSList *groups, const char *const subscription,
+    gboolean pending_out);
+gboolean roster_add(const char *const barejid, const char *const name, GSList *groups, const char *const subscription,
+    gboolean pending_out);
 char* roster_barejid_from_name(const char *const name);
 GSList* roster_get_contacts(void);
 GSList* roster_get_contacts_online(void);

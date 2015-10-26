@@ -59,8 +59,7 @@ void log_debug(const char *const msg, ...);
 void log_info(const char *const msg, ...);
 void log_warning(const char *const msg, ...);
 void log_error(const char *const msg, ...);
-void log_msg(log_level_t level, const char *const area,
-    const char *const msg);
+void log_msg(log_level_t level, const char *const area, const char *const msg);
 log_level_t log_level_from_string(char *log_level);
 
 void log_stderr_init(log_level_t level);
@@ -78,10 +77,10 @@ void chat_log_otr_msg_in(const char *const barejid, const char *const msg, gbool
 void chat_log_pgp_msg_in(const char *const barejid, const char *const msg, GDateTime *timestamp);
 
 void chat_log_close(void);
-GSList* chat_log_get_previous(const gchar *const login,
-    const gchar *const recipient);
+GSList* chat_log_get_previous(const gchar *const login, const gchar *const recipient);
 
 void groupchat_log_init(void);
-void groupchat_log_chat(const gchar *const login, const gchar *const room,
-    const gchar *const nick, const gchar *const msg);
+void groupchat_log_chat(const gchar *const login, const gchar *const room, const gchar *const nick,
+    const gchar *const msg);
+
 #endif
