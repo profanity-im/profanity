@@ -69,6 +69,13 @@ wins_get_console(void)
     return g_hash_table_lookup(windows, GINT_TO_POINTER(1));
 }
 
+gboolean
+wins_chat_exists(const char *const barejid)
+{
+    ProfChatWin *chatwin = wins_get_chat(barejid);
+    return (chatwin != NULL);
+}
+
 ProfChatWin*
 wins_get_chat(const char *const barejid)
 {

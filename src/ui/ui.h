@@ -210,7 +210,6 @@ void ui_show_lines(ProfWin *window, const gchar** lines);
 void ui_redraw_all_room_rosters(void);
 void ui_show_all_room_rosters(void);
 void ui_hide_all_room_rosters(void);
-gboolean ui_chat_win_exists(const char *const barejid);
 void ui_handle_software_version_error(const char *const roomjid, const char *const message);
 void ui_show_software_version(const char *const jid, const char *const  presence,
     const char *const name, const char *const version, const char *const os);

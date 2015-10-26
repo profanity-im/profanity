@@ -46,13 +46,6 @@
 
 static void _win_show_history(ProfChatWin *chatwin, const char *const contact);
 
-gboolean
-ui_chat_win_exists(const char *const barejid)
-{
-    ProfChatWin *chatwin = wins_get_chat(barejid);
-    return (chatwin != NULL);
-}
-
 void
 ui_message_receipt(const char *const barejid, const char *const id)
 {

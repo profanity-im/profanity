@@ -318,7 +318,7 @@ void
 sv_ev_typing(char *barejid, char *resource)
 {
     ui_contact_typing(barejid, resource);
-    if (ui_chat_win_exists(barejid)) {
+    if (wins_chat_exists(barejid)) {
         chat_session_recipient_typing(barejid, resource);
     }
 }
@@ -326,7 +326,7 @@ sv_ev_typing(char *barejid, char *resource)
 void
 sv_ev_paused(char *barejid, char *resource)
 {
-    if (ui_chat_win_exists(barejid)) {
+    if (wins_chat_exists(barejid)) {
         chat_session_recipient_paused(barejid, resource);
     }
 }
@@ -334,7 +334,7 @@ sv_ev_paused(char *barejid, char *resource)
 void
 sv_ev_inactive(char *barejid, char *resource)
 {
-    if (ui_chat_win_exists(barejid)) {
+    if (wins_chat_exists(barejid)) {
         chat_session_recipient_inactive(barejid, resource);
     }
 }
@@ -343,7 +343,7 @@ void
 sv_ev_gone(const char *const barejid, const char *const resource)
 {
     ui_recipient_gone(barejid, resource);
-    if (ui_chat_win_exists(barejid)) {
+    if (wins_chat_exists(barejid)) {
         chat_session_recipient_gone(barejid, resource);
     }
 }
@@ -351,7 +351,7 @@ sv_ev_gone(const char *const barejid, const char *const resource)
 void
 sv_ev_activity(const char *const barejid, const char *const resource, gboolean send_states)
 {
-    if (ui_chat_win_exists(barejid)) {
+    if (wins_chat_exists(barejid)) {
         chat_session_recipient_active(barejid, resource, send_states);
     }
 }
