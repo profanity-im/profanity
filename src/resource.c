@@ -39,8 +39,8 @@
 #include <common.h>
 #include <resource.h>
 
-Resource * resource_new(const char * const name, resource_presence_t presence,
-    const char * const status, const int priority)
+Resource*
+resource_new(const char *const name, resource_presence_t presence, const char *const status, const int priority)
 {
     assert(name != NULL);
     Resource *new_resource = malloc(sizeof(struct resource_t));
@@ -86,7 +86,8 @@ resource_compare_availability(Resource *first, Resource *second)
     }
 }
 
-void resource_destroy(Resource *resource)
+void
+resource_destroy(Resource *resource)
 {
     if (resource) {
         free(resource->name);

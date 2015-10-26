@@ -162,7 +162,7 @@ prof_handle_activity(void)
 }
 
 static void
-_connect_default(const char * const account)
+_connect_default(const char *const account)
 {
     ProfWin *window = wins_get_current();
     if (account) {
@@ -177,7 +177,7 @@ _connect_default(const char * const account)
 }
 
 static void
-_check_autoaway()
+_check_autoaway(void)
 {
     jabber_conn_status_t conn_status = jabber_get_connection_status();
     if (conn_status != JABBER_CONNECTED) {

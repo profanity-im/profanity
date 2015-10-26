@@ -46,21 +46,21 @@ typedef struct tls_cert_t {
 
 void tlscerts_init(void);
 
-TLSCertificate *tlscerts_new(const char * const fingerprint, const char * const domain,
-    const char * const organisation, const char * const email,
-    const char * const notbefore, const char * const notafter);
+TLSCertificate* tlscerts_new(const char *const fingerprint, const char *const domain,
+    const char *const organisation, const char *const email,
+    const char *const notbefore, const char *const notafter);
 
-gboolean tlscerts_exists(const char * const fingerprint);
+gboolean tlscerts_exists(const char *const fingerprint);
 
 void tlscerts_add(TLSCertificate *cert);
 
-gboolean tlscerts_revoke(const char * const fingerprint);
+gboolean tlscerts_revoke(const char *const fingerprint);
 
 void tlscerts_free(TLSCertificate *cert);
 
 GList* tlscerts_list(void);
 
-char* tlscerts_complete(const char * const prefix);
+char* tlscerts_complete(const char *const prefix);
 
 void tlscerts_reset_ac(void);
 

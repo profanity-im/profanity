@@ -71,14 +71,14 @@ cons_show_time(void)
 }
 
 void
-cons_show_word(const char * const word)
+cons_show_word(const char *const word)
 {
     ProfWin *console = wins_get_console();
     win_print(console, '-', 0, NULL, NO_DATE | NO_EOL, 0, "", word);
 }
 
 void
-cons_debug(const char * const msg, ...)
+cons_debug(const char *const msg, ...)
 {
     ProfWin *console = wins_get_console();
     if (strcmp(PACKAGE_STATUS, "development") == 0) {
@@ -93,7 +93,7 @@ cons_debug(const char * const msg, ...)
 }
 
 void
-cons_show(const char * const msg, ...)
+cons_show(const char *const msg, ...)
 {
     ProfWin *console = wins_get_console();
     va_list arg;
@@ -106,7 +106,7 @@ cons_show(const char * const msg, ...)
 }
 
 void
-cons_show_padded(int pad, const char * const msg, ...)
+cons_show_padded(int pad, const char *const msg, ...)
 {
     ProfWin *console = wins_get_console();
     va_list arg;
@@ -162,7 +162,7 @@ cons_show_help(Command *command)
 }
 
 void
-cons_bad_cmd_usage(const char * const cmd)
+cons_bad_cmd_usage(const char *const cmd)
 {
     GString *msg = g_string_new("");
     g_string_printf(msg, "Invalid usage, see '/help %s' for details.", &cmd[1]);
@@ -174,7 +174,7 @@ cons_bad_cmd_usage(const char * const cmd)
 }
 
 void
-cons_show_error(const char * const msg, ...)
+cons_show_error(const char *const msg, ...)
 {
     ProfWin *console = wins_get_console();
     va_list arg;
@@ -189,7 +189,7 @@ cons_show_error(const char * const msg, ...)
 }
 
 void
-cons_show_typing(const char * const barejid)
+cons_show_typing(const char *const barejid)
 {
     ProfWin *console = wins_get_console();
     const char * display_usr = NULL;
@@ -209,7 +209,7 @@ cons_show_typing(const char * const barejid)
 }
 
 void
-cons_show_incoming_message(const char * const short_from, const int win_index)
+cons_show_incoming_message(const char *const short_from, const int win_index)
 {
     ProfWin *console = wins_get_console();
 
@@ -355,7 +355,7 @@ cons_show_info(PContact pcontact)
 }
 
 void
-cons_show_caps(const char * const fulljid, resource_presence_t presence)
+cons_show_caps(const char *const fulljid, resource_presence_t presence)
 {
     ProfWin *console = wins_get_console();
     cons_show("");
@@ -466,7 +466,7 @@ cons_show_sent_subs(void)
 }
 
 void
-cons_show_room_list(GSList *rooms, const char * const conference_node)
+cons_show_room_list(GSList *rooms, const char *const conference_node)
 {
     ProfWin *console = wins_get_console();
     if (rooms && (g_slist_length(rooms) > 0)) {
@@ -574,7 +574,7 @@ cons_show_disco_info(const char *jid, GSList *identities, GSList *features)
 }
 
 void
-cons_show_disco_items(GSList *items, const char * const jid)
+cons_show_disco_items(GSList *items, const char *const jid)
 {
     ProfWin *console = wins_get_console();
     if (items && (g_slist_length(items) > 0)) {
@@ -598,7 +598,7 @@ cons_show_disco_items(GSList *items, const char * const jid)
 }
 
 void
-cons_show_status(const char * const barejid)
+cons_show_status(const char *const barejid)
 {
     ProfWin *console = wins_get_console();
     PContact pcontact = roster_get_contact(barejid);
@@ -613,8 +613,8 @@ cons_show_status(const char * const barejid)
 }
 
 void
-cons_show_room_invite(const char * const invitor, const char * const room,
-    const char * const reason)
+cons_show_room_invite(const char *const invitor, const char * const room,
+    const char *const reason)
 {
     char *display_from = NULL;
     PContact contact = roster_get_contact(invitor);
@@ -1170,18 +1170,7 @@ cons_show_ui_prefs(void)
 void
 cons_notify_setting(void)
 {
-    gboolean notify_enabled = FALSE;
-#ifdef HAVE_OSXNOTIFY
-    notify_enabled = TRUE;
-#endif
-#ifdef HAVE_LIBNOTIFY
-    notify_enabled = TRUE;
-#endif
-#ifdef PLATFORM_CYGWIN
-    notify_enabled = TRUE;
-#endif
-
-    if (notify_enabled) {
+    if (is_notify_enabled()) {
         if (prefs_get_boolean(PREF_NOTIFY_MESSAGE))
             cons_show("Messages (/notify message)          : ON");
         else
@@ -1684,7 +1673,7 @@ cons_navigation_help(void)
 }
 
 void
-cons_show_roster_group(const char * const group, GSList *list)
+cons_show_roster_group(const char *const group, GSList *list)
 {
     cons_show("");
 

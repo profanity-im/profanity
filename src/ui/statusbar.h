@@ -41,7 +41,7 @@ void status_bar_resize(void);
 void status_bar_clear(void);
 void status_bar_clear_message(void);
 void status_bar_get_password(void);
-void status_bar_print_message(const char * const msg);
+void status_bar_print_message(const char *const msg);
 void status_bar_current(int i);
 
 #endif
