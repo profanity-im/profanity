@@ -203,7 +203,6 @@ prefs_free_string(char *pref)
     if (pref) {
         g_free(pref);
     }
-    pref = NULL;
 }
 
 
