@@ -70,19 +70,8 @@ void chatwin_otr_secured(ProfChatWin *chatwin, gboolean trusted) {}
 void chatwin_otr_unsecured(ProfChatWin *chatwin) {}
 void chatwin_otr_trust(ProfChatWin *chatwin) {}
 void chatwin_otr_untrust(ProfChatWin *chatwin) {}
-void chatwin_otr_smp_init(ProfChatWin *chatwin) {}
-void chatwin_otr_smp_init_q(ProfChatWin *chatwin, const char *question) {}
+void chatwin_otr_smp_event(ProfChatWin *chatwin, prof_otr_smp_event_t event, void *data) {}
 
-void chatwin_otr_smp_success(ProfChatWin *chatwin) {}
-void chatwin_otr_smp_sender_failed(ProfChatWin *chatwin) {}
-void chatwin_otr_smp_receiver_failed(ProfChatWin *chatwin) {}
-void chatwin_otr_smp_aborted(ProfChatWin *chatwin) {}
-
-void chatwin_otr_smp_answer_success(ProfChatWin *chatwin) {}
-void chatwin_otr_smp_answer_failure(ProfChatWin *chatwin) {}
-
-void chatwin_otr_smp_authenticating(ProfChatWin *chatwin) {}
-void chatwin_otr_smp_authenticaton_wait(ProfChatWin *chatwin) {}
 void ui_sigwinch_handler(int sig) {}
 
 unsigned long ui_get_idle_time(void)
@@ -552,6 +541,7 @@ void win_show_occupant_info(ProfWin *window, const char * const room, Occupant *
 void win_show_contact(ProfWin *window, PContact contact) {}
 void win_show_info(ProfWin *window, PContact contact) {}
 void win_println(ProfWin *window, int pad, const char * const message) {}
+void win_vprintln_ch(ProfWin *window, char ch, const char *const message, ...) {}
 
 // desktop notifier actions
 void notifier_uninit(void) {}

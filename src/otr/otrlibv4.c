@@ -183,24 +183,24 @@ cb_handle_smp_event(void *opdata, OtrlSMPEvent smp_event,
     {
         case OTRL_SMPEVENT_ASK_FOR_SECRET:
             if (chatwin) {
-                chatwin_otr_smp_init(chatwin);
+                chatwin_otr_smp_event(chatwin, PROF_OTR_SMP_INIT, NULL);
             }
             g_hash_table_insert(smp_initiators, strdup(context->username), strdup(context->username));
             break;
 
         case OTRL_SMPEVENT_ASK_FOR_ANSWER:
             if (chatwin) {
-                chatwin_otr_smp_init_q(chatwin, question);
+                chatwin_otr_smp_event(chatwin, PROF_OTR_SMP_INIT_Q, question);
             }
             break;
 
         case OTRL_SMPEVENT_SUCCESS:
             if (chatwin) {
                 if (context->smstate->received_question == 0) {
-                    chatwin_otr_smp_success(chatwin);
+                    chatwin_otr_smp_event(chatwin, PROF_OTR_SMP_SUCCESS, NULL);
                     chatwin_otr_trust(chatwin);
                 } else {
-                    chatwin_otr_smp_answer_success(chatwin);
+                    chatwin_otr_smp_event(chatwin, PROF_OTR_SMP_SUCCESS_Q, NULL);
                 }
             }
             break;
@@ -209,13 +209,13 @@ cb_handle_smp_event(void *opdata, OtrlSMPEvent smp_event,
             if (chatwin) {
                 if (context->smstate->received_question == 0) {
                     if (nextMsg == OTRL_SMP_EXPECT3) {
-                        chatwin_otr_smp_sender_failed(chatwin);
+                        chatwin_otr_smp_event(chatwin, PROF_OTR_SMP_SENDER_FAIL, NULL);
                     } else if (nextMsg == OTRL_SMP_EXPECT4) {
-                        chatwin_otr_smp_receiver_failed(chatwin);
+                        chatwin_otr_smp_event(chatwin, PROF_OTR_SMP_RECEIVER_FAIL, NULL);
                     }
                     chatwin_otr_untrust(chatwin);
                 } else {
-                    chatwin_otr_smp_answer_failure(chatwin);
+                    chatwin_otr_smp_event(chatwin, PROF_OTR_SMP_FAIL_Q, NULL);
                 }
             }
             break;
@@ -230,7 +230,7 @@ cb_handle_smp_event(void *opdata, OtrlSMPEvent smp_event,
 
         case OTRL_SMPEVENT_ABORT:
             if (chatwin) {
-                chatwin_otr_smp_aborted(chatwin);
+                chatwin_otr_smp_event(chatwin, PROF_OTR_SMP_ABORT, NULL);
                 chatwin_otr_untrust(chatwin);
             }
             break;

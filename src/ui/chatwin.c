@@ -102,89 +102,51 @@ chatwin_otr_unsecured(ProfChatWin *chatwin)
 }
 
 void
-chatwin_otr_smp_init(ProfChatWin *chatwin)
+chatwin_otr_smp_event(ProfChatWin *chatwin, prof_otr_smp_event_t event, void *data)
 {
     assert(chatwin != NULL);
 
-    win_vprint((ProfWin*)chatwin, '!', 0, NULL, 0, 0, "",
-        "%s wants to authenticate your identity, use '/otr secret <secret>'.", chatwin->barejid);
-}
-
-void
-chatwin_otr_smp_init_q(ProfChatWin *chatwin, const char *question)
-{
-    assert(chatwin != NULL);
-
-    win_vprint((ProfWin*)chatwin, '!', 0, NULL, 0, 0, "",
-        "%s wants to authenticate your identity with the following question:", chatwin->barejid);
-    win_vprint((ProfWin*)chatwin, '!', 0, NULL, 0, 0, "", "  %s", question);
-    win_print((ProfWin*)chatwin, '!', 0, NULL, 0, 0, "", "use '/otr answer <answer>'.");
-}
-
-void
-chatwin_otr_smp_sender_failed(ProfChatWin *chatwin)
-{
-    assert(chatwin != NULL);
-
-    win_vprint((ProfWin*)chatwin, '!', 0, NULL, 0, 0, "",
-        "Authentication failed, the secret you entered does not match the secret entered by %s.", chatwin->barejid);
-}
-
-void
-chatwin_otr_smp_receiver_failed(ProfChatWin *chatwin)
-{
-    assert(chatwin != NULL);
-
-    win_vprint((ProfWin*)chatwin, '!', 0, NULL, 0, 0, "",
-        "Authentication failed, the secret entered by %s does not match yours.", chatwin->barejid);
-}
-
-void
-chatwin_otr_smp_aborted(ProfChatWin *chatwin)
-{
-    assert(chatwin != NULL);
-
-    win_print((ProfWin*)chatwin, '!', 0, NULL, 0, 0, "", "SMP session aborted.");
-}
-
-void
-chatwin_otr_smp_success(ProfChatWin *chatwin)
-{
-    assert(chatwin != NULL);
-
-    win_print((ProfWin*)chatwin, '!', 0, NULL, 0, 0, "", "Authentication successful.");
-}
-
-void
-chatwin_otr_smp_answer_success(ProfChatWin *chatwin)
-{
-    assert(chatwin != NULL);
-
-    win_vprint((ProfWin*)chatwin, '!', 0, NULL, 0, 0, "", "%s successfully authenticated you.", chatwin->barejid);
-}
-
-void
-chatwin_otr_smp_answer_failure(ProfChatWin *chatwin)
-{
-    assert(chatwin != NULL);
-
-    win_vprint((ProfWin*)chatwin, '!', 0, NULL, 0, 0, "", "%s failed to authenticate you.", chatwin->barejid);
-}
-
-void
-chatwin_otr_smp_authenticating(ProfChatWin *chatwin)
-{
-    assert(chatwin != NULL);
-
-    win_vprint((ProfWin*)chatwin, '!', 0, NULL, 0, 0, "", "Authenticating %s...", chatwin->barejid);
-}
-
-void
-chatwin_otr_smp_authenticaton_wait(ProfChatWin *chatwin)
-{
-    assert(chatwin != NULL);
-
-    win_vprint((ProfWin*)chatwin, '!', 0, NULL, 0, 0, "", "Awaiting authentication from %s...", chatwin->barejid);
+    switch (event) {
+        case PROF_OTR_SMP_INIT:
+            win_vprintln_ch((ProfWin*)chatwin, '!',
+                "%s wants to authenticate your identity, use '/otr secret <secret>'.", chatwin->barejid);
+            break;
+        case PROF_OTR_SMP_INIT_Q:
+            win_vprintln_ch((ProfWin*)chatwin, '!',
+                "%s wants to authenticate your identity with the following question:", chatwin->barejid);
+            win_vprintln_ch((ProfWin*)chatwin, '!', "  %s", (char*)data);
+            win_vprintln_ch((ProfWin*)chatwin, '!', "use '/otr answer <answer>'.");
+            break;
+        case PROF_OTR_SMP_SENDER_FAIL:
+            win_vprintln_ch((ProfWin*)chatwin, '!',
+                "Authentication failed, the secret you entered does not match the secret entered by %s.",
+                chatwin->barejid);
+            break;
+        case PROF_OTR_SMP_RECEIVER_FAIL:
+            win_vprintln_ch((ProfWin*)chatwin, '!',
+                "Authentication failed, the secret entered by %s does not match yours.", chatwin->barejid);
+            break;
+        case PROF_OTR_SMP_ABORT:
+            win_vprintln_ch((ProfWin*)chatwin, '!', "SMP session aborted.");
+            break;
+        case PROF_OTR_SMP_SUCCESS:
+            win_vprintln_ch((ProfWin*)chatwin, '!', "Authentication successful.");
+            break;
+        case PROF_OTR_SMP_SUCCESS_Q:
+            win_vprintln_ch((ProfWin*)chatwin, '!', "%s successfully authenticated you.", chatwin->barejid);
+            break;
+        case PROF_OTR_SMP_FAIL_Q:
+            win_vprintln_ch((ProfWin*)chatwin, '!', "%s failed to authenticate you.", chatwin->barejid);
+            break;
+        case PROF_OTR_SMP_AUTH:
+            win_vprintln_ch((ProfWin*)chatwin, '!', "Authenticating %s...", chatwin->barejid);
+            break;
+        case PROF_OTR_SMP_AUTH_WAIT:
+            win_vprintln_ch((ProfWin*)chatwin, '!', "Awaiting authentication from %s...", chatwin->barejid);
+            break;
+        default:
+            break;
+    }
 }
 
 void

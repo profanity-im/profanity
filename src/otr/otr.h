@@ -39,13 +39,26 @@
 #include <libotr/message.h>
 
 #include "config/accounts.h"
-#include "ui/ui.h"
+#include "ui/win_types.h"
 
 typedef enum {
     PROF_OTRPOLICY_MANUAL,
     PROF_OTRPOLICY_OPPORTUNISTIC,
     PROF_OTRPOLICY_ALWAYS
 } prof_otrpolicy_t;
+
+typedef enum {
+    PROF_OTR_SMP_INIT,
+    PROF_OTR_SMP_INIT_Q,
+    PROF_OTR_SMP_SENDER_FAIL,
+    PROF_OTR_SMP_RECEIVER_FAIL,
+    PROF_OTR_SMP_ABORT,
+    PROF_OTR_SMP_SUCCESS,
+    PROF_OTR_SMP_SUCCESS_Q,
+    PROF_OTR_SMP_FAIL_Q,
+    PROF_OTR_SMP_AUTH,
+    PROF_OTR_SMP_AUTH_WAIT
+} prof_otr_smp_event_t;
 
 OtrlUserState otr_userstate(void);
 OtrlMessageAppOps* otr_messageops(void);

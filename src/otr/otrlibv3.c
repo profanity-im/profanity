@@ -143,7 +143,7 @@ otrlib_handle_tlvs(OtrlUserState user_state, OtrlMessageAppOps *ops, ConnContext
         } else {
             ProfChatWin *chatwin = wins_get_chat(context->username);
             if (chatwin) {
-                chatwin_otr_smp_init(chatwin);
+                chatwin_otr_smp_event(chatwin, PROF_OTR_SMP_INIT. NULL);
             }
             g_hash_table_insert(smp_initiators, strdup(context->username), strdup(context->username));
         }
@@ -158,7 +158,7 @@ otrlib_handle_tlvs(OtrlUserState user_state, OtrlMessageAppOps *ops, ConnContext
                 char *question = (char *)tlv->data;
                 char *eoq = memchr(question, '\0', tlv->len);
                 if (eoq) {
-                    chatwin_otr_smp_init_q(chatwin, question);
+                    chatwin_otr_smp_event(chatwin, PROF_OTR_SMP_INIT_Q, question);
                 }
             }
         }
@@ -181,17 +181,17 @@ otrlib_handle_tlvs(OtrlUserState user_state, OtrlMessageAppOps *ops, ConnContext
             if (chatwin) {
                 if (context->smstate->received_question == 0) {
                     if (context->active_fingerprint->trust && (context->active_fingerprint->trust[0] != '\0')) {
-                        chatwin_otr_smp_success(chatwin);
+                        chatwin_otr_smp_event(chatwin, PROF_OTR_SMP_SUCCESS, NULL);
                         chatwin_otr_trust(chatwin);
                     } else {
-                        chatwin_otr_smp_sender_failed(chatwin);
+                        chatwin_otr_smp_event(chatwin, PROF_OTR_SMP_SENDER_FAIL, NULL);
                         chatwin_otr_untrust(chatwin);
                     }
                 } else {
                     if (context->smstate->sm_prog_state == OTRL_SMP_PROG_SUCCEEDED) {
-                        chatwin_otr_smp_answer_success(chatwin);
+                        chatwin_otr_smp_event(chatwin, PROF_OTR_SMP_SUCCESS_Q, NULL);
                     } else {
-                        chatwin_otr_smp_answer_failure(chatwin);
+                        chatwin_otr_smp_event(chatwin, PROF_OTR_SMP_FAIL_Q, NULL);
                     }
                 }
             }
@@ -206,10 +206,10 @@ otrlib_handle_tlvs(OtrlUserState user_state, OtrlMessageAppOps *ops, ConnContext
             ProfChatWin *chatwin = wins_get_chat(context->username);
             if (chatwin) {
                 if (context->active_fingerprint->trust && (context->active_fingerprint->trust[0] != '\0')) {
-                    chatwin_otr_smp_success(chatwin);
+                    chatwin_otr_smp_event(chatwin, PROF_OTR_SMP_SUCCESS, NULL);
                     chatwin_otr_trust(chatwin);
                 } else {
-                    chatwin_otr_smp_receiver_failed(chatwin);
+                    chatwin_otr_smp_event(chatwin, PROF_OTR_SMP_RECEIVER_FAIL, NULL);
                     chatwin_otr_untrust(chatwin);
                 }
             }
@@ -220,7 +220,7 @@ otrlib_handle_tlvs(OtrlUserState user_state, OtrlMessageAppOps *ops, ConnContext
         context->smstate->nextExpected = OTRL_SMP_EXPECT1;
         ProfChatWin *chatwin = wins_get_chat(context->username);
         if (chatwin) {
-            chatwin_otr_smp_aborted(chatwin);
+            chatwin_otr_smp_event(chatwin, PROF_OTR_SMP_ABORT, NULL);
             chatwin_otr_untrust(chatwin);
         }
         otr_untrust(context->username);
