@@ -35,7 +35,6 @@
 #ifndef UI_EVENTS_H
 #define UI_EVENTS_H
 
-void ui_ev_focus_win(ProfWin *win);
 ProfChatWin* ui_ev_new_chat_win(const char *const barejid);
 ProfPrivateWin* ui_ev_new_private_win(const char *const fulljid);
 

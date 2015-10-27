@@ -35,14 +35,6 @@
 #include "ui/ui.h"
 #include "window_list.h"
 
-void
-ui_ev_focus_win(ProfWin *win)
-{
-    if (!wins_is_current(win)) {
-        ui_switch_win(win);
-    }
-}
-
 ProfChatWin*
 ui_ev_new_chat_win(const char *const barejid)
 {
