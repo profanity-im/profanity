@@ -42,6 +42,7 @@
 #include "otr/otrlib.h"
 #include "log.h"
 #include "roster_list.h"
+#include "window_list.h"
 #include "contact.h"
 #include "ui/ui.h"
 #include "config/preferences.h"
@@ -143,7 +144,12 @@ cb_write_fingerprints(void *opdata)
 static void
 cb_gone_secure(void *opdata, ConnContext *context)
 {
-    ui_gone_secure(context->username, otr_is_trusted(context->username));
+    ProfChatWin *chatwin = wins_get_chat(context->username);
+    if (!chatwin) {
+        chatwin = (ProfChatWin*) wins_new_chat(context->username);
+    }
+
+    chatwin_otr_secured(chatwin, otr_is_trusted(context->username));
 }
 
 char*
@@ -325,7 +331,7 @@ otr_on_message_send(ProfChatWin *chatwin, const char *const message)
         if (encrypted) {
             id = message_send_chat_otr(chatwin->barejid, encrypted);
             chat_log_otr_msg_out(chatwin->barejid, message);
-            ui_outgoing_chat_msg(chatwin, message, id, PROF_MSG_OTR);
+            chatwin_outgoing_msg(chatwin, message, id, PROF_MSG_OTR);
             otr_free_message(encrypted);
             free(id);
             return TRUE;
@@ -345,7 +351,7 @@ otr_on_message_send(ProfChatWin *chatwin, const char *const message)
     if (policy == PROF_OTRPOLICY_OPPORTUNISTIC) {
         char *otr_tagged_msg = otr_tag_message(message);
         id = message_send_chat_otr(chatwin->barejid, otr_tagged_msg);
-        ui_outgoing_chat_msg(chatwin, message, id, PROF_MSG_PLAIN);
+        chatwin_outgoing_msg(chatwin, message, id, PROF_MSG_PLAIN);
         chat_log_msg_out(chatwin->barejid, message);
         free(otr_tagged_msg);
         free(id);
@@ -567,13 +573,18 @@ otr_smp_secret(const char *const recipient, const char *secret)
     }
 
     // if recipient initiated SMP, send response, else initialise
+    ProfChatWin *chatwin = wins_get_chat(recipient);
     if (g_hash_table_contains(smp_initiators, recipient)) {
         otrl_message_respond_smp(user_state, &ops, NULL, context, (const unsigned char*)secret, strlen(secret));
-        ui_otr_authenticating(recipient);
+        if (chatwin) {
+            chatwin_otr_smp_event(chatwin, PROF_OTR_SMP_AUTH, NULL);
+        }
         g_hash_table_remove(smp_initiators, context->username);
     } else {
         otrl_message_initiate_smp(user_state, &ops, NULL, context, (const unsigned char*)secret, strlen(secret));
-        ui_otr_authetication_waiting(recipient);
+        if (chatwin) {
+            chatwin_otr_smp_event(chatwin, PROF_OTR_SMP_AUTH_WAIT, NULL);
+        }
     }
 }
 
@@ -591,7 +602,10 @@ otr_smp_question(const char *const recipient, const char *question, const char *
     }
 
     otrl_message_initiate_smp_q(user_state, &ops, NULL, context, question, (const unsigned char*)answer, strlen(answer));
-    ui_otr_authetication_waiting(recipient);
+    ProfChatWin *chatwin = wins_get_chat(recipient);
+    if (chatwin) {
+        chatwin_otr_smp_event(chatwin, PROF_OTR_SMP_AUTH_WAIT, NULL);
+    }
 }
 
 void
@@ -733,7 +747,10 @@ otr_decrypt_message(const char *const from, const char *const message, gboolean 
         if (tlv) {
             if (context) {
                 otrl_context_force_plaintext(context);
-                ui_gone_insecure(from);
+                ProfChatWin *chatwin = wins_get_chat(from);
+                if (chatwin) {
+                    chatwin_otr_unsecured(chatwin);
+                }
             }
         }
 

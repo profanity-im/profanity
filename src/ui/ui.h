@@ -38,6 +38,7 @@
 #include "command/commands.h"
 #include "ui/win_types.h"
 #include "muc.h"
+#include "otr/otr.h"
 
 #define NO_ME           1
 #define NO_DATE         2
@@ -62,30 +63,25 @@ GSList* ui_get_chat_recipients(void);
 void ui_switch_win(ProfWin *window);
 void ui_sigwinch_handler(int sig);
 
-void ui_gone_secure(const char *const barejid, gboolean trusted);
-void ui_gone_insecure(const char *const barejid);
-void ui_trust(const char *const barejid);
-void ui_untrust(const char *const barejid);
-void ui_smp_recipient_initiated(const char *const barejid);
-void ui_smp_recipient_initiated_q(const char *const barejid, const char *question);
-
-void ui_smp_successful(const char *const barejid);
-void ui_smp_unsuccessful_sender(const char *const barejid);
-void ui_smp_unsuccessful_receiver(const char *const barejid);
-void ui_smp_aborted(const char *const barejid);
-
-void ui_smp_answer_success(const char *const barejid);
-void ui_smp_answer_failure(const char *const barejid);
-
-void ui_otr_authenticating(const char *const barejid);
-void ui_otr_authetication_waiting(const char *const recipient);
+ProfChatWin* chatwin_new(const char *const barejid);
+void chatwin_incoming_msg(ProfChatWin *chatwin, const char *const resource,  const char *const message, GDateTime *timestamp, gboolean win_created, prof_enc_t enc_mode);
+void chatwin_otr_secured(ProfChatWin *chatwin, gboolean trusted);
+void chatwin_otr_unsecured(ProfChatWin *chatwin);
+void chatwin_otr_trust(ProfChatWin *chatwin);
+void chatwin_otr_untrust(ProfChatWin *chatwin);
+void chatwin_otr_smp_event(ProfChatWin *chatwin, prof_otr_smp_event_t event, void *data);
+void chatwin_receipt_received(ProfChatWin *chatwin, const char *const id);
+void chatwin_recipient_gone(ProfChatWin *chatwin);
+void chatwin_outgoing_msg(ProfChatWin *chatwin, const char *const message, char *id, prof_enc_t enc_mode);
+void chatwin_outgoing_carbon(ProfChatWin *chatwin, const char *const message);
+void chatwin_contact_online(ProfChatWin *chatwin, Resource *resource, GDateTime *last_activity);
+void chatwin_contact_offline(ProfChatWin *chatwin, char *resource, char *status);
 
 void ui_handle_otr_error(const char *const barejid, const char *const message);
 
 unsigned long ui_get_idle_time(void);
 void ui_reset_idle_time(void);
 ProfPrivateWin* ui_new_private_win(const char *const fulljid);
-ProfChatWin* ui_new_chat_win(const char *const barejid);
 void ui_print_system_msg_from_recipient(const char *const barejid, const char *message);
 gint ui_unread(void);
 void ui_close_connected_win(int index);
@@ -110,15 +106,10 @@ void ui_handle_stanza(const char *const msg);
 // ui events
 void ui_contact_online(char *barejid, Resource *resource, GDateTime *last_activity);
 void ui_contact_typing(const char *const barejid, const char *const resource);
-void ui_incoming_msg(ProfChatWin *chatwin, const char *const resource,  const char *const message, GDateTime *timestamp, gboolean win_created, prof_enc_t enc_mode);
 void ui_incoming_private_msg(const char *const fulljid, const char *const message, GDateTime *timestamp);
-void ui_message_receipt(const char *const barejid, const char *const id);
 
 void ui_disconnected(void);
-void ui_recipient_gone(const char *const barejid, const char *const resource);
 
-void ui_outgoing_chat_msg(ProfChatWin *chatwin, const char *const message, char *id, prof_enc_t enc_mode);
-void ui_outgoing_chat_msg_carbon(const char *const barejid, const char *const message);
 void ui_outgoing_private_msg(ProfPrivateWin *privwin, const char *const message);
 
 void ui_room_join(const char *const roomjid, gboolean focus);
@@ -179,8 +170,6 @@ void ui_contact_already_in_group(const char *const contact, const char *const gr
 void ui_contact_not_in_group(const char *const contact, const char *const group);
 void ui_group_added(const char *const contact, const char *const group);
 void ui_group_removed(const char *const contact, const char *const group);
-void ui_chat_win_contact_online(PContact contact, Resource *resource, GDateTime *last_activity);
-void ui_chat_win_contact_offline(PContact contact, char *resource, char *status);
 void ui_contact_offline(char *barejid, char *resource, char *status);
 void ui_handle_recipient_not_found(const char *const recipient, const char *const err_msg);
 void ui_handle_recipient_error(const char *const recipient, const char *const err_msg);
@@ -210,7 +199,6 @@ void ui_show_lines(ProfWin *window, const gchar** lines);
 void ui_redraw_all_room_rosters(void);
 void ui_show_all_room_rosters(void);
 void ui_hide_all_room_rosters(void);
-gboolean ui_chat_win_exists(const char *const barejid);
 void ui_handle_software_version_error(const char *const roomjid, const char *const message);
 void ui_show_software_version(const char *const jid, const char *const  presence,
     const char *const name, const char *const version, const char *const os);
@@ -373,6 +361,7 @@ void win_show_occupant_info(ProfWin *window, const char *const room, Occupant *o
 void win_show_contact(ProfWin *window, PContact contact);
 void win_show_info(ProfWin *window, PContact contact);
 void win_println(ProfWin *window, int pad, const char *const message);
+void win_vprintln_ch(ProfWin *window, char ch, const char *const message, ...);
 
 // desktop notifier actions
 void notifier_initialise(void);

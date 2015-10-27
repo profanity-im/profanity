@@ -64,7 +64,6 @@
 #include "ui/inputwin.h"
 #include "ui/window.h"
 #include "window_list.h"
-#include "event/ui_events.h"
 #include "xmpp/xmpp.h"
 
 static WINDOW *inp_win;
@@ -466,7 +465,7 @@ _go_to_win(int i)
 {
     ProfWin *window = wins_get_by_num(i);
     if (window) {
-        ui_ev_focus_win(window);
+        ui_switch_win(window);
     }
 }
 
@@ -545,7 +544,7 @@ _inp_rl_altleft_handler(int count, int key)
 {
     ProfWin *window = wins_get_previous();
     if (window) {
-        ui_ev_focus_win(window);
+        ui_switch_win(window);
     }
     return 0;
 }
@@ -555,7 +554,7 @@ _inp_rl_altright_handler(int count, int key)
 {
     ProfWin *window = wins_get_next();
     if (window) {
-        ui_ev_focus_win(window);
+        ui_switch_win(window);
     }
     return 0;
 }
