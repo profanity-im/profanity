@@ -323,11 +323,17 @@ ui_contact_online(char *barejid, Resource *resource, GDateTime *last_activity)
 
     // show in chat win if "all"
     if (g_strcmp0(show_chat_win, "all") == 0) {
-        ui_chat_win_contact_online(contact, resource, last_activity);
+        ProfChatWin *chatwin = wins_get_chat(barejid);
+        if (chatwin) {
+            chatwin_contact_online(chatwin, resource, last_activity);
+        }
 
     // show in char win if "online" and presence online
     } else if (g_strcmp0(show_chat_win, "online") == 0 && resource->presence == RESOURCE_ONLINE) {
-        ui_chat_win_contact_online(contact, resource, last_activity);
+        ProfChatWin *chatwin = wins_get_chat(barejid);
+        if (chatwin) {
+            chatwin_contact_online(chatwin, resource, last_activity);
+        }
     }
 
     free(show_console);
@@ -1790,11 +1796,17 @@ ui_contact_offline(char *barejid, char *resource, char *status)
 
             // show in chat win if "all"
             if (g_strcmp0(show_chat_win, "all") == 0) {
-                ui_chat_win_contact_offline(contact, resource, status);
+                ProfChatWin *chatwin = wins_get_chat(barejid);
+                if (chatwin) {
+                    chatwin_contact_offline(chatwin, resource, status);
+                }
 
             // show in char win if "online" and presence online
             } else if (g_strcmp0(show_chat_win, "online") == 0) {
-                ui_chat_win_contact_offline(contact, resource, status);
+                ProfChatWin *chatwin = wins_get_chat(barejid);
+                if (chatwin) {
+                    chatwin_contact_offline(chatwin, resource, status);
+                }
             }
         }
     }

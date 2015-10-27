@@ -304,33 +304,28 @@ chatwin_outgoing_carbon(ProfChatWin *chatwin, const char *const message)
 }
 
 void
-ui_chat_win_contact_online(PContact contact, Resource *resource, GDateTime *last_activity)
+chatwin_contact_online(ProfChatWin *chatwin, Resource *resource, GDateTime *last_activity)
 {
+    assert(chatwin != NULL);
+
     const char *show = string_from_resource_presence(resource->presence);
+    PContact contact = roster_get_contact(chatwin->barejid);
     char *display_str = p_contact_create_display_string(contact, resource->name);
-    const char *barejid = p_contact_barejid(contact);
 
-    ProfWin *window = (ProfWin*)wins_get_chat(barejid);
-    if (window) {
-        win_show_status_string(window, display_str, show, resource->status,
-            last_activity, "++", "online");
-
-    }
+    win_show_status_string((ProfWin*)chatwin, display_str, show, resource->status, last_activity, "++", "online");
 
     free(display_str);
 }
 
 void
-ui_chat_win_contact_offline(PContact contact, char *resource, char *status)
+chatwin_contact_offline(ProfChatWin *chatwin, char *resource, char *status)
 {
-    char *display_str = p_contact_create_display_string(contact, resource);
-    const char *barejid = p_contact_barejid(contact);
+    assert(chatwin != NULL);
 
-    ProfWin *window = (ProfWin*)wins_get_chat(barejid);
-    if (window) {
-        win_show_status_string(window, display_str, "offline", status, NULL, "--",
-            "offline");
-    }
+    PContact contact = roster_get_contact(chatwin->barejid);
+    char *display_str = p_contact_create_display_string(contact, resource);
+
+    win_show_status_string((ProfWin*)chatwin, display_str, "offline", status, NULL, "--", "offline");
 
     free(display_str);
 }
