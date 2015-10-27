@@ -85,7 +85,7 @@ ProfPrivateWin* ui_new_private_win(const char * const fulljid)
     return NULL;
 }
 
-ProfChatWin* ui_new_chat_win(const char * const barejid)
+ProfChatWin* chatwin_new(const char * const barejid)
 {
     return NULL;
 }

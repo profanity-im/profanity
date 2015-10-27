@@ -198,7 +198,7 @@ chatwin_recipient_gone(ProfChatWin *chatwin)
 }
 
 ProfChatWin*
-ui_new_chat_win(const char *const barejid)
+chatwin_new(const char *const barejid)
 {
     ProfWin *window = wins_new_chat(barejid);
     ProfChatWin *chatwin = (ProfChatWin *)window;
@@ -294,7 +294,7 @@ ui_outgoing_chat_msg_carbon(const char *const barejid, const char *const message
 
     // create new window
     if (!chatwin) {
-        chatwin = ui_new_chat_win(barejid);
+        chatwin = chatwin_new(barejid);
     }
 
     chat_state_active(chatwin->state);

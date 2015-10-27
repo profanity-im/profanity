@@ -1522,7 +1522,7 @@ cmd_msg(ProfWin *window, const char *const command, gchar **args)
 
         ProfChatWin *chatwin = wins_get_chat(barejid);
         if (!chatwin) {
-            chatwin = ui_new_chat_win(barejid);
+            chatwin = chatwin_new(barejid);
         }
         ui_switch_win((ProfWin*)chatwin);
 
@@ -4665,7 +4665,7 @@ cmd_pgp(ProfWin *window, const char *const command, gchar **args)
 
             chatwin = wins_get_chat(barejid);
             if (!chatwin) {
-                chatwin = ui_new_chat_win(barejid);
+                chatwin = chatwin_new(barejid);
             }
             ui_switch_win((ProfWin*)chatwin);
         } else {
@@ -4866,7 +4866,7 @@ cmd_otr(ProfWin *window, const char *const command, gchar **args)
 
             ProfChatWin *chatwin = wins_get_chat(barejid);
             if (!chatwin) {
-                chatwin = ui_new_chat_win(barejid);
+                chatwin = chatwin_new(barejid);
             }
             ui_switch_win((ProfWin*)chatwin);
 
