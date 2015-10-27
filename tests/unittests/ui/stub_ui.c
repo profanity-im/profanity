@@ -181,7 +181,7 @@ void ui_incoming_private_msg(const char * const fulljid, const char * const mess
 void ui_disconnected(void) {}
 void chatwin_recipient_gone(ProfChatWin *chatwin) {}
 
-void ui_outgoing_chat_msg(ProfChatWin *chatwin, const char * const message, char *id, prof_enc_t enc_mode) {}
+void chatwin_outgoing_msg(ProfChatWin *chatwin, const char * const message, char *id, prof_enc_t enc_mode) {}
 void ui_outgoing_chat_msg_carbon(const char * const barejid, const char * const message) {}
 void ui_outgoing_private_msg(ProfPrivateWin *privwin, const char * const message) {}
 

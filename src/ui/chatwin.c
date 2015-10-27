@@ -271,7 +271,7 @@ chatwin_incoming_msg(ProfChatWin *chatwin, const char *const resource, const cha
 }
 
 void
-ui_outgoing_chat_msg(ProfChatWin *chatwin, const char *const message, char *id, prof_enc_t enc_mode)
+chatwin_outgoing_msg(ProfChatWin *chatwin, const char *const message, char *id, prof_enc_t enc_mode)
 {
     char enc_char = '-';
     if (enc_mode == PROF_MSG_OTR) {
