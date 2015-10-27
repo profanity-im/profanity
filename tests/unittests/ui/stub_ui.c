@@ -66,23 +66,23 @@ GSList* ui_get_chat_recipients(void)
 
 void ui_switch_win(ProfWin *win) {}
 
-void ui_gone_secure(ProfChatWin *chatwin, gboolean trusted) {}
-void ui_gone_insecure(ProfChatWin *chatwin) {}
-void ui_trust(ProfChatWin *chatwin) {}
-void ui_untrust(ProfChatWin *chatwin) {}
-void ui_smp_recipient_initiated(ProfChatWin *chatwin) {}
-void ui_smp_recipient_initiated_q(ProfChatWin *chatwin, const char *question) {}
+void chatwin_otr_secured(ProfChatWin *chatwin, gboolean trusted) {}
+void chatwin_otr_unsecured(ProfChatWin *chatwin) {}
+void chatwin_otr_trust(ProfChatWin *chatwin) {}
+void chatwin_otr_untrust(ProfChatWin *chatwin) {}
+void chatwin_otr_smp_init(ProfChatWin *chatwin) {}
+void chatwin_otr_smp_init_q(ProfChatWin *chatwin, const char *question) {}
 
-void ui_smp_successful(ProfChatWin *chatwin) {}
-void ui_smp_unsuccessful_sender(ProfChatWin *chatwin) {}
-void ui_smp_unsuccessful_receiver(ProfChatWin *chatwin) {}
-void ui_smp_aborted(ProfChatWin *chatwin) {}
+void chatwin_otr_smp_success(ProfChatWin *chatwin) {}
+void chatwin_otr_smp_sender_failed(ProfChatWin *chatwin) {}
+void chatwin_otr_smp_receiver_failed(ProfChatWin *chatwin) {}
+void chatwin_otr_smp_aborted(ProfChatWin *chatwin) {}
 
-void ui_smp_answer_success(ProfChatWin *chatwin) {}
-void ui_smp_answer_failure(ProfChatWin *chatwin) {}
+void chatwin_otr_smp_answer_success(ProfChatWin *chatwin) {}
+void chatwin_otr_smp_answer_failure(ProfChatWin *chatwin) {}
 
-void ui_otr_authenticating(ProfChatWin *chatwin) {}
-void ui_otr_authetication_waiting(ProfChatWin *chatwin) {}
+void chatwin_otr_smp_authenticating(ProfChatWin *chatwin) {}
+void chatwin_otr_smp_authenticaton_wait(ProfChatWin *chatwin) {}
 void ui_sigwinch_handler(int sig) {}
 
 unsigned long ui_get_idle_time(void)
@@ -185,7 +185,7 @@ void ui_contact_online(char *barejid, Resource *resource, GDateTime *last_activi
 
 void ui_contact_typing(const char * const barejid, const char * const resource) {}
 void ui_incoming_msg(ProfChatWin *chatwin, const char * const resource, const char * const message, GDateTime *timestamp, gboolean win_created, prof_enc_t enc_mode) {}
-void ui_message_receipt(ProfChatWin *chatwin, const char * const id) {}
+void chatwin_receipt_received(ProfChatWin *chatwin, const char * const id) {}
 
 void ui_incoming_private_msg(const char * const fulljid, const char * const message, GDateTime *timestamp) {}
 

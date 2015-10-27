@@ -315,7 +315,7 @@ sv_ev_message_receipt(char *barejid, char *id)
     if (!chatwin)
         return;
 
-    ui_message_receipt(chatwin, id);
+    chatwin_receipt_received(chatwin, id);
 }
 
 void

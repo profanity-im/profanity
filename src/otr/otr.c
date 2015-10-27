@@ -149,7 +149,7 @@ cb_gone_secure(void *opdata, ConnContext *context)
         chatwin = (ProfChatWin*) wins_new_chat(context->username);
     }
 
-    ui_gone_secure(chatwin, otr_is_trusted(context->username));
+    chatwin_otr_secured(chatwin, otr_is_trusted(context->username));
 }
 
 char*
@@ -577,13 +577,13 @@ otr_smp_secret(const char *const recipient, const char *secret)
     if (g_hash_table_contains(smp_initiators, recipient)) {
         otrl_message_respond_smp(user_state, &ops, NULL, context, (const unsigned char*)secret, strlen(secret));
         if (chatwin) {
-            ui_otr_authenticating(chatwin);
+            chatwin_otr_smp_authenticating(chatwin);
         }
         g_hash_table_remove(smp_initiators, context->username);
     } else {
         otrl_message_initiate_smp(user_state, &ops, NULL, context, (const unsigned char*)secret, strlen(secret));
         if (chatwin) {
-            ui_otr_authetication_waiting(chatwin);
+            chatwin_otr_smp_authenticaton_wait(chatwin);
         }
     }
 }
@@ -604,7 +604,7 @@ otr_smp_question(const char *const recipient, const char *question, const char *
     otrl_message_initiate_smp_q(user_state, &ops, NULL, context, question, (const unsigned char*)answer, strlen(answer));
     ProfChatWin *chatwin = wins_get_chat(recipient);
     if (chatwin) {
-        ui_otr_authetication_waiting(chatwin);
+        chatwin_otr_smp_authenticaton_wait(chatwin);
     }
 }
 
@@ -749,7 +749,7 @@ otr_decrypt_message(const char *const from, const char *const message, gboolean 
                 otrl_context_force_plaintext(context);
                 ProfChatWin *chatwin = wins_get_chat(from);
                 if (chatwin) {
-                    ui_gone_insecure(chatwin);
+                    chatwin_otr_unsecured(chatwin);
                 }
             }
         }

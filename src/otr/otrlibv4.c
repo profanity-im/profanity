@@ -183,24 +183,24 @@ cb_handle_smp_event(void *opdata, OtrlSMPEvent smp_event,
     {
         case OTRL_SMPEVENT_ASK_FOR_SECRET:
             if (chatwin) {
-                ui_smp_recipient_initiated(chatwin);
+                chatwin_otr_smp_init(chatwin);
             }
             g_hash_table_insert(smp_initiators, strdup(context->username), strdup(context->username));
             break;
 
         case OTRL_SMPEVENT_ASK_FOR_ANSWER:
             if (chatwin) {
-                ui_smp_recipient_initiated_q(chatwin, question);
+                chatwin_otr_smp_init_q(chatwin, question);
             }
             break;
 
         case OTRL_SMPEVENT_SUCCESS:
             if (chatwin) {
                 if (context->smstate->received_question == 0) {
-                    ui_smp_successful(chatwin);
-                    ui_trust(chatwin);
+                    chatwin_otr_smp_success(chatwin);
+                    chatwin_otr_trust(chatwin);
                 } else {
-                    ui_smp_answer_success(chatwin);
+                    chatwin_otr_smp_answer_success(chatwin);
                 }
             }
             break;
@@ -209,13 +209,13 @@ cb_handle_smp_event(void *opdata, OtrlSMPEvent smp_event,
             if (chatwin) {
                 if (context->smstate->received_question == 0) {
                     if (nextMsg == OTRL_SMP_EXPECT3) {
-                        ui_smp_unsuccessful_sender(chatwin);
+                        chatwin_otr_smp_sender_failed(chatwin);
                     } else if (nextMsg == OTRL_SMP_EXPECT4) {
-                        ui_smp_unsuccessful_receiver(chatwin);
+                        chatwin_otr_smp_receiver_failed(chatwin);
                     }
-                    ui_untrust(chatwin);
+                    chatwin_otr_untrust(chatwin);
                 } else {
-                    ui_smp_answer_failure(chatwin);
+                    chatwin_otr_smp_answer_failure(chatwin);
                 }
             }
             break;
@@ -230,8 +230,8 @@ cb_handle_smp_event(void *opdata, OtrlSMPEvent smp_event,
 
         case OTRL_SMPEVENT_ABORT:
             if (chatwin) {
-                ui_smp_aborted(chatwin);
-                ui_untrust(chatwin);
+                chatwin_otr_smp_aborted(chatwin);
+                chatwin_otr_untrust(chatwin);
             }
             break;
 

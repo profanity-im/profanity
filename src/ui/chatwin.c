@@ -48,7 +48,7 @@
 static void _win_show_history(ProfChatWin *chatwin, const char *const contact);
 
 void
-ui_message_receipt(ProfChatWin *chatwin, const char *const id)
+chatwin_receipt_received(ProfChatWin *chatwin, const char *const id)
 {
     assert(chatwin != NULL);
 
@@ -57,7 +57,7 @@ ui_message_receipt(ProfChatWin *chatwin, const char *const id)
 }
 
 void
-ui_gone_secure(ProfChatWin *chatwin, gboolean trusted)
+chatwin_otr_secured(ProfChatWin *chatwin, gboolean trusted)
 {
     assert(chatwin != NULL);
 
@@ -87,7 +87,7 @@ ui_gone_secure(ProfChatWin *chatwin, gboolean trusted)
 }
 
 void
-ui_gone_insecure(ProfChatWin *chatwin)
+chatwin_otr_unsecured(ProfChatWin *chatwin)
 {
     assert(chatwin != NULL);
 
@@ -102,7 +102,7 @@ ui_gone_insecure(ProfChatWin *chatwin)
 }
 
 void
-ui_smp_recipient_initiated(ProfChatWin *chatwin)
+chatwin_otr_smp_init(ProfChatWin *chatwin)
 {
     assert(chatwin != NULL);
 
@@ -111,7 +111,7 @@ ui_smp_recipient_initiated(ProfChatWin *chatwin)
 }
 
 void
-ui_smp_recipient_initiated_q(ProfChatWin *chatwin, const char *question)
+chatwin_otr_smp_init_q(ProfChatWin *chatwin, const char *question)
 {
     assert(chatwin != NULL);
 
@@ -122,7 +122,7 @@ ui_smp_recipient_initiated_q(ProfChatWin *chatwin, const char *question)
 }
 
 void
-ui_smp_unsuccessful_sender(ProfChatWin *chatwin)
+chatwin_otr_smp_sender_failed(ProfChatWin *chatwin)
 {
     assert(chatwin != NULL);
 
@@ -131,7 +131,7 @@ ui_smp_unsuccessful_sender(ProfChatWin *chatwin)
 }
 
 void
-ui_smp_unsuccessful_receiver(ProfChatWin *chatwin)
+chatwin_otr_smp_receiver_failed(ProfChatWin *chatwin)
 {
     assert(chatwin != NULL);
 
@@ -140,7 +140,7 @@ ui_smp_unsuccessful_receiver(ProfChatWin *chatwin)
 }
 
 void
-ui_smp_aborted(ProfChatWin *chatwin)
+chatwin_otr_smp_aborted(ProfChatWin *chatwin)
 {
     assert(chatwin != NULL);
 
@@ -148,7 +148,7 @@ ui_smp_aborted(ProfChatWin *chatwin)
 }
 
 void
-ui_smp_successful(ProfChatWin *chatwin)
+chatwin_otr_smp_success(ProfChatWin *chatwin)
 {
     assert(chatwin != NULL);
 
@@ -156,7 +156,7 @@ ui_smp_successful(ProfChatWin *chatwin)
 }
 
 void
-ui_smp_answer_success(ProfChatWin *chatwin)
+chatwin_otr_smp_answer_success(ProfChatWin *chatwin)
 {
     assert(chatwin != NULL);
 
@@ -164,7 +164,7 @@ ui_smp_answer_success(ProfChatWin *chatwin)
 }
 
 void
-ui_smp_answer_failure(ProfChatWin *chatwin)
+chatwin_otr_smp_answer_failure(ProfChatWin *chatwin)
 {
     assert(chatwin != NULL);
 
@@ -172,7 +172,7 @@ ui_smp_answer_failure(ProfChatWin *chatwin)
 }
 
 void
-ui_otr_authenticating(ProfChatWin *chatwin)
+chatwin_otr_smp_authenticating(ProfChatWin *chatwin)
 {
     assert(chatwin != NULL);
 
@@ -180,7 +180,7 @@ ui_otr_authenticating(ProfChatWin *chatwin)
 }
 
 void
-ui_otr_authetication_waiting(ProfChatWin *chatwin)
+chatwin_otr_smp_authenticaton_wait(ProfChatWin *chatwin)
 {
     assert(chatwin != NULL);
 
@@ -188,7 +188,7 @@ ui_otr_authetication_waiting(ProfChatWin *chatwin)
 }
 
 void
-ui_trust(ProfChatWin *chatwin)
+chatwin_otr_trust(ProfChatWin *chatwin)
 {
     assert(chatwin != NULL);
 
@@ -203,7 +203,7 @@ ui_trust(ProfChatWin *chatwin)
 }
 
 void
-ui_untrust(ProfChatWin *chatwin)
+chatwin_otr_untrust(ProfChatWin *chatwin)
 {
     assert(chatwin != NULL);
 

@@ -1531,7 +1531,7 @@ cmd_msg(ProfWin *window, const char *const command, gchar **args)
         } else {
 #ifdef HAVE_LIBOTR
             if (otr_is_secure(barejid)) {
-                ui_gone_secure(chatwin, otr_is_trusted(barejid));
+                chatwin_otr_secured(chatwin, otr_is_trusted(barejid));
             }
 #endif
         }
@@ -4892,7 +4892,7 @@ cmd_otr(ProfWin *window, const char *const command, gchar **args)
                 return TRUE;
             }
 
-            ui_gone_secure(chatwin, otr_is_trusted(barejid));
+            chatwin_otr_secured(chatwin, otr_is_trusted(barejid));
             return TRUE;
 
         // no recipient, use current chat
@@ -4938,7 +4938,7 @@ cmd_otr(ProfWin *window, const char *const command, gchar **args)
             return TRUE;
         }
 
-        ui_gone_insecure(chatwin);
+        chatwin_otr_unsecured(chatwin);
         otr_end_session(chatwin->barejid);
         return TRUE;
 
@@ -4955,7 +4955,7 @@ cmd_otr(ProfWin *window, const char *const command, gchar **args)
             return TRUE;
         }
 
-        ui_trust(chatwin);
+        chatwin_otr_trust(chatwin);
         otr_trust(chatwin->barejid);
         return TRUE;
 
@@ -4972,7 +4972,7 @@ cmd_otr(ProfWin *window, const char *const command, gchar **args)
             return TRUE;
         }
 
-        ui_untrust(chatwin);
+        chatwin_otr_untrust(chatwin);
         otr_untrust(chatwin->barejid);
         return TRUE;
 
