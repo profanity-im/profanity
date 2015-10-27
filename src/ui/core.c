@@ -550,6 +550,17 @@ ui_handle_recipient_error(const char *const recipient, const char *const err_msg
 }
 
 void
+ui_handle_otr_error(const char *const barejid, const char *const message)
+{
+    ProfChatWin *chatwin = wins_get_chat(barejid);
+    if (chatwin) {
+        win_print((ProfWin*)chatwin, '!', 0, NULL, 0, THEME_ERROR, "", message);
+    } else {
+        cons_show_error("%s - %s", barejid, message);
+    }
+}
+
+void
 ui_handle_error(const char *const err_msg)
 {
     GString *msg = g_string_new("");
