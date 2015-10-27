@@ -205,6 +205,8 @@ chatwin_otr_untrust(ProfChatWin *chatwin)
 void
 chatwin_recipient_gone(ProfChatWin *chatwin)
 {
+    assert(chatwin != NULL);
+
     const char *display_usr = NULL;
     PContact contact = roster_get_contact(chatwin->barejid);
     if (contact) {
@@ -223,6 +225,8 @@ chatwin_recipient_gone(ProfChatWin *chatwin)
 void
 chatwin_incoming_msg(ProfChatWin *chatwin, const char *const resource, const char *const message, GDateTime *timestamp, gboolean win_created, prof_enc_t enc_mode)
 {
+    assert(chatwin != NULL);
+
     ProfWin *window = (ProfWin*)chatwin;
     int num = wins_get_num(window);
 
@@ -273,6 +277,8 @@ chatwin_incoming_msg(ProfChatWin *chatwin, const char *const resource, const cha
 void
 chatwin_outgoing_msg(ProfChatWin *chatwin, const char *const message, char *id, prof_enc_t enc_mode)
 {
+    assert(chatwin != NULL);
+
     char enc_char = '-';
     if (enc_mode == PROF_MSG_OTR) {
         enc_char = prefs_get_otr_char();
@@ -288,19 +294,11 @@ chatwin_outgoing_msg(ProfChatWin *chatwin, const char *const message, char *id, 
 }
 
 void
-ui_outgoing_chat_msg_carbon(const char *const barejid, const char *const message)
+chatwin_outgoing_carbon(ProfChatWin *chatwin, const char *const message)
 {
-    ProfChatWin *chatwin = wins_get_chat(barejid);
-
-    // create new window
-    if (!chatwin) {
-        chatwin = chatwin_new(barejid);
-    }
-
-    chat_state_active(chatwin->state);
+    assert(chatwin != NULL);
 
     win_print((ProfWin*)chatwin, '-', 0, NULL, 0, THEME_TEXT_ME, "me", message);
-
     int num = wins_get_num((ProfWin*)chatwin);
     status_bar_active(num);
 }

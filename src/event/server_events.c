@@ -180,7 +180,14 @@ sv_ev_incoming_private_message(const char *const fulljid, char *message)
 void
 sv_ev_outgoing_carbon(char *barejid, char *message)
 {
-    ui_outgoing_chat_msg_carbon(barejid, message);
+    ProfChatWin *chatwin = wins_get_chat(barejid);
+    if (!chatwin) {
+        chatwin = chatwin_new(barejid);
+    }
+
+    chat_state_active(chatwin->state);
+
+    chatwin_outgoing_carbon(chatwin, message);
 }
 
 void
