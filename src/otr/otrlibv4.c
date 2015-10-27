@@ -195,30 +195,28 @@ cb_handle_smp_event(void *opdata, OtrlSMPEvent smp_event,
             break;
 
         case OTRL_SMPEVENT_SUCCESS:
-            if (context->smstate->received_question == 0) {
-                if (chatwin) {
+            if (chatwin) {
+                if (context->smstate->received_question == 0) {
                     ui_smp_successful(chatwin);
+                    ui_trust(chatwin);
+                } else {
+                    ui_smp_answer_success(chatwin);
                 }
-                ui_trust(context->username);
-            } else {
-                ui_smp_answer_success(context->username);
             }
             break;
 
         case OTRL_SMPEVENT_FAILURE:
-            if (context->smstate->received_question == 0) {
-                if (nextMsg == OTRL_SMP_EXPECT3) {
-                    if (chatwin) {
+            if (chatwin) {
+                if (context->smstate->received_question == 0) {
+                    if (nextMsg == OTRL_SMP_EXPECT3) {
                         ui_smp_unsuccessful_sender(chatwin);
-                    }
-                } else if (nextMsg == OTRL_SMP_EXPECT4) {
-                    if (chatwin) {
+                    } else if (nextMsg == OTRL_SMP_EXPECT4) {
                         ui_smp_unsuccessful_receiver(chatwin);
                     }
+                    ui_untrust(chatwin);
+                } else {
+                    ui_smp_answer_failure(chatwin);
                 }
-                ui_untrust(context->username);
-            } else {
-                ui_smp_answer_failure(context->username);
             }
             break;
 
@@ -233,8 +231,8 @@ cb_handle_smp_event(void *opdata, OtrlSMPEvent smp_event,
         case OTRL_SMPEVENT_ABORT:
             if (chatwin) {
                 ui_smp_aborted(chatwin);
+                ui_untrust(chatwin);
             }
-            ui_untrust(context->username);
             break;
 
         case OTRL_SMPEVENT_IN_PROGRESS:

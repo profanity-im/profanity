@@ -176,24 +176,22 @@ otrlib_handle_tlvs(OtrlUserState user_state, OtrlMessageAppOps *ops, ConnContext
             otrl_message_abort_smp(user_state, ops, NULL, context);
         } else {
             context->smstate->nextExpected = OTRL_SMP_EXPECT1;
-            if (context->smstate->received_question == 0) {
-                ProfChatWin *chatwin = wins_get_chat(context->username);
-                if (context->active_fingerprint->trust && (context->active_fingerprint->trust[0] != '\0')) {
-                    if (chatwin) {
+            ProfChatWin *chatwin = wins_get_chat(context->username);
+            if (chatwin) {
+                if (context->smstate->received_question == 0) {
+                    if (context->active_fingerprint->trust && (context->active_fingerprint->trust[0] != '\0')) {
                         ui_smp_successful(chatwin);
-                    }
-                    ui_trust(context->username);
-                } else {
-                    if (chatwin) {
+                        ui_trust(chatwin);
+                    } else {
                         ui_smp_unsuccessful_sender(chatwin);
+                        ui_untrust(chatwin);
                     }
-                    ui_untrust(context->username);
-                }
-            } else {
-                if (context->smstate->sm_prog_state == OTRL_SMP_PROG_SUCCEEDED) {
-                    ui_smp_answer_success(context->username);
                 } else {
-                    ui_smp_answer_failure(context->username);
+                    if (context->smstate->sm_prog_state == OTRL_SMP_PROG_SUCCEEDED) {
+                        ui_smp_answer_success(chatwin);
+                    } else {
+                        ui_smp_answer_failure(chatwin);
+                    }
                 }
             }
         }
@@ -205,16 +203,14 @@ otrlib_handle_tlvs(OtrlUserState user_state, OtrlMessageAppOps *ops, ConnContext
         } else {
             context->smstate->nextExpected = OTRL_SMP_EXPECT1;
             ProfChatWin *chatwin = wins_get_chat(context->username);
-            if (context->active_fingerprint->trust && (context->active_fingerprint->trust[0] != '\0')) {
-                if (chatwin) {
+            if (chatwin) {
+                if (context->active_fingerprint->trust && (context->active_fingerprint->trust[0] != '\0')) {
                     ui_smp_successful(chatwin);
-                }
-                ui_trust(context->username);
-            } else {
-                if (chatwin) {
+                    ui_trust(chatwin);
+                } else {
                     ui_smp_unsuccessful_receiver(chatwin);
+                    ui_untrust(chatwin);
                 }
-                ui_untrust(context->username);
             }
         }
     }
@@ -224,8 +220,8 @@ otrlib_handle_tlvs(OtrlUserState user_state, OtrlMessageAppOps *ops, ConnContext
         ProfChatWin *chatwin = wins_get_chat(context->username);
         if (chatwin) {
             ui_smp_aborted(chatwin);
+            ui_untrust(chatwin);
         }
-        ui_untrust(context->username);
         otr_untrust(context->username);
     }
 }

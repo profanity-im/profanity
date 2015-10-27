@@ -4956,7 +4956,7 @@ cmd_otr(ProfWin *window, const char *const command, gchar **args)
             return TRUE;
         }
 
-        ui_trust(chatwin->barejid);
+        ui_trust(chatwin);
         otr_trust(chatwin->barejid);
         return TRUE;
 
@@ -4973,7 +4973,7 @@ cmd_otr(ProfWin *window, const char *const command, gchar **args)
             return TRUE;
         }
 
-        ui_untrust(chatwin->barejid);
+        ui_untrust(chatwin);
         otr_untrust(chatwin->barejid);
         return TRUE;
 

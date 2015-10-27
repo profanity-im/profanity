@@ -68,8 +68,8 @@ void ui_switch_win(ProfWin *win) {}
 
 void ui_gone_secure(ProfChatWin *chatwin, gboolean trusted) {}
 void ui_gone_insecure(ProfChatWin *chatwin) {}
-void ui_trust(const char * const barejid) {}
-void ui_untrust(const char * const barejid) {}
+void ui_trust(ProfChatWin *chatwin) {}
+void ui_untrust(ProfChatWin *chatwin) {}
 void ui_smp_recipient_initiated(ProfChatWin *chatwin) {}
 void ui_smp_recipient_initiated_q(ProfChatWin *chatwin, const char *question) {}
 
@@ -78,11 +78,11 @@ void ui_smp_unsuccessful_sender(ProfChatWin *chatwin) {}
 void ui_smp_unsuccessful_receiver(ProfChatWin *chatwin) {}
 void ui_smp_aborted(ProfChatWin *chatwin) {}
 
-void ui_smp_answer_success(const char * const barejid) {}
-void ui_smp_answer_failure(const char * const barejid) {}
+void ui_smp_answer_success(ProfChatWin *chatwin) {}
+void ui_smp_answer_failure(ProfChatWin *chatwin) {}
 
-void ui_otr_authenticating(const char * const barejid) {}
-void ui_otr_authetication_waiting(const char * const recipient) {}
+void ui_otr_authenticating(ProfChatWin *chatwin) {}
+void ui_otr_authetication_waiting(ProfChatWin *chatwin) {}
 void ui_sigwinch_handler(int sig) {}
 
 unsigned long ui_get_idle_time(void)

@@ -156,38 +156,64 @@ ui_smp_successful(ProfChatWin *chatwin)
 }
 
 void
-ui_smp_answer_success(const char *const barejid)
+ui_smp_answer_success(ProfChatWin *chatwin)
 {
-    ProfChatWin *chatwin = wins_get_chat(barejid);
-    if (chatwin) {
-        win_vprint((ProfWin*)chatwin, '!', 0, NULL, 0, 0, "", "%s successfully authenticated you.", barejid);
+    assert(chatwin != NULL);
+
+    win_vprint((ProfWin*)chatwin, '!', 0, NULL, 0, 0, "", "%s successfully authenticated you.", chatwin->barejid);
+}
+
+void
+ui_smp_answer_failure(ProfChatWin *chatwin)
+{
+    assert(chatwin != NULL);
+
+    win_vprint((ProfWin*)chatwin, '!', 0, NULL, 0, 0, "", "%s failed to authenticate you.", chatwin->barejid);
+}
+
+void
+ui_otr_authenticating(ProfChatWin *chatwin)
+{
+    assert(chatwin != NULL);
+
+    win_vprint((ProfWin*)chatwin, '!', 0, NULL, 0, 0, "", "Authenticating %s...", chatwin->barejid);
+}
+
+void
+ui_otr_authetication_waiting(ProfChatWin *chatwin)
+{
+    assert(chatwin != NULL);
+
+    win_vprint((ProfWin*)chatwin, '!', 0, NULL, 0, 0, "", "Awaiting authentication from %s...", chatwin->barejid);
+}
+
+void
+ui_trust(ProfChatWin *chatwin)
+{
+    assert(chatwin != NULL);
+
+    chatwin->is_otr = TRUE;
+    chatwin->otr_is_trusted = TRUE;
+
+    ProfWin *window = (ProfWin*)chatwin;
+    win_print(window, '!', 0, NULL, 0, THEME_OTR_TRUSTED, "", "OTR session trusted.");
+    if (wins_is_current(window)) {
+        title_bar_switch();
     }
 }
 
 void
-ui_smp_answer_failure(const char *const barejid)
+ui_untrust(ProfChatWin *chatwin)
 {
-    ProfChatWin *chatwin = wins_get_chat(barejid);
-    if (chatwin) {
-        win_vprint((ProfWin*)chatwin, '!', 0, NULL, 0, 0, "", "%s failed to authenticate you.", barejid);
-    }
-}
+    assert(chatwin != NULL);
 
-void
-ui_otr_authenticating(const char *const barejid)
-{
-    ProfChatWin *chatwin = wins_get_chat(barejid);
-    if (chatwin) {
-        win_vprint((ProfWin*)chatwin, '!', 0, NULL, 0, 0, "", "Authenticating %s...", barejid);
-    }
-}
+    chatwin->is_otr = TRUE;
+    chatwin->otr_is_trusted = FALSE;
 
-void
-ui_otr_authetication_waiting(const char *const barejid)
-{
-    ProfChatWin *chatwin = wins_get_chat(barejid);
-    if (chatwin) {
-        win_vprint((ProfWin*)chatwin, '!', 0, NULL, 0, 0, "", "Awaiting authentication from %s...", barejid);
+    ProfWin *window = (ProfWin*)chatwin;
+    win_print(window, '!', 0, NULL, 0, THEME_OTR_UNTRUSTED, "", "OTR session untrusted.");
+    if (wins_is_current(window)) {
+        title_bar_switch();
     }
 }
 
@@ -199,38 +225,6 @@ ui_handle_otr_error(const char *const barejid, const char *const message)
         win_print((ProfWin*)chatwin, '!', 0, NULL, 0, THEME_ERROR, "", message);
     } else {
         cons_show_error("%s - %s", barejid, message);
-    }
-}
-
-void
-ui_trust(const char *const barejid)
-{
-    ProfChatWin *chatwin = wins_get_chat(barejid);
-    if (chatwin) {
-        chatwin->is_otr = TRUE;
-        chatwin->otr_is_trusted = TRUE;
-
-        ProfWin *window = (ProfWin*)chatwin;
-        win_print(window, '!', 0, NULL, 0, THEME_OTR_TRUSTED, "", "OTR session trusted.");
-        if (wins_is_current(window)) {
-            title_bar_switch();
-        }
-    }
-}
-
-void
-ui_untrust(const char *const barejid)
-{
-    ProfChatWin *chatwin = wins_get_chat(barejid);
-    if (chatwin) {
-        chatwin->is_otr = TRUE;
-        chatwin->otr_is_trusted = FALSE;
-
-        ProfWin *window = (ProfWin*)chatwin;
-        win_print(window, '!', 0, NULL, 0, THEME_OTR_UNTRUSTED, "", "OTR session untrusted.");
-        if (wins_is_current(window)) {
-            title_bar_switch();
-        }
     }
 }
 

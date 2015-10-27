@@ -573,13 +573,18 @@ otr_smp_secret(const char *const recipient, const char *secret)
     }
 
     // if recipient initiated SMP, send response, else initialise
+    ProfChatWin *chatwin = wins_get_chat(recipient);
     if (g_hash_table_contains(smp_initiators, recipient)) {
         otrl_message_respond_smp(user_state, &ops, NULL, context, (const unsigned char*)secret, strlen(secret));
-        ui_otr_authenticating(recipient);
+        if (chatwin) {
+            ui_otr_authenticating(chatwin);
+        }
         g_hash_table_remove(smp_initiators, context->username);
     } else {
         otrl_message_initiate_smp(user_state, &ops, NULL, context, (const unsigned char*)secret, strlen(secret));
-        ui_otr_authetication_waiting(recipient);
+        if (chatwin) {
+            ui_otr_authetication_waiting(chatwin);
+        }
     }
 }
 
@@ -597,7 +602,10 @@ otr_smp_question(const char *const recipient, const char *question, const char *
     }
 
     otrl_message_initiate_smp_q(user_state, &ops, NULL, context, question, (const unsigned char*)answer, strlen(answer));
-    ui_otr_authetication_waiting(recipient);
+    ProfChatWin *chatwin = wins_get_chat(recipient);
+    if (chatwin) {
+        ui_otr_authetication_waiting(chatwin);
+    }
 }
 
 void
