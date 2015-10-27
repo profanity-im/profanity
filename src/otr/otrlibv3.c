@@ -143,7 +143,7 @@ otrlib_handle_tlvs(OtrlUserState user_state, OtrlMessageAppOps *ops, ConnContext
         } else {
             ProfChatWin *chatwin = wins_get_chat(context->username);
             if (chatwin) {
-                chatwin_otr_smp_event(chatwin, PROF_OTR_SMP_INIT. NULL);
+                chatwin_otr_smp_event(chatwin, PROF_OTR_SMP_INIT, NULL);
             }
             g_hash_table_insert(smp_initiators, strdup(context->username), strdup(context->username));
         }
