@@ -45,7 +45,7 @@
 #include "ui/window.h"
 #include "ui/titlebar.h"
 
-static void _win_show_history(ProfChatWin *chatwin, const char *const contact);
+static void _chatwin_history(ProfChatWin *chatwin, const char *const contact);
 
 ProfChatWin*
 chatwin_new(const char *const barejid)
@@ -54,7 +54,7 @@ chatwin_new(const char *const barejid)
     ProfChatWin *chatwin = (ProfChatWin *)window;
 
     if (prefs_get_boolean(PREF_CHLOG) && prefs_get_boolean(PREF_HISTORY)) {
-        _win_show_history(chatwin, barejid);
+        _chatwin_history(chatwin, barejid);
     }
 
     // if the contact is offline, show a message
@@ -249,7 +249,7 @@ chatwin_incoming_msg(ProfChatWin *chatwin, const char *const resource, const cha
 
         chatwin->unread++;
         if (prefs_get_boolean(PREF_CHLOG) && prefs_get_boolean(PREF_HISTORY)) {
-            _win_show_history(chatwin, chatwin->barejid);
+            _chatwin_history(chatwin, chatwin->barejid);
         }
 
         // show users status first, when receiving message via delayed delivery
@@ -336,7 +336,7 @@ ui_chat_win_contact_offline(PContact contact, char *resource, char *status)
 }
 
 static void
-_win_show_history(ProfChatWin *chatwin, const char *const contact)
+_chatwin_history(ProfChatWin *chatwin, const char *const contact)
 {
     if (!chatwin->history_shown) {
         Jid *jid = jid_create(jabber_get_fulljid());
