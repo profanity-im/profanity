@@ -74,7 +74,6 @@
 #include "ui/window.h"
 #include "window_list.h"
 #include "xmpp/xmpp.h"
-#include "event/ui_events.h"
 
 static char *win_title;
 

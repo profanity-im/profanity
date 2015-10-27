@@ -70,7 +70,6 @@
 #include "ui/ui.h"
 #include "window_list.h"
 #include "event/client_events.h"
-#include "event/ui_events.h"
 
 static void _update_presence(const resource_presence_t presence,
     const char *const show, gchar **args);
@@ -1498,7 +1497,7 @@ cmd_msg(ProfWin *window, const char *const command, gchar **args)
 
             ProfPrivateWin *privwin = wins_get_private(full_jid->str);
             if (!privwin) {
-                privwin = ui_ev_new_private_win(full_jid->str);
+                privwin = ui_new_private_win(full_jid->str);
             }
             ui_switch_win((ProfWin*)privwin);
 

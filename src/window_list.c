@@ -46,7 +46,6 @@
 #include "ui/ui.h"
 #include "ui/statusbar.h"
 #include "window_list.h"
-#include "event/ui_events.h"
 
 static GHashTable *windows;
 static int current;
