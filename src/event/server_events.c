@@ -346,7 +346,21 @@ sv_ev_inactive(char *barejid, char *resource)
 void
 sv_ev_gone(const char *const barejid, const char *const resource)
 {
-    ui_recipient_gone(barejid, resource);
+    if (barejid && resource) {
+        gboolean show_message = TRUE;
+
+        ProfChatWin *chatwin = wins_get_chat(barejid);
+        if (chatwin) {
+            ChatSession *session = chat_session_get(barejid);
+            if (session && g_strcmp0(session->resource, resource) != 0) {
+                show_message = FALSE;
+            }
+            if (show_message) {
+                ui_recipient_gone(chatwin);
+            }
+        }
+    }
+
     if (wins_chat_exists(barejid)) {
         chat_session_recipient_gone(barejid, resource);
     }

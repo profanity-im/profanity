@@ -104,7 +104,7 @@ void ui_incoming_private_msg(const char *const fulljid, const char *const messag
 void chatwin_receipt_received(ProfChatWin *chatwin, const char *const id);
 
 void ui_disconnected(void);
-void ui_recipient_gone(const char *const barejid, const char *const resource);
+void ui_recipient_gone(ProfChatWin *chatwin);
 
 void ui_outgoing_chat_msg(ProfChatWin *chatwin, const char *const message, char *id, prof_enc_t enc_mode);
 void ui_outgoing_chat_msg_carbon(const char *const barejid, const char *const message);

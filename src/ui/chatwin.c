@@ -191,37 +191,21 @@ ui_handle_otr_error(const char *const barejid, const char *const message)
 }
 
 void
-ui_recipient_gone(const char *const barejid, const char *const resource)
+ui_recipient_gone(ProfChatWin *chatwin)
 {
-    if (barejid == NULL)
-        return;
-    if (resource == NULL)
-        return;
-
-    gboolean show_message = TRUE;
-
-    ProfChatWin *chatwin = wins_get_chat(barejid);
-    if (chatwin) {
-        ChatSession *session = chat_session_get(barejid);
-        if (session && g_strcmp0(session->resource, resource) != 0) {
-            show_message = FALSE;
+    const char *display_usr = NULL;
+    PContact contact = roster_get_contact(chatwin->barejid);
+    if (contact) {
+        if (p_contact_name(contact)) {
+            display_usr = p_contact_name(contact);
+        } else {
+            display_usr = chatwin->barejid;
         }
-        if (show_message) {
-            const char * display_usr = NULL;
-            PContact contact = roster_get_contact(barejid);
-            if (contact) {
-                if (p_contact_name(contact)) {
-                    display_usr = p_contact_name(contact);
-                } else {
-                    display_usr = barejid;
-                }
-            } else {
-                display_usr = barejid;
-            }
-
-            win_vprint((ProfWin*)chatwin, '!', 0, NULL, 0, THEME_GONE, "", "<- %s has left the conversation.", display_usr);
-        }
+    } else {
+        display_usr = chatwin->barejid;
     }
+
+    win_vprint((ProfWin*)chatwin, '!', 0, NULL, 0, THEME_GONE, "", "<- %s has left the conversation.", display_usr);
 }
 
 ProfChatWin*
