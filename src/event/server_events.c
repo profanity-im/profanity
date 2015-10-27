@@ -356,7 +356,7 @@ sv_ev_gone(const char *const barejid, const char *const resource)
                 show_message = FALSE;
             }
             if (show_message) {
-                ui_recipient_gone(chatwin);
+                chatwin_recipient_gone(chatwin);
             }
         }
     }

@@ -191,7 +191,7 @@ ui_handle_otr_error(const char *const barejid, const char *const message)
 }
 
 void
-ui_recipient_gone(ProfChatWin *chatwin)
+chatwin_recipient_gone(ProfChatWin *chatwin)
 {
     const char *display_usr = NULL;
     PContact contact = roster_get_contact(chatwin->barejid);
