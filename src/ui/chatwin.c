@@ -47,6 +47,29 @@
 
 static void _win_show_history(ProfChatWin *chatwin, const char *const contact);
 
+ProfChatWin*
+chatwin_new(const char *const barejid)
+{
+    ProfWin *window = wins_new_chat(barejid);
+    ProfChatWin *chatwin = (ProfChatWin *)window;
+
+    if (prefs_get_boolean(PREF_CHLOG) && prefs_get_boolean(PREF_HISTORY)) {
+        _win_show_history(chatwin, barejid);
+    }
+
+    // if the contact is offline, show a message
+    PContact contact = roster_get_contact(barejid);
+    if (contact) {
+        if (strcmp(p_contact_presence(contact), "offline") == 0) {
+            const char * const show = p_contact_presence(contact);
+            const char * const status = p_contact_status(contact);
+            win_show_status_string(window, barejid, show, status, NULL, "--", "offline");
+        }
+    }
+
+    return chatwin;
+}
+
 void
 chatwin_receipt_received(ProfChatWin *chatwin, const char *const id)
 {
@@ -197,31 +220,8 @@ chatwin_recipient_gone(ProfChatWin *chatwin)
     win_vprint((ProfWin*)chatwin, '!', 0, NULL, 0, THEME_GONE, "", "<- %s has left the conversation.", display_usr);
 }
 
-ProfChatWin*
-chatwin_new(const char *const barejid)
-{
-    ProfWin *window = wins_new_chat(barejid);
-    ProfChatWin *chatwin = (ProfChatWin *)window;
-
-    if (prefs_get_boolean(PREF_CHLOG) && prefs_get_boolean(PREF_HISTORY)) {
-        _win_show_history(chatwin, barejid);
-    }
-
-    // if the contact is offline, show a message
-    PContact contact = roster_get_contact(barejid);
-    if (contact) {
-        if (strcmp(p_contact_presence(contact), "offline") == 0) {
-            const char * const show = p_contact_presence(contact);
-            const char * const status = p_contact_status(contact);
-            win_show_status_string(window, barejid, show, status, NULL, "--", "offline");
-        }
-    }
-
-    return chatwin;
-}
-
 void
-ui_incoming_msg(ProfChatWin *chatwin, const char *const resource, const char *const message, GDateTime *timestamp, gboolean win_created, prof_enc_t enc_mode)
+chatwin_incoming_msg(ProfChatWin *chatwin, const char *const resource, const char *const message, GDateTime *timestamp, gboolean win_created, prof_enc_t enc_mode)
 {
     ProfWin *window = (ProfWin*)chatwin;
     int num = wins_get_num(window);

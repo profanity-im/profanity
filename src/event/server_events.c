@@ -194,7 +194,7 @@ sv_ev_incoming_carbon(char *barejid, char *resource, char *message)
         new_win = TRUE;
     }
 
-    ui_incoming_msg(chatwin, resource, message, NULL, new_win, PROF_MSG_PLAIN);
+    chatwin_incoming_msg(chatwin, resource, message, NULL, new_win, PROF_MSG_PLAIN);
     chat_log_msg_in(barejid, message, NULL);
 }
 
@@ -204,12 +204,12 @@ _sv_ev_incoming_pgp(ProfChatWin *chatwin, gboolean new_win, char *barejid, char 
 {
     char *decrypted = p_gpg_decrypt(pgp_message);
     if (decrypted) {
-        ui_incoming_msg(chatwin, resource, decrypted, timestamp, new_win, PROF_MSG_PGP);
+        chatwin_incoming_msg(chatwin, resource, decrypted, timestamp, new_win, PROF_MSG_PGP);
         chat_log_pgp_msg_in(barejid, decrypted, timestamp);
         chatwin->pgp_recv = TRUE;
         p_gpg_free_decrypted(decrypted);
     } else {
-        ui_incoming_msg(chatwin, resource, message, timestamp, new_win, PROF_MSG_PLAIN);
+        chatwin_incoming_msg(chatwin, resource, message, timestamp, new_win, PROF_MSG_PLAIN);
         chat_log_msg_in(barejid, message, timestamp);
         chatwin->pgp_recv = FALSE;
     }
@@ -224,10 +224,10 @@ _sv_ev_incoming_otr(ProfChatWin *chatwin, gboolean new_win, char *barejid, char 
     char *otr_res = otr_on_message_recv(barejid, resource, message, &decrypted);
     if (otr_res) {
         if (decrypted) {
-            ui_incoming_msg(chatwin, resource, otr_res, timestamp, new_win, PROF_MSG_OTR);
+            chatwin_incoming_msg(chatwin, resource, otr_res, timestamp, new_win, PROF_MSG_OTR);
             chatwin->pgp_send = FALSE;
         } else {
-            ui_incoming_msg(chatwin, resource, otr_res, timestamp, new_win, PROF_MSG_PLAIN);
+            chatwin_incoming_msg(chatwin, resource, otr_res, timestamp, new_win, PROF_MSG_PLAIN);
         }
         chat_log_otr_msg_in(barejid, otr_res, decrypted, timestamp);
         otr_free_message(otr_res);
@@ -240,7 +240,7 @@ _sv_ev_incoming_otr(ProfChatWin *chatwin, gboolean new_win, char *barejid, char 
 static void
 _sv_ev_incoming_plain(ProfChatWin *chatwin, gboolean new_win, char *barejid, char *resource, char *message, GDateTime *timestamp)
 {
-    ui_incoming_msg(chatwin, resource, message, timestamp, new_win, PROF_MSG_PLAIN);
+    chatwin_incoming_msg(chatwin, resource, message, timestamp, new_win, PROF_MSG_PLAIN);
     chat_log_msg_in(barejid, message, timestamp);
     chatwin->pgp_recv = FALSE;
 }
