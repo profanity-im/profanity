@@ -75,7 +75,6 @@
 #include "window_list.h"
 #include "xmpp/xmpp.h"
 #include "plugins/plugins.h"
-#include "event/ui_events.h"
 
 static char *win_title;
 
@@ -88,8 +87,6 @@ static Display *display;
 
 static GTimer *ui_idle_time;
 
-//static void _win_handle_switch(const wint_t ch);
-static void _win_show_history(ProfChatWin *chatwin, const char *const contact);
 static void _ui_draw_term_title(void);
 
 void
@@ -301,13 +298,6 @@ ui_handle_stanza(const char *const msg)
     }
 }
 
-gboolean
-ui_chat_win_exists(const char *const barejid)
-{
-    ProfChatWin *chatwin = wins_get_chat(barejid);
-    return (chatwin != NULL);
-}
-
 void
 ui_contact_online(char *barejid, Resource *resource, GDateTime *last_activity)
 {
@@ -333,11 +323,17 @@ ui_contact_online(char *barejid, Resource *resource, GDateTime *last_activity)
 
     // show in chat win if "all"
     if (g_strcmp0(show_chat_win, "all") == 0) {
-        ui_chat_win_contact_online(contact, resource, last_activity);
+        ProfChatWin *chatwin = wins_get_chat(barejid);
+        if (chatwin) {
+            chatwin_contact_online(chatwin, resource, last_activity);
+        }
 
     // show in char win if "online" and presence online
     } else if (g_strcmp0(show_chat_win, "online") == 0 && resource->presence == RESOURCE_ONLINE) {
-        ui_chat_win_contact_online(contact, resource, last_activity);
+        ProfChatWin *chatwin = wins_get_chat(barejid);
+        if (chatwin) {
+            chatwin_contact_online(chatwin, resource, last_activity);
+        }
     }
 
     free(show_console);
@@ -392,71 +388,6 @@ ui_get_chat_recipients(void)
 {
     GSList *recipients = wins_get_chat_recipients();
     return recipients;
-}
-
-void
-ui_message_receipt(const char *const barejid, const char *const id)
-{
-    ProfChatWin *chatwin = wins_get_chat(barejid);
-    if (chatwin) {
-        ProfWin *win = (ProfWin*) chatwin;
-        win_mark_received(win, id);
-    }
-}
-
-void
-ui_incoming_msg(ProfChatWin *chatwin, const char *const resource, const char *const message, GDateTime *timestamp, gboolean win_created, prof_enc_t enc_mode)
-{
-    char *plugin_message = plugins_pre_chat_message_display(chatwin->barejid, message);
-
-    ProfWin *window = (ProfWin*)chatwin;
-    int num = wins_get_num(window);
-
-    char *display_name = roster_get_msg_display_name(chatwin->barejid, resource);
-
-    // currently viewing chat window with sender
-    if (wins_is_current(window)) {
-        win_print_incoming_message(window, timestamp, display_name, plugin_message, enc_mode);
-        title_bar_set_typing(FALSE);
-        status_bar_active(num);
-
-    // not currently viewing chat window with sender
-    } else {
-        status_bar_new(num);
-        cons_show_incoming_message(display_name, num);
-
-        if (prefs_get_boolean(PREF_FLASH)) {
-            flash();
-        }
-
-        chatwin->unread++;
-        if (prefs_get_boolean(PREF_CHLOG) && prefs_get_boolean(PREF_HISTORY)) {
-            _win_show_history(chatwin, chatwin->barejid);
-        }
-
-        // show users status first, when receiving message via delayed delivery
-        if (timestamp && win_created) {
-            PContact pcontact = roster_get_contact(chatwin->barejid);
-            if (pcontact) {
-                win_show_contact(window, pcontact);
-            }
-        }
-
-        win_print_incoming_message(window, timestamp, display_name, plugin_message, enc_mode);
-    }
-
-    if (prefs_get_boolean(PREF_BEEP)) {
-        beep();
-    }
-
-    if (prefs_get_boolean(PREF_NOTIFY_MESSAGE)) {
-        notify_message(window, display_name, plugin_message);
-    }
-
-    free(display_name);
-
-    plugins_post_chat_message_display(chatwin->barejid, plugin_message);
-    free(plugin_message);
 }
 
 void
@@ -621,6 +552,17 @@ ui_handle_recipient_error(const char *const recipient, const char *const err_msg
     if (privatewin) {
         win_vprint((ProfWin*)privatewin, '!', 0, NULL, 0, THEME_ERROR, "", "Error from %s: %s", recipient, err_msg);
         return;
+    }
+}
+
+void
+ui_handle_otr_error(const char *const barejid, const char *const message)
+{
+    ProfChatWin *chatwin = wins_get_chat(barejid);
+    if (chatwin) {
+        win_print((ProfWin*)chatwin, '!', 0, NULL, 0, THEME_ERROR, "", message);
+    } else {
+        cons_show_error("%s - %s", barejid, message);
     }
 }
 
@@ -830,6 +772,10 @@ ui_switch_win(ProfWin *window)
 {
     assert(window != NULL);
 
+    if (wins_is_current(window)) {
+        return;
+    }
+
     ProfWin *old_current = wins_get_current();
     if (old_current->type == WIN_MUC_CONFIG) {
         ProfMucConfWin *confwin = (ProfMucConfWin*)old_current;
@@ -851,193 +797,6 @@ ui_switch_win(ProfWin *window)
     }
     status_bar_current(i);
     status_bar_active(i);
-}
-
-void
-ui_gone_secure(const char *const barejid, gboolean trusted)
-{
-    ProfWin *window = NULL;
-
-    ProfChatWin *chatwin = wins_get_chat(barejid);
-    if (chatwin) {
-        window = (ProfWin*)chatwin;
-    } else {
-        window = wins_new_chat(barejid);
-        chatwin = (ProfChatWin*)window;
-    }
-
-    chatwin->is_otr = TRUE;
-    chatwin->otr_is_trusted = trusted;
-    if (trusted) {
-        win_print(window, '!', 0, NULL, 0, THEME_OTR_STARTED_TRUSTED, "", "OTR session started (trusted).");
-    } else {
-        win_print(window, '!', 0, NULL, 0, THEME_OTR_STARTED_UNTRUSTED, "", "OTR session started (untrusted).");
-    }
-
-    if (wins_is_current(window)) {
-         title_bar_switch();
-    } else {
-        int num = wins_get_num(window);
-        status_bar_new(num);
-
-        int ui_index = num;
-        if (ui_index == 10) {
-            ui_index = 0;
-        }
-        cons_show("%s started an OTR session (%d).", barejid, ui_index);
-        cons_alert();
-    }
-}
-
-void
-ui_gone_insecure(const char *const barejid)
-{
-    ProfChatWin *chatwin = wins_get_chat(barejid);
-    if (chatwin) {
-        chatwin->is_otr = FALSE;
-        chatwin->otr_is_trusted = FALSE;
-
-        ProfWin *window = (ProfWin*)chatwin;
-        win_print(window, '!', 0, NULL, 0, THEME_OTR_ENDED, "", "OTR session ended.");
-        if (wins_is_current(window)) {
-            title_bar_switch();
-        }
-    }
-}
-
-void
-ui_smp_recipient_initiated(const char *const barejid)
-{
-    ProfChatWin *chatwin = wins_get_chat(barejid);
-    if (chatwin) {
-        win_vprint((ProfWin*)chatwin, '!', 0, NULL, 0, 0, "", "%s wants to authenticate your identity, use '/otr secret <secret>'.", barejid);
-    }
-}
-
-void
-ui_smp_recipient_initiated_q(const char *const barejid, const char *question)
-{
-    ProfChatWin *chatwin = wins_get_chat(barejid);
-    if (chatwin) {
-        win_vprint((ProfWin*)chatwin, '!', 0, NULL, 0, 0, "", "%s wants to authenticate your identity with the following question:", barejid);
-        win_vprint((ProfWin*)chatwin, '!', 0, NULL, 0, 0, "", "  %s", question);
-        win_print((ProfWin*)chatwin, '!', 0, NULL, 0, 0, "", "use '/otr answer <answer>'.");
-    }
-}
-
-void
-ui_smp_unsuccessful_sender(const char *const barejid)
-{
-    ProfChatWin *chatwin = wins_get_chat(barejid);
-    if (chatwin) {
-        win_vprint((ProfWin*)chatwin, '!', 0, NULL, 0, 0, "", "Authentication failed, the secret you entered does not match the secret entered by %s.", barejid);
-    }
-}
-
-void
-ui_smp_unsuccessful_receiver(const char *const barejid)
-{
-    ProfChatWin *chatwin = wins_get_chat(barejid);
-    if (chatwin) {
-        win_vprint((ProfWin*)chatwin, '!', 0, NULL, 0, 0, "", "Authentication failed, the secret entered by %s does not match yours.", barejid);
-    }
-}
-
-void
-ui_smp_aborted(const char *const barejid)
-{
-    ProfChatWin *chatwin = wins_get_chat(barejid);
-    if (chatwin) {
-        win_print((ProfWin*)chatwin, '!', 0, NULL, 0, 0, "", "SMP session aborted.");
-    }
-}
-
-void
-ui_smp_successful(const char *const barejid)
-{
-    ProfChatWin *chatwin = wins_get_chat(barejid);
-    if (chatwin) {
-        win_print((ProfWin*)chatwin, '!', 0, NULL, 0, 0, "", "Authentication successful.");
-    }
-}
-
-void
-ui_smp_answer_success(const char *const barejid)
-{
-    ProfChatWin *chatwin = wins_get_chat(barejid);
-    if (chatwin) {
-        win_vprint((ProfWin*)chatwin, '!', 0, NULL, 0, 0, "", "%s successfully authenticated you.", barejid);
-    }
-}
-
-void
-ui_smp_answer_failure(const char *const barejid)
-{
-    ProfChatWin *chatwin = wins_get_chat(barejid);
-    if (chatwin) {
-        win_vprint((ProfWin*)chatwin, '!', 0, NULL, 0, 0, "", "%s failed to authenticate you.", barejid);
-    }
-}
-
-void
-ui_otr_authenticating(const char *const barejid)
-{
-    ProfChatWin *chatwin = wins_get_chat(barejid);
-    if (chatwin) {
-        win_vprint((ProfWin*)chatwin, '!', 0, NULL, 0, 0, "", "Authenticating %s...", barejid);
-    }
-}
-
-void
-ui_otr_authetication_waiting(const char *const barejid)
-{
-    ProfChatWin *chatwin = wins_get_chat(barejid);
-    if (chatwin) {
-        win_vprint((ProfWin*)chatwin, '!', 0, NULL, 0, 0, "", "Awaiting authentication from %s...", barejid);
-    }
-}
-
-void
-ui_handle_otr_error(const char *const barejid, const char *const message)
-{
-    ProfChatWin *chatwin = wins_get_chat(barejid);
-    if (chatwin) {
-        win_print((ProfWin*)chatwin, '!', 0, NULL, 0, THEME_ERROR, "", message);
-    } else {
-        cons_show_error("%s - %s", barejid, message);
-    }
-}
-
-void
-ui_trust(const char *const barejid)
-{
-    ProfChatWin *chatwin = wins_get_chat(barejid);
-    if (chatwin) {
-        chatwin->is_otr = TRUE;
-        chatwin->otr_is_trusted = TRUE;
-
-        ProfWin *window = (ProfWin*)chatwin;
-        win_print(window, '!', 0, NULL, 0, THEME_OTR_TRUSTED, "", "OTR session trusted.");
-        if (wins_is_current(window)) {
-            title_bar_switch();
-        }
-    }
-}
-
-void
-ui_untrust(const char *const barejid)
-{
-    ProfChatWin *chatwin = wins_get_chat(barejid);
-    if (chatwin) {
-        chatwin->is_otr = TRUE;
-        chatwin->otr_is_trusted = FALSE;
-
-        ProfWin *window = (ProfWin*)chatwin;
-        win_print(window, '!', 0, NULL, 0, THEME_OTR_UNTRUSTED, "", "OTR session untrusted.");
-        if (wins_is_current(window)) {
-            title_bar_switch();
-        }
-    }
 }
 
 void
@@ -1177,40 +936,6 @@ ui_print_system_msg_from_recipient(const char *const barejid, const char *messag
     win_vprint(window, '-', 0, NULL, 0, 0, "", "*%s %s", barejid, message);
 }
 
-void
-ui_recipient_gone(const char *const barejid, const char *const resource)
-{
-    if (barejid == NULL)
-        return;
-    if (resource == NULL)
-        return;
-
-    gboolean show_message = TRUE;
-
-    ProfChatWin *chatwin = wins_get_chat(barejid);
-    if (chatwin) {
-        ChatSession *session = chat_session_get(barejid);
-        if (session && g_strcmp0(session->resource, resource) != 0) {
-            show_message = FALSE;
-        }
-        if (show_message) {
-            const char * display_usr = NULL;
-            PContact contact = roster_get_contact(barejid);
-            if (contact) {
-                if (p_contact_name(contact)) {
-                    display_usr = p_contact_name(contact);
-                } else {
-                    display_usr = barejid;
-                }
-            } else {
-                display_usr = barejid;
-            }
-
-            win_vprint((ProfWin*)chatwin, '!', 0, NULL, 0, THEME_GONE, "", "<- %s has left the conversation.", display_usr);
-        }
-    }
-}
-
 ProfPrivateWin*
 ui_new_private_win(const char *const fulljid)
 {
@@ -1222,7 +947,7 @@ void
 ui_create_xmlconsole_win(void)
 {
     ProfWin *window = wins_new_xmlconsole();
-    ui_ev_focus_win(window);
+    ui_switch_win(window);
 }
 
 void
@@ -1230,66 +955,8 @@ ui_open_xmlconsole_win(void)
 {
     ProfXMLWin *xmlwin = wins_get_xmlconsole();
     if (xmlwin) {
-        ui_ev_focus_win((ProfWin*)xmlwin);
+        ui_switch_win((ProfWin*)xmlwin);
     }
-}
-
-ProfChatWin*
-ui_new_chat_win(const char *const barejid)
-{
-    ProfWin *window = wins_new_chat(barejid);
-    ProfChatWin *chatwin = (ProfChatWin *)window;
-
-    if (prefs_get_boolean(PREF_CHLOG) && prefs_get_boolean(PREF_HISTORY)) {
-        _win_show_history(chatwin, barejid);
-    }
-
-    // if the contact is offline, show a message
-    PContact contact = roster_get_contact(barejid);
-    if (contact) {
-        if (strcmp(p_contact_presence(contact), "offline") == 0) {
-            const char * const show = p_contact_presence(contact);
-            const char * const status = p_contact_status(contact);
-            win_show_status_string(window, barejid, show, status, NULL, "--", "offline");
-        }
-    }
-
-    return chatwin;
-}
-
-void
-ui_outgoing_chat_msg(ProfChatWin *chatwin, const char *const message, char *id, prof_enc_t enc_mode)
-{
-    char enc_char = '-';
-    if (enc_mode == PROF_MSG_OTR) {
-        enc_char = prefs_get_otr_char();
-    } else if (enc_mode == PROF_MSG_PGP) {
-        enc_char = prefs_get_pgp_char();
-    }
-
-    if (prefs_get_boolean(PREF_RECEIPTS_REQUEST) && id) {
-        win_print_with_receipt((ProfWin*)chatwin, enc_char, 0, NULL, 0, THEME_TEXT_ME, "me", message, id);
-    } else {
-        win_print((ProfWin*)chatwin, enc_char, 0, NULL, 0, THEME_TEXT_ME, "me", message);
-    }
-}
-
-void
-ui_outgoing_chat_msg_carbon(const char *const barejid, const char *const message)
-{
-    ProfChatWin *chatwin = wins_get_chat(barejid);
-
-    // create new window
-    if (!chatwin) {
-        chatwin = ui_new_chat_win(barejid);
-    }
-
-    chat_state_active(chatwin->state);
-
-    win_print((ProfWin*)chatwin, '-', 0, NULL, 0, THEME_TEXT_ME, "me", message);
-
-    int num = wins_get_num((ProfWin*)chatwin);
-    status_bar_active(num);
 }
 
 void
@@ -1322,7 +989,7 @@ ui_room_join(const char *const roomjid, gboolean focus)
 
 
     if (focus) {
-        ui_ev_focus_win(window);
+        ui_switch_win(window);
     } else {
         int num = wins_get_num(window);
         status_bar_active(num);
@@ -1336,7 +1003,7 @@ void
 ui_switch_to_room(const char *const roomjid)
 {
     ProfWin *window = (ProfWin*)wins_get_muc(roomjid);
-    ui_ev_focus_win(window);
+    ui_switch_win(window);
 }
 
 void
@@ -2109,38 +1776,6 @@ ui_ask_pgp_passphrase(const char *hint, int prev_fail)
 }
 
 void
-ui_chat_win_contact_online(PContact contact, Resource *resource, GDateTime *last_activity)
-{
-    const char *show = string_from_resource_presence(resource->presence);
-    char *display_str = p_contact_create_display_string(contact, resource->name);
-    const char *barejid = p_contact_barejid(contact);
-
-    ProfWin *window = (ProfWin*)wins_get_chat(barejid);
-    if (window) {
-        win_show_status_string(window, display_str, show, resource->status,
-            last_activity, "++", "online");
-
-    }
-
-    free(display_str);
-}
-
-void
-ui_chat_win_contact_offline(PContact contact, char *resource, char *status)
-{
-    char *display_str = p_contact_create_display_string(contact, resource);
-    const char *barejid = p_contact_barejid(contact);
-
-    ProfWin *window = (ProfWin*)wins_get_chat(barejid);
-    if (window) {
-        win_show_status_string(window, display_str, "offline", status, NULL, "--",
-            "offline");
-    }
-
-    free(display_str);
-}
-
-void
 ui_contact_offline(char *barejid, char *resource, char *status)
 {
     char *show_console = prefs_get_string(PREF_STATUSES_CONSOLE);
@@ -2161,11 +1796,17 @@ ui_contact_offline(char *barejid, char *resource, char *status)
 
             // show in chat win if "all"
             if (g_strcmp0(show_chat_win, "all") == 0) {
-                ui_chat_win_contact_offline(contact, resource, status);
+                ProfChatWin *chatwin = wins_get_chat(barejid);
+                if (chatwin) {
+                    chatwin_contact_offline(chatwin, resource, status);
+                }
 
             // show in char win if "online" and presence online
             } else if (g_strcmp0(show_chat_win, "online") == 0) {
-                ui_chat_win_contact_offline(contact, resource, status);
+                ProfChatWin *chatwin = wins_get_chat(barejid);
+                if (chatwin) {
+                    chatwin_contact_offline(chatwin, resource, status);
+                }
             }
         }
     }
@@ -2547,7 +2188,7 @@ ui_handle_room_configuration(const char *const roomjid, DataForm *form)
     ProfMucConfWin *confwin = (ProfMucConfWin*)window;
     assert(confwin->memcheck == PROFCONFWIN_MEMCHECK);
 
-    ui_ev_focus_win(window);
+    ui_switch_win(window);
     ui_show_form(confwin);
 
     win_print(window, '-', 0, NULL, 0, 0, "", "");
@@ -2599,11 +2240,11 @@ ui_handle_room_config_submit_result(const char *const roomjid)
         }
 
         if (muc_window) {
-            ui_ev_focus_win((ProfWin*)muc_window);
+            ui_switch_win((ProfWin*)muc_window);
             win_print(muc_window, '!', 0, NULL, 0, THEME_ROOMINFO, "", "Room configuration successful");
         } else {
             ProfWin *console = wins_get_console();
-            ui_ev_focus_win(console);
+            ui_switch_win(console);
             cons_show("Room configuration successful: %s", roomjid);
         }
     } else {
@@ -2865,36 +2506,6 @@ ui_show_software_version(const char *const jid, const char *const  presence,
     }
     if (os) {
         win_vprint(window, '-', 0, NULL, 0, 0, "", "OS      : %s", os);
-    }
-}
-
-static void
-_win_show_history(ProfChatWin *chatwin, const char *const contact)
-{
-    if (!chatwin->history_shown) {
-        Jid *jid = jid_create(jabber_get_fulljid());
-        GSList *history = chat_log_get_previous(jid->barejid, contact);
-        jid_destroy(jid);
-        GSList *curr = history;
-        while (curr) {
-            char *line = curr->data;
-            // entry
-            if (line[2] == ':') {
-                char hh[3]; memcpy(hh, &line[0], 2); hh[2] = '\0'; int ihh = atoi(hh);
-                char mm[3]; memcpy(mm, &line[3], 2); mm[2] = '\0'; int imm = atoi(mm);
-                char ss[3]; memcpy(ss, &line[6], 2); ss[2] = '\0'; int iss = atoi(ss);
-                GDateTime *timestamp = g_date_time_new_local(2000, 1, 1, ihh, imm, iss);
-                win_print((ProfWin*)chatwin, '-', 0, timestamp, NO_COLOUR_DATE, 0, "", curr->data+11);
-                g_date_time_unref(timestamp);
-            // header
-            } else {
-                win_print((ProfWin*)chatwin, '-', 0, NULL, 0, 0, "", curr->data);
-            }
-            curr = g_slist_next(curr);
-        }
-        chatwin->history_shown = TRUE;
-
-        g_slist_free_full(history, free);
     }
 }
 

@@ -71,7 +71,6 @@
 #include "ui/ui.h"
 #include "window_list.h"
 #include "event/client_events.h"
-#include "event/ui_events.h"
 
 static void _update_presence(const resource_presence_t presence,
     const char *const show, gchar **args);
@@ -921,7 +920,7 @@ cmd_win(ProfWin *window, const char *const command, gchar **args)
     if (!focuswin) {
         cons_show("Window %d does not exist.", num);
     } else {
-        ui_ev_focus_win(focuswin);
+        ui_switch_win(focuswin);
     }
 
     return TRUE;
@@ -1506,9 +1505,9 @@ cmd_msg(ProfWin *window, const char *const command, gchar **args)
 
             ProfPrivateWin *privwin = wins_get_private(full_jid->str);
             if (!privwin) {
-                privwin = ui_ev_new_private_win(full_jid->str);
+                privwin = ui_new_private_win(full_jid->str);
             }
-            ui_ev_focus_win((ProfWin*)privwin);
+            ui_switch_win((ProfWin*)privwin);
 
             if (msg) {
                 cl_ev_send_priv_msg(privwin, msg);
@@ -1531,16 +1530,16 @@ cmd_msg(ProfWin *window, const char *const command, gchar **args)
 
         ProfChatWin *chatwin = wins_get_chat(barejid);
         if (!chatwin) {
-            chatwin = ui_ev_new_chat_win(barejid);
+            chatwin = chatwin_new(barejid);
         }
-        ui_ev_focus_win((ProfWin*)chatwin);
+        ui_switch_win((ProfWin*)chatwin);
 
         if (msg) {
             cl_ev_send_msg(chatwin, msg);
         } else {
 #ifdef PROF_HAVE_LIBOTR
             if (otr_is_secure(barejid)) {
-                ui_gone_secure(barejid, otr_is_trusted(barejid));
+                chatwin_otr_secured(chatwin, otr_is_trusted(barejid));
             }
 #endif
         }
@@ -2754,7 +2753,7 @@ cmd_form(ProfWin *window, const char *const command, gchar **args)
         if (!new_current) {
             new_current = wins_get_console();
         }
-        ui_ev_focus_win(new_current);
+        ui_switch_win(new_current);
         wins_close_by_num(num);
     }
 
@@ -3060,7 +3059,7 @@ cmd_room(ProfWin *window, const char *const command, gchar **args)
         ProfMucConfWin *confwin = wins_get_muc_conf(mucwin->roomjid);
 
         if (confwin) {
-            ui_ev_focus_win((ProfWin*)confwin);
+            ui_switch_win((ProfWin*)confwin);
         } else {
             iq_request_room_config_form(mucwin->roomjid);
         }
@@ -4695,9 +4694,9 @@ cmd_pgp(ProfWin *window, const char *const command, gchar **args)
 
             chatwin = wins_get_chat(barejid);
             if (!chatwin) {
-                chatwin = ui_ev_new_chat_win(barejid);
+                chatwin = chatwin_new(barejid);
             }
-            ui_ev_focus_win((ProfWin*)chatwin);
+            ui_switch_win((ProfWin*)chatwin);
         } else {
             chatwin = (ProfChatWin*)window;
             assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
@@ -4895,9 +4894,9 @@ cmd_otr(ProfWin *window, const char *const command, gchar **args)
 
             ProfChatWin *chatwin = wins_get_chat(barejid);
             if (!chatwin) {
-                chatwin = ui_ev_new_chat_win(barejid);
+                chatwin = chatwin_new(barejid);
             }
-            ui_ev_focus_win((ProfWin*)chatwin);
+            ui_switch_win((ProfWin*)chatwin);
 
             if (chatwin->pgp_send) {
                 ui_current_print_formatted_line('!', 0, "You must disable PGP encryption before starting an OTR session.");
@@ -4921,7 +4920,7 @@ cmd_otr(ProfWin *window, const char *const command, gchar **args)
                 return TRUE;
             }
 
-            ui_gone_secure(barejid, otr_is_trusted(barejid));
+            chatwin_otr_secured(chatwin, otr_is_trusted(barejid));
             return TRUE;
 
         // no recipient, use current chat
@@ -4967,7 +4966,7 @@ cmd_otr(ProfWin *window, const char *const command, gchar **args)
             return TRUE;
         }
 
-        ui_gone_insecure(chatwin->barejid);
+        chatwin_otr_unsecured(chatwin);
         otr_end_session(chatwin->barejid);
         return TRUE;
 
@@ -4984,7 +4983,7 @@ cmd_otr(ProfWin *window, const char *const command, gchar **args)
             return TRUE;
         }
 
-        ui_trust(chatwin->barejid);
+        chatwin_otr_trust(chatwin);
         otr_trust(chatwin->barejid);
         return TRUE;
 
@@ -5001,7 +5000,7 @@ cmd_otr(ProfWin *window, const char *const command, gchar **args)
             return TRUE;
         }
 
-        ui_untrust(chatwin->barejid);
+        chatwin_otr_untrust(chatwin);
         otr_untrust(chatwin->barejid);
         return TRUE;
 

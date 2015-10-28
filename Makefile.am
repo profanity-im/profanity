@@ -15,7 +15,6 @@ core_sources = \
 	src/xmpp/form.c src/xmpp/form.h \
 	src/event/server_events.c src/event/server_events.h \
 	src/event/client_events.c src/event/client_events.h \
-	src/event/ui_events.c src/event/ui_events.h \
 	src/ui/ui.h src/ui/window.c src/ui/window.h src/ui/core.c \
 	src/ui/titlebar.c src/ui/statusbar.c src/ui/inputwin.c \
 	src/ui/titlebar.h src/ui/statusbar.h src/ui/inputwin.h \
@@ -24,6 +23,7 @@ core_sources = \
 	src/window_list.c src/window_list.h \
 	src/ui/rosterwin.c src/ui/occupantswin.c \
 	src/ui/buffer.c src/ui/buffer.h \
+	src/ui/chatwin.c \
 	src/command/command.h src/command/command.c \
 	src/command/commands.h src/command/commands.c \
 	src/tools/parser.c \
@@ -74,7 +74,6 @@ unittest_sources = \
 	src/window_list.c src/window_list.h \
 	src/event/server_events.c src/event/server_events.h \
 	src/event/client_events.c src/event/client_events.h \
-	src/event/ui_events.c src/event/ui_events.h \
 	tests/unittests/xmpp/stub_xmpp.c \
 	tests/unittests/ui/stub_ui.c \
 	tests/unittests/log/stub_log.c \

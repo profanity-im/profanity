@@ -190,7 +190,14 @@ sv_ev_incoming_private_message(const char *const fulljid, char *message)
 void
 sv_ev_outgoing_carbon(char *barejid, char *message)
 {
-    ui_outgoing_chat_msg_carbon(barejid, message);
+    ProfChatWin *chatwin = wins_get_chat(barejid);
+    if (!chatwin) {
+        chatwin = chatwin_new(barejid);
+    }
+
+    chat_state_active(chatwin->state);
+
+    chatwin_outgoing_carbon(chatwin, message);
 }
 
 void
@@ -204,7 +211,7 @@ sv_ev_incoming_carbon(char *barejid, char *resource, char *message)
         new_win = TRUE;
     }
 
-    ui_incoming_msg(chatwin, resource, message, NULL, new_win, PROF_MSG_PLAIN);
+    chatwin_incoming_msg(chatwin, resource, message, NULL, new_win, PROF_MSG_PLAIN);
     chat_log_msg_in(barejid, message, NULL);
 }
 
@@ -214,12 +221,12 @@ _sv_ev_incoming_pgp(ProfChatWin *chatwin, gboolean new_win, char *barejid, char 
 {
     char *decrypted = p_gpg_decrypt(pgp_message);
     if (decrypted) {
-        ui_incoming_msg(chatwin, resource, decrypted, timestamp, new_win, PROF_MSG_PGP);
+        chatwin_incoming_msg(chatwin, resource, decrypted, timestamp, new_win, PROF_MSG_PGP);
         chat_log_pgp_msg_in(barejid, decrypted, timestamp);
         chatwin->pgp_recv = TRUE;
         p_gpg_free_decrypted(decrypted);
     } else {
-        ui_incoming_msg(chatwin, resource, message, timestamp, new_win, PROF_MSG_PLAIN);
+        chatwin_incoming_msg(chatwin, resource, message, timestamp, new_win, PROF_MSG_PLAIN);
         chat_log_msg_in(barejid, message, timestamp);
         chatwin->pgp_recv = FALSE;
     }
@@ -234,10 +241,10 @@ _sv_ev_incoming_otr(ProfChatWin *chatwin, gboolean new_win, char *barejid, char 
     char *otr_res = otr_on_message_recv(barejid, resource, message, &decrypted);
     if (otr_res) {
         if (decrypted) {
-            ui_incoming_msg(chatwin, resource, otr_res, timestamp, new_win, PROF_MSG_OTR);
+            chatwin_incoming_msg(chatwin, resource, otr_res, timestamp, new_win, PROF_MSG_OTR);
             chatwin->pgp_send = FALSE;
         } else {
-            ui_incoming_msg(chatwin, resource, otr_res, timestamp, new_win, PROF_MSG_PLAIN);
+            chatwin_incoming_msg(chatwin, resource, otr_res, timestamp, new_win, PROF_MSG_PLAIN);
         }
         chat_log_otr_msg_in(barejid, otr_res, decrypted, timestamp);
         otr_free_message(otr_res);
@@ -250,7 +257,7 @@ _sv_ev_incoming_otr(ProfChatWin *chatwin, gboolean new_win, char *barejid, char 
 static void
 _sv_ev_incoming_plain(ProfChatWin *chatwin, gboolean new_win, char *barejid, char *resource, char *message, GDateTime *timestamp)
 {
-    ui_incoming_msg(chatwin, resource, message, timestamp, new_win, PROF_MSG_PLAIN);
+    chatwin_incoming_msg(chatwin, resource, message, timestamp, new_win, PROF_MSG_PLAIN);
     chat_log_msg_in(barejid, message, timestamp);
     chatwin->pgp_recv = FALSE;
 }
@@ -325,14 +332,18 @@ sv_ev_delayed_private_message(const char *const fulljid, char *message, GDateTim
 void
 sv_ev_message_receipt(char *barejid, char *id)
 {
-    ui_message_receipt(barejid, id);
+    ProfChatWin *chatwin = wins_get_chat(barejid);
+    if (!chatwin)
+        return;
+
+    chatwin_receipt_received(chatwin, id);
 }
 
 void
 sv_ev_typing(char *barejid, char *resource)
 {
     ui_contact_typing(barejid, resource);
-    if (ui_chat_win_exists(barejid)) {
+    if (wins_chat_exists(barejid)) {
         chat_session_recipient_typing(barejid, resource);
     }
 }
@@ -340,7 +351,7 @@ sv_ev_typing(char *barejid, char *resource)
 void
 sv_ev_paused(char *barejid, char *resource)
 {
-    if (ui_chat_win_exists(barejid)) {
+    if (wins_chat_exists(barejid)) {
         chat_session_recipient_paused(barejid, resource);
     }
 }
@@ -348,7 +359,7 @@ sv_ev_paused(char *barejid, char *resource)
 void
 sv_ev_inactive(char *barejid, char *resource)
 {
-    if (ui_chat_win_exists(barejid)) {
+    if (wins_chat_exists(barejid)) {
         chat_session_recipient_inactive(barejid, resource);
     }
 }
@@ -356,8 +367,22 @@ sv_ev_inactive(char *barejid, char *resource)
 void
 sv_ev_gone(const char *const barejid, const char *const resource)
 {
-    ui_recipient_gone(barejid, resource);
-    if (ui_chat_win_exists(barejid)) {
+    if (barejid && resource) {
+        gboolean show_message = TRUE;
+
+        ProfChatWin *chatwin = wins_get_chat(barejid);
+        if (chatwin) {
+            ChatSession *session = chat_session_get(barejid);
+            if (session && g_strcmp0(session->resource, resource) != 0) {
+                show_message = FALSE;
+            }
+            if (show_message) {
+                chatwin_recipient_gone(chatwin);
+            }
+        }
+    }
+
+    if (wins_chat_exists(barejid)) {
         chat_session_recipient_gone(barejid, resource);
     }
 }
@@ -365,7 +390,7 @@ sv_ev_gone(const char *const barejid, const char *const resource)
 void
 sv_ev_activity(const char *const barejid, const char *const resource, gboolean send_states)
 {
-    if (ui_chat_win_exists(barejid)) {
+    if (wins_chat_exists(barejid)) {
         chat_session_recipient_active(barejid, resource, send_states);
     }
 }

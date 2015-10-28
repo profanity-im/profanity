@@ -46,6 +46,8 @@ ProfWin* wins_new_muc_config(const char *const roomjid, DataForm *form);
 ProfWin* wins_new_private(const char *const fulljid);
 ProfWin* wins_new_plugin(const char *const tag);
 
+gboolean wins_chat_exists(const char *const barejid);
+
 ProfWin* wins_get_console(void);
 ProfChatWin* wins_get_chat(const char *const barejid);
 ProfMucWin* wins_get_muc(const char *const roomjid);

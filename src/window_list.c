@@ -46,7 +46,6 @@
 #include "ui/ui.h"
 #include "ui/statusbar.h"
 #include "window_list.h"
-#include "event/ui_events.h"
 
 static GHashTable *windows;
 static int current;
@@ -67,6 +66,13 @@ ProfWin*
 wins_get_console(void)
 {
     return g_hash_table_lookup(windows, GINT_TO_POINTER(1));
+}
+
+gboolean
+wins_chat_exists(const char *const barejid)
+{
+    ProfChatWin *chatwin = wins_get_chat(barejid);
+    return (chatwin != NULL);
 }
 
 ProfChatWin*
@@ -562,7 +568,7 @@ wins_swap(int source_win, int target_win)
             }
             if (wins_get_current_num() == source_win) {
                 wins_set_current_by_num(target_win);
-                ui_ev_focus_win(console);
+                ui_switch_win(console);
             }
             return TRUE;
 
@@ -583,7 +589,7 @@ wins_swap(int source_win, int target_win)
                 status_bar_active(source_win);
             }
             if ((wins_get_current_num() == source_win) || (wins_get_current_num() == target_win)) {
-                ui_ev_focus_win(console);
+                ui_switch_win(console);
             }
             return TRUE;
         }
@@ -643,7 +649,7 @@ wins_tidy(void)
         windows = new_windows;
         current = 1;
         ProfWin *console = wins_get_console();
-        ui_ev_focus_win(console);
+        ui_switch_win(console);
         g_list_free(keys);
         return TRUE;
     } else {

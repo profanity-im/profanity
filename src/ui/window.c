@@ -983,6 +983,18 @@ win_println(ProfWin *window, int pad, const char *const message)
 }
 
 void
+win_vprintln_ch(ProfWin *window, char ch, const char *const message, ...)
+{
+    va_list arg;
+    va_start(arg, message);
+    GString *fmt_msg = g_string_new(NULL);
+    g_string_vprintf(fmt_msg, message, arg);
+    win_print(window, ch, 0, NULL, 0, 0, "", fmt_msg->str);
+    g_string_free(fmt_msg, TRUE);
+    va_end(arg);
+}
+
+void
 win_newline(ProfWin *window)
 {
     win_print(window, '-', 0, NULL, NO_DATE, 0, "", "");

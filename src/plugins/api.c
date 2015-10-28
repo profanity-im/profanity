@@ -44,7 +44,6 @@
 #include "ui/ui.h"
 #include "config/theme.h"
 #include "command/command.h"
-#include "event/ui_events.h"
 #include "window_list.h"
 #include "common.h"
 
@@ -190,7 +189,7 @@ void
 api_win_focus(const char *tag)
 {
     ProfPluginWin *pluginwin = wins_get_plugin(tag);
-    ui_ev_focus_win((ProfWin*)pluginwin);
+    ui_switch_win((ProfWin*)pluginwin);
 }
 
 void

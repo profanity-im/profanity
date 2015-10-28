@@ -96,14 +96,14 @@ cl_ev_send_msg(ProfChatWin *chatwin, const char *const msg)
     if (chatwin->pgp_send) {
         char *id = message_send_chat_pgp(chatwin->barejid, plugin_msg);
         chat_log_pgp_msg_out(chatwin->barejid, plugin_msg);
-        ui_outgoing_chat_msg(chatwin, plugin_msg, id, PROF_MSG_PGP);
+        chatwin_outgoing_msg(chatwin, plugin_msg, id, PROF_MSG_PGP);
         free(id);
     } else {
         gboolean handled = otr_on_message_send(chatwin, plugin_msg);
         if (!handled) {
             char *id = message_send_chat(chatwin->barejid, plugin_msg);
             chat_log_msg_out(chatwin->barejid, plugin_msg);
-            ui_outgoing_chat_msg(chatwin, plugin_msg, id, PROF_MSG_PLAIN);
+            chatwin_outgoing_msg(chatwin, plugin_msg, id, PROF_MSG_PLAIN);
             free(id);
         }
     }
@@ -118,7 +118,7 @@ cl_ev_send_msg(ProfChatWin *chatwin, const char *const msg)
     if (!handled) {
         char *id = message_send_chat(chatwin->barejid, plugin_msg);
         chat_log_msg_out(chatwin->barejid, plugin_msg);
-        ui_outgoing_chat_msg(chatwin, plugin_msg, id, PROF_MSG_PLAIN);
+        chatwin_outgoing_msg(chatwin, plugin_msg, id, PROF_MSG_PLAIN);
         free(id);
     }
     return;
@@ -131,12 +131,12 @@ cl_ev_send_msg(ProfChatWin *chatwin, const char *const msg)
     if (chatwin->pgp_send) {
         char *id = message_send_chat_pgp(chatwin->barejid, plugin_msg);
         chat_log_pgp_msg_out(chatwin->barejid, plugin_msg);
-        ui_outgoing_chat_msg(chatwin, plugin_msg, id, PROF_MSG_PGP);
+        chatwin_outgoing_msg(chatwin, plugin_msg, id, PROF_MSG_PGP);
         free(id);
     } else {
         char *id = message_send_chat(chatwin->barejid, plugin_msg);
         chat_log_msg_out(chatwin->barejid, plugin_msg);
-        ui_outgoing_chat_msg(chatwin, plugin_msg, id, PROF_MSG_PLAIN);
+        chatwin_outgoing_msg(chatwin, plugin_msg, id, PROF_MSG_PLAIN);
         free(id);
     }
     return;
@@ -148,7 +148,7 @@ cl_ev_send_msg(ProfChatWin *chatwin, const char *const msg)
 #ifndef PROF_HAVE_LIBGPGME
     char *id = message_send_chat(chatwin->barejid, plugin_msg);
     chat_log_msg_out(chatwin->barejid, plugin_msg);
-    ui_outgoing_chat_msg(chatwin, plugin_msg, id, PROF_MSG_PLAIN);
+    chatwin_outgoing_msg(chatwin, plugin_msg, id, PROF_MSG_PLAIN);
     free(id);
     return;
 #endif
