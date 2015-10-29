@@ -2851,6 +2851,23 @@ cmd_subject(ProfWin *window, const char *const command, gchar **args)
         return TRUE;
     }
 
+    if (g_strcmp0(args[0], "prepend") == 0) {
+        if (args[1]) {
+            char *old_subject = muc_subject(mucwin->roomjid);
+            if (old_subject) {
+                GString *new_subject = g_string_new(args[1]);
+                g_string_append(new_subject, old_subject);
+                message_send_groupchat_subject(mucwin->roomjid, new_subject->str);
+                g_string_free(new_subject, TRUE);
+            } else {
+                win_vprint(window, '!', 0, NULL, NO_EOL, THEME_ROOMINFO, "", "Room does not have a subject, use /subject set <subject>");
+            }
+        } else {
+            cons_bad_cmd_usage(command);
+        }
+        return TRUE;
+    }
+
     if (g_strcmp0(args[0], "append") == 0) {
         if (args[1]) {
             char *old_subject = muc_subject(mucwin->roomjid);
