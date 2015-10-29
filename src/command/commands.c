@@ -2851,6 +2851,15 @@ cmd_subject(ProfWin *window, const char *const command, gchar **args)
         return TRUE;
     }
 
+    if (g_strcmp0(args[0], "edit") == 0) {
+        if (args[1]) {
+            message_send_groupchat_subject(mucwin->roomjid, args[1]);
+        } else {
+            cons_bad_cmd_usage(command);
+        }
+        return TRUE;
+    }
+
     if (g_strcmp0(args[0], "prepend") == 0) {
         if (args[1]) {
             char *old_subject = muc_subject(mucwin->roomjid);
