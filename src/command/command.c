@@ -561,11 +561,13 @@ static struct cmd_t command_defs[] =
             CMD_TAG_GROUPCHAT)
         CMD_SYN(
             "/subject set <subject>",
+            "/subject append <text>",
             "/subject clear")
         CMD_DESC(
-            "Set or clear room subject.")
+            "Set, append to, or clear room subject.")
         CMD_ARGS(
             { "set <subject>", "Set the room subject." },
+            { "append <text>", "Append text to the current room subject, use double quotes if a preceeding space is needed." },
             { "clear",         "Clear the room subject." })
         CMD_NOEXAMPLES
     },
@@ -2135,6 +2137,7 @@ cmd_init(void)
 
     subject_ac = autocomplete_new();
     autocomplete_add(subject_ac, "set");
+    autocomplete_add(subject_ac, "append");
     autocomplete_add(subject_ac, "clear");
 
     form_ac = autocomplete_new();
