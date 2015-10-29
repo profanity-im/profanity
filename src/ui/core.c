@@ -1578,7 +1578,7 @@ ui_room_subject(const char *const roomjid, const char *const nick, const char *c
             }
         } else {
             if (nick) {
-                win_vprint(window, '!', 0, NULL, 0, THEME_ROOMINFO, "", "*%s has cleared the room subject: ", nick);
+                win_vprint(window, '!', 0, NULL, 0, THEME_ROOMINFO, "", "*%s has cleared the room subject.", nick);
             } else {
                 win_vprint(window, '!', 0, NULL, 0, THEME_ROOMINFO, "", "Room subject cleared");
             }
