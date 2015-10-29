@@ -110,6 +110,7 @@ static char* _help_autocomplete(ProfWin *window, const char *const input);
 static char* _wins_autocomplete(ProfWin *window, const char *const input);
 static char* _tls_autocomplete(ProfWin *window, const char *const input);
 static char* _script_autocomplete(ProfWin *window, const char *const input);
+static char* _subject_autocomplete(ProfWin *window, const char *const input);
 
 GHashTable *commands = NULL;
 
@@ -561,12 +562,18 @@ static struct cmd_t command_defs[] =
             CMD_TAG_GROUPCHAT)
         CMD_SYN(
             "/subject set <subject>",
+            "/subject edit <subject>",
+            "/subject prepend <text>",
+            "/subject append <text>",
             "/subject clear")
         CMD_DESC(
-            "Set or clear room subject.")
+            "Set, modify, or clear room subject.")
         CMD_ARGS(
-            { "set <subject>", "Set the room subject." },
-            { "clear",         "Clear the room subject." })
+            { "set <subject>",  "Set the room subject." },
+            { "edit <subject>", "Edit the current room subject, tab autocompletion will display the subject to edit." },
+            { "prepend <text>", "Prepend text to the current room subject, use double quotes if a trailing space is needed." },
+            { "append <text>",  "Append text to the current room subject, use double quotes if a preceeding space is needed." },
+            { "clear",          "Clear the room subject." })
         CMD_NOEXAMPLES
     },
 
@@ -2135,6 +2142,9 @@ cmd_init(void)
 
     subject_ac = autocomplete_new();
     autocomplete_add(subject_ac, "set");
+    autocomplete_add(subject_ac, "edit");
+    autocomplete_add(subject_ac, "prepend");
+    autocomplete_add(subject_ac, "append");
     autocomplete_add(subject_ac, "clear");
 
     form_ac = autocomplete_new();
@@ -2694,8 +2704,8 @@ _cmd_complete_parameters(ProfWin *window, const char *const input)
         }
     }
 
-    gchar *cmds[] = { "/prefs", "/disco", "/close", "/subject", "/room" };
-    Autocomplete completers[] = { prefs_ac, disco_ac, close_ac, subject_ac, room_ac };
+    gchar *cmds[] = { "/prefs", "/disco", "/close", "/room" };
+    Autocomplete completers[] = { prefs_ac, disco_ac, close_ac, room_ac };
 
     for (i = 0; i < ARRAY_SIZE(cmds); i++) {
         result = autocomplete_param_with_ac(input, cmds[i], completers[i], TRUE);
@@ -2737,6 +2747,7 @@ _cmd_complete_parameters(ProfWin *window, const char *const input)
     g_hash_table_insert(ac_funcs, "/wins",          _wins_autocomplete);
     g_hash_table_insert(ac_funcs, "/tls",           _tls_autocomplete);
     g_hash_table_insert(ac_funcs, "/script",        _script_autocomplete);
+    g_hash_table_insert(ac_funcs, "/subject",        _subject_autocomplete);
 
     int len = strlen(input);
     char parsed[len+1];
@@ -3928,6 +3939,44 @@ _join_autocomplete(ProfWin *window, const char *const input)
     }
 
     g_strfreev(args);
+
+    return NULL;
+}
+
+static char*
+_subject_autocomplete(ProfWin *window, const char *const input)
+{
+    char *result = NULL;
+
+    if (window->type == WIN_MUC) {
+        if ((g_strcmp0(input, "/subject e") == 0)
+                || (g_strcmp0(input, "/subject ed") == 0)
+                || (g_strcmp0(input, "/subject edi") == 0)
+                || (g_strcmp0(input, "/subject edit") == 0)
+                || (g_strcmp0(input, "/subject edit ") == 0)
+                || (g_strcmp0(input, "/subject edit \"") == 0)) {
+            ProfMucWin *mucwin = (ProfMucWin*)window;
+            assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
+
+            char *subject = muc_subject(mucwin->roomjid);
+            if (subject) {
+                GString *result_str = g_string_new("/subject edit \"");
+                g_string_append(result_str, subject);
+                g_string_append(result_str, "\"");
+
+                result = result_str->str;
+                g_string_free(result_str, FALSE);
+            }
+        }
+    }
+    if (result) {
+        return result;
+    }
+
+    result = autocomplete_param_with_ac(input, "/subject", subject_ac, TRUE);
+    if (result) {
+        return result;
+    }
 
     return NULL;
 }
