@@ -31,10 +31,12 @@
  * source files in the program, then also delete it here.
  *
  */
+
+#include "prof_config.h"
+
 #include <string.h>
 #include <glib.h>
 
-#include "prof_config.h"
 #ifdef PROF_HAVE_GIT_VERSION
 #include "gitversion.h"
 #endif

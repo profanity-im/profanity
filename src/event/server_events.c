@@ -32,11 +32,11 @@
  *
  */
 
+#include "prof_config.h"
+
 #include <string.h>
 #include <stdlib.h>
 #include <assert.h>
-
-#include "prof_config.h"
 
 #include "chat_session.h"
 #include "log.h"

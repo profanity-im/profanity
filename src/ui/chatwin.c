@@ -32,6 +32,8 @@
  *
  */
 
+#include "prof_config.h"
+
 #include <string.h>
 #include <stdlib.h>
 #include <assert.h>
@@ -45,6 +47,9 @@
 #include "ui/window.h"
 #include "ui/titlebar.h"
 #include "plugins/plugins.h"
+#ifdef PROF_HAVE_LIBOTR
+#include "otr/otr.h"
+#endif
 
 static void _chatwin_history(ProfChatWin *chatwin, const char *const contact);
 
@@ -80,6 +85,7 @@ chatwin_receipt_received(ProfChatWin *chatwin, const char *const id)
     win_mark_received(win, id);
 }
 
+#ifdef PROF_HAVE_LIBOTR
 void
 chatwin_otr_secured(ProfChatWin *chatwin, gboolean trusted)
 {
@@ -202,6 +208,7 @@ chatwin_otr_untrust(ProfChatWin *chatwin)
         title_bar_switch();
     }
 }
+#endif
 
 void
 chatwin_recipient_gone(ProfChatWin *chatwin)

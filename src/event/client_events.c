@@ -32,10 +32,11 @@
  *
  */
 
+#include "prof_config.h"
+
 #include <stdlib.h>
 #include <glib.h>
 
-#include "prof_config.h"
 #include "log.h"
 #include "ui/ui.h"
 #include "window_list.h"

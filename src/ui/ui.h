@@ -35,10 +35,14 @@
 #ifndef UI_UI_H
 #define UI_UI_H
 
+#include "prof_config.h"
+
 #include "command/commands.h"
 #include "ui/win_types.h"
 #include "muc.h"
+#ifdef PROF_HAVE_LIBOTR
 #include "otr/otr.h"
+#endif
 
 #define NO_ME           1
 #define NO_DATE         2
@@ -65,11 +69,15 @@ void ui_sigwinch_handler(int sig);
 
 ProfChatWin* chatwin_new(const char *const barejid);
 void chatwin_incoming_msg(ProfChatWin *chatwin, const char *const resource,  const char *const message, GDateTime *timestamp, gboolean win_created, prof_enc_t enc_mode);
+
+#ifdef PROF_HAVE_LIBOTR
 void chatwin_otr_secured(ProfChatWin *chatwin, gboolean trusted);
 void chatwin_otr_unsecured(ProfChatWin *chatwin);
 void chatwin_otr_trust(ProfChatWin *chatwin);
 void chatwin_otr_untrust(ProfChatWin *chatwin);
 void chatwin_otr_smp_event(ProfChatWin *chatwin, prof_otr_smp_event_t event, void *data);
+#endif
+
 void chatwin_receipt_received(ProfChatWin *chatwin, const char *const id);
 void chatwin_recipient_gone(ProfChatWin *chatwin);
 void chatwin_outgoing_msg(ProfChatWin *chatwin, const char *const message, char *id, prof_enc_t enc_mode);
