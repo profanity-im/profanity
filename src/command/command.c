@@ -32,6 +32,8 @@
  *
  */
 
+#include "config.h"
+
 #include <assert.h>
 #include <errno.h>
 #include <limits.h>
@@ -40,8 +42,6 @@
 #include <string.h>
 
 #include <glib.h>
-
-#include "config.h"
 
 #include "chat_session.h"
 #include "command/command.h"

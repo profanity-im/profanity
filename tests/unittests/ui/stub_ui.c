@@ -1,3 +1,5 @@
+#include "config.h"
+
 #include <glib.h>
 #include <wchar.h>
 
@@ -6,6 +8,9 @@
 
 #include "ui/window.h"
 #include "ui/ui.h"
+#ifdef HAVE_LIBOTR
+#include "otr/otr.h"
+#endif
 
 #include "tests/unittests/ui/stub_ui.h"
 
@@ -66,11 +71,13 @@ GSList* ui_get_chat_recipients(void)
 
 void ui_switch_win(ProfWin *win) {}
 
+#ifdef HAVE_LIBOTR
 void chatwin_otr_secured(ProfChatWin *chatwin, gboolean trusted) {}
 void chatwin_otr_unsecured(ProfChatWin *chatwin) {}
 void chatwin_otr_trust(ProfChatWin *chatwin) {}
 void chatwin_otr_untrust(ProfChatWin *chatwin) {}
 void chatwin_otr_smp_event(ProfChatWin *chatwin, prof_otr_smp_event_t event, void *data) {}
+#endif
 
 void ui_sigwinch_handler(int sig) {}
 
