@@ -79,6 +79,7 @@ chatwin_receipt_received(ProfChatWin *chatwin, const char *const id)
     win_mark_received(win, id);
 }
 
+#ifdef HAVE_LIBOTR
 void
 chatwin_otr_secured(ProfChatWin *chatwin, gboolean trusted)
 {
@@ -201,6 +202,7 @@ chatwin_otr_untrust(ProfChatWin *chatwin)
         title_bar_switch();
     }
 }
+#endif
 
 void
 chatwin_recipient_gone(ProfChatWin *chatwin)
