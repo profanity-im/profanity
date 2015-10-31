@@ -1,3 +1,5 @@
+#include "config.h"
+
 #include <glib.h>
 #include <wchar.h>
 
@@ -6,6 +8,9 @@
 
 #include "ui/window.h"
 #include "ui/ui.h"
+#ifdef HAVE_LIBOTR
+#include "otr/otr.h"
+#endif
 
 #include "tests/unittests/ui/stub_ui.h"
 

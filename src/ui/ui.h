@@ -35,6 +35,8 @@
 #ifndef UI_UI_H
 #define UI_UI_H
 
+#include "config.h"
+
 #include "command/commands.h"
 #include "ui/win_types.h"
 #include "muc.h"

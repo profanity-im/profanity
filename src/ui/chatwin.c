@@ -32,6 +32,8 @@
  *
  */
 
+#include "config.h"
+
 #include <string.h>
 #include <stdlib.h>
 #include <assert.h>
@@ -44,6 +46,9 @@
 #include "ui/ui.h"
 #include "ui/window.h"
 #include "ui/titlebar.h"
+#ifdef HAVE_LIBOTR
+#include "otr/otr.h"
+#endif
 
 static void _chatwin_history(ProfChatWin *chatwin, const char *const contact);
 
