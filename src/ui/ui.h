@@ -209,7 +209,7 @@ void chatwin_otr_smp_event(ProfChatWin *chatwin, prof_otr_smp_event_t event, voi
 #endif
 
 // xml console
-void xmlwin_show(const char *const msg);
+void xmlwin_show(ProfXMLWin *xmlwin, const char *const msg);
 
 // Input window
 char* inp_readline(void);

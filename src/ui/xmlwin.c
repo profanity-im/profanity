@@ -32,16 +32,15 @@
  *
  */
 
+#include <assert.h>
+
 #include "ui/win_types.h"
 #include "window_list.h"
 
 void
-xmlwin_show(const char *const msg)
+xmlwin_show(ProfXMLWin *xmlwin, const char *const msg)
 {
-    ProfXMLWin *xmlwin = wins_get_xmlconsole();
-    if (!xmlwin) {
-        return;
-    }
+    assert(xmlwin != NULL);
 
     ProfWin *window = (ProfWin*)xmlwin;
     if (g_str_has_prefix(msg, "SENT:")) {
