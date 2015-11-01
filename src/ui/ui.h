@@ -56,7 +56,7 @@ typedef enum {
     PROF_MSG_PGP
 } prof_enc_t;
 
-// ui startup and control
+// core UI
 void ui_init(void);
 void ui_load_colours(void);
 void ui_update(void);
@@ -66,30 +66,7 @@ void ui_resize(void);
 GSList* ui_get_chat_recipients(void);
 void ui_switch_win(ProfWin *window);
 void ui_sigwinch_handler(int sig);
-
-ProfChatWin* chatwin_new(const char *const barejid);
-void chatwin_incoming_msg(ProfChatWin *chatwin, const char *const resource,  const char *const message, GDateTime *timestamp, gboolean win_created, prof_enc_t enc_mode);
-
-#ifdef HAVE_LIBOTR
-void chatwin_otr_secured(ProfChatWin *chatwin, gboolean trusted);
-void chatwin_otr_unsecured(ProfChatWin *chatwin);
-void chatwin_otr_trust(ProfChatWin *chatwin);
-void chatwin_otr_untrust(ProfChatWin *chatwin);
-void chatwin_otr_smp_event(ProfChatWin *chatwin, prof_otr_smp_event_t event, void *data);
-#endif
-
-void chatwin_receipt_received(ProfChatWin *chatwin, const char *const id);
-void chatwin_recipient_gone(ProfChatWin *chatwin);
-void chatwin_outgoing_msg(ProfChatWin *chatwin, const char *const message, char *id, prof_enc_t enc_mode);
-void chatwin_outgoing_carbon(ProfChatWin *chatwin, const char *const message);
-void chatwin_contact_online(ProfChatWin *chatwin, Resource *resource, GDateTime *last_activity);
-void chatwin_contact_offline(ProfChatWin *chatwin, char *resource, char *status);
-
-char* inp_readline(void);
-void inp_nonblocking(gboolean reset);
-
 void ui_handle_otr_error(const char *const barejid, const char *const message);
-
 unsigned long ui_get_idle_time(void);
 void ui_reset_idle_time(void);
 ProfPrivateWin* ui_new_private_win(const char *const fulljid);
@@ -98,34 +75,24 @@ gint ui_unread(void);
 void ui_close_connected_win(int index);
 int ui_close_all_wins(void);
 int ui_close_read_wins(void);
-
-// current window actions
 void ui_current_print_line(const char *const msg, ...);
 void ui_current_print_formatted_line(const char show_char, int attrs, const char *const msg, ...);
 void ui_current_error_line(const char *const msg);
 void ui_win_error_line(ProfWin *window, const char *const msg);
-
 win_type_t ui_win_type(int index);
 void ui_close_win(int index);
 int ui_win_unread(int index);
 char* ui_ask_password(void);
 char* ui_get_line(void);
 char* ui_ask_pgp_passphrase(const char *hint, int prev_fail);
-
 void ui_handle_stanza(const char *const msg);
-
-// ui events
 void ui_contact_online(char *barejid, Resource *resource, GDateTime *last_activity);
 void ui_contact_typing(const char *const barejid, const char *const resource);
 void ui_incoming_private_msg(const char *const fulljid, const char *const message, GDateTime *timestamp);
-
 void ui_disconnected(void);
-
 void ui_outgoing_private_msg(ProfPrivateWin *privwin, const char *const message);
-
 void ui_room_join(const char *const roomjid, gboolean focus);
 void ui_switch_to_room(const char *const roomjid);
-
 void ui_room_role_change(const char *const roomjid, const char *const role, const char *const actor,
     const char *const reason);
 void ui_room_affiliation_change(const char *const roomjid, const char *const affiliation, const char *const actor,
@@ -134,15 +101,14 @@ void ui_room_role_and_affiliation_change(const char *const roomjid, const char *
     const char *const affiliation, const char *const actor, const char *const reason);
 void ui_room_occupant_role_change(const char *const roomjid, const char *const nick, const char *const role,
     const char *const actor, const char *const reason);
-void ui_room_occupant_affiliation_change(const char *const roomjid, const char *const nick, const char *const affiliation,
-    const char *const actor, const char *const reason);
-void ui_room_occupant_role_and_affiliation_change(const char *const roomjid, const char *const nick, const char *const role,
+void ui_room_occupant_affiliation_change(const char *const roomjid, const char *const nick,
     const char *const affiliation, const char *const actor, const char *const reason);
+void ui_room_occupant_role_and_affiliation_change(const char *const roomjid, const char *const nick,
+    const char *const role, const char *const affiliation, const char *const actor, const char *const reason);
 void ui_room_roster(const char *const roomjid, GList *occupants, const char *const presence);
-void ui_room_history(const char *const roomjid, const char *const nick,
-    GDateTime *timestamp, const char *const message);
-void ui_room_message(const char *const roomjid, const char *const nick,
+void ui_room_history(const char *const roomjid, const char *const nick, GDateTime *timestamp,
     const char *const message);
+void ui_room_message(const char *const roomjid, const char *const nick, const char *const message);
 void ui_room_subject(const char *const roomjid, const char *const nick, const char *const subject);
 void ui_room_requires_config(const char *const roomjid);
 void ui_room_destroy(const char *const roomjid);
@@ -160,16 +126,14 @@ void ui_room_banned(const char *const roomjid, const char *const actor, const ch
 void ui_room_member_banned(const char *const roomjid, const char *const nick, const char *const actor,
     const char *const reason);
 void ui_leave_room(const char *const roomjid);
-void ui_room_broadcast(const char *const roomjid,
-    const char *const message);
+void ui_room_broadcast(const char *const roomjid, const char *const message);
 void ui_room_member_offline(const char *const roomjid, const char *const nick);
 void ui_room_member_online(const char *const roomjid, const char *const nick, const char *const roles,
     const char *const affiliation, const char *const show, const char *const status);
-void ui_room_member_nick_change(const char *const roomjid,
-    const char *const old_nick, const char *const nick);
+void ui_room_member_nick_change(const char *const roomjid, const char *const old_nick, const char *const nick);
 void ui_room_nick_change(const char *const roomjid, const char *const nick);
-void ui_room_member_presence(const char *const roomjid,
-    const char *const nick, const char *const show, const char *const status);
+void ui_room_member_presence(const char *const roomjid, const char *const nick, const char *const show,
+    const char *const status);
 void ui_room_update_occupants(const char *const roomjid);
 void ui_room_show_occupants(const char *const roomjid);
 void ui_room_hide_occupants(const char *const roomjid);
@@ -211,35 +175,48 @@ void ui_redraw_all_room_rosters(void);
 void ui_show_all_room_rosters(void);
 void ui_hide_all_room_rosters(void);
 void ui_handle_software_version_error(const char *const roomjid, const char *const message);
-void ui_show_software_version(const char *const jid, const char *const  presence,
-    const char *const name, const char *const version, const char *const os);
-
+void ui_show_software_version(const char *const jid, const char *const  presence, const char *const name,
+    const char *const version, const char *const os);
 gboolean ui_tidy_wins(void);
 void ui_prune_wins(void);
 gboolean ui_swap_wins(int source_win, int target_win);
-
 void ui_clear_win(ProfWin *window);
-
 void ui_auto_away(char *message, gint time, resource_presence_t res_presence);
 void ui_titlebar_presence(contact_presence_t presence);
 void ui_handle_login_account_success(ProfAccount *account, int secured);
-void ui_update_presence(const resource_presence_t resource_presence,
-    const char *const message, const char *const show);
+void ui_update_presence(const resource_presence_t resource_presence, const char *const message, const char *const show);
 void ui_statusbar_new(const int win);
-
 void ui_write(char *line, int offset);
-
 void ui_invalid_command_usage(const char *const cmd, void (*setting_func)(void));
-
 void ui_create_xmlconsole_win(void);
 gboolean ui_xmlconsole_exists(void);
 void ui_open_xmlconsole_win(void);
-
 gboolean ui_win_has_unsaved_form(int num);
-
 void ui_inp_history_append(char *inp);
 
-// console window actions
+// Chat window
+ProfChatWin* chatwin_new(const char *const barejid);
+void chatwin_incoming_msg(ProfChatWin *chatwin, const char *const resource, const char *const message,
+    GDateTime *timestamp, gboolean win_created, prof_enc_t enc_mode);
+void chatwin_receipt_received(ProfChatWin *chatwin, const char *const id);
+void chatwin_recipient_gone(ProfChatWin *chatwin);
+void chatwin_outgoing_msg(ProfChatWin *chatwin, const char *const message, char *id, prof_enc_t enc_mode);
+void chatwin_outgoing_carbon(ProfChatWin *chatwin, const char *const message);
+void chatwin_contact_online(ProfChatWin *chatwin, Resource *resource, GDateTime *last_activity);
+void chatwin_contact_offline(ProfChatWin *chatwin, char *resource, char *status);
+#ifdef HAVE_LIBOTR
+void chatwin_otr_secured(ProfChatWin *chatwin, gboolean trusted);
+void chatwin_otr_unsecured(ProfChatWin *chatwin);
+void chatwin_otr_trust(ProfChatWin *chatwin);
+void chatwin_otr_untrust(ProfChatWin *chatwin);
+void chatwin_otr_smp_event(ProfChatWin *chatwin, prof_otr_smp_event_t event, void *data);
+#endif
+
+// Input window
+char* inp_readline(void);
+void inp_nonblocking(gboolean reset);
+
+// Console window
 void cons_show(const char *const msg, ...);
 void cons_show_padded(int pad, const char *const msg, ...);
 void cons_about(void);
@@ -273,16 +250,14 @@ void cons_show_scripts(GSList *scripts);
 void cons_show_script(const char *const script, GSList *commands);
 void cons_show_aliases(GList *aliases);
 void cons_show_login_success(ProfAccount *account, int secured);
-void cons_show_software_version(const char *const jid,
-    const char *const presence, const char *const name,
+void cons_show_software_version(const char *const jid, const char *const presence, const char *const name,
     const char *const version, const char *const os);
 void cons_show_account_list(gchar **accounts);
 void cons_show_room_list(GSList *room, const char *const conference_node);
 void cons_show_bookmarks(const GList *list);
 void cons_show_disco_items(GSList *items, const char *const jid);
 void cons_show_disco_info(const char *from, GSList *identities, GSList *features);
-void cons_show_room_invite(const char *const invitor, const char *const room,
-    const char *const reason);
+void cons_show_room_invite(const char *const invitor, const char *const room, const char *const reason);
 void cons_check_version(gboolean not_available_msg);
 void cons_show_typing(const char *const barejid);
 void cons_show_incoming_message(const char *const short_from, const int win_index);
@@ -348,7 +323,6 @@ ProfWin* win_create_chat(const char *const barejid);
 ProfWin* win_create_muc(const char *const roomjid);
 ProfWin* win_create_muc_config(const char *const title, DataForm *form);
 ProfWin* win_create_private(const char *const fulljid);
-
 void win_update_virtual(ProfWin *window);
 void win_free(ProfWin *window);
 int win_unread(ProfWin *window);
@@ -367,17 +341,14 @@ void win_show_info(ProfWin *window, PContact contact);
 void win_println(ProfWin *window, int pad, const char *const message);
 void win_vprintln_ch(ProfWin *window, char ch, const char *const message, ...);
 
-// desktop notifier actions
+// desktop notifications
 void notifier_initialise(void);
 void notifier_uninit(void);
-
 void notify_typing(const char *const handle);
 void notify_message(ProfWin *window, const char *const name, const char *const text);
-void notify_room_message(const char *const handle, const char *const room,
-    int win, const char *const text);
+void notify_room_message(const char *const handle, const char *const room, int win, const char *const text);
 void notify_remind(void);
-void notify_invite(const char *const from, const char *const room,
-    const char *const reason);
+void notify_invite(const char *const from, const char *const room, const char *const reason);
 void notify_subscription(const char *const from);
 
 #endif
