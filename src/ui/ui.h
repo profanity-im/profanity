@@ -183,7 +183,7 @@ void mucwin_show_role_list(ProfMucWin *mucwin, muc_role_t role);
 void mucwin_show_affiliation_list(ProfMucWin *mucwin, muc_affiliation_t affiliation);
 void mucwin_room_info_error(ProfMucWin *mucwin, const char *const error);
 void mucwin_room_disco_info(ProfMucWin *mucwin, GSList *identities, GSList *features);
-void mucwin_occupant_kicked(const char *const roomjid, const char *const nick, const char *const actor,
+void mucwin_occupant_kicked(ProfMucWin *mucwin, const char *const nick, const char *const actor,
     const char *const reason);
 void mucwin_occupant_banned(const char *const roomjid, const char *const nick, const char *const actor,
     const char *const reason);
