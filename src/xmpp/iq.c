@@ -1283,7 +1283,7 @@ _room_affiliation_set_result_handler(xmpp_conn_t *const conn, xmpp_stanza_t *con
     if (g_strcmp0(type, STANZA_TYPE_ERROR) == 0) {
         char *error_message = stanza_get_error_message(stanza);
         log_debug("Error setting affiliation %s list for room %s, user %s: %s", affiliation_set->privilege, from, affiliation_set->item, error_message);
-        ui_handle_room_affiliation_set_error(from, affiliation_set->item, affiliation_set->privilege, error_message);
+        mucwin_affiliation_set_error(from, affiliation_set->item, affiliation_set->privilege, error_message);
         free(error_message);
     }
 
