@@ -130,7 +130,7 @@ mucwin_occupant_role_and_affiliation_change(const char *const roomjid, const cha
 }
 
 void
-ui_handle_room_info_error(const char *const roomjid, const char *const error)
+mucwin_room_info_error(const char *const roomjid, const char *const error)
 {
     ProfWin *window = (ProfWin*)wins_get_muc(roomjid);
     if (window) {

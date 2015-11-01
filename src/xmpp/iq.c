@@ -1507,7 +1507,7 @@ _room_info_response_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza
     if (g_strcmp0(type, STANZA_TYPE_ERROR) == 0) {
         if (cb_data->display) {
             char *error_message = stanza_get_error_message(stanza);
-            ui_handle_room_info_error(cb_data->room, error_message);
+            mucwin_room_info_error(cb_data->room, error_message);
             free(error_message);
         }
         free(cb_data->room);
