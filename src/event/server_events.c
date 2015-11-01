@@ -599,7 +599,10 @@ sv_ev_muc_self_online(const char *const room, const char *const nick, gboolean c
 
             // affiliation changed
             } else if (g_strcmp0(affiliation, old_affiliation) != 0) {
-                mucwin_affiliation_change(room, affiliation, actor, reason);
+                ProfMucWin *mucwin = wins_get_muc(room);
+                if (mucwin) {
+                    mucwin_affiliation_change(mucwin, affiliation, actor, reason);
+                }
             }
         }
     }

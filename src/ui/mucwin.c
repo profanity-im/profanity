@@ -41,8 +41,7 @@
 #include "ui/window.h"
 
 void
-mucwin_role_change(ProfMucWin *mucwin, const char *const role, const char *const actor,
-    const char *const reason)
+mucwin_role_change(ProfMucWin *mucwin, const char *const role, const char *const actor, const char *const reason)
 {
     assert(mucwin != NULL);
 
@@ -58,10 +57,12 @@ mucwin_role_change(ProfMucWin *mucwin, const char *const role, const char *const
 }
 
 void
-mucwin_affiliation_change(const char *const roomjid, const char *const affiliation, const char *const actor,
+mucwin_affiliation_change(ProfMucWin *mucwin, const char *const affiliation, const char *const actor,
     const char *const reason)
 {
-    ProfWin *window = (ProfWin*)wins_get_muc(roomjid);
+    assert(mucwin != NULL);
+
+    ProfWin *window = (ProfWin*)mucwin;
     win_vprint(window, '!', 0, NULL, NO_EOL, THEME_ROOMINFO, "", "Your affiliation has been changed to: %s", affiliation);
     if (actor) {
         win_vprint(window, '!', 0, NULL, NO_DATE | NO_EOL, THEME_ROOMINFO, "", ", by: %s", actor);

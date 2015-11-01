@@ -162,7 +162,7 @@ void chatwin_otr_smp_event(ProfChatWin *chatwin, prof_otr_smp_event_t event, voi
 
 // MUC window
 void mucwin_role_change(ProfMucWin *mucwin, const char *const role, const char *const actor, const char *const reason);
-void mucwin_affiliation_change(const char *const roomjid, const char *const affiliation, const char *const actor,
+void mucwin_affiliation_change(ProfMucWin *mucwin, const char *const affiliation, const char *const actor,
     const char *const reason);
 void mucwin_role_and_affiliation_change(const char *const roomjid, const char *const role,
     const char *const affiliation, const char *const actor, const char *const reason);
