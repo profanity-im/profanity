@@ -2085,7 +2085,7 @@ cmd_info(ProfWin *window, const char *const command, gchar **args)
                 ProfMucWin *mucwin = (ProfMucWin*)window;
                 assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
                 iq_room_info_request(mucwin->roomjid, TRUE);
-                ui_show_room_info(mucwin);
+                mucwin_info(mucwin);
                 return TRUE;
             }
             break;
