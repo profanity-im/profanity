@@ -541,7 +541,7 @@ sv_ev_muc_self_online(const char *const room, const char *const nick, gboolean c
     // handle self nick change
     if (muc_nick_change_pending(room)) {
         muc_nick_change_complete(room, nick);
-        ui_room_nick_change(room, nick);
+        mucwin_nick_change(room, nick);
 
     // handle roster complete
     } else if (!muc_roster_complete(room)) {

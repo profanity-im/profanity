@@ -325,7 +325,7 @@ mucwin_occupant_nick_change(const char *const roomjid,
 }
 
 void
-ui_room_nick_change(const char *const roomjid, const char *const nick)
+mucwin_nick_change(const char *const roomjid, const char *const nick)
 {
     ProfWin *window = (ProfWin*)wins_get_muc(roomjid);
     if (window == NULL) {
