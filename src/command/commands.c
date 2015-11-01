@@ -4052,7 +4052,7 @@ cmd_inpblock(ProfWin *window, const char *const command, gchar **args)
         if (res) {
             cons_show("Input blocking set to %d milliseconds.", intval);
             prefs_set_inpblock(intval);
-            ui_input_nonblocking(FALSE);
+            inp_nonblocking(FALSE);
         } else {
             cons_show(err_msg);
             free(err_msg);

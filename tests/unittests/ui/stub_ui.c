@@ -153,10 +153,6 @@ int ui_win_unread(int index)
     return 0;
 }
 
-void ui_page_up(void) {}
-void ui_page_down(void) {}
-void ui_subwin_page_up(void) {}
-void ui_subwin_page_down(void) {}
 void ui_clear_win(ProfWin *window) {}
 
 char * ui_ask_password(void)
@@ -313,15 +309,14 @@ void ui_update_presence(const resource_presence_t resource_presence,
     const char * const message, const char * const show) {}
 void ui_statusbar_new(const int win) {}
 
-char*  ui_readline(void)
+char* inp_readline(void)
 {
     return NULL;
 }
 
-void ui_inp_history_append(char *inp) {}
+void inp_nonblocking(gboolean reset) {}
 
-void ui_input_clear(void) {}
-void ui_input_nonblocking(gboolean reset) {}
+void ui_inp_history_append(char *inp) {}
 
 void ui_invalid_command_usage(const char * const usage, void (*setting_func)(void)) {}
 

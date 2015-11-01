@@ -264,15 +264,6 @@ inp_put_back(void)
     _inp_win_update_virtual();
 }
 
-void
-inp_win_clear(void)
-{
-    werase(inp_win);
-    wmove(inp_win, 0, 0);
-    pad_start = 0;
-    _inp_win_update_virtual();
-}
-
 static void
 _inp_win_update_virtual(void)
 {
@@ -562,27 +553,31 @@ _inp_rl_altright_handler(int count, int key)
 static int
 _inp_rl_pageup_handler(int count, int key)
 {
-    ui_page_up();
+    ProfWin *current = wins_get_current();
+    win_page_up(current);
     return 0;
 }
 
 static int
 _inp_rl_pagedown_handler(int count, int key)
 {
-    ui_page_down();
+    ProfWin *current = wins_get_current();
+    win_page_down(current);
     return 0;
 }
 
 static int
 _inp_rl_altpageup_handler(int count, int key)
 {
-    ui_subwin_page_up();
+    ProfWin *current = wins_get_current();
+    win_sub_page_up(current);
     return 0;
 }
 
 static int
 _inp_rl_altpagedown_handler(int count, int key)
 {
-    ui_subwin_page_down();
+    ProfWin *current = wins_get_current();
+    win_sub_page_down(current);
     return 0;
 }
