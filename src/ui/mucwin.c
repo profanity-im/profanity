@@ -642,7 +642,7 @@ mucwin_show_affiliation_list(ProfMucWin *mucwin, muc_affiliation_t affiliation)
 }
 
 void
-ui_handle_room_role_list_error(const char *const roomjid, const char *const role, const char *const error)
+mucwin_role_list_error(const char *const roomjid, const char *const role, const char *const error)
 {
     ProfWin *window = (ProfWin*)wins_get_muc(roomjid);
     if (window) {
