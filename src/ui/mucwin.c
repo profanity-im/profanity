@@ -582,7 +582,7 @@ mucwin_handle_affiliation_list(const char *const roomjid, const char *const affi
 }
 
 void
-ui_show_room_affiliation_list(ProfMucWin *mucwin, muc_affiliation_t affiliation)
+mucwin_show_affiliation_list(ProfMucWin *mucwin, muc_affiliation_t affiliation)
 {
     ProfWin *window = (ProfWin*) mucwin;
     GSList *occupants = muc_occupants_by_affiliation(mucwin->roomjid, affiliation);

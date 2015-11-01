@@ -1222,19 +1222,19 @@ _who_room(ProfWin *window, const char *const command, gchar **args)
         }
 
         if (g_strcmp0(args[0], "owner") == 0) {
-            ui_show_room_affiliation_list(mucwin, MUC_AFFILIATION_OWNER);
+            mucwin_show_affiliation_list(mucwin, MUC_AFFILIATION_OWNER);
             return;
         }
         if (g_strcmp0(args[0], "admin") == 0) {
-            ui_show_room_affiliation_list(mucwin, MUC_AFFILIATION_ADMIN);
+            mucwin_show_affiliation_list(mucwin, MUC_AFFILIATION_ADMIN);
             return;
         }
         if (g_strcmp0(args[0], "member") == 0) {
-            ui_show_room_affiliation_list(mucwin, MUC_AFFILIATION_MEMBER);
+            mucwin_show_affiliation_list(mucwin, MUC_AFFILIATION_MEMBER);
             return;
         }
         if (g_strcmp0(args[0], "outcast") == 0) {
-            ui_show_room_affiliation_list(mucwin, MUC_AFFILIATION_OUTCAST);
+            mucwin_show_affiliation_list(mucwin, MUC_AFFILIATION_OUTCAST);
             return;
         }
     }
