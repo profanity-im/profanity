@@ -320,7 +320,6 @@ char* inp_readline(void)
 
 void ui_inp_history_append(char *inp) {}
 
-void ui_input_clear(void) {}
 void ui_input_nonblocking(gboolean reset) {}
 
 void ui_invalid_command_usage(const char * const usage, void (*setting_func)(void)) {}

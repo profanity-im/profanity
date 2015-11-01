@@ -214,12 +214,6 @@ ui_subwin_page_down(void)
 }
 
 void
-ui_input_clear(void)
-{
-    inp_win_clear();
-}
-
-void
 ui_input_nonblocking(gboolean reset)
 {
     inp_nonblocking(reset);
