@@ -638,7 +638,7 @@ sv_ev_muc_occupant_online(const char *const room, const char *const nick, const 
     if (!occupant) {
         char *muc_status_pref = prefs_get_string(PREF_STATUSES_MUC);
         if (g_strcmp0(muc_status_pref, "none") != 0) {
-            ui_room_member_online(room, nick, role, affiliation, show, status);
+            mucwin_occupant_online(room, nick, role, affiliation, show, status);
         }
         prefs_free_string(muc_status_pref);
         occupantswin_occupants(room);

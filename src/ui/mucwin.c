@@ -280,7 +280,7 @@ mucwin_occupant_banned(const char *const roomjid, const char *const nick, const 
 }
 
 void
-ui_room_member_online(const char *const roomjid, const char *const nick, const char *const role,
+mucwin_occupant_online(const char *const roomjid, const char *const nick, const char *const role,
     const char *const affiliation, const char *const show, const char *const status)
 {
     ProfWin *window = (ProfWin*)wins_get_muc(roomjid);
