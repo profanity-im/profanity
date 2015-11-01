@@ -664,7 +664,10 @@ sv_ev_muc_occupant_online(const char *const room, const char *const nick, const 
 
             // role changed
             } else if (g_strcmp0(role, old_role) != 0) {
-                mucwin_occupant_role_change(room, nick, role, actor, reason);
+                ProfMucWin *mucwin = wins_get_muc(room);
+                if (mucwin) {
+                    mucwin_occupant_role_change(mucwin, nick, role, actor, reason);
+                }
 
             // affiliation changed
             } else if (g_strcmp0(affiliation, old_affiliation) != 0) {
