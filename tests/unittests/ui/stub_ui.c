@@ -208,7 +208,7 @@ void mucwin_history(const char * const roomjid, const char * const nick,
     GDateTime *timestamp, const char * const message) {}
 void mucwin_message(const char * const roomjid, const char * const nick,
     const char * const message) {}
-void ui_room_subject(const char * const roomjid, const char * const nick, const char * const subject) {}
+void mucwin_subject(const char * const roomjid, const char * const nick, const char * const subject) {}
 void mucwin_requires_config(const char * const roomjid) {}
 void ui_room_destroy(const char * const roomjid) {}
 void ui_show_room_info(ProfMucWin *mucwin) {}

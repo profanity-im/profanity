@@ -147,7 +147,7 @@ sv_ev_room_subject(const char *const room, const char *const nick, const char *c
 {
     muc_set_subject(room, subject);
     if (muc_roster_complete(room)) {
-        ui_room_subject(room, nick, subject);
+        mucwin_subject(room, nick, subject);
     }
 }
 
@@ -565,7 +565,7 @@ sv_ev_muc_self_online(const char *const room, const char *const nick, gboolean c
 
         char *subject = muc_subject(room);
         if (subject) {
-            ui_room_subject(room, NULL, subject);
+            mucwin_subject(room, NULL, subject);
         }
 
         GList *pending_broadcasts = muc_pending_broadcasts(room);

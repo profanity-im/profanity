@@ -481,7 +481,7 @@ mucwin_requires_config(const char *const roomjid)
 }
 
 void
-ui_room_subject(const char *const roomjid, const char *const nick, const char *const subject)
+mucwin_subject(const char *const roomjid, const char *const nick, const char *const subject)
 {
     ProfWin *window = (ProfWin*)wins_get_muc(roomjid);
     if (window == NULL) {
