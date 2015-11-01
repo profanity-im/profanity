@@ -160,7 +160,7 @@ void mucwin_affiliation_list_error(const char *const roomjid, const char *const 
 void mucwin_handle_affiliation_list(const char *const roomjid, const char *const affiliation, GSList *jids);
 void mucwin_affiliation_set_error(const char *const roomjid, const char *const jid,
     const char *const affiliation, const char *const error);
-void ui_handle_room_role_set_error(const char *const roomjid, const char *const nick, const char *const role,
+void mucwin_role_set_error(const char *const roomjid, const char *const nick, const char *const role,
     const char *const error);
 void mucwin_role_list_error(const char *const roomjid, const char *const role, const char *const error);
 void mucwin_handle_role_list(const char *const roomjid, const char *const role, GSList *nicks);

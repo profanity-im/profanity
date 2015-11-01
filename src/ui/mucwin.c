@@ -745,7 +745,7 @@ mucwin_affiliation_set_error(const char *const roomjid, const char *const jid, c
 }
 
 void
-ui_handle_room_role_set_error(const char *const roomjid, const char *const nick, const char *const role,
+mucwin_role_set_error(const char *const roomjid, const char *const nick, const char *const role,
     const char *const error)
 {
     ProfWin *window = (ProfWin*)wins_get_muc(roomjid);
