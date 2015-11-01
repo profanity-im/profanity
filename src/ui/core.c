@@ -186,12 +186,6 @@ ui_close(void)
 }
 
 void
-ui_input_nonblocking(gboolean reset)
-{
-    inp_nonblocking(reset);
-}
-
-void
 ui_resize(void)
 {
     struct winsize w;

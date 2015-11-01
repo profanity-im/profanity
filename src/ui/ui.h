@@ -86,6 +86,7 @@ void chatwin_contact_online(ProfChatWin *chatwin, Resource *resource, GDateTime 
 void chatwin_contact_offline(ProfChatWin *chatwin, char *resource, char *status);
 
 char* inp_readline(void);
+void inp_nonblocking(gboolean reset);
 
 void ui_handle_otr_error(const char *const barejid, const char *const message);
 
@@ -226,7 +227,6 @@ void ui_update_presence(const resource_presence_t resource_presence,
     const char *const message, const char *const show);
 void ui_statusbar_new(const int win);
 
-void ui_input_nonblocking(gboolean);
 void ui_write(char *line, int offset);
 
 void ui_invalid_command_usage(const char *const cmd, void (*setting_func)(void));

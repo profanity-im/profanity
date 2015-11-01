@@ -340,7 +340,7 @@ _init(char *log_level)
     p_gpg_init();
 #endif
     atexit(_shutdown);
-    ui_input_nonblocking(TRUE);
+    inp_nonblocking(TRUE);
 }
 
 static void

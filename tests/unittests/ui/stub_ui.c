@@ -314,9 +314,9 @@ char* inp_readline(void)
     return NULL;
 }
 
-void ui_inp_history_append(char *inp) {}
+void inp_nonblocking(gboolean reset) {}
 
-void ui_input_nonblocking(gboolean reset) {}
+void ui_inp_history_append(char *inp) {}
 
 void ui_invalid_command_usage(const char * const usage, void (*setting_func)(void)) {}
 

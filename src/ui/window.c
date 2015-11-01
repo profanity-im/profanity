@@ -921,7 +921,7 @@ win_print(ProfWin *window, const char show_char, int pad_indent, GDateTime *time
     buffer_push(window->layout->buffer, show_char, pad_indent, timestamp, flags, theme_item, from, message, NULL);
     _win_print(window, show_char, pad_indent, timestamp, flags, theme_item, from, message, NULL);
     // TODO: cross-reference.. this should be replaced by a real event-based system
-    ui_input_nonblocking(TRUE);
+    inp_nonblocking(TRUE);
     g_date_time_unref(timestamp);
 }
 
@@ -944,7 +944,7 @@ win_print_with_receipt(ProfWin *window, const char show_char, int pad_indent, GT
     buffer_push(window->layout->buffer, show_char, pad_indent, time, flags, theme_item, from, message, receipt);
     _win_print(window, show_char, pad_indent, time, flags, theme_item, from, message, receipt);
     // TODO: cross-reference.. this should be replaced by a real event-based system
-    ui_input_nonblocking(TRUE);
+    inp_nonblocking(TRUE);
     g_date_time_unref(time);
 }
 
