@@ -4397,10 +4397,11 @@ cmd_vercheck(ProfWin *window, const char *const command, gchar **args)
 gboolean
 cmd_xmlconsole(ProfWin *window, const char *const command, gchar **args)
 {
-    if (!ui_xmlconsole_exists()) {
-        ui_create_xmlconsole_win();
-    } else {
+    ProfXMLWin *xmlwin = wins_get_xmlconsole();
+    if (xmlwin) {
         ui_open_xmlconsole_win();
+    } else {
+        ui_create_xmlconsole_win();
     }
 
     return TRUE;

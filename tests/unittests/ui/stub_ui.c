@@ -321,10 +321,6 @@ void ui_inp_history_append(char *inp) {}
 void ui_invalid_command_usage(const char * const usage, void (*setting_func)(void)) {}
 
 void ui_create_xmlconsole_win(void) {}
-gboolean ui_xmlconsole_exists(void)
-{
-    return FALSE;
-}
 
 void ui_open_xmlconsole_win(void) {}
 
