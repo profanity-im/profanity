@@ -85,6 +85,8 @@ void chatwin_outgoing_carbon(ProfChatWin *chatwin, const char *const message);
 void chatwin_contact_online(ProfChatWin *chatwin, Resource *resource, GDateTime *last_activity);
 void chatwin_contact_offline(ProfChatWin *chatwin, char *resource, char *status);
 
+char* inp_readline(void);
+
 void ui_handle_otr_error(const char *const barejid, const char *const message);
 
 unsigned long ui_get_idle_time(void);
@@ -228,7 +230,6 @@ void ui_update_presence(const resource_presence_t resource_presence,
     const char *const message, const char *const show);
 void ui_statusbar_new(const int win);
 
-char* ui_readline(void);
 void ui_input_clear(void);
 void ui_input_nonblocking(gboolean);
 void ui_write(char *line, int offset);

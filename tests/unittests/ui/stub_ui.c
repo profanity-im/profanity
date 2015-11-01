@@ -313,7 +313,7 @@ void ui_update_presence(const resource_presence_t resource_presence,
     const char * const message, const char * const show) {}
 void ui_statusbar_new(const int win) {}
 
-char*  ui_readline(void)
+char* inp_readline(void)
 {
     return NULL;
 }

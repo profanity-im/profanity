@@ -185,12 +185,6 @@ ui_close(void)
     endwin();
 }
 
-char*
-ui_readline(void)
-{
-    return inp_readline();
-}
-
 void
 ui_page_up(void)
 {
