@@ -227,7 +227,7 @@ void ui_room_member_banned(const char * const roomjid, const char * const nick, 
 void ui_leave_room(const char * const roomjid) {}
 void ui_room_broadcast(const char * const roomjid,
     const char * const message) {}
-void ui_room_member_offline(const char * const roomjid, const char * const nick) {}
+void mucwin_occupant_offline(const char * const roomjid, const char * const nick) {}
 void ui_room_member_online(const char * const roomjid, const char * const nick, const char * const roles,
     const char * const affiliation, const char * const show, const char * const status) {}
 void ui_room_member_nick_change(const char * const roomjid,

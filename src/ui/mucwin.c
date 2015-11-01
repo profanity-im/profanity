@@ -221,7 +221,7 @@ mucwin_roster(const char *const roomjid, GList *roster, const char *const presen
 }
 
 void
-ui_room_member_offline(const char *const roomjid, const char *const nick)
+mucwin_occupant_offline(const char *const roomjid, const char *const nick)
 {
     ProfWin *window = (ProfWin*)wins_get_muc(roomjid);
     if (window == NULL) {

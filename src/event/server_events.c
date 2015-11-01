@@ -486,7 +486,7 @@ sv_ev_room_occupant_offline(const char *const room, const char *const nick,
 
     char *muc_status_pref = prefs_get_string(PREF_STATUSES_MUC);
     if (g_strcmp0(muc_status_pref, "none") != 0) {
-        ui_room_member_offline(room, nick);
+        mucwin_occupant_offline(room, nick);
     }
     prefs_free_string(muc_status_pref);
     occupantswin_occupants(room);
