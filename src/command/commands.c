@@ -1158,7 +1158,7 @@ _who_room(ProfWin *window, const char *const command, gchar **args)
 
         // no arg, show all contacts
         if ((presence == NULL) || (g_strcmp0(presence, "any") == 0)) {
-            ui_room_roster(mucwin->roomjid, occupants, NULL);
+            mucwin_roster(mucwin->roomjid, occupants, NULL);
 
         // available
         } else if (strcmp("available", presence) == 0) {
@@ -1172,7 +1172,7 @@ _who_room(ProfWin *window, const char *const command, gchar **args)
                 occupants = g_list_next(occupants);
             }
 
-            ui_room_roster(mucwin->roomjid, filtered, "available");
+            mucwin_roster(mucwin->roomjid, filtered, "available");
 
         // unavailable
         } else if (strcmp("unavailable", presence) == 0) {
@@ -1186,7 +1186,7 @@ _who_room(ProfWin *window, const char *const command, gchar **args)
                 occupants = g_list_next(occupants);
             }
 
-            ui_room_roster(mucwin->roomjid, filtered, "unavailable");
+            mucwin_roster(mucwin->roomjid, filtered, "unavailable");
 
         // show specific status
         } else {
@@ -1201,7 +1201,7 @@ _who_room(ProfWin *window, const char *const command, gchar **args)
                 occupants = g_list_next(occupants);
             }
 
-            ui_room_roster(mucwin->roomjid, filtered, presence);
+            mucwin_roster(mucwin->roomjid, filtered, presence);
         }
 
         g_list_free(occupants);
@@ -1209,32 +1209,32 @@ _who_room(ProfWin *window, const char *const command, gchar **args)
     // role or affiliation filter
     } else {
         if (g_strcmp0(args[0], "moderator") == 0) {
-            ui_show_room_role_list(mucwin, MUC_ROLE_MODERATOR);
+            mucwin_show_role_list(mucwin, MUC_ROLE_MODERATOR);
             return;
         }
         if (g_strcmp0(args[0], "participant") == 0) {
-            ui_show_room_role_list(mucwin, MUC_ROLE_PARTICIPANT);
+            mucwin_show_role_list(mucwin, MUC_ROLE_PARTICIPANT);
             return;
         }
         if (g_strcmp0(args[0], "visitor") == 0) {
-            ui_show_room_role_list(mucwin, MUC_ROLE_VISITOR);
+            mucwin_show_role_list(mucwin, MUC_ROLE_VISITOR);
             return;
         }
 
         if (g_strcmp0(args[0], "owner") == 0) {
-            ui_show_room_affiliation_list(mucwin, MUC_AFFILIATION_OWNER);
+            mucwin_show_affiliation_list(mucwin, MUC_AFFILIATION_OWNER);
             return;
         }
         if (g_strcmp0(args[0], "admin") == 0) {
-            ui_show_room_affiliation_list(mucwin, MUC_AFFILIATION_ADMIN);
+            mucwin_show_affiliation_list(mucwin, MUC_AFFILIATION_ADMIN);
             return;
         }
         if (g_strcmp0(args[0], "member") == 0) {
-            ui_show_room_affiliation_list(mucwin, MUC_AFFILIATION_MEMBER);
+            mucwin_show_affiliation_list(mucwin, MUC_AFFILIATION_MEMBER);
             return;
         }
         if (g_strcmp0(args[0], "outcast") == 0) {
-            ui_show_room_affiliation_list(mucwin, MUC_AFFILIATION_OUTCAST);
+            mucwin_show_affiliation_list(mucwin, MUC_AFFILIATION_OUTCAST);
             return;
         }
     }
@@ -2085,7 +2085,7 @@ cmd_info(ProfWin *window, const char *const command, gchar **args)
                 ProfMucWin *mucwin = (ProfMucWin*)window;
                 assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
                 iq_room_info_request(mucwin->roomjid, TRUE);
-                ui_show_room_info(mucwin);
+                mucwin_info(mucwin);
                 return TRUE;
             }
             break;
@@ -3171,16 +3171,16 @@ cmd_occupants(ProfWin *window, const char *const command, gchar **args)
     if (g_strcmp0(args[0], "show") == 0) {
         if (g_strcmp0(args[1], "jid") == 0) {
             mucwin->showjid = TRUE;
-            ui_room_update_occupants(mucwin->roomjid);
+            mucwin_update_occupants(mucwin->roomjid);
         } else {
-            ui_room_show_occupants(mucwin->roomjid);
+            mucwin_show_occupants(mucwin->roomjid);
         }
     } else if (g_strcmp0(args[0], "hide") == 0) {
         if (g_strcmp0(args[1], "jid") == 0) {
             mucwin->showjid = FALSE;
-            ui_room_update_occupants(mucwin->roomjid);
+            mucwin_update_occupants(mucwin->roomjid);
         } else {
-            ui_room_hide_occupants(mucwin->roomjid);
+            mucwin_hide_occupants(mucwin->roomjid);
         }
     } else {
         cons_bad_cmd_usage(command);

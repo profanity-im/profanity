@@ -1283,7 +1283,7 @@ _room_affiliation_set_result_handler(xmpp_conn_t *const conn, xmpp_stanza_t *con
     if (g_strcmp0(type, STANZA_TYPE_ERROR) == 0) {
         char *error_message = stanza_get_error_message(stanza);
         log_debug("Error setting affiliation %s list for room %s, user %s: %s", affiliation_set->privilege, from, affiliation_set->item, error_message);
-        ui_handle_room_affiliation_set_error(from, affiliation_set->item, affiliation_set->privilege, error_message);
+        mucwin_affiliation_set_error(from, affiliation_set->item, affiliation_set->privilege, error_message);
         free(error_message);
     }
 
@@ -1313,7 +1313,7 @@ _room_role_set_result_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const stan
     if (g_strcmp0(type, STANZA_TYPE_ERROR) == 0) {
         char *error_message = stanza_get_error_message(stanza);
         log_debug("Error setting role %s list for room %s, user %s: %s", role_set->privilege, from, role_set->item, error_message);
-        ui_handle_room_role_set_error(from, role_set->item, role_set->privilege, error_message);
+        mucwin_role_set_error(from, role_set->item, role_set->privilege, error_message);
         free(error_message);
     }
 
@@ -1342,7 +1342,7 @@ _room_affiliation_list_result_handler(xmpp_conn_t *const conn, xmpp_stanza_t *co
     if (g_strcmp0(type, STANZA_TYPE_ERROR) == 0) {
         char *error_message = stanza_get_error_message(stanza);
         log_debug("Error retrieving %s list for room %s: %s", affiliation, from, error_message);
-        ui_handle_room_affiliation_list_error(from, affiliation, error_message);
+        mucwin_affiliation_list_error(from, affiliation, error_message);
         free(error_message);
         free(affiliation);
         return 0;
@@ -1365,7 +1365,7 @@ _room_affiliation_list_result_handler(xmpp_conn_t *const conn, xmpp_stanza_t *co
     }
 
     muc_jid_autocomplete_add_all(from, jids);
-    ui_handle_room_affiliation_list(from, affiliation, jids);
+    mucwin_handle_affiliation_list(from, affiliation, jids);
     free(affiliation);
     g_slist_free(jids);
 
@@ -1390,7 +1390,7 @@ _room_role_list_result_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const sta
     if (g_strcmp0(type, STANZA_TYPE_ERROR) == 0) {
         char *error_message = stanza_get_error_message(stanza);
         log_debug("Error retrieving %s list for room %s: %s", role, from, error_message);
-        ui_handle_room_role_list_error(from, role, error_message);
+        mucwin_role_list_error(from, role, error_message);
         free(error_message);
         free(role);
         return 0;
@@ -1412,7 +1412,7 @@ _room_role_list_result_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const sta
         }
     }
 
-    ui_handle_room_role_list(from, role, nicks);
+    mucwin_handle_role_list(from, role, nicks);
     free(role);
     g_slist_free(nicks);
 
@@ -1463,7 +1463,7 @@ _room_kick_result_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza, 
     // handle error responses
     if (g_strcmp0(type, STANZA_TYPE_ERROR) == 0) {
         char *error_message = stanza_get_error_message(stanza);
-        ui_handle_room_kick_error(from, nick, error_message);
+        mucwin_kick_error(from, nick, error_message);
         free(error_message);
         free(nick);
         return 0;
@@ -1507,7 +1507,7 @@ _room_info_response_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza
     if (g_strcmp0(type, STANZA_TYPE_ERROR) == 0) {
         if (cb_data->display) {
             char *error_message = stanza_get_error_message(stanza);
-            ui_handle_room_info_error(cb_data->room, error_message);
+            mucwin_room_info_error(cb_data->room, error_message);
             free(error_message);
         }
         free(cb_data->room);
@@ -1561,7 +1561,7 @@ _room_info_response_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza
 
         muc_set_features(cb_data->room, features);
         if (cb_data->display) {
-            ui_show_room_disco_info(cb_data->room, identities, features);
+            mucwin_room_disco_info(cb_data->room, identities, features);
         }
 
         g_slist_free_full(features, free);
