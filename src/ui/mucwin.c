@@ -681,7 +681,7 @@ mucwin_handle_role_list(const char *const roomjid, const char *const role, GSLis
 }
 
 void
-ui_show_room_role_list(ProfMucWin *mucwin, muc_role_t role)
+mucwin_show_role_list(ProfMucWin *mucwin, muc_role_t role)
 {
     ProfWin *window = (ProfWin*) mucwin;
     GSList *occupants = muc_occupants_by_role(mucwin->roomjid, role);

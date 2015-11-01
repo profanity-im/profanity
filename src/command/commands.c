@@ -1209,15 +1209,15 @@ _who_room(ProfWin *window, const char *const command, gchar **args)
     // role or affiliation filter
     } else {
         if (g_strcmp0(args[0], "moderator") == 0) {
-            ui_show_room_role_list(mucwin, MUC_ROLE_MODERATOR);
+            mucwin_show_role_list(mucwin, MUC_ROLE_MODERATOR);
             return;
         }
         if (g_strcmp0(args[0], "participant") == 0) {
-            ui_show_room_role_list(mucwin, MUC_ROLE_PARTICIPANT);
+            mucwin_show_role_list(mucwin, MUC_ROLE_PARTICIPANT);
             return;
         }
         if (g_strcmp0(args[0], "visitor") == 0) {
-            ui_show_room_role_list(mucwin, MUC_ROLE_VISITOR);
+            mucwin_show_role_list(mucwin, MUC_ROLE_VISITOR);
             return;
         }
 
