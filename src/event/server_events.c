@@ -580,7 +580,7 @@ sv_ev_muc_self_online(const char *const room, const char *const nick, gboolean c
         // room configuration required
         if (config_required) {
             muc_set_requires_config(room, TRUE);
-            ui_room_requires_config(room);
+            mucwin_requires_config(room);
         }
 
     // check for change in role/affiliation

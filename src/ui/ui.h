@@ -109,7 +109,7 @@ void mucwin_history(const char *const roomjid, const char *const nick, GDateTime
     const char *const message);
 void mucwin_message(const char *const roomjid, const char *const nick, const char *const message);
 void ui_room_subject(const char *const roomjid, const char *const nick, const char *const subject);
-void ui_room_requires_config(const char *const roomjid);
+void mucwin_requires_config(const char *const roomjid);
 void ui_room_destroy(const char *const roomjid);
 void ui_show_room_info(ProfMucWin *mucwin);
 void ui_show_room_role_list(ProfMucWin *mucwin, muc_role_t role);
