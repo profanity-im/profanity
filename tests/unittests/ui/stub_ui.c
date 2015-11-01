@@ -195,7 +195,7 @@ void mucwin_role_change(ProfMucWin *mucwin, const char * const role, const char 
     const char * const reason) {}
 void mucwin_affiliation_change(ProfMucWin *mucwin, const char * const affiliation, const char * const actor,
     const char * const reason) {}
-void mucwin_role_and_affiliation_change(const char * const roomjid, const char * const role,
+void mucwin_role_and_affiliation_change(ProfMucWin *mucwin, const char * const role,
     const char * const affiliation, const char * const actor, const char * const reason) {}
 void mucwin_occupant_role_change(const char * const roomjid, const char * const nick, const char * const role,
     const char * const actor, const char * const reason) {}

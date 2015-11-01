@@ -74,10 +74,12 @@ mucwin_affiliation_change(ProfMucWin *mucwin, const char *const affiliation, con
 }
 
 void
-mucwin_role_and_affiliation_change(const char *const roomjid, const char *const role, const char *const affiliation,
+mucwin_role_and_affiliation_change(ProfMucWin *mucwin, const char *const role, const char *const affiliation,
     const char *const actor, const char *const reason)
 {
-    ProfWin *window = (ProfWin*)wins_get_muc(roomjid);
+    assert(mucwin != NULL);
+
+    ProfWin *window = (ProfWin*)mucwin;
     win_vprint(window, '!', 0, NULL, NO_EOL, THEME_ROOMINFO, "", "Your role and affiliation have been changed, role: %s, affiliation: %s", role, affiliation);
     if (actor) {
         win_vprint(window, '!', 0, NULL, NO_DATE | NO_EOL, THEME_ROOMINFO, "", ", by: %s", actor);
