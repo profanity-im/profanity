@@ -256,7 +256,7 @@ mucwin_occupant_kicked(const char *const roomjid, const char *const nick, const 
 }
 
 void
-ui_room_member_banned(const char *const roomjid, const char *const nick, const char *const actor,
+mucwin_occupant_banned(const char *const roomjid, const char *const nick, const char *const actor,
     const char *const reason)
 {
     ProfWin *window = (ProfWin*)wins_get_muc(roomjid);

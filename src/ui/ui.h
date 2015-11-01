@@ -122,7 +122,7 @@ void ui_room_kicked(const char *const roomjid, const char *const actor, const ch
 void mucwin_occupant_kicked(const char *const roomjid, const char *const nick, const char *const actor,
     const char *const reason);
 void ui_room_banned(const char *const roomjid, const char *const actor, const char *const reason);
-void ui_room_member_banned(const char *const roomjid, const char *const nick, const char *const actor,
+void mucwin_occupant_banned(const char *const roomjid, const char *const nick, const char *const actor,
     const char *const reason);
 void ui_leave_room(const char *const roomjid);
 void ui_room_broadcast(const char *const roomjid, const char *const message);
