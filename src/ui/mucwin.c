@@ -263,27 +263,25 @@ mucwin_occupant_kicked(ProfMucWin *mucwin, const char *const nick, const char *c
 }
 
 void
-mucwin_occupant_banned(const char *const roomjid, const char *const nick, const char *const actor,
+mucwin_occupant_banned(ProfMucWin *mucwin, const char *const nick, const char *const actor,
     const char *const reason)
 {
-    ProfWin *window = (ProfWin*)wins_get_muc(roomjid);
-    if (window == NULL) {
-        log_error("Received ban for room participant %s, but no window open for %s.", nick, roomjid);
-    } else {
-        GString *message = g_string_new(nick);
-        g_string_append(message, " has been banned from the room");
-        if (actor) {
-            g_string_append(message, " by ");
-            g_string_append(message, actor);
-        }
-        if (reason) {
-            g_string_append(message, ", reason: ");
-            g_string_append(message, reason);
-        }
+    assert(mucwin != NULL);
 
-        win_vprint(window, '!', 0, NULL, 0, THEME_OFFLINE, "", "<- %s", message->str);
-        g_string_free(message, TRUE);
+    ProfWin *window = (ProfWin*)mucwin;
+    GString *message = g_string_new(nick);
+    g_string_append(message, " has been banned from the room");
+    if (actor) {
+        g_string_append(message, " by ");
+        g_string_append(message, actor);
     }
+    if (reason) {
+        g_string_append(message, ", reason: ");
+        g_string_append(message, reason);
+    }
+
+    win_vprint(window, '!', 0, NULL, 0, THEME_OFFLINE, "", "<- %s", message->str);
+    g_string_free(message, TRUE);
 }
 
 void
