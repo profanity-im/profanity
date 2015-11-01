@@ -787,7 +787,7 @@ mucwin_show_occupants(const char *const roomjid)
 }
 
 void
-ui_room_hide_occupants(const char *const roomjid)
+mucwin_hide_occupants(const char *const roomjid)
 {
     ProfWin *window = (ProfWin*)wins_get_muc(roomjid);
     if (window && win_has_active_subwin(window)) {

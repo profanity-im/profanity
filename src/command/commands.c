@@ -3180,7 +3180,7 @@ cmd_occupants(ProfWin *window, const char *const command, gchar **args)
             mucwin->showjid = FALSE;
             mucwin_update_occupants(mucwin->roomjid);
         } else {
-            ui_room_hide_occupants(mucwin->roomjid);
+            mucwin_hide_occupants(mucwin->roomjid);
         }
     } else {
         cons_bad_cmd_usage(command);
