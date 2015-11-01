@@ -275,7 +275,7 @@ void ui_handle_room_configuration(const char * const roomjid, DataForm *form) {}
 void ui_handle_room_configuration_form_error(const char * const roomjid, const char * const message) {}
 void ui_handle_room_config_submit_result(const char * const roomjid) {}
 void ui_handle_room_config_submit_result_error(const char * const roomjid, const char * const message) {}
-void ui_handle_room_affiliation_list_error(const char * const roomjid, const char * const affiliation,
+void mucwin_affiliation_list_error(const char * const roomjid, const char * const affiliation,
     const char * const error) {}
 void ui_handle_room_affiliation_list(const char * const roomjid, const char * const affiliation, GSList *jids) {}
 void ui_handle_room_affiliation_set_error(const char * const roomjid, const char * const jid,

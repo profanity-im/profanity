@@ -1342,7 +1342,7 @@ _room_affiliation_list_result_handler(xmpp_conn_t *const conn, xmpp_stanza_t *co
     if (g_strcmp0(type, STANZA_TYPE_ERROR) == 0) {
         char *error_message = stanza_get_error_message(stanza);
         log_debug("Error retrieving %s list for room %s: %s", affiliation, from, error_message);
-        ui_handle_room_affiliation_list_error(from, affiliation, error_message);
+        mucwin_affiliation_list_error(from, affiliation, error_message);
         free(error_message);
         free(affiliation);
         return 0;

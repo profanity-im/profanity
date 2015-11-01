@@ -551,7 +551,7 @@ mucwin_broadcast(const char *const roomjid, const char *const message)
 }
 
 void
-ui_handle_room_affiliation_list_error(const char *const roomjid, const char *const affiliation,
+mucwin_affiliation_list_error(const char *const roomjid, const char *const affiliation,
     const char *const error)
 {
     ProfWin *window = (ProfWin*)wins_get_muc(roomjid);
