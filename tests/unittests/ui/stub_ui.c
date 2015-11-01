@@ -219,7 +219,7 @@ void mucwin_room_disco_info(const char * const roomjid, GSList *identities, GSLi
 void ui_room_destroyed(const char * const roomjid, const char * const reason, const char * const new_jid,
     const char * const password) {}
 void ui_room_kicked(const char * const roomjid, const char * const actor, const char * const reason) {}
-void ui_room_member_kicked(const char * const roomjid, const char * const nick, const char * const actor,
+void mucwin_occupant_kicked(const char * const roomjid, const char * const nick, const char * const actor,
     const char * const reason) {}
 void ui_room_banned(const char * const roomjid, const char * const actor, const char * const reason) {}
 void ui_room_member_banned(const char * const roomjid, const char * const nick, const char * const actor,

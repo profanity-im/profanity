@@ -497,7 +497,7 @@ sv_ev_room_occupent_kicked(const char *const room, const char *const nick, const
     const char *const reason)
 {
     muc_roster_remove(room, nick);
-    ui_room_member_kicked(room, nick, actor, reason);
+    mucwin_occupant_kicked(room, nick, actor, reason);
     occupantswin_occupants(room);
 }
 
