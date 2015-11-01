@@ -24,6 +24,7 @@ core_sources = \
 	src/ui/rosterwin.c src/ui/occupantswin.c \
 	src/ui/buffer.c src/ui/buffer.h \
 	src/ui/chatwin.c \
+	src/ui/xmlwin.c \
 	src/command/command.h src/command/command.c \
 	src/command/commands.h src/command/commands.c \
 	src/tools/parser.c \

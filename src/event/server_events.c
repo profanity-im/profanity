@@ -521,7 +521,10 @@ sv_ev_roster_update(const char *const barejid, const char *const name,
 void
 sv_ev_xmpp_stanza(const char *const msg)
 {
-    ui_handle_stanza(msg);
+    ProfXMLWin *xmlwin = wins_get_xmlconsole();
+    if (xmlwin) {
+        xmlwin_show(xmlwin, msg);
+    }
 }
 
 void
