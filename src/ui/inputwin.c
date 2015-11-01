@@ -264,15 +264,6 @@ inp_put_back(void)
     _inp_win_update_virtual();
 }
 
-void
-inp_win_clear(void)
-{
-    werase(inp_win);
-    wmove(inp_win, 0, 0);
-    pad_start = 0;
-    _inp_win_update_virtual();
-}
-
 static void
 _inp_win_update_virtual(void)
 {
