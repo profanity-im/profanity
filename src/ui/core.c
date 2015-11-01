@@ -222,36 +222,6 @@ ui_load_colours(void)
     }
 }
 
-gboolean
-ui_xmlconsole_exists(void)
-{
-    ProfXMLWin *xmlwin = wins_get_xmlconsole();
-    if (xmlwin) {
-        return TRUE;
-    } else {
-        return FALSE;
-    }
-}
-
-void
-ui_handle_stanza(const char *const msg)
-{
-    if (ui_xmlconsole_exists()) {
-        ProfXMLWin *xmlconsole = wins_get_xmlconsole();
-        ProfWin *window = (ProfWin*) xmlconsole;
-
-        if (g_str_has_prefix(msg, "SENT:")) {
-            win_print(window, '-', 0, NULL, 0, 0, "", "SENT:");
-            win_print(window, '-', 0, NULL, 0, THEME_ONLINE, "", &msg[6]);
-            win_print(window, '-', 0, NULL, 0, THEME_ONLINE, "", "");
-        } else if (g_str_has_prefix(msg, "RECV:")) {
-            win_print(window, '-', 0, NULL, 0, 0, "", "RECV:");
-            win_print(window, '-', 0, NULL, 0, THEME_AWAY, "", &msg[6]);
-            win_print(window, '-', 0, NULL, 0, THEME_AWAY, "", "");
-        }
-    }
-}
-
 void
 ui_contact_online(char *barejid, Resource *resource, GDateTime *last_activity)
 {
@@ -895,22 +865,6 @@ ui_new_private_win(const char *const fulljid)
 {
     ProfWin *window = wins_new_private(fulljid);
     return (ProfPrivateWin*)window;
-}
-
-void
-ui_create_xmlconsole_win(void)
-{
-    ProfWin *window = wins_new_xmlconsole();
-    ui_switch_win(window);
-}
-
-void
-ui_open_xmlconsole_win(void)
-{
-    ProfXMLWin *xmlwin = wins_get_xmlconsole();
-    if (xmlwin) {
-        ui_switch_win((ProfWin*)xmlwin);
-    }
 }
 
 void

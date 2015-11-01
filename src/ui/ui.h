@@ -85,7 +85,6 @@ int ui_win_unread(int index);
 char* ui_ask_password(void);
 char* ui_get_line(void);
 char* ui_ask_pgp_passphrase(const char *hint, int prev_fail);
-void ui_handle_stanza(const char *const msg);
 void ui_contact_online(char *barejid, Resource *resource, GDateTime *last_activity);
 void ui_contact_typing(const char *const barejid, const char *const resource);
 void ui_incoming_private_msg(const char *const fulljid, const char *const message, GDateTime *timestamp);
@@ -188,9 +187,6 @@ void ui_update_presence(const resource_presence_t resource_presence, const char 
 void ui_statusbar_new(const int win);
 void ui_write(char *line, int offset);
 void ui_invalid_command_usage(const char *const cmd, void (*setting_func)(void));
-void ui_create_xmlconsole_win(void);
-gboolean ui_xmlconsole_exists(void);
-void ui_open_xmlconsole_win(void);
 gboolean ui_win_has_unsaved_form(int num);
 void ui_inp_history_append(char *inp);
 
@@ -211,6 +207,9 @@ void chatwin_otr_trust(ProfChatWin *chatwin);
 void chatwin_otr_untrust(ProfChatWin *chatwin);
 void chatwin_otr_smp_event(ProfChatWin *chatwin, prof_otr_smp_event_t event, void *data);
 #endif
+
+// xml console
+void xmlwin_show(ProfXMLWin *xmlwin, const char *const msg);
 
 // Input window
 char* inp_readline(void);

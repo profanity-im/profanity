@@ -165,7 +165,7 @@ char *ui_get_line(void)
     return NULL;
 }
 
-void ui_handle_stanza(const char * const msg) {}
+void xmlwin_show(ProfXMLWin *xmlwin, const char * const msg) {}
 
 // ui events
 void ui_contact_online(char *barejid, Resource *resource, GDateTime *last_activity)
@@ -319,14 +319,6 @@ void inp_nonblocking(gboolean reset) {}
 void ui_inp_history_append(char *inp) {}
 
 void ui_invalid_command_usage(const char * const usage, void (*setting_func)(void)) {}
-
-void ui_create_xmlconsole_win(void) {}
-gboolean ui_xmlconsole_exists(void)
-{
-    return FALSE;
-}
-
-void ui_open_xmlconsole_win(void) {}
 
 gboolean ui_win_has_unsaved_form(int num)
 {
