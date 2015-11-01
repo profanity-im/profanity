@@ -585,27 +585,19 @@ sv_ev_muc_self_online(const char *const room, const char *const nick, gboolean c
 
     // check for change in role/affiliation
     } else {
-        if (prefs_get_boolean(PREF_MUC_PRIVILEGES)) {
+        ProfMucWin *mucwin = wins_get_muc(room);
+        if (mucwin && prefs_get_boolean(PREF_MUC_PRIVILEGES)) {
             // both changed
             if ((g_strcmp0(role, old_role) != 0) && (g_strcmp0(affiliation, old_affiliation) != 0)) {
-                ProfMucWin *mucwin = wins_get_muc(room);
-                if (mucwin) {
-                    mucwin_role_and_affiliation_change(mucwin, role, affiliation, actor, reason);
-                }
+                mucwin_role_and_affiliation_change(mucwin, role, affiliation, actor, reason);
 
             // role changed
             } else if (g_strcmp0(role, old_role) != 0) {
-                ProfMucWin *mucwin = wins_get_muc(room);
-                if (mucwin) {
-                    mucwin_role_change(mucwin, role, actor, reason);
-                }
+                mucwin_role_change(mucwin, role, actor, reason);
 
             // affiliation changed
             } else if (g_strcmp0(affiliation, old_affiliation) != 0) {
-                ProfMucWin *mucwin = wins_get_muc(room);
-                if (mucwin) {
-                    mucwin_affiliation_change(mucwin, affiliation, actor, reason);
-                }
+                mucwin_affiliation_change(mucwin, affiliation, actor, reason);
             }
         }
     }
