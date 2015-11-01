@@ -153,10 +153,6 @@ int ui_win_unread(int index)
     return 0;
 }
 
-void ui_page_up(void) {}
-void ui_page_down(void) {}
-void ui_subwin_page_up(void) {}
-void ui_subwin_page_down(void) {}
 void ui_clear_win(ProfWin *window) {}
 
 char * ui_ask_password(void)
