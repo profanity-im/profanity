@@ -136,7 +136,7 @@ void
 sv_ev_room_broadcast(const char *const room_jid, const char *const message)
 {
     if (muc_roster_complete(room_jid)) {
-        ui_room_broadcast(room_jid, message);
+        mucwin_broadcast(room_jid, message);
     } else {
         muc_pending_broadcasts_add(room_jid, message);
     }
@@ -147,7 +147,7 @@ sv_ev_room_subject(const char *const room, const char *const nick, const char *c
 {
     muc_set_subject(room, subject);
     if (muc_roster_complete(room)) {
-        ui_room_subject(room, nick, subject);
+        mucwin_subject(room, nick, subject);
     }
 }
 
@@ -156,7 +156,7 @@ sv_ev_room_history(const char *const room_jid, const char *const nick,
     GDateTime *timestamp, const char *const message)
 {
     char *new_message = plugins_pre_room_message_display(room_jid, nick, message);
-    ui_room_history(room_jid, nick, timestamp, new_message);
+    mucwin_history(room_jid, nick, timestamp, new_message);
     plugins_post_room_message_display(room_jid, nick, new_message);
 }
 
@@ -165,7 +165,7 @@ sv_ev_room_message(const char *const room_jid, const char *const nick,
     const char *const message)
 {
     char *new_message = plugins_pre_room_message_display(room_jid, nick, message);
-    ui_room_message(room_jid, nick, new_message);
+    mucwin_message(room_jid, nick, new_message);
     plugins_post_room_message_display(room_jid, nick, new_message);
 
     if (prefs_get_boolean(PREF_GRLOG)) {
@@ -500,7 +500,7 @@ sv_ev_room_occupant_offline(const char *const room, const char *const nick,
 
     char *muc_status_pref = prefs_get_string(PREF_STATUSES_MUC);
     if (g_strcmp0(muc_status_pref, "none") != 0) {
-        ui_room_member_offline(room, nick);
+        mucwin_occupant_offline(room, nick);
     }
     prefs_free_string(muc_status_pref);
     occupantswin_occupants(room);
@@ -511,7 +511,7 @@ sv_ev_room_occupent_kicked(const char *const room, const char *const nick, const
     const char *const reason)
 {
     muc_roster_remove(room, nick);
-    ui_room_member_kicked(room, nick, actor, reason);
+    mucwin_occupant_kicked(room, nick, actor, reason);
     occupantswin_occupants(room);
 }
 
@@ -520,7 +520,7 @@ sv_ev_room_occupent_banned(const char *const room, const char *const nick, const
     const char *const reason)
 {
     muc_roster_remove(room, nick);
-    ui_room_member_banned(room, nick, actor, reason);
+    mucwin_occupant_banned(room, nick, actor, reason);
     occupantswin_occupants(room);
 }
 
@@ -555,7 +555,7 @@ sv_ev_muc_self_online(const char *const room, const char *const nick, gboolean c
     // handle self nick change
     if (muc_nick_change_pending(room)) {
         muc_nick_change_complete(room, nick);
-        ui_room_nick_change(room, nick);
+        mucwin_nick_change(room, nick);
 
     // handle roster complete
     } else if (!muc_roster_complete(room)) {
@@ -573,20 +573,20 @@ sv_ev_muc_self_online(const char *const room, const char *const nick, gboolean c
         // show roster if occupants list disabled by default
         if (!prefs_get_boolean(PREF_OCCUPANTS)) {
             GList *occupants = muc_roster(room);
-            ui_room_roster(room, occupants, NULL);
+            mucwin_roster(room, occupants, NULL);
             g_list_free(occupants);
         }
 
         char *subject = muc_subject(room);
         if (subject) {
-            ui_room_subject(room, NULL, subject);
+            mucwin_subject(room, NULL, subject);
         }
 
         GList *pending_broadcasts = muc_pending_broadcasts(room);
         if (pending_broadcasts) {
             GList *curr = pending_broadcasts;
             while (curr) {
-                ui_room_broadcast(room, curr->data);
+                mucwin_broadcast(room, curr->data);
                 curr = g_list_next(curr);
             }
         }
@@ -594,7 +594,7 @@ sv_ev_muc_self_online(const char *const room, const char *const nick, gboolean c
         // room configuration required
         if (config_required) {
             muc_set_requires_config(room, TRUE);
-            ui_room_requires_config(room);
+            mucwin_requires_config(room);
         }
 
     // check for change in role/affiliation
@@ -602,15 +602,15 @@ sv_ev_muc_self_online(const char *const room, const char *const nick, gboolean c
         if (prefs_get_boolean(PREF_MUC_PRIVILEGES)) {
             // both changed
             if ((g_strcmp0(role, old_role) != 0) && (g_strcmp0(affiliation, old_affiliation) != 0)) {
-                ui_room_role_and_affiliation_change(room, role, affiliation, actor, reason);
+                mucwin_role_and_affiliation_change(room, role, affiliation, actor, reason);
 
             // role changed
             } else if (g_strcmp0(role, old_role) != 0) {
-                ui_room_role_change(room, role, actor, reason);
+                mucwin_role_change(room, role, actor, reason);
 
             // affiliation changed
             } else if (g_strcmp0(affiliation, old_affiliation) != 0) {
-                ui_room_affiliation_change(room, affiliation, actor, reason);
+                mucwin_affiliation_change(room, affiliation, actor, reason);
             }
         }
     }
@@ -642,7 +642,7 @@ sv_ev_muc_occupant_online(const char *const room, const char *const nick, const 
     // handle nickname change
     char *old_nick = muc_roster_nick_change_complete(room, nick);
     if (old_nick) {
-        ui_room_member_nick_change(room, old_nick, nick);
+        mucwin_occupant_nick_change(room, old_nick, nick);
         free(old_nick);
         occupantswin_occupants(room);
         return;
@@ -652,7 +652,7 @@ sv_ev_muc_occupant_online(const char *const room, const char *const nick, const 
     if (!occupant) {
         char *muc_status_pref = prefs_get_string(PREF_STATUSES_MUC);
         if (g_strcmp0(muc_status_pref, "none") != 0) {
-            ui_room_member_online(room, nick, role, affiliation, show, status);
+            mucwin_occupant_online(room, nick, role, affiliation, show, status);
         }
         prefs_free_string(muc_status_pref);
         occupantswin_occupants(room);
@@ -663,7 +663,7 @@ sv_ev_muc_occupant_online(const char *const room, const char *const nick, const 
     if (updated) {
         char *muc_status_pref = prefs_get_string(PREF_STATUSES_MUC);
         if (g_strcmp0(muc_status_pref, "all") == 0) {
-            ui_room_member_presence(room, nick, show, status);
+            mucwin_occupant_presence(room, nick, show, status);
         }
         prefs_free_string(muc_status_pref);
         occupantswin_occupants(room);
@@ -673,15 +673,15 @@ sv_ev_muc_occupant_online(const char *const room, const char *const nick, const 
         if (prefs_get_boolean(PREF_MUC_PRIVILEGES)) {
             // both changed
             if ((g_strcmp0(role, old_role) != 0) && (g_strcmp0(affiliation, old_affiliation) != 0)) {
-                ui_room_occupant_role_and_affiliation_change(room, nick, role, affiliation, actor, reason);
+                mucwin_occupant_role_and_affiliation_change(room, nick, role, affiliation, actor, reason);
 
             // role changed
             } else if (g_strcmp0(role, old_role) != 0) {
-                ui_room_occupant_role_change(room, nick, role, actor, reason);
+                mucwin_occupant_role_change(room, nick, role, actor, reason);
 
             // affiliation changed
             } else if (g_strcmp0(affiliation, old_affiliation) != 0) {
-                ui_room_occupant_affiliation_change(room, nick, affiliation, actor, reason);
+                mucwin_occupant_affiliation_change(room, nick, affiliation, actor, reason);
             }
         }
         occupantswin_occupants(room);
