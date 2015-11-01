@@ -232,14 +232,12 @@ mucwin_roster(ProfMucWin *mucwin, GList *roster, const char *const presence)
 }
 
 void
-mucwin_occupant_offline(const char *const roomjid, const char *const nick)
+mucwin_occupant_offline(ProfMucWin *mucwin, const char *const nick)
 {
-    ProfWin *window = (ProfWin*)wins_get_muc(roomjid);
-    if (window == NULL) {
-        log_error("Received offline presence for room participant %s, but no window open for %s.", nick, roomjid);
-    } else {
-        win_vprint(window, '!', 0, NULL, 0, THEME_OFFLINE, "", "<- %s has left the room.", nick);
-    }
+    assert(mucwin != NULL);
+
+    ProfWin *window = (ProfWin*)mucwin;
+    win_vprint(window, '!', 0, NULL, 0, THEME_OFFLINE, "", "<- %s has left the room.", nick);
 }
 
 void
