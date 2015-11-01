@@ -1365,7 +1365,7 @@ _room_affiliation_list_result_handler(xmpp_conn_t *const conn, xmpp_stanza_t *co
     }
 
     muc_jid_autocomplete_add_all(from, jids);
-    ui_handle_room_affiliation_list(from, affiliation, jids);
+    mucwin_handle_affiliation_list(from, affiliation, jids);
     free(affiliation);
     g_slist_free(jids);
 

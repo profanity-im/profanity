@@ -561,7 +561,7 @@ mucwin_affiliation_list_error(const char *const roomjid, const char *const affil
 }
 
 void
-ui_handle_room_affiliation_list(const char *const roomjid, const char *const affiliation, GSList *jids)
+mucwin_handle_affiliation_list(const char *const roomjid, const char *const affiliation, GSList *jids)
 {
     ProfWin *window = (ProfWin*)wins_get_muc(roomjid);
     if (window) {
@@ -578,6 +578,66 @@ ui_handle_room_affiliation_list(const char *const roomjid, const char *const aff
             win_vprint(window, '!', 0, NULL, 0, 0, "", "No users found with affiliation: %s", affiliation);
             win_print(window, '!', 0, NULL, 0, 0, "", "");
         }
+    }
+}
+
+void
+ui_show_room_affiliation_list(ProfMucWin *mucwin, muc_affiliation_t affiliation)
+{
+    ProfWin *window = (ProfWin*) mucwin;
+    GSList *occupants = muc_occupants_by_affiliation(mucwin->roomjid, affiliation);
+
+    if (!occupants) {
+        switch (affiliation) {
+            case MUC_AFFILIATION_OWNER:
+                win_print(window, '!', 0, NULL, 0, 0, "", "No owners found.");
+                break;
+            case MUC_AFFILIATION_ADMIN:
+                win_print(window, '!', 0, NULL, 0, 0, "", "No admins found.");
+                break;
+            case MUC_AFFILIATION_MEMBER:
+                win_print(window, '!', 0, NULL, 0, 0, "", "No members found.");
+                break;
+            case MUC_AFFILIATION_OUTCAST:
+                win_print(window, '!', 0, NULL, 0, 0, "", "No outcasts found.");
+                break;
+            default:
+                break;
+        }
+        win_print(window, '-', 0, NULL, 0, 0, "", "");
+    } else {
+        switch (affiliation) {
+            case MUC_AFFILIATION_OWNER:
+                win_print(window, '!', 0, NULL, 0, 0, "", "Owners:");
+                break;
+            case MUC_AFFILIATION_ADMIN:
+                win_print(window, '!', 0, NULL, 0, 0, "", "Admins:");
+                break;
+            case MUC_AFFILIATION_MEMBER:
+                win_print(window, '!', 0, NULL, 0, 0, "", "Members:");
+                break;
+            case MUC_AFFILIATION_OUTCAST:
+                win_print(window, '!', 0, NULL, 0, 0, "", "Outcasts:");
+                break;
+            default:
+                break;
+        }
+
+        GSList *curr_occupant = occupants;
+        while(curr_occupant) {
+            Occupant *occupant = curr_occupant->data;
+            if (occupant->affiliation == affiliation) {
+                if (occupant->jid) {
+                    win_vprint(window, '!', 0, NULL, 0, 0, "", "  %s (%s)", occupant->nick, occupant->jid);
+                } else {
+                    win_vprint(window, '!', 0, NULL, 0, 0, "", "  %s", occupant->nick);
+                }
+            }
+
+            curr_occupant = g_slist_next(curr_occupant);
+        }
+
+        win_print(window, '-', 0, NULL, 0, 0, "", "");
     }
 }
 
@@ -693,66 +753,6 @@ ui_show_room_role_list(ProfMucWin *mucwin, muc_role_t role)
         while(curr_occupant) {
             Occupant *occupant = curr_occupant->data;
             if (occupant->role == role) {
-                if (occupant->jid) {
-                    win_vprint(window, '!', 0, NULL, 0, 0, "", "  %s (%s)", occupant->nick, occupant->jid);
-                } else {
-                    win_vprint(window, '!', 0, NULL, 0, 0, "", "  %s", occupant->nick);
-                }
-            }
-
-            curr_occupant = g_slist_next(curr_occupant);
-        }
-
-        win_print(window, '-', 0, NULL, 0, 0, "", "");
-    }
-}
-
-void
-ui_show_room_affiliation_list(ProfMucWin *mucwin, muc_affiliation_t affiliation)
-{
-    ProfWin *window = (ProfWin*) mucwin;
-    GSList *occupants = muc_occupants_by_affiliation(mucwin->roomjid, affiliation);
-
-    if (!occupants) {
-        switch (affiliation) {
-            case MUC_AFFILIATION_OWNER:
-                win_print(window, '!', 0, NULL, 0, 0, "", "No owners found.");
-                break;
-            case MUC_AFFILIATION_ADMIN:
-                win_print(window, '!', 0, NULL, 0, 0, "", "No admins found.");
-                break;
-            case MUC_AFFILIATION_MEMBER:
-                win_print(window, '!', 0, NULL, 0, 0, "", "No members found.");
-                break;
-            case MUC_AFFILIATION_OUTCAST:
-                win_print(window, '!', 0, NULL, 0, 0, "", "No outcasts found.");
-                break;
-            default:
-                break;
-        }
-        win_print(window, '-', 0, NULL, 0, 0, "", "");
-    } else {
-        switch (affiliation) {
-            case MUC_AFFILIATION_OWNER:
-                win_print(window, '!', 0, NULL, 0, 0, "", "Owners:");
-                break;
-            case MUC_AFFILIATION_ADMIN:
-                win_print(window, '!', 0, NULL, 0, 0, "", "Admins:");
-                break;
-            case MUC_AFFILIATION_MEMBER:
-                win_print(window, '!', 0, NULL, 0, 0, "", "Members:");
-                break;
-            case MUC_AFFILIATION_OUTCAST:
-                win_print(window, '!', 0, NULL, 0, 0, "", "Outcasts:");
-                break;
-            default:
-                break;
-        }
-
-        GSList *curr_occupant = occupants;
-        while(curr_occupant) {
-            Occupant *occupant = curr_occupant->data;
-            if (occupant->affiliation == affiliation) {
                 if (occupant->jid) {
                     win_vprint(window, '!', 0, NULL, 0, 0, "", "  %s (%s)", occupant->nick, occupant->jid);
                 } else {
