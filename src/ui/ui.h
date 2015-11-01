@@ -94,7 +94,7 @@ void ui_room_join(const char *const roomjid, gboolean focus);
 void ui_switch_to_room(const char *const roomjid);
 void mucwin_role_change(const char *const roomjid, const char *const role, const char *const actor,
     const char *const reason);
-void ui_room_affiliation_change(const char *const roomjid, const char *const affiliation, const char *const actor,
+void mucwin_affiliation_change(const char *const roomjid, const char *const affiliation, const char *const actor,
     const char *const reason);
 void ui_room_role_and_affiliation_change(const char *const roomjid, const char *const role,
     const char *const affiliation, const char *const actor, const char *const reason);
