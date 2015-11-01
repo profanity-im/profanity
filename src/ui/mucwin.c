@@ -143,13 +143,13 @@ mucwin_occupant_role_and_affiliation_change(ProfMucWin *mucwin, const char *cons
 }
 
 void
-mucwin_room_info_error(const char *const roomjid, const char *const error)
+mucwin_room_info_error(ProfMucWin *mucwin, const char *const error)
 {
-    ProfWin *window = (ProfWin*)wins_get_muc(roomjid);
-    if (window) {
-        win_vprint(window, '!', 0, NULL, 0, 0, "", "Room info request failed: %s", error);
-        win_print(window, '-', 0, NULL, 0, 0, "", "");
-    }
+    assert(mucwin != NULL);
+
+    ProfWin *window = (ProfWin*)mucwin;
+    win_vprint(window, '!', 0, NULL, 0, 0, "", "Room info request failed: %s", error);
+    win_print(window, '-', 0, NULL, 0, 0, "", "");
 }
 
 void

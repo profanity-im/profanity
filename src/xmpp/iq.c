@@ -54,6 +54,7 @@
 #include "muc.h"
 #include "profanity.h"
 #include "ui/ui.h"
+#include "window_list.h"
 #include "config/preferences.h"
 #include "event/server_events.h"
 #include "xmpp/capabilities.h"
@@ -1505,9 +1506,10 @@ _room_info_response_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza
 
     // handle error responses
     if (g_strcmp0(type, STANZA_TYPE_ERROR) == 0) {
-        if (cb_data->display) {
+        ProfMucWin *mucwin = wins_get_muc(cb_data->room);
+        if (mucwin && cb_data->display) {
             char *error_message = stanza_get_error_message(stanza);
-            mucwin_room_info_error(cb_data->room, error_message);
+            mucwin_room_info_error(mucwin, error_message);
             free(error_message);
         }
         free(cb_data->room);

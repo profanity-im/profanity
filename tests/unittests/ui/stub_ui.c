@@ -214,7 +214,7 @@ void ui_room_destroy(const char * const roomjid) {}
 void mucwin_info(ProfMucWin *mucwin) {}
 void mucwin_show_role_list(ProfMucWin *mucwin, muc_role_t role) {}
 void mucwin_show_affiliation_list(ProfMucWin *mucwin, muc_affiliation_t affiliation) {}
-void mucwin_room_info_error(const char * const roomjid, const char * const error) {}
+void mucwin_room_info_error(ProfMucWin *mucwin, const char * const error) {}
 void mucwin_room_disco_info(const char * const roomjid, GSList *identities, GSList *features) {}
 void ui_room_destroyed(const char * const roomjid, const char * const reason, const char * const new_jid,
     const char * const password) {}
