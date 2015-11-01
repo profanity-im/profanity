@@ -85,7 +85,6 @@ int ui_win_unread(int index);
 char* ui_ask_password(void);
 char* ui_get_line(void);
 char* ui_ask_pgp_passphrase(const char *hint, int prev_fail);
-void ui_handle_stanza(const char *const msg);
 void ui_contact_online(char *barejid, Resource *resource, GDateTime *last_activity);
 void ui_contact_typing(const char *const barejid, const char *const resource);
 void ui_incoming_private_msg(const char *const fulljid, const char *const message, GDateTime *timestamp);
@@ -208,6 +207,9 @@ void chatwin_otr_trust(ProfChatWin *chatwin);
 void chatwin_otr_untrust(ProfChatWin *chatwin);
 void chatwin_otr_smp_event(ProfChatWin *chatwin, prof_otr_smp_event_t event, void *data);
 #endif
+
+// xml console
+void xmlwin_show(const char *const msg);
 
 // Input window
 char* inp_readline(void);

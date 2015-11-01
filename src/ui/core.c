@@ -223,26 +223,6 @@ ui_load_colours(void)
 }
 
 void
-ui_handle_stanza(const char *const msg)
-{
-    ProfXMLWin *xmlwin = wins_get_xmlconsole();
-    if (!xmlwin) {
-        return;
-    }
-
-    ProfWin *window = (ProfWin*)xmlwin;
-    if (g_str_has_prefix(msg, "SENT:")) {
-        win_print(window, '-', 0, NULL, 0, 0, "", "SENT:");
-        win_print(window, '-', 0, NULL, 0, THEME_ONLINE, "", &msg[6]);
-        win_print(window, '-', 0, NULL, 0, THEME_ONLINE, "", "");
-    } else if (g_str_has_prefix(msg, "RECV:")) {
-        win_print(window, '-', 0, NULL, 0, 0, "", "RECV:");
-        win_print(window, '-', 0, NULL, 0, THEME_AWAY, "", &msg[6]);
-        win_print(window, '-', 0, NULL, 0, THEME_AWAY, "", "");
-    }
-}
-
-void
 ui_contact_online(char *barejid, Resource *resource, GDateTime *last_activity)
 {
     char *show_console = prefs_get_string(PREF_STATUSES_CONSOLE);

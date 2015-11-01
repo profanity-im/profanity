@@ -165,7 +165,7 @@ char *ui_get_line(void)
     return NULL;
 }
 
-void ui_handle_stanza(const char * const msg) {}
+void xmlwin_show(const char * const msg) {}
 
 // ui events
 void ui_contact_online(char *barejid, Resource *resource, GDateTime *last_activity)
