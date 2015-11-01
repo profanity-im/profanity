@@ -362,7 +362,7 @@ mucwin_history(const char *const roomjid, const char *const nick,
 }
 
 void
-ui_room_message(const char *const roomjid, const char *const nick,
+mucwin_message(const char *const roomjid, const char *const nick,
     const char *const message)
 {
     ProfMucWin *mucwin = wins_get_muc(roomjid);

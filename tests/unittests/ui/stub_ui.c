@@ -206,7 +206,7 @@ void mucwin_occupant_role_and_affiliation_change(const char * const roomjid, con
 void mucwin_roster(const char * const roomjid, GList *occupants, const char * const presence) {}
 void mucwin_history(const char * const roomjid, const char * const nick,
     GDateTime *timestamp, const char * const message) {}
-void ui_room_message(const char * const roomjid, const char * const nick,
+void mucwin_message(const char * const roomjid, const char * const nick,
     const char * const message) {}
 void ui_room_subject(const char * const roomjid, const char * const nick, const char * const subject) {}
 void ui_room_requires_config(const char * const roomjid) {}
