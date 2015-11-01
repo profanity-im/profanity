@@ -108,7 +108,7 @@ prof_run(char *log_level, char *account_name)
         log_stderr_handler();
         _check_autoaway();
 
-        line = ui_readline();
+        line = inp_readline();
         if (line) {
             ProfWin *window = wins_get_current();
             cont = cmd_process_input(window, line);
@@ -340,7 +340,7 @@ _init(char *log_level)
     p_gpg_init();
 #endif
     atexit(_shutdown);
-    ui_input_nonblocking(TRUE);
+    inp_nonblocking(TRUE);
 }
 
 static void
