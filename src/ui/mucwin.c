@@ -313,7 +313,7 @@ mucwin_occupant_presence(const char *const roomjid, const char *const nick,
 }
 
 void
-ui_room_member_nick_change(const char *const roomjid,
+mucwin_occupant_nick_change(const char *const roomjid,
     const char *const old_nick, const char *const nick)
 {
     ProfWin *window = (ProfWin*)wins_get_muc(roomjid);
