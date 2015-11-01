@@ -285,24 +285,22 @@ mucwin_occupant_banned(ProfMucWin *mucwin, const char *const nick, const char *c
 }
 
 void
-mucwin_occupant_online(const char *const roomjid, const char *const nick, const char *const role,
+mucwin_occupant_online(ProfMucWin *mucwin, const char *const nick, const char *const role,
     const char *const affiliation, const char *const show, const char *const status)
 {
-    ProfWin *window = (ProfWin*)wins_get_muc(roomjid);
-    if (window == NULL) {
-        log_error("Received online presence for room participant %s, but no window open for %s.", nick, roomjid);
-    } else {
-        win_vprint(window, '!', 0, NULL, NO_EOL, THEME_ONLINE, "", "-> %s has joined the room", nick);
-        if (prefs_get_boolean(PREF_MUC_PRIVILEGES)) {
-            if (role) {
-                win_vprint(window, '!', 0, NULL, NO_DATE | NO_EOL, THEME_ONLINE, "", ", role: %s", role);
-            }
-            if (affiliation) {
-                win_vprint(window, '!', 0, NULL, NO_DATE | NO_EOL, THEME_ONLINE, "", ", affiliation: %s", affiliation);
-            }
+    assert(mucwin != NULL);
+
+    ProfWin *window = (ProfWin*)mucwin;
+    win_vprint(window, '!', 0, NULL, NO_EOL, THEME_ONLINE, "", "-> %s has joined the room", nick);
+    if (prefs_get_boolean(PREF_MUC_PRIVILEGES)) {
+        if (role) {
+            win_vprint(window, '!', 0, NULL, NO_DATE | NO_EOL, THEME_ONLINE, "", ", role: %s", role);
         }
-        win_print(window, '!', 0, NULL, NO_DATE, THEME_ROOMINFO, "", "");
+        if (affiliation) {
+            win_vprint(window, '!', 0, NULL, NO_DATE | NO_EOL, THEME_ONLINE, "", ", affiliation: %s", affiliation);
+        }
     }
+    win_print(window, '!', 0, NULL, NO_DATE, THEME_ROOMINFO, "", "");
 }
 
 void
