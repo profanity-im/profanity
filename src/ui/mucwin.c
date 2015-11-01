@@ -194,42 +194,40 @@ mucwin_room_disco_info(ProfMucWin *mucwin, GSList *identities, GSList *features)
 }
 
 void
-mucwin_roster(const char *const roomjid, GList *roster, const char *const presence)
+mucwin_roster(ProfMucWin *mucwin, GList *roster, const char *const presence)
 {
-    ProfWin *window = (ProfWin*)wins_get_muc(roomjid);
-    if (window == NULL) {
-        log_error("Received room roster but no window open for %s.", roomjid);
-    } else {
-        if ((roster == NULL) || (g_list_length(roster) == 0)) {
-            if (presence == NULL) {
-                win_print(window, '!', 0, NULL, 0, THEME_ROOMINFO, "", "Room is empty.");
-            } else {
-                win_vprint(window, '!', 0, NULL, 0, THEME_ROOMINFO, "", "No occupants %s.", presence);
-            }
+    assert(mucwin != NULL);
+
+    ProfWin *window = (ProfWin*)mucwin;
+    if ((roster == NULL) || (g_list_length(roster) == 0)) {
+        if (presence == NULL) {
+            win_print(window, '!', 0, NULL, 0, THEME_ROOMINFO, "", "Room is empty.");
         } else {
-            int length = g_list_length(roster);
-            if (presence == NULL) {
-                win_vprint(window, '!', 0, NULL, NO_EOL, THEME_ROOMINFO, "", "%d occupants: ", length);
-            } else {
-                win_vprint(window, '!', 0, NULL, NO_EOL, THEME_ROOMINFO, "", "%d %s: ", length, presence);
-            }
-
-            while (roster) {
-                Occupant *occupant = roster->data;
-                const char *presence_str = string_from_resource_presence(occupant->presence);
-
-                theme_item_t presence_colour = theme_main_presence_attrs(presence_str);
-                win_vprint(window, '!', 0, NULL, NO_DATE | NO_EOL, presence_colour, "", "%s", occupant->nick);
-
-                if (roster->next) {
-                    win_print(window, '!', 0, NULL, NO_DATE | NO_EOL, 0, "", ", ");
-                }
-
-                roster = g_list_next(roster);
-            }
-            win_print(window, '!', 0, NULL, NO_DATE, THEME_ONLINE, "", "");
-
+            win_vprint(window, '!', 0, NULL, 0, THEME_ROOMINFO, "", "No occupants %s.", presence);
         }
+    } else {
+        int length = g_list_length(roster);
+        if (presence == NULL) {
+            win_vprint(window, '!', 0, NULL, NO_EOL, THEME_ROOMINFO, "", "%d occupants: ", length);
+        } else {
+            win_vprint(window, '!', 0, NULL, NO_EOL, THEME_ROOMINFO, "", "%d %s: ", length, presence);
+        }
+
+        while (roster) {
+            Occupant *occupant = roster->data;
+            const char *presence_str = string_from_resource_presence(occupant->presence);
+
+            theme_item_t presence_colour = theme_main_presence_attrs(presence_str);
+            win_vprint(window, '!', 0, NULL, NO_DATE | NO_EOL, presence_colour, "", "%s", occupant->nick);
+
+            if (roster->next) {
+                win_print(window, '!', 0, NULL, NO_DATE | NO_EOL, 0, "", ", ");
+            }
+
+            roster = g_list_next(roster);
+        }
+        win_print(window, '!', 0, NULL, NO_DATE, THEME_ONLINE, "", "");
+
     }
 }
 

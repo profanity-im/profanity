@@ -557,9 +557,10 @@ sv_ev_muc_self_online(const char *const room, const char *const nick, gboolean c
         muc_roster_set_complete(room);
 
         // show roster if occupants list disabled by default
-        if (!prefs_get_boolean(PREF_OCCUPANTS)) {
+        ProfMucWin *mucwin = wins_get_muc(room);
+        if (mucwin && !prefs_get_boolean(PREF_OCCUPANTS)) {
             GList *occupants = muc_roster(room);
-            mucwin_roster(room, occupants, NULL);
+            mucwin_roster(mucwin, occupants, NULL);
             g_list_free(occupants);
         }
 
