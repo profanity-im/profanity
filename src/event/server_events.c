@@ -155,7 +155,7 @@ void
 sv_ev_room_history(const char *const room_jid, const char *const nick,
     GDateTime *timestamp, const char *const message)
 {
-    ui_room_history(room_jid, nick, timestamp, message);
+    mucwin_history(room_jid, nick, timestamp, message);
 }
 
 void

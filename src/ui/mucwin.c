@@ -336,7 +336,7 @@ mucwin_nick_change(const char *const roomjid, const char *const nick)
 }
 
 void
-ui_room_history(const char *const roomjid, const char *const nick,
+mucwin_history(const char *const roomjid, const char *const nick,
     GDateTime *timestamp, const char *const message)
 {
     ProfWin *window = (ProfWin*)wins_get_muc(roomjid);
