@@ -1463,7 +1463,7 @@ _room_kick_result_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza, 
     // handle error responses
     if (g_strcmp0(type, STANZA_TYPE_ERROR) == 0) {
         char *error_message = stanza_get_error_message(stanza);
-        ui_handle_room_kick_error(from, nick, error_message);
+        mucwin_kick_error(from, nick, error_message);
         free(error_message);
         free(nick);
         return 0;

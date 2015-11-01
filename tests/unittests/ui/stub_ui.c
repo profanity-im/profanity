@@ -284,7 +284,7 @@ void ui_handle_room_role_set_error(const char * const roomjid, const char * cons
     const char * const error) {}
 void ui_handle_room_role_list_error(const char * const roomjid, const char * const role, const char * const error) {}
 void ui_handle_room_role_list(const char * const roomjid, const char * const role, GSList *nicks) {}
-void ui_handle_room_kick_error(const char * const roomjid, const char * const nick, const char * const error) {}
+void mucwin_kick_error(const char * const roomjid, const char * const nick, const char * const error) {}
 void ui_show_form(ProfMucConfWin *confwin) {}
 void ui_show_form_field(ProfWin *window, DataForm *form, char *tag) {}
 void ui_show_form_help(ProfMucConfWin *confwin) {}
