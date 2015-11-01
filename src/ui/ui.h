@@ -115,7 +115,7 @@ void ui_show_room_info(ProfMucWin *mucwin);
 void ui_show_room_role_list(ProfMucWin *mucwin, muc_role_t role);
 void ui_show_room_affiliation_list(ProfMucWin *mucwin, muc_affiliation_t affiliation);
 void mucwin_room_info_error(const char *const roomjid, const char *const error);
-void ui_show_room_disco_info(const char *const roomjid, GSList *identities, GSList *features);
+void mucwin_room_disco_info(const char *const roomjid, GSList *identities, GSList *features);
 void ui_room_destroyed(const char *const roomjid, const char *const reason, const char *const new_jid,
     const char *const password);
 void ui_room_kicked(const char *const roomjid, const char *const actor, const char *const reason);

@@ -1561,7 +1561,7 @@ _room_info_response_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza
 
         muc_set_features(cb_data->room, features);
         if (cb_data->display) {
-            ui_show_room_disco_info(cb_data->room, identities, features);
+            mucwin_room_disco_info(cb_data->room, identities, features);
         }
 
         g_slist_free_full(features, free);

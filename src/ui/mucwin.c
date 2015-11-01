@@ -140,7 +140,7 @@ mucwin_room_info_error(const char *const roomjid, const char *const error)
 }
 
 void
-ui_show_room_disco_info(const char *const roomjid, GSList *identities, GSList *features)
+mucwin_room_disco_info(const char *const roomjid, GSList *identities, GSList *features)
 {
     ProfWin *window = (ProfWin*)wins_get_muc(roomjid);
     if (window) {
