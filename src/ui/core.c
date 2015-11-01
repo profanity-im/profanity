@@ -223,13 +223,6 @@ ui_load_colours(void)
 }
 
 void
-ui_create_xmlconsole_win(void)
-{
-    ProfWin *window = wins_new_xmlconsole();
-    ui_switch_win(window);
-}
-
-void
 ui_open_xmlconsole_win(void)
 {
     ProfXMLWin *xmlwin = wins_get_xmlconsole();

@@ -188,7 +188,6 @@ void ui_update_presence(const resource_presence_t resource_presence, const char 
 void ui_statusbar_new(const int win);
 void ui_write(char *line, int offset);
 void ui_invalid_command_usage(const char *const cmd, void (*setting_func)(void));
-void ui_create_xmlconsole_win(void);
 void ui_open_xmlconsole_win(void);
 gboolean ui_win_has_unsaved_form(int num);
 void ui_inp_history_append(char *inp);
