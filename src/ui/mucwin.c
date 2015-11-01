@@ -153,43 +153,43 @@ mucwin_room_info_error(ProfMucWin *mucwin, const char *const error)
 }
 
 void
-mucwin_room_disco_info(const char *const roomjid, GSList *identities, GSList *features)
+mucwin_room_disco_info(ProfMucWin *mucwin, GSList *identities, GSList *features)
 {
-    ProfWin *window = (ProfWin*)wins_get_muc(roomjid);
-    if (window) {
-        if ((identities && (g_slist_length(identities) > 0)) ||
-            (features && (g_slist_length(features) > 0))) {
-            if (identities) {
-                win_print(window, '!', 0, NULL, 0, 0, "", "Identities:");
-            }
-            while (identities) {
-                DiscoIdentity *identity = identities->data;  // anme trpe, cat
-                GString *identity_str = g_string_new("  ");
-                if (identity->name) {
-                    identity_str = g_string_append(identity_str, identity->name);
-                    identity_str = g_string_append(identity_str, " ");
-                }
-                if (identity->type) {
-                    identity_str = g_string_append(identity_str, identity->type);
-                    identity_str = g_string_append(identity_str, " ");
-                }
-                if (identity->category) {
-                    identity_str = g_string_append(identity_str, identity->category);
-                }
-                win_print(window, '!', 0, NULL, 0, 0, "", identity_str->str);
-                g_string_free(identity_str, TRUE);
-                identities = g_slist_next(identities);
-            }
+    assert(mucwin != NULL);
 
-            if (features) {
-                win_print(window, '!', 0, NULL, 0, 0, "", "Features:");
-            }
-            while (features) {
-                win_vprint(window, '!', 0, NULL, 0, 0, "", "  %s", features->data);
-                features = g_slist_next(features);
-            }
-            win_print(window, '-', 0, NULL, 0, 0, "", "");
+    ProfWin *window = (ProfWin*)mucwin;
+    if ((identities && (g_slist_length(identities) > 0)) ||
+        (features && (g_slist_length(features) > 0))) {
+        if (identities) {
+            win_print(window, '!', 0, NULL, 0, 0, "", "Identities:");
         }
+        while (identities) {
+            DiscoIdentity *identity = identities->data;  // anme trpe, cat
+            GString *identity_str = g_string_new("  ");
+            if (identity->name) {
+                identity_str = g_string_append(identity_str, identity->name);
+                identity_str = g_string_append(identity_str, " ");
+            }
+            if (identity->type) {
+                identity_str = g_string_append(identity_str, identity->type);
+                identity_str = g_string_append(identity_str, " ");
+            }
+            if (identity->category) {
+                identity_str = g_string_append(identity_str, identity->category);
+            }
+            win_print(window, '!', 0, NULL, 0, 0, "", identity_str->str);
+            g_string_free(identity_str, TRUE);
+            identities = g_slist_next(identities);
+        }
+
+        if (features) {
+            win_print(window, '!', 0, NULL, 0, 0, "", "Features:");
+        }
+        while (features) {
+            win_vprint(window, '!', 0, NULL, 0, 0, "", "  %s", features->data);
+            features = g_slist_next(features);
+        }
+        win_print(window, '-', 0, NULL, 0, 0, "", "");
     }
 }
 
