@@ -136,7 +136,7 @@ void
 sv_ev_room_broadcast(const char *const room_jid, const char *const message)
 {
     if (muc_roster_complete(room_jid)) {
-        ui_room_broadcast(room_jid, message);
+        mucwin_broadcast(room_jid, message);
     } else {
         muc_pending_broadcasts_add(room_jid, message);
     }
@@ -572,7 +572,7 @@ sv_ev_muc_self_online(const char *const room, const char *const nick, gboolean c
         if (pending_broadcasts) {
             GList *curr = pending_broadcasts;
             while (curr) {
-                ui_room_broadcast(room, curr->data);
+                mucwin_broadcast(room, curr->data);
                 curr = g_list_next(curr);
             }
         }

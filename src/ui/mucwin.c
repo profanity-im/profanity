@@ -528,7 +528,7 @@ mucwin_kick_error(const char *const roomjid, const char *const nick, const char 
 }
 
 void
-ui_room_broadcast(const char *const roomjid, const char *const message)
+mucwin_broadcast(const char *const roomjid, const char *const message)
 {
     ProfWin *window = (ProfWin*)wins_get_muc(roomjid);
     if (window == NULL) {
