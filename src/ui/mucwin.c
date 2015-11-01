@@ -32,6 +32,8 @@
  *
  */
 
+#include <assert.h>
+
 #include "ui/win_types.h"
 #include "window_list.h"
 #include "log.h"
@@ -39,10 +41,12 @@
 #include "ui/window.h"
 
 void
-mucwin_role_change(const char *const roomjid, const char *const role, const char *const actor,
+mucwin_role_change(ProfMucWin *mucwin, const char *const role, const char *const actor,
     const char *const reason)
 {
-    ProfWin *window = (ProfWin*)wins_get_muc(roomjid);
+    assert(mucwin != NULL);
+
+    ProfWin *window = (ProfWin*)mucwin;
     win_vprint(window, '!', 0, NULL, NO_EOL, THEME_ROOMINFO, "", "Your role has been changed to: %s", role);
     if (actor) {
         win_vprint(window, '!', 0, NULL, NO_DATE | NO_EOL, THEME_ROOMINFO, "", ", by: %s", actor);
