@@ -223,15 +223,6 @@ ui_load_colours(void)
 }
 
 void
-ui_open_xmlconsole_win(void)
-{
-    ProfXMLWin *xmlwin = wins_get_xmlconsole();
-    if (xmlwin) {
-        ui_switch_win((ProfWin*)xmlwin);
-    }
-}
-
-void
 ui_handle_stanza(const char *const msg)
 {
     ProfXMLWin *xmlwin = wins_get_xmlconsole();

@@ -4399,7 +4399,7 @@ cmd_xmlconsole(ProfWin *window, const char *const command, gchar **args)
 {
     ProfXMLWin *xmlwin = wins_get_xmlconsole();
     if (xmlwin) {
-        ui_open_xmlconsole_win();
+        ui_switch_win((ProfWin*)xmlwin);
     } else {
         ProfWin *window = wins_new_xmlconsole();
         ui_switch_win(window);

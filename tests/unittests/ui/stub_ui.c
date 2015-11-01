@@ -320,8 +320,6 @@ void ui_inp_history_append(char *inp) {}
 
 void ui_invalid_command_usage(const char * const usage, void (*setting_func)(void)) {}
 
-void ui_open_xmlconsole_win(void) {}
-
 gboolean ui_win_has_unsaved_form(int num)
 {
     return FALSE;
