@@ -134,7 +134,7 @@ void mucwin_nick_change(const char *const roomjid, const char *const nick);
 void mucwin_occupant_presence(const char *const roomjid, const char *const nick, const char *const show,
     const char *const status);
 void mucwin_update_occupants(const char *const roomjid);
-void ui_room_show_occupants(const char *const roomjid);
+void mucwin_occupants(const char *const roomjid);
 void ui_room_hide_occupants(const char *const roomjid);
 void ui_show_roster(void);
 void ui_hide_roster(void);

@@ -668,7 +668,7 @@ ui_show_all_room_rosters(void)
         if (window->type == WIN_MUC && !win_has_active_subwin(window)) {
             ProfMucWin *mucwin = (ProfMucWin*)window;
             assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
-            ui_room_show_occupants(mucwin->roomjid);
+            mucwin_occupants(mucwin->roomjid);
         }
         curr = g_list_next(curr);
     }
