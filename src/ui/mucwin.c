@@ -651,7 +651,7 @@ mucwin_role_list_error(const char *const roomjid, const char *const role, const 
 }
 
 void
-ui_handle_room_role_list(const char *const roomjid, const char *const role, GSList *nicks)
+mucwin_handle_role_list(const char *const roomjid, const char *const role, GSList *nicks)
 {
     ProfWin *window = (ProfWin*)wins_get_muc(roomjid);
     if (window) {
@@ -678,39 +678,6 @@ ui_handle_room_role_list(const char *const roomjid, const char *const role, GSLi
             win_print(window, '!', 0, NULL, 0, 0, "", "");
         }
     }
-}
-
-void
-ui_handle_room_affiliation_set_error(const char *const roomjid, const char *const jid, const char *const affiliation,
-    const char *const error)
-{
-    ProfWin *window = (ProfWin*)wins_get_muc(roomjid);
-    if (window) {
-        win_vprint(window, '!', 0, NULL, 0, THEME_ERROR, "", "Error setting %s affiliation for %s: %s", affiliation, jid, error);
-    }
-}
-
-void
-ui_handle_room_role_set_error(const char *const roomjid, const char *const nick, const char *const role,
-    const char *const error)
-{
-    ProfWin *window = (ProfWin*)wins_get_muc(roomjid);
-    if (window) {
-        win_vprint(window, '!', 0, NULL, 0, THEME_ERROR, "", "Error setting %s role for %s: %s", role, nick, error);
-    }
-}
-
-void
-ui_show_room_info(ProfMucWin *mucwin)
-{
-    char *role = muc_role_str(mucwin->roomjid);
-    char *affiliation = muc_affiliation_str(mucwin->roomjid);
-
-    ProfWin *window = (ProfWin*) mucwin;
-    win_vprint(window, '!', 0, NULL, 0, 0, "", "Room: %s", mucwin->roomjid);
-    win_vprint(window, '!', 0, NULL, 0, 0, "", "Affiliation: %s", affiliation);
-    win_vprint(window, '!', 0, NULL, 0, 0, "", "Role: %s", role);
-    win_print(window, '-', 0, NULL, 0, 0, "", "");
 }
 
 void
@@ -765,6 +732,39 @@ ui_show_room_role_list(ProfMucWin *mucwin, muc_role_t role)
 
         win_print(window, '-', 0, NULL, 0, 0, "", "");
     }
+}
+
+void
+ui_handle_room_affiliation_set_error(const char *const roomjid, const char *const jid, const char *const affiliation,
+    const char *const error)
+{
+    ProfWin *window = (ProfWin*)wins_get_muc(roomjid);
+    if (window) {
+        win_vprint(window, '!', 0, NULL, 0, THEME_ERROR, "", "Error setting %s affiliation for %s: %s", affiliation, jid, error);
+    }
+}
+
+void
+ui_handle_room_role_set_error(const char *const roomjid, const char *const nick, const char *const role,
+    const char *const error)
+{
+    ProfWin *window = (ProfWin*)wins_get_muc(roomjid);
+    if (window) {
+        win_vprint(window, '!', 0, NULL, 0, THEME_ERROR, "", "Error setting %s role for %s: %s", role, nick, error);
+    }
+}
+
+void
+ui_show_room_info(ProfMucWin *mucwin)
+{
+    char *role = muc_role_str(mucwin->roomjid);
+    char *affiliation = muc_affiliation_str(mucwin->roomjid);
+
+    ProfWin *window = (ProfWin*) mucwin;
+    win_vprint(window, '!', 0, NULL, 0, 0, "", "Room: %s", mucwin->roomjid);
+    win_vprint(window, '!', 0, NULL, 0, 0, "", "Affiliation: %s", affiliation);
+    win_vprint(window, '!', 0, NULL, 0, 0, "", "Role: %s", role);
+    win_print(window, '-', 0, NULL, 0, 0, "", "");
 }
 
 void

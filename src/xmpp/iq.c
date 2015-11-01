@@ -1412,7 +1412,7 @@ _room_role_list_result_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const sta
         }
     }
 
-    ui_handle_room_role_list(from, role, nicks);
+    mucwin_handle_role_list(from, role, nicks);
     free(role);
     g_slist_free(nicks);
 
