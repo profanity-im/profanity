@@ -592,7 +592,7 @@ sv_ev_muc_self_online(const char *const room, const char *const nick, gboolean c
 
             // role changed
             } else if (g_strcmp0(role, old_role) != 0) {
-                ui_room_role_change(room, role, actor, reason);
+                mucwin_role_change(room, role, actor, reason);
 
             // affiliation changed
             } else if (g_strcmp0(affiliation, old_affiliation) != 0) {
