@@ -69,7 +69,7 @@ mucwin_affiliation_change(const char *const roomjid, const char *const affiliati
 }
 
 void
-ui_room_role_and_affiliation_change(const char *const roomjid, const char *const role, const char *const affiliation,
+mucwin_role_and_affiliation_change(const char *const roomjid, const char *const role, const char *const affiliation,
     const char *const actor, const char *const reason)
 {
     ProfWin *window = (ProfWin*)wins_get_muc(roomjid);
