@@ -1158,7 +1158,7 @@ _who_room(ProfWin *window, const char *const command, gchar **args)
 
         // no arg, show all contacts
         if ((presence == NULL) || (g_strcmp0(presence, "any") == 0)) {
-            ui_room_roster(mucwin->roomjid, occupants, NULL);
+            mucwin_roster(mucwin->roomjid, occupants, NULL);
 
         // available
         } else if (strcmp("available", presence) == 0) {
@@ -1172,7 +1172,7 @@ _who_room(ProfWin *window, const char *const command, gchar **args)
                 occupants = g_list_next(occupants);
             }
 
-            ui_room_roster(mucwin->roomjid, filtered, "available");
+            mucwin_roster(mucwin->roomjid, filtered, "available");
 
         // unavailable
         } else if (strcmp("unavailable", presence) == 0) {
@@ -1186,7 +1186,7 @@ _who_room(ProfWin *window, const char *const command, gchar **args)
                 occupants = g_list_next(occupants);
             }
 
-            ui_room_roster(mucwin->roomjid, filtered, "unavailable");
+            mucwin_roster(mucwin->roomjid, filtered, "unavailable");
 
         // show specific status
         } else {
@@ -1201,7 +1201,7 @@ _who_room(ProfWin *window, const char *const command, gchar **args)
                 occupants = g_list_next(occupants);
             }
 
-            ui_room_roster(mucwin->roomjid, filtered, presence);
+            mucwin_roster(mucwin->roomjid, filtered, presence);
         }
 
         g_list_free(occupants);

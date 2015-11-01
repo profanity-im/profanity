@@ -181,7 +181,7 @@ mucwin_room_disco_info(const char *const roomjid, GSList *identities, GSList *fe
 }
 
 void
-ui_room_roster(const char *const roomjid, GList *roster, const char *const presence)
+mucwin_roster(const char *const roomjid, GList *roster, const char *const presence)
 {
     ProfWin *window = (ProfWin*)wins_get_muc(roomjid);
     if (window == NULL) {
