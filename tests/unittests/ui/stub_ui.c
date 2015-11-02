@@ -272,7 +272,7 @@ void ui_handle_room_configuration_form_error(const char * const roomjid, const c
 void ui_handle_room_config_submit_result(const char * const roomjid) {}
 void ui_handle_room_config_submit_result_error(const char * const roomjid, const char * const message) {}
 void mucwin_affiliation_list_error(ProfMucWin *mucwin, const char * const affiliation, const char * const error) {}
-void mucwin_handle_affiliation_list(const char * const roomjid, const char * const affiliation, GSList *jids) {}
+void mucwin_handle_affiliation_list(ProfMucWin *mucwin, const char * const affiliation, GSList *jids) {}
 void mucwin_affiliation_set_error(const char * const roomjid, const char * const jid,
     const char * const affiliation, const char * const error) {}
 void mucwin_role_set_error(const char * const roomjid, const char * const nick, const char * const role,

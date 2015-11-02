@@ -537,23 +537,23 @@ mucwin_affiliation_list_error(ProfMucWin *mucwin, const char *const affiliation,
 }
 
 void
-mucwin_handle_affiliation_list(const char *const roomjid, const char *const affiliation, GSList *jids)
+mucwin_handle_affiliation_list(ProfMucWin *mucwin, const char *const affiliation, GSList *jids)
 {
-    ProfWin *window = (ProfWin*)wins_get_muc(roomjid);
-    if (window) {
-        if (jids) {
-            win_vprint(window, '!', 0, NULL, 0, 0, "", "Affiliation: %s", affiliation);
-            GSList *curr_jid = jids;
-            while (curr_jid) {
-                char *jid = curr_jid->data;
-                win_vprint(window, '!', 0, NULL, 0, 0, "", "  %s", jid);
-                curr_jid = g_slist_next(curr_jid);
-            }
-            win_print(window, '!', 0, NULL, 0, 0, "", "");
-        } else {
-            win_vprint(window, '!', 0, NULL, 0, 0, "", "No users found with affiliation: %s", affiliation);
-            win_print(window, '!', 0, NULL, 0, 0, "", "");
+    assert(mucwin != NULL);
+
+    ProfWin *window = (ProfWin*)mucwin;
+    if (jids) {
+        win_vprint(window, '!', 0, NULL, 0, 0, "", "Affiliation: %s", affiliation);
+        GSList *curr_jid = jids;
+        while (curr_jid) {
+            char *jid = curr_jid->data;
+            win_vprint(window, '!', 0, NULL, 0, 0, "", "  %s", jid);
+            curr_jid = g_slist_next(curr_jid);
         }
+        win_print(window, '!', 0, NULL, 0, 0, "", "");
+    } else {
+        win_vprint(window, '!', 0, NULL, 0, 0, "", "No users found with affiliation: %s", affiliation);
+        win_print(window, '!', 0, NULL, 0, 0, "", "");
     }
 }
 
