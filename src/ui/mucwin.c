@@ -355,18 +355,13 @@ mucwin_history(ProfMucWin *mucwin, const char *const nick, GDateTime *timestamp,
 }
 
 void
-mucwin_message(const char *const roomjid, const char *const nick,
-    const char *const message)
+mucwin_message(ProfMucWin *mucwin, const char *const nick, const char *const message)
 {
-    ProfMucWin *mucwin = wins_get_muc(roomjid);
-    if (mucwin == NULL) {
-        log_error("Room message received from %s, but no window open for %s", nick, roomjid);
-        return;
-    }
+    assert(mucwin != NULL);
 
-    ProfWin *window = (ProfWin*) mucwin;
+    ProfWin *window = (ProfWin*)mucwin;
     int num = wins_get_num(window);
-    char *my_nick = muc_nick(roomjid);
+    char *my_nick = muc_nick(mucwin->roomjid);
 
     if (g_strcmp0(nick, my_nick) != 0) {
         if (g_strrstr(message, my_nick)) {
@@ -427,7 +422,7 @@ mucwin_message(const char *const roomjid, const char *const nick,
     if (notify) {
         gboolean is_current = wins_is_current(window);
         if ( !is_current || (is_current && prefs_get_boolean(PREF_NOTIFY_ROOM_CURRENT)) ) {
-            Jid *jidp = jid_create(roomjid);
+            Jid *jidp = jid_create(mucwin->roomjid);
             if (prefs_get_boolean(PREF_NOTIFY_ROOM_TEXT)) {
                 notify_room_message(nick, jidp->localpart, ui_index, message);
             } else {

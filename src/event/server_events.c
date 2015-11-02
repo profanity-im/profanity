@@ -165,7 +165,10 @@ void
 sv_ev_room_message(const char *const room_jid, const char *const nick,
     const char *const message)
 {
-    mucwin_message(room_jid, nick, message);
+    ProfMucWin *mucwin = wins_get_muc(room_jid);
+    if (mucwin) {
+        mucwin_message(mucwin, nick, message);
+    }
 
     if (prefs_get_boolean(PREF_GRLOG)) {
         Jid *jid = jid_create(jabber_get_fulljid());
