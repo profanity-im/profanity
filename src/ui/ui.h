@@ -193,7 +193,7 @@ void mucwin_occupant_online(ProfMucWin *mucwin, const char *const nick, const ch
     const char *const affiliation, const char *const show, const char *const status);
 void mucwin_occupant_nick_change(const char *const roomjid, const char *const old_nick, const char *const nick);
 void mucwin_nick_change(const char *const roomjid, const char *const nick);
-void mucwin_occupant_presence(const char *const roomjid, const char *const nick, const char *const show,
+void mucwin_occupant_presence(ProfMucWin *mucwin, const char *const nick, const char *const show,
     const char *const status);
 void mucwin_update_occupants(const char *const roomjid);
 void mucwin_show_occupants(const char *const roomjid);

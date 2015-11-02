@@ -304,15 +304,13 @@ mucwin_occupant_online(ProfMucWin *mucwin, const char *const nick, const char *c
 }
 
 void
-mucwin_occupant_presence(const char *const roomjid, const char *const nick,
+mucwin_occupant_presence(ProfMucWin *mucwin, const char *const nick,
     const char *const show, const char *const status)
 {
-    ProfWin *window = (ProfWin*)wins_get_muc(roomjid);
-    if (window == NULL) {
-        log_error("Received presence for room participant %s, but no window open for %s.", nick, roomjid);
-    } else {
-        win_show_status_string(window, nick, show, status, NULL, "++", "online");
-    }
+    assert(mucwin != NULL);
+
+    ProfWin *window = (ProfWin*)mucwin;
+    win_show_status_string(window, nick, show, status, NULL, "++", "online");
 }
 
 void
