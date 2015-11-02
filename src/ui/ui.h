@@ -132,7 +132,6 @@ void ui_prune_wins(void);
 gboolean ui_swap_wins(int source_win, int target_win);
 void ui_clear_win(ProfWin *window);
 void ui_auto_away(char *message, gint time, resource_presence_t res_presence);
-void ui_titlebar_presence(contact_presence_t presence);
 void ui_handle_login_account_success(ProfAccount *account, int secured);
 void ui_update_presence(const resource_presence_t resource_presence, const char *const message, const char *const show);
 void ui_statusbar_new(const int win);
@@ -299,6 +298,9 @@ void cons_inpblock_setting(void);
 void cons_show_contact_online(PContact contact, Resource *resource, GDateTime *last_activity);
 void cons_show_contact_offline(PContact contact, char *resource, char *status);
 void cons_theme_colours(void);
+
+// title bar
+void title_bar_set_presence(contact_presence_t presence);
 
 // status bar
 void status_bar_inactive(const int win);

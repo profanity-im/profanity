@@ -395,12 +395,6 @@ ui_group_removed(const char *const contact, const char *const group)
 }
 
 void
-ui_titlebar_presence(contact_presence_t presence)
-{
-    title_bar_set_presence(presence);
-}
-
-void
 ui_handle_login_account_success(ProfAccount *account, int secured)
 {
     resource_presence_t resource_presence = accounts_get_login_presence(account->name);
