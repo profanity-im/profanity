@@ -271,7 +271,6 @@ void ui_prune_wins(void) {}
 void ui_handle_login_account_success(ProfAccount *account, int secured) {}
 void ui_update_presence(const resource_presence_t resource_presence,
     const char * const message, const char * const show) {}
-void ui_statusbar_new(const int win) {}
 
 char* inp_readline(void)
 {

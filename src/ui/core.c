@@ -1081,12 +1081,6 @@ ui_goodbye_title(void)
     if(result == -1) log_error("Error printing title on shutdown");
 }
 
-void
-ui_statusbar_new(const int win)
-{
-    status_bar_new(win);
-}
-
 static void
 _ui_draw_term_title(void)
 {

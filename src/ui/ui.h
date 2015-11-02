@@ -127,7 +127,6 @@ void ui_prune_wins(void);
 void ui_auto_away(char *message, gint time, resource_presence_t res_presence);
 void ui_handle_login_account_success(ProfAccount *account, int secured);
 void ui_update_presence(const resource_presence_t resource_presence, const char *const message, const char *const show);
-void ui_statusbar_new(const int win);
 void ui_write(char *line, int offset);
 void ui_invalid_command_usage(const char *const cmd, void (*setting_func)(void));
 gboolean ui_win_has_unsaved_form(int num);
