@@ -761,12 +761,14 @@ mucwin_update_occupants(ProfMucWin *mucwin)
 }
 
 void
-mucwin_show_occupants(const char *const roomjid)
+mucwin_show_occupants(ProfMucWin *mucwin)
 {
-    ProfWin *window = (ProfWin*)wins_get_muc(roomjid);
-    if (window && !win_has_active_subwin(window)) {
+    assert(mucwin != NULL);
+
+    ProfWin *window = (ProfWin*)mucwin;
+    if (!win_has_active_subwin(window)) {
         wins_show_subwin(window);
-        occupantswin_occupants(roomjid);
+        occupantswin_occupants(mucwin->roomjid);
     }
 }
 
