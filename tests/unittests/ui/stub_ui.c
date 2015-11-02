@@ -64,12 +64,8 @@ void ui_update(void) {}
 void ui_close(void) {}
 void ui_redraw(void) {}
 void ui_resize(void) {}
-GSList* ui_get_chat_recipients(void)
-{
-    return NULL;
-}
 
-void ui_switch_win(ProfWin *win) {}
+void ui_focus_win(ProfWin *win) {}
 
 #ifdef HAVE_LIBOTR
 void chatwin_otr_secured(ProfChatWin *chatwin, gboolean trusted) {}
@@ -98,10 +94,6 @@ ProfChatWin* chatwin_new(const char * const barejid)
 }
 
 void ui_print_system_msg_from_recipient(const char * const barejid, const char *message) {}
-gint ui_unread(void)
-{
-    return 0;
-}
 
 void ui_close_connected_win(int index) {}
 int ui_close_all_wins(void)
@@ -140,20 +132,12 @@ void ui_current_print_formatted_line(const char show_char, int attrs, const char
 void ui_current_error_line(const char * const msg) {}
 void ui_win_error_line(ProfWin *window, const char * const msg) {}
 
-
-win_type_t ui_win_type(int index)
-{
-    return WIN_CONSOLE;
-}
-
 void ui_close_win(int index) {}
 
 int ui_win_unread(int index)
 {
     return 0;
 }
-
-void ui_clear_win(ProfWin *window) {}
 
 char * ui_ask_password(void)
 {
@@ -247,12 +231,6 @@ void chatwin_contact_offline(ProfChatWin *chatwin, char *resource, char *status)
 
 void ui_contact_offline(char *barejid, char *resource, char *status) {}
 
-void ui_handle_recipient_not_found(const char * const recipient, const char * const err_msg)
-{
-    check_expected(recipient);
-    check_expected(err_msg);
-}
-
 void ui_handle_recipient_error(const char * const recipient, const char * const err_msg)
 {
     check_expected(recipient);
@@ -266,7 +244,6 @@ void ui_handle_error(const char * const err_msg)
 
 void ui_clear_win_title(void) {}
 void ui_goodbye_title(void) {}
-void ui_handle_room_join_error(const char * const roomjid, const char * const err) {}
 void ui_handle_room_configuration(const char * const roomjid, DataForm *form) {}
 void ui_handle_room_configuration_form_error(const char * const roomjid, const char * const message) {}
 void ui_handle_room_config_submit_result(const char * const roomjid) {}
@@ -289,20 +266,11 @@ void ui_redraw_all_room_rosters(void) {}
 void ui_show_all_room_rosters(void) {}
 void ui_hide_all_room_rosters(void) {}
 
-gboolean ui_tidy_wins(void) {
-    return TRUE;
-}
 void ui_prune_wins(void) {}
-gboolean ui_swap_wins(int source_win, int target_win)
-{
-    return FALSE;
-}
 
-void ui_titlebar_presence(contact_presence_t presence) {}
 void ui_handle_login_account_success(ProfAccount *account, int secured) {}
 void ui_update_presence(const resource_presence_t resource_presence,
     const char * const message, const char * const show) {}
-void ui_statusbar_new(const int win) {}
 
 char* inp_readline(void)
 {
@@ -469,6 +437,9 @@ void cons_show_contact_online(PContact contact, Resource *resource, GDateTime *l
 void cons_show_contact_offline(PContact contact, char *resource, char *status) {}
 void cons_theme_colours(void) {}
 
+// title bar
+void title_bar_set_presence(contact_presence_t presence) {}
+
 // status bar
 void status_bar_inactive(const int win) {}
 void status_bar_active(const int win) {}
@@ -531,6 +502,7 @@ void win_show_contact(ProfWin *window, PContact contact) {}
 void win_show_info(ProfWin *window, PContact contact) {}
 void win_println(ProfWin *window, int pad, const char * const message) {}
 void win_vprintln_ch(ProfWin *window, char ch, const char *const message, ...) {}
+void win_clear(ProfWin *window) {}
 
 // desktop notifier actions
 void notifier_uninit(void) {}
