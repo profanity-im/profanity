@@ -506,25 +506,23 @@ mucwin_kick_error(ProfMucWin *mucwin, const char *const nick, const char *const 
 }
 
 void
-mucwin_broadcast(const char *const roomjid, const char *const message)
+mucwin_broadcast(ProfMucWin *mucwin, const char *const message)
 {
-    ProfWin *window = (ProfWin*)wins_get_muc(roomjid);
-    if (window == NULL) {
-        log_error("Received room broadcast, but no window open for %s.", roomjid);
+    assert(mucwin != NULL);
+
+    ProfWin *window = (ProfWin*)mucwin;
+    int num = wins_get_num(window);
+
+    win_vprint(window, '!', 0, NULL, NO_EOL, THEME_ROOMINFO, "", "Room message: ");
+    win_vprint(window, '!', 0, NULL, NO_DATE, 0, "", "%s", message);
+
+    // currently in groupchat window
+    if (wins_is_current(window)) {
+        status_bar_active(num);
+
+    // not currently on groupchat window
     } else {
-        int num = wins_get_num(window);
-
-        win_vprint(window, '!', 0, NULL, NO_EOL, THEME_ROOMINFO, "", "Room message: ");
-        win_vprint(window, '!', 0, NULL, NO_DATE, 0, "", "%s", message);
-
-        // currently in groupchat window
-        if (wins_is_current(window)) {
-            status_bar_active(num);
-
-        // not currently on groupchat window
-        } else {
-            status_bar_new(num);
-        }
+        status_bar_new(num);
     }
 }
 
