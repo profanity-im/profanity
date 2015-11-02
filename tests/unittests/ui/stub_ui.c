@@ -207,7 +207,7 @@ void mucwin_roster(ProfMucWin *mucwin, GList *occupants, const char * const pres
 void mucwin_history(ProfMucWin *mucwin, const char * const nick, GDateTime *timestamp, const char * const message) {}
 void mucwin_message(ProfMucWin *mucwin, const char * const nick, const char * const message) {}
 void mucwin_subject(const char * const roomjid, const char * const nick, const char * const subject) {}
-void mucwin_requires_config(const char * const roomjid) {}
+void mucwin_requires_config(ProfMucWin *mucwin) {}
 void ui_room_destroy(const char * const roomjid) {}
 void mucwin_info(ProfMucWin *mucwin) {}
 void mucwin_show_role_list(ProfMucWin *mucwin, muc_role_t role) {}
