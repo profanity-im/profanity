@@ -751,12 +751,6 @@ ui_prune_wins(void)
     }
 }
 
-gboolean
-ui_swap_wins(int source_win, int target_win)
-{
-    return wins_swap(source_win, target_win);
-}
-
 win_type_t
 ui_win_type(int index)
 {

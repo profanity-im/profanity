@@ -127,7 +127,6 @@ void ui_handle_software_version_error(const char *const roomjid, const char *con
 void ui_show_software_version(const char *const jid, const char *const  presence, const char *const name,
     const char *const version, const char *const os);
 void ui_prune_wins(void);
-gboolean ui_swap_wins(int source_win, int target_win);
 void ui_clear_win(ProfWin *window);
 void ui_auto_away(char *message, gint time, resource_presence_t res_presence);
 void ui_handle_login_account_success(ProfAccount *account, int secured);

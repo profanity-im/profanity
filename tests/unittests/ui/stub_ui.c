@@ -280,10 +280,6 @@ void ui_show_all_room_rosters(void) {}
 void ui_hide_all_room_rosters(void) {}
 
 void ui_prune_wins(void) {}
-gboolean ui_swap_wins(int source_win, int target_win)
-{
-    return FALSE;
-}
 
 void ui_handle_login_account_success(ProfAccount *account, int secured) {}
 void ui_update_presence(const resource_presence_t resource_presence,

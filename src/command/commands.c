@@ -875,7 +875,7 @@ cmd_wins(ProfWin *window, const char *const command, gchar **args)
             } else if (source_win == 10 || target_win == 10) {
                 cons_show("Window 10 does not exist");
             } else if (source_win != target_win) {
-                gboolean swapped = ui_swap_wins(source_win, target_win);
+                gboolean swapped = wins_swap(source_win, target_win);
                 if (swapped) {
                     cons_show("Swapped windows %d <-> %d", source_win, target_win);
                 } else {
