@@ -199,8 +199,8 @@ void mucwin_show_occupants(const char *const roomjid);
 void mucwin_hide_occupants(const char *const roomjid);
 void mucwin_affiliation_list_error(ProfMucWin *mucwin, const char *const affiliation, const char *const error);
 void mucwin_handle_affiliation_list(ProfMucWin *mucwin, const char *const affiliation, GSList *jids);
-void mucwin_affiliation_set_error(const char *const roomjid, const char *const jid,
-    const char *const affiliation, const char *const error);
+void mucwin_affiliation_set_error(ProfMucWin *mucwin, const char *const jid, const char *const affiliation,
+    const char *const error);
 void mucwin_role_set_error(const char *const roomjid, const char *const nick, const char *const role,
     const char *const error);
 void mucwin_role_list_error(ProfMucWin *mucwin, const char *const role, const char *const error);
