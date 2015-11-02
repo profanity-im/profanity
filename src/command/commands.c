@@ -2485,11 +2485,11 @@ cmd_form_field(ProfWin *window, char *tag, gchar **args)
             if (g_strcmp0(value, "on") == 0) {
                 form_set_value(form, tag, "1");
                 ui_current_print_line("Field updated...");
-                mucconfwin_show_form_field(window, form, tag);
+                mucconfwin_show_form_field(confwin, form, tag);
             } else if (g_strcmp0(value, "off") == 0) {
                 form_set_value(form, tag, "0");
                 ui_current_print_line("Field updated...");
-                mucconfwin_show_form_field(window, form, tag);
+                mucconfwin_show_form_field(confwin, form, tag);
             } else {
                 ui_current_print_line("Invalid command, usage:");
                 mucconfwin_field_help(confwin, tag);
@@ -2508,7 +2508,7 @@ cmd_form_field(ProfWin *window, char *tag, gchar **args)
             } else {
                 form_set_value(form, tag, value);
                 ui_current_print_line("Field updated...");
-                mucconfwin_show_form_field(window, form, tag);
+                mucconfwin_show_form_field(confwin, form, tag);
             }
             break;
         case FIELD_LIST_SINGLE:
@@ -2520,7 +2520,7 @@ cmd_form_field(ProfWin *window, char *tag, gchar **args)
             } else {
                 form_set_value(form, tag, value);
                 ui_current_print_line("Field updated...");
-                mucconfwin_show_form_field(window, form, tag);
+                mucconfwin_show_form_field(confwin, form, tag);
             }
             break;
 
@@ -2544,7 +2544,7 @@ cmd_form_field(ProfWin *window, char *tag, gchar **args)
             if (g_strcmp0(cmd, "add") == 0) {
                 form_add_value(form, tag, value);
                 ui_current_print_line("Field updated...");
-                mucconfwin_show_form_field(window, form, tag);
+                mucconfwin_show_form_field(confwin, form, tag);
                 break;
             }
             if (g_strcmp0(args[0], "remove") == 0) {
@@ -2572,7 +2572,7 @@ cmd_form_field(ProfWin *window, char *tag, gchar **args)
                 removed = form_remove_text_multi_value(form, tag, index);
                 if (removed) {
                     ui_current_print_line("Field updated...");
-                    mucconfwin_show_form_field(window, form, tag);
+                    mucconfwin_show_form_field(confwin, form, tag);
                 } else {
                     ui_current_print_line("Could not remove %s from %s", value, tag);
                 }
@@ -2601,7 +2601,7 @@ cmd_form_field(ProfWin *window, char *tag, gchar **args)
                     added = form_add_unique_value(form, tag, value);
                     if (added) {
                         ui_current_print_line("Field updated...");
-                        mucconfwin_show_form_field(window, form, tag);
+                        mucconfwin_show_form_field(confwin, form, tag);
                     } else {
                         ui_current_print_line("Value %s already selected for %s", value, tag);
                     }
@@ -2618,7 +2618,7 @@ cmd_form_field(ProfWin *window, char *tag, gchar **args)
                     removed = form_remove_value(form, tag, value);
                     if (removed) {
                         ui_current_print_line("Field updated...");
-                        mucconfwin_show_form_field(window, form, tag);
+                        mucconfwin_show_form_field(confwin, form, tag);
                     } else {
                         ui_current_print_line("Value %s is not currently set for %s", value, tag);
                     }
@@ -2650,7 +2650,7 @@ cmd_form_field(ProfWin *window, char *tag, gchar **args)
                 added = form_add_unique_value(form, tag, value);
                 if (added) {
                     ui_current_print_line("Field updated...");
-                    mucconfwin_show_form_field(window, form, tag);
+                    mucconfwin_show_form_field(confwin, form, tag);
                 } else {
                     ui_current_print_line("JID %s already exists in %s", value, tag);
                 }
@@ -2660,7 +2660,7 @@ cmd_form_field(ProfWin *window, char *tag, gchar **args)
                 removed = form_remove_value(form, tag, value);
                 if (removed) {
                     ui_current_print_line("Field updated...");
-                    mucconfwin_show_form_field(window, form, tag);
+                    mucconfwin_show_form_field(confwin, form, tag);
                 } else {
                     ui_current_print_line("Field %s does not contain %s", tag, value);
                 }

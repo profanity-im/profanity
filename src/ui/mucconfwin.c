@@ -75,21 +75,24 @@ mucconfwin_show_form(ProfMucConfWin *confwin)
 }
 
 void
-mucconfwin_show_form_field(ProfWin *window, DataForm *form, char *tag)
+mucconfwin_show_form_field(ProfMucConfWin *confwin, DataForm *form, char *tag)
 {
+    assert(confwin != NULL);
+
     FormField *field = form_get_field_by_tag(form, tag);
+    ProfWin *window = (ProfWin*)confwin;
     _mucconfwin_form_field(window, tag, field);
     win_println(window, 0, "");
 }
 
 void
-mucconfwin_handle_configuration(const char *const roomjid, DataForm *form)
+mucconfwin_handle_configuration(ProfMucConfWin *confwin, DataForm *form)
 {
-    ProfWin *window = wins_new_muc_config(roomjid, form);
-    ProfMucConfWin *confwin = (ProfMucConfWin*)window;
-    assert(confwin->memcheck == PROFCONFWIN_MEMCHECK);
+    assert(confwin != NULL);
 
+    ProfWin *window = (ProfWin*)confwin;
     ui_focus_win(window);
+
     mucconfwin_show_form(confwin);
 
     win_print(window, '-', 0, NULL, 0, 0, "", "");

@@ -1260,7 +1260,8 @@ _room_config_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza,
     }
 
     DataForm *form = form_create(x);
-    mucconfwin_handle_configuration(from, form);
+    ProfMucConfWin *confwin = (ProfMucConfWin*)wins_new_muc_config(from, form);
+    mucconfwin_handle_configuration(confwin, form);
 
     return 0;
 }

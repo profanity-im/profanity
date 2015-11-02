@@ -108,12 +108,12 @@ void ui_handle_recipient_error(const char *const recipient, const char *const er
 void ui_handle_error(const char *const err_msg);
 void ui_clear_win_title(void);
 void ui_goodbye_title(void);
-void mucconfwin_handle_configuration(const char *const roomjid, DataForm *form);
+void mucconfwin_handle_configuration(ProfMucConfWin *confwin, DataForm *form);
 void ui_handle_room_configuration_form_error(const char *const roomjid, const char *const message);
 void ui_handle_room_config_submit_result(const char *const roomjid);
 void ui_handle_room_config_submit_result_error(const char *const roomjid, const char *const message);
 void mucconfwin_show_form(ProfMucConfWin *confwin);
-void mucconfwin_show_form_field(ProfWin *window, DataForm *form, char *tag);
+void mucconfwin_show_form_field(ProfMucConfWin *confwin, DataForm *form, char *tag);
 void mucconfwin_form_help(ProfMucConfWin *confwin);
 void mucconfwin_field_help(ProfMucConfWin *confwin, char *tag);
 void ui_show_lines(ProfWin *window, const gchar** lines);
