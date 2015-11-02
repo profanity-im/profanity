@@ -737,6 +737,8 @@ mucwin_role_set_error(ProfMucWin *mucwin, const char *const nick, const char *co
 void
 mucwin_info(ProfMucWin *mucwin)
 {
+    assert(mucwin != NULL);
+
     char *role = muc_role_str(mucwin->roomjid);
     char *affiliation = muc_affiliation_str(mucwin->roomjid);
 
