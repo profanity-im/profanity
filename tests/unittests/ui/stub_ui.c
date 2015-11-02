@@ -191,53 +191,49 @@ void ui_outgoing_private_msg(ProfPrivateWin *privwin, const char * const message
 void ui_room_join(const char * const roomjid, gboolean focus) {}
 void ui_switch_to_room(const char * const roomjid) {}
 
-void mucwin_role_change(const char * const roomjid, const char * const role, const char * const actor,
+void mucwin_role_change(ProfMucWin *mucwin, const char * const role, const char * const actor,
     const char * const reason) {}
-void mucwin_affiliation_change(const char * const roomjid, const char * const affiliation, const char * const actor,
+void mucwin_affiliation_change(ProfMucWin *mucwin, const char * const affiliation, const char * const actor,
     const char * const reason) {}
-void mucwin_role_and_affiliation_change(const char * const roomjid, const char * const role,
+void mucwin_role_and_affiliation_change(ProfMucWin *mucwin, const char * const role,
     const char * const affiliation, const char * const actor, const char * const reason) {}
-void mucwin_occupant_role_change(const char * const roomjid, const char * const nick, const char * const role,
+void mucwin_occupant_role_change(ProfMucWin *mucwin, const char * const nick, const char * const role,
     const char * const actor, const char * const reason) {}
-void mucwin_occupant_affiliation_change(const char * const roomjid, const char * const nick, const char * const affiliation,
+void mucwin_occupant_affiliation_change(ProfMucWin *mucwin, const char * const nick, const char * const affiliation,
     const char * const actor, const char * const reason) {}
-void mucwin_occupant_role_and_affiliation_change(const char * const roomjid, const char * const nick, const char * const role,
+void mucwin_occupant_role_and_affiliation_change(ProfMucWin *mucwin, const char * const nick, const char * const role,
     const char * const affiliation, const char * const actor, const char * const reason) {}
-void mucwin_roster(const char * const roomjid, GList *occupants, const char * const presence) {}
-void mucwin_history(const char * const roomjid, const char * const nick,
-    GDateTime *timestamp, const char * const message) {}
-void mucwin_message(const char * const roomjid, const char * const nick,
-    const char * const message) {}
-void mucwin_subject(const char * const roomjid, const char * const nick, const char * const subject) {}
-void mucwin_requires_config(const char * const roomjid) {}
+void mucwin_roster(ProfMucWin *mucwin, GList *occupants, const char * const presence) {}
+void mucwin_history(ProfMucWin *mucwin, const char * const nick, GDateTime *timestamp, const char * const message) {}
+void mucwin_message(ProfMucWin *mucwin, const char * const nick, const char * const message) {}
+void mucwin_subject(ProfMucWin *mucwin, const char * const nick, const char * const subject) {}
+void mucwin_requires_config(ProfMucWin *mucwin) {}
 void ui_room_destroy(const char * const roomjid) {}
 void mucwin_info(ProfMucWin *mucwin) {}
 void mucwin_show_role_list(ProfMucWin *mucwin, muc_role_t role) {}
 void mucwin_show_affiliation_list(ProfMucWin *mucwin, muc_affiliation_t affiliation) {}
-void mucwin_room_info_error(const char * const roomjid, const char * const error) {}
-void mucwin_room_disco_info(const char * const roomjid, GSList *identities, GSList *features) {}
+void mucwin_room_info_error(ProfMucWin *mucwin, const char * const error) {}
+void mucwin_room_disco_info(ProfMucWin *mucwin, GSList *identities, GSList *features) {}
 void ui_room_destroyed(const char * const roomjid, const char * const reason, const char * const new_jid,
     const char * const password) {}
 void ui_room_kicked(const char * const roomjid, const char * const actor, const char * const reason) {}
-void mucwin_occupant_kicked(const char * const roomjid, const char * const nick, const char * const actor,
+void mucwin_occupant_kicked(ProfMucWin *mucwin, const char * const nick, const char * const actor,
     const char * const reason) {}
 void ui_room_banned(const char * const roomjid, const char * const actor, const char * const reason) {}
-void mucwin_occupant_banned(const char * const roomjid, const char * const nick, const char * const actor,
+void mucwin_occupant_banned(ProfMucWin *mucwin, const char * const nick, const char * const actor,
     const char * const reason) {}
 void ui_leave_room(const char * const roomjid) {}
-void mucwin_broadcast(const char * const roomjid,
-    const char * const message) {}
-void mucwin_occupant_offline(const char * const roomjid, const char * const nick) {}
-void mucwin_occupant_online(const char * const roomjid, const char * const nick, const char * const roles,
+void mucwin_broadcast(ProfMucWin *mucwin, const char * const message) {}
+void mucwin_occupant_offline(ProfMucWin *mucwin, const char * const nick) {}
+void mucwin_occupant_online(ProfMucWin *mucwin, const char * const nick, const char * const roles,
     const char * const affiliation, const char * const show, const char * const status) {}
-void mucwin_occupant_nick_change(const char * const roomjid,
-    const char * const old_nick, const char * const nick) {}
-void mucwin_nick_change(const char * const roomjid, const char * const nick) {}
-void mucwin_occupant_presence(const char * const roomjid,
-    const char * const nick, const char * const show, const char * const status) {}
-void mucwin_update_occupants(const char * const roomjid) {}
-void mucwin_show_occupants(const char * const roomjid) {}
-void mucwin_hide_occupants(const char * const roomjid) {}
+void mucwin_occupant_nick_change(ProfMucWin *mucwin, const char * const old_nick, const char * const nick) {}
+void mucwin_nick_change(ProfMucWin *mucwin, const char * const nick) {}
+void mucwin_occupant_presence(ProfMucWin *mucwin, const char * const nick, const char * const show,
+    const char * const status) {}
+void mucwin_update_occupants(ProfMucWin *mucwin) {}
+void mucwin_show_occupants(ProfMucWin *mucwin) {}
+void mucwin_hide_occupants(ProfMucWin *mucwin) {}
 void ui_show_roster(void) {}
 void ui_hide_roster(void) {}
 void ui_roster_add(const char * const barejid, const char * const name) {}
@@ -275,16 +271,15 @@ void ui_handle_room_configuration(const char * const roomjid, DataForm *form) {}
 void ui_handle_room_configuration_form_error(const char * const roomjid, const char * const message) {}
 void ui_handle_room_config_submit_result(const char * const roomjid) {}
 void ui_handle_room_config_submit_result_error(const char * const roomjid, const char * const message) {}
-void mucwin_affiliation_list_error(const char * const roomjid, const char * const affiliation,
+void mucwin_affiliation_list_error(ProfMucWin *mucwin, const char * const affiliation, const char * const error) {}
+void mucwin_handle_affiliation_list(ProfMucWin *mucwin, const char * const affiliation, GSList *jids) {}
+void mucwin_affiliation_set_error(ProfMucWin *mucwin, const char * const jid, const char * const affiliation,
     const char * const error) {}
-void mucwin_handle_affiliation_list(const char * const roomjid, const char * const affiliation, GSList *jids) {}
-void mucwin_affiliation_set_error(const char * const roomjid, const char * const jid,
-    const char * const affiliation, const char * const error) {}
-void mucwin_role_set_error(const char * const roomjid, const char * const nick, const char * const role,
+void mucwin_role_set_error(ProfMucWin *mucwin, const char * const nick, const char * const role,
     const char * const error) {}
-void mucwin_role_list_error(const char * const roomjid, const char * const role, const char * const error) {}
-void mucwin_handle_role_list(const char * const roomjid, const char * const role, GSList *nicks) {}
-void mucwin_kick_error(const char * const roomjid, const char * const nick, const char * const error) {}
+void mucwin_role_list_error(ProfMucWin *mucwin, const char * const role, const char * const error) {}
+void mucwin_handle_role_list(ProfMucWin *mucwin, const char * const role, GSList *nicks) {}
+void mucwin_kick_error(ProfMucWin *mucwin, const char * const nick, const char * const error) {}
 void ui_show_form(ProfMucConfWin *confwin) {}
 void ui_show_form_field(ProfWin *window, DataForm *form, char *tag) {}
 void ui_show_form_help(ProfMucConfWin *confwin) {}

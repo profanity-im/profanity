@@ -161,54 +161,50 @@ void chatwin_otr_smp_event(ProfChatWin *chatwin, prof_otr_smp_event_t event, voi
 #endif
 
 // MUC window
-void mucwin_role_change(const char *const roomjid, const char *const role, const char *const actor,
+void mucwin_role_change(ProfMucWin *mucwin, const char *const role, const char *const actor, const char *const reason);
+void mucwin_affiliation_change(ProfMucWin *mucwin, const char *const affiliation, const char *const actor,
     const char *const reason);
-void mucwin_affiliation_change(const char *const roomjid, const char *const affiliation, const char *const actor,
-    const char *const reason);
-void mucwin_role_and_affiliation_change(const char *const roomjid, const char *const role,
+void mucwin_role_and_affiliation_change(ProfMucWin *mucwin, const char *const role,
     const char *const affiliation, const char *const actor, const char *const reason);
-void mucwin_occupant_role_change(const char *const roomjid, const char *const nick, const char *const role,
+void mucwin_occupant_role_change(ProfMucWin *mucwin, const char *const nick, const char *const role,
     const char *const actor, const char *const reason);
-void mucwin_occupant_affiliation_change(const char *const roomjid, const char *const nick,
+void mucwin_occupant_affiliation_change(ProfMucWin *mucwin, const char *const nick,
     const char *const affiliation, const char *const actor, const char *const reason);
-void mucwin_occupant_role_and_affiliation_change(const char *const roomjid, const char *const nick,
+void mucwin_occupant_role_and_affiliation_change(ProfMucWin *mucwin, const char *const nick,
     const char *const role, const char *const affiliation, const char *const actor, const char *const reason);
-void mucwin_roster(const char *const roomjid, GList *occupants, const char *const presence);
-void mucwin_history(const char *const roomjid, const char *const nick, GDateTime *timestamp,
-    const char *const message);
-void mucwin_message(const char *const roomjid, const char *const nick, const char *const message);
-void mucwin_subject(const char *const roomjid, const char *const nick, const char *const subject);
-void mucwin_requires_config(const char *const roomjid);
+void mucwin_roster(ProfMucWin *mucwin, GList *occupants, const char *const presence);
+void mucwin_history(ProfMucWin *mucwin, const char *const nick, GDateTime *timestamp, const char *const message);
+void mucwin_message(ProfMucWin *mucwin, const char *const nick, const char *const message);
+void mucwin_subject(ProfMucWin *mucwin, const char *const nick, const char *const subject);
+void mucwin_requires_config(ProfMucWin *mucwin);
 void mucwin_info(ProfMucWin *mucwin);
 void mucwin_show_role_list(ProfMucWin *mucwin, muc_role_t role);
 void mucwin_show_affiliation_list(ProfMucWin *mucwin, muc_affiliation_t affiliation);
-void mucwin_room_info_error(const char *const roomjid, const char *const error);
-void mucwin_room_disco_info(const char *const roomjid, GSList *identities, GSList *features);
-void mucwin_occupant_kicked(const char *const roomjid, const char *const nick, const char *const actor,
+void mucwin_room_info_error(ProfMucWin *mucwin, const char *const error);
+void mucwin_room_disco_info(ProfMucWin *mucwin, GSList *identities, GSList *features);
+void mucwin_occupant_kicked(ProfMucWin *mucwin, const char *const nick, const char *const actor,
     const char *const reason);
-void mucwin_occupant_banned(const char *const roomjid, const char *const nick, const char *const actor,
+void mucwin_occupant_banned(ProfMucWin *mucwin, const char *const nick, const char *const actor,
     const char *const reason);
-void mucwin_broadcast(const char *const roomjid, const char *const message);
-void mucwin_occupant_offline(const char *const roomjid, const char *const nick);
-void mucwin_occupant_online(const char *const roomjid, const char *const nick, const char *const roles,
+void mucwin_broadcast(ProfMucWin *mucwin, const char *const message);
+void mucwin_occupant_offline(ProfMucWin *mucwin, const char *const nick);
+void mucwin_occupant_online(ProfMucWin *mucwin, const char *const nick, const char *const roles,
     const char *const affiliation, const char *const show, const char *const status);
-void mucwin_occupant_nick_change(const char *const roomjid, const char *const old_nick, const char *const nick);
-void mucwin_nick_change(const char *const roomjid, const char *const nick);
-void mucwin_occupant_presence(const char *const roomjid, const char *const nick, const char *const show,
+void mucwin_occupant_nick_change(ProfMucWin *mucwin, const char *const old_nick, const char *const nick);
+void mucwin_nick_change(ProfMucWin *mucwin, const char *const nick);
+void mucwin_occupant_presence(ProfMucWin *mucwin, const char *const nick, const char *const show,
     const char *const status);
-void mucwin_update_occupants(const char *const roomjid);
-void mucwin_show_occupants(const char *const roomjid);
-void mucwin_hide_occupants(const char *const roomjid);
-void mucwin_affiliation_list_error(const char *const roomjid, const char *const affiliation,
+void mucwin_update_occupants(ProfMucWin *mucwin);
+void mucwin_show_occupants(ProfMucWin *mucwin);
+void mucwin_hide_occupants(ProfMucWin *mucwin);
+void mucwin_affiliation_list_error(ProfMucWin *mucwin, const char *const affiliation, const char *const error);
+void mucwin_handle_affiliation_list(ProfMucWin *mucwin, const char *const affiliation, GSList *jids);
+void mucwin_affiliation_set_error(ProfMucWin *mucwin, const char *const jid, const char *const affiliation,
     const char *const error);
-void mucwin_handle_affiliation_list(const char *const roomjid, const char *const affiliation, GSList *jids);
-void mucwin_affiliation_set_error(const char *const roomjid, const char *const jid,
-    const char *const affiliation, const char *const error);
-void mucwin_role_set_error(const char *const roomjid, const char *const nick, const char *const role,
-    const char *const error);
-void mucwin_role_list_error(const char *const roomjid, const char *const role, const char *const error);
-void mucwin_handle_role_list(const char *const roomjid, const char *const role, GSList *nicks);
-void mucwin_kick_error(const char *const roomjid, const char *const nick, const char *const error);
+void mucwin_role_set_error(ProfMucWin *mucwin, const char *const nick, const char *const role, const char *const error);
+void mucwin_role_list_error(ProfMucWin *mucwin, const char *const role, const char *const error);
+void mucwin_handle_role_list(ProfMucWin *mucwin, const char *const role, GSList *nicks);
+void mucwin_kick_error(ProfMucWin *mucwin, const char *const nick, const char *const error);
 
 // xml console
 void xmlwin_show(ProfXMLWin *xmlwin, const char *const msg);

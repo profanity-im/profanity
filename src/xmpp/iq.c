@@ -54,6 +54,7 @@
 #include "muc.h"
 #include "profanity.h"
 #include "ui/ui.h"
+#include "window_list.h"
 #include "config/preferences.h"
 #include "event/server_events.h"
 #include "xmpp/capabilities.h"
@@ -1283,7 +1284,10 @@ _room_affiliation_set_result_handler(xmpp_conn_t *const conn, xmpp_stanza_t *con
     if (g_strcmp0(type, STANZA_TYPE_ERROR) == 0) {
         char *error_message = stanza_get_error_message(stanza);
         log_debug("Error setting affiliation %s list for room %s, user %s: %s", affiliation_set->privilege, from, affiliation_set->item, error_message);
-        mucwin_affiliation_set_error(from, affiliation_set->item, affiliation_set->privilege, error_message);
+        ProfMucWin *mucwin = wins_get_muc(from);
+        if (mucwin) {
+            mucwin_affiliation_set_error(mucwin, affiliation_set->item, affiliation_set->privilege, error_message);
+        }
         free(error_message);
     }
 
@@ -1313,7 +1317,10 @@ _room_role_set_result_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const stan
     if (g_strcmp0(type, STANZA_TYPE_ERROR) == 0) {
         char *error_message = stanza_get_error_message(stanza);
         log_debug("Error setting role %s list for room %s, user %s: %s", role_set->privilege, from, role_set->item, error_message);
-        mucwin_role_set_error(from, role_set->item, role_set->privilege, error_message);
+        ProfMucWin *mucwin = wins_get_muc(from);
+        if (mucwin) {
+            mucwin_role_set_error(mucwin, role_set->item, role_set->privilege, error_message);
+        }
         free(error_message);
     }
 
@@ -1342,7 +1349,10 @@ _room_affiliation_list_result_handler(xmpp_conn_t *const conn, xmpp_stanza_t *co
     if (g_strcmp0(type, STANZA_TYPE_ERROR) == 0) {
         char *error_message = stanza_get_error_message(stanza);
         log_debug("Error retrieving %s list for room %s: %s", affiliation, from, error_message);
-        mucwin_affiliation_list_error(from, affiliation, error_message);
+        ProfMucWin *mucwin = wins_get_muc(from);
+        if (mucwin) {
+            mucwin_affiliation_list_error(mucwin, affiliation, error_message);
+        }
         free(error_message);
         free(affiliation);
         return 0;
@@ -1365,7 +1375,10 @@ _room_affiliation_list_result_handler(xmpp_conn_t *const conn, xmpp_stanza_t *co
     }
 
     muc_jid_autocomplete_add_all(from, jids);
-    mucwin_handle_affiliation_list(from, affiliation, jids);
+    ProfMucWin *mucwin = wins_get_muc(from);
+    if (mucwin) {
+        mucwin_handle_affiliation_list(mucwin, affiliation, jids);
+    }
     free(affiliation);
     g_slist_free(jids);
 
@@ -1390,7 +1403,10 @@ _room_role_list_result_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const sta
     if (g_strcmp0(type, STANZA_TYPE_ERROR) == 0) {
         char *error_message = stanza_get_error_message(stanza);
         log_debug("Error retrieving %s list for room %s: %s", role, from, error_message);
-        mucwin_role_list_error(from, role, error_message);
+        ProfMucWin *mucwin = wins_get_muc(from);
+        if (mucwin) {
+            mucwin_role_list_error(mucwin, role, error_message);
+        }
         free(error_message);
         free(role);
         return 0;
@@ -1412,7 +1428,10 @@ _room_role_list_result_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const sta
         }
     }
 
-    mucwin_handle_role_list(from, role, nicks);
+    ProfMucWin *mucwin = wins_get_muc(from);
+    if (mucwin) {
+        mucwin_handle_role_list(mucwin, role, nicks);
+    }
     free(role);
     g_slist_free(nicks);
 
@@ -1461,12 +1480,11 @@ _room_kick_result_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza, 
     }
 
     // handle error responses
-    if (g_strcmp0(type, STANZA_TYPE_ERROR) == 0) {
+    ProfMucWin *mucwin = wins_get_muc(from);
+    if (mucwin && (g_strcmp0(type, STANZA_TYPE_ERROR) == 0)) {
         char *error_message = stanza_get_error_message(stanza);
-        mucwin_kick_error(from, nick, error_message);
+        mucwin_kick_error(mucwin, nick, error_message);
         free(error_message);
-        free(nick);
-        return 0;
     }
 
     free(nick);
@@ -1505,9 +1523,10 @@ _room_info_response_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza
 
     // handle error responses
     if (g_strcmp0(type, STANZA_TYPE_ERROR) == 0) {
-        if (cb_data->display) {
+        ProfMucWin *mucwin = wins_get_muc(cb_data->room);
+        if (mucwin && cb_data->display) {
             char *error_message = stanza_get_error_message(stanza);
-            mucwin_room_info_error(cb_data->room, error_message);
+            mucwin_room_info_error(mucwin, error_message);
             free(error_message);
         }
         free(cb_data->room);
@@ -1560,8 +1579,9 @@ _room_info_response_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza
         }
 
         muc_set_features(cb_data->room, features);
-        if (cb_data->display) {
-            mucwin_room_disco_info(cb_data->room, identities, features);
+        ProfMucWin *mucwin = wins_get_muc(cb_data->room);
+        if (mucwin && cb_data->display) {
+            mucwin_room_disco_info(mucwin, identities, features);
         }
 
         g_slist_free_full(features, free);
