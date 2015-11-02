@@ -106,7 +106,6 @@ void ui_contact_not_in_group(const char *const contact, const char *const group)
 void ui_group_added(const char *const contact, const char *const group);
 void ui_group_removed(const char *const contact, const char *const group);
 void ui_contact_offline(char *barejid, char *resource, char *status);
-void ui_handle_recipient_not_found(const char *const recipient, const char *const err_msg);
 void ui_handle_recipient_error(const char *const recipient, const char *const err_msg);
 void ui_handle_error(const char *const err_msg);
 void ui_clear_win_title(void);

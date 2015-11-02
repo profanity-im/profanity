@@ -427,18 +427,6 @@ ui_update_presence(const resource_presence_t resource_presence,
 }
 
 void
-ui_handle_recipient_not_found(const char *const recipient, const char *const err_msg)
-{
-    // intended recipient was invalid chat room
-    ProfMucWin *mucwin = wins_get_muc(recipient);
-    if (mucwin) {
-        cons_show_error("Room %s not found: %s", recipient, err_msg);
-        win_vprint((ProfWin*) mucwin, '!', 0, NULL, 0, THEME_ERROR, "", "Room %s not found: %s", recipient, err_msg);
-        return;
-    }
-}
-
-void
 ui_handle_recipient_error(const char *const recipient, const char *const err_msg)
 {
     // always show in console

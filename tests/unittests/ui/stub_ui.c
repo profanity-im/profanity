@@ -243,12 +243,6 @@ void chatwin_contact_offline(ProfChatWin *chatwin, char *resource, char *status)
 
 void ui_contact_offline(char *barejid, char *resource, char *status) {}
 
-void ui_handle_recipient_not_found(const char * const recipient, const char * const err_msg)
-{
-    check_expected(recipient);
-    check_expected(err_msg);
-}
-
 void ui_handle_recipient_error(const char * const recipient, const char * const err_msg)
 {
     check_expected(recipient);
