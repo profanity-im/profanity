@@ -560,6 +560,8 @@ mucwin_handle_affiliation_list(ProfMucWin *mucwin, const char *const affiliation
 void
 mucwin_show_affiliation_list(ProfMucWin *mucwin, muc_affiliation_t affiliation)
 {
+    assert(mucwin != NULL);
+
     ProfWin *window = (ProfWin*) mucwin;
     GSList *occupants = muc_occupants_by_affiliation(mucwin->roomjid, affiliation);
 
