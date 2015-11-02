@@ -132,7 +132,7 @@ prof_handle_idle(void)
 {
     jabber_conn_status_t status = jabber_get_connection_status();
     if (status == JABBER_CONNECTED) {
-        GSList *recipients = ui_get_chat_recipients();
+        GSList *recipients = wins_get_chat_recipients();
         GSList *curr = recipients;
 
         while (curr) {

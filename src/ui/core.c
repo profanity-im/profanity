@@ -76,16 +76,13 @@
 #include "xmpp/xmpp.h"
 
 static char *win_title;
-
 static int inp_size;
-
 static gboolean perform_resize = FALSE;
+static GTimer *ui_idle_time;
 
 #ifdef HAVE_LIBXSS
 static Display *display;
 #endif
-
-static GTimer *ui_idle_time;
 
 static void _ui_draw_term_title(void);
 
@@ -305,13 +302,6 @@ ui_contact_typing(const char *const barejid, const char *const resource)
             notify_typing(display_usr);
         }
     }
-}
-
-GSList*
-ui_get_chat_recipients(void)
-{
-    GSList *recipients = wins_get_chat_recipients();
-    return recipients;
 }
 
 void
