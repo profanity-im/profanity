@@ -712,12 +712,6 @@ ui_close_win(int index)
     status_bar_active(1);
 }
 
-gboolean
-ui_tidy_wins(void)
-{
-    return wins_tidy();
-}
-
 void
 ui_prune_wins(void)
 {

@@ -126,7 +126,6 @@ void ui_hide_all_room_rosters(void);
 void ui_handle_software_version_error(const char *const roomjid, const char *const message);
 void ui_show_software_version(const char *const jid, const char *const  presence, const char *const name,
     const char *const version, const char *const os);
-gboolean ui_tidy_wins(void);
 void ui_prune_wins(void);
 gboolean ui_swap_wins(int source_win, int target_win);
 void ui_clear_win(ProfWin *window);

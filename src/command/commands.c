@@ -857,7 +857,7 @@ cmd_wins(ProfWin *window, const char *const command, gchar **args)
     if (args[0] == NULL) {
         cons_show_wins();
     } else if (strcmp(args[0], "tidy") == 0) {
-        if (ui_tidy_wins()) {
+        if (wins_tidy()) {
             cons_show("Windows tidied.");
         } else {
             cons_show("No tidy needed.");
@@ -889,7 +889,7 @@ cmd_wins(ProfWin *window, const char *const command, gchar **args)
         if (g_strcmp0(args[1], "on") == 0) {
             cons_show("Window autotidy enabled");
             prefs_set_boolean(PREF_WINS_AUTO_TIDY, TRUE);
-            ui_tidy_wins();
+            wins_tidy();
         } else if (g_strcmp0(args[1], "off") == 0) {
             cons_show("Window autotidy disabled");
             prefs_set_boolean(PREF_WINS_AUTO_TIDY, FALSE);
@@ -3600,7 +3600,7 @@ cmd_close(ProfWin *window, const char *const command, gchar **args)
 
     // Tidy up the window list.
     if (prefs_get_boolean(PREF_WINS_AUTO_TIDY)) {
-        ui_tidy_wins();
+        wins_tidy();
     }
 
     return TRUE;
