@@ -102,6 +102,8 @@ mucconfwin_handle_configuration(const char *const roomjid, DataForm *form)
 void
 mucconfwin_field_help(ProfMucConfWin *confwin, char *tag)
 {
+    assert(confwin != NULL);
+
     ProfWin *window = (ProfWin*) confwin;
     FormField *field = form_get_field_by_tag(confwin->form, tag);
     if (field) {
