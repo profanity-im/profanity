@@ -233,7 +233,7 @@ void mucwin_occupant_presence(ProfMucWin *mucwin, const char * const nick, const
     const char * const status) {}
 void mucwin_update_occupants(ProfMucWin *mucwin) {}
 void mucwin_show_occupants(ProfMucWin *mucwin) {}
-void mucwin_hide_occupants(const char * const roomjid) {}
+void mucwin_hide_occupants(ProfMucWin *mucwin) {}
 void ui_show_roster(void) {}
 void ui_hide_roster(void) {}
 void ui_roster_add(const char * const barejid, const char * const name) {}
