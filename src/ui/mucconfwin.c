@@ -183,6 +183,8 @@ mucconfwin_field_help(ProfMucConfWin *confwin, char *tag)
 void
 mucconfwin_form_help(ProfMucConfWin *confwin)
 {
+    assert(confwin != NULL);
+
     if (confwin->form->instructions) {
         ProfWin *window = (ProfWin*) confwin;
         win_print(window, '-', 0, NULL, 0, 0, "", "Supplied instructions:");
