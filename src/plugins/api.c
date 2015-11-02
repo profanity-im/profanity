@@ -189,7 +189,7 @@ void
 api_win_focus(const char *tag)
 {
     ProfPluginWin *pluginwin = wins_get_plugin(tag);
-    ui_switch_win((ProfWin*)pluginwin);
+    ui_focus_win((ProfWin*)pluginwin);
 }
 
 void

@@ -63,15 +63,13 @@ void ui_update(void);
 void ui_close(void);
 void ui_redraw(void);
 void ui_resize(void);
-GSList* ui_get_chat_recipients(void);
-void ui_switch_win(ProfWin *window);
+void ui_focus_win(ProfWin *window);
 void ui_sigwinch_handler(int sig);
 void ui_handle_otr_error(const char *const barejid, const char *const message);
 unsigned long ui_get_idle_time(void);
 void ui_reset_idle_time(void);
 ProfPrivateWin* ui_new_private_win(const char *const fulljid);
 void ui_print_system_msg_from_recipient(const char *const barejid, const char *message);
-gint ui_unread(void);
 void ui_close_connected_win(int index);
 int ui_close_all_wins(void);
 int ui_close_read_wins(void);
@@ -79,7 +77,6 @@ void ui_current_print_line(const char *const msg, ...);
 void ui_current_print_formatted_line(const char show_char, int attrs, const char *const msg, ...);
 void ui_current_error_line(const char *const msg);
 void ui_win_error_line(ProfWin *window, const char *const msg);
-win_type_t ui_win_type(int index);
 void ui_close_win(int index);
 int ui_win_unread(int index);
 char* ui_ask_password(void);
@@ -107,12 +104,10 @@ void ui_contact_not_in_group(const char *const contact, const char *const group)
 void ui_group_added(const char *const contact, const char *const group);
 void ui_group_removed(const char *const contact, const char *const group);
 void ui_contact_offline(char *barejid, char *resource, char *status);
-void ui_handle_recipient_not_found(const char *const recipient, const char *const err_msg);
 void ui_handle_recipient_error(const char *const recipient, const char *const err_msg);
 void ui_handle_error(const char *const err_msg);
 void ui_clear_win_title(void);
 void ui_goodbye_title(void);
-void ui_handle_room_join_error(const char *const roomjid, const char *const err);
 void ui_handle_room_configuration(const char *const roomjid, DataForm *form);
 void ui_handle_room_configuration_form_error(const char *const roomjid, const char *const message);
 void ui_handle_room_config_submit_result(const char *const roomjid);
@@ -128,15 +123,10 @@ void ui_hide_all_room_rosters(void);
 void ui_handle_software_version_error(const char *const roomjid, const char *const message);
 void ui_show_software_version(const char *const jid, const char *const  presence, const char *const name,
     const char *const version, const char *const os);
-gboolean ui_tidy_wins(void);
 void ui_prune_wins(void);
-gboolean ui_swap_wins(int source_win, int target_win);
-void ui_clear_win(ProfWin *window);
 void ui_auto_away(char *message, gint time, resource_presence_t res_presence);
-void ui_titlebar_presence(contact_presence_t presence);
 void ui_handle_login_account_success(ProfAccount *account, int secured);
 void ui_update_presence(const resource_presence_t resource_presence, const char *const message, const char *const show);
-void ui_statusbar_new(const int win);
 void ui_write(char *line, int offset);
 void ui_invalid_command_usage(const char *const cmd, void (*setting_func)(void));
 gboolean ui_win_has_unsaved_form(int num);
@@ -301,6 +291,9 @@ void cons_show_contact_online(PContact contact, Resource *resource, GDateTime *l
 void cons_show_contact_offline(PContact contact, char *resource, char *status);
 void cons_theme_colours(void);
 
+// title bar
+void title_bar_set_presence(contact_presence_t presence);
+
 // status bar
 void status_bar_inactive(const int win);
 void status_bar_active(const int win);
@@ -338,6 +331,7 @@ void win_show_contact(ProfWin *window, PContact contact);
 void win_show_info(ProfWin *window, PContact contact);
 void win_println(ProfWin *window, int pad, const char *const message);
 void win_vprintln_ch(ProfWin *window, char ch, const char *const message, ...);
+void win_clear(ProfWin *window);
 
 // desktop notifications
 void notifier_initialise(void);

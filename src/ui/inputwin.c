@@ -456,7 +456,7 @@ _go_to_win(int i)
 {
     ProfWin *window = wins_get_by_num(i);
     if (window) {
-        ui_switch_win(window);
+        ui_focus_win(window);
     }
 }
 
@@ -535,7 +535,7 @@ _inp_rl_altleft_handler(int count, int key)
 {
     ProfWin *window = wins_get_previous();
     if (window) {
-        ui_switch_win(window);
+        ui_focus_win(window);
     }
     return 0;
 }
@@ -545,7 +545,7 @@ _inp_rl_altright_handler(int count, int key)
 {
     ProfWin *window = wins_get_next();
     if (window) {
-        ui_switch_win(window);
+        ui_focus_win(window);
     }
     return 0;
 }

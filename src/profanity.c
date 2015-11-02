@@ -136,7 +136,7 @@ prof_handle_idle(void)
 {
     jabber_conn_status_t status = jabber_get_connection_status();
     if (status == JABBER_CONNECTED) {
-        GSList *recipients = ui_get_chat_recipients();
+        GSList *recipients = wins_get_chat_recipients();
         GSList *curr = recipients;
 
         while (curr) {
@@ -231,7 +231,7 @@ _check_autoaway(void)
                     }
                     prefs_free_string(message);
 
-                    ui_titlebar_presence(CONTACT_AWAY);
+                    title_bar_set_presence(CONTACT_AWAY);
                 }
             } else if (g_strcmp0(mode, "idle") == 0) {
                 activity_state = ACTIVITY_ST_IDLE;
@@ -271,7 +271,7 @@ _check_autoaway(void)
             }
             prefs_free_string(message);
 
-            ui_titlebar_presence(CONTACT_XA);
+            title_bar_set_presence(CONTACT_XA);
         } else if (check && (idle_ms < away_time_ms)) {
             activity_state = ACTIVITY_ST_ACTIVE;
 
@@ -280,7 +280,7 @@ _check_autoaway(void)
             // send saved presence without last activity
             cl_ev_presence_send(saved_presence, saved_status, 0);
             contact_presence_t contact_pres = contact_presence_from_resource_presence(saved_presence);
-            ui_titlebar_presence(contact_pres);
+            title_bar_set_presence(contact_pres);
         }
         break;
     case ACTIVITY_ST_XA:
@@ -292,7 +292,7 @@ _check_autoaway(void)
             // send saved presence without last activity
             cl_ev_presence_send(saved_presence, saved_status, 0);
             contact_presence_t contact_pres = contact_presence_from_resource_presence(saved_presence);
-            ui_titlebar_presence(contact_pres);
+            title_bar_set_presence(contact_pres);
         }
         break;
     }

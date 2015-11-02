@@ -77,15 +77,13 @@
 #include "plugins/plugins.h"
 
 static char *win_title;
-
 static int inp_size;
-
 static gboolean perform_resize = FALSE;
+static GTimer *ui_idle_time;
+
 #ifdef PROF_HAVE_LIBXSS
 static Display *display;
 #endif
-
-static GTimer *ui_idle_time;
 
 static void _ui_draw_term_title(void);
 
@@ -307,13 +305,6 @@ ui_contact_typing(const char *const barejid, const char *const resource)
     }
 }
 
-GSList*
-ui_get_chat_recipients(void)
-{
-    GSList *recipients = wins_get_chat_recipients();
-    return recipients;
-}
-
 void
 ui_incoming_private_msg(const char *const fulljid, const char *const message, GDateTime *timestamp)
 {
@@ -405,12 +396,6 @@ ui_group_removed(const char *const contact, const char *const group)
 }
 
 void
-ui_titlebar_presence(contact_presence_t presence)
-{
-    title_bar_set_presence(presence);
-}
-
-void
 ui_handle_login_account_success(ProfAccount *account, int secured)
 {
     resource_presence_t resource_presence = accounts_get_login_presence(account->name);
@@ -439,18 +424,6 @@ ui_update_presence(const resource_presence_t resource_presence,
         cons_show("Status set to %s (priority %d), \"%s\".", show, priority, message);
     } else {
         cons_show("Status set to %s (priority %d).", show, priority);
-    }
-}
-
-void
-ui_handle_recipient_not_found(const char *const recipient, const char *const err_msg)
-{
-    // intended recipient was invalid chat room
-    ProfMucWin *mucwin = wins_get_muc(recipient);
-    if (mucwin) {
-        cons_show_error("Room %s not found: %s", recipient, err_msg);
-        win_vprint((ProfWin*) mucwin, '!', 0, NULL, 0, THEME_ERROR, "", "Room %s not found: %s", recipient, err_msg);
-        return;
     }
 }
 
@@ -692,7 +665,7 @@ ui_win_has_unsaved_form(int num)
 }
 
 void
-ui_switch_win(ProfWin *window)
+ui_focus_win(ProfWin *window)
 {
     assert(window != NULL);
 
@@ -740,12 +713,6 @@ ui_close_win(int index)
     status_bar_active(1);
 }
 
-gboolean
-ui_tidy_wins(void)
-{
-    return wins_tidy();
-}
-
 void
 ui_prune_wins(void)
 {
@@ -783,19 +750,6 @@ ui_prune_wins(void)
     } else {
         cons_show("No prune needed.");
     }
-}
-
-gboolean
-ui_swap_wins(int source_win, int target_win)
-{
-    return wins_swap(source_win, target_win);
-}
-
-win_type_t
-ui_win_type(int index)
-{
-    ProfWin *window = wins_get_by_num(index);
-    return window->type;
 }
 
 void
@@ -897,7 +851,7 @@ ui_room_join(const char *const roomjid, gboolean focus)
 
 
     if (focus) {
-        ui_switch_win(window);
+        ui_focus_win(window);
     } else {
         int num = wins_get_num(window);
         status_bar_active(num);
@@ -911,13 +865,7 @@ void
 ui_switch_to_room(const char *const roomjid)
 {
     ProfWin *window = (ProfWin*)wins_get_muc(roomjid);
-    ui_switch_win(window);
-}
-
-void
-ui_handle_room_join_error(const char *const roomjid, const char *const err)
-{
-    cons_show_error("Error joining room %s, reason: %s", roomjid, err);
+    ui_focus_win(window);
 }
 
 void
@@ -1025,12 +973,6 @@ ui_room_banned(const char *const roomjid, const char *const actor, const char *c
     }
 }
 
-gint
-ui_unread(void)
-{
-    return wins_get_total_unread();
-}
-
 int
 ui_win_unread(int index)
 {
@@ -1134,22 +1076,10 @@ ui_clear_win_title(void)
 }
 
 void
-ui_clear_win(ProfWin *window)
-{
-    win_clear(window);
-}
-
-void
 ui_goodbye_title(void)
 {
     int result = system("/bin/echo -ne \"\033]0;Thanks for using Profanity\007\"");
     if(result == -1) log_error("Error printing title on shutdown");
-}
-
-void
-ui_statusbar_new(const int win)
-{
-    status_bar_new(win);
 }
 
 static void
@@ -1160,7 +1090,7 @@ _ui_draw_term_title(void)
 
     if (status == JABBER_CONNECTED) {
         const char * const jid = jabber_get_fulljid();
-        gint unread = ui_unread();
+        gint unread = wins_get_total_unread();
 
         if (unread != 0) {
             snprintf(new_win_title, sizeof(new_win_title),
@@ -1367,7 +1297,7 @@ ui_handle_room_configuration(const char *const roomjid, DataForm *form)
     ProfMucConfWin *confwin = (ProfMucConfWin*)window;
     assert(confwin->memcheck == PROFCONFWIN_MEMCHECK);
 
-    ui_switch_win(window);
+    ui_focus_win(window);
     ui_show_form(confwin);
 
     win_print(window, '-', 0, NULL, 0, 0, "", "");
@@ -1419,11 +1349,11 @@ ui_handle_room_config_submit_result(const char *const roomjid)
         }
 
         if (muc_window) {
-            ui_switch_win((ProfWin*)muc_window);
+            ui_focus_win((ProfWin*)muc_window);
             win_print(muc_window, '!', 0, NULL, 0, THEME_ROOMINFO, "", "Room configuration successful");
         } else {
             ProfWin *console = wins_get_console();
-            ui_switch_win(console);
+            ui_focus_win(console);
             cons_show("Room configuration successful: %s", roomjid);
         }
     } else {
