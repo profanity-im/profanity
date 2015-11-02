@@ -629,32 +629,32 @@ mucwin_role_list_error(ProfMucWin *mucwin, const char *const role, const char *c
 }
 
 void
-mucwin_handle_role_list(const char *const roomjid, const char *const role, GSList *nicks)
+mucwin_handle_role_list(ProfMucWin *mucwin, const char *const role, GSList *nicks)
 {
-    ProfWin *window = (ProfWin*)wins_get_muc(roomjid);
-    if (window) {
-        if (nicks) {
-            win_vprint(window, '!', 0, NULL, 0, 0, "", "Role: %s", role);
-            GSList *curr_nick = nicks;
-            while (curr_nick) {
-                char *nick = curr_nick->data;
-                Occupant *occupant = muc_roster_item(roomjid, nick);
-                if (occupant) {
-                    if (occupant->jid) {
-                        win_vprint(window, '!', 0, NULL, 0, 0, "", "  %s (%s)", nick, occupant->jid);
-                    } else {
-                        win_vprint(window, '!', 0, NULL, 0, 0, "", "  %s", nick);
-                    }
+    assert(mucwin != NULL);
+
+    ProfWin *window = (ProfWin*)mucwin;
+    if (nicks) {
+        win_vprint(window, '!', 0, NULL, 0, 0, "", "Role: %s", role);
+        GSList *curr_nick = nicks;
+        while (curr_nick) {
+            char *nick = curr_nick->data;
+            Occupant *occupant = muc_roster_item(mucwin->roomjid, nick);
+            if (occupant) {
+                if (occupant->jid) {
+                    win_vprint(window, '!', 0, NULL, 0, 0, "", "  %s (%s)", nick, occupant->jid);
                 } else {
                     win_vprint(window, '!', 0, NULL, 0, 0, "", "  %s", nick);
                 }
-                curr_nick = g_slist_next(curr_nick);
+            } else {
+                win_vprint(window, '!', 0, NULL, 0, 0, "", "  %s", nick);
             }
-            win_print(window, '!', 0, NULL, 0, 0, "", "");
-        } else {
-            win_vprint(window, '!', 0, NULL, 0, 0, "", "No occupants found with role: %s", role);
-            win_print(window, '!', 0, NULL, 0, 0, "", "");
+            curr_nick = g_slist_next(curr_nick);
         }
+        win_print(window, '!', 0, NULL, 0, 0, "", "");
+    } else {
+        win_vprint(window, '!', 0, NULL, 0, 0, "", "No occupants found with role: %s", role);
+        win_print(window, '!', 0, NULL, 0, 0, "", "");
     }
 }
 

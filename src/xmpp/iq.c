@@ -1422,7 +1422,10 @@ _room_role_list_result_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const sta
         }
     }
 
-    mucwin_handle_role_list(from, role, nicks);
+    ProfMucWin *mucwin = wins_get_muc(from);
+    if (mucwin) {
+        mucwin_handle_role_list(mucwin, role, nicks);
+    }
     free(role);
     g_slist_free(nicks);
 
