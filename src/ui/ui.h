@@ -63,7 +63,7 @@ void ui_update(void);
 void ui_close(void);
 void ui_redraw(void);
 void ui_resize(void);
-void ui_switch_win(ProfWin *window);
+void ui_focus_win(ProfWin *window);
 void ui_sigwinch_handler(int sig);
 void ui_handle_otr_error(const char *const barejid, const char *const message);
 unsigned long ui_get_idle_time(void);

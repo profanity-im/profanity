@@ -65,7 +65,7 @@ void ui_close(void) {}
 void ui_redraw(void) {}
 void ui_resize(void) {}
 
-void ui_switch_win(ProfWin *win) {}
+void ui_focus_win(ProfWin *win) {}
 
 #ifdef HAVE_LIBOTR
 void chatwin_otr_secured(ProfChatWin *chatwin, gboolean trusted) {}

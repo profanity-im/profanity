@@ -664,7 +664,7 @@ ui_win_has_unsaved_form(int num)
 }
 
 void
-ui_switch_win(ProfWin *window)
+ui_focus_win(ProfWin *window)
 {
     assert(window != NULL);
 
@@ -869,7 +869,7 @@ ui_room_join(const char *const roomjid, gboolean focus)
 
 
     if (focus) {
-        ui_switch_win(window);
+        ui_focus_win(window);
     } else {
         int num = wins_get_num(window);
         status_bar_active(num);
@@ -883,7 +883,7 @@ void
 ui_switch_to_room(const char *const roomjid)
 {
     ProfWin *window = (ProfWin*)wins_get_muc(roomjid);
-    ui_switch_win(window);
+    ui_focus_win(window);
 }
 
 void
@@ -1339,7 +1339,7 @@ ui_handle_room_configuration(const char *const roomjid, DataForm *form)
     ProfMucConfWin *confwin = (ProfMucConfWin*)window;
     assert(confwin->memcheck == PROFCONFWIN_MEMCHECK);
 
-    ui_switch_win(window);
+    ui_focus_win(window);
     ui_show_form(confwin);
 
     win_print(window, '-', 0, NULL, 0, 0, "", "");
@@ -1391,11 +1391,11 @@ ui_handle_room_config_submit_result(const char *const roomjid)
         }
 
         if (muc_window) {
-            ui_switch_win((ProfWin*)muc_window);
+            ui_focus_win((ProfWin*)muc_window);
             win_print(muc_window, '!', 0, NULL, 0, THEME_ROOMINFO, "", "Room configuration successful");
         } else {
             ProfWin *console = wins_get_console();
-            ui_switch_win(console);
+            ui_focus_win(console);
             cons_show("Room configuration successful: %s", roomjid);
         }
     } else {

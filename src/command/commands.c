@@ -912,7 +912,7 @@ cmd_win(ProfWin *window, const char *const command, gchar **args)
     if (!focuswin) {
         cons_show("Window %d does not exist.", num);
     } else {
-        ui_switch_win(focuswin);
+        ui_focus_win(focuswin);
     }
 
     return TRUE;
@@ -1499,7 +1499,7 @@ cmd_msg(ProfWin *window, const char *const command, gchar **args)
             if (!privwin) {
                 privwin = ui_new_private_win(full_jid->str);
             }
-            ui_switch_win((ProfWin*)privwin);
+            ui_focus_win((ProfWin*)privwin);
 
             if (msg) {
                 cl_ev_send_priv_msg(privwin, msg);
@@ -1524,7 +1524,7 @@ cmd_msg(ProfWin *window, const char *const command, gchar **args)
         if (!chatwin) {
             chatwin = chatwin_new(barejid);
         }
-        ui_switch_win((ProfWin*)chatwin);
+        ui_focus_win((ProfWin*)chatwin);
 
         if (msg) {
             cl_ev_send_msg(chatwin, msg);
@@ -2745,7 +2745,7 @@ cmd_form(ProfWin *window, const char *const command, gchar **args)
         if (!new_current) {
             new_current = wins_get_console();
         }
-        ui_switch_win(new_current);
+        ui_focus_win(new_current);
         wins_close_by_num(num);
     }
 
@@ -3094,7 +3094,7 @@ cmd_room(ProfWin *window, const char *const command, gchar **args)
         ProfMucConfWin *confwin = wins_get_muc_conf(mucwin->roomjid);
 
         if (confwin) {
-            ui_switch_win((ProfWin*)confwin);
+            ui_focus_win((ProfWin*)confwin);
         } else {
             iq_request_room_config_form(mucwin->roomjid);
         }
@@ -4399,10 +4399,10 @@ cmd_xmlconsole(ProfWin *window, const char *const command, gchar **args)
 {
     ProfXMLWin *xmlwin = wins_get_xmlconsole();
     if (xmlwin) {
-        ui_switch_win((ProfWin*)xmlwin);
+        ui_focus_win((ProfWin*)xmlwin);
     } else {
         ProfWin *window = wins_new_xmlconsole();
-        ui_switch_win(window);
+        ui_focus_win(window);
     }
 
     return TRUE;
@@ -4712,7 +4712,7 @@ cmd_pgp(ProfWin *window, const char *const command, gchar **args)
             if (!chatwin) {
                 chatwin = chatwin_new(barejid);
             }
-            ui_switch_win((ProfWin*)chatwin);
+            ui_focus_win((ProfWin*)chatwin);
         } else {
             chatwin = (ProfChatWin*)window;
             assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
@@ -4913,7 +4913,7 @@ cmd_otr(ProfWin *window, const char *const command, gchar **args)
             if (!chatwin) {
                 chatwin = chatwin_new(barejid);
             }
-            ui_switch_win((ProfWin*)chatwin);
+            ui_focus_win((ProfWin*)chatwin);
 
             if (chatwin->pgp_send) {
                 ui_current_print_formatted_line('!', 0, "You must disable PGP encryption before starting an OTR session.");
