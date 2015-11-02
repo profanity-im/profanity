@@ -751,13 +751,6 @@ ui_prune_wins(void)
     }
 }
 
-win_type_t
-ui_win_type(int index)
-{
-    ProfWin *window = wins_get_by_num(index);
-    return window->type;
-}
-
 void
 ui_current_print_line(const char *const msg, ...)
 {

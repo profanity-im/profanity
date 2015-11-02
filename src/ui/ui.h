@@ -78,7 +78,6 @@ void ui_current_print_line(const char *const msg, ...);
 void ui_current_print_formatted_line(const char show_char, int attrs, const char *const msg, ...);
 void ui_current_error_line(const char *const msg);
 void ui_win_error_line(ProfWin *window, const char *const msg);
-win_type_t ui_win_type(int index);
 void ui_close_win(int index);
 int ui_win_unread(int index);
 char* ui_ask_password(void);
