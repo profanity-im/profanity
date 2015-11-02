@@ -661,7 +661,9 @@ mucwin_handle_role_list(ProfMucWin *mucwin, const char *const role, GSList *nick
 void
 mucwin_show_role_list(ProfMucWin *mucwin, muc_role_t role)
 {
-    ProfWin *window = (ProfWin*) mucwin;
+    assert(mucwin != NULL);
+
+    ProfWin *window = (ProfWin*)mucwin;
     GSList *occupants = muc_occupants_by_role(mucwin->roomjid, role);
 
     if (!occupants) {
