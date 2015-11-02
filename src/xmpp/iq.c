@@ -1397,7 +1397,10 @@ _room_role_list_result_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const sta
     if (g_strcmp0(type, STANZA_TYPE_ERROR) == 0) {
         char *error_message = stanza_get_error_message(stanza);
         log_debug("Error retrieving %s list for room %s: %s", role, from, error_message);
-        mucwin_role_list_error(from, role, error_message);
+        ProfMucWin *mucwin = wins_get_muc(from);
+        if (mucwin) {
+            mucwin_role_list_error(mucwin, role, error_message);
+        }
         free(error_message);
         free(role);
         return 0;

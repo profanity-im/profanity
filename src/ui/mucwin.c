@@ -620,12 +620,12 @@ mucwin_show_affiliation_list(ProfMucWin *mucwin, muc_affiliation_t affiliation)
 }
 
 void
-mucwin_role_list_error(const char *const roomjid, const char *const role, const char *const error)
+mucwin_role_list_error(ProfMucWin *mucwin, const char *const role, const char *const error)
 {
-    ProfWin *window = (ProfWin*)wins_get_muc(roomjid);
-    if (window) {
-        win_vprint(window, '!', 0, NULL, 0, THEME_ERROR, "", "Error retrieving %s list: %s", role, error);
-    }
+    assert(mucwin != NULL);
+
+    ProfWin *window = (ProfWin*)mucwin;
+    win_vprint(window, '!', 0, NULL, 0, THEME_ERROR, "", "Error retrieving %s list: %s", role, error);
 }
 
 void

@@ -277,7 +277,7 @@ void mucwin_affiliation_set_error(const char * const roomjid, const char * const
     const char * const affiliation, const char * const error) {}
 void mucwin_role_set_error(const char * const roomjid, const char * const nick, const char * const role,
     const char * const error) {}
-void mucwin_role_list_error(const char * const roomjid, const char * const role, const char * const error) {}
+void mucwin_role_list_error(ProfMucWin *mucwin, const char * const role, const char * const error) {}
 void mucwin_handle_role_list(const char * const roomjid, const char * const role, GSList *nicks) {}
 void mucwin_kick_error(ProfMucWin *mucwin, const char * const nick, const char * const error) {}
 void ui_show_form(ProfMucConfWin *confwin) {}
