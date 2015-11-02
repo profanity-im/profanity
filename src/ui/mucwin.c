@@ -332,29 +332,26 @@ mucwin_nick_change(ProfMucWin *mucwin, const char *const nick)
 }
 
 void
-mucwin_history(const char *const roomjid, const char *const nick,
-    GDateTime *timestamp, const char *const message)
+mucwin_history(ProfMucWin *mucwin, const char *const nick, GDateTime *timestamp, const char *const message)
 {
-    ProfWin *window = (ProfWin*)wins_get_muc(roomjid);
-    if (window == NULL) {
-        log_error("Room history message received from %s, but no window open for %s", nick, roomjid);
+    assert(mucwin != NULL);
+
+    ProfWin *window = (ProfWin*)mucwin;
+    GString *line = g_string_new("");
+
+    if (strncmp(message, "/me ", 4) == 0) {
+        g_string_append(line, "*");
+        g_string_append(line, nick);
+        g_string_append(line, " ");
+        g_string_append(line, message + 4);
     } else {
-        GString *line = g_string_new("");
-
-        if (strncmp(message, "/me ", 4) == 0) {
-            g_string_append(line, "*");
-            g_string_append(line, nick);
-            g_string_append(line, " ");
-            g_string_append(line, message + 4);
-        } else {
-            g_string_append(line, nick);
-            g_string_append(line, ": ");
-            g_string_append(line, message);
-        }
-
-        win_print(window, '-', 0, timestamp, NO_COLOUR_DATE, 0, "", line->str);
-        g_string_free(line, TRUE);
+        g_string_append(line, nick);
+        g_string_append(line, ": ");
+        g_string_append(line, message);
     }
+
+    win_print(window, '-', 0, timestamp, NO_COLOUR_DATE, 0, "", line->str);
+    g_string_free(line, TRUE);
 }
 
 void

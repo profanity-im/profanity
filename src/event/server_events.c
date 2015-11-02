@@ -155,7 +155,10 @@ void
 sv_ev_room_history(const char *const room_jid, const char *const nick,
     GDateTime *timestamp, const char *const message)
 {
-    mucwin_history(room_jid, nick, timestamp, message);
+    ProfMucWin *mucwin = wins_get_muc(room_jid);
+    if (mucwin) {
+        mucwin_history(mucwin, nick, timestamp, message);
+    }
 }
 
 void
