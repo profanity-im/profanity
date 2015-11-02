@@ -139,8 +139,6 @@ int ui_win_unread(int index)
     return 0;
 }
 
-void ui_clear_win(ProfWin *window) {}
-
 char * ui_ask_password(void)
 {
     return mock_ptr_type(char *);
@@ -505,6 +503,7 @@ void win_show_contact(ProfWin *window, PContact contact) {}
 void win_show_info(ProfWin *window, PContact contact) {}
 void win_println(ProfWin *window, int pad, const char * const message) {}
 void win_vprintln_ch(ProfWin *window, char ch, const char *const message, ...) {}
+void win_clear(ProfWin *window) {}
 
 // desktop notifier actions
 void notifier_uninit(void) {}

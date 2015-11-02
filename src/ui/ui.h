@@ -124,7 +124,6 @@ void ui_handle_software_version_error(const char *const roomjid, const char *con
 void ui_show_software_version(const char *const jid, const char *const  presence, const char *const name,
     const char *const version, const char *const os);
 void ui_prune_wins(void);
-void ui_clear_win(ProfWin *window);
 void ui_auto_away(char *message, gint time, resource_presence_t res_presence);
 void ui_handle_login_account_success(ProfAccount *account, int secured);
 void ui_update_presence(const resource_presence_t resource_presence, const char *const message, const char *const show);
@@ -332,6 +331,7 @@ void win_show_contact(ProfWin *window, PContact contact);
 void win_show_info(ProfWin *window, PContact contact);
 void win_println(ProfWin *window, int pad, const char *const message);
 void win_vprintln_ch(ProfWin *window, char ch, const char *const message, ...);
+void win_clear(ProfWin *window);
 
 // desktop notifications
 void notifier_initialise(void);

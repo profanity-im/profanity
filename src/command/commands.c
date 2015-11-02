@@ -3530,7 +3530,7 @@ cmd_tiny(ProfWin *window, const char *const command, gchar **args)
 gboolean
 cmd_clear(ProfWin *window, const char *const command, gchar **args)
 {
-    ui_clear_win(window);
+    win_clear(window);
     return TRUE;
 }
 
