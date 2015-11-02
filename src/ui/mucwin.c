@@ -314,15 +314,12 @@ mucwin_occupant_presence(ProfMucWin *mucwin, const char *const nick,
 }
 
 void
-mucwin_occupant_nick_change(const char *const roomjid,
-    const char *const old_nick, const char *const nick)
+mucwin_occupant_nick_change(ProfMucWin *mucwin, const char *const old_nick, const char *const nick)
 {
-    ProfWin *window = (ProfWin*)wins_get_muc(roomjid);
-    if (window == NULL) {
-        log_error("Received nick change for room participant %s, but no window open for %s.", old_nick, roomjid);
-    } else {
-        win_vprint(window, '!', 0, NULL, 0, THEME_THEM, "", "** %s is now known as %s", old_nick, nick);
-    }
+    assert(mucwin != NULL);
+
+    ProfWin *window = (ProfWin*)mucwin;
+    win_vprint(window, '!', 0, NULL, 0, THEME_THEM, "", "** %s is now known as %s", old_nick, nick);
 }
 
 void

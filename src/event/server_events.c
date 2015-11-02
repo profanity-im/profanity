@@ -637,7 +637,10 @@ sv_ev_muc_occupant_online(const char *const room, const char *const nick, const 
     // handle nickname change
     char *old_nick = muc_roster_nick_change_complete(room, nick);
     if (old_nick) {
-        mucwin_occupant_nick_change(room, old_nick, nick);
+        ProfMucWin *mucwin = wins_get_muc(room);
+        if (mucwin) {
+            mucwin_occupant_nick_change(mucwin, old_nick, nick);
+        }
         free(old_nick);
         occupantswin_occupants(room);
         return;
