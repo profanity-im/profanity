@@ -1462,12 +1462,11 @@ _room_kick_result_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza, 
     }
 
     // handle error responses
-    if (g_strcmp0(type, STANZA_TYPE_ERROR) == 0) {
+    ProfMucWin *mucwin = wins_get_muc(from);
+    if (mucwin && (g_strcmp0(type, STANZA_TYPE_ERROR) == 0)) {
         char *error_message = stanza_get_error_message(stanza);
-        mucwin_kick_error(from, nick, error_message);
+        mucwin_kick_error(mucwin, nick, error_message);
         free(error_message);
-        free(nick);
-        return 0;
     }
 
     free(nick);

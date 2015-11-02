@@ -497,14 +497,12 @@ mucwin_subject(ProfMucWin *mucwin, const char *const nick, const char *const sub
 }
 
 void
-mucwin_kick_error(const char *const roomjid, const char *const nick, const char *const error)
+mucwin_kick_error(ProfMucWin *mucwin, const char *const nick, const char *const error)
 {
-    ProfWin *window = (ProfWin*)wins_get_muc(roomjid);
-    if (window == NULL) {
-        log_error("Kick error received for %s, but no window open for %s.", nick, roomjid);
-    } else {
-        win_vprint(window, '!', 0, NULL, 0, THEME_ERROR, "", "Error kicking %s: %s", nick, error);
-    }
+    assert(mucwin != NULL);
+
+    ProfWin *window = (ProfWin*)mucwin;
+    win_vprint(window, '!', 0, NULL, 0, THEME_ERROR, "", "Error kicking %s: %s", nick, error);
 }
 
 void
