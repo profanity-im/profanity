@@ -231,7 +231,7 @@ void mucwin_occupant_offline(ProfMucWin *mucwin, const char * const nick) {}
 void mucwin_occupant_online(ProfMucWin *mucwin, const char * const nick, const char * const roles,
     const char * const affiliation, const char * const show, const char * const status) {}
 void mucwin_occupant_nick_change(ProfMucWin *mucwin, const char * const old_nick, const char * const nick) {}
-void mucwin_nick_change(const char * const roomjid, const char * const nick) {}
+void mucwin_nick_change(ProfMucWin *mucwin, const char * const nick) {}
 void mucwin_occupant_presence(ProfMucWin *mucwin, const char * const nick, const char * const show,
     const char * const status) {}
 void mucwin_update_occupants(const char * const roomjid) {}
