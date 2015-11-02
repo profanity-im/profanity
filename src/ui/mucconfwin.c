@@ -39,10 +39,10 @@
 #include "ui/win_types.h"
 #include "window_list.h"
 
-static void _ui_handle_form_field(ProfWin *window, char *tag, FormField *field);
+static void _mucconfwin_form_field(ProfWin *window, char *tag, FormField *field);
 
 void
-ui_show_form(ProfMucConfWin *confwin)
+mucconfwin_show_form(ProfMucConfWin *confwin)
 {
     ProfWin *window = (ProfWin*) confwin;
     if (confwin->form->title) {
@@ -53,7 +53,7 @@ ui_show_form(ProfMucConfWin *confwin)
     }
     win_print(window, '-', 0, NULL, 0, 0, "", "");
 
-    ui_show_form_help(confwin);
+    mucconfwin_form_help(confwin);
 
     GSList *fields = confwin->form->fields;
     GSList *curr_field = fields;
@@ -67,7 +67,7 @@ ui_show_form(ProfMucConfWin *confwin)
             }
         } else if (g_strcmp0(field->type, "hidden") != 0 && field->var) {
             char *tag = g_hash_table_lookup(confwin->form->var_to_tag, field->var);
-            _ui_handle_form_field(window, tag, field);
+            _mucconfwin_form_field(window, tag, field);
         }
 
         curr_field = g_slist_next(curr_field);
@@ -75,22 +75,25 @@ ui_show_form(ProfMucConfWin *confwin)
 }
 
 void
-ui_show_form_field(ProfWin *window, DataForm *form, char *tag)
+mucconfwin_show_form_field(ProfMucConfWin *confwin, DataForm *form, char *tag)
 {
+    assert(confwin != NULL);
+
     FormField *field = form_get_field_by_tag(form, tag);
-    _ui_handle_form_field(window, tag, field);
+    ProfWin *window = (ProfWin*)confwin;
+    _mucconfwin_form_field(window, tag, field);
     win_println(window, 0, "");
 }
 
 void
-ui_handle_room_configuration(const char *const roomjid, DataForm *form)
+mucconfwin_handle_configuration(ProfMucConfWin *confwin, DataForm *form)
 {
-    ProfWin *window = wins_new_muc_config(roomjid, form);
-    ProfMucConfWin *confwin = (ProfMucConfWin*)window;
-    assert(confwin->memcheck == PROFCONFWIN_MEMCHECK);
+    assert(confwin != NULL);
 
+    ProfWin *window = (ProfWin*)confwin;
     ui_focus_win(window);
-    ui_show_form(confwin);
+
+    mucconfwin_show_form(confwin);
 
     win_print(window, '-', 0, NULL, 0, 0, "", "");
     win_print(window, '-', 0, NULL, 0, 0, "", "Use '/form submit' to save changes.");
@@ -100,8 +103,10 @@ ui_handle_room_configuration(const char *const roomjid, DataForm *form)
 }
 
 void
-ui_show_form_field_help(ProfMucConfWin *confwin, char *tag)
+mucconfwin_field_help(ProfMucConfWin *confwin, char *tag)
 {
+    assert(confwin != NULL);
+
     ProfWin *window = (ProfWin*) confwin;
     FormField *field = form_get_field_by_tag(confwin->form, tag);
     if (field) {
@@ -181,8 +186,10 @@ ui_show_form_field_help(ProfMucConfWin *confwin, char *tag)
 }
 
 void
-ui_show_form_help(ProfMucConfWin *confwin)
+mucconfwin_form_help(ProfMucConfWin *confwin)
 {
+    assert(confwin != NULL);
+
     if (confwin->form->instructions) {
         ProfWin *window = (ProfWin*) confwin;
         win_print(window, '-', 0, NULL, 0, 0, "", "Supplied instructions:");
@@ -192,7 +199,7 @@ ui_show_form_help(ProfMucConfWin *confwin)
 }
 
 static void
-_ui_handle_form_field(ProfWin *window, char *tag, FormField *field)
+_mucconfwin_form_field(ProfWin *window, char *tag, FormField *field)
 {
     win_vprint(window, '-', 0, NULL, NO_EOL, THEME_AWAY, "", "[%s] ", tag);
     win_vprint(window, '-', 0, NULL, NO_EOL | NO_DATE, 0, "", "%s", field->label);
