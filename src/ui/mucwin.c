@@ -463,38 +463,36 @@ mucwin_requires_config(ProfMucWin *mucwin)
 }
 
 void
-mucwin_subject(const char *const roomjid, const char *const nick, const char *const subject)
+mucwin_subject(ProfMucWin *mucwin, const char *const nick, const char *const subject)
 {
-    ProfWin *window = (ProfWin*)wins_get_muc(roomjid);
-    if (window == NULL) {
-        log_error("Received room subject, but no window open for %s.", roomjid);
+    assert(mucwin != NULL);
+
+    ProfWin *window = (ProfWin*)mucwin;
+    int num = wins_get_num(window);
+
+    if (subject) {
+        if (nick) {
+            win_vprint(window, '!', 0, NULL, NO_EOL, THEME_ROOMINFO, "", "*%s has set the room subject: ", nick);
+            win_vprint(window, '!', 0, NULL, NO_DATE, 0, "", "%s", subject);
+        } else {
+            win_vprint(window, '!', 0, NULL, NO_EOL, THEME_ROOMINFO, "", "Room subject: ");
+            win_vprint(window, '!', 0, NULL, NO_DATE, 0, "", "%s", subject);
+        }
     } else {
-        int num = wins_get_num(window);
-
-        if (subject) {
-            if (nick) {
-                win_vprint(window, '!', 0, NULL, NO_EOL, THEME_ROOMINFO, "", "*%s has set the room subject: ", nick);
-                win_vprint(window, '!', 0, NULL, NO_DATE, 0, "", "%s", subject);
-            } else {
-                win_vprint(window, '!', 0, NULL, NO_EOL, THEME_ROOMINFO, "", "Room subject: ");
-                win_vprint(window, '!', 0, NULL, NO_DATE, 0, "", "%s", subject);
-            }
+        if (nick) {
+            win_vprint(window, '!', 0, NULL, 0, THEME_ROOMINFO, "", "*%s has cleared the room subject.", nick);
         } else {
-            if (nick) {
-                win_vprint(window, '!', 0, NULL, 0, THEME_ROOMINFO, "", "*%s has cleared the room subject.", nick);
-            } else {
-                win_vprint(window, '!', 0, NULL, 0, THEME_ROOMINFO, "", "Room subject cleared");
-            }
+            win_vprint(window, '!', 0, NULL, 0, THEME_ROOMINFO, "", "Room subject cleared");
         }
+    }
 
-        // currently in groupchat window
-        if (wins_is_current(window)) {
-            status_bar_active(num);
+    // currently in groupchat window
+    if (wins_is_current(window)) {
+        status_bar_active(num);
 
-        // not currently on groupchat window
-        } else {
-            status_bar_active(num);
-        }
+    // not currently on groupchat window
+    } else {
+        status_bar_active(num);
     }
 }
 

@@ -146,8 +146,9 @@ void
 sv_ev_room_subject(const char *const room, const char *const nick, const char *const subject)
 {
     muc_set_subject(room, subject);
-    if (muc_roster_complete(room)) {
-        mucwin_subject(room, nick, subject);
+    ProfMucWin *mucwin = wins_get_muc(room);
+    if (mucwin && muc_roster_complete(room)) {
+        mucwin_subject(mucwin, nick, subject);
     }
 }
 
@@ -581,8 +582,8 @@ sv_ev_muc_self_online(const char *const room, const char *const nick, gboolean c
         }
 
         char *subject = muc_subject(room);
-        if (subject) {
-            mucwin_subject(room, NULL, subject);
+        if (mucwin && subject) {
+            mucwin_subject(mucwin, NULL, subject);
         }
 
         GList *pending_broadcasts = muc_pending_broadcasts(room);
