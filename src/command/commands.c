@@ -3171,14 +3171,14 @@ cmd_occupants(ProfWin *window, const char *const command, gchar **args)
     if (g_strcmp0(args[0], "show") == 0) {
         if (g_strcmp0(args[1], "jid") == 0) {
             mucwin->showjid = TRUE;
-            mucwin_update_occupants(mucwin->roomjid);
+            mucwin_update_occupants(mucwin);
         } else {
             mucwin_show_occupants(mucwin->roomjid);
         }
     } else if (g_strcmp0(args[0], "hide") == 0) {
         if (g_strcmp0(args[1], "jid") == 0) {
             mucwin->showjid = FALSE;
-            mucwin_update_occupants(mucwin->roomjid);
+            mucwin_update_occupants(mucwin);
         } else {
             mucwin_hide_occupants(mucwin->roomjid);
         }
