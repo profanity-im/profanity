@@ -1317,7 +1317,10 @@ _room_role_set_result_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const stan
     if (g_strcmp0(type, STANZA_TYPE_ERROR) == 0) {
         char *error_message = stanza_get_error_message(stanza);
         log_debug("Error setting role %s list for room %s, user %s: %s", role_set->privilege, from, role_set->item, error_message);
-        mucwin_role_set_error(from, role_set->item, role_set->privilege, error_message);
+        ProfMucWin *mucwin = wins_get_muc(from);
+        if (mucwin) {
+            mucwin_role_set_error(mucwin, role_set->item, role_set->privilege, error_message);
+        }
         free(error_message);
     }
 

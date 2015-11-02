@@ -725,13 +725,13 @@ mucwin_affiliation_set_error(ProfMucWin *mucwin, const char *const jid, const ch
 }
 
 void
-mucwin_role_set_error(const char *const roomjid, const char *const nick, const char *const role,
+mucwin_role_set_error(ProfMucWin *mucwin, const char *const nick, const char *const role,
     const char *const error)
 {
-    ProfWin *window = (ProfWin*)wins_get_muc(roomjid);
-    if (window) {
-        win_vprint(window, '!', 0, NULL, 0, THEME_ERROR, "", "Error setting %s role for %s: %s", role, nick, error);
-    }
+    assert(mucwin != NULL);
+
+    ProfWin *window = (ProfWin*)mucwin;
+    win_vprint(window, '!', 0, NULL, 0, THEME_ERROR, "", "Error setting %s role for %s: %s", role, nick, error);
 }
 
 void
