@@ -868,12 +868,6 @@ ui_switch_to_room(const char *const roomjid)
 }
 
 void
-ui_handle_room_join_error(const char *const roomjid, const char *const err)
-{
-    cons_show_error("Error joining room %s, reason: %s", roomjid, err);
-}
-
-void
 ui_room_destroy(const char *const roomjid)
 {
     ProfWin *window = (ProfWin*)wins_get_muc(roomjid);

@@ -390,7 +390,7 @@ _presence_error_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza,
         if (muc_active(fulljid->barejid)) {
             muc_leave(fulljid->barejid);
         }
-        ui_handle_room_join_error(fulljid->barejid, error_cond);
+        cons_show_error("Error joining room %s, reason: %s", fulljid->barejid, error_cond);
         jid_destroy(fulljid);
         return 1;
     }
