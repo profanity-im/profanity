@@ -1260,7 +1260,7 @@ _room_config_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza,
     }
 
     DataForm *form = form_create(x);
-    ui_handle_room_configuration(from, form);
+    mucconfwin_handle_configuration(from, form);
 
     return 0;
 }

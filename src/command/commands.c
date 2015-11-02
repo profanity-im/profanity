@@ -2485,14 +2485,14 @@ cmd_form_field(ProfWin *window, char *tag, gchar **args)
             if (g_strcmp0(value, "on") == 0) {
                 form_set_value(form, tag, "1");
                 ui_current_print_line("Field updated...");
-                ui_show_form_field(window, form, tag);
+                mucconfwin_show_form_field(window, form, tag);
             } else if (g_strcmp0(value, "off") == 0) {
                 form_set_value(form, tag, "0");
                 ui_current_print_line("Field updated...");
-                ui_show_form_field(window, form, tag);
+                mucconfwin_show_form_field(window, form, tag);
             } else {
                 ui_current_print_line("Invalid command, usage:");
-                ui_show_form_field_help(confwin, tag);
+                mucconfwin_field_help(confwin, tag);
                 ui_current_print_line("");
             }
             break;
@@ -2503,24 +2503,24 @@ cmd_form_field(ProfWin *window, char *tag, gchar **args)
             value = args[0];
             if (value == NULL) {
                 ui_current_print_line("Invalid command, usage:");
-                ui_show_form_field_help(confwin, tag);
+                mucconfwin_field_help(confwin, tag);
                 ui_current_print_line("");
             } else {
                 form_set_value(form, tag, value);
                 ui_current_print_line("Field updated...");
-                ui_show_form_field(window, form, tag);
+                mucconfwin_show_form_field(window, form, tag);
             }
             break;
         case FIELD_LIST_SINGLE:
             value = args[0];
             if ((value == NULL) || !form_field_contains_option(form, tag, value)) {
                 ui_current_print_line("Invalid command, usage:");
-                ui_show_form_field_help(confwin, tag);
+                mucconfwin_field_help(confwin, tag);
                 ui_current_print_line("");
             } else {
                 form_set_value(form, tag, value);
                 ui_current_print_line("Field updated...");
-                ui_show_form_field(window, form, tag);
+                mucconfwin_show_form_field(window, form, tag);
             }
             break;
 
@@ -2531,32 +2531,32 @@ cmd_form_field(ProfWin *window, char *tag, gchar **args)
             }
             if ((g_strcmp0(cmd, "add") != 0) && (g_strcmp0(cmd, "remove"))) {
                 ui_current_print_line("Invalid command, usage:");
-                ui_show_form_field_help(confwin, tag);
+                mucconfwin_field_help(confwin, tag);
                 ui_current_print_line("");
                 break;
             }
             if (value == NULL) {
                 ui_current_print_line("Invalid command, usage:");
-                ui_show_form_field_help(confwin, tag);
+                mucconfwin_field_help(confwin, tag);
                 ui_current_print_line("");
                 break;
             }
             if (g_strcmp0(cmd, "add") == 0) {
                 form_add_value(form, tag, value);
                 ui_current_print_line("Field updated...");
-                ui_show_form_field(window, form, tag);
+                mucconfwin_show_form_field(window, form, tag);
                 break;
             }
             if (g_strcmp0(args[0], "remove") == 0) {
                 if (!g_str_has_prefix(value, "val")) {
                     ui_current_print_line("Invalid command, usage:");
-                    ui_show_form_field_help(confwin, tag);
+                    mucconfwin_field_help(confwin, tag);
                     ui_current_print_line("");
                     break;
                 }
                 if (strlen(value) < 4) {
                     ui_current_print_line("Invalid command, usage:");
-                    ui_show_form_field_help(confwin, tag);
+                    mucconfwin_field_help(confwin, tag);
                     ui_current_print_line("");
                     break;
                 }
@@ -2564,7 +2564,7 @@ cmd_form_field(ProfWin *window, char *tag, gchar **args)
                 int index = strtol(&value[3], NULL, 10);
                 if ((index < 1) || (index > form_get_value_count(form, tag))) {
                     ui_current_print_line("Invalid command, usage:");
-                    ui_show_form_field_help(confwin, tag);
+                    mucconfwin_field_help(confwin, tag);
                     ui_current_print_line("");
                     break;
                 }
@@ -2572,7 +2572,7 @@ cmd_form_field(ProfWin *window, char *tag, gchar **args)
                 removed = form_remove_text_multi_value(form, tag, index);
                 if (removed) {
                     ui_current_print_line("Field updated...");
-                    ui_show_form_field(window, form, tag);
+                    mucconfwin_show_form_field(window, form, tag);
                 } else {
                     ui_current_print_line("Could not remove %s from %s", value, tag);
                 }
@@ -2585,13 +2585,13 @@ cmd_form_field(ProfWin *window, char *tag, gchar **args)
             }
             if ((g_strcmp0(cmd, "add") != 0) && (g_strcmp0(cmd, "remove"))) {
                 ui_current_print_line("Invalid command, usage:");
-                ui_show_form_field_help(confwin, tag);
+                mucconfwin_field_help(confwin, tag);
                 ui_current_print_line("");
                 break;
             }
             if (value == NULL) {
                 ui_current_print_line("Invalid command, usage:");
-                ui_show_form_field_help(confwin, tag);
+                mucconfwin_field_help(confwin, tag);
                 ui_current_print_line("");
                 break;
             }
@@ -2601,13 +2601,13 @@ cmd_form_field(ProfWin *window, char *tag, gchar **args)
                     added = form_add_unique_value(form, tag, value);
                     if (added) {
                         ui_current_print_line("Field updated...");
-                        ui_show_form_field(window, form, tag);
+                        mucconfwin_show_form_field(window, form, tag);
                     } else {
                         ui_current_print_line("Value %s already selected for %s", value, tag);
                     }
                 } else {
                     ui_current_print_line("Invalid command, usage:");
-                    ui_show_form_field_help(confwin, tag);
+                    mucconfwin_field_help(confwin, tag);
                     ui_current_print_line("");
                 }
                 break;
@@ -2618,13 +2618,13 @@ cmd_form_field(ProfWin *window, char *tag, gchar **args)
                     removed = form_remove_value(form, tag, value);
                     if (removed) {
                         ui_current_print_line("Field updated...");
-                        ui_show_form_field(window, form, tag);
+                        mucconfwin_show_form_field(window, form, tag);
                     } else {
                         ui_current_print_line("Value %s is not currently set for %s", value, tag);
                     }
                 } else {
                     ui_current_print_line("Invalid command, usage:");
-                    ui_show_form_field_help(confwin, tag);
+                    mucconfwin_field_help(confwin, tag);
                     ui_current_print_line("");
                 }
             }
@@ -2636,13 +2636,13 @@ cmd_form_field(ProfWin *window, char *tag, gchar **args)
             }
             if ((g_strcmp0(cmd, "add") != 0) && (g_strcmp0(cmd, "remove"))) {
                 ui_current_print_line("Invalid command, usage:");
-                ui_show_form_field_help(confwin, tag);
+                mucconfwin_field_help(confwin, tag);
                 ui_current_print_line("");
                 break;
             }
             if (value == NULL) {
                 ui_current_print_line("Invalid command, usage:");
-                ui_show_form_field_help(confwin, tag);
+                mucconfwin_field_help(confwin, tag);
                 ui_current_print_line("");
                 break;
             }
@@ -2650,7 +2650,7 @@ cmd_form_field(ProfWin *window, char *tag, gchar **args)
                 added = form_add_unique_value(form, tag, value);
                 if (added) {
                     ui_current_print_line("Field updated...");
-                    ui_show_form_field(window, form, tag);
+                    mucconfwin_show_form_field(window, form, tag);
                 } else {
                     ui_current_print_line("JID %s already exists in %s", value, tag);
                 }
@@ -2660,7 +2660,7 @@ cmd_form_field(ProfWin *window, char *tag, gchar **args)
                 removed = form_remove_value(form, tag, value);
                 if (removed) {
                     ui_current_print_line("Field updated...");
-                    ui_show_form_field(window, form, tag);
+                    mucconfwin_show_form_field(window, form, tag);
                 } else {
                     ui_current_print_line("Field %s does not contain %s", tag, value);
                 }
@@ -2702,16 +2702,16 @@ cmd_form(ProfWin *window, const char *const command, gchar **args)
     assert(confwin->memcheck == PROFCONFWIN_MEMCHECK);
 
     if (g_strcmp0(args[0], "show") == 0) {
-        ui_show_form(confwin);
+        mucconfwin_show_form(confwin);
         return TRUE;
     }
 
     if (g_strcmp0(args[0], "help") == 0) {
         char *tag = args[1];
         if (tag) {
-            ui_show_form_field_help(confwin, tag);
+            mucconfwin_field_help(confwin, tag);
         } else {
-            ui_show_form_help(confwin);
+            mucconfwin_form_help(confwin);
 
             const gchar **help_text = NULL;
             Command *command = g_hash_table_lookup(commands, "/form");
