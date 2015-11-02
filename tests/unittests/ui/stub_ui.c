@@ -94,10 +94,6 @@ ProfChatWin* chatwin_new(const char * const barejid)
 }
 
 void ui_print_system_msg_from_recipient(const char * const barejid, const char *message) {}
-gint ui_unread(void)
-{
-    return 0;
-}
 
 void ui_close_connected_win(int index) {}
 int ui_close_all_wins(void)

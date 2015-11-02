@@ -972,12 +972,6 @@ ui_room_banned(const char *const roomjid, const char *const actor, const char *c
     }
 }
 
-gint
-ui_unread(void)
-{
-    return wins_get_total_unread();
-}
-
 int
 ui_win_unread(int index)
 {
@@ -1107,7 +1101,7 @@ _ui_draw_term_title(void)
 
     if (status == JABBER_CONNECTED) {
         const char * const jid = jabber_get_fulljid();
-        gint unread = ui_unread();
+        gint unread = wins_get_total_unread();
 
         if (unread != 0) {
             snprintf(new_win_title, sizeof(new_win_title),
