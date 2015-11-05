@@ -83,3 +83,8 @@ ui_incoming_private_msg(const char *const fulljid, const char *const message, GD
     free(display_from);
 }
 
+void
+ui_outgoing_private_msg(ProfPrivateWin *privwin, const char *const message)
+{
+    win_print((ProfWin*)privwin, '-', 0, NULL, 0, THEME_TEXT_ME, "me", message);
+}

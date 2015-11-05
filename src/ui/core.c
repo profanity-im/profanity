@@ -770,12 +770,6 @@ ui_print_system_msg_from_recipient(const char *const barejid, const char *messag
 }
 
 void
-ui_outgoing_private_msg(ProfPrivateWin *privwin, const char *const message)
-{
-    win_print((ProfWin*)privwin, '-', 0, NULL, 0, THEME_TEXT_ME, "me", message);
-}
-
-void
 ui_room_join(const char *const roomjid, gboolean focus)
 {
     ProfWin *window = (ProfWin*)wins_get_muc(roomjid);
