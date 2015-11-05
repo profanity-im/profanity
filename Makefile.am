@@ -25,6 +25,7 @@ core_sources = \
 	src/ui/buffer.c src/ui/buffer.h \
 	src/ui/chatwin.c \
 	src/ui/mucwin.c \
+	src/ui/privwin.c \
 	src/ui/mucconfwin.c \
 	src/ui/xmlwin.c \
 	src/command/command.h src/command/command.c \

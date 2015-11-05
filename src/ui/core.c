@@ -306,50 +306,6 @@ ui_contact_typing(const char *const barejid, const char *const resource)
 }
 
 void
-ui_incoming_private_msg(const char *const fulljid, const char *const message, GDateTime *timestamp)
-{
-    char *display_from = NULL;
-    display_from = get_nick_from_full_jid(fulljid);
-
-    ProfPrivateWin *privatewin = wins_get_private(fulljid);
-    if (privatewin == NULL) {
-        ProfWin *window = wins_new_private(fulljid);
-        privatewin = (ProfPrivateWin*)window;
-    }
-
-    ProfWin *window = (ProfWin*) privatewin;
-    int num = wins_get_num(window);
-
-    // currently viewing chat window with sender
-    if (wins_is_current(window)) {
-        win_print_incoming_message(window, timestamp, display_from, message, PROF_MSG_PLAIN);
-        title_bar_set_typing(FALSE);
-        status_bar_active(num);
-
-    // not currently viewing chat window with sender
-    } else {
-        privatewin->unread++;
-        status_bar_new(num);
-        cons_show_incoming_message(display_from, num);
-        win_print_incoming_message(window, timestamp, display_from, message, PROF_MSG_PLAIN);
-
-        if (prefs_get_boolean(PREF_FLASH)) {
-            flash();
-        }
-    }
-
-    if (prefs_get_boolean(PREF_BEEP)) {
-        beep();
-    }
-
-    if (prefs_get_boolean(PREF_NOTIFY_MESSAGE)) {
-        notify_message(window, display_from, message);
-    }
-
-    free(display_from);
-}
-
-void
 ui_roster_add(const char *const barejid, const char *const name)
 {
     if (name) {
@@ -812,19 +768,6 @@ ui_print_system_msg_from_recipient(const char *const barejid, const char *messag
     }
 
     win_vprint(window, '-', 0, NULL, 0, 0, "", "*%s %s", barejid, message);
-}
-
-ProfPrivateWin*
-ui_new_private_win(const char *const fulljid)
-{
-    ProfWin *window = wins_new_private(fulljid);
-    return (ProfPrivateWin*)window;
-}
-
-void
-ui_outgoing_private_msg(ProfPrivateWin *privwin, const char *const message)
-{
-    win_print((ProfWin*)privwin, '-', 0, NULL, 0, THEME_TEXT_ME, "me", message);
 }
 
 void

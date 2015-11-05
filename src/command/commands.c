@@ -1505,7 +1505,7 @@ cmd_msg(ProfWin *window, const char *const command, gchar **args)
 
             ProfPrivateWin *privwin = wins_get_private(full_jid->str);
             if (!privwin) {
-                privwin = ui_new_private_win(full_jid->str);
+                privwin = (ProfPrivateWin*)wins_new_private(full_jid->str);
             }
             ui_focus_win((ProfWin*)privwin);
 

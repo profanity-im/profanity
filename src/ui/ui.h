@@ -68,7 +68,6 @@ void ui_sigwinch_handler(int sig);
 void ui_handle_otr_error(const char *const barejid, const char *const message);
 unsigned long ui_get_idle_time(void);
 void ui_reset_idle_time(void);
-ProfPrivateWin* ui_new_private_win(const char *const fulljid);
 void ui_print_system_msg_from_recipient(const char *const barejid, const char *message);
 void ui_close_connected_win(int index);
 int ui_close_all_wins(void);
