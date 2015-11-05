@@ -769,13 +769,6 @@ ui_print_system_msg_from_recipient(const char *const barejid, const char *messag
     win_vprint(window, '-', 0, NULL, 0, 0, "", "*%s %s", barejid, message);
 }
 
-ProfPrivateWin*
-ui_new_private_win(const char *const fulljid)
-{
-    ProfWin *window = wins_new_private(fulljid);
-    return (ProfPrivateWin*)window;
-}
-
 void
 ui_outgoing_private_msg(ProfPrivateWin *privwin, const char *const message)
 {

@@ -83,10 +83,6 @@ unsigned long ui_get_idle_time(void)
 }
 
 void ui_reset_idle_time(void) {}
-ProfPrivateWin* ui_new_private_win(const char * const fulljid)
-{
-    return NULL;
-}
 
 ProfChatWin* chatwin_new(const char * const barejid)
 {
