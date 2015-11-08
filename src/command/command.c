@@ -997,10 +997,11 @@ static struct cmd_t command_defs[] =
             { "statusbar off",             "Do not show time in status bar." },
             { "lastactivity set <format>", "Change time format for last activity." })
         CMD_EXAMPLES(
-            "/time main set \"%d-%m-%y %H:%M\"",
-            "/time main off",
+            "/time console set %H:%M:%S",
+            "/time chat set \"%d-%m-%y %H:%M:%S\"",
+            "/time xml off",
             "/time statusbar set %H:%M",
-            "/time lastactivity set \"%d-%m-%y %H:%M\"")
+            "/time lastactivity set \"%d-%m-%y %H:%M:%S\"")
     },
 
     { "/inpblock",
