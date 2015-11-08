@@ -32,6 +32,7 @@
  *
  */
 
+#include <assert.h>
 #include <glib.h>
 
 #include "ui/win_types.h"
@@ -41,18 +42,14 @@
 #include "config/preferences.h"
 
 void
-ui_incoming_private_msg(const char *const fulljid, const char *const message, GDateTime *timestamp)
+privwin_incoming_msg(ProfPrivateWin *privatewin, const char *const message, GDateTime *timestamp)
 {
-    ProfPrivateWin *privatewin = wins_get_private(fulljid);
-    if (privatewin == NULL) {
-        ProfWin *window = wins_new_private(fulljid);
-        privatewin = (ProfPrivateWin*)window;
-    }
+    assert(privatewin != NULL);
 
     ProfWin *window = (ProfWin*) privatewin;
     int num = wins_get_num(window);
 
-    char *display_from = get_nick_from_full_jid(fulljid);
+    char *display_from = get_nick_from_full_jid(privatewin->fulljid);
 
     // currently viewing chat window with sender
     if (wins_is_current(window)) {
@@ -84,7 +81,9 @@ ui_incoming_private_msg(const char *const fulljid, const char *const message, GD
 }
 
 void
-ui_outgoing_private_msg(ProfPrivateWin *privwin, const char *const message)
+privwin_outgoing_msg(ProfPrivateWin *privwin, const char *const message)
 {
+    assert(privwin != NULL);
+
     win_print((ProfWin*)privwin, '-', 0, NULL, 0, THEME_TEXT_ME, "me", message);
 }

@@ -164,5 +164,5 @@ void
 cl_ev_send_priv_msg(ProfPrivateWin *privwin, const char *const msg)
 {
     message_send_private(privwin->fulljid, msg);
-    ui_outgoing_private_msg(privwin, msg);
+    privwin_outgoing_msg(privwin, msg);
 }
