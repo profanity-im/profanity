@@ -83,9 +83,7 @@ char* ui_get_line(void);
 char* ui_ask_pgp_passphrase(const char *hint, int prev_fail);
 void ui_contact_online(char *barejid, Resource *resource, GDateTime *last_activity);
 void ui_contact_typing(const char *const barejid, const char *const resource);
-void ui_incoming_private_msg(ProfPrivateWin *privatewin, const char *const message, GDateTime *timestamp);
 void ui_disconnected(void);
-void ui_outgoing_private_msg(ProfPrivateWin *privwin, const char *const message);
 void ui_room_join(const char *const roomjid, gboolean focus);
 void ui_switch_to_room(const char *const roomjid);
 void ui_room_destroy(const char *const roomjid);
@@ -107,14 +105,9 @@ void ui_handle_recipient_error(const char *const recipient, const char *const er
 void ui_handle_error(const char *const err_msg);
 void ui_clear_win_title(void);
 void ui_goodbye_title(void);
-void mucconfwin_handle_configuration(ProfMucConfWin *confwin, DataForm *form);
 void ui_handle_room_configuration_form_error(const char *const roomjid, const char *const message);
 void ui_handle_room_config_submit_result(const char *const roomjid);
 void ui_handle_room_config_submit_result_error(const char *const roomjid, const char *const message);
-void mucconfwin_show_form(ProfMucConfWin *confwin);
-void mucconfwin_show_form_field(ProfMucConfWin *confwin, DataForm *form, char *tag);
-void mucconfwin_form_help(ProfMucConfWin *confwin);
-void mucconfwin_field_help(ProfMucConfWin *confwin, char *tag);
 void ui_show_lines(ProfWin *window, const gchar** lines);
 void ui_redraw_all_room_rosters(void);
 void ui_show_all_room_rosters(void);
@@ -194,6 +187,17 @@ void mucwin_role_set_error(ProfMucWin *mucwin, const char *const nick, const cha
 void mucwin_role_list_error(ProfMucWin *mucwin, const char *const role, const char *const error);
 void mucwin_handle_role_list(ProfMucWin *mucwin, const char *const role, GSList *nicks);
 void mucwin_kick_error(ProfMucWin *mucwin, const char *const nick, const char *const error);
+
+// MUC private chat window
+void privwin_incoming_msg(ProfPrivateWin *privatewin, const char *const message, GDateTime *timestamp);
+void privwin_outgoing_msg(ProfPrivateWin *privwin, const char *const message);
+
+// MUC room config window
+void mucconfwin_handle_configuration(ProfMucConfWin *confwin, DataForm *form);
+void mucconfwin_show_form(ProfMucConfWin *confwin);
+void mucconfwin_show_form_field(ProfMucConfWin *confwin, DataForm *form, char *tag);
+void mucconfwin_form_help(ProfMucConfWin *confwin);
+void mucconfwin_field_help(ProfMucConfWin *confwin, char *tag);
 
 // xml console
 void xmlwin_show(ProfXMLWin *xmlwin, const char *const msg);

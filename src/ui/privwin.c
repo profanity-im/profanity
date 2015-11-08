@@ -42,7 +42,7 @@
 #include "config/preferences.h"
 
 void
-ui_incoming_private_msg(ProfPrivateWin *privatewin, const char *const message, GDateTime *timestamp)
+privwin_incoming_msg(ProfPrivateWin *privatewin, const char *const message, GDateTime *timestamp)
 {
     assert(privatewin != NULL);
 
@@ -81,7 +81,7 @@ ui_incoming_private_msg(ProfPrivateWin *privatewin, const char *const message, G
 }
 
 void
-ui_outgoing_private_msg(ProfPrivateWin *privwin, const char *const message)
+privwin_outgoing_msg(ProfPrivateWin *privwin, const char *const message)
 {
     assert(privwin != NULL);
 

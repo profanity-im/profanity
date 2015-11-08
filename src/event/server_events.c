@@ -189,7 +189,7 @@ sv_ev_incoming_private_message(const char *const fulljid, char *message)
         ProfWin *window = wins_new_private(fulljid);
         privatewin = (ProfPrivateWin*)window;
     }
-    ui_incoming_private_msg(privatewin, message, NULL);
+    privwin_incoming_msg(privatewin, message, NULL);
 }
 
 void
@@ -200,7 +200,7 @@ sv_ev_delayed_private_message(const char *const fulljid, char *message, GDateTim
         ProfWin *window = wins_new_private(fulljid);
         privatewin = (ProfPrivateWin*)window;
     }
-    ui_incoming_private_msg(privatewin, message, timestamp);
+    privwin_incoming_msg(privatewin, message, timestamp);
 }
 
 void
