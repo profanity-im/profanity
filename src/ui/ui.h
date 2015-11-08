@@ -83,7 +83,7 @@ char* ui_get_line(void);
 char* ui_ask_pgp_passphrase(const char *hint, int prev_fail);
 void ui_contact_online(char *barejid, Resource *resource, GDateTime *last_activity);
 void ui_contact_typing(const char *const barejid, const char *const resource);
-void ui_incoming_private_msg(const char *const fulljid, const char *const message, GDateTime *timestamp);
+void ui_incoming_private_msg(ProfPrivateWin *privatewin, const char *const message, GDateTime *timestamp);
 void ui_disconnected(void);
 void ui_outgoing_private_msg(ProfPrivateWin *privwin, const char *const message);
 void ui_room_join(const char *const roomjid, gboolean focus);

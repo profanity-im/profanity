@@ -159,7 +159,7 @@ void ui_contact_typing(const char * const barejid, const char * const resource) 
 void chatwin_incoming_msg(ProfChatWin *chatwin, const char * const resource, const char * const message, GDateTime *timestamp, gboolean win_created, prof_enc_t enc_mode) {}
 void chatwin_receipt_received(ProfChatWin *chatwin, const char * const id) {}
 
-void ui_incoming_private_msg(const char * const fulljid, const char * const message, GDateTime *timestamp) {}
+void ui_incoming_private_msg(ProfPrivateWin *privatewin, const char * const message, GDateTime *timestamp) {}
 
 void ui_disconnected(void) {}
 void chatwin_recipient_gone(ProfChatWin *chatwin) {}

@@ -184,7 +184,23 @@ sv_ev_room_message(const char *const room_jid, const char *const nick,
 void
 sv_ev_incoming_private_message(const char *const fulljid, char *message)
 {
-    ui_incoming_private_msg(fulljid, message, NULL);
+    ProfPrivateWin *privatewin = wins_get_private(fulljid);
+    if (privatewin == NULL) {
+        ProfWin *window = wins_new_private(fulljid);
+        privatewin = (ProfPrivateWin*)window;
+    }
+    ui_incoming_private_msg(privatewin, message, NULL);
+}
+
+void
+sv_ev_delayed_private_message(const char *const fulljid, char *message, GDateTime *timestamp)
+{
+    ProfPrivateWin *privatewin = wins_get_private(fulljid);
+    if (privatewin == NULL) {
+        ProfWin *window = wins_new_private(fulljid);
+        privatewin = (ProfPrivateWin*)window;
+    }
+    ui_incoming_private_msg(privatewin, message, timestamp);
 }
 
 void
@@ -317,12 +333,6 @@ sv_ev_incoming_message(char *barejid, char *resource, char *message, char *pgp_m
     return;
 #endif
 #endif
-}
-
-void
-sv_ev_delayed_private_message(const char *const fulljid, char *message, GDateTime *timestamp)
-{
-    ui_incoming_private_msg(fulljid, message, timestamp);
 }
 
 void
