@@ -192,10 +192,34 @@ void
 sv_ev_incoming_private_message(const char *const fulljid, char *message)
 {
     char *plugin_message =  plugins_pre_priv_message_display(fulljid, message);
-    ui_incoming_private_msg(fulljid, plugin_message, NULL);
+
+    ProfPrivateWin *privatewin = wins_get_private(fulljid);
+    if (privatewin == NULL) {
+        ProfWin *window = wins_new_private(fulljid);
+        privatewin = (ProfPrivateWin*)window;
+    }
+    privwin_incoming_msg(privatewin, plugin_message, NULL);
+
     plugins_post_priv_message_display(fulljid, plugin_message);
 
     free(plugin_message);
+}
+
+void
+sv_ev_delayed_private_message(const char *const fulljid, char *message, GDateTime *timestamp)
+{
+    char *new_message = plugins_pre_priv_message_display(fulljid, message);
+
+    ProfPrivateWin *privatewin = wins_get_private(fulljid);
+    if (privatewin == NULL) {
+        ProfWin *window = wins_new_private(fulljid);
+        privatewin = (ProfPrivateWin*)window;
+    }
+    privwin_incoming_msg(privatewin, new_message, timestamp);
+
+    plugins_post_priv_message_display(fulljid, new_message);
+
+    free(new_message);
 }
 
 void
@@ -328,16 +352,6 @@ sv_ev_incoming_message(char *barejid, char *resource, char *message, char *pgp_m
     return;
 #endif
 #endif
-}
-
-void
-sv_ev_delayed_private_message(const char *const fulljid, char *message, GDateTime *timestamp)
-{
-    char *new_message = plugins_pre_priv_message_display(fulljid, message);
-    ui_incoming_private_msg(fulljid, new_message, timestamp);
-    plugins_post_priv_message_display(fulljid, new_message);
-
-    free(new_message);
 }
 
 void
