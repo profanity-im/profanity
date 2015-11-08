@@ -77,6 +77,8 @@ static gboolean _cmd_execute(ProfWin *window, const char *const command, const c
 
 static char* _cmd_complete_parameters(ProfWin *window, const char *const input);
 
+static char* _script_autocomplete_func(const char *const prefix);
+
 static char* _sub_autocomplete(ProfWin *window, const char *const input);
 static char* _notify_autocomplete(ProfWin *window, const char *const input);
 static char* _theme_autocomplete(ProfWin *window, const char *const input);
@@ -3247,38 +3249,36 @@ _theme_autocomplete(ProfWin *window, const char *const input)
 }
 
 static char*
+_script_autocomplete_func(const char *const prefix)
+{
+    if (script_show_ac == NULL) {
+        script_show_ac = autocomplete_new();
+        GSList *scripts = scripts_list();
+        GSList *curr = scripts;
+        while (curr) {
+            autocomplete_add(script_show_ac, curr->data);
+            curr = g_slist_next(curr);
+        }
+        g_slist_free_full(scripts, g_free);
+    }
+
+    return autocomplete_complete(script_show_ac, prefix, FALSE);
+}
+
+
+static char*
 _script_autocomplete(ProfWin *window, const char *const input)
 {
     char *result = NULL;
     if ((strncmp(input, "/script show ", 13) == 0) && (strlen(input) > 13)) {
-        if (script_show_ac == NULL) {
-            script_show_ac = autocomplete_new();
-            GSList *scripts = scripts_list();
-            GSList *curr = scripts;
-            while (curr) {
-                autocomplete_add(script_show_ac, curr->data);
-                curr = g_slist_next(curr);
-            }
-            g_slist_free_full(scripts, g_free);
-        }
-        result = autocomplete_param_with_ac(input, "/script show", script_show_ac, TRUE);
+        result = autocomplete_param_with_func(input, "/script show", _script_autocomplete_func);
         if (result) {
             return result;
         }
     }
 
     if ((strncmp(input, "/script run ", 12) == 0) && (strlen(input) > 12)) {
-        if (script_show_ac == NULL) {
-            script_show_ac = autocomplete_new();
-            GSList *scripts = scripts_list();
-            GSList *curr = scripts;
-            while (curr) {
-                autocomplete_add(script_show_ac, curr->data);
-                curr = g_slist_next(curr);
-            }
-            g_slist_free_full(scripts, g_free);
-        }
-        result = autocomplete_param_with_ac(input, "/script run", script_show_ac, TRUE);
+        result = autocomplete_param_with_func(input, "/script run", _script_autocomplete_func);
         if (result) {
             return result;
         }
@@ -4014,6 +4014,15 @@ _account_autocomplete(ProfWin *window, const char *const input)
             g_string_append(beginning, " ");
             g_string_append(beginning, args[2]);
             found = autocomplete_param_with_ac(input, beginning->str, tls_property_ac, TRUE);
+            g_string_free(beginning, TRUE);
+            if (found) {
+                g_strfreev(args);
+                return found;
+            }
+        } else if ((g_strv_length(args) > 3) && (g_strcmp0(args[2], "startscript")) == 0) {
+            g_string_append(beginning, " ");
+            g_string_append(beginning, args[2]);
+            found = autocomplete_param_with_func(input, beginning->str, _script_autocomplete_func);
             g_string_free(beginning, TRUE);
             if (found) {
                 g_strfreev(args);
