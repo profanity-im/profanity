@@ -119,6 +119,7 @@ sv_ev_failed_login(void)
 {
     cons_show_error("Login failed.");
     log_info("Login failed");
+    tlscerts_clear_current();
 }
 
 void

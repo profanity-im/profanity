@@ -392,7 +392,23 @@ _connection_certfail_cb(const char *const certname, const char *const certfp,
 {
     return sv_ev_certfail(errormsg, certname, certfp, notbefore, notafter);
 }
+
+char*
+jabber_get_tls_peer_cert(void)
+{
+    return xmpp_conn_tls_peer_cert(jabber_conn.conn);
+}
 #endif
+
+gboolean
+jabber_conn_is_secured(void)
+{
+    if (jabber_conn.conn_status == JABBER_CONNECTED) {
+        return xmpp_conn_is_secured(jabber_conn.conn) == 0 ? FALSE : TRUE;
+    } else {
+        return FALSE;
+    }
+}
 
 static jabber_conn_status_t
 _jabber_connect(const char *const fulljid, const char *const passwd,

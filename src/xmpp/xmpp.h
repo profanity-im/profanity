@@ -152,6 +152,10 @@ char* jabber_get_account_name(void);
 GList* jabber_get_available_resources(void);
 char* jabber_create_uuid(void);
 void jabber_free_uuid(char *uuid);
+#ifdef HAVE_LIBMESODE
+char* jabber_get_tls_peer_cert(void);
+#endif
+gboolean jabber_conn_is_secured(void);
 
 // message functions
 char* message_send_chat(const char *const barejid, const char *const msg);

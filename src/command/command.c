@@ -206,6 +206,7 @@ static struct cmd_t command_defs[] =
             "/tls allow",
             "/tls always",
             "/tls deny",
+            "/tls cert",
             "/tls trusted",
             "/tls revoke <fingerprint>",
             "/tls certpath",
@@ -218,6 +219,7 @@ static struct cmd_t command_defs[] =
             { "allow",                "Allow connection to continue with an invalid TLS certificate." },
             { "always",               "Always allow connections with this invalid TLS certificate." },
             { "deny",                 "Terminate TLS connection." },
+            { "cert",                 "Show the current TLS certificate." },
             { "trusted",              "List manually trusted certificates (with /tls always)." },
             { "revoke <fingerprint>", "Remove a manually trusted certificate." },
             { "certpath",             "Show the trusted certificate path." },
@@ -2220,6 +2222,7 @@ cmd_init(void)
     autocomplete_add(tls_ac, "allow");
     autocomplete_add(tls_ac, "always");
     autocomplete_add(tls_ac, "deny");
+    autocomplete_add(tls_ac, "cert");
     autocomplete_add(tls_ac, "trusted");
     autocomplete_add(tls_ac, "revoke");
     autocomplete_add(tls_ac, "certpath");
