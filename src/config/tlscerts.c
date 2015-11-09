@@ -51,6 +51,8 @@ static void _save_tlscerts(void);
 
 static Autocomplete certs_ac;
 
+static char *current_fp;
+
 void
 tlscerts_init(void)
 {
@@ -73,6 +75,32 @@ tlscerts_init(void)
         autocomplete_add(certs_ac, groups[i]);
     }
     g_strfreev(groups);
+
+    current_fp = NULL;
+}
+
+void
+tlscerts_set_current(const char *const fp)
+{
+    if (current_fp) {
+        free(current_fp);
+    }
+    current_fp = strdup(fp);
+}
+
+char*
+tlscerts_get_current(void)
+{
+    return current_fp;
+}
+
+void
+tlscerts_clear_current(void)
+{
+    if (current_fp) {
+        free(current_fp);
+        current_fp = NULL;
+    }
 }
 
 gboolean
@@ -223,6 +251,10 @@ tlscerts_close(void)
 {
     g_key_file_free(tlscerts);
     tlscerts = NULL;
+
+    free(current_fp);
+    current_fp = NULL;
+
     autocomplete_free(certs_ac);
 }
 

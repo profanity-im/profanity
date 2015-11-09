@@ -839,6 +839,7 @@ cmd_disconnect(ProfWin *window, const char *const command, gchar **args)
         roster_clear();
         muc_invites_clear();
         chat_sessions_clear();
+        tlscerts_clear_current();
         ui_disconnected();
 #ifdef PROF_HAVE_LIBGPGME
         p_gpg_on_disconnect();
