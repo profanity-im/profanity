@@ -50,6 +50,12 @@ TLSCertificate* tlscerts_new(const char *const fingerprint, const char *const do
     const char *const organisation, const char *const email,
     const char *const notbefore, const char *const notafter);
 
+void tlscerts_set_current(const char *const fp);
+
+char* tlscerts_get_current(void);
+
+void tlscerts_clear_current(void);
+
 gboolean tlscerts_exists(const char *const fingerprint);
 
 void tlscerts_add(TLSCertificate *cert);
