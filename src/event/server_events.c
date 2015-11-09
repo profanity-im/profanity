@@ -718,7 +718,14 @@ int
 sv_ev_certfail(const char *const errormsg, const char *const certname, const char *const certfp,
     const char *const notbefore, const char *const notafter)
 {
+    // check profanity trusted certs
     if (tlscerts_exists(certfp)) {
+        return 1;
+    }
+
+    // check current cert
+    char *current_fp = tlscerts_get_current();
+    if (current_fp && g_strcmp0(current_fp, certfp) == 0) {
         return 1;
     }
 
@@ -780,6 +787,7 @@ sv_ev_certfail(const char *const errormsg, const char *const certname, const cha
     }
 
     if (g_strcmp0(cmd, "/tls allow") == 0) {
+        tlscerts_set_current(certfp);
         free(cmd);
         free(domain);
         free(org);
