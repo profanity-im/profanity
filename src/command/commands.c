@@ -159,6 +159,7 @@ gboolean
 cmd_tls(ProfWin *window, const char *const command, gchar **args)
 {
     if (g_strcmp0(args[0], "certpath") == 0) {
+#ifdef HAVE_LIBMESODE
         if (g_strcmp0(args[1], "set") == 0) {
             if (args[2] == NULL) {
                 cons_bad_cmd_usage(command);
@@ -189,7 +190,12 @@ cmd_tls(ProfWin *window, const char *const command, gchar **args)
             cons_bad_cmd_usage(command);
             return TRUE;
         }
+#else
+        cons_show("Certificate path setting only supported when built with libmesode.");
+        return TRUE;
+#endif
     } else if (g_strcmp0(args[0], "trusted") == 0) {
+#ifdef HAVE_LIBMESODE
         GList *certs = tlscerts_list();
         GList *curr = certs;
 
@@ -224,7 +230,12 @@ cmd_tls(ProfWin *window, const char *const command, gchar **args)
         }
         g_list_free_full(certs, (GDestroyNotify)tlscerts_free);
         return TRUE;
+#else
+        cons_show("Manual certificate trust only supported when built with libmesode.");
+        return TRUE;
+#endif
     } else if (g_strcmp0(args[0], "revoke") == 0) {
+#ifdef HAVE_LIBMESODE
         if (args[1] == NULL) {
             cons_bad_cmd_usage(command);
         } else {
@@ -236,8 +247,34 @@ cmd_tls(ProfWin *window, const char *const command, gchar **args)
             }
         }
         return TRUE;
+#else
+        cons_show("Manual certificate trust only supported when built with libmesode.");
+        return TRUE;
+#endif
     } else if (g_strcmp0(args[0], "show") == 0) {
         return _cmd_set_boolean_preference(args[1], command, "TLS titlebar indicator", PREF_TLS_SHOW);
+    } else if (g_strcmp0(args[0], "cert") == 0) {
+#ifdef HAVE_LIBMESODE
+        jabber_conn_status_t conn_status = jabber_get_connection_status();
+        if (conn_status != JABBER_CONNECTED) {
+            cons_show("You are not currently connected.");
+            return TRUE;
+        }
+        if (!jabber_conn_is_secured()) {
+            cons_show("No TLS connection established");
+            return TRUE;
+        }
+        char *cert = jabber_get_tls_peer_cert();
+        if (cert) {
+            cons_show("TLS certificate fingerprint: %s", cert);
+        } else {
+            cons_show("Error getting TLS fingerprint.");
+        }
+        return TRUE;
+#else
+        cons_show("Certificate fetching not supported.");
+        return TRUE;
+#endif
     } else {
         cons_bad_cmd_usage(command);
         return TRUE;
