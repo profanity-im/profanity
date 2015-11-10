@@ -36,19 +36,38 @@
 #define TLSCERTS_H
 
 typedef struct tls_cert_t {
-    char *fingerprint;
-    char *domain;
+    int version;
+    char *serialnumber;
     char *subjectname;
-    char *organisation;
-    char *email;
+    char *subject_country;
+    char *subject_state;
+    char *subject_distinguishedname;
+    char *subject_serialnumber;
+    char *subject_commonname;
+    char *subject_organisation;
+    char *subject_organisation_unit;
+    char *subject_email;
+    char *issuername;
+    char *issuer_country;
+    char *issuer_state;
+    char *issuer_distinguishedname;
+    char *issuer_serialnumber;
+    char *issuer_commonname;
+    char *issuer_organisation;
+    char *issuer_organisation_unit;
+    char *issuer_email;
     char *notbefore;
     char *notafter;
+    char *fingerprint;
+    char *key_alg;
+    char *signature_alg;
 } TLSCertificate;
 
 void tlscerts_init(void);
 
-TLSCertificate* tlscerts_new(const char *const fingerprint, const char *const subjectname, const char *const notbefore,
-    const char *const notafter);
+TLSCertificate* tlscerts_new(const char *const fingerprint, int version, const char *const serialnumber, const char *const subjectname,
+    const char *const issuername, const char *const notbefore, const char *const notafter,
+    const char *const key_alg, const char *const signature_alg);
 
 void tlscerts_set_current(const char *const fp);
 
