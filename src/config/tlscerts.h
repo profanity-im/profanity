@@ -38,6 +38,7 @@
 typedef struct tls_cert_t {
     char *fingerprint;
     char *domain;
+    char *subjectname;
     char *organisation;
     char *email;
     char *notbefore;
@@ -46,9 +47,8 @@ typedef struct tls_cert_t {
 
 void tlscerts_init(void);
 
-TLSCertificate* tlscerts_new(const char *const fingerprint, const char *const domain,
-    const char *const organisation, const char *const email,
-    const char *const notbefore, const char *const notafter);
+TLSCertificate* tlscerts_new(const char *const fingerprint, const char *const subjectname, const char *const notbefore,
+    const char *const notafter);
 
 void tlscerts_set_current(const char *const fp);
 

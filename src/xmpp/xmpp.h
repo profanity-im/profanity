@@ -45,6 +45,7 @@
 #endif
 
 #include "config/accounts.h"
+#include "config/tlscerts.h"
 #include "contact.h"
 #include "jid.h"
 #include "tools/autocomplete.h"
@@ -153,7 +154,7 @@ GList* jabber_get_available_resources(void);
 char* jabber_create_uuid(void);
 void jabber_free_uuid(char *uuid);
 #ifdef HAVE_LIBMESODE
-char* jabber_get_tls_peer_cert(void);
+TLSCertificate* jabber_get_tls_peer_cert(void);
 #endif
 gboolean jabber_conn_is_secured(void);
 
