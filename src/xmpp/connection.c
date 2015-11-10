@@ -387,16 +387,34 @@ _connection_free_session_data(void)
 
 #ifdef HAVE_LIBMESODE
 static int
-_connection_certfail_cb(const char *const certname, const char *const certfp,
-    char *const notbefore, const char *const notafter, const char *const errormsg)
+_connection_certfail_cb(xmpp_tlscert_t *xmpptlscert, const char *const errormsg)
 {
-    return sv_ev_certfail(errormsg, certname, certfp, notbefore, notafter);
+    char *subjectname = xmpp_conn_tlscert_subjectname(xmpptlscert);
+    char *fp = xmpp_conn_tlscert_fp(xmpptlscert);
+    char *notbefore = xmpp_conn_tlscert_notbefore(xmpptlscert);
+    char *notafter = xmpp_conn_tlscert_notafter(xmpptlscert);
+
+    TLSCertificate *cert = tlscerts_new(fp, subjectname, notbefore, notafter);
+    int res = sv_ev_certfail(errormsg, cert);
+    tlscerts_free(cert);
+
+    return res;
 }
 
-char*
+TLSCertificate*
 jabber_get_tls_peer_cert(void)
 {
-    return xmpp_conn_tls_peer_cert(jabber_conn.conn);
+    xmpp_tlscert_t *xmpptlscert = xmpp_conn_tls_peer_cert(jabber_conn.conn);
+    char *subjectname = xmpp_conn_tlscert_subjectname(xmpptlscert);
+    char *fp = xmpp_conn_tlscert_fp(xmpptlscert);
+    char *notbefore = xmpp_conn_tlscert_notbefore(xmpptlscert);
+    char *notafter = xmpp_conn_tlscert_notafter(xmpptlscert);
+
+    TLSCertificate *cert = tlscerts_new(fp, subjectname, notbefore, notafter);
+
+    xmpp_conn_free_tlscert(jabber_conn.ctx, xmpptlscert);
+
+    return cert;
 }
 #endif
 

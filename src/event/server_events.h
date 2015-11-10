@@ -85,8 +85,7 @@ void sv_ev_muc_occupant_online(const char *const room, const char *const nick, c
 void sv_ev_roster_update(const char *const barejid, const char *const name,
     GSList *groups, const char *const subscription, gboolean pending_out);
 void sv_ev_roster_received(void);
-int sv_ev_certfail(const char *const errormsg, const char *const certname, const char *const certfp,
-    const char *const notbefore, const char *const notafter);
+int sv_ev_certfail(const char *const errormsg, TLSCertificate *cert);
 void sv_ev_lastactivity_response(const char *const from, const int seconds, const char *const msg);
 
 #endif

@@ -189,6 +189,28 @@ cons_show_error(const char *const msg, ...)
 }
 
 void
+cons_show_tlscert(TLSCertificate *cert)
+{
+    if (!cert) {
+        return;
+    }
+
+    cons_show("Certificate:");
+    if (cert->domain) {
+        cons_show("  Domain       : %s", cert->domain);
+    }
+    if (cert->organisation) {
+        cons_show("  Organisation : %s", cert->organisation);
+    }
+    if (cert->email) {
+        cons_show("  Email        : %s", cert->email);
+    }
+    cons_show("  Fingerprint  : %s", cert->fingerprint);
+    cons_show("  Start        : %s", cert->notbefore);
+    cons_show("  End          : %s", cert->notafter);
+}
+
+void
 cons_show_typing(const char *const barejid)
 {
     ProfWin *console = wins_get_console();

@@ -119,13 +119,11 @@ tlscerts_list(void)
     int i = 0;
     for (i = 0; i < g_strv_length(groups); i++) {
         char *fingerprint = strdup(groups[i]);
-        char *domain = g_key_file_get_string(tlscerts, fingerprint, "domain", NULL);
-        char *organisation = g_key_file_get_string(tlscerts, fingerprint, "organisation", NULL);
-        char *email = g_key_file_get_string(tlscerts, fingerprint, "email", NULL);
+        char *subjectname = g_key_file_get_string(tlscerts, fingerprint, "subjectname", NULL);
         char *notbefore = g_key_file_get_string(tlscerts, fingerprint, "start", NULL);
         char *notafter = g_key_file_get_string(tlscerts, fingerprint, "end", NULL);
 
-        TLSCertificate *cert = tlscerts_new(fingerprint, domain, organisation, email, notbefore, notafter);
+        TLSCertificate *cert = tlscerts_new(fingerprint, subjectname, notbefore, notafter);
 
         res = g_list_append(res, cert);
     }
@@ -138,29 +136,20 @@ tlscerts_list(void)
 }
 
 TLSCertificate*
-tlscerts_new(const char *const fingerprint, const char *const domain, const char *const organisation,
-    const char *const email, const char *const notbefore, const char *const notafter)
+tlscerts_new(const char *const fingerprint, const char *const subjectname, const char *const notbefore,
+    const char *const notafter)
 {
     TLSCertificate *cert = malloc(sizeof(TLSCertificate));
+
+    if (subjectname) {
+        cert->subjectname = strdup(subjectname);
+    } else {
+        cert->subjectname = NULL;
+    }
     if (fingerprint) {
         cert->fingerprint = strdup(fingerprint);
     } else {
         cert->fingerprint = NULL;
-    }
-    if (domain) {
-        cert->domain = strdup(domain);
-    } else {
-        cert->domain = NULL;
-    }
-    if (organisation) {
-        cert->organisation = strdup(organisation);
-    } else {
-        cert->organisation = NULL;
-    }
-    if (email) {
-        cert->email = strdup(email);
-    } else {
-        cert->email= NULL;
     }
     if (notbefore) {
         cert->notbefore = strdup(notbefore);
@@ -172,6 +161,28 @@ tlscerts_new(const char *const fingerprint, const char *const domain, const char
     } else {
         cert->notafter = NULL;
     }
+
+    cert->domain = NULL;
+    cert->email = NULL;
+    cert->organisation = NULL;
+    gchar** fields = g_strsplit(subjectname, "/", 0);
+    int i = 0;
+    for (i = 0; i < g_strv_length(fields); i++) {
+        gchar** keyval = g_strsplit(fields[i], "=", 2);
+        if (g_strv_length(keyval) == 2) {
+            if (g_strcmp0(keyval[0], "CN") == 0) {
+                cert->domain = strdup(keyval[1]);
+            }
+            if (g_strcmp0(keyval[0], "O") == 0) {
+                cert->organisation = strdup(keyval[1]);
+            }
+            if (g_strcmp0(keyval[0], "emailAddress") == 0) {
+                cert->email = strdup(keyval[1]);
+            }
+        }
+        g_strfreev(keyval);
+    }
+    g_strfreev(fields);
 
     return cert;
 }
@@ -189,14 +200,8 @@ tlscerts_add(TLSCertificate *cert)
 
     autocomplete_add(certs_ac, cert->fingerprint);
 
-    if (cert->domain) {
-        g_key_file_set_string(tlscerts, cert->fingerprint, "domain", cert->domain);
-    }
-    if (cert->organisation) {
-        g_key_file_set_string(tlscerts, cert->fingerprint, "organisation", cert->organisation);
-    }
-    if (cert->email) {
-        g_key_file_set_string(tlscerts, cert->fingerprint, "email", cert->email);
+    if (cert->subjectname) {
+        g_key_file_set_string(tlscerts, cert->fingerprint, "subjectname", cert->subjectname);
     }
     if (cert->notbefore) {
         g_key_file_set_string(tlscerts, cert->fingerprint, "start", cert->notbefore);
@@ -237,6 +242,7 @@ void
 tlscerts_free(TLSCertificate *cert)
 {
     if (cert) {
+        free(cert->subjectname);
         free(cert->fingerprint);
         free(cert->domain);
         free(cert->organisation);

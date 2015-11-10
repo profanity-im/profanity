@@ -207,24 +207,7 @@ cmd_tls(ProfWin *window, const char *const command, gchar **args)
         }
         while (curr) {
             TLSCertificate *cert = curr->data;
-            if (cert->fingerprint) {
-                cons_show("Fingerprint  : %s", cert->fingerprint);
-            }
-            if (cert->domain) {
-                cons_show("Domain       : %s", cert->domain);
-            }
-            if (cert->organisation) {
-                cons_show("Organisation : %s", cert->organisation);
-            }
-            if (cert->email) {
-                cons_show("Email        : %s", cert->email);
-            }
-            if (cert->notbefore) {
-                cons_show("Start        : %s", cert->notbefore);
-            }
-            if (cert->notafter) {
-                cons_show("End          : %s", cert->notafter);
-            }
+            cons_show_tlscert(cert);
             cons_show("");
             curr = g_list_next(curr);
         }
@@ -264,9 +247,11 @@ cmd_tls(ProfWin *window, const char *const command, gchar **args)
             cons_show("No TLS connection established");
             return TRUE;
         }
-        char *cert = jabber_get_tls_peer_cert();
+        TLSCertificate *cert = jabber_get_tls_peer_cert();
         if (cert) {
-            cons_show("TLS certificate fingerprint: %s", cert);
+            cons_show_tlscert(cert);
+            cons_show("");
+            tlscerts_free(cert);
         } else {
             cons_show("Error getting TLS fingerprint.");
         }
