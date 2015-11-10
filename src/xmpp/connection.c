@@ -389,12 +389,18 @@ _connection_free_session_data(void)
 static int
 _connection_certfail_cb(xmpp_tlscert_t *xmpptlscert, const char *const errormsg)
 {
+    int version = xmpp_conn_tlscert_version(xmpptlscert);
+    char *serialnumber = xmpp_conn_tlscert_serialnumber(xmpptlscert);
     char *subjectname = xmpp_conn_tlscert_subjectname(xmpptlscert);
-    char *fp = xmpp_conn_tlscert_fp(xmpptlscert);
+    char *issuername = xmpp_conn_tlscert_issuername(xmpptlscert);
+    char *fingerprint = xmpp_conn_tlscert_fingerprint(xmpptlscert);
     char *notbefore = xmpp_conn_tlscert_notbefore(xmpptlscert);
     char *notafter = xmpp_conn_tlscert_notafter(xmpptlscert);
+    char *key_alg = xmpp_conn_tlscert_key_algorithm(xmpptlscert);
+    char *signature_alg = xmpp_conn_tlscert_signature_algorithm(xmpptlscert);
 
-    TLSCertificate *cert = tlscerts_new(fp, subjectname, notbefore, notafter);
+    TLSCertificate *cert = tlscerts_new(fingerprint, version, serialnumber, subjectname, issuername, notbefore,
+        notafter, key_alg, signature_alg);
     int res = sv_ev_certfail(errormsg, cert);
     tlscerts_free(cert);
 
@@ -405,12 +411,18 @@ TLSCertificate*
 jabber_get_tls_peer_cert(void)
 {
     xmpp_tlscert_t *xmpptlscert = xmpp_conn_tls_peer_cert(jabber_conn.conn);
+    int version = xmpp_conn_tlscert_version(xmpptlscert);
+    char *serialnumber = xmpp_conn_tlscert_serialnumber(xmpptlscert);
     char *subjectname = xmpp_conn_tlscert_subjectname(xmpptlscert);
-    char *fp = xmpp_conn_tlscert_fp(xmpptlscert);
+    char *issuername = xmpp_conn_tlscert_issuername(xmpptlscert);
+    char *fingerprint = xmpp_conn_tlscert_fingerprint(xmpptlscert);
     char *notbefore = xmpp_conn_tlscert_notbefore(xmpptlscert);
     char *notafter = xmpp_conn_tlscert_notafter(xmpptlscert);
+    char *key_alg = xmpp_conn_tlscert_key_algorithm(xmpptlscert);
+    char *signature_alg = xmpp_conn_tlscert_signature_algorithm(xmpptlscert);
 
-    TLSCertificate *cert = tlscerts_new(fp, subjectname, notbefore, notafter);
+    TLSCertificate *cert = tlscerts_new(fingerprint, version, serialnumber, subjectname, issuername, notbefore,
+        notafter, key_alg, signature_alg);
 
     xmpp_conn_free_tlscert(jabber_conn.ctx, xmpptlscert);
 

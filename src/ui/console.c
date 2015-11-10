@@ -196,18 +196,76 @@ cons_show_tlscert(TLSCertificate *cert)
     }
 
     cons_show("Certificate:");
-    if (cert->domain) {
-        cons_show("  Domain       : %s", cert->domain);
+
+    cons_show("  Subject:");
+    if (cert->subject_commonname) {
+        cons_show("    Common name        : %s", cert->subject_commonname);
     }
-    if (cert->organisation) {
-        cons_show("  Organisation : %s", cert->organisation);
+    if (cert->subject_distinguishedname) {
+        cons_show("    Distinguished name : %s", cert->subject_distinguishedname);
     }
-    if (cert->email) {
-        cons_show("  Email        : %s", cert->email);
+    if (cert->subject_organisation) {
+        cons_show("    Organisation       : %s", cert->subject_organisation);
     }
-    cons_show("  Fingerprint  : %s", cert->fingerprint);
-    cons_show("  Start        : %s", cert->notbefore);
-    cons_show("  End          : %s", cert->notafter);
+    if (cert->subject_organisation_unit) {
+        cons_show("    Organisation unit  : %s", cert->subject_organisation_unit);
+    }
+    if (cert->subject_email) {
+        cons_show("    Email              : %s", cert->subject_email);
+    }
+    if (cert->subject_state) {
+        cons_show("    State              : %s", cert->subject_state);
+    }
+    if (cert->subject_country) {
+        cons_show("    Country            : %s", cert->subject_country);
+    }
+    if (cert->subject_serialnumber) {
+        cons_show("    Serial number      : %s", cert->subject_serialnumber);
+    }
+
+    cons_show("  Issuer:");
+    if (cert->issuer_commonname) {
+        cons_show("    Common name        : %s", cert->issuer_commonname);
+    }
+    if (cert->issuer_distinguishedname) {
+        cons_show("    Distinguished name : %s", cert->issuer_distinguishedname);
+    }
+    if (cert->issuer_organisation) {
+        cons_show("    Organisation       : %s", cert->issuer_organisation);
+    }
+    if (cert->issuer_organisation_unit) {
+        cons_show("    Organisation unit  : %s", cert->issuer_organisation_unit);
+    }
+    if (cert->issuer_email) {
+        cons_show("    Email              : %s", cert->issuer_email);
+    }
+    if (cert->issuer_state) {
+        cons_show("    State              : %s", cert->issuer_state);
+    }
+    if (cert->issuer_country) {
+        cons_show("    Country            : %s", cert->issuer_country);
+    }
+    if (cert->issuer_serialnumber) {
+        cons_show("    Serial number      : %s", cert->issuer_serialnumber);
+    }
+
+    cons_show("  Version             : %d", cert->version);
+
+    if (cert->serialnumber) {
+        cons_show("  Serial number       : %s", cert->serialnumber);
+    }
+
+    if (cert->key_alg) {
+        cons_show("  Key algorithm       : %s", cert->key_alg);
+    }
+    if (cert->signature_alg) {
+        cons_show("  Signature algorithm : %s", cert->signature_alg);
+    }
+
+    cons_show("  Start               : %s", cert->notbefore);
+    cons_show("  End                 : %s", cert->notafter);
+
+    cons_show("  Fingerprint         : %s", cert->fingerprint);
 }
 
 void
