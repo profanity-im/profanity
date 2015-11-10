@@ -207,6 +207,7 @@ static struct cmd_t command_defs[] =
             "/tls always",
             "/tls deny",
             "/tls cert",
+            "/tls trust",
             "/tls trusted",
             "/tls revoke <fingerprint>",
             "/tls certpath",
@@ -216,11 +217,12 @@ static struct cmd_t command_defs[] =
         CMD_DESC(
             "Handle TLS certificates. ")
         CMD_ARGS(
-            { "allow",                "Allow connection to continue with an invalid TLS certificate." },
-            { "always",               "Always allow connections with this invalid TLS certificate." },
-            { "deny",                 "Terminate TLS connection." },
+            { "allow",                "Allow connection to continue with TLS certificate." },
+            { "always",               "Always allow connections with TLS certificate." },
+            { "deny",                 "Abort connection." },
             { "cert",                 "Show the current TLS certificate." },
-            { "trusted",              "List manually trusted certificates (with /tls always)." },
+            { "trust",                "Add the current TLS certificate to manually trusted certiciates." },
+            { "trusted",              "List manually trusted certificates (with '/tls always' or '/tls trust')." },
             { "revoke <fingerprint>", "Remove a manually trusted certificate." },
             { "certpath",             "Show the trusted certificate path." },
             { "certpath set <path>",  "Specify filesystem path containing trusted certificates." },
@@ -2223,6 +2225,7 @@ cmd_init(void)
     autocomplete_add(tls_ac, "always");
     autocomplete_add(tls_ac, "deny");
     autocomplete_add(tls_ac, "cert");
+    autocomplete_add(tls_ac, "trust");
     autocomplete_add(tls_ac, "trusted");
     autocomplete_add(tls_ac, "revoke");
     autocomplete_add(tls_ac, "certpath");

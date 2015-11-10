@@ -47,6 +47,7 @@
 #include "roster_list.h"
 #include "window_list.h"
 #include "config/tlscerts.h"
+#include "profanity.h"
 
 #ifdef HAVE_LIBOTR
 #include "otr/otr.h"
@@ -733,9 +734,9 @@ sv_ev_certfail(const char *const errormsg, TLSCertificate *cert)
     cons_show_error("TLS certificate verification failed: %s", errormsg);
     cons_show_tlscert(cert);
     cons_show("");
-    cons_show("Use '/tls allow' to accept this certificate");
-    cons_show("Use '/tls always' to accept this certificate permanently");
-    cons_show("Use '/tls deny' to reject this certificate");
+    cons_show("Use '/tls allow' to accept this certificate.");
+    cons_show("Use '/tls always' to accept this certificate permanently.");
+    cons_show("Use '/tls deny' to reject this certificate.");
     cons_show("");
     ui_update();
 
@@ -743,10 +744,11 @@ sv_ev_certfail(const char *const errormsg, TLSCertificate *cert)
 
     while ((g_strcmp0(cmd, "/tls allow") != 0)
                 && (g_strcmp0(cmd, "/tls always") != 0)
-                && (g_strcmp0(cmd, "/tls deny") != 0)) {
-        cons_show("Use '/tls allow' to accept this certificate");
-        cons_show("Use '/tls always' to accept this certificate permanently");
-        cons_show("Use '/tls deny' to reject this certificate");
+                && (g_strcmp0(cmd, "/tls deny") != 0)
+                && (g_strcmp0(cmd, "/quit") != 0)) {
+        cons_show("Use '/tls allow' to accept this certificate.");
+        cons_show("Use '/tls always' to accept this certificate permanently.");
+        cons_show("Use '/tls deny' to reject this certificate.");
         cons_show("");
         ui_update();
         free(cmd);
@@ -754,16 +756,23 @@ sv_ev_certfail(const char *const errormsg, TLSCertificate *cert)
     }
 
     if (g_strcmp0(cmd, "/tls allow") == 0) {
+        cons_show("Coninuing with connection.");
         tlscerts_set_current(cert->fingerprint);
         free(cmd);
         return 1;
     } else if (g_strcmp0(cmd, "/tls always") == 0) {
+        cons_show("Adding %s to trusted certificates.", cert->fingerprint);
         if (!tlscerts_exists(cert->fingerprint)) {
             tlscerts_add(cert);
         }
         free(cmd);
         return 1;
+    } else if (g_strcmp0(cmd, "/quit") == 0) {
+        prof_set_quit();
+        free(cmd);
+        return 0;
     } else {
+        cons_show("Aborting connection.");
         free(cmd);
         return 0;
     }

@@ -194,6 +194,20 @@ cmd_tls(ProfWin *window, const char *const command, gchar **args)
         cons_show("Certificate path setting only supported when built with libmesode.");
         return TRUE;
 #endif
+    } else if (g_strcmp0(args[0], "trust") == 0) {
+#ifdef HAVE_LIBMESODE
+        TLSCertificate *cert = jabber_get_tls_peer_cert();
+        if (!tlscerts_exists(cert->fingerprint)) {
+            cons_show("Adding %s to trusted certificates.", cert->fingerprint);
+            tlscerts_add(cert);
+        } else {
+            cons_show("Certificate %s already trusted.", cert->fingerprint);
+        }
+        return TRUE;
+#else
+        cons_show("Manual certificate trust only supported when built with libmesode.");
+        return TRUE;
+#endif
     } else if (g_strcmp0(args[0], "trusted") == 0) {
 #ifdef HAVE_LIBMESODE
         GList *certs = tlscerts_list();

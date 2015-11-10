@@ -45,4 +45,6 @@ void prof_handle_activity(void);
 
 gboolean process_input(char *inp);
 
+void prof_set_quit(void);
+
 #endif
