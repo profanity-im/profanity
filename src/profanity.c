@@ -91,6 +91,7 @@ resource_presence_t saved_presence;
 char *saved_status;
 
 static gboolean cont = TRUE;
+static gboolean force_quit = FALSE;
 
 void
 prof_run(char *log_level, char *account_name)
@@ -107,7 +108,7 @@ prof_run(char *log_level, char *account_name)
     saved_status = NULL;
 
     char *line = NULL;
-    while(cont) {
+    while(cont && !force_quit) {
         log_stderr_handler();
         _check_autoaway();
 
@@ -129,6 +130,12 @@ prof_run(char *log_level, char *account_name)
         jabber_process_events(10);
         ui_update();
     }
+}
+
+void
+prof_set_quit(void)
+{
+    force_quit = TRUE;
 }
 
 void
