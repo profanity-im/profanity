@@ -262,6 +262,17 @@ void ui_redraw_all_room_rosters(void) {}
 void ui_show_all_room_rosters(void) {}
 void ui_hide_all_room_rosters(void) {}
 
+gboolean jabber_conn_is_secured(void)
+{
+    return TRUE;
+}
+TLSCertificate* jabber_get_tls_peer_cert(void)
+{
+    return NULL;
+}
+void cons_show_tlscert(TLSCertificate *cert) {}
+
+
 void ui_prune_wins(void) {}
 
 void ui_handle_login_account_success(ProfAccount *account, int secured) {}
