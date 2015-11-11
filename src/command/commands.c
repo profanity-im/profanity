@@ -196,13 +196,28 @@ cmd_tls(ProfWin *window, const char *const command, gchar **args)
 #endif
     } else if (g_strcmp0(args[0], "trust") == 0) {
 #ifdef HAVE_LIBMESODE
-        TLSCertificate *cert = jabber_get_tls_peer_cert();
-        if (!tlscerts_exists(cert->fingerprint)) {
-            cons_show("Adding %s to trusted certificates.", cert->fingerprint);
-            tlscerts_add(cert);
-        } else {
-            cons_show("Certificate %s already trusted.", cert->fingerprint);
+        jabber_conn_status_t conn_status = jabber_get_connection_status();
+        if (conn_status != JABBER_CONNECTED) {
+            cons_show("You are not currently connected.");
+            return TRUE;
         }
+        if (!jabber_conn_is_secured()) {
+            cons_show("No TLS connection established");
+            return TRUE;
+        }
+        TLSCertificate *cert = jabber_get_tls_peer_cert();
+        if (!cert) {
+            cons_show("Error getting TLS certificate.");
+            return TRUE;
+        }
+        if (tlscerts_exists(cert->fingerprint)) {
+            cons_show("Certificate %s already trusted.", cert->fingerprint);
+            tlscerts_free(cert);
+            return TRUE;
+        }
+        cons_show("Adding %s to trusted certificates.", cert->fingerprint);
+        tlscerts_add(cert);
+        tlscerts_free(cert);
         return TRUE;
 #else
         cons_show("Manual certificate trust only supported when built with libmesode.");
@@ -262,13 +277,13 @@ cmd_tls(ProfWin *window, const char *const command, gchar **args)
             return TRUE;
         }
         TLSCertificate *cert = jabber_get_tls_peer_cert();
-        if (cert) {
-            cons_show_tlscert(cert);
-            cons_show("");
-            tlscerts_free(cert);
-        } else {
-            cons_show("Error getting TLS fingerprint.");
+        if (!cert) {
+            cons_show("Error getting TLS certificate.");
+            return TRUE;
         }
+        cons_show_tlscert(cert);
+        cons_show("");
+        tlscerts_free(cert);
         return TRUE;
 #else
         cons_show("Certificate fetching not supported.");
