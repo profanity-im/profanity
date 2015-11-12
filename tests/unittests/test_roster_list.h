@@ -16,3 +16,8 @@ void find_on_empty_returns_null(void **state);
 void find_twice_returns_second_when_two_match(void **state);
 void find_five_times_finds_fifth(void **state);
 void find_twice_returns_first_when_two_match_and_reset(void **state);
+void add_contact_with_no_group_returns_no_groups(void **state);
+void add_contact_with_group_returns_group(void **state);
+void add_contact_with_two_groups_returns_groups(void **state);
+void add_contact_with_three_groups_returns_groups(void **state);
+void add_contact_with_three_groups_update_adding_two_returns_groups(void **state);

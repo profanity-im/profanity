@@ -55,6 +55,7 @@ static Autocomplete fulljid_ac;
 
 // groups
 static Autocomplete groups_ac;
+GHashTable *group_count;
 
 // contacts, indexed on barejid
 static GHashTable *contacts;
@@ -76,11 +77,11 @@ roster_clear(void)
     autocomplete_clear(fulljid_ac);
     autocomplete_clear(groups_ac);
     g_hash_table_destroy(contacts);
-    contacts = g_hash_table_new_full(g_str_hash, (GEqualFunc)_key_equals, g_free,
-        (GDestroyNotify)p_contact_free);
+    contacts = g_hash_table_new_full(g_str_hash, (GEqualFunc)_key_equals, g_free, (GDestroyNotify)p_contact_free);
     g_hash_table_destroy(name_to_barejid);
-    name_to_barejid = g_hash_table_new_full(g_str_hash, g_str_equal, g_free,
-        g_free);
+    name_to_barejid = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, g_free);
+    g_hash_table_destroy(group_count);
+    group_count = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, NULL);
 }
 
 gboolean
@@ -179,10 +180,9 @@ roster_init(void)
     barejid_ac = autocomplete_new();
     fulljid_ac = autocomplete_new();
     groups_ac = autocomplete_new();
-    contacts = g_hash_table_new_full(g_str_hash, (GEqualFunc)_key_equals, g_free,
-        (GDestroyNotify)p_contact_free);
-    name_to_barejid = g_hash_table_new_full(g_str_hash, g_str_equal, g_free,
-        g_free);
+    contacts = g_hash_table_new_full(g_str_hash, (GEqualFunc)_key_equals, g_free, (GDestroyNotify)p_contact_free);
+    name_to_barejid = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, g_free);
+    group_count = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, NULL);
 }
 
 void
@@ -230,6 +230,23 @@ roster_remove(const char *const name, const char *const barejid)
             resources = g_list_next(resources);
         }
         g_list_free(resources);
+
+        GSList *groups = p_contact_groups(contact);
+        GSList *curr = groups;
+        while (curr) {
+            gchar *group = curr->data;
+            if (g_hash_table_contains(group_count, group)) {
+                int count = GPOINTER_TO_INT(g_hash_table_lookup(group_count, group));
+                count--;
+                if (count < 1) {
+                    g_hash_table_remove(group_count, group);
+                    autocomplete_remove(groups_ac, group);
+                } else {
+                    g_hash_table_insert(group_count, strdup(group), GINT_TO_POINTER(count));
+                }
+            }
+            curr = g_slist_next(curr);
+        }
     }
 
     // remove the contact
@@ -253,14 +270,51 @@ roster_update(const char *const barejid, const char *const name, GSList *groups,
     }
 
     p_contact_set_name(contact, new_name);
-    p_contact_set_groups(contact, groups);
     _replace_name(current_name, new_name, barejid);
 
-    // add groups
-    while (groups) {
-        autocomplete_add(groups_ac, groups->data);
-        groups = g_slist_next(groups);
+    GSList *curr_new_group = groups;
+    while (curr_new_group) {
+        char *new_group = curr_new_group->data;
+
+        // contact added to group
+        if (!p_contact_in_group(contact, new_group)) {
+
+            // group doesn't yet exist
+            if (!g_hash_table_contains(group_count, new_group)) {
+                g_hash_table_insert(group_count, strdup(new_group), GINT_TO_POINTER(1));
+                autocomplete_add(groups_ac, curr_new_group->data);
+
+            // increment count
+            } else {
+                int count = GPOINTER_TO_INT(g_hash_table_lookup(group_count, new_group));
+                g_hash_table_insert(group_count, strdup(new_group), GINT_TO_POINTER(count + 1));
+            }
+        }
+        curr_new_group = g_slist_next(curr_new_group);
     }
+
+    GSList *old_groups = p_contact_groups(contact);
+    GSList *curr_old_group = old_groups;
+    while (curr_old_group) {
+        char *old_group = curr_old_group->data;
+        // removed from group
+        if (!g_slist_find_custom(groups, old_group, (GCompareFunc)g_strcmp0)) {
+            if (g_hash_table_contains(group_count, old_group)) {
+                int count = GPOINTER_TO_INT(g_hash_table_lookup(group_count, old_group));
+                count--;
+                if (count < 1) {
+                    g_hash_table_remove(group_count, old_group);
+                    autocomplete_remove(groups_ac, old_group);
+                } else {
+                    g_hash_table_insert(group_count, strdup(old_group), GINT_TO_POINTER(count));
+                }
+            }
+        }
+
+        curr_old_group = g_slist_next(curr_old_group);
+    }
+
+    p_contact_set_groups(contact, groups);
 }
 
 gboolean
@@ -276,9 +330,18 @@ roster_add(const char *const barejid, const char *const name, GSList *groups, co
         pending_out);
 
     // add groups
-    while (groups) {
-        autocomplete_add(groups_ac, groups->data);
-        groups = g_slist_next(groups);
+    GSList *curr_new_group = groups;
+    while (curr_new_group) {
+        char *new_group = curr_new_group->data;
+        if (g_hash_table_contains(group_count, new_group)) {
+            int count = GPOINTER_TO_INT(g_hash_table_lookup(group_count, new_group));
+            g_hash_table_insert(group_count, strdup(new_group), GINT_TO_POINTER(count + 1));
+        } else {
+            g_hash_table_insert(group_count, strdup(new_group), GINT_TO_POINTER(1));
+            autocomplete_add(groups_ac, new_group);
+        }
+
+        curr_new_group = g_slist_next(curr_new_group);
     }
 
     g_hash_table_insert(contacts, strdup(barejid), contact);

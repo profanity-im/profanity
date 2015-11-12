@@ -14,6 +14,7 @@ void empty_list_when_none_added(void **state)
     roster_init();
     GSList *list = roster_get_contacts();
     assert_null(list);
+    roster_clear();
     roster_free();
 }
 
@@ -23,6 +24,7 @@ void contains_one_element(void **state)
     roster_add("James", NULL, NULL, NULL, FALSE);
     GSList *list = roster_get_contacts();
     assert_int_equal(1, g_slist_length(list));
+    roster_clear();
     roster_free();
 }
 
@@ -34,6 +36,7 @@ void first_element_correct(void **state)
     PContact james = list->data;
 
     assert_string_equal("James", p_contact_barejid(james));
+    roster_clear();
     roster_free();
 }
 
@@ -45,6 +48,7 @@ void contains_two_elements(void **state)
     GSList *list = roster_get_contacts();
 
     assert_int_equal(2, g_slist_length(list));
+    roster_clear();
     roster_free();
 }
 
@@ -60,6 +64,7 @@ void first_and_second_elements_correct(void **state)
 
     assert_string_equal("Dave", p_contact_barejid(first));
     assert_string_equal("James", p_contact_barejid(second));
+    roster_clear();
     roster_free();
 }
 
@@ -72,6 +77,7 @@ void contains_three_elements(void **state)
     GSList *list = roster_get_contacts();
 
     assert_int_equal(3, g_slist_length(list));
+    roster_clear();
     roster_free();
 }
 
@@ -89,6 +95,7 @@ void first_three_elements_correct(void **state)
     assert_string_equal("James", p_contact_barejid(james));
     assert_string_equal("Dave", p_contact_barejid(dave));
     assert_string_equal("Bob", p_contact_barejid(bob));
+    roster_clear();
     roster_free();
 }
 
@@ -108,6 +115,7 @@ void add_twice_at_beginning_adds_once(void **state)
     assert_string_equal("Bob", p_contact_barejid(first));
     assert_string_equal("Dave", p_contact_barejid(second));
     assert_string_equal("James", p_contact_barejid(third));
+    roster_clear();
     roster_free();
 }
 
@@ -127,6 +135,7 @@ void add_twice_in_middle_adds_once(void **state)
     assert_string_equal("Bob", p_contact_barejid(first));
     assert_string_equal("Dave", p_contact_barejid(second));
     assert_string_equal("James", p_contact_barejid(third));
+    roster_clear();
     roster_free();
 }
 
@@ -146,6 +155,7 @@ void add_twice_at_end_adds_once(void **state)
     assert_string_equal("Bob", p_contact_barejid(first));
     assert_string_equal("Dave", p_contact_barejid(second));
     assert_string_equal("James", p_contact_barejid(third));
+    roster_clear();
     roster_free();
 }
 
@@ -162,6 +172,7 @@ void find_first_exists(void **state)
     assert_string_equal("Bob", result);
     free(result);
     free(search);
+    roster_clear();
     roster_free();
 }
 
@@ -175,6 +186,7 @@ void find_second_exists(void **state)
     char *result = roster_contact_autocomplete("Dav");
     assert_string_equal("Dave", result);
     free(result);
+    roster_clear();
     roster_free();
 }
 
@@ -188,6 +200,7 @@ void find_third_exists(void **state)
     char *result = roster_contact_autocomplete("Ja");
     assert_string_equal("James", result);
     free(result);
+    roster_clear();
     roster_free();
 }
 
@@ -200,6 +213,7 @@ void find_returns_null(void **state)
 
     char *result = roster_contact_autocomplete("Mike");
     assert_null(result);
+    roster_clear();
     roster_free();
 }
 
@@ -208,6 +222,7 @@ void find_on_empty_returns_null(void **state)
     roster_init();
     char *result = roster_contact_autocomplete("James");
     assert_null(result);
+    roster_clear();
     roster_free();
 }
 
@@ -223,6 +238,7 @@ void find_twice_returns_second_when_two_match(void **state)
     assert_string_equal("Jamie", result2);
     free(result1);
     free(result2);
+    roster_clear();
     roster_free();
 }
 
@@ -251,6 +267,7 @@ void find_five_times_finds_fifth(void **state)
     free(result3);
     free(result4);
     free(result5);
+    roster_clear();
     roster_free();
 }
 
@@ -267,5 +284,133 @@ void find_twice_returns_first_when_two_match_and_reset(void **state)
     assert_string_equal("James", result2);
     free(result1);
     free(result2);
+    roster_clear();
+    roster_free();
+}
+
+void add_contact_with_no_group_returns_no_groups(void **state)
+{
+    roster_init();
+    roster_add("person@server.org", NULL, NULL, NULL, FALSE);
+
+    GSList *groups_res = roster_get_groups();
+    assert_int_equal(g_slist_length(groups_res), 0);
+
+    g_slist_free_full(groups_res, g_free);
+    roster_clear();
+    roster_free();
+}
+
+void add_contact_with_group_returns_group(void **state)
+{
+    roster_init();
+
+    GSList *groups = NULL;
+    groups = g_slist_append(groups, strdup("friends"));
+    roster_add("person@server.org", NULL, groups, NULL, FALSE);
+
+    GSList *groups_res = roster_get_groups();
+    assert_int_equal(g_slist_length(groups_res), 1);
+
+    GSList *found = g_slist_find_custom(groups_res, "friends", g_strcmp0);
+    assert_true(found != NULL);
+    assert_string_equal(found->data, "friends");
+
+    g_slist_free_full(groups_res, g_free);
+    roster_clear();
+    roster_free();
+}
+
+void add_contact_with_two_groups_returns_groups(void **state)
+{
+    roster_init();
+
+    GSList *groups = NULL;
+    groups = g_slist_append(groups, strdup("friends"));
+    groups = g_slist_append(groups, strdup("work"));
+    roster_add("person@server.org", NULL, groups, NULL, FALSE);
+
+    GSList *groups_res = roster_get_groups();
+    assert_int_equal(g_slist_length(groups_res), 2);
+
+    GSList *found = g_slist_find_custom(groups_res, "friends", g_strcmp0);
+    assert_true(found != NULL);
+    assert_string_equal(found->data, "friends");
+    found = g_slist_find_custom(groups_res, "work", g_strcmp0);
+    assert_true(found != NULL);
+    assert_string_equal(found->data, "work");
+
+    g_slist_free_full(groups_res, g_free);
+    roster_clear();
+    roster_free();
+}
+
+void add_contact_with_three_groups_returns_groups(void **state)
+{
+    roster_init();
+
+    GSList *groups = NULL;
+    groups = g_slist_append(groups, strdup("friends"));
+    groups = g_slist_append(groups, strdup("work"));
+    groups = g_slist_append(groups, strdup("stuff"));
+    roster_add("person@server.org", NULL, groups, NULL, FALSE);
+
+    GSList *groups_res = roster_get_groups();
+    assert_int_equal(g_slist_length(groups_res), 3);
+
+    GSList *found = g_slist_find_custom(groups_res, "friends", g_strcmp0);
+    assert_true(found != NULL);
+    assert_string_equal(found->data, "friends");
+    found = g_slist_find_custom(groups_res, "work", g_strcmp0);
+    assert_true(found != NULL);
+    assert_string_equal(found->data, "work");
+    found = g_slist_find_custom(groups_res, "stuff", g_strcmp0);
+    assert_true(found != NULL);
+    assert_string_equal(found->data, "stuff");
+
+    g_slist_free_full(groups_res, g_free);
+    roster_clear();
+    roster_free();
+}
+
+void add_contact_with_three_groups_update_adding_two_returns_groups(void **state)
+{
+    roster_init();
+
+    GSList *groups1 = NULL;
+    groups1 = g_slist_append(groups1, strdup("friends"));
+    groups1 = g_slist_append(groups1, strdup("work"));
+    groups1 = g_slist_append(groups1, strdup("stuff"));
+    roster_add("person@server.org", NULL, groups1, NULL, FALSE);
+
+    GSList *groups2 = NULL;
+    groups2 = g_slist_append(groups2, strdup("friends"));
+    groups2 = g_slist_append(groups2, strdup("work"));
+    groups2 = g_slist_append(groups2, strdup("stuff"));
+    groups2 = g_slist_append(groups2, strdup("things"));
+    groups2 = g_slist_append(groups2, strdup("people"));
+    roster_update("person@server.org", NULL, groups2, NULL, FALSE);
+
+    GSList *groups_res = roster_get_groups();
+    assert_int_equal(g_slist_length(groups_res), 5);
+
+    GSList *found = g_slist_find_custom(groups_res, "friends", g_strcmp0);
+    assert_true(found != NULL);
+    assert_string_equal(found->data, "friends");
+    found = g_slist_find_custom(groups_res, "work", g_strcmp0);
+    assert_true(found != NULL);
+    assert_string_equal(found->data, "work");
+    found = g_slist_find_custom(groups_res, "stuff", g_strcmp0);
+    assert_true(found != NULL);
+    assert_string_equal(found->data, "stuff");
+    found = g_slist_find_custom(groups_res, "things", g_strcmp0);
+    assert_true(found != NULL);
+    assert_string_equal(found->data, "things");
+    found = g_slist_find_custom(groups_res, "people", g_strcmp0);
+    assert_true(found != NULL);
+    assert_string_equal(found->data, "people");
+
+    g_slist_free_full(groups_res, g_free);
+    roster_clear();
     roster_free();
 }

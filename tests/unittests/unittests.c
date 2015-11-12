@@ -210,6 +210,11 @@ int main(int argc, char* argv[]) {
         unit_test(find_twice_returns_second_when_two_match),
         unit_test(find_five_times_finds_fifth),
         unit_test(find_twice_returns_first_when_two_match_and_reset),
+        unit_test(add_contact_with_no_group_returns_no_groups),
+        unit_test(add_contact_with_group_returns_group),
+        unit_test(add_contact_with_two_groups_returns_groups),
+        unit_test(add_contact_with_three_groups_returns_groups),
+        unit_test(add_contact_with_three_groups_update_adding_two_returns_groups),
 
         unit_test_setup_teardown(returns_false_when_chat_session_does_not_exist,
             init_chat_sessions,
