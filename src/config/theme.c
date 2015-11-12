@@ -124,17 +124,17 @@ static struct colours_t {
         NCURSES_COLOR_T receiptsent;
 } colour_prefs;
 
-static NCURSES_COLOR_T _lookup_colour(const char * const colour);
+static NCURSES_COLOR_T _lookup_colour(const char *const colour);
 static void _set_colour(gchar *val, NCURSES_COLOR_T *pref, NCURSES_COLOR_T def, theme_item_t theme_item);
 static void _load_colours(void);
 static void _load_preferences(void);
-static gchar * _get_themes_dir(void);
-void _theme_list_dir(const gchar * const dir, GSList **result);
-static GString * _theme_find(const char * const theme_name);
-static gboolean _theme_load_file(const char * const theme_name);
+static gchar* _get_themes_dir(void);
+void _theme_list_dir(const gchar *const dir, GSList **result);
+static GString* _theme_find(const char *const theme_name);
+static gboolean _theme_load_file(const char *const theme_name);
 
 void
-theme_init(const char * const theme_name)
+theme_init(const char *const theme_name)
 {
     if (!_theme_load_file(theme_name) && !_theme_load_file("default")) {
         log_error("Theme initialisation failed");
@@ -144,7 +144,7 @@ theme_init(const char * const theme_name)
 }
 
 gboolean
-theme_load(const char * const theme_name)
+theme_load(const char *const theme_name)
 {
     if (_theme_load_file(theme_name)) {
         _load_colours();
@@ -156,7 +156,7 @@ theme_load(const char * const theme_name)
 }
 
 static gboolean
-_theme_load_file(const char * const theme_name)
+_theme_load_file(const char *const theme_name)
 {
     // use default theme
     if (theme_name == NULL || strcmp(theme_name, "default") == 0) {
@@ -189,7 +189,7 @@ _theme_load_file(const char * const theme_name)
     return TRUE;
 }
 
-GSList *
+GSList*
 theme_list(void)
 {
     GSList *result = NULL;
@@ -300,7 +300,7 @@ theme_init_colours(void)
 }
 
 static NCURSES_COLOR_T
-_lookup_colour(const char * const colour)
+_lookup_colour(const char *const colour)
 {
     int i;
     for (i = 0; i < num_colours; i++) {
@@ -471,6 +471,7 @@ _load_preferences(void)
     _set_boolean_preference("intype", PREF_INTYPE);
 
     _set_boolean_preference("enc.warn", PREF_ENC_WARN);
+    _set_boolean_preference("tls.show", PREF_TLS_SHOW);
 
     if (g_key_file_has_key(theme, "ui", "otr.char", NULL)) {
         gchar *ch = g_key_file_get_string(theme, "ui", "otr.char", NULL);
@@ -488,7 +489,7 @@ _load_preferences(void)
     }
 }
 
-static gchar *
+static gchar*
 _get_themes_dir(void)
 {
     gchar *xdg_config = xdg_get_config_home();
@@ -499,7 +500,7 @@ _get_themes_dir(void)
 }
 
 void
-_theme_list_dir(const gchar * const dir, GSList **result)
+_theme_list_dir(const gchar *const dir, GSList **result)
 {
     GDir *themes = g_dir_open(dir, 0, NULL);
     if (themes) {
@@ -512,8 +513,8 @@ _theme_list_dir(const gchar * const dir, GSList **result)
     }
 }
 
-static GString *
-_theme_find(const char * const theme_name)
+static GString*
+_theme_find(const char *const theme_name)
 {
     GString *path = NULL;
     gchar *themes_dir = _get_themes_dir();
@@ -545,7 +546,7 @@ _theme_find(const char * const theme_name)
 }
 
 theme_item_t
-theme_main_presence_attrs(const char * const presence)
+theme_main_presence_attrs(const char *const presence)
 {
     if (g_strcmp0(presence, "online") == 0) {
         return THEME_ONLINE;

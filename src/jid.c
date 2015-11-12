@@ -41,8 +41,8 @@
 
 #include "common.h"
 
-Jid *
-jid_create(const gchar * const str)
+Jid*
+jid_create(const gchar *const str)
 {
     Jid *result = NULL;
 
@@ -106,8 +106,8 @@ jid_create(const gchar * const str)
     return result;
 }
 
-Jid *
-jid_create_from_bare_and_resource(const char * const room, const char * const nick)
+Jid*
+jid_create_from_bare_and_resource(const char *const room, const char *const nick)
 {
     Jid *result;
     char *jid = create_fulljid(room, nick);
@@ -142,8 +142,8 @@ jid_is_valid_room_form(Jid *jid)
  * barejid/resourcepart
  * Will return a newly created string that must be freed by the caller
  */
-char *
-create_fulljid(const char * const barejid, const char * const resource)
+char*
+create_fulljid(const char *const barejid, const char *const resource)
 {
     gchar *barejidlower = g_utf8_strdown(barejid, -1);
     GString *full_jid = g_string_new(barejidlower);
@@ -163,8 +163,8 @@ create_fulljid(const char * const barejid, const char * const resource)
  * Full JID = "test@conference.server/person"
  * returns "person"
  */
-char *
-get_nick_from_full_jid(const char * const full_room_jid)
+char*
+get_nick_from_full_jid(const char *const full_room_jid)
 {
     char **tokens = g_strsplit(full_room_jid, "/", 0);
     char *nick_part = NULL;
@@ -184,7 +184,7 @@ get_nick_from_full_jid(const char * const full_room_jid)
 /*
  * get the fulljid, fall back to the barejid
  */
-char *
+char*
 jid_fulljid_or_barejid(Jid *jid)
 {
     if (jid->fulljid) {

@@ -209,7 +209,7 @@ void cmd_otr_gen_generates_key_for_connected_account(void **state)
     gchar *args[] = { "gen", NULL };
     char *account_name = "myaccount";
     ProfAccount *account = account_new(account_name, "me@jabber.org", NULL, NULL,
-        TRUE, NULL, 0, NULL, NULL, NULL, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+        TRUE, NULL, 0, NULL, NULL, NULL, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
 
     will_return(jabber_get_connection_status, JABBER_CONNECTED);
     will_return(jabber_get_account_name, account_name);

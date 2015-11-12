@@ -51,7 +51,7 @@
 #include "window_list.h"
 #include "config/preferences.h"
 
-static void _notify(const char * const message, int timeout, const char * const category);
+static void _notify(const char *const message, int timeout, const char *const category);
 
 static GTimer *remind_timer;
 
@@ -73,7 +73,7 @@ notifier_uninit(void)
 }
 
 void
-notify_typing(const char * const handle)
+notify_typing(const char *const handle)
 {
     char message[strlen(handle) + 1 + 11];
     sprintf(message, "%s: typing...", handle);
@@ -82,8 +82,8 @@ notify_typing(const char * const handle)
 }
 
 void
-notify_invite(const char * const from, const char * const room,
-    const char * const reason)
+notify_invite(const char *const from, const char *const room,
+    const char *const reason)
 {
     GString *message = g_string_new("Room invite\nfrom: ");
     g_string_append(message, from);
@@ -99,7 +99,7 @@ notify_invite(const char * const from, const char * const room,
 }
 
 void
-notify_message(ProfWin *window, const char * const name, const char * const text)
+notify_message(ProfWin *window, const char *const name, const char *const text)
 {
     int num = wins_get_num(window);
     if (num == 10) {
@@ -121,7 +121,7 @@ notify_message(ProfWin *window, const char * const name, const char * const text
 }
 
 void
-notify_room_message(const char * const handle, const char * const room, int win, const char * const text)
+notify_room_message(const char *const handle, const char *const room, int win, const char *const text)
 {
     GString *message = g_string_new("");
     g_string_append_printf(message, "%s in %s (win %d)", handle, room, win);
@@ -135,7 +135,7 @@ notify_room_message(const char * const handle, const char * const room, int win,
 }
 
 void
-notify_subscription(const char * const from)
+notify_subscription(const char *const from)
 {
     GString *message = g_string_new("Subscription request: \n");
     g_string_append(message, from);
@@ -149,7 +149,7 @@ notify_remind(void)
     gdouble elapsed = g_timer_elapsed(remind_timer, NULL);
     gint remind_period = prefs_get_notify_remind();
     if (remind_period > 0 && elapsed >= remind_period) {
-        gint unread = ui_unread();
+        gint unread = wins_get_total_unread();
         gint open = muc_invites_count();
         gint subs = presence_sub_request_count();
 
@@ -195,8 +195,7 @@ notify_remind(void)
 }
 
 static void
-_notify(const char * const message, int timeout,
-    const char * const category)
+_notify(const char *const message, int timeout, const char *const category)
 {
 #ifdef HAVE_LIBNOTIFY
     log_debug("Attempting notification: %s", message);

@@ -48,16 +48,15 @@ typedef struct chat_session_t {
 void chat_sessions_init(void);
 void chat_sessions_clear(void);
 
-void chat_session_resource_override(const char * const barejid, const char * const resource);
-ChatSession* chat_session_get(const char * const barejid);
+void chat_session_resource_override(const char *const barejid, const char *const resource);
+ChatSession* chat_session_get(const char *const barejid);
 
-void chat_session_recipient_active(const char * const barejid, const char * const resource,
-    gboolean send_states);
-void chat_session_recipient_typing(const char * const barejid, const char * const resource);
-void chat_session_recipient_paused(const char * const barejid, const char * const resource);
-void chat_session_recipient_gone(const char * const barejid, const char * const resource);
-void chat_session_recipient_inactive(const char * const barejid, const char * const resource);
+void chat_session_recipient_active(const char *const barejid, const char *const resource, gboolean send_states);
+void chat_session_recipient_typing(const char *const barejid, const char *const resource);
+void chat_session_recipient_paused(const char *const barejid, const char *const resource);
+void chat_session_recipient_gone(const char *const barejid, const char *const resource);
+void chat_session_recipient_inactive(const char *const barejid, const char *const resource);
 
-void chat_session_remove(const char * const barejid);
+void chat_session_remove(const char *const barejid);
 
 #endif

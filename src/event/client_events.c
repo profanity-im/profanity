@@ -32,10 +32,11 @@
  *
  */
 
+#include "config.h"
+
 #include <stdlib.h>
 #include <glib.h>
 
-#include "config.h"
 #include "log.h"
 #include "ui/ui.h"
 #include "window_list.h"
@@ -48,10 +49,10 @@
 #endif
 
 jabber_conn_status_t
-cl_ev_connect_jid(const char * const jid, const char * const passwd, const char * const altdomain, const int port)
+cl_ev_connect_jid(const char *const jid, const char *const passwd, const char *const altdomain, const int port, const char *const tls_policy)
 {
     cons_show("Connecting as %s", jid);
-    return jabber_connect_with_details(jid, passwd, altdomain, port);
+    return jabber_connect_with_details(jid, passwd, altdomain, port, tls_policy);
 }
 
 jabber_conn_status_t
@@ -65,7 +66,7 @@ cl_ev_connect_account(ProfAccount *account)
 }
 
 void
-cl_ev_presence_send(const resource_presence_t presence_type, const char * const msg, const int idle_secs)
+cl_ev_presence_send(const resource_presence_t presence_type, const char *const msg, const int idle_secs)
 {
     char *signed_status = NULL;
 
@@ -84,7 +85,7 @@ cl_ev_presence_send(const resource_presence_t presence_type, const char * const 
 }
 
 void
-cl_ev_send_msg(ProfChatWin *chatwin, const char * const msg)
+cl_ev_send_msg(ProfChatWin *chatwin, const char *const msg)
 {
     chat_state_active(chatwin->state);
 
@@ -94,14 +95,14 @@ cl_ev_send_msg(ProfChatWin *chatwin, const char * const msg)
     if (chatwin->pgp_send) {
         char *id = message_send_chat_pgp(chatwin->barejid, msg);
         chat_log_pgp_msg_out(chatwin->barejid, msg);
-        ui_outgoing_chat_msg(chatwin, msg, id, PROF_MSG_PGP);
+        chatwin_outgoing_msg(chatwin, msg, id, PROF_MSG_PGP);
         free(id);
     } else {
         gboolean handled = otr_on_message_send(chatwin, msg);
         if (!handled) {
             char *id = message_send_chat(chatwin->barejid, msg);
             chat_log_msg_out(chatwin->barejid, msg);
-            ui_outgoing_chat_msg(chatwin, msg, id, PROF_MSG_PLAIN);
+            chatwin_outgoing_msg(chatwin, msg, id, PROF_MSG_PLAIN);
             free(id);
         }
     }
@@ -116,7 +117,7 @@ cl_ev_send_msg(ProfChatWin *chatwin, const char * const msg)
     if (!handled) {
         char *id = message_send_chat(chatwin->barejid, msg);
         chat_log_msg_out(chatwin->barejid, msg);
-        ui_outgoing_chat_msg(chatwin, msg, id, PROF_MSG_PLAIN);
+        chatwin_outgoing_msg(chatwin, msg, id, PROF_MSG_PLAIN);
         free(id);
     }
     return;
@@ -129,12 +130,12 @@ cl_ev_send_msg(ProfChatWin *chatwin, const char * const msg)
     if (chatwin->pgp_send) {
         char *id = message_send_chat_pgp(chatwin->barejid, msg);
         chat_log_pgp_msg_out(chatwin->barejid, msg);
-        ui_outgoing_chat_msg(chatwin, msg, id, PROF_MSG_PGP);
+        chatwin_outgoing_msg(chatwin, msg, id, PROF_MSG_PGP);
         free(id);
     } else {
         char *id = message_send_chat(chatwin->barejid, msg);
         chat_log_msg_out(chatwin->barejid, msg);
-        ui_outgoing_chat_msg(chatwin, msg, id, PROF_MSG_PLAIN);
+        chatwin_outgoing_msg(chatwin, msg, id, PROF_MSG_PLAIN);
         free(id);
     }
     return;
@@ -146,7 +147,7 @@ cl_ev_send_msg(ProfChatWin *chatwin, const char * const msg)
 #ifndef HAVE_LIBGPGME
     char *id = message_send_chat(chatwin->barejid, msg);
     chat_log_msg_out(chatwin->barejid, msg);
-    ui_outgoing_chat_msg(chatwin, msg, id, PROF_MSG_PLAIN);
+    chatwin_outgoing_msg(chatwin, msg, id, PROF_MSG_PLAIN);
     free(id);
     return;
 #endif
@@ -154,14 +155,14 @@ cl_ev_send_msg(ProfChatWin *chatwin, const char * const msg)
 }
 
 void
-cl_ev_send_muc_msg(ProfMucWin *mucwin, const char * const msg)
+cl_ev_send_muc_msg(ProfMucWin *mucwin, const char *const msg)
 {
     message_send_groupchat(mucwin->roomjid, msg);
 }
 
 void
-cl_ev_send_priv_msg(ProfPrivateWin *privwin, const char * const msg)
+cl_ev_send_priv_msg(ProfPrivateWin *privwin, const char *const msg)
 {
     message_send_private(privwin->fulljid, msg);
-    ui_outgoing_private_msg(privwin, msg);
+    privwin_outgoing_msg(privwin, msg);
 }

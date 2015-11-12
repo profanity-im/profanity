@@ -66,11 +66,11 @@ gint log_maxsize = 0;
 static Autocomplete boolean_choice_ac;
 
 static void _save_prefs(void);
-static gchar * _get_preferences_file(void);
-static const char * _get_group(preference_t pref);
-static const char * _get_key(preference_t pref);
+static gchar* _get_preferences_file(void);
+static const char* _get_group(preference_t pref);
+static const char* _get_key(preference_t pref);
 static gboolean _get_default_boolean(preference_t pref);
-static char * _get_default_string(preference_t pref);
+static char* _get_default_string(preference_t pref);
 
 void
 prefs_load(void)
@@ -142,8 +142,8 @@ prefs_close(void)
     prefs = NULL;
 }
 
-char *
-prefs_autocomplete_boolean_choice(const char * const prefix)
+char*
+prefs_autocomplete_boolean_choice(const char *const prefix)
 {
     return autocomplete_complete(boolean_choice_ac, prefix, TRUE);
 }
@@ -177,7 +177,7 @@ prefs_set_boolean(preference_t pref, gboolean value)
     _save_prefs();
 }
 
-char *
+char*
 prefs_get_string(preference_t pref)
 {
     const char *group = _get_group(pref);
@@ -203,7 +203,6 @@ prefs_free_string(char *pref)
     if (pref) {
         g_free(pref);
     }
-    pref = NULL;
 }
 
 
@@ -263,7 +262,8 @@ prefs_set_max_log_size(gint value)
     _save_prefs();
 }
 
-gint prefs_get_inpblock(void)
+gint
+prefs_get_inpblock(void)
 {
     int val = g_key_file_get_integer(prefs, PREF_GROUP_UI, "inpblock", NULL);
     if (val == 0) {
@@ -273,7 +273,8 @@ gint prefs_get_inpblock(void)
     }
 }
 
-void prefs_set_inpblock(gint value)
+void
+prefs_set_inpblock(gint value)
 {
     g_key_file_set_integer(prefs, PREF_GROUP_UI, "inpblock", value);
     _save_prefs();
@@ -444,7 +445,7 @@ prefs_set_pgp_char(char ch)
 }
 
 gboolean
-prefs_add_alias(const char * const name, const char * const value)
+prefs_add_alias(const char *const name, const char *const value)
 {
     if (g_key_file_has_key(prefs, PREF_GROUP_ALIAS, name, NULL)) {
         return FALSE;
@@ -455,15 +456,15 @@ prefs_add_alias(const char * const name, const char * const value)
     }
 }
 
-char *
-prefs_get_alias(const char * const name)
+char*
+prefs_get_alias(const char *const name)
 {
     return g_key_file_get_string(prefs, PREF_GROUP_ALIAS, name, NULL);
 
 }
 
 gboolean
-prefs_remove_alias(const char * const name)
+prefs_remove_alias(const char *const name)
 {
     if (!g_key_file_has_key(prefs, PREF_GROUP_ALIAS, name, NULL)) {
         return FALSE;
@@ -483,7 +484,7 @@ _alias_cmp(gconstpointer *p1, gconstpointer *p2)
     return strcmp(alias1->name, alias2->name);
 }
 
-GList *
+GList*
 prefs_get_aliases(void)
 {
     if (!g_key_file_has_group(prefs, PREF_GROUP_ALIAS)) {
@@ -545,7 +546,7 @@ _save_prefs(void)
     g_string_free(base_str, TRUE);
 }
 
-static gchar *
+static gchar*
 _get_preferences_file(void)
 {
     gchar *xdg_config = xdg_get_config_home();
@@ -561,7 +562,7 @@ _get_preferences_file(void)
 // get the preference group for a specific preference
 // for example the PREF_BEEP setting ("beep" in .profrc, see _get_key) belongs
 // to the [ui] section.
-static const char *
+static const char*
 _get_group(preference_t pref)
 {
     switch (pref)
@@ -602,6 +603,7 @@ _get_group(preference_t pref)
         case PREF_RESOURCE_MESSAGE:
         case PREF_ENC_WARN:
         case PREF_INPBLOCK_DYNAMIC:
+        case PREF_TLS_SHOW:
             return PREF_GROUP_UI;
         case PREF_STATES:
         case PREF_OUTTYPE:
@@ -626,13 +628,14 @@ _get_group(preference_t pref)
         case PREF_AUTOAWAY_MODE:
         case PREF_AUTOAWAY_MESSAGE:
         case PREF_AUTOXA_MESSAGE:
+        case PREF_LASTACTIVITY:
             return PREF_GROUP_PRESENCE;
         case PREF_CONNECT_ACCOUNT:
         case PREF_DEFAULT_ACCOUNT:
         case PREF_CARBONS:
         case PREF_RECEIPTS_SEND:
         case PREF_RECEIPTS_REQUEST:
-        case PREF_CERT_PATH:
+        case PREF_TLS_CERTPATH:
             return PREF_GROUP_CONNECTION;
         case PREF_OTR_LOG:
         case PREF_OTR_POLICY:
@@ -646,7 +649,7 @@ _get_group(preference_t pref)
 
 // get the key used in .profrc for the preference
 // for example the PREF_AUTOAWAY_MODE maps to "autoaway.mode" in .profrc
-static const char *
+static const char*
 _get_key(preference_t pref)
 {
     switch (pref)
@@ -779,8 +782,12 @@ _get_key(preference_t pref)
             return "enc.warn";
         case PREF_PGP_LOG:
             return "log";
-        case PREF_CERT_PATH:
-            return "certpath";
+        case PREF_TLS_CERTPATH:
+            return "tls.certpath";
+        case PREF_TLS_SHOW:
+            return "tls.show";
+        case PREF_LASTACTIVITY:
+            return "lastactivity";
         default:
             return NULL;
     }
@@ -817,6 +824,8 @@ _get_default_boolean(preference_t pref)
         case PREF_ROSTER_OFFLINE:
         case PREF_ROSTER_RESOURCE:
         case PREF_ROSTER_EMPTY:
+        case PREF_TLS_SHOW:
+        case PREF_LASTACTIVITY:
             return TRUE;
         default:
             return FALSE;
@@ -825,7 +834,7 @@ _get_default_boolean(preference_t pref)
 
 // the default setting for a string type preference
 // if it is not specified in .profrc
-static char *
+static char*
 _get_default_string(preference_t pref)
 {
     switch (pref)

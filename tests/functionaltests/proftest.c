@@ -244,7 +244,7 @@ prof_connect_with_roster(char *roster)
         "</presence>"
     );
 
-    prof_input("/connect stabber@localhost port 5230");
+    prof_input("/connect stabber@localhost server 127.0.0.1 port 5230 tls allow");
     prof_input("password");
 
     // Allow time for profanity to connect

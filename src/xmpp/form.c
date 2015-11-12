@@ -78,7 +78,7 @@ _is_valid_form_element(xmpp_stanza_t *stanza)
     return TRUE;
 }
 
-static DataForm *
+static DataForm*
 _form_new(void)
 {
     DataForm *form = malloc(sizeof(DataForm));
@@ -93,7 +93,7 @@ _form_new(void)
     return form;
 }
 
-static FormField *
+static FormField*
 _field_new(void)
 {
     FormField *field = malloc(sizeof(FormField));
@@ -108,8 +108,8 @@ _field_new(void)
     return field;
 }
 
-static char *
-_get_property(xmpp_stanza_t * const stanza, const char * const property)
+static char*
+_get_property(xmpp_stanza_t *const stanza, const char *const property)
 {
     char *result = NULL;
     xmpp_ctx_t *ctx = connection_get_ctx();
@@ -126,8 +126,8 @@ _get_property(xmpp_stanza_t * const stanza, const char * const property)
     return result;
 }
 
-static char *
-_get_attr(xmpp_stanza_t * const stanza, const char * const attr)
+static char*
+_get_attr(xmpp_stanza_t *const stanza, const char *const attr)
 {
     char *result = xmpp_stanza_get_attribute(stanza, attr);
     if (result) {
@@ -138,7 +138,7 @@ _get_attr(xmpp_stanza_t * const stanza, const char * const attr)
 }
 
 static gboolean
-_is_required(xmpp_stanza_t * const stanza)
+_is_required(xmpp_stanza_t *const stanza)
 {
     xmpp_stanza_t *child = xmpp_stanza_get_child_by_name(stanza, "required");
     if (child) {
@@ -149,7 +149,7 @@ _is_required(xmpp_stanza_t * const stanza)
 }
 
 static form_field_type_t
-_get_field_type(const char * const type)
+_get_field_type(const char *const type)
 {
     if (g_strcmp0(type, "hidden") == 0) {
         return FIELD_HIDDEN;
@@ -184,8 +184,8 @@ _get_field_type(const char * const type)
     return FIELD_UNKNOWN;
 }
 
-DataForm *
-form_create(xmpp_stanza_t * const form_stanza)
+DataForm*
+form_create(xmpp_stanza_t *const form_stanza)
 {
     xmpp_ctx_t *ctx = connection_get_ctx();
 
@@ -281,7 +281,7 @@ form_create(xmpp_stanza_t * const form_stanza)
     return form;
 }
 
-xmpp_stanza_t *
+xmpp_stanza_t*
 form_create_submission(DataForm *form)
 {
     xmpp_ctx_t *ctx = connection_get_ctx();
@@ -408,7 +408,7 @@ _field_compare_by_var(FormField *a, FormField *b)
     return g_strcmp0(a->var, b->var);
 }
 
-GSList *
+GSList*
 form_get_non_form_type_fields_sorted(DataForm *form)
 {
     GSList *sorted = NULL;
@@ -424,7 +424,7 @@ form_get_non_form_type_fields_sorted(DataForm *form)
     return sorted;
 }
 
-GSList *
+GSList*
 form_get_field_values_sorted(FormField *field)
 {
     GSList *sorted = NULL;
@@ -440,7 +440,7 @@ form_get_field_values_sorted(FormField *field)
     return sorted;
 }
 
-char *
+char*
 form_get_form_type_field(DataForm *form)
 {
     GSList *curr = form->fields;
@@ -456,7 +456,7 @@ form_get_form_type_field(DataForm *form)
 }
 
 gboolean
-form_tag_exists(DataForm *form, const char * const tag)
+form_tag_exists(DataForm *form, const char *const tag)
 {
     GList *tags = g_hash_table_get_keys(form->tag_to_var);
     GList *curr = tags;
@@ -472,7 +472,7 @@ form_tag_exists(DataForm *form, const char * const tag)
 }
 
 form_field_type_t
-form_get_field_type(DataForm *form, const char * const tag)
+form_get_field_type(DataForm *form, const char *const tag)
 {
     char *var = g_hash_table_lookup(form->tag_to_var, tag);
     if (var) {
@@ -489,7 +489,7 @@ form_get_field_type(DataForm *form, const char * const tag)
 }
 
 void
-form_set_value(DataForm *form, const char * const tag, char *value)
+form_set_value(DataForm *form, const char *const tag, char *value)
 {
     char *var = g_hash_table_lookup(form->tag_to_var, tag);
     if (var) {
@@ -514,7 +514,7 @@ form_set_value(DataForm *form, const char * const tag, char *value)
 }
 
 void
-form_add_value(DataForm *form, const char * const tag, char *value)
+form_add_value(DataForm *form, const char *const tag, char *value)
 {
     char *var = g_hash_table_lookup(form->tag_to_var, tag);
     if (var) {
@@ -539,7 +539,7 @@ form_add_value(DataForm *form, const char * const tag, char *value)
 }
 
 gboolean
-form_add_unique_value(DataForm *form, const char * const tag, char *value)
+form_add_unique_value(DataForm *form, const char *const tag, char *value)
 {
     char *var = g_hash_table_lookup(form->tag_to_var, tag);
     if (var) {
@@ -570,7 +570,7 @@ form_add_unique_value(DataForm *form, const char * const tag, char *value)
 }
 
 gboolean
-form_remove_value(DataForm *form, const char * const tag, char *value)
+form_remove_value(DataForm *form, const char *const tag, char *value)
 {
     char *var = g_hash_table_lookup(form->tag_to_var, tag);
     if (var) {
@@ -600,7 +600,7 @@ form_remove_value(DataForm *form, const char * const tag, char *value)
 }
 
 gboolean
-form_remove_text_multi_value(DataForm *form, const char * const tag, int index)
+form_remove_text_multi_value(DataForm *form, const char *const tag, int index)
 {
     index--;
     char *var = g_hash_table_lookup(form->tag_to_var, tag);
@@ -632,7 +632,7 @@ form_remove_text_multi_value(DataForm *form, const char * const tag, int index)
 }
 
 int
-form_get_value_count(DataForm *form, const char * const tag)
+form_get_value_count(DataForm *form, const char *const tag)
 {
     char *var = g_hash_table_lookup(form->tag_to_var, tag);
     if (var) {
@@ -654,7 +654,7 @@ form_get_value_count(DataForm *form, const char * const tag)
 }
 
 gboolean
-form_field_contains_option(DataForm *form, const char * const tag, char *value)
+form_field_contains_option(DataForm *form, const char *const tag, char *value)
 {
     char *var = g_hash_table_lookup(form->tag_to_var, tag);
     if (var) {
@@ -678,8 +678,8 @@ form_field_contains_option(DataForm *form, const char * const tag, char *value)
     return FALSE;
 }
 
-FormField *
-form_get_field_by_tag(DataForm *form, const char * const tag)
+FormField*
+form_get_field_by_tag(DataForm *form, const char *const tag)
 {
     char *var = g_hash_table_lookup(form->tag_to_var, tag);
     if (var) {
@@ -696,7 +696,7 @@ form_get_field_by_tag(DataForm *form, const char * const tag)
 }
 
 Autocomplete
-form_get_value_ac(DataForm *form, const char * const tag)
+form_get_value_ac(DataForm *form, const char *const tag)
 {
     char *var = g_hash_table_lookup(form->tag_to_var, tag);
     if (var) {

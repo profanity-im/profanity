@@ -64,7 +64,6 @@
 #include "ui/inputwin.h"
 #include "ui/window.h"
 #include "window_list.h"
-#include "event/ui_events.h"
 #include "xmpp/xmpp.h"
 
 static WINDOW *inp_win;
@@ -129,7 +128,7 @@ create_input_window(void)
     _inp_win_update_virtual();
 }
 
-char *
+char*
 inp_readline(void)
 {
     free(inp_line);
@@ -225,7 +224,7 @@ inp_close(void)
     rl_callback_handler_remove();
 }
 
-char *
+char*
 inp_get_line(void)
 {
     werase(inp_win);
@@ -235,6 +234,7 @@ inp_get_line(void)
     char *line = NULL;
     while (!line) {
         line = inp_readline();
+        ui_update();
     }
     status_bar_clear();
     return line;
@@ -251,6 +251,7 @@ inp_get_password(void)
     get_password = TRUE;
     while (!password) {
         password = inp_readline();
+        ui_update();
     }
     get_password = FALSE;
     status_bar_clear();
@@ -260,15 +261,6 @@ inp_get_password(void)
 void
 inp_put_back(void)
 {
-    _inp_win_update_virtual();
-}
-
-void
-inp_win_clear(void)
-{
-    werase(inp_win);
-    wmove(inp_win, 0, 0);
-    pad_start = 0;
     _inp_win_update_virtual();
 }
 
@@ -297,7 +289,7 @@ static int
 _inp_printable(const wint_t ch)
 {
     char bytes[MB_CUR_MAX+1];
-    size_t utf_len = wcrtomb(bytes, ch, NULL);
+    size_t utf_len = wcrtomb(bytes, ch, (mbstate_t*)NULL);
     bytes[utf_len] = '\0';
     gunichar unichar = g_utf8_get_char(bytes);
 
@@ -442,7 +434,7 @@ _inp_rl_tab_handler(int count, int key)
     if ((strncmp(rl_line_buffer, "/", 1) != 0) && (current->type == WIN_MUC)) {
         char *result = muc_autocomplete(current, rl_line_buffer);
         if (result) {
-            rl_replace_line(result, 0);
+            rl_replace_line(result, 1);
             rl_point = rl_end;
             free(result);
         }
@@ -450,7 +442,7 @@ _inp_rl_tab_handler(int count, int key)
         ProfWin *window = wins_get_current();
         char *result = cmd_autocomplete(window, rl_line_buffer);
         if (result) {
-            rl_replace_line(result, 0);
+            rl_replace_line(result, 1);
             rl_point = rl_end;
             free(result);
         }
@@ -464,7 +456,7 @@ _go_to_win(int i)
 {
     ProfWin *window = wins_get_by_num(i);
     if (window) {
-        ui_ev_focus_win(window);
+        ui_focus_win(window);
     }
 }
 
@@ -543,7 +535,7 @@ _inp_rl_altleft_handler(int count, int key)
 {
     ProfWin *window = wins_get_previous();
     if (window) {
-        ui_ev_focus_win(window);
+        ui_focus_win(window);
     }
     return 0;
 }
@@ -553,7 +545,7 @@ _inp_rl_altright_handler(int count, int key)
 {
     ProfWin *window = wins_get_next();
     if (window) {
-        ui_ev_focus_win(window);
+        ui_focus_win(window);
     }
     return 0;
 }
@@ -561,27 +553,31 @@ _inp_rl_altright_handler(int count, int key)
 static int
 _inp_rl_pageup_handler(int count, int key)
 {
-    ui_page_up();
+    ProfWin *current = wins_get_current();
+    win_page_up(current);
     return 0;
 }
 
 static int
 _inp_rl_pagedown_handler(int count, int key)
 {
-    ui_page_down();
+    ProfWin *current = wins_get_current();
+    win_page_down(current);
     return 0;
 }
 
 static int
 _inp_rl_altpageup_handler(int count, int key)
 {
-    ui_subwin_page_up();
+    ProfWin *current = wins_get_current();
+    win_sub_page_up(current);
     return 0;
 }
 
 static int
 _inp_rl_altpagedown_handler(int count, int key)
 {
-    ui_subwin_page_down();
+    ProfWin *current = wins_get_current();
+    win_sub_page_down(current);
     return 0;
 }

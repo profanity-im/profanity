@@ -37,6 +37,7 @@
 #include <libotr/message.h>
 
 #include "ui/ui.h"
+#include "window_list.h"
 #include "log.h"
 #include "otr/otr.h"
 #include "otr/otrlib.h"
@@ -71,15 +72,14 @@ otrlib_poll(void)
     }
 }
 
-char *
+char*
 otrlib_start_query(void)
 {
     return "?OTR?v2? This user has requested an Off-the-Record private conversation. However, you do not have a plugin to support that. See http://otr.cypherpunks.ca/ for more information.";
 }
 
 static const char*
-cb_otr_error_message(void *opdata, ConnContext *context,
-    OtrlErrorCode err_code)
+cb_otr_error_message(void *opdata, ConnContext *context, OtrlErrorCode err_code)
 {
     switch(err_code)
     {
@@ -177,36 +177,46 @@ cb_handle_smp_event(void *opdata, OtrlSMPEvent smp_event,
     OtrlMessageAppOps *ops = otr_messageops();
     GHashTable *smp_initiators = otr_smpinitators();
 
+    ProfChatWin *chatwin = wins_get_chat(context->username);
+
     switch(smp_event)
     {
         case OTRL_SMPEVENT_ASK_FOR_SECRET:
-            ui_smp_recipient_initiated(context->username);
+            if (chatwin) {
+                chatwin_otr_smp_event(chatwin, PROF_OTR_SMP_INIT, NULL);
+            }
             g_hash_table_insert(smp_initiators, strdup(context->username), strdup(context->username));
             break;
 
         case OTRL_SMPEVENT_ASK_FOR_ANSWER:
-            ui_smp_recipient_initiated_q(context->username, question);
+            if (chatwin) {
+                chatwin_otr_smp_event(chatwin, PROF_OTR_SMP_INIT_Q, question);
+            }
             break;
 
         case OTRL_SMPEVENT_SUCCESS:
-            if (context->smstate->received_question == 0) {
-                ui_smp_successful(context->username);
-                ui_trust(context->username);
-            } else {
-                ui_smp_answer_success(context->username);
+            if (chatwin) {
+                if (context->smstate->received_question == 0) {
+                    chatwin_otr_smp_event(chatwin, PROF_OTR_SMP_SUCCESS, NULL);
+                    chatwin_otr_trust(chatwin);
+                } else {
+                    chatwin_otr_smp_event(chatwin, PROF_OTR_SMP_SUCCESS_Q, NULL);
+                }
             }
             break;
 
         case OTRL_SMPEVENT_FAILURE:
-            if (context->smstate->received_question == 0) {
-                if (nextMsg == OTRL_SMP_EXPECT3) {
-                    ui_smp_unsuccessful_sender(context->username);
-                } else if (nextMsg == OTRL_SMP_EXPECT4) {
-                    ui_smp_unsuccessful_receiver(context->username);
+            if (chatwin) {
+                if (context->smstate->received_question == 0) {
+                    if (nextMsg == OTRL_SMP_EXPECT3) {
+                        chatwin_otr_smp_event(chatwin, PROF_OTR_SMP_SENDER_FAIL, NULL);
+                    } else if (nextMsg == OTRL_SMP_EXPECT4) {
+                        chatwin_otr_smp_event(chatwin, PROF_OTR_SMP_RECEIVER_FAIL, NULL);
+                    }
+                    chatwin_otr_untrust(chatwin);
+                } else {
+                    chatwin_otr_smp_event(chatwin, PROF_OTR_SMP_FAIL_Q, NULL);
                 }
-                ui_untrust(context->username);
-            } else {
-                ui_smp_answer_failure(context->username);
             }
             break;
 
@@ -219,8 +229,10 @@ cb_handle_smp_event(void *opdata, OtrlSMPEvent smp_event,
             break;
 
         case OTRL_SMPEVENT_ABORT:
-            ui_smp_aborted(context->username);
-            ui_untrust(context->username);
+            if (chatwin) {
+                chatwin_otr_smp_event(chatwin, PROF_OTR_SMP_ABORT, NULL);
+                chatwin_otr_untrust(chatwin);
+            }
             break;
 
         case OTRL_SMPEVENT_IN_PROGRESS:
@@ -241,14 +253,14 @@ otrlib_init_ops(OtrlMessageAppOps *ops)
     ops->timer_control = cb_timer_control;
 }
 
-ConnContext *
-otrlib_context_find(OtrlUserState user_state, const char * const recipient, char *jid)
+ConnContext*
+otrlib_context_find(OtrlUserState user_state, const char *const recipient, char *jid)
 {
     return otrl_context_find(user_state, recipient, jid, "xmpp", OTRL_INSTAG_MASTER, 0, NULL, NULL, NULL);
 }
 
 void
-otrlib_end_session(OtrlUserState user_state, const char * const recipient, char *jid, OtrlMessageAppOps *ops)
+otrlib_end_session(OtrlUserState user_state, const char *const recipient, char *jid, OtrlMessageAppOps *ops)
 {
     ConnContext *context = otrl_context_find(user_state, recipient, jid, "xmpp",
         OTRL_INSTAG_MASTER, 0, NULL, NULL, NULL);
@@ -259,8 +271,8 @@ otrlib_end_session(OtrlUserState user_state, const char * const recipient, char 
 }
 
 gcry_error_t
-otrlib_encrypt_message(OtrlUserState user_state, OtrlMessageAppOps *ops, char *jid, const char * const to,
-    const char * const message, char **newmessage)
+otrlib_encrypt_message(OtrlUserState user_state, OtrlMessageAppOps *ops, char *jid, const char *const to,
+    const char *const message, char **newmessage)
 {
     gcry_error_t err;
 
@@ -284,8 +296,8 @@ otrlib_encrypt_message(OtrlUserState user_state, OtrlMessageAppOps *ops, char *j
 }
 
 int
-otrlib_decrypt_message(OtrlUserState user_state, OtrlMessageAppOps *ops, char *jid, const char * const from,
-    const char * const message, char **decrypted, OtrlTLV **tlvs)
+otrlib_decrypt_message(OtrlUserState user_state, OtrlMessageAppOps *ops, char *jid, const char *const from,
+    const char *const message, char **decrypted, OtrlTLV **tlvs)
 {
     return otrl_message_receiving(
         user_state,

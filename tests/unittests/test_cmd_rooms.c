@@ -54,22 +54,9 @@ void cmd_rooms_shows_message_when_undefined(void **state)
 void cmd_rooms_uses_account_default_when_no_arg(void **state)
 {
     gchar *args[] = { NULL };
-    ProfAccount *account = malloc(sizeof(ProfAccount));
-    account->name = NULL;
-    account->jid = NULL;
-    account->password = NULL;
-    account->eval_password = NULL;
-    account->resource = NULL;
-    account->server = NULL;
-    account->last_presence = NULL;
-    account->login_presence = NULL;
-    account->muc_nick = NULL;
-    account->otr_policy = NULL;
-    account->otr_manual = NULL;
-    account->otr_opportunistic = NULL;
-    account->otr_always = NULL;
-    account->pgp_keyid = NULL;
-    account->muc_service = strdup("default_conf_server");
+
+    ProfAccount *account = account_new("testaccount", NULL, NULL, NULL, TRUE, NULL, 0, NULL, NULL, NULL,
+        0, 0, 0, 0, 0, strdup("default_conf_server"), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
 
     will_return(jabber_get_connection_status, JABBER_CONNECTED);
     will_return(jabber_get_account_name, "account_name");

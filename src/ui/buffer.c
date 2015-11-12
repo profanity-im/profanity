@@ -58,7 +58,7 @@ struct prof_buff_t {
 static void _free_entry(ProfBuffEntry *entry);
 
 ProfBuff
-buffer_create()
+buffer_create(void)
 {
     ProfBuff new_buff = malloc(sizeof(struct prof_buff_t));
     new_buff->entries = NULL;
@@ -76,12 +76,11 @@ buffer_free(ProfBuff buffer)
 {
     g_slist_free_full(buffer->entries, (GDestroyNotify)_free_entry);
     free(buffer);
-    buffer = NULL;
 }
 
 void
 buffer_push(ProfBuff buffer, const char show_char, int pad_indent, GDateTime *time,
-    int flags, theme_item_t theme_item, const char * const from, const char * const message, DeliveryReceipt *receipt)
+    int flags, theme_item_t theme_item, const char *const from, const char *const message, DeliveryReceipt *receipt)
 {
     ProfBuffEntry *e = malloc(sizeof(struct prof_buff_entry_t));
     e->show_char = show_char;
@@ -102,7 +101,7 @@ buffer_push(ProfBuff buffer, const char show_char, int pad_indent, GDateTime *ti
 }
 
 gboolean
-buffer_mark_received(ProfBuff buffer, const char * const id)
+buffer_mark_received(ProfBuff buffer, const char *const id)
 {
     GSList *entries = buffer->entries;
     while (entries) {

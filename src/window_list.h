@@ -39,27 +39,29 @@
 
 void wins_init(void);
 
-ProfWin * wins_new_xmlconsole(void);
-ProfWin * wins_new_chat(const char * const barejid);
-ProfWin * wins_new_muc(const char * const roomjid);
-ProfWin * wins_new_muc_config(const char * const roomjid, DataForm *form);
-ProfWin * wins_new_private(const char * const fulljid);
+ProfWin* wins_new_xmlconsole(void);
+ProfWin* wins_new_chat(const char *const barejid);
+ProfWin* wins_new_muc(const char *const roomjid);
+ProfWin* wins_new_muc_config(const char *const roomjid, DataForm *form);
+ProfWin* wins_new_private(const char *const fulljid);
 
-ProfWin * wins_get_console(void);
-ProfChatWin *wins_get_chat(const char * const barejid);
-ProfMucWin * wins_get_muc(const char * const roomjid);
-ProfMucConfWin * wins_get_muc_conf(const char * const roomjid);
-ProfPrivateWin *wins_get_private(const char * const fulljid);
-ProfXMLWin * wins_get_xmlconsole(void);
+gboolean wins_chat_exists(const char *const barejid);
 
-ProfWin * wins_get_current(void);
+ProfWin* wins_get_console(void);
+ProfChatWin* wins_get_chat(const char *const barejid);
+ProfMucWin* wins_get_muc(const char *const roomjid);
+ProfMucConfWin* wins_get_muc_conf(const char *const roomjid);
+ProfPrivateWin* wins_get_private(const char *const fulljid);
+ProfXMLWin* wins_get_xmlconsole(void);
+
+ProfWin* wins_get_current(void);
 
 void wins_set_current_by_num(int i);
 
-ProfWin * wins_get_by_num(int i);
+ProfWin* wins_get_by_num(int i);
 
-ProfWin * wins_get_next(void);
-ProfWin * wins_get_previous(void);
+ProfWin* wins_get_next(void);
+ProfWin* wins_get_previous(void);
 int wins_get_num(ProfWin *window);
 int wins_get_current_num(void);
 void wins_close_current(void);
@@ -67,13 +69,13 @@ void wins_close_by_num(int i);
 gboolean wins_is_current(ProfWin *window);
 int wins_get_total_unread(void);
 void wins_resize_all(void);
-GSList * wins_get_chat_recipients(void);
-GSList * wins_get_prune_wins(void);
+GSList* wins_get_chat_recipients(void);
+GSList* wins_get_prune_wins(void);
 void wins_lost_connection(void);
 gboolean wins_tidy(void);
-GSList * wins_create_summary(void);
+GSList* wins_create_summary(void);
 void wins_destroy(void);
-GList * wins_get_nums(void);
+GList* wins_get_nums(void);
 gboolean wins_swap(int source_win, int target_win);
 void wins_hide_subwin(ProfWin *window);
 void wins_show_subwin(ProfWin *window);

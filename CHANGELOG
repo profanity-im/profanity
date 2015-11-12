@@ -3,9 +3,12 @@
 
 - Build against libmesode if available
 - Handle invalid SSL certificates (requires libmesode)
+- TLS indicator in titlebar
 - Allow auto extended away
 - Include last acitvity in initial presence (xep-0256)
 - Last Activity (xep-0012)
+- Run command sequence with /script
+- Account startscript property
 
 0.4.7
 =====

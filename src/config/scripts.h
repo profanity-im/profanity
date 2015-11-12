@@ -1,5 +1,5 @@
 /*
- * ui_events.h
+ * scripts.h
  *
  * Copyright (C) 2012 - 2015 James Booth <boothj5@gmail.com>
  *
@@ -32,11 +32,9 @@
  *
  */
 
-#ifndef UI_EVENTS_H
-#define UI_EVENTS_H
+#include <glib.h>
 
-void ui_ev_focus_win(ProfWin *win);
-ProfChatWin* ui_ev_new_chat_win(const char * const barejid);
-ProfPrivateWin* ui_ev_new_private_win(const char * const fulljid);
-
-#endif
+void scripts_init(void);
+GSList* scripts_list(void);
+GSList* scripts_read(const char *const script);
+gboolean scripts_exec(const char *const script);

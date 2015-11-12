@@ -62,7 +62,7 @@ static unsigned long unique_id = 0;
 static size_t _data_callback(void *ptr, size_t size, size_t nmemb, void *data);
 
 // taken from glib 2.30.3
-gchar *
+gchar*
 p_utf8_substring(const gchar *str, glong start_pos, glong end_pos)
 {
     gchar *start, *end, *out;
@@ -102,7 +102,7 @@ p_hash_table_add(GHashTable *hash_table, gpointer key)
 }
 
 gboolean
-p_hash_table_contains(GHashTable  *hash_table, gconstpointer key)
+p_hash_table_contains(GHashTable *hash_table, gconstpointer key)
 {
     // doesn't handle when key exists, but value == NULL
     gpointer found = g_hash_table_lookup(hash_table, key);
@@ -148,7 +148,7 @@ mkdir_recursive(const char *dir)
     return result;
 }
 
-char *
+char*
 str_replace(const char *string, const char *substr,
     const char *replacement)
 {
@@ -193,7 +193,7 @@ str_replace(const char *string, const char *substr,
 }
 
 gboolean
-str_contains_str(const char *  const searchstr, const char * const substr)
+str_contains_str(const char *const searchstr, const char *const substr)
 {
     if (!searchstr) {
         return FALSE;
@@ -244,7 +244,7 @@ strtoi_range(char *str, int *saveptr, int min, int max, char **err_msg)
 }
 
 int
-utf8_display_len(const char * const str)
+utf8_display_len(const char *const str)
 {
     if (!str) {
         return 0;
@@ -265,7 +265,7 @@ utf8_display_len(const char * const str)
     return len;
 }
 
-char *
+char*
 prof_getline(FILE *stream)
 {
     char *buf;
@@ -309,8 +309,8 @@ prof_getline(FILE *stream)
     return s;
 }
 
-char *
-release_get_latest()
+char*
+release_get_latest(void)
 {
     char *url = "http://www.profanity.im/profanity_version.txt";
 
@@ -362,7 +362,7 @@ release_is_new(char *found_version)
 }
 
 gboolean
-valid_resource_presence_string(const char * const str)
+valid_resource_presence_string(const char *const str)
 {
     assert(str != NULL);
     if ((strcmp(str, "online") == 0) || (strcmp(str, "chat") == 0) ||
@@ -374,7 +374,7 @@ valid_resource_presence_string(const char * const str)
     }
 }
 
-const char *
+const char*
 string_from_resource_presence(resource_presence_t presence)
 {
     switch(presence)
@@ -393,7 +393,7 @@ string_from_resource_presence(resource_presence_t presence)
 }
 
 resource_presence_t
-resource_presence_from_string(const char * const str)
+resource_presence_from_string(const char *const str)
 {
     if (str == NULL) {
         return RESOURCE_ONLINE;
@@ -430,7 +430,7 @@ contact_presence_from_resource_presence(resource_presence_t resource_presence)
     }
 }
 
-gchar *
+gchar*
 xdg_get_config_home(void)
 {
     gchar *xdg_config_home = getenv("XDG_CONFIG_HOME");
@@ -449,7 +449,7 @@ xdg_get_config_home(void)
     }
 }
 
-gchar *
+gchar*
 xdg_get_data_home(void)
 {
     gchar *xdg_data_home = getenv("XDG_DATA_HOME");
@@ -468,7 +468,7 @@ xdg_get_data_home(void)
     }
 }
 
-char *
+char*
 create_unique_id(char *prefix)
 {
     char *result = NULL;
@@ -492,7 +492,7 @@ reset_unique_id(void)
     unique_id = 0;
 }
 
-char *
+char*
 p_sha1_hash(char *str)
 {
     P_SHA1_CTX ctx;
@@ -623,8 +623,8 @@ get_file_or_linked(char *loc, char *basedir)
     return true_loc;
 }
 
-char *
-strip_arg_quotes(const char * const input)
+char*
+strip_arg_quotes(const char *const input)
 {
     char *unquoted = strdup(input);
 
@@ -643,4 +643,22 @@ strip_arg_quotes(const char * const input)
     }
 
     return unquoted;
+}
+
+gboolean
+is_notify_enabled(void)
+{
+    gboolean notify_enabled = FALSE;
+
+#ifdef HAVE_OSXNOTIFY
+    notify_enabled = TRUE;
+#endif
+#ifdef HAVE_LIBNOTIFY
+    notify_enabled = TRUE;
+#endif
+#ifdef PLATFORM_CYGWIN
+    notify_enabled = TRUE;
+#endif
+
+    return notify_enabled;
 }

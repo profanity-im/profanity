@@ -61,13 +61,13 @@
 
 #define HANDLE(ns, type, func) xmpp_handler_add(conn, func, ns, STANZA_NAME_MESSAGE, type, ctx)
 
-static int _groupchat_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, void * const userdata);
-static int _chat_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, void * const userdata);
-static int _muc_user_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, void * const userdata);
-static int _conference_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, void * const userdata);
-static int _captcha_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, void * const userdata);
-static int _message_error_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, void * const userdata);
-static int _receipt_received_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, void * const userdata);
+static int _groupchat_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza, void *const userdata);
+static int _chat_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza, void *const userdata);
+static int _muc_user_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza, void *const userdata);
+static int _conference_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza, void *const userdata);
+static int _captcha_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza, void *const userdata);
+static int _message_error_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza, void *const userdata);
+static int _receipt_received_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza, void *const userdata);
 
 void
 message_add_handlers(void)
@@ -85,7 +85,7 @@ message_add_handlers(void)
 }
 
 static char*
-_session_jid(const char * const barejid)
+_session_jid(const char *const barejid)
 {
     ChatSession *session = chat_session_get(barejid);
     char *jid = NULL;
@@ -101,7 +101,7 @@ _session_jid(const char * const barejid)
 }
 
 static char*
-_session_state(const char * const barejid)
+_session_state(const char *const barejid)
 {
     ChatSession *session = chat_session_get(barejid);
     char *state = NULL;
@@ -118,8 +118,8 @@ _session_state(const char * const barejid)
     return state;
 }
 
-char *
-message_send_chat(const char * const barejid, const char * const msg)
+char*
+message_send_chat(const char *const barejid, const char *const msg)
 {
     xmpp_conn_t * const conn = connection_get_conn();
     xmpp_ctx_t * const ctx = connection_get_ctx();
@@ -145,8 +145,8 @@ message_send_chat(const char * const barejid, const char * const msg)
     return id;
 }
 
-char *
-message_send_chat_pgp(const char * const barejid, const char * const msg)
+char*
+message_send_chat_pgp(const char *const barejid, const char *const msg)
 {
     xmpp_conn_t * const conn = connection_get_conn();
     xmpp_ctx_t * const ctx = connection_get_ctx();
@@ -203,8 +203,8 @@ message_send_chat_pgp(const char * const barejid, const char * const msg)
     return id;
 }
 
-char *
-message_send_chat_otr(const char * const barejid, const char * const msg)
+char*
+message_send_chat_otr(const char *const barejid, const char *const msg)
 {
     xmpp_conn_t * const conn = connection_get_conn();
     xmpp_ctx_t * const ctx = connection_get_ctx();
@@ -235,7 +235,7 @@ message_send_chat_otr(const char * const barejid, const char * const msg)
 }
 
 void
-message_send_private(const char * const fulljid, const char * const msg)
+message_send_private(const char *const fulljid, const char *const msg)
 {
     xmpp_conn_t * const conn = connection_get_conn();
     xmpp_ctx_t * const ctx = connection_get_ctx();
@@ -248,7 +248,7 @@ message_send_private(const char * const fulljid, const char * const msg)
 }
 
 void
-message_send_groupchat(const char * const roomjid, const char * const msg)
+message_send_groupchat(const char *const roomjid, const char *const msg)
 {
     xmpp_conn_t * const conn = connection_get_conn();
     xmpp_ctx_t * const ctx = connection_get_ctx();
@@ -261,7 +261,7 @@ message_send_groupchat(const char * const roomjid, const char * const msg)
 }
 
 void
-message_send_groupchat_subject(const char * const roomjid, const char * const subject)
+message_send_groupchat_subject(const char *const roomjid, const char *const subject)
 {
     xmpp_conn_t * const conn = connection_get_conn();
     xmpp_ctx_t * const ctx = connection_get_ctx();
@@ -272,8 +272,8 @@ message_send_groupchat_subject(const char * const roomjid, const char * const su
 }
 
 void
-message_send_invite(const char * const roomjid, const char * const contact,
-    const char * const reason)
+message_send_invite(const char *const roomjid, const char *const contact,
+    const char *const reason)
 {
     xmpp_conn_t * const conn = connection_get_conn();
     xmpp_ctx_t * const ctx = connection_get_ctx();
@@ -295,7 +295,7 @@ message_send_invite(const char * const roomjid, const char * const contact,
 }
 
 void
-message_send_composing(const char * const jid)
+message_send_composing(const char *const jid)
 {
     xmpp_conn_t * const conn = connection_get_conn();
     xmpp_ctx_t * const ctx = connection_get_ctx();
@@ -307,7 +307,7 @@ message_send_composing(const char * const jid)
 }
 
 void
-message_send_paused(const char * const jid)
+message_send_paused(const char *const jid)
 {
     xmpp_conn_t * const conn = connection_get_conn();
     xmpp_ctx_t * const ctx = connection_get_ctx();
@@ -317,7 +317,7 @@ message_send_paused(const char * const jid)
 }
 
 void
-message_send_inactive(const char * const jid)
+message_send_inactive(const char *const jid)
 {
     xmpp_conn_t * const conn = connection_get_conn();
     xmpp_ctx_t * const ctx = connection_get_ctx();
@@ -328,7 +328,7 @@ message_send_inactive(const char * const jid)
 }
 
 void
-message_send_gone(const char * const jid)
+message_send_gone(const char *const jid)
 {
     xmpp_conn_t * const conn = connection_get_conn();
     xmpp_ctx_t * const ctx = connection_get_ctx();
@@ -338,7 +338,7 @@ message_send_gone(const char * const jid)
 }
 
 static int
-_message_error_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, void * const userdata)
+_message_error_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza, void *const userdata)
 {
     char *id = xmpp_stanza_get_id(stanza);
     char *jid = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
@@ -388,7 +388,7 @@ _message_error_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, v
 }
 
 static int
-_muc_user_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, void * const userdata)
+_muc_user_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza, void *const userdata)
 {
     xmpp_ctx_t *ctx = connection_get_ctx();
     xmpp_stanza_t *xns_muc_user = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_MUC_USER);
@@ -442,7 +442,7 @@ _muc_user_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, void *
 }
 
 static int
-_conference_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, void * const userdata)
+_conference_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza, void *const userdata)
 {
     xmpp_stanza_t *xns_conference = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_CONFERENCE);
 
@@ -474,7 +474,7 @@ _conference_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, void
 }
 
 static int
-_captcha_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, void * const userdata)
+_captcha_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza, void *const userdata)
 {
     xmpp_ctx_t *ctx = connection_get_ctx();
     char *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
@@ -502,7 +502,7 @@ _captcha_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, void * 
 }
 
 static int
-_groupchat_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, void * const userdata)
+_groupchat_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza, void *const userdata)
 {
     xmpp_ctx_t *ctx = connection_get_ctx();
     char *message = NULL;
@@ -584,7 +584,7 @@ _groupchat_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, void 
 }
 
 void
-_message_send_receipt(const char * const fulljid, const char * const message_id)
+_message_send_receipt(const char *const fulljid, const char *const message_id)
 {
     xmpp_conn_t * const conn = connection_get_conn();
     xmpp_ctx_t * const ctx = connection_get_ctx();
@@ -608,7 +608,7 @@ _message_send_receipt(const char * const fulljid, const char * const message_id)
 }
 
 static int
-_receipt_received_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, void * const userdata)
+_receipt_received_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza, void *const userdata)
 {
     xmpp_stanza_t *receipt = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_RECEIPTS);
     char *name = xmpp_stanza_get_name(receipt);
@@ -634,7 +634,7 @@ _receipt_received_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza
 }
 
 void
-_receipt_request_handler(xmpp_stanza_t * const stanza)
+_receipt_request_handler(xmpp_stanza_t *const stanza)
 {
     if (!prefs_get_boolean(PREF_RECEIPTS_SEND)) {
         return;
@@ -662,7 +662,7 @@ _receipt_request_handler(xmpp_stanza_t * const stanza)
 }
 
 void
-_private_chat_handler(xmpp_stanza_t * const stanza, const char * const fulljid)
+_private_chat_handler(xmpp_stanza_t *const stanza, const char *const fulljid)
 {
     xmpp_stanza_t *body = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_BODY);
     if (!body) {
@@ -687,7 +687,7 @@ _private_chat_handler(xmpp_stanza_t * const stanza, const char * const fulljid)
 }
 
 static gboolean
-_handle_carbons(xmpp_stanza_t * const stanza)
+_handle_carbons(xmpp_stanza_t *const stanza)
 {
     xmpp_stanza_t *carbons = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_CARBONS);
     if (!carbons) {
@@ -739,7 +739,7 @@ _handle_carbons(xmpp_stanza_t * const stanza)
 }
 
 static int
-_chat_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, void * const userdata)
+_chat_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza, void *const userdata)
 {
     // ignore if type not chat or absent
     char *type = xmpp_stanza_get_type(stanza);

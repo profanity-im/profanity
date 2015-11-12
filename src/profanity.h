@@ -38,11 +38,13 @@
 #include "resource.h"
 #include "xmpp/xmpp.h"
 
-void prof_run(const int disable_tls, char *log_level, char *account_name);
+void prof_run(char *log_level, char *account_name);
 
 void prof_handle_idle(void);
 void prof_handle_activity(void);
 
 gboolean process_input(char *inp);
+
+void prof_set_quit(void);
 
 #endif

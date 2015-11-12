@@ -71,14 +71,14 @@ cons_show_time(void)
 }
 
 void
-cons_show_word(const char * const word)
+cons_show_word(const char *const word)
 {
     ProfWin *console = wins_get_console();
     win_print(console, '-', 0, NULL, NO_DATE | NO_EOL, 0, "", word);
 }
 
 void
-cons_debug(const char * const msg, ...)
+cons_debug(const char *const msg, ...)
 {
     ProfWin *console = wins_get_console();
     if (strcmp(PACKAGE_STATUS, "development") == 0) {
@@ -93,7 +93,7 @@ cons_debug(const char * const msg, ...)
 }
 
 void
-cons_show(const char * const msg, ...)
+cons_show(const char *const msg, ...)
 {
     ProfWin *console = wins_get_console();
     va_list arg;
@@ -106,7 +106,7 @@ cons_show(const char * const msg, ...)
 }
 
 void
-cons_show_padded(int pad, const char * const msg, ...)
+cons_show_padded(int pad, const char *const msg, ...)
 {
     ProfWin *console = wins_get_console();
     va_list arg;
@@ -162,7 +162,7 @@ cons_show_help(Command *command)
 }
 
 void
-cons_bad_cmd_usage(const char * const cmd)
+cons_bad_cmd_usage(const char *const cmd)
 {
     GString *msg = g_string_new("");
     g_string_printf(msg, "Invalid usage, see '/help %s' for details.", &cmd[1]);
@@ -174,7 +174,7 @@ cons_bad_cmd_usage(const char * const cmd)
 }
 
 void
-cons_show_error(const char * const msg, ...)
+cons_show_error(const char *const msg, ...)
 {
     ProfWin *console = wins_get_console();
     va_list arg;
@@ -189,7 +189,87 @@ cons_show_error(const char * const msg, ...)
 }
 
 void
-cons_show_typing(const char * const barejid)
+cons_show_tlscert(TLSCertificate *cert)
+{
+    if (!cert) {
+        return;
+    }
+
+    cons_show("Certificate:");
+
+    cons_show("  Subject:");
+    if (cert->subject_commonname) {
+        cons_show("    Common name        : %s", cert->subject_commonname);
+    }
+    if (cert->subject_distinguishedname) {
+        cons_show("    Distinguished name : %s", cert->subject_distinguishedname);
+    }
+    if (cert->subject_organisation) {
+        cons_show("    Organisation       : %s", cert->subject_organisation);
+    }
+    if (cert->subject_organisation_unit) {
+        cons_show("    Organisation unit  : %s", cert->subject_organisation_unit);
+    }
+    if (cert->subject_email) {
+        cons_show("    Email              : %s", cert->subject_email);
+    }
+    if (cert->subject_state) {
+        cons_show("    State              : %s", cert->subject_state);
+    }
+    if (cert->subject_country) {
+        cons_show("    Country            : %s", cert->subject_country);
+    }
+    if (cert->subject_serialnumber) {
+        cons_show("    Serial number      : %s", cert->subject_serialnumber);
+    }
+
+    cons_show("  Issuer:");
+    if (cert->issuer_commonname) {
+        cons_show("    Common name        : %s", cert->issuer_commonname);
+    }
+    if (cert->issuer_distinguishedname) {
+        cons_show("    Distinguished name : %s", cert->issuer_distinguishedname);
+    }
+    if (cert->issuer_organisation) {
+        cons_show("    Organisation       : %s", cert->issuer_organisation);
+    }
+    if (cert->issuer_organisation_unit) {
+        cons_show("    Organisation unit  : %s", cert->issuer_organisation_unit);
+    }
+    if (cert->issuer_email) {
+        cons_show("    Email              : %s", cert->issuer_email);
+    }
+    if (cert->issuer_state) {
+        cons_show("    State              : %s", cert->issuer_state);
+    }
+    if (cert->issuer_country) {
+        cons_show("    Country            : %s", cert->issuer_country);
+    }
+    if (cert->issuer_serialnumber) {
+        cons_show("    Serial number      : %s", cert->issuer_serialnumber);
+    }
+
+    cons_show("  Version             : %d", cert->version);
+
+    if (cert->serialnumber) {
+        cons_show("  Serial number       : %s", cert->serialnumber);
+    }
+
+    if (cert->key_alg) {
+        cons_show("  Key algorithm       : %s", cert->key_alg);
+    }
+    if (cert->signature_alg) {
+        cons_show("  Signature algorithm : %s", cert->signature_alg);
+    }
+
+    cons_show("  Start               : %s", cert->notbefore);
+    cons_show("  End                 : %s", cert->notafter);
+
+    cons_show("  Fingerprint         : %s", cert->fingerprint);
+}
+
+void
+cons_show_typing(const char *const barejid)
 {
     ProfWin *console = wins_get_console();
     const char * display_usr = NULL;
@@ -209,7 +289,7 @@ cons_show_typing(const char * const barejid)
 }
 
 void
-cons_show_incoming_message(const char * const short_from, const int win_index)
+cons_show_incoming_message(const char *const short_from, const int win_index)
 {
     ProfWin *console = wins_get_console();
 
@@ -290,7 +370,7 @@ cons_check_version(gboolean not_available_msg)
 }
 
 void
-cons_show_login_success(ProfAccount *account)
+cons_show_login_success(ProfAccount *account, int secured)
 {
     ProfWin *console = wins_get_console();
     win_vprint(console, '-', 0, NULL, NO_EOL, 0, "", "%s logged in successfully, ", account->jid);
@@ -303,6 +383,9 @@ cons_show_login_success(ProfAccount *account)
     win_vprint(console, '-', 0, NULL, NO_DATE | NO_EOL, 0, "", " (priority %d)",
         accounts_get_priority_for_presence_type(account->name, presence));
     win_print(console, '-', 0, NULL, NO_DATE, 0, "", ".");
+    if (!secured) {
+        cons_show_error("TLS connection not established");
+    }
     cons_alert();
 }
 
@@ -352,7 +435,7 @@ cons_show_info(PContact pcontact)
 }
 
 void
-cons_show_caps(const char * const fulljid, resource_presence_t presence)
+cons_show_caps(const char *const fulljid, resource_presence_t presence)
 {
     ProfWin *console = wins_get_console();
     cons_show("");
@@ -463,7 +546,7 @@ cons_show_sent_subs(void)
 }
 
 void
-cons_show_room_list(GSList *rooms, const char * const conference_node)
+cons_show_room_list(GSList *rooms, const char *const conference_node)
 {
     ProfWin *console = wins_get_console();
     if (rooms && (g_slist_length(rooms) > 0)) {
@@ -571,7 +654,7 @@ cons_show_disco_info(const char *jid, GSList *identities, GSList *features)
 }
 
 void
-cons_show_disco_items(GSList *items, const char * const jid)
+cons_show_disco_items(GSList *items, const char *const jid)
 {
     ProfWin *console = wins_get_console();
     if (items && (g_slist_length(items) > 0)) {
@@ -595,7 +678,7 @@ cons_show_disco_items(GSList *items, const char * const jid)
 }
 
 void
-cons_show_status(const char * const barejid)
+cons_show_status(const char *const barejid)
 {
     ProfWin *console = wins_get_console();
     PContact pcontact = roster_get_contact(barejid);
@@ -610,8 +693,8 @@ cons_show_status(const char * const barejid)
 }
 
 void
-cons_show_room_invite(const char * const invitor, const char * const room,
-    const char * const reason)
+cons_show_room_invite(const char *const invitor, const char * const room,
+    const char *const reason)
 {
     char *display_from = NULL;
     PContact contact = roster_get_contact(invitor);
@@ -704,13 +787,18 @@ cons_show_account(ProfAccount *account)
     if (account->muc_nick) {
         cons_show   ("muc nick          : %s", account->muc_nick);
     }
+    if (account->tls_policy) {
+        cons_show   ("TLS policy        : %s", account->tls_policy);
+    }
     if (account->last_presence) {
         cons_show   ("Last presence     : %s", account->last_presence);
     }
     if (account->login_presence) {
         cons_show   ("Login presence    : %s", account->login_presence);
     }
-
+    if (account->startscript) {
+        cons_show   ("Start script      : %s", account->startscript);
+    }
     if (account->otr_policy) {
         cons_show   ("OTR policy        : %s", account->otr_policy);
     }
@@ -939,6 +1027,16 @@ cons_encwarn_setting(void)
 }
 
 void
+cons_tlsshow_setting(void)
+{
+    if (prefs_get_boolean(PREF_TLS_SHOW)) {
+        cons_show("TLS show (/tls)               : ON");
+    } else {
+        cons_show("TLS show (/tls)               : OFF");
+    }
+}
+
+void
 cons_presence_setting(void)
 {
     if (prefs_get_boolean(PREF_PRESENCE))
@@ -1144,6 +1242,7 @@ cons_show_ui_prefs(void)
     cons_encwarn_setting();
     cons_presence_setting();
     cons_inpblock_setting();
+    cons_tlsshow_setting();
 
     cons_alert();
 }
@@ -1151,18 +1250,7 @@ cons_show_ui_prefs(void)
 void
 cons_notify_setting(void)
 {
-    gboolean notify_enabled = FALSE;
-#ifdef HAVE_OSXNOTIFY
-    notify_enabled = TRUE;
-#endif
-#ifdef HAVE_LIBNOTIFY
-    notify_enabled = TRUE;
-#endif
-#ifdef PLATFORM_CYGWIN
-    notify_enabled = TRUE;
-#endif
-
-    if (notify_enabled) {
+    if (is_notify_enabled()) {
         if (prefs_get_boolean(PREF_NOTIFY_MESSAGE))
             cons_show("Messages (/notify message)          : ON");
         else
@@ -1445,6 +1533,12 @@ cons_show_presence_prefs(void)
     cons_show("");
     cons_autoaway_setting();
 
+    if (prefs_get_boolean(PREF_LASTACTIVITY)) {
+        cons_show("Send last activity (/lastactivity)        : ON");
+    } else {
+        cons_show("Send last activity (/lastactivity)        : OFF");
+    }
+
     cons_alert();
 }
 
@@ -1560,6 +1654,42 @@ cons_show_themes(GSList *themes)
 }
 
 void
+cons_show_scripts(GSList *scripts)
+{
+    cons_show("");
+
+    if (scripts == NULL) {
+        cons_show("No scripts available.");
+    } else {
+        cons_show("Scripts:");
+        while (scripts) {
+            cons_show(scripts->data);
+            scripts = g_slist_next(scripts);
+        }
+    }
+
+    cons_alert();
+}
+
+void
+cons_show_script(const char *const script, GSList *commands)
+{
+    cons_show("");
+
+    if (commands == NULL) {
+        cons_show("Script not found: %s", script);
+    } else {
+        cons_show("%s:", script);
+        while (commands) {
+            cons_show("  %s", commands->data);
+            commands = g_slist_next(commands);
+        }
+    }
+
+    cons_alert();
+}
+
+void
 cons_prefs(void)
 {
     cons_show("");
@@ -1623,7 +1753,7 @@ cons_navigation_help(void)
 }
 
 void
-cons_show_roster_group(const char * const group, GSList *list)
+cons_show_roster_group(const char *const group, GSList *list)
 {
     cons_show("");
 

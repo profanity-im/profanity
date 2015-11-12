@@ -55,24 +55,22 @@
 #define PAD_SIZE 1000
 
 void win_move_to_end(ProfWin *window);
-void win_show_status_string(ProfWin *window, const char * const from,
-    const char * const show, const char * const status,
-    GDateTime *last_activity, const char * const pre,
-    const char * const default_show);
+void win_show_status_string(ProfWin *window, const char *const from,
+    const char *const show, const char *const status,
+    GDateTime *last_activity, const char *const pre,
+    const char *const default_show);
 void win_print_incoming_message(ProfWin *window, GDateTime *timestamp,
-    const char * const from, const char * const message, prof_enc_t enc_mode);
+    const char *const from, const char *const message, prof_enc_t enc_mode);
 void win_print_with_receipt(ProfWin *window, const char show_char, int pad_indent, GTimeVal *tstamp, int flags,
-    theme_item_t theme_item, const char * const from, const char * const message, char *id);
+    theme_item_t theme_item, const char *const from, const char *const message, char *id);
 void win_newline(ProfWin *window);
 void win_redraw(ProfWin *window);
 int win_roster_cols(void);
 int win_occpuants_cols(void);
 void win_printline_nowrap(WINDOW *win, char *msg);
-void win_mark_received(ProfWin *window, const char * const id);
+void win_mark_received(ProfWin *window, const char *const id);
 
 gboolean win_has_active_subwin(ProfWin *window);
-
-void win_clear(ProfWin *window);
 
 void win_page_up(ProfWin *window);
 void win_page_down(ProfWin *window);

@@ -82,7 +82,7 @@ _rosterwin_contact(ProfLayoutSplit *layout, PContact contact)
 }
 
 static void
-_rosterwin_contacts_by_presence(ProfLayoutSplit *layout, const char * const presence, char *title)
+_rosterwin_contacts_by_presence(ProfLayoutSplit *layout, const char *const presence, char *title)
 {
     GSList *contacts = roster_get_contacts_by_presence(presence);
 

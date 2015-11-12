@@ -1,5 +1,5 @@
 /*
- * ui_events.c
+ * xmlwin.c
  *
  * Copyright (C) 2012 - 2015 James Booth <boothj5@gmail.com>
  *
@@ -32,25 +32,24 @@
  *
  */
 
-#include "ui/ui.h"
+#include <assert.h>
+
+#include "ui/win_types.h"
 #include "window_list.h"
 
 void
-ui_ev_focus_win(ProfWin *win)
+xmlwin_show(ProfXMLWin *xmlwin, const char *const msg)
 {
-    if (!wins_is_current(win)) {
-        ui_switch_win(win);
+    assert(xmlwin != NULL);
+
+    ProfWin *window = (ProfWin*)xmlwin;
+    if (g_str_has_prefix(msg, "SENT:")) {
+        win_print(window, '-', 0, NULL, 0, 0, "", "SENT:");
+        win_print(window, '-', 0, NULL, 0, THEME_ONLINE, "", &msg[6]);
+        win_print(window, '-', 0, NULL, 0, THEME_ONLINE, "", "");
+    } else if (g_str_has_prefix(msg, "RECV:")) {
+        win_print(window, '-', 0, NULL, 0, 0, "", "RECV:");
+        win_print(window, '-', 0, NULL, 0, THEME_AWAY, "", &msg[6]);
+        win_print(window, '-', 0, NULL, 0, THEME_AWAY, "", "");
     }
-}
-
-ProfChatWin*
-ui_ev_new_chat_win(const char * const barejid)
-{
-    return ui_new_chat_win(barejid);
-}
-
-ProfPrivateWin*
-ui_ev_new_private_win(const char * const fulljid)
-{
-    return ui_new_private_win(fulljid);
 }

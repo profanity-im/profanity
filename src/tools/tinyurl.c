@@ -54,7 +54,7 @@ tinyurl_valid(char *url)
         g_str_has_prefix(url, "https://"));
 }
 
-char *
+char*
 tinyurl_get(char *url)
 {
     GString *full_url = g_string_new("http://tinyurl.com/api-create.php?url=");

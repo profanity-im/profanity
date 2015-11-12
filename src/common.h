@@ -98,35 +98,35 @@ gchar* p_utf8_substring(const gchar *str, glong start_pos, glong end_pos);
 void p_slist_free_full(GSList *items, GDestroyNotify free_func);
 void p_list_free_full(GList *items, GDestroyNotify free_func);
 gboolean p_hash_table_add(GHashTable *hash_table, gpointer key);
-gboolean p_hash_table_contains(GHashTable  *hash_table, gconstpointer  key);
+gboolean p_hash_table_contains(GHashTable *hash_table, gconstpointer key);
 
 gboolean create_dir(char *name);
 gboolean mkdir_recursive(const char *dir);
-char * str_replace(const char *string, const char *substr,
-    const char *replacement);
-gboolean str_contains_str(const char *  const searchstr, const char * const substr);
+char* str_replace(const char *string, const char *substr, const char *replacement);
+gboolean str_contains_str(const char *const searchstr, const char *const substr);
 int str_contains(const char str[], int size, char ch);
 gboolean strtoi_range(char *str, int *saveptr, int min, int max, char **err_msg);
-int utf8_display_len(const char * const str);
-char * prof_getline(FILE *stream);
+int utf8_display_len(const char *const str);
+char* prof_getline(FILE *stream);
 char* release_get_latest(void);
 gboolean release_is_new(char *found_version);
-gchar * xdg_get_config_home(void);
-gchar * xdg_get_data_home(void);
+gchar* xdg_get_config_home(void);
+gchar* xdg_get_data_home(void);
 
-gboolean valid_resource_presence_string(const char * const str);
-const char * string_from_resource_presence(resource_presence_t presence);
-resource_presence_t resource_presence_from_string(const char * const str);
+gboolean valid_resource_presence_string(const char *const str);
+const char* string_from_resource_presence(resource_presence_t presence);
+resource_presence_t resource_presence_from_string(const char *const str);
 contact_presence_t contact_presence_from_resource_presence(resource_presence_t resource_presence);
 
-char * p_sha1_hash(char *str);
-char * create_unique_id(char *prefix);
+char* p_sha1_hash(char *str);
+char* create_unique_id(char *prefix);
 void reset_unique_id(void);
 
 int cmp_win_num(gconstpointer a, gconstpointer b);
 int get_next_available_win_num(GList *used);
 
 char* get_file_or_linked(char *loc, char *basedir);
-char * strip_arg_quotes(const char * const input);
+char* strip_arg_quotes(const char *const input);
+gboolean is_notify_enabled(void);
 
 #endif

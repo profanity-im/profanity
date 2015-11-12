@@ -51,6 +51,7 @@
 #include "config/accounts.h"
 #include "config/preferences.h"
 #include "config/theme.h"
+#include "config/scripts.h"
 #include "command/command.h"
 #include "common.h"
 #include "contact.h"
@@ -72,7 +73,7 @@
 #include "config/tlscerts.h"
 
 static void _check_autoaway(void);
-static void _init(const int disable_tls, char *log_level);
+static void _init(char *log_level);
 static void _shutdown(void);
 static void _create_directories(void);
 static void _connect_default(const char * const account);
@@ -89,11 +90,12 @@ resource_presence_t saved_presence;
 char *saved_status;
 
 static gboolean cont = TRUE;
+static gboolean force_quit = FALSE;
 
 void
-prof_run(const int disable_tls, char *log_level, char *account_name)
+prof_run(char *log_level, char *account_name)
 {
-    _init(disable_tls, log_level);
+    _init(log_level);
     _connect_default(account_name);
     ui_update();
 
@@ -103,11 +105,11 @@ prof_run(const int disable_tls, char *log_level, char *account_name)
     saved_status = NULL;
 
     char *line = NULL;
-    while(cont) {
+    while(cont && !force_quit) {
         log_stderr_handler();
         _check_autoaway();
 
-        line = ui_readline();
+        line = inp_readline();
         if (line) {
             ProfWin *window = wins_get_current();
             cont = cmd_process_input(window, line);
@@ -127,11 +129,17 @@ prof_run(const int disable_tls, char *log_level, char *account_name)
 }
 
 void
+prof_set_quit(void)
+{
+    force_quit = TRUE;
+}
+
+void
 prof_handle_idle(void)
 {
     jabber_conn_status_t status = jabber_get_connection_status();
     if (status == JABBER_CONNECTED) {
-        GSList *recipients = ui_get_chat_recipients();
+        GSList *recipients = wins_get_chat_recipients();
         GSList *curr = recipients;
 
         while (curr) {
@@ -161,7 +169,7 @@ prof_handle_activity(void)
 }
 
 static void
-_connect_default(const char * const account)
+_connect_default(const char *const account)
 {
     ProfWin *window = wins_get_current();
     if (account) {
@@ -176,7 +184,7 @@ _connect_default(const char * const account)
 }
 
 static void
-_check_autoaway()
+_check_autoaway(void)
 {
     jabber_conn_status_t conn_status = jabber_get_connection_status();
     if (conn_status != JABBER_CONNECTED) {
@@ -212,7 +220,11 @@ _check_autoaway()
 
                     // send away presence with last activity
                     char *message = prefs_get_string(PREF_AUTOAWAY_MESSAGE);
-                    cl_ev_presence_send(RESOURCE_AWAY, message, idle_ms / 1000);
+                    if (prefs_get_boolean(PREF_LASTACTIVITY)) {
+                        cl_ev_presence_send(RESOURCE_AWAY, message, idle_ms / 1000);
+                    } else {
+                        cl_ev_presence_send(RESOURCE_AWAY, message, 0);
+                    }
 
                     int pri = accounts_get_priority_for_presence_type(account, RESOURCE_AWAY);
                     if (message) {
@@ -222,7 +234,7 @@ _check_autoaway()
                     }
                     prefs_free_string(message);
 
-                    ui_titlebar_presence(CONTACT_AWAY);
+                    title_bar_set_presence(CONTACT_AWAY);
                 }
             } else if (g_strcmp0(mode, "idle") == 0) {
                 activity_state = ACTIVITY_ST_IDLE;
@@ -248,7 +260,11 @@ _check_autoaway()
 
             // send extended away presence with last activity
             char *message = prefs_get_string(PREF_AUTOXA_MESSAGE);
-            cl_ev_presence_send(RESOURCE_XA, message, idle_ms / 1000);
+            if (prefs_get_boolean(PREF_LASTACTIVITY)) {
+                cl_ev_presence_send(RESOURCE_XA, message, idle_ms / 1000);
+            } else {
+                cl_ev_presence_send(RESOURCE_XA, message, 0);
+            }
 
             int pri = accounts_get_priority_for_presence_type(account, RESOURCE_XA);
             if (message) {
@@ -258,7 +274,7 @@ _check_autoaway()
             }
             prefs_free_string(message);
 
-            ui_titlebar_presence(CONTACT_XA);
+            title_bar_set_presence(CONTACT_XA);
         } else if (check && (idle_ms < away_time_ms)) {
             activity_state = ACTIVITY_ST_ACTIVE;
 
@@ -267,7 +283,7 @@ _check_autoaway()
             // send saved presence without last activity
             cl_ev_presence_send(saved_presence, saved_status, 0);
             contact_presence_t contact_pres = contact_presence_from_resource_presence(saved_presence);
-            ui_titlebar_presence(contact_pres);
+            title_bar_set_presence(contact_pres);
         }
         break;
     case ACTIVITY_ST_XA:
@@ -279,7 +295,7 @@ _check_autoaway()
             // send saved presence without last activity
             cl_ev_presence_send(saved_presence, saved_status, 0);
             contact_presence_t contact_pres = contact_presence_from_resource_presence(saved_presence);
-            ui_titlebar_presence(contact_pres);
+            title_bar_set_presence(contact_pres);
         }
         break;
     }
@@ -288,7 +304,7 @@ _check_autoaway()
 }
 
 static void
-_init(const int disable_tls, char *log_level)
+_init(char *log_level)
 {
     setlocale(LC_ALL, "");
     // ignore SIGPIPE
@@ -317,12 +333,13 @@ _init(const int disable_tls, char *log_level)
     theme_init(theme);
     prefs_free_string(theme);
     ui_init();
-    jabber_init(disable_tls);
+    jabber_init();
     cmd_init();
     log_info("Initialising contact list");
     roster_init();
     muc_init();
     tlscerts_init();
+    scripts_init();
 #ifdef HAVE_LIBOTR
     otr_init();
 #endif
@@ -330,7 +347,7 @@ _init(const int disable_tls, char *log_level)
     p_gpg_init();
 #endif
     atexit(_shutdown);
-    ui_input_nonblocking(TRUE);
+    inp_nonblocking(TRUE);
 }
 
 static void

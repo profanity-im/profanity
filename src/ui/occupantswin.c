@@ -62,7 +62,7 @@ _occuptantswin_occupant(ProfLayoutSplit *layout, Occupant *occupant, gboolean sh
 }
 
 void
-occupantswin_occupants(const char * const roomjid)
+occupantswin_occupants(const char *const roomjid)
 {
     ProfMucWin *mucwin = wins_get_muc(roomjid);
     if (mucwin) {

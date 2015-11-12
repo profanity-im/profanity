@@ -50,7 +50,7 @@ connect_jid_requests_bookmarks(void **state)
 void
 connect_bad_password(void **state)
 {
-    prof_input("/connect stabber@localhost port 5230");
+    prof_input("/connect stabber@localhost server 127.0.0.1 port 5230 tls allow");
     prof_input("badpassword");
 
     assert_true(prof_output_exact("Login failed."));

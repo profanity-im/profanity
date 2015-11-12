@@ -32,6 +32,8 @@
  *
  */
 
+#include "config.h"
+
 #include <assert.h>
 #include <errno.h>
 #include <limits.h>
@@ -41,8 +43,6 @@
 
 #include <glib.h>
 
-#include "config.h"
-
 #include "chat_session.h"
 #include "command/command.h"
 #include "command/commands.h"
@@ -51,6 +51,7 @@
 #include "config/preferences.h"
 #include "config/theme.h"
 #include "config/tlscerts.h"
+#include "config/scripts.h"
 #include "contact.h"
 #include "roster_list.h"
 #include "jid.h"
@@ -72,42 +73,46 @@
 #include "ui/ui.h"
 #include "window_list.h"
 
-static gboolean _cmd_execute(ProfWin *window, const char * const command, const char * const inp);
+static gboolean _cmd_execute(ProfWin *window, const char *const command, const char *const inp);
 
-static char * _cmd_complete_parameters(ProfWin *window, const char * const input);
+static char* _cmd_complete_parameters(ProfWin *window, const char *const input);
 
-static char * _sub_autocomplete(ProfWin *window, const char * const input);
-static char * _notify_autocomplete(ProfWin *window, const char * const input);
-static char * _theme_autocomplete(ProfWin *window, const char * const input);
-static char * _autoaway_autocomplete(ProfWin *window, const char * const input);
-static char * _autoconnect_autocomplete(ProfWin *window, const char * const input);
-static char * _account_autocomplete(ProfWin *window, const char * const input);
-static char * _who_autocomplete(ProfWin *window, const char * const input);
-static char * _roster_autocomplete(ProfWin *window, const char * const input);
-static char * _group_autocomplete(ProfWin *window, const char * const input);
-static char * _bookmark_autocomplete(ProfWin *window, const char * const input);
-static char * _otr_autocomplete(ProfWin *window, const char * const input);
-static char * _pgp_autocomplete(ProfWin *window, const char * const input);
-static char * _connect_autocomplete(ProfWin *window, const char * const input);
-static char * _statuses_autocomplete(ProfWin *window, const char * const input);
-static char * _alias_autocomplete(ProfWin *window, const char * const input);
-static char * _join_autocomplete(ProfWin *window, const char * const input);
-static char * _log_autocomplete(ProfWin *window, const char * const input);
-static char * _form_autocomplete(ProfWin *window, const char * const input);
-static char * _form_field_autocomplete(ProfWin *window, const char * const input);
-static char * _occupants_autocomplete(ProfWin *window, const char * const input);
-static char * _kick_autocomplete(ProfWin *window, const char * const input);
-static char * _ban_autocomplete(ProfWin *window, const char * const input);
-static char * _affiliation_autocomplete(ProfWin *window, const char * const input);
-static char * _role_autocomplete(ProfWin *window, const char * const input);
-static char * _resource_autocomplete(ProfWin *window, const char * const input);
-static char * _titlebar_autocomplete(ProfWin *window, const char * const input);
-static char * _inpblock_autocomplete(ProfWin *window, const char * const input);
-static char * _time_autocomplete(ProfWin *window, const char * const input);
-static char * _receipts_autocomplete(ProfWin *window, const char * const input);
-static char * _help_autocomplete(ProfWin *window, const char * const input);
-static char * _wins_autocomplete(ProfWin *window, const char * const input);
-static char * _tls_autocomplete(ProfWin *window, const char * const input);
+static char* _script_autocomplete_func(const char *const prefix);
+
+static char* _sub_autocomplete(ProfWin *window, const char *const input);
+static char* _notify_autocomplete(ProfWin *window, const char *const input);
+static char* _theme_autocomplete(ProfWin *window, const char *const input);
+static char* _autoaway_autocomplete(ProfWin *window, const char *const input);
+static char* _autoconnect_autocomplete(ProfWin *window, const char *const input);
+static char* _account_autocomplete(ProfWin *window, const char *const input);
+static char* _who_autocomplete(ProfWin *window, const char *const input);
+static char* _roster_autocomplete(ProfWin *window, const char *const input);
+static char* _group_autocomplete(ProfWin *window, const char *const input);
+static char* _bookmark_autocomplete(ProfWin *window, const char *const input);
+static char* _otr_autocomplete(ProfWin *window, const char *const input);
+static char* _pgp_autocomplete(ProfWin *window, const char *const input);
+static char* _connect_autocomplete(ProfWin *window, const char *const input);
+static char* _statuses_autocomplete(ProfWin *window, const char *const input);
+static char* _alias_autocomplete(ProfWin *window, const char *const input);
+static char* _join_autocomplete(ProfWin *window, const char *const input);
+static char* _log_autocomplete(ProfWin *window, const char *const input);
+static char* _form_autocomplete(ProfWin *window, const char *const input);
+static char* _form_field_autocomplete(ProfWin *window, const char *const input);
+static char* _occupants_autocomplete(ProfWin *window, const char *const input);
+static char* _kick_autocomplete(ProfWin *window, const char *const input);
+static char* _ban_autocomplete(ProfWin *window, const char *const input);
+static char* _affiliation_autocomplete(ProfWin *window, const char *const input);
+static char* _role_autocomplete(ProfWin *window, const char *const input);
+static char* _resource_autocomplete(ProfWin *window, const char *const input);
+static char* _titlebar_autocomplete(ProfWin *window, const char *const input);
+static char* _inpblock_autocomplete(ProfWin *window, const char *const input);
+static char* _time_autocomplete(ProfWin *window, const char *const input);
+static char* _receipts_autocomplete(ProfWin *window, const char *const input);
+static char* _help_autocomplete(ProfWin *window, const char *const input);
+static char* _wins_autocomplete(ProfWin *window, const char *const input);
+static char* _tls_autocomplete(ProfWin *window, const char *const input);
+static char* _script_autocomplete(ProfWin *window, const char *const input);
+static char* _subject_autocomplete(ProfWin *window, const char *const input);
 
 GHashTable *commands = NULL;
 
@@ -166,12 +171,12 @@ static struct cmd_t command_defs[] =
     },
 
     { "/connect",
-        cmd_connect, parse_args, 0, 5, NULL,
+        cmd_connect, parse_args, 0, 7, NULL,
         CMD_TAGS(
             CMD_TAG_CONNECTION)
         CMD_SYN(
             "/connect [<account>]",
-            "/connect <account> [server <server>] [port <port>]")
+            "/connect <account> [server <server>] [port <port>] [tls force|allow|disable]")
         CMD_DESC(
             "Login to a chat service. "
             "If no account is specified, the default is used if one is configured. "
@@ -179,39 +184,50 @@ static struct cmd_t command_defs[] =
         CMD_ARGS(
             { "<account>",         "The local account you wish to connect with, or a JID if connecting for the first time." },
             { "server <server>",   "Supply a server if it is different to the domain part of your JID." },
-            { "port <port>",       "The port to use if different to the default (5222, or 5223 for SSL)." })
+            { "port <port>",       "The port to use if different to the default (5222, or 5223 for SSL)." },
+            { "tls force",         "Force TLS connection, and fail if one cannot be established, this is default behaviour." },
+            { "tls allow",         "Use TLS for the connection if it is available." },
+            { "tls disable",       "Disable TLS for the connection." })
         CMD_EXAMPLES(
             "/connect",
             "/connect myuser@gmail.com",
             "/connect myuser@mycompany.com server talk.google.com",
             "/connect bob@someplace port 5678",
+            "/connect me@localhost.test.org server 127.0.0.1 tls disable",
             "/connect me@chatty server chatty.com port 5443")
         },
 
     { "/tls",
         cmd_tls, parse_args, 1, 3, NULL,
         CMD_TAGS(
-            CMD_TAG_CONNECTION)
+            CMD_TAG_CONNECTION,
+            CMD_TAG_UI)
         CMD_SYN(
             "/tls allow",
             "/tls always",
             "/tls deny",
+            "/tls cert",
+            "/tls trust",
             "/tls trusted",
             "/tls revoke <fingerprint>",
             "/tls certpath",
             "/tls certpath set <path>",
-            "/tls certpath clear")
+            "/tls certpath clear",
+            "/tls show on|off")
         CMD_DESC(
             "Handle TLS certificates. ")
         CMD_ARGS(
-            { "allow",                "Allow connection to continue with an invalid TLS certificate." },
-            { "always",               "Always allow connections with this invalid TLS certificate." },
-            { "deny",                 "Terminate TLS connection." },
-            { "trusted",              "List manually trusted certificates (with /tls always)." },
+            { "allow",                "Allow connection to continue with TLS certificate." },
+            { "always",               "Always allow connections with TLS certificate." },
+            { "deny",                 "Abort connection." },
+            { "cert",                 "Show the current TLS certificate." },
+            { "trust",                "Add the current TLS certificate to manually trusted certiciates." },
+            { "trusted",              "List manually trusted certificates (with '/tls always' or '/tls trust')." },
             { "revoke <fingerprint>", "Remove a manually trusted certificate." },
             { "certpath",             "Show the trusted certificate path." },
             { "certpath set <path>",  "Specify filesystem path containing trusted certificates." },
-            { "certpath clear",       "Clear the trusted certificate path." })
+            { "certpath clear",       "Clear the trusted certificate path." },
+            { "show on|off",          "Show or hide the TLS indicator in the titlebar." })
         CMD_NOEXAMPLES
     },
 
@@ -552,12 +568,18 @@ static struct cmd_t command_defs[] =
             CMD_TAG_GROUPCHAT)
         CMD_SYN(
             "/subject set <subject>",
+            "/subject edit <subject>",
+            "/subject prepend <text>",
+            "/subject append <text>",
             "/subject clear")
         CMD_DESC(
-            "Set or clear room subject.")
+            "Set, modify, or clear room subject.")
         CMD_ARGS(
-            { "set <subject>", "Set the room subject." },
-            { "clear",         "Clear the room subject." })
+            { "set <subject>",  "Set the room subject." },
+            { "edit <subject>", "Edit the current room subject, tab autocompletion will display the subject to edit." },
+            { "prepend <text>", "Prepend text to the current room subject, use double quotes if a trailing space is needed." },
+            { "append <text>",  "Append text to the current room subject, use double quotes if a preceeding space is needed." },
+            { "clear",          "Clear the room subject." })
         CMD_NOEXAMPLES
     },
 
@@ -700,13 +722,16 @@ static struct cmd_t command_defs[] =
         CMD_TAGS(
             CMD_TAG_PRESENCE)
         CMD_SYN(
+            "/lastactivity on|off",
             "/lastactivity [<jid>]")
         CMD_DESC(
-            "Send a last activity query to the supplied JID, omitting the JID will send the query to your server.")
+            "Enable/disable sending last activity, and send last activity requests.")
         CMD_ARGS(
-            { "<jid>", "The JID of the entity to which the query will be sent." })
+            { "on|off", "Enable or disable sending of last activity." },
+            { "<jid>",  "The JID of the entity to query, omitting the JID will query your server." })
         CMD_EXAMPLES(
             "/lastactivity",
+            "/lastactivity off",
             "/lastactivity alice@securechat.org",
             "/lastactivity alice@securechat.org/laptop",
             "/lastactivity someserver.com")
@@ -975,10 +1000,11 @@ static struct cmd_t command_defs[] =
             { "statusbar off",             "Do not show time in status bar." },
             { "lastactivity set <format>", "Change time format for last activity." })
         CMD_EXAMPLES(
-            "/time main set \"%d-%m-%y %H:%M\"",
-            "/time main off",
+            "/time console set %H:%M:%S",
+            "/time chat set \"%d-%m-%y %H:%M:%S\"",
+            "/time xml off",
             "/time statusbar set %H:%M",
-            "/time lastactivity set \"%d-%m-%y %H:%M\"")
+            "/time lastactivity set \"%d-%m-%y %H:%M:%S\"")
     },
 
     { "/inpblock",
@@ -1482,12 +1508,15 @@ static struct cmd_t command_defs[] =
             "/account set <account> nick <nick>",
             "/account set <account> otr <policy>",
             "/account set <account> pgpkeyid <pgpkeyid>",
+            "/account set <account> startscript <script>",
+            "/account set <account> tls force|allow|disable",
             "/account clear <account> password",
             "/account clear <account> eval_password",
             "/account clear <account> server",
             "/account clear <account> port",
             "/account clear <account> otr",
-            "/account clear <account> pgpkeyid")
+            "/account clear <account> pgpkeyid",
+            "/account clear <account> startscript")
         CMD_DESC(
             "Commands for creating and managing accounts. "
             "Calling with no arguments will display information for the current account.")
@@ -1514,12 +1543,17 @@ static struct cmd_t command_defs[] =
             { "set <account> nick <nick>",              "The default nickname to use when joining chat rooms." },
             { "set <account> otr <policy>",             "Override global OTR policy for this account, see /otr." },
             { "set <account> pgpkeyid <pgpkeyid>",      "Set the ID of the PGP key for this account, see /pgp." },
+            { "set <account> startscript <script>",     "Set the script to execute after connecting." },
+            { "set <account> tls force",                "Force TLS connection, and fail if one cannot be established, this is default behaviour." },
+            { "set <account> tls allow",                "Use TLS for the connection if it is available." },
+            { "set <account> tls disable",              "Disable TLS for the connection." },
             { "clear <account> server",                 "Remove the server setting for this account." },
             { "clear <account> port",                   "Remove the port setting for this account." },
             { "clear <account> password",               "Remove the password setting for this account." },
             { "clear <account> eval_password",          "Remove the eval_password setting for this account." },
             { "clear <account> otr",                    "Remove the OTR policy setting for this account." },
-            { "clear <account> pgpkeyid",               "Remove pgpkeyid associated with this account." })
+            { "clear <account> pgpkeyid",               "Remove pgpkeyid associated with this account." },
+            { "clear <account> startscript",            "Remove startscript associated with this account." })
         CMD_EXAMPLES(
             "/account add me",
             "/account set me jid me@chatty",
@@ -1681,6 +1715,26 @@ static struct cmd_t command_defs[] =
             "/xa",
             "/xa This meeting is going to be a long one")
     },
+
+    { "/script",
+        cmd_script, parse_args, 1, 2, NULL,
+        CMD_NOTAGS
+        CMD_SYN(
+            "/script run <script>",
+            "/script list",
+            "/script show <script>")
+        CMD_DESC(
+            "Run command scripts. "
+            "Scripts are stored in $XDG_DATA_HOME/profanity/scripts/ which is usually $HOME/.local/share/profanity/scripts/.")
+        CMD_ARGS(
+            { "script run <script>",    "Execute a script." },
+            { "script list",            "List all scripts TODO." },
+            { "script show <script>",   "Show the commands in script TODO." })
+        CMD_EXAMPLES(
+            "/script list",
+            "/script run myscript",
+            "/script show somescript")
+    },
 };
 
 static Autocomplete commands_ac;
@@ -1721,6 +1775,7 @@ static Autocomplete otr_ac;
 static Autocomplete otr_log_ac;
 static Autocomplete otr_policy_ac;
 static Autocomplete connect_property_ac;
+static Autocomplete tls_property_ac;
 static Autocomplete statuses_ac;
 static Autocomplete statuses_setting_ac;
 static Autocomplete alias_ac;
@@ -1745,6 +1800,8 @@ static Autocomplete pgp_ac;
 static Autocomplete pgp_log_ac;
 static Autocomplete tls_ac;
 static Autocomplete tls_certpath_ac;
+static Autocomplete script_ac;
+static Autocomplete script_show_ac;
 
 /*
  * Initialise command autocompleter and history
@@ -1909,6 +1966,8 @@ cmd_init(void)
     autocomplete_add(account_set_ac, "nick");
     autocomplete_add(account_set_ac, "otr");
     autocomplete_add(account_set_ac, "pgpkeyid");
+    autocomplete_add(account_set_ac, "startscript");
+    autocomplete_add(account_set_ac, "tls");
 
     account_clear_ac = autocomplete_new();
     autocomplete_add(account_clear_ac, "password");
@@ -1917,6 +1976,7 @@ cmd_init(void)
     autocomplete_add(account_clear_ac, "port");
     autocomplete_add(account_clear_ac, "otr");
     autocomplete_add(account_clear_ac, "pgpkeyid");
+    autocomplete_add(account_clear_ac, "startscript");
 
     account_default_ac = autocomplete_new();
     autocomplete_add(account_default_ac, "set");
@@ -2039,6 +2099,12 @@ cmd_init(void)
     connect_property_ac = autocomplete_new();
     autocomplete_add(connect_property_ac, "server");
     autocomplete_add(connect_property_ac, "port");
+    autocomplete_add(connect_property_ac, "tls");
+
+    tls_property_ac = autocomplete_new();
+    autocomplete_add(tls_property_ac, "force");
+    autocomplete_add(tls_property_ac, "allow");
+    autocomplete_add(tls_property_ac, "disable");
 
     join_property_ac = autocomplete_new();
     autocomplete_add(join_property_ac, "nick");
@@ -2083,6 +2149,9 @@ cmd_init(void)
 
     subject_ac = autocomplete_new();
     autocomplete_add(subject_ac, "set");
+    autocomplete_add(subject_ac, "edit");
+    autocomplete_add(subject_ac, "prepend");
+    autocomplete_add(subject_ac, "append");
     autocomplete_add(subject_ac, "clear");
 
     form_ac = autocomplete_new();
@@ -2155,13 +2224,23 @@ cmd_init(void)
     autocomplete_add(tls_ac, "allow");
     autocomplete_add(tls_ac, "always");
     autocomplete_add(tls_ac, "deny");
+    autocomplete_add(tls_ac, "cert");
+    autocomplete_add(tls_ac, "trust");
     autocomplete_add(tls_ac, "trusted");
     autocomplete_add(tls_ac, "revoke");
     autocomplete_add(tls_ac, "certpath");
+    autocomplete_add(tls_ac, "show");
 
     tls_certpath_ac = autocomplete_new();
     autocomplete_add(tls_certpath_ac, "set");
     autocomplete_add(tls_certpath_ac, "clear");
+
+    script_ac = autocomplete_new();
+    autocomplete_add(script_ac, "run");
+    autocomplete_add(script_ac, "list");
+    autocomplete_add(script_ac, "show");
+
+    script_show_ac = NULL;
 }
 
 void
@@ -2205,6 +2284,7 @@ cmd_uninit(void)
     autocomplete_free(otr_log_ac);
     autocomplete_free(otr_policy_ac);
     autocomplete_free(connect_property_ac);
+    autocomplete_free(tls_property_ac);
     autocomplete_free(statuses_ac);
     autocomplete_free(statuses_setting_ac);
     autocomplete_free(alias_ac);
@@ -2229,6 +2309,8 @@ cmd_uninit(void)
     autocomplete_free(pgp_log_ac);
     autocomplete_free(tls_ac);
     autocomplete_free(tls_certpath_ac);
+    autocomplete_free(script_ac);
+    autocomplete_free(script_show_ac);
 }
 
 gboolean
@@ -2313,7 +2395,7 @@ cmd_alias_remove(char *value)
 
 // Command autocompletion functions
 char*
-cmd_autocomplete(ProfWin *window, const char * const input)
+cmd_autocomplete(ProfWin *window, const char *const input)
 {
     // autocomplete command
     if ((strncmp(input, "/", 1) == 0) && (!str_contains(input, strlen(input), ' '))) {
@@ -2389,6 +2471,7 @@ cmd_reset_autocomplete(ProfWin *window)
     autocomplete_reset(otr_log_ac);
     autocomplete_reset(otr_policy_ac);
     autocomplete_reset(connect_property_ac);
+    autocomplete_reset(tls_property_ac);
     autocomplete_reset(statuses_ac);
     autocomplete_reset(statuses_setting_ac);
     autocomplete_reset(alias_ac);
@@ -2413,6 +2496,11 @@ cmd_reset_autocomplete(ProfWin *window)
     autocomplete_reset(pgp_log_ac);
     autocomplete_reset(tls_ac);
     autocomplete_reset(tls_certpath_ac);
+    autocomplete_reset(script_ac);
+    if (script_show_ac) {
+        autocomplete_free(script_show_ac);
+        script_show_ac = NULL;
+    }
 
     if (window->type == WIN_CHAT) {
         ProfChatWin *chatwin = (ProfChatWin*)window;
@@ -2442,7 +2530,7 @@ cmd_reset_autocomplete(ProfWin *window)
 }
 
 gboolean
-cmd_valid_tag(const char * const str)
+cmd_valid_tag(const char *const str)
 {
     return ((g_strcmp0(str, CMD_TAG_CHAT) == 0) ||
         (g_strcmp0(str, CMD_TAG_GROUPCHAT) == 0) ||
@@ -2454,7 +2542,7 @@ cmd_valid_tag(const char * const str)
 }
 
 gboolean
-cmd_has_tag(Command *pcmd, const char * const tag)
+cmd_has_tag(Command *pcmd, const char *const tag)
 {
     int i = 0;
     for (i = 0; pcmd->help.tags[i] != NULL; i++) {
@@ -2499,7 +2587,7 @@ cmd_process_input(ProfWin *window, char *inp)
 // Command execution
 
 void
-cmd_execute_connect(ProfWin *window, const char * const account)
+cmd_execute_connect(ProfWin *window, const char *const account)
 {
     GString *command = g_string_new("/connect ");
     g_string_append(command, account);
@@ -2508,7 +2596,7 @@ cmd_execute_connect(ProfWin *window, const char * const account)
 }
 
 static gboolean
-_cmd_execute(ProfWin *window, const char * const command, const char * const inp)
+_cmd_execute(ProfWin *window, const char *const command, const char *const inp)
 {
     if (g_str_has_prefix(command, "/field") && window->type == WIN_MUC_CONFIG) {
         gboolean result = FALSE;
@@ -2551,8 +2639,8 @@ _cmd_execute(ProfWin *window, const char * const command, const char * const inp
     }
 }
 
-static char *
-_cmd_complete_parameters(ProfWin *window, const char * const input)
+static char*
+_cmd_complete_parameters(ProfWin *window, const char *const input)
 {
     int i;
     char *result = NULL;
@@ -2560,7 +2648,7 @@ _cmd_complete_parameters(ProfWin *window, const char * const input)
     // autocomplete boolean settings
     gchar *boolean_choices[] = { "/beep", "/intype", "/states", "/outtype",
         "/flash", "/splash", "/chlog", "/grlog", "/history", "/vercheck",
-        "/privileges", "/presence", "/wrap", "/winstidy", "/carbons", "/encwarn" };
+        "/privileges", "/presence", "/wrap", "/winstidy", "/carbons", "/encwarn", "/lastactivity" };
 
     for (i = 0; i < ARRAY_SIZE(boolean_choices); i++) {
         result = autocomplete_param_with_func(input, boolean_choices[i], prefs_autocomplete_boolean_choice);
@@ -2625,8 +2713,8 @@ _cmd_complete_parameters(ProfWin *window, const char * const input)
         }
     }
 
-    gchar *cmds[] = { "/prefs", "/disco", "/close", "/subject", "/room" };
-    Autocomplete completers[] = { prefs_ac, disco_ac, close_ac, subject_ac, room_ac };
+    gchar *cmds[] = { "/prefs", "/disco", "/close", "/room" };
+    Autocomplete completers[] = { prefs_ac, disco_ac, close_ac, room_ac };
 
     for (i = 0; i < ARRAY_SIZE(cmds); i++) {
         result = autocomplete_param_with_ac(input, cmds[i], completers[i], TRUE);
@@ -2667,6 +2755,8 @@ _cmd_complete_parameters(ProfWin *window, const char * const input)
     g_hash_table_insert(ac_funcs, "/receipts",      _receipts_autocomplete);
     g_hash_table_insert(ac_funcs, "/wins",          _wins_autocomplete);
     g_hash_table_insert(ac_funcs, "/tls",           _tls_autocomplete);
+    g_hash_table_insert(ac_funcs, "/script",        _script_autocomplete);
+    g_hash_table_insert(ac_funcs, "/subject",        _subject_autocomplete);
 
     int len = strlen(input);
     char parsed[len+1];
@@ -2701,8 +2791,8 @@ _cmd_complete_parameters(ProfWin *window, const char * const input)
     return NULL;
 }
 
-static char *
-_sub_autocomplete(ProfWin *window, const char * const input)
+static char*
+_sub_autocomplete(ProfWin *window, const char *const input)
 {
     char *result = NULL;
     result = autocomplete_param_with_func(input, "/sub allow", presence_sub_request_find);
@@ -2721,8 +2811,8 @@ _sub_autocomplete(ProfWin *window, const char * const input)
     return NULL;
 }
 
-static char *
-_who_autocomplete(ProfWin *window, const char * const input)
+static char*
+_who_autocomplete(ProfWin *window, const char *const input)
 {
     char *result = NULL;
 
@@ -2753,8 +2843,8 @@ _who_autocomplete(ProfWin *window, const char * const input)
     return NULL;
 }
 
-static char *
-_roster_autocomplete(ProfWin *window, const char * const input)
+static char*
+_roster_autocomplete(ProfWin *window, const char *const input)
 {
     char *result = NULL;
     result = autocomplete_param_with_func(input, "/roster nick", roster_barejid_autocomplete);
@@ -2793,8 +2883,8 @@ _roster_autocomplete(ProfWin *window, const char * const input)
     return NULL;
 }
 
-static char *
-_group_autocomplete(ProfWin *window, const char * const input)
+static char*
+_group_autocomplete(ProfWin *window, const char *const input)
 {
     char *result = NULL;
     result = autocomplete_param_with_func(input, "/group show", roster_group_autocomplete);
@@ -2826,8 +2916,8 @@ _group_autocomplete(ProfWin *window, const char * const input)
     return NULL;
 }
 
-static char *
-_bookmark_autocomplete(ProfWin *window, const char * const input)
+static char*
+_bookmark_autocomplete(ProfWin *window, const char *const input)
 {
     char *found = NULL;
 
@@ -2905,8 +2995,8 @@ _bookmark_autocomplete(ProfWin *window, const char * const input)
     return found;
 }
 
-static char *
-_notify_autocomplete(ProfWin *window, const char * const input)
+static char*
+_notify_autocomplete(ProfWin *window, const char *const input)
 {
     int i = 0;
     char *result = NULL;
@@ -2968,8 +3058,8 @@ _notify_autocomplete(ProfWin *window, const char * const input)
     return NULL;
 }
 
-static char *
-_autoaway_autocomplete(ProfWin *window, const char * const input)
+static char*
+_autoaway_autocomplete(ProfWin *window, const char *const input)
 {
     char *result = NULL;
 
@@ -3000,8 +3090,8 @@ _autoaway_autocomplete(ProfWin *window, const char * const input)
     return NULL;
 }
 
-static char *
-_log_autocomplete(ProfWin *window, const char * const input)
+static char*
+_log_autocomplete(ProfWin *window, const char *const input)
 {
     char *result = NULL;
 
@@ -3023,8 +3113,8 @@ _log_autocomplete(ProfWin *window, const char * const input)
     return NULL;
 }
 
-static char *
-_autoconnect_autocomplete(ProfWin *window, const char * const input)
+static char*
+_autoconnect_autocomplete(ProfWin *window, const char *const input)
 {
     char *result = NULL;
 
@@ -3041,8 +3131,8 @@ _autoconnect_autocomplete(ProfWin *window, const char * const input)
     return NULL;
 }
 
-static char *
-_otr_autocomplete(ProfWin *window, const char * const input)
+static char*
+_otr_autocomplete(ProfWin *window, const char *const input)
 {
     char *found = NULL;
 
@@ -3088,8 +3178,8 @@ _otr_autocomplete(ProfWin *window, const char * const input)
     return NULL;
 }
 
-static char *
-_pgp_autocomplete(ProfWin *window, const char * const input)
+static char*
+_pgp_autocomplete(ProfWin *window, const char *const input)
 {
     char *found = NULL;
 
@@ -3136,8 +3226,8 @@ _pgp_autocomplete(ProfWin *window, const char * const input)
     return NULL;
 }
 
-static char *
-_theme_autocomplete(ProfWin *window, const char * const input)
+static char*
+_theme_autocomplete(ProfWin *window, const char *const input)
 {
     char *result = NULL;
     if ((strncmp(input, "/theme load ", 12) == 0) && (strlen(input) > 12)) {
@@ -3165,8 +3255,52 @@ _theme_autocomplete(ProfWin *window, const char * const input)
     return NULL;
 }
 
-static char *
-_resource_autocomplete(ProfWin *window, const char * const input)
+static char*
+_script_autocomplete_func(const char *const prefix)
+{
+    if (script_show_ac == NULL) {
+        script_show_ac = autocomplete_new();
+        GSList *scripts = scripts_list();
+        GSList *curr = scripts;
+        while (curr) {
+            autocomplete_add(script_show_ac, curr->data);
+            curr = g_slist_next(curr);
+        }
+        g_slist_free_full(scripts, g_free);
+    }
+
+    return autocomplete_complete(script_show_ac, prefix, FALSE);
+}
+
+
+static char*
+_script_autocomplete(ProfWin *window, const char *const input)
+{
+    char *result = NULL;
+    if ((strncmp(input, "/script show ", 13) == 0) && (strlen(input) > 13)) {
+        result = autocomplete_param_with_func(input, "/script show", _script_autocomplete_func);
+        if (result) {
+            return result;
+        }
+    }
+
+    if ((strncmp(input, "/script run ", 12) == 0) && (strlen(input) > 12)) {
+        result = autocomplete_param_with_func(input, "/script run", _script_autocomplete_func);
+        if (result) {
+            return result;
+        }
+    }
+
+    result = autocomplete_param_with_ac(input, "/script", script_ac, TRUE);
+    if (result) {
+        return result;
+    }
+
+    return NULL;
+}
+
+static char*
+_resource_autocomplete(ProfWin *window, const char *const input)
 {
     char *found = NULL;
 
@@ -3201,8 +3335,8 @@ _resource_autocomplete(ProfWin *window, const char * const input)
     return NULL;
 }
 
-static char *
-_titlebar_autocomplete(ProfWin *window, const char * const input)
+static char*
+_titlebar_autocomplete(ProfWin *window, const char *const input)
 {
     char *found = NULL;
 
@@ -3224,8 +3358,8 @@ _titlebar_autocomplete(ProfWin *window, const char * const input)
     return NULL;
 }
 
-static char *
-_inpblock_autocomplete(ProfWin *window, const char * const input)
+static char*
+_inpblock_autocomplete(ProfWin *window, const char *const input)
 {
     char *found = NULL;
 
@@ -3242,8 +3376,8 @@ _inpblock_autocomplete(ProfWin *window, const char * const input)
     return NULL;
 }
 
-static char *
-_form_autocomplete(ProfWin *window, const char * const input)
+static char*
+_form_autocomplete(ProfWin *window, const char *const input)
 {
     if (window->type != WIN_MUC_CONFIG) {
         return NULL;
@@ -3268,8 +3402,8 @@ _form_autocomplete(ProfWin *window, const char * const input)
     return NULL;
 }
 
-static char *
-_form_field_autocomplete(ProfWin *window, const char * const input)
+static char*
+_form_field_autocomplete(ProfWin *window, const char *const input)
 {
     if (window->type != WIN_MUC_CONFIG) {
         return NULL;
@@ -3338,8 +3472,8 @@ _form_field_autocomplete(ProfWin *window, const char * const input)
     return found;
 }
 
-static char *
-_occupants_autocomplete(ProfWin *window, const char * const input)
+static char*
+_occupants_autocomplete(ProfWin *window, const char *const input)
 {
     char *found = NULL;
 
@@ -3376,8 +3510,8 @@ _occupants_autocomplete(ProfWin *window, const char * const input)
     return NULL;
 }
 
-static char *
-_time_autocomplete(ProfWin *window, const char * const input)
+static char*
+_time_autocomplete(ProfWin *window, const char *const input)
 {
     char *found = NULL;
 
@@ -3429,8 +3563,8 @@ _time_autocomplete(ProfWin *window, const char * const input)
     return NULL;
 }
 
-static char *
-_kick_autocomplete(ProfWin *window, const char * const input)
+static char*
+_kick_autocomplete(ProfWin *window, const char *const input)
 {
     char *result = NULL;
 
@@ -3450,8 +3584,8 @@ _kick_autocomplete(ProfWin *window, const char * const input)
     return result;
 }
 
-static char *
-_ban_autocomplete(ProfWin *window, const char * const input)
+static char*
+_ban_autocomplete(ProfWin *window, const char *const input)
 {
     char *result = NULL;
 
@@ -3471,8 +3605,8 @@ _ban_autocomplete(ProfWin *window, const char * const input)
     return result;
 }
 
-static char *
-_affiliation_autocomplete(ProfWin *window, const char * const input)
+static char*
+_affiliation_autocomplete(ProfWin *window, const char *const input)
 {
     char *result = NULL;
 
@@ -3519,8 +3653,8 @@ _affiliation_autocomplete(ProfWin *window, const char * const input)
     return result;
 }
 
-static char *
-_role_autocomplete(ProfWin *window, const char * const input)
+static char*
+_role_autocomplete(ProfWin *window, const char *const input)
 {
     char *result = NULL;
 
@@ -3567,8 +3701,8 @@ _role_autocomplete(ProfWin *window, const char * const input)
     return result;
 }
 
-static char *
-_statuses_autocomplete(ProfWin *window, const char * const input)
+static char*
+_statuses_autocomplete(ProfWin *window, const char *const input)
 {
     char *result = NULL;
 
@@ -3595,8 +3729,8 @@ _statuses_autocomplete(ProfWin *window, const char * const input)
     return NULL;
 }
 
-static char *
-_wins_autocomplete(ProfWin *window, const char * const input)
+static char*
+_wins_autocomplete(ProfWin *window, const char *const input)
 {
     char *result = NULL;
 
@@ -3613,8 +3747,8 @@ _wins_autocomplete(ProfWin *window, const char * const input)
     return NULL;
 }
 
-static char *
-_tls_autocomplete(ProfWin *window, const char * const input)
+static char*
+_tls_autocomplete(ProfWin *window, const char *const input)
 {
     char *result = NULL;
 
@@ -3628,6 +3762,11 @@ _tls_autocomplete(ProfWin *window, const char * const input)
         return result;
     }
 
+    result = autocomplete_param_with_func(input, "/tls show", prefs_autocomplete_boolean_choice);
+    if (result) {
+        return result;
+    }
+
     result = autocomplete_param_with_ac(input, "/tls", tls_ac, TRUE);
     if (result) {
         return result;
@@ -3636,8 +3775,8 @@ _tls_autocomplete(ProfWin *window, const char * const input)
     return result;
 }
 
-static char *
-_receipts_autocomplete(ProfWin *window, const char * const input)
+static char*
+_receipts_autocomplete(ProfWin *window, const char *const input)
 {
     char *result = NULL;
 
@@ -3659,8 +3798,8 @@ _receipts_autocomplete(ProfWin *window, const char * const input)
     return NULL;
 }
 
-static char *
-_alias_autocomplete(ProfWin *window, const char * const input)
+static char*
+_alias_autocomplete(ProfWin *window, const char *const input)
 {
     char *result = NULL;
 
@@ -3677,13 +3816,13 @@ _alias_autocomplete(ProfWin *window, const char * const input)
     return NULL;
 }
 
-static char *
-_connect_autocomplete(ProfWin *window, const char * const input)
+static char*
+_connect_autocomplete(ProfWin *window, const char *const input)
 {
     char *found = NULL;
     gboolean result = FALSE;
 
-    gchar **args = parse_args(input, 2, 4, &result);
+    gchar **args = parse_args(input, 2, 6, &result);
 
     if ((strncmp(input, "/connect", 8) == 0) && (result == TRUE)) {
         GString *beginning = g_string_new("/connect ");
@@ -3693,12 +3832,58 @@ _connect_autocomplete(ProfWin *window, const char * const input)
             g_string_append(beginning, args[1]);
             g_string_append(beginning, " ");
             g_string_append(beginning, args[2]);
+            if (args[3] && args[4]) {
+                g_string_append(beginning, " ");
+                g_string_append(beginning, args[3]);
+                g_string_append(beginning, " ");
+                g_string_append(beginning, args[4]);
+            }
         }
         found = autocomplete_param_with_ac(input, beginning->str, connect_property_ac, TRUE);
         g_string_free(beginning, TRUE);
         if (found) {
             g_strfreev(args);
             return found;
+        }
+    }
+
+    g_strfreev(args);
+
+    result = FALSE;
+    args = parse_args(input, 2, 7, &result);
+
+    if ((strncmp(input, "/connect", 8) == 0) && (result == TRUE)) {
+        GString *beginning = g_string_new("/connect ");
+        g_string_append(beginning, args[0]);
+        int curr = 0;
+        if (args[1]) {
+            g_string_append(beginning, " ");
+            g_string_append(beginning, args[1]);
+            curr = 1;
+            if (args[2] && args[3]) {
+                g_string_append(beginning, " ");
+                g_string_append(beginning, args[2]);
+                g_string_append(beginning, " ");
+                g_string_append(beginning, args[3]);
+                curr = 3;
+                if (args[4] && args[5]) {
+                    g_string_append(beginning, " ");
+                    g_string_append(beginning, args[4]);
+                    g_string_append(beginning, " ");
+                    g_string_append(beginning, args[5]);
+                    curr = 5;
+                }
+            }
+        }
+        if (curr != 0 && (g_strcmp0(args[curr], "tls") == 0)) {
+            found = autocomplete_param_with_ac(input, beginning->str, tls_property_ac, TRUE);
+            g_string_free(beginning, TRUE);
+            if (found) {
+                g_strfreev(args);
+                return found;
+            }
+        } else {
+            g_string_free(beginning, TRUE);
         }
     }
 
@@ -3712,8 +3897,8 @@ _connect_autocomplete(ProfWin *window, const char * const input)
     return NULL;
 }
 
-static char *
-_help_autocomplete(ProfWin *window, const char * const input)
+static char*
+_help_autocomplete(ProfWin *window, const char *const input)
 {
     char *result = NULL;
 
@@ -3730,8 +3915,8 @@ _help_autocomplete(ProfWin *window, const char * const input)
     return NULL;
 }
 
-static char *
-_join_autocomplete(ProfWin *window, const char * const input)
+static char*
+_join_autocomplete(ProfWin *window, const char *const input)
 {
     char *found = NULL;
     gboolean result = FALSE;
@@ -3765,8 +3950,46 @@ _join_autocomplete(ProfWin *window, const char * const input)
     return NULL;
 }
 
-static char *
-_account_autocomplete(ProfWin *window, const char * const input)
+static char*
+_subject_autocomplete(ProfWin *window, const char *const input)
+{
+    char *result = NULL;
+
+    if (window->type == WIN_MUC) {
+        if ((g_strcmp0(input, "/subject e") == 0)
+                || (g_strcmp0(input, "/subject ed") == 0)
+                || (g_strcmp0(input, "/subject edi") == 0)
+                || (g_strcmp0(input, "/subject edit") == 0)
+                || (g_strcmp0(input, "/subject edit ") == 0)
+                || (g_strcmp0(input, "/subject edit \"") == 0)) {
+            ProfMucWin *mucwin = (ProfMucWin*)window;
+            assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
+
+            char *subject = muc_subject(mucwin->roomjid);
+            if (subject) {
+                GString *result_str = g_string_new("/subject edit \"");
+                g_string_append(result_str, subject);
+                g_string_append(result_str, "\"");
+
+                result = result_str->str;
+                g_string_free(result_str, FALSE);
+            }
+        }
+    }
+    if (result) {
+        return result;
+    }
+
+    result = autocomplete_param_with_ac(input, "/subject", subject_ac, TRUE);
+    if (result) {
+        return result;
+    }
+
+    return NULL;
+}
+
+static char*
+_account_autocomplete(ProfWin *window, const char *const input)
 {
     char *found = NULL;
     gboolean result = FALSE;
@@ -3789,6 +4012,24 @@ _account_autocomplete(ProfWin *window, const char * const input)
             g_string_append(beginning, " ");
             g_string_append(beginning, args[2]);
             found = autocomplete_param_with_ac(input, beginning->str, account_status_ac, TRUE);
+            g_string_free(beginning, TRUE);
+            if (found) {
+                g_strfreev(args);
+                return found;
+            }
+        } else if ((g_strv_length(args) > 3) && (g_strcmp0(args[2], "tls")) == 0) {
+            g_string_append(beginning, " ");
+            g_string_append(beginning, args[2]);
+            found = autocomplete_param_with_ac(input, beginning->str, tls_property_ac, TRUE);
+            g_string_free(beginning, TRUE);
+            if (found) {
+                g_strfreev(args);
+                return found;
+            }
+        } else if ((g_strv_length(args) > 3) && (g_strcmp0(args[2], "startscript")) == 0) {
+            g_string_append(beginning, " ");
+            g_string_append(beginning, args[2]);
+            found = autocomplete_param_with_func(input, beginning->str, _script_autocomplete_func);
             g_string_free(beginning, TRUE);
             if (found) {
                 g_strfreev(args);

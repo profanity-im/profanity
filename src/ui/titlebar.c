@@ -51,6 +51,8 @@
 
 static WINDOW *win;
 static contact_presence_t current_presence;
+static gboolean tls_secured;
+static gboolean is_connected;
 
 static gboolean typing;
 static GTimer *typing_elapsed;
@@ -69,6 +71,8 @@ create_title_bar(void)
     wbkgd(win, theme_attrs(THEME_TITLE_TEXT));
     title_bar_console();
     title_bar_set_presence(CONTACT_OFFLINE);
+    title_bar_set_tls(FALSE);
+    title_bar_set_connected(FALSE);
     wnoutrefresh(win);
     inp_put_back();
 }
@@ -120,6 +124,20 @@ void
 title_bar_set_presence(contact_presence_t presence)
 {
     current_presence = presence;
+    _title_bar_draw();
+}
+
+void
+title_bar_set_connected(gboolean connected)
+{
+    is_connected = connected;
+    _title_bar_draw();
+}
+
+void
+title_bar_set_tls(gboolean secured)
+{
+    tls_secured = secured;
     _title_bar_draw();
 }
 
@@ -190,55 +208,99 @@ _show_self_presence(void)
 {
     int presence_attrs = 0;
     int bracket_attrs = theme_attrs(THEME_TITLE_BRACKET);
+    int encrypted_attrs = theme_attrs(THEME_TITLE_ENCRYPTED);
+    int unencrypted_attrs = theme_attrs(THEME_TITLE_UNENCRYPTED);
     int cols = getmaxx(stdscr);
 
-    wattron(win, bracket_attrs);
-    mvwaddch(win, 0, cols - 14, '[');
-    wattroff(win, bracket_attrs);
+    int tls_start = 0;
 
     switch (current_presence)
     {
         case CONTACT_ONLINE:
             presence_attrs = theme_attrs(THEME_TITLE_ONLINE);
+            wattron(win, bracket_attrs);
+            mvwaddch(win, 0, cols - 9, '[');
+            wattroff(win, bracket_attrs);
             wattron(win, presence_attrs);
-            mvwprintw(win, 0, cols - 13, " ...online ");
+            mvwprintw(win, 0, cols - 8, "online");
             wattroff(win, presence_attrs);
+            tls_start = 15;
             break;
         case CONTACT_AWAY:
             presence_attrs = theme_attrs(THEME_TITLE_AWAY);
+            wattron(win, bracket_attrs);
+            mvwaddch(win, 0, cols - 7, '[');
+            wattroff(win, bracket_attrs);
             wattron(win, presence_attrs);
-            mvwprintw(win, 0, cols - 13, " .....away ");
+            mvwprintw(win, 0, cols - 6, "away");
             wattroff(win, presence_attrs);
+            tls_start = 13;
             break;
         case CONTACT_DND:
             presence_attrs = theme_attrs(THEME_TITLE_DND);
+            wattron(win, bracket_attrs);
+            mvwaddch(win, 0, cols - 6, '[');
+            wattroff(win, bracket_attrs);
             wattron(win, presence_attrs);
-            mvwprintw(win, 0, cols - 13, " ......dnd ");
+            mvwprintw(win, 0, cols - 5, "dnd");
             wattroff(win, presence_attrs);
+            tls_start = 12;
             break;
         case CONTACT_CHAT:
             presence_attrs = theme_attrs(THEME_TITLE_CHAT);
+            wattron(win, bracket_attrs);
+            mvwaddch(win, 0, cols - 7, '[');
+            wattroff(win, bracket_attrs);
             wattron(win, presence_attrs);
-            mvwprintw(win, 0, cols - 13, " .....chat ");
+            mvwprintw(win, 0, cols - 6, "chat");
             wattroff(win, presence_attrs);
+            tls_start = 13;
             break;
         case CONTACT_XA:
             presence_attrs = theme_attrs(THEME_TITLE_XA);
+            wattron(win, bracket_attrs);
+            mvwaddch(win, 0, cols - 5, '[');
+            wattroff(win, bracket_attrs);
             wattron(win, presence_attrs);
-            mvwprintw(win, 0, cols - 13, " .......xa ");
+            mvwprintw(win, 0, cols - 4, "xa");
             wattroff(win, presence_attrs);
+            tls_start = 11;
             break;
         case CONTACT_OFFLINE:
             presence_attrs = theme_attrs(THEME_TITLE_OFFLINE);
+            wattron(win, bracket_attrs);
+            mvwaddch(win, 0, cols - 10, '[');
+            wattroff(win, bracket_attrs);
             wattron(win, presence_attrs);
-            mvwprintw(win, 0, cols - 13, " ..offline ");
+            mvwprintw(win, 0, cols - 9, "offline");
             wattroff(win, presence_attrs);
+            tls_start = 16;
             break;
     }
 
     wattron(win, bracket_attrs);
     mvwaddch(win, 0, cols - 2, ']');
     wattroff(win, bracket_attrs);
+
+    if (is_connected && prefs_get_boolean(PREF_TLS_SHOW)) {
+        wattron(win, bracket_attrs);
+        mvwaddch(win, 0, cols - tls_start, '[');
+        wattroff(win, bracket_attrs);
+
+        if (tls_secured) {
+            wattron(win, encrypted_attrs);
+            mvwprintw(win, 0, cols - (tls_start - 1), "TLS");
+            wattroff(win, encrypted_attrs);
+        } else {
+            wattron(win, unencrypted_attrs);
+            mvwprintw(win, 0, cols - (tls_start - 1), "TLS");
+            wattroff(win, unencrypted_attrs);
+        }
+
+        wattron(win, bracket_attrs);
+        mvwaddch(win, 0, cols - (tls_start - 4), ']');
+        wattroff(win, bracket_attrs);
+    }
 }
 
 static void

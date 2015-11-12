@@ -37,10 +37,10 @@
 
 #include <glib.h>
 
-gchar** parse_args(const char * const inp, int min, int max, gboolean *result);
-gchar** parse_args_with_freetext(const char * const inp, int min, int max, gboolean *result);
-int count_tokens(const char * const string);
-char* get_start(const char * const string, int tokens);
+gchar** parse_args(const char *const inp, int min, int max, gboolean *result);
+gchar** parse_args_with_freetext(const char *const inp, int min, int max, gboolean *result);
+int count_tokens(const char *const string);
+char* get_start(const char *const string, int tokens);
 GHashTable* parse_options(gchar **args, gchar **keys, gboolean *res);
 void options_destroy(GHashTable *options);
 

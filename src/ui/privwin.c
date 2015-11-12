@@ -1,5 +1,5 @@
 /*
- * chat_state.h
+ * privwin.c
  *
  * Copyright (C) 2012 - 2015 James Booth <boothj5@gmail.com>
  *
@@ -32,30 +32,58 @@
  *
  */
 
-#ifndef CHAT_STATE_H
-#define CHAT_STATE_H
-
+#include <assert.h>
 #include <glib.h>
 
-typedef enum {
-    CHAT_STATE_ACTIVE,
-    CHAT_STATE_COMPOSING,
-    CHAT_STATE_PAUSED,
-    CHAT_STATE_INACTIVE,
-    CHAT_STATE_GONE
-} chat_state_type_t;
+#include "ui/win_types.h"
+#include "ui/window.h"
+#include "ui/titlebar.h"
+#include "window_list.h"
+#include "config/preferences.h"
 
-typedef struct prof_chat_state_t {
-    chat_state_type_t type;
-    GTimer *timer;
-} ChatState;
+void
+privwin_incoming_msg(ProfPrivateWin *privatewin, const char *const message, GDateTime *timestamp)
+{
+    assert(privatewin != NULL);
 
-ChatState* chat_state_new(void);
-void chat_state_free(ChatState *state);
+    ProfWin *window = (ProfWin*) privatewin;
+    int num = wins_get_num(window);
 
-void chat_state_handle_idle(const char *const barejid, ChatState *state);
-void chat_state_handle_typing(const char *const barejid, ChatState *state);
-void chat_state_active(ChatState *state);
-void chat_state_gone(const char *const barejid, ChatState *state);
+    char *display_from = get_nick_from_full_jid(privatewin->fulljid);
 
-#endif
+    // currently viewing chat window with sender
+    if (wins_is_current(window)) {
+        win_print_incoming_message(window, timestamp, display_from, message, PROF_MSG_PLAIN);
+        title_bar_set_typing(FALSE);
+        status_bar_active(num);
+
+    // not currently viewing chat window with sender
+    } else {
+        privatewin->unread++;
+        status_bar_new(num);
+        cons_show_incoming_message(display_from, num);
+        win_print_incoming_message(window, timestamp, display_from, message, PROF_MSG_PLAIN);
+
+        if (prefs_get_boolean(PREF_FLASH)) {
+            flash();
+        }
+    }
+
+    if (prefs_get_boolean(PREF_BEEP)) {
+        beep();
+    }
+
+    if (prefs_get_boolean(PREF_NOTIFY_MESSAGE)) {
+        notify_message(window, display_from, message);
+    }
+
+    free(display_from);
+}
+
+void
+privwin_outgoing_msg(ProfPrivateWin *privwin, const char *const message)
+{
+    assert(privwin != NULL);
+
+    win_print((ProfWin*)privwin, '-', 0, NULL, 0, THEME_TEXT_ME, "me", message);
+}

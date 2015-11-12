@@ -60,8 +60,8 @@
 #define CEILING(X) (X-(int)(X) > 0 ? (int)(X+1) : (int)(X))
 
 static void _win_print(ProfWin *window, const char show_char, int pad_indent, GDateTime *time,
-    int flags, theme_item_t theme_item, const char * const from, const char * const message, DeliveryReceipt *receipt);
-static void _win_print_wrapped(WINDOW *win, const char * const message, size_t indent, int pad_indent);
+    int flags, theme_item_t theme_item, const char *const from, const char *const message, DeliveryReceipt *receipt);
+static void _win_print_wrapped(WINDOW *win, const char *const message, size_t indent, int pad_indent);
 
 int
 win_roster_cols(void)
@@ -127,7 +127,7 @@ win_create_console(void)
 }
 
 ProfWin*
-win_create_chat(const char * const barejid)
+win_create_chat(const char *const barejid)
 {
     ProfChatWin *new_win = malloc(sizeof(ProfChatWin));
     new_win->window.type = WIN_CHAT;
@@ -149,7 +149,7 @@ win_create_chat(const char * const barejid)
 }
 
 ProfWin*
-win_create_muc(const char * const roomjid)
+win_create_muc(const char *const roomjid)
 {
     ProfMucWin *new_win = malloc(sizeof(ProfMucWin));
     int cols = getmaxx(stdscr);
@@ -192,7 +192,7 @@ win_create_muc(const char * const roomjid)
 }
 
 ProfWin*
-win_create_muc_config(const char * const roomjid, DataForm *form)
+win_create_muc_config(const char *const roomjid, DataForm *form)
 {
     ProfMucConfWin *new_win = malloc(sizeof(ProfMucConfWin));
     new_win->window.type = WIN_MUC_CONFIG;
@@ -207,7 +207,7 @@ win_create_muc_config(const char * const roomjid, DataForm *form)
 }
 
 ProfWin*
-win_create_private(const char * const fulljid)
+win_create_private(const char *const fulljid)
 {
     ProfPrivateWin *new_win = malloc(sizeof(ProfPrivateWin));
     new_win->window.type = WIN_PRIVATE;
@@ -233,7 +233,7 @@ win_create_xmlconsole(void)
     return &new_win->window;
 }
 
-char *
+char*
 win_get_title(ProfWin *window)
 {
     if (window == NULL) {
@@ -471,12 +471,12 @@ win_clear(ProfWin *window)
 void
 win_resize(ProfWin *window)
 {
-    int subwin_cols = 0;
     int cols = getmaxx(stdscr);
 
     if (window->layout->type == LAYOUT_SPLIT) {
         ProfLayoutSplit *layout = (ProfLayoutSplit*)window->layout;
         if (layout->subwin) {
+            int subwin_cols = 0;
             if (window->type == WIN_CONSOLE) {
                 subwin_cols = win_roster_cols();
             } else if (window->type == WIN_MUC) {
@@ -506,11 +506,11 @@ win_update_virtual(ProfWin *window)
 {
     int rows, cols;
     getmaxyx(stdscr, rows, cols);
-    int subwin_cols = 0;
 
     if (window->layout->type == LAYOUT_SPLIT) {
         ProfLayoutSplit *layout = (ProfLayoutSplit*)window->layout;
         if (layout->subwin) {
+            int subwin_cols = 0;
             if (window->type == WIN_MUC) {
                 subwin_cols = win_occpuants_cols();
             } else {
@@ -634,7 +634,7 @@ win_show_contact(ProfWin *window, PContact contact)
 }
 
 void
-win_show_occupant_info(ProfWin *window, const char * const room, Occupant *occupant)
+win_show_occupant_info(ProfWin *window, const char *const room, Occupant *occupant)
 {
     const char *presence_str = string_from_resource_presence(occupant->presence);
     const char *occupant_affiliation = muc_occupant_affiliation_str(occupant);
@@ -828,10 +828,10 @@ win_show_info(ProfWin *window, PContact contact)
 }
 
 void
-win_show_status_string(ProfWin *window, const char * const from,
-    const char * const show, const char * const status,
-    GDateTime *last_activity, const char * const pre,
-    const char * const default_show)
+win_show_status_string(ProfWin *window, const char *const from,
+    const char *const show, const char *const status,
+    GDateTime *last_activity, const char *const pre,
+    const char *const default_show)
 {
     theme_item_t presence_colour;
 
@@ -872,7 +872,7 @@ win_show_status_string(ProfWin *window, const char * const from,
 
 void
 win_print_incoming_message(ProfWin *window, GDateTime *timestamp,
-    const char * const from, const char * const message, prof_enc_t enc_mode)
+    const char *const from, const char *const message, prof_enc_t enc_mode)
 {
     char enc_char = '-';
 
@@ -897,7 +897,7 @@ win_print_incoming_message(ProfWin *window, GDateTime *timestamp,
 
 void
 win_vprint(ProfWin *window, const char show_char, int pad_indent, GDateTime *timestamp,
-    int flags, theme_item_t theme_item, const char * const from, const char * const message, ...)
+    int flags, theme_item_t theme_item, const char *const from, const char *const message, ...)
 {
     va_list arg;
     va_start(arg, message);
@@ -905,11 +905,12 @@ win_vprint(ProfWin *window, const char show_char, int pad_indent, GDateTime *tim
     g_string_vprintf(fmt_msg, message, arg);
     win_print(window, show_char, pad_indent, timestamp, flags, theme_item, from, fmt_msg->str);
     g_string_free(fmt_msg, TRUE);
+    va_end(arg);
 }
 
 void
 win_print(ProfWin *window, const char show_char, int pad_indent, GDateTime *timestamp,
-    int flags, theme_item_t theme_item, const char * const from, const char * const message)
+    int flags, theme_item_t theme_item, const char *const from, const char *const message)
 {
     if (timestamp == NULL) {
         timestamp = g_date_time_new_now_local();
@@ -920,13 +921,13 @@ win_print(ProfWin *window, const char show_char, int pad_indent, GDateTime *time
     buffer_push(window->layout->buffer, show_char, pad_indent, timestamp, flags, theme_item, from, message, NULL);
     _win_print(window, show_char, pad_indent, timestamp, flags, theme_item, from, message, NULL);
     // TODO: cross-reference.. this should be replaced by a real event-based system
-    ui_input_nonblocking(TRUE);
+    inp_nonblocking(TRUE);
     g_date_time_unref(timestamp);
 }
 
 void
 win_print_with_receipt(ProfWin *window, const char show_char, int pad_indent, GTimeVal *tstamp,
-    int flags, theme_item_t theme_item, const char * const from, const char * const message, char *id)
+    int flags, theme_item_t theme_item, const char *const from, const char *const message, char *id)
 {
     GDateTime *time;
 
@@ -943,12 +944,12 @@ win_print_with_receipt(ProfWin *window, const char show_char, int pad_indent, GT
     buffer_push(window->layout->buffer, show_char, pad_indent, time, flags, theme_item, from, message, receipt);
     _win_print(window, show_char, pad_indent, time, flags, theme_item, from, message, receipt);
     // TODO: cross-reference.. this should be replaced by a real event-based system
-    ui_input_nonblocking(TRUE);
+    inp_nonblocking(TRUE);
     g_date_time_unref(time);
 }
 
 void
-win_mark_received(ProfWin *window, const char * const id)
+win_mark_received(ProfWin *window, const char *const id)
 {
     gboolean received = buffer_mark_received(window->layout->buffer, id);
     if (received) {
@@ -957,9 +958,21 @@ win_mark_received(ProfWin *window, const char * const id)
 }
 
 void
-win_println(ProfWin *window, int pad, const char * const message)
+win_println(ProfWin *window, int pad, const char *const message)
 {
     win_print(window, '-', pad, NULL, 0, 0, "", message);
+}
+
+void
+win_vprintln_ch(ProfWin *window, char ch, const char *const message, ...)
+{
+    va_list arg;
+    va_start(arg, message);
+    GString *fmt_msg = g_string_new(NULL);
+    g_string_vprintf(fmt_msg, message, arg);
+    win_print(window, ch, 0, NULL, 0, 0, "", fmt_msg->str);
+    g_string_free(fmt_msg, TRUE);
+    va_end(arg);
 }
 
 void
@@ -970,7 +983,7 @@ win_newline(ProfWin *window)
 
 static void
 _win_print(ProfWin *window, const char show_char, int pad_indent, GDateTime *time,
-    int flags, theme_item_t theme_item, const char * const from, const char * const message, DeliveryReceipt *receipt)
+    int flags, theme_item_t theme_item, const char *const from, const char *const message, DeliveryReceipt *receipt)
 {
     // flags : 1st bit =  0/1 - me/not me
     //         2nd bit =  0/1 - date/no date
@@ -1097,7 +1110,7 @@ _win_indent(WINDOW *win, int size)
 }
 
 static void
-_win_print_wrapped(WINDOW *win, const char * const message, size_t indent, int pad_indent)
+_win_print_wrapped(WINDOW *win, const char *const message, size_t indent, int pad_indent)
 {
     int starty = getcury(win);
     int wordi = 0;

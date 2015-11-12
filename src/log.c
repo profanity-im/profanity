@@ -78,23 +78,22 @@ struct dated_chat_log {
 };
 
 static gboolean _log_roll_needed(struct dated_chat_log *dated_log);
-static struct dated_chat_log * _create_log(const char * const other, const  char * const login);
-static struct dated_chat_log * _create_groupchat_log(char *room, const char * const login);
+static struct dated_chat_log* _create_log(const char *const other, const char *const login);
+static struct dated_chat_log* _create_groupchat_log(char *room, const char *const login);
 static void _free_chat_log(struct dated_chat_log *dated_log);
 static gboolean _key_equals(void *key1, void *key2);
-static char * _get_log_filename(const char * const other, const char * const login,
-    GDateTime *dt, gboolean create);
-static char * _get_groupchat_log_filename(const char * const room,
-    const char * const login, GDateTime *dt, gboolean create);
-static gchar * _get_chatlog_dir(void);
-static gchar * _get_main_log_file(void);
+static char* _get_log_filename(const char *const other, const char *const login, GDateTime *dt, gboolean create);
+static char* _get_groupchat_log_filename(const char *const room, const char *const login, GDateTime *dt,
+    gboolean create);
+static gchar* _get_chatlog_dir(void);
+static gchar* _get_main_log_file(void);
 static void _rotate_log_file(void);
 static char* _log_string_from_level(log_level_t level);
-static void _chat_log_chat(const char * const login, const char * const other,
-    const gchar * const msg, chat_log_direction_t direction, GDateTime *timestamp);
+static void _chat_log_chat(const char *const login, const char *const other, const gchar *const msg,
+    chat_log_direction_t direction, GDateTime *timestamp);
 
 void
-log_debug(const char * const msg, ...)
+log_debug(const char *const msg, ...)
 {
     va_list arg;
     va_start(arg, msg);
@@ -106,7 +105,7 @@ log_debug(const char * const msg, ...)
 }
 
 void
-log_info(const char * const msg, ...)
+log_info(const char *const msg, ...)
 {
     va_list arg;
     va_start(arg, msg);
@@ -118,7 +117,7 @@ log_info(const char * const msg, ...)
 }
 
 void
-log_warning(const char * const msg, ...)
+log_warning(const char *const msg, ...)
 {
     va_list arg;
     va_start(arg, msg);
@@ -130,7 +129,7 @@ log_warning(const char * const msg, ...)
 }
 
 void
-log_error(const char * const msg, ...)
+log_error(const char *const msg, ...)
 {
     va_list arg;
     va_start(arg, msg);
@@ -160,7 +159,7 @@ log_reinit(void)
     log_init(level_filter);
 }
 
-char *
+char*
 get_log_file_location(void)
 {
     return mainlogfile->str;
@@ -183,7 +182,7 @@ log_close(void)
 }
 
 void
-log_msg(log_level_t level, const char * const area, const char * const msg)
+log_msg(log_level_t level, const char *const area, const char *const msg)
 {
     if (level >= level_filter && logp) {
         dt = g_date_time_new_now(tz);
@@ -263,7 +262,7 @@ groupchat_log_init(void)
 }
 
 void
-chat_log_msg_out(const char * const barejid, const char * const msg)
+chat_log_msg_out(const char *const barejid, const char *const msg)
 {
     if (prefs_get_boolean(PREF_CHLOG)) {
         const char *jid = jabber_get_fulljid();
@@ -274,7 +273,7 @@ chat_log_msg_out(const char * const barejid, const char * const msg)
 }
 
 void
-chat_log_otr_msg_out(const char * const barejid, const char * const msg)
+chat_log_otr_msg_out(const char *const barejid, const char *const msg)
 {
     if (prefs_get_boolean(PREF_CHLOG)) {
         const char *jid = jabber_get_fulljid();
@@ -291,7 +290,7 @@ chat_log_otr_msg_out(const char * const barejid, const char * const msg)
 }
 
 void
-chat_log_pgp_msg_out(const char * const barejid, const char * const msg)
+chat_log_pgp_msg_out(const char *const barejid, const char *const msg)
 {
     if (prefs_get_boolean(PREF_CHLOG)) {
         const char *jid = jabber_get_fulljid();
@@ -308,7 +307,7 @@ chat_log_pgp_msg_out(const char * const barejid, const char * const msg)
 }
 
 void
-chat_log_otr_msg_in(const char * const barejid, const char * const msg, gboolean was_decrypted, GDateTime *timestamp)
+chat_log_otr_msg_in(const char *const barejid, const char *const msg, gboolean was_decrypted, GDateTime *timestamp)
 {
     if (prefs_get_boolean(PREF_CHLOG)) {
         const char *jid = jabber_get_fulljid();
@@ -325,7 +324,7 @@ chat_log_otr_msg_in(const char * const barejid, const char * const msg, gboolean
 }
 
 void
-chat_log_pgp_msg_in(const char * const barejid, const char * const msg, GDateTime *timestamp)
+chat_log_pgp_msg_in(const char *const barejid, const char *const msg, GDateTime *timestamp)
 {
     if (prefs_get_boolean(PREF_CHLOG)) {
         const char *jid = jabber_get_fulljid();
@@ -342,7 +341,7 @@ chat_log_pgp_msg_in(const char * const barejid, const char * const msg, GDateTim
 }
 
 void
-chat_log_msg_in(const char * const barejid, const char * const msg, GDateTime *timestamp)
+chat_log_msg_in(const char *const barejid, const char *const msg, GDateTime *timestamp)
 {
     if (prefs_get_boolean(PREF_CHLOG)) {
         const char *jid = jabber_get_fulljid();
@@ -353,8 +352,8 @@ chat_log_msg_in(const char * const barejid, const char * const msg, GDateTime *t
 }
 
 static void
-_chat_log_chat(const char * const login, const char * const other,
-    const char * const msg, chat_log_direction_t direction, GDateTime *timestamp)
+_chat_log_chat(const char *const login, const char *const other, const char *const msg,
+    chat_log_direction_t direction, GDateTime *timestamp)
 {
     struct dated_chat_log *dated_log = g_hash_table_lookup(logs, other);
 
@@ -404,8 +403,7 @@ _chat_log_chat(const char * const login, const char * const other,
 }
 
 void
-groupchat_log_chat(const gchar * const login, const gchar * const room,
-    const gchar * const nick, const gchar * const msg)
+groupchat_log_chat(const gchar *const login, const gchar *const room, const gchar *const nick, const gchar *const msg)
 {
     gchar *room_copy = strdup(room);
     struct dated_chat_log *dated_log = g_hash_table_lookup(groupchat_logs, room_copy);
@@ -446,8 +444,8 @@ groupchat_log_chat(const gchar * const login, const gchar * const room,
 }
 
 
-GSList *
-chat_log_get_previous(const gchar * const login, const gchar * const recipient)
+GSList*
+chat_log_get_previous(const gchar *const login, const gchar *const recipient)
 {
     GSList *history = NULL;
     GDateTime *now = g_date_time_new_now_local();
@@ -502,8 +500,8 @@ chat_log_close(void)
     g_date_time_unref(session_started);
 }
 
-static struct dated_chat_log *
-_create_log(const char * const other, const char * const login)
+static struct dated_chat_log*
+_create_log(const char *const other, const char *const login)
 {
     GDateTime *now = g_date_time_new_now_local();
     char *filename = _get_log_filename(other, login, now, TRUE);
@@ -517,8 +515,8 @@ _create_log(const char * const other, const char * const login)
     return new_log;
 }
 
-static struct dated_chat_log *
-_create_groupchat_log(char *room, const char * const login)
+static struct dated_chat_log*
+_create_groupchat_log(char *room, const char *const login)
 {
     GDateTime *now = g_date_time_new_now_local();
     char *filename = _get_groupchat_log_filename(room, login, now, TRUE);
@@ -571,9 +569,8 @@ gboolean _key_equals(void *key1, void *key2)
     return (g_strcmp0(str1, str2) == 0);
 }
 
-static char *
-_get_log_filename(const char * const other, const char * const login,
-    GDateTime *dt, gboolean create)
+static char*
+_get_log_filename(const char *const other, const char *const login, GDateTime *dt, gboolean create)
 {
     gchar *chatlogs_dir = _get_chatlog_dir();
     GString *log_file = g_string_new(chatlogs_dir);
@@ -603,9 +600,8 @@ _get_log_filename(const char * const other, const char * const login,
     return result;
 }
 
-static char *
-_get_groupchat_log_filename(const char * const room, const char * const login,
-    GDateTime *dt, gboolean create)
+static char*
+_get_groupchat_log_filename(const char *const room, const char *const login, GDateTime *dt, gboolean create)
 {
     gchar *chatlogs_dir = _get_chatlog_dir();
     GString *log_file = g_string_new(chatlogs_dir);
@@ -640,7 +636,7 @@ _get_groupchat_log_filename(const char * const room, const char * const login,
     return result;
 }
 
-static gchar *
+static gchar*
 _get_chatlog_dir(void)
 {
     gchar *xdg_data = xdg_get_data_home();
@@ -653,7 +649,7 @@ _get_chatlog_dir(void)
     return result;
 }
 
-static gchar *
+static gchar*
 _get_main_log_file(void)
 {
     gchar *xdg_data = xdg_get_data_home();

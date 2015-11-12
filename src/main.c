@@ -31,18 +31,20 @@
  * source files in the program, then also delete it here.
  *
  */
+
+#include "config.h"
+
 #include <string.h>
 #include <glib.h>
 
-#include "config.h"
 #ifdef HAVE_GIT_VERSION
 #include "gitversion.h"
 #endif
 
 #include "profanity.h"
+#include "common.h"
 #include "command/command.h"
 
-static gboolean disable_tls = FALSE;
 static gboolean version = FALSE;
 static char *log = "INFO";
 static char *account_name = NULL;
@@ -58,7 +60,6 @@ main(int argc, char **argv)
     static GOptionEntry entries[] =
     {
         { "version", 'v', 0, G_OPTION_ARG_NONE, &version, "Show version information", NULL },
-        { "disable-tls", 'd', 0, G_OPTION_ARG_NONE, &disable_tls, "Disable TLS", NULL },
         { "account", 'a', 0, G_OPTION_ARG_STRING, &account_name, "Auto connect to an account on startup" },
         { "log",'l', 0, G_OPTION_ARG_STRING, &log, "Set logging levels, DEBUG, INFO (default), WARN, ERROR", "LEVEL" },
         { NULL }
@@ -105,18 +106,7 @@ main(int argc, char **argv)
         g_print("XMPP library: libstrophe\n");
 #endif
 
-        gboolean notify_enabled = FALSE;
-
-#ifdef HAVE_OSXNOTIFY
-        notify_enabled = TRUE;
-#endif
-#ifdef HAVE_LIBNOTIFY
-        notify_enabled = TRUE;
-#endif
-#ifdef PLATFORM_CYGWIN
-        notify_enabled = TRUE;
-#endif
-        if (notify_enabled) {
+        if (is_notify_enabled()) {
             g_print("Desktop notification support: Enabled\n");
         } else {
             g_print("Desktop notification support: Disabled\n");
@@ -137,7 +127,7 @@ main(int argc, char **argv)
         return 0;
     }
 
-    prof_run(disable_tls, log, account_name);
+    prof_run(log, account_name);
 
     return 0;
 }

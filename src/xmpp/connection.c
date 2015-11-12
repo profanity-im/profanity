@@ -70,7 +70,6 @@ static struct _jabber_conn_t {
     jabber_conn_status_t conn_status;
     char *presence_message;
     int priority;
-    int tls_disabled;
     char *domain;
 } jabber_conn;
 
@@ -88,6 +87,7 @@ static struct {
     char *passwd;
     char *altdomain;
     int port;
+    char *tls_policy;
 } saved_details;
 
 static GTimer *reconnect_timer;
@@ -95,44 +95,40 @@ static GTimer *reconnect_timer;
 static log_level_t _get_log_level(xmpp_log_level_t xmpp_level);
 static xmpp_log_level_t _get_xmpp_log_level();
 
-static void _xmpp_file_logger(void * const userdata,
-    const xmpp_log_level_t level, const char * const area,
-    const char * const msg);
+static void _xmpp_file_logger(void *const userdata, const xmpp_log_level_t level, const char *const area,
+    const char *const msg);
 
-static xmpp_log_t * _xmpp_get_file_logger();
+static xmpp_log_t* _xmpp_get_file_logger();
 
-static jabber_conn_status_t _jabber_connect(const char * const fulljid,
-    const char * const passwd, const char * const altdomain, int port);
+static jabber_conn_status_t _jabber_connect(const char *const fulljid, const char *const passwd,
+    const char *const altdomain, int port, const char *const tls_policy);
 
 static void _jabber_reconnect(void);
 
-static void _connection_handler(xmpp_conn_t * const conn,
-    const xmpp_conn_event_t status, const int error,
-    xmpp_stream_error_t * const stream_error, void * const userdata);
+static void _connection_handler(xmpp_conn_t *const conn, const xmpp_conn_event_t status, const int error,
+    xmpp_stream_error_t *const stream_error, void *const userdata);
 
 void _connection_free_saved_account(void);
 void _connection_free_saved_details(void);
 void _connection_free_session_data(void);
 
 void
-jabber_init(const int disable_tls)
+jabber_init(void)
 {
     log_info("Initialising XMPP");
     jabber_conn.conn_status = JABBER_STARTED;
     jabber_conn.presence_message = NULL;
     jabber_conn.conn = NULL;
     jabber_conn.ctx = NULL;
-    jabber_conn.tls_disabled = disable_tls;
     jabber_conn.domain = NULL;
     presence_sub_requests_init();
     caps_init();
-    available_resources = g_hash_table_new_full(g_str_hash, g_str_equal, free,
-        (GDestroyNotify)resource_destroy);
+    available_resources = g_hash_table_new_full(g_str_hash, g_str_equal, free, (GDestroyNotify)resource_destroy);
     xmpp_initialize();
 }
 
 jabber_conn_status_t
-jabber_connect_with_account(const ProfAccount * const account)
+jabber_connect_with_account(const ProfAccount *const account)
 {
     assert(account != NULL);
 
@@ -151,15 +147,15 @@ jabber_connect_with_account(const ProfAccount * const account)
     // connect with fulljid
     Jid *jidp = jid_create_from_bare_and_resource(account->jid, account->resource);
     jabber_conn_status_t result =
-      _jabber_connect(jidp->fulljid, account->password, account->server, account->port);
+        _jabber_connect(jidp->fulljid, account->password, account->server, account->port, account->tls_policy);
     jid_destroy(jidp);
 
     return result;
 }
 
 jabber_conn_status_t
-jabber_connect_with_details(const char * const jid,
-    const char * const passwd, const char * const altdomain, const int port)
+jabber_connect_with_details(const char *const jid, const char *const passwd, const char *const altdomain,
+    const int port, const char *const tls_policy)
 {
     assert(jid != NULL);
     assert(passwd != NULL);
@@ -177,6 +173,11 @@ jabber_connect_with_details(const char * const jid,
     } else {
         saved_details.port = 0;
     }
+    if (tls_policy) {
+        saved_details.tls_policy = strdup(tls_policy);
+    } else {
+        saved_details.tls_policy = NULL;
+    }
 
     // use 'profanity' when no resourcepart in provided jid
     Jid *jidp = jid_create(jid);
@@ -191,7 +192,13 @@ jabber_connect_with_details(const char * const jid,
 
     // connect with fulljid
     log_info("Connecting without account, JID: %s", saved_details.jid);
-    return _jabber_connect(saved_details.jid, passwd, saved_details.altdomain, saved_details.port);
+
+    return _jabber_connect(
+        saved_details.jid,
+        passwd,
+        saved_details.altdomain,
+        saved_details.port,
+        saved_details.tls_policy);
 }
 
 void
@@ -262,7 +269,7 @@ jabber_process_events(int millis)
     }
 }
 
-GList *
+GList*
 jabber_get_available_resources(void)
 {
     return g_hash_table_get_values(available_resources);
@@ -274,44 +281,58 @@ jabber_get_connection_status(void)
     return (jabber_conn.conn_status);
 }
 
-xmpp_conn_t *
+xmpp_conn_t*
 connection_get_conn(void)
 {
     return jabber_conn.conn;
 }
 
-xmpp_ctx_t *
+xmpp_ctx_t*
 connection_get_ctx(void)
 {
     return jabber_conn.ctx;
 }
 
-const char *
+const char*
 jabber_get_fulljid(void)
 {
     return xmpp_conn_get_jid(jabber_conn.conn);
 }
 
-const char *
+const char*
 jabber_get_domain(void)
 {
     return jabber_conn.domain;
 }
 
-char *
+char*
 jabber_get_presence_message(void)
 {
     return jabber_conn.presence_message;
 }
 
-char *
+char*
 jabber_get_account_name(void)
 {
     return saved_account.name;
 }
 
+char*
+jabber_create_uuid(void)
+{
+    return xmpp_uuid_gen(jabber_conn.ctx);
+}
+
 void
-connection_set_presence_message(const char * const message)
+jabber_free_uuid(char *uuid)
+{
+    if (uuid) {
+        xmpp_free(jabber_conn.ctx, uuid);
+    }
+}
+
+void
+connection_set_presence_message(const char *const message)
 {
     FREE_SET_NULL(jabber_conn.presence_message);
     if (message) {
@@ -332,7 +353,7 @@ connection_add_available_resource(Resource *resource)
 }
 
 void
-connection_remove_available_resource(const char * const resource)
+connection_remove_available_resource(const char *const resource)
 {
     g_hash_table_remove(available_resources, resource);
 }
@@ -351,6 +372,7 @@ _connection_free_saved_details(void)
     FREE_SET_NULL(saved_details.jid);
     FREE_SET_NULL(saved_details.passwd);
     FREE_SET_NULL(saved_details.altdomain);
+    FREE_SET_NULL(saved_details.tls_policy);
 }
 
 void
@@ -363,16 +385,62 @@ _connection_free_session_data(void)
 
 #ifdef HAVE_LIBMESODE
 static int
-_connection_certfail_cb(const char * const certname, const char * const certfp,
-    char * const notbefore, const char * const notafter, const char * const errormsg)
+_connection_certfail_cb(xmpp_tlscert_t *xmpptlscert, const char *const errormsg)
 {
-    return sv_ev_certfail(errormsg, certname, certfp, notbefore, notafter);
+    int version = xmpp_conn_tlscert_version(xmpptlscert);
+    char *serialnumber = xmpp_conn_tlscert_serialnumber(xmpptlscert);
+    char *subjectname = xmpp_conn_tlscert_subjectname(xmpptlscert);
+    char *issuername = xmpp_conn_tlscert_issuername(xmpptlscert);
+    char *fingerprint = xmpp_conn_tlscert_fingerprint(xmpptlscert);
+    char *notbefore = xmpp_conn_tlscert_notbefore(xmpptlscert);
+    char *notafter = xmpp_conn_tlscert_notafter(xmpptlscert);
+    char *key_alg = xmpp_conn_tlscert_key_algorithm(xmpptlscert);
+    char *signature_alg = xmpp_conn_tlscert_signature_algorithm(xmpptlscert);
+
+    TLSCertificate *cert = tlscerts_new(fingerprint, version, serialnumber, subjectname, issuername, notbefore,
+        notafter, key_alg, signature_alg);
+    int res = sv_ev_certfail(errormsg, cert);
+    tlscerts_free(cert);
+
+    return res;
+}
+
+TLSCertificate*
+jabber_get_tls_peer_cert(void)
+{
+    xmpp_tlscert_t *xmpptlscert = xmpp_conn_tls_peer_cert(jabber_conn.conn);
+    int version = xmpp_conn_tlscert_version(xmpptlscert);
+    char *serialnumber = xmpp_conn_tlscert_serialnumber(xmpptlscert);
+    char *subjectname = xmpp_conn_tlscert_subjectname(xmpptlscert);
+    char *issuername = xmpp_conn_tlscert_issuername(xmpptlscert);
+    char *fingerprint = xmpp_conn_tlscert_fingerprint(xmpptlscert);
+    char *notbefore = xmpp_conn_tlscert_notbefore(xmpptlscert);
+    char *notafter = xmpp_conn_tlscert_notafter(xmpptlscert);
+    char *key_alg = xmpp_conn_tlscert_key_algorithm(xmpptlscert);
+    char *signature_alg = xmpp_conn_tlscert_signature_algorithm(xmpptlscert);
+
+    TLSCertificate *cert = tlscerts_new(fingerprint, version, serialnumber, subjectname, issuername, notbefore,
+        notafter, key_alg, signature_alg);
+
+    xmpp_conn_free_tlscert(jabber_conn.ctx, xmpptlscert);
+
+    return cert;
 }
 #endif
 
+gboolean
+jabber_conn_is_secured(void)
+{
+    if (jabber_conn.conn_status == JABBER_CONNECTED) {
+        return xmpp_conn_is_secured(jabber_conn.conn) == 0 ? FALSE : TRUE;
+    } else {
+        return FALSE;
+    }
+}
+
 static jabber_conn_status_t
-_jabber_connect(const char * const fulljid, const char * const passwd,
-    const char * const altdomain, int port)
+_jabber_connect(const char *const fulljid, const char *const passwd, const char *const altdomain, int port,
+    const char *const tls_policy)
 {
     assert(fulljid != NULL);
     assert(passwd != NULL);
@@ -416,29 +484,42 @@ _jabber_connect(const char * const fulljid, const char * const passwd,
     }
     xmpp_conn_set_jid(jabber_conn.conn, fulljid);
     xmpp_conn_set_pass(jabber_conn.conn, passwd);
-    if (jabber_conn.tls_disabled) {
-        xmpp_conn_disable_tls(jabber_conn.conn);
+
+    if (!tls_policy || (g_strcmp0(tls_policy, "force") == 0)) {
+        xmpp_conn_set_flags(jabber_conn.conn, XMPP_CONN_FLAG_MANDATORY_TLS);
+    } else if (g_strcmp0(tls_policy, "disable") == 0) {
+        xmpp_conn_set_flags(jabber_conn.conn, XMPP_CONN_FLAG_DISABLE_TLS);
     }
 
 #ifdef HAVE_LIBMESODE
-    char *cert_path = prefs_get_string(PREF_CERT_PATH);
+    char *cert_path = prefs_get_string(PREF_TLS_CERTPATH);
     if (cert_path) {
         xmpp_conn_tlscert_path(jabber_conn.conn, cert_path);
     }
 #endif
 
 #ifdef HAVE_LIBMESODE
-    int connect_status = xmpp_connect_client(jabber_conn.conn, altdomain, port,
-        _connection_certfail_cb, _connection_handler, jabber_conn.ctx);
+    int connect_status = xmpp_connect_client(
+        jabber_conn.conn,
+        altdomain,
+        port,
+        _connection_certfail_cb,
+        _connection_handler,
+        jabber_conn.ctx);
 #else
-    int connect_status = xmpp_connect_client(jabber_conn.conn, altdomain, port,
-        _connection_handler, jabber_conn.ctx);
+    int connect_status = xmpp_connect_client(
+        jabber_conn.conn,
+        altdomain,
+        port,
+        _connection_handler,
+        jabber_conn.ctx);
 #endif
 
-    if (connect_status == 0)
+    if (connect_status == 0) {
         jabber_conn.conn_status = JABBER_CONNECTING;
-    else
+    } else {
         jabber_conn.conn_status = JABBER_DISCONNECTED;
+    }
 
     return jabber_conn.conn_status;
 }
@@ -454,33 +535,35 @@ _jabber_reconnect(void)
     } else {
         char *fulljid = create_fulljid(account->jid, account->resource);
         log_debug("Attempting reconnect with account %s", account->name);
-        _jabber_connect(fulljid, saved_account.passwd, account->server, account->port);
+        _jabber_connect(fulljid, saved_account.passwd, account->server, account->port, account->tls_policy);
         free(fulljid);
         g_timer_start(reconnect_timer);
     }
 }
 
 static void
-_connection_handler(xmpp_conn_t * const conn,
-    const xmpp_conn_event_t status, const int error,
-    xmpp_stream_error_t * const stream_error, void * const userdata)
+_connection_handler(xmpp_conn_t *const conn, const xmpp_conn_event_t status, const int error,
+    xmpp_stream_error_t *const stream_error, void *const userdata)
 {
     // login success
     if (status == XMPP_CONN_CONNECT) {
         log_debug("Connection handler: XMPP_CONN_CONNECT");
+        jabber_conn.conn_status = JABBER_CONNECTED;
+
+        int secured = xmpp_conn_is_secured(jabber_conn.conn);
 
         // logged in with account
         if (saved_account.name) {
             log_debug("Connection handler: logged in with account name: %s", saved_account.name);
-            sv_ev_login_account_success(saved_account.name);
+            sv_ev_login_account_success(saved_account.name, secured);
 
         // logged in without account, use details to create new account
         } else {
             log_debug("Connection handler: logged in with jid: %s", saved_details.name);
-            accounts_add(saved_details.name, saved_details.altdomain, saved_details.port);
+            accounts_add(saved_details.name, saved_details.altdomain, saved_details.port, saved_details.tls_policy);
             accounts_set_jid(saved_details.name, saved_details.jid);
 
-            sv_ev_login_account_success(saved_details.name);
+            sv_ev_login_account_success(saved_details.name, secured);
             saved_account.name = strdup(saved_details.name);
             saved_account.passwd = strdup(saved_details.passwd);
 
@@ -505,13 +588,9 @@ _connection_handler(xmpp_conn_t * const conn,
             iq_enable_carbons();
         }
 
-        jabber_conn.conn_status = JABBER_CONNECTED;
-
-        if (prefs_get_reconnect() != 0) {
-            if (reconnect_timer) {
-                g_timer_destroy(reconnect_timer);
-                reconnect_timer = NULL;
-            }
+        if ((prefs_get_reconnect() != 0) && reconnect_timer) {
+            g_timer_destroy(reconnect_timer);
+            reconnect_timer = NULL;
         }
 
     } else if (status == XMPP_CONN_DISCONNECT) {
@@ -591,8 +670,7 @@ _get_xmpp_log_level()
 }
 
 static void
-_xmpp_file_logger(void * const userdata, const xmpp_log_level_t level,
-    const char * const area, const char * const msg)
+_xmpp_file_logger(void *const userdata, const xmpp_log_level_t level, const char *const area, const char *const msg)
 {
     log_level_t prof_level = _get_log_level(level);
     log_msg(prof_level, area, msg);
@@ -601,7 +679,7 @@ _xmpp_file_logger(void * const userdata, const xmpp_log_level_t level,
     }
 }
 
-static xmpp_log_t *
+static xmpp_log_t*
 _xmpp_get_file_logger()
 {
     xmpp_log_level_t level = _get_xmpp_log_level();

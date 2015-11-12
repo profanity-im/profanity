@@ -46,7 +46,7 @@ struct autocomplete_t {
     gchar *search_str;
 };
 
-static gchar * _search_from(Autocomplete ac, GSList *curr, gboolean quote);
+static gchar* _search_from(Autocomplete ac, GSList *curr, gboolean quote);
 
 Autocomplete
 autocomplete_new(void)
@@ -118,7 +118,7 @@ autocomplete_add(Autocomplete ac, const char *item)
 }
 
 void
-autocomplete_remove(Autocomplete ac, const char * const item)
+autocomplete_remove(Autocomplete ac, const char *const item)
 {
     if (ac) {
         GSList *curr = g_slist_find_custom(ac->items, item, (GCompareFunc)strcmp);
@@ -139,7 +139,7 @@ autocomplete_remove(Autocomplete ac, const char * const item)
     return;
 }
 
-GSList *
+GSList*
 autocomplete_create_list(Autocomplete ac)
 {
     GSList *copy = NULL;
@@ -168,7 +168,7 @@ autocomplete_contains(Autocomplete ac, const char *value)
     return FALSE;
 }
 
-gchar *
+gchar*
 autocomplete_complete(Autocomplete ac, const gchar *search_str, gboolean quote)
 {
     gchar *found = NULL;
@@ -215,8 +215,8 @@ autocomplete_complete(Autocomplete ac, const gchar *search_str, gboolean quote)
     }
 }
 
-char *
-autocomplete_param_with_func(const char * const input, char *command, autocomplete_func func)
+char*
+autocomplete_param_with_func(const char *const input, char *command, autocomplete_func func)
 {
     GString *auto_msg = NULL;
     char *result = NULL;
@@ -246,8 +246,8 @@ autocomplete_param_with_func(const char * const input, char *command, autocomple
     return result;
 }
 
-char *
-autocomplete_param_with_ac(const char * const input, char *command, Autocomplete ac, gboolean quote)
+char*
+autocomplete_param_with_ac(const char *const input, char *command, Autocomplete ac, gboolean quote)
 {
     GString *auto_msg = NULL;
     char *result = NULL;
@@ -277,8 +277,8 @@ autocomplete_param_with_ac(const char * const input, char *command, Autocomplete
     return result;
 }
 
-char *
-autocomplete_param_no_with_func(const char * const input, char *command, int arg_number, autocomplete_func func)
+char*
+autocomplete_param_no_with_func(const char *const input, char *command, int arg_number, autocomplete_func func)
 {
     if (strncmp(input, command, strlen(command)) == 0 && (strlen(input) > strlen(command))) {
         GString *result_str = NULL;
@@ -309,7 +309,7 @@ autocomplete_param_no_with_func(const char * const input, char *command, int arg
     return NULL;
 }
 
-static gchar *
+static gchar*
 _search_from(Autocomplete ac, GSList *curr, gboolean quote)
 {
     while(curr) {

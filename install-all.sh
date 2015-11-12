@@ -24,7 +24,7 @@ debian_prepare()
     echo
     echo Profanity installer... installing dependencies
     echo
-    sudo apt-get -y install git automake autoconf libssl-dev libexpat1-dev libncursesw5-dev libglib2.0-dev libnotify-dev libcurl3-dev libxss-dev libotr5-dev libreadline-dev libtool libgpgme11-dev uuid-dev
+    sudo apt-get -y install git automake autoconf libssl-dev libexpat1-dev libncursesw5-dev libglib2.0-dev libnotify-dev libcurl3-dev libxss-dev libotr5-dev libreadline-dev libtool libgpgme11-dev
 
 }
 
@@ -34,7 +34,7 @@ fedora_prepare()
     echo Profanity installer... installing dependencies
     echo
 
-    sudo dnf -y install gcc git autoconf automake openssl-devel expat-devel ncurses-devel glib2-devel libnotify-devel libcurl-devel libXScrnSaver-devel libotr3-devel readline-devel libtool libuuid-devel gpgme-devel
+    sudo dnf -y install gcc git autoconf automake openssl-devel expat-devel ncurses-devel glib2-devel libnotify-devel libcurl-devel libXScrnSaver-devel libotr3-devel readline-devel libtool gpgme-devel
 }
 
 opensuse_prepare()
@@ -42,7 +42,7 @@ opensuse_prepare()
     echo
     echo Profanity installer...installing dependencies
     echo
-    sudo zypper -n in gcc git automake make autoconf libopenssl-devel expat libexpat-devel ncurses-devel glib2-devel libnotify-devel libcurl-devel libXScrnSaver-devel libotr-devel readline-devel libtool libuuid-devel libgpgme-devel
+    sudo zypper -n in gcc git automake make autoconf libopenssl-devel expat libexpat-devel ncurses-devel glib2-devel libnotify-devel libcurl-devel libXScrnSaver-devel libotr-devel readline-devel libtool libgpgme-devel
 }
 
 centos_prepare()
@@ -54,7 +54,7 @@ centos_prepare()
     sudo yum -y install epel-release
     sudo yum -y install git
     sudo yum -y install gcc autoconf automake cmake
-    sudo yum -y install openssl-devel expat-devel ncurses-devel glib2-devel libnotify-devel libcurl-devel libXScrnSaver-devel libotr-devel readline-devel libtool libuuid-devel gpgme-devel
+    sudo yum -y install openssl-devel expat-devel ncurses-devel glib2-devel libnotify-devel libcurl-devel libXScrnSaver-devel libotr-devel readline-devel libtool gpgme-devel
 }
 
 cygwin_prepare()
@@ -63,16 +63,11 @@ cygwin_prepare()
     echo Profanity installer... installing dependencies
     echo
 
-    wget https://raw.githubusercontent.com/transcode-open/apt-cyg/master/apt-cyg
-    #wget --no-check-certificate https://raw.github.com/boothj5/apt-cyg/master/apt-cyg
-    #wget http://apt-cyg.googlecode.com/svn/trunk/apt-cyg
-    chmod +x apt-cyg
-    mv apt-cyg /usr/local/bin/
-
+    if ! command -v apt-cyg &>/dev/null; then cyg_install_apt_cyg; fi
     if [ -n "$CYG_MIRROR" ]; then
-        apt-cyg -m $CYG_MIRROR install git make gcc-core m4 automake autoconf pkg-config openssl-devel libexpat-devel zlib-devel libncursesw-devel libglib2.0-devel libcurl-devel libidn-devel libssh2-devel libkrb5-devel openldap-devel libgcrypt-devel libreadline-devel libgpgme-devel libtool libuuid-devel
+        apt-cyg -m $CYG_MIRROR install git make gcc-core m4 automake autoconf pkg-config openssl-devel libexpat-devel zlib-devel libncursesw-devel libglib2.0-devel libcurl-devel libidn-devel libssh2-devel libkrb5-devel openldap-devel libgcrypt-devel libreadline-devel libgpgme-devel libtool
     else
-        apt-cyg install git make gcc-core m4 automake autoconf pkg-config openssl-devel libexpat-devel zlib-devel libncursesw-devel libglib2.0-devel libcurl-devel libidn-devel libssh2-devel libkrb5-devel openldap-devel libgcrypt-devel libreadline-devel libgpgme-devel libtool libuuid-devel
+        apt-cyg install git make gcc-core m4 automake autoconf pkg-config openssl-devel libexpat-devel zlib-devel libncursesw-devel libglib2.0-devel libcurl-devel libidn-devel libssh2-devel libkrb5-devel openldap-devel libgcrypt-devel libreadline-devel libgpgme-devel libtool
 
     fi
 }
@@ -82,7 +77,7 @@ install_lib_mesode()
     echo
     echo Profanity installer... installing libmesode
     echo
-    git clone git@github.com:boothj5/libmesode.git
+    git clone https://github.com/boothj5/libmesode.git
     cd libmesode
     ./bootstrap.sh
     ./configure --prefix=$1
@@ -105,12 +100,24 @@ install_profanity()
     sudo make install
 }
 
+cyg_install_apt_cyg()
+{
+    echo
+    echo Profanity installer... installing apt-cyg
+    echo
+    wget https://raw.githubusercontent.com/transcode-open/apt-cyg/master/apt-cyg
+    #wget --no-check-certificate https://raw.github.com/boothj5/apt-cyg/master/apt-cyg
+    #wget http://apt-cyg.googlecode.com/svn/trunk/apt-cyg
+    chmod +x apt-cyg
+    mv apt-cyg /usr/local/bin/
+
+}
 cyg_install_lib_mesode()
 {
     echo
     echo Profanity installer... installing libmesode
     echo
-    git clone git@github.com:boothj5/libmesode.git
+    git clone https://github.com/boothj5/libmesode.git
     cd libmesode
     ./bootstrap.sh
     ./bootstrap.sh # second call seems to fix problem on cygwin

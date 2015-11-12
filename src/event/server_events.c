@@ -32,20 +32,22 @@
  *
  */
 
+#include "config.h"
+
 #include <string.h>
 #include <stdlib.h>
 #include <assert.h>
-
-#include "config.h"
 
 #include "chat_session.h"
 #include "log.h"
 #include "muc.h"
 #include "config/preferences.h"
 #include "config/account.h"
+#include "config/scripts.h"
 #include "roster_list.h"
 #include "window_list.h"
 #include "config/tlscerts.h"
+#include "profanity.h"
 
 #ifdef HAVE_LIBOTR
 #include "otr/otr.h"
@@ -57,7 +59,7 @@
 #include "ui/ui.h"
 
 void
-sv_ev_login_account_success(char *account_name)
+sv_ev_login_account_success(char *account_name, int secured)
 {
     ProfAccount *account = accounts_get_account(account_name);
 
@@ -69,7 +71,7 @@ sv_ev_login_account_success(char *account_name)
     p_gpg_on_connect(account->jid);
 #endif
 
-    ui_handle_login_account_success(account);
+    ui_handle_login_account_success(account, secured);
 
     // attempt to rejoin rooms with passwords
     GList *curr = muc_rooms();
@@ -84,6 +86,11 @@ sv_ev_login_account_success(char *account_name)
     g_list_free(curr);
 
     log_info("%s logged in successfully", account->jid);
+
+    if (account->startscript) {
+        scripts_exec(account->startscript);
+    }
+
     account_free(account);
 }
 
@@ -113,12 +120,13 @@ sv_ev_failed_login(void)
 {
     cons_show_error("Login failed.");
     log_info("Login failed");
+    tlscerts_clear_current();
 }
 
 void
 sv_ev_room_invite(jabber_invite_t invite_type,
-    const char * const invitor, const char * const room,
-    const char * const reason, const char * const password)
+    const char *const invitor, const char *const room,
+    const char *const reason, const char *const password)
 {
     if (!muc_active(room) && !muc_invites_contain(room)) {
         cons_show_room_invite(invitor, room, reason);
@@ -127,37 +135,46 @@ sv_ev_room_invite(jabber_invite_t invite_type,
 }
 
 void
-sv_ev_room_broadcast(const char *const room_jid,
-    const char * const message)
+sv_ev_room_broadcast(const char *const room_jid, const char *const message)
 {
     if (muc_roster_complete(room_jid)) {
-        ui_room_broadcast(room_jid, message);
+        ProfMucWin *mucwin = wins_get_muc(room_jid);
+        if (mucwin) {
+            mucwin_broadcast(mucwin, message);
+        }
     } else {
         muc_pending_broadcasts_add(room_jid, message);
     }
 }
 
 void
-sv_ev_room_subject(const char * const room, const char * const nick, const char * const subject)
+sv_ev_room_subject(const char *const room, const char *const nick, const char *const subject)
 {
     muc_set_subject(room, subject);
-    if (muc_roster_complete(room)) {
-        ui_room_subject(room, nick, subject);
+    ProfMucWin *mucwin = wins_get_muc(room);
+    if (mucwin && muc_roster_complete(room)) {
+        mucwin_subject(mucwin, nick, subject);
     }
 }
 
 void
-sv_ev_room_history(const char * const room_jid, const char * const nick,
-    GDateTime *timestamp, const char * const message)
+sv_ev_room_history(const char *const room_jid, const char *const nick,
+    GDateTime *timestamp, const char *const message)
 {
-    ui_room_history(room_jid, nick, timestamp, message);
+    ProfMucWin *mucwin = wins_get_muc(room_jid);
+    if (mucwin) {
+        mucwin_history(mucwin, nick, timestamp, message);
+    }
 }
 
 void
-sv_ev_room_message(const char * const room_jid, const char * const nick,
-    const char * const message)
+sv_ev_room_message(const char *const room_jid, const char *const nick,
+    const char *const message)
 {
-    ui_room_message(room_jid, nick, message);
+    ProfMucWin *mucwin = wins_get_muc(room_jid);
+    if (mucwin) {
+        mucwin_message(mucwin, nick, message);
+    }
 
     if (prefs_get_boolean(PREF_GRLOG)) {
         Jid *jid = jid_create(jabber_get_fulljid());
@@ -167,15 +184,38 @@ sv_ev_room_message(const char * const room_jid, const char * const nick,
 }
 
 void
-sv_ev_incoming_private_message(const char * const fulljid, char *message)
+sv_ev_incoming_private_message(const char *const fulljid, char *message)
 {
-    ui_incoming_private_msg(fulljid, message, NULL);
+    ProfPrivateWin *privatewin = wins_get_private(fulljid);
+    if (privatewin == NULL) {
+        ProfWin *window = wins_new_private(fulljid);
+        privatewin = (ProfPrivateWin*)window;
+    }
+    privwin_incoming_msg(privatewin, message, NULL);
+}
+
+void
+sv_ev_delayed_private_message(const char *const fulljid, char *message, GDateTime *timestamp)
+{
+    ProfPrivateWin *privatewin = wins_get_private(fulljid);
+    if (privatewin == NULL) {
+        ProfWin *window = wins_new_private(fulljid);
+        privatewin = (ProfPrivateWin*)window;
+    }
+    privwin_incoming_msg(privatewin, message, timestamp);
 }
 
 void
 sv_ev_outgoing_carbon(char *barejid, char *message)
 {
-    ui_outgoing_chat_msg_carbon(barejid, message);
+    ProfChatWin *chatwin = wins_get_chat(barejid);
+    if (!chatwin) {
+        chatwin = chatwin_new(barejid);
+    }
+
+    chat_state_active(chatwin->state);
+
+    chatwin_outgoing_carbon(chatwin, message);
 }
 
 void
@@ -189,7 +229,7 @@ sv_ev_incoming_carbon(char *barejid, char *resource, char *message)
         new_win = TRUE;
     }
 
-    ui_incoming_msg(chatwin, resource, message, NULL, new_win, PROF_MSG_PLAIN);
+    chatwin_incoming_msg(chatwin, resource, message, NULL, new_win, PROF_MSG_PLAIN);
     chat_log_msg_in(barejid, message, NULL);
 }
 
@@ -199,12 +239,12 @@ _sv_ev_incoming_pgp(ProfChatWin *chatwin, gboolean new_win, char *barejid, char 
 {
     char *decrypted = p_gpg_decrypt(pgp_message);
     if (decrypted) {
-        ui_incoming_msg(chatwin, resource, decrypted, timestamp, new_win, PROF_MSG_PGP);
+        chatwin_incoming_msg(chatwin, resource, decrypted, timestamp, new_win, PROF_MSG_PGP);
         chat_log_pgp_msg_in(barejid, decrypted, timestamp);
         chatwin->pgp_recv = TRUE;
         p_gpg_free_decrypted(decrypted);
     } else {
-        ui_incoming_msg(chatwin, resource, message, timestamp, new_win, PROF_MSG_PLAIN);
+        chatwin_incoming_msg(chatwin, resource, message, timestamp, new_win, PROF_MSG_PLAIN);
         chat_log_msg_in(barejid, message, timestamp);
         chatwin->pgp_recv = FALSE;
     }
@@ -219,10 +259,10 @@ _sv_ev_incoming_otr(ProfChatWin *chatwin, gboolean new_win, char *barejid, char 
     char *otr_res = otr_on_message_recv(barejid, resource, message, &decrypted);
     if (otr_res) {
         if (decrypted) {
-            ui_incoming_msg(chatwin, resource, otr_res, timestamp, new_win, PROF_MSG_OTR);
+            chatwin_incoming_msg(chatwin, resource, otr_res, timestamp, new_win, PROF_MSG_OTR);
             chatwin->pgp_send = FALSE;
         } else {
-            ui_incoming_msg(chatwin, resource, otr_res, timestamp, new_win, PROF_MSG_PLAIN);
+            chatwin_incoming_msg(chatwin, resource, otr_res, timestamp, new_win, PROF_MSG_PLAIN);
         }
         chat_log_otr_msg_in(barejid, otr_res, decrypted, timestamp);
         otr_free_message(otr_res);
@@ -235,7 +275,7 @@ _sv_ev_incoming_otr(ProfChatWin *chatwin, gboolean new_win, char *barejid, char 
 static void
 _sv_ev_incoming_plain(ProfChatWin *chatwin, gboolean new_win, char *barejid, char *resource, char *message, GDateTime *timestamp)
 {
-    ui_incoming_msg(chatwin, resource, message, timestamp, new_win, PROF_MSG_PLAIN);
+    chatwin_incoming_msg(chatwin, resource, message, timestamp, new_win, PROF_MSG_PLAIN);
     chat_log_msg_in(barejid, message, timestamp);
     chatwin->pgp_recv = FALSE;
 }
@@ -298,22 +338,20 @@ sv_ev_incoming_message(char *barejid, char *resource, char *message, char *pgp_m
 }
 
 void
-sv_ev_delayed_private_message(const char * const fulljid, char *message, GDateTime *timestamp)
-{
-    ui_incoming_private_msg(fulljid, message, timestamp);
-}
-
-void
 sv_ev_message_receipt(char *barejid, char *id)
 {
-    ui_message_receipt(barejid, id);
+    ProfChatWin *chatwin = wins_get_chat(barejid);
+    if (!chatwin)
+        return;
+
+    chatwin_receipt_received(chatwin, id);
 }
 
 void
 sv_ev_typing(char *barejid, char *resource)
 {
     ui_contact_typing(barejid, resource);
-    if (ui_chat_win_exists(barejid)) {
+    if (wins_chat_exists(barejid)) {
         chat_session_recipient_typing(barejid, resource);
     }
 }
@@ -321,7 +359,7 @@ sv_ev_typing(char *barejid, char *resource)
 void
 sv_ev_paused(char *barejid, char *resource)
 {
-    if (ui_chat_win_exists(barejid)) {
+    if (wins_chat_exists(barejid)) {
         chat_session_recipient_paused(barejid, resource);
     }
 }
@@ -329,24 +367,38 @@ sv_ev_paused(char *barejid, char *resource)
 void
 sv_ev_inactive(char *barejid, char *resource)
 {
-    if (ui_chat_win_exists(barejid)) {
+    if (wins_chat_exists(barejid)) {
         chat_session_recipient_inactive(barejid, resource);
     }
 }
 
 void
-sv_ev_gone(const char * const barejid, const char * const resource)
+sv_ev_gone(const char *const barejid, const char *const resource)
 {
-    ui_recipient_gone(barejid, resource);
-    if (ui_chat_win_exists(barejid)) {
+    if (barejid && resource) {
+        gboolean show_message = TRUE;
+
+        ProfChatWin *chatwin = wins_get_chat(barejid);
+        if (chatwin) {
+            ChatSession *session = chat_session_get(barejid);
+            if (session && g_strcmp0(session->resource, resource) != 0) {
+                show_message = FALSE;
+            }
+            if (show_message) {
+                chatwin_recipient_gone(chatwin);
+            }
+        }
+    }
+
+    if (wins_chat_exists(barejid)) {
         chat_session_recipient_gone(barejid, resource);
     }
 }
 
 void
-sv_ev_activity(const char * const barejid, const char * const resource, gboolean send_states)
+sv_ev_activity(const char *const barejid, const char *const resource, gboolean send_states)
 {
-    if (ui_chat_win_exists(barejid)) {
+    if (wins_chat_exists(barejid)) {
         chat_session_recipient_active(barejid, resource, send_states);
     }
 }
@@ -413,91 +465,101 @@ sv_ev_contact_online(char *barejid, Resource *resource, GDateTime *last_activity
 }
 
 void
-sv_ev_leave_room(const char * const room)
+sv_ev_leave_room(const char *const room)
 {
     muc_leave(room);
     ui_leave_room(room);
 }
 
 void
-sv_ev_room_destroy(const char * const room)
+sv_ev_room_destroy(const char *const room)
 {
     muc_leave(room);
     ui_room_destroy(room);
 }
 
 void
-sv_ev_room_destroyed(const char * const room, const char * const new_jid, const char * const password,
-    const char * const reason)
+sv_ev_room_destroyed(const char *const room, const char *const new_jid, const char *const password,
+    const char *const reason)
 {
     muc_leave(room);
     ui_room_destroyed(room, reason, new_jid, password);
 }
 
 void
-sv_ev_room_kicked(const char * const room, const char * const actor, const char * const reason)
+sv_ev_room_kicked(const char *const room, const char *const actor, const char *const reason)
 {
     muc_leave(room);
     ui_room_kicked(room, actor, reason);
 }
 
 void
-sv_ev_room_banned(const char * const room, const char * const actor, const char * const reason)
+sv_ev_room_banned(const char *const room, const char *const actor, const char *const reason)
 {
     muc_leave(room);
     ui_room_banned(room, actor, reason);
 }
 
 void
-sv_ev_room_occupant_offline(const char * const room, const char * const nick,
-    const char * const show, const char * const status)
+sv_ev_room_occupant_offline(const char *const room, const char *const nick,
+    const char *const show, const char *const status)
 {
     muc_roster_remove(room, nick);
 
     char *muc_status_pref = prefs_get_string(PREF_STATUSES_MUC);
-    if (g_strcmp0(muc_status_pref, "none") != 0) {
-        ui_room_member_offline(room, nick);
+    ProfMucWin *mucwin = wins_get_muc(room);
+    if (mucwin && (g_strcmp0(muc_status_pref, "none") != 0)) {
+        mucwin_occupant_offline(mucwin, nick);
     }
     prefs_free_string(muc_status_pref);
     occupantswin_occupants(room);
 }
 
 void
-sv_ev_room_occupent_kicked(const char * const room, const char * const nick, const char * const actor,
-    const char * const reason)
+sv_ev_room_occupent_kicked(const char *const room, const char *const nick, const char *const actor,
+    const char *const reason)
 {
     muc_roster_remove(room, nick);
-    ui_room_member_kicked(room, nick, actor, reason);
+    ProfMucWin *mucwin = wins_get_muc(room);
+    if (mucwin) {
+        mucwin_occupant_kicked(mucwin, nick, actor, reason);
+    }
     occupantswin_occupants(room);
 }
 
 void
-sv_ev_room_occupent_banned(const char * const room, const char * const nick, const char * const actor,
-    const char * const reason)
+sv_ev_room_occupent_banned(const char *const room, const char *const nick, const char *const actor,
+    const char *const reason)
 {
     muc_roster_remove(room, nick);
-    ui_room_member_banned(room, nick, actor, reason);
+    ProfMucWin *mucwin = wins_get_muc(room);
+    if (mucwin) {
+        mucwin_occupant_banned(mucwin, nick, actor, reason);
+    }
     occupantswin_occupants(room);
 }
 
 void
-sv_ev_roster_update(const char * const barejid, const char * const name,
-    GSList *groups, const char * const subscription, gboolean pending_out)
+sv_ev_roster_update(const char *const barejid, const char *const name,
+    GSList *groups, const char *const subscription, gboolean pending_out)
 {
     roster_update(barejid, name, groups, subscription, pending_out);
     rosterwin_roster();
 }
 
 void
-sv_ev_xmpp_stanza(const char * const msg)
+sv_ev_xmpp_stanza(const char *const msg)
 {
-    ui_handle_stanza(msg);
+    ProfXMLWin *xmlwin = wins_get_xmlconsole();
+    if (xmlwin) {
+        xmlwin_show(xmlwin, msg);
+    }
 }
 
 void
-sv_ev_muc_self_online(const char * const room, const char * const nick, gboolean config_required,
-    const char * const role, const char * const affiliation, const char * const actor, const char * const reason,
-    const char * const jid, const char * const show, const char * const status)
+sv_ev_muc_self_online(const char *const room, const char *const nick, gboolean config_required,
+    const char *const role, const char *const affiliation, const char *const actor, const char *const reason,
+    const char *const jid, const char *const show, const char *const status)
 {
     muc_roster_add(room, nick, jid, role, affiliation, show, status);
     char *old_role = muc_role_str(room);
@@ -508,7 +570,10 @@ sv_ev_muc_self_online(const char * const room, const char * const nick, gboolean
     // handle self nick change
     if (muc_nick_change_pending(room)) {
         muc_nick_change_complete(room, nick);
-        ui_room_nick_change(room, nick);
+        ProfMucWin *mucwin = wins_get_muc(room);
+        if (mucwin) {
+            mucwin_nick_change(mucwin, nick);
+        }
 
     // handle roster complete
     } else if (!muc_roster_complete(room)) {
@@ -524,22 +589,23 @@ sv_ev_muc_self_online(const char * const room, const char * const nick, gboolean
         muc_roster_set_complete(room);
 
         // show roster if occupants list disabled by default
-        if (!prefs_get_boolean(PREF_OCCUPANTS)) {
+        ProfMucWin *mucwin = wins_get_muc(room);
+        if (mucwin && !prefs_get_boolean(PREF_OCCUPANTS)) {
             GList *occupants = muc_roster(room);
-            ui_room_roster(room, occupants, NULL);
+            mucwin_roster(mucwin, occupants, NULL);
             g_list_free(occupants);
         }
 
         char *subject = muc_subject(room);
-        if (subject) {
-            ui_room_subject(room, NULL, subject);
+        if (mucwin && subject) {
+            mucwin_subject(mucwin, NULL, subject);
         }
 
         GList *pending_broadcasts = muc_pending_broadcasts(room);
-        if (pending_broadcasts) {
+        if (mucwin && pending_broadcasts) {
             GList *curr = pending_broadcasts;
             while (curr) {
-                ui_room_broadcast(room, curr->data);
+                mucwin_broadcast(mucwin, curr->data);
                 curr = g_list_next(curr);
             }
         }
@@ -547,23 +613,26 @@ sv_ev_muc_self_online(const char * const room, const char * const nick, gboolean
         // room configuration required
         if (config_required) {
             muc_set_requires_config(room, TRUE);
-            ui_room_requires_config(room);
+            if (mucwin) {
+                mucwin_requires_config(mucwin);
+            }
         }
 
     // check for change in role/affiliation
     } else {
-        if (prefs_get_boolean(PREF_MUC_PRIVILEGES)) {
+        ProfMucWin *mucwin = wins_get_muc(room);
+        if (mucwin && prefs_get_boolean(PREF_MUC_PRIVILEGES)) {
             // both changed
             if ((g_strcmp0(role, old_role) != 0) && (g_strcmp0(affiliation, old_affiliation) != 0)) {
-                ui_room_role_and_affiliation_change(room, role, affiliation, actor, reason);
+                mucwin_role_and_affiliation_change(mucwin, role, affiliation, actor, reason);
 
             // role changed
             } else if (g_strcmp0(role, old_role) != 0) {
-                ui_room_role_change(room, role, actor, reason);
+                mucwin_role_change(mucwin, role, actor, reason);
 
             // affiliation changed
             } else if (g_strcmp0(affiliation, old_affiliation) != 0) {
-                ui_room_affiliation_change(room, affiliation, actor, reason);
+                mucwin_affiliation_change(mucwin, affiliation, actor, reason);
             }
         }
     }
@@ -572,9 +641,9 @@ sv_ev_muc_self_online(const char * const room, const char * const nick, gboolean
 }
 
 void
-sv_ev_muc_occupant_online(const char * const room, const char * const nick, const char * const jid,
-    const char * const role, const char * const affiliation, const char * const actor, const char * const reason,
-    const char * const show, const char * const status)
+sv_ev_muc_occupant_online(const char *const room, const char *const nick, const char *const jid,
+    const char *const role, const char *const affiliation, const char *const actor, const char *const reason,
+    const char *const show, const char *const status)
 {
     Occupant *occupant = muc_roster_item(room, nick);
 
@@ -595,7 +664,10 @@ sv_ev_muc_occupant_online(const char * const room, const char * const nick, cons
     // handle nickname change
     char *old_nick = muc_roster_nick_change_complete(room, nick);
     if (old_nick) {
-        ui_room_member_nick_change(room, old_nick, nick);
+        ProfMucWin *mucwin = wins_get_muc(room);
+        if (mucwin) {
+            mucwin_occupant_nick_change(mucwin, old_nick, nick);
+        }
         free(old_nick);
         occupantswin_occupants(room);
         return;
@@ -604,8 +676,9 @@ sv_ev_muc_occupant_online(const char * const room, const char * const nick, cons
     // joined room
     if (!occupant) {
         char *muc_status_pref = prefs_get_string(PREF_STATUSES_MUC);
-        if (g_strcmp0(muc_status_pref, "none") != 0) {
-            ui_room_member_online(room, nick, role, affiliation, show, status);
+        ProfMucWin *mucwin = wins_get_muc(room);
+        if (mucwin && g_strcmp0(muc_status_pref, "none") != 0) {
+            mucwin_occupant_online(mucwin, nick, role, affiliation, show, status);
         }
         prefs_free_string(muc_status_pref);
         occupantswin_occupants(room);
@@ -615,26 +688,28 @@ sv_ev_muc_occupant_online(const char * const room, const char * const nick, cons
     // presence updated
     if (updated) {
         char *muc_status_pref = prefs_get_string(PREF_STATUSES_MUC);
-        if (g_strcmp0(muc_status_pref, "all") == 0) {
-            ui_room_member_presence(room, nick, show, status);
+        ProfMucWin *mucwin = wins_get_muc(room);
+        if (mucwin && (g_strcmp0(muc_status_pref, "all") == 0)) {
+            mucwin_occupant_presence(mucwin, nick, show, status);
         }
         prefs_free_string(muc_status_pref);
         occupantswin_occupants(room);
 
     // presence unchanged, check for role/affiliation change
     } else {
-        if (prefs_get_boolean(PREF_MUC_PRIVILEGES)) {
+        ProfMucWin *mucwin = wins_get_muc(room);
+        if (mucwin && prefs_get_boolean(PREF_MUC_PRIVILEGES)) {
             // both changed
             if ((g_strcmp0(role, old_role) != 0) && (g_strcmp0(affiliation, old_affiliation) != 0)) {
-                ui_room_occupant_role_and_affiliation_change(room, nick, role, affiliation, actor, reason);
+                mucwin_occupant_role_and_affiliation_change(mucwin, nick, role, affiliation, actor, reason);
 
             // role changed
             } else if (g_strcmp0(role, old_role) != 0) {
-                ui_room_occupant_role_change(room, nick, role, actor, reason);
+                mucwin_occupant_role_change(mucwin, nick, role, actor, reason);
 
             // affiliation changed
             } else if (g_strcmp0(affiliation, old_affiliation) != 0) {
-                ui_room_occupant_affiliation_change(room, nick, affiliation, actor, reason);
+                mucwin_occupant_affiliation_change(mucwin, nick, affiliation, actor, reason);
             }
         }
         occupantswin_occupants(room);
@@ -642,53 +717,26 @@ sv_ev_muc_occupant_online(const char * const room, const char * const nick, cons
 }
 
 int
-sv_ev_certfail(const char * const errormsg, const char * const certname, const char * const certfp,
-    const char * const notbefore, const char * const notafter)
+sv_ev_certfail(const char *const errormsg, TLSCertificate *cert)
 {
-    if (tlscerts_exists(certfp)) {
+    // check profanity trusted certs
+    if (tlscerts_exists(cert->fingerprint)) {
         return 1;
     }
 
-    char *domain = NULL;
-    char *org = NULL;
-    char *email = NULL;
-    gchar** fields = g_strsplit(certname, "/", 0);
-    int i = 0;
-    for (i = 0; i < g_strv_length(fields); i++) {
-        gchar** keyval = g_strsplit(fields[i], "=", 2);
-        if (g_strv_length(keyval) == 2) {
-            if (g_strcmp0(keyval[0], "CN") == 0) {
-                domain = strdup(keyval[1]);
-            }
-            if (g_strcmp0(keyval[0], "O") == 0) {
-                org = strdup(keyval[1]);
-            }
-            if (g_strcmp0(keyval[0], "emailAddress") == 0) {
-                email = strdup(keyval[1]);
-            }
-        }
-        g_strfreev(keyval);
+    // check current cert
+    char *current_fp = tlscerts_get_current();
+    if (current_fp && g_strcmp0(current_fp, cert->fingerprint) == 0) {
+        return 1;
     }
-    g_strfreev(fields);
 
     cons_show("");
     cons_show_error("TLS certificate verification failed: %s", errormsg);
-    if (domain) {
-        cons_show("  Domain       : %s", domain);
-    }
-    if (org) {
-        cons_show("  Organisation : %s", org);
-    }
-    if (email) {
-        cons_show("  Email        : %s", email);
-    }
-    cons_show("  Fingerprint  : %s", certfp);
-    cons_show("  Start        : %s", notbefore);
-    cons_show("  End          : %s", notafter);
+    cons_show_tlscert(cert);
     cons_show("");
-    cons_show("Use '/tls allow' to accept this certificate");
-    cons_show("Use '/tls always' to accept this certificate permanently");
-    cons_show("Use '/tls deny' to reject this certificate");
+    cons_show("Use '/tls allow' to accept this certificate.");
+    cons_show("Use '/tls always' to accept this certificate permanently.");
+    cons_show("Use '/tls deny' to reject this certificate.");
     cons_show("");
     ui_update();
 
@@ -696,10 +744,11 @@ sv_ev_certfail(const char * const errormsg, const char * const certname, const c
 
     while ((g_strcmp0(cmd, "/tls allow") != 0)
                 && (g_strcmp0(cmd, "/tls always") != 0)
-                && (g_strcmp0(cmd, "/tls deny") != 0)) {
-        cons_show("Use '/tls allow' to accept this certificate");
-        cons_show("Use '/tls always' to accept this certificate permanently");
-        cons_show("Use '/tls deny' to reject this certificate");
+                && (g_strcmp0(cmd, "/tls deny") != 0)
+                && (g_strcmp0(cmd, "/quit") != 0)) {
+        cons_show("Use '/tls allow' to accept this certificate.");
+        cons_show("Use '/tls always' to accept this certificate permanently.");
+        cons_show("Use '/tls deny' to reject this certificate.");
         cons_show("");
         ui_update();
         free(cmd);
@@ -707,33 +756,30 @@ sv_ev_certfail(const char * const errormsg, const char * const certname, const c
     }
 
     if (g_strcmp0(cmd, "/tls allow") == 0) {
+        cons_show("Coninuing with connection.");
+        tlscerts_set_current(cert->fingerprint);
         free(cmd);
-        free(domain);
-        free(org);
-        free(email);
         return 1;
     } else if (g_strcmp0(cmd, "/tls always") == 0) {
-        if (!tlscerts_exists(certfp)) {
-            TLSCertificate *cert = tlscerts_new(certfp, domain, org, email, notbefore, notafter);
+        cons_show("Adding %s to trusted certificates.", cert->fingerprint);
+        if (!tlscerts_exists(cert->fingerprint)) {
             tlscerts_add(cert);
-            tlscerts_free(cert);
         }
         free(cmd);
-        free(domain);
-        free(org);
-        free(email);
         return 1;
-    } else {
+    } else if (g_strcmp0(cmd, "/quit") == 0) {
+        prof_set_quit();
         free(cmd);
-        free(domain);
-        free(org);
-        free(email);
+        return 0;
+    } else {
+        cons_show("Aborting connection.");
+        free(cmd);
         return 0;
     }
 }
 
 void
-sv_ev_lastactivity_response(const char * const from, const int seconds, const char * const msg)
+sv_ev_lastactivity_response(const char *const from, const int seconds, const char *const msg)
 {
     Jid *jidp = jid_create(from);
 
