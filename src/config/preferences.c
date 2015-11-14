@@ -859,6 +859,10 @@ _get_default_string(preference_t pref)
             return "%H:%M:%S";
         case PREF_TIME_MUC:
             return "%H:%M:%S";
+        case PREF_TIME_MUCCONFIG:
+            return "%H:%M:%S";
+        case PREF_TIME_PRIVATE:
+            return "%H:%M:%S";
         case PREF_TIME_XMLCONSOLE:
             return "%H:%M:%S";
         case PREF_TIME_STATUSBAR:
