@@ -288,7 +288,7 @@ void find_twice_returns_first_when_two_match_and_reset(void **state)
     roster_free();
 }
 
-void add_contact_with_no_group_returns_no_groups(void **state)
+void add_contact_with_no_group(void **state)
 {
     roster_init();
     roster_add("person@server.org", NULL, NULL, NULL, FALSE);
@@ -301,7 +301,7 @@ void add_contact_with_no_group_returns_no_groups(void **state)
     roster_free();
 }
 
-void add_contact_with_group_returns_group(void **state)
+void add_contact_with_group(void **state)
 {
     roster_init();
 
@@ -321,7 +321,7 @@ void add_contact_with_group_returns_group(void **state)
     roster_free();
 }
 
-void add_contact_with_two_groups_returns_groups(void **state)
+void add_contact_with_two_groups(void **state)
 {
     roster_init();
 
@@ -345,7 +345,7 @@ void add_contact_with_two_groups_returns_groups(void **state)
     roster_free();
 }
 
-void add_contact_with_three_groups_returns_groups(void **state)
+void add_contact_with_three_groups(void **state)
 {
     roster_init();
 
@@ -373,7 +373,7 @@ void add_contact_with_three_groups_returns_groups(void **state)
     roster_free();
 }
 
-void add_contact_with_three_groups_update_adding_two_returns_groups(void **state)
+void add_contact_with_three_groups_update_adding_two(void **state)
 {
     roster_init();
 
@@ -409,6 +409,261 @@ void add_contact_with_three_groups_update_adding_two_returns_groups(void **state
     found = g_slist_find_custom(groups_res, "people", g_strcmp0);
     assert_true(found != NULL);
     assert_string_equal(found->data, "people");
+
+    g_slist_free_full(groups_res, g_free);
+    roster_clear();
+    roster_free();
+}
+
+void add_contact_with_three_groups_update_removing_one(void **state)
+{
+    roster_init();
+
+    GSList *groups1 = NULL;
+    groups1 = g_slist_append(groups1, strdup("friends"));
+    groups1 = g_slist_append(groups1, strdup("work"));
+    groups1 = g_slist_append(groups1, strdup("stuff"));
+    roster_add("person@server.org", NULL, groups1, NULL, FALSE);
+
+    GSList *groups2 = NULL;
+    groups2 = g_slist_append(groups2, strdup("friends"));
+    groups2 = g_slist_append(groups2, strdup("stuff"));
+    roster_update("person@server.org", NULL, groups2, NULL, FALSE);
+
+    GSList *groups_res = roster_get_groups();
+    assert_int_equal(g_slist_length(groups_res), 2);
+
+    GSList *found = g_slist_find_custom(groups_res, "friends", g_strcmp0);
+    assert_true(found != NULL);
+    assert_string_equal(found->data, "friends");
+    found = g_slist_find_custom(groups_res, "stuff", g_strcmp0);
+    assert_true(found != NULL);
+    assert_string_equal(found->data, "stuff");
+
+    g_slist_free_full(groups_res, g_free);
+    roster_clear();
+    roster_free();
+}
+
+void add_contact_with_three_groups_update_removing_two(void **state)
+{
+    roster_init();
+
+    GSList *groups1 = NULL;
+    groups1 = g_slist_append(groups1, strdup("friends"));
+    groups1 = g_slist_append(groups1, strdup("work"));
+    groups1 = g_slist_append(groups1, strdup("stuff"));
+    roster_add("person@server.org", NULL, groups1, NULL, FALSE);
+
+    GSList *groups2 = NULL;
+    groups2 = g_slist_append(groups2, strdup("stuff"));
+    roster_update("person@server.org", NULL, groups2, NULL, FALSE);
+
+    GSList *groups_res = roster_get_groups();
+    assert_int_equal(g_slist_length(groups_res), 1);
+
+    GSList *found = g_slist_find_custom(groups_res, "stuff", g_strcmp0);
+    assert_true(found != NULL);
+    assert_string_equal(found->data, "stuff");
+
+    g_slist_free_full(groups_res, g_free);
+    roster_clear();
+    roster_free();
+}
+
+void add_contact_with_three_groups_update_removing_three(void **state)
+{
+    roster_init();
+
+    GSList *groups1 = NULL;
+    groups1 = g_slist_append(groups1, strdup("friends"));
+    groups1 = g_slist_append(groups1, strdup("work"));
+    groups1 = g_slist_append(groups1, strdup("stuff"));
+    roster_add("person@server.org", NULL, groups1, NULL, FALSE);
+
+    roster_update("person@server.org", NULL, NULL, NULL, FALSE);
+
+    GSList *groups_res = roster_get_groups();
+    assert_int_equal(g_slist_length(groups_res), 0);
+
+    g_slist_free_full(groups_res, g_free);
+    roster_clear();
+    roster_free();
+}
+
+void add_contact_with_three_groups_update_two_new(void **state)
+{
+    roster_init();
+
+    GSList *groups1 = NULL;
+    groups1 = g_slist_append(groups1, strdup("friends"));
+    groups1 = g_slist_append(groups1, strdup("work"));
+    groups1 = g_slist_append(groups1, strdup("stuff"));
+    roster_add("person@server.org", NULL, groups1, NULL, FALSE);
+
+    GSList *groups2 = NULL;
+    groups2 = g_slist_append(groups2, strdup("newfriends"));
+    groups2 = g_slist_append(groups2, strdup("somepeople"));
+    roster_update("person@server.org", NULL, groups2, NULL, FALSE);
+
+    GSList *groups_res = roster_get_groups();
+    assert_int_equal(g_slist_length(groups_res), 2);
+
+    GSList *found = g_slist_find_custom(groups_res, "newfriends", g_strcmp0);
+    assert_true(found != NULL);
+    found = g_slist_find_custom(groups_res, "somepeople", g_strcmp0);
+    assert_true(found != NULL);
+
+    g_slist_free_full(groups_res, g_free);
+    roster_clear();
+    roster_free();
+}
+
+void add_remove_contact_groups(void **state)
+{
+    roster_init();
+
+    GSList *groups1 = NULL;
+    groups1 = g_slist_append(groups1, strdup("friends"));
+    groups1 = g_slist_append(groups1, strdup("work"));
+    groups1 = g_slist_append(groups1, strdup("stuff"));
+    roster_add("person@server.org", NULL, groups1, NULL, FALSE);
+
+    roster_remove("person@server.org", "person@server.org");
+
+    GSList *groups_res = roster_get_groups();
+    assert_int_equal(g_slist_length(groups_res), 0);
+
+    g_slist_free_full(groups_res, g_free);
+    roster_clear();
+    roster_free();
+}
+
+void add_contacts_with_different_groups(void **state)
+{
+    roster_init();
+
+    GSList *groups1 = NULL;
+    groups1 = g_slist_append(groups1, strdup("friends"));
+    groups1 = g_slist_append(groups1, strdup("work"));
+    groups1 = g_slist_append(groups1, strdup("stuff"));
+    roster_add("person@server.org", NULL, groups1, NULL, FALSE);
+
+    GSList *groups2 = NULL;
+    groups2 = g_slist_append(groups2, strdup("newfriends"));
+    groups2 = g_slist_append(groups2, strdup("somepeople"));
+    roster_add("bob@server.org", NULL, groups2, NULL, FALSE);
+
+    GSList *groups_res = roster_get_groups();
+    assert_int_equal(g_slist_length(groups_res), 5);
+
+    GSList *found = g_slist_find_custom(groups_res, "friends", g_strcmp0);
+    assert_true(found != NULL);
+    found = g_slist_find_custom(groups_res, "work", g_strcmp0);
+    assert_true(found != NULL);
+    found = g_slist_find_custom(groups_res, "stuff", g_strcmp0);
+    assert_true(found != NULL);
+    found = g_slist_find_custom(groups_res, "newfriends", g_strcmp0);
+    assert_true(found != NULL);
+    found = g_slist_find_custom(groups_res, "somepeople", g_strcmp0);
+    assert_true(found != NULL);
+
+    g_slist_free_full(groups_res, g_free);
+    roster_clear();
+    roster_free();
+}
+
+void add_contacts_with_same_groups(void **state)
+{
+    roster_init();
+
+    GSList *groups1 = NULL;
+    groups1 = g_slist_append(groups1, strdup("friends"));
+    groups1 = g_slist_append(groups1, strdup("work"));
+    groups1 = g_slist_append(groups1, strdup("stuff"));
+    roster_add("person@server.org", NULL, groups1, NULL, FALSE);
+
+    GSList *groups2 = NULL;
+    groups2 = g_slist_append(groups2, strdup("friends"));
+    groups2 = g_slist_append(groups2, strdup("work"));
+    groups2 = g_slist_append(groups2, strdup("stuff"));
+    roster_add("bob@server.org", NULL, groups2, NULL, FALSE);
+
+    GSList *groups_res = roster_get_groups();
+    assert_int_equal(g_slist_length(groups_res), 3);
+
+    GSList *found = g_slist_find_custom(groups_res, "friends", g_strcmp0);
+    assert_true(found != NULL);
+    found = g_slist_find_custom(groups_res, "work", g_strcmp0);
+    assert_true(found != NULL);
+    found = g_slist_find_custom(groups_res, "stuff", g_strcmp0);
+    assert_true(found != NULL);
+
+    g_slist_free_full(groups_res, g_free);
+    roster_clear();
+    roster_free();
+}
+
+void add_contacts_with_overlapping_groups(void **state)
+{
+    roster_init();
+
+    GSList *groups1 = NULL;
+    groups1 = g_slist_append(groups1, strdup("friends"));
+    groups1 = g_slist_append(groups1, strdup("work"));
+    groups1 = g_slist_append(groups1, strdup("stuff"));
+    roster_add("person@server.org", NULL, groups1, NULL, FALSE);
+
+    GSList *groups2 = NULL;
+    groups2 = g_slist_append(groups2, strdup("friends"));
+    groups2 = g_slist_append(groups2, strdup("work"));
+    groups2 = g_slist_append(groups2, strdup("different"));
+    roster_add("bob@server.org", NULL, groups2, NULL, FALSE);
+
+    GSList *groups_res = roster_get_groups();
+    assert_int_equal(g_slist_length(groups_res), 4);
+
+    GSList *found = g_slist_find_custom(groups_res, "friends", g_strcmp0);
+    assert_true(found != NULL);
+    found = g_slist_find_custom(groups_res, "work", g_strcmp0);
+    assert_true(found != NULL);
+    found = g_slist_find_custom(groups_res, "stuff", g_strcmp0);
+    assert_true(found != NULL);
+    found = g_slist_find_custom(groups_res, "different", g_strcmp0);
+    assert_true(found != NULL);
+
+    g_slist_free_full(groups_res, g_free);
+    roster_clear();
+    roster_free();
+}
+
+void remove_contact_with_remaining_in_group(void **state)
+{
+    roster_init();
+
+    GSList *groups1 = NULL;
+    groups1 = g_slist_append(groups1, strdup("friends"));
+    groups1 = g_slist_append(groups1, strdup("work"));
+    groups1 = g_slist_append(groups1, strdup("stuff"));
+    roster_add("person@server.org", NULL, groups1, NULL, FALSE);
+
+    GSList *groups2 = NULL;
+    groups2 = g_slist_append(groups2, strdup("friends"));
+    groups2 = g_slist_append(groups2, strdup("work"));
+    groups2 = g_slist_append(groups2, strdup("different"));
+    roster_add("bob@server.org", NULL, groups2, NULL, FALSE);
+
+    roster_remove("bob@server.org", "bob@server.org");
+
+    GSList *groups_res = roster_get_groups();
+    assert_int_equal(g_slist_length(groups_res), 3);
+
+    GSList *found = g_slist_find_custom(groups_res, "friends", g_strcmp0);
+    assert_true(found != NULL);
+    found = g_slist_find_custom(groups_res, "work", g_strcmp0);
+    assert_true(found != NULL);
+    found = g_slist_find_custom(groups_res, "stuff", g_strcmp0);
+    assert_true(found != NULL);
 
     g_slist_free_full(groups_res, g_free);
     roster_clear();
