@@ -43,6 +43,38 @@
 #include "roster_list.h"
 
 static void
+_rosterwin_presence(ProfLayoutSplit *layout, int indent, theme_item_t colour, const char *presence, const char *status)
+{
+    char *by = prefs_get_string(PREF_ROSTER_BY);
+    gboolean by_presence = g_strcmp0(by, "presence") == 0;
+    gboolean has_status = status != NULL;
+    gboolean show_status = prefs_get_boolean(PREF_ROSTER_STATUS);
+    if (!by_presence || (has_status && show_status)) {
+        wattron(layout->subwin, theme_attrs(colour));
+        GString *msg = g_string_new(" ");
+        while (indent > 0) {
+            g_string_append(msg, " ");
+            indent--;
+        }
+        if (!by_presence) {
+            g_string_append(msg, presence);
+        }
+        if (has_status && show_status) {
+            if (!by_presence) {
+                g_string_append(msg, ", \"");
+            } else {
+                g_string_append(msg, "\"");
+            }
+            g_string_append(msg, status);
+            g_string_append(msg, "\"");
+        }
+        win_printline_nowrap(layout->subwin, msg->str);
+        g_string_free(msg, TRUE);
+        wattroff(layout->subwin, theme_attrs(colour));
+    }
+}
+
+static void
 _rosterwin_resource(ProfLayoutSplit *layout, PContact contact)
 {
     GList *resources = p_contact_get_available_resources(contact);
@@ -125,6 +157,7 @@ _rosterwin_contact(ProfLayoutSplit *layout, PContact contact)
 {
     const char *name = p_contact_name_or_jid(contact);
     const char *presence = p_contact_presence(contact);
+    const char *status = p_contact_status(contact);
 
     if ((g_strcmp0(presence, "offline") != 0) || ((g_strcmp0(presence, "offline") == 0) &&
             (prefs_get_boolean(PREF_ROSTER_OFFLINE)))) {
@@ -140,30 +173,7 @@ _rosterwin_contact(ProfLayoutSplit *layout, PContact contact)
         if (prefs_get_boolean(PREF_ROSTER_RESOURCE)) {
             _rosterwin_resource(layout, contact);
         } else if (prefs_get_boolean(PREF_ROSTER_PRESENCE)) {
-            char *by = prefs_get_string(PREF_ROSTER_BY);
-            gboolean by_presence = g_strcmp0(by, "presence") == 0;
-            gboolean has_status = p_contact_status(contact) != NULL;
-            gboolean show_status = prefs_get_boolean(PREF_ROSTER_STATUS);
-            if (!by_presence || (has_status && show_status)) {
-                wattron(layout->subwin, theme_attrs(presence_colour));
-                GString *msg = g_string_new("     ");
-                if (!by_presence) {
-                    g_string_append(msg, presence);
-                }
-                if (has_status && show_status) {
-                    if (!by_presence) {
-                        g_string_append(msg, ", \"");
-                    } else {
-                        g_string_append(msg, "\"");
-                    }
-                    const char *status = p_contact_status(contact);
-                    g_string_append(msg, status);
-                    g_string_append(msg, "\"");
-                }
-                win_printline_nowrap(layout->subwin, msg->str);
-                g_string_free(msg, TRUE);
-                wattroff(layout->subwin, theme_attrs(presence_colour));
-            }
+            _rosterwin_presence(layout, 4, presence_colour, presence, status);
         }
     }
 }
