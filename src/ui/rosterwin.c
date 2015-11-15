@@ -93,29 +93,7 @@ _rosterwin_resource(ProfLayoutSplit *layout, PContact contact)
             wattroff(layout->subwin, theme_attrs(resource_presence_colour));
 
             if (prefs_get_boolean(PREF_ROSTER_PRESENCE)) {
-                char *by = prefs_get_string(PREF_ROSTER_BY);
-                gboolean by_presence = g_strcmp0(by, "presence") == 0;
-                gboolean has_status = resource->status != NULL;
-                gboolean show_status = prefs_get_boolean(PREF_ROSTER_STATUS);
-                if (!by_presence || (has_status && show_status)) {
-                    wattron(layout->subwin, theme_attrs(resource_presence_colour));
-                    GString *msg = g_string_new("       ");
-                    if (!by_presence) {
-                        g_string_append(msg, resource_presence);
-                    }
-                    if (has_status && show_status) {
-                        if (!by_presence) {
-                            g_string_append(msg, ", \"");
-                        } else {
-                            g_string_append(msg, "\"");
-                        }
-                        g_string_append(msg, resource->status);
-                        g_string_append(msg, "\"");
-                    }
-                    win_printline_nowrap(layout->subwin, msg->str);
-                    g_string_free(msg, TRUE);
-                    wattroff(layout->subwin, theme_attrs(resource_presence_colour));
-                }
+                _rosterwin_presence(layout, 6, resource_presence_colour, resource_presence, resource->status);
             }
 
             curr_resource = g_list_next(curr_resource);
