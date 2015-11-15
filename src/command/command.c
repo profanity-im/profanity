@@ -274,8 +274,8 @@ static struct cmd_t command_defs[] =
         CMD_SYN(
             "/roster",
             "/roster online",
-            "/roster show [offline|resource|empty]",
-            "/roster hide [offline|resource|empty]",
+            "/roster show [offline|resource|presence|status|empty]",
+            "/roster hide [offline|resource|presence|status|empty]",
             "/roster by group|presence|none",
             "/roster size <percent>",
             "/roster add <jid> [<nick>]",
@@ -291,10 +291,14 @@ static struct cmd_t command_defs[] =
             { "show",                "Show the roster panel." },
             { "show offline",        "Show offline contacts in the roster panel." },
             { "show resource",       "Show contact's connected resources in the roster panel." },
+            { "show presence",       "Show contact's presence in the roster panel." },
+            { "show status",         "Show contact's status message in the roster panel." },
             { "show empty",          "When grouping by presence, show empty presence groups." },
             { "hide",                "Hide the roster panel." },
             { "hide offline",        "Hide offline contacts in the roster panel." },
             { "hide resource",       "Hide contact's connected resources in the roster panel." },
+            { "hide presence",       "Hide contact's presence in the roster panel." },
+            { "hide status",         "Hide contact's status message in the roster panel." },
             { "hide empty",          "When grouping by presence, hide empty presence groups." },
             { "by group",            "Group contacts in the roster panel by roster group." },
             { "by presence",         "Group contacts in the roster panel by presence." },
@@ -2015,6 +2019,8 @@ cmd_init(void)
     roster_option_ac = autocomplete_new();
     autocomplete_add(roster_option_ac, "offline");
     autocomplete_add(roster_option_ac, "resource");
+    autocomplete_add(roster_option_ac, "presence");
+    autocomplete_add(roster_option_ac, "status");
     autocomplete_add(roster_option_ac, "empty");
 
     roster_by_ac = autocomplete_new();

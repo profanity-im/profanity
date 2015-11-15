@@ -47,6 +47,7 @@ _rosterwin_contact(ProfLayoutSplit *layout, PContact contact)
 {
     const char *name = p_contact_name_or_jid(contact);
     const char *presence = p_contact_presence(contact);
+    char *by = prefs_get_string(PREF_ROSTER_BY);
 
     if ((g_strcmp0(presence, "offline") != 0) || ((g_strcmp0(presence, "offline") == 0) &&
             (prefs_get_boolean(PREF_ROSTER_OFFLINE)))) {
@@ -74,9 +75,58 @@ _rosterwin_contact(ProfLayoutSplit *layout, PContact contact)
                 g_string_free(msg, TRUE);
                 wattroff(layout->subwin, theme_attrs(resource_presence_colour));
 
+                if (prefs_get_boolean(PREF_ROSTER_PRESENCE)) {
+                    gboolean by_presence = g_strcmp0(by, "presence") == 0;
+                    gboolean has_status = resource->status != NULL;
+                    gboolean show_status = prefs_get_boolean(PREF_ROSTER_STATUS);
+                    if (!by_presence || (has_status && show_status)) {
+                        wattron(layout->subwin, theme_attrs(resource_presence_colour));
+                        GString *msg = g_string_new("       ");
+                        if (!by_presence) {
+                            g_string_append(msg, resource_presence);
+                        }
+                        if (has_status && show_status) {
+                            if (!by_presence) {
+                                g_string_append(msg, ", \"");
+                            } else {
+                                g_string_append(msg, "\"");
+                            }
+                            g_string_append(msg, resource->status);
+                            g_string_append(msg, "\"");
+                        }
+                        win_printline_nowrap(layout->subwin, msg->str);
+                        g_string_free(msg, TRUE);
+                        wattroff(layout->subwin, theme_attrs(resource_presence_colour));
+                    }
+                }
+
                 curr_resource = g_list_next(curr_resource);
             }
             g_list_free(resources);
+        } else if (prefs_get_boolean(PREF_ROSTER_PRESENCE)) {
+            gboolean by_presence = g_strcmp0(by, "presence") == 0;
+            gboolean has_status = p_contact_status(contact) != NULL;
+            gboolean show_status = prefs_get_boolean(PREF_ROSTER_STATUS);
+            if (!by_presence || (has_status && show_status)) {
+                wattron(layout->subwin, theme_attrs(presence_colour));
+                GString *msg = g_string_new("     ");
+                if (!by_presence) {
+                    g_string_append(msg, presence);
+                }
+                if (has_status && show_status) {
+                    if (!by_presence) {
+                        g_string_append(msg, ", \"");
+                    } else {
+                        g_string_append(msg, "\"");
+                    }
+                    const char *status = p_contact_status(contact);
+                    g_string_append(msg, status);
+                    g_string_append(msg, "\"");
+                }
+                win_printline_nowrap(layout->subwin, msg->str);
+                g_string_free(msg, TRUE);
+                wattroff(layout->subwin, theme_attrs(presence_colour));
+            }
         }
     }
 }
