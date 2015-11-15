@@ -1207,6 +1207,16 @@ cons_roster_setting(void)
     else
         cons_show("Roster resource (/roster)     : hide");
 
+    if (prefs_get_boolean(PREF_ROSTER_PRESENCE))
+        cons_show("Roster presence (/roster)     : show");
+    else
+        cons_show("Roster presence (/roster)     : hide");
+
+    if (prefs_get_boolean(PREF_ROSTER_STATUS))
+        cons_show("Roster status (/roster)       : show");
+    else
+        cons_show("Roster status (/roster)       : hide");
+
     if (prefs_get_boolean(PREF_ROSTER_EMPTY))
         cons_show("Roster empty (/roster)        : show");
     else
