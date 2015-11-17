@@ -167,7 +167,15 @@ _rosterwin_contacts_by_group(ProfLayoutSplit *layout, char *group)
     g_string_free(title, TRUE);
     wattroff(layout->subwin, theme_attrs(THEME_ROSTER_HEADER));
 
-    GSList *contacts = roster_get_group(group);
+    GSList *contacts = NULL;
+
+    char *order = prefs_get_string(PREF_ROSTER_ORDER);
+    if (g_strcmp0(order, "presence") == 0) {
+        contacts = roster_get_group_ord_presence(group);
+    } else {
+        contacts = roster_get_group(group);
+    }
+
     if (contacts) {
         GSList *curr_contact = contacts;
         while (curr_contact) {
@@ -182,7 +190,15 @@ _rosterwin_contacts_by_group(ProfLayoutSplit *layout, char *group)
 static void
 _rosterwin_contacts_by_no_group(ProfLayoutSplit *layout)
 {
-    GSList *contacts = roster_get_nogroup();
+    GSList *contacts = NULL;
+
+    char *order = prefs_get_string(PREF_ROSTER_ORDER);
+    if (g_strcmp0(order, "presence") == 0) {
+        contacts = roster_get_nogroup_ord_presence();
+    } else {
+        contacts = roster_get_nogroup();
+    }
+
     if (contacts) {
         wattron(layout->subwin, theme_attrs(THEME_ROSTER_HEADER));
         win_printline_nowrap(layout->subwin, " -no group");
@@ -228,7 +244,15 @@ rosterwin_roster(void)
             g_slist_free_full(groups, free);
             _rosterwin_contacts_by_no_group(layout);
         } else {
-            GSList *contacts = roster_get_contacts();
+            GSList *contacts = NULL;
+
+            char *order = prefs_get_string(PREF_ROSTER_ORDER);
+            if (g_strcmp0(order, "presence") == 0) {
+                contacts = roster_get_contacts_ord_presence();
+            } else {
+                contacts = roster_get_contacts();
+            }
+
             if (contacts) {
                 werase(layout->subwin);
 

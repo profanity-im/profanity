@@ -67,7 +67,8 @@ static gboolean _key_equals(void *key1, void *key2);
 static gboolean _datetimes_equal(GDateTime *dt1, GDateTime *dt2);
 static void _replace_name(const char *const current_name, const char *const new_name, const char *const barejid);
 static void _add_name_and_barejid(const char *const name, const char *const barejid);
-static gint _compare_contacts(PContact a, PContact b);
+static gint _compare_name(PContact a, PContact b);
+static gint _compare_presence(PContact a, PContact b);
 
 void
 roster_clear(void)
@@ -373,8 +374,25 @@ roster_get_contacts_by_presence(const char *const presence)
     while (g_hash_table_iter_next(&iter, &key, &value)) {
         PContact contact = (PContact)value;
         if (g_strcmp0(p_contact_presence(contact), presence) == 0) {
-            result = g_slist_insert_sorted(result, value, (GCompareFunc)_compare_contacts);
+            result = g_slist_insert_sorted(result, value, (GCompareFunc)_compare_name);
         }
+    }
+
+    // return all contact structs
+    return result;
+}
+
+GSList*
+roster_get_contacts_ord_presence(void)
+{
+    GSList *result = NULL;
+    GHashTableIter iter;
+    gpointer key;
+    gpointer value;
+
+    g_hash_table_iter_init(&iter, contacts);
+    while (g_hash_table_iter_next(&iter, &key, &value)) {
+        result = g_slist_insert_sorted(result, value, (GCompareFunc)_compare_presence);
     }
 
     // return all contact structs
@@ -391,7 +409,7 @@ roster_get_contacts(void)
 
     g_hash_table_iter_init(&iter, contacts);
     while (g_hash_table_iter_next(&iter, &key, &value)) {
-        result = g_slist_insert_sorted(result, value, (GCompareFunc)_compare_contacts);
+        result = g_slist_insert_sorted(result, value, (GCompareFunc)_compare_name);
     }
 
     // return all contact structs
@@ -409,7 +427,7 @@ roster_get_contacts_online(void)
     g_hash_table_iter_init(&iter, contacts);
     while (g_hash_table_iter_next(&iter, &key, &value)) {
         if(strcmp(p_contact_presence(value), "offline"))
-            result = g_slist_insert_sorted(result, value, (GCompareFunc)_compare_contacts);
+            result = g_slist_insert_sorted(result, value, (GCompareFunc)_compare_name);
     }
 
     // return all contact structs
@@ -447,6 +465,26 @@ roster_fulljid_autocomplete(const char *const search_str)
 }
 
 GSList*
+roster_get_nogroup_ord_presence(void)
+{
+    GSList *result = NULL;
+    GHashTableIter iter;
+    gpointer key;
+    gpointer value;
+
+    g_hash_table_iter_init(&iter, contacts);
+    while (g_hash_table_iter_next(&iter, &key, &value)) {
+        GSList *groups = p_contact_groups(value);
+        if (groups == NULL) {
+            result = g_slist_insert_sorted(result, value, (GCompareFunc)_compare_presence);
+        }
+    }
+
+    // return all contact structs
+    return result;
+}
+
+GSList*
 roster_get_nogroup(void)
 {
     GSList *result = NULL;
@@ -458,7 +496,31 @@ roster_get_nogroup(void)
     while (g_hash_table_iter_next(&iter, &key, &value)) {
         GSList *groups = p_contact_groups(value);
         if (groups == NULL) {
-            result = g_slist_insert_sorted(result, value, (GCompareFunc)_compare_contacts);
+            result = g_slist_insert_sorted(result, value, (GCompareFunc)_compare_name);
+        }
+    }
+
+    // return all contact structs
+    return result;
+}
+
+GSList*
+roster_get_group_ord_presence(const char *const group)
+{
+    GSList *result = NULL;
+    GHashTableIter iter;
+    gpointer key;
+    gpointer value;
+
+    g_hash_table_iter_init(&iter, contacts);
+    while (g_hash_table_iter_next(&iter, &key, &value)) {
+        GSList *groups = p_contact_groups(value);
+        while (groups) {
+            if (strcmp(groups->data, group) == 0) {
+                result = g_slist_insert_sorted(result, value, (GCompareFunc)_compare_presence);
+                break;
+            }
+            groups = g_slist_next(groups);
         }
     }
 
@@ -479,7 +541,7 @@ roster_get_group(const char *const group)
         GSList *groups = p_contact_groups(value);
         while (groups) {
             if (strcmp(groups->data, group) == 0) {
-                result = g_slist_insert_sorted(result, value, (GCompareFunc)_compare_contacts);
+                result = g_slist_insert_sorted(result, value, (GCompareFunc)_compare_name);
                 break;
             }
             groups = g_slist_next(groups);
@@ -560,7 +622,7 @@ _add_name_and_barejid(const char *const name, const char *const barejid)
 }
 
 static gint
-_compare_contacts(PContact a, PContact b)
+_compare_name(PContact a, PContact b)
 {
     const char * utf8_str_a = NULL;
     const char * utf8_str_b = NULL;
@@ -579,4 +641,44 @@ _compare_contacts(PContact a, PContact b)
     gint result = g_strcmp0(utf8_str_a, utf8_str_b);
 
     return result;
+}
+
+static gint
+_get_presence_weight(const char *presence)
+{
+    if (g_strcmp0(presence, "chat") == 0) {
+        return 0;
+    } else if (g_strcmp0(presence, "online") == 0) {
+        return 1;
+    } else if (g_strcmp0(presence, "away") == 0) {
+        return 2;
+    } else if (g_strcmp0(presence, "xa") == 0) {
+        return 3;
+    } else if (g_strcmp0(presence, "dnd") == 0) {
+        return 4;
+    } else { // offline
+        return 5;
+    }
+}
+
+static gint
+_compare_presence(PContact a, PContact b)
+{
+    const char *presence_a = p_contact_presence(a);
+    const char *presence_b = p_contact_presence(b);
+
+    // if presence different, order by presence
+    if (g_strcmp0(presence_a, presence_b) != 0) {
+        int weight_a = _get_presence_weight(presence_a);
+        int weight_b = _get_presence_weight(presence_b);
+        if (weight_a < weight_b) {
+            return -1;
+        } else {
+            return 1;
+        }
+
+    // otherwise order by name
+    } else {
+        return _compare_name(a, b);
+    }
 }
