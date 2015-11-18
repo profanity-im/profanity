@@ -140,7 +140,12 @@ _rosterwin_contacts_by_presence(ProfLayoutSplit *layout, const char *const prese
     // if this group has contacts, or if we want to show empty groups
     if (contacts || prefs_get_boolean(PREF_ROSTER_EMPTY)) {
         wattron(layout->subwin, theme_attrs(THEME_ROSTER_HEADER));
-        win_printline_nowrap(layout->subwin, title);
+        GString *title_str = g_string_new(title);
+        if (prefs_get_boolean(PREF_ROSTER_COUNT)) {
+            g_string_append_printf(title_str, " (%d)", g_slist_length(contacts));
+        }
+        win_printline_nowrap(layout->subwin, title_str->str);
+        g_string_free(title_str, TRUE);
         wattroff(layout->subwin, theme_attrs(THEME_ROSTER_HEADER));
     }
 
@@ -172,6 +177,9 @@ _rosterwin_contacts_by_group(ProfLayoutSplit *layout, char *group)
         wattron(layout->subwin, theme_attrs(THEME_ROSTER_HEADER));
         GString *title = g_string_new(" -");
         g_string_append(title, group);
+        if (prefs_get_boolean(PREF_ROSTER_COUNT)) {
+            g_string_append_printf(title, " (%d)", g_slist_length(contacts));
+        }
         win_printline_nowrap(layout->subwin, title->str);
         g_string_free(title, TRUE);
         wattroff(layout->subwin, theme_attrs(THEME_ROSTER_HEADER));
@@ -201,7 +209,12 @@ _rosterwin_contacts_by_no_group(ProfLayoutSplit *layout)
 
     if (contacts || prefs_get_boolean(PREF_ROSTER_EMPTY)) {
         wattron(layout->subwin, theme_attrs(THEME_ROSTER_HEADER));
-        win_printline_nowrap(layout->subwin, " -no group");
+        GString *title = g_string_new(" -no group");
+        if (prefs_get_boolean(PREF_ROSTER_COUNT)) {
+            g_string_append_printf(title, " (%d)", g_slist_length(contacts));
+        }
+        win_printline_nowrap(layout->subwin, title->str);
+        g_string_free(title, TRUE);
         wattroff(layout->subwin, theme_attrs(THEME_ROSTER_HEADER));
 
         GSList *curr_contact = contacts;
@@ -257,7 +270,12 @@ rosterwin_roster(void)
             werase(layout->subwin);
 
             wattron(layout->subwin, theme_attrs(THEME_ROSTER_HEADER));
-            win_printline_nowrap(layout->subwin, " -Roster");
+            GString *title = g_string_new(" -Roster");
+            if (prefs_get_boolean(PREF_ROSTER_COUNT)) {
+                g_string_append_printf(title, " (%d)", g_slist_length(contacts));
+            }
+            win_printline_nowrap(layout->subwin, title->str);
+            g_string_free(title, TRUE);
             wattroff(layout->subwin, theme_attrs(THEME_ROSTER_HEADER));
 
             if (contacts) {
