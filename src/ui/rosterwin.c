@@ -49,7 +49,8 @@ _rosterwin_presence(ProfLayoutSplit *layout, int indent, theme_item_t colour, co
     gboolean by_presence = g_strcmp0(by, "presence") == 0;
     gboolean has_status = status != NULL;
     gboolean show_status = prefs_get_boolean(PREF_ROSTER_STATUS);
-    if (!by_presence || (has_status && show_status)) {
+    gboolean is_offline = g_strcmp0(presence, "offline") == 0;
+    if (!is_offline && (!by_presence || (has_status && show_status))) {
         wattron(layout->subwin, theme_attrs(colour));
         GString *msg = g_string_new(" ");
         while (indent > 0) {
