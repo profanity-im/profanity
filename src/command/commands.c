@@ -1320,7 +1320,7 @@ _who_roster(ProfWin *window, const char *const command, gchar **args)
     cons_show("");
     GSList *list = NULL;
     if (group) {
-        list = roster_get_group(group, ROSTER_ORD_NAME);
+        list = roster_get_group(group, ROSTER_ORD_NAME, TRUE);
         if (list == NULL) {
             cons_show("No such group: %s.", group);
             return;
@@ -1628,7 +1628,7 @@ cmd_group(ProfWin *window, const char *const command, gchar **args)
             return TRUE;
         }
 
-        GSList *list = roster_get_group(group, ROSTER_ORD_NAME);
+        GSList *list = roster_get_group(group, ROSTER_ORD_NAME, TRUE);
         cons_show_roster_group(group, list);
         return TRUE;
     }

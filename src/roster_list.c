@@ -455,7 +455,7 @@ roster_fulljid_autocomplete(const char *const search_str)
 }
 
 GSList*
-roster_get_nogroup(roster_ord_t order)
+roster_get_nogroup(roster_ord_t order, gboolean include_offline)
 {
     GSList *result = NULL;
     GHashTableIter iter;
@@ -471,6 +471,12 @@ roster_get_nogroup(roster_ord_t order)
 
     g_hash_table_iter_init(&iter, contacts);
     while (g_hash_table_iter_next(&iter, &key, &value)) {
+        PContact contact = value;
+        const char *presence = p_contact_presence(contact);
+        if (!include_offline && (g_strcmp0(presence, "offline") == 0)) {
+            continue;
+        }
+
         GSList *groups = p_contact_groups(value);
         if (groups == NULL) {
             result = g_slist_insert_sorted(result, value, cmp_func);
@@ -482,7 +488,7 @@ roster_get_nogroup(roster_ord_t order)
 }
 
 GSList*
-roster_get_group(const char *const group, roster_ord_t order)
+roster_get_group(const char *const group, roster_ord_t order, gboolean include_offline)
 {
     GSList *result = NULL;
     GHashTableIter iter;
@@ -498,6 +504,12 @@ roster_get_group(const char *const group, roster_ord_t order)
 
     g_hash_table_iter_init(&iter, contacts);
     while (g_hash_table_iter_next(&iter, &key, &value)) {
+        PContact contact = value;
+        const char *presence = p_contact_presence(contact);
+        if (!include_offline && (g_strcmp0(presence, "offline") == 0)) {
+            continue;
+        }
+
         GSList *groups = p_contact_groups(value);
         while (groups) {
             if (strcmp(groups->data, group) == 0) {
