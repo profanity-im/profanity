@@ -383,33 +383,23 @@ roster_get_contacts_by_presence(const char *const presence)
 }
 
 GSList*
-roster_get_contacts_ord_presence(void)
+roster_get_contacts(roster_ord_t order)
 {
     GSList *result = NULL;
     GHashTableIter iter;
     gpointer key;
     gpointer value;
 
-    g_hash_table_iter_init(&iter, contacts);
-    while (g_hash_table_iter_next(&iter, &key, &value)) {
-        result = g_slist_insert_sorted(result, value, (GCompareFunc)_compare_presence);
+    GCompareFunc cmp_func;
+    if (order == ROSTER_ORD_PRESENCE) {
+        cmp_func = (GCompareFunc) _compare_presence;
+    } else {
+        cmp_func = (GCompareFunc) _compare_name;
     }
 
-    // return all contact structs
-    return result;
-}
-
-GSList*
-roster_get_contacts(void)
-{
-    GSList *result = NULL;
-    GHashTableIter iter;
-    gpointer key;
-    gpointer value;
-
     g_hash_table_iter_init(&iter, contacts);
     while (g_hash_table_iter_next(&iter, &key, &value)) {
-        result = g_slist_insert_sorted(result, value, (GCompareFunc)_compare_name);
+        result = g_slist_insert_sorted(result, value, cmp_func);
     }
 
     // return all contact structs
@@ -465,18 +455,25 @@ roster_fulljid_autocomplete(const char *const search_str)
 }
 
 GSList*
-roster_get_nogroup_ord_presence(void)
+roster_get_nogroup(roster_ord_t order)
 {
     GSList *result = NULL;
     GHashTableIter iter;
     gpointer key;
     gpointer value;
 
+    GCompareFunc cmp_func;
+    if (order == ROSTER_ORD_PRESENCE) {
+        cmp_func = (GCompareFunc) _compare_presence;
+    } else {
+        cmp_func = (GCompareFunc) _compare_name;
+    }
+
     g_hash_table_iter_init(&iter, contacts);
     while (g_hash_table_iter_next(&iter, &key, &value)) {
         GSList *groups = p_contact_groups(value);
         if (groups == NULL) {
-            result = g_slist_insert_sorted(result, value, (GCompareFunc)_compare_presence);
+            result = g_slist_insert_sorted(result, value, cmp_func);
         }
     }
 
@@ -485,63 +482,26 @@ roster_get_nogroup_ord_presence(void)
 }
 
 GSList*
-roster_get_nogroup(void)
+roster_get_group(const char *const group, roster_ord_t order)
 {
     GSList *result = NULL;
     GHashTableIter iter;
     gpointer key;
     gpointer value;
 
-    g_hash_table_iter_init(&iter, contacts);
-    while (g_hash_table_iter_next(&iter, &key, &value)) {
-        GSList *groups = p_contact_groups(value);
-        if (groups == NULL) {
-            result = g_slist_insert_sorted(result, value, (GCompareFunc)_compare_name);
-        }
+    GCompareFunc cmp_func;
+    if (order == ROSTER_ORD_PRESENCE) {
+        cmp_func = (GCompareFunc) _compare_presence;
+    } else {
+        cmp_func = (GCompareFunc) _compare_name;
     }
-
-    // return all contact structs
-    return result;
-}
-
-GSList*
-roster_get_group_ord_presence(const char *const group)
-{
-    GSList *result = NULL;
-    GHashTableIter iter;
-    gpointer key;
-    gpointer value;
 
     g_hash_table_iter_init(&iter, contacts);
     while (g_hash_table_iter_next(&iter, &key, &value)) {
         GSList *groups = p_contact_groups(value);
         while (groups) {
             if (strcmp(groups->data, group) == 0) {
-                result = g_slist_insert_sorted(result, value, (GCompareFunc)_compare_presence);
-                break;
-            }
-            groups = g_slist_next(groups);
-        }
-    }
-
-    // return all contact structs
-    return result;
-}
-
-GSList*
-roster_get_group(const char *const group)
-{
-    GSList *result = NULL;
-    GHashTableIter iter;
-    gpointer key;
-    gpointer value;
-
-    g_hash_table_iter_init(&iter, contacts);
-    while (g_hash_table_iter_next(&iter, &key, &value)) {
-        GSList *groups = p_contact_groups(value);
-        while (groups) {
-            if (strcmp(groups->data, group) == 0) {
-                result = g_slist_insert_sorted(result, value, (GCompareFunc)_compare_name);
+                result = g_slist_insert_sorted(result, value, cmp_func);
                 break;
             }
             groups = g_slist_next(groups);

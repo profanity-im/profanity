@@ -40,6 +40,11 @@
 #include "resource.h"
 #include "contact.h"
 
+typedef enum {
+    ROSTER_ORD_NAME,
+    ROSTER_ORD_PRESENCE
+} roster_ord_t;
+
 void roster_clear(void);
 gboolean roster_update_presence(const char *const barejid, Resource *resource, GDateTime *last_activity);
 PContact roster_get_contact(const char *const barejid);
@@ -54,20 +59,17 @@ void roster_update(const char *const barejid, const char *const name, GSList *gr
 gboolean roster_add(const char *const barejid, const char *const name, GSList *groups, const char *const subscription,
     gboolean pending_out);
 char* roster_barejid_from_name(const char *const name);
-GSList* roster_get_contacts(void);
-GSList* roster_get_contacts_ord_presence(void);
+GSList* roster_get_contacts(roster_ord_t order);
 GSList* roster_get_contacts_online(void);
 gboolean roster_has_pending_subscriptions(void);
 char* roster_contact_autocomplete(const char *const search_str);
 char* roster_fulljid_autocomplete(const char *const search_str);
-GSList* roster_get_group(const char *const group);
-GSList* roster_get_group_ord_presence(const char *const group);
+GSList* roster_get_group(const char *const group, roster_ord_t order);
 GSList* roster_get_groups(void);
 char* roster_group_autocomplete(const char *const search_str);
 char* roster_barejid_autocomplete(const char *const search_str);
 GSList* roster_get_contacts_by_presence(const char *const presence);
-GSList* roster_get_nogroup(void);
-GSList* roster_get_nogroup_ord_presence(void);
+GSList* roster_get_nogroup(roster_ord_t order);
 char* roster_get_msg_display_name(const char *const barejid, const char *const resource);
 
 #endif

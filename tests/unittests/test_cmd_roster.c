@@ -55,7 +55,7 @@ void cmd_roster_shows_roster_when_no_args(void **state)
 
     roster_init();
     roster_add("bob@server.org", "bob", NULL, "both", FALSE);
-    GSList *roster = roster_get_contacts();
+    GSList *roster = roster_get_contacts(ROSTER_ORD_NAME);
 
     expect_memory(cons_show_roster, list, roster, sizeof(roster));
 

@@ -527,7 +527,7 @@ void
 cons_show_sent_subs(void)
 {
    if (roster_has_pending_subscriptions()) {
-        GSList *contacts = roster_get_contacts();
+        GSList *contacts = roster_get_contacts(ROSTER_ORD_NAME);
         PContact contact = NULL;
         cons_show("Awaiting subscription responses from:");
         GSList *curr = contacts;
