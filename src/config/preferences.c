@@ -865,7 +865,7 @@ _get_default_string(preference_t pref)
         case PREF_ROSTER_BY:
             return "presence";
         case PREF_ROSTER_ORDER:
-            return "name";
+            return "presence";
         case PREF_TIME_CONSOLE:
             return "%H:%M:%S";
         case PREF_TIME_CHAT:

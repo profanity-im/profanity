@@ -1326,7 +1326,7 @@ _who_roster(ProfWin *window, const char *const command, gchar **args)
             return;
         }
     } else {
-        list = roster_get_contacts(ROSTER_ORD_NAME);
+        list = roster_get_contacts(ROSTER_ORD_NAME, TRUE);
         if (list == NULL) {
             cons_show("No contacts in roster.");
             return;
@@ -1711,7 +1711,7 @@ cmd_roster(ProfWin *window, const char *const command, gchar **args)
             return TRUE;
         }
 
-        GSList *list = roster_get_contacts(ROSTER_ORD_NAME);
+        GSList *list = roster_get_contacts(ROSTER_ORD_NAME, TRUE);
         cons_show_roster(list);
         g_slist_free(list);
         return TRUE;
@@ -1931,7 +1931,7 @@ cmd_roster(ProfWin *window, const char *const command, gchar **args)
             return TRUE;
         }
 
-        GSList *all = roster_get_contacts(ROSTER_ORD_NAME);
+        GSList *all = roster_get_contacts(ROSTER_ORD_NAME, TRUE);
         GSList *curr = all;
         while (curr) {
             PContact contact = curr->data;

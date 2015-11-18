@@ -383,7 +383,7 @@ roster_get_contacts_by_presence(const char *const presence)
 }
 
 GSList*
-roster_get_contacts(roster_ord_t order)
+roster_get_contacts(roster_ord_t order, gboolean include_offline)
 {
     GSList *result = NULL;
     GHashTableIter iter;
@@ -399,6 +399,12 @@ roster_get_contacts(roster_ord_t order)
 
     g_hash_table_iter_init(&iter, contacts);
     while (g_hash_table_iter_next(&iter, &key, &value)) {
+        PContact contact = value;
+        const char *presence = p_contact_presence(contact);
+        if (!include_offline && (g_strcmp0(presence, "offline") == 0)) {
+            continue;
+        }
+
         result = g_slist_insert_sorted(result, value, cmp_func);
     }
 

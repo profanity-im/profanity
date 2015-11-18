@@ -59,7 +59,7 @@ void roster_update(const char *const barejid, const char *const name, GSList *gr
 gboolean roster_add(const char *const barejid, const char *const name, GSList *groups, const char *const subscription,
     gboolean pending_out);
 char* roster_barejid_from_name(const char *const name);
-GSList* roster_get_contacts(roster_ord_t order);
+GSList* roster_get_contacts(roster_ord_t order, gboolean include_offline);
 GSList* roster_get_contacts_online(void);
 gboolean roster_has_pending_subscriptions(void);
 char* roster_contact_autocomplete(const char *const search_str);
