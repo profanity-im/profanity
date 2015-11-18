@@ -274,8 +274,8 @@ static struct cmd_t command_defs[] =
         CMD_SYN(
             "/roster",
             "/roster online",
-            "/roster show [offline|resource|presence|status|empty|count]",
-            "/roster hide [offline|resource|presence|status|empty|count]",
+            "/roster show [offline|resource|presence|status|empty|count|priority]",
+            "/roster hide [offline|resource|presence|status|empty|count|priority]",
             "/roster by group|presence|none",
             "/roster order name|presence"
             "/roster size <percent>",
@@ -296,6 +296,7 @@ static struct cmd_t command_defs[] =
             { "show status",         "Show contact's status message in the roster panel." },
             { "show empty",          "When grouping by presence, show empty presence groups." },
             { "show count",          "Show number of contacts in group/presence." },
+            { "show priority",       "Show resource priority." },
             { "hide",                "Hide the roster panel." },
             { "hide offline",        "Hide offline contacts in the roster panel." },
             { "hide resource",       "Hide contact's connected resources in the roster panel." },
@@ -303,6 +304,7 @@ static struct cmd_t command_defs[] =
             { "hide status",         "Hide contact's status message in the roster panel." },
             { "hide empty",          "When grouping by presence, hide empty presence groups." },
             { "hide count",          "Hide number of contacts in group/presence." },
+            { "hide priority",       "Hide resource priority." },
             { "by group",            "Group contacts in the roster panel by roster group." },
             { "by presence",         "Group contacts in the roster panel by presence." },
             { "by none",             "No grouping in the roster panel." },
@@ -2030,6 +2032,7 @@ cmd_init(void)
     autocomplete_add(roster_option_ac, "status");
     autocomplete_add(roster_option_ac, "empty");
     autocomplete_add(roster_option_ac, "count");
+    autocomplete_add(roster_option_ac, "priority");
 
     roster_by_ac = autocomplete_new();
     autocomplete_add(roster_by_ac, "group");

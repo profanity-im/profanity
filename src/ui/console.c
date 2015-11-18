@@ -1227,6 +1227,11 @@ cons_roster_setting(void)
     else
         cons_show("Roster count (/roster)        : hide");
 
+    if (prefs_get_boolean(PREF_ROSTER_PRIORITY))
+        cons_show("Roster priority (/roster)     : show");
+    else
+        cons_show("Roster priority (/roster)     : hide");
+
     char *by = prefs_get_string(PREF_ROSTER_BY);
     cons_show("Roster by (/roster)           : %s", by);
     prefs_free_string(by);

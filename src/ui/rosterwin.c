@@ -89,6 +89,9 @@ _rosterwin_resource(ProfLayoutSplit *layout, PContact contact)
             wattron(layout->subwin, theme_attrs(resource_presence_colour));
             GString *msg = g_string_new("     ");
             g_string_append(msg, resource->name);
+            if (prefs_get_boolean(PREF_ROSTER_PRIORITY)) {
+                g_string_append_printf(msg, " [%d]", resource->priority);
+            }
             win_printline_nowrap(layout->subwin, msg->str);
             g_string_free(msg, TRUE);
             wattroff(layout->subwin, theme_attrs(resource_presence_colour));
