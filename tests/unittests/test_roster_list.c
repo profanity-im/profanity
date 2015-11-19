@@ -12,7 +12,7 @@
 void empty_list_when_none_added(void **state)
 {
     roster_init();
-    GSList *list = roster_get_contacts();
+    GSList *list = roster_get_contacts(ROSTER_ORD_NAME, TRUE);
     assert_null(list);
     roster_clear();
     roster_free();
@@ -22,7 +22,7 @@ void contains_one_element(void **state)
 {
     roster_init();
     roster_add("James", NULL, NULL, NULL, FALSE);
-    GSList *list = roster_get_contacts();
+    GSList *list = roster_get_contacts(ROSTER_ORD_NAME, TRUE);
     assert_int_equal(1, g_slist_length(list));
     roster_clear();
     roster_free();
@@ -32,7 +32,7 @@ void first_element_correct(void **state)
 {
     roster_init();
     roster_add("James", NULL, NULL, NULL, FALSE);
-    GSList *list = roster_get_contacts();
+    GSList *list = roster_get_contacts(ROSTER_ORD_NAME, TRUE);
     PContact james = list->data;
 
     assert_string_equal("James", p_contact_barejid(james));
@@ -45,7 +45,7 @@ void contains_two_elements(void **state)
     roster_init();
     roster_add("James", NULL, NULL, NULL, FALSE);
     roster_add("Dave", NULL, NULL, NULL, FALSE);
-    GSList *list = roster_get_contacts();
+    GSList *list = roster_get_contacts(ROSTER_ORD_NAME, TRUE);
 
     assert_int_equal(2, g_slist_length(list));
     roster_clear();
@@ -57,7 +57,7 @@ void first_and_second_elements_correct(void **state)
     roster_init();
     roster_add("James", NULL, NULL, NULL, FALSE);
     roster_add("Dave", NULL, NULL, NULL, FALSE);
-    GSList *list = roster_get_contacts();
+    GSList *list = roster_get_contacts(ROSTER_ORD_NAME, TRUE);
 
     PContact first = list->data;
     PContact second = (g_slist_next(list))->data;
@@ -74,7 +74,7 @@ void contains_three_elements(void **state)
     roster_add("James", NULL, NULL, NULL, FALSE);
     roster_add("Bob", NULL, NULL, NULL, FALSE);
     roster_add("Dave", NULL, NULL, NULL, FALSE);
-    GSList *list = roster_get_contacts();
+    GSList *list = roster_get_contacts(ROSTER_ORD_NAME, TRUE);
 
     assert_int_equal(3, g_slist_length(list));
     roster_clear();
@@ -87,7 +87,7 @@ void first_three_elements_correct(void **state)
     roster_add("Bob", NULL, NULL, NULL, FALSE);
     roster_add("Dave", NULL, NULL, NULL, FALSE);
     roster_add("James", NULL, NULL, NULL, FALSE);
-    GSList *list = roster_get_contacts();
+    GSList *list = roster_get_contacts(ROSTER_ORD_NAME, TRUE);
     PContact bob = list->data;
     PContact dave = (g_slist_next(list))->data;
     PContact james = (g_slist_next(g_slist_next(list)))->data;
@@ -106,7 +106,7 @@ void add_twice_at_beginning_adds_once(void **state)
     roster_add("James", NULL, NULL, NULL, FALSE);
     roster_add("Dave", NULL, NULL, NULL, FALSE);
     roster_add("Bob", NULL, NULL, NULL, FALSE);
-    GSList *list = roster_get_contacts();
+    GSList *list = roster_get_contacts(ROSTER_ORD_NAME, TRUE);
     PContact first = list->data;
     PContact second = (g_slist_next(list))->data;
     PContact third = (g_slist_next(g_slist_next(list)))->data;
@@ -126,7 +126,7 @@ void add_twice_in_middle_adds_once(void **state)
     roster_add("Dave", NULL, NULL, NULL, FALSE);
     roster_add("James", NULL, NULL, NULL, FALSE);
     roster_add("Bob", NULL, NULL, NULL, FALSE);
-    GSList *list = roster_get_contacts();
+    GSList *list = roster_get_contacts(ROSTER_ORD_NAME, TRUE);
     PContact first = list->data;
     PContact second = (g_slist_next(list))->data;
     PContact third = (g_slist_next(g_slist_next(list)))->data;
@@ -146,7 +146,7 @@ void add_twice_at_end_adds_once(void **state)
     roster_add("Dave", NULL, NULL, NULL, FALSE);
     roster_add("Bob", NULL, NULL, NULL, FALSE);
     roster_add("James", NULL, NULL, NULL, FALSE);
-    GSList *list = roster_get_contacts();
+    GSList *list = roster_get_contacts(ROSTER_ORD_NAME, TRUE);
     PContact first = list->data;
     PContact second = (g_slist_next(list))->data;
     PContact third = (g_slist_next(g_slist_next(list)))->data;

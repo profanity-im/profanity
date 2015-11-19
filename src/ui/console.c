@@ -527,7 +527,7 @@ void
 cons_show_sent_subs(void)
 {
    if (roster_has_pending_subscriptions()) {
-        GSList *contacts = roster_get_contacts();
+        GSList *contacts = roster_get_contacts(ROSTER_ORD_NAME, TRUE);
         PContact contact = NULL;
         cons_show("Awaiting subscription responses from:");
         GSList *curr = contacts;
@@ -1207,14 +1207,38 @@ cons_roster_setting(void)
     else
         cons_show("Roster resource (/roster)     : hide");
 
+    if (prefs_get_boolean(PREF_ROSTER_PRESENCE))
+        cons_show("Roster presence (/roster)     : show");
+    else
+        cons_show("Roster presence (/roster)     : hide");
+
+    if (prefs_get_boolean(PREF_ROSTER_STATUS))
+        cons_show("Roster status (/roster)       : show");
+    else
+        cons_show("Roster status (/roster)       : hide");
+
     if (prefs_get_boolean(PREF_ROSTER_EMPTY))
         cons_show("Roster empty (/roster)        : show");
     else
         cons_show("Roster empty (/roster)        : hide");
 
+    if (prefs_get_boolean(PREF_ROSTER_COUNT))
+        cons_show("Roster count (/roster)        : show");
+    else
+        cons_show("Roster count (/roster)        : hide");
+
+    if (prefs_get_boolean(PREF_ROSTER_PRIORITY))
+        cons_show("Roster priority (/roster)     : show");
+    else
+        cons_show("Roster priority (/roster)     : hide");
+
     char *by = prefs_get_string(PREF_ROSTER_BY);
     cons_show("Roster by (/roster)           : %s", by);
     prefs_free_string(by);
+
+    char *order = prefs_get_string(PREF_ROSTER_ORDER);
+    cons_show("Roster order (/roster)        : %s", order);
+    prefs_free_string(order);
 
     int size = prefs_get_roster_size();
     cons_show("Roster size (/roster)         : %d", size);
