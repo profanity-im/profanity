@@ -277,7 +277,7 @@ static struct cmd_t command_defs[] =
             "/roster show [offline|resource|presence|status|empty|count|priority]",
             "/roster hide [offline|resource|presence|status|empty|count|priority]",
             "/roster by group|presence|none",
-            "/roster order name|presence"
+            "/roster order name|presence",
             "/roster size <percent>",
             "/roster add <jid> [<nick>]",
             "/roster remove <jid>",
