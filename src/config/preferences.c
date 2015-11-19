@@ -837,9 +837,6 @@ _get_default_boolean(preference_t pref)
         case PREF_RESOURCE_MESSAGE:
         case PREF_ROSTER:
         case PREF_ROSTER_OFFLINE:
-        case PREF_ROSTER_RESOURCE:
-        case PREF_ROSTER_PRESENCE:
-        case PREF_ROSTER_STATUS:
         case PREF_ROSTER_EMPTY:
         case PREF_ROSTER_COUNT:
         case PREF_ROSTER_PRIORITY:
