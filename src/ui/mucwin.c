@@ -32,6 +32,7 @@
  *
  */
 
+#include <string.h>
 #include <assert.h>
 
 #include "ui/win_types.h"
