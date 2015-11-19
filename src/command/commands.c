@@ -1750,6 +1750,25 @@ cmd_roster(ProfWin *window, const char *const command, gchar **args)
             return TRUE;
         }
 
+    // set header character
+    } else if (g_strcmp0(args[0], "char") == 0) {
+        if (g_strcmp0(args[1], "header") == 0) {
+            if (!args[2]) {
+                cons_bad_cmd_usage(command);
+            } else if (g_strcmp0(args[2], "none") == 0) {
+                prefs_clear_roster_header_char();
+                cons_show("Roster header char removed.");
+                rosterwin_roster();
+            } else {
+                prefs_set_roster_header_char(args[2][0]);
+                cons_show("Roster header char set to %c.", args[2][0]);
+                rosterwin_roster();
+            }
+        } else {
+            cons_bad_cmd_usage(command);
+        }
+        return TRUE;
+
     // show/hide roster
     } else if (g_strcmp0(args[0], "show") == 0) {
         if (args[1] == NULL) {

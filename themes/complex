@@ -29,6 +29,7 @@ roster.order=presence
 roster.count=true
 roster.priority=true
 roster.size=25
+roster.header.char=-
 privileges=true
 presence=true
 intype=true
