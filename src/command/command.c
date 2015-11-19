@@ -274,9 +274,10 @@ static struct cmd_t command_defs[] =
         CMD_SYN(
             "/roster",
             "/roster online",
-            "/roster show [offline|resource|empty]",
-            "/roster hide [offline|resource|empty]",
+            "/roster show [offline|resource|presence|status|empty|count|priority]",
+            "/roster hide [offline|resource|presence|status|empty|count|priority]",
             "/roster by group|presence|none",
+            "/roster order name|presence"
             "/roster size <percent>",
             "/roster add <jid> [<nick>]",
             "/roster remove <jid>",
@@ -291,14 +292,24 @@ static struct cmd_t command_defs[] =
             { "show",                "Show the roster panel." },
             { "show offline",        "Show offline contacts in the roster panel." },
             { "show resource",       "Show contact's connected resources in the roster panel." },
+            { "show presence",       "Show contact's presence in the roster panel." },
+            { "show status",         "Show contact's status message in the roster panel." },
             { "show empty",          "When grouping by presence, show empty presence groups." },
+            { "show count",          "Show number of contacts in group/presence." },
+            { "show priority",       "Show resource priority." },
             { "hide",                "Hide the roster panel." },
             { "hide offline",        "Hide offline contacts in the roster panel." },
             { "hide resource",       "Hide contact's connected resources in the roster panel." },
+            { "hide presence",       "Hide contact's presence in the roster panel." },
+            { "hide status",         "Hide contact's status message in the roster panel." },
             { "hide empty",          "When grouping by presence, hide empty presence groups." },
+            { "hide count",          "Hide number of contacts in group/presence." },
+            { "hide priority",       "Hide resource priority." },
             { "by group",            "Group contacts in the roster panel by roster group." },
             { "by presence",         "Group contacts in the roster panel by presence." },
             { "by none",             "No grouping in the roster panel." },
+            { "order name",          "Order roster items by name only." },
+            { "order presence",      "Order roster items by presence, and then by name." },
             { "size <precent>",      "Percentage of the screen taken up by the roster (1-99)." },
             { "add <jid> [<nick>]",  "Add a new item to the roster." },
             { "remove <jid>",        "Removes an item from the roster." },
@@ -1767,6 +1778,7 @@ static Autocomplete wins_ac;
 static Autocomplete roster_ac;
 static Autocomplete roster_option_ac;
 static Autocomplete roster_by_ac;
+static Autocomplete roster_order_ac;
 static Autocomplete roster_remove_all_ac;
 static Autocomplete group_ac;
 static Autocomplete bookmark_ac;
@@ -2010,17 +2022,26 @@ cmd_init(void)
     autocomplete_add(roster_ac, "show");
     autocomplete_add(roster_ac, "hide");
     autocomplete_add(roster_ac, "by");
+    autocomplete_add(roster_ac, "order");
     autocomplete_add(roster_ac, "size");
 
     roster_option_ac = autocomplete_new();
     autocomplete_add(roster_option_ac, "offline");
     autocomplete_add(roster_option_ac, "resource");
+    autocomplete_add(roster_option_ac, "presence");
+    autocomplete_add(roster_option_ac, "status");
     autocomplete_add(roster_option_ac, "empty");
+    autocomplete_add(roster_option_ac, "count");
+    autocomplete_add(roster_option_ac, "priority");
 
     roster_by_ac = autocomplete_new();
     autocomplete_add(roster_by_ac, "group");
     autocomplete_add(roster_by_ac, "presence");
     autocomplete_add(roster_by_ac, "none");
+
+    roster_order_ac = autocomplete_new();
+    autocomplete_add(roster_order_ac, "name");
+    autocomplete_add(roster_order_ac, "presence");
 
     roster_remove_all_ac = autocomplete_new();
     autocomplete_add(roster_remove_all_ac, "contacts");
@@ -2276,6 +2297,7 @@ cmd_uninit(void)
     autocomplete_free(roster_ac);
     autocomplete_free(roster_option_ac);
     autocomplete_free(roster_by_ac);
+    autocomplete_free(roster_order_ac);
     autocomplete_free(roster_remove_all_ac);
     autocomplete_free(group_ac);
     autocomplete_free(bookmark_ac);
@@ -2462,6 +2484,7 @@ cmd_reset_autocomplete(ProfWin *window)
     autocomplete_reset(roster_ac);
     autocomplete_reset(roster_option_ac);
     autocomplete_reset(roster_by_ac);
+    autocomplete_reset(roster_order_ac);
     autocomplete_reset(roster_remove_all_ac);
     autocomplete_reset(group_ac);
     autocomplete_reset(titlebar_ac);
@@ -2872,6 +2895,10 @@ _roster_autocomplete(ProfWin *window, const char *const input)
         return result;
     }
     result = autocomplete_param_with_ac(input, "/roster by", roster_by_ac, TRUE);
+    if (result) {
+        return result;
+    }
+    result = autocomplete_param_with_ac(input, "/roster order", roster_order_ac, TRUE);
     if (result) {
         return result;
     }

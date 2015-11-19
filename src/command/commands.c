@@ -1320,13 +1320,13 @@ _who_roster(ProfWin *window, const char *const command, gchar **args)
     cons_show("");
     GSList *list = NULL;
     if (group) {
-        list = roster_get_group(group);
+        list = roster_get_group(group, ROSTER_ORD_NAME, TRUE);
         if (list == NULL) {
             cons_show("No such group: %s.", group);
             return;
         }
     } else {
-        list = roster_get_contacts();
+        list = roster_get_contacts(ROSTER_ORD_NAME, TRUE);
         if (list == NULL) {
             cons_show("No contacts in roster.");
             return;
@@ -1628,7 +1628,7 @@ cmd_group(ProfWin *window, const char *const command, gchar **args)
             return TRUE;
         }
 
-        GSList *list = roster_get_group(group);
+        GSList *list = roster_get_group(group, ROSTER_ORD_NAME, TRUE);
         cons_show_roster_group(group, list);
         return TRUE;
     }
@@ -1711,7 +1711,7 @@ cmd_roster(ProfWin *window, const char *const command, gchar **args)
             return TRUE;
         }
 
-        GSList *list = roster_get_contacts();
+        GSList *list = roster_get_contacts(ROSTER_ORD_NAME, TRUE);
         cons_show_roster(list);
         g_slist_free(list);
         return TRUE;
@@ -1773,9 +1773,37 @@ cmd_roster(ProfWin *window, const char *const command, gchar **args)
                 rosterwin_roster();
             }
             return TRUE;
+        } else if (g_strcmp0(args[1], "presence") == 0) {
+            cons_show("Roster presence enabled");
+            prefs_set_boolean(PREF_ROSTER_PRESENCE, TRUE);
+            if (conn_status == JABBER_CONNECTED) {
+                rosterwin_roster();
+            }
+            return TRUE;
+        } else if (g_strcmp0(args[1], "status") == 0) {
+            cons_show("Roster status enabled");
+            prefs_set_boolean(PREF_ROSTER_STATUS, TRUE);
+            if (conn_status == JABBER_CONNECTED) {
+                rosterwin_roster();
+            }
+            return TRUE;
         } else if (g_strcmp0(args[1], "empty") == 0) {
             cons_show("Roster empty enabled");
             prefs_set_boolean(PREF_ROSTER_EMPTY, TRUE);
+            if (conn_status == JABBER_CONNECTED) {
+                rosterwin_roster();
+            }
+            return TRUE;
+        } else if (g_strcmp0(args[1], "count") == 0) {
+            cons_show("Roster count enabled");
+            prefs_set_boolean(PREF_ROSTER_COUNT, TRUE);
+            if (conn_status == JABBER_CONNECTED) {
+                rosterwin_roster();
+            }
+            return TRUE;
+        } else if (g_strcmp0(args[1], "priority") == 0) {
+            cons_show("Roster priority enabled");
+            prefs_set_boolean(PREF_ROSTER_PRIORITY, TRUE);
             if (conn_status == JABBER_CONNECTED) {
                 rosterwin_roster();
             }
@@ -1806,9 +1834,37 @@ cmd_roster(ProfWin *window, const char *const command, gchar **args)
                 rosterwin_roster();
             }
             return TRUE;
+        } else if (g_strcmp0(args[1], "presence") == 0) {
+            cons_show("Roster presence disabled");
+            prefs_set_boolean(PREF_ROSTER_PRESENCE, FALSE);
+            if (conn_status == JABBER_CONNECTED) {
+                rosterwin_roster();
+            }
+            return TRUE;
+        } else if (g_strcmp0(args[1], "status") == 0) {
+            cons_show("Roster status disabled");
+            prefs_set_boolean(PREF_ROSTER_STATUS, FALSE);
+            if (conn_status == JABBER_CONNECTED) {
+                rosterwin_roster();
+            }
+            return TRUE;
         } else if (g_strcmp0(args[1], "empty") == 0) {
             cons_show("Roster empty disabled");
             prefs_set_boolean(PREF_ROSTER_EMPTY, FALSE);
+            if (conn_status == JABBER_CONNECTED) {
+                rosterwin_roster();
+            }
+            return TRUE;
+        } else if (g_strcmp0(args[1], "count") == 0) {
+            cons_show("Roster count disabled");
+            prefs_set_boolean(PREF_ROSTER_COUNT, FALSE);
+            if (conn_status == JABBER_CONNECTED) {
+                rosterwin_roster();
+            }
+            return TRUE;
+        } else if (g_strcmp0(args[1], "priority") == 0) {
+            cons_show("Roster priority disabled");
+            prefs_set_boolean(PREF_ROSTER_PRIORITY, FALSE);
             if (conn_status == JABBER_CONNECTED) {
                 rosterwin_roster();
             }
@@ -1836,6 +1892,26 @@ cmd_roster(ProfWin *window, const char *const command, gchar **args)
         } else if (g_strcmp0(args[1], "none") == 0) {
             cons_show("Roster grouping disabled");
             prefs_set_string(PREF_ROSTER_BY, "none");
+            if (conn_status == JABBER_CONNECTED) {
+                rosterwin_roster();
+            }
+            return TRUE;
+        } else {
+            cons_bad_cmd_usage(command);
+            return TRUE;
+        }
+    // roster item order
+    } else if (g_strcmp0(args[0], "order") == 0) {
+        if (g_strcmp0(args[1], "name") == 0) {
+            cons_show("Ordering roster by name");
+            prefs_set_string(PREF_ROSTER_ORDER, "name");
+            if (conn_status == JABBER_CONNECTED) {
+                rosterwin_roster();
+            }
+            return TRUE;
+        } else if (g_strcmp0(args[1], "presence") == 0) {
+            cons_show("Ordering roster by presence");
+            prefs_set_string(PREF_ROSTER_ORDER, "presence");
             if (conn_status == JABBER_CONNECTED) {
                 rosterwin_roster();
             }
@@ -1883,7 +1959,7 @@ cmd_roster(ProfWin *window, const char *const command, gchar **args)
             return TRUE;
         }
 
-        GSList *all = roster_get_contacts();
+        GSList *all = roster_get_contacts(ROSTER_ORD_NAME, TRUE);
         GSList *curr = all;
         while (curr) {
             PContact contact = curr->data;
