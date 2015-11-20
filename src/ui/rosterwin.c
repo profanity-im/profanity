@@ -70,7 +70,7 @@ _rosterwin_presence(ProfLayoutSplit *layout, int indent, theme_item_t colour, co
         }
 
     // show both presence and status when not grouped by presence
-    } else {
+    } else if (prefs_get_boolean(PREF_ROSTER_PRESENCE) || (status && prefs_get_boolean(PREF_ROSTER_STATUS))) {
         wattron(layout->subwin, theme_attrs(colour));
         GString *msg = g_string_new(" ");
         while (indent > 0) {
