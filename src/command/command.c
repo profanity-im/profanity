@@ -1482,7 +1482,7 @@ static struct cmd_t command_defs[] =
     },
 
     { "/priority",
-        cmd_priority, parse_args, 1, 1, &cons_priority_setting,
+        cmd_priority, parse_args, 1, 1, NULL,
         CMD_TAGS(
             CMD_TAG_PRESENCE)
         CMD_SYN(
