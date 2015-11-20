@@ -34,12 +34,14 @@
 
 #include <assert.h>
 #include <glib.h>
+#include <stdlib.h>
 
 #include "ui/win_types.h"
 #include "ui/window.h"
 #include "ui/titlebar.h"
 #include "window_list.h"
 #include "config/preferences.h"
+
 
 void
 privwin_incoming_msg(ProfPrivateWin *privatewin, const char *const message, GDateTime *timestamp)
