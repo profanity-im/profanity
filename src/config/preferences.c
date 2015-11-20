@@ -281,12 +281,6 @@ prefs_set_inpblock(gint value)
 }
 
 gint
-prefs_get_priority(void)
-{
-    return g_key_file_get_integer(prefs, PREF_GROUP_PRESENCE, "priority", NULL);
-}
-
-gint
 prefs_get_reconnect(void)
 {
     if (!g_key_file_has_key(prefs, PREF_GROUP_CONNECTION, "reconnect", NULL)) {

@@ -1605,13 +1605,6 @@ cons_autoping_setting(void)
 }
 
 void
-cons_priority_setting(void)
-{
-    gint priority = prefs_get_priority();
-    cons_show("Priority (/priority) : %d", priority);
-}
-
-void
 cons_show_connection_prefs(void)
 {
     cons_show("Connection preferences:");
