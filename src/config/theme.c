@@ -476,6 +476,13 @@ _load_preferences(void)
             g_free(ch);
         }
     }
+    if (g_key_file_has_key(theme, "ui", "roster.contact.char", NULL)) {
+        gchar *ch = g_key_file_get_string(theme, "ui", "roster.contact.char", NULL);
+        if (ch && strlen(ch) > 0) {
+            prefs_set_roster_contact_char(ch[0]);
+            g_free(ch);
+        }
+    }
 
     _set_boolean_preference("privileges", PREF_MUC_PRIVILEGES);
 

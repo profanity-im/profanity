@@ -279,6 +279,7 @@ static struct cmd_t command_defs[] =
             "/roster by group|presence|none",
             "/roster order name|presence",
             "/roster char header <char>|none",
+            "/roster char contact <char>|none",
             "/roster size <percent>",
             "/roster add <jid> [<nick>]",
             "/roster remove <jid>",
@@ -313,6 +314,8 @@ static struct cmd_t command_defs[] =
             { "order presence",      "Order roster items by presence, and then by name." },
             { "char header <char>",  "Prefix roster headers with specificed character." },
             { "char header none",    "Remove roster header character prefix." },
+            { "char contact <char>", "Prefix roster contacts with specificed character." },
+            { "char contact none",   "Remove roster contact character prefix." },
             { "size <precent>",      "Percentage of the screen taken up by the roster (1-99)." },
             { "add <jid> [<nick>]",  "Add a new item to the roster." },
             { "remove <jid>",        "Removes an item from the roster." },
@@ -2033,6 +2036,7 @@ cmd_init(void)
 
     roster_char_ac = autocomplete_new();
     autocomplete_add(roster_char_ac, "header");
+    autocomplete_add(roster_char_ac, "contact");
 
     roster_char_none_ac = autocomplete_new();
     autocomplete_add(roster_char_none_ac, "none");
@@ -2887,6 +2891,10 @@ _roster_autocomplete(ProfWin *window, const char *const input)
 {
     char *result = NULL;
     result = autocomplete_param_with_ac(input, "/roster char header", roster_char_none_ac, TRUE);
+    if (result) {
+        return result;
+    }
+    result = autocomplete_param_with_ac(input, "/roster char contact", roster_char_none_ac, TRUE);
     if (result) {
         return result;
     }

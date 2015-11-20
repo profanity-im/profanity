@@ -30,6 +30,7 @@ roster.count=true
 roster.priority=true
 roster.size=25
 roster.header.char=-
+roster.contact.char=-
 privileges=true
 presence=true
 intype=true

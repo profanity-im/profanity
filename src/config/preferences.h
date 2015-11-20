@@ -168,6 +168,9 @@ void prefs_set_pgp_char(char ch);
 char prefs_get_roster_header_char(void);
 void prefs_set_roster_header_char(char ch);
 void prefs_clear_roster_header_char(void);
+char prefs_get_roster_contact_char(void);
+void prefs_set_roster_contact_char(char ch);
+void prefs_clear_roster_contact_char(void);
 
 void prefs_add_login(const char *jid);
 

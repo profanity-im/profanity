@@ -1764,6 +1764,18 @@ cmd_roster(ProfWin *window, const char *const command, gchar **args)
                 cons_show("Roster header char set to %c.", args[2][0]);
                 rosterwin_roster();
             }
+        } else if (g_strcmp0(args[1], "contact") == 0) {
+            if (!args[2]) {
+                cons_bad_cmd_usage(command);
+            } else if (g_strcmp0(args[2], "none") == 0) {
+                prefs_clear_roster_contact_char();
+                cons_show("Roster contact char removed.");
+                rosterwin_roster();
+            } else {
+                prefs_set_roster_contact_char(args[2][0]);
+                cons_show("Roster contact char set to %c.", args[2][0]);
+                rosterwin_roster();
+            }
         } else {
             cons_bad_cmd_usage(command);
         }

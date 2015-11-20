@@ -83,6 +83,7 @@ roster.count=true
 roster.priority=true
 roster.size=25
 roster.header.char=@
+roster.contact.char=-
 occupants=true
 occupants.size=15
 occupants.jid=false

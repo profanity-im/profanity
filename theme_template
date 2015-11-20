@@ -83,6 +83,7 @@ roster.count=
 roster.priority=
 roster.size=
 roster.header.char=
+roster.contact.char=
 occupants=
 occupants.size=
 occupants.jid=

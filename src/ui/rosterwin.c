@@ -139,6 +139,10 @@ _rosterwin_contact(ProfLayoutSplit *layout, PContact contact)
 
     wattron(layout->subwin, theme_attrs(presence_colour));
     GString *msg = g_string_new("   ");
+    char ch = prefs_get_roster_contact_char();
+    if (ch) {
+        g_string_append_printf(msg, "%c", ch);
+    }
     g_string_append(msg, name);
     win_printline_nowrap(layout->subwin, msg->str);
     g_string_free(msg, TRUE);
