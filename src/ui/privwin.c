@@ -40,6 +40,7 @@
 #include "ui/titlebar.h"
 #include "window_list.h"
 #include "config/preferences.h"
+#include "stdlib.h"
 
 void
 privwin_incoming_msg(ProfPrivateWin *privatewin, const char *const message, GDateTime *timestamp)
