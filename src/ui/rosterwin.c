@@ -139,6 +139,10 @@ _rosterwin_contact(ProfLayoutSplit *layout, PContact contact)
 
     wattron(layout->subwin, theme_attrs(presence_colour));
     GString *msg = g_string_new("   ");
+    char ch = prefs_get_roster_contact_char();
+    if (ch) {
+        g_string_append_printf(msg, "%c", ch);
+    }
     g_string_append(msg, name);
     win_printline_nowrap(layout->subwin, msg->str);
     g_string_free(msg, TRUE);
@@ -159,7 +163,12 @@ _rosterwin_contacts_by_presence(ProfLayoutSplit *layout, const char *const prese
     // if this group has contacts, or if we want to show empty groups
     if (contacts || prefs_get_boolean(PREF_ROSTER_EMPTY)) {
         wattron(layout->subwin, theme_attrs(THEME_ROSTER_HEADER));
-        GString *title_str = g_string_new(title);
+        GString *title_str = g_string_new(" ");
+        char ch = prefs_get_roster_header_char();
+        if (ch) {
+            g_string_append_printf(title_str, "%c", ch);
+        }
+        g_string_append(title_str, title);
         if (prefs_get_boolean(PREF_ROSTER_COUNT)) {
             g_string_append_printf(title_str, " (%d)", g_slist_length(contacts));
         }
@@ -194,7 +203,11 @@ _rosterwin_contacts_by_group(ProfLayoutSplit *layout, char *group)
 
     if (contacts || prefs_get_boolean(PREF_ROSTER_EMPTY)) {
         wattron(layout->subwin, theme_attrs(THEME_ROSTER_HEADER));
-        GString *title = g_string_new(" -");
+        GString *title = g_string_new(" ");
+        char ch = prefs_get_roster_header_char();
+        if (ch) {
+            g_string_append_printf(title, "%c", ch);
+        }
         g_string_append(title, group);
         if (prefs_get_boolean(PREF_ROSTER_COUNT)) {
             g_string_append_printf(title, " (%d)", g_slist_length(contacts));
@@ -228,7 +241,13 @@ _rosterwin_contacts_by_no_group(ProfLayoutSplit *layout)
 
     if (contacts || prefs_get_boolean(PREF_ROSTER_EMPTY)) {
         wattron(layout->subwin, theme_attrs(THEME_ROSTER_HEADER));
-        GString *title = g_string_new(" -no group");
+        GString *title = g_string_new(" ");
+        char ch = prefs_get_roster_header_char();
+        if (ch) {
+            g_string_append_printf(title, "%c", ch);
+        }
+        g_string_append(title, "no group");
+
         if (prefs_get_boolean(PREF_ROSTER_COUNT)) {
             g_string_append_printf(title, " (%d)", g_slist_length(contacts));
         }
@@ -257,13 +276,13 @@ rosterwin_roster(void)
        char *by = prefs_get_string(PREF_ROSTER_BY);
         if (g_strcmp0(by, "presence") == 0) {
             werase(layout->subwin);
-            _rosterwin_contacts_by_presence(layout, "chat", " -Available for chat");
-            _rosterwin_contacts_by_presence(layout, "online", " -Online");
-            _rosterwin_contacts_by_presence(layout, "away", " -Away");
-            _rosterwin_contacts_by_presence(layout, "xa", " -Extended Away");
-            _rosterwin_contacts_by_presence(layout, "dnd", " -Do not disturb");
+            _rosterwin_contacts_by_presence(layout, "chat", "Available for chat");
+            _rosterwin_contacts_by_presence(layout, "online", "Online");
+            _rosterwin_contacts_by_presence(layout, "away", "Away");
+            _rosterwin_contacts_by_presence(layout, "xa", "Extended Away");
+            _rosterwin_contacts_by_presence(layout, "dnd", "Do not disturb");
             if (prefs_get_boolean(PREF_ROSTER_OFFLINE)) {
-                _rosterwin_contacts_by_presence(layout, "offline", " -Offline");
+                _rosterwin_contacts_by_presence(layout, "offline", "Offline");
             }
         } else if (g_strcmp0(by, "group") == 0) {
             werase(layout->subwin);
@@ -289,7 +308,12 @@ rosterwin_roster(void)
             werase(layout->subwin);
 
             wattron(layout->subwin, theme_attrs(THEME_ROSTER_HEADER));
-            GString *title = g_string_new(" -Roster");
+            GString *title = g_string_new(" ");
+            char ch = prefs_get_roster_header_char();
+            if (ch) {
+                g_string_append_printf(title, "%c", ch);
+            }
+            g_string_append(title, "Roster");
             if (prefs_get_boolean(PREF_ROSTER_COUNT)) {
                 g_string_append_printf(title, " (%d)", g_slist_length(contacts));
             }

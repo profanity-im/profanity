@@ -1242,6 +1242,18 @@ cons_roster_setting(void)
 
     int size = prefs_get_roster_size();
     cons_show("Roster size (/roster)         : %d", size);
+
+    char header_ch = prefs_get_roster_header_char();
+    if (header_ch)
+        cons_show("Roster header char (/roster)  : %c", header_ch);
+    else
+        cons_show("Roster header char (/roster)  : none");
+
+    char contact_ch = prefs_get_roster_contact_char();
+    if (contact_ch)
+        cons_show("Roster contact char (/roster) : %c", contact_ch);
+    else
+        cons_show("Roster contact char (/roster) : none");
 }
 
 void

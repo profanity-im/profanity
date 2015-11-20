@@ -279,6 +279,8 @@ static struct cmd_t command_defs[] =
             "/roster hide [offline|resource|presence|status|empty|count|priority]",
             "/roster by group|presence|none",
             "/roster order name|presence",
+            "/roster char header <char>|none",
+            "/roster char contact <char>|none",
             "/roster size <percent>",
             "/roster add <jid> [<nick>]",
             "/roster remove <jid>",
@@ -311,6 +313,10 @@ static struct cmd_t command_defs[] =
             { "by none",             "No grouping in the roster panel." },
             { "order name",          "Order roster items by name only." },
             { "order presence",      "Order roster items by presence, and then by name." },
+            { "char header <char>",  "Prefix roster headers with specificed character." },
+            { "char header none",    "Remove roster header character prefix." },
+            { "char contact <char>", "Prefix roster contacts with specificed character." },
+            { "char contact none",   "Remove roster contact character prefix." },
             { "size <precent>",      "Percentage of the screen taken up by the roster (1-99)." },
             { "add <jid> [<nick>]",  "Add a new item to the roster." },
             { "remove <jid>",        "Removes an item from the roster." },
@@ -1788,6 +1794,8 @@ static Autocomplete disco_ac;
 static Autocomplete close_ac;
 static Autocomplete wins_ac;
 static Autocomplete roster_ac;
+static Autocomplete roster_char_ac;
+static Autocomplete roster_char_none_ac;
 static Autocomplete roster_option_ac;
 static Autocomplete roster_by_ac;
 static Autocomplete roster_order_ac;
@@ -2036,6 +2044,14 @@ cmd_init(void)
     autocomplete_add(roster_ac, "by");
     autocomplete_add(roster_ac, "order");
     autocomplete_add(roster_ac, "size");
+    autocomplete_add(roster_ac, "char");
+
+    roster_char_ac = autocomplete_new();
+    autocomplete_add(roster_char_ac, "header");
+    autocomplete_add(roster_char_ac, "contact");
+
+    roster_char_none_ac = autocomplete_new();
+    autocomplete_add(roster_char_none_ac, "none");
 
     roster_option_ac = autocomplete_new();
     autocomplete_add(roster_option_ac, "offline");
@@ -2307,6 +2323,8 @@ cmd_uninit(void)
     autocomplete_free(close_ac);
     autocomplete_free(wins_ac);
     autocomplete_free(roster_ac);
+    autocomplete_free(roster_char_ac);
+    autocomplete_free(roster_char_none_ac);
     autocomplete_free(roster_option_ac);
     autocomplete_free(roster_by_ac);
     autocomplete_free(roster_order_ac);
@@ -2494,6 +2512,8 @@ cmd_reset_autocomplete(ProfWin *window)
     autocomplete_reset(close_ac);
     autocomplete_reset(wins_ac);
     autocomplete_reset(roster_ac);
+    autocomplete_reset(roster_char_ac);
+    autocomplete_reset(roster_char_none_ac);
     autocomplete_reset(roster_option_ac);
     autocomplete_reset(roster_by_ac);
     autocomplete_reset(roster_order_ac);
@@ -2892,6 +2912,14 @@ static char*
 _roster_autocomplete(ProfWin *window, const char *const input)
 {
     char *result = NULL;
+    result = autocomplete_param_with_ac(input, "/roster char header", roster_char_none_ac, TRUE);
+    if (result) {
+        return result;
+    }
+    result = autocomplete_param_with_ac(input, "/roster char contact", roster_char_none_ac, TRUE);
+    if (result) {
+        return result;
+    }
     result = autocomplete_param_with_func(input, "/roster nick", roster_barejid_autocomplete);
     if (result) {
         return result;
@@ -2921,6 +2949,10 @@ _roster_autocomplete(ProfWin *window, const char *const input)
         return result;
     }
     result = autocomplete_param_with_ac(input, "/roster order", roster_order_ac, TRUE);
+    if (result) {
+        return result;
+    }
+    result = autocomplete_param_with_ac(input, "/roster char", roster_char_ac, TRUE);
     if (result) {
         return result;
     }
