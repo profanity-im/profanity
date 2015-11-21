@@ -279,69 +279,71 @@ void
 rosterwin_roster(void)
 {
     ProfWin *console = wins_get_console();
-    if (console) {
-        ProfLayoutSplit *layout = (ProfLayoutSplit*)console->layout;
-        assert(layout->memcheck == LAYOUT_SPLIT_MEMCHECK);
-
-        char *by = prefs_get_string(PREF_ROSTER_BY);
-        if (g_strcmp0(by, "presence") == 0) {
-            werase(layout->subwin);
-            _rosterwin_contacts_by_presence(layout, "chat", "Available for chat");
-            _rosterwin_contacts_by_presence(layout, "online", "Online");
-            _rosterwin_contacts_by_presence(layout, "away", "Away");
-            _rosterwin_contacts_by_presence(layout, "xa", "Extended Away");
-            _rosterwin_contacts_by_presence(layout, "dnd", "Do not disturb");
-            if (prefs_get_boolean(PREF_ROSTER_OFFLINE)) {
-                _rosterwin_contacts_by_presence(layout, "offline", "Offline");
-            }
-        } else if (g_strcmp0(by, "group") == 0) {
-            werase(layout->subwin);
-            GSList *groups = roster_get_groups();
-            GSList *curr_group = groups;
-            while (curr_group) {
-                _rosterwin_contacts_by_group(layout, curr_group->data);
-                curr_group = g_slist_next(curr_group);
-            }
-            g_slist_free_full(groups, free);
-            _rosterwin_contacts_by_no_group(layout);
-        } else {
-            GSList *contacts = NULL;
-
-            char *order = prefs_get_string(PREF_ROSTER_ORDER);
-            gboolean offline = prefs_get_boolean(PREF_ROSTER_OFFLINE);
-            if (g_strcmp0(order, "presence") == 0) {
-                contacts = roster_get_contacts(ROSTER_ORD_PRESENCE, offline);
-            } else {
-                contacts = roster_get_contacts(ROSTER_ORD_NAME, offline);
-            }
-            prefs_free_string(order);
-
-            werase(layout->subwin);
-
-            wattron(layout->subwin, theme_attrs(THEME_ROSTER_HEADER));
-            GString *title = g_string_new(" ");
-            char ch = prefs_get_roster_header_char();
-            if (ch) {
-                g_string_append_printf(title, "%c", ch);
-            }
-            g_string_append(title, "Roster");
-            if (prefs_get_boolean(PREF_ROSTER_COUNT)) {
-                g_string_append_printf(title, " (%d)", g_slist_length(contacts));
-            }
-            win_print_nowrap(layout->subwin, title->str, TRUE);
-            g_string_free(title, TRUE);
-            wattroff(layout->subwin, theme_attrs(THEME_ROSTER_HEADER));
-
-            if (contacts) {
-                GSList *curr_contact = contacts;
-                while (curr_contact) {
-                    PContact contact = curr_contact->data;
-                    _rosterwin_contact(layout, contact);
-                    curr_contact = g_slist_next(curr_contact);
-                }
-            }
-            g_slist_free(contacts);
-        }
-        prefs_free_string(by);
+    if (!console) {
+        return;
     }
+
+    ProfLayoutSplit *layout = (ProfLayoutSplit*)console->layout;
+    assert(layout->memcheck == LAYOUT_SPLIT_MEMCHECK);
+
+    char *by = prefs_get_string(PREF_ROSTER_BY);
+    if (g_strcmp0(by, "presence") == 0) {
+        werase(layout->subwin);
+        _rosterwin_contacts_by_presence(layout, "chat", "Available for chat");
+        _rosterwin_contacts_by_presence(layout, "online", "Online");
+        _rosterwin_contacts_by_presence(layout, "away", "Away");
+        _rosterwin_contacts_by_presence(layout, "xa", "Extended Away");
+        _rosterwin_contacts_by_presence(layout, "dnd", "Do not disturb");
+        if (prefs_get_boolean(PREF_ROSTER_OFFLINE)) {
+            _rosterwin_contacts_by_presence(layout, "offline", "Offline");
+        }
+    } else if (g_strcmp0(by, "group") == 0) {
+        werase(layout->subwin);
+        GSList *groups = roster_get_groups();
+        GSList *curr_group = groups;
+        while (curr_group) {
+            _rosterwin_contacts_by_group(layout, curr_group->data);
+            curr_group = g_slist_next(curr_group);
+        }
+        g_slist_free_full(groups, free);
+        _rosterwin_contacts_by_no_group(layout);
+    } else {
+        GSList *contacts = NULL;
+
+        char *order = prefs_get_string(PREF_ROSTER_ORDER);
+        gboolean offline = prefs_get_boolean(PREF_ROSTER_OFFLINE);
+        if (g_strcmp0(order, "presence") == 0) {
+            contacts = roster_get_contacts(ROSTER_ORD_PRESENCE, offline);
+        } else {
+            contacts = roster_get_contacts(ROSTER_ORD_NAME, offline);
+        }
+        prefs_free_string(order);
+
+        werase(layout->subwin);
+
+        wattron(layout->subwin, theme_attrs(THEME_ROSTER_HEADER));
+        GString *title = g_string_new(" ");
+        char ch = prefs_get_roster_header_char();
+        if (ch) {
+            g_string_append_printf(title, "%c", ch);
+        }
+        g_string_append(title, "Roster");
+        if (prefs_get_boolean(PREF_ROSTER_COUNT)) {
+            g_string_append_printf(title, " (%d)", g_slist_length(contacts));
+        }
+        win_print_nowrap(layout->subwin, title->str, TRUE);
+        g_string_free(title, TRUE);
+        wattroff(layout->subwin, theme_attrs(THEME_ROSTER_HEADER));
+
+        if (contacts) {
+            GSList *curr_contact = contacts;
+            while (curr_contact) {
+                PContact contact = curr_contact->data;
+                _rosterwin_contact(layout, contact);
+                curr_contact = g_slist_next(curr_contact);
+            }
+        }
+        g_slist_free(contacts);
+    }
+    prefs_free_string(by);
 }
