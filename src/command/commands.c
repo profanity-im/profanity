@@ -1781,6 +1781,29 @@ cmd_roster(ProfWin *window, const char *const command, gchar **args)
         }
         return TRUE;
 
+    // set indentations
+    } else if (g_strcmp0(args[0], "indent") == 0) {
+        if (g_strcmp0(args[1], "contact") == 0) {
+            if (!args[2]) {
+                cons_bad_cmd_usage(command);
+            } else {
+                int intval = 0;
+                char *err_msg = NULL;
+                gboolean res = strtoi_range(args[2], &intval, 0, 10, &err_msg);
+                if (res) {
+                    prefs_set_roster_contact_indent(intval);
+                    cons_show("Roster contact indent set to: %d", intval);
+                    rosterwin_roster();
+                } else {
+                    cons_show(err_msg);
+                    free(err_msg);
+                }
+            }
+        } else {
+            cons_bad_cmd_usage(command);
+        }
+        return TRUE;
+
     // show/hide roster
     } else if (g_strcmp0(args[0], "show") == 0) {
         if (args[1] == NULL) {

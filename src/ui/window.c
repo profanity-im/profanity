@@ -1266,12 +1266,14 @@ win_unread(ProfWin *window)
 }
 
 void
-win_printline_nowrap(WINDOW *win, char *msg)
+win_print_nowrap(WINDOW *win, char *msg, gboolean newline)
 {
     int maxx = getmaxx(win);
     int cury = getcury(win);
 
     waddnstr(win, msg, maxx);
 
-    wmove(win, cury+1, 0);
+    if (newline) {
+        wmove(win, cury+1, 0);
+    }
 }

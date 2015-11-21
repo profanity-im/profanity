@@ -64,7 +64,7 @@ _rosterwin_presence(ProfLayoutSplit *layout, int indent, theme_item_t colour, co
                 indent--;
             }
             g_string_append_printf(msg, "\"%s\"", status);
-            win_printline_nowrap(layout->subwin, msg->str);
+            win_print_nowrap(layout->subwin, msg->str, TRUE);
             g_string_free(msg, TRUE);
             wattroff(layout->subwin, theme_attrs(colour));
         }
@@ -85,7 +85,7 @@ _rosterwin_presence(ProfLayoutSplit *layout, int indent, theme_item_t colour, co
         } else if (status && prefs_get_boolean(PREF_ROSTER_STATUS)) {
             g_string_append_printf(msg, "\"%s\"", status);
         }
-        win_printline_nowrap(layout->subwin, msg->str);
+        win_print_nowrap(layout->subwin, msg->str, TRUE);
         g_string_free(msg, TRUE);
         wattroff(layout->subwin, theme_attrs(colour));
     }
@@ -108,7 +108,7 @@ _rosterwin_resource(ProfLayoutSplit *layout, PContact contact)
             if (prefs_get_boolean(PREF_ROSTER_PRIORITY)) {
                 g_string_append_printf(msg, " [%d]", resource->priority);
             }
-            win_printline_nowrap(layout->subwin, msg->str);
+            win_print_nowrap(layout->subwin, msg->str, TRUE);
             g_string_free(msg, TRUE);
             wattroff(layout->subwin, theme_attrs(resource_presence_colour));
 
@@ -138,13 +138,20 @@ _rosterwin_contact(ProfLayoutSplit *layout, PContact contact)
     theme_item_t presence_colour = theme_main_presence_attrs(presence);
 
     wattron(layout->subwin, theme_attrs(presence_colour));
-    GString *msg = g_string_new("   ");
+    GString *msg = g_string_new(" ");
+    int indent = prefs_get_roster_contact_indent();
+    if (indent > 0) {
+        while (indent > 0) {
+            g_string_append(msg, " ");
+            indent--;
+        }
+    }
     char ch = prefs_get_roster_contact_char();
     if (ch) {
         g_string_append_printf(msg, "%c", ch);
     }
     g_string_append(msg, name);
-    win_printline_nowrap(layout->subwin, msg->str);
+    win_print_nowrap(layout->subwin, msg->str, TRUE);
     g_string_free(msg, TRUE);
     wattroff(layout->subwin, theme_attrs(presence_colour));
 
@@ -172,7 +179,7 @@ _rosterwin_contacts_by_presence(ProfLayoutSplit *layout, const char *const prese
         if (prefs_get_boolean(PREF_ROSTER_COUNT)) {
             g_string_append_printf(title_str, " (%d)", g_slist_length(contacts));
         }
-        win_printline_nowrap(layout->subwin, title_str->str);
+        win_print_nowrap(layout->subwin, title_str->str, TRUE);
         g_string_free(title_str, TRUE);
         wattroff(layout->subwin, theme_attrs(THEME_ROSTER_HEADER));
     }
@@ -212,7 +219,7 @@ _rosterwin_contacts_by_group(ProfLayoutSplit *layout, char *group)
         if (prefs_get_boolean(PREF_ROSTER_COUNT)) {
             g_string_append_printf(title, " (%d)", g_slist_length(contacts));
         }
-        win_printline_nowrap(layout->subwin, title->str);
+        win_print_nowrap(layout->subwin, title->str, TRUE);
         g_string_free(title, TRUE);
         wattroff(layout->subwin, theme_attrs(THEME_ROSTER_HEADER));
 
@@ -251,7 +258,7 @@ _rosterwin_contacts_by_no_group(ProfLayoutSplit *layout)
         if (prefs_get_boolean(PREF_ROSTER_COUNT)) {
             g_string_append_printf(title, " (%d)", g_slist_length(contacts));
         }
-        win_printline_nowrap(layout->subwin, title->str);
+        win_print_nowrap(layout->subwin, title->str, TRUE);
         g_string_free(title, TRUE);
         wattroff(layout->subwin, theme_attrs(THEME_ROSTER_HEADER));
 
@@ -317,7 +324,7 @@ rosterwin_roster(void)
             if (prefs_get_boolean(PREF_ROSTER_COUNT)) {
                 g_string_append_printf(title, " (%d)", g_slist_length(contacts));
             }
-            win_printline_nowrap(layout->subwin, title->str);
+            win_print_nowrap(layout->subwin, title->str, TRUE);
             g_string_free(title, TRUE);
             wattroff(layout->subwin, theme_attrs(THEME_ROSTER_HEADER));
 
