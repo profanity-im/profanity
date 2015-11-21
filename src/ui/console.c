@@ -1260,6 +1260,9 @@ cons_roster_setting(void)
 
     gint resource_indent = prefs_get_roster_resource_indent();
     cons_show("Roster resource indent (/roster) : %d", resource_indent);
+
+    gint presence_indent = prefs_get_roster_presence_indent();
+    cons_show("Roster presence indent (/roster) : %d", presence_indent);
 }
 
 void

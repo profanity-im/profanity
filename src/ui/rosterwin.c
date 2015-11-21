@@ -43,7 +43,8 @@
 #include "roster_list.h"
 
 static void
-_rosterwin_presence(ProfLayoutSplit *layout, int indent, theme_item_t colour, const char *presence, const char *status)
+_rosterwin_presence(ProfLayoutSplit *layout, theme_item_t colour, const char *presence, const char *status,
+    int current_indent)
 {
     // don't show presence for offline contacts
     gboolean is_offline = g_strcmp0(presence, "offline") == 0;
@@ -55,14 +56,19 @@ _rosterwin_presence(ProfLayoutSplit *layout, int indent, theme_item_t colour, co
     gboolean by_presence = g_strcmp0(by, "presence") == 0;
     prefs_free_string(by);
 
+    int presence_indent = prefs_get_roster_presence_indent();
+    if (presence_indent > 0) {
+        current_indent += presence_indent;
+    }
+
     // show only status when grouped by presence
     if (by_presence) {
         if (status && prefs_get_boolean(PREF_ROSTER_STATUS)) {
             wattron(layout->subwin, theme_attrs(colour));
             GString *msg = g_string_new(" ");
-            while (indent > 0) {
+            while (current_indent > 0) {
                 g_string_append(msg, " ");
-                indent--;
+                current_indent--;
             }
             g_string_append_printf(msg, "\"%s\"", status);
             win_print_nowrap(layout->subwin, msg->str, TRUE);
@@ -74,9 +80,9 @@ _rosterwin_presence(ProfLayoutSplit *layout, int indent, theme_item_t colour, co
     } else if (prefs_get_boolean(PREF_ROSTER_PRESENCE) || (status && prefs_get_boolean(PREF_ROSTER_STATUS))) {
         wattron(layout->subwin, theme_attrs(colour));
         GString *msg = g_string_new(" ");
-        while (indent > 0) {
+        while (current_indent > 0) {
             g_string_append(msg, " ");
-            indent--;
+            current_indent--;
         }
         if (prefs_get_boolean(PREF_ROSTER_PRESENCE)) {
             g_string_append(msg, presence);
@@ -124,7 +130,7 @@ _rosterwin_resource(ProfLayoutSplit *layout, PContact contact, int current_inden
             wattroff(layout->subwin, theme_attrs(resource_presence_colour));
 
             if (prefs_get_boolean(PREF_ROSTER_PRESENCE) || prefs_get_boolean(PREF_ROSTER_STATUS)) {
-                _rosterwin_presence(layout, 6, resource_presence_colour, resource_presence, resource->status);
+                _rosterwin_presence(layout, resource_presence_colour, resource_presence, resource->status, current_indent);
             }
 
             curr_resource = g_list_next(curr_resource);
@@ -133,7 +139,7 @@ _rosterwin_resource(ProfLayoutSplit *layout, PContact contact, int current_inden
         const char *presence = p_contact_presence(contact);
         const char *status = p_contact_status(contact);
         theme_item_t presence_colour = theme_main_presence_attrs(presence);
-        _rosterwin_presence(layout, 4, presence_colour, presence, status);
+        _rosterwin_presence(layout, presence_colour, presence, status, current_indent);
     }
     g_list_free(resources);
 
@@ -171,7 +177,7 @@ _rosterwin_contact(ProfLayoutSplit *layout, PContact contact)
     if (prefs_get_boolean(PREF_ROSTER_RESOURCE)) {
         _rosterwin_resource(layout, contact, current_indent);
     } else if (prefs_get_boolean(PREF_ROSTER_PRESENCE) || prefs_get_boolean(PREF_ROSTER_STATUS)) {
-        _rosterwin_presence(layout, 4, presence_colour, presence, status);
+        _rosterwin_presence(layout, presence_colour, presence, status, current_indent);
     }
 }
 

@@ -282,6 +282,7 @@ static struct cmd_t command_defs[] =
             "/roster char contact <char>|none",
             "/roster indent contact <indent>",
             "/roster indent resource <indent>",
+            "/roster indent presence <indent>",
             "/roster size <percent>",
             "/roster add <jid> [<nick>]",
             "/roster remove <jid>",
@@ -319,7 +320,8 @@ static struct cmd_t command_defs[] =
             { "char contact <char>",        "Prefix roster contacts with specificed character." },
             { "char contact none",          "Remove roster contact character prefix." },
             { "indent contact <indent>",    "Indent contact line by <indent> spaces." },
-            { "indent resource <indent>",   "Indent roster line by <indent> spaces." },
+            { "indent resource <indent>",   "Indent resource line by <indent> spaces." },
+            { "indent presence <indent>",   "Indent presence line by <indent> spaces." },
             { "size <precent>",             "Percentage of the screen taken up by the roster (1-99)." },
             { "add <jid> [<nick>]",         "Add a new item to the roster." },
             { "remove <jid>",               "Removes an item from the roster." },
@@ -2050,6 +2052,7 @@ cmd_init(void)
     roster_indent_ac = autocomplete_new();
     autocomplete_add(roster_indent_ac, "contact");
     autocomplete_add(roster_indent_ac, "resource");
+    autocomplete_add(roster_indent_ac, "presence");
 
     roster_option_ac = autocomplete_new();
     autocomplete_add(roster_option_ac, "offline");
