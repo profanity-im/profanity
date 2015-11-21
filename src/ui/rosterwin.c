@@ -53,6 +53,7 @@ _rosterwin_presence(ProfLayoutSplit *layout, int indent, theme_item_t colour, co
 
     char *by = prefs_get_string(PREF_ROSTER_BY);
     gboolean by_presence = g_strcmp0(by, "presence") == 0;
+    prefs_free_string(by);
 
     // show only status when grouped by presence
     if (by_presence) {
@@ -207,6 +208,7 @@ _rosterwin_contacts_by_group(ProfLayoutSplit *layout, char *group)
     } else {
         contacts = roster_get_group(group, ROSTER_ORD_NAME, offline);
     }
+    prefs_free_string(order);
 
     if (contacts || prefs_get_boolean(PREF_ROSTER_EMPTY)) {
         wattron(layout->subwin, theme_attrs(THEME_ROSTER_HEADER));
@@ -245,6 +247,7 @@ _rosterwin_contacts_by_no_group(ProfLayoutSplit *layout)
     } else {
         contacts = roster_get_nogroup(ROSTER_ORD_NAME, offline);
     }
+    prefs_free_string(order);
 
     if (contacts || prefs_get_boolean(PREF_ROSTER_EMPTY)) {
         wattron(layout->subwin, theme_attrs(THEME_ROSTER_HEADER));
@@ -280,7 +283,7 @@ rosterwin_roster(void)
         ProfLayoutSplit *layout = (ProfLayoutSplit*)console->layout;
         assert(layout->memcheck == LAYOUT_SPLIT_MEMCHECK);
 
-       char *by = prefs_get_string(PREF_ROSTER_BY);
+        char *by = prefs_get_string(PREF_ROSTER_BY);
         if (g_strcmp0(by, "presence") == 0) {
             werase(layout->subwin);
             _rosterwin_contacts_by_presence(layout, "chat", "Available for chat");
@@ -311,6 +314,7 @@ rosterwin_roster(void)
             } else {
                 contacts = roster_get_contacts(ROSTER_ORD_NAME, offline);
             }
+            prefs_free_string(order);
 
             werase(layout->subwin);
 
@@ -338,6 +342,6 @@ rosterwin_roster(void)
             }
             g_slist_free(contacts);
         }
-        free(by);
+        prefs_free_string(by);
     }
 }

@@ -3848,7 +3848,9 @@ cmd_time(ProfWin *window, const char *const command, gchar **args)
 {
     if (g_strcmp0(args[0], "lastactivity") == 0) {
         if (args[1] == NULL) {
-            cons_show("Last activity time format: '%s'.", prefs_get_string(PREF_TIME_LASTACTIVITY));
+            char *format = prefs_get_string(PREF_TIME_LASTACTIVITY);
+            cons_show("Last activity time format: '%s'.", format);
+            prefs_free_string(format);
             return TRUE;
         } else if (g_strcmp0(args[1], "set") == 0 && args[2] != NULL) {
             prefs_set_string(PREF_TIME_LASTACTIVITY, args[2]);
@@ -3865,7 +3867,9 @@ cmd_time(ProfWin *window, const char *const command, gchar **args)
         }
     } else if (g_strcmp0(args[0], "statusbar") == 0) {
         if (args[1] == NULL) {
-            cons_show("Status bar time format: '%s'.", prefs_get_string(PREF_TIME_STATUSBAR));
+            char *format = prefs_get_string(PREF_TIME_STATUSBAR);
+            cons_show("Status bar time format: '%s'.", format);
+            prefs_free_string(format);
             return TRUE;
         } else if (g_strcmp0(args[1], "set") == 0 && args[2] != NULL) {
             prefs_set_string(PREF_TIME_STATUSBAR, args[2]);
@@ -3883,7 +3887,9 @@ cmd_time(ProfWin *window, const char *const command, gchar **args)
         }
     } else if (g_strcmp0(args[0], "console") == 0) {
         if (args[1] == NULL) {
-            cons_show("Console time format: '%s'.", prefs_get_string(PREF_TIME_CONSOLE));
+            char *format = prefs_get_string(PREF_TIME_CONSOLE);
+            cons_show("Console time format: '%s'.", format);
+            prefs_free_string(format);
             return TRUE;
         } else if (g_strcmp0(args[1], "set") == 0 && args[2] != NULL) {
             prefs_set_string(PREF_TIME_CONSOLE, args[2]);
@@ -3901,7 +3907,9 @@ cmd_time(ProfWin *window, const char *const command, gchar **args)
         }
     } else if (g_strcmp0(args[0], "chat") == 0) {
         if (args[1] == NULL) {
-            cons_show("Chat time format: '%s'.", prefs_get_string(PREF_TIME_CHAT));
+            char *format = prefs_get_string(PREF_TIME_CHAT);
+            cons_show("Chat time format: '%s'.", format);
+            prefs_free_string(format);
             return TRUE;
         } else if (g_strcmp0(args[1], "set") == 0 && args[2] != NULL) {
             prefs_set_string(PREF_TIME_CHAT, args[2]);
@@ -3919,7 +3927,9 @@ cmd_time(ProfWin *window, const char *const command, gchar **args)
         }
     } else if (g_strcmp0(args[0], "muc") == 0) {
         if (args[1] == NULL) {
-            cons_show("MUC time format: '%s'.", prefs_get_string(PREF_TIME_MUC));
+            char *format = prefs_get_string(PREF_TIME_MUC);
+            cons_show("MUC time format: '%s'.", format);
+            prefs_free_string(format);
             return TRUE;
         } else if (g_strcmp0(args[1], "set") == 0 && args[2] != NULL) {
             prefs_set_string(PREF_TIME_MUC, args[2]);
@@ -3937,7 +3947,9 @@ cmd_time(ProfWin *window, const char *const command, gchar **args)
         }
     } else if (g_strcmp0(args[0], "mucconfig") == 0) {
         if (args[1] == NULL) {
-            cons_show("MUC config time format: '%s'.", prefs_get_string(PREF_TIME_MUCCONFIG));
+            char *format = prefs_get_string(PREF_TIME_MUCCONFIG);
+            cons_show("MUC config time format: '%s'.", format);
+            prefs_free_string(format);
             return TRUE;
         } else if (g_strcmp0(args[1], "set") == 0 && args[2] != NULL) {
             prefs_set_string(PREF_TIME_MUCCONFIG, args[2]);
@@ -3955,7 +3967,9 @@ cmd_time(ProfWin *window, const char *const command, gchar **args)
         }
     } else if (g_strcmp0(args[0], "private") == 0) {
         if (args[1] == NULL) {
-            cons_show("Private chat time format: '%s'.", prefs_get_string(PREF_TIME_PRIVATE));
+            char *format = prefs_get_string(PREF_TIME_PRIVATE);
+            cons_show("Private chat time format: '%s'.", format);
+            prefs_free_string(format);
             return TRUE;
         } else if (g_strcmp0(args[1], "set") == 0 && args[2] != NULL) {
             prefs_set_string(PREF_TIME_PRIVATE, args[2]);
@@ -3973,7 +3987,9 @@ cmd_time(ProfWin *window, const char *const command, gchar **args)
         }
     } else if (g_strcmp0(args[0], "xml") == 0) {
         if (args[1] == NULL) {
-            cons_show("XML Console time format: '%s'.", prefs_get_string(PREF_TIME_XMLCONSOLE));
+            char *format = prefs_get_string(PREF_TIME_XMLCONSOLE);
+            cons_show("XML Console time format: '%s'.", format);
+            prefs_free_string(format);
             return TRUE;
         } else if (g_strcmp0(args[1], "set") == 0 && args[2] != NULL) {
             prefs_set_string(PREF_TIME_XMLCONSOLE, args[2]);
