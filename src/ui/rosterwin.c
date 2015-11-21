@@ -93,10 +93,15 @@ _rosterwin_presence(ProfLayoutSplit *layout, int indent, theme_item_t colour, co
 }
 
 static void
-_rosterwin_resource(ProfLayoutSplit *layout, PContact contact)
+_rosterwin_resource(ProfLayoutSplit *layout, PContact contact, int current_indent)
 {
     GList *resources = p_contact_get_available_resources(contact);
     if (resources) {
+        int resource_indent = prefs_get_roster_resource_indent();
+        if (resource_indent > 0) {
+            current_indent += resource_indent;
+        }
+
         GList *curr_resource = resources;
         while (curr_resource) {
             Resource *resource = curr_resource->data;
@@ -104,7 +109,12 @@ _rosterwin_resource(ProfLayoutSplit *layout, PContact contact)
             theme_item_t resource_presence_colour = theme_main_presence_attrs(resource_presence);
 
             wattron(layout->subwin, theme_attrs(resource_presence_colour));
-            GString *msg = g_string_new("     ");
+            GString *msg = g_string_new(" ");
+            int this_indent = current_indent;
+            while (this_indent > 0) {
+                g_string_append(msg, " ");
+                this_indent--;
+            }
             g_string_append(msg, resource->name);
             if (prefs_get_boolean(PREF_ROSTER_PRIORITY)) {
                 g_string_append_printf(msg, " [%d]", resource->priority);
@@ -141,7 +151,9 @@ _rosterwin_contact(ProfLayoutSplit *layout, PContact contact)
     wattron(layout->subwin, theme_attrs(presence_colour));
     GString *msg = g_string_new(" ");
     int indent = prefs_get_roster_contact_indent();
+    int current_indent = 0;
     if (indent > 0) {
+        current_indent += indent;
         while (indent > 0) {
             g_string_append(msg, " ");
             indent--;
@@ -157,7 +169,7 @@ _rosterwin_contact(ProfLayoutSplit *layout, PContact contact)
     wattroff(layout->subwin, theme_attrs(presence_colour));
 
     if (prefs_get_boolean(PREF_ROSTER_RESOURCE)) {
-        _rosterwin_resource(layout, contact);
+        _rosterwin_resource(layout, contact, current_indent);
     } else if (prefs_get_boolean(PREF_ROSTER_PRESENCE) || prefs_get_boolean(PREF_ROSTER_STATUS)) {
         _rosterwin_presence(layout, 4, presence_colour, presence, status);
     }

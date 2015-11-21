@@ -1799,6 +1799,22 @@ cmd_roster(ProfWin *window, const char *const command, gchar **args)
                     free(err_msg);
                 }
             }
+        } else if (g_strcmp0(args[1], "resource") == 0) {
+            if (!args[2]) {
+                cons_bad_cmd_usage(command);
+            } else {
+                int intval = 0;
+                char *err_msg = NULL;
+                gboolean res = strtoi_range(args[2], &intval, 0, 10, &err_msg);
+                if (res) {
+                    prefs_set_roster_resource_indent(intval);
+                    cons_show("Roster resource indent set to: %d", intval);
+                    rosterwin_roster();
+                } else {
+                    cons_show(err_msg);
+                    free(err_msg);
+                }
+            }
         } else {
             cons_bad_cmd_usage(command);
         }

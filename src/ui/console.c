@@ -960,9 +960,9 @@ cons_theme_setting(void)
 {
     char *theme = prefs_get_string(PREF_THEME);
     if (theme == NULL) {
-        cons_show("Theme (/theme)                  : default");
+        cons_show("Theme (/theme)                   : default");
     } else {
-        cons_show("Theme (/theme)                  : %s", theme);
+        cons_show("Theme (/theme)                   : %s", theme);
     }
     prefs_free_string(theme);
 }
@@ -971,58 +971,58 @@ void
 cons_privileges_setting(void)
 {
     if (prefs_get_boolean(PREF_MUC_PRIVILEGES))
-        cons_show("MUC privileges (/privileges)    : ON");
+        cons_show("MUC privileges (/privileges)     : ON");
     else
-        cons_show("MUC privileges (/privileges)    : OFF");
+        cons_show("MUC privileges (/privileges)     : OFF");
 }
 
 void
 cons_beep_setting(void)
 {
     if (prefs_get_boolean(PREF_BEEP))
-        cons_show("Terminal beep (/beep)           : ON");
+        cons_show("Terminal beep (/beep)            : ON");
     else
-        cons_show("Terminal beep (/beep)           : OFF");
+        cons_show("Terminal beep (/beep)            : OFF");
 }
 
 void
 cons_resource_setting(void)
 {
     if (prefs_get_boolean(PREF_RESOURCE_TITLE))
-        cons_show("Resource title (/resource)      : ON");
+        cons_show("Resource title (/resource)       : ON");
     else
-        cons_show("Resource title (/resource)      : OFF");
+        cons_show("Resource title (/resource)       : OFF");
     if (prefs_get_boolean(PREF_RESOURCE_MESSAGE))
-        cons_show("Resource message (/resource)    : ON");
+        cons_show("Resource message (/resource)     : ON");
     else
-        cons_show("Resource message (/resource)    : OFF");
+        cons_show("Resource message (/resource)     : OFF");
 }
 
 void
 cons_wrap_setting(void)
 {
     if (prefs_get_boolean(PREF_WRAP))
-        cons_show("Word wrap (/wrap)               : ON");
+        cons_show("Word wrap (/wrap)                : ON");
     else
-        cons_show("Word wrap (/wrap)               : OFF");
+        cons_show("Word wrap (/wrap)                : OFF");
 }
 
 void
 cons_winstidy_setting(void)
 {
     if (prefs_get_boolean(PREF_WINS_AUTO_TIDY))
-        cons_show("Window Auto Tidy (/wins)        : ON");
+        cons_show("Window Auto Tidy (/wins)         : ON");
     else
-        cons_show("Window Auto Tidy (/wins)        : OFF");
+        cons_show("Window Auto Tidy (/wins)         : OFF");
 }
 
 void
 cons_encwarn_setting(void)
 {
     if (prefs_get_boolean(PREF_ENC_WARN)) {
-        cons_show("Warn unencrypted (/encwarn)     : ON");
+        cons_show("Warn unencrypted (/encwarn)      : ON");
     } else {
-        cons_show("Warn unencrypted (/encwarn)     : OFF");
+        cons_show("Warn unencrypted (/encwarn)      : OFF");
     }
 }
 
@@ -1030,9 +1030,9 @@ void
 cons_tlsshow_setting(void)
 {
     if (prefs_get_boolean(PREF_TLS_SHOW)) {
-        cons_show("TLS show (/tls)                 : ON");
+        cons_show("TLS show (/tls)                  : ON");
     } else {
-        cons_show("TLS show (/tls)                 : OFF");
+        cons_show("TLS show (/tls)                  : OFF");
     }
 }
 
@@ -1040,44 +1040,44 @@ void
 cons_presence_setting(void)
 {
     if (prefs_get_boolean(PREF_PRESENCE))
-        cons_show("Contact presence (/presence)    : ON");
+        cons_show("Contact presence (/presence)     : ON");
     else
-        cons_show("Contact presence (/presence)    : OFF");
+        cons_show("Contact presence (/presence)     : OFF");
 }
 
 void
 cons_flash_setting(void)
 {
     if (prefs_get_boolean(PREF_FLASH))
-        cons_show("Terminal flash (/flash)         : ON");
+        cons_show("Terminal flash (/flash)          : ON");
     else
-        cons_show("Terminal flash (/flash)         : OFF");
+        cons_show("Terminal flash (/flash)          : OFF");
 }
 
 void
 cons_splash_setting(void)
 {
     if (prefs_get_boolean(PREF_SPLASH))
-        cons_show("Splash screen (/splash)         : ON");
+        cons_show("Splash screen (/splash)          : ON");
     else
-        cons_show("Splash screen (/splash)         : OFF");
+        cons_show("Splash screen (/splash)          : OFF");
 }
 
 void
 cons_occupants_setting(void)
 {
     if (prefs_get_boolean(PREF_OCCUPANTS))
-        cons_show("Occupants (/occupants)          : show");
+        cons_show("Occupants (/occupants)           : show");
     else
-        cons_show("Occupants (/occupants)          : hide");
+        cons_show("Occupants (/occupants)           : hide");
 
     if (prefs_get_boolean(PREF_OCCUPANTS_JID))
-        cons_show("Occupant jids (/occupants)      : show");
+        cons_show("Occupant jids (/occupants)       : show");
     else
-        cons_show("Occupant jids (/occupants)      : hide");
+        cons_show("Occupant jids (/occupants)       : hide");
 
     int size = prefs_get_occupants_size();
-    cons_show("Occupants size (/occupants)     : %d", size);
+    cons_show("Occupants size (/occupants)      : %d", size);
 }
 
 void
@@ -1097,55 +1097,55 @@ cons_time_setting(void)
 {
     char *pref_time_console = prefs_get_string(PREF_TIME_CONSOLE);
     if (g_strcmp0(pref_time_console, "off") == 0)
-        cons_show("Time console (/time)            : OFF");
+        cons_show("Time console (/time)             : OFF");
     else
-        cons_show("Time console (/time)            : %s", pref_time_console);
+        cons_show("Time console (/time)             : %s", pref_time_console);
     prefs_free_string(pref_time_console);
 
     char *pref_time_chat = prefs_get_string(PREF_TIME_CHAT);
     if (g_strcmp0(pref_time_chat, "off") == 0)
-        cons_show("Time chat (/time)               : OFF");
+        cons_show("Time chat (/time)                : OFF");
     else
-        cons_show("Time chat (/time)               : %s", pref_time_chat);
+        cons_show("Time chat (/time)                : %s", pref_time_chat);
     prefs_free_string(pref_time_chat);
 
     char *pref_time_muc = prefs_get_string(PREF_TIME_MUC);
     if (g_strcmp0(pref_time_muc, "off") == 0)
-        cons_show("Time MUC (/time)                : OFF");
+        cons_show("Time MUC (/time)                 : OFF");
     else
-        cons_show("Time MUC (/time)                : %s", pref_time_muc);
+        cons_show("Time MUC (/time)                 : %s", pref_time_muc);
     prefs_free_string(pref_time_muc);
 
     char *pref_time_mucconf = prefs_get_string(PREF_TIME_MUCCONFIG);
     if (g_strcmp0(pref_time_mucconf, "off") == 0)
-        cons_show("Time MUC config (/time)         : OFF");
+        cons_show("Time MUC config (/time)          : OFF");
     else
-        cons_show("Time MUC config (/time)         : %s", pref_time_mucconf);
+        cons_show("Time MUC config (/time)          : %s", pref_time_mucconf);
     prefs_free_string(pref_time_mucconf);
 
     char *pref_time_private = prefs_get_string(PREF_TIME_PRIVATE);
     if (g_strcmp0(pref_time_private, "off") == 0)
-        cons_show("Time private (/time)            : OFF");
+        cons_show("Time private (/time)             : OFF");
     else
-        cons_show("Time private (/time)            : %s", pref_time_private);
+        cons_show("Time private (/time)             : %s", pref_time_private);
     prefs_free_string(pref_time_private);
 
     char *pref_time_xml = prefs_get_string(PREF_TIME_XMLCONSOLE);
     if (g_strcmp0(pref_time_xml, "off") == 0)
-        cons_show("Time XML Console (/time)        : OFF");
+        cons_show("Time XML Console (/time)         : OFF");
     else
-        cons_show("Time XML Console (/time)        : %s", pref_time_xml);
+        cons_show("Time XML Console (/time)         : %s", pref_time_xml);
     prefs_free_string(pref_time_xml);
 
     char *pref_time_statusbar = prefs_get_string(PREF_TIME_STATUSBAR);
     if (g_strcmp0(pref_time_statusbar, "off") == 0)
-        cons_show("Time statusbar (/time)          : OFF");
+        cons_show("Time statusbar (/time)           : OFF");
     else
-        cons_show("Time statusbar (/time)          : %s", pref_time_statusbar);
+        cons_show("Time statusbar (/time)           : %s", pref_time_statusbar);
     prefs_free_string(pref_time_statusbar);
 
     char *pref_time_lastactivity = prefs_get_string(PREF_TIME_LASTACTIVITY);
-    cons_show("Time last activity (/time)      : %s", pref_time_lastactivity);
+    cons_show("Time last activity (/time)       : %s", pref_time_lastactivity);
     prefs_free_string(pref_time_lastactivity);
 }
 
@@ -1153,9 +1153,9 @@ void
 cons_vercheck_setting(void)
 {
     if (prefs_get_boolean(PREF_VERCHECK))
-        cons_show("Version checking (/vercheck)    : ON");
+        cons_show("Version checking (/vercheck)     : ON");
     else
-        cons_show("Version checking (/vercheck)    : OFF");
+        cons_show("Version checking (/vercheck)     : OFF");
 }
 
 void
@@ -1165,9 +1165,9 @@ cons_statuses_setting(void)
     char *chat = prefs_get_string(PREF_STATUSES_CHAT);
     char *muc = prefs_get_string(PREF_STATUSES_MUC);
 
-    cons_show("Console statuses (/statuses)    : %s", console);
-    cons_show("Chat statuses (/statuses)       : %s", chat);
-    cons_show("MUC statuses (/statuses)        : %s", muc);
+    cons_show("Console statuses (/statuses)     : %s", console);
+    cons_show("Chat statuses (/statuses)        : %s", chat);
+    cons_show("MUC statuses (/statuses)         : %s", muc);
 
     prefs_free_string(console);
     prefs_free_string(chat);
@@ -1178,14 +1178,14 @@ void
 cons_titlebar_setting(void)
 {
     if (prefs_get_boolean(PREF_TITLEBAR_SHOW)) {
-        cons_show("Titlebar show (/titlebar)       : ON");
+        cons_show("Titlebar show (/titlebar)        : ON");
     } else {
-        cons_show("Titlebar show (/titlebar)       : OFF");
+        cons_show("Titlebar show (/titlebar)        : OFF");
     }
     if (prefs_get_boolean(PREF_TITLEBAR_GOODBYE)) {
-        cons_show("Titlebar goodbye (/titlebar)    : ON");
+        cons_show("Titlebar goodbye (/titlebar)     : ON");
     } else {
-        cons_show("Titlebar goodbye (/titlebar)    : OFF");
+        cons_show("Titlebar goodbye (/titlebar)     : OFF");
     }
 }
 
@@ -1193,70 +1193,73 @@ void
 cons_roster_setting(void)
 {
     if (prefs_get_boolean(PREF_ROSTER))
-        cons_show("Roster (/roster)                : show");
+        cons_show("Roster (/roster)                 : show");
     else
-        cons_show("Roster (/roster)                : hide");
+        cons_show("Roster (/roster)                 : hide");
 
     if (prefs_get_boolean(PREF_ROSTER_OFFLINE))
-        cons_show("Roster offline (/roster)        : show");
+        cons_show("Roster offline (/roster)         : show");
     else
-        cons_show("Roster offline (/roster)        : hide");
+        cons_show("Roster offline (/roster)         : hide");
 
     if (prefs_get_boolean(PREF_ROSTER_RESOURCE))
-        cons_show("Roster resource (/roster)       : show");
+        cons_show("Roster resource (/roster)        : show");
     else
-        cons_show("Roster resource (/roster)       : hide");
+        cons_show("Roster resource (/roster)        : hide");
 
     if (prefs_get_boolean(PREF_ROSTER_PRESENCE))
-        cons_show("Roster presence (/roster)       : show");
+        cons_show("Roster presence (/roster)        : show");
     else
-        cons_show("Roster presence (/roster)       : hide");
+        cons_show("Roster presence (/roster)        : hide");
 
     if (prefs_get_boolean(PREF_ROSTER_STATUS))
-        cons_show("Roster status (/roster)         : show");
+        cons_show("Roster status (/roster)          : show");
     else
-        cons_show("Roster status (/roster)         : hide");
+        cons_show("Roster status (/roster)          : hide");
 
     if (prefs_get_boolean(PREF_ROSTER_EMPTY))
-        cons_show("Roster empty (/roster)          : show");
+        cons_show("Roster empty (/roster)           : show");
     else
-        cons_show("Roster empty (/roster)          : hide");
+        cons_show("Roster empty (/roster)           : hide");
 
     if (prefs_get_boolean(PREF_ROSTER_COUNT))
-        cons_show("Roster count (/roster)          : show");
+        cons_show("Roster count (/roster)           : show");
     else
-        cons_show("Roster count (/roster)          : hide");
+        cons_show("Roster count (/roster)           : hide");
 
     if (prefs_get_boolean(PREF_ROSTER_PRIORITY))
-        cons_show("Roster priority (/roster)       : show");
+        cons_show("Roster priority (/roster)        : show");
     else
-        cons_show("Roster priority (/roster)       : hide");
+        cons_show("Roster priority (/roster)        : hide");
 
     char *by = prefs_get_string(PREF_ROSTER_BY);
-    cons_show("Roster by (/roster)             : %s", by);
+    cons_show("Roster by (/roster)              : %s", by);
     prefs_free_string(by);
 
     char *order = prefs_get_string(PREF_ROSTER_ORDER);
-    cons_show("Roster order (/roster)          : %s", order);
+    cons_show("Roster order (/roster)           : %s", order);
     prefs_free_string(order);
 
     int size = prefs_get_roster_size();
-    cons_show("Roster size (/roster)           : %d", size);
+    cons_show("Roster size (/roster)            : %d", size);
 
     char header_ch = prefs_get_roster_header_char();
     if (header_ch)
-        cons_show("Roster header char (/roster)    : %c", header_ch);
+        cons_show("Roster header char (/roster)     : %c", header_ch);
     else
-        cons_show("Roster header char (/roster)    : none");
+        cons_show("Roster header char (/roster)     : none");
 
     char contact_ch = prefs_get_roster_contact_char();
     if (contact_ch)
-        cons_show("Roster contact char (/roster)   : %c", contact_ch);
+        cons_show("Roster contact char (/roster)    : %c", contact_ch);
     else
-        cons_show("Roster contact char (/roster)   : none");
+        cons_show("Roster contact char (/roster)    : none");
 
     gint contact_indent = prefs_get_roster_contact_indent();
-    cons_show("Roster contact indent (/roster) : %d", contact_indent);
+    cons_show("Roster contact indent (/roster)  : %d", contact_indent);
+
+    gint resource_indent = prefs_get_roster_resource_indent();
+    cons_show("Roster resource indent (/roster) : %d", resource_indent);
 }
 
 void
@@ -1460,11 +1463,11 @@ cons_show_chat_prefs(void)
 void
 cons_inpblock_setting(void)
 {
-    cons_show("Input timeout (/inpblock)       : %d milliseconds", prefs_get_inpblock());
+    cons_show("Input timeout (/inpblock)        : %d milliseconds", prefs_get_inpblock());
     if (prefs_get_boolean(PREF_INPBLOCK_DYNAMIC)) {
-        cons_show("Dynamic timeout (/inpblock)     : ON");
+        cons_show("Dynamic timeout (/inpblock)      : ON");
     } else {
-        cons_show("Dynamic timeout (/inpblock)     : OFF");
+        cons_show("Dynamic timeout (/inpblock)      : OFF");
     }
 }
 

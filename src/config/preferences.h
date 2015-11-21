@@ -174,6 +174,8 @@ void prefs_clear_roster_contact_char(void);
 
 gint prefs_get_roster_contact_indent(void);
 void prefs_set_roster_contact_indent(gint value);
+gint prefs_get_roster_resource_indent(void);
+void prefs_set_roster_resource_indent(gint value);
 
 void prefs_add_login(const char *jid);
 
