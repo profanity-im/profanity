@@ -31,6 +31,7 @@ roster.priority=true
 roster.size=25
 roster.header.char=-
 roster.contact.char=-
+roster.resource.char=-
 roster.contact.indent=2
 roster.resource.indent=2
 roster.presence.indent=2

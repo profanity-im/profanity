@@ -281,6 +281,7 @@ static struct cmd_t command_defs[] =
             "/roster order name|presence",
             "/roster char header <char>|none",
             "/roster char contact <char>|none",
+            "/roster char resource <char>|none",
             "/roster indent contact <indent>",
             "/roster indent resource <indent>",
             "/roster indent presence <indent>",
@@ -321,6 +322,8 @@ static struct cmd_t command_defs[] =
             { "char header none",           "Remove roster header character prefix." },
             { "char contact <char>",        "Prefix roster contacts with specificed character." },
             { "char contact none",          "Remove roster contact character prefix." },
+            { "char resource <char>",       "Prefix roster resources with specificed character." },
+            { "char resource none",         "Remove roster resource character prefix." },
             { "indent contact <indent>",    "Indent contact line by <indent> spaces (0 to 10)." },
             { "indent resource <indent>",   "Indent resource line by <indent> spaces (0 to 10)." },
             { "indent presence <indent>",   "Indent presence line by <indent> spaces (-1 to 10), a value of -1 will show presence on the previous line." },
@@ -2060,6 +2063,7 @@ cmd_init(void)
     roster_char_ac = autocomplete_new();
     autocomplete_add(roster_char_ac, "header");
     autocomplete_add(roster_char_ac, "contact");
+    autocomplete_add(roster_char_ac, "resource");
 
     roster_char_none_ac = autocomplete_new();
     autocomplete_add(roster_char_none_ac, "none");
@@ -2935,6 +2939,10 @@ _roster_autocomplete(ProfWin *window, const char *const input)
         return result;
     }
     result = autocomplete_param_with_ac(input, "/roster char contact", roster_char_none_ac, TRUE);
+    if (result) {
+        return result;
+    }
+    result = autocomplete_param_with_ac(input, "/roster char resource", roster_char_none_ac, TRUE);
     if (result) {
         return result;
     }

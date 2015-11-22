@@ -1255,6 +1255,12 @@ cons_roster_setting(void)
     else
         cons_show("Roster contact char (/roster)    : none");
 
+    char resource_ch = prefs_get_roster_resource_char();
+    if (resource_ch)
+        cons_show("Roster resource char (/roster)   : %c", resource_ch);
+    else
+        cons_show("Roster resource char (/roster)   : none");
+
     gint contact_indent = prefs_get_roster_contact_indent();
     cons_show("Roster contact indent (/roster)  : %d", contact_indent);
 

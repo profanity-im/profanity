@@ -484,6 +484,13 @@ _load_preferences(void)
             g_free(ch);
         }
     }
+    if (g_key_file_has_key(theme, "ui", "roster.resource.char", NULL)) {
+        gchar *ch = g_key_file_get_string(theme, "ui", "roster.resource.char", NULL);
+        if (ch && strlen(ch) > 0) {
+            prefs_set_roster_resource_char(ch[0]);
+            g_free(ch);
+        }
+    }
     if (g_key_file_has_key(theme, "ui", "roster.contact.indent", NULL)) {
         gint contact_indent = g_key_file_get_integer(theme, "ui", "roster.contact.indent", NULL);
         prefs_set_roster_contact_indent(contact_indent);
