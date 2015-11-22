@@ -1266,7 +1266,7 @@ win_unread(ProfWin *window)
 }
 
 void
-win_print_nowrap(WINDOW *win, char *msg, gboolean newline)
+win_sub_print_nowrap(WINDOW *win, char *msg, gboolean newline)
 {
     int maxx = getmaxx(win);
     int curx = getcurx(win);
@@ -1280,7 +1280,7 @@ win_print_nowrap(WINDOW *win, char *msg, gboolean newline)
 }
 
 void
-win_newline_lazy(WINDOW *win)
+win_sub_newline_lazy(WINDOW *win)
 {
     int curx = getcurx(win);
     if (curx > 0) {
