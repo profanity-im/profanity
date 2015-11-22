@@ -31,6 +31,7 @@ roster.size=25
 roster.contact.indent=0
 roster.resource.indent=0
 roster.presence.indent=-1
+roster.wrap=false
 privileges=false
 presence=false
 intype=false
