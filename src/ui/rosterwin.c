@@ -148,7 +148,7 @@ _rosterwin_resources(ProfLayoutSplit *layout, PContact contact, int current_inde
             }
             g_string_append(msg, resource->name);
             if (prefs_get_boolean(PREF_ROSTER_PRIORITY)) {
-                g_string_append_printf(msg, " [%d]", resource->priority);
+                g_string_append_printf(msg, " %d", resource->priority);
             }
             win_newline_lazy(layout->subwin);
             win_print_nowrap(layout->subwin, msg->str, FALSE);
