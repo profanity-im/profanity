@@ -483,6 +483,18 @@ _load_preferences(void)
             g_free(ch);
         }
     }
+    if (g_key_file_has_key(theme, "ui", "roster.contact.indent", NULL)) {
+        gint contact_indent = g_key_file_get_integer(theme, "ui", "roster.contact.indent", NULL);
+        prefs_set_roster_contact_indent(contact_indent);
+    }
+    if (g_key_file_has_key(theme, "ui", "roster.resource.indent", NULL)) {
+        gint resource_indent = g_key_file_get_integer(theme, "ui", "roster.resource.indent", NULL);
+        prefs_set_roster_resource_indent(resource_indent);
+    }
+    if (g_key_file_has_key(theme, "ui", "roster.presence.indent", NULL)) {
+        gint presence_indent = g_key_file_get_integer(theme, "ui", "roster.presence.indent", NULL);
+        prefs_set_roster_presence_indent(presence_indent);
+    }
 
     _set_boolean_preference("privileges", PREF_MUC_PRIVILEGES);
 

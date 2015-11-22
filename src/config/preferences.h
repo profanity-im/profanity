@@ -174,6 +174,13 @@ char prefs_get_roster_contact_char(void);
 void prefs_set_roster_contact_char(char ch);
 void prefs_clear_roster_contact_char(void);
 
+gint prefs_get_roster_contact_indent(void);
+void prefs_set_roster_contact_indent(gint value);
+gint prefs_get_roster_resource_indent(void);
+void prefs_set_roster_resource_indent(gint value);
+gint prefs_get_roster_presence_indent(void);
+void prefs_set_roster_presence_indent(gint value);
+
 void prefs_add_login(const char *jid);
 
 gboolean prefs_add_alias(const char *const name, const char *const value);

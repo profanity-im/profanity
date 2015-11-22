@@ -1789,6 +1789,61 @@ cmd_roster(ProfWin *window, const char *const command, gchar **args)
         }
         return TRUE;
 
+    // set indentations
+    } else if (g_strcmp0(args[0], "indent") == 0) {
+        if (g_strcmp0(args[1], "contact") == 0) {
+            if (!args[2]) {
+                cons_bad_cmd_usage(command);
+            } else {
+                int intval = 0;
+                char *err_msg = NULL;
+                gboolean res = strtoi_range(args[2], &intval, 0, 10, &err_msg);
+                if (res) {
+                    prefs_set_roster_contact_indent(intval);
+                    cons_show("Roster contact indent set to: %d", intval);
+                    rosterwin_roster();
+                } else {
+                    cons_show(err_msg);
+                    free(err_msg);
+                }
+            }
+        } else if (g_strcmp0(args[1], "resource") == 0) {
+            if (!args[2]) {
+                cons_bad_cmd_usage(command);
+            } else {
+                int intval = 0;
+                char *err_msg = NULL;
+                gboolean res = strtoi_range(args[2], &intval, 0, 10, &err_msg);
+                if (res) {
+                    prefs_set_roster_resource_indent(intval);
+                    cons_show("Roster resource indent set to: %d", intval);
+                    rosterwin_roster();
+                } else {
+                    cons_show(err_msg);
+                    free(err_msg);
+                }
+            }
+        } else if (g_strcmp0(args[1], "presence") == 0) {
+            if (!args[2]) {
+                cons_bad_cmd_usage(command);
+            } else {
+                int intval = 0;
+                char *err_msg = NULL;
+                gboolean res = strtoi_range(args[2], &intval, -1, 10, &err_msg);
+                if (res) {
+                    prefs_set_roster_presence_indent(intval);
+                    cons_show("Roster presence indent set to: %d", intval);
+                    rosterwin_roster();
+                } else {
+                    cons_show(err_msg);
+                    free(err_msg);
+                }
+            }
+        } else {
+            cons_bad_cmd_usage(command);
+        }
+        return TRUE;
+
     // show/hide roster
     } else if (g_strcmp0(args[0], "show") == 0) {
         if (args[1] == NULL) {
@@ -3833,7 +3888,9 @@ cmd_time(ProfWin *window, const char *const command, gchar **args)
 {
     if (g_strcmp0(args[0], "lastactivity") == 0) {
         if (args[1] == NULL) {
-            cons_show("Last activity time format: '%s'.", prefs_get_string(PREF_TIME_LASTACTIVITY));
+            char *format = prefs_get_string(PREF_TIME_LASTACTIVITY);
+            cons_show("Last activity time format: '%s'.", format);
+            prefs_free_string(format);
             return TRUE;
         } else if (g_strcmp0(args[1], "set") == 0 && args[2] != NULL) {
             prefs_set_string(PREF_TIME_LASTACTIVITY, args[2]);
@@ -3850,7 +3907,9 @@ cmd_time(ProfWin *window, const char *const command, gchar **args)
         }
     } else if (g_strcmp0(args[0], "statusbar") == 0) {
         if (args[1] == NULL) {
-            cons_show("Status bar time format: '%s'.", prefs_get_string(PREF_TIME_STATUSBAR));
+            char *format = prefs_get_string(PREF_TIME_STATUSBAR);
+            cons_show("Status bar time format: '%s'.", format);
+            prefs_free_string(format);
             return TRUE;
         } else if (g_strcmp0(args[1], "set") == 0 && args[2] != NULL) {
             prefs_set_string(PREF_TIME_STATUSBAR, args[2]);
@@ -3868,7 +3927,9 @@ cmd_time(ProfWin *window, const char *const command, gchar **args)
         }
     } else if (g_strcmp0(args[0], "console") == 0) {
         if (args[1] == NULL) {
-            cons_show("Console time format: '%s'.", prefs_get_string(PREF_TIME_CONSOLE));
+            char *format = prefs_get_string(PREF_TIME_CONSOLE);
+            cons_show("Console time format: '%s'.", format);
+            prefs_free_string(format);
             return TRUE;
         } else if (g_strcmp0(args[1], "set") == 0 && args[2] != NULL) {
             prefs_set_string(PREF_TIME_CONSOLE, args[2]);
@@ -3886,7 +3947,9 @@ cmd_time(ProfWin *window, const char *const command, gchar **args)
         }
     } else if (g_strcmp0(args[0], "chat") == 0) {
         if (args[1] == NULL) {
-            cons_show("Chat time format: '%s'.", prefs_get_string(PREF_TIME_CHAT));
+            char *format = prefs_get_string(PREF_TIME_CHAT);
+            cons_show("Chat time format: '%s'.", format);
+            prefs_free_string(format);
             return TRUE;
         } else if (g_strcmp0(args[1], "set") == 0 && args[2] != NULL) {
             prefs_set_string(PREF_TIME_CHAT, args[2]);
@@ -3904,7 +3967,9 @@ cmd_time(ProfWin *window, const char *const command, gchar **args)
         }
     } else if (g_strcmp0(args[0], "muc") == 0) {
         if (args[1] == NULL) {
-            cons_show("MUC time format: '%s'.", prefs_get_string(PREF_TIME_MUC));
+            char *format = prefs_get_string(PREF_TIME_MUC);
+            cons_show("MUC time format: '%s'.", format);
+            prefs_free_string(format);
             return TRUE;
         } else if (g_strcmp0(args[1], "set") == 0 && args[2] != NULL) {
             prefs_set_string(PREF_TIME_MUC, args[2]);
@@ -3922,7 +3987,9 @@ cmd_time(ProfWin *window, const char *const command, gchar **args)
         }
     } else if (g_strcmp0(args[0], "mucconfig") == 0) {
         if (args[1] == NULL) {
-            cons_show("MUC config time format: '%s'.", prefs_get_string(PREF_TIME_MUCCONFIG));
+            char *format = prefs_get_string(PREF_TIME_MUCCONFIG);
+            cons_show("MUC config time format: '%s'.", format);
+            prefs_free_string(format);
             return TRUE;
         } else if (g_strcmp0(args[1], "set") == 0 && args[2] != NULL) {
             prefs_set_string(PREF_TIME_MUCCONFIG, args[2]);
@@ -3940,7 +4007,9 @@ cmd_time(ProfWin *window, const char *const command, gchar **args)
         }
     } else if (g_strcmp0(args[0], "private") == 0) {
         if (args[1] == NULL) {
-            cons_show("Private chat time format: '%s'.", prefs_get_string(PREF_TIME_PRIVATE));
+            char *format = prefs_get_string(PREF_TIME_PRIVATE);
+            cons_show("Private chat time format: '%s'.", format);
+            prefs_free_string(format);
             return TRUE;
         } else if (g_strcmp0(args[1], "set") == 0 && args[2] != NULL) {
             prefs_set_string(PREF_TIME_PRIVATE, args[2]);
@@ -3958,7 +4027,9 @@ cmd_time(ProfWin *window, const char *const command, gchar **args)
         }
     } else if (g_strcmp0(args[0], "xml") == 0) {
         if (args[1] == NULL) {
-            cons_show("XML Console time format: '%s'.", prefs_get_string(PREF_TIME_XMLCONSOLE));
+            char *format = prefs_get_string(PREF_TIME_XMLCONSOLE);
+            cons_show("XML Console time format: '%s'.", format);
+            prefs_free_string(format);
             return TRUE;
         } else if (g_strcmp0(args[1], "set") == 0 && args[2] != NULL) {
             prefs_set_string(PREF_TIME_XMLCONSOLE, args[2]);

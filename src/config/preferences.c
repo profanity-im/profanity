@@ -519,6 +519,72 @@ prefs_clear_roster_contact_char(void)
     _save_prefs();
 }
 
+gint
+prefs_get_roster_contact_indent(void)
+{
+    if (!g_key_file_has_key(prefs, PREF_GROUP_UI, "roster.contact.indent", NULL)) {
+        return 2;
+    }
+
+    gint result = g_key_file_get_integer(prefs, PREF_GROUP_UI, "roster.contact.indent", NULL);
+    if (result < 0) {
+        result = 0;
+    }
+
+    return result;
+}
+
+void
+prefs_set_roster_contact_indent(gint value)
+{
+    g_key_file_set_integer(prefs, PREF_GROUP_UI, "roster.contact.indent", value);
+    _save_prefs();
+}
+
+gint
+prefs_get_roster_resource_indent(void)
+{
+    if (!g_key_file_has_key(prefs, PREF_GROUP_UI, "roster.resource.indent", NULL)) {
+        return 2;
+    }
+
+    gint result = g_key_file_get_integer(prefs, PREF_GROUP_UI, "roster.resource.indent", NULL);
+    if (result < 0) {
+        result = 0;
+    }
+
+    return result;
+}
+
+void
+prefs_set_roster_resource_indent(gint value)
+{
+    g_key_file_set_integer(prefs, PREF_GROUP_UI, "roster.resource.indent", value);
+    _save_prefs();
+}
+
+gint
+prefs_get_roster_presence_indent(void)
+{
+    if (!g_key_file_has_key(prefs, PREF_GROUP_UI, "roster.presence.indent", NULL)) {
+        return 2;
+    }
+
+    gint result = g_key_file_get_integer(prefs, PREF_GROUP_UI, "roster.presence.indent", NULL);
+    if (result < -1) {
+        result = 0;
+    }
+
+    return result;
+}
+
+void
+prefs_set_roster_presence_indent(gint value)
+{
+    g_key_file_set_integer(prefs, PREF_GROUP_UI, "roster.presence.indent", value);
+    _save_prefs();
+}
+
 gboolean
 prefs_add_alias(const char *const name, const char *const value)
 {
