@@ -293,6 +293,7 @@ void cons_show_contact_online(PContact contact, Resource *resource, GDateTime *l
 void cons_show_contact_offline(PContact contact, char *resource, char *status);
 void cons_theme_colours(void);
 void cons_show_tlscert(TLSCertificate *cert);
+void cons_show_tlscert_summary(TLSCertificate *cert);
 
 // title bar
 void title_bar_set_presence(contact_presence_t presence);

@@ -244,7 +244,7 @@ cmd_tls(ProfWin *window, const char *const command, gchar **args)
         }
         while (curr) {
             TLSCertificate *cert = curr->data;
-            cons_show_tlscert(cert);
+            cons_show_tlscert_summary(cert);
             cons_show("");
             curr = g_list_next(curr);
         }
@@ -275,24 +275,35 @@ cmd_tls(ProfWin *window, const char *const command, gchar **args)
         return _cmd_set_boolean_preference(args[1], command, "TLS titlebar indicator", PREF_TLS_SHOW);
     } else if (g_strcmp0(args[0], "cert") == 0) {
 #ifdef HAVE_LIBMESODE
-        jabber_conn_status_t conn_status = jabber_get_connection_status();
-        if (conn_status != JABBER_CONNECTED) {
-            cons_show("You are not currently connected.");
+        if (args[1]) {
+            TLSCertificate *cert = tlscerts_get_trusted(args[1]);
+            if (!cert) {
+                cons_show("No such certificate.");
+            } else {
+                cons_show_tlscert(cert);
+                tlscerts_free(cert);
+            }
+            return TRUE;
+        } else {
+            jabber_conn_status_t conn_status = jabber_get_connection_status();
+            if (conn_status != JABBER_CONNECTED) {
+                cons_show("You are not currently connected.");
+                return TRUE;
+            }
+            if (!jabber_conn_is_secured()) {
+                cons_show("No TLS connection established");
+                return TRUE;
+            }
+            TLSCertificate *cert = jabber_get_tls_peer_cert();
+            if (!cert) {
+                cons_show("Error getting TLS certificate.");
+                return TRUE;
+            }
+            cons_show_tlscert(cert);
+            cons_show("");
+            tlscerts_free(cert);
             return TRUE;
         }
-        if (!jabber_conn_is_secured()) {
-            cons_show("No TLS connection established");
-            return TRUE;
-        }
-        TLSCertificate *cert = jabber_get_tls_peer_cert();
-        if (!cert) {
-            cons_show("Error getting TLS certificate.");
-            return TRUE;
-        }
-        cons_show_tlscert(cert);
-        cons_show("");
-        tlscerts_free(cert);
-        return TRUE;
 #else
         cons_show("Certificate fetching not supported.");
         return TRUE;

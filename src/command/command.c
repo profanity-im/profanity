@@ -207,7 +207,7 @@ static struct cmd_t command_defs[] =
             "/tls allow",
             "/tls always",
             "/tls deny",
-            "/tls cert",
+            "/tls cert [<fingerprint>]",
             "/tls trust",
             "/tls trusted",
             "/tls revoke <fingerprint>",
@@ -222,8 +222,9 @@ static struct cmd_t command_defs[] =
             { "always",               "Always allow connections with TLS certificate." },
             { "deny",                 "Abort connection." },
             { "cert",                 "Show the current TLS certificate." },
+            { "cert <fingerprint>",   "Show details of trusted certificate." },
             { "trust",                "Add the current TLS certificate to manually trusted certiciates." },
-            { "trusted",              "List manually trusted certificates (with '/tls always' or '/tls trust')." },
+            { "trusted",              "List summary of manually trusted certificates (with '/tls always' or '/tls trust')." },
             { "revoke <fingerprint>", "Remove a manually trusted certificate." },
             { "certpath",             "Show the trusted certificate path." },
             { "certpath set <path>",  "Specify filesystem path containing trusted certificates." },
@@ -3895,6 +3896,11 @@ _tls_autocomplete(ProfWin *window, const char *const input)
     char *result = NULL;
 
     result = autocomplete_param_with_func(input, "/tls revoke", tlscerts_complete);
+    if (result) {
+        return result;
+    }
+
+    result = autocomplete_param_with_func(input, "/tls cert", tlscerts_complete);
     if (result) {
         return result;
     }
