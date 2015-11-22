@@ -271,7 +271,7 @@ TLSCertificate* jabber_get_tls_peer_cert(void)
     return NULL;
 }
 void cons_show_tlscert(TLSCertificate *cert) {}
-
+void cons_show_tlscert_summary(TLSCertificate *cert) {}
 
 void ui_prune_wins(void) {}
 

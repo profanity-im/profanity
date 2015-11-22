@@ -131,6 +131,15 @@ tlscerts_list(void)
         TLSCertificate *cert = tlscerts_new(fingerprint, version, serialnumber, subjectname, issuername, notbefore,
             notafter, keyalg, signaturealg);
 
+        free(fingerprint);
+        free(serialnumber);
+        free(subjectname);
+        free(issuername);
+        free(notbefore);
+        free(notafter);
+        free(keyalg);
+        free(signaturealg);
+
         res = g_list_append(res, cert);
     }
 
@@ -326,6 +335,36 @@ tlscerts_revoke(const char *const fingerprint)
     _save_tlscerts();
 
     return result;
+}
+
+TLSCertificate*
+tlscerts_get_trusted(const char * const fingerprint)
+{
+    if (!g_key_file_has_group(tlscerts, fingerprint)) {
+        return NULL;
+    }
+
+    int version = g_key_file_get_integer(tlscerts, fingerprint, "version", NULL);
+    char *serialnumber = g_key_file_get_string(tlscerts, fingerprint, "serialnumber", NULL);
+    char *subjectname = g_key_file_get_string(tlscerts, fingerprint, "subjectname", NULL);
+    char *issuername = g_key_file_get_string(tlscerts, fingerprint, "issuername", NULL);
+    char *notbefore = g_key_file_get_string(tlscerts, fingerprint, "start", NULL);
+    char *notafter = g_key_file_get_string(tlscerts, fingerprint, "end", NULL);
+    char *keyalg = g_key_file_get_string(tlscerts, fingerprint, "keyalg", NULL);
+    char *signaturealg = g_key_file_get_string(tlscerts, fingerprint, "signaturealg", NULL);
+
+    TLSCertificate *cert = tlscerts_new(fingerprint, version, serialnumber, subjectname, issuername, notbefore,
+        notafter, keyalg, signaturealg);
+
+    free(serialnumber);
+    free(subjectname);
+    free(issuername);
+    free(notbefore);
+    free(notafter);
+    free(keyalg);
+    free(signaturealg);
+
+    return cert;
 }
 
 char*

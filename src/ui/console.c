@@ -189,6 +189,18 @@ cons_show_error(const char *const msg, ...)
 }
 
 void
+cons_show_tlscert_summary(TLSCertificate *cert)
+{
+    if (!cert) {
+        return;
+    }
+
+    cons_show("Subject     : %s", cert->subject_commonname);
+    cons_show("Issuer      : %s", cert->issuer_commonname);
+    cons_show("Fingerprint : %s", cert->fingerprint);
+}
+
+void
 cons_show_tlscert(TLSCertificate *cert)
 {
     if (!cert) {
