@@ -284,6 +284,7 @@ static struct cmd_t command_defs[] =
             "/roster indent contact <indent>",
             "/roster indent resource <indent>",
             "/roster indent presence <indent>",
+            "/roster resource join on|off",
             "/roster size <percent>",
             "/roster wrap on|off",
             "/roster add <jid> [<nick>]",
@@ -326,6 +327,7 @@ static struct cmd_t command_defs[] =
             { "indent contact <indent>",    "Indent contact line by <indent> spaces (0 to 10)." },
             { "indent resource <indent>",   "Indent resource line by <indent> spaces (0 to 10)." },
             { "indent presence <indent>",   "Indent presence line by <indent> spaces (-1 to 10), a value of -1 will show presence on the previous line." },
+            { "resource join on|off",       "Join resource with previous line when only one available resource." },
             { "size <precent>",             "Percentage of the screen taken up by the roster (1-99)." },
             { "wrap on|off",                "Enabled or disanle line wrapping in roster panel." },
             { "add <jid> [<nick>]",         "Add a new item to the roster." },
@@ -1793,6 +1795,7 @@ static Autocomplete disco_ac;
 static Autocomplete close_ac;
 static Autocomplete wins_ac;
 static Autocomplete roster_ac;
+static Autocomplete roster_resource_ac;
 static Autocomplete roster_char_ac;
 static Autocomplete roster_char_none_ac;
 static Autocomplete roster_indent_ac;
@@ -2047,6 +2050,10 @@ cmd_init(void)
     autocomplete_add(roster_ac, "char");
     autocomplete_add(roster_ac, "indent");
     autocomplete_add(roster_ac, "wrap");
+    autocomplete_add(roster_ac, "resource");
+
+    roster_resource_ac = autocomplete_new();
+    autocomplete_add(roster_resource_ac, "join");
 
     roster_char_ac = autocomplete_new();
     autocomplete_add(roster_char_ac, "header");
@@ -2331,6 +2338,7 @@ cmd_uninit(void)
     autocomplete_free(close_ac);
     autocomplete_free(wins_ac);
     autocomplete_free(roster_ac);
+    autocomplete_free(roster_resource_ac);
     autocomplete_free(roster_char_ac);
     autocomplete_free(roster_char_none_ac);
     autocomplete_free(roster_indent_ac);
@@ -2521,6 +2529,7 @@ cmd_reset_autocomplete(ProfWin *window)
     autocomplete_reset(close_ac);
     autocomplete_reset(wins_ac);
     autocomplete_reset(roster_ac);
+    autocomplete_reset(roster_resource_ac);
     autocomplete_reset(roster_char_ac);
     autocomplete_reset(roster_char_none_ac);
     autocomplete_reset(roster_indent_ac);
@@ -2912,6 +2921,10 @@ static char*
 _roster_autocomplete(ProfWin *window, const char *const input)
 {
     char *result = NULL;
+    result = autocomplete_param_with_func(input, "/roster resource join", prefs_autocomplete_boolean_choice);
+    if (result) {
+        return result;
+    }
     result = autocomplete_param_with_ac(input, "/roster char header", roster_char_none_ac, TRUE);
     if (result) {
         return result;
@@ -2965,6 +2978,10 @@ _roster_autocomplete(ProfWin *window, const char *const input)
         return result;
     }
     result = autocomplete_param_with_func(input, "/roster wrap", prefs_autocomplete_boolean_choice);
+    if (result) {
+        return result;
+    }
+    result = autocomplete_param_with_ac(input, "/roster resource", roster_resource_ac, TRUE);
     if (result) {
         return result;
     }

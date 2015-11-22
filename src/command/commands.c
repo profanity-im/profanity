@@ -1761,6 +1761,17 @@ cmd_roster(ProfWin *window, const char *const command, gchar **args)
             return res;
         }
 
+    // roster join with previous line
+    } else if (g_strcmp0(args[0], "resource") == 0) {
+        if (g_strcmp0(args[1], "join") == 0) {
+            int res =  _cmd_set_boolean_preference(args[2], command, "Roster join", PREF_ROSTER_RESOURCE_JOIN);
+            rosterwin_roster();
+            return res;
+        } else {
+            cons_bad_cmd_usage(command);
+            return TRUE;
+        }
+
     // set header character
     } else if (g_strcmp0(args[0], "char") == 0) {
         if (g_strcmp0(args[1], "header") == 0) {
