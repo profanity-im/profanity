@@ -745,6 +745,7 @@ _get_group(preference_t pref)
         case PREF_ROSTER_ORDER:
         case PREF_ROSTER_COUNT:
         case PREF_ROSTER_PRIORITY:
+        case PREF_ROSTER_WRAP:
         case PREF_RESOURCE_TITLE:
         case PREF_RESOURCE_MESSAGE:
         case PREF_ENC_WARN:
@@ -928,6 +929,8 @@ _get_key(preference_t pref)
             return "roster.count";
         case PREF_ROSTER_PRIORITY:
             return "roster.priority";
+        case PREF_ROSTER_WRAP:
+            return "roster.wrap";
         case PREF_RESOURCE_TITLE:
             return "resource.title";
         case PREF_RESOURCE_MESSAGE:

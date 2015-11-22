@@ -1758,6 +1758,17 @@ cmd_roster(ProfWin *window, const char *const command, gchar **args)
             return TRUE;
         }
 
+    // set line wrapping
+    } else if (g_strcmp0(args[0], "wrap") == 0) {
+        if (!args[1]) {
+            cons_bad_cmd_usage(command);
+            return TRUE;
+        } else {
+            int res =  _cmd_set_boolean_preference(args[1], command, "Roster panel line wrap", PREF_ROSTER_WRAP);
+            rosterwin_roster();
+            return res;
+        }
+
     // set header character
     } else if (g_strcmp0(args[0], "char") == 0) {
         if (g_strcmp0(args[1], "header") == 0) {

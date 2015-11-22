@@ -461,6 +461,7 @@ _load_preferences(void)
     _set_boolean_preference("roster.presence", PREF_ROSTER_PRESENCE);
     _set_boolean_preference("roster.status", PREF_ROSTER_STATUS);
     _set_boolean_preference("roster.empty", PREF_ROSTER_EMPTY);
+    _set_boolean_preference("roster.wrap", PREF_ROSTER_WRAP);
     _set_string_preference("roster.by", PREF_ROSTER_BY);
     _set_string_preference("roster.order", PREF_ROSTER_ORDER);
     _set_boolean_preference("roster.count", PREF_ROSTER_COUNT);

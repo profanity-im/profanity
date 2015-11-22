@@ -1285,13 +1285,17 @@ win_unread(ProfWin *window)
 }
 
 void
-win_sub_print(WINDOW *win, char *msg, gboolean newline, gboolean wrap)
+win_sub_print(WINDOW *win, char *msg, gboolean newline, gboolean wrap, int indent)
 {
     int maxx = getmaxx(win);
     int curx = getcurx(win);
     int cury = getcury(win);
 
-    waddnstr(win, msg, maxx - curx);
+    if (wrap) {
+        _win_print_wrapped(win, msg, 1, indent);
+    } else {
+        waddnstr(win, msg, maxx - curx);
+    }
 
     if (newline) {
         wmove(win, cury+1, 0);

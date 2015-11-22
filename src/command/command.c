@@ -285,6 +285,7 @@ static struct cmd_t command_defs[] =
             "/roster indent resource <indent>",
             "/roster indent presence <indent>",
             "/roster size <percent>",
+            "/roster wrap on|off",
             "/roster add <jid> [<nick>]",
             "/roster remove <jid>",
             "/roster remove_all contacts",
@@ -324,6 +325,7 @@ static struct cmd_t command_defs[] =
             { "indent resource <indent>",   "Indent resource line by <indent> spaces." },
             { "indent presence <indent>",   "Indent presence line by <indent> spaces." },
             { "size <precent>",             "Percentage of the screen taken up by the roster (1-99)." },
+            { "wrap on|off",                "Enabled or disanle line wrapping in roster panel." },
             { "add <jid> [<nick>]",         "Add a new item to the roster." },
             { "remove <jid>",               "Removes an item from the roster." },
             { "remove_all contacts",        "Remove all items from roster." },
@@ -2053,6 +2055,7 @@ cmd_init(void)
     autocomplete_add(roster_ac, "size");
     autocomplete_add(roster_ac, "char");
     autocomplete_add(roster_ac, "indent");
+    autocomplete_add(roster_ac, "wrap");
 
     roster_char_ac = autocomplete_new();
     autocomplete_add(roster_char_ac, "header");
@@ -2972,6 +2975,10 @@ _roster_autocomplete(ProfWin *window, const char *const input)
         return result;
     }
     result = autocomplete_param_with_ac(input, "/roster indent", roster_indent_ac, TRUE);
+    if (result) {
+        return result;
+    }
+    result = autocomplete_param_with_func(input, "/roster wrap", prefs_autocomplete_boolean_choice);
     if (result) {
         return result;
     }
