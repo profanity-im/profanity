@@ -1821,7 +1821,7 @@ cmd_roster(ProfWin *window, const char *const command, gchar **args)
             } else {
                 int intval = 0;
                 char *err_msg = NULL;
-                gboolean res = strtoi_range(args[2], &intval, 0, 10, &err_msg);
+                gboolean res = strtoi_range(args[2], &intval, -1, 10, &err_msg);
                 if (res) {
                     prefs_set_roster_presence_indent(intval);
                     cons_show("Roster presence indent set to: %d", intval);

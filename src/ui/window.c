@@ -1269,11 +1269,22 @@ void
 win_print_nowrap(WINDOW *win, char *msg, gboolean newline)
 {
     int maxx = getmaxx(win);
+    int curx = getcurx(win);
     int cury = getcury(win);
 
-    waddnstr(win, msg, maxx);
+    waddnstr(win, msg, maxx - curx);
 
     if (newline) {
+        wmove(win, cury+1, 0);
+    }
+}
+
+void
+win_newline_lazy(WINDOW *win)
+{
+    int curx = getcurx(win);
+    if (curx > 0) {
+        int cury = getcury(win);
         wmove(win, cury+1, 0);
     }
 }

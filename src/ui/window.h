@@ -68,6 +68,7 @@ void win_redraw(ProfWin *window);
 int win_roster_cols(void);
 int win_occpuants_cols(void);
 void win_print_nowrap(WINDOW *win, char *msg, gboolean newline);
+void win_newline_lazy(WINDOW *win);
 void win_mark_received(ProfWin *window, const char *const id);
 
 gboolean win_has_active_subwin(ProfWin *window);

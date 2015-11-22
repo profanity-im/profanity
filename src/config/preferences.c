@@ -558,7 +558,7 @@ prefs_get_roster_presence_indent(void)
     }
 
     gint result = g_key_file_get_integer(prefs, PREF_GROUP_UI, "roster.presence.indent", NULL);
-    if (result < 0) {
+    if (result < -1) {
         result = 0;
     }
 
