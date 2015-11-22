@@ -1263,6 +1263,11 @@ cons_roster_setting(void)
 
     gint presence_indent = prefs_get_roster_presence_indent();
     cons_show("Roster presence indent (/roster) : %d", presence_indent);
+
+    if (prefs_get_boolean(PREF_ROSTER_WRAP))
+        cons_show("Roster wrap (/roster)            : ON");
+    else
+        cons_show("Roster wrap (/roster)            : OFF");
 }
 
 void

@@ -87,6 +87,7 @@ roster.contact.char=
 roster.contact.indent=
 roster.resource.indent=
 roster.presence.indent=
+roster.wrap=
 occupants=
 occupants.size=
 occupants.jid=
