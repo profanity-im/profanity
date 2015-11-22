@@ -280,6 +280,9 @@ static struct cmd_t command_defs[] =
             "/roster order name|presence",
             "/roster char header <char>|none",
             "/roster char contact <char>|none",
+            "/roster indent contact <indent>",
+            "/roster indent resource <indent>",
+            "/roster indent presence <indent>",
             "/roster size <percent>",
             "/roster add <jid> [<nick>]",
             "/roster remove <jid>",
@@ -290,38 +293,41 @@ static struct cmd_t command_defs[] =
             "Manage your roster, and roster display settings. "
             "Passing no arguments lists all contacts in your roster.")
         CMD_ARGS(
-            { "online",              "Show all online contacts in your roster." },
-            { "show",                "Show the roster panel." },
-            { "show offline",        "Show offline contacts in the roster panel." },
-            { "show resource",       "Show contact's connected resources in the roster panel." },
-            { "show presence",       "Show contact's presence in the roster panel." },
-            { "show status",         "Show contact's status message in the roster panel." },
-            { "show empty",          "When grouping by presence, show empty presence groups." },
-            { "show count",          "Show number of contacts in group/presence." },
-            { "show priority",       "Show resource priority." },
-            { "hide",                "Hide the roster panel." },
-            { "hide offline",        "Hide offline contacts in the roster panel." },
-            { "hide resource",       "Hide contact's connected resources in the roster panel." },
-            { "hide presence",       "Hide contact's presence in the roster panel." },
-            { "hide status",         "Hide contact's status message in the roster panel." },
-            { "hide empty",          "When grouping by presence, hide empty presence groups." },
-            { "hide count",          "Hide number of contacts in group/presence." },
-            { "hide priority",       "Hide resource priority." },
-            { "by group",            "Group contacts in the roster panel by roster group." },
-            { "by presence",         "Group contacts in the roster panel by presence." },
-            { "by none",             "No grouping in the roster panel." },
-            { "order name",          "Order roster items by name only." },
-            { "order presence",      "Order roster items by presence, and then by name." },
-            { "char header <char>",  "Prefix roster headers with specificed character." },
-            { "char header none",    "Remove roster header character prefix." },
-            { "char contact <char>", "Prefix roster contacts with specificed character." },
-            { "char contact none",   "Remove roster contact character prefix." },
-            { "size <precent>",      "Percentage of the screen taken up by the roster (1-99)." },
-            { "add <jid> [<nick>]",  "Add a new item to the roster." },
-            { "remove <jid>",        "Removes an item from the roster." },
-            { "remove_all contacts", "Remove all items from roster." },
-            { "nick <jid> <nick>",   "Change a contacts nickname." },
-            { "clearnick <jid>",     "Removes the current nickname." })
+            { "online",                     "Show all online contacts in your roster." },
+            { "show",                       "Show the roster panel." },
+            { "show offline",               "Show offline contacts in the roster panel." },
+            { "show resource",              "Show contact's connected resources in the roster panel." },
+            { "show presence",              "Show contact's presence in the roster panel." },
+            { "show status",                "Show contact's status message in the roster panel." },
+            { "show empty",                 "When grouping by presence, show empty presence groups." },
+            { "show count",                 "Show number of contacts in group/presence." },
+            { "show priority",              "Show resource priority." },
+            { "hide",                       "Hide the roster panel." },
+            { "hide offline",               "Hide offline contacts in the roster panel." },
+            { "hide resource",              "Hide contact's connected resources in the roster panel." },
+            { "hide presence",              "Hide contact's presence in the roster panel." },
+            { "hide status",                "Hide contact's status message in the roster panel." },
+            { "hide empty",                 "When grouping by presence, hide empty presence groups." },
+            { "hide count",                 "Hide number of contacts in group/presence." },
+            { "hide priority",              "Hide resource priority." },
+            { "by group",                   "Group contacts in the roster panel by roster group." },
+            { "by presence",                "Group contacts in the roster panel by presence." },
+            { "by none",                    "No grouping in the roster panel." },
+            { "order name",                 "Order roster items by name only." },
+            { "order presence",             "Order roster items by presence, and then by name." },
+            { "char header <char>",         "Prefix roster headers with specificed character." },
+            { "char header none",           "Remove roster header character prefix." },
+            { "char contact <char>",        "Prefix roster contacts with specificed character." },
+            { "char contact none",          "Remove roster contact character prefix." },
+            { "indent contact <indent>",    "Indent contact line by <indent> spaces." },
+            { "indent resource <indent>",   "Indent resource line by <indent> spaces." },
+            { "indent presence <indent>",   "Indent presence line by <indent> spaces." },
+            { "size <precent>",             "Percentage of the screen taken up by the roster (1-99)." },
+            { "add <jid> [<nick>]",         "Add a new item to the roster." },
+            { "remove <jid>",               "Removes an item from the roster." },
+            { "remove_all contacts",        "Remove all items from roster." },
+            { "nick <jid> <nick>",          "Change a contacts nickname." },
+            { "clearnick <jid>",            "Removes the current nickname." })
         CMD_EXAMPLES(
             "/roster",
             "/roster add someone@contacts.org",
@@ -1784,6 +1790,7 @@ static Autocomplete wins_ac;
 static Autocomplete roster_ac;
 static Autocomplete roster_char_ac;
 static Autocomplete roster_char_none_ac;
+static Autocomplete roster_indent_ac;
 static Autocomplete roster_option_ac;
 static Autocomplete roster_by_ac;
 static Autocomplete roster_order_ac;
@@ -2033,6 +2040,7 @@ cmd_init(void)
     autocomplete_add(roster_ac, "order");
     autocomplete_add(roster_ac, "size");
     autocomplete_add(roster_ac, "char");
+    autocomplete_add(roster_ac, "indent");
 
     roster_char_ac = autocomplete_new();
     autocomplete_add(roster_char_ac, "header");
@@ -2040,6 +2048,11 @@ cmd_init(void)
 
     roster_char_none_ac = autocomplete_new();
     autocomplete_add(roster_char_none_ac, "none");
+
+    roster_indent_ac = autocomplete_new();
+    autocomplete_add(roster_indent_ac, "contact");
+    autocomplete_add(roster_indent_ac, "resource");
+    autocomplete_add(roster_indent_ac, "presence");
 
     roster_option_ac = autocomplete_new();
     autocomplete_add(roster_option_ac, "offline");
@@ -2313,6 +2326,7 @@ cmd_uninit(void)
     autocomplete_free(roster_ac);
     autocomplete_free(roster_char_ac);
     autocomplete_free(roster_char_none_ac);
+    autocomplete_free(roster_indent_ac);
     autocomplete_free(roster_option_ac);
     autocomplete_free(roster_by_ac);
     autocomplete_free(roster_order_ac);
@@ -2502,6 +2516,7 @@ cmd_reset_autocomplete(ProfWin *window)
     autocomplete_reset(roster_ac);
     autocomplete_reset(roster_char_ac);
     autocomplete_reset(roster_char_none_ac);
+    autocomplete_reset(roster_indent_ac);
     autocomplete_reset(roster_option_ac);
     autocomplete_reset(roster_by_ac);
     autocomplete_reset(roster_order_ac);
@@ -2931,6 +2946,10 @@ _roster_autocomplete(ProfWin *window, const char *const input)
         return result;
     }
     result = autocomplete_param_with_ac(input, "/roster char", roster_char_ac, TRUE);
+    if (result) {
+        return result;
+    }
+    result = autocomplete_param_with_ac(input, "/roster indent", roster_indent_ac, TRUE);
     if (result) {
         return result;
     }

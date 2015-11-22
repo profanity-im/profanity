@@ -1266,12 +1266,25 @@ win_unread(ProfWin *window)
 }
 
 void
-win_printline_nowrap(WINDOW *win, char *msg)
+win_sub_print(WINDOW *win, char *msg, gboolean newline, gboolean wrap)
 {
     int maxx = getmaxx(win);
+    int curx = getcurx(win);
     int cury = getcury(win);
 
-    waddnstr(win, msg, maxx);
+    waddnstr(win, msg, maxx - curx);
 
-    wmove(win, cury+1, 0);
+    if (newline) {
+        wmove(win, cury+1, 0);
+    }
+}
+
+void
+win_sub_newline_lazy(WINDOW *win)
+{
+    int curx = getcurx(win);
+    if (curx > 0) {
+        int cury = getcury(win);
+        wmove(win, cury+1, 0);
+    }
 }
