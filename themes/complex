@@ -34,6 +34,7 @@ roster.contact.char=-
 roster.contact.indent=2
 roster.resource.indent=2
 roster.presence.indent=2
+roster.wrap=true
 privileges=true
 presence=true
 intype=true
