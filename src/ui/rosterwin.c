@@ -148,6 +148,10 @@ _rosterwin_resources(ProfLayoutSplit *layout, PContact contact, int current_inde
                 g_string_append(msg, " ");
                 this_indent--;
             }
+            char ch = prefs_get_roster_resource_char();
+            if (ch) {
+                g_string_append_printf(msg, "%c", ch);
+            }
             g_string_append(msg, resource->name);
             if (prefs_get_boolean(PREF_ROSTER_PRIORITY)) {
                 g_string_append_printf(msg, " %d", resource->priority);
