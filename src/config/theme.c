@@ -458,6 +458,7 @@ _load_preferences(void)
     _set_boolean_preference("roster", PREF_ROSTER);
     _set_boolean_preference("roster.offline", PREF_ROSTER_OFFLINE);
     _set_boolean_preference("roster.resource", PREF_ROSTER_RESOURCE);
+    _set_boolean_preference("roster.resource.join", PREF_ROSTER_RESOURCE_JOIN);
     _set_boolean_preference("roster.presence", PREF_ROSTER_PRESENCE);
     _set_boolean_preference("roster.status", PREF_ROSTER_STATUS);
     _set_boolean_preference("roster.empty", PREF_ROSTER_EMPTY);
@@ -476,6 +477,8 @@ _load_preferences(void)
             prefs_set_roster_header_char(ch[0]);
             g_free(ch);
         }
+    } else {
+        prefs_clear_roster_header_char();
     }
     if (g_key_file_has_key(theme, "ui", "roster.contact.char", NULL)) {
         gchar *ch = g_key_file_get_string(theme, "ui", "roster.contact.char", NULL);
@@ -483,6 +486,8 @@ _load_preferences(void)
             prefs_set_roster_contact_char(ch[0]);
             g_free(ch);
         }
+    } else {
+        prefs_clear_roster_contact_char();
     }
     if (g_key_file_has_key(theme, "ui", "roster.resource.char", NULL)) {
         gchar *ch = g_key_file_get_string(theme, "ui", "roster.resource.char", NULL);
@@ -490,6 +495,8 @@ _load_preferences(void)
             prefs_set_roster_resource_char(ch[0]);
             g_free(ch);
         }
+    } else {
+        prefs_clear_roster_resource_char();
     }
     if (g_key_file_has_key(theme, "ui", "roster.contact.indent", NULL)) {
         gint contact_indent = g_key_file_get_integer(theme, "ui", "roster.contact.indent", NULL);

@@ -278,12 +278,13 @@ static struct cmd_t command_defs[] =
             "/roster hide [offline|resource|presence|status|empty|count|priority]",
             "/roster by group|presence|none",
             "/roster order name|presence",
-            "/roster char header <char>|none",
-            "/roster char contact <char>|none",
-            "/roster char resource <char>|none",
-            "/roster indent contact <indent>",
-            "/roster indent resource <indent>",
-            "/roster indent presence <indent>",
+            "/roster header char <char>|none",
+            "/roster presence indent <indent>",
+            "/roster contact char <char>|none",
+            "/roster contact indent <indent>",
+            "/roster resource char <char>|none",
+            "/roster resource indent <indent>",
+            "/roster resource join on|off",
             "/roster size <percent>",
             "/roster wrap on|off",
             "/roster add <jid> [<nick>]",
@@ -317,15 +318,16 @@ static struct cmd_t command_defs[] =
             { "by none",                    "No grouping in the roster panel." },
             { "order name",                 "Order roster items by name only." },
             { "order presence",             "Order roster items by presence, and then by name." },
-            { "char header <char>",         "Prefix roster headers with specificed character." },
-            { "char header none",           "Remove roster header character prefix." },
-            { "char contact <char>",        "Prefix roster contacts with specificed character." },
-            { "char contact none",          "Remove roster contact character prefix." },
-            { "char resource <char>",       "Prefix roster resources with specificed character." },
-            { "char resource none",         "Remove roster resource character prefix." },
-            { "indent contact <indent>",    "Indent contact line by <indent> spaces (0 to 10)." },
-            { "indent resource <indent>",   "Indent resource line by <indent> spaces (0 to 10)." },
-            { "indent presence <indent>",   "Indent presence line by <indent> spaces (-1 to 10), a value of -1 will show presence on the previous line." },
+            { "header char <char>",         "Prefix roster headers with specificed character." },
+            { "header char none",           "Remove roster header character prefix." },
+            { "contact char <char>",        "Prefix roster contacts with specificed character." },
+            { "contact char none",          "Remove roster contact character prefix." },
+            { "contact indent <indent>",    "Indent contact line by <indent> spaces (0 to 10)." },
+            { "resource char <char>",       "Prefix roster resources with specificed character." },
+            { "resource char none",         "Remove roster resource character prefix." },
+            { "resource indent <indent>",   "Indent resource line by <indent> spaces (0 to 10)." },
+            { "resource join on|off",       "Join resource with previous line when only one available resource." },
+            { "presence indent <indent>",   "Indent presence line by <indent> spaces (-1 to 10), a value of -1 will show presence on the previous line." },
             { "size <precent>",             "Percentage of the screen taken up by the roster (1-99)." },
             { "wrap on|off",                "Enabled or disanle line wrapping in roster panel." },
             { "add <jid> [<nick>]",         "Add a new item to the roster." },
@@ -1793,12 +1795,14 @@ static Autocomplete disco_ac;
 static Autocomplete close_ac;
 static Autocomplete wins_ac;
 static Autocomplete roster_ac;
-static Autocomplete roster_char_ac;
-static Autocomplete roster_char_none_ac;
-static Autocomplete roster_indent_ac;
-static Autocomplete roster_option_ac;
+static Autocomplete roster_show_ac;
 static Autocomplete roster_by_ac;
 static Autocomplete roster_order_ac;
+static Autocomplete roster_header_ac;
+static Autocomplete roster_contact_ac;
+static Autocomplete roster_resource_ac;
+static Autocomplete roster_presence_ac;
+static Autocomplete roster_char_ac;
 static Autocomplete roster_remove_all_ac;
 static Autocomplete group_ac;
 static Autocomplete bookmark_ac;
@@ -2044,31 +2048,38 @@ cmd_init(void)
     autocomplete_add(roster_ac, "by");
     autocomplete_add(roster_ac, "order");
     autocomplete_add(roster_ac, "size");
-    autocomplete_add(roster_ac, "char");
-    autocomplete_add(roster_ac, "indent");
     autocomplete_add(roster_ac, "wrap");
+    autocomplete_add(roster_ac, "header");
+    autocomplete_add(roster_ac, "contact");
+    autocomplete_add(roster_ac, "resource");
+    autocomplete_add(roster_ac, "presence");
+
+    roster_header_ac = autocomplete_new();
+    autocomplete_add(roster_header_ac, "char");
+
+    roster_contact_ac = autocomplete_new();
+    autocomplete_add(roster_contact_ac, "char");
+    autocomplete_add(roster_contact_ac, "indent");
+
+    roster_resource_ac = autocomplete_new();
+    autocomplete_add(roster_resource_ac, "char");
+    autocomplete_add(roster_resource_ac, "indent");
+    autocomplete_add(roster_resource_ac, "join");
+
+    roster_presence_ac = autocomplete_new();
+    autocomplete_add(roster_presence_ac, "indent");
 
     roster_char_ac = autocomplete_new();
-    autocomplete_add(roster_char_ac, "header");
-    autocomplete_add(roster_char_ac, "contact");
-    autocomplete_add(roster_char_ac, "resource");
+    autocomplete_add(roster_char_ac, "none");
 
-    roster_char_none_ac = autocomplete_new();
-    autocomplete_add(roster_char_none_ac, "none");
-
-    roster_indent_ac = autocomplete_new();
-    autocomplete_add(roster_indent_ac, "contact");
-    autocomplete_add(roster_indent_ac, "resource");
-    autocomplete_add(roster_indent_ac, "presence");
-
-    roster_option_ac = autocomplete_new();
-    autocomplete_add(roster_option_ac, "offline");
-    autocomplete_add(roster_option_ac, "resource");
-    autocomplete_add(roster_option_ac, "presence");
-    autocomplete_add(roster_option_ac, "status");
-    autocomplete_add(roster_option_ac, "empty");
-    autocomplete_add(roster_option_ac, "count");
-    autocomplete_add(roster_option_ac, "priority");
+    roster_show_ac = autocomplete_new();
+    autocomplete_add(roster_show_ac, "offline");
+    autocomplete_add(roster_show_ac, "resource");
+    autocomplete_add(roster_show_ac, "presence");
+    autocomplete_add(roster_show_ac, "status");
+    autocomplete_add(roster_show_ac, "empty");
+    autocomplete_add(roster_show_ac, "count");
+    autocomplete_add(roster_show_ac, "priority");
 
     roster_by_ac = autocomplete_new();
     autocomplete_add(roster_by_ac, "group");
@@ -2331,10 +2342,12 @@ cmd_uninit(void)
     autocomplete_free(close_ac);
     autocomplete_free(wins_ac);
     autocomplete_free(roster_ac);
+    autocomplete_free(roster_header_ac);
+    autocomplete_free(roster_contact_ac);
+    autocomplete_free(roster_resource_ac);
+    autocomplete_free(roster_presence_ac);
     autocomplete_free(roster_char_ac);
-    autocomplete_free(roster_char_none_ac);
-    autocomplete_free(roster_indent_ac);
-    autocomplete_free(roster_option_ac);
+    autocomplete_free(roster_show_ac);
     autocomplete_free(roster_by_ac);
     autocomplete_free(roster_order_ac);
     autocomplete_free(roster_remove_all_ac);
@@ -2521,10 +2534,12 @@ cmd_reset_autocomplete(ProfWin *window)
     autocomplete_reset(close_ac);
     autocomplete_reset(wins_ac);
     autocomplete_reset(roster_ac);
+    autocomplete_reset(roster_header_ac);
+    autocomplete_reset(roster_contact_ac);
+    autocomplete_reset(roster_resource_ac);
+    autocomplete_reset(roster_presence_ac);
     autocomplete_reset(roster_char_ac);
-    autocomplete_reset(roster_char_none_ac);
-    autocomplete_reset(roster_indent_ac);
-    autocomplete_reset(roster_option_ac);
+    autocomplete_reset(roster_show_ac);
     autocomplete_reset(roster_by_ac);
     autocomplete_reset(roster_order_ac);
     autocomplete_reset(roster_remove_all_ac);
@@ -2912,15 +2927,19 @@ static char*
 _roster_autocomplete(ProfWin *window, const char *const input)
 {
     char *result = NULL;
-    result = autocomplete_param_with_ac(input, "/roster char header", roster_char_none_ac, TRUE);
+    result = autocomplete_param_with_ac(input, "/roster header char", roster_char_ac, TRUE);
     if (result) {
         return result;
     }
-    result = autocomplete_param_with_ac(input, "/roster char contact", roster_char_none_ac, TRUE);
+    result = autocomplete_param_with_ac(input, "/roster contact char", roster_char_ac, TRUE);
     if (result) {
         return result;
     }
-    result = autocomplete_param_with_ac(input, "/roster char resource", roster_char_none_ac, TRUE);
+    result = autocomplete_param_with_ac(input, "/roster resource char", roster_char_ac, TRUE);
+    if (result) {
+        return result;
+    }
+    result = autocomplete_param_with_func(input, "/roster resource join", prefs_autocomplete_boolean_choice);
     if (result) {
         return result;
     }
@@ -2940,11 +2959,11 @@ _roster_autocomplete(ProfWin *window, const char *const input)
     if (result) {
         return result;
     }
-    result = autocomplete_param_with_ac(input, "/roster show", roster_option_ac, TRUE);
+    result = autocomplete_param_with_ac(input, "/roster show", roster_show_ac, TRUE);
     if (result) {
         return result;
     }
-    result = autocomplete_param_with_ac(input, "/roster hide", roster_option_ac, TRUE);
+    result = autocomplete_param_with_ac(input, "/roster hide", roster_show_ac, TRUE);
     if (result) {
         return result;
     }
@@ -2956,15 +2975,23 @@ _roster_autocomplete(ProfWin *window, const char *const input)
     if (result) {
         return result;
     }
-    result = autocomplete_param_with_ac(input, "/roster char", roster_char_ac, TRUE);
-    if (result) {
-        return result;
-    }
-    result = autocomplete_param_with_ac(input, "/roster indent", roster_indent_ac, TRUE);
-    if (result) {
-        return result;
-    }
     result = autocomplete_param_with_func(input, "/roster wrap", prefs_autocomplete_boolean_choice);
+    if (result) {
+        return result;
+    }
+    result = autocomplete_param_with_ac(input, "/roster header", roster_header_ac, TRUE);
+    if (result) {
+        return result;
+    }
+    result = autocomplete_param_with_ac(input, "/roster contact", roster_contact_ac, TRUE);
+    if (result) {
+        return result;
+    }
+    result = autocomplete_param_with_ac(input, "/roster resource", roster_resource_ac, TRUE);
+    if (result) {
+        return result;
+    }
+    result = autocomplete_param_with_ac(input, "/roster presence", roster_presence_ac, TRUE);
     if (result) {
         return result;
     }

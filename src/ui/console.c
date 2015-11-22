@@ -1202,15 +1202,47 @@ cons_roster_setting(void)
     else
         cons_show("Roster offline (/roster)         : hide");
 
+    char header_ch = prefs_get_roster_header_char();
+    if (header_ch)
+        cons_show("Roster header char (/roster)     : %c", header_ch);
+    else
+        cons_show("Roster header char (/roster)     : none");
+
+    char contact_ch = prefs_get_roster_contact_char();
+    if (contact_ch)
+        cons_show("Roster contact char (/roster)    : %c", contact_ch);
+    else
+        cons_show("Roster contact char (/roster)    : none");
+
+    gint contact_indent = prefs_get_roster_contact_indent();
+    cons_show("Roster contact indent (/roster)  : %d", contact_indent);
+
     if (prefs_get_boolean(PREF_ROSTER_RESOURCE))
         cons_show("Roster resource (/roster)        : show");
     else
         cons_show("Roster resource (/roster)        : hide");
 
+    char resource_ch = prefs_get_roster_resource_char();
+    if (resource_ch)
+        cons_show("Roster resource char (/roster)   : %c", resource_ch);
+    else
+        cons_show("Roster resource char (/roster)   : none");
+
+    gint resource_indent = prefs_get_roster_resource_indent();
+    cons_show("Roster resource indent (/roster) : %d", resource_indent);
+
+    if (prefs_get_boolean(PREF_ROSTER_RESOURCE_JOIN))
+        cons_show("Roster resource join (/roster)   : on");
+    else
+        cons_show("Roster resource join (/roster)   : off");
+
     if (prefs_get_boolean(PREF_ROSTER_PRESENCE))
         cons_show("Roster presence (/roster)        : show");
     else
         cons_show("Roster presence (/roster)        : hide");
+
+    gint presence_indent = prefs_get_roster_presence_indent();
+    cons_show("Roster presence indent (/roster) : %d", presence_indent);
 
     if (prefs_get_boolean(PREF_ROSTER_STATUS))
         cons_show("Roster status (/roster)          : show");
@@ -1242,33 +1274,6 @@ cons_roster_setting(void)
 
     int size = prefs_get_roster_size();
     cons_show("Roster size (/roster)            : %d", size);
-
-    char header_ch = prefs_get_roster_header_char();
-    if (header_ch)
-        cons_show("Roster header char (/roster)     : %c", header_ch);
-    else
-        cons_show("Roster header char (/roster)     : none");
-
-    char contact_ch = prefs_get_roster_contact_char();
-    if (contact_ch)
-        cons_show("Roster contact char (/roster)    : %c", contact_ch);
-    else
-        cons_show("Roster contact char (/roster)    : none");
-
-    char resource_ch = prefs_get_roster_resource_char();
-    if (resource_ch)
-        cons_show("Roster resource char (/roster)   : %c", resource_ch);
-    else
-        cons_show("Roster resource char (/roster)   : none");
-
-    gint contact_indent = prefs_get_roster_contact_indent();
-    cons_show("Roster contact indent (/roster)  : %d", contact_indent);
-
-    gint resource_indent = prefs_get_roster_resource_indent();
-    cons_show("Roster resource indent (/roster) : %d", resource_indent);
-
-    gint presence_indent = prefs_get_roster_presence_indent();
-    cons_show("Roster presence indent (/roster) : %d", presence_indent);
 
     if (prefs_get_boolean(PREF_ROSTER_WRAP))
         cons_show("Roster wrap (/roster)            : ON");

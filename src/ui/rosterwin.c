@@ -128,45 +128,74 @@ _rosterwin_presence(ProfLayoutSplit *layout, theme_item_t colour, const char *pr
 static void
 _rosterwin_resources(ProfLayoutSplit *layout, PContact contact, int current_indent)
 {
+    gboolean join = prefs_get_boolean(PREF_ROSTER_RESOURCE_JOIN);
+
     GList *resources = p_contact_get_available_resources(contact);
     if (resources) {
-        int resource_indent = prefs_get_roster_resource_indent();
-        if (resource_indent > 0) {
-            current_indent += resource_indent;
-        }
-
-        GList *curr_resource = resources;
-        while (curr_resource) {
-            Resource *resource = curr_resource->data;
+        if (join && (g_list_length(resources) == 1)) {
+            Resource *resource = resources->data;
             const char *resource_presence = string_from_resource_presence(resource->presence);
             theme_item_t resource_presence_colour = theme_main_presence_attrs(resource_presence);
 
             wattron(layout->subwin, theme_attrs(resource_presence_colour));
-            GString *msg = g_string_new(" ");
-            int this_indent = current_indent;
-            while (this_indent > 0) {
-                g_string_append(msg, " ");
-                this_indent--;
-            }
+            GString *msg = g_string_new("");
             char ch = prefs_get_roster_resource_char();
             if (ch) {
                 g_string_append_printf(msg, "%c", ch);
+            } else {
+                g_string_append(msg, " ");
             }
             g_string_append(msg, resource->name);
             if (prefs_get_boolean(PREF_ROSTER_PRIORITY)) {
                 g_string_append_printf(msg, " %d", resource->priority);
             }
-            win_sub_newline_lazy(layout->subwin);
             gboolean wrap = prefs_get_boolean(PREF_ROSTER_WRAP);
-            win_sub_print(layout->subwin, msg->str, FALSE, wrap, current_indent);
+            win_sub_print(layout->subwin, msg->str, FALSE, wrap, 0);
             g_string_free(msg, TRUE);
             wattroff(layout->subwin, theme_attrs(resource_presence_colour));
 
             if (prefs_get_boolean(PREF_ROSTER_PRESENCE) || prefs_get_boolean(PREF_ROSTER_STATUS)) {
                 _rosterwin_presence(layout, resource_presence_colour, resource_presence, resource->status, current_indent);
             }
+        } else {
+            int resource_indent = prefs_get_roster_resource_indent();
+            if (resource_indent > 0) {
+                current_indent += resource_indent;
+            }
 
-            curr_resource = g_list_next(curr_resource);
+            GList *curr_resource = resources;
+            while (curr_resource) {
+                Resource *resource = curr_resource->data;
+                const char *resource_presence = string_from_resource_presence(resource->presence);
+                theme_item_t resource_presence_colour = theme_main_presence_attrs(resource_presence);
+
+                wattron(layout->subwin, theme_attrs(resource_presence_colour));
+                GString *msg = g_string_new(" ");
+                int this_indent = current_indent;
+                while (this_indent > 0) {
+                    g_string_append(msg, " ");
+                    this_indent--;
+                }
+                char ch = prefs_get_roster_resource_char();
+                if (ch) {
+                    g_string_append_printf(msg, "%c", ch);
+                }
+                g_string_append(msg, resource->name);
+                if (prefs_get_boolean(PREF_ROSTER_PRIORITY)) {
+                    g_string_append_printf(msg, " %d", resource->priority);
+                }
+                win_sub_newline_lazy(layout->subwin);
+                gboolean wrap = prefs_get_boolean(PREF_ROSTER_WRAP);
+                win_sub_print(layout->subwin, msg->str, FALSE, wrap, current_indent);
+                g_string_free(msg, TRUE);
+                wattroff(layout->subwin, theme_attrs(resource_presence_colour));
+
+                if (prefs_get_boolean(PREF_ROSTER_PRESENCE) || prefs_get_boolean(PREF_ROSTER_STATUS)) {
+                    _rosterwin_presence(layout, resource_presence_colour, resource_presence, resource->status, current_indent);
+                }
+
+                curr_resource = g_list_next(curr_resource);
+            }
         }
     } else if (prefs_get_boolean(PREF_ROSTER_PRESENCE) || prefs_get_boolean(PREF_ROSTER_STATUS)) {
         const char *presence = p_contact_presence(contact);
