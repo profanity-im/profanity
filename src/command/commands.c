@@ -1764,14 +1764,14 @@ cmd_roster(ProfWin *window, const char *const command, gchar **args)
             cons_bad_cmd_usage(command);
             return TRUE;
         } else {
-            int res =  _cmd_set_boolean_preference(args[1], command, "Roster panel line wrap", PREF_ROSTER_WRAP);
+            int res = _cmd_set_boolean_preference(args[1], command, "Roster panel line wrap", PREF_ROSTER_WRAP);
             rosterwin_roster();
             return res;
         }
 
-    // set header character
-    } else if (g_strcmp0(args[0], "char") == 0) {
-        if (g_strcmp0(args[1], "header") == 0) {
+    // header settings
+    } else if (g_strcmp0(args[0], "header") == 0) {
+        if (g_strcmp0(args[1], "char") == 0) {
             if (!args[2]) {
                 cons_bad_cmd_usage(command);
             } else if (g_strcmp0(args[2], "none") == 0) {
@@ -1783,7 +1783,14 @@ cmd_roster(ProfWin *window, const char *const command, gchar **args)
                 cons_show("Roster header char set to %c.", args[2][0]);
                 rosterwin_roster();
             }
-        } else if (g_strcmp0(args[1], "contact") == 0) {
+        } else {
+            cons_bad_cmd_usage(command);
+        }
+        return TRUE;
+
+    // contact settings
+    } else if (g_strcmp0(args[0], "contact") == 0) {
+        if (g_strcmp0(args[1], "char") == 0) {
             if (!args[2]) {
                 cons_bad_cmd_usage(command);
             } else if (g_strcmp0(args[2], "none") == 0) {
@@ -1795,26 +1802,7 @@ cmd_roster(ProfWin *window, const char *const command, gchar **args)
                 cons_show("Roster contact char set to %c.", args[2][0]);
                 rosterwin_roster();
             }
-        } else if (g_strcmp0(args[1], "resource") == 0) {
-            if (!args[2]) {
-                cons_bad_cmd_usage(command);
-            } else if (g_strcmp0(args[2], "none") == 0) {
-                prefs_clear_roster_resource_char();
-                cons_show("Roster resource char removed.");
-                rosterwin_roster();
-            } else {
-                prefs_set_roster_resource_char(args[2][0]);
-                cons_show("Roster resource char set to %c.", args[2][0]);
-                rosterwin_roster();
-            }
-        } else {
-            cons_bad_cmd_usage(command);
-        }
-        return TRUE;
-
-    // set indentations
-    } else if (g_strcmp0(args[0], "indent") == 0) {
-        if (g_strcmp0(args[1], "contact") == 0) {
+        } else if (g_strcmp0(args[1], "indent") == 0) {
             if (!args[2]) {
                 cons_bad_cmd_usage(command);
             } else {
@@ -1830,7 +1818,26 @@ cmd_roster(ProfWin *window, const char *const command, gchar **args)
                     free(err_msg);
                 }
             }
-        } else if (g_strcmp0(args[1], "resource") == 0) {
+        } else {
+            cons_bad_cmd_usage(command);
+        }
+        return TRUE;
+
+    // resource settings
+    } else if (g_strcmp0(args[0], "resource") == 0) {
+        if (g_strcmp0(args[1], "char") == 0) {
+            if (!args[2]) {
+                cons_bad_cmd_usage(command);
+            } else if (g_strcmp0(args[2], "none") == 0) {
+                prefs_clear_roster_resource_char();
+                cons_show("Roster resource char removed.");
+                rosterwin_roster();
+            } else {
+                prefs_set_roster_resource_char(args[2][0]);
+                cons_show("Roster resource char set to %c.", args[2][0]);
+                rosterwin_roster();
+            }
+        } else if (g_strcmp0(args[1], "indent") == 0) {
             if (!args[2]) {
                 cons_bad_cmd_usage(command);
             } else {
@@ -1846,7 +1853,18 @@ cmd_roster(ProfWin *window, const char *const command, gchar **args)
                     free(err_msg);
                 }
             }
-        } else if (g_strcmp0(args[1], "presence") == 0) {
+        } else if (g_strcmp0(args[1], "join") == 0) {
+            int res = _cmd_set_boolean_preference(args[2], command, "Roster join", PREF_ROSTER_RESOURCE_JOIN);
+            rosterwin_roster();
+            return res;
+        } else {
+            cons_bad_cmd_usage(command);
+        }
+        return TRUE;
+
+    // presence settings
+    } else if (g_strcmp0(args[0], "presence") == 0) {
+        if (g_strcmp0(args[1], "indent") == 0) {
             if (!args[2]) {
                 cons_bad_cmd_usage(command);
             } else {
@@ -1990,6 +2008,7 @@ cmd_roster(ProfWin *window, const char *const command, gchar **args)
             cons_bad_cmd_usage(command);
             return TRUE;
         }
+
     // roster grouping
     } else if (g_strcmp0(args[0], "by") == 0) {
         if (g_strcmp0(args[1], "group") == 0) {
@@ -2017,6 +2036,7 @@ cmd_roster(ProfWin *window, const char *const command, gchar **args)
             cons_bad_cmd_usage(command);
             return TRUE;
         }
+
     // roster item order
     } else if (g_strcmp0(args[0], "order") == 0) {
         if (g_strcmp0(args[1], "name") == 0) {
@@ -2037,6 +2057,7 @@ cmd_roster(ProfWin *window, const char *const command, gchar **args)
             cons_bad_cmd_usage(command);
             return TRUE;
         }
+
     // add contact
     } else if (strcmp(args[0], "add") == 0) {
         if (conn_status != JABBER_CONNECTED) {

@@ -780,6 +780,7 @@ _get_group(preference_t pref)
         case PREF_ROSTER_COUNT:
         case PREF_ROSTER_PRIORITY:
         case PREF_ROSTER_WRAP:
+        case PREF_ROSTER_RESOURCE_JOIN:
         case PREF_RESOURCE_TITLE:
         case PREF_RESOURCE_MESSAGE:
         case PREF_ENC_WARN:
@@ -965,6 +966,8 @@ _get_key(preference_t pref)
             return "roster.priority";
         case PREF_ROSTER_WRAP:
             return "roster.wrap";
+        case PREF_ROSTER_RESOURCE_JOIN:
+            return "roster.resource.join";
         case PREF_RESOURCE_TITLE:
             return "resource.title";
         case PREF_RESOURCE_MESSAGE:
@@ -1018,6 +1021,7 @@ _get_default_boolean(preference_t pref)
         case PREF_ROSTER_EMPTY:
         case PREF_ROSTER_COUNT:
         case PREF_ROSTER_PRIORITY:
+        case PREF_ROSTER_RESOURCE_JOIN:
         case PREF_TLS_SHOW:
         case PREF_LASTACTIVITY:
             return TRUE;
