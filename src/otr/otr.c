@@ -233,38 +233,47 @@ otr_on_connect(ProfAccount *account)
     GString *keysfilename = g_string_new(basedir->str);
     g_string_append(keysfilename, "keys.txt");
     if (!g_file_test(keysfilename->str, G_FILE_TEST_IS_REGULAR)) {
-        log_info("No private key file found %s", keysfilename->str);
+        log_info("No OTR private key file found %s", keysfilename->str);
         data_loaded = FALSE;
     } else {
         log_info("Loading OTR private key %s", keysfilename->str);
         err = otrl_privkey_read(user_state, keysfilename->str);
         if (!err == GPG_ERR_NO_ERROR) {
+            log_warning("Failed to read OTR private key file: %s", keysfilename->str);
+            cons_show_error("Failed to read OTR private key file: %s", keysfilename->str);
             g_string_free(basedir, TRUE);
             g_string_free(keysfilename, TRUE);
-            log_error("Failed to load private key");
             return;
-        } else {
-            log_info("Loaded private key");
-            data_loaded = TRUE;
         }
+
+        OtrlPrivKey* privkey = otrl_privkey_find(user_state, jid, "xmpp");
+        if (!privkey) {
+            log_warning("No OTR private key found for account \"%s\", protocol \"xmpp\" in file: %s", jid, keysfilename->str);
+            cons_show_error("No OTR private key found for account \"%s\", protocol \"xmpp\" in file: %s", jid, keysfilename->str);
+            g_string_free(basedir, TRUE);
+            g_string_free(keysfilename, TRUE);
+            return;
+        }
+        log_info("Loaded OTR private key");
+        data_loaded = TRUE;
     }
 
     GString *fpsfilename = g_string_new(basedir->str);
     g_string_append(fpsfilename, "fingerprints.txt");
     if (!g_file_test(fpsfilename->str, G_FILE_TEST_IS_REGULAR)) {
-        log_info("No fingerprints file found %s", fpsfilename->str);
+        log_info("No OTR fingerprints file found %s", fpsfilename->str);
         data_loaded = FALSE;
     } else {
-        log_info("Loading fingerprints %s", fpsfilename->str);
+        log_info("Loading OTR fingerprints %s", fpsfilename->str);
         err = otrl_privkey_read_fingerprints(user_state, fpsfilename->str, NULL, NULL);
         if (!err == GPG_ERR_NO_ERROR) {
+            log_error("Failed to load OTR fingerprints file: %s", fpsfilename->str);
             g_string_free(basedir, TRUE);
             g_string_free(keysfilename, TRUE);
             g_string_free(fpsfilename, TRUE);
-            log_error("Failed to load fingerprints");
             return;
         } else {
-            log_info("Loaded fingerprints");
+            log_info("Loaded OTR fingerprints");
             data_loaded = TRUE;
         }
     }
