@@ -4207,6 +4207,30 @@ cmd_notify(ProfWin *window, const char *const command, gchar **args)
             } else {
                 cons_show("Usage: /notify message text on|off");
             }
+        } else if (g_strcmp0(args[1], "trigger") == 0) {
+            if (g_strcmp0(args[2], "add") == 0) {
+                if (!args[3]) {
+                    cons_bad_cmd_usage(command);
+                } else {
+                    cons_show("Adding trigger: %s", args[3]);
+                }
+            } else if (g_strcmp0(args[2], "remove") == 0) {
+                if (!args[3]) {
+                    cons_bad_cmd_usage(command);
+                } else {
+                    cons_show("Removing trigger: %s", args[3]);
+                }
+            } else if (g_strcmp0(args[2], "list") == 0) {
+                cons_show("Listing triggers");
+            } else if (g_strcmp0(args[2], "on") == 0) {
+                cons_show("Enabling message triggers");
+                prefs_set_boolean(PREF_NOTIFY_MESSAGE_TRIGGER, TRUE);
+            } else if (g_strcmp0(args[2], "off") == 0) {
+                cons_show("Disabling message triggers");
+                prefs_set_boolean(PREF_NOTIFY_MESSAGE_TRIGGER, FALSE);
+            } else {
+                cons_bad_cmd_usage(command);
+            }
         } else {
             cons_show("Usage: /notify message on|off");
         }
@@ -4241,6 +4265,30 @@ cmd_notify(ProfWin *window, const char *const command, gchar **args)
                 prefs_set_boolean(PREF_NOTIFY_ROOM_TEXT, FALSE);
             } else {
                 cons_show("Usage: /notify room text on|off");
+            }
+        } else if (g_strcmp0(args[1], "trigger") == 0) {
+            if (g_strcmp0(args[2], "add") == 0) {
+                if (!args[3]) {
+                    cons_bad_cmd_usage(command);
+                } else {
+                    cons_show("Adding trigger: %s", args[3]);
+                }
+            } else if (g_strcmp0(args[2], "remove") == 0) {
+                if (!args[3]) {
+                    cons_bad_cmd_usage(command);
+                } else {
+                    cons_show("Removing trigger: %s", args[3]);
+                }
+            } else if (g_strcmp0(args[2], "list") == 0) {
+                cons_show("Listing triggers");
+            } else if (g_strcmp0(args[2], "on") == 0) {
+                cons_show("Enabling room triggers");
+                prefs_set_boolean(PREF_NOTIFY_ROOM_TRIGGER, TRUE);
+            } else if (g_strcmp0(args[2], "off") == 0) {
+                cons_show("Disabling room triggers");
+                prefs_set_boolean(PREF_NOTIFY_ROOM_TRIGGER, FALSE);
+            } else {
+                cons_bad_cmd_usage(command);
             }
         } else {
             cons_show("Usage: /notify room on|off|mention");

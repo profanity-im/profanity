@@ -1339,6 +1339,11 @@ cons_notify_setting(void)
         else
             cons_show("Messages text (/notify message)     : OFF");
 
+        if (prefs_get_boolean(PREF_NOTIFY_MESSAGE_TRIGGER))
+            cons_show("Messages trigger (/notify message)  : ON");
+        else
+            cons_show("Messages trigger (/notify message)  : OFF");
+
         char *room_setting = prefs_get_string(PREF_NOTIFY_ROOM);
         if (g_strcmp0(room_setting, "on") == 0) {
         cons_show    ("Room messages (/notify room)        : ON");
@@ -1358,6 +1363,11 @@ cons_notify_setting(void)
             cons_show("Room text (/notify room)            : ON");
         else
             cons_show("Room text (/notify room)            : OFF");
+
+        if (prefs_get_boolean(PREF_NOTIFY_ROOM_TRIGGER))
+            cons_show("Room trigger (/notify room)         : ON");
+        else
+            cons_show("Room trigger (/notify room)         : OFF");
 
         if (prefs_get_boolean(PREF_NOTIFY_TYPING))
             cons_show("Composing (/notify typing)          : ON");
