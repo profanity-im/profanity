@@ -802,7 +802,7 @@ static void
 writecsv(int fd, const char *const str){
     if(!str) return;
     size_t len = strlen(str);
-    char *s = malloc((2 * len + 1) * sizeof(char));
+    char *s = malloc(2 * len * sizeof(char));
     char *c = s;
     for(int i = 0; i < strlen(str); i++){
         if(str[i] != '"') *c++ = str[i];
