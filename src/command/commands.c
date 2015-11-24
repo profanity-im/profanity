@@ -808,7 +808,8 @@ writecsv(int fd, const char *const str){
         if(str[i] != '"') *c++ = str[i];
         else { *c++ = '"'; *c++ = '"'; len++; }
     }
-    write(fd, s, len);
+    int unused = write(fd, s, len);
+    (void)(unused);
     free(s);
 }
 
@@ -835,13 +836,15 @@ cmd_export(ProfWin *window, const char *const command, gchar **args)
                 PContact contact = curr->data;
                 const char *jid = p_contact_barejid(contact);
                 const char  *name = p_contact_name(contact);
+                int unused;
+                (void)(unused);
 
                 /* write the data to the file */
-                write(fd, "\"", 1);
+                unused = write(fd, "\"", 1);
                 writecsv(fd, jid);
-                write(fd, "\",\"", 3);
+                unused = write(fd, "\",\"", 3);
                 writecsv(fd, name);
-                write(fd, "\"\n", 2);
+                unused = write(fd, "\"\n", 2);
 
                 /* loop */
                 curr = g_slist_next(curr);
