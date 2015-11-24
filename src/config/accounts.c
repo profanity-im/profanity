@@ -42,6 +42,7 @@
 
 #include "common.h"
 #include "config/account.h"
+#include "config/conflists.h"
 #include "jid.h"
 #include "log.h"
 #include "tools/autocomplete.h"
@@ -55,7 +56,6 @@ static Autocomplete enabled_ac;
 
 static void _save_accounts(void);
 static gchar* _get_accounts_file(void);
-static void _remove_from_list(GKeyFile *accounts, const char *const account_name, const char *const key, const char *const contact_jid);
 
 void
 accounts_load(void)
@@ -558,110 +558,25 @@ accounts_add_otr_policy(const char *const account_name, const char *const contac
     if (accounts_account_exists(account_name)) {
         GString *key = g_string_new("otr.");
         g_string_append(key, policy);
-        gsize length;
-        gchar **list = g_key_file_get_string_list(accounts, account_name, key->str, &length, NULL);
-        GList *glist = NULL;
-
-        // list found
-        if (list) {
-            int i = 0;
-            for (i = 0; i < length; i++) {
-                // item already in list, exit function
-                if (strcmp(list[i], contact_jid) == 0) {
-                    g_list_free_full(glist, g_free);
-                    g_strfreev(list);
-                    return;
-                }
-                // add item to our g_list
-                glist = g_list_append(glist, strdup(list[i]));
-            }
-
-            // item not found, add to our g_list
-            glist = g_list_append(glist, strdup(contact_jid));
-
-            // create the new list entry
-            const gchar* new_list[g_list_length(glist)+1];
-            GList *curr = glist;
-            i = 0;
-            while (curr) {
-                new_list[i++] = strdup(curr->data);
-                curr = g_list_next(curr);
-            }
-            new_list[i] = NULL;
-            g_key_file_set_string_list(accounts, account_name, key->str, new_list, g_list_length(glist));
-
-        // list not found
-        } else {
-            const gchar* new_list[2];
-            new_list[0] = strdup(contact_jid);
-            new_list[1] = NULL;
-            g_key_file_set_string_list(accounts, account_name, key->str, new_list, 1);
-        }
-
-        g_strfreev(list);
-        g_list_free_full(glist, g_free);
+        conf_string_list_add(accounts, account_name, key->str, contact_jid);
         g_string_free(key, TRUE);
 
         // check for and remove from other lists
         if (strcmp(policy, "manual") == 0) {
-            _remove_from_list(accounts, account_name, "otr.opportunistic", contact_jid);
-            _remove_from_list(accounts, account_name, "otr.always", contact_jid);
+            conf_string_list_remove(accounts, account_name, "otr.opportunistic", contact_jid);
+            conf_string_list_remove(accounts, account_name, "otr.always", contact_jid);
         }
         if (strcmp(policy, "opportunistic") == 0) {
-            _remove_from_list(accounts, account_name, "otr.manual", contact_jid);
-            _remove_from_list(accounts, account_name, "otr.always", contact_jid);
+            conf_string_list_remove(accounts, account_name, "otr.manual", contact_jid);
+            conf_string_list_remove(accounts, account_name, "otr.always", contact_jid);
         }
         if (strcmp(policy, "always") == 0) {
-            _remove_from_list(accounts, account_name, "otr.opportunistic", contact_jid);
-            _remove_from_list(accounts, account_name, "otr.manual", contact_jid);
+            conf_string_list_remove(accounts, account_name, "otr.opportunistic", contact_jid);
+            conf_string_list_remove(accounts, account_name, "otr.manual", contact_jid);
         }
 
         _save_accounts();
     }
-}
-
-static void
-_remove_from_list(GKeyFile *accounts, const char *const account_name, const char *const key, const char *const contact_jid)
-{
-    gsize length;
-    gchar **list = g_key_file_get_string_list(accounts, account_name, key, &length, NULL);
-
-    if (list) {
-        int i = 0;
-        GList *glist = NULL;
-        gboolean deleted = FALSE;
-
-        for (i = 0; i < length; i++) {
-            // item found, mark as deleted
-            if (strcmp(list[i], contact_jid) == 0) {
-                deleted = TRUE;
-            } else {
-                // add item to our g_list
-                glist = g_list_append(glist, strdup(list[i]));
-            }
-        }
-
-        if (deleted) {
-            if (g_list_length(glist) == 0) {
-                g_key_file_remove_key(accounts, account_name, key, NULL);
-            } else {
-                // create the new list entry
-                const gchar* new_list[g_list_length(glist)+1];
-                GList *curr = glist;
-                i = 0;
-                while (curr) {
-                    new_list[i++] = strdup(curr->data);
-                    curr = g_list_next(curr);
-                }
-                new_list[i] = NULL;
-                g_key_file_set_string_list(accounts, account_name, key, new_list, g_list_length(glist));
-            }
-        }
-
-        g_list_free_full(glist, g_free);
-    }
-
-    g_strfreev(list);
 }
 
 void
