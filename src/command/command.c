@@ -2636,6 +2636,8 @@ cmd_reset_autocomplete(ProfWin *window)
     }
 
     bookmark_autocomplete_reset();
+    prefs_reset_message_trigger_ac();
+    prefs_reset_room_trigger_ac();
 }
 
 gboolean
@@ -3149,6 +3151,16 @@ _notify_autocomplete(ProfWin *window, const char *const input)
 {
     int i = 0;
     char *result = NULL;
+
+    result = autocomplete_param_with_func(input, "/notify message trigger remove", prefs_autocomplete_message_trigger);
+    if (result) {
+        return result;
+    }
+
+    result = autocomplete_param_with_func(input, "/notify room trigger remove", prefs_autocomplete_room_trigger);
+    if (result) {
+        return result;
+    }
 
     result = autocomplete_param_with_func(input, "/notify room current", prefs_autocomplete_boolean_choice);
     if (result) {

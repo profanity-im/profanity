@@ -65,6 +65,8 @@ static GKeyFile *prefs;
 gint log_maxsize = 0;
 
 static Autocomplete boolean_choice_ac;
+static Autocomplete message_trigger_ac;
+static Autocomplete room_trigger_ac;
 
 static void _save_prefs(void);
 static gchar* _get_preferences_file(void);
@@ -133,12 +135,33 @@ prefs_load(void)
     boolean_choice_ac = autocomplete_new();
     autocomplete_add(boolean_choice_ac, "on");
     autocomplete_add(boolean_choice_ac, "off");
+
+    message_trigger_ac = autocomplete_new();
+    gsize len = 0;
+    gchar **triggers = g_key_file_get_string_list(prefs, PREF_GROUP_NOTIFICATIONS, "message.trigger.list", &len, NULL);
+
+    int i;
+    for (i = 0; i < len; i++) {
+        autocomplete_add(message_trigger_ac, triggers[i]);
+    }
+    g_strfreev(triggers);
+
+    room_trigger_ac = autocomplete_new();
+    len = 0;
+    triggers = g_key_file_get_string_list(prefs, PREF_GROUP_NOTIFICATIONS, "room.trigger.list", &len, NULL);
+
+    for (i = 0; i < len; i++) {
+        autocomplete_add(room_trigger_ac, triggers[i]);
+    }
+    g_strfreev(triggers);
 }
 
 void
 prefs_close(void)
 {
     autocomplete_free(boolean_choice_ac);
+    autocomplete_free(message_trigger_ac);
+    autocomplete_free(room_trigger_ac);
     g_key_file_free(prefs);
     prefs = NULL;
 }
@@ -153,6 +176,30 @@ void
 prefs_reset_boolean_choice(void)
 {
     autocomplete_reset(boolean_choice_ac);
+}
+
+char*
+prefs_autocomplete_message_trigger(const char *const prefix)
+{
+    return autocomplete_complete(message_trigger_ac, prefix, TRUE);
+}
+
+void
+prefs_reset_message_trigger_ac(void)
+{
+    autocomplete_reset(message_trigger_ac);
+}
+
+char*
+prefs_autocomplete_room_trigger(const char *const prefix)
+{
+    return autocomplete_complete(room_trigger_ac, prefix, TRUE);
+}
+
+void
+prefs_reset_room_trigger_ac(void)
+{
+    autocomplete_reset(room_trigger_ac);
 }
 
 gboolean
@@ -613,6 +660,10 @@ prefs_add_msg_notify_trigger(const char * const text)
     gboolean res = conf_string_list_add(prefs, PREF_GROUP_NOTIFICATIONS, "message.trigger.list", text);
     _save_prefs();
 
+    if (res) {
+        autocomplete_add(message_trigger_ac, text);
+    }
+
     return res;
 }
 
@@ -621,6 +672,10 @@ prefs_remove_msg_notify_trigger(const char * const text)
 {
     gboolean res = conf_string_list_remove(prefs, PREF_GROUP_NOTIFICATIONS, "message.trigger.list", text);
     _save_prefs();
+
+    if (res) {
+        autocomplete_remove(message_trigger_ac, text);
+    }
 
     return res;
 }
@@ -648,6 +703,10 @@ prefs_add_room_notify_trigger(const char * const text)
     gboolean res = conf_string_list_add(prefs, PREF_GROUP_NOTIFICATIONS, "room.trigger.list", text);
     _save_prefs();
 
+    if (res) {
+        autocomplete_add(room_trigger_ac, text);
+    }
+
     return res;
 }
 
@@ -656,6 +715,10 @@ prefs_remove_room_notify_trigger(const char * const text)
 {
     gboolean res = conf_string_list_remove(prefs, PREF_GROUP_NOTIFICATIONS, "room.trigger.list", text);
     _save_prefs();
+
+    if (res) {
+        autocomplete_remove(room_trigger_ac, text);
+    }
 
     return res;
 }

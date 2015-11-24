@@ -135,8 +135,14 @@ void prefs_close(void);
 
 char* prefs_find_login(char *prefix);
 void prefs_reset_login_search(void);
+
 char* prefs_autocomplete_boolean_choice(const char *const prefix);
 void prefs_reset_boolean_choice(void);
+
+char* prefs_autocomplete_message_trigger(const char *const prefix);
+void prefs_reset_message_trigger_ac(void);
+char* prefs_autocomplete_room_trigger(const char *const prefix);
+void prefs_reset_room_trigger_ac(void);
 
 gint prefs_get_gone(void);
 void prefs_set_gone(gint value);
