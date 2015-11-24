@@ -1777,7 +1777,7 @@ static struct cmd_t command_defs[] =
         CMD_ARGS(
             { "<filepath>", "Path to the output file." })
         CMD_EXAMPLES(
-            "/export /path/to/output.cxv",
+            "/export /path/to/output.csv",
             "/export ~/contacts.csv")
     },
 };
