@@ -73,17 +73,16 @@ notifier_uninit(void)
 }
 
 void
-notify_typing(const char *const handle)
+notify_typing(const char *const name)
 {
-    char message[strlen(handle) + 1 + 11];
-    sprintf(message, "%s: typing...", handle);
+    char message[strlen(name) + 1 + 11];
+    sprintf(message, "%s: typing...", name);
 
     _notify(message, 10000, "Incoming message");
 }
 
 void
-notify_invite(const char *const from, const char *const room,
-    const char *const reason)
+notify_invite(const char *const from, const char *const room, const char *const reason)
 {
     GString *message = g_string_new("Room invite\nfrom: ");
     g_string_append(message, from);
@@ -99,32 +98,24 @@ notify_invite(const char *const from, const char *const room,
 }
 
 void
-notify_message(ProfWin *window, const char *const name, const char *const text)
+notify_message(const char *const name, int win, const char *const text)
 {
-    int num = wins_get_num(window);
-    if (num == 10) {
-        num = 0;
+    GString *message = g_string_new("");
+    g_string_append_printf(message, "%s (win %d)", name, win);
+    if (text) {
+        g_string_append_printf(message, "\n%s", text);
     }
 
-    gboolean is_current = wins_is_current(window);
-    if (!is_current || (is_current && prefs_get_boolean(PREF_NOTIFY_MESSAGE_CURRENT)) ) {
-        GString *message = g_string_new("");
-        g_string_append_printf(message, "%s (win %d)", name, num);
+    _notify(message->str, 10000, "incoming message");
 
-        if (prefs_get_boolean(PREF_NOTIFY_MESSAGE_TEXT) && text) {
-            g_string_append_printf(message, "\n%s", text);
-        }
-
-        _notify(message->str, 10000, "incoming message");
-        g_string_free(message, TRUE);
-    }
+    g_string_free(message, TRUE);
 }
 
 void
-notify_room_message(const char *const handle, const char *const room, int win, const char *const text)
+notify_room_message(const char *const nick, const char *const room, int win, const char *const text)
 {
     GString *message = g_string_new("");
-    g_string_append_printf(message, "%s in %s (win %d)", handle, room, win);
+    g_string_append_printf(message, "%s in %s (win %d)", nick, room, win);
     if (text) {
         g_string_append_printf(message, "\n%s", text);
     }

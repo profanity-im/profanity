@@ -203,6 +203,47 @@ prefs_reset_room_trigger_ac(void)
 }
 
 gboolean
+prefs_get_notify_chat(gboolean current_win)
+{
+    gboolean notify_message = prefs_get_boolean(PREF_NOTIFY_MESSAGE);
+    gboolean notify_window = FALSE;
+
+    if (!current_win || (current_win && prefs_get_boolean(PREF_NOTIFY_MESSAGE_CURRENT)) ) {
+        notify_window = TRUE;
+    }
+
+    return (notify_message && notify_window);
+}
+
+gboolean
+prefs_get_notify_room(gboolean current_win, const char *const nick, const char *const message)
+{
+    gboolean notify_message = FALSE;
+    gboolean notify_window = FALSE;
+
+    char *room_setting = prefs_get_string(PREF_NOTIFY_ROOM);
+    if (g_strcmp0(room_setting, "on") == 0) {
+        notify_message = TRUE;
+    }
+    if (g_strcmp0(room_setting, "mention") == 0) {
+        char *message_lower = g_utf8_strdown(message, -1);
+        char *nick_lower = g_utf8_strdown(nick, -1);
+        if (g_strrstr(message_lower, nick_lower)) {
+            notify_message = TRUE;
+        }
+        g_free(message_lower);
+        g_free(nick_lower);
+    }
+    prefs_free_string(room_setting);
+
+    if (!current_win || (current_win && prefs_get_boolean(PREF_NOTIFY_ROOM_CURRENT)) ) {
+        notify_window = TRUE;
+    }
+
+    return (notify_message && notify_window);
+}
+
+gboolean
 prefs_get_boolean(preference_t pref)
 {
     const char *group = _get_group(pref);

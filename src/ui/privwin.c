@@ -75,8 +75,32 @@ privwin_incoming_msg(ProfPrivateWin *privatewin, const char *const message, GDat
         beep();
     }
 
-    if (prefs_get_boolean(PREF_NOTIFY_MESSAGE)) {
-        notify_message(window, display_from, message);
+    if (!prefs_get_boolean(PREF_NOTIFY_MESSAGE)) {
+        free(display_from);
+        return;
+    }
+
+    gboolean notify = FALSE;
+
+    gboolean is_current = wins_is_current(window);
+    if (!is_current || (is_current && prefs_get_boolean(PREF_NOTIFY_MESSAGE_CURRENT)) ) {
+        notify = TRUE;
+    }
+
+    if (!notify) {
+        free(display_from);
+        return;
+    }
+
+    int ui_index = num;
+    if (ui_index == 10) {
+        ui_index = 0;
+    }
+
+    if (prefs_get_boolean(PREF_NOTIFY_MESSAGE_TEXT)) {
+        notify_message(display_from, ui_index, message);
+    } else {
+        notify_message(display_from, ui_index, NULL);
     }
 
     free(display_from);

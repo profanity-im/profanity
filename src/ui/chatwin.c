@@ -274,8 +274,32 @@ chatwin_incoming_msg(ProfChatWin *chatwin, const char *const resource, const cha
         beep();
     }
 
-    if (prefs_get_boolean(PREF_NOTIFY_MESSAGE)) {
-        notify_message(window, display_name, message);
+    if (!prefs_get_boolean(PREF_NOTIFY_MESSAGE)) {
+        free(display_name);
+        return;
+    }
+
+    gboolean notify = FALSE;
+
+    gboolean is_current = wins_is_current(window);
+    if (!is_current || (is_current && prefs_get_boolean(PREF_NOTIFY_MESSAGE_CURRENT)) ) {
+        notify = TRUE;
+    }
+
+    if (!notify) {
+        free(display_name);
+        return;
+    }
+
+    int ui_index = num;
+    if (ui_index == 10) {
+        ui_index = 0;
+    }
+
+    if (prefs_get_boolean(PREF_NOTIFY_MESSAGE_TEXT)) {
+        notify_message(display_name, ui_index, message);
+    } else {
+        notify_message(display_name, ui_index, NULL);
     }
 
     free(display_name);

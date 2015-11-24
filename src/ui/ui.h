@@ -339,9 +339,9 @@ void win_clear(ProfWin *window);
 // desktop notifications
 void notifier_initialise(void);
 void notifier_uninit(void);
-void notify_typing(const char *const handle);
-void notify_message(ProfWin *window, const char *const name, const char *const text);
-void notify_room_message(const char *const handle, const char *const room, int win, const char *const text);
+void notify_typing(const char *const name);
+void notify_message(const char *const name, int win, const char *const text);
+void notify_room_message(const char *const nick, const char *const room, int win, const char *const text);
 void notify_remind(void);
 void notify_invite(const char *const from, const char *const room, const char *const reason);
 void notify_subscription(const char *const from);

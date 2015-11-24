@@ -390,11 +390,6 @@ mucwin_message(ProfMucWin *mucwin, const char *const nick, const char *const mes
         mucwin->unread++;
     }
 
-    int ui_index = num;
-    if (ui_index == 10) {
-        ui_index = 0;
-    }
-
     // don't notify self messages
     if (strcmp(nick, my_nick) == 0) {
         return;
@@ -404,34 +399,24 @@ mucwin_message(ProfMucWin *mucwin, const char *const nick, const char *const mes
         beep();
     }
 
-    gboolean notify = FALSE;
-    char *room_setting = prefs_get_string(PREF_NOTIFY_ROOM);
-    if (g_strcmp0(room_setting, "on") == 0) {
-        notify = TRUE;
+    gboolean is_current = wins_is_current(window);
+    gboolean notify = prefs_get_notify_room(is_current, my_nick, message);
+    if (!notify) {
+        return;
     }
-    if (g_strcmp0(room_setting, "mention") == 0) {
-        char *message_lower = g_utf8_strdown(message, -1);
-        char *nick_lower = g_utf8_strdown(nick, -1);
-        if (g_strrstr(message_lower, nick_lower)) {
-            notify = TRUE;
-        }
-        g_free(message_lower);
-        g_free(nick_lower);
-    }
-    prefs_free_string(room_setting);
 
-    if (notify) {
-        gboolean is_current = wins_is_current(window);
-        if ( !is_current || (is_current && prefs_get_boolean(PREF_NOTIFY_ROOM_CURRENT)) ) {
-            Jid *jidp = jid_create(mucwin->roomjid);
-            if (prefs_get_boolean(PREF_NOTIFY_ROOM_TEXT)) {
-                notify_room_message(nick, jidp->localpart, ui_index, message);
-            } else {
-                notify_room_message(nick, jidp->localpart, ui_index, NULL);
-            }
-            jid_destroy(jidp);
-        }
+    Jid *jidp = jid_create(mucwin->roomjid);
+    int ui_index = num;
+    if (ui_index == 10) {
+        ui_index = 0;
     }
+
+    if (prefs_get_boolean(PREF_NOTIFY_ROOM_TEXT)) {
+        notify_room_message(nick, jidp->localpart, ui_index, message);
+    } else {
+        notify_room_message(nick, jidp->localpart, ui_index, NULL);
+    }
+    jid_destroy(jidp);
 }
 
 void
