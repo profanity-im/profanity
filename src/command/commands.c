@@ -799,17 +799,17 @@ cmd_script(ProfWin *window, const char *const command, gchar **args)
 
 /* escape a string into csv and write it to the file descriptor */
 static int
-writecsv(int fd, const char *const str){
+_writecsv(int fd, const char *const str){
     if(!str) return 0;
     size_t len = strlen(str);
     char *s = malloc(2 * len * sizeof(char));
     char *c = s;
     int i = 0;
-    for(; i < strlen(str); i++){
+    for(; i < strlen(str); i++) {
         if(str[i] != '"') *c++ = str[i];
         else { *c++ = '"'; *c++ = '"'; len++; }
     }
-    if(-1 == write(fd, s, len)){
+    if(-1 == write(fd, s, len)) {
         cons_show("error: failed to write '%s' to the requested file: %s", s, strerror(errno));
         return -1;
     }
@@ -821,12 +821,10 @@ gboolean
 cmd_export(ProfWin *window, const char *const command, gchar **args)
 {
     if(args[0]){
-        /* temporary, we SHOULD pass everything to an escape function (to escape out quotes)
-         * and then use fputs */
         int fd = open(args[0], O_WRONLY | O_CREAT, 00600);
         GSList *list = NULL;
 
-        if(-1 == fd){
+        if(-1 == fd) {
             cons_show("error: cannot open %s: %s", args[0], strerror(errno));
             cons_show("");
             return TRUE;
@@ -835,7 +833,7 @@ cmd_export(ProfWin *window, const char *const command, gchar **args)
         if(-1 == write(fd, "jid,name\n", strlen("jid,name\n"))) goto write_error;
 
         list = roster_get_contacts(ROSTER_ORD_NAME, TRUE);
-        if(list){
+        if(list) {
             GSList *curr = list;
             while(curr){
                 PContact contact = curr->data;
