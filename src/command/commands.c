@@ -799,7 +799,8 @@ cmd_script(ProfWin *window, const char *const command, gchar **args)
 
 /* escape a string into csv and write it to the file descriptor */
 static int
-_writecsv(int fd, const char *const str){
+_writecsv(int fd, const char *const str)
+{
     if(!str) return 0;
     size_t len = strlen(str);
     char *s = malloc(2 * len * sizeof(char));
