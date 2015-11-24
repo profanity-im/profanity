@@ -9,6 +9,7 @@
 - Last Activity (xep-0012)
 - Run command sequence with /script
 - Account startscript property
+- Add /export command
 
 0.4.7
 =====
