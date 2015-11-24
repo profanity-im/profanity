@@ -34,5 +34,7 @@
 
 #include <glib.h>
 
+gboolean conf_string_list_add(GKeyFile *keyfile, const char *const group, const char *const key,
+    const char *const item);
 gboolean conf_string_list_remove(GKeyFile *keyfile, const char *const group, const char *const key,
     const char *const item);
