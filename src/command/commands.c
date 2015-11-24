@@ -39,6 +39,10 @@
 #include <errno.h>
 #include <assert.h>
 #include <glib.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <fcntl.h>
+#include <unistd.h>
 
 #include "chat_session.h"
 #include "command/commands.h"
@@ -791,6 +795,56 @@ cmd_script(ProfWin *window, const char *const command, gchar **args)
     }
 
     return TRUE;
+}
+
+static void
+writecsv(int fd, const char *const str){
+    if(str){
+        for(int i = 0; i < strlen(str); i++){
+            if(str[i] != '"') write(fd, str + i, 1);
+            /* two quotes ("") escapes a single quote (") */
+            else write(fd, "\"\"", 2);
+        }
+    }
+}
+
+gboolean
+cmd_export(ProfWin *window, const char *const command, gchar **args)
+{
+    if(args[0]){
+        /* temporary, we SHOULD pass everything to an escape function (to escape out quotes)
+         * and then use fputs */
+        int fd = open(args[0], O_WRONLY | O_CREAT, 00600);
+        GSList *list = roster_get_contacts(ROSTER_ORD_NAME, TRUE);
+
+        write(fd, "jid,name\n", strlen("jid,name\n"));
+        if(list){
+            GSList *curr = list;
+            while(curr){
+                PContact contact = curr->data;
+                const char *jid = p_contact_barejid(contact);
+                const char  *name = p_contact_name(contact);
+
+                /* write the data to the file */
+                write(fd, "\"", 1);
+                writecsv(fd, jid);
+                write(fd, "\",\"", 3);
+                writecsv(fd, name);
+                write(fd, "\"\n", 2);
+
+                /* loop */
+                curr = g_slist_next(curr);
+            }
+        } else {
+            cons_show("No contacts in roster.");
+        }
+
+        g_slist_free(list);
+        close(fd);
+        return TRUE;
+    } else {
+        return FALSE;
+    }
 }
 
 gboolean
