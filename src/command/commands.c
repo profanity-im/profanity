@@ -798,9 +798,9 @@ cmd_script(ProfWin *window, const char *const command, gchar **args)
 }
 
 /* escape a string into csv and write it to the file descriptor */
-static void
+static int
 writecsv(int fd, const char *const str){
-    if(!str) return;
+    if(!str) return 0;
     size_t len = strlen(str);
     char *s = malloc(2 * len * sizeof(char));
     char *c = s;
@@ -809,9 +809,12 @@ writecsv(int fd, const char *const str){
         if(str[i] != '"') *c++ = str[i];
         else { *c++ = '"'; *c++ = '"'; len++; }
     }
-    int unused = write(fd, s, len);
-    (void)(unused);
+    if(-1 == write(fd, s, len)){
+        cons_show("error: failed to write '%s' to the requested file: %s", s, strerror(errno));
+        return -1;
+    }
     free(s);
+    return 0;
 }
 
 gboolean
@@ -823,15 +826,14 @@ cmd_export(ProfWin *window, const char *const command, gchar **args)
         int fd = open(args[0], O_WRONLY | O_CREAT, 00600);
         GSList *list = NULL;
 
-        if(fd == -1){
+        if(-1 == fd){
             cons_show("error: cannot open %s: %s", args[0], strerror(errno));
             cons_show("");
             return TRUE;
         }
-        int unused;
-        (void)(unused);
 
-        unused = write(fd, "jid,name\n", strlen("jid,name\n"));
+        if(-1 == write(fd, "jid,name\n", strlen("jid,name\n"))) goto write_error;
+
         list = roster_get_contacts(ROSTER_ORD_NAME, TRUE);
         if(list){
             GSList *curr = list;
@@ -841,11 +843,11 @@ cmd_export(ProfWin *window, const char *const command, gchar **args)
                 const char  *name = p_contact_name(contact);
 
                 /* write the data to the file */
-                unused = write(fd, "\"", 1);
-                writecsv(fd, jid);
-                unused = write(fd, "\",\"", 3);
-                writecsv(fd, name);
-                unused = write(fd, "\"\n", 2);
+                if(-1 == write(fd, "\"", 1)) goto write_error;
+                if(-1 == writecsv(fd, jid)) goto write_error;
+                if(-1 == write(fd, "\",\"", 3)) goto write_error;
+                if(-1 == writecsv(fd, name)) goto write_error;
+                if(-1 == write(fd, "\"\n", 2)) goto write_error;
 
                 /* loop */
                 curr = g_slist_next(curr);
@@ -857,6 +859,12 @@ cmd_export(ProfWin *window, const char *const command, gchar **args)
             cons_show("");
         }
 
+        g_slist_free(list);
+        close(fd);
+        return TRUE;
+write_error:
+        cons_show("error: write failed: %s", strerror(errno));
+        cons_show("");
         g_slist_free(list);
         close(fd);
         return TRUE;
