@@ -4212,21 +4212,42 @@ cmd_notify(ProfWin *window, const char *const command, gchar **args)
                 if (!args[3]) {
                     cons_bad_cmd_usage(command);
                 } else {
-                    cons_show("Adding trigger: %s", args[3]);
+                    gboolean res = prefs_add_msg_notify_trigger(args[3]);
+                    if (res) {
+                        cons_show("Adding message notification trigger: %s", args[3]);
+                    } else {
+                        cons_show("Message notification trigger already exists: %s", args[3]);
+                    }
                 }
             } else if (g_strcmp0(args[2], "remove") == 0) {
                 if (!args[3]) {
                     cons_bad_cmd_usage(command);
                 } else {
-                    cons_show("Removing trigger: %s", args[3]);
+                    gboolean res = prefs_remove_msg_notify_trigger(args[3]);
+                    if (res) {
+                        cons_show("Removing message notification trigger: %s", args[3]);
+                    } else {
+                        cons_show("Message notification trigger does not exist: %s", args[3]);
+                    }
                 }
             } else if (g_strcmp0(args[2], "list") == 0) {
-                cons_show("Listing triggers");
+                GList *triggers = prefs_get_msg_notify_triggers();
+                GList *curr = triggers;
+                if (curr) {
+                    cons_show("Message notification triggers:");
+                } else {
+                    cons_show("No message notification triggers");
+                }
+                while (curr) {
+                    cons_show("  %s", curr->data);
+                    curr = g_list_next(curr);
+                }
+                g_list_free_full(triggers, free);
             } else if (g_strcmp0(args[2], "on") == 0) {
-                cons_show("Enabling message triggers");
+                cons_show("Enabling message notification triggers");
                 prefs_set_boolean(PREF_NOTIFY_MESSAGE_TRIGGER, TRUE);
             } else if (g_strcmp0(args[2], "off") == 0) {
-                cons_show("Disabling message triggers");
+                cons_show("Disabling message notification triggers");
                 prefs_set_boolean(PREF_NOTIFY_MESSAGE_TRIGGER, FALSE);
             } else {
                 cons_bad_cmd_usage(command);
@@ -4271,21 +4292,42 @@ cmd_notify(ProfWin *window, const char *const command, gchar **args)
                 if (!args[3]) {
                     cons_bad_cmd_usage(command);
                 } else {
-                    cons_show("Adding trigger: %s", args[3]);
+                    gboolean res = prefs_add_room_notify_trigger(args[3]);
+                    if (res) {
+                        cons_show("Adding room notification trigger: %s", args[3]);
+                    } else {
+                        cons_show("Room notification trigger already exists: %s", args[3]);
+                    }
                 }
             } else if (g_strcmp0(args[2], "remove") == 0) {
                 if (!args[3]) {
                     cons_bad_cmd_usage(command);
                 } else {
-                    cons_show("Removing trigger: %s", args[3]);
+                    gboolean res = prefs_remove_room_notify_trigger(args[3]);
+                    if (res) {
+                        cons_show("Removing room notification trigger: %s", args[3]);
+                    } else {
+                        cons_show("Room notification trigger does not exist: %s", args[3]);
+                    }
                 }
             } else if (g_strcmp0(args[2], "list") == 0) {
-                cons_show("Listing triggers");
+                GList *triggers = prefs_get_room_notify_triggers();
+                GList *curr = triggers;
+                if (curr) {
+                    cons_show("Room notification triggers:");
+                } else {
+                    cons_show("No room notification triggers");
+                }
+                while (curr) {
+                    cons_show("  %s", curr->data);
+                    curr = g_list_next(curr);
+                }
+                g_list_free_full(triggers, free);
             } else if (g_strcmp0(args[2], "on") == 0) {
-                cons_show("Enabling room triggers");
+                cons_show("Enabling room notification triggers");
                 prefs_set_boolean(PREF_NOTIFY_ROOM_TRIGGER, TRUE);
             } else if (g_strcmp0(args[2], "off") == 0) {
-                cons_show("Disabling room triggers");
+                cons_show("Disabling room notification triggers");
                 prefs_set_boolean(PREF_NOTIFY_ROOM_TRIGGER, FALSE);
             } else {
                 cons_bad_cmd_usage(command);

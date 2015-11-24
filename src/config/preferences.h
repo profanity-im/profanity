@@ -194,6 +194,13 @@ char* prefs_get_alias(const char *const name);
 GList* prefs_get_aliases(void);
 void prefs_free_aliases(GList *aliases);
 
+gboolean prefs_add_msg_notify_trigger(const char * const text);
+gboolean prefs_add_room_notify_trigger(const char * const text);
+gboolean prefs_remove_msg_notify_trigger(const char * const text);
+gboolean prefs_remove_room_notify_trigger(const char * const text);
+GList* prefs_get_msg_notify_triggers(void);
+GList* prefs_get_room_notify_triggers(void);
+
 gboolean prefs_get_boolean(preference_t pref);
 void prefs_set_boolean(preference_t pref, gboolean value);
 char* prefs_get_string(preference_t pref);

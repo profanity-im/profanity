@@ -45,6 +45,7 @@
 #include "log.h"
 #include "preferences.h"
 #include "tools/autocomplete.h"
+#include "config/conflists.h"
 
 // preference groups refer to the sections in .profrc, for example [ui]
 #define PREF_GROUP_LOGGING "logging"
@@ -604,6 +605,76 @@ prefs_set_roster_presence_indent(gint value)
 {
     g_key_file_set_integer(prefs, PREF_GROUP_UI, "roster.presence.indent", value);
     _save_prefs();
+}
+
+gboolean
+prefs_add_msg_notify_trigger(const char * const text)
+{
+    gboolean res = conf_string_list_add(prefs, PREF_GROUP_NOTIFICATIONS, "message.trigger.list", text);
+    _save_prefs();
+
+    return res;
+}
+
+gboolean
+prefs_remove_msg_notify_trigger(const char * const text)
+{
+    gboolean res = conf_string_list_remove(prefs, PREF_GROUP_NOTIFICATIONS, "message.trigger.list", text);
+    _save_prefs();
+
+    return res;
+}
+
+GList*
+prefs_get_msg_notify_triggers(void)
+{
+    GList *result = NULL;
+    gsize len = 0;
+    gchar **triggers = g_key_file_get_string_list(prefs, PREF_GROUP_NOTIFICATIONS, "message.trigger.list", &len, NULL);
+
+    int i;
+    for (i = 0; i < len; i++) {
+        result = g_list_append(result, strdup(triggers[i]));
+    }
+
+    g_strfreev(triggers);
+
+    return result;
+}
+
+gboolean
+prefs_add_room_notify_trigger(const char * const text)
+{
+    gboolean res = conf_string_list_add(prefs, PREF_GROUP_NOTIFICATIONS, "room.trigger.list", text);
+    _save_prefs();
+
+    return res;
+}
+
+gboolean
+prefs_remove_room_notify_trigger(const char * const text)
+{
+    gboolean res = conf_string_list_remove(prefs, PREF_GROUP_NOTIFICATIONS, "room.trigger.list", text);
+    _save_prefs();
+
+    return res;
+}
+
+GList*
+prefs_get_room_notify_triggers(void)
+{
+    GList *result = NULL;
+    gsize len = 0;
+    gchar **triggers = g_key_file_get_string_list(prefs, PREF_GROUP_NOTIFICATIONS, "room.trigger.list", &len, NULL);
+
+    int i;
+    for (i = 0; i < len; i++) {
+        result = g_list_append(result, strdup(triggers[i]));
+    }
+
+    g_strfreev(triggers);
+
+    return result;
 }
 
 gboolean
