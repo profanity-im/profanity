@@ -804,7 +804,8 @@ writecsv(int fd, const char *const str){
     size_t len = strlen(str);
     char *s = malloc(2 * len * sizeof(char));
     char *c = s;
-    for(int i = 0; i < strlen(str); i++){
+    int i = 0;
+    for(; i < strlen(str); i++){
         if(str[i] != '"') *c++ = str[i];
         else { *c++ = '"'; *c++ = '"'; len++; }
     }
@@ -827,8 +828,10 @@ cmd_export(ProfWin *window, const char *const command, gchar **args)
             cons_show("");
             return TRUE;
         }
+        int unused;
+        (void)(unused);
 
-        write(fd, "jid,name\n", strlen("jid,name\n"));
+        unused = write(fd, "jid,name\n", strlen("jid,name\n"));
         list = roster_get_contacts(ROSTER_ORD_NAME, TRUE);
         if(list){
             GSList *curr = list;
@@ -836,8 +839,6 @@ cmd_export(ProfWin *window, const char *const command, gchar **args)
                 PContact contact = curr->data;
                 const char *jid = p_contact_barejid(contact);
                 const char  *name = p_contact_name(contact);
-                int unused;
-                (void)(unused);
 
                 /* write the data to the file */
                 unused = write(fd, "\"", 1);
