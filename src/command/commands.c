@@ -797,15 +797,19 @@ cmd_script(ProfWin *window, const char *const command, gchar **args)
     return TRUE;
 }
 
+/* escape a string into csv and write it to the file descriptor */
 static void
 writecsv(int fd, const char *const str){
-    if(str){
-        for(int i = 0; i < strlen(str); i++){
-            if(str[i] != '"') write(fd, str + i, 1);
-            /* two quotes ("") escapes a single quote (") */
-            else write(fd, "\"\"", 2);
-        }
+    if(!str) return;
+    size_t len = strlen(str);
+    char *s = malloc((2 * len + 1) * sizeof(char));
+    char *c = s;
+    for(int i = 0; i < strlen(str); i++){
+        if(str[i] != '"') *c++ = str[i];
+        else { *c++ = '"'; *c++ = '"'; len++; }
     }
+    write(fd, s, len);
+    free(s);
 }
 
 gboolean
@@ -815,9 +819,16 @@ cmd_export(ProfWin *window, const char *const command, gchar **args)
         /* temporary, we SHOULD pass everything to an escape function (to escape out quotes)
          * and then use fputs */
         int fd = open(args[0], O_WRONLY | O_CREAT, 00600);
-        GSList *list = roster_get_contacts(ROSTER_ORD_NAME, TRUE);
+        GSList *list = NULL;
+
+        if(fd == -1){
+            cons_show("error: cannot open %s: %s", args[0], strerror(errno));
+            cons_show("");
+            return TRUE;
+        }
 
         write(fd, "jid,name\n", strlen("jid,name\n"));
+        list = roster_get_contacts(ROSTER_ORD_NAME, TRUE);
         if(list){
             GSList *curr = list;
             while(curr){
@@ -835,8 +846,11 @@ cmd_export(ProfWin *window, const char *const command, gchar **args)
                 /* loop */
                 curr = g_slist_next(curr);
             }
+            cons_show("Contacts exported successfully");
+            cons_show("");
         } else {
             cons_show("No contacts in roster.");
+            cons_show("");
         }
 
         g_slist_free(list);
