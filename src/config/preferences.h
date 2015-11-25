@@ -213,7 +213,7 @@ char* prefs_get_string(preference_t pref);
 void prefs_free_string(char *pref);
 void prefs_set_string(preference_t pref, char *value);
 
-gboolean prefs_get_notify_chat(gboolean current_win);
+gboolean prefs_get_notify_chat(gboolean current_win, const char *const message);
 gboolean prefs_get_notify_room(gboolean current_win, const char *const nick, const char *const message);
 
 #endif

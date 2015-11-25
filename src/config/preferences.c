@@ -202,17 +202,51 @@ prefs_reset_room_trigger_ac(void)
     autocomplete_reset(room_trigger_ac);
 }
 
+
+
 gboolean
-prefs_get_notify_chat(gboolean current_win)
+prefs_get_notify_chat(gboolean current_win, const char *const message)
 {
     gboolean notify_message = prefs_get_boolean(PREF_NOTIFY_MESSAGE);
-    gboolean notify_window = FALSE;
 
+    gboolean notify_trigger = prefs_get_boolean(PREF_NOTIFY_MESSAGE_TRIGGER);
+    gboolean trigger_found = FALSE;
+    if (notify_trigger) {
+        char *message_lower = g_utf8_strdown(message, -1);
+        gsize len = 0;
+        gchar **triggers = g_key_file_get_string_list(prefs, PREF_GROUP_NOTIFICATIONS, "message.trigger.list", &len, NULL);
+        int i;
+        for (i = 0; i < len; i++) {
+            char *trigger_lower = g_utf8_strdown(triggers[i], -1);
+            if (g_strrstr(message_lower, trigger_lower)) {
+                trigger_found = TRUE;
+                g_free(trigger_lower);
+                break;
+            }
+            g_free(trigger_lower);
+        }
+        g_strfreev(triggers);
+        g_free(message_lower);
+    }
+
+    gboolean notify_window = FALSE;
     if (!current_win || (current_win && prefs_get_boolean(PREF_NOTIFY_MESSAGE_CURRENT)) ) {
         notify_window = TRUE;
     }
 
-    return (notify_message && notify_window);
+    if (!notify_window) {
+        return FALSE;
+    }
+
+    if (notify_message) {
+        return TRUE;
+    }
+
+    if (notify_trigger && trigger_found) {
+        return TRUE;
+    }
+
+    return FALSE;
 }
 
 gboolean

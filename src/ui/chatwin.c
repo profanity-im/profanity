@@ -274,18 +274,8 @@ chatwin_incoming_msg(ProfChatWin *chatwin, const char *const resource, const cha
         beep();
     }
 
-    if (!prefs_get_boolean(PREF_NOTIFY_MESSAGE)) {
-        free(display_name);
-        return;
-    }
-
-    gboolean notify = FALSE;
-
     gboolean is_current = wins_is_current(window);
-    if (!is_current || (is_current && prefs_get_boolean(PREF_NOTIFY_MESSAGE_CURRENT)) ) {
-        notify = TRUE;
-    }
-
+    gboolean notify = prefs_get_notify_chat(is_current, message);
     if (!notify) {
         free(display_name);
         return;
