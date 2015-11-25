@@ -1782,6 +1782,20 @@ static struct cmd_t command_defs[] =
             "/script run myscript",
             "/script show somescript")
     },
+
+    { "/export",
+        cmd_export, parse_args, 1, 1, NULL,
+        CMD_NOTAGS
+        CMD_SYN(
+            "/export <filepath>")
+        CMD_DESC(
+            "Exports contacts to a csv file.")
+        CMD_ARGS(
+            { "<filepath>", "Path to the output file." })
+        CMD_EXAMPLES(
+            "/export /path/to/output.csv",
+            "/export ~/contacts.csv")
+    },
 };
 
 static Autocomplete commands_ac;
