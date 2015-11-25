@@ -1067,7 +1067,8 @@ static struct cmd_t command_defs[] =
             "/notify message trigger remove <text>",
             "/notify message trigger list",
             "/notify message trigger on|off",
-            "/notify room on|off|mention",
+            "/notify room on|off",
+            "/notify room mention on|off",
             "/notify room current on|off",
             "/notify room text on|off",
             "/notify room trigger add <text>",
@@ -1089,7 +1090,8 @@ static struct cmd_t command_defs[] =
             { "message trigger remove <text>",  "Remove regular chat notification for specified text." },
             { "message trigger list",           "List all regular chat custom text notifications." },
             { "message trigger on|off",         "Enable or disable all regular chat custom text notifications." },
-            { "room on|off|mention",            "Notifications for chat room messages, mention triggers notifications only when your nick is mentioned." },
+            { "room on|off",                    "Notifications for chat room messages, mention triggers notifications only when your nick is mentioned." },
+            { "room mention on|off",            "Notifications for chat room messages when your nick is mentioned." },
             { "room current on|off",            "Whether chat room messages in the current window trigger notifications." },
             { "room text on|off",               "Show message text in chat room message notifications." },
             { "room trigger add <text>",        "Notify when specified text included in regular chat message." },
@@ -1104,7 +1106,7 @@ static struct cmd_t command_defs[] =
         CMD_EXAMPLES(
             "/notify message on",
             "/notify message text on",
-            "/notify room mention",
+            "/notify room mention on",
             "/notify room current off",
             "/notify room text off",
             "/notify remind 10",
@@ -3202,6 +3204,11 @@ _notify_autocomplete(ProfWin *window, const char *const input)
     }
 
     result = autocomplete_param_with_func(input, "/notify room text", prefs_autocomplete_boolean_choice);
+    if (result) {
+        return result;
+    }
+
+    result = autocomplete_param_with_func(input, "/notify room mention", prefs_autocomplete_boolean_choice);
     if (result) {
         return result;
     }

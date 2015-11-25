@@ -130,6 +130,19 @@ prefs_load(void)
         prefs_free_string(time);
     }
 
+    // move pre 0.4.8 notify settings
+    if (g_key_file_has_key(prefs, PREF_GROUP_NOTIFICATIONS, "room", NULL)) {
+        char *value = g_key_file_get_string(prefs, PREF_GROUP_NOTIFICATIONS, "room", NULL);
+        if (g_strcmp0(value, "on") == 0) {
+            g_key_file_set_boolean(prefs, PREF_GROUP_NOTIFICATIONS, "room", TRUE);
+        } else if (g_strcmp0(value, "off") == 0) {
+            g_key_file_set_boolean(prefs, PREF_GROUP_NOTIFICATIONS, "room", FALSE);
+        } else if (g_strcmp0(value, "mention") == 0) {
+            g_key_file_set_boolean(prefs, PREF_GROUP_NOTIFICATIONS, "room", FALSE);
+            g_key_file_set_boolean(prefs, PREF_GROUP_NOTIFICATIONS, "room.mention", TRUE);
+        }
+    }
+
     _save_prefs();
 
     boolean_choice_ac = autocomplete_new();
@@ -207,42 +220,43 @@ prefs_reset_room_trigger_ac(void)
 gboolean
 prefs_get_notify_chat(gboolean current_win, const char *const message)
 {
-    gboolean notify_message = prefs_get_boolean(PREF_NOTIFY_MESSAGE);
-
-    gboolean notify_trigger = prefs_get_boolean(PREF_NOTIFY_MESSAGE_TRIGGER);
-    gboolean trigger_found = FALSE;
-    if (notify_trigger) {
-        char *message_lower = g_utf8_strdown(message, -1);
-        gsize len = 0;
-        gchar **triggers = g_key_file_get_string_list(prefs, PREF_GROUP_NOTIFICATIONS, "message.trigger.list", &len, NULL);
-        int i;
-        for (i = 0; i < len; i++) {
-            char *trigger_lower = g_utf8_strdown(triggers[i], -1);
-            if (g_strrstr(message_lower, trigger_lower)) {
-                trigger_found = TRUE;
-                g_free(trigger_lower);
-                break;
-            }
-            g_free(trigger_lower);
-        }
-        g_strfreev(triggers);
-        g_free(message_lower);
-    }
-
+    gboolean notify_current = prefs_get_boolean(PREF_NOTIFY_MESSAGE_CURRENT);
     gboolean notify_window = FALSE;
-    if (!current_win || (current_win && prefs_get_boolean(PREF_NOTIFY_MESSAGE_CURRENT)) ) {
+    if (!current_win || (current_win && notify_current) ) {
         notify_window = TRUE;
     }
-
     if (!notify_window) {
         return FALSE;
     }
 
+    gboolean notify_message = prefs_get_boolean(PREF_NOTIFY_MESSAGE);
     if (notify_message) {
         return TRUE;
     }
 
-    if (notify_trigger && trigger_found) {
+    gboolean notify_trigger = prefs_get_boolean(PREF_NOTIFY_MESSAGE_TRIGGER);
+    if (!notify_trigger) {
+        return FALSE;
+    }
+
+    gboolean trigger_found = FALSE;
+    char *message_lower = g_utf8_strdown(message, -1);
+    gsize len = 0;
+    gchar **triggers = g_key_file_get_string_list(prefs, PREF_GROUP_NOTIFICATIONS, "message.trigger.list", &len, NULL);
+    int i;
+    for (i = 0; i < len; i++) {
+        char *trigger_lower = g_utf8_strdown(triggers[i], -1);
+        if (g_strrstr(message_lower, trigger_lower)) {
+            trigger_found = TRUE;
+            g_free(trigger_lower);
+            break;
+        }
+        g_free(trigger_lower);
+    }
+    g_strfreev(triggers);
+    g_free(message_lower);
+
+    if (trigger_found) {
         return TRUE;
     }
 
@@ -252,29 +266,60 @@ prefs_get_notify_chat(gboolean current_win, const char *const message)
 gboolean
 prefs_get_notify_room(gboolean current_win, const char *const nick, const char *const message)
 {
-    gboolean notify_message = FALSE;
+    gboolean notify_current = prefs_get_boolean(PREF_NOTIFY_ROOM_CURRENT);
     gboolean notify_window = FALSE;
-
-    char *room_setting = prefs_get_string(PREF_NOTIFY_ROOM);
-    if (g_strcmp0(room_setting, "on") == 0) {
-        notify_message = TRUE;
+    if (!current_win || (current_win && notify_current) ) {
+        notify_window = TRUE;
     }
-    if (g_strcmp0(room_setting, "mention") == 0) {
+    if (!notify_window) {
+        return FALSE;
+    }
+
+    gboolean notify_room = prefs_get_boolean(PREF_NOTIFY_ROOM);
+    if (notify_room) {
+        return TRUE;
+    }
+
+    gboolean notify_mention = prefs_get_boolean(PREF_NOTIFY_ROOM_MENTION);
+    if (notify_mention) {
         char *message_lower = g_utf8_strdown(message, -1);
         char *nick_lower = g_utf8_strdown(nick, -1);
         if (g_strrstr(message_lower, nick_lower)) {
-            notify_message = TRUE;
+            g_free(message_lower);
+            g_free(nick_lower);
+            return TRUE;
         }
         g_free(message_lower);
         g_free(nick_lower);
     }
-    prefs_free_string(room_setting);
 
-    if (!current_win || (current_win && prefs_get_boolean(PREF_NOTIFY_ROOM_CURRENT)) ) {
-        notify_window = TRUE;
+    gboolean notify_trigger = prefs_get_boolean(PREF_NOTIFY_ROOM_TRIGGER);
+    if (!notify_trigger) {
+        return FALSE;
     }
 
-    return (notify_message && notify_window);
+    gboolean trigger_found = FALSE;
+    char *message_lower = g_utf8_strdown(message, -1);
+    gsize len = 0;
+    gchar **triggers = g_key_file_get_string_list(prefs, PREF_GROUP_NOTIFICATIONS, "room.trigger.list", &len, NULL);
+    int i;
+    for (i = 0; i < len; i++) {
+        char *trigger_lower = g_utf8_strdown(triggers[i], -1);
+        if (g_strrstr(message_lower, trigger_lower)) {
+            trigger_found = TRUE;
+            g_free(trigger_lower);
+            break;
+        }
+        g_free(trigger_lower);
+    }
+    g_strfreev(triggers);
+    g_free(message_lower);
+
+    if (trigger_found) {
+        return TRUE;
+    }
+
+    return FALSE;
 }
 
 gboolean
@@ -989,13 +1034,14 @@ _get_group(preference_t pref)
         case PREF_NOTIFY_TYPING:
         case PREF_NOTIFY_TYPING_CURRENT:
         case PREF_NOTIFY_MESSAGE:
+        case PREF_NOTIFY_MESSAGE_TRIGGER:
         case PREF_NOTIFY_MESSAGE_CURRENT:
         case PREF_NOTIFY_MESSAGE_TEXT:
-        case PREF_NOTIFY_MESSAGE_TRIGGER:
         case PREF_NOTIFY_ROOM:
+        case PREF_NOTIFY_ROOM_MENTION:
+        case PREF_NOTIFY_ROOM_TRIGGER:
         case PREF_NOTIFY_ROOM_CURRENT:
         case PREF_NOTIFY_ROOM_TEXT:
-        case PREF_NOTIFY_ROOM_TRIGGER:
         case PREF_NOTIFY_INVITE:
         case PREF_NOTIFY_SUB:
             return PREF_GROUP_NOTIFICATIONS;
@@ -1082,20 +1128,22 @@ _get_key(preference_t pref)
             return "typing.current";
         case PREF_NOTIFY_MESSAGE:
             return "message";
+        case PREF_NOTIFY_MESSAGE_TRIGGER:
+            return "message.trigger";
         case PREF_NOTIFY_MESSAGE_CURRENT:
             return "message.current";
         case PREF_NOTIFY_MESSAGE_TEXT:
             return "message.text";
-        case PREF_NOTIFY_MESSAGE_TRIGGER:
-            return "message.trigger";
         case PREF_NOTIFY_ROOM:
             return "room";
+        case PREF_NOTIFY_ROOM_TRIGGER:
+            return "room.trigger";
+        case PREF_NOTIFY_ROOM_MENTION:
+            return "room.mention";
         case PREF_NOTIFY_ROOM_CURRENT:
             return "room.current";
         case PREF_NOTIFY_ROOM_TEXT:
             return "room.text";
-        case PREF_NOTIFY_ROOM_TRIGGER:
-            return "room.trigger";
         case PREF_NOTIFY_INVITE:
             return "invite";
         case PREF_NOTIFY_SUB:
@@ -1204,6 +1252,7 @@ _get_default_boolean(preference_t pref)
         case PREF_LOG_SHARED:
         case PREF_NOTIFY_MESSAGE:
         case PREF_NOTIFY_MESSAGE_CURRENT:
+        case PREF_NOTIFY_ROOM:
         case PREF_NOTIFY_ROOM_CURRENT:
         case PREF_NOTIFY_TYPING:
         case PREF_NOTIFY_TYPING_CURRENT:
@@ -1241,8 +1290,6 @@ _get_default_string(preference_t pref)
     {
         case PREF_AUTOAWAY_MODE:
             return "off";
-        case PREF_NOTIFY_ROOM:
-            return "on";
         case PREF_OTR_LOG:
             return "redact";
         case PREF_OTR_POLICY:

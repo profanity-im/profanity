@@ -4354,14 +4354,21 @@ cmd_notify(ProfWin *window, const char *const command, gchar **args)
     // set room setting
     } else if (strcmp(kind, "room") == 0) {
         if (strcmp(args[1], "on") == 0) {
-            cons_show("Chat room notifications enabled.");
-            prefs_set_string(PREF_NOTIFY_ROOM, "on");
+            cons_show("Room notifications enabled.");
+            prefs_set_boolean(PREF_NOTIFY_ROOM, TRUE);
         } else if (strcmp(args[1], "off") == 0) {
-            cons_show("Chat room notifications disabled.");
-            prefs_set_string(PREF_NOTIFY_ROOM, "off");
+            cons_show("Room notifications disabled.");
+            prefs_set_boolean(PREF_NOTIFY_ROOM, FALSE);
         } else if (strcmp(args[1], "mention") == 0) {
-            cons_show("Chat room notifications enabled on mention.");
-            prefs_set_string(PREF_NOTIFY_ROOM, "mention");
+            if (strcmp(args[2], "on") == 0) {
+                cons_show("Room notifications with mention enabled.");
+                prefs_set_boolean(PREF_NOTIFY_ROOM_MENTION, TRUE);
+            } else if (strcmp(args[2], "off") == 0) {
+                cons_show("Room notifications with mention disabled.");
+                prefs_set_boolean(PREF_NOTIFY_ROOM_MENTION, FALSE);
+            } else {
+                cons_show("Usage: /notify room mention on|off");
+            }
         } else if (strcmp(args[1], "current") == 0) {
             if (g_strcmp0(args[2], "on") == 0) {
                 cons_show("Current window chat room message notifications enabled.");
