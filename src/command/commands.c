@@ -828,8 +828,19 @@ cmd_export(ProfWin *window, const char *const command, gchar **args)
         cons_show("");
         return TRUE;
     } else if(args[0]) {
-        int fd = open(args[0], O_WRONLY | O_CREAT, 00600);
+        GString *fname = g_string_new("");
         GSList *list = NULL;
+        int fd;
+
+        /* deal with the ~ convention for $HOME */
+        if(args[0][0] == '~') {
+            fname = g_string_append(fname, getenv("HOME"));
+            fname = g_string_append(fname, args[0] + 1);
+        } else {
+            fname = g_string_append(fname, args[0]);
+        }
+
+        fd = open(fname->str, O_WRONLY | O_CREAT, 00600);
 
         if(-1 == fd) {
             cons_show("error: cannot open %s: %s", args[0], strerror(errno));
@@ -866,6 +877,7 @@ cmd_export(ProfWin *window, const char *const command, gchar **args)
 
         g_slist_free(list);
         close(fd);
+        g_string_free(fname, TRUE);
         return TRUE;
 write_error:
         cons_show("error: write failed: %s", strerror(errno));
