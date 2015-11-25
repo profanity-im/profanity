@@ -140,13 +140,14 @@ notify_remind(void)
     gdouble elapsed = g_timer_elapsed(remind_timer, NULL);
     gint remind_period = prefs_get_notify_remind();
     if (remind_period > 0 && elapsed >= remind_period) {
+        gboolean notify = wins_get_notify();
         gint unread = wins_get_total_unread();
         gint open = muc_invites_count();
         gint subs = presence_sub_request_count();
 
         GString *text = g_string_new("");
 
-        if (unread > 0) {
+        if (notify && unread > 0) {
             if (unread == 1) {
                 g_string_append(text, "1 unread message");
             } else {
@@ -175,7 +176,7 @@ notify_remind(void)
             }
         }
 
-        if ((unread > 0) || (open > 0) || (subs > 0)) {
+        if ((notify && unread > 0) || (open > 0) || (subs > 0)) {
             _notify(text->str, 5000, "Incoming message");
         }
 

@@ -239,6 +239,9 @@ chatwin_incoming_msg(ProfChatWin *chatwin, const char *const resource, const cha
 
     char *display_name = roster_get_msg_display_name(chatwin->barejid, resource);
 
+    gboolean is_current = wins_is_current(window);
+    gboolean notify = prefs_get_notify_chat(is_current, message);
+
     // currently viewing chat window with sender
     if (wins_is_current(window)) {
         win_print_incoming_message(window, timestamp, display_name, message, enc_mode);
@@ -255,6 +258,9 @@ chatwin_incoming_msg(ProfChatWin *chatwin, const char *const resource, const cha
         }
 
         chatwin->unread++;
+        if (notify) {
+            chatwin->notify = TRUE;
+        }
         if (prefs_get_boolean(PREF_CHLOG) && prefs_get_boolean(PREF_HISTORY)) {
             _chatwin_history(chatwin, chatwin->barejid);
         }
@@ -274,8 +280,6 @@ chatwin_incoming_msg(ProfChatWin *chatwin, const char *const resource, const cha
         beep();
     }
 
-    gboolean is_current = wins_is_current(window);
-    gboolean notify = prefs_get_notify_chat(is_current, message);
     if (!notify) {
         free(display_name);
         return;

@@ -53,6 +53,9 @@ privwin_incoming_msg(ProfPrivateWin *privatewin, const char *const message, GDat
 
     char *display_from = get_nick_from_full_jid(privatewin->fulljid);
 
+    gboolean is_current = wins_is_current(window);
+    gboolean notify = prefs_get_notify_chat(is_current, message);
+
     // currently viewing chat window with sender
     if (wins_is_current(window)) {
         win_print_incoming_message(window, timestamp, display_from, message, PROF_MSG_PLAIN);
@@ -62,6 +65,9 @@ privwin_incoming_msg(ProfPrivateWin *privatewin, const char *const message, GDat
     // not currently viewing chat window with sender
     } else {
         privatewin->unread++;
+        if (notify) {
+            privatewin->notify = TRUE;
+        }
         status_bar_new(num);
         cons_show_incoming_message(display_from, num);
         win_print_incoming_message(window, timestamp, display_from, message, PROF_MSG_PLAIN);
@@ -73,18 +79,6 @@ privwin_incoming_msg(ProfPrivateWin *privatewin, const char *const message, GDat
 
     if (prefs_get_boolean(PREF_BEEP)) {
         beep();
-    }
-
-    if (!prefs_get_boolean(PREF_NOTIFY_MESSAGE)) {
-        free(display_from);
-        return;
-    }
-
-    gboolean notify = FALSE;
-
-    gboolean is_current = wins_is_current(window);
-    if (!is_current || (is_current && prefs_get_boolean(PREF_NOTIFY_MESSAGE_CURRENT)) ) {
-        notify = TRUE;
     }
 
     if (!notify) {

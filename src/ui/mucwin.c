@@ -374,6 +374,9 @@ mucwin_message(ProfMucWin *mucwin, const char *const nick, const char *const mes
         win_print(window, '-', 0, NULL, 0, THEME_TEXT_ME, nick, message);
     }
 
+    gboolean is_current = wins_is_current(window);
+    gboolean notify = prefs_get_notify_room(is_current, my_nick, message);
+
     // currently in groupchat window
     if (wins_is_current(window)) {
         status_bar_active(num);
@@ -388,6 +391,9 @@ mucwin_message(ProfMucWin *mucwin, const char *const nick, const char *const mes
         }
 
         mucwin->unread++;
+        if (notify) {
+            mucwin->notify = TRUE;
+        }
     }
 
     // don't notify self messages
@@ -399,8 +405,6 @@ mucwin_message(ProfMucWin *mucwin, const char *const nick, const char *const mes
         beep();
     }
 
-    gboolean is_current = wins_is_current(window);
-    gboolean notify = prefs_get_notify_room(is_current, my_nick, message);
     if (!notify) {
         return;
     }

@@ -319,6 +319,7 @@ ProfWin* win_create_muc_config(const char *const title, DataForm *form);
 ProfWin* win_create_private(const char *const fulljid);
 void win_update_virtual(ProfWin *window);
 void win_free(ProfWin *window);
+gboolean win_notify(ProfWin *window);
 int win_unread(ProfWin *window);
 void win_resize(ProfWin *window);
 void win_hide_subwin(ProfWin *window);
