@@ -827,7 +827,7 @@ cmd_export(ProfWin *window, const char *const command, gchar **args)
         cons_show("You are not currently connected.");
         cons_show("");
         return TRUE;
-    } else if(args[0]) {
+    } else {
         GString *fname = g_string_new("");
         GSList *list = NULL;
         int fd;
@@ -885,8 +885,6 @@ write_error:
         g_slist_free(list);
         close(fd);
         return TRUE;
-    } else {
-        return FALSE;
     }
 }
 
