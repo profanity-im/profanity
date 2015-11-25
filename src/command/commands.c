@@ -821,7 +821,13 @@ _writecsv(int fd, const char *const str)
 gboolean
 cmd_export(ProfWin *window, const char *const command, gchar **args)
 {
-    if(args[0]){
+    jabber_conn_status_t conn_status = jabber_get_connection_status();
+
+    if (conn_status != JABBER_CONNECTED) {
+        cons_show("You are not currently connected.");
+        cons_show("");
+        return TRUE;
+    } else if(args[0]) {
         int fd = open(args[0], O_WRONLY | O_CREAT, 00600);
         GSList *list = NULL;
 
@@ -843,9 +849,9 @@ cmd_export(ProfWin *window, const char *const command, gchar **args)
 
                 /* write the data to the file */
                 if(-1 == write(fd, "\"", 1)) goto write_error;
-                if(-1 == writecsv(fd, jid)) goto write_error;
+                if(-1 == _writecsv(fd, jid)) goto write_error;
                 if(-1 == write(fd, "\",\"", 3)) goto write_error;
-                if(-1 == writecsv(fd, name)) goto write_error;
+                if(-1 == _writecsv(fd, name)) goto write_error;
                 if(-1 == write(fd, "\"\n", 2)) goto write_error;
 
                 /* loop */
