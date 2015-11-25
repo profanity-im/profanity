@@ -841,6 +841,7 @@ cmd_export(ProfWin *window, const char *const command, gchar **args)
         }
 
         fd = open(fname->str, O_WRONLY | O_CREAT, 00600);
+        g_string_free(fname, TRUE);
 
         if(-1 == fd) {
             cons_show("error: cannot open %s: %s", args[0], strerror(errno));
@@ -877,7 +878,6 @@ cmd_export(ProfWin *window, const char *const command, gchar **args)
 
         g_slist_free(list);
         close(fd);
-        g_string_free(fname, TRUE);
         return TRUE;
 write_error:
         cons_show("error: write failed: %s", strerror(errno));
