@@ -801,16 +801,16 @@ cmd_script(ProfWin *window, const char *const command, gchar **args)
 static int
 _writecsv(int fd, const char *const str)
 {
-    if(!str) return 0;
+    if (!str) return 0;
     size_t len = strlen(str);
     char *s = malloc(2 * len * sizeof(char));
     char *c = s;
     int i = 0;
-    for(; i < strlen(str); i++) {
+    for (; i < strlen(str); i++) {
         if(str[i] != '"') *c++ = str[i];
         else { *c++ = '"'; *c++ = '"'; len++; }
     }
-    if(-1 == write(fd, s, len)) {
+    if (-1 == write(fd, s, len)) {
         cons_show("error: failed to write '%s' to the requested file: %s", s, strerror(errno));
         return -1;
     }
@@ -833,7 +833,7 @@ cmd_export(ProfWin *window, const char *const command, gchar **args)
         int fd;
 
         /* deal with the ~ convention for $HOME */
-        if(args[0][0] == '~') {
+        if (args[0][0] == '~') {
             fname = g_string_append(fname, getenv("HOME"));
             fname = g_string_append(fname, args[0] + 1);
         } else {
@@ -843,28 +843,28 @@ cmd_export(ProfWin *window, const char *const command, gchar **args)
         fd = open(fname->str, O_WRONLY | O_CREAT, 00600);
         g_string_free(fname, TRUE);
 
-        if(-1 == fd) {
+        if (-1 == fd) {
             cons_show("error: cannot open %s: %s", args[0], strerror(errno));
             cons_show("");
             return TRUE;
         }
 
-        if(-1 == write(fd, "jid,name\n", strlen("jid,name\n"))) goto write_error;
+        if (-1 == write(fd, "jid,name\n", strlen("jid,name\n"))) goto write_error;
 
         list = roster_get_contacts(ROSTER_ORD_NAME, TRUE);
-        if(list) {
+        if (list) {
             GSList *curr = list;
-            while(curr){
+            while (curr){
                 PContact contact = curr->data;
                 const char *jid = p_contact_barejid(contact);
                 const char  *name = p_contact_name(contact);
 
                 /* write the data to the file */
-                if(-1 == write(fd, "\"", 1)) goto write_error;
-                if(-1 == _writecsv(fd, jid)) goto write_error;
-                if(-1 == write(fd, "\",\"", 3)) goto write_error;
-                if(-1 == _writecsv(fd, name)) goto write_error;
-                if(-1 == write(fd, "\"\n", 2)) goto write_error;
+                if (-1 == write(fd, "\"", 1)) goto write_error;
+                if (-1 == _writecsv(fd, jid)) goto write_error;
+                if (-1 == write(fd, "\",\"", 3)) goto write_error;
+                if (-1 == _writecsv(fd, name)) goto write_error;
+                if (-1 == write(fd, "\"\n", 2)) goto write_error;
 
                 /* loop */
                 curr = g_slist_next(curr);
