@@ -39,6 +39,10 @@
 #include <errno.h>
 #include <assert.h>
 #include <glib.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <fcntl.h>
+#include <unistd.h>
 
 #include "chat_session.h"
 #include "command/commands.h"
@@ -799,6 +803,97 @@ cmd_script(ProfWin *window, const char *const command, gchar **args)
     }
 
     return TRUE;
+}
+
+/* escape a string into csv and write it to the file descriptor */
+static int
+_writecsv(int fd, const char *const str)
+{
+    if (!str) return 0;
+    size_t len = strlen(str);
+    char *s = malloc(2 * len * sizeof(char));
+    char *c = s;
+    int i = 0;
+    for (; i < strlen(str); i++) {
+        if (str[i] != '"') *c++ = str[i];
+        else { *c++ = '"'; *c++ = '"'; len++; }
+    }
+    if (-1 == write(fd, s, len)) {
+        cons_show("error: failed to write '%s' to the requested file: %s", s, strerror(errno));
+        return -1;
+    }
+    free(s);
+    return 0;
+}
+
+gboolean
+cmd_export(ProfWin *window, const char *const command, gchar **args)
+{
+    jabber_conn_status_t conn_status = jabber_get_connection_status();
+
+    if (conn_status != JABBER_CONNECTED) {
+        cons_show("You are not currently connected.");
+        cons_show("");
+        return TRUE;
+    } else {
+        GString *fname = g_string_new("");
+        GSList *list = NULL;
+        int fd;
+
+        /* deal with the ~ convention for $HOME */
+        if (args[0][0] == '~') {
+            fname = g_string_append(fname, getenv("HOME"));
+            fname = g_string_append(fname, args[0] + 1);
+        } else {
+            fname = g_string_append(fname, args[0]);
+        }
+
+        fd = open(fname->str, O_WRONLY | O_CREAT, 00600);
+        g_string_free(fname, TRUE);
+
+        if (-1 == fd) {
+            cons_show("error: cannot open %s: %s", args[0], strerror(errno));
+            cons_show("");
+            return TRUE;
+        }
+
+        if (-1 == write(fd, "jid,name\n", strlen("jid,name\n"))) goto write_error;
+
+        list = roster_get_contacts(ROSTER_ORD_NAME, TRUE);
+        if (list) {
+            GSList *curr = list;
+            while (curr){
+                PContact contact = curr->data;
+                const char *jid = p_contact_barejid(contact);
+                const char  *name = p_contact_name(contact);
+
+                /* write the data to the file */
+                if (-1 == write(fd, "\"", 1)) goto write_error;
+                if (-1 == _writecsv(fd, jid)) goto write_error;
+                if (-1 == write(fd, "\",\"", 3)) goto write_error;
+                if (-1 == _writecsv(fd, name)) goto write_error;
+                if (-1 == write(fd, "\"\n", 2)) goto write_error;
+
+                /* loop */
+                curr = g_slist_next(curr);
+            }
+            cons_show("Contacts exported successfully");
+            cons_show("");
+        } else {
+            cons_show("No contacts in roster.");
+            cons_show("");
+        }
+
+        g_slist_free(list);
+        close(fd);
+        return TRUE;
+write_error:
+        cons_show("error: write failed: %s", strerror(errno));
+        cons_show("");
+        g_slist_free(list);
+        close(fd);
+        return TRUE;
+    }
 }
 
 gboolean
