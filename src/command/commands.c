@@ -3699,7 +3699,7 @@ cmd_disco(ProfWin *window, const char *const command, gchar **args)
     jabber_conn_status_t conn_status = jabber_get_connection_status();
 
     if (conn_status != JABBER_CONNECTED) {
-        cons_show("You are not currenlty connected.");
+        cons_show("You are not currently connected.");
         return TRUE;
     }
 
