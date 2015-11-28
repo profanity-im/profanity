@@ -1063,10 +1063,6 @@ static struct cmd_t command_defs[] =
             "/notify message on|off",
             "/notify message current on|off",
             "/notify message text on|off",
-            "/notify message trigger add <text>",
-            "/notify message trigger remove <text>",
-            "/notify message trigger list",
-            "/notify message trigger on|off",
             "/notify room on|off",
             "/notify room mention on|off",
             "/notify room current on|off",
@@ -1089,10 +1085,6 @@ static struct cmd_t command_defs[] =
             { "message on|off",                 "Notifications for regular chat messages." },
             { "message current on|off",         "Whether to show regular chat message notifications when the window is focussed." },
             { "message text on|off",            "Show message text in regular message notifications." },
-            { "message trigger add <text>",     "Notify when specified text included in regular chat message." },
-            { "message trigger remove <text>",  "Remove regular chat notification for specified text." },
-            { "message trigger list",           "List all regular chat custom text notifications." },
-            { "message trigger on|off",         "Enable or disable all regular chat notification triggers." },
             { "room on|off",                    "Notifications for all chat room messages, 'mention' only notifies when your nick is mentioned." },
             { "room mention on|off",            "Notifications for all chat room messages when your nick is mentioned." },
             { "room current on|off",            "Whether to show all chat room messages notifications when the window is focussed." },
@@ -1113,6 +1105,8 @@ static struct cmd_t command_defs[] =
             "/notify message on",
             "/notify message text on",
             "/notify room mention on",
+            "/notify room trigger add beer",
+            "/notify room trigger on",
             "/notify room current off",
             "/notify room text off",
             "/notify remind 10",
@@ -1958,7 +1952,6 @@ cmd_init(void)
     autocomplete_add(notify_message_ac, "off");
     autocomplete_add(notify_message_ac, "current");
     autocomplete_add(notify_message_ac, "text");
-    autocomplete_add(notify_message_ac, "trigger");
 
     notify_room_ac = autocomplete_new();
     autocomplete_add(notify_room_ac, "on");
@@ -2662,7 +2655,6 @@ cmd_reset_autocomplete(ProfWin *window)
     }
 
     bookmark_autocomplete_reset();
-    prefs_reset_message_trigger_ac();
     prefs_reset_room_trigger_ac();
 }
 
@@ -3178,11 +3170,6 @@ _notify_autocomplete(ProfWin *window, const char *const input)
     int i = 0;
     char *result = NULL;
 
-    result = autocomplete_param_with_func(input, "/notify message trigger remove", prefs_autocomplete_message_trigger);
-    if (result) {
-        return result;
-    }
-
     result = autocomplete_param_with_func(input, "/notify room trigger remove", prefs_autocomplete_room_trigger);
     if (result) {
         return result;
@@ -3199,11 +3186,6 @@ _notify_autocomplete(ProfWin *window, const char *const input)
     }
 
     result = autocomplete_param_with_ac(input, "/notify room trigger", notify_trigger_ac, TRUE);
-    if (result) {
-        return result;
-    }
-
-    result = autocomplete_param_with_ac(input, "/notify message trigger", notify_trigger_ac, TRUE);
     if (result) {
         return result;
     }

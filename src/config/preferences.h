@@ -94,7 +94,6 @@ typedef enum {
     PREF_NOTIFY_TYPING,
     PREF_NOTIFY_TYPING_CURRENT,
     PREF_NOTIFY_MESSAGE,
-    PREF_NOTIFY_MESSAGE_TRIGGER,
     PREF_NOTIFY_MESSAGE_CURRENT,
     PREF_NOTIFY_MESSAGE_TEXT,
     PREF_NOTIFY_ROOM,
@@ -140,8 +139,6 @@ void prefs_reset_login_search(void);
 char* prefs_autocomplete_boolean_choice(const char *const prefix);
 void prefs_reset_boolean_choice(void);
 
-char* prefs_autocomplete_message_trigger(const char *const prefix);
-void prefs_reset_message_trigger_ac(void);
 char* prefs_autocomplete_room_trigger(const char *const prefix);
 void prefs_reset_room_trigger_ac(void);
 
@@ -201,11 +198,8 @@ char* prefs_get_alias(const char *const name);
 GList* prefs_get_aliases(void);
 void prefs_free_aliases(GList *aliases);
 
-gboolean prefs_add_msg_notify_trigger(const char * const text);
 gboolean prefs_add_room_notify_trigger(const char * const text);
-gboolean prefs_remove_msg_notify_trigger(const char * const text);
 gboolean prefs_remove_room_notify_trigger(const char * const text);
-GList* prefs_get_msg_notify_triggers(void);
 GList* prefs_get_room_notify_triggers(void);
 
 gboolean prefs_get_boolean(preference_t pref);

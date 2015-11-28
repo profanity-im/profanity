@@ -1329,11 +1329,6 @@ cons_notify_setting(void)
         else
             cons_show("Messages (/notify message)          : OFF");
 
-        if (prefs_get_boolean(PREF_NOTIFY_MESSAGE_TRIGGER))
-            cons_show("Messages trigger (/notify message)  : ON");
-        else
-            cons_show("Messages trigger (/notify message)  : OFF");
-
         if (prefs_get_boolean(PREF_NOTIFY_MESSAGE_CURRENT))
             cons_show("Messages current (/notify message)  : ON");
         else

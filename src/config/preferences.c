@@ -65,7 +65,6 @@ static GKeyFile *prefs;
 gint log_maxsize = 0;
 
 static Autocomplete boolean_choice_ac;
-static Autocomplete message_trigger_ac;
 static Autocomplete room_trigger_ac;
 
 static void _save_prefs(void);
@@ -149,20 +148,11 @@ prefs_load(void)
     autocomplete_add(boolean_choice_ac, "on");
     autocomplete_add(boolean_choice_ac, "off");
 
-    message_trigger_ac = autocomplete_new();
-    gsize len = 0;
-    gchar **triggers = g_key_file_get_string_list(prefs, PREF_GROUP_NOTIFICATIONS, "message.trigger.list", &len, NULL);
-
-    int i;
-    for (i = 0; i < len; i++) {
-        autocomplete_add(message_trigger_ac, triggers[i]);
-    }
-    g_strfreev(triggers);
-
     room_trigger_ac = autocomplete_new();
-    len = 0;
-    triggers = g_key_file_get_string_list(prefs, PREF_GROUP_NOTIFICATIONS, "room.trigger.list", &len, NULL);
+    gsize len = 0;
+    gchar **triggers = g_key_file_get_string_list(prefs, PREF_GROUP_NOTIFICATIONS, "room.trigger.list", &len, NULL);
 
+    int i = 0;
     for (i = 0; i < len; i++) {
         autocomplete_add(room_trigger_ac, triggers[i]);
     }
@@ -173,7 +163,6 @@ void
 prefs_close(void)
 {
     autocomplete_free(boolean_choice_ac);
-    autocomplete_free(message_trigger_ac);
     autocomplete_free(room_trigger_ac);
     g_key_file_free(prefs);
     prefs = NULL;
@@ -189,18 +178,6 @@ void
 prefs_reset_boolean_choice(void)
 {
     autocomplete_reset(boolean_choice_ac);
-}
-
-char*
-prefs_autocomplete_message_trigger(const char *const prefix)
-{
-    return autocomplete_complete(message_trigger_ac, prefix, TRUE);
-}
-
-void
-prefs_reset_message_trigger_ac(void)
-{
-    autocomplete_reset(message_trigger_ac);
 }
 
 char*
@@ -230,30 +207,6 @@ prefs_do_chat_notify(gboolean current_win, const char *const message)
     gboolean notify_message = prefs_get_boolean(PREF_NOTIFY_MESSAGE);
     if (notify_message) {
         return TRUE;
-    }
-
-    gboolean notify_trigger = prefs_get_boolean(PREF_NOTIFY_MESSAGE_TRIGGER);
-    if (notify_trigger) {
-        gboolean trigger_found = FALSE;
-        char *message_lower = g_utf8_strdown(message, -1);
-        gsize len = 0;
-        gchar **triggers = g_key_file_get_string_list(prefs, PREF_GROUP_NOTIFICATIONS, "message.trigger.list", &len, NULL);
-        int i;
-        for (i = 0; i < len; i++) {
-            char *trigger_lower = g_utf8_strdown(triggers[i], -1);
-            if (g_strrstr(message_lower, trigger_lower)) {
-                trigger_found = TRUE;
-                g_free(trigger_lower);
-                break;
-            }
-            g_free(trigger_lower);
-        }
-        g_strfreev(triggers);
-        g_free(message_lower);
-
-        if (trigger_found) {
-            return TRUE;
-        }
     }
 
     return FALSE;
@@ -854,49 +807,6 @@ prefs_set_roster_presence_indent(gint value)
 }
 
 gboolean
-prefs_add_msg_notify_trigger(const char * const text)
-{
-    gboolean res = conf_string_list_add(prefs, PREF_GROUP_NOTIFICATIONS, "message.trigger.list", text);
-    _save_prefs();
-
-    if (res) {
-        autocomplete_add(message_trigger_ac, text);
-    }
-
-    return res;
-}
-
-gboolean
-prefs_remove_msg_notify_trigger(const char * const text)
-{
-    gboolean res = conf_string_list_remove(prefs, PREF_GROUP_NOTIFICATIONS, "message.trigger.list", text);
-    _save_prefs();
-
-    if (res) {
-        autocomplete_remove(message_trigger_ac, text);
-    }
-
-    return res;
-}
-
-GList*
-prefs_get_msg_notify_triggers(void)
-{
-    GList *result = NULL;
-    gsize len = 0;
-    gchar **triggers = g_key_file_get_string_list(prefs, PREF_GROUP_NOTIFICATIONS, "message.trigger.list", &len, NULL);
-
-    int i;
-    for (i = 0; i < len; i++) {
-        result = g_list_append(result, strdup(triggers[i]));
-    }
-
-    g_strfreev(triggers);
-
-    return result;
-}
-
-gboolean
 prefs_add_room_notify_trigger(const char * const text)
 {
     gboolean res = conf_string_list_add(prefs, PREF_GROUP_NOTIFICATIONS, "room.trigger.list", text);
@@ -1113,7 +1023,6 @@ _get_group(preference_t pref)
         case PREF_NOTIFY_TYPING:
         case PREF_NOTIFY_TYPING_CURRENT:
         case PREF_NOTIFY_MESSAGE:
-        case PREF_NOTIFY_MESSAGE_TRIGGER:
         case PREF_NOTIFY_MESSAGE_CURRENT:
         case PREF_NOTIFY_MESSAGE_TEXT:
         case PREF_NOTIFY_ROOM:
@@ -1207,8 +1116,6 @@ _get_key(preference_t pref)
             return "typing.current";
         case PREF_NOTIFY_MESSAGE:
             return "message";
-        case PREF_NOTIFY_MESSAGE_TRIGGER:
-            return "message.trigger";
         case PREF_NOTIFY_MESSAGE_CURRENT:
             return "message.current";
         case PREF_NOTIFY_MESSAGE_TEXT:
