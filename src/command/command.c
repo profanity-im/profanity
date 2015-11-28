@@ -1074,6 +1074,7 @@ static struct cmd_t command_defs[] =
             "/notify on|off",
             "/notify mention on|off",
             "/notify trigger on|off"
+            "/notify reset"
             "/notify remind <seconds>",
             "/notify typing on|off",
             "/notify typing current on|off",
@@ -1946,6 +1947,7 @@ cmd_init(void)
     autocomplete_add(notify_ac, "off");
     autocomplete_add(notify_ac, "mention");
     autocomplete_add(notify_ac, "trigger");
+    autocomplete_add(notify_ac, "reset");
 
     notify_message_ac = autocomplete_new();
     autocomplete_add(notify_message_ac, "on");
