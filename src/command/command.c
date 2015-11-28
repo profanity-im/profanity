@@ -1054,7 +1054,7 @@ static struct cmd_t command_defs[] =
     },
 
     { "/notify",
-        cmd_notify, parse_args_with_freetext, 2, 4, &cons_notify_setting,
+        cmd_notify, parse_args_with_freetext, 0, 4, NULL,
         CMD_TAGS(
             CMD_TAG_UI,
             CMD_TAG_CHAT,
@@ -1075,6 +1075,9 @@ static struct cmd_t command_defs[] =
             "/notify room trigger remove <text>",
             "/notify room trigger list",
             "/notify room trigger on|off",
+            "/notify on|off",
+            "/notify mention on|off",
+            "/notify trigger on|off"
             "/notify remind <seconds>",
             "/notify typing on|off",
             "/notify typing current on|off",
@@ -1084,20 +1087,23 @@ static struct cmd_t command_defs[] =
             "Settings for various kinds of desktop notifications.")
         CMD_ARGS(
             { "message on|off",                 "Notifications for regular chat messages." },
-            { "message current on|off",         "Whether messages in the current window trigger notifications." },
+            { "message current on|off",         "Whether to show regular chat message notifications when the window is focussed." },
             { "message text on|off",            "Show message text in regular message notifications." },
             { "message trigger add <text>",     "Notify when specified text included in regular chat message." },
             { "message trigger remove <text>",  "Remove regular chat notification for specified text." },
             { "message trigger list",           "List all regular chat custom text notifications." },
-            { "message trigger on|off",         "Enable or disable all regular chat custom text notifications." },
-            { "room on|off",                    "Notifications for chat room messages, mention triggers notifications only when your nick is mentioned." },
-            { "room mention on|off",            "Notifications for chat room messages when your nick is mentioned." },
-            { "room current on|off",            "Whether chat room messages in the current window trigger notifications." },
+            { "message trigger on|off",         "Enable or disable all regular chat notification triggers." },
+            { "room on|off",                    "Notifications for all chat room messages, 'mention' only notifies when your nick is mentioned." },
+            { "room mention on|off",            "Notifications for all chat room messages when your nick is mentioned." },
+            { "room current on|off",            "Whether to show all chat room messages notifications when the window is focussed." },
             { "room text on|off",               "Show message text in chat room message notifications." },
-            { "room trigger add <text>",        "Notify when specified text included in regular chat message." },
-            { "room trigger remove <text>",     "Remove regular chat notification for specified text." },
-            { "room trigger list",              "List all regular chat custom text notifications." },
-            { "room trigger on|off",            "Enable or disable all regular chat custom text notifications." },
+            { "room trigger add <text>",        "Notify when specified text included in all chat room messages." },
+            { "room trigger remove <text>",     "Remove chat room notification trigger." },
+            { "room trigger list",              "List all chat room triggers." },
+            { "room trigger on|off",            "Enable or disable all chat room notification triggers." },
+            { "on|off",                         "Notifications for the current chat room." },
+            { "mention on|off",                 "Override the global 'mention' setting for the current chat room." },
+            { "trigger on|off",                 "Override the global 'trigger' setting for the current chat room." },
             { "remind <seconds>",               "Notification reminder period for unread messages, use 0 to disable." },
             { "typing on|off",                  "Notifications when contacts are typing." },
             { "typing current on|off",          "Whether typing notifications are triggered for the current window." },
@@ -1942,6 +1948,10 @@ cmd_init(void)
     autocomplete_add(notify_ac, "remind");
     autocomplete_add(notify_ac, "invite");
     autocomplete_add(notify_ac, "sub");
+    autocomplete_add(notify_ac, "on");
+    autocomplete_add(notify_ac, "off");
+    autocomplete_add(notify_ac, "mention");
+    autocomplete_add(notify_ac, "trigger");
 
     notify_message_ac = autocomplete_new();
     autocomplete_add(notify_message_ac, "on");
@@ -3178,9 +3188,14 @@ _notify_autocomplete(ProfWin *window, const char *const input)
         return result;
     }
 
-    result = autocomplete_param_with_func(input, "/notify room current", prefs_autocomplete_boolean_choice);
-    if (result) {
-        return result;
+    gchar *boolean_choices1[] = { "/notify room current", "/notify message current", "/notify typing current",
+        "/notify room text", "/notify room mention", "/notify message text" };
+    for (i = 0; i < ARRAY_SIZE(boolean_choices1); i++) {
+        result = autocomplete_param_with_func(input, boolean_choices1[i],
+            prefs_autocomplete_boolean_choice);
+        if (result) {
+            return result;
+        }
     }
 
     result = autocomplete_param_with_ac(input, "/notify room trigger", notify_trigger_ac, TRUE);
@@ -3188,32 +3203,7 @@ _notify_autocomplete(ProfWin *window, const char *const input)
         return result;
     }
 
-    result = autocomplete_param_with_func(input, "/notify message current", prefs_autocomplete_boolean_choice);
-    if (result) {
-        return result;
-    }
-
     result = autocomplete_param_with_ac(input, "/notify message trigger", notify_trigger_ac, TRUE);
-    if (result) {
-        return result;
-    }
-
-    result = autocomplete_param_with_func(input, "/notify typing current", prefs_autocomplete_boolean_choice);
-    if (result) {
-        return result;
-    }
-
-    result = autocomplete_param_with_func(input, "/notify room text", prefs_autocomplete_boolean_choice);
-    if (result) {
-        return result;
-    }
-
-    result = autocomplete_param_with_func(input, "/notify room mention", prefs_autocomplete_boolean_choice);
-    if (result) {
-        return result;
-    }
-
-    result = autocomplete_param_with_func(input, "/notify message text", prefs_autocomplete_boolean_choice);
     if (result) {
         return result;
     }
@@ -3233,9 +3223,9 @@ _notify_autocomplete(ProfWin *window, const char *const input)
         return result;
     }
 
-    gchar *boolean_choices[] = { "/notify invite", "/notify sub" };
-    for (i = 0; i < ARRAY_SIZE(boolean_choices); i++) {
-        result = autocomplete_param_with_func(input, boolean_choices[i],
+    gchar *boolean_choices2[] = { "/notify invite", "/notify sub", "/notify mention", "/notify trigger"};
+    for (i = 0; i < ARRAY_SIZE(boolean_choices2); i++) {
+        result = autocomplete_param_with_func(input, boolean_choices2[i],
             prefs_autocomplete_boolean_choice);
         if (result) {
             return result;

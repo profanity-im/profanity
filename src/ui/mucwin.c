@@ -375,7 +375,7 @@ mucwin_message(ProfMucWin *mucwin, const char *const nick, const char *const mes
     }
 
     gboolean is_current = wins_is_current(window);
-    gboolean notify = prefs_get_notify_room(is_current, my_nick, message);
+    gboolean notify = prefs_do_room_notify(is_current, mucwin->roomjid, my_nick, message);
 
     // currently in groupchat window
     if (wins_is_current(window)) {

@@ -214,7 +214,18 @@ char* prefs_get_string(preference_t pref);
 void prefs_free_string(char *pref);
 void prefs_set_string(preference_t pref, char *value);
 
-gboolean prefs_get_notify_chat(gboolean current_win, const char *const message);
-gboolean prefs_get_notify_room(gboolean current_win, const char *const nick, const char *const message);
+gboolean prefs_do_chat_notify(gboolean current_win, const char *const message);
+gboolean prefs_do_room_notify(gboolean current_win, const char *const roomjid, const char *const nick, const char *const message);
+
+void prefs_set_room_notify(const char *const roomjid, gboolean value);
+void prefs_set_room_notify_mention(const char *const roomjid, gboolean value);
+void prefs_set_room_notify_trigger(const char *const roomjid, gboolean value);
+gboolean prefs_reset_room_notify(const char *const roomjid);
+gboolean prefs_has_room_notify(const char *const roomjid);
+gboolean prefs_has_room_notify_mention(const char *const roomjid);
+gboolean prefs_has_room_notify_trigger(const char *const roomjid);
+gboolean prefs_get_room_notify(const char *const roomjid);
+gboolean prefs_get_room_notify_mention(const char *const roomjid);
+gboolean prefs_get_room_notify_trigger(const char *const roomjid);
 
 #endif

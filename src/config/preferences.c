@@ -215,10 +215,8 @@ prefs_reset_room_trigger_ac(void)
     autocomplete_reset(room_trigger_ac);
 }
 
-
-
 gboolean
-prefs_get_notify_chat(gboolean current_win, const char *const message)
+prefs_do_chat_notify(gboolean current_win, const char *const message)
 {
     gboolean notify_current = prefs_get_boolean(PREF_NOTIFY_MESSAGE_CURRENT);
     gboolean notify_window = FALSE;
@@ -235,36 +233,35 @@ prefs_get_notify_chat(gboolean current_win, const char *const message)
     }
 
     gboolean notify_trigger = prefs_get_boolean(PREF_NOTIFY_MESSAGE_TRIGGER);
-    if (!notify_trigger) {
-        return FALSE;
-    }
-
-    gboolean trigger_found = FALSE;
-    char *message_lower = g_utf8_strdown(message, -1);
-    gsize len = 0;
-    gchar **triggers = g_key_file_get_string_list(prefs, PREF_GROUP_NOTIFICATIONS, "message.trigger.list", &len, NULL);
-    int i;
-    for (i = 0; i < len; i++) {
-        char *trigger_lower = g_utf8_strdown(triggers[i], -1);
-        if (g_strrstr(message_lower, trigger_lower)) {
-            trigger_found = TRUE;
+    if (notify_trigger) {
+        gboolean trigger_found = FALSE;
+        char *message_lower = g_utf8_strdown(message, -1);
+        gsize len = 0;
+        gchar **triggers = g_key_file_get_string_list(prefs, PREF_GROUP_NOTIFICATIONS, "message.trigger.list", &len, NULL);
+        int i;
+        for (i = 0; i < len; i++) {
+            char *trigger_lower = g_utf8_strdown(triggers[i], -1);
+            if (g_strrstr(message_lower, trigger_lower)) {
+                trigger_found = TRUE;
+                g_free(trigger_lower);
+                break;
+            }
             g_free(trigger_lower);
-            break;
         }
-        g_free(trigger_lower);
-    }
-    g_strfreev(triggers);
-    g_free(message_lower);
+        g_strfreev(triggers);
+        g_free(message_lower);
 
-    if (trigger_found) {
-        return TRUE;
+        if (trigger_found) {
+            return TRUE;
+        }
     }
 
     return FALSE;
 }
 
 gboolean
-prefs_get_notify_room(gboolean current_win, const char *const nick, const char *const message)
+prefs_do_room_notify(gboolean current_win, const char *const roomjid, const char *const nick,
+    const char *const message)
 {
     gboolean notify_current = prefs_get_boolean(PREF_NOTIFY_ROOM_CURRENT);
     gboolean notify_window = FALSE;
@@ -275,12 +272,22 @@ prefs_get_notify_room(gboolean current_win, const char *const nick, const char *
         return FALSE;
     }
 
-    gboolean notify_room = prefs_get_boolean(PREF_NOTIFY_ROOM);
+    gboolean notify_room = FALSE;
+    if (g_key_file_has_key(prefs, roomjid, "notify", NULL)) {
+        notify_room = g_key_file_get_boolean(prefs, roomjid, "notify", NULL);
+    } else {
+        notify_room = prefs_get_boolean(PREF_NOTIFY_ROOM);
+    }
     if (notify_room) {
         return TRUE;
     }
 
-    gboolean notify_mention = prefs_get_boolean(PREF_NOTIFY_ROOM_MENTION);
+    gboolean notify_mention = FALSE;
+    if (g_key_file_has_key(prefs, roomjid, "notify.mention", NULL)) {
+        notify_mention = g_key_file_get_boolean(prefs, roomjid, "notify.mention", NULL);
+    } else {
+        notify_mention = prefs_get_boolean(PREF_NOTIFY_ROOM_MENTION);
+    }
     if (notify_mention) {
         char *message_lower = g_utf8_strdown(message, -1);
         char *nick_lower = g_utf8_strdown(nick, -1);
@@ -293,29 +300,101 @@ prefs_get_notify_room(gboolean current_win, const char *const nick, const char *
         g_free(nick_lower);
     }
 
-    gboolean notify_trigger = prefs_get_boolean(PREF_NOTIFY_ROOM_TRIGGER);
-    if (!notify_trigger) {
-        return FALSE;
+    gboolean notify_trigger = FALSE;
+    if (g_key_file_has_key(prefs, roomjid, "notify.trigger", NULL)) {
+        notify_trigger = g_key_file_get_boolean(prefs, roomjid, "notify.trigger", NULL);
+    } else {
+        notify_trigger = prefs_get_boolean(PREF_NOTIFY_ROOM_TRIGGER);
     }
-
-    gboolean trigger_found = FALSE;
-    char *message_lower = g_utf8_strdown(message, -1);
-    gsize len = 0;
-    gchar **triggers = g_key_file_get_string_list(prefs, PREF_GROUP_NOTIFICATIONS, "room.trigger.list", &len, NULL);
-    int i;
-    for (i = 0; i < len; i++) {
-        char *trigger_lower = g_utf8_strdown(triggers[i], -1);
-        if (g_strrstr(message_lower, trigger_lower)) {
-            trigger_found = TRUE;
+    if (notify_trigger) {
+        gboolean trigger_found = FALSE;
+        char *message_lower = g_utf8_strdown(message, -1);
+        gsize len = 0;
+        gchar **triggers = g_key_file_get_string_list(prefs, PREF_GROUP_NOTIFICATIONS, "room.trigger.list", &len, NULL);
+        int i;
+        for (i = 0; i < len; i++) {
+            char *trigger_lower = g_utf8_strdown(triggers[i], -1);
+            if (g_strrstr(message_lower, trigger_lower)) {
+                trigger_found = TRUE;
+                g_free(trigger_lower);
+                break;
+            }
             g_free(trigger_lower);
-            break;
         }
-        g_free(trigger_lower);
-    }
-    g_strfreev(triggers);
-    g_free(message_lower);
+        g_strfreev(triggers);
+        g_free(message_lower);
 
-    if (trigger_found) {
+        if (trigger_found) {
+            return TRUE;
+        }
+    }
+
+    return FALSE;
+}
+
+void
+prefs_set_room_notify(const char *const roomjid, gboolean value)
+{
+    g_key_file_set_boolean(prefs, roomjid, "notify", value);
+    _save_prefs();
+}
+
+void
+prefs_set_room_notify_mention(const char *const roomjid, gboolean value)
+{
+    g_key_file_set_boolean(prefs, roomjid, "notify.mention", value);
+    _save_prefs();
+}
+
+void
+prefs_set_room_notify_trigger(const char *const roomjid, gboolean value)
+{
+    g_key_file_set_boolean(prefs, roomjid, "notify.trigger", value);
+    _save_prefs();
+}
+
+gboolean
+prefs_has_room_notify(const char *const roomjid)
+{
+    return g_key_file_has_key(prefs, roomjid, "notify", NULL);
+}
+
+gboolean
+prefs_has_room_notify_mention(const char *const roomjid)
+{
+    return g_key_file_has_key(prefs, roomjid, "notify.mention", NULL);
+}
+
+gboolean
+prefs_has_room_notify_trigger(const char *const roomjid)
+{
+    return g_key_file_has_key(prefs, roomjid, "notify.trigger", NULL);
+}
+
+gboolean
+prefs_get_room_notify(const char *const roomjid)
+{
+    return g_key_file_get_boolean(prefs, roomjid, "notify", NULL);
+}
+
+gboolean
+prefs_get_room_notify_mention(const char *const roomjid)
+{
+    return g_key_file_get_boolean(prefs, roomjid, "notify.mention", NULL);
+}
+
+gboolean
+prefs_get_room_notify_trigger(const char *const roomjid)
+{
+    return g_key_file_get_boolean(prefs, roomjid, "notify.trigger", NULL);
+}
+
+gboolean
+prefs_reset_room_notify(const char *const roomjid)
+{
+    if (g_key_file_has_group(prefs, roomjid)) {
+        g_key_file_remove_group(prefs, roomjid, NULL);
+        _save_prefs();
         return TRUE;
     }
 
