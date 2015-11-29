@@ -390,6 +390,9 @@ _inp_rl_startup_hook(void)
     // unbind unwanted mappings
     rl_bind_keyseq("\\e=", NULL);
 
+    // disable readline completion
+    rl_variable_bind("disable-completion", "on");
+
     return 0;
 }
 
