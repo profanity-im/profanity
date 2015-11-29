@@ -4280,23 +4280,23 @@ cmd_notify(ProfWin *window, const char *const command, gchar **args)
                 win_vprintln_ch(window, '!', "Notification settings for %s", mucwin->roomjid);
                 if (has_notify) {
                     if (prefs_get_room_notify(mucwin->roomjid)) {
-                        win_vprintln_ch(window, '!', "  All: ON");
+                        win_vprintln_ch(window, '!', "  Message  : ON");
                     } else {
-                        win_vprintln_ch(window, '!', "  All: OFF");
+                        win_vprintln_ch(window, '!', "  Message  : OFF");
                     }
                 }
                 if (has_notify_mention) {
                     if (prefs_get_room_notify_mention(mucwin->roomjid)) {
-                        win_vprintln_ch(window, '!', "  Mention: ON");
+                        win_vprintln_ch(window, '!', "  Mention  : ON");
                     } else {
-                        win_vprintln_ch(window, '!', "  Mention: OFF");
+                        win_vprintln_ch(window, '!', "  Mention  : OFF");
                     }
                 }
                 if (has_notify_trigger) {
                     if (prefs_get_room_notify_trigger(mucwin->roomjid)) {
-                        win_vprintln_ch(window, '!', "  Triggers: ON");
+                        win_vprintln_ch(window, '!', "  Triggers : ON");
                     } else {
-                        win_vprintln_ch(window, '!', "  Triggers: OFF");
+                        win_vprintln_ch(window, '!', "  Triggers : OFF");
                     }
                 }
             }
@@ -4306,33 +4306,33 @@ cmd_notify(ProfWin *window, const char *const command, gchar **args)
         return TRUE;
     }
 
-    // message settings
-    if (strcmp(args[0], "message") == 0) {
+    // chat settings
+    if (strcmp(args[0], "chat") == 0) {
         if (strcmp(args[1], "on") == 0) {
-            cons_show("Message notifications enabled.");
-            prefs_set_boolean(PREF_NOTIFY_MESSAGE, TRUE);
+            cons_show("Chat notifications enabled.");
+            prefs_set_boolean(PREF_NOTIFY_CHAT, TRUE);
         } else if (strcmp(args[1], "off") == 0) {
-            cons_show("Message notifications disabled.");
-            prefs_set_boolean(PREF_NOTIFY_MESSAGE, FALSE);
+            cons_show("Chat notifications disabled.");
+            prefs_set_boolean(PREF_NOTIFY_CHAT, FALSE);
         } else if (strcmp(args[1], "current") == 0) {
             if (g_strcmp0(args[2], "on") == 0) {
-                cons_show("Current window message notifications enabled.");
-                prefs_set_boolean(PREF_NOTIFY_MESSAGE_CURRENT, TRUE);
+                cons_show("Current window chat notifications enabled.");
+                prefs_set_boolean(PREF_NOTIFY_CHAT_CURRENT, TRUE);
             } else if (g_strcmp0(args[2], "off") == 0) {
-                cons_show("Current window message notifications disabled.");
-                prefs_set_boolean(PREF_NOTIFY_MESSAGE_CURRENT, FALSE);
+                cons_show("Current window chat notifications disabled.");
+                prefs_set_boolean(PREF_NOTIFY_CHAT_CURRENT, FALSE);
             } else {
-                cons_show("Usage: /notify message current on|off");
+                cons_show("Usage: /notify chat current on|off");
             }
         } else if (strcmp(args[1], "text") == 0) {
             if (g_strcmp0(args[2], "on") == 0) {
-                cons_show("Showing text in message notifications enabled.");
-                prefs_set_boolean(PREF_NOTIFY_MESSAGE_TEXT, TRUE);
+                cons_show("Showing text in chat notifications enabled.");
+                prefs_set_boolean(PREF_NOTIFY_CHAT_TEXT, TRUE);
             } else if (g_strcmp0(args[2], "off") == 0) {
-                cons_show("Showing text in message notifications disabled.");
-                prefs_set_boolean(PREF_NOTIFY_MESSAGE_TEXT, FALSE);
+                cons_show("Showing text in chat notifications disabled.");
+                prefs_set_boolean(PREF_NOTIFY_CHAT_TEXT, FALSE);
             } else {
-                cons_show("Usage: /notify message text on|off");
+                cons_show("Usage: /notify chat text on|off");
             }
         }
 

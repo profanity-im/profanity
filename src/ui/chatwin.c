@@ -290,7 +290,7 @@ chatwin_incoming_msg(ProfChatWin *chatwin, const char *const resource, const cha
         ui_index = 0;
     }
 
-    if (prefs_get_boolean(PREF_NOTIFY_MESSAGE_TEXT)) {
+    if (prefs_get_boolean(PREF_NOTIFY_CHAT_TEXT)) {
         notify_message(display_name, ui_index, message);
     } else {
         notify_message(display_name, ui_index, NULL);

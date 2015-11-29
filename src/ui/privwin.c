@@ -91,7 +91,7 @@ privwin_incoming_msg(ProfPrivateWin *privatewin, const char *const message, GDat
         ui_index = 0;
     }
 
-    if (prefs_get_boolean(PREF_NOTIFY_MESSAGE_TEXT)) {
+    if (prefs_get_boolean(PREF_NOTIFY_CHAT_TEXT)) {
         notify_message(display_from, ui_index, message);
     } else {
         notify_message(display_from, ui_index, NULL);

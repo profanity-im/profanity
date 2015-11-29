@@ -195,7 +195,7 @@ prefs_reset_room_trigger_ac(void)
 gboolean
 prefs_do_chat_notify(gboolean current_win, const char *const message)
 {
-    gboolean notify_current = prefs_get_boolean(PREF_NOTIFY_MESSAGE_CURRENT);
+    gboolean notify_current = prefs_get_boolean(PREF_NOTIFY_CHAT_CURRENT);
     gboolean notify_window = FALSE;
     if (!current_win || (current_win && notify_current) ) {
         notify_window = TRUE;
@@ -204,7 +204,7 @@ prefs_do_chat_notify(gboolean current_win, const char *const message)
         return FALSE;
     }
 
-    gboolean notify_message = prefs_get_boolean(PREF_NOTIFY_MESSAGE);
+    gboolean notify_message = prefs_get_boolean(PREF_NOTIFY_CHAT);
     if (notify_message) {
         return TRUE;
     }
@@ -1022,9 +1022,9 @@ _get_group(preference_t pref)
             return PREF_GROUP_CHATSTATES;
         case PREF_NOTIFY_TYPING:
         case PREF_NOTIFY_TYPING_CURRENT:
-        case PREF_NOTIFY_MESSAGE:
-        case PREF_NOTIFY_MESSAGE_CURRENT:
-        case PREF_NOTIFY_MESSAGE_TEXT:
+        case PREF_NOTIFY_CHAT:
+        case PREF_NOTIFY_CHAT_CURRENT:
+        case PREF_NOTIFY_CHAT_TEXT:
         case PREF_NOTIFY_ROOM:
         case PREF_NOTIFY_ROOM_MENTION:
         case PREF_NOTIFY_ROOM_TRIGGER:
@@ -1114,11 +1114,11 @@ _get_key(preference_t pref)
             return "typing";
         case PREF_NOTIFY_TYPING_CURRENT:
             return "typing.current";
-        case PREF_NOTIFY_MESSAGE:
+        case PREF_NOTIFY_CHAT:
             return "message";
-        case PREF_NOTIFY_MESSAGE_CURRENT:
+        case PREF_NOTIFY_CHAT_CURRENT:
             return "message.current";
-        case PREF_NOTIFY_MESSAGE_TEXT:
+        case PREF_NOTIFY_CHAT_TEXT:
             return "message.text";
         case PREF_NOTIFY_ROOM:
             return "room";
@@ -1236,8 +1236,8 @@ _get_default_boolean(preference_t pref)
         case PREF_AUTOAWAY_CHECK:
         case PREF_LOG_ROTATE:
         case PREF_LOG_SHARED:
-        case PREF_NOTIFY_MESSAGE:
-        case PREF_NOTIFY_MESSAGE_CURRENT:
+        case PREF_NOTIFY_CHAT:
+        case PREF_NOTIFY_CHAT_CURRENT:
         case PREF_NOTIFY_ROOM:
         case PREF_NOTIFY_ROOM_CURRENT:
         case PREF_NOTIFY_TYPING:

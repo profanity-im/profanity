@@ -1323,77 +1323,78 @@ cons_show_ui_prefs(void)
 void
 cons_notify_setting(void)
 {
-    if (is_notify_enabled()) {
-        if (prefs_get_boolean(PREF_NOTIFY_MESSAGE))
-            cons_show("Messages (/notify message)          : ON");
-        else
-            cons_show("Messages (/notify message)          : OFF");
-
-        if (prefs_get_boolean(PREF_NOTIFY_MESSAGE_CURRENT))
-            cons_show("Messages current (/notify message)  : ON");
-        else
-            cons_show("Messages current (/notify message)  : OFF");
-
-        if (prefs_get_boolean(PREF_NOTIFY_MESSAGE_TEXT))
-            cons_show("Messages text (/notify message)     : ON");
-        else
-            cons_show("Messages text (/notify message)     : OFF");
-
-        if (prefs_get_boolean(PREF_NOTIFY_ROOM))
-            cons_show("Room messages (/notify room)        : ON");
-        else
-            cons_show("Room messages (/notify room)        : OFF");
-
-        if (prefs_get_boolean(PREF_NOTIFY_ROOM_MENTION))
-            cons_show("Room mention (/notify room)         : ON");
-        else
-            cons_show("Room mention (/notify room)         : OFF");
-
-        if (prefs_get_boolean(PREF_NOTIFY_ROOM_TRIGGER))
-            cons_show("Room trigger (/notify room)         : ON");
-        else
-            cons_show("Room trigger (/notify room)         : OFF");
-
-        if (prefs_get_boolean(PREF_NOTIFY_ROOM_CURRENT))
-            cons_show("Room current (/notify room)         : ON");
-        else
-            cons_show("Room current (/notify room)         : OFF");
-
-        if (prefs_get_boolean(PREF_NOTIFY_ROOM_TEXT))
-            cons_show("Room text (/notify room)            : ON");
-        else
-            cons_show("Room text (/notify room)            : OFF");
-
-        if (prefs_get_boolean(PREF_NOTIFY_TYPING))
-            cons_show("Composing (/notify typing)          : ON");
-        else
-            cons_show("Composing (/notify typing)          : OFF");
-
-        if (prefs_get_boolean(PREF_NOTIFY_TYPING_CURRENT))
-            cons_show("Composing current (/notify typing)  : ON");
-        else
-            cons_show("Composing current (/notify typing)  : OFF");
-
-        if (prefs_get_boolean(PREF_NOTIFY_INVITE))
-            cons_show("Room invites (/notify invite)       : ON");
-        else
-            cons_show("Room invites (/notify invite)       : OFF");
-
-        if (prefs_get_boolean(PREF_NOTIFY_SUB))
-            cons_show("Subscription requests (/notify sub) : ON");
-        else
-            cons_show("Subscription requests (/notify sub) : OFF");
-
-        gint remind_period = prefs_get_notify_remind();
-        if (remind_period == 0) {
-            cons_show("Reminder period (/notify remind)    : OFF");
-        } else if (remind_period == 1) {
-            cons_show("Reminder period (/notify remind)    : 1 second");
-        } else {
-            cons_show("Reminder period (/notify remind)    : %d seconds", remind_period);
-        }
-    } else {
+    if (!is_notify_enabled()) {
         cons_show("Notification support was not included in this build.");
+        return;
+    }
+
+    if (prefs_get_boolean(PREF_NOTIFY_CHAT))
+        cons_show("Chat message (/notify chat)         : ON");
+    else
+        cons_show("Chat message (/notify chat)         : OFF");
+
+    if (prefs_get_boolean(PREF_NOTIFY_CHAT_CURRENT))
+        cons_show("Chat current (/notify chat)         : ON");
+    else
+        cons_show("Chat current (/notify chat)         : OFF");
+
+    if (prefs_get_boolean(PREF_NOTIFY_CHAT_TEXT))
+        cons_show("Chat text (/notify chat)            : ON");
+    else
+        cons_show("Chat text (/notify chat)            : OFF");
+
+    if (prefs_get_boolean(PREF_NOTIFY_ROOM))
+        cons_show("Room message (/notify room)         : ON");
+    else
+        cons_show("Room message (/notify room)         : OFF");
+
+    if (prefs_get_boolean(PREF_NOTIFY_ROOM_MENTION))
+        cons_show("Room mention (/notify room)         : ON");
+    else
+        cons_show("Room mention (/notify room)         : OFF");
+
+    if (prefs_get_boolean(PREF_NOTIFY_ROOM_TRIGGER))
+        cons_show("Room trigger (/notify room)         : ON");
+    else
+        cons_show("Room trigger (/notify room)         : OFF");
+
+    if (prefs_get_boolean(PREF_NOTIFY_ROOM_CURRENT))
+        cons_show("Room current (/notify room)         : ON");
+    else
+        cons_show("Room current (/notify room)         : OFF");
+
+    if (prefs_get_boolean(PREF_NOTIFY_ROOM_TEXT))
+        cons_show("Room text (/notify room)            : ON");
+    else
+        cons_show("Room text (/notify room)            : OFF");
+
+    if (prefs_get_boolean(PREF_NOTIFY_TYPING))
+        cons_show("Composing (/notify typing)          : ON");
+    else
+        cons_show("Composing (/notify typing)          : OFF");
+
+    if (prefs_get_boolean(PREF_NOTIFY_TYPING_CURRENT))
+        cons_show("Composing current (/notify typing)  : ON");
+    else
+        cons_show("Composing current (/notify typing)  : OFF");
+
+    if (prefs_get_boolean(PREF_NOTIFY_INVITE))
+        cons_show("Room invites (/notify invite)       : ON");
+    else
+        cons_show("Room invites (/notify invite)       : OFF");
+
+    if (prefs_get_boolean(PREF_NOTIFY_SUB))
+        cons_show("Subscription requests (/notify sub) : ON");
+    else
+        cons_show("Subscription requests (/notify sub) : OFF");
+
+    gint remind_period = prefs_get_notify_remind();
+    if (remind_period == 0) {
+        cons_show("Reminder period (/notify remind)    : OFF");
+    } else if (remind_period == 1) {
+        cons_show("Reminder period (/notify remind)    : 1 second");
+    } else {
+        cons_show("Reminder period (/notify remind)    : %d seconds", remind_period);
     }
 }
 
