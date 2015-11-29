@@ -613,7 +613,7 @@ cons_show_bookmarks(const GList *list)
                 ProfWin *roomwin = (ProfWin*)wins_get_muc(item->jid);
                 if (roomwin) {
                     int num = wins_get_num(roomwin);
-                    win_vprint(console, '-', 0, NULL, NO_DATE | NO_EOL, presence_colour, "", " (%d)", num);
+                    win_vprint(console, '-', 0, NULL, NO_DATE | NO_EOL, presence_colour, "", " (win %d)", num);
                 }
             }
             win_newline(console);
