@@ -4274,58 +4274,111 @@ cmd_gone(ProfWin *window, const char *const command, gchar **args)
 gboolean
 cmd_notify(ProfWin *window, const char *const command, gchar **args)
 {
-    char *kind = args[0];
+    if (!args[0]) {
+        ProfWin *current = wins_get_current();
+        if (current->type == WIN_MUC) {
+            win_println(current, 0, "");
+            ProfMucWin *mucwin = (ProfMucWin *)current;
 
-    // bad kind
-    if ((strcmp(kind, "message") != 0) && (strcmp(kind, "typing") != 0) &&
-            (strcmp(kind, "remind") != 0) && (strcmp(kind, "invite") != 0) &&
-            (strcmp(kind, "sub") != 0) && (strcmp(kind, "room") != 0)) {
-        cons_bad_cmd_usage(command);
-
-    // set message setting
-    } else if (strcmp(kind, "message") == 0) {
-        if (strcmp(args[1], "on") == 0) {
-            cons_show("Message notifications enabled.");
-            prefs_set_boolean(PREF_NOTIFY_MESSAGE, TRUE);
-        } else if (strcmp(args[1], "off") == 0) {
-            cons_show("Message notifications disabled.");
-            prefs_set_boolean(PREF_NOTIFY_MESSAGE, FALSE);
-        } else if (strcmp(args[1], "current") == 0) {
-            if (g_strcmp0(args[2], "on") == 0) {
-                cons_show("Current window message notifications enabled.");
-                prefs_set_boolean(PREF_NOTIFY_MESSAGE_CURRENT, TRUE);
-            } else if (g_strcmp0(args[2], "off") == 0) {
-                cons_show("Current window message notifications disabled.");
-                prefs_set_boolean(PREF_NOTIFY_MESSAGE_CURRENT, FALSE);
+            win_vprintln_ch(window, '!', "Notification settings for %s:", mucwin->roomjid);
+            if (prefs_has_room_notify(mucwin->roomjid)) {
+                if (prefs_get_room_notify(mucwin->roomjid)) {
+                    win_vprintln_ch(window, '!', "  Message  : ON");
+                } else {
+                    win_vprintln_ch(window, '!', "  Message  : OFF");
+                }
             } else {
-                cons_show("Usage: /notify message current on|off");
+                if (prefs_get_boolean(PREF_NOTIFY_ROOM)) {
+                    win_vprintln_ch(window, '!', "  Message  : ON (global setting)");
+                } else {
+                    win_vprintln_ch(window, '!', "  Message  : OFF (global setting)");
+                }
             }
-        } else if (strcmp(args[1], "text") == 0) {
-            if (g_strcmp0(args[2], "on") == 0) {
-                cons_show("Showing text in message notifications enabled.");
-                prefs_set_boolean(PREF_NOTIFY_MESSAGE_TEXT, TRUE);
-            } else if (g_strcmp0(args[2], "off") == 0) {
-                cons_show("Showing text in message notifications disabled.");
-                prefs_set_boolean(PREF_NOTIFY_MESSAGE_TEXT, FALSE);
+            if (prefs_has_room_notify_mention(mucwin->roomjid)) {
+                if (prefs_get_room_notify_mention(mucwin->roomjid)) {
+                    win_vprintln_ch(window, '!', "  Mention  : ON");
+                } else {
+                    win_vprintln_ch(window, '!', "  Mention  : OFF");
+                }
             } else {
-                cons_show("Usage: /notify message text on|off");
+                if (prefs_get_boolean(PREF_NOTIFY_ROOM_MENTION)) {
+                    win_vprintln_ch(window, '!', "  Mention  : ON (global setting)");
+                } else {
+                    win_vprintln_ch(window, '!', "  Mention  : OFF (global setting)");
+                }
             }
+            if (prefs_has_room_notify_trigger(mucwin->roomjid)) {
+                if (prefs_get_room_notify_trigger(mucwin->roomjid)) {
+                    win_vprintln_ch(window, '!', "  Triggers : ON");
+                } else {
+                    win_vprintln_ch(window, '!', "  Triggers : OFF");
+                }
+            } else {
+                if (prefs_get_boolean(PREF_NOTIFY_ROOM_TRIGGER)) {
+                    win_vprintln_ch(window, '!', "  Triggers : ON (global setting)");
+                } else {
+                    win_vprintln_ch(window, '!', "  Triggers : OFF (global setting)");
+                }
+            }
+            win_println(current, 0, "");
         } else {
-            cons_show("Usage: /notify message on|off");
+            cons_show("");
+            cons_notify_setting();
+            cons_bad_cmd_usage(command);
+
+        }
+        return TRUE;
+    }
+
+    // chat settings
+    if (g_strcmp0(args[0], "chat") == 0) {
+        if (g_strcmp0(args[1], "on") == 0) {
+            cons_show("Chat notifications enabled.");
+            prefs_set_boolean(PREF_NOTIFY_CHAT, TRUE);
+        } else if (g_strcmp0(args[1], "off") == 0) {
+            cons_show("Chat notifications disabled.");
+            prefs_set_boolean(PREF_NOTIFY_CHAT, FALSE);
+        } else if (g_strcmp0(args[1], "current") == 0) {
+            if (g_strcmp0(args[2], "on") == 0) {
+                cons_show("Current window chat notifications enabled.");
+                prefs_set_boolean(PREF_NOTIFY_CHAT_CURRENT, TRUE);
+            } else if (g_strcmp0(args[2], "off") == 0) {
+                cons_show("Current window chat notifications disabled.");
+                prefs_set_boolean(PREF_NOTIFY_CHAT_CURRENT, FALSE);
+            } else {
+                cons_show("Usage: /notify chat current on|off");
+            }
+        } else if (g_strcmp0(args[1], "text") == 0) {
+            if (g_strcmp0(args[2], "on") == 0) {
+                cons_show("Showing text in chat notifications enabled.");
+                prefs_set_boolean(PREF_NOTIFY_CHAT_TEXT, TRUE);
+            } else if (g_strcmp0(args[2], "off") == 0) {
+                cons_show("Showing text in chat notifications disabled.");
+                prefs_set_boolean(PREF_NOTIFY_CHAT_TEXT, FALSE);
+            } else {
+                cons_show("Usage: /notify chat text on|off");
+            }
         }
 
-    // set room setting
-    } else if (strcmp(kind, "room") == 0) {
-        if (strcmp(args[1], "on") == 0) {
-            cons_show("Chat room notifications enabled.");
-            prefs_set_string(PREF_NOTIFY_ROOM, "on");
-        } else if (strcmp(args[1], "off") == 0) {
-            cons_show("Chat room notifications disabled.");
-            prefs_set_string(PREF_NOTIFY_ROOM, "off");
-        } else if (strcmp(args[1], "mention") == 0) {
-            cons_show("Chat room notifications enabled on mention.");
-            prefs_set_string(PREF_NOTIFY_ROOM, "mention");
-        } else if (strcmp(args[1], "current") == 0) {
+    // chat room settings
+    } else if (g_strcmp0(args[0], "room") == 0) {
+        if (g_strcmp0(args[1], "on") == 0) {
+            cons_show("Room notifications enabled.");
+            prefs_set_boolean(PREF_NOTIFY_ROOM, TRUE);
+        } else if (g_strcmp0(args[1], "off") == 0) {
+            cons_show("Room notifications disabled.");
+            prefs_set_boolean(PREF_NOTIFY_ROOM, FALSE);
+        } else if (g_strcmp0(args[1], "mention") == 0) {
+            if (g_strcmp0(args[2], "on") == 0) {
+                cons_show("Room notifications with mention enabled.");
+                prefs_set_boolean(PREF_NOTIFY_ROOM_MENTION, TRUE);
+            } else if (g_strcmp0(args[2], "off") == 0) {
+                cons_show("Room notifications with mention disabled.");
+                prefs_set_boolean(PREF_NOTIFY_ROOM_MENTION, FALSE);
+            } else {
+                cons_show("Usage: /notify room mention on|off");
+            }
+        } else if (g_strcmp0(args[1], "current") == 0) {
             if (g_strcmp0(args[2], "on") == 0) {
                 cons_show("Current window chat room message notifications enabled.");
                 prefs_set_boolean(PREF_NOTIFY_ROOM_CURRENT, TRUE);
@@ -4335,7 +4388,7 @@ cmd_notify(ProfWin *window, const char *const command, gchar **args)
             } else {
                 cons_show("Usage: /notify room current on|off");
             }
-        } else if (strcmp(args[1], "text") == 0) {
+        } else if (g_strcmp0(args[1], "text") == 0) {
             if (g_strcmp0(args[2], "on") == 0) {
                 cons_show("Showing text in chat room message notifications enabled.");
                 prefs_set_boolean(PREF_NOTIFY_ROOM_TEXT, TRUE);
@@ -4345,19 +4398,64 @@ cmd_notify(ProfWin *window, const char *const command, gchar **args)
             } else {
                 cons_show("Usage: /notify room text on|off");
             }
+        } else if (g_strcmp0(args[1], "trigger") == 0) {
+            if (g_strcmp0(args[2], "add") == 0) {
+                if (!args[3]) {
+                    cons_bad_cmd_usage(command);
+                } else {
+                    gboolean res = prefs_add_room_notify_trigger(args[3]);
+                    if (res) {
+                        cons_show("Adding room notification trigger: %s", args[3]);
+                    } else {
+                        cons_show("Room notification trigger already exists: %s", args[3]);
+                    }
+                }
+            } else if (g_strcmp0(args[2], "remove") == 0) {
+                if (!args[3]) {
+                    cons_bad_cmd_usage(command);
+                } else {
+                    gboolean res = prefs_remove_room_notify_trigger(args[3]);
+                    if (res) {
+                        cons_show("Removing room notification trigger: %s", args[3]);
+                    } else {
+                        cons_show("Room notification trigger does not exist: %s", args[3]);
+                    }
+                }
+            } else if (g_strcmp0(args[2], "list") == 0) {
+                GList *triggers = prefs_get_room_notify_triggers();
+                GList *curr = triggers;
+                if (curr) {
+                    cons_show("Room notification triggers:");
+                } else {
+                    cons_show("No room notification triggers");
+                }
+                while (curr) {
+                    cons_show("  %s", curr->data);
+                    curr = g_list_next(curr);
+                }
+                g_list_free_full(triggers, free);
+            } else if (g_strcmp0(args[2], "on") == 0) {
+                cons_show("Enabling room notification triggers");
+                prefs_set_boolean(PREF_NOTIFY_ROOM_TRIGGER, TRUE);
+            } else if (g_strcmp0(args[2], "off") == 0) {
+                cons_show("Disabling room notification triggers");
+                prefs_set_boolean(PREF_NOTIFY_ROOM_TRIGGER, FALSE);
+            } else {
+                cons_bad_cmd_usage(command);
+            }
         } else {
             cons_show("Usage: /notify room on|off|mention");
         }
 
-    // set typing setting
-    } else if (strcmp(kind, "typing") == 0) {
-        if (strcmp(args[1], "on") == 0) {
+    // typing settings
+    } else if (g_strcmp0(args[0], "typing") == 0) {
+        if (g_strcmp0(args[1], "on") == 0) {
             cons_show("Typing notifications enabled.");
             prefs_set_boolean(PREF_NOTIFY_TYPING, TRUE);
-        } else if (strcmp(args[1], "off") == 0) {
+        } else if (g_strcmp0(args[1], "off") == 0) {
             cons_show("Typing notifications disabled.");
             prefs_set_boolean(PREF_NOTIFY_TYPING, FALSE);
-        } else if (strcmp(args[1], "current") == 0) {
+        } else if (g_strcmp0(args[1], "current") == 0) {
             if (g_strcmp0(args[2], "on") == 0) {
                 cons_show("Current window typing notifications enabled.");
                 prefs_set_boolean(PREF_NOTIFY_TYPING_CURRENT, TRUE);
@@ -4371,44 +4469,154 @@ cmd_notify(ProfWin *window, const char *const command, gchar **args)
             cons_show("Usage: /notify typing on|off");
         }
 
-    // set invite setting
-    } else if (strcmp(kind, "invite") == 0) {
-        if (strcmp(args[1], "on") == 0) {
+    // invite settings
+    } else if (g_strcmp0(args[0], "invite") == 0) {
+        if (g_strcmp0(args[1], "on") == 0) {
             cons_show("Chat room invite notifications enabled.");
             prefs_set_boolean(PREF_NOTIFY_INVITE, TRUE);
-        } else if (strcmp(args[1], "off") == 0) {
+        } else if (g_strcmp0(args[1], "off") == 0) {
             cons_show("Chat room invite notifications disabled.");
             prefs_set_boolean(PREF_NOTIFY_INVITE, FALSE);
         } else {
             cons_show("Usage: /notify invite on|off");
         }
 
-    // set subscription setting
-    } else if (strcmp(kind, "sub") == 0) {
-        if (strcmp(args[1], "on") == 0) {
+    // subscription settings
+    } else if (g_strcmp0(args[0], "sub") == 0) {
+        if (g_strcmp0(args[1], "on") == 0) {
             cons_show("Subscription notifications enabled.");
             prefs_set_boolean(PREF_NOTIFY_SUB, TRUE);
-        } else if (strcmp(args[1], "off") == 0) {
+        } else if (g_strcmp0(args[1], "off") == 0) {
             cons_show("Subscription notifications disabled.");
             prefs_set_boolean(PREF_NOTIFY_SUB, FALSE);
         } else {
             cons_show("Usage: /notify sub on|off");
         }
 
-    // set remind setting
-    } else if (strcmp(kind, "remind") == 0) {
-        gint period = atoi(args[1]);
-        prefs_set_notify_remind(period);
-        if (period == 0) {
-            cons_show("Message reminders disabled.");
-        } else if (period == 1) {
-            cons_show("Message reminder period set to 1 second.");
+    // remind settings
+    } else if (g_strcmp0(args[0], "remind") == 0) {
+        if (!args[1]) {
+            cons_bad_cmd_usage(command);
         } else {
-            cons_show("Message reminder period set to %d seconds.", period);
+            gint period = atoi(args[1]);
+            prefs_set_notify_remind(period);
+            if (period == 0) {
+                cons_show("Message reminders disabled.");
+            } else if (period == 1) {
+                cons_show("Message reminder period set to 1 second.");
+            } else {
+                cons_show("Message reminder period set to %d seconds.", period);
+            }
         }
 
+    // current chat room settings
+    } else if (g_strcmp0(args[0], "on") == 0) {
+        jabber_conn_status_t conn_status = jabber_get_connection_status();
+
+        if (conn_status != JABBER_CONNECTED) {
+            cons_show("You are not currenlty connected.");
+        } else {
+            ProfWin *window = wins_get_current();
+            if (window->type != WIN_MUC) {
+                cons_show("You must be in a chat room.");
+            } else {
+                ProfMucWin *mucwin = (ProfMucWin*)window;
+                prefs_set_room_notify(mucwin->roomjid, TRUE);
+                win_vprintln_ch(window, '!', "Notifications enabled for %s", mucwin->roomjid);
+            }
+        }
+    } else if (g_strcmp0(args[0], "off") == 0) {
+        jabber_conn_status_t conn_status = jabber_get_connection_status();
+
+        if (conn_status != JABBER_CONNECTED) {
+            cons_show("You are not currenlty connected.");
+        } else {
+            ProfWin *window = wins_get_current();
+            if (window->type != WIN_MUC) {
+                cons_show("You must be in a chat room.");
+            } else {
+                ProfMucWin *mucwin = (ProfMucWin*)window;
+                prefs_set_room_notify(mucwin->roomjid, FALSE);
+                win_vprintln_ch(window, '!', "Notifications disabled for %s", mucwin->roomjid);
+            }
+        }
+    } else if (g_strcmp0(args[0], "mention") == 0) {
+        jabber_conn_status_t conn_status = jabber_get_connection_status();
+
+        if (conn_status != JABBER_CONNECTED) {
+            cons_show("You are not currenlty connected.");
+        } else {
+            if (g_strcmp0(args[1], "on") == 0) {
+                ProfWin *window = wins_get_current();
+                if (window->type != WIN_MUC) {
+                    cons_show("You must be in a chat room.");
+                } else {
+                    ProfMucWin *mucwin = (ProfMucWin*)window;
+                    prefs_set_room_notify_mention(mucwin->roomjid, TRUE);
+                    win_vprintln_ch(window, '!', "Mention notifications enabled for %s", mucwin->roomjid);
+                }
+            } else if (g_strcmp0(args[1], "off") == 0) {
+                ProfWin *window = wins_get_current();
+                if (window->type != WIN_MUC) {
+                    cons_show("You must be in a chat rooms.");
+                } else {
+                    ProfMucWin *mucwin = (ProfMucWin*)window;
+                    prefs_set_room_notify_mention(mucwin->roomjid, FALSE);
+                    win_vprintln_ch(window, '!', "Mention notifications disabled for %s", mucwin->roomjid);
+                }
+            } else {
+                cons_bad_cmd_usage(command);
+            }
+        }
+    } else if (g_strcmp0(args[0], "trigger") == 0) {
+        jabber_conn_status_t conn_status = jabber_get_connection_status();
+
+        if (conn_status != JABBER_CONNECTED) {
+            cons_show("You are not currenlty connected.");
+        } else {
+            if (g_strcmp0(args[1], "on") == 0) {
+                ProfWin *window = wins_get_current();
+                if (window->type != WIN_MUC) {
+                    cons_show("You must be in a chat room.");
+                } else {
+                    ProfMucWin *mucwin = (ProfMucWin*)window;
+                    prefs_set_room_notify_trigger(mucwin->roomjid, TRUE);
+                    win_vprintln_ch(window, '!', "Custom trigger notifications enabled for %s", mucwin->roomjid);
+                }
+            } else if (g_strcmp0(args[1], "off") == 0) {
+                ProfWin *window = wins_get_current();
+                if (window->type != WIN_MUC) {
+                    cons_show("You must be in a chat rooms.");
+                } else {
+                    ProfMucWin *mucwin = (ProfMucWin*)window;
+                    prefs_set_room_notify_trigger(mucwin->roomjid, FALSE);
+                    win_vprintln_ch(window, '!', "Custom trigger notifications disabled for %s", mucwin->roomjid);
+                }
+            } else {
+                cons_bad_cmd_usage(command);
+            }
+        }
+    } else if (g_strcmp0(args[0], "reset") == 0) {
+        jabber_conn_status_t conn_status = jabber_get_connection_status();
+
+        if (conn_status != JABBER_CONNECTED) {
+            cons_show("You are not currenlty connected.");
+        } else {
+            ProfWin *window = wins_get_current();
+            if (window->type != WIN_MUC) {
+                cons_show("You must be in a chat room.");
+            } else {
+                ProfMucWin *mucwin = (ProfMucWin*)window;
+                gboolean res = prefs_reset_room_notify(mucwin->roomjid);
+                if (res) {
+                    win_vprintln_ch(window, '!', "Notification settings set to global defaults for %s", mucwin->roomjid);
+                } else {
+                    win_vprintln_ch(window, '!', "No custom notification settings for %s", mucwin->roomjid);
+                }
+            }
+        }
     } else {
-        cons_show("Unknown command: %s.", kind);
+        cons_bad_cmd_usage(command);
     }
 
     return TRUE;

@@ -93,10 +93,12 @@ typedef enum {
     PREF_OUTTYPE,
     PREF_NOTIFY_TYPING,
     PREF_NOTIFY_TYPING_CURRENT,
-    PREF_NOTIFY_MESSAGE,
-    PREF_NOTIFY_MESSAGE_CURRENT,
-    PREF_NOTIFY_MESSAGE_TEXT,
+    PREF_NOTIFY_CHAT,
+    PREF_NOTIFY_CHAT_CURRENT,
+    PREF_NOTIFY_CHAT_TEXT,
     PREF_NOTIFY_ROOM,
+    PREF_NOTIFY_ROOM_MENTION,
+    PREF_NOTIFY_ROOM_TRIGGER,
     PREF_NOTIFY_ROOM_CURRENT,
     PREF_NOTIFY_ROOM_TEXT,
     PREF_NOTIFY_INVITE,
@@ -133,8 +135,12 @@ void prefs_close(void);
 
 char* prefs_find_login(char *prefix);
 void prefs_reset_login_search(void);
+
 char* prefs_autocomplete_boolean_choice(const char *const prefix);
 void prefs_reset_boolean_choice(void);
+
+char* prefs_autocomplete_room_trigger(const char *const prefix);
+void prefs_reset_room_trigger_ac(void);
 
 gint prefs_get_gone(void);
 void prefs_set_gone(gint value);
@@ -194,10 +200,28 @@ char* prefs_get_alias(const char *const name);
 GList* prefs_get_aliases(void);
 void prefs_free_aliases(GList *aliases);
 
+gboolean prefs_add_room_notify_trigger(const char * const text);
+gboolean prefs_remove_room_notify_trigger(const char * const text);
+GList* prefs_get_room_notify_triggers(void);
+
 gboolean prefs_get_boolean(preference_t pref);
 void prefs_set_boolean(preference_t pref, gboolean value);
 char* prefs_get_string(preference_t pref);
 void prefs_free_string(char *pref);
 void prefs_set_string(preference_t pref, char *value);
+
+gboolean prefs_do_chat_notify(gboolean current_win, const char *const message);
+gboolean prefs_do_room_notify(gboolean current_win, const char *const roomjid, const char *const nick, const char *const message);
+
+void prefs_set_room_notify(const char *const roomjid, gboolean value);
+void prefs_set_room_notify_mention(const char *const roomjid, gboolean value);
+void prefs_set_room_notify_trigger(const char *const roomjid, gboolean value);
+gboolean prefs_reset_room_notify(const char *const roomjid);
+gboolean prefs_has_room_notify(const char *const roomjid);
+gboolean prefs_has_room_notify_mention(const char *const roomjid);
+gboolean prefs_has_room_notify_trigger(const char *const roomjid);
+gboolean prefs_get_room_notify(const char *const roomjid);
+gboolean prefs_get_room_notify_mention(const char *const roomjid);
+gboolean prefs_get_room_notify_trigger(const char *const roomjid);
 
 #endif

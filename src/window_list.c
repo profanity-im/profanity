@@ -210,13 +210,16 @@ wins_set_current_by_num(int i)
             ProfChatWin *chatwin = (ProfChatWin*) window;
             assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
             chatwin->unread = 0;
+            chatwin->notify = FALSE;
         } else if (window->type == WIN_MUC) {
             ProfMucWin *mucwin = (ProfMucWin*) window;
             assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
             mucwin->unread = 0;
+            mucwin->notify = FALSE;
         } else if (window->type == WIN_PRIVATE) {
             ProfPrivateWin *privatewin = (ProfPrivateWin*) window;
             privatewin->unread = 0;
+            privatewin->notify = FALSE;
         }
     }
 }
@@ -412,6 +415,23 @@ wins_new_plugin(const char * const tag)
     g_hash_table_insert(windows, GINT_TO_POINTER(result), new);
     g_list_free(keys);
     return new;
+}
+
+gboolean
+wins_get_notify(void)
+{
+    GList *values = g_hash_table_get_values(windows);
+    GList *curr = values;
+
+    while (curr) {
+        ProfWin *window = curr->data;
+        if (win_notify(window)) {
+            g_list_free(values);
+            return TRUE;
+        }
+        curr = g_list_next(curr);
+    }
+    return FALSE;
 }
 
 int

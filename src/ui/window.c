@@ -141,6 +141,7 @@ win_create_chat(const char *const barejid)
     new_win->pgp_send = FALSE;
     new_win->history_shown = FALSE;
     new_win->unread = 0;
+    new_win->notify = FALSE;
     new_win->state = chat_state_new();
 
     new_win->memcheck = PROFCHATWIN_MEMCHECK;
@@ -180,6 +181,7 @@ win_create_muc(const char *const roomjid)
 
     new_win->roomjid = strdup(roomjid);
     new_win->unread = 0;
+    new_win->notify = FALSE;
     if (prefs_get_boolean(PREF_OCCUPANTS_JID)) {
         new_win->showjid = TRUE;
     } else {
@@ -215,6 +217,7 @@ win_create_private(const char *const fulljid)
 
     new_win->fulljid = strdup(fulljid);
     new_win->unread = 0;
+    new_win->notify = FALSE;
 
     new_win->memcheck = PROFPRIVATEWIN_MEMCHECK;
 
@@ -1259,6 +1262,26 @@ win_has_active_subwin(ProfWin *window)
     if (window->layout->type == LAYOUT_SPLIT) {
         ProfLayoutSplit *layout = (ProfLayoutSplit*)window->layout;
         return (layout->subwin != NULL);
+    } else {
+        return FALSE;
+    }
+}
+
+gboolean
+win_notify(ProfWin *window)
+{
+    if (window->type == WIN_CHAT) {
+        ProfChatWin *chatwin = (ProfChatWin*) window;
+        assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
+        return chatwin->notify;
+    } else if (window->type == WIN_MUC) {
+        ProfMucWin *mucwin = (ProfMucWin*) window;
+        assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
+        return mucwin->notify;
+    } else if (window->type == WIN_PRIVATE) {
+        ProfPrivateWin *privatewin = (ProfPrivateWin*) window;
+        assert(privatewin->memcheck == PROFPRIVATEWIN_MEMCHECK);
+        return privatewin->notify;
     } else {
         return FALSE;
     }
