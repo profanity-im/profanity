@@ -102,6 +102,7 @@ typedef struct prof_chat_win_t {
     ProfWin window;
     char *barejid;
     int unread;
+    gboolean notify;
     ChatState *state;
     gboolean is_otr;
     gboolean otr_is_trusted;
@@ -116,6 +117,7 @@ typedef struct prof_muc_win_t {
     ProfWin window;
     char *roomjid;
     int unread;
+    gboolean notify;
     gboolean showjid;
     unsigned long memcheck;
 } ProfMucWin;
@@ -131,6 +133,7 @@ typedef struct prof_private_win_t {
     ProfWin window;
     char *fulljid;
     int unread;
+    gboolean notify;
     unsigned long memcheck;
 } ProfPrivateWin;
 

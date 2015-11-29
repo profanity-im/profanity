@@ -45,6 +45,7 @@
 #include "log.h"
 #include "preferences.h"
 #include "tools/autocomplete.h"
+#include "config/conflists.h"
 
 // preference groups refer to the sections in .profrc, for example [ui]
 #define PREF_GROUP_LOGGING "logging"
@@ -64,6 +65,7 @@ static GKeyFile *prefs;
 gint log_maxsize = 0;
 
 static Autocomplete boolean_choice_ac;
+static Autocomplete room_trigger_ac;
 
 static void _save_prefs(void);
 static gchar* _get_preferences_file(void);
@@ -127,17 +129,41 @@ prefs_load(void)
         prefs_free_string(time);
     }
 
+    // move pre 0.4.8 notify settings
+    if (g_key_file_has_key(prefs, PREF_GROUP_NOTIFICATIONS, "room", NULL)) {
+        char *value = g_key_file_get_string(prefs, PREF_GROUP_NOTIFICATIONS, "room", NULL);
+        if (g_strcmp0(value, "on") == 0) {
+            g_key_file_set_boolean(prefs, PREF_GROUP_NOTIFICATIONS, "room", TRUE);
+        } else if (g_strcmp0(value, "off") == 0) {
+            g_key_file_set_boolean(prefs, PREF_GROUP_NOTIFICATIONS, "room", FALSE);
+        } else if (g_strcmp0(value, "mention") == 0) {
+            g_key_file_set_boolean(prefs, PREF_GROUP_NOTIFICATIONS, "room", FALSE);
+            g_key_file_set_boolean(prefs, PREF_GROUP_NOTIFICATIONS, "room.mention", TRUE);
+        }
+    }
+
     _save_prefs();
 
     boolean_choice_ac = autocomplete_new();
     autocomplete_add(boolean_choice_ac, "on");
     autocomplete_add(boolean_choice_ac, "off");
+
+    room_trigger_ac = autocomplete_new();
+    gsize len = 0;
+    gchar **triggers = g_key_file_get_string_list(prefs, PREF_GROUP_NOTIFICATIONS, "room.trigger.list", &len, NULL);
+
+    int i = 0;
+    for (i = 0; i < len; i++) {
+        autocomplete_add(room_trigger_ac, triggers[i]);
+    }
+    g_strfreev(triggers);
 }
 
 void
 prefs_close(void)
 {
     autocomplete_free(boolean_choice_ac);
+    autocomplete_free(room_trigger_ac);
     g_key_file_free(prefs);
     prefs = NULL;
 }
@@ -152,6 +178,180 @@ void
 prefs_reset_boolean_choice(void)
 {
     autocomplete_reset(boolean_choice_ac);
+}
+
+char*
+prefs_autocomplete_room_trigger(const char *const prefix)
+{
+    return autocomplete_complete(room_trigger_ac, prefix, TRUE);
+}
+
+void
+prefs_reset_room_trigger_ac(void)
+{
+    autocomplete_reset(room_trigger_ac);
+}
+
+gboolean
+prefs_do_chat_notify(gboolean current_win, const char *const message)
+{
+    gboolean notify_current = prefs_get_boolean(PREF_NOTIFY_CHAT_CURRENT);
+    gboolean notify_window = FALSE;
+    if (!current_win || (current_win && notify_current) ) {
+        notify_window = TRUE;
+    }
+    if (!notify_window) {
+        return FALSE;
+    }
+
+    gboolean notify_message = prefs_get_boolean(PREF_NOTIFY_CHAT);
+    if (notify_message) {
+        return TRUE;
+    }
+
+    return FALSE;
+}
+
+gboolean
+prefs_do_room_notify(gboolean current_win, const char *const roomjid, const char *const nick,
+    const char *const message)
+{
+    gboolean notify_current = prefs_get_boolean(PREF_NOTIFY_ROOM_CURRENT);
+    gboolean notify_window = FALSE;
+    if (!current_win || (current_win && notify_current) ) {
+        notify_window = TRUE;
+    }
+    if (!notify_window) {
+        return FALSE;
+    }
+
+    gboolean notify_room = FALSE;
+    if (g_key_file_has_key(prefs, roomjid, "notify", NULL)) {
+        notify_room = g_key_file_get_boolean(prefs, roomjid, "notify", NULL);
+    } else {
+        notify_room = prefs_get_boolean(PREF_NOTIFY_ROOM);
+    }
+    if (notify_room) {
+        return TRUE;
+    }
+
+    gboolean notify_mention = FALSE;
+    if (g_key_file_has_key(prefs, roomjid, "notify.mention", NULL)) {
+        notify_mention = g_key_file_get_boolean(prefs, roomjid, "notify.mention", NULL);
+    } else {
+        notify_mention = prefs_get_boolean(PREF_NOTIFY_ROOM_MENTION);
+    }
+    if (notify_mention) {
+        char *message_lower = g_utf8_strdown(message, -1);
+        char *nick_lower = g_utf8_strdown(nick, -1);
+        if (g_strrstr(message_lower, nick_lower)) {
+            g_free(message_lower);
+            g_free(nick_lower);
+            return TRUE;
+        }
+        g_free(message_lower);
+        g_free(nick_lower);
+    }
+
+    gboolean notify_trigger = FALSE;
+    if (g_key_file_has_key(prefs, roomjid, "notify.trigger", NULL)) {
+        notify_trigger = g_key_file_get_boolean(prefs, roomjid, "notify.trigger", NULL);
+    } else {
+        notify_trigger = prefs_get_boolean(PREF_NOTIFY_ROOM_TRIGGER);
+    }
+    if (notify_trigger) {
+        gboolean trigger_found = FALSE;
+        char *message_lower = g_utf8_strdown(message, -1);
+        gsize len = 0;
+        gchar **triggers = g_key_file_get_string_list(prefs, PREF_GROUP_NOTIFICATIONS, "room.trigger.list", &len, NULL);
+        int i;
+        for (i = 0; i < len; i++) {
+            char *trigger_lower = g_utf8_strdown(triggers[i], -1);
+            if (g_strrstr(message_lower, trigger_lower)) {
+                trigger_found = TRUE;
+                g_free(trigger_lower);
+                break;
+            }
+            g_free(trigger_lower);
+        }
+        g_strfreev(triggers);
+        g_free(message_lower);
+
+        if (trigger_found) {
+            return TRUE;
+        }
+    }
+
+    return FALSE;
+}
+
+void
+prefs_set_room_notify(const char *const roomjid, gboolean value)
+{
+    g_key_file_set_boolean(prefs, roomjid, "notify", value);
+    _save_prefs();
+}
+
+void
+prefs_set_room_notify_mention(const char *const roomjid, gboolean value)
+{
+    g_key_file_set_boolean(prefs, roomjid, "notify.mention", value);
+    _save_prefs();
+}
+
+void
+prefs_set_room_notify_trigger(const char *const roomjid, gboolean value)
+{
+    g_key_file_set_boolean(prefs, roomjid, "notify.trigger", value);
+    _save_prefs();
+}
+
+gboolean
+prefs_has_room_notify(const char *const roomjid)
+{
+    return g_key_file_has_key(prefs, roomjid, "notify", NULL);
+}
+
+gboolean
+prefs_has_room_notify_mention(const char *const roomjid)
+{
+    return g_key_file_has_key(prefs, roomjid, "notify.mention", NULL);
+}
+
+gboolean
+prefs_has_room_notify_trigger(const char *const roomjid)
+{
+    return g_key_file_has_key(prefs, roomjid, "notify.trigger", NULL);
+}
+
+gboolean
+prefs_get_room_notify(const char *const roomjid)
+{
+    return g_key_file_get_boolean(prefs, roomjid, "notify", NULL);
+}
+
+gboolean
+prefs_get_room_notify_mention(const char *const roomjid)
+{
+    return g_key_file_get_boolean(prefs, roomjid, "notify.mention", NULL);
+}
+
+gboolean
+prefs_get_room_notify_trigger(const char *const roomjid)
+{
+    return g_key_file_get_boolean(prefs, roomjid, "notify.trigger", NULL);
+}
+
+gboolean
+prefs_reset_room_notify(const char *const roomjid)
+{
+    if (g_key_file_has_group(prefs, roomjid)) {
+        g_key_file_remove_group(prefs, roomjid, NULL);
+        _save_prefs();
+        return TRUE;
+    }
+
+    return FALSE;
 }
 
 gboolean
@@ -607,6 +807,49 @@ prefs_set_roster_presence_indent(gint value)
 }
 
 gboolean
+prefs_add_room_notify_trigger(const char * const text)
+{
+    gboolean res = conf_string_list_add(prefs, PREF_GROUP_NOTIFICATIONS, "room.trigger.list", text);
+    _save_prefs();
+
+    if (res) {
+        autocomplete_add(room_trigger_ac, text);
+    }
+
+    return res;
+}
+
+gboolean
+prefs_remove_room_notify_trigger(const char * const text)
+{
+    gboolean res = conf_string_list_remove(prefs, PREF_GROUP_NOTIFICATIONS, "room.trigger.list", text);
+    _save_prefs();
+
+    if (res) {
+        autocomplete_remove(room_trigger_ac, text);
+    }
+
+    return res;
+}
+
+GList*
+prefs_get_room_notify_triggers(void)
+{
+    GList *result = NULL;
+    gsize len = 0;
+    gchar **triggers = g_key_file_get_string_list(prefs, PREF_GROUP_NOTIFICATIONS, "room.trigger.list", &len, NULL);
+
+    int i;
+    for (i = 0; i < len; i++) {
+        result = g_list_append(result, strdup(triggers[i]));
+    }
+
+    g_strfreev(triggers);
+
+    return result;
+}
+
+gboolean
 prefs_add_alias(const char *const name, const char *const value)
 {
     if (g_key_file_has_key(prefs, PREF_GROUP_ALIAS, name, NULL)) {
@@ -779,10 +1022,12 @@ _get_group(preference_t pref)
             return PREF_GROUP_CHATSTATES;
         case PREF_NOTIFY_TYPING:
         case PREF_NOTIFY_TYPING_CURRENT:
-        case PREF_NOTIFY_MESSAGE:
-        case PREF_NOTIFY_MESSAGE_CURRENT:
-        case PREF_NOTIFY_MESSAGE_TEXT:
+        case PREF_NOTIFY_CHAT:
+        case PREF_NOTIFY_CHAT_CURRENT:
+        case PREF_NOTIFY_CHAT_TEXT:
         case PREF_NOTIFY_ROOM:
+        case PREF_NOTIFY_ROOM_MENTION:
+        case PREF_NOTIFY_ROOM_TRIGGER:
         case PREF_NOTIFY_ROOM_CURRENT:
         case PREF_NOTIFY_ROOM_TEXT:
         case PREF_NOTIFY_INVITE:
@@ -869,14 +1114,18 @@ _get_key(preference_t pref)
             return "typing";
         case PREF_NOTIFY_TYPING_CURRENT:
             return "typing.current";
-        case PREF_NOTIFY_MESSAGE:
+        case PREF_NOTIFY_CHAT:
             return "message";
-        case PREF_NOTIFY_MESSAGE_CURRENT:
+        case PREF_NOTIFY_CHAT_CURRENT:
             return "message.current";
-        case PREF_NOTIFY_MESSAGE_TEXT:
+        case PREF_NOTIFY_CHAT_TEXT:
             return "message.text";
         case PREF_NOTIFY_ROOM:
             return "room";
+        case PREF_NOTIFY_ROOM_TRIGGER:
+            return "room.trigger";
+        case PREF_NOTIFY_ROOM_MENTION:
+            return "room.mention";
         case PREF_NOTIFY_ROOM_CURRENT:
             return "room.current";
         case PREF_NOTIFY_ROOM_TEXT:
@@ -987,8 +1236,9 @@ _get_default_boolean(preference_t pref)
         case PREF_AUTOAWAY_CHECK:
         case PREF_LOG_ROTATE:
         case PREF_LOG_SHARED:
-        case PREF_NOTIFY_MESSAGE:
-        case PREF_NOTIFY_MESSAGE_CURRENT:
+        case PREF_NOTIFY_CHAT:
+        case PREF_NOTIFY_CHAT_CURRENT:
+        case PREF_NOTIFY_ROOM:
         case PREF_NOTIFY_ROOM_CURRENT:
         case PREF_NOTIFY_TYPING:
         case PREF_NOTIFY_TYPING_CURRENT:
@@ -1026,8 +1276,6 @@ _get_default_string(preference_t pref)
     {
         case PREF_AUTOAWAY_MODE:
             return "off";
-        case PREF_NOTIFY_ROOM:
-            return "on";
         case PREF_OTR_LOG:
             return "redact";
         case PREF_OTR_POLICY:

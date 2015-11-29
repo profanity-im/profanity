@@ -67,6 +67,7 @@ int wins_get_current_num(void);
 void wins_close_current(void);
 void wins_close_by_num(int i);
 gboolean wins_is_current(ProfWin *window);
+gboolean wins_get_notify(void);
 int wins_get_total_unread(void);
 void wins_resize_all(void);
 GSList* wins_get_chat_recipients(void);

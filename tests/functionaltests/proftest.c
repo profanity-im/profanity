@@ -179,8 +179,8 @@ init_prof_test(void **state)
     assert_true(prof_output_exact("Input blocking set to 5 milliseconds"));
     prof_input("/inpblock dynamic off");
     assert_true(prof_output_exact("Dynamic input blocking disabled"));
-    prof_input("/notify message off");
-    assert_true(prof_output_exact("Message notifications disabled"));
+    prof_input("/notify chat off");
+    assert_true(prof_output_exact("Chat notifications disabled"));
     prof_input("/wrap off");
     assert_true(prof_output_exact("Word wrap disabled"));
     prof_input("/roster hide");
