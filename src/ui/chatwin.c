@@ -355,6 +355,32 @@ chatwin_contact_offline(ProfChatWin *chatwin, char *resource, char *status)
     free(display_str);
 }
 
+char*
+chatwin_get_string(ProfChatWin *chatwin)
+{
+    assert(chatwin != NULL);
+
+    GString *res = g_string_new("Chat ");
+
+    PContact contact = roster_get_contact(chatwin->barejid);
+    if (contact == NULL) {
+        g_string_append(res, chatwin->barejid);
+    } else {
+        const char *display_name = p_contact_name_or_jid(contact);
+        g_string_append(res, display_name);
+        g_string_append_printf(res, " - %s", p_contact_presence(contact));
+    }
+
+    if (chatwin->unread > 0) {
+        g_string_append_printf(res, ", %d unread", chatwin->unread);
+    }
+
+    char *resstr = res->str;
+    g_string_free(res, FALSE);
+
+    return resstr;
+}
+
 static void
 _chatwin_history(ProfChatWin *chatwin, const char *const contact)
 {

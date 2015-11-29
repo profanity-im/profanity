@@ -657,106 +657,26 @@ wins_create_summary(void)
 
     while (curr) {
         ProfWin *window = g_hash_table_lookup(windows, curr->data);
+        GString *line = g_string_new("");
+
         int ui_index = GPOINTER_TO_INT(curr->data);
-
-        GString *chat_string;
-        GString *priv_string;
-        GString *muc_string;
-        GString *muc_config_string;
-        GString *xml_string;
-
-        switch (window->type)
-        {
-            case WIN_CONSOLE:
-                result = g_slist_append(result, strdup("1: Console"));
-                break;
-            case WIN_CHAT:
-                chat_string = g_string_new("");
-
-                ProfChatWin *chatwin = (ProfChatWin*)window;
-                PContact contact = roster_get_contact(chatwin->barejid);
-                if (contact == NULL) {
-                    g_string_printf(chat_string, "%d: Chat %s", ui_index, chatwin->barejid);
-                } else {
-                    const char *display_name = p_contact_name_or_jid(contact);
-                    g_string_printf(chat_string, "%d: Chat %s", ui_index, display_name);
-                    GString *chat_presence = g_string_new("");
-                    g_string_printf(chat_presence, " - %s", p_contact_presence(contact));
-                    g_string_append(chat_string, chat_presence->str);
-                    g_string_free(chat_presence, TRUE);
-                }
-
-                if (chatwin->unread > 0) {
-                    GString *chat_unread = g_string_new("");
-                    g_string_printf(chat_unread, ", %d unread", chatwin->unread);
-                    g_string_append(chat_string, chat_unread->str);
-                    g_string_free(chat_unread, TRUE);
-                }
-
-                result = g_slist_append(result, strdup(chat_string->str));
-                g_string_free(chat_string, TRUE);
-
-                break;
-
-            case WIN_PRIVATE:
-                priv_string = g_string_new("");
-                ProfPrivateWin *privatewin = (ProfPrivateWin*)window;
-                g_string_printf(priv_string, "%d: Private %s", ui_index, privatewin->fulljid);
-
-                if (privatewin->unread > 0) {
-                    GString *priv_unread = g_string_new("");
-                    g_string_printf(priv_unread, ", %d unread", privatewin->unread);
-                    g_string_append(priv_string, priv_unread->str);
-                    g_string_free(priv_unread, TRUE);
-                }
-
-                result = g_slist_append(result, strdup(priv_string->str));
-                g_string_free(priv_string, TRUE);
-
-                break;
-
-            case WIN_MUC:
-                muc_string = g_string_new("");
-                ProfMucWin *mucwin = (ProfMucWin*)window;
-                g_string_printf(muc_string, "%d: Room %s", ui_index, mucwin->roomjid);
-
-                if (mucwin->unread > 0) {
-                    GString *muc_unread = g_string_new("");
-                    g_string_printf(muc_unread, ", %d unread", mucwin->unread);
-                    g_string_append(muc_string, muc_unread->str);
-                    g_string_free(muc_unread, TRUE);
-                }
-
-                result = g_slist_append(result, strdup(muc_string->str));
-                g_string_free(muc_string, TRUE);
-
-                break;
-
-            case WIN_MUC_CONFIG:
-                muc_config_string = g_string_new("");
-                char *title = win_get_title(window);
-                g_string_printf(muc_config_string, "%d: %s", ui_index, title);
-                result = g_slist_append(result, strdup(muc_config_string->str));
-                g_string_free(muc_config_string, TRUE);
-                free(title);
-
-                break;
-
-            case WIN_XML:
-                xml_string = g_string_new("");
-                g_string_printf(xml_string, "%d: XML console", ui_index);
-                result = g_slist_append(result, strdup(xml_string->str));
-                g_string_free(xml_string, TRUE);
-
-                break;
-
-            default:
-                break;
+        char *winstring = win_get_string(window);
+        if (!winstring) {
+            g_string_free(line, TRUE);
+            continue;
         }
+
+        g_string_append_printf(line, "%d: %s", ui_index, winstring);
+        free(winstring);
+
+        result = g_slist_append(result, strdup(line->str));
+        g_string_free(line, TRUE);
+
         curr = g_list_next(curr);
     }
 
     g_list_free(keys);
+
     return result;
 }
 

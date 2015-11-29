@@ -53,3 +53,11 @@ xmlwin_show(ProfXMLWin *xmlwin, const char *const msg)
         win_print(window, '-', 0, NULL, 0, THEME_AWAY, "", "");
     }
 }
+
+char*
+xmlwin_get_string(ProfXMLWin *xmlwin)
+{
+    assert(xmlwin != NULL);
+
+    return strdup("XML console");
+}

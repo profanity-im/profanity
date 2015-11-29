@@ -773,3 +773,20 @@ mucwin_hide_occupants(ProfMucWin *mucwin)
     }
 }
 
+char*
+mucwin_get_string(ProfMucWin *mucwin)
+{
+    assert(mucwin != NULL);
+
+    GString *res = g_string_new("Room ");
+    g_string_append(res, mucwin->roomjid);
+
+    if (mucwin->unread > 0) {
+        g_string_append_printf(res, ", %d unread", mucwin->unread);
+    }
+
+    char *resstr = res->str;
+    g_string_free(res, FALSE);
+
+    return resstr;
+}

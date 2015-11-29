@@ -107,3 +107,21 @@ privwin_outgoing_msg(ProfPrivateWin *privwin, const char *const message)
 
     win_print((ProfWin*)privwin, '-', 0, NULL, 0, THEME_TEXT_ME, "me", message);
 }
+
+char*
+privwin_get_string(ProfPrivateWin *privwin)
+{
+    assert(privwin != NULL);
+
+    GString *res = g_string_new("Private ");
+    g_string_append(res, privwin->fulljid);
+
+    if (privwin->unread > 0) {
+        g_string_append_printf(res, ", %d unread", privwin->unread);
+    }
+
+    char *resstr = res->str;
+    g_string_free(res, FALSE);
+
+    return resstr;
+}

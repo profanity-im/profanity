@@ -328,3 +328,20 @@ _mucconfwin_form_field(ProfWin *window, char *tag, FormField *field)
         break;
     }
 }
+
+char*
+mucconfwin_get_string(ProfMucConfWin *confwin)
+{
+    assert(confwin != NULL);
+
+    GString *res = g_string_new("");
+
+    char *title = win_get_title((ProfWin*)confwin);
+    g_string_append(res, title);
+    free(title);
+
+    char *resstr = res->str;
+    g_string_free(res, FALSE);
+
+    return resstr;
+}

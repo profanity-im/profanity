@@ -35,6 +35,7 @@
 
 #include <string.h>
 #include <stdlib.h>
+#include <assert.h>
 
 #ifdef HAVE_NCURSESW_NCURSES_H
 #include <ncursesw/ncurses.h>
@@ -1899,6 +1900,14 @@ cons_alert(void)
     if (current->type != WIN_CONSOLE) {
         status_bar_new(1);
     }
+}
+
+char*
+cons_get_string(ProfConsoleWin *conswin)
+{
+    assert(conswin != NULL);
+
+    return strdup("Console");
 }
 
 void
