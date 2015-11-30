@@ -358,7 +358,7 @@ cons_bad_cmd_usage(const char * const cmd)
 }
 
 void cons_show_roster_group(const char * const group, GSList * list) {}
-void cons_show_wins(void) {}
+void cons_show_wins(gboolean unread) {}
 void cons_show_status(const char * const barejid) {}
 void cons_show_info(PContact pcontact) {}
 void cons_show_caps(const char * const fulljid, resource_presence_t presence) {}
@@ -513,6 +513,10 @@ void win_show_info(ProfWin *window, PContact contact) {}
 void win_println(ProfWin *window, int pad, const char * const message) {}
 void win_vprintln_ch(ProfWin *window, char ch, const char *const message, ...) {}
 void win_clear(ProfWin *window) {}
+char* win_get_string(ProfWin *window)
+{
+    return NULL;
+}
 
 // desktop notifier actions
 void notifier_uninit(void) {}

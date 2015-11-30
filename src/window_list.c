@@ -647,8 +647,12 @@ wins_tidy(void)
 }
 
 GSList*
-wins_create_summary(void)
+wins_create_summary(gboolean unread)
 {
+    if (unread && wins_get_total_unread() == 0) {
+        return NULL;
+    }
+
     GSList *result = NULL;
 
     GList *keys = g_hash_table_get_keys(windows);
@@ -657,20 +661,22 @@ wins_create_summary(void)
 
     while (curr) {
         ProfWin *window = g_hash_table_lookup(windows, curr->data);
-        GString *line = g_string_new("");
+        if (!unread || (unread && win_unread(window) > 0)) {
+            GString *line = g_string_new("");
 
-        int ui_index = GPOINTER_TO_INT(curr->data);
-        char *winstring = win_get_string(window);
-        if (!winstring) {
+            int ui_index = GPOINTER_TO_INT(curr->data);
+            char *winstring = win_get_string(window);
+            if (!winstring) {
+                g_string_free(line, TRUE);
+                continue;
+            }
+
+            g_string_append_printf(line, "%d: %s", ui_index, winstring);
+            free(winstring);
+
+            result = g_slist_append(result, strdup(line->str));
             g_string_free(line, TRUE);
-            continue;
         }
-
-        g_string_append_printf(line, "%d: %s", ui_index, winstring);
-        free(winstring);
-
-        result = g_slist_append(result, strdup(line->str));
-        g_string_free(line, TRUE);
 
         curr = g_list_next(curr);
     }

@@ -74,7 +74,7 @@ GSList* wins_get_chat_recipients(void);
 GSList* wins_get_prune_wins(void);
 void wins_lost_connection(void);
 gboolean wins_tidy(void);
-GSList* wins_create_summary(void);
+GSList* wins_create_summary(gboolean unread);
 void wins_destroy(void);
 GList* wins_get_nums(void);
 gboolean wins_swap(int source_win, int target_win);

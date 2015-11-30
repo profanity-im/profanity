@@ -1013,7 +1013,9 @@ gboolean
 cmd_wins(ProfWin *window, const char *const command, gchar **args)
 {
     if (args[0] == NULL) {
-        cons_show_wins();
+        cons_show_wins(FALSE);
+    } else if (strcmp(args[0], "unread") == 0) {
+        cons_show_wins(TRUE);
     } else if (strcmp(args[0], "tidy") == 0) {
         if (wins_tidy()) {
             cons_show("Windows tidied.");

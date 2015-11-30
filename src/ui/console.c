@@ -403,12 +403,20 @@ cons_show_login_success(ProfAccount *account, int secured)
 }
 
 void
-cons_show_wins(void)
+cons_show_wins(gboolean unread)
 {
     ProfWin *console = wins_get_console();
     cons_show("");
-    cons_show("Active windows:");
-    GSList *window_strings = wins_create_summary();
+    GSList *window_strings = wins_create_summary(unread);
+
+    if (unread && window_strings == NULL) {
+        cons_show("No windows with unread messages.");
+        return;
+    } else if (unread) {
+        cons_show("Unread:");
+    } else {
+        cons_show("Active windows:");
+    }
 
     GSList *curr = window_strings;
     while (curr) {
@@ -417,7 +425,6 @@ cons_show_wins(void)
     }
     g_slist_free_full(window_strings, free);
 
-    cons_show("");
     cons_alert();
 }
 
