@@ -33,7 +33,7 @@
  */
 
 #include <assert.h>
-#include <stdlib.h>
+#include <string.h>
 
 #include "ui/win_types.h"
 #include "window_list.h"
