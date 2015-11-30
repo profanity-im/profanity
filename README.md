@@ -12,6 +12,6 @@ Links
 
 Homepage: http://www.profanity.im
 
-Chat room: [profanitydev@conference.jabber.org](xmpp:profanitydev@conference.jabber.org?join)
+Chat room: profanitydev@conference.jabber.org
 
 Mailing List: https://groups.google.com/forum/#!forum/profanitydev
