@@ -134,6 +134,8 @@ void chatwin_outgoing_msg(ProfChatWin *chatwin, const char *const message, char 
 void chatwin_outgoing_carbon(ProfChatWin *chatwin, const char *const message);
 void chatwin_contact_online(ProfChatWin *chatwin, Resource *resource, GDateTime *last_activity);
 void chatwin_contact_offline(ProfChatWin *chatwin, char *resource, char *status);
+char* chatwin_get_string(ProfChatWin *chatwin);
+
 #ifdef HAVE_LIBOTR
 void chatwin_otr_secured(ProfChatWin *chatwin, gboolean trusted);
 void chatwin_otr_unsecured(ProfChatWin *chatwin);
@@ -187,10 +189,12 @@ void mucwin_role_set_error(ProfMucWin *mucwin, const char *const nick, const cha
 void mucwin_role_list_error(ProfMucWin *mucwin, const char *const role, const char *const error);
 void mucwin_handle_role_list(ProfMucWin *mucwin, const char *const role, GSList *nicks);
 void mucwin_kick_error(ProfMucWin *mucwin, const char *const nick, const char *const error);
+char* mucwin_get_string(ProfMucWin *mucwin);
 
 // MUC private chat window
 void privwin_incoming_msg(ProfPrivateWin *privatewin, const char *const message, GDateTime *timestamp);
 void privwin_outgoing_msg(ProfPrivateWin *privwin, const char *const message);
+char* privwin_get_string(ProfPrivateWin *privwin);
 
 // MUC room config window
 void mucconfwin_handle_configuration(ProfMucConfWin *confwin, DataForm *form);
@@ -198,9 +202,11 @@ void mucconfwin_show_form(ProfMucConfWin *confwin);
 void mucconfwin_show_form_field(ProfMucConfWin *confwin, DataForm *form, char *tag);
 void mucconfwin_form_help(ProfMucConfWin *confwin);
 void mucconfwin_field_help(ProfMucConfWin *confwin, char *tag);
+char* mucconfwin_get_string(ProfMucConfWin *confwin);
 
 // xml console
 void xmlwin_show(ProfXMLWin *xmlwin, const char *const msg);
+char* xmlwin_get_string(ProfXMLWin *xmlwin);
 
 // Input window
 char* inp_readline(void);
@@ -231,7 +237,8 @@ void cons_show_error(const char *const cmd, ...);
 void cons_show_contacts(GSList *list);
 void cons_show_roster(GSList *list);
 void cons_show_roster_group(const char *const group, GSList *list);
-void cons_show_wins(void);
+void cons_show_wins(gboolean unread);
+char* cons_get_string(ProfConsoleWin *conswin);
 void cons_show_status(const char *const barejid);
 void cons_show_info(PContact pcontact);
 void cons_show_caps(const char *const fulljid, resource_presence_t presence);
@@ -336,6 +343,7 @@ void win_show_info(ProfWin *window, PContact contact);
 void win_println(ProfWin *window, int pad, const char *const message);
 void win_vprintln_ch(ProfWin *window, char ch, const char *const message, ...);
 void win_clear(ProfWin *window);
+char* win_get_string(ProfWin *window);
 
 // desktop notifications
 void notifier_initialise(void);

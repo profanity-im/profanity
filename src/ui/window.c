@@ -285,6 +285,47 @@ win_get_title(ProfWin *window)
     return NULL;
 }
 
+char*
+win_get_string(ProfWin *window)
+{
+    assert(window != NULL);
+
+    switch (window->type) {
+        case WIN_CONSOLE:
+        {
+            ProfConsoleWin *conswin = (ProfConsoleWin*)window;
+            return cons_get_string(conswin);
+        }
+        case WIN_CHAT:
+        {
+            ProfChatWin *chatwin = (ProfChatWin*)window;
+            return chatwin_get_string(chatwin);
+        }
+        case WIN_MUC:
+        {
+            ProfMucWin *mucwin = (ProfMucWin*)window;
+            return mucwin_get_string(mucwin);
+        }
+        case WIN_MUC_CONFIG:
+        {
+            ProfMucConfWin *mucconfwin = (ProfMucConfWin*)window;
+            return mucconfwin_get_string(mucconfwin);
+        }
+        case WIN_PRIVATE:
+        {
+            ProfPrivateWin *privwin = (ProfPrivateWin*)window;
+            return privwin_get_string(privwin);
+        }
+        case WIN_XML:
+        {
+            ProfXMLWin *xmlwin = (ProfXMLWin*)window;
+            return xmlwin_get_string(xmlwin);
+        }
+        default:
+            return NULL;
+    }
+}
+
 void
 win_hide_subwin(ProfWin *window)
 {
