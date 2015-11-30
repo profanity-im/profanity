@@ -800,6 +800,8 @@ static struct cmd_t command_defs[] =
         CMD_TAGS(
             CMD_TAG_UI)
         CMD_SYN(
+            "/wins",
+            "/wins unread",
             "/wins tidy",
             "/wins autotidy on|off",
             "/wins prune",
@@ -808,6 +810,7 @@ static struct cmd_t command_defs[] =
             "Manage windows. "
             "Passing no argument will list all currently active windows and information about their usage.")
         CMD_ARGS(
+            { "unread",                 "List windows with unread messages." },
             { "tidy",                   "Move windows so there are no gaps." },
             { "autotidy on|off",        "Automatically remove gaps when closing windows." },
             { "prune",                  "Close all windows with no unread messages, and then tidy so there are no gaps." },
@@ -2091,6 +2094,7 @@ cmd_init(void)
     autocomplete_add(close_ac, "all");
 
     wins_ac = autocomplete_new();
+    autocomplete_add(wins_ac, "unread");
     autocomplete_add(wins_ac, "prune");
     autocomplete_add(wins_ac, "tidy");
     autocomplete_add(wins_ac, "autotidy");
