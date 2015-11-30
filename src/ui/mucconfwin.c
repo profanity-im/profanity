@@ -33,6 +33,7 @@
  */
 
 #include <assert.h>
+#include <stdlib.h>
 
 #include "ui/ui.h"
 #include "ui/window.h"
