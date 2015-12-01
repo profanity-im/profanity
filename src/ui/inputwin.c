@@ -37,6 +37,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 #include <wchar.h>
 #include <sys/time.h>
 #include <errno.h>
@@ -74,6 +75,7 @@ static struct timeval p_rl_timeout;
 static gint inp_timeout = 0;
 static gint no_input_count = 0;
 
+static FILE *discard;
 static fd_set fds;
 static int r;
 static char *inp_line = NULL;
@@ -115,6 +117,8 @@ create_input_window(void)
 #else
     ESCDELAY = 25;
 #endif
+    discard = fopen("/dev/null", "a");
+    rl_outstream = discard;
     rl_readline_name = "profanity";
     rl_getc_function = _inp_rl_getc;
     rl_startup_hook = _inp_rl_startup_hook;
@@ -222,6 +226,7 @@ void
 inp_close(void)
 {
     rl_callback_handler_remove();
+    fclose(discard);
 }
 
 char*
