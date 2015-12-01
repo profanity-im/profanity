@@ -5,11 +5,13 @@ Profanity is a console based XMPP client inspired by [Irssi](http://www.irssi.or
 
 ![alt tag](http://www.profanity.im/images/prof-1.png)
 
-See the [User Guide](http://www.profanity.im/userguide.html) for information on installing, upgrading and using Profanity.
+See the [User Guide](http://www.profanity.im/userguide.html) for information on installing and using Profanity.
 
 Links
 -----
 
 Homepage: http://www.profanity.im
+
+Chat room: profanitydev@conference.jabber.org
 
 Mailing List: https://groups.google.com/forum/#!forum/profanitydev
