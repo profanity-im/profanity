@@ -95,14 +95,14 @@ prefs_load(void)
         g_error_free(err);
     }
 
-    // move pre 0.4.8 autoaway.time to autoaway.awaytime
+    // move pre 0.5.0 autoaway.time to autoaway.awaytime
     if (g_key_file_has_key(prefs, PREF_GROUP_PRESENCE, "autoaway.time", NULL)) {
         gint time = g_key_file_get_integer(prefs, PREF_GROUP_PRESENCE, "autoaway.time", NULL);
         g_key_file_set_integer(prefs, PREF_GROUP_PRESENCE, "autoaway.awaytime", time);
         g_key_file_remove_key(prefs, PREF_GROUP_PRESENCE, "autoaway.time", NULL);
     }
 
-    // move pre 0.4.8 autoaway.message to autoaway.awaymessage
+    // move pre 0.5.0 autoaway.message to autoaway.awaymessage
     if (g_key_file_has_key(prefs, PREF_GROUP_PRESENCE, "autoaway.message", NULL)) {
         char *message = g_key_file_get_string(prefs, PREF_GROUP_PRESENCE, "autoaway.message", NULL);
         g_key_file_set_string(prefs, PREF_GROUP_PRESENCE, "autoaway.awaymessage", message);
@@ -110,7 +110,7 @@ prefs_load(void)
         prefs_free_string(message);
     }
 
-    // migrate pre 0.4.8 time settings
+    // migrate pre 0.5.0 time settings
     if (g_key_file_has_key(prefs, PREF_GROUP_UI, "time", NULL)) {
         char *time = g_key_file_get_string(prefs, PREF_GROUP_UI, "time", NULL);
         char *val = NULL;
@@ -129,7 +129,7 @@ prefs_load(void)
         prefs_free_string(time);
     }
 
-    // move pre 0.4.8 notify settings
+    // move pre 0.5.0 notify settings
     if (g_key_file_has_key(prefs, PREF_GROUP_NOTIFICATIONS, "room", NULL)) {
         char *value = g_key_file_get_string(prefs, PREF_GROUP_NOTIFICATIONS, "room", NULL);
         if (g_strcmp0(value, "on") == 0) {
