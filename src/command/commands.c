@@ -171,7 +171,7 @@ gboolean
 cmd_tls(ProfWin *window, const char *const command, gchar **args)
 {
     if (g_strcmp0(args[0], "certpath") == 0) {
-#ifdef HAVE_LIBMESODE
+#ifdef PROF_HAVE_LIBMESODE
         if (g_strcmp0(args[1], "set") == 0) {
             if (args[2] == NULL) {
                 cons_bad_cmd_usage(command);
@@ -207,7 +207,7 @@ cmd_tls(ProfWin *window, const char *const command, gchar **args)
         return TRUE;
 #endif
     } else if (g_strcmp0(args[0], "trust") == 0) {
-#ifdef HAVE_LIBMESODE
+#ifdef PROF_HAVE_LIBMESODE
         jabber_conn_status_t conn_status = jabber_get_connection_status();
         if (conn_status != JABBER_CONNECTED) {
             cons_show("You are not currently connected.");
@@ -236,7 +236,7 @@ cmd_tls(ProfWin *window, const char *const command, gchar **args)
         return TRUE;
 #endif
     } else if (g_strcmp0(args[0], "trusted") == 0) {
-#ifdef HAVE_LIBMESODE
+#ifdef PROF_HAVE_LIBMESODE
         GList *certs = tlscerts_list();
         GList *curr = certs;
 
@@ -259,7 +259,7 @@ cmd_tls(ProfWin *window, const char *const command, gchar **args)
         return TRUE;
 #endif
     } else if (g_strcmp0(args[0], "revoke") == 0) {
-#ifdef HAVE_LIBMESODE
+#ifdef PROF_HAVE_LIBMESODE
         if (args[1] == NULL) {
             cons_bad_cmd_usage(command);
         } else {
@@ -278,7 +278,7 @@ cmd_tls(ProfWin *window, const char *const command, gchar **args)
     } else if (g_strcmp0(args[0], "show") == 0) {
         return _cmd_set_boolean_preference(args[1], command, "TLS titlebar indicator", PREF_TLS_SHOW);
     } else if (g_strcmp0(args[0], "cert") == 0) {
-#ifdef HAVE_LIBMESODE
+#ifdef PROF_HAVE_LIBMESODE
         if (args[1]) {
             TLSCertificate *cert = tlscerts_get_trusted(args[1]);
             if (!cert) {
