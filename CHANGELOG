@@ -9,7 +9,9 @@
 - Last Activity (xep-0012)
 - Run command sequence with /script
 - Account startscript property
-- Add /export command
+- Export roster to CSV file with /export
+- User specified text triggers for chat room notifications
+- Per chat room notification options
 
 0.4.7
 =====
