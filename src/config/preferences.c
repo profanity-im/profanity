@@ -85,8 +85,7 @@ prefs_load(void)
     }
 
     prefs = g_key_file_new();
-    g_key_file_load_from_file(prefs, prefs_loc, G_KEY_FILE_KEEP_COMMENTS,
-        NULL);
+    g_key_file_load_from_file(prefs, prefs_loc, G_KEY_FILE_KEEP_COMMENTS, NULL);
 
     err = NULL;
     log_maxsize = g_key_file_get_integer(prefs, PREF_GROUP_LOGGING, "maxsize", &err);
@@ -931,6 +930,25 @@ prefs_get_aliases(void)
 
         return result;
     }
+}
+
+gchar*
+prefs_get_inputrc(void)
+{
+    gchar *xdg_config = xdg_get_config_home();
+    GString *inputrc_file = g_string_new(xdg_config);
+    g_free(xdg_config);
+
+    g_string_append(inputrc_file, "/profanity/inputrc");
+
+    if (g_file_test(inputrc_file->str, G_FILE_TEST_IS_REGULAR)) {
+        gchar *result = strdup(inputrc_file->str);
+        g_string_free(inputrc_file, TRUE);
+
+        return result;
+    }
+
+    return NULL;
 }
 
 void

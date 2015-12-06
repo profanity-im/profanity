@@ -224,4 +224,6 @@ gboolean prefs_get_room_notify(const char *const roomjid);
 gboolean prefs_get_room_notify_mention(const char *const roomjid);
 gboolean prefs_get_room_notify_trigger(const char *const roomjid);
 
+gchar* prefs_get_inputrc(void);
+
 #endif
