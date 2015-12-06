@@ -87,6 +87,7 @@ static void _inp_win_handle_scroll(void);
 static int _inp_offset_to_col(char *str, int offset);
 static void _inp_write(char *line, int offset);
 
+static void _inp_rl_addfuncs(void);
 static int _inp_rl_getc(FILE *stream);
 static void _inp_rl_linehandler(char *line);
 static int _inp_rl_tab_handler(int count, int key);
@@ -120,6 +121,7 @@ create_input_window(void)
     discard = fopen("/dev/null", "a");
     rl_outstream = discard;
     rl_readline_name = "profanity";
+    _inp_rl_addfuncs();
     rl_getc_function = _inp_rl_getc;
     rl_startup_hook = _inp_rl_startup_hook;
     rl_callback_handler_install(NULL, _inp_rl_linehandler);
@@ -341,6 +343,28 @@ _inp_win_handle_scroll(void)
     }
 }
 
+static void
+_inp_rl_addfuncs(void)
+{
+    rl_add_funmap_entry("prof_win_1", _inp_rl_win1_handler);
+    rl_add_funmap_entry("prof_win_2", _inp_rl_win2_handler);
+    rl_add_funmap_entry("prof_win_3", _inp_rl_win3_handler);
+    rl_add_funmap_entry("prof_win_4", _inp_rl_win4_handler);
+    rl_add_funmap_entry("prof_win_5", _inp_rl_win5_handler);
+    rl_add_funmap_entry("prof_win_6", _inp_rl_win6_handler);
+    rl_add_funmap_entry("prof_win_7", _inp_rl_win7_handler);
+    rl_add_funmap_entry("prof_win_8", _inp_rl_win8_handler);
+    rl_add_funmap_entry("prof_win_9", _inp_rl_win9_handler);
+    rl_add_funmap_entry("prof_win_0", _inp_rl_win0_handler);
+    rl_add_funmap_entry("prof_win_prev", _inp_rl_altleft_handler);
+    rl_add_funmap_entry("prof_win_next", _inp_rl_altright_handler);
+    rl_add_funmap_entry("prof_win_pageup", _inp_rl_pageup_handler);
+    rl_add_funmap_entry("prof_win_pagedown", _inp_rl_pagedown_handler);
+    rl_add_funmap_entry("prof_subwin_pageup", _inp_rl_altpageup_handler);
+    rl_add_funmap_entry("prof_subwin_pagedown", _inp_rl_altpagedown_handler);
+    rl_add_funmap_entry("prof_win_clear", _inp_rl_clear_handler);
+}
+
 // Readline callbacks
 
 static int
@@ -390,7 +414,6 @@ _inp_rl_startup_hook(void)
     rl_bind_keyseq("\\eOs", _inp_rl_pagedown_handler);
 
     rl_bind_key('\t', _inp_rl_tab_handler);
-    rl_bind_key(CTRL('L'), _inp_rl_clear_handler);
 
     // unbind unwanted mappings
     rl_bind_keyseq("\\e=", NULL);
