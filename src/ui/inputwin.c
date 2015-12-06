@@ -421,6 +421,13 @@ _inp_rl_startup_hook(void)
     // disable readline completion
     rl_variable_bind("disable-completion", "on");
 
+    // check for and load ~/.config/profanity/inputrc
+    char *inputrc = prefs_get_inputrc();
+    if (inputrc) {
+        rl_read_init_file(inputrc);
+        free(inputrc);
+    }
+
     return 0;
 }
 
