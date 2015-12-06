@@ -223,7 +223,7 @@ static struct cmd_t command_defs[] =
             { "deny",                 "Abort connection." },
             { "cert",                 "Show the current TLS certificate." },
             { "cert <fingerprint>",   "Show details of trusted certificate." },
-            { "trust",                "Add the current TLS certificate to manually trusted certiciates." },
+            { "trust",                "Add the current TLS certificate to manually trusted certificates." },
             { "trusted",              "List summary of manually trusted certificates (with '/tls always' or '/tls trust')." },
             { "revoke <fingerprint>", "Remove a manually trusted certificate." },
             { "certpath",             "Show the trusted certificate path." },
@@ -320,18 +320,18 @@ static struct cmd_t command_defs[] =
             { "by none",                    "No grouping in the roster panel." },
             { "order name",                 "Order roster items by name only." },
             { "order presence",             "Order roster items by presence, and then by name." },
-            { "header char <char>",         "Prefix roster headers with specificed character." },
+            { "header char <char>",         "Prefix roster headers with specified character." },
             { "header char none",           "Remove roster header character prefix." },
-            { "contact char <char>",        "Prefix roster contacts with specificed character." },
+            { "contact char <char>",        "Prefix roster contacts with specified character." },
             { "contact char none",          "Remove roster contact character prefix." },
             { "contact indent <indent>",    "Indent contact line by <indent> spaces (0 to 10)." },
-            { "resource char <char>",       "Prefix roster resources with specificed character." },
+            { "resource char <char>",       "Prefix roster resources with specified character." },
             { "resource char none",         "Remove roster resource character prefix." },
             { "resource indent <indent>",   "Indent resource line by <indent> spaces (0 to 10)." },
             { "resource join on|off",       "Join resource with previous line when only one available resource." },
             { "presence indent <indent>",   "Indent presence line by <indent> spaces (-1 to 10), a value of -1 will show presence on the previous line." },
             { "size <precent>",             "Percentage of the screen taken up by the roster (1-99)." },
-            { "wrap on|off",                "Enabled or disanle line wrapping in roster panel." },
+            { "wrap on|off",                "Enable or disable line wrapping in roster panel." },
             { "add <jid> [<nick>]",         "Add a new item to the roster." },
             { "remove <jid>",               "Removes an item from the roster." },
             { "remove_all contacts",        "Remove all items from roster." },
@@ -610,7 +610,7 @@ static struct cmd_t command_defs[] =
             { "set <subject>",  "Set the room subject." },
             { "edit <subject>", "Edit the current room subject, tab autocompletion will display the subject to edit." },
             { "prepend <text>", "Prepend text to the current room subject, use double quotes if a trailing space is needed." },
-            { "append <text>",  "Append text to the current room subject, use double quotes if a preceeding space is needed." },
+            { "append <text>",  "Append text to the current room subject, use double quotes if a preceding space is needed." },
             { "clear",          "Clear the room subject." })
         CMD_NOEXAMPLES
     },
@@ -971,7 +971,7 @@ static struct cmd_t command_defs[] =
         CMD_DESC(
             "Titlebar encryption warning.")
         CMD_ARGS(
-            { "on|off", "Enabled or disable the unencrypted warning message in the titlebar." })
+            { "on|off", "Enable or disable the unencrypted warning message in the titlebar." })
         CMD_NOEXAMPLES
     },
 
