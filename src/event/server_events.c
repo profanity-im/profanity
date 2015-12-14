@@ -48,6 +48,7 @@
 #include "window_list.h"
 #include "config/tlscerts.h"
 #include "profanity.h"
+#include "event/client_events.h"
 
 #ifdef HAVE_LIBOTR
 #include "otr/otr.h"
@@ -99,6 +100,36 @@ sv_ev_roster_received(void)
 {
     if (prefs_get_boolean(PREF_ROSTER)) {
         ui_show_roster();
+    }
+
+    char *account = jabber_get_account_name();
+
+    // send initial presence
+    resource_presence_t conn_presence = accounts_get_login_presence(account);
+    char *last_activity_str = accounts_get_last_activity(account);
+    if (last_activity_str) {
+        GDateTime *nowdt = g_date_time_new_now_utc();
+
+        GTimeVal lasttv;
+        gboolean res = g_time_val_from_iso8601(last_activity_str, &lasttv);
+        if (res) {
+            GDateTime *lastdt = g_date_time_new_from_timeval_utc(&lasttv);
+            GTimeSpan diff_micros = g_date_time_difference(nowdt, lastdt);
+            int diff_secs = (diff_micros / 1000) / 1000;
+            if (prefs_get_boolean(PREF_LASTACTIVITY)) {
+                cl_ev_presence_send(conn_presence, NULL, diff_secs);
+            } else {
+                cl_ev_presence_send(conn_presence, NULL, 0);
+            }
+            g_date_time_unref(lastdt);
+        } else {
+            cl_ev_presence_send(conn_presence, NULL, 0);
+        }
+
+        free(last_activity_str);
+        g_date_time_unref(nowdt);
+    } else {
+        cl_ev_presence_send(conn_presence, NULL, 0);
     }
 }
 
