@@ -28,7 +28,7 @@ char* p_gpg_sign(const char * const str, const char * const fp)
     return NULL;
 }
 
-gboolean p_gpg_valid_key(const char * const keyid)
+gboolean p_gpg_valid_key(const char * const keyid, char **err_str)
 {
     return FALSE;
 }
