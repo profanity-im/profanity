@@ -102,11 +102,21 @@ sv_ev_roster_received(void)
         ui_show_roster();
     }
 
-    char *account = jabber_get_account_name();
+    char *account_name = jabber_get_account_name();
+
+    // check pgp key valid if specified
+    ProfAccount *account = accounts_get_account(account_name);
+    if (account && account->pgp_keyid) {
+        char *err_str = NULL;
+        if (!p_gpg_valid_key(account->pgp_keyid, &err_str)) {
+            cons_show_error("Invalid PGP key ID specified: %s, %s", account->pgp_keyid, err_str);
+        }
+        free(err_str);
+    }
 
     // send initial presence
-    resource_presence_t conn_presence = accounts_get_login_presence(account);
-    char *last_activity_str = accounts_get_last_activity(account);
+    resource_presence_t conn_presence = accounts_get_login_presence(account_name);
+    char *last_activity_str = accounts_get_last_activity(account_name);
     if (last_activity_str) {
         GDateTime *nowdt = g_date_time_new_now_utc();
 

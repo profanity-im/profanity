@@ -59,7 +59,7 @@ GHashTable* p_gpg_list_keys(void);
 void p_gpg_free_keys(GHashTable *keys);
 gboolean p_gpg_addkey(const char *const jid, const char *const keyid);
 GHashTable* p_gpg_pubkeys(void);
-gboolean p_gpg_valid_key(const char *const keyid);
+gboolean p_gpg_valid_key(const char *const keyid, char **err_str);
 gboolean p_gpg_available(const char *const barejid);
 const char* p_gpg_libver(void);
 char* p_gpg_sign(const char *const str, const char *const fp);

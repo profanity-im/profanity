@@ -424,12 +424,13 @@ p_gpg_libver(void)
 }
 
 gboolean
-p_gpg_valid_key(const char *const keyid)
+p_gpg_valid_key(const char *const keyid, char **err_str)
 {
     gpgme_ctx_t ctx;
     gpgme_error_t error = gpgme_new(&ctx);
     if (error) {
         log_error("GPG: Failed to create gpgme context. %s %s", gpgme_strsource(error), gpgme_strerror(error));
+        *err_str = strdup(gpgme_strerror(error));
         return FALSE;
     }
 
@@ -438,18 +439,21 @@ p_gpg_valid_key(const char *const keyid)
 
     if (error || key == NULL) {
         log_error("GPG: Failed to get key. %s %s", gpgme_strsource(error), gpgme_strerror(error));
+        *err_str = strdup(gpgme_strerror(error));
         gpgme_release(ctx);
         return FALSE;
     }
 
-    if (key) {
+    if (key == NULL) {
+        *err_str = strdup("Unknown error");
         gpgme_release(ctx);
-        gpgme_key_unref(key);
-        return TRUE;
+        return FALSE;
     }
 
     gpgme_release(ctx);
-    return FALSE;
+    gpgme_key_unref(key);
+    return TRUE;
+
 }
 
 gboolean
