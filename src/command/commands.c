@@ -651,12 +651,14 @@ cmd_account(ProfWin *window, const char *const command, gchar **args)
                     cons_show("");
                 } else if (strcmp(property, "pgpkeyid") == 0) {
 #ifdef HAVE_LIBGPGME
-                    if (!p_gpg_valid_key(value)) {
-                        cons_show("Invalid PGP key ID specified, see /pgp keys");
+                    char *err_str = NULL;
+                    if (!p_gpg_valid_key(value, &err_str)) {
+                        cons_show("Invalid PGP key ID specified: %s, see /pgp keys", err_str);
                     } else {
                         accounts_set_pgp_keyid(account_name, value);
                         cons_show("Updated PGP key ID for account %s: %s", account_name, value);
                     }
+                    free(err_str);
 #else
                     cons_show("PGP support is not included in this build.");
 #endif
@@ -5319,11 +5321,14 @@ cmd_pgp(ProfWin *window, const char *const command, gchar **args)
         }
 
         ProfAccount *account = accounts_get_account(jabber_get_account_name());
-        if (!p_gpg_valid_key(account->pgp_keyid)) {
-            ui_current_print_formatted_line('!', 0, "You must specify a valid PGP key ID for this account to start PGP encryption.");
+        char *err_str = NULL;
+        if (!p_gpg_valid_key(account->pgp_keyid, &err_str)) {
+            ui_current_print_formatted_line('!', 0, "Invalid PGP key ID %s: %s, cannot start PGP encryption.", account->pgp_keyid, err_str);
+            free(err_str);
             account_free(account);
             return TRUE;
         }
+        free(err_str);
         account_free(account);
 
         if (!p_gpg_available(chatwin->barejid)) {
