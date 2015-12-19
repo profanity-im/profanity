@@ -311,7 +311,7 @@ _inp_offset_to_col(char *str, int offset)
 
     while (i < offset && str[i] != '\0') {
         gunichar uni = g_utf8_get_char(&str[i]);
-        size_t ch_len = mbrlen(&str[i], 4, NULL);
+        size_t ch_len = mbrlen(&str[i], MB_CUR_MAX, NULL);
         i += ch_len;
         col++;
         if (g_unichar_iswide(uni)) {

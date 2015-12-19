@@ -151,6 +151,7 @@ gboolean cmd_inpblock(ProfWin *window, const char *const command, gchar **args);
 gboolean cmd_encwarn(ProfWin *window, const char *const command, gchar **args);
 gboolean cmd_script(ProfWin *window, const char *const command, gchar **args);
 gboolean cmd_export(ProfWin *window, const char *const command, gchar **args);
+gboolean cmd_charset(ProfWin *window, const char *const command, gchar **args);
 gboolean cmd_plugins(ProfWin *window, const char *const command, gchar **args);
 
 gboolean cmd_form_field(ProfWin *window, char *tag, gchar **args);

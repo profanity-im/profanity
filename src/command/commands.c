@@ -43,6 +43,7 @@
 #include <sys/types.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include <langinfo.h>
 
 #include "chat_session.h"
 #include "command/commands.h"
@@ -4013,6 +4014,26 @@ cmd_privileges(ProfWin *window, const char *const command, gchar **args)
     ui_redraw_all_room_rosters();
 
     return result;
+}
+
+gboolean
+cmd_charset(ProfWin *window, const char *const command, gchar **args)
+{
+    char *codeset = nl_langinfo(CODESET);
+    char *lang = getenv("LANG");
+
+    cons_show("Charset information:");
+
+    if (lang) {
+        cons_show("  LANG:       %s", lang);
+    }
+    if (codeset) {
+        cons_show("  CODESET:    %s", codeset);
+    }
+        cons_show("  MB_CUR_MAX: %d", MB_CUR_MAX);
+        cons_show("  MB_LEN_MAX: %d", MB_LEN_MAX);
+
+    return TRUE;
 }
 
 gboolean
