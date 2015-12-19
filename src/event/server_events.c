@@ -109,7 +109,7 @@ sv_ev_roster_received(void)
     if (account && account->pgp_keyid) {
         char *err_str = NULL;
         if (!p_gpg_valid_key(account->pgp_keyid, &err_str)) {
-            cons_show_error("Invalid PGP key ID specified: %s, %s", account->pgp_keyid, err_str);
+            cons_show_error("Invalid PGP key ID specified: %s, %s", account->pgp_keyid, err_str);
         }
         free(err_str);
     }
