@@ -181,6 +181,8 @@ init_prof_test(void **state)
     assert_true(prof_output_exact("Dynamic input blocking disabled"));
     prof_input("/notify chat off");
     assert_true(prof_output_exact("Chat notifications disabled"));
+    prof_input("/notify room off");
+    assert_true(prof_output_exact("Room notifications disabled"));
     prof_input("/wrap off");
     assert_true(prof_output_exact("Word wrap disabled"));
     prof_input("/roster hide");
