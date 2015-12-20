@@ -950,7 +950,7 @@ static struct cmd_t command_defs[] =
         CMD_TAGS(
             CMD_TAG_UI)
         CMD_SYN(
-            "/beep")
+            "/charset")
         CMD_DESC(
             "Display information about the current character set supported by the terminal. ")
         CMD_NOARGS
