@@ -361,7 +361,6 @@ mucwin_message(ProfMucWin *mucwin, const char *const nick, const char *const mes
     assert(mucwin != NULL);
 
     ProfWin *window = (ProfWin*)mucwin;
-    int num = wins_get_num(window);
     char *my_nick = muc_nick(mucwin->roomjid);
 
     if (g_strcmp0(nick, my_nick) != 0) {
@@ -373,54 +372,6 @@ mucwin_message(ProfMucWin *mucwin, const char *const nick, const char *const mes
     } else {
         win_print(window, '-', 0, NULL, 0, THEME_TEXT_ME, nick, message);
     }
-
-    gboolean is_current = wins_is_current(window);
-    gboolean notify = prefs_do_room_notify(is_current, mucwin->roomjid, my_nick, message);
-
-    // currently in groupchat window
-    if (wins_is_current(window)) {
-        status_bar_active(num);
-
-    // not currently on groupchat window
-    } else {
-        status_bar_new(num);
-        cons_show_incoming_message(nick, num);
-
-        if (prefs_get_boolean(PREF_FLASH) && (strcmp(nick, my_nick) != 0)) {
-            flash();
-        }
-
-        mucwin->unread++;
-        if (notify) {
-            mucwin->notify = TRUE;
-        }
-    }
-
-    // don't notify self messages
-    if (strcmp(nick, my_nick) == 0) {
-        return;
-    }
-
-    if (prefs_get_boolean(PREF_BEEP)) {
-        beep();
-    }
-
-    if (!notify) {
-        return;
-    }
-
-    Jid *jidp = jid_create(mucwin->roomjid);
-    int ui_index = num;
-    if (ui_index == 10) {
-        ui_index = 0;
-    }
-
-    if (prefs_get_boolean(PREF_NOTIFY_ROOM_TEXT)) {
-        notify_room_message(nick, jidp->localpart, ui_index, message);
-    } else {
-        notify_room_message(nick, jidp->localpart, ui_index, NULL);
-    }
-    jid_destroy(jidp);
 }
 
 void
