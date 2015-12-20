@@ -259,6 +259,7 @@ void cons_check_version(gboolean not_available_msg);
 void cons_show_typing(const char *const barejid);
 void cons_show_incoming_room_message(const char *const nick, const char *const room, const int win_index);
 void cons_show_incoming_message(const char *const short_from, const int win_index);
+void cons_show_incoming_private_message(const char *const nick, const char *const room, const int win_index);
 void cons_show_room_invites(GSList *invites);
 void cons_show_received_subs(void);
 void cons_show_sent_subs(void);
