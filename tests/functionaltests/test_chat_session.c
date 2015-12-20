@@ -63,7 +63,7 @@ sends_message_to_fulljid_when_received_from_fulljid(void **state)
             "<body>First message</body>"
         "</message>"
     );
-    assert_true(prof_output_exact("<< incoming from Buddy1/mobile (2)"));
+    assert_true(prof_output_exact("<< incoming from Buddy1/mobile (win 2)"));
 
     prof_input("/msg buddy1@localhost Hi there");
 
@@ -91,7 +91,7 @@ sends_subsequent_messages_to_fulljid(void **state)
             "<body>First message</body>"
         "</message>"
     );
-    assert_true(prof_output_exact("<< incoming from Buddy1/mobile (2)"));
+    assert_true(prof_output_exact("<< incoming from Buddy1/mobile (win 2)"));
 
     prof_input("/msg buddy1@localhost Outgoing 1");
     assert_true(stbbr_received(
@@ -132,7 +132,7 @@ resets_to_barejid_after_presence_received(void **state)
             "<body>First message</body>"
         "</message>"
     );
-    assert_true(prof_output_exact("<< incoming from Buddy1/mobile (2)"));
+    assert_true(prof_output_exact("<< incoming from Buddy1/mobile (win 2)"));
 
     prof_input("/msg buddy1@localhost Outgoing 1");
     assert_true(stbbr_received(
@@ -182,7 +182,7 @@ new_session_when_message_received_from_different_fulljid(void **state)
             "<body>From first resource</body>"
         "</message>"
     );
-    assert_true(prof_output_exact("<< incoming from Buddy1/mobile (2)"));
+    assert_true(prof_output_exact("<< incoming from Buddy1/mobile (win 2)"));
 
     prof_input("/msg buddy1@localhost Outgoing 1");
     assert_true(stbbr_received(

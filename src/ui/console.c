@@ -325,7 +325,7 @@ cons_show_incoming_message(const char *const short_from, const int win_index)
     if (ui_index == 10) {
         ui_index = 0;
     }
-    win_vprint(console, '-', 0, NULL, 0, THEME_INCOMING, "", "<< incoming from %s (%d)", short_from, ui_index);
+    win_vprint(console, '-', 0, NULL, 0, THEME_INCOMING, "", "<< incoming from %s (win %d)", short_from, ui_index);
 
     cons_alert();
 }
