@@ -20,6 +20,7 @@
 #include "test_receipts.h"
 #include "test_roster.h"
 #include "test_software.h"
+#include "test_muc.h"
 
 #define PROF_FUNC_TEST(test) unit_test_setup_teardown(test, init_prof_test, close_prof_test)
 
@@ -82,6 +83,18 @@ int main(int argc, char* argv[]) {
         PROF_FUNC_TEST(display_software_version_result_when_from_domainpart),
         PROF_FUNC_TEST(show_message_in_chat_window_when_no_resource),
         PROF_FUNC_TEST(display_software_version_result_in_chat),
+
+        PROF_FUNC_TEST(sends_room_join),
+        PROF_FUNC_TEST(sends_room_join_with_default_muc_service),
+        PROF_FUNC_TEST(sends_room_join_with_nick),
+        PROF_FUNC_TEST(sends_room_join_with_password),
+        PROF_FUNC_TEST(sends_room_join_with_nick_and_password),
+        PROF_FUNC_TEST(shows_role_and_affiliation_on_join),
+        PROF_FUNC_TEST(shows_subject_on_join),
+        PROF_FUNC_TEST(shows_history_message),
+        PROF_FUNC_TEST(shows_occupant_join),
+        PROF_FUNC_TEST(shows_message),
+
     };
 
     return run_tests(all_tests);

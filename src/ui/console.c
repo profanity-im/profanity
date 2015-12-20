@@ -302,6 +302,21 @@ cons_show_typing(const char *const barejid)
 }
 
 void
+cons_show_incoming_room_message(const char *const nick, const char *const room, const int win_index)
+{
+    ProfWin *const console = wins_get_console();
+
+    int ui_index = win_index;
+    if (ui_index == 10) {
+        ui_index = 0;
+    }
+
+    win_vprint(console, '-', 0, NULL, 0, THEME_INCOMING, "", "<< incoming from %s in %s (win %d)", nick, room, ui_index);
+
+    cons_alert();
+}
+
+void
 cons_show_incoming_message(const char *const short_from, const int win_index)
 {
     ProfWin *console = wins_get_console();
