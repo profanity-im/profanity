@@ -250,5 +250,5 @@ shows_message_in_console_when_window_not_focussed(void **state)
         "</message>"
     );
 
-    assert_true(prof_output_exact("<< incoming from testoccupant in testroom@conference.localhost (win 2)"));
+    assert_true(prof_output_exact("<< room message: testoccupant in testroom@conference.localhost (win 2)"));
 }

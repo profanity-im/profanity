@@ -51,14 +51,17 @@ privwin_incoming_msg(ProfPrivateWin *privatewin, const char *const message, GDat
     ProfWin *window = (ProfWin*) privatewin;
     int num = wins_get_num(window);
 
-    char *display_from = get_nick_from_full_jid(privatewin->fulljid);
+    Jid *jidp = jid_create(privatewin->fulljid);
+    if (jidp == NULL) {
+        return;
+    }
 
     gboolean is_current = wins_is_current(window);
     gboolean notify = prefs_do_chat_notify(is_current, message);
 
     // currently viewing chat window with sender
     if (wins_is_current(window)) {
-        win_print_incoming_message(window, timestamp, display_from, message, PROF_MSG_PLAIN);
+        win_print_incoming_message(window, timestamp, jidp->resourcepart, message, PROF_MSG_PLAIN);
         title_bar_set_typing(FALSE);
         status_bar_active(num);
 
@@ -69,8 +72,8 @@ privwin_incoming_msg(ProfPrivateWin *privatewin, const char *const message, GDat
             privatewin->notify = TRUE;
         }
         status_bar_new(num);
-        cons_show_incoming_message(display_from, num);
-        win_print_incoming_message(window, timestamp, display_from, message, PROF_MSG_PLAIN);
+        cons_show_incoming_private_message(jidp->resourcepart, jidp->barejid, num);
+        win_print_incoming_message(window, timestamp, jidp->resourcepart, message, PROF_MSG_PLAIN);
 
         if (prefs_get_boolean(PREF_FLASH)) {
             flash();
@@ -82,7 +85,7 @@ privwin_incoming_msg(ProfPrivateWin *privatewin, const char *const message, GDat
     }
 
     if (!notify) {
-        free(display_from);
+        jid_destroy(jidp);
         return;
     }
 
@@ -92,12 +95,12 @@ privwin_incoming_msg(ProfPrivateWin *privatewin, const char *const message, GDat
     }
 
     if (prefs_get_boolean(PREF_NOTIFY_CHAT_TEXT)) {
-        notify_message(display_from, ui_index, message);
+        notify_message(jidp->resourcepart, ui_index, message);
     } else {
-        notify_message(display_from, ui_index, NULL);
+        notify_message(jidp->resourcepart, ui_index, NULL);
     }
 
-    free(display_from);
+    jid_destroy(jidp);
 }
 
 void
