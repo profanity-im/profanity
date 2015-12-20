@@ -212,16 +212,69 @@ void
 sv_ev_room_message(const char *const room_jid, const char *const nick,
     const char *const message)
 {
-    ProfMucWin *mucwin = wins_get_muc(room_jid);
-    if (mucwin) {
-        mucwin_message(mucwin, nick, message);
-    }
-
     if (prefs_get_boolean(PREF_GRLOG)) {
         Jid *jid = jid_create(jabber_get_fulljid());
         groupchat_log_chat(jid->barejid, room_jid, nick, message);
         jid_destroy(jid);
     }
+
+    ProfMucWin *mucwin = wins_get_muc(room_jid);
+    if (!mucwin) {
+        return;
+    }
+
+    mucwin_message(mucwin, nick, message);
+
+    ProfWin *window = (ProfWin*)mucwin;
+    gboolean is_current = wins_is_current(window);
+    int num = wins_get_num(window);
+    char *my_nick = muc_nick(mucwin->roomjid);
+    gboolean notify = prefs_do_room_notify(is_current, mucwin->roomjid, my_nick, message);
+
+    // currently in groupchat window
+    if (wins_is_current(window)) {
+        status_bar_active(num);
+
+    // not currently on groupchat window
+    } else {
+        status_bar_new(num);
+        cons_show_incoming_room_message(nick, mucwin->roomjid, num);
+
+        if (prefs_get_boolean(PREF_FLASH) && (strcmp(nick, my_nick) != 0)) {
+            flash();
+        }
+
+        mucwin->unread++;
+        if (notify) {
+            mucwin->notify = TRUE;
+        }
+    }
+
+    // don't notify self messages
+    if (strcmp(nick, my_nick) == 0) {
+        return;
+    }
+
+    if (prefs_get_boolean(PREF_BEEP)) {
+        beep();
+    }
+
+    if (!notify) {
+        return;
+    }
+
+    Jid *jidp = jid_create(mucwin->roomjid);
+    int ui_index = num;
+    if (ui_index == 10) {
+        ui_index = 0;
+    }
+
+    if (prefs_get_boolean(PREF_NOTIFY_ROOM_TEXT)) {
+        notify_room_message(nick, jidp->localpart, ui_index, message);
+    } else {
+        notify_room_message(nick, jidp->localpart, ui_index, NULL);
+    }
+    jid_destroy(jidp);
 }
 
 void
