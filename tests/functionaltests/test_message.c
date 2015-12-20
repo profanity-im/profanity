@@ -38,5 +38,5 @@ message_receive(void **state)
         "</message>"
     );
 
-    assert_true(prof_output_exact("<< incoming from someuser@chatserv.org/laptop (2)"));
+    assert_true(prof_output_exact("<< chat message: someuser@chatserv.org/laptop (win 2)"));
 }
