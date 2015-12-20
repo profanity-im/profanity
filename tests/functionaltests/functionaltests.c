@@ -89,8 +89,11 @@ int main(int argc, char* argv[]) {
         PROF_FUNC_TEST(sends_room_join_with_nick),
         PROF_FUNC_TEST(sends_room_join_with_password),
         PROF_FUNC_TEST(sends_room_join_with_nick_and_password),
-        PROF_FUNC_TEST(show_role_and_affiliation_on_join),
-        PROF_FUNC_TEST(show_subject_on_join),
+        PROF_FUNC_TEST(shows_role_and_affiliation_on_join),
+        PROF_FUNC_TEST(shows_subject_on_join),
+        PROF_FUNC_TEST(shows_history_message),
+        PROF_FUNC_TEST(shows_occupant_join),
+        PROF_FUNC_TEST(shows_message),
 
     };
 

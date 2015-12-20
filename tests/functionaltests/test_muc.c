@@ -91,7 +91,7 @@ sends_room_join_with_nick_and_password(void **state)
 }
 
 void
-show_role_and_affiliation_on_join(void **state)
+shows_role_and_affiliation_on_join(void **state)
 {
     prof_connect();
 
@@ -111,7 +111,7 @@ show_role_and_affiliation_on_join(void **state)
 }
 
 void
-show_subject_on_join(void **state)
+shows_subject_on_join(void **state)
 {
     prof_connect();
 
@@ -136,4 +136,89 @@ show_subject_on_join(void **state)
     );
 
     assert_true(prof_output_regex("Room subject: .+Test room subject"));
+}
+
+void
+shows_history_message(void **state)
+{
+    prof_connect();
+
+    stbbr_for_id("prof_join_2",
+        "<presence id=\"prof_join_2\" lang=\"en\" to=\"stabber@localhost/profanity\" from=\"testroom@conference.localhost/stabber\">"
+            "<c hash=\"sha-1\" xmlns=\"http://jabber.org/protocol/caps\" node=\"http://www.profanity.im\" ver=\"*\"/>"
+            "<x xmlns=\"http://jabber.org/protocol/muc#user\">"
+                "<item role=\"participant\" jid=\"stabber@localhost/profanity\" affiliation=\"none\"/>"
+            "</x>"
+            "<status code=\"110\"/>"
+        "</presence>"
+    );
+
+    prof_input("/join testroom@conference.localhost");
+    assert_true(prof_output_exact("-> You have joined the room as stabber, role: participant, affiliation: none"));
+
+    stbbr_send(
+        "<message type=\"groupchat\" to=\"stabber@localhost/profanity\" from=\"testroom@conference.localhost/testoccupant\">"
+            "<body>an old message</body>"
+            "<delay xmlns=\"urn:xmpp:delay\" stamp=\"2015-12-19T23:55:25Z\" from=\"testroom@conference.localhost\"/>"
+            "<x xmlns=\"jabber:x:delay\" stamp=\"20151219T23:55:25\"/>"
+        "</message>"
+    );
+
+    assert_true(prof_output_regex("testoccupant: an old message"));
+}
+
+void
+shows_occupant_join(void **state)
+{
+    prof_connect();
+
+    stbbr_for_id("prof_join_2",
+        "<presence id=\"prof_join_2\" lang=\"en\" to=\"stabber@localhost/profanity\" from=\"testroom@conference.localhost/stabber\">"
+            "<c hash=\"sha-1\" xmlns=\"http://jabber.org/protocol/caps\" node=\"http://www.profanity.im\" ver=\"*\"/>"
+            "<x xmlns=\"http://jabber.org/protocol/muc#user\">"
+                "<item role=\"participant\" jid=\"stabber@localhost/profanity\" affiliation=\"none\"/>"
+            "</x>"
+            "<status code=\"110\"/>"
+        "</presence>"
+    );
+
+    prof_input("/join testroom@conference.localhost");
+    assert_true(prof_output_exact("-> You have joined the room as stabber, role: participant, affiliation: none"));
+
+    stbbr_send(
+        "<presence to=\"stabber@localhost/profanity\" from=\"testroom@conference.localhost/testoccupant\">"
+            "<x xmlns=\"http://jabber.org/protocol/muc#user\">"
+                "<item role=\"participant\" jid=\"someuser@someserver.org/work\" affiliation=\"none\"/>"
+            "</x>"
+        "</presence>"
+    );
+
+    assert_true(prof_output_exact("-> testoccupant has joined the room, role: participant, affiliation: none"));
+}
+
+void
+shows_message(void **state)
+{
+    prof_connect();
+
+    stbbr_for_id("prof_join_2",
+        "<presence id=\"prof_join_2\" lang=\"en\" to=\"stabber@localhost/profanity\" from=\"testroom@conference.localhost/stabber\">"
+            "<c hash=\"sha-1\" xmlns=\"http://jabber.org/protocol/caps\" node=\"http://www.profanity.im\" ver=\"*\"/>"
+            "<x xmlns=\"http://jabber.org/protocol/muc#user\">"
+                "<item role=\"participant\" jid=\"stabber@localhost/profanity\" affiliation=\"none\"/>"
+            "</x>"
+            "<status code=\"110\"/>"
+        "</presence>"
+    );
+
+    prof_input("/join testroom@conference.localhost");
+    assert_true(prof_output_exact("-> You have joined the room as stabber, role: participant, affiliation: none"));
+
+    stbbr_send(
+        "<message type=\"groupchat\" to=\"stabber@localhost/profanity\" from=\"testroom@conference.localhost/testoccupant\">"
+            "<body>a new message</body>"
+        "</message>"
+    );
+
+    assert_true(prof_output_regex("testoccupant: .+a new message"));
 }
