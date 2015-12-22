@@ -104,6 +104,7 @@ sv_ev_roster_received(void)
 
     char *account_name = jabber_get_account_name();
 
+#ifdef PROF_HAVE_LIBGPGME
     // check pgp key valid if specified
     ProfAccount *account = accounts_get_account(account_name);
     if (account && account->pgp_keyid) {
@@ -113,6 +114,7 @@ sv_ev_roster_received(void)
         }
         free(err_str);
     }
+#endif
 
     // send initial presence
     resource_presence_t conn_presence = accounts_get_login_presence(account_name);
