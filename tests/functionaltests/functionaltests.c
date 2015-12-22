@@ -61,7 +61,8 @@ int main(int argc, char* argv[]) {
         PROF_FUNC_TEST(presence_missing_resource_defaults),
 
         PROF_FUNC_TEST(message_send),
-        PROF_FUNC_TEST(message_receive),
+        PROF_FUNC_TEST(message_receive_console),
+        PROF_FUNC_TEST(message_receive_chatwin),
 
         PROF_FUNC_TEST(sends_message_to_barejid_when_contact_offline),
         PROF_FUNC_TEST(sends_message_to_barejid_when_contact_online),
