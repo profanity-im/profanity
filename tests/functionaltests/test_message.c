@@ -28,7 +28,7 @@ message_send(void **state)
 }
 
 void
-message_receive(void **state)
+message_receive_console(void **state)
 {
     prof_connect();
 
@@ -39,4 +39,21 @@ message_receive(void **state)
     );
 
     assert_true(prof_output_exact("<< chat message: someuser@chatserv.org/laptop (win 2)"));
+}
+
+void
+message_receive_chatwin(void **state)
+{
+    prof_connect();
+
+    prof_input("/msg someuser@chatserv.org");
+    prof_output_exact("someuser@chatserv.org");
+
+    stbbr_send(
+        "<message id=\"message1\" to=\"stabber@localhost\" from=\"someuser@chatserv.org/laptop\" type=\"chat\">"
+            "<body>How are you?</body>"
+        "</message>"
+    );
+
+    assert_true(prof_output_regex("someuser@chatserv.org/laptop: .+How are you?"));
 }
