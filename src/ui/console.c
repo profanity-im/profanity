@@ -1080,6 +1080,14 @@ cons_encwarn_setting(void)
 }
 
 void
+cons_console_setting(void)
+{
+    char *setting = prefs_get_string(PREF_CONSOLE_MUC);
+    cons_show("Console MUC messages (/console)  : %s", setting);
+    prefs_free_string(setting);
+}
+
+void
 cons_tlsshow_setting(void)
 {
     if (prefs_get_boolean(PREF_TLS_SHOW)) {
@@ -1349,6 +1357,7 @@ cons_show_ui_prefs(void)
     cons_resource_setting();
     cons_vercheck_setting();
     cons_statuses_setting();
+    cons_console_setting();
     cons_occupants_setting();
     cons_roster_setting();
     cons_privileges_setting();

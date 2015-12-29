@@ -4035,6 +4035,26 @@ cmd_beep(ProfWin *window, const char *const command, gchar **args)
 }
 
 gboolean
+cmd_console(ProfWin *window, const char *const command, gchar **args)
+{
+    if (g_strcmp0(args[0], "muc") != 0) {
+        cons_bad_cmd_usage(command);
+        return TRUE;
+    }
+
+    char *setting = args[1];
+    if ((g_strcmp0(setting, "all") != 0) && (g_strcmp0(setting, "first") != 0) && (g_strcmp0(setting, "none") != 0)) {
+        cons_bad_cmd_usage(command);
+        return TRUE;
+    }
+
+    prefs_set_string(PREF_CONSOLE_MUC, setting);
+    cons_show("Console MUC messages set: %s", setting);
+
+    return TRUE;
+}
+
+gboolean
 cmd_presence(ProfWin *window, const char *const command, gchar **args)
 {
     return _cmd_set_boolean_preference(args[0], command, "Contact presence", PREF_PRESENCE);

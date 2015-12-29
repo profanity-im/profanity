@@ -246,6 +246,7 @@ sv_ev_room_message(const char *const room_jid, const char *const nick,
         } else if (g_strcmp0(muc_show, "first") == 0 && mucwin->unread == 0) {
             cons_show_incoming_room_message(NULL, mucwin->roomjid, num);
         }
+        prefs_free_string(muc_show);
 
         if (prefs_get_boolean(PREF_FLASH) && (strcmp(nick, my_nick) != 0)) {
             flash();
