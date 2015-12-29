@@ -311,7 +311,11 @@ cons_show_incoming_room_message(const char *const nick, const char *const room, 
         ui_index = 0;
     }
 
-    win_vprint(console, '-', 0, NULL, 0, THEME_INCOMING, "", "<< room message: %s in %s (win %d)", nick, room, ui_index);
+    if (nick) {
+        win_vprint(console, '-', 0, NULL, 0, THEME_INCOMING, "", "<< room message: %s in %s (win %d)", nick, room, ui_index);
+    } else {
+        win_vprint(console, '-', 0, NULL, 0, THEME_INCOMING, "", "<< room message: %s (win %d)", room, ui_index);
+    }
 
     cons_alert();
 }
