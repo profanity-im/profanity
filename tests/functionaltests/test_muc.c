@@ -224,7 +224,7 @@ shows_message(void **state)
 }
 
 void
-shows_message_in_console_when_window_not_focussed(void **state)
+shows_all_messages_in_console_when_window_not_focussed(void **state)
 {
     prof_connect();
 
@@ -251,4 +251,93 @@ shows_message_in_console_when_window_not_focussed(void **state)
     );
 
     assert_true(prof_output_exact("<< room message: testoccupant in testroom@conference.localhost (win 2)"));
+
+    stbbr_send(
+        "<message type='groupchat' to='stabber@localhost/profanity' from='testroom@conference.localhost/anotheroccupant'>"
+            "<body>some other message</body>"
+        "</message>"
+    );
+
+    assert_true(prof_output_exact("<< room message: anotheroccupant in testroom@conference.localhost (win 2)"));
+}
+
+void
+shows_first_message_in_console_when_window_not_focussed(void **state)
+{
+    prof_connect();
+
+    prof_input("/console muc first");
+    assert_true(prof_output_exact("Console MUC messages set: first"));
+
+    stbbr_for_id("prof_join_2",
+        "<presence id='prof_join_2' lang='en' to='stabber@localhost/profanity' from='testroom@conference.localhost/stabber'>"
+            "<c hash='sha-1' xmlns='http://jabber.org/protocol/caps' node='http://www.profanity.im' ver='*'/>"
+            "<x xmlns='http://jabber.org/protocol/muc#user'>"
+                "<item role='participant' jid='stabber@localhost/profanity' affiliation='none'/>"
+            "</x>"
+            "<status code='110'/>"
+        "</presence>"
+    );
+
+    prof_input("/join testroom@conference.localhost");
+    assert_true(prof_output_exact("-> You have joined the room as stabber, role: participant, affiliation: none"));
+
+    prof_input("/win 1");
+    assert_true(prof_output_exact("Profanity. Type /help for help information."));
+
+    stbbr_send(
+        "<message type='groupchat' to='stabber@localhost/profanity' from='testroom@conference.localhost/testoccupant'>"
+            "<body>a new message</body>"
+        "</message>"
+    );
+
+    assert_true(prof_output_exact("<< room message: testroom@conference.localhost (win 2)"));
+    prof_input("/clear");
+    prof_input("/about");
+    assert_true(prof_output_exact("Type '/help' to show complete help."));
+
+    stbbr_send(
+        "<message type='groupchat' to='stabber@localhost/profanity' from='testroom@conference.localhost/anotheroccupant'>"
+            "<body>some other message</body>"
+        "</message>"
+    );
+
+    prof_timeout(2);
+    assert_false(prof_output_exact("<< room message: testroom@conference.localhost (win 2)"));
+    prof_timeout_reset();
+}
+
+void
+shows_no_message_in_console_when_window_not_focussed(void **state)
+{
+    prof_connect();
+
+    prof_input("/console muc none");
+    assert_true(prof_output_exact("Console MUC messages set: none"));
+
+    stbbr_for_id("prof_join_2",
+        "<presence id='prof_join_2' lang='en' to='stabber@localhost/profanity' from='testroom@conference.localhost/stabber'>"
+            "<c hash='sha-1' xmlns='http://jabber.org/protocol/caps' node='http://www.profanity.im' ver='*'/>"
+            "<x xmlns='http://jabber.org/protocol/muc#user'>"
+                "<item role='participant' jid='stabber@localhost/profanity' affiliation='none'/>"
+            "</x>"
+            "<status code='110'/>"
+        "</presence>"
+    );
+
+    prof_input("/join testroom@conference.localhost");
+    assert_true(prof_output_exact("-> You have joined the room as stabber, role: participant, affiliation: none"));
+
+    prof_input("/win 1");
+    assert_true(prof_output_exact("Profanity. Type /help for help information."));
+
+    stbbr_send(
+        "<message type='groupchat' to='stabber@localhost/profanity' from='testroom@conference.localhost/testoccupant'>"
+            "<body>a new message</body>"
+        "</message>"
+    );
+
+    prof_timeout(2);
+    assert_false(prof_output_exact("testroom@conference.localhost (win 2)"));
+    prof_timeout_reset();
 }

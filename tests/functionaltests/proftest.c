@@ -257,6 +257,18 @@ prof_connect_with_roster(char *roster)
 }
 
 void
+prof_timeout(int timeout)
+{
+    exp_timeout = timeout;
+}
+
+void
+prof_timeout_reset(void)
+{
+    exp_timeout = 10;
+}
+
+void
 prof_connect(void)
 {
     prof_connect_with_roster(
