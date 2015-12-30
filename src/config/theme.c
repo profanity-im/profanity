@@ -533,6 +533,8 @@ _load_preferences(void)
             g_free(ch);
         }
     }
+
+    _set_string_preference("console.muc", PREF_CONSOLE_MUC);
 }
 
 static gchar*
