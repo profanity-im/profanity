@@ -93,7 +93,7 @@ static int _room_kick_result_handler(xmpp_conn_t *const conn, xmpp_stanza_t *con
 static int _enable_carbons_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza, void *const userdata);
 static int _disable_carbons_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza, void *const userdata);
 static int _manual_pong_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza, void *const userdata);
-static int _ping_timed_handler(xmpp_conn_t *const conn, void *const userdata);
+static int _autoping_timed_handler(xmpp_conn_t *const conn, void *const userdata);
 static int _caps_response_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza, void *const userdata);
 static int _caps_response_handler_for_jid(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza, void *const userdata);
 static int _caps_response_handler_legacy(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza, void *const userdata);
@@ -119,7 +119,7 @@ iq_add_handlers(void)
 
     if (prefs_get_autoping() != 0) {
         int millis = prefs_get_autoping() * 1000;
-        xmpp_timed_handler_add(conn, _ping_timed_handler, millis, ctx);
+        xmpp_timed_handler_add(conn, _autoping_timed_handler, millis, ctx);
     }
 }
 
@@ -130,11 +130,11 @@ iq_set_autoping(const int seconds)
     xmpp_ctx_t * const ctx = connection_get_ctx();
 
     if (jabber_get_connection_status() == JABBER_CONNECTED) {
-        xmpp_timed_handler_delete(conn, _ping_timed_handler);
+        xmpp_timed_handler_delete(conn, _autoping_timed_handler);
 
         if (seconds != 0) {
             int millis = seconds * 1000;
-            xmpp_timed_handler_add(conn, _ping_timed_handler, millis,
+            xmpp_timed_handler_add(conn, _autoping_timed_handler, millis,
                 ctx);
         }
     }
@@ -550,7 +550,7 @@ _pong_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza,
                         log_warning("Server ping (id=%s) error type 'cancel', disabling autoping.", id);
                         prefs_set_autoping(0);
                         cons_show_error("Server ping not supported, autoping disabled.");
-                        xmpp_timed_handler_delete(conn, _ping_timed_handler);
+                        xmpp_timed_handler_delete(conn, _autoping_timed_handler);
                     }
                 }
             }
@@ -839,7 +839,7 @@ _manual_pong_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza,
 }
 
 static int
-_ping_timed_handler(xmpp_conn_t *const conn, void *const userdata)
+_autoping_timed_handler(xmpp_conn_t *const conn, void *const userdata)
 {
     xmpp_ctx_t *ctx = (xmpp_ctx_t *)userdata;
 
