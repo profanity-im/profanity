@@ -114,6 +114,7 @@ static char* _wins_autocomplete(ProfWin *window, const char *const input);
 static char* _tls_autocomplete(ProfWin *window, const char *const input);
 static char* _script_autocomplete(ProfWin *window, const char *const input);
 static char* _subject_autocomplete(ProfWin *window, const char *const input);
+static char* _console_autocomplete(ProfWin *window, const char *const input);
 
 GHashTable *commands = NULL;
 
@@ -970,6 +971,23 @@ static struct cmd_t command_defs[] =
             "If the terminal does not support sounds, it may attempt to flash the screen instead.")
         CMD_ARGS(
             { "on|off", "Enable or disable terminal bell." })
+        CMD_NOEXAMPLES
+    },
+
+    { "/console",
+        cmd_console, parse_args, 2, 2, &cons_console_setting,
+        CMD_TAGS(
+            CMD_TAG_UI,
+            CMD_TAG_GROUPCHAT)
+        CMD_SYN(
+            "/console muc all|first|none")
+        CMD_DESC(
+            "Configure what is displayed in the console window when new chat room messages are received. "
+            "The default is set to 'all'.")
+        CMD_ARGS(
+            { "muc all",    "Indicate all new chat room messages in the console." },
+            { "muc first",  "Indicate only the first new message in each room in the console." },
+            { "muc none",   "Do not show any new messages in the console window." })
         CMD_NOEXAMPLES
     },
 
@@ -1900,6 +1918,8 @@ static Autocomplete tls_ac;
 static Autocomplete tls_certpath_ac;
 static Autocomplete script_ac;
 static Autocomplete script_show_ac;
+static Autocomplete console_ac;
+static Autocomplete console_muc_ac;
 
 /*
  * Initialise command autocompleter and history
@@ -2385,6 +2405,14 @@ cmd_init(void)
     autocomplete_add(script_ac, "show");
 
     script_show_ac = NULL;
+
+    console_ac = autocomplete_new();
+    autocomplete_add(console_ac, "muc");
+
+    console_muc_ac = autocomplete_new();
+    autocomplete_add(console_muc_ac, "all");
+    autocomplete_add(console_muc_ac, "first");
+    autocomplete_add(console_muc_ac, "none");
 }
 
 void
@@ -2462,6 +2490,8 @@ cmd_uninit(void)
     autocomplete_free(tls_certpath_ac);
     autocomplete_free(script_ac);
     autocomplete_free(script_show_ac);
+    autocomplete_free(console_ac);
+    autocomplete_free(console_muc_ac);
 }
 
 gboolean
@@ -2654,6 +2684,8 @@ cmd_reset_autocomplete(ProfWin *window)
     autocomplete_reset(pgp_log_ac);
     autocomplete_reset(tls_ac);
     autocomplete_reset(tls_certpath_ac);
+    autocomplete_reset(console_ac);
+    autocomplete_reset(console_muc_ac);
     autocomplete_reset(script_ac);
     if (script_show_ac) {
         autocomplete_free(script_show_ac);
@@ -2918,7 +2950,8 @@ _cmd_complete_parameters(ProfWin *window, const char *const input)
     g_hash_table_insert(ac_funcs, "/wins",          _wins_autocomplete);
     g_hash_table_insert(ac_funcs, "/tls",           _tls_autocomplete);
     g_hash_table_insert(ac_funcs, "/script",        _script_autocomplete);
-    g_hash_table_insert(ac_funcs, "/subject",        _subject_autocomplete);
+    g_hash_table_insert(ac_funcs, "/subject",       _subject_autocomplete);
+    g_hash_table_insert(ac_funcs, "/console",       _console_autocomplete);
 
     int len = strlen(input);
     char parsed[len+1];
@@ -4153,6 +4186,24 @@ _join_autocomplete(ProfWin *window, const char *const input)
     }
 
     g_strfreev(args);
+
+    return NULL;
+}
+
+static char*
+_console_autocomplete(ProfWin *window, const char *const input)
+{
+    char *result = NULL;
+
+    result = autocomplete_param_with_ac(input, "/console muc", console_muc_ac, TRUE);
+    if (result) {
+        return result;
+    }
+
+    result = autocomplete_param_with_ac(input, "/console", console_ac, TRUE);
+    if (result) {
+        return result;
+    }
 
     return NULL;
 }

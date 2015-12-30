@@ -311,7 +311,11 @@ cons_show_incoming_room_message(const char *const nick, const char *const room, 
         ui_index = 0;
     }
 
-    win_vprint(console, '-', 0, NULL, 0, THEME_INCOMING, "", "<< room message: %s in %s (win %d)", nick, room, ui_index);
+    if (nick) {
+        win_vprint(console, '-', 0, NULL, 0, THEME_INCOMING, "", "<< room message: %s in %s (win %d)", nick, room, ui_index);
+    } else {
+        win_vprint(console, '-', 0, NULL, 0, THEME_INCOMING, "", "<< room message: %s (win %d)", room, ui_index);
+    }
 
     cons_alert();
 }
@@ -1076,6 +1080,14 @@ cons_encwarn_setting(void)
 }
 
 void
+cons_console_setting(void)
+{
+    char *setting = prefs_get_string(PREF_CONSOLE_MUC);
+    cons_show("Console MUC messages (/console)  : %s", setting);
+    prefs_free_string(setting);
+}
+
+void
 cons_tlsshow_setting(void)
 {
     if (prefs_get_boolean(PREF_TLS_SHOW)) {
@@ -1345,6 +1357,7 @@ cons_show_ui_prefs(void)
     cons_resource_setting();
     cons_vercheck_setting();
     cons_statuses_setting();
+    cons_console_setting();
     cons_occupants_setting();
     cons_roster_setting();
     cons_privileges_setting();

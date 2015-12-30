@@ -405,6 +405,7 @@ void cons_alert(void) {}
 void cons_theme_setting(void) {}
 void cons_privileges_setting(void) {}
 void cons_beep_setting(void) {}
+void cons_console_setting(void) {}
 void cons_flash_setting(void) {}
 void cons_splash_setting(void) {}
 void cons_vercheck_setting(void) {}
