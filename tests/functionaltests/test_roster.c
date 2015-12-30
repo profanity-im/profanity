@@ -17,9 +17,9 @@ sends_new_item(void **state)
     prof_connect();
 
     stbbr_for_query("jabber:iq:roster",
-        "<iq type=\"set\" from=\"stabber@localhost\">"
-            "<query xmlns=\"jabber:iq:roster\">"
-                "<item jid=\"bob@localhost\" subscription=\"none\" name=\"\"/>"
+        "<iq type='set' from='stabber@localhost'>"
+            "<query xmlns='jabber:iq:roster'>"
+                "<item jid='bob@localhost' subscription='none' name=''/>"
             "</query>"
         "</iq>"
     );
@@ -27,9 +27,9 @@ sends_new_item(void **state)
     prof_input("/roster add bob@localhost");
 
     assert_true(stbbr_received(
-        "<iq type=\"set\" id=\"*\">"
-            "<query xmlns=\"jabber:iq:roster\">"
-                "<item jid=\"bob@localhost\" name=\"\"/>"
+        "<iq type='set' id='*'>"
+            "<query xmlns='jabber:iq:roster'>"
+                "<item jid='bob@localhost' name=''/>"
             "</query>"
         "</iq>"
     ));
@@ -43,9 +43,9 @@ sends_new_item_nick(void **state)
     prof_connect();
 
     stbbr_for_query("jabber:iq:roster",
-        "<iq type=\"set\" from=\"stabber@localhost\">"
-            "<query xmlns=\"jabber:iq:roster\">"
-                "<item jid=\"bob@localhost\" subscription=\"none\" name=\"Bobby\"/>"
+        "<iq type='set' from='stabber@localhost'>"
+            "<query xmlns='jabber:iq:roster'>"
+                "<item jid='bob@localhost' subscription='none' name='Bobby'/>"
             "</query>"
         "</iq>"
     );
@@ -53,9 +53,9 @@ sends_new_item_nick(void **state)
     prof_input("/roster add bob@localhost Bobby");
 
     assert_true(stbbr_received(
-        "<iq type=\"set\" id=\"*\">"
-            "<query xmlns=\"jabber:iq:roster\">"
-                "<item jid=\"bob@localhost\" name=\"Bobby\"/>"
+        "<iq type='set' id='*'>"
+            "<query xmlns='jabber:iq:roster'>"
+                "<item jid='bob@localhost' name='Bobby'/>"
             "</query>"
         "</iq>"
     ));
@@ -67,14 +67,14 @@ void
 sends_remove_item(void **state)
 {
     prof_connect_with_roster(
-        "<item jid=\"buddy1@localhost\" subscription=\"both\"/>"
-        "<item jid=\"buddy2@localhost\" subscription=\"both\"/>"
+        "<item jid='buddy1@localhost' subscription='both'/>"
+        "<item jid='buddy2@localhost' subscription='both'/>"
     );
 
     stbbr_for_query("jabber:iq:roster",
-        "<iq id=\"*\" type=\"set\">"
-            "<query xmlns=\"jabber:iq:roster\">"
-                "<item jid=\"buddy1@localhost\" subscription=\"remove\"/>"
+        "<iq id='*' type='set'>"
+            "<query xmlns='jabber:iq:roster'>"
+                "<item jid='buddy1@localhost' subscription='remove'/>"
             "</query>"
         "</iq>"
     );
@@ -82,9 +82,9 @@ sends_remove_item(void **state)
     prof_input("/roster remove buddy1@localhost");
 
     assert_true(stbbr_received(
-        "<iq type=\"set\" id=\"*\">"
-            "<query xmlns=\"jabber:iq:roster\">"
-                "<item jid=\"buddy1@localhost\" subscription=\"remove\"/>"
+        "<iq type='set' id='*'>"
+            "<query xmlns='jabber:iq:roster'>"
+                "<item jid='buddy1@localhost' subscription='remove'/>"
             "</query>"
         "</iq>"
     ));
@@ -96,7 +96,7 @@ void
 sends_nick_change(void **state)
 {
     prof_connect_with_roster(
-        "<item jid=\"buddy1@localhost\" subscription=\"both\"/>"
+        "<item jid='buddy1@localhost' subscription='both'/>"
     );
 
     prof_input("/roster nick buddy1@localhost Buddy1");
@@ -104,9 +104,9 @@ sends_nick_change(void **state)
     assert_true(prof_output_exact("Nickname for buddy1@localhost set to: Buddy1."));
 
     assert_true(stbbr_received(
-        "<iq type=\"set\" id=\"*\">"
-            "<query xmlns=\"jabber:iq:roster\">"
-                "<item jid=\"buddy1@localhost\" name=\"Buddy1\"/>"
+        "<iq type='set' id='*'>"
+            "<query xmlns='jabber:iq:roster'>"
+                "<item jid='buddy1@localhost' name='Buddy1'/>"
             "</query>"
         "</iq>"
     ));

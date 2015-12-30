@@ -16,4 +16,7 @@ int prof_output_exact(char *text);
 int prof_output_regex(char *text);
 int prof_output_glob(char *text);
 
+void prof_timeout(int timeout);
+void prof_timeout_reset(void);
+
 #endif

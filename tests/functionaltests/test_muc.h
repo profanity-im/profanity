@@ -8,4 +8,6 @@ void shows_subject_on_join(void **state);
 void shows_history_message(void **state);
 void shows_occupant_join(void **state);
 void shows_message(void **state);
-void shows_message_in_console_when_window_not_focussed(void **state);
+void shows_all_messages_in_console_when_window_not_focussed(void **state);
+void shows_first_message_in_console_when_window_not_focussed(void **state);
+void shows_no_message_in_console_when_window_not_focussed(void **state);

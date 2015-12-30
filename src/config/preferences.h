@@ -123,6 +123,7 @@ typedef enum {
     PREF_TLS_CERTPATH,
     PREF_TLS_SHOW,
     PREF_LASTACTIVITY,
+    PREF_CONSOLE_MUC,
 } preference_t;
 
 typedef struct prof_alias_t {
