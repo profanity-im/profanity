@@ -144,10 +144,12 @@ jabber_conn_status_t jabber_connect_with_details(const char *const jid, const ch
 jabber_conn_status_t jabber_connect_with_account(const ProfAccount *const account);
 void jabber_disconnect(void);
 void jabber_shutdown(void);
+void jabber_ping_fail(void);
 void jabber_process_events(int millis);
 const char* jabber_get_fulljid(void);
 const char* jabber_get_domain(void);
 jabber_conn_status_t jabber_get_connection_status(void);
+void jabber_set_connection_status(jabber_conn_status_t status);
 char* jabber_get_presence_message(void);
 char* jabber_get_account_name(void);
 GList* jabber_get_available_resources(void);
@@ -212,6 +214,7 @@ void iq_room_affiliation_set(const char *const room, const char *const jid, char
 void iq_room_kick_occupant(const char *const room, const char *const nick, const char *const reason);
 void iq_room_role_set(const char *const room, const char *const nick, char *role, const char *const reason);
 void iq_room_role_list(const char * const room, char *role);
+void iq_autoping_check(void);
 
 // caps functions
 Capabilities* caps_lookup(const char *const jid);
