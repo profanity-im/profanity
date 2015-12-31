@@ -98,6 +98,8 @@ static int _caps_response_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const 
 static int _caps_response_handler_for_jid(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza, void *const userdata);
 static int _caps_response_handler_legacy(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza, void *const userdata);
 
+static gboolean autoping_wait = FALSE;
+
 void
 iq_add_handlers(void)
 {
@@ -526,13 +528,15 @@ _error_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza,
 static int
 _auto_pong_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza, void *const userdata)
 {
+    autoping_wait = FALSE;
+
     char *id = xmpp_stanza_get_id(stanza);
     if (id == NULL) {
-        log_debug("IQ pong handler fired.");
+        log_debug("Autoping: Pong handler fired.");
         return 0;
     }
 
-    log_debug("IQ pong handler fired, id: %s.", id);
+    log_debug("Autoping: Pong handler fired: %s.", id);
 
     char *type = xmpp_stanza_get_type(stanza);
     if (type == NULL) {
@@ -850,15 +854,23 @@ _autoping_timed_handler(xmpp_conn_t *const conn, void *const userdata)
         return 1;
     }
 
+    if (autoping_wait) {
+        log_debug("Autoping: Existing ping already in progress, aborting");
+        return 1;
+    }
+
     xmpp_ctx_t *ctx = (xmpp_ctx_t *)userdata;
     xmpp_stanza_t *iq = stanza_create_ping_iq(ctx, NULL);
     char *id = xmpp_stanza_get_id(iq);
+    log_debug("Autoping: Sending ping request: %s", id);
 
     // add pong handler
     xmpp_id_handler_add(conn, _auto_pong_handler, id, ctx);
 
     xmpp_send(conn, iq);
     xmpp_stanza_release(iq);
+    autoping_wait = TRUE;
+
     return 1;
 }
 
