@@ -139,10 +139,11 @@ iq_autoping_check(void)
 
     gdouble elapsed = g_timer_elapsed(autoping_time, NULL);
     unsigned long seconds_elapsed = elapsed * 1.0;
-    log_debug("Autoping check: waiting, %u", seconds_elapsed);
-    if (seconds_elapsed > 5) {
-        // disconnect
-        jabber_ping_fail();
+    gint timeout = prefs_get_autoping_timeout();
+    if (timeout > 0 && seconds_elapsed >= timeout) {
+        cons_show("Autoping response timed out afer %u seconds.", timeout);
+        log_debug("Autoping check: timed out afer %u seconds, disconnecting", timeout);
+        jabber_autoping_fail();
         autoping_wait = FALSE;
         g_timer_destroy(autoping_time);
     }

@@ -202,7 +202,7 @@ jabber_connect_with_details(const char *const jid, const char *const passwd, con
 }
 
 void
-jabber_ping_fail(void)
+jabber_autoping_fail(void)
 {
     if (jabber_conn.conn_status == JABBER_CONNECTED) {
         log_info("Closing connection");

@@ -144,7 +144,7 @@ jabber_conn_status_t jabber_connect_with_details(const char *const jid, const ch
 jabber_conn_status_t jabber_connect_with_account(const ProfAccount *const account);
 void jabber_disconnect(void);
 void jabber_shutdown(void);
-void jabber_ping_fail(void);
+void jabber_autoping_fail(void);
 void jabber_process_events(int millis);
 const char* jabber_get_fulljid(void);
 const char* jabber_get_domain(void);

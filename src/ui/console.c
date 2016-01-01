@@ -1695,6 +1695,15 @@ cons_autoping_setting(void)
     } else {
         cons_show("Autoping interval (/autoping)   : %d seconds", autoping_interval);
     }
+
+    gint autoping_timeout = prefs_get_autoping_timeout();
+    if (autoping_timeout == 0) {
+        cons_show("Autoping timeout (/autoping)    : OFF");
+    } else if (autoping_timeout == 1) {
+        cons_show("Autoping timeout (/autoping)    : 1 second");
+    } else {
+        cons_show("Autoping timeout (/autoping)    : %d seconds", autoping_timeout);
+    }
 }
 
 void

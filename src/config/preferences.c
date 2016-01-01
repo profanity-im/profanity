@@ -514,6 +514,23 @@ prefs_set_autoping(gint value)
 }
 
 gint
+prefs_get_autoping_timeout(void)
+{
+    if (!g_key_file_has_key(prefs, PREF_GROUP_CONNECTION, "autoping.timeout", NULL)) {
+        return 5;
+    } else {
+        return g_key_file_get_integer(prefs, PREF_GROUP_CONNECTION, "autoping.timeout", NULL);
+    }
+}
+
+void
+prefs_set_autoping_timeout(gint value)
+{
+    g_key_file_set_integer(prefs, PREF_GROUP_CONNECTION, "autoping.timeout", value);
+    _save_prefs();
+}
+
+gint
 prefs_get_autoaway_time(void)
 {
     gint result = g_key_file_get_integer(prefs, PREF_GROUP_PRESENCE, "autoaway.awaytime", NULL);
