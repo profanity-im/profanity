@@ -173,6 +173,7 @@ void iq_room_role_set(const char * const room, const char * const nick, char *ro
     const char * const reason) {}
 void iq_room_role_list(const char * const room, char *role) {}
 void iq_last_activity_request(gchar *jid) {}
+void iq_autoping_check(void) {}
 
 // caps functions
 Capabilities* caps_lookup(const char * const jid)

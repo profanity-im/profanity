@@ -124,6 +124,7 @@ prof_run(char *log_level, char *account_name)
 #endif
         notify_remind();
         jabber_process_events(10);
+        iq_autoping_check();
         ui_update();
     }
 }

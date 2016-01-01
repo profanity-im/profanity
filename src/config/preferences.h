@@ -156,6 +156,8 @@ void prefs_set_reconnect(gint value);
 gint prefs_get_reconnect(void);
 void prefs_set_autoping(gint value);
 gint prefs_get_autoping(void);
+void prefs_set_autoping_timeout(gint value);
+gint prefs_get_autoping_timeout(void);
 gint prefs_get_inpblock(void);
 void prefs_set_inpblock(gint value);
 

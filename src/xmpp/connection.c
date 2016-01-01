@@ -104,7 +104,7 @@ static jabber_conn_status_t _jabber_connect(const char *const fulljid, const cha
     const char *const altdomain, int port, const char *const tls_policy);
 
 static void _jabber_reconnect(void);
-
+static void _jabber_lost_connection(void);
 static void _connection_handler(xmpp_conn_t *const conn, const xmpp_conn_event_t status, const int error,
     xmpp_stream_error_t *const stream_error, void *const userdata);
 
@@ -202,6 +202,35 @@ jabber_connect_with_details(const char *const jid, const char *const passwd, con
 }
 
 void
+jabber_autoping_fail(void)
+{
+    if (jabber_conn.conn_status == JABBER_CONNECTED) {
+        log_info("Closing connection");
+        accounts_set_last_activity(jabber_get_account_name());
+        jabber_conn.conn_status = JABBER_DISCONNECTING;
+        xmpp_disconnect(jabber_conn.conn);
+
+        while (jabber_get_connection_status() == JABBER_DISCONNECTING) {
+            jabber_process_events(10);
+        }
+        if (jabber_conn.conn) {
+            xmpp_conn_release(jabber_conn.conn);
+            jabber_conn.conn = NULL;
+        }
+        if (jabber_conn.ctx) {
+            xmpp_ctx_free(jabber_conn.ctx);
+            jabber_conn.ctx = NULL;
+        }
+    }
+
+    FREE_SET_NULL(jabber_conn.presence_message);
+    FREE_SET_NULL(jabber_conn.domain);
+
+    jabber_conn.conn_status = JABBER_DISCONNECTED;
+    _jabber_lost_connection();
+}
+
+void
 jabber_disconnect(void)
 {
     // if connected, send end stream and wait for response
@@ -279,6 +308,12 @@ jabber_conn_status_t
 jabber_get_connection_status(void)
 {
     return (jabber_conn.conn_status);
+}
+
+void
+jabber_set_connection_status(jabber_conn_status_t status)
+{
+    jabber_conn.conn_status = status;
 }
 
 xmpp_conn_t*
@@ -543,6 +578,20 @@ _jabber_reconnect(void)
 }
 
 static void
+_jabber_lost_connection(void)
+{
+    sv_ev_lost_connection();
+    if (prefs_get_reconnect() != 0) {
+        assert(reconnect_timer == NULL);
+        reconnect_timer = g_timer_new();
+    } else {
+        _connection_free_saved_account();
+        _connection_free_saved_details();
+    }
+    _connection_free_session_data();
+}
+
+static void
 _connection_handler(xmpp_conn_t *const conn, const xmpp_conn_event_t status, const int error,
     xmpp_stream_error_t *const stream_error, void *const userdata)
 {
@@ -600,17 +649,7 @@ _connection_handler(xmpp_conn_t *const conn, const xmpp_conn_event_t status, con
         // lost connection for unknown reason
         if (jabber_conn.conn_status == JABBER_CONNECTED) {
             log_debug("Connection handler: Lost connection for unknown reason");
-            sv_ev_lost_connection();
-            if (prefs_get_reconnect() != 0) {
-                assert(reconnect_timer == NULL);
-                reconnect_timer = g_timer_new();
-                // free resources but leave saved_user untouched
-                _connection_free_session_data();
-            } else {
-                _connection_free_saved_account();
-                _connection_free_saved_details();
-                _connection_free_session_data();
-            }
+            _jabber_lost_connection();
 
         // login attempt failed
         } else if (jabber_conn.conn_status != JABBER_DISCONNECTING) {
