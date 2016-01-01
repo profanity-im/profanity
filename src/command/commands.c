@@ -4796,23 +4796,46 @@ cmd_reconnect(ProfWin *window, const char *const command, gchar **args)
 gboolean
 cmd_autoping(ProfWin *window, const char *const command, gchar **args)
 {
-    char *value = args[0];
+    char *cmd = args[0];
+    char *value = args[1];
 
-    int intval = 0;
-    char *err_msg = NULL;
-    gboolean res = strtoi_range(value, &intval, 0, INT_MAX, &err_msg);
-    if (res) {
-        prefs_set_autoping(intval);
-        iq_set_autoping(intval);
-        if (intval == 0) {
-            cons_show("Autoping disabled.", intval);
+    if (g_strcmp0(cmd, "set") == 0) {
+        int intval = 0;
+        char *err_msg = NULL;
+        gboolean res = strtoi_range(value, &intval, 0, INT_MAX, &err_msg);
+        if (res) {
+            prefs_set_autoping(intval);
+            iq_set_autoping(intval);
+            if (intval == 0) {
+                cons_show("Autoping disabled.");
+            } else {
+                cons_show("Autoping interval set to %d seconds.", intval);
+            }
         } else {
-            cons_show("Autoping interval set to %d seconds.", intval);
+            cons_show(err_msg);
+            cons_bad_cmd_usage(command);
+            free(err_msg);
         }
+
+    } else if (g_strcmp0(cmd, "timeout") == 0) {
+        int intval = 0;
+        char *err_msg = NULL;
+        gboolean res = strtoi_range(value, &intval, 0, INT_MAX, &err_msg);
+        if (res) {
+            prefs_set_autoping_timeout(intval);
+            if (intval == 0) {
+                cons_show("Autoping timeout disabled.");
+            } else {
+                cons_show("Autoping timeout set to %d seconds.", intval);
+            }
+        } else {
+            cons_show(err_msg);
+            cons_bad_cmd_usage(command);
+            free(err_msg);
+        }
+
     } else {
-        cons_show(err_msg);
         cons_bad_cmd_usage(command);
-        free(err_msg);
     }
 
     return TRUE;

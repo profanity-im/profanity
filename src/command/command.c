@@ -1491,15 +1491,17 @@ static struct cmd_t command_defs[] =
     },
 
     { "/autoping",
-        cmd_autoping, parse_args, 1, 1, &cons_autoping_setting,
+        cmd_autoping, parse_args, 2, 2, &cons_autoping_setting,
         CMD_TAGS(
             CMD_TAG_CONNECTION)
         CMD_SYN(
-            "/autoping <seconds>")
+            "/autoping set <seconds>",
+            "/autoping timeout <seconds>")
         CMD_DESC(
             "Set the interval between sending ping requests to the server to ensure the connection is kept alive.")
         CMD_ARGS(
-            { "<seconds>", "Number of seconds between sending pings, a value of 0 disables autoping." })
+            { "set <seconds>",      "Number of seconds between sending pings, a value of 0 disables autoping." },
+            { "timeout <seconds>",  "Seconds to wait for autoping responses, after which the connection is considered broken." })
         CMD_NOEXAMPLES
     },
 
@@ -1920,6 +1922,7 @@ static Autocomplete script_ac;
 static Autocomplete script_show_ac;
 static Autocomplete console_ac;
 static Autocomplete console_muc_ac;
+static Autocomplete autoping_ac;
 
 /*
  * Initialise command autocompleter and history
@@ -2413,6 +2416,10 @@ cmd_init(void)
     autocomplete_add(console_muc_ac, "all");
     autocomplete_add(console_muc_ac, "first");
     autocomplete_add(console_muc_ac, "none");
+
+    autoping_ac = autocomplete_new();
+    autocomplete_add(autoping_ac, "set");
+    autocomplete_add(autoping_ac, "timeout");
 }
 
 void
@@ -2492,6 +2499,7 @@ cmd_uninit(void)
     autocomplete_free(script_show_ac);
     autocomplete_free(console_ac);
     autocomplete_free(console_muc_ac);
+    autocomplete_free(autoping_ac);
 }
 
 gboolean
@@ -2686,6 +2694,7 @@ cmd_reset_autocomplete(ProfWin *window)
     autocomplete_reset(tls_certpath_ac);
     autocomplete_reset(console_ac);
     autocomplete_reset(console_muc_ac);
+    autocomplete_reset(autoping_ac);
     autocomplete_reset(script_ac);
     if (script_show_ac) {
         autocomplete_free(script_show_ac);
@@ -2907,8 +2916,8 @@ _cmd_complete_parameters(ProfWin *window, const char *const input)
         }
     }
 
-    gchar *cmds[] = { "/prefs", "/disco", "/close", "/room" };
-    Autocomplete completers[] = { prefs_ac, disco_ac, close_ac, room_ac };
+    gchar *cmds[] = { "/prefs", "/disco", "/close", "/room", "/autoping" };
+    Autocomplete completers[] = { prefs_ac, disco_ac, close_ac, room_ac, autoping_ac };
 
     for (i = 0; i < ARRAY_SIZE(cmds); i++) {
         result = autocomplete_param_with_ac(input, cmds[i], completers[i], TRUE);
