@@ -292,6 +292,8 @@ sv_ev_room_message(const char *const room_jid, const char *const nick,
     }
     jid_destroy(jidp);
 
+    rosterwin_roster();
+
     plugins_post_room_message_display(room_jid, nick, new_message);
     free(new_message);
 }
@@ -742,6 +744,8 @@ sv_ev_muc_self_online(const char *const room, const char *const nick, gboolean c
                 mucwin_requires_config(mucwin);
             }
         }
+
+        rosterwin_roster();
 
     // check for change in role/affiliation
     } else {

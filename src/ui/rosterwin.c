@@ -370,6 +370,74 @@ _rosterwin_contacts_by_no_group(ProfLayoutSplit *layout, gboolean newline)
 }
 
 void
+_rosterwin_room(ProfLayoutSplit *layout, ProfMucWin *mucwin)
+{
+    GString *msg = g_string_new(" ");
+    theme_item_t presence_colour = theme_main_presence_attrs("online");
+    wattron(layout->subwin, theme_attrs(presence_colour));
+    int indent = prefs_get_roster_contact_indent();
+    int current_indent = 0;
+    if (indent > 0) {
+        current_indent += indent;
+        while (indent > 0) {
+            g_string_append(msg, " ");
+            indent--;
+        }
+    }
+    char ch = prefs_get_roster_contact_char();
+    if (ch) {
+        g_string_append_printf(msg, "%c", ch);
+    }
+
+    g_string_append(msg, mucwin->roomjid);
+    if (mucwin->unread > 0) {
+        g_string_append_printf(msg, " (%d)", mucwin->unread);
+    }
+
+    win_sub_newline_lazy(layout->subwin);
+    gboolean wrap = prefs_get_boolean(PREF_ROSTER_WRAP);
+    win_sub_print(layout->subwin, msg->str, FALSE, wrap, current_indent);
+    g_string_free(msg, TRUE);
+    wattroff(layout->subwin, theme_attrs(presence_colour));
+}
+
+void
+_rosterwin_rooms(ProfLayoutSplit *layout, gboolean newline)
+{
+    GList *rooms = muc_rooms();
+
+    // if this group has contacts, or if we want to show empty groups
+    if (rooms || prefs_get_boolean(PREF_ROSTER_EMPTY)) {
+        if (newline) {
+            win_sub_newline_lazy(layout->subwin);
+        }
+        wattron(layout->subwin, theme_attrs(THEME_ROSTER_HEADER));
+        GString *title_str = g_string_new(" ");
+        char ch = prefs_get_roster_header_char();
+        if (ch) {
+            g_string_append_printf(title_str, "%c", ch);
+        }
+        g_string_append(title_str, "Rooms");
+        if (prefs_get_boolean(PREF_ROSTER_COUNT)) {
+            g_string_append_printf(title_str, " (%d)", g_list_length(rooms));
+        }
+        gboolean wrap = prefs_get_boolean(PREF_ROSTER_WRAP);
+        win_sub_print(layout->subwin, title_str->str, FALSE, wrap, 1);
+        g_string_free(title_str, TRUE);
+        wattroff(layout->subwin, theme_attrs(THEME_ROSTER_HEADER));
+
+        GList *curr_room = rooms;
+        while (curr_room) {
+            ProfMucWin *mucwin = wins_get_muc(curr_room->data);
+            _rosterwin_room(layout, mucwin);
+            curr_room = g_list_next(curr_room);
+        }
+    }
+
+    g_list_free(rooms);
+}
+
+void
 rosterwin_roster(void)
 {
     ProfWin *console = wins_get_console();
@@ -443,4 +511,8 @@ rosterwin_roster(void)
         g_slist_free(contacts);
     }
     prefs_free_string(by);
+
+    if (prefs_get_boolean(PREF_ROSTER_ROOMS)) {
+        _rosterwin_rooms(layout, TRUE);
+    }
 }
