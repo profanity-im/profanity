@@ -89,6 +89,7 @@ roster.resource.join=true
 roster.presence=true
 roster.presence.indent=-1
 roster.status=true
+roster.rooms=true
 occupants=true
 occupants.size=15
 occupants.jid=false

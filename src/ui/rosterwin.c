@@ -512,5 +512,7 @@ rosterwin_roster(void)
     }
     prefs_free_string(by);
 
-    _rosterwin_rooms(layout, TRUE);
+    if (prefs_get_boolean(PREF_ROSTER_ROOMS)) {
+        _rosterwin_rooms(layout, TRUE);
+    }
 }
