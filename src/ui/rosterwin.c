@@ -417,7 +417,7 @@ _rosterwin_rooms(ProfLayoutSplit *layout, gboolean newline)
         if (ch) {
             g_string_append_printf(title_str, "%c", ch);
         }
-        g_string_append(title_str, "rooms");
+        g_string_append(title_str, "Rooms");
         if (prefs_get_boolean(PREF_ROSTER_COUNT)) {
             g_string_append_printf(title_str, " (%d)", g_list_length(rooms));
         }
