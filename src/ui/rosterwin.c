@@ -429,7 +429,9 @@ _rosterwin_rooms(ProfLayoutSplit *layout, gboolean newline)
         GList *curr_room = rooms;
         while (curr_room) {
             ProfMucWin *mucwin = wins_get_muc(curr_room->data);
-            _rosterwin_room(layout, mucwin);
+            if (mucwin) {
+                _rosterwin_room(layout, mucwin);
+            }
             curr_room = g_list_next(curr_room);
         }
     }
