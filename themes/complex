@@ -37,6 +37,7 @@ roster.resource.join=false
 roster.presence=true
 roster.presence.indent=1
 roster.status=true
+roster.rooms=true
 privileges=true
 presence=true
 intype=true

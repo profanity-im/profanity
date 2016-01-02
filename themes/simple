@@ -30,6 +30,7 @@ roster.contact.indent=0
 roster.resource=false
 roster.presence=false
 roster.status=false
+roster.rooms=false
 privileges=false
 presence=false
 intype=false
