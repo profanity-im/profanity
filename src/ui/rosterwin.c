@@ -429,7 +429,7 @@ _rosterwin_rooms(ProfLayoutSplit *layout, gboolean newline)
     g_list_free(rooms);
 
     // if this group has contacts, or if we want to show empty groups
-    if (rooms || prefs_get_boolean(PREF_ROSTER_EMPTY)) {
+    if (rooms_sorted || prefs_get_boolean(PREF_ROSTER_EMPTY)) {
         if (newline) {
             win_sub_newline_lazy(layout->subwin);
         }
@@ -441,7 +441,7 @@ _rosterwin_rooms(ProfLayoutSplit *layout, gboolean newline)
         }
         g_string_append(title_str, "Rooms");
         if (prefs_get_boolean(PREF_ROSTER_COUNT)) {
-            g_string_append_printf(title_str, " (%d)", g_list_length(rooms));
+            g_string_append_printf(title_str, " (%d)", g_list_length(rooms_sorted));
         }
         gboolean wrap = prefs_get_boolean(PREF_ROSTER_WRAP);
         win_sub_print(layout->subwin, title_str->str, FALSE, wrap, 1);
