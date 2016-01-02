@@ -644,6 +644,7 @@ ui_focus_win(ProfWin *window)
 
     if (i == 1) {
         title_bar_console();
+        rosterwin_roster();
     } else {
         title_bar_switch();
     }
