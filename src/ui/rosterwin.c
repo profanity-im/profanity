@@ -401,10 +401,32 @@ _rosterwin_room(ProfLayoutSplit *layout, ProfMucWin *mucwin)
     wattroff(layout->subwin, theme_attrs(presence_colour));
 }
 
+static int
+_compare_rooms(ProfMucWin *a, ProfMucWin *b)
+{
+    if (a->unread > b->unread) {
+        return -1;
+    } else if (a->unread == b->unread) {
+        return g_strcmp0(a->roomjid, b->roomjid);
+    } else {
+        return 1;
+    }
+}
+
 void
 _rosterwin_rooms(ProfLayoutSplit *layout, gboolean newline)
 {
     GList *rooms = muc_rooms();
+    GList *rooms_sorted = NULL;
+    GList *curr_room = rooms;
+    while (curr_room) {
+        ProfMucWin *mucwin = wins_get_muc(curr_room->data);
+        if (mucwin) {
+            rooms_sorted = g_list_insert_sorted(rooms_sorted, mucwin, (GCompareFunc)_compare_rooms);
+        }
+        curr_room = g_list_next(curr_room);
+    }
+    g_list_free(rooms);
 
     // if this group has contacts, or if we want to show empty groups
     if (rooms || prefs_get_boolean(PREF_ROSTER_EMPTY)) {
@@ -426,17 +448,14 @@ _rosterwin_rooms(ProfLayoutSplit *layout, gboolean newline)
         g_string_free(title_str, TRUE);
         wattroff(layout->subwin, theme_attrs(THEME_ROSTER_HEADER));
 
-        GList *curr_room = rooms;
+        GList *curr_room = rooms_sorted;
         while (curr_room) {
-            ProfMucWin *mucwin = wins_get_muc(curr_room->data);
-            if (mucwin) {
-                _rosterwin_room(layout, mucwin);
-            }
+            _rosterwin_room(layout, curr_room->data);
             curr_room = g_list_next(curr_room);
         }
     }
 
-    g_list_free(rooms);
+    g_list_free(rooms_sorted);
 }
 
 void
