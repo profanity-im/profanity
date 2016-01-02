@@ -99,7 +99,7 @@ static int _caps_response_handler_for_jid(xmpp_conn_t *const conn, xmpp_stanza_t
 static int _caps_response_handler_legacy(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza, void *const userdata);
 
 static gboolean autoping_wait = FALSE;
-static GTimer *autoping_time;
+static GTimer *autoping_time = NULL;
 
 void
 iq_add_handlers(void)
@@ -137,6 +137,10 @@ iq_autoping_check(void)
         return;
     }
 
+    if (autoping_time == NULL) {
+        return;
+    }
+
     gdouble elapsed = g_timer_elapsed(autoping_time, NULL);
     unsigned long seconds_elapsed = elapsed * 1.0;
     gint timeout = prefs_get_autoping_timeout();
@@ -146,6 +150,7 @@ iq_autoping_check(void)
         jabber_autoping_fail();
         autoping_wait = FALSE;
         g_timer_destroy(autoping_time);
+        autoping_time = NULL;
     }
 }
 
@@ -553,7 +558,10 @@ static int
 _auto_pong_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza, void *const userdata)
 {
     autoping_wait = FALSE;
-    g_timer_destroy(autoping_time);
+    if (autoping_time) {
+        g_timer_destroy(autoping_time);
+        autoping_time = NULL;
+    }
 
     char *id = xmpp_stanza_get_id(stanza);
     if (id == NULL) {
@@ -895,6 +903,9 @@ _autoping_timed_handler(xmpp_conn_t *const conn, void *const userdata)
     xmpp_send(conn, iq);
     xmpp_stanza_release(iq);
     autoping_wait = TRUE;
+    if (autoping_time) {
+        g_timer_destroy(autoping_time);
+    }
     autoping_time = g_timer_new();
 
     return 1;
