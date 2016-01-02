@@ -517,7 +517,7 @@ gint
 prefs_get_autoping_timeout(void)
 {
     if (!g_key_file_has_key(prefs, PREF_GROUP_CONNECTION, "autoping.timeout", NULL)) {
-        return 5;
+        return 10;
     } else {
         return g_key_file_get_integer(prefs, PREF_GROUP_CONNECTION, "autoping.timeout", NULL);
     }
