@@ -41,6 +41,8 @@
 #include "ui/ui.h"
 #include "window_list.h"
 #include "xmpp/xmpp.h"
+#include "roster_list.h"
+#include "chat_session.h"
 #ifdef HAVE_LIBOTR
 #include "otr/otr.h"
 #endif
@@ -63,6 +65,24 @@ cl_ev_connect_account(ProfAccount *account)
     free(jid);
 
     return jabber_connect_with_account(account);
+}
+
+void
+cl_ev_disconnect(void)
+{
+    const char *jid = jabber_get_fulljid();
+    cons_show("%s logged out successfully.", jid);
+
+    jabber_disconnect();
+    roster_clear();
+    muc_invites_clear();
+    chat_sessions_clear();
+    tlscerts_clear_current();
+    ui_disconnected();
+    ui_close_all_wins();
+#ifdef HAVE_LIBGPGME
+    p_gpg_on_disconnect();
+#endif
 }
 
 void
