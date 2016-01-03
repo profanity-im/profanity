@@ -149,6 +149,7 @@ void
 sv_ev_lost_connection(void)
 {
     cons_show_error("Lost connection.");
+
     roster_clear();
     muc_invites_clear();
     chat_sessions_clear();
