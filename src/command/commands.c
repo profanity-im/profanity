@@ -992,23 +992,12 @@ cmd_sub(ProfWin *window, const char *const command, gchar **args)
 gboolean
 cmd_disconnect(ProfWin *window, const char *const command, gchar **args)
 {
-    if (jabber_get_connection_status() == JABBER_CONNECTED) {
-        char *jid = strdup(jabber_get_fulljid());
-        cons_show("%s logged out successfully.", jid);
-        jabber_disconnect();
-        roster_clear();
-        muc_invites_clear();
-        chat_sessions_clear();
-        tlscerts_clear_current();
-        ui_disconnected();
-        ui_close_all_wins();
-#ifdef PROF_HAVE_LIBGPGME
-        p_gpg_on_disconnect();
-#endif
-        free(jid);
-    } else {
+    if (jabber_get_connection_status() != JABBER_CONNECTED) {
         cons_show("You are not currently connected.");
+        return TRUE;
     }
+
+    cl_ev_disconnect();
 
     return TRUE;
 }
