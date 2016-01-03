@@ -568,6 +568,12 @@ sv_ev_contact_offline(char *barejid, char *resource, char *status)
         ui_contact_offline(barejid, resource, status);
     }
 
+    ProfChatWin *chatwin = wins_get_chat(barejid);
+    if (chatwin && otr_is_secure(barejid)) {
+        chatwin_otr_unsecured(chatwin);
+        otr_end_session(chatwin->barejid);
+    }
+
     rosterwin_roster();
     chat_session_remove(barejid);
 }
