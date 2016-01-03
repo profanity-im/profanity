@@ -992,7 +992,7 @@ ui_contact_offline(char *barejid, char *resource, char *status)
                     chatwin_contact_offline(chatwin, resource, status);
                 }
 
-            // show in char win if "online" and presence online
+            // show in chat win if "online" and presence online
             } else if (g_strcmp0(show_chat_win, "online") == 0) {
                 ProfChatWin *chatwin = wins_get_chat(barejid);
                 if (chatwin) {
