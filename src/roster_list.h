@@ -50,8 +50,8 @@ gboolean roster_update_presence(const char *const barejid, Resource *resource, G
 PContact roster_get_contact(const char *const barejid);
 gboolean roster_contact_offline(const char *const barejid, const char *const resource, const char *const status);
 void roster_reset_search_attempts(void);
-void roster_init(void);
-void roster_free(void);
+void roster_create(void);
+void roster_destroy(void);
 void roster_change_name(PContact contact, const char *const new_name);
 void roster_remove(const char *const name, const char *const barejid);
 void roster_update(const char *const barejid, const char *const name, GSList *groups, const char *const subscription,

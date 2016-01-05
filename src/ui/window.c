@@ -262,10 +262,15 @@ win_get_title(ProfWin *window)
     if (window->type == WIN_CHAT) {
         ProfChatWin *chatwin = (ProfChatWin*) window;
         assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
-        PContact contact = roster_get_contact(chatwin->barejid);
-        if (contact) {
-            const char *name = p_contact_name_or_jid(contact);
-            return strdup(name);
+        jabber_conn_status_t conn_status = jabber_get_connection_status();
+        if (conn_status == JABBER_CONNECTED) {
+            PContact contact = roster_get_contact(chatwin->barejid);
+            if (contact) {
+                const char *name = p_contact_name_or_jid(contact);
+                return strdup(name);
+            } else {
+                return strdup(chatwin->barejid);
+            }
         } else {
             return strdup(chatwin->barejid);
         }

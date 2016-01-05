@@ -2317,6 +2317,13 @@ cmd_resource(ProfWin *window, const char *const command, gchar **args)
         cons_show("Resource can only be changed in chat windows.");
         return TRUE;
     }
+
+    jabber_conn_status_t conn_status = jabber_get_connection_status();
+    if (conn_status != JABBER_CONNECTED) {
+        cons_show("You are not currently connected.");
+        return TRUE;
+    }
+
     ProfChatWin *chatwin = (ProfChatWin*)window;
 
     if (g_strcmp0(cmd, "set") == 0) {

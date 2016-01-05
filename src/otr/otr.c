@@ -84,9 +84,13 @@ cb_policy(void *opdata, ConnContext *context)
 }
 
 static int
-cb_is_logged_in(void *opdata, const char *accountname,
-    const char *protocol, const char *recipient)
+cb_is_logged_in(void *opdata, const char *accountname, const char *protocol, const char *recipient)
 {
+    jabber_conn_status_t conn_status = jabber_get_connection_status();
+    if (conn_status != JABBER_CONNECTED) {
+        return PRESENCE_OFFLINE;
+    }
+
     PContact contact = roster_get_contact(recipient);
 
     // not in roster

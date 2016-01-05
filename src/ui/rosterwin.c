@@ -466,6 +466,11 @@ rosterwin_roster(void)
         return;
     }
 
+    jabber_conn_status_t conn_status = jabber_get_connection_status();
+    if (conn_status != JABBER_CONNECTED) {
+        return;
+    }
+
     ProfLayoutSplit *layout = (ProfLayoutSplit*)console->layout;
     assert(layout->memcheck == LAYOUT_SPLIT_MEMCHECK);
 
