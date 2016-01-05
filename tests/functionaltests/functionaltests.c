@@ -21,6 +21,7 @@
 #include "test_roster.h"
 #include "test_software.h"
 #include "test_muc.h"
+#include "test_disconnect.h"
 
 #define PROF_FUNC_TEST(test) unit_test_setup_teardown(test, init_prof_test, close_prof_test)
 
@@ -98,6 +99,8 @@ int main(int argc, char* argv[]) {
         PROF_FUNC_TEST(shows_all_messages_in_console_when_window_not_focussed),
         PROF_FUNC_TEST(shows_first_message_in_console_when_window_not_focussed),
         PROF_FUNC_TEST(shows_no_message_in_console_when_window_not_focussed),
+
+        PROF_FUNC_TEST(disconnect_ends_session),
     };
 
     return run_tests(all_tests);
