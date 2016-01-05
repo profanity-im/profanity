@@ -73,13 +73,13 @@ cl_ev_disconnect(void)
     const char *jid = jabber_get_fulljid();
     cons_show("%s logged out successfully.", jid);
 
+    ui_disconnected();
+    ui_close_all_wins();
     jabber_disconnect();
     roster_clear();
     muc_invites_clear();
     chat_sessions_clear();
     tlscerts_clear_current();
-    ui_disconnected();
-    ui_close_all_wins();
 #ifdef HAVE_LIBGPGME
     p_gpg_on_disconnect();
 #endif
