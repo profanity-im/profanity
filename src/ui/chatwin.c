@@ -362,13 +362,18 @@ chatwin_get_string(ProfChatWin *chatwin)
 
     GString *res = g_string_new("Chat ");
 
-    PContact contact = roster_get_contact(chatwin->barejid);
-    if (contact == NULL) {
-        g_string_append(res, chatwin->barejid);
+    jabber_conn_status_t conn_status = jabber_get_connection_status();
+    if (conn_status == JABBER_CONNECTED) {
+        PContact contact = roster_get_contact(chatwin->barejid);
+        if (contact == NULL) {
+            g_string_append(res, chatwin->barejid);
+        } else {
+            const char *display_name = p_contact_name_or_jid(contact);
+            g_string_append(res, display_name);
+            g_string_append_printf(res, " - %s", p_contact_presence(contact));
+        }
     } else {
-        const char *display_name = p_contact_name_or_jid(contact);
-        g_string_append(res, display_name);
-        g_string_append_printf(res, " - %s", p_contact_presence(contact));
+        g_string_append(res, chatwin->barejid);
     }
 
     if (chatwin->unread > 0) {

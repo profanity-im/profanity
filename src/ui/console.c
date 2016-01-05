@@ -746,8 +746,7 @@ cons_show_status(const char *const barejid)
 }
 
 void
-cons_show_room_invite(const char *const invitor, const char * const room,
-    const char *const reason)
+cons_show_room_invite(const char *const invitor, const char * const room, const char *const reason)
 {
     char *display_from = NULL;
     PContact contact = roster_get_contact(invitor);

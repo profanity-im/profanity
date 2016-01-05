@@ -74,7 +74,7 @@ cl_ev_disconnect(void)
     cons_show("%s logged out successfully.", jid);
 
     jabber_disconnect();
-    roster_clear();
+    roster_destroy();
     muc_invites_clear();
     chat_sessions_clear();
     tlscerts_clear_current();

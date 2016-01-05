@@ -463,7 +463,7 @@ void occupantswin_occupants(const char * const room) {}
 // window interface
 ProfWin* win_create_console(void)
 {
-    return NULL;
+    return (ProfWin*)mock();
 }
 ProfWin* win_create_xmlconsole(void)
 {

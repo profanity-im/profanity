@@ -337,7 +337,6 @@ _init(char *log_level)
     jabber_init();
     cmd_init();
     log_info("Initialising contact list");
-    roster_init();
     muc_init();
     tlscerts_init();
     scripts_init();
@@ -361,10 +360,13 @@ _shutdown(void)
             ui_clear_win_title();
         }
     }
-    ui_close_all_wins();
-    jabber_disconnect();
+
+    jabber_conn_status_t conn_status = jabber_get_connection_status();
+    if (conn_status == JABBER_CONNECTED) {
+        cl_ev_disconnect();
+    }
+
     jabber_shutdown();
-    roster_free();
     muc_close();
     caps_close();
     ui_close();
