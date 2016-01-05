@@ -17,7 +17,7 @@
 void console_shows_online_presence_when_set_online(void **state)
 {
     prefs_set_string(PREF_STATUSES_CONSOLE, "online");
-    roster_init();
+    roster_create();
     char *barejid = "test1@server";
     roster_add(barejid, "bob", NULL, "both", FALSE);
     Resource *resource = resource_new("resource", RESOURCE_ONLINE, NULL, 10);
@@ -28,13 +28,13 @@ void console_shows_online_presence_when_set_online(void **state)
 
     sv_ev_contact_online(barejid, resource, NULL, NULL);
 
-    roster_clear();
+    roster_destroy();
 }
 
 void console_shows_online_presence_when_set_all(void **state)
 {
     prefs_set_string(PREF_STATUSES_CONSOLE, "all");
-    roster_init();
+    roster_create();
     char *barejid = "test1@server";
     roster_add(barejid, "bob", NULL, "both", FALSE);
     Resource *resource = resource_new("resource", RESOURCE_ONLINE, NULL, 10);
@@ -45,13 +45,13 @@ void console_shows_online_presence_when_set_all(void **state)
 
     sv_ev_contact_online(barejid, resource, NULL, NULL);
 
-    roster_clear();
+    roster_destroy();
 }
 
 void console_shows_dnd_presence_when_set_all(void **state)
 {
     prefs_set_string(PREF_STATUSES_CONSOLE, "all");
-    roster_init();
+    roster_create();
     char *barejid = "test1@server";
     roster_add(barejid, "bob", NULL, "both", FALSE);
     Resource *resource = resource_new("resource", RESOURCE_ONLINE, NULL, 10);
@@ -62,30 +62,34 @@ void console_shows_dnd_presence_when_set_all(void **state)
 
     sv_ev_contact_online(barejid, resource, NULL, NULL);
 
-    roster_clear();
+    roster_destroy();
 }
 
 void handle_offline_removes_chat_session(void **state)
 {
+    roster_create();
     chat_sessions_init();
     char *barejid = "friend@server.chat.com";
     char *resource = "home";
-    roster_init();
     roster_add(barejid, "bob", NULL, "both", FALSE);
     Resource *resourcep = resource_new(resource, RESOURCE_ONLINE, NULL, 10);
     roster_update_presence(barejid, resourcep, NULL);
     chat_session_recipient_active(barejid, resource, FALSE);
+    ProfConsoleWin *console = malloc(sizeof(ProfConsoleWin));
+    will_return(win_create_console, &console->window);
+    wins_init();
     sv_ev_contact_offline(barejid, resource, NULL);
     ChatSession *session = chat_session_get(barejid);
 
     assert_null(session);
 
-    roster_clear();
+    roster_destroy();
     chat_sessions_clear();
 }
 
 void lost_connection_clears_chat_sessions(void **state)
 {
+    roster_create();
     chat_sessions_init();
     chat_session_recipient_active("bob@server.org", "laptop", FALSE);
     chat_session_recipient_active("steve@server.org", "mobile", FALSE);

@@ -64,6 +64,8 @@ sv_ev_login_account_success(char *account_name, int secured)
 {
     ProfAccount *account = accounts_get_account(account_name);
 
+    roster_create();
+
 #ifdef HAVE_LIBOTR
     otr_on_connect(account);
 #endif
@@ -150,7 +152,7 @@ sv_ev_lost_connection(void)
 {
     cons_show_error("Lost connection.");
 
-    roster_clear();
+    roster_destroy();
     muc_invites_clear();
     chat_sessions_clear();
     ui_disconnected();
@@ -168,8 +170,7 @@ sv_ev_failed_login(void)
 }
 
 void
-sv_ev_room_invite(jabber_invite_t invite_type,
-    const char *const invitor, const char *const room,
+sv_ev_room_invite(jabber_invite_t invite_type, const char *const invitor, const char *const room,
     const char *const reason, const char *const password)
 {
     if (!muc_active(room) && !muc_invites_contain(room)) {

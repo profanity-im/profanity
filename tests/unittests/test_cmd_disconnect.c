@@ -17,7 +17,7 @@
 void clears_chat_sessions(void **state)
 {
     chat_sessions_init();
-    roster_init();
+    roster_create();
     chat_session_recipient_active("bob@server.org", "laptop", FALSE);
     chat_session_recipient_active("mike@server.org", "work", FALSE);
 
