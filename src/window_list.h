@@ -61,6 +61,7 @@ ProfWin* wins_get_current(void);
 void wins_set_current_by_num(int i);
 
 ProfWin* wins_get_by_num(int i);
+ProfWin* wins_get_by_string(char *str);
 
 ProfWin* wins_get_next(void);
 ProfWin* wins_get_previous(void);
@@ -82,5 +83,8 @@ GList* wins_get_nums(void);
 gboolean wins_swap(int source_win, int target_win);
 void wins_hide_subwin(ProfWin *window);
 void wins_show_subwin(ProfWin *window);
+
+char* win_autocomplete(const char *const search_str);
+void win_reset_search_attempts(void);
 
 #endif

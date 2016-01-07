@@ -115,6 +115,7 @@ static char* _tls_autocomplete(ProfWin *window, const char *const input);
 static char* _script_autocomplete(ProfWin *window, const char *const input);
 static char* _subject_autocomplete(ProfWin *window, const char *const input);
 static char* _console_autocomplete(ProfWin *window, const char *const input);
+static char* _win_autocomplete(ProfWin *window, const char *const input);
 
 GHashTable *commands = NULL;
 
@@ -790,12 +791,30 @@ static struct cmd_t command_defs[] =
         CMD_TAGS(
             CMD_TAG_UI)
         CMD_SYN(
-            "/win <num>")
+            "/win console",
+            "/win <num>",
+            "/win <barejid>",
+            "/win <nick>",
+            "/win <roomjid>",
+            "/win <roomoccupantjid>",
+            "/win xmlconsole")
         CMD_DESC(
             "Move to the specified window.")
         CMD_ARGS(
-            { "<num>", "Window number to display." })
-        CMD_NOEXAMPLES
+            { "console",            "Go to the Console window." },
+            { "<num>",              "Go to specified window number." },
+            { "<barejid>",          "Go to chat window with contact by JID if open." },
+            { "<nick>",             "Go to chat window with contact by nickname if open." },
+            { "<roomjid>",          "Go to chat room window with roomjid if open." },
+            { "<roomoccupantjid>",  "Go to private chat roomjidoccupant if open." },
+            { "xmlconsole",         "Go to the XML Console window if open." })
+        CMD_EXAMPLES(
+            "/win console",
+            "/win 4",
+            "/win friend@chat.org",
+            "/win Eddie",
+            "/win bigroom@conference.chat.org",
+            "/win bigroom@conference.chat.org/bruce")
     },
 
     { "/wins",
@@ -2734,6 +2753,7 @@ cmd_reset_autocomplete(ProfWin *window)
 
     bookmark_autocomplete_reset();
     prefs_reset_room_trigger_ac();
+    win_reset_search_attempts();
     plugins_reset_autocomplete();
 }
 
@@ -2972,6 +2992,7 @@ _cmd_complete_parameters(ProfWin *window, const char *const input)
     g_hash_table_insert(ac_funcs, "/script",        _script_autocomplete);
     g_hash_table_insert(ac_funcs, "/subject",       _subject_autocomplete);
     g_hash_table_insert(ac_funcs, "/console",       _console_autocomplete);
+    g_hash_table_insert(ac_funcs, "/win",           _win_autocomplete);
 
     int len = strlen(input);
     char parsed[len+1];
@@ -4248,6 +4269,19 @@ _console_autocomplete(ProfWin *window, const char *const input)
     result = autocomplete_param_with_ac(input, "/console", console_ac, TRUE);
     if (result) {
         return result;
+    }
+
+    return NULL;
+}
+
+static char*
+_win_autocomplete(ProfWin *window, const char *const input)
+{
+    char *found = NULL;
+
+    found = autocomplete_param_with_func(input, "/win", win_autocomplete);
+    if (found) {
+        return found;
     }
 
     return NULL;
