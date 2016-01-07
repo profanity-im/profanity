@@ -44,6 +44,7 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <langinfo.h>
+#include <ctype.h>
 
 #include "chat_session.h"
 #include "command/commands.h"
@@ -1059,13 +1060,31 @@ cmd_wins(ProfWin *window, const char *const command, gchar **args)
 gboolean
 cmd_win(ProfWin *window, const char *const command, gchar **args)
 {
-    int num = atoi(args[0]);
+    gboolean is_num = TRUE;
+    int i = 0;
+    for (i = 0; i < strlen(args[0]); i++) {
+        if (!isdigit(args[0][i])) {
+            is_num = FALSE;
+            break;
+        }
+    }
 
-    ProfWin *focuswin = wins_get_by_num(num);
-    if (!focuswin) {
-        cons_show("Window %d does not exist.", num);
+    if (is_num) {
+        int num = atoi(args[0]);
+
+        ProfWin *focuswin = wins_get_by_num(num);
+        if (!focuswin) {
+            cons_show("Window %d does not exist.", num);
+        } else {
+            ui_focus_win(focuswin);
+        }
     } else {
-        ui_focus_win(focuswin);
+        ProfWin *focuswin = wins_get_by_string(args[0]);
+        if (!focuswin) {
+            cons_show("Window \"%s\" does not exist.", args[0]);
+        } else {
+            ui_focus_win(focuswin);
+        }
     }
 
     return TRUE;
