@@ -16,6 +16,7 @@
 - Time format preferences per window type (/time)
 - Edit, prepend and append to room subject (/subject)
 - Autoping timeout preference (/autoping)
+- Window navigation by window title (/win)
 - Configure level of room message notifications in console window (/console)
 - Check ~/.config/profanity/inputrc for readline settings
 - Custom readline functions for navigation key bindings
