@@ -152,10 +152,10 @@ sv_ev_lost_connection(void)
 {
     cons_show_error("Lost connection.");
 
-    roster_destroy();
     muc_invites_clear();
     chat_sessions_clear();
     ui_disconnected();
+    roster_destroy();
 #ifdef HAVE_LIBGPGME
     p_gpg_on_disconnect();
 #endif
