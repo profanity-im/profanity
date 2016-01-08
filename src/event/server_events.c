@@ -152,6 +152,23 @@ sv_ev_lost_connection(void)
 {
     cons_show_error("Lost connection.");
 
+#ifdef HAVE_LIBOTR
+    GSList *recipients = wins_get_chat_recipients();
+    GSList *curr = recipients;
+    while (curr) {
+        char *barejid = curr->data;
+        ProfChatWin *chatwin = wins_get_chat(barejid);
+        if (chatwin && otr_is_secure(barejid)) {
+            chatwin_otr_unsecured(chatwin);
+            otr_end_session(barejid);
+        }
+        curr = g_slist_next(curr);
+    }
+    if (recipients) {
+        g_slist_free(recipients);
+    }
+#endif
+
     muc_invites_clear();
     chat_sessions_clear();
     ui_disconnected();
