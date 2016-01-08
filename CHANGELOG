@@ -2,16 +2,23 @@
 =====
 
 - Build against libmesode if available
-- Handle invalid SSL certificates (requires libmesode)
-- TLS indicator in titlebar
-- Allow auto extended away
+- SSL certificate verification (requires libmesode) (/tls)
+- Allow auto extended away (/autoaway)
 - Include last acitvity in initial presence (xep-0256)
 - Last Activity (xep-0012)
-- Run command sequence with /script
-- Account startscript property
-- Export roster to CSV file with /export
-- User specified text triggers for chat room notifications
-- Per chat room notification options
+- Ability to run command scripts (/script)
+- Account startscript property to execute a command script on connect
+- Export roster to CSV file (/export)
+- User specified text triggers for chat room notifications (/notify)
+- Per chat room notification options (/notify)
+- More roster panel display options (/roster)
+- Option to include active chat rooms in roster panel (/roster)
+- Time format preferences per window type (/time)
+- Edit, prepend and append to room subject (/subject)
+- Autoping timeout preference (/autoping)
+- Configure level of room message notifications in console window (/console)
+- Check ~/.config/profanity/inputrc for readline settings
+- Custom readline functions for navigation key bindings
 
 0.4.7
 =====
