@@ -4,10 +4,10 @@
 - Build against libmesode if available
 - SSL certificate verification (requires libmesode) (/tls)
 - Allow auto extended away (/autoaway)
-- Include last acitvity in initial presence (xep-0256)
-- Last Activity (xep-0012)
+- Include last acitvity in initial presence (xep-0256) (/lastactivity)
+- Last Activity (xep-0012) (/lastactivity)
 - Ability to run command scripts (/script)
-- Account startscript property to execute a command script on connect
+- Account startscript property to execute a command script on connect (/account)
 - Export roster to CSV file (/export)
 - User specified text triggers for chat room notifications (/notify)
 - Per chat room notification options (/notify)
