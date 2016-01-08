@@ -12,6 +12,13 @@
 - Export roster to CSV file with /export
 - User specified text triggers for chat room notifications
 - Per chat room notification options
+- Option to include active chat rooms in roster panel
+- Time format preferences per window type
+- /subject command allows edit, prepend and append operations
+- More roster panel configuration options
+- Check ~/.config/profanity/inputrc for readline settings
+- Custom readline functions for navigation key bindings
+- Autoping timeout preference
 
 0.4.7
 =====
