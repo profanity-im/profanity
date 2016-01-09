@@ -375,9 +375,9 @@ _rosterwin_room(ProfLayoutSplit *layout, ProfMucWin *mucwin)
     GString *msg = g_string_new(" ");
 
     if (mucwin->unread > 0) {
-        wattron(layout->subwin, theme_attrs(THEME_GREEN_BOLD));
+        wattron(layout->subwin, theme_attrs(THEME_ROSTER_ROOM_UNREAD));
     } else {
-        wattron(layout->subwin, theme_attrs(THEME_GREEN));
+        wattron(layout->subwin, theme_attrs(THEME_ROSTER_ROOM));
     }
 
     int indent = prefs_get_roster_contact_indent();
@@ -405,9 +405,9 @@ _rosterwin_room(ProfLayoutSplit *layout, ProfMucWin *mucwin)
     g_string_free(msg, TRUE);
 
     if (mucwin->unread > 0) {
-        wattroff(layout->subwin, theme_attrs(THEME_GREEN_BOLD));
+        wattroff(layout->subwin, theme_attrs(THEME_ROSTER_ROOM_UNREAD));
     } else {
-        wattroff(layout->subwin, theme_attrs(THEME_GREEN));
+        wattroff(layout->subwin, theme_attrs(THEME_ROSTER_ROOM));
     }
 }
 

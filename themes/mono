@@ -46,5 +46,7 @@ roommention=white
 me=white
 them=white
 roster.header=white
+roster.room=white
+roster.room.unread=white
 occupants.header=white
 receipt.sent=white

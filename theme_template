@@ -46,6 +46,8 @@ roommention=
 me=
 them=
 roster.header=
+roster.room=
+roster.room.unread=
 occupants.header=
 receipt.sent=
 
