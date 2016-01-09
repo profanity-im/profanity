@@ -92,6 +92,7 @@ roster.presence=true
 roster.presence.indent=-1
 roster.status=true
 roster.rooms=true
+roster.rooms.order=name
 occupants=true
 occupants.size=15
 occupants.jid=false
