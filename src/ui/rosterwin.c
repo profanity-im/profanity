@@ -412,6 +412,12 @@ _rosterwin_room(ProfLayoutSplit *layout, ProfMucWin *mucwin)
 }
 
 static int
+_compare_rooms_name(ProfMucWin *a, ProfMucWin *b)
+{
+    return g_strcmp0(a->roomjid, b->roomjid);
+}
+
+static int
 _compare_rooms_unread(ProfMucWin *a, ProfMucWin *b)
 {
     if (a->unread > b->unread) {
@@ -432,7 +438,13 @@ _rosterwin_rooms(ProfLayoutSplit *layout, gboolean newline)
     while (curr_room) {
         ProfMucWin *mucwin = wins_get_muc(curr_room->data);
         if (mucwin) {
-            rooms_sorted = g_list_insert_sorted(rooms_sorted, mucwin, (GCompareFunc)_compare_rooms_unread);
+            char *order = prefs_get_string(PREF_ROSTER_ROOMS_ORDER);
+            if (g_strcmp0(order, "unread") == 0) {
+                rooms_sorted = g_list_insert_sorted(rooms_sorted, mucwin, (GCompareFunc)_compare_rooms_unread);
+            } else {
+                rooms_sorted = g_list_insert_sorted(rooms_sorted, mucwin, (GCompareFunc)_compare_rooms_name);
+            }
+            prefs_free_string(order);
         }
         curr_room = g_list_next(curr_room);
     }
