@@ -46,5 +46,7 @@ roommention=bold_cyan
 me=blue
 them=bold_blue
 roster.header=bold_green
+roster.room=green
+roster.room.unread=bold_green
 occupants.header=bold_green
 receipt.sent=bold_black

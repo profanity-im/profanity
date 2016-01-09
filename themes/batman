@@ -46,5 +46,7 @@ subscribed=magenta
 unsubscribed=black_bold
 roommention=cyan
 roster.header=yellow
+roster.room=green
+roster.room.unread=green
 occupants.header=yellow
 receipt.sent=red

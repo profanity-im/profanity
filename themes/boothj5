@@ -46,6 +46,8 @@ roommention=bold_red
 me=blue
 them=bold_green
 roster.header=bold_yellow
+roster.room=green
+roster.room.unread=bold_green
 occupants.header=bold_yellow
 receipt.sent=bold_black
 
@@ -90,6 +92,7 @@ roster.presence=true
 roster.presence.indent=-1
 roster.status=true
 roster.rooms=true
+roster.rooms.order=name
 occupants=true
 occupants.size=15
 occupants.jid=false
