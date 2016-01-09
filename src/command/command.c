@@ -282,6 +282,7 @@ static struct cmd_t command_defs[] =
             "/roster hide [offline|resource|presence|status|empty|count|priority|rooms]",
             "/roster by group|presence|none",
             "/roster order name|presence",
+            "/roster room order name|unread",
             "/roster header char <char>|none",
             "/roster presence indent <indent>",
             "/roster contact char <char>|none",
@@ -324,6 +325,8 @@ static struct cmd_t command_defs[] =
             { "by none",                    "No grouping in the roster panel." },
             { "order name",                 "Order roster items by name only." },
             { "order presence",             "Order roster items by presence, and then by name." },
+            { "room order name",            "Order roster rooms by name." },
+            { "room order unread",          "Order roster rooms by unread messages, and then by name." },
             { "header char <char>",         "Prefix roster headers with specified character." },
             { "header char none",           "Remove roster header character prefix." },
             { "contact char <char>",        "Prefix roster contacts with specified character." },
@@ -1907,6 +1910,8 @@ static Autocomplete roster_resource_ac;
 static Autocomplete roster_presence_ac;
 static Autocomplete roster_char_ac;
 static Autocomplete roster_remove_all_ac;
+static Autocomplete roster_room_ac;
+static Autocomplete roster_room_order_ac;
 static Autocomplete group_ac;
 static Autocomplete bookmark_ac;
 static Autocomplete bookmark_property_ac;
@@ -2167,6 +2172,7 @@ cmd_init(void)
     autocomplete_add(roster_ac, "hide");
     autocomplete_add(roster_ac, "by");
     autocomplete_add(roster_ac, "order");
+    autocomplete_add(roster_ac, "room");
     autocomplete_add(roster_ac, "size");
     autocomplete_add(roster_ac, "wrap");
     autocomplete_add(roster_ac, "header");
@@ -2210,6 +2216,13 @@ cmd_init(void)
     roster_order_ac = autocomplete_new();
     autocomplete_add(roster_order_ac, "name");
     autocomplete_add(roster_order_ac, "presence");
+
+    roster_room_ac = autocomplete_new();
+    autocomplete_add(roster_room_ac, "order");
+
+    roster_room_order_ac = autocomplete_new();
+    autocomplete_add(roster_room_order_ac, "name");
+    autocomplete_add(roster_room_order_ac, "unread");
 
     roster_remove_all_ac = autocomplete_new();
     autocomplete_add(roster_remove_all_ac, "contacts");
@@ -2484,6 +2497,8 @@ cmd_uninit(void)
     autocomplete_free(roster_show_ac);
     autocomplete_free(roster_by_ac);
     autocomplete_free(roster_order_ac);
+    autocomplete_free(roster_room_ac);
+    autocomplete_free(roster_room_order_ac);
     autocomplete_free(roster_remove_all_ac);
     autocomplete_free(group_ac);
     autocomplete_free(bookmark_ac);
@@ -2693,6 +2708,8 @@ cmd_reset_autocomplete(ProfWin *window)
     autocomplete_reset(roster_show_ac);
     autocomplete_reset(roster_by_ac);
     autocomplete_reset(roster_order_ac);
+    autocomplete_reset(roster_room_ac);
+    autocomplete_reset(roster_room_order_ac);
     autocomplete_reset(roster_remove_all_ac);
     autocomplete_reset(group_ac);
     autocomplete_reset(titlebar_ac);
@@ -3109,6 +3126,10 @@ _roster_autocomplete(ProfWin *window, const char *const input)
     if (result) {
         return result;
     }
+    result = autocomplete_param_with_ac(input, "/roster room order", roster_room_order_ac, TRUE);
+    if (result) {
+        return result;
+    }
 
     jabber_conn_status_t conn_status = jabber_get_connection_status();
     if (conn_status == JABBER_CONNECTED) {
@@ -3143,6 +3164,10 @@ _roster_autocomplete(ProfWin *window, const char *const input)
         return result;
     }
     result = autocomplete_param_with_ac(input, "/roster order", roster_order_ac, TRUE);
+    if (result) {
+        return result;
+    }
+    result = autocomplete_param_with_ac(input, "/roster room", roster_room_ac, TRUE);
     if (result) {
         return result;
     }

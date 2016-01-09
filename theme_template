@@ -46,6 +46,8 @@ roommention=
 me=
 them=
 roster.header=
+roster.room=
+roster.room.unread=
 occupants.header=
 receipt.sent=
 
@@ -90,6 +92,8 @@ roster.resource.join=
 roster.presence=
 roster.presence.indent=
 roster.status=
+roster.rooms=
+roster.rooms.order=
 occupants=
 occupants.size=
 occupants.jid=

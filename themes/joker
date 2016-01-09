@@ -46,5 +46,7 @@ roommention=green
 me=magenta
 them=green
 roster.header=magenta
+roster.room=green
+roster.room.unread=green
 occupants.header=magenta
 receipt.sent=red

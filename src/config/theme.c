@@ -120,6 +120,8 @@ static struct colours_t {
         NCURSES_COLOR_T otrtrusted;
         NCURSES_COLOR_T otruntrusted;
         NCURSES_COLOR_T rosterheader;
+        NCURSES_COLOR_T rosterroom;
+        NCURSES_COLOR_T rosterroomunread;
         NCURSES_COLOR_T occupantsheader;
         NCURSES_COLOR_T receiptsent;
 } colour_prefs;
@@ -284,19 +286,23 @@ theme_init_colours(void)
     init_pair(43, colour_prefs.otrtrusted, colour_prefs.bkgnd);
     init_pair(44, colour_prefs.otruntrusted, colour_prefs.bkgnd);
 
-    // subwin headers
+    // roster
     init_pair(45, colour_prefs.rosterheader, colour_prefs.bkgnd);
-    init_pair(46, colour_prefs.occupantsheader, colour_prefs.bkgnd);
+    init_pair(46, colour_prefs.rosterroom, colour_prefs.bkgnd);
+    init_pair(47, colour_prefs.rosterroomunread, colour_prefs.bkgnd);
+
+    // occupants
+    init_pair(48, colour_prefs.occupantsheader, colour_prefs.bkgnd);
 
     // raw
-    init_pair(47, COLOR_WHITE, colour_prefs.bkgnd);
-    init_pair(48, COLOR_GREEN, colour_prefs.bkgnd);
-    init_pair(49, COLOR_RED, colour_prefs.bkgnd);
-    init_pair(50, COLOR_YELLOW, colour_prefs.bkgnd);
-    init_pair(51, COLOR_BLUE, colour_prefs.bkgnd);
-    init_pair(52, COLOR_CYAN, colour_prefs.bkgnd);
-    init_pair(53, COLOR_BLACK, colour_prefs.bkgnd);
-    init_pair(54, COLOR_MAGENTA, colour_prefs.bkgnd);
+    init_pair(49, COLOR_WHITE, colour_prefs.bkgnd);
+    init_pair(50, COLOR_GREEN, colour_prefs.bkgnd);
+    init_pair(51, COLOR_RED, colour_prefs.bkgnd);
+    init_pair(52, COLOR_YELLOW, colour_prefs.bkgnd);
+    init_pair(53, COLOR_BLUE, colour_prefs.bkgnd);
+    init_pair(54, COLOR_CYAN, colour_prefs.bkgnd);
+    init_pair(55, COLOR_BLACK, colour_prefs.bkgnd);
+    init_pair(56, COLOR_MAGENTA, colour_prefs.bkgnd);
 }
 
 static NCURSES_COLOR_T
@@ -401,6 +407,8 @@ _load_colours(void)
     _set_colour("me",                       &colour_prefs.me,                   COLOR_YELLOW,   THEME_ME);
     _set_colour("them",                     &colour_prefs.them,                 COLOR_GREEN,    THEME_THEM);
     _set_colour("roster.header",            &colour_prefs.rosterheader,         COLOR_YELLOW,   THEME_ROSTER_HEADER);
+    _set_colour("roster.room",              &colour_prefs.rosterroom,           COLOR_GREEN,    THEME_ROSTER_ROOM);
+    _set_colour("roster.room.unread",       &colour_prefs.rosterroomunread,     COLOR_GREEN,    THEME_ROSTER_ROOM_UNREAD);
     _set_colour("occupants.header",         &colour_prefs.occupantsheader,      COLOR_YELLOW,   THEME_OCCUPANTS_HEADER);
     _set_colour("receipt.sent",             &colour_prefs.receiptsent,          COLOR_RED,      THEME_RECEIPT_SENT);
 }
@@ -468,6 +476,7 @@ _load_preferences(void)
     _set_boolean_preference("roster.count", PREF_ROSTER_COUNT);
     _set_boolean_preference("roster.priority", PREF_ROSTER_PRIORITY);
     _set_boolean_preference("roster.rooms", PREF_ROSTER_ROOMS);
+    _set_string_preference("roster.rooms.order", PREF_ROSTER_ROOMS_ORDER);
     if (g_key_file_has_key(theme, "ui", "roster.size", NULL)) {
         gint roster_size = g_key_file_get_integer(theme, "ui", "roster.size", NULL);
         prefs_set_roster_size(roster_size);
@@ -663,23 +672,25 @@ theme_attrs(theme_item_t attrs)
     case THEME_OTR_TRUSTED:             result = COLOR_PAIR(43); break;
     case THEME_OTR_UNTRUSTED:           result = COLOR_PAIR(44); break;
     case THEME_ROSTER_HEADER:           result = COLOR_PAIR(45); break;
-    case THEME_OCCUPANTS_HEADER:        result = COLOR_PAIR(46); break;
-    case THEME_WHITE:                   result = COLOR_PAIR(47); break;
-    case THEME_WHITE_BOLD:              result = COLOR_PAIR(47); break;
-    case THEME_GREEN:                   result = COLOR_PAIR(48); break;
-    case THEME_GREEN_BOLD:              result = COLOR_PAIR(48); break;
-    case THEME_RED:                     result = COLOR_PAIR(49); break;
-    case THEME_RED_BOLD:                result = COLOR_PAIR(49); break;
-    case THEME_YELLOW:                  result = COLOR_PAIR(50); break;
-    case THEME_YELLOW_BOLD:             result = COLOR_PAIR(50); break;
-    case THEME_BLUE:                    result = COLOR_PAIR(51); break;
-    case THEME_BLUE_BOLD:               result = COLOR_PAIR(51); break;
-    case THEME_CYAN:                    result = COLOR_PAIR(52); break;
-    case THEME_CYAN_BOLD:               result = COLOR_PAIR(52); break;
-    case THEME_BLACK:                   result = COLOR_PAIR(53); break;
-    case THEME_BLACK_BOLD:              result = COLOR_PAIR(53); break;
-    case THEME_MAGENTA:                 result = COLOR_PAIR(54); break;
-    case THEME_MAGENTA_BOLD:            result = COLOR_PAIR(54); break;
+    case THEME_ROSTER_ROOM:             result = COLOR_PAIR(46); break;
+    case THEME_ROSTER_ROOM_UNREAD:      result = COLOR_PAIR(47); break;
+    case THEME_OCCUPANTS_HEADER:        result = COLOR_PAIR(48); break;
+    case THEME_WHITE:                   result = COLOR_PAIR(49); break;
+    case THEME_WHITE_BOLD:              result = COLOR_PAIR(49); break;
+    case THEME_GREEN:                   result = COLOR_PAIR(50); break;
+    case THEME_GREEN_BOLD:              result = COLOR_PAIR(50); break;
+    case THEME_RED:                     result = COLOR_PAIR(51); break;
+    case THEME_RED_BOLD:                result = COLOR_PAIR(51); break;
+    case THEME_YELLOW:                  result = COLOR_PAIR(52); break;
+    case THEME_YELLOW_BOLD:             result = COLOR_PAIR(52); break;
+    case THEME_BLUE:                    result = COLOR_PAIR(53); break;
+    case THEME_BLUE_BOLD:               result = COLOR_PAIR(53); break;
+    case THEME_CYAN:                    result = COLOR_PAIR(54); break;
+    case THEME_CYAN_BOLD:               result = COLOR_PAIR(54); break;
+    case THEME_BLACK:                   result = COLOR_PAIR(55); break;
+    case THEME_BLACK_BOLD:              result = COLOR_PAIR(55); break;
+    case THEME_MAGENTA:                 result = COLOR_PAIR(56); break;
+    case THEME_MAGENTA_BOLD:            result = COLOR_PAIR(56); break;
     default:                            break;
     }
 

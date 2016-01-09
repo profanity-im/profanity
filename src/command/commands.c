@@ -2192,6 +2192,31 @@ cmd_roster(ProfWin *window, const char *const command, gchar **args)
             return TRUE;
         }
 
+    } else if (g_strcmp0(args[0], "room") == 0) {
+        if (g_strcmp0(args[1], "order") == 0) {
+            if (g_strcmp0(args[2], "name") == 0) {
+                cons_show("Ordering roster rooms by name");
+                prefs_set_string(PREF_ROSTER_ROOMS_ORDER, "name");
+                if (conn_status == JABBER_CONNECTED) {
+                    rosterwin_roster();
+                }
+                return TRUE;
+            } else if (g_strcmp0(args[2], "unread") == 0) {
+                cons_show("Ordering roster rooms by unread messages");
+                prefs_set_string(PREF_ROSTER_ROOMS_ORDER, "unread");
+                if (conn_status == JABBER_CONNECTED) {
+                    rosterwin_roster();
+                }
+                return TRUE;
+            } else {
+                cons_bad_cmd_usage(command);
+                return TRUE;
+            }
+        } else {
+            cons_bad_cmd_usage(command);
+            return TRUE;
+        }
+
     // add contact
     } else if (strcmp(args[0], "add") == 0) {
         if (conn_status != JABBER_CONNECTED) {
