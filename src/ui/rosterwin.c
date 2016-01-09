@@ -373,8 +373,13 @@ void
 _rosterwin_room(ProfLayoutSplit *layout, ProfMucWin *mucwin)
 {
     GString *msg = g_string_new(" ");
-    theme_item_t presence_colour = theme_main_presence_attrs("online");
-    wattron(layout->subwin, theme_attrs(presence_colour));
+
+    if (mucwin->unread > 0) {
+        wattron(layout->subwin, theme_attrs(THEME_GREEN_BOLD));
+    } else {
+        wattron(layout->subwin, theme_attrs(THEME_GREEN));
+    }
+
     int indent = prefs_get_roster_contact_indent();
     int current_indent = 0;
     if (indent > 0) {
@@ -398,11 +403,16 @@ _rosterwin_room(ProfLayoutSplit *layout, ProfMucWin *mucwin)
     gboolean wrap = prefs_get_boolean(PREF_ROSTER_WRAP);
     win_sub_print(layout->subwin, msg->str, FALSE, wrap, current_indent);
     g_string_free(msg, TRUE);
-    wattroff(layout->subwin, theme_attrs(presence_colour));
+
+    if (mucwin->unread > 0) {
+        wattroff(layout->subwin, theme_attrs(THEME_GREEN_BOLD));
+    } else {
+        wattroff(layout->subwin, theme_attrs(THEME_GREEN));
+    }
 }
 
 static int
-_compare_rooms(ProfMucWin *a, ProfMucWin *b)
+_compare_rooms_unread(ProfMucWin *a, ProfMucWin *b)
 {
     if (a->unread > b->unread) {
         return -1;
@@ -422,7 +432,7 @@ _rosterwin_rooms(ProfLayoutSplit *layout, gboolean newline)
     while (curr_room) {
         ProfMucWin *mucwin = wins_get_muc(curr_room->data);
         if (mucwin) {
-            rooms_sorted = g_list_insert_sorted(rooms_sorted, mucwin, (GCompareFunc)_compare_rooms);
+            rooms_sorted = g_list_insert_sorted(rooms_sorted, mucwin, (GCompareFunc)_compare_rooms_unread);
         }
         curr_room = g_list_next(curr_room);
     }
