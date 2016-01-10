@@ -531,7 +531,9 @@ win_resize(ProfWin *window)
             } else if (window->type == WIN_MUC) {
                 subwin_cols = win_occpuants_cols();
             }
+            wbkgd(layout->base.win, theme_attrs(THEME_TEXT));
             wresize(layout->base.win, PAD_SIZE, cols - subwin_cols);
+            wbkgd(layout->subwin, theme_attrs(THEME_TEXT));
             wresize(layout->subwin, PAD_SIZE, subwin_cols);
             if (window->type == WIN_CONSOLE) {
                 rosterwin_roster();
@@ -541,9 +543,11 @@ win_resize(ProfWin *window)
                 occupantswin_occupants(mucwin->roomjid);
             }
         } else {
+            wbkgd(layout->base.win, theme_attrs(THEME_TEXT));
             wresize(layout->base.win, PAD_SIZE, cols);
         }
     } else {
+        wbkgd(window->layout->win, theme_attrs(THEME_TEXT));
         wresize(window->layout->win, PAD_SIZE, cols);
     }
 
