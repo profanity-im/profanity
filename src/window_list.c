@@ -50,6 +50,7 @@
 static GHashTable *windows;
 static int current;
 static Autocomplete wins_ac;
+static Autocomplete wins_close_ac;
 
 void
 wins_init(void)
@@ -64,6 +65,10 @@ wins_init(void)
 
     wins_ac = autocomplete_new();
     autocomplete_add(wins_ac, "console");
+
+    wins_close_ac = autocomplete_new();
+    autocomplete_add(wins_close_ac, "all");
+    autocomplete_add(wins_close_ac, "read");
 }
 
 ProfWin*
@@ -374,6 +379,7 @@ wins_close_by_num(int i)
             {
                 ProfChatWin *chatwin = (ProfChatWin*)window;
                 autocomplete_remove(wins_ac, chatwin->barejid);
+                autocomplete_remove(wins_close_ac, chatwin->barejid);
 
                 jabber_conn_status_t conn_status = jabber_get_connection_status();
                 if (conn_status == JABBER_CONNECTED) {
@@ -382,6 +388,7 @@ wins_close_by_num(int i)
                         const char* nick = p_contact_name(contact);
                         if (nick) {
                             autocomplete_remove(wins_ac, nick);
+                            autocomplete_remove(wins_close_ac, nick);
                         }
                     }
                 }
@@ -392,17 +399,20 @@ wins_close_by_num(int i)
             {
                 ProfMucWin *mucwin = (ProfMucWin*)window;
                 autocomplete_remove(wins_ac, mucwin->roomjid);
+                autocomplete_remove(wins_close_ac, mucwin->roomjid);
                 break;
             }
             case WIN_PRIVATE:
             {
                 ProfPrivateWin *privwin = (ProfPrivateWin*)window;
                 autocomplete_remove(wins_ac, privwin->fulljid);
+                autocomplete_remove(wins_close_ac, privwin->fulljid);
                 break;
             }
             case WIN_XML:
             {
                 autocomplete_remove(wins_ac, "xmlconsole");
+                autocomplete_remove(wins_close_ac, "xmlconsole");
                 break;
             }
             case WIN_MUC_CONFIG:
@@ -437,6 +447,7 @@ wins_new_xmlconsole(void)
     ProfWin *newwin = win_create_xmlconsole();
     g_hash_table_insert(windows, GINT_TO_POINTER(result), newwin);
     autocomplete_add(wins_ac, "xmlconsole");
+    autocomplete_add(wins_close_ac, "xmlconsole");
     return newwin;
 }
 
@@ -450,11 +461,13 @@ wins_new_chat(const char *const barejid)
     g_hash_table_insert(windows, GINT_TO_POINTER(result), newwin);
 
     autocomplete_add(wins_ac, barejid);
+    autocomplete_add(wins_close_ac, barejid);
     PContact contact = roster_get_contact(barejid);
     if (contact) {
         const char* nick = p_contact_name(contact);
         if (nick) {
             autocomplete_add(wins_ac, nick);
+            autocomplete_add(wins_close_ac, nick);
         }
     }
 
@@ -470,6 +483,7 @@ wins_new_muc(const char *const roomjid)
     ProfWin *newwin = win_create_muc(roomjid);
     g_hash_table_insert(windows, GINT_TO_POINTER(result), newwin);
     autocomplete_add(wins_ac, roomjid);
+    autocomplete_add(wins_close_ac, roomjid);
     return newwin;
 }
 
@@ -493,6 +507,7 @@ wins_new_private(const char *const fulljid)
     ProfWin *newwin = win_create_private(fulljid);
     g_hash_table_insert(windows, GINT_TO_POINTER(result), newwin);
     autocomplete_add(wins_ac, fulljid);
+    autocomplete_add(wins_close_ac, fulljid);
     return newwin;
 }
 
@@ -803,6 +818,12 @@ win_autocomplete(const char *const search_str)
     return autocomplete_complete(wins_ac, search_str, TRUE);
 }
 
+char*
+win_close_autocomplete(const char *const search_str)
+{
+    return autocomplete_complete(wins_close_ac, search_str, TRUE);
+}
+
 void
 win_reset_search_attempts(void)
 {
@@ -810,8 +831,15 @@ win_reset_search_attempts(void)
 }
 
 void
+win_close_reset_search_attempts(void)
+{
+    autocomplete_reset(wins_close_ac);
+}
+
+void
 wins_destroy(void)
 {
     g_hash_table_destroy(windows);
     autocomplete_free(wins_ac);
+    autocomplete_free(wins_close_ac);
 }
