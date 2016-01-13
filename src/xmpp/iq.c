@@ -983,15 +983,19 @@ _version_result_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza,
         presence = string_from_resource_presence(occupant->presence);
     } else {
         PContact contact = roster_get_contact(jidp->barejid);
-        Resource *resource = p_contact_get_resource(contact, jidp->resourcepart);
-        if (!resource) {
-            ui_handle_software_version_error(jidp->fulljid, "Unknown resource");
-            if (name_str) xmpp_free(ctx, name_str);
-            if (version_str) xmpp_free(ctx, version_str);
-            if (os_str) xmpp_free(ctx, os_str);
-            return 0;
+        if (contact) {
+            Resource *resource = p_contact_get_resource(contact, jidp->resourcepart);
+            if (!resource) {
+                ui_handle_software_version_error(jidp->fulljid, "Unknown resource");
+                if (name_str) xmpp_free(ctx, name_str);
+                if (version_str) xmpp_free(ctx, version_str);
+                if (os_str) xmpp_free(ctx, os_str);
+                return 0;
+            }
+            presence = string_from_resource_presence(resource->presence);
+        } else {
+            presence = "offline";
         }
-        presence = string_from_resource_presence(resource->presence);
     }
 
     ui_show_software_version(jidp->fulljid, presence, name_str, version_str, os_str);
