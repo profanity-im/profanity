@@ -1066,6 +1066,128 @@ cmd_wins(ProfWin *window, const char *const command, gchar **args)
 }
 
 gboolean
+cmd_close(ProfWin *window, const char *const command, gchar **args)
+{
+    jabber_conn_status_t conn_status = jabber_get_connection_status();
+
+    if (g_strcmp0(args[0], "all") == 0) {
+        int count = ui_close_all_wins();
+        if (count == 0) {
+            cons_show("No windows to close.");
+        } else if (count == 1) {
+            cons_show("Closed 1 window.");
+        } else {
+            cons_show("Closed %d windows.", count);
+        }
+        return TRUE;
+    }
+
+    if (g_strcmp0(args[0], "read") == 0) {
+        int count = ui_close_read_wins();
+        if (count == 0) {
+            cons_show("No windows to close.");
+        } else if (count == 1) {
+            cons_show("Closed 1 window.");
+        } else {
+            cons_show("Closed %d windows.", count);
+        }
+        return TRUE;
+    }
+
+    gboolean is_num = TRUE;
+    int index = 0;
+    if (args[0] != NULL) {
+        int i = 0;
+        for (i = 0; i < strlen(args[0]); i++) {
+            if (!isdigit(args[0][i])) {
+                is_num = FALSE;
+                break;
+            }
+        }
+
+        if (is_num) {
+            index = atoi(args[0]);
+        }
+    } else {
+        index = wins_get_current_num();
+    }
+
+    if (is_num) {
+        if (index < 0 || index == 10) {
+            cons_show("No such window exists.");
+            return TRUE;
+        }
+
+        if (index == 1) {
+            cons_show("Cannot close console window.");
+            return TRUE;
+        }
+
+        ProfWin *toclose = wins_get_by_num(index);
+        if (!toclose) {
+            cons_show("Window is not open.");
+            return TRUE;
+        }
+
+        // check for unsaved form
+        if (ui_win_has_unsaved_form(index)) {
+            ui_current_print_line("You have unsaved changes, use /form submit or /form cancel");
+            return TRUE;
+        }
+
+        // handle leaving rooms, or chat
+        if (conn_status == JABBER_CONNECTED) {
+            ui_close_connected_win(index);
+        }
+
+        // close the window
+        ui_close_win(index);
+        cons_show("Closed window %d", index);
+
+        // Tidy up the window list.
+        if (prefs_get_boolean(PREF_WINS_AUTO_TIDY)) {
+            wins_tidy();
+        }
+
+        return TRUE;
+    } else {
+        if (g_strcmp0(args[0], "console") == 0) {
+            cons_show("Cannot close console window.");
+            return TRUE;
+        }
+
+        ProfWin *toclose = wins_get_by_string(args[0]);
+        if (!toclose) {
+            cons_show("Window \"%s\" does not exist.", args[0]);
+            return TRUE;
+        }
+        index = wins_get_num(toclose);
+
+        // check for unsaved form
+        if (ui_win_has_unsaved_form(index)) {
+            ui_current_print_line("You have unsaved changes, use /form submit or /form cancel");
+            return TRUE;
+        }
+
+        // handle leaving rooms, or chat
+        if (conn_status == JABBER_CONNECTED) {
+            ui_close_connected_win(index);
+        }
+
+        // close the window
+        ui_close_win(index);
+        cons_show("Closed window %s", args[0]);
+
+        // Tidy up the window list.
+        if (prefs_get_boolean(PREF_WINS_AUTO_TIDY)) {
+            wins_tidy();
+        }
+
+        return TRUE;
+    }
+}
+
+gboolean
 cmd_win(ProfWin *window, const char *const command, gchar **args)
 {
     gboolean is_num = TRUE;
@@ -3963,78 +4085,6 @@ gboolean
 cmd_clear(ProfWin *window, const char *const command, gchar **args)
 {
     win_clear(window);
-    return TRUE;
-}
-
-gboolean
-cmd_close(ProfWin *window, const char *const command, gchar **args)
-{
-    jabber_conn_status_t conn_status = jabber_get_connection_status();
-    int index = 0;
-    int count = 0;
-
-    if (args[0] == NULL) {
-        index = wins_get_current_num();
-    } else if (strcmp(args[0], "all") == 0) {
-        count = ui_close_all_wins();
-        if (count == 0) {
-            cons_show("No windows to close.");
-        } else if (count == 1) {
-            cons_show("Closed 1 window.");
-        } else {
-            cons_show("Closed %d windows.", count);
-        }
-        return TRUE;
-    } else if (strcmp(args[0], "read") == 0) {
-        count = ui_close_read_wins();
-        if (count == 0) {
-            cons_show("No windows to close.");
-        } else if (count == 1) {
-            cons_show("Closed 1 window.");
-        } else {
-            cons_show("Closed %d windows.", count);
-        }
-        return TRUE;
-    } else {
-        index = atoi(args[0]);
-    }
-
-    if (index < 0 || index == 10) {
-        cons_show("No such window exists.");
-        return TRUE;
-    }
-
-    if (index == 1) {
-        cons_show("Cannot close console window.");
-        return TRUE;
-    }
-
-    ProfWin *toclose = wins_get_by_num(index);
-    if (!toclose) {
-        cons_show("Window is not open.");
-        return TRUE;
-    }
-
-    // check for unsaved form
-    if (ui_win_has_unsaved_form(index)) {
-        ui_current_print_line("You have unsaved changes, use /form submit or /form cancel");
-        return TRUE;
-    }
-
-    // handle leaving rooms, or chat
-    if (conn_status == JABBER_CONNECTED) {
-        ui_close_connected_win(index);
-    }
-
-    // close the window
-    ui_close_win(index);
-    cons_show("Closed window %d", index);
-
-    // Tidy up the window list.
-    if (prefs_get_boolean(PREF_WINS_AUTO_TIDY)) {
-        wins_tidy();
-    }
-
     return TRUE;
 }
 

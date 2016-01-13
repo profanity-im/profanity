@@ -86,5 +86,7 @@ void wins_show_subwin(ProfWin *window);
 
 char* win_autocomplete(const char *const search_str);
 void win_reset_search_attempts(void);
+char* win_close_autocomplete(const char *const search_str);
+void win_close_reset_search_attempts(void);
 
 #endif

@@ -116,6 +116,7 @@ static char* _script_autocomplete(ProfWin *window, const char *const input);
 static char* _subject_autocomplete(ProfWin *window, const char *const input);
 static char* _console_autocomplete(ProfWin *window, const char *const input);
 static char* _win_autocomplete(ProfWin *window, const char *const input);
+static char* _close_autocomplete(ProfWin *window, const char *const input);
 
 GHashTable *commands = NULL;
 
@@ -809,7 +810,7 @@ static struct cmd_t command_defs[] =
             { "<barejid>",          "Go to chat window with contact by JID if open." },
             { "<nick>",             "Go to chat window with contact by nickname if open." },
             { "<roomjid>",          "Go to chat room window with roomjid if open." },
-            { "<roomoccupantjid>",  "Go to private chat roomjidoccupant if open." },
+            { "<roomoccupantjid>",  "Go to private chat roomoccupantjid if open." },
             { "xmlconsole",         "Go to the XML Console window if open." })
         CMD_EXAMPLES(
             "/win console",
@@ -922,15 +923,26 @@ static struct cmd_t command_defs[] =
         CMD_TAGS(
             CMD_TAG_UI)
         CMD_SYN(
-            "/close [<num>]",
+            "/close",
+            "/close <num>",
+            "/close <barejid>",
+            "/close <nick>",
+            "/close <roomjid>",
+            "/close <roomoccupantjid>",
+            "/close xmlconsole",
             "/close all|read")
         CMD_DESC(
             "Close windows. "
             "Passing no argument closes the current window.")
         CMD_ARGS(
-            { "<num>", "Close the specified window." },
-            { "all", "Close all windows." },
-            { "read", "Close all windows that have no unread messages." })
+            { "<num>",              "Close specified window number." },
+            { "<barejid>",          "Close chat window with contact by JID if open." },
+            { "<nick>",             "Close chat window with contact by nickname if open." },
+            { "<roomjid>",          "Close chat room window with roomjid if open." },
+            { "<roomoccupantjid>",  "Close private chat roomoccupantjid if open." },
+            { "xmlconsole",         "Close the XML Console window if open." },
+            { "all",                "Close all windows." },
+            { "read",               "Close all windows that have no unread messages." })
         CMD_NOEXAMPLES
     },
 
@@ -1898,7 +1910,6 @@ static Autocomplete account_clear_ac;
 static Autocomplete account_default_ac;
 static Autocomplete account_status_ac;
 static Autocomplete disco_ac;
-static Autocomplete close_ac;
 static Autocomplete wins_ac;
 static Autocomplete roster_ac;
 static Autocomplete roster_show_ac;
@@ -2149,10 +2160,6 @@ cmd_init(void)
     autocomplete_add(account_status_ac, "xa");
     autocomplete_add(account_status_ac, "dnd");
     autocomplete_add(account_status_ac, "last");
-
-    close_ac = autocomplete_new();
-    autocomplete_add(close_ac, "read");
-    autocomplete_add(close_ac, "all");
 
     wins_ac = autocomplete_new();
     autocomplete_add(wins_ac, "unread");
@@ -2486,7 +2493,6 @@ cmd_uninit(void)
     autocomplete_free(account_default_ac);
     autocomplete_free(account_status_ac);
     autocomplete_free(disco_ac);
-    autocomplete_free(close_ac);
     autocomplete_free(wins_ac);
     autocomplete_free(roster_ac);
     autocomplete_free(roster_header_ac);
@@ -2697,7 +2703,6 @@ cmd_reset_autocomplete(ProfWin *window)
     autocomplete_reset(account_default_ac);
     autocomplete_reset(account_status_ac);
     autocomplete_reset(disco_ac);
-    autocomplete_reset(close_ac);
     autocomplete_reset(wins_ac);
     autocomplete_reset(roster_ac);
     autocomplete_reset(roster_header_ac);
@@ -2771,6 +2776,7 @@ cmd_reset_autocomplete(ProfWin *window)
     bookmark_autocomplete_reset();
     prefs_reset_room_trigger_ac();
     win_reset_search_attempts();
+    win_close_reset_search_attempts();
     plugins_reset_autocomplete();
 }
 
@@ -2964,8 +2970,8 @@ _cmd_complete_parameters(ProfWin *window, const char *const input)
         }
     }
 
-    gchar *cmds[] = { "/prefs", "/disco", "/close", "/room", "/autoping" };
-    Autocomplete completers[] = { prefs_ac, disco_ac, close_ac, room_ac, autoping_ac };
+    gchar *cmds[] = { "/prefs", "/disco", "/room", "/autoping" };
+    Autocomplete completers[] = { prefs_ac, disco_ac, room_ac, autoping_ac };
 
     for (i = 0; i < ARRAY_SIZE(cmds); i++) {
         result = autocomplete_param_with_ac(input, cmds[i], completers[i], TRUE);
@@ -3010,6 +3016,7 @@ _cmd_complete_parameters(ProfWin *window, const char *const input)
     g_hash_table_insert(ac_funcs, "/subject",       _subject_autocomplete);
     g_hash_table_insert(ac_funcs, "/console",       _console_autocomplete);
     g_hash_table_insert(ac_funcs, "/win",           _win_autocomplete);
+    g_hash_table_insert(ac_funcs, "/close",         _close_autocomplete);
 
     int len = strlen(input);
     char parsed[len+1];
@@ -4305,6 +4312,19 @@ _win_autocomplete(ProfWin *window, const char *const input)
     char *found = NULL;
 
     found = autocomplete_param_with_func(input, "/win", win_autocomplete);
+    if (found) {
+        return found;
+    }
+
+    return NULL;
+}
+
+static char*
+_close_autocomplete(ProfWin *window, const char *const input)
+{
+    char *found = NULL;
+
+    found = autocomplete_param_with_func(input, "/close", win_close_autocomplete);
     if (found) {
         return found;
     }
