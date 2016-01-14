@@ -451,6 +451,7 @@ sv_ev_incoming_message(char *barejid, char *resource, char *message, char *pgp_m
     } else {
         _sv_ev_incoming_otr(chatwin, new_win, barejid, resource, message, timestamp);
     }
+    rosterwin_roster();
     return;
 #endif
 #endif
@@ -459,6 +460,7 @@ sv_ev_incoming_message(char *barejid, char *resource, char *message, char *pgp_m
 #ifdef PROF_HAVE_LIBOTR
 #ifndef PROF_HAVE_LIBGPGME
     _sv_ev_incoming_otr(chatwin, new_win, barejid, resource, message, timestamp);
+    rosterwin_roster();
     return;
 #endif
 #endif
@@ -471,6 +473,7 @@ sv_ev_incoming_message(char *barejid, char *resource, char *message, char *pgp_m
     } else {
         _sv_ev_incoming_plain(chatwin, new_win, barejid, resource, message, timestamp);
     }
+    rosterwin_roster();
     return;
 #endif
 #endif
@@ -479,6 +482,7 @@ sv_ev_incoming_message(char *barejid, char *resource, char *message, char *pgp_m
 #ifndef PROF_HAVE_LIBOTR
 #ifndef PROF_HAVE_LIBGPGME
     _sv_ev_incoming_plain(chatwin, new_win, barejid, resource, message, timestamp);
+    rosterwin_roster();
     return;
 #endif
 #endif

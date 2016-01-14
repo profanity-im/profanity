@@ -1079,6 +1079,7 @@ cmd_close(ProfWin *window, const char *const command, gchar **args)
         } else {
             cons_show("Closed %d windows.", count);
         }
+        rosterwin_roster();
         return TRUE;
     }
 
@@ -1091,6 +1092,7 @@ cmd_close(ProfWin *window, const char *const command, gchar **args)
         } else {
             cons_show("Closed %d windows.", count);
         }
+        rosterwin_roster();
         return TRUE;
     }
 
@@ -1149,6 +1151,7 @@ cmd_close(ProfWin *window, const char *const command, gchar **args)
             wins_tidy();
         }
 
+        rosterwin_roster();
         return TRUE;
     } else {
         if (g_strcmp0(args[0], "console") == 0) {
@@ -1183,6 +1186,7 @@ cmd_close(ProfWin *window, const char *const command, gchar **args)
             wins_tidy();
         }
 
+        rosterwin_roster();
         return TRUE;
     }
 }

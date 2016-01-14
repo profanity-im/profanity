@@ -448,6 +448,60 @@ _theme_find(const char *const theme_name)
 }
 
 theme_item_t
+theme_roster_unread_presence_attrs(const char *const presence)
+{
+    if (g_strcmp0(presence, "online") == 0) {
+        return THEME_ROSTER_ONLINE_UNREAD;
+    } else if (g_strcmp0(presence, "away") == 0) {
+        return THEME_ROSTER_AWAY_UNREAD;
+    } else if (g_strcmp0(presence, "chat") == 0) {
+        return THEME_ROSTER_CHAT_UNREAD;
+    } else if (g_strcmp0(presence, "dnd") == 0) {
+        return THEME_ROSTER_DND_UNREAD;
+    } else if (g_strcmp0(presence, "xa") == 0) {
+        return THEME_ROSTER_XA_UNREAD;
+    } else {
+        return THEME_ROSTER_OFFLINE_UNREAD;
+    }
+}
+
+theme_item_t
+theme_roster_active_presence_attrs(const char *const presence)
+{
+    if (g_strcmp0(presence, "online") == 0) {
+        return THEME_ROSTER_ONLINE_ACTIVE;
+    } else if (g_strcmp0(presence, "away") == 0) {
+        return THEME_ROSTER_AWAY_ACTIVE;
+    } else if (g_strcmp0(presence, "chat") == 0) {
+        return THEME_ROSTER_CHAT_ACTIVE;
+    } else if (g_strcmp0(presence, "dnd") == 0) {
+        return THEME_ROSTER_DND_ACTIVE;
+    } else if (g_strcmp0(presence, "xa") == 0) {
+        return THEME_ROSTER_XA_ACTIVE;
+    } else {
+        return THEME_ROSTER_OFFLINE_ACTIVE;
+    }
+}
+
+theme_item_t
+theme_roster_presence_attrs(const char *const presence)
+{
+    if (g_strcmp0(presence, "online") == 0) {
+        return THEME_ROSTER_ONLINE;
+    } else if (g_strcmp0(presence, "away") == 0) {
+        return THEME_ROSTER_AWAY;
+    } else if (g_strcmp0(presence, "chat") == 0) {
+        return THEME_ROSTER_CHAT;
+    } else if (g_strcmp0(presence, "dnd") == 0) {
+        return THEME_ROSTER_DND;
+    } else if (g_strcmp0(presence, "xa") == 0) {
+        return THEME_ROSTER_XA;
+    } else {
+        return THEME_ROSTER_OFFLINE;
+    }
+}
+
+theme_item_t
 theme_main_presence_attrs(const char *const presence)
 {
     if (g_strcmp0(presence, "online") == 0) {
@@ -554,6 +608,24 @@ theme_attrs(theme_item_t attrs)
     case THEME_OTR_TRUSTED:             _theme_prep_fgnd("otr.trusted",             "green",    lookup_str, &bold); break;
     case THEME_OTR_UNTRUSTED:           _theme_prep_fgnd("otr.untrusted",           "yellow",   lookup_str, &bold); break;
     case THEME_ROSTER_HEADER:           _theme_prep_fgnd("roster.header",           "yellow",   lookup_str, &bold); break;
+    case THEME_ROSTER_ONLINE:           _theme_prep_fgnd("roster.online",           "green",    lookup_str, &bold); break;
+    case THEME_ROSTER_OFFLINE:          _theme_prep_fgnd("roster.offline",          "red",      lookup_str, &bold); break;
+    case THEME_ROSTER_CHAT:             _theme_prep_fgnd("roster.chat",             "green",    lookup_str, &bold); break;
+    case THEME_ROSTER_AWAY:             _theme_prep_fgnd("roster.away",             "cyan",     lookup_str, &bold); break;
+    case THEME_ROSTER_DND:              _theme_prep_fgnd("roster.dnd",              "red",      lookup_str, &bold); break;
+    case THEME_ROSTER_XA:               _theme_prep_fgnd("roster.xa",               "cyan",     lookup_str, &bold); break;
+    case THEME_ROSTER_ONLINE_ACTIVE:    _theme_prep_fgnd("roster.online.active",    "green",    lookup_str, &bold); break;
+    case THEME_ROSTER_OFFLINE_ACTIVE:   _theme_prep_fgnd("roster.offline.active",   "red",      lookup_str, &bold); break;
+    case THEME_ROSTER_CHAT_ACTIVE:      _theme_prep_fgnd("roster.chat.active",      "green",    lookup_str, &bold); break;
+    case THEME_ROSTER_AWAY_ACTIVE:      _theme_prep_fgnd("roster.away.active",      "cyan",     lookup_str, &bold); break;
+    case THEME_ROSTER_DND_ACTIVE:       _theme_prep_fgnd("roster.dnd.active",       "red",      lookup_str, &bold); break;
+    case THEME_ROSTER_XA_ACTIVE:        _theme_prep_fgnd("roster.xa.active",        "cyan",     lookup_str, &bold); break;
+    case THEME_ROSTER_ONLINE_UNREAD:    _theme_prep_fgnd("roster.online.unread",    "green",    lookup_str, &bold); break;
+    case THEME_ROSTER_OFFLINE_UNREAD:   _theme_prep_fgnd("roster.offline.unread",   "red",      lookup_str, &bold); break;
+    case THEME_ROSTER_CHAT_UNREAD:      _theme_prep_fgnd("roster.chat.unread",      "green",    lookup_str, &bold); break;
+    case THEME_ROSTER_AWAY_UNREAD:      _theme_prep_fgnd("roster.away.unread",      "cyan",     lookup_str, &bold); break;
+    case THEME_ROSTER_DND_UNREAD:       _theme_prep_fgnd("roster.dnd.unread",       "red",      lookup_str, &bold); break;
+    case THEME_ROSTER_XA_UNREAD:        _theme_prep_fgnd("roster.xa.unread",        "cyan",     lookup_str, &bold); break;
     case THEME_ROSTER_ROOM:             _theme_prep_fgnd("roster.room",             "green",    lookup_str, &bold); break;
     case THEME_ROSTER_ROOM_UNREAD:      _theme_prep_fgnd("roster.room.unread",      "green",    lookup_str, &bold); break;
     case THEME_OCCUPANTS_HEADER:        _theme_prep_fgnd("occupants.header",        "yellow",   lookup_str, &bold); break;

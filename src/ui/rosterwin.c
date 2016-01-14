@@ -42,6 +42,12 @@
 #include "config/preferences.h"
 #include "roster_list.h"
 
+typedef enum {
+    ROSTER_CONTACT,
+    ROSTER_CONTACT_ACTIVE,
+    ROSTER_CONTACT_UNREAD
+} roster_contact_theme_t;
+
 static void
 _rosterwin_presence(ProfLayoutSplit *layout, theme_item_t colour, const char *presence, const char *status,
     int current_indent)
@@ -126,7 +132,7 @@ _rosterwin_presence(ProfLayoutSplit *layout, theme_item_t colour, const char *pr
 }
 
 static void
-_rosterwin_resources(ProfLayoutSplit *layout, PContact contact, int current_indent)
+_rosterwin_resources(ProfLayoutSplit *layout, PContact contact, int current_indent, roster_contact_theme_t theme_type)
 {
     gboolean join = prefs_get_boolean(PREF_ROSTER_RESOURCE_JOIN);
 
@@ -135,7 +141,13 @@ _rosterwin_resources(ProfLayoutSplit *layout, PContact contact, int current_inde
         if (join && (g_list_length(resources) == 1)) {
             Resource *resource = resources->data;
             const char *resource_presence = string_from_resource_presence(resource->presence);
-            theme_item_t resource_presence_colour = theme_main_presence_attrs(resource_presence);
+
+            theme_item_t resource_presence_colour;
+            switch (theme_type) {
+            case ROSTER_CONTACT:        resource_presence_colour = theme_roster_presence_attrs(resource_presence); break;
+            case ROSTER_CONTACT_ACTIVE: resource_presence_colour = theme_roster_active_presence_attrs(resource_presence); break;
+            case ROSTER_CONTACT_UNREAD: resource_presence_colour = theme_roster_unread_presence_attrs(resource_presence); break;
+            }
 
             wattron(layout->subwin, theme_attrs(resource_presence_colour));
             GString *msg = g_string_new("");
@@ -167,7 +179,13 @@ _rosterwin_resources(ProfLayoutSplit *layout, PContact contact, int current_inde
             while (curr_resource) {
                 Resource *resource = curr_resource->data;
                 const char *resource_presence = string_from_resource_presence(resource->presence);
-                theme_item_t resource_presence_colour = theme_main_presence_attrs(resource_presence);
+
+                theme_item_t resource_presence_colour;
+                switch (theme_type) {
+                case ROSTER_CONTACT:        resource_presence_colour = theme_roster_presence_attrs(resource_presence); break;
+                case ROSTER_CONTACT_ACTIVE: resource_presence_colour = theme_roster_active_presence_attrs(resource_presence); break;
+                case ROSTER_CONTACT_UNREAD: resource_presence_colour = theme_roster_unread_presence_attrs(resource_presence); break;
+                }
 
                 wattron(layout->subwin, theme_attrs(resource_presence_colour));
                 GString *msg = g_string_new(" ");
@@ -213,8 +231,24 @@ _rosterwin_contact(ProfLayoutSplit *layout, PContact contact)
     const char *name = p_contact_name_or_jid(contact);
     const char *presence = p_contact_presence(contact);
     const char *status = p_contact_status(contact);
+    const char *barejid = p_contact_barejid(contact);
 
-    theme_item_t presence_colour = theme_main_presence_attrs(presence);
+    roster_contact_theme_t theme_type = ROSTER_CONTACT;
+    ProfChatWin *chatwin = wins_get_chat(barejid);
+    if (chatwin) {
+        if (chatwin->unread > 0) {
+            theme_type = ROSTER_CONTACT_UNREAD;
+        } else {
+            theme_type = ROSTER_CONTACT_ACTIVE;
+        }
+    }
+
+    theme_item_t presence_colour;
+    switch (theme_type) {
+    case ROSTER_CONTACT:        presence_colour = theme_roster_presence_attrs(presence); break;
+    case ROSTER_CONTACT_ACTIVE: presence_colour = theme_roster_active_presence_attrs(presence); break;
+    case ROSTER_CONTACT_UNREAD: presence_colour = theme_roster_unread_presence_attrs(presence); break;
+    }
 
     wattron(layout->subwin, theme_attrs(presence_colour));
     GString *msg = g_string_new(" ");
@@ -239,7 +273,7 @@ _rosterwin_contact(ProfLayoutSplit *layout, PContact contact)
     wattroff(layout->subwin, theme_attrs(presence_colour));
 
     if (prefs_get_boolean(PREF_ROSTER_RESOURCE)) {
-        _rosterwin_resources(layout, contact, current_indent);
+        _rosterwin_resources(layout, contact, current_indent, theme_type);
     } else if (prefs_get_boolean(PREF_ROSTER_PRESENCE) || prefs_get_boolean(PREF_ROSTER_STATUS)) {
         _rosterwin_presence(layout, presence_colour, presence, status, current_indent);
     }
