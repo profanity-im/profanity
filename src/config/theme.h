@@ -85,6 +85,24 @@ typedef enum {
     THEME_OTR_UNTRUSTED,
     THEME_OCCUPANTS_HEADER,
     THEME_ROSTER_HEADER,
+    THEME_ROSTER_ONLINE,
+    THEME_ROSTER_OFFLINE,
+    THEME_ROSTER_AWAY,
+    THEME_ROSTER_CHAT,
+    THEME_ROSTER_DND,
+    THEME_ROSTER_XA,
+    THEME_ROSTER_ONLINE_ACTIVE,
+    THEME_ROSTER_OFFLINE_ACTIVE,
+    THEME_ROSTER_AWAY_ACTIVE,
+    THEME_ROSTER_CHAT_ACTIVE,
+    THEME_ROSTER_DND_ACTIVE,
+    THEME_ROSTER_XA_ACTIVE,
+    THEME_ROSTER_ONLINE_UNREAD,
+    THEME_ROSTER_OFFLINE_UNREAD,
+    THEME_ROSTER_AWAY_UNREAD,
+    THEME_ROSTER_CHAT_UNREAD,
+    THEME_ROSTER_DND_UNREAD,
+    THEME_ROSTER_XA_UNREAD,
     THEME_ROSTER_ROOM,
     THEME_ROSTER_ROOM_UNREAD,
     THEME_RECEIPT_SENT,
@@ -113,6 +131,10 @@ gboolean theme_load(const char *const theme_name);
 GSList* theme_list(void);
 void theme_close(void);
 int theme_attrs(theme_item_t attrs);
+
 theme_item_t theme_main_presence_attrs(const char *const presence);
+theme_item_t theme_roster_unread_presence_attrs(const char *const presence);
+theme_item_t theme_roster_active_presence_attrs(const char *const presence);
+theme_item_t theme_roster_presence_attrs(const char *const presence);
 
 #endif
