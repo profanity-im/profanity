@@ -1091,7 +1091,7 @@ cmd_close(ProfWin *window, const char *const command, gchar **args)
     if (args[0] != NULL) {
         int i = 0;
         for (i = 0; i < strlen(args[0]); i++) {
-            if (!isdigit(args[0][i])) {
+            if (!isdigit((int)args[0][i])) {
                 is_num = FALSE;
                 break;
             }
@@ -1185,7 +1185,7 @@ cmd_win(ProfWin *window, const char *const command, gchar **args)
     gboolean is_num = TRUE;
     int i = 0;
     for (i = 0; i < strlen(args[0]); i++) {
-        if (!isdigit(args[0][i])) {
+        if (!isdigit((int)args[0][i])) {
             is_num = FALSE;
             break;
         }
