@@ -1341,6 +1341,15 @@ cons_roster_setting(void)
     cons_show("Roster rooms order (/roster)     : %s", rooms_order);
     prefs_free_string(rooms_order);
 
+    char *roomsunread = prefs_get_string(PREF_ROSTER_ROOMS_UNREAD);
+    if (g_strcmp0(roomsunread, "before") == 0) {
+        cons_show("Roster rooms unread (/roster)    : before");
+    } else if (g_strcmp0(roomsunread, "after") == 0) {
+        cons_show("Roster rooms unread (/roster)    : after");
+    } else {
+        cons_show("Roster rooms unread (/roster)    : OFF");
+    }
+
     int size = prefs_get_roster_size();
     cons_show("Roster size (/roster)            : %d", size);
 

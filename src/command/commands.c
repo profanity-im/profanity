@@ -2330,6 +2330,32 @@ cmd_roster(ProfWin *window, const char *const command, gchar **args)
                 cons_bad_cmd_usage(command);
                 return TRUE;
             }
+        } else if (g_strcmp0(args[1], "unread") == 0) {
+            if (g_strcmp0(args[2], "before") == 0) {
+                cons_show("Roster rooms unread message count: before");
+                prefs_set_string(PREF_ROSTER_ROOMS_UNREAD, "before");
+                if (conn_status == JABBER_CONNECTED) {
+                    rosterwin_roster();
+                }
+                return TRUE;
+            } else if (g_strcmp0(args[2], "after") == 0) {
+                cons_show("Roster rooms unread message count: after");
+                prefs_set_string(PREF_ROSTER_ROOMS_UNREAD, "after");
+                if (conn_status == JABBER_CONNECTED) {
+                    rosterwin_roster();
+                }
+                return TRUE;
+            } else if (g_strcmp0(args[2], "off") == 0) {
+                cons_show("Roster rooms unread message count: off");
+                prefs_set_string(PREF_ROSTER_ROOMS_UNREAD, "off");
+                if (conn_status == JABBER_CONNECTED) {
+                    rosterwin_roster();
+                }
+                return TRUE;
+            } else {
+                cons_bad_cmd_usage(command);
+                return TRUE;
+            }
         } else {
             cons_bad_cmd_usage(command);
             return TRUE;

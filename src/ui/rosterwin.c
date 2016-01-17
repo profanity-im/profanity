@@ -483,10 +483,15 @@ _rosterwin_room(ProfLayoutSplit *layout, ProfMucWin *mucwin)
         g_string_append_printf(msg, "%c", ch);
     }
 
+    char *unreadpos = prefs_get_string(PREF_ROSTER_ROOMS_UNREAD);
+    if ((g_strcmp0(unreadpos, "before") == 0) && mucwin->unread > 0) {
+        g_string_append_printf(msg, "(%d) ", mucwin->unread);
+    }
     g_string_append(msg, mucwin->roomjid);
-    if (mucwin->unread > 0) {
+    if ((g_strcmp0(unreadpos, "after") == 0) && mucwin->unread > 0) {
         g_string_append_printf(msg, " (%d)", mucwin->unread);
     }
+    prefs_free_string(unreadpos);
 
     win_sub_newline_lazy(layout->subwin);
     gboolean wrap = prefs_get_boolean(PREF_ROSTER_WRAP);

@@ -39,6 +39,7 @@ roster.presence.indent=1
 roster.status=true
 roster.rooms=true
 roster.rooms.order=unread
+roster.rooms.unread=after
 privileges=true
 presence=true
 intype=true
