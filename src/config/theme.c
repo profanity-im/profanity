@@ -317,6 +317,7 @@ _load_preferences(void)
     _set_boolean_preference("roster.wrap", PREF_ROSTER_WRAP);
     _set_string_preference("roster.by", PREF_ROSTER_BY);
     _set_string_preference("roster.order", PREF_ROSTER_ORDER);
+    _set_string_preference("roster.unread", PREF_ROSTER_UNREAD);
     _set_boolean_preference("roster.count", PREF_ROSTER_COUNT);
     _set_boolean_preference("roster.priority", PREF_ROSTER_PRIORITY);
     _set_boolean_preference("roster.rooms", PREF_ROSTER_ROOMS);

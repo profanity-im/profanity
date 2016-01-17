@@ -282,6 +282,7 @@ static struct cmd_t command_defs[] =
             "/roster hide [offline|resource|presence|status|empty|count|priority|rooms]",
             "/roster by group|presence|none",
             "/roster order name|presence",
+            "/roster unread before|after|off",
             "/roster room order name|unread",
             "/roster room unread before|after|off",
             "/roster header char <char>|none",
@@ -326,11 +327,14 @@ static struct cmd_t command_defs[] =
             { "by none",                    "No grouping in the roster panel." },
             { "order name",                 "Order roster items by name only." },
             { "order presence",             "Order roster items by presence, and then by name." },
+            { "unread before",              "Show unread message count before contact in roster." },
+            { "unread after",               "Show unread message count after contact in roster." },
+            { "unread off",                 "Do not show unread message count for contacts in roster." },
             { "room order name",            "Order roster rooms by name." },
             { "room order unread",          "Order roster rooms by unread messages, and then by name." },
             { "room unread before",         "Show unread message count before room in roster." },
             { "room unread after",          "Show unread message count after room in roster." },
-            { "room unread off",            "Do not show unread message count for rooms in rosters." },
+            { "room unread off",            "Do not show unread message count for rooms in roster." },
             { "header char <char>",         "Prefix roster headers with specified character." },
             { "header char none",           "Remove roster header character prefix." },
             { "contact char <char>",        "Prefix roster contacts with specified character." },
@@ -2172,6 +2176,7 @@ cmd_init(void)
     autocomplete_add(roster_ac, "hide");
     autocomplete_add(roster_ac, "by");
     autocomplete_add(roster_ac, "order");
+    autocomplete_add(roster_ac, "unread");
     autocomplete_add(roster_ac, "room");
     autocomplete_add(roster_ac, "size");
     autocomplete_add(roster_ac, "wrap");
@@ -3166,6 +3171,10 @@ _roster_autocomplete(ProfWin *window, const char *const input)
         return result;
     }
     result = autocomplete_param_with_ac(input, "/roster order", roster_order_ac, TRUE);
+    if (result) {
+        return result;
+    }
+    result = autocomplete_param_with_ac(input, "/roster unread", roster_unread_ac, TRUE);
     if (result) {
         return result;
     }

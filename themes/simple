@@ -22,6 +22,7 @@ roster.offline=false
 roster.empty=false
 roster.by=none
 roster.order=presence
+roster.unread=off
 roster.count=false
 roster.priority=false
 roster.size=25
