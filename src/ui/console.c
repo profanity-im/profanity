@@ -1324,11 +1324,6 @@ cons_roster_setting(void)
     else
         cons_show("Roster priority (/roster)        : hide");
 
-    if (prefs_get_boolean(PREF_ROSTER_ROOMS))
-        cons_show("Roster rooms (/roster)           : show");
-    else
-        cons_show("Roster rooms (/roster)           : hide");
-
     char *by = prefs_get_string(PREF_ROSTER_BY);
     cons_show("Roster by (/roster)              : %s", by);
     prefs_free_string(by);
@@ -1337,9 +1332,32 @@ cons_roster_setting(void)
     cons_show("Roster order (/roster)           : %s", order);
     prefs_free_string(order);
 
+    char *unread = prefs_get_string(PREF_ROSTER_UNREAD);
+    if (g_strcmp0(unread, "before") == 0) {
+        cons_show("Roster unread (/roster)          : before");
+    } else if (g_strcmp0(unread, "after") == 0) {
+        cons_show("Roster unread (/roster)          : after");
+    } else {
+        cons_show("Roster unread (/roster)          : OFF");
+    }
+
+    if (prefs_get_boolean(PREF_ROSTER_ROOMS))
+        cons_show("Roster rooms (/roster)           : show");
+    else
+        cons_show("Roster rooms (/roster)           : hide");
+
     char *rooms_order = prefs_get_string(PREF_ROSTER_ROOMS_ORDER);
     cons_show("Roster rooms order (/roster)     : %s", rooms_order);
     prefs_free_string(rooms_order);
+
+    char *roomsunread = prefs_get_string(PREF_ROSTER_ROOMS_UNREAD);
+    if (g_strcmp0(roomsunread, "before") == 0) {
+        cons_show("Roster rooms unread (/roster)    : before");
+    } else if (g_strcmp0(roomsunread, "after") == 0) {
+        cons_show("Roster rooms unread (/roster)    : after");
+    } else {
+        cons_show("Roster rooms unread (/roster)    : OFF");
+    }
 
     int size = prefs_get_roster_size();
     cons_show("Roster size (/roster)            : %d", size);

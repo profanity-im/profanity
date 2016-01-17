@@ -317,10 +317,12 @@ _load_preferences(void)
     _set_boolean_preference("roster.wrap", PREF_ROSTER_WRAP);
     _set_string_preference("roster.by", PREF_ROSTER_BY);
     _set_string_preference("roster.order", PREF_ROSTER_ORDER);
+    _set_string_preference("roster.unread", PREF_ROSTER_UNREAD);
     _set_boolean_preference("roster.count", PREF_ROSTER_COUNT);
     _set_boolean_preference("roster.priority", PREF_ROSTER_PRIORITY);
     _set_boolean_preference("roster.rooms", PREF_ROSTER_ROOMS);
     _set_string_preference("roster.rooms.order", PREF_ROSTER_ROOMS_ORDER);
+    _set_string_preference("roster.rooms.unread", PREF_ROSTER_ROOMS_ORDER);
     if (g_key_file_has_key(theme, "ui", "roster.size", NULL)) {
         gint roster_size = g_key_file_get_integer(theme, "ui", "roster.size", NULL);
         prefs_set_roster_size(roster_size);
