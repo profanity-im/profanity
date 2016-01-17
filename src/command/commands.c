@@ -2318,6 +2318,33 @@ cmd_roster(ProfWin *window, const char *const command, gchar **args)
             return TRUE;
         }
 
+    } else if (g_strcmp0(args[0], "unread") == 0) {
+        if (g_strcmp0(args[1], "before") == 0) {
+            cons_show("Roster unread message count: before");
+            prefs_set_string(PREF_ROSTER_UNREAD, "before");
+            if (conn_status == JABBER_CONNECTED) {
+                rosterwin_roster();
+            }
+            return TRUE;
+        } else if (g_strcmp0(args[1], "after") == 0) {
+            cons_show("Roster unread message count: after");
+            prefs_set_string(PREF_ROSTER_UNREAD, "after");
+            if (conn_status == JABBER_CONNECTED) {
+                rosterwin_roster();
+            }
+            return TRUE;
+        } else if (g_strcmp0(args[1], "off") == 0) {
+            cons_show("Roster unread message count: off");
+            prefs_set_string(PREF_ROSTER_UNREAD, "off");
+            if (conn_status == JABBER_CONNECTED) {
+                rosterwin_roster();
+            }
+            return TRUE;
+        } else {
+            cons_bad_cmd_usage(command);
+            return TRUE;
+        }
+
     } else if (g_strcmp0(args[0], "room") == 0) {
         if (g_strcmp0(args[1], "order") == 0) {
             if (g_strcmp0(args[2], "name") == 0) {
@@ -2330,6 +2357,32 @@ cmd_roster(ProfWin *window, const char *const command, gchar **args)
             } else if (g_strcmp0(args[2], "unread") == 0) {
                 cons_show("Ordering roster rooms by unread messages");
                 prefs_set_string(PREF_ROSTER_ROOMS_ORDER, "unread");
+                if (conn_status == JABBER_CONNECTED) {
+                    rosterwin_roster();
+                }
+                return TRUE;
+            } else {
+                cons_bad_cmd_usage(command);
+                return TRUE;
+            }
+        } else if (g_strcmp0(args[1], "unread") == 0) {
+            if (g_strcmp0(args[2], "before") == 0) {
+                cons_show("Roster rooms unread message count: before");
+                prefs_set_string(PREF_ROSTER_ROOMS_UNREAD, "before");
+                if (conn_status == JABBER_CONNECTED) {
+                    rosterwin_roster();
+                }
+                return TRUE;
+            } else if (g_strcmp0(args[2], "after") == 0) {
+                cons_show("Roster rooms unread message count: after");
+                prefs_set_string(PREF_ROSTER_ROOMS_UNREAD, "after");
+                if (conn_status == JABBER_CONNECTED) {
+                    rosterwin_roster();
+                }
+                return TRUE;
+            } else if (g_strcmp0(args[2], "off") == 0) {
+                cons_show("Roster rooms unread message count: off");
+                prefs_set_string(PREF_ROSTER_ROOMS_UNREAD, "off");
                 if (conn_status == JABBER_CONNECTED) {
                     rosterwin_roster();
                 }

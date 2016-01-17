@@ -167,9 +167,11 @@ _rosterwin_resources(ProfLayoutSplit *layout, PContact contact, int current_inde
                 g_string_append_printf(msg, " %d", resource->priority);
             }
 
-            if (unread > 0) {
+            char *unreadpos = prefs_get_string(PREF_ROSTER_UNREAD);
+            if ((g_strcmp0(unreadpos, "after") == 0) && unread > 0) {
                 g_string_append_printf(msg, " (%d)", unread);
             }
+            prefs_free_string(unreadpos);
 
             gboolean wrap = prefs_get_boolean(PREF_ROSTER_WRAP);
             win_sub_print(layout->subwin, msg->str, FALSE, wrap, 0);
@@ -182,7 +184,8 @@ _rosterwin_resources(ProfLayoutSplit *layout, PContact contact, int current_inde
         } else {
             gboolean wrap = prefs_get_boolean(PREF_ROSTER_WRAP);
 
-            if (unread > 0) {
+            char *unreadpos = prefs_get_string(PREF_ROSTER_UNREAD);
+            if ((g_strcmp0(unreadpos, "after") == 0) && unread > 0) {
                 GString *unreadmsg = g_string_new("");
                 g_string_append_printf(unreadmsg, " (%d)", unread);
 
@@ -193,6 +196,7 @@ _rosterwin_resources(ProfLayoutSplit *layout, PContact contact, int current_inde
                 win_sub_print(layout->subwin, unreadmsg->str, FALSE, wrap, current_indent);
                 wattroff(layout->subwin, theme_attrs(presence_colour));
             }
+            prefs_free_string(unreadpos);
 
             int resource_indent = prefs_get_roster_resource_indent();
             if (resource_indent > 0) {
@@ -238,7 +242,8 @@ _rosterwin_resources(ProfLayoutSplit *layout, PContact contact, int current_inde
         theme_item_t presence_colour = _get_roster_theme(theme_type, presence);
         gboolean wrap = prefs_get_boolean(PREF_ROSTER_WRAP);
 
-        if (unread > 0) {
+        char *unreadpos = prefs_get_string(PREF_ROSTER_UNREAD);
+        if ((g_strcmp0(unreadpos, "after") == 0) && unread > 0) {
             GString *unreadmsg = g_string_new("");
             g_string_append_printf(unreadmsg, " (%d)", unread);
 
@@ -246,11 +251,13 @@ _rosterwin_resources(ProfLayoutSplit *layout, PContact contact, int current_inde
             win_sub_print(layout->subwin, unreadmsg->str, FALSE, wrap, current_indent);
             wattroff(layout->subwin, theme_attrs(presence_colour));
         }
+        prefs_free_string(unreadpos);
         _rosterwin_presence(layout, presence_colour, presence, status, current_indent);
     } else {
         gboolean wrap = prefs_get_boolean(PREF_ROSTER_WRAP);
 
-        if (unread > 0) {
+        char *unreadpos = prefs_get_string(PREF_ROSTER_UNREAD);
+        if ((g_strcmp0(unreadpos, "after") == 0) && unread > 0) {
             GString *unreadmsg = g_string_new("");
             g_string_append_printf(unreadmsg, " (%d)", unread);
             const char *presence = p_contact_presence(contact);
@@ -260,6 +267,7 @@ _rosterwin_resources(ProfLayoutSplit *layout, PContact contact, int current_inde
             win_sub_print(layout->subwin, unreadmsg->str, FALSE, wrap, current_indent);
             wattroff(layout->subwin, theme_attrs(presence_colour));
         }
+        prefs_free_string(unreadpos);
     }
 
     g_list_free(resources);
@@ -303,14 +311,21 @@ _rosterwin_contact(ProfLayoutSplit *layout, PContact contact)
     if (ch) {
         g_string_append_printf(msg, "%c", ch);
     }
-    g_string_append(msg, name);
 
-    if (!prefs_get_boolean(PREF_ROSTER_RESOURCE)) {
-        if (unread > 0) {
-            g_string_append_printf(msg, " (%d)", unread);
-        }
-        unread = 0;
+    char *unreadpos = prefs_get_string(PREF_ROSTER_UNREAD);
+    if ((g_strcmp0(unreadpos, "before") == 0) && unread > 0) {
+        g_string_append_printf(msg, "(%d) ", unread);
     }
+    g_string_append(msg, name);
+    if (g_strcmp0(unreadpos, "after") == 0) {
+        if (!prefs_get_boolean(PREF_ROSTER_RESOURCE)) {
+            if (unread > 0) {
+                g_string_append_printf(msg, " (%d)", unread);
+            }
+            unread = 0;
+        }
+    }
+    prefs_free_string(unreadpos);
 
     win_sub_newline_lazy(layout->subwin);
     gboolean wrap = prefs_get_boolean(PREF_ROSTER_WRAP);
@@ -483,10 +498,15 @@ _rosterwin_room(ProfLayoutSplit *layout, ProfMucWin *mucwin)
         g_string_append_printf(msg, "%c", ch);
     }
 
+    char *unreadpos = prefs_get_string(PREF_ROSTER_ROOMS_UNREAD);
+    if ((g_strcmp0(unreadpos, "before") == 0) && mucwin->unread > 0) {
+        g_string_append_printf(msg, "(%d) ", mucwin->unread);
+    }
     g_string_append(msg, mucwin->roomjid);
-    if (mucwin->unread > 0) {
+    if ((g_strcmp0(unreadpos, "after") == 0) && mucwin->unread > 0) {
         g_string_append_printf(msg, " (%d)", mucwin->unread);
     }
+    prefs_free_string(unreadpos);
 
     win_sub_newline_lazy(layout->subwin);
     gboolean wrap = prefs_get_boolean(PREF_ROSTER_WRAP);
