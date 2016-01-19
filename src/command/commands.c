@@ -2338,7 +2338,26 @@ cmd_roster(ProfWin *window, const char *const command, gchar **args)
         }
 
     } else if (g_strcmp0(args[0], "room") == 0) {
-        if (g_strcmp0(args[1], "order") == 0) {
+        if (g_strcmp0(args[1], "position") == 0) {
+            if (g_strcmp0(args[2], "first") == 0) {
+                cons_show("Showing rooms first in roster.");
+                prefs_set_string(PREF_ROSTER_ROOMS_POS, "first");
+                if (conn_status == JABBER_CONNECTED) {
+                    rosterwin_roster();
+                }
+                return TRUE;
+            } else if (g_strcmp0(args[2], "last") == 0) {
+                cons_show("Showing rooms last in roster.");
+                prefs_set_string(PREF_ROSTER_ROOMS_POS, "last");
+                if (conn_status == JABBER_CONNECTED) {
+                    rosterwin_roster();
+                }
+                return TRUE;
+            } else {
+                cons_bad_cmd_usage(command);
+                return TRUE;
+            }
+        } else if (g_strcmp0(args[1], "order") == 0) {
             if (g_strcmp0(args[2], "name") == 0) {
                 cons_show("Ordering roster rooms by name");
                 prefs_set_string(PREF_ROSTER_ROOMS_ORDER, "name");

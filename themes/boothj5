@@ -113,6 +113,7 @@ roster.status=true
 roster.rooms=true
 roster.rooms.order=name
 roster.rooms.unread=before
+roster.rooms.pos=last
 occupants=true
 occupants.size=15
 occupants.jid=false

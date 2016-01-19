@@ -41,6 +41,7 @@ roster.status=true
 roster.rooms=true
 roster.rooms.order=unread
 roster.rooms.unread=after
+roster.rooms.pos=last
 privileges=true
 presence=true
 intype=true
