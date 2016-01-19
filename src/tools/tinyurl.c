@@ -34,6 +34,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <sys/select.h>
 
 #include <curl/curl.h>
 #include <curl/easy.h>
