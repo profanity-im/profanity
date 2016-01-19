@@ -33,6 +33,7 @@
  */
 #include "prof_config.h"
 
+#include <sys/select.h>
 #include <assert.h>
 #include <errno.h>
 #include <stdlib.h>
