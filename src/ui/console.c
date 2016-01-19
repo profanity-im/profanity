@@ -1346,6 +1346,10 @@ cons_roster_setting(void)
     else
         cons_show("Roster rooms (/roster)           : hide");
 
+    char *rooms_pos = prefs_get_string(PREF_ROSTER_ROOMS_POS);
+    cons_show("Roster rooms position (/roster)  : %s", rooms_pos);
+    prefs_free_string(rooms_pos);
+
     char *rooms_order = prefs_get_string(PREF_ROSTER_ROOMS_ORDER);
     cons_show("Roster rooms order (/roster)     : %s", rooms_order);
     prefs_free_string(rooms_order);
