@@ -315,6 +315,7 @@ _rosterwin_contact(ProfLayoutSplit *layout, PContact contact)
     char *unreadpos = prefs_get_string(PREF_ROSTER_UNREAD);
     if ((g_strcmp0(unreadpos, "before") == 0) && unread > 0) {
         g_string_append_printf(msg, "(%d) ", unread);
+        unread = 0;
     }
     g_string_append(msg, name);
     if (g_strcmp0(unreadpos, "after") == 0) {
@@ -604,11 +605,18 @@ rosterwin_roster(void)
 
     ProfLayoutSplit *layout = (ProfLayoutSplit*)console->layout;
     assert(layout->memcheck == LAYOUT_SPLIT_MEMCHECK);
+    werase(layout->subwin);
+
+    gboolean newline = FALSE;
+    char *roomspos = prefs_get_string(PREF_ROSTER_ROOMS_POS);
+    if (prefs_get_boolean(PREF_ROSTER_ROOMS) && (g_strcmp0(roomspos, "first") == 0)) {
+        _rosterwin_rooms(layout, newline);
+        newline = TRUE;
+    }
 
     char *by = prefs_get_string(PREF_ROSTER_BY);
     if (g_strcmp0(by, "presence") == 0) {
-        werase(layout->subwin);
-        _rosterwin_contacts_by_presence(layout, "chat", "Available for chat", FALSE);
+        _rosterwin_contacts_by_presence(layout, "chat", "Available for chat", newline);
         _rosterwin_contacts_by_presence(layout, "online", "Online", TRUE);
         _rosterwin_contacts_by_presence(layout, "away", "Away", TRUE);
         _rosterwin_contacts_by_presence(layout, "xa", "Extended Away", TRUE);
@@ -617,8 +625,6 @@ rosterwin_roster(void)
             _rosterwin_contacts_by_presence(layout, "offline", "Offline", TRUE);
         }
     } else if (g_strcmp0(by, "group") == 0) {
-        werase(layout->subwin);
-        gboolean newline = FALSE;
         GSList *groups = roster_get_groups();
         GSList *curr_group = groups;
         while (curr_group) {
@@ -640,14 +646,16 @@ rosterwin_roster(void)
         }
         prefs_free_string(order);
 
-        werase(layout->subwin);
-
         wattron(layout->subwin, theme_attrs(THEME_ROSTER_HEADER));
         GString *title = g_string_new(" ");
         char ch = prefs_get_roster_header_char();
         if (ch) {
             g_string_append_printf(title, "%c", ch);
         }
+        if (newline) {
+            win_sub_newline_lazy(layout->subwin);
+        }
+
         g_string_append(title, "Roster");
         if (prefs_get_boolean(PREF_ROSTER_COUNT)) {
             g_string_append_printf(title, " (%d)", g_slist_length(contacts));
@@ -669,7 +677,9 @@ rosterwin_roster(void)
     }
     prefs_free_string(by);
 
-    if (prefs_get_boolean(PREF_ROSTER_ROOMS)) {
+    if (prefs_get_boolean(PREF_ROSTER_ROOMS) && (g_strcmp0(roomspos, "last") == 0)) {
         _rosterwin_rooms(layout, TRUE);
     }
+
+    prefs_free_string(roomspos);
 }
