@@ -2189,6 +2189,13 @@ cmd_roster(ProfWin *window, const char *const command, gchar **args)
                 rosterwin_roster();
             }
             return TRUE;
+        } else if (g_strcmp0(args[1], "contacts") == 0) {
+            cons_show("Roster contacts enabled");
+            prefs_set_boolean(PREF_ROSTER_CONTACTS, TRUE);
+            if (conn_status == JABBER_CONNECTED) {
+                rosterwin_roster();
+            }
+            return TRUE;
         } else if (g_strcmp0(args[1], "rooms") == 0) {
             cons_show("Roster rooms enabled");
             prefs_set_boolean(PREF_ROSTER_ROOMS, TRUE);
@@ -2253,6 +2260,13 @@ cmd_roster(ProfWin *window, const char *const command, gchar **args)
         } else if (g_strcmp0(args[1], "priority") == 0) {
             cons_show("Roster priority disabled");
             prefs_set_boolean(PREF_ROSTER_PRIORITY, FALSE);
+            if (conn_status == JABBER_CONNECTED) {
+                rosterwin_roster();
+            }
+            return TRUE;
+        } else if (g_strcmp0(args[1], "contacts") == 0) {
+            cons_show("Roster contacts disabled");
+            prefs_set_boolean(PREF_ROSTER_CONTACTS, FALSE);
             if (conn_status == JABBER_CONNECTED) {
                 rosterwin_roster();
             }

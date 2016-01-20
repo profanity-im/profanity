@@ -1060,6 +1060,7 @@ _get_group(preference_t pref)
         case PREF_ROSTER_PRIORITY:
         case PREF_ROSTER_WRAP:
         case PREF_ROSTER_RESOURCE_JOIN:
+        case PREF_ROSTER_CONTACTS:
         case PREF_ROSTER_ROOMS:
         case PREF_ROSTER_ROOMS_POS:
         case PREF_ROSTER_ROOMS_ORDER:
@@ -1260,6 +1261,8 @@ _get_key(preference_t pref)
             return "roster.wrap";
         case PREF_ROSTER_RESOURCE_JOIN:
             return "roster.resource.join";
+        case PREF_ROSTER_CONTACTS:
+            return "roster.contacts";
         case PREF_ROSTER_ROOMS:
             return "roster.rooms";
         case PREF_ROSTER_ROOMS_POS:
@@ -1325,6 +1328,7 @@ _get_default_boolean(preference_t pref)
         case PREF_ROSTER_COUNT:
         case PREF_ROSTER_PRIORITY:
         case PREF_ROSTER_RESOURCE_JOIN:
+        case PREF_ROSTER_CONTACTS:
         case PREF_ROSTER_ROOMS:
         case PREF_TLS_SHOW:
         case PREF_LASTACTIVITY:

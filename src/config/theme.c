@@ -320,6 +320,7 @@ _load_preferences(void)
     _set_string_preference("roster.unread", PREF_ROSTER_UNREAD);
     _set_boolean_preference("roster.count", PREF_ROSTER_COUNT);
     _set_boolean_preference("roster.priority", PREF_ROSTER_PRIORITY);
+    _set_boolean_preference("roster.contacts", PREF_ROSTER_CONTACTS);
     _set_boolean_preference("roster.rooms", PREF_ROSTER_ROOMS);
     _set_string_preference("roster.rooms.order", PREF_ROSTER_ROOMS_ORDER);
     _set_string_preference("roster.rooms.unread", PREF_ROSTER_ROOMS_UNREAD);

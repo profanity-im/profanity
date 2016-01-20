@@ -31,6 +31,7 @@ roster.contact.indent=0
 roster.resource=false
 roster.presence=false
 roster.status=false
+roster.contacts=true
 roster.rooms=false
 roster.rooms.unread=off
 privileges=false
