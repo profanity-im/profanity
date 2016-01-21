@@ -1,8 +1,8 @@
 [colours]
 bkgnd=default
 titlebar=blue
-titlebar.text=white
-titlebar.brackets=white
+titlebar.text=bold_white
+titlebar.brackets=bold_white
 titlebar.unencrypted=bold_red
 titlebar.encrypted=bold_white
 titlebar.untrusted=bold_yellow
@@ -15,7 +15,7 @@ titlebar.dnd=bold_red
 titlebar.chat=bold_green
 statusbar=blue
 statusbar.text=bold_white
-statusbar.brackets=white
+statusbar.brackets=bold_white
 statusbar.active=bold_cyan
 statusbar.new=bold_white
 main.text=white

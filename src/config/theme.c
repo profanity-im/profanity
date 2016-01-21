@@ -53,6 +53,7 @@ static GString *theme_loc;
 static GKeyFile *theme;
 static GHashTable *bold_items;
 static GHashTable *str_to_pair;
+static GHashTable *defaults;
 
 struct colour_string_t {
     char *str;
@@ -73,6 +74,74 @@ theme_init(const char *const theme_name)
     }
 
     str_to_pair = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, NULL);
+    defaults = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, NULL);
+
+    g_hash_table_insert(defaults, strdup("main.text"),               strdup("white"));
+    g_hash_table_insert(defaults, strdup("main.text.me"),            strdup("white"));
+    g_hash_table_insert(defaults, strdup("main.text.them"),          strdup("white"));
+    g_hash_table_insert(defaults, strdup("main.splash"),             strdup("cyan"));
+    g_hash_table_insert(defaults, strdup("error"),                   strdup("red"));
+    g_hash_table_insert(defaults, strdup("incoming"),                strdup("yellow"));
+    g_hash_table_insert(defaults, strdup("input.text"),              strdup("white"));
+    g_hash_table_insert(defaults, strdup("main.time"),               strdup("white"));
+    g_hash_table_insert(defaults, strdup("titlebar.text"),           strdup("white"));
+    g_hash_table_insert(defaults, strdup("titlebar.brackets"),       strdup("cyan"));
+    g_hash_table_insert(defaults, strdup("titlebar.unencrypted"),    strdup("red"));
+    g_hash_table_insert(defaults, strdup("titlebar.encrypted"),      strdup("white"));
+    g_hash_table_insert(defaults, strdup("titlebar.untrusted"),      strdup("yellow"));
+    g_hash_table_insert(defaults, strdup("titlebar.trusted"),        strdup("white"));
+    g_hash_table_insert(defaults, strdup("titlebar.online"),         strdup("white"));
+    g_hash_table_insert(defaults, strdup("titlebar.offline"),        strdup("white"));
+    g_hash_table_insert(defaults, strdup("titlebar.away"),           strdup("white"));
+    g_hash_table_insert(defaults, strdup("titlebar.chat"),           strdup("white"));
+    g_hash_table_insert(defaults, strdup("titlebar.dnd"),            strdup("white"));
+    g_hash_table_insert(defaults, strdup("titlebar.xa"),             strdup("white"));
+    g_hash_table_insert(defaults, strdup("statusbar.text"),          strdup("white"));
+    g_hash_table_insert(defaults, strdup("statusbar.brackets"),      strdup("cyan"));
+    g_hash_table_insert(defaults, strdup("statusbar.active"),        strdup("cyan"));
+    g_hash_table_insert(defaults, strdup("statusbar.new"),           strdup("white"));
+    g_hash_table_insert(defaults, strdup("me"),                      strdup("yellow"));
+    g_hash_table_insert(defaults, strdup("them"),                    strdup("green"));
+    g_hash_table_insert(defaults, strdup("receipt.sent"),            strdup("red"));
+    g_hash_table_insert(defaults, strdup("roominfo"),                strdup("yellow"));
+    g_hash_table_insert(defaults, strdup("roommention"),             strdup("yellow"));
+    g_hash_table_insert(defaults, strdup("online"),                  strdup("green"));
+    g_hash_table_insert(defaults, strdup("offline"),                 strdup("red"));
+    g_hash_table_insert(defaults, strdup("away"),                    strdup("cyan"));
+    g_hash_table_insert(defaults, strdup("chat"),                    strdup("green"));
+    g_hash_table_insert(defaults, strdup("dnd"),                     strdup("red"));
+    g_hash_table_insert(defaults, strdup("xa"),                      strdup("cyan"));
+    g_hash_table_insert(defaults, strdup("typing"),                  strdup("yellow"));
+    g_hash_table_insert(defaults, strdup("gone"),                    strdup("red"));
+    g_hash_table_insert(defaults, strdup("subscribed"),              strdup("green"));
+    g_hash_table_insert(defaults, strdup("unsubscribed"),            strdup("red"));
+    g_hash_table_insert(defaults, strdup("otr.started.trusted"),     strdup("green"));
+    g_hash_table_insert(defaults, strdup("otr.started.untrusted"),   strdup("yellow"));
+    g_hash_table_insert(defaults, strdup("otr.ended"),               strdup("red"));
+    g_hash_table_insert(defaults, strdup("otr.trusted"),             strdup("green"));
+    g_hash_table_insert(defaults, strdup("otr.untrusted"),           strdup("yellow"));
+    g_hash_table_insert(defaults, strdup("roster.header"),           strdup("yellow"));
+    g_hash_table_insert(defaults, strdup("roster.online"),           strdup("green"));
+    g_hash_table_insert(defaults, strdup("roster.offline"),          strdup("red"));
+    g_hash_table_insert(defaults, strdup("roster.chat"),             strdup("green"));
+    g_hash_table_insert(defaults, strdup("roster.away"),             strdup("cyan"));
+    g_hash_table_insert(defaults, strdup("roster.dnd"),              strdup("red"));
+    g_hash_table_insert(defaults, strdup("roster.xa"),               strdup("cyan"));
+    g_hash_table_insert(defaults, strdup("roster.online.active"),    strdup("green"));
+    g_hash_table_insert(defaults, strdup("roster.offline.active"),   strdup("red"));
+    g_hash_table_insert(defaults, strdup("roster.chat.active"),      strdup("green"));
+    g_hash_table_insert(defaults, strdup("roster.away.active"),      strdup("cyan"));
+    g_hash_table_insert(defaults, strdup("roster.dnd.active"),       strdup("red"));
+    g_hash_table_insert(defaults, strdup("roster.xa.active"),        strdup("cyan"));
+    g_hash_table_insert(defaults, strdup("roster.online.unread"),    strdup("green"));
+    g_hash_table_insert(defaults, strdup("roster.offline.unread"),   strdup("red"));
+    g_hash_table_insert(defaults, strdup("roster.chat.unread"),      strdup("green"));
+    g_hash_table_insert(defaults, strdup("roster.away.unread"),      strdup("cyan"));
+    g_hash_table_insert(defaults, strdup("roster.dnd.unread"),       strdup("red"));
+    g_hash_table_insert(defaults, strdup("roster.xa.unread"),        strdup("cyan"));
+    g_hash_table_insert(defaults, strdup("roster.room"),             strdup("green"));
+    g_hash_table_insert(defaults, strdup("roster.room.unread"),      strdup("green"));
+    g_hash_table_insert(defaults, strdup("occupants.header"),        strdup("yellow"));
 }
 
 gboolean
@@ -151,6 +220,10 @@ theme_close(void)
     if (str_to_pair) {
         g_hash_table_destroy(str_to_pair);
         str_to_pair = NULL;
+    }
+    if (defaults) {
+        g_hash_table_destroy(defaults);
+        defaults = NULL;
     }
 }
 
@@ -560,7 +633,12 @@ _theme_prep_fgnd(char *setting, char *def, GString *lookup_str, gboolean *bold)
 char*
 theme_get_string(char *str)
 {
-    return g_key_file_get_string(theme, "colours", str, NULL);
+    char *res = g_key_file_get_string(theme, "colours", str, NULL);
+    if (!res) {
+        return strdup(g_hash_table_lookup(defaults, str));
+    } else {
+        return res;
+    }
 }
 
 void
