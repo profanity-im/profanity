@@ -404,7 +404,6 @@ prefs_free_string(char *pref)
     }
 }
 
-
 void
 prefs_set_string(preference_t pref, char *value)
 {

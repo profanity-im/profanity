@@ -2004,104 +2004,111 @@ cons_get_string(ProfConsoleWin *conswin)
 }
 
 void
-cons_theme_properties(void)
+_cons_theme_bar_prop(theme_item_t theme, char *prop)
 {
     ProfWin *console = wins_get_console();
+    GString *str = g_string_new(" ");
+    char *setting = theme_get_string(prop);
+    g_string_append_printf(str, "%s=%s ", prop, setting);
+    theme_free_string(setting);
+    win_print(console, '-', 0, NULL, NO_EOL, theme, "", str->str);
+    win_print(console, '-', 0, NULL, NO_DATE, THEME_TEXT, "", "");
+    g_string_free(str, TRUE);
+}
 
-    win_print(console, '-', 0, NULL, NO_EOL, THEME_TITLE_TEXT, "", " titlebar.text ");
-    win_print(console, '-', 0, NULL, NO_DATE, THEME_TEXT, "", "");
-    win_print(console, '-', 0, NULL, NO_EOL, THEME_TITLE_BRACKET, "", " titlebar.brackets ");
-    win_print(console, '-', 0, NULL, NO_DATE, THEME_TEXT, "", "");
+void
+_cons_theme_prop(theme_item_t theme, char *prop)
+{
+    ProfWin *console = wins_get_console();
+    GString *str = g_string_new(prop);
+    char *setting = theme_get_string(prop);
+    g_string_append_printf(str, "=%s", setting);
+    theme_free_string(setting);
+    win_print(console, '-', 0, NULL, 0, theme, "", str->str);
+    g_string_free(str, TRUE);
+}
 
-    win_print(console, '-', 0, NULL, NO_EOL, THEME_TITLE_UNENCRYPTED, "", " titlebar.unencrypted ");
-    win_print(console, '-', 0, NULL, NO_DATE, THEME_TEXT, "", "");
-    win_print(console, '-', 0, NULL, NO_EOL, THEME_TITLE_ENCRYPTED, "", " titlebar.encrypted ");
-    win_print(console, '-', 0, NULL, NO_DATE, THEME_TEXT, "", "");
-    win_print(console, '-', 0, NULL, NO_EOL, THEME_TITLE_UNTRUSTED, "", " titlebar.untrusted ");
-    win_print(console, '-', 0, NULL, NO_DATE, THEME_TEXT, "", "");
-    win_print(console, '-', 0, NULL, NO_EOL, THEME_TITLE_TRUSTED, "", " titlebar.trusted ");
-    win_print(console, '-', 0, NULL, NO_DATE, THEME_TEXT, "", "");
+void
+cons_theme_properties(void)
+{
+    _cons_theme_bar_prop(THEME_TITLE_TEXT, "titlebar.text");
+    _cons_theme_bar_prop(THEME_TITLE_BRACKET, "titlebar.brackets");
 
-    win_print(console, '-', 0, NULL, NO_EOL, THEME_TITLE_CHAT, "", " titlebar.chat ");
-    win_print(console, '-', 0, NULL, NO_DATE, THEME_TEXT, "", "");
-    win_print(console, '-', 0, NULL, NO_EOL, THEME_TITLE_ONLINE, "", " titlebar.online ");
-    win_print(console, '-', 0, NULL, NO_DATE, THEME_TEXT, "", "");
-    win_print(console, '-', 0, NULL, NO_EOL, THEME_TITLE_AWAY, "", " titlebar.away ");
-    win_print(console, '-', 0, NULL, NO_DATE, THEME_TEXT, "", "");
-    win_print(console, '-', 0, NULL, NO_EOL, THEME_TITLE_XA, "", " titlebar.xa ");
-    win_print(console, '-', 0, NULL, NO_DATE, THEME_TEXT, "", "");
-    win_print(console, '-', 0, NULL, NO_EOL, THEME_TITLE_DND, "", " titlebar.dnd ");
-    win_print(console, '-', 0, NULL, NO_DATE, THEME_TEXT, "", "");
-    win_print(console, '-', 0, NULL, NO_EOL, THEME_TITLE_OFFLINE, "", " titlebar.offline ");
-    win_print(console, '-', 0, NULL, NO_DATE, THEME_TEXT, "", "");
+    _cons_theme_bar_prop(THEME_TITLE_UNENCRYPTED, "titlebar.unencrypted");
+    _cons_theme_bar_prop(THEME_TITLE_ENCRYPTED, "titlebar.encrypted");
+    _cons_theme_bar_prop(THEME_TITLE_UNTRUSTED, "titlebar.untrusted");
+    _cons_theme_bar_prop(THEME_TITLE_TRUSTED, "titlebar.trusted");
 
-    win_print(console, '-', 0, NULL, NO_EOL, THEME_STATUS_TEXT, "", " statusbar.text ");
-    win_print(console, '-', 0, NULL, NO_DATE, THEME_TEXT, "", "");
-    win_print(console, '-', 0, NULL, NO_EOL, THEME_STATUS_BRACKET, "", " statusbar.brackets ");
-    win_print(console, '-', 0, NULL, NO_DATE, THEME_TEXT, "", "");
-    win_print(console, '-', 0, NULL, NO_EOL, THEME_STATUS_ACTIVE, "", " statusbar.active ");
-    win_print(console, '-', 0, NULL, NO_DATE, THEME_TEXT, "", "");
-    win_print(console, '-', 0, NULL, NO_EOL, THEME_STATUS_NEW, "", " statusbar.new ");
-    win_print(console, '-', 0, NULL, NO_DATE, THEME_TEXT, "", "");
+    _cons_theme_bar_prop(THEME_TITLE_CHAT, "titlebar.chat");
+    _cons_theme_bar_prop(THEME_TITLE_ONLINE, "titlebar.online");
+    _cons_theme_bar_prop(THEME_TITLE_AWAY, "titlebar.away");
+    _cons_theme_bar_prop(THEME_TITLE_XA, "titlebar.xa");
+    _cons_theme_bar_prop(THEME_TITLE_DND, "titlebar.dnd");
+    _cons_theme_bar_prop(THEME_TITLE_OFFLINE, "titlebar.offline");
 
-    win_print(console, '-', 0, NULL, 0, THEME_TIME, "", "main.time");
-    win_print(console, '-', 0, NULL, 0, THEME_TEXT, "", "main.text");
-    win_print(console, '-', 0, NULL, 0, THEME_SPLASH, "", "main.splash");
-    win_print(console, '-', 0, NULL, 0, THEME_ERROR, "", "error");
-    win_print(console, '-', 0, NULL, 0, THEME_OTR_STARTED_TRUSTED, "", "otr.started.trusted");
-    win_print(console, '-', 0, NULL, 0, THEME_OTR_STARTED_UNTRUSTED, "", "otr.started.untrusted");
-    win_print(console, '-', 0, NULL, 0, THEME_OTR_ENDED, "", "otr.ended");
-    win_print(console, '-', 0, NULL, 0, THEME_OTR_TRUSTED, "", "otr.trusted");
-    win_print(console, '-', 0, NULL, 0, THEME_OTR_UNTRUSTED, "", "otr.untrusted");
+    _cons_theme_bar_prop(THEME_STATUS_TEXT, "statusbar.text");
+    _cons_theme_bar_prop(THEME_STATUS_BRACKET, "statusbar.brackets");
+    _cons_theme_bar_prop(THEME_STATUS_ACTIVE, "statusbar.active");
+    _cons_theme_bar_prop(THEME_STATUS_NEW, "statusbar.new");
 
-    win_print(console, '-', 0, NULL, 0, THEME_ME, "", "me");
-    win_print(console, '-', 0, NULL, 0, THEME_TEXT_ME, "", "main.text.me");
-    win_print(console, '-', 0, NULL, 0, THEME_THEM, "", "them");
-    win_print(console, '-', 0, NULL, 0, THEME_TEXT_THEM, "", "main.text.them");
+    _cons_theme_prop(THEME_TIME, "main.time");
+    _cons_theme_prop(THEME_TEXT, "main.text");
+    _cons_theme_prop(THEME_SPLASH, "main.splash");
+    _cons_theme_prop(THEME_ERROR, "error");
+    _cons_theme_prop(THEME_OTR_STARTED_TRUSTED, "otr.started.trusted");
+    _cons_theme_prop(THEME_OTR_STARTED_UNTRUSTED, "otr.started.untrusted");
+    _cons_theme_prop(THEME_OTR_ENDED, "otr.ended");
+    _cons_theme_prop(THEME_OTR_TRUSTED, "otr.trusted");
+    _cons_theme_prop(THEME_OTR_UNTRUSTED, "otr.untrusted");
 
-    win_print(console, '-', 0, NULL, 0, THEME_CHAT, "", "chat");
-    win_print(console, '-', 0, NULL, 0, THEME_ONLINE, "", "online");
-    win_print(console, '-', 0, NULL, 0, THEME_AWAY, "", "away");
-    win_print(console, '-', 0, NULL, 0, THEME_XA, "", "xa");
-    win_print(console, '-', 0, NULL, 0, THEME_DND, "", "dnd");
-    win_print(console, '-', 0, NULL, 0, THEME_OFFLINE, "", "offline");
-    win_print(console, '-', 0, NULL, 0, THEME_SUBSCRIBED, "", "subscribed");
-    win_print(console, '-', 0, NULL, 0, THEME_UNSUBSCRIBED, "", "unsubscribed");
+    _cons_theme_prop(THEME_ME, "me");
+    _cons_theme_prop(THEME_TEXT_ME, "main.text.me");
+    _cons_theme_prop(THEME_THEM, "them");
+    _cons_theme_prop(THEME_TEXT_THEM, "main.text.them");
 
-    win_print(console, '-', 0, NULL, 0, THEME_INCOMING, "", "incoming");
-    win_print(console, '-', 0, NULL, 0, THEME_TYPING, "", "typing");
-    win_print(console, '-', 0, NULL, 0, THEME_GONE, "", "gone");
+    _cons_theme_prop(THEME_CHAT, "chat");
+    _cons_theme_prop(THEME_ONLINE, "online");
+    _cons_theme_prop(THEME_AWAY, "away");
+    _cons_theme_prop(THEME_XA, "xa");
+    _cons_theme_prop(THEME_DND, "dnd");
+    _cons_theme_prop(THEME_OFFLINE, "offline");
+    _cons_theme_prop(THEME_SUBSCRIBED, "subscribed");
+    _cons_theme_prop(THEME_UNSUBSCRIBED, "unsubscribed");
 
-    win_print(console, '-', 0, NULL, 0, THEME_ROOMINFO, "", "roominfo");
-    win_print(console, '-', 0, NULL, 0, THEME_ROOMMENTION, "", "roommention");
+    _cons_theme_prop(THEME_INCOMING, "incoming");
+    _cons_theme_prop(THEME_TYPING, "typing");
+    _cons_theme_prop(THEME_GONE, "gone");
 
-    win_print(console, '-', 0, NULL, 0, THEME_ROSTER_HEADER, "", "roster.header");
-    win_print(console, '-', 0, NULL, 0, THEME_ROSTER_CHAT, "", "roster.chat");
-    win_print(console, '-', 0, NULL, 0, THEME_ROSTER_ONLINE, "", "roster.online");
-    win_print(console, '-', 0, NULL, 0, THEME_ROSTER_AWAY, "", "roster.away");
-    win_print(console, '-', 0, NULL, 0, THEME_ROSTER_XA, "", "roster.xa");
-    win_print(console, '-', 0, NULL, 0, THEME_ROSTER_DND, "", "roster.dnd");
-    win_print(console, '-', 0, NULL, 0, THEME_ROSTER_OFFLINE, "", "roster.offline");
-    win_print(console, '-', 0, NULL, 0, THEME_ROSTER_CHAT_ACTIVE, "", "roster.chat.active");
-    win_print(console, '-', 0, NULL, 0, THEME_ROSTER_ONLINE_ACTIVE, "", "roster.online.active");
-    win_print(console, '-', 0, NULL, 0, THEME_ROSTER_AWAY_ACTIVE, "", "roster.away.active");
-    win_print(console, '-', 0, NULL, 0, THEME_ROSTER_XA_ACTIVE, "", "roster.xa.active");
-    win_print(console, '-', 0, NULL, 0, THEME_ROSTER_DND_ACTIVE, "", "roster.dnd.active");
-    win_print(console, '-', 0, NULL, 0, THEME_ROSTER_OFFLINE_ACTIVE, "", "roster.offline.active");
-    win_print(console, '-', 0, NULL, 0, THEME_ROSTER_CHAT_UNREAD, "", "roster.chat.unread");
-    win_print(console, '-', 0, NULL, 0, THEME_ROSTER_ONLINE_UNREAD, "", "roster.online.unread");
-    win_print(console, '-', 0, NULL, 0, THEME_ROSTER_AWAY_UNREAD, "", "roster.away.unread");
-    win_print(console, '-', 0, NULL, 0, THEME_ROSTER_XA_UNREAD, "", "roster.xa.unread");
-    win_print(console, '-', 0, NULL, 0, THEME_ROSTER_DND_UNREAD, "", "roster.dnd.unread");
-    win_print(console, '-', 0, NULL, 0, THEME_ROSTER_OFFLINE_UNREAD, "", "roster.offline.unread");
-    win_print(console, '-', 0, NULL, 0, THEME_ROSTER_ROOM, "", "roster.room");
-    win_print(console, '-', 0, NULL, 0, THEME_ROSTER_ROOM_UNREAD, "", "roster.room.unread");
+    _cons_theme_prop(THEME_ROOMINFO, "roominfo");
+    _cons_theme_prop(THEME_ROOMMENTION, "roommention");
 
-    win_print(console, '-', 0, NULL, 0, THEME_OCCUPANTS_HEADER, "", "occupants.header");
+    _cons_theme_prop(THEME_ROSTER_HEADER, "roster.header");
+    _cons_theme_prop(THEME_ROSTER_CHAT, "roster.chat");
+    _cons_theme_prop(THEME_ROSTER_ONLINE, "roster.online");
+    _cons_theme_prop(THEME_ROSTER_AWAY, "roster.away");
+    _cons_theme_prop(THEME_ROSTER_XA, "roster.xa");
+    _cons_theme_prop(THEME_ROSTER_DND, "roster.dnd");
+    _cons_theme_prop(THEME_ROSTER_OFFLINE, "roster.offline");
+    _cons_theme_prop(THEME_ROSTER_CHAT_ACTIVE, "roster.chat.active");
+    _cons_theme_prop(THEME_ROSTER_ONLINE_ACTIVE, "roster.online.active");
+    _cons_theme_prop(THEME_ROSTER_AWAY_ACTIVE, "roster.away.active");
+    _cons_theme_prop(THEME_ROSTER_XA_ACTIVE, "roster.xa.active");
+    _cons_theme_prop(THEME_ROSTER_DND_ACTIVE, "roster.dnd.active");
+    _cons_theme_prop(THEME_ROSTER_OFFLINE_ACTIVE, "roster.offline.active");
+    _cons_theme_prop(THEME_ROSTER_CHAT_UNREAD, "roster.chat.unread");
+    _cons_theme_prop(THEME_ROSTER_ONLINE_UNREAD, "roster.online.unread");
+    _cons_theme_prop(THEME_ROSTER_AWAY_UNREAD, "roster.away.unread");
+    _cons_theme_prop(THEME_ROSTER_XA_UNREAD, "roster.xa.unread");
+    _cons_theme_prop(THEME_ROSTER_DND_UNREAD, "roster.dnd.unread");
+    _cons_theme_prop(THEME_ROSTER_OFFLINE_UNREAD, "roster.offline.unread");
+    _cons_theme_prop(THEME_ROSTER_ROOM, "roster.room");
+    _cons_theme_prop(THEME_ROSTER_ROOM_UNREAD, "roster.room.unread");
 
-    win_print(console, '-', 0, NULL, 0, THEME_RECEIPT_SENT, "", "receipt.sent");
+    _cons_theme_prop(THEME_OCCUPANTS_HEADER, "occupants.header");
 
-    win_print(console, '-', 0, NULL, 0, THEME_INPUT_TEXT, "", "input.text");
+    _cons_theme_prop(THEME_RECEIPT_SENT, "receipt.sent");
+
+    _cons_theme_prop(THEME_INPUT_TEXT, "input.text");
 
     cons_show("");
 }

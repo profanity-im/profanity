@@ -131,7 +131,8 @@ gboolean theme_load(const char *const theme_name);
 GSList* theme_list(void);
 void theme_close(void);
 int theme_attrs(theme_item_t attrs);
-
+char* theme_get_string(char *str);
+void theme_free_string(char *str);
 theme_item_t theme_main_presence_attrs(const char *const presence);
 theme_item_t theme_roster_unread_presence_attrs(const char *const presence);
 theme_item_t theme_roster_active_presence_attrs(const char *const presence);
