@@ -1727,13 +1727,15 @@ static struct cmd_t command_defs[] =
         CMD_SYN(
             "/theme list",
             "/theme load <theme>",
-            "/theme colours")
+            "/theme colours",
+            "/theme properties")
         CMD_DESC(
             "Load a theme, includes colours and UI options.")
         CMD_ARGS(
             { "list", "List all available themes." },
             { "load <theme>", "Load the specified theme. 'default' will reset to the default theme." },
-            { "colours", "Show the colour values as rendered by the terminal." })
+            { "colours", "Show the colour values as rendered by the terminal." },
+            { "properties", "Show each themed property." })
         CMD_EXAMPLES(
             "/theme list",
             "/theme load forest")
@@ -2106,6 +2108,7 @@ cmd_init(void)
     autocomplete_add(theme_ac, "load");
     autocomplete_add(theme_ac, "list");
     autocomplete_add(theme_ac, "colours");
+    autocomplete_add(theme_ac, "properties");
 
     disco_ac = autocomplete_new();
     autocomplete_add(disco_ac, "info");

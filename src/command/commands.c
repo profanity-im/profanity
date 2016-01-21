@@ -1401,6 +1401,8 @@ cmd_theme(ProfWin *window, const char *const command, gchar **args)
     // show colours
     } else if (g_strcmp0(args[0], "colours") == 0) {
         cons_theme_colours();
+    } else if (g_strcmp0(args[0], "properties") == 0) {
+        cons_theme_properties();
     } else {
         cons_bad_cmd_usage(command);
     }

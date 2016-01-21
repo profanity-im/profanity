@@ -1086,6 +1086,7 @@ _win_print(ProfWin *window, const char show_char, int pad_indent, GDateTime *tim
     if ((flags & NO_DATE) == 0) {
         if (date_fmt && strlen(date_fmt)) {
             if ((flags & NO_COLOUR_DATE) == 0) {
+                wbkgdset(window->layout->win, theme_attrs(THEME_TIME));
                 wattron(window->layout->win, theme_attrs(THEME_TIME));
             }
             wprintw(window->layout->win, "%s %c ", date_fmt, show_char);
@@ -1108,6 +1109,7 @@ _win_print(ProfWin *window, const char show_char, int pad_indent, GDateTime *tim
             colour = theme_attrs(THEME_RECEIPT_SENT);
         }
 
+        wbkgdset(window->layout->win, colour);
         wattron(window->layout->win, colour);
         if (strncmp(message, "/me ", 4) == 0) {
             wprintw(window->layout->win, "*%s ", from);
@@ -1121,8 +1123,10 @@ _win_print(ProfWin *window, const char show_char, int pad_indent, GDateTime *tim
 
     if (!me_message) {
         if (receipt && !receipt->received) {
+            wbkgdset(window->layout->win, theme_attrs(THEME_RECEIPT_SENT));
             wattron(window->layout->win, theme_attrs(THEME_RECEIPT_SENT));
         } else {
+            wbkgdset(window->layout->win, theme_attrs(theme_item));
             wattron(window->layout->win, theme_attrs(theme_item));
         }
     }
