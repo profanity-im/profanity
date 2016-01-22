@@ -145,6 +145,22 @@ theme_init(const char *const theme_name)
 }
 
 gboolean
+theme_exists(const char *const theme_name)
+{
+    if (g_strcmp0(theme_name, "default") == 0) {
+        return TRUE;
+    }
+
+    GString *new_theme_file = _theme_find(theme_name);
+    if (new_theme_file == NULL) {
+        return FALSE;
+    }
+
+    g_string_free(new_theme_file, TRUE);
+    return TRUE;
+}
+
+gboolean
 theme_load(const char *const theme_name)
 {
     if (_theme_load_file(theme_name)) {

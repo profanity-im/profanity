@@ -851,6 +851,9 @@ cons_show_account(ProfAccount *account)
     if (account->startscript) {
         cons_show   ("Start script      : %s", account->startscript);
     }
+    if (account->theme) {
+        cons_show   ("Theme             : %s", account->theme);
+    }
     if (account->otr_policy) {
         cons_show   ("OTR policy        : %s", account->otr_policy);
     }
