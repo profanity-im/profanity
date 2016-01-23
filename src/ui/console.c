@@ -2012,7 +2012,7 @@ _cons_theme_bar_prop(theme_item_t theme, char *prop)
     ProfWin *console = wins_get_console();
     GString *str = g_string_new(" ");
     char *setting = theme_get_string(prop);
-    g_string_append_printf(str, "%s=%s ", prop, setting);
+    g_string_append_printf(str, "%-24s%s ", prop, setting);
     theme_free_string(setting);
     win_print(console, '-', 0, NULL, NO_EOL, theme, "", str->str);
     win_print(console, '-', 0, NULL, NO_DATE, THEME_TEXT, "", "");
@@ -2023,9 +2023,9 @@ void
 _cons_theme_prop(theme_item_t theme, char *prop)
 {
     ProfWin *console = wins_get_console();
-    GString *str = g_string_new(prop);
+    GString *str = g_string_new(" ");
     char *setting = theme_get_string(prop);
-    g_string_append_printf(str, "=%s", setting);
+    g_string_append_printf(str, "%-24s%s", prop, setting);
     theme_free_string(setting);
     win_print(console, '-', 0, NULL, 0, theme, "", str->str);
     g_string_free(str, TRUE);
@@ -2034,6 +2034,7 @@ _cons_theme_prop(theme_item_t theme, char *prop)
 void
 cons_theme_properties(void)
 {
+    cons_show("Current colours:");
     _cons_theme_bar_prop(THEME_TITLE_TEXT, "titlebar.text");
     _cons_theme_bar_prop(THEME_TITLE_BRACKET, "titlebar.brackets");
 
@@ -2133,7 +2134,7 @@ cons_theme_colours(void)
      */
 
     ProfWin *console = wins_get_console();
-    cons_show("Theme colours:");
+    cons_show("Available colours:");
     win_print(console, '-', 0, NULL, NO_EOL, THEME_WHITE, "",         " white   ");
     win_print(console, '-', 0, NULL, NO_DATE, THEME_WHITE_BOLD, "",   " bold_white");
     win_print(console, '-', 0, NULL, NO_EOL, THEME_GREEN, "",         " green   ");
