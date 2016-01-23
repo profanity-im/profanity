@@ -2010,25 +2010,44 @@ void
 _cons_theme_bar_prop(theme_item_t theme, char *prop)
 {
     ProfWin *console = wins_get_console();
-    GString *str = g_string_new(" ");
+
+    GString *propstr = g_string_new(" ");
+    g_string_append_printf(propstr, "%-24s", prop);
+    win_print(console, '-', 0, NULL, NO_EOL, THEME_TEXT, "", propstr->str);
+    g_string_free(propstr, TRUE);
+
+    GString *valstr = g_string_new(" ");
     char *setting = theme_get_string(prop);
-    g_string_append_printf(str, "%-24s%s ", prop, setting);
+    g_string_append_printf(valstr, "%s ", setting);
     theme_free_string(setting);
-    win_print(console, '-', 0, NULL, NO_EOL, theme, "", str->str);
+    win_print(console, '-', 0, NULL, NO_DATE | NO_EOL, theme, "", valstr->str);
     win_print(console, '-', 0, NULL, NO_DATE, THEME_TEXT, "", "");
-    g_string_free(str, TRUE);
+    g_string_free(valstr, TRUE);
 }
 
 void
 _cons_theme_prop(theme_item_t theme, char *prop)
 {
     ProfWin *console = wins_get_console();
-    GString *str = g_string_new(" ");
+
+    GString *propstr = g_string_new(" ");
+    g_string_append_printf(propstr, "%-24s", prop);
+    win_print(console, '-', 0, NULL, NO_EOL, THEME_TEXT, "", propstr->str);
+    g_string_free(propstr, TRUE);
+
+    GString *valstr = g_string_new("");
     char *setting = theme_get_string(prop);
-    g_string_append_printf(str, "%-24s%s", prop, setting);
+    g_string_append_printf(valstr, "%s", setting);
     theme_free_string(setting);
-    win_print(console, '-', 0, NULL, 0, theme, "", str->str);
-    g_string_free(str, TRUE);
+    win_print(console, '-', 0, NULL, NO_DATE, theme, "", valstr->str);
+    g_string_free(valstr, TRUE);
+
+//    GString *str = g_string_new(" ");
+//    char *setting = theme_get_string(prop);
+//    g_string_append_printf(str, "%-24s%s", prop, setting);
+//    theme_free_string(setting);
+//    win_print(console, '-', 0, NULL, 0, theme, "", str->str);
+//    g_string_free(str, TRUE);
 }
 
 void

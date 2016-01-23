@@ -1735,10 +1735,10 @@ static struct cmd_t command_defs[] =
         CMD_DESC(
             "Load a theme, includes colours and UI options.")
         CMD_ARGS(
-            { "list", "List all available themes." },
-            { "load <theme>", "Load the specified theme. 'default' will reset to the default theme." },
-            { "colours", "Show the colour values as rendered by the terminal." },
-            { "properties", "Show each themed property." })
+            { "list",           "List all available themes." },
+            { "load <theme>",   "Load the specified theme. 'default' will reset to the default theme." },
+            { "colours",        "Show colour values as rendered by the terminal." },
+            { "properties",     "Show colour settings for current theme." })
         CMD_EXAMPLES(
             "/theme list",
             "/theme load forest")
