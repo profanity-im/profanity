@@ -19,6 +19,7 @@ AC_CANONICAL_HOST
 PLATFORM="unknown"
 AS_CASE([$host_os],
     [freebsd*], [PLATFORM="freebsd"],
+    [openbsd*], [PLATFORM="openbsd"],
     [darwin*], [PLATFORM="osx"],
     [cygwin], [PLATFORM="cygwin"],
     [PLATFORM="nix"])
@@ -96,15 +97,22 @@ PKG_CHECK_MODULES([glib], [glib-2.0 >= 2.26], [],
 PKG_CHECK_MODULES([curl], [libcurl], [],
     [AC_MSG_ERROR([libcurl is required for profanity])])
 
-AS_IF([test "x$PLATFORM" != xosx],
-    [AC_CHECK_LIB([readline], [main], [],
-        [AC_MSG_ERROR([libreadline is required for profanity])])],
-    [AC_CHECK_FILE([/usr/local/opt/readline/lib],
-        [LIBS="-lreadline $LIBS"
-            AM_CPPFLAGS="-I/usr/local/opt/readline/include $AM_CPPFLAGS"
-            AM_LDFLAGS="-L/usr/local/opt/readline/lib $AM_LDFLAGS"
-            AC_SUBST(AM_LDFLAGS)],
-        [AC_MSG_ERROR([libreadline is required for profanity])])])
+AS_IF([test "x$PLATFORM" = xosx],
+      [AC_CHECK_FILE([/usr/local/opt/readline/lib],
+          [LIBS="-lreadline $LIBS"
+              AM_CPPFLAGS="-I/usr/local/opt/readline/include $AM_CPPFLAGS"
+              AM_LDFLAGS="-L/usr/local/opt/readline/lib $AM_LDFLAGS"
+              AC_SUBST(AM_LDFLAGS)])],
+      [test "x$PLATFORM" = xopenbsd],
+      [AC_CHECK_FILE([/usr/local/include/ereadline],
+          [LIBS="-lereadline $LIBS"
+              AM_CPPFLAGS="-I/usr/local/include/ereadline $AM_CPPFLAGS"
+              AM_LDFLAGS="-L/usr/local/lib $AM_LDFLAGS"
+              AC_SUBST(AM_LDFLAGS)])],
+      [test "x$PLATFORM" = xnix],
+      [AC_CHECK_LIB([readline],[main],[],
+              [AC_MSG_ERROR([libreadline is required for profanity])])],
+      [AC_MSG_ERROR([libreadline is required for profanity])])
 
 AS_IF([test "x$PLATFORM" = xosx], [LIBS="-lcurl $LIBS"])
 
