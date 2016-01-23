@@ -676,6 +676,34 @@ cmd_account(ProfWin *window, const char *const command, gchar **args)
                 } else if (strcmp(property, "startscript") == 0) {
                     accounts_set_script_start(account_name, value);
                     cons_show("Updated start script for account %s: %s", account_name, value);
+                } else if (strcmp(property, "theme") == 0) {
+                    if (theme_exists(value)) {
+                        accounts_set_theme(account_name, value);
+                        if (jabber_get_connection_status() == JABBER_CONNECTED) {
+                            ProfAccount *account = accounts_get_account(jabber_get_account_name());
+                            if (account) {
+                                if (g_strcmp0(account->name, account_name) == 0) {
+                                    theme_load(value);
+                                    ui_load_colours();
+                                    if (prefs_get_boolean(PREF_ROSTER)) {
+                                        ui_show_roster();
+                                    } else {
+                                        ui_hide_roster();
+                                    }
+                                    if (prefs_get_boolean(PREF_OCCUPANTS)) {
+                                        ui_show_all_room_rosters();
+                                    } else {
+                                        ui_hide_all_room_rosters();
+                                    }
+                                    ui_redraw();
+                                }
+                                account_free(account);
+                            }
+                        }
+                        cons_show("Updated theme for account %s: %s", account_name, value);
+                    } else {
+                        cons_show("Theme does not exist: %s", value);
+                    }
                 } else if (strcmp(property, "tls") == 0) {
                     if ((g_strcmp0(value, "force") != 0)
                             && (g_strcmp0(value, "allow") != 0)
@@ -771,6 +799,10 @@ cmd_account(ProfWin *window, const char *const command, gchar **args)
                 } else if (strcmp(property, "startscript") == 0) {
                     accounts_clear_script_start(account_name);
                     cons_show("Removed start script for account %s", account_name);
+                    cons_show("");
+                } else if (strcmp(property, "theme") == 0) {
+                    accounts_clear_theme(account_name);
+                    cons_show("Removed theme for account %s", account_name);
                     cons_show("");
                 } else {
                     cons_show("Invalid property: %s", property);
@@ -999,6 +1031,29 @@ cmd_disconnect(ProfWin *window, const char *const command, gchar **args)
     }
 
     cl_ev_disconnect();
+
+    char *theme = prefs_get_string(PREF_THEME);
+    if (theme) {
+        gboolean res = theme_load(theme);
+        prefs_free_string(theme);
+        if (!res) {
+            theme_load("default");
+        }
+    } else {
+        theme_load("default");
+    }
+    ui_load_colours();
+    if (prefs_get_boolean(PREF_ROSTER)) {
+        ui_show_roster();
+    } else {
+        ui_hide_roster();
+    }
+    if (prefs_get_boolean(PREF_OCCUPANTS)) {
+        ui_show_all_room_rosters();
+    } else {
+        ui_hide_all_room_rosters();
+    }
+    ui_redraw();
 
     return TRUE;
 }
@@ -1409,6 +1464,8 @@ cmd_theme(ProfWin *window, const char *const command, gchar **args)
     // show colours
     } else if (g_strcmp0(args[0], "colours") == 0) {
         cons_theme_colours();
+    } else if (g_strcmp0(args[0], "properties") == 0) {
+        cons_theme_properties();
     } else {
         cons_bad_cmd_usage(command);
     }

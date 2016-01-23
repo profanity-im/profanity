@@ -52,7 +52,7 @@ account_new(const gchar *const name, const gchar *const jid,
     const gchar *const muc_service, const gchar *const muc_nick,
     const gchar *const otr_policy, GList *otr_manual, GList *otr_opportunistic,
     GList *otr_always, const gchar *const pgp_keyid, const char *const startscript,
-    gchar *tls_policy)
+    const char *const theme, gchar *tls_policy)
 {
     ProfAccount *new_account = malloc(sizeof(ProfAccount));
 
@@ -157,6 +157,12 @@ account_new(const gchar *const name, const gchar *const jid,
         new_account->startscript = NULL;
     }
 
+    if (theme != NULL) {
+        new_account->theme = strdup(theme);
+    } else {
+        new_account->theme = NULL;
+    }
+
     if (tls_policy != NULL) {
         new_account->tls_policy = strdup(tls_policy);
     } else {
@@ -231,6 +237,7 @@ account_free(ProfAccount *account)
         free(account->otr_policy);
         free(account->pgp_keyid);
         free(account->startscript);
+        free(account->theme);
         free(account->tls_policy);
         g_list_free_full(account->otr_manual, g_free);
         g_list_free_full(account->otr_opportunistic, g_free);

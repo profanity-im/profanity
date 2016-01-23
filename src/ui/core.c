@@ -354,6 +354,25 @@ ui_group_removed(const char *const contact, const char *const group)
 void
 ui_handle_login_account_success(ProfAccount *account, int secured)
 {
+    if (account->theme) {
+        if (theme_load(account->theme)) {
+            ui_load_colours();
+            if (prefs_get_boolean(PREF_ROSTER)) {
+                ui_show_roster();
+            } else {
+                ui_hide_roster();
+            }
+            if (prefs_get_boolean(PREF_OCCUPANTS)) {
+                ui_show_all_room_rosters();
+            } else {
+                ui_hide_all_room_rosters();
+            }
+            ui_redraw();
+        } else {
+            cons_show("Couldn't find account theme: %s", account->theme);
+        }
+    }
+
     resource_presence_t resource_presence = accounts_get_login_presence(account->name);
     contact_presence_t contact_presence = contact_presence_from_resource_presence(resource_presence);
     cons_show_login_success(account, secured);
