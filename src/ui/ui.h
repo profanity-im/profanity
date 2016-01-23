@@ -301,6 +301,7 @@ void cons_autoconnect_setting(void);
 void cons_inpblock_setting(void);
 void cons_show_contact_online(PContact contact, Resource *resource, GDateTime *last_activity);
 void cons_show_contact_offline(PContact contact, char *resource, char *status);
+void cons_theme_properties(void);
 void cons_theme_colours(void);
 void cons_show_tlscert(TLSCertificate *cert);
 void cons_show_tlscert_summary(TLSCertificate *cert);

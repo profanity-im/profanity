@@ -272,6 +272,11 @@ accounts_get_account(const char *const name)
             startscript = g_key_file_get_string(accounts, name, "script.start", NULL);
         }
 
+        gchar *theme = NULL;
+        if (g_key_file_has_key(accounts, name, "theme", NULL)) {
+            theme = g_key_file_get_string(accounts, name, "theme", NULL);
+        }
+
         gchar *tls_policy = g_key_file_get_string(accounts, name, "tls.policy", NULL);
         if (tls_policy && ((g_strcmp0(tls_policy, "force") != 0) &&
                 (g_strcmp0(tls_policy, "allow") != 0) &&
@@ -284,7 +289,7 @@ accounts_get_account(const char *const name)
             server, port, resource, last_presence, login_presence,
             priority_online, priority_chat, priority_away, priority_xa,
             priority_dnd, muc_service, muc_nick, otr_policy, otr_manual,
-            otr_opportunistic, otr_always, pgp_keyid, startscript, tls_policy);
+            otr_opportunistic, otr_always, pgp_keyid, startscript, theme, tls_policy);
 
         g_free(jid);
         g_free(password);
@@ -298,6 +303,7 @@ accounts_get_account(const char *const name)
         g_free(otr_policy);
         g_free(pgp_keyid);
         g_free(startscript);
+        g_free(theme);
         g_free(tls_policy);
 
         return new_account;
@@ -491,6 +497,15 @@ accounts_set_script_start(const char *const account_name, const char *const valu
 }
 
 void
+accounts_set_theme(const char *const account_name, const char *const value)
+{
+    if (accounts_account_exists(account_name)) {
+        g_key_file_set_string(accounts, account_name, "theme", value);
+        _save_accounts();
+    }
+}
+
+void
 accounts_clear_password(const char *const account_name)
 {
     if (accounts_account_exists(account_name)) {
@@ -543,6 +558,16 @@ accounts_clear_script_start(const char *const account_name)
         _save_accounts();
     }
 }
+
+void
+accounts_clear_theme(const char *const account_name)
+{
+    if (accounts_account_exists(account_name)) {
+        g_key_file_remove_key(accounts, account_name, "theme", NULL);
+        _save_accounts();
+    }
+}
+
 void
 accounts_clear_otr(const char *const account_name)
 {

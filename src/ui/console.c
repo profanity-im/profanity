@@ -851,6 +851,9 @@ cons_show_account(ProfAccount *account)
     if (account->startscript) {
         cons_show   ("Start script      : %s", account->startscript);
     }
+    if (account->theme) {
+        cons_show   ("Theme             : %s", account->theme);
+    }
     if (account->otr_policy) {
         cons_show   ("OTR policy        : %s", account->otr_policy);
     }
@@ -2004,6 +2007,136 @@ cons_get_string(ProfConsoleWin *conswin)
 }
 
 void
+_cons_theme_bar_prop(theme_item_t theme, char *prop)
+{
+    ProfWin *console = wins_get_console();
+
+    GString *propstr = g_string_new(" ");
+    g_string_append_printf(propstr, "%-24s", prop);
+    win_print(console, '-', 0, NULL, NO_EOL, THEME_TEXT, "", propstr->str);
+    g_string_free(propstr, TRUE);
+
+    GString *valstr = g_string_new(" ");
+    char *setting = theme_get_string(prop);
+    g_string_append_printf(valstr, "%s ", setting);
+    theme_free_string(setting);
+    win_print(console, '-', 0, NULL, NO_DATE | NO_EOL, theme, "", valstr->str);
+    win_print(console, '-', 0, NULL, NO_DATE, THEME_TEXT, "", "");
+    g_string_free(valstr, TRUE);
+}
+
+void
+_cons_theme_prop(theme_item_t theme, char *prop)
+{
+    ProfWin *console = wins_get_console();
+
+    GString *propstr = g_string_new(" ");
+    g_string_append_printf(propstr, "%-24s", prop);
+    win_print(console, '-', 0, NULL, NO_EOL, THEME_TEXT, "", propstr->str);
+    g_string_free(propstr, TRUE);
+
+    GString *valstr = g_string_new("");
+    char *setting = theme_get_string(prop);
+    g_string_append_printf(valstr, "%s", setting);
+    theme_free_string(setting);
+    win_print(console, '-', 0, NULL, NO_DATE, theme, "", valstr->str);
+    g_string_free(valstr, TRUE);
+
+//    GString *str = g_string_new(" ");
+//    char *setting = theme_get_string(prop);
+//    g_string_append_printf(str, "%-24s%s", prop, setting);
+//    theme_free_string(setting);
+//    win_print(console, '-', 0, NULL, 0, theme, "", str->str);
+//    g_string_free(str, TRUE);
+}
+
+void
+cons_theme_properties(void)
+{
+    cons_show("Current colours:");
+    _cons_theme_bar_prop(THEME_TITLE_TEXT, "titlebar.text");
+    _cons_theme_bar_prop(THEME_TITLE_BRACKET, "titlebar.brackets");
+
+    _cons_theme_bar_prop(THEME_TITLE_UNENCRYPTED, "titlebar.unencrypted");
+    _cons_theme_bar_prop(THEME_TITLE_ENCRYPTED, "titlebar.encrypted");
+    _cons_theme_bar_prop(THEME_TITLE_UNTRUSTED, "titlebar.untrusted");
+    _cons_theme_bar_prop(THEME_TITLE_TRUSTED, "titlebar.trusted");
+
+    _cons_theme_bar_prop(THEME_TITLE_CHAT, "titlebar.chat");
+    _cons_theme_bar_prop(THEME_TITLE_ONLINE, "titlebar.online");
+    _cons_theme_bar_prop(THEME_TITLE_AWAY, "titlebar.away");
+    _cons_theme_bar_prop(THEME_TITLE_XA, "titlebar.xa");
+    _cons_theme_bar_prop(THEME_TITLE_DND, "titlebar.dnd");
+    _cons_theme_bar_prop(THEME_TITLE_OFFLINE, "titlebar.offline");
+
+    _cons_theme_bar_prop(THEME_STATUS_TEXT, "statusbar.text");
+    _cons_theme_bar_prop(THEME_STATUS_BRACKET, "statusbar.brackets");
+    _cons_theme_bar_prop(THEME_STATUS_ACTIVE, "statusbar.active");
+    _cons_theme_bar_prop(THEME_STATUS_NEW, "statusbar.new");
+
+    _cons_theme_prop(THEME_TIME, "main.time");
+    _cons_theme_prop(THEME_TEXT, "main.text");
+    _cons_theme_prop(THEME_SPLASH, "main.splash");
+    _cons_theme_prop(THEME_ERROR, "error");
+    _cons_theme_prop(THEME_OTR_STARTED_TRUSTED, "otr.started.trusted");
+    _cons_theme_prop(THEME_OTR_STARTED_UNTRUSTED, "otr.started.untrusted");
+    _cons_theme_prop(THEME_OTR_ENDED, "otr.ended");
+    _cons_theme_prop(THEME_OTR_TRUSTED, "otr.trusted");
+    _cons_theme_prop(THEME_OTR_UNTRUSTED, "otr.untrusted");
+
+    _cons_theme_prop(THEME_ME, "me");
+    _cons_theme_prop(THEME_TEXT_ME, "main.text.me");
+    _cons_theme_prop(THEME_THEM, "them");
+    _cons_theme_prop(THEME_TEXT_THEM, "main.text.them");
+
+    _cons_theme_prop(THEME_CHAT, "chat");
+    _cons_theme_prop(THEME_ONLINE, "online");
+    _cons_theme_prop(THEME_AWAY, "away");
+    _cons_theme_prop(THEME_XA, "xa");
+    _cons_theme_prop(THEME_DND, "dnd");
+    _cons_theme_prop(THEME_OFFLINE, "offline");
+    _cons_theme_prop(THEME_SUBSCRIBED, "subscribed");
+    _cons_theme_prop(THEME_UNSUBSCRIBED, "unsubscribed");
+
+    _cons_theme_prop(THEME_INCOMING, "incoming");
+    _cons_theme_prop(THEME_TYPING, "typing");
+    _cons_theme_prop(THEME_GONE, "gone");
+
+    _cons_theme_prop(THEME_ROOMINFO, "roominfo");
+    _cons_theme_prop(THEME_ROOMMENTION, "roommention");
+
+    _cons_theme_prop(THEME_ROSTER_HEADER, "roster.header");
+    _cons_theme_prop(THEME_ROSTER_CHAT, "roster.chat");
+    _cons_theme_prop(THEME_ROSTER_ONLINE, "roster.online");
+    _cons_theme_prop(THEME_ROSTER_AWAY, "roster.away");
+    _cons_theme_prop(THEME_ROSTER_XA, "roster.xa");
+    _cons_theme_prop(THEME_ROSTER_DND, "roster.dnd");
+    _cons_theme_prop(THEME_ROSTER_OFFLINE, "roster.offline");
+    _cons_theme_prop(THEME_ROSTER_CHAT_ACTIVE, "roster.chat.active");
+    _cons_theme_prop(THEME_ROSTER_ONLINE_ACTIVE, "roster.online.active");
+    _cons_theme_prop(THEME_ROSTER_AWAY_ACTIVE, "roster.away.active");
+    _cons_theme_prop(THEME_ROSTER_XA_ACTIVE, "roster.xa.active");
+    _cons_theme_prop(THEME_ROSTER_DND_ACTIVE, "roster.dnd.active");
+    _cons_theme_prop(THEME_ROSTER_OFFLINE_ACTIVE, "roster.offline.active");
+    _cons_theme_prop(THEME_ROSTER_CHAT_UNREAD, "roster.chat.unread");
+    _cons_theme_prop(THEME_ROSTER_ONLINE_UNREAD, "roster.online.unread");
+    _cons_theme_prop(THEME_ROSTER_AWAY_UNREAD, "roster.away.unread");
+    _cons_theme_prop(THEME_ROSTER_XA_UNREAD, "roster.xa.unread");
+    _cons_theme_prop(THEME_ROSTER_DND_UNREAD, "roster.dnd.unread");
+    _cons_theme_prop(THEME_ROSTER_OFFLINE_UNREAD, "roster.offline.unread");
+    _cons_theme_prop(THEME_ROSTER_ROOM, "roster.room");
+    _cons_theme_prop(THEME_ROSTER_ROOM_UNREAD, "roster.room.unread");
+
+    _cons_theme_prop(THEME_OCCUPANTS_HEADER, "occupants.header");
+
+    _cons_theme_prop(THEME_RECEIPT_SENT, "receipt.sent");
+
+    _cons_theme_prop(THEME_INPUT_TEXT, "input.text");
+
+    cons_show("");
+}
+
+void
 cons_theme_colours(void)
 {
     /*
@@ -2020,7 +2153,7 @@ cons_theme_colours(void)
      */
 
     ProfWin *console = wins_get_console();
-    cons_show("Theme colours:");
+    cons_show("Available colours:");
     win_print(console, '-', 0, NULL, NO_EOL, THEME_WHITE, "",         " white   ");
     win_print(console, '-', 0, NULL, NO_DATE, THEME_WHITE_BOLD, "",   " bold_white");
     win_print(console, '-', 0, NULL, NO_EOL, THEME_GREEN, "",         " green   ");

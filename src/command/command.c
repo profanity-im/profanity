@@ -1644,6 +1644,7 @@ static struct cmd_t command_defs[] =
             "/account set <account> pgpkeyid <pgpkeyid>",
             "/account set <account> startscript <script>",
             "/account set <account> tls force|allow|disable",
+            "/account set <account> theme <theme>",
             "/account clear <account> password",
             "/account clear <account> eval_password",
             "/account clear <account> server",
@@ -1681,13 +1682,15 @@ static struct cmd_t command_defs[] =
             { "set <account> tls force",                "Force TLS connection, and fail if one cannot be established, this is default behaviour." },
             { "set <account> tls allow",                "Use TLS for the connection if it is available." },
             { "set <account> tls disable",              "Disable TLS for the connection." },
+            { "set <account> <theme>",                  "Set the UI theme for the account." },
             { "clear <account> server",                 "Remove the server setting for this account." },
             { "clear <account> port",                   "Remove the port setting for this account." },
             { "clear <account> password",               "Remove the password setting for this account." },
             { "clear <account> eval_password",          "Remove the eval_password setting for this account." },
             { "clear <account> otr",                    "Remove the OTR policy setting for this account." },
             { "clear <account> pgpkeyid",               "Remove pgpkeyid associated with this account." },
-            { "clear <account> startscript",            "Remove startscript associated with this account." })
+            { "clear <account> startscript",            "Remove startscript associated with this account." },
+            { "clear <account> theme",                  "Clear the theme setting for the account, the global theme will be used." })
         CMD_EXAMPLES(
             "/account add me",
             "/account set me jid me@chatty",
@@ -1727,13 +1730,15 @@ static struct cmd_t command_defs[] =
         CMD_SYN(
             "/theme list",
             "/theme load <theme>",
-            "/theme colours")
+            "/theme colours",
+            "/theme properties")
         CMD_DESC(
             "Load a theme, includes colours and UI options.")
         CMD_ARGS(
-            { "list", "List all available themes." },
-            { "load <theme>", "Load the specified theme. 'default' will reset to the default theme." },
-            { "colours", "Show the colour values as rendered by the terminal." })
+            { "list",           "List all available themes." },
+            { "load <theme>",   "Load the specified theme. 'default' will reset to the default theme." },
+            { "colours",        "Show colour values as rendered by the terminal." },
+            { "properties",     "Show colour settings for current theme." })
         CMD_EXAMPLES(
             "/theme list",
             "/theme load forest")
@@ -2106,6 +2111,7 @@ cmd_init(void)
     autocomplete_add(theme_ac, "load");
     autocomplete_add(theme_ac, "list");
     autocomplete_add(theme_ac, "colours");
+    autocomplete_add(theme_ac, "properties");
 
     disco_ac = autocomplete_new();
     autocomplete_add(disco_ac, "info");
@@ -2142,6 +2148,7 @@ cmd_init(void)
     autocomplete_add(account_set_ac, "pgpkeyid");
     autocomplete_add(account_set_ac, "startscript");
     autocomplete_add(account_set_ac, "tls");
+    autocomplete_add(account_set_ac, "theme");
 
     account_clear_ac = autocomplete_new();
     autocomplete_add(account_clear_ac, "password");
@@ -2151,6 +2158,7 @@ cmd_init(void)
     autocomplete_add(account_clear_ac, "otr");
     autocomplete_add(account_clear_ac, "pgpkeyid");
     autocomplete_add(account_clear_ac, "startscript");
+    autocomplete_add(account_clear_ac, "theme");
 
     account_default_ac = autocomplete_new();
     autocomplete_add(account_default_ac, "set");
@@ -4437,6 +4445,25 @@ _account_autocomplete(ProfWin *window, const char *const input)
             g_string_free(beginning, TRUE);
             if (found) {
                 g_strfreev(args);
+                return found;
+            }
+        } else if ((g_strv_length(args) > 3) && (g_strcmp0(args[2], "theme")) == 0) {
+            g_string_append(beginning, " ");
+            g_string_append(beginning, args[2]);
+            if (theme_load_ac == NULL) {
+                theme_load_ac = autocomplete_new();
+                GSList *themes = theme_list();
+                GSList *curr = themes;
+                while (curr) {
+                    autocomplete_add(theme_load_ac, curr->data);
+                    curr = g_slist_next(curr);
+                }
+                g_slist_free_full(themes, g_free);
+                autocomplete_add(theme_load_ac, "default");
+            }
+            found = autocomplete_param_with_ac(input, beginning->str, theme_load_ac, TRUE);
+            g_string_free(beginning, TRUE);
+            if (found) {
                 return found;
             }
 #ifdef HAVE_LIBGPGME
