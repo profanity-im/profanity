@@ -1354,6 +1354,15 @@ cons_roster_setting(void)
     else
         cons_show("Roster rooms (/roster)           : hide");
 
+    char *priv = prefs_get_string(PREF_ROSTER_PRIVATE);
+    if (g_strcmp0(priv, "room") == 0) {
+        cons_show("Roster private (/roster)         : room");
+    } else if (g_strcmp0(priv, "group") == 0) {
+        cons_show("Roster private (/roster)         : group");
+    } else {
+        cons_show("Roster private (/roster)         : OFF");
+    }
+
     char *rooms_pos = prefs_get_string(PREF_ROSTER_ROOMS_POS);
     cons_show("Roster rooms position (/roster)  : %s", rooms_pos);
     prefs_free_string(rooms_pos);

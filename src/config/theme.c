@@ -414,6 +414,7 @@ _load_preferences(void)
     _set_string_preference("roster.rooms.order", PREF_ROSTER_ROOMS_ORDER);
     _set_string_preference("roster.rooms.unread", PREF_ROSTER_ROOMS_UNREAD);
     _set_string_preference("roster.rooms.pos", PREF_ROSTER_ROOMS_POS);
+    _set_string_preference("roster.private", PREF_ROSTER_PRIVATE);
     if (g_key_file_has_key(theme, "ui", "roster.size", NULL)) {
         gint roster_size = g_key_file_get_integer(theme, "ui", "roster.size", NULL);
         prefs_set_roster_size(roster_size);

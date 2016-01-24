@@ -2408,6 +2408,33 @@ cmd_roster(ProfWin *window, const char *const command, gchar **args)
             return TRUE;
         }
 
+    } else if (g_strcmp0(args[0], "private") == 0) {
+        if (g_strcmp0(args[1], "room") == 0) {
+            cons_show("Showing room private chats under room.");
+            prefs_set_string(PREF_ROSTER_PRIVATE, "room");
+            if (conn_status == JABBER_CONNECTED) {
+                rosterwin_roster();
+            }
+            return TRUE;
+        } else if (g_strcmp0(args[1], "group") == 0) {
+            cons_show("Showing room private chats as roster group.");
+            prefs_set_string(PREF_ROSTER_PRIVATE, "group");
+            if (conn_status == JABBER_CONNECTED) {
+                rosterwin_roster();
+            }
+            return TRUE;
+        } else if (g_strcmp0(args[1], "off") == 0) {
+            cons_show("Hiding room private chats in roster.");
+            prefs_set_string(PREF_ROSTER_PRIVATE, "off");
+            if (conn_status == JABBER_CONNECTED) {
+                rosterwin_roster();
+            }
+            return TRUE;
+        } else {
+            cons_bad_cmd_usage(command);
+            return TRUE;
+        }
+
     } else if (g_strcmp0(args[0], "room") == 0) {
         if (g_strcmp0(args[1], "position") == 0) {
             if (g_strcmp0(args[2], "first") == 0) {
