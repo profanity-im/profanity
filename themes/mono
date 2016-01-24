@@ -43,6 +43,7 @@ gone=white
 error=white
 roominfo=white
 roommention=white
+roomtrigger=white
 me=white
 them=white
 roster.header=white
