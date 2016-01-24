@@ -185,7 +185,7 @@ wins_get_private_chats(const char *const roomjid)
         ProfWin *window = curr->data;
         if (window->type == WIN_PRIVATE) {
             ProfPrivateWin *privatewin = (ProfPrivateWin*)window;
-            if (g_str_has_prefix(privatewin->fulljid, prefix->str)) {
+            if (roomjid == NULL || g_str_has_prefix(privatewin->fulljid, prefix->str)) {
                 result = g_list_append(result, privatewin);
             }
         }
