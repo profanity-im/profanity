@@ -43,6 +43,7 @@ gone=red
 error=red
 roominfo=yellow
 roommention=yellow
+roomtrigger=yellow
 me=black
 them=black
 roster.header=black
