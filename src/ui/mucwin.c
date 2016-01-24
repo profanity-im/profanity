@@ -366,6 +366,8 @@ mucwin_message(ProfMucWin *mucwin, const char *const nick, const char *const mes
     if (g_strcmp0(nick, my_nick) != 0) {
         if (g_strrstr(message, my_nick)) {
             win_print(window, '-', 0, NULL, NO_ME, THEME_ROOMMENTION, nick, message);
+        } else if (prefs_message_contains_trigger(message)) {
+            win_print(window, '-', 0, NULL, NO_ME, THEME_ROOMTRIGGER, nick, message);
         } else {
             win_print(window, '-', 0, NULL, NO_ME, THEME_TEXT_THEM, nick, message);
         }

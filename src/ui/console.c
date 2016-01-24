@@ -2125,6 +2125,7 @@ cons_theme_properties(void)
 
     _cons_theme_prop(THEME_ROOMINFO, "roominfo");
     _cons_theme_prop(THEME_ROOMMENTION, "roommention");
+    _cons_theme_prop(THEME_ROOMTRIGGER, "roomtrigger");
 
     _cons_theme_prop(THEME_ROSTER_HEADER, "roster.header");
     _cons_theme_prop(THEME_ROSTER_CHAT, "roster.chat");

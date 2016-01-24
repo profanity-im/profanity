@@ -212,6 +212,29 @@ prefs_do_chat_notify(gboolean current_win, const char *const message)
 }
 
 gboolean
+prefs_message_contains_trigger(const char *const message)
+{
+    gboolean trigger_found = FALSE;
+    char *message_lower = g_utf8_strdown(message, -1);
+    gsize len = 0;
+    gchar **triggers = g_key_file_get_string_list(prefs, PREF_GROUP_NOTIFICATIONS, "room.trigger.list", &len, NULL);
+    int i;
+    for (i = 0; i < len; i++) {
+        char *trigger_lower = g_utf8_strdown(triggers[i], -1);
+        if (g_strrstr(message_lower, trigger_lower)) {
+            trigger_found = TRUE;
+            g_free(trigger_lower);
+            break;
+        }
+        g_free(trigger_lower);
+    }
+    g_strfreev(triggers);
+    g_free(message_lower);
+
+    return trigger_found;
+}
+
+gboolean
 prefs_do_room_notify(gboolean current_win, const char *const roomjid, const char *const nick,
     const char *const message)
 {
@@ -258,27 +281,8 @@ prefs_do_room_notify(gboolean current_win, const char *const roomjid, const char
     } else {
         notify_trigger = prefs_get_boolean(PREF_NOTIFY_ROOM_TRIGGER);
     }
-    if (notify_trigger) {
-        gboolean trigger_found = FALSE;
-        char *message_lower = g_utf8_strdown(message, -1);
-        gsize len = 0;
-        gchar **triggers = g_key_file_get_string_list(prefs, PREF_GROUP_NOTIFICATIONS, "room.trigger.list", &len, NULL);
-        int i;
-        for (i = 0; i < len; i++) {
-            char *trigger_lower = g_utf8_strdown(triggers[i], -1);
-            if (g_strrstr(message_lower, trigger_lower)) {
-                trigger_found = TRUE;
-                g_free(trigger_lower);
-                break;
-            }
-            g_free(trigger_lower);
-        }
-        g_strfreev(triggers);
-        g_free(message_lower);
-
-        if (trigger_found) {
-            return TRUE;
-        }
+    if (notify_trigger && prefs_message_contains_trigger(message)) {
+        return TRUE;
     }
 
     return FALSE;
