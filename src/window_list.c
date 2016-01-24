@@ -172,6 +172,31 @@ wins_get_private(const char *const fulljid)
     return NULL;
 }
 
+GList*
+wins_get_private_chats(const char *const roomjid)
+{
+    GList *result = NULL;
+    GString *prefix = g_string_new(roomjid);
+    g_string_append(prefix, "/");
+    GList *values = g_hash_table_get_values(windows);
+    GList *curr = values;
+
+    while (curr) {
+        ProfWin *window = curr->data;
+        if (window->type == WIN_PRIVATE) {
+            ProfPrivateWin *privatewin = (ProfPrivateWin*)window;
+            if (roomjid == NULL || g_str_has_prefix(privatewin->fulljid, prefix->str)) {
+                result = g_list_append(result, privatewin);
+            }
+        }
+        curr = g_list_next(curr);
+    }
+
+    g_list_free(values);
+    g_string_free(prefix, TRUE);
+    return result;
+}
+
 ProfWin*
 wins_get_current(void)
 {
