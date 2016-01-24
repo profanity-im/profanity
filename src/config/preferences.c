@@ -223,7 +223,6 @@ prefs_message_get_triggers(const char *const message)
     for (i = 0; i < len; i++) {
         char *trigger_lower = g_utf8_strdown(triggers[i], -1);
         if (g_strrstr(message_lower, trigger_lower)) {
-            g_free(trigger_lower);
             result = g_list_append(result, strdup(triggers[i]));
         }
         g_free(trigger_lower);

@@ -270,13 +270,8 @@ sv_ev_room_message(const char *const room_jid, const char *const nick, const cha
     // not currently on groupchat window
     } else {
         status_bar_new(num);
-        char *muc_show = prefs_get_string(PREF_CONSOLE_MUC);
-        if (g_strcmp0(muc_show, "all") == 0) {
-            cons_show_incoming_room_message(nick, mucwin->roomjid, num);
-        } else if (g_strcmp0(muc_show, "first") == 0 && mucwin->unread == 0) {
-            cons_show_incoming_room_message(NULL, mucwin->roomjid, num);
-        }
-        prefs_free_string(muc_show);
+
+        cons_show_incoming_room_message(nick, mucwin->roomjid, num, mention, triggers, mucwin->unread);
 
         if (prefs_get_boolean(PREF_FLASH) && (strcmp(nick, mynick) != 0)) {
             flash();
@@ -286,6 +281,10 @@ sv_ev_room_message(const char *const room_jid, const char *const nick, const cha
         if (notify) {
             mucwin->notify = TRUE;
         }
+    }
+
+    if (triggers) {
+        g_list_free_full(triggers, free);
     }
 
     rosterwin_roster();
