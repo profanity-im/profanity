@@ -45,6 +45,7 @@ main.text.them=white
 subscribed=magenta
 unsubscribed=black_bold
 roommention=cyan
+roomtrigger=cyan
 roster.header=yellow
 roster.chat=green
 roster.online=green
