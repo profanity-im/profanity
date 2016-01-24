@@ -284,9 +284,12 @@ static struct cmd_t command_defs[] =
             "/roster by group|presence|none",
             "/roster order name|presence",
             "/roster unread before|after|off",
+            "/roster room char <char>|none",
             "/roster room position first|last",
             "/roster room order name|unread",
             "/roster room unread before|after|off",
+            "/roster private room|group|off",
+            "/roster private char <char>|none",
             "/roster header char <char>|none",
             "/roster presence indent <indent>",
             "/roster contact char <char>|none",
@@ -334,6 +337,8 @@ static struct cmd_t command_defs[] =
             { "unread before",              "Show unread message count before contact in roster." },
             { "unread after",               "Show unread message count after contact in roster." },
             { "unread off",                 "Do not show unread message count for contacts in roster." },
+            { "room char <char>",           "Prefix roster rooms with specified character." },
+            { "room char none",             "Remove roster room character prefix." },
             { "room position first",        "Show rooms first in roster." },
             { "room position last",         "Show rooms last in roster." },
             { "room order name",            "Order roster rooms by name." },
@@ -341,6 +346,11 @@ static struct cmd_t command_defs[] =
             { "room unread before",         "Show unread message count before room in roster." },
             { "room unread after",          "Show unread message count after room in roster." },
             { "room unread off",            "Do not show unread message count for rooms in roster." },
+            { "private room",               "Show room private chats below the room in the roster." },
+            { "private group",              "Show room private chats as a separate roster group." },
+            { "private off",                "Do not show room private chats in the roster." },
+            { "private char <char>",        "Prefix roster private room chats with specified character." },
+            { "private char none",          "Remove roster private room chat character prefix." },
             { "header char <char>",         "Prefix roster headers with specified character." },
             { "header char none",           "Remove roster header character prefix." },
             { "contact char <char>",        "Prefix roster contacts with specified character." },
@@ -1943,6 +1953,7 @@ static Autocomplete roster_room_ac;
 static Autocomplete roster_room_position_ac;
 static Autocomplete roster_room_order_ac;
 static Autocomplete roster_unread_ac;
+static Autocomplete roster_private_ac;
 static Autocomplete group_ac;
 static Autocomplete bookmark_ac;
 static Autocomplete bookmark_property_ac;
@@ -2210,6 +2221,13 @@ cmd_init(void)
     autocomplete_add(roster_ac, "contact");
     autocomplete_add(roster_ac, "resource");
     autocomplete_add(roster_ac, "presence");
+    autocomplete_add(roster_ac, "private");
+
+    roster_private_ac = autocomplete_new();
+    autocomplete_add(roster_private_ac, "room");
+    autocomplete_add(roster_private_ac, "group");
+    autocomplete_add(roster_private_ac, "off");
+    autocomplete_add(roster_private_ac, "char");
 
     roster_header_ac = autocomplete_new();
     autocomplete_add(roster_header_ac, "char");
@@ -2255,6 +2273,7 @@ cmd_init(void)
     autocomplete_add(roster_unread_ac, "off");
 
     roster_room_ac = autocomplete_new();
+    autocomplete_add(roster_room_ac, "char");
     autocomplete_add(roster_room_ac, "position");
     autocomplete_add(roster_room_ac, "order");
     autocomplete_add(roster_room_ac, "unread");
@@ -2544,6 +2563,7 @@ cmd_uninit(void)
     autocomplete_free(roster_room_position_ac);
     autocomplete_free(roster_room_order_ac);
     autocomplete_free(roster_remove_all_ac);
+    autocomplete_free(roster_private_ac);
     autocomplete_free(group_ac);
     autocomplete_free(bookmark_ac);
     autocomplete_free(bookmark_property_ac);
@@ -2756,6 +2776,7 @@ cmd_reset_autocomplete(ProfWin *window)
     autocomplete_reset(roster_room_position_ac);
     autocomplete_reset(roster_room_order_ac);
     autocomplete_reset(roster_remove_all_ac);
+    autocomplete_reset(roster_private_ac);
     autocomplete_reset(group_ac);
     autocomplete_reset(titlebar_ac);
     autocomplete_reset(bookmark_ac);
@@ -3165,6 +3186,14 @@ _roster_autocomplete(ProfWin *window, const char *const input)
     if (result) {
         return result;
     }
+    result = autocomplete_param_with_ac(input, "/roster room char", roster_char_ac, TRUE);
+    if (result) {
+        return result;
+    }
+    result = autocomplete_param_with_ac(input, "/roster private char", roster_char_ac, TRUE);
+    if (result) {
+        return result;
+    }
     result = autocomplete_param_with_ac(input, "/roster resource char", roster_char_ac, TRUE);
     if (result) {
         return result;
@@ -3247,6 +3276,10 @@ _roster_autocomplete(ProfWin *window, const char *const input)
         return result;
     }
     result = autocomplete_param_with_ac(input, "/roster presence", roster_presence_ac, TRUE);
+    if (result) {
+        return result;
+    }
+    result = autocomplete_param_with_ac(input, "/roster private", roster_private_ac, TRUE);
     if (result) {
         return result;
     }

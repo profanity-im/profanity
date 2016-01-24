@@ -333,6 +333,7 @@ sv_ev_incoming_private_message(const char *const fulljid, char *message)
     plugins_post_priv_message_display(fulljid, plugin_message);
 
     free(plugin_message);
+    rosterwin_roster();
 }
 
 void

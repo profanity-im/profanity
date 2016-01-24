@@ -47,6 +47,7 @@ ProfWin* wins_new_private(const char *const fulljid);
 ProfWin* wins_new_plugin(const char *const tag);
 
 gboolean wins_chat_exists(const char *const barejid);
+GList* wins_get_private_chats(const char *const roomjid);
 
 ProfWin* wins_get_console(void);
 ProfChatWin* wins_get_chat(const char *const barejid);
