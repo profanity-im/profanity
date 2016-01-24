@@ -373,29 +373,10 @@ _load_preferences(void)
     _set_boolean_preference("splash", PREF_SPLASH);
     _set_boolean_preference("wrap", PREF_WRAP);
     _set_boolean_preference("wins.autotidy", PREF_WINS_AUTO_TIDY);
-    _set_string_preference("time.console", PREF_TIME_CONSOLE);
-    _set_string_preference("time.chat", PREF_TIME_CHAT);
-    _set_string_preference("time.muc", PREF_TIME_MUC);
-    _set_string_preference("time.mucconfig", PREF_TIME_MUCCONFIG);
-    _set_string_preference("time.private", PREF_TIME_PRIVATE);
-    _set_string_preference("time.xmlconsole", PREF_TIME_XMLCONSOLE);
-    _set_string_preference("time.statusbar", PREF_TIME_STATUSBAR);
-    _set_string_preference("time.lastactivity", PREF_TIME_LASTACTIVITY);
-
     _set_boolean_preference("resource.title", PREF_RESOURCE_TITLE);
     _set_boolean_preference("resource.message", PREF_RESOURCE_MESSAGE);
-
-    _set_string_preference("statuses.console", PREF_STATUSES_CONSOLE);
-    _set_string_preference("statuses.chat", PREF_STATUSES_CHAT);
-    _set_string_preference("statuses.muc", PREF_STATUSES_MUC);
-
     _set_boolean_preference("occupants", PREF_OCCUPANTS);
     _set_boolean_preference("occupants.jid", PREF_OCCUPANTS_JID);
-    if (g_key_file_has_key(theme, "ui", "occupants.size", NULL)) {
-        gint occupants_size = g_key_file_get_integer(theme, "ui", "occupants.size", NULL);
-        prefs_set_occupants_size(occupants_size);
-    }
-
     _set_boolean_preference("roster", PREF_ROSTER);
     _set_boolean_preference("roster.offline", PREF_ROSTER_OFFLINE);
     _set_boolean_preference("roster.resource", PREF_ROSTER_RESOURCE);
@@ -404,21 +385,46 @@ _load_preferences(void)
     _set_boolean_preference("roster.status", PREF_ROSTER_STATUS);
     _set_boolean_preference("roster.empty", PREF_ROSTER_EMPTY);
     _set_boolean_preference("roster.wrap", PREF_ROSTER_WRAP);
-    _set_string_preference("roster.by", PREF_ROSTER_BY);
-    _set_string_preference("roster.order", PREF_ROSTER_ORDER);
-    _set_string_preference("roster.unread", PREF_ROSTER_UNREAD);
     _set_boolean_preference("roster.count", PREF_ROSTER_COUNT);
     _set_boolean_preference("roster.priority", PREF_ROSTER_PRIORITY);
     _set_boolean_preference("roster.contacts", PREF_ROSTER_CONTACTS);
     _set_boolean_preference("roster.rooms", PREF_ROSTER_ROOMS);
+    _set_boolean_preference("privileges", PREF_MUC_PRIVILEGES);
+    _set_boolean_preference("presence", PREF_PRESENCE);
+    _set_boolean_preference("intype", PREF_INTYPE);
+    _set_boolean_preference("enc.warn", PREF_ENC_WARN);
+    _set_boolean_preference("tls.show", PREF_TLS_SHOW);
+
+    _set_string_preference("time.console", PREF_TIME_CONSOLE);
+    _set_string_preference("time.chat", PREF_TIME_CHAT);
+    _set_string_preference("time.muc", PREF_TIME_MUC);
+    _set_string_preference("time.mucconfig", PREF_TIME_MUCCONFIG);
+    _set_string_preference("time.private", PREF_TIME_PRIVATE);
+    _set_string_preference("time.xmlconsole", PREF_TIME_XMLCONSOLE);
+    _set_string_preference("time.statusbar", PREF_TIME_STATUSBAR);
+    _set_string_preference("time.lastactivity", PREF_TIME_LASTACTIVITY);
+    _set_string_preference("statuses.console", PREF_STATUSES_CONSOLE);
+    _set_string_preference("statuses.chat", PREF_STATUSES_CHAT);
+    _set_string_preference("statuses.muc", PREF_STATUSES_MUC);
+    _set_string_preference("console.muc", PREF_CONSOLE_MUC);
+    _set_string_preference("roster.by", PREF_ROSTER_BY);
+    _set_string_preference("roster.order", PREF_ROSTER_ORDER);
+    _set_string_preference("roster.unread", PREF_ROSTER_UNREAD);
     _set_string_preference("roster.rooms.order", PREF_ROSTER_ROOMS_ORDER);
     _set_string_preference("roster.rooms.unread", PREF_ROSTER_ROOMS_UNREAD);
     _set_string_preference("roster.rooms.pos", PREF_ROSTER_ROOMS_POS);
     _set_string_preference("roster.private", PREF_ROSTER_PRIVATE);
+
+    if (g_key_file_has_key(theme, "ui", "occupants.size", NULL)) {
+        gint occupants_size = g_key_file_get_integer(theme, "ui", "occupants.size", NULL);
+        prefs_set_occupants_size(occupants_size);
+    }
+
     if (g_key_file_has_key(theme, "ui", "roster.size", NULL)) {
         gint roster_size = g_key_file_get_integer(theme, "ui", "roster.size", NULL);
         prefs_set_roster_size(roster_size);
     }
+
     if (g_key_file_has_key(theme, "ui", "roster.header.char", NULL)) {
         gchar *ch = g_key_file_get_string(theme, "ui", "roster.header.char", NULL);
         if (ch && strlen(ch) > 0) {
@@ -428,6 +434,7 @@ _load_preferences(void)
     } else {
         prefs_clear_roster_header_char();
     }
+
     if (g_key_file_has_key(theme, "ui", "roster.contact.char", NULL)) {
         gchar *ch = g_key_file_get_string(theme, "ui", "roster.contact.char", NULL);
         if (ch && strlen(ch) > 0) {
@@ -437,6 +444,7 @@ _load_preferences(void)
     } else {
         prefs_clear_roster_contact_char();
     }
+
     if (g_key_file_has_key(theme, "ui", "roster.resource.char", NULL)) {
         gchar *ch = g_key_file_get_string(theme, "ui", "roster.resource.char", NULL);
         if (ch && strlen(ch) > 0) {
@@ -446,26 +454,41 @@ _load_preferences(void)
     } else {
         prefs_clear_roster_resource_char();
     }
+
+    if (g_key_file_has_key(theme, "ui", "roster.rooms.char", NULL)) {
+        gchar *ch = g_key_file_get_string(theme, "ui", "roster.rooms.char", NULL);
+        if (ch && strlen(ch) > 0) {
+            prefs_set_roster_room_char(ch[0]);
+            g_free(ch);
+        }
+    } else {
+        prefs_clear_roster_room_char();
+    }
+
+    if (g_key_file_has_key(theme, "ui", "roster.private.char", NULL)) {
+        gchar *ch = g_key_file_get_string(theme, "ui", "roster.private.char", NULL);
+        if (ch && strlen(ch) > 0) {
+            prefs_set_roster_private_char(ch[0]);
+            g_free(ch);
+        }
+    } else {
+        prefs_clear_roster_private_char();
+    }
+
     if (g_key_file_has_key(theme, "ui", "roster.contact.indent", NULL)) {
         gint contact_indent = g_key_file_get_integer(theme, "ui", "roster.contact.indent", NULL);
         prefs_set_roster_contact_indent(contact_indent);
     }
+
     if (g_key_file_has_key(theme, "ui", "roster.resource.indent", NULL)) {
         gint resource_indent = g_key_file_get_integer(theme, "ui", "roster.resource.indent", NULL);
         prefs_set_roster_resource_indent(resource_indent);
     }
+
     if (g_key_file_has_key(theme, "ui", "roster.presence.indent", NULL)) {
         gint presence_indent = g_key_file_get_integer(theme, "ui", "roster.presence.indent", NULL);
         prefs_set_roster_presence_indent(presence_indent);
     }
-
-    _set_boolean_preference("privileges", PREF_MUC_PRIVILEGES);
-
-    _set_boolean_preference("presence", PREF_PRESENCE);
-    _set_boolean_preference("intype", PREF_INTYPE);
-
-    _set_boolean_preference("enc.warn", PREF_ENC_WARN);
-    _set_boolean_preference("tls.show", PREF_TLS_SHOW);
 
     if (g_key_file_has_key(theme, "ui", "otr.char", NULL)) {
         gchar *ch = g_key_file_get_string(theme, "ui", "otr.char", NULL);
@@ -474,6 +497,7 @@ _load_preferences(void)
             g_free(ch);
         }
     }
+
     if (g_key_file_has_key(theme, "ui", "pgp.char", NULL)) {
         gchar *ch = g_key_file_get_string(theme, "ui", "pgp.char", NULL);
         if (ch && strlen(ch) > 0) {
@@ -481,8 +505,6 @@ _load_preferences(void)
             g_free(ch);
         }
     }
-
-    _set_string_preference("console.muc", PREF_CONSOLE_MUC);
 }
 
 static gchar*

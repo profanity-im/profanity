@@ -1277,6 +1277,24 @@ cons_roster_setting(void)
     else
         cons_show("Roster contact char (/roster)    : none");
 
+    char resource_ch = prefs_get_roster_resource_char();
+    if (resource_ch)
+        cons_show("Roster resource char (/roster)   : %c", resource_ch);
+    else
+        cons_show("Roster resource char (/roster)   : none");
+
+    char room_ch = prefs_get_roster_room_char();
+    if (room_ch)
+        cons_show("Roster room char (/roster)       : %c", room_ch);
+    else
+        cons_show("Roster room char (/roster)       : none");
+
+    char private_ch = prefs_get_roster_private_char();
+    if (private_ch)
+        cons_show("Roster private char (/roster)    : %c", private_ch);
+    else
+        cons_show("Roster private char (/roster)    : none");
+
     gint contact_indent = prefs_get_roster_contact_indent();
     cons_show("Roster contact indent (/roster)  : %d", contact_indent);
 
@@ -1284,12 +1302,6 @@ cons_roster_setting(void)
         cons_show("Roster resource (/roster)        : show");
     else
         cons_show("Roster resource (/roster)        : hide");
-
-    char resource_ch = prefs_get_roster_resource_char();
-    if (resource_ch)
-        cons_show("Roster resource char (/roster)   : %c", resource_ch);
-    else
-        cons_show("Roster resource char (/roster)   : none");
 
     gint resource_indent = prefs_get_roster_resource_indent();
     cons_show("Roster resource indent (/roster) : %d", resource_indent);

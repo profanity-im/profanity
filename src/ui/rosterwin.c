@@ -494,7 +494,7 @@ _rosterwin_room(ProfLayoutSplit *layout, ProfMucWin *mucwin)
             indent--;
         }
     }
-    char ch = prefs_get_roster_contact_char();
+    char ch = prefs_get_roster_room_char();
     if (ch) {
         g_string_append_printf(msg, "%c", ch);
     }
@@ -549,14 +549,12 @@ _rosterwin_room(ProfLayoutSplit *layout, ProfMucWin *mucwin)
                 }
             }
 
-            // TODO add preference
             unreadpos = prefs_get_string(PREF_ROSTER_ROOMS_UNREAD);
             if ((g_strcmp0(unreadpos, "before") == 0) && privwin->unread > 0) {
                 g_string_append_printf(privmsg, "(%d) ", privwin->unread);
             }
 
-            // TODO add preference
-            ch = '/';
+            ch = prefs_get_roster_private_char();
             if (ch) {
                 g_string_append_printf(privmsg, "%c", ch);
             }
@@ -650,6 +648,11 @@ _rosterwin_private_chats(ProfLayoutSplit *layout)
             char *unreadpos = prefs_get_string(PREF_ROSTER_ROOMS_UNREAD);
             if ((g_strcmp0(unreadpos, "before") == 0) && privwin->unread > 0) {
                 g_string_append_printf(privmsg, "(%d) ", privwin->unread);
+            }
+
+            ch = prefs_get_roster_private_char();
+            if (ch) {
+                g_string_append_printf(privmsg, "%c", ch);
             }
 
             g_string_append(privmsg, privwin->fulljid);

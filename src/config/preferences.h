@@ -192,6 +192,12 @@ void prefs_clear_roster_contact_char(void);
 char prefs_get_roster_resource_char(void);
 void prefs_set_roster_resource_char(char ch);
 void prefs_clear_roster_resource_char(void);
+char prefs_get_roster_private_char(void);
+void prefs_set_roster_private_char(char ch);
+void prefs_clear_roster_private_char(void);
+char prefs_get_roster_room_char(void);
+void prefs_set_roster_room_char(char ch);
+void prefs_clear_roster_room_char(void);
 
 gint prefs_get_roster_contact_indent(void);
 void prefs_set_roster_contact_indent(gint value);

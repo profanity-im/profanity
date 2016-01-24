@@ -755,6 +755,80 @@ prefs_clear_roster_resource_char(void)
     _save_prefs();
 }
 
+char
+prefs_get_roster_private_char(void)
+{
+    char result = 0;
+
+    char *resultstr = g_key_file_get_string(prefs, PREF_GROUP_UI, "roster.private.char", NULL);
+    if (!resultstr) {
+        result =  0;
+    } else {
+        result = resultstr[0];
+    }
+    free(resultstr);
+
+    return result;
+}
+
+void
+prefs_set_roster_private_char(char ch)
+{
+    char str[2];
+    str[0] = ch;
+    str[1] = '\0';
+
+    g_key_file_set_string(prefs, PREF_GROUP_UI, "roster.private.char", str);
+    _save_prefs();
+}
+
+void
+prefs_clear_roster_private_char(void)
+{
+    g_key_file_remove_key(prefs, PREF_GROUP_UI, "roster.private.char", NULL);
+    _save_prefs();
+}
+
+
+
+char
+prefs_get_roster_room_char(void)
+{
+    char result = 0;
+
+    char *resultstr = g_key_file_get_string(prefs, PREF_GROUP_UI, "roster.rooms.char", NULL);
+    if (!resultstr) {
+        result =  0;
+    } else {
+        result = resultstr[0];
+    }
+    free(resultstr);
+
+    return result;
+}
+
+void
+prefs_set_roster_room_char(char ch)
+{
+    char str[2];
+    str[0] = ch;
+    str[1] = '\0';
+
+    g_key_file_set_string(prefs, PREF_GROUP_UI, "roster.rooms.char", str);
+    _save_prefs();
+}
+
+void
+prefs_clear_roster_room_char(void)
+{
+    g_key_file_remove_key(prefs, PREF_GROUP_UI, "roster.rooms.char", NULL);
+    _save_prefs();
+}
+
+
+
+
+
 gint
 prefs_get_roster_contact_indent(void)
 {

@@ -2409,7 +2409,20 @@ cmd_roster(ProfWin *window, const char *const command, gchar **args)
         }
 
     } else if (g_strcmp0(args[0], "private") == 0) {
-        if (g_strcmp0(args[1], "room") == 0) {
+        if (g_strcmp0(args[1], "char") == 0) {
+            if (!args[2]) {
+                cons_bad_cmd_usage(command);
+            } else if (g_strcmp0(args[2], "none") == 0) {
+                prefs_clear_roster_private_char();
+                cons_show("Roster private room chat char removed.");
+                rosterwin_roster();
+            } else {
+                prefs_set_roster_private_char(args[2][0]);
+                cons_show("Roster private room chat char set to %c.", args[2][0]);
+                rosterwin_roster();
+            }
+            return TRUE;
+        } else if (g_strcmp0(args[1], "room") == 0) {
             cons_show("Showing room private chats under room.");
             prefs_set_string(PREF_ROSTER_PRIVATE, "room");
             if (conn_status == JABBER_CONNECTED) {
@@ -2436,7 +2449,20 @@ cmd_roster(ProfWin *window, const char *const command, gchar **args)
         }
 
     } else if (g_strcmp0(args[0], "room") == 0) {
-        if (g_strcmp0(args[1], "position") == 0) {
+        if (g_strcmp0(args[1], "char") == 0) {
+            if (!args[2]) {
+                cons_bad_cmd_usage(command);
+            } else if (g_strcmp0(args[2], "none") == 0) {
+                prefs_clear_roster_room_char();
+                cons_show("Roster room char removed.");
+                rosterwin_roster();
+            } else {
+                prefs_set_roster_room_char(args[2][0]);
+                cons_show("Roster room char set to %c.", args[2][0]);
+                rosterwin_roster();
+            }
+            return TRUE;
+        } else if (g_strcmp0(args[1], "position") == 0) {
             if (g_strcmp0(args[2], "first") == 0) {
                 cons_show("Showing rooms first in roster.");
                 prefs_set_string(PREF_ROSTER_ROOMS_POS, "first");
