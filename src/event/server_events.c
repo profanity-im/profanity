@@ -315,6 +315,7 @@ sv_ev_incoming_private_message(const char *const fulljid, char *message)
         privatewin = (ProfPrivateWin*)window;
     }
     privwin_incoming_msg(privatewin, message, NULL);
+    rosterwin_roster();
 }
 
 void

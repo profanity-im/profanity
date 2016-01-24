@@ -519,6 +519,73 @@ _rosterwin_room(ProfLayoutSplit *layout, ProfMucWin *mucwin)
     } else {
         wattroff(layout->subwin, theme_attrs(THEME_ROSTER_ROOM));
     }
+
+    // TODO if show private chat with room
+    GList *privs = wins_get_private_chats(mucwin->roomjid);
+    GList *curr = privs;
+    while (curr) {
+        ProfPrivateWin *privwin = curr->data;
+        win_sub_newline_lazy(layout->subwin);
+
+        GString *privmsg = g_string_new(" ");
+        indent = prefs_get_roster_contact_indent();
+        current_indent = 0;
+        if (indent > 0) {
+            current_indent += indent;
+            while (indent > 0) {
+                g_string_append(privmsg, " ");
+                indent--;
+            }
+        }
+
+        // TODO add preference
+        indent = prefs_get_roster_resource_indent();
+        if (indent > 0) {
+            current_indent += indent;
+            while (indent > 0) {
+                g_string_append(privmsg, " ");
+                indent--;
+            }
+        }
+
+        // TODO add preference
+        unreadpos = prefs_get_string(PREF_ROSTER_ROOMS_UNREAD);
+        if ((g_strcmp0(unreadpos, "before") == 0) && privwin->unread > 0) {
+            g_string_append_printf(privmsg, "(%d) ", privwin->unread);
+        }
+
+        // TODO add preference
+        ch = '/';
+        if (ch) {
+            g_string_append_printf(privmsg, "%c", ch);
+        }
+
+        g_string_append(privmsg, privwin->fulljid + strlen(mucwin->roomjid) + 1);
+
+        if ((g_strcmp0(unreadpos, "after") == 0) && privwin->unread > 0) {
+            g_string_append_printf(privmsg, " (%d)", privwin->unread);
+        }
+        prefs_free_string(unreadpos);
+
+        if (privwin->unread > 0) {
+            wattron(layout->subwin, theme_attrs(THEME_ROSTER_ROOM_UNREAD));
+        } else {
+            wattron(layout->subwin, theme_attrs(THEME_ROSTER_ROOM));
+        }
+
+        win_sub_print(layout->subwin, privmsg->str, FALSE, wrap, current_indent);
+
+        if (mucwin->unread > 0) {
+            wattroff(layout->subwin, theme_attrs(THEME_ROSTER_ROOM_UNREAD));
+        } else {
+            wattroff(layout->subwin, theme_attrs(THEME_ROSTER_ROOM));
+        }
+
+        g_string_free(privmsg, TRUE);
+        curr = g_list_next(curr);
+    }
+
+    g_list_free(privs);
 }
 
 static int
@@ -560,7 +627,7 @@ _rosterwin_rooms(ProfLayoutSplit *layout, gboolean newline)
     }
     g_list_free(rooms);
 
-    // if this group has contacts, or if we want to show empty groups
+    // if there are active rooms, or if we want to show empty groups
     if (rooms_sorted || prefs_get_boolean(PREF_ROSTER_EMPTY)) {
         if (newline) {
             win_sub_newline_lazy(layout->subwin);
