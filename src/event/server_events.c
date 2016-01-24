@@ -230,8 +230,7 @@ sv_ev_room_history(const char *const room_jid, const char *const nick,
 }
 
 void
-sv_ev_room_message(const char *const room_jid, const char *const nick,
-    const char *const message)
+sv_ev_room_message(const char *const room_jid, const char *const nick, const char *const message)
 {
     if (prefs_get_boolean(PREF_GRLOG)) {
         Jid *jid = jid_create(jabber_get_fulljid());
@@ -244,13 +243,25 @@ sv_ev_room_message(const char *const room_jid, const char *const nick,
         return;
     }
 
-    mucwin_message(mucwin, nick, message);
+    char *mynick = muc_nick(mucwin->roomjid);
+
+    gboolean mention = FALSE;
+    char *message_lower = g_utf8_strdown(message, -1);
+    char *mynick_lower = g_utf8_strdown(mynick, -1);
+    if (g_strrstr(message_lower, mynick_lower)) {
+        mention = TRUE;
+    }
+    g_free(message_lower);
+    g_free(mynick_lower);
+
+    GList *triggers = prefs_message_get_triggers(message);
+
+    mucwin_message(mucwin, nick, message, mention, triggers != NULL);
 
     ProfWin *window = (ProfWin*)mucwin;
     gboolean is_current = wins_is_current(window);
     int num = wins_get_num(window);
-    char *my_nick = muc_nick(mucwin->roomjid);
-    gboolean notify = prefs_do_room_notify(is_current, mucwin->roomjid, my_nick, message);
+    gboolean notify = prefs_do_room_notify(is_current, mucwin->roomjid, mynick, message, mention, triggers != NULL);
 
     // currently in groupchat window
     if (wins_is_current(window)) {
@@ -267,7 +278,7 @@ sv_ev_room_message(const char *const room_jid, const char *const nick,
         }
         prefs_free_string(muc_show);
 
-        if (prefs_get_boolean(PREF_FLASH) && (strcmp(nick, my_nick) != 0)) {
+        if (prefs_get_boolean(PREF_FLASH) && (strcmp(nick, mynick) != 0)) {
             flash();
         }
 
@@ -280,7 +291,7 @@ sv_ev_room_message(const char *const room_jid, const char *const nick,
     rosterwin_roster();
 
     // don't notify self messages
-    if (strcmp(nick, my_nick) == 0) {
+    if (strcmp(nick, mynick) == 0) {
         return;
     }
 

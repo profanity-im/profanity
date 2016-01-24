@@ -211,10 +211,11 @@ prefs_do_chat_notify(gboolean current_win, const char *const message)
     return FALSE;
 }
 
-gboolean
-prefs_message_contains_trigger(const char *const message)
+GList*
+prefs_message_get_triggers(const char *const message)
 {
-    gboolean trigger_found = FALSE;
+    GList *result = NULL;
+
     char *message_lower = g_utf8_strdown(message, -1);
     gsize len = 0;
     gchar **triggers = g_key_file_get_string_list(prefs, PREF_GROUP_NOTIFICATIONS, "room.trigger.list", &len, NULL);
@@ -222,21 +223,20 @@ prefs_message_contains_trigger(const char *const message)
     for (i = 0; i < len; i++) {
         char *trigger_lower = g_utf8_strdown(triggers[i], -1);
         if (g_strrstr(message_lower, trigger_lower)) {
-            trigger_found = TRUE;
             g_free(trigger_lower);
-            break;
+            result = g_list_append(result, strdup(triggers[i]));
         }
         g_free(trigger_lower);
     }
     g_strfreev(triggers);
     g_free(message_lower);
 
-    return trigger_found;
+    return result;
 }
 
 gboolean
-prefs_do_room_notify(gboolean current_win, const char *const roomjid, const char *const nick,
-    const char *const message)
+prefs_do_room_notify(gboolean current_win, const char *const roomjid, const char *const nick, const char *const message,
+    gboolean mention, gboolean trigger_found)
 {
     gboolean notify_current = prefs_get_boolean(PREF_NOTIFY_ROOM_CURRENT);
     gboolean notify_window = FALSE;
@@ -263,16 +263,8 @@ prefs_do_room_notify(gboolean current_win, const char *const roomjid, const char
     } else {
         notify_mention = prefs_get_boolean(PREF_NOTIFY_ROOM_MENTION);
     }
-    if (notify_mention) {
-        char *message_lower = g_utf8_strdown(message, -1);
-        char *nick_lower = g_utf8_strdown(nick, -1);
-        if (g_strrstr(message_lower, nick_lower)) {
-            g_free(message_lower);
-            g_free(nick_lower);
-            return TRUE;
-        }
-        g_free(message_lower);
-        g_free(nick_lower);
+    if (notify_mention && mention) {
+        return TRUE;
     }
 
     gboolean notify_trigger = FALSE;
@@ -281,7 +273,7 @@ prefs_do_room_notify(gboolean current_win, const char *const roomjid, const char
     } else {
         notify_trigger = prefs_get_boolean(PREF_NOTIFY_ROOM_TRIGGER);
     }
-    if (notify_trigger && prefs_message_contains_trigger(message)) {
+    if (notify_trigger && trigger_found) {
         return TRUE;
     }
 
