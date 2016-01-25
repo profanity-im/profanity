@@ -301,8 +301,27 @@ cons_show_typing(const char *const barejid)
     cons_alert();
 }
 
+char*
+_room_triggers_to_string(GList *triggers)
+{
+    GString *triggers_str = g_string_new("");
+    GList *curr = triggers;
+    while (curr) {
+        g_string_append_printf(triggers_str, "\"%s\"", (char*)curr->data);
+        curr = g_list_next(curr);
+        if (curr) {
+            g_string_append(triggers_str, ", ");
+        }
+    }
+
+    char *result = triggers_str->str;
+    g_string_free(triggers_str, FALSE);
+    return result;
+}
+
 void
-cons_show_incoming_room_message(const char *const nick, const char *const room, const int win_index)
+cons_show_incoming_room_message(const char *const nick, const char *const room, const int win_index, gboolean mention,
+    GList *triggers, int unread)
 {
     ProfWin *const console = wins_get_console();
 
@@ -311,13 +330,35 @@ cons_show_incoming_room_message(const char *const nick, const char *const room, 
         ui_index = 0;
     }
 
-    if (nick) {
-        win_vprint(console, '-', 0, NULL, 0, THEME_INCOMING, "", "<< room message: %s in %s (win %d)", nick, room, ui_index);
-    } else {
-        win_vprint(console, '-', 0, NULL, 0, THEME_INCOMING, "", "<< room message: %s (win %d)", room, ui_index);
-    }
+    char *muc_show = prefs_get_string(PREF_CONSOLE_MUC);
 
-    cons_alert();
+    if (g_strcmp0(muc_show, "all") == 0) {
+        if (mention) {
+            win_vprint(console, '-', 0, NULL, 0, THEME_INCOMING, "", "<< room mention: %s in %s (win %d)", nick, room, ui_index);
+        } else if (triggers) {
+            char *triggers_str = _room_triggers_to_string(triggers);
+            win_vprint(console, '-', 0, NULL, 0, THEME_INCOMING, "", "<< room trigger %s: %s in %s (win %d)", triggers_str, nick, room, ui_index);
+            free(triggers_str);
+        } else {
+            win_vprint(console, '-', 0, NULL, 0, THEME_INCOMING, "", "<< room message: %s in %s (win %d)", nick, room, ui_index);
+        }
+        cons_alert();
+
+    } else if (g_strcmp0(muc_show, "first") == 0) {
+        if (mention) {
+            win_vprint(console, '-', 0, NULL, 0, THEME_INCOMING, "", "<< room mention: %s in %s (win %d)", nick, room, ui_index);
+            cons_alert();
+        } else if (triggers) {
+            char *triggers_str = _room_triggers_to_string(triggers);
+            win_vprint(console, '-', 0, NULL, 0, THEME_INCOMING, "", "<< room trigger %s: %s in %s (win %d)", triggers_str, nick, room, ui_index);
+            free(triggers_str);
+            cons_alert();
+        } else if (unread == 0) {
+            win_vprint(console, '-', 0, NULL, 0, THEME_INCOMING, "", "<< room message: %s (win %d)", room, ui_index);
+            cons_alert();
+        }
+    }
+    prefs_free_string(muc_show);
 }
 
 void
@@ -2148,6 +2189,8 @@ cons_theme_properties(void)
     _cons_theme_prop(THEME_ROSTER_OFFLINE_UNREAD, "roster.offline.unread");
     _cons_theme_prop(THEME_ROSTER_ROOM, "roster.room");
     _cons_theme_prop(THEME_ROSTER_ROOM_UNREAD, "roster.room.unread");
+    _cons_theme_prop(THEME_ROSTER_ROOM_TRIGGER, "roster.room.trigger");
+    _cons_theme_prop(THEME_ROSTER_ROOM_MENTION, "roster.room.mention");
 
     _cons_theme_prop(THEME_OCCUPANTS_HEADER, "occupants.header");
 

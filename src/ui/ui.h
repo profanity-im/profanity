@@ -157,7 +157,7 @@ void mucwin_occupant_role_and_affiliation_change(ProfMucWin *mucwin, const char 
     const char *const role, const char *const affiliation, const char *const actor, const char *const reason);
 void mucwin_roster(ProfMucWin *mucwin, GList *occupants, const char *const presence);
 void mucwin_history(ProfMucWin *mucwin, const char *const nick, GDateTime *timestamp, const char *const message);
-void mucwin_message(ProfMucWin *mucwin, const char *const nick, const char *const message);
+void mucwin_message(ProfMucWin *mucwin, const char *const nick, const char *const message, gboolean mention, gboolean trigger_found);
 void mucwin_subject(ProfMucWin *mucwin, const char *const nick, const char *const subject);
 void mucwin_requires_config(ProfMucWin *mucwin);
 void mucwin_info(ProfMucWin *mucwin);
@@ -256,7 +256,8 @@ void cons_show_disco_info(const char *from, GSList *identities, GSList *features
 void cons_show_room_invite(const char *const invitor, const char *const room, const char *const reason);
 void cons_check_version(gboolean not_available_msg);
 void cons_show_typing(const char *const barejid);
-void cons_show_incoming_room_message(const char *const nick, const char *const room, const int win_index);
+void cons_show_incoming_room_message(const char *const nick, const char *const room, const int win_index,
+    gboolean mention, GList *triggers, int unread);
 void cons_show_incoming_message(const char *const short_from, const int win_index);
 void cons_show_incoming_private_message(const char *const nick, const char *const room, const int win_index);
 void cons_show_room_invites(GSList *invites);

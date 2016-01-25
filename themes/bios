@@ -67,6 +67,8 @@ roster.dnd.unread=bold_red
 roster.offline.unread=bold_blue
 roster.room=bold_red
 roster.room.unread=bold_magenta
+roster.room.mention=bold_magenta
+roster.room.trigger=bold_magenta
 occupants.header=bold_magenta
 receipt.sent=bold_blue
 

@@ -181,6 +181,8 @@ win_create_muc(const char *const roomjid)
 
     new_win->roomjid = strdup(roomjid);
     new_win->unread = 0;
+    new_win->unread_mentions = FALSE;
+    new_win->unread_triggers = FALSE;
     new_win->notify = FALSE;
     if (prefs_get_boolean(PREF_OCCUPANTS_JID)) {
         new_win->showjid = TRUE;

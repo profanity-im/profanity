@@ -67,6 +67,8 @@ roster.dnd.unread=
 roster.offline.unread=
 roster.room=
 roster.room.unread=
+roster.room.trigger=
+roster.room.mention=
 occupants.header=
 receipt.sent=
 

@@ -119,6 +119,8 @@ typedef struct prof_muc_win_t {
     ProfWin window;
     char *roomjid;
     int unread;
+    gboolean unread_mentions;
+    gboolean unread_triggers;
     gboolean notify;
     gboolean showjid;
     unsigned long memcheck;
