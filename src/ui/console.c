@@ -2189,6 +2189,8 @@ cons_theme_properties(void)
     _cons_theme_prop(THEME_ROSTER_OFFLINE_UNREAD, "roster.offline.unread");
     _cons_theme_prop(THEME_ROSTER_ROOM, "roster.room");
     _cons_theme_prop(THEME_ROSTER_ROOM_UNREAD, "roster.room.unread");
+    _cons_theme_prop(THEME_ROSTER_ROOM_TRIGGER, "roster.room.trigger");
+    _cons_theme_prop(THEME_ROSTER_ROOM_MENTION, "roster.room.mention");
 
     _cons_theme_prop(THEME_OCCUPANTS_HEADER, "occupants.header");
 

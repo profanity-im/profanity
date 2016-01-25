@@ -142,6 +142,8 @@ theme_init(const char *const theme_name)
     g_hash_table_insert(defaults, strdup("roster.xa.unread"),        strdup("cyan"));
     g_hash_table_insert(defaults, strdup("roster.room"),             strdup("green"));
     g_hash_table_insert(defaults, strdup("roster.room.unread"),      strdup("green"));
+    g_hash_table_insert(defaults, strdup("roster.room.trigger"),     strdup("green"));
+    g_hash_table_insert(defaults, strdup("roster.room.mention"),     strdup("green"));
     g_hash_table_insert(defaults, strdup("occupants.header"),        strdup("yellow"));
 }
 
@@ -765,6 +767,8 @@ theme_attrs(theme_item_t attrs)
     case THEME_ROSTER_XA_UNREAD:        _theme_prep_fgnd("roster.xa.unread",        "cyan",     lookup_str, &bold); break;
     case THEME_ROSTER_ROOM:             _theme_prep_fgnd("roster.room",             "green",    lookup_str, &bold); break;
     case THEME_ROSTER_ROOM_UNREAD:      _theme_prep_fgnd("roster.room.unread",      "green",    lookup_str, &bold); break;
+    case THEME_ROSTER_ROOM_TRIGGER:     _theme_prep_fgnd("roster.room.trigger",     "green",    lookup_str, &bold); break;
+    case THEME_ROSTER_ROOM_MENTION:     _theme_prep_fgnd("roster.room.mention",     "green",    lookup_str, &bold); break;
     case THEME_OCCUPANTS_HEADER:        _theme_prep_fgnd("occupants.header",        "yellow",   lookup_str, &bold); break;
     case THEME_WHITE:                   g_string_append(lookup_str, "white");   bold = FALSE;   break;
     case THEME_WHITE_BOLD:              g_string_append(lookup_str, "white");   bold = TRUE;    break;

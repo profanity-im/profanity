@@ -281,6 +281,13 @@ sv_ev_room_message(const char *const room_jid, const char *const nick, const cha
         if (notify) {
             mucwin->notify = TRUE;
         }
+
+        if (mention) {
+            mucwin->unread_mentions = TRUE;
+        }
+        if (triggers) {
+            mucwin->unread_triggers = TRUE;
+        }
     }
 
     if (triggers) {

@@ -479,7 +479,11 @@ _rosterwin_room(ProfLayoutSplit *layout, ProfMucWin *mucwin)
 {
     GString *msg = g_string_new(" ");
 
-    if (mucwin->unread > 0) {
+    if (mucwin->unread_mentions) {
+        wattron(layout->subwin, theme_attrs(THEME_ROSTER_ROOM_MENTION));
+    } else if (mucwin->unread_triggers) {
+        wattron(layout->subwin, theme_attrs(THEME_ROSTER_ROOM_TRIGGER));
+    } else if (mucwin->unread > 0) {
         wattron(layout->subwin, theme_attrs(THEME_ROSTER_ROOM_UNREAD));
     } else {
         wattron(layout->subwin, theme_attrs(THEME_ROSTER_ROOM));
@@ -514,7 +518,11 @@ _rosterwin_room(ProfLayoutSplit *layout, ProfMucWin *mucwin)
     win_sub_print(layout->subwin, msg->str, FALSE, wrap, current_indent);
     g_string_free(msg, TRUE);
 
-    if (mucwin->unread > 0) {
+    if (mucwin->unread_mentions) {
+        wattroff(layout->subwin, theme_attrs(THEME_ROSTER_ROOM_MENTION));
+    } else if (mucwin->unread_triggers) {
+        wattroff(layout->subwin, theme_attrs(THEME_ROSTER_ROOM_TRIGGER));
+    } else if (mucwin->unread > 0) {
         wattroff(layout->subwin, theme_attrs(THEME_ROSTER_ROOM_UNREAD));
     } else {
         wattroff(layout->subwin, theme_attrs(THEME_ROSTER_ROOM));
