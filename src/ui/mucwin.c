@@ -356,7 +356,8 @@ mucwin_history(ProfMucWin *mucwin, const char *const nick, GDateTime *timestamp,
 }
 
 void
-mucwin_message(ProfMucWin *mucwin, const char *const nick, const char *const message)
+mucwin_message(ProfMucWin *mucwin, const char *const nick, const char *const message, gboolean mention,
+    gboolean trigger_found)
 {
     assert(mucwin != NULL);
 
@@ -364,9 +365,9 @@ mucwin_message(ProfMucWin *mucwin, const char *const nick, const char *const mes
     char *my_nick = muc_nick(mucwin->roomjid);
 
     if (g_strcmp0(nick, my_nick) != 0) {
-        if (g_strrstr(message, my_nick)) {
+        if (mention) {
             win_print(window, '-', 0, NULL, NO_ME, THEME_ROOMMENTION, nick, message);
-        } else if (prefs_message_contains_trigger(message)) {
+        } else if (trigger_found) {
             win_print(window, '-', 0, NULL, NO_ME, THEME_ROOMTRIGGER, nick, message);
         } else {
             win_print(window, '-', 0, NULL, NO_ME, THEME_TEXT_THEM, nick, message);

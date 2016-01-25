@@ -228,6 +228,8 @@ wins_set_current_by_num(int i)
             ProfMucWin *mucwin = (ProfMucWin*) window;
             assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
             mucwin->unread = 0;
+            mucwin->unread_mentions = FALSE;
+            mucwin->unread_triggers = FALSE;
             mucwin->notify = FALSE;
         } else if (window->type == WIN_PRIVATE) {
             ProfPrivateWin *privatewin = (ProfPrivateWin*) window;
