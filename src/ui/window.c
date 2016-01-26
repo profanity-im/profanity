@@ -1223,7 +1223,11 @@ _win_print_wrapped(WINDOW *win, const char *const message, size_t indent, int pa
             wordi = 0;
             int wordlen = 0;
             while (*curr_ch != ' ' && *curr_ch != '\n' && *curr_ch != '\0') {
-                size_t ch_len = mbrlen(curr_ch, 4, NULL);
+                size_t ch_len = mbrlen(curr_ch, MB_CUR_MAX, NULL);
+                if ((ch_len == (size_t)-2) || (ch_len == (size_t)-1)) {
+                    curr_ch++;
+                    continue;
+                }
                 int offset = 0;
                 while (offset < ch_len) {
                     word[wordi++] = curr_ch[offset++];
