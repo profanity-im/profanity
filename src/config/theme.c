@@ -388,7 +388,7 @@ _load_preferences(void)
     _set_boolean_preference("roster.status", PREF_ROSTER_STATUS);
     _set_boolean_preference("roster.empty", PREF_ROSTER_EMPTY);
     _set_boolean_preference("roster.wrap", PREF_ROSTER_WRAP);
-    _set_boolean_preference("roster.count", PREF_ROSTER_COUNT);
+    _set_boolean_preference("roster.count.zero", PREF_ROSTER_COUNT_ZERO);
     _set_boolean_preference("roster.priority", PREF_ROSTER_PRIORITY);
     _set_boolean_preference("roster.contacts", PREF_ROSTER_CONTACTS);
     _set_boolean_preference("roster.rooms", PREF_ROSTER_ROOMS);
@@ -417,6 +417,8 @@ _load_preferences(void)
     _set_string_preference("roster.rooms.unread", PREF_ROSTER_ROOMS_UNREAD);
     _set_string_preference("roster.rooms.pos", PREF_ROSTER_ROOMS_POS);
     _set_string_preference("roster.private", PREF_ROSTER_PRIVATE);
+    _set_string_preference("roster.count", PREF_ROSTER_COUNT);
+
 
     if (g_key_file_has_key(theme, "ui", "occupants.size", NULL)) {
         gint occupants_size = g_key_file_get_integer(theme, "ui", "occupants.size", NULL);

@@ -1370,11 +1370,6 @@ cons_roster_setting(void)
     else
         cons_show("Roster empty (/roster)           : hide");
 
-    if (prefs_get_boolean(PREF_ROSTER_COUNT))
-        cons_show("Roster count (/roster)           : show");
-    else
-        cons_show("Roster count (/roster)           : hide");
-
     if (prefs_get_boolean(PREF_ROSTER_PRIORITY))
         cons_show("Roster priority (/roster)        : show");
     else
@@ -1384,6 +1379,19 @@ cons_roster_setting(void)
         cons_show("Roster contacts (/roster)        : show");
     else
         cons_show("Roster contacts (/roster)        : hide");
+
+    char *count = prefs_get_string(PREF_ROSTER_COUNT);
+    if (g_strcmp0(count, "off") == 0) {
+        cons_show("Roster count (/roster)           : OFF");
+    } else {
+        cons_show("Roster count (/roster)           : %s", count);
+    }
+    prefs_free_string(count);
+
+    if (prefs_get_boolean(PREF_ROSTER_COUNT_ZERO))
+        cons_show("Roster count zero (/roster)      : ON");
+    else
+        cons_show("Roster count zero (/roster)      : OFF");
 
     char *by = prefs_get_string(PREF_ROSTER_BY);
     cons_show("Roster by (/roster)              : %s", by);

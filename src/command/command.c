@@ -2250,7 +2250,6 @@ cmd_init(void)
     autocomplete_add(roster_show_ac, "presence");
     autocomplete_add(roster_show_ac, "status");
     autocomplete_add(roster_show_ac, "empty");
-    autocomplete_add(roster_show_ac, "count");
     autocomplete_add(roster_show_ac, "priority");
     autocomplete_add(roster_show_ac, "contacts");
     autocomplete_add(roster_show_ac, "rooms");
