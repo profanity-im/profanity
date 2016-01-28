@@ -374,7 +374,7 @@ _rosterwin_contacts_by_presence(ProfLayoutSplit *layout, const char *const prese
             int itemcount = g_slist_length(contacts);
             if (itemcount == 0 && prefs_get_boolean(PREF_ROSTER_COUNT_ZERO)) {
                 g_string_append_printf(title_str, " (%d)", itemcount);
-            } else {
+            } else if (itemcount > 0) {
                 g_string_append_printf(title_str, " (%d)", itemcount);
             }
         } else if (g_strcmp0(countpref, "unread") == 0) {
@@ -391,7 +391,7 @@ _rosterwin_contacts_by_presence(ProfLayoutSplit *layout, const char *const prese
             }
             if (unreadcount == 0 && prefs_get_boolean(PREF_ROSTER_COUNT_ZERO)) {
                 g_string_append_printf(title_str, " (%d)", unreadcount);
-            } else {
+            } else if (unreadcount > 0) {
                 g_string_append_printf(title_str, " (%d)", unreadcount);
             }
         }
@@ -445,7 +445,7 @@ _rosterwin_contacts_by_group(ProfLayoutSplit *layout, char *group, gboolean newl
             int itemcount = g_slist_length(contacts);
             if (itemcount == 0 && prefs_get_boolean(PREF_ROSTER_COUNT_ZERO)) {
                 g_string_append_printf(title, " (%d)", itemcount);
-            } else {
+            } else if (itemcount > 0) {
                 g_string_append_printf(title, " (%d)", itemcount);
             }
         } else if (g_strcmp0(countpref, "unread") == 0) {
@@ -462,7 +462,7 @@ _rosterwin_contacts_by_group(ProfLayoutSplit *layout, char *group, gboolean newl
             }
             if (unreadcount == 0 && prefs_get_boolean(PREF_ROSTER_COUNT_ZERO)) {
                 g_string_append_printf(title, " (%d)", unreadcount);
-            } else {
+            } else if (unreadcount > 0) {
                 g_string_append_printf(title, " (%d)", unreadcount);
             }
         }
@@ -514,7 +514,7 @@ _rosterwin_contacts_by_no_group(ProfLayoutSplit *layout, gboolean newline)
             int itemcount = g_slist_length(contacts);
             if (itemcount == 0 && prefs_get_boolean(PREF_ROSTER_COUNT_ZERO)) {
                 g_string_append_printf(title, " (%d)", itemcount);
-            } else {
+            } else if (itemcount > 0) {
                 g_string_append_printf(title, " (%d)", itemcount);
             }
         } else if (g_strcmp0(countpref, "unread") == 0) {
@@ -531,7 +531,7 @@ _rosterwin_contacts_by_no_group(ProfLayoutSplit *layout, gboolean newline)
             }
             if (unreadcount == 0 && prefs_get_boolean(PREF_ROSTER_COUNT_ZERO)) {
                 g_string_append_printf(title, " (%d)", unreadcount);
-            } else {
+            } else if (unreadcount > 0) {
                 g_string_append_printf(title, " (%d)", unreadcount);
             }
         }
@@ -811,13 +811,13 @@ _rosterwin_rooms(ProfLayoutSplit *layout, gboolean newline)
             int count = g_list_length(rooms_sorted);
             if (count == 0 && prefs_get_boolean(PREF_ROSTER_COUNT_ZERO)) {
                 g_string_append_printf(title_str, " (%d)", count);
-            } else {
+            } else if (count > 0) {
                 g_string_append_printf(title_str, " (%d)", count);
             }
         } else if (g_strcmp0(countpref, "unread") == 0) {
             if (unread == 0 && prefs_get_boolean(PREF_ROSTER_COUNT_ZERO)) {
                 g_string_append_printf(title_str, " (%d)", unread);
-            } else {
+            } else if (unread > 0) {
                 g_string_append_printf(title_str, " (%d)", unread);
             }
         }
@@ -935,7 +935,7 @@ rosterwin_roster(void)
                 }
                 if (unreadcount == 0 && prefs_get_boolean(PREF_ROSTER_COUNT_ZERO)) {
                     g_string_append_printf(title, " (%d)", unreadcount);
-                } else {
+                } else if (unreadcount > 0) {
                     g_string_append_printf(title, " (%d)", unreadcount);
                 }
             }
