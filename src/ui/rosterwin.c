@@ -707,9 +707,31 @@ _rosterwin_private_chats(ProfLayoutSplit *layout)
             g_string_append_printf(title_str, "%c", ch);
         }
         g_string_append(title_str, "Private chats");
-        if (prefs_get_boolean(PREF_ROSTER_COUNT)) {
-            g_string_append_printf(title_str, " (%d)", g_list_length(privs));
+
+        char *countpref = prefs_get_string(PREF_ROSTER_COUNT);
+        if (g_strcmp0(countpref, "items") == 0) {
+            int itemcount = g_list_length(privs);
+            if (itemcount == 0 && prefs_get_boolean(PREF_ROSTER_COUNT_ZERO)) {
+                g_string_append_printf(title_str, " (%d)", itemcount);
+            } else if (itemcount > 0) {
+                g_string_append_printf(title_str, " (%d)", itemcount);
+            }
+        } else if (g_strcmp0(countpref, "unread") == 0) {
+            int unreadcount = 0;
+            GList *curr = privs;
+            while (curr) {
+                ProfPrivateWin *privwin = curr->data;
+                unreadcount += privwin->unread;
+                curr = g_list_next(curr);
+            }
+            if (unreadcount == 0 && prefs_get_boolean(PREF_ROSTER_COUNT_ZERO)) {
+                g_string_append_printf(title_str, " (%d)", unreadcount);
+            } else if (unreadcount > 0) {
+                g_string_append_printf(title_str, " (%d)", unreadcount);
+            }
         }
+        prefs_free_string(countpref);
+
         gboolean wrap = prefs_get_boolean(PREF_ROSTER_WRAP);
         win_sub_print(layout->subwin, title_str->str, FALSE, wrap, 1);
         g_string_free(title_str, TRUE);
@@ -815,6 +837,18 @@ _rosterwin_rooms(ProfLayoutSplit *layout, gboolean newline)
                 g_string_append_printf(title_str, " (%d)", count);
             }
         } else if (g_strcmp0(countpref, "unread") == 0) {
+            char *prefpriv = prefs_get_string(PREF_ROSTER_PRIVATE);
+            if (g_strcmp0(prefpriv, "room") == 0) {
+                GList *privwins = wins_get_private_chats(NULL);
+                GList *curr = privwins;
+                while (curr) {
+                    ProfPrivateWin *privwin = curr->data;
+                    unread += privwin->unread;
+                    curr = g_list_next(curr);
+                }
+                g_list_free(privwins);
+            }
+            prefs_free_string(prefpriv);
             if (unread == 0 && prefs_get_boolean(PREF_ROSTER_COUNT_ZERO)) {
                 g_string_append_printf(title_str, " (%d)", unread);
             } else if (unread > 0) {
