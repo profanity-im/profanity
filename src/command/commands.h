@@ -42,7 +42,7 @@ typedef struct cmd_help_t {
     const gchar *tags[20];
     const gchar *synopsis[50];
     const gchar *desc;
-    const gchar *args[64][2];
+    const gchar *args[128][2];
     const gchar *examples[20];
 } CommandHelp;
 

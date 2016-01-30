@@ -1125,6 +1125,7 @@ _get_group(preference_t pref)
         case PREF_ROSTER_ORDER:
         case PREF_ROSTER_UNREAD:
         case PREF_ROSTER_COUNT:
+        case PREF_ROSTER_COUNT_ZERO:
         case PREF_ROSTER_PRIORITY:
         case PREF_ROSTER_WRAP:
         case PREF_ROSTER_RESOURCE_JOIN:
@@ -1324,6 +1325,8 @@ _get_key(preference_t pref)
             return "roster.unread";
         case PREF_ROSTER_COUNT:
             return "roster.count";
+        case PREF_ROSTER_COUNT_ZERO:
+            return "roster.count.zero";
         case PREF_ROSTER_PRIORITY:
             return "roster.priority";
         case PREF_ROSTER_WRAP:
@@ -1396,7 +1399,7 @@ _get_default_boolean(preference_t pref)
         case PREF_ROSTER:
         case PREF_ROSTER_OFFLINE:
         case PREF_ROSTER_EMPTY:
-        case PREF_ROSTER_COUNT:
+        case PREF_ROSTER_COUNT_ZERO:
         case PREF_ROSTER_PRIORITY:
         case PREF_ROSTER_RESOURCE_JOIN:
         case PREF_ROSTER_CONTACTS:
@@ -1428,6 +1431,8 @@ _get_default_string(preference_t pref)
             return "all";
         case PREF_ROSTER_BY:
             return "presence";
+        case PREF_ROSTER_COUNT:
+            return "unread";
         case PREF_ROSTER_ORDER:
             return "presence";
         case PREF_ROSTER_UNREAD:
