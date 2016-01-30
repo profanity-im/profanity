@@ -2224,13 +2224,6 @@ cmd_roster(ProfWin *window, const char *const command, gchar **args)
                 rosterwin_roster();
             }
             return TRUE;
-        } else if (g_strcmp0(args[1], "count") == 0) {
-            cons_show("Roster count enabled");
-            prefs_set_boolean(PREF_ROSTER_COUNT, TRUE);
-            if (conn_status == JABBER_CONNECTED) {
-                rosterwin_roster();
-            }
-            return TRUE;
         } else if (g_strcmp0(args[1], "priority") == 0) {
             cons_show("Roster priority enabled");
             prefs_set_boolean(PREF_ROSTER_PRIORITY, TRUE);
@@ -2295,13 +2288,6 @@ cmd_roster(ProfWin *window, const char *const command, gchar **args)
         } else if (g_strcmp0(args[1], "empty") == 0) {
             cons_show("Roster empty disabled");
             prefs_set_boolean(PREF_ROSTER_EMPTY, FALSE);
-            if (conn_status == JABBER_CONNECTED) {
-                rosterwin_roster();
-            }
-            return TRUE;
-        } else if (g_strcmp0(args[1], "count") == 0) {
-            cons_show("Roster count disabled");
-            prefs_set_boolean(PREF_ROSTER_COUNT, FALSE);
             if (conn_status == JABBER_CONNECTED) {
                 rosterwin_roster();
             }
@@ -2372,6 +2358,41 @@ cmd_roster(ProfWin *window, const char *const command, gchar **args)
         } else if (g_strcmp0(args[1], "presence") == 0) {
             cons_show("Ordering roster by presence");
             prefs_set_string(PREF_ROSTER_ORDER, "presence");
+            if (conn_status == JABBER_CONNECTED) {
+                rosterwin_roster();
+            }
+            return TRUE;
+        } else {
+            cons_bad_cmd_usage(command);
+            return TRUE;
+        }
+
+    } else if (g_strcmp0(args[0], "count") == 0) {
+        if (g_strcmp0(args[1], "zero") == 0) {
+            gboolean result = _cmd_set_boolean_preference(args[2], command, "Roster header zero count", PREF_ROSTER_COUNT_ZERO);
+            if (result) {
+                if (conn_status == JABBER_CONNECTED) {
+                    rosterwin_roster();
+                }
+            }
+            return result;
+        } else if (g_strcmp0(args[1], "unread") == 0) {
+            cons_show("Roster header count set to unread");
+            prefs_set_string(PREF_ROSTER_COUNT, "unread");
+            if (conn_status == JABBER_CONNECTED) {
+                rosterwin_roster();
+            }
+            return TRUE;
+        } else if (g_strcmp0(args[1], "items") == 0) {
+            cons_show("Roster header count set to items");
+            prefs_set_string(PREF_ROSTER_COUNT, "items");
+            if (conn_status == JABBER_CONNECTED) {
+                rosterwin_roster();
+            }
+            return TRUE;
+        } else if (g_strcmp0(args[1], "off") == 0) {
+            cons_show("Disabling roster header count");
+            prefs_set_string(PREF_ROSTER_COUNT, "off");
             if (conn_status == JABBER_CONNECTED) {
                 rosterwin_roster();
             }

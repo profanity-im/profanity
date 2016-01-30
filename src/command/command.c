@@ -278,9 +278,11 @@ static struct cmd_t command_defs[] =
         CMD_SYN(
             "/roster",
             "/roster online",
-            "/roster show [offline|resource|presence|status|empty|count|priority|contacts|rooms]",
-            "/roster hide [offline|resource|presence|status|empty|count|priority|contacts|rooms]",
+            "/roster show [offline|resource|presence|status|empty|priority|contacts|rooms]",
+            "/roster hide [offline|resource|presence|status|empty|priority|contacts|rooms]",
             "/roster by group|presence|none",
+            "/roster count unread|items|off"
+            "/roster count zero on|off"
             "/roster order name|presence",
             "/roster unread before|after|off",
             "/roster room char <char>|none",
@@ -331,6 +333,11 @@ static struct cmd_t command_defs[] =
             { "by group",                   "Group contacts in the roster panel by roster group." },
             { "by presence",                "Group contacts in the roster panel by presence." },
             { "by none",                    "No grouping in the roster panel." },
+            { "count unread",               "Show total unread message count with roster headers." },
+            { "count items",                "Show item count with roster headers." },
+            { "count off",                  "Do not show any count with roster headers." },
+            { "count zero on",              "Show roster count when 0." },
+            { "count zero off",             "Hide roster count when 0." },
             { "order name",                 "Order roster items by name only." },
             { "order presence",             "Order roster items by presence, and then by name." },
             { "unread before",              "Show unread message count before contact in roster." },
@@ -1930,6 +1937,7 @@ static Autocomplete wins_ac;
 static Autocomplete roster_ac;
 static Autocomplete roster_show_ac;
 static Autocomplete roster_by_ac;
+static Autocomplete roster_count_ac;
 static Autocomplete roster_order_ac;
 static Autocomplete roster_header_ac;
 static Autocomplete roster_contact_ac;
@@ -2200,6 +2208,7 @@ cmd_init(void)
     autocomplete_add(roster_ac, "show");
     autocomplete_add(roster_ac, "hide");
     autocomplete_add(roster_ac, "by");
+    autocomplete_add(roster_ac, "count");
     autocomplete_add(roster_ac, "order");
     autocomplete_add(roster_ac, "unread");
     autocomplete_add(roster_ac, "room");
@@ -2241,7 +2250,6 @@ cmd_init(void)
     autocomplete_add(roster_show_ac, "presence");
     autocomplete_add(roster_show_ac, "status");
     autocomplete_add(roster_show_ac, "empty");
-    autocomplete_add(roster_show_ac, "count");
     autocomplete_add(roster_show_ac, "priority");
     autocomplete_add(roster_show_ac, "contacts");
     autocomplete_add(roster_show_ac, "rooms");
@@ -2250,6 +2258,12 @@ cmd_init(void)
     autocomplete_add(roster_by_ac, "group");
     autocomplete_add(roster_by_ac, "presence");
     autocomplete_add(roster_by_ac, "none");
+
+    roster_count_ac = autocomplete_new();
+    autocomplete_add(roster_count_ac, "unread");
+    autocomplete_add(roster_count_ac, "items");
+    autocomplete_add(roster_count_ac, "off");
+    autocomplete_add(roster_count_ac, "zero");
 
     roster_order_ac = autocomplete_new();
     autocomplete_add(roster_order_ac, "name");
@@ -2545,6 +2559,7 @@ cmd_uninit(void)
     autocomplete_free(roster_char_ac);
     autocomplete_free(roster_show_ac);
     autocomplete_free(roster_by_ac);
+    autocomplete_free(roster_count_ac);
     autocomplete_free(roster_order_ac);
     autocomplete_free(roster_room_ac);
     autocomplete_free(roster_unread_ac);
@@ -2758,6 +2773,7 @@ cmd_reset_autocomplete(ProfWin *window)
     autocomplete_reset(roster_char_ac);
     autocomplete_reset(roster_show_ac);
     autocomplete_reset(roster_by_ac);
+    autocomplete_reset(roster_count_ac);
     autocomplete_reset(roster_order_ac);
     autocomplete_reset(roster_room_ac);
     autocomplete_reset(roster_unread_ac);
@@ -3192,6 +3208,10 @@ _roster_autocomplete(ProfWin *window, const char *const input)
     if (result) {
         return result;
     }
+    result = autocomplete_param_with_func(input, "/roster count zero", prefs_autocomplete_boolean_choice);
+    if (result) {
+        return result;
+    }
 
     jabber_conn_status_t conn_status = jabber_get_connection_status();
     if (conn_status == JABBER_CONNECTED) {
@@ -3222,6 +3242,10 @@ _roster_autocomplete(ProfWin *window, const char *const input)
         return result;
     }
     result = autocomplete_param_with_ac(input, "/roster by", roster_by_ac, TRUE);
+    if (result) {
+        return result;
+    }
+    result = autocomplete_param_with_ac(input, "/roster count", roster_count_ac, TRUE);
     if (result) {
         return result;
     }
