@@ -354,6 +354,10 @@ _rosterwin_contact(ProfLayoutSplit *layout, PContact contact)
 static void
 _rosterwin_contacts_by_presence(ProfLayoutSplit *layout, const char *const presence, char *title, gboolean newline)
 {
+    if ((g_strcmp0(presence, "offline") == 0) && !prefs_get_boolean(PREF_ROSTER_OFFLINE)) {
+        return;
+    }
+
     GSList *contacts = roster_get_contacts_by_presence(presence);
 
     // if this group has contacts, or if we want to show empty groups
@@ -910,9 +914,7 @@ rosterwin_roster(void)
             _rosterwin_contacts_by_presence(layout, "away", "Away", TRUE);
             _rosterwin_contacts_by_presence(layout, "xa", "Extended Away", TRUE);
             _rosterwin_contacts_by_presence(layout, "dnd", "Do not disturb", TRUE);
-            if (prefs_get_boolean(PREF_ROSTER_OFFLINE)) {
-                _rosterwin_contacts_by_presence(layout, "offline", "Offline", TRUE);
-            }
+            _rosterwin_contacts_by_presence(layout, "offline", "Offline", TRUE);
         } else if (g_strcmp0(by, "group") == 0) {
             GSList *groups = roster_get_groups();
             GSList *curr_group = groups;
