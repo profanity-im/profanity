@@ -650,7 +650,7 @@ _rosterwin_room(ProfLayoutSplit *layout, ProfMucWin *mucwin)
                 g_string_append_printf(privmsg, "(%d) ", privwin->unread);
             }
 
-            ch = prefs_get_roster_private_char();
+            ch = prefs_get_roster_room_private_char();
             if (ch) {
                 g_string_append_printf(privmsg, "%c", ch);
             }

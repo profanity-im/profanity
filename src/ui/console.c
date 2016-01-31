@@ -1330,6 +1330,12 @@ cons_roster_setting(void)
     else
         cons_show("Roster room char (/roster)       : none");
 
+    char room_priv_ch = prefs_get_roster_room_private_char();
+    if (room_priv_ch)
+        cons_show("Roster room private char (/roster) : %c", room_priv_ch);
+    else
+        cons_show("Roster room private char (/roster) : none");
+
     char private_ch = prefs_get_roster_private_char();
     if (private_ch)
         cons_show("Roster private char (/roster)    : %c", private_ch);
