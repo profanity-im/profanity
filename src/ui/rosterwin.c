@@ -137,9 +137,9 @@ _rosterwin_contacts_all(ProfLayoutSplit *layout, gboolean newline)
 
     char *order = prefs_get_string(PREF_ROSTER_ORDER);
     if (g_strcmp0(order, "presence") == 0) {
-        contacts = roster_get_contacts(ROSTER_ORD_PRESENCE, TRUE);
+        contacts = roster_get_contacts(ROSTER_ORD_PRESENCE);
     } else {
-        contacts = roster_get_contacts(ROSTER_ORD_NAME, TRUE);
+        contacts = roster_get_contacts(ROSTER_ORD_NAME);
     }
     prefs_free_string(order);
 
@@ -189,9 +189,9 @@ _rosterwin_contacts_by_group(ProfLayoutSplit *layout, char *group, gboolean newl
 
     char *order = prefs_get_string(PREF_ROSTER_ORDER);
     if (g_strcmp0(order, "presence") == 0) {
-        contacts = roster_get_group(group, ROSTER_ORD_PRESENCE, TRUE);
+        contacts = roster_get_group(group, ROSTER_ORD_PRESENCE);
     } else {
-        contacts = roster_get_group(group, ROSTER_ORD_NAME, TRUE);
+        contacts = roster_get_group(group, ROSTER_ORD_NAME);
     }
     prefs_free_string(order);
 

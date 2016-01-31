@@ -406,7 +406,7 @@ roster_get_contacts_by_presence(const char *const presence)
 }
 
 GSList*
-roster_get_contacts(roster_ord_t order, gboolean include_offline)
+roster_get_contacts(roster_ord_t order)
 {
     assert(roster != NULL);
 
@@ -424,12 +424,6 @@ roster_get_contacts(roster_ord_t order, gboolean include_offline)
 
     g_hash_table_iter_init(&iter, roster->contacts);
     while (g_hash_table_iter_next(&iter, &key, &value)) {
-        PContact contact = value;
-        const char *presence = p_contact_presence(contact);
-        if (!include_offline && (g_strcmp0(presence, "offline") == 0)) {
-            continue;
-        }
-
         result = g_slist_insert_sorted(result, value, cmp_func);
     }
 
@@ -494,7 +488,7 @@ roster_fulljid_autocomplete(const char *const search_str)
 }
 
 GSList*
-roster_get_group(const char *const group, roster_ord_t order, gboolean include_offline)
+roster_get_group(const char *const group, roster_ord_t order)
 {
     assert(roster != NULL);
 
@@ -512,12 +506,6 @@ roster_get_group(const char *const group, roster_ord_t order, gboolean include_o
 
     g_hash_table_iter_init(&iter, roster->contacts);
     while (g_hash_table_iter_next(&iter, &key, &value)) {
-        PContact contact = value;
-        const char *presence = p_contact_presence(contact);
-        if (!include_offline && (g_strcmp0(presence, "offline") == 0)) {
-            continue;
-        }
-
         GSList *groups = p_contact_groups(value);
         if (group == NULL) {
             if (groups == NULL) {

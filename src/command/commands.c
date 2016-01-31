@@ -887,7 +887,7 @@ cmd_export(ProfWin *window, const char *const command, gchar **args)
 
         if (-1 == write(fd, "jid,name\n", strlen("jid,name\n"))) goto write_error;
 
-        list = roster_get_contacts(ROSTER_ORD_NAME, TRUE);
+        list = roster_get_contacts(ROSTER_ORD_NAME);
         if (list) {
             GSList *curr = list;
             while (curr){
@@ -1623,13 +1623,13 @@ _who_roster(ProfWin *window, const char *const command, gchar **args)
     cons_show("");
     GSList *list = NULL;
     if (group) {
-        list = roster_get_group(group, ROSTER_ORD_NAME, TRUE);
+        list = roster_get_group(group, ROSTER_ORD_NAME);
         if (list == NULL) {
             cons_show("No such group: %s.", group);
             return;
         }
     } else {
-        list = roster_get_contacts(ROSTER_ORD_NAME, TRUE);
+        list = roster_get_contacts(ROSTER_ORD_NAME);
         if (list == NULL) {
             cons_show("No contacts in roster.");
             return;
@@ -1931,7 +1931,7 @@ cmd_group(ProfWin *window, const char *const command, gchar **args)
             return TRUE;
         }
 
-        GSList *list = roster_get_group(group, ROSTER_ORD_NAME, TRUE);
+        GSList *list = roster_get_group(group, ROSTER_ORD_NAME);
         cons_show_roster_group(group, list);
         return TRUE;
     }
@@ -2014,7 +2014,7 @@ cmd_roster(ProfWin *window, const char *const command, gchar **args)
             return TRUE;
         }
 
-        GSList *list = roster_get_contacts(ROSTER_ORD_NAME, TRUE);
+        GSList *list = roster_get_contacts(ROSTER_ORD_NAME);
         cons_show_roster(list);
         g_slist_free(list);
         return TRUE;
@@ -2591,7 +2591,7 @@ cmd_roster(ProfWin *window, const char *const command, gchar **args)
             return TRUE;
         }
 
-        GSList *all = roster_get_contacts(ROSTER_ORD_NAME, TRUE);
+        GSList *all = roster_get_contacts(ROSTER_ORD_NAME);
         GSList *curr = all;
         while (curr) {
             PContact contact = curr->data;
