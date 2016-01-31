@@ -622,7 +622,9 @@ int main(int argc, char* argv[]) {
         unit_test(remove_text_multi_value_removes_when_one),
         unit_test(remove_text_multi_value_removes_when_many),
 
-        unit_test(clears_chat_sessions),
+        unit_test_setup_teardown(clears_chat_sessions,
+            load_preferences,
+            close_preferences),
     };
 
     return run_tests(all_tests);

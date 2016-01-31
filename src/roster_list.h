@@ -69,7 +69,6 @@ GSList* roster_get_groups(void);
 char* roster_group_autocomplete(const char *const search_str);
 char* roster_barejid_autocomplete(const char *const search_str);
 GSList* roster_get_contacts_by_presence(const char *const presence);
-GSList* roster_get_nogroup(roster_ord_t order, gboolean include_offline);
 char* roster_get_msg_display_name(const char *const barejid, const char *const resource);
 
 #endif

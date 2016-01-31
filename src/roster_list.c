@@ -494,41 +494,6 @@ roster_fulljid_autocomplete(const char *const search_str)
 }
 
 GSList*
-roster_get_nogroup(roster_ord_t order, gboolean include_offline)
-{
-    assert(roster != NULL);
-
-    GSList *result = NULL;
-    GHashTableIter iter;
-    gpointer key;
-    gpointer value;
-
-    GCompareFunc cmp_func;
-    if (order == ROSTER_ORD_PRESENCE) {
-        cmp_func = (GCompareFunc) _compare_presence;
-    } else {
-        cmp_func = (GCompareFunc) _compare_name;
-    }
-
-    g_hash_table_iter_init(&iter, roster->contacts);
-    while (g_hash_table_iter_next(&iter, &key, &value)) {
-        PContact contact = value;
-        const char *presence = p_contact_presence(contact);
-        if (!include_offline && (g_strcmp0(presence, "offline") == 0)) {
-            continue;
-        }
-
-        GSList *groups = p_contact_groups(value);
-        if (groups == NULL) {
-            result = g_slist_insert_sorted(result, value, cmp_func);
-        }
-    }
-
-    // return all contact structs
-    return result;
-}
-
-GSList*
 roster_get_group(const char *const group, roster_ord_t order, gboolean include_offline)
 {
     assert(roster != NULL);
@@ -554,12 +519,18 @@ roster_get_group(const char *const group, roster_ord_t order, gboolean include_o
         }
 
         GSList *groups = p_contact_groups(value);
-        while (groups) {
-            if (strcmp(groups->data, group) == 0) {
+        if (group == NULL) {
+            if (groups == NULL) {
                 result = g_slist_insert_sorted(result, value, cmp_func);
-                break;
             }
-            groups = g_slist_next(groups);
+        } else {
+            while (groups) {
+                if (strcmp(groups->data, group) == 0) {
+                    result = g_slist_insert_sorted(result, value, cmp_func);
+                    break;
+                }
+                groups = g_slist_next(groups);
+            }
         }
     }
 
