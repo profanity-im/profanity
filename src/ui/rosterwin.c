@@ -661,26 +661,31 @@ _rosterwin_room(ProfLayoutSplit *layout, ProfMucWin *mucwin)
                 g_string_append_printf(privmsg, "%c", ch);
             }
 
-            g_string_append(privmsg, privwin->fulljid + strlen(mucwin->roomjid) + 1);
+            char *nick = privwin->fulljid + strlen(mucwin->roomjid) + 1;
+            g_string_append(privmsg, nick);
 
             if ((g_strcmp0(unreadpos, "after") == 0) && privwin->unread > 0) {
                 g_string_append_printf(privmsg, " (%d)", privwin->unread);
             }
             prefs_free_string(unreadpos);
 
-            if (privwin->unread > 0) {
-                wattron(layout->subwin, theme_attrs(THEME_ROSTER_ROOM_UNREAD));
-            } else {
-                wattron(layout->subwin, theme_attrs(THEME_ROSTER_ROOM));
+            const char *presence = "offline";
+
+            Occupant *occupant = muc_roster_item(mucwin->roomjid, nick);
+            if (occupant) {
+                presence = string_from_resource_presence(occupant->presence);
             }
 
+            theme_item_t colour;
+            if (privwin->unread > 0) {
+                colour = _get_roster_theme(ROSTER_CONTACT_UNREAD, presence);
+            } else {
+                colour = _get_roster_theme(ROSTER_CONTACT_ACTIVE, presence);
+            }
+
+            wattron(layout->subwin, theme_attrs(colour));
             win_sub_print(layout->subwin, privmsg->str, FALSE, wrap, current_indent);
-
-            if (privwin->unread > 0) {
-                wattroff(layout->subwin, theme_attrs(THEME_ROSTER_ROOM_UNREAD));
-            } else {
-                wattroff(layout->subwin, theme_attrs(THEME_ROSTER_ROOM));
-            }
+            wattroff(layout->subwin, theme_attrs(colour));
 
             g_string_free(privmsg, TRUE);
             curr = g_list_next(curr);
@@ -744,20 +749,27 @@ _rosterwin_private_chats(ProfLayoutSplit *layout, GList *orphaned_privchats)
             }
             prefs_free_string(unreadpos);
 
+            Jid *jidp = jid_create(privwin->fulljid);
+            Occupant *occupant = muc_roster_item(jidp->barejid, jidp->resourcepart);
+            jid_destroy(jidp);
+
+            const char *presence = "offline";
+            if (occupant) {
+                presence = string_from_resource_presence(occupant->presence);
+            }
+
+            theme_item_t colour;
             if (privwin->unread > 0) {
-                wattron(layout->subwin, theme_attrs(THEME_ROSTER_ROOM_UNREAD));
+                colour = _get_roster_theme(ROSTER_CONTACT_UNREAD, presence);
             } else {
-                wattron(layout->subwin, theme_attrs(THEME_ROSTER_ROOM));
+                colour = _get_roster_theme(ROSTER_CONTACT_ACTIVE, presence);
             }
 
             gboolean wrap = prefs_get_boolean(PREF_ROSTER_WRAP);
-            win_sub_print(layout->subwin, privmsg->str, FALSE, wrap, current_indent);
 
-            if (privwin->unread > 0) {
-                wattroff(layout->subwin, theme_attrs(THEME_ROSTER_ROOM_UNREAD));
-            } else {
-                wattroff(layout->subwin, theme_attrs(THEME_ROSTER_ROOM));
-            }
+            wattron(layout->subwin, theme_attrs(colour));
+            win_sub_print(layout->subwin, privmsg->str, FALSE, wrap, current_indent);
+            wattroff(layout->subwin, theme_attrs(colour));
 
             g_string_free(privmsg, TRUE);
             curr = g_list_next(curr);
