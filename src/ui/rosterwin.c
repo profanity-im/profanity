@@ -62,8 +62,11 @@ static void _rosterwin_resources(ProfLayoutSplit *layout, PContact contact, int 
     roster_contact_theme_t theme_type, int unread);
 
 static void _rosterwin_rooms(ProfLayoutSplit *layout, gboolean newline);
+static void _rosterwin_rooms_header(ProfLayoutSplit *layout, gboolean newline, GList *rooms);
 static void _rosterwin_room(ProfLayoutSplit *layout, ProfMucWin *mucwin);
+
 static void _rosterwin_private_chats(ProfLayoutSplit *layout);
+static void _rosterwin_private_header(ProfLayoutSplit *layout, GList *privs);
 
 static theme_item_t _get_roster_theme(roster_contact_theme_t theme_type, const char *presence);
 static int _compare_rooms_name(ProfMucWin *a, ProfMucWin *b);
@@ -503,7 +506,6 @@ _rosterwin_resources(ProfLayoutSplit *layout, PContact contact, int current_inde
 static void
 _rosterwin_rooms(ProfLayoutSplit *layout, gboolean newline)
 {
-    int unread = 0;
     GList *rooms = muc_rooms();
     GList *rooms_sorted = NULL;
     GList *curr_room = rooms;
@@ -517,7 +519,6 @@ _rosterwin_rooms(ProfLayoutSplit *layout, gboolean newline)
                 rooms_sorted = g_list_insert_sorted(rooms_sorted, mucwin, (GCompareFunc)_compare_rooms_name);
             }
             prefs_free_string(order);
-            unread += mucwin->unread;
         }
         curr_room = g_list_next(curr_room);
     }
@@ -525,50 +526,7 @@ _rosterwin_rooms(ProfLayoutSplit *layout, gboolean newline)
 
     // if there are active rooms, or if we want to show empty groups
     if (rooms_sorted || prefs_get_boolean(PREF_ROSTER_EMPTY)) {
-        if (newline) {
-            win_sub_newline_lazy(layout->subwin);
-        }
-        wattron(layout->subwin, theme_attrs(THEME_ROSTER_HEADER));
-        GString *title_str = g_string_new(" ");
-        char ch = prefs_get_roster_header_char();
-        if (ch) {
-            g_string_append_printf(title_str, "%c", ch);
-        }
-        g_string_append(title_str, "Rooms");
-
-        char *countpref = prefs_get_string(PREF_ROSTER_COUNT);
-        if (g_strcmp0(countpref, "items") == 0) {
-            int count = g_list_length(rooms_sorted);
-            if (count == 0 && prefs_get_boolean(PREF_ROSTER_COUNT_ZERO)) {
-                g_string_append_printf(title_str, " (%d)", count);
-            } else if (count > 0) {
-                g_string_append_printf(title_str, " (%d)", count);
-            }
-        } else if (g_strcmp0(countpref, "unread") == 0) {
-            char *prefpriv = prefs_get_string(PREF_ROSTER_PRIVATE);
-            if (g_strcmp0(prefpriv, "room") == 0) {
-                GList *privwins = wins_get_private_chats(NULL);
-                GList *curr = privwins;
-                while (curr) {
-                    ProfPrivateWin *privwin = curr->data;
-                    unread += privwin->unread;
-                    curr = g_list_next(curr);
-                }
-                g_list_free(privwins);
-            }
-            prefs_free_string(prefpriv);
-            if (unread == 0 && prefs_get_boolean(PREF_ROSTER_COUNT_ZERO)) {
-                g_string_append_printf(title_str, " (%d)", unread);
-            } else if (unread > 0) {
-                g_string_append_printf(title_str, " (%d)", unread);
-            }
-        }
-        prefs_free_string(countpref);
-
-        gboolean wrap = prefs_get_boolean(PREF_ROSTER_WRAP);
-        win_sub_print(layout->subwin, title_str->str, FALSE, wrap, 1);
-        g_string_free(title_str, TRUE);
-        wattroff(layout->subwin, theme_attrs(THEME_ROSTER_HEADER));
+        _rosterwin_rooms_header(layout, newline, rooms_sorted);
 
         GList *curr_room = rooms_sorted;
         while (curr_room) {
@@ -715,43 +673,7 @@ _rosterwin_private_chats(ProfLayoutSplit *layout)
 {
     GList *privs = wins_get_private_chats(NULL);
     if (privs || prefs_get_boolean(PREF_ROSTER_EMPTY)) {
-        win_sub_newline_lazy(layout->subwin);
-        wattron(layout->subwin, theme_attrs(THEME_ROSTER_HEADER));
-        GString *title_str = g_string_new(" ");
-        char ch = prefs_get_roster_header_char();
-        if (ch) {
-            g_string_append_printf(title_str, "%c", ch);
-        }
-        g_string_append(title_str, "Private chats");
-
-        char *countpref = prefs_get_string(PREF_ROSTER_COUNT);
-        if (g_strcmp0(countpref, "items") == 0) {
-            int itemcount = g_list_length(privs);
-            if (itemcount == 0 && prefs_get_boolean(PREF_ROSTER_COUNT_ZERO)) {
-                g_string_append_printf(title_str, " (%d)", itemcount);
-            } else if (itemcount > 0) {
-                g_string_append_printf(title_str, " (%d)", itemcount);
-            }
-        } else if (g_strcmp0(countpref, "unread") == 0) {
-            int unreadcount = 0;
-            GList *curr = privs;
-            while (curr) {
-                ProfPrivateWin *privwin = curr->data;
-                unreadcount += privwin->unread;
-                curr = g_list_next(curr);
-            }
-            if (unreadcount == 0 && prefs_get_boolean(PREF_ROSTER_COUNT_ZERO)) {
-                g_string_append_printf(title_str, " (%d)", unreadcount);
-            } else if (unreadcount > 0) {
-                g_string_append_printf(title_str, " (%d)", unreadcount);
-            }
-        }
-        prefs_free_string(countpref);
-
-        gboolean wrap = prefs_get_boolean(PREF_ROSTER_WRAP);
-        win_sub_print(layout->subwin, title_str->str, FALSE, wrap, 1);
-        g_string_free(title_str, TRUE);
-        wattroff(layout->subwin, theme_attrs(THEME_ROSTER_HEADER));
+        _rosterwin_private_header(layout, privs);
 
         GList *curr = privs;
         while (curr) {
@@ -774,7 +696,7 @@ _rosterwin_private_chats(ProfLayoutSplit *layout)
                 g_string_append_printf(privmsg, "(%d) ", privwin->unread);
             }
 
-            ch = prefs_get_roster_private_char();
+            char ch = prefs_get_roster_private_char();
             if (ch) {
                 g_string_append_printf(privmsg, "%c", ch);
             }
@@ -792,6 +714,7 @@ _rosterwin_private_chats(ProfLayoutSplit *layout)
                 wattron(layout->subwin, theme_attrs(THEME_ROSTER_ROOM));
             }
 
+            gboolean wrap = prefs_get_boolean(PREF_ROSTER_WRAP);
             win_sub_print(layout->subwin, privmsg->str, FALSE, wrap, current_indent);
 
             if (privwin->unread > 0) {
@@ -887,4 +810,108 @@ _rosterwin_contacts_header(ProfLayoutSplit *layout, const char *const title, gbo
     wattroff(layout->subwin, theme_attrs(THEME_ROSTER_HEADER));
 
     g_string_free(header, TRUE);
+}
+
+static void
+_rosterwin_rooms_header(ProfLayoutSplit *layout, gboolean newline, GList *rooms)
+{
+    if (newline) {
+        win_sub_newline_lazy(layout->subwin);
+    }
+    GString *header = g_string_new(" ");
+    char ch = prefs_get_roster_header_char();
+    if (ch) {
+        g_string_append_printf(header, "%c", ch);
+    }
+    g_string_append(header, "Rooms");
+
+    char *countpref = prefs_get_string(PREF_ROSTER_COUNT);
+    if (g_strcmp0(countpref, "items") == 0) {
+        int count = g_list_length(rooms);
+        if (count == 0 && prefs_get_boolean(PREF_ROSTER_COUNT_ZERO)) {
+            g_string_append_printf(header, " (%d)", count);
+        } else if (count > 0) {
+            g_string_append_printf(header, " (%d)", count);
+        }
+    } else if (g_strcmp0(countpref, "unread") == 0) {
+        int unread = 0;
+        GList *curr = rooms;
+        while (curr) {
+            ProfMucWin *mucwin = curr->data;
+            unread += mucwin->unread;
+            curr = g_list_next(curr);
+        }
+
+        char *prefpriv = prefs_get_string(PREF_ROSTER_PRIVATE);
+        if (g_strcmp0(prefpriv, "room") == 0) {
+            GList *privwins = wins_get_private_chats(NULL);
+            GList *curr = privwins;
+            while (curr) {
+                ProfPrivateWin *privwin = curr->data;
+                unread += privwin->unread;
+                curr = g_list_next(curr);
+            }
+            g_list_free(privwins);
+        }
+        prefs_free_string(prefpriv);
+        if (unread == 0 && prefs_get_boolean(PREF_ROSTER_COUNT_ZERO)) {
+            g_string_append_printf(header, " (%d)", unread);
+        } else if (unread > 0) {
+            g_string_append_printf(header, " (%d)", unread);
+        }
+    }
+    prefs_free_string(countpref);
+
+    gboolean wrap = prefs_get_boolean(PREF_ROSTER_WRAP);
+
+    wattron(layout->subwin, theme_attrs(THEME_ROSTER_HEADER));
+    win_sub_print(layout->subwin, header->str, FALSE, wrap, 1);
+    wattroff(layout->subwin, theme_attrs(THEME_ROSTER_HEADER));
+
+    g_string_free(header, TRUE);
+}
+
+static void
+_rosterwin_private_header(ProfLayoutSplit *layout, GList *privs)
+{
+    win_sub_newline_lazy(layout->subwin);
+
+    GString *title_str = g_string_new(" ");
+    char ch = prefs_get_roster_header_char();
+    if (ch) {
+        g_string_append_printf(title_str, "%c", ch);
+    }
+    g_string_append(title_str, "Private chats");
+
+    char *countpref = prefs_get_string(PREF_ROSTER_COUNT);
+    if (g_strcmp0(countpref, "items") == 0) {
+        int itemcount = g_list_length(privs);
+        if (itemcount == 0 && prefs_get_boolean(PREF_ROSTER_COUNT_ZERO)) {
+            g_string_append_printf(title_str, " (%d)", itemcount);
+        } else if (itemcount > 0) {
+            g_string_append_printf(title_str, " (%d)", itemcount);
+        }
+    } else if (g_strcmp0(countpref, "unread") == 0) {
+        int unreadcount = 0;
+        GList *curr = privs;
+        while (curr) {
+            ProfPrivateWin *privwin = curr->data;
+            unreadcount += privwin->unread;
+            curr = g_list_next(curr);
+        }
+        if (unreadcount == 0 && prefs_get_boolean(PREF_ROSTER_COUNT_ZERO)) {
+            g_string_append_printf(title_str, " (%d)", unreadcount);
+        } else if (unreadcount > 0) {
+            g_string_append_printf(title_str, " (%d)", unreadcount);
+        }
+    }
+    prefs_free_string(countpref);
+
+    gboolean wrap = prefs_get_boolean(PREF_ROSTER_WRAP);
+
+    wattron(layout->subwin, theme_attrs(THEME_ROSTER_HEADER));
+    win_sub_print(layout->subwin, title_str->str, FALSE, wrap, 1);
+    wattroff(layout->subwin, theme_attrs(THEME_ROSTER_HEADER));
+
+    g_string_free(title_str, TRUE);
 }
