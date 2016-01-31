@@ -843,21 +843,24 @@ _rosterwin_rooms_header(ProfLayoutSplit *layout, gboolean newline, GList *rooms)
         while (curr) {
             ProfMucWin *mucwin = curr->data;
             unread += mucwin->unread;
+
+            // include private chats
+            char *prefpriv = prefs_get_string(PREF_ROSTER_PRIVATE);
+            if (g_strcmp0(prefpriv, "room") == 0) {
+                GList *privwins = wins_get_private_chats(mucwin->roomjid);
+                GList *curr_priv = privwins;
+                while (curr_priv) {
+                    ProfPrivateWin *privwin = curr_priv->data;
+                    unread += privwin->unread;
+                    curr_priv = g_list_next(curr_priv);
+                }
+                g_list_free(privwins);
+            }
+            prefs_free_string(prefpriv);
+
             curr = g_list_next(curr);
         }
 
-        char *prefpriv = prefs_get_string(PREF_ROSTER_PRIVATE);
-        if (g_strcmp0(prefpriv, "room") == 0) {
-            GList *privwins = wins_get_private_chats(NULL);
-            GList *curr = privwins;
-            while (curr) {
-                ProfPrivateWin *privwin = curr->data;
-                unread += privwin->unread;
-                curr = g_list_next(curr);
-            }
-            g_list_free(privwins);
-        }
-        prefs_free_string(prefpriv);
         if (unread == 0 && prefs_get_boolean(PREF_ROSTER_COUNT_ZERO)) {
             g_string_append_printf(header, " (%d)", unread);
         } else if (unread > 0) {
