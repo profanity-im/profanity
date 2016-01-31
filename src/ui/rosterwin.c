@@ -923,7 +923,6 @@ _rosterwin_private_header(ProfLayoutSplit *layout, GList *privs)
 static GSList*
 _filter_contacts(GSList *contacts)
 {
-    char *countpref = prefs_get_string(PREF_ROSTER_COUNT);
     GSList *filtered_contacts = NULL;
 
     // if show offline, include all contacts
@@ -935,43 +934,25 @@ _filter_contacts(GSList *contacts)
         }
     // if dont show offline
     } else {
-        // if header count unread
-        if (g_strcmp0(countpref, "unread") == 0) {
-            GSList *curr = contacts;
-            while (curr) {
-                PContact contact = curr->data;
-                const char *presence = p_contact_presence(contact);
+        GSList *curr = contacts;
+        while (curr) {
+            PContact contact = curr->data;
+            const char *presence = p_contact_presence(contact);
 
-                // include if not offline
-                if (g_strcmp0(presence, "offline") != 0) {
-                    filtered_contacts = g_slist_append(filtered_contacts, contact);
-
-                // include if offline and unread messages
-                } else {
-                    ProfChatWin *chatwin = wins_get_chat(p_contact_barejid(contact));
-                    if (chatwin && chatwin->unread > 0) {
-                        filtered_contacts = g_slist_append(filtered_contacts, contact);
-                    }
-                }
-                curr = g_slist_next(curr);
-            }
-
-        // header count not unread
-        } else {
-            GSList *curr = contacts;
-            while (curr) {
-                PContact contact = curr->data;
-                const char *presence = p_contact_presence(contact);
-
-                // include if not offline
-                if (g_strcmp0(presence, "offline") != 0) {
+            // include if offline and unread messages
+            if (g_strcmp0(presence, "offline") == 0) {
+                ProfChatWin *chatwin = wins_get_chat(p_contact_barejid(contact));
+                if (chatwin && chatwin->unread > 0) {
                     filtered_contacts = g_slist_append(filtered_contacts, contact);
                 }
-                curr = g_slist_next(curr);
+
+            // include if not offline
+            } else {
+                filtered_contacts = g_slist_append(filtered_contacts, contact);
             }
+            curr = g_slist_next(curr);
         }
     }
-    prefs_free_string(countpref);
 
     return filtered_contacts;
 }
@@ -983,7 +964,6 @@ _filter_contacts_with_presence(GSList *contacts, const char *const presence)
 
     // handling offline contacts
     if (g_strcmp0(presence, "offline") == 0) {
-        char *countpref = prefs_get_string(PREF_ROSTER_COUNT);
 
         // if show offline, include all contacts
         if (prefs_get_boolean(PREF_ROSTER_OFFLINE)) {
@@ -993,8 +973,8 @@ _filter_contacts_with_presence(GSList *contacts, const char *const presence)
                 curr = g_slist_next(curr);
             }
 
-        // if header count unread, include those with unread messages
-        } else if (g_strcmp0(countpref, "unread") == 0) {
+        // otherwise show if unread messages
+        } else {
             GSList *curr = contacts;
             while (curr) {
                 PContact contact = curr->data;
@@ -1005,8 +985,6 @@ _filter_contacts_with_presence(GSList *contacts, const char *const presence)
                 curr = g_slist_next(curr);
             }
         }
-
-        prefs_free_string(countpref);
 
     // any other presence, include all
     } else {
