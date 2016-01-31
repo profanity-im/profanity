@@ -65,7 +65,7 @@ static void _rosterwin_rooms(ProfLayoutSplit *layout, gboolean newline);
 static void _rosterwin_rooms_header(ProfLayoutSplit *layout, gboolean newline, GList *rooms);
 static void _rosterwin_room(ProfLayoutSplit *layout, ProfMucWin *mucwin);
 
-static void _rosterwin_private_chats(ProfLayoutSplit *layout);
+static void _rosterwin_private_chats(ProfLayoutSplit *layout, GList *orphaned_privchats);
 static void _rosterwin_private_header(ProfLayoutSplit *layout, GList *privs);
 
 static GSList* _filter_contacts(GSList *contacts);
@@ -541,11 +541,25 @@ _rosterwin_rooms(ProfLayoutSplit *layout, gboolean newline)
 
     g_list_free(rooms_sorted);
 
+    GList *orphaned_privchats = NULL;
+    GList *privchats = wins_get_private_chats(NULL);
+    GList *curr = privchats;
+    while (curr) {
+        ProfPrivateWin *privwin = curr->data;
+        Jid *jidp = jid_create(privwin->fulljid);
+        if (!muc_active(jidp->barejid)) {
+            orphaned_privchats = g_list_append(orphaned_privchats, privwin);
+        }
+        jid_destroy(jidp);
+        curr = g_list_next(curr);
+    }
+
     char *privpref = prefs_get_string(PREF_ROSTER_PRIVATE);
-    if (g_strcmp0(privpref, "group") == 0) {
-        _rosterwin_private_chats(layout);
+    if (g_strcmp0(privpref, "group") == 0 || orphaned_privchats) {
+        _rosterwin_private_chats(layout, orphaned_privchats);
     }
     prefs_free_string(privpref);
+    g_list_free(orphaned_privchats);
 }
 
 static void
@@ -673,9 +687,21 @@ _rosterwin_room(ProfLayoutSplit *layout, ProfMucWin *mucwin)
 }
 
 static void
-_rosterwin_private_chats(ProfLayoutSplit *layout)
+_rosterwin_private_chats(ProfLayoutSplit *layout, GList *orphaned_privchats)
 {
-    GList *privs = wins_get_private_chats(NULL);
+    GList *privs = NULL;
+
+    char *privpref = prefs_get_string(PREF_ROSTER_PRIVATE);
+    if (g_strcmp0(privpref, "group") == 0) {
+        privs = wins_get_private_chats(NULL);
+    } else {
+        GList *curr = orphaned_privchats;
+        while (curr) {
+            privs = g_list_append(privs, curr->data);
+            curr = g_list_next(curr);
+        }
+    }
+
     if (privs || prefs_get_boolean(PREF_ROSTER_EMPTY)) {
         _rosterwin_private_header(layout, privs);
 
