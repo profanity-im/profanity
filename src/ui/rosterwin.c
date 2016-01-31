@@ -65,7 +65,7 @@ static void _rosterwin_rooms(ProfLayoutSplit *layout, gboolean newline);
 static void _rosterwin_rooms_header(ProfLayoutSplit *layout, gboolean newline, GList *rooms);
 static void _rosterwin_room(ProfLayoutSplit *layout, ProfMucWin *mucwin);
 
-static void _rosterwin_private_chats(ProfLayoutSplit *layout);
+static void _rosterwin_private_chats(ProfLayoutSplit *layout, GList *orphaned_privchats);
 static void _rosterwin_private_header(ProfLayoutSplit *layout, GList *privs);
 
 static GSList* _filter_contacts(GSList *contacts);
@@ -541,11 +541,25 @@ _rosterwin_rooms(ProfLayoutSplit *layout, gboolean newline)
 
     g_list_free(rooms_sorted);
 
+    GList *orphaned_privchats = NULL;
+    GList *privchats = wins_get_private_chats(NULL);
+    GList *curr = privchats;
+    while (curr) {
+        ProfPrivateWin *privwin = curr->data;
+        Jid *jidp = jid_create(privwin->fulljid);
+        if (!muc_active(jidp->barejid)) {
+            orphaned_privchats = g_list_append(orphaned_privchats, privwin);
+        }
+        jid_destroy(jidp);
+        curr = g_list_next(curr);
+    }
+
     char *privpref = prefs_get_string(PREF_ROSTER_PRIVATE);
-    if (g_strcmp0(privpref, "group") == 0) {
-        _rosterwin_private_chats(layout);
+    if (g_strcmp0(privpref, "group") == 0 || orphaned_privchats) {
+        _rosterwin_private_chats(layout, orphaned_privchats);
     }
     prefs_free_string(privpref);
+    g_list_free(orphaned_privchats);
 }
 
 static void
@@ -636,7 +650,7 @@ _rosterwin_room(ProfLayoutSplit *layout, ProfMucWin *mucwin)
                 g_string_append_printf(privmsg, "(%d) ", privwin->unread);
             }
 
-            ch = prefs_get_roster_private_char();
+            ch = prefs_get_roster_room_private_char();
             if (ch) {
                 g_string_append_printf(privmsg, "%c", ch);
             }
@@ -673,9 +687,21 @@ _rosterwin_room(ProfLayoutSplit *layout, ProfMucWin *mucwin)
 }
 
 static void
-_rosterwin_private_chats(ProfLayoutSplit *layout)
+_rosterwin_private_chats(ProfLayoutSplit *layout, GList *orphaned_privchats)
 {
-    GList *privs = wins_get_private_chats(NULL);
+    GList *privs = NULL;
+
+    char *privpref = prefs_get_string(PREF_ROSTER_PRIVATE);
+    if (g_strcmp0(privpref, "group") == 0) {
+        privs = wins_get_private_chats(NULL);
+    } else {
+        GList *curr = orphaned_privchats;
+        while (curr) {
+            privs = g_list_append(privs, curr->data);
+            curr = g_list_next(curr);
+        }
+    }
+
     if (privs || prefs_get_boolean(PREF_ROSTER_EMPTY)) {
         _rosterwin_private_header(layout, privs);
 
@@ -843,21 +869,24 @@ _rosterwin_rooms_header(ProfLayoutSplit *layout, gboolean newline, GList *rooms)
         while (curr) {
             ProfMucWin *mucwin = curr->data;
             unread += mucwin->unread;
+
+            // include private chats
+            char *prefpriv = prefs_get_string(PREF_ROSTER_PRIVATE);
+            if (g_strcmp0(prefpriv, "room") == 0) {
+                GList *privwins = wins_get_private_chats(mucwin->roomjid);
+                GList *curr_priv = privwins;
+                while (curr_priv) {
+                    ProfPrivateWin *privwin = curr_priv->data;
+                    unread += privwin->unread;
+                    curr_priv = g_list_next(curr_priv);
+                }
+                g_list_free(privwins);
+            }
+            prefs_free_string(prefpriv);
+
             curr = g_list_next(curr);
         }
 
-        char *prefpriv = prefs_get_string(PREF_ROSTER_PRIVATE);
-        if (g_strcmp0(prefpriv, "room") == 0) {
-            GList *privwins = wins_get_private_chats(NULL);
-            GList *curr = privwins;
-            while (curr) {
-                ProfPrivateWin *privwin = curr->data;
-                unread += privwin->unread;
-                curr = g_list_next(curr);
-            }
-            g_list_free(privwins);
-        }
-        prefs_free_string(prefpriv);
         if (unread == 0 && prefs_get_boolean(PREF_ROSTER_COUNT_ZERO)) {
             g_string_append_printf(header, " (%d)", unread);
         } else if (unread > 0) {

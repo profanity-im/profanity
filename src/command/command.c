@@ -287,6 +287,7 @@ static struct cmd_t command_defs[] =
             "/roster order name|presence",
             "/roster unread before|after|off",
             "/roster room char <char>|none",
+            "/roster room private char <char>|none",
             "/roster room position first|last",
             "/roster room order name|unread",
             "/roster room unread before|after|off",
@@ -310,54 +311,54 @@ static struct cmd_t command_defs[] =
             "Manage your roster, and roster display settings. "
             "Passing no arguments lists all contacts in your roster.")
         CMD_ARGS(
-            { "online",                     "Show all online contacts in your roster." },
+            { "online",                     "Show all online contacts in console." },
             { "show",                       "Show the roster panel." },
-            { "show offline",               "Show offline contacts in the roster panel." },
-            { "show resource",              "Show contact's connected resources in the roster panel." },
-            { "show presence",              "Show contact's presence in the roster panel." },
-            { "show status",                "Show contact's status message in the roster panel." },
-            { "show empty",                 "When grouping by presence, show empty presence groups." },
-            { "show count",                 "Show number of contacts in group/presence." },
-            { "show priority",              "Show resource priority." },
+            { "show offline",               "Show offline contacts in roster panel." },
+            { "show resource",              "Show contact's connected resources in roster panel." },
+            { "show presence",              "Show contact's presence in roster panel." },
+            { "show status",                "Show contact's status message in roster panel." },
+            { "show empty",                 "Show empty groups in roster panel." },
+            { "show priority",              "Show resource priority in roster panel." },
             { "show contacts",              "Show contacts in roster panel." },
             { "show rooms",                 "Show chat rooms in roster panel." },
             { "hide",                       "Hide the roster panel." },
-            { "hide offline",               "Hide offline contacts in the roster panel." },
-            { "hide resource",              "Hide contact's connected resources in the roster panel." },
-            { "hide presence",              "Hide contact's presence in the roster panel." },
-            { "hide status",                "Hide contact's status message in the roster panel." },
-            { "hide empty",                 "When grouping by presence, hide empty presence groups." },
-            { "hide count",                 "Hide number of contacts in group/presence." },
-            { "hide priority",              "Hide resource priority." },
+            { "hide offline",               "Hide offline contacts in roster panel." },
+            { "hide resource",              "Hide contact's connected resources in roster panel." },
+            { "hide presence",              "Hide contact's presence in roster panel." },
+            { "hide status",                "Hide contact's status message in roster panel." },
+            { "hide empty",                 "Hide empty groups in roster panel." },
+            { "hide priority",              "Hide resource priority in roster panel." },
             { "hide contacts",              "Hide contacts in roster panel." },
             { "hide rooms",                 "Hide chat rooms in roster panel." },
-            { "by group",                   "Group contacts in the roster panel by roster group." },
-            { "by presence",                "Group contacts in the roster panel by presence." },
-            { "by none",                    "No grouping in the roster panel." },
-            { "count unread",               "Show total unread message count with roster headers." },
+            { "by group",                   "Group contacts in roster panel by roster group." },
+            { "by presence",                "Group contacts in roster panel by presence." },
+            { "by none",                    "No grouping in roster panel." },
+            { "count unread",               "Show unread message count with roster headers." },
             { "count items",                "Show item count with roster headers." },
             { "count off",                  "Do not show any count with roster headers." },
-            { "count zero on",              "Show roster count when 0." },
-            { "count zero off",             "Hide roster count when 0." },
-            { "order name",                 "Order roster items by name only." },
-            { "order presence",             "Order roster items by presence, and then by name." },
-            { "unread before",              "Show unread message count before contact in roster." },
-            { "unread after",               "Show unread message count after contact in roster." },
-            { "unread off",                 "Do not show unread message count for contacts in roster." },
-            { "room char <char>",           "Prefix roster rooms with specified character." },
-            { "room char none",             "Remove roster room character prefix." },
+            { "count zero on",              "Show roster header count when 0." },
+            { "count zero off",             "Hide roster header count when 0." },
+            { "order name",                 "Order roster contacts by name only." },
+            { "order presence",             "Order roster contacts by presence, and then by name." },
+            { "unread before",              "Show unread message count before contact." },
+            { "unread after",               "Show unread message count after contact." },
+            { "unread off",                 "Do not show unread message count for contacts." },
+            { "room char <char>",           "Prefix rooms with specified character." },
+            { "room char none",             "Remove room character prefix." },
+            { "room private char <char>",   "Prefix private room chat with specified character when displayed with room." },
+            { "room private char none",     "Remove private room chat character prefix when displayed with room." },
             { "room position first",        "Show rooms first in roster." },
             { "room position last",         "Show rooms last in roster." },
-            { "room order name",            "Order roster rooms by name." },
-            { "room order unread",          "Order roster rooms by unread messages, and then by name." },
-            { "room unread before",         "Show unread message count before room in roster." },
-            { "room unread after",          "Show unread message count after room in roster." },
-            { "room unread off",            "Do not show unread message count for rooms in roster." },
-            { "private room",               "Show room private chats below the room in the roster." },
+            { "room order name",            "Order rooms by name." },
+            { "room order unread",          "Order rooms by unread messages, and then by name." },
+            { "room unread before",         "Show unread message count before room." },
+            { "room unread after",          "Show unread message count after room." },
+            { "room unread off",            "Do not show unread message count for rooms." },
+            { "private room",               "Show room private chats with the room." },
             { "private group",              "Show room private chats as a separate roster group." },
-            { "private off",                "Do not show room private chats in the roster." },
-            { "private char <char>",        "Prefix roster private room chats with specified character." },
-            { "private char none",          "Remove roster private room chat character prefix." },
+            { "private off",                "Do not show room private chats." },
+            { "private char <char>",        "Prefix private room chats with specified character when displayed in separate group." },
+            { "private char none",          "Remove private room chat character prefix." },
             { "header char <char>",         "Prefix roster headers with specified character." },
             { "header char none",           "Remove roster header character prefix." },
             { "contact char <char>",        "Prefix roster contacts with specified character." },
@@ -2291,6 +2292,7 @@ cmd_init(void)
     autocomplete_add(roster_room_ac, "position");
     autocomplete_add(roster_room_ac, "order");
     autocomplete_add(roster_room_ac, "unread");
+    autocomplete_add(roster_room_ac, "private");
 
     roster_room_order_ac = autocomplete_new();
     autocomplete_add(roster_room_order_ac, "name");
@@ -3194,6 +3196,14 @@ static char*
 _roster_autocomplete(ProfWin *window, const char *const input)
 {
     char *result = NULL;
+    result = autocomplete_param_with_ac(input, "/roster room private char", roster_char_ac, TRUE);
+    if (result) {
+        return result;
+    }
+    result = autocomplete_param_with_ac(input, "/roster room private", roster_header_ac, TRUE);
+    if (result) {
+        return result;
+    }
     result = autocomplete_param_with_ac(input, "/roster header char", roster_char_ac, TRUE);
     if (result) {
         return result;

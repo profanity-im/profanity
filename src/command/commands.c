@@ -2555,6 +2555,24 @@ cmd_roster(ProfWin *window, const char *const command, gchar **args)
                 cons_bad_cmd_usage(command);
                 return TRUE;
             }
+        } else if (g_strcmp0(args[1], "private") == 0) {
+            if (g_strcmp0(args[2], "char") == 0) {
+                if (!args[3]) {
+                    cons_bad_cmd_usage(command);
+                } else if (g_strcmp0(args[3], "none") == 0) {
+                    prefs_clear_roster_room_private_char();
+                    cons_show("Roster room private char removed.");
+                    rosterwin_roster();
+                } else {
+                    prefs_set_roster_room_private_char(args[3][0]);
+                    cons_show("Roster room private char set to %c.", args[3][0]);
+                    rosterwin_roster();
+                }
+                return TRUE;
+            } else {
+                cons_bad_cmd_usage(command);
+                return TRUE;
+            }
         } else {
             cons_bad_cmd_usage(command);
             return TRUE;
