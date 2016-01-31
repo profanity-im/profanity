@@ -666,6 +666,7 @@ sv_ev_room_occupant_offline(const char *const room, const char *const nick,
     }
     prefs_free_string(muc_status_pref);
     occupantswin_occupants(room);
+    rosterwin_roster();
 }
 
 void
@@ -678,6 +679,7 @@ sv_ev_room_occupent_kicked(const char *const room, const char *const nick, const
         mucwin_occupant_kicked(mucwin, nick, actor, reason);
     }
     occupantswin_occupants(room);
+    rosterwin_roster();
 }
 
 void
@@ -690,6 +692,7 @@ sv_ev_room_occupent_banned(const char *const room, const char *const nick, const
         mucwin_occupant_banned(mucwin, nick, actor, reason);
     }
     occupantswin_occupants(room);
+    rosterwin_roster();
 }
 
 void
@@ -825,6 +828,7 @@ sv_ev_muc_occupant_online(const char *const room, const char *const nick, const 
         }
         free(old_nick);
         occupantswin_occupants(room);
+        rosterwin_roster();
         return;
     }
 
@@ -837,6 +841,7 @@ sv_ev_muc_occupant_online(const char *const room, const char *const nick, const 
         }
         prefs_free_string(muc_status_pref);
         occupantswin_occupants(room);
+        rosterwin_roster();
         return;
     }
 
@@ -869,6 +874,8 @@ sv_ev_muc_occupant_online(const char *const room, const char *const nick, const 
         }
         occupantswin_occupants(room);
     }
+
+    rosterwin_roster();
 }
 
 int
