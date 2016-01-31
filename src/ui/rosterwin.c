@@ -68,6 +68,8 @@ static void _rosterwin_room(ProfLayoutSplit *layout, ProfMucWin *mucwin);
 static void _rosterwin_private_chats(ProfLayoutSplit *layout);
 static void _rosterwin_private_header(ProfLayoutSplit *layout, GList *privs);
 
+static GSList* _filter_contacts(GSList *contacts);
+static GSList* _filter_contacts_with_presence(GSList *contacts, const char *const presence);
 static theme_item_t _get_roster_theme(roster_contact_theme_t theme_type, const char *presence);
 static int _compare_rooms_name(ProfMucWin *a, ProfMucWin *b);
 static int _compare_rooms_unread(ProfMucWin *a, ProfMucWin *b);
@@ -134,50 +136,50 @@ _rosterwin_contacts_all(ProfLayoutSplit *layout, gboolean newline)
     GSList *contacts = NULL;
 
     char *order = prefs_get_string(PREF_ROSTER_ORDER);
-    gboolean offline = prefs_get_boolean(PREF_ROSTER_OFFLINE);
     if (g_strcmp0(order, "presence") == 0) {
-        contacts = roster_get_contacts(ROSTER_ORD_PRESENCE, offline);
+        contacts = roster_get_contacts(ROSTER_ORD_PRESENCE, TRUE);
     } else {
-        contacts = roster_get_contacts(ROSTER_ORD_NAME, offline);
+        contacts = roster_get_contacts(ROSTER_ORD_NAME, TRUE);
     }
     prefs_free_string(order);
 
-    _rosterwin_contacts_header(layout, "Roster", newline, contacts);
+    GSList *filtered_contacts = _filter_contacts(contacts);
+    g_slist_free(contacts);
 
-    if (contacts) {
-        GSList *curr_contact = contacts;
+    _rosterwin_contacts_header(layout, "Roster", newline, filtered_contacts);
+
+    if (filtered_contacts) {
+        GSList *curr_contact = filtered_contacts;
         while (curr_contact) {
             PContact contact = curr_contact->data;
             _rosterwin_contact(layout, contact);
             curr_contact = g_slist_next(curr_contact);
         }
     }
-    g_slist_free(contacts);
+    g_slist_free(filtered_contacts);
 }
 
 static void
 _rosterwin_contacts_by_presence(ProfLayoutSplit *layout, const char *const presence, char *title, gboolean newline)
 {
-    if ((g_strcmp0(presence, "offline") == 0) && !prefs_get_boolean(PREF_ROSTER_OFFLINE)) {
-        return;
-    }
-
     GSList *contacts = roster_get_contacts_by_presence(presence);
+    GSList *filtered_contacts = _filter_contacts_with_presence(contacts, presence);
+    g_slist_free(contacts);
 
     // if this group has contacts, or if we want to show empty groups
-    if (contacts || prefs_get_boolean(PREF_ROSTER_EMPTY)) {
-        _rosterwin_contacts_header(layout, title, newline, contacts);
+    if (filtered_contacts || prefs_get_boolean(PREF_ROSTER_EMPTY)) {
+        _rosterwin_contacts_header(layout, title, newline, filtered_contacts);
     }
 
-    if (contacts) {
-        GSList *curr_contact = contacts;
+    if (filtered_contacts) {
+        GSList *curr_contact = filtered_contacts;
         while (curr_contact) {
             PContact contact = curr_contact->data;
             _rosterwin_contact(layout, contact);
             curr_contact = g_slist_next(curr_contact);
         }
     }
-    g_slist_free(contacts);
+    g_slist_free(filtered_contacts);
 }
 
 static void
@@ -186,29 +188,31 @@ _rosterwin_contacts_by_group(ProfLayoutSplit *layout, char *group, gboolean newl
     GSList *contacts = NULL;
 
     char *order = prefs_get_string(PREF_ROSTER_ORDER);
-    gboolean offline = prefs_get_boolean(PREF_ROSTER_OFFLINE);
     if (g_strcmp0(order, "presence") == 0) {
-        contacts = roster_get_group(group, ROSTER_ORD_PRESENCE, offline);
+        contacts = roster_get_group(group, ROSTER_ORD_PRESENCE, TRUE);
     } else {
-        contacts = roster_get_group(group, ROSTER_ORD_NAME, offline);
+        contacts = roster_get_group(group, ROSTER_ORD_NAME, TRUE);
     }
     prefs_free_string(order);
 
-    if (contacts || prefs_get_boolean(PREF_ROSTER_EMPTY)) {
+    GSList *filtered_contacts = _filter_contacts(contacts);
+    g_slist_free(contacts);
+
+    if (filtered_contacts || prefs_get_boolean(PREF_ROSTER_EMPTY)) {
         if (group) {
-            _rosterwin_contacts_header(layout, group, newline, contacts);
+            _rosterwin_contacts_header(layout, group, newline, filtered_contacts);
         } else {
-            _rosterwin_contacts_header(layout, "no group", newline, contacts);
+            _rosterwin_contacts_header(layout, "no group", newline, filtered_contacts);
         }
 
-        GSList *curr_contact = contacts;
+        GSList *curr_contact = filtered_contacts;
         while (curr_contact) {
             PContact contact = curr_contact->data;
             _rosterwin_contact(layout, contact);
             curr_contact = g_slist_next(curr_contact);
         }
     }
-    g_slist_free(contacts);
+    g_slist_free(filtered_contacts);
 }
 
 static void
@@ -915,3 +919,104 @@ _rosterwin_private_header(ProfLayoutSplit *layout, GList *privs)
 
     g_string_free(title_str, TRUE);
 }
+
+static GSList*
+_filter_contacts(GSList *contacts)
+{
+    char *countpref = prefs_get_string(PREF_ROSTER_COUNT);
+    GSList *filtered_contacts = NULL;
+
+    // if show offline, include all contacts
+    if (prefs_get_boolean(PREF_ROSTER_OFFLINE)) {
+        GSList *curr = contacts;
+        while (curr) {
+            filtered_contacts = g_slist_append(filtered_contacts, curr->data);
+            curr = g_slist_next(curr);
+        }
+    // if dont show offline
+    } else {
+        // if header count unread
+        if (g_strcmp0(countpref, "unread") == 0) {
+            GSList *curr = contacts;
+            while (curr) {
+                PContact contact = curr->data;
+                const char *presence = p_contact_presence(contact);
+
+                // include if not offline
+                if (g_strcmp0(presence, "offline") != 0) {
+                    filtered_contacts = g_slist_append(filtered_contacts, contact);
+
+                // include if offline and unread messages
+                } else {
+                    ProfChatWin *chatwin = wins_get_chat(p_contact_barejid(contact));
+                    if (chatwin && chatwin->unread > 0) {
+                        filtered_contacts = g_slist_append(filtered_contacts, contact);
+                    }
+                }
+                curr = g_slist_next(curr);
+            }
+
+        // header count not unread
+        } else {
+            GSList *curr = contacts;
+            while (curr) {
+                PContact contact = curr->data;
+                const char *presence = p_contact_presence(contact);
+
+                // include if not offline
+                if (g_strcmp0(presence, "offline") != 0) {
+                    filtered_contacts = g_slist_append(filtered_contacts, contact);
+                }
+                curr = g_slist_next(curr);
+            }
+        }
+    }
+    prefs_free_string(countpref);
+
+    return filtered_contacts;
+}
+
+static GSList*
+_filter_contacts_with_presence(GSList *contacts, const char *const presence)
+{
+    GSList *filtered_contacts = NULL;
+
+    // handling offline contacts
+    if (g_strcmp0(presence, "offline") == 0) {
+        char *countpref = prefs_get_string(PREF_ROSTER_COUNT);
+
+        // if show offline, include all contacts
+        if (prefs_get_boolean(PREF_ROSTER_OFFLINE)) {
+            GSList *curr = contacts;
+            while (curr) {
+                filtered_contacts = g_slist_append(filtered_contacts, curr->data);
+                curr = g_slist_next(curr);
+            }
+
+        // if header count unread, include those with unread messages
+        } else if (g_strcmp0(countpref, "unread") == 0) {
+            GSList *curr = contacts;
+            while (curr) {
+                PContact contact = curr->data;
+                ProfChatWin *chatwin = wins_get_chat(p_contact_barejid(contact));
+                if (chatwin && chatwin->unread > 0) {
+                    filtered_contacts = g_slist_append(filtered_contacts, contact);
+                }
+                curr = g_slist_next(curr);
+            }
+        }
+
+        prefs_free_string(countpref);
+
+    // any other presence, include all
+    } else {
+        GSList *curr = contacts;
+        while (curr) {
+            filtered_contacts = g_slist_append(filtered_contacts, curr->data);
+            curr = g_slist_next(curr);
+        }
+    }
+
+    return filtered_contacts;
+}
+
