@@ -24,7 +24,6 @@ roster.empty=true
 roster.by=presence
 roster.order=presence
 roster.unread=after
-roster.count=true
 roster.priority=true
 roster.size=25
 roster.wrap=true

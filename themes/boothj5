@@ -100,7 +100,6 @@ roster.empty=false
 roster.by=group
 roster.order=presence
 roster.unread=after
-roster.count=true
 roster.priority=false
 roster.size=25
 roster.wrap=true
