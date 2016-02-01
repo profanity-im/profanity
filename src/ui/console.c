@@ -1434,6 +1434,10 @@ cons_roster_setting(void)
     cons_show("Roster rooms position (/roster)    : %s", rooms_pos);
     prefs_free_string(rooms_pos);
 
+    char *rooms_by = prefs_get_string(PREF_ROSTER_ROOMS_BY);
+    cons_show("Roster rooms by (/roster)          : %s", rooms_by);
+    prefs_free_string(rooms_by);
+
     char *rooms_order = prefs_get_string(PREF_ROSTER_ROOMS_ORDER);
     cons_show("Roster rooms order (/roster)       : %s", rooms_order);
     prefs_free_string(rooms_order);

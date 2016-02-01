@@ -119,6 +119,7 @@ roster.rooms=
 roster.rooms.order=
 roster.rooms.unread=
 roster.rooms.pos=
+roster.rooms.by=
 roster.rooms.char=
 roster.rooms.private.char=
 roster.private=

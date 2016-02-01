@@ -2573,6 +2573,25 @@ cmd_roster(ProfWin *window, const char *const command, gchar **args)
                 cons_bad_cmd_usage(command);
                 return TRUE;
             }
+        } else if (g_strcmp0(args[1], "by") == 0) {
+            if (g_strcmp0(args[2], "service") == 0) {
+                cons_show("Grouping rooms by service");
+                prefs_set_string(PREF_ROSTER_ROOMS_BY, "service");
+                if (conn_status == JABBER_CONNECTED) {
+                    rosterwin_roster();
+                }
+                return TRUE;
+            } else if (g_strcmp0(args[2], "none") == 0) {
+                cons_show("Roster room grouping disabled");
+                prefs_set_string(PREF_ROSTER_ROOMS_BY, "none");
+                if (conn_status == JABBER_CONNECTED) {
+                    rosterwin_roster();
+                }
+                return TRUE;
+            } else {
+                cons_bad_cmd_usage(command);
+                return TRUE;
+            }
         } else {
             cons_bad_cmd_usage(command);
             return TRUE;
