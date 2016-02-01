@@ -43,6 +43,7 @@ roster.rooms=true
 roster.rooms.order=unread
 roster.rooms.unread=after
 roster.rooms.pos=last
+roster.rooms.by=service
 roster.rooms.char=#
 roster.rooms.private.char=/
 roster.private=room
