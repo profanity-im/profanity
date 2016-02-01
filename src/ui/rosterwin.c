@@ -61,8 +61,9 @@ static void _rosterwin_presence(ProfLayoutSplit *layout, const char *presence, c
 static void _rosterwin_resources(ProfLayoutSplit *layout, PContact contact, int current_indent,
     roster_contact_theme_t theme_type, int unread);
 
-static void _rosterwin_rooms(ProfLayoutSplit *layout, gboolean newline);
-static void _rosterwin_rooms_header(ProfLayoutSplit *layout, gboolean newline, GList *rooms);
+static void _rosterwin_rooms(ProfLayoutSplit *layout, gboolean newline, char *title, GList *rooms);
+static void _rosterwin_rooms_by_service(ProfLayoutSplit *layout, gboolean newline);
+static void _rosterwin_rooms_header(ProfLayoutSplit *layout, gboolean newline, GList *rooms, char *title);
 static void _rosterwin_room(ProfLayoutSplit *layout, ProfMucWin *mucwin);
 
 static void _rosterwin_private_chats(ProfLayoutSplit *layout, GList *orphaned_privchats);
@@ -94,8 +95,36 @@ rosterwin_roster(void)
     gboolean newline = FALSE;
     char *roomspos = prefs_get_string(PREF_ROSTER_ROOMS_POS);
     if (prefs_get_boolean(PREF_ROSTER_ROOMS) && (g_strcmp0(roomspos, "first") == 0)) {
-        _rosterwin_rooms(layout, newline);
+        char *roomsbypref = prefs_get_string(PREF_ROSTER_ROOMS_BY);
+        if (g_strcmp0(roomsbypref, "service") == 0) {
+            _rosterwin_rooms_by_service(layout, newline);
+        } else {
+            GList *rooms = muc_rooms();
+            _rosterwin_rooms(layout, newline, "Rooms", rooms);
+        }
         newline = TRUE;
+        prefs_free_string(roomsbypref);
+
+        GList *orphaned_privchats = NULL;
+        GList *privchats = wins_get_private_chats(NULL);
+        GList *curr = privchats;
+        while (curr) {
+            ProfPrivateWin *privwin = curr->data;
+            Jid *jidp = jid_create(privwin->fulljid);
+            if (!muc_active(jidp->barejid)) {
+                orphaned_privchats = g_list_append(orphaned_privchats, privwin);
+            }
+            jid_destroy(jidp);
+            curr = g_list_next(curr);
+        }
+
+        char *privpref = prefs_get_string(PREF_ROSTER_PRIVATE);
+        if (g_strcmp0(privpref, "group") == 0 || orphaned_privchats) {
+            _rosterwin_private_chats(layout, orphaned_privchats);
+        }
+        prefs_free_string(privpref);
+        g_list_free(orphaned_privchats);
+
     }
 
     if (prefs_get_boolean(PREF_ROSTER_CONTACTS)) {
@@ -124,7 +153,34 @@ rosterwin_roster(void)
     }
 
     if (prefs_get_boolean(PREF_ROSTER_ROOMS) && (g_strcmp0(roomspos, "last") == 0)) {
-        _rosterwin_rooms(layout, TRUE);
+        char *roomsbypref = prefs_get_string(PREF_ROSTER_ROOMS_BY);
+        if (g_strcmp0(roomsbypref, "service") == 0) {
+            _rosterwin_rooms_by_service(layout, newline);
+        } else {
+            GList *rooms = muc_rooms();
+            _rosterwin_rooms(layout, newline, "Rooms", rooms);
+        }
+        prefs_free_string(roomsbypref);
+
+        GList *orphaned_privchats = NULL;
+        GList *privchats = wins_get_private_chats(NULL);
+        GList *curr = privchats;
+        while (curr) {
+            ProfPrivateWin *privwin = curr->data;
+            Jid *jidp = jid_create(privwin->fulljid);
+            if (!muc_active(jidp->barejid)) {
+                orphaned_privchats = g_list_append(orphaned_privchats, privwin);
+            }
+            jid_destroy(jidp);
+            curr = g_list_next(curr);
+        }
+
+        char *privpref = prefs_get_string(PREF_ROSTER_PRIVATE);
+        if (g_strcmp0(privpref, "group") == 0 || orphaned_privchats) {
+            _rosterwin_private_chats(layout, orphaned_privchats);
+        }
+        prefs_free_string(privpref);
+        g_list_free(orphaned_privchats);
     }
 
     prefs_free_string(roomspos);
@@ -514,9 +570,8 @@ _rosterwin_resources(ProfLayoutSplit *layout, PContact contact, int current_inde
 }
 
 static void
-_rosterwin_rooms(ProfLayoutSplit *layout, gboolean newline)
+_rosterwin_rooms(ProfLayoutSplit *layout, gboolean newline, char *title, GList *rooms)
 {
-    GList *rooms = muc_rooms();
     GList *rooms_sorted = NULL;
     GList *curr_room = rooms;
     while (curr_room) {
@@ -536,7 +591,7 @@ _rosterwin_rooms(ProfLayoutSplit *layout, gboolean newline)
 
     // if there are active rooms, or if we want to show empty groups
     if (rooms_sorted || prefs_get_boolean(PREF_ROSTER_EMPTY)) {
-        _rosterwin_rooms_header(layout, newline, rooms_sorted);
+        _rosterwin_rooms_header(layout, newline, rooms_sorted, title);
 
         GList *curr_room = rooms_sorted;
         while (curr_room) {
@@ -546,26 +601,44 @@ _rosterwin_rooms(ProfLayoutSplit *layout, gboolean newline)
     }
 
     g_list_free(rooms_sorted);
+}
 
-    GList *orphaned_privchats = NULL;
-    GList *privchats = wins_get_private_chats(NULL);
-    GList *curr = privchats;
-    while (curr) {
-        ProfPrivateWin *privwin = curr->data;
-        Jid *jidp = jid_create(privwin->fulljid);
-        if (!muc_active(jidp->barejid)) {
-            orphaned_privchats = g_list_append(orphaned_privchats, privwin);
+static void
+_rosterwin_rooms_by_service(ProfLayoutSplit *layout, gboolean newline)
+{
+    GList *curr_room = muc_rooms();
+    GList *services = NULL;
+    while (curr_room) {
+        char *roomjid = curr_room->data;
+        Jid *jidp = jid_create(roomjid);
+        if (!g_list_find_custom(services, jidp->domainpart, (GCompareFunc)g_strcmp0)) {
+            services = g_list_insert_sorted(services, strdup(jidp->domainpart), (GCompareFunc)g_strcmp0);
         }
-        jid_destroy(jidp);
-        curr = g_list_next(curr);
+        curr_room = g_list_next(curr_room);
     }
 
-    char *privpref = prefs_get_string(PREF_ROSTER_PRIVATE);
-    if (g_strcmp0(privpref, "group") == 0 || orphaned_privchats) {
-        _rosterwin_private_chats(layout, orphaned_privchats);
+    GList *curr_service = services;
+    while (curr_service) {
+        char *service = curr_service->data;
+        GList *filtered_rooms = NULL;
+
+        curr_room = muc_rooms();
+        while (curr_room) {
+            char *roomjid = curr_room->data;
+            Jid *jidp = jid_create(roomjid);
+
+            if (g_strcmp0(curr_service->data, jidp->domainpart) == 0) {
+                filtered_rooms = g_list_append(filtered_rooms, jidp->barejid);
+            }
+
+            curr_room = g_list_next(curr_room);
+        }
+
+        _rosterwin_rooms(layout, newline, service, filtered_rooms);
+        newline = TRUE;
+
+        curr_service = g_list_next(curr_service);
     }
-    prefs_free_string(privpref);
-    g_list_free(orphaned_privchats);
 }
 
 static void
@@ -601,7 +674,14 @@ _rosterwin_room(ProfLayoutSplit *layout, ProfMucWin *mucwin)
     if ((g_strcmp0(unreadpos, "before") == 0) && mucwin->unread > 0) {
         g_string_append_printf(msg, "(%d) ", mucwin->unread);
     }
-    g_string_append(msg, mucwin->roomjid);
+    char *roombypref = prefs_get_string(PREF_ROSTER_ROOMS_BY);
+    if (g_strcmp0(roombypref, "service") == 0) {
+        Jid *jidp = jid_create(mucwin->roomjid);
+        g_string_append(msg, jidp->localpart);
+        jid_destroy(jidp);
+    } else {
+        g_string_append(msg, mucwin->roomjid);
+    }
     if ((g_strcmp0(unreadpos, "after") == 0) && mucwin->unread > 0) {
         g_string_append_printf(msg, " (%d)", mucwin->unread);
     }
@@ -861,7 +941,7 @@ _rosterwin_contacts_header(ProfLayoutSplit *layout, const char *const title, gbo
 }
 
 static void
-_rosterwin_rooms_header(ProfLayoutSplit *layout, gboolean newline, GList *rooms)
+_rosterwin_rooms_header(ProfLayoutSplit *layout, gboolean newline, GList *rooms, char *title)
 {
     if (newline) {
         win_sub_newline_lazy(layout->subwin);
@@ -871,7 +951,7 @@ _rosterwin_rooms_header(ProfLayoutSplit *layout, gboolean newline, GList *rooms)
     if (ch) {
         g_string_append_printf(header, "%c", ch);
     }
-    g_string_append(header, "Rooms");
+    g_string_append(header, title);
 
     char *countpref = prefs_get_string(PREF_ROSTER_COUNT);
     if (g_strcmp0(countpref, "items") == 0) {
