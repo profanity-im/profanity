@@ -850,7 +850,9 @@ sv_ev_muc_occupant_online(const char *const room, const char *const nick, const 
         if (mucwin) {
             mucwin_occupant_nick_change(mucwin, old_nick, nick);
         }
+        wins_private_nick_change(mucwin->roomjid, old_nick, nick);
         free(old_nick);
+
         occupantswin_occupants(room);
         rosterwin_roster();
         return;
