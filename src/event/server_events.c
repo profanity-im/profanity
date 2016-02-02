@@ -686,6 +686,14 @@ sv_ev_room_occupent_kicked(const char *const room, const char *const nick, const
     if (mucwin) {
         mucwin_occupant_kicked(mucwin, nick, actor, reason);
     }
+
+    Jid *jidp = jid_create_from_bare_and_resource(room, nick);
+    ProfPrivateWin *privwin = wins_get_private(jidp->fulljid);
+    jid_destroy(jidp);
+    if (privwin != NULL) {
+        privwin_occupant_kicked(privwin, actor, reason);
+    }
+
     occupantswin_occupants(room);
     rosterwin_roster();
 }
@@ -699,6 +707,14 @@ sv_ev_room_occupent_banned(const char *const room, const char *const nick, const
     if (mucwin) {
         mucwin_occupant_banned(mucwin, nick, actor, reason);
     }
+
+    Jid *jidp = jid_create_from_bare_and_resource(room, nick);
+    ProfPrivateWin *privwin = wins_get_private(jidp->fulljid);
+    jid_destroy(jidp);
+    if (privwin != NULL) {
+        privwin_occupant_banned(privwin, actor, reason);
+    }
+
     occupantswin_occupants(room);
     rosterwin_roster();
 }

@@ -198,6 +198,8 @@ void privwin_message_occupant_offline(ProfPrivateWin *privwin);
 
 char* privwin_get_string(ProfPrivateWin *privwin);
 void privwin_occupant_offline(ProfPrivateWin *privwin);
+void privwin_occupant_kicked(ProfPrivateWin *privwin, const char *const actor, const char *const reason);
+void privwin_occupant_banned(ProfPrivateWin *privwin, const char *const actor, const char *const reason);
 void privwin_occupant_online(ProfPrivateWin *privwin);
 
 // MUC room config window
