@@ -220,6 +220,7 @@ win_create_private(const char *const fulljid)
     new_win->fulljid = strdup(fulljid);
     new_win->unread = 0;
     new_win->notify = FALSE;
+    new_win->occupant_offline = FALSE;
 
     new_win->memcheck = PROFPRIVATEWIN_MEMCHECK;
 
@@ -1126,7 +1127,7 @@ _win_print(ProfWin *window, const char show_char, int pad_indent, GDateTime *tim
         }
     }
 
-    if (strlen(from) > 0) {
+    if (from && strlen(from) > 0) {
         if (flags & NO_ME) {
             colour = theme_attrs(THEME_THEM);
         }

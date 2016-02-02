@@ -218,6 +218,30 @@ wins_get_private_chats(const char *const roomjid)
     return result;
 }
 
+void
+wins_private_nick_change(const char *const roomjid, const char *const oldnick, const char *const newnick)
+{
+    Jid *oldjid = jid_create_from_bare_and_resource(roomjid, oldnick);
+
+    ProfPrivateWin *privwin = wins_get_private(oldjid->fulljid);
+    if (privwin) {
+        free(privwin->fulljid);
+
+        Jid *newjid = jid_create_from_bare_and_resource(roomjid, newnick);
+        privwin->fulljid = strdup(newjid->fulljid);
+        win_vprint((ProfWin*)privwin, '!', 0, NULL, 0, THEME_THEM, NULL, "** %s is now known as %s.", oldjid->resourcepart, newjid->resourcepart);
+
+        autocomplete_remove(wins_ac, oldjid->fulljid);
+        autocomplete_remove(wins_close_ac, oldjid->fulljid);
+        autocomplete_add(wins_ac, newjid->fulljid);
+        autocomplete_add(wins_close_ac, newjid->fulljid);
+
+        jid_destroy(newjid);
+    }
+
+    jid_destroy(oldjid);
+}
+
 ProfWin*
 wins_get_current(void)
 {

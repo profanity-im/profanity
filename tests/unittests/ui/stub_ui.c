@@ -168,6 +168,12 @@ void chatwin_outgoing_msg(ProfChatWin *chatwin, const char * const message, char
 void chatwin_outgoing_carbon(ProfChatWin *chatwin, const char * const message) {}
 void privwin_outgoing_msg(ProfPrivateWin *privwin, const char * const message) {}
 
+void privwin_occupant_offline(ProfPrivateWin *privwin) {}
+void privwin_occupant_kicked(ProfPrivateWin *privwin, const char *const actor, const char *const reason) {}
+void privwin_occupant_banned(ProfPrivateWin *privwin, const char *const actor, const char *const reason) {}
+void privwin_occupant_online(ProfPrivateWin *privwin) {}
+void privwin_message_occupant_offline(ProfPrivateWin *privwin) {}
+
 void ui_room_join(const char * const roomjid, gboolean focus) {}
 void ui_switch_to_room(const char * const roomjid) {}
 

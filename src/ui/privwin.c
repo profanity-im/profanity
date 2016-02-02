@@ -111,6 +111,82 @@ privwin_outgoing_msg(ProfPrivateWin *privwin, const char *const message)
     win_print((ProfWin*)privwin, '-', 0, NULL, 0, THEME_TEXT_ME, "me", message);
 }
 
+void
+privwin_message_occupant_offline(ProfPrivateWin *privwin)
+{
+    assert(privwin != NULL);
+
+    win_print((ProfWin*)privwin, '-', 0, NULL, 0, THEME_ERROR, NULL, "Unable to send message, occupant no longer present in room.");
+}
+
+void
+privwin_occupant_offline(ProfPrivateWin *privwin)
+{
+    assert(privwin != NULL);
+
+    privwin->occupant_offline = TRUE;
+    Jid *jidp = jid_create(privwin->fulljid);
+    win_vprint((ProfWin*)privwin, '-', 0, NULL, 0, THEME_OFFLINE, NULL, "<- %s has left the room.", jidp->resourcepart);
+    jid_destroy(jidp);
+}
+
+void
+privwin_occupant_kicked(ProfPrivateWin *privwin, const char *const actor, const char *const reason)
+{
+    assert(privwin != NULL);
+
+    privwin->occupant_offline = TRUE;
+    Jid *jidp = jid_create(privwin->fulljid);
+    GString *message = g_string_new(jidp->resourcepart);
+    jid_destroy(jidp);
+    g_string_append(message, " has been kicked from the room");
+    if (actor) {
+        g_string_append(message, " by ");
+        g_string_append(message, actor);
+    }
+    if (reason) {
+        g_string_append(message, ", reason: ");
+        g_string_append(message, reason);
+    }
+
+    win_vprint((ProfWin*)privwin, '!', 0, NULL, 0, THEME_OFFLINE, NULL, "<- %s", message->str);
+    g_string_free(message, TRUE);
+}
+
+void
+privwin_occupant_banned(ProfPrivateWin *privwin, const char *const actor, const char *const reason)
+{
+    assert(privwin != NULL);
+
+    privwin->occupant_offline = TRUE;
+    Jid *jidp = jid_create(privwin->fulljid);
+    GString *message = g_string_new(jidp->resourcepart);
+    jid_destroy(jidp);
+    g_string_append(message, " has been banned from the room");
+    if (actor) {
+        g_string_append(message, " by ");
+        g_string_append(message, actor);
+    }
+    if (reason) {
+        g_string_append(message, ", reason: ");
+        g_string_append(message, reason);
+    }
+
+    win_vprint((ProfWin*)privwin, '!', 0, NULL, 0, THEME_OFFLINE, NULL, "<- %s", message->str);
+    g_string_free(message, TRUE);
+}
+
+void
+privwin_occupant_online(ProfPrivateWin *privwin)
+{
+    assert(privwin != NULL);
+
+    privwin->occupant_offline = FALSE;
+    Jid *jidp = jid_create(privwin->fulljid);
+    win_vprint((ProfWin*)privwin, '-', 0, NULL, 0, THEME_ONLINE, NULL, "-- %s has joined the room.", jidp->resourcepart);
+    jid_destroy(jidp);
+}
+
 char*
 privwin_get_string(ProfPrivateWin *privwin)
 {

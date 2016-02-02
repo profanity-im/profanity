@@ -193,11 +193,15 @@ cl_ev_send_muc_msg(ProfMucWin *mucwin, const char *const msg)
 void
 cl_ev_send_priv_msg(ProfPrivateWin *privwin, const char *const msg)
 {
-    char *plugin_msg = plugins_pre_priv_message_send(privwin->fulljid, msg);
+    if (privwin->occupant_offline) {
+        privwin_message_occupant_offline(privwin);
+    } else {
+        char *plugin_msg = plugins_pre_priv_message_send(privwin->fulljid, msg);
 
-    message_send_private(privwin->fulljid, plugin_msg);
-    privwin_outgoing_msg(privwin, plugin_msg);
+        message_send_private(privwin->fulljid, plugin_msg);
+        privwin_outgoing_msg(privwin, plugin_msg);
 
-    plugins_post_priv_message_send(privwin->fulljid, plugin_msg);
-    free(plugin_msg);
+        plugins_post_priv_message_send(privwin->fulljid, plugin_msg);
+        free(plugin_msg);
+    }
 }

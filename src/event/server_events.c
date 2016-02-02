@@ -688,6 +688,14 @@ sv_ev_room_occupant_offline(const char *const room, const char *const nick,
         mucwin_occupant_offline(mucwin, nick);
     }
     prefs_free_string(muc_status_pref);
+
+    Jid *jidp = jid_create_from_bare_and_resource(room, nick);
+    ProfPrivateWin *privwin = wins_get_private(jidp->fulljid);
+    jid_destroy(jidp);
+    if (privwin != NULL) {
+        privwin_occupant_offline(privwin);
+    }
+
     occupantswin_occupants(room);
     rosterwin_roster();
 }
@@ -701,6 +709,14 @@ sv_ev_room_occupent_kicked(const char *const room, const char *const nick, const
     if (mucwin) {
         mucwin_occupant_kicked(mucwin, nick, actor, reason);
     }
+
+    Jid *jidp = jid_create_from_bare_and_resource(room, nick);
+    ProfPrivateWin *privwin = wins_get_private(jidp->fulljid);
+    jid_destroy(jidp);
+    if (privwin != NULL) {
+        privwin_occupant_kicked(privwin, actor, reason);
+    }
+
     occupantswin_occupants(room);
     rosterwin_roster();
 }
@@ -714,6 +730,14 @@ sv_ev_room_occupent_banned(const char *const room, const char *const nick, const
     if (mucwin) {
         mucwin_occupant_banned(mucwin, nick, actor, reason);
     }
+
+    Jid *jidp = jid_create_from_bare_and_resource(room, nick);
+    ProfPrivateWin *privwin = wins_get_private(jidp->fulljid);
+    jid_destroy(jidp);
+    if (privwin != NULL) {
+        privwin_occupant_banned(privwin, actor, reason);
+    }
+
     occupantswin_occupants(room);
     rosterwin_roster();
 }
@@ -849,7 +873,9 @@ sv_ev_muc_occupant_online(const char *const room, const char *const nick, const 
         if (mucwin) {
             mucwin_occupant_nick_change(mucwin, old_nick, nick);
         }
+        wins_private_nick_change(mucwin->roomjid, old_nick, nick);
         free(old_nick);
+
         occupantswin_occupants(room);
         rosterwin_roster();
         return;
@@ -863,6 +889,14 @@ sv_ev_muc_occupant_online(const char *const room, const char *const nick, const 
             mucwin_occupant_online(mucwin, nick, role, affiliation, show, status);
         }
         prefs_free_string(muc_status_pref);
+
+        Jid *jidp = jid_create_from_bare_and_resource(mucwin->roomjid, nick);
+        ProfPrivateWin *privwin = wins_get_private(jidp->fulljid);
+        jid_destroy(jidp);
+        if (privwin) {
+            privwin_occupant_online(privwin);
+        }
+
         occupantswin_occupants(room);
         rosterwin_roster();
         return;
