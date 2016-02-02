@@ -88,7 +88,7 @@ buffer_push(ProfBuff buffer, const char show_char, int pad_indent, GDateTime *ti
     e->flags = flags;
     e->theme_item = theme_item;
     e->time = g_date_time_ref(time);
-    e->from = strdup(from);
+    e->from = from ? strdup(from) : NULL;
     e->message = strdup(message);
     e->receipt = receipt;
 
