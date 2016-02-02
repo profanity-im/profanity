@@ -111,6 +111,36 @@ privwin_outgoing_msg(ProfPrivateWin *privwin, const char *const message)
     win_print((ProfWin*)privwin, '-', 0, NULL, 0, THEME_TEXT_ME, "me", message);
 }
 
+void
+privwin_message_occupant_offline(ProfPrivateWin *privwin)
+{
+    assert(privwin != NULL);
+
+    win_print((ProfWin*)privwin, '-', 0, NULL, 0, THEME_ERROR, NULL, "Unable to send message, occupant no longer present in room.");
+}
+
+void
+privwin_occupant_offline(ProfPrivateWin *privwin)
+{
+    assert(privwin != NULL);
+
+    privwin->occupant_offline = TRUE;
+    Jid *jidp = jid_create(privwin->fulljid);
+    win_vprint((ProfWin*)privwin, '-', 0, NULL, 0, THEME_OFFLINE, NULL, "-- %s has left the room.", jidp->resourcepart);
+    jid_destroy(jidp);
+}
+
+void
+privwin_occupant_online(ProfPrivateWin *privwin)
+{
+    assert(privwin != NULL);
+
+    privwin->occupant_offline = FALSE;
+    Jid *jidp = jid_create(privwin->fulljid);
+    win_vprint((ProfWin*)privwin, '-', 0, NULL, 0, THEME_ONLINE, NULL, "-- %s has joined the room.", jidp->resourcepart);
+    jid_destroy(jidp);
+}
+
 char*
 privwin_get_string(ProfPrivateWin *privwin)
 {

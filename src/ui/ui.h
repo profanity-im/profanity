@@ -194,7 +194,11 @@ char* mucwin_get_string(ProfMucWin *mucwin);
 // MUC private chat window
 void privwin_incoming_msg(ProfPrivateWin *privatewin, const char *const message, GDateTime *timestamp);
 void privwin_outgoing_msg(ProfPrivateWin *privwin, const char *const message);
+void privwin_message_occupant_offline(ProfPrivateWin *privwin);
+
 char* privwin_get_string(ProfPrivateWin *privwin);
+void privwin_occupant_offline(ProfPrivateWin *privwin);
+void privwin_occupant_online(ProfPrivateWin *privwin);
 
 // MUC room config window
 void mucconfwin_handle_configuration(ProfMucConfWin *confwin, DataForm *form);
