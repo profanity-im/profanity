@@ -1157,6 +1157,7 @@ _get_group(preference_t pref)
         case PREF_INPBLOCK_DYNAMIC:
         case PREF_TLS_SHOW:
         case PREF_CONSOLE_MUC:
+        case PREF_CONSOLE_CHAT:
             return PREF_GROUP_UI;
         case PREF_STATES:
         case PREF_OUTTYPE:
@@ -1381,6 +1382,8 @@ _get_key(preference_t pref)
             return "lastactivity";
         case PREF_CONSOLE_MUC:
             return "console.muc";
+        case PREF_CONSOLE_CHAT:
+            return "console.chat";
         default:
             return NULL;
     }
@@ -1484,6 +1487,8 @@ _get_default_string(preference_t pref)
         case PREF_PGP_LOG:
             return "redact";
         case PREF_CONSOLE_MUC:
+            return "all";
+        case PREF_CONSOLE_CHAT:
             return "all";
         default:
             return NULL;

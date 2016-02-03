@@ -4409,7 +4409,7 @@ cmd_beep(ProfWin *window, const char *const command, gchar **args)
 gboolean
 cmd_console(ProfWin *window, const char *const command, gchar **args)
 {
-    if (g_strcmp0(args[0], "muc") != 0) {
+    if ((g_strcmp0(args[0], "chat") != 0) && (g_strcmp0(args[0], "muc") != 0)) {
         cons_bad_cmd_usage(command);
         return TRUE;
     }
@@ -4420,8 +4420,17 @@ cmd_console(ProfWin *window, const char *const command, gchar **args)
         return TRUE;
     }
 
-    prefs_set_string(PREF_CONSOLE_MUC, setting);
-    cons_show("Console MUC messages set: %s", setting);
+    if (g_strcmp0(args[0], "chat") == 0) {
+        prefs_set_string(PREF_CONSOLE_CHAT, setting);
+        cons_show("Console chat messages set: %s", setting);
+        return TRUE;
+    }
+
+    if (g_strcmp0(args[0], "muc") == 0) {
+        prefs_set_string(PREF_CONSOLE_MUC, setting);
+        cons_show("Console MUC messages set: %s", setting);
+        return TRUE;
+    }
 
     return TRUE;
 }

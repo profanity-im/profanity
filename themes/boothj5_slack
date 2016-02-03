@@ -126,3 +126,4 @@ otr.char=@
 pgp.char=%
 tls.show=true
 console.muc=first
+console.chat=all
