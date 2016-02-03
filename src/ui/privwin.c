@@ -120,6 +120,14 @@ privwin_message_occupant_offline(ProfPrivateWin *privwin)
 }
 
 void
+privwin_message_left_room(ProfPrivateWin *privwin)
+{
+    assert(privwin != NULL);
+
+    win_print((ProfWin*)privwin, '-', 0, NULL, 0, THEME_ERROR, NULL, "Unable to send message, you are no longer present in room.");
+}
+
+void
 privwin_occupant_offline(ProfPrivateWin *privwin)
 {
     assert(privwin != NULL);
@@ -185,6 +193,85 @@ privwin_occupant_online(ProfPrivateWin *privwin)
     Jid *jidp = jid_create(privwin->fulljid);
     win_vprint((ProfWin*)privwin, '-', 0, NULL, 0, THEME_ONLINE, NULL, "-- %s has joined the room.", jidp->resourcepart);
     jid_destroy(jidp);
+}
+
+void
+privwin_room_destroyed(ProfPrivateWin *privwin)
+{
+    assert(privwin != NULL);
+
+    privwin->room_left = TRUE;
+    Jid *jidp = jid_create(privwin->fulljid);
+    win_vprint((ProfWin*)privwin, '!', 0, NULL, 0, THEME_OFFLINE, NULL, "-- %s has been destroyed.", jidp->barejid);
+    jid_destroy(jidp);
+}
+
+void
+privwin_room_joined(ProfPrivateWin *privwin)
+{
+    assert(privwin != NULL);
+
+    privwin->room_left = FALSE;
+    Jid *jidp = jid_create(privwin->fulljid);
+    win_vprint((ProfWin*)privwin, '!', 0, NULL, 0, THEME_OFFLINE, NULL, "-- You have joined %s.", jidp->barejid);
+    jid_destroy(jidp);
+}
+
+void
+privwin_room_left(ProfPrivateWin *privwin)
+{
+    assert(privwin != NULL);
+
+    privwin->room_left = TRUE;
+    Jid *jidp = jid_create(privwin->fulljid);
+    win_vprint((ProfWin*)privwin, '!', 0, NULL, 0, THEME_OFFLINE, NULL, "-- You have left %s.", jidp->barejid);
+    jid_destroy(jidp);
+}
+
+void
+privwin_room_kicked(ProfPrivateWin *privwin, const char *const actor, const char *const reason)
+{
+    assert(privwin != NULL);
+
+    privwin->room_left = TRUE;
+    GString *message = g_string_new("Kicked from ");
+    Jid *jidp = jid_create(privwin->fulljid);
+    g_string_append(message, jidp->barejid);
+    jid_destroy(jidp);
+    if (actor) {
+        g_string_append(message, " by ");
+        g_string_append(message, actor);
+    }
+    if (reason) {
+        g_string_append(message, ", reason: ");
+        g_string_append(message, reason);
+    }
+
+    win_vprint((ProfWin*)privwin, '!', 0, NULL, 0, THEME_OFFLINE, "", "<- %s", message->str);
+    g_string_free(message, TRUE);
+}
+
+void
+privwin_room_banned(ProfPrivateWin *privwin, const char *const actor, const char *const reason)
+{
+    assert(privwin != NULL);
+
+    privwin->room_left = TRUE;
+    GString *message = g_string_new("Banned from ");
+    Jid *jidp = jid_create(privwin->fulljid);
+    g_string_append(message, jidp->barejid);
+    jid_destroy(jidp);
+    if (actor) {
+        g_string_append(message, " by ");
+        g_string_append(message, actor);
+    }
+    if (reason) {
+        g_string_append(message, ", reason: ");
+        g_string_append(message, reason);
+    }
+
+    win_vprint((ProfWin*)privwin, '!', 0, NULL, 0, THEME_OFFLINE, "", "<- %s", message->str);
+    g_string_free(message, TRUE);
 }
 
 char*

@@ -138,6 +138,7 @@ typedef struct prof_private_win_t {
     gboolean notify;
     unsigned long memcheck;
     gboolean occupant_offline;
+    gboolean room_left;
 } ProfPrivateWin;
 
 typedef struct prof_xml_win_t {

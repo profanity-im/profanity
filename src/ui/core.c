@@ -821,6 +821,15 @@ ui_room_join(const char *const roomjid, gboolean focus)
         char *nick = muc_nick(roomjid);
         win_vprint(console, '!', 0, NULL, 0, THEME_TYPING, "", "-> Autojoined %s as %s (%d).", roomjid, nick, num);
     }
+
+    GList *privwins = wins_get_private_chats(roomjid);
+    GList *curr = privwins;
+    while (curr) {
+        ProfPrivateWin *privwin = curr->data;
+        privwin_room_joined(privwin);
+        curr = g_list_next(curr);
+    }
+    g_list_free(privwins);
 }
 
 void
@@ -841,6 +850,15 @@ ui_room_destroy(const char *const roomjid)
         ui_close_win(num);
         cons_show("Room destroyed: %s", roomjid);
     }
+
+    GList *privwins = wins_get_private_chats(roomjid);
+    GList *curr = privwins;
+    while (curr) {
+        ProfPrivateWin *privwin = curr->data;
+        privwin_room_destroyed(privwin);
+        curr = g_list_next(curr);
+    }
+    g_list_free(privwins);
 }
 
 void
@@ -851,6 +869,16 @@ ui_leave_room(const char *const roomjid)
         int num = wins_get_num(window);
         ui_close_win(num);
     }
+
+    GList *privwins = wins_get_private_chats(roomjid);
+    GList *curr = privwins;
+    while (curr) {
+        ProfPrivateWin *privwin = curr->data;
+        privwin_room_left(privwin);
+        curr = g_list_next(curr);
+    }
+    g_list_free(privwins);
+
 }
 
 void
@@ -879,6 +907,15 @@ ui_room_destroyed(const char *const roomjid, const char *const reason, const cha
             }
         }
     }
+
+    GList *privwins = wins_get_private_chats(roomjid);
+    GList *curr = privwins;
+    while (curr) {
+        ProfPrivateWin *privwin = curr->data;
+        privwin_room_destroyed(privwin);
+        curr = g_list_next(curr);
+    }
+    g_list_free(privwins);
 }
 
 void
@@ -906,6 +943,15 @@ ui_room_kicked(const char *const roomjid, const char *const actor, const char *c
         win_vprint(console, '!', 0, NULL, 0, THEME_TYPING, "", "<- %s", message->str);
         g_string_free(message, TRUE);
     }
+
+    GList *privwins = wins_get_private_chats(roomjid);
+    GList *curr = privwins;
+    while (curr) {
+        ProfPrivateWin *privwin = curr->data;
+        privwin_room_kicked(privwin, actor, reason);
+        curr = g_list_next(curr);
+    }
+    g_list_free(privwins);
 }
 
 void
@@ -933,6 +979,15 @@ ui_room_banned(const char *const roomjid, const char *const actor, const char *c
         win_vprint(console, '!', 0, NULL, 0, THEME_TYPING, "", "<- %s", message->str);
         g_string_free(message, TRUE);
     }
+
+    GList *privwins = wins_get_private_chats(roomjid);
+    GList *curr = privwins;
+    while (curr) {
+        ProfPrivateWin *privwin = curr->data;
+        privwin_room_banned(privwin, actor, reason);
+        curr = g_list_next(curr);
+    }
+    g_list_free(privwins);
 }
 
 int
