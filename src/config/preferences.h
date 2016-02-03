@@ -133,6 +133,7 @@ typedef enum {
     PREF_TLS_SHOW,
     PREF_LASTACTIVITY,
     PREF_CONSOLE_MUC,
+    PREF_CONSOLE_PRIVATE,
     PREF_CONSOLE_CHAT,
 } preference_t;
 

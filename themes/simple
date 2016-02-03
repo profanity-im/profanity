@@ -43,3 +43,4 @@ wins.autotidy=false
 tls.show=false
 console.muc=first
 console.chat=first
+console.private=first

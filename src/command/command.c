@@ -1047,20 +1047,25 @@ static struct cmd_t command_defs[] =
         cmd_console, parse_args, 2, 2, &cons_console_setting,
         CMD_TAGS(
             CMD_TAG_UI,
+            CMD_TAG_CHAT,
             CMD_TAG_GROUPCHAT)
         CMD_SYN(
             "/console chat all|first|none",
-            "/console muc all|first|none")
+            "/console muc all|first|none",
+            "/console private all|first|none")
         CMD_DESC(
             "Configure what is displayed in the console window when messages are received. "
             "The default is set to 'all' for all types of messages.")
         CMD_ARGS(
-            { "chat all",   "Indicate all new chat messages in the console." },
-            { "chat first", "Indicate only the first new message per chat in the console." },
-            { "chat none",  "Do not show any new chat messages in the console window." },
-            { "muc all",    "Indicate all new chat room messages in the console." },
-            { "muc first",  "Indicate only the first new message in each room in the console." },
-            { "muc none",   "Do not show any new chat room messages in the console window." })
+            { "chat all",       "Indicate all new chat messages in the console." },
+            { "chat first",     "Indicate only the first new message per chat in the console." },
+            { "chat none",      "Do not show any new chat messages in the console window." },
+            { "muc all",        "Indicate all new chat room messages in the console." },
+            { "muc first",      "Indicate only the first new message in each room in the console." },
+            { "muc none",       "Do not show any new chat room messages in the console window." },
+            { "private all",    "Indicate all new private room messages in the console." },
+            { "private first",  "Indicate only the first private room message in the console." },
+            { "private none",   "Do not show any new private room messages in the console window." })
         CMD_NOEXAMPLES
     },
 
@@ -2526,6 +2531,7 @@ cmd_init(void)
     console_ac = autocomplete_new();
     autocomplete_add(console_ac, "chat");
     autocomplete_add(console_ac, "muc");
+    autocomplete_add(console_ac, "private");
 
     console_msg_ac = autocomplete_new();
     autocomplete_add(console_msg_ac, "all");
@@ -4415,6 +4421,10 @@ _console_autocomplete(ProfWin *window, const char *const input)
         return result;
     }
     result = autocomplete_param_with_ac(input, "/console muc", console_msg_ac, TRUE);
+    if (result) {
+        return result;
+    }
+    result = autocomplete_param_with_ac(input, "/console private", console_msg_ac, TRUE);
     if (result) {
         return result;
     }
