@@ -242,6 +242,32 @@ wins_private_nick_change(const char *const roomjid, const char *const oldnick, c
     jid_destroy(oldjid);
 }
 
+void
+wins_change_nick(const char *const barejid, const char *const oldnick, const char *const newnick)
+{
+    ProfChatWin *chatwin = wins_get_chat(barejid);
+    if (chatwin) {
+        if (oldnick) {
+            autocomplete_remove(wins_ac, oldnick);
+            autocomplete_remove(wins_close_ac, oldnick);
+        }
+        autocomplete_add(wins_ac, newnick);
+        autocomplete_add(wins_close_ac, newnick);
+    }
+}
+
+void
+wins_remove_nick(const char *const barejid, const char *const oldnick)
+{
+    ProfChatWin *chatwin = wins_get_chat(barejid);
+    if (chatwin) {
+        if (oldnick) {
+            autocomplete_remove(wins_ac, oldnick);
+            autocomplete_remove(wins_close_ac, oldnick);
+        }
+    }
+}
+
 ProfWin*
 wins_get_current(void)
 {
