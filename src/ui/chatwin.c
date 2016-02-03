@@ -251,7 +251,7 @@ chatwin_incoming_msg(ProfChatWin *chatwin, const char *const resource, const cha
     // not currently viewing chat window with sender
     } else {
         status_bar_new(num);
-        cons_show_incoming_message(display_name, num);
+        cons_show_incoming_message(display_name, num, chatwin->unread);
 
         if (prefs_get_boolean(PREF_FLASH)) {
             flash();

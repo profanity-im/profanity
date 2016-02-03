@@ -362,7 +362,7 @@ cons_show_incoming_room_message(const char *const nick, const char *const room, 
 }
 
 void
-cons_show_incoming_message(const char *const short_from, const int win_index)
+cons_show_incoming_message(const char *const short_from, const int win_index, int unread)
 {
     ProfWin *console = wins_get_console();
 
@@ -370,9 +370,17 @@ cons_show_incoming_message(const char *const short_from, const int win_index)
     if (ui_index == 10) {
         ui_index = 0;
     }
-    win_vprint(console, '-', 0, NULL, 0, THEME_INCOMING, "", "<< chat message: %s (win %d)", short_from, ui_index);
 
-    cons_alert();
+    char *chat_show = prefs_get_string(PREF_CONSOLE_CHAT);
+    if (g_strcmp0(chat_show, "all") == 0) {
+        win_vprint(console, '-', 0, NULL, 0, THEME_INCOMING, "", "<< chat message: %s (win %d)", short_from, ui_index);
+        cons_alert();
+    } else if ((g_strcmp0(chat_show, "first") == 0) && unread == 0) {
+        win_vprint(console, '-', 0, NULL, 0, THEME_INCOMING, "", "<< chat message: %s (win %d)", short_from, ui_index);
+        cons_alert();
+    }
+
+    prefs_free_string(chat_show);
 }
 
 void
@@ -1125,9 +1133,13 @@ cons_encwarn_setting(void)
 void
 cons_console_setting(void)
 {
-    char *setting = prefs_get_string(PREF_CONSOLE_MUC);
-    cons_show("Console MUC messages (/console)    : %s", setting);
-    prefs_free_string(setting);
+    char *chatsetting = prefs_get_string(PREF_CONSOLE_CHAT);
+    cons_show("Console chat messages (/console)   : %s", chatsetting);
+    prefs_free_string(chatsetting);
+
+    char *mucsetting = prefs_get_string(PREF_CONSOLE_MUC);
+    cons_show("Console MUC messages (/console)    : %s", mucsetting);
+    prefs_free_string(mucsetting);
 }
 
 void
