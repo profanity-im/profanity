@@ -55,3 +55,5 @@ intype=true
 enc.warn=true
 tls.show=true
 console.muc=all
+console.chat=all
+console.private=all

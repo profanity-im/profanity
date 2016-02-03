@@ -410,6 +410,8 @@ _load_preferences(void)
     _set_string_preference("statuses.chat", PREF_STATUSES_CHAT);
     _set_string_preference("statuses.muc", PREF_STATUSES_MUC);
     _set_string_preference("console.muc", PREF_CONSOLE_MUC);
+    _set_string_preference("console.private", PREF_CONSOLE_PRIVATE);
+    _set_string_preference("console.chat", PREF_CONSOLE_CHAT);
     _set_string_preference("roster.by", PREF_ROSTER_BY);
     _set_string_preference("roster.order", PREF_ROSTER_ORDER);
     _set_string_preference("roster.unread", PREF_ROSTER_UNREAD);
