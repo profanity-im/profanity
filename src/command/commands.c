@@ -2665,9 +2665,14 @@ cmd_roster(ProfWin *window, const char *const command, gchar **args)
         }
 
         const char *barejid = p_contact_barejid(contact);
+
+        // TODO wait for result stanza before updating
+        const char *oldnick = p_contact_name(contact);
+        wins_change_nick(barejid, oldnick, name);
         roster_change_name(contact, name);
         GSList *groups = p_contact_groups(contact);
         roster_send_name_change(barejid, name, groups);
+
 
         cons_show("Nickname for %s set to: %s.", jid, name);
 
@@ -2693,6 +2698,10 @@ cmd_roster(ProfWin *window, const char *const command, gchar **args)
         }
 
         const char *barejid = p_contact_barejid(contact);
+
+        // TODO wait for result stanza before updating
+        const char *oldnick = p_contact_name(contact);
+        wins_remove_nick(barejid, oldnick);
         roster_change_name(contact, NULL);
         GSList *groups = p_contact_groups(contact);
         roster_send_name_change(barejid, NULL, groups);

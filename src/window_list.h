@@ -48,6 +48,8 @@ ProfWin* wins_new_private(const char *const fulljid);
 gboolean wins_chat_exists(const char *const barejid);
 GList* wins_get_private_chats(const char *const roomjid);
 void wins_private_nick_change(const char *const roomjid, const char *const oldnick, const char *const newnick);
+void wins_change_nick(const char *const barejid, const char *const oldnick, const char *const newnick);
+void wins_remove_nick(const char *const barejid, const char *const oldnick);
 
 ProfWin* wins_get_console(void);
 ProfChatWin* wins_get_chat(const char *const barejid);
