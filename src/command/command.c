@@ -1049,14 +1049,18 @@ static struct cmd_t command_defs[] =
             CMD_TAG_UI,
             CMD_TAG_GROUPCHAT)
         CMD_SYN(
+            "/console chat all|first|none",
             "/console muc all|first|none")
         CMD_DESC(
-            "Configure what is displayed in the console window when new chat room messages are received. "
-            "The default is set to 'all'.")
+            "Configure what is displayed in the console window when messages are received. "
+            "The default is set to 'all' for all types of messages.")
         CMD_ARGS(
+            { "chat all",   "Indicate all new chat messages in the console." },
+            { "chat first", "Indicate only the first new message per chat in the console." },
+            { "chat none",  "Do not show any new chat messages in the console window." },
             { "muc all",    "Indicate all new chat room messages in the console." },
             { "muc first",  "Indicate only the first new message in each room in the console." },
-            { "muc none",   "Do not show any new messages in the console window." })
+            { "muc none",   "Do not show any new chat room messages in the console window." })
         CMD_NOEXAMPLES
     },
 
@@ -1990,7 +1994,7 @@ static Autocomplete tls_certpath_ac;
 static Autocomplete script_ac;
 static Autocomplete script_show_ac;
 static Autocomplete console_ac;
-static Autocomplete console_muc_ac;
+static Autocomplete console_msg_ac;
 static Autocomplete autoping_ac;
 
 /*
@@ -2520,12 +2524,13 @@ cmd_init(void)
     script_show_ac = NULL;
 
     console_ac = autocomplete_new();
+    autocomplete_add(console_ac, "chat");
     autocomplete_add(console_ac, "muc");
 
-    console_muc_ac = autocomplete_new();
-    autocomplete_add(console_muc_ac, "all");
-    autocomplete_add(console_muc_ac, "first");
-    autocomplete_add(console_muc_ac, "none");
+    console_msg_ac = autocomplete_new();
+    autocomplete_add(console_msg_ac, "all");
+    autocomplete_add(console_msg_ac, "first");
+    autocomplete_add(console_msg_ac, "none");
 
     autoping_ac = autocomplete_new();
     autocomplete_add(autoping_ac, "set");
@@ -2614,7 +2619,7 @@ cmd_uninit(void)
     autocomplete_free(script_ac);
     autocomplete_free(script_show_ac);
     autocomplete_free(console_ac);
-    autocomplete_free(console_muc_ac);
+    autocomplete_free(console_msg_ac);
     autocomplete_free(autoping_ac);
 }
 
@@ -2828,7 +2833,7 @@ cmd_reset_autocomplete(ProfWin *window)
     autocomplete_reset(tls_ac);
     autocomplete_reset(tls_certpath_ac);
     autocomplete_reset(console_ac);
-    autocomplete_reset(console_muc_ac);
+    autocomplete_reset(console_msg_ac);
     autocomplete_reset(autoping_ac);
     autocomplete_reset(script_ac);
     if (script_show_ac) {
@@ -4405,7 +4410,11 @@ _console_autocomplete(ProfWin *window, const char *const input)
 {
     char *result = NULL;
 
-    result = autocomplete_param_with_ac(input, "/console muc", console_muc_ac, TRUE);
+    result = autocomplete_param_with_ac(input, "/console chat", console_msg_ac, TRUE);
+    if (result) {
+        return result;
+    }
+    result = autocomplete_param_with_ac(input, "/console muc", console_msg_ac, TRUE);
     if (result) {
         return result;
     }
