@@ -131,3 +131,5 @@ wins.autotidy=
 otr.char=
 pgp.char=
 console.muc=
+console.chat=
+console.private=

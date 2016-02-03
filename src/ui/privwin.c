@@ -67,13 +67,14 @@ privwin_incoming_msg(ProfPrivateWin *privatewin, const char *const message, GDat
 
     // not currently viewing chat window with sender
     } else {
+        status_bar_new(num);
+        cons_show_incoming_private_message(jidp->resourcepart, jidp->barejid, num, privatewin->unread);
+        win_print_incoming_message(window, timestamp, jidp->resourcepart, message, PROF_MSG_PLAIN);
+
         privatewin->unread++;
         if (notify) {
             privatewin->notify = TRUE;
         }
-        status_bar_new(num);
-        cons_show_incoming_private_message(jidp->resourcepart, jidp->barejid, num);
-        win_print_incoming_message(window, timestamp, jidp->resourcepart, message, PROF_MSG_PLAIN);
 
         if (prefs_get_boolean(PREF_FLASH)) {
             flash();
