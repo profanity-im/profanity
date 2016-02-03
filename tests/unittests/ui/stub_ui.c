@@ -174,6 +174,8 @@ void privwin_occupant_banned(ProfPrivateWin *privwin, const char *const actor, c
 void privwin_occupant_online(ProfPrivateWin *privwin) {}
 void privwin_message_occupant_offline(ProfPrivateWin *privwin) {}
 
+void privwin_message_left_room(ProfPrivateWin *privwin) {}
+
 void ui_room_join(const char * const roomjid, gboolean focus) {}
 void ui_switch_to_room(const char * const roomjid) {}
 
