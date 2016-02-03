@@ -221,6 +221,7 @@ win_create_private(const char *const fulljid)
     new_win->unread = 0;
     new_win->notify = FALSE;
     new_win->occupant_offline = FALSE;
+    new_win->room_left = FALSE;
 
     new_win->memcheck = PROFPRIVATEWIN_MEMCHECK;
 

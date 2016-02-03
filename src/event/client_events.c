@@ -195,6 +195,8 @@ cl_ev_send_priv_msg(ProfPrivateWin *privwin, const char *const msg)
 {
     if (privwin->occupant_offline) {
         privwin_message_occupant_offline(privwin);
+    } else if (privwin->room_left) {
+        privwin_message_left_room(privwin);
     } else {
         char *plugin_msg = plugins_pre_priv_message_send(privwin->fulljid, msg);
 
