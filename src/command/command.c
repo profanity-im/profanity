@@ -282,8 +282,8 @@ static struct cmd_t command_defs[] =
             "/roster show [offline|resource|presence|status|empty|priority|contacts|rooms]",
             "/roster hide [offline|resource|presence|status|empty|priority|contacts|rooms]",
             "/roster by group|presence|none",
-            "/roster count unread|items|off"
-            "/roster count zero on|off"
+            "/roster count unread|items|off",
+            "/roster count zero on|off",
             "/roster order name|presence",
             "/roster unread before|after|off",
             "/roster room char <char>|none",
