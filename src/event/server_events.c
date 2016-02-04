@@ -267,28 +267,29 @@ sv_ev_room_message(const char *const room_jid, const char *const nick, const cha
     mucwin_message(mucwin, nick, new_message, mention, triggers != NULL);
 
     ProfWin *window = (ProfWin*)mucwin;
-    gboolean is_current = wins_is_current(window);
     int num = wins_get_num(window);
-    gboolean notify = prefs_do_room_notify(is_current, mucwin->roomjid, mynick, new_message, mention, triggers != NULL);
+    gboolean is_current = FALSE;
 
     // currently in groupchat window
     if (wins_is_current(window)) {
+        is_current = TRUE;
         status_bar_active(num);
+
+        if ((g_strcmp0(mynick, nick) != 0) && (prefs_get_boolean(PREF_BEEP))) {
+            beep();
+        }
 
     // not currently on groupchat window
     } else {
         status_bar_new(num);
 
-        cons_show_incoming_room_message(nick, mucwin->roomjid, num, mention, triggers, mucwin->unread);
-
-        if (prefs_get_boolean(PREF_FLASH) && (strcmp(nick, mynick) != 0)) {
+        if ((g_strcmp0(mynick, nick) != 0) && (prefs_get_boolean(PREF_FLASH))) {
             flash();
         }
 
+        cons_show_incoming_room_message(nick, mucwin->roomjid, num, mention, triggers, mucwin->unread);
+
         mucwin->unread++;
-        if (notify) {
-            mucwin->notify = TRUE;
-        }
 
         if (mention) {
             mucwin->unread_mentions = TRUE;
@@ -298,37 +299,17 @@ sv_ev_room_message(const char *const room_jid, const char *const nick, const cha
         }
     }
 
+    if (prefs_do_room_notify(is_current, mucwin->roomjid, mynick, nick, message, mention, triggers != NULL)) {
+        Jid *jidp = jid_create(mucwin->roomjid);
+        notify_room_message(nick, jidp->localpart, num, message);
+        jid_destroy(jidp);
+    }
+
     if (triggers) {
         g_list_free_full(triggers, free);
     }
 
     rosterwin_roster();
-
-    // don't notify self messages
-    if (strcmp(nick, mynick) == 0) {
-        return;
-    }
-
-    if (prefs_get_boolean(PREF_BEEP)) {
-        beep();
-    }
-
-    if (!notify) {
-        return;
-    }
-
-    Jid *jidp = jid_create(mucwin->roomjid);
-    int ui_index = num;
-    if (ui_index == 10) {
-        ui_index = 0;
-    }
-
-    if (prefs_get_boolean(PREF_NOTIFY_ROOM_TEXT)) {
-        notify_room_message(nick, jidp->localpart, ui_index, new_message);
-    } else {
-        notify_room_message(nick, jidp->localpart, ui_index, NULL);
-    }
-    jid_destroy(jidp);
 
     plugins_post_room_message_display(room_jid, nick, new_message);
     free(new_message);

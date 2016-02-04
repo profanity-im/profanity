@@ -141,7 +141,6 @@ win_create_chat(const char *const barejid)
     new_win->pgp_send = FALSE;
     new_win->history_shown = FALSE;
     new_win->unread = 0;
-    new_win->notify = FALSE;
     new_win->state = chat_state_new();
 
     new_win->memcheck = PROFCHATWIN_MEMCHECK;
@@ -183,7 +182,6 @@ win_create_muc(const char *const roomjid)
     new_win->unread = 0;
     new_win->unread_mentions = FALSE;
     new_win->unread_triggers = FALSE;
-    new_win->notify = FALSE;
     if (prefs_get_boolean(PREF_OCCUPANTS_JID)) {
         new_win->showjid = TRUE;
     } else {
@@ -219,7 +217,6 @@ win_create_private(const char *const fulljid)
 
     new_win->fulljid = strdup(fulljid);
     new_win->unread = 0;
-    new_win->notify = FALSE;
     new_win->occupant_offline = FALSE;
     new_win->room_left = FALSE;
 
@@ -1341,19 +1338,45 @@ win_has_active_subwin(ProfWin *window)
 gboolean
 win_notify(ProfWin *window)
 {
-    if (window->type == WIN_CHAT) {
+    switch (window->type) {
+    case WIN_CHAT:
+    {
         ProfChatWin *chatwin = (ProfChatWin*) window;
         assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
-        return chatwin->notify;
-    } else if (window->type == WIN_MUC) {
+
+        if (prefs_get_boolean(PREF_NOTIFY_CHAT) && chatwin->unread > 0) {
+            return TRUE;
+        } else {
+            return FALSE;
+        }
+    }
+    case WIN_MUC:
+    {
         ProfMucWin *mucwin = (ProfMucWin*) window;
         assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
-        return mucwin->notify;
-    } else if (window->type == WIN_PRIVATE) {
+
+        if (prefs_get_room_notify(mucwin->roomjid) && mucwin->unread > 0) {
+            return TRUE;
+        } else if (prefs_get_room_notify_mention(mucwin->roomjid) && mucwin->unread_mentions) {
+            return TRUE;
+        } else if (prefs_get_room_notify_trigger(mucwin->roomjid) && mucwin->unread_triggers) {
+            return TRUE;
+        } else {
+            return FALSE;
+        }
+    }
+    case WIN_PRIVATE:
+    {
         ProfPrivateWin *privatewin = (ProfPrivateWin*) window;
         assert(privatewin->memcheck == PROFPRIVATEWIN_MEMCHECK);
-        return privatewin->notify;
-    } else {
+
+        if (prefs_get_boolean(PREF_NOTIFY_CHAT) && privatewin->unread > 0) {
+            return TRUE;
+        } else {
+            return FALSE;
+        }
+    }
+    default:
         return FALSE;
     }
 }
