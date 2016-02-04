@@ -192,7 +192,7 @@ prefs_reset_room_trigger_ac(void)
 }
 
 gboolean
-prefs_do_chat_notify(gboolean current_win, const char *const message)
+prefs_do_chat_notify(gboolean current_win)
 {
     gboolean notify_current = prefs_get_boolean(PREF_NOTIFY_CHAT_CURRENT);
     gboolean notify_window = FALSE;

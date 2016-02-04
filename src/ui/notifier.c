@@ -140,7 +140,7 @@ notify_remind(void)
     gdouble elapsed = g_timer_elapsed(remind_timer, NULL);
     gint remind_period = prefs_get_notify_remind();
     if (remind_period > 0 && elapsed >= remind_period) {
-        gboolean notify = wins_get_notify();
+        gboolean notify = wins_do_notify_remind();
         gint unread = wins_get_total_unread();
         gint open = muc_invites_count();
         gint subs = presence_sub_request_count();

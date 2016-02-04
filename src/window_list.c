@@ -589,7 +589,7 @@ wins_new_private(const char *const fulljid)
 }
 
 gboolean
-wins_get_notify(void)
+wins_do_notify_remind(void)
 {
     GList *values = g_hash_table_get_values(windows);
     GList *curr = values;

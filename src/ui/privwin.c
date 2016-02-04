@@ -57,7 +57,7 @@ privwin_incoming_msg(ProfPrivateWin *privatewin, const char *const message, GDat
     }
 
     gboolean is_current = wins_is_current(window);
-    gboolean notify = prefs_do_chat_notify(is_current, message);
+    gboolean notify = prefs_do_chat_notify(is_current);
 
     // currently viewing chat window with sender
     if (wins_is_current(window)) {
