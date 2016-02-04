@@ -117,11 +117,16 @@ notify_message(const char *const name, int num, const char *const text)
 }
 
 void
-notify_room_message(const char *const nick, const char *const room, int win, const char *const text)
+notify_room_message(const char *const nick, const char *const room, int num, const char *const text)
 {
+    int ui_index = num;
+    if (ui_index == 10) {
+        ui_index = 0;
+    }
+
     GString *message = g_string_new("");
-    g_string_append_printf(message, "%s in %s (win %d)", nick, room, win);
-    if (text) {
+    g_string_append_printf(message, "%s in %s (win %d)", nick, room, ui_index);
+    if (text && prefs_get_boolean(PREF_NOTIFY_ROOM_TEXT)) {
         g_string_append_printf(message, "\n%s", text);
     }
 

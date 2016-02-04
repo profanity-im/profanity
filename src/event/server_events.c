@@ -305,22 +305,11 @@ sv_ev_room_message(const char *const room_jid, const char *const nick, const cha
         beep();
     }
 
-    if (!notify) {
-        return;
+    if (notify) {
+        Jid *jidp = jid_create(mucwin->roomjid);
+        notify_room_message(nick, jidp->localpart, num, message);
+        jid_destroy(jidp);
     }
-
-    Jid *jidp = jid_create(mucwin->roomjid);
-    int ui_index = num;
-    if (ui_index == 10) {
-        ui_index = 0;
-    }
-
-    if (prefs_get_boolean(PREF_NOTIFY_ROOM_TEXT)) {
-        notify_room_message(nick, jidp->localpart, ui_index, message);
-    } else {
-        notify_room_message(nick, jidp->localpart, ui_index, NULL);
-    }
-    jid_destroy(jidp);
 }
 
 void
