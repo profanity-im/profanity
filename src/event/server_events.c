@@ -299,9 +299,9 @@ sv_ev_room_message(const char *const room_jid, const char *const nick, const cha
         }
     }
 
-    if (prefs_do_room_notify(is_current, mucwin->roomjid, mynick, nick, message, mention, triggers != NULL)) {
+    if (prefs_do_room_notify(is_current, mucwin->roomjid, mynick, nick, new_message, mention, triggers != NULL)) {
         Jid *jidp = jid_create(mucwin->roomjid);
-        notify_room_message(nick, jidp->localpart, num, message);
+        notify_room_message(nick, jidp->localpart, num, new_message);
         jid_destroy(jidp);
     }
 
