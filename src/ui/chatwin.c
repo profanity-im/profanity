@@ -280,20 +280,8 @@ chatwin_incoming_msg(ProfChatWin *chatwin, const char *const resource, const cha
         beep();
     }
 
-    if (!notify) {
-        free(display_name);
-        return;
-    }
-
-    int ui_index = num;
-    if (ui_index == 10) {
-        ui_index = 0;
-    }
-
-    if (prefs_get_boolean(PREF_NOTIFY_CHAT_TEXT)) {
-        notify_message(display_name, ui_index, message);
-    } else {
-        notify_message(display_name, ui_index, NULL);
+    if (notify) {
+        notify_message(display_name, num, message);
     }
 
     free(display_name);

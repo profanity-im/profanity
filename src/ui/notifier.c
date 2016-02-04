@@ -98,11 +98,16 @@ notify_invite(const char *const from, const char *const room, const char *const 
 }
 
 void
-notify_message(const char *const name, int win, const char *const text)
+notify_message(const char *const name, int num, const char *const text)
 {
+    int ui_index = num;
+    if (ui_index == 10) {
+        ui_index = 0;
+    }
+
     GString *message = g_string_new("");
-    g_string_append_printf(message, "%s (win %d)", name, win);
-    if (text) {
+    g_string_append_printf(message, "%s (win %d)", name, ui_index);
+    if (text && prefs_get_boolean(PREF_NOTIFY_CHAT_TEXT)) {
         g_string_append_printf(message, "\n%s", text);
     }
 
