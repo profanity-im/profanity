@@ -228,9 +228,13 @@ prefs_message_get_triggers(const char *const message)
 }
 
 gboolean
-prefs_do_room_notify(gboolean current_win, const char *const roomjid, const char *const nick, const char *const message,
-    gboolean mention, gboolean trigger_found)
+prefs_do_room_notify(gboolean current_win, const char *const roomjid, const char *const mynick,
+    const char *const theirnick, const char *const message, gboolean mention, gboolean trigger_found)
 {
+    if (g_strcmp0(mynick, theirnick) == 0) {
+        return FALSE;
+    }
+
     gboolean notify_current = prefs_get_boolean(PREF_NOTIFY_ROOM_CURRENT);
     gboolean notify_window = FALSE;
     if (!current_win || (current_win && notify_current) ) {

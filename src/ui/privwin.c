@@ -72,9 +72,6 @@ privwin_incoming_msg(ProfPrivateWin *privatewin, const char *const message, GDat
         win_print_incoming_message(window, timestamp, jidp->resourcepart, message, PROF_MSG_PLAIN);
 
         privatewin->unread++;
-        if (notify) {
-            privatewin->notify = TRUE;
-        }
 
         if (prefs_get_boolean(PREF_FLASH)) {
             flash();

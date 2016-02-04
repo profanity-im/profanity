@@ -258,9 +258,7 @@ chatwin_incoming_msg(ProfChatWin *chatwin, const char *const resource, const cha
         }
 
         chatwin->unread++;
-        if (notify) {
-            chatwin->notify = TRUE;
-        }
+
         if (prefs_get_boolean(PREF_CHLOG) && prefs_get_boolean(PREF_HISTORY)) {
             _chatwin_history(chatwin, chatwin->barejid);
         }
