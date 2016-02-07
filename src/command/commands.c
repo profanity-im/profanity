@@ -2253,6 +2253,13 @@ cmd_roster(ProfWin *window, const char *const command, gchar **args)
                 rosterwin_roster();
             }
             return TRUE;
+        } else if (g_strcmp0(args[1], "unsubscribed") == 0) {
+            cons_show("Roster unsubscribed enabled");
+            prefs_set_boolean(PREF_ROSTER_UNSUBSCRIBED, TRUE);
+            if (conn_status == JABBER_CONNECTED) {
+                rosterwin_roster();
+            }
+            return TRUE;
         } else {
             cons_bad_cmd_usage(command);
             return TRUE;
@@ -2317,6 +2324,13 @@ cmd_roster(ProfWin *window, const char *const command, gchar **args)
         } else if (g_strcmp0(args[1], "rooms") == 0) {
             cons_show("Roster rooms disabled");
             prefs_set_boolean(PREF_ROSTER_ROOMS, FALSE);
+            if (conn_status == JABBER_CONNECTED) {
+                rosterwin_roster();
+            }
+            return TRUE;
+        } else if (g_strcmp0(args[1], "unsubscribed") == 0) {
+            cons_show("Roster unsubscribed disabled");
+            prefs_set_boolean(PREF_ROSTER_UNSUBSCRIBED, FALSE);
             if (conn_status == JABBER_CONNECTED) {
                 rosterwin_roster();
             }

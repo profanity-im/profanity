@@ -54,6 +54,7 @@ void wins_remove_nick(const char *const barejid, const char *const oldnick);
 
 ProfWin* wins_get_console(void);
 ProfChatWin* wins_get_chat(const char *const barejid);
+GList* wins_get_chat_unsubscribed(void);
 ProfMucWin* wins_get_muc(const char *const roomjid);
 ProfMucConfWin* wins_get_muc_conf(const char *const roomjid);
 ProfPrivateWin* wins_get_private(const char *const fulljid);

@@ -1336,7 +1336,7 @@ win_has_active_subwin(ProfWin *window)
 }
 
 gboolean
-win_notify(ProfWin *window)
+win_notify_remind(ProfWin *window)
 {
     switch (window->type) {
     case WIN_CHAT:
@@ -1355,15 +1355,7 @@ win_notify(ProfWin *window)
         ProfMucWin *mucwin = (ProfMucWin*) window;
         assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
 
-        if (prefs_get_room_notify(mucwin->roomjid) && mucwin->unread > 0) {
-            return TRUE;
-        } else if (prefs_get_room_notify_mention(mucwin->roomjid) && mucwin->unread_mentions) {
-            return TRUE;
-        } else if (prefs_get_room_notify_trigger(mucwin->roomjid) && mucwin->unread_triggers) {
-            return TRUE;
-        } else {
-            return FALSE;
-        }
+        return prefs_do_room_notify_mention(mucwin->roomjid, mucwin->unread, mucwin->unread_mentions, mucwin->unread_triggers);
     }
     case WIN_PRIVATE:
     {

@@ -115,6 +115,7 @@ roster.presence=
 roster.presence.indent=
 roster.status=
 roster.contacts=
+roster.unsubscribed=
 roster.rooms=
 roster.rooms.order=
 roster.rooms.unread=
