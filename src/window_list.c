@@ -106,6 +106,35 @@ wins_get_chat(const char *const barejid)
     return NULL;
 }
 
+static gint
+_cmp_unsubscribed_wins(ProfChatWin *a, ProfChatWin *b)
+{
+    return g_strcmp0(a->barejid, b->barejid);
+}
+
+GList*
+wins_get_chat_unsubscribed(void)
+{
+    GList *result = NULL;
+    GList *values = g_hash_table_get_values(windows);
+    GList *curr = values;
+
+    while (curr) {
+        ProfWin *window = curr->data;
+        if (window->type == WIN_CHAT) {
+            ProfChatWin *chatwin = (ProfChatWin*)window;
+            PContact contact = roster_get_contact(chatwin->barejid);
+            if (contact == NULL) {
+                result = g_list_insert_sorted(result, chatwin, (GCompareFunc)_cmp_unsubscribed_wins);
+            }
+        }
+        curr = g_list_next(curr);
+    }
+
+    g_list_free(values);
+    return result;
+}
+
 ProfMucConfWin*
 wins_get_muc_conf(const char *const roomjid)
 {

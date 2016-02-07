@@ -109,6 +109,7 @@ roster.resource=false
 roster.presence=false
 roster.status=true
 roster.contacts=true
+roster.unsubscribed=true
 roster.rooms=true
 roster.rooms.order=name
 roster.rooms.unread=after

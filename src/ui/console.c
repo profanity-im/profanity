@@ -1410,6 +1410,11 @@ cons_roster_setting(void)
     else
         cons_show("Roster contacts (/roster)           : hide");
 
+    if (prefs_get_boolean(PREF_ROSTER_UNSUBSCRIBED))
+        cons_show("Roster unsubscribed (/roster)       : show");
+    else
+        cons_show("Roster unsubscribed (/roster)       : hide");
+
     char *count = prefs_get_string(PREF_ROSTER_COUNT);
     if (g_strcmp0(count, "off") == 0) {
         cons_show("Roster count (/roster)              : OFF");

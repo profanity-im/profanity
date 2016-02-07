@@ -391,6 +391,7 @@ _load_preferences(void)
     _set_boolean_preference("roster.count.zero", PREF_ROSTER_COUNT_ZERO);
     _set_boolean_preference("roster.priority", PREF_ROSTER_PRIORITY);
     _set_boolean_preference("roster.contacts", PREF_ROSTER_CONTACTS);
+    _set_boolean_preference("roster.unsubscribed", PREF_ROSTER_UNSUBSCRIBED);
     _set_boolean_preference("roster.rooms", PREF_ROSTER_ROOMS);
     _set_boolean_preference("privileges", PREF_MUC_PRIVILEGES);
     _set_boolean_preference("presence", PREF_PRESENCE);
