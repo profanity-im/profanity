@@ -235,6 +235,7 @@ void prefs_set_string(preference_t pref, char *value);
 gboolean prefs_do_chat_notify(gboolean current_win);
 gboolean prefs_do_room_notify(gboolean current_win, const char *const roomjid, const char *const mynick,
     const char *const theirnick, const char *const message, gboolean mention, gboolean trigger_found);
+gboolean prefs_do_room_notify_mention(const char *const roomjid, int unread, gboolean mention, gboolean trigger);
 GList* prefs_message_get_triggers(const char *const message);
 
 void prefs_set_room_notify(const char *const roomjid, gboolean value);

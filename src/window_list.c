@@ -622,7 +622,7 @@ wins_do_notify_remind(void)
 
     while (curr) {
         ProfWin *window = curr->data;
-        if (win_notify(window)) {
+        if (win_notify_remind(window)) {
             g_list_free(values);
             return TRUE;
         }

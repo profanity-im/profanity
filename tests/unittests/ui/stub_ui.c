@@ -497,7 +497,7 @@ ProfWin* win_create_private(const char * const fulljid)
 
 void win_update_virtual(ProfWin *window) {}
 void win_free(ProfWin *window) {}
-gboolean win_notify(ProfWin *window)
+gboolean win_notify_remind(ProfWin *window)
 {
     return TRUE;
 }
