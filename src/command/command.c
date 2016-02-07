@@ -2266,6 +2266,7 @@ cmd_init(void)
     autocomplete_add(roster_show_ac, "empty");
     autocomplete_add(roster_show_ac, "priority");
     autocomplete_add(roster_show_ac, "contacts");
+    autocomplete_add(roster_show_ac, "unsubscribed");
     autocomplete_add(roster_show_ac, "rooms");
 
     roster_by_ac = autocomplete_new();
