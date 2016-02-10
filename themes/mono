@@ -45,6 +45,7 @@ gone=white
 error=white
 roominfo=white
 roommention=white
+roommention.term=white
 roomtrigger=white
 me=white
 them=white

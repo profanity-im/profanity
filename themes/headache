@@ -45,6 +45,7 @@ gone=yellow
 error=red
 roominfo=white
 roommention=bold_green
+roommention.term=bold_green
 roomtrigger=bold_green
 me=white
 them=white

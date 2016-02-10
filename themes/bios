@@ -45,6 +45,7 @@ gone=bold_red
 error=bold_red
 roominfo=bold_yellow
 roommention=bold_green
+roommention.term=bold_green
 roomtrigger=bold_green
 me=bold_cyan
 them=bold_magenta
