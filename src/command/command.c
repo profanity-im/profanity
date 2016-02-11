@@ -663,7 +663,7 @@ static struct cmd_t command_defs[] =
             CMD_TAG_GROUPCHAT)
         CMD_SYN(
             "/affiliation set <affiliation> <jid> [<reason>]",
-            "/list [<affiliation>]")
+            "/affiliation list [<affiliation>]")
         CMD_DESC(
             "Manage room affiliations. "
             "Affiliation may be one of owner, admin, member, outcast or none.")
@@ -679,7 +679,7 @@ static struct cmd_t command_defs[] =
             CMD_TAG_GROUPCHAT)
         CMD_SYN(
             "/role set <role> <nick> [<reason>]",
-            "/list [<role>]")
+            "/role list [<role>]")
         CMD_DESC(
             "Manage room roles. "
             "Role may be one of moderator, participant, visitor or none.")

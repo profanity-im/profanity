@@ -334,10 +334,10 @@ cons_show_incoming_room_message(const char *const nick, const char *const room, 
 
     if (g_strcmp0(muc_show, "all") == 0) {
         if (mention) {
-            win_vprint(console, '-', 0, NULL, 0, THEME_INCOMING, "", "<< room mention: %s in %s (win %d)", nick, room, ui_index);
+            win_vprint(console, '-', 0, NULL, 0, THEME_MENTION, "", "<< room mention: %s in %s (win %d)", nick, room, ui_index);
         } else if (triggers) {
             char *triggers_str = _room_triggers_to_string(triggers);
-            win_vprint(console, '-', 0, NULL, 0, THEME_INCOMING, "", "<< room trigger %s: %s in %s (win %d)", triggers_str, nick, room, ui_index);
+            win_vprint(console, '-', 0, NULL, 0, THEME_TRIGGER, "", "<< room trigger %s: %s in %s (win %d)", triggers_str, nick, room, ui_index);
             free(triggers_str);
         } else {
             win_vprint(console, '-', 0, NULL, 0, THEME_INCOMING, "", "<< room message: %s in %s (win %d)", nick, room, ui_index);
@@ -346,11 +346,11 @@ cons_show_incoming_room_message(const char *const nick, const char *const room, 
 
     } else if (g_strcmp0(muc_show, "first") == 0) {
         if (mention) {
-            win_vprint(console, '-', 0, NULL, 0, THEME_INCOMING, "", "<< room mention: %s in %s (win %d)", nick, room, ui_index);
+            win_vprint(console, '-', 0, NULL, 0, THEME_MENTION, "", "<< room mention: %s in %s (win %d)", nick, room, ui_index);
             cons_alert();
         } else if (triggers) {
             char *triggers_str = _room_triggers_to_string(triggers);
-            win_vprint(console, '-', 0, NULL, 0, THEME_INCOMING, "", "<< room trigger %s: %s in %s (win %d)", triggers_str, nick, room, ui_index);
+            win_vprint(console, '-', 0, NULL, 0, THEME_TRIGGER, "", "<< room trigger %s: %s in %s (win %d)", triggers_str, nick, room, ui_index);
             free(triggers_str);
             cons_alert();
         } else if (unread == 0) {
@@ -2208,6 +2208,8 @@ cons_theme_properties(void)
     _cons_theme_prop(THEME_UNSUBSCRIBED, "unsubscribed");
 
     _cons_theme_prop(THEME_INCOMING, "incoming");
+    _cons_theme_prop(THEME_MENTION, "mention");
+    _cons_theme_prop(THEME_TRIGGER, "trigger");
     _cons_theme_prop(THEME_TYPING, "typing");
     _cons_theme_prop(THEME_GONE, "gone");
 
