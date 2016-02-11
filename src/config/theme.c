@@ -82,6 +82,8 @@ theme_init(const char *const theme_name)
     g_hash_table_insert(defaults, strdup("main.splash"),             strdup("cyan"));
     g_hash_table_insert(defaults, strdup("error"),                   strdup("red"));
     g_hash_table_insert(defaults, strdup("incoming"),                strdup("yellow"));
+    g_hash_table_insert(defaults, strdup("mention"),                 strdup("yellow"));
+    g_hash_table_insert(defaults, strdup("trigger"),                 strdup("yellow"));
     g_hash_table_insert(defaults, strdup("input.text"),              strdup("white"));
     g_hash_table_insert(defaults, strdup("main.time"),               strdup("white"));
     g_hash_table_insert(defaults, strdup("titlebar.text"),           strdup("white"));
@@ -724,6 +726,8 @@ theme_attrs(theme_item_t attrs)
     case THEME_SPLASH:                  _theme_prep_fgnd("main.splash",             lookup_str, &bold); break;
     case THEME_ERROR:                   _theme_prep_fgnd("error",                   lookup_str, &bold); break;
     case THEME_INCOMING:                _theme_prep_fgnd("incoming",                lookup_str, &bold); break;
+    case THEME_MENTION:                 _theme_prep_fgnd("mention",                 lookup_str, &bold); break;
+    case THEME_TRIGGER:                 _theme_prep_fgnd("trigger",                 lookup_str, &bold); break;
     case THEME_INPUT_TEXT:              _theme_prep_fgnd("input.text",              lookup_str, &bold); break;
     case THEME_TIME:                    _theme_prep_fgnd("main.time",               lookup_str, &bold); break;
     case THEME_TITLE_TEXT:              _theme_prep_fgnd("titlebar.text",           lookup_str, &bold); break;
