@@ -385,9 +385,71 @@ _mucwin_print_mention(ProfWin *window, const char *const message, const char *co
     g_free(message_lower);
 }
 
+static void
+_mucwin_print_triggers(ProfWin *window, const char *const message, GList *triggers)
+{
+    char *message_lower = g_utf8_strdown(message, -1);
+
+    // find earliest trigger in message
+    int first_trigger_pos = -1;
+    int first_trigger_len = -1;
+    GList *curr = triggers;
+    while (curr) {
+        char *trigger_lower = g_utf8_strdown(curr->data, -1);
+        char *trigger_ptr = g_strstr_len(message_lower, -1, trigger_lower);
+
+        // not found, try next
+        if (trigger_ptr == NULL) {
+            curr = g_list_next(curr);
+            continue;
+        }
+
+        // found, repace vars if earlier than previous
+        int trigger_pos = trigger_ptr - message_lower;
+        if (first_trigger_pos == -1 || trigger_pos < first_trigger_pos) {
+            first_trigger_pos = trigger_pos;
+            first_trigger_len = strlen(trigger_lower);
+        }
+
+        g_free(trigger_lower);
+        curr = g_list_next(curr);
+    }
+
+    g_free(message_lower);
+
+    // no triggers found
+    if (first_trigger_pos == -1) {
+        win_print(window, '-', 0, NULL, NO_DATE | NO_ME, THEME_ROOMTRIGGER, "", message);
+    } else {
+        if (first_trigger_pos > 0) {
+            char message_section[strlen(message) + 1];
+            int i = 0;
+            while (i < first_trigger_pos) {
+                message_section[i] = message[i];
+                i++;
+            }
+            message_section[i] = '\0';
+            win_print(window, '-', 0, NULL, NO_DATE | NO_ME | NO_EOL, THEME_ROOMTRIGGER, "", message_section);
+        }
+        char trigger_section[first_trigger_len + 1];
+        int i = 0;
+        while (i < first_trigger_len) {
+            trigger_section[i] = message[first_trigger_pos + i];
+            i++;
+        }
+        trigger_section[i] = '\0';
+
+        if (first_trigger_pos + first_trigger_len < strlen(message)) {
+            win_print(window, '-', 0, NULL, NO_DATE | NO_ME | NO_EOL, THEME_ROOMTRIGGER_TERM, "", trigger_section);
+            _mucwin_print_triggers(window, &message[first_trigger_pos + first_trigger_len], triggers);
+        } else {
+            win_print(window, '-', 0, NULL, NO_DATE | NO_ME, THEME_ROOMTRIGGER_TERM, "", trigger_section);
+        }
+    }
+}
+
 void
-mucwin_message(ProfMucWin *mucwin, const char *const nick, const char *const message, gboolean mention,
-    gboolean trigger_found)
+mucwin_message(ProfMucWin *mucwin, const char *const nick, const char *const message, gboolean mention, GList *triggers)
 {
     assert(mucwin != NULL);
 
@@ -398,8 +460,9 @@ mucwin_message(ProfMucWin *mucwin, const char *const nick, const char *const mes
         if (mention) {
             win_print(window, '-', 0, NULL, NO_ME | NO_EOL, THEME_ROOMMENTION, nick, "");
             _mucwin_print_mention(window, message, my_nick);
-        } else if (trigger_found) {
-            win_print(window, '-', 0, NULL, NO_ME, THEME_ROOMTRIGGER, nick, message);
+        } else if (triggers) {
+            win_print(window, '-', 0, NULL, NO_ME | NO_EOL, THEME_ROOMTRIGGER, nick, "");
+            _mucwin_print_triggers(window, message, triggers);
         } else {
             win_print(window, '-', 0, NULL, NO_ME, THEME_TEXT_THEM, nick, message);
         }

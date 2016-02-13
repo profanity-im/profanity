@@ -47,6 +47,7 @@ roominfo=
 roommention=
 roommention.term=
 roomtrigger=
+roomtrigger.term=
 me=
 them=
 roster.header=

@@ -256,7 +256,7 @@ sv_ev_room_message(const char *const room_jid, const char *const nick, const cha
 
     GList *triggers = prefs_message_get_triggers(message);
 
-    mucwin_message(mucwin, nick, message, mention, triggers != NULL);
+    mucwin_message(mucwin, nick, message, mention, triggers);
 
     ProfWin *window = (ProfWin*)mucwin;
     int num = wins_get_num(window);

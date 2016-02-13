@@ -47,6 +47,7 @@ roominfo=blue
 roommention=blue
 roommention.term=blue
 roomtrigger=blue
+roomtrigger.term=blue
 me=black
 them=black
 roster.header=black

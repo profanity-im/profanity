@@ -49,6 +49,7 @@ unsubscribed=black_bold
 roommention=cyan
 roommention.term=cyan
 roomtrigger=cyan
+roomtrigger.term=cyan
 roster.header=yellow
 roster.chat=green
 roster.online=green

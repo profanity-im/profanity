@@ -47,6 +47,7 @@ roominfo=white
 roommention=white
 roommention.term=white
 roomtrigger=white
+roomtrigger.term=white
 me=white
 them=white
 roster.header=white

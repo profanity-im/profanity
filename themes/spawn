@@ -47,6 +47,7 @@ roominfo=green
 roommention=red
 roommention.term=red
 roomtrigger=red
+roomtrigger.term=red
 me=green
 them=yellow
 roster.header=white

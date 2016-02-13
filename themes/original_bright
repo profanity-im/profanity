@@ -47,6 +47,7 @@ roominfo=bold_yellow
 roommention=bold_yellow
 roommention.term=bold_yellow
 roomtrigger=bold_yellow
+roomtrigger.term=bold_yellow
 me=bold_yellow
 them=bold_green
 roster.header=bold_yellow
