@@ -385,15 +385,34 @@ _mucwin_print_mention(ProfWin *window, const char *const message, const char *co
     g_free(message_lower);
 }
 
+gint
+_cmp_trigger_weight(gconstpointer a, gconstpointer b)
+{
+    int alen = strlen((char*)a);
+    int blen = strlen((char*)b);
+
+    if (alen > blen) return -1;
+    if (alen < blen) return 1;
+
+    return 0;
+}
+
 static void
 _mucwin_print_triggers(ProfWin *window, const char *const message, GList *triggers)
 {
+    GList *weighted_triggers = NULL;
+    GList *curr = triggers;
+    while (curr) {
+        weighted_triggers = g_list_insert_sorted(weighted_triggers, curr->data, (GCompareFunc)_cmp_trigger_weight);
+        curr = g_list_next(curr);
+    }
+
     char *message_lower = g_utf8_strdown(message, -1);
 
     // find earliest trigger in message
     int first_trigger_pos = -1;
     int first_trigger_len = -1;
-    GList *curr = triggers;
+    curr = weighted_triggers;
     while (curr) {
         char *trigger_lower = g_utf8_strdown(curr->data, -1);
         char *trigger_ptr = g_strstr_len(message_lower, -1, trigger_lower);
@@ -416,6 +435,7 @@ _mucwin_print_triggers(ProfWin *window, const char *const message, GList *trigge
     }
 
     g_free(message_lower);
+    g_list_free(weighted_triggers);
 
     // no triggers found
     if (first_trigger_pos == -1) {
