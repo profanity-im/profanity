@@ -107,7 +107,9 @@ theme_init(const char *const theme_name)
     g_hash_table_insert(defaults, strdup("receipt.sent"),            strdup("red"));
     g_hash_table_insert(defaults, strdup("roominfo"),                strdup("yellow"));
     g_hash_table_insert(defaults, strdup("roommention"),             strdup("yellow"));
+    g_hash_table_insert(defaults, strdup("roommention.term"),        strdup("yellow"));
     g_hash_table_insert(defaults, strdup("roomtrigger"),             strdup("yellow"));
+    g_hash_table_insert(defaults, strdup("roomtrigger.term"),        strdup("yellow"));
     g_hash_table_insert(defaults, strdup("online"),                  strdup("green"));
     g_hash_table_insert(defaults, strdup("offline"),                 strdup("red"));
     g_hash_table_insert(defaults, strdup("away"),                    strdup("cyan"));
@@ -751,7 +753,9 @@ theme_attrs(theme_item_t attrs)
     case THEME_RECEIPT_SENT:            _theme_prep_fgnd("receipt.sent",            lookup_str, &bold); break;
     case THEME_ROOMINFO:                _theme_prep_fgnd("roominfo",                lookup_str, &bold); break;
     case THEME_ROOMMENTION:             _theme_prep_fgnd("roommention",             lookup_str, &bold); break;
+    case THEME_ROOMMENTION_TERM:        _theme_prep_fgnd("roommention.term",        lookup_str, &bold); break;
     case THEME_ROOMTRIGGER:             _theme_prep_fgnd("roomtrigger",             lookup_str, &bold); break;
+    case THEME_ROOMTRIGGER_TERM:        _theme_prep_fgnd("roomtrigger.term",        lookup_str, &bold); break;
     case THEME_ONLINE:                  _theme_prep_fgnd("online",                  lookup_str, &bold); break;
     case THEME_OFFLINE:                 _theme_prep_fgnd("offline",                 lookup_str, &bold); break;
     case THEME_AWAY:                    _theme_prep_fgnd("away",                    lookup_str, &bold); break;
