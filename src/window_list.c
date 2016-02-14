@@ -660,6 +660,7 @@ wins_do_notify_remind(void)
         }
         curr = g_list_next(curr);
     }
+    g_list_free(values);
     return FALSE;
 }
 

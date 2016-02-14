@@ -759,6 +759,7 @@ _rosterwin_room(ProfLayoutSplit *layout, ProfMucWin *mucwin)
     } else {
         g_string_append(msg, mucwin->roomjid);
     }
+    prefs_free_string(roombypref);
     if ((g_strcmp0(unreadpos, "after") == 0) && mucwin->unread > 0) {
         g_string_append_printf(msg, " (%d)", mucwin->unread);
     }

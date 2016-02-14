@@ -162,7 +162,9 @@ cmd_execute_alias(ProfWin *window, const char *const inp, gboolean *ran)
     free(alias);
     if (value) {
         *ran = TRUE;
-        return cmd_process_input(window, value);
+        gboolean result = cmd_process_input(window, value);
+        prefs_free_string(value);
+        return result;
     }
 
     *ran = FALSE;
