@@ -139,6 +139,7 @@ prefs_load(void)
             g_key_file_set_boolean(prefs, PREF_GROUP_NOTIFICATIONS, "room", FALSE);
             g_key_file_set_boolean(prefs, PREF_GROUP_NOTIFICATIONS, "room.mention", TRUE);
         }
+        prefs_free_string(value);
     }
 
     _save_prefs();
