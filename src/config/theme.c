@@ -74,7 +74,7 @@ theme_init(const char *const theme_name)
     }
 
     str_to_pair = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, NULL);
-    defaults = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, NULL);
+    defaults = g_hash_table_new_full(g_str_hash, g_str_equal, free, free);
 
     g_hash_table_insert(defaults, strdup("main.text"),               strdup("white"));
     g_hash_table_insert(defaults, strdup("main.text.me"),            strdup("white"));
