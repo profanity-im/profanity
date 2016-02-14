@@ -116,6 +116,7 @@ sv_ev_roster_received(void)
         }
         free(err_str);
     }
+    account_free(account);
 #endif
 
     // send initial presence
