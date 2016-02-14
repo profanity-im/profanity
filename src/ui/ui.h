@@ -1,7 +1,7 @@
 /*
  * ui.h
  *
- * Copyright (C) 2012 - 2015 James Booth <boothj5@gmail.com>
+ * Copyright (C) 2012 - 2016 James Booth <boothj5@gmail.com>
  *
  * This file is part of Profanity.
  *
@@ -158,7 +158,7 @@ void mucwin_occupant_role_and_affiliation_change(ProfMucWin *mucwin, const char 
     const char *const role, const char *const affiliation, const char *const actor, const char *const reason);
 void mucwin_roster(ProfMucWin *mucwin, GList *occupants, const char *const presence);
 void mucwin_history(ProfMucWin *mucwin, const char *const nick, GDateTime *timestamp, const char *const message);
-void mucwin_message(ProfMucWin *mucwin, const char *const nick, const char *const message, gboolean mention, gboolean trigger_found);
+void mucwin_message(ProfMucWin *mucwin, const char *const nick, const char *const message, gboolean mention, GList *triggers);
 void mucwin_subject(ProfMucWin *mucwin, const char *const nick, const char *const subject);
 void mucwin_requires_config(ProfMucWin *mucwin);
 void mucwin_info(ProfMucWin *mucwin);
@@ -345,7 +345,7 @@ ProfWin* win_create_muc_config(const char *const title, DataForm *form);
 ProfWin* win_create_private(const char *const fulljid);
 void win_update_virtual(ProfWin *window);
 void win_free(ProfWin *window);
-gboolean win_notify(ProfWin *window);
+gboolean win_notify_remind(ProfWin *window);
 int win_unread(ProfWin *window);
 void win_resize(ProfWin *window);
 void win_hide_subwin(ProfWin *window);

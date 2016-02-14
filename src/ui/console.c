@@ -1,7 +1,7 @@
 /*
  * console.c
  *
- * Copyright (C) 2012 - 2015 James Booth <boothj5@gmail.com>
+ * Copyright (C) 2012 - 2016 James Booth <boothj5@gmail.com>
  *
  * This file is part of Profanity.
  *
@@ -334,10 +334,10 @@ cons_show_incoming_room_message(const char *const nick, const char *const room, 
 
     if (g_strcmp0(muc_show, "all") == 0) {
         if (mention) {
-            win_vprint(console, '-', 0, NULL, 0, THEME_INCOMING, "", "<< room mention: %s in %s (win %d)", nick, room, ui_index);
+            win_vprint(console, '-', 0, NULL, 0, THEME_MENTION, "", "<< room mention: %s in %s (win %d)", nick, room, ui_index);
         } else if (triggers) {
             char *triggers_str = _room_triggers_to_string(triggers);
-            win_vprint(console, '-', 0, NULL, 0, THEME_INCOMING, "", "<< room trigger %s: %s in %s (win %d)", triggers_str, nick, room, ui_index);
+            win_vprint(console, '-', 0, NULL, 0, THEME_TRIGGER, "", "<< room trigger %s: %s in %s (win %d)", triggers_str, nick, room, ui_index);
             free(triggers_str);
         } else {
             win_vprint(console, '-', 0, NULL, 0, THEME_INCOMING, "", "<< room message: %s in %s (win %d)", nick, room, ui_index);
@@ -346,11 +346,11 @@ cons_show_incoming_room_message(const char *const nick, const char *const room, 
 
     } else if (g_strcmp0(muc_show, "first") == 0) {
         if (mention) {
-            win_vprint(console, '-', 0, NULL, 0, THEME_INCOMING, "", "<< room mention: %s in %s (win %d)", nick, room, ui_index);
+            win_vprint(console, '-', 0, NULL, 0, THEME_MENTION, "", "<< room mention: %s in %s (win %d)", nick, room, ui_index);
             cons_alert();
         } else if (triggers) {
             char *triggers_str = _room_triggers_to_string(triggers);
-            win_vprint(console, '-', 0, NULL, 0, THEME_INCOMING, "", "<< room trigger %s: %s in %s (win %d)", triggers_str, nick, room, ui_index);
+            win_vprint(console, '-', 0, NULL, 0, THEME_TRIGGER, "", "<< room trigger %s: %s in %s (win %d)", triggers_str, nick, room, ui_index);
             free(triggers_str);
             cons_alert();
         } else if (unread == 0) {
@@ -427,7 +427,7 @@ cons_about(void)
         }
     }
 
-    win_vprint(console, '-', 0, NULL, 0, 0, "", "Copyright (C) 2012 - 2015 James Booth <%s>.", PACKAGE_BUGREPORT);
+    win_vprint(console, '-', 0, NULL, 0, 0, "", "Copyright (C) 2012 - 2016 James Booth <%s>.", PACKAGE_BUGREPORT);
     win_println(console, 0, "License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>");
     win_println(console, 0, "");
     win_println(console, 0, "This is free software; you are free to change and redistribute it.");
@@ -1410,6 +1410,11 @@ cons_roster_setting(void)
     else
         cons_show("Roster contacts (/roster)           : hide");
 
+    if (prefs_get_boolean(PREF_ROSTER_UNSUBSCRIBED))
+        cons_show("Roster unsubscribed (/roster)       : show");
+    else
+        cons_show("Roster unsubscribed (/roster)       : hide");
+
     char *count = prefs_get_string(PREF_ROSTER_COUNT);
     if (g_strcmp0(count, "off") == 0) {
         cons_show("Roster count (/roster)              : OFF");
@@ -2203,12 +2208,16 @@ cons_theme_properties(void)
     _cons_theme_prop(THEME_UNSUBSCRIBED, "unsubscribed");
 
     _cons_theme_prop(THEME_INCOMING, "incoming");
+    _cons_theme_prop(THEME_MENTION, "mention");
+    _cons_theme_prop(THEME_TRIGGER, "trigger");
     _cons_theme_prop(THEME_TYPING, "typing");
     _cons_theme_prop(THEME_GONE, "gone");
 
     _cons_theme_prop(THEME_ROOMINFO, "roominfo");
     _cons_theme_prop(THEME_ROOMMENTION, "roommention");
+    _cons_theme_prop(THEME_ROOMMENTION_TERM, "roommention.term");
     _cons_theme_prop(THEME_ROOMTRIGGER, "roomtrigger");
+    _cons_theme_prop(THEME_ROOMTRIGGER_TERM, "roomtrigger.term");
 
     _cons_theme_prop(THEME_ROSTER_HEADER, "roster.header");
     _cons_theme_prop(THEME_ROSTER_CHAT, "roster.chat");

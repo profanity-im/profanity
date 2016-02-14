@@ -1,7 +1,7 @@
 /*
  * preferences.c
  *
- * Copyright (C) 2012 - 2015 James Booth <boothj5@gmail.com>
+ * Copyright (C) 2012 - 2016 James Booth <boothj5@gmail.com>
  *
  * This file is part of Profanity.
  *
@@ -139,6 +139,7 @@ prefs_load(void)
             g_key_file_set_boolean(prefs, PREF_GROUP_NOTIFICATIONS, "room", FALSE);
             g_key_file_set_boolean(prefs, PREF_GROUP_NOTIFICATIONS, "room.mention", TRUE);
         }
+        prefs_free_string(value);
     }
 
     _save_prefs();
@@ -271,6 +272,42 @@ prefs_do_room_notify(gboolean current_win, const char *const roomjid, const char
         notify_trigger = prefs_get_boolean(PREF_NOTIFY_ROOM_TRIGGER);
     }
     if (notify_trigger && trigger_found) {
+        return TRUE;
+    }
+
+    return FALSE;
+}
+
+gboolean
+prefs_do_room_notify_mention(const char *const roomjid, int unread, gboolean mention, gboolean trigger)
+{
+    gboolean notify_room = FALSE;
+    if (g_key_file_has_key(prefs, roomjid, "notify", NULL)) {
+        notify_room = g_key_file_get_boolean(prefs, roomjid, "notify", NULL);
+    } else {
+        notify_room = prefs_get_boolean(PREF_NOTIFY_ROOM);
+    }
+    if (notify_room && unread > 0) {
+        return TRUE;
+    }
+
+    gboolean notify_mention = FALSE;
+    if (g_key_file_has_key(prefs, roomjid, "notify.mention", NULL)) {
+        notify_mention = g_key_file_get_boolean(prefs, roomjid, "notify.mention", NULL);
+    } else {
+        notify_mention = prefs_get_boolean(PREF_NOTIFY_ROOM_MENTION);
+    }
+    if (notify_mention && mention) {
+        return TRUE;
+    }
+
+    gboolean notify_trigger = FALSE;
+    if (g_key_file_has_key(prefs, roomjid, "notify.trigger", NULL)) {
+        notify_trigger = g_key_file_get_boolean(prefs, roomjid, "notify.trigger", NULL);
+    } else {
+        notify_trigger = prefs_get_boolean(PREF_NOTIFY_ROOM_TRIGGER);
+    }
+    if (notify_trigger && trigger) {
         return TRUE;
     }
 
@@ -1143,6 +1180,7 @@ _get_group(preference_t pref)
         case PREF_ROSTER_WRAP:
         case PREF_ROSTER_RESOURCE_JOIN:
         case PREF_ROSTER_CONTACTS:
+        case PREF_ROSTER_UNSUBSCRIBED:
         case PREF_ROSTER_ROOMS:
         case PREF_ROSTER_ROOMS_POS:
         case PREF_ROSTER_ROOMS_BY:
@@ -1351,6 +1389,8 @@ _get_key(preference_t pref)
             return "roster.resource.join";
         case PREF_ROSTER_CONTACTS:
             return "roster.contacts";
+        case PREF_ROSTER_UNSUBSCRIBED:
+            return "roster.unsubscribed";
         case PREF_ROSTER_ROOMS:
             return "roster.rooms";
         case PREF_ROSTER_ROOMS_POS:
@@ -1425,6 +1465,7 @@ _get_default_boolean(preference_t pref)
         case PREF_ROSTER_PRIORITY:
         case PREF_ROSTER_RESOURCE_JOIN:
         case PREF_ROSTER_CONTACTS:
+        case PREF_ROSTER_UNSUBSCRIBED:
         case PREF_ROSTER_ROOMS:
         case PREF_TLS_SHOW:
         case PREF_LASTACTIVITY:

@@ -1,7 +1,7 @@
 /*
  * rosterwin.c
  *
- * Copyright (C) 2012 - 2015 James Booth <boothj5@gmail.com>
+ * Copyright (C) 2012 - 2016 James Booth <boothj5@gmail.com>
  *
  * This file is part of Profanity.
  *
@@ -53,9 +53,12 @@ static void _rosterwin_contacts_all(ProfLayoutSplit *layout, gboolean newline);
 static void _rosterwin_contacts_by_presence(ProfLayoutSplit *layout, const char *const presence, char *title,
     gboolean newline);
 static void _rosterwin_contacts_by_group(ProfLayoutSplit *layout, char *group, gboolean newline);
+static void _rosteriwin_unsubscribed(ProfLayoutSplit *layout, gboolean newline);
 static void _rosterwin_contacts_header(ProfLayoutSplit *layout, const char *title, gboolean newline, GSList *contacts);
+static void _rosterwin_unsubscribed_header(ProfLayoutSplit *layout, gboolean newline, GList *wins);
 
 static void _rosterwin_contact(ProfLayoutSplit *layout, PContact contact);
+static void _rosterwin_unsubscribed_item(ProfLayoutSplit *layout, ProfChatWin *chatwin);
 static void _rosterwin_presence(ProfLayoutSplit *layout, const char *presence, const char *status,
     int current_indent);
 static void _rosterwin_resources(ProfLayoutSplit *layout, PContact contact, int current_indent,
@@ -149,6 +152,10 @@ rosterwin_roster(void)
         } else {
             _rosterwin_contacts_all(layout, newline);
         }
+
+        if (prefs_get_boolean(PREF_ROSTER_UNSUBSCRIBED)) {
+            _rosteriwin_unsubscribed(layout, newline);
+        }
         prefs_free_string(by);
     }
 
@@ -216,6 +223,24 @@ _rosterwin_contacts_all(ProfLayoutSplit *layout, gboolean newline)
 }
 
 static void
+_rosteriwin_unsubscribed(ProfLayoutSplit *layout, gboolean newline)
+{
+    GList *wins = wins_get_chat_unsubscribed();
+    if (wins) {
+        _rosterwin_unsubscribed_header(layout, newline, wins);
+    }
+
+    GList *curr = wins;
+    while (curr) {
+        ProfChatWin *chatwin = curr->data;
+        _rosterwin_unsubscribed_item(layout, chatwin);
+        curr = g_list_next(curr);
+    }
+
+    g_list_free(wins);
+}
+
+static void
 _rosterwin_contacts_by_presence(ProfLayoutSplit *layout, const char *const presence, char *title, gboolean newline)
 {
     GSList *contacts = roster_get_contacts_by_presence(presence);
@@ -269,6 +294,58 @@ _rosterwin_contacts_by_group(ProfLayoutSplit *layout, char *group, gboolean newl
         }
     }
     g_slist_free(filtered_contacts);
+}
+
+static void
+_rosterwin_unsubscribed_item(ProfLayoutSplit *layout, ProfChatWin *chatwin)
+{
+    const char *const name = chatwin->barejid;
+    const char *const presence = "offline";
+    int unread = 0;
+
+    roster_contact_theme_t theme_type = ROSTER_CONTACT;
+    if (chatwin->unread > 0) {
+        theme_type = ROSTER_CONTACT_UNREAD;
+        unread = chatwin->unread;
+    } else {
+        theme_type = ROSTER_CONTACT_ACTIVE;
+    }
+
+    theme_item_t presence_colour = _get_roster_theme(theme_type, presence);
+
+    wattron(layout->subwin, theme_attrs(presence_colour));
+    GString *msg = g_string_new(" ");
+    int indent = prefs_get_roster_contact_indent();
+    int current_indent = 0;
+    if (indent > 0) {
+        current_indent += indent;
+        while (indent > 0) {
+            g_string_append(msg, " ");
+            indent--;
+        }
+    }
+    char ch = prefs_get_roster_contact_char();
+    if (ch) {
+        g_string_append_printf(msg, "%c", ch);
+    }
+
+    char *unreadpos = prefs_get_string(PREF_ROSTER_UNREAD);
+    if ((g_strcmp0(unreadpos, "before") == 0) && unread > 0) {
+        g_string_append_printf(msg, "(%d) ", unread);
+        unread = 0;
+    }
+    g_string_append(msg, name);
+    if ((g_strcmp0(unreadpos, "after") == 0) && unread > 0) {
+        g_string_append_printf(msg, " (%d)", unread);
+        unread = 0;
+    }
+    prefs_free_string(unreadpos);
+
+    win_sub_newline_lazy(layout->subwin);
+    gboolean wrap = prefs_get_boolean(PREF_ROSTER_WRAP);
+    win_sub_print(layout->subwin, msg->str, FALSE, wrap, current_indent);
+    g_string_free(msg, TRUE);
+    wattroff(layout->subwin, theme_attrs(presence_colour));
 }
 
 static void
@@ -682,6 +759,7 @@ _rosterwin_room(ProfLayoutSplit *layout, ProfMucWin *mucwin)
     } else {
         g_string_append(msg, mucwin->roomjid);
     }
+    prefs_free_string(roombypref);
     if ((g_strcmp0(unreadpos, "after") == 0) && mucwin->unread > 0) {
         g_string_append_printf(msg, " (%d)", mucwin->unread);
     }
@@ -886,6 +964,54 @@ _compare_rooms_unread(ProfMucWin *a, ProfMucWin *b)
     } else {
         return 1;
     }
+}
+
+static void
+_rosterwin_unsubscribed_header(ProfLayoutSplit *layout, gboolean newline, GList *wins)
+{
+    if (newline) {
+        win_sub_newline_lazy(layout->subwin);
+    }
+
+    GString *header = g_string_new(" ");
+    char ch = prefs_get_roster_header_char();
+    if (ch) {
+        g_string_append_printf(header, "%c", ch);
+    }
+
+    g_string_append(header, "Unsubscribed");
+
+    char *countpref = prefs_get_string(PREF_ROSTER_COUNT);
+    if (g_strcmp0(countpref, "items") == 0) {
+        int itemcount = g_list_length(wins);
+        if (itemcount == 0 && prefs_get_boolean(PREF_ROSTER_COUNT_ZERO)) {
+            g_string_append_printf(header, " (%d)", itemcount);
+        } else {
+            g_string_append_printf(header, " (%d)", itemcount);
+        }
+    } else if (g_strcmp0(countpref, "unread") == 0) {
+        int unreadcount = 0;
+        GList *curr = wins;
+        while (curr) {
+            ProfChatWin *chatwin = curr->data;
+            unreadcount += chatwin->unread;
+            curr = g_list_next(curr);
+        }
+        if (unreadcount == 0 && prefs_get_boolean(PREF_ROSTER_COUNT_ZERO)) {
+            g_string_append_printf(header, " (%d)", unreadcount);
+        } else if (unreadcount > 0) {
+            g_string_append_printf(header, " (%d)", unreadcount);
+        }
+    }
+    prefs_free_string(countpref);
+
+    gboolean wrap = prefs_get_boolean(PREF_ROSTER_WRAP);
+
+    wattron(layout->subwin, theme_attrs(THEME_ROSTER_HEADER));
+    win_sub_print(layout->subwin, header->str, FALSE, wrap, 1);
+    wattroff(layout->subwin, theme_attrs(THEME_ROSTER_HEADER));
+
+    g_string_free(header, TRUE);
 }
 
 static void

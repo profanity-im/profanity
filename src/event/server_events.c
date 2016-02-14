@@ -1,7 +1,7 @@
 /*
  * server_events.c
  *
- * Copyright (C) 2012 - 2015 James Booth <boothj5@gmail.com>
+ * Copyright (C) 2012 - 2016 James Booth <boothj5@gmail.com>
  *
  * This file is part of Profanity.
  *
@@ -116,6 +116,7 @@ sv_ev_roster_received(void)
         }
         free(err_str);
     }
+    account_free(account);
 #endif
 
     // send initial presence
@@ -256,7 +257,7 @@ sv_ev_room_message(const char *const room_jid, const char *const nick, const cha
 
     GList *triggers = prefs_message_get_triggers(message);
 
-    mucwin_message(mucwin, nick, message, mention, triggers != NULL);
+    mucwin_message(mucwin, nick, message, mention, triggers);
 
     ProfWin *window = (ProfWin*)mucwin;
     int num = wins_get_num(window);

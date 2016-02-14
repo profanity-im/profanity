@@ -1,7 +1,7 @@
 /*
  * theme.c
  *
- * Copyright (C) 2012 - 2015 James Booth <boothj5@gmail.com>
+ * Copyright (C) 2012 - 2016 James Booth <boothj5@gmail.com>
  *
  * This file is part of Profanity.
  *
@@ -74,7 +74,7 @@ theme_init(const char *const theme_name)
     }
 
     str_to_pair = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, NULL);
-    defaults = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, NULL);
+    defaults = g_hash_table_new_full(g_str_hash, g_str_equal, free, free);
 
     g_hash_table_insert(defaults, strdup("main.text"),               strdup("white"));
     g_hash_table_insert(defaults, strdup("main.text.me"),            strdup("white"));
@@ -82,6 +82,8 @@ theme_init(const char *const theme_name)
     g_hash_table_insert(defaults, strdup("main.splash"),             strdup("cyan"));
     g_hash_table_insert(defaults, strdup("error"),                   strdup("red"));
     g_hash_table_insert(defaults, strdup("incoming"),                strdup("yellow"));
+    g_hash_table_insert(defaults, strdup("mention"),                 strdup("yellow"));
+    g_hash_table_insert(defaults, strdup("trigger"),                 strdup("yellow"));
     g_hash_table_insert(defaults, strdup("input.text"),              strdup("white"));
     g_hash_table_insert(defaults, strdup("main.time"),               strdup("white"));
     g_hash_table_insert(defaults, strdup("titlebar.text"),           strdup("white"));
@@ -105,7 +107,9 @@ theme_init(const char *const theme_name)
     g_hash_table_insert(defaults, strdup("receipt.sent"),            strdup("red"));
     g_hash_table_insert(defaults, strdup("roominfo"),                strdup("yellow"));
     g_hash_table_insert(defaults, strdup("roommention"),             strdup("yellow"));
+    g_hash_table_insert(defaults, strdup("roommention.term"),        strdup("yellow"));
     g_hash_table_insert(defaults, strdup("roomtrigger"),             strdup("yellow"));
+    g_hash_table_insert(defaults, strdup("roomtrigger.term"),        strdup("yellow"));
     g_hash_table_insert(defaults, strdup("online"),                  strdup("green"));
     g_hash_table_insert(defaults, strdup("offline"),                 strdup("red"));
     g_hash_table_insert(defaults, strdup("away"),                    strdup("cyan"));
@@ -391,6 +395,7 @@ _load_preferences(void)
     _set_boolean_preference("roster.count.zero", PREF_ROSTER_COUNT_ZERO);
     _set_boolean_preference("roster.priority", PREF_ROSTER_PRIORITY);
     _set_boolean_preference("roster.contacts", PREF_ROSTER_CONTACTS);
+    _set_boolean_preference("roster.unsubscribed", PREF_ROSTER_UNSUBSCRIBED);
     _set_boolean_preference("roster.rooms", PREF_ROSTER_ROOMS);
     _set_boolean_preference("privileges", PREF_MUC_PRIVILEGES);
     _set_boolean_preference("presence", PREF_PRESENCE);
@@ -723,6 +728,8 @@ theme_attrs(theme_item_t attrs)
     case THEME_SPLASH:                  _theme_prep_fgnd("main.splash",             lookup_str, &bold); break;
     case THEME_ERROR:                   _theme_prep_fgnd("error",                   lookup_str, &bold); break;
     case THEME_INCOMING:                _theme_prep_fgnd("incoming",                lookup_str, &bold); break;
+    case THEME_MENTION:                 _theme_prep_fgnd("mention",                 lookup_str, &bold); break;
+    case THEME_TRIGGER:                 _theme_prep_fgnd("trigger",                 lookup_str, &bold); break;
     case THEME_INPUT_TEXT:              _theme_prep_fgnd("input.text",              lookup_str, &bold); break;
     case THEME_TIME:                    _theme_prep_fgnd("main.time",               lookup_str, &bold); break;
     case THEME_TITLE_TEXT:              _theme_prep_fgnd("titlebar.text",           lookup_str, &bold); break;
@@ -746,7 +753,9 @@ theme_attrs(theme_item_t attrs)
     case THEME_RECEIPT_SENT:            _theme_prep_fgnd("receipt.sent",            lookup_str, &bold); break;
     case THEME_ROOMINFO:                _theme_prep_fgnd("roominfo",                lookup_str, &bold); break;
     case THEME_ROOMMENTION:             _theme_prep_fgnd("roommention",             lookup_str, &bold); break;
+    case THEME_ROOMMENTION_TERM:        _theme_prep_fgnd("roommention.term",        lookup_str, &bold); break;
     case THEME_ROOMTRIGGER:             _theme_prep_fgnd("roomtrigger",             lookup_str, &bold); break;
+    case THEME_ROOMTRIGGER_TERM:        _theme_prep_fgnd("roomtrigger.term",        lookup_str, &bold); break;
     case THEME_ONLINE:                  _theme_prep_fgnd("online",                  lookup_str, &bold); break;
     case THEME_OFFLINE:                 _theme_prep_fgnd("offline",                 lookup_str, &bold); break;
     case THEME_AWAY:                    _theme_prep_fgnd("away",                    lookup_str, &bold); break;

@@ -38,6 +38,7 @@ roster.presence=true
 roster.presence.indent=1
 roster.status=true
 roster.contacts=true
+roster.unsubscribed=true
 roster.rooms=true
 roster.rooms.order=unread
 roster.rooms.unread=after

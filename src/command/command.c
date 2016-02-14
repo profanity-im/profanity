@@ -1,7 +1,7 @@
 /*
  * command.c
  *
- * Copyright (C) 2012 - 2015 James Booth <boothj5@gmail.com>
+ * Copyright (C) 2012 - 2016 James Booth <boothj5@gmail.com>
  *
  * This file is part of Profanity.
  *
@@ -662,7 +662,7 @@ static struct cmd_t command_defs[] =
             CMD_TAG_GROUPCHAT)
         CMD_SYN(
             "/affiliation set <affiliation> <jid> [<reason>]",
-            "/list [<affiliation>]")
+            "/affiliation list [<affiliation>]")
         CMD_DESC(
             "Manage room affiliations. "
             "Affiliation may be one of owner, admin, member, outcast or none.")
@@ -678,7 +678,7 @@ static struct cmd_t command_defs[] =
             CMD_TAG_GROUPCHAT)
         CMD_SYN(
             "/role set <role> <nick> [<reason>]",
-            "/list [<role>]")
+            "/role list [<role>]")
         CMD_DESC(
             "Manage room roles. "
             "Role may be one of moderator, participant, visitor or none.")
@@ -2266,6 +2266,7 @@ cmd_init(void)
     autocomplete_add(roster_show_ac, "empty");
     autocomplete_add(roster_show_ac, "priority");
     autocomplete_add(roster_show_ac, "contacts");
+    autocomplete_add(roster_show_ac, "unsubscribed");
     autocomplete_add(roster_show_ac, "rooms");
 
     roster_by_ac = autocomplete_new();

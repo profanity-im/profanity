@@ -1,7 +1,7 @@
 /*
  * theme.h
  *
- * Copyright (C) 2012 - 2015 James Booth <boothj5@gmail.com>
+ * Copyright (C) 2012 - 2016 James Booth <boothj5@gmail.com>
  *
  * This file is part of Profanity.
  *
@@ -46,6 +46,8 @@ typedef enum {
     THEME_SPLASH,
     THEME_ERROR,
     THEME_INCOMING,
+    THEME_MENTION,
+    THEME_TRIGGER,
     THEME_INPUT_TEXT,
     THEME_TIME,
     THEME_TITLE_TEXT,
@@ -68,7 +70,9 @@ typedef enum {
     THEME_THEM,
     THEME_ROOMINFO,
     THEME_ROOMMENTION,
+    THEME_ROOMMENTION_TERM,
     THEME_ROOMTRIGGER,
+    THEME_ROOMTRIGGER_TERM,
     THEME_ONLINE,
     THEME_OFFLINE,
     THEME_AWAY,
