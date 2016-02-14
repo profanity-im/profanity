@@ -1,5 +1,5 @@
 /*
- * connection.h
+ * api.h
  *
  * Copyright (C) 2012 - 2015 James Booth <boothj5@gmail.com>
  *
@@ -32,25 +32,38 @@
  *
  */
 
-#ifndef XMPP_CONNECTION_H
-#define XMPP_CONNECTION_H
+#ifndef API_H
+#define API_H
 
-#include "prof_config.h"
+#include "plugins/callbacks.h"
 
-#ifdef PROF_HAVE_LIBMESODE
-#include <mesode.h>
-#endif
-#ifdef PROF_HAVE_LIBSTROPHE
-#include <strophe.h>
-#endif
+void api_cons_alert(void);
+void api_cons_show(const char * const message);
+void api_notify(const char *message, const char *category, int timeout_ms);
+void api_send_line(char *line);
+char * api_get_current_recipient(void);
+char * api_get_current_muc(void);
 
-#include "resource.h"
+void api_register_command(const char *command_name, int min_args, int max_args,
+    const char *usage, const char *short_help, const char *long_help,
+    void *callback, void(*callback_func)(PluginCommand *command, gchar **args));
+void api_register_timed(void *callback, int interval_seconds,
+    void (*callback_func)(PluginTimedFunction *timed_function));
+void api_register_ac(const char *key, char **items);
 
-xmpp_conn_t* connection_get_conn(void);
-xmpp_ctx_t* connection_get_ctx(void);
-void connection_set_priority(int priority);
-void connection_set_presence_message(const char *const message);
-void connection_add_available_resource(Resource *resource);
-void connection_remove_available_resource(const char *const resource);
+void api_log_debug(const char *message);
+void api_log_info(const char *message);
+void api_log_warning(const char *message);
+void api_log_error(const char *message);
+
+int api_win_exists(const char *tag);
+void api_win_create(const char *tag, void *callback,
+    void(*callback_func)(PluginWindowCallback *window_callback, char *tag, char *line));
+void api_win_focus(const char *tag);
+void api_win_show(const char *tag, const char *line);
+void api_win_show_green(const char *tag, const char *line);
+void api_win_show_red(const char *tag, const char *line);
+void api_win_show_cyan(const char *tag, const char *line);
+void api_win_show_yellow(const char *tag, const char *line);
 
 #endif

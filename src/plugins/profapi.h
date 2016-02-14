@@ -1,5 +1,5 @@
 /*
- * connection.h
+ * prof_api.h
  *
  * Copyright (C) 2012 - 2015 James Booth <boothj5@gmail.com>
  *
@@ -32,25 +32,41 @@
  *
  */
 
-#ifndef XMPP_CONNECTION_H
-#define XMPP_CONNECTION_H
+#ifndef PROF_API_H
+#define PROF_API_H
 
-#include "prof_config.h"
+typedef char* PROF_WIN_TAG;
 
-#ifdef PROF_HAVE_LIBMESODE
-#include <mesode.h>
-#endif
-#ifdef PROF_HAVE_LIBSTROPHE
-#include <strophe.h>
-#endif
+void (*prof_cons_alert)(void);
 
-#include "resource.h"
+void (*prof_cons_show)(const char * const message);
 
-xmpp_conn_t* connection_get_conn(void);
-xmpp_ctx_t* connection_get_ctx(void);
-void connection_set_priority(int priority);
-void connection_set_presence_message(const char *const message);
-void connection_add_available_resource(Resource *resource);
-void connection_remove_available_resource(const char *const resource);
+void (*prof_register_command)(const char *command_name, int min_args, int max_args,
+    const char *usage, const char *short_help, const char *long_help, void(*callback)(char **args));
+
+void (*prof_register_timed)(void(*callback)(void), int interval_seconds);
+
+void (*prof_register_ac)(const char *key, char **items);
+
+void (*prof_notify)(const char *message, int timeout_ms, const char *category);
+
+void (*prof_send_line)(char *line);
+
+char* (*prof_get_current_recipient)(void);
+char* (*prof_get_current_muc)(void);
+
+void (*prof_log_debug)(const char *message);
+void (*prof_log_info)(const char *message);
+void (*prof_log_warning)(const char *message);
+void (*prof_log_error)(const char *message);
+
+int (*prof_win_exists)(PROF_WIN_TAG win);
+void (*prof_win_create)(PROF_WIN_TAG win, void(*input_handler)(PROF_WIN_TAG win, char *line));
+void (*prof_win_focus)(PROF_WIN_TAG win);
+void (*prof_win_show)(PROF_WIN_TAG win, char *line);
+void (*prof_win_show_green)(PROF_WIN_TAG win, char *line);
+void (*prof_win_show_red)(PROF_WIN_TAG win, char *line);
+void (*prof_win_show_cyan)(PROF_WIN_TAG win, char *line);
+void (*prof_win_show_yellow)(PROF_WIN_TAG win, char *line);
 
 #endif

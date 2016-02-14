@@ -47,8 +47,8 @@ void cmd_uninit(void);
 
 char* cmd_autocomplete(ProfWin *window, const char *const input);
 void cmd_reset_autocomplete(ProfWin *window);
-void cmd_autocomplete_add(char *value);
-void cmd_autocomplete_remove(char *value);
+void cmd_autocomplete_add(const char *const value);
+void cmd_autocomplete_remove(const char *const value);
 void cmd_autocomplete_add_form_fields(DataForm *form);
 void cmd_autocomplete_remove_form_fields(DataForm *form);
 void cmd_alias_add(char *value);

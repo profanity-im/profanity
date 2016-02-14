@@ -1,5 +1,5 @@
 /*
- * connection.h
+ * autocompleters.h
  *
  * Copyright (C) 2012 - 2015 James Booth <boothj5@gmail.com>
  *
@@ -32,25 +32,15 @@
  *
  */
 
-#ifndef XMPP_CONNECTION_H
-#define XMPP_CONNECTION_H
+#ifndef AUTOCOMPLETERS_H
+#define AUTOCOMPLETERS_H
 
-#include "prof_config.h"
+#include <glib.h>
 
-#ifdef PROF_HAVE_LIBMESODE
-#include <mesode.h>
-#endif
-#ifdef PROF_HAVE_LIBSTROPHE
-#include <strophe.h>
-#endif
-
-#include "resource.h"
-
-xmpp_conn_t* connection_get_conn(void);
-xmpp_ctx_t* connection_get_ctx(void);
-void connection_set_priority(int priority);
-void connection_set_presence_message(const char *const message);
-void connection_add_available_resource(Resource *resource);
-void connection_remove_available_resource(const char *const resource);
+void autocompleters_init(void);
+void autocompleters_add(const char *key, char **items);
+char* autocompleters_complete(const char * const input);
+void autocompleters_reset(void);
+void autocompleters_destroy(void);
 
 #endif

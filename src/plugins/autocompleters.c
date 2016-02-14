@@ -1,5 +1,5 @@
 /*
- * connection.h
+ * autocompleters.c
  *
  * Copyright (C) 2012 - 2015 James Booth <boothj5@gmail.com>
  *
@@ -32,25 +32,61 @@
  *
  */
 
-#ifndef XMPP_CONNECTION_H
-#define XMPP_CONNECTION_H
+#include <string.h>
 
-#include "prof_config.h"
+#include <glib.h>
 
-#ifdef PROF_HAVE_LIBMESODE
-#include <mesode.h>
-#endif
-#ifdef PROF_HAVE_LIBSTROPHE
-#include <strophe.h>
-#endif
+#include "tools/autocomplete.h"
 
-#include "resource.h"
+static GHashTable *autocompleters;
 
-xmpp_conn_t* connection_get_conn(void);
-xmpp_ctx_t* connection_get_ctx(void);
-void connection_set_priority(int priority);
-void connection_set_presence_message(const char *const message);
-void connection_add_available_resource(Resource *resource);
-void connection_remove_available_resource(const char *const resource);
+void
+autocompleters_init(void)
+{
+    autocompleters = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, (GDestroyNotify)autocomplete_free);
+}
 
-#endif
+void
+autocompleters_add(const char *key, char **items)
+{
+    Autocomplete new_ac = autocomplete_new();
+    int i = 0;
+    for (i = 0; i < g_strv_length(items); i++) {
+        autocomplete_add(new_ac, items[i]);
+    }
+    g_hash_table_insert(autocompleters, strdup(key), new_ac);
+}
+
+char *
+autocompleters_complete(const char * const input)
+{
+    char *result = NULL;
+
+    GList *keys = g_hash_table_get_keys(autocompleters);
+    GList *curr = keys;
+    while (curr) {
+        result = autocomplete_param_with_ac(input, curr->data, g_hash_table_lookup(autocompleters, curr->data), TRUE);
+        if (result) {
+            return result;
+        }
+        curr = g_list_next(curr);
+    }
+
+    return NULL;
+}
+
+void
+autocompleters_reset(void)
+{
+    GList *acs = g_hash_table_get_values(autocompleters);
+    GList *curr = acs;
+    while (curr) {
+        autocomplete_reset(curr->data);
+        curr = g_list_next(curr);
+    }
+}
+
+void autocompleters_destroy(void)
+{
+    g_hash_table_destroy(autocompleters);
+}

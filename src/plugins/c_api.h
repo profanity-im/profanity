@@ -1,5 +1,5 @@
 /*
- * connection.h
+ * c_api.h
  *
  * Copyright (C) 2012 - 2015 James Booth <boothj5@gmail.com>
  *
@@ -32,25 +32,10 @@
  *
  */
 
-#ifndef XMPP_CONNECTION_H
-#define XMPP_CONNECTION_H
+#include <glib.h>
 
-#include "prof_config.h"
+void c_api_init(void);
 
-#ifdef PROF_HAVE_LIBMESODE
-#include <mesode.h>
-#endif
-#ifdef PROF_HAVE_LIBSTROPHE
-#include <strophe.h>
-#endif
-
-#include "resource.h"
-
-xmpp_conn_t* connection_get_conn(void);
-xmpp_ctx_t* connection_get_ctx(void);
-void connection_set_priority(int priority);
-void connection_set_presence_message(const char *const message);
-void connection_add_available_resource(Resource *resource);
-void connection_remove_available_resource(const char *const resource);
-
-#endif
+void c_command_callback(PluginCommand *command, gchar **args);
+void c_timed_callback(PluginTimedFunction *timed_function);
+void c_window_callback(PluginWindowCallback *window_callback, char *tag, char *line);

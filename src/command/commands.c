@@ -32,7 +32,7 @@
  *
  */
 
-#include "config.h"
+#include "prof_config.h"
 
 #include <string.h>
 #include <stdlib.h>
@@ -61,13 +61,14 @@
 #include "jid.h"
 #include "log.h"
 #include "muc.h"
-#ifdef HAVE_LIBOTR
+#ifdef PROF_HAVE_LIBOTR
 #include "otr/otr.h"
 #endif
-#ifdef HAVE_LIBGPGME
+#ifdef PROF_HAVE_LIBGPGME
 #include "pgp/gpg.h"
 #endif
 #include "profanity.h"
+#include "plugins/plugins.h"
 #include "tools/autocomplete.h"
 #include "tools/parser.h"
 #include "tools/tinyurl.h"
@@ -100,9 +101,16 @@ cmd_execute_default(ProfWin *window, const char *inp)
         return TRUE;
     }
 
-    // handle non commands in non chat windows
-    if (window->type != WIN_CHAT && window->type != WIN_MUC && window->type != WIN_PRIVATE) {
+    // handle non commands in non chat or plugin windows
+    if (window->type != WIN_CHAT && window->type != WIN_MUC && window->type != WIN_PRIVATE && window->type != WIN_PLUGIN) {
         cons_show("Unknown command: %s", inp);
+        return TRUE;
+    }
+
+    // handle plugin window
+    if (window->type == WIN_PLUGIN) {
+        ProfPluginWin *pluginwin = (ProfPluginWin*)window;
+        plugins_win_process_line(pluginwin->tag, inp);
         return TRUE;
     }
 
@@ -167,7 +175,7 @@ gboolean
 cmd_tls(ProfWin *window, const char *const command, gchar **args)
 {
     if (g_strcmp0(args[0], "certpath") == 0) {
-#ifdef HAVE_LIBMESODE
+#ifdef PROF_HAVE_LIBMESODE
         if (g_strcmp0(args[1], "set") == 0) {
             if (args[2] == NULL) {
                 cons_bad_cmd_usage(command);
@@ -203,7 +211,7 @@ cmd_tls(ProfWin *window, const char *const command, gchar **args)
         return TRUE;
 #endif
     } else if (g_strcmp0(args[0], "trust") == 0) {
-#ifdef HAVE_LIBMESODE
+#ifdef PROF_HAVE_LIBMESODE
         jabber_conn_status_t conn_status = jabber_get_connection_status();
         if (conn_status != JABBER_CONNECTED) {
             cons_show("You are not currently connected.");
@@ -232,7 +240,7 @@ cmd_tls(ProfWin *window, const char *const command, gchar **args)
         return TRUE;
 #endif
     } else if (g_strcmp0(args[0], "trusted") == 0) {
-#ifdef HAVE_LIBMESODE
+#ifdef PROF_HAVE_LIBMESODE
         GList *certs = tlscerts_list();
         GList *curr = certs;
 
@@ -255,7 +263,7 @@ cmd_tls(ProfWin *window, const char *const command, gchar **args)
         return TRUE;
 #endif
     } else if (g_strcmp0(args[0], "revoke") == 0) {
-#ifdef HAVE_LIBMESODE
+#ifdef PROF_HAVE_LIBMESODE
         if (args[1] == NULL) {
             cons_bad_cmd_usage(command);
         } else {
@@ -274,7 +282,7 @@ cmd_tls(ProfWin *window, const char *const command, gchar **args)
     } else if (g_strcmp0(args[0], "show") == 0) {
         return _cmd_set_boolean_preference(args[1], command, "TLS titlebar indicator", PREF_TLS_SHOW);
     } else if (g_strcmp0(args[0], "cert") == 0) {
-#ifdef HAVE_LIBMESODE
+#ifdef PROF_HAVE_LIBMESODE
         if (args[1]) {
             TLSCertificate *cert = tlscerts_get_trusted(args[1]);
             if (!cert) {
@@ -654,7 +662,7 @@ cmd_account(ProfWin *window, const char *const command, gchar **args)
                     }
                     cons_show("");
                 } else if (strcmp(property, "pgpkeyid") == 0) {
-#ifdef HAVE_LIBGPGME
+#ifdef PROF_HAVE_LIBGPGME
                     char *err_str = NULL;
                     if (!p_gpg_valid_key(value, &err_str)) {
                         cons_show("Invalid PGP key ID specified: %s, see /pgp keys", err_str);
@@ -1886,7 +1894,7 @@ cmd_msg(ProfWin *window, const char *const command, gchar **args)
         if (msg) {
             cl_ev_send_msg(chatwin, msg);
         } else {
-#ifdef HAVE_LIBOTR
+#ifdef PROF_HAVE_LIBOTR
             if (otr_is_secure(barejid)) {
                 chatwin_otr_secured(chatwin, otr_is_trusted(barejid));
             }
@@ -2774,7 +2782,7 @@ cmd_resource(ProfWin *window, const char *const command, gchar **args)
             return TRUE;
         }
 
-#ifdef HAVE_LIBOTR
+#ifdef PROF_HAVE_LIBOTR
         if (otr_is_secure(chatwin->barejid)) {
             cons_show("Cannot choose resource during an OTR session.");
             return TRUE;
@@ -5603,9 +5611,30 @@ cmd_xa(ProfWin *window, const char *const command, gchar **args)
 }
 
 gboolean
+cmd_plugins(ProfWin *window, const char *const command, gchar **args)
+{
+    GSList *plugins = plugins_get_list();
+
+    GSList *curr = plugins;
+    if (curr == NULL) {
+        cons_show("No plugins installed.");
+    } else {
+        cons_show("Installed plugins:");
+        while (curr) {
+            ProfPlugin *plugin = curr->data;
+            char *lang = plugins_get_lang_string(plugin);
+            cons_show("  %s (%s)", plugin->name, lang);
+            curr = g_slist_next(curr);
+        }
+    }
+    g_slist_free(curr);
+    return TRUE;
+}
+
+gboolean
 cmd_pgp(ProfWin *window, const char *const command, gchar **args)
 {
-#ifdef HAVE_LIBGPGME
+#ifdef PROF_HAVE_LIBGPGME
     if (args[0] == NULL) {
         cons_bad_cmd_usage(command);
         return TRUE;
@@ -5837,13 +5866,12 @@ cmd_pgp(ProfWin *window, const char *const command, gchar **args)
     cons_show("This version of Profanity has not been built with PGP support enabled");
     return TRUE;
 #endif
-
 }
 
 gboolean
 cmd_otr(ProfWin *window, const char *const command, gchar **args)
 {
-#ifdef HAVE_LIBOTR
+#ifdef PROF_HAVE_LIBOTR
     if (args[0] == NULL) {
         cons_bad_cmd_usage(command);
         return TRUE;

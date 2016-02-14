@@ -1,4 +1,4 @@
-#include "config.h"
+#include "prof_config.h"
 
 #include <glib.h>
 #include <wchar.h>
@@ -8,7 +8,7 @@
 
 #include "ui/window.h"
 #include "ui/ui.h"
-#ifdef HAVE_LIBOTR
+#ifdef PROF_HAVE_LIBOTR
 #include "otr/otr.h"
 #endif
 
@@ -67,7 +67,7 @@ void ui_resize(void) {}
 
 void ui_focus_win(ProfWin *win) {}
 
-#ifdef HAVE_LIBOTR
+#ifdef PROF_HAVE_LIBOTR
 void chatwin_otr_secured(ProfChatWin *chatwin, gboolean trusted) {}
 void chatwin_otr_unsecured(ProfChatWin *chatwin) {}
 void chatwin_otr_trust(ProfChatWin *chatwin) {}
@@ -303,8 +303,10 @@ gboolean ui_win_has_unsaved_form(int num)
     return FALSE;
 }
 
-void
-ui_write(char *line, int offset) {}
+void ui_status_bar_inactive(const int win) {}
+void ui_status_bar_active(const int win) {}
+void ui_status_bar_new(const int win) {}
+void ui_write(char *line, int offset) {}
 
 // console window actions
 
@@ -494,6 +496,10 @@ ProfWin* win_create_private(const char * const fulljid)
 {
     return NULL;
 }
+ProfWin* win_create_plugin(const char * const tag)
+{
+    return NULL;
+}
 
 void win_update_virtual(ProfWin *window) {}
 void win_free(ProfWin *window) {}
@@ -540,3 +546,6 @@ void notify_remind(void) {}
 void notify_invite(const char * const from, const char * const room,
     const char * const reason) {}
 void notify_subscription(const char * const from) {}
+void notify(const char * const message, int timeout,
+    const char * const category) {}
+

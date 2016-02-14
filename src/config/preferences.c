@@ -32,7 +32,7 @@
  *
  */
 
-#include "config.h"
+#include "prof_config.h"
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -589,6 +589,19 @@ prefs_set_autoxa_time(gint value)
 {
     g_key_file_set_integer(prefs, PREF_GROUP_PRESENCE, "autoaway.xatime", value);
     _save_prefs();
+}
+
+gchar **
+prefs_get_plugins(void)
+{
+    if (!g_key_file_has_group(prefs, "plugins")) {
+        return NULL;
+    }
+    if (!g_key_file_has_key(prefs, "plugins", "load", NULL)) {
+        return NULL;
+    }
+
+    return g_key_file_get_string_list(prefs, "plugins", "load", NULL, NULL);
 }
 
 void

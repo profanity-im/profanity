@@ -32,7 +32,7 @@
  *
  */
 
-#include "config.h"
+#include "prof_config.h"
 
 #include <string.h>
 #include <stdlib.h>
@@ -45,15 +45,16 @@
 #include "config/account.h"
 #include "config/scripts.h"
 #include "roster_list.h"
+#include "plugins/plugins.h"
 #include "window_list.h"
 #include "config/tlscerts.h"
 #include "profanity.h"
 #include "event/client_events.h"
 
-#ifdef HAVE_LIBOTR
+#ifdef PROF_HAVE_LIBOTR
 #include "otr/otr.h"
 #endif
-#ifdef HAVE_LIBGPGME
+#ifdef PROF_HAVE_LIBGPGME
 #include "pgp/gpg.h"
 #endif
 
@@ -66,11 +67,11 @@ sv_ev_login_account_success(char *account_name, int secured)
 
     roster_create();
 
-#ifdef HAVE_LIBOTR
+#ifdef PROF_HAVE_LIBOTR
     otr_on_connect(account);
 #endif
 
-#ifdef HAVE_LIBGPGME
+#ifdef PROF_HAVE_LIBGPGME
     p_gpg_on_connect(account->jid);
 #endif
 
@@ -106,7 +107,7 @@ sv_ev_roster_received(void)
 
     char *account_name = jabber_get_account_name();
 
-#ifdef HAVE_LIBGPGME
+#ifdef PROF_HAVE_LIBGPGME
     // check pgp key valid if specified
     ProfAccount *account = accounts_get_account(account_name);
     if (account && account->pgp_keyid) {
@@ -146,6 +147,9 @@ sv_ev_roster_received(void)
     } else {
         cl_ev_presence_send(conn_presence, NULL, 0);
     }
+
+    const char *fulljid = jabber_get_fulljid();
+    plugins_on_connect(account_name, fulljid);
 }
 
 void
@@ -153,7 +157,7 @@ sv_ev_lost_connection(void)
 {
     cons_show_error("Lost connection.");
 
-#ifdef HAVE_LIBOTR
+#ifdef PROF_HAVE_LIBOTR
     GSList *recipients = wins_get_chat_recipients();
     GSList *curr = recipients;
     while (curr) {
@@ -174,7 +178,7 @@ sv_ev_lost_connection(void)
     chat_sessions_clear();
     ui_disconnected();
     roster_destroy();
-#ifdef HAVE_LIBGPGME
+#ifdef PROF_HAVE_LIBGPGME
     p_gpg_on_disconnect();
 #endif
 }
@@ -226,7 +230,10 @@ sv_ev_room_history(const char *const room_jid, const char *const nick,
 {
     ProfMucWin *mucwin = wins_get_muc(room_jid);
     if (mucwin) {
-        mucwin_history(mucwin, nick, timestamp, message);
+        char *new_message = plugins_pre_room_message_display(room_jid, nick, message);
+        mucwin_history(mucwin, nick, timestamp, new_message);
+        plugins_post_room_message_display(room_jid, nick, new_message);
+        free(new_message);
     }
 }
 
@@ -244,10 +251,11 @@ sv_ev_room_message(const char *const room_jid, const char *const nick, const cha
         return;
     }
 
+    char *new_message = plugins_pre_room_message_display(room_jid, nick, message);
     char *mynick = muc_nick(mucwin->roomjid);
 
     gboolean mention = FALSE;
-    char *message_lower = g_utf8_strdown(message, -1);
+    char *message_lower = g_utf8_strdown(new_message, -1);
     char *mynick_lower = g_utf8_strdown(mynick, -1);
     if (g_strrstr(message_lower, mynick_lower)) {
         mention = TRUE;
@@ -255,9 +263,9 @@ sv_ev_room_message(const char *const room_jid, const char *const nick, const cha
     g_free(message_lower);
     g_free(mynick_lower);
 
-    GList *triggers = prefs_message_get_triggers(message);
+    GList *triggers = prefs_message_get_triggers(new_message);
 
-    mucwin_message(mucwin, nick, message, mention, triggers);
+    mucwin_message(mucwin, nick, new_message, mention, triggers);
 
     ProfWin *window = (ProfWin*)mucwin;
     int num = wins_get_num(window);
@@ -292,9 +300,9 @@ sv_ev_room_message(const char *const room_jid, const char *const nick, const cha
         }
     }
 
-    if (prefs_do_room_notify(is_current, mucwin->roomjid, mynick, nick, message, mention, triggers != NULL)) {
+    if (prefs_do_room_notify(is_current, mucwin->roomjid, mynick, nick, new_message, mention, triggers != NULL)) {
         Jid *jidp = jid_create(mucwin->roomjid);
-        notify_room_message(nick, jidp->localpart, num, message);
+        notify_room_message(nick, jidp->localpart, num, new_message);
         jid_destroy(jidp);
     }
 
@@ -303,29 +311,44 @@ sv_ev_room_message(const char *const room_jid, const char *const nick, const cha
     }
 
     rosterwin_roster();
+
+    plugins_post_room_message_display(room_jid, nick, new_message);
+    free(new_message);
 }
 
 void
 sv_ev_incoming_private_message(const char *const fulljid, char *message)
 {
+    char *plugin_message =  plugins_pre_priv_message_display(fulljid, message);
+
     ProfPrivateWin *privatewin = wins_get_private(fulljid);
     if (privatewin == NULL) {
         ProfWin *window = wins_new_private(fulljid);
         privatewin = (ProfPrivateWin*)window;
     }
-    privwin_incoming_msg(privatewin, message, NULL);
+    privwin_incoming_msg(privatewin, plugin_message, NULL);
+
+    plugins_post_priv_message_display(fulljid, plugin_message);
+
+    free(plugin_message);
     rosterwin_roster();
 }
 
 void
 sv_ev_delayed_private_message(const char *const fulljid, char *message, GDateTime *timestamp)
 {
+    char *new_message = plugins_pre_priv_message_display(fulljid, message);
+
     ProfPrivateWin *privatewin = wins_get_private(fulljid);
     if (privatewin == NULL) {
         ProfWin *window = wins_new_private(fulljid);
         privatewin = (ProfPrivateWin*)window;
     }
-    privwin_incoming_msg(privatewin, message, timestamp);
+    privwin_incoming_msg(privatewin, new_message, timestamp);
+
+    plugins_post_priv_message_display(fulljid, new_message);
+
+    free(new_message);
 }
 
 void
@@ -356,7 +379,7 @@ sv_ev_incoming_carbon(char *barejid, char *resource, char *message)
     chat_log_msg_in(barejid, message, NULL);
 }
 
-#ifdef HAVE_LIBGPGME
+#ifdef PROF_HAVE_LIBGPGME
 static void
 _sv_ev_incoming_pgp(ProfChatWin *chatwin, gboolean new_win, char *barejid, char *resource, char *message, char *pgp_message, GDateTime *timestamp)
 {
@@ -374,7 +397,7 @@ _sv_ev_incoming_pgp(ProfChatWin *chatwin, gboolean new_win, char *barejid, char 
 }
 #endif
 
-#ifdef HAVE_LIBOTR
+#ifdef PROF_HAVE_LIBOTR
 static void
 _sv_ev_incoming_otr(ProfChatWin *chatwin, gboolean new_win, char *barejid, char *resource, char *message, GDateTime *timestamp)
 {
@@ -394,7 +417,7 @@ _sv_ev_incoming_otr(ProfChatWin *chatwin, gboolean new_win, char *barejid, char 
 }
 #endif
 
-#ifndef HAVE_LIBOTR
+#ifndef PROF_HAVE_LIBOTR
 static void
 _sv_ev_incoming_plain(ProfChatWin *chatwin, gboolean new_win, char *barejid, char *resource, char *message, GDateTime *timestamp)
 {
@@ -416,8 +439,8 @@ sv_ev_incoming_message(char *barejid, char *resource, char *message, char *pgp_m
     }
 
 // OTR suported, PGP supported
-#ifdef HAVE_LIBOTR
-#ifdef HAVE_LIBGPGME
+#ifdef PROF_HAVE_LIBOTR
+#ifdef PROF_HAVE_LIBGPGME
     if (pgp_message) {
         if (chatwin->is_otr) {
             win_println((ProfWin*)chatwin, 0, "PGP encrypted message received whilst in OTR session.");
@@ -433,8 +456,8 @@ sv_ev_incoming_message(char *barejid, char *resource, char *message, char *pgp_m
 #endif
 
 // OTR supported, PGP unsupported
-#ifdef HAVE_LIBOTR
-#ifndef HAVE_LIBGPGME
+#ifdef PROF_HAVE_LIBOTR
+#ifndef PROF_HAVE_LIBGPGME
     _sv_ev_incoming_otr(chatwin, new_win, barejid, resource, message, timestamp);
     rosterwin_roster();
     return;
@@ -442,8 +465,8 @@ sv_ev_incoming_message(char *barejid, char *resource, char *message, char *pgp_m
 #endif
 
 // OTR unsupported, PGP supported
-#ifndef HAVE_LIBOTR
-#ifdef HAVE_LIBGPGME
+#ifndef PROF_HAVE_LIBOTR
+#ifdef PROF_HAVE_LIBGPGME
     if (pgp_message) {
         _sv_ev_incoming_pgp(chatwin, new_win, barejid, resource, message, pgp_message, timestamp);
     } else {
@@ -455,8 +478,8 @@ sv_ev_incoming_message(char *barejid, char *resource, char *message, char *pgp_m
 #endif
 
 // OTR unsupported, PGP unsupported
-#ifndef HAVE_LIBOTR
-#ifndef HAVE_LIBGPGME
+#ifndef PROF_HAVE_LIBOTR
+#ifndef PROF_HAVE_LIBGPGME
     _sv_ev_incoming_plain(chatwin, new_win, barejid, resource, message, timestamp);
     rosterwin_roster();
     return;
@@ -568,7 +591,7 @@ sv_ev_contact_offline(char *barejid, char *resource, char *status)
         ui_contact_offline(barejid, resource, status);
     }
 
-#ifdef HAVE_LIBOTR
+#ifdef PROF_HAVE_LIBOTR
     ProfChatWin *chatwin = wins_get_chat(barejid);
     if (chatwin && otr_is_secure(barejid)) {
         chatwin_otr_unsecured(chatwin);
@@ -589,7 +612,7 @@ sv_ev_contact_online(char *barejid, Resource *resource, GDateTime *last_activity
         ui_contact_online(barejid, resource, last_activity);
     }
 
-#ifdef HAVE_LIBGPGME
+#ifdef PROF_HAVE_LIBGPGME
     if (pgpsig) {
         p_gpg_verify(barejid, pgpsig);
     }

@@ -35,12 +35,12 @@
 #ifndef UI_UI_H
 #define UI_UI_H
 
-#include "config.h"
+#include "prof_config.h"
 
 #include "command/commands.h"
 #include "ui/win_types.h"
 #include "muc.h"
-#ifdef HAVE_LIBOTR
+#ifdef PROF_HAVE_LIBOTR
 #include "otr/otr.h"
 #endif
 
@@ -135,8 +135,7 @@ void chatwin_outgoing_carbon(ProfChatWin *chatwin, const char *const message);
 void chatwin_contact_online(ProfChatWin *chatwin, Resource *resource, GDateTime *last_activity);
 void chatwin_contact_offline(ProfChatWin *chatwin, char *resource, char *status);
 char* chatwin_get_string(ProfChatWin *chatwin);
-
-#ifdef HAVE_LIBOTR
+#ifdef PROF_HAVE_LIBOTR
 void chatwin_otr_secured(ProfChatWin *chatwin, gboolean trusted);
 void chatwin_otr_unsecured(ProfChatWin *chatwin);
 void chatwin_otr_trust(ProfChatWin *chatwin);
@@ -343,6 +342,7 @@ ProfWin* win_create_chat(const char *const barejid);
 ProfWin* win_create_muc(const char *const roomjid);
 ProfWin* win_create_muc_config(const char *const title, DataForm *form);
 ProfWin* win_create_private(const char *const fulljid);
+ProfWin* win_create_plugin(const char *const tag);
 void win_update_virtual(ProfWin *window);
 void win_free(ProfWin *window);
 gboolean win_notify_remind(ProfWin *window);
@@ -372,6 +372,7 @@ void notify_message(const char *const name, int win, const char *const text);
 void notify_room_message(const char *const nick, const char *const room, int win, const char *const text);
 void notify_remind(void);
 void notify_invite(const char *const from, const char *const room, const char *const reason);
+void notify(const char *const message, int timeout, const char *const category);
 void notify_subscription(const char *const from);
 
 #endif

@@ -1,5 +1,5 @@
 /*
- * connection.h
+ * callbacks.h
  *
  * Copyright (C) 2012 - 2015 James Booth <boothj5@gmail.com>
  *
@@ -32,25 +32,37 @@
  *
  */
 
-#ifndef XMPP_CONNECTION_H
-#define XMPP_CONNECTION_H
+#ifndef CALLBACKS_H
+#define CALLBACKS_H
 
-#include "prof_config.h"
+#include <glib.h>
 
-#ifdef PROF_HAVE_LIBMESODE
-#include <mesode.h>
-#endif
-#ifdef PROF_HAVE_LIBSTROPHE
-#include <strophe.h>
-#endif
+typedef struct p_command {
+    const char *command_name;
+    int min_args;
+    int max_args;
+    const char *usage;
+    const char *short_help;
+    const char *long_help;
+    void *callback;
+    void (*callback_func)(struct p_command *command, gchar **args);
+} PluginCommand;
 
-#include "resource.h"
+typedef struct p_timed_function {
+    void *callback;
+    void (*callback_func)(struct p_timed_function *timed_function);
+    int interval_seconds;
+    GTimer *timer;
+} PluginTimedFunction;
 
-xmpp_conn_t* connection_get_conn(void);
-xmpp_ctx_t* connection_get_ctx(void);
-void connection_set_priority(int priority);
-void connection_set_presence_message(const char *const message);
-void connection_add_available_resource(Resource *resource);
-void connection_remove_available_resource(const char *const resource);
+typedef struct p_window_input_callback {
+    void *callback;
+    void (*callback_func)(struct p_window_input_callback *window_callback, const char *tag, const char * const line);
+} PluginWindowCallback;
+
+void callbacks_add_command(PluginCommand *command);
+void callbacks_add_timed(PluginTimedFunction *timed_function);
+void callbacks_add_window_handler(const char *tag, PluginWindowCallback *window_callback);
+void * callbacks_get_window_handler(const char *tag);
 
 #endif

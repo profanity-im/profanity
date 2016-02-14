@@ -32,7 +32,7 @@
  *
  */
 
-#include "config.h"
+#include "prof_config.h"
 
 #include <string.h>
 #include <stdlib.h>
@@ -46,7 +46,8 @@
 #include "ui/ui.h"
 #include "ui/window.h"
 #include "ui/titlebar.h"
-#ifdef HAVE_LIBOTR
+#include "plugins/plugins.h"
+#ifdef PROF_HAVE_LIBOTR
 #include "otr/otr.h"
 #endif
 
@@ -84,7 +85,7 @@ chatwin_receipt_received(ProfChatWin *chatwin, const char *const id)
     win_mark_received(win, id);
 }
 
-#ifdef HAVE_LIBOTR
+#ifdef PROF_HAVE_LIBOTR
 void
 chatwin_otr_secured(ProfChatWin *chatwin, gboolean trusted)
 {
@@ -234,6 +235,8 @@ chatwin_incoming_msg(ProfChatWin *chatwin, const char *const resource, const cha
 {
     assert(chatwin != NULL);
 
+    char *plugin_message = plugins_pre_chat_message_display(chatwin->barejid, message);
+
     ProfWin *window = (ProfWin*)chatwin;
     int num = wins_get_num(window);
 
@@ -244,7 +247,7 @@ chatwin_incoming_msg(ProfChatWin *chatwin, const char *const resource, const cha
 
     // currently viewing chat window with sender
     if (wins_is_current(window)) {
-        win_print_incoming_message(window, timestamp, display_name, message, enc_mode);
+        win_print_incoming_message(window, timestamp, display_name, plugin_message, enc_mode);
         title_bar_set_typing(FALSE);
         status_bar_active(num);
 
@@ -271,7 +274,7 @@ chatwin_incoming_msg(ProfChatWin *chatwin, const char *const resource, const cha
             }
         }
 
-        win_print_incoming_message(window, timestamp, display_name, message, enc_mode);
+        win_print_incoming_message(window, timestamp, display_name, plugin_message, enc_mode);
     }
 
     if (prefs_get_boolean(PREF_BEEP)) {
@@ -279,10 +282,14 @@ chatwin_incoming_msg(ProfChatWin *chatwin, const char *const resource, const cha
     }
 
     if (notify) {
-        notify_message(display_name, num, message);
+        notify_message(display_name, num, plugin_message);
     }
 
     free(display_name);
+
+    plugins_post_chat_message_display(chatwin->barejid, plugin_message);
+
+    free(plugin_message);
 }
 
 void

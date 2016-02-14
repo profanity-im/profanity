@@ -32,15 +32,15 @@
  *
  */
 
-#include "config.h"
+#include "prof_config.h"
 
 #include <string.h>
 #include <stdlib.h>
 
-#ifdef HAVE_LIBMESODE
+#ifdef PROF_HAVE_LIBMESODE
 #include <mesode.h>
 #endif
-#ifdef HAVE_LIBSTROPHE
+#ifdef PROF_HAVE_LIBSTROPHE
 #include <strophe.h>
 #endif
 

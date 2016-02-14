@@ -32,7 +32,7 @@
  *
  */
 
-#include "config.h"
+#include "prof_config.h"
 
 #include <string.h>
 #include <assert.h>
@@ -192,6 +192,27 @@ wins_get_private(const char *const fulljid)
             if (g_strcmp0(privatewin->fulljid, fulljid) == 0) {
                 g_list_free(values);
                 return privatewin;
+            }
+        }
+        curr = g_list_next(curr);
+    }
+
+    g_list_free(values);
+    return NULL;
+}
+
+ProfPluginWin*
+wins_get_plugin(const char *const tag)
+{
+    GList *values = g_hash_table_get_values(windows);
+    GList *curr = values;
+
+    while (curr) {
+        ProfWin *window = curr->data;
+        if (window->type == WIN_PLUGIN) {
+            ProfPluginWin *pluginwin = (ProfPluginWin*)window;
+            if (g_strcmp0(pluginwin->tag, tag) == 0) {
+                return pluginwin;
             }
         }
         curr = g_list_next(curr);
@@ -612,6 +633,17 @@ wins_new_private(const char *const fulljid)
     autocomplete_add(wins_ac, fulljid);
     autocomplete_add(wins_close_ac, fulljid);
     return newwin;
+}
+
+ProfWin *
+wins_new_plugin(const char * const tag)
+{
+    GList *keys = g_hash_table_get_keys(windows);
+    int result = get_next_available_win_num(keys);
+    ProfWin *new = win_create_plugin(tag);
+    g_hash_table_insert(windows, GINT_TO_POINTER(result), new);
+    g_list_free(keys);
+    return new;
 }
 
 gboolean
