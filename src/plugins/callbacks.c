@@ -92,13 +92,14 @@ plugins_run_command(const char * const input)
             gchar **args = parse_args(input, command->min_args, command->max_args, &result);
             if (result == FALSE) {
                 ui_invalid_command_usage(command->usage, NULL);
+                g_strfreev(split);
                 return TRUE;
             } else {
                 command->callback_func(command, args);
                 g_strfreev(split);
+                g_strfreev(args);
                 return TRUE;
             }
-            g_strfreev(args);
         }
         p_command = g_slist_next(p_command);
     }

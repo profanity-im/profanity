@@ -92,6 +92,7 @@ plugins_init(void)
             curr = g_slist_next(curr);
         }
     }
+    prefs_free_plugins(plugins_load);
 
     return;
 }
