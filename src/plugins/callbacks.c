@@ -51,6 +51,8 @@ callbacks_add_command(PluginCommand *command)
 {
     p_commands = g_slist_append(p_commands, command);
     cmd_autocomplete_add(command->command_name);
+    cmd_help_autocomplete_add(&command->command_name[1]);
+
 }
 
 void
