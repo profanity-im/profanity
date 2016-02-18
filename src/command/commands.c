@@ -1368,11 +1368,11 @@ cmd_help(ProfWin *window, const char *const command, gchar **args)
 
         Command *command = g_hash_table_lookup(commands, cmd_with_slash);
         if (command) {
-            cons_show_help(command);
+            cons_show_help(cmd_with_slash, &command->help);
         } else {
             CommandHelp *commandHelp = plugins_get_help(cmd_with_slash);
             if (commandHelp) {
-                cons_show_plugin_help(cmd_with_slash, commandHelp);
+                cons_show_help(cmd_with_slash, commandHelp);
             } else {
                 cons_show("No such command.");
             }
