@@ -1370,7 +1370,12 @@ cmd_help(ProfWin *window, const char *const command, gchar **args)
         if (command) {
             cons_show_help(command);
         } else {
-            cons_show("No such command.");
+            CommandHelp *commandHelp = plugins_get_help(cmd_with_slash);
+            if (commandHelp) {
+                cons_show_plugin_help(cmd_with_slash, commandHelp);
+            } else {
+                cons_show("No such command.");
+            }
         }
         cons_show("");
     }

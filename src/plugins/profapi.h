@@ -42,7 +42,8 @@ void (*prof_cons_alert)(void);
 void (*prof_cons_show)(const char * const message);
 
 void (*prof_register_command)(const char *command_name, int min_args, int max_args,
-    const char *usage, const char *short_help, const char *long_help, void(*callback)(char **args));
+    const char **synopsis, const char *description, const char *arguments[][2], const char **examples,
+    void(*callback)(char **args));
 
 void (*prof_register_timed)(void(*callback)(void), int interval_seconds);
 

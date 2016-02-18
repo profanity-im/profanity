@@ -45,7 +45,7 @@ char * api_get_current_recipient(void);
 char * api_get_current_muc(void);
 
 void api_register_command(const char *command_name, int min_args, int max_args,
-    const char *usage, const char *short_help, const char *long_help,
+    const char **synopsis, const char *description, const char *arguments[][2], const char **examples,
     void *callback, void(*callback_func)(PluginCommand *command, gchar **args));
 void api_register_timed(void *callback, int interval_seconds,
     void (*callback_func)(PluginTimedFunction *timed_function));

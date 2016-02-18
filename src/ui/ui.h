@@ -231,6 +231,7 @@ void cons_show_padded(int pad, const char *const msg, ...);
 void cons_about(void);
 void cons_help(void);
 void cons_show_help(Command *command);
+void cons_show_plugin_help(const char *const cmd, CommandHelp *help);
 void cons_bad_cmd_usage(const char *const cmd);
 void cons_navigation_help(void);
 void cons_prefs(void);

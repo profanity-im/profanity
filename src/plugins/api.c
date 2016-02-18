@@ -65,18 +65,38 @@ api_cons_show(const char * const message)
 
 void
 api_register_command(const char *command_name, int min_args, int max_args,
-    const char *usage, const char *short_help, const char *long_help, void *callback,
+    const char **synopsis, const char *description, const char *arguments[][2], const char **examples, void *callback,
     void(*callback_func)(PluginCommand *command, gchar **args))
 {
     PluginCommand *command = malloc(sizeof(PluginCommand));
     command->command_name = command_name;
     command->min_args = min_args;
     command->max_args = max_args;
-    command->usage = usage;
-    command->short_help = short_help;
-    command->long_help = long_help;
     command->callback = callback;
     command->callback_func = callback_func;
+
+    CommandHelp *help = malloc(sizeof(CommandHelp));
+
+    int i = 0;
+    for (i = 0; synopsis[i] != NULL; i++) {
+        help->synopsis[i] = strdup(synopsis[i]);
+    }
+    help->synopsis[i] = NULL;
+
+    help->desc = strdup(description);
+    for (i = 0; arguments[i][0] != NULL; i++) {
+        help->args[i][0] = strdup(arguments[i][0]);
+        help->args[i][1] = strdup(arguments[i][1]);
+    }
+    help->args[i][0] = NULL;
+    help->args[i][1] = NULL;
+
+    for (i = 0; examples[i] != NULL; i++) {
+        help->examples[i] = strdup(examples[i]);
+    }
+    help->examples[i] = NULL;
+
+    command->help = help;
 
     callbacks_add_command(command);
 }

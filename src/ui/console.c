@@ -120,6 +120,49 @@ cons_show_padded(int pad, const char *const msg, ...)
 }
 
 void
+cons_show_plugin_help(const char *const cmd, CommandHelp *help)
+{
+    ProfWin *console = wins_get_console();
+
+    cons_show("");
+    win_vprint(console, '-', 0, NULL, 0, THEME_WHITE_BOLD, "", "%s", &cmd[1]);
+    win_print(console, '-', 0, NULL, NO_EOL, THEME_WHITE_BOLD, "", "");
+    int i;
+    for (i = 0; i < strlen(cmd) - 1 ; i++) {
+        win_print(console, '-', 0, NULL, NO_EOL | NO_DATE, THEME_WHITE_BOLD, "", "-");
+    }
+    win_print(console, '-', 0, NULL, NO_DATE, THEME_WHITE_BOLD, "", "");
+    cons_show("");
+
+    win_print(console, '-', 0, NULL, 0, THEME_WHITE_BOLD, "", "Synopsis");
+    ui_show_lines(console, help->synopsis);
+    cons_show("");
+
+    win_print(console, '-', 0, NULL, 0, THEME_WHITE_BOLD, "", "Description");
+    win_println(console, 0, help->desc);
+
+    int maxlen = 0;
+    for (i = 0; help->args[i][0] != NULL; i++) {
+        if (strlen(help->args[i][0]) > maxlen)
+            maxlen = strlen(help->args[i][0]);
+    }
+
+    if (i > 0) {
+        cons_show("");
+        win_print(console, '-', 0, NULL, 0, THEME_WHITE_BOLD, "", "Arguments");
+        for (i = 0; help->args[i][0] != NULL; i++) {
+            win_vprint(console, '-', maxlen + 3, NULL, 0, 0, "", "%-*s: %s", maxlen + 1, help->args[i][0], help->args[i][1]);
+        }
+    }
+
+    if (g_strv_length((gchar**)help->examples) > 0) {
+        cons_show("");
+        win_print(console, '-', 0, NULL, 0, THEME_WHITE_BOLD, "", "Examples");
+        ui_show_lines(console, help->examples);
+    }
+}
+
+void
 cons_show_help(Command *command)
 {
     ProfWin *console = wins_get_console();

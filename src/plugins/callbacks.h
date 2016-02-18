@@ -37,13 +37,13 @@
 
 #include <glib.h>
 
+#include "command/command.h"
+
 typedef struct p_command {
     const char *command_name;
     int min_args;
     int max_args;
-    const char *usage;
-    const char *short_help;
-    const char *long_help;
+    CommandHelp *help;
     void *callback;
     void (*callback_func)(struct p_command *command, gchar **args);
 } PluginCommand;

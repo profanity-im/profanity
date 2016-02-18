@@ -69,12 +69,13 @@ c_api_cons_show(const char * const message)
 
 static void
 c_api_register_command(const char *command_name, int min_args, int max_args,
-    const char *usage, const char *short_help, const char *long_help, void(*callback)(char **args))
+    const char **synopsis, const char *description, const char *arguments[][2], const char **examples,
+    void(*callback)(char **args))
 {
     CommandWrapper *wrapper = malloc(sizeof(CommandWrapper));
     wrapper->func = callback;
-    api_register_command(command_name, min_args, max_args, usage,
-        short_help, long_help, wrapper, c_command_callback);
+    api_register_command(command_name, min_args, max_args, synopsis,
+        description, arguments, examples, wrapper, c_command_callback);
 }
 
 static void

@@ -91,7 +91,7 @@ plugins_run_command(const char * const input)
             gboolean result;
             gchar **args = parse_args(input, command->min_args, command->max_args, &result);
             if (result == FALSE) {
-                ui_invalid_command_usage(command->usage, NULL);
+                ui_invalid_command_usage(command->command_name, NULL);
                 g_strfreev(split);
                 return TRUE;
             } else {
@@ -105,6 +105,22 @@ plugins_run_command(const char * const input)
     }
     g_strfreev(split);
     return FALSE;
+}
+
+CommandHelp*
+plugins_get_help(const char *const cmd)
+{
+    GSList *curr = p_commands;
+    while (curr) {
+        PluginCommand *command = curr->data;
+        if (g_strcmp0(cmd, command->command_name) == 0) {
+            return command->help;
+        }
+
+        curr = g_slist_next(curr);
+    }
+
+    return NULL;
 }
 
 void
