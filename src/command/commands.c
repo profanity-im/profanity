@@ -1293,19 +1293,41 @@ _cmd_help_cmd_list(const char *const tag)
     }
 
     GList *ordered_commands = NULL;
-    GHashTableIter iter;
-    gpointer key;
-    gpointer value;
 
-    g_hash_table_iter_init(&iter, commands);
-    while (g_hash_table_iter_next(&iter, &key, &value)) {
-        Command *pcmd = (Command *)value;
-        if (tag) {
-            if (cmd_has_tag(pcmd, tag)) {
+    if (g_strcmp0(tag, "plugins") == 0) {
+        GList *plugins_cmds = plugins_get_command_names();
+        GList *curr = plugins_cmds;
+        while (curr) {
+            ordered_commands = g_list_insert_sorted(ordered_commands, curr->data, (GCompareFunc)g_strcmp0);
+            curr = g_list_next(curr);
+        }
+        g_list_free(plugins_cmds);
+    } else {
+        GHashTableIter iter;
+        gpointer key;
+        gpointer value;
+
+        g_hash_table_iter_init(&iter, commands);
+        while (g_hash_table_iter_next(&iter, &key, &value)) {
+            Command *pcmd = (Command *)value;
+            if (tag) {
+                if (cmd_has_tag(pcmd, tag)) {
+                    ordered_commands = g_list_insert_sorted(ordered_commands, pcmd->cmd, (GCompareFunc)g_strcmp0);
+                }
+            } else {
                 ordered_commands = g_list_insert_sorted(ordered_commands, pcmd->cmd, (GCompareFunc)g_strcmp0);
             }
-        } else {
-            ordered_commands = g_list_insert_sorted(ordered_commands, pcmd->cmd, (GCompareFunc)g_strcmp0);
+        }
+
+        // add plugins if showing all commands
+        if (!tag) {
+            GList *plugins_cmds = plugins_get_command_names();
+            GList *curr = plugins_cmds;
+            while (curr) {
+                ordered_commands = g_list_insert_sorted(ordered_commands, curr->data, (GCompareFunc)g_strcmp0);
+                curr = g_list_next(curr);
+            }
+            g_list_free(plugins_cmds);
         }
     }
 

@@ -2050,6 +2050,7 @@ cons_help(void)
     cons_show_padded(pad, "/help commands discovery  : List service discovery commands.");
     cons_show_padded(pad, "/help commands connection : List commands related to managing your connection.");
     cons_show_padded(pad, "/help commands ui         : List commands for manipulating the user interface.");
+    cons_show_padded(pad, "/help commands plugins    : List plugin commands.");
     cons_show_padded(pad, "/help [command]           : Detailed help on a specific command.");
     cons_show_padded(pad, "/help navigation          : How to navigate around Profanity.");
     cons_show("");

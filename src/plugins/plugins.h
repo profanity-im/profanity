@@ -101,6 +101,7 @@ void  plugins_post_priv_message_send(const char * const jid, const char * const 
 
 gboolean plugins_run_command(const char * const cmd);
 void plugins_run_timed(void);
+GList* plugins_get_command_names(void);
 gchar * plugins_get_dir(void);
 CommandHelp* plugins_get_help(const char *const cmd);
 

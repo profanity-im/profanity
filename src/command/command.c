@@ -127,6 +127,7 @@ GHashTable *commands = NULL;
 #define CMD_TAG_CONNECTION  "connection"
 #define CMD_TAG_DISCOVERY   "discovery"
 #define CMD_TAG_UI          "ui"
+#define CMD_TAG_PLUGINS     "plugins"
 
 #define CMD_NOTAGS          { { NULL },
 #define CMD_TAGS(...)       { { __VA_ARGS__, NULL },
@@ -2065,6 +2066,7 @@ cmd_init(void)
     autocomplete_add(help_commands_ac, "discovery");
     autocomplete_add(help_commands_ac, "connection");
     autocomplete_add(help_commands_ac, "ui");
+    autocomplete_add(help_commands_ac, "plugins");
 
     prefs_ac = autocomplete_new();
     autocomplete_add(prefs_ac, "ui");
@@ -2899,7 +2901,8 @@ cmd_valid_tag(const char *const str)
         (g_strcmp0(str, CMD_TAG_ROSTER) == 0) ||
         (g_strcmp0(str, CMD_TAG_DISCOVERY) == 0) ||
         (g_strcmp0(str, CMD_TAG_CONNECTION) == 0) ||
-        (g_strcmp0(str, CMD_TAG_UI) == 0));
+        (g_strcmp0(str, CMD_TAG_UI) == 0) ||
+        (g_strcmp0(str, CMD_TAG_PLUGINS) == 0));
 }
 
 gboolean

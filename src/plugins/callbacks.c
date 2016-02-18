@@ -143,3 +143,18 @@ plugins_run_timed(void)
     }
     return;
 }
+
+GList*
+plugins_get_command_names(void)
+{
+    GList *result = NULL;
+
+    GSList *curr = p_commands;
+    while (curr) {
+        PluginCommand *command = curr->data;
+        result = g_list_append(result, (char*)command->command_name);
+        curr = g_slist_next(curr);
+    }
+
+    return result;
+}
