@@ -64,6 +64,14 @@ api_cons_show(const char * const message)
 }
 
 void
+api_cons_bad_cmd_usage(const char *const cmd)
+{
+    if (cmd) {
+        cons_bad_cmd_usage(cmd);
+    }
+}
+
+void
 api_register_command(const char *command_name, int min_args, int max_args,
     const char **synopsis, const char *description, const char *arguments[][2], const char **examples, void *callback,
     void(*callback_func)(PluginCommand *command, gchar **args))

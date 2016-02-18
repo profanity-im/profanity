@@ -38,8 +38,8 @@
 typedef char* PROF_WIN_TAG;
 
 void (*prof_cons_alert)(void);
-
 void (*prof_cons_show)(const char * const message);
+void (*prof_cons_bad_cmd_usage)(const char *const cmd);
 
 void (*prof_register_command)(const char *command_name, int min_args, int max_args,
     const char **synopsis, const char *description, const char *arguments[][2], const char **examples,

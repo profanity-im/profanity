@@ -39,6 +39,7 @@
 
 void api_cons_alert(void);
 void api_cons_show(const char * const message);
+void api_cons_bad_cmd_usage(const char *const cmd);
 void api_notify(const char *message, const char *category, int timeout_ms);
 void api_send_line(char *line);
 char * api_get_current_recipient(void);

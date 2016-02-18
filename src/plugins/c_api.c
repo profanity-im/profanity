@@ -68,6 +68,14 @@ c_api_cons_show(const char * const message)
 }
 
 static void
+c_api_cons_bad_cmd_usage(const char *const cmd)
+{
+    if (cmd) {
+        api_cons_bad_cmd_usage(cmd);
+    }
+}
+
+static void
 c_api_register_command(const char *command_name, int min_args, int max_args,
     const char **synopsis, const char *description, const char *arguments[][2], const char **examples,
     void(*callback)(char **args))
@@ -219,6 +227,7 @@ c_api_init(void)
 {
     prof_cons_alert = c_api_cons_alert;
     prof_cons_show = c_api_cons_show;
+    prof_cons_bad_cmd_usage = c_api_cons_bad_cmd_usage;
     prof_register_command = c_api_register_command;
     prof_register_timed = c_api_register_timed;
     prof_register_ac = c_api_register_ac;

@@ -38,8 +38,8 @@
 #include "plugins/callbacks.h"
 
 void (*prof_cons_alert)(void) = NULL;
-
 void (*prof_cons_show)(const char * const message) = NULL;
+void (*prof_cons_bad_cmd_usage)(const char *const cmd) = NULL;
 
 void (*prof_register_command)(const char *command_name, int min_args, int max_args,
     const char **synopsis, const char *description, const char *arguments[][2], const char **examples,
