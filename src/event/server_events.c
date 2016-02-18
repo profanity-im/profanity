@@ -230,10 +230,7 @@ sv_ev_room_history(const char *const room_jid, const char *const nick,
 {
     ProfMucWin *mucwin = wins_get_muc(room_jid);
     if (mucwin) {
-        char *new_message = plugins_pre_room_message_display(room_jid, nick, message);
-        mucwin_history(mucwin, nick, timestamp, new_message);
-        plugins_post_room_message_display(room_jid, nick, new_message);
-        free(new_message);
+        mucwin_history(mucwin, nick, timestamp, message);
     }
 }
 
