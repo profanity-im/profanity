@@ -2658,6 +2658,9 @@ cmd_autocomplete_add(const char *const value)
     if (commands_ac) {
         autocomplete_add(commands_ac, value);
     }
+    if (help_ac) {
+        autocomplete_add(help_ac, &value[1]);
+    }
 }
 
 void
