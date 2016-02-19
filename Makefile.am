@@ -41,7 +41,8 @@ core_sources = \
 	src/config/account.c src/config/account.h \
 	src/config/preferences.c src/config/preferences.h \
 	src/config/theme.c src/config/theme.h \
-	src/config/scripts.c src/config/scripts.h
+	src/config/scripts.c src/config/scripts.h \
+	src/tray.h src/tray.c
 
 unittest_sources = \
 	src/contact.c src/contact.h src/common.c \

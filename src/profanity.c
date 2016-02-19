@@ -37,6 +37,7 @@
 #include "gitversion.h"
 #endif
 
+#include <gtk/gtk.h>
 #include <locale.h>
 #include <signal.h>
 #include <stdlib.h>
@@ -71,6 +72,7 @@
 #include "window_list.h"
 #include "event/client_events.h"
 #include "config/tlscerts.h"
+#include "tray.h"
 
 static void _check_autoaway(void);
 static void _init(char *log_level);
@@ -96,6 +98,7 @@ void
 prof_run(char *log_level, char *account_name)
 {
     _init(log_level);
+    gtk_main_iteration_do(false);
     _connect_default(account_name);
     ui_update();
 
@@ -126,6 +129,7 @@ prof_run(char *log_level, char *account_name)
         jabber_process_events(10);
         iq_autoping_check();
         ui_update();
+        gtk_main_iteration_do(false);
     }
 }
 
@@ -318,6 +322,7 @@ _init(char *log_level)
     prefs_load();
     log_init(prof_log_level);
     log_stderr_init(PROF_LEVEL_ERROR);
+    create_tray();
     if (strcmp(PACKAGE_STATUS, "development") == 0) {
 #ifdef HAVE_GIT_VERSION
             log_info("Starting Profanity (%sdev.%s.%s)...", PACKAGE_VERSION, PROF_GIT_BRANCH, PROF_GIT_REVISION);
@@ -366,6 +371,7 @@ _shutdown(void)
         cl_ev_disconnect();
     }
 
+    destroy_tray();
     jabber_shutdown();
     muc_close();
     caps_close();

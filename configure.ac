@@ -96,6 +96,10 @@ PKG_CHECK_MODULES([glib], [glib-2.0 >= 2.26], [],
 PKG_CHECK_MODULES([curl], [libcurl], [],
     [AC_MSG_ERROR([libcurl is required for profanity])])
 
+# Checks GTK+ 2.0
+PKG_CHECK_MODULES([GTK], [gtk+-2.0 >= 2.24.10], [],
+    [AC_MSG_ERROR([gtk+-2.0 or higher is required for profanity])])
+
 AS_IF([test "x$PLATFORM" != xosx],
     [AC_CHECK_LIB([readline], [main], [],
         [AC_MSG_ERROR([libreadline is required for profanity])])],
@@ -208,9 +212,9 @@ AC_CHECK_HEADERS([ncurses.h], [], [])
 AM_CFLAGS="-Wall -Wno-deprecated-declarations"
 AS_IF([test "x$PACKAGE_STATUS" = xdevelopment],
     [AM_CFLAGS="$AM_CFLAGS -Wunused -Werror"])
-AM_CPPFLAGS="$AM_CPPFLAGS $glib_CFLAGS $curl_CFLAGS $libnotify_CFLAGS"
+AM_CPPFLAGS="$AM_CPPFLAGS $glib_CFLAGS $curl_CFLAGS $libnotify_CFLAGS ${GTK_CFLAGS}"
 AM_CPPFLAGS="$AM_CPPFLAGS -DTHEMES_PATH=\"\\\"$THEMES_PATH\\\"\""
-LIBS="$glib_LIBS $curl_LIBS $libnotify_LIBS $LIBS"
+LIBS="$glib_LIBS $curl_LIBS $libnotify_LIBS $LIBS ${GTK_LIBS}"
 
 AC_SUBST(AM_CFLAGS)
 AC_SUBST(AM_CPPFLAGS)
