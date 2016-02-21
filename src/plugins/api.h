@@ -38,8 +38,8 @@
 #include "plugins/callbacks.h"
 
 void api_cons_alert(void);
-void api_cons_show(const char * const message);
-void api_cons_bad_cmd_usage(const char *const cmd);
+int api_cons_show(const char * const message);
+int api_cons_bad_cmd_usage(const char *const cmd);
 void api_notify(const char *message, const char *category, int timeout_ms);
 void api_send_line(char *line);
 char * api_get_current_recipient(void);
@@ -60,11 +60,11 @@ void api_log_error(const char *message);
 int api_win_exists(const char *tag);
 void api_win_create(const char *tag, void *callback,
     void(*callback_func)(PluginWindowCallback *window_callback, char *tag, char *line));
-void api_win_focus(const char *tag);
-void api_win_show(const char *tag, const char *line);
-void api_win_show_green(const char *tag, const char *line);
-void api_win_show_red(const char *tag, const char *line);
-void api_win_show_cyan(const char *tag, const char *line);
-void api_win_show_yellow(const char *tag, const char *line);
+int api_win_focus(const char *tag);
+int api_win_show(const char *tag, const char *line);
+int api_win_show_green(const char *tag, const char *line);
+int api_win_show_red(const char *tag, const char *line);
+int api_win_show_cyan(const char *tag, const char *line);
+int api_win_show_yellow(const char *tag, const char *line);
 
 #endif

@@ -38,8 +38,8 @@
 typedef char* PROF_WIN_TAG;
 
 void (*prof_cons_alert)(void);
-void (*prof_cons_show)(const char * const message);
-void (*prof_cons_bad_cmd_usage)(const char *const cmd);
+int (*prof_cons_show)(const char * const message);
+int (*prof_cons_bad_cmd_usage)(const char *const cmd);
 
 void (*prof_register_command)(const char *command_name, int min_args, int max_args,
     const char **synopsis, const char *description, const char *arguments[][2], const char **examples,
@@ -63,11 +63,11 @@ void (*prof_log_error)(const char *message);
 
 int (*prof_win_exists)(PROF_WIN_TAG win);
 void (*prof_win_create)(PROF_WIN_TAG win, void(*input_handler)(PROF_WIN_TAG win, char *line));
-void (*prof_win_focus)(PROF_WIN_TAG win);
-void (*prof_win_show)(PROF_WIN_TAG win, char *line);
-void (*prof_win_show_green)(PROF_WIN_TAG win, char *line);
-void (*prof_win_show_red)(PROF_WIN_TAG win, char *line);
-void (*prof_win_show_cyan)(PROF_WIN_TAG win, char *line);
-void (*prof_win_show_yellow)(PROF_WIN_TAG win, char *line);
+int (*prof_win_focus)(PROF_WIN_TAG win);
+int (*prof_win_show)(PROF_WIN_TAG win, char *line);
+int (*prof_win_show_green)(PROF_WIN_TAG win, char *line);
+int (*prof_win_show_red)(PROF_WIN_TAG win, char *line);
+int (*prof_win_show_cyan)(PROF_WIN_TAG win, char *line);
+int (*prof_win_show_yellow)(PROF_WIN_TAG win, char *line);
 
 #endif

@@ -38,8 +38,8 @@
 #include "plugins/callbacks.h"
 
 void (*prof_cons_alert)(void) = NULL;
-void (*prof_cons_show)(const char * const message) = NULL;
-void (*prof_cons_bad_cmd_usage)(const char *const cmd) = NULL;
+int (*prof_cons_show)(const char * const message) = NULL;
+int (*prof_cons_bad_cmd_usage)(const char *const cmd) = NULL;
 
 void (*prof_register_command)(const char *command_name, int min_args, int max_args,
     const char **synopsis, const char *description, const char *arguments[][2], const char **examples,
@@ -63,9 +63,9 @@ void (*prof_log_error)(const char *message) = NULL;
 
 int (*prof_win_exists)(PROF_WIN_TAG win) = NULL;
 void (*prof_win_create)(PROF_WIN_TAG win, void(*input_handler)(PROF_WIN_TAG win, char *line)) = NULL;
-void (*prof_win_focus)(PROF_WIN_TAG win) = NULL;
-void (*prof_win_show)(PROF_WIN_TAG win, char *line) = NULL;
-void (*prof_win_show_green)(PROF_WIN_TAG win, char *line) = NULL;
-void (*prof_win_show_red)(PROF_WIN_TAG win, char *line) = NULL;
-void (*prof_win_show_cyan)(PROF_WIN_TAG win, char *line) = NULL;
-void (*prof_win_show_yellow)(PROF_WIN_TAG win, char *line) = NULL;
+int (*prof_win_focus)(PROF_WIN_TAG win) = NULL;
+int (*prof_win_show)(PROF_WIN_TAG win, char *line) = NULL;
+int (*prof_win_show_green)(PROF_WIN_TAG win, char *line) = NULL;
+int (*prof_win_show_red)(PROF_WIN_TAG win, char *line) = NULL;
+int (*prof_win_show_cyan)(PROF_WIN_TAG win, char *line) = NULL;
+int (*prof_win_show_yellow)(PROF_WIN_TAG win, char *line) = NULL;

@@ -69,7 +69,7 @@ c_plugin_create(const char * const filename)
     handle = dlopen (path->str, RTLD_NOW | RTLD_GLOBAL);
 
     if (!handle) {
-        log_warning ("dlopen failed to open `%s', %s", filename, dlerror ());
+        log_warning("dlopen failed to open `%s', %s", filename, dlerror ());
         g_string_free(path, TRUE);
         return NULL;
     }

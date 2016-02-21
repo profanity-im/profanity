@@ -53,22 +53,32 @@ api_cons_alert(void)
     cons_alert();
 }
 
-void
+int
 api_cons_show(const char * const message)
 {
-    if (message) {
-        char *parsed = str_replace(message, "\r\n", "\n");
-        cons_show("%s", parsed);
-        free(parsed);
+    if (message == NULL) {
+        log_warning("%s", "prof_cons_show failed, message is NULL");
+        return 0;
     }
+
+    char *parsed = str_replace(message, "\r\n", "\n");
+    cons_show("%s", parsed);
+    free(parsed);
+
+    return 1;
 }
 
-void
+int
 api_cons_bad_cmd_usage(const char *const cmd)
 {
-    if (cmd) {
-        cons_bad_cmd_usage(cmd);
+    if (cmd == NULL) {
+        log_warning("%s", "prof_cons_bad_cmd_usage failed, cmd is NULL");
+        return 0;
     }
+
+    cons_bad_cmd_usage(cmd);
+
+    return 1;
 }
 
 void
@@ -213,49 +223,141 @@ api_win_create(const char *tag, void *callback,
     status_bar_active(num);
 }
 
-void
+int
 api_win_focus(const char *tag)
 {
+    if (tag == NULL) {
+        log_warning("%s", "prof_win_focus failed, tag is NULL");
+        return 0;
+    }
+
     ProfPluginWin *pluginwin = wins_get_plugin(tag);
+    if (pluginwin == NULL) {
+        log_warning("prof_win_focus failed, no window with tag: %s", tag);
+        return 0;
+    }
+
     ui_focus_win((ProfWin*)pluginwin);
+
+    return 1;
 }
 
-void
+int
 api_win_show(const char *tag, const char *line)
 {
+    if (tag == NULL) {
+        log_warning("%s", "prof_win_show failed, tag is NULL");
+        return 0;
+    }
+    if (line == NULL) {
+        log_warning("%s", "prof_win_show failed, line is NULL");
+        return 0;
+    }
+
     ProfPluginWin *pluginwin = wins_get_plugin(tag);
+    if (pluginwin == NULL) {
+        log_warning("prof_win_show failed, no window with tag: %s", tag);
+        return 0;
+    }
+
     ProfWin *window = (ProfWin*)pluginwin;
     win_print(window, '!', 0, NULL, 0, 0, "", line);
+
+    return 1;
 }
 
-void
+int
 api_win_show_green(const char *tag, const char *line)
 {
+    if (tag == NULL) {
+        log_warning("%s", "prof_win_show_green failed, tag is NULL");
+        return 0;
+    }
+    if (line == NULL) {
+        log_warning("%s", "prof_win_show_green failed, line is NULL");
+        return 0;
+    }
+
     ProfPluginWin *pluginwin = wins_get_plugin(tag);
+    if (pluginwin == NULL) {
+        log_warning("prof_win_show_green failed, no window with tag: %s", tag);
+        return 0;
+    }
+
     ProfWin *window = (ProfWin*)pluginwin;
     win_print(window, '!', 0, NULL, 0, THEME_GREEN, "", line);
+
+    return 1;
 }
 
-void
+int
 api_win_show_red(const char *tag, const char *line)
 {
+    if (tag == NULL) {
+        log_warning("%s", "prof_win_show_red failed, tag is NULL");
+        return 0;
+    }
+    if (line == NULL) {
+        log_warning("%s", "prof_win_show_red failed, line is NULL");
+        return 0;
+    }
+
     ProfPluginWin *pluginwin = wins_get_plugin(tag);
+    if (pluginwin == NULL) {
+        log_warning("prof_win_show_red failed, no window with tag: %s", tag);
+        return 0;
+    }
+
     ProfWin *window = (ProfWin*)pluginwin;
     win_print(window, '!', 0, NULL, 0, THEME_RED, "", line);
+
+    return 1;
 }
 
-void
+int
 api_win_show_cyan(const char *tag, const char *line)
 {
+    if (tag == NULL) {
+        log_warning("%s", "prof_win_show_cyan failed, tag is NULL");
+        return 0;
+    }
+    if (line == NULL) {
+        log_warning("%s", "prof_win_show_cyan failed, line is NULL");
+        return 0;
+    }
+
     ProfPluginWin *pluginwin = wins_get_plugin(tag);
+    if (pluginwin == NULL) {
+        log_warning("prof_win_show_cyan failed, no window with tag: %s", tag);
+        return 0;
+    }
+
     ProfWin *window = (ProfWin*)pluginwin;
     win_print(window, '!', 0, NULL, 0, THEME_CYAN, "", line);
+
+    return 1;
 }
 
-void
+int
 api_win_show_yellow(const char *tag, const char *line)
 {
+    if (tag == NULL) {
+        log_warning("%s", "prof_win_show_yellow failed, tag is NULL");
+        return 0;
+    }
+    if (line == NULL) {
+        log_warning("%s", "prof_win_show_yellow failed, line is NULL");
+        return 0;
+    }
+
     ProfPluginWin *pluginwin = wins_get_plugin(tag);
+    if (pluginwin == NULL) {
+        log_warning("prof_win_show_yellow failed, no window with tag: %s", tag);
+        return 0;
+    }
+
     ProfWin *window = (ProfWin*)pluginwin;
     win_print(window, '!', 0, NULL, 0, THEME_YELLOW, "", line);
+
+    return 1;
 }
