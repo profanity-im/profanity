@@ -45,7 +45,8 @@ core_sources = \
 	src/plugins/plugins.h src/plugins/plugins.c \
 	src/plugins/api.h src/plugins/api.c \
 	src/plugins/callbacks.h src/plugins/callbacks.c \
-	src/plugins/autocompleters.c src/plugins/autocompleters.h
+	src/plugins/autocompleters.c src/plugins/autocompleters.h \
+	src/plugins/themes.c src/plugins/themes.h
 
 unittest_sources = \
 	src/contact.c src/contact.h src/common.c \
@@ -77,6 +78,7 @@ unittest_sources = \
 	src/plugins/api.h src/plugins/api.c \
 	src/plugins/callbacks.h src/plugins/callbacks.c \
 	src/plugins/autocompleters.c src/plugins/autocompleters.h \
+	src/plugins/themes.c src/plugins/themes.h \
 	src/window_list.c src/window_list.h \
 	src/event/server_events.c src/event/server_events.h \
 	src/event/client_events.c src/event/client_events.h \

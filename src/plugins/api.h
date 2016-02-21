@@ -39,6 +39,7 @@
 
 void api_cons_alert(void);
 int api_cons_show(const char * const message);
+int api_cons_show_themed(const char *const group, const char *const item, const char *const def, const char *const message);
 int api_cons_bad_cmd_usage(const char *const cmd);
 void api_notify(const char *message, const char *category, int timeout_ms);
 void api_send_line(char *line);
@@ -62,9 +63,7 @@ void api_win_create(const char *tag, void *callback,
     void(*callback_func)(PluginWindowCallback *window_callback, char *tag, char *line));
 int api_win_focus(const char *tag);
 int api_win_show(const char *tag, const char *line);
-int api_win_show_green(const char *tag, const char *line);
-int api_win_show_red(const char *tag, const char *line);
-int api_win_show_cyan(const char *tag, const char *line);
-int api_win_show_yellow(const char *tag, const char *line);
+int api_win_show_themed(const char *tag, const char *const group, const char *const key, const char *const def, const char *line);
+
 
 #endif

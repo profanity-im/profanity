@@ -40,6 +40,7 @@
 #include "log.h"
 #include "plugins/callbacks.h"
 #include "plugins/autocompleters.h"
+#include "plugins/themes.h"
 #include "plugins/api.h"
 #include "plugins/plugins.h"
 
@@ -57,6 +58,7 @@ plugins_init(void)
 {
     plugins = NULL;
     autocompleters_init();
+    plugin_themes_init();
 
 #ifdef PROF_HAVE_C
     c_env_init();
@@ -401,6 +403,7 @@ plugins_shutdown(void)
 #endif
 
     autocompleters_destroy();
+    plugin_themes_close();
 }
 
 gchar *
