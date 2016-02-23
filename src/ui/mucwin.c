@@ -380,7 +380,7 @@ _mucwin_print_mention(ProfWin *window, const char *const message, const char *co
         win_print(window, '-', 0, NULL, NO_DATE | NO_ME, THEME_ROOMMENTION_TERM, "", mention_section);
     }
 
-    free(mention_section);
+    g_free(mention_section);
     g_free(mynick_lower);
     g_free(message_lower);
 }
