@@ -43,10 +43,10 @@
 #include "xmpp/xmpp.h"
 #include "roster_list.h"
 #include "chat_session.h"
+#include "plugins/plugins.h"
 #ifdef PROF_HAVE_LIBOTR
 #include "otr/otr.h"
 #endif
-#include "plugins/plugins.h"
 #ifdef PROF_HAVE_LIBGPGME
 #include "pgp/gpg.h"
 #endif
@@ -128,6 +128,9 @@ cl_ev_send_msg(ProfChatWin *chatwin, const char *const msg)
             free(id);
         }
     }
+
+    plugins_post_chat_message_send(chatwin->barejid, plugin_msg);
+    free(plugin_msg);
     return;
 #endif
 #endif
@@ -142,6 +145,9 @@ cl_ev_send_msg(ProfChatWin *chatwin, const char *const msg)
         chatwin_outgoing_msg(chatwin, plugin_msg, id, PROF_MSG_PLAIN);
         free(id);
     }
+
+    plugins_post_chat_message_send(chatwin->barejid, plugin_msg);
+    free(plugin_msg);
     return;
 #endif
 #endif
@@ -160,6 +166,9 @@ cl_ev_send_msg(ProfChatWin *chatwin, const char *const msg)
         chatwin_outgoing_msg(chatwin, plugin_msg, id, PROF_MSG_PLAIN);
         free(id);
     }
+
+    plugins_post_chat_message_send(chatwin->barejid, plugin_msg);
+    free(plugin_msg);
     return;
 #endif
 #endif
@@ -171,6 +180,9 @@ cl_ev_send_msg(ProfChatWin *chatwin, const char *const msg)
     chat_log_msg_out(chatwin->barejid, plugin_msg);
     chatwin_outgoing_msg(chatwin, plugin_msg, id, PROF_MSG_PLAIN);
     free(id);
+
+    plugins_post_chat_message_send(chatwin->barejid, plugin_msg);
+    free(plugin_msg);
     return;
 #endif
 #endif

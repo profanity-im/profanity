@@ -591,7 +591,7 @@ prefs_set_autoxa_time(gint value)
     _save_prefs();
 }
 
-gchar **
+gchar**
 prefs_get_plugins(void)
 {
     if (!g_key_file_has_group(prefs, "plugins")) {
@@ -602,6 +602,12 @@ prefs_get_plugins(void)
     }
 
     return g_key_file_get_string_list(prefs, "plugins", "load", NULL, NULL);
+}
+
+void
+prefs_free_plugins(gchar **plugins)
+{
+    g_strfreev(plugins);
 }
 
 void

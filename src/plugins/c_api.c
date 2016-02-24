@@ -59,22 +59,33 @@ c_api_cons_alert(void)
     api_cons_alert();
 }
 
-static void
+static int
 c_api_cons_show(const char * const message)
 {
-    if (message) {
-        api_cons_show(message);
-    }
+    return api_cons_show(message);
+}
+
+static int
+c_api_cons_show_themed(const char *const group, const char *const item, const char *const def, const char *const message)
+{
+    return api_cons_show_themed(group, item, def, message);
+}
+
+static int
+c_api_cons_bad_cmd_usage(const char *const cmd)
+{
+    return api_cons_bad_cmd_usage(cmd);
 }
 
 static void
 c_api_register_command(const char *command_name, int min_args, int max_args,
-    const char *usage, const char *short_help, const char *long_help, void(*callback)(char **args))
+    const char **synopsis, const char *description, const char *arguments[][2], const char **examples,
+    void(*callback)(char **args))
 {
     CommandWrapper *wrapper = malloc(sizeof(CommandWrapper));
     wrapper->func = callback;
-    api_register_command(command_name, min_args, max_args, usage,
-        short_help, long_help, wrapper, c_command_callback);
+    api_register_command(command_name, min_args, max_args, synopsis,
+        description, arguments, examples, wrapper, c_command_callback);
 }
 
 static void
@@ -139,13 +150,13 @@ c_api_log_error(const char *message)
     api_log_error(message);
 }
 
-int
+static int
 c_api_win_exists(char *tag)
 {
     return api_win_exists(tag);
 }
 
-void
+static void
 c_api_win_create(char *tag, void(*callback)(char *tag, char *line))
 {
     WindowWrapper *wrapper = malloc(sizeof(WindowWrapper));
@@ -153,40 +164,22 @@ c_api_win_create(char *tag, void(*callback)(char *tag, char *line))
     api_win_create(tag, wrapper, c_window_callback);
 }
 
-void
+static int
 c_api_win_focus(char *tag)
 {
-    api_win_focus(tag);
+    return api_win_focus(tag);
 }
 
-void
+static int
 c_api_win_show(char *tag, char *line)
 {
-    api_win_show(tag, line);
+    return api_win_show(tag, line);
 }
 
-void
-c_api_win_show_green(char *tag, char *line)
+static int
+c_api_win_show_themed(char *tag, char *group, char *key, char *def, char *line)
 {
-    api_win_show_green(tag, line);
-}
-
-void
-c_api_win_show_red(char *tag, char *line)
-{
-    api_win_show_red(tag, line);
-}
-
-void
-c_api_win_show_cyan(char *tag, char *line)
-{
-    api_win_show_cyan(tag, line);
-}
-
-void
-c_api_win_show_yellow(char *tag, char *line)
-{
-    api_win_show_yellow(tag, line);
+    return api_win_show_themed(tag, group, key, def, line);
 }
 
 void
@@ -218,6 +211,8 @@ c_api_init(void)
 {
     prof_cons_alert = c_api_cons_alert;
     prof_cons_show = c_api_cons_show;
+    prof_cons_show_themed = c_api_cons_show_themed;
+    prof_cons_bad_cmd_usage = c_api_cons_bad_cmd_usage;
     prof_register_command = c_api_register_command;
     prof_register_timed = c_api_register_timed;
     prof_register_ac = c_api_register_ac;
@@ -233,8 +228,5 @@ c_api_init(void)
     prof_win_create = c_api_win_create;
     prof_win_focus = c_api_win_focus;
     prof_win_show = c_api_win_show;
-    prof_win_show_green = c_api_win_show_green;
-    prof_win_show_red = c_api_win_show_red;
-    prof_win_show_cyan = c_api_win_show_cyan;
-    prof_win_show_yellow = c_api_win_show_yellow;
+    prof_win_show_themed = c_api_win_show_themed;
 }

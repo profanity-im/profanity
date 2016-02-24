@@ -35,6 +35,8 @@
 #ifndef PLUGINS_H
 #define PLUGINS_H
 
+#include "command/command.h"
+
 typedef enum {
     LANG_PYTHON,
     LANG_RUBY,
@@ -102,7 +104,10 @@ void  plugins_post_priv_message_send(const char * const jid, const char * const 
 
 gboolean plugins_run_command(const char * const cmd);
 void plugins_run_timed(void);
+GList* plugins_get_command_names(void);
 gchar * plugins_get_dir(void);
+CommandHelp* plugins_get_help(const char *const cmd);
 
 void plugins_win_process_line(char *win, const char * const line);
+
 #endif

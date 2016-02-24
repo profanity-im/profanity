@@ -61,24 +61,80 @@ python_api_cons_show(PyObject *self, PyObject *args)
 }
 
 static PyObject*
+python_api_cons_show_themed(PyObject *self, PyObject *args)
+{
+    const char *group = NULL;
+    const char *key = NULL;
+    const char *def = NULL;
+    const char *message = NULL;
+    if (!PyArg_ParseTuple(args, "zzzs", &group, &key, &def, &message)) {
+        return Py_BuildValue("");
+    }
+    api_cons_show_themed(group, key, def, message);
+    return Py_BuildValue("");
+}
+
+static PyObject*
 python_api_register_command(PyObject *self, PyObject *args)
 {
     const char *command_name = NULL;
     int min_args = 0;
     int max_args = 0;
-    const char *usage = NULL;
-    const char *short_help = NULL;
-    const char *long_help = NULL;
+    PyObject *synopsis = NULL;
+    const char *description = NULL;
+    PyObject *arguments = NULL;
+    PyObject *examples = NULL;
     PyObject *p_callback = NULL;
 
-    if (!PyArg_ParseTuple(args, "siisssO", &command_name, &min_args, &max_args,
-            &usage, &short_help, &long_help, &p_callback)) {
+    if (!PyArg_ParseTuple(args, "siiOsOOO", &command_name, &min_args, &max_args,
+            &synopsis, &description, &arguments, &examples, &p_callback)) {
         return Py_BuildValue("");
     }
 
     if (p_callback && PyCallable_Check(p_callback)) {
-        api_register_command(command_name, min_args, max_args, usage,
-            short_help, long_help, p_callback, python_command_callback);
+        Py_ssize_t len = PyList_Size(synopsis);
+        const char *c_synopsis[len == 0 ? 0 : len+1];
+        Py_ssize_t i = 0;
+        for (i = 0; i < len; i++) {
+            PyObject *item = PyList_GetItem(synopsis, i);
+            char *c_item = PyString_AsString(item);
+            c_synopsis[i] = c_item;
+        }
+        c_synopsis[len] = NULL;
+
+        Py_ssize_t args_len = PyList_Size(arguments);
+        const char *c_arguments[args_len == 0 ? 0 : args_len+1][2];
+        i = 0;
+        for (i = 0; i < args_len; i++) {
+            PyObject *item = PyList_GetItem(arguments, i);
+            Py_ssize_t len2 = PyList_Size(item);
+            if (len2 != 2) {
+                return Py_BuildValue("");
+            }
+            PyObject *arg = PyList_GetItem(item, 0);
+            char *c_arg = PyString_AsString(arg);
+            PyObject *desc = PyList_GetItem(item, 1);
+            char *c_desc = PyString_AsString(desc);
+
+            c_arguments[i][0] = c_arg;
+            c_arguments[i][1] = c_desc;
+        }
+
+        c_arguments[args_len][0] = NULL;
+        c_arguments[args_len][1] = NULL;
+
+        len = PyList_Size(examples);
+        const char *c_examples[len == 0 ? 0 : len+1];
+        i = 0;
+        for (i = 0; i < len; i++) {
+            PyObject *item = PyList_GetItem(examples, i);
+            char *c_item = PyString_AsString(item);
+            c_examples[i] = c_item;
+        }
+        c_examples[len] = NULL;
+
+        api_register_command(command_name, min_args, max_args, c_synopsis,
+            description, c_arguments, c_examples, p_callback, python_command_callback);
     }
 
     return Py_BuildValue("");
@@ -281,58 +337,19 @@ python_api_win_show(PyObject *self, PyObject *args)
 }
 
 static PyObject *
-python_api_win_show_green(PyObject *self, PyObject *args)
+python_api_win_show_themed(PyObject *self, PyObject *args)
 {
     char *tag = NULL;
+    char *group = NULL;
+    char *key = NULL;
+    char *def = NULL;
     char *line = NULL;
 
-    if (!PyArg_ParseTuple(args, "ss", &tag, &line)) {
+    if (!PyArg_ParseTuple(args, "szzzs", &tag, &group, &key, &def, &line)) {
         return Py_BuildValue("");
     }
 
-    api_win_show_green(tag, line);
-    return Py_BuildValue("");
-}
-
-static PyObject *
-python_api_win_show_red(PyObject *self, PyObject *args)
-{
-    char *tag = NULL;
-    char *line = NULL;
-
-    if (!PyArg_ParseTuple(args, "ss", &tag, &line)) {
-        return Py_BuildValue("");
-    }
-
-    api_win_show_red(tag, line);
-    return Py_BuildValue("");
-}
-
-static PyObject *
-python_api_win_show_cyan(PyObject *self, PyObject *args)
-{
-    char *tag = NULL;
-    char *line = NULL;
-
-    if (!PyArg_ParseTuple(args, "ss", &tag, &line)) {
-        return Py_BuildValue("");
-    }
-
-    api_win_show_cyan(tag, line);
-    return Py_BuildValue("");
-}
-
-static PyObject *
-python_api_win_show_yellow(PyObject *self, PyObject *args)
-{
-    char *tag = NULL;
-    char *line = NULL;
-
-    if (!PyArg_ParseTuple(args, "ss", &tag, &line)) {
-        return Py_BuildValue("");
-    }
-
-    api_win_show_yellow(tag, line);
+    api_win_show_themed(tag, group, key, def, line);
     return Py_BuildValue("");
 }
 
@@ -406,6 +423,7 @@ python_window_callback(PluginWindowCallback *window_callback, char *tag, char *l
 static PyMethodDef apiMethods[] = {
     { "cons_alert", python_api_cons_alert, METH_NOARGS, "Highlight the console window in the status bar." },
     { "cons_show", python_api_cons_show, METH_VARARGS, "Print a line to the console." },
+    { "cons_show_themed", python_api_cons_show_themed, METH_VARARGS, "Print a themed line to the console" },
     { "register_command", python_api_register_command, METH_VARARGS, "Register a command." },
     { "register_timed", python_api_register_timed, METH_VARARGS, "Register a timed function." },
     { "register_ac", python_api_register_ac, METH_VARARGS, "Register an autocompleter." },
@@ -421,10 +439,7 @@ static PyMethodDef apiMethods[] = {
     { "win_create", python_api_win_create, METH_VARARGS, "Create a new window." },
     { "win_focus", python_api_win_focus, METH_VARARGS, "Focus a window." },
     { "win_show", python_api_win_show, METH_VARARGS, "Show text in the window." },
-    { "win_show_green", python_api_win_show_green, METH_VARARGS, "Show green text in the window." },
-    { "win_show_red", python_api_win_show_red, METH_VARARGS, "Show red text in the window." },
-    { "win_show_cyan", python_api_win_show_cyan, METH_VARARGS, "Show cyan text in the window." },
-    { "win_show_yellow", python_api_win_show_yellow, METH_VARARGS, "Show yellow text in the window." },
+    { "win_show_themed", python_api_win_show_themed, METH_VARARGS, "Show themed text in the window." },
     { NULL, NULL, 0, NULL }
 };
 

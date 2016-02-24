@@ -38,14 +38,16 @@
 #include "plugins/callbacks.h"
 
 void api_cons_alert(void);
-void api_cons_show(const char * const message);
+int api_cons_show(const char * const message);
+int api_cons_show_themed(const char *const group, const char *const item, const char *const def, const char *const message);
+int api_cons_bad_cmd_usage(const char *const cmd);
 void api_notify(const char *message, const char *category, int timeout_ms);
 void api_send_line(char *line);
 char * api_get_current_recipient(void);
 char * api_get_current_muc(void);
 
 void api_register_command(const char *command_name, int min_args, int max_args,
-    const char *usage, const char *short_help, const char *long_help,
+    const char **synopsis, const char *description, const char *arguments[][2], const char **examples,
     void *callback, void(*callback_func)(PluginCommand *command, gchar **args));
 void api_register_timed(void *callback, int interval_seconds,
     void (*callback_func)(PluginTimedFunction *timed_function));
@@ -59,11 +61,8 @@ void api_log_error(const char *message);
 int api_win_exists(const char *tag);
 void api_win_create(const char *tag, void *callback,
     void(*callback_func)(PluginWindowCallback *window_callback, char *tag, char *line));
-void api_win_focus(const char *tag);
-void api_win_show(const char *tag, const char *line);
-void api_win_show_green(const char *tag, const char *line);
-void api_win_show_red(const char *tag, const char *line);
-void api_win_show_cyan(const char *tag, const char *line);
-void api_win_show_yellow(const char *tag, const char *line);
+int api_win_focus(const char *tag);
+int api_win_show(const char *tag, const char *line);
+int api_win_show_themed(const char *tag, const char *const group, const char *const key, const char *const def, const char *line);
 
 #endif

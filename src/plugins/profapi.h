@@ -38,11 +38,13 @@
 typedef char* PROF_WIN_TAG;
 
 void (*prof_cons_alert)(void);
-
-void (*prof_cons_show)(const char * const message);
+int (*prof_cons_show)(const char * const message);
+int (*prof_cons_show_themed)(const char *const group, const char *const item, const char *const def, const char *const message);
+int (*prof_cons_bad_cmd_usage)(const char *const cmd);
 
 void (*prof_register_command)(const char *command_name, int min_args, int max_args,
-    const char *usage, const char *short_help, const char *long_help, void(*callback)(char **args));
+    const char **synopsis, const char *description, const char *arguments[][2], const char **examples,
+    void(*callback)(char **args));
 
 void (*prof_register_timed)(void(*callback)(void), int interval_seconds);
 
@@ -62,11 +64,8 @@ void (*prof_log_error)(const char *message);
 
 int (*prof_win_exists)(PROF_WIN_TAG win);
 void (*prof_win_create)(PROF_WIN_TAG win, void(*input_handler)(PROF_WIN_TAG win, char *line));
-void (*prof_win_focus)(PROF_WIN_TAG win);
-void (*prof_win_show)(PROF_WIN_TAG win, char *line);
-void (*prof_win_show_green)(PROF_WIN_TAG win, char *line);
-void (*prof_win_show_red)(PROF_WIN_TAG win, char *line);
-void (*prof_win_show_cyan)(PROF_WIN_TAG win, char *line);
-void (*prof_win_show_yellow)(PROF_WIN_TAG win, char *line);
+int (*prof_win_focus)(PROF_WIN_TAG win);
+int (*prof_win_show)(PROF_WIN_TAG win, char *line);
+int (*prof_win_show_themed)(PROF_WIN_TAG tag, char *group, char *key, char *def, char *line);
 
 #endif

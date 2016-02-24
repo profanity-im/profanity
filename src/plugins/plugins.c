@@ -35,6 +35,7 @@
 #include <string.h>
 #include <stdlib.h>
 
+#include "prof_config.h"
 #include "common.h"
 #include "config/preferences.h"
 #include "log.h"
@@ -42,6 +43,7 @@
 #include "plugins/autocompleters.h"
 #include "plugins/api.h"
 #include "plugins/plugins.h"
+#include "plugins/themes.h"
 
 #ifdef PROF_HAVE_PYTHON
 #include "plugins/python_plugins.h"
@@ -61,8 +63,8 @@
 #ifdef PROF_HAVE_C
 #include "plugins/c_plugins.h"
 #include "plugins/c_api.h"
-
 #endif
+
 #include "ui/ui.h"
 
 static GSList* plugins;
@@ -85,6 +87,8 @@ plugins_init(void)
 #ifdef PROF_HAVE_C
     c_env_init();
 #endif
+
+    plugin_themes_init();
 
     // load plugins
     gchar **plugins_load = prefs_get_plugins();
@@ -143,6 +147,8 @@ plugins_init(void)
             curr = g_slist_next(curr);
         }
     }
+
+    prefs_free_plugins(plugins_load);
 
     return;
 }
@@ -481,6 +487,7 @@ plugins_shutdown(void)
 #endif
 
     autocompleters_destroy();
+    plugin_themes_close();
 }
 
 gchar *

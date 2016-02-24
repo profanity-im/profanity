@@ -127,6 +127,7 @@ GHashTable *commands = NULL;
 #define CMD_TAG_CONNECTION  "connection"
 #define CMD_TAG_DISCOVERY   "discovery"
 #define CMD_TAG_UI          "ui"
+#define CMD_TAG_PLUGINS     "plugins"
 
 #define CMD_NOTAGS          { { NULL },
 #define CMD_TAGS(...)       { { __VA_ARGS__, NULL },
@@ -2065,6 +2066,7 @@ cmd_init(void)
     autocomplete_add(help_commands_ac, "discovery");
     autocomplete_add(help_commands_ac, "connection");
     autocomplete_add(help_commands_ac, "ui");
+    autocomplete_add(help_commands_ac, "plugins");
 
     prefs_ac = autocomplete_new();
     autocomplete_add(prefs_ac, "ui");
@@ -2653,10 +2655,18 @@ cmd_exists(char *cmd)
 }
 
 void
-cmd_autocomplete_add(const char * const value)
+cmd_autocomplete_add(const char *const value)
 {
     if (commands_ac) {
         autocomplete_add(commands_ac, value);
+    }
+}
+
+void
+cmd_help_autocomplete_add(const char *const value)
+{
+    if (help_ac) {
+        autocomplete_add(help_ac, value);
     }
 }
 
@@ -2699,7 +2709,7 @@ cmd_autocomplete_remove_form_fields(DataForm *form)
 }
 
 void
-cmd_autocomplete_remove(const char * const value)
+cmd_autocomplete_remove(const char *const value)
 {
     if (commands_ac) {
         autocomplete_remove(commands_ac, value);
@@ -2891,7 +2901,8 @@ cmd_valid_tag(const char *const str)
         (g_strcmp0(str, CMD_TAG_ROSTER) == 0) ||
         (g_strcmp0(str, CMD_TAG_DISCOVERY) == 0) ||
         (g_strcmp0(str, CMD_TAG_CONNECTION) == 0) ||
-        (g_strcmp0(str, CMD_TAG_UI) == 0));
+        (g_strcmp0(str, CMD_TAG_UI) == 0) ||
+        (g_strcmp0(str, CMD_TAG_PLUGINS) == 0));
 }
 
 gboolean
@@ -3145,9 +3156,7 @@ _cmd_complete_parameters(ProfWin *window, const char *const input)
 
     result = plugins_autocomplete(input);
     if (result) {
-        if (result) {
-            return result;
-        }
+        return result;
     }
 
     if (g_str_has_prefix(input, "/field")) {

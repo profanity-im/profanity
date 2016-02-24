@@ -51,6 +51,7 @@ callbacks_add_command(PluginCommand *command)
 {
     p_commands = g_slist_append(p_commands, command);
     cmd_autocomplete_add(command->command_name);
+    cmd_help_autocomplete_add(&command->command_name[1]);
 }
 
 void
@@ -91,19 +92,36 @@ plugins_run_command(const char * const input)
             gboolean result;
             gchar **args = parse_args(input, command->min_args, command->max_args, &result);
             if (result == FALSE) {
-                ui_invalid_command_usage(command->usage, NULL);
+                ui_invalid_command_usage(command->command_name, NULL);
+                g_strfreev(split);
                 return TRUE;
             } else {
                 command->callback_func(command, args);
                 g_strfreev(split);
+                g_strfreev(args);
                 return TRUE;
             }
-            g_strfreev(args);
         }
         p_command = g_slist_next(p_command);
     }
     g_strfreev(split);
     return FALSE;
+}
+
+CommandHelp*
+plugins_get_help(const char *const cmd)
+{
+    GSList *curr = p_commands;
+    while (curr) {
+        PluginCommand *command = curr->data;
+        if (g_strcmp0(cmd, command->command_name) == 0) {
+            return command->help;
+        }
+
+        curr = g_slist_next(curr);
+    }
+
+    return NULL;
 }
 
 void
@@ -123,4 +141,19 @@ plugins_run_timed(void)
         p_timed_function = g_slist_next(p_timed_function);
     }
     return;
+}
+
+GList*
+plugins_get_command_names(void)
+{
+    GList *result = NULL;
+
+    GSList *curr = p_commands;
+    while (curr) {
+        PluginCommand *command = curr->data;
+        result = g_list_append(result, (char*)command->command_name);
+        curr = g_slist_next(curr);
+    }
+
+    return result;
 }

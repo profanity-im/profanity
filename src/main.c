@@ -124,6 +124,12 @@ main(int argc, char **argv)
         g_print("PGP support: Disabled\n");
 #endif
 
+#ifdef PROF_HAVE_C
+        g_print("C plugins: Enabled\n");
+#else
+        g_print("C plugins: Disabled\n");
+#endif
+
         return 0;
     }
 

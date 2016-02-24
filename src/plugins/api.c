@@ -40,6 +40,7 @@
 #include "log.h"
 #include "plugins/callbacks.h"
 #include "plugins/autocompleters.h"
+#include "plugins/themes.h"
 #include "profanity.h"
 #include "ui/ui.h"
 #include "config/theme.h"
@@ -53,30 +54,86 @@ api_cons_alert(void)
     cons_alert();
 }
 
-void
+int
 api_cons_show(const char * const message)
 {
-    if (message) {
-        char *parsed = str_replace(message, "\r\n", "\n");
-        cons_show("%s", parsed);
-        free(parsed);
+    if (message == NULL) {
+        log_warning("%s", "prof_cons_show failed, message is NULL");
+        return 0;
     }
+
+    char *parsed = str_replace(message, "\r\n", "\n");
+    cons_show("%s", parsed);
+    free(parsed);
+
+    return 1;
+}
+
+int
+api_cons_show_themed(const char *const group, const char *const key, const char *const def, const char *const message)
+{
+    if (message == NULL) {
+        log_warning("%s", "prof_cons_show_themed failed, message is NULL");
+        return 0;
+    }
+
+    char *parsed = str_replace(message, "\r\n", "\n");
+    theme_item_t themeitem = plugin_themes_get(group, key, def);
+    ProfWin *console = wins_get_console();
+    win_print(console, '-', 0, NULL, 0, themeitem, "", parsed);
+
+    free(parsed);
+
+    return 1;
+}
+
+int
+api_cons_bad_cmd_usage(const char *const cmd)
+{
+    if (cmd == NULL) {
+        log_warning("%s", "prof_cons_bad_cmd_usage failed, cmd is NULL");
+        return 0;
+    }
+
+    cons_bad_cmd_usage(cmd);
+
+    return 1;
 }
 
 void
 api_register_command(const char *command_name, int min_args, int max_args,
-    const char *usage, const char *short_help, const char *long_help, void *callback,
+    const char **synopsis, const char *description, const char *arguments[][2], const char **examples, void *callback,
     void(*callback_func)(PluginCommand *command, gchar **args))
 {
     PluginCommand *command = malloc(sizeof(PluginCommand));
     command->command_name = command_name;
     command->min_args = min_args;
     command->max_args = max_args;
-    command->usage = usage;
-    command->short_help = short_help;
-    command->long_help = long_help;
     command->callback = callback;
     command->callback_func = callback_func;
+
+    CommandHelp *help = malloc(sizeof(CommandHelp));
+
+    int i = 0;
+    for (i = 0; synopsis[i] != NULL; i++) {
+        help->synopsis[i] = strdup(synopsis[i]);
+    }
+    help->synopsis[i] = NULL;
+
+    help->desc = strdup(description);
+    for (i = 0; arguments[i][0] != NULL; i++) {
+        help->args[i][0] = strdup(arguments[i][0]);
+        help->args[i][1] = strdup(arguments[i][1]);
+    }
+    help->args[i][0] = NULL;
+    help->args[i][1] = NULL;
+
+    for (i = 0; examples[i] != NULL; i++) {
+        help->examples[i] = strdup(examples[i]);
+    }
+    help->examples[i] = NULL;
+
+    command->help = help;
 
     callbacks_add_command(command);
 }
@@ -185,49 +242,70 @@ api_win_create(const char *tag, void *callback,
     status_bar_active(num);
 }
 
-void
+int
 api_win_focus(const char *tag)
 {
+    if (tag == NULL) {
+        log_warning("%s", "prof_win_focus failed, tag is NULL");
+        return 0;
+    }
+
     ProfPluginWin *pluginwin = wins_get_plugin(tag);
+    if (pluginwin == NULL) {
+        log_warning("prof_win_focus failed, no window with tag: %s", tag);
+        return 0;
+    }
+
     ui_focus_win((ProfWin*)pluginwin);
+
+    return 1;
 }
 
-void
+int
 api_win_show(const char *tag, const char *line)
 {
+    if (tag == NULL) {
+        log_warning("%s", "prof_win_show failed, tag is NULL");
+        return 0;
+    }
+    if (line == NULL) {
+        log_warning("%s", "prof_win_show failed, line is NULL");
+        return 0;
+    }
+
     ProfPluginWin *pluginwin = wins_get_plugin(tag);
+    if (pluginwin == NULL) {
+        log_warning("prof_win_show failed, no window with tag: %s", tag);
+        return 0;
+    }
+
     ProfWin *window = (ProfWin*)pluginwin;
     win_print(window, '!', 0, NULL, 0, 0, "", line);
+
+    return 1;
 }
 
-void
-api_win_show_green(const char *tag, const char *line)
+int
+api_win_show_themed(const char *tag, const char *const group, const char *const key, const char *const def, const char *line)
 {
-    ProfPluginWin *pluginwin = wins_get_plugin(tag);
-    ProfWin *window = (ProfWin*)pluginwin;
-    win_print(window, '!', 0, NULL, 0, THEME_GREEN, "", line);
-}
+    if (tag == NULL) {
+        log_warning("%s", "prof_win_show_themed failed, tag is NULL");
+        return 0;
+    }
+    if (line == NULL) {
+        log_warning("%s", "prof_win_show_themed failed, line is NULL");
+        return 0;
+    }
 
-void
-api_win_show_red(const char *tag, const char *line)
-{
     ProfPluginWin *pluginwin = wins_get_plugin(tag);
-    ProfWin *window = (ProfWin*)pluginwin;
-    win_print(window, '!', 0, NULL, 0, THEME_RED, "", line);
-}
+    if (pluginwin == NULL) {
+        log_warning("prof_win_show_themed failed, no window with tag: %s", tag);
+        return 0;
+    }
 
-void
-api_win_show_cyan(const char *tag, const char *line)
-{
-    ProfPluginWin *pluginwin = wins_get_plugin(tag);
+    theme_item_t themeitem = plugin_themes_get(group, key, def);
     ProfWin *window = (ProfWin*)pluginwin;
-    win_print(window, '!', 0, NULL, 0, THEME_CYAN, "", line);
-}
+    win_print(window, '!', 0, NULL, 0, themeitem, "", line);
 
-void
-api_win_show_yellow(const char *tag, const char *line)
-{
-    ProfPluginWin *pluginwin = wins_get_plugin(tag);
-    ProfWin *window = (ProfWin*)pluginwin;
-    win_print(window, '!', 0, NULL, 0, THEME_YELLOW, "", line);
+    return 1;
 }

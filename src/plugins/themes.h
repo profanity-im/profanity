@@ -1,5 +1,5 @@
 /*
- * callbacks.h
+ * themes.h
  *
  * Copyright (C) 2012 - 2016 James Booth <boothj5@gmail.com>
  *
@@ -32,37 +32,6 @@
  *
  */
 
-#ifndef CALLBACKS_H
-#define CALLBACKS_H
-
-#include <glib.h>
-
-#include "command/command.h"
-
-typedef struct p_command {
-    const char *command_name;
-    int min_args;
-    int max_args;
-    CommandHelp *help;
-    void *callback;
-    void (*callback_func)(struct p_command *command, gchar **args);
-} PluginCommand;
-
-typedef struct p_timed_function {
-    void *callback;
-    void (*callback_func)(struct p_timed_function *timed_function);
-    int interval_seconds;
-    GTimer *timer;
-} PluginTimedFunction;
-
-typedef struct p_window_input_callback {
-    void *callback;
-    void (*callback_func)(struct p_window_input_callback *window_callback, const char *tag, const char * const line);
-} PluginWindowCallback;
-
-void callbacks_add_command(PluginCommand *command);
-void callbacks_add_timed(PluginTimedFunction *timed_function);
-void callbacks_add_window_handler(const char *tag, PluginWindowCallback *window_callback);
-void * callbacks_get_window_handler(const char *tag);
-
-#endif
+void plugin_themes_init(void);
+void plugin_themes_close(void);
+theme_item_t plugin_themes_get(const char *const group, const char *const key, const char *const def);
