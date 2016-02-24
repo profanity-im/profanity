@@ -34,6 +34,7 @@
 
 #include <string.h>
 #include <assert.h>
+#include <stdlib.h>
 
 #include "ui/win_types.h"
 #include "window_list.h"
