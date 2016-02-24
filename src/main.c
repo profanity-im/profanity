@@ -130,6 +130,12 @@ main(int argc, char **argv)
         g_print("C plugins: Disabled\n");
 #endif
 
+#ifdef PROF_HAVE_PYTHON
+        g_print("Python plugins: Enabled\n");
+#else
+        g_print("Python plugins: Disabled\n");
+#endif
+
         return 0;
     }
 
