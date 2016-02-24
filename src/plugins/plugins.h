@@ -38,6 +38,7 @@
 #include "command/command.h"
 
 typedef enum {
+    LANG_PYTHON,
     LANG_C
 } lang_t;
 
@@ -106,4 +107,5 @@ gchar * plugins_get_dir(void);
 CommandHelp* plugins_get_help(const char *const cmd);
 
 void plugins_win_process_line(char *win, const char * const line);
+
 #endif
