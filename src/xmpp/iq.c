@@ -32,9 +32,9 @@
  *
  */
 
-#include "config.h"
+#include "prof_config.h"
 
-#ifdef HAVE_GIT_VERSION
+#ifdef PROF_HAVE_GIT_VERSION
 #include "gitversion.h"
 #endif
 
@@ -43,10 +43,10 @@
 #include <stdio.h>
 #include <glib.h>
 
-#ifdef HAVE_LIBMESODE
+#ifdef PROF_HAVE_LIBMESODE
 #include <mesode.h>
 #endif
-#ifdef HAVE_LIBSTROPHE
+#ifdef PROF_HAVE_LIBSTROPHE
 #include <strophe.h>
 #endif
 
@@ -1081,9 +1081,9 @@ _version_get_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza,
         xmpp_stanza_t *version = xmpp_stanza_new(ctx);
         xmpp_stanza_set_name(version, "version");
         xmpp_stanza_t *version_txt = xmpp_stanza_new(ctx);
-        GString *version_str = g_string_new(PACKAGE_VERSION);
-        if (strcmp(PACKAGE_STATUS, "development") == 0) {
-#ifdef HAVE_GIT_VERSION
+        GString *version_str = g_string_new(PROF_PACKAGE_VERSION);
+        if (strcmp(PROF_PACKAGE_STATUS, "development") == 0) {
+#ifdef PROF_HAVE_GIT_VERSION
             g_string_append(version_str, "dev.");
             g_string_append(version_str, PROF_GIT_BRANCH);
             g_string_append(version_str, ".");

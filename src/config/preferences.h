@@ -35,7 +35,7 @@
 #ifndef PREFERENCES_H
 #define PREFERENCES_H
 
-#include "config.h"
+#include "prof_config.h"
 
 #include <glib.h>
 
@@ -182,6 +182,9 @@ gint prefs_get_autoaway_time(void);
 void prefs_set_autoaway_time(gint value);
 gint prefs_get_autoxa_time(void);
 void prefs_set_autoxa_time(gint value);
+
+gchar** prefs_get_plugins(void);
+void prefs_free_plugins(gchar **plugins);
 
 char prefs_get_otr_char(void);
 void prefs_set_otr_char(char ch);

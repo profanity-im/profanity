@@ -33,9 +33,11 @@ m4/
 src/config.h
 src/config.h.in
 src/config.h.in~
+src/prof_config.h
 src/gitversion.h
 src/gitversion.h.in
 src/stamp-h1
+src/plugins/profapi.lo
 
 # binaries
 profanity

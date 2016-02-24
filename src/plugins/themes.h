@@ -1,5 +1,5 @@
 /*
- * capabilities.h
+ * themes.h
  *
  * Copyright (C) 2012 - 2016 James Booth <boothj5@gmail.com>
  *
@@ -32,30 +32,6 @@
  *
  */
 
-#ifndef XMPP_CAPABILITIES_H
-#define XMPP_CAPABILITIES_H
-
-#include "prof_config.h"
-
-#ifdef PROF_HAVE_LIBMESODE
-#include <mesode.h>
-#endif
-#ifdef PROF_HAVE_LIBSTROPHE
-#include <strophe.h>
-#endif
-
-#include "xmpp/xmpp.h"
-
-void caps_init(void);
-
-void caps_add_by_ver(const char *const ver, Capabilities *caps);
-void caps_add_by_jid(const char *const jid, Capabilities *caps);
-void caps_map_jid_to_ver(const char *const jid, const char *const ver);
-gboolean caps_contains(const char *const ver);
-
-char* caps_create_sha1_str(xmpp_stanza_t *const query);
-xmpp_stanza_t* caps_create_query_response_stanza(xmpp_ctx_t *const ctx);
-Capabilities* caps_create(xmpp_stanza_t *query);
-char* caps_get_my_sha1(xmpp_ctx_t *const ctx);
-
-#endif
+void plugin_themes_init(void);
+void plugin_themes_close(void);
+theme_item_t plugin_themes_get(const char *const group, const char *const key, const char *const def);

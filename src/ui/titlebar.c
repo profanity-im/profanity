@@ -36,7 +36,7 @@
 #include <string.h>
 #include <assert.h>
 
-#include "config.h"
+#include "prof_config.h"
 
 #include "common.h"
 #include "config/theme.h"

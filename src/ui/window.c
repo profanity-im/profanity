@@ -32,7 +32,7 @@
  *
  */
 
-#include "config.h"
+#include "prof_config.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -41,9 +41,9 @@
 #include <wchar.h>
 
 #include <glib.h>
-#ifdef HAVE_NCURSESW_NCURSES_H
+#ifdef PROF_HAVE_NCURSESW_NCURSES_H
 #include <ncursesw/ncurses.h>
-#elif HAVE_NCURSES_H
+#elif PROF_HAVE_NCURSES_H
 #include <ncurses.h>
 #endif
 
@@ -237,6 +237,20 @@ win_create_xmlconsole(void)
     return &new_win->window;
 }
 
+ProfWin*
+win_create_plugin(const char *const tag)
+{
+    ProfPluginWin *new_win = malloc(sizeof(ProfPluginWin));
+    new_win->super.type = WIN_PLUGIN;
+    new_win->super.layout = _win_create_simple_layout();
+
+    new_win->tag = strdup(tag);
+
+    new_win->memcheck = PROFPLUGINWIN_MEMCHECK;
+
+    return &new_win->super;
+}
+
 char*
 win_get_title(ProfWin *window)
 {
@@ -287,6 +301,11 @@ win_get_title(ProfWin *window)
     if (window->type == WIN_XML) {
         return strdup(XML_WIN_TITLE);
     }
+    if (window->type == WIN_PLUGIN) {
+        ProfPluginWin *pluginwin = (ProfPluginWin*) window;
+        assert(pluginwin->memcheck == PROFPLUGINWIN_MEMCHECK);
+        return strdup(pluginwin->tag);
+    }
 
     return NULL;
 }
@@ -326,6 +345,15 @@ win_get_string(ProfWin *window)
         {
             ProfXMLWin *xmlwin = (ProfXMLWin*)window;
             return xmlwin_get_string(xmlwin);
+        }
+        case WIN_PLUGIN:
+        {
+            ProfPluginWin *pluginwin = (ProfPluginWin*)window;
+            GString *gstring = g_string_new("");
+            g_string_append_printf(gstring, "%s plugin", pluginwin->tag);
+            char *res = gstring->str;
+            g_string_free(gstring, FALSE);
+            return res;
         }
         default:
             return NULL;

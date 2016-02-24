@@ -32,16 +32,16 @@
  *
  */
 
-#include "config.h"
+#include "prof_config.h"
 
 #include <assert.h>
 #include <string.h>
 #include <stdlib.h>
 
-#ifdef HAVE_LIBMESODE
+#ifdef PROF_HAVE_LIBMESODE
 #include <mesode.h>
 #endif
-#ifdef HAVE_LIBSTROPHE
+#ifdef PROF_HAVE_LIBSTROPHE
 #include <strophe.h>
 #endif
 
@@ -51,6 +51,7 @@
 #include "jid.h"
 #include "log.h"
 #include "muc.h"
+#include "plugins/plugins.h"
 #include "profanity.h"
 #include "event/server_events.h"
 #include "xmpp/bookmark.h"
@@ -93,12 +94,12 @@ static struct {
 static GTimer *reconnect_timer;
 
 static log_level_t _get_log_level(xmpp_log_level_t xmpp_level);
-static xmpp_log_level_t _get_xmpp_log_level();
+static xmpp_log_level_t _get_xmpp_log_level(void);
 
 static void _xmpp_file_logger(void *const userdata, const xmpp_log_level_t level, const char *const area,
     const char *const msg);
 
-static xmpp_log_t* _xmpp_get_file_logger();
+static xmpp_log_t* _xmpp_get_file_logger(void);
 
 static jabber_conn_status_t _jabber_connect(const char *const fulljid, const char *const passwd,
     const char *const altdomain, int port, const char *const tls_policy);
@@ -235,6 +236,9 @@ jabber_disconnect(void)
 {
     // if connected, send end stream and wait for response
     if (jabber_conn.conn_status == JABBER_CONNECTED) {
+        char *account_name = jabber_get_account_name();
+        const char *fulljid = jabber_get_fulljid();
+        plugins_on_disconnect(account_name, fulljid);
         log_info("Closing connection");
         accounts_set_last_activity(jabber_get_account_name());
         jabber_conn.conn_status = JABBER_DISCONNECTING;
@@ -418,7 +422,7 @@ _connection_free_session_data(void)
     presence_clear_sub_requests();
 }
 
-#ifdef HAVE_LIBMESODE
+#ifdef PROF_HAVE_LIBMESODE
 static int
 _connection_certfail_cb(xmpp_tlscert_t *xmpptlscert, const char *const errormsg)
 {
@@ -526,7 +530,7 @@ _jabber_connect(const char *const fulljid, const char *const passwd, const char 
         xmpp_conn_set_flags(jabber_conn.conn, XMPP_CONN_FLAG_DISABLE_TLS);
     }
 
-#ifdef HAVE_LIBMESODE
+#ifdef PROF_HAVE_LIBMESODE
     char *cert_path = prefs_get_string(PREF_TLS_CERTPATH);
     if (cert_path) {
         xmpp_conn_tlscert_path(jabber_conn.conn, cert_path);
@@ -534,7 +538,7 @@ _jabber_connect(const char *const fulljid, const char *const passwd, const char 
     prefs_free_string(cert_path);
 #endif
 
-#ifdef HAVE_LIBMESODE
+#ifdef PROF_HAVE_LIBMESODE
     int connect_status = xmpp_connect_client(
         jabber_conn.conn,
         altdomain,
@@ -580,6 +584,9 @@ _jabber_reconnect(void)
 static void
 _jabber_lost_connection(void)
 {
+    char *account_name = jabber_get_account_name();
+    const char *fulljid = jabber_get_fulljid();
+    plugins_on_disconnect(account_name, fulljid);
     sv_ev_lost_connection();
     if (prefs_get_reconnect() != 0) {
         assert(reconnect_timer == NULL);

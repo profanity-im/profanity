@@ -35,12 +35,12 @@
 #ifndef XMPP_CONNECTION_H
 #define XMPP_CONNECTION_H
 
-#include "config.h"
+#include "prof_config.h"
 
-#ifdef HAVE_LIBMESODE
+#ifdef PROF_HAVE_LIBMESODE
 #include <mesode.h>
 #endif
-#ifdef HAVE_LIBSTROPHE
+#ifdef PROF_HAVE_LIBSTROPHE
 #include <strophe.h>
 #endif
 

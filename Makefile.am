@@ -41,7 +41,12 @@ core_sources = \
 	src/config/account.c src/config/account.h \
 	src/config/preferences.c src/config/preferences.h \
 	src/config/theme.c src/config/theme.h \
-	src/config/scripts.c src/config/scripts.h
+	src/config/scripts.c src/config/scripts.h \
+	src/plugins/plugins.h src/plugins/plugins.c \
+	src/plugins/api.h src/plugins/api.c \
+	src/plugins/callbacks.h src/plugins/callbacks.c \
+	src/plugins/autocompleters.c src/plugins/autocompleters.h \
+	src/plugins/themes.c src/plugins/themes.h
 
 unittest_sources = \
 	src/contact.c src/contact.h src/common.c \
@@ -69,6 +74,11 @@ unittest_sources = \
 	src/config/theme.c src/config/theme.h \
 	src/config/scripts.c src/config/scripts.h \
 	src/config/conflists.c src/config/conflists.h \
+	src/plugins/plugins.h src/plugins/plugins.c \
+	src/plugins/api.h src/plugins/api.c \
+	src/plugins/callbacks.h src/plugins/callbacks.c \
+	src/plugins/autocompleters.c src/plugins/autocompleters.h \
+	src/plugins/themes.c src/plugins/themes.h \
 	src/window_list.c src/window_list.h \
 	src/event/server_events.c src/event/server_events.h \
 	src/event/client_events.c src/event/client_events.h \
@@ -120,6 +130,10 @@ functionaltest_sources = \
 
 main_source = src/main.c
 
+c_sources = \
+	src/plugins/c_plugins.h src/plugins/c_plugins.c \
+	src/plugins/c_api.h src/plugins/c_api.c
+
 git_include = src/gitversion.h
 
 pgp_sources = \
@@ -133,6 +147,11 @@ otr3_sources = \
 
 otr4_sources = \
 	src/otr/otrlib.h src/otr/otrlibv4.c src/otr/otr.h src/otr/otr.c
+
+if BUILD_C_API
+core_sources += $(c_sources)
+unittest_sources += $(c_sources)
+endif
 
 otr_unittest_sources = \
 	tests/unittests/otr/stub_otr.c
@@ -166,6 +185,15 @@ profanity_themes_DATA = $(themes_sources)
 endif
 if INCLUDE_GIT_VERSION
 BUILT_SOURCES = $(git_include)
+endif
+
+if BUILD_C_API
+lib_LTLIBRARIES = libprofanity.la
+libprofanity_la_LDFLAGS=-avoid-version -shared
+libprofanity_la_SOURCES = src/plugins/profapi.c
+
+library_includedir=$(includedir)
+library_include_HEADERS = src/plugins/profapi.h
 endif
 
 TESTS = tests/unittests/unittests

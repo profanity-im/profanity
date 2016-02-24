@@ -37,9 +37,9 @@
 #include <stdlib.h>
 #include <assert.h>
 
-#ifdef HAVE_NCURSESW_NCURSES_H
+#ifdef PROF_HAVE_NCURSESW_NCURSES_H
 #include <ncursesw/ncurses.h>
-#elif HAVE_NCURSES_H
+#elif PROF_HAVE_NCURSES_H
 #include <ncurses.h>
 #endif
 
@@ -57,7 +57,7 @@
 #include "xmpp/xmpp.h"
 #include "xmpp/bookmark.h"
 
-#ifdef HAVE_GIT_VERSION
+#ifdef PROF_HAVE_GIT_VERSION
 #include "gitversion.h"
 #endif
 
@@ -82,7 +82,7 @@ void
 cons_debug(const char *const msg, ...)
 {
     ProfWin *console = wins_get_console();
-    if (strcmp(PACKAGE_STATUS, "development") == 0) {
+    if (strcmp(PROF_PACKAGE_STATUS, "development") == 0) {
         va_list arg;
         va_start(arg, msg);
         GString *fmt_msg = g_string_new(NULL);
@@ -120,45 +120,45 @@ cons_show_padded(int pad, const char *const msg, ...)
 }
 
 void
-cons_show_help(Command *command)
+cons_show_help(const char *const cmd, CommandHelp *help)
 {
     ProfWin *console = wins_get_console();
 
     cons_show("");
-    win_vprint(console, '-', 0, NULL, 0, THEME_WHITE_BOLD, "", "%s", &command->cmd[1]);
+    win_vprint(console, '-', 0, NULL, 0, THEME_WHITE_BOLD, "", "%s", &cmd[1]);
     win_print(console, '-', 0, NULL, NO_EOL, THEME_WHITE_BOLD, "", "");
     int i;
-    for (i = 0; i < strlen(command->cmd) - 1 ; i++) {
+    for (i = 0; i < strlen(cmd) - 1 ; i++) {
         win_print(console, '-', 0, NULL, NO_EOL | NO_DATE, THEME_WHITE_BOLD, "", "-");
     }
     win_print(console, '-', 0, NULL, NO_DATE, THEME_WHITE_BOLD, "", "");
     cons_show("");
 
     win_print(console, '-', 0, NULL, 0, THEME_WHITE_BOLD, "", "Synopsis");
-    ui_show_lines(console, command->help.synopsis);
+    ui_show_lines(console, help->synopsis);
     cons_show("");
 
     win_print(console, '-', 0, NULL, 0, THEME_WHITE_BOLD, "", "Description");
-    win_println(console, 0, command->help.desc);
+    win_println(console, 0, help->desc);
 
     int maxlen = 0;
-    for (i = 0; command->help.args[i][0] != NULL; i++) {
-        if (strlen(command->help.args[i][0]) > maxlen)
-            maxlen = strlen(command->help.args[i][0]);
+    for (i = 0; help->args[i][0] != NULL; i++) {
+        if (strlen(help->args[i][0]) > maxlen)
+            maxlen = strlen(help->args[i][0]);
     }
 
     if (i > 0) {
         cons_show("");
         win_print(console, '-', 0, NULL, 0, THEME_WHITE_BOLD, "", "Arguments");
-        for (i = 0; command->help.args[i][0] != NULL; i++) {
-            win_vprint(console, '-', maxlen + 3, NULL, 0, 0, "", "%-*s: %s", maxlen + 1, command->help.args[i][0], command->help.args[i][1]);
+        for (i = 0; help->args[i][0] != NULL; i++) {
+            win_vprint(console, '-', maxlen + 3, NULL, 0, 0, "", "%-*s: %s", maxlen + 1, help->args[i][0], help->args[i][1]);
         }
     }
 
-    if (g_strv_length((gchar**)command->help.examples) > 0) {
+    if (g_strv_length((gchar**)help->examples) > 0) {
         cons_show("");
         win_print(console, '-', 0, NULL, 0, THEME_WHITE_BOLD, "", "Examples");
-        ui_show_lines(console, command->help.examples);
+        ui_show_lines(console, help->examples);
     }
 }
 
@@ -416,18 +416,18 @@ cons_about(void)
         _cons_splash_logo();
     } else {
 
-        if (strcmp(PACKAGE_STATUS, "development") == 0) {
-#ifdef HAVE_GIT_VERSION
-            win_vprint(console, '-', 0, NULL, 0, 0, "", "Welcome to Profanity, version %sdev.%s.%s", PACKAGE_VERSION, PROF_GIT_BRANCH, PROF_GIT_REVISION);
+        if (strcmp(PROF_PACKAGE_STATUS, "development") == 0) {
+#ifdef PROF_HAVE_GIT_VERSION
+            win_vprint(console, '-', 0, NULL, 0, 0, "", "Welcome to Profanity, version %sdev.%s.%s", PROF_PACKAGE_VERSION, PROF_GIT_BRANCH, PROF_GIT_REVISION);
 #else
-            win_vprint(console, '-', 0, NULL, 0, 0, "", "Welcome to Profanity, version %sdev", PACKAGE_VERSION);
+            win_vprint(console, '-', 0, NULL, 0, 0, "", "Welcome to Profanity, version %sdev", PROF_PACKAGE_VERSION);
 #endif
         } else {
-            win_vprint(console, '-', 0, NULL, 0, 0, "", "Welcome to Profanity, version %s", PACKAGE_VERSION);
+            win_vprint(console, '-', 0, NULL, 0, 0, "", "Welcome to Profanity, version %s", PROF_PACKAGE_VERSION);
         }
     }
 
-    win_vprint(console, '-', 0, NULL, 0, 0, "", "Copyright (C) 2012 - 2016 James Booth <%s>.", PACKAGE_BUGREPORT);
+    win_vprint(console, '-', 0, NULL, 0, 0, "", "Copyright (C) 2012 - 2016 James Booth <%s>.", PROF_PACKAGE_BUGREPORT);
     win_println(console, 0, "License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>");
     win_println(console, 0, "");
     win_println(console, 0, "This is free software; you are free to change and redistribute it.");
@@ -2007,6 +2007,7 @@ cons_help(void)
     cons_show_padded(pad, "/help commands discovery  : List service discovery commands.");
     cons_show_padded(pad, "/help commands connection : List commands related to managing your connection.");
     cons_show_padded(pad, "/help commands ui         : List commands for manipulating the user interface.");
+    cons_show_padded(pad, "/help commands plugins    : List plugin commands.");
     cons_show_padded(pad, "/help [command]           : Detailed help on a specific command.");
     cons_show_padded(pad, "/help navigation          : How to navigate around Profanity.");
     cons_show("");
@@ -2304,14 +2305,14 @@ _cons_splash_logo(void)
     win_print(console, '-', 0, NULL, 0, THEME_SPLASH, "", "|_|                                    (____/ ");
     win_print(console, '-', 0, NULL, 0, THEME_SPLASH, "", "");
 
-    if (strcmp(PACKAGE_STATUS, "development") == 0) {
-#ifdef HAVE_GIT_VERSION
-        win_vprint(console, '-', 0, NULL, 0, 0, "", "Version %sdev.%s.%s", PACKAGE_VERSION, PROF_GIT_BRANCH, PROF_GIT_REVISION);
+    if (strcmp(PROF_PACKAGE_STATUS, "development") == 0) {
+#ifdef PROF_HAVE_GIT_VERSION
+        win_vprint(console, '-', 0, NULL, 0, 0, "", "Version %sdev.%s.%s", PROF_PACKAGE_VERSION, PROF_GIT_BRANCH, PROF_GIT_REVISION);
 #else
-        win_vprint(console, '-', 0, NULL, 0, 0, "", "Version %sdev", PACKAGE_VERSION);
+        win_vprint(console, '-', 0, NULL, 0, 0, "", "Version %sdev", PROF_PACKAGE_VERSION);
 #endif
     } else {
-        win_vprint(console, '-', 0, NULL, 0, 0, "", "Version %s", PACKAGE_VERSION);
+        win_vprint(console, '-', 0, NULL, 0, 0, "", "Version %s", PROF_PACKAGE_VERSION);
     }
 }
 

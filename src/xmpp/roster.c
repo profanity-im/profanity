@@ -32,7 +32,7 @@
  *
  */
 
-#include "config.h"
+#include "prof_config.h"
 
 #include <assert.h>
 #include <stdlib.h>
@@ -40,14 +40,15 @@
 
 #include <glib.h>
 
-#ifdef HAVE_LIBMESODE
+#ifdef PROF_HAVE_LIBMESODE
 #include <mesode.h>
 #endif
-#ifdef HAVE_LIBSTROPHE
+#ifdef PROF_HAVE_LIBSTROPHE
 #include <strophe.h>
 #endif
 
 #include "log.h"
+#include "plugins/plugins.h"
 #include "profanity.h"
 #include "ui/ui.h"
 #include "event/server_events.h"

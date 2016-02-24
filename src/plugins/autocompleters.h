@@ -1,5 +1,5 @@
 /*
- * capabilities.h
+ * autocompleters.h
  *
  * Copyright (C) 2012 - 2016 James Booth <boothj5@gmail.com>
  *
@@ -32,30 +32,15 @@
  *
  */
 
-#ifndef XMPP_CAPABILITIES_H
-#define XMPP_CAPABILITIES_H
+#ifndef AUTOCOMPLETERS_H
+#define AUTOCOMPLETERS_H
 
-#include "prof_config.h"
+#include <glib.h>
 
-#ifdef PROF_HAVE_LIBMESODE
-#include <mesode.h>
-#endif
-#ifdef PROF_HAVE_LIBSTROPHE
-#include <strophe.h>
-#endif
-
-#include "xmpp/xmpp.h"
-
-void caps_init(void);
-
-void caps_add_by_ver(const char *const ver, Capabilities *caps);
-void caps_add_by_jid(const char *const jid, Capabilities *caps);
-void caps_map_jid_to_ver(const char *const jid, const char *const ver);
-gboolean caps_contains(const char *const ver);
-
-char* caps_create_sha1_str(xmpp_stanza_t *const query);
-xmpp_stanza_t* caps_create_query_response_stanza(xmpp_ctx_t *const ctx);
-Capabilities* caps_create(xmpp_stanza_t *query);
-char* caps_get_my_sha1(xmpp_ctx_t *const ctx);
+void autocompleters_init(void);
+void autocompleters_add(const char *key, char **items);
+char* autocompleters_complete(const char * const input);
+void autocompleters_reset(void);
+void autocompleters_destroy(void);
 
 #endif
