@@ -75,6 +75,17 @@ python_api_cons_show_themed(PyObject *self, PyObject *args)
 }
 
 static PyObject*
+python_api_cons_bad_cmd_usage(PyObject *self, PyObject *args)
+{
+    const char *cmd = NULL;
+    if (!PyArg_ParseTuple(args, "s", &cmd)) {
+        return Py_BuildValue("");
+    }
+    api_cons_bad_cmd_usage(cmd);
+    return Py_BuildValue("");
+}
+
+static PyObject*
 python_api_register_command(PyObject *self, PyObject *args)
 {
     const char *command_name = NULL;
@@ -424,6 +435,7 @@ static PyMethodDef apiMethods[] = {
     { "cons_alert", python_api_cons_alert, METH_NOARGS, "Highlight the console window in the status bar." },
     { "cons_show", python_api_cons_show, METH_VARARGS, "Print a line to the console." },
     { "cons_show_themed", python_api_cons_show_themed, METH_VARARGS, "Print a themed line to the console" },
+    { "cons_bad_cmd_usage", python_api_cons_bad_cmd_usage, METH_VARARGS, "Show invalid command message in console" },
     { "register_command", python_api_register_command, METH_VARARGS, "Register a command." },
     { "register_timed", python_api_register_timed, METH_VARARGS, "Register a timed function." },
     { "register_ac", python_api_register_ac, METH_VARARGS, "Register an autocompleter." },
