@@ -207,6 +207,9 @@ jabber_autoping_fail(void)
 {
     if (jabber_conn.conn_status == JABBER_CONNECTED) {
         log_info("Closing connection");
+        char *account_name = jabber_get_account_name();
+        const char *fulljid = jabber_get_fulljid();
+        plugins_on_disconnect(account_name, fulljid);
         accounts_set_last_activity(jabber_get_account_name());
         jabber_conn.conn_status = JABBER_DISCONNECTING;
         xmpp_disconnect(jabber_conn.conn);
@@ -584,9 +587,6 @@ _jabber_reconnect(void)
 static void
 _jabber_lost_connection(void)
 {
-    char *account_name = jabber_get_account_name();
-    const char *fulljid = jabber_get_fulljid();
-    plugins_on_disconnect(account_name, fulljid);
     sv_ev_lost_connection();
     if (prefs_get_reconnect() != 0) {
         assert(reconnect_timer == NULL);
