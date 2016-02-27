@@ -31,14 +31,14 @@
  * source files in the program, then also delete it here.
  *
  */
-#include "config.h"
+#include "prof_config.h"
 
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 
 #include <glib.h>
-#ifdef HAVE_LIBNOTIFY
+#ifdef PROF_HAVE_LIBNOTIFY
 #include <libnotify/notify.h>
 #endif
 #ifdef PLATFORM_CYGWIN
@@ -51,8 +51,6 @@
 #include "window_list.h"
 #include "config/preferences.h"
 
-static void _notify(const char *const message, int timeout, const char *const category);
-
 static GTimer *remind_timer;
 
 void
@@ -64,7 +62,7 @@ notifier_initialise(void)
 void
 notifier_uninit(void)
 {
-#ifdef HAVE_LIBNOTIFY
+#ifdef PROF_HAVE_LIBNOTIFY
     if (notify_is_initted()) {
         notify_uninit();
     }
@@ -78,7 +76,7 @@ notify_typing(const char *const name)
     char message[strlen(name) + 1 + 11];
     sprintf(message, "%s: typing...", name);
 
-    _notify(message, 10000, "Incoming message");
+    notify(message, 10000, "Incoming message");
 }
 
 void
@@ -92,7 +90,7 @@ notify_invite(const char *const from, const char *const room, const char *const 
         g_string_append_printf(message, "\n\"%s\"", reason);
     }
 
-    _notify(message->str, 10000, "Incoming message");
+    notify(message->str, 10000, "Incoming message");
 
     g_string_free(message, TRUE);
 }
@@ -111,8 +109,7 @@ notify_message(const char *const name, int num, const char *const text)
         g_string_append_printf(message, "\n%s", text);
     }
 
-    _notify(message->str, 10000, "incoming message");
-
+    notify(message->str, 10000, "incoming message");
     g_string_free(message, TRUE);
 }
 
@@ -130,7 +127,7 @@ notify_room_message(const char *const nick, const char *const room, int num, con
         g_string_append_printf(message, "\n%s", text);
     }
 
-    _notify(message->str, 10000, "incoming message");
+    notify(message->str, 10000, "incoming message");
 
     g_string_free(message, TRUE);
 }
@@ -140,7 +137,7 @@ notify_subscription(const char *const from)
 {
     GString *message = g_string_new("Subscription request: \n");
     g_string_append(message, from);
-    _notify(message->str, 10000, "Incoming message");
+    notify(message->str, 10000, "Incomming message");
     g_string_free(message, TRUE);
 }
 
@@ -150,14 +147,14 @@ notify_remind(void)
     gdouble elapsed = g_timer_elapsed(remind_timer, NULL);
     gint remind_period = prefs_get_notify_remind();
     if (remind_period > 0 && elapsed >= remind_period) {
-        gboolean notify = wins_do_notify_remind();
+        gboolean donotify = wins_do_notify_remind();
         gint unread = wins_get_total_unread();
         gint open = muc_invites_count();
         gint subs = presence_sub_request_count();
 
         GString *text = g_string_new("");
 
-        if (notify && unread > 0) {
+        if (donotify && unread > 0) {
             if (unread == 1) {
                 g_string_append(text, "1 unread message");
             } else {
@@ -186,8 +183,8 @@ notify_remind(void)
             }
         }
 
-        if ((notify && unread > 0) || (open > 0) || (subs > 0)) {
-            _notify(text->str, 5000, "Incoming message");
+        if ((donotify && unread > 0) || (open > 0) || (subs > 0)) {
+            notify(text->str, 5000, "Incoming message");
         }
 
         g_string_free(text, TRUE);
@@ -196,10 +193,10 @@ notify_remind(void)
     }
 }
 
-static void
-_notify(const char *const message, int timeout, const char *const category)
+void
+notify(const char *const message, int timeout, const char *const category)
 {
-#ifdef HAVE_LIBNOTIFY
+#ifdef PROF_HAVE_LIBNOTIFY
     log_debug("Attempting notification: %s", message);
     if (notify_is_initted()) {
         log_debug("Reinitialising libnotify");
@@ -251,7 +248,7 @@ _notify(const char *const message, int timeout, const char *const category)
 
     Shell_NotifyIcon(NIM_MODIFY, &nid);
 #endif
-#ifdef HAVE_OSXNOTIFY
+#ifdef PROF_HAVE_OSXNOTIFY
     GString *notify_command = g_string_new("terminal-notifier -title \"Profanity\" -message '");
 
     char *escaped_single = str_replace(message, "'", "'\\''");

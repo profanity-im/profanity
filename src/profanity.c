@@ -31,9 +31,9 @@
  * source files in the program, then also delete it here.
  *
  */
-#include "config.h"
+#include "prof_config.h"
 
-#ifdef HAVE_GIT_VERSION
+#ifdef PROF_HAVE_GIT_VERSION
 #include "gitversion.h"
 #endif
 
@@ -59,10 +59,11 @@
 #include "config/tlscerts.h"
 #include "log.h"
 #include "muc.h"
-#ifdef HAVE_LIBOTR
+#include "plugins/plugins.h"
+#ifdef PROF_HAVE_LIBOTR
 #include "otr/otr.h"
 #endif
-#ifdef HAVE_LIBGPGME
+#ifdef PROF_HAVE_LIBGPGME
 #include "pgp/gpg.h"
 #endif
 #include "resource.h"
@@ -96,7 +97,9 @@ void
 prof_run(char *log_level, char *account_name)
 {
     _init(log_level);
+    plugins_on_start();
     _connect_default(account_name);
+
     ui_update();
 
     log_info("Starting main event loop");
@@ -119,9 +122,10 @@ prof_run(char *log_level, char *account_name)
             cont = TRUE;
         }
 
-#ifdef HAVE_LIBOTR
+#ifdef PROF_HAVE_LIBOTR
         otr_poll();
 #endif
+        plugins_run_timed();
         notify_remind();
         jabber_process_events(10);
         iq_autoping_check();
@@ -318,14 +322,14 @@ _init(char *log_level)
     prefs_load();
     log_init(prof_log_level);
     log_stderr_init(PROF_LEVEL_ERROR);
-    if (strcmp(PACKAGE_STATUS, "development") == 0) {
-#ifdef HAVE_GIT_VERSION
-            log_info("Starting Profanity (%sdev.%s.%s)...", PACKAGE_VERSION, PROF_GIT_BRANCH, PROF_GIT_REVISION);
+    if (strcmp(PROF_PACKAGE_STATUS, "development") == 0) {
+#ifdef PROF_HAVE_GIT_VERSION
+            log_info("Starting Profanity (%sdev.%s.%s)...", PROF_PACKAGE_VERSION, PROF_GIT_BRANCH, PROF_GIT_REVISION);
 #else
-            log_info("Starting Profanity (%sdev)...", PACKAGE_VERSION);
+            log_info("Starting Profanity (%sdev)...", PROF_PACKAGE_VERSION);
 #endif
     } else {
-        log_info("Starting Profanity (%s)...", PACKAGE_VERSION);
+        log_info("Starting Profanity (%s)...", PROF_PACKAGE_VERSION);
     }
     chat_log_init();
     groupchat_log_init();
@@ -340,13 +344,14 @@ _init(char *log_level)
     muc_init();
     tlscerts_init();
     scripts_init();
-#ifdef HAVE_LIBOTR
+#ifdef PROF_HAVE_LIBOTR
     otr_init();
 #endif
-#ifdef HAVE_LIBGPGME
+#ifdef PROF_HAVE_LIBGPGME
     p_gpg_init();
 #endif
     atexit(_shutdown);
+    plugins_init();
     inp_nonblocking(TRUE);
 }
 
@@ -367,13 +372,14 @@ _shutdown(void)
     }
 
     jabber_shutdown();
+    plugins_on_shutdown();
     muc_close();
     caps_close();
     ui_close();
-#ifdef HAVE_LIBOTR
+#ifdef PROF_HAVE_LIBOTR
     otr_shutdown();
 #endif
-#ifdef HAVE_LIBGPGME
+#ifdef PROF_HAVE_LIBGPGME
     p_gpg_close();
 #endif
     chat_log_close();
@@ -383,6 +389,7 @@ _shutdown(void)
     cmd_uninit();
     log_stderr_close();
     log_close();
+    plugins_shutdown();
     prefs_close();
     if (saved_status) {
         free(saved_status);
@@ -401,6 +408,8 @@ _create_directories(void)
     g_string_append(chatlogs_dir, "/profanity/chatlogs");
     GString *logs_dir = g_string_new(xdg_data);
     g_string_append(logs_dir, "/profanity/logs");
+    GString *plugins_dir = g_string_new(xdg_data);
+    g_string_append(plugins_dir, "/profanity/plugins");
 
     if (!mkdir_recursive(themes_dir->str)) {
         log_error("Error while creating directory %s", themes_dir->str);
@@ -411,10 +420,14 @@ _create_directories(void)
     if (!mkdir_recursive(logs_dir->str)) {
         log_error("Error while creating directory %s", logs_dir->str);
     }
+    if (!mkdir_recursive(plugins_dir->str)) {
+        log_error("Error while creating directory %s", plugins_dir->str);
+    }
 
     g_string_free(themes_dir, TRUE);
     g_string_free(chatlogs_dir, TRUE);
     g_string_free(logs_dir, TRUE);
+    g_string_free(plugins_dir, TRUE);
 
     g_free(xdg_config);
     g_free(xdg_data);

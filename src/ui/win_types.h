@@ -35,13 +35,13 @@
 #ifndef UI_WIN_TYPES_H
 #define UI_WIN_TYPES_H
 
-#include "config.h"
+#include "prof_config.h"
 
 #include <wchar.h>
 #include <glib.h>
-#ifdef HAVE_NCURSESW_NCURSES_H
+#ifdef PROF_HAVE_NCURSESW_NCURSES_H
 #include <ncursesw/ncurses.h>
-#elif HAVE_NCURSES_H
+#elif PROF_HAVE_NCURSES_H
 #include <ncurses.h>
 #endif
 
@@ -55,6 +55,7 @@
 #define PROFPRIVATEWIN_MEMCHECK     77437483
 #define PROFCONFWIN_MEMCHECK        64334685
 #define PROFXMLWIN_MEMCHECK         87333463
+#define PROFPLUGINWIN_MEMCHECK      43434777
 
 typedef enum {
     LAYOUT_SIMPLE,
@@ -86,7 +87,8 @@ typedef enum {
     WIN_MUC,
     WIN_MUC_CONFIG,
     WIN_PRIVATE,
-    WIN_XML
+    WIN_XML,
+    WIN_PLUGIN
 } win_type_t;
 
 typedef struct prof_win_t {
@@ -142,5 +144,11 @@ typedef struct prof_xml_win_t {
     ProfWin window;
     unsigned long memcheck;
 } ProfXMLWin;
+
+typedef struct prof_plugin_win_t {
+    ProfWin super;
+    char *tag;
+    unsigned long memcheck;
+} ProfPluginWin;
 
 #endif

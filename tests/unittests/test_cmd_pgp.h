@@ -1,6 +1,6 @@
-#include "config.h"
+#include "prof_config.h"
 
-#ifdef HAVE_LIBGPGME
+#ifdef PROF_HAVE_LIBGPGME
 void cmd_pgp_shows_usage_when_no_args(void **state);
 void cmd_pgp_start_shows_message_when_disconnected(void **state);
 void cmd_pgp_start_shows_message_when_disconnecting(void **state);

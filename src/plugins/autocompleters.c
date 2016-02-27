@@ -1,5 +1,5 @@
 /*
- * capabilities.h
+ * autocompleters.c
  *
  * Copyright (C) 2012 - 2016 James Booth <boothj5@gmail.com>
  *
@@ -32,30 +32,61 @@
  *
  */
 
-#ifndef XMPP_CAPABILITIES_H
-#define XMPP_CAPABILITIES_H
+#include <string.h>
 
-#include "prof_config.h"
+#include <glib.h>
 
-#ifdef PROF_HAVE_LIBMESODE
-#include <mesode.h>
-#endif
-#ifdef PROF_HAVE_LIBSTROPHE
-#include <strophe.h>
-#endif
+#include "tools/autocomplete.h"
 
-#include "xmpp/xmpp.h"
+static GHashTable *autocompleters;
 
-void caps_init(void);
+void
+autocompleters_init(void)
+{
+    autocompleters = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, (GDestroyNotify)autocomplete_free);
+}
 
-void caps_add_by_ver(const char *const ver, Capabilities *caps);
-void caps_add_by_jid(const char *const jid, Capabilities *caps);
-void caps_map_jid_to_ver(const char *const jid, const char *const ver);
-gboolean caps_contains(const char *const ver);
+void
+autocompleters_add(const char *key, char **items)
+{
+    Autocomplete new_ac = autocomplete_new();
+    int i = 0;
+    for (i = 0; i < g_strv_length(items); i++) {
+        autocomplete_add(new_ac, items[i]);
+    }
+    g_hash_table_insert(autocompleters, strdup(key), new_ac);
+}
 
-char* caps_create_sha1_str(xmpp_stanza_t *const query);
-xmpp_stanza_t* caps_create_query_response_stanza(xmpp_ctx_t *const ctx);
-Capabilities* caps_create(xmpp_stanza_t *query);
-char* caps_get_my_sha1(xmpp_ctx_t *const ctx);
+char *
+autocompleters_complete(const char * const input)
+{
+    char *result = NULL;
 
-#endif
+    GList *keys = g_hash_table_get_keys(autocompleters);
+    GList *curr = keys;
+    while (curr) {
+        result = autocomplete_param_with_ac(input, curr->data, g_hash_table_lookup(autocompleters, curr->data), TRUE);
+        if (result) {
+            return result;
+        }
+        curr = g_list_next(curr);
+    }
+
+    return NULL;
+}
+
+void
+autocompleters_reset(void)
+{
+    GList *acs = g_hash_table_get_values(autocompleters);
+    GList *curr = acs;
+    while (curr) {
+        autocomplete_reset(curr->data);
+        curr = g_list_next(curr);
+    }
+}
+
+void autocompleters_destroy(void)
+{
+    g_hash_table_destroy(autocompleters);
+}

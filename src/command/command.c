@@ -32,7 +32,7 @@
  *
  */
 
-#include "config.h"
+#include "prof_config.h"
 
 #include <assert.h>
 #include <errno.h>
@@ -58,10 +58,11 @@
 #include "xmpp/form.h"
 #include "log.h"
 #include "muc.h"
-#ifdef HAVE_LIBOTR
+#include "plugins/plugins.h"
+#ifdef PROF_HAVE_LIBOTR
 #include "otr/otr.h"
 #endif
-#ifdef HAVE_LIBGPGME
+#ifdef PROF_HAVE_LIBGPGME
 #include "pgp/gpg.h"
 #endif
 #include "profanity.h"
@@ -126,6 +127,7 @@ GHashTable *commands = NULL;
 #define CMD_TAG_CONNECTION  "connection"
 #define CMD_TAG_DISCOVERY   "discovery"
 #define CMD_TAG_UI          "ui"
+#define CMD_TAG_PLUGINS     "plugins"
 
 #define CMD_NOTAGS          { { NULL },
 #define CMD_TAGS(...)       { { __VA_ARGS__, NULL },
@@ -1733,6 +1735,17 @@ static struct cmd_t command_defs[] =
             "/account rename me gtalk")
     },
 
+    { "/plugins",
+        cmd_plugins, parse_args, 0, 0, NULL,
+        CMD_NOTAGS
+        CMD_SYN(
+            "/plugins")
+        CMD_DESC(
+            "Show currently installed plugins. ")
+        CMD_NOARGS
+        CMD_NOEXAMPLES
+    },
+
     { "/prefs",
         cmd_prefs, parse_args, 0, 1, NULL,
         CMD_NOTAGS
@@ -2053,6 +2066,7 @@ cmd_init(void)
     autocomplete_add(help_commands_ac, "discovery");
     autocomplete_add(help_commands_ac, "connection");
     autocomplete_add(help_commands_ac, "ui");
+    autocomplete_add(help_commands_ac, "plugins");
 
     prefs_ac = autocomplete_new();
     autocomplete_add(prefs_ac, "ui");
@@ -2641,10 +2655,18 @@ cmd_exists(char *cmd)
 }
 
 void
-cmd_autocomplete_add(char *value)
+cmd_autocomplete_add(const char *const value)
 {
     if (commands_ac) {
         autocomplete_add(commands_ac, value);
+    }
+}
+
+void
+cmd_help_autocomplete_add(const char *const value)
+{
+    if (help_ac) {
+        autocomplete_add(help_ac, value);
     }
 }
 
@@ -2687,7 +2709,7 @@ cmd_autocomplete_remove_form_fields(DataForm *form)
 }
 
 void
-cmd_autocomplete_remove(char *value)
+cmd_autocomplete_remove(const char *const value)
 {
     if (commands_ac) {
         autocomplete_remove(commands_ac, value);
@@ -2756,7 +2778,7 @@ cmd_reset_autocomplete(ProfWin *window)
     tlscerts_reset_ac();
     prefs_reset_boolean_choice();
     presence_reset_sub_request_search();
-#ifdef HAVE_LIBGPGME
+#ifdef PROF_HAVE_LIBGPGME
     p_gpg_autocomplete_key_reset();
 #endif
     autocomplete_reset(help_ac);
@@ -2867,6 +2889,7 @@ cmd_reset_autocomplete(ProfWin *window)
     prefs_reset_room_trigger_ac();
     win_reset_search_attempts();
     win_close_reset_search_attempts();
+    plugins_reset_autocomplete();
 }
 
 gboolean
@@ -2878,7 +2901,8 @@ cmd_valid_tag(const char *const str)
         (g_strcmp0(str, CMD_TAG_ROSTER) == 0) ||
         (g_strcmp0(str, CMD_TAG_DISCOVERY) == 0) ||
         (g_strcmp0(str, CMD_TAG_CONNECTION) == 0) ||
-        (g_strcmp0(str, CMD_TAG_UI) == 0));
+        (g_strcmp0(str, CMD_TAG_UI) == 0) ||
+        (g_strcmp0(str, CMD_TAG_PLUGINS) == 0));
 }
 
 gboolean
@@ -2968,6 +2992,8 @@ _cmd_execute(ProfWin *window, const char *const command, const char *const inp)
             g_strfreev(args);
             return result;
         }
+    } else if (plugins_run_command(inp)) {
+        return TRUE;
     } else {
         gboolean ran_alias = FALSE;
         gboolean alias_result = cmd_execute_alias(window, inp, &ran_alias);
@@ -3128,6 +3154,11 @@ _cmd_complete_parameters(ProfWin *window, const char *const input)
     }
     g_hash_table_destroy(ac_funcs);
 
+    result = plugins_autocomplete(input);
+    if (result) {
+        return result;
+    }
+
     if (g_str_has_prefix(input, "/field")) {
         result = _form_field_autocomplete(window, input);
         if (result) {
@@ -3190,7 +3221,7 @@ _who_autocomplete(ProfWin *window, const char *const input)
         }
     }
 
-    return NULL;
+    return result;
 }
 
 static char*
@@ -3647,7 +3678,7 @@ _pgp_autocomplete(ProfWin *window, const char *const input)
         return found;
     }
 
-#ifdef HAVE_LIBGPGME
+#ifdef PROF_HAVE_LIBGPGME
     gboolean result;
     gchar **args = parse_args(input, 2, 3, &result);
     if ((strncmp(input, "/pgp", 4) == 0) && (result == TRUE)) {
@@ -4568,7 +4599,7 @@ _account_autocomplete(ProfWin *window, const char *const input)
             if (found) {
                 return found;
             }
-#ifdef HAVE_LIBGPGME
+#ifdef PROF_HAVE_LIBGPGME
         } else if ((g_strv_length(args) > 3) && (g_strcmp0(args[2], "pgpkeyid")) == 0) {
             g_string_append(beginning, " ");
             g_string_append(beginning, args[2]);

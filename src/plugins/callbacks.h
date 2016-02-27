@@ -1,5 +1,5 @@
 /*
- * capabilities.h
+ * callbacks.h
  *
  * Copyright (C) 2012 - 2016 James Booth <boothj5@gmail.com>
  *
@@ -32,30 +32,37 @@
  *
  */
 
-#ifndef XMPP_CAPABILITIES_H
-#define XMPP_CAPABILITIES_H
+#ifndef CALLBACKS_H
+#define CALLBACKS_H
 
-#include "prof_config.h"
+#include <glib.h>
 
-#ifdef PROF_HAVE_LIBMESODE
-#include <mesode.h>
-#endif
-#ifdef PROF_HAVE_LIBSTROPHE
-#include <strophe.h>
-#endif
+#include "command/command.h"
 
-#include "xmpp/xmpp.h"
+typedef struct p_command {
+    const char *command_name;
+    int min_args;
+    int max_args;
+    CommandHelp *help;
+    void *callback;
+    void (*callback_func)(struct p_command *command, gchar **args);
+} PluginCommand;
 
-void caps_init(void);
+typedef struct p_timed_function {
+    void *callback;
+    void (*callback_func)(struct p_timed_function *timed_function);
+    int interval_seconds;
+    GTimer *timer;
+} PluginTimedFunction;
 
-void caps_add_by_ver(const char *const ver, Capabilities *caps);
-void caps_add_by_jid(const char *const jid, Capabilities *caps);
-void caps_map_jid_to_ver(const char *const jid, const char *const ver);
-gboolean caps_contains(const char *const ver);
+typedef struct p_window_input_callback {
+    void *callback;
+    void (*callback_func)(struct p_window_input_callback *window_callback, const char *tag, const char * const line);
+} PluginWindowCallback;
 
-char* caps_create_sha1_str(xmpp_stanza_t *const query);
-xmpp_stanza_t* caps_create_query_response_stanza(xmpp_ctx_t *const ctx);
-Capabilities* caps_create(xmpp_stanza_t *query);
-char* caps_get_my_sha1(xmpp_ctx_t *const ctx);
+void callbacks_add_command(PluginCommand *command);
+void callbacks_add_timed(PluginTimedFunction *timed_function);
+void callbacks_add_window_handler(const char *tag, PluginWindowCallback *window_callback);
+void * callbacks_get_window_handler(const char *tag);
 
 #endif

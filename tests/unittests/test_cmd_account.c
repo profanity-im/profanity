@@ -798,7 +798,7 @@ void cmd_account_set_priority_updates_presence_when_account_connected_with_prese
 
     will_return(jabber_get_account_name, "a_account");
 
-#ifdef HAVE_LIBGPGME
+#ifdef PROF_HAVE_LIBGPGME
     ProfAccount *account = account_new("a_account", "a_jid", NULL, NULL, TRUE, NULL, 5222, "a_resource",
         NULL, NULL, 10, 10, 10, 10, 10, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
 

@@ -35,12 +35,12 @@
 #ifndef XMPP_XMPP_H
 #define XMPP_XMPP_H
 
-#include "config.h"
+#include "prof_config.h"
 
-#ifdef HAVE_LIBMESODE
+#ifdef PROF_HAVE_LIBMESODE
 #include <mesode.h>
 #endif
-#ifdef HAVE_LIBSTROPHE
+#ifdef PROF_HAVE_LIBSTROPHE
 #include <strophe.h>
 #endif
 
@@ -155,7 +155,7 @@ char* jabber_get_account_name(void);
 GList* jabber_get_available_resources(void);
 char* jabber_create_uuid(void);
 void jabber_free_uuid(char *uuid);
-#ifdef HAVE_LIBMESODE
+#ifdef PROF_HAVE_LIBMESODE
 TLSCertificate* jabber_get_tls_peer_cert(void);
 #endif
 gboolean jabber_conn_is_secured(void);

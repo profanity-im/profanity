@@ -1,5 +1,5 @@
 /*
- * capabilities.h
+ * prof_api.h
  *
  * Copyright (C) 2012 - 2016 James Booth <boothj5@gmail.com>
  *
@@ -32,30 +32,41 @@
  *
  */
 
-#ifndef XMPP_CAPABILITIES_H
-#define XMPP_CAPABILITIES_H
+#ifndef PROF_API_H
+#define PROF_API_H
 
-#include "prof_config.h"
+typedef char* PROF_WIN_TAG;
 
-#ifdef PROF_HAVE_LIBMESODE
-#include <mesode.h>
-#endif
-#ifdef PROF_HAVE_LIBSTROPHE
-#include <strophe.h>
-#endif
+void (*prof_cons_alert)(void);
+int (*prof_cons_show)(const char * const message);
+int (*prof_cons_show_themed)(const char *const group, const char *const item, const char *const def, const char *const message);
+int (*prof_cons_bad_cmd_usage)(const char *const cmd);
 
-#include "xmpp/xmpp.h"
+void (*prof_register_command)(const char *command_name, int min_args, int max_args,
+    const char **synopsis, const char *description, const char *arguments[][2], const char **examples,
+    void(*callback)(char **args));
 
-void caps_init(void);
+void (*prof_register_timed)(void(*callback)(void), int interval_seconds);
 
-void caps_add_by_ver(const char *const ver, Capabilities *caps);
-void caps_add_by_jid(const char *const jid, Capabilities *caps);
-void caps_map_jid_to_ver(const char *const jid, const char *const ver);
-gboolean caps_contains(const char *const ver);
+void (*prof_register_ac)(const char *key, char **items);
 
-char* caps_create_sha1_str(xmpp_stanza_t *const query);
-xmpp_stanza_t* caps_create_query_response_stanza(xmpp_ctx_t *const ctx);
-Capabilities* caps_create(xmpp_stanza_t *query);
-char* caps_get_my_sha1(xmpp_ctx_t *const ctx);
+void (*prof_notify)(const char *message, int timeout_ms, const char *category);
+
+void (*prof_send_line)(char *line);
+
+char* (*prof_get_current_recipient)(void);
+char* (*prof_get_current_muc)(void);
+
+void (*prof_log_debug)(const char *message);
+void (*prof_log_info)(const char *message);
+void (*prof_log_warning)(const char *message);
+void (*prof_log_error)(const char *message);
+
+int (*prof_win_exists)(PROF_WIN_TAG win);
+void (*prof_win_create)(PROF_WIN_TAG win, void(*input_handler)(PROF_WIN_TAG win, char *line));
+int (*prof_win_focus)(PROF_WIN_TAG win);
+int (*prof_win_show)(PROF_WIN_TAG win, char *line);
+int (*prof_win_show_themed)(PROF_WIN_TAG tag, char *group, char *key, char *def, char *line);
+
 
 #endif
