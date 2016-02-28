@@ -255,10 +255,10 @@ AC_CHECK_HEADERS([ncurses.h], [], [])
 AM_CFLAGS="-Wall -Wno-deprecated-declarations"
 AS_IF([test "x$PACKAGE_STATUS" = xdevelopment],
     [AM_CFLAGS="$AM_CFLAGS -Wunused -Werror"])
-AM_LDFLAGS="$AM_LDFLAGS $PYTHON_LDFLAGS -export-dynamic"
+AM_LDFLAGS="$AM_LDFLAGS -export-dynamic"
 AM_CPPFLAGS="$AM_CPPFLAGS $glib_CFLAGS $curl_CFLAGS $libnotify_CFLAGS $PYTHON_CPPFLAGS"
 AM_CPPFLAGS="$AM_CPPFLAGS -DTHEMES_PATH=\"\\\"$THEMES_PATH\\\"\""
-LIBS="$glib_LIBS $curl_LIBS $libnotify_LIBS $LIBS"
+LIBS="$glib_LIBS $curl_LIBS $libnotify_LIBS $PYTHON_LIBS $PYTHON_LDFLAGS $LIBS"
 
 AC_SUBST(AM_LDFLAGS)
 AC_SUBST(AM_CFLAGS)
