@@ -216,7 +216,7 @@ endif
 
 if BUILD_C_API
 lib_LTLIBRARIES = libprofanity.la
-libprofanity_la_LDFLAGS=-avoid-version -shared
+libprofanity_la_LDFLAGS=-avoid-version -shared -no-undefined
 libprofanity_la_SOURCES = src/plugins/profapi.c
 
 library_includedir=$(includedir)
