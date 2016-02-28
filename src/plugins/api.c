@@ -197,6 +197,17 @@ api_get_current_muc(void)
     }
 }
 
+int
+api_current_win_is_console(void)
+{
+    ProfWin *current = wins_get_current();
+    if (current && current->type == WIN_CONSOLE) {
+        return 1;
+    } else {
+        return 0;
+    }
+}
+
 void
 api_log_debug(const char *message)
 {
