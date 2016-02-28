@@ -43,8 +43,10 @@ int api_cons_show_themed(const char *const group, const char *const item, const 
 int api_cons_bad_cmd_usage(const char *const cmd);
 void api_notify(const char *message, const char *category, int timeout_ms);
 void api_send_line(char *line);
+
 char * api_get_current_recipient(void);
 char * api_get_current_muc(void);
+gboolean api_current_win_is_console(void);
 
 void api_register_command(const char *command_name, int min_args, int max_args,
     const char **synopsis, const char *description, const char *arguments[][2], const char **examples,
