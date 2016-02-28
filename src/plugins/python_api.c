@@ -244,6 +244,17 @@ python_api_get_current_muc(PyObject *self, PyObject *args)
     }
 }
 
+static PyObject*
+python_api_current_win_is_console(PyObject *self, PyObject *args)
+{
+    int res = api_current_win_is_console();
+    if (res) {
+        return Py_BuildValue("O", Py_True);
+    } else {
+        return Py_BuildValue("O", Py_False);
+    }
+}
+
 static PyObject *
 python_api_log_debug(PyObject *self, PyObject *args)
 {
@@ -443,6 +454,7 @@ static PyMethodDef apiMethods[] = {
     { "notify", python_api_notify, METH_VARARGS, "Send desktop notification." },
     { "get_current_recipient", python_api_get_current_recipient, METH_VARARGS, "Return the jid of the recipient of the current window." },
     { "get_current_muc", python_api_get_current_muc, METH_VARARGS, "Return the jid of the room of the current window." },
+    { "current_win_is_console", python_api_current_win_is_console, METH_VARARGS, "Returns whether the current window is the console." },
     { "log_debug", python_api_log_debug, METH_VARARGS, "Log a debug message" },
     { "log_info", python_api_log_info, METH_VARARGS, "Log an info message" },
     { "log_warning", python_api_log_warning, METH_VARARGS, "Log a warning message" },
