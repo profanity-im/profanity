@@ -350,7 +350,7 @@ win_get_string(ProfWin *window)
         {
             ProfPluginWin *pluginwin = (ProfPluginWin*)window;
             GString *gstring = g_string_new("");
-            g_string_append_printf(gstring, "%s plugin", pluginwin->tag);
+            g_string_append_printf(gstring, "Plugin: %s", pluginwin->tag);
             char *res = gstring->str;
             g_string_free(gstring, FALSE);
             return res;
