@@ -42,6 +42,9 @@ AS_IF([test "x$PLATFORM" = xcygwin],
 AS_IF([test "x$PLATFORM" = xosx],
     [AC_DEFINE([PLATFORM_OSX], [1], [OSx])])
 
+### Environment variables
+AC_ARG_VAR([PYTHON_FRAMEWORK], [Set base directory for Python Framework])
+
 ### Options
 AC_ARG_ENABLE([notifications],
     [AS_HELP_STRING([--enable-notifications], [enable desktop notifications])])
@@ -66,6 +69,11 @@ AC_ARG_WITH([themes],
 if test "x$enable_plugins" = xno; then
     AM_CONDITIONAL([BUILD_PYTHON_API], [false])
 elif test "x$enable_python_plugins" != xno; then
+    AS_IF([test "x$PLATFORM" = xosx], [
+        AS_IF([test "x$PYTHON_FRAMEWORK" = x], [ PYTHON_FRAMEWORK="/Library/Frameworks/Python.framework" ])
+        AC_MSG_NOTICE([Symlinking Python.framework to $PYTHON_FRAMEWORK])
+        rm -f Python.framework
+        ln -s $PYTHON_FRAMEWORK Python.framework ])
     AC_CHECK_PROG(PYTHON_CONFIG_EXISTS, python-config, yes, no)
     if test "$PYTHON_CONFIG_EXISTS" == "yes"; then
         AX_PYTHON_DEVEL
@@ -79,6 +87,7 @@ elif test "x$enable_python_plugins" != xno; then
             AC_MSG_NOTICE([Python development package not found, Python plugin support disabled.])
         fi
     fi
+    AS_IF([test "x$PLATFORM" = xosx], [rm -f Python.framework])
 else
     AM_CONDITIONAL([BUILD_PYTHON_API], [false])
 fi
