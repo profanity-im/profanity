@@ -57,6 +57,7 @@ void
 plugins_init(void)
 {
     plugins = NULL;
+    callbacks_init();
     autocompleters_init();
     plugin_themes_init();
 
@@ -404,6 +405,7 @@ plugins_shutdown(void)
 
     autocompleters_destroy();
     plugin_themes_close();
+    callbacks_close();
 }
 
 gchar *

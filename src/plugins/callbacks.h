@@ -57,8 +57,12 @@ typedef struct p_timed_function {
 
 typedef struct p_window_input_callback {
     void *callback;
+    void (*destroy)(void *callback);
     void (*callback_func)(struct p_window_input_callback *window_callback, const char *tag, const char * const line);
 } PluginWindowCallback;
+
+void callbacks_init(void);
+void callbacks_close(void);
 
 void callbacks_add_command(PluginCommand *command);
 void callbacks_add_timed(PluginTimedFunction *timed_function);
