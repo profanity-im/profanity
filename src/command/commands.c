@@ -5160,7 +5160,7 @@ cmd_log(ProfWin *window, const char *const command, gchar **args)
         gboolean res = strtoi_range(value, &intval, PREFS_MIN_LOG_SIZE, INT_MAX, &err_msg);
         if (res) {
             prefs_set_max_log_size(intval);
-            cons_show("Log maxinum size set to %d bytes", intval);
+            cons_show("Log maximum size set to %d bytes", intval);
         } else {
             cons_show(err_msg);
             free(err_msg);
