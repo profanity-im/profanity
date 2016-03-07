@@ -167,7 +167,7 @@ c_api_win_create(char *tag, void(*callback)(char *tag, char *line))
 {
     WindowWrapper *wrapper = malloc(sizeof(WindowWrapper));
     wrapper->func = callback;
-    api_win_create(tag, wrapper, c_window_callback);
+    api_win_create(tag, wrapper, free, c_window_callback);
 }
 
 static int
