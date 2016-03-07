@@ -228,7 +228,7 @@ lua_api_win_create(lua_State *L)
     int *p_callback_ref = malloc(sizeof(int));
     *p_callback_ref = luaL_ref(L, LUA_REGISTRYINDEX);
 
-    api_win_create(tag, p_callback_ref, lua_window_callback);
+    api_win_create(tag, p_callback_ref, NULL, lua_window_callback);
 
     return 0;
 }

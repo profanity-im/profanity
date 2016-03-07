@@ -46,6 +46,27 @@ static GSList *p_commands = NULL;
 static GSList *p_timed_functions = NULL;
 static GHashTable *p_window_callbacks = NULL;
 
+static void
+_free_window_callback(PluginWindowCallback *window_callback)
+{
+    if (window_callback->destroy) {
+        window_callback->destroy(window_callback->callback);
+    }
+    free(window_callback);
+}
+
+void
+callbacks_init(void)
+{
+    p_window_callbacks = g_hash_table_new_full(g_str_hash, g_str_equal, free, (GDestroyNotify)_free_window_callback);
+}
+
+void
+callbacks_close(void)
+{
+    g_hash_table_destroy(p_window_callbacks);
+}
+
 void
 callbacks_add_command(PluginCommand *command)
 {
@@ -63,10 +84,6 @@ callbacks_add_timed(PluginTimedFunction *timed_function)
 void
 callbacks_add_window_handler(const char *tag, PluginWindowCallback *window_callback)
 {
-    if (p_window_callbacks == NULL) {
-        p_window_callbacks = g_hash_table_new(g_str_hash, g_str_equal);
-    }
-
     g_hash_table_insert(p_window_callbacks, strdup(tag), window_callback);
 }
 

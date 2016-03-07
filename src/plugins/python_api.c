@@ -303,7 +303,7 @@ python_api_win_create(PyObject *self, PyObject *args)
     }
 
     if (p_callback && PyCallable_Check(p_callback)) {
-        api_win_create(tag, p_callback, python_window_callback);
+        api_win_create(tag, p_callback, NULL, python_window_callback);
     }
 
     return Py_BuildValue("");

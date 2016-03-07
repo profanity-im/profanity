@@ -213,7 +213,7 @@ ruby_api_win_create(VALUE self, VALUE v_tag, VALUE v_callback)
 {
     char *tag = STR2CSTR(v_tag);
 
-    api_win_create(tag, (void*)v_callback, ruby_window_callback);
+    api_win_create(tag, (void*)v_callback, NULL, ruby_window_callback);
 
     return Qnil;
 }

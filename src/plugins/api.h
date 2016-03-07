@@ -61,7 +61,10 @@ void api_log_warning(const char *message);
 void api_log_error(const char *message);
 
 int api_win_exists(const char *tag);
-void api_win_create(const char *tag, void *callback,
+void api_win_create(
+    const char *tag,
+    void *callback,
+    void(*destroy)(void *callback),
     void(*callback_func)(PluginWindowCallback *window_callback, char *tag, char *line));
 int api_win_focus(const char *tag);
 int api_win_show(const char *tag, const char *line);

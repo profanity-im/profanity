@@ -239,12 +239,16 @@ api_win_exists(const char *tag)
 }
 
 void
-api_win_create(const char *tag, void *callback,
+api_win_create(
+    const char *tag,
+    void *callback,
+    void(*destroy)(void *callback),
     void(*callback_func)(PluginWindowCallback *window_callback, const char *tag, const char * const line))
 {
     PluginWindowCallback *window = malloc(sizeof(PluginWindowCallback));
     window->callback = callback;
     window->callback_func = callback_func;
+    window->destroy = destroy;
     callbacks_add_window_handler(tag, window);
     wins_new_plugin(tag);
 

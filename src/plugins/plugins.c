@@ -73,6 +73,7 @@ void
 plugins_init(void)
 {
     plugins = NULL;
+    callbacks_init();
     autocompleters_init();
 
 #ifdef PROF_HAVE_PYTHON
@@ -488,6 +489,7 @@ plugins_shutdown(void)
 
     autocompleters_destroy();
     plugin_themes_close();
+    callbacks_close();
 }
 
 gchar *
