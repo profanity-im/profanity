@@ -67,10 +67,12 @@ autocompleters_complete(const char * const input)
     while (curr) {
         result = autocomplete_param_with_ac(input, curr->data, g_hash_table_lookup(autocompleters, curr->data), TRUE);
         if (result) {
+            g_list_free(keys);
             return result;
         }
         curr = g_list_next(curr);
     }
+    g_list_free(keys);
 
     return NULL;
 }
@@ -84,6 +86,8 @@ autocompleters_reset(void)
         autocomplete_reset(curr->data);
         curr = g_list_next(curr);
     }
+
+    g_list_free(acs);
 }
 
 void autocompleters_destroy(void)
