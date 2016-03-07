@@ -403,6 +403,8 @@ _create_directories(void)
 
     GString *themes_dir = g_string_new(xdg_config);
     g_string_append(themes_dir, "/profanity/themes");
+    GString *icons_dir = g_string_new(xdg_config);
+    g_string_append(icons_dir, "/profanity/icons");
     GString *chatlogs_dir = g_string_new(xdg_data);
     g_string_append(chatlogs_dir, "/profanity/chatlogs");
     GString *logs_dir = g_string_new(xdg_data);
@@ -410,6 +412,9 @@ _create_directories(void)
 
     if (!mkdir_recursive(themes_dir->str)) {
         log_error("Error while creating directory %s", themes_dir->str);
+    }
+    if (!mkdir_recursive(icons_dir->str)) {
+        log_error("Error while creating directory %s", icons_dir->str);
     }
     if (!mkdir_recursive(chatlogs_dir->str)) {
         log_error("Error while creating directory %s", chatlogs_dir->str);
@@ -419,6 +424,7 @@ _create_directories(void)
     }
 
     g_string_free(themes_dir, TRUE);
+    g_string_free(icons_dir, TRUE);
     g_string_free(chatlogs_dir, TRUE);
     g_string_free(logs_dir, TRUE);
 

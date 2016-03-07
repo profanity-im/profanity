@@ -192,6 +192,9 @@ AS_IF([test "x$with_themes" = xno -o "x$with_themes" = xyes -o "x$with_themes" =
 AC_SUBST(THEMES_PATH)
 AM_CONDITIONAL([THEMES_INSTALL], "$THEMES_INSTALL")
 
+ICONS_PATH='${pkgdatadir}/icons'
+AC_SUBST(ICONS_PATH)
+
 ### cmocka is required only for tests, profanity shouldn't be linked with it
 ### TODO: pass cmocka_CFLAGS and cmocka_LIBS to Makefile.am
 PKG_CHECK_MODULES([cmocka], [cmocka], [],
@@ -213,7 +216,7 @@ AM_CFLAGS="-Wall -Wno-deprecated-declarations"
 AS_IF([test "x$PACKAGE_STATUS" = xdevelopment],
     [AM_CFLAGS="$AM_CFLAGS -Wunused -Werror"])
 AM_CPPFLAGS="$AM_CPPFLAGS $glib_CFLAGS $curl_CFLAGS $libnotify_CFLAGS ${GTK_CFLAGS}"
-AM_CPPFLAGS="$AM_CPPFLAGS -DTHEMES_PATH=\"\\\"$THEMES_PATH\\\"\""
+AM_CPPFLAGS="$AM_CPPFLAGS -DICONS_PATH=\"\\\"$ICONS_PATH\\\"\" -DTHEMES_PATH=\"\\\"$THEMES_PATH\\\"\""
 LIBS="$glib_LIBS $curl_LIBS $libnotify_LIBS $LIBS ${GTK_LIBS}"
 
 AC_SUBST(AM_CFLAGS)
@@ -234,5 +237,6 @@ echo "LIBS           : $LIBS"
 echo "XML Parser     : $PARSER"
 echo "Install themes : $THEMES_INSTALL"
 echo "Themes path    : $THEMES_PATH"
+echo "Icons path     : $ICONS_PATH"
 echo ""
 echo "Now you can run \`make' to build profanity"

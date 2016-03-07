@@ -140,6 +140,8 @@ otr_unittest_sources = \
 
 themes_sources = themes/*
 
+icons_sources = icons/*
+
 script_sources = bootstrap.sh configure-debug install-all.sh
 
 man_sources = docs/profanity.1
@@ -168,6 +170,8 @@ endif
 if INCLUDE_GIT_VERSION
 BUILT_SOURCES = $(git_include)
 endif
+profanity_iconsdir = @ICONS_PATH@
+profanity_icons_DATA = $(icons_sources)
 
 TESTS = tests/unittests/unittests
 check_PROGRAMS = tests/unittests/unittests
@@ -187,7 +191,7 @@ endif
 
 man_MANS = $(man_sources)
 
-EXTRA_DIST = $(man_sources) $(themes_sources) $(script_sources) profrc.example LICENSE.txt
+EXTRA_DIST = $(man_sources) $(icons_sources) $(themes_sources) $(script_sources) profrc.example LICENSE.txt
 
 if INCLUDE_GIT_VERSION
 EXTRA_DIST += .git/HEAD .git/index
