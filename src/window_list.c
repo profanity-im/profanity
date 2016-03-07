@@ -212,6 +212,7 @@ wins_get_plugin(const char *const tag)
         if (window->type == WIN_PLUGIN) {
             ProfPluginWin *pluginwin = (ProfPluginWin*)window;
             if (g_strcmp0(pluginwin->tag, tag) == 0) {
+                g_list_free(values);
                 return pluginwin;
             }
         }

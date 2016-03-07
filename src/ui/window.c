@@ -419,27 +419,42 @@ win_free(ProfWin* window)
     }
     free(window->layout);
 
-    if (window->type == WIN_CHAT) {
+    switch (window->type) {
+    case WIN_CHAT:
+    {
         ProfChatWin *chatwin = (ProfChatWin*)window;
         free(chatwin->barejid);
         free(chatwin->resource_override);
         chat_state_free(chatwin->state);
+        break;
     }
-
-    if (window->type == WIN_MUC) {
+    case WIN_MUC:
+    {
         ProfMucWin *mucwin = (ProfMucWin*)window;
         free(mucwin->roomjid);
+        break;
     }
-
-    if (window->type == WIN_MUC_CONFIG) {
+    case WIN_MUC_CONFIG:
+    {
         ProfMucConfWin *mucconf = (ProfMucConfWin*)window;
         free(mucconf->roomjid);
         form_destroy(mucconf->form);
+        break;
     }
-
-    if (window->type == WIN_PRIVATE) {
+    case WIN_PRIVATE:
+    {
         ProfPrivateWin *privatewin = (ProfPrivateWin*)window;
         free(privatewin->fulljid);
+        break;
+    }
+    case WIN_PLUGIN:
+    {
+        ProfPluginWin *pluginwin = (ProfPluginWin*)window;
+        free(pluginwin->tag);
+        break;
+    }
+    default:
+        break;
     }
 
     free(window);
