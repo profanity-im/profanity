@@ -45,8 +45,12 @@
 static PyObject*
 python_api_cons_alert(PyObject *self, PyObject *args)
 {
+    allow_python_threads();
     api_cons_alert();
+    disable_python_threads();
+
     return Py_BuildValue("");
+
 }
 
 static PyObject*
@@ -56,7 +60,10 @@ python_api_cons_show(PyObject *self, PyObject *args)
     if (!PyArg_ParseTuple(args, "s", &message)) {
         return Py_BuildValue("");
     }
+    allow_python_threads();
     api_cons_show(message);
+    disable_python_threads();
+
     return Py_BuildValue("");
 }
 
@@ -70,7 +77,10 @@ python_api_cons_show_themed(PyObject *self, PyObject *args)
     if (!PyArg_ParseTuple(args, "zzzs", &group, &key, &def, &message)) {
         return Py_BuildValue("");
     }
+    allow_python_threads();
     api_cons_show_themed(group, key, def, message);
+    disable_python_threads();
+
     return Py_BuildValue("");
 }
 
@@ -81,7 +91,10 @@ python_api_cons_bad_cmd_usage(PyObject *self, PyObject *args)
     if (!PyArg_ParseTuple(args, "s", &cmd)) {
         return Py_BuildValue("");
     }
+    allow_python_threads();
     api_cons_bad_cmd_usage(cmd);
+    disable_python_threads();
+
     return Py_BuildValue("");
 }
 
@@ -144,8 +157,10 @@ python_api_register_command(PyObject *self, PyObject *args)
         }
         c_examples[len] = NULL;
 
+        allow_python_threads();
         api_register_command(command_name, min_args, max_args, c_synopsis,
             description, c_arguments, c_examples, p_callback, python_command_callback);
+        disable_python_threads();
     }
 
     return Py_BuildValue("");
@@ -162,7 +177,9 @@ python_api_register_timed(PyObject *self, PyObject *args)
     }
 
     if (p_callback && PyCallable_Check(p_callback)) {
+        allow_python_threads();
         api_register_timed(p_callback, interval_seconds, python_timed_callback);
+        disable_python_threads();
     }
 
     return Py_BuildValue("");
@@ -189,7 +206,10 @@ python_api_register_ac(PyObject *self, PyObject *args)
     }
     c_items[len] = NULL;
 
+    allow_python_threads();
     autocompleters_add(key, c_items);
+    disable_python_threads();
+
     return Py_BuildValue("");
 }
 
@@ -204,7 +224,9 @@ python_api_notify(PyObject *self, PyObject *args)
         return Py_BuildValue("");
     }
 
+    allow_python_threads();
     api_notify(message, category, timeout_ms);
+    disable_python_threads();
 
     return Py_BuildValue("");
 }
@@ -217,7 +239,9 @@ python_api_send_line(PyObject *self, PyObject *args)
         return Py_BuildValue("");
     }
 
+    allow_python_threads();
     api_send_line(line);
+    disable_python_threads();
 
     return Py_BuildValue("");
 }
@@ -225,7 +249,9 @@ python_api_send_line(PyObject *self, PyObject *args)
 static PyObject *
 python_api_get_current_recipient(PyObject *self, PyObject *args)
 {
+    allow_python_threads();
     char *recipient = api_get_current_recipient();
+    disable_python_threads();
     if (recipient) {
         return Py_BuildValue("s", recipient);
     } else {
@@ -236,7 +262,9 @@ python_api_get_current_recipient(PyObject *self, PyObject *args)
 static PyObject *
 python_api_get_current_muc(PyObject *self, PyObject *args)
 {
+    allow_python_threads();
     char *room = api_get_current_muc();
+    disable_python_threads();
     if (room) {
         return Py_BuildValue("s", room);
     } else {
@@ -247,7 +275,9 @@ python_api_get_current_muc(PyObject *self, PyObject *args)
 static PyObject*
 python_api_current_win_is_console(PyObject *self, PyObject *args)
 {
+    allow_python_threads();
     int res = api_current_win_is_console();
+    disable_python_threads();
     if (res) {
         return Py_BuildValue("O", Py_True);
     } else {
@@ -262,7 +292,10 @@ python_api_log_debug(PyObject *self, PyObject *args)
     if (!PyArg_ParseTuple(args, "s", &message)) {
         return Py_BuildValue("");
     }
+    allow_python_threads();
     api_log_debug(message);
+    disable_python_threads();
+
     return Py_BuildValue("");
 }
 
@@ -273,7 +306,11 @@ python_api_log_info(PyObject *self, PyObject *args)
     if (!PyArg_ParseTuple(args, "s", &message)) {
         return Py_BuildValue("");
     }
+
+    allow_python_threads();
     api_log_info(message);
+    disable_python_threads();
+
     return Py_BuildValue("");
 }
 
@@ -284,7 +321,10 @@ python_api_log_warning(PyObject *self, PyObject *args)
     if (!PyArg_ParseTuple(args, "s", &message)) {
         return Py_BuildValue("");
     }
+
+    allow_python_threads();
     api_log_warning(message);
+    disable_python_threads();
     return Py_BuildValue("");
 }
 
@@ -295,7 +335,10 @@ python_api_log_error(PyObject *self, PyObject *args)
     if (!PyArg_ParseTuple(args, "s", &message)) {
         return Py_BuildValue("");
     }
+    allow_python_threads();
     api_log_error(message);
+    disable_python_threads();
+
     return Py_BuildValue("");
 }
 
@@ -307,7 +350,11 @@ python_api_win_exists(PyObject *self, PyObject *args)
         return Py_BuildValue("");
     }
 
-    if (api_win_exists(tag)) {
+    allow_python_threads();
+    gboolean exists = api_win_exists(tag);
+    disable_python_threads();
+
+    if (exists) {
         return Py_BuildValue("i", 1);
     } else {
         return Py_BuildValue("i", 0);
@@ -325,7 +372,9 @@ python_api_win_create(PyObject *self, PyObject *args)
     }
 
     if (p_callback && PyCallable_Check(p_callback)) {
+        allow_python_threads();
         api_win_create(tag, p_callback, NULL, python_window_callback);
+        disable_python_threads();
     }
 
     return Py_BuildValue("");
@@ -340,7 +389,10 @@ python_api_win_focus(PyObject *self, PyObject *args)
         return Py_BuildValue("");
     }
 
+    allow_python_threads();
     api_win_focus(tag);
+    disable_python_threads();
+
     return Py_BuildValue("");
 }
 
@@ -354,7 +406,10 @@ python_api_win_show(PyObject *self, PyObject *args)
         return Py_BuildValue("");
     }
 
+    allow_python_threads();
     api_win_show(tag, line);
+    disable_python_threads();
+
     return Py_BuildValue("");
 }
 
@@ -371,7 +426,10 @@ python_api_win_show_themed(PyObject *self, PyObject *args)
         return Py_BuildValue("");
     }
 
+    allow_python_threads();
     api_win_show_themed(tag, group, key, def, line);
+    disable_python_threads();
+
     return Py_BuildValue("");
 }
 
