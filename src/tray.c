@@ -49,11 +49,22 @@ static guint timer;
 static gchar*
 _get_icons_dir(void)
 {
+    GString *icons_dir =  NULL;
+
+#ifdef ICONS_PATH
+
+    icons_dir = g_string_new(ICONS_PATH);
+
+#else
+
     gchar *xdg_config = xdg_get_config_home();
-    GString *icons_dir = g_string_new(xdg_config);
+    icons_dir = g_string_new(xdg_config);
     g_free(xdg_config);
     g_string_append(icons_dir, "/profanity/icons");
-    return g_string_free(icons_dir, true);
+
+#endif /* ICONS_PATH */
+
+    return g_string_free(icons_dir, false);
 }
 
 gboolean tray_change_icon(gpointer data)
@@ -75,15 +86,15 @@ gboolean tray_change_icon(gpointer data)
 
 void create_tray(void)
 {
-    gchar *icons_dir = _get_icons_dir();
-    icon_filename = g_string_new(icons_dir);
-    icon_msg_filename = g_string_new(icons_dir);
+    gchar *icons_dir_ret = _get_icons_dir();
+    icon_filename = g_string_new(icons_dir_ret);
+    icon_msg_filename = g_string_new(icons_dir_ret);
     g_string_append(icon_filename, "/proIcon.png");
     g_string_append(icon_msg_filename, "/proIconMsg.png");
     prof_tray = gtk_status_icon_new_from_file(icon_filename->str);
     shutting_down = false;
     timer = g_timeout_add(5000, tray_change_icon, NULL);
-    g_free(icons_dir);
+    g_free(icons_dir_ret);
 }
 
 void destroy_tray(void)
