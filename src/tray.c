@@ -34,7 +34,7 @@
 
 #include <gtk/gtk.h>
 #include <glib.h>
-#include <string.h>
+#include <glib/gstdio.h>
 
 #include "tray.h"
 #include "window_list.h"
@@ -42,29 +42,55 @@
 static GtkStatusIcon *prof_tray = NULL;
 static GString *icon_filename = NULL;
 static GString *icon_msg_filename = NULL;
-static int unread_messages;
+static gint unread_messages;
 static bool shutting_down;
 static guint timer;
 
-static gchar*
-_get_icons_dir(void)
+static void _get_icons(void)
 {
     GString *icons_dir =  NULL;
 
 #ifdef ICONS_PATH
 
     icons_dir = g_string_new(ICONS_PATH);
+    icon_filename = g_string_new(icons_dir->str);
+    icon_msg_filename = g_string_new(icons_dir->str);
+    g_string_append(icon_filename, "/proIcon.png");
+    g_string_append(icon_msg_filename, "/proIconMsg.png");
+    g_string_free(icons_dir, true);
 
-#else
+#endif /* ICONS_PATH */
 
     gchar *xdg_config = xdg_get_config_home();
     icons_dir = g_string_new(xdg_config);
     g_free(xdg_config);
     g_string_append(icons_dir, "/profanity/icons");
-
-#endif /* ICONS_PATH */
-
-    return g_string_free(icons_dir, false);
+    GError *err = NULL;
+    if (!g_file_test(icons_dir->str, G_FILE_TEST_IS_DIR)) {
+        return;
+    }
+    GDir *dir = g_dir_open(icons_dir->str, 0, &err);
+    if (dir) {
+        GString *name = g_string_new(g_dir_read_name(dir));
+        while (name->len) {
+            if (g_strcmp0("proIcon.png", name->str) == 0) {
+                icon_filename = g_string_new(icons_dir->str);
+                g_string_append(icon_filename, "/proIcon.png");
+            } else
+            if (g_strcmp0("proIconMsg.png", name->str) == 0){
+                icon_msg_filename = g_string_new(icons_dir->str);
+                g_string_append(icon_msg_filename, "/proIconMsg.png");
+            }
+            g_string_free(name, true);
+            name = g_string_new(g_dir_read_name(dir));
+        }
+    } else {
+        fprintf (stderr, "Unable to open dir: %s\n", err->message);
+        g_error_free(err);
+    }
+    g_dir_close(dir);
+    g_free(err);
+    g_string_free(icons_dir, true);
 }
 
 gboolean tray_change_icon(gpointer data)
@@ -86,15 +112,10 @@ gboolean tray_change_icon(gpointer data)
 
 void create_tray(void)
 {
-    gchar *icons_dir_ret = _get_icons_dir();
-    icon_filename = g_string_new(icons_dir_ret);
-    icon_msg_filename = g_string_new(icons_dir_ret);
-    g_string_append(icon_filename, "/proIcon.png");
-    g_string_append(icon_msg_filename, "/proIconMsg.png");
+    _get_icons();
     prof_tray = gtk_status_icon_new_from_file(icon_filename->str);
     shutting_down = false;
     timer = g_timeout_add(5000, tray_change_icon, NULL);
-    g_free(icons_dir_ret);
 }
 
 void destroy_tray(void)
@@ -105,6 +126,6 @@ void destroy_tray(void)
         gtk_widget_destroy(GTK_WIDGET(prof_tray));
         prof_tray = NULL;
     }
-    g_string_free(icon_filename, false);
-    g_string_free(icon_msg_filename, false);
+    g_string_free(icon_filename, true);
+    g_string_free(icon_msg_filename, true);
 }
