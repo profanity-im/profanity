@@ -35,20 +35,26 @@
 #include <string.h>
 #include <stdlib.h>
 
+#include "prof_config.h"
 #include "common.h"
 #include "config/preferences.h"
 #include "log.h"
 #include "plugins/callbacks.h"
 #include "plugins/autocompleters.h"
-#include "plugins/themes.h"
 #include "plugins/api.h"
 #include "plugins/plugins.h"
+#include "plugins/themes.h"
+
+#ifdef PROF_HAVE_PYTHON
+#include "plugins/python_plugins.h"
+#include "plugins/python_api.h"
+#endif
 
 #ifdef PROF_HAVE_C
 #include "plugins/c_plugins.h"
 #include "plugins/c_api.h"
-
 #endif
+
 #include "ui/ui.h"
 
 static GSList* plugins;
@@ -59,11 +65,15 @@ plugins_init(void)
     plugins = NULL;
     callbacks_init();
     autocompleters_init();
-    plugin_themes_init();
 
+#ifdef PROF_HAVE_PYTHON
+    python_env_init();
+#endif
 #ifdef PROF_HAVE_C
     c_env_init();
 #endif
+
+    plugin_themes_init();
 
     // load plugins
     gchar **plugins_load = prefs_get_plugins();
@@ -73,6 +83,15 @@ plugins_init(void)
         {
             gboolean loaded = FALSE;
             gchar *filename = plugins_load[i];
+#ifdef PROF_HAVE_PYTHON
+            if (g_str_has_suffix(filename, ".py")) {
+                ProfPlugin *plugin = python_plugin_create(filename);
+                if (plugin) {
+                    plugins = g_slist_append(plugins, plugin);
+                    loaded = TRUE;
+                }
+            }
+#endif
 #ifdef PROF_HAVE_C
             if (g_str_has_suffix(filename, ".so")) {
                 ProfPlugin *plugin = c_plugin_create(filename);
@@ -95,6 +114,7 @@ plugins_init(void)
             curr = g_slist_next(curr);
         }
     }
+
     prefs_free_plugins(plugins_load);
 
     return;
@@ -111,6 +131,8 @@ plugins_get_lang_string(ProfPlugin *plugin)
 {
     switch (plugin->lang)
     {
+        case LANG_PYTHON:
+            return "Python";
         case LANG_C:
             return "C";
         default:
@@ -391,6 +413,11 @@ plugins_shutdown(void)
     GSList *curr = plugins;
 
     while (curr) {
+#ifdef PROF_HAVE_PYTHON
+        if (((ProfPlugin *)curr->data)->lang == LANG_PYTHON) {
+            python_plugin_destroy(curr->data);
+        }
+#endif
 #ifdef PROF_HAVE_C
         if (((ProfPlugin *)curr->data)->lang == LANG_C) {
             c_plugin_destroy(curr->data);
@@ -399,6 +426,9 @@ plugins_shutdown(void)
 
         curr = g_slist_next(curr);
     }
+#ifdef PROF_HAVE_PYTHON
+    python_shutdown();
+#endif
 #ifdef PROF_HAVE_C
     c_shutdown();
 #endif

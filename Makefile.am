@@ -130,6 +130,10 @@ functionaltest_sources = \
 
 main_source = src/main.c
 
+python_sources = \
+	src/plugins/python_plugins.h src/plugins/python_plugins.c \
+	src/plugins/python_api.h src/plugins/python_api.c
+
 c_sources = \
 	src/plugins/c_plugins.h src/plugins/c_plugins.c \
 	src/plugins/c_api.h src/plugins/c_api.c
@@ -147,6 +151,11 @@ otr3_sources = \
 
 otr4_sources = \
 	src/otr/otrlib.h src/otr/otrlibv4.c src/otr/otr.h src/otr/otr.c
+
+if BUILD_PYTHON_API
+core_sources += $(python_sources)
+unittest_sources += $(python_sources)
+endif
 
 if BUILD_C_API
 core_sources += $(c_sources)
