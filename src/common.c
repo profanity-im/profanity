@@ -663,7 +663,7 @@ is_notify_enabled(void)
 #ifdef PROF_HAVE_LIBNOTIFY
     notify_enabled = TRUE;
 #endif
-#ifdef PLATFORM_CYGWIN
+#ifdef PROF_PLATFORM_CYGWIN
     notify_enabled = TRUE;
 #endif
 
