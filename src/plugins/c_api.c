@@ -126,6 +126,12 @@ c_api_get_current_muc(void)
     return api_get_current_muc();
 }
 
+static int
+c_api_current_win_is_console()
+{
+    return api_current_win_is_console();
+}
+
 static void
 c_api_log_debug(const char *message)
 {
@@ -161,7 +167,7 @@ c_api_win_create(char *tag, void(*callback)(char *tag, char *line))
 {
     WindowWrapper *wrapper = malloc(sizeof(WindowWrapper));
     wrapper->func = callback;
-    api_win_create(tag, wrapper, c_window_callback);
+    api_win_create(tag, wrapper, free, c_window_callback);
 }
 
 static int
@@ -220,6 +226,7 @@ c_api_init(void)
     prof_send_line = c_api_send_line;
     prof_get_current_recipient = c_api_get_current_recipient;
     prof_get_current_muc = c_api_get_current_muc;
+    prof_current_win_is_console = c_api_current_win_is_console;
     prof_log_debug = c_api_log_debug;
     prof_log_info = c_api_log_info;
     prof_log_warning = c_api_log_warning;

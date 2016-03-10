@@ -411,6 +411,8 @@ tlscerts_free(TLSCertificate *cert)
 
         free(cert->key_alg);
         free(cert->signature_alg);
+
+        free(cert);
     }
 }
 

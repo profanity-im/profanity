@@ -350,7 +350,7 @@ win_get_string(ProfWin *window)
         {
             ProfPluginWin *pluginwin = (ProfPluginWin*)window;
             GString *gstring = g_string_new("");
-            g_string_append_printf(gstring, "%s plugin", pluginwin->tag);
+            g_string_append_printf(gstring, "Plugin: %s", pluginwin->tag);
             char *res = gstring->str;
             g_string_free(gstring, FALSE);
             return res;
@@ -419,27 +419,42 @@ win_free(ProfWin* window)
     }
     free(window->layout);
 
-    if (window->type == WIN_CHAT) {
+    switch (window->type) {
+    case WIN_CHAT:
+    {
         ProfChatWin *chatwin = (ProfChatWin*)window;
         free(chatwin->barejid);
         free(chatwin->resource_override);
         chat_state_free(chatwin->state);
+        break;
     }
-
-    if (window->type == WIN_MUC) {
+    case WIN_MUC:
+    {
         ProfMucWin *mucwin = (ProfMucWin*)window;
         free(mucwin->roomjid);
+        break;
     }
-
-    if (window->type == WIN_MUC_CONFIG) {
+    case WIN_MUC_CONFIG:
+    {
         ProfMucConfWin *mucconf = (ProfMucConfWin*)window;
         free(mucconf->roomjid);
         form_destroy(mucconf->form);
+        break;
     }
-
-    if (window->type == WIN_PRIVATE) {
+    case WIN_PRIVATE:
+    {
         ProfPrivateWin *privatewin = (ProfPrivateWin*)window;
         free(privatewin->fulljid);
+        break;
+    }
+    case WIN_PLUGIN:
+    {
+        ProfPluginWin *pluginwin = (ProfPluginWin*)window;
+        free(pluginwin->tag);
+        break;
+    }
+    default:
+        break;
     }
 
     free(window);

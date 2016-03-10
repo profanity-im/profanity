@@ -398,7 +398,7 @@ static struct cmd_t command_defs[] =
         CMD_SYN(
             "/group",
             "/group show <group>",
-            "/group add <group> <contat>"
+            "/group add <group> <contat>",
             "/group remove <group> <contact>")
         CMD_DESC(
             "View, add to, and remove from roster groups. "

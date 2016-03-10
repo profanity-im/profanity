@@ -212,6 +212,7 @@ wins_get_plugin(const char *const tag)
         if (window->type == WIN_PLUGIN) {
             ProfPluginWin *pluginwin = (ProfPluginWin*)window;
             if (g_strcmp0(pluginwin->tag, tag) == 0) {
+                g_list_free(values);
                 return pluginwin;
             }
         }
@@ -389,6 +390,11 @@ wins_get_by_string(char *str)
         return (ProfWin*)privwin;
     }
 
+    ProfPluginWin *pluginwin = wins_get_plugin(str);
+    if (pluginwin) {
+        return (ProfWin*)pluginwin;
+    }
+
     return NULL;
 }
 
@@ -539,6 +545,13 @@ wins_close_by_num(int i)
                 autocomplete_remove(wins_close_ac, "xmlconsole");
                 break;
             }
+            case WIN_PLUGIN:
+            {
+                ProfPluginWin *pluginwin = (ProfPluginWin*)window;
+                autocomplete_remove(wins_ac, pluginwin->tag);
+                autocomplete_remove(wins_close_ac, pluginwin->tag);
+                break;
+            }
             case WIN_MUC_CONFIG:
             default:
                 break;
@@ -640,10 +653,12 @@ wins_new_plugin(const char * const tag)
 {
     GList *keys = g_hash_table_get_keys(windows);
     int result = get_next_available_win_num(keys);
-    ProfWin *new = win_create_plugin(tag);
-    g_hash_table_insert(windows, GINT_TO_POINTER(result), new);
     g_list_free(keys);
-    return new;
+    ProfWin *newwin = win_create_plugin(tag);
+    g_hash_table_insert(windows, GINT_TO_POINTER(result), newwin);
+    autocomplete_add(wins_ac, tag);
+    autocomplete_add(wins_close_ac, tag);
+    return newwin;
 }
 
 gboolean

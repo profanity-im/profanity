@@ -197,6 +197,17 @@ api_get_current_muc(void)
     }
 }
 
+int
+api_current_win_is_console(void)
+{
+    ProfWin *current = wins_get_current();
+    if (current && current->type == WIN_CONSOLE) {
+        return 1;
+    } else {
+        return 0;
+    }
+}
+
 void
 api_log_debug(const char *message)
 {
@@ -228,12 +239,16 @@ api_win_exists(const char *tag)
 }
 
 void
-api_win_create(const char *tag, void *callback,
+api_win_create(
+    const char *tag,
+    void *callback,
+    void(*destroy)(void *callback),
     void(*callback_func)(PluginWindowCallback *window_callback, const char *tag, const char * const line))
 {
     PluginWindowCallback *window = malloc(sizeof(PluginWindowCallback));
     window->callback = callback;
     window->callback_func = callback_func;
+    window->destroy = destroy;
     callbacks_add_window_handler(tag, window);
     wins_new_plugin(tag);
 
