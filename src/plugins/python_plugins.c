@@ -42,18 +42,18 @@
 #include "plugins/python_plugins.h"
 #include "ui/ui.h"
 
-//static PyThreadState *thread_state;
+static PyThreadState *thread_state;
 
 void
 allow_python_threads()
 {
-//    thread_state = PyEval_SaveThread();
+    thread_state = PyEval_SaveThread();
 }
 
 void
 disable_python_threads()
 {
-//    PyEval_RestoreThread(thread_state);
+    PyEval_RestoreThread(thread_state);
 }
 
 void

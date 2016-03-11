@@ -42,6 +42,9 @@ AS_IF([test "x$PLATFORM" = xcygwin],
 AS_IF([test "x$PLATFORM" = xosx],
     [AC_DEFINE([PLATFORM_OSX], [1], [OSx])])
 
+### Environment variables
+AC_ARG_VAR([PYTHON_FRAMEWORK], [Set base directory for Python Framework])
+
 ### Options
 AC_ARG_ENABLE([notifications],
     [AS_HELP_STRING([--enable-notifications], [enable desktop notifications])])
@@ -131,6 +134,11 @@ fi
 if test "x$enable_plugins" = xno; then
     AM_CONDITIONAL([BUILD_PYTHON_API], [false])
 elif test "x$enable_python_plugins" != xno; then
+    AS_IF([test "x$PLATFORM" = xosx], [
+        AS_IF([test "x$PYTHON_FRAMEWORK" = x], [ PYTHON_FRAMEWORK="/Library/Frameworks/Python.framework" ])
+        AC_MSG_NOTICE([Symlinking Python.framework to $PYTHON_FRAMEWORK])
+        rm -f Python.framework
+        ln -s $PYTHON_FRAMEWORK Python.framework ])
     AC_CHECK_PROG(PYTHON_CONFIG_EXISTS, python-config, yes, no)
     if test "$PYTHON_CONFIG_EXISTS" == "yes"; then
         AX_PYTHON_DEVEL
@@ -144,6 +152,7 @@ elif test "x$enable_python_plugins" != xno; then
             AC_MSG_NOTICE([Python development package not found, Python plugin support disabled.])
         fi
     fi
+    AS_IF([test "x$PLATFORM" = xosx], [rm -f Python.framework])
 else
     AM_CONDITIONAL([BUILD_PYTHON_API], [false])
 fi
@@ -334,10 +343,10 @@ AC_CHECK_HEADERS([ncurses.h], [], [])
 AM_CFLAGS="-Wall -Wno-deprecated-declarations"
 AS_IF([test "x$PACKAGE_STATUS" = xdevelopment],
     [AM_CFLAGS="$AM_CFLAGS -Wunused -Werror"])
-AM_LDFLAGS="$AM_LDFLAGS $PYTHON_LDFLAGS $RUBY_LDFLAGS $LUA_LIB -export-dynamic"
+AM_LDFLAGS="$AM_LDFLAGS $RUBY_LDFLAGS $LUA_LIB -export-dynamic"
 AM_CPPFLAGS="$AM_CPPFLAGS $glib_CFLAGS $curl_CFLAGS $libnotify_CFLAGS $PYTHON_CPPFLAGS $RUBY_CFLAGS $LUA_INCLUDE"
 AM_CPPFLAGS="$AM_CPPFLAGS -DTHEMES_PATH=\"\\\"$THEMES_PATH\\\"\""
-LIBS="$glib_LIBS $curl_LIBS $libnotify_LIBS $RUBY_LIBS $LIBS"
+LIBS="$glib_LIBS $curl_LIBS $libnotify_LIBS $PYTHON_LIBS $PYTHON_LDFLAGS $RUBY_LIBS $LIBS"
 
 AC_SUBST(AM_LDFLAGS)
 AC_SUBST(AM_CFLAGS)
