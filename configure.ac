@@ -152,6 +152,10 @@ PKG_CHECK_MODULES([glib], [glib-2.0 >= 2.26], [],
 PKG_CHECK_MODULES([curl], [libcurl], [],
     [AC_MSG_ERROR([libcurl is required for profanity])])
 
+# Checks GTK+ 2.0
+PKG_CHECK_MODULES([GTK], [gtk+-2.0 >= 2.24.10], [],
+    [AC_MSG_ERROR([gtk+-2.0 or higher is required for profanity])])
+
 AS_IF([test "x$PLATFORM" != xosx],
     [AC_CHECK_LIB([readline], [main], [],
         [AC_MSG_ERROR([libreadline is required for profanity])])],
@@ -244,6 +248,9 @@ AS_IF([test "x$with_themes" = xno -o "x$with_themes" = xyes -o "x$with_themes" =
 AC_SUBST(THEMES_PATH)
 AM_CONDITIONAL([THEMES_INSTALL], "$THEMES_INSTALL")
 
+ICONS_PATH='${pkgdatadir}/icons'
+AC_SUBST(ICONS_PATH)
+
 ### cmocka is required only for tests, profanity shouldn't be linked with it
 ### TODO: pass cmocka_CFLAGS and cmocka_LIBS to Makefile.am
 PKG_CHECK_MODULES([cmocka], [cmocka], [],
@@ -265,9 +272,9 @@ AM_CFLAGS="-Wall -Wno-deprecated-declarations"
 AS_IF([test "x$PACKAGE_STATUS" = xdevelopment],
     [AM_CFLAGS="$AM_CFLAGS -Wunused -Werror"])
 AM_LDFLAGS="$AM_LDFLAGS -export-dynamic"
-AM_CPPFLAGS="$AM_CPPFLAGS $glib_CFLAGS $curl_CFLAGS $libnotify_CFLAGS $PYTHON_CPPFLAGS"
-AM_CPPFLAGS="$AM_CPPFLAGS -DTHEMES_PATH=\"\\\"$THEMES_PATH\\\"\""
-LIBS="$glib_LIBS $curl_LIBS $libnotify_LIBS $PYTHON_LIBS $PYTHON_LDFLAGS $LIBS"
+AM_CPPFLAGS="$AM_CPPFLAGS $glib_CFLAGS $curl_CFLAGS $libnotify_CFLAGS $PYTHON_CPPFLAGS ${GTK_CFLAGS}"
+AM_CPPFLAGS="$AM_CPPFLAGS -DTHEMES_PATH=\"\\\"$THEMES_PATH\\\"\" -DICONS_PATH=\"\\\"$ICONS_PATH\\\"\""
+LIBS="$glib_LIBS $curl_LIBS $libnotify_LIBS $PYTHON_LIBS $PYTHON_LDFLAGS ${GTK_LIBS} $LIBS"
 
 AC_SUBST(AM_LDFLAGS)
 AC_SUBST(AM_CFLAGS)
@@ -289,5 +296,6 @@ echo "LIBS           : $LIBS"
 echo "XML Parser     : $PARSER"
 echo "Install themes : $THEMES_INSTALL"
 echo "Themes path    : $THEMES_PATH"
+echo "Icons path     : $ICONS_PATH"
 echo ""
 echo "Now you can run \`make' to build profanity"

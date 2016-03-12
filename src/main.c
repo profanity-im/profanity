@@ -34,8 +34,10 @@
 
 #include "prof_config.h"
 
+#include <gtk/gtk.h>
 #include <string.h>
 #include <glib.h>
+#include <assert.h>
 
 #ifdef PROF_HAVE_GIT_VERSION
 #include "gitversion.h"
@@ -139,6 +141,8 @@ main(int argc, char **argv)
         return 0;
     }
 
+    assert (gtk_init_check(&argc, &argv) == true);
+    gtk_init(&argc, &argv);
     prof_run(log, account_name);
 
     return 0;

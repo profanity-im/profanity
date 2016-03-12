@@ -46,7 +46,8 @@ core_sources = \
 	src/plugins/api.h src/plugins/api.c \
 	src/plugins/callbacks.h src/plugins/callbacks.c \
 	src/plugins/autocompleters.c src/plugins/autocompleters.h \
-	src/plugins/themes.c src/plugins/themes.h
+	src/plugins/themes.c src/plugins/themes.h \
+	src/tray.h src/tray.c
 
 unittest_sources = \
 	src/contact.c src/contact.h src/common.c \
@@ -167,6 +168,8 @@ otr_unittest_sources = \
 
 themes_sources = themes/*
 
+icons_sources = icons/*
+
 script_sources = bootstrap.sh configure-debug install-all.sh
 
 man_sources = docs/profanity.1
@@ -195,6 +198,8 @@ endif
 if INCLUDE_GIT_VERSION
 BUILT_SOURCES = $(git_include)
 endif
+profanity_iconsdir = @ICONS_PATH@
+profanity_icons_DATA = $(icons_sources)
 
 if BUILD_C_API
 lib_LTLIBRARIES = libprofanity.la
@@ -223,7 +228,7 @@ endif
 
 man_MANS = $(man_sources)
 
-EXTRA_DIST = $(man_sources) $(themes_sources) $(script_sources) profrc.example LICENSE.txt
+EXTRA_DIST = $(man_sources) $(icons_sources) $(themes_sources) $(script_sources) profrc.example LICENSE.txt
 
 if INCLUDE_GIT_VERSION
 EXTRA_DIST += .git/HEAD .git/index

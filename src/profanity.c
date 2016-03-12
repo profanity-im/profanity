@@ -37,6 +37,7 @@
 #include "gitversion.h"
 #endif
 
+#include <gtk/gtk.h>
 #include <locale.h>
 #include <signal.h>
 #include <stdlib.h>
@@ -72,6 +73,7 @@
 #include "window_list.h"
 #include "event/client_events.h"
 #include "config/tlscerts.h"
+#include "tray.h"
 
 static void _check_autoaway(void);
 static void _init(char *log_level);
@@ -98,6 +100,7 @@ prof_run(char *log_level, char *account_name)
 {
     _init(log_level);
     plugins_on_start();
+    gtk_main_iteration_do(false);
     _connect_default(account_name);
 
     ui_update();
@@ -130,6 +133,7 @@ prof_run(char *log_level, char *account_name)
         jabber_process_events(10);
         iq_autoping_check();
         ui_update();
+        gtk_main_iteration_do(false);
     }
 }
 
@@ -352,6 +356,7 @@ _init(char *log_level)
 #endif
     atexit(_shutdown);
     plugins_init();
+    create_tray();
     inp_nonblocking(TRUE);
 }
 
@@ -371,6 +376,7 @@ _shutdown(void)
         cl_ev_disconnect();
     }
 
+    destroy_tray();
     jabber_shutdown();
     plugins_on_shutdown();
     muc_close();
@@ -404,6 +410,8 @@ _create_directories(void)
 
     GString *themes_dir = g_string_new(xdg_config);
     g_string_append(themes_dir, "/profanity/themes");
+    GString *icons_dir = g_string_new(xdg_config);
+    g_string_append(icons_dir, "/profanity/icons");
     GString *chatlogs_dir = g_string_new(xdg_data);
     g_string_append(chatlogs_dir, "/profanity/chatlogs");
     GString *logs_dir = g_string_new(xdg_data);
@@ -413,6 +421,9 @@ _create_directories(void)
 
     if (!mkdir_recursive(themes_dir->str)) {
         log_error("Error while creating directory %s", themes_dir->str);
+    }
+    if (!mkdir_recursive(icons_dir->str)) {
+        log_error("Error while creating directory %s", icons_dir->str);
     }
     if (!mkdir_recursive(chatlogs_dir->str)) {
         log_error("Error while creating directory %s", chatlogs_dir->str);
@@ -425,6 +436,7 @@ _create_directories(void)
     }
 
     g_string_free(themes_dir, TRUE);
+    g_string_free(icons_dir, TRUE);
     g_string_free(chatlogs_dir, TRUE);
     g_string_free(logs_dir, TRUE);
     g_string_free(plugins_dir, TRUE);
