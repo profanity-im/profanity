@@ -38,7 +38,7 @@
 #include "resource.h"
 #include "xmpp/xmpp.h"
 
-void prof_run(char *log_level, char *account_name);
+void prof_run(char *log_level, char *account_name, gboolean use_gtk);
 
 void prof_handle_idle(void);
 void prof_handle_activity(void);

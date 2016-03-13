@@ -50,6 +50,7 @@
 static gboolean version = FALSE;
 static char *log = "INFO";
 static char *account_name = NULL;
+static gboolean use_gtk = FALSE;
 
 int
 main(int argc, char **argv)
@@ -141,9 +142,11 @@ main(int argc, char **argv)
         return 0;
     }
 
-    assert (gtk_init_check(&argc, &argv) == true);
-    gtk_init(&argc, &argv);
-    prof_run(log, account_name);
+    use_gtk = gtk_init_check(&argc, &argv);
+    if (use_gtk) {
+        gtk_init(&argc, &argv);
+    }
+    prof_run(log, account_name, use_gtk);
 
     return 0;
 }

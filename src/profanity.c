@@ -94,13 +94,17 @@ char *saved_status;
 
 static gboolean cont = TRUE;
 static gboolean force_quit = FALSE;
+static gboolean gtk_enabled = FALSE;
 
 void
-prof_run(char *log_level, char *account_name)
+prof_run(char *log_level, char *account_name, gboolean use_gtk)
 {
+    gtk_enabled = use_gtk;
     _init(log_level);
     plugins_on_start();
-    gtk_main_iteration_do(false);
+    if (gtk_enabled) {
+        gtk_main_iteration_do(false);
+    }
     _connect_default(account_name);
 
     ui_update();
@@ -356,7 +360,9 @@ _init(char *log_level)
 #endif
     atexit(_shutdown);
     plugins_init();
-    create_tray();
+    if (gtk_enabled) {
+        create_tray();
+    }
     inp_nonblocking(TRUE);
 }
 
@@ -375,8 +381,9 @@ _shutdown(void)
     if (conn_status == JABBER_CONNECTED) {
         cl_ev_disconnect();
     }
-
-    destroy_tray();
+    if (gtk_enabled) {
+        destroy_tray();
+    }
     jabber_shutdown();
     plugins_on_shutdown();
     muc_close();
