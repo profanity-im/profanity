@@ -137,7 +137,9 @@ prof_run(char *log_level, char *account_name, gboolean use_gtk)
         jabber_process_events(10);
         iq_autoping_check();
         ui_update();
-        gtk_main_iteration_do(false);
+        if (gtk_enabled) {
+            gtk_main_iteration_do(false);
+        }
     }
 }
 
