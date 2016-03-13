@@ -84,12 +84,16 @@ static void _get_icons(void)
         GString *name = g_string_new(g_dir_read_name(dir));
         while (name->len) {
             if (g_strcmp0("proIcon.png", name->str) == 0) {
-                g_string_free(icon_filename, true);
+                if (icon_filename) {
+                    g_string_free(icon_filename, true);
+                }
                 icon_filename = g_string_new(icons_dir->str);
                 g_string_append(icon_filename, "/proIcon.png");
             } else
             if (g_strcmp0("proIconMsg.png", name->str) == 0){
-                g_string_free(icon_msg_filename, true);
+                if (icon_filename) {
+                    g_string_free(icon_msg_filename, true);
+                }
                 icon_msg_filename = g_string_new(icons_dir->str);
                 g_string_append(icon_msg_filename, "/proIconMsg.png");
             }
