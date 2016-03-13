@@ -91,7 +91,7 @@ static void _get_icons(void)
                 g_string_append(icon_filename, "/proIcon.png");
             } else
             if (g_strcmp0("proIconMsg.png", name->str) == 0){
-                if (icon_filename) {
+                if (icon_msg_filename) {
                     g_string_free(icon_msg_filename, true);
                 }
                 icon_msg_filename = g_string_new(icons_dir->str);
