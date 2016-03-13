@@ -83,6 +83,7 @@ unittest_sources = \
 	src/window_list.c src/window_list.h \
 	src/event/server_events.c src/event/server_events.h \
 	src/event/client_events.c src/event/client_events.h \
+	src/tray.h src/tray.c \
 	tests/unittests/xmpp/stub_xmpp.c \
 	tests/unittests/ui/stub_ui.c \
 	tests/unittests/log/stub_log.c \
