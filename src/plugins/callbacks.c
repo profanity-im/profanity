@@ -108,7 +108,7 @@ plugins_run_command(const char * const input)
         PluginCommand *command = p_command->data;
         if (g_strcmp0(split[0], command->command_name) == 0) {
             gboolean result;
-            gchar **args = parse_args(input, command->min_args, command->max_args, &result);
+            gchar **args = parse_args_with_freetext(input, command->min_args, command->max_args, &result);
             if (result == FALSE) {
                 ui_invalid_command_usage(command->command_name, NULL);
                 g_strfreev(split);
