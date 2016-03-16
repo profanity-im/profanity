@@ -49,12 +49,21 @@ autocompleters_init(void)
 void
 autocompleters_add(const char *key, char **items)
 {
-    Autocomplete new_ac = autocomplete_new();
-    int i = 0;
-    for (i = 0; i < g_strv_length(items); i++) {
-        autocomplete_add(new_ac, items[i]);
+    if (g_hash_table_contains(autocompleters, key)) {
+        Autocomplete existing_ac = g_hash_table_lookup(autocompleters, key);
+
+        int i = 0;
+        for (i = 0; i < g_strv_length(items); i++) {
+            autocomplete_add(existing_ac, items[i]);
+        }
+    } else {
+        Autocomplete new_ac = autocomplete_new();
+        int i = 0;
+        for (i = 0; i < g_strv_length(items); i++) {
+            autocomplete_add(new_ac, items[i]);
+        }
+        g_hash_table_insert(autocompleters, strdup(key), new_ac);
     }
-    g_hash_table_insert(autocompleters, strdup(key), new_ac);
 }
 
 char *
