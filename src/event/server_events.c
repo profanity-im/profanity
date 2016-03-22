@@ -500,6 +500,7 @@ sv_ev_incoming_carbon(char *barejid, char *resource, char *message, char *pgp_me
 #else
     _sv_ev_incoming_plain(chatwin, new_win, barejid, resource, message, NULL);
 #endif
+    rosterwin_roster();
 }
 
 void
