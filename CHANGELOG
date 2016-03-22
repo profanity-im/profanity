@@ -1,7 +1,7 @@
 0.5.0
 =====
 
-- Build against libmesode if available
+- Plugins API supporting C and Python plugins
 - SSL certificate verification (requires libmesode) (/tls)
 - Allow auto extended away (/autoaway)
 - Include last acitvity in initial presence (xep-0256) (/lastactivity)

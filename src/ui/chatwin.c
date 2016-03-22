@@ -312,11 +312,16 @@ chatwin_outgoing_msg(ProfChatWin *chatwin, const char *const message, char *id, 
 }
 
 void
-chatwin_outgoing_carbon(ProfChatWin *chatwin, const char *const message)
+chatwin_outgoing_carbon(ProfChatWin *chatwin, const char *const message, prof_enc_t enc_mode)
 {
     assert(chatwin != NULL);
 
-    win_print((ProfWin*)chatwin, '-', 0, NULL, 0, THEME_TEXT_ME, "me", message);
+    char enc_char = '-';
+    if (enc_mode == PROF_MSG_PGP) {
+        enc_char = prefs_get_pgp_char();
+    }
+
+    win_print((ProfWin*)chatwin, enc_char, 0, NULL, 0, THEME_TEXT_ME, "me", message);
     int num = wins_get_num((ProfWin*)chatwin);
     status_bar_active(num);
 }
