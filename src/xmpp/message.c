@@ -191,8 +191,6 @@ message_send_chat_pgp(const char *const barejid, const char *const msg)
         stanza_attach_state(ctx, message, state);
     }
 
-    stanza_attach_carbons_private(ctx, message);
-
     if (prefs_get_boolean(PREF_RECEIPTS_REQUEST)) {
         stanza_attach_receipt_request(ctx, message);
     }
@@ -714,17 +712,25 @@ _handle_carbons(xmpp_stanza_t *const stanza)
         // check for and deal with message
         xmpp_stanza_t *body = xmpp_stanza_get_child_by_name(message, STANZA_NAME_BODY);
         if (body) {
-            char *message = xmpp_stanza_get_text(body);
-            if (message) {
+            char *message_txt = xmpp_stanza_get_text(body);
+            if (message_txt) {
+                // check for pgp encrypted message
+                char *enc_message = NULL;
+                xmpp_stanza_t *x = xmpp_stanza_get_child_by_ns(message, STANZA_NS_ENCRYPTED);
+                if (x) {
+                    enc_message = xmpp_stanza_get_text(x);
+                }
+
                 // if we are the recipient, treat as standard incoming message
                 if(g_strcmp0(my_jid->barejid, jid_to->barejid) == 0){
-                    sv_ev_incoming_carbon(jid_from->barejid, jid_from->resourcepart, message);
-                }
+                    sv_ev_incoming_carbon(jid_from->barejid, jid_from->resourcepart, message_txt, enc_message);
+
                 // else treat as a sent message
-                else{
-                    sv_ev_outgoing_carbon(jid_to->barejid, message);
+                } else {
+                    sv_ev_outgoing_carbon(jid_to->barejid, message_txt, enc_message);
                 }
-                xmpp_free(ctx, message);
+                xmpp_free(ctx, message_txt);
+                xmpp_free(ctx, enc_message);
             }
         }
 

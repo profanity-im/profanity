@@ -63,3 +63,6 @@ toc_fragment.html
 
 # valgrind files
 valgrind.out
+
+.DS_Store
+apidocs/c/html/
