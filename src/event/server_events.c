@@ -349,7 +349,7 @@ sv_ev_delayed_private_message(const char *const fulljid, char *message, GDateTim
 }
 
 void
-sv_ev_outgoing_carbon(char *barejid, char *message)
+sv_ev_outgoing_carbon(char *barejid, char *message, char *pgp_message)
 {
     ProfChatWin *chatwin = wins_get_chat(barejid);
     if (!chatwin) {
@@ -358,22 +358,20 @@ sv_ev_outgoing_carbon(char *barejid, char *message)
 
     chat_state_active(chatwin->state);
 
-    chatwin_outgoing_carbon(chatwin, message);
-}
-
-void
-sv_ev_incoming_carbon(char *barejid, char *resource, char *message)
-{
-    gboolean new_win = FALSE;
-    ProfChatWin *chatwin = wins_get_chat(barejid);
-    if (!chatwin) {
-        ProfWin *window = wins_new_chat(barejid);
-        chatwin = (ProfChatWin*)window;
-        new_win = TRUE;
+#ifdef PROF_HAVE_LIBGPGME
+    if (pgp_message) {
+        char *decrypted = p_gpg_decrypt(pgp_message);
+        if (decrypted) {
+            chatwin_outgoing_carbon(chatwin, decrypted, PROF_MSG_PGP);
+        } else {
+            chatwin_outgoing_carbon(chatwin, message, PROF_MSG_PLAIN);
+        }
+    } else {
+        chatwin_outgoing_carbon(chatwin, message, PROF_MSG_PLAIN);
     }
-
-    chatwin_incoming_msg(chatwin, resource, message, NULL, new_win, PROF_MSG_PLAIN);
-    chat_log_msg_in(barejid, message, NULL);
+#else
+    chatwin_outgoing_carbon(chatwin, message, PROF_MSG_PLAIN);
+#endif
 }
 
 #ifdef PROF_HAVE_LIBGPGME
@@ -414,7 +412,6 @@ _sv_ev_incoming_otr(ProfChatWin *chatwin, gboolean new_win, char *barejid, char 
 }
 #endif
 
-#ifndef PROF_HAVE_LIBOTR
 static void
 _sv_ev_incoming_plain(ProfChatWin *chatwin, gboolean new_win, char *barejid, char *resource, char *message, GDateTime *timestamp)
 {
@@ -422,7 +419,6 @@ _sv_ev_incoming_plain(ProfChatWin *chatwin, gboolean new_win, char *barejid, cha
     chat_log_msg_in(barejid, message, timestamp);
     chatwin->pgp_recv = FALSE;
 }
-#endif
 
 void
 sv_ev_incoming_message(char *barejid, char *resource, char *message, char *pgp_message, GDateTime *timestamp)
@@ -481,6 +477,28 @@ sv_ev_incoming_message(char *barejid, char *resource, char *message, char *pgp_m
     rosterwin_roster();
     return;
 #endif
+#endif
+}
+
+void
+sv_ev_incoming_carbon(char *barejid, char *resource, char *message, char *pgp_message)
+{
+    gboolean new_win = FALSE;
+    ProfChatWin *chatwin = wins_get_chat(barejid);
+    if (!chatwin) {
+        ProfWin *window = wins_new_chat(barejid);
+        chatwin = (ProfChatWin*)window;
+        new_win = TRUE;
+    }
+
+#ifdef PROF_HAVE_LIBGPGME
+    if (pgp_message) {
+        _sv_ev_incoming_pgp(chatwin, new_win, barejid, resource, message, pgp_message, NULL);
+    } else {
+        _sv_ev_incoming_plain(chatwin, new_win, barejid, resource, message, NULL);
+    }
+#else
+    _sv_ev_incoming_plain(chatwin, new_win, barejid, resource, message, NULL);
 #endif
 }
 
