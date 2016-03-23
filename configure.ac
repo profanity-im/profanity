@@ -68,7 +68,12 @@ AC_ARG_WITH([themes],
 # python
 if test "x$enable_plugins" = xno; then
     AM_CONDITIONAL([BUILD_PYTHON_API], [false])
-elif test "x$enable_python_plugins" != xno; then
+#
+# Python plugins are temporary disabled by default, because Profanity doesn't
+# build with all python versions. Change `= xyes` to `!= xno` to enable it by
+# default.
+#
+elif test "x$enable_python_plugins" = xyes; then
     AS_IF([test "x$PLATFORM" = xosx], [
         AS_IF([test "x$PYTHON_FRAMEWORK" = x], [ PYTHON_FRAMEWORK="/Library/Frameworks/Python.framework" ])
         AC_MSG_NOTICE([Symlinking Python.framework to $PYTHON_FRAMEWORK])
