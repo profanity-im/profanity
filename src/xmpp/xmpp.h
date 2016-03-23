@@ -159,6 +159,7 @@ void jabber_free_uuid(char *uuid);
 TLSCertificate* jabber_get_tls_peer_cert(void);
 #endif
 gboolean jabber_conn_is_secured(void);
+gboolean jabber_send_stanza(const char *const stanza);
 
 // message functions
 char* message_send_chat(const char *const barejid, const char *const msg);

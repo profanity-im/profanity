@@ -433,6 +433,24 @@ python_api_win_show_themed(PyObject *self, PyObject *args)
     return Py_BuildValue("");
 }
 
+static PyObject*
+python_api_send_stanza(PyObject *self, PyObject *args)
+{
+    const char *stanza = NULL;
+    if (!PyArg_ParseTuple(args, "s", &stanza)) {
+        return Py_BuildValue("i", 0);
+    }
+
+    allow_python_threads();
+    int res = api_send_stanza(stanza);
+    disable_python_threads();
+    if (res) {
+        return Py_BuildValue("i", 1);
+    } else {
+        return Py_BuildValue("i", 0);
+    }
+}
+
 void
 python_command_callback(PluginCommand *command, gchar **args)
 {
@@ -522,6 +540,7 @@ static PyMethodDef apiMethods[] = {
     { "win_focus", python_api_win_focus, METH_VARARGS, "Focus a window." },
     { "win_show", python_api_win_show, METH_VARARGS, "Show text in the window." },
     { "win_show_themed", python_api_win_show_themed, METH_VARARGS, "Show themed text in the window." },
+    { "send_stanza", python_api_send_stanza, METH_VARARGS, "Send an XMPP stanza." },
     { NULL, NULL, 0, NULL }
 };
 

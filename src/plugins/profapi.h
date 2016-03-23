@@ -69,4 +69,6 @@ int (*prof_win_focus)(PROF_WIN_TAG win);
 int (*prof_win_show)(PROF_WIN_TAG win, char *line);
 int (*prof_win_show_themed)(PROF_WIN_TAG tag, char *group, char *key, char *def, char *line);
 
+int (*prof_send_stanza)(char *stanza);
+
 #endif

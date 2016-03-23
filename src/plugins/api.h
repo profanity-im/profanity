@@ -70,4 +70,6 @@ int api_win_focus(const char *tag);
 int api_win_show(const char *tag, const char *line);
 int api_win_show_themed(const char *tag, const char *const group, const char *const key, const char *const def, const char *line);
 
+int api_send_stanza(const char *const stanza);
+
 #endif
