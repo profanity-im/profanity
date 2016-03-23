@@ -637,13 +637,13 @@ _caps_response_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza,
     }
 
     if (query == NULL) {
-        log_warning("No query element found.");
+        log_info("No query element found.");
         return 0;
     }
 
     char *node = xmpp_stanza_get_attribute(query, STANZA_ATTR_NODE);
     if (node == NULL) {
-        log_warning("No node attribute found");
+        log_info("No node attribute found");
         return 0;
     }
 
@@ -715,14 +715,14 @@ _caps_response_handler_for_jid(xmpp_conn_t *const conn, xmpp_stanza_t *const sta
     }
 
     if (query == NULL) {
-        log_warning("No query element found.");
+        log_info("No query element found.");
         free(jid);
         return 0;
     }
 
     char *node = xmpp_stanza_get_attribute(query, STANZA_ATTR_NODE);
     if (node == NULL) {
-        log_warning("No node attribute found");
+        log_info("No node attribute found");
         free(jid);
         return 0;
     }
@@ -774,14 +774,14 @@ _caps_response_handler_legacy(xmpp_conn_t *const conn, xmpp_stanza_t *const stan
     }
 
     if (query == NULL) {
-        log_warning("No query element found.");
+        log_info("No query element found.");
         free(expected_node);
         return 0;
     }
 
     char *node = xmpp_stanza_get_attribute(query, STANZA_ATTR_NODE);
     if (node == NULL) {
-        log_warning("No node attribute found");
+        log_info("No node attribute found");
         free(expected_node);
         return 0;
     }

@@ -325,3 +325,10 @@ api_win_show_themed(const char *tag, const char *const group, const char *const 
 
     return 1;
 }
+
+int
+api_send_stanza(const char *const stanza)
+{
+    return jabber_send_stanza(stanza);
+}
+

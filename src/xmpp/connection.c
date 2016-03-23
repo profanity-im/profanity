@@ -480,6 +480,17 @@ jabber_conn_is_secured(void)
     }
 }
 
+gboolean
+jabber_send_stanza(const char *const stanza)
+{
+    if (jabber_conn.conn_status != JABBER_CONNECTED) {
+        return FALSE;
+    } else {
+        xmpp_send_raw(jabber_conn.conn, stanza, strlen(stanza));
+        return TRUE;
+    }
+}
+
 static jabber_conn_status_t
 _jabber_connect(const char *const fulljid, const char *const passwd, const char *const altdomain, int port,
     const char *const tls_policy)

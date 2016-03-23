@@ -69,3 +69,4 @@ int (*prof_win_focus)(PROF_WIN_TAG win) = NULL;
 int (*prof_win_show)(PROF_WIN_TAG win, char *line) = NULL;
 int (*prof_win_show_themed)(PROF_WIN_TAG tag, char *group, char *key, char *def, char *line) = NULL;
 
+int (*prof_send_stanza)(char *stanza) = NULL;

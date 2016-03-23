@@ -64,6 +64,12 @@ GList * jabber_get_available_resources(void)
     return NULL;
 }
 
+gboolean
+jabber_send_stanza(const char *const stanza)
+{
+    return TRUE;
+}
+
 // message functions
 char* message_send_chat(const char * const barejid, const char * const msg)
 {
