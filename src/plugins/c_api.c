@@ -188,6 +188,12 @@ c_api_win_show_themed(char *tag, char *group, char *key, char *def, char *line)
     return api_win_show_themed(tag, group, key, def, line);
 }
 
+static int
+c_api_send_stanza(char *stanza)
+{
+    return api_send_stanza(stanza);
+}
+
 void
 c_command_callback(PluginCommand *command, gchar **args)
 {
@@ -236,4 +242,5 @@ c_api_init(void)
     prof_win_focus = c_api_win_focus;
     prof_win_show = c_api_win_show;
     prof_win_show_themed = c_api_win_show_themed;
+    prof_send_stanza = c_api_send_stanza;
 }
