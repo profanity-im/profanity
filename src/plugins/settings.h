@@ -1,5 +1,5 @@
 /*
- * themes.h
+ * settings.h
  *
  * Copyright (C) 2012 - 2016 James Booth <boothj5@gmail.com>
  *
@@ -32,11 +32,12 @@
  *
  */
 
-#ifndef PLUGIN_THEMES_H
-#define PLUGIN_THEMES_H
+#ifndef PLUGIN_SETTINGS_H
+#define PLUGIN_SETTINGS_H
 
-void plugin_themes_init(void);
-void plugin_themes_close(void);
-theme_item_t plugin_themes_get(const char *const group, const char *const key, const char *const def);
+void plugin_settings_init(void);
+void plugin_settings_close(void);
+gboolean plugin_settings_get_boolean(const char *const group, const char *const key, gboolean def);
+void plugin_settings_set_boolean(const char *const group, const char *const key, gboolean value);
 
 #endif

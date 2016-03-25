@@ -71,5 +71,7 @@ int (*prof_win_show_themed)(PROF_WIN_TAG tag, char *group, char *key, char *def,
 
 int (*prof_send_stanza)(char *stanza);
 
+int (*prof_settings_get_boolean)(char *group, char *key, int def);
+void (*prof_settings_set_boolean)(char *group, char *key, int value);
 
 #endif

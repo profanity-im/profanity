@@ -72,4 +72,7 @@ int api_win_show_themed(const char *tag, const char *const group, const char *co
 
 int api_send_stanza(const char *const stanza);
 
+gboolean api_settings_get_boolean(const char *const group, const char *const key, gboolean def);
+void api_settings_set_boolean(const char *const group, const char *const key, gboolean value);
+
 #endif

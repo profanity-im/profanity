@@ -355,9 +355,9 @@ python_api_win_exists(PyObject *self, PyObject *args)
     disable_python_threads();
 
     if (exists) {
-        return Py_BuildValue("i", 1);
+        return Py_BuildValue("O", Py_True);
     } else {
-        return Py_BuildValue("i", 0);
+        return Py_BuildValue("O", Py_False);
     }
 }
 
@@ -438,17 +438,61 @@ python_api_send_stanza(PyObject *self, PyObject *args)
 {
     const char *stanza = NULL;
     if (!PyArg_ParseTuple(args, "s", &stanza)) {
-        return Py_BuildValue("i", 0);
+        return Py_BuildValue("O", Py_False);
     }
 
     allow_python_threads();
     int res = api_send_stanza(stanza);
     disable_python_threads();
     if (res) {
-        return Py_BuildValue("i", 1);
+        return Py_BuildValue("O", Py_True);
     } else {
-        return Py_BuildValue("i", 0);
+        return Py_BuildValue("O", Py_False);
     }
+}
+
+static PyObject*
+python_api_settings_get_boolean(PyObject *self, PyObject *args)
+{
+    char *group = NULL;
+    char *key = NULL;
+    PyObject *defobj = NULL;
+
+    if (!PyArg_ParseTuple(args, "ssO!", &group, &key, &PyBool_Type, &defobj)) {
+        return Py_BuildValue("");
+    }
+
+    int def = PyObject_IsTrue(defobj);
+
+    allow_python_threads();
+    int res = api_settings_get_boolean(group, key, def);
+    disable_python_threads();
+
+    if (res) {
+        return Py_BuildValue("O", Py_True);
+    } else {
+        return Py_BuildValue("O", Py_False);
+    }
+}
+
+static PyObject*
+python_api_settings_set_boolean(PyObject *self, PyObject *args)
+{
+    char *group = NULL;
+    char *key = NULL;
+    PyObject *valobj = NULL;
+
+    if (!PyArg_ParseTuple(args, "ssO!", &group, &key, &PyBool_Type, &valobj)) {
+        return Py_BuildValue("");
+    }
+
+    int val = PyObject_IsTrue(valobj);
+
+    allow_python_threads();
+    api_settings_set_boolean(group, key, val);
+    disable_python_threads();
+
+    return Py_BuildValue("");
 }
 
 void
@@ -541,6 +585,8 @@ static PyMethodDef apiMethods[] = {
     { "win_show", python_api_win_show, METH_VARARGS, "Show text in the window." },
     { "win_show_themed", python_api_win_show_themed, METH_VARARGS, "Show themed text in the window." },
     { "send_stanza", python_api_send_stanza, METH_VARARGS, "Send an XMPP stanza." },
+    { "settings_get_boolean", python_api_settings_get_boolean, METH_VARARGS, "Get a boolean setting" },
+    { "settings_set_boolean", python_api_settings_set_boolean, METH_VARARGS, "Set a boolean setting" },
     { NULL, NULL, 0, NULL }
 };
 
