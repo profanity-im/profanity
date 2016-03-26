@@ -76,5 +76,7 @@ gboolean api_settings_get_boolean(const char *const group, const char *const key
 void api_settings_set_boolean(const char *const group, const char *const key, gboolean value);
 char* api_settings_get_string(const char *const group, const char *const key, const char *const def);
 void api_settings_set_string(const char *const group, const char *const key, const char *const value);
+int api_settings_get_int(const char *const group, const char *const key, int def);
+void api_settings_set_int(const char *const group, const char *const key, int value);
 
 #endif

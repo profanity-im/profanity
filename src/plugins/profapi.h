@@ -75,5 +75,7 @@ int (*prof_settings_get_boolean)(char *group, char *key, int def);
 void (*prof_settings_set_boolean)(char *group, char *key, int value);
 char* (*prof_settings_get_string)(char *group, char *key, char *def);
 void (*prof_settings_set_string)(char *group, char *key, char *value);
+int (*prof_settings_get_int)(char *group, char *key, int def);
+void (*prof_settings_set_int)(char *group, char *key, int value);
 
 #endif

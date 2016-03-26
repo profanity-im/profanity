@@ -356,3 +356,15 @@ api_settings_set_string(const char *const group, const char *const key, const ch
 {
     plugin_settings_set_string(group, key, value);
 }
+
+int
+api_settings_get_int(const char *const group, const char *const key, int def)
+{
+    return plugin_settings_get_int(group, key, def);
+}
+
+void
+api_settings_set_int(const char *const group, const char *const key, int value)
+{
+    plugin_settings_set_int(group, key, value);
+}

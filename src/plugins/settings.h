@@ -37,9 +37,12 @@
 
 void plugin_settings_init(void);
 void plugin_settings_close(void);
+
 gboolean plugin_settings_get_boolean(const char *const group, const char *const key, gboolean def);
 void plugin_settings_set_boolean(const char *const group, const char *const key, gboolean value);
 char* plugin_settings_get_string(const char *const group, const char *const key, const char *const def);
 void plugin_settings_set_string(const char *const group, const char *const key, const char *const value);
+int plugin_settings_get_int(const char *const group, const char *const key, int def);
+void plugin_settings_set_int(const char *const group, const char *const key, int value);
 
 #endif

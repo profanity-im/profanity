@@ -535,6 +535,42 @@ python_api_settings_set_string(PyObject *self, PyObject *args)
     return Py_BuildValue("");
 }
 
+static PyObject*
+python_api_settings_get_int(PyObject *self, PyObject *args)
+{
+    char *group = NULL;
+    char *key = NULL;
+    int def = 0;
+
+    if (!PyArg_ParseTuple(args, "ssi", &group, &key, &def)) {
+        return Py_BuildValue("");
+    }
+
+    allow_python_threads();
+    int res = api_settings_get_int(group, key, def);
+    disable_python_threads();
+
+    return Py_BuildValue("i", res);
+}
+
+static PyObject*
+python_api_settings_set_int(PyObject *self, PyObject *args)
+{
+    char *group = NULL;
+    char *key = NULL;
+    int val = 0;
+
+    if (!PyArg_ParseTuple(args, "ssi", &group, &key, &val)) {
+        return Py_BuildValue("");
+    }
+
+    allow_python_threads();
+    api_settings_set_int(group, key, val);
+    disable_python_threads();
+
+    return Py_BuildValue("");
+}
+
 void
 python_command_callback(PluginCommand *command, gchar **args)
 {
@@ -629,6 +665,8 @@ static PyMethodDef apiMethods[] = {
     { "settings_set_boolean", python_api_settings_set_boolean, METH_VARARGS, "Set a boolean setting" },
     { "settings_get_string", python_api_settings_get_string, METH_VARARGS, "Get a string setting" },
     { "settings_set_string", python_api_settings_set_string, METH_VARARGS, "Set a string setting" },
+    { "settings_get_int", python_api_settings_get_int, METH_VARARGS, "Get a integer setting" },
+    { "settings_set_int", python_api_settings_set_int, METH_VARARGS, "Set a integer setting" },
     { NULL, NULL, 0, NULL }
 };
 

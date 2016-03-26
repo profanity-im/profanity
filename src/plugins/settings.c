@@ -111,6 +111,23 @@ plugin_settings_set_string(const char *const group, const char *const key, const
     _save_settings();
 }
 
+int
+plugin_settings_get_int(const char *const group, const char *const key, int def)
+{
+    if (group && key && g_key_file_has_key(settings, group, key, NULL)) {
+        return g_key_file_get_integer(settings, group, key, NULL);
+    } else {
+        return def;
+    }
+}
+
+void
+plugin_settings_set_int(const char *const group, const char *const key, int value)
+{
+    g_key_file_set_integer(settings, group, key, value);
+    _save_settings();
+}
+
 static void
 _save_settings(void)
 {
