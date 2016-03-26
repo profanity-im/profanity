@@ -486,7 +486,7 @@ jabber_send_stanza(const char *const stanza)
     if (jabber_conn.conn_status != JABBER_CONNECTED) {
         return FALSE;
     } else {
-        xmpp_send_raw(jabber_conn.conn, stanza, strlen(stanza));
+        xmpp_send_raw_string(jabber_conn.conn, "%s", stanza);
         return TRUE;
     }
 }
