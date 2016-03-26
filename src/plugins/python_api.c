@@ -495,6 +495,46 @@ python_api_settings_set_boolean(PyObject *self, PyObject *args)
     return Py_BuildValue("");
 }
 
+static PyObject*
+python_api_settings_get_string(PyObject *self, PyObject *args)
+{
+    char *group = NULL;
+    char *key = NULL;
+    char *def = NULL;
+
+    if (!PyArg_ParseTuple(args, "ssz", &group, &key, &def)) {
+        return Py_BuildValue("");
+    }
+
+    allow_python_threads();
+    char *res = api_settings_get_string(group, key, def);
+    disable_python_threads();
+
+    if (res) {
+        return Py_BuildValue("s", res);
+    } else {
+        return Py_BuildValue("");
+    }
+}
+
+static PyObject*
+python_api_settings_set_string(PyObject *self, PyObject *args)
+{
+    char *group = NULL;
+    char *key = NULL;
+    char *val = NULL;
+
+    if (!PyArg_ParseTuple(args, "sss", &group, &key, &val)) {
+        return Py_BuildValue("");
+    }
+
+    allow_python_threads();
+    api_settings_set_string(group, key, val);
+    disable_python_threads();
+
+    return Py_BuildValue("");
+}
+
 void
 python_command_callback(PluginCommand *command, gchar **args)
 {
@@ -587,6 +627,8 @@ static PyMethodDef apiMethods[] = {
     { "send_stanza", python_api_send_stanza, METH_VARARGS, "Send an XMPP stanza." },
     { "settings_get_boolean", python_api_settings_get_boolean, METH_VARARGS, "Get a boolean setting" },
     { "settings_set_boolean", python_api_settings_set_boolean, METH_VARARGS, "Set a boolean setting" },
+    { "settings_get_string", python_api_settings_get_string, METH_VARARGS, "Get a string setting" },
+    { "settings_set_string", python_api_settings_set_string, METH_VARARGS, "Set a string setting" },
     { NULL, NULL, 0, NULL }
 };
 

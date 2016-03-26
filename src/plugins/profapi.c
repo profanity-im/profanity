@@ -73,3 +73,5 @@ int (*prof_send_stanza)(char *stanza) = NULL;
 
 int (*prof_settings_get_boolean)(char *group, char *key, int def) = NULL;
 void (*prof_settings_set_boolean)(char *group, char *key, int value) = NULL;
+char* (*prof_settings_get_string)(char *group, char *key, char *def) = NULL;
+void (*prof_settings_set_string)(char *group, char *key, char *value) = NULL;

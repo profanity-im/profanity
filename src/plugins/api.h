@@ -74,5 +74,7 @@ int api_send_stanza(const char *const stanza);
 
 gboolean api_settings_get_boolean(const char *const group, const char *const key, gboolean def);
 void api_settings_set_boolean(const char *const group, const char *const key, gboolean value);
+char* api_settings_get_string(const char *const group, const char *const key, const char *const def);
+void api_settings_set_string(const char *const group, const char *const key, const char *const value);
 
 #endif

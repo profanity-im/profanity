@@ -92,6 +92,25 @@ plugin_settings_set_boolean(const char *const group, const char *const key, gboo
     _save_settings();
 }
 
+char*
+plugin_settings_get_string(const char *const group, const char *const key, const char *const def)
+{
+    if (group && key && g_key_file_has_key(settings, group, key, NULL)) {
+        return g_key_file_get_string(settings, group, key, NULL);
+    } else if (def) {
+        return strdup(def);
+    } else {
+        return NULL;
+    }
+}
+
+void
+plugin_settings_set_string(const char *const group, const char *const key, const char *const value)
+{
+    g_key_file_set_string(settings, group, key, value);
+    _save_settings();
+}
+
 static void
 _save_settings(void)
 {

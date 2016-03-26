@@ -344,3 +344,15 @@ api_settings_set_boolean(const char *const group, const char *const key, gboolea
 {
     plugin_settings_set_boolean(group, key, value);
 }
+
+char*
+api_settings_get_string(const char *const group, const char *const key, const char *const def)
+{
+    return plugin_settings_get_string(group, key, def);
+}
+
+void
+api_settings_set_string(const char *const group, const char *const key, const char *const value)
+{
+    plugin_settings_set_string(group, key, value);
+}
