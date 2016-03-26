@@ -825,9 +825,9 @@ _send_presence_stanza(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza)
 
     char *plugin_text = plugins_on_presence_stanza_send(text);
     if (plugin_text) {
-        xmpp_send_raw(conn, plugin_text, strlen(plugin_text));
+        xmpp_send_raw_string(conn, "%s", plugin_text);
     } else {
-        xmpp_send_raw(conn, text, text_size);
+        xmpp_send_raw_string(conn, "%s", text);
     }
 }
 
@@ -840,8 +840,8 @@ _send_iq_stanza(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza)
 
     char *plugin_text = plugins_on_iq_stanza_send(text);
     if (plugin_text) {
-        xmpp_send_raw(conn, plugin_text, strlen(plugin_text));
+        xmpp_send_raw_string(conn, "%s", plugin_text);
     } else {
-        xmpp_send_raw(conn, text, text_size);
+        xmpp_send_raw_string(conn, "%s", text);
     }
 }
