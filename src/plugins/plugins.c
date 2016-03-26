@@ -44,6 +44,7 @@
 #include "plugins/api.h"
 #include "plugins/plugins.h"
 #include "plugins/themes.h"
+#include "plugins/settings.h"
 
 #ifdef PROF_HAVE_PYTHON
 #include "plugins/python_plugins.h"
@@ -90,6 +91,7 @@ plugins_init(void)
 #endif
 
     plugin_themes_init();
+    plugin_settings_init();
 
     // load plugins
     gchar **plugins_load = prefs_get_plugins();
@@ -489,6 +491,7 @@ plugins_shutdown(void)
 
     autocompleters_destroy();
     plugin_themes_close();
+    plugin_settings_close();
     callbacks_close();
 }
 

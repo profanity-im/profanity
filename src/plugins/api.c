@@ -42,6 +42,7 @@
 #include "plugins/callbacks.h"
 #include "plugins/autocompleters.h"
 #include "plugins/themes.h"
+#include "plugins/settings.h"
 #include "profanity.h"
 #include "ui/ui.h"
 #include "config/theme.h"
@@ -332,3 +333,38 @@ api_send_stanza(const char *const stanza)
     return jabber_send_stanza(stanza);
 }
 
+gboolean
+api_settings_get_boolean(const char *const group, const char *const key, gboolean def)
+{
+    return plugin_settings_get_boolean(group, key, def);
+}
+
+void
+api_settings_set_boolean(const char *const group, const char *const key, gboolean value)
+{
+    plugin_settings_set_boolean(group, key, value);
+}
+
+char*
+api_settings_get_string(const char *const group, const char *const key, const char *const def)
+{
+    return plugin_settings_get_string(group, key, def);
+}
+
+void
+api_settings_set_string(const char *const group, const char *const key, const char *const value)
+{
+    plugin_settings_set_string(group, key, value);
+}
+
+int
+api_settings_get_int(const char *const group, const char *const key, int def)
+{
+    return plugin_settings_get_int(group, key, def);
+}
+
+void
+api_settings_set_int(const char *const group, const char *const key, int value)
+{
+    plugin_settings_set_int(group, key, value);
+}

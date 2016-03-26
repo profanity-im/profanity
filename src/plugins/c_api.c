@@ -194,6 +194,42 @@ c_api_send_stanza(char *stanza)
     return api_send_stanza(stanza);
 }
 
+static int
+c_api_settings_get_boolean(char *group, char *key, int def)
+{
+    return api_settings_get_boolean(group, key, def);
+}
+
+static void
+c_api_settings_set_boolean(char *group, char *key, int value)
+{
+    api_settings_set_boolean(group, key, value);
+}
+
+static char*
+c_api_settings_get_string(char *group, char *key, char *def)
+{
+    return api_settings_get_string(group, key, def);
+}
+
+static void
+c_api_settings_set_string(char *group, char *key, char *value)
+{
+    api_settings_set_string(group, key, value);
+}
+
+static int
+c_api_settings_get_int(char *group, char *key, int def)
+{
+    return api_settings_get_int(group, key, def);
+}
+
+static void
+c_api_settings_set_int(char *group, char *key, int value)
+{
+    api_settings_set_int(group, key, value);
+}
+
 void
 c_command_callback(PluginCommand *command, gchar **args)
 {
@@ -243,4 +279,10 @@ c_api_init(void)
     prof_win_show = c_api_win_show;
     prof_win_show_themed = c_api_win_show_themed;
     prof_send_stanza = c_api_send_stanza;
+    prof_settings_get_boolean = c_api_settings_get_boolean;
+    prof_settings_set_boolean = c_api_settings_set_boolean;
+    prof_settings_get_string = c_api_settings_get_string;
+    prof_settings_set_string = c_api_settings_set_string;
+    prof_settings_get_int = c_api_settings_get_int;
+    prof_settings_set_int = c_api_settings_set_int;
 }
