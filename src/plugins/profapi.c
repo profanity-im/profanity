@@ -70,3 +70,10 @@ int (*prof_win_show)(PROF_WIN_TAG win, char *line) = NULL;
 int (*prof_win_show_themed)(PROF_WIN_TAG tag, char *group, char *key, char *def, char *line) = NULL;
 
 int (*prof_send_stanza)(char *stanza) = NULL;
+
+int (*prof_settings_get_boolean)(char *group, char *key, int def) = NULL;
+void (*prof_settings_set_boolean)(char *group, char *key, int value) = NULL;
+char* (*prof_settings_get_string)(char *group, char *key, char *def) = NULL;
+void (*prof_settings_set_string)(char *group, char *key, char *value) = NULL;
+int (*prof_settings_get_int)(char *group, char *key, int def) = NULL;
+void (*prof_settings_set_int)(char *group, char *key, int value) = NULL;
