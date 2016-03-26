@@ -102,7 +102,7 @@ cmd_execute_default(ProfWin *window, const char *inp)
     }
 
     // handle non commands in non chat or plugin windows
-    if (window->type != WIN_CHAT && window->type != WIN_MUC && window->type != WIN_PRIVATE && window->type != WIN_PLUGIN) {
+    if (window->type != WIN_CHAT && window->type != WIN_MUC && window->type != WIN_PRIVATE && window->type != WIN_PLUGIN && window->type != WIN_XML) {
         cons_show("Unknown command: %s", inp);
         return TRUE;
     }
@@ -140,6 +140,11 @@ cmd_execute_default(ProfWin *window, const char *inp)
         ProfMucWin *mucwin = (ProfMucWin*)window;
         assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
         cl_ev_send_muc_msg(mucwin, inp);
+        break;
+    }
+    case WIN_XML:
+    {
+        jabber_send_stanza(inp);
         break;
     }
     default:
