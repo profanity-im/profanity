@@ -59,6 +59,7 @@
 #include "xmpp/connection.h"
 #include "xmpp/stanza.h"
 #include "xmpp/xmpp.h"
+#include "plugins/plugins.h"
 
 static Autocomplete sub_requests_ac;
 
@@ -74,6 +75,9 @@ static int _presence_error_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const
 
 void _send_caps_request(char *node, char *caps_key, char *id, char *from);
 static void _send_room_presence(xmpp_conn_t *conn, xmpp_stanza_t *presence);
+
+static void _send_presence_stanza(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza);
+static void _send_iq_stanza(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza);
 
 void
 presence_sub_requests_init(void)
@@ -134,7 +138,7 @@ presence_subscription(const char *const jid, const jabber_subscr_t action)
     xmpp_stanza_set_name(presence, STANZA_NAME_PRESENCE);
     xmpp_stanza_set_type(presence, type);
     xmpp_stanza_set_attribute(presence, STANZA_ATTR_TO, jidp->barejid);
-    xmpp_send(conn, presence);
+    _send_presence_stanza(conn, presence);
     xmpp_stanza_release(presence);
 
     jid_destroy(jidp);
@@ -239,7 +243,7 @@ presence_send(const resource_presence_t presence_type, const char *const msg, co
         stanza_attach_last_activity(ctx, presence, idle);
     }
     stanza_attach_caps(ctx, presence);
-    xmpp_send(conn, presence);
+    _send_presence_stanza(conn, presence);
     _send_room_presence(conn, presence);
     xmpp_stanza_release(presence);
 
@@ -269,7 +273,7 @@ _send_room_presence(xmpp_conn_t *conn, xmpp_stanza_t *presence)
 
             xmpp_stanza_set_attribute(presence, STANZA_ATTR_TO, full_room_jid);
             log_debug("Sending presence to room: %s", full_room_jid);
-            xmpp_send(conn, presence);
+            _send_presence_stanza(conn, presence);
             free(full_room_jid);
         }
 
@@ -302,7 +306,7 @@ presence_join_room(char *room, char *nick, char * passwd)
     stanza_attach_priority(ctx, presence, pri);
     stanza_attach_caps(ctx, presence);
 
-    xmpp_send(conn, presence);
+    _send_presence_stanza(conn, presence);
     xmpp_stanza_release(presence);
 
     jid_destroy(jid);
@@ -332,7 +336,7 @@ presence_change_room_nick(const char *const room, const char *const nick)
     stanza_attach_priority(ctx, presence, pri);
     stanza_attach_caps(ctx, presence);
 
-    xmpp_send(conn, presence);
+    _send_presence_stanza(conn, presence);
     xmpp_stanza_release(presence);
 
     free(full_room_jid);
@@ -351,7 +355,7 @@ presence_leave_chat_room(const char *const room_jid)
     if (nick) {
         xmpp_stanza_t *presence = stanza_create_room_leave_presence(ctx, room_jid,
             nick);
-        xmpp_send(conn, presence);
+        _send_presence_stanza(conn, presence);
         xmpp_stanza_release(presence);
     }
 }
@@ -649,7 +653,7 @@ _send_caps_request(char *node, char *caps_key, char *id, char *from)
         if (!caps_contains(caps_key)) {
             log_debug("Capabilities not cached for '%s', sending discovery IQ.", from);
             xmpp_stanza_t *iq = stanza_create_disco_info_iq(ctx, id, from, node);
-            xmpp_send(conn, iq);
+            _send_iq_stanza(conn, iq);
             xmpp_stanza_release(iq);
         } else {
             log_debug("Capabilities already cached, for %s", caps_key);
@@ -810,4 +814,34 @@ _muc_user_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza, void *co
     jid_destroy(from_jid);
 
     return 1;
+}
+
+static void
+_send_presence_stanza(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza)
+{
+    char *text;
+    size_t text_size;
+    xmpp_stanza_to_text(stanza, &text, &text_size);
+
+    char *plugin_text = plugins_on_presence_stanza_send(text);
+    if (plugin_text) {
+        xmpp_send_raw(conn, plugin_text, strlen(plugin_text));
+    } else {
+        xmpp_send_raw(conn, text, text_size);
+    }
+}
+
+static void
+_send_iq_stanza(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza)
+{
+    char *text;
+    size_t text_size;
+    xmpp_stanza_to_text(stanza, &text, &text_size);
+
+    char *plugin_text = plugins_on_iq_stanza_send(text);
+    if (plugin_text) {
+        xmpp_send_raw(conn, plugin_text, strlen(plugin_text));
+    } else {
+        xmpp_send_raw(conn, text, text_size);
+    }
 }
