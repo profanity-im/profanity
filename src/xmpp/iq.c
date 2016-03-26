@@ -63,6 +63,7 @@
 #include "xmpp/form.h"
 #include "roster_list.h"
 #include "xmpp/xmpp.h"
+#include "plugins/plugins.h"
 
 #define HANDLE(ns, type, func) xmpp_handler_add(conn, func, ns, STANZA_NAME_IQ, type, ctx)
 
@@ -97,6 +98,8 @@ static int _autoping_timed_handler(xmpp_conn_t *const conn, void *const userdata
 static int _caps_response_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza, void *const userdata);
 static int _caps_response_handler_for_jid(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza, void *const userdata);
 static int _caps_response_handler_legacy(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza, void *const userdata);
+
+static void _send_iq_stanza(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza);
 
 static gboolean autoping_wait = FALSE;
 static GTimer *autoping_time = NULL;
@@ -179,7 +182,7 @@ iq_room_list_request(gchar *conferencejid)
     xmpp_conn_t * const conn = connection_get_conn();
     xmpp_ctx_t * const ctx = connection_get_ctx();
     xmpp_stanza_t *iq = stanza_create_disco_items_iq(ctx, "confreq", conferencejid);
-    xmpp_send(conn, iq);
+    _send_iq_stanza(conn, iq);
     xmpp_stanza_release(iq);
 }
 
@@ -193,7 +196,7 @@ iq_enable_carbons(void)
 
     xmpp_id_handler_add(conn, _enable_carbons_handler, id, NULL);
 
-    xmpp_send(conn, iq);
+    _send_iq_stanza(conn, iq);
     xmpp_stanza_release(iq);
 }
 
@@ -207,7 +210,7 @@ iq_disable_carbons(void)
 
     xmpp_id_handler_add(conn, _disable_carbons_handler, id, NULL);
 
-    xmpp_send(conn, iq);
+    _send_iq_stanza(conn, iq);
     xmpp_stanza_release(iq);
 }
 
@@ -223,7 +226,7 @@ iq_disco_info_request(gchar *jid)
 
     free(id);
 
-    xmpp_send(conn, iq);
+    _send_iq_stanza(conn, iq);
     xmpp_stanza_release(iq);
 }
 
@@ -239,7 +242,7 @@ iq_last_activity_request(gchar *jid)
 
     free(id);
 
-    xmpp_send(conn, iq);
+    _send_iq_stanza(conn, iq);
     xmpp_stanza_release(iq);
 }
 
@@ -259,7 +262,7 @@ iq_room_info_request(const char *const room, gboolean display_result)
 
     free(id);
 
-    xmpp_send(conn, iq);
+    _send_iq_stanza(conn, iq);
     xmpp_stanza_release(iq);
 }
 
@@ -288,7 +291,7 @@ iq_send_caps_request_for_jid(const char *const to, const char *const id,
 
     xmpp_id_handler_add(conn, _caps_response_handler_for_jid, id, strdup(to));
 
-    xmpp_send(conn, iq);
+    _send_iq_stanza(conn, iq);
     xmpp_stanza_release(iq);
 }
 
@@ -315,7 +318,7 @@ iq_send_caps_request(const char *const to, const char *const id,
 
     xmpp_id_handler_add(conn, _caps_response_handler, id, NULL);
 
-    xmpp_send(conn, iq);
+    _send_iq_stanza(conn, iq);
     xmpp_stanza_release(iq);
 }
 
@@ -342,7 +345,7 @@ iq_send_caps_request_legacy(const char *const to, const char *const id,
     xmpp_id_handler_add(conn, _caps_response_handler_legacy, id, node_str->str);
     g_string_free(node_str, FALSE);
 
-    xmpp_send(conn, iq);
+    _send_iq_stanza(conn, iq);
     xmpp_stanza_release(iq);
 }
 
@@ -352,7 +355,7 @@ iq_disco_items_request(gchar *jid)
     xmpp_conn_t * const conn = connection_get_conn();
     xmpp_ctx_t * const ctx = connection_get_ctx();
     xmpp_stanza_t *iq = stanza_create_disco_items_iq(ctx, "discoitemsreq", jid);
-    xmpp_send(conn, iq);
+    _send_iq_stanza(conn, iq);
     xmpp_stanza_release(iq);
 }
 
@@ -366,7 +369,7 @@ iq_send_software_version(const char *const fulljid)
     char *id = xmpp_stanza_get_id(iq);
     xmpp_id_handler_add(conn, _version_result_handler, id, strdup(fulljid));
 
-    xmpp_send(conn, iq);
+    _send_iq_stanza(conn, iq);
     xmpp_stanza_release(iq);
 }
 
@@ -376,7 +379,7 @@ iq_confirm_instant_room(const char *const room_jid)
     xmpp_conn_t * const conn = connection_get_conn();
     xmpp_ctx_t * const ctx = connection_get_ctx();
     xmpp_stanza_t *iq = stanza_create_instant_room_request_iq(ctx, room_jid);
-    xmpp_send(conn, iq);
+    _send_iq_stanza(conn, iq);
     xmpp_stanza_release(iq);
 }
 
@@ -390,7 +393,7 @@ iq_destroy_room(const char *const room_jid)
     char *id = xmpp_stanza_get_id(iq);
     xmpp_id_handler_add(conn, _destroy_room_result_handler, id, NULL);
 
-    xmpp_send(conn, iq);
+    _send_iq_stanza(conn, iq);
     xmpp_stanza_release(iq);
 }
 
@@ -404,7 +407,7 @@ iq_request_room_config_form(const char *const room_jid)
     char *id = xmpp_stanza_get_id(iq);
     xmpp_id_handler_add(conn, _room_config_handler, id, NULL);
 
-    xmpp_send(conn, iq);
+    _send_iq_stanza(conn, iq);
     xmpp_stanza_release(iq);
 }
 
@@ -418,7 +421,7 @@ iq_submit_room_config(const char *const room, DataForm *form)
     char *id = xmpp_stanza_get_id(iq);
     xmpp_id_handler_add(conn, _room_config_submit_handler, id, NULL);
 
-    xmpp_send(conn, iq);
+    _send_iq_stanza(conn, iq);
     xmpp_stanza_release(iq);
 }
 
@@ -428,7 +431,7 @@ iq_room_config_cancel(const char *const room_jid)
     xmpp_conn_t * const conn = connection_get_conn();
     xmpp_ctx_t * const ctx = connection_get_ctx();
     xmpp_stanza_t *iq = stanza_create_room_config_cancel_iq(ctx, room_jid);
-    xmpp_send(conn, iq);
+    _send_iq_stanza(conn, iq);
     xmpp_stanza_release(iq);
 }
 
@@ -442,7 +445,7 @@ iq_room_affiliation_list(const char *const room, char *affiliation)
     char *id = xmpp_stanza_get_id(iq);
     xmpp_id_handler_add(conn, _room_affiliation_list_result_handler, id, strdup(affiliation));
 
-    xmpp_send(conn, iq);
+    _send_iq_stanza(conn, iq);
     xmpp_stanza_release(iq);
 }
 
@@ -456,7 +459,7 @@ iq_room_kick_occupant(const char *const room, const char *const nick, const char
     char *id = xmpp_stanza_get_id(iq);
     xmpp_id_handler_add(conn, _room_kick_result_handler, id, strdup(nick));
 
-    xmpp_send(conn, iq);
+    _send_iq_stanza(conn, iq);
     xmpp_stanza_release(iq);
 }
 
@@ -481,7 +484,7 @@ iq_room_affiliation_set(const char *const room, const char *const jid, char *aff
 
     xmpp_id_handler_add(conn, _room_affiliation_set_result_handler, id, affiliation_set);
 
-    xmpp_send(conn, iq);
+    _send_iq_stanza(conn, iq);
     xmpp_stanza_release(iq);
 }
 
@@ -501,7 +504,7 @@ iq_room_role_set(const char *const room, const char *const nick, char *role,
 
     xmpp_id_handler_add(conn, _room_role_set_result_handler, id, role_set);
 
-    xmpp_send(conn, iq);
+    _send_iq_stanza(conn, iq);
     xmpp_stanza_release(iq);
 }
 
@@ -515,7 +518,7 @@ iq_room_role_list(const char *const room, char *role)
     char *id = xmpp_stanza_get_id(iq);
     xmpp_id_handler_add(conn, _room_role_list_result_handler, id, strdup(role));
 
-    xmpp_send(conn, iq);
+    _send_iq_stanza(conn, iq);
     xmpp_stanza_release(iq);
 }
 
@@ -530,7 +533,7 @@ iq_send_ping(const char *const target)
     GDateTime *now = g_date_time_new_now_local();
     xmpp_id_handler_add(conn, _manual_pong_handler, id, now);
 
-    xmpp_send(conn, iq);
+    _send_iq_stanza(conn, iq);
     xmpp_stanza_release(iq);
 }
 
@@ -900,7 +903,7 @@ _autoping_timed_handler(xmpp_conn_t *const conn, void *const userdata)
     // add pong handler
     xmpp_id_handler_add(conn, _auto_pong_handler, id, ctx);
 
-    xmpp_send(conn, iq);
+    _send_iq_stanza(conn, iq);
     xmpp_stanza_release(iq);
     autoping_wait = TRUE;
     if (autoping_time) {
@@ -1039,7 +1042,7 @@ _ping_get_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza,
         xmpp_stanza_set_attribute(pong, STANZA_ATTR_ID, id);
     }
 
-    xmpp_send(conn, pong);
+    _send_iq_stanza(conn, pong);
     xmpp_stanza_release(pong);
 
     return 1;
@@ -1099,7 +1102,7 @@ _version_get_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza,
         xmpp_stanza_add_child(query, version);
         xmpp_stanza_add_child(response, query);
 
-        xmpp_send(conn, response);
+        _send_iq_stanza(conn, response);
 
         g_string_free(version_str, TRUE);
         xmpp_stanza_release(name_txt);
@@ -1137,7 +1140,7 @@ _disco_items_get_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza,
         xmpp_stanza_set_name(query, STANZA_NAME_QUERY);
         xmpp_stanza_set_ns(query, XMPP_NS_DISCO_ITEMS);
         xmpp_stanza_add_child(response, query);
-        xmpp_send(conn, response);
+        _send_iq_stanza(conn, response);
 
         xmpp_stanza_release(response);
     }
@@ -1175,7 +1178,7 @@ _last_activity_get_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza,
         xmpp_stanza_add_child(response, query);
         xmpp_stanza_release(query);
 
-        xmpp_send(conn, response);
+        _send_iq_stanza(conn, response);
 
         xmpp_stanza_release(response);
     } else {
@@ -1199,7 +1202,7 @@ _last_activity_get_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza,
         xmpp_stanza_add_child(response, error);
         xmpp_stanza_release(error);
 
-        xmpp_send(conn, response);
+        _send_iq_stanza(conn, response);
 
         xmpp_stanza_release(response);
     }
@@ -1236,7 +1239,7 @@ _disco_info_get_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza,
             xmpp_stanza_set_attribute(query, STANZA_ATTR_NODE, node_str);
         }
         xmpp_stanza_add_child(response, query);
-        xmpp_send(conn, response);
+        _send_iq_stanza(conn, response);
 
         xmpp_stanza_release(query);
         xmpp_stanza_release(response);
@@ -1832,4 +1835,19 @@ _disco_items_result_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza
     g_slist_free_full(items, (GDestroyNotify)_item_destroy);
 
     return 1;
+}
+
+static void
+_send_iq_stanza(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza)
+{
+    char *text;
+    size_t text_size;
+    xmpp_stanza_to_text(stanza, &text, &text_size);
+
+    char *plugin_text = plugins_on_iq_stanza_send(text);
+    if (plugin_text) {
+        xmpp_send_raw(conn, plugin_text, strlen(plugin_text));
+    } else {
+        xmpp_send_raw(conn, text, text_size);
+    }
 }

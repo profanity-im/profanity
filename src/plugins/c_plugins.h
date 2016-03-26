@@ -64,4 +64,8 @@ void  c_post_priv_message_display_hook(ProfPlugin *plugin, const char * const ro
 char* c_pre_priv_message_send_hook(ProfPlugin *plugin, const char * const room, const char * const nick, const char * const message);
 void  c_post_priv_message_send_hook(ProfPlugin *plugin, const char * const room, const char * const nick, const char * const message);
 
+char* c_on_message_stanza_send_hook(ProfPlugin *plugin, const char *const text);
+char* c_on_presence_stanza_send_hook(ProfPlugin *plugin, const char *const text);
+char* c_on_iq_stanza_send_hook(ProfPlugin *plugin, const char *const text);
+
 #endif

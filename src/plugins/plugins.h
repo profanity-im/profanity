@@ -72,6 +72,9 @@ typedef struct prof_plugin_t {
     char* (*pre_priv_message_send)(struct prof_plugin_t* plugin, const char * const room, const char * const nick, const char * const message);
     void  (*post_priv_message_send)(struct prof_plugin_t* plugin, const char * const room, const char * const nick, const char * const message);
 
+    char* (*on_message_stanza_send)(struct prof_plugin_t* plugin, const char *const text);
+    char* (*on_presence_stanza_send)(struct prof_plugin_t* plugin, const char *const text);
+    char* (*on_iq_stanza_send)(struct prof_plugin_t* plugin, const char *const text);
 } ProfPlugin;
 
 void plugins_init(void);
@@ -102,12 +105,16 @@ void  plugins_post_priv_message_display(const char * const jid, const char *mess
 char* plugins_pre_priv_message_send(const char * const jid, const char * const message);
 void  plugins_post_priv_message_send(const char * const jid, const char * const message);
 
+void plugins_win_process_line(char *win, const char * const line);
+
+char* plugins_on_message_stanza_send(const char *const text);
+char* plugins_on_presence_stanza_send(const char *const text);
+char* plugins_on_iq_stanza_send(const char *const text);
+
 gboolean plugins_run_command(const char * const cmd);
 void plugins_run_timed(void);
 GList* plugins_get_command_names(void);
 gchar * plugins_get_dir(void);
 CommandHelp* plugins_get_help(const char *const cmd);
-
-void plugins_win_process_line(char *win, const char * const line);
 
 #endif

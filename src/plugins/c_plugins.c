@@ -97,6 +97,9 @@ c_plugin_create(const char * const filename)
     plugin->post_priv_message_display = c_post_priv_message_display_hook;
     plugin->pre_priv_message_send = c_pre_priv_message_send_hook;
     plugin->post_priv_message_send = c_post_priv_message_send_hook;
+    plugin->on_message_stanza_send = c_on_message_stanza_send_hook;
+    plugin->on_presence_stanza_send = c_on_presence_stanza_send_hook;
+    plugin->on_iq_stanza_send = c_on_iq_stanza_send_hook;
 
     g_string_free(path, TRUE);
     g_free(module_name);
@@ -345,6 +348,48 @@ c_post_priv_message_send_hook(ProfPlugin *plugin, const char * const room, const
 
     func = (void (*)(const char * const, const char * const, const char *)) f;
     func (room, nick, message);
+}
+
+char *
+c_on_message_stanza_send_hook(ProfPlugin *plugin, const char * const text)
+{
+    void * f = NULL;
+    char* (*func)(const char * const __text);
+    assert (plugin && plugin->module);
+
+    if (NULL == (f = dlsym (plugin->module, "prof_on_message_stanza_send")))
+        return NULL;
+
+    func = (char* (*)(const char * const)) f;
+    return func (text);
+}
+
+char *
+c_on_presence_stanza_send_hook(ProfPlugin *plugin, const char * const text)
+{
+    void * f = NULL;
+    char* (*func)(const char * const __text);
+    assert (plugin && plugin->module);
+
+    if (NULL == (f = dlsym (plugin->module, "prof_on_presence_stanza_send")))
+        return NULL;
+
+    func = (char* (*)(const char * const)) f;
+    return func (text);
+}
+
+char *
+c_on_iq_stanza_send_hook(ProfPlugin *plugin, const char * const text)
+{
+    void * f = NULL;
+    char* (*func)(const char * const __text);
+    assert (plugin && plugin->module);
+
+    if (NULL == (f = dlsym (plugin->module, "prof_on_iq_stanza_send")))
+        return NULL;
+
+    func = (char* (*)(const char * const)) f;
+    return func (text);
 }
 
 void

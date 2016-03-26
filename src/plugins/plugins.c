@@ -447,6 +447,69 @@ plugins_post_priv_message_send(const char * const jid, const char * const messag
     jid_destroy(jidp);
 }
 
+char*
+plugins_on_message_stanza_send(const char *const text)
+{
+    char *new_stanza = NULL;
+    char *curr_stanza = strdup(text);
+
+    GSList *curr = plugins;
+    while (curr) {
+        ProfPlugin *plugin = curr->data;
+        new_stanza = plugin->on_message_stanza_send(plugin, curr_stanza);
+        if (new_stanza) {
+            free(curr_stanza);
+            curr_stanza = strdup(new_stanza);
+            free(new_stanza);
+        }
+        curr = g_slist_next(curr);
+    }
+
+    return curr_stanza;
+}
+
+char*
+plugins_on_presence_stanza_send(const char *const text)
+{
+    char *new_stanza = NULL;
+    char *curr_stanza = strdup(text);
+
+    GSList *curr = plugins;
+    while (curr) {
+        ProfPlugin *plugin = curr->data;
+        new_stanza = plugin->on_presence_stanza_send(plugin, curr_stanza);
+        if (new_stanza) {
+            free(curr_stanza);
+            curr_stanza = strdup(new_stanza);
+            free(new_stanza);
+        }
+        curr = g_slist_next(curr);
+    }
+
+    return curr_stanza;
+}
+
+char*
+plugins_on_iq_stanza_send(const char *const text)
+{
+    char *new_stanza = NULL;
+    char *curr_stanza = strdup(text);
+
+    GSList *curr = plugins;
+    while (curr) {
+        ProfPlugin *plugin = curr->data;
+        new_stanza = plugin->on_iq_stanza_send(plugin, curr_stanza);
+        if (new_stanza) {
+            free(curr_stanza);
+            curr_stanza = strdup(new_stanza);
+            free(new_stanza);
+        }
+        curr = g_slist_next(curr);
+    }
+
+    return curr_stanza;
+}
+
 void
 plugins_shutdown(void)
 {
