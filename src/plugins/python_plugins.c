@@ -115,6 +115,9 @@ python_plugin_create(const char * const filename)
         plugin->post_priv_message_display = python_post_priv_message_display_hook;
         plugin->pre_priv_message_send = python_pre_priv_message_send_hook;
         plugin->post_priv_message_send = python_post_priv_message_send_hook;
+        plugin->on_message_stanza_send = python_on_message_stanza_send_hook;
+        plugin->on_presence_stanza_send = python_on_presence_stanza_send_hook;
+        plugin->on_iq_stanza_send = python_on_iq_stanza_send_hook;
         g_free(module_name);
 
         allow_python_threads();
@@ -566,6 +569,114 @@ python_post_priv_message_send_hook(ProfPlugin *plugin, const char * const room, 
     }
 
     allow_python_threads();
+}
+
+char*
+python_on_message_stanza_send_hook(ProfPlugin *plugin, const char *const text)
+{
+    disable_python_threads();
+    PyObject *p_args = Py_BuildValue("(s)", text);
+    PyObject *p_function;
+
+    PyObject *p_module = plugin->module;
+    if (PyObject_HasAttrString(p_module, "prof_on_message_stanza_send")) {
+        p_function = PyObject_GetAttrString(p_module, "prof_on_message_stanza_send");
+        python_check_error();
+        if (p_function && PyCallable_Check(p_function)) {
+            PyObject *result = PyObject_CallObject(p_function, p_args);
+            python_check_error();
+            Py_XDECREF(p_function);
+            if (PyUnicode_Check(result)) {
+                char *result_str = strdup(PyString_AsString(PyUnicode_AsUTF8String(result)));
+                Py_XDECREF(result);
+                allow_python_threads();
+                return result_str;
+            } else if (result != Py_None) {
+                char *result_str = strdup(PyString_AsString(result));
+                Py_XDECREF(result);
+                allow_python_threads();
+                return result_str;
+            } else {
+                allow_python_threads();
+                return NULL;
+            }
+        }
+    }
+
+    allow_python_threads();
+    return NULL;
+}
+
+char*
+python_on_presence_stanza_send_hook(ProfPlugin *plugin, const char *const text)
+{
+    disable_python_threads();
+    PyObject *p_args = Py_BuildValue("(s)", text);
+    PyObject *p_function;
+
+    PyObject *p_module = plugin->module;
+    if (PyObject_HasAttrString(p_module, "prof_on_presence_stanza_send")) {
+        p_function = PyObject_GetAttrString(p_module, "prof_on_presence_stanza_send");
+        python_check_error();
+        if (p_function && PyCallable_Check(p_function)) {
+            PyObject *result = PyObject_CallObject(p_function, p_args);
+            python_check_error();
+            Py_XDECREF(p_function);
+            if (PyUnicode_Check(result)) {
+                char *result_str = strdup(PyString_AsString(PyUnicode_AsUTF8String(result)));
+                Py_XDECREF(result);
+                allow_python_threads();
+                return result_str;
+            } else if (result != Py_None) {
+                char *result_str = strdup(PyString_AsString(result));
+                Py_XDECREF(result);
+                allow_python_threads();
+                return result_str;
+            } else {
+                allow_python_threads();
+                return NULL;
+            }
+        }
+    }
+
+    allow_python_threads();
+    return NULL;
+}
+
+char*
+python_on_iq_stanza_send_hook(ProfPlugin *plugin, const char *const text)
+{
+    disable_python_threads();
+    PyObject *p_args = Py_BuildValue("(s)", text);
+    PyObject *p_function;
+
+    PyObject *p_module = plugin->module;
+    if (PyObject_HasAttrString(p_module, "prof_on_iq_stanza_send")) {
+        p_function = PyObject_GetAttrString(p_module, "prof_on_iq_stanza_send");
+        python_check_error();
+        if (p_function && PyCallable_Check(p_function)) {
+            PyObject *result = PyObject_CallObject(p_function, p_args);
+            python_check_error();
+            Py_XDECREF(p_function);
+            if (PyUnicode_Check(result)) {
+                char *result_str = strdup(PyString_AsString(PyUnicode_AsUTF8String(result)));
+                Py_XDECREF(result);
+                allow_python_threads();
+                return result_str;
+            } else if (result != Py_None) {
+                char *result_str = strdup(PyString_AsString(result));
+                Py_XDECREF(result);
+                allow_python_threads();
+                return result_str;
+            } else {
+                allow_python_threads();
+                return NULL;
+            }
+        }
+    }
+
+    allow_python_threads();
+    return NULL;
 }
 
 void

@@ -56,6 +56,7 @@
 #include "xmpp/xmpp.h"
 #include "xmpp/bookmark.h"
 #include "ui/ui.h"
+#include "plugins/plugins.h"
 
 #define BOOKMARK_TIMEOUT 5000
 
@@ -69,6 +70,8 @@ static int _bookmark_handle_delete(xmpp_conn_t *const conn,
 static void _bookmark_item_destroy(gpointer item);
 static int _match_bookmark_by_jid(gconstpointer a, gconstpointer b);
 static void _send_bookmarks(void);
+
+static void _send_iq_stanza(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza);
 
 void
 bookmark_request(void)
@@ -92,7 +95,7 @@ bookmark_request(void)
 
     iq = stanza_create_bookmarks_storage_request(ctx);
     xmpp_stanza_set_id(iq, id);
-    xmpp_send(conn, iq);
+    _send_iq_stanza(conn, iq);
     xmpp_stanza_release(iq);
 }
 
@@ -474,6 +477,21 @@ _send_bookmarks(void)
     xmpp_stanza_release(storage);
     xmpp_stanza_release(query);
 
-    xmpp_send(conn, iq);
+    _send_iq_stanza(conn, iq);
     xmpp_stanza_release(iq);
+}
+
+static void
+_send_iq_stanza(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza)
+{
+    char *text;
+    size_t text_size;
+    xmpp_stanza_to_text(stanza, &text, &text_size);
+
+    char *plugin_text = plugins_on_iq_stanza_send(text);
+    if (plugin_text) {
+        xmpp_send_raw(conn, plugin_text, strlen(plugin_text));
+    } else {
+        xmpp_send_raw(conn, text, text_size);
+    }
 }
