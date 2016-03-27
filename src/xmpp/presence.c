@@ -65,6 +65,7 @@ static Autocomplete sub_requests_ac;
 
 #define HANDLE(ns, type, func) xmpp_handler_add(conn, func, ns, STANZA_NAME_PRESENCE, type, ctx)
 
+// regular handlers
 static int _unavailable_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza, void *const userdata);
 static int _subscribe_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza, void *const userdata);
 static int _subscribed_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza, void *const userdata);
@@ -78,6 +79,7 @@ static void _send_room_presence(xmpp_conn_t *conn, xmpp_stanza_t *presence);
 
 static void _send_presence_stanza(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza);
 static void _send_iq_stanza(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza);
+static gboolean _receive_presence_stanza(xmpp_stanza_t *const stanza);
 
 void
 presence_sub_requests_init(void)
@@ -364,6 +366,8 @@ static int
 _presence_error_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza,
     void *const userdata)
 {
+    log_debug("Presence stanza error handler fired");
+
     char *id = xmpp_stanza_get_id(stanza);
     char *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
     xmpp_stanza_t *error_stanza = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_ERROR);
@@ -438,6 +442,8 @@ static int
 _unsubscribed_handler(xmpp_conn_t *const conn,
     xmpp_stanza_t *const stanza, void *const userdata)
 {
+    log_debug("Presence stanza unsubscribed handler fired");
+
     char *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
     Jid *from_jid = jid_create(from);
     log_debug("Unsubscribed presence handler fired for %s", from);
@@ -454,6 +460,8 @@ static int
 _subscribed_handler(xmpp_conn_t *const conn,
     xmpp_stanza_t *const stanza, void *const userdata)
 {
+    log_debug("Presence stanza subscribed handler fired");
+
     char *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
     Jid *from_jid = jid_create(from);
     log_debug("Subscribed presence handler fired for %s", from);
@@ -470,6 +478,8 @@ static int
 _subscribe_handler(xmpp_conn_t *const conn,
     xmpp_stanza_t *const stanza, void *const userdata)
 {
+    log_debug("Presence stanza subscribe handler fired");
+
     char *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
     log_debug("Subscribe presence handler fired for %s", from);
 
@@ -490,6 +500,8 @@ static int
 _unavailable_handler(xmpp_conn_t *const conn,
     xmpp_stanza_t *const stanza, void *const userdata)
 {
+    log_debug("Presence stanza unavailale handler fired");
+
     inp_nonblocking(TRUE);
 
     const char *jid = xmpp_conn_get_jid(conn);
@@ -564,9 +576,15 @@ _handle_caps(char *jid, XMPPCaps *caps)
 }
 
 static int
-_available_handler(xmpp_conn_t *const conn,
-    xmpp_stanza_t *const stanza, void *const userdata)
+_available_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza, void *const userdata)
 {
+    log_debug("Presence stanza available handler fired");
+
+    gboolean cont = _receive_presence_stanza(stanza);
+    if (!cont) {
+        return 1;
+    }
+
     inp_nonblocking(TRUE);
 
     // handler still fires if error
@@ -666,6 +684,8 @@ _send_caps_request(char *node, char *caps_key, char *id, char *from)
 static int
 _muc_user_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza, void *const userdata)
 {
+    log_debug("Presence stanza muc user handler fired");
+
     inp_nonblocking(TRUE);
 
     char *type = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_TYPE);
@@ -845,3 +865,14 @@ _send_iq_stanza(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza)
         xmpp_send_raw_string(conn, "%s", text);
     }
 }
+
+static gboolean
+_receive_presence_stanza(xmpp_stanza_t *const stanza)
+{
+    char *text;
+    size_t text_size;
+    xmpp_stanza_to_text(stanza, &text, &text_size);
+
+    return plugins_on_presence_stanza_receive(text);
+}
+

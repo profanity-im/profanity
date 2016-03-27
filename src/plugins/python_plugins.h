@@ -65,7 +65,10 @@ char* python_pre_priv_message_send_hook(ProfPlugin *plugin, const char * const r
 void  python_post_priv_message_send_hook(ProfPlugin *plugin, const char * const room, const char * const nick, const char * const message);
 
 char* python_on_message_stanza_send_hook(ProfPlugin *plugin, const char *const text);
+gboolean python_on_message_stanza_receive_hook(ProfPlugin *plugin, const char *const text);
 char* python_on_presence_stanza_send_hook(ProfPlugin *plugin, const char *const text);
+gboolean python_on_presence_stanza_receive_hook(ProfPlugin *plugin, const char *const text);
 char* python_on_iq_stanza_send_hook(ProfPlugin *plugin, const char *const text);
+gboolean python_on_iq_stanza_receive_hook(ProfPlugin *plugin, const char *const text);
 
 #endif

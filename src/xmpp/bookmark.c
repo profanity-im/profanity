@@ -63,10 +63,12 @@
 static Autocomplete bookmark_ac;
 static GList *bookmark_list;
 
-static int _bookmark_handle_result(xmpp_conn_t *const conn,
-    xmpp_stanza_t *const stanza, void *const userdata);
-static int _bookmark_handle_delete(xmpp_conn_t *const conn,
-    void *const userdata);
+// id handlers
+static int _bookmark_result_id_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza, void *const userdata);
+
+// scheduled
+static int _bookmark_handle_delete(xmpp_conn_t *const conn, void *const userdata);
+
 static void _bookmark_item_destroy(gpointer item);
 static int _match_bookmark_by_jid(gconstpointer a, gconstpointer b);
 static void _send_bookmarks(void);
@@ -91,7 +93,7 @@ bookmark_request(void)
     }
 
     xmpp_timed_handler_add(conn, _bookmark_handle_delete, BOOKMARK_TIMEOUT, id);
-    xmpp_id_handler_add(conn, _bookmark_handle_result, id, id);
+    xmpp_id_handler_add(conn, _bookmark_result_id_handler, id, id);
 
     iq = stanza_create_bookmarks_storage_request(ctx);
     xmpp_stanza_set_id(iq, id);
@@ -245,9 +247,11 @@ bookmark_autocomplete_reset(void)
 }
 
 static int
-_bookmark_handle_result(xmpp_conn_t *const conn,
+_bookmark_result_id_handler(xmpp_conn_t *const conn,
     xmpp_stanza_t *const stanza, void *const userdata)
 {
+    log_debug("iq stanza bookmark result id handler fired");
+
     xmpp_ctx_t *ctx = connection_get_ctx();
     char *id = (char *)userdata;
     xmpp_stanza_t *ptr;
@@ -372,7 +376,7 @@ _bookmark_handle_delete(xmpp_conn_t *const conn,
 
     log_debug("Timeout for handler with id=%s", id);
 
-    xmpp_id_handler_delete(conn, _bookmark_handle_result, id);
+    xmpp_id_handler_delete(conn, _bookmark_result_id_handler, id);
     g_free(id);
 
     return 0;

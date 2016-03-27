@@ -62,6 +62,7 @@
 
 #define HANDLE(ns, type, func) xmpp_handler_add(conn, func, ns, STANZA_NAME_MESSAGE, type, ctx)
 
+// regular handlers
 static int _groupchat_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza, void *const userdata);
 static int _chat_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza, void *const userdata);
 static int _muc_user_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza, void *const userdata);
@@ -69,7 +70,9 @@ static int _conference_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const sta
 static int _captcha_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza, void *const userdata);
 static int _message_error_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza, void *const userdata);
 static int _receipt_received_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza, void *const userdata);
+
 static void _send_message_stanza(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza);
+static gboolean _receive_message_stanza(xmpp_stanza_t *const stanza);
 
 void
 message_add_handlers(void)
@@ -340,6 +343,8 @@ message_send_gone(const char *const jid)
 static int
 _message_error_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza, void *const userdata)
 {
+    log_debug("Message stanza error handler fired");
+
     char *id = xmpp_stanza_get_id(stanza);
     char *jid = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
     xmpp_stanza_t *error_stanza = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_ERROR);
@@ -390,6 +395,8 @@ _message_error_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza, voi
 static int
 _muc_user_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza, void *const userdata)
 {
+    log_debug("Message stanza muc user handler fired");
+
     xmpp_ctx_t *ctx = connection_get_ctx();
     xmpp_stanza_t *xns_muc_user = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_MUC_USER);
     char *room = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
@@ -444,6 +451,8 @@ _muc_user_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza, void *co
 static int
 _conference_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza, void *const userdata)
 {
+    log_debug("Message stanza conference handler fired");
+
     xmpp_stanza_t *xns_conference = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_CONFERENCE);
 
     char *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
@@ -476,6 +485,8 @@ _conference_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza, void *
 static int
 _captcha_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza, void *const userdata)
 {
+    log_debug("Message stanza captcha handler fired");
+
     xmpp_ctx_t *ctx = connection_get_ctx();
     char *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
 
@@ -504,6 +515,8 @@ _captcha_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza, void *con
 static int
 _groupchat_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza, void *const userdata)
 {
+    log_debug("Message stanza groupchat handler fired");
+
     xmpp_ctx_t *ctx = connection_get_ctx();
     char *message = NULL;
     char *room_jid = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
@@ -610,6 +623,8 @@ _message_send_receipt(const char *const fulljid, const char *const message_id)
 static int
 _receipt_received_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza, void *const userdata)
 {
+    log_debug("Message stanza receipt received handler fired");
+
     xmpp_stanza_t *receipt = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_RECEIPTS);
     char *name = xmpp_stanza_get_name(receipt);
     if (g_strcmp0(name, "received") != 0) {
@@ -749,6 +764,13 @@ _handle_carbons(xmpp_stanza_t *const stanza)
 static int
 _chat_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza, void *const userdata)
 {
+    log_debug("Message stanza chat handler fired");
+
+    gboolean cont = _receive_message_stanza(stanza);
+    if (!cont) {
+        return 1;
+    }
+
     // ignore if type not chat or absent
     char *type = xmpp_stanza_get_type(stanza);
     if (!(g_strcmp0(type, "chat") == 0 || type == NULL)) {
@@ -846,4 +868,14 @@ _send_message_stanza(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza)
     } else {
         xmpp_send_raw_string(conn, "%s", text);
     }
+}
+
+static gboolean
+_receive_message_stanza(xmpp_stanza_t *const stanza)
+{
+    char *text;
+    size_t text_size;
+    xmpp_stanza_to_text(stanza, &text, &text_size);
+
+    return plugins_on_message_stanza_receive(text);
 }

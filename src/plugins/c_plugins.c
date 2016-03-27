@@ -98,8 +98,11 @@ c_plugin_create(const char * const filename)
     plugin->pre_priv_message_send = c_pre_priv_message_send_hook;
     plugin->post_priv_message_send = c_post_priv_message_send_hook;
     plugin->on_message_stanza_send = c_on_message_stanza_send_hook;
+    plugin->on_message_stanza_receive = c_on_message_stanza_receive_hook;
     plugin->on_presence_stanza_send = c_on_presence_stanza_send_hook;
+    plugin->on_presence_stanza_receive = c_on_presence_stanza_receive_hook;
     plugin->on_iq_stanza_send = c_on_iq_stanza_send_hook;
+    plugin->on_iq_stanza_receive = c_on_iq_stanza_receive_hook;
 
     g_string_free(path, TRUE);
     g_free(module_name);
@@ -364,6 +367,20 @@ c_on_message_stanza_send_hook(ProfPlugin *plugin, const char * const text)
     return func (text);
 }
 
+gboolean
+c_on_message_stanza_receive_hook(ProfPlugin *plugin, const char *const text)
+{
+    void * f = NULL;
+    int (*func)(const char * const __text);
+    assert (plugin && plugin->module);
+
+    if (NULL == (f = dlsym (plugin->module, "prof_on_message_stanza_receive")))
+        return TRUE;
+
+    func = (int (*)(const char * const)) f;
+    return func (text);
+}
+
 char *
 c_on_presence_stanza_send_hook(ProfPlugin *plugin, const char * const text)
 {
@@ -378,6 +395,20 @@ c_on_presence_stanza_send_hook(ProfPlugin *plugin, const char * const text)
     return func (text);
 }
 
+gboolean
+c_on_presence_stanza_receive_hook(ProfPlugin *plugin, const char *const text)
+{
+    void * f = NULL;
+    int (*func)(const char * const __text);
+    assert (plugin && plugin->module);
+
+    if (NULL == (f = dlsym (plugin->module, "prof_on_presence_stanza_receive")))
+        return TRUE;
+
+    func = (int (*)(const char * const)) f;
+    return func (text);
+}
+
 char *
 c_on_iq_stanza_send_hook(ProfPlugin *plugin, const char * const text)
 {
@@ -389,6 +420,20 @@ c_on_iq_stanza_send_hook(ProfPlugin *plugin, const char * const text)
         return NULL;
 
     func = (char* (*)(const char * const)) f;
+    return func (text);
+}
+
+gboolean
+c_on_iq_stanza_receive_hook(ProfPlugin *plugin, const char *const text)
+{
+    void * f = NULL;
+    int (*func)(const char * const __text);
+    assert (plugin && plugin->module);
+
+    if (NULL == (f = dlsym (plugin->module, "prof_on_iq_stanza_receive")))
+        return TRUE;
+
+    func = (int (*)(const char * const)) f;
     return func (text);
 }
 

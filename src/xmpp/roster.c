@@ -75,8 +75,8 @@ static int _roster_set_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const sta
 static int _roster_result_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza, void *const userdata);
 
 // id handlers
-static int _group_add_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza, void *const userdata);
-static int _group_remove_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza, void *const userdata);
+static int _group_add_id_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza, void *const userdata);
+static int _group_remove_id_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza, void *const userdata);
 
 static void _send_iq_stanza(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza);
 
@@ -160,7 +160,7 @@ roster_send_add_to_group(const char *const group, PContact contact)
 
     xmpp_conn_t * const conn = connection_get_conn();
     xmpp_ctx_t * const ctx = connection_get_ctx();
-    xmpp_id_handler_add(conn, _group_add_handler, unique_id, data);
+    xmpp_id_handler_add(conn, _group_add_id_handler, unique_id, data);
     xmpp_stanza_t *iq = stanza_create_roster_set(ctx, unique_id, p_contact_barejid(contact),
         p_contact_name(contact), new_groups);
     _send_iq_stanza(conn, iq);
@@ -169,9 +169,11 @@ roster_send_add_to_group(const char *const group, PContact contact)
 }
 
 static int
-_group_add_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza,
+_group_add_id_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza,
     void *const userdata)
 {
+    log_debug("iq stanza group add id handler fired");
+
     if (userdata) {
         GroupData *data = userdata;
         ui_group_added(data->name, data->group);
@@ -207,7 +209,7 @@ roster_send_remove_from_group(const char *const group, PContact contact)
         data->name = strdup(p_contact_barejid(contact));
     }
 
-    xmpp_id_handler_add(conn, _group_remove_handler, unique_id, data);
+    xmpp_id_handler_add(conn, _group_remove_id_handler, unique_id, data);
     xmpp_stanza_t *iq = stanza_create_roster_set(ctx, unique_id, p_contact_barejid(contact),
         p_contact_name(contact), new_groups);
     _send_iq_stanza(conn, iq);
@@ -216,9 +218,11 @@ roster_send_remove_from_group(const char *const group, PContact contact)
 }
 
 static int
-_group_remove_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza,
+_group_remove_id_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza,
     void *const userdata)
 {
+    log_debug("iq stanza group remove id handler fired");
+
     if (userdata) {
         GroupData *data = userdata;
         ui_group_removed(data->name, data->group);
@@ -233,6 +237,8 @@ static int
 _roster_set_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza,
     void *const userdata)
 {
+    log_debug("iq stanza roster set handler fired");
+
     xmpp_stanza_t *query =
         xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_QUERY);
     xmpp_stanza_t *item =
@@ -302,6 +308,8 @@ _roster_set_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza,
 static int
 _roster_result_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza, void *const userdata)
 {
+    log_debug("iq stanza roster result handler fired");
+
     const char *id = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_ID);
 
     if (g_strcmp0(id, "roster") != 0) {
