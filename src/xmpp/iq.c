@@ -70,8 +70,6 @@ typedef struct p_room_info_data_t {
     gboolean display;
 } ProfRoomInfoData;
 
-typedef int(*ProfIdCallback)(xmpp_stanza_t *const stanza, void *const userdata);
-
 typedef struct p_id_handle_t {
     ProfIdCallback func;
     void *userdata;
