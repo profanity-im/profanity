@@ -64,22 +64,16 @@ static Autocomplete bookmark_ac;
 static GList *bookmark_list;
 
 // id handlers
-static int _bookmark_result_id_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza, void *const userdata);
-
-// scheduled
-static int _bookmark_handle_delete(xmpp_conn_t *const conn, void *const userdata);
+static int _bookmark_result_id_handler(xmpp_stanza_t *const stanza, void *const userdata);
 
 static void _bookmark_item_destroy(gpointer item);
 static int _match_bookmark_by_jid(gconstpointer a, gconstpointer b);
 static void _send_bookmarks(void);
 
-static void _send_iq_stanza(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza);
-
 void
 bookmark_request(void)
 {
     char *id;
-    xmpp_conn_t *conn = connection_get_conn();
     xmpp_ctx_t *ctx = connection_get_ctx();
     xmpp_stanza_t *iq;
 
@@ -92,12 +86,11 @@ bookmark_request(void)
         bookmark_list = NULL;
     }
 
-    xmpp_timed_handler_add(conn, _bookmark_handle_delete, BOOKMARK_TIMEOUT, id);
-    xmpp_id_handler_add(conn, _bookmark_result_id_handler, id, id);
+    id_handler_add(id, _bookmark_result_id_handler, id);
 
     iq = stanza_create_bookmarks_storage_request(ctx);
     xmpp_stanza_set_id(iq, id);
-    _send_iq_stanza(conn, iq);
+    send_iq_stanza(iq);
     xmpp_stanza_release(iq);
 }
 
@@ -247,11 +240,8 @@ bookmark_autocomplete_reset(void)
 }
 
 static int
-_bookmark_result_id_handler(xmpp_conn_t *const conn,
-    xmpp_stanza_t *const stanza, void *const userdata)
+_bookmark_result_id_handler(xmpp_stanza_t *const stanza, void *const userdata)
 {
-    log_debug("iq stanza bookmark result id handler fired");
-
     xmpp_ctx_t *ctx = connection_get_ctx();
     char *id = (char *)userdata;
     xmpp_stanza_t *ptr;
@@ -265,7 +255,6 @@ _bookmark_result_id_handler(xmpp_conn_t *const conn,
     Jid *my_jid;
     Bookmark *item;
 
-    xmpp_timed_handler_delete(conn, _bookmark_handle_delete);
     g_free(id);
 
     name = xmpp_stanza_get_name(stanza);
@@ -366,22 +355,6 @@ _bookmark_result_id_handler(xmpp_conn_t *const conn,
     return 0;
 }
 
-static int
-_bookmark_handle_delete(xmpp_conn_t *const conn,
-    void *const userdata)
-{
-    char *id = (char *)userdata;
-
-    assert(id != NULL);
-
-    log_debug("Timeout for handler with id=%s", id);
-
-    xmpp_id_handler_delete(conn, _bookmark_result_id_handler, id);
-    g_free(id);
-
-    return 0;
-}
-
 static void
 _bookmark_item_destroy(gpointer item)
 {
@@ -409,7 +382,6 @@ _match_bookmark_by_jid(gconstpointer a, gconstpointer b)
 static void
 _send_bookmarks(void)
 {
-    xmpp_conn_t *conn = connection_get_conn();
     xmpp_ctx_t *ctx = connection_get_ctx();
 
     xmpp_stanza_t *iq = xmpp_stanza_new(ctx);
@@ -481,21 +453,6 @@ _send_bookmarks(void)
     xmpp_stanza_release(storage);
     xmpp_stanza_release(query);
 
-    _send_iq_stanza(conn, iq);
+    send_iq_stanza(iq);
     xmpp_stanza_release(iq);
-}
-
-static void
-_send_iq_stanza(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza)
-{
-    char *text;
-    size_t text_size;
-    xmpp_stanza_to_text(stanza, &text, &text_size);
-
-    char *plugin_text = plugins_on_iq_stanza_send(text);
-    if (plugin_text) {
-        xmpp_send_raw_string(conn, "%s", plugin_text);
-    } else {
-        xmpp_send_raw_string(conn, "%s", text);
-    }
 }

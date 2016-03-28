@@ -635,6 +635,7 @@ python_on_message_stanza_receive_hook(ProfPlugin *plugin, const char *const text
         }
     }
 
+    allow_python_threads();
     return TRUE;
 }
 
@@ -699,6 +700,7 @@ python_on_presence_stanza_receive_hook(ProfPlugin *plugin, const char *const tex
         }
     }
 
+    allow_python_threads();
     return TRUE;
 }
 
@@ -763,6 +765,7 @@ python_on_iq_stanza_receive_hook(ProfPlugin *plugin, const char *const text)
         }
     }
 
+    allow_python_threads();
     return TRUE;
 }
 
