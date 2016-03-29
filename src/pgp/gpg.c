@@ -593,7 +593,7 @@ p_gpg_sign(const char *const str, const char *const fp)
 }
 
 char*
-p_gpg_encrypt(const char *const barejid, const char *const message)
+p_gpg_encrypt(const char *const barejid, const char *const message, const char *const fp)
 {
     ProfPGPPubKeyId *pubkeyid = g_hash_table_lookup(pubkeys, barejid);
     if (!pubkeyid) {
@@ -603,10 +603,11 @@ p_gpg_encrypt(const char *const barejid, const char *const message)
         return NULL;
     }
 
-    gpgme_key_t keys[2];
+    gpgme_key_t keys[3];
 
     keys[0] = NULL;
     keys[1] = NULL;
+    keys[2] = NULL;
 
     gpgme_ctx_t ctx;
     gpgme_error_t error = gpgme_new(&ctx);
@@ -615,16 +616,23 @@ p_gpg_encrypt(const char *const barejid, const char *const message)
         return NULL;
     }
 
-    gpgme_key_t key;
-    error = gpgme_get_key(ctx, pubkeyid->id, &key, 0);
-
-    if (error || key == NULL) {
-        log_error("GPG: Failed to get key. %s %s", gpgme_strsource(error), gpgme_strerror(error));
+    gpgme_key_t receiver_key;
+    error = gpgme_get_key(ctx, pubkeyid->id, &receiver_key, 0);
+    if (error || receiver_key == NULL) {
+        log_error("GPG: Failed to get receiver_key. %s %s", gpgme_strsource(error), gpgme_strerror(error));
         gpgme_release(ctx);
         return NULL;
     }
+    keys[0] = receiver_key;
 
-    keys[0] = key;
+    gpgme_key_t sender_key = NULL;
+    error = gpgme_get_key(ctx, fp, &sender_key, 0);
+    if (error || sender_key == NULL) {
+        log_error("GPG: Failed to get sender_key. %s %s", gpgme_strsource(error), gpgme_strerror(error));
+        gpgme_release(ctx);
+        return NULL;
+    }
+    keys[1] = sender_key;
 
     gpgme_data_t plain;
     gpgme_data_new_from_mem(&plain, message, strlen(message), 1);
@@ -636,7 +644,8 @@ p_gpg_encrypt(const char *const barejid, const char *const message)
     error = gpgme_op_encrypt(ctx, keys, GPGME_ENCRYPT_ALWAYS_TRUST, plain, cipher);
     gpgme_data_release(plain);
     gpgme_release(ctx);
-    gpgme_key_unref(key);
+    gpgme_key_unref(receiver_key);
+    gpgme_key_unref(sender_key);
 
     if (error) {
         log_error("GPG: Failed to encrypt message. %s %s", gpgme_strsource(error), gpgme_strerror(error));
@@ -691,19 +700,29 @@ p_gpg_decrypt(const char *const cipher)
 
     gpgme_decrypt_result_t res = gpgme_op_decrypt_result(ctx);
     if (res) {
+        GString *recipients_str = g_string_new("");
         gpgme_recipient_t recipient = res->recipients;
-        if (recipient) {
+        while (recipient) {
             gpgme_key_t key;
             error = gpgme_get_key(ctx, recipient->keyid, &key, 1);
 
             if (!error && key) {
                 const char *addr = gpgme_key_get_string_attr(key, GPGME_ATTR_EMAIL, NULL, 0);
                 if (addr) {
-                    log_debug("GPG: Decrypted message for recipient: %s", addr);
+                    g_string_append(recipients_str, addr);
                 }
                 gpgme_key_unref(key);
             }
+
+            if (recipient->next) {
+                g_string_append(recipients_str, ", ");
+            }
+
+            recipient = recipient->next;
         }
+
+        log_debug("GPG: Decrypted message for recipients: %s", recipients_str->str);
+        g_string_free(recipients_str, TRUE);
     }
     gpgme_release(ctx);
 
