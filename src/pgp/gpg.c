@@ -603,7 +603,7 @@ p_gpg_encrypt(const char *const barejid, const char *const message, const char *
         return NULL;
     }
 
-    gpgme_key_t keys[2];
+    gpgme_key_t keys[3];
 
     keys[0] = NULL;
     keys[1] = NULL;
