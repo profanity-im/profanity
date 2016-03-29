@@ -203,7 +203,7 @@ message_send_chat_pgp(const char *const barejid, const char *const msg)
     ProfAccount *account = accounts_get_account(account_name);
     if (account->pgp_keyid) {
         Jid *jidp = jid_create(jid);
-        char *encrypted = p_gpg_encrypt(jidp->barejid, msg);
+        char *encrypted = p_gpg_encrypt(jidp->barejid, msg, account->pgp_keyid);
         if (encrypted) {
             message = stanza_create_message(ctx, id, jid, STANZA_TYPE_CHAT, "This message is encrypted.");
             xmpp_stanza_t *x = xmpp_stanza_new(ctx);
