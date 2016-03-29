@@ -644,7 +644,6 @@ _connection_handler(xmpp_conn_t *const conn, const xmpp_conn_event_t status, con
 
         chat_sessions_init();
 
-        roster_add_handlers();
         message_add_handlers();
         presence_add_handlers();
         iq_add_handlers();

@@ -468,6 +468,24 @@ plugins_on_message_stanza_send(const char *const text)
     return curr_stanza;
 }
 
+gboolean
+plugins_on_message_stanza_receive(const char *const text)
+{
+    gboolean cont = TRUE;
+
+    GSList *curr = plugins;
+    while (curr) {
+        ProfPlugin *plugin = curr->data;
+        gboolean res = plugin->on_message_stanza_receive(plugin, text);
+        if (res == FALSE) {
+            cont = FALSE;
+        }
+        curr = g_slist_next(curr);
+    }
+
+    return cont;
+}
+
 char*
 plugins_on_presence_stanza_send(const char *const text)
 {
@@ -489,6 +507,24 @@ plugins_on_presence_stanza_send(const char *const text)
     return curr_stanza;
 }
 
+gboolean
+plugins_on_presence_stanza_receive(const char *const text)
+{
+    gboolean cont = TRUE;
+
+    GSList *curr = plugins;
+    while (curr) {
+        ProfPlugin *plugin = curr->data;
+        gboolean res = plugin->on_presence_stanza_receive(plugin, text);
+        if (res == FALSE) {
+            cont = FALSE;
+        }
+        curr = g_slist_next(curr);
+    }
+
+    return cont;
+}
+
 char*
 plugins_on_iq_stanza_send(const char *const text)
 {
@@ -508,6 +544,24 @@ plugins_on_iq_stanza_send(const char *const text)
     }
 
     return curr_stanza;
+}
+
+gboolean
+plugins_on_iq_stanza_receive(const char *const text)
+{
+    gboolean cont = TRUE;
+
+    GSList *curr = plugins;
+    while (curr) {
+        ProfPlugin *plugin = curr->data;
+        gboolean res = plugin->on_iq_stanza_receive(plugin, text);
+        if (res == FALSE) {
+            cont = FALSE;
+        }
+        curr = g_slist_next(curr);
+    }
+
+    return cont;
 }
 
 void

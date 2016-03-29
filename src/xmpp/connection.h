@@ -46,11 +46,19 @@
 
 #include "resource.h"
 
+typedef int(*ProfIdCallback)(xmpp_stanza_t *const stanza, void *const userdata);
+
 xmpp_conn_t* connection_get_conn(void);
 xmpp_ctx_t* connection_get_ctx(void);
 void connection_set_priority(int priority);
 void connection_set_presence_message(const char *const message);
 void connection_add_available_resource(Resource *resource);
 void connection_remove_available_resource(const char *const resource);
+
+void send_iq_stanza(xmpp_stanza_t *const stanza);
+
+void roster_set_handler(xmpp_stanza_t *const stanza);
+void roster_result_handler(xmpp_stanza_t *const stanza);
+void id_handler_add(const char *const id, ProfIdCallback func, void *userdata);
 
 #endif
