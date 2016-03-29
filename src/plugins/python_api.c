@@ -571,6 +571,24 @@ python_api_settings_set_int(PyObject *self, PyObject *args)
     return Py_BuildValue("");
 }
 
+static PyObject*
+python_api_incoming_message(PyObject *self, PyObject *args)
+{
+    char *barejid = NULL;
+    char *resource = NULL;
+    char *message = NULL;
+
+    if (!PyArg_ParseTuple(args, "sss", &barejid, &resource, &message)) {
+        return Py_BuildValue("");
+    }
+
+    allow_python_threads();
+    api_incoming_message(barejid, resource, message);
+    disable_python_threads();
+
+    return Py_BuildValue("");
+}
+
 void
 python_command_callback(PluginCommand *command, gchar **args)
 {
@@ -661,12 +679,13 @@ static PyMethodDef apiMethods[] = {
     { "win_show", python_api_win_show, METH_VARARGS, "Show text in the window." },
     { "win_show_themed", python_api_win_show_themed, METH_VARARGS, "Show themed text in the window." },
     { "send_stanza", python_api_send_stanza, METH_VARARGS, "Send an XMPP stanza." },
-    { "settings_get_boolean", python_api_settings_get_boolean, METH_VARARGS, "Get a boolean setting" },
-    { "settings_set_boolean", python_api_settings_set_boolean, METH_VARARGS, "Set a boolean setting" },
-    { "settings_get_string", python_api_settings_get_string, METH_VARARGS, "Get a string setting" },
-    { "settings_set_string", python_api_settings_set_string, METH_VARARGS, "Set a string setting" },
-    { "settings_get_int", python_api_settings_get_int, METH_VARARGS, "Get a integer setting" },
-    { "settings_set_int", python_api_settings_set_int, METH_VARARGS, "Set a integer setting" },
+    { "settings_get_boolean", python_api_settings_get_boolean, METH_VARARGS, "Get a boolean setting." },
+    { "settings_set_boolean", python_api_settings_set_boolean, METH_VARARGS, "Set a boolean setting." },
+    { "settings_get_string", python_api_settings_get_string, METH_VARARGS, "Get a string setting." },
+    { "settings_set_string", python_api_settings_set_string, METH_VARARGS, "Set a string setting." },
+    { "settings_get_int", python_api_settings_get_int, METH_VARARGS, "Get a integer setting." },
+    { "settings_set_int", python_api_settings_set_int, METH_VARARGS, "Set a integer setting." },
+    { "incoming_message", python_api_incoming_message, METH_VARARGS, "Show an incoming message." },
     { NULL, NULL, 0, NULL }
 };
 

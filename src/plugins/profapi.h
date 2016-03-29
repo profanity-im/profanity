@@ -78,4 +78,6 @@ void (*prof_settings_set_string)(char *group, char *key, char *value);
 int (*prof_settings_get_int)(char *group, char *key, int def);
 void (*prof_settings_set_int)(char *group, char *key, int value);
 
+void (*prof_incoming_message)(char *barejid, char *resource, char *message);
+
 #endif
