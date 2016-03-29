@@ -79,4 +79,6 @@ void api_settings_set_string(const char *const group, const char *const key, con
 int api_settings_get_int(const char *const group, const char *const key, int def);
 void api_settings_set_int(const char *const group, const char *const key, int value);
 
+void api_incoming_message(const char *const barejid, const char *const resource, const char *const message);
+
 #endif
