@@ -62,78 +62,56 @@
 #include "xmpp/xmpp.h"
 #include "plugins/plugins.h"
 
-#define HANDLE(type, func) xmpp_handler_add(conn, func, XMPP_NS_ROSTER, STANZA_NAME_IQ, type, ctx)
-
 // callback data for group commands
 typedef struct _group_data {
     char *name;
     char *group;
 } GroupData;
 
-// event handlers
-static int _roster_set_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza, void *const userdata);
-static int _roster_result_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza, void *const userdata);
-
 // id handlers
-static int _group_add_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza, void *const userdata);
-static int _group_remove_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza, void *const userdata);
-
-static void _send_iq_stanza(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza);
+static int _group_add_id_handler(xmpp_stanza_t *const stanza, void *const userdata);
+static int _group_remove_id_handler(xmpp_stanza_t *const stanza, void *const userdata);
 
 // helper functions
 GSList* _get_groups_from_item(xmpp_stanza_t *item);
 
 void
-roster_add_handlers(void)
-{
-    xmpp_conn_t * const conn = connection_get_conn();
-    xmpp_ctx_t * const ctx = connection_get_ctx();
-
-    HANDLE(STANZA_TYPE_SET,    _roster_set_handler);
-    HANDLE(STANZA_TYPE_RESULT, _roster_result_handler);
-}
-
-void
 roster_request(void)
 {
-    xmpp_conn_t * const conn = connection_get_conn();
     xmpp_ctx_t * const ctx = connection_get_ctx();
     xmpp_stanza_t *iq = stanza_create_roster_iq(ctx);
-    _send_iq_stanza(conn, iq);
+    send_iq_stanza(iq);
     xmpp_stanza_release(iq);
 }
 
 void
 roster_send_add_new(const char *const barejid, const char *const name)
 {
-    xmpp_conn_t * const conn = connection_get_conn();
     xmpp_ctx_t * const ctx = connection_get_ctx();
     char *id = create_unique_id("roster");
     xmpp_stanza_t *iq = stanza_create_roster_set(ctx, id, barejid, name, NULL);
     free(id);
-    _send_iq_stanza(conn, iq);
+    send_iq_stanza(iq);
     xmpp_stanza_release(iq);
 }
 
 void
 roster_send_remove(const char *const barejid)
 {
-    xmpp_conn_t * const conn = connection_get_conn();
     xmpp_ctx_t * const ctx = connection_get_ctx();
     xmpp_stanza_t *iq = stanza_create_roster_remove_set(ctx, barejid);
-    _send_iq_stanza(conn, iq);
+    send_iq_stanza(iq);
     xmpp_stanza_release(iq);
 }
 
 void
 roster_send_name_change(const char *const barejid, const char *const new_name, GSList *groups)
 {
-    xmpp_conn_t * const conn = connection_get_conn();
     xmpp_ctx_t * const ctx = connection_get_ctx();
     char *id = create_unique_id("roster");
     xmpp_stanza_t *iq = stanza_create_roster_set(ctx, id, barejid, new_name, groups);
     free(id);
-    _send_iq_stanza(conn, iq);
+    send_iq_stanza(iq);
     xmpp_stanza_release(iq);
 }
 
@@ -158,19 +136,17 @@ roster_send_add_to_group(const char *const group, PContact contact)
         data->name = strdup(p_contact_barejid(contact));
     }
 
-    xmpp_conn_t * const conn = connection_get_conn();
     xmpp_ctx_t * const ctx = connection_get_ctx();
-    xmpp_id_handler_add(conn, _group_add_handler, unique_id, data);
+    id_handler_add(unique_id, _group_add_id_handler, data);
     xmpp_stanza_t *iq = stanza_create_roster_set(ctx, unique_id, p_contact_barejid(contact),
         p_contact_name(contact), new_groups);
-    _send_iq_stanza(conn, iq);
+    send_iq_stanza(iq);
     xmpp_stanza_release(iq);
     free(unique_id);
 }
 
 static int
-_group_add_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza,
-    void *const userdata)
+_group_add_id_handler(xmpp_stanza_t *const stanza, void *const userdata)
 {
     if (userdata) {
         GroupData *data = userdata;
@@ -194,7 +170,6 @@ roster_send_remove_from_group(const char *const group, PContact contact)
         groups = g_slist_next(groups);
     }
 
-    xmpp_conn_t * const conn = connection_get_conn();
     xmpp_ctx_t * const ctx = connection_get_ctx();
 
     // add an id handler to handle the response
@@ -207,17 +182,16 @@ roster_send_remove_from_group(const char *const group, PContact contact)
         data->name = strdup(p_contact_barejid(contact));
     }
 
-    xmpp_id_handler_add(conn, _group_remove_handler, unique_id, data);
+    id_handler_add(unique_id, _group_remove_id_handler, data);
     xmpp_stanza_t *iq = stanza_create_roster_set(ctx, unique_id, p_contact_barejid(contact),
         p_contact_name(contact), new_groups);
-    _send_iq_stanza(conn, iq);
+    send_iq_stanza(iq);
     xmpp_stanza_release(iq);
     free(unique_id);
 }
 
 static int
-_group_remove_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza,
-    void *const userdata)
+_group_remove_id_handler(xmpp_stanza_t *const stanza, void *const userdata)
 {
     if (userdata) {
         GroupData *data = userdata;
@@ -229,9 +203,8 @@ _group_remove_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza,
     return 0;
 }
 
-static int
-_roster_set_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza,
-    void *const userdata)
+void
+roster_set_handler(xmpp_stanza_t *const stanza)
 {
     xmpp_stanza_t *query =
         xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_QUERY);
@@ -239,7 +212,7 @@ _roster_set_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza,
         xmpp_stanza_get_child_by_name(query, STANZA_NAME_ITEM);
 
     if (item == NULL) {
-        return 1;
+        return;
     }
 
     // if from attribute exists and it is not current users barejid, ignore push
@@ -247,7 +220,7 @@ _roster_set_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza,
     const char *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
     if (from && (strcmp(from, my_jid->barejid) != 0)) {
         jid_destroy(my_jid);
-        return 1;
+        return;
     }
     jid_destroy(my_jid);
 
@@ -296,16 +269,16 @@ _roster_set_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza,
 
     g_free(barejid_lower);
 
-    return 1;
+    return;
 }
 
-static int
-_roster_result_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza, void *const userdata)
+void
+roster_result_handler(xmpp_stanza_t *const stanza)
 {
     const char *id = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_ID);
 
     if (g_strcmp0(id, "roster") != 0) {
-        return 1;
+        return;
     }
 
     // handle initial roster response
@@ -340,7 +313,7 @@ _roster_result_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza, voi
 
     sv_ev_roster_received();
 
-    return 1;
+    return;
 }
 
 GSList*
@@ -360,19 +333,4 @@ _get_groups_from_item(xmpp_stanza_t *item)
     }
 
     return groups;
-}
-
-static void
-_send_iq_stanza(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza)
-{
-    char *text;
-    size_t text_size;
-    xmpp_stanza_to_text(stanza, &text, &text_size);
-
-    char *plugin_text = plugins_on_iq_stanza_send(text);
-    if (plugin_text) {
-        xmpp_send_raw_string(conn, "%s", plugin_text);
-    } else {
-        xmpp_send_raw_string(conn, "%s", text);
-    }
 }
