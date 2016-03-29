@@ -39,6 +39,7 @@
 #include <glib.h>
 
 #include "log.h"
+#include "event/server_events.h"
 #include "plugins/callbacks.h"
 #include "plugins/autocompleters.h"
 #include "plugins/themes.h"
@@ -367,4 +368,13 @@ void
 api_settings_set_int(const char *const group, const char *const key, int value)
 {
     plugin_settings_set_int(group, key, value);
+}
+
+void
+api_incoming_message(const char *const barejid, const char *const resource, const char *const message)
+{
+    sv_ev_incoming_message((char*)barejid, (char*)resource, (char*)message, NULL, NULL);
+
+    // TODO handle all states
+    sv_ev_activity((char*)barejid, (char*)resource, FALSE);
 }
