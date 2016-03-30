@@ -86,8 +86,8 @@ python_env_init(void)
     allow_python_threads();
 }
 
-ProfPlugin *
-python_plugin_create(const char * const filename)
+ProfPlugin*
+python_plugin_create(const char *const filename)
 {
     disable_python_threads();
     gchar *module_name = g_strndup(filename, strlen(filename) - 3);
@@ -121,6 +121,8 @@ python_plugin_create(const char * const filename)
         plugin->on_presence_stanza_receive = python_on_presence_stanza_receive_hook;
         plugin->on_iq_stanza_send = python_on_iq_stanza_send_hook;
         plugin->on_iq_stanza_receive = python_on_iq_stanza_receive_hook;
+        plugin->on_contact_offline = python_on_contact_offline_hook;
+        plugin->on_contact_presence = python_on_contact_presence_hook;
         g_free(module_name);
 
         allow_python_threads();
@@ -133,7 +135,7 @@ python_plugin_create(const char * const filename)
 }
 
 void
-python_init_hook(ProfPlugin *plugin, const char * const version, const char * const status)
+python_init_hook(ProfPlugin *plugin, const char *const version, const char *const status)
 {
     disable_python_threads();
     PyObject *p_args = Py_BuildValue("ss", version, status);
@@ -191,8 +193,7 @@ python_on_shutdown_hook(ProfPlugin *plugin)
 }
 
 void
-python_on_connect_hook(ProfPlugin *plugin, const char * const account_name,
-    const char * const fulljid)
+python_on_connect_hook(ProfPlugin *plugin, const char *const account_name, const char *const fulljid)
 {
     disable_python_threads();
     PyObject *p_args = Py_BuildValue("ss", account_name, fulljid);
@@ -212,8 +213,7 @@ python_on_connect_hook(ProfPlugin *plugin, const char * const account_name,
 }
 
 void
-python_on_disconnect_hook(ProfPlugin *plugin, const char * const account_name,
-    const char * const fulljid)
+python_on_disconnect_hook(ProfPlugin *plugin, const char *const account_name, const char *const fulljid)
 {
     disable_python_threads();
     PyObject *p_args = Py_BuildValue("ss", account_name, fulljid);
@@ -233,7 +233,7 @@ python_on_disconnect_hook(ProfPlugin *plugin, const char * const account_name,
 }
 
 char*
-python_pre_chat_message_display_hook(ProfPlugin *plugin, const char * const jid, const char *message)
+python_pre_chat_message_display_hook(ProfPlugin *plugin, const char *const jid, const char *message)
 {
     disable_python_threads();
     PyObject *p_args = Py_BuildValue("ss", jid, message);
@@ -269,7 +269,7 @@ python_pre_chat_message_display_hook(ProfPlugin *plugin, const char * const jid,
 }
 
 void
-python_post_chat_message_display_hook(ProfPlugin *plugin, const char * const jid, const char *message)
+python_post_chat_message_display_hook(ProfPlugin *plugin, const char *const jid, const char *message)
 {
     disable_python_threads();
     PyObject *p_args = Py_BuildValue("ss", jid, message);
@@ -326,7 +326,7 @@ python_pre_chat_message_send_hook(ProfPlugin *plugin, const char * const jid, co
 }
 
 void
-python_post_chat_message_send_hook(ProfPlugin *plugin, const char * const jid, const char *message)
+python_post_chat_message_send_hook(ProfPlugin *plugin, const char *const jid, const char *message)
 {
     disable_python_threads();
     PyObject *p_args = Py_BuildValue("ss", jid, message);
@@ -383,7 +383,8 @@ python_pre_room_message_display_hook(ProfPlugin *plugin, const char * const room
 }
 
 void
-python_post_room_message_display_hook(ProfPlugin *plugin, const char * const room, const char * const nick, const char *message)
+python_post_room_message_display_hook(ProfPlugin *plugin, const char *const room, const char *const nick,
+    const char *message)
 {
     disable_python_threads();
     PyObject *p_args = Py_BuildValue("sss", room, nick, message);
@@ -404,7 +405,7 @@ python_post_room_message_display_hook(ProfPlugin *plugin, const char * const roo
 }
 
 char*
-python_pre_room_message_send_hook(ProfPlugin *plugin, const char * const room, const char *message)
+python_pre_room_message_send_hook(ProfPlugin *plugin, const char *const room, const char *message)
 {
     disable_python_threads();
     PyObject *p_args = Py_BuildValue("ss", room, message);
@@ -440,7 +441,7 @@ python_pre_room_message_send_hook(ProfPlugin *plugin, const char * const room, c
 }
 
 void
-python_post_room_message_send_hook(ProfPlugin *plugin, const char * const room, const char *message)
+python_post_room_message_send_hook(ProfPlugin *plugin, const char *const room, const char *message)
 {
     disable_python_threads();
     PyObject *p_args = Py_BuildValue("ss", room, message);
@@ -461,7 +462,8 @@ python_post_room_message_send_hook(ProfPlugin *plugin, const char * const room, 
 }
 
 char*
-python_pre_priv_message_display_hook(ProfPlugin *plugin, const char * const room, const char * const nick, const char *message)
+python_pre_priv_message_display_hook(ProfPlugin *plugin, const char *const room, const char *const nick,
+    const char *message)
 {
     disable_python_threads();
     PyObject *p_args = Py_BuildValue("sss", room, nick, message);
@@ -497,7 +499,8 @@ python_pre_priv_message_display_hook(ProfPlugin *plugin, const char * const room
 }
 
 void
-python_post_priv_message_display_hook(ProfPlugin *plugin, const char * const room, const char * const nick, const char *message)
+python_post_priv_message_display_hook(ProfPlugin *plugin, const char *const room, const char *const nick,
+    const char *message)
 {
     disable_python_threads();
     PyObject *p_args = Py_BuildValue("sss", room, nick, message);
@@ -518,7 +521,8 @@ python_post_priv_message_display_hook(ProfPlugin *plugin, const char * const roo
 }
 
 char*
-python_pre_priv_message_send_hook(ProfPlugin *plugin, const char * const room, const char * const nick, const char * const message)
+python_pre_priv_message_send_hook(ProfPlugin *plugin, const char *const room, const char *const nick,
+    const char *const message)
 {
     disable_python_threads();
     PyObject *p_args = Py_BuildValue("sss", room, nick, message);
@@ -554,7 +558,8 @@ python_pre_priv_message_send_hook(ProfPlugin *plugin, const char * const room, c
 }
 
 void
-python_post_priv_message_send_hook(ProfPlugin *plugin, const char * const room, const char * const nick, const char * const message)
+python_post_priv_message_send_hook(ProfPlugin *plugin, const char *const room, const char *const nick,
+    const char *const message)
 {
     disable_python_threads();
     PyObject *p_args = Py_BuildValue("sss", room, nick, message);
@@ -767,6 +772,50 @@ python_on_iq_stanza_receive_hook(ProfPlugin *plugin, const char *const text)
 
     allow_python_threads();
     return TRUE;
+}
+
+void
+python_on_contact_offline_hook(ProfPlugin *plugin, const char *const barejid, const char *const resource,
+    const char *const status)
+{
+    disable_python_threads();
+    PyObject *p_args = Py_BuildValue("sss", barejid, resource, status);
+    PyObject *p_function;
+
+    PyObject *p_module = plugin->module;
+    if (PyObject_HasAttrString(p_module, "prof_on_contact_offline")) {
+        p_function = PyObject_GetAttrString(p_module, "prof_on_contact_offline");
+        python_check_error();
+        if (p_function && PyCallable_Check(p_function)) {
+            PyObject_CallObject(p_function, p_args);
+            python_check_error();
+            Py_XDECREF(p_function);
+        }
+    }
+
+    allow_python_threads();
+}
+
+void
+python_on_contact_presence_hook(ProfPlugin *plugin, const char *const barejid, const char *const resource,
+    const char *const presence, const char *const status, const int priority)
+{
+    disable_python_threads();
+    PyObject *p_args = Py_BuildValue("ssssi", barejid, resource, presence, status, priority);
+    PyObject *p_function;
+
+    PyObject *p_module = plugin->module;
+    if (PyObject_HasAttrString(p_module, "prof_on_contact_presence")) {
+        p_function = PyObject_GetAttrString(p_module, "prof_on_contact_presence");
+        python_check_error();
+        if (p_function && PyCallable_Check(p_function)) {
+            PyObject_CallObject(p_function, p_args);
+            python_check_error();
+            Py_XDECREF(p_function);
+        }
+    }
+
+    allow_python_threads();
 }
 
 void
