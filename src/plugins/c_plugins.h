@@ -39,30 +39,36 @@
 
 void c_env_init(void);
 
-ProfPlugin* c_plugin_create(const char * const filename);
-void c_plugin_destroy(ProfPlugin * plugin);
+ProfPlugin* c_plugin_create(const char *const filename);
+void c_plugin_destroy(ProfPlugin *plugin);
 void c_shutdown(void);
 
-void c_init_hook(ProfPlugin *plugin, const char * const version, const char * const status);
+void c_init_hook(ProfPlugin *plugin, const char *const version, const char *const status);
 void c_on_start_hook(ProfPlugin *plugin);
 void c_on_shutdown_hook(ProfPlugin *plugin);
-void c_on_connect_hook(ProfPlugin *plugin, const char * const account_name, const char * const fulljid);
-void c_on_disconnect_hook(ProfPlugin *plugin, const char * const account_name, const char * const fulljid);
+void c_on_connect_hook(ProfPlugin *plugin, const char *const account_name, const char *const fulljid);
+void c_on_disconnect_hook(ProfPlugin *plugin, const char *const account_name, const char *const fulljid);
 
-char* c_pre_chat_message_display_hook(ProfPlugin *plugin, const char * const jid, const char *message);
-void  c_post_chat_message_display_hook(ProfPlugin *plugin, const char * const jid, const char *message);
-char* c_pre_chat_message_send_hook(ProfPlugin *plugin, const char * const jid, const char *message);
-void  c_post_chat_message_send_hook(ProfPlugin *plugin, const char * const jid, const char *message);
+char* c_pre_chat_message_display_hook(ProfPlugin *plugin, const char *const jid, const char *message);
+void c_post_chat_message_display_hook(ProfPlugin *plugin, const char *const jid, const char *message);
+char* c_pre_chat_message_send_hook(ProfPlugin *plugin, const char *const jid, const char *message);
+void c_post_chat_message_send_hook(ProfPlugin *plugin, const char *const jid, const char *message);
 
-char* c_pre_room_message_display_hook(ProfPlugin *plugin, const char * const room, const char * const nick, const char *message);
-void  c_post_room_message_display_hook(ProfPlugin *plugin, const char * const room, const char * const nick, const char *message);
-char* c_pre_room_message_send_hook(ProfPlugin *plugin, const char * const room, const char *message);
-void  c_post_room_message_send_hook(ProfPlugin *plugin, const char * const room, const char *message);
+char* c_pre_room_message_display_hook(ProfPlugin *plugin, const char *const room, const char *const nick,
+    const char *message);
+void c_post_room_message_display_hook(ProfPlugin *plugin, const char *const room, const char *const nick,
+    const char *message);
+char* c_pre_room_message_send_hook(ProfPlugin *plugin, const char *const room, const char *message);
+void c_post_room_message_send_hook(ProfPlugin *plugin, const char *const room, const char *message);
 
-char* c_pre_priv_message_display_hook(ProfPlugin *plugin, const char * const room, const char * const nick, const char *message);
-void  c_post_priv_message_display_hook(ProfPlugin *plugin, const char * const room, const char * const nick, const char *message);
-char* c_pre_priv_message_send_hook(ProfPlugin *plugin, const char * const room, const char * const nick, const char * const message);
-void  c_post_priv_message_send_hook(ProfPlugin *plugin, const char * const room, const char * const nick, const char * const message);
+char* c_pre_priv_message_display_hook(ProfPlugin *plugin, const char *const room, const char *const nick,
+    const char *message);
+void  c_post_priv_message_display_hook(ProfPlugin *plugin, const char *const room, const char *const nick,
+    const char *message);
+char* c_pre_priv_message_send_hook(ProfPlugin *plugin, const char *const room, const char *const nick,
+    const char *const message);
+void c_post_priv_message_send_hook(ProfPlugin *plugin, const char *const room, const char *const nick,
+    const char * const message);
 
 char* c_on_message_stanza_send_hook(ProfPlugin *plugin, const char *const text);
 gboolean c_on_message_stanza_receive_hook(ProfPlugin *plugin, const char *const text);
@@ -72,5 +78,10 @@ gboolean c_on_presence_stanza_receive_hook(ProfPlugin *plugin, const char *const
 
 char* c_on_iq_stanza_send_hook(ProfPlugin *plugin, const char *const text);
 gboolean c_on_iq_stanza_receive_hook(ProfPlugin *plugin, const char *const text);
+
+void c_on_contact_offline_hook(ProfPlugin *plugin, const char *const barejid, const char *const resource,
+    const char *const status);
+void c_on_contact_presence_hook(ProfPlugin *plugin, const char *const barejid, const char *const resource,
+    const char *const presence, const char *const status, const int priority);
 
 #endif

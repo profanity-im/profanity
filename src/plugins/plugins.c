@@ -527,6 +527,28 @@ plugins_on_iq_stanza_receive(const char *const text)
 }
 
 void
+plugins_on_contact_offline(const char *const barejid, const char *const resource, const char *const status)
+{
+    GSList *curr = plugins;
+    while (curr) {
+        ProfPlugin *plugin = curr->data;
+        plugin->on_contact_offline(plugin, barejid, resource, status);
+        curr = g_slist_next(curr);
+    }
+}
+
+void
+plugins_on_contact_presence(const char *const barejid, const char *const resource, const char *const presence, const char *const status, const int priority)
+{
+    GSList *curr = plugins;
+    while (curr) {
+        ProfPlugin *plugin = curr->data;
+        plugin->on_contact_presence(plugin, barejid, resource, presence, status, priority);
+        curr = g_slist_next(curr);
+    }
+}
+
+void
 plugins_shutdown(void)
 {
     GSList *curr = plugins;

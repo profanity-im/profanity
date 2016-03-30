@@ -604,6 +604,7 @@ sv_ev_contact_offline(char *barejid, char *resource, char *status)
     gboolean updated = roster_contact_offline(barejid, resource, status);
 
     if (resource && updated) {
+        plugins_on_contact_offline(barejid, resource, status);
         ui_contact_offline(barejid, resource, status);
     }
 
@@ -625,6 +626,8 @@ sv_ev_contact_online(char *barejid, Resource *resource, GDateTime *last_activity
     gboolean updated = roster_update_presence(barejid, resource, last_activity);
 
     if (updated) {
+        plugins_on_contact_presence(barejid, resource->name, string_from_resource_presence(resource->presence),
+            resource->status, resource->priority);
         ui_contact_online(barejid, resource, last_activity);
     }
 
