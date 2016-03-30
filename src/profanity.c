@@ -37,7 +37,9 @@
 #include "gitversion.h"
 #endif
 
+#ifdef PROF_HAVE_GTK
 #include <gtk/gtk.h>
+#endif
 #include <locale.h>
 #include <signal.h>
 #include <stdlib.h>
@@ -73,7 +75,9 @@
 #include "window_list.h"
 #include "event/client_events.h"
 #include "config/tlscerts.h"
+#ifdef PROF_HAVE_GTK
 #include "tray.h"
+#endif
 
 static void _check_autoaway(void);
 static void _init(char *log_level);
@@ -94,17 +98,15 @@ char *saved_status;
 
 static gboolean cont = TRUE;
 static gboolean force_quit = FALSE;
-static gboolean gtk_enabled = FALSE;
 
 void
-prof_run(char *log_level, char *account_name, gboolean use_gtk)
+prof_run(char *log_level, char *account_name)
 {
-    gtk_enabled = use_gtk;
     _init(log_level);
     plugins_on_start();
-    if (gtk_enabled) {
-        gtk_main_iteration_do(false);
-    }
+#ifdef PROF_HAVE_GTK
+    gtk_main_iteration_do(false);
+#endif
     _connect_default(account_name);
 
     ui_update();
@@ -137,9 +139,9 @@ prof_run(char *log_level, char *account_name, gboolean use_gtk)
         jabber_process_events(10);
         iq_autoping_check();
         ui_update();
-        if (gtk_enabled) {
-            gtk_main_iteration_do(false);
-        }
+#ifdef PROF_HAVE_GTK
+        gtk_main_iteration_do(false);
+#endif
     }
 }
 
@@ -362,9 +364,9 @@ _init(char *log_level)
 #endif
     atexit(_shutdown);
     plugins_init();
-    if (gtk_enabled) {
-        create_tray();
-    }
+#ifdef PROF_HAVE_GTK
+    create_tray();
+#endif
     inp_nonblocking(TRUE);
 }
 
@@ -383,9 +385,9 @@ _shutdown(void)
     if (conn_status == JABBER_CONNECTED) {
         cl_ev_disconnect();
     }
-    if (gtk_enabled) {
-        destroy_tray();
-    }
+#ifdef PROF_HAVE_GTK
+    destroy_tray();
+#endif
     jabber_shutdown();
     plugins_on_shutdown();
     muc_close();

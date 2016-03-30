@@ -1,7 +1,7 @@
 /*
  * tray.c
  *
- * Copyright (C) 2012 - 2016 David Petroni <petrodavi@gmail.com>
+ * Copyright (C) 2012 - 2016 James Booth <boothj5@gmail.com>
  *
  * This file is part of Profanity.
  *
@@ -32,6 +32,9 @@
  *
  */
 
+#include "prof_config.h"
+
+#ifdef PROF_HAVE_GTK
 #include <gtk/gtk.h>
 #include <glib.h>
 #include <glib/gstdio.h>
@@ -156,3 +159,4 @@ void destroy_tray(void)
 }
 
 /* }}} */
+#endif

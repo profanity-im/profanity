@@ -34,7 +34,9 @@
 
 #include "prof_config.h"
 
+#ifdef PROF_HAVE_GTK
 #include <gtk/gtk.h>
+#endif
 #include <string.h>
 #include <glib.h>
 #include <assert.h>
@@ -50,7 +52,6 @@
 static gboolean version = FALSE;
 static char *log = "INFO";
 static char *account_name = NULL;
-static gboolean use_gtk = FALSE;
 
 int
 main(int argc, char **argv)
@@ -139,14 +140,21 @@ main(int argc, char **argv)
         g_print("Python plugins: Disabled\n");
 #endif
 
+#ifdef PROF_HAVE_GTK
+        g_print("GTK icons: Enabled\n");
+#else
+        g_print("GTK icons: Disabled\n");
+#endif
+
         return 0;
     }
 
-    use_gtk = gtk_init_check(&argc, &argv);
-    if (use_gtk) {
+#ifdef PROF_HAVE_GTK
+    if (gtk_init_check(&argc, &argv)) {
         gtk_init(&argc, &argv);
     }
-    prof_run(log, account_name, use_gtk);
+#endif
+    prof_run(log, account_name);
 
     return 0;
 }
