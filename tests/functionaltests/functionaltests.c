@@ -7,7 +7,7 @@
 #include <cmocka.h>
 #include <sys/stat.h>
 
-#include "prof_config.h"
+#include "config.h"
 
 #include "proftest.h"
 #include "test_connect.h"

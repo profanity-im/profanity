@@ -32,16 +32,16 @@
  *
  */
 
-#include "prof_config.h"
+#include "config.h"
 
 #include <assert.h>
 #include <string.h>
 #include <stdlib.h>
 
-#ifdef PROF_HAVE_LIBMESODE
+#ifdef HAVE_LIBMESODE
 #include <mesode.h>
 #endif
-#ifdef PROF_HAVE_LIBSTROPHE
+#ifdef HAVE_LIBSTROPHE
 #include <strophe.h>
 #endif
 
@@ -425,7 +425,7 @@ _connection_free_session_data(void)
     presence_clear_sub_requests();
 }
 
-#ifdef PROF_HAVE_LIBMESODE
+#ifdef HAVE_LIBMESODE
 static int
 _connection_certfail_cb(xmpp_tlscert_t *xmpptlscert, const char *const errormsg)
 {
@@ -544,7 +544,7 @@ _jabber_connect(const char *const fulljid, const char *const passwd, const char 
         xmpp_conn_set_flags(jabber_conn.conn, XMPP_CONN_FLAG_DISABLE_TLS);
     }
 
-#ifdef PROF_HAVE_LIBMESODE
+#ifdef HAVE_LIBMESODE
     char *cert_path = prefs_get_string(PREF_TLS_CERTPATH);
     if (cert_path) {
         xmpp_conn_tlscert_path(jabber_conn.conn, cert_path);
@@ -552,7 +552,7 @@ _jabber_connect(const char *const fulljid, const char *const passwd, const char 
     prefs_free_string(cert_path);
 #endif
 
-#ifdef PROF_HAVE_LIBMESODE
+#ifdef HAVE_LIBMESODE
     int connect_status = xmpp_connect_client(
         jabber_conn.conn,
         altdomain,

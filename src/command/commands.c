@@ -32,7 +32,7 @@
  *
  */
 
-#include "prof_config.h"
+#include "config.h"
 
 #include <string.h>
 #include <stdlib.h>
@@ -61,10 +61,10 @@
 #include "jid.h"
 #include "log.h"
 #include "muc.h"
-#ifdef PROF_HAVE_LIBOTR
+#ifdef HAVE_LIBOTR
 #include "otr/otr.h"
 #endif
-#ifdef PROF_HAVE_LIBGPGME
+#ifdef HAVE_LIBGPGME
 #include "pgp/gpg.h"
 #endif
 #include "profanity.h"
@@ -180,7 +180,7 @@ gboolean
 cmd_tls(ProfWin *window, const char *const command, gchar **args)
 {
     if (g_strcmp0(args[0], "certpath") == 0) {
-#ifdef PROF_HAVE_LIBMESODE
+#ifdef HAVE_LIBMESODE
         if (g_strcmp0(args[1], "set") == 0) {
             if (args[2] == NULL) {
                 cons_bad_cmd_usage(command);
@@ -216,7 +216,7 @@ cmd_tls(ProfWin *window, const char *const command, gchar **args)
         return TRUE;
 #endif
     } else if (g_strcmp0(args[0], "trust") == 0) {
-#ifdef PROF_HAVE_LIBMESODE
+#ifdef HAVE_LIBMESODE
         jabber_conn_status_t conn_status = jabber_get_connection_status();
         if (conn_status != JABBER_CONNECTED) {
             cons_show("You are not currently connected.");
@@ -245,7 +245,7 @@ cmd_tls(ProfWin *window, const char *const command, gchar **args)
         return TRUE;
 #endif
     } else if (g_strcmp0(args[0], "trusted") == 0) {
-#ifdef PROF_HAVE_LIBMESODE
+#ifdef HAVE_LIBMESODE
         GList *certs = tlscerts_list();
         GList *curr = certs;
 
@@ -268,7 +268,7 @@ cmd_tls(ProfWin *window, const char *const command, gchar **args)
         return TRUE;
 #endif
     } else if (g_strcmp0(args[0], "revoke") == 0) {
-#ifdef PROF_HAVE_LIBMESODE
+#ifdef HAVE_LIBMESODE
         if (args[1] == NULL) {
             cons_bad_cmd_usage(command);
         } else {
@@ -287,7 +287,7 @@ cmd_tls(ProfWin *window, const char *const command, gchar **args)
     } else if (g_strcmp0(args[0], "show") == 0) {
         return _cmd_set_boolean_preference(args[1], command, "TLS titlebar indicator", PREF_TLS_SHOW);
     } else if (g_strcmp0(args[0], "cert") == 0) {
-#ifdef PROF_HAVE_LIBMESODE
+#ifdef HAVE_LIBMESODE
         if (args[1]) {
             TLSCertificate *cert = tlscerts_get_trusted(args[1]);
             if (!cert) {
@@ -667,7 +667,7 @@ cmd_account(ProfWin *window, const char *const command, gchar **args)
                     }
                     cons_show("");
                 } else if (strcmp(property, "pgpkeyid") == 0) {
-#ifdef PROF_HAVE_LIBGPGME
+#ifdef HAVE_LIBGPGME
                     char *err_str = NULL;
                     if (!p_gpg_valid_key(value, &err_str)) {
                         cons_show("Invalid PGP key ID specified: %s, see /pgp keys", err_str);
@@ -1926,7 +1926,7 @@ cmd_msg(ProfWin *window, const char *const command, gchar **args)
         if (msg) {
             cl_ev_send_msg(chatwin, msg);
         } else {
-#ifdef PROF_HAVE_LIBOTR
+#ifdef HAVE_LIBOTR
             if (otr_is_secure(barejid)) {
                 chatwin_otr_secured(chatwin, otr_is_trusted(barejid));
             }
@@ -2814,7 +2814,7 @@ cmd_resource(ProfWin *window, const char *const command, gchar **args)
             return TRUE;
         }
 
-#ifdef PROF_HAVE_LIBOTR
+#ifdef HAVE_LIBOTR
         if (otr_is_secure(chatwin->barejid)) {
             cons_show("Cannot choose resource during an OTR session.");
             return TRUE;
@@ -5666,7 +5666,7 @@ cmd_plugins(ProfWin *window, const char *const command, gchar **args)
 gboolean
 cmd_pgp(ProfWin *window, const char *const command, gchar **args)
 {
-#ifdef PROF_HAVE_LIBGPGME
+#ifdef HAVE_LIBGPGME
     if (args[0] == NULL) {
         cons_bad_cmd_usage(command);
         return TRUE;
@@ -5903,7 +5903,7 @@ cmd_pgp(ProfWin *window, const char *const command, gchar **args)
 gboolean
 cmd_otr(ProfWin *window, const char *const command, gchar **args)
 {
-#ifdef PROF_HAVE_LIBOTR
+#ifdef HAVE_LIBOTR
     if (args[0] == NULL) {
         cons_bad_cmd_usage(command);
         return TRUE;

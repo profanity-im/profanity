@@ -7,7 +7,7 @@
 #include <cmocka.h>
 #include <sys/stat.h>
 
-#include "prof_config.h"
+#include "config.h"
 #include "chat_session.h"
 #include "helpers.h"
 #include "test_autocomplete.h"
@@ -355,7 +355,7 @@ int main(int argc, char* argv[]) {
         unit_test(cmd_account_set_eval_password_when_password_set),
         unit_test(cmd_account_set_muc_sets_muc),
         unit_test(cmd_account_set_nick_sets_nick),
-#ifdef PROF_HAVE_LIBOTR
+#ifdef HAVE_LIBOTR
         unit_test(cmd_account_show_message_for_missing_otr_policy),
         unit_test(cmd_account_show_message_for_invalid_otr_policy),
         unit_test(cmd_account_set_otr_sets_otr),
@@ -504,7 +504,7 @@ int main(int argc, char* argv[]) {
         unit_test(cmd_bookmark_remove_removes_bookmark),
         unit_test(cmd_bookmark_remove_shows_message_when_no_bookmark),
 
-#ifdef PROF_HAVE_LIBOTR
+#ifdef HAVE_LIBOTR
         unit_test(cmd_otr_shows_usage_when_no_args),
         unit_test(cmd_otr_shows_usage_when_invalid_subcommand),
         unit_test(cmd_otr_log_shows_usage_when_no_args),
@@ -556,7 +556,7 @@ int main(int argc, char* argv[]) {
         unit_test(cmd_otr_shows_message_when_otr_unsupported),
 #endif
 
-#ifdef PROF_HAVE_LIBGPGME
+#ifdef HAVE_LIBGPGME
         unit_test(cmd_pgp_shows_usage_when_no_args),
         unit_test(cmd_pgp_start_shows_message_when_disconnected),
         unit_test(cmd_pgp_start_shows_message_when_disconnecting),

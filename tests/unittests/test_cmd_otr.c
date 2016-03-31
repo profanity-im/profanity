@@ -6,9 +6,9 @@
 #include <string.h>
 #include <glib.h>
 
-#include "prof_config.h"
+#include "config.h"
 
-#ifdef PROF_HAVE_LIBOTR
+#ifdef HAVE_LIBOTR
 #include <libotr/proto.h>
 #include "otr/otr.h"
 #endif
@@ -24,7 +24,7 @@
 
 #define CMD_OTR "/otr"
 
-#ifdef PROF_HAVE_LIBOTR
+#ifdef HAVE_LIBOTR
 void cmd_otr_shows_usage_when_no_args(void **state)
 {
     gchar *args[] = { NULL };

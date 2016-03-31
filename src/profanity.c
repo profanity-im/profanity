@@ -31,9 +31,9 @@
  * source files in the program, then also delete it here.
  *
  */
-#include "prof_config.h"
+#include "config.h"
 
-#ifdef PROF_HAVE_GIT_VERSION
+#ifdef HAVE_GIT_VERSION
 #include "gitversion.h"
 #endif
 
@@ -60,10 +60,10 @@
 #include "log.h"
 #include "muc.h"
 #include "plugins/plugins.h"
-#ifdef PROF_HAVE_LIBOTR
+#ifdef HAVE_LIBOTR
 #include "otr/otr.h"
 #endif
-#ifdef PROF_HAVE_LIBGPGME
+#ifdef HAVE_LIBGPGME
 #include "pgp/gpg.h"
 #endif
 #include "resource.h"
@@ -122,7 +122,7 @@ prof_run(char *log_level, char *account_name)
             cont = TRUE;
         }
 
-#ifdef PROF_HAVE_LIBOTR
+#ifdef HAVE_LIBOTR
         otr_poll();
 #endif
         plugins_run_timed();
@@ -322,14 +322,14 @@ _init(char *log_level)
     prefs_load();
     log_init(prof_log_level);
     log_stderr_init(PROF_LEVEL_ERROR);
-    if (strcmp(PROF_PACKAGE_STATUS, "development") == 0) {
-#ifdef PROF_HAVE_GIT_VERSION
-            log_info("Starting Profanity (%sdev.%s.%s)...", PROF_PACKAGE_VERSION, PROF_GIT_BRANCH, PROF_GIT_REVISION);
+    if (strcmp(PACKAGE_STATUS, "development") == 0) {
+#ifdef HAVE_GIT_VERSION
+            log_info("Starting Profanity (%sdev.%s.%s)...", PACKAGE_VERSION, PROF_GIT_BRANCH, PROF_GIT_REVISION);
 #else
-            log_info("Starting Profanity (%sdev)...", PROF_PACKAGE_VERSION);
+            log_info("Starting Profanity (%sdev)...", PACKAGE_VERSION);
 #endif
     } else {
-        log_info("Starting Profanity (%s)...", PROF_PACKAGE_VERSION);
+        log_info("Starting Profanity (%s)...", PACKAGE_VERSION);
     }
     chat_log_init();
     groupchat_log_init();
@@ -344,10 +344,10 @@ _init(char *log_level)
     muc_init();
     tlscerts_init();
     scripts_init();
-#ifdef PROF_HAVE_LIBOTR
+#ifdef HAVE_LIBOTR
     otr_init();
 #endif
-#ifdef PROF_HAVE_LIBGPGME
+#ifdef HAVE_LIBGPGME
     p_gpg_init();
 #endif
     atexit(_shutdown);
@@ -376,10 +376,10 @@ _shutdown(void)
     muc_close();
     caps_close();
     ui_close();
-#ifdef PROF_HAVE_LIBOTR
+#ifdef HAVE_LIBOTR
     otr_shutdown();
 #endif
-#ifdef PROF_HAVE_LIBGPGME
+#ifdef HAVE_LIBGPGME
     p_gpg_close();
 #endif
     chat_log_close();

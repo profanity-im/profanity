@@ -32,7 +32,7 @@
  *
  */
 
-#include "prof_config.h"
+#include "config.h"
 
 #include <locale.h>
 #include <string.h>

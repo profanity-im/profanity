@@ -33,7 +33,7 @@
  */
 
 #define _XOPEN_SOURCE_EXTENDED
-#include "prof_config.h"
+#include "config.h"
 
 #include <sys/select.h>
 #include <stdlib.h>
@@ -46,9 +46,9 @@
 #include <readline/readline.h>
 #include <readline/history.h>
 
-#ifdef PROF_HAVE_NCURSESW_NCURSES_H
+#ifdef HAVE_NCURSESW_NCURSES_H
 #include <ncursesw/ncurses.h>
-#elif PROF_HAVE_NCURSES_H
+#elif HAVE_NCURSES_H
 #include <ncurses.h>
 #endif
 

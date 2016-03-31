@@ -37,9 +37,9 @@
 #include <stdlib.h>
 #include <assert.h>
 
-#ifdef PROF_HAVE_NCURSESW_NCURSES_H
+#ifdef HAVE_NCURSESW_NCURSES_H
 #include <ncursesw/ncurses.h>
-#elif PROF_HAVE_NCURSES_H
+#elif HAVE_NCURSES_H
 #include <ncurses.h>
 #endif
 
@@ -57,7 +57,7 @@
 #include "xmpp/xmpp.h"
 #include "xmpp/bookmark.h"
 
-#ifdef PROF_HAVE_GIT_VERSION
+#ifdef HAVE_GIT_VERSION
 #include "gitversion.h"
 #endif
 
@@ -82,7 +82,7 @@ void
 cons_debug(const char *const msg, ...)
 {
     ProfWin *console = wins_get_console();
-    if (strcmp(PROF_PACKAGE_STATUS, "development") == 0) {
+    if (strcmp(PACKAGE_STATUS, "development") == 0) {
         va_list arg;
         va_start(arg, msg);
         GString *fmt_msg = g_string_new(NULL);
@@ -416,18 +416,18 @@ cons_about(void)
         _cons_splash_logo();
     } else {
 
-        if (strcmp(PROF_PACKAGE_STATUS, "development") == 0) {
-#ifdef PROF_HAVE_GIT_VERSION
-            win_vprint(console, '-', 0, NULL, 0, 0, "", "Welcome to Profanity, version %sdev.%s.%s", PROF_PACKAGE_VERSION, PROF_GIT_BRANCH, PROF_GIT_REVISION);
+        if (strcmp(PACKAGE_STATUS, "development") == 0) {
+#ifdef HAVE_GIT_VERSION
+            win_vprint(console, '-', 0, NULL, 0, 0, "", "Welcome to Profanity, version %sdev.%s.%s", PACKAGE_VERSION, PROF_GIT_BRANCH, PROF_GIT_REVISION);
 #else
-            win_vprint(console, '-', 0, NULL, 0, 0, "", "Welcome to Profanity, version %sdev", PROF_PACKAGE_VERSION);
+            win_vprint(console, '-', 0, NULL, 0, 0, "", "Welcome to Profanity, version %sdev", PACKAGE_VERSION);
 #endif
         } else {
-            win_vprint(console, '-', 0, NULL, 0, 0, "", "Welcome to Profanity, version %s", PROF_PACKAGE_VERSION);
+            win_vprint(console, '-', 0, NULL, 0, 0, "", "Welcome to Profanity, version %s", PACKAGE_VERSION);
         }
     }
 
-    win_vprint(console, '-', 0, NULL, 0, 0, "", "Copyright (C) 2012 - 2016 James Booth <%s>.", PROF_PACKAGE_BUGREPORT);
+    win_vprint(console, '-', 0, NULL, 0, 0, "", "Copyright (C) 2012 - 2016 James Booth <%s>.", PACKAGE_BUGREPORT);
     win_println(console, 0, "License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>");
     win_println(console, 0, "");
     win_println(console, 0, "This is free software; you are free to change and redistribute it.");
@@ -2305,14 +2305,14 @@ _cons_splash_logo(void)
     win_print(console, '-', 0, NULL, 0, THEME_SPLASH, "", "|_|                                    (____/ ");
     win_print(console, '-', 0, NULL, 0, THEME_SPLASH, "", "");
 
-    if (strcmp(PROF_PACKAGE_STATUS, "development") == 0) {
-#ifdef PROF_HAVE_GIT_VERSION
-        win_vprint(console, '-', 0, NULL, 0, 0, "", "Version %sdev.%s.%s", PROF_PACKAGE_VERSION, PROF_GIT_BRANCH, PROF_GIT_REVISION);
+    if (strcmp(PACKAGE_STATUS, "development") == 0) {
+#ifdef HAVE_GIT_VERSION
+        win_vprint(console, '-', 0, NULL, 0, 0, "", "Version %sdev.%s.%s", PACKAGE_VERSION, PROF_GIT_BRANCH, PROF_GIT_REVISION);
 #else
-        win_vprint(console, '-', 0, NULL, 0, 0, "", "Version %sdev", PROF_PACKAGE_VERSION);
+        win_vprint(console, '-', 0, NULL, 0, 0, "", "Version %sdev", PACKAGE_VERSION);
 #endif
     } else {
-        win_vprint(console, '-', 0, NULL, 0, 0, "", "Version %s", PROF_PACKAGE_VERSION);
+        win_vprint(console, '-', 0, NULL, 0, 0, "", "Version %s", PACKAGE_VERSION);
     }
 }
 
