@@ -35,13 +35,13 @@
 #ifndef UI_WIN_TYPES_H
 #define UI_WIN_TYPES_H
 
-#include "prof_config.h"
+#include "config.h"
 
 #include <wchar.h>
 #include <glib.h>
-#ifdef PROF_HAVE_NCURSESW_NCURSES_H
+#ifdef HAVE_NCURSESW_NCURSES_H
 #include <ncursesw/ncurses.h>
-#elif PROF_HAVE_NCURSES_H
+#elif HAVE_NCURSES_H
 #include <ncurses.h>
 #endif
 

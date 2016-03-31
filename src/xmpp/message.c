@@ -32,15 +32,15 @@
  *
  */
 
-#include "prof_config.h"
+#include "config.h"
 
 #include <stdlib.h>
 #include <string.h>
 
-#ifdef PROF_HAVE_LIBMESODE
+#ifdef HAVE_LIBMESODE
 #include <mesode.h>
 #endif
-#ifdef PROF_HAVE_LIBSTROPHE
+#ifdef HAVE_LIBSTROPHE
 #include <strophe.h>
 #endif
 
@@ -198,7 +198,7 @@ message_send_chat_pgp(const char *const barejid, const char *const msg)
     char *id = create_unique_id("msg");
 
     xmpp_stanza_t *message = NULL;
-#ifdef PROF_HAVE_LIBGPGME
+#ifdef HAVE_LIBGPGME
     char *account_name = jabber_get_account_name();
     ProfAccount *account = accounts_get_account(account_name);
     if (account->pgp_keyid) {

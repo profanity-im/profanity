@@ -32,9 +32,9 @@
  *
  */
 
-#include "prof_config.h"
+#include "config.h"
 
-#ifdef PROF_HAVE_GIT_VERSION
+#ifdef HAVE_GIT_VERSION
 #include "gitversion.h"
 #endif
 
@@ -44,10 +44,10 @@
 #include <glib.h>
 #include <glib/gstdio.h>
 
-#ifdef PROF_HAVE_LIBMESODE
+#ifdef HAVE_LIBMESODE
 #include <mesode.h>
 #endif
-#ifdef PROF_HAVE_LIBSTROPHE
+#ifdef HAVE_LIBSTROPHE
 #include <strophe.h>
 #endif
 
@@ -565,9 +565,9 @@ caps_create_query_response_stanza(xmpp_ctx_t *const ctx)
     xmpp_stanza_set_attribute(identity, "type", "console");
 
     GString *name_str = g_string_new("Profanity ");
-    g_string_append(name_str, PROF_PACKAGE_VERSION);
-    if (strcmp(PROF_PACKAGE_STATUS, "development") == 0) {
-#ifdef PROF_HAVE_GIT_VERSION
+    g_string_append(name_str, PACKAGE_VERSION);
+    if (strcmp(PACKAGE_STATUS, "development") == 0) {
+#ifdef HAVE_GIT_VERSION
         g_string_append(name_str, "dev.");
         g_string_append(name_str, PROF_GIT_BRANCH);
         g_string_append(name_str, ".");

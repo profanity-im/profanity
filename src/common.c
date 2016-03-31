@@ -31,7 +31,7 @@
  * source files in the program, then also delete it here.
  *
  */
-#include "prof_config.h"
+#include "config.h"
 
 #include <sys/select.h>
 #include <assert.h>
@@ -46,9 +46,9 @@
 #include <curl/easy.h>
 #include <glib.h>
 
-#ifdef PROF_HAVE_NCURSESW_NCURSES_H
+#ifdef HAVE_NCURSESW_NCURSES_H
 #include <ncursesw/ncurses.h>
-#elif PROF_HAVE_NCURSES_H
+#elif HAVE_NCURSES_H
 #include <ncurses.h>
 #endif
 
@@ -347,7 +347,7 @@ release_is_new(char *found_version)
 {
     int curr_maj, curr_min, curr_patch, found_maj, found_min, found_patch;
 
-    int parse_curr = sscanf(PROF_PACKAGE_VERSION, "%d.%d.%d", &curr_maj, &curr_min,
+    int parse_curr = sscanf(PACKAGE_VERSION, "%d.%d.%d", &curr_maj, &curr_min,
         &curr_patch);
     int parse_found = sscanf(found_version, "%d.%d.%d", &found_maj, &found_min,
         &found_patch);
@@ -657,13 +657,13 @@ is_notify_enabled(void)
 {
     gboolean notify_enabled = FALSE;
 
-#ifdef PROF_HAVE_OSXNOTIFY
+#ifdef HAVE_OSXNOTIFY
     notify_enabled = TRUE;
 #endif
-#ifdef PROF_HAVE_LIBNOTIFY
+#ifdef HAVE_LIBNOTIFY
     notify_enabled = TRUE;
 #endif
-#ifdef PROF_PLATFORM_CYGWIN
+#ifdef PLATFORM_CYGWIN
     notify_enabled = TRUE;
 #endif
 

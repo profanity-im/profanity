@@ -32,9 +32,9 @@
  *
  */
 
-#include "prof_config.h"
+#include "config.h"
 
-#ifdef PROF_HAVE_GIT_VERSION
+#ifdef HAVE_GIT_VERSION
 #include "gitversion.h"
 #endif
 
@@ -44,13 +44,13 @@
 #include <sys/ioctl.h>
 #include <unistd.h>
 
-#ifdef PROF_HAVE_LIBXSS
+#ifdef HAVE_LIBXSS
 #include <X11/extensions/scrnsaver.h>
 #endif
 #include <glib.h>
-#ifdef PROF_HAVE_NCURSESW_NCURSES_H
+#ifdef HAVE_NCURSESW_NCURSES_H
 #include <ncursesw/ncurses.h>
-#elif PROF_HAVE_NCURSES_H
+#elif HAVE_NCURSES_H
 #include <ncurses.h>
 #endif
 
@@ -64,7 +64,7 @@
 #include "jid.h"
 #include "log.h"
 #include "muc.h"
-#ifdef PROF_HAVE_LIBOTR
+#ifdef HAVE_LIBOTR
 #include "otr/otr.h"
 #endif
 #include "ui/ui.h"
@@ -81,7 +81,7 @@ static int inp_size;
 static gboolean perform_resize = FALSE;
 static GTimer *ui_idle_time;
 
-#ifdef PROF_HAVE_LIBXSS
+#ifdef HAVE_LIBXSS
 static Display *display;
 #endif
 
@@ -105,7 +105,7 @@ ui_init(void)
     wins_init();
     notifier_initialise();
     cons_about();
-#ifdef PROF_HAVE_LIBXSS
+#ifdef HAVE_LIBXSS
     display = XOpenDisplay(0);
 #endif
     ui_idle_time = g_timer_new();
@@ -150,7 +150,7 @@ unsigned long
 ui_get_idle_time(void)
 {
 // if compiled with libxss, get the x sessions idle time
-#ifdef PROF_HAVE_LIBXSS
+#ifdef HAVE_LIBXSS
     XScreenSaverInfo *info = XScreenSaverAllocInfo();
     if (info && display) {
         XScreenSaverQueryInfo(display, DefaultRootWindow(display), info);
@@ -497,7 +497,7 @@ ui_close_connected_win(int index)
         } else if (window->type == WIN_CHAT) {
             ProfChatWin *chatwin = (ProfChatWin*) window;
             assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
-#ifdef PROF_HAVE_LIBOTR
+#ifdef HAVE_LIBOTR
             if (chatwin->is_otr) {
                 otr_end_session(chatwin->barejid);
             }

@@ -32,7 +32,7 @@
  *
  */
 
-#include "prof_config.h"
+#include "config.h"
 
 #include <string.h>
 #include <stdlib.h>
@@ -47,7 +47,7 @@
 #include "ui/window.h"
 #include "ui/titlebar.h"
 #include "plugins/plugins.h"
-#ifdef PROF_HAVE_LIBOTR
+#ifdef HAVE_LIBOTR
 #include "otr/otr.h"
 #endif
 
@@ -85,7 +85,7 @@ chatwin_receipt_received(ProfChatWin *chatwin, const char *const id)
     win_mark_received(win, id);
 }
 
-#ifdef PROF_HAVE_LIBOTR
+#ifdef HAVE_LIBOTR
 void
 chatwin_otr_secured(ProfChatWin *chatwin, gboolean trusted)
 {

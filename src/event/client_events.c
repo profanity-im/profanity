@@ -32,7 +32,7 @@
  *
  */
 
-#include "prof_config.h"
+#include "config.h"
 
 #include <stdlib.h>
 #include <glib.h>
@@ -44,10 +44,10 @@
 #include "roster_list.h"
 #include "chat_session.h"
 #include "plugins/plugins.h"
-#ifdef PROF_HAVE_LIBOTR
+#ifdef HAVE_LIBOTR
 #include "otr/otr.h"
 #endif
-#ifdef PROF_HAVE_LIBGPGME
+#ifdef HAVE_LIBGPGME
 #include "pgp/gpg.h"
 #endif
 
@@ -81,7 +81,7 @@ cl_ev_disconnect(void)
     muc_invites_clear();
     chat_sessions_clear();
     tlscerts_clear_current();
-#ifdef PROF_HAVE_LIBGPGME
+#ifdef HAVE_LIBGPGME
     p_gpg_on_disconnect();
 #endif
 }
@@ -91,7 +91,7 @@ cl_ev_presence_send(const resource_presence_t presence_type, const char *const m
 {
     char *signed_status = NULL;
 
-#ifdef PROF_HAVE_LIBGPGME
+#ifdef HAVE_LIBGPGME
     char *account_name = jabber_get_account_name();
     ProfAccount *account = accounts_get_account(account_name);
     if (account->pgp_keyid) {
@@ -112,8 +112,8 @@ cl_ev_send_msg(ProfChatWin *chatwin, const char *const msg)
     char *plugin_msg = plugins_pre_chat_message_send(chatwin->barejid, msg);
 
 // OTR suported, PGP supported
-#ifdef PROF_HAVE_LIBOTR
-#ifdef PROF_HAVE_LIBGPGME
+#ifdef HAVE_LIBOTR
+#ifdef HAVE_LIBGPGME
     if (chatwin->pgp_send) {
         char *id = message_send_chat_pgp(chatwin->barejid, plugin_msg);
         chat_log_pgp_msg_out(chatwin->barejid, plugin_msg);
@@ -136,8 +136,8 @@ cl_ev_send_msg(ProfChatWin *chatwin, const char *const msg)
 #endif
 
 // OTR supported, PGP unsupported
-#ifdef PROF_HAVE_LIBOTR
-#ifndef PROF_HAVE_LIBGPGME
+#ifdef HAVE_LIBOTR
+#ifndef HAVE_LIBGPGME
     gboolean handled = otr_on_message_send(chatwin, plugin_msg);
     if (!handled) {
         char *id = message_send_chat(chatwin->barejid, plugin_msg);
@@ -153,8 +153,8 @@ cl_ev_send_msg(ProfChatWin *chatwin, const char *const msg)
 #endif
 
 // OTR unsupported, PGP supported
-#ifndef PROF_HAVE_LIBOTR
-#ifdef PROF_HAVE_LIBGPGME
+#ifndef HAVE_LIBOTR
+#ifdef HAVE_LIBGPGME
     if (chatwin->pgp_send) {
         char *id = message_send_chat_pgp(chatwin->barejid, plugin_msg);
         chat_log_pgp_msg_out(chatwin->barejid, plugin_msg);
@@ -174,8 +174,8 @@ cl_ev_send_msg(ProfChatWin *chatwin, const char *const msg)
 #endif
 
 // OTR unsupported, PGP unsupported
-#ifndef PROF_HAVE_LIBOTR
-#ifndef PROF_HAVE_LIBGPGME
+#ifndef HAVE_LIBOTR
+#ifndef HAVE_LIBGPGME
     char *id = message_send_chat(chatwin->barejid, plugin_msg);
     chat_log_msg_out(chatwin->barejid, plugin_msg);
     chatwin_outgoing_msg(chatwin, plugin_msg, id, PROF_MSG_PLAIN);

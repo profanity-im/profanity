@@ -32,7 +32,7 @@
  *
  */
 
-#include "prof_config.h"
+#include "config.h"
 
 #include <assert.h>
 #include <errno.h>
@@ -59,10 +59,10 @@
 #include "log.h"
 #include "muc.h"
 #include "plugins/plugins.h"
-#ifdef PROF_HAVE_LIBOTR
+#ifdef HAVE_LIBOTR
 #include "otr/otr.h"
 #endif
-#ifdef PROF_HAVE_LIBGPGME
+#ifdef HAVE_LIBGPGME
 #include "pgp/gpg.h"
 #endif
 #include "profanity.h"
@@ -2778,7 +2778,7 @@ cmd_reset_autocomplete(ProfWin *window)
     tlscerts_reset_ac();
     prefs_reset_boolean_choice();
     presence_reset_sub_request_search();
-#ifdef PROF_HAVE_LIBGPGME
+#ifdef HAVE_LIBGPGME
     p_gpg_autocomplete_key_reset();
 #endif
     autocomplete_reset(help_ac);
@@ -3678,7 +3678,7 @@ _pgp_autocomplete(ProfWin *window, const char *const input)
         return found;
     }
 
-#ifdef PROF_HAVE_LIBGPGME
+#ifdef HAVE_LIBGPGME
     gboolean result;
     gchar **args = parse_args(input, 2, 3, &result);
     if ((strncmp(input, "/pgp", 4) == 0) && (result == TRUE)) {
@@ -4599,7 +4599,7 @@ _account_autocomplete(ProfWin *window, const char *const input)
             if (found) {
                 return found;
             }
-#ifdef PROF_HAVE_LIBGPGME
+#ifdef HAVE_LIBGPGME
         } else if ((g_strv_length(args) > 3) && (g_strcmp0(args[2], "pgpkeyid")) == 0) {
             g_string_append(beginning, " ");
             g_string_append(beginning, args[2]);

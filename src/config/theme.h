@@ -35,7 +35,7 @@
 #ifndef THEME_H
 #define THEME_H
 
-#include "prof_config.h"
+#include "config.h"
 
 #include <glib.h>
 
