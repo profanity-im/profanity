@@ -35,7 +35,7 @@
 #ifndef UI_BUFFER_H
 #define UI_BUFFER_H
 
-#include "prof_config.h"
+#include "config.h"
 #include "config/theme.h"
 
 #include <glib.h>

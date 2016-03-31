@@ -35,7 +35,7 @@
 #include <string.h>
 #include <stdlib.h>
 
-#include "prof_config.h"
+#include "config.h"
 #include "common.h"
 #include "config/preferences.h"
 #include "log.h"
@@ -46,22 +46,22 @@
 #include "plugins/themes.h"
 #include "plugins/settings.h"
 
-#ifdef PROF_HAVE_PYTHON
+#ifdef HAVE_PYTHON
 #include "plugins/python_plugins.h"
 #include "plugins/python_api.h"
 #endif
 
-#ifdef PROF_HAVE_RUBY
+#ifdef HAVE_RUBY
 #include "plugins/ruby_plugins.h"
 #include "plugins/ruby_api.h"
 #endif
 
-#ifdef PROF_HAVE_LUA
+#ifdef HAVE_LUA
 #include "plugins/lua_plugins.h"
 #include "plugins/lua_api.h"
 #endif
 
-#ifdef PROF_HAVE_C
+#ifdef HAVE_C
 #include "plugins/c_plugins.h"
 #include "plugins/c_api.h"
 #endif
@@ -77,16 +77,16 @@ plugins_init(void)
     callbacks_init();
     autocompleters_init();
 
-#ifdef PROF_HAVE_PYTHON
+#ifdef HAVE_PYTHON
     python_env_init();
 #endif
-#ifdef PROF_HAVE_RUBY
+#ifdef HAVE_RUBY
     ruby_env_init();
 #endif
-#ifdef PROF_HAVE_LUA
+#ifdef HAVE_LUA
     lua_env_init();
 #endif
-#ifdef PROF_HAVE_C
+#ifdef HAVE_C
     c_env_init();
 #endif
 
@@ -101,7 +101,7 @@ plugins_init(void)
         {
             gboolean loaded = FALSE;
             gchar *filename = plugins_load[i];
-#ifdef PROF_HAVE_PYTHON
+#ifdef HAVE_PYTHON
             if (g_str_has_suffix(filename, ".py")) {
                 ProfPlugin *plugin = python_plugin_create(filename);
                 if (plugin) {
@@ -110,7 +110,7 @@ plugins_init(void)
                 }
             }
 #endif
-#ifdef PROF_HAVE_RUBY
+#ifdef HAVE_RUBY
             if (g_str_has_suffix(filename, ".rb")) {
                 ProfPlugin *plugin = ruby_plugin_create(filename);
                 if (plugin) {
@@ -119,7 +119,7 @@ plugins_init(void)
                 }
             }
 #endif
-#ifdef PROF_HAVE_LUA
+#ifdef HAVE_LUA
             if (g_str_has_suffix(filename, ".lua")) {
                 ProfPlugin *plugin = lua_plugin_create(filename);
                 if (plugin) {
@@ -128,7 +128,7 @@ plugins_init(void)
                 }
             }
 #endif
-#ifdef PROF_HAVE_C
+#ifdef HAVE_C
             if (g_str_has_suffix(filename, ".so")) {
                 ProfPlugin *plugin = c_plugin_create(filename);
                 if (plugin) {
@@ -146,7 +146,7 @@ plugins_init(void)
         GSList *curr = plugins;
         while (curr) {
             ProfPlugin *plugin = curr->data;
-            plugin->init_func(plugin, PROF_PACKAGE_VERSION, PROF_PACKAGE_STATUS);
+            plugin->init_func(plugin, PACKAGE_VERSION, PACKAGE_STATUS);
             curr = g_slist_next(curr);
         }
     }
@@ -592,22 +592,22 @@ plugins_shutdown(void)
     GSList *curr = plugins;
 
     while (curr) {
-#ifdef PROF_HAVE_PYTHON
+#ifdef HAVE_PYTHON
         if (((ProfPlugin *)curr->data)->lang == LANG_PYTHON) {
             python_plugin_destroy(curr->data);
         }
 #endif
-#ifdef PROF_HAVE_RUBY
+#ifdef HAVE_RUBY
         if (((ProfPlugin *)curr->data)->lang == LANG_RUBY) {
             ruby_plugin_destroy(curr->data);
         }
 #endif
-#ifdef PROF_HAVE_LUA
+#ifdef HAVE_LUA
         if (((ProfPlugin *)curr->data)->lang == LANG_LUA) {
             lua_plugin_destroy(curr->data);
         }
 #endif
-#ifdef PROF_HAVE_C
+#ifdef HAVE_C
         if (((ProfPlugin *)curr->data)->lang == LANG_C) {
             c_plugin_destroy(curr->data);
         }
@@ -615,16 +615,16 @@ plugins_shutdown(void)
 
         curr = g_slist_next(curr);
     }
-#ifdef PROF_HAVE_PYTHON
+#ifdef HAVE_PYTHON
     python_shutdown();
 #endif
-#ifdef PROF_HAVE_RUBY
+#ifdef HAVE_RUBY
     ruby_shutdown();
 #endif
-#ifdef PROF_HAVE_LUA
+#ifdef HAVE_LUA
     lua_shutdown();
 #endif
-#ifdef PROF_HAVE_C
+#ifdef HAVE_C
     c_shutdown();
 #endif
 

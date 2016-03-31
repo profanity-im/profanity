@@ -35,7 +35,7 @@
 #ifndef UI_WINDOW_H
 #define UI_WINDOW_H
 
-#include "prof_config.h"
+#include "config.h"
 
 #include <wchar.h>
 
@@ -46,9 +46,9 @@
 #include "xmpp/xmpp.h"
 #include "chat_state.h"
 
-#ifdef PROF_HAVE_NCURSESW_NCURSES_H
+#ifdef HAVE_NCURSESW_NCURSES_H
 #include <ncursesw/ncurses.h>
-#elif PROF_HAVE_NCURSES_H
+#elif HAVE_NCURSES_H
 #include <ncurses.h>
 #endif
 

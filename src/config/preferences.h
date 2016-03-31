@@ -35,7 +35,7 @@
 #ifndef PREFERENCES_H
 #define PREFERENCES_H
 
-#include "prof_config.h"
+#include "config.h"
 
 #include <glib.h>
 

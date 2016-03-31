@@ -31,17 +31,17 @@
  * source files in the program, then also delete it here.
  *
  */
-#include "prof_config.h"
+#include "config.h"
 
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 
 #include <glib.h>
-#ifdef PROF_HAVE_LIBNOTIFY
+#ifdef HAVE_LIBNOTIFY
 #include <libnotify/notify.h>
 #endif
-#ifdef PROF_PLATFORM_CYGWIN
+#ifdef PLATFORM_CYGWIN
 #include <windows.h>
 #endif
 
@@ -62,7 +62,7 @@ notifier_initialise(void)
 void
 notifier_uninit(void)
 {
-#ifdef PROF_HAVE_LIBNOTIFY
+#ifdef HAVE_LIBNOTIFY
     if (notify_is_initted()) {
         notify_uninit();
     }
@@ -196,7 +196,7 @@ notify_remind(void)
 void
 notify(const char *const message, int timeout, const char *const category)
 {
-#ifdef PROF_HAVE_LIBNOTIFY
+#ifdef HAVE_LIBNOTIFY
     log_debug("Attempting notification: %s", message);
     if (notify_is_initted()) {
         log_debug("Reinitialising libnotify");
@@ -227,7 +227,7 @@ notify(const char *const message, int timeout, const char *const category)
         log_error("Libnotify not initialised.");
     }
 #endif
-#ifdef PROF_PLATFORM_CYGWIN
+#ifdef PLATFORM_CYGWIN
     NOTIFYICONDATA nid;
     nid.cbSize = sizeof(NOTIFYICONDATA);
     //nid.hWnd = hWnd;
@@ -248,7 +248,7 @@ notify(const char *const message, int timeout, const char *const category)
 
     Shell_NotifyIcon(NIM_MODIFY, &nid);
 #endif
-#ifdef PROF_HAVE_OSXNOTIFY
+#ifdef HAVE_OSXNOTIFY
     GString *notify_command = g_string_new("terminal-notifier -title \"Profanity\" -message '");
 
     char *escaped_single = str_replace(message, "'", "'\\''");

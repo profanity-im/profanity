@@ -35,12 +35,12 @@
 #ifndef UI_UI_H
 #define UI_UI_H
 
-#include "prof_config.h"
+#include "config.h"
 
 #include "command/commands.h"
 #include "ui/win_types.h"
 #include "muc.h"
-#ifdef PROF_HAVE_LIBOTR
+#ifdef HAVE_LIBOTR
 #include "otr/otr.h"
 #endif
 
@@ -135,7 +135,7 @@ void chatwin_outgoing_carbon(ProfChatWin *chatwin, const char *const message, pr
 void chatwin_contact_online(ProfChatWin *chatwin, Resource *resource, GDateTime *last_activity);
 void chatwin_contact_offline(ProfChatWin *chatwin, char *resource, char *status);
 char* chatwin_get_string(ProfChatWin *chatwin);
-#ifdef PROF_HAVE_LIBOTR
+#ifdef HAVE_LIBOTR
 void chatwin_otr_secured(ProfChatWin *chatwin, gboolean trusted);
 void chatwin_otr_unsecured(ProfChatWin *chatwin);
 void chatwin_otr_trust(ProfChatWin *chatwin);

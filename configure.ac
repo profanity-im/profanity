@@ -7,7 +7,7 @@ AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_SRCDIR([src/main.c])
 AC_CONFIG_HEADERS([src/config.h])
 AM_INIT_AUTOMAKE([foreign subdir-objects])
-AX_PREFIX_CONFIG_H([src/prof_config.h], [PROF], [src/config.h])
+#AX_PREFIX_CONFIG_H([src/prof_config.h], [PROF], [src/config.h])
 
 ### Checks for programs.
 AC_PROG_CC

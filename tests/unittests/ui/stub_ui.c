@@ -1,4 +1,4 @@
-#include "prof_config.h"
+#include "config.h"
 
 #include <glib.h>
 #include <wchar.h>
@@ -8,7 +8,7 @@
 
 #include "ui/window.h"
 #include "ui/ui.h"
-#ifdef PROF_HAVE_LIBOTR
+#ifdef HAVE_LIBOTR
 #include "otr/otr.h"
 #endif
 
@@ -67,7 +67,7 @@ void ui_resize(void) {}
 
 void ui_focus_win(ProfWin *win) {}
 
-#ifdef PROF_HAVE_LIBOTR
+#ifdef HAVE_LIBOTR
 void chatwin_otr_secured(ProfChatWin *chatwin, gboolean trusted) {}
 void chatwin_otr_unsecured(ProfChatWin *chatwin) {}
 void chatwin_otr_trust(ProfChatWin *chatwin) {}

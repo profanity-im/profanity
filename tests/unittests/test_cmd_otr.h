@@ -1,6 +1,6 @@
-#include "prof_config.h"
+#include "config.h"
 
-#ifdef PROF_HAVE_LIBOTR
+#ifdef HAVE_LIBOTR
 void cmd_otr_shows_usage_when_no_args(void **state);
 void cmd_otr_shows_usage_when_invalid_subcommand(void **state);
 void cmd_otr_log_shows_usage_when_no_args(void **state);

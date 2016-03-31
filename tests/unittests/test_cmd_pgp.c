@@ -6,7 +6,7 @@
 #include <string.h>
 #include <glib.h>
 
-#include "prof_config.h"
+#include "config.h"
 
 #include "command/commands.h"
 
@@ -14,7 +14,7 @@
 
 #define CMD_PGP "/pgp"
 
-#ifdef PROF_HAVE_LIBGPGME
+#ifdef HAVE_LIBGPGME
 void cmd_pgp_shows_usage_when_no_args(void **state)
 {
     gchar *args[] = { NULL };
