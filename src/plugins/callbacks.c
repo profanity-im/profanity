@@ -33,6 +33,7 @@
  */
 
 #include <string.h>
+#include <stdlib.h>
 
 #include "command/command.h"
 #include "plugins/callbacks.h"
