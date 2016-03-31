@@ -49,13 +49,12 @@ typedef enum {
     ROSTER_CONTACT_UNREAD
 } roster_contact_theme_t;
 
-static void _rosterwin_contacts_all(ProfLayoutSplit *layout, gboolean newline);
-static void _rosterwin_contacts_by_presence(ProfLayoutSplit *layout, const char *const presence, char *title,
-    gboolean newline);
-static void _rosterwin_contacts_by_group(ProfLayoutSplit *layout, char *group, gboolean newline);
-static void _rosteriwin_unsubscribed(ProfLayoutSplit *layout, gboolean newline);
-static void _rosterwin_contacts_header(ProfLayoutSplit *layout, const char *title, gboolean newline, GSList *contacts);
-static void _rosterwin_unsubscribed_header(ProfLayoutSplit *layout, gboolean newline, GList *wins);
+static void _rosterwin_contacts_all(ProfLayoutSplit *layout);
+static void _rosterwin_contacts_by_presence(ProfLayoutSplit *layout, const char *const presence, char *title);
+static void _rosterwin_contacts_by_group(ProfLayoutSplit *layout, char *group);
+static void _rosteriwin_unsubscribed(ProfLayoutSplit *layout);
+static void _rosterwin_contacts_header(ProfLayoutSplit *layout, const char *title, GSList *contacts);
+static void _rosterwin_unsubscribed_header(ProfLayoutSplit *layout, GList *wins);
 
 static void _rosterwin_contact(ProfLayoutSplit *layout, PContact contact);
 static void _rosterwin_unsubscribed_item(ProfLayoutSplit *layout, ProfChatWin *chatwin);
@@ -64,9 +63,9 @@ static void _rosterwin_presence(ProfLayoutSplit *layout, const char *presence, c
 static void _rosterwin_resources(ProfLayoutSplit *layout, PContact contact, int current_indent,
     roster_contact_theme_t theme_type, int unread);
 
-static void _rosterwin_rooms(ProfLayoutSplit *layout, gboolean newline, char *title, GList *rooms);
-static void _rosterwin_rooms_by_service(ProfLayoutSplit *layout, gboolean newline);
-static void _rosterwin_rooms_header(ProfLayoutSplit *layout, gboolean newline, GList *rooms, char *title);
+static void _rosterwin_rooms(ProfLayoutSplit *layout, char *title, GList *rooms);
+static void _rosterwin_rooms_by_service(ProfLayoutSplit *layout);
+static void _rosterwin_rooms_header(ProfLayoutSplit *layout, GList *rooms, char *title);
 static void _rosterwin_room(ProfLayoutSplit *layout, ProfMucWin *mucwin);
 
 static void _rosterwin_private_chats(ProfLayoutSplit *layout, GList *orphaned_privchats);
@@ -95,17 +94,15 @@ rosterwin_roster(void)
     assert(layout->memcheck == LAYOUT_SPLIT_MEMCHECK);
     werase(layout->subwin);
 
-    gboolean newline = FALSE;
     char *roomspos = prefs_get_string(PREF_ROSTER_ROOMS_POS);
     if (prefs_get_boolean(PREF_ROSTER_ROOMS) && (g_strcmp0(roomspos, "first") == 0)) {
         char *roomsbypref = prefs_get_string(PREF_ROSTER_ROOMS_BY);
         if (g_strcmp0(roomsbypref, "service") == 0) {
-            _rosterwin_rooms_by_service(layout, newline);
+            _rosterwin_rooms_by_service(layout);
         } else {
             GList *rooms = muc_rooms();
-            _rosterwin_rooms(layout, newline, "Rooms", rooms);
+            _rosterwin_rooms(layout, "Rooms", rooms);
         }
-        newline = TRUE;
         prefs_free_string(roomsbypref);
 
         GList *orphaned_privchats = NULL;
@@ -133,28 +130,27 @@ rosterwin_roster(void)
     if (prefs_get_boolean(PREF_ROSTER_CONTACTS)) {
         char *by = prefs_get_string(PREF_ROSTER_BY);
         if (g_strcmp0(by, "presence") == 0) {
-            _rosterwin_contacts_by_presence(layout, "chat", "Available for chat", newline);
-            _rosterwin_contacts_by_presence(layout, "online", "Online", TRUE);
-            _rosterwin_contacts_by_presence(layout, "away", "Away", TRUE);
-            _rosterwin_contacts_by_presence(layout, "xa", "Extended Away", TRUE);
-            _rosterwin_contacts_by_presence(layout, "dnd", "Do not disturb", TRUE);
-            _rosterwin_contacts_by_presence(layout, "offline", "Offline", TRUE);
+            _rosterwin_contacts_by_presence(layout, "chat", "Available for chat");
+            _rosterwin_contacts_by_presence(layout, "online", "Online");
+            _rosterwin_contacts_by_presence(layout, "away", "Away");
+            _rosterwin_contacts_by_presence(layout, "xa", "Extended Away");
+            _rosterwin_contacts_by_presence(layout, "dnd", "Do not disturb");
+            _rosterwin_contacts_by_presence(layout, "offline", "Offline");
         } else if (g_strcmp0(by, "group") == 0) {
             GSList *groups = roster_get_groups();
             GSList *curr_group = groups;
             while (curr_group) {
-                _rosterwin_contacts_by_group(layout, curr_group->data, newline);
-                newline = TRUE;
+                _rosterwin_contacts_by_group(layout, curr_group->data);
                 curr_group = g_slist_next(curr_group);
             }
             g_slist_free_full(groups, free);
-            _rosterwin_contacts_by_group(layout, NULL, newline);
+            _rosterwin_contacts_by_group(layout, NULL);
         } else {
-            _rosterwin_contacts_all(layout, newline);
+            _rosterwin_contacts_all(layout);
         }
 
         if (prefs_get_boolean(PREF_ROSTER_UNSUBSCRIBED)) {
-            _rosteriwin_unsubscribed(layout, newline);
+            _rosteriwin_unsubscribed(layout);
         }
         prefs_free_string(by);
     }
@@ -162,10 +158,10 @@ rosterwin_roster(void)
     if (prefs_get_boolean(PREF_ROSTER_ROOMS) && (g_strcmp0(roomspos, "last") == 0)) {
         char *roomsbypref = prefs_get_string(PREF_ROSTER_ROOMS_BY);
         if (g_strcmp0(roomsbypref, "service") == 0) {
-            _rosterwin_rooms_by_service(layout, newline);
+            _rosterwin_rooms_by_service(layout);
         } else {
             GList *rooms = muc_rooms();
-            _rosterwin_rooms(layout, newline, "Rooms", rooms);
+            _rosterwin_rooms(layout, "Rooms", rooms);
         }
         prefs_free_string(roomsbypref);
 
@@ -194,7 +190,7 @@ rosterwin_roster(void)
 }
 
 static void
-_rosterwin_contacts_all(ProfLayoutSplit *layout, gboolean newline)
+_rosterwin_contacts_all(ProfLayoutSplit *layout)
 {
     GSList *contacts = NULL;
 
@@ -209,7 +205,7 @@ _rosterwin_contacts_all(ProfLayoutSplit *layout, gboolean newline)
     GSList *filtered_contacts = _filter_contacts(contacts);
     g_slist_free(contacts);
 
-    _rosterwin_contacts_header(layout, "Roster", newline, filtered_contacts);
+    _rosterwin_contacts_header(layout, "Roster", filtered_contacts);
 
     if (filtered_contacts) {
         GSList *curr_contact = filtered_contacts;
@@ -223,11 +219,11 @@ _rosterwin_contacts_all(ProfLayoutSplit *layout, gboolean newline)
 }
 
 static void
-_rosteriwin_unsubscribed(ProfLayoutSplit *layout, gboolean newline)
+_rosteriwin_unsubscribed(ProfLayoutSplit *layout)
 {
     GList *wins = wins_get_chat_unsubscribed();
     if (wins) {
-        _rosterwin_unsubscribed_header(layout, newline, wins);
+        _rosterwin_unsubscribed_header(layout, wins);
     }
 
     GList *curr = wins;
@@ -241,7 +237,7 @@ _rosteriwin_unsubscribed(ProfLayoutSplit *layout, gboolean newline)
 }
 
 static void
-_rosterwin_contacts_by_presence(ProfLayoutSplit *layout, const char *const presence, char *title, gboolean newline)
+_rosterwin_contacts_by_presence(ProfLayoutSplit *layout, const char *const presence, char *title)
 {
     GSList *contacts = roster_get_contacts_by_presence(presence);
     GSList *filtered_contacts = _filter_contacts_with_presence(contacts, presence);
@@ -249,7 +245,7 @@ _rosterwin_contacts_by_presence(ProfLayoutSplit *layout, const char *const prese
 
     // if this group has contacts, or if we want to show empty groups
     if (filtered_contacts || prefs_get_boolean(PREF_ROSTER_EMPTY)) {
-        _rosterwin_contacts_header(layout, title, newline, filtered_contacts);
+        _rosterwin_contacts_header(layout, title, filtered_contacts);
     }
 
     if (filtered_contacts) {
@@ -264,7 +260,7 @@ _rosterwin_contacts_by_presence(ProfLayoutSplit *layout, const char *const prese
 }
 
 static void
-_rosterwin_contacts_by_group(ProfLayoutSplit *layout, char *group, gboolean newline)
+_rosterwin_contacts_by_group(ProfLayoutSplit *layout, char *group)
 {
     GSList *contacts = NULL;
 
@@ -281,9 +277,9 @@ _rosterwin_contacts_by_group(ProfLayoutSplit *layout, char *group, gboolean newl
 
     if (filtered_contacts || prefs_get_boolean(PREF_ROSTER_EMPTY)) {
         if (group) {
-            _rosterwin_contacts_header(layout, group, newline, filtered_contacts);
+            _rosterwin_contacts_header(layout, group, filtered_contacts);
         } else {
-            _rosterwin_contacts_header(layout, "no group", newline, filtered_contacts);
+            _rosterwin_contacts_header(layout, "no group", filtered_contacts);
         }
 
         GSList *curr_contact = filtered_contacts;
@@ -647,7 +643,7 @@ _rosterwin_resources(ProfLayoutSplit *layout, PContact contact, int current_inde
 }
 
 static void
-_rosterwin_rooms(ProfLayoutSplit *layout, gboolean newline, char *title, GList *rooms)
+_rosterwin_rooms(ProfLayoutSplit *layout, char *title, GList *rooms)
 {
     GList *rooms_sorted = NULL;
     GList *curr_room = rooms;
@@ -668,7 +664,7 @@ _rosterwin_rooms(ProfLayoutSplit *layout, gboolean newline, char *title, GList *
 
     // if there are active rooms, or if we want to show empty groups
     if (rooms_sorted || prefs_get_boolean(PREF_ROSTER_EMPTY)) {
-        _rosterwin_rooms_header(layout, newline, rooms_sorted, title);
+        _rosterwin_rooms_header(layout, rooms_sorted, title);
 
         GList *curr_room = rooms_sorted;
         while (curr_room) {
@@ -681,7 +677,7 @@ _rosterwin_rooms(ProfLayoutSplit *layout, gboolean newline, char *title, GList *
 }
 
 static void
-_rosterwin_rooms_by_service(ProfLayoutSplit *layout, gboolean newline)
+_rosterwin_rooms_by_service(ProfLayoutSplit *layout)
 {
     GList *curr_room = muc_rooms();
     GList *services = NULL;
@@ -711,8 +707,7 @@ _rosterwin_rooms_by_service(ProfLayoutSplit *layout, gboolean newline)
             curr_room = g_list_next(curr_room);
         }
 
-        _rosterwin_rooms(layout, newline, service, filtered_rooms);
-        newline = TRUE;
+        _rosterwin_rooms(layout, service, filtered_rooms);
 
         curr_service = g_list_next(curr_service);
     }
@@ -967,11 +962,9 @@ _compare_rooms_unread(ProfMucWin *a, ProfMucWin *b)
 }
 
 static void
-_rosterwin_unsubscribed_header(ProfLayoutSplit *layout, gboolean newline, GList *wins)
+_rosterwin_unsubscribed_header(ProfLayoutSplit *layout, GList *wins)
 {
-    if (newline) {
-        win_sub_newline_lazy(layout->subwin);
-    }
+    win_sub_newline_lazy(layout->subwin);
 
     GString *header = g_string_new(" ");
     char ch = prefs_get_roster_header_char();
@@ -1015,11 +1008,9 @@ _rosterwin_unsubscribed_header(ProfLayoutSplit *layout, gboolean newline, GList 
 }
 
 static void
-_rosterwin_contacts_header(ProfLayoutSplit *layout, const char *const title, gboolean newline, GSList *contacts)
+_rosterwin_contacts_header(ProfLayoutSplit *layout, const char *const title, GSList *contacts)
 {
-    if (newline) {
-        win_sub_newline_lazy(layout->subwin);
-    }
+    win_sub_newline_lazy(layout->subwin);
 
     GString *header = g_string_new(" ");
     char ch = prefs_get_roster_header_char();
@@ -1067,11 +1058,9 @@ _rosterwin_contacts_header(ProfLayoutSplit *layout, const char *const title, gbo
 }
 
 static void
-_rosterwin_rooms_header(ProfLayoutSplit *layout, gboolean newline, GList *rooms, char *title)
+_rosterwin_rooms_header(ProfLayoutSplit *layout, GList *rooms, char *title)
 {
-    if (newline) {
-        win_sub_newline_lazy(layout->subwin);
-    }
+    win_sub_newline_lazy(layout->subwin);
     GString *header = g_string_new(" ");
     char ch = prefs_get_roster_header_char();
     if (ch) {
