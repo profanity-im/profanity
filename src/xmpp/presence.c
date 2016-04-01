@@ -576,7 +576,7 @@ _handle_caps(char *jid, XMPPCaps *caps)
         iq_send_caps_request_legacy(jid, id, caps->node, caps->ver);
         free(id);
     } else {
-        log_info("No hash specified: %s, could not create ver string, not sending service disovery request.", jid);
+        log_info("No hash specified: %s, could not create ver string, not sending service discovery request.", jid);
     }
 }
 
