@@ -631,66 +631,113 @@ void strip_quotes_strips_both(void **state)
     free(result);
 }
 
-void str_not_contains_str(void **state)
+void prof_strstr_contains(void **state)
 {
-    char *main = "somestring";
-    char *occur = "not";
+    assert_true(prof_strstr(NULL,      "some string",           FALSE, FALSE) == FALSE);
+    assert_true(prof_strstr("boothj5", NULL,                    FALSE, FALSE) == FALSE);
+    assert_true(prof_strstr(NULL,      NULL,                    FALSE, FALSE) == FALSE);
 
-    assert_false(str_contains_str(main, occur));
-}
+    assert_true(prof_strstr("boothj5", "boothj5",               FALSE, FALSE) == TRUE);
+    assert_true(prof_strstr("boothj5", "boothj5 hello",         FALSE, FALSE) == TRUE);
+    assert_true(prof_strstr("boothj5", "hello boothj5",         FALSE, FALSE) == TRUE);
+    assert_true(prof_strstr("boothj5", "hello boothj5 there",   FALSE, FALSE) == TRUE);
+    assert_true(prof_strstr("boothj5", "helloboothj5test",      FALSE, FALSE) == TRUE);
 
-void str_contains_str_at_start(void **state)
-{
-    char *main = "somestring";
-    char *occur = "some";
+    assert_true(prof_strstr("boothj5", "BoothJ5",               FALSE, FALSE) == TRUE);
+    assert_true(prof_strstr("boothj5", "BoothJ5 hello",         FALSE, FALSE) == TRUE);
+    assert_true(prof_strstr("boothj5", "hello BoothJ5",         FALSE, FALSE) == TRUE);
+    assert_true(prof_strstr("boothj5", "hello BoothJ5 there",   FALSE, FALSE) == TRUE);
+    assert_true(prof_strstr("boothj5", "helloBoothJ5test",      FALSE, FALSE) == TRUE);
 
-    assert_true(str_contains_str(main, occur));
-}
+    assert_true(prof_strstr("BoothJ5", "boothj5",               FALSE, FALSE) == TRUE);
+    assert_true(prof_strstr("BoothJ5", "boothj5 hello",         FALSE, FALSE) == TRUE);
+    assert_true(prof_strstr("BoothJ5", "hello boothj5",         FALSE, FALSE) == TRUE);
+    assert_true(prof_strstr("BoothJ5", "hello boothj5 there",   FALSE, FALSE) == TRUE);
+    assert_true(prof_strstr("BoothJ5", "helloboothj5test",      FALSE, FALSE) == TRUE);
 
-void str_contains_str_at_end(void **state)
-{
-    char *main = "somestring";
-    char *occur = "string";
+    assert_true(prof_strstr("boothj5", "BoothJ5",               TRUE, FALSE) == FALSE);
+    assert_true(prof_strstr("boothj5", "BoothJ5 hello",         TRUE, FALSE) == FALSE);
+    assert_true(prof_strstr("boothj5", "hello BoothJ5",         TRUE, FALSE) == FALSE);
+    assert_true(prof_strstr("boothj5", "hello BoothJ5 there",   TRUE, FALSE) == FALSE);
+    assert_true(prof_strstr("boothj5", "helloBoothJ5test",      TRUE, FALSE) == FALSE);
 
-    assert_true(str_contains_str(main, occur));
-}
+    assert_true(prof_strstr("BoothJ5", "boothj5",               TRUE, FALSE) == FALSE);
+    assert_true(prof_strstr("BoothJ5", "boothj5 hello",         TRUE, FALSE) == FALSE);
+    assert_true(prof_strstr("BoothJ5", "hello boothj5",         TRUE, FALSE) == FALSE);
+    assert_true(prof_strstr("BoothJ5", "hello boothj5 there",   TRUE, FALSE) == FALSE);
+    assert_true(prof_strstr("BoothJ5", "helloboothj5test",      TRUE, FALSE) == FALSE);
 
-void str_contains_str_in_middle(void **state)
-{
-    char *main = "somestring";
-    char *occur = "str";
+    assert_true(prof_strstr("boothj5", "boothj5",               FALSE, TRUE) == TRUE);
+    assert_true(prof_strstr("boothj5", "boothj5 hello",         FALSE, TRUE) == TRUE);
+    assert_true(prof_strstr("boothj5", "hello boothj5",         FALSE, TRUE) == TRUE);
+    assert_true(prof_strstr("boothj5", "hello boothj5 there",   FALSE, TRUE) == TRUE);
+    assert_true(prof_strstr("boothj5", "boothj5test",           FALSE, TRUE) == FALSE);
+    assert_true(prof_strstr("boothj5", "helloboothj5",          FALSE, TRUE) == FALSE);
+    assert_true(prof_strstr("boothj5", "helloboothj5test",      FALSE, TRUE) == FALSE);
 
-    assert_true(str_contains_str(main, occur));
-}
+    assert_true(prof_strstr("boothj5", "BoothJ5",               TRUE, TRUE) == FALSE);
+    assert_true(prof_strstr("boothj5", "BoothJ5 hello",         TRUE, TRUE) == FALSE);
+    assert_true(prof_strstr("boothj5", "hello BoothJ5",         TRUE, TRUE) == FALSE);
+    assert_true(prof_strstr("boothj5", "hello BoothJ5 there",   TRUE, TRUE) == FALSE);
+    assert_true(prof_strstr("boothj5", "BoothJ5test",           TRUE, TRUE) == FALSE);
+    assert_true(prof_strstr("boothj5", "helloBoothJ5",          TRUE, TRUE) == FALSE);
+    assert_true(prof_strstr("boothj5", "helloBoothJ5test",      TRUE, TRUE) == FALSE);
 
-void str_contains_str_whole(void **state)
-{
-    char *main = "somestring";
-    char *occur = "somestring";
+    assert_true(prof_strstr("BoothJ5", "boothj5",               TRUE, TRUE) == FALSE);
+    assert_true(prof_strstr("BoothJ5", "boothj5 hello",         TRUE, TRUE) == FALSE);
+    assert_true(prof_strstr("BoothJ5", "hello boothj5",         TRUE, TRUE) == FALSE);
+    assert_true(prof_strstr("BoothJ5", "hello boothj5 there",   TRUE, TRUE) == FALSE);
+    assert_true(prof_strstr("BoothJ5", "boothj5test",           TRUE, TRUE) == FALSE);
+    assert_true(prof_strstr("BoothJ5", "helloboothj5",          TRUE, TRUE) == FALSE);
+    assert_true(prof_strstr("BoothJ5", "helloboothj5test",      TRUE, TRUE) == FALSE);
 
-    assert_true(str_contains_str(main, occur));
-}
+    assert_true(prof_strstr("boothj5", "boothj5:",              FALSE, TRUE) == TRUE);
+    assert_true(prof_strstr("boothj5", "boothj5,",              FALSE, TRUE) == TRUE);
+    assert_true(prof_strstr("boothj5", "boothj5-",              FALSE, TRUE) == TRUE);
+    assert_true(prof_strstr("boothj5", ":boothj5",              FALSE, TRUE) == TRUE);
+    assert_true(prof_strstr("boothj5", ",boothj5",              FALSE, TRUE) == TRUE);
+    assert_true(prof_strstr("boothj5", "-boothj5",              FALSE, TRUE) == TRUE);
+    assert_true(prof_strstr("boothj5", ":boothj5:",             FALSE, TRUE) == TRUE);
+    assert_true(prof_strstr("boothj5", ",boothj5,",             FALSE, TRUE) == TRUE);
+    assert_true(prof_strstr("boothj5", "-boothj5-",             FALSE, TRUE) == TRUE);
 
-void str_empty_not_contains_str(void **state)
-{
-    char *main = NULL;
-    char *occur = "str";
+    assert_true(prof_strstr("boothj5", "BoothJ5:",              FALSE, TRUE) == TRUE);
+    assert_true(prof_strstr("boothj5", "BoothJ5,",              FALSE, TRUE) == TRUE);
+    assert_true(prof_strstr("boothj5", "BoothJ5-",              FALSE, TRUE) == TRUE);
+    assert_true(prof_strstr("boothj5", ":BoothJ5",              FALSE, TRUE) == TRUE);
+    assert_true(prof_strstr("boothj5", ",BoothJ5",              FALSE, TRUE) == TRUE);
+    assert_true(prof_strstr("boothj5", "-BoothJ5",              FALSE, TRUE) == TRUE);
+    assert_true(prof_strstr("boothj5", ":BoothJ5:",             FALSE, TRUE) == TRUE);
+    assert_true(prof_strstr("boothj5", ",BoothJ5,",             FALSE, TRUE) == TRUE);
+    assert_true(prof_strstr("boothj5", "-BoothJ5-",             FALSE, TRUE) == TRUE);
 
-    assert_false(str_contains_str(main, occur));
-}
+    assert_true(prof_strstr("boothj5", "BoothJ5:",              TRUE, TRUE) == FALSE);
+    assert_true(prof_strstr("boothj5", "BoothJ5,",              TRUE, TRUE) == FALSE);
+    assert_true(prof_strstr("boothj5", "BoothJ5-",              TRUE, TRUE) == FALSE);
+    assert_true(prof_strstr("boothj5", ":BoothJ5",              TRUE, TRUE) == FALSE);
+    assert_true(prof_strstr("boothj5", ",BoothJ5",              TRUE, TRUE) == FALSE);
+    assert_true(prof_strstr("boothj5", "-BoothJ5",              TRUE, TRUE) == FALSE);
+    assert_true(prof_strstr("boothj5", ":BoothJ5:",             TRUE, TRUE) == FALSE);
+    assert_true(prof_strstr("boothj5", ",BoothJ5,",             TRUE, TRUE) == FALSE);
+    assert_true(prof_strstr("boothj5", "-BoothJ5-",             TRUE, TRUE) == FALSE);
 
-void str_not_contains_str_empty(void **state)
-{
-    char *main = "somestring";
-    char *occur = NULL;
+    assert_true(prof_strstr("K", "don't know", FALSE, FALSE) == TRUE);
+    assert_true(prof_strstr("K", "don't know", TRUE,  FALSE) == FALSE);
+    assert_true(prof_strstr("K", "don't know", FALSE, TRUE) == FALSE);
+    assert_true(prof_strstr("K", "don't know", TRUE, TRUE) == FALSE);
 
-    assert_false(str_contains_str(main, occur));
-}
+    assert_true(prof_strstr("K", "don't Know", FALSE, FALSE) == TRUE);
+    assert_true(prof_strstr("K", "don't Know", TRUE,  FALSE) == TRUE);
+    assert_true(prof_strstr("K", "don't Know", FALSE, TRUE) == FALSE);
+    assert_true(prof_strstr("K", "don't Know", TRUE, TRUE) == FALSE);
 
-void str_empty_not_contains_str_empty(void **state)
-{
-    char *main = NULL;
-    char *occur = NULL;
+    assert_true(prof_strstr("K", "backwards", FALSE, FALSE) == TRUE);
+    assert_true(prof_strstr("K", "backwards", TRUE,  FALSE) == FALSE);
+    assert_true(prof_strstr("K", "backwards", FALSE, TRUE) == FALSE);
+    assert_true(prof_strstr("K", "backwards", TRUE, TRUE) == FALSE);
 
-    assert_false(str_contains_str(main, occur));
+    assert_true(prof_strstr("K", "BACKWARDS", FALSE, FALSE) == TRUE);
+    assert_true(prof_strstr("K", "BACKWARDS", TRUE,  FALSE) == TRUE);
+    assert_true(prof_strstr("K", "BACKWARDS", FALSE, TRUE) == FALSE);
+    assert_true(prof_strstr("K", "BACKWARDS", TRUE, TRUE) == FALSE);
 }

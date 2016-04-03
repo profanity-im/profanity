@@ -103,7 +103,6 @@ gboolean p_hash_table_contains(GHashTable *hash_table, gconstpointer key);
 gboolean create_dir(char *name);
 gboolean mkdir_recursive(const char *dir);
 char* str_replace(const char *string, const char *substr, const char *replacement);
-gboolean str_contains_str(const char *const searchstr, const char *const substr);
 int str_contains(const char str[], int size, char ch);
 gboolean strtoi_range(char *str, int *saveptr, int min, int max, char **err_msg);
 int utf8_display_len(const char *const str);
@@ -128,5 +127,7 @@ int get_next_available_win_num(GList *used);
 char* get_file_or_linked(char *loc, char *basedir);
 char* strip_arg_quotes(const char *const input);
 gboolean is_notify_enabled(void);
+
+gboolean prof_strstr(const char *const needle, const char *const haystack, gboolean case_sensitive, gboolean whole_word);
 
 #endif
