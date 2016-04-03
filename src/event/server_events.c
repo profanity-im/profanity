@@ -251,10 +251,8 @@ sv_ev_room_message(const char *const room_jid, const char *const nick, const cha
     char *new_message = plugins_pre_room_message_display(room_jid, nick, message);
     char *mynick = muc_nick(mucwin->roomjid);
 
-//    gboolean case_sensitive = prefs_get_boolean(PREF_MENTION_CASE_SENSITIVE);
-//    gboolean whole_word = prefs_get_boolean(PREF_MENTION_WHOLE_WORD);
-    gboolean case_sensitive = FALSE;
-    gboolean whole_word = FALSE;
+    gboolean case_sensitive = prefs_get_boolean(PREF_MENTION_CASE_SENSITIVE);
+    gboolean whole_word = prefs_get_boolean(PREF_MENTION_WHOLE_WORD);
     gboolean mention = prof_strstr(mynick, new_message, case_sensitive, whole_word);
     GList *triggers = prefs_message_get_triggers(new_message);
 
