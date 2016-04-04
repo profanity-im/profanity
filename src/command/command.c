@@ -1211,6 +1211,7 @@ static struct cmd_t command_defs[] =
             { "on|off",                     "Override the global message setting for the current chat room." },
             { "mention on|off",             "Override the global 'mention' setting for the current chat room." },
             { "trigger on|off",             "Override the global 'trigger' setting for the current chat room." },
+            { "reset",                      "Reset to global notification settings for the current chat room." },
             { "remind <seconds>",           "Notification reminder period for unread messages, use 0 to disable." },
             { "typing on|off",              "Notifications when contacts are typing." },
             { "typing current on|off",      "Whether typing notifications are triggered for the current window." },
