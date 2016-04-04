@@ -87,6 +87,7 @@ static void _ping_get_handler(xmpp_stanza_t *const stanza);
 
 static int _version_result_id_handler(xmpp_stanza_t *const stanza, void *const userdata);
 static int _disco_info_response_id_handler(xmpp_stanza_t *const stanza, void *const userdata);
+static int _disco_info_response_id_handler_onconnect(xmpp_stanza_t *const stanza, void *const userdata);
 static int _last_activity_response_id_handler(xmpp_stanza_t *const stanza, void *const userdata);
 static int _room_info_response_id_handler(xmpp_stanza_t *const stanza, void *const userdata);
 static int _destroy_room_result_id_handler(xmpp_stanza_t *const stanza, void *const userdata);
@@ -308,6 +309,21 @@ iq_disco_info_request(gchar *jid)
 }
 
 void
+iq_disco_info_request_onconnect(gchar *jid)
+{
+    xmpp_ctx_t * const ctx = connection_get_ctx();
+    char *id = create_unique_id("disco_info_onconnect");
+    xmpp_stanza_t *iq = stanza_create_disco_info_iq(ctx, id, jid, NULL);
+
+    id_handler_add(id, _disco_info_response_id_handler_onconnect, NULL);
+
+    free(id);
+
+    send_iq_stanza(iq);
+    xmpp_stanza_release(iq);
+}
+
+void
 iq_last_activity_request(gchar *jid)
 {
     xmpp_ctx_t * const ctx = connection_get_ctx();
@@ -424,6 +440,15 @@ iq_disco_items_request(gchar *jid)
 {
     xmpp_ctx_t * const ctx = connection_get_ctx();
     xmpp_stanza_t *iq = stanza_create_disco_items_iq(ctx, "discoitemsreq", jid);
+    send_iq_stanza(iq);
+    xmpp_stanza_release(iq);
+}
+
+void
+iq_disco_items_request_onconnect(gchar *jid)
+{
+    xmpp_ctx_t * const ctx = connection_get_ctx();
+    xmpp_stanza_t *iq = stanza_create_disco_items_iq(ctx, "discoitemsreq_onconnect", jid);
     send_iq_stanza(iq);
     xmpp_stanza_release(iq);
 }
@@ -1817,6 +1842,68 @@ _disco_info_response_id_handler(xmpp_stanza_t *const stanza, void *const userdat
     return 0;
 }
 
+static int
+_disco_info_response_id_handler_onconnect(xmpp_stanza_t *const stanza, void *const userdata)
+{
+    const char *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
+    const char *type = xmpp_stanza_get_type(stanza);
+
+    if (from) {
+        log_info("Received disco#info response from: %s", from);
+    } else {
+        log_info("Received disco#info response");
+    }
+
+    // handle error responses
+    if (g_strcmp0(type, STANZA_TYPE_ERROR) == 0) {
+        char *error_message = stanza_get_error_message(stanza);
+        if (from) {
+            log_error("Service discovery failed for %s: %s", from, error_message);
+        } else {
+            log_error("Service discovery failed: %s", error_message);
+        }
+        free(error_message);
+        return 0;
+    }
+
+    xmpp_stanza_t *query = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_QUERY);
+
+    if (query) {
+        xmpp_stanza_t *child = xmpp_stanza_get_children(query);
+
+        GSList *disco_items = jabber_get_disco_items();
+        DiscoInfo *disco_info;
+        if (disco_items && (g_slist_length(disco_items) > 0)) {
+            while (disco_items) {
+                disco_info = disco_items->data;
+                if (g_strcmp0(disco_info->item, from) == 0) {
+                    break;
+                }
+                disco_items = g_slist_next(disco_items);
+                if (!disco_items) {
+                    log_error("No matching disco item found for %s", from);
+                    return 1;
+                }
+            }
+        } else {
+            return 1;
+        }
+
+        while (child) {
+            const char *stanza_name = xmpp_stanza_get_name(child);
+            if (g_strcmp0(stanza_name, STANZA_NAME_FEATURE) == 0) {
+                const char *var = xmpp_stanza_get_attribute(child, STANZA_ATTR_VAR);
+                if (var) {
+                    g_hash_table_add(disco_info->features, strdup(var));
+                }
+            }
+            child = xmpp_stanza_get_next(child);
+        }
+    }
+
+    return 0;
+}
+
 static void
 _disco_items_result_handler(xmpp_stanza_t *const stanza)
 {
@@ -1825,7 +1912,7 @@ _disco_items_result_handler(xmpp_stanza_t *const stanza)
     const char *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
     GSList *items = NULL;
 
-    if ((g_strcmp0(id, "confreq") == 0) || (g_strcmp0(id, "discoitemsreq") == 0)) {
+    if ((g_strcmp0(id, "confreq") == 0) || (g_strcmp0(id, "discoitemsreq") == 0) || (g_strcmp0(id, "discoitemsreq_onconnect") == 0)) {
         log_debug("Response to query: %s", id);
         xmpp_stanza_t *query = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_QUERY);
 
@@ -1857,6 +1944,19 @@ _disco_items_result_handler(xmpp_stanza_t *const stanza)
         cons_show_room_list(items, from);
     } else if (g_strcmp0(id, "discoitemsreq") == 0) {
         cons_show_disco_items(items, from);
+    } else if (g_strcmp0(id, "discoitemsreq_onconnect") == 0) {
+        GSList *res_items = items;
+        if (res_items && (g_slist_length(res_items) > 0)) {
+            while (res_items) {
+                DiscoItem *item = res_items->data;
+                DiscoInfo *info = malloc(sizeof(struct disco_info_t));
+                info->item = strdup(item->jid);
+                info->features = g_hash_table_new_full(g_str_hash, g_str_equal, free, NULL);
+                jabber_set_disco_items(g_slist_append(jabber_get_disco_items(), info));
+                iq_disco_info_request_onconnect(info->item);
+                res_items = g_slist_next(res_items);
+            }
+        }
     }
 
     g_slist_free_full(items, (GDestroyNotify)_item_destroy);

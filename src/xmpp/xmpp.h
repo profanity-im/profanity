@@ -95,6 +95,11 @@ typedef struct disco_identity_t {
     char *category;
 } DiscoIdentity;
 
+typedef struct disco_info_t {
+    char *item;
+    GHashTable *features;
+} DiscoInfo;
+
 typedef enum {
     FIELD_HIDDEN,
     FIELD_TEXT_SINGLE,
@@ -150,6 +155,8 @@ const char* jabber_get_fulljid(void);
 const char* jabber_get_domain(void);
 jabber_conn_status_t jabber_get_connection_status(void);
 void jabber_set_connection_status(jabber_conn_status_t status);
+GSList* jabber_get_disco_items(void);
+void jabber_set_disco_items(GSList *disco_items);
 char* jabber_get_presence_message(void);
 char* jabber_get_account_name(void);
 GList* jabber_get_available_resources(void);
@@ -194,7 +201,9 @@ void iq_disable_carbons(void);
 void iq_send_software_version(const char *const fulljid);
 void iq_room_list_request(gchar *conferencejid);
 void iq_disco_info_request(gchar *jid);
+void iq_disco_info_request_onconnect(gchar *jid);
 void iq_disco_items_request(gchar *jid);
+void iq_disco_items_request_onconnect(gchar *jid);
 void iq_last_activity_request(gchar *jid);
 void iq_set_autoping(int seconds);
 void iq_confirm_instant_room(const char *const room_jid);
