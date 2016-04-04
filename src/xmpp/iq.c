@@ -1611,7 +1611,7 @@ _room_info_response_id_handler(xmpp_stanza_t *const stanza, void *const userdata
 {
     const char *type = xmpp_stanza_get_type(stanza);
     ProfRoomInfoData *cb_data = (ProfRoomInfoData *)userdata;
-    log_info("Received diso#info response for room: %s", cb_data->room);
+    log_info("Received disco#info response for room: %s", cb_data->room);
 
     // handle error responses
     if (g_strcmp0(type, STANZA_TYPE_ERROR) == 0) {
@@ -1747,9 +1747,9 @@ _disco_info_response_id_handler(xmpp_stanza_t *const stanza, void *const userdat
     const char *type = xmpp_stanza_get_type(stanza);
 
     if (from) {
-        log_info("Received diso#info response from: %s", from);
+        log_info("Received disco#info response from: %s", from);
     } else {
-        log_info("Received diso#info response");
+        log_info("Received disco#info response");
     }
 
     // handle error responses
@@ -1820,7 +1820,7 @@ _disco_info_response_id_handler(xmpp_stanza_t *const stanza, void *const userdat
 static void
 _disco_items_result_handler(xmpp_stanza_t *const stanza)
 {
-    log_debug("Received diso#items response");
+    log_debug("Received disco#items response");
     const char *id = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_ID);
     const char *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
     GSList *items = NULL;
