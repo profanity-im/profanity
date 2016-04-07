@@ -60,6 +60,8 @@ void python_post_room_message_display_hook(ProfPlugin *plugin, const char *const
     const char *message);
 char* python_pre_room_message_send_hook(ProfPlugin *plugin, const char *const room, const char *message);
 void python_post_room_message_send_hook(ProfPlugin *plugin, const char *const room, const char *message);
+void python_on_room_history_message_hook(ProfPlugin *plugin, const char *const room, const char *const nick,
+    const char *const message, const char *const timestamp);
 
 char* python_pre_priv_message_display_hook(ProfPlugin *plugin, const char *const room, const char *const nick,
     const char *message);

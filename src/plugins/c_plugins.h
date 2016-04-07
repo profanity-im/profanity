@@ -60,6 +60,8 @@ void c_post_room_message_display_hook(ProfPlugin *plugin, const char *const room
     const char *message);
 char* c_pre_room_message_send_hook(ProfPlugin *plugin, const char *const room, const char *message);
 void c_post_room_message_send_hook(ProfPlugin *plugin, const char *const room, const char *message);
+void c_on_room_history_message_hook(ProfPlugin *plugin, const char *const room, const char *const nick,
+    const char *const message, const char *const timestamp);
 
 char* c_pre_priv_message_display_hook(ProfPlugin *plugin, const char *const room, const char *const nick,
     const char *message);
