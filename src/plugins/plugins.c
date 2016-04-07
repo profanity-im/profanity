@@ -549,6 +549,17 @@ plugins_on_contact_presence(const char *const barejid, const char *const resourc
 }
 
 void
+plugins_on_chat_win_focus(const char *const barejid)
+{
+    GSList *curr = plugins;
+    while (curr) {
+        ProfPlugin *plugin = curr->data;
+        plugin->on_chat_win_focus(plugin, barejid);
+        curr = g_slist_next(curr);
+    }
+}
+
+void
 plugins_shutdown(void)
 {
     GSList *curr = plugins;

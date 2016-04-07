@@ -46,6 +46,8 @@
 #include "ui/ui.h"
 #include "ui/statusbar.h"
 #include "window_list.h"
+#include "plugins/plugins.h"
+
 
 static GHashTable *windows;
 static int current;
@@ -324,6 +326,7 @@ wins_set_current_by_num(int i)
             ProfChatWin *chatwin = (ProfChatWin*) window;
             assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
             chatwin->unread = 0;
+            plugins_on_chat_win_focus(chatwin->barejid);
         } else if (window->type == WIN_MUC) {
             ProfMucWin *mucwin = (ProfMucWin*) window;
             assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);

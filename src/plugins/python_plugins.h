@@ -82,4 +82,6 @@ void python_on_contact_offline_hook(ProfPlugin *plugin, const char *const bareji
 void python_on_contact_presence_hook(ProfPlugin *plugin, const char *const barejid, const char *const resource,
     const char *const presence, const char *const status, const int priority);
 
+void python_on_chat_win_focus_hook(ProfPlugin *plugin, const char *const barejid);
+
 #endif

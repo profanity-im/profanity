@@ -90,6 +90,8 @@ typedef struct prof_plugin_t {
         const char *const status);
     void (*on_contact_presence)(struct prof_plugin_t* plugin, const char *const barejid, const char *const resource,
         const char *const presence, const char *const status, const int priority);
+
+    void (*on_chat_win_focus)(struct prof_plugin_t* plugin, const char *const barejid);
 } ProfPlugin;
 
 void plugins_init(void);
@@ -134,6 +136,8 @@ gboolean plugins_on_iq_stanza_receive(const char *const text);
 void plugins_on_contact_offline(const char *const barejid, const char *const resource, const char *const status);
 void plugins_on_contact_presence(const char *const barejid, const char *const resource, const char *const presence,
     const char *const status, const int priority);
+
+void plugins_on_chat_win_focus(const char *const barejid);
 
 gboolean plugins_run_command(const char * const cmd);
 void plugins_run_timed(void);
