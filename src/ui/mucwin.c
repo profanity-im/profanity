@@ -359,33 +359,30 @@ mucwin_history(ProfMucWin *mucwin, const char *const nick, GDateTime *timestamp,
 }
 
 static void
-_mucwin_print_mention(ProfWin *window, const char *const message, const char *const my_nick)
+_mucwin_print_mention(ProfWin *window, const char *const message, const char *const nick, GSList *mentions)
 {
-    char *mynick_lower = g_utf8_strdown(my_nick, -1);
-    char *message_lower = g_utf8_strdown(message, -1);
-    char message_section[strlen(message) + 1];
+    int last_pos = 0;
+    int pos = 0;
+    GSList *curr = mentions;
+    while (curr) {
+        pos = GPOINTER_TO_INT(curr->data);
 
-    int i = 0;
-    while(!g_str_has_prefix(&message_lower[i], mynick_lower) && i < strlen(message)) {
-        message_section[i] = message[i];
-        i++;
+        char *before_str = g_strndup(message + last_pos, pos - last_pos);
+        win_print(window, '-', 0, NULL, NO_DATE | NO_ME | NO_EOL, THEME_ROOMMENTION, "", before_str);
+        g_free(before_str);
+        char *nick_str = g_strndup(message + pos, strlen(nick));
+        win_print(window, '-', 0, NULL, NO_DATE | NO_ME | NO_EOL, THEME_ROOMMENTION_TERM, "", nick_str);
+        g_free(nick_str);
+
+        last_pos = pos + strlen(nick);
+
+        curr = g_slist_next(curr);
     }
-    message_section[i] = '\0';
-
-    char *mention_section = strndup(&message[i], strlen(my_nick));
-    int used = strlen(message_section) + strlen(mention_section);
-
-    win_print(window, '-', 0, NULL, NO_DATE | NO_ME | NO_EOL, THEME_ROOMMENTION, "", message_section);
-    if (strlen(message) > used) {
-        win_print(window, '-', 0, NULL, NO_DATE | NO_ME | NO_EOL, THEME_ROOMMENTION_TERM, "", mention_section);
-        _mucwin_print_mention(window, &message[used], my_nick);
+    if (last_pos < strlen(message)) {
+        win_print(window, '-', 0, NULL, NO_DATE | NO_ME, THEME_ROOMMENTION, "", &message[last_pos]);
     } else {
-        win_print(window, '-', 0, NULL, NO_DATE | NO_ME, THEME_ROOMMENTION_TERM, "", mention_section);
+        win_print(window, '-', 0, NULL, NO_DATE | NO_ME, THEME_ROOMMENTION, "", "");
     }
-
-    free(mention_section);
-    g_free(mynick_lower);
-    g_free(message_lower);
 }
 
 gint
@@ -472,17 +469,17 @@ _mucwin_print_triggers(ProfWin *window, const char *const message, GList *trigge
 }
 
 void
-mucwin_message(ProfMucWin *mucwin, const char *const nick, const char *const message, gboolean mention, GList *triggers)
+mucwin_message(ProfMucWin *mucwin, const char *const nick, const char *const message, GSList *mentions, GList *triggers)
 {
     assert(mucwin != NULL);
 
     ProfWin *window = (ProfWin*)mucwin;
-    char *my_nick = muc_nick(mucwin->roomjid);
+    char *mynick = muc_nick(mucwin->roomjid);
 
-    if (g_strcmp0(nick, my_nick) != 0) {
-        if (mention) {
+    if (g_strcmp0(nick, mynick) != 0) {
+        if (g_slist_length(mentions) > 0) {
             win_print(window, '-', 0, NULL, NO_ME | NO_EOL, THEME_ROOMMENTION, nick, "");
-            _mucwin_print_mention(window, message, my_nick);
+            _mucwin_print_mention(window, message, mynick, mentions);
         } else if (triggers) {
             win_print(window, '-', 0, NULL, NO_ME | NO_EOL, THEME_ROOMTRIGGER, nick, "");
             _mucwin_print_triggers(window, message, triggers);

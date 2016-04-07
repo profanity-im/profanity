@@ -199,18 +199,6 @@ str_replace(const char *string, const char *substr,
     return newstr;
 }
 
-gboolean
-str_contains_str(const char *const searchstr, const char *const substr)
-{
-    if (!searchstr) {
-        return FALSE;
-    }
-    if (!substr) {
-        return FALSE;
-    }
-    return g_strrstr(searchstr, substr) != NULL;
-}
-
 int
 str_contains(const char str[], int size, char ch)
 {
@@ -669,3 +657,32 @@ is_notify_enabled(void)
 
     return notify_enabled;
 }
+
+GSList*
+prof_occurrences(const char *const needle, const char *const haystack, int offset, gboolean whole_word, GSList **result)
+{
+    if (needle == NULL || haystack == NULL) {
+        return *result;
+    }
+
+    if (g_str_has_prefix(&haystack[offset], needle)) {
+        if (whole_word) {
+            char *prev = g_utf8_prev_char(&haystack[offset]);
+            char *next = g_utf8_next_char(&haystack[offset] + strlen(needle) - 1);
+            gunichar prevu = g_utf8_get_char(prev);
+            gunichar nextu = g_utf8_get_char(next);
+            if (!g_unichar_isalnum(prevu) && !g_unichar_isalnum(nextu)) {
+                *result = g_slist_append(*result, GINT_TO_POINTER(offset));
+            }
+        } else {
+            *result = g_slist_append(*result, GINT_TO_POINTER(offset));
+        }
+    }
+
+    if (haystack[offset+1] != '\0') {
+        *result = prof_occurrences(needle, haystack, offset+1, whole_word, result);
+    }
+
+    return *result;
+}
+

@@ -4855,6 +4855,18 @@ cmd_notify(ProfWin *window, const char *const command, gchar **args)
             } else if (g_strcmp0(args[2], "off") == 0) {
                 cons_show("Room notifications with mention disabled.");
                 prefs_set_boolean(PREF_NOTIFY_ROOM_MENTION, FALSE);
+            } else if (g_strcmp0(args[2], "case_sensitive") == 0) {
+                cons_show("Room mention matching set to case sensitive.");
+                prefs_set_boolean(PREF_NOTIFY_MENTION_CASE_SENSITIVE, TRUE);
+            } else if (g_strcmp0(args[2], "case_insensitive") == 0) {
+                cons_show("Room mention matching set to case insensitive.");
+                prefs_set_boolean(PREF_NOTIFY_MENTION_CASE_SENSITIVE, FALSE);
+            } else if (g_strcmp0(args[2], "word_whole") == 0) {
+                cons_show("Room mention matching set to whole word.");
+                prefs_set_boolean(PREF_NOTIFY_MENTION_WHOLE_WORD, TRUE);
+            } else if (g_strcmp0(args[2], "word_part") == 0) {
+                cons_show("Room mention matching set to partial word.");
+                prefs_set_boolean(PREF_NOTIFY_MENTION_WHOLE_WORD, FALSE);
             } else {
                 cons_show("Usage: /notify room mention on|off");
             }
