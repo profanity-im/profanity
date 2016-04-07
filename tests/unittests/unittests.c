@@ -94,14 +94,6 @@ int main(int argc, char* argv[]) {
         unit_test(strip_quotes_strips_first),
         unit_test(strip_quotes_strips_last),
         unit_test(strip_quotes_strips_both),
-        unit_test(str_not_contains_str),
-        unit_test(str_contains_str_at_start),
-        unit_test(str_contains_str_at_end),
-        unit_test(str_contains_str_in_middle),
-        unit_test(str_contains_str_whole),
-        unit_test(str_empty_not_contains_str),
-        unit_test(str_not_contains_str_empty),
-        unit_test(str_empty_not_contains_str_empty),
 
         unit_test(clear_empty),
         unit_test(reset_after_create),
@@ -624,6 +616,9 @@ int main(int argc, char* argv[]) {
         unit_test_setup_teardown(clears_chat_sessions,
             load_preferences,
             close_preferences),
+
+        unit_test(prof_partial_occurrences_tests),
+        unit_test(prof_whole_occurrences_tests),
     };
 
     return run_tests(all_tests);

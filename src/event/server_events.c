@@ -254,18 +254,20 @@ sv_ev_room_message(const char *const room_jid, const char *const nick, const cha
     char *new_message = plugins_pre_room_message_display(room_jid, nick, message);
     char *mynick = muc_nick(mucwin->roomjid);
 
-    gboolean mention = FALSE;
-    char *message_lower = g_utf8_strdown(new_message, -1);
-    char *mynick_lower = g_utf8_strdown(mynick, -1);
-    if (g_strrstr(message_lower, mynick_lower)) {
-        mention = TRUE;
-    }
-    g_free(message_lower);
-    g_free(mynick_lower);
+    gboolean whole_word = prefs_get_boolean(PREF_NOTIFY_MENTION_WHOLE_WORD);
+    gboolean case_sensitive = prefs_get_boolean(PREF_NOTIFY_MENTION_CASE_SENSITIVE);
+    char *message_search = case_sensitive ? strdup(new_message) : g_utf8_strdown(new_message, -1);
+    char *mynick_search = case_sensitive ? strdup(mynick) : g_utf8_strdown(mynick, -1);
+
+    GSList *mentions = NULL;
+    mentions = prof_occurrences(mynick_search, message_search, 0, whole_word, &mentions);
+    gboolean mention = g_slist_length(mentions) > 0;
+    g_free(message_search);
+    g_free(mynick_search);
 
     GList *triggers = prefs_message_get_triggers(new_message);
 
-    mucwin_message(mucwin, nick, new_message, mention, triggers);
+    mucwin_message(mucwin, nick, new_message, mentions, triggers);
 
     ProfWin *window = (ProfWin*)mucwin;
     int num = wins_get_num(window);

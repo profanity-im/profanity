@@ -1230,6 +1230,8 @@ _get_group(preference_t pref)
         case PREF_NOTIFY_ROOM_TEXT:
         case PREF_NOTIFY_INVITE:
         case PREF_NOTIFY_SUB:
+        case PREF_NOTIFY_MENTION_CASE_SENSITIVE:
+        case PREF_NOTIFY_MENTION_WHOLE_WORD:
             return PREF_GROUP_NOTIFICATIONS;
         case PREF_CHLOG:
         case PREF_GRLOG:
@@ -1332,6 +1334,10 @@ _get_key(preference_t pref)
             return "invite";
         case PREF_NOTIFY_SUB:
             return "sub";
+        case PREF_NOTIFY_MENTION_CASE_SENSITIVE:
+            return "room.mention.casesensitive";
+        case PREF_NOTIFY_MENTION_WHOLE_WORD:
+            return "room.mention.wholeword";
         case PREF_CHLOG:
             return "chlog";
         case PREF_GRLOG:
@@ -1488,6 +1494,8 @@ _get_default_boolean(preference_t pref)
         case PREF_ROSTER_ROOMS:
         case PREF_TLS_SHOW:
         case PREF_LASTACTIVITY:
+        case PREF_NOTIFY_MENTION_CASE_SENSITIVE:
+        case PREF_NOTIFY_MENTION_WHOLE_WORD:
             return TRUE;
         default:
             return FALSE;
