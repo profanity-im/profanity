@@ -617,7 +617,8 @@ int main(int argc, char* argv[]) {
             load_preferences,
             close_preferences),
 
-        unit_test(prof_strstr_contains),
+        unit_test(prof_partial_occurrences_tests),
+        unit_test(prof_whole_occurrences_tests),
     };
 
     return run_tests(all_tests);

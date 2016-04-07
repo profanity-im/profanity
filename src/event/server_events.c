@@ -251,12 +251,20 @@ sv_ev_room_message(const char *const room_jid, const char *const nick, const cha
     char *new_message = plugins_pre_room_message_display(room_jid, nick, message);
     char *mynick = muc_nick(mucwin->roomjid);
 
-    gboolean case_sensitive = prefs_get_boolean(PREF_MENTION_CASE_SENSITIVE);
-    gboolean whole_word = prefs_get_boolean(PREF_MENTION_WHOLE_WORD);
-    gboolean mention = prof_strstr(mynick, new_message, case_sensitive, whole_word);
+    gboolean whole_word = prefs_get_boolean(PREF_NOTIFY_MENTION_WHOLE_WORD);
+    gboolean case_sensitive = prefs_get_boolean(PREF_NOTIFY_MENTION_CASE_SENSITIVE);
+    char *message_search = case_sensitive ? strdup(new_message) : g_utf8_strdown(new_message, -1);
+    char *mynick_search = case_sensitive ? strdup(mynick) : g_utf8_strdown(mynick, -1);
+
+    GSList *mentions = NULL;
+    mentions = prof_occurrences(mynick_search, message_search, 0, whole_word, &mentions);
+    gboolean mention = g_slist_length(mentions) > 0;
+    g_free(message_search);
+    g_free(mynick_search);
+
     GList *triggers = prefs_message_get_triggers(new_message);
 
-    mucwin_message(mucwin, nick, new_message, mention, triggers);
+    mucwin_message(mucwin, nick, new_message, mentions, triggers);
 
     ProfWin *window = (ProfWin*)mucwin;
     int num = wins_get_num(window);

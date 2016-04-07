@@ -658,62 +658,31 @@ is_notify_enabled(void)
     return notify_enabled;
 }
 
-gboolean
-prof_strstr(const char *const needle, const char *const haystack, gboolean case_sensitive, gboolean whole_word)
+GSList*
+prof_occurrences(const char *const needle, const char *const haystack, int offset, gboolean whole_word, GSList **result)
 {
     if (needle == NULL || haystack == NULL) {
-        return FALSE;
+        return *result;
     }
 
-    char *needle_str = case_sensitive ? strdup(needle) : g_utf8_strdown(needle, -1);
-    char *haystack_str = case_sensitive ? strdup(haystack) : g_utf8_strdown(haystack, -1);
-
-    if (whole_word) {
-        if (g_strcmp0(needle_str, haystack_str) == 0) {
-            free(needle_str);
-            free(haystack_str);
-            return TRUE;
-        }
-
-        char *pos = g_strrstr(haystack_str, needle_str);
-        if (pos == NULL) {
-            free(needle_str);
-            free(haystack_str);
-            return FALSE;
-        }
-
-        gboolean at_start = g_str_has_prefix(haystack_str, needle_str);
-        gboolean at_end = g_str_has_suffix(haystack_str, needle_str);
-
-        if (at_start) {
-            char *next = g_utf8_next_char(pos + strlen(needle_str) - 1);
-            gunichar nextu = g_utf8_get_char(next);
-            gboolean result = g_unichar_isalnum(nextu) ? FALSE : TRUE;
-            free(needle_str);
-            free(haystack_str);
-            return result;
-        } else if (at_end) {
-            char *prev = g_utf8_prev_char(pos);
+    if (g_str_has_prefix(&haystack[offset], needle)) {
+        if (whole_word) {
+            char *prev = g_utf8_prev_char(&haystack[offset]);
+            char *next = g_utf8_next_char(&haystack[offset] + strlen(needle) - 1);
             gunichar prevu = g_utf8_get_char(prev);
-            gboolean result = g_unichar_isalnum(prevu) ? FALSE : TRUE;
-            free(needle_str);
-            free(haystack_str);
-            return result;
+            gunichar nextu = g_utf8_get_char(next);
+            if (!g_unichar_isalnum(prevu) && !g_unichar_isalnum(nextu)) {
+                *result = g_slist_append(*result, GINT_TO_POINTER(offset));
+            }
         } else {
-            char *prev = g_utf8_prev_char(pos);
-            char *next = g_utf8_next_char(pos + strlen(needle_str) - 1);
-            gunichar prevu = g_utf8_get_char(prev);
-            gunichar nextu = g_utf8_get_char(next);
-            gboolean result = g_unichar_isalnum(prevu) || g_unichar_isalnum(nextu) ? FALSE : TRUE;
-            free(needle_str);
-            free(haystack_str);
-            return result;
+            *result = g_slist_append(*result, GINT_TO_POINTER(offset));
         }
-    } else {
-        gboolean result = g_strrstr(haystack_str, needle_str) != NULL ? TRUE : FALSE;
-        free(needle_str);
-        free(haystack_str);
-        return result;
     }
+
+    if (haystack[offset+1] != '\0') {
+        *result = prof_occurrences(needle, haystack, offset+1, whole_word, result);
+    }
+
+    return *result;
 }
 

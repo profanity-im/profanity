@@ -1550,6 +1550,16 @@ cons_notify_setting(void)
     else
         cons_show("Room mention (/notify room)         : OFF");
 
+    if (prefs_get_boolean(PREF_NOTIFY_MENTION_CASE_SENSITIVE))
+        cons_show("Room mention case (/notify room)    : Case sensitive");
+    else
+        cons_show("Room mention case (/notify room)    : Case insensitive");
+
+    if (prefs_get_boolean(PREF_NOTIFY_MENTION_WHOLE_WORD))
+        cons_show("Room mention word (/notify room)    : Whole word only");
+    else
+        cons_show("Room mention word (/notify room)    : Part of word");
+
     if (prefs_get_boolean(PREF_NOTIFY_ROOM_TRIGGER))
         cons_show("Room trigger (/notify room)         : ON");
     else

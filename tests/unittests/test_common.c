@@ -631,113 +631,138 @@ void strip_quotes_strips_both(void **state)
     free(result);
 }
 
-void prof_strstr_contains(void **state)
+gboolean
+_lists_equal(GSList *a, GSList *b)
 {
-    assert_true(prof_strstr(NULL,      "some string",           FALSE, FALSE) == FALSE);
-    assert_true(prof_strstr("boothj5", NULL,                    FALSE, FALSE) == FALSE);
-    assert_true(prof_strstr(NULL,      NULL,                    FALSE, FALSE) == FALSE);
+    if (g_slist_length(a) != g_slist_length(b)) {
+        return FALSE;
+    }
 
-    assert_true(prof_strstr("boothj5", "boothj5",               FALSE, FALSE) == TRUE);
-    assert_true(prof_strstr("boothj5", "boothj5 hello",         FALSE, FALSE) == TRUE);
-    assert_true(prof_strstr("boothj5", "hello boothj5",         FALSE, FALSE) == TRUE);
-    assert_true(prof_strstr("boothj5", "hello boothj5 there",   FALSE, FALSE) == TRUE);
-    assert_true(prof_strstr("boothj5", "helloboothj5test",      FALSE, FALSE) == TRUE);
+    GSList *curra = a;
+    GSList *currb = b;
 
-    assert_true(prof_strstr("boothj5", "BoothJ5",               FALSE, FALSE) == TRUE);
-    assert_true(prof_strstr("boothj5", "BoothJ5 hello",         FALSE, FALSE) == TRUE);
-    assert_true(prof_strstr("boothj5", "hello BoothJ5",         FALSE, FALSE) == TRUE);
-    assert_true(prof_strstr("boothj5", "hello BoothJ5 there",   FALSE, FALSE) == TRUE);
-    assert_true(prof_strstr("boothj5", "helloBoothJ5test",      FALSE, FALSE) == TRUE);
+    while (curra) {
+        int aval = GPOINTER_TO_INT(curra->data);
+        int bval = GPOINTER_TO_INT(currb->data);
 
-    assert_true(prof_strstr("BoothJ5", "boothj5",               FALSE, FALSE) == TRUE);
-    assert_true(prof_strstr("BoothJ5", "boothj5 hello",         FALSE, FALSE) == TRUE);
-    assert_true(prof_strstr("BoothJ5", "hello boothj5",         FALSE, FALSE) == TRUE);
-    assert_true(prof_strstr("BoothJ5", "hello boothj5 there",   FALSE, FALSE) == TRUE);
-    assert_true(prof_strstr("BoothJ5", "helloboothj5test",      FALSE, FALSE) == TRUE);
+        if (aval != bval) {
+            return FALSE;
+        }
 
-    assert_true(prof_strstr("boothj5", "BoothJ5",               TRUE, FALSE) == FALSE);
-    assert_true(prof_strstr("boothj5", "BoothJ5 hello",         TRUE, FALSE) == FALSE);
-    assert_true(prof_strstr("boothj5", "hello BoothJ5",         TRUE, FALSE) == FALSE);
-    assert_true(prof_strstr("boothj5", "hello BoothJ5 there",   TRUE, FALSE) == FALSE);
-    assert_true(prof_strstr("boothj5", "helloBoothJ5test",      TRUE, FALSE) == FALSE);
+        curra = g_list_next(curra);
+        currb = g_list_next(currb);
+    }
 
-    assert_true(prof_strstr("BoothJ5", "boothj5",               TRUE, FALSE) == FALSE);
-    assert_true(prof_strstr("BoothJ5", "boothj5 hello",         TRUE, FALSE) == FALSE);
-    assert_true(prof_strstr("BoothJ5", "hello boothj5",         TRUE, FALSE) == FALSE);
-    assert_true(prof_strstr("BoothJ5", "hello boothj5 there",   TRUE, FALSE) == FALSE);
-    assert_true(prof_strstr("BoothJ5", "helloboothj5test",      TRUE, FALSE) == FALSE);
+    return TRUE;
+}
 
-    assert_true(prof_strstr("boothj5", "boothj5",               FALSE, TRUE) == TRUE);
-    assert_true(prof_strstr("boothj5", "boothj5 hello",         FALSE, TRUE) == TRUE);
-    assert_true(prof_strstr("boothj5", "hello boothj5",         FALSE, TRUE) == TRUE);
-    assert_true(prof_strstr("boothj5", "hello boothj5 there",   FALSE, TRUE) == TRUE);
-    assert_true(prof_strstr("boothj5", "boothj5test",           FALSE, TRUE) == FALSE);
-    assert_true(prof_strstr("boothj5", "helloboothj5",          FALSE, TRUE) == FALSE);
-    assert_true(prof_strstr("boothj5", "helloboothj5test",      FALSE, TRUE) == FALSE);
+void prof_partial_occurrences_tests(void **state)
+{
+    GSList *actual = NULL;
+    GSList *expected = NULL;
+    assert_true(_lists_equal(prof_occurrences(NULL, NULL, 0, FALSE, &actual), expected));
+    g_slist_free(actual); actual = NULL;
 
-    assert_true(prof_strstr("boothj5", "BoothJ5",               TRUE, TRUE) == FALSE);
-    assert_true(prof_strstr("boothj5", "BoothJ5 hello",         TRUE, TRUE) == FALSE);
-    assert_true(prof_strstr("boothj5", "hello BoothJ5",         TRUE, TRUE) == FALSE);
-    assert_true(prof_strstr("boothj5", "hello BoothJ5 there",   TRUE, TRUE) == FALSE);
-    assert_true(prof_strstr("boothj5", "BoothJ5test",           TRUE, TRUE) == FALSE);
-    assert_true(prof_strstr("boothj5", "helloBoothJ5",          TRUE, TRUE) == FALSE);
-    assert_true(prof_strstr("boothj5", "helloBoothJ5test",      TRUE, TRUE) == FALSE);
+    assert_true(_lists_equal(prof_occurrences(NULL,         "some string",  0, FALSE, &actual), expected)); g_slist_free(actual); actual = NULL;
+    assert_true(_lists_equal(prof_occurrences("boothj5",    NULL,           0, FALSE, &actual), expected)); g_slist_free(actual); actual = NULL;
+    assert_true(_lists_equal(prof_occurrences(NULL,         NULL,           0, FALSE, &actual), expected)); g_slist_free(actual); actual = NULL;
+    assert_true(_lists_equal(prof_occurrences("boothj5",    "Boothj5",      0, FALSE, &actual), expected)); g_slist_free(actual); actual = NULL;
+    assert_true(_lists_equal(prof_occurrences("Boothj5",    "boothj5",      0, FALSE, &actual), expected)); g_slist_free(actual); actual = NULL;
 
-    assert_true(prof_strstr("BoothJ5", "boothj5",               TRUE, TRUE) == FALSE);
-    assert_true(prof_strstr("BoothJ5", "boothj5 hello",         TRUE, TRUE) == FALSE);
-    assert_true(prof_strstr("BoothJ5", "hello boothj5",         TRUE, TRUE) == FALSE);
-    assert_true(prof_strstr("BoothJ5", "hello boothj5 there",   TRUE, TRUE) == FALSE);
-    assert_true(prof_strstr("BoothJ5", "boothj5test",           TRUE, TRUE) == FALSE);
-    assert_true(prof_strstr("BoothJ5", "helloboothj5",          TRUE, TRUE) == FALSE);
-    assert_true(prof_strstr("BoothJ5", "helloboothj5test",      TRUE, TRUE) == FALSE);
+    expected = g_slist_append(expected, GINT_TO_POINTER(0));
+    assert_true(_lists_equal(prof_occurrences("boothj5", "boothj5",         0, FALSE, &actual), expected)); g_slist_free(actual); actual = NULL;
+    assert_true(_lists_equal(prof_occurrences("boothj5", "boothj5hello",    0, FALSE, &actual), expected)); g_slist_free(actual); actual = NULL;
+    assert_true(_lists_equal(prof_occurrences("boothj5", "boothj5 hello",   0, FALSE, &actual), expected)); g_slist_free(actual); actual = NULL;
+    g_slist_free(expected); expected = NULL;
 
-    assert_true(prof_strstr("boothj5", "boothj5:",              FALSE, TRUE) == TRUE);
-    assert_true(prof_strstr("boothj5", "boothj5,",              FALSE, TRUE) == TRUE);
-    assert_true(prof_strstr("boothj5", "boothj5-",              FALSE, TRUE) == TRUE);
-    assert_true(prof_strstr("boothj5", ":boothj5",              FALSE, TRUE) == TRUE);
-    assert_true(prof_strstr("boothj5", ",boothj5",              FALSE, TRUE) == TRUE);
-    assert_true(prof_strstr("boothj5", "-boothj5",              FALSE, TRUE) == TRUE);
-    assert_true(prof_strstr("boothj5", ":boothj5:",             FALSE, TRUE) == TRUE);
-    assert_true(prof_strstr("boothj5", ",boothj5,",             FALSE, TRUE) == TRUE);
-    assert_true(prof_strstr("boothj5", "-boothj5-",             FALSE, TRUE) == TRUE);
+    expected = g_slist_append(expected, GINT_TO_POINTER(5));
+    assert_true(_lists_equal(prof_occurrences("boothj5", "helloboothj5",        0, FALSE, &actual), expected)); g_slist_free(actual); actual = NULL;
+    assert_true(_lists_equal(prof_occurrences("boothj5", "helloboothj5hello",   0, FALSE, &actual), expected)); g_slist_free(actual); actual = NULL;
+    g_slist_free(expected); expected = NULL;
 
-    assert_true(prof_strstr("boothj5", "BoothJ5:",              FALSE, TRUE) == TRUE);
-    assert_true(prof_strstr("boothj5", "BoothJ5,",              FALSE, TRUE) == TRUE);
-    assert_true(prof_strstr("boothj5", "BoothJ5-",              FALSE, TRUE) == TRUE);
-    assert_true(prof_strstr("boothj5", ":BoothJ5",              FALSE, TRUE) == TRUE);
-    assert_true(prof_strstr("boothj5", ",BoothJ5",              FALSE, TRUE) == TRUE);
-    assert_true(prof_strstr("boothj5", "-BoothJ5",              FALSE, TRUE) == TRUE);
-    assert_true(prof_strstr("boothj5", ":BoothJ5:",             FALSE, TRUE) == TRUE);
-    assert_true(prof_strstr("boothj5", ",BoothJ5,",             FALSE, TRUE) == TRUE);
-    assert_true(prof_strstr("boothj5", "-BoothJ5-",             FALSE, TRUE) == TRUE);
+    expected = g_slist_append(expected, GINT_TO_POINTER(6));
+    assert_true(_lists_equal(prof_occurrences("boothj5", "hello boothj5",       0, FALSE, &actual), expected)); g_slist_free(actual); actual = NULL;
+    assert_true(_lists_equal(prof_occurrences("boothj5", "hello boothj5 hello", 0, FALSE, &actual), expected)); g_slist_free(actual); actual = NULL;
+    g_slist_free(expected); expected = NULL;
 
-    assert_true(prof_strstr("boothj5", "BoothJ5:",              TRUE, TRUE) == FALSE);
-    assert_true(prof_strstr("boothj5", "BoothJ5,",              TRUE, TRUE) == FALSE);
-    assert_true(prof_strstr("boothj5", "BoothJ5-",              TRUE, TRUE) == FALSE);
-    assert_true(prof_strstr("boothj5", ":BoothJ5",              TRUE, TRUE) == FALSE);
-    assert_true(prof_strstr("boothj5", ",BoothJ5",              TRUE, TRUE) == FALSE);
-    assert_true(prof_strstr("boothj5", "-BoothJ5",              TRUE, TRUE) == FALSE);
-    assert_true(prof_strstr("boothj5", ":BoothJ5:",             TRUE, TRUE) == FALSE);
-    assert_true(prof_strstr("boothj5", ",BoothJ5,",             TRUE, TRUE) == FALSE);
-    assert_true(prof_strstr("boothj5", "-BoothJ5-",             TRUE, TRUE) == FALSE);
+    expected = g_slist_append(expected, GINT_TO_POINTER(0));
+    expected = g_slist_append(expected, GINT_TO_POINTER(7));
+    assert_true(_lists_equal(prof_occurrences("boothj5", "boothj5boothj5", 0, FALSE, &actual), expected)); g_slist_free(actual); actual = NULL;
+    g_slist_free(expected); expected = NULL;
 
-    assert_true(prof_strstr("K", "don't know", FALSE, FALSE) == TRUE);
-    assert_true(prof_strstr("K", "don't know", TRUE,  FALSE) == FALSE);
-    assert_true(prof_strstr("K", "don't know", FALSE, TRUE) == FALSE);
-    assert_true(prof_strstr("K", "don't know", TRUE, TRUE) == FALSE);
+    expected = g_slist_append(expected, GINT_TO_POINTER(0));
+    expected = g_slist_append(expected, GINT_TO_POINTER(12));
+    assert_true(_lists_equal(prof_occurrences("boothj5", "boothj5helloboothj5", 0, FALSE, &actual), expected)); g_slist_free(actual); actual = NULL;
+    g_slist_free(expected); expected = NULL;
 
-    assert_true(prof_strstr("K", "don't Know", FALSE, FALSE) == TRUE);
-    assert_true(prof_strstr("K", "don't Know", TRUE,  FALSE) == TRUE);
-    assert_true(prof_strstr("K", "don't Know", FALSE, TRUE) == FALSE);
-    assert_true(prof_strstr("K", "don't Know", TRUE, TRUE) == FALSE);
+    expected = g_slist_append(expected, GINT_TO_POINTER(0));
+    expected = g_slist_append(expected, GINT_TO_POINTER(14));
+    assert_true(_lists_equal(prof_occurrences("boothj5", "boothj5 hello boothj5", 0, FALSE, &actual), expected)); g_slist_free(actual); actual = NULL;
+    g_slist_free(expected); expected = NULL;
 
-    assert_true(prof_strstr("K", "backwards", FALSE, FALSE) == TRUE);
-    assert_true(prof_strstr("K", "backwards", TRUE,  FALSE) == FALSE);
-    assert_true(prof_strstr("K", "backwards", FALSE, TRUE) == FALSE);
-    assert_true(prof_strstr("K", "backwards", TRUE, TRUE) == FALSE);
+    expected = g_slist_append(expected, GINT_TO_POINTER(2));
+    expected = g_slist_append(expected, GINT_TO_POINTER(16));
+    expected = g_slist_append(expected, GINT_TO_POINTER(29));
+    assert_true(_lists_equal(prof_occurrences("boothj5", "hiboothj5 hello boothj5there boothj5s", 0, FALSE, &actual), expected)); g_slist_free(actual); actual = NULL;
+    g_slist_free(expected); expected = NULL;
+}
 
-    assert_true(prof_strstr("K", "BACKWARDS", FALSE, FALSE) == TRUE);
-    assert_true(prof_strstr("K", "BACKWARDS", TRUE,  FALSE) == TRUE);
-    assert_true(prof_strstr("K", "BACKWARDS", FALSE, TRUE) == FALSE);
-    assert_true(prof_strstr("K", "BACKWARDS", TRUE, TRUE) == FALSE);
+void prof_whole_occurrences_tests(void **state)
+{
+    GSList *actual = NULL;
+    GSList *expected = NULL;
+    assert_true(_lists_equal(prof_occurrences(NULL, NULL, 0, FALSE, &actual), expected));
+    g_slist_free(actual); actual = NULL;
+
+    expected = g_slist_append(expected, GINT_TO_POINTER(0));
+    assert_true(_lists_equal(prof_occurrences("boothj5", "boothj5",      0, TRUE, &actual), expected)); g_slist_free(actual); actual = NULL;
+    assert_true(_lists_equal(prof_occurrences("boothj5", "boothj5 hi",   0, TRUE, &actual), expected)); g_slist_free(actual); actual = NULL;
+    assert_true(_lists_equal(prof_occurrences("boothj5", "boothj5: hi",  0, TRUE, &actual), expected)); g_slist_free(actual); actual = NULL;
+    assert_true(_lists_equal(prof_occurrences("boothj5", "boothj5, hi",  0, TRUE, &actual), expected)); g_slist_free(actual); actual = NULL;
+    g_slist_free(expected); expected = NULL;
+
+    expected = g_slist_append(expected, GINT_TO_POINTER(6));
+    assert_true(_lists_equal(prof_occurrences("boothj5", "hello boothj5",        0, TRUE, &actual), expected)); g_slist_free(actual); actual = NULL;
+    assert_true(_lists_equal(prof_occurrences("boothj5", "hello boothj5 there",  0, TRUE, &actual), expected)); g_slist_free(actual); actual = NULL;
+    assert_true(_lists_equal(prof_occurrences("boothj5", "heyy @boothj5, there", 0, TRUE, &actual), expected)); g_slist_free(actual); actual = NULL;
+    g_slist_free(expected); expected = NULL;
+
+    expected = g_slist_append(expected, GINT_TO_POINTER(6));
+    expected = g_slist_append(expected, GINT_TO_POINTER(26));
+    assert_true(_lists_equal(prof_occurrences("boothj5", "hello boothj5 some more a boothj5 stuff",  0, TRUE, &actual), expected)); g_slist_free(actual); actual = NULL;
+    assert_true(_lists_equal(prof_occurrences("boothj5", "hello boothj5 there ands #boothj5",        0, TRUE, &actual), expected)); g_slist_free(actual); actual = NULL;
+    assert_true(_lists_equal(prof_occurrences("boothj5", "heyy @boothj5, there hows boothj5?",       0, TRUE, &actual), expected)); g_slist_free(actual); actual = NULL;
+    g_slist_free(expected); expected = NULL;
+
+    expected = g_slist_append(expected, GINT_TO_POINTER(6));
+    assert_true(_lists_equal(prof_occurrences("p", "ppppp p",   0, TRUE, &actual), expected)); g_slist_free(actual); actual = NULL;
+    g_slist_free(expected); expected = NULL;
+
+    expected = g_slist_append(expected, GINT_TO_POINTER(0));
+    assert_true(_lists_equal(prof_occurrences("p", "p ppppp",   0, TRUE, &actual), expected)); g_slist_free(actual); actual = NULL;
+    g_slist_free(expected); expected = NULL;
+
+    expected = g_slist_append(expected, GINT_TO_POINTER(4));
+    assert_true(_lists_equal(prof_occurrences("p", "ppp p ppp", 0, TRUE, &actual), expected)); g_slist_free(actual); actual = NULL;
+    g_slist_free(expected); expected = NULL;
+
+    expected = NULL;
+    assert_true(_lists_equal(prof_occurrences("boothj5", "boothj5hello",        0, TRUE, &actual), expected)); g_slist_free(actual); actual = NULL;
+    assert_true(_lists_equal(prof_occurrences("boothj5", "heyboothj5",          0, TRUE, &actual), expected)); g_slist_free(actual); actual = NULL;
+    assert_true(_lists_equal(prof_occurrences("boothj5", "heyboothj5hithere",   0, TRUE, &actual), expected)); g_slist_free(actual); actual = NULL;
+    assert_true(_lists_equal(prof_occurrences("boothj5", "hey boothj5hithere",  0, TRUE, &actual), expected)); g_slist_free(actual); actual = NULL;
+    assert_true(_lists_equal(prof_occurrences("boothj5", "hey @boothj5hithere", 0, TRUE, &actual), expected)); g_slist_free(actual); actual = NULL;
+    assert_true(_lists_equal(prof_occurrences("boothj5", "heyboothj5 hithere",  0, TRUE, &actual), expected)); g_slist_free(actual); actual = NULL;
+    assert_true(_lists_equal(prof_occurrences("boothj5", "heyboothj5, hithere", 0, TRUE, &actual), expected)); g_slist_free(actual); actual = NULL;
+    assert_true(_lists_equal(prof_occurrences("boothj5", "boothj5boothj5",      0, TRUE, &actual), expected)); g_slist_free(actual); actual = NULL;
+    assert_true(_lists_equal(prof_occurrences("boothj5", "boothj5fillboothj5",  0, TRUE, &actual), expected)); g_slist_free(actual); actual = NULL;
+    assert_true(_lists_equal(prof_occurrences("k",       "dont know",           0, TRUE, &actual), expected)); g_slist_free(actual); actual = NULL;
+    assert_true(_lists_equal(prof_occurrences("k",       "kick",                0, TRUE, &actual), expected)); g_slist_free(actual); actual = NULL;
+    assert_true(_lists_equal(prof_occurrences("k",       "kick kick",           0, TRUE, &actual), expected)); g_slist_free(actual); actual = NULL;
+    assert_true(_lists_equal(prof_occurrences("k",       "kick kickk",           0, TRUE, &actual), expected)); g_slist_free(actual); actual = NULL;
+    assert_true(_lists_equal(prof_occurrences("k",       "kic",                 0, TRUE, &actual), expected)); g_slist_free(actual); actual = NULL;
+    assert_true(_lists_equal(prof_occurrences("k",       "ick",                 0, TRUE, &actual), expected)); g_slist_free(actual); actual = NULL;
+    assert_true(_lists_equal(prof_occurrences("k",       "kk",                  0, TRUE, &actual), expected)); g_slist_free(actual); actual = NULL;
+    assert_true(_lists_equal(prof_occurrences("k",       "kkkkkkk",                  0, TRUE, &actual), expected)); g_slist_free(actual); actual = NULL;
+    g_slist_free(expected); expected = NULL;
 }

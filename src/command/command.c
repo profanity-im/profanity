@@ -1179,6 +1179,8 @@ static struct cmd_t command_defs[] =
             "/notify chat text on|off",
             "/notify room on|off",
             "/notify room mention on|off",
+            "/notify room mention case_sensitive|case_insensitive",
+            "/notify room mention word_whole|word_part",
             "/notify room current on|off",
             "/notify room text on|off",
             "/notify room trigger add <text>",
@@ -1197,26 +1199,30 @@ static struct cmd_t command_defs[] =
         CMD_DESC(
             "Settings for various kinds of desktop notifications.")
         CMD_ARGS(
-            { "chat on|off",                "Notifications for regular chat messages." },
-            { "chat current on|off",        "Whether to show regular chat message notifications when the window is focussed." },
-            { "chat text on|off",           "Show message text in regular message notifications." },
-            { "room on|off",                "Notifications for all chat room messages, 'mention' only notifies when your nick is mentioned." },
-            { "room mention on|off",        "Notifications for all chat room messages when your nick is mentioned." },
-            { "room current on|off",        "Whether to show all chat room messages notifications when the window is focussed." },
-            { "room text on|off",           "Show message text in chat room message notifications." },
-            { "room trigger add <text>",    "Notify when specified text included in all chat room messages." },
-            { "room trigger remove <text>", "Remove chat room notification trigger." },
-            { "room trigger list",          "List all chat room triggers." },
-            { "room trigger on|off",        "Enable or disable all chat room notification triggers." },
-            { "on|off",                     "Override the global message setting for the current chat room." },
-            { "mention on|off",             "Override the global 'mention' setting for the current chat room." },
-            { "trigger on|off",             "Override the global 'trigger' setting for the current chat room." },
-            { "reset",                      "Reset to global notification settings for the current chat room." },
-            { "remind <seconds>",           "Notification reminder period for unread messages, use 0 to disable." },
-            { "typing on|off",              "Notifications when contacts are typing." },
-            { "typing current on|off",      "Whether typing notifications are triggered for the current window." },
-            { "invite on|off",              "Notifications for chat room invites." },
-            { "sub on|off",                 "Notifications for subscription requests." })
+            { "chat on|off",                    "Notifications for regular chat messages." },
+            { "chat current on|off",            "Whether to show regular chat message notifications when the window is focussed." },
+            { "chat text on|off",               "Show message text in regular message notifications." },
+            { "room on|off",                    "Notifications for all chat room messages, 'mention' only notifies when your nick is mentioned." },
+            { "room mention on|off",            "Notifications for all chat room messages when your nick is mentioned." },
+            { "room mention case_sensitive",    "Set room mention notifications as case sensitive." },
+            { "room mention case_insensitive",  "Set room mention notifications as case insensitive." },
+            { "room mention word_whole",        "Set room mention notifications only on whole word match, i.e. when nickname is not part of a larger word." },
+            { "room mention word_part",         "Set room mention notifications on partial word match, i.e. nickname may be part of a larger word." },
+            { "room current on|off",            "Whether to show all chat room messages notifications when the window is focussed." },
+            { "room text on|off",               "Show message text in chat room message notifications." },
+            { "room trigger add <text>",        "Notify when specified text included in all chat room messages." },
+            { "room trigger remove <text>",     "Remove chat room notification trigger." },
+            { "room trigger list",              "List all chat room triggers." },
+            { "room trigger on|off",            "Enable or disable all chat room notification triggers." },
+            { "on|off",                         "Override the global message setting for the current chat room." },
+            { "mention on|off",                 "Override the global 'mention' setting for the current chat room." },
+            { "trigger on|off",                 "Override the global 'trigger' setting for the current chat room." },
+            { "reset",                          "Reset to global notification settings for the current chat room." },
+            { "remind <seconds>",               "Notification reminder period for unread messages, use 0 to disable." },
+            { "typing on|off",                  "Notifications when contacts are typing." },
+            { "typing current on|off",          "Whether typing notifications are triggered for the current window." },
+            { "invite on|off",                  "Notifications for chat room invites." },
+            { "sub on|off",                     "Notifications for subscription requests." })
         CMD_EXAMPLES(
             "/notify chat on",
             "/notify chat text on",
@@ -1943,6 +1949,7 @@ static Autocomplete notify_ac;
 static Autocomplete notify_chat_ac;
 static Autocomplete notify_room_ac;
 static Autocomplete notify_typing_ac;
+static Autocomplete notify_mention_ac;
 static Autocomplete notify_trigger_ac;
 static Autocomplete prefs_ac;
 static Autocomplete sub_ac;
@@ -2110,6 +2117,14 @@ cmd_init(void)
     autocomplete_add(notify_typing_ac, "on");
     autocomplete_add(notify_typing_ac, "off");
     autocomplete_add(notify_typing_ac, "current");
+
+    notify_mention_ac = autocomplete_new();
+    autocomplete_add(notify_mention_ac, "on");
+    autocomplete_add(notify_mention_ac, "off");
+    autocomplete_add(notify_mention_ac, "case_sensitive");
+    autocomplete_add(notify_mention_ac, "case_insensitive");
+    autocomplete_add(notify_mention_ac, "word_whole");
+    autocomplete_add(notify_mention_ac, "word_part");
 
     notify_trigger_ac = autocomplete_new();
     autocomplete_add(notify_trigger_ac, "add");
@@ -2571,6 +2586,7 @@ cmd_uninit(void)
     autocomplete_free(notify_chat_ac);
     autocomplete_free(notify_room_ac);
     autocomplete_free(notify_typing_ac);
+    autocomplete_free(notify_mention_ac);
     autocomplete_free(notify_trigger_ac);
     autocomplete_free(sub_ac);
     autocomplete_free(titlebar_ac);
@@ -2788,6 +2804,7 @@ cmd_reset_autocomplete(ProfWin *window)
     autocomplete_reset(notify_chat_ac);
     autocomplete_reset(notify_room_ac);
     autocomplete_reset(notify_typing_ac);
+    autocomplete_reset(notify_mention_ac);
     autocomplete_reset(notify_trigger_ac);
     autocomplete_reset(sub_ac);
 
@@ -3491,12 +3508,17 @@ _notify_autocomplete(ProfWin *window, const char *const input)
     }
 
     gchar *boolean_choices1[] = { "/notify room current", "/notify chat current", "/notify typing current",
-        "/notify room text", "/notify room mention", "/notify chat text" };
+        "/notify room text", "/notify chat text" };
     for (i = 0; i < ARRAY_SIZE(boolean_choices1); i++) {
         result = autocomplete_param_with_func(input, boolean_choices1[i], prefs_autocomplete_boolean_choice);
         if (result) {
             return result;
         }
+    }
+
+    result = autocomplete_param_with_ac(input, "/notify room mention", notify_mention_ac, TRUE);
+    if (result) {
+        return result;
     }
 
     result = autocomplete_param_with_ac(input, "/notify room trigger", notify_trigger_ac, TRUE);

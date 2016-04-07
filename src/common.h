@@ -128,6 +128,7 @@ char* get_file_or_linked(char *loc, char *basedir);
 char* strip_arg_quotes(const char *const input);
 gboolean is_notify_enabled(void);
 
-gboolean prof_strstr(const char *const needle, const char *const haystack, gboolean case_sensitive, gboolean whole_word);
+GSList* prof_occurrences(const char *const needle, const char *const haystack, int offset, gboolean whole_word,
+    GSList **result);
 
 #endif

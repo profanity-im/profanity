@@ -64,4 +64,5 @@ void str_contains_str_whole(void **state);
 void str_empty_not_contains_str(void **state);
 void str_not_contains_str_empty(void **state);
 void str_empty_not_contains_str_empty(void **state);
-void prof_strstr_contains(void **state);
+void prof_partial_occurrences_tests(void **state);
+void prof_whole_occurrences_tests(void **state);
