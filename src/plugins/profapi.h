@@ -48,7 +48,7 @@ void (*prof_register_command)(const char *command_name, int min_args, int max_ar
 
 void (*prof_register_timed)(void(*callback)(void), int interval_seconds);
 
-void (*prof_register_ac)(const char *key, char **items);
+void (*prof_completer_add)(const char *key, char **items);
 
 void (*prof_notify)(const char *message, int timeout_ms, const char *category);
 

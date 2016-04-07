@@ -155,7 +155,7 @@ api_register_timed(void *callback, int interval_seconds,
 }
 
 void
-api_register_ac(const char *key, char **items)
+api_completer_add(const char *key, char **items)
 {
     autocompleters_add(key, items);
 }

@@ -97,9 +97,9 @@ c_api_register_timed(void(*callback)(void), int interval_seconds)
 }
 
 static void
-c_api_register_ac(const char *key, char **items)
+c_api_completer_add(const char *key, char **items)
 {
-    api_register_ac(key, items);
+    api_completer_add(key, items);
 }
 
 static void
@@ -269,7 +269,7 @@ c_api_init(void)
     prof_cons_bad_cmd_usage = c_api_cons_bad_cmd_usage;
     prof_register_command = c_api_register_command;
     prof_register_timed = c_api_register_timed;
-    prof_register_ac = c_api_register_ac;
+    prof_completer_add = c_api_completer_add;
     prof_notify = c_api_notify;
     prof_send_line = c_api_send_line;
     prof_get_current_recipient = c_api_get_current_recipient;
