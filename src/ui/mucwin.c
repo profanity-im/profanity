@@ -43,6 +43,7 @@
 #include "log.h"
 #include "config/preferences.h"
 #include "ui/window.h"
+#include "plugins/plugins.h"
 
 void
 mucwin_role_change(ProfMucWin *mucwin, const char *const role, const char *const actor, const char *const reason)
@@ -356,6 +357,8 @@ mucwin_history(ProfMucWin *mucwin, const char *const nick, GDateTime *timestamp,
 
     win_print(window, '-', 0, timestamp, NO_COLOUR_DATE, 0, "", line->str);
     g_string_free(line, TRUE);
+
+    plugins_on_room_history_message(mucwin->roomjid, nick, message, timestamp);
 }
 
 static void

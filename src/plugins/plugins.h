@@ -69,6 +69,8 @@ typedef struct prof_plugin_t {
         const char *message);
     char* (*pre_room_message_send)(struct prof_plugin_t* plugin, const char *const room, const char *message);
     void (*post_room_message_send)(struct prof_plugin_t* plugin, const char *const room, const char *message);
+    void (*on_room_history_message)(struct prof_plugin_t* plugin, const char *const room, const char *const nick, const char *const message,
+        const char *const timestamp);
 
     char* (*pre_priv_message_display)(struct prof_plugin_t* plugin, const char *const room, const char *const nick,
         const char *message);
@@ -119,6 +121,8 @@ char* plugins_pre_room_message_display(const char *const room, const char *const
 void plugins_post_room_message_display(const char *const room, const char *const nick, const char *message);
 char* plugins_pre_room_message_send(const char *const room, const char *message);
 void plugins_post_room_message_send(const char *const room, const char *message);
+void plugins_on_room_history_message(const char *const room, const char *const nick, const char *const message,
+    GDateTime *timestamp);
 
 char* plugins_pre_priv_message_display(const char *const jid, const char *message);
 void plugins_post_priv_message_display(const char *const jid, const char *message);
