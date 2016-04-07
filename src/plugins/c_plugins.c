@@ -93,6 +93,7 @@ c_plugin_create(const char *const filename)
     plugin->post_room_message_display = c_post_room_message_display_hook;
     plugin->pre_room_message_send = c_pre_room_message_send_hook;
     plugin->post_room_message_send = c_post_room_message_send_hook;
+    plugin->on_room_history_message = c_on_room_history_message_hook;
     plugin->pre_priv_message_display = c_pre_priv_message_display_hook;
     plugin->post_priv_message_display = c_post_priv_message_display_hook;
     plugin->pre_priv_message_send = c_pre_priv_message_send_hook;
@@ -300,6 +301,22 @@ c_post_room_message_send_hook(ProfPlugin *plugin, const char *const room, const 
 
     func = (void (*)(const char *const, const char *))f;
     func(room, message);
+}
+
+void
+c_on_room_history_message_hook(ProfPlugin *plugin, const char *const room, const char *const nick,
+    const char *const message, const char *const timestamp)
+{
+    void *f = NULL;
+    void (*func)(const char *const __room, const char *const __nick, const char *const __message,
+        const char *const __timestamp);
+    assert(plugin && plugin->module);
+
+    if (NULL == (f = dlsym(plugin->module, "prof_on_room_history_message")))
+        return;
+
+    func = (void (*)(const char *const, const char *const, const char *const, const char *const))f;
+    func(room, nick, message, timestamp);
 }
 
 char*

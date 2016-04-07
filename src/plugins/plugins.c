@@ -333,6 +333,27 @@ plugins_post_room_message_send(const char * const room, const char *message)
     }
 }
 
+void
+plugins_on_room_history_message(const char *const room, const char *const nick, const char *const message,
+    GDateTime *timestamp)
+{
+    char *timestamp_str = NULL;
+    GTimeVal timestamp_tv;
+    gboolean res = g_date_time_to_timeval(timestamp, &timestamp_tv);
+    if (res) {
+        timestamp_str = g_time_val_to_iso8601(&timestamp_tv);
+    }
+
+    GSList *curr = plugins;
+    while (curr) {
+        ProfPlugin *plugin = curr->data;
+        plugin->on_room_history_message(plugin, room, nick, message, NULL);
+        curr = g_slist_next(curr);
+    }
+
+    free(timestamp_str);
+}
+
 char*
 plugins_pre_priv_message_display(const char * const jid, const char *message)
 {
