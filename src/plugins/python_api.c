@@ -241,6 +241,22 @@ python_api_completer_remove(PyObject *self, PyObject *args)
     return Py_BuildValue("");
 }
 
+static PyObject *
+python_api_completer_clear(PyObject *self, PyObject *args)
+{
+    const char *key = NULL;
+
+    if (!PyArg_ParseTuple(args, "s", &key)) {
+        return Py_BuildValue("");
+    }
+
+    allow_python_threads();
+    autocompleters_clear(key);
+    disable_python_threads();
+
+    return Py_BuildValue("");
+}
+
 static PyObject*
 python_api_notify(PyObject *self, PyObject *args)
 {
@@ -693,6 +709,7 @@ static PyMethodDef apiMethods[] = {
     { "register_timed", python_api_register_timed, METH_VARARGS, "Register a timed function." },
     { "completer_add", python_api_completer_add, METH_VARARGS, "Add items to an autocompleter." },
     { "completer_remove", python_api_completer_remove, METH_VARARGS, "Remove items from an autocompleter." },
+    { "completer_clear", python_api_completer_clear, METH_VARARGS, "Remove all items from an autocompleter." },
     { "send_line", python_api_send_line, METH_VARARGS, "Send a line of input." },
     { "notify", python_api_notify, METH_VARARGS, "Send desktop notification." },
     { "get_current_recipient", python_api_get_current_recipient, METH_VARARGS, "Return the jid of the recipient of the current window." },

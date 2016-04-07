@@ -40,6 +40,7 @@
 void autocompleters_init(void);
 void autocompleters_add(const char *key, char **items);
 void autocompleters_remove(const char *key, char **items);
+void autocompleters_clear(const char *key);
 char* autocompleters_complete(const char * const input);
 void autocompleters_reset(void);
 void autocompleters_destroy(void);

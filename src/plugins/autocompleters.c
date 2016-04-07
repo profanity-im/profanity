@@ -80,6 +80,17 @@ autocompleters_remove(const char *key, char **items)
     }
 }
 
+void
+autocompleters_clear(const char *key)
+{
+    if (!g_hash_table_contains(autocompleters, key)) {
+        return;
+    }
+
+    Autocomplete ac = g_hash_table_lookup(autocompleters, key);
+    autocomplete_clear(ac);
+}
+
 char *
 autocompleters_complete(const char * const input)
 {

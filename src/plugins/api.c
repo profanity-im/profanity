@@ -167,6 +167,12 @@ api_completer_remove(const char *key, char **items)
 }
 
 void
+api_completer_clear(const char *key)
+{
+    autocompleters_clear(key);
+}
+
+void
 api_notify(const char *message, const char *category, int timeout_ms)
 {
     notify(message, timeout_ms, category);

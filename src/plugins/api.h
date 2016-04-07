@@ -56,6 +56,7 @@ void api_register_timed(void *callback, int interval_seconds,
 
 void api_completer_add(const char *key, char **items);
 void api_completer_remove(const char *key, char **items);
+void api_completer_clear(const char *key);
 
 void api_log_debug(const char *message);
 void api_log_info(const char *message);
