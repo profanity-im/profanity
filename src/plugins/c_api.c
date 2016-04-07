@@ -103,6 +103,12 @@ c_api_completer_add(const char *key, char **items)
 }
 
 static void
+c_api_completer_remove(const char *key, char **items)
+{
+    api_completer_remove(key, items);
+}
+
+static void
 c_api_notify(const char *message, int timeout_ms, const char *category)
 {
     api_notify(message, category, timeout_ms);
@@ -270,6 +276,7 @@ c_api_init(void)
     prof_register_command = c_api_register_command;
     prof_register_timed = c_api_register_timed;
     prof_completer_add = c_api_completer_add;
+    prof_completer_remove = c_api_completer_remove;
     prof_notify = c_api_notify;
     prof_send_line = c_api_send_line;
     prof_get_current_recipient = c_api_get_current_recipient;

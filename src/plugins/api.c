@@ -161,6 +161,12 @@ api_completer_add(const char *key, char **items)
 }
 
 void
+api_completer_remove(const char *key, char **items)
+{
+    autocompleters_remove(key, items);
+}
+
+void
 api_notify(const char *message, const char *category, int timeout_ms)
 {
     notify(message, timeout_ms, category);
