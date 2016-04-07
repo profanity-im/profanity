@@ -124,6 +124,7 @@ python_plugin_create(const char *const filename)
         plugin->on_contact_offline = python_on_contact_offline_hook;
         plugin->on_contact_presence = python_on_contact_presence_hook;
         plugin->on_chat_win_focus = python_on_chat_win_focus_hook;
+        plugin->on_room_win_focus = python_on_room_win_focus_hook;
         g_free(module_name);
 
         allow_python_threads();
@@ -829,6 +830,27 @@ python_on_chat_win_focus_hook(ProfPlugin *plugin, const char *const barejid)
     PyObject *p_module = plugin->module;
     if (PyObject_HasAttrString(p_module, "prof_on_chat_win_focus")) {
         p_function = PyObject_GetAttrString(p_module, "prof_on_chat_win_focus");
+        python_check_error();
+        if (p_function && PyCallable_Check(p_function)) {
+            PyObject_CallObject(p_function, p_args);
+            python_check_error();
+            Py_XDECREF(p_function);
+        }
+    }
+
+    allow_python_threads();
+}
+
+void
+python_on_room_win_focus_hook(ProfPlugin *plugin, const char *const roomjid)
+{
+    disable_python_threads();
+    PyObject *p_args = Py_BuildValue("(s)", roomjid);
+    PyObject *p_function;
+
+    PyObject *p_module = plugin->module;
+    if (PyObject_HasAttrString(p_module, "prof_on_room_win_focus")) {
+        p_function = PyObject_GetAttrString(p_module, "prof_on_room_win_focus");
         python_check_error();
         if (p_function && PyCallable_Check(p_function)) {
             PyObject_CallObject(p_function, p_args);

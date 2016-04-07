@@ -333,6 +333,7 @@ wins_set_current_by_num(int i)
             mucwin->unread = 0;
             mucwin->unread_mentions = FALSE;
             mucwin->unread_triggers = FALSE;
+            plugins_on_room_win_focus(mucwin->roomjid);
         } else if (window->type == WIN_PRIVATE) {
             ProfPrivateWin *privatewin = (ProfPrivateWin*) window;
             privatewin->unread = 0;

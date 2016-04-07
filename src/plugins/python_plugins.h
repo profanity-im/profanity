@@ -83,5 +83,6 @@ void python_on_contact_presence_hook(ProfPlugin *plugin, const char *const barej
     const char *const presence, const char *const status, const int priority);
 
 void python_on_chat_win_focus_hook(ProfPlugin *plugin, const char *const barejid);
+void python_on_room_win_focus_hook(ProfPlugin *plugin, const char *const roomjid);
 
 #endif

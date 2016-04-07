@@ -92,6 +92,7 @@ typedef struct prof_plugin_t {
         const char *const presence, const char *const status, const int priority);
 
     void (*on_chat_win_focus)(struct prof_plugin_t* plugin, const char *const barejid);
+    void (*on_room_win_focus)(struct prof_plugin_t* plugin, const char *const roomjid);
 } ProfPlugin;
 
 void plugins_init(void);
@@ -138,6 +139,7 @@ void plugins_on_contact_presence(const char *const barejid, const char *const re
     const char *const status, const int priority);
 
 void plugins_on_chat_win_focus(const char *const barejid);
+void plugins_on_room_win_focus(const char *const roomjid);
 
 gboolean plugins_run_command(const char * const cmd);
 void plugins_run_timed(void);

@@ -560,6 +560,17 @@ plugins_on_chat_win_focus(const char *const barejid)
 }
 
 void
+plugins_on_room_win_focus(const char *const roomjid)
+{
+    GSList *curr = plugins;
+    while (curr) {
+        ProfPlugin *plugin = curr->data;
+        plugin->on_room_win_focus(plugin, roomjid);
+        curr = g_slist_next(curr);
+    }
+}
+
+void
 plugins_shutdown(void)
 {
     GSList *curr = plugins;

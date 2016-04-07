@@ -85,5 +85,6 @@ void c_on_contact_presence_hook(ProfPlugin *plugin, const char *const barejid, c
     const char *const presence, const char *const status, const int priority);
 
 void c_on_chat_win_focus_hook(ProfPlugin *plugin, const char *const barejid);
+void c_on_room_win_focus_hook(ProfPlugin *plugin, const char *const roomjid);
 
 #endif
