@@ -269,6 +269,8 @@ sv_ev_room_message(const char *const room_jid, const char *const nick, const cha
 
     mucwin_message(mucwin, nick, new_message, mentions, triggers);
 
+    g_slist_free(mentions);
+
     ProfWin *window = (ProfWin*)mucwin;
     int num = wins_get_num(window);
     gboolean is_current = FALSE;
