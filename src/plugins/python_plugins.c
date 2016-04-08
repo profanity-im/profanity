@@ -111,6 +111,7 @@ python_plugin_create(const char *const filename)
         plugin->post_room_message_display = python_post_room_message_display_hook;
         plugin->pre_room_message_send = python_pre_room_message_send_hook;
         plugin->post_room_message_send = python_post_room_message_send_hook;
+        plugin->on_room_history_message = python_on_room_history_message_hook;
         plugin->pre_priv_message_display = python_pre_priv_message_display_hook;
         plugin->post_priv_message_display = python_post_priv_message_display_hook;
         plugin->pre_priv_message_send = python_pre_priv_message_send_hook;
@@ -123,6 +124,8 @@ python_plugin_create(const char *const filename)
         plugin->on_iq_stanza_receive = python_on_iq_stanza_receive_hook;
         plugin->on_contact_offline = python_on_contact_offline_hook;
         plugin->on_contact_presence = python_on_contact_presence_hook;
+        plugin->on_chat_win_focus = python_on_chat_win_focus_hook;
+        plugin->on_room_win_focus = python_on_room_win_focus_hook;
         g_free(module_name);
 
         allow_python_threads();
@@ -450,6 +453,28 @@ python_post_room_message_send_hook(ProfPlugin *plugin, const char *const room, c
     PyObject *p_module = plugin->module;
     if (PyObject_HasAttrString(p_module, "prof_post_room_message_send")) {
         p_function = PyObject_GetAttrString(p_module, "prof_post_room_message_send");
+        python_check_error();
+        if (p_function && PyCallable_Check(p_function)) {
+            PyObject_CallObject(p_function, p_args);
+            python_check_error();
+            Py_XDECREF(p_function);
+        }
+    }
+
+    allow_python_threads();
+}
+
+void
+python_on_room_history_message_hook(ProfPlugin *plugin, const char *const room, const char *const nick,
+    const char *const message, const char *const timestamp)
+{
+    disable_python_threads();
+    PyObject *p_args = Py_BuildValue("ssss", room, nick, message, timestamp);
+    PyObject *p_function;
+
+    PyObject *p_module = plugin->module;
+    if (PyObject_HasAttrString(p_module, "prof_on_room_history_message")) {
+        p_function = PyObject_GetAttrString(p_module, "prof_on_room_history_message");
         python_check_error();
         if (p_function && PyCallable_Check(p_function)) {
             PyObject_CallObject(p_function, p_args);
@@ -807,6 +832,48 @@ python_on_contact_presence_hook(ProfPlugin *plugin, const char *const barejid, c
     PyObject *p_module = plugin->module;
     if (PyObject_HasAttrString(p_module, "prof_on_contact_presence")) {
         p_function = PyObject_GetAttrString(p_module, "prof_on_contact_presence");
+        python_check_error();
+        if (p_function && PyCallable_Check(p_function)) {
+            PyObject_CallObject(p_function, p_args);
+            python_check_error();
+            Py_XDECREF(p_function);
+        }
+    }
+
+    allow_python_threads();
+}
+
+void
+python_on_chat_win_focus_hook(ProfPlugin *plugin, const char *const barejid)
+{
+    disable_python_threads();
+    PyObject *p_args = Py_BuildValue("(s)", barejid);
+    PyObject *p_function;
+
+    PyObject *p_module = plugin->module;
+    if (PyObject_HasAttrString(p_module, "prof_on_chat_win_focus")) {
+        p_function = PyObject_GetAttrString(p_module, "prof_on_chat_win_focus");
+        python_check_error();
+        if (p_function && PyCallable_Check(p_function)) {
+            PyObject_CallObject(p_function, p_args);
+            python_check_error();
+            Py_XDECREF(p_function);
+        }
+    }
+
+    allow_python_threads();
+}
+
+void
+python_on_room_win_focus_hook(ProfPlugin *plugin, const char *const roomjid)
+{
+    disable_python_threads();
+    PyObject *p_args = Py_BuildValue("(s)", roomjid);
+    PyObject *p_function;
+
+    PyObject *p_module = plugin->module;
+    if (PyObject_HasAttrString(p_module, "prof_on_room_win_focus")) {
+        p_function = PyObject_GetAttrString(p_module, "prof_on_room_win_focus");
         python_check_error();
         if (p_function && PyCallable_Check(p_function)) {
             PyObject_CallObject(p_function, p_args);

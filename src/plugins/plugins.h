@@ -69,6 +69,8 @@ typedef struct prof_plugin_t {
         const char *message);
     char* (*pre_room_message_send)(struct prof_plugin_t* plugin, const char *const room, const char *message);
     void (*post_room_message_send)(struct prof_plugin_t* plugin, const char *const room, const char *message);
+    void (*on_room_history_message)(struct prof_plugin_t* plugin, const char *const room, const char *const nick, const char *const message,
+        const char *const timestamp);
 
     char* (*pre_priv_message_display)(struct prof_plugin_t* plugin, const char *const room, const char *const nick,
         const char *message);
@@ -92,6 +94,9 @@ typedef struct prof_plugin_t {
         const char *const status);
     void (*on_contact_presence)(struct prof_plugin_t* plugin, const char *const barejid, const char *const resource,
         const char *const presence, const char *const status, const int priority);
+
+    void (*on_chat_win_focus)(struct prof_plugin_t* plugin, const char *const barejid);
+    void (*on_room_win_focus)(struct prof_plugin_t* plugin, const char *const roomjid);
 } ProfPlugin;
 
 void plugins_init(void);
@@ -116,6 +121,8 @@ char* plugins_pre_room_message_display(const char *const room, const char *const
 void plugins_post_room_message_display(const char *const room, const char *const nick, const char *message);
 char* plugins_pre_room_message_send(const char *const room, const char *message);
 void plugins_post_room_message_send(const char *const room, const char *message);
+void plugins_on_room_history_message(const char *const room, const char *const nick, const char *const message,
+    GDateTime *timestamp);
 
 char* plugins_pre_priv_message_display(const char *const jid, const char *message);
 void plugins_post_priv_message_display(const char *const jid, const char *message);
@@ -136,6 +143,9 @@ gboolean plugins_on_iq_stanza_receive(const char *const text);
 void plugins_on_contact_offline(const char *const barejid, const char *const resource, const char *const status);
 void plugins_on_contact_presence(const char *const barejid, const char *const resource, const char *const presence,
     const char *const status, const int priority);
+
+void plugins_on_chat_win_focus(const char *const barejid);
+void plugins_on_room_win_focus(const char *const roomjid);
 
 gboolean plugins_run_command(const char * const cmd);
 void plugins_run_timed(void);

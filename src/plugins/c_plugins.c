@@ -93,6 +93,7 @@ c_plugin_create(const char *const filename)
     plugin->post_room_message_display = c_post_room_message_display_hook;
     plugin->pre_room_message_send = c_pre_room_message_send_hook;
     plugin->post_room_message_send = c_post_room_message_send_hook;
+    plugin->on_room_history_message = c_on_room_history_message_hook;
     plugin->pre_priv_message_display = c_pre_priv_message_display_hook;
     plugin->post_priv_message_display = c_post_priv_message_display_hook;
     plugin->pre_priv_message_send = c_pre_priv_message_send_hook;
@@ -105,6 +106,8 @@ c_plugin_create(const char *const filename)
     plugin->on_iq_stanza_receive = c_on_iq_stanza_receive_hook;
     plugin->on_contact_offline = c_on_contact_offline_hook;
     plugin->on_contact_presence = c_on_contact_presence_hook;
+    plugin->on_chat_win_focus = c_on_chat_win_focus_hook;
+    plugin->on_room_win_focus = c_on_room_win_focus_hook;
 
     g_string_free(path, TRUE);
     g_free(module_name);
@@ -300,6 +303,22 @@ c_post_room_message_send_hook(ProfPlugin *plugin, const char *const room, const 
     func(room, message);
 }
 
+void
+c_on_room_history_message_hook(ProfPlugin *plugin, const char *const room, const char *const nick,
+    const char *const message, const char *const timestamp)
+{
+    void *f = NULL;
+    void (*func)(const char *const __room, const char *const __nick, const char *const __message,
+        const char *const __timestamp);
+    assert(plugin && plugin->module);
+
+    if (NULL == (f = dlsym(plugin->module, "prof_on_room_history_message")))
+        return;
+
+    func = (void (*)(const char *const, const char *const, const char *const, const char *const))f;
+    func(room, nick, message, timestamp);
+}
+
 char*
 c_pre_priv_message_display_hook(ProfPlugin *plugin, const char *const room, const char *const nick, const char *message)
 {
@@ -470,6 +489,34 @@ c_on_contact_presence_hook(ProfPlugin *plugin, const char *const barejid, const 
 
     func = (void (*)(const char *const, const char *const, const char *const, const char *const, const int))f;
     func(barejid, resource, presence, status, priority);
+}
+
+void
+c_on_chat_win_focus_hook(ProfPlugin *plugin, const char *const barejid)
+{
+    void *f = NULL;
+    void (*func)(const char *const __barejid);
+    assert(plugin && plugin->module);
+
+    if (NULL == (f = dlsym(plugin->module, "prof_on_chat_win_focus")))
+        return;
+
+    func = (void (*)(const char *const))f;
+    func(barejid);
+}
+
+void
+c_on_room_win_focus_hook(ProfPlugin *plugin, const char *const roomjid)
+{
+    void *f = NULL;
+    void (*func)(const char *const __roomjid);
+    assert(plugin && plugin->module);
+
+    if (NULL == (f = dlsym(plugin->module, "prof_on_room_win_focus")))
+        return;
+
+    func = (void (*)(const char *const))f;
+    func(roomjid);
 }
 
 void

@@ -60,6 +60,8 @@ void c_post_room_message_display_hook(ProfPlugin *plugin, const char *const room
     const char *message);
 char* c_pre_room_message_send_hook(ProfPlugin *plugin, const char *const room, const char *message);
 void c_post_room_message_send_hook(ProfPlugin *plugin, const char *const room, const char *message);
+void c_on_room_history_message_hook(ProfPlugin *plugin, const char *const room, const char *const nick,
+    const char *const message, const char *const timestamp);
 
 char* c_pre_priv_message_display_hook(ProfPlugin *plugin, const char *const room, const char *const nick,
     const char *message);
@@ -83,5 +85,8 @@ void c_on_contact_offline_hook(ProfPlugin *plugin, const char *const barejid, co
     const char *const status);
 void c_on_contact_presence_hook(ProfPlugin *plugin, const char *const barejid, const char *const resource,
     const char *const presence, const char *const status, const int priority);
+
+void c_on_chat_win_focus_hook(ProfPlugin *plugin, const char *const barejid);
+void c_on_room_win_focus_hook(ProfPlugin *plugin, const char *const roomjid);
 
 #endif

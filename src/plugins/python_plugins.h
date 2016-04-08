@@ -60,6 +60,8 @@ void python_post_room_message_display_hook(ProfPlugin *plugin, const char *const
     const char *message);
 char* python_pre_room_message_send_hook(ProfPlugin *plugin, const char *const room, const char *message);
 void python_post_room_message_send_hook(ProfPlugin *plugin, const char *const room, const char *message);
+void python_on_room_history_message_hook(ProfPlugin *plugin, const char *const room, const char *const nick,
+    const char *const message, const char *const timestamp);
 
 char* python_pre_priv_message_display_hook(ProfPlugin *plugin, const char *const room, const char *const nick,
     const char *message);
@@ -81,5 +83,8 @@ void python_on_contact_offline_hook(ProfPlugin *plugin, const char *const bareji
     const char *const status);
 void python_on_contact_presence_hook(ProfPlugin *plugin, const char *const barejid, const char *const resource,
     const char *const presence, const char *const status, const int priority);
+
+void python_on_chat_win_focus_hook(ProfPlugin *plugin, const char *const barejid);
+void python_on_room_win_focus_hook(ProfPlugin *plugin, const char *const roomjid);
 
 #endif

@@ -371,6 +371,27 @@ plugins_post_room_message_send(const char * const room, const char *message)
     }
 }
 
+void
+plugins_on_room_history_message(const char *const room, const char *const nick, const char *const message,
+    GDateTime *timestamp)
+{
+    char *timestamp_str = NULL;
+    GTimeVal timestamp_tv;
+    gboolean res = g_date_time_to_timeval(timestamp, &timestamp_tv);
+    if (res) {
+        timestamp_str = g_time_val_to_iso8601(&timestamp_tv);
+    }
+
+    GSList *curr = plugins;
+    while (curr) {
+        ProfPlugin *plugin = curr->data;
+        plugin->on_room_history_message(plugin, room, nick, message, timestamp_str);
+        curr = g_slist_next(curr);
+    }
+
+    free(timestamp_str);
+}
+
 char*
 plugins_pre_priv_message_display(const char * const jid, const char *message)
 {
@@ -582,6 +603,28 @@ plugins_on_contact_presence(const char *const barejid, const char *const resourc
     while (curr) {
         ProfPlugin *plugin = curr->data;
         plugin->on_contact_presence(plugin, barejid, resource, presence, status, priority);
+        curr = g_slist_next(curr);
+    }
+}
+
+void
+plugins_on_chat_win_focus(const char *const barejid)
+{
+    GSList *curr = plugins;
+    while (curr) {
+        ProfPlugin *plugin = curr->data;
+        plugin->on_chat_win_focus(plugin, barejid);
+        curr = g_slist_next(curr);
+    }
+}
+
+void
+plugins_on_room_win_focus(const char *const roomjid)
+{
+    GSList *curr = plugins;
+    while (curr) {
+        ProfPlugin *plugin = curr->data;
+        plugin->on_room_win_focus(plugin, roomjid);
         curr = g_slist_next(curr);
     }
 }

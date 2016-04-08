@@ -185,7 +185,7 @@ python_api_register_timed(PyObject *self, PyObject *args)
 }
 
 static PyObject *
-python_api_register_ac(PyObject *self, PyObject *args)
+python_api_completer_add(PyObject *self, PyObject *args)
 {
     const char *key = NULL;
     PyObject *items = NULL;
@@ -207,6 +207,50 @@ python_api_register_ac(PyObject *self, PyObject *args)
 
     allow_python_threads();
     autocompleters_add(key, c_items);
+    disable_python_threads();
+
+    return Py_BuildValue("");
+}
+
+static PyObject *
+python_api_completer_remove(PyObject *self, PyObject *args)
+{
+    const char *key = NULL;
+    PyObject *items = NULL;
+
+    if (!PyArg_ParseTuple(args, "sO", &key, &items)) {
+        return Py_BuildValue("");
+    }
+
+    Py_ssize_t len = PyList_Size(items);
+    char *c_items[len];
+
+    Py_ssize_t i = 0;
+    for (i = 0; i < len; i++) {
+        PyObject *item = PyList_GetItem(items, i);
+        char *c_item = PyString_AsString(item);
+        c_items[i] = c_item;
+    }
+    c_items[len] = NULL;
+
+    allow_python_threads();
+    autocompleters_remove(key, c_items);
+    disable_python_threads();
+
+    return Py_BuildValue("");
+}
+
+static PyObject *
+python_api_completer_clear(PyObject *self, PyObject *args)
+{
+    const char *key = NULL;
+
+    if (!PyArg_ParseTuple(args, "s", &key)) {
+        return Py_BuildValue("");
+    }
+
+    allow_python_threads();
+    autocompleters_clear(key);
     disable_python_threads();
 
     return Py_BuildValue("");
@@ -663,7 +707,9 @@ static PyMethodDef apiMethods[] = {
     { "cons_bad_cmd_usage", python_api_cons_bad_cmd_usage, METH_VARARGS, "Show invalid command message in console" },
     { "register_command", python_api_register_command, METH_VARARGS, "Register a command." },
     { "register_timed", python_api_register_timed, METH_VARARGS, "Register a timed function." },
-    { "register_ac", python_api_register_ac, METH_VARARGS, "Register an autocompleter." },
+    { "completer_add", python_api_completer_add, METH_VARARGS, "Add items to an autocompleter." },
+    { "completer_remove", python_api_completer_remove, METH_VARARGS, "Remove items from an autocompleter." },
+    { "completer_clear", python_api_completer_clear, METH_VARARGS, "Remove all items from an autocompleter." },
     { "send_line", python_api_send_line, METH_VARARGS, "Send a line of input." },
     { "notify", python_api_notify, METH_VARARGS, "Send desktop notification." },
     { "get_current_recipient", python_api_get_current_recipient, METH_VARARGS, "Return the jid of the recipient of the current window." },
