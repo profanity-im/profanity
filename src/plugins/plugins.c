@@ -347,7 +347,7 @@ plugins_on_room_history_message(const char *const room, const char *const nick, 
     GSList *curr = plugins;
     while (curr) {
         ProfPlugin *plugin = curr->data;
-        plugin->on_room_history_message(plugin, room, nick, message, NULL);
+        plugin->on_room_history_message(plugin, room, nick, message, timestamp_str);
         curr = g_slist_next(curr);
     }
 
