@@ -4230,7 +4230,7 @@ cmd_lastactivity(ProfWin *window, const char *const command, gchar **args)
     jabber_conn_status_t conn_status = jabber_get_connection_status();
 
     if (conn_status != JABBER_CONNECTED) {
-        cons_show("You are not currenlty connected.");
+        cons_show("You are not currently connected.");
         return TRUE;
     }
 
@@ -5006,7 +5006,7 @@ cmd_notify(ProfWin *window, const char *const command, gchar **args)
         jabber_conn_status_t conn_status = jabber_get_connection_status();
 
         if (conn_status != JABBER_CONNECTED) {
-            cons_show("You are not currenlty connected.");
+            cons_show("You are not currently connected.");
         } else {
             ProfWin *window = wins_get_current();
             if (window->type != WIN_MUC) {
@@ -5021,7 +5021,7 @@ cmd_notify(ProfWin *window, const char *const command, gchar **args)
         jabber_conn_status_t conn_status = jabber_get_connection_status();
 
         if (conn_status != JABBER_CONNECTED) {
-            cons_show("You are not currenlty connected.");
+            cons_show("You are not currently connected.");
         } else {
             ProfWin *window = wins_get_current();
             if (window->type != WIN_MUC) {
@@ -5036,7 +5036,7 @@ cmd_notify(ProfWin *window, const char *const command, gchar **args)
         jabber_conn_status_t conn_status = jabber_get_connection_status();
 
         if (conn_status != JABBER_CONNECTED) {
-            cons_show("You are not currenlty connected.");
+            cons_show("You are not currently connected.");
         } else {
             if (g_strcmp0(args[1], "on") == 0) {
                 ProfWin *window = wins_get_current();
@@ -5064,7 +5064,7 @@ cmd_notify(ProfWin *window, const char *const command, gchar **args)
         jabber_conn_status_t conn_status = jabber_get_connection_status();
 
         if (conn_status != JABBER_CONNECTED) {
-            cons_show("You are not currenlty connected.");
+            cons_show("You are not currently connected.");
         } else {
             if (g_strcmp0(args[1], "on") == 0) {
                 ProfWin *window = wins_get_current();
@@ -5092,7 +5092,7 @@ cmd_notify(ProfWin *window, const char *const command, gchar **args)
         jabber_conn_status_t conn_status = jabber_get_connection_status();
 
         if (conn_status != JABBER_CONNECTED) {
-            cons_show("You are not currenlty connected.");
+            cons_show("You are not currently connected.");
         } else {
             ProfWin *window = wins_get_current();
             if (window->type != WIN_MUC) {
@@ -5294,7 +5294,7 @@ cmd_ping(ProfWin *window, const char *const command, gchar **args)
     jabber_conn_status_t conn_status = jabber_get_connection_status();
 
     if (conn_status != JABBER_CONNECTED) {
-        cons_show("You are not currenlty connected.");
+        cons_show("You are not currently connected.");
         return TRUE;
     }
 
