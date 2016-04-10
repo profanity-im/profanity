@@ -136,6 +136,12 @@ main(int argc, char **argv)
         g_print("Python plugins: Disabled\n");
 #endif
 
+#ifdef HAVE_GTK
+        g_print("GTK icons: Enabled\n");
+#else
+        g_print("GTK icons: Disabled\n");
+#endif
+
         return 0;
     }
 

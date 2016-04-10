@@ -37,6 +37,10 @@
 #include "gitversion.h"
 #endif
 
+#ifdef HAVE_GTK
+#include <gtk/gtk.h>
+#include "tray.h"
+#endif
 #include <locale.h>
 #include <signal.h>
 #include <stdlib.h>
@@ -92,10 +96,21 @@ char *saved_status;
 
 static gboolean cont = TRUE;
 static gboolean force_quit = FALSE;
+#ifdef HAVE_GTK
+static gboolean gtk_ready = FALSE;
+#endif
 
 void
 prof_run(char *log_level, char *account_name)
 {
+#ifdef HAVE_GTK
+    gtk_ready = gtk_init_check(0, NULL);
+    log_debug("Env is GTK-ready: %s", gtk_ready ? "true" : "false");
+    if (gtk_ready) {
+        gtk_init(0, NULL);
+        gtk_main_iteration_do(FALSE);
+    }
+#endif
     _init(log_level);
     plugins_on_start();
     _connect_default(account_name);
@@ -130,6 +145,11 @@ prof_run(char *log_level, char *account_name)
         jabber_process_events(10);
         iq_autoping_check();
         ui_update();
+#ifdef HAVE_GTK
+        if (gtk_ready) {
+            gtk_main_iteration_do(FALSE);
+        }
+#endif
     }
 }
 
@@ -352,6 +372,12 @@ _init(char *log_level)
 #endif
     atexit(_shutdown);
     plugins_init();
+#ifdef HAVE_GTK
+    if (gtk_ready) {
+        log_debug("Building GTK icon");
+        create_tray();
+    }
+#endif
     inp_nonblocking(TRUE);
 }
 
@@ -370,7 +396,11 @@ _shutdown(void)
     if (conn_status == JABBER_CONNECTED) {
         cl_ev_disconnect();
     }
-
+#ifdef HAVE_GTK
+    if (gtk_ready) {
+        destroy_tray();
+    }
+#endif
     jabber_shutdown();
     plugins_on_shutdown();
     muc_close();
@@ -404,6 +434,8 @@ _create_directories(void)
 
     GString *themes_dir = g_string_new(xdg_config);
     g_string_append(themes_dir, "/profanity/themes");
+    GString *icons_dir = g_string_new(xdg_config);
+    g_string_append(icons_dir, "/profanity/icons");
     GString *chatlogs_dir = g_string_new(xdg_data);
     g_string_append(chatlogs_dir, "/profanity/chatlogs");
     GString *logs_dir = g_string_new(xdg_data);
@@ -413,6 +445,9 @@ _create_directories(void)
 
     if (!mkdir_recursive(themes_dir->str)) {
         log_error("Error while creating directory %s", themes_dir->str);
+    }
+    if (!mkdir_recursive(icons_dir->str)) {
+        log_error("Error while creating directory %s", icons_dir->str);
     }
     if (!mkdir_recursive(chatlogs_dir->str)) {
         log_error("Error while creating directory %s", chatlogs_dir->str);
@@ -425,6 +460,7 @@ _create_directories(void)
     }
 
     g_string_free(themes_dir, TRUE);
+    g_string_free(icons_dir, TRUE);
     g_string_free(chatlogs_dir, TRUE);
     g_string_free(logs_dir, TRUE);
     g_string_free(plugins_dir, TRUE);
