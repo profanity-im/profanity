@@ -1752,7 +1752,7 @@ static struct cmd_t command_defs[] =
         CMD_DESC(
             "Manage plugins. Passing no arguments lists currently loaded plugins.")
         CMD_ARGS(
-            { "laod <plugin>",       "Load a plugin." })
+            { "load <plugin>",       "Load a plugin." })
         CMD_EXAMPLES(
             "/plugin load browser.py")
     },
