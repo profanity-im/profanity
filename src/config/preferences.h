@@ -187,6 +187,7 @@ void prefs_set_autoxa_time(gint value);
 
 gchar** prefs_get_plugins(void);
 void prefs_free_plugins(gchar **plugins);
+void prefs_add_plugin(const char *const name);
 
 char prefs_get_otr_char(void);
 void prefs_set_otr_char(char ch);

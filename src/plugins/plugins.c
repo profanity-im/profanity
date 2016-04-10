@@ -78,13 +78,13 @@ plugins_init(void)
     plugin_settings_init();
 
     // load plugins
-    gchar **plugins_load = prefs_get_plugins();
-    if (plugins_load) {
+    gchar **plugins_pref = prefs_get_plugins();
+    if (plugins_pref) {
         int i;
-        for (i = 0; i < g_strv_length(plugins_load); i++)
+        for (i = 0; i < g_strv_length(plugins_pref); i++)
         {
             gboolean loaded = FALSE;
-            gchar *filename = plugins_load[i];
+            gchar *filename = plugins_pref[i];
 #ifdef HAVE_PYTHON
             if (g_str_has_suffix(filename, ".py")) {
                 ProfPlugin *plugin = python_plugin_create(filename);
@@ -103,8 +103,10 @@ plugins_init(void)
                 }
             }
 #endif
-            if (loaded == TRUE) {
+            if (loaded) {
                 log_info("Loaded plugin: %s", filename);
+            } else {
+                log_info("Failed to load plugin: %s", filename);
             }
         }
 
@@ -117,9 +119,49 @@ plugins_init(void)
         }
     }
 
-    prefs_free_plugins(plugins_load);
+    prefs_free_plugins(plugins_pref);
 
     return;
+}
+
+gboolean
+_find_by_name(gconstpointer pluginp, gconstpointer namep)
+{
+    char *name = (char*)namep;
+    ProfPlugin *plugin = (ProfPlugin*)pluginp;
+
+    return g_strcmp0(name, plugin->name);
+}
+
+gboolean
+plugins_load(const char *const name)
+{
+    GSList *found = g_slist_find_custom(plugins, name, (GCompareFunc)_find_by_name);
+    if (found) {
+        log_info("Failed to load plugin: %s, plugin already loaded", name);
+        return FALSE;
+    }
+
+    ProfPlugin *plugin = NULL;
+#ifdef HAVE_PYTHON
+    if (g_str_has_suffix(name, ".py")) {
+        plugin = python_plugin_create(name);
+    }
+#endif
+#ifdef HAVE_C
+    if (g_str_has_suffix(name, ".so")) {
+        plugin = c_plugin_create(name);
+    }
+#endif
+    if (plugin) {
+        plugins = g_slist_append(plugins, plugin);
+        plugin->init_func(plugin, PACKAGE_VERSION, PACKAGE_STATUS);
+        log_info("Loaded plugin: %s", name);
+        return TRUE;
+    } else {
+        log_info("Failed to load plugin: %s", name);
+        return FALSE;
+    }
 }
 
 GSList *
@@ -128,18 +170,43 @@ plugins_get_list(void)
     return plugins;
 }
 
-char *
-plugins_get_lang_string(ProfPlugin *plugin)
+static gchar*
+_get_plugins_dir(void)
 {
-    switch (plugin->lang)
-    {
-        case LANG_PYTHON:
-            return "Python";
-        case LANG_C:
-            return "C";
-        default:
-            return "Unknown";
+    gchar *xdg_data = xdg_get_data_home();
+    GString *plugins_dir = g_string_new(xdg_data);
+    g_free(xdg_data);
+    g_string_append(plugins_dir, "/profanity/plugins");
+    return g_string_free(plugins_dir, FALSE);
+}
+
+void
+_plugins_list_dir(const gchar *const dir, GSList **result)
+{
+    GDir *plugins = g_dir_open(dir, 0, NULL);
+    if (plugins == NULL) {
+        return;
     }
+
+    const gchar *plugin = g_dir_read_name(plugins);
+    while (plugin) {
+        if (g_str_has_suffix(plugin, ".so") || g_str_has_suffix(plugin, ".py")) {
+            *result = g_slist_append(*result, strdup(plugin));
+        }
+        plugin = g_dir_read_name(plugins);
+    }
+    g_dir_close(plugins);
+}
+
+GSList*
+plugins_file_list(void)
+{
+    GSList *result = NULL;
+    char *plugins_dir = _get_plugins_dir();
+    _plugins_list_dir(plugins_dir, &result);
+    free(plugins_dir);
+
+    return result;
 }
 
 char *

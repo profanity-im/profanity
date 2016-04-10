@@ -74,10 +74,8 @@ c_plugin_create(const char *const filename)
         return NULL;
     }
 
-    gchar *module_name = g_strndup(filename, strlen(filename) - 3);
-
     plugin = malloc(sizeof(ProfPlugin));
-    plugin->name = strdup(module_name);
+    plugin->name = strdup(filename);
     plugin->lang = LANG_C;
     plugin->module = handle;
     plugin->init_func = c_init_hook;
@@ -110,7 +108,6 @@ c_plugin_create(const char *const filename)
     plugin->on_room_win_focus = c_on_room_win_focus_hook;
 
     g_string_free(path, TRUE);
-    g_free(module_name);
 
     return plugin;
 }

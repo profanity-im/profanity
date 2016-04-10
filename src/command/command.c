@@ -117,6 +117,7 @@ static char* _subject_autocomplete(ProfWin *window, const char *const input);
 static char* _console_autocomplete(ProfWin *window, const char *const input);
 static char* _win_autocomplete(ProfWin *window, const char *const input);
 static char* _close_autocomplete(ProfWin *window, const char *const input);
+static char* _plugins_autocomplete(ProfWin *window, const char *const input);
 
 GHashTable *commands = NULL;
 
@@ -1743,14 +1744,17 @@ static struct cmd_t command_defs[] =
     },
 
     { "/plugins",
-        cmd_plugins, parse_args, 0, 0, NULL,
+        cmd_plugins, parse_args, 0, 2, NULL,
         CMD_NOTAGS
         CMD_SYN(
-            "/plugins")
+            "/plugins",
+            "/plugins load <plugin>")
         CMD_DESC(
-            "Show currently installed plugins. ")
-        CMD_NOARGS
-        CMD_NOEXAMPLES
+            "Manage plugins. Passing no arguments lists currently loaded plugins.")
+        CMD_ARGS(
+            { "laod <plugin>",       "Load a plugin." })
+        CMD_EXAMPLES(
+            "/plugin load browser.py")
     },
 
     { "/prefs",
@@ -2022,6 +2026,8 @@ static Autocomplete script_show_ac;
 static Autocomplete console_ac;
 static Autocomplete console_msg_ac;
 static Autocomplete autoping_ac;
+static Autocomplete plugins_ac;
+static Autocomplete plugins_load_ac;
 
 /*
  * Initialise command autocompleter and history
@@ -2348,6 +2354,7 @@ cmd_init(void)
     autocomplete_add(group_ac, "remove");
 
     theme_load_ac = NULL;
+    plugins_load_ac = NULL;
 
     who_roster_ac = autocomplete_new();
     autocomplete_add(who_roster_ac, "chat");
@@ -2572,6 +2579,9 @@ cmd_init(void)
     autoping_ac = autocomplete_new();
     autocomplete_add(autoping_ac, "set");
     autocomplete_add(autoping_ac, "timeout");
+
+    plugins_ac = autocomplete_new();
+    autocomplete_add(plugins_ac, "load");
 }
 
 void
@@ -2659,6 +2669,8 @@ cmd_uninit(void)
     autocomplete_free(console_ac);
     autocomplete_free(console_msg_ac);
     autocomplete_free(autoping_ac);
+    autocomplete_free(plugins_ac);
+    autocomplete_free(plugins_load_ac);
 }
 
 gboolean
@@ -2822,6 +2834,10 @@ cmd_reset_autocomplete(ProfWin *window)
         autocomplete_free(theme_load_ac);
         theme_load_ac = NULL;
     }
+    if (plugins_load_ac) {
+        autocomplete_free(plugins_load_ac);
+        plugins_load_ac = NULL;
+    }
     autocomplete_reset(account_ac);
     autocomplete_reset(account_set_ac);
     autocomplete_reset(account_clear_ac);
@@ -2882,6 +2898,7 @@ cmd_reset_autocomplete(ProfWin *window)
     autocomplete_reset(console_ac);
     autocomplete_reset(console_msg_ac);
     autocomplete_reset(autoping_ac);
+    autocomplete_reset(plugins_ac);
     autocomplete_reset(script_ac);
     if (script_show_ac) {
         autocomplete_free(script_show_ac);
@@ -3148,6 +3165,7 @@ _cmd_complete_parameters(ProfWin *window, const char *const input)
     g_hash_table_insert(ac_funcs, "/console",       _console_autocomplete);
     g_hash_table_insert(ac_funcs, "/win",           _win_autocomplete);
     g_hash_table_insert(ac_funcs, "/close",         _close_autocomplete);
+    g_hash_table_insert(ac_funcs, "/plugins",         _plugins_autocomplete);
 
     int len = strlen(input);
     char parsed[len+1];
@@ -3731,6 +3749,34 @@ _pgp_autocomplete(ProfWin *window, const char *const input)
     found = autocomplete_param_with_ac(input, "/pgp", pgp_ac, TRUE);
     if (found) {
         return found;
+    }
+
+    return NULL;
+}
+
+static char*
+_plugins_autocomplete(ProfWin *window, const char *const input)
+{
+    char *result = NULL;
+    if ((strncmp(input, "/plugins load ", 14) == 0) && (strlen(input) > 14)) {
+        if (plugins_load_ac == NULL) {
+            plugins_load_ac = autocomplete_new();
+            GSList *plugins = plugins_file_list();
+            GSList *curr = plugins;
+            while (curr) {
+                autocomplete_add(plugins_load_ac, curr->data);
+                curr = g_slist_next(curr);
+            }
+            g_slist_free_full(plugins, g_free);
+        }
+        result = autocomplete_param_with_ac(input, "/plugins load", plugins_load_ac, TRUE);
+        if (result) {
+            return result;
+        }
+    }
+    result = autocomplete_param_with_ac(input, "/plugins", plugins_ac, TRUE);
+    if (result) {
+        return result;
     }
 
     return NULL;
