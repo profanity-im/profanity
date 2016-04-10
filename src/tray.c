@@ -41,6 +41,7 @@
 
 #include "tray.h"
 #include "window_list.h"
+#include "log.h"
 
 static GtkStatusIcon *prof_tray = NULL;
 static GString *icon_filename = NULL;
@@ -105,7 +106,7 @@ static void _get_icons(void)
         }
         g_string_free(name, true);
     } else {
-        fprintf (stderr, "Unable to open dir: %s\n", err->message);
+        log_error("Unable to open dir: %s", err->message);
         g_error_free(err);
     }
     g_dir_close(dir);
