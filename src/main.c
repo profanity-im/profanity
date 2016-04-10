@@ -34,9 +34,6 @@
 
 #include "prof_config.h"
 
-#ifdef PROF_HAVE_GTK
-#include <gtk/gtk.h>
-#endif
 #include <string.h>
 #include <glib.h>
 #include <assert.h>
@@ -149,11 +146,6 @@ main(int argc, char **argv)
         return 0;
     }
 
-#ifdef PROF_HAVE_GTK
-    if (gtk_init_check(&argc, &argv)) {
-        gtk_init(&argc, &argv);
-    }
-#endif
     prof_run(log, account_name);
 
     return 0;

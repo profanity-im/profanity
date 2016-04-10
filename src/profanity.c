@@ -39,6 +39,7 @@
 
 #ifdef PROF_HAVE_GTK
 #include <gtk/gtk.h>
+#include "tray.h"
 #endif
 #include <locale.h>
 #include <signal.h>
@@ -75,9 +76,6 @@
 #include "window_list.h"
 #include "event/client_events.h"
 #include "config/tlscerts.h"
-#ifdef PROF_HAVE_GTK
-#include "tray.h"
-#endif
 
 static void _check_autoaway(void);
 static void _init(char *log_level);
@@ -98,15 +96,21 @@ char *saved_status;
 
 static gboolean cont = TRUE;
 static gboolean force_quit = FALSE;
+static gboolean gtk_ready = FALSE;
 
 void
 prof_run(char *log_level, char *account_name)
 {
+#ifdef PROF_HAVE_GTK
+    gtk_ready = gtk_init_check(0, NULL);
+    log_debug("Env is GTK-ready: %s", gtk_ready ? "true" : "false");
+    if (gtk_ready) {
+        gtk_init(0, NULL);
+        gtk_main_iteration_do(false);
+    }
+#endif
     _init(log_level);
     plugins_on_start();
-#ifdef PROF_HAVE_GTK
-    gtk_main_iteration_do(false);
-#endif
     _connect_default(account_name);
 
     ui_update();
@@ -140,7 +144,9 @@ prof_run(char *log_level, char *account_name)
         iq_autoping_check();
         ui_update();
 #ifdef PROF_HAVE_GTK
-        gtk_main_iteration_do(false);
+        if (gtk_ready) {
+            gtk_main_iteration_do(false);
+        }
 #endif
     }
 }
@@ -365,7 +371,10 @@ _init(char *log_level)
     atexit(_shutdown);
     plugins_init();
 #ifdef PROF_HAVE_GTK
-    create_tray();
+    if (gtk_ready) {
+        log_debug("Building GTK icon");
+        create_tray();
+    }
 #endif
     inp_nonblocking(TRUE);
 }
@@ -386,7 +395,9 @@ _shutdown(void)
         cl_ev_disconnect();
     }
 #ifdef PROF_HAVE_GTK
-    destroy_tray();
+    if (gtk_ready) {
+        destroy_tray();
+    }
 #endif
     jabber_shutdown();
     plugins_on_shutdown();

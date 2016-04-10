@@ -151,7 +151,7 @@ void destroy_tray(void)
     shutting_down = true;
     g_source_remove(timer);
     if (prof_tray) {
-        gtk_widget_destroy(GTK_WIDGET(prof_tray));
+        g_clear_object(&prof_tray);
         prof_tray = NULL;
     }
     g_string_free(icon_filename, true);
