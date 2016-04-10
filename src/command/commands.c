@@ -5657,22 +5657,37 @@ cmd_xa(ProfWin *window, const char *const command, gchar **args)
 gboolean
 cmd_plugins(ProfWin *window, const char *const command, gchar **args)
 {
-    GSList *plugins = plugins_get_list();
-
-    GSList *curr = plugins;
-    if (curr == NULL) {
-        cons_show("No plugins installed.");
-    } else {
-        cons_show("Installed plugins:");
-        while (curr) {
-            ProfPlugin *plugin = curr->data;
-            char *lang = plugins_get_lang_string(plugin);
-            cons_show("  %s (%s)", plugin->name, lang);
-            curr = g_slist_next(curr);
+    if (g_strcmp0(args[0], "load") == 0) {
+        if (args[1] == NULL) {
+            cons_bad_cmd_usage(command);
+            return TRUE;
         }
+        gboolean res = plugins_load(args[1]);
+        if (res) {
+            prefs_add_plugin(args[1]);
+            cons_show("Loaded plugin: %s", args[1]);
+        } else {
+            cons_show("Failed to load plugin: %s", args[1]);
+        }
+
+        return TRUE;
+    } else {
+        GSList *plugins = plugins_get_list();
+        GSList *curr = plugins;
+        if (curr == NULL) {
+            cons_show("No plugins installed.");
+        } else {
+            cons_show("Installed plugins:");
+            while (curr) {
+                ProfPlugin *plugin = curr->data;
+                cons_show("  %s", plugin->name);
+                curr = g_slist_next(curr);
+            }
+        }
+        g_slist_free(curr);
+
+        return TRUE;
     }
-    g_slist_free(curr);
-    return TRUE;
 }
 
 gboolean

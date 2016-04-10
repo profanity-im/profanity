@@ -99,10 +99,12 @@ typedef struct prof_plugin_t {
 
 void plugins_init(void);
 GSList* plugins_get_list(void);
-char* plugins_get_lang_string(ProfPlugin *plugin);
+GSList *plugins_file_list(void);
 char* plugins_autocomplete(const char *const input);
 void plugins_reset_autocomplete(void);
 void plugins_shutdown(void);
+
+gboolean plugins_load(const char *const name);
 
 void plugins_on_start(void);
 void plugins_on_shutdown(void);

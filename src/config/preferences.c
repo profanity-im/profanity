@@ -605,6 +605,13 @@ prefs_get_plugins(void)
 }
 
 void
+prefs_add_plugin(const char *const name)
+{
+    conf_string_list_add(prefs, "plugins", "load", name);
+    _save_prefs();
+}
+
+void
 prefs_free_plugins(gchar **plugins)
 {
     g_strfreev(plugins);
