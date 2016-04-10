@@ -24,7 +24,7 @@ debian_prepare()
     echo
     echo Profanity installer... installing dependencies
     echo
-    sudo apt-get -y install git automake autoconf libssl-dev libexpat1-dev libncursesw5-dev libglib2.0-dev libnotify-dev libcurl3-dev libxss-dev libotr5-dev libreadline-dev libtool libgpgme11-dev
+    sudo apt-get -y install git automake autoconf libssl-dev libexpat1-dev libncursesw5-dev libglib2.0-dev libnotify-dev libcurl3-dev libxss-dev libotr5-dev libreadline-dev libtool libgpgme11-dev libgtk2.0-dev
 
 }
 
@@ -34,7 +34,7 @@ fedora_prepare()
     echo Profanity installer... installing dependencies
     echo
 
-    sudo dnf -y install gcc git autoconf automake openssl-devel expat-devel ncurses-devel glib2-devel libnotify-devel libcurl-devel libXScrnSaver-devel libotr-devel readline-devel libtool gpgme-devel
+    sudo dnf -y install gcc git autoconf automake openssl-devel expat-devel ncurses-devel glib2-devel libnotify-devel libcurl-devel libXScrnSaver-devel libotr-devel readline-devel libtool gpgme-devel gtk2-devel
 }
 
 opensuse_prepare()
