@@ -508,6 +508,17 @@ wins_close_by_num(int i)
 
         ProfWin *window = wins_get_by_num(i);
         if (window) {
+            // cancel upload proccesses of this window
+            GSList *upload_process = upload_processes;
+            while (upload_process) {
+                HTTPUpload *upload = upload_process->data;
+                if (upload->window == window) {
+                    upload->cancel = 1;
+                    break;
+                }
+                upload_process = g_slist_next(upload_process);
+            }
+
             switch (window->type) {
             case WIN_CHAT:
             {

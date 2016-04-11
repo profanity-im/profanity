@@ -42,6 +42,10 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <libgen.h>
+
+#include <dirent.h>
+#include <sys/types.h>
 
 #include <glib.h>
 
@@ -120,6 +124,7 @@ static char* _console_autocomplete(ProfWin *window, const char *const input);
 static char* _win_autocomplete(ProfWin *window, const char *const input);
 static char* _close_autocomplete(ProfWin *window, const char *const input);
 static char* _plugins_autocomplete(ProfWin *window, const char *const input);
+static char* _sendfile_autocomplete(ProfWin *window, const char *const input);
 
 GHashTable *commands = NULL;
 
@@ -793,6 +798,22 @@ static struct cmd_t command_defs[] =
             "/disco items myserver.org",
             "/disco items conference.jabber.org",
             "/disco info myfriend@server.com/laptop")
+    },
+
+    { "/sendfile",
+        cmd_sendfile, parse_args_with_freetext, 1, 1, NULL,
+        CMD_TAGS(
+            CMD_TAG_CHAT,
+            CMD_TAG_GROUPCHAT)
+        CMD_SYN(
+            "/sendfile <file>")
+        CMD_DESC(
+            "Send a file using XEP-0363 HTTP file transfer.")
+        CMD_ARGS(
+            { "<file>", "Path to the file." })
+        CMD_EXAMPLES(
+            "/sendfile /etc/hosts",
+            "/sendfile ~/images/sweet_cat.jpg")
     },
 
     { "/lastactivity",
@@ -2043,6 +2064,7 @@ static Autocomplete console_msg_ac;
 static Autocomplete autoping_ac;
 static Autocomplete plugins_ac;
 static Autocomplete plugins_load_ac;
+static Autocomplete sendfile_ac;
 
 /*
  * Initialise command autocompleter and history
@@ -2597,6 +2619,8 @@ cmd_init(void)
 
     plugins_ac = autocomplete_new();
     autocomplete_add(plugins_ac, "load");
+
+    sendfile_ac = autocomplete_new();
 }
 
 void
@@ -2686,6 +2710,7 @@ cmd_uninit(void)
     autocomplete_free(autoping_ac);
     autocomplete_free(plugins_ac);
     autocomplete_free(plugins_load_ac);
+    autocomplete_free(sendfile_ac);
 }
 
 gboolean
@@ -2834,6 +2859,7 @@ cmd_reset_autocomplete(ProfWin *window)
     autocomplete_reset(notify_mention_ac);
     autocomplete_reset(notify_trigger_ac);
     autocomplete_reset(sub_ac);
+    autocomplete_reset(sendfile_ac);
 
     autocomplete_reset(who_room_ac);
     autocomplete_reset(who_roster_ac);
@@ -3191,6 +3217,7 @@ _cmd_complete_parameters(ProfWin *window, const char *const input)
     g_hash_table_insert(ac_funcs, "/win",           _win_autocomplete);
     g_hash_table_insert(ac_funcs, "/close",         _close_autocomplete);
     g_hash_table_insert(ac_funcs, "/plugins",         _plugins_autocomplete);
+    g_hash_table_insert(ac_funcs, "/sendfile",      _sendfile_autocomplete);
 
     int len = strlen(input);
     char parsed[len+1];
@@ -4588,6 +4615,110 @@ _close_autocomplete(ProfWin *window, const char *const input)
 
     return NULL;
 }
+
+static char*
+_sendfile_autocomplete(ProfWin *window, const char *const input)
+{
+    static char* last_directory = NULL;
+
+    unsigned int output_off = 0;
+
+    char *result = NULL;
+    char *tmp;
+
+    // strip command
+    char *inpcp = (char*)input + 9;
+    while (*inpcp == ' ') {
+        inpcp++;
+    }
+
+    inpcp = strdup(inpcp);
+
+    // strip quotes
+    if (*inpcp == '"') {
+        tmp = strchr(inpcp+1, '"');
+        if (tmp) {
+            *tmp = '\0';
+        }
+        tmp = strdup(inpcp+1);
+        free(inpcp);
+        inpcp = tmp;
+    }
+
+    // expand ~ to $HOME
+    if (inpcp[0] == '~' && inpcp[1] == '/') {
+        if (asprintf(&tmp, "%s/%sfoo", getenv("HOME"), inpcp+2) == -1) {
+            return NULL;
+        }
+        output_off = strlen(getenv("HOME"))+1;
+    } else {
+        if (asprintf(&tmp, "%sfoo", inpcp) == -1) {
+            return NULL;
+        }
+    }
+    free(inpcp);
+    inpcp = tmp;
+
+    char* inpcp2 = strdup(inpcp);
+    char* foofile = strdup(basename(inpcp2));
+    char* directory = strdup(dirname(inpcp));
+    free(inpcp);
+    free(inpcp2);
+
+    if (!last_directory || strcmp(last_directory, directory) != 0) {
+        free(last_directory);
+        last_directory = directory;
+        autocomplete_reset(sendfile_ac);
+
+        struct dirent *dir;
+
+        DIR *d = opendir(directory);
+        if (d) {
+            while ((dir = readdir(d)) != NULL) {
+                if (strcmp(dir->d_name, ".") == 0) {
+                    continue;
+                } else if (strcmp(dir->d_name, "..") == 0) {
+                    continue;
+                } else if (*(dir->d_name) == '.' && *foofile != '.') {
+                    // only show hidden files on explicit request
+                    continue;
+                }
+                char * acstring;
+                if (output_off) {
+                    if (asprintf(&tmp, "%s/%s", directory, dir->d_name) == -1) {
+                        return NULL;
+                    }
+                    if (asprintf(&acstring, "~/%s", tmp+output_off) == -1) {
+                        return NULL;
+                    }
+                    free(tmp);
+                } else if (strcmp(directory, "/") == 0) {
+                    if (asprintf(&acstring, "/%s", dir->d_name) == -1) {
+                        return NULL;
+                    }
+                } else {
+                    if (asprintf(&acstring, "%s/%s", directory, dir->d_name) == -1) {
+                        return NULL;
+                    }
+                }
+                autocomplete_add(sendfile_ac, acstring);
+                free(acstring);
+            }
+            closedir(d);
+        }
+    } else {
+        free(foofile);
+        free(directory);
+    }
+
+    result = autocomplete_param_with_ac(input, "/sendfile", sendfile_ac, TRUE);
+    if (result) {
+        return result;
+    }
+
+    return NULL;
+}
+
 
 static char*
 _subject_autocomplete(ProfWin *window, const char *const input)

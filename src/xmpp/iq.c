@@ -64,6 +64,7 @@
 #include "roster_list.h"
 #include "xmpp/xmpp.h"
 #include "plugins/plugins.h"
+#include "tools/http_upload.h"
 
 typedef struct p_room_info_data_t {
     char *room;
@@ -88,6 +89,7 @@ static void _ping_get_handler(xmpp_stanza_t *const stanza);
 static int _version_result_id_handler(xmpp_stanza_t *const stanza, void *const userdata);
 static int _disco_info_response_id_handler(xmpp_stanza_t *const stanza, void *const userdata);
 static int _disco_info_response_id_handler_onconnect(xmpp_stanza_t *const stanza, void *const userdata);
+static int _http_upload_response_id_handler(xmpp_stanza_t *const stanza, void *const upload_ctx);
 static int _last_activity_response_id_handler(xmpp_stanza_t *const stanza, void *const userdata);
 static int _room_info_response_id_handler(xmpp_stanza_t *const stanza, void *const userdata);
 static int _destroy_room_result_id_handler(xmpp_stanza_t *const stanza, void *const userdata);
@@ -291,6 +293,42 @@ iq_disable_carbons(void)
 
     send_iq_stanza(iq);
     xmpp_stanza_release(iq);
+}
+
+void
+iq_http_upload_request(HTTPUpload *upload)
+{
+    GSList *disco_items = jabber_get_disco_items();
+    DiscoInfo *disco_info;
+    if (disco_items && (g_slist_length(disco_items) > 0)) {
+        while (disco_items) {
+            disco_info = disco_items->data;
+            if (g_hash_table_lookup_extended(disco_info->features, STANZA_NS_HTTP_UPLOAD, NULL, NULL)) {
+                break;
+            }
+            disco_items = g_slist_next(disco_items);
+            if (!disco_items) {
+                cons_show_error("XEP-0363 HTTP File Upload is not supported by the server");
+                return;
+            }
+        }
+    } else {
+        cons_show_error("No disco items");
+        return;
+    }
+
+    xmpp_ctx_t * const ctx = connection_get_ctx();
+    char *id = create_unique_id("http_upload_request");
+
+    xmpp_stanza_t *iq = stanza_create_http_upload_request(ctx, id, disco_info->item, upload);
+
+    id_handler_add(id, _http_upload_response_id_handler, upload);
+
+    free(id);
+
+    send_iq_stanza(iq);
+    xmpp_stanza_release(iq);
+    return;
 }
 
 void
@@ -1898,6 +1936,60 @@ _disco_info_response_id_handler_onconnect(xmpp_stanza_t *const stanza, void *con
                 }
             }
             child = xmpp_stanza_get_next(child);
+        }
+    }
+
+    return 0;
+}
+
+static int
+_http_upload_response_id_handler(xmpp_stanza_t *const stanza, void *const userdata)
+{
+    HTTPUpload *upload = (HTTPUpload *)userdata;
+    const char *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
+    const char *type = xmpp_stanza_get_type(stanza);
+
+    if (from) {
+        log_info("Received http_upload response from: %s", from);
+    } else {
+        log_info("Received http_upload response");
+    }
+
+    // handle error responses
+    if (g_strcmp0(type, STANZA_TYPE_ERROR) == 0) {
+        char *error_message = stanza_get_error_message(stanza);
+        if (from) {
+            cons_show_error("Uploading '%s' failed for %s: %s", upload->filename, from, error_message);
+        } else {
+            cons_show_error("Uploading '%s' failed: %s", upload->filename, error_message);
+        }
+        free(error_message);
+        return 0;
+    }
+
+    xmpp_stanza_t *slot = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_SLOT);
+
+    if (slot && g_strcmp0(xmpp_stanza_get_ns(slot), STANZA_NS_HTTP_UPLOAD) == 0) {
+        xmpp_stanza_t *put = xmpp_stanza_get_child_by_name(slot, STANZA_NAME_PUT);
+        xmpp_stanza_t *get = xmpp_stanza_get_child_by_name(slot, STANZA_NAME_GET);
+
+        if (put && get) {
+            char *put_url = xmpp_stanza_get_text(put);
+            char *get_url = xmpp_stanza_get_text(get);
+
+            upload->put_url = strdup(put_url);
+            upload->get_url = strdup(get_url);
+
+            xmpp_conn_t *conn = connection_get_conn();
+            xmpp_ctx_t *ctx = xmpp_conn_get_context(conn);
+            if (put_url) xmpp_free(ctx, put_url);
+            if (get_url) xmpp_free(ctx, get_url);
+
+            pthread_create(&(upload->worker), NULL, &http_file_put, upload);
+            upload_processes = g_slist_append(upload_processes, upload);
+        } else {
+            log_error("Invalid XML in HTTP Upload slot");
+            return 1;
         }
     }
 

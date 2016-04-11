@@ -116,6 +116,12 @@ else
     AM_CONDITIONAL([BUILD_C_API], [false])
 fi
 
+# threading
+ACX_PTHREAD
+LIBS="$PTHREAD_LIBS $LIBS"
+CFLAGS="$CFLAGS $PTHREAD_CFLAGS"
+CC="$PTHREAD_CC"
+
 ### Check for libmesode, fall back to libstrophe
 PKG_CHECK_MODULES([libmesode], [libmesode],
     [LIBS="$libmesode_LIBS $LIBS" CFLAGS="$CFLAGS $libmesode_CFLAGS" AC_DEFINE([HAVE_LIBMESODE], [1], [libmesode])],

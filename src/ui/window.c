@@ -1055,6 +1055,27 @@ win_mark_received(ProfWin *window, const char *const id)
 }
 
 void
+win_update_entry_message(ProfWin *window, const char *const id, const char *const message)
+{
+    ProfBuffEntry *entry = buffer_yield_entry_by_id(window->layout->buffer, id);
+    if (entry) {
+        free(entry->message);
+        entry->message = strdup(message);
+        win_redraw(window);
+    }
+}
+
+void
+win_update_entry_theme(ProfWin *window, const char *const id, theme_item_t theme_item)
+{
+    ProfBuffEntry *entry = buffer_yield_entry_by_id(window->layout->buffer, id);
+    if (entry) {
+        entry->theme_item = theme_item;
+        win_redraw(window);
+    }
+}
+
+void
 win_println(ProfWin *window, int pad, const char *const message)
 {
     win_print(window, '-', pad, NULL, 0, 0, "", message);

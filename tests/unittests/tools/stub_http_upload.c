@@ -1,5 +1,5 @@
 /*
- * profanity.h
+ * http_upload.h
  *
  * Copyright (C) 2012 - 2016 James Booth <boothj5@gmail.com>
  *
@@ -32,22 +32,32 @@
  *
  */
 
-#ifndef PROFANITY_H
-#define PROFANITY_H
+#ifndef TOOLS_HTTP_UPLOAD_H
+#define TOOLS_HTTP_UPLOAD_H
 
-#include <pthread.h>
+#include <curl/curl.h>
 
-#include "resource.h"
-#include "xmpp/xmpp.h"
+// forward -> ui/win_types.h
+typedef struct prof_win_t ProfWin;
 
-void prof_run(char *log_level, char *account_name);
+typedef struct http_upload_t {
+    char *filename;
+    off_t filesize;
+    curl_off_t bytes_sent;
+    char *mime_type;
+    char *get_url;
+    char *put_url;
+    ProfWin *window;
+    pthread_t worker;
+    int cancel;
+} HTTPUpload;
 
-void prof_handle_idle(void);
-void prof_handle_activity(void);
-gboolean prof_process_input(char *inp);
+//GSList *upload_processes;
 
-void prof_set_quit(void);
+void* http_file_put(void *userdata) {}
 
-pthread_mutex_t lock;
+char* file_mime_type(const char* const file_name) {}
+off_t file_size(const char* const file_name) {}
+int is_regular_file(const char *filename) {}
 
 #endif

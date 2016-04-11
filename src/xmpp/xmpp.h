@@ -49,6 +49,7 @@
 #include "contact.h"
 #include "jid.h"
 #include "tools/autocomplete.h"
+#include "tools/http_upload.h"
 
 #define JABBER_PRIORITY_MIN -128
 #define JABBER_PRIORITY_MAX 127
@@ -169,11 +170,11 @@ gboolean jabber_conn_is_secured(void);
 gboolean jabber_send_stanza(const char *const stanza);
 
 // message functions
-char* message_send_chat(const char *const barejid, const char *const msg);
+char* message_send_chat(const char *const barejid, const char *const msg, const char *const oob_url);
 char* message_send_chat_otr(const char *const barejid, const char *const msg);
 char* message_send_chat_pgp(const char *const barejid, const char *const msg);
-void message_send_private(const char *const fulljid, const char *const msg);
-void message_send_groupchat(const char *const roomjid, const char *const msg);
+void message_send_private(const char *const fulljid, const char *const msg, const char *const oob_url);
+void message_send_groupchat(const char *const roomjid, const char *const msg, const char *const oob_url);
 void message_send_groupchat_subject(const char *const roomjid, const char *const subject);
 
 void message_send_inactive(const char *const jid);
@@ -225,6 +226,7 @@ void iq_room_kick_occupant(const char *const room, const char *const nick, const
 void iq_room_role_set(const char *const room, const char *const nick, char *role, const char *const reason);
 void iq_room_role_list(const char * const room, char *role);
 void iq_autoping_check(void);
+void iq_http_upload_request(HTTPUpload *upload);
 
 // caps functions
 Capabilities* caps_lookup(const char *const jid);
