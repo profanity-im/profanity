@@ -47,7 +47,7 @@ typedef struct prof_plugin_t {
     lang_t lang;
     void *module;
     void (*init_func)(struct prof_plugin_t* plugin, const char * const version,
-        const char * const status);
+        const char * const status, const char *const account_name, const char *const fulljid);
 
     void (*on_start_func)(struct prof_plugin_t* plugin);
     void (*on_shutdown_func)(struct prof_plugin_t* plugin);

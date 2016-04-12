@@ -128,10 +128,11 @@ python_plugin_create(const char *const filename)
 }
 
 void
-python_init_hook(ProfPlugin *plugin, const char *const version, const char *const status)
+python_init_hook(ProfPlugin *plugin, const char *const version, const char *const status, const char *const account_name,
+    const char *const fulljid)
 {
     disable_python_threads();
-    PyObject *p_args = Py_BuildValue("ss", version, status);
+    PyObject *p_args = Py_BuildValue("ssss", version, status, account_name, fulljid);
     PyObject *p_function;
 
     PyObject *p_module = plugin->module;

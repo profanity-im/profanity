@@ -43,7 +43,8 @@ ProfPlugin* c_plugin_create(const char *const filename);
 void c_plugin_destroy(ProfPlugin *plugin);
 void c_shutdown(void);
 
-void c_init_hook(ProfPlugin *plugin, const char *const version, const char *const status);
+void c_init_hook(ProfPlugin *plugin, const char *const version, const char *const status, const char *const account_name,
+    const char *const fulljid);
 void c_on_start_hook(ProfPlugin *plugin);
 void c_on_shutdown_hook(ProfPlugin *plugin);
 void c_on_connect_hook(ProfPlugin *plugin, const char *const account_name, const char *const fulljid);
