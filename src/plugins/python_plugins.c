@@ -62,27 +62,17 @@ python_env_init(void)
     Py_Initialize();
     PyEval_InitThreads();
     python_api_init();
-    GString *path = g_string_new(Py_GetPath());
 
-    g_string_append(path, ":");
+    GString *path = g_string_new("import sys\n");
+    g_string_append(path, "sys.path.append(\"");
     gchar *plugins_dir = plugins_get_dir();
     g_string_append(path, plugins_dir);
-    g_string_append(path, "/");
     g_free(plugins_dir);
+    g_string_append(path, "/\")\n");
 
-    PySys_SetPath(path->str);
+    PyRun_SimpleString(path->str);
+
     g_string_free(path, TRUE);
-
-    // add site packages paths
-    PyRun_SimpleString(
-        "import site\n"
-        "import sys\n"
-        "from distutils.sysconfig import get_python_lib\n"
-        "sys.path.append(get_python_lib())\n"
-        "for dir in site.getsitepackages():\n"
-        "   sys.path.append(dir)\n"
-    );
-
     allow_python_threads();
 }
 
