@@ -215,29 +215,30 @@ _get_plugins_dir(void)
 }
 
 void
-_plugins_list_dir(const gchar *const dir, GSList **result)
+_plugins_unloaded_list_dir(const gchar *const dir, GSList **result)
 {
-    GDir *plugins = g_dir_open(dir, 0, NULL);
-    if (plugins == NULL) {
+    GDir *plugins_dir = g_dir_open(dir, 0, NULL);
+    if (plugins_dir == NULL) {
         return;
     }
 
-    const gchar *plugin = g_dir_read_name(plugins);
+    const gchar *plugin = g_dir_read_name(plugins_dir);
     while (plugin) {
-        if (g_str_has_suffix(plugin, ".so") || g_str_has_suffix(plugin, ".py")) {
+        GSList *found = g_slist_find_custom(plugins, plugin, (GCompareFunc)_find_by_name);
+        if ((g_str_has_suffix(plugin, ".so") || g_str_has_suffix(plugin, ".py")) && !found) {
             *result = g_slist_append(*result, strdup(plugin));
         }
-        plugin = g_dir_read_name(plugins);
+        plugin = g_dir_read_name(plugins_dir);
     }
-    g_dir_close(plugins);
+    g_dir_close(plugins_dir);
 }
 
 GSList*
-plugins_file_list(void)
+plugins_unloaded_list(void)
 {
     GSList *result = NULL;
     char *plugins_dir = _get_plugins_dir();
-    _plugins_list_dir(plugins_dir, &result);
+    _plugins_unloaded_list_dir(plugins_dir, &result);
     free(plugins_dir);
 
     return result;

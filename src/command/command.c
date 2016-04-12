@@ -3761,7 +3761,7 @@ _plugins_autocomplete(ProfWin *window, const char *const input)
     if ((strncmp(input, "/plugins load ", 14) == 0) && (strlen(input) > 14)) {
         if (plugins_load_ac == NULL) {
             plugins_load_ac = autocomplete_new();
-            GSList *plugins = plugins_file_list();
+            GSList *plugins = plugins_unloaded_list();
             GSList *curr = plugins;
             while (curr) {
                 autocomplete_add(plugins_load_ac, curr->data);
