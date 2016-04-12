@@ -148,7 +148,7 @@ plugins_init(void)
         GSList *curr = plugins;
         while (curr) {
             ProfPlugin *plugin = curr->data;
-            plugin->init_func(plugin, PACKAGE_VERSION, PACKAGE_STATUS);
+            plugin->init_func(plugin, PACKAGE_VERSION, PACKAGE_STATUS, NULL, NULL);
             curr = g_slist_next(curr);
         }
     }
@@ -189,7 +189,13 @@ plugins_load(const char *const name)
 #endif
     if (plugin) {
         plugins = g_slist_append(plugins, plugin);
-        plugin->init_func(plugin, PACKAGE_VERSION, PACKAGE_STATUS);
+        if (jabber_get_connection_status() == JABBER_CONNECTED) {
+            const char *account_name = jabber_get_account_name();
+            const char *fulljid = jabber_get_fulljid();
+            plugin->init_func(plugin, PACKAGE_VERSION, PACKAGE_STATUS, account_name, fulljid);
+        } else {
+            plugin->init_func(plugin, PACKAGE_VERSION, PACKAGE_STATUS, NULL, NULL);
+        }
         log_info("Loaded plugin: %s", name);
         return TRUE;
     } else {

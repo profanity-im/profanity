@@ -113,10 +113,12 @@ c_plugin_create(const char *const filename)
 }
 
 void
-c_init_hook(ProfPlugin *plugin, const char *const version, const char *const status)
+c_init_hook(ProfPlugin *plugin, const char *const version, const char *const status, const char *const account_name,
+    const char *const fulljid)
 {
     void *f = NULL;
-    void (*func)(const char *const __version, const char *const __status);
+    void (*func)(const char *const __version, const char *const __status, const char *const __account_name,
+        const char *const __fulljid);
 
     assert(plugin && plugin->module);
 
@@ -125,10 +127,10 @@ c_init_hook(ProfPlugin *plugin, const char *const version, const char *const sta
         return;
     }
 
-    func = (void (*)(const char *const, const char *const))f;
+    func = (void (*)(const char *const, const char *const, const char *const, const char *const))f;
 
     // FIXME maybe we want to make it boolean to see if it succeeded or not?
-    func(version, status);
+    func(version, status, account_name, fulljid);
 }
 
 void

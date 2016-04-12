@@ -43,7 +43,8 @@ void python_check_error(void);
 void allow_python_threads();
 void disable_python_threads();
 
-void python_init_hook(ProfPlugin *plugin, const char *const version, const char *const status);
+void python_init_hook(ProfPlugin *plugin, const char *const version, const char *const status,
+    const char *const account_name, const char *const fulljid);
 void python_on_start_hook(ProfPlugin *plugin);
 void python_on_shutdown_hook(ProfPlugin *plugin);
 void python_on_connect_hook(ProfPlugin *plugin, const char *const account_name, const char *const fulljid);
