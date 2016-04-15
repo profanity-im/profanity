@@ -32,6 +32,8 @@
  *
  */
 
+#define _GNU_SOURCE 1
+
 #include "config.h"
 
 #include <assert.h>
@@ -2972,7 +2974,17 @@ cmd_process_input(ProfWin *window, char *inp)
     } else if (inp[0] == '/') {
         char *inp_cpy = strdup(inp);
         char *command = strtok(inp_cpy, " ");
-        result = _cmd_execute(window, command, inp);
+        char *question_mark = strchr(command, '?');
+        if (question_mark) {
+            *question_mark = '\0';
+            char *fakeinp;
+            if (asprintf(&fakeinp, "/help %s", command+1)) {
+                result = _cmd_execute(window, "/help", fakeinp);
+                free(fakeinp);
+            }
+        } else {
+            result = _cmd_execute(window, command, inp);
+        }
         free(inp_cpy);
 
     // call a default handler if input didn't start with '/'
