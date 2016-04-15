@@ -211,6 +211,42 @@ api_get_current_muc(void)
     }
 }
 
+char *
+api_get_current_nick(void)
+{
+    ProfWin *current = wins_get_current();
+    if (current->type == WIN_MUC) {
+        ProfMucWin *mucwin = (ProfMucWin*)current;
+        assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
+        return muc_nick(mucwin->roomjid);
+    } else {
+        return NULL;
+    }
+}
+
+char**
+api_get_current_occupants(void)
+{
+    ProfWin *current = wins_get_current();
+    if (current->type == WIN_MUC) {
+        ProfMucWin *mucwin = (ProfMucWin*)current;
+        assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
+        GList *occupants_list = muc_roster(mucwin->roomjid);
+        char **result = malloc((g_list_length(occupants_list) + 1) * sizeof(char*));
+        GList *curr = occupants_list;
+        int i = 0;
+        while (curr) {
+            Occupant *occupant = curr->data;
+            result[i++] = strdup(occupant->nick);
+            curr = g_list_next(curr);
+        }
+        result[i] = NULL;
+        return result;
+    } else {
+        return NULL;
+    }
+}
+
 int
 api_current_win_is_console(void)
 {

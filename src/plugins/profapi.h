@@ -59,6 +59,8 @@ void (*prof_send_line)(char *line);
 char* (*prof_get_current_recipient)(void);
 char* (*prof_get_current_muc)(void);
 int (*prof_current_win_is_console)(void);
+char* (*prof_get_current_nick)(void);
+char** (*prof_get_current_occupants)(void);
 
 void (*prof_log_debug)(const char *message);
 void (*prof_log_info)(const char *message);
