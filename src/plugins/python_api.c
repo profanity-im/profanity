@@ -316,6 +316,38 @@ python_api_get_current_muc(PyObject *self, PyObject *args)
     }
 }
 
+static PyObject *
+python_api_get_current_nick(PyObject *self, PyObject *args)
+{
+    allow_python_threads();
+    char *nick = api_get_current_nick();
+    disable_python_threads();
+    if (nick) {
+        return Py_BuildValue("s", nick);
+    } else {
+        return Py_BuildValue("");
+    }
+}
+
+static PyObject*
+python_api_get_current_occupants(PyObject *self, PyObject *args)
+{
+    allow_python_threads();
+    char **occupants = api_get_current_occupants();
+    disable_python_threads();
+    PyObject *result = PyList_New(0);
+    if (occupants) {
+        int len = g_strv_length(occupants);
+        int i = 0;
+        for (i = 0; i < len; i++) {
+            PyList_Append(result, Py_BuildValue("s", occupants[i]));
+        }
+        return result;
+    } else {
+        return result;
+    }
+}
+
 static PyObject*
 python_api_current_win_is_console(PyObject *self, PyObject *args)
 {
@@ -714,6 +746,8 @@ static PyMethodDef apiMethods[] = {
     { "notify", python_api_notify, METH_VARARGS, "Send desktop notification." },
     { "get_current_recipient", python_api_get_current_recipient, METH_VARARGS, "Return the jid of the recipient of the current window." },
     { "get_current_muc", python_api_get_current_muc, METH_VARARGS, "Return the jid of the room of the current window." },
+    { "get_current_nick", python_api_get_current_nick, METH_VARARGS, "Return nickname in current room." },
+    { "get_current_occupants", python_api_get_current_occupants, METH_VARARGS, "Return list of occupants in current room." },
     { "current_win_is_console", python_api_current_win_is_console, METH_VARARGS, "Returns whether the current window is the console." },
     { "log_debug", python_api_log_debug, METH_VARARGS, "Log a debug message" },
     { "log_info", python_api_log_info, METH_VARARGS, "Log an info message" },
