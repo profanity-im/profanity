@@ -646,7 +646,7 @@ python_on_message_stanza_receive_hook(ProfPlugin *plugin, const char *const text
             PyObject *result = PyObject_CallObject(p_function, p_args);
             python_check_error();
             Py_XDECREF(p_function);
-            if (PyBool_Check(result)) {
+            if (PyObject_IsTrue(result)) {
                 allow_python_threads();
                 return TRUE;
             } else {
@@ -711,7 +711,7 @@ python_on_presence_stanza_receive_hook(ProfPlugin *plugin, const char *const tex
             PyObject *result = PyObject_CallObject(p_function, p_args);
             python_check_error();
             Py_XDECREF(p_function);
-            if (PyBool_Check(result)) {
+            if (PyObject_IsTrue(result)) {
                 allow_python_threads();
                 return TRUE;
             } else {
@@ -776,7 +776,7 @@ python_on_iq_stanza_receive_hook(ProfPlugin *plugin, const char *const text)
             PyObject *result = PyObject_CallObject(p_function, p_args);
             python_check_error();
             Py_XDECREF(p_function);
-            if (PyBool_Check(result)) {
+            if (PyObject_IsTrue(result)) {
                 allow_python_threads();
                 return TRUE;
             } else {
