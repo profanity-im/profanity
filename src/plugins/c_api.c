@@ -139,9 +139,21 @@ c_api_get_current_muc(void)
 }
 
 static int
-c_api_current_win_is_console()
+c_api_current_win_is_console(void)
 {
     return api_current_win_is_console();
+}
+
+static char*
+c_api_get_current_nick(void)
+{
+    return api_get_current_nick();
+}
+
+static char**
+c_api_get_current_occupants(void)
+{
+    return api_get_current_occupants();
 }
 
 static void
@@ -289,6 +301,8 @@ c_api_init(void)
     prof_get_current_recipient = c_api_get_current_recipient;
     prof_get_current_muc = c_api_get_current_muc;
     prof_current_win_is_console = c_api_current_win_is_console;
+    prof_get_current_nick = c_api_get_current_nick;
+    prof_get_current_occupants = c_api_get_current_occupants;
     prof_log_debug = c_api_log_debug;
     prof_log_info = c_api_log_info;
     prof_log_warning = c_api_log_warning;
