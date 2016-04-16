@@ -284,6 +284,9 @@ void cons_privileges_setting(void);
 void cons_beep_setting(void);
 void cons_console_setting(void);
 void cons_flash_setting(void);
+#ifdef HAVE_GTK
+void cons_tray_setting(void);
+#endif
 void cons_splash_setting(void);
 void cons_encwarn_setting(void);
 void cons_tlsshow_setting(void);

@@ -1253,6 +1253,21 @@ static struct cmd_t command_defs[] =
         CMD_NOEXAMPLES
     },
 
+#ifdef HAVE_GTK
+    { "/tray",
+        cmd_tray, parse_args, 1, 1, &cons_tray_setting,
+        CMD_TAGS(
+            CMD_TAG_UI)
+        CMD_SYN(
+            "/tray on|off")
+        CMD_DESC(
+            "Display an icon in the tray that will indicate new messages.")
+        CMD_ARGS(
+            { "on|off", "Enable or disable tray icon." })
+        CMD_NOEXAMPLES
+    },
+#endif
+
     { "/intype",
         cmd_intype, parse_args, 1, 1, &cons_intype_setting,
         CMD_TAGS(

@@ -373,7 +373,7 @@ _init(char *log_level)
     atexit(_shutdown);
     plugins_init();
 #ifdef HAVE_GTK
-    if (gtk_ready) {
+    if (gtk_ready && prefs_get_boolean(PREF_TRAY)) {
         log_debug("Building GTK icon");
         create_tray();
     }
@@ -397,7 +397,7 @@ _shutdown(void)
         cl_ev_disconnect();
     }
 #ifdef HAVE_GTK
-    if (gtk_ready) {
+    if (gtk_ready && prefs_get_boolean(PREF_TRAY)) {
         destroy_tray();
     }
 #endif

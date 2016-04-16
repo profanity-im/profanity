@@ -52,6 +52,9 @@ typedef enum {
     PREF_TITLEBAR_SHOW,
     PREF_TITLEBAR_GOODBYE,
     PREF_FLASH,
+#ifdef HAVE_GTK
+    PREF_TRAY,
+#endif
     PREF_INTYPE,
     PREF_HISTORY,
     PREF_CARBONS,

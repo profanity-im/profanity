@@ -1182,6 +1182,17 @@ cons_flash_setting(void)
         cons_show("Terminal flash (/flash)             : OFF");
 }
 
+#ifdef HAVE_GTK
+void
+cons_tray_setting(void)
+{
+    if (prefs_get_boolean(PREF_TRAY))
+        cons_show("Tray icon (/tray)             : ON");
+    else
+        cons_show("Tray icon (/tray)             : OFF");
+}
+#endif
+
 void
 cons_splash_setting(void)
 {
@@ -1497,6 +1508,9 @@ cons_show_ui_prefs(void)
     cons_theme_setting();
     cons_beep_setting();
     cons_flash_setting();
+#ifdef HAVE_GTK
+    cons_tray_setting();
+#endif
     cons_splash_setting();
     cons_wrap_setting();
     cons_winstidy_setting();

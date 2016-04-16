@@ -77,6 +77,9 @@
 #include "ui/ui.h"
 #include "window_list.h"
 #include "event/client_events.h"
+#ifdef HAVE_GTK
+#include "tray.h"
+#endif
 
 static void _update_presence(const resource_presence_t presence,
     const char *const show, gchar **args);
@@ -5524,6 +5527,24 @@ cmd_flash(ProfWin *window, const char *const command, gchar **args)
 {
     return _cmd_set_boolean_preference(args[0], command, "Screen flash", PREF_FLASH);
 }
+
+#ifdef HAVE_GTK
+gboolean
+cmd_tray(ProfWin *window, const char *const command, gchar **args)
+{
+    gboolean old = prefs_get_boolean(PREF_TRAY);
+    gboolean ret = _cmd_set_boolean_preference(args[0], command, "Tray icon", PREF_TRAY);
+    gboolean new = prefs_get_boolean(PREF_TRAY);
+    if (old != new) {
+        if (new) {
+            create_tray();
+        } else {
+            destroy_tray();
+        }
+    }
+    return ret;
+}
+#endif
 
 gboolean
 cmd_intype(ProfWin *window, const char *const command, gchar **args)
