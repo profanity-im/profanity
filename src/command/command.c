@@ -1253,6 +1253,19 @@ static struct cmd_t command_defs[] =
         CMD_NOEXAMPLES
     },
 
+    { "/tray",
+        cmd_tray, parse_args, 1, 1, &cons_tray_setting,
+        CMD_TAGS(
+            CMD_TAG_UI)
+        CMD_SYN(
+            "/tray on|off")
+        CMD_DESC(
+            "Display an icon in the tray that will indicate new messages.")
+        CMD_ARGS(
+            { "on|off", "Enable or disable tray icon." })
+        CMD_NOEXAMPLES
+    },
+
     { "/intype",
         cmd_intype, parse_args, 1, 1, &cons_intype_setting,
         CMD_TAGS(
@@ -3061,9 +3074,9 @@ _cmd_complete_parameters(ProfWin *window, const char *const input)
     jabber_conn_status_t conn_status = jabber_get_connection_status();
 
     // autocomplete boolean settings
-    gchar *boolean_choices[] = { "/beep", "/intype", "/states", "/outtype",
-        "/flash", "/splash", "/chlog", "/grlog", "/history", "/vercheck",
-        "/privileges", "/presence", "/wrap", "/winstidy", "/carbons", "/encwarn", "/lastactivity" };
+    gchar *boolean_choices[] = { "/beep", "/intype", "/states", "/outtype", "/flash", "/splash", "/chlog", "/grlog",
+        "/history", "/vercheck", "/privileges", "/presence", "/wrap", "/winstidy", "/carbons", "/encwarn",
+        "/lastactivity", "/tray" };
 
     for (i = 0; i < ARRAY_SIZE(boolean_choices); i++) {
         result = autocomplete_param_with_func(input, boolean_choices[i], prefs_autocomplete_boolean_choice);
