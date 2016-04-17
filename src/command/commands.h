@@ -89,6 +89,7 @@ gboolean cmd_lastactivity(ProfWin *window, const char *const command, gchar **ar
 gboolean cmd_disconnect(ProfWin *window, const char *const command, gchar **args);
 gboolean cmd_dnd(ProfWin *window, const char *const command, gchar **args);
 gboolean cmd_flash(ProfWin *window, const char *const command, gchar **args);
+gboolean cmd_tray(ProfWin *window, const char *const command, gchar **args);
 gboolean cmd_gone(ProfWin *window, const char *const command, gchar **args);
 gboolean cmd_grlog(ProfWin *window, const char *const command, gchar **args);
 gboolean cmd_group(ProfWin *window, const char *const command, gchar **args);
