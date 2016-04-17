@@ -35,6 +35,10 @@
 #ifndef PROFANITY_TRAY_H
 #define PROFANITY_TRAY_H
 
+void tray_init(void);
+void tray_update(void);
+void tray_close(void);
+
 /*
  * Create tray icon
  *

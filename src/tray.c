@@ -42,7 +42,9 @@
 #include "tray.h"
 #include "window_list.h"
 #include "log.h"
+#include "config/preferences.h"
 
+static gboolean gtk_ready = FALSE;
 static GtkStatusIcon *prof_tray = NULL;
 static GString *icon_filename = NULL;
 static GString *icon_msg_filename = NULL;
@@ -139,6 +141,39 @@ _tray_change_icon(gpointer data)
 
 /* }}} */
 /* {{{ Public */
+
+void
+tray_init(void)
+{
+    gtk_ready = gtk_init_check(0, NULL);
+    log_debug("Env is GTK-ready: %s", gtk_ready ? "true" : "false");
+    if (!gtk_ready) {
+        return;
+    }
+
+    gtk_init(0, NULL);
+    gtk_main_iteration_do(FALSE);
+    if (prefs_get_boolean(PREF_TRAY)) {
+        log_debug("Building GTK icon");
+        create_tray();
+    }
+}
+
+void
+tray_update(void)
+{
+    if (gtk_ready) {
+        gtk_main_iteration_do(FALSE);
+    }
+}
+
+void
+tray_close(void)
+{
+    if (gtk_ready && prefs_get_boolean(PREF_TRAY)) {
+        destroy_tray();
+    }
+}
 
 void
 create_tray(void)
