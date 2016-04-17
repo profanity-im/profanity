@@ -153,11 +153,12 @@ tray_init(void)
     }
 
     gtk_init(0, NULL);
-    gtk_main_iteration_do(FALSE);
     if (prefs_get_boolean(PREF_TRAY)) {
         log_debug("Building GTK icon");
         tray_enable();
     }
+
+    gtk_main_iteration_do(FALSE);
 }
 
 void
@@ -183,6 +184,7 @@ tray_enable(void)
 {
     prof_tray = gtk_status_icon_new_from_file(icon_filename->str);
     shutting_down = FALSE;
+    _tray_change_icon(NULL);
     timer = g_timeout_add(5000, _tray_change_icon, NULL);
 }
 
