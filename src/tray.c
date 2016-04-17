@@ -42,7 +42,9 @@
 #include "tray.h"
 #include "window_list.h"
 #include "log.h"
+#include "config/preferences.h"
 
+static gboolean gtk_ready = FALSE;
 static GtkStatusIcon *prof_tray = NULL;
 static GString *icon_filename = NULL;
 static GString *icon_msg_filename = NULL;
@@ -141,16 +143,53 @@ _tray_change_icon(gpointer data)
 /* {{{ Public */
 
 void
-create_tray(void)
+tray_init(void)
 {
     _get_icons();
+    gtk_ready = gtk_init_check(0, NULL);
+    log_debug("Env is GTK-ready: %s", gtk_ready ? "true" : "false");
+    if (!gtk_ready) {
+        return;
+    }
+
+    gtk_init(0, NULL);
+    if (prefs_get_boolean(PREF_TRAY)) {
+        log_debug("Building GTK icon");
+        tray_enable();
+    }
+
+    gtk_main_iteration_do(FALSE);
+}
+
+void
+tray_update(void)
+{
+    if (gtk_ready) {
+        gtk_main_iteration_do(FALSE);
+    }
+}
+
+void
+tray_shutdown(void)
+{
+    if (gtk_ready && prefs_get_boolean(PREF_TRAY)) {
+        tray_disable();
+    }
+    g_string_free(icon_filename, TRUE);
+    g_string_free(icon_msg_filename, TRUE);
+}
+
+void
+tray_enable(void)
+{
     prof_tray = gtk_status_icon_new_from_file(icon_filename->str);
     shutting_down = FALSE;
+    _tray_change_icon(NULL);
     timer = g_timeout_add(5000, _tray_change_icon, NULL);
 }
 
 void
-destroy_tray(void)
+tray_disable(void)
 {
     shutting_down = TRUE;
     g_source_remove(timer);
@@ -158,8 +197,6 @@ destroy_tray(void)
         g_clear_object(&prof_tray);
         prof_tray = NULL;
     }
-    g_string_free(icon_filename, TRUE);
-    g_string_free(icon_msg_filename, TRUE);
 }
 
 /* }}} */
