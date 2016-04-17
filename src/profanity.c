@@ -103,14 +103,6 @@ static gboolean gtk_ready = FALSE;
 void
 prof_run(char *log_level, char *account_name)
 {
-#ifdef HAVE_GTK
-    gtk_ready = gtk_init_check(0, NULL);
-    log_debug("Env is GTK-ready: %s", gtk_ready ? "true" : "false");
-    if (gtk_ready) {
-        gtk_init(0, NULL);
-        gtk_main_iteration_do(FALSE);
-    }
-#endif
     _init(log_level);
     plugins_on_start();
     _connect_default(account_name);
@@ -373,9 +365,15 @@ _init(char *log_level)
     atexit(_shutdown);
     plugins_init();
 #ifdef HAVE_GTK
-    if (gtk_ready && prefs_get_boolean(PREF_TRAY)) {
-        log_debug("Building GTK icon");
-        create_tray();
+    gtk_ready = gtk_init_check(0, NULL);
+    log_debug("Env is GTK-ready: %s", gtk_ready ? "true" : "false");
+    if (gtk_ready) {
+        gtk_init(0, NULL);
+        gtk_main_iteration_do(FALSE);
+        if (prefs_get_boolean(PREF_TRAY)) {
+            log_debug("Building GTK icon");
+            create_tray();
+        }
     }
 #endif
     inp_nonblocking(TRUE);
