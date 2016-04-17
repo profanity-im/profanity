@@ -380,7 +380,7 @@ _shutdown(void)
         cl_ev_disconnect();
     }
 #ifdef HAVE_GTK
-    tray_close();
+    tray_shutdown();
 #endif
     jabber_shutdown();
     plugins_on_shutdown();
