@@ -32,6 +32,8 @@
  *
  */
 
+#define _GNU_SOURCE 1
+
 #include "config.h"
 
 #include <assert.h>
@@ -1248,6 +1250,19 @@ static struct cmd_t command_defs[] =
             "If the terminal doesn't support flashing, it may attempt to beep.")
         CMD_ARGS(
             { "on|off", "Enable or disable terminal flash." })
+        CMD_NOEXAMPLES
+    },
+
+    { "/tray",
+        cmd_tray, parse_args, 1, 1, &cons_tray_setting,
+        CMD_TAGS(
+            CMD_TAG_UI)
+        CMD_SYN(
+            "/tray on|off")
+        CMD_DESC(
+            "Display an icon in the tray that will indicate new messages.")
+        CMD_ARGS(
+            { "on|off", "Enable or disable tray icon." })
         CMD_NOEXAMPLES
     },
 
@@ -2972,7 +2987,17 @@ cmd_process_input(ProfWin *window, char *inp)
     } else if (inp[0] == '/') {
         char *inp_cpy = strdup(inp);
         char *command = strtok(inp_cpy, " ");
-        result = _cmd_execute(window, command, inp);
+        char *question_mark = strchr(command, '?');
+        if (question_mark) {
+            *question_mark = '\0';
+            char *fakeinp;
+            if (asprintf(&fakeinp, "/help %s", command+1)) {
+                result = _cmd_execute(window, "/help", fakeinp);
+                free(fakeinp);
+            }
+        } else {
+            result = _cmd_execute(window, command, inp);
+        }
         free(inp_cpy);
 
     // call a default handler if input didn't start with '/'
@@ -3049,9 +3074,9 @@ _cmd_complete_parameters(ProfWin *window, const char *const input)
     jabber_conn_status_t conn_status = jabber_get_connection_status();
 
     // autocomplete boolean settings
-    gchar *boolean_choices[] = { "/beep", "/intype", "/states", "/outtype",
-        "/flash", "/splash", "/chlog", "/grlog", "/history", "/vercheck",
-        "/privileges", "/presence", "/wrap", "/winstidy", "/carbons", "/encwarn", "/lastactivity" };
+    gchar *boolean_choices[] = { "/beep", "/intype", "/states", "/outtype", "/flash", "/splash", "/chlog", "/grlog",
+        "/history", "/vercheck", "/privileges", "/presence", "/wrap", "/winstidy", "/carbons", "/encwarn",
+        "/lastactivity", "/tray" };
 
     for (i = 0; i < ARRAY_SIZE(boolean_choices); i++) {
         result = autocomplete_param_with_func(input, boolean_choices[i], prefs_autocomplete_boolean_choice);

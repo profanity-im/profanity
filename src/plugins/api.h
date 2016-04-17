@@ -47,6 +47,8 @@ void api_send_line(char *line);
 char * api_get_current_recipient(void);
 char * api_get_current_muc(void);
 gboolean api_current_win_is_console(void);
+char* api_get_current_nick(void);
+char** api_get_current_occupants(void);
 
 void api_register_command(const char *command_name, int min_args, int max_args,
     const char **synopsis, const char *description, const char *arguments[][2], const char **examples,
