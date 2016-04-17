@@ -5546,9 +5546,9 @@ cmd_tray(ProfWin *window, const char *const command, gchar **args)
     gboolean new = prefs_get_boolean(PREF_TRAY);
     if (old != new) {
         if (new) {
-            create_tray();
+            tray_enable();
         } else {
-            destroy_tray();
+            tray_disable();
         }
     }
     return TRUE;

@@ -35,16 +35,20 @@
 #ifndef PROFANITY_TRAY_H
 #define PROFANITY_TRAY_H
 
+void tray_init(void);
+void tray_update(void);
+void tray_shutdown(void);
+
 /*
  * Create tray icon
  *
  * This will initialize the timer that will be called in order to change the icons
  * and will search the icons in the defaults paths
  */
-void create_tray(void);
+void tray_enable(void);
 /*
  * Destroy tray icon
  */
-void destroy_tray(void);
+void tray_disable(void);
 
 #endif

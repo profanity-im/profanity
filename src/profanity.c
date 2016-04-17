@@ -38,7 +38,6 @@
 #endif
 
 #ifdef HAVE_GTK
-#include <gtk/gtk.h>
 #include "tray.h"
 #endif
 #include <locale.h>
@@ -96,21 +95,10 @@ char *saved_status;
 
 static gboolean cont = TRUE;
 static gboolean force_quit = FALSE;
-#ifdef HAVE_GTK
-static gboolean gtk_ready = FALSE;
-#endif
 
 void
 prof_run(char *log_level, char *account_name)
 {
-#ifdef HAVE_GTK
-    gtk_ready = gtk_init_check(0, NULL);
-    log_debug("Env is GTK-ready: %s", gtk_ready ? "true" : "false");
-    if (gtk_ready) {
-        gtk_init(0, NULL);
-        gtk_main_iteration_do(FALSE);
-    }
-#endif
     _init(log_level);
     plugins_on_start();
     _connect_default(account_name);
@@ -146,9 +134,7 @@ prof_run(char *log_level, char *account_name)
         iq_autoping_check();
         ui_update();
 #ifdef HAVE_GTK
-        if (gtk_ready) {
-            gtk_main_iteration_do(FALSE);
-        }
+        tray_update();
 #endif
     }
 }
@@ -373,10 +359,7 @@ _init(char *log_level)
     atexit(_shutdown);
     plugins_init();
 #ifdef HAVE_GTK
-    if (gtk_ready && prefs_get_boolean(PREF_TRAY)) {
-        log_debug("Building GTK icon");
-        create_tray();
-    }
+    tray_init();
 #endif
     inp_nonblocking(TRUE);
 }
@@ -397,9 +380,7 @@ _shutdown(void)
         cl_ev_disconnect();
     }
 #ifdef HAVE_GTK
-    if (gtk_ready && prefs_get_boolean(PREF_TRAY)) {
-        destroy_tray();
-    }
+    tray_shutdown();
 #endif
     jabber_shutdown();
     plugins_on_shutdown();
