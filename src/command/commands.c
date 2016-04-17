@@ -83,7 +83,7 @@
 
 static void _update_presence(const resource_presence_t presence,
     const char *const show, gchar **args);
-static gboolean _cmd_set_boolean_preference(gchar *arg, const char *const command,
+static void _cmd_set_boolean_preference(gchar *arg, const char *const command,
     const char *const display, preference_t pref);
 static void _who_room(ProfWin *window, const char *const command, gchar **args);
 static void _who_roster(ProfWin *window, const char *const command, gchar **args);
@@ -288,7 +288,8 @@ cmd_tls(ProfWin *window, const char *const command, gchar **args)
         return TRUE;
 #endif
     } else if (g_strcmp0(args[0], "show") == 0) {
-        return _cmd_set_boolean_preference(args[1], command, "TLS titlebar indicator", PREF_TLS_SHOW);
+        _cmd_set_boolean_preference(args[1], command, "TLS titlebar indicator", PREF_TLS_SHOW);
+        return TRUE;
     } else if (g_strcmp0(args[0], "cert") == 0) {
 #ifdef HAVE_LIBMESODE
         if (args[1]) {
@@ -2104,9 +2105,9 @@ cmd_roster(ProfWin *window, const char *const command, gchar **args)
             cons_bad_cmd_usage(command);
             return TRUE;
         } else {
-            int res = _cmd_set_boolean_preference(args[1], command, "Roster panel line wrap", PREF_ROSTER_WRAP);
+            _cmd_set_boolean_preference(args[1], command, "Roster panel line wrap", PREF_ROSTER_WRAP);
             rosterwin_roster();
-            return res;
+            return TRUE;
         }
 
     // header settings
@@ -2194,9 +2195,9 @@ cmd_roster(ProfWin *window, const char *const command, gchar **args)
                 }
             }
         } else if (g_strcmp0(args[1], "join") == 0) {
-            int res = _cmd_set_boolean_preference(args[2], command, "Roster join", PREF_ROSTER_RESOURCE_JOIN);
+            _cmd_set_boolean_preference(args[2], command, "Roster join", PREF_ROSTER_RESOURCE_JOIN);
             rosterwin_roster();
-            return res;
+            return TRUE;
         } else {
             cons_bad_cmd_usage(command);
         }
@@ -2428,13 +2429,11 @@ cmd_roster(ProfWin *window, const char *const command, gchar **args)
 
     } else if (g_strcmp0(args[0], "count") == 0) {
         if (g_strcmp0(args[1], "zero") == 0) {
-            gboolean result = _cmd_set_boolean_preference(args[2], command, "Roster header zero count", PREF_ROSTER_COUNT_ZERO);
-            if (result) {
-                if (conn_status == JABBER_CONNECTED) {
-                    rosterwin_roster();
-                }
+            _cmd_set_boolean_preference(args[2], command, "Roster header zero count", PREF_ROSTER_COUNT_ZERO);
+            if (conn_status == JABBER_CONNECTED) {
+                rosterwin_roster();
             }
-            return result;
+            return TRUE;
         } else if (g_strcmp0(args[1], "unread") == 0) {
             cons_show("Roster header count set to unread");
             prefs_set_string(PREF_ROSTER_COUNT, "unread");
@@ -2785,7 +2784,8 @@ cmd_resource(ProfWin *window, const char *const command, gchar **args)
             cons_bad_cmd_usage(command);
             return TRUE;
         } else {
-            return _cmd_set_boolean_preference(setting, command, "Message resource", PREF_RESOURCE_MESSAGE);
+            _cmd_set_boolean_preference(setting, command, "Message resource", PREF_RESOURCE_MESSAGE);
+            return TRUE;
         }
     } else if (g_strcmp0(cmd, "title") == 0) {
         setting = args[1];
@@ -2793,7 +2793,8 @@ cmd_resource(ProfWin *window, const char *const command, gchar **args)
             cons_bad_cmd_usage(command);
             return TRUE;
         } else {
-            return _cmd_set_boolean_preference(setting, command, "Title resource", PREF_RESOURCE_TITLE);
+            _cmd_set_boolean_preference(setting, command, "Title resource", PREF_RESOURCE_TITLE);
+            return TRUE;
         }
     }
 
@@ -4227,7 +4228,8 @@ gboolean
 cmd_lastactivity(ProfWin *window, const char *const command, gchar **args)
 {
     if ((g_strcmp0(args[0], "on") == 0) || (g_strcmp0(args[0], "off") == 0)) {
-        return _cmd_set_boolean_preference(args[0], command, "Last activity", PREF_LASTACTIVITY);
+        _cmd_set_boolean_preference(args[0], command, "Last activity", PREF_LASTACTIVITY);
+        return TRUE;
     }
 
     jabber_conn_status_t conn_status = jabber_get_connection_status();
@@ -4432,11 +4434,11 @@ cmd_leave(ProfWin *window, const char *const command, gchar **args)
 gboolean
 cmd_privileges(ProfWin *window, const char *const command, gchar **args)
 {
-    gboolean result = _cmd_set_boolean_preference(args[0], command, "MUC privileges", PREF_MUC_PRIVILEGES);
+    _cmd_set_boolean_preference(args[0], command, "MUC privileges", PREF_MUC_PRIVILEGES);
 
     ui_redraw_all_room_rosters();
 
-    return result;
+    return TRUE;
 }
 
 gboolean
@@ -4462,7 +4464,8 @@ cmd_charset(ProfWin *window, const char *const command, gchar **args)
 gboolean
 cmd_beep(ProfWin *window, const char *const command, gchar **args)
 {
-    return _cmd_set_boolean_preference(args[0], command, "Sound", PREF_BEEP);
+    _cmd_set_boolean_preference(args[0], command, "Sound", PREF_BEEP);
+    return TRUE;
 }
 
 gboolean
@@ -4503,17 +4506,18 @@ cmd_console(ProfWin *window, const char *const command, gchar **args)
 gboolean
 cmd_presence(ProfWin *window, const char *const command, gchar **args)
 {
-    return _cmd_set_boolean_preference(args[0], command, "Contact presence", PREF_PRESENCE);
+    _cmd_set_boolean_preference(args[0], command, "Contact presence", PREF_PRESENCE);
+    return TRUE;
 }
 
 gboolean
 cmd_wrap(ProfWin *window, const char *const command, gchar **args)
 {
-    gboolean result = _cmd_set_boolean_preference(args[0], command, "Word wrap", PREF_WRAP);
+    _cmd_set_boolean_preference(args[0], command, "Word wrap", PREF_WRAP);
 
     wins_resize_all();
 
-    return result;
+    return TRUE;
 }
 
 gboolean
@@ -4687,16 +4691,15 @@ cmd_time(ProfWin *window, const char *const command, gchar **args)
 gboolean
 cmd_states(ProfWin *window, const char *const command, gchar **args)
 {
-    gboolean result = _cmd_set_boolean_preference(args[0], command, "Sending chat states",
-        PREF_STATES);
+    _cmd_set_boolean_preference(args[0], command, "Sending chat states", PREF_STATES);
 
     // if disabled, disable outtype and gone
-    if (result == TRUE && (strcmp(args[0], "off") == 0)) {
+    if (strcmp(args[0], "off") == 0) {
         prefs_set_boolean(PREF_OUTTYPE, FALSE);
         prefs_set_gone(0);
     }
 
-    return result;
+    return TRUE;
 }
 
 gboolean
@@ -4710,24 +4713,25 @@ cmd_titlebar(ProfWin *window, const char *const command, gchar **args)
         ui_clear_win_title();
     }
     if (g_strcmp0(args[0], "show") == 0) {
-        return _cmd_set_boolean_preference(args[1], command, "Titlebar show", PREF_TITLEBAR_SHOW);
+        _cmd_set_boolean_preference(args[1], command, "Titlebar show", PREF_TITLEBAR_SHOW);
     } else {
-        return _cmd_set_boolean_preference(args[1], command, "Titlebar goodbye", PREF_TITLEBAR_GOODBYE);
+        _cmd_set_boolean_preference(args[1], command, "Titlebar goodbye", PREF_TITLEBAR_GOODBYE);
     }
+
+    return TRUE;
 }
 
 gboolean
 cmd_outtype(ProfWin *window, const char *const command, gchar **args)
 {
-    gboolean result = _cmd_set_boolean_preference(args[0], command,
-        "Sending typing notifications", PREF_OUTTYPE);
+    _cmd_set_boolean_preference(args[0], command, "Sending typing notifications", PREF_OUTTYPE);
 
     // if enabled, enable states
-    if (result == TRUE && (strcmp(args[0], "on") == 0)) {
+    if (strcmp(args[0], "on") == 0) {
         prefs_set_boolean(PREF_STATES, TRUE);
     }
 
-    return result;
+    return TRUE;
 }
 
 gboolean
@@ -5155,7 +5159,8 @@ cmd_inpblock(ProfWin *window, const char *const command, gchar **args)
             return TRUE;
         }
 
-        return _cmd_set_boolean_preference(value, command, "Dynamic input blocking", PREF_INPBLOCK_DYNAMIC);
+        _cmd_set_boolean_preference(value, command, "Dynamic input blocking", PREF_INPBLOCK_DYNAMIC);
+        return TRUE;
     }
 
     cons_bad_cmd_usage(command);
@@ -5193,7 +5198,8 @@ cmd_log(ProfWin *window, const char *const command, gchar **args)
             cons_bad_cmd_usage(command);
             return TRUE;
         }
-        return _cmd_set_boolean_preference(value, command, "Log rotate", PREF_LOG_ROTATE);
+        _cmd_set_boolean_preference(value, command, "Log rotate", PREF_LOG_ROTATE);
+        return TRUE;
     }
 
     if (strcmp(subcmd, "shared") == 0) {
@@ -5201,9 +5207,9 @@ cmd_log(ProfWin *window, const char *const command, gchar **args)
             cons_bad_cmd_usage(command);
             return TRUE;
         }
-        gboolean result = _cmd_set_boolean_preference(value, command, "Shared log", PREF_LOG_SHARED);
+        _cmd_set_boolean_preference(value, command, "Shared log", PREF_LOG_SHARED);
         log_reinit();
-        return result;
+        return TRUE;
     }
 
     if (strcmp(subcmd, "where") == 0) {
@@ -5408,7 +5414,8 @@ cmd_autoaway(ProfWin *window, const char *const command, gchar **args)
     }
 
     if (strcmp(args[0], "check") == 0) {
-        return _cmd_set_boolean_preference(args[1], command, "Online check", PREF_AUTOAWAY_CHECK);
+        _cmd_set_boolean_preference(args[1], command, "Online check", PREF_AUTOAWAY_CHECK);
+        return TRUE;
     }
 
     return TRUE;
@@ -5504,7 +5511,8 @@ cmd_vercheck(ProfWin *window, const char *const command, gchar **args)
         cons_check_version(TRUE);
         return TRUE;
     } else {
-        return _cmd_set_boolean_preference(args[0], command, "Version checking", PREF_VERCHECK);
+        _cmd_set_boolean_preference(args[0], command, "Version checking", PREF_VERCHECK);
+        return TRUE;
     }
 }
 
@@ -5525,7 +5533,8 @@ cmd_xmlconsole(ProfWin *window, const char *const command, gchar **args)
 gboolean
 cmd_flash(ProfWin *window, const char *const command, gchar **args)
 {
-    return _cmd_set_boolean_preference(args[0], command, "Screen flash", PREF_FLASH);
+    _cmd_set_boolean_preference(args[0], command, "Screen flash", PREF_FLASH);
+    return TRUE;
 }
 
 gboolean
@@ -5533,7 +5542,7 @@ cmd_tray(ProfWin *window, const char *const command, gchar **args)
 {
 #ifdef HAVE_GTK
     gboolean old = prefs_get_boolean(PREF_TRAY);
-    gboolean ret = _cmd_set_boolean_preference(args[0], command, "Tray icon", PREF_TRAY);
+    _cmd_set_boolean_preference(args[0], command, "Tray icon", PREF_TRAY);
     gboolean new = prefs_get_boolean(PREF_TRAY);
     if (old != new) {
         if (new) {
@@ -5542,7 +5551,7 @@ cmd_tray(ProfWin *window, const char *const command, gchar **args)
             destroy_tray();
         }
     }
-    return ret;
+    return TRUE;
 #else
     cons_show("This version of Profanity has not been built with GTK Tray Icon support enabled");
     return TRUE;
@@ -5552,13 +5561,15 @@ cmd_tray(ProfWin *window, const char *const command, gchar **args)
 gboolean
 cmd_intype(ProfWin *window, const char *const command, gchar **args)
 {
-    return _cmd_set_boolean_preference(args[0], command, "Show contact typing", PREF_INTYPE);
+    _cmd_set_boolean_preference(args[0], command, "Show contact typing", PREF_INTYPE);
+    return TRUE;
 }
 
 gboolean
 cmd_splash(ProfWin *window, const char *const command, gchar **args)
 {
-    return _cmd_set_boolean_preference(args[0], command, "Splash screen", PREF_SPLASH);
+    _cmd_set_boolean_preference(args[0], command, "Splash screen", PREF_SPLASH);
+    return TRUE;
 }
 
 gboolean
@@ -5579,41 +5590,41 @@ cmd_autoconnect(ProfWin *window, const char *const command, gchar **args)
 gboolean
 cmd_chlog(ProfWin *window, const char *const command, gchar **args)
 {
-    gboolean result = _cmd_set_boolean_preference(args[0], command, "Chat logging", PREF_CHLOG);
+    _cmd_set_boolean_preference(args[0], command, "Chat logging", PREF_CHLOG);
 
     // if set to off, disable history
-    if (result == TRUE && (strcmp(args[0], "off") == 0)) {
+    if (strcmp(args[0], "off") == 0) {
         prefs_set_boolean(PREF_HISTORY, FALSE);
     }
 
-    return result;
+    return TRUE;
 }
 
 gboolean
 cmd_grlog(ProfWin *window, const char *const command, gchar **args)
 {
-    gboolean result = _cmd_set_boolean_preference(args[0], command, "Groupchat logging", PREF_GRLOG);
+    _cmd_set_boolean_preference(args[0], command, "Groupchat logging", PREF_GRLOG);
 
-    return result;
+    return TRUE;
 }
 
 gboolean
 cmd_history(ProfWin *window, const char *const command, gchar **args)
 {
-    gboolean result = _cmd_set_boolean_preference(args[0], command, "Chat history", PREF_HISTORY);
+    _cmd_set_boolean_preference(args[0], command, "Chat history", PREF_HISTORY);
 
     // if set to on, set chlog
-    if (result == TRUE && (strcmp(args[0], "on") == 0)) {
+    if (strcmp(args[0], "on") == 0) {
         prefs_set_boolean(PREF_CHLOG, TRUE);
     }
 
-    return result;
+    return TRUE;
 }
 
 gboolean
 cmd_carbons(ProfWin *window, const char *const command, gchar **args)
 {
-    gboolean result = _cmd_set_boolean_preference(args[0], command, "Message carbons preference", PREF_CARBONS);
+    _cmd_set_boolean_preference(args[0], command, "Message carbons preference", PREF_CARBONS);
 
     jabber_conn_status_t conn_status = jabber_get_connection_status();
 
@@ -5627,20 +5638,21 @@ cmd_carbons(ProfWin *window, const char *const command, gchar **args)
         }
     }
 
-    return result;
+    return TRUE;
 }
 
 gboolean
 cmd_receipts(ProfWin *window, const char *const command, gchar **args)
 {
     if (g_strcmp0(args[0], "send") == 0) {
-        return _cmd_set_boolean_preference(args[1], command, "Send delivery receipts", PREF_RECEIPTS_SEND);
+        _cmd_set_boolean_preference(args[1], command, "Send delivery receipts", PREF_RECEIPTS_SEND);
     } else if (g_strcmp0(args[0], "request") == 0) {
-        return _cmd_set_boolean_preference(args[1], command, "Request delivery receipts", PREF_RECEIPTS_REQUEST);
+        _cmd_set_boolean_preference(args[1], command, "Request delivery receipts", PREF_RECEIPTS_REQUEST);
     } else {
         cons_bad_cmd_usage(command);
-        return TRUE;
     }
+
+    return TRUE;
 }
 
 gboolean
@@ -6274,7 +6286,8 @@ cmd_otr(ProfWin *window, const char *const command, gchar **args)
 gboolean
 cmd_encwarn(ProfWin *window, const char *const command, gchar **args)
 {
-    return _cmd_set_boolean_preference(args[0], command, "Encryption warning message", PREF_ENC_WARN);
+    _cmd_set_boolean_preference(args[0], command, "Encryption warning message", PREF_ENC_WARN);
+    return TRUE;
 }
 
 // helper function for status change commands
@@ -6299,7 +6312,7 @@ _update_presence(const resource_presence_t resource_presence,
 }
 
 // helper function for boolean preference commands
-static gboolean
+static void
 _cmd_set_boolean_preference(gchar *arg, const char *const command,
     const char *const display, preference_t pref)
 {
@@ -6323,6 +6336,4 @@ _cmd_set_boolean_preference(gchar *arg, const char *const command,
 
     g_string_free(enabled, TRUE);
     g_string_free(disabled, TRUE);
-
-    return TRUE;
 }
