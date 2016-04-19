@@ -35,6 +35,11 @@
 #ifndef TOOLS_HTTP_UPLOAD_H
 #define TOOLS_HTTP_UPLOAD_H
 
+#ifdef PLATFORM_CYGWIN
+#define SOCKET int
+#endif
+
+#include <sys/socket.h>
 #include <curl/curl.h>
 
 // forward -> ui/win_types.h
