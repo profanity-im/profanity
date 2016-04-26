@@ -42,6 +42,7 @@
 #include <wchar.h>
 #include <sys/time.h>
 #include <errno.h>
+#include <pthread.h>
 
 #include <readline/readline.h>
 #include <readline/history.h>
@@ -145,7 +146,9 @@ inp_readline(void)
     FD_ZERO(&fds);
     FD_SET(fileno(rl_instream), &fds);
     errno = 0;
+    pthread_mutex_unlock(&lock);
     r = select(FD_SETSIZE, &fds, NULL, NULL, &p_rl_timeout);
+    pthread_mutex_lock(&lock);
     if (r < 0) {
         if (errno != EINTR) {
             char *err_msg = strerror(errno);

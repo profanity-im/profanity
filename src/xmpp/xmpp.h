@@ -49,6 +49,7 @@
 #include "contact.h"
 #include "jid.h"
 #include "tools/autocomplete.h"
+#include "tools/http_upload.h"
 
 #define JABBER_PRIORITY_MIN -128
 #define JABBER_PRIORITY_MAX 127
@@ -95,47 +96,10 @@ typedef struct disco_identity_t {
     char *category;
 } DiscoIdentity;
 
-typedef enum {
-    FIELD_HIDDEN,
-    FIELD_TEXT_SINGLE,
-    FIELD_TEXT_PRIVATE,
-    FIELD_TEXT_MULTI,
-    FIELD_BOOLEAN,
-    FIELD_LIST_SINGLE,
-    FIELD_LIST_MULTI,
-    FIELD_JID_SINGLE,
-    FIELD_JID_MULTI,
-    FIELD_FIXED,
-    FIELD_UNKNOWN
-} form_field_type_t;
-
-typedef struct form_option_t {
-    char *label;
-    char *value;
-} FormOption;
-
-typedef struct form_field_t {
-    char *label;
-    char *type;
-    form_field_type_t type_t;
-    char *var;
-    char *description;
-    gboolean required;
-    GSList *values;
-    GSList *options;
-    Autocomplete value_ac;
-} FormField;
-
-typedef struct data_form_t {
-    char *type;
-    char *title;
-    char *instructions;
-    GSList *fields;
-    GHashTable *var_to_tag;
-    GHashTable *tag_to_var;
-    Autocomplete tag_ac;
-    gboolean modified;
-} DataForm;
+typedef struct disco_info_t {
+    char *item;
+    GHashTable *features;
+} DiscoInfo;
 
 // connection functions
 void jabber_init(void);
@@ -150,6 +114,8 @@ const char* jabber_get_fulljid(void);
 const char* jabber_get_domain(void);
 jabber_conn_status_t jabber_get_connection_status(void);
 void jabber_set_connection_status(jabber_conn_status_t status);
+GSList* jabber_get_disco_items(void);
+void jabber_set_disco_items(GSList *disco_items);
 char* jabber_get_presence_message(void);
 char* jabber_get_account_name(void);
 GList* jabber_get_available_resources(void);
@@ -162,11 +128,11 @@ gboolean jabber_conn_is_secured(void);
 gboolean jabber_send_stanza(const char *const stanza);
 
 // message functions
-char* message_send_chat(const char *const barejid, const char *const msg);
+char* message_send_chat(const char *const barejid, const char *const msg, const char *const oob_url);
 char* message_send_chat_otr(const char *const barejid, const char *const msg);
 char* message_send_chat_pgp(const char *const barejid, const char *const msg);
-void message_send_private(const char *const fulljid, const char *const msg);
-void message_send_groupchat(const char *const roomjid, const char *const msg);
+void message_send_private(const char *const fulljid, const char *const msg, const char *const oob_url);
+void message_send_groupchat(const char *const roomjid, const char *const msg, const char *const oob_url);
 void message_send_groupchat_subject(const char *const roomjid, const char *const subject);
 
 void message_send_inactive(const char *const jid);
@@ -194,7 +160,9 @@ void iq_disable_carbons(void);
 void iq_send_software_version(const char *const fulljid);
 void iq_room_list_request(gchar *conferencejid);
 void iq_disco_info_request(gchar *jid);
+void iq_disco_info_request_onconnect(gchar *jid);
 void iq_disco_items_request(gchar *jid);
+void iq_disco_items_request_onconnect(gchar *jid);
 void iq_last_activity_request(gchar *jid);
 void iq_set_autoping(int seconds);
 void iq_confirm_instant_room(const char *const room_jid);
@@ -216,6 +184,7 @@ void iq_room_kick_occupant(const char *const room, const char *const nick, const
 void iq_room_role_set(const char *const room, const char *const nick, char *role, const char *const reason);
 void iq_room_role_list(const char * const room, char *role);
 void iq_autoping_check(void);
+void iq_http_upload_request(HTTPUpload *upload);
 
 // caps functions
 Capabilities* caps_lookup(const char *const jid);
