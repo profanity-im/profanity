@@ -101,48 +101,6 @@ typedef struct disco_info_t {
     GHashTable *features;
 } DiscoInfo;
 
-typedef enum {
-    FIELD_HIDDEN,
-    FIELD_TEXT_SINGLE,
-    FIELD_TEXT_PRIVATE,
-    FIELD_TEXT_MULTI,
-    FIELD_BOOLEAN,
-    FIELD_LIST_SINGLE,
-    FIELD_LIST_MULTI,
-    FIELD_JID_SINGLE,
-    FIELD_JID_MULTI,
-    FIELD_FIXED,
-    FIELD_UNKNOWN
-} form_field_type_t;
-
-typedef struct form_option_t {
-    char *label;
-    char *value;
-} FormOption;
-
-typedef struct form_field_t {
-    char *label;
-    char *type;
-    form_field_type_t type_t;
-    char *var;
-    char *description;
-    gboolean required;
-    GSList *values;
-    GSList *options;
-    Autocomplete value_ac;
-} FormField;
-
-typedef struct data_form_t {
-    char *type;
-    char *title;
-    char *instructions;
-    GSList *fields;
-    GHashTable *var_to_tag;
-    GHashTable *tag_to_var;
-    Autocomplete tag_ac;
-    gboolean modified;
-} DataForm;
-
 // connection functions
 void jabber_init(void);
 jabber_conn_status_t jabber_connect_with_details(const char *const jid, const char *const passwd,

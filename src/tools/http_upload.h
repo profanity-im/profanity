@@ -41,9 +41,7 @@
 
 #include <sys/select.h>
 #include <curl/curl.h>
-
-// forward -> ui/win_types.h
-typedef struct prof_win_t ProfWin;
+#include "ui/win_types.h"
 
 typedef struct http_upload_t {
     char *filename;

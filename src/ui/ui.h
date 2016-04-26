@@ -40,6 +40,7 @@
 #include "command/commands.h"
 #include "ui/win_types.h"
 #include "muc.h"
+#include "config/tlscerts.h"
 #ifdef HAVE_LIBOTR
 #include "otr/otr.h"
 #endif

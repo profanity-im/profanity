@@ -288,6 +288,8 @@ AC_CHECK_HEADERS([ncurses.h], [], [])
 AM_CFLAGS="-Wall -Wno-deprecated-declarations"
 AS_IF([test "x$PACKAGE_STATUS" = xdevelopment],
     [AM_CFLAGS="$AM_CFLAGS -Wunused -Werror"])
+AS_IF([test "x$PLATFORM" = xosx],
+    [AM_CFLAGS="$AM_CFLAGS -Qunused-arguments"])
 AM_LDFLAGS="$AM_LDFLAGS -export-dynamic"
 AM_CPPFLAGS="$AM_CPPFLAGS $glib_CFLAGS $curl_CFLAGS $libnotify_CFLAGS $PYTHON_CPPFLAGS ${GTK_CFLAGS}"
 AM_CPPFLAGS="$AM_CPPFLAGS -DTHEMES_PATH=\"\\\"$THEMES_PATH\\\"\" -DICONS_PATH=\"\\\"$ICONS_PATH\\\"\""
