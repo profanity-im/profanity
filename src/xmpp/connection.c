@@ -75,6 +75,7 @@ static struct _jabber_conn_t {
 } jabber_conn;
 
 static GHashTable *available_resources;
+static GSList *disco_items;
 
 // for auto reconnect
 static struct {
@@ -113,6 +114,18 @@ void _connection_free_saved_account(void);
 void _connection_free_saved_details(void);
 void _connection_free_session_data(void);
 
+static void
+_info_destroy(DiscoInfo *info)
+{
+    if (info) {
+        free(info->item);
+        if (info->features) {
+            g_hash_table_remove_all(info->features);
+        }
+        free(info);
+    }
+}
+
 void
 jabber_init(void)
 {
@@ -125,6 +138,7 @@ jabber_init(void)
     presence_sub_requests_init();
     caps_init();
     available_resources = g_hash_table_new_full(g_str_hash, g_str_equal, free, (GDestroyNotify)resource_destroy);
+    disco_items = NULL;
     xmpp_initialize();
 }
 
@@ -323,6 +337,18 @@ jabber_set_connection_status(jabber_conn_status_t status)
     jabber_conn.conn_status = status;
 }
 
+GSList*
+jabber_get_disco_items(void)
+{
+    return (disco_items);
+}
+
+void
+jabber_set_disco_items(GSList *_disco_items)
+{
+    disco_items = _disco_items;
+}
+
 xmpp_conn_t*
 connection_get_conn(void)
 {
@@ -420,6 +446,8 @@ _connection_free_saved_details(void)
 void
 _connection_free_session_data(void)
 {
+    g_slist_free_full(disco_items, (GDestroyNotify)_info_destroy);
+    disco_items = NULL;
     g_hash_table_remove_all(available_resources);
     chat_sessions_clear();
     presence_clear_sub_requests();
@@ -650,6 +678,14 @@ _connection_handler(xmpp_conn_t *const conn, const xmpp_conn_event_t status, con
 
         roster_request();
         bookmark_request();
+
+        // items discovery
+        DiscoInfo *info = malloc(sizeof(struct disco_info_t));
+        info->item = strdup(jabber_conn.domain);
+        info->features = g_hash_table_new_full(g_str_hash, g_str_equal, free, NULL);
+        disco_items = g_slist_append(disco_items, info);
+        iq_disco_info_request_onconnect(info->item);
+        iq_disco_items_request_onconnect(jabber_conn.domain);
 
         if (prefs_get_boolean(PREF_CARBONS)){
             iq_enable_carbons();

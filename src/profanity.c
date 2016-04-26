@@ -323,6 +323,11 @@ _init(char *log_level)
     signal(SIGINT, SIG_IGN);
     signal(SIGTSTP, SIG_IGN);
     signal(SIGWINCH, ui_sigwinch_handler);
+    if (pthread_mutex_init(&lock, NULL) != 0) {
+        log_error("Mutex init failed");
+        exit(1);
+    }
+    pthread_mutex_lock(&lock);
     _create_directories();
     log_level_t prof_log_level = log_level_from_string(log_level);
     prefs_load();

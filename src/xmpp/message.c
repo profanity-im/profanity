@@ -163,7 +163,7 @@ _session_state(const char *const barejid)
 }
 
 char*
-message_send_chat(const char *const barejid, const char *const msg)
+message_send_chat(const char *const barejid, const char *const msg, const char *const oob_url)
 {
     xmpp_ctx_t * const ctx = connection_get_ctx();
 
@@ -176,6 +176,10 @@ message_send_chat(const char *const barejid, const char *const msg)
 
     if (state) {
         stanza_attach_state(ctx, message, state);
+    }
+
+    if (oob_url) {
+        stanza_attach_x_oob_url(ctx, message, oob_url);
     }
 
     if (prefs_get_boolean(PREF_RECEIPTS_REQUEST)) {
@@ -274,24 +278,32 @@ message_send_chat_otr(const char *const barejid, const char *const msg)
 }
 
 void
-message_send_private(const char *const fulljid, const char *const msg)
+message_send_private(const char *const fulljid, const char *const msg, const char *const oob_url)
 {
     xmpp_ctx_t * const ctx = connection_get_ctx();
     char *id = create_unique_id("prv");
     xmpp_stanza_t *message = stanza_create_message(ctx, id, fulljid, STANZA_TYPE_CHAT, msg);
     free(id);
 
+    if (oob_url) {
+        stanza_attach_x_oob_url(ctx, message, oob_url);
+    }
+
     _send_message_stanza(message);
     xmpp_stanza_release(message);
 }
 
 void
-message_send_groupchat(const char *const roomjid, const char *const msg)
+message_send_groupchat(const char *const roomjid, const char *const msg, const char *const oob_url)
 {
     xmpp_ctx_t * const ctx = connection_get_ctx();
     char *id = create_unique_id("muc");
     xmpp_stanza_t *message = stanza_create_message(ctx, id, roomjid, STANZA_TYPE_GROUPCHAT, msg);
     free(id);
+
+    if (oob_url) {
+        stanza_attach_x_oob_url(ctx, message, oob_url);
+    }
 
     _send_message_stanza(message);
     xmpp_stanza_release(message);

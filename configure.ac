@@ -116,6 +116,12 @@ else
     AM_CONDITIONAL([BUILD_C_API], [false])
 fi
 
+# threading
+ACX_PTHREAD
+LIBS="$PTHREAD_LIBS $LIBS"
+CFLAGS="$CFLAGS $PTHREAD_CFLAGS"
+CC="$PTHREAD_CC"
+
 ### Check for libmesode, fall back to libstrophe
 PKG_CHECK_MODULES([libmesode], [libmesode],
     [LIBS="$libmesode_LIBS $LIBS" CFLAGS="$CFLAGS $libmesode_CFLAGS" AC_DEFINE([HAVE_LIBMESODE], [1], [libmesode])],
@@ -282,10 +288,12 @@ AC_CHECK_HEADERS([ncurses.h], [], [])
 AM_CFLAGS="-Wall -Wno-deprecated-declarations"
 AS_IF([test "x$PACKAGE_STATUS" = xdevelopment],
     [AM_CFLAGS="$AM_CFLAGS -Wunused -Werror"])
+AS_IF([test "x$PLATFORM" = xosx],
+    [AM_CFLAGS="$AM_CFLAGS -Qunused-arguments"])
 AM_LDFLAGS="$AM_LDFLAGS -export-dynamic"
 AM_CPPFLAGS="$AM_CPPFLAGS $glib_CFLAGS $curl_CFLAGS $libnotify_CFLAGS $PYTHON_CPPFLAGS ${GTK_CFLAGS}"
 AM_CPPFLAGS="$AM_CPPFLAGS -DTHEMES_PATH=\"\\\"$THEMES_PATH\\\"\" -DICONS_PATH=\"\\\"$ICONS_PATH\\\"\""
-LIBS="$glib_LIBS $curl_LIBS $libnotify_LIBS $PYTHON_LIBS $PYTHON_LDFLAGS ${GTK_LIBS} $LIBS"
+LIBS="$glib_LIBS $curl_LIBS $libnotify_LIBS $PYTHON_LIBS $PYTHON_LDFLAGS ${GTK_LIBS} -lgio-2.0 $LIBS"
 
 AC_SUBST(AM_LDFLAGS)
 AC_SUBST(AM_CFLAGS)

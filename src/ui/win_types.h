@@ -45,9 +45,9 @@
 #include <ncurses.h>
 #endif
 
-#include "xmpp/xmpp.h"
 #include "ui/buffer.h"
 #include "chat_state.h"
+#include "tools/autocomplete.h"
 
 #define LAYOUT_SPLIT_MEMCHECK       12345671
 #define PROFCHATWIN_MEMCHECK        22374522
@@ -56,6 +56,48 @@
 #define PROFCONFWIN_MEMCHECK        64334685
 #define PROFXMLWIN_MEMCHECK         87333463
 #define PROFPLUGINWIN_MEMCHECK      43434777
+
+typedef enum {
+    FIELD_HIDDEN,
+    FIELD_TEXT_SINGLE,
+    FIELD_TEXT_PRIVATE,
+    FIELD_TEXT_MULTI,
+    FIELD_BOOLEAN,
+    FIELD_LIST_SINGLE,
+    FIELD_LIST_MULTI,
+    FIELD_JID_SINGLE,
+    FIELD_JID_MULTI,
+    FIELD_FIXED,
+    FIELD_UNKNOWN
+} form_field_type_t;
+
+typedef struct form_option_t {
+    char *label;
+    char *value;
+} FormOption;
+
+typedef struct form_field_t {
+    char *label;
+    char *type;
+    form_field_type_t type_t;
+    char *var;
+    char *description;
+    gboolean required;
+    GSList *values;
+    GSList *options;
+    Autocomplete value_ac;
+} FormField;
+
+typedef struct data_form_t {
+    char *type;
+    char *title;
+    char *instructions;
+    GSList *fields;
+    GHashTable *var_to_tag;
+    GHashTable *tag_to_var;
+    Autocomplete tag_ac;
+    gboolean modified;
+} DataForm;
 
 typedef enum {
     LAYOUT_SIMPLE,

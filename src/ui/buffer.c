@@ -125,6 +125,21 @@ buffer_yield_entry(ProfBuff buffer, int entry)
     return node->data;
 }
 
+ProfBuffEntry*
+buffer_yield_entry_by_id(ProfBuff buffer, const char *const id)
+{
+    GSList *entries = buffer->entries;
+    while (entries) {
+        ProfBuffEntry *entry = entries->data;
+        if (entry->receipt && g_strcmp0(entry->receipt->id, id) == 0) {
+            return entry;
+        }
+        entries = g_slist_next(entries);
+    }
+
+    return NULL;
+}
+
 static void
 _free_entry(ProfBuffEntry *entry)
 {
