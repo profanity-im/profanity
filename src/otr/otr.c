@@ -45,6 +45,7 @@
 #include "window_list.h"
 #include "contact.h"
 #include "ui/ui.h"
+#include "xmpp/xmpp.h"
 #include "config/preferences.h"
 #include "chat_session.h"
 

@@ -32,10 +32,15 @@
  *
  */
 
+#define _GNU_SOURCE 1
+
 #include "config.h"
 
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
+#include <libgen.h>
+#include <inttypes.h>
 
 #include <glib.h>
 
@@ -207,6 +212,61 @@ stanza_create_bookmarks_pubsub_add(xmpp_ctx_t *ctx, const char *const jid,
 #endif
 
 xmpp_stanza_t*
+stanza_create_http_upload_request(xmpp_ctx_t *ctx, const char *const id,
+    const char *const jid, HTTPUpload *upload)
+{
+    int i;
+
+    xmpp_stanza_t *iq = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(iq, STANZA_NAME_IQ);
+    xmpp_stanza_set_type(iq, STANZA_TYPE_GET);
+    xmpp_stanza_set_attribute(iq, STANZA_ATTR_TO, jid);
+    xmpp_stanza_set_id(iq, id);
+
+    xmpp_stanza_t *request = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(request, STANZA_NAME_REQUEST);
+    xmpp_stanza_set_ns(request, STANZA_NS_HTTP_UPLOAD);
+
+    xmpp_stanza_t *filename = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(filename, STANZA_NAME_FILENAME);
+    xmpp_stanza_t *filename_txt = xmpp_stanza_new(ctx);
+    char* filename_cpy = strdup(upload->filename);
+    // strip spaces from filename (servers don't spaces)
+    for (i=0; i<strlen(filename_cpy); i++) {
+        if (filename_cpy[i] == ' ') {
+            filename_cpy[i] = '_';
+        }
+    }
+    xmpp_stanza_set_text(filename_txt, basename(filename_cpy));
+    free(filename_cpy);
+    xmpp_stanza_add_child(filename, filename_txt);
+    xmpp_stanza_add_child(request, filename);
+
+    xmpp_stanza_t *size = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(size, STANZA_NAME_SIZE);
+    xmpp_stanza_t *size_txt = xmpp_stanza_new(ctx);
+    char* filesize = NULL;
+    if (asprintf(&filesize, "%jd", (intmax_t)(upload->filesize)) != -1) {
+        xmpp_stanza_set_text(size_txt, filesize);
+        free(filesize);
+    }
+    xmpp_stanza_add_child(size, size_txt);
+    xmpp_stanza_add_child(request, size);
+
+    xmpp_stanza_t *content_type = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(content_type, STANZA_NAME_CONTENT_TYPE);
+    xmpp_stanza_t *content_type_txt = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_text(content_type_txt, upload->mime_type);
+    xmpp_stanza_add_child(content_type, content_type_txt);
+    xmpp_stanza_add_child(request, content_type);
+
+    xmpp_stanza_add_child(iq, request);
+    xmpp_stanza_release(request);
+
+    return iq;
+}
+
+xmpp_stanza_t*
 stanza_enable_carbons(xmpp_ctx_t *ctx)
 {
     xmpp_stanza_t *iq = xmpp_stanza_new(ctx);
@@ -349,6 +409,30 @@ stanza_attach_receipt_request(xmpp_ctx_t *ctx, xmpp_stanza_t *stanza)
     xmpp_stanza_set_ns(receipet_request, STANZA_NS_RECEIPTS);
     xmpp_stanza_add_child(stanza, receipet_request);
     xmpp_stanza_release(receipet_request);
+
+    return stanza;
+}
+
+xmpp_stanza_t*
+stanza_attach_x_oob_url(xmpp_ctx_t *ctx, xmpp_stanza_t *stanza, const char *const url)
+{
+    xmpp_stanza_t *x_oob = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(x_oob, STANZA_NAME_X);
+    xmpp_stanza_set_ns(x_oob, STANZA_NS_X_OOB);
+
+    xmpp_stanza_t *surl = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(surl, STANZA_NAME_URL);
+
+    xmpp_stanza_t *surl_txt = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_text(surl_txt, url);
+    xmpp_stanza_add_child(surl, surl_txt);
+    xmpp_stanza_release(surl_txt);
+
+    xmpp_stanza_add_child(x_oob, surl);
+    xmpp_stanza_release(surl);
+
+    xmpp_stanza_add_child(stanza, x_oob);
+    xmpp_stanza_release(x_oob);
 
     return stanza;
 }

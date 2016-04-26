@@ -1183,6 +1183,15 @@ cons_flash_setting(void)
 }
 
 void
+cons_tray_setting(void)
+{
+    if (prefs_get_boolean(PREF_TRAY))
+        cons_show("Tray icon (/tray)                   : ON");
+    else
+        cons_show("Tray icon (/tray)                   : OFF");
+}
+
+void
 cons_splash_setting(void)
 {
     if (prefs_get_boolean(PREF_SPLASH))
@@ -1611,6 +1620,7 @@ cons_show_desktop_prefs(void)
     cons_show("Desktop notification preferences:");
     cons_show("");
     cons_notify_setting();
+    cons_tray_setting();
 
     cons_alert();
 }

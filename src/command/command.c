@@ -32,6 +32,8 @@
  *
  */
 
+#define _GNU_SOURCE 1
+
 #include "config.h"
 
 #include <assert.h>
@@ -40,6 +42,10 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <libgen.h>
+
+#include <dirent.h>
+#include <sys/types.h>
 
 #include <glib.h>
 
@@ -118,6 +124,7 @@ static char* _console_autocomplete(ProfWin *window, const char *const input);
 static char* _win_autocomplete(ProfWin *window, const char *const input);
 static char* _close_autocomplete(ProfWin *window, const char *const input);
 static char* _plugins_autocomplete(ProfWin *window, const char *const input);
+static char* _sendfile_autocomplete(ProfWin *window, const char *const input);
 
 GHashTable *commands = NULL;
 
@@ -129,6 +136,11 @@ GHashTable *commands = NULL;
 #define CMD_TAG_DISCOVERY   "discovery"
 #define CMD_TAG_UI          "ui"
 #define CMD_TAG_PLUGINS     "plugins"
+
+#define CMD_MAINFUNC(func)  func,
+#define CMD_NOMAINFUNC      NULL,
+#define CMD_SUBFUNCS(...)   { __VA_ARGS__, { NULL, NULL } },
+#define CMD_NOSUBFUNCS      { { NULL, NULL } },
 
 #define CMD_NOTAGS          { { NULL },
 #define CMD_TAGS(...)       { { __VA_ARGS__, NULL },
@@ -145,7 +157,9 @@ GHashTable *commands = NULL;
 static struct cmd_t command_defs[] =
 {
     { "/help",
-        cmd_help, parse_args, 0, 2, NULL,
+        parse_args, 0, 2, NULL,
+        CMD_NOSUBFUNCS
+        CMD_MAINFUNC(cmd_help)
         CMD_NOTAGS
         CMD_SYN(
             "/help [<area>|<command>]")
@@ -166,7 +180,9 @@ static struct cmd_t command_defs[] =
     },
 
     { "/about",
-        cmd_about, parse_args, 0, 0, NULL,
+        parse_args, 0, 0, NULL,
+        CMD_NOSUBFUNCS
+        CMD_MAINFUNC(cmd_about)
         CMD_NOTAGS
         CMD_SYN(
             "/about")
@@ -177,7 +193,9 @@ static struct cmd_t command_defs[] =
     },
 
     { "/connect",
-        cmd_connect, parse_args, 0, 7, NULL,
+        parse_args, 0, 7, NULL,
+        CMD_NOSUBFUNCS
+        CMD_MAINFUNC(cmd_connect)
         CMD_TAGS(
             CMD_TAG_CONNECTION)
         CMD_SYN(
@@ -204,7 +222,15 @@ static struct cmd_t command_defs[] =
         },
 
     { "/tls",
-        cmd_tls, parse_args, 1, 3, NULL,
+        parse_args, 1, 3, NULL,
+        CMD_SUBFUNCS(
+            { "certpath",   cmd_tls_certpath },
+            { "trust",      cmd_tls_trust },
+            { "trusted",    cmd_tls_trusted },
+            { "revoke",     cmd_tls_revoke },
+            { "show",       cmd_tls_show },
+            { "cert",       cmd_tls_cert })
+        CMD_NOMAINFUNC
         CMD_TAGS(
             CMD_TAG_CONNECTION,
             CMD_TAG_UI)
@@ -239,7 +265,9 @@ static struct cmd_t command_defs[] =
     },
 
     { "/disconnect",
-        cmd_disconnect, parse_args, 0, 0, NULL,
+        parse_args, 0, 0, NULL,
+        CMD_NOSUBFUNCS
+        CMD_MAINFUNC(cmd_disconnect)
         CMD_TAGS(
             CMD_TAG_CONNECTION)
         CMD_SYN(
@@ -251,7 +279,9 @@ static struct cmd_t command_defs[] =
     },
 
     { "/msg",
-        cmd_msg, parse_args_with_freetext, 1, 2, NULL,
+        parse_args_with_freetext, 1, 2, NULL,
+        CMD_NOSUBFUNCS
+        CMD_MAINFUNC(cmd_msg)
         CMD_TAGS(
             CMD_TAG_CHAT)
         CMD_SYN(
@@ -274,7 +304,9 @@ static struct cmd_t command_defs[] =
     },
 
     { "/roster",
-        cmd_roster, parse_args_with_freetext, 0, 4, NULL,
+        parse_args_with_freetext, 0, 4, NULL,
+        CMD_NOSUBFUNCS
+        CMD_MAINFUNC(cmd_roster)
         CMD_TAGS(
             CMD_TAG_ROSTER,
             CMD_TAG_UI)
@@ -392,7 +424,9 @@ static struct cmd_t command_defs[] =
     },
 
     { "/group",
-        cmd_group, parse_args_with_freetext, 0, 3, NULL,
+        parse_args_with_freetext, 0, 3, NULL,
+        CMD_NOSUBFUNCS
+        CMD_MAINFUNC(cmd_group)
         CMD_TAGS(
             CMD_TAG_ROSTER,
             CMD_TAG_UI)
@@ -417,7 +451,9 @@ static struct cmd_t command_defs[] =
     },
 
     { "/info",
-        cmd_info, parse_args, 0, 1, NULL,
+        parse_args, 0, 1, NULL,
+        CMD_NOSUBFUNCS
+        CMD_MAINFUNC(cmd_info)
         CMD_TAGS(
             CMD_TAG_ROSTER,
             CMD_TAG_CHAT,
@@ -438,7 +474,9 @@ static struct cmd_t command_defs[] =
     },
 
     { "/caps",
-        cmd_caps, parse_args, 0, 1, NULL,
+        parse_args, 0, 1, NULL,
+        CMD_NOSUBFUNCS
+        CMD_MAINFUNC(cmd_caps)
         CMD_TAGS(
             CMD_TAG_DISCOVERY,
             CMD_TAG_CHAT,
@@ -459,7 +497,9 @@ static struct cmd_t command_defs[] =
     },
 
     { "/software",
-        cmd_software, parse_args, 0, 1, NULL,
+        parse_args, 0, 1, NULL,
+        CMD_NOSUBFUNCS
+        CMD_MAINFUNC(cmd_software)
         CMD_TAGS(
             CMD_TAG_DISCOVERY,
             CMD_TAG_CHAT,
@@ -481,7 +521,9 @@ static struct cmd_t command_defs[] =
     },
 
     { "/status",
-        cmd_status, parse_args, 0, 1, NULL,
+        parse_args, 0, 1, NULL,
+        CMD_NOSUBFUNCS
+        CMD_MAINFUNC(cmd_status)
         CMD_TAGS(
             CMD_TAG_CHAT,
             CMD_TAG_GROUPCHAT)
@@ -500,7 +542,9 @@ static struct cmd_t command_defs[] =
     },
 
     { "/resource",
-        cmd_resource, parse_args, 1, 2, &cons_resource_setting,
+        parse_args, 1, 2, &cons_resource_setting,
+        CMD_NOSUBFUNCS
+        CMD_MAINFUNC(cmd_resource)
         CMD_TAGS(
             CMD_TAG_CHAT,
             CMD_TAG_UI)
@@ -520,7 +564,9 @@ static struct cmd_t command_defs[] =
     },
 
     { "/join",
-        cmd_join, parse_args, 0, 5, NULL,
+        parse_args, 0, 5, NULL,
+        CMD_NOSUBFUNCS
+        CMD_MAINFUNC(cmd_join)
         CMD_TAGS(
             CMD_TAG_GROUPCHAT)
         CMD_SYN(
@@ -545,7 +591,9 @@ static struct cmd_t command_defs[] =
     },
 
     { "/leave",
-        cmd_leave, parse_args, 0, 0, NULL,
+        parse_args, 0, 0, NULL,
+        CMD_NOSUBFUNCS
+        CMD_MAINFUNC(cmd_leave)
         CMD_TAGS(
             CMD_TAG_GROUPCHAT)
         CMD_SYN(
@@ -557,7 +605,9 @@ static struct cmd_t command_defs[] =
     },
 
     { "/invite",
-        cmd_invite, parse_args_with_freetext, 1, 2, NULL,
+        parse_args_with_freetext, 1, 2, NULL,
+        CMD_NOSUBFUNCS
+        CMD_MAINFUNC(cmd_invite)
         CMD_TAGS(
             CMD_TAG_GROUPCHAT)
         CMD_SYN(
@@ -571,7 +621,9 @@ static struct cmd_t command_defs[] =
     },
 
     { "/invites",
-        cmd_invites, parse_args_with_freetext, 0, 0, NULL,
+        parse_args_with_freetext, 0, 0, NULL,
+        CMD_NOSUBFUNCS
+        CMD_MAINFUNC(cmd_invites)
         CMD_TAGS(
             CMD_TAG_GROUPCHAT)
         CMD_SYN(
@@ -583,7 +635,9 @@ static struct cmd_t command_defs[] =
     },
 
     { "/decline",
-        cmd_decline, parse_args_with_freetext, 1, 1, NULL,
+        parse_args_with_freetext, 1, 1, NULL,
+        CMD_NOSUBFUNCS
+        CMD_MAINFUNC(cmd_decline)
         CMD_TAGS(
             CMD_TAG_GROUPCHAT)
         CMD_SYN(
@@ -596,7 +650,9 @@ static struct cmd_t command_defs[] =
     },
 
     { "/room",
-        cmd_room, parse_args, 1, 1, NULL,
+        parse_args, 1, 1, NULL,
+        CMD_NOSUBFUNCS
+        CMD_MAINFUNC(cmd_room)
         CMD_TAGS(
             CMD_TAG_GROUPCHAT)
         CMD_SYN(
@@ -611,7 +667,9 @@ static struct cmd_t command_defs[] =
     },
 
     { "/kick",
-        cmd_kick, parse_args_with_freetext, 1, 2, NULL,
+        parse_args_with_freetext, 1, 2, NULL,
+        CMD_NOSUBFUNCS
+        CMD_MAINFUNC(cmd_kick)
         CMD_TAGS(
             CMD_TAG_GROUPCHAT)
         CMD_SYN(
@@ -625,7 +683,9 @@ static struct cmd_t command_defs[] =
     },
 
     { "/ban",
-        cmd_ban, parse_args_with_freetext, 1, 2, NULL,
+        parse_args_with_freetext, 1, 2, NULL,
+        CMD_NOSUBFUNCS
+        CMD_MAINFUNC(cmd_ban)
         CMD_TAGS(
             CMD_TAG_GROUPCHAT)
         CMD_SYN(
@@ -639,7 +699,9 @@ static struct cmd_t command_defs[] =
     },
 
     { "/subject",
-        cmd_subject, parse_args_with_freetext, 0, 2, NULL,
+        parse_args_with_freetext, 0, 2, NULL,
+        CMD_NOSUBFUNCS
+        CMD_MAINFUNC(cmd_subject)
         CMD_TAGS(
             CMD_TAG_GROUPCHAT)
         CMD_SYN(
@@ -660,7 +722,9 @@ static struct cmd_t command_defs[] =
     },
 
     { "/affiliation",
-        cmd_affiliation, parse_args_with_freetext, 1, 4, NULL,
+        parse_args_with_freetext, 1, 4, NULL,
+        CMD_NOSUBFUNCS
+        CMD_MAINFUNC(cmd_affiliation)
         CMD_TAGS(
             CMD_TAG_GROUPCHAT)
         CMD_SYN(
@@ -676,7 +740,9 @@ static struct cmd_t command_defs[] =
     },
 
     { "/role",
-        cmd_role, parse_args_with_freetext, 1, 4, NULL,
+        parse_args_with_freetext, 1, 4, NULL,
+        CMD_NOSUBFUNCS
+        CMD_MAINFUNC(cmd_role)
         CMD_TAGS(
             CMD_TAG_GROUPCHAT)
         CMD_SYN(
@@ -692,7 +758,9 @@ static struct cmd_t command_defs[] =
     },
 
     { "/occupants",
-        cmd_occupants, parse_args, 1, 3, cons_occupants_setting,
+        parse_args, 1, 3, cons_occupants_setting,
+        CMD_NOSUBFUNCS
+        CMD_MAINFUNC(cmd_occupants)
         CMD_TAGS(
             CMD_TAG_GROUPCHAT,
             CMD_TAG_UI)
@@ -714,7 +782,9 @@ static struct cmd_t command_defs[] =
     },
 
     { "/form",
-        cmd_form, parse_args, 1, 2, NULL,
+        parse_args, 1, 2, NULL,
+        CMD_NOSUBFUNCS
+        CMD_MAINFUNC(cmd_form)
         CMD_TAGS(
             CMD_TAG_GROUPCHAT)
         CMD_SYN(
@@ -733,7 +803,9 @@ static struct cmd_t command_defs[] =
     },
 
     { "/rooms",
-        cmd_rooms, parse_args, 0, 1, NULL,
+        parse_args, 0, 1, NULL,
+        CMD_NOSUBFUNCS
+        CMD_MAINFUNC(cmd_rooms)
         CMD_TAGS(
             CMD_TAG_GROUPCHAT)
         CMD_SYN(
@@ -748,7 +820,9 @@ static struct cmd_t command_defs[] =
     },
 
     { "/bookmark",
-        cmd_bookmark, parse_args, 0, 8, NULL,
+        parse_args, 0, 8, NULL,
+        CMD_NOSUBFUNCS
+        CMD_MAINFUNC(cmd_bookmark)
         CMD_TAGS(
             CMD_TAG_GROUPCHAT)
         CMD_SYN(
@@ -774,7 +848,9 @@ static struct cmd_t command_defs[] =
     },
 
     { "/disco",
-        cmd_disco, parse_args, 1, 2, NULL,
+        parse_args, 1, 2, NULL,
+        CMD_NOSUBFUNCS
+        CMD_MAINFUNC(cmd_disco)
         CMD_TAGS(
             CMD_TAG_DISCOVERY)
         CMD_SYN(
@@ -793,8 +869,28 @@ static struct cmd_t command_defs[] =
             "/disco info myfriend@server.com/laptop")
     },
 
+    { "/sendfile",
+        parse_args_with_freetext, 1, 1, NULL,
+        CMD_NOSUBFUNCS
+        CMD_MAINFUNC(cmd_sendfile)
+        CMD_TAGS(
+            CMD_TAG_CHAT,
+            CMD_TAG_GROUPCHAT)
+        CMD_SYN(
+            "/sendfile <file>")
+        CMD_DESC(
+            "Send a file using XEP-0363 HTTP file transfer.")
+        CMD_ARGS(
+            { "<file>", "Path to the file." })
+        CMD_EXAMPLES(
+            "/sendfile /etc/hosts",
+            "/sendfile ~/images/sweet_cat.jpg")
+    },
+
     { "/lastactivity",
-        cmd_lastactivity, parse_args, 0, 1, NULL,
+        parse_args, 0, 1, NULL,
+        CMD_NOSUBFUNCS
+        CMD_MAINFUNC(cmd_lastactivity)
         CMD_TAGS(
             CMD_TAG_PRESENCE)
         CMD_SYN(
@@ -814,7 +910,9 @@ static struct cmd_t command_defs[] =
     },
 
     { "/nick",
-        cmd_nick, parse_args_with_freetext, 1, 1, NULL,
+        parse_args_with_freetext, 1, 1, NULL,
+        CMD_NOSUBFUNCS
+        CMD_MAINFUNC(cmd_nick)
         CMD_TAGS(
             CMD_TAG_GROUPCHAT)
         CMD_SYN(
@@ -827,7 +925,9 @@ static struct cmd_t command_defs[] =
     },
 
     { "/win",
-        cmd_win, parse_args, 1, 1, NULL,
+        parse_args, 1, 1, NULL,
+        CMD_NOSUBFUNCS
+        CMD_MAINFUNC(cmd_win)
         CMD_TAGS(
             CMD_TAG_UI)
         CMD_SYN(
@@ -858,7 +958,14 @@ static struct cmd_t command_defs[] =
     },
 
     { "/wins",
-        cmd_wins, parse_args, 0, 3, NULL,
+        parse_args, 0, 3, NULL,
+        CMD_SUBFUNCS(
+            { "unread",     cmd_wins_unread },
+            { "tidy",       cmd_wins_tidy },
+            { "prune",      cmd_wins_prune },
+            { "swap",       cmd_wins_swap },
+            { "autotidy",   cmd_wins_autotidy })
+        CMD_MAINFUNC(cmd_wins)
         CMD_TAGS(
             CMD_TAG_UI)
         CMD_SYN(
@@ -881,7 +988,9 @@ static struct cmd_t command_defs[] =
     },
 
     { "/sub",
-        cmd_sub, parse_args, 1, 2, NULL,
+        parse_args, 1, 2, NULL,
+        CMD_NOSUBFUNCS
+        CMD_MAINFUNC(cmd_sub)
         CMD_TAGS(
             CMD_TAG_ROSTER)
         CMD_SYN(
@@ -909,7 +1018,9 @@ static struct cmd_t command_defs[] =
     },
 
     { "/tiny",
-        cmd_tiny, parse_args, 1, 1, NULL,
+        parse_args, 1, 1, NULL,
+        CMD_NOSUBFUNCS
+        CMD_MAINFUNC(cmd_tiny)
         CMD_TAGS(
             CMD_TAG_CHAT,
             CMD_TAG_GROUPCHAT)
@@ -924,7 +1035,9 @@ static struct cmd_t command_defs[] =
     },
 
     { "/who",
-        cmd_who, parse_args, 0, 2, NULL,
+        parse_args, 0, 2, NULL,
+        CMD_NOSUBFUNCS
+        CMD_MAINFUNC(cmd_who)
         CMD_TAGS(
             CMD_TAG_CHAT,
             CMD_TAG_GROUPCHAT,
@@ -955,7 +1068,9 @@ static struct cmd_t command_defs[] =
     },
 
     { "/close",
-        cmd_close, parse_args, 0, 1, NULL,
+        parse_args, 0, 1, NULL,
+        CMD_NOSUBFUNCS
+        CMD_MAINFUNC(cmd_close)
         CMD_TAGS(
             CMD_TAG_UI)
         CMD_SYN(
@@ -983,7 +1098,9 @@ static struct cmd_t command_defs[] =
     },
 
     { "/clear",
-        cmd_clear, parse_args, 0, 0, NULL,
+        parse_args, 0, 0, NULL,
+        CMD_NOSUBFUNCS
+        CMD_MAINFUNC(cmd_clear)
         CMD_TAGS(
             CMD_TAG_UI)
         CMD_SYN(
@@ -995,7 +1112,9 @@ static struct cmd_t command_defs[] =
     },
 
     { "/quit",
-        cmd_quit, parse_args, 0, 0, NULL,
+        parse_args, 0, 0, NULL,
+        CMD_NOSUBFUNCS
+        CMD_MAINFUNC(cmd_quit)
         CMD_NOTAGS
         CMD_SYN(
             "/quit")
@@ -1006,7 +1125,9 @@ static struct cmd_t command_defs[] =
     },
 
     { "/privileges",
-        cmd_privileges, parse_args, 1, 1, &cons_privileges_setting,
+        parse_args, 1, 1, &cons_privileges_setting,
+        CMD_NOSUBFUNCS
+        CMD_MAINFUNC(cmd_privileges)
         CMD_TAGS(
             CMD_TAG_GROUPCHAT,
             CMD_TAG_UI)
@@ -1020,7 +1141,9 @@ static struct cmd_t command_defs[] =
     },
 
     { "/charset",
-        cmd_charset, parse_args, 0, 0, NULL,
+        parse_args, 0, 0, NULL,
+        CMD_NOSUBFUNCS
+        CMD_MAINFUNC(cmd_charset)
         CMD_TAGS(
             CMD_TAG_UI)
         CMD_SYN(
@@ -1032,7 +1155,9 @@ static struct cmd_t command_defs[] =
     },
 
     { "/beep",
-        cmd_beep, parse_args, 1, 1, &cons_beep_setting,
+        parse_args, 1, 1, &cons_beep_setting,
+        CMD_NOSUBFUNCS
+        CMD_MAINFUNC(cmd_beep)
         CMD_TAGS(
             CMD_TAG_UI)
         CMD_SYN(
@@ -1047,7 +1172,9 @@ static struct cmd_t command_defs[] =
     },
 
     { "/console",
-        cmd_console, parse_args, 2, 2, &cons_console_setting,
+        parse_args, 2, 2, &cons_console_setting,
+        CMD_NOSUBFUNCS
+        CMD_MAINFUNC(cmd_console)
         CMD_TAGS(
             CMD_TAG_UI,
             CMD_TAG_CHAT,
@@ -1073,7 +1200,9 @@ static struct cmd_t command_defs[] =
     },
 
     { "/encwarn",
-        cmd_encwarn, parse_args, 1, 1, &cons_encwarn_setting,
+        parse_args, 1, 1, &cons_encwarn_setting,
+        CMD_NOSUBFUNCS
+        CMD_MAINFUNC(cmd_encwarn)
         CMD_TAGS(
             CMD_TAG_CHAT,
             CMD_TAG_UI)
@@ -1087,7 +1216,9 @@ static struct cmd_t command_defs[] =
     },
 
     { "/presence",
-        cmd_presence, parse_args, 1, 1, &cons_presence_setting,
+        parse_args, 1, 1, &cons_presence_setting,
+        CMD_NOSUBFUNCS
+        CMD_MAINFUNC(cmd_presence)
         CMD_TAGS(
             CMD_TAG_UI,
             CMD_TAG_CHAT)
@@ -1101,7 +1232,9 @@ static struct cmd_t command_defs[] =
     },
 
     { "/wrap",
-        cmd_wrap, parse_args, 1, 1, &cons_wrap_setting,
+        parse_args, 1, 1, &cons_wrap_setting,
+        CMD_NOSUBFUNCS
+        CMD_MAINFUNC(cmd_wrap)
         CMD_TAGS(
             CMD_TAG_UI)
         CMD_SYN(
@@ -1114,7 +1247,9 @@ static struct cmd_t command_defs[] =
     },
 
     { "/time",
-        cmd_time, parse_args, 1, 3, &cons_time_setting,
+        parse_args, 1, 3, &cons_time_setting,
+        CMD_NOSUBFUNCS
+        CMD_MAINFUNC(cmd_time)
         CMD_TAGS(
             CMD_TAG_UI)
         CMD_SYN(
@@ -1154,7 +1289,9 @@ static struct cmd_t command_defs[] =
     },
 
     { "/inpblock",
-        cmd_inpblock, parse_args, 2, 2, &cons_inpblock_setting,
+        parse_args, 2, 2, &cons_inpblock_setting,
+        CMD_NOSUBFUNCS
+        CMD_MAINFUNC(cmd_inpblock)
         CMD_TAGS(
             CMD_TAG_UI)
         CMD_SYN(
@@ -1169,7 +1306,9 @@ static struct cmd_t command_defs[] =
     },
 
     { "/notify",
-        cmd_notify, parse_args_with_freetext, 0, 4, NULL,
+        parse_args_with_freetext, 0, 4, NULL,
+        CMD_NOSUBFUNCS
+        CMD_MAINFUNC(cmd_notify)
         CMD_TAGS(
             CMD_TAG_UI,
             CMD_TAG_CHAT,
@@ -1238,7 +1377,9 @@ static struct cmd_t command_defs[] =
     },
 
     { "/flash",
-        cmd_flash, parse_args, 1, 1, &cons_flash_setting,
+        parse_args, 1, 1, &cons_flash_setting,
+        CMD_NOSUBFUNCS
+        CMD_MAINFUNC(cmd_flash)
         CMD_TAGS(
             CMD_TAG_UI)
         CMD_SYN(
@@ -1251,8 +1392,25 @@ static struct cmd_t command_defs[] =
         CMD_NOEXAMPLES
     },
 
+    { "/tray",
+        parse_args, 1, 1, &cons_tray_setting,
+        CMD_NOSUBFUNCS
+        CMD_MAINFUNC(cmd_tray)
+        CMD_TAGS(
+            CMD_TAG_UI)
+        CMD_SYN(
+            "/tray on|off")
+        CMD_DESC(
+            "Display an icon in the tray that will indicate new messages.")
+        CMD_ARGS(
+            { "on|off", "Enable or disable tray icon." })
+        CMD_NOEXAMPLES
+    },
+
     { "/intype",
-        cmd_intype, parse_args, 1, 1, &cons_intype_setting,
+        parse_args, 1, 1, &cons_intype_setting,
+        CMD_NOSUBFUNCS
+        CMD_MAINFUNC(cmd_intype)
         CMD_TAGS(
             CMD_TAG_UI,
             CMD_TAG_CHAT)
@@ -1266,7 +1424,9 @@ static struct cmd_t command_defs[] =
     },
 
     { "/splash",
-        cmd_splash, parse_args, 1, 1, &cons_splash_setting,
+        parse_args, 1, 1, &cons_splash_setting,
+        CMD_NOSUBFUNCS
+        CMD_MAINFUNC(cmd_splash)
         CMD_TAGS(
             CMD_TAG_UI)
         CMD_SYN(
@@ -1279,7 +1439,9 @@ static struct cmd_t command_defs[] =
     },
 
     { "/autoconnect",
-        cmd_autoconnect, parse_args, 1, 2, &cons_autoconnect_setting,
+        parse_args, 1, 2, &cons_autoconnect_setting,
+        CMD_NOSUBFUNCS
+        CMD_MAINFUNC(cmd_autoconnect)
         CMD_TAGS(
             CMD_TAG_CONNECTION)
         CMD_SYN(
@@ -1297,7 +1459,9 @@ static struct cmd_t command_defs[] =
     },
 
     { "/vercheck",
-        cmd_vercheck, parse_args, 0, 1, NULL,
+        parse_args, 0, 1, NULL,
+        CMD_NOSUBFUNCS
+        CMD_MAINFUNC(cmd_vercheck)
         CMD_TAGS(
             CMD_TAG_UI)
         CMD_SYN(
@@ -1310,7 +1474,9 @@ static struct cmd_t command_defs[] =
     },
 
     { "/titlebar",
-        cmd_titlebar, parse_args, 2, 2, &cons_titlebar_setting,
+        parse_args, 2, 2, &cons_titlebar_setting,
+        CMD_NOSUBFUNCS
+        CMD_MAINFUNC(cmd_titlebar)
         CMD_TAGS(
             CMD_TAG_UI)
         CMD_SYN(
@@ -1325,7 +1491,9 @@ static struct cmd_t command_defs[] =
     },
 
     { "/alias",
-        cmd_alias, parse_args_with_freetext, 1, 3, NULL,
+        parse_args_with_freetext, 1, 3, NULL,
+        CMD_NOSUBFUNCS
+        CMD_MAINFUNC(cmd_alias)
         CMD_NOTAGS
         CMD_SYN(
             "/alias list",
@@ -1346,7 +1514,9 @@ static struct cmd_t command_defs[] =
     },
 
     { "/chlog",
-        cmd_chlog, parse_args, 1, 1, &cons_chlog_setting,
+        parse_args, 1, 1, &cons_chlog_setting,
+        CMD_NOSUBFUNCS
+        CMD_MAINFUNC(cmd_chlog)
         CMD_TAGS(
             CMD_TAG_CHAT)
         CMD_SYN(
@@ -1362,7 +1532,9 @@ static struct cmd_t command_defs[] =
     },
 
     { "/grlog",
-        cmd_grlog, parse_args, 1, 1, &cons_grlog_setting,
+        parse_args, 1, 1, &cons_grlog_setting,
+        CMD_NOSUBFUNCS
+        CMD_MAINFUNC(cmd_grlog)
         CMD_TAGS(
             CMD_TAG_GROUPCHAT)
         CMD_SYN(
@@ -1376,7 +1548,9 @@ static struct cmd_t command_defs[] =
     },
 
     { "/states",
-        cmd_states, parse_args, 1, 1, &cons_states_setting,
+        parse_args, 1, 1, &cons_states_setting,
+        CMD_NOSUBFUNCS
+        CMD_MAINFUNC(cmd_states)
         CMD_TAGS(
             CMD_TAG_CHAT)
         CMD_SYN(
@@ -1389,7 +1563,9 @@ static struct cmd_t command_defs[] =
     },
 
     { "/pgp",
-        cmd_pgp, parse_args, 1, 3, NULL,
+        parse_args, 1, 3, NULL,
+        CMD_NOSUBFUNCS
+        CMD_MAINFUNC(cmd_pgp)
         CMD_TAGS(
             CMD_TAG_CHAT,
             CMD_TAG_UI)
@@ -1424,7 +1600,23 @@ static struct cmd_t command_defs[] =
     },
 
     { "/otr",
-        cmd_otr, parse_args, 1, 3, NULL,
+        parse_args, 1, 3, NULL,
+        CMD_SUBFUNCS(
+            { "char",       cmd_otr_char },
+            { "log",        cmd_otr_log },
+            { "libver",     cmd_otr_libver },
+            { "policy",     cmd_otr_policy },
+            { "gen",        cmd_otr_gen },
+            { "myfp",       cmd_otr_myfp },
+            { "theirfp",    cmd_otr_theirfp },
+            { "start",      cmd_otr_start },
+            { "end",        cmd_otr_end },
+            { "trust",      cmd_otr_trust },
+            { "untrust",    cmd_otr_untrust },
+            { "secret",     cmd_otr_secret },
+            { "question",   cmd_otr_question },
+            { "answer",     cmd_otr_answer })
+        CMD_NOMAINFUNC
         CMD_TAGS(
             CMD_TAG_CHAT,
             CMD_TAG_UI)
@@ -1477,7 +1669,9 @@ static struct cmd_t command_defs[] =
     },
 
     { "/outtype",
-        cmd_outtype, parse_args, 1, 1, &cons_outtype_setting,
+        parse_args, 1, 1, &cons_outtype_setting,
+        CMD_NOSUBFUNCS
+        CMD_MAINFUNC(cmd_outtype)
         CMD_TAGS(
             CMD_TAG_CHAT)
         CMD_SYN(
@@ -1490,7 +1684,9 @@ static struct cmd_t command_defs[] =
     },
 
     { "/gone",
-        cmd_gone, parse_args, 1, 1, &cons_gone_setting,
+        parse_args, 1, 1, &cons_gone_setting,
+        CMD_NOSUBFUNCS
+        CMD_MAINFUNC(cmd_gone)
         CMD_TAGS(
             CMD_TAG_CHAT)
         CMD_SYN(
@@ -1504,7 +1700,9 @@ static struct cmd_t command_defs[] =
     },
 
     { "/history",
-        cmd_history, parse_args, 1, 1, &cons_history_setting,
+        parse_args, 1, 1, &cons_history_setting,
+        CMD_NOSUBFUNCS
+        CMD_MAINFUNC(cmd_history)
         CMD_TAGS(
             CMD_TAG_UI,
             CMD_TAG_CHAT)
@@ -1519,7 +1717,9 @@ static struct cmd_t command_defs[] =
     },
 
     { "/log",
-        cmd_log, parse_args, 1, 2, &cons_log_setting,
+        parse_args, 1, 2, &cons_log_setting,
+        CMD_NOSUBFUNCS
+        CMD_MAINFUNC(cmd_log)
         CMD_NOTAGS
         CMD_SYN(
             "/log where",
@@ -1537,7 +1737,9 @@ static struct cmd_t command_defs[] =
     },
 
     { "/carbons",
-        cmd_carbons, parse_args, 1, 1, &cons_carbons_setting,
+        parse_args, 1, 1, &cons_carbons_setting,
+        CMD_NOSUBFUNCS
+        CMD_MAINFUNC(cmd_carbons)
         CMD_TAGS(
             CMD_TAG_CHAT)
         CMD_SYN(
@@ -1551,7 +1753,9 @@ static struct cmd_t command_defs[] =
     },
 
     { "/receipts",
-        cmd_receipts, parse_args, 2, 2, &cons_receipts_setting,
+        parse_args, 2, 2, &cons_receipts_setting,
+        CMD_NOSUBFUNCS
+        CMD_MAINFUNC(cmd_receipts)
         CMD_TAGS(
             CMD_TAG_CHAT)
         CMD_SYN(
@@ -1566,7 +1770,9 @@ static struct cmd_t command_defs[] =
     },
 
     { "/reconnect",
-        cmd_reconnect, parse_args, 1, 1, &cons_reconnect_setting,
+        parse_args, 1, 1, &cons_reconnect_setting,
+        CMD_NOSUBFUNCS
+        CMD_MAINFUNC(cmd_reconnect)
         CMD_TAGS(
             CMD_TAG_CONNECTION)
         CMD_SYN(
@@ -1579,7 +1785,9 @@ static struct cmd_t command_defs[] =
     },
 
     { "/autoping",
-        cmd_autoping, parse_args, 2, 2, &cons_autoping_setting,
+        parse_args, 2, 2, &cons_autoping_setting,
+        CMD_NOSUBFUNCS
+        CMD_MAINFUNC(cmd_autoping)
         CMD_TAGS(
             CMD_TAG_CONNECTION)
         CMD_SYN(
@@ -1594,7 +1802,9 @@ static struct cmd_t command_defs[] =
     },
 
     { "/ping",
-        cmd_ping, parse_args, 0, 1, NULL,
+        parse_args, 0, 1, NULL,
+        CMD_NOSUBFUNCS
+        CMD_MAINFUNC(cmd_ping)
         CMD_TAGS(
             CMD_TAG_CONNECTION)
         CMD_SYN(
@@ -1608,7 +1818,9 @@ static struct cmd_t command_defs[] =
     },
 
     { "/autoaway",
-        cmd_autoaway, parse_args_with_freetext, 2, 3, &cons_autoaway_setting,
+        parse_args_with_freetext, 2, 3, &cons_autoaway_setting,
+        CMD_NOSUBFUNCS
+        CMD_MAINFUNC(cmd_autoaway)
         CMD_TAGS(
             CMD_TAG_PRESENCE)
         CMD_SYN(
@@ -1639,7 +1851,9 @@ static struct cmd_t command_defs[] =
     },
 
     { "/priority",
-        cmd_priority, parse_args, 1, 1, NULL,
+        parse_args, 1, 1, NULL,
+        CMD_NOSUBFUNCS
+        CMD_MAINFUNC(cmd_priority)
         CMD_TAGS(
             CMD_TAG_PRESENCE)
         CMD_SYN(
@@ -1653,7 +1867,19 @@ static struct cmd_t command_defs[] =
     },
 
     { "/account",
-        cmd_account, parse_args, 0, 4, NULL,
+        parse_args, 0, 4, NULL,
+        CMD_SUBFUNCS(
+            { "list",       cmd_account_list },
+            { "show",       cmd_account_show },
+            { "add",        cmd_account_add },
+            { "remove",     cmd_account_remove },
+            { "enable",     cmd_account_enable },
+            { "disable",    cmd_account_disable },
+            { "rename",     cmd_account_rename },
+            { "default",    cmd_account_default },
+            { "set",        cmd_account_set },
+            { "clear",      cmd_account_clear })
+        CMD_MAINFUNC(cmd_account)
         CMD_TAGS(
             CMD_TAG_CONNECTION
             CMD_TAG_PRESENCE,
@@ -1744,7 +1970,9 @@ static struct cmd_t command_defs[] =
     },
 
     { "/plugins",
-        cmd_plugins, parse_args, 0, 2, NULL,
+        parse_args, 0, 2, NULL,
+        CMD_NOSUBFUNCS
+        CMD_MAINFUNC(cmd_plugins)
         CMD_NOTAGS
         CMD_SYN(
             "/plugins",
@@ -1758,7 +1986,9 @@ static struct cmd_t command_defs[] =
     },
 
     { "/prefs",
-        cmd_prefs, parse_args, 0, 1, NULL,
+        parse_args, 0, 1, NULL,
+        CMD_NOSUBFUNCS
+        CMD_MAINFUNC(cmd_prefs)
         CMD_NOTAGS
         CMD_SYN(
             "/prefs [ui|desktop|chat|log|conn|presence|otr|pgp]")
@@ -1778,7 +2008,9 @@ static struct cmd_t command_defs[] =
     },
 
     { "/theme",
-        cmd_theme, parse_args, 1, 2, &cons_theme_setting,
+        parse_args, 1, 2, &cons_theme_setting,
+        CMD_NOSUBFUNCS
+        CMD_MAINFUNC(cmd_theme)
         CMD_TAGS(
             CMD_TAG_UI)
         CMD_SYN(
@@ -1799,7 +2031,9 @@ static struct cmd_t command_defs[] =
     },
 
     { "/statuses",
-        cmd_statuses, parse_args, 2, 2, &cons_statuses_setting,
+        parse_args, 2, 2, &cons_statuses_setting,
+        CMD_NOSUBFUNCS
+        CMD_MAINFUNC(cmd_statuses)
         CMD_TAGS(
             CMD_TAG_UI,
             CMD_TAG_CHAT,
@@ -1823,7 +2057,9 @@ static struct cmd_t command_defs[] =
     },
 
     { "/xmlconsole",
-        cmd_xmlconsole, parse_args, 0, 0, NULL,
+        parse_args, 0, 0, NULL,
+        CMD_NOSUBFUNCS
+        CMD_MAINFUNC(cmd_xmlconsole)
         CMD_TAGS(
             CMD_TAG_UI)
         CMD_SYN(
@@ -1835,7 +2071,9 @@ static struct cmd_t command_defs[] =
     },
 
     { "/away",
-        cmd_away, parse_args_with_freetext, 0, 1, NULL,
+        parse_args_with_freetext, 0, 1, NULL,
+        CMD_NOSUBFUNCS
+        CMD_MAINFUNC(cmd_away)
         CMD_TAGS(
             CMD_TAG_PRESENCE)
         CMD_SYN(
@@ -1850,7 +2088,9 @@ static struct cmd_t command_defs[] =
     },
 
     { "/chat",
-        cmd_chat, parse_args_with_freetext, 0, 1, NULL,
+        parse_args_with_freetext, 0, 1, NULL,
+        CMD_NOSUBFUNCS
+        CMD_MAINFUNC(cmd_chat)
         CMD_TAGS(
             CMD_TAG_PRESENCE)
         CMD_SYN(
@@ -1865,7 +2105,9 @@ static struct cmd_t command_defs[] =
     },
 
     { "/dnd",
-        cmd_dnd, parse_args_with_freetext, 0, 1, NULL,
+        parse_args_with_freetext, 0, 1, NULL,
+        CMD_NOSUBFUNCS
+        CMD_MAINFUNC(cmd_dnd)
         CMD_TAGS(
             CMD_TAG_PRESENCE)
         CMD_SYN(
@@ -1880,7 +2122,9 @@ static struct cmd_t command_defs[] =
     },
 
     { "/online",
-        cmd_online, parse_args_with_freetext, 0, 1, NULL,
+        parse_args_with_freetext, 0, 1, NULL,
+        CMD_NOSUBFUNCS
+        CMD_MAINFUNC(cmd_online)
         CMD_TAGS(
             CMD_TAG_PRESENCE)
         CMD_SYN(
@@ -1895,7 +2139,9 @@ static struct cmd_t command_defs[] =
     },
 
     { "/xa",
-        cmd_xa, parse_args_with_freetext, 0, 1, NULL,
+        parse_args_with_freetext, 0, 1, NULL,
+        CMD_NOSUBFUNCS
+        CMD_MAINFUNC(cmd_xa)
         CMD_TAGS(
             CMD_TAG_PRESENCE)
         CMD_SYN(
@@ -1910,7 +2156,9 @@ static struct cmd_t command_defs[] =
     },
 
     { "/script",
-        cmd_script, parse_args, 1, 2, NULL,
+        parse_args, 1, 2, NULL,
+        CMD_NOSUBFUNCS
+        CMD_MAINFUNC(cmd_script)
         CMD_NOTAGS
         CMD_SYN(
             "/script run <script>",
@@ -1930,7 +2178,9 @@ static struct cmd_t command_defs[] =
     },
 
     { "/export",
-        cmd_export, parse_args, 1, 1, NULL,
+        parse_args, 1, 1, NULL,
+        CMD_NOSUBFUNCS
+        CMD_MAINFUNC(cmd_export)
         CMD_NOTAGS
         CMD_SYN(
             "/export <filepath>")
@@ -2028,6 +2278,7 @@ static Autocomplete console_msg_ac;
 static Autocomplete autoping_ac;
 static Autocomplete plugins_ac;
 static Autocomplete plugins_load_ac;
+static Autocomplete sendfile_ac;
 
 /*
  * Initialise command autocompleter and history
@@ -2582,6 +2833,8 @@ cmd_init(void)
 
     plugins_ac = autocomplete_new();
     autocomplete_add(plugins_ac, "load");
+
+    sendfile_ac = autocomplete_new();
 }
 
 void
@@ -2671,6 +2924,7 @@ cmd_uninit(void)
     autocomplete_free(autoping_ac);
     autocomplete_free(plugins_ac);
     autocomplete_free(plugins_load_ac);
+    autocomplete_free(sendfile_ac);
 }
 
 gboolean
@@ -2819,6 +3073,7 @@ cmd_reset_autocomplete(ProfWin *window)
     autocomplete_reset(notify_mention_ac);
     autocomplete_reset(notify_trigger_ac);
     autocomplete_reset(sub_ac);
+    autocomplete_reset(sendfile_ac);
 
     autocomplete_reset(who_room_ac);
     autocomplete_reset(who_roster_ac);
@@ -2972,7 +3227,17 @@ cmd_process_input(ProfWin *window, char *inp)
     } else if (inp[0] == '/') {
         char *inp_cpy = strdup(inp);
         char *command = strtok(inp_cpy, " ");
-        result = _cmd_execute(window, command, inp);
+        char *question_mark = strchr(command, '?');
+        if (question_mark) {
+            *question_mark = '\0';
+            char *fakeinp;
+            if (asprintf(&fakeinp, "/help %s", command+1)) {
+                result = _cmd_execute(window, "/help", fakeinp);
+                free(fakeinp);
+            }
+        } else {
+            result = _cmd_execute(window, command, inp);
+        }
         free(inp_cpy);
 
     // call a default handler if input didn't start with '/'
@@ -3022,11 +3287,26 @@ _cmd_execute(ProfWin *window, const char *const command, const char *const inp)
         if (result == FALSE) {
             ui_invalid_command_usage(cmd->cmd, cmd->setting_func);
             return TRUE;
-        } else {
-            gboolean result = cmd->func(window, command, args);
-            g_strfreev(args);
-            return result;
         }
+        if (args[0] && cmd->sub_funcs) {
+            int i = 0;
+            while (cmd->sub_funcs[i][0]) {
+                if (g_strcmp0(args[0], (char*)cmd->sub_funcs[i][0]) == 0) {
+                    gboolean (*func)(ProfWin *window, const char *const command, gchar **args) = cmd->sub_funcs[i][1];
+                    gboolean result = func(window, command, args);
+                    g_strfreev(args);
+                    return result;
+                }
+                i++;
+            }
+        }
+        if (!cmd->func) {
+            ui_invalid_command_usage(cmd->cmd, cmd->setting_func);
+            return TRUE;
+        }
+        gboolean result = cmd->func(window, command, args);
+        g_strfreev(args);
+        return result;
     } else if (plugins_run_command(inp)) {
         return TRUE;
     } else {
@@ -3049,9 +3329,9 @@ _cmd_complete_parameters(ProfWin *window, const char *const input)
     jabber_conn_status_t conn_status = jabber_get_connection_status();
 
     // autocomplete boolean settings
-    gchar *boolean_choices[] = { "/beep", "/intype", "/states", "/outtype",
-        "/flash", "/splash", "/chlog", "/grlog", "/history", "/vercheck",
-        "/privileges", "/presence", "/wrap", "/winstidy", "/carbons", "/encwarn", "/lastactivity" };
+    gchar *boolean_choices[] = { "/beep", "/intype", "/states", "/outtype", "/flash", "/splash", "/chlog", "/grlog",
+        "/history", "/vercheck", "/privileges", "/presence", "/wrap", "/winstidy", "/carbons", "/encwarn",
+        "/lastactivity", "/tray" };
 
     for (i = 0; i < ARRAY_SIZE(boolean_choices); i++) {
         result = autocomplete_param_with_func(input, boolean_choices[i], prefs_autocomplete_boolean_choice);
@@ -3166,6 +3446,7 @@ _cmd_complete_parameters(ProfWin *window, const char *const input)
     g_hash_table_insert(ac_funcs, "/win",           _win_autocomplete);
     g_hash_table_insert(ac_funcs, "/close",         _close_autocomplete);
     g_hash_table_insert(ac_funcs, "/plugins",         _plugins_autocomplete);
+    g_hash_table_insert(ac_funcs, "/sendfile",      _sendfile_autocomplete);
 
     int len = strlen(input);
     char parsed[len+1];
@@ -3761,7 +4042,7 @@ _plugins_autocomplete(ProfWin *window, const char *const input)
     if ((strncmp(input, "/plugins load ", 14) == 0) && (strlen(input) > 14)) {
         if (plugins_load_ac == NULL) {
             plugins_load_ac = autocomplete_new();
-            GSList *plugins = plugins_file_list();
+            GSList *plugins = plugins_unloaded_list();
             GSList *curr = plugins;
             while (curr) {
                 autocomplete_add(plugins_load_ac, curr->data);
@@ -4563,6 +4844,110 @@ _close_autocomplete(ProfWin *window, const char *const input)
 
     return NULL;
 }
+
+static char*
+_sendfile_autocomplete(ProfWin *window, const char *const input)
+{
+    static char* last_directory = NULL;
+
+    unsigned int output_off = 0;
+
+    char *result = NULL;
+    char *tmp;
+
+    // strip command
+    char *inpcp = (char*)input + 9;
+    while (*inpcp == ' ') {
+        inpcp++;
+    }
+
+    inpcp = strdup(inpcp);
+
+    // strip quotes
+    if (*inpcp == '"') {
+        tmp = strchr(inpcp+1, '"');
+        if (tmp) {
+            *tmp = '\0';
+        }
+        tmp = strdup(inpcp+1);
+        free(inpcp);
+        inpcp = tmp;
+    }
+
+    // expand ~ to $HOME
+    if (inpcp[0] == '~' && inpcp[1] == '/') {
+        if (asprintf(&tmp, "%s/%sfoo", getenv("HOME"), inpcp+2) == -1) {
+            return NULL;
+        }
+        output_off = strlen(getenv("HOME"))+1;
+    } else {
+        if (asprintf(&tmp, "%sfoo", inpcp) == -1) {
+            return NULL;
+        }
+    }
+    free(inpcp);
+    inpcp = tmp;
+
+    char* inpcp2 = strdup(inpcp);
+    char* foofile = strdup(basename(inpcp2));
+    char* directory = strdup(dirname(inpcp));
+    free(inpcp);
+    free(inpcp2);
+
+    if (!last_directory || strcmp(last_directory, directory) != 0) {
+        free(last_directory);
+        last_directory = directory;
+        autocomplete_reset(sendfile_ac);
+
+        struct dirent *dir;
+
+        DIR *d = opendir(directory);
+        if (d) {
+            while ((dir = readdir(d)) != NULL) {
+                if (strcmp(dir->d_name, ".") == 0) {
+                    continue;
+                } else if (strcmp(dir->d_name, "..") == 0) {
+                    continue;
+                } else if (*(dir->d_name) == '.' && *foofile != '.') {
+                    // only show hidden files on explicit request
+                    continue;
+                }
+                char * acstring;
+                if (output_off) {
+                    if (asprintf(&tmp, "%s/%s", directory, dir->d_name) == -1) {
+                        return NULL;
+                    }
+                    if (asprintf(&acstring, "~/%s", tmp+output_off) == -1) {
+                        return NULL;
+                    }
+                    free(tmp);
+                } else if (strcmp(directory, "/") == 0) {
+                    if (asprintf(&acstring, "/%s", dir->d_name) == -1) {
+                        return NULL;
+                    }
+                } else {
+                    if (asprintf(&acstring, "%s/%s", directory, dir->d_name) == -1) {
+                        return NULL;
+                    }
+                }
+                autocomplete_add(sendfile_ac, acstring);
+                free(acstring);
+            }
+            closedir(d);
+        }
+    } else {
+        free(foofile);
+        free(directory);
+    }
+
+    result = autocomplete_param_with_ac(input, "/sendfile", sendfile_ac, TRUE);
+    if (result) {
+        return result;
+    }
+
+    return NULL;
+}
+
 
 static char*
 _subject_autocomplete(ProfWin *window, const char *const input)

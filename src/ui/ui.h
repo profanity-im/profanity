@@ -40,6 +40,7 @@
 #include "command/commands.h"
 #include "ui/win_types.h"
 #include "muc.h"
+#include "config/tlscerts.h"
 #ifdef HAVE_LIBOTR
 #include "otr/otr.h"
 #endif
@@ -284,6 +285,7 @@ void cons_privileges_setting(void);
 void cons_beep_setting(void);
 void cons_console_setting(void);
 void cons_flash_setting(void);
+void cons_tray_setting(void);
 void cons_splash_setting(void);
 void cons_encwarn_setting(void);
 void cons_tlsshow_setting(void);

@@ -497,8 +497,6 @@ int main(int argc, char* argv[]) {
         unit_test(cmd_bookmark_remove_shows_message_when_no_bookmark),
 
 #ifdef HAVE_LIBOTR
-        unit_test(cmd_otr_shows_usage_when_no_args),
-        unit_test(cmd_otr_shows_usage_when_invalid_subcommand),
         unit_test(cmd_otr_log_shows_usage_when_no_args),
         unit_test(cmd_otr_log_shows_usage_when_invalid_subcommand),
         unit_test_setup_teardown(cmd_otr_log_on_enables_logging,

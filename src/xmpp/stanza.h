@@ -61,6 +61,7 @@
 #define STANZA_NAME_STATUS "status"
 #define STANZA_NAME_IQ "iq"
 #define STANZA_NAME_QUERY "query"
+#define STANZA_NAME_REQUEST "request"
 #define STANZA_NAME_DELAY "delay"
 #define STANZA_NAME_ERROR "error"
 #define STANZA_NAME_PING "ping"
@@ -87,6 +88,13 @@
 #define STANZA_NAME_ACTOR "actor"
 #define STANZA_NAME_ENABLE "enable"
 #define STANZA_NAME_DISABLE "disable"
+#define STANZA_NAME_FILENAME "filename"
+#define STANZA_NAME_SIZE "size"
+#define STANZA_NAME_CONTENT_TYPE "content-type"
+#define STANZA_NAME_SLOT "slot"
+#define STANZA_NAME_PUT "put"
+#define STANZA_NAME_GET "get"
+#define STANZA_NAME_URL "url"
 
 // error conditions
 #define STANZA_NAME_BAD_REQUEST "bad-request"
@@ -171,6 +179,8 @@
 #define STANZA_NS_RECEIPTS "urn:xmpp:receipts"
 #define STANZA_NS_SIGNED "jabber:x:signed"
 #define STANZA_NS_ENCRYPTED "jabber:x:encrypted"
+#define STANZA_NS_HTTP_UPLOAD "urn:xmpp:http:upload"
+#define STANZA_NS_X_OOB "jabber:x:oob"
 
 #define STANZA_DATAFORM_SOFTWARE "urn:xmpp:dataforms:softwareinfo"
 
@@ -195,6 +205,8 @@ typedef enum {
 
 xmpp_stanza_t* stanza_create_bookmarks_storage_request(xmpp_ctx_t *ctx);
 
+xmpp_stanza_t* stanza_create_http_upload_request(xmpp_ctx_t *ctx, const char *const id, const char *const jid, HTTPUpload *upload);
+
 xmpp_stanza_t* stanza_enable_carbons(xmpp_ctx_t *ctx);
 
 xmpp_stanza_t* stanza_disable_carbons(xmpp_ctx_t *ctx);
@@ -207,6 +219,7 @@ xmpp_stanza_t* stanza_attach_carbons_private(xmpp_ctx_t *ctx, xmpp_stanza_t *sta
 xmpp_stanza_t* stanza_attach_hints_no_copy(xmpp_ctx_t *ctx, xmpp_stanza_t *stanza);
 xmpp_stanza_t* stanza_attach_hints_no_store(xmpp_ctx_t *ctx, xmpp_stanza_t *stanza);
 xmpp_stanza_t* stanza_attach_receipt_request(xmpp_ctx_t *ctx, xmpp_stanza_t *stanza);
+xmpp_stanza_t* stanza_attach_x_oob_url(xmpp_ctx_t *ctx, xmpp_stanza_t *stanza, const char *const url);
 
 xmpp_stanza_t* stanza_create_message(xmpp_ctx_t *ctx, char *id,
     const char *const recipient, const char *const type, const char *const message);

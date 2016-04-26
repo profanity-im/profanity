@@ -32,6 +32,8 @@ core_sources = \
 	src/command/commands.h src/command/commands.c \
 	src/tools/parser.c \
 	src/tools/parser.h \
+	src/tools/http_upload.c \
+	src/tools/http_upload.h \
 	src/tools/p_sha1.h src/tools/p_sha1.c \
 	src/tools/autocomplete.c src/tools/autocomplete.h \
 	src/tools/tinyurl.c src/tools/tinyurl.h \
@@ -90,6 +92,7 @@ unittest_sources = \
 	tests/unittests/ui/stub_ui.c \
 	tests/unittests/log/stub_log.c \
 	tests/unittests/config/stub_accounts.c \
+	tests/unittests/tools/stub_http_upload.c \
 	tests/unittests/helpers.c tests/unittests/helpers.h \
 	tests/unittests/test_form.c tests/unittests/test_form.h \
 	tests/unittests/test_common.c tests/unittests/test_common.h \
