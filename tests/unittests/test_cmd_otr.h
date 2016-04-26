@@ -1,8 +1,6 @@
 #include "config.h"
 
 #ifdef HAVE_LIBOTR
-void cmd_otr_shows_usage_when_no_args(void **state);
-void cmd_otr_shows_usage_when_invalid_subcommand(void **state);
 void cmd_otr_log_shows_usage_when_no_args(void **state);
 void cmd_otr_log_shows_usage_when_invalid_subcommand(void **state);
 void cmd_otr_log_on_enables_logging(void **state);
