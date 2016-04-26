@@ -50,10 +50,12 @@ typedef struct cmd_help_t {
  * Command structure
  *
  * cmd - The command string including leading '/'
- * func - The function to execute for the command
  * parser - The function used to parse arguments
  * min_args - Minimum number of arguments
  * max_args - Maximum number of arguments
+ * setting_func - Function to display current settings to the console
+ * sub_funcs - Optional list of functions mapped to the first argument
+ * func - Main function to call when no arguments, or sub_funcs not implemented
  * help - A help struct containing usage info etc
  */
 typedef struct cmd_t {
