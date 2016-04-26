@@ -64,6 +64,7 @@ void buffer_push(ProfBuff buffer, const char show_char, int pad_indent, GDateTim
     const char *const from, const char *const message, DeliveryReceipt *receipt);
 int buffer_size(ProfBuff buffer);
 ProfBuffEntry* buffer_yield_entry(ProfBuff buffer, int entry);
+ProfBuffEntry* buffer_yield_entry_by_id(ProfBuff buffer, const char *const id);
 gboolean buffer_mark_received(ProfBuff buffer, const char *const id);
 
 #endif

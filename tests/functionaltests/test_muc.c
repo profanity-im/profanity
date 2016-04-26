@@ -95,8 +95,8 @@ shows_role_and_affiliation_on_join(void **state)
 {
     prof_connect();
 
-    stbbr_for_id("prof_join_2",
-        "<presence id='prof_join_2' lang='en' to='stabber@localhost/profanity' from='testroom@conference.localhost/stabber'>"
+    stbbr_for_id("prof_join_3",
+        "<presence id='prof_join_3' lang='en' to='stabber@localhost/profanity' from='testroom@conference.localhost/stabber'>"
             "<c hash='sha-1' xmlns='http://jabber.org/protocol/caps' node='http://www.profanity.im' ver='*'/>"
             "<x xmlns='http://jabber.org/protocol/muc#user'>"
                 "<item role='participant' jid='stabber@localhost/profanity' affiliation='none'/>"
@@ -115,8 +115,8 @@ shows_subject_on_join(void **state)
 {
     prof_connect();
 
-    stbbr_for_id("prof_join_2",
-        "<presence id='prof_join_2' lang='en' to='stabber@localhost/profanity' from='testroom@conference.localhost/stabber'>"
+    stbbr_for_id("prof_join_3",
+        "<presence id='prof_join_3' lang='en' to='stabber@localhost/profanity' from='testroom@conference.localhost/stabber'>"
             "<c hash='sha-1' xmlns='http://jabber.org/protocol/caps' node='http://www.profanity.im' ver='*'/>"
             "<x xmlns='http://jabber.org/protocol/muc#user'>"
                 "<item role='participant' jid='stabber@localhost/profanity' affiliation='none'/>"
@@ -143,8 +143,8 @@ shows_history_message(void **state)
 {
     prof_connect();
 
-    stbbr_for_id("prof_join_2",
-        "<presence id='prof_join_2' lang='en' to='stabber@localhost/profanity' from='testroom@conference.localhost/stabber'>"
+    stbbr_for_id("prof_join_3",
+        "<presence id='prof_join_3' lang='en' to='stabber@localhost/profanity' from='testroom@conference.localhost/stabber'>"
             "<c hash='sha-1' xmlns='http://jabber.org/protocol/caps' node='http://www.profanity.im' ver='*'/>"
             "<x xmlns='http://jabber.org/protocol/muc#user'>"
                 "<item role='participant' jid='stabber@localhost/profanity' affiliation='none'/>"
@@ -172,8 +172,8 @@ shows_occupant_join(void **state)
 {
     prof_connect();
 
-    stbbr_for_id("prof_join_2",
-        "<presence id='prof_join_2' lang='en' to='stabber@localhost/profanity' from='testroom@conference.localhost/stabber'>"
+    stbbr_for_id("prof_join_3",
+        "<presence id='prof_join_3' lang='en' to='stabber@localhost/profanity' from='testroom@conference.localhost/stabber'>"
             "<c hash='sha-1' xmlns='http://jabber.org/protocol/caps' node='http://www.profanity.im' ver='*'/>"
             "<x xmlns='http://jabber.org/protocol/muc#user'>"
                 "<item role='participant' jid='stabber@localhost/profanity' affiliation='none'/>"
@@ -201,8 +201,8 @@ shows_message(void **state)
 {
     prof_connect();
 
-    stbbr_for_id("prof_join_2",
-        "<presence id='prof_join_2' lang='en' to='stabber@localhost/profanity' from='testroom@conference.localhost/stabber'>"
+    stbbr_for_id("prof_join_3",
+        "<presence id='prof_join_3' lang='en' to='stabber@localhost/profanity' from='testroom@conference.localhost/stabber'>"
             "<c hash='sha-1' xmlns='http://jabber.org/protocol/caps' node='http://www.profanity.im' ver='*'/>"
             "<x xmlns='http://jabber.org/protocol/muc#user'>"
                 "<item role='participant' jid='stabber@localhost/profanity' affiliation='none'/>"
@@ -228,8 +228,8 @@ shows_all_messages_in_console_when_window_not_focussed(void **state)
 {
     prof_connect();
 
-    stbbr_for_id("prof_join_2",
-        "<presence id='prof_join_2' lang='en' to='stabber@localhost/profanity' from='testroom@conference.localhost/stabber'>"
+    stbbr_for_id("prof_join_3",
+        "<presence id='prof_join_3' lang='en' to='stabber@localhost/profanity' from='testroom@conference.localhost/stabber'>"
             "<c hash='sha-1' xmlns='http://jabber.org/protocol/caps' node='http://www.profanity.im' ver='*'/>"
             "<x xmlns='http://jabber.org/protocol/muc#user'>"
                 "<item role='participant' jid='stabber@localhost/profanity' affiliation='none'/>"
@@ -269,8 +269,8 @@ shows_first_message_in_console_when_window_not_focussed(void **state)
     prof_input("/console muc first");
     assert_true(prof_output_exact("Console MUC messages set: first"));
 
-    stbbr_for_id("prof_join_2",
-        "<presence id='prof_join_2' lang='en' to='stabber@localhost/profanity' from='testroom@conference.localhost/stabber'>"
+    stbbr_for_id("prof_join_3",
+        "<presence id='prof_join_3' lang='en' to='stabber@localhost/profanity' from='testroom@conference.localhost/stabber'>"
             "<c hash='sha-1' xmlns='http://jabber.org/protocol/caps' node='http://www.profanity.im' ver='*'/>"
             "<x xmlns='http://jabber.org/protocol/muc#user'>"
                 "<item role='participant' jid='stabber@localhost/profanity' affiliation='none'/>"
@@ -315,8 +315,8 @@ shows_no_message_in_console_when_window_not_focussed(void **state)
     prof_input("/console muc none");
     assert_true(prof_output_exact("Console MUC messages set: none"));
 
-    stbbr_for_id("prof_join_2",
-        "<presence id='prof_join_2' lang='en' to='stabber@localhost/profanity' from='testroom@conference.localhost/stabber'>"
+    stbbr_for_id("prof_join_3",
+        "<presence id='prof_join_3' lang='en' to='stabber@localhost/profanity' from='testroom@conference.localhost/stabber'>"
             "<c hash='sha-1' xmlns='http://jabber.org/protocol/caps' node='http://www.profanity.im' ver='*'/>"
             "<x xmlns='http://jabber.org/protocol/muc#user'>"
                 "<item role='participant' jid='stabber@localhost/profanity' affiliation='none'/>"

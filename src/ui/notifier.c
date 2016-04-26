@@ -50,6 +50,7 @@
 #include "ui/ui.h"
 #include "window_list.h"
 #include "config/preferences.h"
+#include "xmpp/xmpp.h"
 
 static GTimer *remind_timer;
 

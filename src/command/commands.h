@@ -104,6 +104,7 @@ gboolean cmd_tls_cert(ProfWin *window, const char *const command, gchar **args);
 
 gboolean cmd_decline(ProfWin *window, const char *const command, gchar **args);
 gboolean cmd_disco(ProfWin *window, const char *const command, gchar **args);
+gboolean cmd_sendfile(ProfWin *window, const char *const command, gchar **args);
 gboolean cmd_lastactivity(ProfWin *window, const char *const command, gchar **args);
 gboolean cmd_disconnect(ProfWin *window, const char *const command, gchar **args);
 gboolean cmd_dnd(ProfWin *window, const char *const command, gchar **args);

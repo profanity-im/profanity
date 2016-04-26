@@ -32,10 +32,13 @@
  *
  */
 
+#define _GNU_SOURCE 1
+
 #include "config.h"
 
 #include <string.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include <errno.h>
 #include <assert.h>
 #include <glib.h>
@@ -80,6 +83,7 @@
 #ifdef HAVE_GTK
 #include "tray.h"
 #endif
+#include "tools/http_upload.h"
 
 static void _update_presence(const resource_presence_t presence,
     const char *const show, gchar **args);
@@ -128,21 +132,21 @@ cmd_execute_default(ProfWin *window, const char *inp)
     {
         ProfChatWin *chatwin = (ProfChatWin*)window;
         assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
-        cl_ev_send_msg(chatwin, inp);
+        cl_ev_send_msg(chatwin, inp, NULL);
         break;
     }
     case WIN_PRIVATE:
     {
         ProfPrivateWin *privatewin = (ProfPrivateWin*)window;
         assert(privatewin->memcheck == PROFPRIVATEWIN_MEMCHECK);
-        cl_ev_send_priv_msg(privatewin, inp);
+        cl_ev_send_priv_msg(privatewin, inp, NULL);
         break;
     }
     case WIN_MUC:
     {
         ProfMucWin *mucwin = (ProfMucWin*)window;
         assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
-        cl_ev_send_muc_msg(mucwin, inp);
+        cl_ev_send_muc_msg(mucwin, inp, NULL);
         break;
     }
     case WIN_XML:
@@ -2013,7 +2017,7 @@ cmd_msg(ProfWin *window, const char *const command, gchar **args)
             ui_focus_win((ProfWin*)privwin);
 
             if (msg) {
-                cl_ev_send_priv_msg(privwin, msg);
+                cl_ev_send_priv_msg(privwin, msg, NULL);
             }
 
             g_string_free(full_jid, TRUE);
@@ -2038,7 +2042,7 @@ cmd_msg(ProfWin *window, const char *const command, gchar **args)
         ui_focus_win((ProfWin*)chatwin);
 
         if (msg) {
-            cl_ev_send_msg(chatwin, msg);
+            cl_ev_send_msg(chatwin, msg, NULL);
         } else {
 #ifdef HAVE_LIBOTR
             if (otr_is_secure(barejid)) {
@@ -4335,6 +4339,57 @@ cmd_disco(ProfWin *window, const char *const command, gchar **args)
 }
 
 gboolean
+cmd_sendfile(ProfWin *window, const char *const command, gchar **args)
+{
+    jabber_conn_status_t conn_status = jabber_get_connection_status();
+    char *filename = args[0];
+
+    // expand ~ to $HOME
+    if (filename[0] == '~' && filename[1] == '/') {
+        if (asprintf(&filename, "%s/%s", getenv("HOME"), filename+2) == -1) {
+            return TRUE;
+        }
+    } else {
+        filename = strdup(filename);
+    }
+
+    if (conn_status != JABBER_CONNECTED) {
+        cons_show("You are not currently connected.");
+        free(filename);
+        return TRUE;
+    }
+
+    if (window->type != WIN_CHAT && window->type != WIN_PRIVATE && window->type != WIN_MUC) {
+        cons_show_error("Unsupported window for file transmission.");
+        free(filename);
+        return TRUE;
+    }
+
+    if (access(filename, R_OK) != 0) {
+        cons_show_error("Uploading '%s' failed: File not found!", filename);
+        free(filename);
+        return TRUE;
+    }
+
+    if (!is_regular_file(filename)) {
+        cons_show_error("Uploading '%s' failed: Not a file!", filename);
+        free(filename);
+        return TRUE;
+    }
+
+    HTTPUpload *upload = malloc(sizeof(HTTPUpload));
+    upload->window = window;
+
+    upload->filename = filename;
+    upload->filesize = file_size(filename);
+    upload->mime_type = file_mime_type(filename);
+
+    iq_http_upload_request(upload);
+
+    return TRUE;
+}
+
+gboolean
 cmd_lastactivity(ProfWin *window, const char *const command, gchar **args)
 {
     if ((g_strcmp0(args[0], "on") == 0) || (g_strcmp0(args[0], "off") == 0)) {
@@ -4485,21 +4540,21 @@ cmd_tiny(ProfWin *window, const char *const command, gchar **args)
     {
         ProfChatWin *chatwin = (ProfChatWin*)window;
         assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
-        cl_ev_send_msg(chatwin, tiny);
+        cl_ev_send_msg(chatwin, tiny, NULL);
         break;
     }
     case WIN_PRIVATE:
     {
         ProfPrivateWin *privatewin = (ProfPrivateWin*)window;
         assert(privatewin->memcheck == PROFPRIVATEWIN_MEMCHECK);
-        cl_ev_send_priv_msg(privatewin, tiny);
+        cl_ev_send_priv_msg(privatewin, tiny, NULL);
         break;
     }
     case WIN_MUC:
     {
         ProfMucWin *mucwin = (ProfMucWin*)window;
         assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
-        cl_ev_send_muc_msg(mucwin, tiny);
+        cl_ev_send_muc_msg(mucwin, tiny, NULL);
         break;
     }
     default:

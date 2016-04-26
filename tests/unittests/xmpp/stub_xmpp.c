@@ -71,7 +71,7 @@ jabber_send_stanza(const char *const stanza)
 }
 
 // message functions
-char* message_send_chat(const char * const barejid, const char * const msg)
+char* message_send_chat(const char * const barejid, const char * const msg, const char *const oob_url)
 {
     check_expected(barejid);
     check_expected(msg);
@@ -90,8 +90,8 @@ char* message_send_chat_pgp(const char * const barejid, const char * const msg)
     return NULL;
 }
 
-void message_send_private(const char * const fulljid, const char * const msg) {}
-void message_send_groupchat(const char * const roomjid, const char * const msg) {}
+void message_send_private(const char * const fulljid, const char * const msg, const char *const oob_url) {}
+void message_send_groupchat(const char * const roomjid, const char * const msg, const char *const oob_url) {}
 void message_send_groupchat_subject(const char * const roomjid, const char * const subject) {}
 
 void message_send_inactive(const char * const barejid) {}
@@ -158,6 +158,7 @@ void iq_room_list_request(gchar *conferencejid)
 void iq_disco_info_request(gchar *jid) {}
 void iq_disco_items_request(gchar *jid) {}
 void iq_set_autoping(int seconds) {}
+void iq_http_upload_request(HTTPUpload *upload) {}
 void iq_confirm_instant_room(const char * const room_jid) {}
 void iq_destroy_room(const char * const room_jid) {}
 void iq_request_room_config_form(const char * const room_jid) {}
