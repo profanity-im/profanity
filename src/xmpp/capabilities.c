@@ -283,11 +283,11 @@ _caps_copy(Capabilities *caps)
 char*
 caps_create_sha1_str(xmpp_stanza_t *const query)
 {
-    char *category = NULL;
-    char *type = NULL;
-    char *lang = NULL;
-    char *name = NULL;
-    char *feature_str = NULL;
+    const char *category = NULL;
+    const char *type = NULL;
+    const char *lang = NULL;
+    const char *name = NULL;
+    const char *feature_str = NULL;
     GSList *identities = NULL;
     GSList *features = NULL;
     GSList *form_names = NULL;
@@ -391,9 +391,9 @@ caps_create_sha1_str(xmpp_stanza_t *const query)
 Capabilities*
 caps_create(xmpp_stanza_t *query)
 {
-    char *category = NULL;
-    char *type = NULL;
-    char *name = NULL;
+    const char *category = NULL;
+    const char *type = NULL;
+    const char *name = NULL;
     char *software = NULL;
     char *software_version = NULL;
     char *os = NULL;
@@ -448,7 +448,7 @@ caps_create(xmpp_stanza_t *query)
     GSList *curr_identity = identity_stanzas;
     while (curr_identity) {
         xmpp_stanza_t *id_stanza = curr_identity->data;
-        char *stanza_lang = xmpp_stanza_get_attribute(id_stanza, "xml:lang");
+        const char *stanza_lang = xmpp_stanza_get_attribute(id_stanza, "xml:lang");
         if (stanza_lang) {
             int i = 0;
             for (i = 0; i < num_langs; i++) {
@@ -469,7 +469,7 @@ caps_create(xmpp_stanza_t *query)
         curr_identity = identity_stanzas;
         while (curr_identity) {
             xmpp_stanza_t *id_stanza = curr_identity->data;
-            char *stanza_lang = xmpp_stanza_get_attribute(id_stanza, "xml:lang");
+            const char *stanza_lang = xmpp_stanza_get_attribute(id_stanza, "xml:lang");
             if (!stanza_lang) {
                 found = id_stanza;
                 break;

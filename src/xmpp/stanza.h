@@ -258,7 +258,7 @@ gboolean stanza_is_muc_self_presence(xmpp_stanza_t *const stanza,
 gboolean stanza_is_room_nick_change(xmpp_stanza_t *const stanza);
 gboolean stanza_muc_requires_config(xmpp_stanza_t *const stanza);
 
-char* stanza_get_new_nick(xmpp_stanza_t *const stanza);
+const char* stanza_get_new_nick(xmpp_stanza_t *const stanza);
 xmpp_stanza_t* stanza_create_instant_room_request_iq(xmpp_ctx_t *ctx, const char *const room_jid);
 xmpp_stanza_t* stanza_create_instant_room_destroy_iq(xmpp_ctx_t *ctx, const char *const room_jid);
 xmpp_stanza_t* stanza_create_room_config_request_iq(xmpp_ctx_t *ctx, const char *const room_jid);
@@ -303,10 +303,10 @@ char* stanza_get_error_message(xmpp_stanza_t *const stanza);
 
 GSList* stanza_get_status_codes_by_ns(xmpp_stanza_t *const stanza, char *ns);
 gboolean stanza_room_destroyed(xmpp_stanza_t *stanza);
-char* stanza_get_muc_destroy_alternative_room(xmpp_stanza_t *stanza);
+const char* stanza_get_muc_destroy_alternative_room(xmpp_stanza_t *stanza);
 char* stanza_get_muc_destroy_alternative_password(xmpp_stanza_t *stanza);
 char* stanza_get_muc_destroy_reason(xmpp_stanza_t *stanza);
-char* stanza_get_actor(xmpp_stanza_t *stanza);
+const char* stanza_get_actor(xmpp_stanza_t *stanza);
 char* stanza_get_reason(xmpp_stanza_t *stanza);
 
 Resource* stanza_resource_from_presence(XMPPPresence *presence);

@@ -148,7 +148,7 @@ GSList* presence_get_subscription_requests(void);
 gint presence_sub_request_count(void);
 void presence_reset_sub_request_search(void);
 char* presence_sub_request_find(const char *const search_str);
-void presence_join_room(char *room, char *nick, char * passwd);
+void presence_join_room(const char *const room, const char *const nick, const char *const passwd);
 void presence_change_room_nick(const char *const room, const char *const nick);
 void presence_leave_chat_room(const char *const room_jid);
 void presence_send(resource_presence_t status, const char *const msg, int idle, char *signed_status);
