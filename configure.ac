@@ -120,7 +120,7 @@ fi
 ACX_PTHREAD
 LIBS="$PTHREAD_LIBS $LIBS"
 CFLAGS="$CFLAGS $PTHREAD_CFLAGS"
-CC="$PTHREAD_CC"
+AS_IF([test "x$PTHREAD_CC" != x], [ CC="$PTHREAD_CC" ])
 
 ### Check for libmesode, fall back to libstrophe
 PKG_CHECK_MODULES([libmesode], [libmesode],
