@@ -64,7 +64,7 @@ AC_ARG_WITH([xscreensaver],
 AC_ARG_WITH([themes],
     [AS_HELP_STRING([--with-themes[[=PATH]]], [install themes (default yes)])])
 AC_ARG_ENABLE([icons],
-    [AS_HELP_STRING([--enable-icons], [enable icons])])
+    [AS_HELP_STRING([--enable-icons], [enable GTK tray icons])])
 
 ### plugins
 
@@ -166,12 +166,12 @@ PKG_CHECK_MODULES([glib], [glib-2.0 >= 2.26], [],
 PKG_CHECK_MODULES([curl], [libcurl], [],
     [AC_MSG_ERROR([libcurl is required for profanity])])
 
-# Checks GTK+ 2.0
-PKG_CHECK_MODULES([GTK], [gtk+-2.0 >= 2.24.10],
-                  [AC_DEFINE([HAVE_GTK], [1], [libgtk module])],
-                  [AS_IF([test "x$enable_icons" = xyes],
-                         [AC_MSG_ERROR([gtk+-2.0 or higher is required for icons])],
-                         [AC_MSG_NOTICE([gtk+-2.0 not found, icons not enabled])])])
+AS_IF([test "x$enable_icons" != xno],
+    [PKG_CHECK_MODULES([GTK], [gtk+-2.0 >= 2.24.10],
+        [AC_DEFINE([HAVE_GTK], [1], [libgtk module])],
+        [AS_IF([test "x$enable_icons" = xyes],
+            [AC_MSG_ERROR([gtk+-2.0 or higher is required for icons])],
+            [AC_MSG_NOTICE([gtk+-2.0 not found, icons not enabled])])])])
 
 AS_IF([test "x$PLATFORM" != xosx],
     [AC_CHECK_LIB([readline], [main], [],
