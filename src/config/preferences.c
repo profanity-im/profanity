@@ -1109,6 +1109,8 @@ prefs_get_inputrc(void)
         return result;
     }
 
+    g_string_free(inputrc_file, TRUE);
+
     return NULL;
 }
 
