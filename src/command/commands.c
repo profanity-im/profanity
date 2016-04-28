@@ -636,6 +636,264 @@ cmd_account_default(ProfWin *window, const char *const command, gchar **args)
 }
 
 gboolean
+_account_set_jid(char *account_name, char *jid)
+{
+    Jid *jidp = jid_create(jid);
+    if (jidp == NULL) {
+        cons_show("Malformed jid: %s", jid);
+    } else {
+        accounts_set_jid(account_name, jidp->barejid);
+        cons_show("Updated jid for account %s: %s", account_name, jidp->barejid);
+        if (jidp->resourcepart) {
+            accounts_set_resource(account_name, jidp->resourcepart);
+            cons_show("Updated resource for account %s: %s", account_name, jidp->resourcepart);
+        }
+        cons_show("");
+    }
+    jid_destroy(jidp);
+
+    return TRUE;
+}
+
+gboolean
+_account_set_server(char *account_name, char *server)
+{
+    accounts_set_server(account_name, server);
+    cons_show("Updated server for account %s: %s", account_name, server);
+    cons_show("");
+    return TRUE;
+}
+
+gboolean
+_account_set_port(char *account_name, char *port)
+{
+    int porti;
+    char *err_msg = NULL;
+    gboolean res = strtoi_range(port, &porti, 1, 65535, &err_msg);
+    if (!res) {
+        cons_show(err_msg);
+        cons_show("");
+        free(err_msg);
+    } else {
+        accounts_set_port(account_name, porti);
+        cons_show("Updated port for account %s: %s", account_name, port);
+        cons_show("");
+    }
+    return TRUE;
+}
+
+gboolean
+_account_set_resource(char *account_name, char *resource)
+{
+    accounts_set_resource(account_name, resource);
+    if (jabber_get_connection_status() == JABBER_CONNECTED) {
+        cons_show("Updated resource for account %s: %s, reconnect to pick up the change.", account_name, resource);
+    } else {
+        cons_show("Updated resource for account %s: %s", account_name, resource);
+    }
+    cons_show("");
+    return TRUE;
+}
+
+gboolean
+_account_set_password(char *account_name, char *password)
+{
+    ProfAccount *account = accounts_get_account(account_name);
+    if (account->eval_password) {
+        cons_show("Cannot set password when eval_password is set.");
+    } else {
+        accounts_set_password(account_name, password);
+        cons_show("Updated password for account %s", account_name);
+        cons_show("");
+    }
+    account_free(account);
+    return TRUE;
+}
+
+gboolean
+_account_set_eval_password(char *account_name, char *eval_password)
+{
+    ProfAccount *account = accounts_get_account(account_name);
+    if(account->password) {
+        cons_show("Cannot set eval_password when password is set.");
+    } else {
+        accounts_set_eval_password(account_name, eval_password);
+        cons_show("Updated eval_password for account %s", account_name);
+        cons_show("");
+    }
+    account_free(account);
+    return TRUE;
+}
+
+gboolean
+_account_set_muc(char *account_name, char *muc)
+{
+    accounts_set_muc_service(account_name, muc);
+    cons_show("Updated muc service for account %s: %s", account_name, muc);
+    cons_show("");
+    return TRUE;
+}
+
+gboolean
+_account_set_nick(char *account_name, char *nick)
+{
+    accounts_set_muc_nick(account_name, nick);
+    cons_show("Updated muc nick for account %s: %s", account_name, nick);
+    cons_show("");
+    return TRUE;
+}
+
+gboolean
+_account_set_otr(char *account_name, char *policy)
+{
+    if ((g_strcmp0(policy, "manual") != 0)
+            && (g_strcmp0(policy, "opportunistic") != 0)
+            && (g_strcmp0(policy, "always") != 0)) {
+        cons_show("OTR policy must be one of: manual, opportunistic or always.");
+    } else {
+        accounts_set_otr_policy(account_name, policy);
+        cons_show("Updated OTR policy for account %s: %s", account_name, policy);
+        cons_show("");
+    }
+    return TRUE;
+}
+
+gboolean
+_account_set_status(char *account_name, char *status)
+{
+    if (!valid_resource_presence_string(status) && (strcmp(status, "last") != 0)) {
+        cons_show("Invalid status: %s", status);
+    } else {
+        accounts_set_login_presence(account_name, status);
+        cons_show("Updated login status for account %s: %s", account_name, status);
+    }
+    cons_show("");
+    return TRUE;
+}
+
+gboolean
+_account_set_pgpkeyid(char *account_name, char *pgpkeyid)
+{
+#ifdef HAVE_LIBGPGME
+    char *err_str = NULL;
+    if (!p_gpg_valid_key(pgpkeyid, &err_str)) {
+        cons_show("Invalid PGP key ID specified: %s, see /pgp keys", err_str);
+    } else {
+        accounts_set_pgp_keyid(account_name, pgpkeyid);
+        cons_show("Updated PGP key ID for account %s: %s", account_name, pgpkeyid);
+    }
+    free(err_str);
+#else
+    cons_show("PGP support is not included in this build.");
+#endif
+    cons_show("");
+    return TRUE;
+}
+
+gboolean
+_account_set_startscript(char *account_name, char *script)
+{
+    accounts_set_script_start(account_name, script);
+    cons_show("Updated start script for account %s: %s", account_name, script);
+    return TRUE;
+}
+
+gboolean
+_account_set_theme(char *account_name, char *theme)
+{
+    if (!theme_exists(theme)) {
+        cons_show("Theme does not exist: %s", theme);
+        return TRUE;
+    }
+
+    accounts_set_theme(account_name, theme);
+    if (jabber_get_connection_status() == JABBER_CONNECTED) {
+        ProfAccount *account = accounts_get_account(jabber_get_account_name());
+        if (account) {
+            if (g_strcmp0(account->name, account_name) == 0) {
+                theme_load(theme);
+                ui_load_colours();
+                if (prefs_get_boolean(PREF_ROSTER)) {
+                    ui_show_roster();
+                } else {
+                    ui_hide_roster();
+                }
+                if (prefs_get_boolean(PREF_OCCUPANTS)) {
+                    ui_show_all_room_rosters();
+                } else {
+                    ui_hide_all_room_rosters();
+                }
+                ui_redraw();
+            }
+            account_free(account);
+        }
+    }
+    cons_show("Updated theme for account %s: %s", account_name, theme);
+    return TRUE;
+}
+
+gboolean
+_account_set_tls(char *account_name, char *policy)
+{
+    if ((g_strcmp0(policy, "force") != 0)
+            && (g_strcmp0(policy, "allow") != 0)
+            && (g_strcmp0(policy, "disable") != 0)) {
+        cons_show("TLS policy must be one of: force, allow or disable.");
+    } else {
+        accounts_set_tls_policy(account_name, policy);
+        cons_show("Updated TLS policy for account %s: %s", account_name, policy);
+        cons_show("");
+    }
+    return TRUE;
+}
+
+gboolean
+_account_set_presence_priority(char *account_name, char *presence, char *priority)
+{
+    int intval;
+    char *err_msg = NULL;
+    gboolean res = strtoi_range(priority, &intval, -128, 127, &err_msg);
+    if (!res) {
+        cons_show(err_msg);
+        free(err_msg);
+        return TRUE;
+    }
+
+    resource_presence_t presence_type = resource_presence_from_string(presence);
+    switch (presence_type)
+    {
+    case (RESOURCE_ONLINE):
+        accounts_set_priority_online(account_name, intval);
+        break;
+    case (RESOURCE_CHAT):
+        accounts_set_priority_chat(account_name, intval);
+        break;
+    case (RESOURCE_AWAY):
+        accounts_set_priority_away(account_name, intval);
+        break;
+    case (RESOURCE_XA):
+        accounts_set_priority_xa(account_name, intval);
+        break;
+    case (RESOURCE_DND):
+        accounts_set_priority_dnd(account_name, intval);
+        break;
+    }
+
+    jabber_conn_status_t conn_status = jabber_get_connection_status();
+    if (conn_status == JABBER_CONNECTED) {
+        char *connected_account = jabber_get_account_name();
+        resource_presence_t last_presence = accounts_get_last_presence(connected_account);
+        if (presence_type == last_presence) {
+            char *message = jabber_get_presence_message();
+            cl_ev_presence_send(last_presence, message, 0);
+        }
+    }
+    cons_show("Updated %s priority for account %s: %s", presence, account_name, priority);
+    cons_show("");
+    return TRUE;
+}
+
+gboolean
 cmd_account_set(ProfWin *window, const char *const command, gchar **args)
 {
     if (g_strv_length(args) != 4) {
@@ -644,196 +902,35 @@ cmd_account_set(ProfWin *window, const char *const command, gchar **args)
     }
 
     char *account_name = args[1];
-    char *property = args[2];
-    char *value = args[3];
-
     if (!accounts_account_exists(account_name)) {
         cons_show("Account %s doesn't exist", account_name);
         cons_show("");
         return TRUE;
     }
 
-    if (strcmp(property, "jid") == 0) {
-        Jid *jid = jid_create(args[3]);
-        if (jid == NULL) {
-            cons_show("Malformed jid: %s", value);
-        } else {
-            accounts_set_jid(account_name, jid->barejid);
-            cons_show("Updated jid for account %s: %s", account_name, jid->barejid);
-            if (jid->resourcepart) {
-                accounts_set_resource(account_name, jid->resourcepart);
-                cons_show("Updated resource for account %s: %s", account_name, jid->resourcepart);
-            }
-            cons_show("");
-        }
-        jid_destroy(jid);
-    } else if (strcmp(property, "server") == 0) {
-        accounts_set_server(account_name, value);
-        cons_show("Updated server for account %s: %s", account_name, value);
-        cons_show("");
-    } else if (strcmp(property, "port") == 0) {
-        int port;
-        char *err_msg = NULL;
-        gboolean res = strtoi_range(value, &port, 1, 65535, &err_msg);
-        if (!res) {
-            cons_show(err_msg);
-            cons_show("");
-            free(err_msg);
-            return TRUE;
-        } else {
-            accounts_set_port(account_name, port);
-            cons_show("Updated port for account %s: %s", account_name, value);
-            cons_show("");
-        }
-    } else if (strcmp(property, "resource") == 0) {
-        accounts_set_resource(account_name, value);
-        if (jabber_get_connection_status() == JABBER_CONNECTED) {
-            cons_show("Updated resource for account %s: %s, you will need to reconnect to pick up the change.", account_name, value);
-        } else {
-            cons_show("Updated resource for account %s: %s", account_name, value);
-        }
-        cons_show("");
-    } else if (strcmp(property, "password") == 0) {
-        if(accounts_get_account(account_name)->eval_password) {
-            cons_show("Cannot set password when eval_password is set.");
-        } else {
-            accounts_set_password(account_name, value);
-            cons_show("Updated password for account %s", account_name);
-            cons_show("");
-        }
-    } else if (strcmp(property, "eval_password") == 0) {
-        if(accounts_get_account(account_name)->password) {
-            cons_show("Cannot set eval_password when password is set.");
-        } else {
-            accounts_set_eval_password(account_name, value);
-            cons_show("Updated eval_password for account %s", account_name);
-            cons_show("");
-        }
-    } else if (strcmp(property, "muc") == 0) {
-        accounts_set_muc_service(account_name, value);
-        cons_show("Updated muc service for account %s: %s", account_name, value);
-        cons_show("");
-    } else if (strcmp(property, "nick") == 0) {
-        accounts_set_muc_nick(account_name, value);
-        cons_show("Updated muc nick for account %s: %s", account_name, value);
-        cons_show("");
-    } else if (strcmp(property, "otr") == 0) {
-        if ((g_strcmp0(value, "manual") != 0)
-                && (g_strcmp0(value, "opportunistic") != 0)
-                && (g_strcmp0(value, "always") != 0)) {
-            cons_show("OTR policy must be one of: manual, opportunistic or always.");
-        } else {
-            accounts_set_otr_policy(account_name, value);
-            cons_show("Updated OTR policy for account %s: %s", account_name, value);
-            cons_show("");
-        }
-    } else if (strcmp(property, "status") == 0) {
-        if (!valid_resource_presence_string(value) && (strcmp(value, "last") != 0)) {
-            cons_show("Invalid status: %s", value);
-        } else {
-            accounts_set_login_presence(account_name, value);
-            cons_show("Updated login status for account %s: %s", account_name, value);
-        }
-        cons_show("");
-    } else if (strcmp(property, "pgpkeyid") == 0) {
-#ifdef HAVE_LIBGPGME
-        char *err_str = NULL;
-        if (!p_gpg_valid_key(value, &err_str)) {
-            cons_show("Invalid PGP key ID specified: %s, see /pgp keys", err_str);
-        } else {
-            accounts_set_pgp_keyid(account_name, value);
-            cons_show("Updated PGP key ID for account %s: %s", account_name, value);
-        }
-        free(err_str);
-#else
-        cons_show("PGP support is not included in this build.");
-#endif
-        cons_show("");
-    } else if (strcmp(property, "startscript") == 0) {
-        accounts_set_script_start(account_name, value);
-        cons_show("Updated start script for account %s: %s", account_name, value);
-    } else if (strcmp(property, "theme") == 0) {
-        if (theme_exists(value)) {
-            accounts_set_theme(account_name, value);
-            if (jabber_get_connection_status() == JABBER_CONNECTED) {
-                ProfAccount *account = accounts_get_account(jabber_get_account_name());
-                if (account) {
-                    if (g_strcmp0(account->name, account_name) == 0) {
-                        theme_load(value);
-                        ui_load_colours();
-                        if (prefs_get_boolean(PREF_ROSTER)) {
-                            ui_show_roster();
-                        } else {
-                            ui_hide_roster();
-                        }
-                        if (prefs_get_boolean(PREF_OCCUPANTS)) {
-                            ui_show_all_room_rosters();
-                        } else {
-                            ui_hide_all_room_rosters();
-                        }
-                        ui_redraw();
-                    }
-                    account_free(account);
-                }
-            }
-            cons_show("Updated theme for account %s: %s", account_name, value);
-        } else {
-            cons_show("Theme does not exist: %s", value);
-        }
-    } else if (strcmp(property, "tls") == 0) {
-        if ((g_strcmp0(value, "force") != 0)
-                && (g_strcmp0(value, "allow") != 0)
-                && (g_strcmp0(value, "disable") != 0)) {
-            cons_show("TLS policy must be one of: force, allow or disable.");
-        } else {
-            accounts_set_tls_policy(account_name, value);
-            cons_show("Updated TLS policy for account %s: %s", account_name, value);
-            cons_show("");
-        }
-    } else if (valid_resource_presence_string(property)) {
-        int intval;
-        char *err_msg = NULL;
-        gboolean res = strtoi_range(value, &intval, -128, 127, &err_msg);
-        if (res) {
-            resource_presence_t presence_type = resource_presence_from_string(property);
-            switch (presence_type)
-            {
-            case (RESOURCE_ONLINE):
-                accounts_set_priority_online(account_name, intval);
-                break;
-            case (RESOURCE_CHAT):
-                accounts_set_priority_chat(account_name, intval);
-                break;
-            case (RESOURCE_AWAY):
-                accounts_set_priority_away(account_name, intval);
-                break;
-            case (RESOURCE_XA):
-                accounts_set_priority_xa(account_name, intval);
-                break;
-            case (RESOURCE_DND):
-                accounts_set_priority_dnd(account_name, intval);
-                break;
-            }
+    char *property = args[2];
+    char *value = args[3];
+    if (strcmp(property, "jid") == 0)           return _account_set_jid(account_name, value);
+    if (strcmp(property, "server") == 0)        return _account_set_server(account_name, value);
+    if (strcmp(property, "port") == 0)          return _account_set_port(account_name, value);
+    if (strcmp(property, "resource") == 0)      return _account_set_resource(account_name, value);
+    if (strcmp(property, "password") == 0)      return _account_set_password(account_name, value);
+    if (strcmp(property, "eval_password") == 0) return _account_set_eval_password(account_name, value);
+    if (strcmp(property, "muc") == 0)           return _account_set_muc(account_name, value);
+    if (strcmp(property, "nick") == 0)          return _account_set_nick(account_name, value);
+    if (strcmp(property, "otr") == 0)           return _account_set_otr(account_name, value);
+    if (strcmp(property, "status") == 0)        return _account_set_status(account_name, value);
+    if (strcmp(property, "pgpkeyid") == 0)      return _account_set_pgpkeyid(account_name, value);
+    if (strcmp(property, "startscript") == 0)   return _account_set_startscript(account_name, value);
+    if (strcmp(property, "theme") == 0)         return _account_set_theme(account_name, value);
+    if (strcmp(property, "tls") == 0)           return _account_set_tls(account_name, value);
 
-            jabber_conn_status_t conn_status = jabber_get_connection_status();
-            if (conn_status == JABBER_CONNECTED) {
-                char *connected_account = jabber_get_account_name();
-                resource_presence_t last_presence = accounts_get_last_presence(connected_account);
-                if (presence_type == last_presence) {
-                    char *message = jabber_get_presence_message();
-                    cl_ev_presence_send(last_presence, message, 0);
-                }
-            }
-            cons_show("Updated %s priority for account %s: %s", property, account_name, value);
-            cons_show("");
-        } else {
-            cons_show(err_msg);
-            free(err_msg);
-        }
-    } else {
-        cons_show("Invalid property: %s", property);
-        cons_show("");
+    if (valid_resource_presence_string(property)) {
+        return _account_set_presence_priority(account_name, property, value);
     }
+
+    cons_show("Invalid property: %s", property);
+    cons_show("");
 
     return TRUE;
 }
