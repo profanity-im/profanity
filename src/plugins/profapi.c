@@ -83,3 +83,5 @@ int (*prof_settings_get_int)(char *group, char *key, int def) = NULL;
 void (*prof_settings_set_int)(char *group, char *key, int value) = NULL;
 
 void (*prof_incoming_message)(char *barejid, char *resource, char *message) = NULL;
+
+void (*prof_disco_add_feature)(char *feature) = NULL;

@@ -665,6 +665,21 @@ python_api_incoming_message(PyObject *self, PyObject *args)
     return Py_BuildValue("");
 }
 
+static PyObject*
+python_api_disco_add_feature(PyObject *self, PyObject *args)
+{
+    char *feature = NULL;
+    if (!PyArg_ParseTuple(args, "s", &feature)) {
+        return Py_BuildValue("");
+    }
+
+    allow_python_threads();
+    api_disco_add_feature(feature);
+    disable_python_threads();
+
+    return Py_BuildValue("");
+}
+
 void
 python_command_callback(PluginCommand *command, gchar **args)
 {
@@ -766,6 +781,7 @@ static PyMethodDef apiMethods[] = {
     { "settings_get_int", python_api_settings_get_int, METH_VARARGS, "Get a integer setting." },
     { "settings_set_int", python_api_settings_set_int, METH_VARARGS, "Set a integer setting." },
     { "incoming_message", python_api_incoming_message, METH_VARARGS, "Show an incoming message." },
+    { "disco_add_feature", python_api_disco_add_feature, METH_VARARGS, "Add a feature to disco info response." },
     { NULL, NULL, 0, NULL }
 };
 

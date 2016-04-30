@@ -50,6 +50,7 @@ core_sources = \
 	src/plugins/autocompleters.c src/plugins/autocompleters.h \
 	src/plugins/themes.c src/plugins/themes.h \
 	src/plugins/settings.c src/plugins/settings.h \
+	src/plugins/disco.c src/plugins/disco.h \
 	src/tray.h src/tray.c
 
 unittest_sources = \
@@ -84,6 +85,7 @@ unittest_sources = \
 	src/plugins/autocompleters.c src/plugins/autocompleters.h \
 	src/plugins/themes.c src/plugins/themes.h \
 	src/plugins/settings.c src/plugins/settings.h \
+	src/plugins/disco.c src/plugins/disco.h \
 	src/window_list.c src/window_list.h \
 	src/event/server_events.c src/event/server_events.h \
 	src/event/client_events.c src/event/client_events.h \
