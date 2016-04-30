@@ -57,6 +57,7 @@
 #include "xmpp/stanza.h"
 #include "xmpp/form.h"
 #include "xmpp/capabilities.h"
+#include "plugins/plugins.h"
 
 static gchar *cache_loc;
 static GKeyFile *cache;
@@ -552,6 +553,15 @@ caps_get_my_sha1(xmpp_ctx_t *const ctx)
     return my_sha1;
 }
 
+void
+caps_reset_ver(void)
+{
+    if (my_sha1) {
+        g_free(my_sha1);
+        my_sha1 = NULL;
+    }
+}
+
 xmpp_stanza_t*
 caps_create_query_response_stanza(xmpp_ctx_t *const ctx)
 {
@@ -631,6 +641,18 @@ caps_create_query_response_stanza(xmpp_ctx_t *const ctx)
     xmpp_stanza_add_child(query, feature_conference);
     xmpp_stanza_add_child(query, feature_ping);
     xmpp_stanza_add_child(query, feature_receipts);
+
+    GList *plugin_features = plugins_get_disco_features();
+    GList *curr = plugin_features;
+    while (curr) {
+        xmpp_stanza_t *feature = xmpp_stanza_new(ctx);
+        xmpp_stanza_set_name(feature, STANZA_NAME_FEATURE);
+        xmpp_stanza_set_attribute(feature, STANZA_ATTR_VAR, curr->data);
+        xmpp_stanza_add_child(query, feature);
+        xmpp_stanza_release(feature);
+
+        curr = g_list_next(curr);
+    }
 
     xmpp_stanza_release(feature_receipts);
     xmpp_stanza_release(feature_ping);

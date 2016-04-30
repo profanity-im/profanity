@@ -398,7 +398,7 @@ void cmd_account_set_resource_sets_resource_with_online_message(void **state)
     expect_string(accounts_set_resource, account_name, "a_account");
     expect_string(accounts_set_resource, value, "a_resource");
 
-    expect_cons_show("Updated resource for account a_account: a_resource, you will need to reconnect to pick up the change.");
+    expect_cons_show("Updated resource for account a_account: a_resource, reconnect to pick up the change.");
     expect_cons_show("");
 
     gboolean result = cmd_account_set(NULL, CMD_ACCOUNT, args);

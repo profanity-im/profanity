@@ -138,7 +138,7 @@ cb_write_fingerprints(void *opdata)
     GString *fpsfilename = g_string_new(basedir->str);
     g_string_append(fpsfilename, "fingerprints.txt");
     err = otrl_privkey_write_fingerprints(user_state, fpsfilename->str);
-    if (!err == GPG_ERR_NO_ERROR) {
+    if (err != GPG_ERR_NO_ERROR) {
         log_error("Failed to write fingerprints file");
         cons_show_error("Failed to create fingerprints file");
     }
@@ -243,7 +243,7 @@ otr_on_connect(ProfAccount *account)
     } else {
         log_info("Loading OTR private key %s", keysfilename->str);
         err = otrl_privkey_read(user_state, keysfilename->str);
-        if (!err == GPG_ERR_NO_ERROR) {
+        if (err != GPG_ERR_NO_ERROR) {
             log_warning("Failed to read OTR private key file: %s", keysfilename->str);
             cons_show_error("Failed to read OTR private key file: %s", keysfilename->str);
             g_string_free(basedir, TRUE);
@@ -271,7 +271,7 @@ otr_on_connect(ProfAccount *account)
     } else {
         log_info("Loading OTR fingerprints %s", fpsfilename->str);
         err = otrl_privkey_read_fingerprints(user_state, fpsfilename->str, NULL, NULL);
-        if (!err == GPG_ERR_NO_ERROR) {
+        if (err != GPG_ERR_NO_ERROR) {
             log_error("Failed to load OTR fingerprints file: %s", fpsfilename->str);
             g_string_free(basedir, TRUE);
             g_string_free(keysfilename, TRUE);
@@ -415,7 +415,7 @@ otr_keygen(ProfAccount *account)
     cons_show("Moving the mouse randomly around the screen may speed up the process!");
     ui_update();
     err = otrl_privkey_generate(user_state, keysfilename->str, account->jid, "xmpp");
-    if (!err == GPG_ERR_NO_ERROR) {
+    if (err != GPG_ERR_NO_ERROR) {
         g_string_free(basedir, TRUE);
         g_string_free(keysfilename, TRUE);
         log_error("Failed to generate private key");
@@ -430,7 +430,7 @@ otr_keygen(ProfAccount *account)
     g_string_append(fpsfilename, "fingerprints.txt");
     log_debug("Generating fingerprints file %s for %s", fpsfilename->str, jid);
     err = otrl_privkey_write_fingerprints(user_state, fpsfilename->str);
-    if (!err == GPG_ERR_NO_ERROR) {
+    if (err != GPG_ERR_NO_ERROR) {
         g_string_free(basedir, TRUE);
         g_string_free(keysfilename, TRUE);
         log_error("Failed to create fingerprints file");
@@ -440,7 +440,7 @@ otr_keygen(ProfAccount *account)
     log_info("Fingerprints file created");
 
     err = otrl_privkey_read(user_state, keysfilename->str);
-    if (!err == GPG_ERR_NO_ERROR) {
+    if (err != GPG_ERR_NO_ERROR) {
         g_string_free(basedir, TRUE);
         g_string_free(keysfilename, TRUE);
         log_error("Failed to load private key");
@@ -449,7 +449,7 @@ otr_keygen(ProfAccount *account)
     }
 
     err = otrl_privkey_read_fingerprints(user_state, fpsfilename->str, NULL, NULL);
-    if (!err == GPG_ERR_NO_ERROR) {
+    if (err != GPG_ERR_NO_ERROR) {
         g_string_free(basedir, TRUE);
         g_string_free(keysfilename, TRUE);
         log_error("Failed to load fingerprints");

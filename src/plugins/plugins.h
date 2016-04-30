@@ -153,4 +153,6 @@ GList* plugins_get_command_names(void);
 gchar * plugins_get_dir(void);
 CommandHelp* plugins_get_help(const char *const cmd);
 
+GList* plugins_get_disco_features(void);
+
 #endif

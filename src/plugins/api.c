@@ -40,10 +40,12 @@
 
 #include "log.h"
 #include "event/server_events.h"
+#include "event/client_events.h"
 #include "plugins/callbacks.h"
 #include "plugins/autocompleters.h"
 #include "plugins/themes.h"
 #include "plugins/settings.h"
+#include "plugins/disco.h"
 #include "profanity.h"
 #include "ui/ui.h"
 #include "config/theme.h"
@@ -426,3 +428,21 @@ api_incoming_message(const char *const barejid, const char *const resource, cons
     // TODO handle all states
     sv_ev_activity((char*)barejid, (char*)resource, FALSE);
 }
+
+void
+api_disco_add_feature(char *feature)
+{
+    if (feature == NULL) {
+        return;
+    }
+
+    disco_add_feature(feature);
+    caps_reset_ver();
+
+    // resend presence to update server's disco info data for this client
+    if (jabber_get_connection_status() == JABBER_CONNECTED) {
+        resource_presence_t last_presence = accounts_get_last_presence(jabber_get_account_name());
+        cl_ev_presence_send(last_presence, jabber_get_presence_message(), 0);
+    }
+}
+

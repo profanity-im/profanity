@@ -190,6 +190,7 @@ void iq_http_upload_request(HTTPUpload *upload);
 Capabilities* caps_lookup(const char *const jid);
 void caps_close(void);
 void caps_destroy(Capabilities *caps);
+void caps_reset_ver(void);
 
 gboolean bookmark_add(const char *jid, const char *nick, const char *password, const char *autojoin_str);
 gboolean bookmark_update(const char *jid, const char *nick, const char *password, const char *autojoin_str);

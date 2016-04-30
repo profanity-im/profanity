@@ -84,4 +84,6 @@ void (*prof_settings_set_int)(char *group, char *key, int value);
 
 void (*prof_incoming_message)(char *barejid, char *resource, char *message);
 
+void (*prof_disco_add_feature)(char *feature);
+
 #endif
