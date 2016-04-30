@@ -45,6 +45,7 @@
 #include "plugins/plugins.h"
 #include "plugins/themes.h"
 #include "plugins/settings.h"
+#include "plugins/disco.h"
 
 #ifdef HAVE_PYTHON
 #include "plugins/python_plugins.h"
@@ -699,6 +700,12 @@ plugins_on_room_win_focus(const char *const roomjid)
     }
 }
 
+GList*
+plugins_get_disco_features(void)
+{
+    return disco_get_features();
+}
+
 void
 plugins_shutdown(void)
 {
@@ -745,6 +752,7 @@ plugins_shutdown(void)
     plugin_themes_close();
     plugin_settings_close();
     callbacks_close();
+    disco_close();
 }
 
 gchar *

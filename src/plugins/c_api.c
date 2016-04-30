@@ -260,6 +260,12 @@ c_api_incoming_message(char *barejid, char *resource, char *message)
     api_incoming_message(barejid, resource, message);
 }
 
+static void
+c_api_disco_add_feature(char *feature)
+{
+    api_disco_add_feature(feature);
+}
+
 void
 c_command_callback(PluginCommand *command, gchar **args)
 {
@@ -320,4 +326,5 @@ c_api_init(void)
     prof_settings_get_int = c_api_settings_get_int;
     prof_settings_set_int = c_api_settings_set_int;
     prof_incoming_message = c_api_incoming_message;
+    prof_disco_add_feature = c_api_disco_add_feature;
 }
