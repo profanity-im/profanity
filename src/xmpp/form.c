@@ -54,19 +54,19 @@
 static gboolean
 _is_valid_form_element(xmpp_stanza_t *stanza)
 {
-    char *name = xmpp_stanza_get_name(stanza);
+    const char *name = xmpp_stanza_get_name(stanza);
     if (g_strcmp0(name, STANZA_NAME_X) != 0) {
         log_error("Error parsing form, root element not <x/>.");
         return FALSE;
     }
 
-    char *ns = xmpp_stanza_get_ns(stanza);
+    const char *ns = xmpp_stanza_get_ns(stanza);
     if (g_strcmp0(ns, STANZA_NS_DATA) != 0) {
         log_error("Error parsing form, namespace not %s.", STANZA_NS_DATA);
         return FALSE;
     }
 
-    char *type = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_TYPE);
+    const char *type = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_TYPE);
     if ((g_strcmp0(type, "form") != 0) &&
             (g_strcmp0(type, "submit") != 0) &&
             (g_strcmp0(type, "cancel") != 0) &&
@@ -129,7 +129,7 @@ _get_property(xmpp_stanza_t *const stanza, const char *const property)
 static char*
 _get_attr(xmpp_stanza_t *const stanza, const char *const attr)
 {
-    char *result = xmpp_stanza_get_attribute(stanza, attr);
+    const char *result = xmpp_stanza_get_attribute(stanza, attr);
     if (result) {
         return strdup(result);
     } else {
@@ -207,7 +207,7 @@ form_create(xmpp_stanza_t *const form_stanza)
     // get fields
     xmpp_stanza_t *form_child = xmpp_stanza_get_children(form_stanza);
     while (form_child) {
-        char *child_name = xmpp_stanza_get_name(form_child);
+        const char *child_name = xmpp_stanza_get_name(form_child);
         if (g_strcmp0(child_name, "field") == 0) {
             xmpp_stanza_t *field_stanza = form_child;
 
