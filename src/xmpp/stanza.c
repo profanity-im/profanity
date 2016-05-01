@@ -117,6 +117,26 @@ stanza_create_bookmarks_storage_request(xmpp_ctx_t *ctx)
     return iq;
 }
 
+xmpp_stanza_t*
+stanza_create_blocked_list_request(xmpp_ctx_t *ctx)
+{
+    xmpp_stanza_t *iq, *blocklist;
+
+    iq = xmpp_stanza_new(ctx);
+    blocklist = xmpp_stanza_new(ctx);
+
+    xmpp_stanza_set_name(iq, STANZA_NAME_IQ);
+    xmpp_stanza_set_type(iq, STANZA_TYPE_GET);
+
+    xmpp_stanza_set_name(blocklist, STANZA_NAME_BLOCKLIST);
+    xmpp_stanza_set_ns(blocklist, STANZA_NS_BLOCKING);
+
+    xmpp_stanza_add_child(iq, blocklist);
+    xmpp_stanza_release(blocklist);
+
+    return iq;
+}
+
 #if 0
 xmpp_stanza_t*
 stanza_create_bookmarks_pubsub_add(xmpp_ctx_t *ctx, const char *const jid,

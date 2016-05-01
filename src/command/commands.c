@@ -2985,6 +2985,69 @@ cmd_roster(ProfWin *window, const char *const command, gchar **args)
 }
 
 gboolean
+cmd_blocked(ProfWin *window, const char *const command, gchar **args)
+{
+    if (jabber_get_connection_status() != JABBER_CONNECTED) {
+        cons_show("You are not currently connected.");
+        return TRUE;
+    }
+
+    if (!jabber_service_supports(XMPP_FEATURE_BLOCKING)) {
+        cons_show("Blocking not supported by server.");
+        return TRUE;
+    }
+
+    if (g_strcmp0(args[0], "add") == 0) {
+        char *jid = args[1];
+        if (jid == NULL && (window->type == WIN_CHAT)) {
+            ProfChatWin *chatwin = (ProfChatWin*)window;
+            jid = chatwin->barejid;
+        }
+
+        if (jid == NULL) {
+            cons_bad_cmd_usage(command);
+            return TRUE;
+        }
+
+        gboolean res = blocked_add(jid);
+        if (!res) {
+            cons_show("User %s already blocked.", jid);
+        }
+
+        return TRUE;
+    }
+
+    if (g_strcmp0(args[0], "remove") == 0) {
+        if (args[1] == NULL) {
+            cons_bad_cmd_usage(command);
+            return TRUE;
+        }
+
+        gboolean res = blocked_remove(args[1]);
+        if (!res) {
+            cons_show("User %s is not currently blocked.", args[1]);
+        }
+
+        return TRUE;
+    }
+
+    GList *blocked = blocked_list();
+    GList *curr = blocked;
+    if (curr) {
+        cons_show("Blocked users:");
+        while (curr) {
+            cons_show("  %s", curr->data);
+            curr = g_list_next(curr);
+        }
+    } else {
+        cons_show("No blocked users.");
+    }
+
+    return TRUE;
+}
+
+
+gboolean
 cmd_resource(ProfWin *window, const char *const command, gchar **args)
 {
     char *cmd = args[0];

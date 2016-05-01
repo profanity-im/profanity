@@ -4,6 +4,7 @@
 - Plugins API supporting C and Python plugins
 - SSL certificate verification (requires libmesode) (/tls)
 - HTTP file upload (xep-0363) (/sendfile)
+- Blocking command (xep-0191) (/blocked)
 - Allow auto extended away (/autoaway)
 - Include last acitvity in initial presence (xep-0256) (/lastactivity)
 - Last Activity (xep-0012) (/lastactivity)

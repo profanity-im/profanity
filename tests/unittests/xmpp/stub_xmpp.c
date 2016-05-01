@@ -70,6 +70,12 @@ jabber_send_stanza(const char *const stanza)
     return TRUE;
 }
 
+gboolean
+jabber_service_supports(const char *const feature)
+{
+    return FALSE;
+}
+
 // message functions
 char* message_send_chat(const char * const barejid, const char * const msg, const char *const oob_url)
 {
@@ -249,3 +255,25 @@ void roster_send_remove(const char * const barejid)
 {
     check_expected(barejid);
 }
+
+GList* blocked_list(void)
+{
+    return NULL;
+}
+
+gboolean blocked_add(char *jid)
+{
+    return TRUE;
+}
+
+gboolean blocked_remove(char *jid)
+{
+    return TRUE;
+}
+
+char* blocked_ac_find(const char *const search_str)
+{
+    return NULL;
+}
+
+void blocked_ac_reset(void) {}
