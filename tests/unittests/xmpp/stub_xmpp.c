@@ -122,7 +122,7 @@ char * presence_sub_request_find(const char * const search_str)
     return  NULL;
 }
 
-void presence_join_room(char *room, char *nick, char * passwd)
+void presence_join_room(const char *const room, const char *const nick, const char *const passwd)
 {
     check_expected(room);
     check_expected(nick);
