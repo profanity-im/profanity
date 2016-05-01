@@ -125,6 +125,7 @@ static char* _win_autocomplete(ProfWin *window, const char *const input);
 static char* _close_autocomplete(ProfWin *window, const char *const input);
 static char* _plugins_autocomplete(ProfWin *window, const char *const input);
 static char* _sendfile_autocomplete(ProfWin *window, const char *const input);
+static char* _blocked_autocomplete(ProfWin *window, const char *const input);
 
 GHashTable *commands = NULL;
 
@@ -421,6 +422,26 @@ static struct cmd_t command_defs[] =
             "/roster nick myfriend@chat.org My Friend",
             "/roster clearnick kai@server.com",
             "/roster size 15")
+    },
+
+    { "/blocked",
+        parse_args, 0, 2, NULL,
+        CMD_NOSUBFUNCS
+        CMD_MAINFUNC(cmd_blocked)
+        CMD_TAGS(
+            CMD_TAG_ROSTER,
+            CMD_TAG_CHAT)
+        CMD_SYN(
+            "/blocked",
+            "/blocked add [<jid>]",
+            "/blocked remove <jid>")
+        CMD_DESC(
+            "Manage blocked users, calling with no arguments shows the current list of blocked users.")
+        CMD_ARGS(
+            { "add [<jid>]",    "Block the specified Jabber ID, if called in a chat window, the current recipient will be used." },
+            { "remove <jid>",   "Remove the specified Jabber ID from the blocked list." })
+        CMD_EXAMPLES(
+            "/blocked add spammer@spam.org")
     },
 
     { "/group",
@@ -2279,6 +2300,7 @@ static Autocomplete autoping_ac;
 static Autocomplete plugins_ac;
 static Autocomplete plugins_load_ac;
 static Autocomplete sendfile_ac;
+static Autocomplete blocked_ac;
 
 /*
  * Initialise command autocompleter and history
@@ -2835,6 +2857,10 @@ cmd_init(void)
     autocomplete_add(plugins_ac, "load");
 
     sendfile_ac = autocomplete_new();
+
+    blocked_ac = autocomplete_new();
+    autocomplete_add(blocked_ac, "add");
+    autocomplete_add(blocked_ac, "remove");
 }
 
 void
@@ -2925,6 +2951,7 @@ cmd_uninit(void)
     autocomplete_free(plugins_ac);
     autocomplete_free(plugins_load_ac);
     autocomplete_free(sendfile_ac);
+    autocomplete_free(blocked_ac);
 }
 
 gboolean
@@ -3154,6 +3181,7 @@ cmd_reset_autocomplete(ProfWin *window)
     autocomplete_reset(console_msg_ac);
     autocomplete_reset(autoping_ac);
     autocomplete_reset(plugins_ac);
+    autocomplete_reset(blocked_ac);
     autocomplete_reset(script_ac);
     if (script_show_ac) {
         autocomplete_free(script_show_ac);
@@ -3176,6 +3204,7 @@ cmd_reset_autocomplete(ProfWin *window)
     }
 
     bookmark_autocomplete_reset();
+    blocked_ac_reset();
     prefs_reset_room_trigger_ac();
     win_reset_search_attempts();
     win_close_reset_search_attempts();
@@ -3445,8 +3474,9 @@ _cmd_complete_parameters(ProfWin *window, const char *const input)
     g_hash_table_insert(ac_funcs, "/console",       _console_autocomplete);
     g_hash_table_insert(ac_funcs, "/win",           _win_autocomplete);
     g_hash_table_insert(ac_funcs, "/close",         _close_autocomplete);
-    g_hash_table_insert(ac_funcs, "/plugins",         _plugins_autocomplete);
+    g_hash_table_insert(ac_funcs, "/plugins",       _plugins_autocomplete);
     g_hash_table_insert(ac_funcs, "/sendfile",      _sendfile_autocomplete);
+    g_hash_table_insert(ac_funcs, "/blocked",       _blocked_autocomplete);
 
     int len = strlen(input);
     char parsed[len+1];
@@ -3715,6 +3745,25 @@ _group_autocomplete(ProfWin *window, const char *const input)
 
     return NULL;
 }
+
+static char*
+_blocked_autocomplete(ProfWin *window, const char *const input)
+{
+    char *result = NULL;
+
+    result = autocomplete_param_with_func(input, "/blocked remove", blocked_ac_find);
+    if (result) {
+        return result;
+    }
+
+    result = autocomplete_param_with_ac(input, "/blocked", blocked_ac, FALSE);
+    if (result) {
+        return result;
+    }
+
+    return NULL;
+}
+
 
 static char*
 _bookmark_autocomplete(ProfWin *window, const char *const input)

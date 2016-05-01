@@ -14,18 +14,18 @@
 void
 ping_multiple(void **state)
 {
-    stbbr_for_id("prof_ping_3",
-        "<iq id='prof_ping_3' type='result' to='stabber@localhost/profanity'/>"
-    );
     stbbr_for_id("prof_ping_4",
         "<iq id='prof_ping_4' type='result' to='stabber@localhost/profanity'/>"
+    );
+    stbbr_for_id("prof_ping_5",
+        "<iq id='prof_ping_5' type='result' to='stabber@localhost/profanity'/>"
     );
 
     prof_connect();
 
     prof_input("/ping");
     assert_true(stbbr_received(
-        "<iq id='prof_ping_3' type='get'>"
+        "<iq id='prof_ping_4' type='get'>"
             "<ping xmlns='urn:xmpp:ping'/>"
         "</iq>"
     ));
@@ -33,7 +33,7 @@ ping_multiple(void **state)
 
     prof_input("/ping");
     assert_true(stbbr_received(
-        "<iq id='prof_ping_4' type='get'>"
+        "<iq id='prof_ping_5' type='get'>"
             "<ping xmlns='urn:xmpp:ping'/>"
         "</iq>"
     ));
