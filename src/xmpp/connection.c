@@ -121,7 +121,7 @@ _info_destroy(DiscoInfo *info)
     if (info) {
         free(info->item);
         if (info->features) {
-            g_hash_table_remove_all(info->features);
+            g_hash_table_destroy(info->features);
         }
         free(info);
     }
@@ -699,7 +699,7 @@ _connection_handler(xmpp_conn_t *const conn, const xmpp_conn_event_t status, con
         // items discovery
         DiscoInfo *info = malloc(sizeof(struct disco_info_t));
         info->item = strdup(jabber_conn.domain);
-        info->features = g_hash_table_new_full(g_str_hash, g_str_equal, free, NULL);
+        info->features = g_hash_table_new_full(g_str_hash, g_str_equal, free, free);
         disco_items = g_slist_append(disco_items, info);
         iq_disco_info_request_onconnect(info->item);
         iq_disco_items_request_onconnect(jabber_conn.domain);
