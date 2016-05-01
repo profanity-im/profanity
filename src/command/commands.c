@@ -2998,14 +2998,20 @@ cmd_blocked(ProfWin *window, const char *const command, gchar **args)
     }
 
     if (g_strcmp0(args[0], "add") == 0) {
-        if (args[1] == NULL) {
+        char *jid = args[1];
+        if (jid == NULL && (window->type == WIN_CHAT)) {
+            ProfChatWin *chatwin = (ProfChatWin*)window;
+            jid = chatwin->barejid;
+        }
+
+        if (jid == NULL) {
             cons_bad_cmd_usage(command);
             return TRUE;
         }
 
-        gboolean res = blocked_add(args[1]);
+        gboolean res = blocked_add(jid);
         if (!res) {
-            cons_show("User %s already blocked.", args[1]);
+            cons_show("User %s already blocked.", jid);
         }
 
         return TRUE;
