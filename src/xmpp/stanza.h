@@ -54,6 +54,9 @@
 
 #define STANZA_NAME_MESSAGE "message"
 #define STANZA_NAME_BODY "body"
+#define STANZA_NAME_BLOCK "block"
+#define STANZA_NAME_UNBLOCK "unblock"
+#define STANZA_NAME_BLOCKLIST "blocklist"
 #define STANZA_NAME_PRESENCE "presence"
 #define STANZA_NAME_PRIORITY "priority"
 #define STANZA_NAME_X "x"
@@ -181,6 +184,7 @@
 #define STANZA_NS_ENCRYPTED "jabber:x:encrypted"
 #define STANZA_NS_HTTP_UPLOAD "urn:xmpp:http:upload"
 #define STANZA_NS_X_OOB "jabber:x:oob"
+#define STANZA_NS_BLOCKING "urn:xmpp:blocking"
 
 #define STANZA_DATAFORM_SOFTWARE "urn:xmpp:dataforms:softwareinfo"
 
@@ -204,6 +208,8 @@ typedef enum {
 } stanza_parse_error_t;
 
 xmpp_stanza_t* stanza_create_bookmarks_storage_request(xmpp_ctx_t *ctx);
+
+xmpp_stanza_t* stanza_create_blocked_list_request(xmpp_ctx_t *ctx);
 
 xmpp_stanza_t* stanza_create_http_upload_request(xmpp_ctx_t *ctx, const char *const id, const char *const jid, HTTPUpload *upload);
 

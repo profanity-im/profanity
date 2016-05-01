@@ -12,6 +12,7 @@ core_sources = \
 	src/xmpp/capabilities.h src/xmpp/connection.h \
 	src/xmpp/roster.c src/xmpp/roster.h \
 	src/xmpp/bookmark.c src/xmpp/bookmark.h \
+	src/xmpp/blocking.c src/xmpp/blocking.h \
 	src/xmpp/form.c src/xmpp/form.h \
 	src/event/server_events.c src/event/server_events.h \
 	src/event/client_events.c src/event/client_events.h \

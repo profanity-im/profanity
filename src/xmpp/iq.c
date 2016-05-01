@@ -58,6 +58,7 @@
 #include "config/preferences.h"
 #include "event/server_events.h"
 #include "xmpp/capabilities.h"
+#include "xmpp/blocking.h"
 #include "xmpp/connection.h"
 #include "xmpp/stanza.h"
 #include "xmpp/form.h"
@@ -168,6 +169,11 @@ _iq_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza, void *const us
     }
     if (roster && (g_strcmp0(type, STANZA_TYPE_RESULT) == 0)) {
         roster_result_handler(stanza);
+    }
+
+    xmpp_stanza_t *blocking = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_BLOCKING);
+    if (blocking && (g_strcmp0(type, STANZA_TYPE_SET) == 0)) {
+        blocked_set_handler(stanza);
     }
 
     const char *id = xmpp_stanza_get_id(stanza);

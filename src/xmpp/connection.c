@@ -55,6 +55,7 @@
 #include "profanity.h"
 #include "event/server_events.h"
 #include "xmpp/bookmark.h"
+#include "xmpp/blocking.h"
 #include "xmpp/capabilities.h"
 #include "xmpp/connection.h"
 #include "xmpp/iq.h"
@@ -341,6 +342,21 @@ GSList*
 jabber_get_disco_items(void)
 {
     return (disco_items);
+}
+
+gboolean
+jabber_service_supports(const char *const feature)
+{
+    DiscoInfo *disco_info;
+    while (disco_items) {
+        disco_info = disco_items->data;
+        if (g_hash_table_lookup_extended(disco_info->features, feature, NULL, NULL)) {
+            return TRUE;
+        }
+        disco_items = g_slist_next(disco_items);
+    }
+
+    return FALSE;
 }
 
 void
@@ -678,6 +694,7 @@ _connection_handler(xmpp_conn_t *const conn, const xmpp_conn_event_t status, con
 
         roster_request();
         bookmark_request();
+        blocking_request();
 
         // items discovery
         DiscoInfo *info = malloc(sizeof(struct disco_info_t));

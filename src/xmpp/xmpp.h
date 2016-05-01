@@ -54,6 +54,8 @@
 #define JABBER_PRIORITY_MIN -128
 #define JABBER_PRIORITY_MAX 127
 
+#define XMPP_FEATURE_BLOCKING "urn:xmpp:blocking"
+
 typedef enum {
     JABBER_UNDEFINED,
     JABBER_STARTED,
@@ -126,6 +128,7 @@ TLSCertificate* jabber_get_tls_peer_cert(void);
 #endif
 gboolean jabber_conn_is_secured(void);
 gboolean jabber_send_stanza(const char *const stanza);
+gboolean jabber_service_supports(const char *const feature);
 
 // message functions
 char* message_send_chat(const char *const barejid, const char *const msg, const char *const oob_url);
@@ -205,6 +208,12 @@ void roster_send_add_to_group(const char *const group, PContact contact);
 void roster_send_remove_from_group(const char *const group, PContact contact);
 void roster_send_add_new(const char *const barejid, const char *const name);
 void roster_send_remove(const char *const barejid);
+
+GList* blocked_list(void);
+gboolean blocked_add(char *jid);
+gboolean blocked_remove(char *jid);
+char* blocked_ac_find(const char *const search_str);
+void blocked_ac_reset(void);
 
 void form_destroy(DataForm *form);
 char* form_get_form_type_field(DataForm *form);
