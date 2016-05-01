@@ -438,7 +438,7 @@ static struct cmd_t command_defs[] =
         CMD_DESC(
             "Manage blocked users, calling with no arguments shows the current list of blocked users.")
         CMD_ARGS(
-            { "add [<jid>]",    "Block the specified Jabber ID, if called in a chat window, the current recipient will be used." },
+            { "add [<jid>]",    "Block the specified Jabber ID, if in a chat window, and not jid specified, the current recipient will be blocked." },
             { "remove <jid>",   "Remove the specified Jabber ID from the blocked list." })
         CMD_EXAMPLES(
             "/blocked add spammer@spam.org")
