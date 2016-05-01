@@ -245,11 +245,12 @@ _bookmark_result_id_handler(xmpp_stanza_t *const stanza, void *const userdata)
     xmpp_ctx_t *ctx = connection_get_ctx();
     char *id = (char *)userdata;
     xmpp_stanza_t *ptr;
-    xmpp_stanza_t *nick;
+    xmpp_stanza_t *nick_st;
     xmpp_stanza_t *password_st;
-    char *name;
-    char *jid;
-    char *autojoin;
+    const char *name;
+    const char *jid;
+    const char *autojoin;
+    char *nick;
     char *password;
     gboolean autojoin_val;
     Jid *my_jid;
@@ -291,13 +292,13 @@ _bookmark_result_id_handler(xmpp_stanza_t *const stanza, void *const userdata)
 
         log_debug("Handle bookmark for %s", jid);
 
-        name = NULL;
-        nick = xmpp_stanza_get_child_by_name(ptr, "nick");
-        if (nick) {
+        nick = NULL;
+        nick_st = xmpp_stanza_get_child_by_name(ptr, "nick");
+        if (nick_st) {
             char *tmp;
-            tmp = xmpp_stanza_get_text(nick);
+            tmp = xmpp_stanza_get_text(nick_st);
             if (tmp) {
-                name = strdup(tmp);
+                nick = strdup(tmp);
                 xmpp_free(ctx, tmp);
             }
         }
@@ -323,7 +324,7 @@ _bookmark_result_id_handler(xmpp_stanza_t *const stanza, void *const userdata)
         autocomplete_add(bookmark_ac, jid);
         item = malloc(sizeof(*item));
         item->jid = strdup(jid);
-        item->nick = name;
+        item->nick = nick;
         item->password = password;
         item->autojoin = autojoin_val;
         bookmark_list = g_list_append(bookmark_list, item);
@@ -333,15 +334,15 @@ _bookmark_result_id_handler(xmpp_stanza_t *const stanza, void *const userdata)
 
             char *account_name = jabber_get_account_name();
             ProfAccount *account = accounts_get_account(account_name);
-            if (name == NULL) {
-                name = account->muc_nick;
+            if (nick == NULL) {
+                nick = account->muc_nick;
             }
 
-            log_debug("Autojoin %s with nick=%s", jid, name);
-            room_jid = jid_create_from_bare_and_resource(jid, name);
+            log_debug("Autojoin %s with nick=%s", jid, nick);
+            room_jid = jid_create_from_bare_and_resource(jid, nick);
             if (!muc_active(room_jid->barejid)) {
-                presence_join_room(jid, name, password);
-                muc_join(jid, name, password, TRUE);
+                presence_join_room(jid, nick, password);
+                muc_join(jid, nick, password, TRUE);
             }
             jid_destroy(room_jid);
             account_free(account);

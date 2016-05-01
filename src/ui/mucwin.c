@@ -607,7 +607,7 @@ mucwin_handle_affiliation_list(ProfMucWin *mucwin, const char *const affiliation
         win_vprint(window, '!', 0, NULL, 0, 0, "", "Affiliation: %s", affiliation);
         GSList *curr_jid = jids;
         while (curr_jid) {
-            char *jid = curr_jid->data;
+            const char *jid = curr_jid->data;
             win_vprint(window, '!', 0, NULL, 0, 0, "", "  %s", jid);
             curr_jid = g_slist_next(curr_jid);
         }
@@ -699,7 +699,7 @@ mucwin_handle_role_list(ProfMucWin *mucwin, const char *const role, GSList *nick
         win_vprint(window, '!', 0, NULL, 0, 0, "", "Role: %s", role);
         GSList *curr_nick = nicks;
         while (curr_nick) {
-            char *nick = curr_nick->data;
+            const char *nick = curr_nick->data;
             Occupant *occupant = muc_roster_item(mucwin->roomjid, nick);
             if (occupant) {
                 if (occupant->jid) {
