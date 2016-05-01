@@ -81,6 +81,7 @@ _message_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza, void *con
     size_t text_size;
     xmpp_stanza_to_text(stanza, &text, &text_size);
     gboolean cont = plugins_on_message_stanza_receive(text);
+    xmpp_free(connection_get_ctx(), text);
     if (!cont) {
         return 1;
     }
@@ -872,7 +873,9 @@ _send_message_stanza(xmpp_stanza_t *const stanza)
     char *plugin_text = plugins_on_message_stanza_send(text);
     if (plugin_text) {
         xmpp_send_raw_string(conn, "%s", plugin_text);
+        free(plugin_text);
     } else {
         xmpp_send_raw_string(conn, "%s", text);
     }
+    xmpp_free(connection_get_ctx(), text);
 }

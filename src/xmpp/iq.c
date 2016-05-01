@@ -125,6 +125,7 @@ _iq_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza, void *const us
     size_t text_size;
     xmpp_stanza_to_text(stanza, &text, &text_size);
     gboolean cont = plugins_on_iq_stanza_receive(text);
+    xmpp_free(connection_get_ctx(), text);
     if (!cont) {
         return 1;
     }
@@ -2049,7 +2050,7 @@ _disco_items_result_handler(xmpp_stanza_t *const stanza)
                 DiscoItem *item = res_items->data;
                 DiscoInfo *info = malloc(sizeof(struct disco_info_t));
                 info->item = strdup(item->jid);
-                info->features = g_hash_table_new_full(g_str_hash, g_str_equal, free, NULL);
+                info->features = g_hash_table_new_full(g_str_hash, g_str_equal, free, free);
                 jabber_set_disco_items(g_slist_append(jabber_get_disco_items(), info));
                 iq_disco_info_request_onconnect(info->item);
                 res_items = g_slist_next(res_items);
@@ -2071,7 +2072,9 @@ send_iq_stanza(xmpp_stanza_t *const stanza)
     char *plugin_text = plugins_on_iq_stanza_send(text);
     if (plugin_text) {
         xmpp_send_raw_string(conn, "%s", plugin_text);
+        free(plugin_text);
     } else {
         xmpp_send_raw_string(conn, "%s", text);
     }
+    xmpp_free(connection_get_ctx(), text);
 }
