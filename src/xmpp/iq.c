@@ -2071,6 +2071,7 @@ send_iq_stanza(xmpp_stanza_t *const stanza)
     char *plugin_text = plugins_on_iq_stanza_send(text);
     if (plugin_text) {
         xmpp_send_raw_string(conn, "%s", plugin_text);
+        free(plugin_text);
     } else {
         xmpp_send_raw_string(conn, "%s", text);
     }
