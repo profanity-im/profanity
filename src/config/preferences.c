@@ -1507,7 +1507,6 @@ _get_default_boolean(preference_t pref)
         case PREF_TLS_SHOW:
         case PREF_LASTACTIVITY:
         case PREF_NOTIFY_MENTION_WHOLE_WORD:
-        case PREF_TRAY:
             return TRUE;
         default:
             return FALSE;
