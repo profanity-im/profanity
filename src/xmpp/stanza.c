@@ -1136,9 +1136,9 @@ stanza_get_delay(xmpp_stanza_t *const stanza)
     // first check for XEP-0203 delayed delivery
     xmpp_stanza_t *delay = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_DELAY);
     if (delay) {
-        char *xmlns = xmpp_stanza_get_attribute(delay, STANZA_ATTR_XMLNS);
+        const char *xmlns = xmpp_stanza_get_attribute(delay, STANZA_ATTR_XMLNS);
         if (xmlns && (strcmp(xmlns, "urn:xmpp:delay") == 0)) {
-            char *stamp = xmpp_stanza_get_attribute(delay, STANZA_ATTR_STAMP);
+            const char *stamp = xmpp_stanza_get_attribute(delay, STANZA_ATTR_STAMP);
             if (stamp && (g_time_val_from_iso8601(stamp, &utc_stamp))) {
                 GDateTime *utc_datetime = g_date_time_new_from_timeval_utc(&utc_stamp);
                 GDateTime *local_datetime = g_date_time_to_local(utc_datetime);
@@ -1152,9 +1152,9 @@ stanza_get_delay(xmpp_stanza_t *const stanza)
     // stanp format : CCYYMMDDThh:mm:ss
     xmpp_stanza_t *x = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_X);
     if (x) {
-        char *xmlns = xmpp_stanza_get_attribute(x, STANZA_ATTR_XMLNS);
+        const char *xmlns = xmpp_stanza_get_attribute(x, STANZA_ATTR_XMLNS);
         if (xmlns && (strcmp(xmlns, "jabber:x:delay") == 0)) {
-            char *stamp = xmpp_stanza_get_attribute(x, STANZA_ATTR_STAMP);
+            const char *stamp = xmpp_stanza_get_attribute(x, STANZA_ATTR_STAMP);
             if (stamp && (g_time_val_from_iso8601(stamp, &utc_stamp))) {
                 GDateTime *utc_datetime = g_date_time_new_from_timeval_utc(&utc_stamp);
                 GDateTime *local_datetime = g_date_time_to_local(utc_datetime);
@@ -1251,7 +1251,7 @@ stanza_muc_requires_config(xmpp_stanza_t *const stanza)
         if (item == NULL) {
             return FALSE;
         }
-        char *affiliation = xmpp_stanza_get_attribute(item, "affiliation");
+        const char *affiliation = xmpp_stanza_get_attribute(item, "affiliation");
         if (g_strcmp0(affiliation, "owner") != 0) {
             return FALSE;
         }
@@ -1260,7 +1260,7 @@ stanza_muc_requires_config(xmpp_stanza_t *const stanza)
         xmpp_stanza_t *x_children = xmpp_stanza_get_children(x);
         while (x_children) {
             if (g_strcmp0(xmpp_stanza_get_name(x_children), STANZA_NAME_STATUS) == 0) {
-                char *code = xmpp_stanza_get_attribute(x_children, STANZA_ATTR_CODE);
+                const char *code = xmpp_stanza_get_attribute(x_children, STANZA_ATTR_CODE);
                 if (g_strcmp0(code, "201") == 0) {
                     return TRUE;
                 }
@@ -1288,7 +1288,7 @@ stanza_is_muc_self_presence(xmpp_stanza_t *const stanza,
         xmpp_stanza_t *x_children = xmpp_stanza_get_children(x);
         while (x_children) {
             if (g_strcmp0(xmpp_stanza_get_name(x_children), STANZA_NAME_STATUS) == 0) {
-                char *code = xmpp_stanza_get_attribute(x_children, STANZA_ATTR_CODE);
+                const char *code = xmpp_stanza_get_attribute(x_children, STANZA_ATTR_CODE);
                 if (g_strcmp0(code, "110") == 0) {
                     return TRUE;
                 }
@@ -1299,7 +1299,7 @@ stanza_is_muc_self_presence(xmpp_stanza_t *const stanza,
         // check for item child element with jid property
         xmpp_stanza_t *item = xmpp_stanza_get_child_by_name(x, STANZA_NAME_ITEM);
         if (item) {
-            char *jid = xmpp_stanza_get_attribute(item, STANZA_ATTR_JID);
+            const char *jid = xmpp_stanza_get_attribute(item, STANZA_ATTR_JID);
             if (jid) {
                 if (g_str_has_prefix(self_jid, jid)) {
                     return TRUE;
@@ -1308,7 +1308,7 @@ stanza_is_muc_self_presence(xmpp_stanza_t *const stanza,
         }
 
         // check if 'from' attribute identifies this user
-        char *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
+        const char *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
         if (from) {
             Jid *from_jid = jid_create(from);
             if (muc_active(from_jid->barejid)) {
@@ -1348,9 +1348,9 @@ stanza_get_status_codes_by_ns(xmpp_stanza_t *const stanza, char *ns)
     if (ns_child) {
         xmpp_stanza_t *child = xmpp_stanza_get_children(ns_child);
         while (child) {
-            char *name = xmpp_stanza_get_name(child);
+            const char *name = xmpp_stanza_get_name(child);
             if (g_strcmp0(name, STANZA_NAME_STATUS) == 0) {
-                char *code = xmpp_stanza_get_attribute(child, STANZA_ATTR_CODE);
+                const char *code = xmpp_stanza_get_attribute(child, STANZA_ATTR_CODE);
                 if (code) {
                     codes = g_slist_append(codes, strdup(code));
                 }
@@ -1364,7 +1364,7 @@ stanza_get_status_codes_by_ns(xmpp_stanza_t *const stanza, char *ns)
 gboolean
 stanza_room_destroyed(xmpp_stanza_t *stanza)
 {
-    char *stanza_name = xmpp_stanza_get_name(stanza);
+    const char *stanza_name = xmpp_stanza_get_name(stanza);
     if (g_strcmp0(stanza_name, STANZA_NAME_PRESENCE) == 0) {
         xmpp_stanza_t *x = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_MUC_USER);
         if (x) {
@@ -1378,16 +1378,16 @@ stanza_room_destroyed(xmpp_stanza_t *stanza)
     return FALSE;
 }
 
-char*
+const char*
 stanza_get_muc_destroy_alternative_room(xmpp_stanza_t *stanza)
 {
-    char *stanza_name = xmpp_stanza_get_name(stanza);
+    const char *stanza_name = xmpp_stanza_get_name(stanza);
     if (g_strcmp0(stanza_name, STANZA_NAME_PRESENCE) == 0) {
         xmpp_stanza_t *x = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_MUC_USER);
         if (x) {
             xmpp_stanza_t *destroy = xmpp_stanza_get_child_by_name(x, STANZA_NAME_DESTROY);
             if (destroy) {
-                char *jid = xmpp_stanza_get_attribute(destroy, STANZA_ATTR_JID);
+                const char *jid = xmpp_stanza_get_attribute(destroy, STANZA_ATTR_JID);
                 if (jid) {
                     return jid;
                 }
@@ -1401,7 +1401,7 @@ stanza_get_muc_destroy_alternative_room(xmpp_stanza_t *stanza)
 char*
 stanza_get_muc_destroy_alternative_password(xmpp_stanza_t *stanza)
 {
-    char *stanza_name = xmpp_stanza_get_name(stanza);
+    const char *stanza_name = xmpp_stanza_get_name(stanza);
     if (g_strcmp0(stanza_name, STANZA_NAME_PRESENCE) == 0) {
         xmpp_stanza_t *x = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_MUC_USER);
         if (x) {
@@ -1423,7 +1423,7 @@ stanza_get_muc_destroy_alternative_password(xmpp_stanza_t *stanza)
 char*
 stanza_get_muc_destroy_reason(xmpp_stanza_t *stanza)
 {
-    char *stanza_name = xmpp_stanza_get_name(stanza);
+    const char *stanza_name = xmpp_stanza_get_name(stanza);
     if (g_strcmp0(stanza_name, STANZA_NAME_PRESENCE) == 0) {
         xmpp_stanza_t *x = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_MUC_USER);
         if (x) {
@@ -1442,10 +1442,10 @@ stanza_get_muc_destroy_reason(xmpp_stanza_t *stanza)
     return NULL;
 }
 
-char*
+const char*
 stanza_get_actor(xmpp_stanza_t *stanza)
 {
-    char *stanza_name = xmpp_stanza_get_name(stanza);
+    const char *stanza_name = xmpp_stanza_get_name(stanza);
     if (g_strcmp0(stanza_name, STANZA_NAME_PRESENCE) == 0) {
         xmpp_stanza_t *x = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_MUC_USER);
         if (x) {
@@ -1453,11 +1453,11 @@ stanza_get_actor(xmpp_stanza_t *stanza)
             if (item) {
                 xmpp_stanza_t *actor = xmpp_stanza_get_child_by_name(item, STANZA_NAME_ACTOR);
                 if (actor) {
-                    char *nick = xmpp_stanza_get_attribute(actor, STANZA_ATTR_NICK);
+                    const char *nick = xmpp_stanza_get_attribute(actor, STANZA_ATTR_NICK);
                     if (nick) {
                         return nick;
                     }
-                    char *jid = xmpp_stanza_get_attribute(actor, STANZA_ATTR_JID);
+                    const char *jid = xmpp_stanza_get_attribute(actor, STANZA_ATTR_JID);
                     if (jid) {
                         return jid;
                     }
@@ -1471,7 +1471,7 @@ stanza_get_actor(xmpp_stanza_t *stanza)
 char*
 stanza_get_reason(xmpp_stanza_t *stanza)
 {
-    char *stanza_name = xmpp_stanza_get_name(stanza);
+    const char *stanza_name = xmpp_stanza_get_name(stanza);
     if (g_strcmp0(stanza_name, STANZA_NAME_PRESENCE) == 0) {
         xmpp_stanza_t *x = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_MUC_USER);
         if (x) {
@@ -1479,6 +1479,9 @@ stanza_get_reason(xmpp_stanza_t *stanza)
             if (item) {
                 xmpp_stanza_t *reason_st = xmpp_stanza_get_child_by_name(item, STANZA_NAME_REASON);
                 if (reason_st) {
+                    /* TODO don't return text generated by xmpp_stanza_get_text(),
+                     * because it should be freed by xmpp_free(). Instead, return
+                     * strdup(reason) and free the `reason'. Check similar places. */
                     char *reason = xmpp_stanza_get_text(reason_st);
                     if (reason) {
                         return reason;
@@ -1506,7 +1509,7 @@ stanza_is_room_nick_change(xmpp_stanza_t *const stanza)
         xmpp_stanza_t *x_children = xmpp_stanza_get_children(x);
         while (x_children) {
             if (g_strcmp0(xmpp_stanza_get_name(x_children), STANZA_NAME_STATUS) == 0) {
-                char *code = xmpp_stanza_get_attribute(x_children, STANZA_ATTR_CODE);
+                const char *code = xmpp_stanza_get_attribute(x_children, STANZA_ATTR_CODE);
                 if (g_strcmp0(code, "303") == 0) {
                     return TRUE;
                 }
@@ -1518,7 +1521,7 @@ stanza_is_room_nick_change(xmpp_stanza_t *const stanza)
     return FALSE;
 }
 
-char*
+const char*
 stanza_get_new_nick(xmpp_stanza_t *const stanza)
 {
     if (!stanza_is_room_nick_change(stanza)) {
@@ -1530,7 +1533,7 @@ stanza_get_new_nick(xmpp_stanza_t *const stanza)
 
     while (x_children) {
         if (strcmp(xmpp_stanza_get_name(x_children), STANZA_NAME_ITEM) == 0) {
-            char *nick = xmpp_stanza_get_attribute(x_children, STANZA_ATTR_NICK);
+            const char *nick = xmpp_stanza_get_attribute(x_children, STANZA_ATTR_NICK);
             if (nick) {
                 return nick;
             }
@@ -1550,7 +1553,7 @@ stanza_get_idle_time(xmpp_stanza_t *const stanza)
         return 0;
     }
 
-    char *ns = xmpp_stanza_get_ns(query);
+    const char *ns = xmpp_stanza_get_ns(query);
     if (ns == NULL) {
         return 0;
     }
@@ -1559,7 +1562,7 @@ stanza_get_idle_time(xmpp_stanza_t *const stanza)
         return 0;
     }
 
-    char *seconds_str = xmpp_stanza_get_attribute(query, STANZA_ATTR_SECONDS);
+    const char *seconds_str = xmpp_stanza_get_attribute(query, STANZA_ATTR_SECONDS);
     if (seconds_str == NULL) {
         return 0;
     }
@@ -1581,14 +1584,14 @@ stanza_parse_caps(xmpp_stanza_t *const stanza)
         return NULL;
     }
 
-    char *ns = xmpp_stanza_get_ns(caps_st);
+    const char *ns = xmpp_stanza_get_ns(caps_st);
     if (g_strcmp0(ns, STANZA_NS_CAPS) != 0) {
         return NULL;
     }
 
-    char *hash = xmpp_stanza_get_attribute(caps_st, STANZA_ATTR_HASH);
-    char *node = xmpp_stanza_get_attribute(caps_st, STANZA_ATTR_NODE);
-    char *ver = xmpp_stanza_get_attribute(caps_st, STANZA_ATTR_VER);
+    const char *hash = xmpp_stanza_get_attribute(caps_st, STANZA_ATTR_HASH);
+    const char *node = xmpp_stanza_get_attribute(caps_st, STANZA_ATTR_NODE);
+    const char *ver = xmpp_stanza_get_attribute(caps_st, STANZA_ATTR_VER);
 
     XMPPCaps *caps = (XMPPCaps *)malloc(sizeof(XMPPCaps));
     caps->hash = hash ? strdup(hash) : NULL;
@@ -1611,8 +1614,8 @@ stanza_get_caps_str(xmpp_stanza_t *const stanza)
         return NULL;
     }
 
-    char *node = xmpp_stanza_get_attribute(caps, STANZA_ATTR_NODE);
-    char *ver = xmpp_stanza_get_attribute(caps, STANZA_ATTR_VER);
+    const char *node = xmpp_stanza_get_attribute(caps, STANZA_ATTR_NODE);
+    const char *ver = xmpp_stanza_get_attribute(caps, STANZA_ATTR_VER);
 
     if ((node == NULL) || (ver == NULL)) {
         return NULL;
@@ -1848,7 +1851,7 @@ stanza_free_presence(XMPPPresence *presence)
 XMPPPresence*
 stanza_parse_presence(xmpp_stanza_t *stanza, int *err)
 {
-    char *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
+    const char *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
     if (!from) {
         *err = STANZA_PARSE_ERROR_NO_FROM;
         return NULL;

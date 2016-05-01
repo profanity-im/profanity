@@ -511,7 +511,7 @@ sv_ev_incoming_carbon(char *barejid, char *resource, char *message, char *pgp_me
 }
 
 void
-sv_ev_message_receipt(char *barejid, char *id)
+sv_ev_message_receipt(const char *const barejid, const char *const id)
 {
     ProfChatWin *chatwin = wins_get_chat(barejid);
     if (!chatwin)
