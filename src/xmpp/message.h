@@ -35,6 +35,6 @@
 #ifndef XMPP_MESSAGE_H
 #define XMPP_MESSAGE_H
 
-void message_add_handlers(void);
+void message_handlers_init(void);
 
 #endif
