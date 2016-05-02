@@ -2050,7 +2050,7 @@ _disco_items_result_handler(xmpp_stanza_t *const stanza)
                 DiscoItem *item = res_items->data;
                 DiscoInfo *info = malloc(sizeof(struct disco_info_t));
                 info->item = strdup(item->jid);
-                info->features = g_hash_table_new_full(g_str_hash, g_str_equal, free, free);
+                info->features = g_hash_table_new_full(g_str_hash, g_str_equal, free, NULL);
                 jabber_set_disco_items(g_slist_append(jabber_get_disco_items(), info));
                 iq_disco_info_request_onconnect(info->item);
                 res_items = g_slist_next(res_items);
