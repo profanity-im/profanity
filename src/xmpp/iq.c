@@ -211,7 +211,7 @@ iq_add_handlers(void)
 }
 
 void
-id_handler_add(const char *const id, ProfIdCallback func, void *userdata)
+iq_id_handler_add(const char *const id, ProfIdCallback func, void *userdata)
 {
     ProfIdHandler *handler = malloc(sizeof(ProfIdHandler));
     handler->func = func;
@@ -283,7 +283,7 @@ iq_enable_carbons(void)
     xmpp_stanza_t *iq = stanza_enable_carbons(ctx);
     const char *id = xmpp_stanza_get_id(iq);
 
-    id_handler_add(id, _enable_carbons_id_handler, NULL);
+    iq_id_handler_add(id, _enable_carbons_id_handler, NULL);
 
     send_iq_stanza(iq);
     xmpp_stanza_release(iq);
@@ -296,7 +296,7 @@ iq_disable_carbons(void)
     xmpp_stanza_t *iq = stanza_disable_carbons(ctx);
     const char *id = xmpp_stanza_get_id(iq);
 
-    id_handler_add(id, _disable_carbons_id_handler, NULL);
+    iq_id_handler_add(id, _disable_carbons_id_handler, NULL);
 
     send_iq_stanza(iq);
     xmpp_stanza_release(iq);
@@ -329,7 +329,7 @@ iq_http_upload_request(HTTPUpload *upload)
 
     xmpp_stanza_t *iq = stanza_create_http_upload_request(ctx, id, disco_info->item, upload);
 
-    id_handler_add(id, _http_upload_response_id_handler, upload);
+    iq_id_handler_add(id, _http_upload_response_id_handler, upload);
 
     free(id);
 
@@ -345,7 +345,7 @@ iq_disco_info_request(gchar *jid)
     char *id = create_unique_id("disco_info");
     xmpp_stanza_t *iq = stanza_create_disco_info_iq(ctx, id, jid, NULL);
 
-    id_handler_add(id, _disco_info_response_id_handler, NULL);
+    iq_id_handler_add(id, _disco_info_response_id_handler, NULL);
 
     free(id);
 
@@ -360,7 +360,7 @@ iq_disco_info_request_onconnect(gchar *jid)
     char *id = create_unique_id("disco_info_onconnect");
     xmpp_stanza_t *iq = stanza_create_disco_info_iq(ctx, id, jid, NULL);
 
-    id_handler_add(id, _disco_info_response_id_handler_onconnect, NULL);
+    iq_id_handler_add(id, _disco_info_response_id_handler_onconnect, NULL);
 
     free(id);
 
@@ -375,7 +375,7 @@ iq_last_activity_request(gchar *jid)
     char *id = create_unique_id("lastactivity");
     xmpp_stanza_t *iq = stanza_create_last_activity_iq(ctx, id, jid);
 
-    id_handler_add(id, _last_activity_response_id_handler, NULL);
+    iq_id_handler_add(id, _last_activity_response_id_handler, NULL);
 
     free(id);
 
@@ -394,7 +394,7 @@ iq_room_info_request(const char *const room, gboolean display_result)
     cb_data->room = strdup(room);
     cb_data->display = display_result;
 
-    id_handler_add(id, _room_info_response_id_handler, cb_data);
+    iq_id_handler_add(id, _room_info_response_id_handler, cb_data);
 
     free(id);
 
@@ -422,7 +422,7 @@ iq_send_caps_request_for_jid(const char *const to, const char *const id,
     xmpp_stanza_t *iq = stanza_create_disco_info_iq(ctx, id, to, node_str->str);
     g_string_free(node_str, TRUE);
 
-    id_handler_add(id, _caps_response_for_jid_id_handler, strdup(to));
+    iq_id_handler_add(id, _caps_response_for_jid_id_handler, strdup(to));
 
     send_iq_stanza(iq);
     xmpp_stanza_release(iq);
@@ -448,7 +448,7 @@ iq_send_caps_request(const char *const to, const char *const id,
     xmpp_stanza_t *iq = stanza_create_disco_info_iq(ctx, id, to, node_str->str);
     g_string_free(node_str, TRUE);
 
-    id_handler_add(id, _caps_response_id_handler, NULL);
+    iq_id_handler_add(id, _caps_response_id_handler, NULL);
 
     send_iq_stanza(iq);
     xmpp_stanza_release(iq);
@@ -473,7 +473,7 @@ iq_send_caps_request_legacy(const char *const to, const char *const id,
     g_string_printf(node_str, "%s#%s", node, ver);
     xmpp_stanza_t *iq = stanza_create_disco_info_iq(ctx, id, to, node_str->str);
 
-    id_handler_add(id, _caps_response_legacy_id_handler, node_str->str);
+    iq_id_handler_add(id, _caps_response_legacy_id_handler, node_str->str);
     g_string_free(node_str, FALSE);
 
     send_iq_stanza(iq);
@@ -505,7 +505,7 @@ iq_send_software_version(const char *const fulljid)
     xmpp_stanza_t *iq = stanza_create_software_version_iq(ctx, fulljid);
 
     const char *id = xmpp_stanza_get_id(iq);
-    id_handler_add(id, _version_result_id_handler, strdup(fulljid));
+    iq_id_handler_add(id, _version_result_id_handler, strdup(fulljid));
 
     send_iq_stanza(iq);
     xmpp_stanza_release(iq);
@@ -527,7 +527,7 @@ iq_destroy_room(const char *const room_jid)
     xmpp_stanza_t *iq = stanza_create_instant_room_destroy_iq(ctx, room_jid);
 
     const char *id = xmpp_stanza_get_id(iq);
-    id_handler_add(id, _destroy_room_result_id_handler, NULL);
+    iq_id_handler_add(id, _destroy_room_result_id_handler, NULL);
 
     send_iq_stanza(iq);
     xmpp_stanza_release(iq);
@@ -540,7 +540,7 @@ iq_request_room_config_form(const char *const room_jid)
     xmpp_stanza_t *iq = stanza_create_room_config_request_iq(ctx, room_jid);
 
     const char *id = xmpp_stanza_get_id(iq);
-    id_handler_add(id, _room_config_id_handler, NULL);
+    iq_id_handler_add(id, _room_config_id_handler, NULL);
 
     send_iq_stanza(iq);
     xmpp_stanza_release(iq);
@@ -553,7 +553,7 @@ iq_submit_room_config(const char *const room, DataForm *form)
     xmpp_stanza_t *iq = stanza_create_room_config_submit_iq(ctx, room, form);
 
     const char *id = xmpp_stanza_get_id(iq);
-    id_handler_add(id, _room_config_submit_id_handler, NULL);
+    iq_id_handler_add(id, _room_config_submit_id_handler, NULL);
 
     send_iq_stanza(iq);
     xmpp_stanza_release(iq);
@@ -575,7 +575,7 @@ iq_room_affiliation_list(const char *const room, char *affiliation)
     xmpp_stanza_t *iq = stanza_create_room_affiliation_list_iq(ctx, room, affiliation);
 
     const char *id = xmpp_stanza_get_id(iq);
-    id_handler_add(id, _room_affiliation_list_result_id_handler, strdup(affiliation));
+    iq_id_handler_add(id, _room_affiliation_list_result_id_handler, strdup(affiliation));
 
     send_iq_stanza(iq);
     xmpp_stanza_release(iq);
@@ -588,7 +588,7 @@ iq_room_kick_occupant(const char *const room, const char *const nick, const char
     xmpp_stanza_t *iq = stanza_create_room_kick_iq(ctx, room, nick, reason);
 
     const char *id = xmpp_stanza_get_id(iq);
-    id_handler_add(id, _room_kick_result_id_handler, strdup(nick));
+    iq_id_handler_add(id, _room_kick_result_id_handler, strdup(nick));
 
     send_iq_stanza(iq);
     xmpp_stanza_release(iq);
@@ -612,7 +612,7 @@ iq_room_affiliation_set(const char *const room, const char *const jid, char *aff
     affiliation_set->item = strdup(jid);
     affiliation_set->privilege = strdup(affiliation);
 
-    id_handler_add(id, _room_affiliation_set_result_id_handler, affiliation_set);
+    iq_id_handler_add(id, _room_affiliation_set_result_id_handler, affiliation_set);
 
     send_iq_stanza(iq);
     xmpp_stanza_release(iq);
@@ -631,7 +631,7 @@ iq_room_role_set(const char *const room, const char *const nick, char *role,
     role_set->item = strdup(nick);
     role_set->privilege = strdup(role);
 
-    id_handler_add(id, _room_role_set_result_id_handler, role_set);
+    iq_id_handler_add(id, _room_role_set_result_id_handler, role_set);
 
     send_iq_stanza(iq);
     xmpp_stanza_release(iq);
@@ -644,7 +644,7 @@ iq_room_role_list(const char *const room, char *role)
     xmpp_stanza_t *iq = stanza_create_room_role_list_iq(ctx, room, role);
 
     const char *id = xmpp_stanza_get_id(iq);
-    id_handler_add(id, _room_role_list_result_id_handler, strdup(role));
+    iq_id_handler_add(id, _room_role_list_result_id_handler, strdup(role));
 
     send_iq_stanza(iq);
     xmpp_stanza_release(iq);
@@ -658,7 +658,7 @@ iq_send_ping(const char *const target)
     const char *id = xmpp_stanza_get_id(iq);
 
     GDateTime *now = g_date_time_new_now_local();
-    id_handler_add(id, _manual_pong_id_handler, now);
+    iq_id_handler_add(id, _manual_pong_id_handler, now);
 
     send_iq_stanza(iq);
     xmpp_stanza_release(iq);
@@ -972,7 +972,7 @@ _autoping_timed_send(xmpp_conn_t *const conn, void *const userdata)
     log_debug("Autoping: Sending ping request: %s", id);
 
     // add pong handler
-    id_handler_add(id, _auto_pong_id_handler, ctx);
+    iq_id_handler_add(id, _auto_pong_id_handler, ctx);
 
     send_iq_stanza(iq);
     xmpp_stanza_release(iq);
