@@ -73,7 +73,7 @@ blocking_request(void)
     }
     blocked_ac = autocomplete_new();
 
-    iq_id_handler_add(id, _blocklist_result_handler, id);
+    iq_id_handler_add(id, _blocklist_result_handler, NULL);
 
     iq = stanza_create_blocked_list_request(ctx);
     xmpp_stanza_set_id(iq, id);
