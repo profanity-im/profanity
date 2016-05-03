@@ -59,6 +59,6 @@ void send_iq_stanza(xmpp_stanza_t *const stanza);
 
 void roster_set_handler(xmpp_stanza_t *const stanza);
 void roster_result_handler(xmpp_stanza_t *const stanza);
-void id_handler_add(const char *const id, ProfIdCallback func, void *userdata);
+void iq_id_handler_add(const char *const id, ProfIdCallback func, void *userdata);
 
 #endif

@@ -131,7 +131,7 @@ _presence_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza, void *co
 }
 
 void
-presence_add_handlers(void)
+presence_handlers_init(void)
 {
     xmpp_conn_t * const conn = connection_get_conn();
     xmpp_ctx_t * const ctx = connection_get_ctx();

@@ -35,7 +35,7 @@
 #ifndef XMPP_IQ_H
 #define XMPP_IQ_H
 
-void iq_add_handlers(void);
+void iq_handlers_init(void);
 void iq_roster_request(void);
 
 #endif
