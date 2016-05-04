@@ -39,6 +39,7 @@
 #include "common.h"
 #include "config/preferences.h"
 #include "log.h"
+#include "xmpp/xmpp.h"
 #include "plugins/callbacks.h"
 #include "plugins/autocompleters.h"
 #include "plugins/api.h"

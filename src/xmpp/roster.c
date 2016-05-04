@@ -56,6 +56,7 @@
 #include "tools/autocomplete.h"
 #include "config/preferences.h"
 #include "xmpp/connection.h"
+#include "xmpp/iq.h"
 #include "xmpp/roster.h"
 #include "roster_list.h"
 #include "xmpp/stanza.h"
@@ -80,7 +81,7 @@ roster_request(void)
 {
     xmpp_ctx_t * const ctx = connection_get_ctx();
     xmpp_stanza_t *iq = stanza_create_roster_iq(ctx);
-    send_iq_stanza(iq);
+    iq_send_stanza(iq);
     xmpp_stanza_release(iq);
 }
 
@@ -91,7 +92,7 @@ roster_send_add_new(const char *const barejid, const char *const name)
     char *id = create_unique_id("roster");
     xmpp_stanza_t *iq = stanza_create_roster_set(ctx, id, barejid, name, NULL);
     free(id);
-    send_iq_stanza(iq);
+    iq_send_stanza(iq);
     xmpp_stanza_release(iq);
 }
 
@@ -100,7 +101,7 @@ roster_send_remove(const char *const barejid)
 {
     xmpp_ctx_t * const ctx = connection_get_ctx();
     xmpp_stanza_t *iq = stanza_create_roster_remove_set(ctx, barejid);
-    send_iq_stanza(iq);
+    iq_send_stanza(iq);
     xmpp_stanza_release(iq);
 }
 
@@ -111,7 +112,7 @@ roster_send_name_change(const char *const barejid, const char *const new_name, G
     char *id = create_unique_id("roster");
     xmpp_stanza_t *iq = stanza_create_roster_set(ctx, id, barejid, new_name, groups);
     free(id);
-    send_iq_stanza(iq);
+    iq_send_stanza(iq);
     xmpp_stanza_release(iq);
 }
 
@@ -140,7 +141,7 @@ roster_send_add_to_group(const char *const group, PContact contact)
     iq_id_handler_add(unique_id, _group_add_id_handler, data);
     xmpp_stanza_t *iq = stanza_create_roster_set(ctx, unique_id, p_contact_barejid(contact),
         p_contact_name(contact), new_groups);
-    send_iq_stanza(iq);
+    iq_send_stanza(iq);
     xmpp_stanza_release(iq);
     free(unique_id);
 }
@@ -185,7 +186,7 @@ roster_send_remove_from_group(const char *const group, PContact contact)
     iq_id_handler_add(unique_id, _group_remove_id_handler, data);
     xmpp_stanza_t *iq = stanza_create_roster_set(ctx, unique_id, p_contact_barejid(contact),
         p_contact_name(contact), new_groups);
-    send_iq_stanza(iq);
+    iq_send_stanza(iq);
     xmpp_stanza_release(iq);
     free(unique_id);
 }

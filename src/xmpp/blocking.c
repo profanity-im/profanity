@@ -48,6 +48,7 @@
 #include "ui/ui.h"
 #include "xmpp/connection.h"
 #include "xmpp/stanza.h"
+#include "xmpp/iq.h"
 
 static int _blocklist_result_handler(xmpp_stanza_t *const stanza, void *const userdata);
 static int _block_add_result_handler(xmpp_stanza_t *const stanza, void *const userdata);
@@ -77,7 +78,7 @@ blocking_request(void)
 
     iq = stanza_create_blocked_list_request(ctx);
     xmpp_stanza_set_id(iq, id);
-    send_iq_stanza(iq);
+    iq_send_stanza(iq);
     xmpp_stanza_release(iq);
     free(id);
 }
@@ -134,7 +135,7 @@ blocked_add(char *jid)
 
     iq_id_handler_add(id, _block_add_result_handler, strdup(jid));
 
-    send_iq_stanza(iq);
+    iq_send_stanza(iq);
     xmpp_stanza_release(iq);
     free(id);
 
@@ -173,7 +174,7 @@ blocked_remove(char *jid)
 
     iq_id_handler_add(id, _block_remove_result_handler, strdup(jid));
 
-    send_iq_stanza(iq);
+    iq_send_stanza(iq);
     xmpp_stanza_release(iq);
     free(id);
 

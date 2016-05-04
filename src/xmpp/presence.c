@@ -58,6 +58,7 @@
 #include "xmpp/capabilities.h"
 #include "xmpp/connection.h"
 #include "xmpp/stanza.h"
+#include "xmpp/iq.h"
 #include "xmpp/xmpp.h"
 #include "plugins/plugins.h"
 
@@ -668,7 +669,7 @@ _send_caps_request(char *node, char *caps_key, char *id, char *from)
         if (!caps_contains(caps_key)) {
             log_debug("Capabilities not cached for '%s', sending discovery IQ.", from);
             xmpp_stanza_t *iq = stanza_create_disco_info_iq(ctx, id, from, node);
-            send_iq_stanza(iq);
+            iq_send_stanza(iq);
             xmpp_stanza_release(iq);
         } else {
             log_debug("Capabilities already cached, for %s", caps_key);

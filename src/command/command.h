@@ -37,7 +37,6 @@
 
 #include <glib.h>
 
-#include "xmpp/form.h"
 #include "ui/ui.h"
 
 GHashTable *commands;

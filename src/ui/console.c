@@ -55,7 +55,6 @@
 #include "ui/ui.h"
 #include "ui/statusbar.h"
 #include "xmpp/xmpp.h"
-#include "xmpp/bookmark.h"
 
 #ifdef HAVE_GIT_VERSION
 #include "gitversion.h"

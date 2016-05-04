@@ -1622,35 +1622,6 @@ stanza_parse_caps(xmpp_stanza_t *const stanza)
 }
 
 char*
-stanza_get_caps_str(xmpp_stanza_t *const stanza)
-{
-    xmpp_stanza_t *caps = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_C);
-
-    if (caps == NULL) {
-        return NULL;
-    }
-
-    if (strcmp(xmpp_stanza_get_ns(caps), STANZA_NS_CAPS) != 0) {
-        return NULL;
-    }
-
-    const char *node = xmpp_stanza_get_attribute(caps, STANZA_ATTR_NODE);
-    const char *ver = xmpp_stanza_get_attribute(caps, STANZA_ATTR_VER);
-
-    if ((node == NULL) || (ver == NULL)) {
-        return NULL;
-    }
-
-    GString *caps_gstr = g_string_new(node);
-    g_string_append(caps_gstr, "#");
-    g_string_append(caps_gstr, ver);
-    char *caps_str = caps_gstr->str;
-    g_string_free(caps_gstr, FALSE);
-
-    return  caps_str;
-}
-
-char*
 stanza_get_error_message(xmpp_stanza_t *stanza)
 {
     xmpp_ctx_t *ctx = connection_get_ctx();
