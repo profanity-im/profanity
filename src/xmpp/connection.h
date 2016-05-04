@@ -54,11 +54,8 @@ void connection_set_priority(int priority);
 void connection_set_presence_message(const char *const message);
 void connection_add_available_resource(Resource *resource);
 void connection_remove_available_resource(const char *const resource);
-
-void send_iq_stanza(xmpp_stanza_t *const stanza);
-
-void roster_set_handler(xmpp_stanza_t *const stanza);
-void roster_result_handler(xmpp_stanza_t *const stanza);
-void iq_id_handler_add(const char *const id, ProfIdCallback func, void *userdata);
+void connection_autoping_fail(void);
+GSList* connection_get_disco_items(void);
+void connection_set_disco_items(GSList *disco_items);
 
 #endif

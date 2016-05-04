@@ -218,7 +218,7 @@ jabber_connect_with_details(const char *const jid, const char *const passwd, con
 }
 
 void
-jabber_autoping_fail(void)
+connection_autoping_fail(void)
 {
     if (jabber_conn.conn_status == JABBER_CONNECTED) {
         log_info("Closing connection");
@@ -332,14 +332,8 @@ jabber_get_connection_status(void)
     return (jabber_conn.conn_status);
 }
 
-void
-jabber_set_connection_status(jabber_conn_status_t status)
-{
-    jabber_conn.conn_status = status;
-}
-
 GSList*
-jabber_get_disco_items(void)
+connection_get_disco_items(void)
 {
     return (disco_items);
 }
@@ -360,7 +354,7 @@ jabber_service_supports(const char *const feature)
 }
 
 void
-jabber_set_disco_items(GSList *_disco_items)
+connection_set_disco_items(GSList *_disco_items)
 {
     disco_items = _disco_items;
 }
@@ -381,12 +375,6 @@ const char*
 jabber_get_fulljid(void)
 {
     return xmpp_conn_get_jid(jabber_conn.conn);
-}
-
-const char*
-jabber_get_domain(void)
-{
-    return jabber_conn.domain;
 }
 
 char*

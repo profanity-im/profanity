@@ -283,10 +283,6 @@ xmpp_stanza_t* stanza_create_room_kick_iq(xmpp_ctx_t *const ctx, const char *con
     const char *const reason);
 
 int stanza_get_idle_time(xmpp_stanza_t *const stanza);
-char* stanza_get_caps_str(xmpp_stanza_t *const stanza);
-
-DataForm* stanza_create_form(xmpp_stanza_t *const stanza);
-void stanza_destroy_form(DataForm *form);
 
 void stanza_attach_priority(xmpp_ctx_t *const ctx, xmpp_stanza_t *const presence, const int pri);
 void stanza_attach_last_activity(xmpp_ctx_t *const ctx, xmpp_stanza_t *const presence, const int idle);
