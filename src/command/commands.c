@@ -76,7 +76,6 @@
 #include "tools/parser.h"
 #include "tools/tinyurl.h"
 #include "xmpp/xmpp.h"
-#include "xmpp/bookmark.h"
 #include "ui/ui.h"
 #include "window_list.h"
 #include "event/client_events.h"

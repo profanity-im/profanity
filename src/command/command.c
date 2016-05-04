@@ -61,7 +61,6 @@
 #include "contact.h"
 #include "roster_list.h"
 #include "jid.h"
-#include "xmpp/form.h"
 #include "log.h"
 #include "muc.h"
 #include "plugins/plugins.h"
@@ -76,7 +75,6 @@
 #include "tools/parser.h"
 #include "tools/tinyurl.h"
 #include "xmpp/xmpp.h"
-#include "xmpp/bookmark.h"
 #include "ui/ui.h"
 #include "window_list.h"
 

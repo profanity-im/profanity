@@ -45,6 +45,7 @@
 #include "window_list.h"
 #include "command/command.h"
 #include "ui/ui.h"
+#include "xmpp/xmpp.h"
 
 void
 scripts_init(void)

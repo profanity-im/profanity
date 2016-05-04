@@ -76,6 +76,13 @@ typedef enum {
     INVITE_MEDIATED
 } jabber_invite_t;
 
+typedef struct bookmark_t {
+    char *jid;
+    char *nick;
+    char *password;
+    gboolean autojoin;
+} Bookmark;
+
 typedef struct capabilities_t {
     char *category;
     char *type;
@@ -103,21 +110,15 @@ typedef struct disco_info_t {
     GHashTable *features;
 } DiscoInfo;
 
-// connection functions
 void jabber_init(void);
 jabber_conn_status_t jabber_connect_with_details(const char *const jid, const char *const passwd,
     const char *const altdomain, const int port, const char *const tls_policy);
 jabber_conn_status_t jabber_connect_with_account(const ProfAccount *const account);
 void jabber_disconnect(void);
 void jabber_shutdown(void);
-void jabber_autoping_fail(void);
 void jabber_process_events(int millis);
 const char* jabber_get_fulljid(void);
-const char* jabber_get_domain(void);
 jabber_conn_status_t jabber_get_connection_status(void);
-void jabber_set_connection_status(jabber_conn_status_t status);
-GSList* jabber_get_disco_items(void);
-void jabber_set_disco_items(GSList *disco_items);
 char* jabber_get_presence_message(void);
 char* jabber_get_account_name(void);
 GList* jabber_get_available_resources(void);
@@ -130,22 +131,18 @@ gboolean jabber_conn_is_secured(void);
 gboolean jabber_send_stanza(const char *const stanza);
 gboolean jabber_service_supports(const char *const feature);
 
-// message functions
 char* message_send_chat(const char *const barejid, const char *const msg, const char *const oob_url);
 char* message_send_chat_otr(const char *const barejid, const char *const msg);
 char* message_send_chat_pgp(const char *const barejid, const char *const msg);
 void message_send_private(const char *const fulljid, const char *const msg, const char *const oob_url);
 void message_send_groupchat(const char *const roomjid, const char *const msg, const char *const oob_url);
 void message_send_groupchat_subject(const char *const roomjid, const char *const subject);
-
 void message_send_inactive(const char *const jid);
 void message_send_composing(const char *const jid);
 void message_send_paused(const char *const jid);
 void message_send_gone(const char *const jid);
-
 void message_send_invite(const char *const room, const char *const contact, const char *const reason);
 
-// presence functions
 void presence_subscription(const char *const jid, const jabber_subscr_t action);
 GSList* presence_get_subscription_requests(void);
 gint presence_sub_request_count(void);
@@ -157,15 +154,12 @@ void presence_leave_chat_room(const char *const room_jid);
 void presence_send(resource_presence_t status, const char *const msg, int idle, char *signed_status);
 gboolean presence_sub_request_exists(const char *const bare_jid);
 
-// iq functions
 void iq_enable_carbons(void);
 void iq_disable_carbons(void);
 void iq_send_software_version(const char *const fulljid);
 void iq_room_list_request(gchar *conferencejid);
 void iq_disco_info_request(gchar *jid);
-void iq_disco_info_request_onconnect(gchar *jid);
 void iq_disco_items_request(gchar *jid);
-void iq_disco_items_request_onconnect(gchar *jid);
 void iq_last_activity_request(gchar *jid);
 void iq_set_autoping(int seconds);
 void iq_confirm_instant_room(const char *const room_jid);
@@ -174,11 +168,6 @@ void iq_request_room_config_form(const char *const room_jid);
 void iq_submit_room_config(const char *const room, DataForm *form);
 void iq_room_config_cancel(const char *const room_jid);
 void iq_send_ping(const char *const target);
-void iq_send_caps_request(const char *const to, const char *const id, const char *const node, const char *const ver);
-void iq_send_caps_request_for_jid(const char *const to, const char *const id, const char *const node,
-    const char *const ver);
-void iq_send_caps_request_legacy(const char *const to, const char *const id, const char *const node,
-    const char *const ver);
 void iq_room_info_request(const char *const room, gboolean display_result);
 void iq_room_affiliation_list(const char *const room, char *affiliation);
 void iq_room_affiliation_set(const char *const room, const char *const jid, char *affiliation,
@@ -189,7 +178,6 @@ void iq_room_role_list(const char * const room, char *role);
 void iq_autoping_check(void);
 void iq_http_upload_request(HTTPUpload *upload);
 
-// caps functions
 Capabilities* caps_lookup(const char *const jid);
 void caps_close(void);
 void caps_destroy(Capabilities *caps);
@@ -216,7 +204,6 @@ char* blocked_ac_find(const char *const search_str);
 void blocked_ac_reset(void);
 
 void form_destroy(DataForm *form);
-char* form_get_form_type_field(DataForm *form);
 void form_set_value(DataForm *form, const char *const tag, char *value);
 gboolean form_add_unique_value(DataForm *form, const char *const tag, char *value);
 void form_add_value(DataForm *form, const char *const tag, char *value);
@@ -229,8 +216,5 @@ int form_get_value_count(DataForm *form, const char *const tag);
 FormField* form_get_field_by_tag(DataForm *form, const char *const tag);
 Autocomplete form_get_value_ac(DataForm *form, const char *const tag);
 void form_reset_autocompleters(DataForm *form);
-
-GSList* form_get_non_form_type_fields_sorted(DataForm *form);
-GSList* form_get_field_values_sorted(FormField *field);
 
 #endif

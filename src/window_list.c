@@ -47,6 +47,7 @@
 #include "ui/statusbar.h"
 #include "window_list.h"
 #include "plugins/plugins.h"
+#include "xmpp/xmpp.h"
 
 
 static GHashTable *windows;

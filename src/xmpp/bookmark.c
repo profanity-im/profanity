@@ -52,6 +52,7 @@
 #include "muc.h"
 #include "event/server_events.h"
 #include "xmpp/connection.h"
+#include "xmpp/iq.h"
 #include "xmpp/stanza.h"
 #include "xmpp/xmpp.h"
 #include "xmpp/bookmark.h"
@@ -90,7 +91,7 @@ bookmark_request(void)
 
     iq = stanza_create_bookmarks_storage_request(ctx);
     xmpp_stanza_set_id(iq, id);
-    send_iq_stanza(iq);
+    iq_send_stanza(iq);
     xmpp_stanza_release(iq);
 }
 
@@ -454,6 +455,6 @@ _send_bookmarks(void)
     xmpp_stanza_release(storage);
     xmpp_stanza_release(query);
 
-    send_iq_stanza(iq);
+    iq_send_stanza(iq);
     xmpp_stanza_release(iq);
 }

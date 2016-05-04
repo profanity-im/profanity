@@ -18,6 +18,7 @@
 #include "command/command.h"
 #include "command/commands.h"
 #include "window_list.h"
+#include "xmpp/xmpp.h"
 
 #include "ui/ui.h"
 #include "ui/stub_ui.h"

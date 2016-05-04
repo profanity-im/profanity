@@ -36,6 +36,14 @@
 #define XMPP_IQ_H
 
 void iq_handlers_init(void);
-void iq_roster_request(void);
+void iq_send_stanza(xmpp_stanza_t *const stanza);
+void iq_id_handler_add(const char *const id, ProfIdCallback func, void *userdata);
+void iq_disco_info_request_onconnect(gchar *jid);
+void iq_disco_items_request_onconnect(gchar *jid);
+void iq_send_caps_request(const char *const to, const char *const id, const char *const node, const char *const ver);
+void iq_send_caps_request_for_jid(const char *const to, const char *const id, const char *const node,
+    const char *const ver);
+void iq_send_caps_request_legacy(const char *const to, const char *const id, const char *const node,
+    const char *const ver);
 
 #endif
