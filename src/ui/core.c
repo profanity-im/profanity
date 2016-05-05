@@ -512,7 +512,7 @@ int
 ui_close_all_wins(void)
 {
     int count = 0;
-    jabber_conn_status_t conn_status = jabber_get_connection_status();
+    jabber_conn_status_t conn_status = connection_get_status();
 
     GList *win_nums = wins_get_nums();
     GList *curr = win_nums;
@@ -539,7 +539,7 @@ int
 ui_close_read_wins(void)
 {
     int count = 0;
-    jabber_conn_status_t conn_status = jabber_get_connection_status();
+    jabber_conn_status_t conn_status = connection_get_status();
 
     GList *win_nums = wins_get_nums();
     GList *curr = win_nums;
@@ -692,7 +692,7 @@ ui_close_win(int index)
 void
 ui_prune_wins(void)
 {
-    jabber_conn_status_t conn_status = jabber_get_connection_status();
+    jabber_conn_status_t conn_status = connection_get_status();
     gboolean pruned = FALSE;
 
     GSList *wins = wins_get_prune_wins();
@@ -1104,7 +1104,7 @@ static void
 _ui_draw_term_title(void)
 {
     char new_win_title[100];
-    jabber_conn_status_t status = jabber_get_connection_status();
+    jabber_conn_status_t status = connection_get_status();
 
     if (status == JABBER_CONNECTED) {
         const char * const jid = jabber_get_fulljid();

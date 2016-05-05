@@ -87,7 +87,7 @@ cb_policy(void *opdata, ConnContext *context)
 static int
 cb_is_logged_in(void *opdata, const char *accountname, const char *protocol, const char *recipient)
 {
-    jabber_conn_status_t conn_status = jabber_get_connection_status();
+    jabber_conn_status_t conn_status = connection_get_status();
     if (conn_status != JABBER_CONNECTED) {
         return PRESENCE_OFFLINE;
     }

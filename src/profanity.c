@@ -148,7 +148,7 @@ prof_set_quit(void)
 void
 prof_handle_idle(void)
 {
-    jabber_conn_status_t status = jabber_get_connection_status();
+    jabber_conn_status_t status = connection_get_status();
     if (status == JABBER_CONNECTED) {
         GSList *recipients = wins_get_chat_recipients();
         GSList *curr = recipients;
@@ -169,7 +169,7 @@ prof_handle_idle(void)
 void
 prof_handle_activity(void)
 {
-    jabber_conn_status_t status = jabber_get_connection_status();
+    jabber_conn_status_t status = connection_get_status();
     ProfWin *current = wins_get_current();
 
     if ((status == JABBER_CONNECTED) && (current->type == WIN_CHAT)) {
@@ -197,7 +197,7 @@ _connect_default(const char *const account)
 static void
 _check_autoaway(void)
 {
-    jabber_conn_status_t conn_status = jabber_get_connection_status();
+    jabber_conn_status_t conn_status = connection_get_status();
     if (conn_status != JABBER_CONNECTED) {
         return;
     }
@@ -380,7 +380,7 @@ _shutdown(void)
         }
     }
 
-    jabber_conn_status_t conn_status = jabber_get_connection_status();
+    jabber_conn_status_t conn_status = connection_get_status();
     if (conn_status == JABBER_CONNECTED) {
         cl_ev_disconnect();
     }

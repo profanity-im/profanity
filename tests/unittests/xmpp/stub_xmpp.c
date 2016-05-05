@@ -44,12 +44,12 @@ char* jabber_create_uuid(void)
 
 void jabber_free_uuid(char * uuid) {}
 
-jabber_conn_status_t jabber_get_connection_status(void)
+jabber_conn_status_t connection_get_status(void)
 {
     return (jabber_conn_status_t)mock();
 }
 
-char* jabber_get_presence_message(void)
+char* connection_get_presence_msg(void)
 {
     return (char*)mock();
 }

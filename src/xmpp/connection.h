@@ -1,5 +1,5 @@
 /*
- * session.h
+ * connection.h
  *
  * Copyright (C) 2012 - 2016 James Booth <boothj5@gmail.com>
  *
@@ -32,35 +32,29 @@
  *
  */
 
-#ifndef XMPP_SESSION_H
-#define XMPP_SESSION_H
+#ifndef XMPP_CONNECTION_H
+#define XMPP_CONNECTION_H
 
-#include "config.h"
+#include "xmpp/xmpp.h"
 
-#ifdef HAVE_LIBMESODE
-#include <mesode.h>
-#endif
-#ifdef HAVE_LIBSTROPHE
-#include <strophe.h>
-#endif
+void connection_init(void);
 
-#include "resource.h"
+jabber_conn_status_t connection_connect(const char *const fulljid, const char *const passwd, const char *const altdomain,
+    int port, const char *const tls_policy, char *cert_path);
 
-typedef int(*ProfIdCallback)(xmpp_stanza_t *const stanza, void *const userdata);
+char *connection_get_domain(void);
 
-xmpp_conn_t* connection_get_conn(void);
-xmpp_ctx_t* connection_get_ctx(void);
-void connection_set_priority(int priority);
-void connection_set_presence_message(const char *const message);
-void connection_add_available_resource(Resource *resource);
-void connection_remove_available_resource(const char *const resource);
-void connection_autoping_fail(void);
-GSList* connection_get_disco_items(void);
-void connection_set_disco_items(GSList *disco_items);
+void connection_set_status(jabber_conn_status_t status);
+void connection_set_presence_msg(const char *const message);
+void connection_set_priority(const int priority);
+void connection_set_domain(char *domain);
 
-void jabber_login_success(int secured);
-void jabber_login_failed(void);
-void jabber_lost_connection(void);
+int connection_is_secured(void);
 
+void connection_free_conn(void);
+void connection_free_ctx(void);
+void connection_free_presence_msg(void);
+void connection_free_domain(void);
+void connection_free_log(void);
 
 #endif

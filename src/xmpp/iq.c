@@ -225,7 +225,7 @@ iq_id_handler_add(const char *const id, ProfIdCallback func, void *userdata)
 void
 iq_autoping_check(void)
 {
-    if (jabber_get_connection_status() != JABBER_CONNECTED) {
+    if (connection_get_status() != JABBER_CONNECTED) {
         return;
     }
 
@@ -253,7 +253,7 @@ iq_autoping_check(void)
 void
 iq_set_autoping(const int seconds)
 {
-    if (jabber_get_connection_status() != JABBER_CONNECTED) {
+    if (connection_get_status() != JABBER_CONNECTED) {
         return;
     }
 
@@ -959,7 +959,7 @@ _manual_pong_id_handler(xmpp_stanza_t *const stanza, void *const userdata)
 static int
 _autoping_timed_send(xmpp_conn_t *const conn, void *const userdata)
 {
-    if (jabber_get_connection_status() != JABBER_CONNECTED) {
+    if (connection_get_status() != JABBER_CONNECTED) {
         return 1;
     }
 

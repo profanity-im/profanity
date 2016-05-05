@@ -374,7 +374,7 @@ wins_get_by_string(char *str)
         return (ProfWin*)chatwin;
     }
 
-    jabber_conn_status_t conn_status = jabber_get_connection_status();
+    jabber_conn_status_t conn_status = connection_get_status();
     if (conn_status == JABBER_CONNECTED) {
         char *barejid = roster_barejid_from_name(str);
         if (barejid) {
@@ -527,7 +527,7 @@ wins_close_by_num(int i)
                 autocomplete_remove(wins_ac, chatwin->barejid);
                 autocomplete_remove(wins_close_ac, chatwin->barejid);
 
-                jabber_conn_status_t conn_status = jabber_get_connection_status();
+                jabber_conn_status_t conn_status = connection_get_status();
                 if (conn_status == JABBER_CONNECTED) {
                     PContact contact = roster_get_contact(chatwin->barejid);
                     if (contact) {

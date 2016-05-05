@@ -3066,7 +3066,7 @@ cmd_autocomplete(ProfWin *window, const char *const input)
 void
 cmd_reset_autocomplete(ProfWin *window)
 {
-    jabber_conn_status_t conn_status = jabber_get_connection_status();
+    jabber_conn_status_t conn_status = connection_get_status();
     if (conn_status == JABBER_CONNECTED) {
         roster_reset_search_attempts();
 
@@ -3353,7 +3353,7 @@ _cmd_complete_parameters(ProfWin *window, const char *const input)
     int i;
     char *result = NULL;
 
-    jabber_conn_status_t conn_status = jabber_get_connection_status();
+    jabber_conn_status_t conn_status = connection_get_status();
 
     // autocomplete boolean settings
     gchar *boolean_choices[] = { "/beep", "/intype", "/states", "/outtype", "/flash", "/splash", "/chlog", "/grlog",
@@ -3545,7 +3545,7 @@ _who_autocomplete(ProfWin *window, const char *const input)
             return result;
         }
     } else {
-        jabber_conn_status_t conn_status = jabber_get_connection_status();
+        jabber_conn_status_t conn_status = connection_get_status();
         if (conn_status == JABBER_CONNECTED) {
             int i = 0;
             gchar *group_commands[] = { "/who any", "/who online", "/who offline",
@@ -3626,7 +3626,7 @@ _roster_autocomplete(ProfWin *window, const char *const input)
         return result;
     }
 
-    jabber_conn_status_t conn_status = jabber_get_connection_status();
+    jabber_conn_status_t conn_status = connection_get_status();
     if (conn_status == JABBER_CONNECTED) {
         result = autocomplete_param_with_func(input, "/roster nick", roster_barejid_autocomplete);
         if (result) {
@@ -3711,7 +3711,7 @@ _group_autocomplete(ProfWin *window, const char *const input)
 {
     char *result = NULL;
 
-    jabber_conn_status_t conn_status = jabber_get_connection_status();
+    jabber_conn_status_t conn_status = connection_get_status();
 
     if (conn_status == JABBER_CONNECTED) {
         result = autocomplete_param_with_func(input, "/group show", roster_group_autocomplete);
@@ -3981,7 +3981,7 @@ _otr_autocomplete(ProfWin *window, const char *const input)
 {
     char *found = NULL;
 
-    jabber_conn_status_t conn_status = jabber_get_connection_status();
+    jabber_conn_status_t conn_status = connection_get_status();
 
     if (conn_status == JABBER_CONNECTED) {
         found = autocomplete_param_with_func(input, "/otr start", roster_contact_autocomplete);
@@ -4033,7 +4033,7 @@ _pgp_autocomplete(ProfWin *window, const char *const input)
 {
     char *found = NULL;
 
-    jabber_conn_status_t conn_status = jabber_get_connection_status();
+    jabber_conn_status_t conn_status = connection_get_status();
 
     if (conn_status == JABBER_CONNECTED) {
         found = autocomplete_param_with_func(input, "/pgp start", roster_contact_autocomplete);
@@ -4188,7 +4188,7 @@ _resource_autocomplete(ProfWin *window, const char *const input)
 {
     char *found = NULL;
 
-    jabber_conn_status_t conn_status = jabber_get_connection_status();
+    jabber_conn_status_t conn_status = connection_get_status();
     if (conn_status == JABBER_CONNECTED && window->type == WIN_CHAT) {
         ProfChatWin *chatwin = (ProfChatWin*)window;
         assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);

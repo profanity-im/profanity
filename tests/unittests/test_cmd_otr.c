@@ -138,7 +138,7 @@ void cmd_otr_gen_shows_message_when_not_connected(void **state)
 {
     gchar *args[] = { "gen", NULL };
 
-    will_return(jabber_get_connection_status, JABBER_DISCONNECTED);
+    will_return(connection_get_status, JABBER_DISCONNECTED);
 
     expect_cons_show("You must be connected with an account to load OTR information.");
 
@@ -150,7 +150,7 @@ static void test_with_command_and_connection_status(char *command, void *cmd_fun
 {
     gchar *args[] = { command, NULL };
 
-    will_return(jabber_get_connection_status, status);
+    will_return(connection_get_status, status);
 
     expect_cons_show("You must be connected with an account to load OTR information.");
 
@@ -191,7 +191,7 @@ void cmd_otr_gen_generates_key_for_connected_account(void **state)
     ProfAccount *account = account_new(account_name, "me@jabber.org", NULL, NULL,
         TRUE, NULL, 0, NULL, NULL, NULL, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
 
-    will_return(jabber_get_connection_status, JABBER_CONNECTED);
+    will_return(connection_get_status, JABBER_CONNECTED);
     will_return(jabber_get_account_name, account_name);
 
     expect_string(accounts_get_account, name, account_name);
@@ -233,7 +233,7 @@ void cmd_otr_myfp_shows_message_when_no_key(void **state)
 {
     gchar *args[] = { "myfp", NULL };
 
-    will_return(jabber_get_connection_status, JABBER_CONNECTED);
+    will_return(connection_get_status, JABBER_CONNECTED);
     will_return(otr_key_loaded, FALSE);
 
     expect_ui_current_print_formatted_line('!', 0, "You have not generated or loaded a private key, use '/otr gen'");
@@ -249,7 +249,7 @@ void cmd_otr_myfp_shows_my_fingerprint(void **state)
     GString *message = g_string_new("Your OTR fingerprint: ");
     g_string_append(message, fingerprint);
 
-    will_return(jabber_get_connection_status, JABBER_CONNECTED);
+    will_return(connection_get_status, JABBER_CONNECTED);
     will_return(otr_key_loaded, TRUE);
     will_return(otr_get_my_fingerprint, strdup(fingerprint));
 
@@ -268,7 +268,7 @@ test_cmd_otr_theirfp_from_wintype(win_type_t wintype)
     ProfWin window;
     window.type = wintype;
 
-    will_return(jabber_get_connection_status, JABBER_CONNECTED);
+    will_return(connection_get_status, JABBER_CONNECTED);
 
     expect_ui_current_print_line("You must be in a regular chat window to view a recipient's fingerprint.");
 
@@ -304,7 +304,7 @@ void cmd_otr_theirfp_shows_message_when_non_otr_chat_window(void **state)
     chatwin.pgp_send = FALSE;
     chatwin.is_otr = FALSE;
 
-    will_return(jabber_get_connection_status, JABBER_CONNECTED);
+    will_return(connection_get_status, JABBER_CONNECTED);
 
     expect_ui_current_print_formatted_line('!', 0, "You are not currently in an OTR session.");
 
@@ -331,7 +331,7 @@ void cmd_otr_theirfp_shows_fingerprint(void **state)
     chatwin.pgp_send = FALSE;
     chatwin.is_otr = TRUE;
 
-    will_return(jabber_get_connection_status, JABBER_CONNECTED);
+    will_return(connection_get_status, JABBER_CONNECTED);
 
     expect_string(otr_get_their_fingerprint, recipient, recipient);
     will_return(otr_get_their_fingerprint, strdup(fingerprint));
@@ -351,7 +351,7 @@ test_cmd_otr_start_from_wintype(win_type_t wintype)
     ProfWin window;
     window.type = wintype;
 
-    will_return(jabber_get_connection_status, JABBER_CONNECTED);
+    will_return(connection_get_status, JABBER_CONNECTED);
 
     expect_ui_current_print_line("You must be in a regular chat window to start an OTR session.");
 
@@ -379,7 +379,7 @@ void cmd_otr_start_shows_message_when_already_started(void **state)
     char *recipient = "someone@server.org";
     gchar *args[] = { "start", NULL };
 
-    will_return(jabber_get_connection_status, JABBER_CONNECTED);
+    will_return(connection_get_status, JABBER_CONNECTED);
 
     ProfWin window;
     window.type = WIN_CHAT;
@@ -401,7 +401,7 @@ void cmd_otr_start_shows_message_when_no_key(void **state)
     char *recipient = "someone@server.org";
     gchar *args[] = { "start", NULL };
 
-    will_return(jabber_get_connection_status, JABBER_CONNECTED);
+    will_return(connection_get_status, JABBER_CONNECTED);
     will_return(otr_key_loaded, FALSE);
 
     ProfWin window;
@@ -435,7 +435,7 @@ cmd_otr_start_sends_otr_query_message_to_current_recipeint(void **state)
     chatwin.pgp_send = FALSE;
     chatwin.is_otr = FALSE;
 
-    will_return(jabber_get_connection_status, JABBER_CONNECTED);
+    will_return(connection_get_status, JABBER_CONNECTED);
     will_return(otr_key_loaded, TRUE);
     will_return(otr_start_query, query_message);
 

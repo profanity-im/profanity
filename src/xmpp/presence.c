@@ -55,6 +55,7 @@
 #include "profanity.h"
 #include "ui/ui.h"
 #include "event/server_events.h"
+#include "xmpp/connection.h"
 #include "xmpp/capabilities.h"
 #include "xmpp/session.h"
 #include "xmpp/stanza.h"
@@ -238,7 +239,7 @@ presence_reset_sub_request_search(void)
 void
 presence_send(const resource_presence_t presence_type, const char *const msg, const int idle, char *signed_status)
 {
-    if (jabber_get_connection_status() != JABBER_CONNECTED) {
+    if (connection_get_status() != JABBER_CONNECTED) {
         log_warning("Error setting presence, not connected.");
         return;
     }
@@ -253,7 +254,7 @@ presence_send(const resource_presence_t presence_type, const char *const msg, co
     const int pri = accounts_get_priority_for_presence_type(jabber_get_account_name(), presence_type);
     const char *show = stanza_get_presence_string_from_type(presence_type);
 
-    connection_set_presence_message(msg);
+    connection_set_presence_msg(msg);
     connection_set_priority(pri);
 
     xmpp_stanza_t *presence = stanza_create_presence(ctx);
@@ -332,7 +333,7 @@ presence_join_room(const char *const room, const char *const nick, const char *c
     resource_presence_t presence_type =
         accounts_get_last_presence(jabber_get_account_name());
     const char *show = stanza_get_presence_string_from_type(presence_type);
-    char *status = jabber_get_presence_message();
+    char *status = connection_get_presence_msg();
     int pri = accounts_get_priority_for_presence_type(jabber_get_account_name(),
         presence_type);
 
@@ -359,7 +360,7 @@ presence_change_room_nick(const char *const room, const char *const nick)
     resource_presence_t presence_type =
         accounts_get_last_presence(jabber_get_account_name());
     const char *show = stanza_get_presence_string_from_type(presence_type);
-    char *status = jabber_get_presence_message();
+    char *status = connection_get_presence_msg();
     int pri = accounts_get_priority_for_presence_type(jabber_get_account_name(),
         presence_type);
 

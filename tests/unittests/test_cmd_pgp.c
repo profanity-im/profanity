@@ -32,7 +32,7 @@ void cmd_pgp_start_shows_message_when_connection(jabber_conn_status_t conn_statu
     ProfWin window;
     window.type = WIN_CHAT;
 
-    will_return(jabber_get_connection_status, conn_status);
+    will_return(connection_get_status, conn_status);
 
     expect_cons_show("You must be connected to start PGP encrpytion.");
 
@@ -71,7 +71,7 @@ void cmd_pgp_start_shows_message_when_no_arg_in_wintype(win_type_t wintype)
     ProfWin window;
     window.type = wintype;
 
-    will_return(jabber_get_connection_status, JABBER_CONNECTED);
+    will_return(connection_get_status, JABBER_CONNECTED);
 
     expect_cons_show("You must be in a regular chat window to start PGP encrpytion.");
 

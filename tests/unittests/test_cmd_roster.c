@@ -19,7 +19,7 @@ static void test_with_connection_status(jabber_conn_status_t status)
 {
     gchar *args[] = { NULL };
 
-    will_return(jabber_get_connection_status, status);
+    will_return(connection_get_status, status);
 
     expect_cons_show("You are not currently connected.");
 
@@ -51,7 +51,7 @@ void cmd_roster_shows_roster_when_no_args(void **state)
 {
     gchar *args[] = { NULL };
 
-    will_return(jabber_get_connection_status, JABBER_CONNECTED);
+    will_return(connection_get_status, JABBER_CONNECTED);
 
     roster_create();
     roster_add("bob@server.org", "bob", NULL, "both", FALSE);
@@ -69,7 +69,7 @@ void cmd_roster_add_shows_message_when_no_jid(void **state)
 {
     gchar *args[] = { "add", NULL };
 
-    will_return(jabber_get_connection_status, JABBER_CONNECTED);
+    will_return(connection_get_status, JABBER_CONNECTED);
 
     expect_string(cons_bad_cmd_usage, cmd, CMD_ROSTER);
 
@@ -83,7 +83,7 @@ void cmd_roster_add_sends_roster_add_request(void **state)
     char *nick = "bob";
     gchar *args[] = { "add", jid, nick, NULL };
 
-    will_return(jabber_get_connection_status, JABBER_CONNECTED);
+    will_return(connection_get_status, JABBER_CONNECTED);
 
     expect_string(roster_send_add_new, barejid, jid);
     expect_string(roster_send_add_new, name, nick);
@@ -96,7 +96,7 @@ void cmd_roster_remove_shows_message_when_no_jid(void **state)
 {
     gchar *args[] = { "remove", NULL };
 
-    will_return(jabber_get_connection_status, JABBER_CONNECTED);
+    will_return(connection_get_status, JABBER_CONNECTED);
 
     expect_string(cons_bad_cmd_usage, cmd, CMD_ROSTER);
 
@@ -109,7 +109,7 @@ void cmd_roster_remove_sends_roster_remove_request(void **state)
     char *jid = "bob@server.org";
     gchar *args[] = { "remove", jid, NULL };
 
-    will_return(jabber_get_connection_status, JABBER_CONNECTED);
+    will_return(connection_get_status, JABBER_CONNECTED);
 
     expect_string(roster_send_remove, barejid, jid);
 
@@ -121,7 +121,7 @@ void cmd_roster_nick_shows_message_when_no_jid(void **state)
 {
     gchar *args[] = { "nick", NULL };
 
-    will_return(jabber_get_connection_status, JABBER_CONNECTED);
+    will_return(connection_get_status, JABBER_CONNECTED);
 
     expect_string(cons_bad_cmd_usage, cmd, CMD_ROSTER);
 
@@ -133,7 +133,7 @@ void cmd_roster_nick_shows_message_when_no_nick(void **state)
 {
     gchar *args[] = { "nick", "bob@server.org", NULL };
 
-    will_return(jabber_get_connection_status, JABBER_CONNECTED);
+    will_return(connection_get_status, JABBER_CONNECTED);
 
     expect_string(cons_bad_cmd_usage, cmd, CMD_ROSTER);
 
@@ -147,7 +147,7 @@ void cmd_roster_nick_shows_message_when_no_contact_exists(void **state)
 
     roster_create();
 
-    will_return(jabber_get_connection_status, JABBER_CONNECTED);
+    will_return(connection_get_status, JABBER_CONNECTED);
 
     expect_cons_show("Contact not found in roster: bob@server.org");
 
@@ -168,7 +168,7 @@ void cmd_roster_nick_sends_name_change_request(void **state)
     groups = g_slist_append(groups, strdup("group1"));
     roster_add(jid, "bob", groups, "both", FALSE);
 
-    will_return(jabber_get_connection_status, JABBER_CONNECTED);
+    will_return(connection_get_status, JABBER_CONNECTED);
 
     expect_string(roster_send_name_change, barejid, jid);
     expect_string(roster_send_name_change, new_name, nick);
@@ -188,7 +188,7 @@ void cmd_roster_clearnick_shows_message_when_no_jid(void **state)
 {
     gchar *args[] = { "clearnick", NULL };
 
-    will_return(jabber_get_connection_status, JABBER_CONNECTED);
+    will_return(connection_get_status, JABBER_CONNECTED);
 
     expect_string(cons_bad_cmd_usage, cmd, CMD_ROSTER);
 
@@ -202,7 +202,7 @@ void cmd_roster_clearnick_shows_message_when_no_contact_exists(void **state)
 
     roster_create();
 
-    will_return(jabber_get_connection_status, JABBER_CONNECTED);
+    will_return(connection_get_status, JABBER_CONNECTED);
 
     expect_cons_show("Contact not found in roster: bob@server.org");
 
@@ -222,7 +222,7 @@ void cmd_roster_clearnick_sends_name_change_request_with_empty_nick(void **state
     groups = g_slist_append(groups, strdup("group1"));
     roster_add(jid, "bob", groups, "both", FALSE);
 
-    will_return(jabber_get_connection_status, JABBER_CONNECTED);
+    will_return(connection_get_status, JABBER_CONNECTED);
 
     expect_string(roster_send_name_change, barejid, jid);
     expect_value(roster_send_name_change, new_name, NULL);
