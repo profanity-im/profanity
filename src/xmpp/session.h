@@ -46,21 +46,13 @@
 
 #include "resource.h"
 
-typedef int(*ProfIdCallback)(xmpp_stanza_t *const stanza, void *const userdata);
-
-xmpp_conn_t* connection_get_conn(void);
-xmpp_ctx_t* connection_get_ctx(void);
-void connection_set_priority(int priority);
-void connection_set_presence_message(const char *const message);
-void connection_add_available_resource(Resource *resource);
-void connection_remove_available_resource(const char *const resource);
-void connection_autoping_fail(void);
-GSList* connection_get_disco_items(void);
-void connection_set_disco_items(GSList *disco_items);
-
-void jabber_login_success(int secured);
-void jabber_login_failed(void);
-void jabber_lost_connection(void);
-
+void session_login_success(int secured);
+void session_login_failed(void);
+void session_lost_connection(void);
+GSList* session_get_disco_items(void);
+void session_set_disco_items(GSList *_disco_items);
+void session_autoping_fail(void);
+void session_remove_available_resource(const char *const resource);
+void session_add_available_resource(Resource *resource);
 
 #endif

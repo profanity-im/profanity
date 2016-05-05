@@ -846,7 +846,7 @@ cons_show_account_list(gchar **accounts)
         int i = 0;
         for (i = 0; i < size; i++) {
             if ((connection_get_status() == JABBER_CONNECTED) &&
-                    (g_strcmp0(jabber_get_account_name(), accounts[i]) == 0)) {
+                    (g_strcmp0(session_get_account_name(), accounts[i]) == 0)) {
                 resource_presence_t presence = accounts_get_last_presence(accounts[i]);
                 theme_item_t presence_colour = theme_main_presence_attrs(string_from_resource_presence(presence));
                 win_vprint(console, '-', 0, NULL, 0, presence_colour, "", "%s", accounts[i]);
@@ -962,8 +962,8 @@ cons_show_account(ProfAccount *account)
         account->priority_xa, account->priority_dnd);
 
     if ((connection_get_status() == JABBER_CONNECTED) &&
-            (g_strcmp0(jabber_get_account_name(), account->name) == 0)) {
-        GList *resources = jabber_get_available_resources();
+            (g_strcmp0(session_get_account_name(), account->name) == 0)) {
+        GList *resources = session_get_available_resources();
         GList *ordered_resources = NULL;
 
         GList *curr = resources;

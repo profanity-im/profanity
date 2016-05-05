@@ -381,7 +381,7 @@ api_win_show_themed(const char *tag, const char *const group, const char *const 
 int
 api_send_stanza(const char *const stanza)
 {
-    return jabber_send_stanza(stanza);
+    return session_send_stanza(stanza);
 }
 
 gboolean
@@ -441,7 +441,7 @@ api_disco_add_feature(char *feature)
 
     // resend presence to update server's disco info data for this client
     if (connection_get_status() == JABBER_CONNECTED) {
-        resource_presence_t last_presence = accounts_get_last_presence(jabber_get_account_name());
+        resource_presence_t last_presence = accounts_get_last_presence(session_get_account_name());
         cl_ev_presence_send(last_presence, connection_get_presence_msg(), 0);
     }
 }

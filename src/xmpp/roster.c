@@ -57,6 +57,7 @@
 #include "config/preferences.h"
 #include "xmpp/session.h"
 #include "xmpp/iq.h"
+#include "xmpp/connection.h"
 #include "xmpp/roster.h"
 #include "roster_list.h"
 #include "xmpp/stanza.h"
@@ -217,7 +218,7 @@ roster_set_handler(xmpp_stanza_t *const stanza)
     }
 
     // if from attribute exists and it is not current users barejid, ignore push
-    Jid *my_jid = jid_create(jabber_get_fulljid());
+    Jid *my_jid = jid_create(session_get_fulljid());
     const char *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
     if (from && (strcmp(from, my_jid->barejid) != 0)) {
         jid_destroy(my_jid);

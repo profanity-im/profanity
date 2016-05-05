@@ -150,7 +150,7 @@ cmd_execute_default(ProfWin *window, const char *inp)
     }
     case WIN_XML:
     {
-        jabber_send_stanza(inp);
+        session_send_stanza(inp);
         break;
     }
     default:
@@ -232,11 +232,11 @@ cmd_tls_trust(ProfWin *window, const char *const command, gchar **args)
         cons_show("You are not currently connected.");
         return TRUE;
     }
-    if (!jabber_conn_is_secured()) {
+    if (!session_conn_is_secured()) {
         cons_show("No TLS connection established");
         return TRUE;
     }
-    TLSCertificate *cert = jabber_get_tls_peer_cert();
+    TLSCertificate *cert = session_get_tls_peer_cert();
     if (!cert) {
         cons_show("Error getting TLS certificate.");
         return TRUE;
@@ -330,11 +330,11 @@ cmd_tls_cert(ProfWin *window, const char *const command, gchar **args)
             cons_show("You are not currently connected.");
             return TRUE;
         }
-        if (!jabber_conn_is_secured()) {
+        if (!session_conn_is_secured()) {
             cons_show("No TLS connection established");
             return TRUE;
         }
-        TLSCertificate *cert = jabber_get_tls_peer_cert();
+        TLSCertificate *cert = session_get_tls_peer_cert();
         if (!cert) {
             cons_show("Error getting TLS certificate.");
             return TRUE;
@@ -807,7 +807,7 @@ _account_set_theme(char *account_name, char *theme)
 
     accounts_set_theme(account_name, theme);
     if (connection_get_status() == JABBER_CONNECTED) {
-        ProfAccount *account = accounts_get_account(jabber_get_account_name());
+        ProfAccount *account = accounts_get_account(session_get_account_name());
         if (account) {
             if (g_strcmp0(account->name, account_name) == 0) {
                 theme_load(theme);
@@ -880,7 +880,7 @@ _account_set_presence_priority(char *account_name, char *presence, char *priorit
 
     jabber_conn_status_t conn_status = connection_get_status();
     if (conn_status == JABBER_CONNECTED) {
-        char *connected_account = jabber_get_account_name();
+        char *connected_account = session_get_account_name();
         resource_presence_t last_presence = accounts_get_last_presence(connected_account);
         if (presence_type == last_presence) {
             char *message = connection_get_presence_msg();
@@ -1004,7 +1004,7 @@ cmd_account(ProfWin *window, const char *const command, gchar **args)
         return TRUE;
     }
 
-    ProfAccount *account = accounts_get_account(jabber_get_account_name());
+    ProfAccount *account = accounts_get_account(session_get_account_name());
     cons_show_account(account);
     account_free(account);
 
@@ -2991,7 +2991,7 @@ cmd_blocked(ProfWin *window, const char *const command, gchar **args)
         return TRUE;
     }
 
-    if (!jabber_service_supports(XMPP_FEATURE_BLOCKING)) {
+    if (!session_service_supports(XMPP_FEATURE_BLOCKING)) {
         cons_show("Blocking not supported by server.");
         return TRUE;
     }
@@ -3419,7 +3419,7 @@ cmd_software(ProfWin *window, const char *const command, gchar **args)
             break;
         case WIN_CONSOLE:
             if (args[0]) {
-                Jid *myJid = jid_create(jabber_get_fulljid());
+                Jid *myJid = jid_create(session_get_fulljid());
                 Jid *jid = jid_create(args[0]);
 
                 if (jid == NULL || jid->fulljid == NULL) {
@@ -3461,13 +3461,13 @@ cmd_join(ProfWin *window, const char *const command, gchar **args)
     }
 
     if (args[0] == NULL) {
-        char *account_name = jabber_get_account_name();
+        char *account_name = session_get_account_name();
         ProfAccount *account = accounts_get_account(account_name);
 
         GString *room_str = g_string_new("");
-        char *uuid = jabber_create_uuid();
+        char *uuid = session_create_uuid();
         g_string_append_printf(room_str, "private-chat-%s@%s", uuid, account->muc_service);
-        jabber_free_uuid(uuid);
+        session_free_uuid(uuid);
 
         presence_join_room(room_str->str, account->muc_nick, NULL);
         muc_join(room_str->str, account->muc_nick, NULL, FALSE);
@@ -3489,7 +3489,7 @@ cmd_join(ProfWin *window, const char *const command, gchar **args)
     char *nick = NULL;
     char *passwd = NULL;
     GString *room_str = g_string_new("");
-    char *account_name = jabber_get_account_name();
+    char *account_name = session_get_account_name();
     ProfAccount *account = accounts_get_account(account_name);
 
     // full room jid supplied (room@server)
@@ -4346,7 +4346,7 @@ cmd_rooms(ProfWin *window, const char *const command, gchar **args)
     }
 
     if (args[0] == NULL) {
-        ProfAccount *account = accounts_get_account(jabber_get_account_name());
+        ProfAccount *account = accounts_get_account(session_get_account_name());
         iq_room_list_request(account->muc_service);
         account_free(account);
     } else {
@@ -4481,7 +4481,7 @@ cmd_disco(ProfWin *window, const char *const command, gchar **args)
     if (args[1]) {
         jid = g_string_append(jid, args[1]);
     } else {
-        Jid *jidp = jid_create(jabber_get_fulljid());
+        Jid *jidp = jid_create(session_get_fulljid());
         jid = g_string_append(jid, jidp->domainpart);
         jid_destroy(jidp);
     }
@@ -4564,7 +4564,7 @@ cmd_lastactivity(ProfWin *window, const char *const command, gchar **args)
     }
 
     if (args[0] == NULL) {
-        Jid *jidp = jid_create(jabber_get_fulljid());
+        Jid *jidp = jid_create(session_get_fulljid());
         GString *jid = g_string_new(jidp->domainpart);
 
         iq_last_activity_request(jid->str);
@@ -5761,8 +5761,8 @@ cmd_priority(ProfWin *window, const char *const command, gchar **args)
     char *err_msg = NULL;
     gboolean res = strtoi_range(value, &intval, -128, 127, &err_msg);
     if (res) {
-        accounts_set_priority_all(jabber_get_account_name(), intval);
-        resource_presence_t last_presence = accounts_get_last_presence(jabber_get_account_name());
+        accounts_set_priority_all(session_get_account_name(), intval);
+        resource_presence_t last_presence = accounts_get_last_presence(session_get_account_name());
         cl_ev_presence_send(last_presence, connection_get_presence_msg(), 0);
         cons_show("Priority set to %d.", intval);
     } else {
@@ -6235,7 +6235,7 @@ cmd_pgp(ProfWin *window, const char *const command, gchar **args)
             return TRUE;
         }
 
-        ProfAccount *account = accounts_get_account(jabber_get_account_name());
+        ProfAccount *account = accounts_get_account(session_get_account_name());
         char *err_str = NULL;
         if (!p_gpg_valid_key(account->pgp_keyid, &err_str)) {
             ui_current_print_formatted_line('!', 0, "Invalid PGP key ID %s: %s, cannot start PGP encryption.", account->pgp_keyid, err_str);
@@ -6384,7 +6384,7 @@ cmd_otr_policy(ProfWin *window, const char *const command, gchar **args)
     if (contact_jid == NULL) {
         contact_jid = contact;
     }
-    accounts_add_otr_policy(jabber_get_account_name(), contact_jid, choice);
+    accounts_add_otr_policy(session_get_account_name(), contact_jid, choice);
     cons_show("OTR policy for %s set to: %s", contact_jid, choice);
     return TRUE;
 #else
@@ -6402,7 +6402,7 @@ cmd_otr_gen(ProfWin *window, const char *const command, gchar **args)
         return TRUE;
     }
 
-    ProfAccount *account = accounts_get_account(jabber_get_account_name());
+    ProfAccount *account = accounts_get_account(session_get_account_name());
     otr_keygen(account);
     account_free(account);
     return TRUE;

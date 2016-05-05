@@ -22,7 +22,7 @@ void clears_chat_sessions(void **state)
     chat_session_recipient_active("mike@server.org", "work", FALSE);
 
     will_return(connection_get_status, JABBER_CONNECTED);
-    will_return(jabber_get_fulljid, "myjid@myserver.com");
+    will_return(session_get_fulljid, "myjid@myserver.com");
     expect_any_cons_show();
 
     gboolean result = cmd_disconnect(NULL, CMD_DISCONNECT, NULL);

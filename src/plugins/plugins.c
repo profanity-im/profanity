@@ -158,8 +158,8 @@ plugins_load(const char *const name)
     if (plugin) {
         plugins = g_slist_append(plugins, plugin);
         if (connection_get_status() == JABBER_CONNECTED) {
-            const char *account_name = jabber_get_account_name();
-            const char *fulljid = jabber_get_fulljid();
+            const char *account_name = session_get_account_name();
+            const char *fulljid = session_get_fulljid();
             plugin->init_func(plugin, PACKAGE_VERSION, PACKAGE_STATUS, account_name, fulljid);
         } else {
             plugin->init_func(plugin, PACKAGE_VERSION, PACKAGE_STATUS, NULL, NULL);

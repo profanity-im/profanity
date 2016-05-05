@@ -64,6 +64,8 @@
 #include "xmpp/form.h"
 #include "roster_list.h"
 #include "xmpp/xmpp.h"
+#include "xmpp/connection.h"
+#include "xmpp/session.h"
 #include "xmpp/iq.h"
 #include "xmpp/roster.h"
 #include "plugins/plugins.h"
@@ -243,7 +245,7 @@ iq_autoping_check(void)
     if (timeout > 0 && seconds_elapsed >= timeout) {
         cons_show("Autoping response timed out afer %u seconds.", timeout);
         log_debug("Autoping check: timed out afer %u seconds, disconnecting", timeout);
-        connection_autoping_fail();
+        session_autoping_fail();
         autoping_wait = FALSE;
         g_timer_destroy(autoping_time);
         autoping_time = NULL;
@@ -307,7 +309,7 @@ iq_disable_carbons(void)
 void
 iq_http_upload_request(HTTPUpload *upload)
 {
-    GSList *disco_items = connection_get_disco_items();
+    GSList *disco_items = session_get_disco_items();
     DiscoInfo *disco_info;
     if (disco_items && (g_slist_length(disco_items) > 0)) {
         while (disco_items) {
@@ -1918,7 +1920,7 @@ _disco_info_response_id_handler_onconnect(xmpp_stanza_t *const stanza, void *con
     if (query) {
         xmpp_stanza_t *child = xmpp_stanza_get_children(query);
 
-        GSList *disco_items = connection_get_disco_items();
+        GSList *disco_items = session_get_disco_items();
         DiscoInfo *disco_info;
         if (disco_items && (g_slist_length(disco_items) > 0)) {
             while (disco_items) {
@@ -2053,7 +2055,7 @@ _disco_items_result_handler(xmpp_stanza_t *const stanza)
                 DiscoInfo *info = malloc(sizeof(struct disco_info_t));
                 info->item = strdup(item->jid);
                 info->features = g_hash_table_new_full(g_str_hash, g_str_equal, free, NULL);
-                connection_set_disco_items(g_slist_append(connection_get_disco_items(), info));
+                session_set_disco_items(g_slist_append(session_get_disco_items(), info));
                 iq_disco_info_request_onconnect(info->item);
                 res_items = g_slist_next(res_items);
             }

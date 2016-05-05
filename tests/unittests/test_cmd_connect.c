@@ -59,11 +59,11 @@ void cmd_connect_when_no_account(void **state)
 
     expect_cons_show("Connecting as user@server.org");
 
-    expect_string(jabber_connect_with_details, jid, "user@server.org");
-    expect_string(jabber_connect_with_details, passwd, "password");
-    expect_value(jabber_connect_with_details, altdomain, NULL);
-    expect_value(jabber_connect_with_details, port, 0);
-    will_return(jabber_connect_with_details, JABBER_CONNECTING);
+    expect_string(session_connect_with_details, jid, "user@server.org");
+    expect_string(session_connect_with_details, passwd, "password");
+    expect_value(session_connect_with_details, altdomain, NULL);
+    expect_value(session_connect_with_details, port, 0);
+    will_return(session_connect_with_details, JABBER_CONNECTING);
 
     gboolean result = cmd_connect(NULL, CMD_CONNECT, args);
     assert_true(result);
@@ -82,11 +82,11 @@ void cmd_connect_fail_message(void **state)
 
     expect_cons_show("Connecting as user@server.org");
 
-    expect_any(jabber_connect_with_details, jid);
-    expect_any(jabber_connect_with_details, passwd);
-    expect_any(jabber_connect_with_details, altdomain);
-    expect_any(jabber_connect_with_details, port);
-    will_return(jabber_connect_with_details, JABBER_DISCONNECTED);
+    expect_any(session_connect_with_details, jid);
+    expect_any(session_connect_with_details, passwd);
+    expect_any(session_connect_with_details, altdomain);
+    expect_any(session_connect_with_details, port);
+    will_return(session_connect_with_details, JABBER_DISCONNECTED);
 
     expect_cons_show_error("Connection attempt for user@server.org failed.");
 
@@ -107,11 +107,11 @@ void cmd_connect_lowercases_argument(void **state)
 
     expect_cons_show("Connecting as user@server.org");
 
-    expect_any(jabber_connect_with_details, jid);
-    expect_any(jabber_connect_with_details, passwd);
-    expect_any(jabber_connect_with_details, altdomain);
-    expect_any(jabber_connect_with_details, port);
-    will_return(jabber_connect_with_details, JABBER_CONNECTING);
+    expect_any(session_connect_with_details, jid);
+    expect_any(session_connect_with_details, passwd);
+    expect_any(session_connect_with_details, altdomain);
+    expect_any(session_connect_with_details, port);
+    will_return(session_connect_with_details, JABBER_CONNECTING);
 
     gboolean result = cmd_connect(NULL, CMD_CONNECT, args);
     assert_true(result);
@@ -132,8 +132,8 @@ void cmd_connect_asks_password_when_not_in_account(void **state)
 
     expect_cons_show("Connecting with account jabber_org as me@jabber.org");
 
-    expect_any(jabber_connect_with_account, account);
-    will_return(jabber_connect_with_account, JABBER_CONNECTING);
+    expect_any(session_connect_with_account, account);
+    will_return(session_connect_with_account, JABBER_CONNECTING);
 
     gboolean result = cmd_connect(NULL, CMD_CONNECT, args);
     assert_true(result);
@@ -308,11 +308,11 @@ void cmd_connect_with_server_when_provided(void **state)
 
     expect_cons_show("Connecting as user@server.org");
 
-    expect_string(jabber_connect_with_details, jid, "user@server.org");
-    expect_string(jabber_connect_with_details, passwd, "password");
-    expect_string(jabber_connect_with_details, altdomain, "aserver");
-    expect_value(jabber_connect_with_details, port, 0);
-    will_return(jabber_connect_with_details, JABBER_CONNECTING);
+    expect_string(session_connect_with_details, jid, "user@server.org");
+    expect_string(session_connect_with_details, passwd, "password");
+    expect_string(session_connect_with_details, altdomain, "aserver");
+    expect_value(session_connect_with_details, port, 0);
+    will_return(session_connect_with_details, JABBER_CONNECTING);
 
     gboolean result = cmd_connect(NULL, CMD_CONNECT, args);
     assert_true(result);
@@ -331,11 +331,11 @@ void cmd_connect_with_port_when_provided(void **state)
 
     expect_cons_show("Connecting as user@server.org");
 
-    expect_string(jabber_connect_with_details, jid, "user@server.org");
-    expect_string(jabber_connect_with_details, passwd, "password");
-    expect_value(jabber_connect_with_details, altdomain, NULL);
-    expect_value(jabber_connect_with_details, port, 5432);
-    will_return(jabber_connect_with_details, JABBER_CONNECTING);
+    expect_string(session_connect_with_details, jid, "user@server.org");
+    expect_string(session_connect_with_details, passwd, "password");
+    expect_value(session_connect_with_details, altdomain, NULL);
+    expect_value(session_connect_with_details, port, 5432);
+    will_return(session_connect_with_details, JABBER_CONNECTING);
 
     gboolean result = cmd_connect(NULL, CMD_CONNECT, args);
     assert_true(result);
@@ -354,11 +354,11 @@ void cmd_connect_with_server_and_port_when_provided(void **state)
 
     expect_cons_show("Connecting as user@server.org");
 
-    expect_string(jabber_connect_with_details, jid, "user@server.org");
-    expect_string(jabber_connect_with_details, passwd, "password");
-    expect_string(jabber_connect_with_details, altdomain, "aserver");
-    expect_value(jabber_connect_with_details, port, 5432);
-    will_return(jabber_connect_with_details, JABBER_CONNECTING);
+    expect_string(session_connect_with_details, jid, "user@server.org");
+    expect_string(session_connect_with_details, passwd, "password");
+    expect_string(session_connect_with_details, altdomain, "aserver");
+    expect_value(session_connect_with_details, port, 5432);
+    will_return(session_connect_with_details, JABBER_CONNECTING);
 
     gboolean result = cmd_connect(NULL, CMD_CONNECT, args);
     assert_true(result);
@@ -377,8 +377,8 @@ void cmd_connect_shows_message_when_connecting_with_account(void **state)
 
     expect_cons_show("Connecting with account jabber_org as user@jabber.org/laptop");
 
-    expect_any(jabber_connect_with_account, account);
-    will_return(jabber_connect_with_account, JABBER_CONNECTING);
+    expect_any(session_connect_with_account, account);
+    will_return(session_connect_with_account, JABBER_CONNECTING);
 
     gboolean result = cmd_connect(NULL, CMD_CONNECT, args);
     assert_true(result);
@@ -397,8 +397,8 @@ void cmd_connect_connects_with_account(void **state)
 
     expect_cons_show("Connecting with account jabber_org as me@jabber.org");
 
-    expect_memory(jabber_connect_with_account, account, account, sizeof(account));
-    will_return(jabber_connect_with_account, JABBER_CONNECTING);
+    expect_memory(session_connect_with_account, account, account, sizeof(account));
+    will_return(session_connect_with_account, JABBER_CONNECTING);
 
     gboolean result = cmd_connect(NULL, CMD_CONNECT, args);
     assert_true(result);

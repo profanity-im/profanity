@@ -388,7 +388,7 @@ static void
 _chatwin_history(ProfChatWin *chatwin, const char *const contact)
 {
     if (!chatwin->history_shown) {
-        Jid *jid = jid_create(jabber_get_fulljid());
+        Jid *jid = jid_create(session_get_fulljid());
         GSList *history = chat_log_get_previous(jid->barejid, contact);
         jid_destroy(jid);
         GSList *curr = history;

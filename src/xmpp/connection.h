@@ -57,4 +57,8 @@ void connection_free_presence_msg(void);
 void connection_free_domain(void);
 void connection_free_log(void);
 
+xmpp_conn_t* connection_get_conn(void);
+xmpp_ctx_t* connection_get_ctx(void);
+void connection_set_priority(int priority);
+
 #endif

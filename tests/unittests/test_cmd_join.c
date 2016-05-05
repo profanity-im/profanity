@@ -75,7 +75,7 @@ void cmd_join_uses_account_mucservice_when_no_service_specified(void **state)
     muc_init();
 
     will_return(connection_get_status, JABBER_CONNECTED);
-    will_return(jabber_get_account_name, account_name);
+    will_return(session_get_account_name, account_name);
 
     expect_string(accounts_get_account, name, account_name);
     will_return(accounts_get_account, account);
@@ -100,7 +100,7 @@ void cmd_join_uses_supplied_nick(void **state)
     muc_init();
 
     will_return(connection_get_status, JABBER_CONNECTED);
-    will_return(jabber_get_account_name, account_name);
+    will_return(session_get_account_name, account_name);
 
     expect_string(accounts_get_account, name, account_name);
     will_return(accounts_get_account, account);
@@ -125,7 +125,7 @@ void cmd_join_uses_account_nick_when_not_supplied(void **state)
     muc_init();
 
     will_return(connection_get_status, JABBER_CONNECTED);
-    will_return(jabber_get_account_name, account_name);
+    will_return(session_get_account_name, account_name);
 
     expect_string(accounts_get_account, name, account_name);
     will_return(accounts_get_account, account);
@@ -153,7 +153,7 @@ void cmd_join_uses_password_when_supplied(void **state)
     muc_init();
 
     will_return(connection_get_status, JABBER_CONNECTED);
-    will_return(jabber_get_account_name, account_name);
+    will_return(session_get_account_name, account_name);
 
     expect_string(accounts_get_account, name, account_name);
     will_return(accounts_get_account, account);

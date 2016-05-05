@@ -394,7 +394,7 @@ ui_update_presence(const resource_presence_t resource_presence,
 {
     contact_presence_t contact_presence = contact_presence_from_resource_presence(resource_presence);
     title_bar_set_presence(contact_presence);
-    gint priority = accounts_get_priority_for_presence_type(jabber_get_account_name(), resource_presence);
+    gint priority = accounts_get_priority_for_presence_type(session_get_account_name(), resource_presence);
     if (message) {
         cons_show("Status set to %s (priority %d), \"%s\".", show, priority, message);
     } else {
@@ -1107,7 +1107,7 @@ _ui_draw_term_title(void)
     jabber_conn_status_t status = connection_get_status();
 
     if (status == JABBER_CONNECTED) {
-        const char * const jid = jabber_get_fulljid();
+        const char * const jid = session_get_fulljid();
         gint unread = wins_get_total_unread();
 
         if (unread != 0) {

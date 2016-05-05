@@ -59,7 +59,7 @@ void cmd_rooms_uses_account_default_when_no_arg(void **state)
         0, 0, 0, 0, 0, strdup("default_conf_server"), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
 
     will_return(connection_get_status, JABBER_CONNECTED);
-    will_return(jabber_get_account_name, "account_name");
+    will_return(session_get_account_name, "account_name");
     expect_any(accounts_get_account, name);
     will_return(accounts_get_account, account);
 

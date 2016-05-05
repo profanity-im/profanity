@@ -35,6 +35,8 @@
 #ifndef XMPP_IQ_H
 #define XMPP_IQ_H
 
+typedef int(*ProfIdCallback)(xmpp_stanza_t *const stanza, void *const userdata);
+
 void iq_handlers_init(void);
 void iq_send_stanza(xmpp_stanza_t *const stanza);
 void iq_id_handler_add(const char *const id, ProfIdCallback func, void *userdata);

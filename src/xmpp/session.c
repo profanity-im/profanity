@@ -86,17 +86,17 @@ static struct {
 
 static GTimer *reconnect_timer;
 
-static jabber_conn_status_t _jabber_connect(const char *const fulljid, const char *const passwd,
+static jabber_conn_status_t _session_connect(const char *const fulljid, const char *const passwd,
     const char *const altdomain, int port, const char *const tls_policy);
 
-static void _jabber_reconnect(void);
+static void _session_reconnect(void);
 
-void _connection_free_saved_account(void);
-void _connection_free_saved_details(void);
-void _connection_free_session_data(void);
+static void _session_free_saved_account(void);
+static void _session_free_saved_details(void);
+static void _session_free_session_data(void);
 
 static void
-_info_destroy(DiscoInfo *info)
+_session_info_destroy(DiscoInfo *info)
 {
     if (info) {
         free(info->item);
@@ -108,7 +108,7 @@ _info_destroy(DiscoInfo *info)
 }
 
 void
-jabber_init(void)
+session_init(void)
 {
     log_info("Initialising XMPP");
     connection_init();
@@ -120,7 +120,7 @@ jabber_init(void)
 }
 
 jabber_conn_status_t
-jabber_connect_with_account(const ProfAccount *const account)
+session_connect_with_account(const ProfAccount *const account)
 {
     assert(account != NULL);
 
@@ -139,14 +139,14 @@ jabber_connect_with_account(const ProfAccount *const account)
     // connect with fulljid
     Jid *jidp = jid_create_from_bare_and_resource(account->jid, account->resource);
     jabber_conn_status_t result =
-        _jabber_connect(jidp->fulljid, account->password, account->server, account->port, account->tls_policy);
+        _session_connect(jidp->fulljid, account->password, account->server, account->port, account->tls_policy);
     jid_destroy(jidp);
 
     return result;
 }
 
 jabber_conn_status_t
-jabber_connect_with_details(const char *const jid, const char *const passwd, const char *const altdomain,
+session_connect_with_details(const char *const jid, const char *const passwd, const char *const altdomain,
     const int port, const char *const tls_policy)
 {
     assert(jid != NULL);
@@ -185,7 +185,7 @@ jabber_connect_with_details(const char *const jid, const char *const passwd, con
     // connect with fulljid
     log_info("Connecting without account, JID: %s", saved_details.jid);
 
-    return _jabber_connect(
+    return _session_connect(
         saved_details.jid,
         passwd,
         saved_details.altdomain,
@@ -194,19 +194,19 @@ jabber_connect_with_details(const char *const jid, const char *const passwd, con
 }
 
 void
-connection_autoping_fail(void)
+session_autoping_fail(void)
 {
     if (connection_get_status() == JABBER_CONNECTED) {
         log_info("Closing connection");
-        char *account_name = jabber_get_account_name();
-        const char *fulljid = jabber_get_fulljid();
+        char *account_name = session_get_account_name();
+        const char *fulljid = session_get_fulljid();
         plugins_on_disconnect(account_name, fulljid);
-        accounts_set_last_activity(jabber_get_account_name());
+        accounts_set_last_activity(session_get_account_name());
         connection_set_status(JABBER_DISCONNECTING);
         xmpp_disconnect(connection_get_conn());
 
         while (connection_get_status() == JABBER_DISCONNECTING) {
-            jabber_process_events(10);
+            session_process_events(10);
         }
 
         connection_free_conn();
@@ -218,28 +218,28 @@ connection_autoping_fail(void)
 
     connection_set_status(JABBER_DISCONNECTED);
 
-    jabber_lost_connection();
+    session_lost_connection();
 }
 
 void
-jabber_disconnect(void)
+session_disconnect(void)
 {
     // if connected, send end stream and wait for response
     if (connection_get_status() == JABBER_CONNECTED) {
-        char *account_name = jabber_get_account_name();
-        const char *fulljid = jabber_get_fulljid();
+        char *account_name = session_get_account_name();
+        const char *fulljid = session_get_fulljid();
         plugins_on_disconnect(account_name, fulljid);
         log_info("Closing connection");
-        accounts_set_last_activity(jabber_get_account_name());
+        accounts_set_last_activity(session_get_account_name());
         connection_set_status(JABBER_DISCONNECTING);
         xmpp_disconnect(connection_get_conn());
 
         while (connection_get_status() == JABBER_DISCONNECTING) {
-            jabber_process_events(10);
+            session_process_events(10);
         }
-        _connection_free_saved_account();
-        _connection_free_saved_details();
-        _connection_free_session_data();
+        _session_free_saved_account();
+        _session_free_saved_details();
+        _session_free_session_data();
 
         connection_free_conn();
         connection_free_ctx();
@@ -252,17 +252,17 @@ jabber_disconnect(void)
 }
 
 void
-jabber_shutdown(void)
+session_shutdown(void)
 {
-    _connection_free_saved_account();
-    _connection_free_saved_details();
-    _connection_free_session_data();
+    _session_free_saved_account();
+    _session_free_saved_details();
+    _session_free_session_data();
     xmpp_shutdown();
     connection_free_log();
 }
 
 void
-jabber_process_events(int millis)
+session_process_events(int millis)
 {
     int reconnect_sec;
 
@@ -279,7 +279,7 @@ jabber_process_events(int millis)
             if ((reconnect_sec != 0) && reconnect_timer) {
                 int elapsed_sec = g_timer_elapsed(reconnect_timer, NULL);
                 if (elapsed_sec > reconnect_sec) {
-                    _jabber_reconnect();
+                    _session_reconnect();
                 }
             }
             break;
@@ -289,19 +289,19 @@ jabber_process_events(int millis)
 }
 
 GList*
-jabber_get_available_resources(void)
+session_get_available_resources(void)
 {
     return g_hash_table_get_values(available_resources);
 }
 
 GSList*
-connection_get_disco_items(void)
+session_get_disco_items(void)
 {
     return (disco_items);
 }
 
 gboolean
-jabber_service_supports(const char *const feature)
+session_service_supports(const char *const feature)
 {
     DiscoInfo *disco_info;
     while (disco_items) {
@@ -316,31 +316,31 @@ jabber_service_supports(const char *const feature)
 }
 
 void
-connection_set_disco_items(GSList *_disco_items)
+session_set_disco_items(GSList *_disco_items)
 {
     disco_items = _disco_items;
 }
 
 const char*
-jabber_get_fulljid(void)
+session_get_fulljid(void)
 {
     return xmpp_conn_get_jid(connection_get_conn());
 }
 
 char*
-jabber_get_account_name(void)
+session_get_account_name(void)
 {
     return saved_account.name;
 }
 
 char*
-jabber_create_uuid(void)
+session_create_uuid(void)
 {
     return xmpp_uuid_gen(connection_get_ctx());
 }
 
 void
-jabber_free_uuid(char *uuid)
+session_free_uuid(char *uuid)
 {
     if (uuid) {
         xmpp_free(connection_get_ctx(), uuid);
@@ -348,26 +348,26 @@ jabber_free_uuid(char *uuid)
 }
 
 void
-connection_add_available_resource(Resource *resource)
+session_add_available_resource(Resource *resource)
 {
     g_hash_table_replace(available_resources, strdup(resource->name), resource);
 }
 
 void
-connection_remove_available_resource(const char *const resource)
+session_remove_available_resource(const char *const resource)
 {
     g_hash_table_remove(available_resources, resource);
 }
 
 void
-_connection_free_saved_account(void)
+_session_free_saved_account(void)
 {
     FREE_SET_NULL(saved_account.name);
     FREE_SET_NULL(saved_account.passwd);
 }
 
 void
-_connection_free_saved_details(void)
+_session_free_saved_details(void)
 {
     FREE_SET_NULL(saved_details.name);
     FREE_SET_NULL(saved_details.jid);
@@ -377,9 +377,9 @@ _connection_free_saved_details(void)
 }
 
 void
-_connection_free_session_data(void)
+_session_free_session_data(void)
 {
-    g_slist_free_full(disco_items, (GDestroyNotify)_info_destroy);
+    g_slist_free_full(disco_items, (GDestroyNotify)_session_info_destroy);
     disco_items = NULL;
     g_hash_table_remove_all(available_resources);
     chat_sessions_clear();
@@ -387,7 +387,7 @@ _connection_free_session_data(void)
 }
 
 void
-jabber_login_success(int secured)
+session_login_success(int secured)
 {
     // logged in with account
     if (saved_account.name) {
@@ -404,10 +404,10 @@ jabber_login_success(int secured)
         saved_account.name = strdup(saved_details.name);
         saved_account.passwd = strdup(saved_details.passwd);
 
-        _connection_free_saved_details();
+        _session_free_saved_details();
     }
 
-    Jid *my_jid = jid_create(jabber_get_fulljid());
+    Jid *my_jid = jid_create(session_get_fulljid());
     connection_set_domain(my_jid->domainpart);
     jid_destroy(my_jid);
 
@@ -440,27 +440,27 @@ jabber_login_success(int secured)
 }
 
 void
-jabber_login_failed(void)
+session_login_failed(void)
 {
     if (reconnect_timer == NULL) {
         log_debug("Connection handler: No reconnect timer");
         sv_ev_failed_login();
-        _connection_free_saved_account();
-        _connection_free_saved_details();
-        _connection_free_session_data();
+        _session_free_saved_account();
+        _session_free_saved_details();
+        _session_free_session_data();
     } else {
         log_debug("Connection handler: Restarting reconnect timer");
         if (prefs_get_reconnect() != 0) {
             g_timer_start(reconnect_timer);
         }
         // free resources but leave saved_user untouched
-        _connection_free_session_data();
+        _session_free_session_data();
     }
 }
 
 #ifdef HAVE_LIBMESODE
 TLSCertificate*
-jabber_get_tls_peer_cert(void)
+session_get_tls_peer_cert(void)
 {
     xmpp_tlscert_t *xmpptlscert = xmpp_conn_tls_peer_cert(connection_get_conn());
     int version = xmpp_conn_tlscert_version(xmpptlscert);
@@ -483,7 +483,7 @@ jabber_get_tls_peer_cert(void)
 #endif
 
 gboolean
-jabber_conn_is_secured(void)
+session_conn_is_secured(void)
 {
     if (connection_get_status() == JABBER_CONNECTED) {
         return xmpp_conn_is_secured(connection_get_conn()) == 0 ? FALSE : TRUE;
@@ -493,7 +493,7 @@ jabber_conn_is_secured(void)
 }
 
 gboolean
-jabber_send_stanza(const char *const stanza)
+session_send_stanza(const char *const stanza)
 {
     if (connection_get_status() != JABBER_CONNECTED) {
         return FALSE;
@@ -504,7 +504,7 @@ jabber_send_stanza(const char *const stanza)
 }
 
 static jabber_conn_status_t
-_jabber_connect(const char *const fulljid, const char *const passwd, const char *const altdomain, int port,
+_session_connect(const char *const fulljid, const char *const passwd, const char *const altdomain, int port,
     const char *const tls_policy)
 {
     assert(fulljid != NULL);
@@ -534,7 +534,7 @@ _jabber_connect(const char *const fulljid, const char *const passwd, const char 
 }
 
 static void
-_jabber_reconnect(void)
+_session_reconnect(void)
 {
     // reconnect with account.
     ProfAccount *account = accounts_get_account(saved_account.name);
@@ -544,22 +544,22 @@ _jabber_reconnect(void)
     } else {
         char *fulljid = create_fulljid(account->jid, account->resource);
         log_debug("Attempting reconnect with account %s", account->name);
-        _jabber_connect(fulljid, saved_account.passwd, account->server, account->port, account->tls_policy);
+        _session_connect(fulljid, saved_account.passwd, account->server, account->port, account->tls_policy);
         free(fulljid);
         g_timer_start(reconnect_timer);
     }
 }
 
 void
-jabber_lost_connection(void)
+session_lost_connection(void)
 {
     sv_ev_lost_connection();
     if (prefs_get_reconnect() != 0) {
         assert(reconnect_timer == NULL);
         reconnect_timer = g_timer_new();
     } else {
-        _connection_free_saved_account();
-        _connection_free_saved_details();
+        _session_free_saved_account();
+        _session_free_saved_details();
     }
-    _connection_free_session_data();
+    _session_free_session_data();
 }

@@ -110,26 +110,29 @@ typedef struct disco_info_t {
     GHashTable *features;
 } DiscoInfo;
 
-void jabber_init(void);
-jabber_conn_status_t jabber_connect_with_details(const char *const jid, const char *const passwd,
+void session_init(void);
+jabber_conn_status_t session_connect_with_details(const char *const jid, const char *const passwd,
     const char *const altdomain, const int port, const char *const tls_policy);
-jabber_conn_status_t jabber_connect_with_account(const ProfAccount *const account);
-void jabber_disconnect(void);
-void jabber_shutdown(void);
-void jabber_process_events(int millis);
-const char* jabber_get_fulljid(void);
+jabber_conn_status_t session_connect_with_account(const ProfAccount *const account);
+void session_disconnect(void);
+void session_shutdown(void);
+void session_process_events(int millis);
+const char* session_get_fulljid(void);
+char* session_get_account_name(void);
+GList* session_get_available_resources(void);
+char* session_create_uuid(void);
+void session_free_uuid(char *uuid);
+gboolean session_send_stanza(const char *const stanza);
+
+#ifdef HAVE_LIBMESODE
+TLSCertificate* session_get_tls_peer_cert(void);
+#endif
+gboolean session_conn_is_secured(void);
+gboolean session_send_stanza(const char *const stanza);
+gboolean session_service_supports(const char *const feature);
+
 jabber_conn_status_t connection_get_status(void);
 char *connection_get_presence_msg(void);
-char* jabber_get_account_name(void);
-GList* jabber_get_available_resources(void);
-char* jabber_create_uuid(void);
-void jabber_free_uuid(char *uuid);
-#ifdef HAVE_LIBMESODE
-TLSCertificate* jabber_get_tls_peer_cert(void);
-#endif
-gboolean jabber_conn_is_secured(void);
-gboolean jabber_send_stanza(const char *const stanza);
-gboolean jabber_service_supports(const char *const feature);
 
 char* message_send_chat(const char *const barejid, const char *const msg, const char *const oob_url);
 char* message_send_chat_otr(const char *const barejid, const char *const msg);

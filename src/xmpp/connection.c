@@ -255,7 +255,7 @@ _connection_handler(xmpp_conn_t *const conn, const xmpp_conn_event_t status, con
         log_debug("Connection handler: XMPP_CONN_CONNECT");
         connection_set_status(JABBER_CONNECTED);
 
-        jabber_login_success(connection_is_secured());
+        session_login_success(connection_is_secured());
 
     } else if (status == XMPP_CONN_DISCONNECT) {
         log_debug("Connection handler: XMPP_CONN_DISCONNECT");
@@ -263,12 +263,12 @@ _connection_handler(xmpp_conn_t *const conn, const xmpp_conn_event_t status, con
         // lost connection for unknown reason
         if (connection_get_status() == JABBER_CONNECTED) {
             log_debug("Connection handler: Lost connection for unknown reason");
-            jabber_lost_connection();
+            session_lost_connection();
 
         // login attempt failed
         } else if (connection_get_status() != JABBER_DISCONNECTING) {
             log_debug("Connection handler: Login failed");
-            jabber_login_failed();
+            session_login_failed();
         }
 
         // close stream response from server after disconnect is handled too
