@@ -49,7 +49,7 @@
 #include "log.h"
 #include "xmpp/xmpp.h"
 #include "xmpp/stanza.h"
-#include "xmpp/connection.h"
+#include "xmpp/session.h"
 
 static gboolean
 _is_valid_form_element(xmpp_stanza_t *stanza)

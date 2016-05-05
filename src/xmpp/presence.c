@@ -56,7 +56,7 @@
 #include "ui/ui.h"
 #include "event/server_events.h"
 #include "xmpp/capabilities.h"
-#include "xmpp/connection.h"
+#include "xmpp/session.h"
 #include "xmpp/stanza.h"
 #include "xmpp/iq.h"
 #include "xmpp/xmpp.h"

@@ -59,7 +59,7 @@
 #include "event/server_events.h"
 #include "xmpp/capabilities.h"
 #include "xmpp/blocking.h"
-#include "xmpp/connection.h"
+#include "xmpp/session.h"
 #include "xmpp/stanza.h"
 #include "xmpp/form.h"
 #include "roster_list.h"

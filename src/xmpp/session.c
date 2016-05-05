@@ -1,5 +1,5 @@
 /*
- * connection.c
+ * session.c
  *
  * Copyright (C) 2012 - 2016 James Booth <boothj5@gmail.com>
  *
@@ -57,7 +57,7 @@
 #include "xmpp/bookmark.h"
 #include "xmpp/blocking.h"
 #include "xmpp/capabilities.h"
-#include "xmpp/connection.h"
+#include "xmpp/session.h"
 #include "xmpp/iq.h"
 #include "xmpp/message.h"
 #include "xmpp/presence.h"

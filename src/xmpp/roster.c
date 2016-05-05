@@ -55,7 +55,7 @@
 #include "event/client_events.h"
 #include "tools/autocomplete.h"
 #include "config/preferences.h"
-#include "xmpp/connection.h"
+#include "xmpp/session.h"
 #include "xmpp/iq.h"
 #include "xmpp/roster.h"
 #include "roster_list.h"

@@ -1,5 +1,5 @@
 /*
- * connection.h
+ * session.h
  *
  * Copyright (C) 2012 - 2016 James Booth <boothj5@gmail.com>
  *
@@ -32,8 +32,8 @@
  *
  */
 
-#ifndef XMPP_CONNECTION_H
-#define XMPP_CONNECTION_H
+#ifndef XMPP_SESSION_H
+#define XMPP_SESSION_H
 
 #include "config.h"
 

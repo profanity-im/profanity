@@ -51,7 +51,7 @@
 #include "profanity.h"
 #include "ui/ui.h"
 #include "event/server_events.h"
-#include "xmpp/connection.h"
+#include "xmpp/session.h"
 #include "xmpp/message.h"
 #include "xmpp/roster.h"
 #include "roster_list.h"

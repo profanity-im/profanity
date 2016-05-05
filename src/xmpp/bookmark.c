@@ -51,7 +51,7 @@
 #include "log.h"
 #include "muc.h"
 #include "event/server_events.h"
-#include "xmpp/connection.h"
+#include "xmpp/session.h"
 #include "xmpp/iq.h"
 #include "xmpp/stanza.h"
 #include "xmpp/xmpp.h"
