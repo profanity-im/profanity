@@ -721,7 +721,7 @@ _muc_user_handler(xmpp_stanza_t *const stanza)
     }
 
     // handle self presence
-    if (stanza_is_muc_self_presence(stanza, session_get_fulljid())) {
+    if (stanza_is_muc_self_presence(stanza, connection_get_fulljid())) {
         log_debug("Room self presence received from %s", from_jid->fulljid);
 
         // self unavailable

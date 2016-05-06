@@ -189,7 +189,7 @@ session_autoping_fail(void)
     if (connection_get_status() == JABBER_CONNECTED) {
         log_info("Closing connection");
         char *account_name = session_get_account_name();
-        const char *fulljid = session_get_fulljid();
+        const char *fulljid = connection_get_fulljid();
         plugins_on_disconnect(account_name, fulljid);
         accounts_set_last_activity(session_get_account_name());
         connection_set_status(JABBER_DISCONNECTING);
@@ -217,7 +217,7 @@ session_disconnect(void)
     // if connected, send end stream and wait for response
     if (connection_get_status() == JABBER_CONNECTED) {
         char *account_name = session_get_account_name();
-        const char *fulljid = session_get_fulljid();
+        const char *fulljid = connection_get_fulljid();
         plugins_on_disconnect(account_name, fulljid);
         log_info("Closing connection");
         accounts_set_last_activity(session_get_account_name());
@@ -311,12 +311,6 @@ session_set_disco_items(GSList *_disco_items)
     disco_items = _disco_items;
 }
 
-const char*
-session_get_fulljid(void)
-{
-    return xmpp_conn_get_jid(connection_get_conn());
-}
-
 char*
 session_get_account_name(void)
 {
@@ -370,7 +364,7 @@ session_login_success(int secured)
         _session_free_saved_details();
     }
 
-    Jid *my_jid = jid_create(session_get_fulljid());
+    Jid *my_jid = jid_create(connection_get_fulljid());
     connection_set_domain(my_jid->domainpart);
     jid_destroy(my_jid);
 

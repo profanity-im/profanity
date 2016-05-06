@@ -71,7 +71,7 @@ cl_ev_connect_account(ProfAccount *account)
 void
 cl_ev_disconnect(void)
 {
-    const char *jid = session_get_fulljid();
+    const char *jid = connection_get_fulljid();
     cons_show("%s logged out successfully.", jid);
 
     ui_disconnected();

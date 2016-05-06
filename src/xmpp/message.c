@@ -740,7 +740,7 @@ _handle_carbons(xmpp_stanza_t *const stanza)
 
         Jid *jid_from = jid_create(from);
         Jid *jid_to = jid_create(to);
-        Jid *my_jid = jid_create(session_get_fulljid());
+        Jid *my_jid = jid_create(connection_get_fulljid());
 
         // check for and deal with message
         xmpp_stanza_t *body = xmpp_stanza_get_child_by_name(message, STANZA_NAME_BODY);

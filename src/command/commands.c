@@ -3419,7 +3419,7 @@ cmd_software(ProfWin *window, const char *const command, gchar **args)
             break;
         case WIN_CONSOLE:
             if (args[0]) {
-                Jid *myJid = jid_create(session_get_fulljid());
+                Jid *myJid = jid_create(connection_get_fulljid());
                 Jid *jid = jid_create(args[0]);
 
                 if (jid == NULL || jid->fulljid == NULL) {
@@ -4481,7 +4481,7 @@ cmd_disco(ProfWin *window, const char *const command, gchar **args)
     if (args[1]) {
         jid = g_string_append(jid, args[1]);
     } else {
-        Jid *jidp = jid_create(session_get_fulljid());
+        Jid *jidp = jid_create(connection_get_fulljid());
         jid = g_string_append(jid, jidp->domainpart);
         jid_destroy(jidp);
     }
@@ -4564,7 +4564,7 @@ cmd_lastactivity(ProfWin *window, const char *const command, gchar **args)
     }
 
     if (args[0] == NULL) {
-        Jid *jidp = jid_create(session_get_fulljid());
+        Jid *jidp = jid_create(connection_get_fulljid());
         GString *jid = g_string_new(jidp->domainpart);
 
         iq_last_activity_request(jid->str);

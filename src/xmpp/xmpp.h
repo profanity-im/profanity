@@ -117,7 +117,6 @@ jabber_conn_status_t session_connect_with_account(const ProfAccount *const accou
 void session_disconnect(void);
 void session_shutdown(void);
 void session_process_events(int millis);
-const char* session_get_fulljid(void);
 char* session_get_account_name(void);
 GList* session_get_available_resources(void);
 char* session_create_uuid(void);
@@ -133,6 +132,7 @@ gboolean session_service_supports(const char *const feature);
 
 jabber_conn_status_t connection_get_status(void);
 char *connection_get_presence_msg(void);
+const char* connection_get_fulljid(void);
 
 char* message_send_chat(const char *const barejid, const char *const msg, const char *const oob_url);
 char* message_send_chat_otr(const char *const barejid, const char *const msg);

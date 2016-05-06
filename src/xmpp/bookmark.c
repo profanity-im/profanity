@@ -276,7 +276,7 @@ _bookmark_result_id_handler(xmpp_stanza_t *const stanza, void *const userdata)
     if (bookmark_ac == NULL) {
         bookmark_ac = autocomplete_new();
     }
-    my_jid = jid_create(session_get_fulljid());
+    my_jid = jid_create(connection_get_fulljid());
 
     ptr = xmpp_stanza_get_children(ptr);
     while (ptr) {

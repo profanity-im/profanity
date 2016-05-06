@@ -1107,7 +1107,7 @@ _ui_draw_term_title(void)
     jabber_conn_status_t status = connection_get_status();
 
     if (status == JABBER_CONNECTED) {
-        const char * const jid = session_get_fulljid();
+        const char * const jid = connection_get_fulljid();
         gint unread = wins_get_total_unread();
 
         if (unread != 0) {

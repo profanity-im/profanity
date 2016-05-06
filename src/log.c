@@ -265,7 +265,7 @@ void
 chat_log_msg_out(const char *const barejid, const char *const msg)
 {
     if (prefs_get_boolean(PREF_CHLOG)) {
-        const char *jid = session_get_fulljid();
+        const char *jid = connection_get_fulljid();
         Jid *jidp = jid_create(jid);
         _chat_log_chat(jidp->barejid, barejid, msg, PROF_OUT_LOG, NULL);
         jid_destroy(jidp);
@@ -276,7 +276,7 @@ void
 chat_log_otr_msg_out(const char *const barejid, const char *const msg)
 {
     if (prefs_get_boolean(PREF_CHLOG)) {
-        const char *jid = session_get_fulljid();
+        const char *jid = connection_get_fulljid();
         Jid *jidp = jid_create(jid);
         char *pref_otr_log = prefs_get_string(PREF_OTR_LOG);
         if (strcmp(pref_otr_log, "on") == 0) {
@@ -293,7 +293,7 @@ void
 chat_log_pgp_msg_out(const char *const barejid, const char *const msg)
 {
     if (prefs_get_boolean(PREF_CHLOG)) {
-        const char *jid = session_get_fulljid();
+        const char *jid = connection_get_fulljid();
         Jid *jidp = jid_create(jid);
         char *pref_pgp_log = prefs_get_string(PREF_PGP_LOG);
         if (strcmp(pref_pgp_log, "on") == 0) {
@@ -310,7 +310,7 @@ void
 chat_log_otr_msg_in(const char *const barejid, const char *const msg, gboolean was_decrypted, GDateTime *timestamp)
 {
     if (prefs_get_boolean(PREF_CHLOG)) {
-        const char *jid = session_get_fulljid();
+        const char *jid = connection_get_fulljid();
         Jid *jidp = jid_create(jid);
         char *pref_otr_log = prefs_get_string(PREF_OTR_LOG);
         if (!was_decrypted || (strcmp(pref_otr_log, "on") == 0)) {
@@ -327,7 +327,7 @@ void
 chat_log_pgp_msg_in(const char *const barejid, const char *const msg, GDateTime *timestamp)
 {
     if (prefs_get_boolean(PREF_CHLOG)) {
-        const char *jid = session_get_fulljid();
+        const char *jid = connection_get_fulljid();
         Jid *jidp = jid_create(jid);
         char *pref_pgp_log = prefs_get_string(PREF_PGP_LOG);
         if (strcmp(pref_pgp_log, "on") == 0) {
@@ -344,7 +344,7 @@ void
 chat_log_msg_in(const char *const barejid, const char *const msg, GDateTime *timestamp)
 {
     if (prefs_get_boolean(PREF_CHLOG)) {
-        const char *jid = session_get_fulljid();
+        const char *jid = connection_get_fulljid();
         Jid *jidp = jid_create(jid);
         _chat_log_chat(jidp->barejid, barejid, msg, PROF_IN_LOG, timestamp);
         jid_destroy(jidp);

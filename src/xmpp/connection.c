@@ -170,6 +170,12 @@ connection_get_ctx(void)
     return conn.ctx;
 }
 
+const char*
+connection_get_fulljid(void)
+{
+    return xmpp_conn_get_jid(conn.conn);
+}
+
 char *
 connection_get_domain(void)
 {
