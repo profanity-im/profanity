@@ -3465,9 +3465,9 @@ cmd_join(ProfWin *window, const char *const command, gchar **args)
         ProfAccount *account = accounts_get_account(account_name);
 
         GString *room_str = g_string_new("");
-        char *uuid = session_create_uuid();
+        char *uuid = connection_create_uuid();
         g_string_append_printf(room_str, "private-chat-%s@%s", uuid, account->muc_service);
-        session_free_uuid(uuid);
+        connection_free_uuid(uuid);
 
         presence_join_room(room_str->str, account->muc_nick, NULL);
         muc_join(room_str->str, account->muc_nick, NULL, FALSE);

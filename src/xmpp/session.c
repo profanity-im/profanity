@@ -317,20 +317,6 @@ session_get_account_name(void)
     return saved_account.name;
 }
 
-char*
-session_create_uuid(void)
-{
-    return xmpp_uuid_gen(connection_get_ctx());
-}
-
-void
-session_free_uuid(char *uuid)
-{
-    if (uuid) {
-        xmpp_free(connection_get_ctx(), uuid);
-    }
-}
-
 void
 session_add_available_resource(Resource *resource)
 {

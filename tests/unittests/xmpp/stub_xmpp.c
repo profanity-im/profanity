@@ -49,12 +49,12 @@ session_get_tls_peer_cert(void)
 }
 
 
-char* session_create_uuid(void)
+char* connection_create_uuid(void)
 {
     return NULL;
 }
 
-void session_free_uuid(char * uuid) {}
+void connection_free_uuid(char * uuid) {}
 
 jabber_conn_status_t connection_get_status(void)
 {

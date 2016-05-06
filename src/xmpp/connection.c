@@ -176,6 +176,20 @@ connection_get_fulljid(void)
     return xmpp_conn_get_jid(conn.conn);
 }
 
+char*
+connection_create_uuid(void)
+{
+    return xmpp_uuid_gen(conn.ctx);
+}
+
+void
+connection_free_uuid(char *uuid)
+{
+    if (uuid) {
+        xmpp_free(conn.ctx, uuid);
+    }
+}
+
 char *
 connection_get_domain(void)
 {
