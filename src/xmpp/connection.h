@@ -39,7 +39,7 @@
 
 void connection_init(void);
 
-jabber_conn_status_t connection_connect_main(const char *const fulljid, const char *const passwd, const char *const altdomain, int port,
+jabber_conn_status_t connection_connect(const char *const fulljid, const char *const passwd, const char *const altdomain, int port,
     const char *const tls_policy);
 
 char *connection_get_domain(void);

@@ -69,9 +69,6 @@ static void _xmpp_file_logger(void *const userdata, const xmpp_log_level_t level
 static log_level_t _get_log_level(const xmpp_log_level_t xmpp_level);
 static void _connection_handler(xmpp_conn_t *const conn, const xmpp_conn_event_t status, const int error,
     xmpp_stream_error_t *const stream_error, void *const userdata);
-static jabber_conn_status_t
-_connection_connect(const char *const fulljid, const char *const passwd, const char *const altdomain, int port,
-    const char *const tls_policy, char *cert_path);
 
 #ifdef HAVE_LIBMESODE
 static int _connection_certfail_cb(xmpp_tlscert_t *xmpptlscert, const char *const errormsg);
@@ -87,14 +84,13 @@ void connection_init(void)
 }
 
 jabber_conn_status_t
-connection_connect_main(const char *const fulljid, const char *const passwd, const char *const altdomain, int port,
+connection_connect(const char *const fulljid, const char *const passwd, const char *const altdomain, int port,
     const char *const tls_policy)
 {
     assert(fulljid != NULL);
     assert(passwd != NULL);
 
     Jid *jid = jid_create(fulljid);
-
     if (jid == NULL) {
         log_error("Malformed JID not able to connect: %s", fulljid);
         conn.conn_status = JABBER_DISCONNECTED;
@@ -105,21 +101,10 @@ connection_connect_main(const char *const fulljid, const char *const passwd, con
         jid_destroy(jid);
         return conn.conn_status;
     }
-
     jid_destroy(jid);
 
     log_info("Connecting as %s", fulljid);
-    char *cert_path = prefs_get_string(PREF_TLS_CERTPATH);
-    jabber_conn_status_t status = _connection_connect(fulljid, passwd, altdomain, port, tls_policy, cert_path);
-    prefs_free_string(cert_path);
 
-    return status;
-}
-
-static jabber_conn_status_t
-_connection_connect(const char *const fulljid, const char *const passwd, const char *const altdomain, int port,
-    const char *const tls_policy, char *cert_path)
-{
     if (conn.log) {
         free(conn.log);
     }
@@ -151,12 +136,12 @@ _connection_connect(const char *const fulljid, const char *const passwd, const c
     }
 
 #ifdef HAVE_LIBMESODE
+    char *cert_path = prefs_get_string(PREF_TLS_CERTPATH);
     if (cert_path) {
         xmpp_conn_tlscert_path(conn.conn, cert_path);
     }
-#endif
+    prefs_free_string(cert_path);
 
-#ifdef HAVE_LIBMESODE
     int connect_status = xmpp_connect_client(
         conn.conn,
         altdomain,

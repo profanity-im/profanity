@@ -126,7 +126,7 @@ session_connect_with_account(const ProfAccount *const account)
     // connect with fulljid
     Jid *jidp = jid_create_from_bare_and_resource(account->jid, account->resource);
     jabber_conn_status_t result =
-        connection_connect_main(jidp->fulljid, account->password, account->server, account->port, account->tls_policy);
+        connection_connect(jidp->fulljid, account->password, account->server, account->port, account->tls_policy);
     jid_destroy(jidp);
 
     return result;
@@ -172,7 +172,7 @@ session_connect_with_details(const char *const jid, const char *const passwd, co
     // connect with fulljid
     log_info("Connecting without account, JID: %s", saved_details.jid);
 
-    return connection_connect_main(
+    return connection_connect(
         saved_details.jid,
         passwd,
         saved_details.altdomain,
@@ -435,7 +435,7 @@ _session_reconnect(void)
     } else {
         char *fulljid = create_fulljid(account->jid, account->resource);
         log_debug("Attempting reconnect with account %s", account->name);
-        connection_connect_main(fulljid, saved_account.passwd, account->server, account->port, account->tls_policy);
+        connection_connect(fulljid, saved_account.passwd, account->server, account->port, account->tls_policy);
         free(fulljid);
         g_timer_start(reconnect_timer);
     }
