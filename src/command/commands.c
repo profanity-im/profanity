@@ -236,7 +236,7 @@ cmd_tls_trust(ProfWin *window, const char *const command, gchar **args)
         cons_show("No TLS connection established");
         return TRUE;
     }
-    TLSCertificate *cert = session_get_tls_peer_cert();
+    TLSCertificate *cert = connection_get_tls_peer_cert();
     if (!cert) {
         cons_show("Error getting TLS certificate.");
         return TRUE;
@@ -334,7 +334,7 @@ cmd_tls_cert(ProfWin *window, const char *const command, gchar **args)
             cons_show("No TLS connection established");
             return TRUE;
         }
-        TLSCertificate *cert = session_get_tls_peer_cert();
+        TLSCertificate *cert = connection_get_tls_peer_cert();
         if (!cert) {
             cons_show("Error getting TLS certificate.");
             return TRUE;

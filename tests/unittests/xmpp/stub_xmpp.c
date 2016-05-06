@@ -43,7 +43,7 @@ gboolean session_conn_is_secured(void)
 }
 
 TLSCertificate*
-session_get_tls_peer_cert(void)
+connection_get_tls_peer_cert(void)
 {
     return NULL;
 }
