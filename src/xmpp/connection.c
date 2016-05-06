@@ -52,9 +52,9 @@
 #include "xmpp/session.h"
 
 typedef struct prof_conn_t {
-    xmpp_log_t *log;
-    xmpp_ctx_t *ctx;
-    xmpp_conn_t *conn;
+    xmpp_log_t *xmpp_log;
+    xmpp_ctx_t *xmpp_ctx;
+    xmpp_conn_t *xmpp_conn;
     jabber_conn_status_t conn_status;
     char *presence_message;
     int priority;
@@ -67,7 +67,7 @@ static xmpp_log_t* _xmpp_get_file_logger(void);
 static xmpp_log_level_t _get_xmpp_log_level(void);
 static void _xmpp_file_logger(void *const userdata, const xmpp_log_level_t level, const char *const area, const char *const msg);
 static log_level_t _get_log_level(const xmpp_log_level_t xmpp_level);
-static void _connection_handler(xmpp_conn_t *const conn, const xmpp_conn_event_t status, const int error,
+static void _connection_handler(xmpp_conn_t *const xmpp_conn, const xmpp_conn_event_t status, const int error,
     xmpp_stream_error_t *const stream_error, void *const userdata);
 
 #ifdef HAVE_LIBMESODE
@@ -78,8 +78,8 @@ void connection_init(void)
 {
     conn.conn_status = JABBER_STARTED;
     conn.presence_message = NULL;
-    conn.conn = NULL;
-    conn.ctx = NULL;
+    conn.xmpp_conn = NULL;
+    conn.xmpp_ctx = NULL;
     conn.domain = NULL;
 }
 
@@ -105,57 +105,57 @@ connection_connect(const char *const fulljid, const char *const passwd, const ch
 
     log_info("Connecting as %s", fulljid);
 
-    if (conn.log) {
-        free(conn.log);
+    if (conn.xmpp_log) {
+        free(conn.xmpp_log);
     }
-    conn.log = _xmpp_get_file_logger();
+    conn.xmpp_log = _xmpp_get_file_logger();
 
-    if (conn.conn) {
-        xmpp_conn_release(conn.conn);
+    if (conn.xmpp_conn) {
+        xmpp_conn_release(conn.xmpp_conn);
     }
-    if (conn.ctx) {
-        xmpp_ctx_free(conn.ctx);
+    if (conn.xmpp_ctx) {
+        xmpp_ctx_free(conn.xmpp_ctx);
     }
-    conn.ctx = xmpp_ctx_new(NULL, conn.log);
-    if (conn.ctx == NULL) {
+    conn.xmpp_ctx = xmpp_ctx_new(NULL, conn.xmpp_log);
+    if (conn.xmpp_ctx == NULL) {
         log_warning("Failed to get libstrophe ctx during connect");
         return JABBER_DISCONNECTED;
     }
-    conn.conn = xmpp_conn_new(conn.ctx);
-    if (conn.conn == NULL) {
+    conn.xmpp_conn = xmpp_conn_new(conn.xmpp_ctx);
+    if (conn.xmpp_conn == NULL) {
         log_warning("Failed to get libstrophe conn during connect");
         return JABBER_DISCONNECTED;
     }
-    xmpp_conn_set_jid(conn.conn, fulljid);
-    xmpp_conn_set_pass(conn.conn, passwd);
+    xmpp_conn_set_jid(conn.xmpp_conn, fulljid);
+    xmpp_conn_set_pass(conn.xmpp_conn, passwd);
 
     if (!tls_policy || (g_strcmp0(tls_policy, "force") == 0)) {
-        xmpp_conn_set_flags(conn.conn, XMPP_CONN_FLAG_MANDATORY_TLS);
+        xmpp_conn_set_flags(conn.xmpp_conn, XMPP_CONN_FLAG_MANDATORY_TLS);
     } else if (g_strcmp0(tls_policy, "disable") == 0) {
-        xmpp_conn_set_flags(conn.conn, XMPP_CONN_FLAG_DISABLE_TLS);
+        xmpp_conn_set_flags(conn.xmpp_conn, XMPP_CONN_FLAG_DISABLE_TLS);
     }
 
 #ifdef HAVE_LIBMESODE
     char *cert_path = prefs_get_string(PREF_TLS_CERTPATH);
     if (cert_path) {
-        xmpp_conn_tlscert_path(conn.conn, cert_path);
+        xmpp_conn_tlscert_path(conn.xmpp_conn, cert_path);
     }
     prefs_free_string(cert_path);
 
     int connect_status = xmpp_connect_client(
-        conn.conn,
+        conn.xmpp_conn,
         altdomain,
         port,
         _connection_certfail_cb,
         _connection_handler,
-        conn.ctx);
+        conn.xmpp_ctx);
 #else
     int connect_status = xmpp_connect_client(
-        conn.conn,
+        conn.xmpp_conn,
         altdomain,
         port,
         _connection_handler,
-        conn.ctx);
+        conn.xmpp_ctx);
 #endif
 
     if (connect_status == 0) {
@@ -182,32 +182,32 @@ connection_set_status(jabber_conn_status_t status)
 xmpp_conn_t*
 connection_get_conn(void)
 {
-    return conn.conn;
+    return conn.xmpp_conn;
 }
 
 xmpp_ctx_t*
 connection_get_ctx(void)
 {
-    return conn.ctx;
+    return conn.xmpp_ctx;
 }
 
 const char*
 connection_get_fulljid(void)
 {
-    return xmpp_conn_get_jid(conn.conn);
+    return xmpp_conn_get_jid(conn.xmpp_conn);
 }
 
 char*
 connection_create_uuid(void)
 {
-    return xmpp_uuid_gen(conn.ctx);
+    return xmpp_uuid_gen(conn.xmpp_ctx);
 }
 
 void
 connection_free_uuid(char *uuid)
 {
     if (uuid) {
-        xmpp_free(conn.ctx, uuid);
+        xmpp_free(conn.xmpp_ctx, uuid);
     }
 }
 
@@ -226,18 +226,18 @@ connection_get_presence_msg(void)
 void
 connection_free_conn(void)
 {
-    if (conn.conn) {
-        xmpp_conn_release(conn.conn);
-        conn.conn = NULL;
+    if (conn.xmpp_conn) {
+        xmpp_conn_release(conn.xmpp_conn);
+        conn.xmpp_conn = NULL;
     }
 }
 
 void
 connection_free_ctx(void)
 {
-    if (conn.ctx) {
-        xmpp_ctx_free(conn.ctx);
-        conn.ctx = NULL;
+    if (conn.xmpp_ctx) {
+        xmpp_ctx_free(conn.xmpp_ctx);
+        conn.xmpp_ctx = NULL;
     }
 }
 
@@ -265,8 +265,8 @@ connection_free_domain(void)
 void
 connection_free_log(void)
 {
-    free(conn.log);
-    conn.log = NULL;
+    free(conn.xmpp_log);
+    conn.xmpp_log = NULL;
 }
 
 void
@@ -285,7 +285,7 @@ connection_set_domain(char *domain)
 TLSCertificate*
 connection_get_tls_peer_cert(void)
 {
-    xmpp_tlscert_t *xmpptlscert = xmpp_conn_tls_peer_cert(conn.conn);
+    xmpp_tlscert_t *xmpptlscert = xmpp_conn_tls_peer_cert(conn.xmpp_conn);
     int version = xmpp_conn_tlscert_version(xmpptlscert);
     char *serialnumber = xmpp_conn_tlscert_serialnumber(xmpptlscert);
     char *subjectname = xmpp_conn_tlscert_subjectname(xmpptlscert);
@@ -299,7 +299,7 @@ connection_get_tls_peer_cert(void)
     TLSCertificate *cert = tlscerts_new(fingerprint, version, serialnumber, subjectname, issuername, notbefore,
         notafter, key_alg, signature_alg);
 
-    xmpp_conn_free_tlscert(conn.ctx, xmpptlscert);
+    xmpp_conn_free_tlscert(conn.xmpp_ctx, xmpptlscert);
 
     return cert;
 }
@@ -309,7 +309,7 @@ gboolean
 connection_is_secured(void)
 {
     if (conn.conn_status == JABBER_CONNECTED) {
-        return xmpp_conn_is_secured(conn.conn) == 0 ? FALSE : TRUE;
+        return xmpp_conn_is_secured(conn.xmpp_conn) == 0 ? FALSE : TRUE;
     } else {
         return FALSE;
     }
@@ -321,19 +321,19 @@ connection_send_stanza(const char *const stanza)
     if (conn.conn_status != JABBER_CONNECTED) {
         return FALSE;
     } else {
-        xmpp_send_raw_string(conn.conn, "%s", stanza);
+        xmpp_send_raw_string(conn.xmpp_conn, "%s", stanza);
         return TRUE;
     }
 }
 
 static void
-_connection_handler(xmpp_conn_t *const conn, const xmpp_conn_event_t status, const int error,
+_connection_handler(xmpp_conn_t *const xmpp_conn, const xmpp_conn_event_t status, const int error,
     xmpp_stream_error_t *const stream_error, void *const userdata)
 {
     // login success
     if (status == XMPP_CONN_CONNECT) {
         log_debug("Connection handler: XMPP_CONN_CONNECT");
-        connection_set_status(JABBER_CONNECTED);
+        conn.conn_status = JABBER_CONNECTED;
 
         session_login_success(connection_is_secured());
 
@@ -341,18 +341,18 @@ _connection_handler(xmpp_conn_t *const conn, const xmpp_conn_event_t status, con
         log_debug("Connection handler: XMPP_CONN_DISCONNECT");
 
         // lost connection for unknown reason
-        if (connection_get_status() == JABBER_CONNECTED) {
+        if (conn.conn_status == JABBER_CONNECTED) {
             log_debug("Connection handler: Lost connection for unknown reason");
             session_lost_connection();
 
         // login attempt failed
-        } else if (connection_get_status() != JABBER_DISCONNECTING) {
+        } else if (conn.conn_status != JABBER_DISCONNECTING) {
             log_debug("Connection handler: Login failed");
             session_login_failed();
         }
 
         // close stream response from server after disconnect is handled too
-        connection_set_status(JABBER_DISCONNECTED);
+        conn.conn_status = JABBER_DISCONNECTED;
     } else if (status == XMPP_CONN_FAIL) {
         log_debug("Connection handler: XMPP_CONN_FAIL");
     } else {
