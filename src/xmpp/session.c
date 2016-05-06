@@ -95,17 +95,7 @@ static void _session_free_saved_account(void);
 static void _session_free_saved_details(void);
 static void _session_free_session_data(void);
 
-static void
-_session_info_destroy(DiscoInfo *info)
-{
-    if (info) {
-        free(info->item);
-        if (info->features) {
-            g_hash_table_destroy(info->features);
-        }
-        free(info);
-    }
-}
+static void _session_info_destroy(DiscoInfo *info);
 
 void
 session_init(void)
@@ -360,33 +350,6 @@ session_remove_available_resource(const char *const resource)
 }
 
 void
-_session_free_saved_account(void)
-{
-    FREE_SET_NULL(saved_account.name);
-    FREE_SET_NULL(saved_account.passwd);
-}
-
-void
-_session_free_saved_details(void)
-{
-    FREE_SET_NULL(saved_details.name);
-    FREE_SET_NULL(saved_details.jid);
-    FREE_SET_NULL(saved_details.passwd);
-    FREE_SET_NULL(saved_details.altdomain);
-    FREE_SET_NULL(saved_details.tls_policy);
-}
-
-void
-_session_free_session_data(void)
-{
-    g_slist_free_full(disco_items, (GDestroyNotify)_session_info_destroy);
-    disco_items = NULL;
-    g_hash_table_remove_all(available_resources);
-    chat_sessions_clear();
-    presence_clear_sub_requests();
-}
-
-void
 session_login_success(int secured)
 {
     // logged in with account
@@ -503,6 +466,32 @@ session_send_stanza(const char *const stanza)
     }
 }
 
+void
+session_lost_connection(void)
+{
+    sv_ev_lost_connection();
+    if (prefs_get_reconnect() != 0) {
+        assert(reconnect_timer == NULL);
+        reconnect_timer = g_timer_new();
+    } else {
+        _session_free_saved_account();
+        _session_free_saved_details();
+    }
+    _session_free_session_data();
+}
+
+static void
+_session_info_destroy(DiscoInfo *info)
+{
+    if (info) {
+        free(info->item);
+        if (info->features) {
+            g_hash_table_destroy(info->features);
+        }
+        free(info);
+    }
+}
+
 static jabber_conn_status_t
 _session_connect(const char *const fulljid, const char *const passwd, const char *const altdomain, int port,
     const char *const tls_policy)
@@ -550,16 +539,30 @@ _session_reconnect(void)
     }
 }
 
-void
-session_lost_connection(void)
+static void
+_session_free_saved_account(void)
 {
-    sv_ev_lost_connection();
-    if (prefs_get_reconnect() != 0) {
-        assert(reconnect_timer == NULL);
-        reconnect_timer = g_timer_new();
-    } else {
-        _session_free_saved_account();
-        _session_free_saved_details();
-    }
-    _session_free_session_data();
+    FREE_SET_NULL(saved_account.name);
+    FREE_SET_NULL(saved_account.passwd);
 }
+
+static void
+_session_free_saved_details(void)
+{
+    FREE_SET_NULL(saved_details.name);
+    FREE_SET_NULL(saved_details.jid);
+    FREE_SET_NULL(saved_details.passwd);
+    FREE_SET_NULL(saved_details.altdomain);
+    FREE_SET_NULL(saved_details.tls_policy);
+}
+
+static void
+_session_free_session_data(void)
+{
+    g_slist_free_full(disco_items, (GDestroyNotify)_session_info_destroy);
+    disco_items = NULL;
+    g_hash_table_remove_all(available_resources);
+    chat_sessions_clear();
+    presence_clear_sub_requests();
+}
+
