@@ -402,16 +402,6 @@ session_login_failed(void)
 }
 
 gboolean
-session_conn_is_secured(void)
-{
-    if (connection_get_status() == JABBER_CONNECTED) {
-        return xmpp_conn_is_secured(connection_get_conn()) == 0 ? FALSE : TRUE;
-    } else {
-        return FALSE;
-    }
-}
-
-gboolean
 session_send_stanza(const char *const stanza)
 {
     if (connection_get_status() != JABBER_CONNECTED) {

@@ -37,7 +37,7 @@ const char * session_get_domain(void)
     return NULL;
 }
 
-gboolean session_conn_is_secured(void)
+gboolean connection_conn_is_secured(void)
 {
     return 1;
 }

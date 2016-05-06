@@ -232,7 +232,7 @@ cmd_tls_trust(ProfWin *window, const char *const command, gchar **args)
         cons_show("You are not currently connected.");
         return TRUE;
     }
-    if (!session_conn_is_secured()) {
+    if (!connection_conn_is_secured()) {
         cons_show("No TLS connection established");
         return TRUE;
     }
@@ -330,7 +330,7 @@ cmd_tls_cert(ProfWin *window, const char *const command, gchar **args)
             cons_show("You are not currently connected.");
             return TRUE;
         }
-        if (!session_conn_is_secured()) {
+        if (!connection_conn_is_secured()) {
             cons_show("No TLS connection established");
             return TRUE;
         }

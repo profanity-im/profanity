@@ -121,7 +121,6 @@ char* session_get_account_name(void);
 GList* session_get_available_resources(void);
 gboolean session_send_stanza(const char *const stanza);
 
-gboolean session_conn_is_secured(void);
 gboolean session_send_stanza(const char *const stanza);
 gboolean session_service_supports(const char *const feature);
 
@@ -133,6 +132,7 @@ void connection_free_uuid(char *uuid);
 #ifdef HAVE_LIBMESODE
 TLSCertificate* connection_get_tls_peer_cert(void);
 #endif
+gboolean connection_conn_is_secured(void);
 
 char* message_send_chat(const char *const barejid, const char *const msg, const char *const oob_url);
 char* message_send_chat_otr(const char *const barejid, const char *const msg);

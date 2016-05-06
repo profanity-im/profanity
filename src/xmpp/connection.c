@@ -290,6 +290,16 @@ connection_get_tls_peer_cert(void)
 }
 #endif
 
+gboolean
+connection_conn_is_secured(void)
+{
+    if (conn.conn_status == JABBER_CONNECTED) {
+        return xmpp_conn_is_secured(conn.conn) == 0 ? FALSE : TRUE;
+    } else {
+        return FALSE;
+    }
+}
+
 static void
 _connection_handler(xmpp_conn_t *const conn, const xmpp_conn_event_t status, const int error,
     xmpp_stream_error_t *const stream_error, void *const userdata)
