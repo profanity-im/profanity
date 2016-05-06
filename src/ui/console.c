@@ -472,7 +472,7 @@ cons_check_version(gboolean not_available_msg)
 }
 
 void
-cons_show_login_success(ProfAccount *account, int secured)
+cons_show_login_success(ProfAccount *account, gboolean secured)
 {
     ProfWin *console = wins_get_console();
     win_vprint(console, '-', 0, NULL, NO_EOL, 0, "", "%s logged in successfully, ", account->jid);

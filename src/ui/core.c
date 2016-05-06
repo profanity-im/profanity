@@ -352,7 +352,7 @@ ui_group_removed(const char *const contact, const char *const group)
 }
 
 void
-ui_handle_login_account_success(ProfAccount *account, int secured)
+ui_handle_login_account_success(ProfAccount *account, gboolean secured)
 {
     if (account->theme) {
         if (theme_load(account->theme)) {
@@ -378,7 +378,7 @@ ui_handle_login_account_success(ProfAccount *account, int secured)
     cons_show_login_success(account, secured);
     title_bar_set_presence(contact_presence);
     title_bar_set_connected(TRUE);
-    title_bar_set_tls(secured ? TRUE : FALSE);
+    title_bar_set_tls(secured);
 
     GString *fulljid = g_string_new(account->jid);
     g_string_append(fulljid, "/");

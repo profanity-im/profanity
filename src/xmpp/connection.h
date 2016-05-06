@@ -49,8 +49,6 @@ void connection_set_presence_msg(const char *const message);
 void connection_set_priority(const int priority);
 void connection_set_domain(char *domain);
 
-int connection_is_secured(void);
-
 void connection_free_conn(void);
 void connection_free_ctx(void);
 void connection_free_presence_msg(void);

@@ -46,7 +46,7 @@
 
 #include "resource.h"
 
-void session_login_success(int secured);
+void session_login_success(gboolean secured);
 void session_login_failed(void);
 void session_lost_connection(void);
 GSList* session_get_disco_items(void);

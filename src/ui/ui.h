@@ -118,7 +118,7 @@ void ui_show_software_version(const char *const jid, const char *const  presence
     const char *const version, const char *const os);
 void ui_prune_wins(void);
 void ui_auto_away(char *message, gint time, resource_presence_t res_presence);
-void ui_handle_login_account_success(ProfAccount *account, int secured);
+void ui_handle_login_account_success(ProfAccount *account, gboolean secured);
 void ui_update_presence(const resource_presence_t resource_presence, const char *const message, const char *const show);
 void ui_write(char *line, int offset);
 void ui_invalid_command_usage(const char *const cmd, void (*setting_func)(void));
@@ -260,7 +260,7 @@ void cons_show_themes(GSList *themes);
 void cons_show_scripts(GSList *scripts);
 void cons_show_script(const char *const script, GSList *commands);
 void cons_show_aliases(GList *aliases);
-void cons_show_login_success(ProfAccount *account, int secured);
+void cons_show_login_success(ProfAccount *account, gboolean secured);
 void cons_show_software_version(const char *const jid, const char *const presence, const char *const name,
     const char *const version, const char *const os);
 void cons_show_account_list(gchar **accounts);

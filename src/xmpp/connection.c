@@ -281,12 +281,6 @@ connection_set_domain(char *domain)
     conn.domain = strdup(domain);
 }
 
-int
-connection_is_secured(void)
-{
-    return xmpp_conn_is_secured(conn.conn);
-}
-
 #ifdef HAVE_LIBMESODE
 TLSCertificate*
 connection_get_tls_peer_cert(void)
@@ -312,7 +306,7 @@ connection_get_tls_peer_cert(void)
 #endif
 
 gboolean
-connection_conn_is_secured(void)
+connection_is_secured(void)
 {
     if (conn.conn_status == JABBER_CONNECTED) {
         return xmpp_conn_is_secured(conn.conn) == 0 ? FALSE : TRUE;

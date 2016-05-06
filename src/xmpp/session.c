@@ -327,7 +327,7 @@ session_remove_available_resource(const char *const resource)
 }
 
 void
-session_login_success(int secured)
+session_login_success(gboolean secured)
 {
     // logged in with account
     if (saved_account.name) {

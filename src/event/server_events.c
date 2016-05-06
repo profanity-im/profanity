@@ -61,7 +61,7 @@
 #include "ui/ui.h"
 
 void
-sv_ev_login_account_success(char *account_name, int secured)
+sv_ev_login_account_success(char *account_name, gboolean secured)
 {
     ProfAccount *account = accounts_get_account(account_name);
 
