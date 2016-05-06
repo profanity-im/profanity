@@ -150,7 +150,7 @@ cmd_execute_default(ProfWin *window, const char *inp)
     }
     case WIN_XML:
     {
-        session_send_stanza(inp);
+        connection_send_stanza(inp);
         break;
     }
     default:

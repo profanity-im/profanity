@@ -401,17 +401,6 @@ session_login_failed(void)
     }
 }
 
-gboolean
-session_send_stanza(const char *const stanza)
-{
-    if (connection_get_status() != JABBER_CONNECTED) {
-        return FALSE;
-    } else {
-        xmpp_send_raw_string(connection_get_conn(), "%s", stanza);
-        return TRUE;
-    }
-}
-
 void
 session_lost_connection(void)
 {

@@ -381,7 +381,7 @@ api_win_show_themed(const char *tag, const char *const group, const char *const 
 int
 api_send_stanza(const char *const stanza)
 {
-    return session_send_stanza(stanza);
+    return connection_send_stanza(stanza);
 }
 
 gboolean

@@ -119,9 +119,7 @@ void session_shutdown(void);
 void session_process_events(int millis);
 char* session_get_account_name(void);
 GList* session_get_available_resources(void);
-gboolean session_send_stanza(const char *const stanza);
 
-gboolean session_send_stanza(const char *const stanza);
 gboolean session_service_supports(const char *const feature);
 
 jabber_conn_status_t connection_get_status(void);
@@ -133,6 +131,7 @@ void connection_free_uuid(char *uuid);
 TLSCertificate* connection_get_tls_peer_cert(void);
 #endif
 gboolean connection_conn_is_secured(void);
+gboolean connection_send_stanza(const char *const stanza);
 
 char* message_send_chat(const char *const barejid, const char *const msg, const char *const oob_url);
 char* message_send_chat_otr(const char *const barejid, const char *const msg);

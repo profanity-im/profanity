@@ -300,6 +300,17 @@ connection_conn_is_secured(void)
     }
 }
 
+gboolean
+connection_send_stanza(const char *const stanza)
+{
+    if (conn.conn_status != JABBER_CONNECTED) {
+        return FALSE;
+    } else {
+        xmpp_send_raw_string(conn.conn, "%s", stanza);
+        return TRUE;
+    }
+}
+
 static void
 _connection_handler(xmpp_conn_t *const conn, const xmpp_conn_event_t status, const int error,
     xmpp_stream_error_t *const stream_error, void *const userdata)

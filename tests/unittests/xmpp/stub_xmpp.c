@@ -77,7 +77,7 @@ GList * session_get_available_resources(void)
 }
 
 gboolean
-session_send_stanza(const char *const stanza)
+connection_send_stanza(const char *const stanza)
 {
     return TRUE;
 }
