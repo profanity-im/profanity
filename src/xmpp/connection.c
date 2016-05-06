@@ -36,6 +36,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <assert.h>
 
 #ifdef HAVE_LIBMESODE
 #include <mesode.h>
@@ -45,6 +46,7 @@
 #endif
 
 #include "log.h"
+#include "config/preferences.h"
 #include "event/server_events.h"
 #include "xmpp/connection.h"
 #include "xmpp/session.h"
@@ -67,6 +69,10 @@ static void _xmpp_file_logger(void *const userdata, const xmpp_log_level_t level
 static log_level_t _get_log_level(const xmpp_log_level_t xmpp_level);
 static void _connection_handler(xmpp_conn_t *const conn, const xmpp_conn_event_t status, const int error,
     xmpp_stream_error_t *const stream_error, void *const userdata);
+static jabber_conn_status_t
+_connection_connect(const char *const fulljid, const char *const passwd, const char *const altdomain, int port,
+    const char *const tls_policy, char *cert_path);
+
 #ifdef HAVE_LIBMESODE
 static int _connection_certfail_cb(xmpp_tlscert_t *xmpptlscert, const char *const errormsg);
 #endif
@@ -81,7 +87,37 @@ void connection_init(void)
 }
 
 jabber_conn_status_t
-connection_connect(const char *const fulljid, const char *const passwd, const char *const altdomain, int port,
+connection_connect_main(const char *const fulljid, const char *const passwd, const char *const altdomain, int port,
+    const char *const tls_policy)
+{
+    assert(fulljid != NULL);
+    assert(passwd != NULL);
+
+    Jid *jid = jid_create(fulljid);
+
+    if (jid == NULL) {
+        log_error("Malformed JID not able to connect: %s", fulljid);
+        conn.conn_status = JABBER_DISCONNECTED;
+        return conn.conn_status;
+    } else if (jid->fulljid == NULL) {
+        log_error("Full JID required to connect, received: %s", fulljid);
+        conn.conn_status = JABBER_DISCONNECTED;
+        jid_destroy(jid);
+        return conn.conn_status;
+    }
+
+    jid_destroy(jid);
+
+    log_info("Connecting as %s", fulljid);
+    char *cert_path = prefs_get_string(PREF_TLS_CERTPATH);
+    jabber_conn_status_t status = _connection_connect(fulljid, passwd, altdomain, port, tls_policy, cert_path);
+    prefs_free_string(cert_path);
+
+    return status;
+}
+
+static jabber_conn_status_t
+_connection_connect(const char *const fulljid, const char *const passwd, const char *const altdomain, int port,
     const char *const tls_policy, char *cert_path)
 {
     if (conn.log) {

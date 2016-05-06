@@ -86,9 +86,6 @@ static struct {
 
 static GTimer *reconnect_timer;
 
-static jabber_conn_status_t _session_connect(const char *const fulljid, const char *const passwd,
-    const char *const altdomain, int port, const char *const tls_policy);
-
 static void _session_reconnect(void);
 
 static void _session_free_saved_account(void);
@@ -129,7 +126,7 @@ session_connect_with_account(const ProfAccount *const account)
     // connect with fulljid
     Jid *jidp = jid_create_from_bare_and_resource(account->jid, account->resource);
     jabber_conn_status_t result =
-        _session_connect(jidp->fulljid, account->password, account->server, account->port, account->tls_policy);
+        connection_connect_main(jidp->fulljid, account->password, account->server, account->port, account->tls_policy);
     jid_destroy(jidp);
 
     return result;
@@ -175,7 +172,7 @@ session_connect_with_details(const char *const jid, const char *const passwd, co
     // connect with fulljid
     log_info("Connecting without account, JID: %s", saved_details.jid);
 
-    return _session_connect(
+    return connection_connect_main(
         saved_details.jid,
         passwd,
         saved_details.altdomain,
@@ -427,36 +424,6 @@ _session_info_destroy(DiscoInfo *info)
     }
 }
 
-static jabber_conn_status_t
-_session_connect(const char *const fulljid, const char *const passwd, const char *const altdomain, int port,
-    const char *const tls_policy)
-{
-    assert(fulljid != NULL);
-    assert(passwd != NULL);
-
-    Jid *jid = jid_create(fulljid);
-
-    if (jid == NULL) {
-        log_error("Malformed JID not able to connect: %s", fulljid);
-        connection_set_status(JABBER_DISCONNECTED);
-        return connection_get_status();
-    } else if (jid->fulljid == NULL) {
-        log_error("Full JID required to connect, received: %s", fulljid);
-        connection_set_status(JABBER_DISCONNECTED);
-        jid_destroy(jid);
-        return connection_get_status();
-    }
-
-    jid_destroy(jid);
-
-    log_info("Connecting as %s", fulljid);
-    char *cert_path = prefs_get_string(PREF_TLS_CERTPATH);
-    jabber_conn_status_t status = connection_connect(fulljid, passwd, altdomain, port, tls_policy, cert_path);
-    prefs_free_string(cert_path);
-
-    return status;
-}
-
 static void
 _session_reconnect(void)
 {
@@ -468,7 +435,7 @@ _session_reconnect(void)
     } else {
         char *fulljid = create_fulljid(account->jid, account->resource);
         log_debug("Attempting reconnect with account %s", account->name);
-        _session_connect(fulljid, saved_account.passwd, account->server, account->port, account->tls_policy);
+        connection_connect_main(fulljid, saved_account.passwd, account->server, account->port, account->tls_policy);
         free(fulljid);
         g_timer_start(reconnect_timer);
     }
