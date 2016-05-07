@@ -538,7 +538,7 @@ _unavailable_handler(xmpp_stanza_t *const stanza)
         }
     } else {
         if (from_jid->resourcepart) {
-            session_remove_available_resource(from_jid->resourcepart);
+            connection_remove_available_resource(from_jid->resourcepart);
         }
     }
 
@@ -644,7 +644,7 @@ _available_handler(xmpp_stanza_t *const stanza)
     Resource *resource = stanza_resource_from_presence(xmpp_presence);
 
     if (g_strcmp0(xmpp_presence->jid->barejid, my_jid->barejid) == 0) {
-        session_add_available_resource(resource);
+        connection_add_available_resource(resource);
     } else {
         char *pgpsig = NULL;
         xmpp_stanza_t *x = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_SIGNED);

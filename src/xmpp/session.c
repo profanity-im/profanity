@@ -66,7 +66,6 @@
 #include "xmpp/stanza.h"
 #include "xmpp/xmpp.h"
 
-static GHashTable *available_resources;
 static GSList *disco_items;
 
 // for auto reconnect
@@ -101,7 +100,6 @@ session_init(void)
     connection_init();
     presence_sub_requests_init();
     caps_init();
-    available_resources = g_hash_table_new_full(g_str_hash, g_str_equal, free, (GDestroyNotify)resource_destroy);
     disco_items = NULL;
     xmpp_initialize();
 }
@@ -275,12 +273,6 @@ session_process_events(int millis)
     }
 }
 
-GList*
-session_get_available_resources(void)
-{
-    return g_hash_table_get_values(available_resources);
-}
-
 GSList*
 session_get_disco_items(void)
 {
@@ -312,18 +304,6 @@ char*
 session_get_account_name(void)
 {
     return saved_account.name;
-}
-
-void
-session_add_available_resource(Resource *resource)
-{
-    g_hash_table_replace(available_resources, strdup(resource->name), resource);
-}
-
-void
-session_remove_available_resource(const char *const resource)
-{
-    g_hash_table_remove(available_resources, resource);
 }
 
 void
@@ -463,7 +443,7 @@ _session_free_session_data(void)
 {
     g_slist_free_full(disco_items, (GDestroyNotify)_session_info_destroy);
     disco_items = NULL;
-    g_hash_table_remove_all(available_resources);
+    connection_remove_all_available_resources();
     chat_sessions_clear();
     presence_clear_sub_requests();
 }

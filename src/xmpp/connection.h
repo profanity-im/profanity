@@ -48,6 +48,7 @@ void connection_set_status(jabber_conn_status_t status);
 void connection_set_presence_msg(const char *const message);
 void connection_set_priority(const int priority);
 void connection_set_domain(char *domain);
+void connection_set_priority(int priority);
 
 void connection_free_conn(void);
 void connection_free_ctx(void);
@@ -57,6 +58,8 @@ void connection_free_log(void);
 
 xmpp_conn_t* connection_get_conn(void);
 xmpp_ctx_t* connection_get_ctx(void);
-void connection_set_priority(int priority);
+void connection_add_available_resource(Resource *resource);
+void connection_remove_available_resource(const char *const resource);
+void connection_remove_all_available_resources(void);
 
 #endif

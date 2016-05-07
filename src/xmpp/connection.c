@@ -59,6 +59,7 @@ typedef struct prof_conn_t {
     char *presence_message;
     int priority;
     char *domain;
+    GHashTable *available_resources;
 } ProfConnection;
 
 static ProfConnection conn;
@@ -81,6 +82,7 @@ void connection_init(void)
     conn.xmpp_conn = NULL;
     conn.xmpp_ctx = NULL;
     conn.domain = NULL;
+    conn.available_resources = g_hash_table_new_full(g_str_hash, g_str_equal, free, (GDestroyNotify)resource_destroy);
 }
 
 jabber_conn_status_t
@@ -195,6 +197,30 @@ const char*
 connection_get_fulljid(void)
 {
     return xmpp_conn_get_jid(conn.xmpp_conn);
+}
+
+GList*
+connection_get_available_resources(void)
+{
+    return g_hash_table_get_values(conn.available_resources);
+}
+
+void
+connection_add_available_resource(Resource *resource)
+{
+    g_hash_table_replace(conn.available_resources, strdup(resource->name), resource);
+}
+
+void
+connection_remove_available_resource(const char *const resource)
+{
+    g_hash_table_remove(conn.available_resources, resource);
+}
+
+void
+connection_remove_all_available_resources(void)
+{
+    g_hash_table_remove_all(conn.available_resources);
 }
 
 char*

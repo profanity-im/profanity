@@ -963,7 +963,7 @@ cons_show_account(ProfAccount *account)
 
     if ((connection_get_status() == JABBER_CONNECTED) &&
             (g_strcmp0(session_get_account_name(), account->name) == 0)) {
-        GList *resources = session_get_available_resources();
+        GList *resources = connection_get_available_resources();
         GList *ordered_resources = NULL;
 
         GList *curr = resources;

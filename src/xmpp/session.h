@@ -52,7 +52,5 @@ void session_lost_connection(void);
 GSList* session_get_disco_items(void);
 void session_set_disco_items(GSList *_disco_items);
 void session_autoping_fail(void);
-void session_remove_available_resource(const char *const resource);
-void session_add_available_resource(Resource *resource);
 
 #endif
