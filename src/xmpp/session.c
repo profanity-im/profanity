@@ -294,10 +294,6 @@ session_login_success(gboolean secured)
         _session_free_saved_details();
     }
 
-    Jid *my_jid = jid_create(connection_get_fulljid());
-    connection_set_domain(my_jid->domainpart);
-    jid_destroy(my_jid);
-
     chat_sessions_init();
 
     message_handlers_init();
@@ -309,7 +305,6 @@ session_login_success(gboolean secured)
     blocking_request();
 
     // items discovery
-    connection_disco_on_login();
     iq_disco_info_request_onconnect(connection_get_domain());
     iq_disco_items_request_onconnect(connection_get_domain());
 

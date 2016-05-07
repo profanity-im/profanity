@@ -41,12 +41,10 @@ void connection_init(void);
 
 jabber_conn_status_t connection_connect(const char *const fulljid, const char *const passwd, const char *const altdomain, int port,
     const char *const tls_policy);
-void connection_disco_on_login(void);
 
 void connection_set_status(jabber_conn_status_t status);
 void connection_set_presence_msg(const char *const message);
 void connection_set_priority(const int priority);
-void connection_set_domain(char *domain);
 void connection_set_priority(int priority);
 void connection_set_disco_items(GSList *disco_items);
 

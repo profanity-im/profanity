@@ -316,12 +316,6 @@ connection_set_priority(const int priority)
     conn.priority = priority;
 }
 
-void
-connection_set_domain(char *domain)
-{
-    conn.domain = strdup(domain);
-}
-
 #ifdef HAVE_LIBMESODE
 TLSCertificate*
 connection_get_tls_peer_cert(void)
@@ -367,16 +361,7 @@ connection_send_stanza(const char *const stanza)
     }
 }
 
-void
-connection_disco_on_login(void)
-{
-    DiscoInfo *info = malloc(sizeof(struct disco_info_t));
-    info->item = strdup(conn.domain);
-    info->features = g_hash_table_new_full(g_str_hash, g_str_equal, free, NULL);
-    conn.disco_items = g_slist_append(conn.disco_items, info);
-}
-
-void
+static void
 _disco_item_destroy(DiscoInfo *info)
 {
     if (info) {
@@ -418,7 +403,17 @@ _connection_handler(xmpp_conn_t *const xmpp_conn, const xmpp_conn_event_t status
     // login success
     if (status == XMPP_CONN_CONNECT) {
         log_debug("Connection handler: XMPP_CONN_CONNECT");
+
         conn.conn_status = JABBER_CONNECTED;
+
+        Jid *my_jid = jid_create(xmpp_conn_get_jid(conn.xmpp_conn));
+        conn.domain = strdup(my_jid->domainpart);
+        jid_destroy(my_jid);
+
+        DiscoInfo *info = malloc(sizeof(struct disco_info_t));
+        info->item = strdup(conn.domain);
+        info->features = g_hash_table_new_full(g_str_hash, g_str_equal, free, NULL);
+        conn.disco_items = g_slist_append(conn.disco_items, info);
 
         session_login_success(connection_is_secured());
 
