@@ -83,7 +83,7 @@ connection_send_stanza(const char *const stanza)
 }
 
 gboolean
-session_service_supports(const char *const feature)
+connection_supports(const char *const feature)
 {
     return FALSE;
 }

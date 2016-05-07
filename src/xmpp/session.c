@@ -66,8 +66,6 @@
 #include "xmpp/stanza.h"
 #include "xmpp/xmpp.h"
 
-static GSList *disco_items;
-
 // for auto reconnect
 static struct {
     char *name;
@@ -91,8 +89,6 @@ static void _session_free_saved_account(void);
 static void _session_free_saved_details(void);
 static void _session_free_session_data(void);
 
-static void _session_info_destroy(DiscoInfo *info);
-
 void
 session_init(void)
 {
@@ -100,7 +96,6 @@ session_init(void)
     connection_init();
     presence_sub_requests_init();
     caps_init();
-    disco_items = NULL;
     xmpp_initialize();
 }
 
@@ -273,33 +268,6 @@ session_process_events(int millis)
     }
 }
 
-GSList*
-session_get_disco_items(void)
-{
-    return (disco_items);
-}
-
-gboolean
-session_service_supports(const char *const feature)
-{
-    DiscoInfo *disco_info;
-    while (disco_items) {
-        disco_info = disco_items->data;
-        if (g_hash_table_lookup_extended(disco_info->features, feature, NULL, NULL)) {
-            return TRUE;
-        }
-        disco_items = g_slist_next(disco_items);
-    }
-
-    return FALSE;
-}
-
-void
-session_set_disco_items(GSList *_disco_items)
-{
-    disco_items = _disco_items;
-}
-
 char*
 session_get_account_name(void)
 {
@@ -342,11 +310,8 @@ session_login_success(gboolean secured)
     blocking_request();
 
     // items discovery
-    DiscoInfo *info = malloc(sizeof(struct disco_info_t));
-    info->item = strdup(connection_get_domain());
-    info->features = g_hash_table_new_full(g_str_hash, g_str_equal, free, NULL);
-    disco_items = g_slist_append(disco_items, info);
-    iq_disco_info_request_onconnect(info->item);
+    connection_disco_on_login();
+    iq_disco_info_request_onconnect(connection_get_domain());
     iq_disco_items_request_onconnect(connection_get_domain());
 
     if (prefs_get_boolean(PREF_CARBONS)){
@@ -393,18 +358,6 @@ session_lost_connection(void)
 }
 
 static void
-_session_info_destroy(DiscoInfo *info)
-{
-    if (info) {
-        free(info->item);
-        if (info->features) {
-            g_hash_table_destroy(info->features);
-        }
-        free(info);
-    }
-}
-
-static void
 _session_reconnect(void)
 {
     // reconnect with account.
@@ -441,8 +394,6 @@ _session_free_saved_details(void)
 static void
 _session_free_session_data(void)
 {
-    g_slist_free_full(disco_items, (GDestroyNotify)_session_info_destroy);
-    disco_items = NULL;
     connection_remove_all_available_resources();
     chat_sessions_clear();
     presence_clear_sub_requests();

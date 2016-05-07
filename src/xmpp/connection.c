@@ -60,6 +60,7 @@ typedef struct prof_conn_t {
     int priority;
     char *domain;
     GHashTable *available_resources;
+    GSList *disco_items;
 } ProfConnection;
 
 static ProfConnection conn;
@@ -82,6 +83,7 @@ void connection_init(void)
     conn.xmpp_conn = NULL;
     conn.xmpp_ctx = NULL;
     conn.domain = NULL;
+    conn.disco_items = NULL;
     conn.available_resources = g_hash_table_new_full(g_str_hash, g_str_equal, free, (GDestroyNotify)resource_destroy);
 }
 
@@ -199,6 +201,12 @@ connection_get_fulljid(void)
     return xmpp_conn_get_jid(conn.xmpp_conn);
 }
 
+GSList*
+connection_get_disco_items(void)
+{
+    return conn.disco_items;
+}
+
 GList*
 connection_get_available_resources(void)
 {
@@ -283,6 +291,12 @@ connection_set_presence_msg(const char *const message)
 }
 
 void
+connection_set_disco_items(GSList *disco_items)
+{
+    conn.disco_items = disco_items;
+}
+
+void
 connection_free_domain(void)
 {
     FREE_SET_NULL(conn.domain);
@@ -350,6 +364,50 @@ connection_send_stanza(const char *const stanza)
         xmpp_send_raw_string(conn.xmpp_conn, "%s", stanza);
         return TRUE;
     }
+}
+
+void
+connection_disco_on_login(void)
+{
+    DiscoInfo *info = malloc(sizeof(struct disco_info_t));
+    info->item = strdup(conn.domain);
+    info->features = g_hash_table_new_full(g_str_hash, g_str_equal, free, NULL);
+    conn.disco_items = g_slist_append(conn.disco_items, info);
+}
+
+void
+_disco_item_destroy(DiscoInfo *info)
+{
+    if (info) {
+        free(info->item);
+        if (info->features) {
+            g_hash_table_destroy(info->features);
+        }
+        free(info);
+    }
+}
+
+void
+connection_disco_items_free(void)
+{
+    g_slist_free_full(conn.disco_items, (GDestroyNotify)_disco_item_destroy);
+    conn.disco_items = NULL;
+}
+
+gboolean
+connection_supports(const char *const feature)
+{
+    DiscoInfo *disco_info;
+    GSList *curr = conn.disco_items;
+    while (curr) {
+        disco_info = curr->data;
+        if (g_hash_table_lookup_extended(disco_info->features, feature, NULL, NULL)) {
+            return TRUE;
+        }
+        curr = g_slist_next(curr);
+    }
+
+    return FALSE;
 }
 
 static void

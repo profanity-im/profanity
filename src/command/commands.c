@@ -2991,7 +2991,7 @@ cmd_blocked(ProfWin *window, const char *const command, gchar **args)
         return TRUE;
     }
 
-    if (!session_service_supports(XMPP_FEATURE_BLOCKING)) {
+    if (!connection_supports(XMPP_FEATURE_BLOCKING)) {
         cons_show("Blocking not supported by server.");
         return TRUE;
     }
