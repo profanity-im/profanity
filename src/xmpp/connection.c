@@ -78,6 +78,7 @@ static int _connection_certfail_cb(xmpp_tlscert_t *xmpptlscert, const char *cons
 
 void connection_init(void)
 {
+    xmpp_initialize();
     conn.conn_status = JABBER_STARTED;
     conn.presence_message = NULL;
     conn.xmpp_conn = NULL;

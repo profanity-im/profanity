@@ -96,7 +96,6 @@ session_init(void)
     connection_init();
     presence_sub_requests_init();
     caps_init();
-    xmpp_initialize();
 }
 
 jabber_conn_status_t
