@@ -389,7 +389,7 @@ _session_free_saved_details(void)
 static void
 _session_free_session_data(void)
 {
-\   connection_disco_items_free();
+    connection_disco_items_free();
     connection_remove_all_available_resources();
     chat_sessions_clear();
     presence_clear_sub_requests();
