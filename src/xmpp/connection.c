@@ -85,7 +85,7 @@ void connection_init(void)
     conn.xmpp_conn = NULL;
     conn.xmpp_ctx = NULL;
     conn.domain = NULL;
-    conn.features_by_jid = g_hash_table_new_full(g_str_hash, g_str_equal, free, (GDestroyNotify)g_hash_table_destroy);
+    conn.features_by_jid = NULL;
     conn.available_resources = g_hash_table_new_full(g_str_hash, g_str_equal, free, (GDestroyNotify)resource_destroy);
 }
 
@@ -434,6 +434,7 @@ _connection_handler(xmpp_conn_t *const xmpp_conn, const xmpp_conn_event_t status
         conn.domain = strdup(my_jid->domainpart);
         jid_destroy(my_jid);
 
+        conn.features_by_jid = g_hash_table_new_full(g_str_hash, g_str_equal, free, (GDestroyNotify)g_hash_table_destroy);
         g_hash_table_insert(conn.features_by_jid, strdup(conn.domain), g_hash_table_new_full(g_str_hash, g_str_equal, free, NULL));
 
         session_login_success(connection_is_secured());
