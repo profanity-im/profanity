@@ -1903,8 +1903,8 @@ _disco_info_response_id_handler_onconnect(xmpp_stanza_t *const stanza, void *con
     xmpp_stanza_t *query = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_QUERY);
 
     if (query) {
-        DiscoInfo *disco_info = connection_get_disco_info(from);
-        if (disco_info == NULL) {
+        GHashTable *features = connection_get_features(from);
+        if (features == NULL) {
             log_error("No matching disco item found for %s", from);
             return 1;
         }
@@ -1915,7 +1915,7 @@ _disco_info_response_id_handler_onconnect(xmpp_stanza_t *const stanza, void *con
             if (g_strcmp0(stanza_name, STANZA_NAME_FEATURE) == 0) {
                 const char *var = xmpp_stanza_get_attribute(child, STANZA_ATTR_VAR);
                 if (var) {
-                    g_hash_table_add(disco_info->features, strdup(var));
+                    g_hash_table_add(features, strdup(var));
                 }
             }
             child = xmpp_stanza_get_next(child);

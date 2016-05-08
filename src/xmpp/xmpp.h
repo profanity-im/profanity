@@ -105,11 +105,6 @@ typedef struct disco_identity_t {
     char *category;
 } DiscoIdentity;
 
-typedef struct disco_info_t {
-    char *jid;
-    GHashTable *features;
-} DiscoInfo;
-
 void session_init(void);
 jabber_conn_status_t session_connect_with_details(const char *const jid, const char *const passwd,
     const char *const altdomain, const int port, const char *const tls_policy);
@@ -118,7 +113,6 @@ void session_disconnect(void);
 void session_shutdown(void);
 void session_process_events(int millis);
 char* session_get_account_name(void);
-
 
 jabber_conn_status_t connection_get_status(void);
 char *connection_get_presence_msg(void);

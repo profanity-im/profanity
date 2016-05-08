@@ -61,7 +61,7 @@ typedef struct prof_conn_t {
     int priority;
     char *domain;
     GHashTable *available_resources;
-    GSList *disco_infos;
+    GHashTable *features_by_jid;
 } ProfConnection;
 
 static ProfConnection conn;
@@ -85,7 +85,7 @@ void connection_init(void)
     conn.xmpp_conn = NULL;
     conn.xmpp_ctx = NULL;
     conn.domain = NULL;
-    conn.disco_infos = NULL;
+    conn.features_by_jid = g_hash_table_new_full(g_str_hash, g_str_equal, free, (GDestroyNotify)g_hash_table_destroy);
     conn.available_resources = g_hash_table_new_full(g_str_hash, g_str_equal, free, (GDestroyNotify)resource_destroy);
 }
 
@@ -203,19 +203,10 @@ connection_get_fulljid(void)
     return xmpp_conn_get_jid(conn.xmpp_conn);
 }
 
-DiscoInfo*
-connection_get_disco_info(const char *const jid)
+GHashTable*
+connection_get_features(const char *const jid)
 {
-    GSList *curr = conn.disco_infos;
-    while (curr) {
-        DiscoInfo *disco_info = curr->data;
-        if (g_strcmp0(disco_info->jid, jid) == 0) {
-            return disco_info;
-        }
-        curr = g_slist_next(curr);
-    }
-
-    return NULL;
+    return g_hash_table_lookup(conn.features_by_jid, jid);
 }
 
 GList*
@@ -365,37 +356,30 @@ connection_send_stanza(const char *const stanza)
     }
 }
 
-static void
-_disco_info_destroy(DiscoInfo *info)
-{
-    if (info) {
-        free(info->jid);
-        if (info->features) {
-            g_hash_table_destroy(info->features);
-        }
-        free(info);
-    }
-}
-
 void
 connection_disco_items_free(void)
 {
-    g_slist_free_full(conn.disco_infos, (GDestroyNotify)_disco_info_destroy);
-    conn.disco_infos = NULL;
+    g_hash_table_destroy(conn.features_by_jid);
+    conn.features_by_jid = NULL;
 }
 
 gboolean
 connection_supports(const char *const feature)
 {
-    DiscoInfo *disco_info;
-    GSList *curr = conn.disco_infos;
+    GList *jids = g_hash_table_get_keys(conn.features_by_jid);
+
+    GList *curr = jids;
     while (curr) {
-        disco_info = curr->data;
-        if (g_hash_table_lookup_extended(disco_info->features, feature, NULL, NULL)) {
+        char *jid = curr->data;
+        GHashTable *features = g_hash_table_lookup(conn.features_by_jid, jid);
+        if (features && g_hash_table_lookup(features, feature)) {
             return TRUE;
         }
-        curr = g_slist_next(curr);
+
+        curr = g_list_next(curr);
     }
+
+    g_list_free(jids);
 
     return FALSE;
 }
@@ -403,15 +387,20 @@ connection_supports(const char *const feature)
 char*
 connection_jid_for_feature(const char *const feature)
 {
-    DiscoInfo *disco_info;
-    GSList *curr = conn.disco_infos;
+    GList *jids = g_hash_table_get_keys(conn.features_by_jid);
+
+    GList *curr = jids;
     while (curr) {
-        disco_info = curr->data;
-        if (g_hash_table_lookup_extended(disco_info->features, feature, NULL, NULL)) {
-            return disco_info->jid;
+        char *jid = curr->data;
+        GHashTable *features = g_hash_table_lookup(conn.features_by_jid, jid);
+        if (features && g_hash_table_lookup(features, feature)) {
+            return jid;
         }
-        curr = g_slist_next(curr);
+
+        curr = g_list_next(curr);
     }
+
+    g_list_free(jids);
 
     return NULL;
 }
@@ -422,11 +411,10 @@ connection_set_disco_items(GSList *items)
     GSList *curr = items;
     while (curr) {
         DiscoItem *item = curr->data;
-        DiscoInfo *info = malloc(sizeof(struct disco_info_t));
-        info->jid = strdup(item->jid);
-        info->features = g_hash_table_new_full(g_str_hash, g_str_equal, free, NULL);
-        conn.disco_infos = g_slist_append(conn.disco_infos, info);
-        iq_disco_info_request_onconnect(info->jid);
+        g_hash_table_insert(conn.features_by_jid, strdup(item->jid),
+            g_hash_table_new_full(g_str_hash, g_str_equal, free, NULL));
+
+        iq_disco_info_request_onconnect(item->jid);
 
         curr = g_slist_next(curr);
     }
@@ -446,10 +434,7 @@ _connection_handler(xmpp_conn_t *const xmpp_conn, const xmpp_conn_event_t status
         conn.domain = strdup(my_jid->domainpart);
         jid_destroy(my_jid);
 
-        DiscoInfo *info = malloc(sizeof(struct disco_info_t));
-        info->jid = strdup(conn.domain);
-        info->features = g_hash_table_new_full(g_str_hash, g_str_equal, free, NULL);
-        conn.disco_infos = g_slist_append(conn.disco_infos, info);
+        g_hash_table_insert(conn.features_by_jid, strdup(conn.domain), g_hash_table_new_full(g_str_hash, g_str_equal, free, NULL));
 
         session_login_success(connection_is_secured());
 
