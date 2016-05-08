@@ -2015,32 +2015,42 @@ _disco_items_result_handler(xmpp_stanza_t *const stanza)
     const char *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
     GSList *items = NULL;
 
-    if ((g_strcmp0(id, "confreq") == 0) || (g_strcmp0(id, "discoitemsreq") == 0) || (g_strcmp0(id, "discoitemsreq_onconnect") == 0)) {
-        log_debug("Response to query: %s", id);
-        xmpp_stanza_t *query = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_QUERY);
+    if ((g_strcmp0(id, "confreq") != 0) &&
+            (g_strcmp0(id, "discoitemsreq") != 0) &&
+            (g_strcmp0(id, "discoitemsreq_onconnect") != 0)) {
+        return;
+    }
 
-        if (query) {
-            xmpp_stanza_t *child = xmpp_stanza_get_children(query);
-            while (child) {
-                const char *stanza_name = xmpp_stanza_get_name(child);
-                if (stanza_name && (g_strcmp0(stanza_name, STANZA_NAME_ITEM) == 0)) {
-                    const char *item_jid = xmpp_stanza_get_attribute(child, STANZA_ATTR_JID);
-                    if (item_jid) {
-                        DiscoItem *item = malloc(sizeof(struct disco_item_t));
-                        item->jid = strdup(item_jid);
-                        const char *item_name = xmpp_stanza_get_attribute(child, STANZA_ATTR_NAME);
-                        if (item_name) {
-                            item->name = strdup(item_name);
-                        } else {
-                            item->name = NULL;
-                        }
-                        items = g_slist_append(items, item);
-                    }
+    log_debug("Response to query: %s", id);
+
+    xmpp_stanza_t *query = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_QUERY);
+    if (query == NULL) {
+        return;
+    }
+
+    xmpp_stanza_t *child = xmpp_stanza_get_children(query);
+    if (child == NULL) {
+        return;
+    }
+
+    while (child) {
+        const char *stanza_name = xmpp_stanza_get_name(child);
+        if (stanza_name && (g_strcmp0(stanza_name, STANZA_NAME_ITEM) == 0)) {
+            const char *item_jid = xmpp_stanza_get_attribute(child, STANZA_ATTR_JID);
+            if (item_jid) {
+                DiscoItem *item = malloc(sizeof(struct disco_item_t));
+                item->jid = strdup(item_jid);
+                const char *item_name = xmpp_stanza_get_attribute(child, STANZA_ATTR_NAME);
+                if (item_name) {
+                    item->name = strdup(item_name);
+                } else {
+                    item->name = NULL;
                 }
-
-                child = xmpp_stanza_get_next(child);
+                items = g_slist_append(items, item);
             }
         }
+
+        child = xmpp_stanza_get_next(child);
     }
 
     if (g_strcmp0(id, "confreq") == 0) {
@@ -2048,18 +2058,7 @@ _disco_items_result_handler(xmpp_stanza_t *const stanza)
     } else if (g_strcmp0(id, "discoitemsreq") == 0) {
         cons_show_disco_items(items, from);
     } else if (g_strcmp0(id, "discoitemsreq_onconnect") == 0) {
-        GSList *res_items = items;
-        if (res_items && (g_slist_length(res_items) > 0)) {
-            while (res_items) {
-                DiscoItem *item = res_items->data;
-                DiscoInfo *info = malloc(sizeof(struct disco_info_t));
-                info->item = strdup(item->jid);
-                info->features = g_hash_table_new_full(g_str_hash, g_str_equal, free, NULL);
-                connection_set_disco_items(g_slist_append(connection_get_disco_items(), info));
-                iq_disco_info_request_onconnect(info->item);
-                res_items = g_slist_next(res_items);
-            }
-        }
+        connection_set_disco_items(items);
     }
 
     g_slist_free_full(items, (GDestroyNotify)_item_destroy);

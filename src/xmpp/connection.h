@@ -46,7 +46,7 @@ void connection_set_status(jabber_conn_status_t status);
 void connection_set_presence_msg(const char *const message);
 void connection_set_priority(const int priority);
 void connection_set_priority(int priority);
-void connection_set_disco_items(GSList *disco_items);
+void connection_set_disco_items(GSList *items);
 
 void connection_free_conn(void);
 void connection_free_ctx(void);

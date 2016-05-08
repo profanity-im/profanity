@@ -50,6 +50,7 @@
 #include "event/server_events.h"
 #include "xmpp/connection.h"
 #include "xmpp/session.h"
+#include "xmpp/iq.h"
 
 typedef struct prof_conn_t {
     xmpp_log_t *xmpp_log;
@@ -292,12 +293,6 @@ connection_set_presence_msg(const char *const message)
 }
 
 void
-connection_set_disco_items(GSList *disco_items)
-{
-    conn.disco_items = disco_items;
-}
-
-void
 connection_free_domain(void)
 {
     FREE_SET_NULL(conn.domain);
@@ -394,6 +389,22 @@ connection_supports(const char *const feature)
     }
 
     return FALSE;
+}
+
+void
+connection_set_disco_items(GSList *items)
+{
+    GSList *curr = items;
+    while (curr) {
+        DiscoItem *item = curr->data;
+        DiscoInfo *info = malloc(sizeof(struct disco_info_t));
+        info->item = strdup(item->jid);
+        info->features = g_hash_table_new_full(g_str_hash, g_str_equal, free, NULL);
+        conn.disco_items = g_slist_append(conn.disco_items, info);
+        iq_disco_info_request_onconnect(info->item);
+
+        curr = g_slist_next(curr);
+    }
 }
 
 static void
