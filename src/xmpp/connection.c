@@ -61,7 +61,7 @@ typedef struct prof_conn_t {
     int priority;
     char *domain;
     GHashTable *available_resources;
-    GSList *disco_items;
+    GSList *disco_infos;
 } ProfConnection;
 
 static ProfConnection conn;
@@ -85,7 +85,7 @@ void connection_init(void)
     conn.xmpp_conn = NULL;
     conn.xmpp_ctx = NULL;
     conn.domain = NULL;
-    conn.disco_items = NULL;
+    conn.disco_infos = NULL;
     conn.available_resources = g_hash_table_new_full(g_str_hash, g_str_equal, free, (GDestroyNotify)resource_destroy);
 }
 
@@ -204,15 +204,15 @@ connection_get_fulljid(void)
 }
 
 GSList*
-connection_get_disco_items(void)
+connection_get_disco_infos(void)
 {
-    return conn.disco_items;
+    return conn.disco_infos;
 }
 
 DiscoInfo*
 connection_get_disco_info(const char *const jid)
 {
-    GSList *curr = conn.disco_items;
+    GSList *curr = conn.disco_infos;
     while (curr) {
         DiscoInfo *disco_info = curr->data;
         if (g_strcmp0(disco_info->jid, jid) == 0) {
@@ -372,7 +372,7 @@ connection_send_stanza(const char *const stanza)
 }
 
 static void
-_disco_item_destroy(DiscoInfo *info)
+_disco_info_destroy(DiscoInfo *info)
 {
     if (info) {
         free(info->jid);
@@ -386,15 +386,15 @@ _disco_item_destroy(DiscoInfo *info)
 void
 connection_disco_items_free(void)
 {
-    g_slist_free_full(conn.disco_items, (GDestroyNotify)_disco_item_destroy);
-    conn.disco_items = NULL;
+    g_slist_free_full(conn.disco_infos, (GDestroyNotify)_disco_info_destroy);
+    conn.disco_infos = NULL;
 }
 
 gboolean
 connection_supports(const char *const feature)
 {
     DiscoInfo *disco_info;
-    GSList *curr = conn.disco_items;
+    GSList *curr = conn.disco_infos;
     while (curr) {
         disco_info = curr->data;
         if (g_hash_table_lookup_extended(disco_info->features, feature, NULL, NULL)) {
@@ -410,7 +410,7 @@ char*
 connection_jid_for_feature(const char *const feature)
 {
     DiscoInfo *disco_info;
-    GSList *curr = conn.disco_items;
+    GSList *curr = conn.disco_infos;
     while (curr) {
         disco_info = curr->data;
         if (g_hash_table_lookup_extended(disco_info->features, feature, NULL, NULL)) {
@@ -431,7 +431,7 @@ connection_set_disco_items(GSList *items)
         DiscoInfo *info = malloc(sizeof(struct disco_info_t));
         info->jid = strdup(item->jid);
         info->features = g_hash_table_new_full(g_str_hash, g_str_equal, free, NULL);
-        conn.disco_items = g_slist_append(conn.disco_items, info);
+        conn.disco_infos = g_slist_append(conn.disco_infos, info);
         iq_disco_info_request_onconnect(info->jid);
 
         curr = g_slist_next(curr);
@@ -455,7 +455,7 @@ _connection_handler(xmpp_conn_t *const xmpp_conn, const xmpp_conn_event_t status
         DiscoInfo *info = malloc(sizeof(struct disco_info_t));
         info->jid = strdup(conn.domain);
         info->features = g_hash_table_new_full(g_str_hash, g_str_equal, free, NULL);
-        conn.disco_items = g_slist_append(conn.disco_items, info);
+        conn.disco_infos = g_slist_append(conn.disco_infos, info);
 
         session_login_success(connection_is_secured());
 
