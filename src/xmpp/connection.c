@@ -209,6 +209,21 @@ connection_get_disco_items(void)
     return conn.disco_items;
 }
 
+DiscoInfo*
+connection_get_disco_info(const char *const jid)
+{
+    GSList *curr = conn.disco_items;
+    while (curr) {
+        DiscoInfo *disco_info = curr->data;
+        if (g_strcmp0(disco_info->jid, jid) == 0) {
+            return disco_info;
+        }
+        curr = g_slist_next(curr);
+    }
+
+    return NULL;
+}
+
 GList*
 connection_get_available_resources(void)
 {
@@ -360,7 +375,7 @@ static void
 _disco_item_destroy(DiscoInfo *info)
 {
     if (info) {
-        free(info->item);
+        free(info->jid);
         if (info->features) {
             g_hash_table_destroy(info->features);
         }
@@ -392,14 +407,14 @@ connection_supports(const char *const feature)
 }
 
 char*
-connection_item_for_feature(const char *const feature)
+connection_jid_for_feature(const char *const feature)
 {
     DiscoInfo *disco_info;
     GSList *curr = conn.disco_items;
     while (curr) {
         disco_info = curr->data;
         if (g_hash_table_lookup_extended(disco_info->features, feature, NULL, NULL)) {
-            return disco_info->item;
+            return disco_info->jid;
         }
         curr = g_slist_next(curr);
     }
@@ -414,10 +429,10 @@ connection_set_disco_items(GSList *items)
     while (curr) {
         DiscoItem *item = curr->data;
         DiscoInfo *info = malloc(sizeof(struct disco_info_t));
-        info->item = strdup(item->jid);
+        info->jid = strdup(item->jid);
         info->features = g_hash_table_new_full(g_str_hash, g_str_equal, free, NULL);
         conn.disco_items = g_slist_append(conn.disco_items, info);
-        iq_disco_info_request_onconnect(info->item);
+        iq_disco_info_request_onconnect(info->jid);
 
         curr = g_slist_next(curr);
     }
@@ -438,7 +453,7 @@ _connection_handler(xmpp_conn_t *const xmpp_conn, const xmpp_conn_event_t status
         jid_destroy(my_jid);
 
         DiscoInfo *info = malloc(sizeof(struct disco_info_t));
-        info->item = strdup(conn.domain);
+        info->jid = strdup(conn.domain);
         info->features = g_hash_table_new_full(g_str_hash, g_str_equal, free, NULL);
         conn.disco_items = g_slist_append(conn.disco_items, info);
 

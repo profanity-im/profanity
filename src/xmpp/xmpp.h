@@ -106,7 +106,7 @@ typedef struct disco_identity_t {
 } DiscoIdentity;
 
 typedef struct disco_info_t {
-    char *item;
+    char *jid;
     GHashTable *features;
 } DiscoInfo;
 
