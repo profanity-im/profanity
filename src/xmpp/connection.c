@@ -203,12 +203,6 @@ connection_get_fulljid(void)
     return xmpp_conn_get_jid(conn.xmpp_conn);
 }
 
-GSList*
-connection_get_disco_infos(void)
-{
-    return conn.disco_infos;
-}
-
 DiscoInfo*
 connection_get_disco_info(const char *const jid)
 {

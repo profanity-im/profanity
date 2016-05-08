@@ -57,7 +57,6 @@ void connection_free_log(void);
 xmpp_conn_t* connection_get_conn(void);
 xmpp_ctx_t* connection_get_ctx(void);
 char *connection_get_domain(void);
-GSList* connection_get_disco_infos(void);
 char* connection_jid_for_feature(const char *const feature);
 DiscoInfo* connection_get_disco_info(const char *const jid);
 
