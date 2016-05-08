@@ -391,6 +391,22 @@ connection_supports(const char *const feature)
     return FALSE;
 }
 
+char*
+connection_item_for_feature(const char *const feature)
+{
+    DiscoInfo *disco_info;
+    GSList *curr = conn.disco_items;
+    while (curr) {
+        disco_info = curr->data;
+        if (g_hash_table_lookup_extended(disco_info->features, feature, NULL, NULL)) {
+            return disco_info->item;
+        }
+        curr = g_slist_next(curr);
+    }
+
+    return NULL;
+}
+
 void
 connection_set_disco_items(GSList *items)
 {

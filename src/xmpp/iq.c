@@ -309,36 +309,21 @@ iq_disable_carbons(void)
 void
 iq_http_upload_request(HTTPUpload *upload)
 {
-    GSList *disco_items = connection_get_disco_items();
-    DiscoInfo *disco_info;
-    if (disco_items && (g_slist_length(disco_items) > 0)) {
-        while (disco_items) {
-            disco_info = disco_items->data;
-            if (g_hash_table_lookup_extended(disco_info->features, STANZA_NS_HTTP_UPLOAD, NULL, NULL)) {
-                break;
-            }
-            disco_items = g_slist_next(disco_items);
-            if (!disco_items) {
-                cons_show_error("XEP-0363 HTTP File Upload is not supported by the server");
-                return;
-            }
-        }
-    } else {
-        cons_show_error("No disco items");
+    char *item = connection_item_for_feature(STANZA_NS_HTTP_UPLOAD);
+    if (item == NULL) {
+        cons_show_error("XEP-0363 HTTP File Upload is not supported by the server");
         return;
     }
 
     xmpp_ctx_t * const ctx = connection_get_ctx();
     char *id = create_unique_id("http_upload_request");
-
-    xmpp_stanza_t *iq = stanza_create_http_upload_request(ctx, id, disco_info->item, upload);
-
+    xmpp_stanza_t *iq = stanza_create_http_upload_request(ctx, id, item, upload);
     iq_id_handler_add(id, _http_upload_response_id_handler, upload);
-
     free(id);
 
     iq_send_stanza(iq);
     xmpp_stanza_release(iq);
+
     return;
 }
 
@@ -1920,22 +1905,22 @@ _disco_info_response_id_handler_onconnect(xmpp_stanza_t *const stanza, void *con
     if (query) {
         xmpp_stanza_t *child = xmpp_stanza_get_children(query);
 
-        GSList *disco_items = connection_get_disco_items();
-        DiscoInfo *disco_info;
-        if (disco_items && (g_slist_length(disco_items) > 0)) {
-            while (disco_items) {
-                disco_info = disco_items->data;
-                if (g_strcmp0(disco_info->item, from) == 0) {
-                    break;
-                }
-                disco_items = g_slist_next(disco_items);
-                if (!disco_items) {
-                    log_error("No matching disco item found for %s", from);
-                    return 1;
-                }
-            }
-        } else {
+        GSList *curr = connection_get_disco_items();
+        if (curr == NULL) {
             return 1;
+        }
+
+        DiscoInfo *disco_info;
+        while (curr) {
+            disco_info = curr->data;
+            if (g_strcmp0(disco_info->item, from) == 0) {
+                break;
+            }
+            curr = g_slist_next(curr);
+            if (!curr) {
+                log_error("No matching disco item found for %s", from);
+                return 1;
+            }
         }
 
         while (child) {

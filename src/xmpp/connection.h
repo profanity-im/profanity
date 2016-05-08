@@ -58,6 +58,7 @@ xmpp_conn_t* connection_get_conn(void);
 xmpp_ctx_t* connection_get_ctx(void);
 char *connection_get_domain(void);
 GSList* connection_get_disco_items(void);
+char* connection_item_for_feature(const char *const feature);
 
 void connection_add_available_resource(Resource *resource);
 void connection_remove_available_resource(const char *const resource);
