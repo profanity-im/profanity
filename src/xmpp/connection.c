@@ -247,13 +247,13 @@ connection_free_uuid(char *uuid)
     }
 }
 
-char *
+char*
 connection_get_domain(void)
 {
     return conn.domain;
 }
 
-char *
+char*
 connection_get_presence_msg(void)
 {
     return conn.presence_message;

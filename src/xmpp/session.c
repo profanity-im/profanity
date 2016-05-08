@@ -305,8 +305,9 @@ session_login_success(gboolean secured)
     blocking_request();
 
     // items discovery
-    iq_disco_info_request_onconnect(connection_get_domain());
-    iq_disco_items_request_onconnect(connection_get_domain());
+    char *domain = connection_get_domain();
+    iq_disco_info_request_onconnect(domain);
+    iq_disco_items_request_onconnect(domain);
 
     if (prefs_get_boolean(PREF_CARBONS)){
         iq_enable_carbons();
@@ -388,7 +389,7 @@ _session_free_saved_details(void)
 static void
 _session_free_session_data(void)
 {
-    connection_disco_items_free();
+\   connection_disco_items_free();
     connection_remove_all_available_resources();
     chat_sessions_clear();
     presence_clear_sub_requests();
