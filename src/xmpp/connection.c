@@ -81,10 +81,10 @@ void
 connection_init(void)
 {
     xmpp_initialize();
-    conn.conn_status = JABBER_DISCONNECTED;
-    conn.presence_message = NULL;
     conn.xmpp_conn = NULL;
     conn.xmpp_ctx = NULL;
+    conn.conn_status = JABBER_DISCONNECTED;
+    conn.presence_message = NULL;
     conn.domain = NULL;
     conn.features_by_jid = NULL;
     conn.available_resources = g_hash_table_new_full(g_str_hash, g_str_equal, free, (GDestroyNotify)resource_destroy);
@@ -93,8 +93,7 @@ connection_init(void)
 void
 connection_shutdown(void)
 {
-    connection_disco_items_free();
-    connection_remove_all_available_resources();
+    connection_clear_data();
     xmpp_shutdown();
 
     free(conn.xmpp_log);
@@ -204,6 +203,15 @@ connection_disconnect(void)
         xmpp_ctx_free(conn.xmpp_ctx);
         conn.xmpp_ctx = NULL;
     }
+}
+
+void
+connection_clear_data(void)
+{
+    g_hash_table_destroy(conn.features_by_jid);
+    conn.features_by_jid = NULL;
+
+    g_hash_table_remove_all(conn.available_resources);
 }
 
 #ifdef HAVE_LIBMESODE
@@ -350,12 +358,6 @@ connection_remove_available_resource(const char *const resource)
     g_hash_table_remove(conn.available_resources, resource);
 }
 
-void
-connection_remove_all_available_resources(void)
-{
-    g_hash_table_remove_all(conn.available_resources);
-}
-
 char*
 connection_create_uuid(void)
 {
@@ -407,13 +409,6 @@ void
 connection_set_priority(const int priority)
 {
     conn.priority = priority;
-}
-
-void
-connection_disco_items_free(void)
-{
-    g_hash_table_destroy(conn.features_by_jid);
-    conn.features_by_jid = NULL;
 }
 
 static void

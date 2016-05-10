@@ -208,8 +208,7 @@ session_disconnect(void)
         connection_disconnect();
         _session_free_saved_account();
         _session_free_saved_details();
-        connection_disco_items_free();
-        connection_remove_all_available_resources();
+        connection_clear_data();
         chat_sessions_clear();
         presence_clear_sub_requests();
     }
@@ -317,21 +316,16 @@ session_login_failed(void)
         sv_ev_failed_login();
         _session_free_saved_account();
         _session_free_saved_details();
-        connection_disco_items_free();
-        connection_remove_all_available_resources();
-        chat_sessions_clear();
-        presence_clear_sub_requests();
     } else {
         log_debug("Connection handler: Restarting reconnect timer");
         if (prefs_get_reconnect() != 0) {
             g_timer_start(reconnect_timer);
         }
-        // free resources but leave saved_user untouched
-        connection_disco_items_free();
-        connection_remove_all_available_resources();
-        chat_sessions_clear();
-        presence_clear_sub_requests();
     }
+
+    connection_clear_data();
+    chat_sessions_clear();
+    presence_clear_sub_requests();
 }
 
 void
@@ -345,8 +339,8 @@ session_lost_connection(void)
         _session_free_saved_account();
         _session_free_saved_details();
     }
-    connection_disco_items_free();
-    connection_remove_all_available_resources();
+
+    connection_clear_data();
     chat_sessions_clear();
     presence_clear_sub_requests();
 }

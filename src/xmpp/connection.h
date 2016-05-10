@@ -58,10 +58,10 @@ xmpp_ctx_t* connection_get_ctx(void);
 char *connection_get_domain(void);
 char* connection_jid_for_feature(const char *const feature);
 GHashTable* connection_get_features(const char *const jid);
-void connection_disco_items_free(void);
+
+void connection_clear_data(void);
 
 void connection_add_available_resource(Resource *resource);
 void connection_remove_available_resource(const char *const resource);
-void connection_remove_all_available_resources(void);
 
 #endif
