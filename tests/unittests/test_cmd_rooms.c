@@ -18,7 +18,7 @@
 
 static void test_with_connection_status(jabber_conn_status_t status)
 {
-    will_return(jabber_get_connection_status, status);
+    will_return(connection_get_status, status);
 
     expect_cons_show("You are not currently connected.");
 
@@ -41,16 +41,6 @@ void cmd_rooms_shows_message_when_connecting(void **state)
     test_with_connection_status(JABBER_CONNECTING);
 }
 
-void cmd_rooms_shows_message_when_started(void **state)
-{
-    test_with_connection_status(JABBER_STARTED);
-}
-
-void cmd_rooms_shows_message_when_undefined(void **state)
-{
-    test_with_connection_status(JABBER_UNDEFINED);
-}
-
 void cmd_rooms_uses_account_default_when_no_arg(void **state)
 {
     gchar *args[] = { NULL };
@@ -58,8 +48,8 @@ void cmd_rooms_uses_account_default_when_no_arg(void **state)
     ProfAccount *account = account_new("testaccount", NULL, NULL, NULL, TRUE, NULL, 0, NULL, NULL, NULL,
         0, 0, 0, 0, 0, strdup("default_conf_server"), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
 
-    will_return(jabber_get_connection_status, JABBER_CONNECTED);
-    will_return(jabber_get_account_name, "account_name");
+    will_return(connection_get_status, JABBER_CONNECTED);
+    will_return(session_get_account_name, "account_name");
     expect_any(accounts_get_account, name);
     will_return(accounts_get_account, account);
 
@@ -73,7 +63,7 @@ void cmd_rooms_arg_used_when_passed(void **state)
 {
     gchar *args[] = { "conf_server_arg" };
 
-    will_return(jabber_get_connection_status, JABBER_CONNECTED);
+    will_return(connection_get_status, JABBER_CONNECTED);
 
     expect_string(iq_room_list_request, conferencejid, "conf_server_arg");
 

@@ -19,7 +19,7 @@ void cmd_sub_shows_message_when_not_connected(void **state)
 {
     gchar *args[] = { NULL };
 
-    will_return(jabber_get_connection_status, JABBER_DISCONNECTED);
+    will_return(connection_get_status, JABBER_DISCONNECTED);
 
     expect_cons_show("You are currently not connected.");
 
@@ -31,7 +31,7 @@ void cmd_sub_shows_usage_when_no_arg(void **state)
 {
     gchar *args[] = { NULL };
 
-    will_return(jabber_get_connection_status, JABBER_CONNECTED);
+    will_return(connection_get_status, JABBER_CONNECTED);
 
     expect_string(cons_bad_cmd_usage, cmd, CMD_SUB);
 

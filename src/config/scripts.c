@@ -159,7 +159,7 @@ scripts_exec(const char *const script)
     while ((read = getline(&line, &len, scriptfile)) != -1) {
         ProfWin *win = wins_get_current();
         cmd_process_input(win, line);
-        jabber_process_events(10);
+        session_process_events(10);
         ui_update();
     }
 

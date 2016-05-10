@@ -24,7 +24,7 @@
 
 static void test_with_connection_status(jabber_conn_status_t status)
 {
-    will_return(jabber_get_connection_status, status);
+    will_return(connection_get_status, status);
     expect_cons_show("You are not currently connected.");
 
     gboolean result = cmd_bookmark(NULL, CMD_BOOKMARK, NULL);
@@ -46,23 +46,13 @@ void cmd_bookmark_shows_message_when_connecting(void **state)
     test_with_connection_status(JABBER_CONNECTING);
 }
 
-void cmd_bookmark_shows_message_when_started(void **state)
-{
-    test_with_connection_status(JABBER_STARTED);
-}
-
-void cmd_bookmark_shows_message_when_undefined(void **state)
-{
-    test_with_connection_status(JABBER_UNDEFINED);
-}
-
 void cmd_bookmark_shows_usage_when_no_args(void **state)
 {
     gchar *args[] = { NULL };
     ProfWin window;
     window.type = WIN_CONSOLE;
 
-    will_return(jabber_get_connection_status, JABBER_CONNECTED);
+    will_return(connection_get_status, JABBER_CONNECTED);
 
     expect_string(cons_bad_cmd_usage, cmd, CMD_BOOKMARK);
 
@@ -127,7 +117,7 @@ void cmd_bookmark_list_shows_bookmarks(void **state)
     bookmarks = g_list_append(bookmarks, bm4);
     bookmarks = g_list_append(bookmarks, bm5);
 
-    will_return(jabber_get_connection_status, JABBER_CONNECTED);
+    will_return(connection_get_status, JABBER_CONNECTED);
     will_return(bookmark_get_list, bookmarks);
 
     // TODO - Custom list compare
@@ -147,7 +137,7 @@ void cmd_bookmark_add_shows_message_when_invalid_jid(void **state)
     ProfWin window;
     window.type = WIN_CONSOLE;
 
-    will_return(jabber_get_connection_status, JABBER_CONNECTED);
+    will_return(connection_get_status, JABBER_CONNECTED);
 
     expect_cons_show("Can't add bookmark with JID 'room'; should be 'room@domain.tld'");
 
@@ -162,7 +152,7 @@ void cmd_bookmark_add_adds_bookmark_with_jid(void **state)
     ProfWin window;
     window.type = WIN_CONSOLE;
 
-    will_return(jabber_get_connection_status, JABBER_CONNECTED);
+    will_return(connection_get_status, JABBER_CONNECTED);
 
     expect_string(bookmark_add, jid, jid);
     expect_any(bookmark_add, nick);
@@ -184,7 +174,7 @@ void cmd_bookmark_add_adds_bookmark_with_jid_nick(void **state)
     ProfWin window;
     window.type = WIN_CONSOLE;
 
-    will_return(jabber_get_connection_status, JABBER_CONNECTED);
+    will_return(connection_get_status, JABBER_CONNECTED);
 
     expect_string(bookmark_add, jid, jid);
     expect_string(bookmark_add, nick, nick);
@@ -205,7 +195,7 @@ void cmd_bookmark_add_adds_bookmark_with_jid_autojoin(void **state)
     ProfWin window;
     window.type = WIN_CONSOLE;
 
-    will_return(jabber_get_connection_status, JABBER_CONNECTED);
+    will_return(connection_get_status, JABBER_CONNECTED);
 
     expect_string(bookmark_add, jid, jid);
     expect_any(bookmark_add, nick);
@@ -227,7 +217,7 @@ void cmd_bookmark_add_adds_bookmark_with_jid_nick_autojoin(void **state)
     ProfWin window;
     window.type = WIN_CONSOLE;
 
-    will_return(jabber_get_connection_status, JABBER_CONNECTED);
+    will_return(connection_get_status, JABBER_CONNECTED);
 
     expect_string(bookmark_add, jid, jid);
     expect_string(bookmark_add, nick, nick);
@@ -248,7 +238,7 @@ void cmd_bookmark_remove_removes_bookmark(void **state)
     ProfWin window;
     window.type = WIN_CONSOLE;
 
-    will_return(jabber_get_connection_status, JABBER_CONNECTED);
+    will_return(connection_get_status, JABBER_CONNECTED);
 
     expect_string(bookmark_remove, jid, jid);
     will_return(bookmark_remove, TRUE);
@@ -266,7 +256,7 @@ void cmd_bookmark_remove_shows_message_when_no_bookmark(void **state)
     ProfWin window;
     window.type = WIN_CONSOLE;
 
-    will_return(jabber_get_connection_status, JABBER_CONNECTED);
+    will_return(connection_get_status, JABBER_CONNECTED);
 
     expect_any(bookmark_remove, jid);
     will_return(bookmark_remove, FALSE);

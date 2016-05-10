@@ -352,7 +352,7 @@ ui_group_removed(const char *const contact, const char *const group)
 }
 
 void
-ui_handle_login_account_success(ProfAccount *account, int secured)
+ui_handle_login_account_success(ProfAccount *account, gboolean secured)
 {
     if (account->theme) {
         if (theme_load(account->theme)) {
@@ -378,7 +378,7 @@ ui_handle_login_account_success(ProfAccount *account, int secured)
     cons_show_login_success(account, secured);
     title_bar_set_presence(contact_presence);
     title_bar_set_connected(TRUE);
-    title_bar_set_tls(secured ? TRUE : FALSE);
+    title_bar_set_tls(secured);
 
     GString *fulljid = g_string_new(account->jid);
     g_string_append(fulljid, "/");
@@ -394,7 +394,7 @@ ui_update_presence(const resource_presence_t resource_presence,
 {
     contact_presence_t contact_presence = contact_presence_from_resource_presence(resource_presence);
     title_bar_set_presence(contact_presence);
-    gint priority = accounts_get_priority_for_presence_type(jabber_get_account_name(), resource_presence);
+    gint priority = accounts_get_priority_for_presence_type(session_get_account_name(), resource_presence);
     if (message) {
         cons_show("Status set to %s (priority %d), \"%s\".", show, priority, message);
     } else {
@@ -512,7 +512,7 @@ int
 ui_close_all_wins(void)
 {
     int count = 0;
-    jabber_conn_status_t conn_status = jabber_get_connection_status();
+    jabber_conn_status_t conn_status = connection_get_status();
 
     GList *win_nums = wins_get_nums();
     GList *curr = win_nums;
@@ -539,7 +539,7 @@ int
 ui_close_read_wins(void)
 {
     int count = 0;
-    jabber_conn_status_t conn_status = jabber_get_connection_status();
+    jabber_conn_status_t conn_status = connection_get_status();
 
     GList *win_nums = wins_get_nums();
     GList *curr = win_nums;
@@ -692,7 +692,7 @@ ui_close_win(int index)
 void
 ui_prune_wins(void)
 {
-    jabber_conn_status_t conn_status = jabber_get_connection_status();
+    jabber_conn_status_t conn_status = connection_get_status();
     gboolean pruned = FALSE;
 
     GSList *wins = wins_get_prune_wins();
@@ -1104,10 +1104,10 @@ static void
 _ui_draw_term_title(void)
 {
     char new_win_title[100];
-    jabber_conn_status_t status = jabber_get_connection_status();
+    jabber_conn_status_t status = connection_get_status();
 
     if (status == JABBER_CONNECTED) {
-        const char * const jid = jabber_get_fulljid();
+        const char * const jid = connection_get_fulljid();
         gint unread = wins_get_total_unread();
 
         if (unread != 0) {

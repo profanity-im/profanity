@@ -61,7 +61,7 @@
 #include "ui/ui.h"
 
 void
-sv_ev_login_account_success(char *account_name, int secured)
+sv_ev_login_account_success(char *account_name, gboolean secured)
 {
     ProfAccount *account = accounts_get_account(account_name);
 
@@ -105,7 +105,7 @@ sv_ev_roster_received(void)
         ui_show_roster();
     }
 
-    char *account_name = jabber_get_account_name();
+    char *account_name = session_get_account_name();
 
 #ifdef HAVE_LIBGPGME
     // check pgp key valid if specified
@@ -148,7 +148,7 @@ sv_ev_roster_received(void)
         cl_ev_presence_send(conn_presence, NULL, 0);
     }
 
-    const char *fulljid = jabber_get_fulljid();
+    const char *fulljid = connection_get_fulljid();
     plugins_on_connect(account_name, fulljid);
 }
 
@@ -238,7 +238,7 @@ void
 sv_ev_room_message(const char *const room_jid, const char *const nick, const char *const message)
 {
     if (prefs_get_boolean(PREF_GRLOG)) {
-        Jid *jid = jid_create(jabber_get_fulljid());
+        Jid *jid = jid_create(connection_get_fulljid());
         groupchat_log_chat(jid->barejid, room_jid, nick, message);
         jid_destroy(jid);
     }

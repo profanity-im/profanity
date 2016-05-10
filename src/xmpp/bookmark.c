@@ -51,7 +51,7 @@
 #include "log.h"
 #include "muc.h"
 #include "event/server_events.h"
-#include "xmpp/session.h"
+#include "xmpp/connection.h"
 #include "xmpp/iq.h"
 #include "xmpp/stanza.h"
 #include "xmpp/xmpp.h"
@@ -177,7 +177,7 @@ bookmark_join(const char *jid)
     if (found == NULL) {
         return FALSE;
     } else {
-        char *account_name = jabber_get_account_name();
+        char *account_name = session_get_account_name();
         ProfAccount *account = accounts_get_account(account_name);
         Bookmark *item = found->data;
         if (!muc_active(item->jid)) {
@@ -276,7 +276,7 @@ _bookmark_result_id_handler(xmpp_stanza_t *const stanza, void *const userdata)
     if (bookmark_ac == NULL) {
         bookmark_ac = autocomplete_new();
     }
-    my_jid = jid_create(jabber_get_fulljid());
+    my_jid = jid_create(connection_get_fulljid());
 
     ptr = xmpp_stanza_get_children(ptr);
     while (ptr) {
@@ -333,7 +333,7 @@ _bookmark_result_id_handler(xmpp_stanza_t *const stanza, void *const userdata)
         if (autojoin_val) {
             Jid *room_jid;
 
-            char *account_name = jabber_get_account_name();
+            char *account_name = session_get_account_name();
             ProfAccount *account = accounts_get_account(account_name);
             if (nick == NULL) {
                 nick = account->muc_nick;

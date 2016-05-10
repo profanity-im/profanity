@@ -85,7 +85,7 @@ rosterwin_roster(void)
         return;
     }
 
-    jabber_conn_status_t conn_status = jabber_get_connection_status();
+    jabber_conn_status_t conn_status = connection_get_status();
     if (conn_status != JABBER_CONNECTED) {
         return;
     }

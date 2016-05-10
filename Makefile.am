@@ -7,6 +7,7 @@ core_sources = \
 	src/resource.c src/resource.h \
 	src/roster_list.c src/roster_list.h \
 	src/xmpp/xmpp.h src/xmpp/capabilities.c src/xmpp/session.c \
+	src/xmpp/connection.h src/xmpp/connection.c \
 	src/xmpp/iq.c src/xmpp/message.c src/xmpp/presence.c src/xmpp/stanza.c \
 	src/xmpp/stanza.h src/xmpp/message.h src/xmpp/iq.h src/xmpp/presence.h \
 	src/xmpp/capabilities.h src/xmpp/session.h \

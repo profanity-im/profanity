@@ -56,6 +56,7 @@
 #include "xmpp/roster.h"
 #include "roster_list.h"
 #include "xmpp/stanza.h"
+#include "xmpp/connection.h"
 #include "xmpp/xmpp.h"
 #include "pgp/gpg.h"
 #include "plugins/plugins.h"
@@ -204,7 +205,7 @@ message_send_chat_pgp(const char *const barejid, const char *const msg)
 
     xmpp_stanza_t *message = NULL;
 #ifdef HAVE_LIBGPGME
-    char *account_name = jabber_get_account_name();
+    char *account_name = session_get_account_name();
     ProfAccount *account = accounts_get_account(account_name);
     if (account->pgp_keyid) {
         Jid *jidp = jid_create(jid);
@@ -739,7 +740,7 @@ _handle_carbons(xmpp_stanza_t *const stanza)
 
         Jid *jid_from = jid_create(from);
         Jid *jid_to = jid_create(to);
-        Jid *my_jid = jid_create(jabber_get_fulljid());
+        Jid *my_jid = jid_create(connection_get_fulljid());
 
         // check for and deal with message
         xmpp_stanza_t *body = xmpp_stanza_get_child_by_name(message, STANZA_NAME_BODY);
