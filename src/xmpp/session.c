@@ -116,8 +116,12 @@ session_connect_with_account(const ProfAccount *const account)
 
     // connect with fulljid
     Jid *jidp = jid_create_from_bare_and_resource(account->jid, account->resource);
-    jabber_conn_status_t result =
-        connection_connect(jidp->fulljid, account->password, account->server, account->port, account->tls_policy);
+    jabber_conn_status_t result = connection_connect(
+        jidp->fulljid,
+        account->password,
+        account->server,
+        account->port,
+        account->tls_policy);
     jid_destroy(jidp);
 
     return result;
@@ -181,8 +185,6 @@ session_autoping_fail(void)
         plugins_on_disconnect(account_name, fulljid);
         accounts_set_last_activity(session_get_account_name());
         connection_disconnect();
-        connection_free_conn();
-        connection_free_ctx();
     }
 
     connection_free_presence_msg();
@@ -210,8 +212,6 @@ session_disconnect(void)
         connection_remove_all_available_resources();
         chat_sessions_clear();
         presence_clear_sub_requests();
-        connection_free_conn();
-        connection_free_ctx();
     }
 
     connection_free_presence_msg();

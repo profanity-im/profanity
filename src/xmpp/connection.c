@@ -194,6 +194,16 @@ connection_disconnect(void)
     while (conn.conn_status == JABBER_DISCONNECTING) {
         session_process_events(10);
     }
+
+    if (conn.xmpp_conn) {
+        xmpp_conn_release(conn.xmpp_conn);
+        conn.xmpp_conn = NULL;
+    }
+
+    if (conn.xmpp_ctx) {
+        xmpp_ctx_free(conn.xmpp_ctx);
+        conn.xmpp_ctx = NULL;
+    }
 }
 
 #ifdef HAVE_LIBMESODE
@@ -370,24 +380,6 @@ char*
 connection_get_presence_msg(void)
 {
     return conn.presence_message;
-}
-
-void
-connection_free_conn(void)
-{
-    if (conn.xmpp_conn) {
-        xmpp_conn_release(conn.xmpp_conn);
-        conn.xmpp_conn = NULL;
-    }
-}
-
-void
-connection_free_ctx(void)
-{
-    if (conn.xmpp_ctx) {
-        xmpp_ctx_free(conn.xmpp_ctx);
-        conn.xmpp_ctx = NULL;
-    }
 }
 
 void

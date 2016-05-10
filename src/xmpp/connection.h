@@ -50,8 +50,6 @@ void connection_set_priority(const int priority);
 void connection_set_priority(int priority);
 void connection_set_disco_items(GSList *items);
 
-void connection_free_conn(void);
-void connection_free_ctx(void);
 void connection_free_presence_msg(void);
 void connection_free_domain(void);
 
