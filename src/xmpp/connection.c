@@ -67,12 +67,10 @@ typedef struct prof_conn_t {
 static ProfConnection conn;
 
 static xmpp_log_t* _xmpp_get_file_logger(void);
-static xmpp_log_level_t _get_xmpp_log_level(void);
 static void _xmpp_file_logger(void *const userdata, const xmpp_log_level_t level, const char *const area, const char *const msg);
-static log_level_t _get_log_level(const xmpp_log_level_t xmpp_level);
+
 static void _connection_handler(xmpp_conn_t *const xmpp_conn, const xmpp_conn_event_t status, const int error,
     xmpp_stream_error_t *const stream_error, void *const userdata);
-
 #ifdef HAVE_LIBMESODE
 static int _connection_certfail_cb(xmpp_tlscert_t *xmpptlscert, const char *const errormsg);
 #endif
@@ -171,6 +169,111 @@ connection_connect(const char *const fulljid, const char *const passwd, const ch
     }
 
     return conn.conn_status;
+}
+
+#ifdef HAVE_LIBMESODE
+TLSCertificate*
+_xmppcert_to_profcert(xmpp_tlscert_t *xmpptlscert)
+{
+    return tlscerts_new(
+        xmpp_conn_tlscert_fingerprint(xmpptlscert),
+        xmpp_conn_tlscert_version(xmpptlscert),
+        xmpp_conn_tlscert_serialnumber(xmpptlscert),
+        xmpp_conn_tlscert_subjectname(xmpptlscert),
+        xmpp_conn_tlscert_issuername(xmpptlscert),
+        xmpp_conn_tlscert_notbefore(xmpptlscert),
+        xmpp_conn_tlscert_notafter(xmpptlscert),
+        xmpp_conn_tlscert_key_algorithm(xmpptlscert),
+        xmpp_conn_tlscert_signature_algorithm(xmpptlscert));
+}
+
+TLSCertificate*
+connection_get_tls_peer_cert(void)
+{
+    xmpp_tlscert_t *xmpptlscert = xmpp_conn_tls_peer_cert(conn.xmpp_conn);
+    TLSCertificate *cert = _xmppcert_to_profcert(xmpptlscert);
+    xmpp_conn_free_tlscert(conn.xmpp_ctx, xmpptlscert);
+
+    return cert;
+}
+#endif
+
+gboolean
+connection_is_secured(void)
+{
+    if (conn.conn_status == JABBER_CONNECTED) {
+        return xmpp_conn_is_secured(conn.xmpp_conn) == 0 ? FALSE : TRUE;
+    } else {
+        return FALSE;
+    }
+}
+
+gboolean
+connection_send_stanza(const char *const stanza)
+{
+    if (conn.conn_status != JABBER_CONNECTED) {
+        return FALSE;
+    } else {
+        xmpp_send_raw_string(conn.xmpp_conn, "%s", stanza);
+        return TRUE;
+    }
+}
+
+gboolean
+connection_supports(const char *const feature)
+{
+    GList *jids = g_hash_table_get_keys(conn.features_by_jid);
+
+    GList *curr = jids;
+    while (curr) {
+        char *jid = curr->data;
+        GHashTable *features = g_hash_table_lookup(conn.features_by_jid, jid);
+        if (features && g_hash_table_lookup(features, feature)) {
+            return TRUE;
+        }
+
+        curr = g_list_next(curr);
+    }
+
+    g_list_free(jids);
+
+    return FALSE;
+}
+
+char*
+connection_jid_for_feature(const char *const feature)
+{
+    GList *jids = g_hash_table_get_keys(conn.features_by_jid);
+
+    GList *curr = jids;
+    while (curr) {
+        char *jid = curr->data;
+        GHashTable *features = g_hash_table_lookup(conn.features_by_jid, jid);
+        if (features && g_hash_table_lookup(features, feature)) {
+            return jid;
+        }
+
+        curr = g_list_next(curr);
+    }
+
+    g_list_free(jids);
+
+    return NULL;
+}
+
+void
+connection_set_disco_items(GSList *items)
+{
+    GSList *curr = items;
+    while (curr) {
+        DiscoItem *item = curr->data;
+        g_hash_table_insert(conn.features_by_jid, strdup(item->jid),
+            g_hash_table_new_full(g_str_hash, g_str_equal, free, NULL));
+
+        iq_disco_info_request_onconnect(item->jid);
+
+        curr = g_slist_next(curr);
+    }
 }
 
 jabber_conn_status_t
@@ -311,113 +414,11 @@ connection_set_priority(const int priority)
     conn.priority = priority;
 }
 
-#ifdef HAVE_LIBMESODE
-TLSCertificate*
-connection_get_tls_peer_cert(void)
-{
-    xmpp_tlscert_t *xmpptlscert = xmpp_conn_tls_peer_cert(conn.xmpp_conn);
-    int version = xmpp_conn_tlscert_version(xmpptlscert);
-    char *serialnumber = xmpp_conn_tlscert_serialnumber(xmpptlscert);
-    char *subjectname = xmpp_conn_tlscert_subjectname(xmpptlscert);
-    char *issuername = xmpp_conn_tlscert_issuername(xmpptlscert);
-    char *fingerprint = xmpp_conn_tlscert_fingerprint(xmpptlscert);
-    char *notbefore = xmpp_conn_tlscert_notbefore(xmpptlscert);
-    char *notafter = xmpp_conn_tlscert_notafter(xmpptlscert);
-    char *key_alg = xmpp_conn_tlscert_key_algorithm(xmpptlscert);
-    char *signature_alg = xmpp_conn_tlscert_signature_algorithm(xmpptlscert);
-
-    TLSCertificate *cert = tlscerts_new(fingerprint, version, serialnumber, subjectname, issuername, notbefore,
-        notafter, key_alg, signature_alg);
-
-    xmpp_conn_free_tlscert(conn.xmpp_ctx, xmpptlscert);
-
-    return cert;
-}
-#endif
-
-gboolean
-connection_is_secured(void)
-{
-    if (conn.conn_status == JABBER_CONNECTED) {
-        return xmpp_conn_is_secured(conn.xmpp_conn) == 0 ? FALSE : TRUE;
-    } else {
-        return FALSE;
-    }
-}
-
-gboolean
-connection_send_stanza(const char *const stanza)
-{
-    if (conn.conn_status != JABBER_CONNECTED) {
-        return FALSE;
-    } else {
-        xmpp_send_raw_string(conn.xmpp_conn, "%s", stanza);
-        return TRUE;
-    }
-}
-
 void
 connection_disco_items_free(void)
 {
     g_hash_table_destroy(conn.features_by_jid);
     conn.features_by_jid = NULL;
-}
-
-gboolean
-connection_supports(const char *const feature)
-{
-    GList *jids = g_hash_table_get_keys(conn.features_by_jid);
-
-    GList *curr = jids;
-    while (curr) {
-        char *jid = curr->data;
-        GHashTable *features = g_hash_table_lookup(conn.features_by_jid, jid);
-        if (features && g_hash_table_lookup(features, feature)) {
-            return TRUE;
-        }
-
-        curr = g_list_next(curr);
-    }
-
-    g_list_free(jids);
-
-    return FALSE;
-}
-
-char*
-connection_jid_for_feature(const char *const feature)
-{
-    GList *jids = g_hash_table_get_keys(conn.features_by_jid);
-
-    GList *curr = jids;
-    while (curr) {
-        char *jid = curr->data;
-        GHashTable *features = g_hash_table_lookup(conn.features_by_jid, jid);
-        if (features && g_hash_table_lookup(features, feature)) {
-            return jid;
-        }
-
-        curr = g_list_next(curr);
-    }
-
-    g_list_free(jids);
-
-    return NULL;
-}
-
-void
-connection_set_disco_items(GSList *items)
-{
-    GSList *curr = items;
-    while (curr) {
-        DiscoItem *item = curr->data;
-        g_hash_table_insert(conn.features_by_jid, strdup(item->jid),
-            g_hash_table_new_full(g_str_hash, g_str_equal, free, NULL));
-
-        iq_disco_info_request_onconnect(item->jid);
-
-        curr = g_slist_next(curr);
-    }
 }
 
 static void
@@ -466,18 +467,8 @@ _connection_handler(xmpp_conn_t *const xmpp_conn, const xmpp_conn_event_t status
 static int
 _connection_certfail_cb(xmpp_tlscert_t *xmpptlscert, const char *const errormsg)
 {
-    int version = xmpp_conn_tlscert_version(xmpptlscert);
-    char *serialnumber = xmpp_conn_tlscert_serialnumber(xmpptlscert);
-    char *subjectname = xmpp_conn_tlscert_subjectname(xmpptlscert);
-    char *issuername = xmpp_conn_tlscert_issuername(xmpptlscert);
-    char *fingerprint = xmpp_conn_tlscert_fingerprint(xmpptlscert);
-    char *notbefore = xmpp_conn_tlscert_notbefore(xmpptlscert);
-    char *notafter = xmpp_conn_tlscert_notafter(xmpptlscert);
-    char *key_alg = xmpp_conn_tlscert_key_algorithm(xmpptlscert);
-    char *signature_alg = xmpp_conn_tlscert_signature_algorithm(xmpptlscert);
+    TLSCertificate *cert = _xmppcert_to_profcert(xmpptlscert);
 
-    TLSCertificate *cert = tlscerts_new(fingerprint, version, serialnumber, subjectname, issuername, notbefore,
-        notafter, key_alg, signature_alg);
     int res = sv_ev_certfail(errormsg, cert);
     tlscerts_free(cert);
 
@@ -488,51 +479,38 @@ _connection_certfail_cb(xmpp_tlscert_t *xmpptlscert, const char *const errormsg)
 static xmpp_log_t*
 _xmpp_get_file_logger(void)
 {
-    xmpp_log_level_t level = _get_xmpp_log_level();
-    xmpp_log_t *file_log = malloc(sizeof(xmpp_log_t));
+    log_level_t prof_level = log_get_filter();
+    xmpp_log_level_t xmpp_level = XMPP_LEVEL_ERROR;
 
+    switch (prof_level) {
+    case PROF_LEVEL_DEBUG:  xmpp_level = XMPP_LEVEL_DEBUG; break;
+    case PROF_LEVEL_INFO:   xmpp_level = XMPP_LEVEL_INFO;  break;
+    case PROF_LEVEL_WARN:   xmpp_level = XMPP_LEVEL_WARN;  break;
+    default:                xmpp_level = XMPP_LEVEL_ERROR; break;
+    }
+
+    xmpp_log_t *file_log = malloc(sizeof(xmpp_log_t));
     file_log->handler = _xmpp_file_logger;
-    file_log->userdata = &level;
+    file_log->userdata = &xmpp_level;
 
     return file_log;
 }
 
-static xmpp_log_level_t
-_get_xmpp_log_level(void)
-{
-    log_level_t prof_level = log_get_filter();
-
-    if (prof_level == PROF_LEVEL_DEBUG) {
-        return XMPP_LEVEL_DEBUG;
-    } else if (prof_level == PROF_LEVEL_INFO) {
-        return XMPP_LEVEL_INFO;
-    } else if (prof_level == PROF_LEVEL_WARN) {
-        return XMPP_LEVEL_WARN;
-    } else {
-        return XMPP_LEVEL_ERROR;
-    }
-}
-
 static void
-_xmpp_file_logger(void *const userdata, const xmpp_log_level_t level, const char *const area, const char *const msg)
+_xmpp_file_logger(void *const userdata, const xmpp_log_level_t xmpp_level, const char *const area, const char *const msg)
 {
-    log_level_t prof_level = _get_log_level(level);
+    log_level_t prof_level = PROF_LEVEL_ERROR;
+
+    switch (xmpp_level) {
+    case XMPP_LEVEL_DEBUG:  prof_level = PROF_LEVEL_DEBUG; break;
+    case XMPP_LEVEL_INFO:   prof_level = PROF_LEVEL_INFO;  break;
+    case XMPP_LEVEL_WARN:   prof_level = PROF_LEVEL_WARN;  break;
+    default:                prof_level = PROF_LEVEL_ERROR; break;
+    }
+
     log_msg(prof_level, area, msg);
+
     if ((g_strcmp0(area, "xmpp") == 0) || (g_strcmp0(area, "conn")) == 0) {
         sv_ev_xmpp_stanza(msg);
-    }
-}
-
-static log_level_t
-_get_log_level(const xmpp_log_level_t xmpp_level)
-{
-    if (xmpp_level == XMPP_LEVEL_DEBUG) {
-        return PROF_LEVEL_DEBUG;
-    } else if (xmpp_level == XMPP_LEVEL_INFO) {
-        return PROF_LEVEL_INFO;
-    } else if (xmpp_level == XMPP_LEVEL_WARN) {
-        return PROF_LEVEL_WARN;
-    } else {
-        return PROF_LEVEL_ERROR;
     }
 }
