@@ -38,6 +38,7 @@
 #include "xmpp/xmpp.h"
 
 void connection_init(void);
+void connection_shutdown(void);
 
 jabber_conn_status_t connection_connect(const char *const fulljid, const char *const passwd, const char *const altdomain, int port,
     const char *const tls_policy);
@@ -53,7 +54,6 @@ void connection_free_conn(void);
 void connection_free_ctx(void);
 void connection_free_presence_msg(void);
 void connection_free_domain(void);
-void connection_free_log(void);
 
 xmpp_conn_t* connection_get_conn(void);
 xmpp_ctx_t* connection_get_ctx(void);

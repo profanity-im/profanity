@@ -225,12 +225,9 @@ session_shutdown(void)
 {
     _session_free_saved_account();
     _session_free_saved_details();
-    connection_disco_items_free();
-    connection_remove_all_available_resources();
     chat_sessions_clear();
     presence_clear_sub_requests();
-    xmpp_shutdown();
-    connection_free_log();
+    connection_shutdown();
 }
 
 void

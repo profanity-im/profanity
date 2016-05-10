@@ -90,6 +90,17 @@ connection_init(void)
     conn.available_resources = g_hash_table_new_full(g_str_hash, g_str_equal, free, (GDestroyNotify)resource_destroy);
 }
 
+void
+connection_shutdown(void)
+{
+    connection_disco_items_free();
+    connection_remove_all_available_resources();
+    xmpp_shutdown();
+
+    free(conn.xmpp_log);
+    conn.xmpp_log = NULL;
+}
+
 jabber_conn_status_t
 connection_connect(const char *const fulljid, const char *const passwd, const char *const altdomain, int port,
     const char *const tls_policy)
@@ -398,13 +409,6 @@ void
 connection_free_domain(void)
 {
     FREE_SET_NULL(conn.domain);
-}
-
-void
-connection_free_log(void)
-{
-    free(conn.xmpp_log);
-    conn.xmpp_log = NULL;
 }
 
 void
