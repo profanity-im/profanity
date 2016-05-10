@@ -77,7 +77,8 @@ TLSCertificate* _xmppcert_to_profcert(xmpp_tlscert_t *xmpptlscert);
 static int _connection_certfail_cb(xmpp_tlscert_t *xmpptlscert, const char *const errormsg);
 #endif
 
-void connection_init(void)
+void
+connection_init(void)
 {
     xmpp_initialize();
     conn.conn_status = JABBER_STARTED;

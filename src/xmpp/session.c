@@ -87,7 +87,6 @@ static void _session_reconnect(void);
 
 static void _session_free_saved_account(void);
 static void _session_free_saved_details(void);
-static void _session_free_session_data(void);
 
 void
 session_init(void)
@@ -218,8 +217,10 @@ session_disconnect(void)
         }
         _session_free_saved_account();
         _session_free_saved_details();
-        _session_free_session_data();
-
+        connection_disco_items_free();
+        connection_remove_all_available_resources();
+        chat_sessions_clear();
+        presence_clear_sub_requests();
         connection_free_conn();
         connection_free_ctx();
     }
@@ -235,7 +236,10 @@ session_shutdown(void)
 {
     _session_free_saved_account();
     _session_free_saved_details();
-    _session_free_session_data();
+    connection_disco_items_free();
+    connection_remove_all_available_resources();
+    chat_sessions_clear();
+    presence_clear_sub_requests();
     xmpp_shutdown();
     connection_free_log();
 }
@@ -248,22 +252,22 @@ session_process_events(int millis)
     jabber_conn_status_t conn_status = connection_get_status();
     switch (conn_status)
     {
-        case JABBER_CONNECTED:
-        case JABBER_CONNECTING:
-        case JABBER_DISCONNECTING:
-            xmpp_run_once(connection_get_ctx(), millis);
-            break;
-        case JABBER_DISCONNECTED:
-            reconnect_sec = prefs_get_reconnect();
-            if ((reconnect_sec != 0) && reconnect_timer) {
-                int elapsed_sec = g_timer_elapsed(reconnect_timer, NULL);
-                if (elapsed_sec > reconnect_sec) {
-                    _session_reconnect();
-                }
+    case JABBER_CONNECTED:
+    case JABBER_CONNECTING:
+    case JABBER_DISCONNECTING:
+        xmpp_run_once(connection_get_ctx(), millis);
+        break;
+    case JABBER_DISCONNECTED:
+        reconnect_sec = prefs_get_reconnect();
+        if ((reconnect_sec != 0) && reconnect_timer) {
+            int elapsed_sec = g_timer_elapsed(reconnect_timer, NULL);
+            if (elapsed_sec > reconnect_sec) {
+                _session_reconnect();
             }
-            break;
-        default:
-            break;
+        }
+        break;
+    default:
+        break;
     }
 }
 
@@ -327,14 +331,20 @@ session_login_failed(void)
         sv_ev_failed_login();
         _session_free_saved_account();
         _session_free_saved_details();
-        _session_free_session_data();
+        connection_disco_items_free();
+        connection_remove_all_available_resources();
+        chat_sessions_clear();
+        presence_clear_sub_requests();
     } else {
         log_debug("Connection handler: Restarting reconnect timer");
         if (prefs_get_reconnect() != 0) {
             g_timer_start(reconnect_timer);
         }
         // free resources but leave saved_user untouched
-        _session_free_session_data();
+        connection_disco_items_free();
+        connection_remove_all_available_resources();
+        chat_sessions_clear();
+        presence_clear_sub_requests();
     }
 }
 
@@ -349,7 +359,10 @@ session_lost_connection(void)
         _session_free_saved_account();
         _session_free_saved_details();
     }
-    _session_free_session_data();
+    connection_disco_items_free();
+    connection_remove_all_available_resources();
+    chat_sessions_clear();
+    presence_clear_sub_requests();
 }
 
 static void
@@ -357,16 +370,16 @@ _session_reconnect(void)
 {
     // reconnect with account.
     ProfAccount *account = accounts_get_account(saved_account.name);
-
     if (account == NULL) {
         log_error("Unable to reconnect, account no longer exists: %s", saved_account.name);
-    } else {
-        char *fulljid = create_fulljid(account->jid, account->resource);
-        log_debug("Attempting reconnect with account %s", account->name);
-        connection_connect(fulljid, saved_account.passwd, account->server, account->port, account->tls_policy);
-        free(fulljid);
-        g_timer_start(reconnect_timer);
+        return;
     }
+
+    char *fulljid = create_fulljid(account->jid, account->resource);
+    log_debug("Attempting reconnect with account %s", account->name);
+    connection_connect(fulljid, saved_account.passwd, account->server, account->port, account->tls_policy);
+    free(fulljid);
+    g_timer_start(reconnect_timer);
 }
 
 static void
@@ -384,14 +397,5 @@ _session_free_saved_details(void)
     FREE_SET_NULL(saved_details.passwd);
     FREE_SET_NULL(saved_details.altdomain);
     FREE_SET_NULL(saved_details.tls_policy);
-}
-
-static void
-_session_free_session_data(void)
-{
-    connection_disco_items_free();
-    connection_remove_all_available_resources();
-    chat_sessions_clear();
-    presence_clear_sub_requests();
 }
 
