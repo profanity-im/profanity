@@ -180,17 +180,17 @@ session_autoping_fail(void)
 {
     if (connection_get_status() == JABBER_CONNECTED) {
         log_info("Closing connection");
+
         char *account_name = session_get_account_name();
         const char *fulljid = connection_get_fulljid();
         plugins_on_disconnect(account_name, fulljid);
+
         accounts_set_last_activity(session_get_account_name());
+
         connection_disconnect();
     }
 
-    connection_free_presence_msg();
-    connection_free_domain();
-
-    connection_set_status(JABBER_DISCONNECTED);
+    connection_set_disconnected();
 
     session_lost_connection();
 }
@@ -201,22 +201,25 @@ session_disconnect(void)
     // if connected, send end stream and wait for response
     if (connection_get_status() == JABBER_CONNECTED) {
         log_info("Closing connection");
+
         char *account_name = session_get_account_name();
         const char *fulljid = connection_get_fulljid();
         plugins_on_disconnect(account_name, fulljid);
+
         accounts_set_last_activity(session_get_account_name());
+
         connection_disconnect();
+
         _session_free_saved_account();
         _session_free_saved_details();
+
         connection_clear_data();
+
         chat_sessions_clear();
         presence_clear_sub_requests();
     }
 
-    connection_free_presence_msg();
-    connection_free_domain();
-
-    connection_set_status(JABBER_DISCONNECTED);
+    connection_set_disconnected();
 }
 
 void
@@ -224,8 +227,10 @@ session_shutdown(void)
 {
     _session_free_saved_account();
     _session_free_saved_details();
+
     chat_sessions_clear();
     presence_clear_sub_requests();
+
     connection_shutdown();
 }
 

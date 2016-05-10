@@ -206,6 +206,14 @@ connection_disconnect(void)
 }
 
 void
+connection_set_disconnected(void)
+{
+    FREE_SET_NULL(conn.presence_message);
+    FREE_SET_NULL(conn.domain);
+    conn.conn_status = JABBER_DISCONNECTED;
+}
+
+void
 connection_clear_data(void)
 {
     g_hash_table_destroy(conn.features_by_jid);
@@ -310,12 +318,6 @@ connection_get_status(void)
     return conn.conn_status;
 }
 
-void
-connection_set_status(jabber_conn_status_t status)
-{
-    conn.conn_status = status;
-}
-
 xmpp_conn_t*
 connection_get_conn(void)
 {
@@ -385,24 +387,12 @@ connection_get_presence_msg(void)
 }
 
 void
-connection_free_presence_msg(void)
-{
-    FREE_SET_NULL(conn.presence_message);
-}
-
-void
 connection_set_presence_msg(const char *const message)
 {
     FREE_SET_NULL(conn.presence_message);
     if (message) {
         conn.presence_message = strdup(message);
     }
-}
-
-void
-connection_free_domain(void)
-{
-    FREE_SET_NULL(conn.domain);
 }
 
 void

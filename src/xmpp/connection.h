@@ -43,15 +43,12 @@ void connection_shutdown(void);
 jabber_conn_status_t connection_connect(const char *const fulljid, const char *const passwd, const char *const altdomain, int port,
     const char *const tls_policy);
 void connection_disconnect(void);
+void connection_set_disconnected(void);
 
-void connection_set_status(jabber_conn_status_t status);
 void connection_set_presence_msg(const char *const message);
 void connection_set_priority(const int priority);
 void connection_set_priority(int priority);
 void connection_set_disco_items(GSList *items);
-
-void connection_free_presence_msg(void);
-void connection_free_domain(void);
 
 xmpp_conn_t* connection_get_conn(void);
 xmpp_ctx_t* connection_get_ctx(void);
