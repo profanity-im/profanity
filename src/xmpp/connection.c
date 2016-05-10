@@ -71,7 +71,9 @@ static void _xmpp_file_logger(void *const userdata, const xmpp_log_level_t level
 
 static void _connection_handler(xmpp_conn_t *const xmpp_conn, const xmpp_conn_event_t status, const int error,
     xmpp_stream_error_t *const stream_error, void *const userdata);
+
 #ifdef HAVE_LIBMESODE
+TLSCertificate* _xmppcert_to_profcert(xmpp_tlscert_t *xmpptlscert);
 static int _connection_certfail_cb(xmpp_tlscert_t *xmpptlscert, const char *const errormsg);
 #endif
 
@@ -172,21 +174,6 @@ connection_connect(const char *const fulljid, const char *const passwd, const ch
 }
 
 #ifdef HAVE_LIBMESODE
-TLSCertificate*
-_xmppcert_to_profcert(xmpp_tlscert_t *xmpptlscert)
-{
-    return tlscerts_new(
-        xmpp_conn_tlscert_fingerprint(xmpptlscert),
-        xmpp_conn_tlscert_version(xmpptlscert),
-        xmpp_conn_tlscert_serialnumber(xmpptlscert),
-        xmpp_conn_tlscert_subjectname(xmpptlscert),
-        xmpp_conn_tlscert_issuername(xmpptlscert),
-        xmpp_conn_tlscert_notbefore(xmpptlscert),
-        xmpp_conn_tlscert_notafter(xmpptlscert),
-        xmpp_conn_tlscert_key_algorithm(xmpptlscert),
-        xmpp_conn_tlscert_signature_algorithm(xmpptlscert));
-}
-
 TLSCertificate*
 connection_get_tls_peer_cert(void)
 {
@@ -425,10 +412,11 @@ static void
 _connection_handler(xmpp_conn_t *const xmpp_conn, const xmpp_conn_event_t status, const int error,
     xmpp_stream_error_t *const stream_error, void *const userdata)
 {
-    // login success
-    if (status == XMPP_CONN_CONNECT) {
-        log_debug("Connection handler: XMPP_CONN_CONNECT");
+    switch (status) {
 
+    // login success
+    case XMPP_CONN_CONNECT:
+        log_debug("Connection handler: XMPP_CONN_CONNECT");
         conn.conn_status = JABBER_CONNECTED;
 
         Jid *my_jid = jid_create(xmpp_conn_get_jid(conn.xmpp_conn));
@@ -440,7 +428,10 @@ _connection_handler(xmpp_conn_t *const xmpp_conn, const xmpp_conn_event_t status
 
         session_login_success(connection_is_secured());
 
-    } else if (status == XMPP_CONN_DISCONNECT) {
+        break;
+
+    // disconnected
+    case XMPP_CONN_DISCONNECT:
         log_debug("Connection handler: XMPP_CONN_DISCONNECT");
 
         // lost connection for unknown reason
@@ -454,12 +445,20 @@ _connection_handler(xmpp_conn_t *const xmpp_conn, const xmpp_conn_event_t status
             session_login_failed();
         }
 
-        // close stream response from server after disconnect is handled too
+        // close stream response from server after disconnect is handled
         conn.conn_status = JABBER_DISCONNECTED;
-    } else if (status == XMPP_CONN_FAIL) {
+
+        break;
+
+    // connection failed
+    case XMPP_CONN_FAIL:
         log_debug("Connection handler: XMPP_CONN_FAIL");
-    } else {
+        break;
+
+    // unknown state
+    default:
         log_error("Connection handler: Unknown status");
+        break;
     }
 }
 
@@ -473,6 +472,21 @@ _connection_certfail_cb(xmpp_tlscert_t *xmpptlscert, const char *const errormsg)
     tlscerts_free(cert);
 
     return res;
+}
+
+TLSCertificate*
+_xmppcert_to_profcert(xmpp_tlscert_t *xmpptlscert)
+{
+    return tlscerts_new(
+        xmpp_conn_tlscert_fingerprint(xmpptlscert),
+        xmpp_conn_tlscert_version(xmpptlscert),
+        xmpp_conn_tlscert_serialnumber(xmpptlscert),
+        xmpp_conn_tlscert_subjectname(xmpptlscert),
+        xmpp_conn_tlscert_issuername(xmpptlscert),
+        xmpp_conn_tlscert_notbefore(xmpptlscert),
+        xmpp_conn_tlscert_notafter(xmpptlscert),
+        xmpp_conn_tlscert_key_algorithm(xmpptlscert),
+        xmpp_conn_tlscert_signature_algorithm(xmpptlscert));
 }
 #endif
 
