@@ -46,16 +46,6 @@ void cmd_bookmark_shows_message_when_connecting(void **state)
     test_with_connection_status(JABBER_CONNECTING);
 }
 
-void cmd_bookmark_shows_message_when_started(void **state)
-{
-    test_with_connection_status(JABBER_STARTED);
-}
-
-void cmd_bookmark_shows_message_when_undefined(void **state)
-{
-    test_with_connection_status(JABBER_UNDEFINED);
-}
-
 void cmd_bookmark_shows_usage_when_no_args(void **state)
 {
     gchar *args[] = { NULL };

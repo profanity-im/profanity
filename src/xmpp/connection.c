@@ -81,7 +81,7 @@ void
 connection_init(void)
 {
     xmpp_initialize();
-    conn.conn_status = JABBER_STARTED;
+    conn.conn_status = JABBER_DISCONNECTED;
     conn.presence_message = NULL;
     conn.xmpp_conn = NULL;
     conn.xmpp_ctx = NULL;
@@ -172,6 +172,17 @@ connection_connect(const char *const fulljid, const char *const passwd, const ch
     }
 
     return conn.conn_status;
+}
+
+void
+connection_disconnect(void)
+{
+    conn.conn_status = JABBER_DISCONNECTING;
+    xmpp_disconnect(conn.xmpp_conn);
+
+    while (conn.conn_status == JABBER_DISCONNECTING) {
+        session_process_events(10);
+    }
 }
 
 #ifdef HAVE_LIBMESODE

@@ -41,11 +41,6 @@ void cmd_connect_shows_message_when_connected(void **state)
     test_with_connection_status(JABBER_CONNECTED);
 }
 
-void cmd_connect_shows_message_when_undefined(void **state)
-{
-    test_with_connection_status(JABBER_UNDEFINED);
-}
-
 void cmd_connect_when_no_account(void **state)
 {
     gchar *args[] = { "user@server.org", NULL };

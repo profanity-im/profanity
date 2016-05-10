@@ -41,16 +41,6 @@ void cmd_rooms_shows_message_when_connecting(void **state)
     test_with_connection_status(JABBER_CONNECTING);
 }
 
-void cmd_rooms_shows_message_when_started(void **state)
-{
-    test_with_connection_status(JABBER_STARTED);
-}
-
-void cmd_rooms_shows_message_when_undefined(void **state)
-{
-    test_with_connection_status(JABBER_UNDEFINED);
-}
-
 void cmd_rooms_uses_account_default_when_no_arg(void **state)
 {
     gchar *args[] = { NULL };

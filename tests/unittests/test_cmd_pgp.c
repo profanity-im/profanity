@@ -55,16 +55,6 @@ void cmd_pgp_start_shows_message_when_connecting(void **state)
     cmd_pgp_start_shows_message_when_connection(JABBER_CONNECTING);
 }
 
-void cmd_pgp_start_shows_message_when_undefined(void **state)
-{
-    cmd_pgp_start_shows_message_when_connection(JABBER_UNDEFINED);
-}
-
-void cmd_pgp_start_shows_message_when_started(void **state)
-{
-    cmd_pgp_start_shows_message_when_connection(JABBER_STARTED);
-}
-
 void cmd_pgp_start_shows_message_when_no_arg_in_wintype(win_type_t wintype)
 {
     gchar *args[] = { "start", NULL };

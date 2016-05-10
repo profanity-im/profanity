@@ -354,7 +354,7 @@ gboolean
 cmd_connect(ProfWin *window, const char *const command, gchar **args)
 {
     jabber_conn_status_t conn_status = connection_get_status();
-    if ((conn_status != JABBER_DISCONNECTED) && (conn_status != JABBER_STARTED)) {
+    if (conn_status != JABBER_DISCONNECTED) {
         cons_show("You are either connected already, or a login is in process.");
         return TRUE;
     }

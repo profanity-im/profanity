@@ -43,11 +43,6 @@ void cmd_join_shows_message_when_disconnected(void **state)
     test_with_connection_status(JABBER_DISCONNECTED);
 }
 
-void cmd_join_shows_message_when_undefined(void **state)
-{
-    test_with_connection_status(JABBER_UNDEFINED);
-}
-
 void cmd_join_shows_error_message_when_invalid_room_jid(void **state)
 {
     gchar *args[] = { "//@@/", NULL };

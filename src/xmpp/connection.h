@@ -41,6 +41,7 @@ void connection_init(void);
 
 jabber_conn_status_t connection_connect(const char *const fulljid, const char *const passwd, const char *const altdomain, int port,
     const char *const tls_policy);
+void connection_disconnect(void);
 
 void connection_set_status(jabber_conn_status_t status);
 void connection_set_presence_msg(const char *const message);

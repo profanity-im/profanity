@@ -42,11 +42,6 @@ void cmd_roster_shows_message_when_disconnected(void **state)
     test_with_connection_status(JABBER_DISCONNECTED);
 }
 
-void cmd_roster_shows_message_when_undefined(void **state)
-{
-    test_with_connection_status(JABBER_UNDEFINED);
-}
-
 void cmd_roster_shows_roster_when_no_args(void **state)
 {
     gchar *args[] = { NULL };

@@ -164,16 +164,6 @@ void cmd_otr_gen_shows_message_when_disconnected(void **state)
     test_with_command_and_connection_status("gen", cmd_otr_gen, JABBER_DISCONNECTED);
 }
 
-void cmd_otr_gen_shows_message_when_undefined(void **state)
-{
-    test_with_command_and_connection_status("gen", cmd_otr_gen, JABBER_UNDEFINED);
-}
-
-void cmd_otr_gen_shows_message_when_started(void **state)
-{
-    test_with_command_and_connection_status("gen", cmd_otr_gen, JABBER_STARTED);
-}
-
 void cmd_otr_gen_shows_message_when_connecting(void **state)
 {
     test_with_command_and_connection_status("gen", cmd_otr_gen, JABBER_CONNECTING);
@@ -207,16 +197,6 @@ void cmd_otr_gen_generates_key_for_connected_account(void **state)
 void cmd_otr_myfp_shows_message_when_disconnected(void **state)
 {
     test_with_command_and_connection_status("myfp", cmd_otr_myfp, JABBER_DISCONNECTED);
-}
-
-void cmd_otr_myfp_shows_message_when_undefined(void **state)
-{
-    test_with_command_and_connection_status("myfp", cmd_otr_myfp, JABBER_UNDEFINED);
-}
-
-void cmd_otr_myfp_shows_message_when_started(void **state)
-{
-    test_with_command_and_connection_status("myfp", cmd_otr_myfp, JABBER_STARTED);
 }
 
 void cmd_otr_myfp_shows_message_when_connecting(void **state)

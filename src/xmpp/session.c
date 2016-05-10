@@ -180,13 +180,7 @@ session_autoping_fail(void)
         const char *fulljid = connection_get_fulljid();
         plugins_on_disconnect(account_name, fulljid);
         accounts_set_last_activity(session_get_account_name());
-        connection_set_status(JABBER_DISCONNECTING);
-        xmpp_disconnect(connection_get_conn());
-
-        while (connection_get_status() == JABBER_DISCONNECTING) {
-            session_process_events(10);
-        }
-
+        connection_disconnect();
         connection_free_conn();
         connection_free_ctx();
     }
@@ -204,17 +198,12 @@ session_disconnect(void)
 {
     // if connected, send end stream and wait for response
     if (connection_get_status() == JABBER_CONNECTED) {
+        log_info("Closing connection");
         char *account_name = session_get_account_name();
         const char *fulljid = connection_get_fulljid();
         plugins_on_disconnect(account_name, fulljid);
-        log_info("Closing connection");
         accounts_set_last_activity(session_get_account_name());
-        connection_set_status(JABBER_DISCONNECTING);
-        xmpp_disconnect(connection_get_conn());
-
-        while (connection_get_status() == JABBER_DISCONNECTING) {
-            session_process_events(10);
-        }
+        connection_disconnect();
         _session_free_saved_account();
         _session_free_saved_details();
         connection_disco_items_free();
@@ -228,7 +217,7 @@ session_disconnect(void)
     connection_free_presence_msg();
     connection_free_domain();
 
-    connection_set_status(JABBER_STARTED);
+    connection_set_status(JABBER_DISCONNECTED);
 }
 
 void
