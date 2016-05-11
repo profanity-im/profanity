@@ -33,9 +33,9 @@
  */
 #include "config.h"
 
+#include <errno.h>
 #include <sys/select.h>
 #include <assert.h>
-#include <errno.h>
 #include <stdlib.h>
 #include <stdint.h>
 #include <string.h>
