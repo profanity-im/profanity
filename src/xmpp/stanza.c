@@ -53,9 +53,10 @@
 
 #include "common.h"
 #include "log.h"
-#include "xmpp/connection.h"
+#include "xmpp/session.h"
 #include "xmpp/stanza.h"
 #include "xmpp/capabilities.h"
+#include "xmpp/connection.h"
 #include "xmpp/form.h"
 
 #include "muc.h"

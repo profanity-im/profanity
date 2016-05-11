@@ -59,11 +59,13 @@
 #include "event/server_events.h"
 #include "xmpp/capabilities.h"
 #include "xmpp/blocking.h"
-#include "xmpp/connection.h"
+#include "xmpp/session.h"
 #include "xmpp/stanza.h"
 #include "xmpp/form.h"
 #include "roster_list.h"
 #include "xmpp/xmpp.h"
+#include "xmpp/connection.h"
+#include "xmpp/session.h"
 #include "xmpp/iq.h"
 #include "xmpp/roster.h"
 #include "plugins/plugins.h"
@@ -225,7 +227,7 @@ iq_id_handler_add(const char *const id, ProfIdCallback func, void *userdata)
 void
 iq_autoping_check(void)
 {
-    if (jabber_get_connection_status() != JABBER_CONNECTED) {
+    if (connection_get_status() != JABBER_CONNECTED) {
         return;
     }
 
@@ -243,7 +245,7 @@ iq_autoping_check(void)
     if (timeout > 0 && seconds_elapsed >= timeout) {
         cons_show("Autoping response timed out afer %u seconds.", timeout);
         log_debug("Autoping check: timed out afer %u seconds, disconnecting", timeout);
-        connection_autoping_fail();
+        session_autoping_fail();
         autoping_wait = FALSE;
         g_timer_destroy(autoping_time);
         autoping_time = NULL;
@@ -253,7 +255,7 @@ iq_autoping_check(void)
 void
 iq_set_autoping(const int seconds)
 {
-    if (jabber_get_connection_status() != JABBER_CONNECTED) {
+    if (connection_get_status() != JABBER_CONNECTED) {
         return;
     }
 
@@ -307,36 +309,21 @@ iq_disable_carbons(void)
 void
 iq_http_upload_request(HTTPUpload *upload)
 {
-    GSList *disco_items = connection_get_disco_items();
-    DiscoInfo *disco_info;
-    if (disco_items && (g_slist_length(disco_items) > 0)) {
-        while (disco_items) {
-            disco_info = disco_items->data;
-            if (g_hash_table_lookup_extended(disco_info->features, STANZA_NS_HTTP_UPLOAD, NULL, NULL)) {
-                break;
-            }
-            disco_items = g_slist_next(disco_items);
-            if (!disco_items) {
-                cons_show_error("XEP-0363 HTTP File Upload is not supported by the server");
-                return;
-            }
-        }
-    } else {
-        cons_show_error("No disco items");
+    char *jid = connection_jid_for_feature(STANZA_NS_HTTP_UPLOAD);
+    if (jid == NULL) {
+        cons_show_error("XEP-0363 HTTP File Upload is not supported by the server");
         return;
     }
 
     xmpp_ctx_t * const ctx = connection_get_ctx();
     char *id = create_unique_id("http_upload_request");
-
-    xmpp_stanza_t *iq = stanza_create_http_upload_request(ctx, id, disco_info->item, upload);
-
+    xmpp_stanza_t *iq = stanza_create_http_upload_request(ctx, id, jid, upload);
     iq_id_handler_add(id, _http_upload_response_id_handler, upload);
-
     free(id);
 
     iq_send_stanza(iq);
     xmpp_stanza_release(iq);
+
     return;
 }
 
@@ -959,7 +946,7 @@ _manual_pong_id_handler(xmpp_stanza_t *const stanza, void *const userdata)
 static int
 _autoping_timed_send(xmpp_conn_t *const conn, void *const userdata)
 {
-    if (jabber_get_connection_status() != JABBER_CONNECTED) {
+    if (connection_get_status() != JABBER_CONNECTED) {
         return 1;
     }
 
@@ -1916,32 +1903,19 @@ _disco_info_response_id_handler_onconnect(xmpp_stanza_t *const stanza, void *con
     xmpp_stanza_t *query = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_QUERY);
 
     if (query) {
-        xmpp_stanza_t *child = xmpp_stanza_get_children(query);
-
-        GSList *disco_items = connection_get_disco_items();
-        DiscoInfo *disco_info;
-        if (disco_items && (g_slist_length(disco_items) > 0)) {
-            while (disco_items) {
-                disco_info = disco_items->data;
-                if (g_strcmp0(disco_info->item, from) == 0) {
-                    break;
-                }
-                disco_items = g_slist_next(disco_items);
-                if (!disco_items) {
-                    log_error("No matching disco item found for %s", from);
-                    return 1;
-                }
-            }
-        } else {
+        GHashTable *features = connection_get_features(from);
+        if (features == NULL) {
+            log_error("No matching disco item found for %s", from);
             return 1;
         }
 
+        xmpp_stanza_t *child = xmpp_stanza_get_children(query);
         while (child) {
             const char *stanza_name = xmpp_stanza_get_name(child);
             if (g_strcmp0(stanza_name, STANZA_NAME_FEATURE) == 0) {
                 const char *var = xmpp_stanza_get_attribute(child, STANZA_ATTR_VAR);
                 if (var) {
-                    g_hash_table_add(disco_info->features, strdup(var));
+                    g_hash_table_add(features, strdup(var));
                 }
             }
             child = xmpp_stanza_get_next(child);
@@ -2013,32 +1987,42 @@ _disco_items_result_handler(xmpp_stanza_t *const stanza)
     const char *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
     GSList *items = NULL;
 
-    if ((g_strcmp0(id, "confreq") == 0) || (g_strcmp0(id, "discoitemsreq") == 0) || (g_strcmp0(id, "discoitemsreq_onconnect") == 0)) {
-        log_debug("Response to query: %s", id);
-        xmpp_stanza_t *query = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_QUERY);
+    if ((g_strcmp0(id, "confreq") != 0) &&
+            (g_strcmp0(id, "discoitemsreq") != 0) &&
+            (g_strcmp0(id, "discoitemsreq_onconnect") != 0)) {
+        return;
+    }
 
-        if (query) {
-            xmpp_stanza_t *child = xmpp_stanza_get_children(query);
-            while (child) {
-                const char *stanza_name = xmpp_stanza_get_name(child);
-                if (stanza_name && (g_strcmp0(stanza_name, STANZA_NAME_ITEM) == 0)) {
-                    const char *item_jid = xmpp_stanza_get_attribute(child, STANZA_ATTR_JID);
-                    if (item_jid) {
-                        DiscoItem *item = malloc(sizeof(struct disco_item_t));
-                        item->jid = strdup(item_jid);
-                        const char *item_name = xmpp_stanza_get_attribute(child, STANZA_ATTR_NAME);
-                        if (item_name) {
-                            item->name = strdup(item_name);
-                        } else {
-                            item->name = NULL;
-                        }
-                        items = g_slist_append(items, item);
-                    }
+    log_debug("Response to query: %s", id);
+
+    xmpp_stanza_t *query = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_QUERY);
+    if (query == NULL) {
+        return;
+    }
+
+    xmpp_stanza_t *child = xmpp_stanza_get_children(query);
+    if (child == NULL) {
+        return;
+    }
+
+    while (child) {
+        const char *stanza_name = xmpp_stanza_get_name(child);
+        if (stanza_name && (g_strcmp0(stanza_name, STANZA_NAME_ITEM) == 0)) {
+            const char *item_jid = xmpp_stanza_get_attribute(child, STANZA_ATTR_JID);
+            if (item_jid) {
+                DiscoItem *item = malloc(sizeof(struct disco_item_t));
+                item->jid = strdup(item_jid);
+                const char *item_name = xmpp_stanza_get_attribute(child, STANZA_ATTR_NAME);
+                if (item_name) {
+                    item->name = strdup(item_name);
+                } else {
+                    item->name = NULL;
                 }
-
-                child = xmpp_stanza_get_next(child);
+                items = g_slist_append(items, item);
             }
         }
+
+        child = xmpp_stanza_get_next(child);
     }
 
     if (g_strcmp0(id, "confreq") == 0) {
@@ -2046,18 +2030,7 @@ _disco_items_result_handler(xmpp_stanza_t *const stanza)
     } else if (g_strcmp0(id, "discoitemsreq") == 0) {
         cons_show_disco_items(items, from);
     } else if (g_strcmp0(id, "discoitemsreq_onconnect") == 0) {
-        GSList *res_items = items;
-        if (res_items && (g_slist_length(res_items) > 0)) {
-            while (res_items) {
-                DiscoItem *item = res_items->data;
-                DiscoInfo *info = malloc(sizeof(struct disco_info_t));
-                info->item = strdup(item->jid);
-                info->features = g_hash_table_new_full(g_str_hash, g_str_equal, free, NULL);
-                connection_set_disco_items(g_slist_append(connection_get_disco_items(), info));
-                iq_disco_info_request_onconnect(info->item);
-                res_items = g_slist_next(res_items);
-            }
-        }
+        connection_set_disco_items(items);
     }
 
     g_slist_free_full(items, (GDestroyNotify)_item_destroy);

@@ -130,7 +130,7 @@ prof_run(char *log_level, char *account_name)
 #endif
         plugins_run_timed();
         notify_remind();
-        jabber_process_events(10);
+        session_process_events(10);
         iq_autoping_check();
         ui_update();
 #ifdef HAVE_GTK
@@ -148,7 +148,7 @@ prof_set_quit(void)
 void
 prof_handle_idle(void)
 {
-    jabber_conn_status_t status = jabber_get_connection_status();
+    jabber_conn_status_t status = connection_get_status();
     if (status == JABBER_CONNECTED) {
         GSList *recipients = wins_get_chat_recipients();
         GSList *curr = recipients;
@@ -169,7 +169,7 @@ prof_handle_idle(void)
 void
 prof_handle_activity(void)
 {
-    jabber_conn_status_t status = jabber_get_connection_status();
+    jabber_conn_status_t status = connection_get_status();
     ProfWin *current = wins_get_current();
 
     if ((status == JABBER_CONNECTED) && (current->type == WIN_CHAT)) {
@@ -197,7 +197,7 @@ _connect_default(const char *const account)
 static void
 _check_autoaway(void)
 {
-    jabber_conn_status_t conn_status = jabber_get_connection_status();
+    jabber_conn_status_t conn_status = connection_get_status();
     if (conn_status != JABBER_CONNECTED) {
         return;
     }
@@ -209,7 +209,7 @@ _check_autoaway(void)
     int away_time_ms = away_time * 60000;
     int xa_time_ms = xa_time * 60000;
 
-    char *account = jabber_get_account_name();
+    char *account = session_get_account_name();
     resource_presence_t curr_presence = accounts_get_last_presence(account);
     char *curr_status = accounts_get_last_status(account);
 
@@ -349,7 +349,7 @@ _init(char *log_level)
     theme_init(theme);
     prefs_free_string(theme);
     ui_init();
-    jabber_init();
+    session_init();
     cmd_init();
     log_info("Initialising contact list");
     muc_init();
@@ -380,14 +380,14 @@ _shutdown(void)
         }
     }
 
-    jabber_conn_status_t conn_status = jabber_get_connection_status();
+    jabber_conn_status_t conn_status = connection_get_status();
     if (conn_status == JABBER_CONNECTED) {
         cl_ev_disconnect();
     }
 #ifdef HAVE_GTK
     tray_shutdown();
 #endif
-    jabber_shutdown();
+    session_shutdown();
     plugins_on_shutdown();
     muc_close();
     caps_close();

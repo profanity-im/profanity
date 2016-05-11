@@ -6,9 +6,9 @@
 #include "xmpp/xmpp.h"
 
 // connection functions
-void jabber_init(void) {}
+void session_init(void) {}
 
-jabber_conn_status_t jabber_connect_with_details(const char * const jid,
+jabber_conn_status_t session_connect_with_details(const char * const jid,
     const char * const passwd, const char * const altdomain, const int port, const char *const tls_policy)
 {
     check_expected(jid);
@@ -18,60 +18,72 @@ jabber_conn_status_t jabber_connect_with_details(const char * const jid,
     return (jabber_conn_status_t)mock();
 }
 
-jabber_conn_status_t jabber_connect_with_account(const ProfAccount * const account)
+jabber_conn_status_t session_connect_with_account(const ProfAccount * const account)
 {
     check_expected(account);
     return (jabber_conn_status_t)mock();
 }
 
-void jabber_disconnect(void) {}
-void jabber_shutdown(void) {}
-void jabber_process_events(int millis) {}
-const char * jabber_get_fulljid(void)
+void session_disconnect(void) {}
+void session_shutdown(void) {}
+void session_process_events(int millis) {}
+const char * connection_get_fulljid(void)
 {
     return (char *)mock();
 }
 
-const char * jabber_get_domain(void)
+const char * session_get_domain(void)
 {
     return NULL;
 }
 
-char* jabber_create_uuid(void)
+gboolean connection_is_secured(void)
+{
+    return 1;
+}
+
+TLSCertificate*
+connection_get_tls_peer_cert(void)
 {
     return NULL;
 }
 
-void jabber_free_uuid(char * uuid) {}
 
-jabber_conn_status_t jabber_get_connection_status(void)
+char* connection_create_uuid(void)
+{
+    return NULL;
+}
+
+void connection_free_uuid(char * uuid) {}
+
+jabber_conn_status_t connection_get_status(void)
 {
     return (jabber_conn_status_t)mock();
 }
 
-char* jabber_get_presence_message(void)
+char* connection_get_presence_msg(void)
 {
     return (char*)mock();
 }
 
-char* jabber_get_account_name(void)
+char* session_get_account_name(void)
 {
     return (char*)mock();
 }
 
-GList * jabber_get_available_resources(void)
+GList * session_get_available_resources(void)
 {
     return NULL;
 }
 
 gboolean
-jabber_send_stanza(const char *const stanza)
+connection_send_stanza(const char *const stanza)
 {
     return TRUE;
 }
 
 gboolean
-jabber_service_supports(const char *const feature)
+connection_supports(const char *const feature)
 {
     return FALSE;
 }

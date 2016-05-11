@@ -20,7 +20,7 @@
 
 static void test_with_connection_status(jabber_conn_status_t status)
 {
-    will_return(jabber_get_connection_status, status);
+    will_return(connection_get_status, status);
 
     expect_cons_show("You are not currently connected.");
 
@@ -43,16 +43,11 @@ void cmd_join_shows_message_when_disconnected(void **state)
     test_with_connection_status(JABBER_DISCONNECTED);
 }
 
-void cmd_join_shows_message_when_undefined(void **state)
-{
-    test_with_connection_status(JABBER_UNDEFINED);
-}
-
 void cmd_join_shows_error_message_when_invalid_room_jid(void **state)
 {
     gchar *args[] = { "//@@/", NULL };
 
-    will_return(jabber_get_connection_status, JABBER_CONNECTED);
+    will_return(connection_get_status, JABBER_CONNECTED);
 
     expect_cons_show_error("Specified room has incorrect format.");
     expect_cons_show("");
@@ -74,8 +69,8 @@ void cmd_join_uses_account_mucservice_when_no_service_specified(void **state)
 
     muc_init();
 
-    will_return(jabber_get_connection_status, JABBER_CONNECTED);
-    will_return(jabber_get_account_name, account_name);
+    will_return(connection_get_status, JABBER_CONNECTED);
+    will_return(session_get_account_name, account_name);
 
     expect_string(accounts_get_account, name, account_name);
     will_return(accounts_get_account, account);
@@ -99,8 +94,8 @@ void cmd_join_uses_supplied_nick(void **state)
 
     muc_init();
 
-    will_return(jabber_get_connection_status, JABBER_CONNECTED);
-    will_return(jabber_get_account_name, account_name);
+    will_return(connection_get_status, JABBER_CONNECTED);
+    will_return(session_get_account_name, account_name);
 
     expect_string(accounts_get_account, name, account_name);
     will_return(accounts_get_account, account);
@@ -124,8 +119,8 @@ void cmd_join_uses_account_nick_when_not_supplied(void **state)
 
     muc_init();
 
-    will_return(jabber_get_connection_status, JABBER_CONNECTED);
-    will_return(jabber_get_account_name, account_name);
+    will_return(connection_get_status, JABBER_CONNECTED);
+    will_return(session_get_account_name, account_name);
 
     expect_string(accounts_get_account, name, account_name);
     will_return(accounts_get_account, account);
@@ -152,8 +147,8 @@ void cmd_join_uses_password_when_supplied(void **state)
 
     muc_init();
 
-    will_return(jabber_get_connection_status, JABBER_CONNECTED);
-    will_return(jabber_get_account_name, account_name);
+    will_return(connection_get_status, JABBER_CONNECTED);
+    will_return(session_get_account_name, account_name);
 
     expect_string(accounts_get_account, name, account_name);
     will_return(accounts_get_account, account);

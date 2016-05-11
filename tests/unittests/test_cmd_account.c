@@ -21,7 +21,7 @@ void cmd_account_shows_usage_when_not_connected_and_no_args(void **state)
 {
     gchar *args[] = { NULL };
 
-    will_return(jabber_get_connection_status, JABBER_DISCONNECTED);
+    will_return(connection_get_status, JABBER_DISCONNECTED);
 
     expect_string(cons_bad_cmd_usage, cmd, CMD_ACCOUNT);
 
@@ -36,8 +36,8 @@ void cmd_account_shows_account_when_connected_and_no_args(void **state)
         TRUE, NULL, 0, NULL, NULL, NULL, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
     gchar *args[] = { NULL };
 
-    will_return(jabber_get_connection_status, JABBER_CONNECTED);
-    will_return(jabber_get_account_name, "account_name");
+    will_return(connection_get_status, JABBER_CONNECTED);
+    will_return(session_get_account_name, "account_name");
     expect_any(accounts_get_account, name);
     will_return(accounts_get_account, account);
 
@@ -371,7 +371,7 @@ void cmd_account_set_resource_sets_resource(void **state)
 {
     gchar *args[] = { "set", "a_account", "resource", "a_resource", NULL };
 
-    will_return(jabber_get_connection_status, JABBER_DISCONNECTED);
+    will_return(connection_get_status, JABBER_DISCONNECTED);
 
     expect_any(accounts_account_exists, account_name);
     will_return(accounts_account_exists, TRUE);
@@ -390,7 +390,7 @@ void cmd_account_set_resource_sets_resource_with_online_message(void **state)
 {
     gchar *args[] = { "set", "a_account", "resource", "a_resource", NULL };
 
-    will_return(jabber_get_connection_status, JABBER_CONNECTED);
+    will_return(connection_get_status, JABBER_CONNECTED);
 
     expect_any(accounts_account_exists, account_name);
     will_return(accounts_account_exists, TRUE);
@@ -644,7 +644,7 @@ void cmd_account_set_online_priority_sets_preference(void **state)
     expect_string(accounts_set_priority_online, account_name, "a_account");
     expect_value(accounts_set_priority_online, value, 10);
 
-    will_return(jabber_get_connection_status, JABBER_DISCONNECTED);
+    will_return(connection_get_status, JABBER_DISCONNECTED);
 
     expect_cons_show("Updated online priority for account a_account: 10");
     expect_cons_show("");
@@ -663,7 +663,7 @@ void cmd_account_set_chat_priority_sets_preference(void **state)
     expect_string(accounts_set_priority_chat, account_name, "a_account");
     expect_value(accounts_set_priority_chat, value, 10);
 
-    will_return(jabber_get_connection_status, JABBER_DISCONNECTED);
+    will_return(connection_get_status, JABBER_DISCONNECTED);
 
     expect_cons_show("Updated chat priority for account a_account: 10");
     expect_cons_show("");
@@ -682,7 +682,7 @@ void cmd_account_set_away_priority_sets_preference(void **state)
     expect_string(accounts_set_priority_away, account_name, "a_account");
     expect_value(accounts_set_priority_away, value, 10);
 
-    will_return(jabber_get_connection_status, JABBER_DISCONNECTED);
+    will_return(connection_get_status, JABBER_DISCONNECTED);
 
     expect_cons_show("Updated away priority for account a_account: 10");
     expect_cons_show("");
@@ -701,7 +701,7 @@ void cmd_account_set_xa_priority_sets_preference(void **state)
     expect_string(accounts_set_priority_xa, account_name, "a_account");
     expect_value(accounts_set_priority_xa, value, 10);
 
-    will_return(jabber_get_connection_status, JABBER_DISCONNECTED);
+    will_return(connection_get_status, JABBER_DISCONNECTED);
 
     expect_cons_show("Updated xa priority for account a_account: 10");
     expect_cons_show("");
@@ -720,7 +720,7 @@ void cmd_account_set_dnd_priority_sets_preference(void **state)
     expect_string(accounts_set_priority_dnd, account_name, "a_account");
     expect_value(accounts_set_priority_dnd, value, 10);
 
-    will_return(jabber_get_connection_status, JABBER_DISCONNECTED);
+    will_return(connection_get_status, JABBER_DISCONNECTED);
 
     expect_cons_show("Updated dnd priority for account a_account: 10");
     expect_cons_show("");
@@ -791,23 +791,23 @@ void cmd_account_set_priority_updates_presence_when_account_connected_with_prese
     expect_any(accounts_set_priority_online, account_name);
     expect_any(accounts_set_priority_online, value);
 
-    will_return(jabber_get_connection_status, JABBER_CONNECTED);
+    will_return(connection_get_status, JABBER_CONNECTED);
 
     expect_any(accounts_get_last_presence, account_name);
     will_return(accounts_get_last_presence, RESOURCE_ONLINE);
 
-    will_return(jabber_get_account_name, "a_account");
+    will_return(session_get_account_name, "a_account");
 
 #ifdef HAVE_LIBGPGME
     ProfAccount *account = account_new("a_account", "a_jid", NULL, NULL, TRUE, NULL, 5222, "a_resource",
         NULL, NULL, 10, 10, 10, 10, 10, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
 
-    will_return(jabber_get_account_name, "a_account");
+    will_return(session_get_account_name, "a_account");
     expect_any(accounts_get_account, name);
     will_return(accounts_get_account, account);
 #endif
 
-    will_return(jabber_get_presence_message, "Free to chat");
+    will_return(connection_get_presence_msg, "Free to chat");
 
     expect_value(presence_send, status, RESOURCE_ONLINE);
     expect_string(presence_send, msg, "Free to chat");
