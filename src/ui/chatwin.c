@@ -360,7 +360,7 @@ chatwin_get_string(ProfChatWin *chatwin)
 
     GString *res = g_string_new("Chat ");
 
-    jabber_conn_status_t conn_status = jabber_get_connection_status();
+    jabber_conn_status_t conn_status = connection_get_status();
     if (conn_status == JABBER_CONNECTED) {
         PContact contact = roster_get_contact(chatwin->barejid);
         if (contact == NULL) {
@@ -388,7 +388,7 @@ static void
 _chatwin_history(ProfChatWin *chatwin, const char *const contact)
 {
     if (!chatwin->history_shown) {
-        Jid *jid = jid_create(jabber_get_fulljid());
+        Jid *jid = jid_create(connection_get_fulljid());
         GSList *history = chat_log_get_previous(jid->barejid, contact);
         jid_destroy(jid);
         GSList *curr = history;

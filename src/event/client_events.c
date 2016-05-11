@@ -55,7 +55,7 @@ jabber_conn_status_t
 cl_ev_connect_jid(const char *const jid, const char *const passwd, const char *const altdomain, const int port, const char *const tls_policy)
 {
     cons_show("Connecting as %s", jid);
-    return jabber_connect_with_details(jid, passwd, altdomain, port, tls_policy);
+    return session_connect_with_details(jid, passwd, altdomain, port, tls_policy);
 }
 
 jabber_conn_status_t
@@ -65,18 +65,18 @@ cl_ev_connect_account(ProfAccount *account)
     cons_show("Connecting with account %s as %s", account->name, jid);
     free(jid);
 
-    return jabber_connect_with_account(account);
+    return session_connect_with_account(account);
 }
 
 void
 cl_ev_disconnect(void)
 {
-    const char *jid = jabber_get_fulljid();
+    const char *jid = connection_get_fulljid();
     cons_show("%s logged out successfully.", jid);
 
     ui_disconnected();
     ui_close_all_wins();
-    jabber_disconnect();
+    session_disconnect();
     roster_destroy();
     muc_invites_clear();
     chat_sessions_clear();
@@ -92,7 +92,7 @@ cl_ev_presence_send(const resource_presence_t presence_type, const char *const m
     char *signed_status = NULL;
 
 #ifdef HAVE_LIBGPGME
-    char *account_name = jabber_get_account_name();
+    char *account_name = session_get_account_name();
     ProfAccount *account = accounts_get_account(account_name);
     if (account->pgp_keyid) {
         signed_status = p_gpg_sign(msg, account->pgp_keyid);

@@ -46,6 +46,7 @@
 #include "log.h"
 #include "common.h"
 #include "ui/ui.h"
+#include "xmpp/session.h"
 #include "xmpp/connection.h"
 #include "xmpp/stanza.h"
 #include "xmpp/iq.h"

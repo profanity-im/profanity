@@ -472,7 +472,7 @@ cons_check_version(gboolean not_available_msg)
 }
 
 void
-cons_show_login_success(ProfAccount *account, int secured)
+cons_show_login_success(ProfAccount *account, gboolean secured)
 {
     ProfWin *console = wins_get_console();
     win_vprint(console, '-', 0, NULL, NO_EOL, 0, "", "%s logged in successfully, ", account->jid);
@@ -845,8 +845,8 @@ cons_show_account_list(gchar **accounts)
         cons_show("Accounts:");
         int i = 0;
         for (i = 0; i < size; i++) {
-            if ((jabber_get_connection_status() == JABBER_CONNECTED) &&
-                    (g_strcmp0(jabber_get_account_name(), accounts[i]) == 0)) {
+            if ((connection_get_status() == JABBER_CONNECTED) &&
+                    (g_strcmp0(session_get_account_name(), accounts[i]) == 0)) {
                 resource_presence_t presence = accounts_get_last_presence(accounts[i]);
                 theme_item_t presence_colour = theme_main_presence_attrs(string_from_resource_presence(presence));
                 win_vprint(console, '-', 0, NULL, 0, presence_colour, "", "%s", accounts[i]);
@@ -961,9 +961,9 @@ cons_show_account(ProfAccount *account)
         account->priority_chat, account->priority_online, account->priority_away,
         account->priority_xa, account->priority_dnd);
 
-    if ((jabber_get_connection_status() == JABBER_CONNECTED) &&
-            (g_strcmp0(jabber_get_account_name(), account->name) == 0)) {
-        GList *resources = jabber_get_available_resources();
+    if ((connection_get_status() == JABBER_CONNECTED) &&
+            (g_strcmp0(session_get_account_name(), account->name) == 0)) {
+        GList *resources = connection_get_available_resources();
         GList *ordered_resources = NULL;
 
         GList *curr = resources;

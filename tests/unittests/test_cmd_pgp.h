@@ -6,7 +6,6 @@ void cmd_pgp_start_shows_message_when_disconnected(void **state);
 void cmd_pgp_start_shows_message_when_disconnecting(void **state);
 void cmd_pgp_start_shows_message_when_connecting(void **state);
 void cmd_pgp_start_shows_message_when_undefined(void **state);
-void cmd_pgp_start_shows_message_when_started(void **state);
 void cmd_pgp_start_shows_message_when_no_arg_in_console(void **state);
 void cmd_pgp_start_shows_message_when_no_arg_in_muc(void **state);
 void cmd_pgp_start_shows_message_when_no_arg_in_mucconf(void **state);

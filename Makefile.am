@@ -6,10 +6,11 @@ core_sources = \
 	src/chat_state.h src/chat_state.c \
 	src/resource.c src/resource.h \
 	src/roster_list.c src/roster_list.h \
-	src/xmpp/xmpp.h src/xmpp/capabilities.c src/xmpp/connection.c \
+	src/xmpp/xmpp.h src/xmpp/capabilities.c src/xmpp/session.c \
+	src/xmpp/connection.h src/xmpp/connection.c \
 	src/xmpp/iq.c src/xmpp/message.c src/xmpp/presence.c src/xmpp/stanza.c \
 	src/xmpp/stanza.h src/xmpp/message.h src/xmpp/iq.h src/xmpp/presence.h \
-	src/xmpp/capabilities.h src/xmpp/connection.h \
+	src/xmpp/capabilities.h src/xmpp/session.h \
 	src/xmpp/roster.c src/xmpp/roster.h \
 	src/xmpp/bookmark.c src/xmpp/bookmark.h \
 	src/xmpp/blocking.c src/xmpp/blocking.h \

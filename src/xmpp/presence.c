@@ -55,8 +55,9 @@
 #include "profanity.h"
 #include "ui/ui.h"
 #include "event/server_events.h"
-#include "xmpp/capabilities.h"
 #include "xmpp/connection.h"
+#include "xmpp/capabilities.h"
+#include "xmpp/session.h"
 #include "xmpp/stanza.h"
 #include "xmpp/iq.h"
 #include "xmpp/xmpp.h"
@@ -238,7 +239,7 @@ presence_reset_sub_request_search(void)
 void
 presence_send(const resource_presence_t presence_type, const char *const msg, const int idle, char *signed_status)
 {
-    if (jabber_get_connection_status() != JABBER_CONNECTED) {
+    if (connection_get_status() != JABBER_CONNECTED) {
         log_warning("Error setting presence, not connected.");
         return;
     }
@@ -250,10 +251,10 @@ presence_send(const resource_presence_t presence_type, const char *const msg, co
     }
 
     xmpp_ctx_t * const ctx = connection_get_ctx();
-    const int pri = accounts_get_priority_for_presence_type(jabber_get_account_name(), presence_type);
+    const int pri = accounts_get_priority_for_presence_type(session_get_account_name(), presence_type);
     const char *show = stanza_get_presence_string_from_type(presence_type);
 
-    connection_set_presence_message(msg);
+    connection_set_presence_msg(msg);
     connection_set_priority(pri);
 
     xmpp_stanza_t *presence = stanza_create_presence(ctx);
@@ -289,7 +290,7 @@ presence_send(const resource_presence_t presence_type, const char *const msg, co
     if (last == NULL) {
         last = STANZA_TEXT_ONLINE;
     }
-    char *account = jabber_get_account_name();
+    char *account = session_get_account_name();
     accounts_set_last_presence(account, last);
     accounts_set_last_status(account, msg);
     free(id);
@@ -330,10 +331,10 @@ presence_join_room(const char *const room, const char *const nick, const char *c
     log_debug("Sending room join presence to: %s", jid->fulljid);
     xmpp_ctx_t *ctx = connection_get_ctx();
     resource_presence_t presence_type =
-        accounts_get_last_presence(jabber_get_account_name());
+        accounts_get_last_presence(session_get_account_name());
     const char *show = stanza_get_presence_string_from_type(presence_type);
-    char *status = jabber_get_presence_message();
-    int pri = accounts_get_priority_for_presence_type(jabber_get_account_name(),
+    char *status = connection_get_presence_msg();
+    int pri = accounts_get_priority_for_presence_type(session_get_account_name(),
         presence_type);
 
     xmpp_stanza_t *presence = stanza_create_room_join_presence(ctx, jid->fulljid, passwd);
@@ -357,10 +358,10 @@ presence_change_room_nick(const char *const room, const char *const nick)
     log_debug("Sending room nickname change to: %s, nick: %s", room, nick);
     xmpp_ctx_t *ctx = connection_get_ctx();
     resource_presence_t presence_type =
-        accounts_get_last_presence(jabber_get_account_name());
+        accounts_get_last_presence(session_get_account_name());
     const char *show = stanza_get_presence_string_from_type(presence_type);
-    char *status = jabber_get_presence_message();
-    int pri = accounts_get_priority_for_presence_type(jabber_get_account_name(),
+    char *status = connection_get_presence_msg();
+    int pri = accounts_get_priority_for_presence_type(session_get_account_name(),
         presence_type);
 
     char *full_room_jid = create_fulljid(room, nick);
@@ -720,7 +721,7 @@ _muc_user_handler(xmpp_stanza_t *const stanza)
     }
 
     // handle self presence
-    if (stanza_is_muc_self_presence(stanza, jabber_get_fulljid())) {
+    if (stanza_is_muc_self_presence(stanza, connection_get_fulljid())) {
         log_debug("Room self presence received from %s", from_jid->fulljid);
 
         // self unavailable
