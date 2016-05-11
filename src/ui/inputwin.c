@@ -35,10 +35,10 @@
 #define _XOPEN_SOURCE_EXTENDED
 #include "config.h"
 
+#include <stdio.h>
 #include <sys/select.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdio.h>
 #include <wchar.h>
 #include <sys/time.h>
 #include <errno.h>
