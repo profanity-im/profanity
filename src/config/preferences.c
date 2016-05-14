@@ -1242,6 +1242,7 @@ _get_group(preference_t pref)
         case PREF_NOTIFY_MENTION_CASE_SENSITIVE:
         case PREF_NOTIFY_MENTION_WHOLE_WORD:
         case PREF_TRAY:
+        case PREF_TRAY_READ:
             return PREF_GROUP_NOTIFICATIONS;
         case PREF_CHLOG:
         case PREF_GRLOG:
@@ -1294,6 +1295,8 @@ _get_key(preference_t pref)
             return "flash";
         case PREF_TRAY:
             return "tray";
+        case PREF_TRAY_READ:
+            return "tray.read";
         case PREF_INTYPE:
             return "intype";
         case PREF_HISTORY:
@@ -1507,6 +1510,7 @@ _get_default_boolean(preference_t pref)
         case PREF_TLS_SHOW:
         case PREF_LASTACTIVITY:
         case PREF_NOTIFY_MENTION_WHOLE_WORD:
+        case PREF_TRAY_READ:
             return TRUE;
         default:
             return FALSE;

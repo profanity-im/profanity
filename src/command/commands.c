@@ -5865,14 +5865,28 @@ gboolean
 cmd_tray(ProfWin *window, const char *const command, gchar **args)
 {
 #ifdef HAVE_GTK
-    gboolean old = prefs_get_boolean(PREF_TRAY);
-    _cmd_set_boolean_preference(args[0], command, "Tray icon", PREF_TRAY);
-    gboolean new = prefs_get_boolean(PREF_TRAY);
-    if (old != new) {
-        if (new) {
-            tray_enable();
+    if (g_strcmp0(args[0], "read") == 0) {
+        if (prefs_get_boolean(PREF_TRAY) == FALSE) {
+            cons_show("Tray icon no currently enable, see /help tray");
+        } else if (g_strcmp0(args[1], "on") == 0) {
+            prefs_set_boolean(PREF_TRAY_READ, TRUE);
+            cons_show("Tray icon enabled when no unread messages.");
+        } else if (g_strcmp0(args[1], "off") == 0) {
+            prefs_set_boolean(PREF_TRAY_READ, FALSE);
+            cons_show("Tray icon disabled when no unread messages.");
         } else {
-            tray_disable();
+            cons_bad_cmd_usage(command);
+        }
+    } else {
+        gboolean old = prefs_get_boolean(PREF_TRAY);
+        _cmd_set_boolean_preference(args[0], command, "Tray icon", PREF_TRAY);
+        gboolean new = prefs_get_boolean(PREF_TRAY);
+        if (old != new) {
+            if (new) {
+                tray_enable();
+            } else {
+                tray_disable();
+            }
         }
     }
     return TRUE;

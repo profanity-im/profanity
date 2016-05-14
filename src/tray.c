@@ -131,9 +131,22 @@ _tray_change_icon(gpointer data)
     unread_messages = wins_get_total_unread();
 
     if (unread_messages) {
-        gtk_status_icon_set_from_file(prof_tray, icon_msg_filename->str);
+        if (!prof_tray) {
+            prof_tray = gtk_status_icon_new_from_file(icon_msg_filename->str);
+        } else {
+            gtk_status_icon_set_from_file(prof_tray, icon_msg_filename->str);
+        }
     } else {
-        gtk_status_icon_set_from_file(prof_tray, icon_filename->str);
+        if (prefs_get_boolean(PREF_TRAY_READ)) {
+            if (!prof_tray) {
+                prof_tray = gtk_status_icon_new_from_file(icon_filename->str);
+            } else {
+                gtk_status_icon_set_from_file(prof_tray, icon_filename->str);
+            }
+        } else {
+            g_clear_object(&prof_tray);
+            prof_tray = NULL;
+        }
     }
 
     return TRUE;
