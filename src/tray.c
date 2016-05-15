@@ -131,9 +131,22 @@ _tray_change_icon(gpointer data)
     unread_messages = wins_get_total_unread();
 
     if (unread_messages) {
-        gtk_status_icon_set_from_file(prof_tray, icon_msg_filename->str);
+        if (!prof_tray) {
+            prof_tray = gtk_status_icon_new_from_file(icon_msg_filename->str);
+        } else {
+            gtk_status_icon_set_from_file(prof_tray, icon_msg_filename->str);
+        }
     } else {
-        gtk_status_icon_set_from_file(prof_tray, icon_filename->str);
+        if (prefs_get_boolean(PREF_TRAY_READ)) {
+            if (!prof_tray) {
+                prof_tray = gtk_status_icon_new_from_file(icon_filename->str);
+            } else {
+                gtk_status_icon_set_from_file(prof_tray, icon_filename->str);
+            }
+        } else {
+            g_clear_object(&prof_tray);
+            prof_tray = NULL;
+        }
     }
 
     return TRUE;
@@ -180,12 +193,21 @@ tray_shutdown(void)
 }
 
 void
+tray_set_timer(int interval)
+{
+    g_source_remove(timer);
+    _tray_change_icon(NULL);
+    timer = g_timeout_add(interval * 1000, _tray_change_icon, NULL);
+}
+
+void
 tray_enable(void)
 {
     prof_tray = gtk_status_icon_new_from_file(icon_filename->str);
     shutting_down = FALSE;
     _tray_change_icon(NULL);
-    timer = g_timeout_add(5000, _tray_change_icon, NULL);
+    int interval = prefs_get_tray_timer() * 1000;
+    timer = g_timeout_add(interval, _tray_change_icon, NULL);
 }
 
 void

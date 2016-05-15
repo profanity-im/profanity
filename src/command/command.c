@@ -124,6 +124,7 @@ static char* _close_autocomplete(ProfWin *window, const char *const input);
 static char* _plugins_autocomplete(ProfWin *window, const char *const input);
 static char* _sendfile_autocomplete(ProfWin *window, const char *const input);
 static char* _blocked_autocomplete(ProfWin *window, const char *const input);
+static char *_tray_autocomplete(ProfWin *window, const char *const input);
 
 GHashTable *commands = NULL;
 
@@ -1412,17 +1413,21 @@ static struct cmd_t command_defs[] =
     },
 
     { "/tray",
-        parse_args, 1, 1, &cons_tray_setting,
+        parse_args, 1, 2, &cons_tray_setting,
         CMD_NOSUBFUNCS
         CMD_MAINFUNC(cmd_tray)
         CMD_TAGS(
             CMD_TAG_UI)
         CMD_SYN(
-            "/tray on|off")
+            "/tray on|off",
+            "/tray read on|off",
+            "/tray timer <seconds>")
         CMD_DESC(
             "Display an icon in the tray that will indicate new messages.")
         CMD_ARGS(
-            { "on|off", "Enable or disable tray icon." })
+            { "on|off",             "Show tray icon." },
+            { "read on|off",        "Show tray icon when no unread messages." },
+            { "timer <seconds>",    "Set tray icon timer, seconds must be between 1-10" })
         CMD_NOEXAMPLES
     },
 
@@ -2299,6 +2304,7 @@ static Autocomplete plugins_ac;
 static Autocomplete plugins_load_ac;
 static Autocomplete sendfile_ac;
 static Autocomplete blocked_ac;
+static Autocomplete tray_ac;
 
 /*
  * Initialise command autocompleter and history
@@ -2859,6 +2865,12 @@ cmd_init(void)
     blocked_ac = autocomplete_new();
     autocomplete_add(blocked_ac, "add");
     autocomplete_add(blocked_ac, "remove");
+
+    tray_ac = autocomplete_new();
+    autocomplete_add(tray_ac, "on");
+    autocomplete_add(tray_ac, "off");
+    autocomplete_add(tray_ac, "read");
+    autocomplete_add(tray_ac, "timer");
 }
 
 void
@@ -2950,6 +2962,7 @@ cmd_uninit(void)
     autocomplete_free(plugins_load_ac);
     autocomplete_free(sendfile_ac);
     autocomplete_free(blocked_ac);
+    autocomplete_free(tray_ac);
 }
 
 gboolean
@@ -3180,6 +3193,7 @@ cmd_reset_autocomplete(ProfWin *window)
     autocomplete_reset(autoping_ac);
     autocomplete_reset(plugins_ac);
     autocomplete_reset(blocked_ac);
+    autocomplete_reset(tray_ac);
     autocomplete_reset(script_ac);
     if (script_show_ac) {
         autocomplete_free(script_show_ac);
@@ -3358,7 +3372,7 @@ _cmd_complete_parameters(ProfWin *window, const char *const input)
     // autocomplete boolean settings
     gchar *boolean_choices[] = { "/beep", "/intype", "/states", "/outtype", "/flash", "/splash", "/chlog", "/grlog",
         "/history", "/vercheck", "/privileges", "/presence", "/wrap", "/winstidy", "/carbons", "/encwarn",
-        "/lastactivity", "/tray" };
+        "/lastactivity" };
 
     for (i = 0; i < ARRAY_SIZE(boolean_choices); i++) {
         result = autocomplete_param_with_func(input, boolean_choices[i], prefs_autocomplete_boolean_choice);
@@ -3475,6 +3489,7 @@ _cmd_complete_parameters(ProfWin *window, const char *const input)
     g_hash_table_insert(ac_funcs, "/plugins",       _plugins_autocomplete);
     g_hash_table_insert(ac_funcs, "/sendfile",      _sendfile_autocomplete);
     g_hash_table_insert(ac_funcs, "/blocked",       _blocked_autocomplete);
+    g_hash_table_insert(ac_funcs, "/tray",          _tray_autocomplete);
 
     int len = strlen(input);
     char parsed[len+1];
@@ -3527,6 +3542,23 @@ _sub_autocomplete(ProfWin *window, const char *const input)
         return result;
     }
     result = autocomplete_param_with_ac(input, "/sub", sub_ac, TRUE);
+    if (result) {
+        return result;
+    }
+
+    return NULL;
+}
+
+static char*
+_tray_autocomplete(ProfWin *window, const char *const input)
+{
+    char *result = NULL;
+    result = autocomplete_param_with_func(input, "/tray read", prefs_autocomplete_boolean_choice);
+    if (result) {
+        return result;
+    }
+
+    result = autocomplete_param_with_ac(input, "/tray", tray_ac, FALSE);
     if (result) {
         return result;
     }
