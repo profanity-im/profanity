@@ -51,4 +51,6 @@ void tray_enable(void);
  */
 void tray_disable(void);
 
+void tray_set_timer(int interval);
+
 #endif
