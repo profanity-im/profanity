@@ -1195,7 +1195,11 @@ cons_tray_setting(void)
         cons_show("Tray icon read (/tray)              : OFF");
 
     int seconds = prefs_get_tray_timer();
-    cons_show("Tray timer (/tray)                  : %d seconds", seconds);
+    if (seconds == 1) {
+        cons_show("Tray timer (/tray)                  : 1 second");
+    } else {
+        cons_show("Tray timer (/tray)                  : %d seconds", seconds);
+    }
 }
 
 void
