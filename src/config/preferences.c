@@ -591,6 +591,25 @@ prefs_set_autoxa_time(gint value)
     _save_prefs();
 }
 
+void
+prefs_set_tray_timer(gint value)
+{
+    g_key_file_set_integer(prefs, PREF_GROUP_NOTIFICATIONS, "tray.timer", value);
+    _save_prefs();
+}
+
+gint
+prefs_get_tray_timer(void)
+{
+    gint result = g_key_file_get_integer(prefs, PREF_GROUP_NOTIFICATIONS, "tray.timer", NULL);
+
+    if (result == 0) {
+        return 5;
+    } else {
+        return result;
+    }
+}
+
 gchar**
 prefs_get_plugins(void)
 {

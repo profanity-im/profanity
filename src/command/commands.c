@@ -5865,9 +5865,35 @@ gboolean
 cmd_tray(ProfWin *window, const char *const command, gchar **args)
 {
 #ifdef HAVE_GTK
-    if (g_strcmp0(args[0], "read") == 0) {
+    if (g_strcmp0(args[0], "timer") == 0) {
+        if (args[1] == NULL) {
+            cons_bad_cmd_usage(command);
+            return TRUE;
+        }
+
         if (prefs_get_boolean(PREF_TRAY) == FALSE) {
-            cons_show("Tray icon no currently enable, see /help tray");
+            cons_show("Tray icon not currently enabled, see /help tray");
+            return TRUE;
+        }
+
+        int intval = 0;
+        char *err_msg = NULL;
+        gboolean res = strtoi_range(args[1], &intval, 1, 10, &err_msg);
+        if (res) {
+            cons_show("Tray timer set to %d seconds.", intval);
+            prefs_set_tray_timer(intval);
+            if (prefs_get_boolean(PREF_TRAY)) {
+                tray_set_timer(intval);
+            }
+        } else {
+            cons_show(err_msg);
+            free(err_msg);
+        }
+
+        return TRUE;
+    } else if (g_strcmp0(args[0], "read") == 0) {
+        if (prefs_get_boolean(PREF_TRAY) == FALSE) {
+            cons_show("Tray icon not currently enabled, see /help tray");
         } else if (g_strcmp0(args[1], "on") == 0) {
             prefs_set_boolean(PREF_TRAY_READ, TRUE);
             cons_show("Tray icon enabled when no unread messages.");
@@ -5877,6 +5903,8 @@ cmd_tray(ProfWin *window, const char *const command, gchar **args)
         } else {
             cons_bad_cmd_usage(command);
         }
+
+        return TRUE;
     } else {
         gboolean old = prefs_get_boolean(PREF_TRAY);
         _cmd_set_boolean_preference(args[0], command, "Tray icon", PREF_TRAY);
@@ -5888,8 +5916,9 @@ cmd_tray(ProfWin *window, const char *const command, gchar **args)
                 tray_disable();
             }
         }
+
+        return TRUE;
     }
-    return TRUE;
 #else
     cons_show("This version of Profanity has not been built with GTK Tray Icon support enabled");
     return TRUE;

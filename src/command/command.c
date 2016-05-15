@@ -1420,12 +1420,14 @@ static struct cmd_t command_defs[] =
             CMD_TAG_UI)
         CMD_SYN(
             "/tray on|off",
-            "/tray read on|off")
+            "/tray read on|off",
+            "/tray timer <seconds>")
         CMD_DESC(
             "Display an icon in the tray that will indicate new messages.")
         CMD_ARGS(
-            { "on|off", "Show tray icon." },
-            { "read on|off", "Show tray icon when no unread messages." })
+            { "on|off",             "Show tray icon." },
+            { "read on|off",        "Show tray icon when no unread messages." },
+            { "timer <seconds>",    "Set tray icon timer, seconds must be between 1-10" })
         CMD_NOEXAMPLES
     },
 
@@ -2868,6 +2870,7 @@ cmd_init(void)
     autocomplete_add(tray_ac, "on");
     autocomplete_add(tray_ac, "off");
     autocomplete_add(tray_ac, "read");
+    autocomplete_add(tray_ac, "timer");
 }
 
 void

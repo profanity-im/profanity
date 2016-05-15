@@ -224,6 +224,9 @@ void prefs_set_roster_presence_indent(gint value);
 
 void prefs_add_login(const char *jid);
 
+void prefs_set_tray_timer(gint value);
+gint prefs_get_tray_timer(void);
+
 gboolean prefs_add_alias(const char *const name, const char *const value);
 gboolean prefs_remove_alias(const char *const name);
 char* prefs_get_alias(const char *const name);
