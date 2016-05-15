@@ -5880,7 +5880,11 @@ cmd_tray(ProfWin *window, const char *const command, gchar **args)
         char *err_msg = NULL;
         gboolean res = strtoi_range(args[1], &intval, 1, 10, &err_msg);
         if (res) {
-            cons_show("Tray timer set to %d seconds.", intval);
+            if (intval == 1) {
+                cons_show("Tray timer set to 1 second.");
+            } else {
+                cons_show("Tray timer set to %d seconds.", intval);
+            }
             prefs_set_tray_timer(intval);
             if (prefs_get_boolean(PREF_TRAY)) {
                 tray_set_timer(intval);
