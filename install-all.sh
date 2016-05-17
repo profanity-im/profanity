@@ -24,7 +24,7 @@ debian_prepare()
     echo
     echo Profanity installer... installing dependencies
     echo
-    sudo apt-get -y install git automake autoconf libssl-dev libexpat1-dev libncursesw5-dev libglib2.0-dev libnotify-dev libcurl3-dev libxss-dev libotr5-dev libreadline-dev libtool libgpgme11-dev libgtk2.0-dev
+    sudo apt-get -y install git automake autoconf libssl-dev libexpat1-dev libncursesw5-dev libglib2.0-dev libnotify-dev libcurl3-dev libxss-dev libotr5-dev libreadline-dev libtool libgpgme11-dev libgtk2.0-dev autoconf-archive
 
 }
 
@@ -34,7 +34,7 @@ fedora_prepare()
     echo Profanity installer... installing dependencies
     echo
 
-    sudo dnf -y install gcc git autoconf automake openssl-devel expat-devel ncurses-devel glib2-devel libnotify-devel libcurl-devel libXScrnSaver-devel libotr-devel readline-devel libtool gpgme-devel gtk2-devel
+    sudo dnf -y install gcc git autoconf automake openssl-devel expat-devel ncurses-devel glib2-devel libnotify-devel libcurl-devel libXScrnSaver-devel libotr-devel readline-devel libtool gpgme-devel gtk2-devel autoconf-archive
 }
 
 opensuse_prepare()
@@ -42,7 +42,7 @@ opensuse_prepare()
     echo
     echo Profanity installer...installing dependencies
     echo
-    sudo zypper -n in gcc git automake make autoconf libopenssl-devel expat libexpat-devel ncurses-devel glib2-devel libnotify-devel libcurl-devel libXScrnSaver-devel libotr-devel readline-devel libtool libgpgme-devel
+    sudo zypper -n in gcc git automake make autoconf libopenssl-devel expat libexpat-devel ncurses-devel glib2-devel libnotify-devel libcurl-devel libXScrnSaver-devel libotr-devel readline-devel libtool libgpgme-devel autoconf-archive
 }
 
 centos_prepare()
@@ -54,7 +54,7 @@ centos_prepare()
     sudo yum -y install epel-release
     sudo yum -y install git
     sudo yum -y install gcc autoconf automake cmake
-    sudo yum -y install openssl-devel expat-devel ncurses-devel glib2-devel libnotify-devel libcurl-devel libXScrnSaver-devel libotr-devel readline-devel libtool gpgme-devel
+    sudo yum -y install openssl-devel expat-devel ncurses-devel glib2-devel libnotify-devel libcurl-devel libXScrnSaver-devel libotr-devel readline-devel libtool gpgme-devel autoconf-archive
 }
 
 cygwin_prepare()
@@ -65,9 +65,9 @@ cygwin_prepare()
 
     if ! command -v apt-cyg &>/dev/null; then cyg_install_apt_cyg; fi
     if [ -n "$CYG_MIRROR" ]; then
-        apt-cyg -m $CYG_MIRROR install git make gcc-core m4 automake autoconf pkg-config openssl-devel libexpat-devel zlib-devel libncursesw-devel libglib2.0-devel libcurl-devel libidn-devel libssh2-devel libkrb5-devel openldap-devel libgcrypt-devel libreadline-devel libgpgme-devel libtool libpcre-devel libisl10 libcloog-isl4
+        apt-cyg -m $CYG_MIRROR install git make gcc-core m4 automake autoconf pkg-config openssl-devel libexpat-devel zlib-devel libncursesw-devel libglib2.0-devel libcurl-devel libidn-devel libssh2-devel libkrb5-devel openldap-devel libgcrypt-devel libreadline-devel libgpgme-devel libtool libpcre-devel libisl10 libcloog-isl4 autoconf-archive
     else
-        apt-cyg install git make gcc-core m4 automake autoconf pkg-config openssl-devel libexpat-devel zlib-devel libncursesw-devel libglib2.0-devel libcurl-devel libidn-devel libssh2-devel libkrb5-devel openldap-devel libgcrypt-devel libreadline-devel libgpgme-devel libtool libpcre-devel libisl10 libcloog-isl4
+        apt-cyg install git make gcc-core m4 automake autoconf pkg-config openssl-devel libexpat-devel zlib-devel libncursesw-devel libglib2.0-devel libcurl-devel libidn-devel libssh2-devel libkrb5-devel openldap-devel libgcrypt-devel libreadline-devel libgpgme-devel libtool libpcre-devel libisl10 libcloog-isl4 autoconf-archive
 
     fi
 }
