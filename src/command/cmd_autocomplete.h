@@ -1,5 +1,5 @@
 /*
- * command.h
+ * cmd_autocomplete.h
  *
  * Copyright (C) 2012 - 2016 James Booth <boothj5@gmail.com>
  *
@@ -32,32 +32,26 @@
  *
  */
 
-#ifndef COMMAND_H
-#define COMMAND_H
+#include "config/preferences.h"
+#include "command/commands.h"
 
-#include <glib.h>
+void cmd_ac_init(void);
+void cmd_ac_uninit(void);
 
-#include "ui/ui.h"
+void cmd_ac_add(const char *const value);
+void cmd_ac_add_help(const char *const value);
+void cmd_ac_add_cmd(Command *command);
+void cmd_ac_add_alias(ProfAlias *alias);
+void cmd_ac_add_alias_value(char *value);
 
-GHashTable *commands;
+void cmd_ac_remove(const char *const value);
+void cmd_ac_remove_alias_value(char *value);
 
-void cmd_init(void);
-void cmd_uninit(void);
+gboolean cmd_ac_exists(char *cmd);
 
-gboolean cmd_valid_tag(const char *const str);
-gboolean cmd_has_tag(Command *pcmd, const char *const tag);
+void cmd_ac_add_form_fields(DataForm *form);
+void cmd_ac_remove_form_fields(DataForm *form);
 
-gboolean cmd_process_input(ProfWin *window, char *inp);
-void cmd_execute_connect(ProfWin *window, const char *const account);
+char* cmd_ac_complete(ProfWin *window, const char *const input);
 
-GSList* cmd_get_basic_help(void);
-GSList* cmd_get_settings_help(void);
-GSList* cmd_get_presence_help(void);
-
-void cmd_history_append(char *inp);
-char* cmd_history_previous(char *inp);
-char* cmd_history_next(char *inp);
-
-void command_docgen(void);
-
-#endif
+void cmd_ac_reset(ProfWin *window);

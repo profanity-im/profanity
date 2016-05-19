@@ -56,6 +56,7 @@
 
 #include "chat_session.h"
 #include "command/command.h"
+#include "command/cmd_autocomplete.h"
 #include "common.h"
 #include "config/preferences.h"
 #include "config/theme.h"
@@ -651,12 +652,12 @@ ui_focus_win(ProfWin *window)
     ProfWin *old_current = wins_get_current();
     if (old_current->type == WIN_MUC_CONFIG) {
         ProfMucConfWin *confwin = (ProfMucConfWin*)old_current;
-        cmd_autocomplete_remove_form_fields(confwin->form);
+        cmd_ac_remove_form_fields(confwin->form);
     }
 
     if (window->type == WIN_MUC_CONFIG) {
         ProfMucConfWin *confwin = (ProfMucConfWin*)window;
-        cmd_autocomplete_add_form_fields(confwin->form);
+        cmd_ac_add_form_fields(confwin->form);
     }
 
     int i = wins_get_num(window);
@@ -679,7 +680,7 @@ ui_close_win(int index)
     if (window && window->type == WIN_MUC_CONFIG) {
         ProfMucConfWin *confwin = (ProfMucConfWin*)window;
         if (confwin->form) {
-            cmd_autocomplete_remove_form_fields(confwin->form);
+            cmd_ac_remove_form_fields(confwin->form);
         }
     }
 

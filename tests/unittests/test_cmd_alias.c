@@ -15,6 +15,7 @@
 
 #include "command/command.h"
 #include "command/commands.h"
+#include "command/cmd_autocomplete.h"
 
 #define CMD_ALIAS "/alias"
 
@@ -77,7 +78,7 @@ void cmd_alias_add_shows_message_when_exists(void **state)
 
     cmd_init();
     prefs_add_alias("hc", "/help commands");
-    cmd_autocomplete_add("/hc");
+    cmd_ac_add("/hc");
 
     expect_cons_show("Command or alias '/hc' already exists.");
 

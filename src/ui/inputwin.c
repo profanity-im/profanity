@@ -53,7 +53,7 @@
 #include <ncurses.h>
 #endif
 
-#include "command/command.h"
+#include "command/cmd_autocomplete.h"
 #include "common.h"
 #include "config/accounts.h"
 #include "config/preferences.h"
@@ -452,7 +452,7 @@ _inp_rl_getc(FILE *stream)
     int ch = rl_getc(stream);
     if (_inp_printable(ch)) {
         ProfWin *window = wins_get_current();
-        cmd_reset_autocomplete(window);
+        cmd_ac_reset(window);
     }
     return ch;
 }
@@ -482,7 +482,7 @@ _inp_rl_tab_handler(int count, int key)
         }
     } else if (strncmp(rl_line_buffer, "/", 1) == 0) {
         ProfWin *window = wins_get_current();
-        char *result = cmd_autocomplete(window, rl_line_buffer);
+        char *result = cmd_ac_complete(window, rl_line_buffer);
         if (result) {
             rl_replace_line(result, 1);
             rl_point = rl_end;

@@ -32,6 +32,7 @@ core_sources = \
 	src/ui/xmlwin.c \
 	src/command/command.h src/command/command.c \
 	src/command/commands.h src/command/commands.c \
+	src/command/cmd_autocomplete.h src/command/cmd_autocomplete.c \
 	src/tools/parser.c \
 	src/tools/parser.h \
 	src/tools/http_upload.c \
@@ -69,6 +70,7 @@ unittest_sources = \
 	src/pgp/gpg.h \
 	src/command/command.h src/command/command.c \
 	src/command/commands.h src/command/commands.c \
+	src/command/cmd_autocomplete.h src/command/cmd_autocomplete.c \
 	src/tools/parser.c \
 	src/tools/parser.h \
 	src/tools/p_sha1.h src/tools/p_sha1.c \

@@ -52,6 +52,7 @@
 #include "chat_session.h"
 #include "command/commands.h"
 #include "command/command.h"
+#include "command/cmd_autocomplete.h"
 #include "common.h"
 #include "config/accounts.h"
 #include "config/account.h"
@@ -3882,7 +3883,7 @@ cmd_form(ProfWin *window, const char *const command, gchar **args)
 
     if ((g_strcmp0(args[0], "submit") == 0) || (g_strcmp0(args[0], "cancel") == 0)) {
         if (confwin->form) {
-            cmd_autocomplete_remove_form_fields(confwin->form);
+            cmd_ac_remove_form_fields(confwin->form);
         }
 
         int num = wins_get_num(window);
@@ -4627,14 +4628,14 @@ cmd_alias(ProfWin *window, const char *const command, gchar **args)
                 cons_bad_cmd_usage(command);
                 g_string_free(ac_value, TRUE);
                 return TRUE;
-            } else if (cmd_exists(ac_value->str)) {
+            } else if (cmd_ac_exists(ac_value->str)) {
                 cons_show("Command or alias '%s' already exists.", ac_value->str);
                 g_string_free(ac_value, TRUE);
                 return TRUE;
             } else {
                 prefs_add_alias(alias_p, value);
-                cmd_autocomplete_add(ac_value->str);
-                cmd_alias_add(alias_p);
+                cmd_ac_add(ac_value->str);
+                cmd_ac_add_alias_value(alias_p);
                 cons_show("Command alias added %s -> %s", ac_value->str, value);
                 g_string_free(ac_value, TRUE);
                 return TRUE;
@@ -4655,8 +4656,8 @@ cmd_alias(ProfWin *window, const char *const command, gchar **args)
             } else {
                 GString *ac_value = g_string_new("/");
                 g_string_append(ac_value, alias);
-                cmd_autocomplete_remove(ac_value->str);
-                cmd_alias_remove(alias);
+                cmd_ac_remove(ac_value->str);
+                cmd_ac_remove_alias_value(alias);
                 g_string_free(ac_value, TRUE);
                 cons_show("Command alias removed -> /%s", alias);
             }
