@@ -139,7 +139,6 @@ PKG_CHECK_MODULES([ncursesw], [ncursesw],
             	[AC_MSG_ERROR([ncurses is required for profanity])])])])])
 AM_CPPFLAGS="$AM_CPPFLAGS $NCURSES_CFLAGS"
 LIBS="$NCURSES_LIBS $LIBS"
-AS_IF([test "x$PLATFORM" = xosx], [LIBS="-lncurses $LIBS"])
 
 ### Check wide characters support in ncurses library
 CFLAGS_RESTORE="$CFLAGS"
@@ -164,7 +163,8 @@ AS_IF([test "x$ncurses_cv_wget_wch" != xyes],
 PKG_CHECK_MODULES([glib], [glib-2.0 >= 2.26], [],
     [AC_MSG_ERROR([glib 2.26 or higher is required for profanity])])
 PKG_CHECK_MODULES([curl], [libcurl], [],
-    [AC_MSG_ERROR([libcurl is required for profanity])])
+    [AC_CHECK_LIB([curl], [main], [],
+        [AC_MSG_ERROR([libcurl is required for profanity])])])
 
 AS_IF([test "x$enable_icons" != xno],
     [PKG_CHECK_MODULES([GTK], [gtk+-2.0 >= 2.24.10],
@@ -182,8 +182,6 @@ AS_IF([test "x$PLATFORM" != xosx],
             AM_LDFLAGS="-L/usr/local/opt/readline/lib $AM_LDFLAGS"
             AC_SUBST(AM_LDFLAGS)],
         [AC_MSG_ERROR([libreadline is required for profanity])])])
-
-AS_IF([test "x$PLATFORM" = xosx], [LIBS="-lcurl $LIBS"])
 
 ### Check for desktop notification support
 ### Linux/FreeBSD require libnotify
