@@ -91,8 +91,120 @@ static void _cmd_set_boolean_preference(gchar *arg, const char *const command,
     const char *const display, preference_t pref);
 static void _who_room(ProfWin *window, const char *const command, gchar **args);
 static void _who_roster(ProfWin *window, const char *const command, gchar **args);
+static gboolean _cmd_execute(ProfWin *window, const char *const command, const char *const inp);
+static gboolean _cmd_execute_alias(ProfWin *window, const char *const inp, gboolean *ran);
 
-extern GHashTable *commands;
+/*
+ * Take a line of input and process it, return TRUE if profanity is to
+ * continue, FALSE otherwise
+ */
+gboolean
+cmd_process_input(ProfWin *window, char *inp)
+{
+    log_debug("Input received: %s", inp);
+    gboolean result = FALSE;
+    g_strchomp(inp);
+
+    // just carry on if no input
+    if (strlen(inp) == 0) {
+        result = TRUE;
+
+    // handle command if input starts with a '/'
+    } else if (inp[0] == '/') {
+        char *inp_cpy = strdup(inp);
+        char *command = strtok(inp_cpy, " ");
+        char *question_mark = strchr(command, '?');
+        if (question_mark) {
+            *question_mark = '\0';
+            char *fakeinp;
+            if (asprintf(&fakeinp, "/help %s", command+1)) {
+                result = _cmd_execute(window, "/help", fakeinp);
+                free(fakeinp);
+            }
+        } else {
+            result = _cmd_execute(window, command, inp);
+        }
+        free(inp_cpy);
+
+    // call a default handler if input didn't start with '/'
+    } else {
+        result = cmd_execute_default(window, inp);
+    }
+
+    return result;
+}
+
+// Command execution
+
+void
+cmd_execute_connect(ProfWin *window, const char *const account)
+{
+    GString *command = g_string_new("/connect ");
+    g_string_append(command, account);
+    cmd_process_input(window, command->str);
+    g_string_free(command, TRUE);
+}
+
+static gboolean
+_cmd_execute(ProfWin *window, const char *const command, const char *const inp)
+{
+    if (g_str_has_prefix(command, "/field") && window->type == WIN_MUC_CONFIG) {
+        gboolean result = FALSE;
+        gchar **args = parse_args_with_freetext(inp, 1, 2, &result);
+        if (!result) {
+            ui_current_print_formatted_line('!', 0, "Invalid command, see /form help");
+            result = TRUE;
+        } else {
+            gchar **tokens = g_strsplit(inp, " ", 2);
+            char *field = tokens[0] + 1;
+            result = cmd_form_field(window, field, args);
+            g_strfreev(tokens);
+        }
+
+        g_strfreev(args);
+        return result;
+    }
+
+    Command *cmd = cmd_get(command);
+    gboolean result = FALSE;
+
+    if (cmd) {
+        gchar **args = cmd->parser(inp, cmd->min_args, cmd->max_args, &result);
+        if (result == FALSE) {
+            ui_invalid_command_usage(cmd->cmd, cmd->setting_func);
+            return TRUE;
+        }
+        if (args[0] && cmd->sub_funcs[0][0]) {
+            int i = 0;
+            while (cmd->sub_funcs[i][0]) {
+                if (g_strcmp0(args[0], (char*)cmd->sub_funcs[i][0]) == 0) {
+                    gboolean (*func)(ProfWin *window, const char *const command, gchar **args) = cmd->sub_funcs[i][1];
+                    gboolean result = func(window, command, args);
+                    g_strfreev(args);
+                    return result;
+                }
+                i++;
+            }
+        }
+        if (!cmd->func) {
+            ui_invalid_command_usage(cmd->cmd, cmd->setting_func);
+            return TRUE;
+        }
+        gboolean result = cmd->func(window, command, args);
+        g_strfreev(args);
+        return result;
+    } else if (plugins_run_command(inp)) {
+        return TRUE;
+    } else {
+        gboolean ran_alias = FALSE;
+        gboolean alias_result = _cmd_execute_alias(window, inp, &ran_alias);
+        if (!ran_alias) {
+            return cmd_execute_default(window, inp);
+        } else {
+            return alias_result;
+        }
+    }
+}
 
 gboolean
 cmd_execute_default(ProfWin *window, const char *inp)
@@ -161,8 +273,8 @@ cmd_execute_default(ProfWin *window, const char *inp)
     return TRUE;
 }
 
-gboolean
-cmd_execute_alias(ProfWin *window, const char *const inp, gboolean *ran)
+static gboolean
+_cmd_execute_alias(ProfWin *window, const char *const inp, gboolean *ran)
 {
     if (inp[0] != '/') {
         ran = FALSE;
@@ -1523,21 +1635,7 @@ _cmd_help_cmd_list(const char *const tag)
         }
         g_list_free(plugins_cmds);
     } else {
-        GHashTableIter iter;
-        gpointer key;
-        gpointer value;
-
-        g_hash_table_iter_init(&iter, commands);
-        while (g_hash_table_iter_next(&iter, &key, &value)) {
-            Command *pcmd = (Command *)value;
-            if (tag) {
-                if (cmd_has_tag(pcmd, tag)) {
-                    ordered_commands = g_list_insert_sorted(ordered_commands, pcmd->cmd, (GCompareFunc)g_strcmp0);
-                }
-            } else {
-                ordered_commands = g_list_insert_sorted(ordered_commands, pcmd->cmd, (GCompareFunc)g_strcmp0);
-            }
-        }
+        ordered_commands = cmd_get_ordered(tag);
 
         // add plugins if showing all commands
         if (!tag) {
@@ -1608,7 +1706,7 @@ cmd_help(ProfWin *window, const char *const command, gchar **args)
         char cmd_with_slash[1 + strlen(cmd) + 1];
         sprintf(cmd_with_slash, "/%s", cmd);
 
-        Command *command = g_hash_table_lookup(commands, cmd_with_slash);
+        Command *command = cmd_get(cmd_with_slash);
         if (command) {
             cons_show_help(cmd_with_slash, &command->help);
         } else {
@@ -3861,7 +3959,7 @@ cmd_form(ProfWin *window, const char *const command, gchar **args)
             mucconfwin_form_help(confwin);
 
             const gchar **help_text = NULL;
-            Command *command = g_hash_table_lookup(commands, "/form");
+            Command *command = cmd_get("/form");
 
             if (command) {
                 help_text = command->help.synopsis;

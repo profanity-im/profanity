@@ -103,8 +103,6 @@
 #define CMD_NOEXAMPLES      { NULL } }
 #define CMD_EXAMPLES(...)   { __VA_ARGS__, NULL } }
 
-static gboolean _cmd_execute(ProfWin *window, const char *const command, const char *const inp);
-
 GHashTable *commands = NULL;
 
 /*
@@ -2241,116 +2239,38 @@ cmd_has_tag(Command *pcmd, const char *const tag)
     return FALSE;
 }
 
-/*
- * Take a line of input and process it, return TRUE if profanity is to
- * continue, FALSE otherwise
- */
-gboolean
-cmd_process_input(ProfWin *window, char *inp)
+Command*
+cmd_get(const char *const command)
 {
-    log_debug("Input received: %s", inp);
-    gboolean result = FALSE;
-    g_strchomp(inp);
-
-    // just carry on if no input
-    if (strlen(inp) == 0) {
-        result = TRUE;
-
-    // handle command if input starts with a '/'
-    } else if (inp[0] == '/') {
-        char *inp_cpy = strdup(inp);
-        char *command = strtok(inp_cpy, " ");
-        char *question_mark = strchr(command, '?');
-        if (question_mark) {
-            *question_mark = '\0';
-            char *fakeinp;
-            if (asprintf(&fakeinp, "/help %s", command+1)) {
-                result = _cmd_execute(window, "/help", fakeinp);
-                free(fakeinp);
-            }
-        } else {
-            result = _cmd_execute(window, command, inp);
-        }
-        free(inp_cpy);
-
-    // call a default handler if input didn't start with '/'
+    if (commands) {
+        return g_hash_table_lookup(commands, command);
     } else {
-        result = cmd_execute_default(window, inp);
+        return NULL;
     }
-
-    return result;
 }
 
-// Command execution
-
-void
-cmd_execute_connect(ProfWin *window, const char *const account)
+GList*
+cmd_get_ordered(const char *const tag)
 {
-    GString *command = g_string_new("/connect ");
-    g_string_append(command, account);
-    cmd_process_input(window, command->str);
-    g_string_free(command, TRUE);
-}
+    GList *ordered_commands = NULL;
 
-static gboolean
-_cmd_execute(ProfWin *window, const char *const command, const char *const inp)
-{
-    if (g_str_has_prefix(command, "/field") && window->type == WIN_MUC_CONFIG) {
-        gboolean result = FALSE;
-        gchar **args = parse_args_with_freetext(inp, 1, 2, &result);
-        if (!result) {
-            ui_current_print_formatted_line('!', 0, "Invalid command, see /form help");
-            result = TRUE;
-        } else {
-            gchar **tokens = g_strsplit(inp, " ", 2);
-            char *field = tokens[0] + 1;
-            result = cmd_form_field(window, field, args);
-            g_strfreev(tokens);
-        }
+    GHashTableIter iter;
+    gpointer key;
+    gpointer value;
 
-        g_strfreev(args);
-        return result;
-    }
-
-    Command *cmd = g_hash_table_lookup(commands, command);
-    gboolean result = FALSE;
-
-    if (cmd) {
-        gchar **args = cmd->parser(inp, cmd->min_args, cmd->max_args, &result);
-        if (result == FALSE) {
-            ui_invalid_command_usage(cmd->cmd, cmd->setting_func);
-            return TRUE;
-        }
-        if (args[0] && cmd->sub_funcs[0][0]) {
-            int i = 0;
-            while (cmd->sub_funcs[i][0]) {
-                if (g_strcmp0(args[0], (char*)cmd->sub_funcs[i][0]) == 0) {
-                    gboolean (*func)(ProfWin *window, const char *const command, gchar **args) = cmd->sub_funcs[i][1];
-                    gboolean result = func(window, command, args);
-                    g_strfreev(args);
-                    return result;
-                }
-                i++;
+    g_hash_table_iter_init(&iter, commands);
+    while (g_hash_table_iter_next(&iter, &key, &value)) {
+        Command *pcmd = (Command *)value;
+        if (tag) {
+            if (cmd_has_tag(pcmd, tag)) {
+                ordered_commands = g_list_insert_sorted(ordered_commands, pcmd->cmd, (GCompareFunc)g_strcmp0);
             }
-        }
-        if (!cmd->func) {
-            ui_invalid_command_usage(cmd->cmd, cmd->setting_func);
-            return TRUE;
-        }
-        gboolean result = cmd->func(window, command, args);
-        g_strfreev(args);
-        return result;
-    } else if (plugins_run_command(inp)) {
-        return TRUE;
-    } else {
-        gboolean ran_alias = FALSE;
-        gboolean alias_result = cmd_execute_alias(window, inp, &ran_alias);
-        if (!ran_alias) {
-            return cmd_execute_default(window, inp);
         } else {
-            return alias_result;
+            ordered_commands = g_list_insert_sorted(ordered_commands, pcmd->cmd, (GCompareFunc)g_strcmp0);
         }
     }
+
+    return ordered_commands;
 }
 
 static int
