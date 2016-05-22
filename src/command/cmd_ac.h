@@ -1,5 +1,5 @@
 /*
- * cmd_autocomplete.h
+ * cmd_ac.h
  *
  * Copyright (C) 2012 - 2016 James Booth <boothj5@gmail.com>
  *
@@ -32,6 +32,9 @@
  *
  */
 
+#ifndef CMD_AC_H
+#define CMD_AC_H
+
 #include "config/preferences.h"
 #include "command/cmd_funcs.h"
 
@@ -55,3 +58,5 @@ void cmd_ac_remove_form_fields(DataForm *form);
 char* cmd_ac_complete(ProfWin *window, const char *const input);
 
 void cmd_ac_reset(ProfWin *window);
+
+#endif

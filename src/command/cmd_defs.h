@@ -1,5 +1,5 @@
 /*
- * command.h
+ * cmd_defs.h
  *
  * Copyright (C) 2012 - 2016 James Booth <boothj5@gmail.com>
  *
@@ -32,8 +32,8 @@
  *
  */
 
-#ifndef COMMAND_H
-#define COMMAND_H
+#ifndef CMD_DEFS_H
+#define CMD_DEFS_H
 
 #include <glib.h>
 

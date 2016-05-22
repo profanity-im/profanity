@@ -1,5 +1,5 @@
 /*
- * cmd_autocomplete.c
+ * cmd_ac.c
  *
  * Copyright (C) 2012 - 2016 James Booth <boothj5@gmail.com>
  *

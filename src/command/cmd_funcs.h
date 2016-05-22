@@ -1,5 +1,5 @@
 /*
- * commands.h
+ * cmd_funcs.h
  *
  * Copyright (C) 2012 - 2016 James Booth <boothj5@gmail.com>
  *
@@ -32,8 +32,8 @@
  *
  */
 
-#ifndef COMMANDS_H
-#define COMMANDS_H
+#ifndef CMD_FUNCS_H
+#define CMD_FUNCS_H
 
 #include "ui/win_types.h"
 
