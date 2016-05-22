@@ -105,6 +105,8 @@
 
 GHashTable *commands = NULL;
 
+static gboolean _cmd_has_tag(Command *pcmd, const char *const tag);
+
 /*
  * Command list
  */
@@ -2226,19 +2228,6 @@ cmd_valid_tag(const char *const str)
         (g_strcmp0(str, CMD_TAG_PLUGINS) == 0));
 }
 
-gboolean
-cmd_has_tag(Command *pcmd, const char *const tag)
-{
-    int i = 0;
-    for (i = 0; pcmd->help.tags[i] != NULL; i++) {
-        if (g_strcmp0(tag, pcmd->help.tags[i]) == 0) {
-            return TRUE;
-        }
-    }
-
-    return FALSE;
-}
-
 Command*
 cmd_get(const char *const command)
 {
@@ -2262,7 +2251,7 @@ cmd_get_ordered(const char *const tag)
     while (g_hash_table_iter_next(&iter, &key, &value)) {
         Command *pcmd = (Command *)value;
         if (tag) {
-            if (cmd_has_tag(pcmd, tag)) {
+            if (_cmd_has_tag(pcmd, tag)) {
                 ordered_commands = g_list_insert_sorted(ordered_commands, pcmd->cmd, (GCompareFunc)g_strcmp0);
             }
         } else {
@@ -2271,6 +2260,19 @@ cmd_get_ordered(const char *const tag)
     }
 
     return ordered_commands;
+}
+
+static gboolean
+_cmd_has_tag(Command *pcmd, const char *const tag)
+{
+    int i = 0;
+    for (i = 0; pcmd->help.tags[i] != NULL; i++) {
+        if (g_strcmp0(tag, pcmd->help.tags[i]) == 0) {
+            return TRUE;
+        }
+    }
+
+    return FALSE;
 }
 
 static int

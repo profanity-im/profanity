@@ -92,6 +92,7 @@ static void _cmd_set_boolean_preference(gchar *arg, const char *const command,
 static void _who_room(ProfWin *window, const char *const command, gchar **args);
 static void _who_roster(ProfWin *window, const char *const command, gchar **args);
 static gboolean _cmd_execute(ProfWin *window, const char *const command, const char *const inp);
+static gboolean _cmd_execute_default(ProfWin *window, const char *inp);
 static gboolean _cmd_execute_alias(ProfWin *window, const char *const inp, gboolean *ran);
 
 /*
@@ -128,7 +129,7 @@ cmd_process_input(ProfWin *window, char *inp)
 
     // call a default handler if input didn't start with '/'
     } else {
-        result = cmd_execute_default(window, inp);
+        result = _cmd_execute_default(window, inp);
     }
 
     return result;
@@ -143,156 +144,6 @@ cmd_execute_connect(ProfWin *window, const char *const account)
     g_string_append(command, account);
     cmd_process_input(window, command->str);
     g_string_free(command, TRUE);
-}
-
-static gboolean
-_cmd_execute(ProfWin *window, const char *const command, const char *const inp)
-{
-    if (g_str_has_prefix(command, "/field") && window->type == WIN_MUC_CONFIG) {
-        gboolean result = FALSE;
-        gchar **args = parse_args_with_freetext(inp, 1, 2, &result);
-        if (!result) {
-            ui_current_print_formatted_line('!', 0, "Invalid command, see /form help");
-            result = TRUE;
-        } else {
-            gchar **tokens = g_strsplit(inp, " ", 2);
-            char *field = tokens[0] + 1;
-            result = cmd_form_field(window, field, args);
-            g_strfreev(tokens);
-        }
-
-        g_strfreev(args);
-        return result;
-    }
-
-    Command *cmd = cmd_get(command);
-    gboolean result = FALSE;
-
-    if (cmd) {
-        gchar **args = cmd->parser(inp, cmd->min_args, cmd->max_args, &result);
-        if (result == FALSE) {
-            ui_invalid_command_usage(cmd->cmd, cmd->setting_func);
-            return TRUE;
-        }
-        if (args[0] && cmd->sub_funcs[0][0]) {
-            int i = 0;
-            while (cmd->sub_funcs[i][0]) {
-                if (g_strcmp0(args[0], (char*)cmd->sub_funcs[i][0]) == 0) {
-                    gboolean (*func)(ProfWin *window, const char *const command, gchar **args) = cmd->sub_funcs[i][1];
-                    gboolean result = func(window, command, args);
-                    g_strfreev(args);
-                    return result;
-                }
-                i++;
-            }
-        }
-        if (!cmd->func) {
-            ui_invalid_command_usage(cmd->cmd, cmd->setting_func);
-            return TRUE;
-        }
-        gboolean result = cmd->func(window, command, args);
-        g_strfreev(args);
-        return result;
-    } else if (plugins_run_command(inp)) {
-        return TRUE;
-    } else {
-        gboolean ran_alias = FALSE;
-        gboolean alias_result = _cmd_execute_alias(window, inp, &ran_alias);
-        if (!ran_alias) {
-            return cmd_execute_default(window, inp);
-        } else {
-            return alias_result;
-        }
-    }
-}
-
-gboolean
-cmd_execute_default(ProfWin *window, const char *inp)
-{
-    // handle escaped commands - treat as normal message
-    if (g_str_has_prefix(inp, "//")) {
-        inp++;
-
-    // handle unknown commands
-    } else if ((inp[0] == '/') && (!g_str_has_prefix(inp, "/me "))) {
-        cons_show("Unknown command: %s", inp);
-        cons_alert();
-        return TRUE;
-    }
-
-    // handle non commands in non chat or plugin windows
-    if (window->type != WIN_CHAT && window->type != WIN_MUC && window->type != WIN_PRIVATE && window->type != WIN_PLUGIN && window->type != WIN_XML) {
-        cons_show("Unknown command: %s", inp);
-        return TRUE;
-    }
-
-    // handle plugin window
-    if (window->type == WIN_PLUGIN) {
-        ProfPluginWin *pluginwin = (ProfPluginWin*)window;
-        plugins_win_process_line(pluginwin->tag, inp);
-        return TRUE;
-    }
-
-    jabber_conn_status_t status = connection_get_status();
-    if (status != JABBER_CONNECTED) {
-        ui_current_print_line("You are not currently connected.");
-        return TRUE;
-    }
-
-    switch (window->type) {
-    case WIN_CHAT:
-    {
-        ProfChatWin *chatwin = (ProfChatWin*)window;
-        assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
-        cl_ev_send_msg(chatwin, inp, NULL);
-        break;
-    }
-    case WIN_PRIVATE:
-    {
-        ProfPrivateWin *privatewin = (ProfPrivateWin*)window;
-        assert(privatewin->memcheck == PROFPRIVATEWIN_MEMCHECK);
-        cl_ev_send_priv_msg(privatewin, inp, NULL);
-        break;
-    }
-    case WIN_MUC:
-    {
-        ProfMucWin *mucwin = (ProfMucWin*)window;
-        assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
-        cl_ev_send_muc_msg(mucwin, inp, NULL);
-        break;
-    }
-    case WIN_XML:
-    {
-        connection_send_stanza(inp);
-        break;
-    }
-    default:
-        break;
-    }
-
-    return TRUE;
-}
-
-static gboolean
-_cmd_execute_alias(ProfWin *window, const char *const inp, gboolean *ran)
-{
-    if (inp[0] != '/') {
-        ran = FALSE;
-        return TRUE;
-    }
-
-    char *alias = strdup(inp+1);
-    char *value = prefs_get_alias(alias);
-    free(alias);
-    if (value) {
-        *ran = TRUE;
-        gboolean result = cmd_process_input(window, value);
-        prefs_free_string(value);
-        return result;
-    }
-
-    *ran = FALSE;
-    return TRUE;
 }
 
 gboolean
@@ -6896,6 +6747,156 @@ gboolean
 cmd_encwarn(ProfWin *window, const char *const command, gchar **args)
 {
     _cmd_set_boolean_preference(args[0], command, "Encryption warning message", PREF_ENC_WARN);
+    return TRUE;
+}
+
+static gboolean
+_cmd_execute(ProfWin *window, const char *const command, const char *const inp)
+{
+    if (g_str_has_prefix(command, "/field") && window->type == WIN_MUC_CONFIG) {
+        gboolean result = FALSE;
+        gchar **args = parse_args_with_freetext(inp, 1, 2, &result);
+        if (!result) {
+            ui_current_print_formatted_line('!', 0, "Invalid command, see /form help");
+            result = TRUE;
+        } else {
+            gchar **tokens = g_strsplit(inp, " ", 2);
+            char *field = tokens[0] + 1;
+            result = cmd_form_field(window, field, args);
+            g_strfreev(tokens);
+        }
+
+        g_strfreev(args);
+        return result;
+    }
+
+    Command *cmd = cmd_get(command);
+    gboolean result = FALSE;
+
+    if (cmd) {
+        gchar **args = cmd->parser(inp, cmd->min_args, cmd->max_args, &result);
+        if (result == FALSE) {
+            ui_invalid_command_usage(cmd->cmd, cmd->setting_func);
+            return TRUE;
+        }
+        if (args[0] && cmd->sub_funcs[0][0]) {
+            int i = 0;
+            while (cmd->sub_funcs[i][0]) {
+                if (g_strcmp0(args[0], (char*)cmd->sub_funcs[i][0]) == 0) {
+                    gboolean (*func)(ProfWin *window, const char *const command, gchar **args) = cmd->sub_funcs[i][1];
+                    gboolean result = func(window, command, args);
+                    g_strfreev(args);
+                    return result;
+                }
+                i++;
+            }
+        }
+        if (!cmd->func) {
+            ui_invalid_command_usage(cmd->cmd, cmd->setting_func);
+            return TRUE;
+        }
+        gboolean result = cmd->func(window, command, args);
+        g_strfreev(args);
+        return result;
+    } else if (plugins_run_command(inp)) {
+        return TRUE;
+    } else {
+        gboolean ran_alias = FALSE;
+        gboolean alias_result = _cmd_execute_alias(window, inp, &ran_alias);
+        if (!ran_alias) {
+            return _cmd_execute_default(window, inp);
+        } else {
+            return alias_result;
+        }
+    }
+}
+
+static gboolean
+_cmd_execute_default(ProfWin *window, const char *inp)
+{
+    // handle escaped commands - treat as normal message
+    if (g_str_has_prefix(inp, "//")) {
+        inp++;
+
+    // handle unknown commands
+    } else if ((inp[0] == '/') && (!g_str_has_prefix(inp, "/me "))) {
+        cons_show("Unknown command: %s", inp);
+        cons_alert();
+        return TRUE;
+    }
+
+    // handle non commands in non chat or plugin windows
+    if (window->type != WIN_CHAT && window->type != WIN_MUC && window->type != WIN_PRIVATE && window->type != WIN_PLUGIN && window->type != WIN_XML) {
+        cons_show("Unknown command: %s", inp);
+        return TRUE;
+    }
+
+    // handle plugin window
+    if (window->type == WIN_PLUGIN) {
+        ProfPluginWin *pluginwin = (ProfPluginWin*)window;
+        plugins_win_process_line(pluginwin->tag, inp);
+        return TRUE;
+    }
+
+    jabber_conn_status_t status = connection_get_status();
+    if (status != JABBER_CONNECTED) {
+        ui_current_print_line("You are not currently connected.");
+        return TRUE;
+    }
+
+    switch (window->type) {
+    case WIN_CHAT:
+    {
+        ProfChatWin *chatwin = (ProfChatWin*)window;
+        assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
+        cl_ev_send_msg(chatwin, inp, NULL);
+        break;
+    }
+    case WIN_PRIVATE:
+    {
+        ProfPrivateWin *privatewin = (ProfPrivateWin*)window;
+        assert(privatewin->memcheck == PROFPRIVATEWIN_MEMCHECK);
+        cl_ev_send_priv_msg(privatewin, inp, NULL);
+        break;
+    }
+    case WIN_MUC:
+    {
+        ProfMucWin *mucwin = (ProfMucWin*)window;
+        assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
+        cl_ev_send_muc_msg(mucwin, inp, NULL);
+        break;
+    }
+    case WIN_XML:
+    {
+        connection_send_stanza(inp);
+        break;
+    }
+    default:
+        break;
+    }
+
+    return TRUE;
+}
+
+static gboolean
+_cmd_execute_alias(ProfWin *window, const char *const inp, gboolean *ran)
+{
+    if (inp[0] != '/') {
+        ran = FALSE;
+        return TRUE;
+    }
+
+    char *alias = strdup(inp+1);
+    char *value = prefs_get_alias(alias);
+    free(alias);
+    if (value) {
+        *ran = TRUE;
+        gboolean result = cmd_process_input(window, value);
+        prefs_free_string(value);
+        return result;
+    }
+
+    *ran = FALSE;
     return TRUE;
 }
 

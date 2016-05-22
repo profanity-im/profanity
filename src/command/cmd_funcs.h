@@ -72,7 +72,6 @@ typedef struct cmd_t {
 
 gboolean cmd_process_input(ProfWin *window, char *inp);
 void cmd_execute_connect(ProfWin *window, const char *const account);
-gboolean cmd_execute_default(ProfWin *window, const char *inp);
 
 gboolean cmd_about(ProfWin *window, const char *const command, gchar **args);
 gboolean cmd_autoaway(ProfWin *window, const char *const command, gchar **args);

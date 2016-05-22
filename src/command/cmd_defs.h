@@ -46,7 +46,6 @@ Command* cmd_get(const char *const command);
 GList* cmd_get_ordered(const char *const tag);
 
 gboolean cmd_valid_tag(const char *const str);
-gboolean cmd_has_tag(Command *pcmd, const char *const tag);
 
 void command_docgen(void);
 
