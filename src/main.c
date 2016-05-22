@@ -43,7 +43,7 @@
 
 #include "profanity.h"
 #include "common.h"
-#include "command/command.h"
+#include "command/cmd_defs.h"
 
 static gboolean version = FALSE;
 static char *log = "INFO";

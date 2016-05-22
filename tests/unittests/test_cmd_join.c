@@ -13,7 +13,7 @@
 
 #include "config/accounts.h"
 
-#include "command/commands.h"
+#include "command/cmd_funcs.h"
 #include "muc.h"
 
 #define CMD_JOIN "/join"

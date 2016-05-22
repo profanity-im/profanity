@@ -35,8 +35,8 @@
 #include <string.h>
 #include <stdlib.h>
 
-#include "command/command.h"
-#include "command/cmd_autocomplete.h"
+#include "command/cmd_defs.h"
+#include "command/cmd_ac.h"
 #include "plugins/callbacks.h"
 #include "plugins/plugins.h"
 #include "tools/autocomplete.h"

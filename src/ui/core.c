@@ -55,8 +55,8 @@
 #endif
 
 #include "chat_session.h"
-#include "command/command.h"
-#include "command/cmd_autocomplete.h"
+#include "command/cmd_defs.h"
+#include "command/cmd_ac.h"
 #include "common.h"
 #include "config/preferences.h"
 #include "config/theme.h"

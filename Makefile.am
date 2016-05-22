@@ -30,9 +30,9 @@ core_sources = \
 	src/ui/privwin.c \
 	src/ui/mucconfwin.c \
 	src/ui/xmlwin.c \
-	src/command/command.h src/command/command.c \
-	src/command/commands.h src/command/commands.c \
-	src/command/cmd_autocomplete.h src/command/cmd_autocomplete.c \
+	src/command/cmd_defs.h src/command/cmd_defs.c \
+	src/command/cmd_funcs.h src/command/cmd_funcs.c \
+	src/command/cmd_ac.h src/command/cmd_ac.c \
 	src/tools/parser.c \
 	src/tools/parser.h \
 	src/tools/http_upload.c \
@@ -68,9 +68,9 @@ unittest_sources = \
 	src/ui/ui.h \
 	src/otr/otr.h \
 	src/pgp/gpg.h \
-	src/command/command.h src/command/command.c \
-	src/command/commands.h src/command/commands.c \
-	src/command/cmd_autocomplete.h src/command/cmd_autocomplete.c \
+	src/command/cmd_defs.h src/command/cmd_defs.c \
+	src/command/cmd_funcs.h src/command/cmd_funcs.c \
+	src/command/cmd_ac.h src/command/cmd_ac.c \
 	src/tools/parser.c \
 	src/tools/parser.h \
 	src/tools/p_sha1.h src/tools/p_sha1.c \

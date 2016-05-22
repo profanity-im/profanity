@@ -49,9 +49,9 @@
 #include <glib.h>
 
 #include "chat_session.h"
-#include "command/command.h"
-#include "command/commands.h"
-#include "command/cmd_autocomplete.h"
+#include "command/cmd_defs.h"
+#include "command/cmd_funcs.h"
+#include "command/cmd_ac.h"
 #include "common.h"
 #include "config/accounts.h"
 #include "config/preferences.h"

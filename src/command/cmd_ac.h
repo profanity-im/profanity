@@ -33,7 +33,7 @@
  */
 
 #include "config/preferences.h"
-#include "command/commands.h"
+#include "command/cmd_funcs.h"
 
 void cmd_ac_init(void);
 void cmd_ac_uninit(void);

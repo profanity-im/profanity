@@ -37,7 +37,7 @@
 
 #include <glib.h>
 
-#include "command/command.h"
+#include "command/cmd_defs.h"
 
 typedef struct p_command {
     const char *command_name;

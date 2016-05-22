@@ -38,11 +38,12 @@
 #include <string.h>
 #include <assert.h>
 #include <libgen.h>
+#include <dirent.h>
 
 #include "common.h"
 #include "tools/parser.h"
 #include "ui/win_types.h"
-#include "command/commands.h"
+#include "command/cmd_funcs.h"
 #include "config/preferences.h"
 #include "config/scripts.h"
 #include "muc.h"
@@ -50,7 +51,7 @@
 #include "roster_list.h"
 #include "window_list.h"
 #include "plugins/plugins.h"
-#include "command/cmd_autocomplete.h"
+#include "command/cmd_ac.h"
 
 #ifdef HAVE_LIBGPGME
 #include "pgp/gpg.h"

@@ -43,7 +43,7 @@
 #include "common.h"
 #include "log.h"
 #include "window_list.h"
-#include "command/command.h"
+#include "command/cmd_defs.h"
 #include "ui/ui.h"
 #include "xmpp/xmpp.h"
 

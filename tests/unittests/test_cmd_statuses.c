@@ -11,7 +11,7 @@
 #include "ui/ui.h"
 #include "ui/stub_ui.h"
 
-#include "command/commands.h"
+#include "command/cmd_funcs.h"
 
 #define CMD_STATUSES "/statuses"
 

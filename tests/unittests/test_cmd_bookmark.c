@@ -14,7 +14,7 @@
 #include "muc.h"
 #include "common.h"
 
-#include "command/commands.h"
+#include "command/cmd_funcs.h"
 
 #include "xmpp/bookmark.h"
 
