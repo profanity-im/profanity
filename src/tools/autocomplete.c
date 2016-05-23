@@ -224,7 +224,7 @@ autocomplete_param_with_func(const char *const input, char *command, autocomplet
     sprintf(command_cpy, "%s ", command);
     int len = strlen(command_cpy);
 
-    if ((strncmp(input, command_cpy, len) == 0) && (strlen(input) > len)) {
+    if (strncmp(input, command_cpy, len) == 0) {
         int i;
         int inp_len = strlen(input);
         char prefix[inp_len];
@@ -255,7 +255,7 @@ autocomplete_param_with_ac(const char *const input, char *command, Autocomplete 
     sprintf(command_cpy, "%s ", command);
     int len = strlen(command_cpy);
     int inp_len = strlen(input);
-    if ((strncmp(input, command_cpy, len) == 0) && (strlen(input) > len)) {
+    if (strncmp(input, command_cpy, len) == 0) {
         int i;
         char prefix[inp_len];
         for(i = len; i < inp_len; i++) {
@@ -280,7 +280,7 @@ autocomplete_param_with_ac(const char *const input, char *command, Autocomplete 
 char*
 autocomplete_param_no_with_func(const char *const input, char *command, int arg_number, autocomplete_func func)
 {
-    if (strncmp(input, command, strlen(command)) == 0 && (strlen(input) > strlen(command))) {
+    if (strncmp(input, command, strlen(command)) == 0) {
         GString *result_str = NULL;
 
         // count tokens properly
