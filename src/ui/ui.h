@@ -37,7 +37,7 @@
 
 #include "config.h"
 
-#include "command/commands.h"
+#include "command/cmd_funcs.h"
 #include "ui/win_types.h"
 #include "muc.h"
 #include "config/tlscerts.h"

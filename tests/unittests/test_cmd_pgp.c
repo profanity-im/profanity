@@ -8,7 +8,7 @@
 
 #include "config.h"
 
-#include "command/commands.h"
+#include "command/cmd_funcs.h"
 #include "xmpp/xmpp.h"
 
 #include "ui/stub_ui.h"
