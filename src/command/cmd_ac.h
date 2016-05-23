@@ -1,5 +1,5 @@
 /*
- * callbacks.h
+ * cmd_ac.h
  *
  * Copyright (C) 2012 - 2016 James Booth <boothj5@gmail.com>
  *
@@ -32,41 +32,31 @@
  *
  */
 
-#ifndef CALLBACKS_H
-#define CALLBACKS_H
+#ifndef CMD_AC_H
+#define CMD_AC_H
 
-#include <glib.h>
+#include "config/preferences.h"
+#include "command/cmd_funcs.h"
 
-#include "command/cmd_defs.h"
+void cmd_ac_init(void);
+void cmd_ac_uninit(void);
 
-typedef struct p_command {
-    const char *command_name;
-    int min_args;
-    int max_args;
-    CommandHelp *help;
-    void *callback;
-    void (*callback_func)(struct p_command *command, gchar **args);
-} PluginCommand;
+void cmd_ac_add(const char *const value);
+void cmd_ac_add_help(const char *const value);
+void cmd_ac_add_cmd(Command *command);
+void cmd_ac_add_alias(ProfAlias *alias);
+void cmd_ac_add_alias_value(char *value);
 
-typedef struct p_timed_function {
-    void *callback;
-    void (*callback_func)(struct p_timed_function *timed_function);
-    int interval_seconds;
-    GTimer *timer;
-} PluginTimedFunction;
+void cmd_ac_remove(const char *const value);
+void cmd_ac_remove_alias_value(char *value);
 
-typedef struct p_window_input_callback {
-    void *callback;
-    void (*destroy)(void *callback);
-    void (*callback_func)(struct p_window_input_callback *window_callback, const char *tag, const char * const line);
-} PluginWindowCallback;
+gboolean cmd_ac_exists(char *cmd);
 
-void callbacks_init(void);
-void callbacks_close(void);
+void cmd_ac_add_form_fields(DataForm *form);
+void cmd_ac_remove_form_fields(DataForm *form);
 
-void callbacks_add_command(PluginCommand *command);
-void callbacks_add_timed(PluginTimedFunction *timed_function);
-void callbacks_add_window_handler(const char *tag, PluginWindowCallback *window_callback);
-void * callbacks_get_window_handler(const char *tag);
+char* cmd_ac_complete(ProfWin *window, const char *const input);
+
+void cmd_ac_reset(ProfWin *window);
 
 #endif

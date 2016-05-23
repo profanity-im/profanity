@@ -55,7 +55,7 @@
 #include "config/preferences.h"
 #include "config/theme.h"
 #include "config/scripts.h"
-#include "command/command.h"
+#include "command/cmd_defs.h"
 #include "common.h"
 #include "contact.h"
 #include "roster_list.h"

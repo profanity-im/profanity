@@ -35,7 +35,7 @@
 #ifndef PLUGINS_H
 #define PLUGINS_H
 
-#include "command/command.h"
+#include "command/cmd_defs.h"
 
 typedef enum {
     LANG_PYTHON,

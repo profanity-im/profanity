@@ -49,7 +49,7 @@
 #include "profanity.h"
 #include "ui/ui.h"
 #include "config/theme.h"
-#include "command/command.h"
+#include "command/cmd_defs.h"
 #include "window_list.h"
 #include "common.h"
 

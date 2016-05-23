@@ -35,7 +35,8 @@
 #include <string.h>
 #include <stdlib.h>
 
-#include "command/command.h"
+#include "command/cmd_defs.h"
+#include "command/cmd_ac.h"
 #include "plugins/callbacks.h"
 #include "plugins/plugins.h"
 #include "tools/autocomplete.h"
@@ -72,9 +73,8 @@ void
 callbacks_add_command(PluginCommand *command)
 {
     p_commands = g_slist_append(p_commands, command);
-    cmd_autocomplete_add(command->command_name);
-    cmd_help_autocomplete_add(&command->command_name[1]);
-
+    cmd_ac_add(command->command_name);
+    cmd_ac_add_help(&command->command_name[1]);
 }
 
 void

@@ -43,7 +43,7 @@
 #include <ncurses.h>
 #endif
 
-#include "command/command.h"
+#include "command/cmd_defs.h"
 #include "common.h"
 #include "log.h"
 #include "muc.h"
