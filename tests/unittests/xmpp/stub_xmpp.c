@@ -254,6 +254,11 @@ void roster_send_name_change(const char * const barejid, const char * const new_
     check_expected(groups);
 }
 
+gboolean bookmark_exists(const char *const room)
+{
+    return FALSE;
+}
+
 void roster_send_add_to_group(const char * const group, PContact contact) {}
 void roster_send_remove_from_group(const char * const group, PContact contact) {}
 

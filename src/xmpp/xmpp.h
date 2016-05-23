@@ -184,6 +184,7 @@ gboolean bookmark_join(const char *jid);
 const GList* bookmark_get_list(void);
 char* bookmark_find(const char *const search_str);
 void bookmark_autocomplete_reset(void);
+gboolean bookmark_exists(const char *const room);
 
 void roster_send_name_change(const char *const barejid, const char *const new_name, GSList *groups);
 void roster_send_add_to_group(const char *const group, PContact contact);

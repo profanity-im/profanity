@@ -140,6 +140,7 @@ typedef enum {
     PREF_CONSOLE_MUC,
     PREF_CONSOLE_PRIVATE,
     PREF_CONSOLE_CHAT,
+    PREF_BOOKMARK_INVITE,
 } preference_t;
 
 typedef struct prof_alias_t {
