@@ -793,7 +793,13 @@ sv_ev_muc_self_online(const char *const room, const char *const nick, gboolean c
 
         iq_room_info_request(room, FALSE);
 
-        muc_invites_remove(room);
+        if (muc_invites_contain(room)) {
+            if (prefs_get_boolean(PREF_BOOKMARK_INVITE) && !bookmark_exists(room)) {
+                bookmark_add(room, nick, muc_invite_password(room), "on");
+            }
+            muc_invites_remove(room);
+        }
+
         muc_roster_set_complete(room);
 
         // show roster if occupants list disabled by default

@@ -717,6 +717,14 @@ cons_show_bookmarks(const GList *list)
             list = g_list_next(list);
         }
     }
+
+    cons_show("");
+    if (prefs_get_boolean(PREF_BOOKMARK_INVITE)) {
+        cons_show("Automatic invite bookmarking (/bookmark invites): ON");
+    } else {
+        cons_show("Automatic invite bookmarking (/bookmark invites): OFF");
+    }
+
     cons_alert();
 }
 

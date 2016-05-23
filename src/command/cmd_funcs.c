@@ -4337,7 +4337,19 @@ cmd_bookmark(ProfWin *window, const char *const command, gchar **args)
             return TRUE;
         }
 
-        if (strcmp(cmd, "list") == 0) {
+        if (strcmp(cmd, "invites") == 0) {
+            if (g_strcmp0(args[1], "on") == 0) {
+                prefs_set_boolean(PREF_BOOKMARK_INVITE, TRUE);
+                cons_show("Auto bookmarking accepted invites enabled.");
+            } else if (g_strcmp0(args[1], "off") == 0) {
+                prefs_set_boolean(PREF_BOOKMARK_INVITE, FALSE);
+                cons_show("Auto bookmarking accepted invites disabled.");
+            } else {
+                cons_bad_cmd_usage(command);
+                cons_show("");
+            }
+            return TRUE;
+        } else if (strcmp(cmd, "list") == 0) {
             const GList *bookmarks = bookmark_get_list();
             cons_show_bookmarks(bookmarks);
         } else {
