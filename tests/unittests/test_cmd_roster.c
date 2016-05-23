@@ -11,7 +11,7 @@
 
 #include "xmpp/xmpp.h"
 #include "roster_list.h"
-#include "command/commands.h"
+#include "command/cmd_funcs.h"
 
 #define CMD_ROSTER "/roster"
 

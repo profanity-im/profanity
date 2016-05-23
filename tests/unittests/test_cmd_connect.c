@@ -11,7 +11,7 @@
 #include "ui/ui.h"
 #include "ui/stub_ui.h"
 
-#include "command/commands.h"
+#include "command/cmd_funcs.h"
 #include "config/accounts.h"
 
 #define CMD_CONNECT "/connect"

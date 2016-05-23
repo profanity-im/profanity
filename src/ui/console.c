@@ -43,7 +43,7 @@
 #include <ncurses.h>
 #endif
 
-#include "command/command.h"
+#include "command/cmd_defs.h"
 #include "common.h"
 #include "log.h"
 #include "muc.h"
@@ -825,7 +825,8 @@ cons_show_room_invite(const char *const invitor, const char * const room, const 
         cons_show("  Message: %s", reason);
     }
 
-    cons_show("Use /join or /decline");
+    cons_show("Use '/join %s' to accept the invitation", room);
+    cons_show("Use '/decline %s' to decline the invitation", room);
 
     if (prefs_get_boolean(PREF_NOTIFY_INVITE)) {
         notify_invite(display_from, room, reason);
