@@ -517,6 +517,7 @@ cmd_ac_init(void)
     autocomplete_add(bookmark_ac, "update");
     autocomplete_add(bookmark_ac, "remove");
     autocomplete_add(bookmark_ac, "join");
+    autocomplete_add(bookmark_ac, "invites");
 
     bookmark_property_ac = autocomplete_new();
     autocomplete_add(bookmark_property_ac, "nick");
@@ -1596,6 +1597,10 @@ _bookmark_autocomplete(ProfWin *window, const char *const input)
         return found;
     }
     found = autocomplete_param_with_func(input, "/bookmark update", bookmark_find);
+    if (found) {
+        return found;
+    }
+    found = autocomplete_param_with_func(input, "/bookmark invites", prefs_autocomplete_boolean_choice);
     if (found) {
         return found;
     }

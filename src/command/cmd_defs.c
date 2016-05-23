@@ -807,7 +807,8 @@ static struct cmd_t command_defs[] =
             "/bookmark add <room> [nick <nick>] [password <password>] [autojoin on|off]",
             "/bookmark update <room> [nick <nick>] [password <password>] [autojoin on|off]",
             "/bookmark remove <room>",
-            "/bookmark join <room>")
+            "/bookmark join <room>",
+            "/bookmark invites on|off")
         CMD_DESC(
             "Manage bookmarks and join bookmarked rooms. "
             "In a chat room, no arguments will bookmark the current room, setting autojoin to \"on\".")
@@ -819,7 +820,8 @@ static struct cmd_t command_defs[] =
             { "nick <nick>", "Nickname used in the chat room." },
             { "password <password>", "Password if required, may be stored in plaintext on your server." },
             { "autojoin on|off", "Whether to join the room automatically on login." },
-            { "join <room>", "Join room using the properties associated with the bookmark." })
+            { "join <room>", "Join room using the properties associated with the bookmark." },
+            { "invites on|off", "Whether or not to bookmark accepted room invites, defaults to 'on'."})
         CMD_NOEXAMPLES
     },
 

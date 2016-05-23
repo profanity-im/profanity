@@ -240,6 +240,24 @@ bookmark_autocomplete_reset(void)
     }
 }
 
+gboolean
+bookmark_exists(const char *const room)
+{
+    GSList *bookmarks = autocomplete_create_list(bookmark_ac);
+    GSList *curr = bookmarks;
+    while (curr) {
+        if (strcmp(curr->data, room) == 0) {
+            g_slist_free_full(bookmarks, g_free);
+            return TRUE;
+        } else {
+            curr = g_slist_next(curr);
+        }
+    }
+    g_slist_free_full(bookmarks, g_free);
+
+    return FALSE;
+}
+
 static int
 _bookmark_result_id_handler(xmpp_stanza_t *const stanza, void *const userdata)
 {

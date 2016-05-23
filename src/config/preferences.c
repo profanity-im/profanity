@@ -57,6 +57,7 @@
 #define PREF_GROUP_ALIAS "alias"
 #define PREF_GROUP_OTR "otr"
 #define PREF_GROUP_PGP "pgp"
+#define PREF_GROUP_MUC "muc"
 
 #define INPBLOCK_DEFAULT 1000
 
@@ -1286,6 +1287,8 @@ _get_group(preference_t pref)
             return PREF_GROUP_OTR;
         case PREF_PGP_LOG:
             return PREF_GROUP_PGP;
+        case PREF_BOOKMARK_INVITE:
+            return PREF_GROUP_MUC;
         default:
             return NULL;
     }
@@ -1484,6 +1487,8 @@ _get_key(preference_t pref)
             return "console.private";
         case PREF_CONSOLE_CHAT:
             return "console.chat";
+        case PREF_BOOKMARK_INVITE:
+            return "bookmark.invite";
         default:
             return NULL;
     }
@@ -1530,6 +1535,7 @@ _get_default_boolean(preference_t pref)
         case PREF_LASTACTIVITY:
         case PREF_NOTIFY_MENTION_WHOLE_WORD:
         case PREF_TRAY_READ:
+        case PREF_BOOKMARK_INVITE:
             return TRUE;
         default:
             return FALSE;
