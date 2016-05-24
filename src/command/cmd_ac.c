@@ -2318,13 +2318,15 @@ _role_autocomplete(ProfWin *window, const char *const input)
         gboolean parse_result;
         Autocomplete nick_ac = muc_roster_ac(mucwin->roomjid);
 
-        gchar **args = parse_args(input, 3, 3, &parse_result);
+        gchar **args = parse_args(input, 2, 3, &parse_result);
 
         if ((strncmp(input, "/role", 5) == 0) && (parse_result == TRUE)) {
             GString *beginning = g_string_new("/role ");
             g_string_append(beginning, args[0]);
             g_string_append(beginning, " ");
-            g_string_append(beginning, args[1]);
+            if (args[1]) {
+                g_string_append(beginning, args[1]);
+            }
 
             result = autocomplete_param_with_ac(input, beginning->str, nick_ac, TRUE);
             g_string_free(beginning, TRUE);
