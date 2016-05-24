@@ -2058,15 +2058,18 @@ cons_help(void)
 void
 cons_navigation_help(void)
 {
-    int pad = strlen("Alt-PAGEUP, Alt-PAGEDOWN") + 3;
     ProfWin *console = wins_get_console();
     cons_show("");
     win_print(console, '-', 0, NULL, 0, THEME_WHITE_BOLD, "", "Navigation");
-    cons_show_padded(pad, "Alt-1..Alt-0, F1..F10    : Choose window.");
-    cons_show_padded(pad, "Alt-LEFT, Alt-RIGHT      : Previous/next chat window");
-    cons_show_padded(pad, "PAGEUP, PAGEDOWN         : Page the main window.");
-    cons_show_padded(pad, "Alt-PAGEUP, Alt-PAGEDOWN : Page occupants/roster panel.");
+    cons_show("Alt-1..Alt-0, F1..F10    : Choose window.");
+    cons_show("Alt-LEFT, Alt-RIGHT      : Previous/next chat window.");
+    cons_show("PAGEUP, PAGEDOWN         : Page the main window.");
+    cons_show("Alt-PAGEUP, Alt-PAGEDOWN : Page occupants/roster panel.");
     cons_show("");
+    cons_show("/win <n>     : Focus window n, where n is the window number.");
+    cons_show("/win <name>  : Focus window with name, where name is the recipient, room or window title.");
+    cons_show("");
+    cons_show("See '/help win' for more information.");
 
     cons_alert();
 }
