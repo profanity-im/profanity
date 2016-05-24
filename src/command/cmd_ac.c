@@ -1853,7 +1853,7 @@ static char*
 _plugins_autocomplete(ProfWin *window, const char *const input)
 {
     char *result = NULL;
-    if ((strncmp(input, "/plugins load ", 14) == 0) && (strlen(input) > 14)) {
+    if (strncmp(input, "/plugins load ", 14) == 0) {
         if (plugins_load_ac == NULL) {
             plugins_load_ac = autocomplete_new();
             GSList *plugins = plugins_unloaded_list();
