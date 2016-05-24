@@ -1928,14 +1928,14 @@ static char*
 _script_autocomplete(ProfWin *window, const char *const input)
 {
     char *result = NULL;
-    if ((strncmp(input, "/script show ", 13) == 0) && (strlen(input) > 13)) {
+    if (strncmp(input, "/script show ", 13) == 0) {
         result = autocomplete_param_with_func(input, "/script show", _script_autocomplete_func);
         if (result) {
             return result;
         }
     }
 
-    if ((strncmp(input, "/script run ", 12) == 0) && (strlen(input) > 12)) {
+    if (strncmp(input, "/script run ", 12) == 0) {
         result = autocomplete_param_with_func(input, "/script run", _script_autocomplete_func);
         if (result) {
             return result;
