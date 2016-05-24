@@ -1881,7 +1881,7 @@ static char*
 _theme_autocomplete(ProfWin *window, const char *const input)
 {
     char *result = NULL;
-    if ((strncmp(input, "/theme load ", 12) == 0) && (strlen(input) > 12)) {
+    if (strncmp(input, "/theme load ", 12) == 0) {
         if (theme_load_ac == NULL) {
             theme_load_ac = autocomplete_new();
             GSList *themes = theme_list();
