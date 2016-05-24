@@ -1707,13 +1707,11 @@ _log_autocomplete(ProfWin *window, const char *const input)
 {
     char *result = NULL;
 
-    result = autocomplete_param_with_func(input, "/log rotate",
-        prefs_autocomplete_boolean_choice);
+    result = autocomplete_param_with_func(input, "/log rotate", prefs_autocomplete_boolean_choice);
     if (result) {
         return result;
     }
-    result = autocomplete_param_with_func(input, "/log shared",
-        prefs_autocomplete_boolean_choice);
+    result = autocomplete_param_with_func(input, "/log shared", prefs_autocomplete_boolean_choice);
     if (result) {
         return result;
     }
@@ -1765,12 +1763,14 @@ _otr_autocomplete(ProfWin *window, const char *const input)
     // /otr policy always user@server.com
     if (conn_status == JABBER_CONNECTED) {
         gboolean result;
-        gchar **args = parse_args(input, 3, 3, &result);
+        gchar **args = parse_args(input, 2, 3, &result);
         if (result && (strcmp(args[0], "policy") == 0)) {
             GString *beginning = g_string_new("/otr ");
             g_string_append(beginning, args[0]);
             g_string_append(beginning, " ");
-            g_string_append(beginning, args[1]);
+            if (args[1]) {
+                g_string_append(beginning, args[1]);
+            }
 
             found = autocomplete_param_with_func(input, beginning->str, roster_contact_autocomplete);
             g_string_free(beginning, TRUE);
