@@ -915,24 +915,27 @@ static struct cmd_t command_defs[] =
             "/win <nick>",
             "/win <roomjid>",
             "/win <roomoccupantjid>",
-            "/win xmlconsole")
+            "/win xmlconsole",
+            "/win <plugin>")
         CMD_DESC(
             "Move to the specified window.")
         CMD_ARGS(
-            { "console",            "Go to the Console window." },
-            { "<num>",              "Go to specified window number." },
-            { "<barejid>",          "Go to chat window with contact by JID if open." },
-            { "<nick>",             "Go to chat window with contact by nickname if open." },
-            { "<roomjid>",          "Go to chat room window with roomjid if open." },
-            { "<roomoccupantjid>",  "Go to private chat roomoccupantjid if open." },
-            { "xmlconsole",         "Go to the XML Console window if open." })
+            { "console",            "Focus the Console window." },
+            { "<num>",              "Focus specified window number." },
+            { "<barejid>",          "Focus chat window with contact by JID if open." },
+            { "<nick>",             "Focus chat window with contact by nickname if open." },
+            { "<roomjid>",          "Focus chat room window with roomjid if open." },
+            { "<roomoccupantjid>",  "Focus private chat roomoccupantjid if open." },
+            { "xmlconsole",         "Focus the XML Console window if open." },
+            { "<plugin>",           "Focus the plugin window."})
         CMD_EXAMPLES(
             "/win console",
             "/win 4",
             "/win friend@chat.org",
             "/win Eddie",
             "/win bigroom@conference.chat.org",
-            "/win bigroom@conference.chat.org/bruce")
+            "/win bigroom@conference.chat.org/bruce",
+            "/win wikipedia")
     },
 
     { "/wins",
