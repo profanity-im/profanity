@@ -2566,31 +2566,38 @@ _join_autocomplete(ProfWin *window, const char *const input)
     char *found = NULL;
     gboolean result = FALSE;
 
-    found = autocomplete_param_with_func(input, "/join", bookmark_find);
-    if (found) {
-        return found;
-    }
+    gchar **args = parse_args(input, 1, 5, &result);
 
-    gchar **args = parse_args(input, 2, 4, &result);
-
-    if ((strncmp(input, "/join", 5) == 0) && (result == TRUE)) {
-        GString *beginning = g_string_new("/join ");
-        g_string_append(beginning, args[0]);
-        if (args[1] && args[2]) {
-            g_string_append(beginning, " ");
-            g_string_append(beginning, args[1]);
-            g_string_append(beginning, " ");
-            g_string_append(beginning, args[2]);
+    if (result) {
+        gboolean space_at_end = g_str_has_suffix(input, " ");
+        GString *beginning = g_string_new("/join");
+        int num_args = g_strv_length(args);
+        if ((num_args == 1 && space_at_end) || (num_args == 2 && !space_at_end)) {
+            g_string_append_printf(beginning, " %s", args[0]);
+            found = autocomplete_param_with_ac(input, beginning->str, join_property_ac, TRUE);
+            g_string_free(beginning, TRUE);
+            if (found) {
+                g_strfreev(args);
+                return found;
+            }
         }
-        found = autocomplete_param_with_ac(input, beginning->str, join_property_ac, TRUE);
-        g_string_free(beginning, TRUE);
-        if (found) {
-            g_strfreev(args);
-            return found;
+        if ((num_args == 3 && space_at_end) || (num_args == 4 && !space_at_end)) {
+            g_string_append_printf(beginning, " %s %s %s", args[0], args[1], args[2]);
+            found = autocomplete_param_with_ac(input, beginning->str, join_property_ac, TRUE);
+            g_string_free(beginning, TRUE);
+            if (found) {
+                g_strfreev(args);
+                return found;
+            }
         }
     }
 
     g_strfreev(args);
+
+    found = autocomplete_param_with_func(input, "/join", bookmark_find);
+    if (found) {
+        return found;
+    }
 
     return NULL;
 }
