@@ -1229,32 +1229,6 @@ static struct cmd_t command_defs[] =
             "/presence room all")
     },
 
-//    { "/statuses",
-//        parse_args, 2, 2, &cons_statuses_setting,
-//        CMD_NOSUBFUNCS
-//        CMD_MAINFUNC(cmd_statuses)
-//        CMD_TAGS(
-//            CMD_TAG_UI,
-//            CMD_TAG_CHAT,
-//            CMD_TAG_GROUPCHAT)
-//        CMD_SYN(
-//            "/statuses console|chat|muc all|online|none")
-//        CMD_DESC(
-//            "Configure which presence changes are displayed in various windows. "
-//            "The default is 'all' for all windows.")
-//        CMD_ARGS(
-//            { "console", "Configure what is displayed in the console window." },
-//            { "chat",    "Configure what is displayed in chat windows." },
-//            { "muc",     "Configure what is displayed in chat room windows." },
-//            { "all",     "Show all presence changes." },
-//            { "online",  "Show only online/offline changes." },
-//            { "none",    "Don't show any presence changes." })
-//        CMD_EXAMPLES(
-//            "/statuses console none",
-//            "/statuses chat online",
-//            "/statuses muc all")
-//    },
-
     { "/wrap",
         parse_args, 1, 1, &cons_wrap_setting,
         CMD_NOSUBFUNCS
