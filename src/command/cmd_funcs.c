@@ -4792,7 +4792,12 @@ cmd_console(ProfWin *window, const char *const command, gchar **args)
 gboolean
 cmd_presence(ProfWin *window, const char *const command, gchar **args)
 {
-    _cmd_set_boolean_preference(args[0], command, "Contact presence", PREF_PRESENCE);
+    if (g_strcmp0(args[0], "titlebar") != 0) {
+        cons_bad_cmd_usage(command);
+        return TRUE;
+    }
+
+    _cmd_set_boolean_preference(args[1], command, "Contact presence", PREF_PRESENCE);
     return TRUE;
 }
 

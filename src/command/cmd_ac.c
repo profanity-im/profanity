@@ -97,7 +97,8 @@ static char* _close_autocomplete(ProfWin *window, const char *const input);
 static char* _plugins_autocomplete(ProfWin *window, const char *const input);
 static char* _sendfile_autocomplete(ProfWin *window, const char *const input);
 static char* _blocked_autocomplete(ProfWin *window, const char *const input);
-static char *_tray_autocomplete(ProfWin *window, const char *const input);
+static char* _tray_autocomplete(ProfWin *window, const char *const input);
+static char* _presence_autocomplete(ProfWin *window, const char *const input);
 
 static char* _script_autocomplete_func(const char *const prefix);
 
@@ -190,6 +191,7 @@ static Autocomplete plugins_load_ac;
 static Autocomplete sendfile_ac;
 static Autocomplete blocked_ac;
 static Autocomplete tray_ac;
+static Autocomplete presence_ac;
 
 void
 cmd_ac_init(void)
@@ -724,6 +726,9 @@ cmd_ac_init(void)
     autocomplete_add(tray_ac, "off");
     autocomplete_add(tray_ac, "read");
     autocomplete_add(tray_ac, "timer");
+
+    presence_ac = autocomplete_new();
+    autocomplete_add(presence_ac, "titlebar");
 }
 
 void
@@ -971,6 +976,8 @@ cmd_ac_reset(ProfWin *window)
     autocomplete_reset(plugins_ac);
     autocomplete_reset(blocked_ac);
     autocomplete_reset(tray_ac);
+    autocomplete_reset(presence_ac);
+
     autocomplete_reset(script_ac);
     if (script_show_ac) {
         autocomplete_free(script_show_ac);
@@ -1090,6 +1097,7 @@ cmd_ac_uninit(void)
     autocomplete_free(sendfile_ac);
     autocomplete_free(blocked_ac);
     autocomplete_free(tray_ac);
+    autocomplete_free(presence_ac);
 }
 
 static char*
@@ -1102,7 +1110,7 @@ _cmd_ac_complete_params(ProfWin *window, const char *const input)
 
     // autocomplete boolean settings
     gchar *boolean_choices[] = { "/beep", "/intype", "/states", "/outtype", "/flash", "/splash", "/chlog", "/grlog",
-        "/history", "/vercheck", "/privileges", "/presence", "/wrap", "/winstidy", "/carbons", "/encwarn",
+        "/history", "/vercheck", "/privileges", "/wrap", "/winstidy", "/carbons", "/encwarn",
         "/lastactivity" };
 
     for (i = 0; i < ARRAY_SIZE(boolean_choices); i++) {
@@ -1221,6 +1229,7 @@ _cmd_ac_complete_params(ProfWin *window, const char *const input)
     g_hash_table_insert(ac_funcs, "/sendfile",      _sendfile_autocomplete);
     g_hash_table_insert(ac_funcs, "/blocked",       _blocked_autocomplete);
     g_hash_table_insert(ac_funcs, "/tray",          _tray_autocomplete);
+    g_hash_table_insert(ac_funcs, "/presence",          _presence_autocomplete);
 
     int len = strlen(input);
     char parsed[len+1];
@@ -2920,4 +2929,22 @@ _account_autocomplete(ProfWin *window, const char *const input)
 
     found = autocomplete_param_with_ac(input, "/account", account_ac, TRUE);
     return found;
+}
+
+static char*
+_presence_autocomplete(ProfWin *window, const char *const input)
+{
+    char *found = NULL;
+
+    found = autocomplete_param_with_func(input, "/presence titlebar", prefs_autocomplete_boolean_choice);
+    if (found) {
+        return found;
+    }
+
+    found = autocomplete_param_with_ac(input, "/presence", presence_ac, TRUE);
+    if (found) {
+        return found;
+    }
+
+    return NULL;
 }
