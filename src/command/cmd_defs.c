@@ -1335,7 +1335,8 @@ static struct cmd_t command_defs[] =
             "/notify invite on|off",
             "/notify sub on|off")
         CMD_DESC(
-            "Settings for various kinds of desktop notifications.")
+            "Configure desktop notifications. "
+            "To configure presence update messages in the console, chat and chat room windows, see '/help presence'.")
         CMD_ARGS(
             { "chat on|off",                    "Notifications for regular chat messages." },
             { "chat current on|off",            "Whether to show regular chat message notifications when the window is focussed." },
