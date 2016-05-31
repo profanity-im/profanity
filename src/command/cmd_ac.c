@@ -1527,64 +1527,74 @@ _blocked_autocomplete(ProfWin *window, const char *const input)
     return NULL;
 }
 
-
 static char*
 _bookmark_autocomplete(ProfWin *window, const char *const input)
 {
     char *found = NULL;
 
     gboolean result;
-    gchar **args = parse_args(input, 3, 8, &result);
-    gboolean handle_options = result && (g_strv_length(args) > 2);
+    gchar **args = parse_args(input, 2, 8, &result);
 
-    if (handle_options && ((strcmp(args[0], "add") == 0) || (strcmp(args[0], "update") == 0)) ) {
+    if (result && ((strcmp(args[0], "add") == 0) || (strcmp(args[0], "update") == 0)) ) {
+        gboolean space_at_end = g_str_has_suffix(input, " ");
         GString *beginning = g_string_new("/bookmark");
-        gboolean autojoin = FALSE;
         int num_args = g_strv_length(args);
-
-        g_string_append(beginning, " ");
-        g_string_append(beginning, args[0]);
-        g_string_append(beginning, " ");
-        g_string_append(beginning, args[1]);
-        if (num_args == 4 && g_strcmp0(args[2], "autojoin") == 0) {
-            g_string_append(beginning, " ");
-            g_string_append(beginning, args[2]);
-            autojoin = TRUE;
-        }
-
-        if (num_args > 4) {
-            g_string_append(beginning, " ");
-            g_string_append(beginning, args[2]);
-            g_string_append(beginning, " ");
-            g_string_append(beginning, args[3]);
-            if (num_args == 6 && g_strcmp0(args[4], "autojoin") == 0) {
-                g_string_append(beginning, " ");
-                g_string_append(beginning, args[4]);
-                autojoin = TRUE;
-            }
-        }
-
-        if (num_args > 6) {
-            g_string_append(beginning, " ");
-            g_string_append(beginning, args[4]);
-            g_string_append(beginning, " ");
-            g_string_append(beginning, args[5]);
-            if (num_args == 8 && g_strcmp0(args[6], "autojoin") == 0) {
-                g_string_append(beginning, " ");
-                g_string_append(beginning, args[6]);
-                autojoin = TRUE;
-            }
-        }
-
-        if (autojoin) {
-            found = autocomplete_param_with_func(input, beginning->str, prefs_autocomplete_boolean_choice);
-        } else {
+        if ((num_args == 2 && space_at_end) || (num_args == 3 && !space_at_end)) {
+            g_string_append_printf(beginning, " %s %s", args[0], args[1]);
             found = autocomplete_param_with_ac(input, beginning->str, bookmark_property_ac, TRUE);
+            g_string_free(beginning, TRUE);
+            if (found) {
+                g_strfreev(args);
+                return found;
+            }
         }
-        g_string_free(beginning, TRUE);
-        if (found) {
-            g_strfreev(args);
-            return found;
+        if ((num_args == 3 && space_at_end && (g_strcmp0(args[2], "autojoin") == 0))
+                || (num_args == 4 && (g_strcmp0(args[2], "autojoin") == 0) && !space_at_end))  {
+            g_string_append_printf(beginning, " %s %s %s", args[0], args[1], args[2]);
+            found = autocomplete_param_with_func(input, beginning->str, prefs_autocomplete_boolean_choice);
+            g_string_free(beginning, TRUE);
+            if (found) {
+                g_strfreev(args);
+                return found;
+            }
+        }
+        if ((num_args == 4 && space_at_end) || (num_args == 5 && !space_at_end)) {
+            g_string_append_printf(beginning, " %s %s %s %s", args[0], args[1], args[2], args[3]);
+            found = autocomplete_param_with_ac(input, beginning->str, bookmark_property_ac, TRUE);
+            g_string_free(beginning, TRUE);
+            if (found) {
+                g_strfreev(args);
+                return found;
+            }
+        }
+        if ((num_args == 5 && space_at_end && (g_strcmp0(args[4], "autojoin") == 0))
+                || (num_args == 6 && (g_strcmp0(args[4], "autojoin") == 0) && !space_at_end))  {
+            g_string_append_printf(beginning, " %s %s %s %s %s", args[0], args[1], args[2], args[3], args[4]);
+            found = autocomplete_param_with_func(input, beginning->str, prefs_autocomplete_boolean_choice);
+            g_string_free(beginning, TRUE);
+            if (found) {
+                g_strfreev(args);
+                return found;
+            }
+        }
+        if ((num_args == 6 && space_at_end) || (num_args == 7 && !space_at_end)) {
+            g_string_append_printf(beginning, " %s %s %s %s %s %s", args[0], args[1], args[2], args[3], args[4], args[5]);
+            found = autocomplete_param_with_ac(input, beginning->str, bookmark_property_ac, TRUE);
+            g_string_free(beginning, TRUE);
+            if (found) {
+                g_strfreev(args);
+                return found;
+            }
+        }
+        if ((num_args == 7 && space_at_end && (g_strcmp0(args[6], "autojoin") == 0))
+                || (num_args == 8 && (g_strcmp0(args[6], "autojoin") == 0) && !space_at_end))  {
+            g_string_append_printf(beginning, " %s %s %s %s %s %s %s", args[0], args[1], args[2], args[3], args[4], args[5], args[6]);
+            found = autocomplete_param_with_func(input, beginning->str, prefs_autocomplete_boolean_choice);
+            g_string_free(beginning, TRUE);
+            if (found) {
+                g_strfreev(args);
+                return found;
+            }
         }
     }
 
@@ -1709,13 +1719,11 @@ _log_autocomplete(ProfWin *window, const char *const input)
 {
     char *result = NULL;
 
-    result = autocomplete_param_with_func(input, "/log rotate",
-        prefs_autocomplete_boolean_choice);
+    result = autocomplete_param_with_func(input, "/log rotate", prefs_autocomplete_boolean_choice);
     if (result) {
         return result;
     }
-    result = autocomplete_param_with_func(input, "/log shared",
-        prefs_autocomplete_boolean_choice);
+    result = autocomplete_param_with_func(input, "/log shared", prefs_autocomplete_boolean_choice);
     if (result) {
         return result;
     }
@@ -1767,12 +1775,14 @@ _otr_autocomplete(ProfWin *window, const char *const input)
     // /otr policy always user@server.com
     if (conn_status == JABBER_CONNECTED) {
         gboolean result;
-        gchar **args = parse_args(input, 3, 3, &result);
+        gchar **args = parse_args(input, 2, 3, &result);
         if (result && (strcmp(args[0], "policy") == 0)) {
             GString *beginning = g_string_new("/otr ");
             g_string_append(beginning, args[0]);
             g_string_append(beginning, " ");
-            g_string_append(beginning, args[1]);
+            if (args[1]) {
+                g_string_append(beginning, args[1]);
+            }
 
             found = autocomplete_param_with_func(input, beginning->str, roster_contact_autocomplete);
             g_string_free(beginning, TRUE);
@@ -1855,7 +1865,7 @@ static char*
 _plugins_autocomplete(ProfWin *window, const char *const input)
 {
     char *result = NULL;
-    if ((strncmp(input, "/plugins load ", 14) == 0) && (strlen(input) > 14)) {
+    if (strncmp(input, "/plugins load ", 14) == 0) {
         if (plugins_load_ac == NULL) {
             plugins_load_ac = autocomplete_new();
             GSList *plugins = plugins_unloaded_list();
@@ -1883,7 +1893,7 @@ static char*
 _theme_autocomplete(ProfWin *window, const char *const input)
 {
     char *result = NULL;
-    if ((strncmp(input, "/theme load ", 12) == 0) && (strlen(input) > 12)) {
+    if (strncmp(input, "/theme load ", 12) == 0) {
         if (theme_load_ac == NULL) {
             theme_load_ac = autocomplete_new();
             GSList *themes = theme_list();
@@ -1930,14 +1940,14 @@ static char*
 _script_autocomplete(ProfWin *window, const char *const input)
 {
     char *result = NULL;
-    if ((strncmp(input, "/script show ", 13) == 0) && (strlen(input) > 13)) {
+    if (strncmp(input, "/script show ", 13) == 0) {
         result = autocomplete_param_with_func(input, "/script show", _script_autocomplete_func);
         if (result) {
             return result;
         }
     }
 
-    if ((strncmp(input, "/script run ", 12) == 0) && (strlen(input) > 12)) {
+    if (strncmp(input, "/script run ", 12) == 0) {
         result = autocomplete_param_with_func(input, "/script run", _script_autocomplete_func);
         if (result) {
             return result;
@@ -2270,13 +2280,15 @@ _affiliation_autocomplete(ProfWin *window, const char *const input)
         gboolean parse_result;
         Autocomplete jid_ac = muc_roster_jid_ac(mucwin->roomjid);
 
-        gchar **args = parse_args(input, 3, 3, &parse_result);
+        gchar **args = parse_args(input, 2, 3, &parse_result);
 
         if ((strncmp(input, "/affiliation", 12) == 0) && (parse_result == TRUE)) {
             GString *beginning = g_string_new("/affiliation ");
             g_string_append(beginning, args[0]);
             g_string_append(beginning, " ");
-            g_string_append(beginning, args[1]);
+            if (args[1]) {
+                g_string_append(beginning, args[1]);
+            }
 
             result = autocomplete_param_with_ac(input, beginning->str, jid_ac, TRUE);
             g_string_free(beginning, TRUE);
@@ -2318,13 +2330,15 @@ _role_autocomplete(ProfWin *window, const char *const input)
         gboolean parse_result;
         Autocomplete nick_ac = muc_roster_ac(mucwin->roomjid);
 
-        gchar **args = parse_args(input, 3, 3, &parse_result);
+        gchar **args = parse_args(input, 2, 3, &parse_result);
 
         if ((strncmp(input, "/role", 5) == 0) && (parse_result == TRUE)) {
             GString *beginning = g_string_new("/role ");
             g_string_append(beginning, args[0]);
             g_string_append(beginning, " ");
-            g_string_append(beginning, args[1]);
+            if (args[1]) {
+                g_string_append(beginning, args[1]);
+            }
 
             result = autocomplete_param_with_ac(input, beginning->str, nick_ac, TRUE);
             g_string_free(beginning, TRUE);
@@ -2453,68 +2467,68 @@ _connect_autocomplete(ProfWin *window, const char *const input)
     char *found = NULL;
     gboolean result = FALSE;
 
-    gchar **args = parse_args(input, 2, 6, &result);
+    gchar **args = parse_args(input, 1, 7, &result);
 
-    if ((strncmp(input, "/connect", 8) == 0) && (result == TRUE)) {
-        GString *beginning = g_string_new("/connect ");
-        g_string_append(beginning, args[0]);
-        if (args[1] && args[2]) {
-            g_string_append(beginning, " ");
-            g_string_append(beginning, args[1]);
-            g_string_append(beginning, " ");
-            g_string_append(beginning, args[2]);
-            if (args[3] && args[4]) {
-                g_string_append(beginning, " ");
-                g_string_append(beginning, args[3]);
-                g_string_append(beginning, " ");
-                g_string_append(beginning, args[4]);
+    if (result) {
+        gboolean space_at_end = g_str_has_suffix(input, " ");
+        GString *beginning = g_string_new("/connect");
+        int num_args = g_strv_length(args);
+        if ((num_args == 1 && space_at_end) || (num_args == 2 && !space_at_end)) {
+            g_string_append_printf(beginning, " %s", args[0]);
+            found = autocomplete_param_with_ac(input, beginning->str, connect_property_ac, TRUE);
+            g_string_free(beginning, TRUE);
+            if (found) {
+                g_strfreev(args);
+                return found;
             }
         }
-        found = autocomplete_param_with_ac(input, beginning->str, connect_property_ac, TRUE);
-        g_string_free(beginning, TRUE);
-        if (found) {
-            g_strfreev(args);
-            return found;
-        }
-    }
-
-    g_strfreev(args);
-
-    result = FALSE;
-    args = parse_args(input, 2, 7, &result);
-
-    if ((strncmp(input, "/connect", 8) == 0) && (result == TRUE)) {
-        GString *beginning = g_string_new("/connect ");
-        g_string_append(beginning, args[0]);
-        int curr = 0;
-        if (args[1]) {
-            g_string_append(beginning, " ");
-            g_string_append(beginning, args[1]);
-            curr = 1;
-            if (args[2] && args[3]) {
-                g_string_append(beginning, " ");
-                g_string_append(beginning, args[2]);
-                g_string_append(beginning, " ");
-                g_string_append(beginning, args[3]);
-                curr = 3;
-                if (args[4] && args[5]) {
-                    g_string_append(beginning, " ");
-                    g_string_append(beginning, args[4]);
-                    g_string_append(beginning, " ");
-                    g_string_append(beginning, args[5]);
-                    curr = 5;
-                }
-            }
-        }
-        if (curr != 0 && (g_strcmp0(args[curr], "tls") == 0)) {
+        if ((num_args == 2 && space_at_end && (g_strcmp0(args[1], "tls") == 0))
+                || (num_args == 3 && (g_strcmp0(args[1], "tls") == 0) && !space_at_end))  {
+            g_string_append_printf(beginning, " %s %s", args[0], args[1]);
             found = autocomplete_param_with_ac(input, beginning->str, tls_property_ac, TRUE);
             g_string_free(beginning, TRUE);
             if (found) {
                 g_strfreev(args);
                 return found;
             }
-        } else {
+        }
+        if ((num_args == 3 && space_at_end) || (num_args == 4 && !space_at_end)) {
+            g_string_append_printf(beginning, " %s %s %s", args[0], args[1], args[2]);
+            found = autocomplete_param_with_ac(input, beginning->str, connect_property_ac, TRUE);
             g_string_free(beginning, TRUE);
+            if (found) {
+                g_strfreev(args);
+                return found;
+            }
+        }
+        if ((num_args == 4 && space_at_end && (g_strcmp0(args[3], "tls") == 0))
+                || (num_args == 5 && (g_strcmp0(args[3], "tls") == 0) && !space_at_end))  {
+            g_string_append_printf(beginning, " %s %s %s %s", args[0], args[1], args[2], args[3]);
+            found = autocomplete_param_with_ac(input, beginning->str, tls_property_ac, TRUE);
+            g_string_free(beginning, TRUE);
+            if (found) {
+                g_strfreev(args);
+                return found;
+            }
+        }
+        if ((num_args == 5 && space_at_end) || (num_args == 6 && !space_at_end)) {
+            g_string_append_printf(beginning, " %s %s %s %s %s", args[0], args[1], args[2], args[3], args[4]);
+            found = autocomplete_param_with_ac(input, beginning->str, connect_property_ac, TRUE);
+            g_string_free(beginning, TRUE);
+            if (found) {
+                g_strfreev(args);
+                return found;
+            }
+        }
+        if ((num_args == 6 && space_at_end && (g_strcmp0(args[5], "tls") == 0))
+                || (num_args == 7 && (g_strcmp0(args[5], "tls") == 0) && !space_at_end))  {
+            g_string_append_printf(beginning, " %s %s %s %s %s %s", args[0], args[1], args[2], args[3], args[4], args[5]);
+            found = autocomplete_param_with_ac(input, beginning->str, tls_property_ac, TRUE);
+            g_string_free(beginning, TRUE);
+            if (found) {
+                g_strfreev(args);
+                return found;
+            }
         }
     }
 
@@ -2552,31 +2566,38 @@ _join_autocomplete(ProfWin *window, const char *const input)
     char *found = NULL;
     gboolean result = FALSE;
 
-    found = autocomplete_param_with_func(input, "/join", bookmark_find);
-    if (found) {
-        return found;
-    }
+    gchar **args = parse_args(input, 1, 5, &result);
 
-    gchar **args = parse_args(input, 2, 4, &result);
-
-    if ((strncmp(input, "/join", 5) == 0) && (result == TRUE)) {
-        GString *beginning = g_string_new("/join ");
-        g_string_append(beginning, args[0]);
-        if (args[1] && args[2]) {
-            g_string_append(beginning, " ");
-            g_string_append(beginning, args[1]);
-            g_string_append(beginning, " ");
-            g_string_append(beginning, args[2]);
+    if (result) {
+        gboolean space_at_end = g_str_has_suffix(input, " ");
+        GString *beginning = g_string_new("/join");
+        int num_args = g_strv_length(args);
+        if ((num_args == 1 && space_at_end) || (num_args == 2 && !space_at_end)) {
+            g_string_append_printf(beginning, " %s", args[0]);
+            found = autocomplete_param_with_ac(input, beginning->str, join_property_ac, TRUE);
+            g_string_free(beginning, TRUE);
+            if (found) {
+                g_strfreev(args);
+                return found;
+            }
         }
-        found = autocomplete_param_with_ac(input, beginning->str, join_property_ac, TRUE);
-        g_string_free(beginning, TRUE);
-        if (found) {
-            g_strfreev(args);
-            return found;
+        if ((num_args == 3 && space_at_end) || (num_args == 4 && !space_at_end)) {
+            g_string_append_printf(beginning, " %s %s %s", args[0], args[1], args[2]);
+            found = autocomplete_param_with_ac(input, beginning->str, join_property_ac, TRUE);
+            g_string_free(beginning, TRUE);
+            if (found) {
+                g_strfreev(args);
+                return found;
+            }
         }
     }
 
     g_strfreev(args);
+
+    found = autocomplete_param_with_func(input, "/join", bookmark_find);
+    if (found) {
+        return found;
+    }
 
     return NULL;
 }
@@ -2781,50 +2802,63 @@ _account_autocomplete(ProfWin *window, const char *const input)
     char *found = NULL;
     gboolean result = FALSE;
 
-    gchar **args = parse_args(input, 3, 4, &result);
-
-    if ((strncmp(input, "/account set", 12) == 0) && (result == TRUE)) {
-        GString *beginning = g_string_new("/account set ");
-        g_string_append(beginning, args[1]);
-        if ((g_strv_length(args) > 3) && (g_strcmp0(args[2], "otr")) == 0) {
-            g_string_append(beginning, " ");
-            g_string_append(beginning, args[2]);
+    gchar **args = parse_args(input, 2, 4, &result);
+    if (result && (strcmp(args[0], "set") == 0)) {
+        gboolean space_at_end = g_str_has_suffix(input, " ");
+        GString *beginning = g_string_new("/account");
+        int num_args = g_strv_length(args);
+        if ((num_args == 2 && space_at_end) || (num_args == 3 && !space_at_end)) {
+            g_string_append_printf(beginning, " %s %s", args[0], args[1]);
+            found = autocomplete_param_with_ac(input, beginning->str, account_set_ac, TRUE);
+            g_string_free(beginning, TRUE);
+            if (found) {
+                g_strfreev(args);
+                return found;
+            }
+        }
+        if ((num_args == 3 && space_at_end && (g_strcmp0(args[2], "otr") == 0))
+                || (num_args == 4 && (g_strcmp0(args[2], "otr") == 0) && !space_at_end))  {
+            g_string_append_printf(beginning, " %s %s %s", args[0], args[1], args[2]);
             found = autocomplete_param_with_ac(input, beginning->str, otr_policy_ac, TRUE);
             g_string_free(beginning, TRUE);
             if (found) {
                 g_strfreev(args);
                 return found;
             }
-        } else if ((g_strv_length(args) > 3) && (g_strcmp0(args[2], "status")) == 0) {
-            g_string_append(beginning, " ");
-            g_string_append(beginning, args[2]);
+        }
+        if ((num_args == 3 && space_at_end && (g_strcmp0(args[2], "status") == 0))
+                || (num_args == 4 && (g_strcmp0(args[2], "status") == 0) && !space_at_end))  {
+            g_string_append_printf(beginning, " %s %s %s", args[0], args[1], args[2]);
             found = autocomplete_param_with_ac(input, beginning->str, account_status_ac, TRUE);
             g_string_free(beginning, TRUE);
             if (found) {
                 g_strfreev(args);
                 return found;
             }
-        } else if ((g_strv_length(args) > 3) && (g_strcmp0(args[2], "tls")) == 0) {
-            g_string_append(beginning, " ");
-            g_string_append(beginning, args[2]);
+        }
+        if ((num_args == 3 && space_at_end && (g_strcmp0(args[2], "tls") == 0))
+                || (num_args == 4 && (g_strcmp0(args[2], "tls") == 0) && !space_at_end))  {
+            g_string_append_printf(beginning, " %s %s %s", args[0], args[1], args[2]);
             found = autocomplete_param_with_ac(input, beginning->str, tls_property_ac, TRUE);
             g_string_free(beginning, TRUE);
             if (found) {
                 g_strfreev(args);
                 return found;
             }
-        } else if ((g_strv_length(args) > 3) && (g_strcmp0(args[2], "startscript")) == 0) {
-            g_string_append(beginning, " ");
-            g_string_append(beginning, args[2]);
+        }
+        if ((num_args == 3 && space_at_end && (g_strcmp0(args[2], "startscript") == 0))
+                || (num_args == 4 && (g_strcmp0(args[2], "startscript") == 0) && !space_at_end))  {
+            g_string_append_printf(beginning, " %s %s %s", args[0], args[1], args[2]);
             found = autocomplete_param_with_func(input, beginning->str, _script_autocomplete_func);
             g_string_free(beginning, TRUE);
             if (found) {
                 g_strfreev(args);
                 return found;
             }
-        } else if ((g_strv_length(args) > 3) && (g_strcmp0(args[2], "theme")) == 0) {
-            g_string_append(beginning, " ");
-            g_string_append(beginning, args[2]);
+        }
+        if ((num_args == 3 && space_at_end && (g_strcmp0(args[2], "theme") == 0))
+                || (num_args == 4 && (g_strcmp0(args[2], "theme") == 0) && !space_at_end))  {
+            g_string_append_printf(beginning, " %s %s %s", args[0], args[1], args[2]);
             if (theme_load_ac == NULL) {
                 theme_load_ac = autocomplete_new();
                 GSList *themes = theme_list();
@@ -2839,27 +2873,22 @@ _account_autocomplete(ProfWin *window, const char *const input)
             found = autocomplete_param_with_ac(input, beginning->str, theme_load_ac, TRUE);
             g_string_free(beginning, TRUE);
             if (found) {
+                g_strfreev(args);
                 return found;
             }
+        }
 #ifdef HAVE_LIBGPGME
-        } else if ((g_strv_length(args) > 3) && (g_strcmp0(args[2], "pgpkeyid")) == 0) {
-            g_string_append(beginning, " ");
-            g_string_append(beginning, args[2]);
+        if ((num_args == 3 && space_at_end && (g_strcmp0(args[2], "pgpkeyid") == 0))
+                || (num_args == 4 && (g_strcmp0(args[2], "pgpkeyid") == 0) && !space_at_end))  {
+            g_string_append_printf(beginning, " %s %s %s", args[0], args[1], args[2]);
             found = autocomplete_param_with_func(input, beginning->str, p_gpg_autocomplete_key);
             g_string_free(beginning, TRUE);
             if (found) {
                 g_strfreev(args);
                 return found;
             }
-#endif
-        } else {
-            found = autocomplete_param_with_ac(input, beginning->str, account_set_ac, TRUE);
-            g_string_free(beginning, TRUE);
-            if (found) {
-                g_strfreev(args);
-                return found;
-            }
         }
+#endif
     }
 
     if ((strncmp(input, "/account clear", 14) == 0) && (result == TRUE)) {
