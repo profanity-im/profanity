@@ -1176,9 +1176,21 @@ void
 cons_presence_setting(void)
 {
     if (prefs_get_boolean(PREF_PRESENCE))
-        cons_show("Contact presence (/presence)        : ON");
+        cons_show("Titlebar presence (/presence)       : ON");
     else
-        cons_show("Contact presence (/presence)        : OFF");
+        cons_show("Titlebar presence (/presence)       : OFF");
+
+    char *console = prefs_get_string(PREF_STATUSES_CONSOLE);
+    char *chat = prefs_get_string(PREF_STATUSES_CHAT);
+    char *room = prefs_get_string(PREF_STATUSES_MUC);
+
+    cons_show("Console presence (/presence)        : %s", console);
+    cons_show("Chat presence (/presence)           : %s", chat);
+    cons_show("Room presence (/presence)           : %s", room);
+
+    prefs_free_string(console);
+    prefs_free_string(chat);
+    prefs_free_string(room);
 }
 
 void
@@ -1313,22 +1325,6 @@ cons_vercheck_setting(void)
         cons_show("Version checking (/vercheck)        : ON");
     else
         cons_show("Version checking (/vercheck)        : OFF");
-}
-
-void
-cons_statuses_setting(void)
-{
-    char *console = prefs_get_string(PREF_STATUSES_CONSOLE);
-    char *chat = prefs_get_string(PREF_STATUSES_CHAT);
-    char *muc = prefs_get_string(PREF_STATUSES_MUC);
-
-    cons_show("Console statuses (/statuses)        : %s", console);
-    cons_show("Chat statuses (/statuses)           : %s", chat);
-    cons_show("MUC statuses (/statuses)            : %s", muc);
-
-    prefs_free_string(console);
-    prefs_free_string(chat);
-    prefs_free_string(muc);
 }
 
 void
@@ -1532,7 +1528,6 @@ cons_show_ui_prefs(void)
     cons_time_setting();
     cons_resource_setting();
     cons_vercheck_setting();
-    cons_statuses_setting();
     cons_console_setting();
     cons_occupants_setting();
     cons_roster_setting();

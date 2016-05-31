@@ -4792,7 +4792,59 @@ cmd_console(ProfWin *window, const char *const command, gchar **args)
 gboolean
 cmd_presence(ProfWin *window, const char *const command, gchar **args)
 {
-    _cmd_set_boolean_preference(args[0], command, "Contact presence", PREF_PRESENCE);
+    if (strcmp(args[0], "console") != 0 &&
+            strcmp(args[0], "chat") != 0 &&
+            strcmp(args[0], "room") != 0 &&
+            strcmp(args[0], "titlebar") != 0) {
+        cons_bad_cmd_usage(command);
+        return TRUE;
+    }
+
+    if (strcmp(args[0], "titlebar") == 0) {
+        _cmd_set_boolean_preference(args[1], command, "Contact presence", PREF_PRESENCE);
+        return TRUE;
+    }
+
+    if (strcmp(args[1], "all") != 0 &&
+            strcmp(args[1], "online") != 0 &&
+            strcmp(args[1], "none") != 0) {
+        cons_bad_cmd_usage(command);
+        return TRUE;
+    }
+
+    if (strcmp(args[0], "console") == 0) {
+        prefs_set_string(PREF_STATUSES_CONSOLE, args[1]);
+        if (strcmp(args[1], "all") == 0) {
+            cons_show("All presence updates will appear in the console.");
+        } else if (strcmp(args[1], "online") == 0) {
+            cons_show("Only online/offline presence updates will appear in the console.");
+        } else {
+            cons_show("Presence updates will not appear in the console.");
+        }
+    }
+
+    if (strcmp(args[0], "chat") == 0) {
+        prefs_set_string(PREF_STATUSES_CHAT, args[1]);
+        if (strcmp(args[1], "all") == 0) {
+            cons_show("All presence updates will appear in chat windows.");
+        } else if (strcmp(args[1], "online") == 0) {
+            cons_show("Only online/offline presence updates will appear in chat windows.");
+        } else {
+            cons_show("Presence updates will not appear in chat windows.");
+        }
+    }
+
+    if (strcmp(args[0], "room") == 0) {
+        prefs_set_string(PREF_STATUSES_MUC, args[1]);
+        if (strcmp(args[1], "all") == 0) {
+            cons_show("All presence updates will appear in chat room windows.");
+        } else if (strcmp(args[1], "online") == 0) {
+            cons_show("Only join/leave presence updates will appear in chat room windows.");
+        } else {
+            cons_show("Presence updates will not appear in chat room windows.");
+        }
+    }
+
     return TRUE;
 }
 
@@ -5730,59 +5782,6 @@ cmd_priority(ProfWin *window, const char *const command, gchar **args)
     } else {
         cons_show(err_msg);
         free(err_msg);
-    }
-
-    return TRUE;
-}
-
-gboolean
-cmd_statuses(ProfWin *window, const char *const command, gchar **args)
-{
-    if (strcmp(args[0], "console") != 0 &&
-            strcmp(args[0], "chat") != 0 &&
-            strcmp(args[0], "muc") != 0) {
-        cons_bad_cmd_usage(command);
-        return TRUE;
-    }
-
-    if (strcmp(args[1], "all") != 0 &&
-            strcmp(args[1], "online") != 0 &&
-            strcmp(args[1], "none") != 0) {
-        cons_bad_cmd_usage(command);
-        return TRUE;
-    }
-
-    if (strcmp(args[0], "console") == 0) {
-        prefs_set_string(PREF_STATUSES_CONSOLE, args[1]);
-        if (strcmp(args[1], "all") == 0) {
-            cons_show("All presence updates will appear in the console.");
-        } else if (strcmp(args[1], "online") == 0) {
-            cons_show("Only online/offline presence updates will appear in the console.");
-        } else {
-            cons_show("Presence updates will not appear in the console.");
-        }
-    }
-
-    if (strcmp(args[0], "chat") == 0) {
-        prefs_set_string(PREF_STATUSES_CHAT, args[1]);
-        if (strcmp(args[1], "all") == 0) {
-            cons_show("All presence updates will appear in chat windows.");
-        } else if (strcmp(args[1], "online") == 0) {
-            cons_show("Only online/offline presence updates will appear in chat windows.");
-        } else {
-            cons_show("Presence updates will not appear in chat windows.");
-        }
-    }
-
-    if (strcmp(args[0], "muc") == 0) {
-        prefs_set_string(PREF_STATUSES_MUC, args[1]);
-        if (strcmp(args[1], "all") == 0) {
-            cons_show("All presence updates will appear in chat room windows.");
-        } else if (strcmp(args[1], "online") == 0) {
-            cons_show("Only join/leave presence updates will appear in chat room windows.");
-        } else {
-            cons_show("Presence updates will not appear in chat room windows.");
-        }
     }
 
     return TRUE;

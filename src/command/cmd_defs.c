@@ -1197,19 +1197,36 @@ static struct cmd_t command_defs[] =
     },
 
     { "/presence",
-        parse_args, 1, 1, &cons_presence_setting,
+        parse_args, 2, 2, &cons_presence_setting,
         CMD_NOSUBFUNCS
         CMD_MAINFUNC(cmd_presence)
         CMD_TAGS(
             CMD_TAG_UI,
-            CMD_TAG_CHAT)
+            CMD_TAG_CHAT,
+            CMD_TAG_GROUPCHAT)
         CMD_SYN(
-            "/presence on|off")
+            "/presence titlebar on|off",
+            "/presence console all|online|none",
+            "/presence chat all|online|none",
+            "/presence room all|online|none")
         CMD_DESC(
-            "Show the contacts presence in the titlebar.")
+            "Show the contacts presence in the titlebar and configure presence messages in different window types.")
         CMD_ARGS(
-            { "on|off", "Switch display of the contacts presence in the titlebar on or off." })
-        CMD_NOEXAMPLES
+            { "titlebar on|off", "Switch display of the contacts presence in the titlebar on or off." },
+            { "console all",     "Show all presence changes in the console window." },
+            { "console online",  "Show only online/offline presence changes in the console window." },
+            { "console none",    "Don't show any presence changes in the console window." },
+            { "chat all",        "Show all presence changes in the chat windows." },
+            { "chat online",     "Show only online/offline presence changes in chat windows." },
+            { "chat none",       "Don't show any presence changes in chat windows." },
+            { "room all",        "Show all presence changes in chat room windows." },
+            { "room online",     "Show only online/offline presence changes in chat room windows." },
+            { "room none",       "Don't show any presence changes in chat room windows." })
+        CMD_EXAMPLES(
+            "/presence titlebar off",
+            "/presence console none",
+            "/presence chat online",
+            "/presence room all")
     },
 
     { "/wrap",
@@ -1318,7 +1335,8 @@ static struct cmd_t command_defs[] =
             "/notify invite on|off",
             "/notify sub on|off")
         CMD_DESC(
-            "Settings for various kinds of desktop notifications.")
+            "Configure desktop notifications. "
+            "To configure presence update messages in the console, chat and chat room windows, see '/help presence'.")
         CMD_ARGS(
             { "chat on|off",                    "Notifications for regular chat messages." },
             { "chat current on|off",            "Whether to show regular chat message notifications when the window is focussed." },
@@ -2013,32 +2031,6 @@ static struct cmd_t command_defs[] =
         CMD_EXAMPLES(
             "/theme list",
             "/theme load forest")
-    },
-
-    { "/statuses",
-        parse_args, 2, 2, &cons_statuses_setting,
-        CMD_NOSUBFUNCS
-        CMD_MAINFUNC(cmd_statuses)
-        CMD_TAGS(
-            CMD_TAG_UI,
-            CMD_TAG_CHAT,
-            CMD_TAG_GROUPCHAT)
-        CMD_SYN(
-            "/statuses console|chat|muc all|online|none")
-        CMD_DESC(
-            "Configure which presence changes are displayed in various windows. "
-            "The default is 'all' for all windows.")
-        CMD_ARGS(
-            { "console", "Configure what is displayed in the console window." },
-            { "chat",    "Configure what is displayed in chat windows." },
-            { "muc",     "Configure what is displayed in chat room windows." },
-            { "all",     "Show all presence changes." },
-            { "online",  "Show only online/offline changes." },
-            { "none",    "Don't show any presence changes." })
-        CMD_EXAMPLES(
-            "/statuses console none",
-            "/statuses chat online",
-            "/statuses muc all")
     },
 
     { "/xmlconsole",
