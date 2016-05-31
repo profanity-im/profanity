@@ -1527,7 +1527,6 @@ _blocked_autocomplete(ProfWin *window, const char *const input)
     return NULL;
 }
 
-
 static char*
 _bookmark_autocomplete(ProfWin *window, const char *const input)
 {
@@ -2468,68 +2467,68 @@ _connect_autocomplete(ProfWin *window, const char *const input)
     char *found = NULL;
     gboolean result = FALSE;
 
-    gchar **args = parse_args(input, 2, 6, &result);
+    gchar **args = parse_args(input, 1, 7, &result);
 
-    if ((strncmp(input, "/connect", 8) == 0) && (result == TRUE)) {
-        GString *beginning = g_string_new("/connect ");
-        g_string_append(beginning, args[0]);
-        if (args[1] && args[2]) {
-            g_string_append(beginning, " ");
-            g_string_append(beginning, args[1]);
-            g_string_append(beginning, " ");
-            g_string_append(beginning, args[2]);
-            if (args[3] && args[4]) {
-                g_string_append(beginning, " ");
-                g_string_append(beginning, args[3]);
-                g_string_append(beginning, " ");
-                g_string_append(beginning, args[4]);
+    if (result) {
+        gboolean space_at_end = g_str_has_suffix(input, " ");
+        GString *beginning = g_string_new("/connect");
+        int num_args = g_strv_length(args);
+        if ((num_args == 1 && space_at_end) || (num_args == 2 && !space_at_end)) {
+            g_string_append_printf(beginning, " %s", args[0]);
+            found = autocomplete_param_with_ac(input, beginning->str, connect_property_ac, TRUE);
+            g_string_free(beginning, TRUE);
+            if (found) {
+                g_strfreev(args);
+                return found;
             }
         }
-        found = autocomplete_param_with_ac(input, beginning->str, connect_property_ac, TRUE);
-        g_string_free(beginning, TRUE);
-        if (found) {
-            g_strfreev(args);
-            return found;
-        }
-    }
-
-    g_strfreev(args);
-
-    result = FALSE;
-    args = parse_args(input, 2, 7, &result);
-
-    if ((strncmp(input, "/connect", 8) == 0) && (result == TRUE)) {
-        GString *beginning = g_string_new("/connect ");
-        g_string_append(beginning, args[0]);
-        int curr = 0;
-        if (args[1]) {
-            g_string_append(beginning, " ");
-            g_string_append(beginning, args[1]);
-            curr = 1;
-            if (args[2] && args[3]) {
-                g_string_append(beginning, " ");
-                g_string_append(beginning, args[2]);
-                g_string_append(beginning, " ");
-                g_string_append(beginning, args[3]);
-                curr = 3;
-                if (args[4] && args[5]) {
-                    g_string_append(beginning, " ");
-                    g_string_append(beginning, args[4]);
-                    g_string_append(beginning, " ");
-                    g_string_append(beginning, args[5]);
-                    curr = 5;
-                }
-            }
-        }
-        if (curr != 0 && (g_strcmp0(args[curr], "tls") == 0)) {
+        if ((num_args == 2 && space_at_end && (g_strcmp0(args[1], "tls") == 0))
+                || (num_args == 3 && (g_strcmp0(args[1], "tls") == 0) && !space_at_end))  {
+            g_string_append_printf(beginning, " %s %s", args[0], args[1]);
             found = autocomplete_param_with_ac(input, beginning->str, tls_property_ac, TRUE);
             g_string_free(beginning, TRUE);
             if (found) {
                 g_strfreev(args);
                 return found;
             }
-        } else {
+        }
+        if ((num_args == 3 && space_at_end) || (num_args == 4 && !space_at_end)) {
+            g_string_append_printf(beginning, " %s %s %s", args[0], args[1], args[2]);
+            found = autocomplete_param_with_ac(input, beginning->str, connect_property_ac, TRUE);
             g_string_free(beginning, TRUE);
+            if (found) {
+                g_strfreev(args);
+                return found;
+            }
+        }
+        if ((num_args == 4 && space_at_end && (g_strcmp0(args[3], "tls") == 0))
+                || (num_args == 5 && (g_strcmp0(args[3], "tls") == 0) && !space_at_end))  {
+            g_string_append_printf(beginning, " %s %s %s %s", args[0], args[1], args[2], args[3]);
+            found = autocomplete_param_with_ac(input, beginning->str, tls_property_ac, TRUE);
+            g_string_free(beginning, TRUE);
+            if (found) {
+                g_strfreev(args);
+                return found;
+            }
+        }
+        if ((num_args == 5 && space_at_end) || (num_args == 6 && !space_at_end)) {
+            g_string_append_printf(beginning, " %s %s %s %s %s", args[0], args[1], args[2], args[3], args[4]);
+            found = autocomplete_param_with_ac(input, beginning->str, connect_property_ac, TRUE);
+            g_string_free(beginning, TRUE);
+            if (found) {
+                g_strfreev(args);
+                return found;
+            }
+        }
+        if ((num_args == 6 && space_at_end && (g_strcmp0(args[5], "tls") == 0))
+                || (num_args == 7 && (g_strcmp0(args[5], "tls") == 0) && !space_at_end))  {
+            g_string_append_printf(beginning, " %s %s %s %s %s %s", args[0], args[1], args[2], args[3], args[4], args[5]);
+            found = autocomplete_param_with_ac(input, beginning->str, tls_property_ac, TRUE);
+            g_string_free(beginning, TRUE);
+            if (found) {
+                g_strfreev(args);
+                return found;
+            }
         }
     }
 
