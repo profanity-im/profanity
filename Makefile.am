@@ -111,7 +111,7 @@ unittest_sources = \
 	tests/unittests/test_preferences.c tests/unittests/test_preferences.h \
 	tests/unittests/test_server_events.c tests/unittests/test_server_events.h \
 	tests/unittests/test_muc.c tests/unittests/test_muc.h \
-	tests/unittests/test_cmd_statuses.c tests/unittests/test_cmd_statuses.h \
+	tests/unittests/test_cmd_presence.c tests/unittests/test_cmd_presence.h \
 	tests/unittests/test_cmd_alias.c tests/unittests/test_cmd_alias.h \
 	tests/unittests/test_cmd_connect.c tests/unittests/test_cmd_connect.h \
 	tests/unittests/test_cmd_rooms.c tests/unittests/test_cmd_rooms.h \
