@@ -18,7 +18,7 @@
 #include "test_cmd_account.h"
 #include "test_cmd_rooms.h"
 #include "test_cmd_sub.h"
-#include "test_cmd_statuses.h"
+#include "test_cmd_presence.h"
 #include "test_cmd_otr.h"
 #include "test_cmd_pgp.h"
 #include "test_jid.h"
@@ -395,35 +395,35 @@ int main(int argc, char* argv[]) {
         unit_test(contact_available_when_highest_priority_online),
         unit_test(contact_available_when_highest_priority_chat),
 
-        unit_test(cmd_statuses_shows_usage_when_bad_subcmd),
-        unit_test(cmd_statuses_shows_usage_when_bad_console_setting),
-        unit_test(cmd_statuses_shows_usage_when_bad_chat_setting),
-        unit_test(cmd_statuses_shows_usage_when_bad_muc_setting),
-        unit_test_setup_teardown(cmd_statuses_console_sets_all,
+        unit_test(cmd_presence_shows_usage_when_bad_subcmd),
+        unit_test(cmd_presence_shows_usage_when_bad_console_setting),
+        unit_test(cmd_presence_shows_usage_when_bad_chat_setting),
+        unit_test(cmd_presence_shows_usage_when_bad_muc_setting),
+        unit_test_setup_teardown(cmd_presence_console_sets_all,
             load_preferences,
             close_preferences),
-        unit_test_setup_teardown(cmd_statuses_console_sets_online,
+        unit_test_setup_teardown(cmd_presence_console_sets_online,
             load_preferences,
             close_preferences),
-        unit_test_setup_teardown(cmd_statuses_console_sets_none,
+        unit_test_setup_teardown(cmd_presence_console_sets_none,
             load_preferences,
             close_preferences),
-        unit_test_setup_teardown(cmd_statuses_chat_sets_all,
+        unit_test_setup_teardown(cmd_presence_chat_sets_all,
             load_preferences,
             close_preferences),
-        unit_test_setup_teardown(cmd_statuses_chat_sets_online,
+        unit_test_setup_teardown(cmd_presence_chat_sets_online,
             load_preferences,
             close_preferences),
-        unit_test_setup_teardown(cmd_statuses_chat_sets_none,
+        unit_test_setup_teardown(cmd_presence_chat_sets_none,
             load_preferences,
             close_preferences),
-        unit_test_setup_teardown(cmd_statuses_muc_sets_all,
+        unit_test_setup_teardown(cmd_presence_room_sets_all,
             load_preferences,
             close_preferences),
-        unit_test_setup_teardown(cmd_statuses_muc_sets_online,
+        unit_test_setup_teardown(cmd_presence_room_sets_online,
             load_preferences,
             close_preferences),
-        unit_test_setup_teardown(cmd_statuses_muc_sets_none,
+        unit_test_setup_teardown(cmd_presence_room_sets_none,
             load_preferences,
             close_preferences),
 

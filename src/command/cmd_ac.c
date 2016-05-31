@@ -70,7 +70,6 @@ static char* _bookmark_autocomplete(ProfWin *window, const char *const input);
 static char* _otr_autocomplete(ProfWin *window, const char *const input);
 static char* _pgp_autocomplete(ProfWin *window, const char *const input);
 static char* _connect_autocomplete(ProfWin *window, const char *const input);
-static char* _statuses_autocomplete(ProfWin *window, const char *const input);
 static char* _alias_autocomplete(ProfWin *window, const char *const input);
 static char* _join_autocomplete(ProfWin *window, const char *const input);
 static char* _log_autocomplete(ProfWin *window, const char *const input);
@@ -157,8 +156,6 @@ static Autocomplete otr_log_ac;
 static Autocomplete otr_policy_ac;
 static Autocomplete connect_property_ac;
 static Autocomplete tls_property_ac;
-static Autocomplete statuses_ac;
-static Autocomplete statuses_setting_ac;
 static Autocomplete alias_ac;
 static Autocomplete aliases_ac;
 static Autocomplete join_property_ac;
@@ -192,6 +189,7 @@ static Autocomplete sendfile_ac;
 static Autocomplete blocked_ac;
 static Autocomplete tray_ac;
 static Autocomplete presence_ac;
+static Autocomplete presence_setting_ac;
 
 void
 cmd_ac_init(void)
@@ -566,16 +564,6 @@ cmd_ac_init(void)
     autocomplete_add(join_property_ac, "nick");
     autocomplete_add(join_property_ac, "password");
 
-    statuses_ac = autocomplete_new();
-    autocomplete_add(statuses_ac, "console");
-    autocomplete_add(statuses_ac, "chat");
-    autocomplete_add(statuses_ac, "muc");
-
-    statuses_setting_ac = autocomplete_new();
-    autocomplete_add(statuses_setting_ac, "all");
-    autocomplete_add(statuses_setting_ac, "online");
-    autocomplete_add(statuses_setting_ac, "none");
-
     alias_ac = autocomplete_new();
     autocomplete_add(alias_ac, "add");
     autocomplete_add(alias_ac, "remove");
@@ -729,6 +717,14 @@ cmd_ac_init(void)
 
     presence_ac = autocomplete_new();
     autocomplete_add(presence_ac, "titlebar");
+    autocomplete_add(presence_ac, "console");
+    autocomplete_add(presence_ac, "chat");
+    autocomplete_add(presence_ac, "room");
+
+    presence_setting_ac = autocomplete_new();
+    autocomplete_add(presence_setting_ac, "all");
+    autocomplete_add(presence_setting_ac, "online");
+    autocomplete_add(presence_setting_ac, "none");
 }
 
 void
@@ -946,8 +942,6 @@ cmd_ac_reset(ProfWin *window)
     autocomplete_reset(otr_policy_ac);
     autocomplete_reset(connect_property_ac);
     autocomplete_reset(tls_property_ac);
-    autocomplete_reset(statuses_ac);
-    autocomplete_reset(statuses_setting_ac);
     autocomplete_reset(alias_ac);
     autocomplete_reset(aliases_ac);
     autocomplete_reset(join_property_ac);
@@ -977,6 +971,7 @@ cmd_ac_reset(ProfWin *window)
     autocomplete_reset(blocked_ac);
     autocomplete_reset(tray_ac);
     autocomplete_reset(presence_ac);
+    autocomplete_reset(presence_setting_ac);
 
     autocomplete_reset(script_ac);
     if (script_show_ac) {
@@ -1063,8 +1058,6 @@ cmd_ac_uninit(void)
     autocomplete_free(otr_policy_ac);
     autocomplete_free(connect_property_ac);
     autocomplete_free(tls_property_ac);
-    autocomplete_free(statuses_ac);
-    autocomplete_free(statuses_setting_ac);
     autocomplete_free(alias_ac);
     autocomplete_free(aliases_ac);
     autocomplete_free(join_property_ac);
@@ -1098,6 +1091,7 @@ cmd_ac_uninit(void)
     autocomplete_free(blocked_ac);
     autocomplete_free(tray_ac);
     autocomplete_free(presence_ac);
+    autocomplete_free(presence_setting_ac);
 }
 
 static char*
@@ -1204,7 +1198,6 @@ _cmd_ac_complete_params(ProfWin *window, const char *const input)
     g_hash_table_insert(ac_funcs, "/otr",           _otr_autocomplete);
     g_hash_table_insert(ac_funcs, "/pgp",           _pgp_autocomplete);
     g_hash_table_insert(ac_funcs, "/connect",       _connect_autocomplete);
-    g_hash_table_insert(ac_funcs, "/statuses",      _statuses_autocomplete);
     g_hash_table_insert(ac_funcs, "/alias",         _alias_autocomplete);
     g_hash_table_insert(ac_funcs, "/join",          _join_autocomplete);
     g_hash_table_insert(ac_funcs, "/form",          _form_autocomplete);
@@ -2363,34 +2356,6 @@ _role_autocomplete(ProfWin *window, const char *const input)
 }
 
 static char*
-_statuses_autocomplete(ProfWin *window, const char *const input)
-{
-    char *result = NULL;
-
-    result = autocomplete_param_with_ac(input, "/statuses console", statuses_setting_ac, TRUE);
-    if (result) {
-        return result;
-    }
-
-    result = autocomplete_param_with_ac(input, "/statuses chat", statuses_setting_ac, TRUE);
-    if (result) {
-        return result;
-    }
-
-    result = autocomplete_param_with_ac(input, "/statuses muc", statuses_setting_ac, TRUE);
-    if (result) {
-        return result;
-    }
-
-    result = autocomplete_param_with_ac(input, "/statuses", statuses_ac, TRUE);
-    if (result) {
-        return result;
-    }
-
-    return NULL;
-}
-
-static char*
 _wins_autocomplete(ProfWin *window, const char *const input)
 {
     char *result = NULL;
@@ -2937,6 +2902,21 @@ _presence_autocomplete(ProfWin *window, const char *const input)
     char *found = NULL;
 
     found = autocomplete_param_with_func(input, "/presence titlebar", prefs_autocomplete_boolean_choice);
+    if (found) {
+        return found;
+    }
+
+    found = autocomplete_param_with_ac(input, "/presence console", presence_setting_ac, TRUE);
+    if (found) {
+        return found;
+    }
+
+    found = autocomplete_param_with_ac(input, "/presence chat", presence_setting_ac, TRUE);
+    if (found) {
+        return found;
+    }
+
+    found = autocomplete_param_with_ac(input, "/presence room", presence_setting_ac, TRUE);
     if (found) {
         return found;
     }
