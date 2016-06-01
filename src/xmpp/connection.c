@@ -216,10 +216,14 @@ connection_set_disconnected(void)
 void
 connection_clear_data(void)
 {
-    g_hash_table_destroy(conn.features_by_jid);
-    conn.features_by_jid = NULL;
+    if (conn.features_by_jid) {
+        g_hash_table_destroy(conn.features_by_jid);
+        conn.features_by_jid = NULL;
+    }
 
-    g_hash_table_remove_all(conn.available_resources);
+    if (conn.available_resources) {
+        g_hash_table_remove_all(conn.available_resources);
+    }
 }
 
 #ifdef HAVE_LIBMESODE
