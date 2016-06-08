@@ -231,6 +231,9 @@ otr_on_connect(ProfAccount *account)
         return;
     }
 
+    if (user_state) {
+        otrl_userstate_free(user_state);
+    }
     user_state = otrl_userstate_create();
 
     gcry_error_t err = 0;

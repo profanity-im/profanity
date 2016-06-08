@@ -87,7 +87,7 @@ bookmark_request(void)
         bookmark_list = NULL;
     }
 
-    iq_id_handler_add(id, _bookmark_result_id_handler, id);
+    iq_id_handler_add(id, _bookmark_result_id_handler, free, id);
 
     iq = stanza_create_bookmarks_storage_request(ctx);
     xmpp_stanza_set_id(iq, id);

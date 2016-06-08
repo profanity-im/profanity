@@ -36,10 +36,11 @@
 #define XMPP_IQ_H
 
 typedef int(*ProfIdCallback)(xmpp_stanza_t *const stanza, void *const userdata);
+typedef void(*ProfIdFreeCallback)(void *userdata);
 
 void iq_handlers_init(void);
 void iq_send_stanza(xmpp_stanza_t *const stanza);
-void iq_id_handler_add(const char *const id, ProfIdCallback func, void *userdata);
+void iq_id_handler_add(const char *const id, ProfIdCallback func, ProfIdFreeCallback free_func, void *userdata);
 void iq_disco_info_request_onconnect(gchar *jid);
 void iq_disco_items_request_onconnect(gchar *jid);
 void iq_send_caps_request(const char *const to, const char *const id, const char *const node, const char *const ver);
