@@ -73,6 +73,7 @@ typedef struct _group_data {
 // id handlers
 static int _group_add_id_handler(xmpp_stanza_t *const stanza, void *const userdata);
 static int _group_remove_id_handler(xmpp_stanza_t *const stanza, void *const userdata);
+static void _free_group_data(GroupData *data);
 
 // helper functions
 GSList* _get_groups_from_item(xmpp_stanza_t *item);
@@ -139,7 +140,7 @@ roster_send_add_to_group(const char *const group, PContact contact)
     }
 
     xmpp_ctx_t * const ctx = connection_get_ctx();
-    iq_id_handler_add(unique_id, _group_add_id_handler, data);
+    iq_id_handler_add(unique_id, _group_add_id_handler, (ProfIdFreeCallback)_free_group_data, data);
     xmpp_stanza_t *iq = stanza_create_roster_set(ctx, unique_id, p_contact_barejid(contact),
         p_contact_name(contact), new_groups);
     iq_send_stanza(iq);
@@ -153,9 +154,7 @@ _group_add_id_handler(xmpp_stanza_t *const stanza, void *const userdata)
     if (userdata) {
         GroupData *data = userdata;
         ui_group_added(data->name, data->group);
-        free(data->name);
-        free(data->group);
-        free(userdata);
+        _free_group_data(data);
     }
     return 0;
 }
@@ -184,7 +183,7 @@ roster_send_remove_from_group(const char *const group, PContact contact)
         data->name = strdup(p_contact_barejid(contact));
     }
 
-    iq_id_handler_add(unique_id, _group_remove_id_handler, data);
+    iq_id_handler_add(unique_id, _group_remove_id_handler, (ProfIdFreeCallback)_free_group_data, data);
     xmpp_stanza_t *iq = stanza_create_roster_set(ctx, unique_id, p_contact_barejid(contact),
         p_contact_name(contact), new_groups);
     iq_send_stanza(iq);
@@ -335,4 +334,14 @@ _get_groups_from_item(xmpp_stanza_t *item)
     }
 
     return groups;
+}
+
+static void
+_free_group_data(GroupData *data)
+{
+    if (data) {
+        free(data->group);
+        free(data->name);
+        free(data);
+    }
 }

@@ -2530,6 +2530,8 @@ _connect_autocomplete(ProfWin *window, const char *const input)
                 return found;
             }
         }
+
+        g_string_free(beginning, TRUE);
     }
 
     g_strfreev(args);

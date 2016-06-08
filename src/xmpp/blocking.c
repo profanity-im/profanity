@@ -76,7 +76,7 @@ blocking_request(void)
     }
     blocked_ac = autocomplete_new();
 
-    iq_id_handler_add(id, _blocklist_result_handler, NULL);
+    iq_id_handler_add(id, _blocklist_result_handler, NULL, NULL);
 
     iq = stanza_create_blocked_list_request(ctx);
     xmpp_stanza_set_id(iq, id);
@@ -135,7 +135,7 @@ blocked_add(char *jid)
     xmpp_stanza_add_child(iq, block);
     xmpp_stanza_release(block);
 
-    iq_id_handler_add(id, _block_add_result_handler, strdup(jid));
+    iq_id_handler_add(id, _block_add_result_handler, free, strdup(jid));
 
     iq_send_stanza(iq);
     xmpp_stanza_release(iq);
@@ -174,7 +174,7 @@ blocked_remove(char *jid)
     xmpp_stanza_add_child(iq, block);
     xmpp_stanza_release(block);
 
-    iq_id_handler_add(id, _block_remove_result_handler, strdup(jid));
+    iq_id_handler_add(id, _block_remove_result_handler, free, strdup(jid));
 
     iq_send_stanza(iq);
     xmpp_stanza_release(iq);
