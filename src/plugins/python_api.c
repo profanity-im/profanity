@@ -33,6 +33,7 @@
  */
 
 #include <Python.h>
+#include <frameobject.h>
 
 #include <glib.h>
 
@@ -41,6 +42,9 @@
 #include "plugins/python_plugins.h"
 #include "plugins/callbacks.h"
 #include "plugins/autocompleters.h"
+#include "log.h"
+
+static char* _python_plugin_name(void);
 
 static PyObject*
 python_api_cons_alert(PyObject *self, PyObject *args)
@@ -156,6 +160,9 @@ python_api_register_command(PyObject *self, PyObject *args)
             c_examples[i] = c_item;
         }
         c_examples[len] = NULL;
+
+        char *plugin_name = _python_plugin_name();
+        log_debug("FILENAME : %s", plugin_name);
 
         allow_python_threads();
         api_register_command(command_name, min_args, max_args, c_synopsis,
@@ -789,4 +796,17 @@ void
 python_api_init(void)
 {
     Py_InitModule("prof", apiMethods);
+}
+
+static char*
+_python_plugin_name(void)
+{
+    PyThreadState *ts = PyThreadState_Get();
+    PyFrameObject *frame = ts->frame;
+    char const* filename = PyString_AsString(frame->f_code->co_filename);
+    gchar **split = g_strsplit(filename, "/", 0);
+    char *plugin_name = strdup(split[g_strv_length(split)-1]);
+    g_strfreev(split);
+
+    return plugin_name;
 }
