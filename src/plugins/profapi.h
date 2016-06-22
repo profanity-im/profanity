@@ -35,6 +35,8 @@
 #ifndef PROF_API_H
 #define PROF_API_H
 
+#define prof_register_command(command_name, min_args, max_args, synopsis, description, arguments, examples, callback) _prof_register_command(__FILE__, command_name, min_args, max_args, synopsis, description, arguments, examples, callback)
+
 typedef char* PROF_WIN_TAG;
 
 void (*prof_cons_alert)(void);
@@ -42,7 +44,7 @@ int (*prof_cons_show)(const char * const message);
 int (*prof_cons_show_themed)(const char *const group, const char *const item, const char *const def, const char *const message);
 int (*prof_cons_bad_cmd_usage)(const char *const cmd);
 
-void (*prof_register_command)(const char *command_name, int min_args, int max_args,
+void (*_prof_register_command)(const char *filename, const char *command_name, int min_args, int max_args,
     const char **synopsis, const char *description, const char *arguments[][2], const char **examples,
     void(*callback)(char **args));
 

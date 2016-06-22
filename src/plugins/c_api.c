@@ -53,6 +53,8 @@ typedef struct window_wrapper_t {
     void(*func)(char *tag, char *line);
 } WindowWrapper;
 
+static char* _c_plugin_name(const char *filename);
+
 static void
 c_api_cons_alert(void)
 {
@@ -78,10 +80,13 @@ c_api_cons_bad_cmd_usage(const char *const cmd)
 }
 
 static void
-c_api_register_command(const char *command_name, int min_args, int max_args,
+c_api_register_command(const char *filename, const char *command_name, int min_args, int max_args,
     const char **synopsis, const char *description, const char *arguments[][2], const char **examples,
     void(*callback)(char **args))
 {
+    char *plugin_name = _c_plugin_name(filename);
+    log_debug("FILENAME : %s", plugin_name);
+
     CommandWrapper *wrapper = malloc(sizeof(CommandWrapper));
     wrapper->func = callback;
     api_register_command(command_name, min_args, max_args, synopsis,
@@ -297,7 +302,7 @@ c_api_init(void)
     prof_cons_show = c_api_cons_show;
     prof_cons_show_themed = c_api_cons_show_themed;
     prof_cons_bad_cmd_usage = c_api_cons_bad_cmd_usage;
-    prof_register_command = c_api_register_command;
+    _prof_register_command = c_api_register_command;
     prof_register_timed = c_api_register_timed;
     prof_completer_add = c_api_completer_add;
     prof_completer_remove = c_api_completer_remove;
@@ -327,4 +332,18 @@ c_api_init(void)
     prof_settings_set_int = c_api_settings_set_int;
     prof_incoming_message = c_api_incoming_message;
     prof_disco_add_feature = c_api_disco_add_feature;
+}
+
+static char *
+_c_plugin_name(const char *filename)
+{
+    GString *plugin_name_str = g_string_new("");
+    char *name = strndup(filename, strlen(filename)-1);
+    g_string_append(plugin_name_str, name);
+    free(name);
+    g_string_append(plugin_name_str, "so");
+    char *result = plugin_name_str->str;
+    g_string_free(plugin_name_str, FALSE);
+
+    return result;
 }
