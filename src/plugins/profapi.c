@@ -46,7 +46,7 @@ void (*_prof_register_command)(const char *filename, const char *command_name, i
     const char **synopsis, const char *description, const char *arguments[][2], const char **examples,
     void(*callback)(char **args)) = NULL;
 
-void (*prof_register_timed)(void(*callback)(void), int interval_seconds) = NULL;
+void (*_prof_register_timed)(const char *filename, void(*callback)(void), int interval_seconds) = NULL;
 
 void (*prof_completer_add)(const char *key, char **items) = NULL;
 void (*prof_completer_remove)(const char *key, char **items) = NULL;

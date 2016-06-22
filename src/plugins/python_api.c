@@ -119,6 +119,9 @@ python_api_register_command(PyObject *self, PyObject *args)
         return Py_BuildValue("");
     }
 
+    char *plugin_name = _python_plugin_name();
+    log_debug("Register command %s for %s", command_name, plugin_name);
+
     if (p_callback && PyCallable_Check(p_callback)) {
         Py_ssize_t len = PyList_Size(synopsis);
         const char *c_synopsis[len == 0 ? 0 : len+1];
@@ -161,9 +164,6 @@ python_api_register_command(PyObject *self, PyObject *args)
         }
         c_examples[len] = NULL;
 
-        char *plugin_name = _python_plugin_name();
-        log_debug("FILENAME : %s", plugin_name);
-
         allow_python_threads();
         api_register_command(command_name, min_args, max_args, c_synopsis,
             description, c_arguments, c_examples, p_callback, python_command_callback);
@@ -176,6 +176,9 @@ python_api_register_command(PyObject *self, PyObject *args)
 static PyObject *
 python_api_register_timed(PyObject *self, PyObject *args)
 {
+    char *plugin_name = _python_plugin_name();
+    log_debug("Register timed for %s", plugin_name);
+
     PyObject *p_callback = NULL;
     int interval_seconds = 0;
 

@@ -85,7 +85,7 @@ c_api_register_command(const char *filename, const char *command_name, int min_a
     void(*callback)(char **args))
 {
     char *plugin_name = _c_plugin_name(filename);
-    log_debug("FILENAME : %s", plugin_name);
+    log_debug("Register command %s for %s", command_name, plugin_name);
 
     CommandWrapper *wrapper = malloc(sizeof(CommandWrapper));
     wrapper->func = callback;
@@ -94,8 +94,11 @@ c_api_register_command(const char *filename, const char *command_name, int min_a
 }
 
 static void
-c_api_register_timed(void(*callback)(void), int interval_seconds)
+c_api_register_timed(const char *filename, void(*callback)(void), int interval_seconds)
 {
+    char *plugin_name = _c_plugin_name(filename);
+    log_debug("Register timed for %s", plugin_name);
+
     TimedWrapper *wrapper = malloc(sizeof(TimedWrapper));
     wrapper->func = callback;
     api_register_timed(wrapper, interval_seconds, c_timed_callback);
@@ -303,7 +306,7 @@ c_api_init(void)
     prof_cons_show_themed = c_api_cons_show_themed;
     prof_cons_bad_cmd_usage = c_api_cons_bad_cmd_usage;
     _prof_register_command = c_api_register_command;
-    prof_register_timed = c_api_register_timed;
+    _prof_register_timed = c_api_register_timed;
     prof_completer_add = c_api_completer_add;
     prof_completer_remove = c_api_completer_remove;
     prof_completer_clear = c_api_completer_clear;
