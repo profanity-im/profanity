@@ -205,6 +205,9 @@ python_api_completer_add(PyObject *self, PyObject *args)
         return Py_BuildValue("");
     }
 
+    char *plugin_name = _python_plugin_name();
+    log_debug("Autocomplete add %s for %s", key, plugin_name);
+
     Py_ssize_t len = PyList_Size(items);
     char *c_items[len];
 

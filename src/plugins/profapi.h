@@ -37,6 +37,7 @@
 
 #define prof_register_command(command_name, min_args, max_args, synopsis, description, arguments, examples, callback) _prof_register_command(__FILE__, command_name, min_args, max_args, synopsis, description, arguments, examples, callback)
 #define prof_register_timed(callback, interval_seconds) _prof_register_timed(__FILE__, callback, interval_seconds)
+#define prof_completer_add(key, items) _prof_completer_add(__FILE__, key, items)
 
 typedef char* PROF_WIN_TAG;
 
@@ -51,7 +52,7 @@ void (*_prof_register_command)(const char *filename, const char *command_name, i
 
 void (*_prof_register_timed)(const char *filename, void(*callback)(void), int interval_seconds);
 
-void (*prof_completer_add)(const char *key, char **items);
+void (*_prof_completer_add)(const char *filename, const char *key, char **items);
 void (*prof_completer_remove)(const char *key, char **items);
 void (*prof_completer_clear)(const char *key);
 

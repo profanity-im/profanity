@@ -105,8 +105,11 @@ c_api_register_timed(const char *filename, void(*callback)(void), int interval_s
 }
 
 static void
-c_api_completer_add(const char *key, char **items)
+c_api_completer_add(const char *filename, const char *key, char **items)
 {
+    char *plugin_name = _c_plugin_name(filename);
+    log_debug("Autocomplete add %s for %s", key, plugin_name);
+
     api_completer_add(key, items);
 }
 
@@ -307,7 +310,7 @@ c_api_init(void)
     prof_cons_bad_cmd_usage = c_api_cons_bad_cmd_usage;
     _prof_register_command = c_api_register_command;
     _prof_register_timed = c_api_register_timed;
-    prof_completer_add = c_api_completer_add;
+    _prof_completer_add = c_api_completer_add;
     prof_completer_remove = c_api_completer_remove;
     prof_completer_clear = c_api_completer_clear;
     prof_notify = c_api_notify;

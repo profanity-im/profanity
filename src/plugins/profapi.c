@@ -48,7 +48,7 @@ void (*_prof_register_command)(const char *filename, const char *command_name, i
 
 void (*_prof_register_timed)(const char *filename, void(*callback)(void), int interval_seconds) = NULL;
 
-void (*prof_completer_add)(const char *key, char **items) = NULL;
+void (*_prof_completer_add)(const char *filename, const char *key, char **items) = NULL;
 void (*prof_completer_remove)(const char *key, char **items) = NULL;
 void (*prof_completer_clear)(const char *key) = NULL;
 
