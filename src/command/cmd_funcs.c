@@ -95,6 +95,49 @@ static gboolean _cmd_execute(ProfWin *window, const char *const command, const c
 static gboolean _cmd_execute_default(ProfWin *window, const char *inp);
 static gboolean _cmd_execute_alias(ProfWin *window, const char *const inp, gboolean *ran);
 
+void
+command_help_free(CommandHelp *help)
+{
+    free(help->desc);
+
+    if (help->tags) {
+        int i = 0;
+        while (i < 20 && help->tags[i]) {
+            free(help->tags[i]);
+            i++;
+        }
+        free(help->tags);
+    }
+
+    if (help->synopsis) {
+        int i = 0;
+        while (i < 50 && help->synopsis[i]) {
+            free(help->synopsis[i]);
+            i++;
+        }
+        free(help->synopsis);
+    }
+
+    if (help->examples) {
+        int i = 0;
+        while (i < 20 && help->examples[i]) {
+            free(help->examples[i]);
+            i++;
+        }
+        free(help->examples);
+    }
+
+    if (help->args) {
+        int i = 0;
+        while (i < 120 && help->args[i]) {
+            free(help->args[i][0]);
+            free(help->args[i][1]);
+            free(help->args[i]);
+        }
+        free(help->args);
+    }
+}
+
 /*
  * Take a line of input and process it, return TRUE if profanity is to
  * continue, FALSE otherwise
@@ -3809,7 +3852,7 @@ cmd_form(ProfWin *window, const char *const command, gchar **args)
         } else {
             mucconfwin_form_help(confwin);
 
-            const gchar **help_text = NULL;
+            gchar **help_text = NULL;
             Command *command = cmd_get("/form");
 
             if (command) {
@@ -6037,6 +6080,16 @@ cmd_plugins(ProfWin *window, const char *const command, gchar **args)
         } else {
             cons_show("Failed to load plugin: %s", args[1]);
         }
+
+        return TRUE;
+    } else if (g_strcmp0(args[0], "unload") == 0) {
+        if (args[1] == NULL) {
+            cons_bad_cmd_usage(command);
+            return TRUE;
+        }
+        plugins_unload(args[1]);
+        prefs_remove_plugin(args[1]);
+        cons_show("Unloaded plugin: %s", args[1]);
 
         return TRUE;
     } else {

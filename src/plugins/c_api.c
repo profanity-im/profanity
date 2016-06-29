@@ -80,7 +80,7 @@ c_api_cons_bad_cmd_usage(const char *const cmd)
 }
 
 static void
-c_api_register_command(const char *filename, const char *command_name, int min_args, int max_args,
+c_api_register_command(const char *filename, char *command_name, int min_args, int max_args,
     const char **synopsis, const char *description, const char *arguments[][2], const char **examples,
     void(*callback)(char **args))
 {
@@ -89,7 +89,7 @@ c_api_register_command(const char *filename, const char *command_name, int min_a
 
     CommandWrapper *wrapper = malloc(sizeof(CommandWrapper));
     wrapper->func = callback;
-    api_register_command(command_name, min_args, max_args, synopsis,
+    api_register_command(plugin_name, command_name, min_args, max_args, synopsis,
         description, arguments, examples, wrapper, c_command_callback);
 }
 

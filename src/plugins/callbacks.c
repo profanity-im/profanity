@@ -78,6 +78,40 @@ callbacks_add_command(PluginCommand *command)
 }
 
 void
+_command_destroy(PluginCommand *command)
+{
+    free(command->command_name);
+    free(command->plugin_name);
+    command_help_free(command->help);
+    // TODO free callback
+}
+
+void
+callbacks_remove_commands(const char *const plugin_name)
+{
+    GSList *items_to_remove = NULL;
+    GSList *curr = p_commands;
+    while (curr) {
+        PluginCommand *command = curr->data;
+        if (g_strcmp0(command->plugin_name, plugin_name) == 0) {
+            cmd_ac_remove(command->command_name);
+            cmd_ac_remove_help(&command->command_name[1]);
+            items_to_remove = g_slist_append(items_to_remove, curr);
+        }
+        curr = g_slist_next(curr);
+    }
+
+    curr = items_to_remove;
+    while (curr) {
+        GSList *item = curr->data;
+        PluginCommand *command = item->data;
+        _command_destroy(command);
+        p_commands = g_slist_remove_link(p_commands, item);
+        curr = g_slist_next(curr);
+    }
+}
+
+void
 callbacks_add_timed(PluginTimedFunction *timed_function)
 {
     p_timed_functions = g_slist_append(p_timed_functions, timed_function);

@@ -702,6 +702,7 @@ cmd_ac_init(void)
 
     plugins_ac = autocomplete_new();
     autocomplete_add(plugins_ac, "load");
+    autocomplete_add(plugins_ac, "unload");
 
     sendfile_ac = autocomplete_new();
 
@@ -781,6 +782,14 @@ cmd_ac_remove(const char *const value)
 {
     if (commands_ac) {
         autocomplete_remove(commands_ac, value);
+    }
+}
+
+void
+cmd_ac_remove_help(const char *const value)
+{
+    if (help_ac) {
+        autocomplete_remove(help_ac, value);
     }
 }
 

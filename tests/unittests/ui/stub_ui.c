@@ -265,7 +265,7 @@ void mucconfwin_show_form(ProfMucConfWin *confwin) {}
 void mucconfwin_show_form_field(ProfMucConfWin *confwin, DataForm *form, char *tag) {}
 void mucconfwin_form_help(ProfMucConfWin *confwin) {}
 void mucconfwin_field_help(ProfMucConfWin *confwin, char *tag) {}
-void ui_show_lines(ProfWin *window, const gchar** lines) {}
+void ui_show_lines(ProfWin *window, gchar** lines) {}
 void ui_redraw_all_room_rosters(void) {}
 void ui_show_all_room_rosters(void) {}
 void ui_hide_all_room_rosters(void) {}
