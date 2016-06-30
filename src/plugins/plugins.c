@@ -68,6 +68,8 @@ plugins_init(void)
     plugins = g_hash_table_new_full(g_str_hash, g_str_equal, free, NULL);
     callbacks_init();
     autocompleters_init();
+    plugin_themes_init();
+    plugin_settings_init();
 
 #ifdef HAVE_PYTHON
     python_env_init();
@@ -75,9 +77,6 @@ plugins_init(void)
 #ifdef HAVE_C
     c_env_init();
 #endif
-
-    plugin_themes_init();
-    plugin_settings_init();
 
     // load plugins
     gchar **plugins_pref = prefs_get_plugins();
