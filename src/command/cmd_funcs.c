@@ -6032,7 +6032,6 @@ cmd_plugins(ProfWin *window, const char *const command, gchar **args)
         }
         gboolean res = plugins_load(args[1]);
         if (res) {
-            prefs_add_plugin(args[1]);
             cons_show("Loaded plugin: %s", args[1]);
         } else {
             cons_show("Failed to load plugin: %s", args[1]);
