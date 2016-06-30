@@ -50,7 +50,7 @@ gboolean api_current_win_is_console(void);
 char* api_get_current_nick(void);
 char** api_get_current_occupants(void);
 
-void api_register_command(char *plugin_name, char *command_name, int min_args, int max_args,
+void api_register_command(const char *command_name, int min_args, int max_args,
     const char **synopsis, const char *description, const char *arguments[][2], const char **examples,
     void *callback, void(*callback_func)(PluginCommand *command, gchar **args));
 void api_register_timed(void *callback, int interval_seconds,

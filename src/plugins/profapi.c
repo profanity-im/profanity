@@ -42,7 +42,7 @@ int (*prof_cons_show)(const char * const message) = NULL;
 int (*prof_cons_show_themed)(const char *const group, const char *const item, const char *const def, const char *const message) = NULL;
 int (*prof_cons_bad_cmd_usage)(const char *const cmd) = NULL;
 
-void (*_prof_register_command)(const char *filename, char *command_name, int min_args, int max_args,
+void (*_prof_register_command)(const char *filename, const char *command_name, int min_args, int max_args,
     const char **synopsis, const char *description, const char *arguments[][2], const char **examples,
     void(*callback)(char **args)) = NULL;
 

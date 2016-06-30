@@ -39,11 +39,11 @@
 
 // Command help strings
 typedef struct cmd_help_t {
-    gchar *tags[20];
-    gchar *synopsis[50];
-    gchar *desc;
-    gchar *args[128][2];
-    gchar *examples[20];
+    const gchar *tags[20];
+    const gchar *synopsis[50];
+    const gchar *desc;
+    const gchar *args[128][2];
+    const gchar *examples[20];
 } CommandHelp;
 
 /*
@@ -69,7 +69,6 @@ typedef struct cmd_t {
     CommandHelp help;
 } Command;
 
-void command_help_free(CommandHelp *help);
 
 gboolean cmd_process_input(ProfWin *window, char *inp);
 void cmd_execute_connect(ProfWin *window, const char *const account);

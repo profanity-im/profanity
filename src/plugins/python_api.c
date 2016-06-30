@@ -105,7 +105,7 @@ python_api_cons_bad_cmd_usage(PyObject *self, PyObject *args)
 static PyObject*
 python_api_register_command(PyObject *self, PyObject *args)
 {
-    char *command_name = NULL;
+    const char *command_name = NULL;
     int min_args = 0;
     int max_args = 0;
     PyObject *synopsis = NULL;
@@ -165,7 +165,7 @@ python_api_register_command(PyObject *self, PyObject *args)
         c_examples[len] = NULL;
 
         allow_python_threads();
-        api_register_command(plugin_name, command_name, min_args, max_args, c_synopsis,
+        api_register_command(command_name, min_args, max_args, c_synopsis,
             description, c_arguments, c_examples, p_callback, python_command_callback);
         disable_python_threads();
     }

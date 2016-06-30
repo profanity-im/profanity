@@ -1230,7 +1230,7 @@ ui_handle_room_config_submit_result_error(const char *const roomjid, const char 
 }
 
 void
-ui_show_lines(ProfWin *window, gchar** lines)
+ui_show_lines(ProfWin *window, const gchar** lines)
 {
     if (lines) {
         int i;

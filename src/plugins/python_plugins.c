@@ -888,7 +888,6 @@ python_check_error(void)
 void
 python_plugin_destroy(ProfPlugin *plugin)
 {
-    callbacks_remove_commands(plugin->name);
     disable_python_threads();
     free(plugin->name);
     Py_XDECREF(plugin->module);

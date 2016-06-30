@@ -40,8 +40,7 @@
 #include "command/cmd_defs.h"
 
 typedef struct p_command {
-    char *plugin_name;
-    char *command_name;
+    const char *command_name;
     int min_args;
     int max_args;
     CommandHelp *help;
@@ -66,7 +65,6 @@ void callbacks_init(void);
 void callbacks_close(void);
 
 void callbacks_add_command(PluginCommand *command);
-void callbacks_remove_commands(const char *const plugin_name);
 void callbacks_add_timed(PluginTimedFunction *timed_function);
 void callbacks_add_window_handler(const char *tag, PluginWindowCallback *window_callback);
 void * callbacks_get_window_handler(const char *tag);

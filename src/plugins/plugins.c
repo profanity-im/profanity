@@ -172,33 +172,6 @@ plugins_load(const char *const name)
     }
 }
 
-gboolean
-plugins_unload(const char *const name)
-{
-    GSList *found = g_slist_find_custom(plugins, name, (GCompareFunc)_find_by_name);
-    if (!found) {
-        log_info("Failed to unload plugin: %s, plugin not currently loaded", name);
-        return FALSE;
-    }
-
-    plugins = g_slist_remove_link(plugins, found);
-
-#ifdef HAVE_PYTHON
-    if (g_str_has_suffix(name, ".py")) {
-        python_plugin_destroy(found->data);
-    }
-#endif
-#ifdef HAVE_C
-    if (g_str_has_suffix(name, ".so")) {
-        c_plugin_destroy(found->data);
-    }
-#endif
-
-    g_slist_free(found);
-
-    return TRUE;
-}
-
 GSList *
 plugins_get_list(void)
 {
