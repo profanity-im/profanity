@@ -165,7 +165,7 @@ plugins_load(const char *const name)
             plugin->init_func(plugin, PACKAGE_VERSION, PACKAGE_STATUS, NULL, NULL);
         }
         log_info("Loaded plugin: %s", name);
-        prefs_add_plugin(args[1]);
+        prefs_add_plugin(name);
         return TRUE;
     } else {
         log_info("Failed to load plugin: %s", name);
