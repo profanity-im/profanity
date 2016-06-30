@@ -1894,13 +1894,13 @@ _plugins_autocomplete(ProfWin *window, const char *const input)
     if (strncmp(input, "/plugins unload ", 16) == 0) {
         if (plugins_unload_ac == NULL) {
             plugins_unload_ac = autocomplete_new();
-            GSList *plugins = plugins_loaded_list();
-            GSList *curr = plugins;
+            GList *plugins = plugins_loaded_list();
+            GList *curr = plugins;
             while (curr) {
                 autocomplete_add(plugins_unload_ac, curr->data);
-                curr = g_slist_next(curr);
+                curr = g_list_next(curr);
             }
-            g_slist_free(plugins);
+            g_list_free(plugins);
         }
         result = autocomplete_param_with_ac(input, "/plugins unload", plugins_unload_ac, TRUE);
         if (result) {

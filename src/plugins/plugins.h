@@ -98,9 +98,8 @@ typedef struct prof_plugin_t {
 } ProfPlugin;
 
 void plugins_init(void);
-GSList* plugins_get_list(void);
 GSList *plugins_unloaded_list(void);
-GSList *plugins_loaded_list(void);
+GList *plugins_loaded_list(void);
 char* plugins_autocomplete(const char *const input);
 void plugins_reset_autocomplete(void);
 void plugins_shutdown(void);

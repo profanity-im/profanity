@@ -6053,19 +6053,19 @@ cmd_plugins(ProfWin *window, const char *const command, gchar **args)
 
         return TRUE;
     } else {
-        GSList *plugins = plugins_get_list();
-        GSList *curr = plugins;
-        if (curr == NULL) {
+        GList *plugins = plugins_loaded_list();
+        if (plugins == NULL) {
             cons_show("No plugins installed.");
-        } else {
-            cons_show("Installed plugins:");
-            while (curr) {
-                ProfPlugin *plugin = curr->data;
-                cons_show("  %s", plugin->name);
-                curr = g_slist_next(curr);
-            }
+            return TRUE;
         }
-        g_slist_free(curr);
+
+        GList *curr = plugins;
+        cons_show("Installed plugins:");
+        while (curr) {
+            cons_show("  %s", curr->data);
+            curr = g_list_next(curr);
+        }
+        g_list_free(plugins);
 
         return TRUE;
     }
