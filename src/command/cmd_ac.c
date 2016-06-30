@@ -185,6 +185,7 @@ static Autocomplete console_msg_ac;
 static Autocomplete autoping_ac;
 static Autocomplete plugins_ac;
 static Autocomplete plugins_load_ac;
+static Autocomplete plugins_unload_ac;
 static Autocomplete sendfile_ac;
 static Autocomplete blocked_ac;
 static Autocomplete tray_ac;
@@ -484,6 +485,7 @@ cmd_ac_init(void)
 
     theme_load_ac = NULL;
     plugins_load_ac = NULL;
+    plugins_unload_ac = NULL;
 
     who_roster_ac = autocomplete_new();
     autocomplete_add(who_roster_ac, "chat");
@@ -702,6 +704,7 @@ cmd_ac_init(void)
 
     plugins_ac = autocomplete_new();
     autocomplete_add(plugins_ac, "load");
+    autocomplete_add(plugins_ac, "unload");
 
     sendfile_ac = autocomplete_new();
 
@@ -909,6 +912,10 @@ cmd_ac_reset(ProfWin *window)
         autocomplete_free(plugins_load_ac);
         plugins_load_ac = NULL;
     }
+    if (plugins_unload_ac) {
+        autocomplete_free(plugins_unload_ac);
+        plugins_unload_ac = NULL;
+    }
     autocomplete_reset(account_ac);
     autocomplete_reset(account_set_ac);
     autocomplete_reset(account_clear_ac);
@@ -1087,6 +1094,7 @@ cmd_ac_uninit(void)
     autocomplete_free(autoping_ac);
     autocomplete_free(plugins_ac);
     autocomplete_free(plugins_load_ac);
+    autocomplete_free(plugins_unload_ac);
     autocomplete_free(sendfile_ac);
     autocomplete_free(blocked_ac);
     autocomplete_free(tray_ac);
@@ -1865,6 +1873,7 @@ static char*
 _plugins_autocomplete(ProfWin *window, const char *const input)
 {
     char *result = NULL;
+
     if (strncmp(input, "/plugins load ", 14) == 0) {
         if (plugins_load_ac == NULL) {
             plugins_load_ac = autocomplete_new();
@@ -1881,6 +1890,24 @@ _plugins_autocomplete(ProfWin *window, const char *const input)
             return result;
         }
     }
+
+    if (strncmp(input, "/plugins unload ", 16) == 0) {
+        if (plugins_unload_ac == NULL) {
+            plugins_unload_ac = autocomplete_new();
+            GSList *plugins = plugins_loaded_list();
+            GSList *curr = plugins;
+            while (curr) {
+                autocomplete_add(plugins_unload_ac, curr->data);
+                curr = g_slist_next(curr);
+            }
+            g_slist_free(plugins);
+        }
+        result = autocomplete_param_with_ac(input, "/plugins unload", plugins_unload_ac, TRUE);
+        if (result) {
+            return result;
+        }
+    }
+
     result = autocomplete_param_with_ac(input, "/plugins", plugins_ac, TRUE);
     if (result) {
         return result;

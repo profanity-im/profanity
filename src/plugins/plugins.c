@@ -172,6 +172,12 @@ plugins_load(const char *const name)
     }
 }
 
+gboolean
+plugins_unload(const char *const name)
+{
+    return FALSE;
+}
+
 GSList *
 plugins_get_list(void)
 {
@@ -214,6 +220,20 @@ plugins_unloaded_list(void)
     char *plugins_dir = _get_plugins_dir();
     _plugins_unloaded_list_dir(plugins_dir, &result);
     free(plugins_dir);
+
+    return result;
+}
+
+GSList*
+plugins_loaded_list(void)
+{
+    GSList *result = NULL;
+    GSList *curr = plugins;
+    while (curr) {
+        ProfPlugin *plugin = curr->data;
+        result = g_slist_append(result, plugin->name);
+        curr = g_slist_next(curr);
+    }
 
     return result;
 }

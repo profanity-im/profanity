@@ -100,11 +100,13 @@ typedef struct prof_plugin_t {
 void plugins_init(void);
 GSList* plugins_get_list(void);
 GSList *plugins_unloaded_list(void);
+GSList *plugins_loaded_list(void);
 char* plugins_autocomplete(const char *const input);
 void plugins_reset_autocomplete(void);
 void plugins_shutdown(void);
 
 gboolean plugins_load(const char *const name);
+gboolean plugins_unload(const char *const name);
 
 void plugins_on_start(void);
 void plugins_on_shutdown(void);
