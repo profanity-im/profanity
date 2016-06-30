@@ -165,7 +165,7 @@ python_api_register_command(PyObject *self, PyObject *args)
         c_examples[len] = NULL;
 
         allow_python_threads();
-        api_register_command(command_name, min_args, max_args, c_synopsis,
+        api_register_command(plugin_name, command_name, min_args, max_args, c_synopsis,
             description, c_arguments, c_examples, p_callback, python_command_callback);
         disable_python_threads();
     }
@@ -188,7 +188,7 @@ python_api_register_timed(PyObject *self, PyObject *args)
 
     if (p_callback && PyCallable_Check(p_callback)) {
         allow_python_threads();
-        api_register_timed(p_callback, interval_seconds, python_timed_callback);
+        api_register_timed(plugin_name, p_callback, interval_seconds, python_timed_callback);
         disable_python_threads();
     }
 
@@ -220,7 +220,7 @@ python_api_completer_add(PyObject *self, PyObject *args)
     c_items[len] = NULL;
 
     allow_python_threads();
-    autocompleters_add(key, c_items);
+    api_completer_add(plugin_name, key, c_items);
     disable_python_threads();
 
     return Py_BuildValue("");
@@ -248,7 +248,7 @@ python_api_completer_remove(PyObject *self, PyObject *args)
     c_items[len] = NULL;
 
     allow_python_threads();
-    autocompleters_remove(key, c_items);
+    api_completer_remove(key, c_items);
     disable_python_threads();
 
     return Py_BuildValue("");
@@ -264,7 +264,7 @@ python_api_completer_clear(PyObject *self, PyObject *args)
     }
 
     allow_python_threads();
-    autocompleters_clear(key);
+    api_completer_clear(key);
     disable_python_threads();
 
     return Py_BuildValue("");

@@ -106,7 +106,7 @@ api_cons_bad_cmd_usage(const char *const cmd)
 }
 
 void
-api_register_command(const char *command_name, int min_args, int max_args,
+api_register_command(const char *const plugin_name, const char *command_name, int min_args, int max_args,
     const char **synopsis, const char *description, const char *arguments[][2], const char **examples, void *callback,
     void(*callback_func)(PluginCommand *command, gchar **args))
 {
@@ -144,7 +144,7 @@ api_register_command(const char *command_name, int min_args, int max_args,
 }
 
 void
-api_register_timed(void *callback, int interval_seconds,
+api_register_timed(const char *const plugin_name, void *callback, int interval_seconds,
     void (*callback_func)(PluginTimedFunction *timed_function))
 {
     PluginTimedFunction *timed_function = malloc(sizeof(PluginTimedFunction));
@@ -157,7 +157,7 @@ api_register_timed(void *callback, int interval_seconds,
 }
 
 void
-api_completer_add(const char *key, char **items)
+api_completer_add(const char *const plugin_name, const char *key, char **items)
 {
     autocompleters_add(key, items);
 }
