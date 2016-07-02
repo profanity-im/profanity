@@ -67,8 +67,8 @@ void (*prof_log_info)(const char *message) = NULL;
 void (*prof_log_warning)(const char *message) = NULL;
 void (*prof_log_error)(const char *message) = NULL;
 
+void (*_prof_win_create)(const char *filename, PROF_WIN_TAG win, void(*input_handler)(PROF_WIN_TAG win, char *line)) = NULL;
 int (*prof_win_exists)(PROF_WIN_TAG win) = NULL;
-void (*prof_win_create)(PROF_WIN_TAG win, void(*input_handler)(PROF_WIN_TAG win, char *line)) = NULL;
 int (*prof_win_focus)(PROF_WIN_TAG win) = NULL;
 int (*prof_win_show)(PROF_WIN_TAG win, char *line) = NULL;
 int (*prof_win_show_themed)(PROF_WIN_TAG tag, char *group, char *key, char *def, char *line) = NULL;

@@ -456,13 +456,16 @@ python_api_win_create(PyObject *self, PyObject *args)
     char *tag = NULL;
     PyObject *p_callback = NULL;
 
+    char *plugin_name = _python_plugin_name();
+    log_debug("Win create %s for %s", tag, plugin_name);
+
     if (!PyArg_ParseTuple(args, "sO", &tag, &p_callback)) {
         return Py_BuildValue("");
     }
 
     if (p_callback && PyCallable_Check(p_callback)) {
         allow_python_threads();
-        api_win_create(tag, p_callback, NULL, python_window_callback);
+        api_win_create(plugin_name, tag, p_callback, NULL, python_window_callback);
         disable_python_threads();
     }
 

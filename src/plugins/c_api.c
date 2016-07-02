@@ -198,11 +198,14 @@ c_api_win_exists(char *tag)
 }
 
 static void
-c_api_win_create(char *tag, void(*callback)(char *tag, char *line))
+c_api_win_create(const char *filename, char *tag, void(*callback)(char *tag, char *line))
 {
+    char *plugin_name = _c_plugin_name(filename);
+    log_debug("Win create %s for %s", tag, plugin_name);
+
     WindowWrapper *wrapper = malloc(sizeof(WindowWrapper));
     wrapper->func = callback;
-    api_win_create(tag, wrapper, free, c_window_callback);
+    api_win_create(plugin_name, tag, wrapper, free, c_window_callback);
 }
 
 static int
@@ -311,6 +314,7 @@ c_api_init(void)
     _prof_register_command = c_api_register_command;
     _prof_register_timed = c_api_register_timed;
     _prof_completer_add = c_api_completer_add;
+    _prof_win_create = c_api_win_create;
     prof_completer_remove = c_api_completer_remove;
     prof_completer_clear = c_api_completer_clear;
     prof_notify = c_api_notify;
@@ -325,7 +329,6 @@ c_api_init(void)
     prof_log_warning = c_api_log_warning;
     prof_log_error = c_api_log_error;
     prof_win_exists = c_api_win_exists;
-    prof_win_create = c_api_win_create;
     prof_win_focus = c_api_win_focus;
     prof_win_show = c_api_win_show;
     prof_win_show_themed = c_api_win_show_themed;

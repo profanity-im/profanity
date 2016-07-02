@@ -292,6 +292,7 @@ api_win_exists(const char *tag)
 
 void
 api_win_create(
+    const char *const plugin_name,
     const char *tag,
     void *callback,
     void(*destroy)(void *callback),
