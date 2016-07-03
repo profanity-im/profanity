@@ -51,8 +51,8 @@ static GHashTable *p_window_callbacks = NULL;
 static void
 _free_window_callback(PluginWindowCallback *window_callback)
 {
-    if (window_callback->destroy) {
-        window_callback->destroy(window_callback->callback);
+    if (window_callback->callback_destroy) {
+        window_callback->callback_destroy(window_callback->callback);
     }
     free(window_callback);
 }
@@ -115,7 +115,7 @@ plugins_run_command(const char * const input)
                 g_strfreev(split);
                 return TRUE;
             } else {
-                command->callback_func(command, args);
+                command->callback_exec(command, args);
                 g_strfreev(split);
                 g_strfreev(args);
                 return TRUE;
@@ -153,7 +153,7 @@ plugins_run_timed(void)
         gdouble elapsed = g_timer_elapsed(timed_function->timer, NULL);
 
         if (timed_function->interval_seconds > 0 && elapsed >= timed_function->interval_seconds) {
-            timed_function->callback_func(timed_function);
+            timed_function->callback_exec(timed_function);
             g_timer_start(timed_function->timer);
         }
 

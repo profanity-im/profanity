@@ -108,14 +108,14 @@ api_cons_bad_cmd_usage(const char *const cmd)
 void
 api_register_command(const char *const plugin_name, const char *command_name, int min_args, int max_args,
     const char **synopsis, const char *description, const char *arguments[][2], const char **examples, void *callback,
-    void(*callback_func)(PluginCommand *command, gchar **args))
+    void(*callback_exec)(PluginCommand *command, gchar **args))
 {
     PluginCommand *command = malloc(sizeof(PluginCommand));
     command->command_name = command_name;
     command->min_args = min_args;
     command->max_args = max_args;
     command->callback = callback;
-    command->callback_func = callback_func;
+    command->callback_exec = callback_exec;
 
     CommandHelp *help = malloc(sizeof(CommandHelp));
 
@@ -145,11 +145,11 @@ api_register_command(const char *const plugin_name, const char *command_name, in
 
 void
 api_register_timed(const char *const plugin_name, void *callback, int interval_seconds,
-    void (*callback_func)(PluginTimedFunction *timed_function))
+    void (*callback_exec)(PluginTimedFunction *timed_function))
 {
     PluginTimedFunction *timed_function = malloc(sizeof(PluginTimedFunction));
     timed_function->callback = callback;
-    timed_function->callback_func = callback_func;
+    timed_function->callback_exec = callback_exec;
     timed_function->interval_seconds = interval_seconds;
     timed_function->timer = g_timer_new();
 
@@ -295,13 +295,13 @@ api_win_create(
     const char *const plugin_name,
     const char *tag,
     void *callback,
-    void(*destroy)(void *callback),
-    void(*callback_func)(PluginWindowCallback *window_callback, const char *tag, const char * const line))
+    void(*callback_exec)(PluginWindowCallback *window_callback, const char *tag, const char * const line),
+    void(*callback_destroy)(void *callback))
 {
     PluginWindowCallback *window = malloc(sizeof(PluginWindowCallback));
     window->callback = callback;
-    window->callback_func = callback_func;
-    window->destroy = destroy;
+    window->callback_exec = callback_exec;
+    window->callback_destroy = callback_destroy;
     callbacks_add_window_handler(tag, window);
     wins_new_plugin(tag);
 

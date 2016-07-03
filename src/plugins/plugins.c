@@ -233,7 +233,7 @@ void
 plugins_win_process_line(char *win, const char * const line)
 {
     PluginWindowCallback *window = callbacks_get_window_handler(win);
-    window->callback_func(window, win, line);
+    window->callback_exec(window, win, line);
 }
 
 void

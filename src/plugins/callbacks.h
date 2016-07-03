@@ -45,20 +45,20 @@ typedef struct p_command {
     int max_args;
     CommandHelp *help;
     void *callback;
-    void (*callback_func)(struct p_command *command, gchar **args);
+    void (*callback_exec)(struct p_command *command, gchar **args);
 } PluginCommand;
 
 typedef struct p_timed_function {
     void *callback;
-    void (*callback_func)(struct p_timed_function *timed_function);
+    void (*callback_exec)(struct p_timed_function *timed_function);
     int interval_seconds;
     GTimer *timer;
 } PluginTimedFunction;
 
 typedef struct p_window_input_callback {
     void *callback;
-    void (*destroy)(void *callback);
-    void (*callback_func)(struct p_window_input_callback *window_callback, const char *tag, const char * const line);
+    void (*callback_exec)(struct p_window_input_callback *window_callback, const char *tag, const char * const line);
+    void (*callback_destroy)(void *callback);
 } PluginWindowCallback;
 
 void callbacks_init(void);
