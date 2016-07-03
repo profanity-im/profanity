@@ -110,7 +110,7 @@ void ui_goodbye_title(void);
 void ui_handle_room_configuration_form_error(const char *const roomjid, const char *const message);
 void ui_handle_room_config_submit_result(const char *const roomjid);
 void ui_handle_room_config_submit_result_error(const char *const roomjid, const char *const message);
-void ui_show_lines(ProfWin *window, const gchar** lines);
+void ui_show_lines(ProfWin *window, gchar** lines);
 void ui_redraw_all_room_rosters(void);
 void ui_show_all_room_rosters(void);
 void ui_hide_all_room_rosters(void);

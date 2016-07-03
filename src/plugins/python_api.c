@@ -166,9 +166,11 @@ python_api_register_command(PyObject *self, PyObject *args)
 
         allow_python_threads();
         api_register_command(plugin_name, command_name, min_args, max_args, c_synopsis,
-            description, c_arguments, c_examples, p_callback, python_command_callback);
+            description, c_arguments, c_examples, p_callback, python_command_callback, NULL);
         disable_python_threads();
     }
+
+    free(plugin_name);
 
     return Py_BuildValue("");
 }
@@ -176,9 +178,6 @@ python_api_register_command(PyObject *self, PyObject *args)
 static PyObject *
 python_api_register_timed(PyObject *self, PyObject *args)
 {
-    char *plugin_name = _python_plugin_name();
-    log_debug("Register timed for %s", plugin_name);
-
     PyObject *p_callback = NULL;
     int interval_seconds = 0;
 
@@ -186,11 +185,16 @@ python_api_register_timed(PyObject *self, PyObject *args)
         return Py_BuildValue("");
     }
 
+    char *plugin_name = _python_plugin_name();
+    log_debug("Register timed for %s", plugin_name);
+
     if (p_callback && PyCallable_Check(p_callback)) {
         allow_python_threads();
-        api_register_timed(plugin_name, p_callback, interval_seconds, python_timed_callback);
+        api_register_timed(plugin_name, p_callback, interval_seconds, python_timed_callback, NULL);
         disable_python_threads();
     }
+
+    free(plugin_name);
 
     return Py_BuildValue("");
 }
@@ -222,6 +226,8 @@ python_api_completer_add(PyObject *self, PyObject *args)
     allow_python_threads();
     api_completer_add(plugin_name, key, c_items);
     disable_python_threads();
+
+    free(plugin_name);
 
     return Py_BuildValue("");
 }
@@ -456,18 +462,20 @@ python_api_win_create(PyObject *self, PyObject *args)
     char *tag = NULL;
     PyObject *p_callback = NULL;
 
-    char *plugin_name = _python_plugin_name();
-    log_debug("Win create %s for %s", tag, plugin_name);
-
     if (!PyArg_ParseTuple(args, "sO", &tag, &p_callback)) {
         return Py_BuildValue("");
     }
 
+    char *plugin_name = _python_plugin_name();
+    log_debug("Win create %s for %s", tag, plugin_name);
+
     if (p_callback && PyCallable_Check(p_callback)) {
         allow_python_threads();
-        api_win_create(plugin_name, tag, p_callback, NULL, python_window_callback);
+        api_win_create(plugin_name, tag, p_callback, python_window_callback, NULL);
         disable_python_threads();
     }
+
+    free(plugin_name);
 
     return Py_BuildValue("");
 }

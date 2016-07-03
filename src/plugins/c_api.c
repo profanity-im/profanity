@@ -90,7 +90,9 @@ c_api_register_command(const char *filename, const char *command_name, int min_a
     CommandWrapper *wrapper = malloc(sizeof(CommandWrapper));
     wrapper->func = callback;
     api_register_command(plugin_name, command_name, min_args, max_args, synopsis,
-        description, arguments, examples, wrapper, c_command_callback);
+        description, arguments, examples, wrapper, c_command_callback, free);
+
+    free(plugin_name);
 }
 
 static void
@@ -101,7 +103,9 @@ c_api_register_timed(const char *filename, void(*callback)(void), int interval_s
 
     TimedWrapper *wrapper = malloc(sizeof(TimedWrapper));
     wrapper->func = callback;
-    api_register_timed(plugin_name, wrapper, interval_seconds, c_timed_callback);
+    api_register_timed(plugin_name, wrapper, interval_seconds, c_timed_callback, free);
+
+    free(plugin_name);
 }
 
 static void
@@ -111,6 +115,8 @@ c_api_completer_add(const char *filename, const char *key, char **items)
     log_debug("Autocomplete add %s for %s", key, plugin_name);
 
     api_completer_add(plugin_name, key, items);
+
+    free(plugin_name);
 }
 
 static void
@@ -205,7 +211,9 @@ c_api_win_create(const char *filename, char *tag, void(*callback)(char *tag, cha
 
     WindowWrapper *wrapper = malloc(sizeof(WindowWrapper));
     wrapper->func = callback;
-    api_win_create(plugin_name, tag, wrapper, free, c_window_callback);
+    api_win_create(plugin_name, tag, wrapper, c_window_callback, free);
+
+    free(plugin_name);
 }
 
 static int

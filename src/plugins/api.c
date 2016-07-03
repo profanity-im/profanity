@@ -107,17 +107,20 @@ api_cons_bad_cmd_usage(const char *const cmd)
 
 void
 api_register_command(const char *const plugin_name, const char *command_name, int min_args, int max_args,
-    const char **synopsis, const char *description, const char *arguments[][2], const char **examples, void *callback,
-    void(*callback_exec)(PluginCommand *command, gchar **args))
+    const char **synopsis, const char *description, const char *arguments[][2], const char **examples,
+    void *callback, void(*callback_exec)(PluginCommand *command, gchar **args), void(*callback_destroy)(void *callback))
 {
     PluginCommand *command = malloc(sizeof(PluginCommand));
-    command->command_name = command_name;
+    command->command_name = strdup(command_name);
     command->min_args = min_args;
     command->max_args = max_args;
     command->callback = callback;
     command->callback_exec = callback_exec;
+    command->callback_destroy = callback_destroy;
 
     CommandHelp *help = malloc(sizeof(CommandHelp));
+
+    help->tags[0] = NULL;
 
     int i = 0;
     for (i = 0; synopsis[i] != NULL; i++) {
@@ -140,16 +143,17 @@ api_register_command(const char *const plugin_name, const char *command_name, in
 
     command->help = help;
 
-    callbacks_add_command(command);
+    callbacks_add_command(plugin_name, command);
 }
 
 void
 api_register_timed(const char *const plugin_name, void *callback, int interval_seconds,
-    void (*callback_exec)(PluginTimedFunction *timed_function))
+    void (*callback_exec)(PluginTimedFunction *timed_function), void(*callback_destroy)(void *callback))
 {
     PluginTimedFunction *timed_function = malloc(sizeof(PluginTimedFunction));
     timed_function->callback = callback;
     timed_function->callback_exec = callback_exec;
+    timed_function->callback_destroy = callback_destroy;
     timed_function->interval_seconds = interval_seconds;
     timed_function->timer = g_timer_new();
 

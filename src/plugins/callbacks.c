@@ -44,7 +44,7 @@
 
 #include "ui/ui.h"
 
-static GSList *p_commands = NULL;
+static GHashTable *p_commands = NULL;
 static GSList *p_timed_functions = NULL;
 static GHashTable *p_window_callbacks = NULL;
 
@@ -57,22 +57,88 @@ _free_window_callback(PluginWindowCallback *window_callback)
     free(window_callback);
 }
 
-void
-callbacks_init(void)
+//typedef struct cmd_help_t {
+//    const gchar *tags[20];
+//    const gchar *synopsis[50];
+//    const gchar *desc;
+//    const gchar *args[128][2];
+//    const gchar *examples[20];
+//} CommandHelp;
+
+static void
+_free_command_help(CommandHelp *help)
 {
-    p_window_callbacks = g_hash_table_new_full(g_str_hash, g_str_equal, free, (GDestroyNotify)_free_window_callback);
+    int i = 0;
+    while (help->tags[i] != NULL) {
+        free(help->tags[i++]);
+    }
+
+    i = 0;
+    while (help->synopsis[i] != NULL) {
+        free(help->synopsis[i++]);
+    }
+
+    free(help->desc);
+
+    i = 0;
+    while (help->args[i] != NULL && help->args[i][0] != NULL) {
+        free(help->args[i][0]);
+        free(help->args[i][1]);
+        i++;
+    }
+
+    i = 0;
+    while (help->examples[i] != NULL) {
+        free(help->examples[i++]);
+    }
+
+    free(help);
+}
+
+static void
+_free_command(PluginCommand *command)
+{
+    if (command->callback_destroy) {
+        command->callback_destroy(command->callback);
+    }
+    free(command->command_name);
+
+    _free_command_help(command->help);
+    free(command);
+}
+
+static void
+_free_command_hash(GHashTable *command_hash)
+{
+    g_hash_table_destroy(command_hash);
 }
 
 void
+callbacks_init(void)
+{
+    p_commands = g_hash_table_new_full(g_str_hash, g_str_equal, free, (GDestroyNotify)_free_command_hash);
+    p_window_callbacks = g_hash_table_new_full(g_str_hash, g_str_equal, free, (GDestroyNotify)_free_window_callback);
+}
+
+// TODO move to plugin destroy functions
+void
 callbacks_close(void)
 {
+    g_hash_table_destroy(p_commands);
     g_hash_table_destroy(p_window_callbacks);
 }
 
 void
-callbacks_add_command(PluginCommand *command)
+callbacks_add_command(const char *const plugin_name, PluginCommand *command)
 {
-    p_commands = g_slist_append(p_commands, command);
+    GHashTable *command_hash = g_hash_table_lookup(p_commands, plugin_name);
+    if (command_hash) {
+        g_hash_table_insert(command_hash, strdup(command->command_name), command);
+    } else {
+        command_hash = g_hash_table_new_full(g_str_hash, g_str_equal, free, (GDestroyNotify)_free_command);
+        g_hash_table_insert(command_hash, strdup(command->command_name), command);
+        g_hash_table_insert(p_commands, strdup(plugin_name), command_hash);
+    }
     cmd_ac_add(command->command_name);
     cmd_ac_add_help(&command->command_name[1]);
 }
@@ -104,25 +170,32 @@ plugins_run_command(const char * const input)
 {
     gchar **split = g_strsplit(input, " ", -1);
 
-    GSList *p_command = p_commands;
-    while (p_command) {
-        PluginCommand *command = p_command->data;
-        if (g_strcmp0(split[0], command->command_name) == 0) {
+    GList *command_hashes = g_hash_table_get_values(p_commands);
+    GList *curr_hash = command_hashes;
+    while (curr_hash) {
+        GHashTable *command_hash = curr_hash->data;
+
+        PluginCommand *command = g_hash_table_lookup(command_hash, split[0]);
+        if (command) {
             gboolean result;
             gchar **args = parse_args_with_freetext(input, command->min_args, command->max_args, &result);
             if (result == FALSE) {
                 ui_invalid_command_usage(command->command_name, NULL);
                 g_strfreev(split);
+                g_list_free(command_hashes);
                 return TRUE;
             } else {
                 command->callback_exec(command, args);
                 g_strfreev(split);
                 g_strfreev(args);
+                g_list_free(command_hashes);
                 return TRUE;
             }
         }
-        p_command = g_slist_next(p_command);
+
+        curr_hash = g_list_next(curr_hash);
     }
+
     g_strfreev(split);
     return FALSE;
 }
@@ -130,15 +203,21 @@ plugins_run_command(const char * const input)
 CommandHelp*
 plugins_get_help(const char *const cmd)
 {
-    GSList *curr = p_commands;
-    while (curr) {
-        PluginCommand *command = curr->data;
-        if (g_strcmp0(cmd, command->command_name) == 0) {
+    GList *command_hashes = g_hash_table_get_values(p_commands);
+    GList *curr_hash = command_hashes;
+    while (curr_hash) {
+        GHashTable *command_hash = curr_hash->data;
+
+        PluginCommand *command = g_hash_table_lookup(command_hash, cmd);
+        if (command) {
+            g_list_free(command_hashes);
             return command->help;
         }
 
-        curr = g_slist_next(curr);
+        curr_hash = g_list_next(curr_hash);
     }
+
+    g_list_free(command_hashes);
 
     return NULL;
 }
@@ -167,12 +246,22 @@ plugins_get_command_names(void)
 {
     GList *result = NULL;
 
-    GSList *curr = p_commands;
-    while (curr) {
-        PluginCommand *command = curr->data;
-        result = g_list_append(result, (char*)command->command_name);
-        curr = g_slist_next(curr);
+    GList *command_hashes = g_hash_table_get_values(p_commands);
+    GList *curr_hash = command_hashes;
+    while (curr_hash) {
+        GHashTable *command_hash = curr_hash->data;
+        GList *commands = g_hash_table_get_keys(command_hash);
+        GList *curr = commands;
+        while (curr) {
+            char *command = curr->data;
+            result = g_list_append(result, command);
+            curr = g_list_next(curr);
+        }
+        g_list_free(commands);
+        curr_hash = g_list_next(curr_hash);
     }
+
+    g_list_free(command_hashes);
 
     return result;
 }

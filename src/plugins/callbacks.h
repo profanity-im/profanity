@@ -40,17 +40,19 @@
 #include "command/cmd_defs.h"
 
 typedef struct p_command {
-    const char *command_name;
+    char *command_name;
     int min_args;
     int max_args;
     CommandHelp *help;
     void *callback;
     void (*callback_exec)(struct p_command *command, gchar **args);
+    void (*callback_destroy)(void *callback);
 } PluginCommand;
 
 typedef struct p_timed_function {
     void *callback;
     void (*callback_exec)(struct p_timed_function *timed_function);
+    void (*callback_destroy)(void *callback);
     int interval_seconds;
     GTimer *timer;
 } PluginTimedFunction;
@@ -64,7 +66,7 @@ typedef struct p_window_input_callback {
 void callbacks_init(void);
 void callbacks_close(void);
 
-void callbacks_add_command(PluginCommand *command);
+void callbacks_add_command(const char *const plugin, PluginCommand *command);
 void callbacks_add_timed(PluginTimedFunction *timed_function);
 void callbacks_add_window_handler(const char *tag, PluginWindowCallback *window_callback);
 void * callbacks_get_window_handler(const char *tag);

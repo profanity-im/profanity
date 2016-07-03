@@ -3809,7 +3809,7 @@ cmd_form(ProfWin *window, const char *const command, gchar **args)
         } else {
             mucconfwin_form_help(confwin);
 
-            const gchar **help_text = NULL;
+            gchar **help_text = NULL;
             Command *command = cmd_get("/form");
 
             if (command) {

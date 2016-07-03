@@ -52,9 +52,9 @@ char** api_get_current_occupants(void);
 
 void api_register_command(const char *const plugin_name, const char *command_name, int min_args, int max_args,
     const char **synopsis, const char *description, const char *arguments[][2], const char **examples,
-    void *callback, void(*callback_func)(PluginCommand *command, gchar **args));
+    void *callback, void(*callback_func)(PluginCommand *command, gchar **args), void(*callback_destroy)(void *callback));
 void api_register_timed(const char *const plugin_name, void *callback, int interval_seconds,
-    void (*callback_func)(PluginTimedFunction *timed_function));
+    void (*callback_func)(PluginTimedFunction *timed_function), void(*callback_destroy)(void *callback));
 
 void api_completer_add(const char *const plugin_name, const char *key, char **items);
 void api_completer_remove(const char *key, char **items);
@@ -70,8 +70,8 @@ void api_win_create(
     const char *const plugin_name,
     const char *tag,
     void *callback,
-    void(*destroy)(void *callback),
-    void(*callback_func)(PluginWindowCallback *window_callback, char *tag, char *line));
+    void(*callback_func)(PluginWindowCallback *window_callback, char *tag, char *line),
+    void(*destroy)(void *callback));
 int api_win_focus(const char *tag);
 int api_win_show(const char *tag, const char *line);
 int api_win_show_themed(const char *tag, const char *const group, const char *const key, const char *const def, const char *line);
