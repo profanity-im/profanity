@@ -157,7 +157,7 @@ api_register_timed(const char *const plugin_name, void *callback, int interval_s
     timed_function->interval_seconds = interval_seconds;
     timed_function->timer = g_timer_new();
 
-    callbacks_add_timed(timed_function);
+    callbacks_add_timed(plugin_name, timed_function);
 }
 
 void

@@ -45,7 +45,7 @@
 #include "ui/ui.h"
 
 static GHashTable *p_commands = NULL;
-static GSList *p_timed_functions = NULL;
+static GHashTable *p_timed_functions = NULL;
 static GHashTable *p_window_callbacks = NULL;
 
 static void
@@ -56,14 +56,6 @@ _free_window_callback(PluginWindowCallback *window_callback)
     }
     free(window_callback);
 }
-
-//typedef struct cmd_help_t {
-//    const gchar *tags[20];
-//    const gchar *synopsis[50];
-//    const gchar *desc;
-//    const gchar *args[128][2];
-//    const gchar *examples[20];
-//} CommandHelp;
 
 static void
 _free_command_help(CommandHelp *help)
@@ -104,6 +96,7 @@ _free_command(PluginCommand *command)
     free(command->command_name);
 
     _free_command_help(command->help);
+
     free(command);
 }
 
@@ -113,10 +106,29 @@ _free_command_hash(GHashTable *command_hash)
     g_hash_table_destroy(command_hash);
 }
 
+static void
+_free_timed_function(PluginTimedFunction *timed_function)
+{
+    if (timed_function->callback_destroy) {
+        timed_function->callback_destroy(timed_function->callback);
+    }
+
+    g_timer_destroy(timed_function->timer);
+
+    free(timed_function);
+}
+
+static void
+_free_timed_function_list(GList *timed_functions)
+{
+    g_list_free_full(timed_functions, (GDestroyNotify)_free_timed_function);
+}
+
 void
 callbacks_init(void)
 {
     p_commands = g_hash_table_new_full(g_str_hash, g_str_equal, free, (GDestroyNotify)_free_command_hash);
+    p_timed_functions = g_hash_table_new_full(g_str_hash, g_str_equal, free, (GDestroyNotify)_free_timed_function_list);
     p_window_callbacks = g_hash_table_new_full(g_str_hash, g_str_equal, free, (GDestroyNotify)_free_window_callback);
 }
 
@@ -125,6 +137,7 @@ void
 callbacks_close(void)
 {
     g_hash_table_destroy(p_commands);
+    g_hash_table_destroy(p_timed_functions);
     g_hash_table_destroy(p_window_callbacks);
 }
 
@@ -144,9 +157,16 @@ callbacks_add_command(const char *const plugin_name, PluginCommand *command)
 }
 
 void
-callbacks_add_timed(PluginTimedFunction *timed_function)
+callbacks_add_timed(const char *const plugin_name, PluginTimedFunction *timed_function)
 {
-    p_timed_functions = g_slist_append(p_timed_functions, timed_function);
+    GList *timed_function_list = g_hash_table_lookup(p_timed_functions, plugin_name);
+    if (timed_function_list) {
+        timed_function_list = g_list_append(timed_function_list, timed_function);
+        g_hash_table_replace(p_timed_functions, strdup(plugin_name), timed_function_list);
+    } else {
+        timed_function_list = g_list_append(timed_function_list, timed_function);
+        g_hash_table_insert(p_timed_functions, strdup(plugin_name), timed_function_list);
+    }
 }
 
 void
@@ -225,20 +245,28 @@ plugins_get_help(const char *const cmd)
 void
 plugins_run_timed(void)
 {
-    GSList *p_timed_function = p_timed_functions;
+    GList *timed_functions_lists = g_hash_table_get_values(p_timed_functions);
 
-    while (p_timed_function) {
-        PluginTimedFunction *timed_function = p_timed_function->data;
-        gdouble elapsed = g_timer_elapsed(timed_function->timer, NULL);
+    GList *curr_list = timed_functions_lists;
+    while (curr_list) {
+        GList *timed_function_list = curr_list->data;
+        GList *curr = timed_function_list;
+        while (curr) {
+            PluginTimedFunction *timed_function = curr->data;
 
-        if (timed_function->interval_seconds > 0 && elapsed >= timed_function->interval_seconds) {
-            timed_function->callback_exec(timed_function);
-            g_timer_start(timed_function->timer);
+            gdouble elapsed = g_timer_elapsed(timed_function->timer, NULL);
+
+            if (timed_function->interval_seconds > 0 && elapsed >= timed_function->interval_seconds) {
+                timed_function->callback_exec(timed_function);
+                g_timer_start(timed_function->timer);
+            }
+
+            curr = g_list_next(curr);
         }
-
-        p_timed_function = g_slist_next(p_timed_function);
+        curr_list = g_list_next(curr_list);
     }
-    return;
+
+    g_list_free(timed_functions_lists);
 }
 
 GList*
