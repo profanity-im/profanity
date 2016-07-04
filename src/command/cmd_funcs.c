@@ -6045,7 +6045,6 @@ cmd_plugins(ProfWin *window, const char *const command, gchar **args)
         }
         gboolean res = plugins_unload(args[1]);
         if (res) {
-            prefs_remove_plugin(args[1]);
             cons_show("Unloaded plugin: %s", args[1]);
         } else {
             cons_show("Failed to unload plugin: %s", args[1]);

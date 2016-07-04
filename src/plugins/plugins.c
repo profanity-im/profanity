@@ -168,7 +168,9 @@ plugins_load(const char *const name)
 gboolean
 plugins_unload(const char *const name)
 {
-    return FALSE;
+    prefs_remove_plugin(name);
+
+    return TRUE;
 }
 
 static gchar*
