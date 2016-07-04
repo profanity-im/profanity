@@ -120,15 +120,25 @@ c_api_completer_add(const char *filename, const char *key, char **items)
 }
 
 static void
-c_api_completer_remove(const char *key, char **items)
+c_api_completer_remove(const char *filename, const char *key, char **items)
 {
-    api_completer_remove(key, items);
+    char *plugin_name = _c_plugin_name(filename);
+    log_debug("Autocomplete remove %s for %s", key, plugin_name);
+
+    api_completer_remove(plugin_name, key, items);
+
+    free(plugin_name);
 }
 
 static void
-c_api_completer_clear(const char *key)
+c_api_completer_clear(const char *filename, const char *key)
 {
-    api_completer_clear(key);
+    char *plugin_name = _c_plugin_name(filename);
+    log_debug("Autocomplete clear %s for %s", key, plugin_name);
+
+    api_completer_clear(plugin_name, key);
+
+    free(plugin_name);
 }
 
 static void
@@ -322,9 +332,9 @@ c_api_init(void)
     _prof_register_command = c_api_register_command;
     _prof_register_timed = c_api_register_timed;
     _prof_completer_add = c_api_completer_add;
+    _prof_completer_remove = c_api_completer_remove;
+    _prof_completer_clear = c_api_completer_clear;
     _prof_win_create = c_api_win_create;
-    prof_completer_remove = c_api_completer_remove;
-    prof_completer_clear = c_api_completer_clear;
     prof_notify = c_api_notify;
     prof_send_line = c_api_send_line;
     prof_get_current_recipient = c_api_get_current_recipient;

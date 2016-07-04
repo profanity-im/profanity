@@ -242,6 +242,9 @@ python_api_completer_remove(PyObject *self, PyObject *args)
         return Py_BuildValue("");
     }
 
+    char *plugin_name = _python_plugin_name();
+    log_debug("Autocomplete remove %s for %s", key, plugin_name);
+
     Py_ssize_t len = PyList_Size(items);
     char *c_items[len];
 
@@ -254,8 +257,10 @@ python_api_completer_remove(PyObject *self, PyObject *args)
     c_items[len] = NULL;
 
     allow_python_threads();
-    api_completer_remove(key, c_items);
+    api_completer_remove(plugin_name, key, c_items);
     disable_python_threads();
+
+    free(plugin_name);
 
     return Py_BuildValue("");
 }
@@ -269,9 +274,14 @@ python_api_completer_clear(PyObject *self, PyObject *args)
         return Py_BuildValue("");
     }
 
+    char *plugin_name = _python_plugin_name();
+    log_debug("Autocomplete clear %s for %s", key, plugin_name);
+
     allow_python_threads();
-    api_completer_clear(key);
+    api_completer_clear(plugin_name, key);
     disable_python_threads();
+
+    free(plugin_name);
 
     return Py_BuildValue("");
 }

@@ -167,13 +167,13 @@ api_completer_add(const char *const plugin_name, const char *key, char **items)
 }
 
 void
-api_completer_remove(const char *key, char **items)
+api_completer_remove(const char *const plugin_name, const char *key, char **items)
 {
     autocompleters_remove(key, items);
 }
 
 void
-api_completer_clear(const char *key)
+api_completer_clear(const char *const plugin_name, const char *key)
 {
     autocompleters_clear(key);
 }

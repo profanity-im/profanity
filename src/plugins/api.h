@@ -57,8 +57,8 @@ void api_register_timed(const char *const plugin_name, void *callback, int inter
     void (*callback_func)(PluginTimedFunction *timed_function), void(*callback_destroy)(void *callback));
 
 void api_completer_add(const char *const plugin_name, const char *key, char **items);
-void api_completer_remove(const char *key, char **items);
-void api_completer_clear(const char *key);
+void api_completer_remove(const char *const plugin_name, const char *key, char **items);
+void api_completer_clear(const char *const plugin_name, const char *key);
 
 void api_log_debug(const char *message);
 void api_log_info(const char *message);

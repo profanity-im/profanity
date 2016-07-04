@@ -38,6 +38,8 @@
 #define prof_register_command(command_name, min_args, max_args, synopsis, description, arguments, examples, callback) _prof_register_command(__FILE__, command_name, min_args, max_args, synopsis, description, arguments, examples, callback)
 #define prof_register_timed(callback, interval_seconds) _prof_register_timed(__FILE__, callback, interval_seconds)
 #define prof_completer_add(key, items) _prof_completer_add(__FILE__, key, items)
+#define prof_completer_remove(key, items) _prof_completer_remove(__FILE__, key, items)
+#define prof_completer_clear(key) _prof_completer_clear(__FILE__, key)
 #define prof_win_create(win, input_handler) _prof_win_create(__FILE__, win, input_handler)
 
 typedef char* PROF_WIN_TAG;
@@ -54,8 +56,8 @@ void (*_prof_register_command)(const char *filename, const char *command_name, i
 void (*_prof_register_timed)(const char *filename, void(*callback)(void), int interval_seconds);
 
 void (*_prof_completer_add)(const char *filename, const char *key, char **items);
-void (*prof_completer_remove)(const char *key, char **items);
-void (*prof_completer_clear)(const char *key);
+void (*_prof_completer_remove)(const char *filename, const char *key, char **items);
+void (*_prof_completer_clear)(const char *filename, const char *key);
 
 void (*prof_notify)(const char *message, int timeout_ms, const char *category);
 
