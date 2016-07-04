@@ -20,13 +20,38 @@ void returns_no_commands(void **state)
 void returns_commands(void **state)
 {
     callbacks_init();
-    PluginCommand *command = malloc(sizeof(PluginCommand));
-    command->command_name = strdup("something");
-    callbacks_add_command("Cool plugin", command);
 
-    GList *commands = plugins_get_command_names();
-    assert_true(g_list_length(commands) == 1);
+    PluginCommand *command1 = malloc(sizeof(PluginCommand));
+    command1->command_name = strdup("command1");
+    callbacks_add_command("plugin1", command1);
 
-    char *name = commands->data;
-    assert_string_equal(name, "something");
+    PluginCommand *command2 = malloc(sizeof(PluginCommand));
+    command2->command_name = strdup("command2");
+    callbacks_add_command("plugin1", command2);
+
+    PluginCommand *command3 = malloc(sizeof(PluginCommand));
+    command3->command_name = strdup("command3");
+    callbacks_add_command("plugin2", command3);
+
+    GList *names = plugins_get_command_names();
+    assert_true(g_list_length(names) == 3);
+
+    gboolean foundCommand1 = FALSE;
+    gboolean foundCommand2 = FALSE;
+    gboolean foundCommand3 = FALSE;
+    GList *curr = names;
+    while (curr) {
+        if (g_strcmp0(curr->data, "command1") == 0) {
+            foundCommand1 = TRUE;
+        }
+        if (g_strcmp0(curr->data, "command2") == 0) {
+            foundCommand2 = TRUE;
+        }
+        if (g_strcmp0(curr->data, "command3") == 0) {
+            foundCommand3 = TRUE;
+        }
+        curr = g_list_next(curr);
+    }
+
+    assert_true(foundCommand1 && foundCommand2 && foundCommand3);
 }
