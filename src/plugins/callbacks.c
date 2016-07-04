@@ -58,6 +58,12 @@ _free_window_callback(PluginWindowCallback *window_callback)
 }
 
 static void
+_free_window_callbacks(GHashTable *window_callbacks)
+{
+    g_hash_table_destroy(window_callbacks);
+}
+
+static void
 _free_command_help(CommandHelp *help)
 {
     int i = 0;
@@ -129,7 +135,7 @@ callbacks_init(void)
 {
     p_commands = g_hash_table_new_full(g_str_hash, g_str_equal, free, (GDestroyNotify)_free_command_hash);
     p_timed_functions = g_hash_table_new_full(g_str_hash, g_str_equal, free, (GDestroyNotify)_free_timed_function_list);
-    p_window_callbacks = g_hash_table_new_full(g_str_hash, g_str_equal, free, (GDestroyNotify)_free_window_callback);
+    p_window_callbacks = g_hash_table_new_full(g_str_hash, g_str_equal, free, (GDestroyNotify)_free_window_callbacks);
 }
 
 // TODO move to plugin destroy functions
@@ -170,16 +176,37 @@ callbacks_add_timed(const char *const plugin_name, PluginTimedFunction *timed_fu
 }
 
 void
-callbacks_add_window_handler(const char *tag, PluginWindowCallback *window_callback)
+callbacks_add_window_handler(const char *const plugin_name, const char *tag, PluginWindowCallback *window_callback)
 {
-    g_hash_table_insert(p_window_callbacks, strdup(tag), window_callback);
+    GHashTable *window_callbacks = g_hash_table_lookup(p_window_callbacks, plugin_name);
+    if (window_callbacks) {
+        g_hash_table_insert(window_callbacks, strdup(tag), window_callback);
+    } else {
+        window_callbacks = g_hash_table_new_full(g_str_hash, g_str_equal, free, (GDestroyNotify)_free_window_callback);
+        g_hash_table_insert(window_callbacks, strdup(tag), window_callback);
+        g_hash_table_insert(p_window_callbacks, strdup(plugin_name), window_callbacks);
+    }
 }
 
 void *
 callbacks_get_window_handler(const char *tag)
 {
     if (p_window_callbacks) {
-        return g_hash_table_lookup(p_window_callbacks, tag);
+        GList *window_callback_hashes = g_hash_table_get_values(p_window_callbacks);
+        GList *curr_hash = window_callback_hashes;
+        while (curr_hash) {
+            GHashTable *window_callback_hash = curr_hash->data;
+            PluginWindowCallback *callback = g_hash_table_lookup(window_callback_hash, tag);
+            if (callback) {
+                g_list_free(window_callback_hashes);
+                return callback;
+            }
+
+            curr_hash = g_list_next(curr_hash);
+        }
+
+        g_list_free(window_callback_hashes);
+        return NULL;
     } else {
         return NULL;
     }

@@ -306,7 +306,9 @@ api_win_create(
     window->callback = callback;
     window->callback_exec = callback_exec;
     window->callback_destroy = callback_destroy;
-    callbacks_add_window_handler(tag, window);
+
+    callbacks_add_window_handler(plugin_name, tag, window);
+
     wins_new_plugin(tag);
 
     // set status bar active
