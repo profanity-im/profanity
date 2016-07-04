@@ -138,7 +138,14 @@ callbacks_init(void)
     p_window_callbacks = g_hash_table_new_full(g_str_hash, g_str_equal, free, (GDestroyNotify)_free_window_callbacks);
 }
 
-// TODO move to plugin destroy functions
+void
+callbacks_remove(const char *const plugin_name)
+{
+    g_hash_table_remove(p_commands, plugin_name);
+    g_hash_table_remove(p_timed_functions, plugin_name);
+    g_hash_table_remove(p_window_callbacks, plugin_name);
+}
+
 void
 callbacks_close(void)
 {

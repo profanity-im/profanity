@@ -523,6 +523,8 @@ c_plugin_destroy(ProfPlugin *plugin)
 {
     assert (plugin && plugin->module);
 
+    callbacks_remove(plugin->name);
+
     if (dlclose (plugin->module)) {
         log_warning ("dlclose failed to close `%s' with `%s'", plugin->name, dlerror ());
     }

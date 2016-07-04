@@ -889,6 +889,7 @@ void
 python_plugin_destroy(ProfPlugin *plugin)
 {
     disable_python_threads();
+    callbacks_remove(plugin->name);
     free(plugin->name);
     Py_XDECREF(plugin->module);
     free(plugin);

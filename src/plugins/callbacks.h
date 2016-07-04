@@ -64,6 +64,7 @@ typedef struct p_window_input_callback {
 } PluginWindowCallback;
 
 void callbacks_init(void);
+void callbacks_remove(const char *const plugin_name);
 void callbacks_close(void);
 
 void callbacks_add_command(const char *const plugin_name, PluginCommand *command);
