@@ -81,6 +81,7 @@ c_plugin_create(const char *const filename)
     plugin->init_func = c_init_hook;
     plugin->on_start_func = c_on_start_hook;
     plugin->on_shutdown_func = c_on_shutdown_hook;
+    plugin->on_unload_func = c_on_unload_hook;
     plugin->on_connect_func = c_on_connect_hook;
     plugin->on_disconnect_func = c_on_disconnect_hook;
     plugin->pre_chat_message_display = c_pre_chat_message_display_hook;
@@ -155,6 +156,20 @@ c_on_shutdown_hook(ProfPlugin *plugin)
     assert(plugin && plugin->module);
 
     if (NULL == (f = dlsym(plugin->module, "prof_on_shutdown")))
+        return;
+
+    func = (void (*)(void))f;
+    func();
+}
+
+void
+c_on_unload_hook(ProfPlugin *plugin)
+{
+    void *f = NULL;
+    void (*func)(void);
+    assert(plugin && plugin->module);
+
+    if (NULL == (f = dlsym(plugin->module, "prof_on_unload")))
         return;
 
     func = (void (*)(void))f;

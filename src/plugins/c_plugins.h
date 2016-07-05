@@ -47,6 +47,7 @@ void c_init_hook(ProfPlugin *plugin, const char *const version, const char *cons
     const char *const fulljid);
 void c_on_start_hook(ProfPlugin *plugin);
 void c_on_shutdown_hook(ProfPlugin *plugin);
+void c_on_unload_hook(ProfPlugin *plugin);
 void c_on_connect_hook(ProfPlugin *plugin, const char *const account_name, const char *const fulljid);
 void c_on_disconnect_hook(ProfPlugin *plugin, const char *const account_name, const char *const fulljid);
 

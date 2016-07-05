@@ -168,6 +168,11 @@ plugins_load(const char *const name)
 gboolean
 plugins_unload(const char *const name)
 {
+    ProfPlugin *plugin = g_hash_table_lookup(plugins, name);
+    if (plugin) {
+        plugin->on_unload_func(plugin);
+    }
+
     prefs_remove_plugin(name);
 
     return TRUE;

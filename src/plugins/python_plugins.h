@@ -47,6 +47,7 @@ void python_init_hook(ProfPlugin *plugin, const char *const version, const char 
     const char *const account_name, const char *const fulljid);
 void python_on_start_hook(ProfPlugin *plugin);
 void python_on_shutdown_hook(ProfPlugin *plugin);
+void python_on_unload_hook(ProfPlugin *plugin);
 void python_on_connect_hook(ProfPlugin *plugin, const char *const account_name, const char *const fulljid);
 void python_on_disconnect_hook(ProfPlugin *plugin, const char *const account_name, const char *const fulljid);
 

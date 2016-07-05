@@ -51,6 +51,7 @@ typedef struct prof_plugin_t {
 
     void (*on_start_func)(struct prof_plugin_t* plugin);
     void (*on_shutdown_func)(struct prof_plugin_t* plugin);
+    void (*on_unload_func)(struct prof_plugin_t* plugin);
 
     void (*on_connect_func)(struct prof_plugin_t* plugin, const char *const account_name, const char *const fulljid);
     void (*on_disconnect_func)(struct prof_plugin_t* plugin, const char *const account_name,

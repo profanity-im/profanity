@@ -91,6 +91,7 @@ python_plugin_create(const char *const filename)
         plugin->init_func = python_init_hook;
         plugin->on_start_func = python_on_start_hook;
         plugin->on_shutdown_func = python_on_shutdown_hook;
+        plugin->on_unload_func = python_on_unload_hook;
         plugin->on_connect_func = python_on_connect_hook;
         plugin->on_disconnect_func = python_on_disconnect_hook;
         plugin->pre_chat_message_display = python_pre_chat_message_display_hook;
@@ -176,6 +177,25 @@ python_on_shutdown_hook(ProfPlugin *plugin)
     PyObject *p_module = plugin->module;
     if (PyObject_HasAttrString(p_module, "prof_on_shutdown")) {
         p_function = PyObject_GetAttrString(p_module, "prof_on_shutdown");
+        python_check_error();
+        if (p_function && PyCallable_Check(p_function)) {
+            PyObject_CallObject(p_function, NULL);
+            python_check_error();
+            Py_XDECREF(p_function);
+        }
+    }
+    allow_python_threads();
+}
+
+void
+python_on_unload_hook(ProfPlugin *plugin)
+{
+    disable_python_threads();
+    PyObject *p_function;
+
+    PyObject *p_module = plugin->module;
+    if (PyObject_HasAttrString(p_module, "prof_on_unload")) {
+        p_function = PyObject_GetAttrString(p_module, "prof_on_unload");
         python_check_error();
         if (p_function && PyCallable_Check(p_function)) {
             PyObject_CallObject(p_function, NULL);
