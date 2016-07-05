@@ -787,6 +787,14 @@ cmd_ac_remove(const char *const value)
     }
 }
 
+void
+cmd_ac_remove_help(const char *const value)
+{
+    if (help_ac) {
+        autocomplete_remove(help_ac, value);
+    }
+}
+
 gboolean
 cmd_ac_exists(char *cmd)
 {

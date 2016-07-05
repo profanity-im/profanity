@@ -171,10 +171,19 @@ plugins_unload(const char *const name)
     ProfPlugin *plugin = g_hash_table_lookup(plugins, name);
     if (plugin) {
         plugin->on_unload_func(plugin);
+#ifdef HAVE_PYTHON
+        if (plugin->lang == LANG_PYTHON) {
+            python_plugin_destroy(plugin);
+        }
+#endif
+#ifdef HAVE_C
+        if (plugin->lang == LANG_C) {
+            c_plugin_destroy(plugin);
+        }
+#endif
+        prefs_remove_plugin(name);
+        g_hash_table_remove(plugins, name);
     }
-
-    prefs_remove_plugin(name);
-
     return TRUE;
 }
 
@@ -240,7 +249,9 @@ void
 plugins_win_process_line(char *win, const char * const line)
 {
     PluginWindowCallback *window = callbacks_get_window_handler(win);
-    window->callback_exec(window, win, line);
+    if (window) {
+        window->callback_exec(window, win, line);
+    }
 }
 
 void

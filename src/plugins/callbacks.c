@@ -41,6 +41,7 @@
 #include "plugins/plugins.h"
 #include "tools/autocomplete.h"
 #include "tools/parser.h"
+#include "window_list.h"
 
 #include "ui/ui.h"
 
@@ -141,9 +142,31 @@ callbacks_init(void)
 void
 callbacks_remove(const char *const plugin_name)
 {
-    // TODO remove from cmd_ac and cmd_ac_help
+    GHashTable *command_hash = g_hash_table_lookup(p_commands, plugin_name);
+    if (command_hash) {
+        GList *commands = g_hash_table_get_keys(command_hash);
+        GList *curr = commands;
+        while (curr) {
+            char *command = curr->data;
+            cmd_ac_remove(command);
+            cmd_ac_remove_help(&command[1]);
+            curr = g_list_next(curr);
+        }
+        g_list_free(commands);
+    }
+
     g_hash_table_remove(p_commands, plugin_name);
     g_hash_table_remove(p_timed_functions, plugin_name);
+
+    GHashTable *tag_to_win_cb_hash = g_hash_table_lookup(p_window_callbacks, plugin_name);
+    GList *tags = g_hash_table_get_keys(tag_to_win_cb_hash);
+    GList *curr = tags;
+    while (curr) {
+        wins_close_plugin(curr->data);
+        curr = g_list_next(curr);
+    }
+    g_list_free(tags);
+
     g_hash_table_remove(p_window_callbacks, plugin_name);
 }
 

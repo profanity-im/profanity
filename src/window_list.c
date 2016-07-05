@@ -226,6 +226,29 @@ wins_get_plugin(const char *const tag)
     return NULL;
 }
 
+void
+wins_close_plugin(const char *const tag)
+{
+    GList *values = g_hash_table_get_values(windows);
+    GList *curr = values;
+
+    while (curr) {
+        ProfWin *window = curr->data;
+        if (window->type == WIN_PLUGIN) {
+            ProfPluginWin *pluginwin = (ProfPluginWin*)window;
+            if (g_strcmp0(pluginwin->tag, tag) == 0) {
+                int num = wins_get_num(window);
+                wins_close_by_num(num);
+                g_list_free(values);
+                return;
+            }
+        }
+        curr = g_list_next(curr);
+    }
+
+    g_list_free(values);
+}
+
 GList*
 wins_get_private_chats(const char *const roomjid)
 {
