@@ -50,7 +50,9 @@ void autocomplete_clear(Autocomplete ac);
 void autocomplete_free(Autocomplete ac);
 
 void autocomplete_add(Autocomplete ac, const char *item);
+void autocomplete_add_all(Autocomplete ac, char **items);
 void autocomplete_remove(Autocomplete ac, const char *const item);
+void autocomplete_remove_all(Autocomplete ac, char **items);
 
 // find the next item prefixed with search string
 gchar* autocomplete_complete(Autocomplete ac, const gchar *search_str, gboolean quote);

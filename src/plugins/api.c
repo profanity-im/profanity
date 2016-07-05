@@ -163,19 +163,19 @@ api_register_timed(const char *const plugin_name, void *callback, int interval_s
 void
 api_completer_add(const char *const plugin_name, const char *key, char **items)
 {
-    autocompleters_add(key, items);
+    autocompleters_add(plugin_name, key, items);
 }
 
 void
 api_completer_remove(const char *const plugin_name, const char *key, char **items)
 {
-    autocompleters_remove(key, items);
+    autocompleters_remove(plugin_name, key, items);
 }
 
 void
 api_completer_clear(const char *const plugin_name, const char *key)
 {
-    autocompleters_clear(key);
+    autocompleters_clear(plugin_name, key);
 }
 
 void
