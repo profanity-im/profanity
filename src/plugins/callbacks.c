@@ -36,6 +36,7 @@
 #include <stdlib.h>
 
 #include "command/cmd_defs.h"
+#include "command/cmd_ac.h"
 #include "plugins/callbacks.h"
 #include "plugins/plugins.h"
 #include "tools/autocomplete.h"
@@ -165,6 +166,8 @@ callbacks_add_command(const char *const plugin_name, PluginCommand *command)
         g_hash_table_insert(command_hash, strdup(command->command_name), command);
         g_hash_table_insert(p_commands, strdup(plugin_name), command_hash);
     }
+    cmd_ac_add(command->command_name);
+    cmd_ac_add_help(&command->command_name[1]);
 }
 
 void

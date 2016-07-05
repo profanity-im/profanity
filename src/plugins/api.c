@@ -52,7 +52,6 @@
 #include "command/cmd_defs.h"
 #include "window_list.h"
 #include "common.h"
-#include "command/cmd_ac.h"
 
 void
 api_cons_alert(void)
@@ -145,9 +144,6 @@ api_register_command(const char *const plugin_name, const char *command_name, in
     command->help = help;
 
     callbacks_add_command(plugin_name, command);
-
-    cmd_ac_add(command->command_name);
-    cmd_ac_add_help(&command->command_name[1]);
 }
 
 void
