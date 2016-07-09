@@ -43,6 +43,7 @@
 #include "ui/ui.h"
 
 static PyThreadState *thread_state;
+static GHashTable *unloaded_modules;
 
 void
 allow_python_threads()
@@ -59,6 +60,8 @@ disable_python_threads()
 void
 python_env_init(void)
 {
+    unloaded_modules = g_hash_table_new_full(g_str_hash, g_str_equal, free, NULL);
+
     Py_Initialize();
     PyEval_InitThreads();
     python_api_init();
@@ -81,7 +84,15 @@ python_plugin_create(const char *const filename)
 {
     disable_python_threads();
     gchar *module_name = g_strndup(filename, strlen(filename) - 3);
-    PyObject *p_module = PyImport_ImportModule(module_name);
+
+    PyObject *p_module = g_hash_table_lookup(unloaded_modules, filename);
+    if (p_module) {
+        p_module = PyImport_ReloadModule(p_module);
+        g_hash_table_remove(unloaded_modules, filename);
+    } else {
+        p_module = PyImport_ImportModule(module_name);
+    }
+
     python_check_error();
     if (p_module) {
         ProfPlugin *plugin = malloc(sizeof(ProfPlugin));
@@ -910,8 +921,9 @@ python_plugin_destroy(ProfPlugin *plugin)
 {
     disable_python_threads();
     callbacks_remove(plugin->name);
+    g_hash_table_insert(unloaded_modules, strdup(plugin->name), plugin->module);
+//    Py_XDECREF(plugin->module);
     free(plugin->name);
-    Py_XDECREF(plugin->module);
     free(plugin);
     allow_python_threads();
 }
