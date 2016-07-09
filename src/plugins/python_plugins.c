@@ -43,7 +43,7 @@
 #include "ui/ui.h"
 
 static PyThreadState *thread_state;
-static GHashTable *unloaded_modules;
+static GHashTable *loaded_modules;
 
 void
 allow_python_threads()
@@ -57,10 +57,16 @@ disable_python_threads()
     PyEval_RestoreThread(thread_state);
 }
 
+static void
+_unref_module(PyObject *module)
+{
+    Py_XDECREF(module);
+}
+
 void
 python_env_init(void)
 {
-    unloaded_modules = g_hash_table_new_full(g_str_hash, g_str_equal, free, NULL);
+    loaded_modules = g_hash_table_new_full(g_str_hash, g_str_equal, free, (GDestroyNotify)_unref_module);
 
     Py_Initialize();
     PyEval_InitThreads();
@@ -83,14 +89,15 @@ ProfPlugin*
 python_plugin_create(const char *const filename)
 {
     disable_python_threads();
-    gchar *module_name = g_strndup(filename, strlen(filename) - 3);
 
-    PyObject *p_module = g_hash_table_lookup(unloaded_modules, filename);
+    PyObject *p_module = g_hash_table_lookup(loaded_modules, filename);
     if (p_module) {
         p_module = PyImport_ReloadModule(p_module);
-        g_hash_table_remove(unloaded_modules, filename);
     } else {
+        gchar *module_name = g_strndup(filename, strlen(filename) - 3);
         p_module = PyImport_ImportModule(module_name);
+        g_hash_table_insert(loaded_modules, strdup(filename), p_module);
+        g_free(module_name);
     }
 
     python_check_error();
@@ -128,12 +135,10 @@ python_plugin_create(const char *const filename)
         plugin->on_contact_presence = python_on_contact_presence_hook;
         plugin->on_chat_win_focus = python_on_chat_win_focus_hook;
         plugin->on_room_win_focus = python_on_room_win_focus_hook;
-        g_free(module_name);
 
         allow_python_threads();
         return plugin;
     } else {
-        g_free(module_name);
         allow_python_threads();
         return NULL;
     }
@@ -921,8 +926,6 @@ python_plugin_destroy(ProfPlugin *plugin)
 {
     disable_python_threads();
     callbacks_remove(plugin->name);
-    g_hash_table_insert(unloaded_modules, strdup(plugin->name), plugin->module);
-//    Py_XDECREF(plugin->module);
     free(plugin->name);
     free(plugin);
     allow_python_threads();
@@ -932,5 +935,6 @@ void
 python_shutdown(void)
 {
     disable_python_threads();
+    g_hash_table_destroy(loaded_modules);
     Py_Finalize();
 }
