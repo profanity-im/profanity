@@ -108,6 +108,7 @@ void plugins_shutdown(void);
 gboolean plugins_load(const char *const name);
 gboolean plugins_unload(const char *const name);
 gboolean plugins_reload(const char *const name);
+void plugins_reload_all(void);
 
 void plugins_on_start(void);
 void plugins_on_shutdown(void);
