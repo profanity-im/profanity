@@ -187,6 +187,17 @@ plugins_unload(const char *const name)
     return TRUE;
 }
 
+gboolean
+plugins_reload(const char *const name)
+{
+    gboolean res = plugins_unload(name);
+    if (res) {
+        res = plugins_load(name);
+    }
+
+    return res;
+}
+
 static gchar*
 _get_plugins_dir(void)
 {

@@ -1980,15 +1980,18 @@ static struct cmd_t command_defs[] =
         CMD_SYN(
             "/plugins",
             "/plugins unload <plugin>",
-            "/plugins load <plugin>")
+            "/plugins load <plugin>",
+            "/plugins reload <plugin>")
         CMD_DESC(
             "Manage plugins. Passing no arguments lists currently loaded plugins.")
         CMD_ARGS(
             { "load <plugin>",       "Load a plugin." },
+            { "reload <plugin>",     "Reload a plugin." },
             { "unload <plugin>",     "Unload a plugin." })
         CMD_EXAMPLES(
             "/plugin load browser.py",
-            "/plugin unload say.py")
+            "/plugin unload say.py",
+            "/plugin reload wikipedia.py")
     },
 
     { "/prefs",

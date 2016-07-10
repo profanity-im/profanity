@@ -6051,6 +6051,19 @@ cmd_plugins(ProfWin *window, const char *const command, gchar **args)
         }
 
         return TRUE;
+    } else if (g_strcmp0(args[0], "reload") == 0) {
+        if (args[1] == NULL) {
+            cons_bad_cmd_usage(command);
+            return TRUE;
+        }
+        gboolean res = plugins_reload(args[1]);
+        if (res) {
+            cons_show("Reloaded plugin: %s", args[1]);
+        } else {
+            cons_show("Failed to reload plugin: %s", args[1]);
+        }
+
+        return TRUE;
     } else {
         GList *plugins = plugins_loaded_list();
         if (plugins == NULL) {
