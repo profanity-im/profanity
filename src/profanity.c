@@ -391,7 +391,6 @@ _shutdown(void)
     plugins_on_shutdown();
     muc_close();
     caps_close();
-    ui_close();
 #ifdef HAVE_LIBOTR
     otr_shutdown();
 #endif
@@ -402,10 +401,11 @@ _shutdown(void)
     theme_close();
     accounts_close();
     tlscerts_close();
-    cmd_uninit();
     log_stderr_close();
     log_close();
     plugins_shutdown();
+    cmd_uninit();
+    ui_close();
     prefs_close();
     if (saved_status) {
         free(saved_status);

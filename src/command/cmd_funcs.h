@@ -39,11 +39,11 @@
 
 // Command help strings
 typedef struct cmd_help_t {
-    const gchar *tags[20];
-    const gchar *synopsis[50];
-    const gchar *desc;
-    const gchar *args[128][2];
-    const gchar *examples[20];
+    gchar *tags[20];
+    gchar *synopsis[50];
+    gchar *desc;
+    gchar *args[128][2];
+    gchar *examples[20];
 } CommandHelp;
 
 /*

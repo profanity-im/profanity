@@ -53,6 +53,7 @@ typedef struct prof_plugin_t {
 
     void (*on_start_func)(struct prof_plugin_t* plugin);
     void (*on_shutdown_func)(struct prof_plugin_t* plugin);
+    void (*on_unload_func)(struct prof_plugin_t* plugin);
 
     void (*on_connect_func)(struct prof_plugin_t* plugin, const char *const account_name, const char *const fulljid);
     void (*on_disconnect_func)(struct prof_plugin_t* plugin, const char *const account_name,
@@ -100,13 +101,17 @@ typedef struct prof_plugin_t {
 } ProfPlugin;
 
 void plugins_init(void);
-GSList* plugins_get_list(void);
 GSList *plugins_unloaded_list(void);
+GList *plugins_loaded_list(void);
 char* plugins_autocomplete(const char *const input);
 void plugins_reset_autocomplete(void);
 void plugins_shutdown(void);
 
+gboolean plugins_install(const char *const plugin_name, const char *const filename);
 gboolean plugins_load(const char *const name);
+gboolean plugins_unload(const char *const name);
+gboolean plugins_reload(const char *const name);
+void plugins_reload_all(void);
 
 void plugins_on_start(void);
 void plugins_on_shutdown(void);
@@ -132,6 +137,7 @@ char* plugins_pre_priv_message_send(const char *const jid, const char *const mes
 void plugins_post_priv_message_send(const char *const jid, const char *const message);
 
 void plugins_win_process_line(char *win, const char *const line);
+void plugins_close_win(const char *const plugin_name, const char *const tag);
 
 char* plugins_on_message_stanza_send(const char *const text);
 gboolean plugins_on_message_stanza_receive(const char *const text);

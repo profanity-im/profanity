@@ -33,6 +33,7 @@
  */
 
 #include <Python.h>
+#include <frameobject.h>
 
 #include <glib.h>
 
@@ -41,6 +42,9 @@
 #include "plugins/python_plugins.h"
 #include "plugins/callbacks.h"
 #include "plugins/autocompleters.h"
+#include "log.h"
+
+static char* _python_plugin_name(void);
 
 static PyObject*
 python_api_cons_alert(PyObject *self, PyObject *args)
@@ -114,6 +118,9 @@ python_api_register_command(PyObject *self, PyObject *args)
         return Py_BuildValue("");
     }
 
+    char *plugin_name = _python_plugin_name();
+    log_debug("Register command %s for %s", command_name, plugin_name);
+
     if (p_callback && PyCallable_Check(p_callback)) {
         Py_ssize_t len = PyList_Size(synopsis);
         const char *c_synopsis[len == 0 ? 0 : len+1];
@@ -157,10 +164,12 @@ python_api_register_command(PyObject *self, PyObject *args)
         c_examples[len] = NULL;
 
         allow_python_threads();
-        api_register_command(command_name, min_args, max_args, c_synopsis,
-            description, c_arguments, c_examples, p_callback, python_command_callback);
+        api_register_command(plugin_name, command_name, min_args, max_args, c_synopsis,
+            description, c_arguments, c_examples, p_callback, python_command_callback, NULL);
         disable_python_threads();
     }
+
+    free(plugin_name);
 
     return Py_BuildValue("");
 }
@@ -175,11 +184,16 @@ python_api_register_timed(PyObject *self, PyObject *args)
         return Py_BuildValue("");
     }
 
+    char *plugin_name = _python_plugin_name();
+    log_debug("Register timed for %s", plugin_name);
+
     if (p_callback && PyCallable_Check(p_callback)) {
         allow_python_threads();
-        api_register_timed(p_callback, interval_seconds, python_timed_callback);
+        api_register_timed(plugin_name, p_callback, interval_seconds, python_timed_callback, NULL);
         disable_python_threads();
     }
+
+    free(plugin_name);
 
     return Py_BuildValue("");
 }
@@ -194,6 +208,9 @@ python_api_completer_add(PyObject *self, PyObject *args)
         return Py_BuildValue("");
     }
 
+    char *plugin_name = _python_plugin_name();
+    log_debug("Autocomplete add %s for %s", key, plugin_name);
+
     Py_ssize_t len = PyList_Size(items);
     char *c_items[len];
 
@@ -206,8 +223,10 @@ python_api_completer_add(PyObject *self, PyObject *args)
     c_items[len] = NULL;
 
     allow_python_threads();
-    autocompleters_add(key, c_items);
+    api_completer_add(plugin_name, key, c_items);
     disable_python_threads();
+
+    free(plugin_name);
 
     return Py_BuildValue("");
 }
@@ -222,6 +241,9 @@ python_api_completer_remove(PyObject *self, PyObject *args)
         return Py_BuildValue("");
     }
 
+    char *plugin_name = _python_plugin_name();
+    log_debug("Autocomplete remove %s for %s", key, plugin_name);
+
     Py_ssize_t len = PyList_Size(items);
     char *c_items[len];
 
@@ -234,8 +256,10 @@ python_api_completer_remove(PyObject *self, PyObject *args)
     c_items[len] = NULL;
 
     allow_python_threads();
-    autocompleters_remove(key, c_items);
+    api_completer_remove(plugin_name, key, c_items);
     disable_python_threads();
+
+    free(plugin_name);
 
     return Py_BuildValue("");
 }
@@ -249,9 +273,14 @@ python_api_completer_clear(PyObject *self, PyObject *args)
         return Py_BuildValue("");
     }
 
+    char *plugin_name = _python_plugin_name();
+    log_debug("Autocomplete clear %s for %s", key, plugin_name);
+
     allow_python_threads();
-    autocompleters_clear(key);
+    api_completer_clear(plugin_name, key);
     disable_python_threads();
+
+    free(plugin_name);
 
     return Py_BuildValue("");
 }
@@ -447,11 +476,16 @@ python_api_win_create(PyObject *self, PyObject *args)
         return Py_BuildValue("");
     }
 
+    char *plugin_name = _python_plugin_name();
+    log_debug("Win create %s for %s", tag, plugin_name);
+
     if (p_callback && PyCallable_Check(p_callback)) {
         allow_python_threads();
-        api_win_create(tag, p_callback, NULL, python_window_callback);
+        api_win_create(plugin_name, tag, p_callback, python_window_callback, NULL);
         disable_python_threads();
     }
+
+    free(plugin_name);
 
     return Py_BuildValue("");
 }
@@ -789,4 +823,17 @@ void
 python_api_init(void)
 {
     Py_InitModule("prof", apiMethods);
+}
+
+static char*
+_python_plugin_name(void)
+{
+    PyThreadState *ts = PyThreadState_Get();
+    PyFrameObject *frame = ts->frame;
+    char const* filename = PyString_AsString(frame->f_code->co_filename);
+    gchar **split = g_strsplit(filename, "/", 0);
+    char *plugin_name = strdup(split[g_strv_length(split)-1]);
+    g_strfreev(split);
+
+    return plugin_name;
 }

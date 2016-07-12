@@ -53,6 +53,8 @@ typedef struct window_wrapper_t {
     void(*func)(char *tag, char *line);
 } WindowWrapper;
 
+static char* _c_plugin_name(const char *filename);
+
 static void
 c_api_cons_alert(void)
 {
@@ -78,40 +80,65 @@ c_api_cons_bad_cmd_usage(const char *const cmd)
 }
 
 static void
-c_api_register_command(const char *command_name, int min_args, int max_args,
+c_api_register_command(const char *filename, const char *command_name, int min_args, int max_args,
     const char **synopsis, const char *description, const char *arguments[][2], const char **examples,
     void(*callback)(char **args))
 {
+    char *plugin_name = _c_plugin_name(filename);
+    log_debug("Register command %s for %s", command_name, plugin_name);
+
     CommandWrapper *wrapper = malloc(sizeof(CommandWrapper));
     wrapper->func = callback;
-    api_register_command(command_name, min_args, max_args, synopsis,
-        description, arguments, examples, wrapper, c_command_callback);
+    api_register_command(plugin_name, command_name, min_args, max_args, synopsis,
+        description, arguments, examples, wrapper, c_command_callback, free);
+
+    free(plugin_name);
 }
 
 static void
-c_api_register_timed(void(*callback)(void), int interval_seconds)
+c_api_register_timed(const char *filename, void(*callback)(void), int interval_seconds)
 {
+    char *plugin_name = _c_plugin_name(filename);
+    log_debug("Register timed for %s", plugin_name);
+
     TimedWrapper *wrapper = malloc(sizeof(TimedWrapper));
     wrapper->func = callback;
-    api_register_timed(wrapper, interval_seconds, c_timed_callback);
+    api_register_timed(plugin_name, wrapper, interval_seconds, c_timed_callback, free);
+
+    free(plugin_name);
 }
 
 static void
-c_api_completer_add(const char *key, char **items)
+c_api_completer_add(const char *filename, const char *key, char **items)
 {
-    api_completer_add(key, items);
+    char *plugin_name = _c_plugin_name(filename);
+    log_debug("Autocomplete add %s for %s", key, plugin_name);
+
+    api_completer_add(plugin_name, key, items);
+
+    free(plugin_name);
 }
 
 static void
-c_api_completer_remove(const char *key, char **items)
+c_api_completer_remove(const char *filename, const char *key, char **items)
 {
-    api_completer_remove(key, items);
+    char *plugin_name = _c_plugin_name(filename);
+    log_debug("Autocomplete remove %s for %s", key, plugin_name);
+
+    api_completer_remove(plugin_name, key, items);
+
+    free(plugin_name);
 }
 
 static void
-c_api_completer_clear(const char *key)
+c_api_completer_clear(const char *filename, const char *key)
 {
-    api_completer_clear(key);
+    char *plugin_name = _c_plugin_name(filename);
+    log_debug("Autocomplete clear %s for %s", key, plugin_name);
+
+    api_completer_clear(plugin_name, key);
+
+    free(plugin_name);
 }
 
 static void
@@ -187,11 +214,16 @@ c_api_win_exists(char *tag)
 }
 
 static void
-c_api_win_create(char *tag, void(*callback)(char *tag, char *line))
+c_api_win_create(const char *filename, char *tag, void(*callback)(char *tag, char *line))
 {
+    char *plugin_name = _c_plugin_name(filename);
+    log_debug("Win create %s for %s", tag, plugin_name);
+
     WindowWrapper *wrapper = malloc(sizeof(WindowWrapper));
     wrapper->func = callback;
-    api_win_create(tag, wrapper, free, c_window_callback);
+    api_win_create(plugin_name, tag, wrapper, c_window_callback, free);
+
+    free(plugin_name);
 }
 
 static int
@@ -297,11 +329,12 @@ c_api_init(void)
     prof_cons_show = c_api_cons_show;
     prof_cons_show_themed = c_api_cons_show_themed;
     prof_cons_bad_cmd_usage = c_api_cons_bad_cmd_usage;
-    prof_register_command = c_api_register_command;
-    prof_register_timed = c_api_register_timed;
-    prof_completer_add = c_api_completer_add;
-    prof_completer_remove = c_api_completer_remove;
-    prof_completer_clear = c_api_completer_clear;
+    _prof_register_command = c_api_register_command;
+    _prof_register_timed = c_api_register_timed;
+    _prof_completer_add = c_api_completer_add;
+    _prof_completer_remove = c_api_completer_remove;
+    _prof_completer_clear = c_api_completer_clear;
+    _prof_win_create = c_api_win_create;
     prof_notify = c_api_notify;
     prof_send_line = c_api_send_line;
     prof_get_current_recipient = c_api_get_current_recipient;
@@ -314,7 +347,6 @@ c_api_init(void)
     prof_log_warning = c_api_log_warning;
     prof_log_error = c_api_log_error;
     prof_win_exists = c_api_win_exists;
-    prof_win_create = c_api_win_create;
     prof_win_focus = c_api_win_focus;
     prof_win_show = c_api_win_show;
     prof_win_show_themed = c_api_win_show_themed;
@@ -327,4 +359,18 @@ c_api_init(void)
     prof_settings_set_int = c_api_settings_set_int;
     prof_incoming_message = c_api_incoming_message;
     prof_disco_add_feature = c_api_disco_add_feature;
+}
+
+static char *
+_c_plugin_name(const char *filename)
+{
+    GString *plugin_name_str = g_string_new("");
+    char *name = strndup(filename, strlen(filename)-1);
+    g_string_append(plugin_name_str, name);
+    free(name);
+    g_string_append(plugin_name_str, "so");
+    char *result = plugin_name_str->str;
+    g_string_free(plugin_name_str, FALSE);
+
+    return result;
 }

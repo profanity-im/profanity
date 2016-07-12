@@ -38,56 +38,71 @@
 
 #include "tools/autocomplete.h"
 
-static GHashTable *autocompleters;
+static GHashTable *plugin_to_acs;
+
+static void
+_free_autocompleters(GHashTable *key_to_ac)
+{
+    g_hash_table_destroy(key_to_ac);
+}
 
 void
 autocompleters_init(void)
 {
-    autocompleters = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, (GDestroyNotify)autocomplete_free);
+    plugin_to_acs = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, (GDestroyNotify)_free_autocompleters);
 }
 
 void
-autocompleters_add(const char *key, char **items)
+autocompleters_add(const char *const plugin_name, const char *key, char **items)
 {
-    if (g_hash_table_contains(autocompleters, key)) {
-        Autocomplete existing_ac = g_hash_table_lookup(autocompleters, key);
-
-        int i = 0;
-        for (i = 0; i < g_strv_length(items); i++) {
-            autocomplete_add(existing_ac, items[i]);
+    GHashTable *key_to_ac = g_hash_table_lookup(plugin_to_acs, plugin_name);
+    if (key_to_ac) {
+        if (g_hash_table_contains(key_to_ac, key)) {
+            Autocomplete existing_ac = g_hash_table_lookup(key_to_ac, key);
+            autocomplete_add_all(existing_ac, items);
+        } else {
+            Autocomplete new_ac = autocomplete_new();
+            autocomplete_add_all(new_ac, items);
+            g_hash_table_insert(key_to_ac, strdup(key), new_ac);
         }
     } else {
+        key_to_ac = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, (GDestroyNotify)autocomplete_free);
         Autocomplete new_ac = autocomplete_new();
-        int i = 0;
-        for (i = 0; i < g_strv_length(items); i++) {
-            autocomplete_add(new_ac, items[i]);
-        }
-        g_hash_table_insert(autocompleters, strdup(key), new_ac);
+        autocomplete_add_all(new_ac, items);
+        g_hash_table_insert(key_to_ac, strdup(key), new_ac);
+        g_hash_table_insert(plugin_to_acs, strdup(plugin_name), key_to_ac);
     }
 }
 
 void
-autocompleters_remove(const char *key, char **items)
+autocompleters_remove(const char *const plugin_name, const char *key, char **items)
 {
-    if (!g_hash_table_contains(autocompleters, key)) {
+    GHashTable *key_to_ac = g_hash_table_lookup(plugin_to_acs, plugin_name);
+    if (!key_to_ac) {
         return;
     }
 
-    Autocomplete ac = g_hash_table_lookup(autocompleters, key);
-    int i = 0;
-    for (i = 0; i < g_strv_length(items); i++) {
-        autocomplete_remove(ac, items[i]);
+    if (!g_hash_table_contains(key_to_ac, key)) {
+        return;
     }
+
+    Autocomplete ac = g_hash_table_lookup(key_to_ac, key);
+    autocomplete_remove_all(ac, items);
 }
 
 void
-autocompleters_clear(const char *key)
+autocompleters_clear(const char *const plugin_name, const char *key)
 {
-    if (!g_hash_table_contains(autocompleters, key)) {
+    GHashTable *key_to_ac = g_hash_table_lookup(plugin_to_acs, plugin_name);
+    if (!key_to_ac) {
         return;
     }
 
-    Autocomplete ac = g_hash_table_lookup(autocompleters, key);
+    if (!g_hash_table_contains(key_to_ac, key)) {
+        return;
+    }
+
+    Autocomplete ac = g_hash_table_lookup(key_to_ac, key);
     autocomplete_clear(ac);
 }
 
@@ -96,17 +111,26 @@ autocompleters_complete(const char * const input)
 {
     char *result = NULL;
 
-    GList *keys = g_hash_table_get_keys(autocompleters);
-    GList *curr = keys;
-    while (curr) {
-        result = autocomplete_param_with_ac(input, curr->data, g_hash_table_lookup(autocompleters, curr->data), TRUE);
-        if (result) {
-            g_list_free(keys);
-            return result;
+    GList *ac_hashes = g_hash_table_get_values(plugin_to_acs);
+    GList *curr_hash = ac_hashes;
+    while (curr_hash) {
+        GHashTable *key_to_ac = curr_hash->data;
+
+        GList *keys = g_hash_table_get_keys(key_to_ac);
+        GList *curr = keys;
+        while (curr) {
+            result = autocomplete_param_with_ac(input, curr->data, g_hash_table_lookup(key_to_ac, curr->data), TRUE);
+            if (result) {
+                g_list_free(keys);
+                return result;
+            }
+            curr = g_list_next(curr);
         }
-        curr = g_list_next(curr);
+        g_list_free(keys);
+
+        curr_hash = g_list_next(curr_hash);
     }
-    g_list_free(keys);
+    g_list_free(ac_hashes);
 
     return NULL;
 }
@@ -114,17 +138,24 @@ autocompleters_complete(const char * const input)
 void
 autocompleters_reset(void)
 {
-    GList *acs = g_hash_table_get_values(autocompleters);
-    GList *curr = acs;
-    while (curr) {
-        autocomplete_reset(curr->data);
-        curr = g_list_next(curr);
+    GList *ac_hashes = g_hash_table_get_values(plugin_to_acs);
+    GList *curr_hash = ac_hashes;
+    while (curr_hash) {
+        GList *acs = g_hash_table_get_values(curr_hash->data);
+        GList *curr = acs;
+        while (curr) {
+            autocomplete_reset(curr->data);
+            curr = g_list_next(curr);
+        }
+
+        g_list_free(acs);
+        curr_hash = g_list_next(curr_hash);
     }
 
-    g_list_free(acs);
+    g_list_free(ac_hashes);
 }
 
 void autocompleters_destroy(void)
 {
-    g_hash_table_destroy(autocompleters);
+    g_hash_table_destroy(plugin_to_acs);
 }
