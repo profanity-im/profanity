@@ -62,8 +62,6 @@
 
 static GHashTable *plugins;
 
-static gchar* _get_plugins_dir(void);
-
 void
 plugins_init(void)
 {
@@ -133,7 +131,7 @@ plugins_init(void)
 gboolean
 plugins_install(const char *const plugin_name, const char *const filename)
 {
-    char *plugins_dir = _get_plugins_dir();
+    char *plugins_dir = plugins_get_dir();
     GString *target_path = g_string_new(plugins_dir);
     free(plugins_dir);
     g_string_append(target_path, "/");
@@ -245,16 +243,6 @@ plugins_reload(const char *const name)
     return res;
 }
 
-static gchar*
-_get_plugins_dir(void)
-{
-    gchar *xdg_data = xdg_get_data_home();
-    GString *plugins_dir = g_string_new(xdg_data);
-    g_free(xdg_data);
-    g_string_append(plugins_dir, "/profanity/plugins");
-    return g_string_free(plugins_dir, FALSE);
-}
-
 void
 _plugins_unloaded_list_dir(const gchar *const dir, GSList **result)
 {
@@ -278,7 +266,7 @@ GSList*
 plugins_unloaded_list(void)
 {
     GSList *result = NULL;
-    char *plugins_dir = _get_plugins_dir();
+    char *plugins_dir = plugins_get_dir();
     _plugins_unloaded_list_dir(plugins_dir, &result);
     free(plugins_dir);
 
@@ -843,13 +831,13 @@ plugins_shutdown(void)
     disco_close();
 }
 
-gchar *
+char*
 plugins_get_dir(void)
 {
     gchar *xdg_data = xdg_get_data_home();
     GString *plugins_dir = g_string_new(xdg_data);
     g_string_append(plugins_dir, "/profanity/plugins");
-    gchar *result = strdup(plugins_dir->str);
+    char *result = strdup(plugins_dir->str);
     g_free(xdg_data);
     g_string_free(plugins_dir, TRUE);
 
