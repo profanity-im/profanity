@@ -452,6 +452,7 @@ win_free(ProfWin* window)
     {
         ProfPluginWin *pluginwin = (ProfPluginWin*)window;
         free(pluginwin->tag);
+        free(pluginwin->plugin_name);
         break;
     }
     default:
