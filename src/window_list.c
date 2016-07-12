@@ -48,7 +48,7 @@
 #include "window_list.h"
 #include "plugins/plugins.h"
 #include "xmpp/xmpp.h"
-
+#include "config/preferences.h"
 
 static GHashTable *windows;
 static int current;
@@ -227,26 +227,19 @@ wins_get_plugin(const char *const tag)
 }
 
 void
-wins_close_plugin(const char *const tag)
+wins_close_plugin(char *tag)
 {
-    GList *values = g_hash_table_get_values(windows);
-    GList *curr = values;
-
-    while (curr) {
-        ProfWin *window = curr->data;
-        if (window->type == WIN_PLUGIN) {
-            ProfPluginWin *pluginwin = (ProfPluginWin*)window;
-            if (g_strcmp0(pluginwin->tag, tag) == 0) {
-                int num = wins_get_num(window);
-                wins_close_by_num(num);
-                g_list_free(values);
-                return;
-            }
-        }
-        curr = g_list_next(curr);
+    ProfWin *toclose = wins_get_by_string(tag);
+    if (toclose == NULL) {
+        return;
     }
 
-    g_list_free(values);
+    int index = wins_get_num(toclose);
+    ui_close_win(index);
+
+    if (prefs_get_boolean(PREF_WINS_AUTO_TIDY)) {
+        wins_tidy();
+    }
 }
 
 GList*

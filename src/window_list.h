@@ -61,7 +61,7 @@ ProfPrivateWin* wins_get_private(const char *const fulljid);
 ProfPluginWin* wins_get_plugin(const char *const tag);
 ProfXMLWin* wins_get_xmlconsole(void);
 
-void wins_close_plugin(const char *const tag);
+void wins_close_plugin(char *tag);
 
 ProfWin* wins_get_current(void);
 

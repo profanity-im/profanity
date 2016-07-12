@@ -302,6 +302,10 @@ api_win_create(
     void(*callback_exec)(PluginWindowCallback *window_callback, const char *tag, const char * const line),
     void(*callback_destroy)(void *callback))
 {
+    if (callbacks_win_exists(plugin_name, tag)) {
+        return;
+    }
+
     PluginWindowCallback *window = malloc(sizeof(PluginWindowCallback));
     window->callback = callback;
     window->callback_exec = callback_exec;

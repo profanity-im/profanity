@@ -206,6 +206,20 @@ callbacks_add_timed(const char *const plugin_name, PluginTimedFunction *timed_fu
     }
 }
 
+gboolean
+callbacks_win_exists(const char *const plugin_name, const char *tag)
+{
+    GHashTable *window_callbacks = g_hash_table_lookup(p_window_callbacks, plugin_name);
+    if (window_callbacks) {
+        PluginWindowCallback *cb = g_hash_table_lookup(window_callbacks, tag);
+        if (cb) {
+            return TRUE;
+        }
+    }
+
+    return FALSE;
+}
+
 void
 callbacks_add_window_handler(const char *const plugin_name, const char *tag, PluginWindowCallback *window_callback)
 {

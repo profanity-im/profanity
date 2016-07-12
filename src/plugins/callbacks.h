@@ -69,6 +69,7 @@ void callbacks_close(void);
 
 void callbacks_add_command(const char *const plugin_name, PluginCommand *command);
 void callbacks_add_timed(const char *const plugin_name, PluginTimedFunction *timed_function);
+gboolean callbacks_win_exists(const char *const plugin_name, const char *tag);
 void callbacks_add_window_handler(const char *const plugin_name, const char *tag, PluginWindowCallback *window_callback);
 void * callbacks_get_window_handler(const char *tag);
 
