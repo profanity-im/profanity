@@ -38,6 +38,7 @@
 #include <assert.h>
 #include <stdlib.h>
 #include <stdint.h>
+#include <stdio.h>
 #include <string.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -153,6 +154,31 @@ mkdir_recursive(const char *dir)
     }
 
     return result;
+}
+
+gboolean
+copy_file(const char *const sourcepath, const char *const targetpath)
+{
+    int ch;
+    FILE *source = fopen(sourcepath, "rb");
+    if (source == NULL) {
+        return FALSE;
+    }
+
+    FILE *target = fopen(targetpath, "wb");
+    if (target == NULL) {
+        fclose(source);
+        return FALSE;
+    }
+
+    while((ch = fgetc(source)) != EOF) {
+        fputc(ch, target);
+    }
+
+    fclose(source);
+    fclose(target);
+
+    return TRUE;
 }
 
 char*

@@ -57,6 +57,8 @@
 #include "pgp/gpg.h"
 #endif
 
+static char* _complete_filepath(const char *const input, char *const startstr);
+
 static char* _sub_autocomplete(ProfWin *window, const char *const input);
 static char* _notify_autocomplete(ProfWin *window, const char *const input);
 static char* _theme_autocomplete(ProfWin *window, const char *const input);
@@ -187,7 +189,7 @@ static Autocomplete plugins_ac;
 static Autocomplete plugins_load_ac;
 static Autocomplete plugins_unload_ac;
 static Autocomplete plugins_reload_ac;
-static Autocomplete sendfile_ac;
+static Autocomplete filepath_ac;
 static Autocomplete blocked_ac;
 static Autocomplete tray_ac;
 static Autocomplete presence_ac;
@@ -705,11 +707,12 @@ cmd_ac_init(void)
     autocomplete_add(autoping_ac, "timeout");
 
     plugins_ac = autocomplete_new();
+    autocomplete_add(plugins_ac, "install");
     autocomplete_add(plugins_ac, "load");
     autocomplete_add(plugins_ac, "unload");
     autocomplete_add(plugins_ac, "reload");
 
-    sendfile_ac = autocomplete_new();
+    filepath_ac = autocomplete_new();
 
     blocked_ac = autocomplete_new();
     autocomplete_add(blocked_ac, "add");
@@ -903,7 +906,7 @@ cmd_ac_reset(ProfWin *window)
     autocomplete_reset(notify_mention_ac);
     autocomplete_reset(notify_trigger_ac);
     autocomplete_reset(sub_ac);
-    autocomplete_reset(sendfile_ac);
+    autocomplete_reset(filepath_ac);
 
     autocomplete_reset(who_room_ac);
     autocomplete_reset(who_roster_ac);
@@ -1111,7 +1114,7 @@ cmd_ac_uninit(void)
     autocomplete_free(plugins_load_ac);
     autocomplete_free(plugins_unload_ac);
     autocomplete_free(plugins_reload_ac);
-    autocomplete_free(sendfile_ac);
+    autocomplete_free(filepath_ac);
     autocomplete_free(blocked_ac);
     autocomplete_free(tray_ac);
     autocomplete_free(presence_ac);
@@ -1889,6 +1892,10 @@ static char*
 _plugins_autocomplete(ProfWin *window, const char *const input)
 {
     char *result = NULL;
+
+    if (strncmp(input, "/plugins install ", 17) == 0) {
+        return _complete_filepath(input, "/plugins install");
+    }
 
     if (strncmp(input, "/plugins load ", 14) == 0) {
         if (plugins_load_ac == NULL) {
@@ -2719,106 +2726,8 @@ _close_autocomplete(ProfWin *window, const char *const input)
 static char*
 _sendfile_autocomplete(ProfWin *window, const char *const input)
 {
-    static char* last_directory = NULL;
-
-    unsigned int output_off = 0;
-
-    char *result = NULL;
-    char *tmp;
-
-    // strip command
-    char *inpcp = (char*)input + 9;
-    while (*inpcp == ' ') {
-        inpcp++;
-    }
-
-    inpcp = strdup(inpcp);
-
-    // strip quotes
-    if (*inpcp == '"') {
-        tmp = strchr(inpcp+1, '"');
-        if (tmp) {
-            *tmp = '\0';
-        }
-        tmp = strdup(inpcp+1);
-        free(inpcp);
-        inpcp = tmp;
-    }
-
-    // expand ~ to $HOME
-    if (inpcp[0] == '~' && inpcp[1] == '/') {
-        if (asprintf(&tmp, "%s/%sfoo", getenv("HOME"), inpcp+2) == -1) {
-            return NULL;
-        }
-        output_off = strlen(getenv("HOME"))+1;
-    } else {
-        if (asprintf(&tmp, "%sfoo", inpcp) == -1) {
-            return NULL;
-        }
-    }
-    free(inpcp);
-    inpcp = tmp;
-
-    char* inpcp2 = strdup(inpcp);
-    char* foofile = strdup(basename(inpcp2));
-    char* directory = strdup(dirname(inpcp));
-    free(inpcp);
-    free(inpcp2);
-
-    if (!last_directory || strcmp(last_directory, directory) != 0) {
-        free(last_directory);
-        last_directory = directory;
-        autocomplete_reset(sendfile_ac);
-
-        struct dirent *dir;
-
-        DIR *d = opendir(directory);
-        if (d) {
-            while ((dir = readdir(d)) != NULL) {
-                if (strcmp(dir->d_name, ".") == 0) {
-                    continue;
-                } else if (strcmp(dir->d_name, "..") == 0) {
-                    continue;
-                } else if (*(dir->d_name) == '.' && *foofile != '.') {
-                    // only show hidden files on explicit request
-                    continue;
-                }
-                char * acstring;
-                if (output_off) {
-                    if (asprintf(&tmp, "%s/%s", directory, dir->d_name) == -1) {
-                        return NULL;
-                    }
-                    if (asprintf(&acstring, "~/%s", tmp+output_off) == -1) {
-                        return NULL;
-                    }
-                    free(tmp);
-                } else if (strcmp(directory, "/") == 0) {
-                    if (asprintf(&acstring, "/%s", dir->d_name) == -1) {
-                        return NULL;
-                    }
-                } else {
-                    if (asprintf(&acstring, "%s/%s", directory, dir->d_name) == -1) {
-                        return NULL;
-                    }
-                }
-                autocomplete_add(sendfile_ac, acstring);
-                free(acstring);
-            }
-            closedir(d);
-        }
-    } else {
-        free(foofile);
-        free(directory);
-    }
-
-    result = autocomplete_param_with_ac(input, "/sendfile", sendfile_ac, TRUE);
-    if (result) {
-        return result;
-    }
-
-    return NULL;
+    return _complete_filepath(input, "/sendfile");
 }
-
 
 static char*
 _subject_autocomplete(ProfWin *window, const char *const input)
@@ -3015,6 +2924,109 @@ _presence_autocomplete(ProfWin *window, const char *const input)
     found = autocomplete_param_with_ac(input, "/presence", presence_ac, TRUE);
     if (found) {
         return found;
+    }
+
+    return NULL;
+}
+
+static char*
+_complete_filepath(const char *const input, char *const startstr)
+{
+    static char* last_directory = NULL;
+
+    unsigned int output_off = 0;
+
+    char *result = NULL;
+    char *tmp;
+
+    // strip command
+    char *inpcp = (char*)input + strlen(startstr);
+    while (*inpcp == ' ') {
+        inpcp++;
+    }
+
+    inpcp = strdup(inpcp);
+
+    // strip quotes
+    if (*inpcp == '"') {
+        tmp = strchr(inpcp+1, '"');
+        if (tmp) {
+            *tmp = '\0';
+        }
+        tmp = strdup(inpcp+1);
+        free(inpcp);
+        inpcp = tmp;
+    }
+
+    // expand ~ to $HOME
+    if (inpcp[0] == '~' && inpcp[1] == '/') {
+        if (asprintf(&tmp, "%s/%sfoo", getenv("HOME"), inpcp+2) == -1) {
+            return NULL;
+        }
+        output_off = strlen(getenv("HOME"))+1;
+    } else {
+        if (asprintf(&tmp, "%sfoo", inpcp) == -1) {
+            return NULL;
+        }
+    }
+    free(inpcp);
+    inpcp = tmp;
+
+    char* inpcp2 = strdup(inpcp);
+    char* foofile = strdup(basename(inpcp2));
+    char* directory = strdup(dirname(inpcp));
+    free(inpcp);
+    free(inpcp2);
+
+    if (!last_directory || strcmp(last_directory, directory) != 0) {
+        free(last_directory);
+        last_directory = directory;
+        autocomplete_reset(filepath_ac);
+
+        struct dirent *dir;
+
+        DIR *d = opendir(directory);
+        if (d) {
+            while ((dir = readdir(d)) != NULL) {
+                if (strcmp(dir->d_name, ".") == 0) {
+                    continue;
+                } else if (strcmp(dir->d_name, "..") == 0) {
+                    continue;
+                } else if (*(dir->d_name) == '.' && *foofile != '.') {
+                    // only show hidden files on explicit request
+                    continue;
+                }
+                char * acstring;
+                if (output_off) {
+                    if (asprintf(&tmp, "%s/%s", directory, dir->d_name) == -1) {
+                        return NULL;
+                    }
+                    if (asprintf(&acstring, "~/%s", tmp+output_off) == -1) {
+                        return NULL;
+                    }
+                    free(tmp);
+                } else if (strcmp(directory, "/") == 0) {
+                    if (asprintf(&acstring, "/%s", dir->d_name) == -1) {
+                        return NULL;
+                    }
+                } else {
+                    if (asprintf(&acstring, "%s/%s", directory, dir->d_name) == -1) {
+                        return NULL;
+                    }
+                }
+                autocomplete_add(filepath_ac, acstring);
+                free(acstring);
+            }
+            closedir(d);
+        }
+    } else {
+        free(foofile);
+        free(directory);
+    }
+
+    result = autocomplete_param_with_ac(input, startstr, filepath_ac, TRUE);
+    if (result) {
+        return result;
     }
 
     return NULL;

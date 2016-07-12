@@ -62,6 +62,8 @@
 
 static GHashTable *plugins;
 
+static gchar* _get_plugins_dir(void);
+
 void
 plugins_init(void)
 {
@@ -126,6 +128,30 @@ plugins_init(void)
     prefs_free_plugins(plugins_pref);
 
     return;
+}
+
+gboolean
+plugins_install(const char *const plugin_name, const char *const filename)
+{
+    char *plugins_dir = _get_plugins_dir();
+    GString *target_path = g_string_new(plugins_dir);
+    free(plugins_dir);
+    g_string_append(target_path, "/");
+    g_string_append(target_path, plugin_name);
+
+    ProfPlugin *plugin = g_hash_table_lookup(plugins, plugin_name);
+    if (plugin) {
+        plugins_unload(plugin_name);
+    }
+
+    gboolean result = copy_file(filename, target_path->str);
+    g_string_free(target_path, TRUE);
+
+    if (result) {
+        result = plugins_load(plugin_name);
+    }
+
+    return result;
 }
 
 gboolean

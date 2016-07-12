@@ -105,6 +105,7 @@ char* plugins_autocomplete(const char *const input);
 void plugins_reset_autocomplete(void);
 void plugins_shutdown(void);
 
+gboolean plugins_install(const char *const plugin_name, const char *const filename);
 gboolean plugins_load(const char *const name);
 gboolean plugins_unload(const char *const name);
 gboolean plugins_reload(const char *const name);
