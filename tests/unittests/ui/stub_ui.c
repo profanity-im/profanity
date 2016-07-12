@@ -497,7 +497,7 @@ ProfWin* win_create_private(const char * const fulljid)
 {
     return NULL;
 }
-ProfWin* win_create_plugin(const char * const tag)
+ProfWin* win_create_plugin(const char *const plugin_name, const char * const tag)
 {
     return NULL;
 }

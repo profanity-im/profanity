@@ -313,7 +313,7 @@ api_win_create(
 
     callbacks_add_window_handler(plugin_name, tag, window);
 
-    wins_new_plugin(tag);
+    wins_new_plugin(plugin_name, tag);
 
     // set status bar active
     ProfPluginWin *pluginwin = wins_get_plugin(tag);

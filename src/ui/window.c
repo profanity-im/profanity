@@ -238,13 +238,14 @@ win_create_xmlconsole(void)
 }
 
 ProfWin*
-win_create_plugin(const char *const tag)
+win_create_plugin(const char *const plugin_name, const char *const tag)
 {
     ProfPluginWin *new_win = malloc(sizeof(ProfPluginWin));
     new_win->super.type = WIN_PLUGIN;
     new_win->super.layout = _win_create_simple_layout();
 
     new_win->tag = strdup(tag);
+    new_win->plugin_name = strdup(plugin_name);
 
     new_win->memcheck = PROFPLUGINWIN_MEMCHECK;
 

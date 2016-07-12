@@ -134,6 +134,7 @@ char* plugins_pre_priv_message_send(const char *const jid, const char *const mes
 void plugins_post_priv_message_send(const char *const jid, const char *const message);
 
 void plugins_win_process_line(char *win, const char *const line);
+void plugins_close_win(const char *const plugin_name, const char *const tag);
 
 char* plugins_on_message_stanza_send(const char *const text);
 gboolean plugins_on_message_stanza_receive(const char *const text);

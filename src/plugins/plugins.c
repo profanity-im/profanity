@@ -287,6 +287,12 @@ plugins_win_process_line(char *win, const char * const line)
 }
 
 void
+plugins_close_win(const char *const plugin_name, const char *const tag)
+{
+    callbacks_remove_win(plugin_name, tag);
+}
+
+void
 plugins_on_start(void)
 {
     GList *values = g_hash_table_get_values(plugins);

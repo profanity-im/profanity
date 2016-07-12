@@ -344,7 +344,7 @@ ProfWin* win_create_chat(const char *const barejid);
 ProfWin* win_create_muc(const char *const roomjid);
 ProfWin* win_create_muc_config(const char *const title, DataForm *form);
 ProfWin* win_create_private(const char *const fulljid);
-ProfWin* win_create_plugin(const char *const tag);
+ProfWin* win_create_plugin(const char *const plugin_name, const char *const tag);
 void win_update_virtual(ProfWin *window);
 void win_free(ProfWin *window);
 gboolean win_notify_remind(ProfWin *window);
