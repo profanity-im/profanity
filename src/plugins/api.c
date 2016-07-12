@@ -303,6 +303,9 @@ api_win_create(
     void(*callback_destroy)(void *callback))
 {
     if (callbacks_win_exists(plugin_name, tag)) {
+        if (callback_destroy) {
+            callback_destroy(callback);
+        }
         return;
     }
 
