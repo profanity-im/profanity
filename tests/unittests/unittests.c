@@ -33,6 +33,7 @@
 #include "test_cmd_roster.h"
 #include "test_cmd_disconnect.h"
 #include "test_form.h"
+#include "test_callbacks.h"
 
 int main(int argc, char* argv[]) {
     const UnitTest all_tests[] = {
@@ -602,6 +603,9 @@ int main(int argc, char* argv[]) {
 
         unit_test(prof_partial_occurrences_tests),
         unit_test(prof_whole_occurrences_tests),
+
+        unit_test(returns_no_commands),
+        unit_test(returns_commands),
     };
 
     return run_tests(all_tests);

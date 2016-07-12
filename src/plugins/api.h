@@ -50,15 +50,15 @@ gboolean api_current_win_is_console(void);
 char* api_get_current_nick(void);
 char** api_get_current_occupants(void);
 
-void api_register_command(const char *command_name, int min_args, int max_args,
+void api_register_command(const char *const plugin_name, const char *command_name, int min_args, int max_args,
     const char **synopsis, const char *description, const char *arguments[][2], const char **examples,
-    void *callback, void(*callback_func)(PluginCommand *command, gchar **args));
-void api_register_timed(void *callback, int interval_seconds,
-    void (*callback_func)(PluginTimedFunction *timed_function));
+    void *callback, void(*callback_func)(PluginCommand *command, gchar **args), void(*callback_destroy)(void *callback));
+void api_register_timed(const char *const plugin_name, void *callback, int interval_seconds,
+    void (*callback_func)(PluginTimedFunction *timed_function), void(*callback_destroy)(void *callback));
 
-void api_completer_add(const char *key, char **items);
-void api_completer_remove(const char *key, char **items);
-void api_completer_clear(const char *key);
+void api_completer_add(const char *const plugin_name, const char *key, char **items);
+void api_completer_remove(const char *const plugin_name, const char *key, char **items);
+void api_completer_clear(const char *const plugin_name, const char *key);
 
 void api_log_debug(const char *message);
 void api_log_info(const char *message);
@@ -67,10 +67,11 @@ void api_log_error(const char *message);
 
 int api_win_exists(const char *tag);
 void api_win_create(
+    const char *const plugin_name,
     const char *tag,
     void *callback,
-    void(*destroy)(void *callback),
-    void(*callback_func)(PluginWindowCallback *window_callback, char *tag, char *line));
+    void(*callback_func)(PluginWindowCallback *window_callback, char *tag, char *line),
+    void(*destroy)(void *callback));
 int api_win_focus(const char *tag);
 int api_win_show(const char *tag, const char *line);
 int api_win_show_themed(const char *tag, const char *const group, const char *const key, const char *const def, const char *line);

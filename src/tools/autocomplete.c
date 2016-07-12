@@ -118,6 +118,15 @@ autocomplete_add(Autocomplete ac, const char *item)
 }
 
 void
+autocomplete_add_all(Autocomplete ac, char **items)
+{
+    int i = 0;
+    for (i = 0; i < g_strv_length(items); i++) {
+        autocomplete_add(ac, items[i]);
+    }
+}
+
+void
 autocomplete_remove(Autocomplete ac, const char *const item)
 {
     if (ac) {
@@ -137,6 +146,15 @@ autocomplete_remove(Autocomplete ac, const char *const item)
     }
 
     return;
+}
+
+void
+autocomplete_remove_all(Autocomplete ac, char **items)
+{
+    int i = 0;
+    for (i = 0; i < g_strv_length(items); i++) {
+        autocomplete_remove(ac, items[i]);
+    }
 }
 
 GSList*

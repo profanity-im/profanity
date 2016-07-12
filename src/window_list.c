@@ -48,7 +48,7 @@
 #include "window_list.h"
 #include "plugins/plugins.h"
 #include "xmpp/xmpp.h"
-
+#include "config/preferences.h"
 
 static GHashTable *windows;
 static int current;
@@ -224,6 +224,22 @@ wins_get_plugin(const char *const tag)
 
     g_list_free(values);
     return NULL;
+}
+
+void
+wins_close_plugin(char *tag)
+{
+    ProfWin *toclose = wins_get_by_string(tag);
+    if (toclose == NULL) {
+        return;
+    }
+
+    int index = wins_get_num(toclose);
+    ui_close_win(index);
+
+    if (prefs_get_boolean(PREF_WINS_AUTO_TIDY)) {
+        wins_tidy();
+    }
 }
 
 GList*
@@ -564,6 +580,7 @@ wins_close_by_num(int i)
             case WIN_PLUGIN:
             {
                 ProfPluginWin *pluginwin = (ProfPluginWin*)window;
+                plugins_close_win(pluginwin->plugin_name, pluginwin->tag);
                 autocomplete_remove(wins_ac, pluginwin->tag);
                 autocomplete_remove(wins_close_ac, pluginwin->tag);
                 break;
@@ -665,12 +682,12 @@ wins_new_private(const char *const fulljid)
 }
 
 ProfWin *
-wins_new_plugin(const char * const tag)
+wins_new_plugin(const char *const plugin_name, const char * const tag)
 {
     GList *keys = g_hash_table_get_keys(windows);
     int result = get_next_available_win_num(keys);
     g_list_free(keys);
-    ProfWin *newwin = win_create_plugin(tag);
+    ProfWin *newwin = win_create_plugin(plugin_name, tag);
     g_hash_table_insert(windows, GINT_TO_POINTER(result), newwin);
     autocomplete_add(wins_ac, tag);
     autocomplete_add(wins_close_ac, tag);

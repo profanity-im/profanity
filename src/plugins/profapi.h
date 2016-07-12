@@ -35,6 +35,13 @@
 #ifndef PROF_API_H
 #define PROF_API_H
 
+#define prof_register_command(command_name, min_args, max_args, synopsis, description, arguments, examples, callback) _prof_register_command(__FILE__, command_name, min_args, max_args, synopsis, description, arguments, examples, callback)
+#define prof_register_timed(callback, interval_seconds) _prof_register_timed(__FILE__, callback, interval_seconds)
+#define prof_completer_add(key, items) _prof_completer_add(__FILE__, key, items)
+#define prof_completer_remove(key, items) _prof_completer_remove(__FILE__, key, items)
+#define prof_completer_clear(key) _prof_completer_clear(__FILE__, key)
+#define prof_win_create(win, input_handler) _prof_win_create(__FILE__, win, input_handler)
+
 typedef char* PROF_WIN_TAG;
 
 void (*prof_cons_alert)(void);
@@ -42,15 +49,15 @@ int (*prof_cons_show)(const char * const message);
 int (*prof_cons_show_themed)(const char *const group, const char *const item, const char *const def, const char *const message);
 int (*prof_cons_bad_cmd_usage)(const char *const cmd);
 
-void (*prof_register_command)(const char *command_name, int min_args, int max_args,
+void (*_prof_register_command)(const char *filename, const char *command_name, int min_args, int max_args,
     const char **synopsis, const char *description, const char *arguments[][2], const char **examples,
     void(*callback)(char **args));
 
-void (*prof_register_timed)(void(*callback)(void), int interval_seconds);
+void (*_prof_register_timed)(const char *filename, void(*callback)(void), int interval_seconds);
 
-void (*prof_completer_add)(const char *key, char **items);
-void (*prof_completer_remove)(const char *key, char **items);
-void (*prof_completer_clear)(const char *key);
+void (*_prof_completer_add)(const char *filename, const char *key, char **items);
+void (*_prof_completer_remove)(const char *filename, const char *key, char **items);
+void (*_prof_completer_clear)(const char *filename, const char *key);
 
 void (*prof_notify)(const char *message, int timeout_ms, const char *category);
 
@@ -67,8 +74,8 @@ void (*prof_log_info)(const char *message);
 void (*prof_log_warning)(const char *message);
 void (*prof_log_error)(const char *message);
 
+void (*_prof_win_create)(const char *filename, PROF_WIN_TAG win, void(*input_handler)(PROF_WIN_TAG win, char *line));
 int (*prof_win_exists)(PROF_WIN_TAG win);
-void (*prof_win_create)(PROF_WIN_TAG win, void(*input_handler)(PROF_WIN_TAG win, char *line));
 int (*prof_win_focus)(PROF_WIN_TAG win);
 int (*prof_win_show)(PROF_WIN_TAG win, char *line);
 int (*prof_win_show_themed)(PROF_WIN_TAG tag, char *group, char *key, char *def, char *line);

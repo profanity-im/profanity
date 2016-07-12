@@ -48,6 +48,7 @@ void cmd_ac_add_alias(ProfAlias *alias);
 void cmd_ac_add_alias_value(char *value);
 
 void cmd_ac_remove(const char *const value);
+void cmd_ac_remove_help(const char *const value);
 void cmd_ac_remove_alias_value(char *value);
 
 gboolean cmd_ac_exists(char *cmd);

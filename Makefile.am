@@ -123,6 +123,7 @@ unittest_sources = \
 	tests/unittests/test_cmd_join.c tests/unittests/test_cmd_join.h \
 	tests/unittests/test_cmd_roster.c tests/unittests/test_cmd_roster.h \
 	tests/unittests/test_cmd_disconnect.c tests/unittests/test_cmd_disconnect.h \
+	tests/unittests/test_callbacks.c tests/unittests/test_callbacks.h \
 	tests/unittests/unittests.c
 
 functionaltest_sources = \

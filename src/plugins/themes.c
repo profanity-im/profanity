@@ -61,7 +61,6 @@ plugin_themes_init(void)
     g_chmod(fileloc->str, S_IRUSR | S_IWUSR);
     g_free(g_data);
     g_string_free(fileloc, TRUE);
-
 }
 
 void

@@ -43,6 +43,7 @@
 #include "ui/ui.h"
 
 static PyThreadState *thread_state;
+static GHashTable *loaded_modules;
 
 void
 allow_python_threads()
@@ -56,9 +57,17 @@ disable_python_threads()
     PyEval_RestoreThread(thread_state);
 }
 
+static void
+_unref_module(PyObject *module)
+{
+    Py_XDECREF(module);
+}
+
 void
 python_env_init(void)
 {
+    loaded_modules = g_hash_table_new_full(g_str_hash, g_str_equal, free, (GDestroyNotify)_unref_module);
+
     Py_Initialize();
     PyEval_InitThreads();
     python_api_init();
@@ -80,8 +89,17 @@ ProfPlugin*
 python_plugin_create(const char *const filename)
 {
     disable_python_threads();
-    gchar *module_name = g_strndup(filename, strlen(filename) - 3);
-    PyObject *p_module = PyImport_ImportModule(module_name);
+
+    PyObject *p_module = g_hash_table_lookup(loaded_modules, filename);
+    if (p_module) {
+        p_module = PyImport_ReloadModule(p_module);
+    } else {
+        gchar *module_name = g_strndup(filename, strlen(filename) - 3);
+        p_module = PyImport_ImportModule(module_name);
+        g_hash_table_insert(loaded_modules, strdup(filename), p_module);
+        g_free(module_name);
+    }
+
     python_check_error();
     if (p_module) {
         ProfPlugin *plugin = malloc(sizeof(ProfPlugin));
@@ -91,6 +109,7 @@ python_plugin_create(const char *const filename)
         plugin->init_func = python_init_hook;
         plugin->on_start_func = python_on_start_hook;
         plugin->on_shutdown_func = python_on_shutdown_hook;
+        plugin->on_unload_func = python_on_unload_hook;
         plugin->on_connect_func = python_on_connect_hook;
         plugin->on_disconnect_func = python_on_disconnect_hook;
         plugin->pre_chat_message_display = python_pre_chat_message_display_hook;
@@ -116,12 +135,10 @@ python_plugin_create(const char *const filename)
         plugin->on_contact_presence = python_on_contact_presence_hook;
         plugin->on_chat_win_focus = python_on_chat_win_focus_hook;
         plugin->on_room_win_focus = python_on_room_win_focus_hook;
-        g_free(module_name);
 
         allow_python_threads();
         return plugin;
     } else {
-        g_free(module_name);
         allow_python_threads();
         return NULL;
     }
@@ -176,6 +193,25 @@ python_on_shutdown_hook(ProfPlugin *plugin)
     PyObject *p_module = plugin->module;
     if (PyObject_HasAttrString(p_module, "prof_on_shutdown")) {
         p_function = PyObject_GetAttrString(p_module, "prof_on_shutdown");
+        python_check_error();
+        if (p_function && PyCallable_Check(p_function)) {
+            PyObject_CallObject(p_function, NULL);
+            python_check_error();
+            Py_XDECREF(p_function);
+        }
+    }
+    allow_python_threads();
+}
+
+void
+python_on_unload_hook(ProfPlugin *plugin)
+{
+    disable_python_threads();
+    PyObject *p_function;
+
+    PyObject *p_module = plugin->module;
+    if (PyObject_HasAttrString(p_module, "prof_on_unload")) {
+        p_function = PyObject_GetAttrString(p_module, "prof_on_unload");
         python_check_error();
         if (p_function && PyCallable_Check(p_function)) {
             PyObject_CallObject(p_function, NULL);
@@ -889,8 +925,8 @@ void
 python_plugin_destroy(ProfPlugin *plugin)
 {
     disable_python_threads();
+    callbacks_remove(plugin->name);
     free(plugin->name);
-    Py_XDECREF(plugin->module);
     free(plugin);
     allow_python_threads();
 }
@@ -899,5 +935,6 @@ void
 python_shutdown(void)
 {
     disable_python_threads();
+    g_hash_table_destroy(loaded_modules);
     Py_Finalize();
 }

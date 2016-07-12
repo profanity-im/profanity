@@ -3809,7 +3809,7 @@ cmd_form(ProfWin *window, const char *const command, gchar **args)
         } else {
             mucconfwin_form_help(confwin);
 
-            const gchar **help_text = NULL;
+            gchar **help_text = NULL;
             Command *command = cmd_get("/form");
 
             if (command) {
@@ -6025,34 +6025,103 @@ cmd_xa(ProfWin *window, const char *const command, gchar **args)
 gboolean
 cmd_plugins(ProfWin *window, const char *const command, gchar **args)
 {
-    if (g_strcmp0(args[0], "load") == 0) {
+    if (g_strcmp0(args[0], "install") == 0) {
+        char *filename = args[1];
+        if (filename == NULL) {
+            cons_bad_cmd_usage(command);
+            return TRUE;
+        }
+
+        // expand ~ to $HOME
+        if (filename[0] == '~' && filename[1] == '/') {
+            if (asprintf(&filename, "%s/%s", getenv("HOME"), filename+2) == -1) {
+                return TRUE;
+            }
+        } else {
+            filename = strdup(filename);
+        }
+
+        if (access(filename, R_OK) != 0) {
+            cons_show("File not found: %s", filename);
+            free(filename);
+            return TRUE;
+        }
+
+        if (!is_regular_file(filename)) {
+            cons_show("Not a file: %s", filename);
+            free(filename);
+            return TRUE;
+        }
+
+        if (!g_str_has_suffix(filename, ".py") && !g_str_has_suffix(filename, ".so")) {
+            cons_show("Plugins must have one of the following extensions: '.py' '.so'");
+            free(filename);
+            return TRUE;
+        }
+
+        char *plugin_name = basename(filename);
+        gboolean result = plugins_install(plugin_name, filename);
+        if (result) {
+            cons_show("Plugin installed, use '/plugin load %s' to enable the plugin.", plugin_name);
+        } else {
+            cons_show("Failed to install plugin: %s", plugin_name);
+        }
+
+        return TRUE;
+    } else if (g_strcmp0(args[0], "load") == 0) {
         if (args[1] == NULL) {
             cons_bad_cmd_usage(command);
             return TRUE;
         }
         gboolean res = plugins_load(args[1]);
         if (res) {
-            prefs_add_plugin(args[1]);
             cons_show("Loaded plugin: %s", args[1]);
         } else {
             cons_show("Failed to load plugin: %s", args[1]);
         }
 
         return TRUE;
-    } else {
-        GSList *plugins = plugins_get_list();
-        GSList *curr = plugins;
-        if (curr == NULL) {
-            cons_show("No plugins installed.");
+    } else if (g_strcmp0(args[0], "unload") == 0) {
+        if (args[1] == NULL) {
+            cons_bad_cmd_usage(command);
+            return TRUE;
+        }
+        gboolean res = plugins_unload(args[1]);
+        if (res) {
+            cons_show("Unloaded plugin: %s", args[1]);
         } else {
-            cons_show("Installed plugins:");
-            while (curr) {
-                ProfPlugin *plugin = curr->data;
-                cons_show("  %s", plugin->name);
-                curr = g_slist_next(curr);
+            cons_show("Failed to unload plugin: %s", args[1]);
+        }
+
+        return TRUE;
+    } else if (g_strcmp0(args[0], "reload") == 0) {
+        if (args[1] == NULL) {
+            plugins_reload_all();
+            cons_show("Reloaded all plugins");
+        } else {
+            gboolean res = plugins_reload(args[1]);
+            if (res) {
+                cons_show("Reloaded plugin: %s", args[1]);
+            } else {
+                cons_show("Failed to reload plugin: %s", args[1]);
             }
         }
-        g_slist_free(curr);
+
+        return TRUE;
+    } else {
+        GList *plugins = plugins_loaded_list();
+        if (plugins == NULL) {
+            cons_show("No plugins installed.");
+            return TRUE;
+        }
+
+        GList *curr = plugins;
+        cons_show("Installed plugins:");
+        while (curr) {
+            cons_show("  %s", curr->data);
+            curr = g_list_next(curr);
+        }
+        g_list_free(plugins);
 
         return TRUE;
     }
