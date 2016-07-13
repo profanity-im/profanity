@@ -34,6 +34,8 @@
 
 #include <Python.h>
 
+#include "config.h"
+
 #include "config/preferences.h"
 #include "plugins/api.h"
 #include "plugins/callbacks.h"
@@ -277,6 +279,18 @@ python_pre_chat_message_display_hook(ProfPlugin *plugin, const char *const jid, 
             PyObject *result = PyObject_CallObject(p_function, p_args);
             python_check_error();
             Py_XDECREF(p_function);
+
+#ifdef PYTHON3
+            if (result != Py_None) {
+                char *result_str = strdup(PyBytes_AS_STRING(PyUnicode_AsUTF8String(result)));
+                Py_XDECREF(result);
+                allow_python_threads();
+                return result_str;
+            } else {
+                allow_python_threads();
+                return NULL;
+            }
+#else
             if (PyUnicode_Check(result)) {
                 char *result_str = strdup(PyString_AsString(PyUnicode_AsUTF8String(result)));
                 Py_XDECREF(result);
@@ -291,6 +305,7 @@ python_pre_chat_message_display_hook(ProfPlugin *plugin, const char *const jid, 
                 allow_python_threads();
                 return NULL;
             }
+#endif
         }
     }
 
@@ -334,6 +349,18 @@ python_pre_chat_message_send_hook(ProfPlugin *plugin, const char * const jid, co
             PyObject *result = PyObject_CallObject(p_function, p_args);
             python_check_error();
             Py_XDECREF(p_function);
+
+#ifdef PYTHON3
+            if (result != Py_None) {
+                char *result_str = strdup(PyBytes_AS_STRING(PyUnicode_AsUTF8String(result)));
+                Py_XDECREF(result);
+                allow_python_threads();
+                return result_str;
+            } else {
+                allow_python_threads();
+                return NULL;
+            }
+#else
             if (PyUnicode_Check(result)) {
                 char *result_str = strdup(PyString_AsString(PyUnicode_AsUTF8String(result)));
                 Py_XDECREF(result);
@@ -348,6 +375,7 @@ python_pre_chat_message_send_hook(ProfPlugin *plugin, const char * const jid, co
                 allow_python_threads();
                 return NULL;
             }
+#endif
         }
     }
 
@@ -391,6 +419,18 @@ python_pre_room_message_display_hook(ProfPlugin *plugin, const char * const room
             PyObject *result = PyObject_CallObject(p_function, p_args);
             python_check_error();
             Py_XDECREF(p_function);
+
+#ifdef PYTHON3
+            if (result != Py_None) {
+                char *result_str = strdup(PyBytes_AS_STRING(PyUnicode_AsUTF8String(result)));
+                Py_XDECREF(result);
+                allow_python_threads();
+                return result_str;
+            } else {
+                allow_python_threads();
+                return NULL;
+            }
+#else
             if (PyUnicode_Check(result)) {
                 char *result_str = strdup(PyString_AsString(PyUnicode_AsUTF8String(result)));
                 Py_XDECREF(result);
@@ -405,6 +445,7 @@ python_pre_room_message_display_hook(ProfPlugin *plugin, const char * const room
                 allow_python_threads();
                 return NULL;
             }
+#endif
         }
     }
 
@@ -449,6 +490,18 @@ python_pre_room_message_send_hook(ProfPlugin *plugin, const char *const room, co
             PyObject *result = PyObject_CallObject(p_function, p_args);
             python_check_error();
             Py_XDECREF(p_function);
+
+#ifdef PYTHON3
+            if (result != Py_None) {
+                char *result_str = strdup(PyBytes_AS_STRING(PyUnicode_AsUTF8String(result)));
+                Py_XDECREF(result);
+                allow_python_threads();
+                return result_str;
+            } else {
+                allow_python_threads();
+                return NULL;
+            }
+#else
             if (PyUnicode_Check(result)) {
                 char *result_str = strdup(PyString_AsString(PyUnicode_AsUTF8String(result)));
                 Py_XDECREF(result);
@@ -463,6 +516,7 @@ python_pre_room_message_send_hook(ProfPlugin *plugin, const char *const room, co
                 allow_python_threads();
                 return NULL;
             }
+#endif
         }
     }
 
@@ -529,6 +583,18 @@ python_pre_priv_message_display_hook(ProfPlugin *plugin, const char *const room,
             PyObject *result = PyObject_CallObject(p_function, p_args);
             python_check_error();
             Py_XDECREF(p_function);
+
+#ifdef PYTHON3
+            if (result != Py_None) {
+                char *result_str = strdup(PyBytes_AS_STRING(PyUnicode_AsUTF8String(result)));
+                Py_XDECREF(result);
+                allow_python_threads();
+                return result_str;
+            } else {
+                allow_python_threads();
+                return NULL;
+            }
+#else
             if (PyUnicode_Check(result)) {
                 char *result_str = strdup(PyString_AsString(PyUnicode_AsUTF8String(result)));
                 Py_XDECREF(result);
@@ -543,6 +609,7 @@ python_pre_priv_message_display_hook(ProfPlugin *plugin, const char *const room,
                 allow_python_threads();
                 return NULL;
             }
+#endif
         }
     }
 
@@ -588,6 +655,18 @@ python_pre_priv_message_send_hook(ProfPlugin *plugin, const char *const room, co
             PyObject *result = PyObject_CallObject(p_function, p_args);
             python_check_error();
             Py_XDECREF(p_function);
+
+#ifdef PYTHON3
+            if (result != Py_None) {
+                char *result_str = strdup(PyBytes_AS_STRING(PyUnicode_AsUTF8String(result)));
+                Py_XDECREF(result);
+                allow_python_threads();
+                return result_str;
+            } else {
+                allow_python_threads();
+                return NULL;
+            }
+#else
             if (PyUnicode_Check(result)) {
                 char *result_str = strdup(PyString_AsString(PyUnicode_AsUTF8String(result)));
                 Py_XDECREF(result);
@@ -602,6 +681,7 @@ python_pre_priv_message_send_hook(ProfPlugin *plugin, const char *const room, co
                 allow_python_threads();
                 return NULL;
             }
+#endif
         }
     }
 
@@ -646,6 +726,18 @@ python_on_message_stanza_send_hook(ProfPlugin *plugin, const char *const text)
             PyObject *result = PyObject_CallObject(p_function, p_args);
             python_check_error();
             Py_XDECREF(p_function);
+
+#ifdef PYTHON3
+            if (result != Py_None) {
+                char *result_str = strdup(PyBytes_AS_STRING(PyUnicode_AsUTF8String(result)));
+                Py_XDECREF(result);
+                allow_python_threads();
+                return result_str;
+            } else {
+                allow_python_threads();
+                return NULL;
+            }
+#else
             if (PyUnicode_Check(result)) {
                 char *result_str = strdup(PyString_AsString(PyUnicode_AsUTF8String(result)));
                 Py_XDECREF(result);
@@ -660,6 +752,7 @@ python_on_message_stanza_send_hook(ProfPlugin *plugin, const char *const text)
                 allow_python_threads();
                 return NULL;
             }
+#endif
         }
     }
 
@@ -711,6 +804,18 @@ python_on_presence_stanza_send_hook(ProfPlugin *plugin, const char *const text)
             PyObject *result = PyObject_CallObject(p_function, p_args);
             python_check_error();
             Py_XDECREF(p_function);
+
+#ifdef PYTHON3
+            if (result != Py_None) {
+                char *result_str = strdup(PyBytes_AS_STRING(PyUnicode_AsUTF8String(result)));
+                Py_XDECREF(result);
+                allow_python_threads();
+                return result_str;
+            } else {
+                allow_python_threads();
+                return NULL;
+            }
+#else
             if (PyUnicode_Check(result)) {
                 char *result_str = strdup(PyString_AsString(PyUnicode_AsUTF8String(result)));
                 Py_XDECREF(result);
@@ -725,6 +830,7 @@ python_on_presence_stanza_send_hook(ProfPlugin *plugin, const char *const text)
                 allow_python_threads();
                 return NULL;
             }
+#endif
         }
     }
 
@@ -776,6 +882,18 @@ python_on_iq_stanza_send_hook(ProfPlugin *plugin, const char *const text)
             PyObject *result = PyObject_CallObject(p_function, p_args);
             python_check_error();
             Py_XDECREF(p_function);
+
+#ifdef PYTHON3
+            if (result != Py_None) {
+                char *result_str = strdup(PyBytes_AS_STRING(PyUnicode_AsUTF8String(result)));
+                Py_XDECREF(result);
+                allow_python_threads();
+                return result_str;
+            } else {
+                allow_python_threads();
+                return NULL;
+            }
+#else
             if (PyUnicode_Check(result)) {
                 char *result_str = strdup(PyString_AsString(PyUnicode_AsUTF8String(result)));
                 Py_XDECREF(result);
@@ -790,6 +908,7 @@ python_on_iq_stanza_send_hook(ProfPlugin *plugin, const char *const text)
                 allow_python_threads();
                 return NULL;
             }
+#endif
         }
     }
 
