@@ -6062,7 +6062,7 @@ cmd_plugins(ProfWin *window, const char *const command, gchar **args)
         char *plugin_name = basename(filename);
         gboolean result = plugins_install(plugin_name, filename);
         if (result) {
-            cons_show("Plugin installed, use '/plugin load %s' to enable the plugin.", plugin_name);
+            cons_show("Plugin installed: %s", plugin_name);
         } else {
             cons_show("Failed to install plugin: %s", plugin_name);
         }
