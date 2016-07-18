@@ -87,8 +87,8 @@ caps_init(void)
     g_key_file_load_from_file(cache, cache_loc, G_KEY_FILE_KEEP_COMMENTS,
         NULL);
 
-    jid_to_ver = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, g_free);
-    jid_to_caps = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, (GDestroyNotify)caps_destroy);
+    jid_to_ver = g_hash_table_new_full(g_str_hash, g_str_equal, free, free);
+    jid_to_caps = g_hash_table_new_full(g_str_hash, g_str_equal, free, (GDestroyNotify)caps_destroy);
 
     my_sha1 = NULL;
 }
