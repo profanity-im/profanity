@@ -96,7 +96,6 @@ elif test "x$enable_python_plugins" = xyes; then
         fi
     fi
     AS_IF([test "x$PLATFORM" = xosx], [rm -f Python.framework])
-    AS_IF([test "x$PYTHON_VERSION" = x3], [AC_DEFINE([PYTHON3], [1], [Python 3 build])])
 else
     AM_CONDITIONAL([BUILD_PYTHON_API], [false])
 fi

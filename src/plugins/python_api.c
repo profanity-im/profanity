@@ -130,7 +130,7 @@ python_api_register_command(PyObject *self, PyObject *args)
         Py_ssize_t i = 0;
         for (i = 0; i < len; i++) {
             PyObject *item = PyList_GetItem(synopsis, i);
-#ifdef PYTHON3
+#if PY_MAJOR_VERSION >= 3
             char *c_item = PyBytes_AS_STRING(PyUnicode_AsUTF8String(item));
 #else
             char *c_item = PyString_AsString(item);
@@ -149,14 +149,14 @@ python_api_register_command(PyObject *self, PyObject *args)
                 return Py_BuildValue("");
             }
             PyObject *arg = PyList_GetItem(item, 0);
-#ifdef PYTHON3
+#if PY_MAJOR_VERSION >= 3
             char *c_arg = PyBytes_AS_STRING(PyUnicode_AsUTF8String(arg));
 #else
             char *c_arg = PyString_AsString(arg);
 #endif
             PyObject *desc = PyList_GetItem(item, 1);
 
-#ifdef PYTHON3
+#if PY_MAJOR_VERSION >= 3
             char *c_desc = PyBytes_AS_STRING(PyUnicode_AsUTF8String(desc));
 #else
             char *c_desc = PyString_AsString(desc);
@@ -173,7 +173,7 @@ python_api_register_command(PyObject *self, PyObject *args)
         i = 0;
         for (i = 0; i < len; i++) {
             PyObject *item = PyList_GetItem(examples, i);
-#ifdef PYTHON3
+#if PY_MAJOR_VERSION >= 3
             char *c_item = PyBytes_AS_STRING(PyUnicode_AsUTF8String(item));
 #else
             char *c_item = PyString_AsString(item);
@@ -236,7 +236,7 @@ python_api_completer_add(PyObject *self, PyObject *args)
     Py_ssize_t i = 0;
     for (i = 0; i < len; i++) {
         PyObject *item = PyList_GetItem(items, i);
-#ifdef PYTHON3
+#if PY_MAJOR_VERSION >= 3
         char *c_item = PyBytes_AS_STRING(PyUnicode_AsUTF8String(item));
 #else
         char *c_item = PyString_AsString(item);
@@ -273,7 +273,7 @@ python_api_completer_remove(PyObject *self, PyObject *args)
     Py_ssize_t i = 0;
     for (i = 0; i < len; i++) {
         PyObject *item = PyList_GetItem(items, i);
-#ifdef PYTHON3
+#if PY_MAJOR_VERSION >= 3
         char *c_item = PyBytes_AS_STRING(PyUnicode_AsUTF8String(item));
 #else
         char *c_item = PyString_AsString(item);
@@ -809,7 +809,7 @@ python_window_callback(PluginWindowCallback *window_callback, char *tag, char *l
 
 static PyMethodDef apiMethods[] = {
     { "cons_alert", python_api_cons_alert, METH_NOARGS, "Highlight the console window in the status bar." },
-    { "cons_show", (PyCFunction)python_api_cons_show, METH_VARARGS, "Print a line to the console." },
+    { "cons_show", python_api_cons_show, METH_VARARGS, "Print a line to the console." },
     { "cons_show_themed", python_api_cons_show_themed, METH_VARARGS, "Print a themed line to the console" },
     { "cons_bad_cmd_usage", python_api_cons_bad_cmd_usage, METH_VARARGS, "Show invalid command message in console" },
     { "register_command", python_api_register_command, METH_VARARGS, "Register a command." },
@@ -845,22 +845,28 @@ static PyMethodDef apiMethods[] = {
     { NULL, NULL, 0, NULL }
 };
 
-#ifdef PYTHON3
+#if PY_MAJOR_VERSION >= 3
 static struct PyModuleDef profModule =
 {
     PyModuleDef_HEAD_INIT,
-    "prof", /* name of module */
-    "",          /* module documentation, may be NULL */
-    -1,          /* size of per-interpreter state of the module, or -1 if the module keeps state in global variables. */
+    "prof",
+    "",
+    -1,
     apiMethods
 };
 #endif
 
-void
+PyMODINIT_FUNC
 python_api_init(void)
 {
-#ifdef PYTHON3
-    PyModule_Create(&profModule);
+#if PY_MAJOR_VERSION >= 3
+    PyObject *result = PyModule_Create(&profModule);
+    if (!result) {
+        log_debug("Failed to initialise prof module");
+    } else {
+        log_debug("Initialised prof module");
+    }
+    return result;
 #else
     Py_InitModule("prof", apiMethods);
 #endif
@@ -871,7 +877,7 @@ _python_plugin_name(void)
 {
     PyThreadState *ts = PyThreadState_Get();
     PyFrameObject *frame = ts->frame;
-#ifdef PYTHON3
+#if PY_MAJOR_VERSION >= 3
     char const *filename = PyBytes_AS_STRING(PyUnicode_AsUTF8String(frame->f_code->co_filename));
 #else
     char const* filename = PyString_AsString(frame->f_code->co_filename);

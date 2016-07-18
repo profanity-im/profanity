@@ -68,22 +68,34 @@ _unref_module(PyObject *module)
 void
 python_env_init(void)
 {
+
     loaded_modules = g_hash_table_new_full(g_str_hash, g_str_equal, free, (GDestroyNotify)_unref_module);
 
+#if PY_MAJOR_VERSION >= 3
+    PyImport_AppendInittab("prof", python_api_init);
+    Py_Initialize();
+    PyEval_InitThreads();
+#else
     Py_Initialize();
     PyEval_InitThreads();
     python_api_init();
+#endif
 
+    const char *ver = Py_GetVersion();
+    cons_show("PYTHON: %s", ver);
+
+    gchar *plugins_dir = plugins_get_dir();
     GString *path = g_string_new("import sys\n");
     g_string_append(path, "sys.path.append(\"");
-    gchar *plugins_dir = plugins_get_dir();
     g_string_append(path, plugins_dir);
-    g_free(plugins_dir);
     g_string_append(path, "/\")\n");
 
     PyRun_SimpleString(path->str);
+    python_check_error();
 
     g_string_free(path, TRUE);
+    g_free(plugins_dir);
+
     allow_python_threads();
 }
 
@@ -98,7 +110,9 @@ python_plugin_create(const char *const filename)
     } else {
         gchar *module_name = g_strndup(filename, strlen(filename) - 3);
         p_module = PyImport_ImportModule(module_name);
-        g_hash_table_insert(loaded_modules, strdup(filename), p_module);
+        if (p_module) {
+            g_hash_table_insert(loaded_modules, strdup(filename), p_module);
+        }
         g_free(module_name);
     }
 
@@ -280,7 +294,7 @@ python_pre_chat_message_display_hook(ProfPlugin *plugin, const char *const jid, 
             python_check_error();
             Py_XDECREF(p_function);
 
-#ifdef PYTHON3
+#if PY_MAJOR_VERSION >= 3
             if (result != Py_None) {
                 char *result_str = strdup(PyBytes_AS_STRING(PyUnicode_AsUTF8String(result)));
                 Py_XDECREF(result);
@@ -350,7 +364,7 @@ python_pre_chat_message_send_hook(ProfPlugin *plugin, const char * const jid, co
             python_check_error();
             Py_XDECREF(p_function);
 
-#ifdef PYTHON3
+#if PY_MAJOR_VERSION >= 3
             if (result != Py_None) {
                 char *result_str = strdup(PyBytes_AS_STRING(PyUnicode_AsUTF8String(result)));
                 Py_XDECREF(result);
@@ -420,7 +434,7 @@ python_pre_room_message_display_hook(ProfPlugin *plugin, const char * const room
             python_check_error();
             Py_XDECREF(p_function);
 
-#ifdef PYTHON3
+#if PY_MAJOR_VERSION >= 3
             if (result != Py_None) {
                 char *result_str = strdup(PyBytes_AS_STRING(PyUnicode_AsUTF8String(result)));
                 Py_XDECREF(result);
@@ -491,7 +505,7 @@ python_pre_room_message_send_hook(ProfPlugin *plugin, const char *const room, co
             python_check_error();
             Py_XDECREF(p_function);
 
-#ifdef PYTHON3
+#if PY_MAJOR_VERSION >= 3
             if (result != Py_None) {
                 char *result_str = strdup(PyBytes_AS_STRING(PyUnicode_AsUTF8String(result)));
                 Py_XDECREF(result);
@@ -584,7 +598,7 @@ python_pre_priv_message_display_hook(ProfPlugin *plugin, const char *const room,
             python_check_error();
             Py_XDECREF(p_function);
 
-#ifdef PYTHON3
+#if PY_MAJOR_VERSION >= 3
             if (result != Py_None) {
                 char *result_str = strdup(PyBytes_AS_STRING(PyUnicode_AsUTF8String(result)));
                 Py_XDECREF(result);
@@ -656,7 +670,7 @@ python_pre_priv_message_send_hook(ProfPlugin *plugin, const char *const room, co
             python_check_error();
             Py_XDECREF(p_function);
 
-#ifdef PYTHON3
+#if PY_MAJOR_VERSION >= 3
             if (result != Py_None) {
                 char *result_str = strdup(PyBytes_AS_STRING(PyUnicode_AsUTF8String(result)));
                 Py_XDECREF(result);
@@ -727,7 +741,7 @@ python_on_message_stanza_send_hook(ProfPlugin *plugin, const char *const text)
             python_check_error();
             Py_XDECREF(p_function);
 
-#ifdef PYTHON3
+#if PY_MAJOR_VERSION >= 3
             if (result != Py_None) {
                 char *result_str = strdup(PyBytes_AS_STRING(PyUnicode_AsUTF8String(result)));
                 Py_XDECREF(result);
@@ -805,7 +819,7 @@ python_on_presence_stanza_send_hook(ProfPlugin *plugin, const char *const text)
             python_check_error();
             Py_XDECREF(p_function);
 
-#ifdef PYTHON3
+#if PY_MAJOR_VERSION >= 3
             if (result != Py_None) {
                 char *result_str = strdup(PyBytes_AS_STRING(PyUnicode_AsUTF8String(result)));
                 Py_XDECREF(result);
@@ -883,7 +897,7 @@ python_on_iq_stanza_send_hook(ProfPlugin *plugin, const char *const text)
             python_check_error();
             Py_XDECREF(p_function);
 
-#ifdef PYTHON3
+#if PY_MAJOR_VERSION >= 3
             if (result != Py_None) {
                 char *result_str = strdup(PyBytes_AS_STRING(PyUnicode_AsUTF8String(result)));
                 Py_XDECREF(result);
@@ -1036,6 +1050,7 @@ python_check_error(void)
 {
     if (PyErr_Occurred()) {
         PyErr_Print();
+        PyRun_SimpleString("import sys\nsys.stdout.flush()");
         PyErr_Clear();
     }
 }
