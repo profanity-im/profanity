@@ -6059,13 +6059,14 @@ cmd_plugins(ProfWin *window, const char *const command, gchar **args)
             return TRUE;
         }
 
-        char *plugin_name = basename(filename);
+        gchar *plugin_name = g_path_get_basename(filename);
         gboolean result = plugins_install(plugin_name, filename);
         if (result) {
-            cons_show("Plugin installed, use '/plugin load %s' to enable the plugin.", plugin_name);
+            cons_show("Plugin installed: %s", plugin_name);
         } else {
             cons_show("Failed to install plugin: %s", plugin_name);
         }
+        g_free(plugin_name);
 
         return TRUE;
     } else if (g_strcmp0(args[0], "load") == 0) {
