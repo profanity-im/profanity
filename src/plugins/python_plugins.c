@@ -68,18 +68,9 @@ _unref_module(PyObject *module)
 void
 python_env_init(void)
 {
-
     loaded_modules = g_hash_table_new_full(g_str_hash, g_str_equal, free, (GDestroyNotify)_unref_module);
 
-#if PY_MAJOR_VERSION >= 3
-    PyImport_AppendInittab("prof", python_api_init);
-    Py_Initialize();
-    PyEval_InitThreads();
-#else
-    Py_Initialize();
-    PyEval_InitThreads();
-    python_api_init();
-#endif
+    python_init_prof();
 
     const char *ver = Py_GetVersion();
     cons_show("PYTHON: %s", ver);

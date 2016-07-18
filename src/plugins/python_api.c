@@ -872,6 +872,20 @@ python_api_init(void)
 #endif
 }
 
+void
+python_init_prof(void)
+{
+#if PY_MAJOR_VERSION >= 3
+    PyImport_AppendInittab("prof", python_api_init);
+    Py_Initialize();
+    PyEval_InitThreads();
+#else
+    Py_Initialize();
+    PyEval_InitThreads();
+    python_api_init();
+#endif
+}
+
 static char*
 _python_plugin_name(void)
 {

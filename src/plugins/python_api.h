@@ -35,10 +35,8 @@
 #ifndef PYTHON_API_H
 #define PYTHON_API_H
 
-#include <Python.h>
-
 void python_env_init(void);
-PyMODINIT_FUNC python_api_init(void);
+void python_init_prof(void);
 void python_shutdown(void);
 
 void python_command_callback(PluginCommand *command, gchar **args);
