@@ -43,4 +43,6 @@ void python_command_callback(PluginCommand *command, gchar **args);
 void python_timed_callback(PluginTimedFunction *timed_function);
 void python_window_callback(PluginWindowCallback *window_callback, char *tag, char *line);
 
+char* python_object_to_string(void *obj);
+
 #endif

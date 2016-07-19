@@ -56,7 +56,6 @@ python_api_cons_alert(PyObject *self, PyObject *args)
     disable_python_threads();
 
     return Py_BuildValue("");
-
 }
 
 static PyObject*
@@ -130,11 +129,7 @@ python_api_register_command(PyObject *self, PyObject *args)
         Py_ssize_t i = 0;
         for (i = 0; i < len; i++) {
             PyObject *item = PyList_GetItem(synopsis, i);
-#if PY_MAJOR_VERSION >= 3
-            char *c_item = PyBytes_AS_STRING(PyUnicode_AsUTF8String(item));
-#else
-            char *c_item = PyString_AsString(item);
-#endif
+            char *c_item = python_object_to_string(item);
             c_synopsis[i] = c_item;
         }
         c_synopsis[len] = NULL;
@@ -149,19 +144,11 @@ python_api_register_command(PyObject *self, PyObject *args)
                 return Py_BuildValue("");
             }
             PyObject *arg = PyList_GetItem(item, 0);
-#if PY_MAJOR_VERSION >= 3
-            char *c_arg = PyBytes_AS_STRING(PyUnicode_AsUTF8String(arg));
-#else
-            char *c_arg = PyString_AsString(arg);
-#endif
-            PyObject *desc = PyList_GetItem(item, 1);
-
-#if PY_MAJOR_VERSION >= 3
-            char *c_desc = PyBytes_AS_STRING(PyUnicode_AsUTF8String(desc));
-#else
-            char *c_desc = PyString_AsString(desc);
-#endif
+            char *c_arg = python_object_to_string(arg);
             c_arguments[i][0] = c_arg;
+
+            PyObject *desc = PyList_GetItem(item, 1);
+            char *c_desc = python_object_to_string(desc);
             c_arguments[i][1] = c_desc;
         }
 
@@ -173,11 +160,7 @@ python_api_register_command(PyObject *self, PyObject *args)
         i = 0;
         for (i = 0; i < len; i++) {
             PyObject *item = PyList_GetItem(examples, i);
-#if PY_MAJOR_VERSION >= 3
-            char *c_item = PyBytes_AS_STRING(PyUnicode_AsUTF8String(item));
-#else
-            char *c_item = PyString_AsString(item);
-#endif
+            char *c_item = python_object_to_string(item);
             c_examples[i] = c_item;
         }
         c_examples[len] = NULL;
@@ -236,11 +219,7 @@ python_api_completer_add(PyObject *self, PyObject *args)
     Py_ssize_t i = 0;
     for (i = 0; i < len; i++) {
         PyObject *item = PyList_GetItem(items, i);
-#if PY_MAJOR_VERSION >= 3
-        char *c_item = PyBytes_AS_STRING(PyUnicode_AsUTF8String(item));
-#else
-        char *c_item = PyString_AsString(item);
-#endif
+        char *c_item = python_object_to_string(item);
         c_items[i] = c_item;
     }
     c_items[len] = NULL;
@@ -273,11 +252,7 @@ python_api_completer_remove(PyObject *self, PyObject *args)
     Py_ssize_t i = 0;
     for (i = 0; i < len; i++) {
         PyObject *item = PyList_GetItem(items, i);
-#if PY_MAJOR_VERSION >= 3
-        char *c_item = PyBytes_AS_STRING(PyUnicode_AsUTF8String(item));
-#else
-        char *c_item = PyString_AsString(item);
-#endif
+        char *c_item = python_object_to_string(item);
         c_items[i] = c_item;
     }
     c_items[len] = NULL;
@@ -891,14 +866,20 @@ _python_plugin_name(void)
 {
     PyThreadState *ts = PyThreadState_Get();
     PyFrameObject *frame = ts->frame;
-#if PY_MAJOR_VERSION >= 3
-    char const *filename = PyBytes_AS_STRING(PyUnicode_AsUTF8String(frame->f_code->co_filename));
-#else
-    char const* filename = PyString_AsString(frame->f_code->co_filename);
-#endif
+    char const* filename = python_object_to_string(frame->f_code->co_filename);
     gchar **split = g_strsplit(filename, "/", 0);
     char *plugin_name = strdup(split[g_strv_length(split)-1]);
     g_strfreev(split);
 
     return plugin_name;
+}
+
+char*
+python_object_to_string(void *obj)
+{
+#if PY_MAJOR_VERSION >= 3
+    return PyBytes_AS_STRING(PyUnicode_AsUTF8String(obj));
+#else
+    return PyString_AsString(obj);
+#endif
 }

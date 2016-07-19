@@ -1,4 +1,4 @@
 #!/bin/sh
 
-./configure PYTHON_VERSION=3 CFLAGS='-g3 -O0' CXXFLAGS='-g3 -O0' --enable-python-plugins $@
-#./configure CFLAGS='-g3 -O0' CXXFLAGS='-g3 -O0' --enable-python-plugins $@
+#./configure PYTHON_VERSION=3 CFLAGS='-g3 -O0' CXXFLAGS='-g3 -O0' --enable-python-plugins $@
+./configure CFLAGS='-g3 -O0' CXXFLAGS='-g3 -O0' --enable-python-plugins $@
