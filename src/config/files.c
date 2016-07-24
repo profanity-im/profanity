@@ -45,8 +45,8 @@
 void
 files_create_directories(void)
 {
-    gchar *xdg_config = xdg_get_config_home();
-    gchar *xdg_data = xdg_get_data_home();
+    gchar *xdg_config = files_get_xdg_config_home();
+    gchar *xdg_data = files_get_xdg_data_home();
 
     GString *themes_dir = g_string_new(xdg_config);
     g_string_append(themes_dir, "/profanity/themes");
@@ -86,7 +86,28 @@ files_create_directories(void)
 }
 
 gchar*
-xdg_get_config_home(void)
+files_get_inputrc_path(void)
+{
+    gchar *xdg_config = files_get_xdg_config_home();
+    GString *inputrc_file = g_string_new(xdg_config);
+    g_free(xdg_config);
+
+    g_string_append(inputrc_file, "/profanity/inputrc");
+
+    if (g_file_test(inputrc_file->str, G_FILE_TEST_IS_REGULAR)) {
+        gchar *result = strdup(inputrc_file->str);
+        g_string_free(inputrc_file, TRUE);
+
+        return result;
+    }
+
+    g_string_free(inputrc_file, TRUE);
+
+    return NULL;
+}
+
+gchar*
+files_get_xdg_config_home(void)
 {
     gchar *xdg_config_home = getenv("XDG_CONFIG_HOME");
     if (xdg_config_home)
@@ -105,7 +126,7 @@ xdg_get_config_home(void)
 }
 
 gchar*
-xdg_get_data_home(void)
+files_get_xdg_data_home(void)
 {
     gchar *xdg_data_home = getenv("XDG_DATA_HOME");
     if (xdg_data_home)

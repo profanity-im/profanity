@@ -49,7 +49,7 @@ static void _save_settings(void);
 void
 plugin_settings_init(void)
 {
-    gchar *xdg_data = xdg_get_data_home();
+    gchar *xdg_data = files_get_xdg_data_home();
     GString *fileloc = g_string_new(xdg_data);
     g_string_append(fileloc, "/profanity/plugin_settings");
     g_free(xdg_data);
@@ -135,7 +135,7 @@ _save_settings(void)
     gsize g_data_size;
     gchar *g_data = g_key_file_to_data(settings, &g_data_size, NULL);
 
-    gchar *xdg_data = xdg_get_data_home();
+    gchar *xdg_data = files_get_xdg_data_home();
     GString *fileloc = g_string_new(xdg_data);
     g_free(xdg_data);
 

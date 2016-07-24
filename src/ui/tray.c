@@ -79,7 +79,7 @@ _get_icons(void)
 
 #endif /* ICONS_PATH */
 
-    gchar *xdg_config = xdg_get_config_home();
+    gchar *xdg_config = files_get_xdg_config_home();
     icons_dir = g_string_new(xdg_config);
     g_free(xdg_config);
     g_string_append(icons_dir, "/profanity/icons");

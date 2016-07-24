@@ -44,7 +44,7 @@ static GKeyFile *themes;
 void
 plugin_themes_init(void)
 {
-    gchar *xdg_data = xdg_get_data_home();
+    gchar *xdg_data = files_get_xdg_data_home();
     GString *fileloc = g_string_new(xdg_data);
     g_string_append(fileloc, "/profanity/plugin_themes");
     g_free(xdg_data);

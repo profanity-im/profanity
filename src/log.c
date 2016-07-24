@@ -639,7 +639,7 @@ _get_groupchat_log_filename(const char *const room, const char *const login, GDa
 static gchar*
 _get_chatlog_dir(void)
 {
-    gchar *xdg_data = xdg_get_data_home();
+    gchar *xdg_data = files_get_xdg_data_home();
     GString *chatlogs_dir = g_string_new(xdg_data);
     g_string_append(chatlogs_dir, "/profanity/chatlogs");
     gchar *result = strdup(chatlogs_dir->str);
@@ -652,7 +652,7 @@ _get_chatlog_dir(void)
 static gchar*
 _get_main_log_file(void)
 {
-    gchar *xdg_data = xdg_get_data_home();
+    gchar *xdg_data = files_get_xdg_data_home();
     GString *logfile = g_string_new(xdg_data);
     g_string_append(logfile, "/profanity/logs/profanity");
     if (!prefs_get_boolean(PREF_LOG_SHARED)) {

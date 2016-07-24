@@ -57,6 +57,7 @@
 #include "log.h"
 #include "common.h"
 #include "command/cmd_ac.h"
+#include "config/files.h"
 #include "config/accounts.h"
 #include "config/preferences.h"
 #include "config/theme.h"
@@ -427,7 +428,7 @@ _inp_rl_startup_hook(void)
     rl_variable_bind("disable-completion", "on");
 
     // check for and load ~/.config/profanity/inputrc
-    char *inputrc = prefs_get_inputrc();
+    char *inputrc = files_get_inputrc_path();
     if (inputrc) {
         rl_read_init_file(inputrc);
         free(inputrc);

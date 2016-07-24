@@ -432,7 +432,7 @@ tlscerts_close(void)
 static gchar*
 _get_tlscerts_file(void)
 {
-    gchar *xdg_data = xdg_get_data_home();
+    gchar *xdg_data = files_get_xdg_data_home();
     GString *tlscerts_file = g_string_new(xdg_data);
     g_string_append(tlscerts_file, "/profanity/tlscerts");
     gchar *result = strdup(tlscerts_file->str);

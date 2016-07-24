@@ -1121,27 +1121,6 @@ prefs_get_aliases(void)
     }
 }
 
-gchar*
-prefs_get_inputrc(void)
-{
-    gchar *xdg_config = xdg_get_config_home();
-    GString *inputrc_file = g_string_new(xdg_config);
-    g_free(xdg_config);
-
-    g_string_append(inputrc_file, "/profanity/inputrc");
-
-    if (g_file_test(inputrc_file->str, G_FILE_TEST_IS_REGULAR)) {
-        gchar *result = strdup(inputrc_file->str);
-        g_string_free(inputrc_file, TRUE);
-
-        return result;
-    }
-
-    g_string_free(inputrc_file, TRUE);
-
-    return NULL;
-}
-
 void
 _free_alias(ProfAlias *alias)
 {
@@ -1161,7 +1140,7 @@ _save_prefs(void)
 {
     gsize g_data_size;
     gchar *g_prefs_data = g_key_file_to_data(prefs, &g_data_size, NULL);
-    gchar *xdg_config = xdg_get_config_home();
+    gchar *xdg_config = files_get_xdg_config_home();
     GString *base_str = g_string_new(xdg_config);
     g_string_append(base_str, "/profanity/");
     gchar *true_loc = get_file_or_linked(prefs_loc, base_str->str);
@@ -1176,7 +1155,7 @@ _save_prefs(void)
 static gchar*
 _get_preferences_file(void)
 {
-    gchar *xdg_config = xdg_get_config_home();
+    gchar *xdg_config = files_get_xdg_config_home();
     GString *prefs_file = g_string_new(xdg_config);
     g_string_append(prefs_file, "/profanity/profrc");
     gchar *result = strdup(prefs_file->str);

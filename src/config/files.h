@@ -37,8 +37,11 @@
 
 #include <glib.h>
 
-gchar* xdg_get_config_home(void);
-gchar* xdg_get_data_home(void);
 void files_create_directories(void);
+
+gchar* files_get_inputrc_path(void);
+
+gchar* files_get_xdg_config_home(void);
+gchar* files_get_xdg_data_home(void);
 
 #endif

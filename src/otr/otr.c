@@ -126,7 +126,7 @@ cb_write_fingerprints(void *opdata)
 {
     gcry_error_t err = 0;
 
-    gchar *data_home = xdg_get_data_home();
+    gchar *data_home = files_get_xdg_data_home();
     GString *basedir = g_string_new(data_home);
     free(data_home);
 
@@ -215,7 +215,7 @@ otr_on_connect(ProfAccount *account)
     jid = strdup(account->jid);
     log_info("Loading OTR key for %s", jid);
 
-    gchar *data_home = xdg_get_data_home();
+    gchar *data_home = files_get_xdg_data_home();
     GString *basedir = g_string_new(data_home);
     free(data_home);
 
@@ -393,7 +393,7 @@ otr_keygen(ProfAccount *account)
     jid = strdup(account->jid);
     log_info("Generating OTR key for %s", jid);
 
-    gchar *data_home = xdg_get_data_home();
+    gchar *data_home = files_get_xdg_data_home();
     GString *basedir = g_string_new(data_home);
     free(data_home);
 

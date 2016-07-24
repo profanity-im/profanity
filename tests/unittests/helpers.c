@@ -15,7 +15,7 @@
 void create_config_dir(void **state)
 {
     setenv("XDG_CONFIG_HOME", "./tests/files/xdg_config_home", 1);
-    gchar *xdg_config = xdg_get_config_home();
+    gchar *xdg_config = files_get_xdg_config_home();
 
     GString *profanity_dir = g_string_new(xdg_config);
     g_string_append(profanity_dir, "/profanity");
@@ -37,7 +37,7 @@ void remove_config_dir(void **state)
 void create_data_dir(void **state)
 {
     setenv("XDG_DATA_HOME", "./tests/files/xdg_data_home", 1);
-    gchar *xdg_data = xdg_get_data_home();
+    gchar *xdg_data = files_get_xdg_data_home();
 
     GString *profanity_dir = g_string_new(xdg_data);
     g_string_append(profanity_dir, "/profanity");

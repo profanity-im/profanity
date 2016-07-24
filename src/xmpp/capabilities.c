@@ -701,7 +701,7 @@ caps_destroy(Capabilities *caps)
 static gchar*
 _get_cache_file(void)
 {
-    gchar *xdg_data = xdg_get_data_home();
+    gchar *xdg_data = files_get_xdg_data_home();
     GString *cache_file = g_string_new(xdg_data);
     g_string_append(cache_file, "/profanity/capscache");
     gchar *result = strdup(cache_file->str);

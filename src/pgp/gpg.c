@@ -157,7 +157,7 @@ p_gpg_close(void)
 void
 p_gpg_on_connect(const char *const barejid)
 {
-    gchar *data_home = xdg_get_data_home();
+    gchar *data_home = files_get_xdg_data_home();
     GString *pubsfile = g_string_new(data_home);
     free(data_home);
 

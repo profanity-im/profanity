@@ -834,7 +834,7 @@ plugins_shutdown(void)
 char*
 plugins_get_dir(void)
 {
-    gchar *xdg_data = xdg_get_data_home();
+    gchar *xdg_data = files_get_xdg_data_home();
     GString *plugins_dir = g_string_new(xdg_data);
     g_string_append(plugins_dir, "/profanity/plugins");
     char *result = strdup(plugins_dir->str);

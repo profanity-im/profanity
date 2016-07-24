@@ -858,7 +858,7 @@ _save_accounts(void)
 {
     gsize g_data_size;
     gchar *g_accounts_data = g_key_file_to_data(accounts, &g_data_size, NULL);
-    gchar *xdg_data = xdg_get_data_home();
+    gchar *xdg_data = files_get_xdg_data_home();
     GString *base_str = g_string_new(xdg_data);
     g_string_append(base_str, "/profanity/");
     gchar *true_loc = get_file_or_linked(accounts_loc, base_str->str);
@@ -873,7 +873,7 @@ _save_accounts(void)
 static gchar*
 _get_accounts_file(void)
 {
-    gchar *xdg_data = xdg_get_data_home();
+    gchar *xdg_data = files_get_xdg_data_home();
     GString *logfile = g_string_new(xdg_data);
     g_string_append(logfile, "/profanity/accounts");
     gchar *result = strdup(logfile->str);

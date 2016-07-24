@@ -51,7 +51,7 @@
 void
 scripts_init(void)
 {
-    gchar *data_home = xdg_get_data_home();
+    gchar *data_home = files_get_xdg_data_home();
     GString *scriptsdir = g_string_new(data_home);
     free(data_home);
 
@@ -75,7 +75,7 @@ scripts_init(void)
 GSList*
 scripts_list(void)
 {
-    gchar *data_home = xdg_get_data_home();
+    gchar *data_home = files_get_xdg_data_home();
     GString *scriptsdir = g_string_new(data_home);
     free(data_home);
     g_string_append(scriptsdir, "/profanity/scripts");
@@ -99,7 +99,7 @@ scripts_list(void)
 GSList*
 scripts_read(const char *const script)
 {
-    gchar *data_home = xdg_get_data_home();
+    gchar *data_home = files_get_xdg_data_home();
     GString *scriptpath = g_string_new(data_home);
     free(data_home);
 
@@ -137,7 +137,7 @@ scripts_read(const char *const script)
 gboolean
 scripts_exec(const char *const script)
 {
-    gchar *data_home = xdg_get_data_home();
+    gchar *data_home = files_get_xdg_data_home();
     GString *scriptpath = g_string_new(data_home);
     free(data_home);
 
