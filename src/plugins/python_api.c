@@ -34,10 +34,10 @@
 
 #include "config.h"
 
-#include <stdlib.h>
-
 #include <Python.h>
 #include <frameobject.h>
+
+#include <stdlib.h>
 
 #include <glib.h>
 
