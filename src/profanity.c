@@ -51,6 +51,7 @@
 #include "profanity.h"
 #include "common.h"
 #include "log.h"
+#include "config/files.h"
 #include "config/tlscerts.h"
 #include "config/accounts.h"
 #include "config/preferences.h"
@@ -81,7 +82,6 @@
 
 static void _init(char *log_level);
 static void _shutdown(void);
-static void _create_directories(void);
 static void _connect_default(const char * const account);
 
 static gboolean cont = TRUE;
@@ -164,7 +164,7 @@ _init(char *log_level)
         exit(1);
     }
     pthread_mutex_lock(&lock);
-    _create_directories();
+    files_create_directories();
     log_level_t prof_log_level = log_level_from_string(log_level);
     prefs_load();
     log_init(prof_log_level);
@@ -243,47 +243,4 @@ _shutdown(void)
     cmd_uninit();
     ui_close();
     prefs_close();
-}
-
-static void
-_create_directories(void)
-{
-    gchar *xdg_config = xdg_get_config_home();
-    gchar *xdg_data = xdg_get_data_home();
-
-    GString *themes_dir = g_string_new(xdg_config);
-    g_string_append(themes_dir, "/profanity/themes");
-    GString *icons_dir = g_string_new(xdg_config);
-    g_string_append(icons_dir, "/profanity/icons");
-    GString *chatlogs_dir = g_string_new(xdg_data);
-    g_string_append(chatlogs_dir, "/profanity/chatlogs");
-    GString *logs_dir = g_string_new(xdg_data);
-    g_string_append(logs_dir, "/profanity/logs");
-    GString *plugins_dir = g_string_new(xdg_data);
-    g_string_append(plugins_dir, "/profanity/plugins");
-
-    if (!mkdir_recursive(themes_dir->str)) {
-        log_error("Error while creating directory %s", themes_dir->str);
-    }
-    if (!mkdir_recursive(icons_dir->str)) {
-        log_error("Error while creating directory %s", icons_dir->str);
-    }
-    if (!mkdir_recursive(chatlogs_dir->str)) {
-        log_error("Error while creating directory %s", chatlogs_dir->str);
-    }
-    if (!mkdir_recursive(logs_dir->str)) {
-        log_error("Error while creating directory %s", logs_dir->str);
-    }
-    if (!mkdir_recursive(plugins_dir->str)) {
-        log_error("Error while creating directory %s", plugins_dir->str);
-    }
-
-    g_string_free(themes_dir, TRUE);
-    g_string_free(icons_dir, TRUE);
-    g_string_free(chatlogs_dir, TRUE);
-    g_string_free(logs_dir, TRUE);
-    g_string_free(plugins_dir, TRUE);
-
-    g_free(xdg_config);
-    g_free(xdg_data);
 }

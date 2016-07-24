@@ -110,8 +110,6 @@ int utf8_display_len(const char *const str);
 char* prof_getline(FILE *stream);
 char* release_get_latest(void);
 gboolean release_is_new(char *found_version);
-gchar* xdg_get_config_home(void);
-gchar* xdg_get_data_home(void);
 
 gboolean valid_resource_presence_string(const char *const str);
 const char* string_from_resource_presence(resource_presence_t presence);

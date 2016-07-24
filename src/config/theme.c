@@ -47,8 +47,9 @@
 
 #include "common.h"
 #include "log.h"
-#include "theme.h"
-#include "preferences.h"
+#include "config/files.h"
+#include "config/theme.h"
+#include "config/preferences.h"
 
 static GString *theme_loc;
 static GKeyFile *theme;

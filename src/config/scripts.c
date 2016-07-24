@@ -42,6 +42,7 @@
 
 #include "common.h"
 #include "log.h"
+#include "config/files.h"
 #include "command/cmd_defs.h"
 #include "ui/ui.h"
 #include "ui/window_list.h"

@@ -45,6 +45,7 @@
 #include "log.h"
 #include "preferences.h"
 #include "tools/autocomplete.h"
+#include "config/files.h"
 #include "config/conflists.h"
 
 // preference groups refer to the sections in .profrc, for example [ui]

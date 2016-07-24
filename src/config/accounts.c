@@ -42,6 +42,7 @@
 
 #include "common.h"
 #include "log.h"
+#include "config/files.h"
 #include "config/account.h"
 #include "config/conflists.h"
 #include "tools/autocomplete.h"

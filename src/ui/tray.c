@@ -41,6 +41,7 @@
 
 #include "log.h"
 #include "config/preferences.h"
+#include "config/files.h"
 #include "ui/tray.h"
 #include "ui/window_list.h"
 

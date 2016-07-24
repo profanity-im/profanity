@@ -47,6 +47,7 @@
 #include "log.h"
 #include "common.h"
 #include "pgp/gpg.h"
+#include "config/files.h"
 #include "tools/autocomplete.h"
 #include "ui/ui.h"
 

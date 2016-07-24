@@ -55,6 +55,7 @@
 #include "common.h"
 #include "log.h"
 #include "plugins/plugins.h"
+#include "config/files.h"
 #include "xmpp/xmpp.h"
 #include "xmpp/stanza.h"
 #include "xmpp/form.h"

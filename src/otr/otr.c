@@ -40,6 +40,7 @@
 
 #include "log.h"
 #include "config/preferences.h"
+#include "config/files.h"
 #include "otr/otr.h"
 #include "otr/otrlib.h"
 #include "ui/ui.h"

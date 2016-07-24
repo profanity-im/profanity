@@ -40,6 +40,7 @@
 
 #include "common.h"
 #include "config/theme.h"
+#include "config/files.h"
 
 static GKeyFile *settings;
 

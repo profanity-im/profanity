@@ -38,6 +38,7 @@
 #include "log.h"
 #include "config.h"
 #include "common.h"
+#include "config/files.h"
 #include "config/preferences.h"
 #include "plugins/callbacks.h"
 #include "plugins/autocompleters.h"

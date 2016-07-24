@@ -40,6 +40,7 @@
 
 #include "log.h"
 #include "common.h"
+#include "config/files.h"
 #include "config/tlscerts.h"
 #include "tools/autocomplete.h"
 
