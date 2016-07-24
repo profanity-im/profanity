@@ -34,6 +34,8 @@
 
 #include "config.h"
 
+#include <stdlib.h>
+
 #include <Python.h>
 #include <frameobject.h>
 
@@ -70,6 +72,7 @@ python_api_cons_show(PyObject *self, PyObject *args)
 
     allow_python_threads();
     api_cons_show(message_str);
+    free(message_str);
     disable_python_threads();
 
     return Py_BuildValue("");
@@ -93,6 +96,10 @@ python_api_cons_show_themed(PyObject *self, PyObject *args)
 
     allow_python_threads();
     api_cons_show_themed(group_str, key_str, def_str, message_str);
+    free(group_str);
+    free(key_str);
+    free(def_str);
+    free(message_str);
     disable_python_threads();
 
     return Py_BuildValue("");
@@ -110,6 +117,7 @@ python_api_cons_bad_cmd_usage(PyObject *self, PyObject *args)
 
     allow_python_threads();
     api_cons_bad_cmd_usage(cmd_str);
+    free(cmd_str);
     disable_python_threads();
 
     return Py_BuildValue("");
@@ -183,6 +191,8 @@ python_api_register_command(PyObject *self, PyObject *args)
         allow_python_threads();
         api_register_command(plugin_name, command_name_str, min_args, max_args, c_synopsis,
             description_str, c_arguments, c_examples, p_callback, python_command_callback, NULL);
+        free(command_name_str);
+        free(description_str);
         disable_python_threads();
     }
 
@@ -243,6 +253,7 @@ python_api_completer_add(PyObject *self, PyObject *args)
 
     allow_python_threads();
     api_completer_add(plugin_name, key_str, c_items);
+    free(key_str);
     disable_python_threads();
 
     free(plugin_name);
@@ -278,6 +289,7 @@ python_api_completer_remove(PyObject *self, PyObject *args)
 
     allow_python_threads();
     api_completer_remove(plugin_name, key_str, c_items);
+    free(key_str);
     disable_python_threads();
 
     free(plugin_name);
@@ -301,6 +313,7 @@ python_api_completer_clear(PyObject *self, PyObject *args)
 
     allow_python_threads();
     api_completer_clear(plugin_name, key_str);
+    free(key_str);
     disable_python_threads();
 
     free(plugin_name);
@@ -324,6 +337,8 @@ python_api_notify(PyObject *self, PyObject *args)
 
     allow_python_threads();
     api_notify(message_str, category_str, timeout_ms);
+    free(message_str);
+    free(category_str);
     disable_python_threads();
 
     return Py_BuildValue("");
@@ -341,6 +356,7 @@ python_api_send_line(PyObject *self, PyObject *args)
 
     allow_python_threads();
     api_send_line(line_str);
+    free(line_str);
     disable_python_threads();
 
     return Py_BuildValue("");
@@ -429,6 +445,7 @@ python_api_log_debug(PyObject *self, PyObject *args)
 
     allow_python_threads();
     api_log_debug(message_str);
+    free(message_str);
     disable_python_threads();
 
     return Py_BuildValue("");
@@ -446,6 +463,7 @@ python_api_log_info(PyObject *self, PyObject *args)
 
     allow_python_threads();
     api_log_info(message_str);
+    free(message_str);
     disable_python_threads();
 
     return Py_BuildValue("");
@@ -463,6 +481,7 @@ python_api_log_warning(PyObject *self, PyObject *args)
 
     allow_python_threads();
     api_log_warning(message_str);
+    free(message_str);
     disable_python_threads();
 
     return Py_BuildValue("");
@@ -480,6 +499,7 @@ python_api_log_error(PyObject *self, PyObject *args)
 
     allow_python_threads();
     api_log_error(message_str);
+    free(message_str);
     disable_python_threads();
 
     return Py_BuildValue("");
@@ -497,6 +517,7 @@ python_api_win_exists(PyObject *self, PyObject *args)
 
     allow_python_threads();
     gboolean exists = api_win_exists(tag_str);
+    free(tag_str);
     disable_python_threads();
 
     if (exists) {
@@ -524,6 +545,7 @@ python_api_win_create(PyObject *self, PyObject *args)
     if (p_callback && PyCallable_Check(p_callback)) {
         allow_python_threads();
         api_win_create(plugin_name, tag_str, p_callback, python_window_callback, NULL);
+        free(tag_str);
         disable_python_threads();
     }
 
@@ -545,6 +567,7 @@ python_api_win_focus(PyObject *self, PyObject *args)
 
     allow_python_threads();
     api_win_focus(tag_str);
+    free(tag_str);
     disable_python_threads();
 
     return Py_BuildValue("");
@@ -565,6 +588,8 @@ python_api_win_show(PyObject *self, PyObject *args)
 
     allow_python_threads();
     api_win_show(tag_str, line_str);
+    free(tag_str);
+    free(line_str);
     disable_python_threads();
 
     return Py_BuildValue("");
@@ -592,6 +617,11 @@ python_api_win_show_themed(PyObject *self, PyObject *args)
 
     allow_python_threads();
     api_win_show_themed(tag_str, group_str, key_str, def_str, line_str);
+    free(tag_str);
+    free(group_str);
+    free(key_str);
+    free(def_str);
+    free(line_str);
     disable_python_threads();
 
     return Py_BuildValue("");
@@ -609,6 +639,7 @@ python_api_send_stanza(PyObject *self, PyObject *args)
 
     allow_python_threads();
     int res = api_send_stanza(stanza_str);
+    free(stanza_str);
     disable_python_threads();
     if (res) {
         return Py_BuildValue("O", Py_True);
@@ -634,6 +665,8 @@ python_api_settings_get_boolean(PyObject *self, PyObject *args)
 
     allow_python_threads();
     int res = api_settings_get_boolean(group_str, key_str, def);
+    free(group_str);
+    free(key_str);
     disable_python_threads();
 
     if (res) {
@@ -660,6 +693,8 @@ python_api_settings_set_boolean(PyObject *self, PyObject *args)
 
     allow_python_threads();
     api_settings_set_boolean(group_str, key_str, val);
+    free(group_str);
+    free(key_str);
     disable_python_threads();
 
     return Py_BuildValue("");
@@ -682,6 +717,9 @@ python_api_settings_get_string(PyObject *self, PyObject *args)
 
     allow_python_threads();
     char *res = api_settings_get_string(group_str, key_str, def_str);
+    free(group_str);
+    free(key_str);
+    free(def_str);
     disable_python_threads();
 
     if (res) {
@@ -708,6 +746,9 @@ python_api_settings_set_string(PyObject *self, PyObject *args)
 
     allow_python_threads();
     api_settings_set_string(group_str, key_str, val_str);
+    free(group_str);
+    free(key_str);
+    free(val_str);
     disable_python_threads();
 
     return Py_BuildValue("");
@@ -729,6 +770,8 @@ python_api_settings_get_int(PyObject *self, PyObject *args)
 
     allow_python_threads();
     int res = api_settings_get_int(group_str, key_str, def);
+    free(group_str);
+    free(key_str);
     disable_python_threads();
 
     return Py_BuildValue("i", res);
@@ -750,6 +793,8 @@ python_api_settings_set_int(PyObject *self, PyObject *args)
 
     allow_python_threads();
     api_settings_set_int(group_str, key_str, val);
+    free(group_str);
+    free(key_str);
     disable_python_threads();
 
     return Py_BuildValue("");
@@ -772,6 +817,9 @@ python_api_incoming_message(PyObject *self, PyObject *args)
 
     allow_python_threads();
     api_incoming_message(barejid_str, resource_str, message_str);
+    free(barejid_str);
+    free(resource_str);
+    free(message_str);
     disable_python_threads();
 
     return Py_BuildValue("");
@@ -789,6 +837,7 @@ python_api_disco_add_feature(PyObject *self, PyObject *args)
 
     allow_python_threads();
     api_disco_add_feature(feature_str);
+    free(feature_str);
     disable_python_threads();
 
     return Py_BuildValue("");
@@ -966,13 +1015,19 @@ python_str_or_unicode_to_string(void *obj)
 
 #if PY_MAJOR_VERSION >= 3
     if (PyUnicode_Check(pyobj)) {
-        return strdup(PyBytes_AS_STRING(PyUnicode_AsUTF8String(pyobj)));
+        PyObject *utf8_str = PyUnicode_AsUTF8String(pyobj);
+        char *result = strdup(PyBytes_AS_STRING(utf8_str));
+        Py_XDECREF(utf8_str);
+        return result;
     } else {
         return strdup(PyBytes_AS_STRING(pyobj));
     }
 #else
     if (PyUnicode_Check(pyobj)) {
-        return strdup(PyString_AsString(PyUnicode_AsUTF8String(pyobj)));
+        PyObject *utf8_str = PyUnicode_AsUTF8String(pyobj);
+        char *result = strdup(PyString_AsString(utf8_str));
+        Py_XDECREF(utf8_str);
+        return result;
     } else {
         return strdup(PyString_AsString(pyobj));
     }
