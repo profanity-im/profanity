@@ -42,7 +42,7 @@
 #include "window_list.h"
 #include "xmpp/xmpp.h"
 #include "roster_list.h"
-#include "chat_session.h"
+#include "xmpp/chat_session.h"
 #include "plugins/plugins.h"
 #ifdef HAVE_LIBOTR
 #include "otr/otr.h"

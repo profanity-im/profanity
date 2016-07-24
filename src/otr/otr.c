@@ -47,7 +47,7 @@
 #include "ui/ui.h"
 #include "xmpp/xmpp.h"
 #include "config/preferences.h"
-#include "chat_session.h"
+#include "xmpp/chat_session.h"
 
 #define PRESENCE_ONLINE 1
 #define PRESENCE_OFFLINE 0

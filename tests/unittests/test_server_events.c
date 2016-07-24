@@ -8,7 +8,7 @@
 
 #include "event/server_events.h"
 #include "roster_list.h"
-#include "chat_session.h"
+#include "xmpp/chat_session.h"
 #include "config/preferences.h"
 #include "ui/ui.h"
 #include "ui/stub_ui.h"

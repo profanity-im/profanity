@@ -38,7 +38,7 @@
 #include <stdlib.h>
 #include <assert.h>
 
-#include "chat_session.h"
+#include "xmpp/chat_session.h"
 #include "window_list.h"
 #include "roster_list.h"
 #include "log.h"

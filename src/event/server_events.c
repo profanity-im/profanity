@@ -38,7 +38,7 @@
 #include <stdlib.h>
 #include <assert.h>
 
-#include "chat_session.h"
+#include "xmpp/chat_session.h"
 #include "log.h"
 #include "muc.h"
 #include "config/preferences.h"

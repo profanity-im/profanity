@@ -49,7 +49,7 @@
 #include <langinfo.h>
 #include <ctype.h>
 
-#include "chat_session.h"
+#include "xmpp/chat_session.h"
 #include "command/cmd_funcs.h"
 #include "command/cmd_defs.h"
 #include "command/cmd_ac.h"

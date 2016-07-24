@@ -8,7 +8,7 @@
 #include <sys/stat.h>
 
 #include "config.h"
-#include "chat_session.h"
+#include "xmpp/chat_session.h"
 #include "helpers.h"
 #include "test_autocomplete.h"
 #include "test_chat_session.h"

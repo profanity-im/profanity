@@ -38,7 +38,7 @@
 #include <glib.h>
 
 #include "chat_state.h"
-#include "chat_session.h"
+#include "xmpp/chat_session.h"
 #include "window_list.h"
 #include "ui/win_types.h"
 #include "xmpp/xmpp.h"

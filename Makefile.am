@@ -1,8 +1,8 @@
 core_sources = \
 	src/contact.c src/contact.h src/log.c src/common.c \
 	src/log.h src/profanity.c src/common.h \
-	src/profanity.h src/chat_session.c \
-	src/chat_session.h src/muc.c src/muc.h src/jid.h src/jid.c \
+	src/profanity.h src/xmpp/chat_session.c \
+	src/xmpp/chat_session.h src/muc.c src/muc.h src/jid.h src/jid.c \
 	src/chat_state.h src/chat_state.c \
 	src/resource.c src/resource.h \
 	src/roster_list.c src/roster_list.h \
@@ -59,8 +59,8 @@ core_sources = \
 unittest_sources = \
 	src/contact.c src/contact.h src/common.c \
 	src/log.h src/profanity.c src/common.h \
-	src/profanity.h src/chat_session.c \
-	src/chat_session.h src/muc.c src/muc.h src/jid.h src/jid.c \
+	src/profanity.h src/xmpp/chat_session.c \
+	src/xmpp/chat_session.h src/muc.c src/muc.h src/jid.h src/jid.c \
 	src/resource.c src/resource.h \
 	src/chat_state.h src/chat_state.c \
 	src/roster_list.c src/roster_list.h \

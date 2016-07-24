@@ -54,7 +54,7 @@
 #include <ncurses.h>
 #endif
 
-#include "chat_session.h"
+#include "xmpp/chat_session.h"
 #include "command/cmd_defs.h"
 #include "command/cmd_ac.h"
 #include "common.h"

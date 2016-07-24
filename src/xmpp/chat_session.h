@@ -32,8 +32,8 @@
  *
  */
 
-#ifndef CHAT_SESSION_H
-#define CHAT_SESSION_H
+#ifndef XMPP_CHAT_SESSION_H
+#define XMPP_CHAT_SESSION_H
 
 #include <glib.h>
 

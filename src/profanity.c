@@ -48,7 +48,7 @@
 #include <glib.h>
 
 #include "profanity.h"
-#include "chat_session.h"
+#include "xmpp/chat_session.h"
 #include "chat_state.h"
 #include "config/accounts.h"
 #include "config/preferences.h"
