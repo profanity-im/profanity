@@ -37,7 +37,7 @@
 
 #include <glib.h>
 
-#include "resource.h"
+#include "xmpp/resource.h"
 #include "xmpp/contact.h"
 
 typedef enum {

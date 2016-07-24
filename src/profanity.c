@@ -68,7 +68,7 @@
 #ifdef HAVE_LIBGPGME
 #include "pgp/gpg.h"
 #endif
-#include "resource.h"
+#include "xmpp/resource.h"
 #include "xmpp/xmpp.h"
 #include "ui/ui.h"
 #include "window_list.h"

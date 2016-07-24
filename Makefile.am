@@ -4,7 +4,7 @@ core_sources = \
 	src/profanity.h src/xmpp/chat_session.c \
 	src/xmpp/chat_session.h src/xmpp/muc.c src/xmpp/muc.h src/xmpp/jid.h src/xmpp/jid.c \
 	src/xmpp/chat_state.h src/xmpp/chat_state.c \
-	src/resource.c src/resource.h \
+	src/xmpp/resource.c src/xmpp/resource.h \
 	src/roster_list.c src/roster_list.h \
 	src/xmpp/xmpp.h src/xmpp/capabilities.c src/xmpp/session.c \
 	src/xmpp/connection.h src/xmpp/connection.c \
@@ -61,7 +61,7 @@ unittest_sources = \
 	src/log.h src/profanity.c src/common.h \
 	src/profanity.h src/xmpp/chat_session.c \
 	src/xmpp/chat_session.h src/xmpp/muc.c src/xmpp/muc.h src/xmpp/jid.h src/xmpp/jid.c \
-	src/resource.c src/resource.h \
+	src/xmpp/resource.c src/xmpp/resource.h \
 	src/xmpp/chat_state.h src/xmpp/chat_state.c \
 	src/roster_list.c src/roster_list.h \
 	src/xmpp/xmpp.h src/xmpp/form.c \

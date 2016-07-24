@@ -32,8 +32,8 @@
  *
  */
 
-#ifndef RESOURCE_H
-#define RESOURCE_H
+#ifndef XMPP_RESOURCE_H
+#define XMPP_RESOURCE_H
 
 #include "common.h"
 

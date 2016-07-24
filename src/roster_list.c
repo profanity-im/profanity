@@ -40,7 +40,7 @@
 #include <assert.h>
 
 #include "roster_list.h"
-#include "resource.h"
+#include "xmpp/resource.h"
 #include "xmpp/contact.h"
 #include "xmpp/jid.h"
 #include "tools/autocomplete.h"
