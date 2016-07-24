@@ -36,11 +36,13 @@
 #define PYTHON_API_H
 
 void python_env_init(void);
-void python_api_init(void);
+void python_init_prof(void);
 void python_shutdown(void);
 
 void python_command_callback(PluginCommand *command, gchar **args);
 void python_timed_callback(PluginTimedFunction *timed_function);
 void python_window_callback(PluginWindowCallback *window_callback, char *tag, char *line);
+
+char* python_str_or_unicode_to_string(void *obj);
 
 #endif

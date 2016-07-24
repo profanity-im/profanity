@@ -84,6 +84,9 @@
 #include "tray.h"
 #endif
 #include "tools/http_upload.h"
+#ifdef HAVE_PYTHON
+#include "plugins/python_plugins.h"
+#endif
 
 static void _update_presence(const resource_presence_t presence,
     const char *const show, gchar **args);
@@ -6109,6 +6112,16 @@ cmd_plugins(ProfWin *window, const char *const command, gchar **args)
         }
 
         return TRUE;
+    } else if (g_strcmp0(args[0], "python_version") == 0) {
+#ifdef HAVE_PYTHON
+        const char *version = python_get_version();
+        cons_show("Python version:");
+        cons_show("%s", version);
+#else
+        cons_show("This build does not support pytyon plugins.");
+#endif
+        return TRUE;
+
     } else {
         GList *plugins = plugins_loaded_list();
         if (plugins == NULL) {

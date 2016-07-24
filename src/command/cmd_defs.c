@@ -1982,14 +1982,16 @@ static struct cmd_t command_defs[] =
             "/plugins install <path>",
             "/plugins unload <plugin>",
             "/plugins load <plugin>",
-            "/plugins reload [<plugin>]")
+            "/plugins reload [<plugin>]",
+            "/plugins python_version")
         CMD_DESC(
             "Manage plugins. Passing no arguments lists currently loaded plugins.")
         CMD_ARGS(
             { "install <file>",      "Install file to plugins directory, and load or reload the plugin." },
             { "load <plugin>",       "Load a plugin that already exists in the plugin directory." },
             { "unload <plugin>",     "Unload a loaded plugin." },
-            { "reload [<plugin>]",   "Reload a plugin, passing no argument will reload all plugins" })
+            { "reload [<plugin>]",   "Reload a plugin, passing no argument will reload all plugins." },
+            { "python_version",      "Show the Python interpreter version." })
         CMD_EXAMPLES(
             "/plugin install /home/steveharris/Downloads/metal.py",
             "/plugin load browser.py",
