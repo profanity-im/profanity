@@ -129,7 +129,7 @@ prof_run(char *log_level, char *account_name)
 #endif
         plugins_run_timed();
         notify_remind();
-        session_process_events(10);
+        session_process_events();
         iq_autoping_check();
         ui_update();
 #ifdef HAVE_GTK

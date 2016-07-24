@@ -91,6 +91,12 @@ connection_init(void)
 }
 
 void
+connection_check_events(void)
+{
+    xmpp_run_once(conn.xmpp_ctx, 10);
+}
+
+void
 connection_shutdown(void)
 {
     connection_clear_data();
@@ -191,7 +197,7 @@ connection_disconnect(void)
     xmpp_disconnect(conn.xmpp_conn);
 
     while (conn.conn_status == JABBER_DISCONNECTING) {
-        session_process_events(10);
+        session_process_events();
     }
 
     if (conn.xmpp_conn) {

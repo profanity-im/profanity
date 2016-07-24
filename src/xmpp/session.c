@@ -38,13 +38,6 @@
 #include <string.h>
 #include <stdlib.h>
 
-#ifdef HAVE_LIBMESODE
-#include <mesode.h>
-#endif
-#ifdef HAVE_LIBSTROPHE
-#include <strophe.h>
-#endif
-
 #include "chat_session.h"
 #include "common.h"
 #include "config/preferences.h"
@@ -235,7 +228,7 @@ session_shutdown(void)
 }
 
 void
-session_process_events(int millis)
+session_process_events(void)
 {
     int reconnect_sec;
 
@@ -245,7 +238,7 @@ session_process_events(int millis)
     case JABBER_CONNECTED:
     case JABBER_CONNECTING:
     case JABBER_DISCONNECTING:
-        xmpp_run_once(connection_get_ctx(), millis);
+        connection_check_events();
         break;
     case JABBER_DISCONNECTED:
         reconnect_sec = prefs_get_reconnect();
