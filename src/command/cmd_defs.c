@@ -70,7 +70,7 @@
 #include "tools/tinyurl.h"
 #include "xmpp/xmpp.h"
 #include "ui/ui.h"
-#include "window_list.h"
+#include "ui/window_list.h"
 
 #ifdef HAVE_LIBOTR
 #include "otr/otr.h"

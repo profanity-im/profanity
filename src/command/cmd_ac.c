@@ -49,7 +49,7 @@
 #include "xmpp/muc.h"
 #include "xmpp/xmpp.h"
 #include "xmpp/roster_list.h"
-#include "window_list.h"
+#include "ui/window_list.h"
 #include "plugins/plugins.h"
 #include "command/cmd_ac.h"
 

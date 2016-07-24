@@ -41,7 +41,7 @@
 #include "plugins/plugins.h"
 #include "tools/autocomplete.h"
 #include "tools/parser.h"
-#include "window_list.h"
+#include "ui/window_list.h"
 
 #include "ui/ui.h"
 

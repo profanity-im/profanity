@@ -71,7 +71,7 @@
 #include "xmpp/resource.h"
 #include "xmpp/xmpp.h"
 #include "ui/ui.h"
-#include "window_list.h"
+#include "ui/window_list.h"
 #include "event/client_events.h"
 #include "config/tlscerts.h"
 

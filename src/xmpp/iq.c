@@ -54,7 +54,7 @@
 #include "muc.h"
 #include "profanity.h"
 #include "ui/ui.h"
-#include "window_list.h"
+#include "ui/window_list.h"
 #include "config/preferences.h"
 #include "event/server_events.h"
 #include "xmpp/capabilities.h"

@@ -50,7 +50,7 @@
 #include "ui/ui.h"
 #include "config/theme.h"
 #include "command/cmd_defs.h"
-#include "window_list.h"
+#include "ui/window_list.h"
 #include "common.h"
 
 void

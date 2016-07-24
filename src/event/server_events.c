@@ -46,7 +46,7 @@
 #include "config/scripts.h"
 #include "xmpp/roster_list.h"
 #include "plugins/plugins.h"
-#include "window_list.h"
+#include "ui/window_list.h"
 #include "config/tlscerts.h"
 #include "profanity.h"
 #include "event/client_events.h"

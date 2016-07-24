@@ -39,7 +39,7 @@
 
 #include "log.h"
 #include "ui/ui.h"
-#include "window_list.h"
+#include "ui/window_list.h"
 #include "xmpp/xmpp.h"
 #include "xmpp/roster_list.h"
 #include "xmpp/chat_session.h"

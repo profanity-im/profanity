@@ -22,7 +22,7 @@ core_sources = \
 	src/ui/titlebar.h src/ui/statusbar.h src/ui/inputwin.h \
 	src/ui/console.c src/ui/notifier.c \
 	src/ui/win_types.h \
-	src/window_list.c src/window_list.h \
+	src/ui/window_list.c src/ui/window_list.h \
 	src/ui/rosterwin.c src/ui/occupantswin.c \
 	src/ui/buffer.c src/ui/buffer.h \
 	src/ui/chatwin.c \
@@ -90,7 +90,7 @@ unittest_sources = \
 	src/plugins/themes.c src/plugins/themes.h \
 	src/plugins/settings.c src/plugins/settings.h \
 	src/plugins/disco.c src/plugins/disco.h \
-	src/window_list.c src/window_list.h \
+	src/ui/window_list.c src/ui/window_list.h \
 	src/event/server_events.c src/event/server_events.h \
 	src/event/client_events.c src/event/client_events.h \
 	src/ui/tray.h src/ui/tray.c \

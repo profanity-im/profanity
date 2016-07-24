@@ -37,7 +37,7 @@
 #include <libotr/message.h>
 
 #include "ui/ui.h"
-#include "window_list.h"
+#include "ui/window_list.h"
 #include "log.h"
 #include "otr/otr.h"
 #include "otr/otrlib.h"

@@ -39,7 +39,7 @@
 
 #include "chat_state.h"
 #include "xmpp/chat_session.h"
-#include "window_list.h"
+#include "ui/window_list.h"
 #include "ui/win_types.h"
 #include "xmpp/xmpp.h"
 #include "config/preferences.h"
