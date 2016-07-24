@@ -42,4 +42,7 @@ void session_login_failed(void);
 void session_lost_connection(void);
 void session_autoping_fail(void);
 
+void session_init_activity(void);
+void session_check_autoaway(void);
+
 #endif

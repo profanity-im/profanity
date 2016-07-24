@@ -7,6 +7,8 @@
 
 // connection functions
 void session_init(void) {}
+void session_init_activity(void) {}
+void session_check_autoaway(void) {}
 
 jabber_conn_status_t session_connect_with_details(const char * const jid,
     const char * const passwd, const char * const altdomain, const int port, const char *const tls_policy)
