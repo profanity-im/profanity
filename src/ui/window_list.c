@@ -61,8 +61,7 @@ static int _wins_get_next_available_num(GList *used);
 void
 wins_init(void)
 {
-    windows = g_hash_table_new_full(g_direct_hash, g_direct_equal, NULL,
-        (GDestroyNotify)win_free);
+    windows = g_hash_table_new_full(g_direct_hash, g_direct_equal, NULL, (GDestroyNotify)win_free);
 
     ProfWin *console = win_create_console();
     g_hash_table_insert(windows, GINT_TO_POINTER(1), console);
@@ -1000,6 +999,7 @@ wins_tidy(void)
         GList *curr = keys;
         while (curr) {
             ProfWin *window = g_hash_table_lookup(windows, curr->data);
+            g_hash_table_steal(windows, curr->data);
             if (num == 10) {
                 g_hash_table_insert(new_windows, GINT_TO_POINTER(0), window);
                 if (win_unread(window) > 0) {
@@ -1019,6 +1019,7 @@ wins_tidy(void)
             curr = g_list_next(curr);
         }
 
+        g_hash_table_destroy(windows);
         windows = new_windows;
         current = 1;
         ProfWin *console = wins_get_console();
