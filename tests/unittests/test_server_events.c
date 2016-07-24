@@ -12,7 +12,7 @@
 #include "config/preferences.h"
 #include "ui/ui.h"
 #include "ui/stub_ui.h"
-#include "muc.h"
+#include "xmpp/muc.h"
 
 void console_shows_online_presence_when_set_online(void **state)
 {

@@ -32,8 +32,8 @@
  *
  */
 
-#ifndef MUC_H
-#define MUC_H
+#ifndef XMPP_MUC_H
+#define XMPP_MUC_H
 
 #include <glib.h>
 

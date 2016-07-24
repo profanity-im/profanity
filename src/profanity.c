@@ -60,7 +60,7 @@
 #include "roster_list.h"
 #include "config/tlscerts.h"
 #include "log.h"
-#include "muc.h"
+#include "xmpp/muc.h"
 #include "plugins/plugins.h"
 #ifdef HAVE_LIBOTR
 #include "otr/otr.h"

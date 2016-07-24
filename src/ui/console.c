@@ -46,7 +46,7 @@
 #include "command/cmd_defs.h"
 #include "common.h"
 #include "log.h"
-#include "muc.h"
+#include "xmpp/muc.h"
 #include "roster_list.h"
 #include "config/preferences.h"
 #include "config/theme.h"

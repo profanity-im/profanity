@@ -40,7 +40,7 @@
 #include <wchar.h>
 
 #include "xmpp/contact.h"
-#include "muc.h"
+#include "xmpp/muc.h"
 #include "ui/ui.h"
 #include "ui/buffer.h"
 #include "xmpp/xmpp.h"

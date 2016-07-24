@@ -62,7 +62,7 @@
 #include "roster_list.h"
 #include "xmpp/jid.h"
 #include "log.h"
-#include "muc.h"
+#include "xmpp/muc.h"
 #include "plugins/plugins.h"
 #include "profanity.h"
 #include "tools/autocomplete.h"

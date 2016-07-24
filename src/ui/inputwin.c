@@ -60,7 +60,7 @@
 #include "config/preferences.h"
 #include "config/theme.h"
 #include "log.h"
-#include "muc.h"
+#include "xmpp/muc.h"
 #include "profanity.h"
 #include "roster_list.h"
 #include "ui/ui.h"

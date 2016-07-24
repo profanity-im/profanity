@@ -46,7 +46,7 @@
 #endif
 
 #include "log.h"
-#include "muc.h"
+#include "xmpp/muc.h"
 #include "ui/ui.h"
 #include "window_list.h"
 #include "config/preferences.h"

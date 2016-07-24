@@ -46,7 +46,7 @@
 #include "command/cmd_funcs.h"
 #include "config/preferences.h"
 #include "config/scripts.h"
-#include "muc.h"
+#include "xmpp/muc.h"
 #include "xmpp/xmpp.h"
 #include "roster_list.h"
 #include "window_list.h"

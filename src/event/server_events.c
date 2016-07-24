@@ -40,7 +40,7 @@
 
 #include "xmpp/chat_session.h"
 #include "log.h"
-#include "muc.h"
+#include "xmpp/muc.h"
 #include "config/preferences.h"
 #include "config/account.h"
 #include "config/scripts.h"
