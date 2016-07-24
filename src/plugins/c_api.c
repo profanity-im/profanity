@@ -218,7 +218,6 @@ static void
 c_api_win_create(const char *filename, char *tag, void(*callback)(char *tag, char *line))
 {
     char *plugin_name = _c_plugin_name(filename);
-    log_debug("Win create %s for %s", tag, plugin_name);
 
     WindowWrapper *wrapper = malloc(sizeof(WindowWrapper));
     wrapper->func = callback;
