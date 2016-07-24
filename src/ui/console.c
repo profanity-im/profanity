@@ -47,7 +47,7 @@
 #include "common.h"
 #include "log.h"
 #include "xmpp/muc.h"
-#include "roster_list.h"
+#include "xmpp/roster_list.h"
 #include "config/preferences.h"
 #include "config/theme.h"
 #include "ui/window.h"

@@ -5,7 +5,7 @@ core_sources = \
 	src/xmpp/chat_session.h src/xmpp/muc.c src/xmpp/muc.h src/xmpp/jid.h src/xmpp/jid.c \
 	src/xmpp/chat_state.h src/xmpp/chat_state.c \
 	src/xmpp/resource.c src/xmpp/resource.h \
-	src/roster_list.c src/roster_list.h \
+	src/xmpp/roster_list.c src/xmpp/roster_list.h \
 	src/xmpp/xmpp.h src/xmpp/capabilities.c src/xmpp/session.c \
 	src/xmpp/connection.h src/xmpp/connection.c \
 	src/xmpp/iq.c src/xmpp/message.c src/xmpp/presence.c src/xmpp/stanza.c \
@@ -63,7 +63,7 @@ unittest_sources = \
 	src/xmpp/chat_session.h src/xmpp/muc.c src/xmpp/muc.h src/xmpp/jid.h src/xmpp/jid.c \
 	src/xmpp/resource.c src/xmpp/resource.h \
 	src/xmpp/chat_state.h src/xmpp/chat_state.c \
-	src/roster_list.c src/roster_list.h \
+	src/xmpp/roster_list.c src/xmpp/roster_list.h \
 	src/xmpp/xmpp.h src/xmpp/form.c \
 	src/ui/ui.h \
 	src/otr/otr.h \

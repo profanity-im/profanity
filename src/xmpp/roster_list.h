@@ -32,8 +32,8 @@
  *
  */
 
-#ifndef ROSTER_LIST_H
-#define ROSTER_LIST_H
+#ifndef XMPP_ROSTER_LIST_H
+#define XMPP_ROSTER_LIST_H
 
 #include <glib.h>
 

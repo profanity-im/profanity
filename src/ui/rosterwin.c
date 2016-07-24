@@ -41,7 +41,7 @@
 #include "ui/window.h"
 #include "window_list.h"
 #include "config/preferences.h"
-#include "roster_list.h"
+#include "xmpp/roster_list.h"
 
 typedef enum {
     ROSTER_CONTACT,

@@ -41,7 +41,7 @@
 #include <glib.h>
 
 #include "common.h"
-#include "roster_list.h"
+#include "xmpp/roster_list.h"
 #include "config/theme.h"
 #include "ui/ui.h"
 #include "ui/statusbar.h"

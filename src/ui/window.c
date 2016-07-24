@@ -49,7 +49,7 @@
 
 #include "config/theme.h"
 #include "config/preferences.h"
-#include "roster_list.h"
+#include "xmpp/roster_list.h"
 #include "ui/ui.h"
 #include "ui/window.h"
 #include "xmpp/xmpp.h"

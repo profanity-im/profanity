@@ -57,7 +57,7 @@
 #include "command/cmd_defs.h"
 #include "common.h"
 #include "xmpp/contact.h"
-#include "roster_list.h"
+#include "xmpp/roster_list.h"
 #include "config/tlscerts.h"
 #include "log.h"
 #include "xmpp/muc.h"

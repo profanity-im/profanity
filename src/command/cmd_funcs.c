@@ -61,7 +61,7 @@
 #include "config/tlscerts.h"
 #include "config/scripts.h"
 #include "xmpp/contact.h"
-#include "roster_list.h"
+#include "xmpp/roster_list.h"
 #include "xmpp/jid.h"
 #include "log.h"
 #include "xmpp/muc.h"

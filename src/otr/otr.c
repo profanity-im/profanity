@@ -41,7 +41,7 @@
 #include "otr/otr.h"
 #include "otr/otrlib.h"
 #include "log.h"
-#include "roster_list.h"
+#include "xmpp/roster_list.h"
 #include "window_list.h"
 #include "xmpp/contact.h"
 #include "ui/ui.h"

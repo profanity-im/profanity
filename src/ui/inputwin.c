@@ -62,7 +62,7 @@
 #include "log.h"
 #include "xmpp/muc.h"
 #include "profanity.h"
-#include "roster_list.h"
+#include "xmpp/roster_list.h"
 #include "ui/ui.h"
 #include "ui/statusbar.h"
 #include "ui/inputwin.h"

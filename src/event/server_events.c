@@ -44,7 +44,7 @@
 #include "config/preferences.h"
 #include "config/account.h"
 #include "config/scripts.h"
-#include "roster_list.h"
+#include "xmpp/roster_list.h"
 #include "plugins/plugins.h"
 #include "window_list.h"
 #include "config/tlscerts.h"
