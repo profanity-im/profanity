@@ -47,8 +47,6 @@
 static PyThreadState *thread_state;
 static GHashTable *loaded_modules;
 
-static char* _python_parse_string_result(PyObject *result);
-
 void
 allow_python_threads()
 {
@@ -286,7 +284,7 @@ python_pre_chat_message_display_hook(ProfPlugin *plugin, const char *const jid, 
             PyObject *result = PyObject_CallObject(p_function, p_args);
             python_check_error();
             Py_XDECREF(p_function);
-            char *result_str = _python_parse_string_result(result);
+            char *result_str = python_str_or_unicode_to_string(result);
             allow_python_threads();
 
             return result_str;
@@ -333,7 +331,7 @@ python_pre_chat_message_send_hook(ProfPlugin *plugin, const char * const jid, co
             PyObject *result = PyObject_CallObject(p_function, p_args);
             python_check_error();
             Py_XDECREF(p_function);
-            char *result_str = _python_parse_string_result(result);
+            char *result_str = python_str_or_unicode_to_string(result);
             allow_python_threads();
 
             return result_str;
@@ -380,7 +378,7 @@ python_pre_room_message_display_hook(ProfPlugin *plugin, const char * const room
             PyObject *result = PyObject_CallObject(p_function, p_args);
             python_check_error();
             Py_XDECREF(p_function);
-            char *result_str = _python_parse_string_result(result);
+            char *result_str = python_str_or_unicode_to_string(result);
             allow_python_threads();
 
             return result_str;
@@ -428,7 +426,7 @@ python_pre_room_message_send_hook(ProfPlugin *plugin, const char *const room, co
             PyObject *result = PyObject_CallObject(p_function, p_args);
             python_check_error();
             Py_XDECREF(p_function);
-            char *result_str = _python_parse_string_result(result);
+            char *result_str = python_str_or_unicode_to_string(result);
             allow_python_threads();
 
             return result_str;
@@ -498,7 +496,7 @@ python_pre_priv_message_display_hook(ProfPlugin *plugin, const char *const room,
             PyObject *result = PyObject_CallObject(p_function, p_args);
             python_check_error();
             Py_XDECREF(p_function);
-            char *result_str = _python_parse_string_result(result);
+            char *result_str = python_str_or_unicode_to_string(result);
             allow_python_threads();
 
             return result_str;
@@ -547,7 +545,7 @@ python_pre_priv_message_send_hook(ProfPlugin *plugin, const char *const room, co
             PyObject *result = PyObject_CallObject(p_function, p_args);
             python_check_error();
             Py_XDECREF(p_function);
-            char *result_str = _python_parse_string_result(result);
+            char *result_str = python_str_or_unicode_to_string(result);
             allow_python_threads();
 
             return result_str;
@@ -595,7 +593,7 @@ python_on_message_stanza_send_hook(ProfPlugin *plugin, const char *const text)
             PyObject *result = PyObject_CallObject(p_function, p_args);
             python_check_error();
             Py_XDECREF(p_function);
-            char *result_str = _python_parse_string_result(result);
+            char *result_str = python_str_or_unicode_to_string(result);
             allow_python_threads();
 
             return result_str;
@@ -650,7 +648,7 @@ python_on_presence_stanza_send_hook(ProfPlugin *plugin, const char *const text)
             PyObject *result = PyObject_CallObject(p_function, p_args);
             python_check_error();
             Py_XDECREF(p_function);
-            char *result_str = _python_parse_string_result(result);
+            char *result_str = python_str_or_unicode_to_string(result);
             allow_python_threads();
 
             return result_str;
@@ -705,7 +703,7 @@ python_on_iq_stanza_send_hook(ProfPlugin *plugin, const char *const text)
             PyObject *result = PyObject_CallObject(p_function, p_args);
             python_check_error();
             Py_XDECREF(p_function);
-            char *result_str = _python_parse_string_result(result);
+            char *result_str = python_str_or_unicode_to_string(result);
             allow_python_threads();
 
             return result_str;
@@ -857,30 +855,4 @@ python_shutdown(void)
     disable_python_threads();
     g_hash_table_destroy(loaded_modules);
     Py_Finalize();
-}
-
-static char*
-_python_parse_string_result(PyObject *result)
-{
-#if PY_MAJOR_VERSION >= 3
-    if (result != Py_None) {
-        char *result_str = strdup(PyBytes_AS_STRING(PyUnicode_AsUTF8String(result)));
-        Py_XDECREF(result);
-        return result_str;
-    } else {
-        return NULL;
-    }
-#else
-    if (PyUnicode_Check(result)) {
-        char *result_str = strdup(PyString_AsString(PyUnicode_AsUTF8String(result)));
-        Py_XDECREF(result);
-        return result_str;
-    } else if (result != Py_None) {
-        char *result_str = strdup(PyString_AsString(result));
-        Py_XDECREF(result);
-        return result_str;
-    } else {
-        return NULL;
-    }
-#endif
 }

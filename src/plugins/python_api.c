@@ -61,12 +61,15 @@ python_api_cons_alert(PyObject *self, PyObject *args)
 static PyObject*
 python_api_cons_show(PyObject *self, PyObject *args)
 {
-    const char *message = NULL;
-    if (!PyArg_ParseTuple(args, "s", &message)) {
+    PyObject* message = NULL;
+    if (!PyArg_ParseTuple(args, "O", &message)) {
         return Py_BuildValue("");
     }
+
+    char *message_str = python_str_or_unicode_to_string(message);
+
     allow_python_threads();
-    api_cons_show(message);
+    api_cons_show(message_str);
     disable_python_threads();
 
     return Py_BuildValue("");
@@ -75,15 +78,21 @@ python_api_cons_show(PyObject *self, PyObject *args)
 static PyObject*
 python_api_cons_show_themed(PyObject *self, PyObject *args)
 {
-    const char *group = NULL;
-    const char *key = NULL;
-    const char *def = NULL;
-    const char *message = NULL;
-    if (!PyArg_ParseTuple(args, "zzzs", &group, &key, &def, &message)) {
+    PyObject *group = NULL;
+    PyObject *key = NULL;
+    PyObject *def = NULL;
+    PyObject *message = NULL;
+    if (!PyArg_ParseTuple(args, "OOOO", &group, &key, &def, &message)) {
         return Py_BuildValue("");
     }
+
+    char *group_str = python_str_or_unicode_to_string(group);
+    char *key_str = python_str_or_unicode_to_string(key);
+    char *def_str = python_str_or_unicode_to_string(def);
+    char *message_str = python_str_or_unicode_to_string(message);
+
     allow_python_threads();
-    api_cons_show_themed(group, key, def, message);
+    api_cons_show_themed(group_str, key_str, def_str, message_str);
     disable_python_threads();
 
     return Py_BuildValue("");
@@ -92,12 +101,15 @@ python_api_cons_show_themed(PyObject *self, PyObject *args)
 static PyObject*
 python_api_cons_bad_cmd_usage(PyObject *self, PyObject *args)
 {
-    const char *cmd = NULL;
-    if (!PyArg_ParseTuple(args, "s", &cmd)) {
+    PyObject *cmd = NULL;
+    if (!PyArg_ParseTuple(args, "O", &cmd)) {
         return Py_BuildValue("");
     }
+
+    char *cmd_str = python_str_or_unicode_to_string(cmd);
+
     allow_python_threads();
-    api_cons_bad_cmd_usage(cmd);
+    api_cons_bad_cmd_usage(cmd_str);
     disable_python_threads();
 
     return Py_BuildValue("");
@@ -106,22 +118,25 @@ python_api_cons_bad_cmd_usage(PyObject *self, PyObject *args)
 static PyObject*
 python_api_register_command(PyObject *self, PyObject *args)
 {
-    const char *command_name = NULL;
+    PyObject *command_name = NULL;
     int min_args = 0;
     int max_args = 0;
     PyObject *synopsis = NULL;
-    const char *description = NULL;
+    PyObject *description = NULL;
     PyObject *arguments = NULL;
     PyObject *examples = NULL;
     PyObject *p_callback = NULL;
 
-    if (!PyArg_ParseTuple(args, "siiOsOOO", &command_name, &min_args, &max_args,
+    if (!PyArg_ParseTuple(args, "OiiOOOOO", &command_name, &min_args, &max_args,
             &synopsis, &description, &arguments, &examples, &p_callback)) {
         return Py_BuildValue("");
     }
 
+    char *command_name_str = python_str_or_unicode_to_string(command_name);
+    char *description_str = python_str_or_unicode_to_string(description);
+
     char *plugin_name = _python_plugin_name();
-    log_debug("Register command %s for %s", command_name, plugin_name);
+    log_debug("Register command %s for %s", command_name_str, plugin_name);
 
     if (p_callback && PyCallable_Check(p_callback)) {
         Py_ssize_t len = PyList_Size(synopsis);
@@ -129,7 +144,7 @@ python_api_register_command(PyObject *self, PyObject *args)
         Py_ssize_t i = 0;
         for (i = 0; i < len; i++) {
             PyObject *item = PyList_GetItem(synopsis, i);
-            char *c_item = python_object_to_string(item);
+            char *c_item = python_str_or_unicode_to_string(item);
             c_synopsis[i] = c_item;
         }
         c_synopsis[len] = NULL;
@@ -144,11 +159,11 @@ python_api_register_command(PyObject *self, PyObject *args)
                 return Py_BuildValue("");
             }
             PyObject *arg = PyList_GetItem(item, 0);
-            char *c_arg = python_object_to_string(arg);
+            char *c_arg = python_str_or_unicode_to_string(arg);
             c_arguments[i][0] = c_arg;
 
             PyObject *desc = PyList_GetItem(item, 1);
-            char *c_desc = python_object_to_string(desc);
+            char *c_desc = python_str_or_unicode_to_string(desc);
             c_arguments[i][1] = c_desc;
         }
 
@@ -160,14 +175,14 @@ python_api_register_command(PyObject *self, PyObject *args)
         i = 0;
         for (i = 0; i < len; i++) {
             PyObject *item = PyList_GetItem(examples, i);
-            char *c_item = python_object_to_string(item);
+            char *c_item = python_str_or_unicode_to_string(item);
             c_examples[i] = c_item;
         }
         c_examples[len] = NULL;
 
         allow_python_threads();
-        api_register_command(plugin_name, command_name, min_args, max_args, c_synopsis,
-            description, c_arguments, c_examples, p_callback, python_command_callback, NULL);
+        api_register_command(plugin_name, command_name_str, min_args, max_args, c_synopsis,
+            description_str, c_arguments, c_examples, p_callback, python_command_callback, NULL);
         disable_python_threads();
     }
 
@@ -203,15 +218,17 @@ python_api_register_timed(PyObject *self, PyObject *args)
 static PyObject *
 python_api_completer_add(PyObject *self, PyObject *args)
 {
-    const char *key = NULL;
+    PyObject *key = NULL;
     PyObject *items = NULL;
 
-    if (!PyArg_ParseTuple(args, "sO", &key, &items)) {
+    if (!PyArg_ParseTuple(args, "OO", &key, &items)) {
         return Py_BuildValue("");
     }
 
+    char *key_str = python_str_or_unicode_to_string(key);
+
     char *plugin_name = _python_plugin_name();
-    log_debug("Autocomplete add %s for %s", key, plugin_name);
+    log_debug("Autocomplete add %s for %s", key_str, plugin_name);
 
     Py_ssize_t len = PyList_Size(items);
     char *c_items[len];
@@ -219,13 +236,13 @@ python_api_completer_add(PyObject *self, PyObject *args)
     Py_ssize_t i = 0;
     for (i = 0; i < len; i++) {
         PyObject *item = PyList_GetItem(items, i);
-        char *c_item = python_object_to_string(item);
+        char *c_item = python_str_or_unicode_to_string(item);
         c_items[i] = c_item;
     }
     c_items[len] = NULL;
 
     allow_python_threads();
-    api_completer_add(plugin_name, key, c_items);
+    api_completer_add(plugin_name, key_str, c_items);
     disable_python_threads();
 
     free(plugin_name);
@@ -236,15 +253,17 @@ python_api_completer_add(PyObject *self, PyObject *args)
 static PyObject *
 python_api_completer_remove(PyObject *self, PyObject *args)
 {
-    const char *key = NULL;
+    PyObject *key = NULL;
     PyObject *items = NULL;
 
-    if (!PyArg_ParseTuple(args, "sO", &key, &items)) {
+    if (!PyArg_ParseTuple(args, "OO", &key, &items)) {
         return Py_BuildValue("");
     }
 
+    char *key_str = python_str_or_unicode_to_string(key);
+
     char *plugin_name = _python_plugin_name();
-    log_debug("Autocomplete remove %s for %s", key, plugin_name);
+    log_debug("Autocomplete remove %s for %s", key_str, plugin_name);
 
     Py_ssize_t len = PyList_Size(items);
     char *c_items[len];
@@ -252,13 +271,13 @@ python_api_completer_remove(PyObject *self, PyObject *args)
     Py_ssize_t i = 0;
     for (i = 0; i < len; i++) {
         PyObject *item = PyList_GetItem(items, i);
-        char *c_item = python_object_to_string(item);
+        char *c_item = python_str_or_unicode_to_string(item);
         c_items[i] = c_item;
     }
     c_items[len] = NULL;
 
     allow_python_threads();
-    api_completer_remove(plugin_name, key, c_items);
+    api_completer_remove(plugin_name, key_str, c_items);
     disable_python_threads();
 
     free(plugin_name);
@@ -269,17 +288,19 @@ python_api_completer_remove(PyObject *self, PyObject *args)
 static PyObject *
 python_api_completer_clear(PyObject *self, PyObject *args)
 {
-    const char *key = NULL;
+    PyObject *key = NULL;
 
-    if (!PyArg_ParseTuple(args, "s", &key)) {
+    if (!PyArg_ParseTuple(args, "O", &key)) {
         return Py_BuildValue("");
     }
 
+    char *key_str = python_str_or_unicode_to_string(key);
+
     char *plugin_name = _python_plugin_name();
-    log_debug("Autocomplete clear %s for %s", key, plugin_name);
+    log_debug("Autocomplete clear %s for %s", key_str, plugin_name);
 
     allow_python_threads();
-    api_completer_clear(plugin_name, key);
+    api_completer_clear(plugin_name, key_str);
     disable_python_threads();
 
     free(plugin_name);
@@ -290,16 +311,19 @@ python_api_completer_clear(PyObject *self, PyObject *args)
 static PyObject*
 python_api_notify(PyObject *self, PyObject *args)
 {
-    const char *message = NULL;
-    const char *category = NULL;
+    PyObject *message = NULL;
+    PyObject *category = NULL;
     int timeout_ms = 5000;
 
-    if (!PyArg_ParseTuple(args, "sis", &message, &timeout_ms, &category)) {
+    if (!PyArg_ParseTuple(args, "OiO", &message, &timeout_ms, &category)) {
         return Py_BuildValue("");
     }
 
+    char *message_str = python_str_or_unicode_to_string(message);
+    char *category_str = python_str_or_unicode_to_string(category);
+
     allow_python_threads();
-    api_notify(message, category, timeout_ms);
+    api_notify(message_str, category_str, timeout_ms);
     disable_python_threads();
 
     return Py_BuildValue("");
@@ -308,13 +332,15 @@ python_api_notify(PyObject *self, PyObject *args)
 static PyObject*
 python_api_send_line(PyObject *self, PyObject *args)
 {
-    char *line = NULL;
-    if (!PyArg_ParseTuple(args, "s", &line)) {
+    PyObject *line = NULL;
+    if (!PyArg_ParseTuple(args, "O", &line)) {
         return Py_BuildValue("");
     }
 
+    char *line_str = python_str_or_unicode_to_string(line);
+
     allow_python_threads();
-    api_send_line(line);
+    api_send_line(line_str);
     disable_python_threads();
 
     return Py_BuildValue("");
@@ -394,12 +420,15 @@ python_api_current_win_is_console(PyObject *self, PyObject *args)
 static PyObject *
 python_api_log_debug(PyObject *self, PyObject *args)
 {
-    const char *message = NULL;
-    if (!PyArg_ParseTuple(args, "s", &message)) {
+    PyObject *message = NULL;
+    if (!PyArg_ParseTuple(args, "O", &message)) {
         return Py_BuildValue("");
     }
+
+    char *message_str = python_str_or_unicode_to_string(message);
+
     allow_python_threads();
-    api_log_debug(message);
+    api_log_debug(message_str);
     disable_python_threads();
 
     return Py_BuildValue("");
@@ -408,13 +437,15 @@ python_api_log_debug(PyObject *self, PyObject *args)
 static PyObject *
 python_api_log_info(PyObject *self, PyObject *args)
 {
-    const char *message = NULL;
-    if (!PyArg_ParseTuple(args, "s", &message)) {
+    PyObject *message = NULL;
+    if (!PyArg_ParseTuple(args, "O", &message)) {
         return Py_BuildValue("");
     }
 
+    char *message_str = python_str_or_unicode_to_string(message);
+
     allow_python_threads();
-    api_log_info(message);
+    api_log_info(message_str);
     disable_python_threads();
 
     return Py_BuildValue("");
@@ -423,26 +454,32 @@ python_api_log_info(PyObject *self, PyObject *args)
 static PyObject *
 python_api_log_warning(PyObject *self, PyObject *args)
 {
-    const char *message = NULL;
-    if (!PyArg_ParseTuple(args, "s", &message)) {
+    PyObject *message = NULL;
+    if (!PyArg_ParseTuple(args, "O", &message)) {
         return Py_BuildValue("");
     }
 
+    char *message_str = python_str_or_unicode_to_string(message);
+
     allow_python_threads();
-    api_log_warning(message);
+    api_log_warning(message_str);
     disable_python_threads();
+
     return Py_BuildValue("");
 }
 
 static PyObject *
 python_api_log_error(PyObject *self, PyObject *args)
 {
-    const char *message = NULL;
-    if (!PyArg_ParseTuple(args, "s", &message)) {
+    PyObject *message = NULL;
+    if (!PyArg_ParseTuple(args, "O", &message)) {
         return Py_BuildValue("");
     }
+
+    char *message_str = python_str_or_unicode_to_string(message);
+
     allow_python_threads();
-    api_log_error(message);
+    api_log_error(message_str);
     disable_python_threads();
 
     return Py_BuildValue("");
@@ -451,13 +488,15 @@ python_api_log_error(PyObject *self, PyObject *args)
 static PyObject *
 python_api_win_exists(PyObject *self, PyObject *args)
 {
-    char *tag = NULL;
-    if (!PyArg_ParseTuple(args, "s", &tag)) {
+    PyObject *tag = NULL;
+    if (!PyArg_ParseTuple(args, "O", &tag)) {
         return Py_BuildValue("");
     }
 
+    char *tag_str = python_str_or_unicode_to_string(tag);
+
     allow_python_threads();
-    gboolean exists = api_win_exists(tag);
+    gboolean exists = api_win_exists(tag_str);
     disable_python_threads();
 
     if (exists) {
@@ -470,19 +509,21 @@ python_api_win_exists(PyObject *self, PyObject *args)
 static PyObject *
 python_api_win_create(PyObject *self, PyObject *args)
 {
-    char *tag = NULL;
+    PyObject *tag = NULL;
     PyObject *p_callback = NULL;
 
-    if (!PyArg_ParseTuple(args, "sO", &tag, &p_callback)) {
+    if (!PyArg_ParseTuple(args, "OO", &tag, &p_callback)) {
         return Py_BuildValue("");
     }
 
+    char *tag_str = python_str_or_unicode_to_string(tag);
+
     char *plugin_name = _python_plugin_name();
-    log_debug("Win create %s for %s", tag, plugin_name);
+    log_debug("Win create %s for %s", tag_str, plugin_name);
 
     if (p_callback && PyCallable_Check(p_callback)) {
         allow_python_threads();
-        api_win_create(plugin_name, tag, p_callback, python_window_callback, NULL);
+        api_win_create(plugin_name, tag_str, p_callback, python_window_callback, NULL);
         disable_python_threads();
     }
 
@@ -494,14 +535,16 @@ python_api_win_create(PyObject *self, PyObject *args)
 static PyObject *
 python_api_win_focus(PyObject *self, PyObject *args)
 {
-    char *tag = NULL;
+    PyObject *tag = NULL;
 
-    if (!PyArg_ParseTuple(args, "s", &tag)) {
+    if (!PyArg_ParseTuple(args, "O", &tag)) {
         return Py_BuildValue("");
     }
 
+    char *tag_str = python_str_or_unicode_to_string(tag);
+
     allow_python_threads();
-    api_win_focus(tag);
+    api_win_focus(tag_str);
     disable_python_threads();
 
     return Py_BuildValue("");
@@ -510,15 +553,18 @@ python_api_win_focus(PyObject *self, PyObject *args)
 static PyObject *
 python_api_win_show(PyObject *self, PyObject *args)
 {
-    char *tag = NULL;
-    char *line = NULL;
+    PyObject *tag = NULL;
+    PyObject *line = NULL;
 
-    if (!PyArg_ParseTuple(args, "ss", &tag, &line)) {
+    if (!PyArg_ParseTuple(args, "OO", &tag, &line)) {
         return Py_BuildValue("");
     }
 
+    char *tag_str = python_str_or_unicode_to_string(tag);
+    char *line_str = python_str_or_unicode_to_string(line);
+
     allow_python_threads();
-    api_win_show(tag, line);
+    api_win_show(tag_str, line_str);
     disable_python_threads();
 
     return Py_BuildValue("");
@@ -527,18 +573,25 @@ python_api_win_show(PyObject *self, PyObject *args)
 static PyObject *
 python_api_win_show_themed(PyObject *self, PyObject *args)
 {
-    char *tag = NULL;
-    char *group = NULL;
-    char *key = NULL;
-    char *def = NULL;
-    char *line = NULL;
+    PyObject *tag = NULL;
+    PyObject *group = NULL;
+    PyObject *key = NULL;
+    PyObject *def = NULL;
+    PyObject *line = NULL;
 
-    if (!PyArg_ParseTuple(args, "szzzs", &tag, &group, &key, &def, &line)) {
+    if (!PyArg_ParseTuple(args, "OOOOO", &tag, &group, &key, &def, &line)) {
+        python_check_error();
         return Py_BuildValue("");
     }
 
+    char *tag_str = python_str_or_unicode_to_string(tag);
+    char *group_str = python_str_or_unicode_to_string(group);
+    char *key_str = python_str_or_unicode_to_string(key);
+    char *def_str = python_str_or_unicode_to_string(def);
+    char *line_str = python_str_or_unicode_to_string(line);
+
     allow_python_threads();
-    api_win_show_themed(tag, group, key, def, line);
+    api_win_show_themed(tag_str, group_str, key_str, def_str, line_str);
     disable_python_threads();
 
     return Py_BuildValue("");
@@ -547,13 +600,15 @@ python_api_win_show_themed(PyObject *self, PyObject *args)
 static PyObject*
 python_api_send_stanza(PyObject *self, PyObject *args)
 {
-    const char *stanza = NULL;
-    if (!PyArg_ParseTuple(args, "s", &stanza)) {
+    PyObject *stanza = NULL;
+    if (!PyArg_ParseTuple(args, "O", &stanza)) {
         return Py_BuildValue("O", Py_False);
     }
 
+    char *stanza_str = python_str_or_unicode_to_string(stanza);
+
     allow_python_threads();
-    int res = api_send_stanza(stanza);
+    int res = api_send_stanza(stanza_str);
     disable_python_threads();
     if (res) {
         return Py_BuildValue("O", Py_True);
@@ -565,18 +620,20 @@ python_api_send_stanza(PyObject *self, PyObject *args)
 static PyObject*
 python_api_settings_get_boolean(PyObject *self, PyObject *args)
 {
-    char *group = NULL;
-    char *key = NULL;
+    PyObject *group = NULL;
+    PyObject *key = NULL;
     PyObject *defobj = NULL;
 
-    if (!PyArg_ParseTuple(args, "ssO!", &group, &key, &PyBool_Type, &defobj)) {
+    if (!PyArg_ParseTuple(args, "OOO!", &group, &key, &PyBool_Type, &defobj)) {
         return Py_BuildValue("");
     }
 
+    char *group_str = python_str_or_unicode_to_string(group);
+    char *key_str = python_str_or_unicode_to_string(key);
     int def = PyObject_IsTrue(defobj);
 
     allow_python_threads();
-    int res = api_settings_get_boolean(group, key, def);
+    int res = api_settings_get_boolean(group_str, key_str, def);
     disable_python_threads();
 
     if (res) {
@@ -589,18 +646,20 @@ python_api_settings_get_boolean(PyObject *self, PyObject *args)
 static PyObject*
 python_api_settings_set_boolean(PyObject *self, PyObject *args)
 {
-    char *group = NULL;
-    char *key = NULL;
+    PyObject *group = NULL;
+    PyObject *key = NULL;
     PyObject *valobj = NULL;
 
-    if (!PyArg_ParseTuple(args, "ssO!", &group, &key, &PyBool_Type, &valobj)) {
+    if (!PyArg_ParseTuple(args, "OOO!", &group, &key, &PyBool_Type, &valobj)) {
         return Py_BuildValue("");
     }
 
+    char *group_str = python_str_or_unicode_to_string(group);
+    char *key_str = python_str_or_unicode_to_string(key);
     int val = PyObject_IsTrue(valobj);
 
     allow_python_threads();
-    api_settings_set_boolean(group, key, val);
+    api_settings_set_boolean(group_str, key_str, val);
     disable_python_threads();
 
     return Py_BuildValue("");
@@ -609,16 +668,20 @@ python_api_settings_set_boolean(PyObject *self, PyObject *args)
 static PyObject*
 python_api_settings_get_string(PyObject *self, PyObject *args)
 {
-    char *group = NULL;
-    char *key = NULL;
-    char *def = NULL;
+    PyObject *group = NULL;
+    PyObject *key = NULL;
+    PyObject *def = NULL;
 
-    if (!PyArg_ParseTuple(args, "ssz", &group, &key, &def)) {
+    if (!PyArg_ParseTuple(args, "OOO", &group, &key, &def)) {
         return Py_BuildValue("");
     }
 
+    char *group_str = python_str_or_unicode_to_string(group);
+    char *key_str = python_str_or_unicode_to_string(key);
+    char *def_str = python_str_or_unicode_to_string(def);
+
     allow_python_threads();
-    char *res = api_settings_get_string(group, key, def);
+    char *res = api_settings_get_string(group_str, key_str, def_str);
     disable_python_threads();
 
     if (res) {
@@ -631,16 +694,20 @@ python_api_settings_get_string(PyObject *self, PyObject *args)
 static PyObject*
 python_api_settings_set_string(PyObject *self, PyObject *args)
 {
-    char *group = NULL;
-    char *key = NULL;
-    char *val = NULL;
+    PyObject *group = NULL;
+    PyObject *key = NULL;
+    PyObject *val = NULL;
 
-    if (!PyArg_ParseTuple(args, "sss", &group, &key, &val)) {
+    if (!PyArg_ParseTuple(args, "OOO", &group, &key, &val)) {
         return Py_BuildValue("");
     }
 
+    char *group_str = python_str_or_unicode_to_string(group);
+    char *key_str = python_str_or_unicode_to_string(key);
+    char *val_str = python_str_or_unicode_to_string(val);
+
     allow_python_threads();
-    api_settings_set_string(group, key, val);
+    api_settings_set_string(group_str, key_str, val_str);
     disable_python_threads();
 
     return Py_BuildValue("");
@@ -649,16 +716,19 @@ python_api_settings_set_string(PyObject *self, PyObject *args)
 static PyObject*
 python_api_settings_get_int(PyObject *self, PyObject *args)
 {
-    char *group = NULL;
-    char *key = NULL;
+    PyObject *group = NULL;
+    PyObject *key = NULL;
     int def = 0;
 
-    if (!PyArg_ParseTuple(args, "ssi", &group, &key, &def)) {
+    if (!PyArg_ParseTuple(args, "OOi", &group, &key, &def)) {
         return Py_BuildValue("");
     }
 
+    char *group_str = python_str_or_unicode_to_string(group);
+    char *key_str = python_str_or_unicode_to_string(key);
+
     allow_python_threads();
-    int res = api_settings_get_int(group, key, def);
+    int res = api_settings_get_int(group_str, key_str, def);
     disable_python_threads();
 
     return Py_BuildValue("i", res);
@@ -667,16 +737,19 @@ python_api_settings_get_int(PyObject *self, PyObject *args)
 static PyObject*
 python_api_settings_set_int(PyObject *self, PyObject *args)
 {
-    char *group = NULL;
-    char *key = NULL;
+    PyObject *group = NULL;
+    PyObject *key = NULL;
     int val = 0;
 
-    if (!PyArg_ParseTuple(args, "ssi", &group, &key, &val)) {
+    if (!PyArg_ParseTuple(args, "OOi", &group, &key, &val)) {
         return Py_BuildValue("");
     }
 
+    char *group_str = python_str_or_unicode_to_string(group);
+    char *key_str = python_str_or_unicode_to_string(key);
+
     allow_python_threads();
-    api_settings_set_int(group, key, val);
+    api_settings_set_int(group_str, key_str, val);
     disable_python_threads();
 
     return Py_BuildValue("");
@@ -685,16 +758,20 @@ python_api_settings_set_int(PyObject *self, PyObject *args)
 static PyObject*
 python_api_incoming_message(PyObject *self, PyObject *args)
 {
-    char *barejid = NULL;
-    char *resource = NULL;
-    char *message = NULL;
+    PyObject *barejid = NULL;
+    PyObject *resource = NULL;
+    PyObject *message = NULL;
 
-    if (!PyArg_ParseTuple(args, "sss", &barejid, &resource, &message)) {
+    if (!PyArg_ParseTuple(args, "OOO", &barejid, &resource, &message)) {
         return Py_BuildValue("");
     }
 
+    char *barejid_str = python_str_or_unicode_to_string(barejid);
+    char *resource_str = python_str_or_unicode_to_string(resource);
+    char *message_str = python_str_or_unicode_to_string(message);
+
     allow_python_threads();
-    api_incoming_message(barejid, resource, message);
+    api_incoming_message(barejid_str, resource_str, message_str);
     disable_python_threads();
 
     return Py_BuildValue("");
@@ -703,13 +780,15 @@ python_api_incoming_message(PyObject *self, PyObject *args)
 static PyObject*
 python_api_disco_add_feature(PyObject *self, PyObject *args)
 {
-    char *feature = NULL;
-    if (!PyArg_ParseTuple(args, "s", &feature)) {
+    PyObject *feature = NULL;
+    if (!PyArg_ParseTuple(args, "O", &feature)) {
         return Py_BuildValue("");
     }
 
+    char *feature_str = python_str_or_unicode_to_string(feature);
+
     allow_python_threads();
-    api_disco_add_feature(feature);
+    api_disco_add_feature(feature_str);
     disable_python_threads();
 
     return Py_BuildValue("");
@@ -866,7 +945,7 @@ _python_plugin_name(void)
 {
     PyThreadState *ts = PyThreadState_Get();
     PyFrameObject *frame = ts->frame;
-    char const* filename = python_object_to_string(frame->f_code->co_filename);
+    char const* filename = python_str_or_unicode_to_string(frame->f_code->co_filename);
     gchar **split = g_strsplit(filename, "/", 0);
     char *plugin_name = strdup(split[g_strv_length(split)-1]);
     g_strfreev(split);
@@ -875,11 +954,27 @@ _python_plugin_name(void)
 }
 
 char*
-python_object_to_string(void *obj)
+python_str_or_unicode_to_string(void *obj)
 {
+    if (!obj) {
+        return NULL;
+    }
+    PyObject *pyobj = (PyObject*)obj;
+    if (pyobj == Py_None) {
+        return NULL;
+    }
+
 #if PY_MAJOR_VERSION >= 3
-    return PyBytes_AS_STRING(PyUnicode_AsUTF8String(obj));
+    if (PyUnicode_Check(pyobj)) {
+        return strdup(PyBytes_AS_STRING(PyUnicode_AsUTF8String(pyobj)));
+    } else {
+        return strdup(PyBytes_AS_STRING(pyobj));
+    }
 #else
-    return PyString_AsString(obj);
+    if (PyUnicode_Check(pyobj)) {
+        return strdup(PyString_AsString(PyUnicode_AsUTF8String(pyobj)));
+    } else {
+        return strdup(PyString_AsString(pyobj));
+    }
 #endif
 }
