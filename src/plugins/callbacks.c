@@ -159,13 +159,15 @@ callbacks_remove(const char *const plugin_name)
     g_hash_table_remove(p_timed_functions, plugin_name);
 
     GHashTable *tag_to_win_cb_hash = g_hash_table_lookup(p_window_callbacks, plugin_name);
-    GList *tags = g_hash_table_get_keys(tag_to_win_cb_hash);
-    GList *curr = tags;
-    while (curr) {
-        wins_close_plugin(curr->data);
-        curr = g_list_next(curr);
+    if (tag_to_win_cb_hash) {
+        GList *tags = g_hash_table_get_keys(tag_to_win_cb_hash);
+        GList *curr = tags;
+        while (curr) {
+            wins_close_plugin(curr->data);
+            curr = g_list_next(curr);
+        }
+        g_list_free(tags);
     }
-    g_list_free(tags);
 
     g_hash_table_remove(p_window_callbacks, plugin_name);
 }

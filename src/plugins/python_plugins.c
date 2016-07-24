@@ -34,6 +34,8 @@
 
 #include <Python.h>
 
+#include "config.h"
+
 #include "config/preferences.h"
 #include "plugins/api.h"
 #include "plugins/callbacks.h"
@@ -63,25 +65,31 @@ _unref_module(PyObject *module)
     Py_XDECREF(module);
 }
 
+const char*
+python_get_version(void)
+{
+    return Py_GetVersion();
+}
+
 void
 python_env_init(void)
 {
     loaded_modules = g_hash_table_new_full(g_str_hash, g_str_equal, free, (GDestroyNotify)_unref_module);
 
-    Py_Initialize();
-    PyEval_InitThreads();
-    python_api_init();
+    python_init_prof();
 
+    gchar *plugins_dir = plugins_get_dir();
     GString *path = g_string_new("import sys\n");
     g_string_append(path, "sys.path.append(\"");
-    gchar *plugins_dir = plugins_get_dir();
     g_string_append(path, plugins_dir);
-    g_free(plugins_dir);
     g_string_append(path, "/\")\n");
 
     PyRun_SimpleString(path->str);
+    python_check_error();
 
     g_string_free(path, TRUE);
+    g_free(plugins_dir);
+
     allow_python_threads();
 }
 
@@ -96,7 +104,9 @@ python_plugin_create(const char *const filename)
     } else {
         gchar *module_name = g_strndup(filename, strlen(filename) - 3);
         p_module = PyImport_ImportModule(module_name);
-        g_hash_table_insert(loaded_modules, strdup(filename), p_module);
+        if (p_module) {
+            g_hash_table_insert(loaded_modules, strdup(filename), p_module);
+        }
         g_free(module_name);
     }
 
@@ -277,20 +287,10 @@ python_pre_chat_message_display_hook(ProfPlugin *plugin, const char *const jid, 
             PyObject *result = PyObject_CallObject(p_function, p_args);
             python_check_error();
             Py_XDECREF(p_function);
-            if (PyUnicode_Check(result)) {
-                char *result_str = strdup(PyString_AsString(PyUnicode_AsUTF8String(result)));
-                Py_XDECREF(result);
-                allow_python_threads();
-                return result_str;
-            } else if (result != Py_None) {
-                char *result_str = strdup(PyString_AsString(result));
-                Py_XDECREF(result);
-                allow_python_threads();
-                return result_str;
-            } else {
-                allow_python_threads();
-                return NULL;
-            }
+            char *result_str = python_str_or_unicode_to_string(result);
+            allow_python_threads();
+
+            return result_str;
         }
     }
 
@@ -334,20 +334,10 @@ python_pre_chat_message_send_hook(ProfPlugin *plugin, const char * const jid, co
             PyObject *result = PyObject_CallObject(p_function, p_args);
             python_check_error();
             Py_XDECREF(p_function);
-            if (PyUnicode_Check(result)) {
-                char *result_str = strdup(PyString_AsString(PyUnicode_AsUTF8String(result)));
-                Py_XDECREF(result);
-                allow_python_threads();
-                return result_str;
-            } else if (result != Py_None) {
-                char *result_str = strdup(PyString_AsString(result));
-                Py_XDECREF(result);
-                allow_python_threads();
-                return result_str;
-            } else {
-                allow_python_threads();
-                return NULL;
-            }
+            char *result_str = python_str_or_unicode_to_string(result);
+            allow_python_threads();
+
+            return result_str;
         }
     }
 
@@ -391,20 +381,10 @@ python_pre_room_message_display_hook(ProfPlugin *plugin, const char * const room
             PyObject *result = PyObject_CallObject(p_function, p_args);
             python_check_error();
             Py_XDECREF(p_function);
-            if (PyUnicode_Check(result)) {
-                char *result_str = strdup(PyString_AsString(PyUnicode_AsUTF8String(result)));
-                Py_XDECREF(result);
-                allow_python_threads();
-                return result_str;
-            } else if (result != Py_None) {
-                char *result_str = strdup(PyString_AsString(result));
-                Py_XDECREF(result);
-                allow_python_threads();
-                return result_str;
-            } else {
-                allow_python_threads();
-                return NULL;
-            }
+            char *result_str = python_str_or_unicode_to_string(result);
+            allow_python_threads();
+
+            return result_str;
         }
     }
 
@@ -449,20 +429,10 @@ python_pre_room_message_send_hook(ProfPlugin *plugin, const char *const room, co
             PyObject *result = PyObject_CallObject(p_function, p_args);
             python_check_error();
             Py_XDECREF(p_function);
-            if (PyUnicode_Check(result)) {
-                char *result_str = strdup(PyString_AsString(PyUnicode_AsUTF8String(result)));
-                Py_XDECREF(result);
-                allow_python_threads();
-                return result_str;
-            } else if (result != Py_None) {
-                char *result_str = strdup(PyString_AsString(result));
-                Py_XDECREF(result);
-                allow_python_threads();
-                return result_str;
-            } else {
-                allow_python_threads();
-                return NULL;
-            }
+            char *result_str = python_str_or_unicode_to_string(result);
+            allow_python_threads();
+
+            return result_str;
         }
     }
 
@@ -529,20 +499,10 @@ python_pre_priv_message_display_hook(ProfPlugin *plugin, const char *const room,
             PyObject *result = PyObject_CallObject(p_function, p_args);
             python_check_error();
             Py_XDECREF(p_function);
-            if (PyUnicode_Check(result)) {
-                char *result_str = strdup(PyString_AsString(PyUnicode_AsUTF8String(result)));
-                Py_XDECREF(result);
-                allow_python_threads();
-                return result_str;
-            } else if (result != Py_None) {
-                char *result_str = strdup(PyString_AsString(result));
-                Py_XDECREF(result);
-                allow_python_threads();
-                return result_str;
-            } else {
-                allow_python_threads();
-                return NULL;
-            }
+            char *result_str = python_str_or_unicode_to_string(result);
+            allow_python_threads();
+
+            return result_str;
         }
     }
 
@@ -588,20 +548,10 @@ python_pre_priv_message_send_hook(ProfPlugin *plugin, const char *const room, co
             PyObject *result = PyObject_CallObject(p_function, p_args);
             python_check_error();
             Py_XDECREF(p_function);
-            if (PyUnicode_Check(result)) {
-                char *result_str = strdup(PyString_AsString(PyUnicode_AsUTF8String(result)));
-                Py_XDECREF(result);
-                allow_python_threads();
-                return result_str;
-            } else if (result != Py_None) {
-                char *result_str = strdup(PyString_AsString(result));
-                Py_XDECREF(result);
-                allow_python_threads();
-                return result_str;
-            } else {
-                allow_python_threads();
-                return NULL;
-            }
+            char *result_str = python_str_or_unicode_to_string(result);
+            allow_python_threads();
+
+            return result_str;
         }
     }
 
@@ -646,20 +596,10 @@ python_on_message_stanza_send_hook(ProfPlugin *plugin, const char *const text)
             PyObject *result = PyObject_CallObject(p_function, p_args);
             python_check_error();
             Py_XDECREF(p_function);
-            if (PyUnicode_Check(result)) {
-                char *result_str = strdup(PyString_AsString(PyUnicode_AsUTF8String(result)));
-                Py_XDECREF(result);
-                allow_python_threads();
-                return result_str;
-            } else if (result != Py_None) {
-                char *result_str = strdup(PyString_AsString(result));
-                Py_XDECREF(result);
-                allow_python_threads();
-                return result_str;
-            } else {
-                allow_python_threads();
-                return NULL;
-            }
+            char *result_str = python_str_or_unicode_to_string(result);
+            allow_python_threads();
+
+            return result_str;
         }
     }
 
@@ -711,20 +651,10 @@ python_on_presence_stanza_send_hook(ProfPlugin *plugin, const char *const text)
             PyObject *result = PyObject_CallObject(p_function, p_args);
             python_check_error();
             Py_XDECREF(p_function);
-            if (PyUnicode_Check(result)) {
-                char *result_str = strdup(PyString_AsString(PyUnicode_AsUTF8String(result)));
-                Py_XDECREF(result);
-                allow_python_threads();
-                return result_str;
-            } else if (result != Py_None) {
-                char *result_str = strdup(PyString_AsString(result));
-                Py_XDECREF(result);
-                allow_python_threads();
-                return result_str;
-            } else {
-                allow_python_threads();
-                return NULL;
-            }
+            char *result_str = python_str_or_unicode_to_string(result);
+            allow_python_threads();
+
+            return result_str;
         }
     }
 
@@ -776,20 +706,10 @@ python_on_iq_stanza_send_hook(ProfPlugin *plugin, const char *const text)
             PyObject *result = PyObject_CallObject(p_function, p_args);
             python_check_error();
             Py_XDECREF(p_function);
-            if (PyUnicode_Check(result)) {
-                char *result_str = strdup(PyString_AsString(PyUnicode_AsUTF8String(result)));
-                Py_XDECREF(result);
-                allow_python_threads();
-                return result_str;
-            } else if (result != Py_None) {
-                char *result_str = strdup(PyString_AsString(result));
-                Py_XDECREF(result);
-                allow_python_threads();
-                return result_str;
-            } else {
-                allow_python_threads();
-                return NULL;
-            }
+            char *result_str = python_str_or_unicode_to_string(result);
+            allow_python_threads();
+
+            return result_str;
         }
     }
 
@@ -917,6 +837,7 @@ python_check_error(void)
 {
     if (PyErr_Occurred()) {
         PyErr_Print();
+        PyRun_SimpleString("import sys\nsys.stdout.flush()");
         PyErr_Clear();
     }
 }
