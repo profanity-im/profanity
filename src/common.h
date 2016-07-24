@@ -107,14 +107,9 @@ char* str_replace(const char *string, const char *substr, const char *replacemen
 int str_contains(const char str[], int size, char ch);
 gboolean strtoi_range(char *str, int *saveptr, int min, int max, char **err_msg);
 int utf8_display_len(const char *const str);
-char* prof_getline(FILE *stream);
+char* file_getline(FILE *stream);
 char* release_get_latest(void);
 gboolean release_is_new(char *found_version);
-
-gboolean valid_resource_presence_string(const char *const str);
-const char* string_from_resource_presence(resource_presence_t presence);
-resource_presence_t resource_presence_from_string(const char *const str);
-contact_presence_t contact_presence_from_resource_presence(resource_presence_t resource_presence);
 
 char* p_sha1_hash(char *str);
 char* create_unique_id(char *prefix);

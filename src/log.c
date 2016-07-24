@@ -472,7 +472,7 @@ chat_log_get_previous(const gchar *const login, const gchar *const recipient)
             g_string_free(header, FALSE);
 
             char *line;
-            while ((line = prof_getline(logp)) != NULL) {
+            while ((line = file_getline(logp)) != NULL) {
                 history = g_slist_append(history, line);
             }
 

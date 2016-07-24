@@ -42,6 +42,7 @@
 #include "log.h"
 #include "config/account.h"
 #include "xmpp/jid.h"
+#include "xmpp/resource.h"
 
 ProfAccount*
 account_new(const gchar *const name, const gchar *const jid,

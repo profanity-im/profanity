@@ -49,4 +49,9 @@ Resource* resource_new(const char *const name, resource_presence_t presence, con
 void resource_destroy(Resource *resource);
 int resource_compare_availability(Resource *first, Resource *second);
 
+gboolean valid_resource_presence_string(const char *const str);
+const char* string_from_resource_presence(resource_presence_t presence);
+resource_presence_t resource_presence_from_string(const char *const str);
+contact_presence_t contact_presence_from_resource_presence(resource_presence_t resource_presence);
+
 #endif

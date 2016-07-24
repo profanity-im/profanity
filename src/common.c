@@ -285,7 +285,7 @@ utf8_display_len(const char *const str)
 }
 
 char*
-prof_getline(FILE *stream)
+file_getline(FILE *stream)
 {
     char *buf;
     char *result;
@@ -377,75 +377,6 @@ release_is_new(char *found_version)
         }
     } else {
         return FALSE;
-    }
-}
-
-gboolean
-valid_resource_presence_string(const char *const str)
-{
-    assert(str != NULL);
-    if ((strcmp(str, "online") == 0) || (strcmp(str, "chat") == 0) ||
-            (strcmp(str, "away") == 0) || (strcmp(str, "xa") == 0) ||
-            (strcmp(str, "dnd") == 0)) {
-        return TRUE;
-    } else {
-        return FALSE;
-    }
-}
-
-const char*
-string_from_resource_presence(resource_presence_t presence)
-{
-    switch(presence)
-    {
-        case RESOURCE_CHAT:
-            return "chat";
-        case RESOURCE_AWAY:
-            return "away";
-        case RESOURCE_XA:
-            return "xa";
-        case RESOURCE_DND:
-            return "dnd";
-        default:
-            return "online";
-    }
-}
-
-resource_presence_t
-resource_presence_from_string(const char *const str)
-{
-    if (str == NULL) {
-        return RESOURCE_ONLINE;
-    } else if (strcmp(str, "online") == 0) {
-        return RESOURCE_ONLINE;
-    } else if (strcmp(str, "chat") == 0) {
-        return RESOURCE_CHAT;
-    } else if (strcmp(str, "away") == 0) {
-        return RESOURCE_AWAY;
-    } else if (strcmp(str, "xa") == 0) {
-        return RESOURCE_XA;
-    } else if (strcmp(str, "dnd") == 0) {
-        return RESOURCE_DND;
-    } else {
-        return RESOURCE_ONLINE;
-    }
-}
-
-contact_presence_t
-contact_presence_from_resource_presence(resource_presence_t resource_presence)
-{
-    switch(resource_presence)
-    {
-        case RESOURCE_CHAT:
-            return CONTACT_CHAT;
-        case RESOURCE_AWAY:
-            return CONTACT_AWAY;
-        case RESOURCE_XA:
-            return CONTACT_XA;
-        case RESOURCE_DND:
-            return CONTACT_DND;
-        default:
-            return CONTACT_ONLINE;
     }
 }
 
