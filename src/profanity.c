@@ -49,7 +49,7 @@
 
 #include "profanity.h"
 #include "xmpp/chat_session.h"
-#include "chat_state.h"
+#include "xmpp/chat_state.h"
 #include "config/accounts.h"
 #include "config/preferences.h"
 #include "config/theme.h"

@@ -46,7 +46,7 @@
 #endif
 
 #include "ui/buffer.h"
-#include "chat_state.h"
+#include "xmpp/chat_state.h"
 #include "tools/autocomplete.h"
 
 #define LAYOUT_SPLIT_MEMCHECK       12345671

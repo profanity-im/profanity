@@ -44,7 +44,7 @@
 #include "ui/ui.h"
 #include "ui/buffer.h"
 #include "xmpp/xmpp.h"
-#include "chat_state.h"
+#include "xmpp/chat_state.h"
 
 #ifdef HAVE_NCURSESW_NCURSES_H
 #include <ncursesw/ncurses.h>

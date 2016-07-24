@@ -54,7 +54,7 @@
 #endif
 
 #include "command/cmd_ac.h"
-#include "chat_state.h"
+#include "xmpp/chat_state.h"
 #include "common.h"
 #include "config/accounts.h"
 #include "config/preferences.h"
