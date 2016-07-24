@@ -60,7 +60,7 @@
 #include "config/scripts.h"
 #include "xmpp/contact.h"
 #include "roster_list.h"
-#include "jid.h"
+#include "xmpp/jid.h"
 #include "log.h"
 #include "muc.h"
 #include "plugins/plugins.h"

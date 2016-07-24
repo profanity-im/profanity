@@ -38,7 +38,7 @@
 
 #include <glib.h>
 
-#include "jid.h"
+#include "xmpp/jid.h"
 #include "config/account.h"
 #include "common.h"
 #include "log.h"

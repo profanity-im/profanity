@@ -42,7 +42,7 @@
 #include "roster_list.h"
 #include "resource.h"
 #include "xmpp/contact.h"
-#include "jid.h"
+#include "xmpp/jid.h"
 #include "tools/autocomplete.h"
 #include "config/preferences.h"
 

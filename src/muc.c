@@ -40,7 +40,7 @@
 
 #include "xmpp/contact.h"
 #include "common.h"
-#include "jid.h"
+#include "xmpp/jid.h"
 #include "tools/autocomplete.h"
 #include "ui/ui.h"
 #include "window_list.h"

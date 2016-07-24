@@ -32,8 +32,8 @@
  *
  */
 
-#ifndef JID_H
-#define JID_H
+#ifndef XMPP_JID_H
+#define XMPP_JID_H
 
 #include <glib.h>
 

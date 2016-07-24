@@ -38,7 +38,7 @@
 #include <glib.h>
 
 #include "xmpp/contact.h"
-#include "jid.h"
+#include "xmpp/jid.h"
 #include "tools/autocomplete.h"
 #include "ui/win_types.h"
 

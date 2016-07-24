@@ -43,7 +43,7 @@
 #include "common.h"
 #include "config/account.h"
 #include "config/conflists.h"
-#include "jid.h"
+#include "xmpp/jid.h"
 #include "log.h"
 #include "tools/autocomplete.h"
 #include "xmpp/xmpp.h"
