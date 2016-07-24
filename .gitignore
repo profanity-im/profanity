@@ -65,3 +65,5 @@ valgrind.out
 
 .DS_Store
 apidocs/c/html/
+python2/
+python3/
