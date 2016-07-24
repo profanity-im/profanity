@@ -43,21 +43,22 @@
 #ifdef HAVE_LIBMESODE
 #include <mesode.h>
 #endif
+
 #ifdef HAVE_LIBSTROPHE
 #include <strophe.h>
 #endif
 
 #include "common.h"
 #include "log.h"
-#include "muc.h"
 #include "event/server_events.h"
+#include "plugins/plugins.h"
+#include "ui/ui.h"
 #include "xmpp/connection.h"
 #include "xmpp/iq.h"
 #include "xmpp/stanza.h"
 #include "xmpp/xmpp.h"
 #include "xmpp/bookmark.h"
-#include "ui/ui.h"
-#include "plugins/plugins.h"
+#include "xmpp/muc.h"
 
 #define BOOKMARK_TIMEOUT 5000
 

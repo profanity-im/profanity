@@ -34,10 +34,10 @@
 
 #include <assert.h>
 
+#include "config/preferences.h"
 #include "ui/ui.h"
 #include "ui/window.h"
-#include "window_list.h"
-#include "config/preferences.h"
+#include "ui/window_list.h"
 
 static void
 _occuptantswin_occupant(ProfLayoutSplit *layout, Occupant *occupant, gboolean showjid)

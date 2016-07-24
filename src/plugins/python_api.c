@@ -41,12 +41,12 @@
 
 #include <glib.h>
 
+#include "log.h"
 #include "plugins/api.h"
 #include "plugins/python_api.h"
 #include "plugins/python_plugins.h"
 #include "plugins/callbacks.h"
 #include "plugins/autocompleters.h"
-#include "log.h"
 
 static char* _python_plugin_name(void);
 

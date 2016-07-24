@@ -40,6 +40,7 @@
 #ifdef HAVE_GTK
 #include "ui/tray.h"
 #endif
+
 #include <locale.h>
 #include <signal.h>
 #include <stdlib.h>
@@ -48,32 +49,35 @@
 #include <glib.h>
 
 #include "profanity.h"
-#include "xmpp/chat_session.h"
-#include "xmpp/chat_state.h"
+#include "common.h"
+#include "log.h"
+#include "config/tlscerts.h"
 #include "config/accounts.h"
 #include "config/preferences.h"
 #include "config/theme.h"
+#include "config/tlscerts.h"
 #include "config/scripts.h"
 #include "command/cmd_defs.h"
-#include "common.h"
+#include "plugins/plugins.h"
+#include "event/client_events.h"
+#include "ui/ui.h"
+#include "ui/window_list.h"
+#include "xmpp/resource.h"
+#include "xmpp/xmpp.h"
+#include "xmpp/muc.h"
+#include "xmpp/chat_session.h"
+#include "xmpp/chat_state.h"
 #include "xmpp/contact.h"
 #include "xmpp/roster_list.h"
-#include "config/tlscerts.h"
-#include "log.h"
-#include "xmpp/muc.h"
-#include "plugins/plugins.h"
+
 #ifdef HAVE_LIBOTR
 #include "otr/otr.h"
 #endif
+
 #ifdef HAVE_LIBGPGME
 #include "pgp/gpg.h"
 #endif
-#include "xmpp/resource.h"
-#include "xmpp/xmpp.h"
-#include "ui/ui.h"
-#include "ui/window_list.h"
-#include "event/client_events.h"
-#include "config/tlscerts.h"
+
 
 static void _check_autoaway(void);
 static void _init(char *log_level);

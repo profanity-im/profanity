@@ -41,6 +41,7 @@
 #include <wchar.h>
 
 #include <glib.h>
+
 #ifdef HAVE_NCURSESW_NCURSES_H
 #include <ncursesw/ncurses.h>
 #elif HAVE_NCURSES_H
@@ -49,10 +50,10 @@
 
 #include "config/theme.h"
 #include "config/preferences.h"
-#include "xmpp/roster_list.h"
 #include "ui/ui.h"
 #include "ui/window.h"
 #include "xmpp/xmpp.h"
+#include "xmpp/roster_list.h"
 
 #define CONS_WIN_TITLE "Profanity. Type /help for help information."
 #define XML_WIN_TITLE "XML Console"

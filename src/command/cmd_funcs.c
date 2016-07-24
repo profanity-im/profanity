@@ -49,41 +49,45 @@
 #include <langinfo.h>
 #include <ctype.h>
 
-#include "xmpp/chat_session.h"
+#include "profanity.h"
+#include "log.h"
+#include "common.h"
 #include "command/cmd_funcs.h"
 #include "command/cmd_defs.h"
 #include "command/cmd_ac.h"
-#include "common.h"
 #include "config/accounts.h"
 #include "config/account.h"
 #include "config/preferences.h"
 #include "config/theme.h"
 #include "config/tlscerts.h"
 #include "config/scripts.h"
-#include "xmpp/contact.h"
-#include "xmpp/roster_list.h"
-#include "xmpp/jid.h"
-#include "log.h"
-#include "xmpp/muc.h"
-#ifdef HAVE_LIBOTR
-#include "otr/otr.h"
-#endif
-#ifdef HAVE_LIBGPGME
-#include "pgp/gpg.h"
-#endif
-#include "profanity.h"
-#include "plugins/plugins.h"
+#include "event/client_events.h"
+#include "tools/http_upload.h"
 #include "tools/autocomplete.h"
 #include "tools/parser.h"
 #include "tools/tinyurl.h"
-#include "xmpp/xmpp.h"
+#include "plugins/plugins.h"
 #include "ui/ui.h"
 #include "ui/window_list.h"
-#include "event/client_events.h"
+#include "xmpp/xmpp.h"
+#include "xmpp/contact.h"
+#include "xmpp/roster_list.h"
+#include "xmpp/jid.h"
+#include "xmpp/muc.h"
+#include "xmpp/chat_session.h"
+
+#ifdef HAVE_LIBOTR
+#include "otr/otr.h"
+#endif
+
+#ifdef HAVE_LIBGPGME
+#include "pgp/gpg.h"
+#endif
+
 #ifdef HAVE_GTK
 #include "ui/tray.h"
 #endif
-#include "tools/http_upload.h"
+
 #ifdef HAVE_PYTHON
 #include "plugins/python_plugins.h"
 #endif

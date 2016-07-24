@@ -44,24 +44,25 @@
 #ifdef HAVE_LIBMESODE
 #include <mesode.h>
 #endif
+
 #ifdef HAVE_LIBSTROPHE
 #include <strophe.h>
 #endif
 
+#include "profanity.h"
+#include "log.h"
 #include "common.h"
 #include "config/preferences.h"
-#include "log.h"
-#include "muc.h"
-#include "profanity.h"
-#include "ui/ui.h"
 #include "event/server_events.h"
+#include "plugins/plugins.h"
+#include "ui/ui.h"
 #include "xmpp/connection.h"
 #include "xmpp/capabilities.h"
 #include "xmpp/session.h"
 #include "xmpp/stanza.h"
 #include "xmpp/iq.h"
 #include "xmpp/xmpp.h"
-#include "plugins/plugins.h"
+#include "xmpp/muc.h"
 
 static Autocomplete sub_requests_ac;
 

@@ -35,16 +35,7 @@
 #ifndef XMPP_SESSION_H
 #define XMPP_SESSION_H
 
-#include "config.h"
-
-#ifdef HAVE_LIBMESODE
-#include <mesode.h>
-#endif
-#ifdef HAVE_LIBSTROPHE
-#include <strophe.h>
-#endif
-
-#include "resource.h"
+#include <glib.h>
 
 void session_login_success(gboolean secured);
 void session_login_failed(void);

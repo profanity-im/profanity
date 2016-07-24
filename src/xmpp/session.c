@@ -38,14 +38,11 @@
 #include <string.h>
 #include <stdlib.h>
 
-#include "chat_session.h"
+#include "profanity.h"
+#include "log.h"
 #include "common.h"
 #include "config/preferences.h"
-#include "jid.h"
-#include "log.h"
-#include "muc.h"
 #include "plugins/plugins.h"
-#include "profanity.h"
 #include "event/server_events.h"
 #include "xmpp/bookmark.h"
 #include "xmpp/blocking.h"
@@ -58,6 +55,9 @@
 #include "xmpp/roster.h"
 #include "xmpp/stanza.h"
 #include "xmpp/xmpp.h"
+#include "xmpp/muc.h"
+#include "xmpp/chat_session.h"
+#include "xmpp/jid.h"
 
 // for auto reconnect
 static struct {

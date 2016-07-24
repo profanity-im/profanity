@@ -35,14 +35,15 @@
 #ifndef XMPP_FORM_H
 #define XMPP_FORM_H
 
-#include "xmpp/xmpp.h"
-
 #ifdef HAVE_LIBMESODE
 #include <mesode.h>
 #endif
+
 #ifdef HAVE_LIBSTROPHE
 #include <strophe.h>
 #endif
+
+#include "xmpp/xmpp.h"
 
 DataForm* form_create(xmpp_stanza_t *const stanza);
 xmpp_stanza_t* form_create_submission(DataForm *form);

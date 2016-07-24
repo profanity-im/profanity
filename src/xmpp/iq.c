@@ -46,30 +46,31 @@
 #ifdef HAVE_LIBMESODE
 #include <mesode.h>
 #endif
+
 #ifdef HAVE_LIBSTROPHE
 #include <strophe.h>
 #endif
 
-#include "log.h"
-#include "muc.h"
 #include "profanity.h"
-#include "ui/ui.h"
-#include "ui/window_list.h"
+#include "log.h"
 #include "config/preferences.h"
 #include "event/server_events.h"
+#include "plugins/plugins.h"
+#include "tools/http_upload.h"
+#include "ui/ui.h"
+#include "ui/window_list.h"
+#include "xmpp/xmpp.h"
+#include "xmpp/connection.h"
+#include "xmpp/session.h"
+#include "xmpp/iq.h"
 #include "xmpp/capabilities.h"
 #include "xmpp/blocking.h"
 #include "xmpp/session.h"
 #include "xmpp/stanza.h"
 #include "xmpp/form.h"
-#include "roster_list.h"
-#include "xmpp/xmpp.h"
-#include "xmpp/connection.h"
-#include "xmpp/session.h"
-#include "xmpp/iq.h"
+#include "xmpp/roster_list.h"
 #include "xmpp/roster.h"
-#include "plugins/plugins.h"
-#include "tools/http_upload.h"
+#include "xmpp/muc.h"
 
 typedef struct p_room_info_data_t {
     char *room;

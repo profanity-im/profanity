@@ -39,10 +39,10 @@
 #include <glib.h>
 #include <glib/gstdio.h>
 
-#include "tray.h"
-#include "window_list.h"
 #include "log.h"
 #include "config/preferences.h"
+#include "ui/tray.h"
+#include "ui/window_list.h"
 
 static gboolean gtk_ready = FALSE;
 static GtkStatusIcon *prof_tray = NULL;

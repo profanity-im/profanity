@@ -35,6 +35,8 @@
 #ifndef CONFIG_TLSCERTS_H
 #define CONFIG_TLSCERTS_H
 
+#include <glib.h>
+
 typedef struct tls_cert_t {
     int version;
     char *serialnumber;

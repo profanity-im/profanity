@@ -37,10 +37,10 @@
 
 #include <glib.h>
 
-#include "xmpp/contact.h"
-#include "xmpp/jid.h"
 #include "tools/autocomplete.h"
 #include "ui/win_types.h"
+#include "xmpp/contact.h"
+#include "xmpp/jid.h"
 
 typedef enum {
     MUC_ROLE_NONE,

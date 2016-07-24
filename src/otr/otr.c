@@ -38,16 +38,16 @@
 #include <libotr/sm.h>
 #include <glib.h>
 
+#include "log.h"
+#include "config/preferences.h"
 #include "otr/otr.h"
 #include "otr/otrlib.h"
-#include "log.h"
-#include "xmpp/roster_list.h"
-#include "ui/window_list.h"
-#include "xmpp/contact.h"
 #include "ui/ui.h"
-#include "xmpp/xmpp.h"
-#include "config/preferences.h"
+#include "ui/window_list.h"
 #include "xmpp/chat_session.h"
+#include "xmpp/roster_list.h"
+#include "xmpp/contact.h"
+#include "xmpp/xmpp.h"
 
 #define PRESENCE_ONLINE 1
 #define PRESENCE_OFFLINE 0

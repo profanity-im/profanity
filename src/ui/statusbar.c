@@ -45,10 +45,10 @@
 #endif
 
 #include "config/theme.h"
+#include "config/preferences.h"
 #include "ui/ui.h"
 #include "ui/statusbar.h"
 #include "ui/inputwin.h"
-#include "config/preferences.h"
 
 #define TIME_CHECK 60000000
 

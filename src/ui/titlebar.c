@@ -44,7 +44,7 @@
 #include "ui/ui.h"
 #include "ui/titlebar.h"
 #include "ui/inputwin.h"
-#include "window_list.h"
+#include "ui/window_list.h"
 #include "ui/window.h"
 #include "xmpp/roster_list.h"
 #include "xmpp/chat_session.h"

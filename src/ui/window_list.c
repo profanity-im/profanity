@@ -41,14 +41,14 @@
 #include <glib.h>
 
 #include "common.h"
-#include "xmpp/roster_list.h"
+#include "config/preferences.h"
 #include "config/theme.h"
+#include "plugins/plugins.h"
 #include "ui/ui.h"
 #include "ui/statusbar.h"
-#include "window_list.h"
-#include "plugins/plugins.h"
+#include "ui/window_list.h"
 #include "xmpp/xmpp.h"
-#include "config/preferences.h"
+#include "xmpp/roster_list.h"
 
 static GHashTable *windows;
 static int current;

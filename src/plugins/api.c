@@ -38,7 +38,11 @@
 
 #include <glib.h>
 
+#include "profanity.h"
 #include "log.h"
+#include "common.h"
+#include "config/theme.h"
+#include "command/cmd_defs.h"
 #include "event/server_events.h"
 #include "event/client_events.h"
 #include "plugins/callbacks.h"
@@ -46,12 +50,8 @@
 #include "plugins/themes.h"
 #include "plugins/settings.h"
 #include "plugins/disco.h"
-#include "profanity.h"
 #include "ui/ui.h"
-#include "config/theme.h"
-#include "command/cmd_defs.h"
 #include "ui/window_list.h"
-#include "common.h"
 
 void
 api_cons_alert(void)

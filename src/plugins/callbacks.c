@@ -41,9 +41,8 @@
 #include "plugins/plugins.h"
 #include "tools/autocomplete.h"
 #include "tools/parser.h"
-#include "ui/window_list.h"
-
 #include "ui/ui.h"
+#include "ui/window_list.h"
 
 static GHashTable *p_commands = NULL;
 static GHashTable *p_timed_functions = NULL;

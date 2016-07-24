@@ -36,6 +36,7 @@
 #define PROFANITY_H
 
 #include <pthread.h>
+#include <glib.h>
 
 void prof_run(char *log_level, char *account_name);
 

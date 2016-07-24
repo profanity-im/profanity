@@ -35,8 +35,8 @@
 #include <glib.h>
 #include <glib/gstdio.h>
 
-#include "config/theme.h"
 #include "common.h"
+#include "config/theme.h"
 
 static GKeyFile *themes;
 

@@ -37,12 +37,12 @@
 
 #include <glib.h>
 
-#include "chat_state.h"
-#include "xmpp/chat_session.h"
+#include "config/preferences.h"
 #include "ui/window_list.h"
 #include "ui/win_types.h"
 #include "xmpp/xmpp.h"
-#include "config/preferences.h"
+#include "xmpp/chat_state.h"
+#include "xmpp/chat_session.h"
 
 #define PAUSED_TIMEOUT 10.0
 #define INACTIVE_TIMEOUT 30.0

@@ -53,22 +53,22 @@
 #include <ncurses.h>
 #endif
 
-#include "command/cmd_ac.h"
-#include "xmpp/chat_state.h"
+#include "profanity.h"
+#include "log.h"
 #include "common.h"
+#include "command/cmd_ac.h"
 #include "config/accounts.h"
 #include "config/preferences.h"
 #include "config/theme.h"
-#include "log.h"
-#include "xmpp/muc.h"
-#include "profanity.h"
-#include "xmpp/roster_list.h"
 #include "ui/ui.h"
 #include "ui/statusbar.h"
 #include "ui/inputwin.h"
 #include "ui/window.h"
-#include "window_list.h"
+#include "ui/window_list.h"
 #include "xmpp/xmpp.h"
+#include "xmpp/muc.h"
+#include "xmpp/roster_list.h"
+#include "xmpp/chat_state.h"
 
 static WINDOW *inp_win;
 static int pad_start = 0;

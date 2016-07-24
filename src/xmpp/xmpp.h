@@ -40,16 +40,17 @@
 #ifdef HAVE_LIBMESODE
 #include <mesode.h>
 #endif
+
 #ifdef HAVE_LIBSTROPHE
 #include <strophe.h>
 #endif
 
 #include "config/accounts.h"
 #include "config/tlscerts.h"
-#include "contact.h"
-#include "jid.h"
 #include "tools/autocomplete.h"
 #include "tools/http_upload.h"
+#include "xmpp/contact.h"
+#include "xmpp/jid.h"
 
 #define JABBER_PRIORITY_MIN -128
 #define JABBER_PRIORITY_MAX 127

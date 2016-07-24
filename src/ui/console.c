@@ -43,18 +43,18 @@
 #include <ncurses.h>
 #endif
 
-#include "command/cmd_defs.h"
 #include "common.h"
 #include "log.h"
-#include "xmpp/muc.h"
-#include "xmpp/roster_list.h"
 #include "config/preferences.h"
 #include "config/theme.h"
-#include "ui/window.h"
-#include "window_list.h"
+#include "command/cmd_defs.h"
+#include "ui/window_list.h"
 #include "ui/ui.h"
+#include "ui/window.h"
 #include "ui/statusbar.h"
 #include "xmpp/xmpp.h"
+#include "xmpp/muc.h"
+#include "xmpp/roster_list.h"
 
 #ifdef HAVE_GIT_VERSION
 #include "gitversion.h"

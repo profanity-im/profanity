@@ -38,13 +38,13 @@
 
 #include <glib.h>
 
-#include "xmpp/contact.h"
 #include "common.h"
-#include "xmpp/jid.h"
 #include "tools/autocomplete.h"
 #include "ui/ui.h"
 #include "ui/window_list.h"
-#include "muc.h"
+#include "xmpp/jid.h"
+#include "xmpp/muc.h"
+#include "xmpp/contact.h"
 
 typedef struct _muc_room_t {
     char *room; // e.g. test@conference.server

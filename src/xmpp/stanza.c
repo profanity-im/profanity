@@ -47,6 +47,7 @@
 #ifdef HAVE_LIBMESODE
 #include <mesode.h>
 #endif
+
 #ifdef HAVE_LIBSTROPHE
 #include <strophe.h>
 #endif
@@ -58,8 +59,7 @@
 #include "xmpp/capabilities.h"
 #include "xmpp/connection.h"
 #include "xmpp/form.h"
-
-#include "muc.h"
+#include "xmpp/muc.h"
 
 #if 0
 xmpp_stanza_t*

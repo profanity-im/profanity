@@ -35,11 +35,10 @@
 #include <string.h>
 #include <stdlib.h>
 
+#include "log.h"
 #include "config.h"
 #include "common.h"
 #include "config/preferences.h"
-#include "log.h"
-#include "xmpp/xmpp.h"
 #include "plugins/callbacks.h"
 #include "plugins/autocompleters.h"
 #include "plugins/api.h"
@@ -47,6 +46,8 @@
 #include "plugins/themes.h"
 #include "plugins/settings.h"
 #include "plugins/disco.h"
+#include "ui/ui.h"
+#include "xmpp/xmpp.h"
 
 #ifdef HAVE_PYTHON
 #include "plugins/python_plugins.h"
@@ -57,8 +58,6 @@
 #include "plugins/c_plugins.h"
 #include "plugins/c_api.h"
 #endif
-
-#include "ui/ui.h"
 
 static GHashTable *plugins;
 

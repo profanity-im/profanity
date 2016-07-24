@@ -47,17 +47,18 @@
 #ifdef HAVE_LIBMESODE
 #include <mesode.h>
 #endif
+
 #ifdef HAVE_LIBSTROPHE
 #include <strophe.h>
 #endif
 
 #include "common.h"
 #include "log.h"
+#include "plugins/plugins.h"
 #include "xmpp/xmpp.h"
 #include "xmpp/stanza.h"
 #include "xmpp/form.h"
 #include "xmpp/capabilities.h"
-#include "plugins/plugins.h"
 
 static gchar *cache_loc;
 static GKeyFile *cache;

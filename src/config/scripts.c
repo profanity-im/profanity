@@ -42,9 +42,9 @@
 
 #include "common.h"
 #include "log.h"
-#include "ui/window_list.h"
 #include "command/cmd_defs.h"
 #include "ui/ui.h"
+#include "ui/window_list.h"
 #include "xmpp/xmpp.h"
 
 void
