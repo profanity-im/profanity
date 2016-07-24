@@ -148,7 +148,7 @@ python_api_register_command(PyObject *self, PyObject *args)
 
     if (p_callback && PyCallable_Check(p_callback)) {
         Py_ssize_t len = PyList_Size(synopsis);
-        const char *c_synopsis[len == 0 ? 0 : len+1];
+        char *c_synopsis[len == 0 ? 0 : len+1];
         Py_ssize_t i = 0;
         for (i = 0; i < len; i++) {
             PyObject *item = PyList_GetItem(synopsis, i);
@@ -158,7 +158,7 @@ python_api_register_command(PyObject *self, PyObject *args)
         c_synopsis[len] = NULL;
 
         Py_ssize_t args_len = PyList_Size(arguments);
-        const char *c_arguments[args_len == 0 ? 0 : args_len+1][2];
+        char *c_arguments[args_len == 0 ? 0 : args_len+1][2];
         i = 0;
         for (i = 0; i < args_len; i++) {
             PyObject *item = PyList_GetItem(arguments, i);
@@ -179,7 +179,7 @@ python_api_register_command(PyObject *self, PyObject *args)
         c_arguments[args_len][1] = NULL;
 
         len = PyList_Size(examples);
-        const char *c_examples[len == 0 ? 0 : len+1];
+        char *c_examples[len == 0 ? 0 : len+1];
         i = 0;
         for (i = 0; i < len; i++) {
             PyObject *item = PyList_GetItem(examples, i);
@@ -193,6 +193,20 @@ python_api_register_command(PyObject *self, PyObject *args)
             description_str, c_arguments, c_examples, p_callback, python_command_callback, NULL);
         free(command_name_str);
         free(description_str);
+        i = 0;
+        while (c_synopsis[i] != NULL) {
+            free(c_synopsis[i++]);
+        }
+        i = 0;
+        while (c_arguments[i] != NULL && c_arguments[i][0] != NULL) {
+            free(c_arguments[i][0]);
+            free(c_arguments[i][1]);
+            i++;
+        }
+        i = 0;
+        while (c_examples[i] != NULL) {
+            free(c_examples[i++]);
+        }
         disable_python_threads();
     }
 
@@ -254,6 +268,10 @@ python_api_completer_add(PyObject *self, PyObject *args)
     allow_python_threads();
     api_completer_add(plugin_name, key_str, c_items);
     free(key_str);
+    i = 0;
+    while (c_items[i] != NULL) {
+        free(c_items[i++]);
+    }
     disable_python_threads();
 
     free(plugin_name);
@@ -993,8 +1011,9 @@ _python_plugin_name(void)
 {
     PyThreadState *ts = PyThreadState_Get();
     PyFrameObject *frame = ts->frame;
-    char const* filename = python_str_or_unicode_to_string(frame->f_code->co_filename);
+    char* filename = python_str_or_unicode_to_string(frame->f_code->co_filename);
     gchar **split = g_strsplit(filename, "/", 0);
+    free(filename);
     char *plugin_name = strdup(split[g_strv_length(split)-1]);
     g_strfreev(split);
 

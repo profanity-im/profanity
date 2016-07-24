@@ -51,7 +51,7 @@ char* api_get_current_nick(void);
 char** api_get_current_occupants(void);
 
 void api_register_command(const char *const plugin_name, const char *command_name, int min_args, int max_args,
-    const char **synopsis, const char *description, const char *arguments[][2], const char **examples,
+    char **synopsis, const char *description, char *arguments[][2], char **examples,
     void *callback, void(*callback_func)(PluginCommand *command, gchar **args), void(*callback_destroy)(void *callback));
 void api_register_timed(const char *const plugin_name, void *callback, int interval_seconds,
     void (*callback_func)(PluginTimedFunction *timed_function), void(*callback_destroy)(void *callback));

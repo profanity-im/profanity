@@ -107,7 +107,7 @@ api_cons_bad_cmd_usage(const char *const cmd)
 
 void
 api_register_command(const char *const plugin_name, const char *command_name, int min_args, int max_args,
-    const char **synopsis, const char *description, const char *arguments[][2], const char **examples,
+    char **synopsis, const char *description, char *arguments[][2], char **examples,
     void *callback, void(*callback_exec)(PluginCommand *command, gchar **args), void(*callback_destroy)(void *callback))
 {
     PluginCommand *command = malloc(sizeof(PluginCommand));
