@@ -32,8 +32,8 @@
  *
  */
 
-#ifndef ACCOUNT_H
-#define ACCOUNT_H
+#ifndef CONFIG_ACCOUNT_H
+#define CONFIG_ACCOUNT_H
 
 #include "common.h"
 

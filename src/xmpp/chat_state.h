@@ -1,5 +1,5 @@
 /*
- * resource.h
+ * chat_state.h
  *
  * Copyright (C) 2012 - 2016 James Booth <boothj5@gmail.com>
  *
@@ -32,21 +32,33 @@
  *
  */
 
-#ifndef RESOURCE_H
-#define RESOURCE_H
+#ifndef XMPP_CHAT_STATE_H
+#define XMPP_CHAT_STATE_H
 
-#include "common.h"
+#include <glib.h>
 
-typedef struct resource_t {
-    char *name;
-    resource_presence_t presence;
-    char *status;
-    int priority;
-} Resource;
+typedef enum {
+    CHAT_STATE_ACTIVE,
+    CHAT_STATE_COMPOSING,
+    CHAT_STATE_PAUSED,
+    CHAT_STATE_INACTIVE,
+    CHAT_STATE_GONE
+} chat_state_type_t;
 
-Resource* resource_new(const char *const name, resource_presence_t presence, const char *const status,
-    const int priority);
-void resource_destroy(Resource *resource);
-int resource_compare_availability(Resource *first, Resource *second);
+typedef struct prof_chat_state_t {
+    chat_state_type_t type;
+    GTimer *timer;
+} ChatState;
+
+ChatState* chat_state_new(void);
+void chat_state_free(ChatState *state);
+
+void chat_state_idle(void);
+void chat_state_activity(void);
+
+void chat_state_handle_idle(const char *const barejid, ChatState *state);
+void chat_state_handle_typing(const char *const barejid, ChatState *state);
+void chat_state_active(ChatState *state);
+void chat_state_gone(const char *const barejid, ChatState *state);
 
 #endif

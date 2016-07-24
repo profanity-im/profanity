@@ -35,7 +35,7 @@
 #ifndef LOG_H
 #define LOG_H
 
-#include "glib.h"
+#include <glib.h>
 
 // log levels
 typedef enum {

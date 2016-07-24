@@ -32,15 +32,15 @@
  *
  */
 
-#ifndef MUC_H
-#define MUC_H
+#ifndef XMPP_MUC_H
+#define XMPP_MUC_H
 
 #include <glib.h>
 
-#include "contact.h"
-#include "jid.h"
 #include "tools/autocomplete.h"
 #include "ui/win_types.h"
+#include "xmpp/contact.h"
+#include "xmpp/jid.h"
 
 typedef enum {
     MUC_ROLE_NONE,

@@ -4,7 +4,7 @@
 #include <cmocka.h>
 #include <stdlib.h>
 
-#include "muc.h"
+#include "xmpp/muc.h"
 
 void muc_before_test(void **state)
 {

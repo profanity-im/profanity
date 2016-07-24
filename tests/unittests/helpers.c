@@ -10,7 +10,7 @@
 #include "common.h"
 #include "helpers.h"
 #include "config/preferences.h"
-#include "chat_session.h"
+#include "xmpp/chat_session.h"
 
 void create_config_dir(void **state)
 {

@@ -1,11 +1,11 @@
 core_sources = \
-	src/contact.c src/contact.h src/log.c src/common.c \
+	src/xmpp/contact.c src/xmpp/contact.h src/log.c src/common.c \
 	src/log.h src/profanity.c src/common.h \
-	src/profanity.h src/chat_session.c \
-	src/chat_session.h src/muc.c src/muc.h src/jid.h src/jid.c \
-	src/chat_state.h src/chat_state.c \
-	src/resource.c src/resource.h \
-	src/roster_list.c src/roster_list.h \
+	src/profanity.h src/xmpp/chat_session.c \
+	src/xmpp/chat_session.h src/xmpp/muc.c src/xmpp/muc.h src/xmpp/jid.h src/xmpp/jid.c \
+	src/xmpp/chat_state.h src/xmpp/chat_state.c \
+	src/xmpp/resource.c src/xmpp/resource.h \
+	src/xmpp/roster_list.c src/xmpp/roster_list.h \
 	src/xmpp/xmpp.h src/xmpp/capabilities.c src/xmpp/session.c \
 	src/xmpp/connection.h src/xmpp/connection.c \
 	src/xmpp/iq.c src/xmpp/message.c src/xmpp/presence.c src/xmpp/stanza.c \
@@ -22,7 +22,7 @@ core_sources = \
 	src/ui/titlebar.h src/ui/statusbar.h src/ui/inputwin.h \
 	src/ui/console.c src/ui/notifier.c \
 	src/ui/win_types.h \
-	src/window_list.c src/window_list.h \
+	src/ui/window_list.c src/ui/window_list.h \
 	src/ui/rosterwin.c src/ui/occupantswin.c \
 	src/ui/buffer.c src/ui/buffer.h \
 	src/ui/chatwin.c \
@@ -54,16 +54,16 @@ core_sources = \
 	src/plugins/themes.c src/plugins/themes.h \
 	src/plugins/settings.c src/plugins/settings.h \
 	src/plugins/disco.c src/plugins/disco.h \
-	src/tray.h src/tray.c
+	src/ui/tray.h src/ui/tray.c
 
 unittest_sources = \
-	src/contact.c src/contact.h src/common.c \
+	src/xmpp/contact.c src/xmpp/contact.h src/common.c \
 	src/log.h src/profanity.c src/common.h \
-	src/profanity.h src/chat_session.c \
-	src/chat_session.h src/muc.c src/muc.h src/jid.h src/jid.c \
-	src/resource.c src/resource.h \
-	src/chat_state.h src/chat_state.c \
-	src/roster_list.c src/roster_list.h \
+	src/profanity.h src/xmpp/chat_session.c \
+	src/xmpp/chat_session.h src/xmpp/muc.c src/xmpp/muc.h src/xmpp/jid.h src/xmpp/jid.c \
+	src/xmpp/resource.c src/xmpp/resource.h \
+	src/xmpp/chat_state.h src/xmpp/chat_state.c \
+	src/xmpp/roster_list.c src/xmpp/roster_list.h \
 	src/xmpp/xmpp.h src/xmpp/form.c \
 	src/ui/ui.h \
 	src/otr/otr.h \
@@ -90,10 +90,10 @@ unittest_sources = \
 	src/plugins/themes.c src/plugins/themes.h \
 	src/plugins/settings.c src/plugins/settings.h \
 	src/plugins/disco.c src/plugins/disco.h \
-	src/window_list.c src/window_list.h \
+	src/ui/window_list.c src/ui/window_list.h \
 	src/event/server_events.c src/event/server_events.h \
 	src/event/client_events.c src/event/client_events.h \
-	src/tray.h src/tray.c \
+	src/ui/tray.h src/ui/tray.c \
 	tests/unittests/xmpp/stub_xmpp.c \
 	tests/unittests/ui/stub_ui.c \
 	tests/unittests/log/stub_log.c \

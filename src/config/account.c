@@ -38,10 +38,10 @@
 
 #include <glib.h>
 
-#include "jid.h"
-#include "config/account.h"
 #include "common.h"
 #include "log.h"
+#include "config/account.h"
+#include "xmpp/jid.h"
 
 ProfAccount*
 account_new(const gchar *const name, const gchar *const jid,

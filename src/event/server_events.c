@@ -38,22 +38,23 @@
 #include <stdlib.h>
 #include <assert.h>
 
-#include "chat_session.h"
+#include "profanity.h"
 #include "log.h"
-#include "muc.h"
 #include "config/preferences.h"
+#include "config/tlscerts.h"
 #include "config/account.h"
 #include "config/scripts.h"
-#include "roster_list.h"
-#include "plugins/plugins.h"
-#include "window_list.h"
-#include "config/tlscerts.h"
-#include "profanity.h"
 #include "event/client_events.h"
+#include "plugins/plugins.h"
+#include "ui/window_list.h"
+#include "xmpp/muc.h"
+#include "xmpp/chat_session.h"
+#include "xmpp/roster_list.h"
 
 #ifdef HAVE_LIBOTR
 #include "otr/otr.h"
 #endif
+
 #ifdef HAVE_LIBGPGME
 #include "pgp/gpg.h"
 #endif

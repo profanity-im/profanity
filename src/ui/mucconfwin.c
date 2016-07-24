@@ -38,7 +38,7 @@
 #include "ui/ui.h"
 #include "ui/window.h"
 #include "ui/win_types.h"
-#include "window_list.h"
+#include "ui/window_list.h"
 
 static void _mucconfwin_form_field(ProfWin *window, char *tag, FormField *field);
 

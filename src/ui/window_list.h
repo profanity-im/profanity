@@ -32,8 +32,8 @@
  *
  */
 
-#ifndef WINDOW_LIST_H
-#define WINDOW_LIST_H
+#ifndef UI_WINDOW_LIST_H
+#define UI_WINDOW_LIST_H
 
 #include "ui/ui.h"
 

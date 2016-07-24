@@ -43,26 +43,26 @@
 #ifdef HAVE_LIBMESODE
 #include <mesode.h>
 #endif
+
 #ifdef HAVE_LIBSTROPHE
 #include <strophe.h>
 #endif
 
-#include "log.h"
-#include "plugins/plugins.h"
 #include "profanity.h"
-#include "ui/ui.h"
+#include "log.h"
+#include "config/preferences.h"
+#include "plugins/plugins.h"
 #include "event/server_events.h"
 #include "event/client_events.h"
 #include "tools/autocomplete.h"
-#include "config/preferences.h"
+#include "ui/ui.h"
 #include "xmpp/session.h"
 #include "xmpp/iq.h"
 #include "xmpp/connection.h"
 #include "xmpp/roster.h"
-#include "roster_list.h"
+#include "xmpp/roster_list.h"
 #include "xmpp/stanza.h"
 #include "xmpp/xmpp.h"
-#include "plugins/plugins.h"
 
 // callback data for group commands
 typedef struct _group_data {

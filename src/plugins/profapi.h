@@ -32,8 +32,8 @@
  *
  */
 
-#ifndef PROF_API_H
-#define PROF_API_H
+#ifndef PLUGINS_PROF_API_H
+#define PLUGINS_PROF_API_H
 
 #define prof_register_command(command_name, min_args, max_args, synopsis, description, arguments, examples, callback) _prof_register_command(__FILE__, command_name, min_args, max_args, synopsis, description, arguments, examples, callback)
 #define prof_register_timed(callback, interval_seconds) _prof_register_timed(__FILE__, callback, interval_seconds)

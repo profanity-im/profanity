@@ -41,6 +41,7 @@
 #ifdef HAVE_LIBMESODE
 #include <mesode.h>
 #endif
+
 #ifdef HAVE_LIBSTROPHE
 #include <strophe.h>
 #endif
@@ -88,6 +89,12 @@ connection_init(void)
     conn.domain = NULL;
     conn.features_by_jid = NULL;
     conn.available_resources = g_hash_table_new_full(g_str_hash, g_str_equal, free, (GDestroyNotify)resource_destroy);
+}
+
+void
+connection_check_events(void)
+{
+    xmpp_run_once(conn.xmpp_ctx, 10);
 }
 
 void
@@ -191,7 +198,7 @@ connection_disconnect(void)
     xmpp_disconnect(conn.xmpp_conn);
 
     while (conn.conn_status == JABBER_DISCONNECTING) {
-        session_process_events(10);
+        session_process_events();
     }
 
     if (conn.xmpp_conn) {

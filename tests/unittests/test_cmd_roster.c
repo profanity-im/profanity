@@ -10,7 +10,7 @@
 #include "ui/stub_ui.h"
 
 #include "xmpp/xmpp.h"
-#include "roster_list.h"
+#include "xmpp/roster_list.h"
 #include "command/cmd_funcs.h"
 
 #define CMD_ROSTER "/roster"

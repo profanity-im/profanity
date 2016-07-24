@@ -14,7 +14,7 @@
 #include "config/accounts.h"
 
 #include "command/cmd_funcs.h"
-#include "muc.h"
+#include "xmpp/muc.h"
 
 #define CMD_JOIN "/join"
 

@@ -38,19 +38,21 @@
 #include <stdlib.h>
 
 #include <glib.h>
+
 #ifdef HAVE_LIBNOTIFY
 #include <libnotify/notify.h>
 #endif
+
 #ifdef PLATFORM_CYGWIN
 #include <windows.h>
 #endif
 
 #include "log.h"
-#include "muc.h"
-#include "ui/ui.h"
-#include "window_list.h"
 #include "config/preferences.h"
+#include "ui/ui.h"
+#include "ui/window_list.h"
 #include "xmpp/xmpp.h"
+#include "xmpp/muc.h"
 
 static GTimer *remind_timer;
 

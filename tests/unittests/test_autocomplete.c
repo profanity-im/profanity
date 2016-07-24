@@ -5,7 +5,7 @@
 #include <cmocka.h>
 #include <stdlib.h>
 
-#include "contact.h"
+#include "xmpp/contact.h"
 #include "tools/autocomplete.h"
 
 void clear_empty(void **state)

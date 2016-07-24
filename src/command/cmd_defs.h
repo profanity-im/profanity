@@ -32,8 +32,8 @@
  *
  */
 
-#ifndef CMD_DEFS_H
-#define CMD_DEFS_H
+#ifndef COMMAND_CMD_DEFS_H
+#define COMMAND_CMD_DEFS_H
 
 #include <glib.h>
 

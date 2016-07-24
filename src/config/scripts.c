@@ -42,9 +42,9 @@
 
 #include "common.h"
 #include "log.h"
-#include "window_list.h"
 #include "command/cmd_defs.h"
 #include "ui/ui.h"
+#include "ui/window_list.h"
 #include "xmpp/xmpp.h"
 
 void
@@ -159,7 +159,7 @@ scripts_exec(const char *const script)
     while ((read = getline(&line, &len, scriptfile)) != -1) {
         ProfWin *win = wins_get_current();
         cmd_process_input(win, line);
-        session_process_events(10);
+        session_process_events();
         ui_update();
     }
 

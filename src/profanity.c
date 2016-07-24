@@ -38,43 +38,46 @@
 #endif
 
 #ifdef HAVE_GTK
-#include "tray.h"
+#include "ui/tray.h"
 #endif
+
 #include <locale.h>
 #include <signal.h>
 #include <stdlib.h>
 #include <string.h>
-#include <assert.h>
 
 #include <glib.h>
 
 #include "profanity.h"
-#include "chat_session.h"
-#include "chat_state.h"
+#include "common.h"
+#include "log.h"
+#include "config/tlscerts.h"
 #include "config/accounts.h"
 #include "config/preferences.h"
 #include "config/theme.h"
+#include "config/tlscerts.h"
 #include "config/scripts.h"
 #include "command/cmd_defs.h"
-#include "common.h"
-#include "contact.h"
-#include "roster_list.h"
-#include "config/tlscerts.h"
-#include "log.h"
-#include "muc.h"
 #include "plugins/plugins.h"
+#include "event/client_events.h"
+#include "ui/ui.h"
+#include "ui/window_list.h"
+#include "xmpp/resource.h"
+#include "xmpp/xmpp.h"
+#include "xmpp/muc.h"
+#include "xmpp/chat_session.h"
+#include "xmpp/chat_state.h"
+#include "xmpp/contact.h"
+#include "xmpp/roster_list.h"
+
 #ifdef HAVE_LIBOTR
 #include "otr/otr.h"
 #endif
+
 #ifdef HAVE_LIBGPGME
 #include "pgp/gpg.h"
 #endif
-#include "resource.h"
-#include "xmpp/xmpp.h"
-#include "ui/ui.h"
-#include "window_list.h"
-#include "event/client_events.h"
-#include "config/tlscerts.h"
+
 
 static void _check_autoaway(void);
 static void _init(char *log_level);
@@ -130,7 +133,7 @@ prof_run(char *log_level, char *account_name)
 #endif
         plugins_run_timed();
         notify_remind();
-        session_process_events(10);
+        session_process_events();
         iq_autoping_check();
         ui_update();
 #ifdef HAVE_GTK
@@ -143,40 +146,6 @@ void
 prof_set_quit(void)
 {
     force_quit = TRUE;
-}
-
-void
-prof_handle_idle(void)
-{
-    jabber_conn_status_t status = connection_get_status();
-    if (status == JABBER_CONNECTED) {
-        GSList *recipients = wins_get_chat_recipients();
-        GSList *curr = recipients;
-
-        while (curr) {
-            char *barejid = curr->data;
-            ProfChatWin *chatwin = wins_get_chat(barejid);
-            chat_state_handle_idle(chatwin->barejid, chatwin->state);
-            curr = g_slist_next(curr);
-        }
-
-        if (recipients) {
-            g_slist_free(recipients);
-        }
-    }
-}
-
-void
-prof_handle_activity(void)
-{
-    jabber_conn_status_t status = connection_get_status();
-    ProfWin *current = wins_get_current();
-
-    if ((status == JABBER_CONNECTED) && (current->type == WIN_CHAT)) {
-        ProfChatWin *chatwin = (ProfChatWin*)current;
-        assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
-        chat_state_handle_typing(chatwin->barejid, chatwin->state);
-    }
 }
 
 static void

@@ -36,8 +36,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <common.h>
-#include <resource.h>
+#include "common.h"
+#include "xmpp/resource.h"
 
 Resource*
 resource_new(const char *const name, resource_presence_t presence, const char *const status, const int priority)

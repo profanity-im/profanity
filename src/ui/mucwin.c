@@ -38,12 +38,12 @@
 #include <assert.h>
 #include <stdlib.h>
 
-#include "ui/win_types.h"
-#include "window_list.h"
 #include "log.h"
 #include "config/preferences.h"
-#include "ui/window.h"
 #include "plugins/plugins.h"
+#include "ui/window.h"
+#include "ui/win_types.h"
+#include "ui/window_list.h"
 
 void
 mucwin_role_change(ProfMucWin *mucwin, const char *const role, const char *const actor, const char *const reason)

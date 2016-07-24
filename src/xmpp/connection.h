@@ -39,6 +39,7 @@
 
 void connection_init(void);
 void connection_shutdown(void);
+void connection_check_events(void);
 
 jabber_conn_status_t connection_connect(const char *const fulljid, const char *const passwd, const char *const altdomain, int port,
     const char *const tls_policy);

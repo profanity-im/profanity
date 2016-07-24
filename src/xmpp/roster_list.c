@@ -39,12 +39,12 @@
 #include <glib.h>
 #include <assert.h>
 
-#include "roster_list.h"
-#include "resource.h"
-#include "contact.h"
-#include "jid.h"
-#include "tools/autocomplete.h"
 #include "config/preferences.h"
+#include "tools/autocomplete.h"
+#include "xmpp/roster_list.h"
+#include "xmpp/resource.h"
+#include "xmpp/contact.h"
+#include "xmpp/jid.h"
 
 typedef struct prof_roster_t {
     // contacts, indexed on barejid

@@ -32,8 +32,8 @@
  *
  */
 
-#ifndef PYTHON_API_H
-#define PYTHON_API_H
+#ifndef PLUGINS_PYTHON_API_H
+#define PLUGINS_PYTHON_API_H
 
 void python_env_init(void);
 void python_init_prof(void);

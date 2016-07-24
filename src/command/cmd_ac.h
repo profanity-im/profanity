@@ -32,8 +32,8 @@
  *
  */
 
-#ifndef CMD_AC_H
-#define CMD_AC_H
+#ifndef COMMAND_CMD_AC_H
+#define COMMAND_CMD_AC_H
 
 #include "config/preferences.h"
 #include "command/cmd_funcs.h"

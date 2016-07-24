@@ -37,11 +37,12 @@
 
 #include "config.h"
 
-#include "command/cmd_funcs.h"
-#include "ui/win_types.h"
-#include "muc.h"
 #include "config/tlscerts.h"
 #include "config/account.h"
+#include "command/cmd_funcs.h"
+#include "ui/win_types.h"
+#include "xmpp/muc.h"
+
 #ifdef HAVE_LIBOTR
 #include "otr/otr.h"
 #endif

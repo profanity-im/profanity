@@ -38,15 +38,17 @@
 #include <glib.h>
 
 #include "log.h"
-#include "ui/ui.h"
-#include "window_list.h"
-#include "xmpp/xmpp.h"
-#include "roster_list.h"
-#include "chat_session.h"
 #include "plugins/plugins.h"
+#include "ui/window_list.h"
+#include "ui/ui.h"
+#include "xmpp/xmpp.h"
+#include "xmpp/roster_list.h"
+#include "xmpp/chat_session.h"
+
 #ifdef HAVE_LIBOTR
 #include "otr/otr.h"
 #endif
+
 #ifdef HAVE_LIBGPGME
 #include "pgp/gpg.h"
 #endif

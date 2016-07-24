@@ -44,10 +44,10 @@
 #include "ui/ui.h"
 #include "ui/titlebar.h"
 #include "ui/inputwin.h"
-#include "window_list.h"
+#include "ui/window_list.h"
 #include "ui/window.h"
-#include "roster_list.h"
-#include "chat_session.h"
+#include "xmpp/roster_list.h"
+#include "xmpp/chat_session.h"
 
 static WINDOW *win;
 static contact_presence_t current_presence;

@@ -32,8 +32,10 @@
  *
  */
 
-#ifndef CLIENT_EVENTS_H
-#define CLIENT_EVENTS_H
+#ifndef EVENT_CLIENT_EVENTS_H
+#define EVENT_CLIENT_EVENTS_H
+
+#include "xmpp/xmpp.h"
 
 jabber_conn_status_t cl_ev_connect_jid(const char *const jid, const char *const passwd, const char *const altdomain, const int port, const char *const tls_policy);
 jabber_conn_status_t cl_ev_connect_account(ProfAccount *account);

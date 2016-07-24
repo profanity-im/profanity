@@ -32,8 +32,8 @@
  *
  */
 
-#ifndef CMD_FUNCS_H
-#define CMD_FUNCS_H
+#ifndef COMMAND_CMD_FUNCS_H
+#define COMMAND_CMD_FUNCS_H
 
 #include "ui/win_types.h"
 

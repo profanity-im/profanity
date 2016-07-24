@@ -37,9 +37,8 @@
 
 #include <glib.h>
 
-#include "jid.h"
-
 #include "common.h"
+#include "xmpp/jid.h"
 
 Jid*
 jid_create(const gchar *const str)

@@ -38,10 +38,10 @@
 
 #include <glib.h>
 
-#include "chat_session.h"
-#include "config/preferences.h"
 #include "log.h"
+#include "config/preferences.h"
 #include "xmpp/xmpp.h"
+#include "xmpp/chat_session.h"
 
 static GHashTable *sessions;
 

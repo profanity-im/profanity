@@ -17,7 +17,7 @@
 
 #include "command/cmd_defs.h"
 #include "command/cmd_funcs.h"
-#include "window_list.h"
+#include "ui/window_list.h"
 #include "xmpp/xmpp.h"
 
 #include "ui/ui.h"

@@ -32,8 +32,8 @@
  *
  */
 
-#ifndef OTR_H
-#define OTR_H
+#ifndef OTR_OTR_H
+#define OTR_OTR_H
 
 #include <libotr/proto.h>
 #include <libotr/message.h>

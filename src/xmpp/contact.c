@@ -38,10 +38,10 @@
 
 #include <glib.h>
 
-#include "contact.h"
 #include "common.h"
-#include "resource.h"
 #include "tools/autocomplete.h"
+#include "xmpp/resource.h"
+#include "xmpp/contact.h"
 
 struct p_contact_t {
     char *barejid;

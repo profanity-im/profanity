@@ -35,7 +35,6 @@
 #include <Python.h>
 
 #include "config.h"
-
 #include "config/preferences.h"
 #include "plugins/api.h"
 #include "plugins/callbacks.h"
