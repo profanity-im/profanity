@@ -16,7 +16,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Profanity.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Profanity.  If not, see <https://www.gnu.org/licenses/>.
  *
  * In addition, as a special exception, the copyright holders give permission to
  * link the code of portions of this program with the OpenSSL library under
@@ -427,7 +427,7 @@ cons_about(void)
     }
 
     win_vprint(console, '-', 0, NULL, 0, 0, "", "Copyright (C) 2012 - 2016 James Booth <%s>.", PACKAGE_BUGREPORT);
-    win_println(console, 0, "License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>");
+    win_println(console, 0, "License GPLv3+: GNU GPL version 3 or later <https://www.gnu.org/licenses/gpl.html>");
     win_println(console, 0, "");
     win_println(console, 0, "This is free software; you are free to change and redistribute it.");
     win_println(console, 0, "There is NO WARRANTY, to the extent permitted by law.");
