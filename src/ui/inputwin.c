@@ -54,6 +54,7 @@
 #endif
 
 #include "command/cmd_ac.h"
+#include "chat_state.h"
 #include "common.h"
 #include "config/accounts.h"
 #include "config/preferences.h"
@@ -164,7 +165,7 @@ inp_readline(void)
                 rl_line_buffer[0] != '/' &&
                 rl_line_buffer[0] != '\0' &&
                 rl_line_buffer[0] != '\n') {
-            prof_handle_activity();
+            chat_state_activity();
         }
 
         ui_reset_idle_time();
@@ -174,7 +175,7 @@ inp_readline(void)
         inp_nonblocking(TRUE);
     } else {
         inp_nonblocking(FALSE);
-        prof_handle_idle();
+        chat_state_idle();
     }
 
     if (inp_line) {

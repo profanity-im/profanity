@@ -44,7 +44,6 @@
 #include <signal.h>
 #include <stdlib.h>
 #include <string.h>
-#include <assert.h>
 
 #include <glib.h>
 
@@ -143,40 +142,6 @@ void
 prof_set_quit(void)
 {
     force_quit = TRUE;
-}
-
-void
-prof_handle_idle(void)
-{
-    jabber_conn_status_t status = connection_get_status();
-    if (status == JABBER_CONNECTED) {
-        GSList *recipients = wins_get_chat_recipients();
-        GSList *curr = recipients;
-
-        while (curr) {
-            char *barejid = curr->data;
-            ProfChatWin *chatwin = wins_get_chat(barejid);
-            chat_state_handle_idle(chatwin->barejid, chatwin->state);
-            curr = g_slist_next(curr);
-        }
-
-        if (recipients) {
-            g_slist_free(recipients);
-        }
-    }
-}
-
-void
-prof_handle_activity(void)
-{
-    jabber_conn_status_t status = connection_get_status();
-    ProfWin *current = wins_get_current();
-
-    if ((status == JABBER_CONNECTED) && (current->type == WIN_CHAT)) {
-        ProfChatWin *chatwin = (ProfChatWin*)current;
-        assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
-        chat_state_handle_typing(chatwin->barejid, chatwin->state);
-    }
 }
 
 static void
