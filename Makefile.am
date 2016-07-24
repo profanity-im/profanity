@@ -54,7 +54,7 @@ core_sources = \
 	src/plugins/themes.c src/plugins/themes.h \
 	src/plugins/settings.c src/plugins/settings.h \
 	src/plugins/disco.c src/plugins/disco.h \
-	src/tray.h src/tray.c
+	src/ui/tray.h src/ui/tray.c
 
 unittest_sources = \
 	src/xmpp/contact.c src/xmpp/contact.h src/common.c \
@@ -93,7 +93,7 @@ unittest_sources = \
 	src/window_list.c src/window_list.h \
 	src/event/server_events.c src/event/server_events.h \
 	src/event/client_events.c src/event/client_events.h \
-	src/tray.h src/tray.c \
+	src/ui/tray.h src/ui/tray.c \
 	tests/unittests/xmpp/stub_xmpp.c \
 	tests/unittests/ui/stub_ui.c \
 	tests/unittests/log/stub_log.c \

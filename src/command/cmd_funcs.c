@@ -81,7 +81,7 @@
 #include "window_list.h"
 #include "event/client_events.h"
 #ifdef HAVE_GTK
-#include "tray.h"
+#include "ui/tray.h"
 #endif
 #include "tools/http_upload.h"
 #ifdef HAVE_PYTHON

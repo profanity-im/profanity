@@ -38,7 +38,7 @@
 #endif
 
 #ifdef HAVE_GTK
-#include "tray.h"
+#include "ui/tray.h"
 #endif
 #include <locale.h>
 #include <signal.h>

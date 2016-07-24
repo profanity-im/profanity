@@ -32,8 +32,8 @@
  *
  */
 
-#ifndef TRAY_H
-#define TRAY_H
+#ifndef UI_TRAY_H
+#define UI_TRAY_H
 
 void tray_init(void);
 void tray_update(void);
