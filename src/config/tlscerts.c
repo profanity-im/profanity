@@ -44,10 +44,9 @@
 #include "config/tlscerts.h"
 #include "tools/autocomplete.h"
 
-static gchar *tlscerts_loc;
+static char *tlscerts_loc;
 static GKeyFile *tlscerts;
 
-static gchar* _get_tlscerts_file(void);
 static void _save_tlscerts(void);
 
 static Autocomplete certs_ac;
@@ -58,7 +57,7 @@ void
 tlscerts_init(void)
 {
     log_info("Loading TLS certificates");
-    tlscerts_loc = _get_tlscerts_file();
+    tlscerts_loc = files_get_data_path(FILE_TLSCERTS);
 
     if (g_file_test(tlscerts_loc, G_FILE_TEST_EXISTS)) {
         g_chmod(tlscerts_loc, S_IRUSR | S_IWUSR);
@@ -427,19 +426,6 @@ tlscerts_close(void)
     current_fp = NULL;
 
     autocomplete_free(certs_ac);
-}
-
-static gchar*
-_get_tlscerts_file(void)
-{
-    gchar *xdg_data = files_get_xdg_data_home();
-    GString *tlscerts_file = g_string_new(xdg_data);
-    g_string_append(tlscerts_file, "/profanity/tlscerts");
-    gchar *result = strdup(tlscerts_file->str);
-    g_free(xdg_data);
-    g_string_free(tlscerts_file, TRUE);
-
-    return result;
 }
 
 static void

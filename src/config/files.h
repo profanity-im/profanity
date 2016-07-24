@@ -37,11 +37,27 @@
 
 #include <glib.h>
 
+#define FILE_PROFRC "profrc"
+#define FILE_ACCOUNTS "accounts"
+#define FILE_TLSCERTS "tlscerts"
+#define FILE_PLUGIN_SETTINGS "plugin_settings"
+#define FILE_PLUGIN_THEMES "plugin_themes"
+#define FILE_CAPSCACHE "capscache"
+
+#define DIR_THEMES "themes"
+#define DIR_ICONS "icons"
+#define DIR_SCRIPTS "scripts"
+#define DIR_CHATLOGS "chatlogs"
+#define DIR_OTR "otr"
+#define DIR_PGP "pgp"
+#define DIR_PLUGINS "plugins"
+
 void files_create_directories(void);
 
-gchar* files_get_inputrc_path(void);
+char* files_get_config_path(char *config_base);
+char* files_get_data_path(char *data_base);
 
-gchar* files_get_xdg_config_home(void);
-gchar* files_get_xdg_data_home(void);
+char* files_get_log_file(void);
+char* files_get_inputrc_file(void);
 
 #endif

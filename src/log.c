@@ -85,8 +85,6 @@ static gboolean _key_equals(void *key1, void *key2);
 static char* _get_log_filename(const char *const other, const char *const login, GDateTime *dt, gboolean create);
 static char* _get_groupchat_log_filename(const char *const room, const char *const login, GDateTime *dt,
     gboolean create);
-static gchar* _get_chatlog_dir(void);
-static gchar* _get_main_log_file(void);
 static void _rotate_log_file(void);
 static char* _log_string_from_level(log_level_t level);
 static void _chat_log_chat(const char *const login, const char *const other, const gchar *const msg,
@@ -145,7 +143,7 @@ log_init(log_level_t filter)
 {
     level_filter = filter;
     tz = g_time_zone_new_local();
-    gchar *log_file = _get_main_log_file();
+    char *log_file = files_get_log_file();
     logp = fopen(log_file, "a");
     g_chmod(log_file, S_IRUSR | S_IWUSR);
     mainlogfile = g_string_new(log_file);
@@ -226,7 +224,7 @@ log_level_from_string(char *log_level)
 static void
 _rotate_log_file(void)
 {
-    gchar *log_file = _get_main_log_file();
+    char *log_file = files_get_log_file();
     size_t len = strlen(log_file);
     char *log_file_new = malloc(len + 3);
 
@@ -572,7 +570,7 @@ gboolean _key_equals(void *key1, void *key2)
 static char*
 _get_log_filename(const char *const other, const char *const login, GDateTime *dt, gboolean create)
 {
-    gchar *chatlogs_dir = _get_chatlog_dir();
+    char *chatlogs_dir = files_get_data_path(DIR_CHATLOGS);
     GString *log_file = g_string_new(chatlogs_dir);
     free(chatlogs_dir);
 
@@ -603,9 +601,9 @@ _get_log_filename(const char *const other, const char *const login, GDateTime *d
 static char*
 _get_groupchat_log_filename(const char *const room, const char *const login, GDateTime *dt, gboolean create)
 {
-    gchar *chatlogs_dir = _get_chatlog_dir();
+    char *chatlogs_dir = files_get_data_path(DIR_CHATLOGS);
     GString *log_file = g_string_new(chatlogs_dir);
-    g_free(chatlogs_dir);
+    free(chatlogs_dir);
 
     gchar *login_dir = str_replace(login, "@", "_at_");
     g_string_append_printf(log_file, "/%s", login_dir);
@@ -632,36 +630,6 @@ _get_groupchat_log_filename(const char *const room, const char *const login, GDa
 
     char *result = strdup(log_file->str);
     g_string_free(log_file, TRUE);
-
-    return result;
-}
-
-static gchar*
-_get_chatlog_dir(void)
-{
-    gchar *xdg_data = files_get_xdg_data_home();
-    GString *chatlogs_dir = g_string_new(xdg_data);
-    g_string_append(chatlogs_dir, "/profanity/chatlogs");
-    gchar *result = strdup(chatlogs_dir->str);
-    free(xdg_data);
-    g_string_free(chatlogs_dir, TRUE);
-
-    return result;
-}
-
-static gchar*
-_get_main_log_file(void)
-{
-    gchar *xdg_data = files_get_xdg_data_home();
-    GString *logfile = g_string_new(xdg_data);
-    g_string_append(logfile, "/profanity/logs/profanity");
-    if (!prefs_get_boolean(PREF_LOG_SHARED)) {
-        g_string_append_printf(logfile, "%d", getpid());
-    }
-    g_string_append(logfile, ".log");
-    gchar *result = strdup(logfile->str);
-    free(xdg_data);
-    g_string_free(logfile, TRUE);
 
     return result;
 }

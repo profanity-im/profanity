@@ -15,17 +15,9 @@
 void create_config_dir(void **state)
 {
     setenv("XDG_CONFIG_HOME", "./tests/files/xdg_config_home", 1);
-    gchar *xdg_config = files_get_xdg_config_home();
-
-    GString *profanity_dir = g_string_new(xdg_config);
-    g_string_append(profanity_dir, "/profanity");
-
-    if (!mkdir_recursive(profanity_dir->str)) {
+    if (!mkdir_recursive("./tests/files/xdg_config_home/profanity")) {
         assert_true(FALSE);
     }
-
-    g_free(xdg_config);
-    g_string_free(profanity_dir, TRUE);
 }
 
 void remove_config_dir(void **state)
@@ -37,17 +29,9 @@ void remove_config_dir(void **state)
 void create_data_dir(void **state)
 {
     setenv("XDG_DATA_HOME", "./tests/files/xdg_data_home", 1);
-    gchar *xdg_data = files_get_xdg_data_home();
-
-    GString *profanity_dir = g_string_new(xdg_data);
-    g_string_append(profanity_dir, "/profanity");
-
-    if (!mkdir_recursive(profanity_dir->str)) {
+    if (!mkdir_recursive("./tests/files/xdg_data_home/profanity")) {
         assert_true(FALSE);
     }
-
-    g_free(xdg_data);
-    g_string_free(profanity_dir, TRUE);
 }
 
 void remove_data_dir(void **state)

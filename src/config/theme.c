@@ -63,7 +63,6 @@ struct colour_string_t {
 };
 
 static void _load_preferences(void);
-static gchar* _get_themes_dir(void);
 void _theme_list_dir(const gchar *const dir, GSList **result);
 static GString* _theme_find(const char *const theme_name);
 static gboolean _theme_load_file(const char *const theme_name);
@@ -218,7 +217,7 @@ GSList*
 theme_list(void)
 {
     GSList *result = NULL;
-    char *themes_dir = _get_themes_dir();
+    char *themes_dir = files_get_config_path(DIR_THEMES);
     _theme_list_dir(themes_dir, &result);
     free(themes_dir);
 #ifdef THEMES_PATH
@@ -532,16 +531,6 @@ _load_preferences(void)
     }
 }
 
-static gchar*
-_get_themes_dir(void)
-{
-    gchar *xdg_config = files_get_xdg_config_home();
-    GString *themes_dir = g_string_new(xdg_config);
-    g_free(xdg_config);
-    g_string_append(themes_dir, "/profanity/themes");
-    return g_string_free(themes_dir, FALSE);
-}
-
 void
 _theme_list_dir(const gchar *const dir, GSList **result)
 {
@@ -560,11 +549,11 @@ static GString*
 _theme_find(const char *const theme_name)
 {
     GString *path = NULL;
-    gchar *themes_dir = _get_themes_dir();
+    char *themes_dir = files_get_config_path(DIR_THEMES);
 
     if (themes_dir) {
         path = g_string_new(themes_dir);
-        g_free(themes_dir);
+        free(themes_dir);
         g_string_append(path, "/");
         g_string_append(path, theme_name);
         if (!g_file_test(path->str, G_FILE_TEST_EXISTS)) {

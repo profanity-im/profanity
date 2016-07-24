@@ -32,6 +32,8 @@
  *
  */
 
+#include <stdlib.h>
+
 #include <glib.h>
 #include <glib/gstdio.h>
 
@@ -44,24 +46,21 @@ static GKeyFile *themes;
 void
 plugin_themes_init(void)
 {
-    gchar *xdg_data = files_get_xdg_data_home();
-    GString *fileloc = g_string_new(xdg_data);
-    g_string_append(fileloc, "/profanity/plugin_themes");
-    g_free(xdg_data);
+    char *themes_file = files_get_data_path(FILE_PLUGIN_THEMES);
 
-    if (g_file_test(fileloc->str, G_FILE_TEST_EXISTS)) {
-        g_chmod(fileloc->str, S_IRUSR | S_IWUSR);
+    if (g_file_test(themes_file, G_FILE_TEST_EXISTS)) {
+        g_chmod(themes_file, S_IRUSR | S_IWUSR);
     }
 
     themes = g_key_file_new();
-    g_key_file_load_from_file(themes, fileloc->str, G_KEY_FILE_KEEP_COMMENTS, NULL);
+    g_key_file_load_from_file(themes, themes_file, G_KEY_FILE_KEEP_COMMENTS, NULL);
 
     gsize g_data_size;
     gchar *g_data = g_key_file_to_data(themes, &g_data_size, NULL);
-    g_file_set_contents(fileloc->str, g_data, g_data_size, NULL);
-    g_chmod(fileloc->str, S_IRUSR | S_IWUSR);
+    g_file_set_contents(themes_file, g_data, g_data_size, NULL);
+    g_chmod(themes_file, S_IRUSR | S_IWUSR);
     g_free(g_data);
-    g_string_free(fileloc, TRUE);
+    free(themes_file);
 }
 
 void

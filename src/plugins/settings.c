@@ -49,24 +49,21 @@ static void _save_settings(void);
 void
 plugin_settings_init(void)
 {
-    gchar *xdg_data = files_get_xdg_data_home();
-    GString *fileloc = g_string_new(xdg_data);
-    g_string_append(fileloc, "/profanity/plugin_settings");
-    g_free(xdg_data);
+    char *settings_file = files_get_data_path(FILE_PLUGIN_SETTINGS);
 
-    if (g_file_test(fileloc->str, G_FILE_TEST_EXISTS)) {
-        g_chmod(fileloc->str, S_IRUSR | S_IWUSR);
+    if (g_file_test(settings_file, G_FILE_TEST_EXISTS)) {
+        g_chmod(settings_file, S_IRUSR | S_IWUSR);
     }
 
     settings = g_key_file_new();
-    g_key_file_load_from_file(settings, fileloc->str, G_KEY_FILE_KEEP_COMMENTS, NULL);
+    g_key_file_load_from_file(settings, settings_file, G_KEY_FILE_KEEP_COMMENTS, NULL);
 
     gsize g_data_size;
     gchar *g_data = g_key_file_to_data(settings, &g_data_size, NULL);
-    g_file_set_contents(fileloc->str, g_data, g_data_size, NULL);
-    g_chmod(fileloc->str, S_IRUSR | S_IWUSR);
+    g_file_set_contents(settings_file, g_data, g_data_size, NULL);
+    g_chmod(settings_file, S_IRUSR | S_IWUSR);
     g_free(g_data);
-    g_string_free(fileloc, TRUE);
+    free(settings_file);
 }
 
 void
@@ -135,19 +132,13 @@ _save_settings(void)
     gsize g_data_size;
     gchar *g_data = g_key_file_to_data(settings, &g_data_size, NULL);
 
-    gchar *xdg_data = files_get_xdg_data_home();
-    GString *fileloc = g_string_new(xdg_data);
-    g_free(xdg_data);
-
-    g_string_append(fileloc, "/profanity/");
-    char *base = strdup(fileloc->str);
-    g_string_append(fileloc, "plugin_settings");
-
-    gchar *true_loc = get_file_or_linked(fileloc->str, base);
-    free(base);
+    char *fileloc = files_get_data_path(FILE_PLUGIN_SETTINGS);
+    gchar *base = g_path_get_basename(fileloc);
+    gchar *true_loc = get_file_or_linked(fileloc, base);
+    g_free(base);
     g_file_set_contents(true_loc, g_data, g_data_size, NULL);
     free(true_loc);
     g_free(g_data);
-    g_chmod(fileloc->str, S_IRUSR | S_IWUSR);
-    g_string_free(fileloc, TRUE);
+    g_chmod(fileloc, S_IRUSR | S_IWUSR);
+    free(fileloc);
 }

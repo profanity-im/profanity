@@ -62,7 +62,7 @@
 
 #define INPBLOCK_DEFAULT 1000
 
-static gchar *prefs_loc;
+static char *prefs_loc;
 static GKeyFile *prefs;
 gint log_maxsize = 0;
 
@@ -70,7 +70,6 @@ static Autocomplete boolean_choice_ac;
 static Autocomplete room_trigger_ac;
 
 static void _save_prefs(void);
-static gchar* _get_preferences_file(void);
 static const char* _get_group(preference_t pref);
 static const char* _get_key(preference_t pref);
 static gboolean _get_default_boolean(preference_t pref);
@@ -80,7 +79,7 @@ void
 prefs_load(void)
 {
     GError *err;
-    prefs_loc = _get_preferences_file();
+    prefs_loc = files_get_config_path(FILE_PROFRC);
 
     if (g_file_test(prefs_loc, G_FILE_TEST_EXISTS)) {
         g_chmod(prefs_loc, S_IRUSR | S_IWUSR);
@@ -1140,29 +1139,15 @@ _save_prefs(void)
 {
     gsize g_data_size;
     gchar *g_prefs_data = g_key_file_to_data(prefs, &g_data_size, NULL);
-    gchar *xdg_config = files_get_xdg_config_home();
-    GString *base_str = g_string_new(xdg_config);
-    g_string_append(base_str, "/profanity/");
-    gchar *true_loc = get_file_or_linked(prefs_loc, base_str->str);
+    gchar *base = g_path_get_basename(prefs_loc);
+    gchar *true_loc = get_file_or_linked(prefs_loc, base);
+
     g_file_set_contents(true_loc, g_prefs_data, g_data_size, NULL);
     g_chmod(prefs_loc, S_IRUSR | S_IWUSR);
-    g_free(xdg_config);
+
+    g_free(base);
     free(true_loc);
     g_free(g_prefs_data);
-    g_string_free(base_str, TRUE);
-}
-
-static gchar*
-_get_preferences_file(void)
-{
-    gchar *xdg_config = files_get_xdg_config_home();
-    GString *prefs_file = g_string_new(xdg_config);
-    g_string_append(prefs_file, "/profanity/profrc");
-    gchar *result = strdup(prefs_file->str);
-    g_free(xdg_config);
-    g_string_free(prefs_file, TRUE);
-
-    return result;
 }
 
 // get the preference group for a specific preference

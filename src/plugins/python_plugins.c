@@ -36,6 +36,7 @@
 
 #include "config.h"
 #include "config/preferences.h"
+#include "config/files.h"
 #include "plugins/api.h"
 #include "plugins/callbacks.h"
 #include "plugins/plugins.h"
@@ -77,7 +78,7 @@ python_env_init(void)
 
     python_init_prof();
 
-    gchar *plugins_dir = plugins_get_dir();
+    char *plugins_dir = files_get_data_path(DIR_PLUGINS);
     GString *path = g_string_new("import sys\n");
     g_string_append(path, "sys.path.append(\"");
     g_string_append(path, plugins_dir);

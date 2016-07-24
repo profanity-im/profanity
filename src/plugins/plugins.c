@@ -131,7 +131,7 @@ plugins_init(void)
 gboolean
 plugins_install(const char *const plugin_name, const char *const filename)
 {
-    char *plugins_dir = plugins_get_dir();
+    char *plugins_dir = files_get_data_path(DIR_PLUGINS);
     GString *target_path = g_string_new(plugins_dir);
     free(plugins_dir);
     g_string_append(target_path, "/");
@@ -266,7 +266,7 @@ GSList*
 plugins_unloaded_list(void)
 {
     GSList *result = NULL;
-    char *plugins_dir = plugins_get_dir();
+    char *plugins_dir = files_get_data_path(DIR_PLUGINS);
     _plugins_unloaded_list_dir(plugins_dir, &result);
     free(plugins_dir);
 
@@ -829,17 +829,4 @@ plugins_shutdown(void)
     plugin_settings_close();
     callbacks_close();
     disco_close();
-}
-
-char*
-plugins_get_dir(void)
-{
-    gchar *xdg_data = files_get_xdg_data_home();
-    GString *plugins_dir = g_string_new(xdg_data);
-    g_string_append(plugins_dir, "/profanity/plugins");
-    char *result = strdup(plugins_dir->str);
-    g_free(xdg_data);
-    g_string_free(plugins_dir, TRUE);
-
-    return result;
 }

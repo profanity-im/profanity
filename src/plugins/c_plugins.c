@@ -41,6 +41,7 @@
 
 #include "log.h"
 #include "config/preferences.h"
+#include "config/files.h"
 #include "plugins/api.h"
 #include "plugins/callbacks.h"
 #include "plugins/plugins.h"
@@ -60,9 +61,9 @@ c_plugin_create(const char *const filename)
     ProfPlugin *plugin;
     void *handle = NULL;
 
-    gchar *plugins_dir = plugins_get_dir();
+    char *plugins_dir = files_get_data_path(DIR_PLUGINS);
     GString *path = g_string_new(plugins_dir);
-    g_free(plugins_dir);
+    free(plugins_dir);
     g_string_append(path, "/");
     g_string_append(path, filename);
 
