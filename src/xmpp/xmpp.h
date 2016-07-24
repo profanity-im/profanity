@@ -40,16 +40,17 @@
 #ifdef HAVE_LIBMESODE
 #include <mesode.h>
 #endif
+
 #ifdef HAVE_LIBSTROPHE
 #include <strophe.h>
 #endif
 
 #include "config/accounts.h"
 #include "config/tlscerts.h"
-#include "contact.h"
-#include "jid.h"
 #include "tools/autocomplete.h"
 #include "tools/http_upload.h"
+#include "xmpp/contact.h"
+#include "xmpp/jid.h"
 
 #define JABBER_PRIORITY_MIN -128
 #define JABBER_PRIORITY_MAX 127
@@ -109,7 +110,7 @@ jabber_conn_status_t session_connect_with_details(const char *const jid, const c
 jabber_conn_status_t session_connect_with_account(const ProfAccount *const account);
 void session_disconnect(void);
 void session_shutdown(void);
-void session_process_events(int millis);
+void session_process_events(void);
 char* session_get_account_name(void);
 
 jabber_conn_status_t connection_get_status(void);

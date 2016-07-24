@@ -5,10 +5,10 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "chat_session.h"
+#include "xmpp/chat_session.h"
 #include "command/cmd_funcs.h"
 #include "xmpp/xmpp.h"
-#include "roster_list.h"
+#include "xmpp/roster_list.h"
 
 #include "ui/stub_ui.h"
 

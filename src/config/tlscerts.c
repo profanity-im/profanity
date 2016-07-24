@@ -38,9 +38,9 @@
 #include <glib.h>
 #include <glib/gstdio.h>
 
-#include "config/tlscerts.h"
 #include "log.h"
 #include "common.h"
+#include "config/tlscerts.h"
 #include "tools/autocomplete.h"
 
 static gchar *tlscerts_loc;

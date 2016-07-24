@@ -36,7 +36,7 @@
 #include <string.h>
 
 #include "ui/win_types.h"
-#include "window_list.h"
+#include "ui/window_list.h"
 
 void
 xmlwin_show(ProfXMLWin *xmlwin, const char *const msg)

@@ -1,5 +1,5 @@
 /*
- * tray.h
+ * chat_session.h
  *
  * Copyright (C) 2012 - 2016 James Booth <boothj5@gmail.com>
  *
@@ -32,25 +32,31 @@
  *
  */
 
-#ifndef PROFANITY_TRAY_H
-#define PROFANITY_TRAY_H
+#ifndef XMPP_CHAT_SESSION_H
+#define XMPP_CHAT_SESSION_H
 
-void tray_init(void);
-void tray_update(void);
-void tray_shutdown(void);
+#include <glib.h>
 
-/*
- * Create tray icon
- *
- * This will initialize the timer that will be called in order to change the icons
- * and will search the icons in the defaults paths
- */
-void tray_enable(void);
-/*
- * Destroy tray icon
- */
-void tray_disable(void);
+typedef struct chat_session_t {
+    char *barejid;
+    char *resource;
+    gboolean resource_override;
+    gboolean send_states;
 
-void tray_set_timer(int interval);
+} ChatSession;
+
+void chat_sessions_init(void);
+void chat_sessions_clear(void);
+
+void chat_session_resource_override(const char *const barejid, const char *const resource);
+ChatSession* chat_session_get(const char *const barejid);
+
+void chat_session_recipient_active(const char *const barejid, const char *const resource, gboolean send_states);
+void chat_session_recipient_typing(const char *const barejid, const char *const resource);
+void chat_session_recipient_paused(const char *const barejid, const char *const resource);
+void chat_session_recipient_gone(const char *const barejid, const char *const resource);
+void chat_session_recipient_inactive(const char *const barejid, const char *const resource);
+
+void chat_session_remove(const char *const barejid);
 
 #endif

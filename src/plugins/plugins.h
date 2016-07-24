@@ -32,8 +32,8 @@
  *
  */
 
-#ifndef PLUGINS_H
-#define PLUGINS_H
+#ifndef PLUGINS_PLUGINS_H
+#define PLUGINS_PLUGINS_H
 
 #include "command/cmd_defs.h"
 

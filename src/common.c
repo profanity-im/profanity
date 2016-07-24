@@ -53,11 +53,9 @@
 #include <ncurses.h>
 #endif
 
-#include "tools/p_sha1.h"
-
 #include "log.h"
 #include "common.h"
-
+#include "tools/p_sha1.h"
 
 struct curl_data_t
 {

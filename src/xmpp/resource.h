@@ -1,5 +1,5 @@
 /*
- * chat_session.h
+ * resource.h
  *
  * Copyright (C) 2012 - 2016 James Booth <boothj5@gmail.com>
  *
@@ -32,31 +32,21 @@
  *
  */
 
-#ifndef CHAT_SESSION_H
-#define CHAT_SESSION_H
+#ifndef XMPP_RESOURCE_H
+#define XMPP_RESOURCE_H
 
-#include <glib.h>
+#include "common.h"
 
-typedef struct chat_session_t {
-    char *barejid;
-    char *resource;
-    gboolean resource_override;
-    gboolean send_states;
+typedef struct resource_t {
+    char *name;
+    resource_presence_t presence;
+    char *status;
+    int priority;
+} Resource;
 
-} ChatSession;
-
-void chat_sessions_init(void);
-void chat_sessions_clear(void);
-
-void chat_session_resource_override(const char *const barejid, const char *const resource);
-ChatSession* chat_session_get(const char *const barejid);
-
-void chat_session_recipient_active(const char *const barejid, const char *const resource, gboolean send_states);
-void chat_session_recipient_typing(const char *const barejid, const char *const resource);
-void chat_session_recipient_paused(const char *const barejid, const char *const resource);
-void chat_session_recipient_gone(const char *const barejid, const char *const resource);
-void chat_session_recipient_inactive(const char *const barejid, const char *const resource);
-
-void chat_session_remove(const char *const barejid);
+Resource* resource_new(const char *const name, resource_presence_t presence, const char *const status,
+    const int priority);
+void resource_destroy(Resource *resource);
+int resource_compare_availability(Resource *first, Resource *second);
 
 #endif

@@ -26,7 +26,7 @@ jabber_conn_status_t session_connect_with_account(const ProfAccount * const acco
 
 void session_disconnect(void) {}
 void session_shutdown(void) {}
-void session_process_events(int millis) {}
+void session_process_events(void) {}
 const char * connection_get_fulljid(void)
 {
     return (char *)mock();

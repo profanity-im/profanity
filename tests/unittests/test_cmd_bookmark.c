@@ -11,7 +11,7 @@
 #include "ui/ui.h"
 #include "ui/stub_ui.h"
 
-#include "muc.h"
+#include "xmpp/muc.h"
 #include "common.h"
 
 #include "command/cmd_funcs.h"

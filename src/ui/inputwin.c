@@ -53,21 +53,22 @@
 #include <ncurses.h>
 #endif
 
-#include "command/cmd_ac.h"
+#include "profanity.h"
+#include "log.h"
 #include "common.h"
+#include "command/cmd_ac.h"
 #include "config/accounts.h"
 #include "config/preferences.h"
 #include "config/theme.h"
-#include "log.h"
-#include "muc.h"
-#include "profanity.h"
-#include "roster_list.h"
 #include "ui/ui.h"
 #include "ui/statusbar.h"
 #include "ui/inputwin.h"
 #include "ui/window.h"
-#include "window_list.h"
+#include "ui/window_list.h"
 #include "xmpp/xmpp.h"
+#include "xmpp/muc.h"
+#include "xmpp/roster_list.h"
+#include "xmpp/chat_state.h"
 
 static WINDOW *inp_win;
 static int pad_start = 0;
@@ -164,7 +165,7 @@ inp_readline(void)
                 rl_line_buffer[0] != '/' &&
                 rl_line_buffer[0] != '\0' &&
                 rl_line_buffer[0] != '\n') {
-            prof_handle_activity();
+            chat_state_activity();
         }
 
         ui_reset_idle_time();
@@ -174,7 +175,7 @@ inp_readline(void)
         inp_nonblocking(TRUE);
     } else {
         inp_nonblocking(FALSE);
-        prof_handle_idle();
+        chat_state_idle();
     }
 
     if (inp_line) {

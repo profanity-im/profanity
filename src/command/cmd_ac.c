@@ -41,17 +41,17 @@
 #include <dirent.h>
 
 #include "common.h"
-#include "tools/parser.h"
-#include "ui/win_types.h"
-#include "command/cmd_funcs.h"
 #include "config/preferences.h"
 #include "config/scripts.h"
-#include "muc.h"
-#include "xmpp/xmpp.h"
-#include "roster_list.h"
-#include "window_list.h"
-#include "plugins/plugins.h"
 #include "command/cmd_ac.h"
+#include "command/cmd_funcs.h"
+#include "tools/parser.h"
+#include "plugins/plugins.h"
+#include "ui/win_types.h"
+#include "ui/window_list.h"
+#include "xmpp/muc.h"
+#include "xmpp/xmpp.h"
+#include "xmpp/roster_list.h"
 
 #ifdef HAVE_LIBGPGME
 #include "pgp/gpg.h"

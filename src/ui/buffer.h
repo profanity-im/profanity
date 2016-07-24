@@ -35,10 +35,10 @@
 #ifndef UI_BUFFER_H
 #define UI_BUFFER_H
 
+#include <glib.h>
+
 #include "config.h"
 #include "config/theme.h"
-
-#include <glib.h>
 
 typedef struct delivery_receipt_t {
     char *id;

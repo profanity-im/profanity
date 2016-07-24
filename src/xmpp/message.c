@@ -40,26 +40,27 @@
 #ifdef HAVE_LIBMESODE
 #include <mesode.h>
 #endif
+
 #ifdef HAVE_LIBSTROPHE
 #include <strophe.h>
 #endif
 
-#include "chat_session.h"
-#include "config/preferences.h"
-#include "log.h"
-#include "muc.h"
 #include "profanity.h"
-#include "ui/ui.h"
+#include "log.h"
+#include "config/preferences.h"
 #include "event/server_events.h"
+#include "pgp/gpg.h"
+#include "plugins/plugins.h"
+#include "ui/ui.h"
+#include "xmpp/chat_session.h"
+#include "xmpp/muc.h"
 #include "xmpp/session.h"
 #include "xmpp/message.h"
 #include "xmpp/roster.h"
-#include "roster_list.h"
+#include "xmpp/roster_list.h"
 #include "xmpp/stanza.h"
 #include "xmpp/connection.h"
 #include "xmpp/xmpp.h"
-#include "pgp/gpg.h"
-#include "plugins/plugins.h"
 
 static int _message_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza, void *const userdata);
 

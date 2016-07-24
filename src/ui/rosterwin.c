@@ -36,12 +36,12 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "contact.h"
+#include "config/preferences.h"
 #include "ui/ui.h"
 #include "ui/window.h"
-#include "window_list.h"
-#include "config/preferences.h"
-#include "roster_list.h"
+#include "ui/window_list.h"
+#include "xmpp/roster_list.h"
+#include "xmpp/contact.h"
 
 typedef enum {
     ROSTER_CONTACT,

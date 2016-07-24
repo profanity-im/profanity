@@ -44,38 +44,40 @@
 #include <sys/ioctl.h>
 #include <unistd.h>
 
+#include <glib.h>
+
 #ifdef HAVE_LIBXSS
 #include <X11/extensions/scrnsaver.h>
 #endif
-#include <glib.h>
+
 #ifdef HAVE_NCURSESW_NCURSES_H
 #include <ncursesw/ncurses.h>
 #elif HAVE_NCURSES_H
 #include <ncurses.h>
 #endif
 
-#include "chat_session.h"
+#include "log.h"
+#include "common.h"
 #include "command/cmd_defs.h"
 #include "command/cmd_ac.h"
-#include "common.h"
 #include "config/preferences.h"
 #include "config/theme.h"
-#include "contact.h"
-#include "roster_list.h"
-#include "jid.h"
-#include "log.h"
-#include "muc.h"
-#ifdef HAVE_LIBOTR
-#include "otr/otr.h"
-#endif
 #include "ui/ui.h"
 #include "ui/titlebar.h"
 #include "ui/statusbar.h"
 #include "ui/inputwin.h"
 #include "ui/window.h"
-#include "window_list.h"
+#include "ui/window_list.h"
 #include "xmpp/xmpp.h"
-#include "plugins/plugins.h"
+#include "xmpp/muc.h"
+#include "xmpp/chat_session.h"
+#include "xmpp/contact.h"
+#include "xmpp/roster_list.h"
+#include "xmpp/jid.h"
+
+#ifdef HAVE_LIBOTR
+#include "otr/otr.h"
+#endif
 
 static char *win_title;
 static int inp_size;

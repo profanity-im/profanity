@@ -32,8 +32,8 @@
  *
  */
 
-#ifndef PLUGIN_SETTINGS_H
-#define PLUGIN_SETTINGS_H
+#ifndef PLUGINS_SETTINGS_H
+#define PLUGINS_SETTINGS_H
 
 void plugin_settings_init(void);
 void plugin_settings_close(void);

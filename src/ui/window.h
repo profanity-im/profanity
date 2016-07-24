@@ -39,18 +39,18 @@
 
 #include <wchar.h>
 
-#include "contact.h"
-#include "muc.h"
-#include "ui/ui.h"
-#include "ui/buffer.h"
-#include "xmpp/xmpp.h"
-#include "chat_state.h"
-
 #ifdef HAVE_NCURSESW_NCURSES_H
 #include <ncursesw/ncurses.h>
 #elif HAVE_NCURSES_H
 #include <ncurses.h>
 #endif
+
+#include "ui/ui.h"
+#include "ui/buffer.h"
+#include "xmpp/xmpp.h"
+#include "xmpp/chat_state.h"
+#include "xmpp/contact.h"
+#include "xmpp/muc.h"
 
 #define PAD_SIZE 1000
 

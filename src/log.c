@@ -44,7 +44,6 @@
 #include "glib/gstdio.h"
 
 #include "log.h"
-
 #include "common.h"
 #include "config/preferences.h"
 #include "xmpp/xmpp.h"

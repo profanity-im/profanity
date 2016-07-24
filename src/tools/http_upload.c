@@ -45,11 +45,11 @@
 #include <assert.h>
 
 #include "profanity.h"
+#include "event/client_events.h"
+#include "tools/http_upload.h"
+#include "config/preferences.h"
 #include "ui/ui.h"
 #include "ui/window.h"
-#include "tools/http_upload.h"
-#include "event/client_events.h"
-#include "config/preferences.h"
 
 #define FALLBACK_MIMETYPE "application/octet-stream"
 #define FALLBACK_CONTENTTYPE_HEADER "Content-Type: application/octet-stream"

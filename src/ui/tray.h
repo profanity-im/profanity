@@ -1,5 +1,5 @@
 /*
- * jid.h
+ * tray.h
  *
  * Copyright (C) 2012 - 2016 James Booth <boothj5@gmail.com>
  *
@@ -32,30 +32,25 @@
  *
  */
 
-#ifndef JID_H
-#define JID_H
+#ifndef UI_TRAY_H
+#define UI_TRAY_H
 
-#include <glib.h>
+void tray_init(void);
+void tray_update(void);
+void tray_shutdown(void);
 
-struct jid_t {
-    char *str;
-    char *localpart;
-    char *domainpart;
-    char *resourcepart;
-    char *barejid;
-    char *fulljid;
-};
+/*
+ * Create tray icon
+ *
+ * This will initialize the timer that will be called in order to change the icons
+ * and will search the icons in the defaults paths
+ */
+void tray_enable(void);
+/*
+ * Destroy tray icon
+ */
+void tray_disable(void);
 
-typedef struct jid_t Jid;
-
-Jid* jid_create(const gchar *const str);
-Jid* jid_create_from_bare_and_resource(const char *const room, const char *const nick);
-void jid_destroy(Jid *jid);
-
-gboolean jid_is_valid_room_form(Jid *jid);
-char* create_fulljid(const char *const barejid, const char *const resource);
-char* get_nick_from_full_jid(const char *const full_room_jid);
-
-char* jid_fulljid_or_barejid(Jid *jid);
+void tray_set_timer(int interval);
 
 #endif

@@ -44,9 +44,9 @@
 #include <glib/gstdio.h>
 #include <gpgme.h>
 
-#include "pgp/gpg.h"
 #include "log.h"
 #include "common.h"
+#include "pgp/gpg.h"
 #include "tools/autocomplete.h"
 #include "ui/ui.h"
 

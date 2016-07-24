@@ -41,12 +41,12 @@
 #include "accounts.h"
 
 #include "common.h"
+#include "log.h"
 #include "config/account.h"
 #include "config/conflists.h"
-#include "jid.h"
-#include "log.h"
 #include "tools/autocomplete.h"
 #include "xmpp/xmpp.h"
+#include "xmpp/jid.h"
 
 static gchar *accounts_loc;
 static GKeyFile *accounts;

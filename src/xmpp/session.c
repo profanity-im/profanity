@@ -38,21 +38,11 @@
 #include <string.h>
 #include <stdlib.h>
 
-#ifdef HAVE_LIBMESODE
-#include <mesode.h>
-#endif
-#ifdef HAVE_LIBSTROPHE
-#include <strophe.h>
-#endif
-
-#include "chat_session.h"
+#include "profanity.h"
+#include "log.h"
 #include "common.h"
 #include "config/preferences.h"
-#include "jid.h"
-#include "log.h"
-#include "muc.h"
 #include "plugins/plugins.h"
-#include "profanity.h"
 #include "event/server_events.h"
 #include "xmpp/bookmark.h"
 #include "xmpp/blocking.h"
@@ -65,6 +55,9 @@
 #include "xmpp/roster.h"
 #include "xmpp/stanza.h"
 #include "xmpp/xmpp.h"
+#include "xmpp/muc.h"
+#include "xmpp/chat_session.h"
+#include "xmpp/jid.h"
 
 // for auto reconnect
 static struct {
@@ -235,7 +228,7 @@ session_shutdown(void)
 }
 
 void
-session_process_events(int millis)
+session_process_events(void)
 {
     int reconnect_sec;
 
@@ -245,7 +238,7 @@ session_process_events(int millis)
     case JABBER_CONNECTED:
     case JABBER_CONNECTING:
     case JABBER_DISCONNECTING:
-        xmpp_run_once(connection_get_ctx(), millis);
+        connection_check_events();
         break;
     case JABBER_DISCONNECTED:
         reconnect_sec = prefs_get_reconnect();

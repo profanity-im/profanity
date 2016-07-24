@@ -5,7 +5,7 @@
 #include <cmocka.h>
 #include <stdlib.h>
 
-#include "chat_session.h"
+#include "xmpp/chat_session.h"
 
 void returns_false_when_chat_session_does_not_exist(void **state)
 {

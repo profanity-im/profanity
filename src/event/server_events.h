@@ -32,8 +32,8 @@
  *
  */
 
-#ifndef SERVER_EVENTS_H
-#define SERVER_EVENTS_H
+#ifndef EVENT_SERVER_EVENTS_H
+#define EVENT_SERVER_EVENTS_H
 
 #include "xmpp/xmpp.h"
 

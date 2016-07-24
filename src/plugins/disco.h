@@ -32,8 +32,8 @@
  *
  */
 
-#ifndef DISCO_H
-#define DISCO_H
+#ifndef PLUGINS_DISCO_H
+#define PLUGINS_DISCO_H
 
 void disco_add_feature(char *feature);
 GList* disco_get_features(void);

@@ -41,6 +41,7 @@
 
 #include <sys/select.h>
 #include <curl/curl.h>
+
 #include "ui/win_types.h"
 
 typedef struct http_upload_t {

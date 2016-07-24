@@ -32,8 +32,8 @@
  *
  */
 
-#ifndef PREFERENCES_H
-#define PREFERENCES_H
+#ifndef CONFIG_PREFERENCES_H
+#define CONFIG_PREFERENCES_H
 
 #include "config.h"
 

@@ -32,8 +32,8 @@
  *
  */
 
-#ifndef TINYURL_H
-#define TINYURL_H
+#ifndef TOOLS_TINYURL_H
+#define TOOLS_TINYURL_H
 
 #include <glib.h>
 

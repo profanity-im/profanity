@@ -32,8 +32,8 @@
  *
  */
 
-#ifndef PARSER_H
-#define PARSER_H
+#ifndef TOOLS_PARSER_H
+#define TOOLS_PARSER_H
 
 #include <glib.h>
 
