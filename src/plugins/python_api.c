@@ -540,7 +540,6 @@ python_api_win_create(PyObject *self, PyObject *args)
     char *tag_str = python_str_or_unicode_to_string(tag);
 
     char *plugin_name = _python_plugin_name();
-    log_debug("Win create %s for %s", tag_str, plugin_name);
 
     if (p_callback && PyCallable_Check(p_callback)) {
         allow_python_threads();

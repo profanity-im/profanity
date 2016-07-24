@@ -285,7 +285,7 @@ utf8_display_len(const char *const str)
 }
 
 char*
-prof_getline(FILE *stream)
+file_getline(FILE *stream)
 {
     char *buf;
     char *result;
@@ -380,113 +380,6 @@ release_is_new(char *found_version)
     }
 }
 
-gboolean
-valid_resource_presence_string(const char *const str)
-{
-    assert(str != NULL);
-    if ((strcmp(str, "online") == 0) || (strcmp(str, "chat") == 0) ||
-            (strcmp(str, "away") == 0) || (strcmp(str, "xa") == 0) ||
-            (strcmp(str, "dnd") == 0)) {
-        return TRUE;
-    } else {
-        return FALSE;
-    }
-}
-
-const char*
-string_from_resource_presence(resource_presence_t presence)
-{
-    switch(presence)
-    {
-        case RESOURCE_CHAT:
-            return "chat";
-        case RESOURCE_AWAY:
-            return "away";
-        case RESOURCE_XA:
-            return "xa";
-        case RESOURCE_DND:
-            return "dnd";
-        default:
-            return "online";
-    }
-}
-
-resource_presence_t
-resource_presence_from_string(const char *const str)
-{
-    if (str == NULL) {
-        return RESOURCE_ONLINE;
-    } else if (strcmp(str, "online") == 0) {
-        return RESOURCE_ONLINE;
-    } else if (strcmp(str, "chat") == 0) {
-        return RESOURCE_CHAT;
-    } else if (strcmp(str, "away") == 0) {
-        return RESOURCE_AWAY;
-    } else if (strcmp(str, "xa") == 0) {
-        return RESOURCE_XA;
-    } else if (strcmp(str, "dnd") == 0) {
-        return RESOURCE_DND;
-    } else {
-        return RESOURCE_ONLINE;
-    }
-}
-
-contact_presence_t
-contact_presence_from_resource_presence(resource_presence_t resource_presence)
-{
-    switch(resource_presence)
-    {
-        case RESOURCE_CHAT:
-            return CONTACT_CHAT;
-        case RESOURCE_AWAY:
-            return CONTACT_AWAY;
-        case RESOURCE_XA:
-            return CONTACT_XA;
-        case RESOURCE_DND:
-            return CONTACT_DND;
-        default:
-            return CONTACT_ONLINE;
-    }
-}
-
-gchar*
-xdg_get_config_home(void)
-{
-    gchar *xdg_config_home = getenv("XDG_CONFIG_HOME");
-    if (xdg_config_home)
-        g_strstrip(xdg_config_home);
-
-    if (xdg_config_home && (strcmp(xdg_config_home, "") != 0)) {
-        return strdup(xdg_config_home);
-    } else {
-        GString *default_path = g_string_new(getenv("HOME"));
-        g_string_append(default_path, "/.config");
-        gchar *result = strdup(default_path->str);
-        g_string_free(default_path, TRUE);
-
-        return result;
-    }
-}
-
-gchar*
-xdg_get_data_home(void)
-{
-    gchar *xdg_data_home = getenv("XDG_DATA_HOME");
-    if (xdg_data_home)
-        g_strstrip(xdg_data_home);
-
-    if (xdg_data_home && (strcmp(xdg_data_home, "") != 0)) {
-        return strdup(xdg_data_home);
-    } else {
-        GString *default_path = g_string_new(getenv("HOME"));
-        g_string_append(default_path, "/.local/share");
-        gchar *result = strdup(default_path->str);
-        g_string_free(default_path, TRUE);
-
-        return result;
-    }
-}
-
 char*
 create_unique_id(char *prefix)
 {
@@ -526,79 +419,6 @@ p_sha1_hash(char *str)
     free(input);
     return g_base64_encode(digest, sizeof(digest));
 }
-
-int
-cmp_win_num(gconstpointer a, gconstpointer b)
-{
-    int real_a = GPOINTER_TO_INT(a);
-    int real_b = GPOINTER_TO_INT(b);
-
-    if (real_a == 0) {
-        real_a = 10;
-    }
-
-    if (real_b == 0) {
-        real_b = 10;
-    }
-
-    if (real_a < real_b) {
-        return -1;
-    } else if (real_a == real_b) {
-        return 0;
-    } else {
-        return 1;
-    }
-}
-
-int
-get_next_available_win_num(GList *used)
-{
-    // only console used
-    if (g_list_length(used) == 1) {
-        return 2;
-    } else {
-        GList *sorted = NULL;
-        GList *curr = used;
-        while (curr) {
-            sorted = g_list_insert_sorted(sorted, curr->data, cmp_win_num);
-            curr = g_list_next(curr);
-        }
-
-        int result = 0;
-        int last_num = 1;
-        curr = sorted;
-        // skip console
-        curr = g_list_next(curr);
-        while (curr) {
-            int curr_num = GPOINTER_TO_INT(curr->data);
-
-            if (((last_num != 9) && ((last_num + 1) != curr_num)) ||
-                    ((last_num == 9) && (curr_num != 0))) {
-                result = last_num + 1;
-                if (result == 10) {
-                    result = 0;
-                }
-                g_list_free(sorted);
-                return (result);
-
-            } else {
-                last_num = curr_num;
-                if (last_num == 0) {
-                    last_num = 10;
-                }
-            }
-            curr = g_list_next(curr);
-        }
-        result = last_num + 1;
-        if (result == 10) {
-            result = 0;
-        }
-
-        g_list_free(sorted);
-        return result;
-    }
-}
-
 
 static size_t
 _data_callback(void *ptr, size_t size, size_t nmemb, void *data)

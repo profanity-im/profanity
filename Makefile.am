@@ -40,6 +40,7 @@ core_sources = \
 	src/tools/p_sha1.h src/tools/p_sha1.c \
 	src/tools/autocomplete.c src/tools/autocomplete.h \
 	src/tools/tinyurl.c src/tools/tinyurl.h \
+	src/config/files.c src/config/files.h \
 	src/config/conflists.c src/config/conflists.h \
 	src/config/accounts.c src/config/accounts.h \
 	src/config/tlscerts.c src/config/tlscerts.h \
@@ -78,6 +79,7 @@ unittest_sources = \
 	src/tools/tinyurl.c src/tools/tinyurl.h \
 	src/config/accounts.h \
 	src/config/account.c src/config/account.h \
+	src/config/files.c src/config/files.h \
 	src/config/tlscerts.c src/config/tlscerts.h \
 	src/config/preferences.c src/config/preferences.h \
 	src/config/theme.c src/config/theme.h \

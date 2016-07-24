@@ -55,6 +55,9 @@ static int current;
 static Autocomplete wins_ac;
 static Autocomplete wins_close_ac;
 
+static int _wins_cmp_num(gconstpointer a, gconstpointer b);
+static int _wins_get_next_available_num(GList *used);
+
 void
 wins_init(void)
 {
@@ -424,7 +427,7 @@ wins_get_next(void)
 {
     // get and sort win nums
     GList *keys = g_hash_table_get_keys(windows);
-    keys = g_list_sort(keys, cmp_win_num);
+    keys = g_list_sort(keys, _wins_cmp_num);
     GList *curr = keys;
 
     // find our place in the list
@@ -453,7 +456,7 @@ wins_get_previous(void)
 {
     // get and sort win nums
     GList *keys = g_hash_table_get_keys(windows);
-    keys = g_list_sort(keys, cmp_win_num);
+    keys = g_list_sort(keys, _wins_cmp_num);
     GList *curr = keys;
 
     // find our place in the list
@@ -612,7 +615,7 @@ ProfWin*
 wins_new_xmlconsole(void)
 {
     GList *keys = g_hash_table_get_keys(windows);
-    int result = get_next_available_win_num(keys);
+    int result = _wins_get_next_available_num(keys);
     g_list_free(keys);
     ProfWin *newwin = win_create_xmlconsole();
     g_hash_table_insert(windows, GINT_TO_POINTER(result), newwin);
@@ -625,7 +628,7 @@ ProfWin*
 wins_new_chat(const char *const barejid)
 {
     GList *keys = g_hash_table_get_keys(windows);
-    int result = get_next_available_win_num(keys);
+    int result = _wins_get_next_available_num(keys);
     g_list_free(keys);
     ProfWin *newwin = win_create_chat(barejid);
     g_hash_table_insert(windows, GINT_TO_POINTER(result), newwin);
@@ -648,7 +651,7 @@ ProfWin*
 wins_new_muc(const char *const roomjid)
 {
     GList *keys = g_hash_table_get_keys(windows);
-    int result = get_next_available_win_num(keys);
+    int result = _wins_get_next_available_num(keys);
     g_list_free(keys);
     ProfWin *newwin = win_create_muc(roomjid);
     g_hash_table_insert(windows, GINT_TO_POINTER(result), newwin);
@@ -661,7 +664,7 @@ ProfWin*
 wins_new_muc_config(const char *const roomjid, DataForm *form)
 {
     GList *keys = g_hash_table_get_keys(windows);
-    int result = get_next_available_win_num(keys);
+    int result = _wins_get_next_available_num(keys);
     g_list_free(keys);
     ProfWin *newwin = win_create_muc_config(roomjid, form);
     g_hash_table_insert(windows, GINT_TO_POINTER(result), newwin);
@@ -672,7 +675,7 @@ ProfWin*
 wins_new_private(const char *const fulljid)
 {
     GList *keys = g_hash_table_get_keys(windows);
-    int result = get_next_available_win_num(keys);
+    int result = _wins_get_next_available_num(keys);
     g_list_free(keys);
     ProfWin *newwin = win_create_private(fulljid);
     g_hash_table_insert(windows, GINT_TO_POINTER(result), newwin);
@@ -685,7 +688,7 @@ ProfWin *
 wins_new_plugin(const char *const plugin_name, const char * const tag)
 {
     GList *keys = g_hash_table_get_keys(windows);
-    int result = get_next_available_win_num(keys);
+    int result = _wins_get_next_available_num(keys);
     g_list_free(keys);
     ProfWin *newwin = win_create_plugin(plugin_name, tag);
     g_hash_table_insert(windows, GINT_TO_POINTER(result), newwin);
@@ -896,23 +899,95 @@ wins_swap(int source_win, int target_win)
     }
 }
 
+static int
+_wins_cmp_num(gconstpointer a, gconstpointer b)
+{
+    int real_a = GPOINTER_TO_INT(a);
+    int real_b = GPOINTER_TO_INT(b);
+
+    if (real_a == 0) {
+        real_a = 10;
+    }
+
+    if (real_b == 0) {
+        real_b = 10;
+    }
+
+    if (real_a < real_b) {
+        return -1;
+    } else if (real_a == real_b) {
+        return 0;
+    } else {
+        return 1;
+    }
+}
+
+static int
+_wins_get_next_available_num(GList *used)
+{
+    // only console used
+    if (g_list_length(used) == 1) {
+        return 2;
+    } else {
+        GList *sorted = NULL;
+        GList *curr = used;
+        while (curr) {
+            sorted = g_list_insert_sorted(sorted, curr->data, _wins_cmp_num);
+            curr = g_list_next(curr);
+        }
+
+        int result = 0;
+        int last_num = 1;
+        curr = sorted;
+        // skip console
+        curr = g_list_next(curr);
+        while (curr) {
+            int curr_num = GPOINTER_TO_INT(curr->data);
+
+            if (((last_num != 9) && ((last_num + 1) != curr_num)) ||
+                    ((last_num == 9) && (curr_num != 0))) {
+                result = last_num + 1;
+                if (result == 10) {
+                    result = 0;
+                }
+                g_list_free(sorted);
+                return (result);
+
+            } else {
+                last_num = curr_num;
+                if (last_num == 0) {
+                    last_num = 10;
+                }
+            }
+            curr = g_list_next(curr);
+        }
+        result = last_num + 1;
+        if (result == 10) {
+            result = 0;
+        }
+
+        g_list_free(sorted);
+        return result;
+    }
+}
+
 gboolean
 wins_tidy(void)
 {
     gboolean tidy_required = FALSE;
     // check for gaps
     GList *keys = g_hash_table_get_keys(windows);
-    keys = g_list_sort(keys, cmp_win_num);
+    keys = g_list_sort(keys, _wins_cmp_num);
 
     // get last used
     GList *last = g_list_last(keys);
     int last_num = GPOINTER_TO_INT(last->data);
 
     // find first free num TODO - Will sort again
-    int next_available = get_next_available_win_num(keys);
+    int next_available = _wins_get_next_available_num(keys);
 
     // found gap (next available before last window)
-    if (cmp_win_num(GINT_TO_POINTER(next_available), GINT_TO_POINTER(last_num)) < 0) {
+    if (_wins_cmp_num(GINT_TO_POINTER(next_available), GINT_TO_POINTER(last_num)) < 0) {
         tidy_required = TRUE;
     }
 
@@ -966,7 +1041,7 @@ wins_create_summary(gboolean unread)
     GSList *result = NULL;
 
     GList *keys = g_hash_table_get_keys(windows);
-    keys = g_list_sort(keys, cmp_win_num);
+    keys = g_list_sort(keys, _wins_cmp_num);
     GList *curr = keys;
 
     while (curr) {

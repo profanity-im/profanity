@@ -55,12 +55,13 @@
 #include "common.h"
 #include "log.h"
 #include "plugins/plugins.h"
+#include "config/files.h"
 #include "xmpp/xmpp.h"
 #include "xmpp/stanza.h"
 #include "xmpp/form.h"
 #include "xmpp/capabilities.h"
 
-static gchar *cache_loc;
+static char *cache_loc;
 static GKeyFile *cache;
 
 static GHashTable *jid_to_ver;
@@ -68,7 +69,6 @@ static GHashTable *jid_to_caps;
 
 static char *my_sha1;
 
-static gchar* _get_cache_file(void);
 static void _save_cache(void);
 static Capabilities* _caps_by_ver(const char *const ver);
 static Capabilities* _caps_by_jid(const char *const jid);
@@ -78,15 +78,14 @@ void
 caps_init(void)
 {
     log_info("Loading capabilities cache");
-    cache_loc = _get_cache_file();
+    cache_loc = files_get_data_path(FILE_CAPSCACHE);
 
     if (g_file_test(cache_loc, G_FILE_TEST_EXISTS)) {
         g_chmod(cache_loc, S_IRUSR | S_IWUSR);
     }
 
     cache = g_key_file_new();
-    g_key_file_load_from_file(cache, cache_loc, G_KEY_FILE_KEEP_COMMENTS,
-        NULL);
+    g_key_file_load_from_file(cache, cache_loc, G_KEY_FILE_KEEP_COMMENTS, NULL);
 
     jid_to_ver = g_hash_table_new_full(g_str_hash, g_str_equal, free, free);
     jid_to_caps = g_hash_table_new_full(g_str_hash, g_str_equal, free, (GDestroyNotify)caps_destroy);
@@ -677,6 +676,8 @@ caps_close(void)
     cache = NULL;
     g_hash_table_destroy(jid_to_ver);
     g_hash_table_destroy(jid_to_caps);
+    free(cache_loc);
+    cache_loc = NULL;
 }
 
 void
@@ -695,19 +696,6 @@ caps_destroy(Capabilities *caps)
         }
         free(caps);
     }
-}
-
-static gchar*
-_get_cache_file(void)
-{
-    gchar *xdg_data = xdg_get_data_home();
-    GString *cache_file = g_string_new(xdg_data);
-    g_string_append(cache_file, "/profanity/capscache");
-    gchar *result = strdup(cache_file->str);
-    g_free(xdg_data);
-    g_string_free(cache_file, TRUE);
-
-    return result;
 }
 
 static void
