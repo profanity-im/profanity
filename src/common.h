@@ -108,15 +108,13 @@ int str_contains(const char str[], int size, char ch);
 gboolean strtoi_range(char *str, int *saveptr, int min, int max, char **err_msg);
 int utf8_display_len(const char *const str);
 char* file_getline(FILE *stream);
+
 char* release_get_latest(void);
 gboolean release_is_new(char *found_version);
 
 char* p_sha1_hash(char *str);
 char* create_unique_id(char *prefix);
 void reset_unique_id(void);
-
-int cmp_win_num(gconstpointer a, gconstpointer b);
-int get_next_available_win_num(GList *used);
 
 char* get_file_or_linked(char *loc, char *basedir);
 char* strip_arg_quotes(const char *const input);
