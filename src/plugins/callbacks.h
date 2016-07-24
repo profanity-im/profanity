@@ -32,8 +32,8 @@
  *
  */
 
-#ifndef CALLBACKS_H
-#define CALLBACKS_H
+#ifndef PLUGINS_CALLBACKS_H
+#define PLUGINS_CALLBACKS_H
 
 #include <glib.h>
 

@@ -32,8 +32,8 @@
  *
  */
 
-#ifndef PLUGIN_THEMES_H
-#define PLUGIN_THEMES_H
+#ifndef PLUGINS_THEMES_H
+#define PLUGINS_THEMES_H
 
 void plugin_themes_init(void);
 void plugin_themes_close(void);

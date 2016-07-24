@@ -32,8 +32,8 @@
  *
  */
 
-#ifndef AUTOCOMPLETE_H
-#define AUTOCOMPLETE_H
+#ifndef TOOLS_AUTOCOMPLETE_H
+#define TOOLS_AUTOCOMPLETE_H
 
 #include <glib.h>
 

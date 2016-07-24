@@ -32,8 +32,8 @@
  *
  */
 
-#ifndef FORM_H
-#define FORM_H
+#ifndef XMPP_FORM_H
+#define XMPP_FORM_H
 
 #include "xmpp/xmpp.h"
 

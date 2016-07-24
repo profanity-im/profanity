@@ -32,8 +32,8 @@
  *
  */
 
-#ifndef API_H
-#define API_H
+#ifndef PLUGINS_API_H
+#define PLUGINS_API_H
 
 #include "plugins/callbacks.h"
 

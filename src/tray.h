@@ -32,8 +32,8 @@
  *
  */
 
-#ifndef PROFANITY_TRAY_H
-#define PROFANITY_TRAY_H
+#ifndef TRAY_H
+#define TRAY_H
 
 void tray_init(void);
 void tray_update(void);

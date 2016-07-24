@@ -32,8 +32,8 @@
  *
  */
 
-#ifndef AUTOCOMPLETERS_H
-#define AUTOCOMPLETERS_H
+#ifndef PLUGINS_AUTOCOMPLETERS_H
+#define PLUGINS_AUTOCOMPLETERS_H
 
 #include <glib.h>
 

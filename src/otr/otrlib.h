@@ -32,8 +32,8 @@
  *
  */
 
-#ifndef OTRLIB_H
-#define OTRLIB_H
+#ifndef OTR_OTRLIB_H
+#define OTR_OTRLIB_H
 
 OtrlPolicy otrlib_policy(void);
 

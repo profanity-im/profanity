@@ -32,8 +32,8 @@
  *
  */
 
-#ifndef ACCOUNTS_H
-#define ACCOUNTS_H
+#ifndef CONFIG_ACCOUNTS_H
+#define CONFIG_ACCOUNTS_H
 
 #define MAX_PASSWORD_SIZE 64
 

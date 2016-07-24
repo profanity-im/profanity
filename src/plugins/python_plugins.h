@@ -32,8 +32,8 @@
  *
  */
 
-#ifndef PYTHON_PLUGINS_H
-#define PYTHON_PLUGINS_H
+#ifndef PLUGINS_PYTHON_PLUGINS_H
+#define PLUGINS_PYTHON_PLUGINS_H
 
 #include "plugins/plugins.h"
 

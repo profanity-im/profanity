@@ -32,8 +32,8 @@
  *
  */
 
-#ifndef GPG_H
-#define GPG_H
+#ifndef PGP_GPG_H
+#define PGP_GPG_H
 
 typedef struct pgp_key_t {
     char *id;

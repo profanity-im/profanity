@@ -32,8 +32,8 @@
  *
  */
 
-#ifndef CHAT_STATE_H
-#define CHAT_STATE_H
+#ifndef XMPP_CHAT_STATE_H
+#define XMPP_CHAT_STATE_H
 
 #include <glib.h>
 

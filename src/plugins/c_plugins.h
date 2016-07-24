@@ -32,8 +32,8 @@
  *
  */
 
-#ifndef C_PLUGINS_H
-#define C_PLUGINS_H
+#ifndef PLUGINS_C_PLUGINS_H
+#define PLUGINS_C_PLUGINS_H
 
 #include "plugins/plugins.h"
 

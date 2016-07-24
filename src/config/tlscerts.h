@@ -32,8 +32,8 @@
  *
  */
 
-#ifndef TLSCERTS_H
-#define TLSCERTS_H
+#ifndef CONFIG_TLSCERTS_H
+#define CONFIG_TLSCERTS_H
 
 typedef struct tls_cert_t {
     int version;
