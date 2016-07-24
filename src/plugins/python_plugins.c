@@ -65,15 +65,18 @@ _unref_module(PyObject *module)
     Py_XDECREF(module);
 }
 
+const char*
+python_get_version(void)
+{
+    return Py_GetVersion();
+}
+
 void
 python_env_init(void)
 {
     loaded_modules = g_hash_table_new_full(g_str_hash, g_str_equal, free, (GDestroyNotify)_unref_module);
 
     python_init_prof();
-
-    const char *ver = Py_GetVersion();
-    cons_show("PYTHON: %s", ver);
 
     gchar *plugins_dir = plugins_get_dir();
     GString *path = g_string_new("import sys\n");
