@@ -6,7 +6,7 @@
 #include <cmocka.h>
 #include <stdlib.h>
 
-#include "contact.h"
+#include "xmpp/contact.h"
 #include "roster_list.h"
 
 void empty_list_when_none_added(void **state)

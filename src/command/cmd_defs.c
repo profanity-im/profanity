@@ -58,7 +58,7 @@
 #include "config/theme.h"
 #include "config/tlscerts.h"
 #include "config/scripts.h"
-#include "contact.h"
+#include "xmpp/contact.h"
 #include "roster_list.h"
 #include "jid.h"
 #include "log.h"

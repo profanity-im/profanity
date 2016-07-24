@@ -39,7 +39,7 @@
 
 #include <wchar.h>
 
-#include "contact.h"
+#include "xmpp/contact.h"
 #include "muc.h"
 #include "ui/ui.h"
 #include "ui/buffer.h"

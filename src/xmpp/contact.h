@@ -32,8 +32,8 @@
  *
  */
 
-#ifndef CONTACT_H
-#define CONTACT_H
+#ifndef XMPP_CONTACT_H
+#define XMPP_CONTACT_H
 
 #include "resource.h"
 #include "tools/autocomplete.h"

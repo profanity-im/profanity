@@ -38,7 +38,7 @@
 #include <glib.h>
 
 #include "resource.h"
-#include "contact.h"
+#include "xmpp/contact.h"
 
 typedef enum {
     ROSTER_ORD_NAME,

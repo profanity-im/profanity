@@ -60,7 +60,7 @@
 #include "common.h"
 #include "config/preferences.h"
 #include "config/theme.h"
-#include "contact.h"
+#include "xmpp/contact.h"
 #include "roster_list.h"
 #include "jid.h"
 #include "log.h"

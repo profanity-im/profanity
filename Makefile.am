@@ -1,5 +1,5 @@
 core_sources = \
-	src/contact.c src/contact.h src/log.c src/common.c \
+	src/xmpp/contact.c src/xmpp/contact.h src/log.c src/common.c \
 	src/log.h src/profanity.c src/common.h \
 	src/profanity.h src/xmpp/chat_session.c \
 	src/xmpp/chat_session.h src/muc.c src/muc.h src/jid.h src/jid.c \
@@ -57,7 +57,7 @@ core_sources = \
 	src/tray.h src/tray.c
 
 unittest_sources = \
-	src/contact.c src/contact.h src/common.c \
+	src/xmpp/contact.c src/xmpp/contact.h src/common.c \
 	src/log.h src/profanity.c src/common.h \
 	src/profanity.h src/xmpp/chat_session.c \
 	src/xmpp/chat_session.h src/muc.c src/muc.h src/jid.h src/jid.c \

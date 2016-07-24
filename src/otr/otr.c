@@ -43,7 +43,7 @@
 #include "log.h"
 #include "roster_list.h"
 #include "window_list.h"
-#include "contact.h"
+#include "xmpp/contact.h"
 #include "ui/ui.h"
 #include "xmpp/xmpp.h"
 #include "config/preferences.h"

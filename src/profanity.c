@@ -56,7 +56,7 @@
 #include "config/scripts.h"
 #include "command/cmd_defs.h"
 #include "common.h"
-#include "contact.h"
+#include "xmpp/contact.h"
 #include "roster_list.h"
 #include "config/tlscerts.h"
 #include "log.h"

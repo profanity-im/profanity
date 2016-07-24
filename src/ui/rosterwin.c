@@ -36,7 +36,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "contact.h"
+#include "xmpp/contact.h"
 #include "ui/ui.h"
 #include "ui/window.h"
 #include "window_list.h"
