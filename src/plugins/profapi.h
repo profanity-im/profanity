@@ -50,7 +50,7 @@ int (*prof_cons_show_themed)(const char *const group, const char *const item, co
 int (*prof_cons_bad_cmd_usage)(const char *const cmd);
 
 void (*_prof_register_command)(const char *filename, const char *command_name, int min_args, int max_args,
-    const char **synopsis, const char *description, const char *arguments[][2], const char **examples,
+    char **synopsis, const char *description, char *arguments[][2], char **examples,
     void(*callback)(char **args));
 
 void (*_prof_register_timed)(const char *filename, void(*callback)(void), int interval_seconds);

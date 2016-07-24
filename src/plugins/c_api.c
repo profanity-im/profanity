@@ -82,7 +82,7 @@ c_api_cons_bad_cmd_usage(const char *const cmd)
 
 static void
 c_api_register_command(const char *filename, const char *command_name, int min_args, int max_args,
-    const char **synopsis, const char *description, const char *arguments[][2], const char **examples,
+    char **synopsis, const char *description, char *arguments[][2], char **examples,
     void(*callback)(char **args))
 {
     char *plugin_name = _c_plugin_name(filename);
