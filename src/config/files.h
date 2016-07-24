@@ -1,5 +1,5 @@
 /*
- * session.h
+ * files.h
  *
  * Copyright (C) 2012 - 2016 James Booth <boothj5@gmail.com>
  *
@@ -32,17 +32,32 @@
  *
  */
 
-#ifndef XMPP_SESSION_H
-#define XMPP_SESSION_H
+#ifndef CONFIG_FILES_H
+#define CONFIG_FILES_H
 
 #include <glib.h>
 
-void session_login_success(gboolean secured);
-void session_login_failed(void);
-void session_lost_connection(void);
-void session_autoping_fail(void);
+#define FILE_PROFRC "profrc"
+#define FILE_ACCOUNTS "accounts"
+#define FILE_TLSCERTS "tlscerts"
+#define FILE_PLUGIN_SETTINGS "plugin_settings"
+#define FILE_PLUGIN_THEMES "plugin_themes"
+#define FILE_CAPSCACHE "capscache"
 
-void session_init_activity(void);
-void session_check_autoaway(void);
+#define DIR_THEMES "themes"
+#define DIR_ICONS "icons"
+#define DIR_SCRIPTS "scripts"
+#define DIR_CHATLOGS "chatlogs"
+#define DIR_OTR "otr"
+#define DIR_PGP "pgp"
+#define DIR_PLUGINS "plugins"
+
+void files_create_directories(void);
+
+char* files_get_config_path(char *config_base);
+char* files_get_data_path(char *data_base);
+
+char* files_get_log_file(void);
+char* files_get_inputrc_file(void);
 
 #endif

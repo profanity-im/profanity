@@ -42,20 +42,20 @@
 
 #include "common.h"
 #include "log.h"
+#include "config/files.h"
 #include "config/account.h"
 #include "config/conflists.h"
 #include "tools/autocomplete.h"
 #include "xmpp/xmpp.h"
 #include "xmpp/jid.h"
 
-static gchar *accounts_loc;
+static char *accounts_loc;
 static GKeyFile *accounts;
 
 static Autocomplete all_ac;
 static Autocomplete enabled_ac;
 
 static void _save_accounts(void);
-static gchar* _get_accounts_file(void);
 
 void
 accounts_load(void)
@@ -63,7 +63,7 @@ accounts_load(void)
     log_info("Loading accounts");
     all_ac = autocomplete_new();
     enabled_ac = autocomplete_new();
-    accounts_loc = _get_accounts_file();
+    accounts_loc = files_get_data_path(FILE_ACCOUNTS);
 
     if (g_file_test(accounts_loc, G_FILE_TEST_EXISTS)) {
         g_chmod(accounts_loc, S_IRUSR | S_IWUSR);
@@ -857,27 +857,13 @@ _save_accounts(void)
 {
     gsize g_data_size;
     gchar *g_accounts_data = g_key_file_to_data(accounts, &g_data_size, NULL);
-    gchar *xdg_data = xdg_get_data_home();
-    GString *base_str = g_string_new(xdg_data);
-    g_string_append(base_str, "/profanity/");
-    gchar *true_loc = get_file_or_linked(accounts_loc, base_str->str);
+
+    gchar *base = g_path_get_basename(accounts_loc);
+    gchar *true_loc = get_file_or_linked(accounts_loc, base);
     g_file_set_contents(true_loc, g_accounts_data, g_data_size, NULL);
     g_chmod(accounts_loc, S_IRUSR | S_IWUSR);
-    g_free(xdg_data);
+
+    g_free(base);
     free(true_loc);
     g_free(g_accounts_data);
-    g_string_free(base_str, TRUE);
-}
-
-static gchar*
-_get_accounts_file(void)
-{
-    gchar *xdg_data = xdg_get_data_home();
-    GString *logfile = g_string_new(xdg_data);
-    g_string_append(logfile, "/profanity/accounts");
-    gchar *result = strdup(logfile->str);
-    g_free(xdg_data);
-    g_string_free(logfile, TRUE);
-
-    return result;
 }

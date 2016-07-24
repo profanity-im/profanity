@@ -45,6 +45,7 @@
 #include "log.h"
 #include "preferences.h"
 #include "tools/autocomplete.h"
+#include "config/files.h"
 #include "config/conflists.h"
 
 // preference groups refer to the sections in .profrc, for example [ui]
@@ -61,7 +62,7 @@
 
 #define INPBLOCK_DEFAULT 1000
 
-static gchar *prefs_loc;
+static char *prefs_loc;
 static GKeyFile *prefs;
 gint log_maxsize = 0;
 
@@ -69,7 +70,6 @@ static Autocomplete boolean_choice_ac;
 static Autocomplete room_trigger_ac;
 
 static void _save_prefs(void);
-static gchar* _get_preferences_file(void);
 static const char* _get_group(preference_t pref);
 static const char* _get_key(preference_t pref);
 static gboolean _get_default_boolean(preference_t pref);
@@ -79,7 +79,7 @@ void
 prefs_load(void)
 {
     GError *err;
-    prefs_loc = _get_preferences_file();
+    prefs_loc = files_get_config_path(FILE_PROFRC);
 
     if (g_file_test(prefs_loc, G_FILE_TEST_EXISTS)) {
         g_chmod(prefs_loc, S_IRUSR | S_IWUSR);
@@ -1120,27 +1120,6 @@ prefs_get_aliases(void)
     }
 }
 
-gchar*
-prefs_get_inputrc(void)
-{
-    gchar *xdg_config = xdg_get_config_home();
-    GString *inputrc_file = g_string_new(xdg_config);
-    g_free(xdg_config);
-
-    g_string_append(inputrc_file, "/profanity/inputrc");
-
-    if (g_file_test(inputrc_file->str, G_FILE_TEST_IS_REGULAR)) {
-        gchar *result = strdup(inputrc_file->str);
-        g_string_free(inputrc_file, TRUE);
-
-        return result;
-    }
-
-    g_string_free(inputrc_file, TRUE);
-
-    return NULL;
-}
-
 void
 _free_alias(ProfAlias *alias)
 {
@@ -1160,29 +1139,15 @@ _save_prefs(void)
 {
     gsize g_data_size;
     gchar *g_prefs_data = g_key_file_to_data(prefs, &g_data_size, NULL);
-    gchar *xdg_config = xdg_get_config_home();
-    GString *base_str = g_string_new(xdg_config);
-    g_string_append(base_str, "/profanity/");
-    gchar *true_loc = get_file_or_linked(prefs_loc, base_str->str);
+    gchar *base = g_path_get_basename(prefs_loc);
+    gchar *true_loc = get_file_or_linked(prefs_loc, base);
+
     g_file_set_contents(true_loc, g_prefs_data, g_data_size, NULL);
     g_chmod(prefs_loc, S_IRUSR | S_IWUSR);
-    g_free(xdg_config);
+
+    g_free(base);
     free(true_loc);
     g_free(g_prefs_data);
-    g_string_free(base_str, TRUE);
-}
-
-static gchar*
-_get_preferences_file(void)
-{
-    gchar *xdg_config = xdg_get_config_home();
-    GString *prefs_file = g_string_new(xdg_config);
-    g_string_append(prefs_file, "/profanity/profrc");
-    gchar *result = strdup(prefs_file->str);
-    g_free(xdg_config);
-    g_string_free(prefs_file, TRUE);
-
-    return result;
 }
 
 // get the preference group for a specific preference

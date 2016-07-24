@@ -47,6 +47,7 @@
 #include "log.h"
 #include "common.h"
 #include "pgp/gpg.h"
+#include "config/files.h"
 #include "tools/autocomplete.h"
 #include "ui/ui.h"
 
@@ -156,12 +157,10 @@ p_gpg_close(void)
 void
 p_gpg_on_connect(const char *const barejid)
 {
-    gchar *data_home = xdg_get_data_home();
-    GString *pubsfile = g_string_new(data_home);
-    free(data_home);
-
+    char *pgpdir = files_get_data_path(DIR_PGP);
+    GString *pubsfile = g_string_new(pgpdir);
     gchar *account_dir = str_replace(barejid, "@", "_at_");
-    g_string_append(pubsfile, "/profanity/pgp/");
+    g_string_append(pubsfile, "/");
     g_string_append(pubsfile, account_dir);
     free(account_dir);
 

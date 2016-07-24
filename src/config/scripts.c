@@ -42,6 +42,7 @@
 
 #include "common.h"
 #include "log.h"
+#include "config/files.h"
 #include "command/cmd_defs.h"
 #include "ui/ui.h"
 #include "ui/window_list.h"
@@ -50,38 +51,31 @@
 void
 scripts_init(void)
 {
-    gchar *data_home = xdg_get_data_home();
-    GString *scriptsdir = g_string_new(data_home);
-    free(data_home);
-
-    g_string_append(scriptsdir, "/profanity/scripts");
+    char *scriptsdir = files_get_data_path(DIR_SCRIPTS);
 
     // mkdir if doesn't exist
     errno = 0;
-    int res = g_mkdir_with_parents(scriptsdir->str, S_IRWXU);
+    int res = g_mkdir_with_parents(scriptsdir, S_IRWXU);
     if (res == -1) {
         char *errmsg = strerror(errno);
         if (errmsg) {
-            log_error("Error creating directory: %s, %s", scriptsdir->str, errmsg);
+            log_error("Error creating directory: %s, %s", scriptsdir, errmsg);
         } else {
-            log_error("Error creating directory: %s", scriptsdir->str);
+            log_error("Error creating directory: %s", scriptsdir);
         }
     }
 
-    g_string_free(scriptsdir, TRUE);
+    free(scriptsdir);
 }
 
 GSList*
 scripts_list(void)
 {
-    gchar *data_home = xdg_get_data_home();
-    GString *scriptsdir = g_string_new(data_home);
-    free(data_home);
-    g_string_append(scriptsdir, "/profanity/scripts");
+    char *scriptsdir = files_get_data_path(DIR_SCRIPTS);
 
     GSList *result = NULL;
-    GDir *scripts = g_dir_open(scriptsdir->str, 0, NULL);
-    g_string_free(scriptsdir, TRUE);
+    GDir *scripts = g_dir_open(scriptsdir, 0, NULL);
+    free(scriptsdir);
 
     if (scripts) {
         const gchar *script = g_dir_read_name(scripts);
@@ -98,11 +92,10 @@ scripts_list(void)
 GSList*
 scripts_read(const char *const script)
 {
-    gchar *data_home = xdg_get_data_home();
-    GString *scriptpath = g_string_new(data_home);
-    free(data_home);
-
-    g_string_append(scriptpath, "/profanity/scripts/");
+    char *scriptsdir = files_get_data_path(DIR_SCRIPTS);
+    GString *scriptpath = g_string_new(scriptsdir);
+    free(scriptsdir);
+    g_string_append(scriptpath, "/");
     g_string_append(scriptpath, script);
 
     FILE *scriptfile = g_fopen(scriptpath->str, "r");
@@ -136,11 +129,10 @@ scripts_read(const char *const script)
 gboolean
 scripts_exec(const char *const script)
 {
-    gchar *data_home = xdg_get_data_home();
-    GString *scriptpath = g_string_new(data_home);
-    free(data_home);
-
-    g_string_append(scriptpath, "/profanity/scripts/");
+    char *scriptsdir = files_get_data_path(DIR_SCRIPTS);
+    GString *scriptpath = g_string_new(scriptsdir);
+    free(scriptsdir);
+    g_string_append(scriptpath, "/");
     g_string_append(scriptpath, script);
 
     FILE *scriptfile = g_fopen(scriptpath->str, "r");

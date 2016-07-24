@@ -40,6 +40,7 @@
 
 #include "log.h"
 #include "config/preferences.h"
+#include "config/files.h"
 #include "otr/otr.h"
 #include "otr/otrlib.h"
 #include "ui/ui.h"
@@ -125,12 +126,11 @@ cb_write_fingerprints(void *opdata)
 {
     gcry_error_t err = 0;
 
-    gchar *data_home = xdg_get_data_home();
-    GString *basedir = g_string_new(data_home);
-    free(data_home);
-
+    char *otrdir = files_get_data_path(DIR_OTR);
+    GString *basedir = g_string_new(otrdir);
+    free(otrdir);
     gchar *account_dir = str_replace(jid, "@", "_at_");
-    g_string_append(basedir, "/profanity/otr/");
+    g_string_append(basedir, "/");
     g_string_append(basedir, account_dir);
     g_string_append(basedir, "/");
     free(account_dir);
@@ -214,12 +214,11 @@ otr_on_connect(ProfAccount *account)
     jid = strdup(account->jid);
     log_info("Loading OTR key for %s", jid);
 
-    gchar *data_home = xdg_get_data_home();
-    GString *basedir = g_string_new(data_home);
-    free(data_home);
-
+    char *otrdir = files_get_data_path(DIR_OTR);
+    GString *basedir = g_string_new(otrdir);
+    free(otrdir);
     gchar *account_dir = str_replace(jid, "@", "_at_");
-    g_string_append(basedir, "/profanity/otr/");
+    g_string_append(basedir, "/");
     g_string_append(basedir, account_dir);
     g_string_append(basedir, "/");
     free(account_dir);
@@ -392,12 +391,11 @@ otr_keygen(ProfAccount *account)
     jid = strdup(account->jid);
     log_info("Generating OTR key for %s", jid);
 
-    gchar *data_home = xdg_get_data_home();
-    GString *basedir = g_string_new(data_home);
-    free(data_home);
-
+    char *otrdir = files_get_data_path(DIR_OTR);
+    GString *basedir = g_string_new(otrdir);
+    free(otrdir);
     gchar *account_dir = str_replace(jid, "@", "_at_");
-    g_string_append(basedir, "/profanity/otr/");
+    g_string_append(basedir, "/");
     g_string_append(basedir, account_dir);
     g_string_append(basedir, "/");
     free(account_dir);
