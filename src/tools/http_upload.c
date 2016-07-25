@@ -301,7 +301,7 @@ end:
 char*
 file_mime_type(const char* const file_name)
 {
-	char *out_mime_type;
+    char *out_mime_type;
     char file_header[FILE_HEADER_BYTES];
     FILE *fd;
     if (!(fd = fopen(file_name, "rb"))) {
