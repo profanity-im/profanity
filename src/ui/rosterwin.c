@@ -102,6 +102,7 @@ rosterwin_roster(void)
         } else {
             GList *rooms = muc_rooms();
             _rosterwin_rooms(layout, "Rooms", rooms);
+            g_list_free(rooms);
         }
         prefs_free_string(roomsbypref);
 
@@ -162,6 +163,7 @@ rosterwin_roster(void)
         } else {
             GList *rooms = muc_rooms();
             _rosterwin_rooms(layout, "Rooms", rooms);
+            g_list_free(rooms);
         }
         prefs_free_string(roomsbypref);
 
@@ -660,7 +662,6 @@ _rosterwin_rooms(ProfLayoutSplit *layout, char *title, GList *rooms)
         }
         curr_room = g_list_next(curr_room);
     }
-    g_list_free(rooms);
 
     // if there are active rooms, or if we want to show empty groups
     if (rooms_sorted || prefs_get_boolean(PREF_ROSTER_EMPTY)) {
@@ -679,15 +680,19 @@ _rosterwin_rooms(ProfLayoutSplit *layout, char *title, GList *rooms)
 static void
 _rosterwin_rooms_by_service(ProfLayoutSplit *layout)
 {
-    GList *curr_room = muc_rooms();
+    GList *rooms = muc_rooms();
+    GList *curr = rooms;
     GList *services = NULL;
-    while (curr_room) {
-        char *roomjid = curr_room->data;
+    while (curr) {
+        char *roomjid = curr->data;
         Jid *jidp = jid_create(roomjid);
+
         if (!g_list_find_custom(services, jidp->domainpart, (GCompareFunc)g_strcmp0)) {
             services = g_list_insert_sorted(services, strdup(jidp->domainpart), (GCompareFunc)g_strcmp0);
         }
-        curr_room = g_list_next(curr_room);
+
+        jid_destroy(jidp);
+        curr = g_list_next(curr);
     }
 
     GList *curr_service = services;
@@ -695,22 +700,27 @@ _rosterwin_rooms_by_service(ProfLayoutSplit *layout)
         char *service = curr_service->data;
         GList *filtered_rooms = NULL;
 
-        curr_room = muc_rooms();
-        while (curr_room) {
-            char *roomjid = curr_room->data;
+        curr = rooms;
+        while (curr) {
+            char *roomjid = curr->data;
             Jid *jidp = jid_create(roomjid);
 
             if (g_strcmp0(curr_service->data, jidp->domainpart) == 0) {
-                filtered_rooms = g_list_append(filtered_rooms, jidp->barejid);
+                filtered_rooms = g_list_append(filtered_rooms, strdup(jidp->barejid));
             }
 
-            curr_room = g_list_next(curr_room);
+            jid_destroy(jidp);
+            curr = g_list_next(curr);
         }
 
         _rosterwin_rooms(layout, service, filtered_rooms);
 
+        g_list_free_full(filtered_rooms, free);
         curr_service = g_list_next(curr_service);
     }
+
+    g_list_free(rooms);
+    g_list_free_full(services, free);
 }
 
 static void

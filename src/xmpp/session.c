@@ -498,6 +498,7 @@ _session_reconnect(void)
     log_debug("Attempting reconnect with account %s", account->name);
     connection_connect(fulljid, saved_account.passwd, account->server, account->port, account->tls_policy);
     free(fulljid);
+    account_free(account);
     g_timer_start(reconnect_timer);
 }
 

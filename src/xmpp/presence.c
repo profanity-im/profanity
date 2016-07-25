@@ -300,11 +300,11 @@ presence_send(const resource_presence_t presence_type, const char *const msg, co
 static void
 _send_room_presence(xmpp_stanza_t *presence)
 {
-    GList *rooms_p = muc_rooms();
-    GList *rooms = rooms_p;
+    GList *rooms = muc_rooms();
+    GList *curr = rooms;
 
-    while (rooms) {
-        const char *room = rooms->data;
+    while (curr) {
+        const char *room = curr->data;
         const char *nick = muc_nick(room);
 
         if (nick) {
@@ -316,12 +316,10 @@ _send_room_presence(xmpp_stanza_t *presence)
             free(full_room_jid);
         }
 
-        rooms = g_list_next(rooms);
+        curr = g_list_next(curr);
     }
 
-    if (rooms_p) {
-        g_list_free(rooms_p);
-    }
+    g_list_free(rooms);
 }
 
 void

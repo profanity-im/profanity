@@ -79,7 +79,8 @@ sv_ev_login_account_success(char *account_name, gboolean secured)
     ui_handle_login_account_success(account, secured);
 
     // attempt to rejoin rooms with passwords
-    GList *curr = muc_rooms();
+    GList *rooms = muc_rooms();
+    GList *curr = rooms;
     while (curr) {
         char *password = muc_password(curr->data);
         if (password) {
@@ -88,7 +89,7 @@ sv_ev_login_account_success(char *account_name, gboolean secured)
         }
         curr = g_list_next(curr);
     }
-    g_list_free(curr);
+    g_list_free(rooms);
 
     log_info("%s logged in successfully", account->jid);
 

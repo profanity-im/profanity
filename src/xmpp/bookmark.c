@@ -191,6 +191,7 @@ bookmark_join(const char *jid)
             account_free(account);
         } else if (muc_roster_complete(item->jid)) {
             ui_room_join(item->jid, TRUE);
+            account_free(account);
         }
         return TRUE;
     }

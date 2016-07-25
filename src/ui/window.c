@@ -711,6 +711,7 @@ win_show_contact(ProfWin *window, PContact contact)
     if (last_activity) {
         GDateTime *now = g_date_time_new_now_local();
         GTimeSpan span = g_date_time_difference(now, last_activity);
+        g_date_time_unref(now);
 
         int hours = span / G_TIME_SPAN_HOUR;
         span = span - hours * G_TIME_SPAN_HOUR;
