@@ -403,7 +403,7 @@ _chat_log_chat(const char *const login, const char *const other, const char *con
 void
 groupchat_log_chat(const gchar *const login, const gchar *const room, const gchar *const nick, const gchar *const msg)
 {
-    gchar *room_copy = strdup(room);
+    char *room_copy = strdup(room);
     struct dated_chat_log *dated_log = g_hash_table_lookup(groupchat_logs, room_copy);
 
     // no log for room
@@ -416,6 +416,7 @@ groupchat_log_chat(const gchar *const login, const gchar *const room, const gcha
         dated_log = _create_groupchat_log(room_copy, login);
         g_hash_table_replace(logs, room_copy, dated_log);
     }
+    free(room_copy);
 
     GDateTime *dt = g_date_time_new_now_local();
 
