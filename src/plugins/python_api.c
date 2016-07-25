@@ -740,7 +740,9 @@ python_api_settings_get_string(PyObject *self, PyObject *args)
     disable_python_threads();
 
     if (res) {
-        return Py_BuildValue("s", res);
+        PyObject *pyres = Py_BuildValue("s", res);
+        free(res);
+        return pyres;
     } else {
         Py_RETURN_NONE;
     }
