@@ -61,6 +61,7 @@ static int is_active[12];
 static GHashTable *remaining_active;
 static int is_new[12];
 static GHashTable *remaining_new;
+static GTimeZone *tz;
 static GDateTime *last_time;
 static int current;
 
@@ -95,10 +96,12 @@ create_status_bar(void)
     mvwprintw(status_bar, 0, cols - 34 + ((current - 1) * 3), bracket);
     wattroff(status_bar, bracket_attrs);
 
+    tz = g_time_zone_new_local();
+
     if (last_time) {
         g_date_time_unref(last_time);
     }
-    last_time = g_date_time_new_now_local();
+    last_time = g_date_time_new_now(tz);
 
     _status_bar_draw();
 }
@@ -451,7 +454,7 @@ _status_bar_draw(void)
     if (last_time) {
         g_date_time_unref(last_time);
     }
-    last_time = g_date_time_new_now_local();
+    last_time = g_date_time_new_now(tz);
 
     int bracket_attrs = theme_attrs(THEME_STATUS_BRACKET);
 
