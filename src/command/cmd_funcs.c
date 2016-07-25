@@ -589,9 +589,11 @@ cmd_account_default(ProfWin *window, const char *const command, gchar **args)
         }
     } else if (g_strv_length(args) == 3) {
         if (strcmp(args[1], "set") == 0) {
-            if (accounts_get_account(args[2])) {
+            ProfAccount *account_p = accounts_get_account(args[2]);
+            if (account_p) {
                 prefs_set_string(PREF_DEFAULT_ACCOUNT, args[2]);
                 cons_show("Default account set to %s.", args[2]);
+                account_free(account_p);
             } else {
                 cons_show("Account %s does not exist.", args[2]);
             }
