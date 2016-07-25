@@ -79,7 +79,7 @@ struct dated_chat_log {
 
 static gboolean _log_roll_needed(struct dated_chat_log *dated_log);
 static struct dated_chat_log* _create_log(const char *const other, const char *const login);
-static struct dated_chat_log* _create_groupchat_log(char *room, const char *const login);
+static struct dated_chat_log* _create_groupchat_log(const char *const room, const char *const login);
 static void _free_chat_log(struct dated_chat_log *dated_log);
 static gboolean _key_equals(void *key1, void *key2);
 static char* _get_log_filename(const char *const other, const char *const login, GDateTime *dt, gboolean create);
@@ -403,20 +403,18 @@ _chat_log_chat(const char *const login, const char *const other, const char *con
 void
 groupchat_log_chat(const gchar *const login, const gchar *const room, const gchar *const nick, const gchar *const msg)
 {
-    char *room_copy = strdup(room);
-    struct dated_chat_log *dated_log = g_hash_table_lookup(groupchat_logs, room_copy);
+    struct dated_chat_log *dated_log = g_hash_table_lookup(groupchat_logs, room);
 
     // no log for room
     if (dated_log == NULL) {
-        dated_log = _create_groupchat_log(room_copy, login);
-        g_hash_table_insert(groupchat_logs, room_copy, dated_log);
+        dated_log = _create_groupchat_log(room, login);
+        g_hash_table_insert(groupchat_logs, strdup(room), dated_log);
 
     // log exists but needs rolling
     } else if (_log_roll_needed(dated_log)) {
-        dated_log = _create_groupchat_log(room_copy, login);
-        g_hash_table_replace(logs, room_copy, dated_log);
+        dated_log = _create_groupchat_log(room, login);
+        g_hash_table_replace(logs, strdup(room), dated_log);
     }
-    free(room_copy);
 
     GDateTime *dt = g_date_time_new_now_local();
 
@@ -515,7 +513,7 @@ _create_log(const char *const other, const char *const login)
 }
 
 static struct dated_chat_log*
-_create_groupchat_log(char *room, const char *const login)
+_create_groupchat_log(const char * const room, const char *const login)
 {
     GDateTime *now = g_date_time_new_now_local();
     char *filename = _get_groupchat_log_filename(room, login, now, TRUE);
