@@ -299,6 +299,7 @@ plugins_run_command(const char * const input)
         curr_hash = g_list_next(curr_hash);
     }
 
+    g_list_free(command_hashes);
     g_strfreev(split);
     return FALSE;
 }
