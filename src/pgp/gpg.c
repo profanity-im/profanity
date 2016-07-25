@@ -159,6 +159,7 @@ p_gpg_on_connect(const char *const barejid)
 {
     char *pgpdir = files_get_data_path(DIR_PGP);
     GString *pubsfile = g_string_new(pgpdir);
+    free(pgpdir);
     gchar *account_dir = str_replace(barejid, "@", "_at_");
     g_string_append(pubsfile, "/");
     g_string_append(pubsfile, account_dir);
