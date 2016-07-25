@@ -57,7 +57,7 @@ python_api_cons_alert(PyObject *self, PyObject *args)
     api_cons_alert();
     disable_python_threads();
 
-    return Py_BuildValue("");
+    Py_RETURN_NONE;
 }
 
 static PyObject*
@@ -65,7 +65,7 @@ python_api_cons_show(PyObject *self, PyObject *args)
 {
     PyObject* message = NULL;
     if (!PyArg_ParseTuple(args, "O", &message)) {
-        return Py_BuildValue("");
+        Py_RETURN_NONE;
     }
 
     char *message_str = python_str_or_unicode_to_string(message);
@@ -75,7 +75,7 @@ python_api_cons_show(PyObject *self, PyObject *args)
     free(message_str);
     disable_python_threads();
 
-    return Py_BuildValue("");
+    Py_RETURN_NONE;
 }
 
 static PyObject*
@@ -86,7 +86,7 @@ python_api_cons_show_themed(PyObject *self, PyObject *args)
     PyObject *def = NULL;
     PyObject *message = NULL;
     if (!PyArg_ParseTuple(args, "OOOO", &group, &key, &def, &message)) {
-        return Py_BuildValue("");
+        Py_RETURN_NONE;
     }
 
     char *group_str = python_str_or_unicode_to_string(group);
@@ -102,7 +102,7 @@ python_api_cons_show_themed(PyObject *self, PyObject *args)
     free(message_str);
     disable_python_threads();
 
-    return Py_BuildValue("");
+    Py_RETURN_NONE;
 }
 
 static PyObject*
@@ -110,7 +110,7 @@ python_api_cons_bad_cmd_usage(PyObject *self, PyObject *args)
 {
     PyObject *cmd = NULL;
     if (!PyArg_ParseTuple(args, "O", &cmd)) {
-        return Py_BuildValue("");
+        Py_RETURN_NONE;
     }
 
     char *cmd_str = python_str_or_unicode_to_string(cmd);
@@ -120,7 +120,7 @@ python_api_cons_bad_cmd_usage(PyObject *self, PyObject *args)
     free(cmd_str);
     disable_python_threads();
 
-    return Py_BuildValue("");
+    Py_RETURN_NONE;
 }
 
 static PyObject*
@@ -137,7 +137,7 @@ python_api_register_command(PyObject *self, PyObject *args)
 
     if (!PyArg_ParseTuple(args, "OiiOOOOO", &command_name, &min_args, &max_args,
             &synopsis, &description, &arguments, &examples, &p_callback)) {
-        return Py_BuildValue("");
+        Py_RETURN_NONE;
     }
 
     char *command_name_str = python_str_or_unicode_to_string(command_name);
@@ -164,7 +164,7 @@ python_api_register_command(PyObject *self, PyObject *args)
             PyObject *item = PyList_GetItem(arguments, i);
             Py_ssize_t len2 = PyList_Size(item);
             if (len2 != 2) {
-                return Py_BuildValue("");
+                Py_RETURN_NONE;
             }
             PyObject *arg = PyList_GetItem(item, 0);
             char *c_arg = python_str_or_unicode_to_string(arg);
@@ -212,7 +212,7 @@ python_api_register_command(PyObject *self, PyObject *args)
 
     free(plugin_name);
 
-    return Py_BuildValue("");
+    Py_RETURN_NONE;
 }
 
 static PyObject *
@@ -222,7 +222,7 @@ python_api_register_timed(PyObject *self, PyObject *args)
     int interval_seconds = 0;
 
     if (!PyArg_ParseTuple(args, "Oi", &p_callback, &interval_seconds)) {
-        return Py_BuildValue("");
+        Py_RETURN_NONE;
     }
 
     char *plugin_name = _python_plugin_name();
@@ -236,7 +236,7 @@ python_api_register_timed(PyObject *self, PyObject *args)
 
     free(plugin_name);
 
-    return Py_BuildValue("");
+    Py_RETURN_NONE;
 }
 
 static PyObject *
@@ -246,7 +246,7 @@ python_api_completer_add(PyObject *self, PyObject *args)
     PyObject *items = NULL;
 
     if (!PyArg_ParseTuple(args, "OO", &key, &items)) {
-        return Py_BuildValue("");
+        Py_RETURN_NONE;
     }
 
     char *key_str = python_str_or_unicode_to_string(key);
@@ -276,7 +276,7 @@ python_api_completer_add(PyObject *self, PyObject *args)
 
     free(plugin_name);
 
-    return Py_BuildValue("");
+    Py_RETURN_NONE;
 }
 
 static PyObject *
@@ -286,7 +286,7 @@ python_api_completer_remove(PyObject *self, PyObject *args)
     PyObject *items = NULL;
 
     if (!PyArg_ParseTuple(args, "OO", &key, &items)) {
-        return Py_BuildValue("");
+        Py_RETURN_NONE;
     }
 
     char *key_str = python_str_or_unicode_to_string(key);
@@ -312,7 +312,7 @@ python_api_completer_remove(PyObject *self, PyObject *args)
 
     free(plugin_name);
 
-    return Py_BuildValue("");
+    Py_RETURN_NONE;
 }
 
 static PyObject *
@@ -321,7 +321,7 @@ python_api_completer_clear(PyObject *self, PyObject *args)
     PyObject *key = NULL;
 
     if (!PyArg_ParseTuple(args, "O", &key)) {
-        return Py_BuildValue("");
+        Py_RETURN_NONE;
     }
 
     char *key_str = python_str_or_unicode_to_string(key);
@@ -336,7 +336,7 @@ python_api_completer_clear(PyObject *self, PyObject *args)
 
     free(plugin_name);
 
-    return Py_BuildValue("");
+    Py_RETURN_NONE;
 }
 
 static PyObject*
@@ -347,7 +347,7 @@ python_api_notify(PyObject *self, PyObject *args)
     int timeout_ms = 5000;
 
     if (!PyArg_ParseTuple(args, "OiO", &message, &timeout_ms, &category)) {
-        return Py_BuildValue("");
+        Py_RETURN_NONE;
     }
 
     char *message_str = python_str_or_unicode_to_string(message);
@@ -359,7 +359,7 @@ python_api_notify(PyObject *self, PyObject *args)
     free(category_str);
     disable_python_threads();
 
-    return Py_BuildValue("");
+    Py_RETURN_NONE;
 }
 
 static PyObject*
@@ -367,7 +367,7 @@ python_api_send_line(PyObject *self, PyObject *args)
 {
     PyObject *line = NULL;
     if (!PyArg_ParseTuple(args, "O", &line)) {
-        return Py_BuildValue("");
+        Py_RETURN_NONE;
     }
 
     char *line_str = python_str_or_unicode_to_string(line);
@@ -377,7 +377,7 @@ python_api_send_line(PyObject *self, PyObject *args)
     free(line_str);
     disable_python_threads();
 
-    return Py_BuildValue("");
+    Py_RETURN_NONE;
 }
 
 static PyObject *
@@ -389,7 +389,7 @@ python_api_get_current_recipient(PyObject *self, PyObject *args)
     if (recipient) {
         return Py_BuildValue("s", recipient);
     } else {
-        return Py_BuildValue("");
+        Py_RETURN_NONE;
     }
 }
 
@@ -402,7 +402,7 @@ python_api_get_current_muc(PyObject *self, PyObject *args)
     if (room) {
         return Py_BuildValue("s", room);
     } else {
-        return Py_BuildValue("");
+        Py_RETURN_NONE;
     }
 }
 
@@ -415,7 +415,7 @@ python_api_get_current_nick(PyObject *self, PyObject *args)
     if (nick) {
         return Py_BuildValue("s", nick);
     } else {
-        return Py_BuildValue("");
+        Py_RETURN_NONE;
     }
 }
 
@@ -456,7 +456,7 @@ python_api_log_debug(PyObject *self, PyObject *args)
 {
     PyObject *message = NULL;
     if (!PyArg_ParseTuple(args, "O", &message)) {
-        return Py_BuildValue("");
+        Py_RETURN_NONE;
     }
 
     char *message_str = python_str_or_unicode_to_string(message);
@@ -466,7 +466,7 @@ python_api_log_debug(PyObject *self, PyObject *args)
     free(message_str);
     disable_python_threads();
 
-    return Py_BuildValue("");
+    Py_RETURN_NONE;
 }
 
 static PyObject *
@@ -474,7 +474,7 @@ python_api_log_info(PyObject *self, PyObject *args)
 {
     PyObject *message = NULL;
     if (!PyArg_ParseTuple(args, "O", &message)) {
-        return Py_BuildValue("");
+        Py_RETURN_NONE;
     }
 
     char *message_str = python_str_or_unicode_to_string(message);
@@ -484,7 +484,7 @@ python_api_log_info(PyObject *self, PyObject *args)
     free(message_str);
     disable_python_threads();
 
-    return Py_BuildValue("");
+    Py_RETURN_NONE;
 }
 
 static PyObject *
@@ -492,7 +492,7 @@ python_api_log_warning(PyObject *self, PyObject *args)
 {
     PyObject *message = NULL;
     if (!PyArg_ParseTuple(args, "O", &message)) {
-        return Py_BuildValue("");
+        Py_RETURN_NONE;
     }
 
     char *message_str = python_str_or_unicode_to_string(message);
@@ -502,7 +502,7 @@ python_api_log_warning(PyObject *self, PyObject *args)
     free(message_str);
     disable_python_threads();
 
-    return Py_BuildValue("");
+    Py_RETURN_NONE;
 }
 
 static PyObject *
@@ -510,7 +510,7 @@ python_api_log_error(PyObject *self, PyObject *args)
 {
     PyObject *message = NULL;
     if (!PyArg_ParseTuple(args, "O", &message)) {
-        return Py_BuildValue("");
+        Py_RETURN_NONE;
     }
 
     char *message_str = python_str_or_unicode_to_string(message);
@@ -520,7 +520,7 @@ python_api_log_error(PyObject *self, PyObject *args)
     free(message_str);
     disable_python_threads();
 
-    return Py_BuildValue("");
+    Py_RETURN_NONE;
 }
 
 static PyObject *
@@ -528,7 +528,7 @@ python_api_win_exists(PyObject *self, PyObject *args)
 {
     PyObject *tag = NULL;
     if (!PyArg_ParseTuple(args, "O", &tag)) {
-        return Py_BuildValue("");
+        Py_RETURN_NONE;
     }
 
     char *tag_str = python_str_or_unicode_to_string(tag);
@@ -552,7 +552,7 @@ python_api_win_create(PyObject *self, PyObject *args)
     PyObject *p_callback = NULL;
 
     if (!PyArg_ParseTuple(args, "OO", &tag, &p_callback)) {
-        return Py_BuildValue("");
+        Py_RETURN_NONE;
     }
 
     char *tag_str = python_str_or_unicode_to_string(tag);
@@ -568,7 +568,7 @@ python_api_win_create(PyObject *self, PyObject *args)
 
     free(plugin_name);
 
-    return Py_BuildValue("");
+    Py_RETURN_NONE;
 }
 
 static PyObject *
@@ -577,7 +577,7 @@ python_api_win_focus(PyObject *self, PyObject *args)
     PyObject *tag = NULL;
 
     if (!PyArg_ParseTuple(args, "O", &tag)) {
-        return Py_BuildValue("");
+        Py_RETURN_NONE;
     }
 
     char *tag_str = python_str_or_unicode_to_string(tag);
@@ -587,7 +587,7 @@ python_api_win_focus(PyObject *self, PyObject *args)
     free(tag_str);
     disable_python_threads();
 
-    return Py_BuildValue("");
+    Py_RETURN_NONE;
 }
 
 static PyObject *
@@ -597,7 +597,7 @@ python_api_win_show(PyObject *self, PyObject *args)
     PyObject *line = NULL;
 
     if (!PyArg_ParseTuple(args, "OO", &tag, &line)) {
-        return Py_BuildValue("");
+        Py_RETURN_NONE;
     }
 
     char *tag_str = python_str_or_unicode_to_string(tag);
@@ -609,7 +609,7 @@ python_api_win_show(PyObject *self, PyObject *args)
     free(line_str);
     disable_python_threads();
 
-    return Py_BuildValue("");
+    Py_RETURN_NONE;
 }
 
 static PyObject *
@@ -623,7 +623,7 @@ python_api_win_show_themed(PyObject *self, PyObject *args)
 
     if (!PyArg_ParseTuple(args, "OOOOO", &tag, &group, &key, &def, &line)) {
         python_check_error();
-        return Py_BuildValue("");
+        Py_RETURN_NONE;
     }
 
     char *tag_str = python_str_or_unicode_to_string(tag);
@@ -641,7 +641,7 @@ python_api_win_show_themed(PyObject *self, PyObject *args)
     free(line_str);
     disable_python_threads();
 
-    return Py_BuildValue("");
+    Py_RETURN_NONE;
 }
 
 static PyObject*
@@ -673,7 +673,7 @@ python_api_settings_get_boolean(PyObject *self, PyObject *args)
     PyObject *defobj = NULL;
 
     if (!PyArg_ParseTuple(args, "OOO!", &group, &key, &PyBool_Type, &defobj)) {
-        return Py_BuildValue("");
+        Py_RETURN_NONE;
     }
 
     char *group_str = python_str_or_unicode_to_string(group);
@@ -701,7 +701,7 @@ python_api_settings_set_boolean(PyObject *self, PyObject *args)
     PyObject *valobj = NULL;
 
     if (!PyArg_ParseTuple(args, "OOO!", &group, &key, &PyBool_Type, &valobj)) {
-        return Py_BuildValue("");
+        Py_RETURN_NONE;
     }
 
     char *group_str = python_str_or_unicode_to_string(group);
@@ -714,7 +714,7 @@ python_api_settings_set_boolean(PyObject *self, PyObject *args)
     free(key_str);
     disable_python_threads();
 
-    return Py_BuildValue("");
+    Py_RETURN_NONE;
 }
 
 static PyObject*
@@ -725,7 +725,7 @@ python_api_settings_get_string(PyObject *self, PyObject *args)
     PyObject *def = NULL;
 
     if (!PyArg_ParseTuple(args, "OOO", &group, &key, &def)) {
-        return Py_BuildValue("");
+        Py_RETURN_NONE;
     }
 
     char *group_str = python_str_or_unicode_to_string(group);
@@ -742,7 +742,7 @@ python_api_settings_get_string(PyObject *self, PyObject *args)
     if (res) {
         return Py_BuildValue("s", res);
     } else {
-        return Py_BuildValue("");
+        Py_RETURN_NONE;
     }
 }
 
@@ -754,7 +754,7 @@ python_api_settings_set_string(PyObject *self, PyObject *args)
     PyObject *val = NULL;
 
     if (!PyArg_ParseTuple(args, "OOO", &group, &key, &val)) {
-        return Py_BuildValue("");
+        Py_RETURN_NONE;
     }
 
     char *group_str = python_str_or_unicode_to_string(group);
@@ -768,7 +768,7 @@ python_api_settings_set_string(PyObject *self, PyObject *args)
     free(val_str);
     disable_python_threads();
 
-    return Py_BuildValue("");
+    Py_RETURN_NONE;
 }
 
 static PyObject*
@@ -779,7 +779,7 @@ python_api_settings_get_int(PyObject *self, PyObject *args)
     int def = 0;
 
     if (!PyArg_ParseTuple(args, "OOi", &group, &key, &def)) {
-        return Py_BuildValue("");
+        Py_RETURN_NONE;
     }
 
     char *group_str = python_str_or_unicode_to_string(group);
@@ -802,7 +802,7 @@ python_api_settings_set_int(PyObject *self, PyObject *args)
     int val = 0;
 
     if (!PyArg_ParseTuple(args, "OOi", &group, &key, &val)) {
-        return Py_BuildValue("");
+        Py_RETURN_NONE;
     }
 
     char *group_str = python_str_or_unicode_to_string(group);
@@ -814,7 +814,7 @@ python_api_settings_set_int(PyObject *self, PyObject *args)
     free(key_str);
     disable_python_threads();
 
-    return Py_BuildValue("");
+    Py_RETURN_NONE;
 }
 
 static PyObject*
@@ -825,7 +825,7 @@ python_api_incoming_message(PyObject *self, PyObject *args)
     PyObject *message = NULL;
 
     if (!PyArg_ParseTuple(args, "OOO", &barejid, &resource, &message)) {
-        return Py_BuildValue("");
+        Py_RETURN_NONE;
     }
 
     char *barejid_str = python_str_or_unicode_to_string(barejid);
@@ -839,7 +839,7 @@ python_api_incoming_message(PyObject *self, PyObject *args)
     free(message_str);
     disable_python_threads();
 
-    return Py_BuildValue("");
+    Py_RETURN_NONE;
 }
 
 static PyObject*
@@ -847,7 +847,7 @@ python_api_disco_add_feature(PyObject *self, PyObject *args)
 {
     PyObject *feature = NULL;
     if (!PyArg_ParseTuple(args, "O", &feature)) {
-        return Py_BuildValue("");
+        Py_RETURN_NONE;
     }
 
     char *feature_str = python_str_or_unicode_to_string(feature);
@@ -857,7 +857,7 @@ python_api_disco_add_feature(PyObject *self, PyObject *args)
     free(feature_str);
     disable_python_threads();
 
-    return Py_BuildValue("");
+    Py_RETURN_NONE;
 }
 
 void
