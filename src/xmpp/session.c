@@ -397,7 +397,11 @@ session_check_autoaway(void)
                     if (saved_status) {
                         free(saved_status);
                     }
-                    saved_status = curr_status;
+                    if (curr_status) {
+                        saved_status = strdup(curr_status);
+                    } else {
+                        saved_status = NULL;
+                    }
 
                     // send away presence with last activity
                     char *message = prefs_get_string(PREF_AUTOAWAY_MESSAGE);
@@ -481,6 +485,7 @@ session_check_autoaway(void)
         break;
     }
 
+    free(curr_status);
     prefs_free_string(mode);
 }
 

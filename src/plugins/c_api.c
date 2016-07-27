@@ -365,9 +365,9 @@ static char *
 _c_plugin_name(const char *filename)
 {
     GString *plugin_name_str = g_string_new("");
-    char *name = strndup(filename, strlen(filename)-1);
+    gchar *name = g_strndup(filename, strlen(filename)-1);
     g_string_append(plugin_name_str, name);
-    free(name);
+    g_free(name);
     g_string_append(plugin_name_str, "so");
     char *result = plugin_name_str->str;
     g_string_free(plugin_name_str, FALSE);
