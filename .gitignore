@@ -68,6 +68,8 @@ apidocs/python/_build/
 apidocs/python/modules.rst
 apidocs/python/prof.rst
 apidocs/python/src/prof.pyc
+apidocs/python/plugin.rst
+apidocs/python/src/plugin.pyc
 apidocs/c/html/
 
 # Temp Vim files
