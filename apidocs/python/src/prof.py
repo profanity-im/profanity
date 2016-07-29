@@ -9,27 +9,33 @@ def cons_alert():
     pass
 
 def cons_show(message): 
-    """
-    Show a message in the console.\n
-    *message*: The message to print\n 
-    Return: True on success, False on failure
+    """Show a message in the console window.
+
+    :param message: the message to print
+    :return: ``True`` on success, ``False`` on failure
     """
     pass
 
-def cons_show_themed(): 
-    """\n	
-    Show a message in the console, using the specified theme.
-    | Themes can be must be specified in ~/.local/share/profanity/plugin_themes\n
-    *group* The group name in the themes file, or NULL\n
-    *item* The item name within the group, or NULL\n
-    *def* A default colour if the theme cannot be found, or NULL\n
-    *message* the message to print\n
-    Return: True on success, False on failure
+def cons_show_themed(group, item, default, message): 
+    """Show a message in the console, using the specified theme.\n
+    Themes can be must be specified in ``~/.local/share/profanity/plugin_themes``
+
+    :param group: the group name in the themes file, or None
+    :param item: the item name within the group, or None
+    :param default: default colour if the theme cannot be found, or None
+    :param message: the message to print
+    :return: ``True`` on success, ``False`` on failure
     """
     pass
 
-def cons_bad_cmd_usage(): 
-	pass
+
+def cons_bad_cmd_usage(command): 
+    """Show a message indicating the command has been called incorrectly.
+
+    :param command: the command name with leading slash, e.g. ``"/say"``
+    """
+    pass
+
 
 def register_command(): 
 	pass
