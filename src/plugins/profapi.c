@@ -44,9 +44,9 @@ int (*prof_cons_bad_cmd_usage)(const char *const cmd) = NULL;
 
 void (*_prof_register_command)(const char *filename, const char *command_name, int min_args, int max_args,
     char **synopsis, const char *description, char *arguments[][2], char **examples,
-    void(*callback)(char **args)) = NULL;
+    CMD_CB callback) = NULL;
 
-void (*_prof_register_timed)(const char *filename, void(*callback)(void), int interval_seconds) = NULL;
+void (*_prof_register_timed)(const char *filename, TIMED_CB callback, int interval_seconds) = NULL;
 
 void (*_prof_completer_add)(const char *filename, const char *key, char **items) = NULL;
 void (*_prof_completer_remove)(const char *filename, const char *key, char **items) = NULL;
@@ -67,7 +67,7 @@ void (*prof_log_info)(const char *message) = NULL;
 void (*prof_log_warning)(const char *message) = NULL;
 void (*prof_log_error)(const char *message) = NULL;
 
-void (*_prof_win_create)(const char *filename, PROF_WIN_TAG win, void(*input_handler)(PROF_WIN_TAG win, char *line)) = NULL;
+void (*_prof_win_create)(const char *filename, PROF_WIN_TAG win, WINDOW_CB input_handler) = NULL;
 int (*prof_win_exists)(PROF_WIN_TAG win) = NULL;
 int (*prof_win_focus)(PROF_WIN_TAG win) = NULL;
 int (*prof_win_show)(PROF_WIN_TAG win, char *line) = NULL;
