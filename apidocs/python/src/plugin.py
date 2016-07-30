@@ -236,6 +236,7 @@ def prof_post_priv_message_send(room, nick, message):
     :param nick: nickname of the message recipient
     :param message: the sent message
     :type room: str or unicode
+    :type nick: str or unicode
     :type message: str or unicode
     """
     pass

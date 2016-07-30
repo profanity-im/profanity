@@ -216,7 +216,7 @@ def notify(message, timeout, category):
 def get_current_recipient(): 
     """Retrieve the Jabber ID of the current chat recipient, when in a chat window.
 
-    :return: The Jabber ID of the current chat recipient e.g. ``"buddy@chat.org"``, or ``None`` if not in a chat window.
+    :return: the Jabber ID of the current chat recipient e.g. ``"buddy@chat.org"``, or ``None`` if not in a chat window.
     :rtype: str
     """
     pass
@@ -225,7 +225,7 @@ def get_current_recipient():
 def get_current_muc(): 
     """Retrieve the Jabber ID of the current room, when in a chat room window.
 
-    :return: The Jabber ID of the current chat room e.g. ``"metalchat@conference.chat.org"``, or ``None`` if not in a chat room window.
+    :return: the Jabber ID of the current chat room e.g. ``"metalchat@conference.chat.org"``, or ``None`` if not in a chat room window.
     :rtype: str
     """
     pass
@@ -234,7 +234,7 @@ def get_current_muc():
 def get_current_nick(): 
     """Retrieve the users nickname in a chat room, when in a chat room window.
 
-    :return: The users nickname in the current chat room e.g. ``"eddie"``, or ``None`` if not in a chat room window.
+    :return: the users nickname in the current chat room e.g. ``"eddie"``, or ``None`` if not in a chat room window.
     :rtype: str
     """
     pass
@@ -243,7 +243,7 @@ def get_current_nick():
 def get_current_occupants(): 
     """Retrieve nicknames of all occupants in a chat room, when in a chat room window.
 
-    :return: Nicknames of all occupants in the current room or an empty list if not in a chat room window.
+    :return: nicknames of all occupants in the current room or an empty list if not in a chat room window.
     :rtype: list of str
     """
     pass
@@ -340,7 +340,7 @@ def win_focus(tag):
 def win_show(tag, message): 
     """Show a message in the plugin window.
 
-    :param tag: The tag of the window to focus
+    :param tag: The tag of the window to display the message
     :type tag: str or unicode
     :param message: the message to print
     :type message: str or unicode
@@ -354,9 +354,9 @@ def win_show(tag, message):
 
 def win_show_themed(tag, group, key, default, message): 
     """Show a message in the plugin window, using the specified theme.\n
-    Themes can be must be specified in ``~/.local/share/profanity/plugin_themes``
+    Themes must be specified in ``~/.local/share/profanity/plugin_themes``
 
-    :param tag: The tag of the window to focus
+    :param tag: The tag of the window to display the message
     :type tag: str or unicode
     :param group: the group name in the themes file
     :param key: the item name within the group
