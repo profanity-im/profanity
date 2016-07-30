@@ -1,5 +1,11 @@
 """
-Profanity plugin API
+This module contains the functions available to plugins to interact with Profanity.
+
+The ``prof`` module must be imported
+::
+    import prof
+
+Profanity accepts both ``str`` and ``unicode`` objects as string arguments, to allow plugins to work with both Python 2 and 3.
 """
 
 
@@ -374,7 +380,7 @@ def send_stanza(stanza):
     :param stanza: An XMPP stanza
     :type stanza: str or unicode
     :return: ``True`` if the stanza was sent successfully, ``False`` otherwise
-    :rtype boolean:
+    :rtype: boolean
 
     Example:
     ::
