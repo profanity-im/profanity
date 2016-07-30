@@ -6,12 +6,6 @@ Contents:
 .. toctree::
    :maxdepth: 2
 
-
-
-Indices and tables
-==================
-
+   prof
+   plugin
 * :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
-
