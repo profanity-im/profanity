@@ -374,7 +374,7 @@ def send_stanza(stanza):
     :param stanza: An XMPP stanza
     :type stanza: str or unicode
     :return: ``True`` if the stanza was sent successfully, ``False`` otherwise
-    :rtype boolean:
+    :rtype: boolean
 
     Example:
     ::
