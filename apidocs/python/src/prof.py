@@ -172,7 +172,6 @@ def completer_clear(key):
     """Remove all values from autocompletion for a command, or command argument.
 
     :param key: the prefix from which to clear the autocompletion items
-    :param items: the items to remove
 
     Examples:
     ::

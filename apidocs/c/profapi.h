@@ -90,7 +90,6 @@ void prof_completer_remove(const char *key, char **items);
 Remove all values from autocompletion for a command, or command argument.
 
 @param key the prefix from which to clear the autocompletion items
-@param items the items to remove
 */
 void prof_completer_clear(const char *key);
 
@@ -186,10 +185,10 @@ int prof_win_focus(PROF_WIN_TAG win);
 /**
 Show a message in the plugin window.
 @param win the {@link PROF_WIN_TAG} of the window to display the message
-@param line The message to print
+@param message The message to print
 @return 1 on success, 0 on failure
 */
-int prof_win_show(PROF_WIN_TAG win, char *line);
+int prof_win_show(PROF_WIN_TAG win, char *message);
 
 /**	
 Show a message in the plugin window, using the specified theme.
@@ -201,7 +200,7 @@ Themes must be specified in ~/.local/share/profanity/plugin_themes
 @param message the message to print 
 @return 1 on success, 0 on failure
 */
-int prof_win_show_themed(PROF_WIN_TAG tag, char *group, char *key, char *def, char *line);
+int prof_win_show_themed(PROF_WIN_TAG tag, char *group, char *key, char *def, char *message);
 
 /**
 Send an XMPP stanza
