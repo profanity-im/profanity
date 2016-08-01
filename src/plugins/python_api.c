@@ -839,26 +839,19 @@ python_api_settings_get_string_list(PyObject *self, PyObject *args)
     disable_python_threads();
 
     if (!c_list) {
-        log_debug("NO ITEMS");
         Py_RETURN_NONE;
     }
 
 
     int len = g_strv_length(c_list);
-    log_debug("GOT ITEMS: %d", len);
     PyObject *py_list = PyList_New(0);
-    log_debug("CRETED LIST");
     int i = 0;
     for (i = 0; i < len; i++) {
-        log_debug("ADDING %s", c_list[i]);
         PyObject *py_curr = Py_BuildValue("s", c_list[i]);
         int res = PyList_Append(py_list, py_curr);
-        log_debug("Created object");
         if (res != 0) {
-            log_debug("ERROR");
             Py_RETURN_NONE;
         }
-        log_debug("Added");
     }
 
     return Py_BuildValue("O", py_list);
