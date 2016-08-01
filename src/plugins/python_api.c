@@ -820,6 +820,127 @@ python_api_settings_set_int(PyObject *self, PyObject *args)
 }
 
 static PyObject*
+python_api_settings_get_string_list(PyObject *self, PyObject *args)
+{
+    PyObject *group = NULL;
+    PyObject *key = NULL;
+
+    if (!PyArg_ParseTuple(args, "OO", &group, &key)) {
+        Py_RETURN_NONE;
+    }
+
+    char *group_str = python_str_or_unicode_to_string(group);
+    char *key_str = python_str_or_unicode_to_string(key);
+
+    allow_python_threads();
+    char** c_list = api_settings_get_string_list(group_str, key_str);
+    free(group_str);
+    free(key_str);
+    disable_python_threads();
+
+    if (!c_list) {
+        log_debug("NO ITEMS");
+        Py_RETURN_NONE;
+    }
+
+
+    int len = g_strv_length(c_list);
+    log_debug("GOT ITEMS: %d", len);
+    PyObject *py_list = PyList_New(0);
+    log_debug("CRETED LIST");
+    int i = 0;
+    for (i = 0; i < len; i++) {
+        log_debug("ADDING %s", c_list[i]);
+        PyObject *py_curr = Py_BuildValue("s", c_list[i]);
+        int res = PyList_Append(py_list, py_curr);
+        log_debug("Created object");
+        if (res != 0) {
+            log_debug("ERROR");
+            Py_RETURN_NONE;
+        }
+        log_debug("Added");
+    }
+
+    return Py_BuildValue("O", py_list);
+}
+
+static PyObject*
+python_api_settings_string_list_add(PyObject *self, PyObject *args)
+{
+    PyObject *group = NULL;
+    PyObject *key = NULL;
+    PyObject *val = NULL;
+
+    if (!PyArg_ParseTuple(args, "OOO", &group, &key, &val)) {
+        Py_RETURN_NONE;
+    }
+
+    char *group_str = python_str_or_unicode_to_string(group);
+    char *key_str = python_str_or_unicode_to_string(key);
+    char *val_str = python_str_or_unicode_to_string(val);
+
+    allow_python_threads();
+    api_settings_string_list_add(group_str, key_str, val_str);
+    free(group_str);
+    free(key_str);
+    free(val_str);
+    disable_python_threads();
+
+    Py_RETURN_NONE;
+}
+
+static PyObject*
+python_api_settings_string_list_remove(PyObject *self, PyObject *args)
+{
+    PyObject *group = NULL;
+    PyObject *key = NULL;
+    PyObject *val = NULL;
+
+    if (!PyArg_ParseTuple(args, "OOO", &group, &key, &val)) {
+        Py_RETURN_NONE;
+    }
+
+    char *group_str = python_str_or_unicode_to_string(group);
+    char *key_str = python_str_or_unicode_to_string(key);
+    char *val_str = python_str_or_unicode_to_string(val);
+
+    allow_python_threads();
+    int res = api_settings_string_list_remove(group_str, key_str, val_str);
+    free(group_str);
+    free(key_str);
+    free(val_str);
+    disable_python_threads();
+
+    if (res) {
+        return Py_BuildValue("O", Py_True);
+    } else {
+        return Py_BuildValue("O", Py_False);
+    }
+}
+
+static PyObject*
+python_api_settings_string_list_remove_all(PyObject *self, PyObject *args)
+{
+    PyObject *group = NULL;
+    PyObject *key = NULL;
+
+    if (!PyArg_ParseTuple(args, "OO", &group, &key)) {
+        Py_RETURN_NONE;
+    }
+
+    char *group_str = python_str_or_unicode_to_string(group);
+    char *key_str = python_str_or_unicode_to_string(key);
+
+    allow_python_threads();
+    api_settings_string_list_remove_all(group_str, key_str);
+    free(group_str);
+    free(key_str);
+    disable_python_threads();
+
+    Py_RETURN_NONE;
+}
+
+static PyObject*
 python_api_incoming_message(PyObject *self, PyObject *args)
 {
     PyObject *barejid = NULL;
@@ -962,6 +1083,10 @@ static PyMethodDef apiMethods[] = {
     { "settings_set_string", python_api_settings_set_string, METH_VARARGS, "Set a string setting." },
     { "settings_get_int", python_api_settings_get_int, METH_VARARGS, "Get a integer setting." },
     { "settings_set_int", python_api_settings_set_int, METH_VARARGS, "Set a integer setting." },
+    { "settings_get_string_list", python_api_settings_get_string_list, METH_VARARGS, "Get a string list setting." },
+    { "settings_string_list_add", python_api_settings_string_list_add, METH_VARARGS, "Add item to string list setting." },
+    { "settings_string_list_remove", python_api_settings_string_list_remove, METH_VARARGS, "Remove item from string list setting." },
+    { "settings_string_list_remove_all", python_api_settings_string_list_remove_all, METH_VARARGS, "Remove all items from string list setting." },
     { "incoming_message", python_api_incoming_message, METH_VARARGS, "Show an incoming message." },
     { "disco_add_feature", python_api_disco_add_feature, METH_VARARGS, "Add a feature to disco info response." },
     { NULL, NULL, 0, NULL }

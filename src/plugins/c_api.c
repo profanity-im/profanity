@@ -274,6 +274,30 @@ c_api_settings_set_string(char *group, char *key, char *value)
     api_settings_set_string(group, key, value);
 }
 
+static char**
+c_api_settings_get_string_list(char *group, char *key)
+{
+    return api_settings_get_string_list(group, key);
+}
+
+static void
+c_api_settings_string_list_add(char *group, char *key, char* value)
+{
+    api_settings_string_list_add(group, key, value);
+}
+
+static int
+c_api_settings_string_list_remove(char *group, char *key, char *value)
+{
+    return api_settings_string_list_remove(group, key, value);
+}
+
+static void
+c_api_settings_string_list_remove_all(char *group, char *key)
+{
+    api_settings_string_list_remove_all(group, key);
+}
+
 static int
 c_api_settings_get_int(char *group, char *key, int def)
 {
@@ -357,6 +381,10 @@ c_api_init(void)
     prof_settings_set_string = c_api_settings_set_string;
     prof_settings_get_int = c_api_settings_get_int;
     prof_settings_set_int = c_api_settings_set_int;
+    prof_settings_get_string_list = c_api_settings_get_string_list;
+    prof_settings_string_list_add = c_api_settings_string_list_add;
+    prof_settings_string_list_remove = c_api_settings_string_list_remove;
+    prof_settings_string_list_remove_all = c_api_settings_string_list_remove_all;
     prof_incoming_message = c_api_incoming_message;
     prof_disco_add_feature = c_api_disco_add_feature;
 }

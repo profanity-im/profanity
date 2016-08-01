@@ -41,6 +41,7 @@
 #include "common.h"
 #include "config/theme.h"
 #include "config/files.h"
+#include "config/conflists.h"
 
 static GKeyFile *settings;
 
@@ -123,6 +124,45 @@ void
 plugin_settings_set_int(const char *const group, const char *const key, int value)
 {
     g_key_file_set_integer(settings, group, key, value);
+    _save_settings();
+}
+
+gchar**
+plugin_settings_get_string_list(const char *const group, const char *const key)
+{
+    if (!g_key_file_has_key(settings, group, key, NULL)) {
+        return NULL;
+    }
+
+    return g_key_file_get_string_list(settings, group, key, NULL, NULL);
+}
+
+int
+plugin_settings_string_list_add(const char *const group, const char *const key, const char *const value)
+{
+    int res = conf_string_list_add(settings, group, key, value);
+    _save_settings();
+
+    return res;
+}
+
+int
+plugin_settings_string_list_remove(const char *const group, const char *const key, const char *const value)
+{
+    int res = conf_string_list_remove(settings, group, key, value);
+    _save_settings();
+
+    return res;
+}
+
+void
+plugin_settings_string_list_remove_all(const char *const group, const char *const key)
+{
+    if (!g_key_file_has_key(settings, group, key, NULL)) {
+        return;
+    }
+
+    g_key_file_remove_key(settings, group, key, NULL);
     _save_settings();
 }
 

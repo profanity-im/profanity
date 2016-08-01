@@ -44,5 +44,9 @@ char* plugin_settings_get_string(const char *const group, const char *const key,
 void plugin_settings_set_string(const char *const group, const char *const key, const char *const value);
 int plugin_settings_get_int(const char *const group, const char *const key, int def);
 void plugin_settings_set_int(const char *const group, const char *const key, int value);
+char** plugin_settings_get_string_list(const char *const group, const char *const key);
+void plugin_settings_string_list_add(const char *const group, const char *const key, const char *const value);
+int plugin_settings_string_list_remove(const char *const group, const char *const key, const char *const value);
+void plugin_settings_string_list_remove_all(const char *const group, const char *const key);
 
 #endif

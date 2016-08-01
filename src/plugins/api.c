@@ -422,6 +422,30 @@ api_settings_set_string(const char *const group, const char *const key, const ch
     plugin_settings_set_string(group, key, value);
 }
 
+char**
+api_settings_get_string_list(const char *const group, const char *const key)
+{
+    return plugin_settings_get_string_list(group, key);
+}
+
+void
+api_settings_string_list_add(const char *const group, const char *const key, const char *const value)
+{
+    plugin_settings_string_list_add(group, key, value);
+}
+
+int
+api_settings_string_list_remove(const char *const group, const char *const key, const char *const value)
+{
+    return plugin_settings_string_list_remove(group, key, value);
+}
+
+void
+api_settings_string_list_remove_all(const char *const group, const char *const key)
+{
+    plugin_settings_string_list_remove_all(group, key);
+}
+
 int
 api_settings_get_int(const char *const group, const char *const key, int def)
 {
