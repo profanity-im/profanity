@@ -850,9 +850,12 @@ python_api_settings_get_string_list(PyObject *self, PyObject *args)
         PyObject *py_curr = Py_BuildValue("s", c_list[i]);
         int res = PyList_Append(py_list, py_curr);
         if (res != 0) {
+            g_strfreev(c_list);
             Py_RETURN_NONE;
         }
     }
+
+    g_strfreev(c_list);
 
     return Py_BuildValue("O", py_list);
 }
@@ -918,19 +921,23 @@ python_api_settings_string_list_remove_all(PyObject *self, PyObject *args)
     PyObject *key = NULL;
 
     if (!PyArg_ParseTuple(args, "OO", &group, &key)) {
-        Py_RETURN_NONE;
+        return Py_BuildValue("O", Py_False);
     }
 
     char *group_str = python_str_or_unicode_to_string(group);
     char *key_str = python_str_or_unicode_to_string(key);
 
     allow_python_threads();
-    api_settings_string_list_remove_all(group_str, key_str);
+    int res = api_settings_string_list_remove_all(group_str, key_str);
     free(group_str);
     free(key_str);
     disable_python_threads();
 
-    Py_RETURN_NONE;
+    if (res) {
+        return Py_BuildValue("O", Py_True);
+    } else {
+        return Py_BuildValue("O", Py_False);
+    }
 }
 
 static PyObject*

@@ -440,10 +440,10 @@ api_settings_string_list_remove(const char *const group, const char *const key, 
     return plugin_settings_string_list_remove(group, key, value);
 }
 
-void
+int
 api_settings_string_list_remove_all(const char *const group, const char *const key)
 {
-    plugin_settings_string_list_remove_all(group, key);
+    return plugin_settings_string_list_remove_all(group, key);
 }
 
 int

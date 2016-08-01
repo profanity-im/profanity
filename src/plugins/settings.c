@@ -155,15 +155,17 @@ plugin_settings_string_list_remove(const char *const group, const char *const ke
     return res;
 }
 
-void
+int
 plugin_settings_string_list_remove_all(const char *const group, const char *const key)
 {
     if (!g_key_file_has_key(settings, group, key, NULL)) {
-        return;
+        return 0;
     }
 
     g_key_file_remove_key(settings, group, key, NULL);
     _save_settings();
+
+    return 1;
 }
 
 static void
