@@ -292,10 +292,10 @@ c_api_settings_string_list_remove(char *group, char *key, char *value)
     return api_settings_string_list_remove(group, key, value);
 }
 
-static void
+static int
 c_api_settings_string_list_remove_all(char *group, char *key)
 {
-    api_settings_string_list_remove_all(group, key);
+    return api_settings_string_list_remove_all(group, key);
 }
 
 static int

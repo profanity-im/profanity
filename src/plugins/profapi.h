@@ -94,7 +94,7 @@ void (*prof_settings_set_int)(char *group, char *key, int value);
 char** (*prof_settings_get_string_list)(char *group, char *key);
 void (*prof_settings_string_list_add)(char *group, char *key, char *value);
 int (*prof_settings_string_list_remove)(char *group, char *key, char *value);
-void (*prof_settings_string_list_remove_all)(char *group, char *key);
+int (*prof_settings_string_list_remove_all)(char *group, char *key);
 
 void (*prof_incoming_message)(char *barejid, char *resource, char *message);
 
