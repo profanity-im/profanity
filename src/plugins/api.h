@@ -84,6 +84,10 @@ char* api_settings_get_string(const char *const group, const char *const key, co
 void api_settings_set_string(const char *const group, const char *const key, const char *const value);
 int api_settings_get_int(const char *const group, const char *const key, int def);
 void api_settings_set_int(const char *const group, const char *const key, int value);
+char** api_settings_get_string_list(const char *const group, const char *const key);
+void api_settings_string_list_add(const char *const group, const char *const key, const char *const value);
+int api_settings_string_list_remove(const char *const group, const char *const key, const char *const value);
+int api_settings_string_list_remove_all(const char *const group, const char *const key);
 
 void api_incoming_message(const char *const barejid, const char *const resource, const char *const message);
 

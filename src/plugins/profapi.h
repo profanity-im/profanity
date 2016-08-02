@@ -43,6 +43,9 @@
 #define prof_win_create(win, input_handler) _prof_win_create(__FILE__, win, input_handler)
 
 typedef char* PROF_WIN_TAG;
+typedef void(*CMD_CB)(char **args);
+typedef void(*TIMED_CB)(void);
+typedef void(*WINDOW_CB)(PROF_WIN_TAG win, char *line);
 
 void (*prof_cons_alert)(void);
 int (*prof_cons_show)(const char * const message);
@@ -51,9 +54,9 @@ int (*prof_cons_bad_cmd_usage)(const char *const cmd);
 
 void (*_prof_register_command)(const char *filename, const char *command_name, int min_args, int max_args,
     char **synopsis, const char *description, char *arguments[][2], char **examples,
-    void(*callback)(char **args));
+    CMD_CB callback);
 
-void (*_prof_register_timed)(const char *filename, void(*callback)(void), int interval_seconds);
+void (*_prof_register_timed)(const char *filename, TIMED_CB callback, int interval_seconds);
 
 void (*_prof_completer_add)(const char *filename, const char *key, char **items);
 void (*_prof_completer_remove)(const char *filename, const char *key, char **items);
@@ -74,7 +77,7 @@ void (*prof_log_info)(const char *message);
 void (*prof_log_warning)(const char *message);
 void (*prof_log_error)(const char *message);
 
-void (*_prof_win_create)(const char *filename, PROF_WIN_TAG win, void(*input_handler)(PROF_WIN_TAG win, char *line));
+void (*_prof_win_create)(const char *filename, PROF_WIN_TAG win, WINDOW_CB input_handler);
 int (*prof_win_exists)(PROF_WIN_TAG win);
 int (*prof_win_focus)(PROF_WIN_TAG win);
 int (*prof_win_show)(PROF_WIN_TAG win, char *line);
@@ -88,6 +91,10 @@ char* (*prof_settings_get_string)(char *group, char *key, char *def);
 void (*prof_settings_set_string)(char *group, char *key, char *value);
 int (*prof_settings_get_int)(char *group, char *key, int def);
 void (*prof_settings_set_int)(char *group, char *key, int value);
+char** (*prof_settings_get_string_list)(char *group, char *key);
+void (*prof_settings_string_list_add)(char *group, char *key, char *value);
+int (*prof_settings_string_list_remove)(char *group, char *key, char *value);
+int (*prof_settings_string_list_remove_all)(char *group, char *key);
 
 void (*prof_incoming_message)(char *barejid, char *resource, char *message);
 
