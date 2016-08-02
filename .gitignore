@@ -16,8 +16,8 @@ compile_commands.json
 
 # autotools
 .libs/
-Makefile
-Makefile.in
+/Makefile
+/Makefile.in
 _configs.sed
 aclocal.m4
 autom4te.cache/
