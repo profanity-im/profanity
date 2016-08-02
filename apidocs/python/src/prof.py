@@ -460,6 +460,78 @@ def settings_set_string(group, key, value):
     pass
 
 
+def settings_get_string_list(group, key):
+    """Get a string list setting\n
+    Settings must be specified in ``~/.local/share/profanity/plugin_settings``\n
+    The string list setting items are separated by semicolons.
+
+    :param group: the group name in the settings file
+    :param key: the item name within the group
+    :type group: str or unicode
+    :type key: str or unicode
+    :return: the list setting
+    :rtype: list of str or unicode
+
+    Example:
+    ::
+        prof.settings_get_string_list("someplugin", "somelist")
+    """
+
+
+def settings_string_list_add(group, key, value):
+    """Add an item to a string list setting\n
+    Settings must be specified in ``~/.local/share/profanity/plugin_settings``\n
+    If the list does not exist, a new one will be created with the element added
+
+    :param group: the group name in the settings file
+    :param key: the item name within the group
+    :param value: item to add
+    :type group: str or unicode
+    :type key: str or unicode
+    :type value: str
+
+    Example:
+    ::
+        prof.settings_string_list_add("someplugin", "somelist", "anelement")
+    """
+
+
+def settings_string_list_remove(group, key, value):
+    """Remove an item from a string list setting\n
+    Settings must be specified in ``~/.local/share/profanity/plugin_settings``\n
+
+    :param group: the group name in the settings file
+    :param key: the item name within the group
+    :param value: item to remove
+    :type group: str or unicode
+    :type key: str or unicode
+    :type value: str
+    :return: ``True`` if the item was removed, or is not in the list, ``False`` if the list does not exist
+    :rtype: boolean
+
+    Example:
+    ::
+        prof.settings_string_list_remove("someplugin", "somelist", "anelement")
+    """
+
+
+def settings_string_list_remove_all(group, key):
+    """Remove all items from a string list setting\n
+    Settings must be specified in ``~/.local/share/profanity/plugin_settings``\n
+
+    :param group: the group name in the settings file
+    :param key: the item name within the group
+    :type group: str or unicode
+    :type key: str or unicode
+    :return: ``True`` if the list was cleared, ``False`` if the list does not exist
+    :rtype: boolean
+
+    Example:
+    ::
+        prof.settings_string_list_remove_all("someplugin", "somelist")
+    """
+
+
 def settings_get_int(group, key, default):
     """Get an integer setting\n
     Settings must be specified in ``~/.local/share/profanity/plugin_settings``

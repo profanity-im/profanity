@@ -193,7 +193,7 @@ int prof_win_show(PROF_WIN_TAG win, char *message);
 /**	
 Show a message in the plugin window, using the specified theme.
 Themes must be specified in ~/.local/share/profanity/plugin_themes
-@param win The {@link PROF_WIN_TAG} of the window to display the message
+@param tag The {@link PROF_WIN_TAG} of the window to display the message
 @param group the group name in the themes file
 @param key the item name within the group
 @param def default colour if the theme cannot be found or NULL
@@ -246,6 +246,45 @@ Settings must be specified in ~/.local/share/profanity/plugin_settings
 @param value value to set
 */
 void prof_settings_set_string(char *group, char *key, char *value);
+
+/**
+Get a string list setting
+Settings must be specified in ~/.local/share/profanity/plugin_settings
+The string list setting items are separated by semicolons.
+@param group the group name in the settings file
+@param key the item name within the group
+@return the list setting
+*/
+char** prof_settings_get_string_list(char *group, char *key);
+
+/**
+Add an item to a string list setting
+Settings must be specified in ~/.local/share/profanity/plugin_settings
+If the list does not exist, a new one will be created with the element added
+@param group the group name in the settings file
+@param key the item name within the group
+@param value item to add
+*/
+void prof_settings_string_list_add(char *group, char *key, char *value);
+
+/**
+Remove an item from a string list setting
+Settings must be specified in ~/.local/share/profanity/plugin_settings
+@param group the group name in the settings file
+@param key the item name within the group
+@param value item to remove
+@return 1 if the item was removed, or is not in the list, 0 if the list does not exist
+*/
+int prof_settings_string_list_remove(char *group, char *key, char *value);
+
+/**
+Remove all items from a string list setting
+Settings must be specified in ~/.local/share/profanity/plugin_settings
+@param group the group name in the settings file
+@param key the item name within the group
+@return 1 if the list was cleared, 0 if the list does not exist
+*/
+int prof_settings_string_list_remove_all(char *group, char *key);
 
 /**
 Get an integer setting
