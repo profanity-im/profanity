@@ -71,6 +71,7 @@ apidocs/python/src/prof.pyc
 apidocs/python/plugin.rst
 apidocs/python/src/plugin.pyc
 apidocs/c/html/
+apidocs/c/doxygen_sqlite3.db
 
 # Temp Vim files
 **/*.swp

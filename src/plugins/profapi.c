@@ -81,6 +81,10 @@ char* (*prof_settings_get_string)(char *group, char *key, char *def) = NULL;
 void (*prof_settings_set_string)(char *group, char *key, char *value) = NULL;
 int (*prof_settings_get_int)(char *group, char *key, int def) = NULL;
 void (*prof_settings_set_int)(char *group, char *key, int value) = NULL;
+char** (*prof_settings_get_string_list)(char *group, char *key) = NULL;
+void (*prof_settings_string_list_add)(char *group, char *key, char *value) = NULL;
+int (*prof_settings_string_list_remove)(char *group, char *key, char *value) = NULL;
+int (*prof_settings_string_list_remove_all)(char *group, char *key) = NULL;
 
 void (*prof_incoming_message)(char *barejid, char *resource, char *message) = NULL;
 
