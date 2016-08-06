@@ -85,16 +85,16 @@ int (*prof_win_show_themed)(PROF_WIN_TAG tag, char *group, char *key, char *def,
 
 int (*prof_send_stanza)(char *stanza);
 
-int (*prof_settings_get_boolean)(char *group, char *key, int def);
-void (*prof_settings_set_boolean)(char *group, char *key, int value);
-char* (*prof_settings_get_string)(char *group, char *key, char *def);
-void (*prof_settings_set_string)(char *group, char *key, char *value);
-int (*prof_settings_get_int)(char *group, char *key, int def);
-void (*prof_settings_set_int)(char *group, char *key, int value);
-char** (*prof_settings_get_string_list)(char *group, char *key);
+int (*prof_settings_boolean_get)(char *group, char *key, int def);
+void (*prof_settings_boolean_set)(char *group, char *key, int value);
+char* (*prof_settings_string_get)(char *group, char *key, char *def);
+void (*prof_settings_string_set)(char *group, char *key, char *value);
+int (*prof_settings_int_get)(char *group, char *key, int def);
+void (*prof_settings_int_set)(char *group, char *key, int value);
+char** (*prof_settings_string_list_get)(char *group, char *key);
 void (*prof_settings_string_list_add)(char *group, char *key, char *value);
 int (*prof_settings_string_list_remove)(char *group, char *key, char *value);
-int (*prof_settings_string_list_remove_all)(char *group, char *key);
+int (*prof_settings_string_list_clear)(char *group, char *key);
 
 void (*prof_incoming_message)(char *barejid, char *resource, char *message);
 

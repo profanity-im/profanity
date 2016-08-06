@@ -666,7 +666,7 @@ python_api_send_stanza(PyObject *self, PyObject *args)
 }
 
 static PyObject*
-python_api_settings_get_boolean(PyObject *self, PyObject *args)
+python_api_settings_boolean_get(PyObject *self, PyObject *args)
 {
     PyObject *group = NULL;
     PyObject *key = NULL;
@@ -681,7 +681,7 @@ python_api_settings_get_boolean(PyObject *self, PyObject *args)
     int def = PyObject_IsTrue(defobj);
 
     allow_python_threads();
-    int res = api_settings_get_boolean(group_str, key_str, def);
+    int res = api_settings_boolean_get(group_str, key_str, def);
     free(group_str);
     free(key_str);
     disable_python_threads();
@@ -694,7 +694,7 @@ python_api_settings_get_boolean(PyObject *self, PyObject *args)
 }
 
 static PyObject*
-python_api_settings_set_boolean(PyObject *self, PyObject *args)
+python_api_settings_boolean_set(PyObject *self, PyObject *args)
 {
     PyObject *group = NULL;
     PyObject *key = NULL;
@@ -709,7 +709,7 @@ python_api_settings_set_boolean(PyObject *self, PyObject *args)
     int val = PyObject_IsTrue(valobj);
 
     allow_python_threads();
-    api_settings_set_boolean(group_str, key_str, val);
+    api_settings_boolean_set(group_str, key_str, val);
     free(group_str);
     free(key_str);
     disable_python_threads();
@@ -718,7 +718,7 @@ python_api_settings_set_boolean(PyObject *self, PyObject *args)
 }
 
 static PyObject*
-python_api_settings_get_string(PyObject *self, PyObject *args)
+python_api_settings_string_get(PyObject *self, PyObject *args)
 {
     PyObject *group = NULL;
     PyObject *key = NULL;
@@ -733,7 +733,7 @@ python_api_settings_get_string(PyObject *self, PyObject *args)
     char *def_str = python_str_or_unicode_to_string(def);
 
     allow_python_threads();
-    char *res = api_settings_get_string(group_str, key_str, def_str);
+    char *res = api_settings_string_get(group_str, key_str, def_str);
     free(group_str);
     free(key_str);
     free(def_str);
@@ -749,7 +749,7 @@ python_api_settings_get_string(PyObject *self, PyObject *args)
 }
 
 static PyObject*
-python_api_settings_set_string(PyObject *self, PyObject *args)
+python_api_settings_string_set(PyObject *self, PyObject *args)
 {
     PyObject *group = NULL;
     PyObject *key = NULL;
@@ -764,7 +764,7 @@ python_api_settings_set_string(PyObject *self, PyObject *args)
     char *val_str = python_str_or_unicode_to_string(val);
 
     allow_python_threads();
-    api_settings_set_string(group_str, key_str, val_str);
+    api_settings_string_set(group_str, key_str, val_str);
     free(group_str);
     free(key_str);
     free(val_str);
@@ -774,7 +774,7 @@ python_api_settings_set_string(PyObject *self, PyObject *args)
 }
 
 static PyObject*
-python_api_settings_get_int(PyObject *self, PyObject *args)
+python_api_settings_int_get(PyObject *self, PyObject *args)
 {
     PyObject *group = NULL;
     PyObject *key = NULL;
@@ -788,7 +788,7 @@ python_api_settings_get_int(PyObject *self, PyObject *args)
     char *key_str = python_str_or_unicode_to_string(key);
 
     allow_python_threads();
-    int res = api_settings_get_int(group_str, key_str, def);
+    int res = api_settings_int_get(group_str, key_str, def);
     free(group_str);
     free(key_str);
     disable_python_threads();
@@ -797,7 +797,7 @@ python_api_settings_get_int(PyObject *self, PyObject *args)
 }
 
 static PyObject*
-python_api_settings_set_int(PyObject *self, PyObject *args)
+python_api_settings_int_set(PyObject *self, PyObject *args)
 {
     PyObject *group = NULL;
     PyObject *key = NULL;
@@ -811,7 +811,7 @@ python_api_settings_set_int(PyObject *self, PyObject *args)
     char *key_str = python_str_or_unicode_to_string(key);
 
     allow_python_threads();
-    api_settings_set_int(group_str, key_str, val);
+    api_settings_int_set(group_str, key_str, val);
     free(group_str);
     free(key_str);
     disable_python_threads();
@@ -820,7 +820,7 @@ python_api_settings_set_int(PyObject *self, PyObject *args)
 }
 
 static PyObject*
-python_api_settings_get_string_list(PyObject *self, PyObject *args)
+python_api_settings_string_list_get(PyObject *self, PyObject *args)
 {
     PyObject *group = NULL;
     PyObject *key = NULL;
@@ -833,7 +833,7 @@ python_api_settings_get_string_list(PyObject *self, PyObject *args)
     char *key_str = python_str_or_unicode_to_string(key);
 
     allow_python_threads();
-    char** c_list = api_settings_get_string_list(group_str, key_str);
+    char** c_list = api_settings_string_list_get(group_str, key_str);
     free(group_str);
     free(key_str);
     disable_python_threads();
@@ -915,7 +915,7 @@ python_api_settings_string_list_remove(PyObject *self, PyObject *args)
 }
 
 static PyObject*
-python_api_settings_string_list_remove_all(PyObject *self, PyObject *args)
+python_api_settings_string_list_clear(PyObject *self, PyObject *args)
 {
     PyObject *group = NULL;
     PyObject *key = NULL;
@@ -928,7 +928,7 @@ python_api_settings_string_list_remove_all(PyObject *self, PyObject *args)
     char *key_str = python_str_or_unicode_to_string(key);
 
     allow_python_threads();
-    int res = api_settings_string_list_remove_all(group_str, key_str);
+    int res = api_settings_string_list_clear(group_str, key_str);
     free(group_str);
     free(key_str);
     disable_python_threads();
@@ -1077,16 +1077,16 @@ static PyMethodDef apiMethods[] = {
     { "win_show", python_api_win_show, METH_VARARGS, "Show text in the window." },
     { "win_show_themed", python_api_win_show_themed, METH_VARARGS, "Show themed text in the window." },
     { "send_stanza", python_api_send_stanza, METH_VARARGS, "Send an XMPP stanza." },
-    { "settings_get_boolean", python_api_settings_get_boolean, METH_VARARGS, "Get a boolean setting." },
-    { "settings_set_boolean", python_api_settings_set_boolean, METH_VARARGS, "Set a boolean setting." },
-    { "settings_get_string", python_api_settings_get_string, METH_VARARGS, "Get a string setting." },
-    { "settings_set_string", python_api_settings_set_string, METH_VARARGS, "Set a string setting." },
-    { "settings_get_int", python_api_settings_get_int, METH_VARARGS, "Get a integer setting." },
-    { "settings_set_int", python_api_settings_set_int, METH_VARARGS, "Set a integer setting." },
-    { "settings_get_string_list", python_api_settings_get_string_list, METH_VARARGS, "Get a string list setting." },
+    { "settings_boolean_get", python_api_settings_boolean_get, METH_VARARGS, "Get a boolean setting." },
+    { "settings_boolean_set", python_api_settings_boolean_set, METH_VARARGS, "Set a boolean setting." },
+    { "settings_string_get", python_api_settings_string_get, METH_VARARGS, "Get a string setting." },
+    { "settings_string_set", python_api_settings_string_set, METH_VARARGS, "Set a string setting." },
+    { "settings_int_get", python_api_settings_int_get, METH_VARARGS, "Get a integer setting." },
+    { "settings_int_set", python_api_settings_int_set, METH_VARARGS, "Set a integer setting." },
+    { "settings_string_list_get", python_api_settings_string_list_get, METH_VARARGS, "Get a string list setting." },
     { "settings_string_list_add", python_api_settings_string_list_add, METH_VARARGS, "Add item to string list setting." },
     { "settings_string_list_remove", python_api_settings_string_list_remove, METH_VARARGS, "Remove item from string list setting." },
-    { "settings_string_list_remove_all", python_api_settings_string_list_remove_all, METH_VARARGS, "Remove all items from string list setting." },
+    { "settings_string_list_clear", python_api_settings_string_list_clear, METH_VARARGS, "Remove all items from string list setting." },
     { "incoming_message", python_api_incoming_message, METH_VARARGS, "Show an incoming message." },
     { "disco_add_feature", python_api_disco_add_feature, METH_VARARGS, "Add a feature to disco info response." },
     { NULL, NULL, 0, NULL }

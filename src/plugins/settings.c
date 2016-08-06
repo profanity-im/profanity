@@ -75,7 +75,7 @@ plugin_settings_close(void)
 }
 
 gboolean
-plugin_settings_get_boolean(const char *const group, const char *const key, gboolean def)
+plugin_settings_boolean_get(const char *const group, const char *const key, gboolean def)
 {
     if (group && key && g_key_file_has_key(settings, group, key, NULL)) {
         return g_key_file_get_boolean(settings, group, key, NULL);
@@ -85,14 +85,14 @@ plugin_settings_get_boolean(const char *const group, const char *const key, gboo
 }
 
 void
-plugin_settings_set_boolean(const char *const group, const char *const key, gboolean value)
+plugin_settings_boolean_set(const char *const group, const char *const key, gboolean value)
 {
     g_key_file_set_boolean(settings, group, key, value);
     _save_settings();
 }
 
 char*
-plugin_settings_get_string(const char *const group, const char *const key, const char *const def)
+plugin_settings_string_get(const char *const group, const char *const key, const char *const def)
 {
     if (group && key && g_key_file_has_key(settings, group, key, NULL)) {
         return g_key_file_get_string(settings, group, key, NULL);
@@ -104,14 +104,14 @@ plugin_settings_get_string(const char *const group, const char *const key, const
 }
 
 void
-plugin_settings_set_string(const char *const group, const char *const key, const char *const value)
+plugin_settings_string_set(const char *const group, const char *const key, const char *const value)
 {
     g_key_file_set_string(settings, group, key, value);
     _save_settings();
 }
 
 int
-plugin_settings_get_int(const char *const group, const char *const key, int def)
+plugin_settings_int_get(const char *const group, const char *const key, int def)
 {
     if (group && key && g_key_file_has_key(settings, group, key, NULL)) {
         return g_key_file_get_integer(settings, group, key, NULL);
@@ -121,14 +121,14 @@ plugin_settings_get_int(const char *const group, const char *const key, int def)
 }
 
 void
-plugin_settings_set_int(const char *const group, const char *const key, int value)
+plugin_settings_int_set(const char *const group, const char *const key, int value)
 {
     g_key_file_set_integer(settings, group, key, value);
     _save_settings();
 }
 
 gchar**
-plugin_settings_get_string_list(const char *const group, const char *const key)
+plugin_settings_string_list_get(const char *const group, const char *const key)
 {
     if (!g_key_file_has_key(settings, group, key, NULL)) {
         return NULL;
@@ -156,7 +156,7 @@ plugin_settings_string_list_remove(const char *const group, const char *const ke
 }
 
 int
-plugin_settings_string_list_remove_all(const char *const group, const char *const key)
+plugin_settings_string_list_clear(const char *const group, const char *const key)
 {
     if (!g_key_file_has_key(settings, group, key, NULL)) {
         return 0;
