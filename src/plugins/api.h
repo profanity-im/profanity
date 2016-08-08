@@ -78,16 +78,16 @@ int api_win_show_themed(const char *tag, const char *const group, const char *co
 
 int api_send_stanza(const char *const stanza);
 
-gboolean api_settings_get_boolean(const char *const group, const char *const key, gboolean def);
-void api_settings_set_boolean(const char *const group, const char *const key, gboolean value);
-char* api_settings_get_string(const char *const group, const char *const key, const char *const def);
-void api_settings_set_string(const char *const group, const char *const key, const char *const value);
-int api_settings_get_int(const char *const group, const char *const key, int def);
-void api_settings_set_int(const char *const group, const char *const key, int value);
-char** api_settings_get_string_list(const char *const group, const char *const key);
+gboolean api_settings_boolean_get(const char *const group, const char *const key, gboolean def);
+void api_settings_boolean_set(const char *const group, const char *const key, gboolean value);
+char* api_settings_string_get(const char *const group, const char *const key, const char *const def);
+void api_settings_string_set(const char *const group, const char *const key, const char *const value);
+int api_settings_int_get(const char *const group, const char *const key, int def);
+void api_settings_int_set(const char *const group, const char *const key, int value);
+char** api_settings_string_list_get(const char *const group, const char *const key);
 void api_settings_string_list_add(const char *const group, const char *const key, const char *const value);
 int api_settings_string_list_remove(const char *const group, const char *const key, const char *const value);
-int api_settings_string_list_remove_all(const char *const group, const char *const key);
+int api_settings_string_list_clear(const char *const group, const char *const key);
 
 void api_incoming_message(const char *const barejid, const char *const resource, const char *const message);
 
