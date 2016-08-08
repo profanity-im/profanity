@@ -217,7 +217,7 @@ Settings must be specified in ~/.local/share/profanity/plugin_settings
 @param def default value if setting not found
 @return the setting, or default value
 */
-int prof_settings_get_boolean(char *group, char *key, int def);
+int prof_settings_boolean_get(char *group, char *key, int def);
 
 /**
 Set a boolean setting
@@ -226,7 +226,7 @@ Settings must be specified in ~/.local/share/profanity/plugin_settings
 @param key the item name within the group
 @param value value to set
 */
-void prof_settings_set_boolean(char *group, char *key, int value);
+void prof_settings_boolean_set(char *group, char *key, int value);
 
 /**
 Get a string setting
@@ -236,7 +236,7 @@ Settings must be specified in ~/.local/share/profanity/plugin_settings
 @param def default value if setting not found
 @return the setting, or default value
 */
-char* prof_settings_get_string(char *group, char *key, char *def);
+char* prof_settings_string_get(char *group, char *key, char *def);
 
 /**
 Set a string setting
@@ -245,7 +245,7 @@ Settings must be specified in ~/.local/share/profanity/plugin_settings
 @param key the item name within the group
 @param value value to set
 */
-void prof_settings_set_string(char *group, char *key, char *value);
+void prof_settings_string_set(char *group, char *key, char *value);
 
 /**
 Get a string list setting
@@ -255,7 +255,7 @@ The string list setting items are separated by semicolons.
 @param key the item name within the group
 @return the list setting
 */
-char** prof_settings_get_string_list(char *group, char *key);
+char** prof_settings_string_list_get(char *group, char *key);
 
 /**
 Add an item to a string list setting
@@ -284,7 +284,7 @@ Settings must be specified in ~/.local/share/profanity/plugin_settings
 @param key the item name within the group
 @return 1 if the list was cleared, 0 if the list does not exist
 */
-int prof_settings_string_list_remove_all(char *group, char *key);
+int prof_settings_string_list_clear(char *group, char *key);
 
 /**
 Get an integer setting
@@ -294,7 +294,7 @@ Settings must be specified in ~/.local/share/profanity/plugin_settings
 @param def default value if setting not found
 @return the setting, or default value
 */
-int prof_settings_get_int(char *group, char *key, int def);
+int prof_settings_int_get(char *group, char *key, int def);
 
 /**
 Set an integer setting
@@ -303,7 +303,7 @@ Settings must be specified in ~/.local/share/profanity/plugin_settings
 @param key the item name within the group
 @param value value to set
 */
-void prof_settings_set_int(char *group, char *key, int value);
+void prof_settings_int_set(char *group, char *key, int value);
 
 /**
 Trigger incoming message handling, this plugin will make profanity act as if the message has been received

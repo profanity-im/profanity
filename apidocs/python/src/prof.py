@@ -110,7 +110,7 @@ def register_command(name, min_args, max_args, synopsis, description, arguments,
 def register_timed(callback, interval): 
     """Register a function that Profanity will call periodically.
 
-    :param callback: the funciton to call
+    :param callback: the function to call
     :param interval: the time between each call to the function, in seconds
     :type callback: function
     :type interval: int
@@ -388,7 +388,7 @@ def send_stanza(stanza):
     pass
 
 
-def settings_get_boolean(group, key, default):
+def settings_boolean_get(group, key, default):
     """Get a boolean setting\n
     Settings must be specified in ``~/.local/share/profanity/plugin_settings``
 
@@ -406,7 +406,7 @@ def settings_get_boolean(group, key, default):
     pass
 
 
-def settings_set_boolean(group, key, value):
+def settings_boolean_set(group, key, value):
     """Set a boolean setting\n
     Settings must be specified in ``~/.local/share/profanity/plugin_settings``
 
@@ -424,7 +424,7 @@ def settings_set_boolean(group, key, value):
     pass
 
 
-def settings_get_string(group, key, default):
+def settings_string_get(group, key, default):
     """Get a string setting\n
     Settings must be specified in ``~/.local/share/profanity/plugin_settings``
 
@@ -442,7 +442,7 @@ def settings_get_string(group, key, default):
     pass
 
 
-def settings_set_string(group, key, value):
+def settings_string_set(group, key, value):
     """Set a string setting\n
     Settings must be specified in ``~/.local/share/profanity/plugin_settings``
 
@@ -460,7 +460,7 @@ def settings_set_string(group, key, value):
     pass
 
 
-def settings_get_string_list(group, key):
+def settings_string_list_get(group, key):
     """Get a string list setting\n
     Settings must be specified in ``~/.local/share/profanity/plugin_settings``\n
     The string list setting items are separated by semicolons.
@@ -515,7 +515,7 @@ def settings_string_list_remove(group, key, value):
     """
 
 
-def settings_string_list_remove_all(group, key):
+def settings_string_list_clear(group, key):
     """Remove all items from a string list setting\n
     Settings must be specified in ``~/.local/share/profanity/plugin_settings``\n
 
@@ -532,7 +532,7 @@ def settings_string_list_remove_all(group, key):
     """
 
 
-def settings_get_int(group, key, default):
+def settings_int_get(group, key, default):
     """Get an integer setting\n
     Settings must be specified in ``~/.local/share/profanity/plugin_settings``
 
@@ -550,7 +550,7 @@ def settings_get_int(group, key, default):
     pass
 
 
-def settings_set_int(group, key, value):
+def settings_int_set(group, key, value):
     """Set an integer setting\n
     Settings must be specified in ``~/.local/share/profanity/plugin_settings``
 

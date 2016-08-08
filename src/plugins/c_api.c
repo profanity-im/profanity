@@ -251,33 +251,33 @@ c_api_send_stanza(char *stanza)
 }
 
 static int
-c_api_settings_get_boolean(char *group, char *key, int def)
+c_api_settings_boolean_get(char *group, char *key, int def)
 {
-    return api_settings_get_boolean(group, key, def);
+    return api_settings_boolean_get(group, key, def);
 }
 
 static void
-c_api_settings_set_boolean(char *group, char *key, int value)
+c_api_settings_boolean_set(char *group, char *key, int value)
 {
-    api_settings_set_boolean(group, key, value);
+    api_settings_boolean_set(group, key, value);
 }
 
 static char*
-c_api_settings_get_string(char *group, char *key, char *def)
+c_api_settings_string_get(char *group, char *key, char *def)
 {
-    return api_settings_get_string(group, key, def);
+    return api_settings_string_get(group, key, def);
 }
 
 static void
-c_api_settings_set_string(char *group, char *key, char *value)
+c_api_settings_string_set(char *group, char *key, char *value)
 {
-    api_settings_set_string(group, key, value);
+    api_settings_string_set(group, key, value);
 }
 
 static char**
-c_api_settings_get_string_list(char *group, char *key)
+c_api_settings_string_list_get(char *group, char *key)
 {
-    return api_settings_get_string_list(group, key);
+    return api_settings_string_list_get(group, key);
 }
 
 static void
@@ -293,21 +293,21 @@ c_api_settings_string_list_remove(char *group, char *key, char *value)
 }
 
 static int
-c_api_settings_string_list_remove_all(char *group, char *key)
+c_api_settings_string_list_clear(char *group, char *key)
 {
-    return api_settings_string_list_remove_all(group, key);
+    return api_settings_string_list_clear(group, key);
 }
 
 static int
-c_api_settings_get_int(char *group, char *key, int def)
+c_api_settings_int_get(char *group, char *key, int def)
 {
-    return api_settings_get_int(group, key, def);
+    return api_settings_int_get(group, key, def);
 }
 
 static void
-c_api_settings_set_int(char *group, char *key, int value)
+c_api_settings_int_set(char *group, char *key, int value)
 {
-    api_settings_set_int(group, key, value);
+    api_settings_int_set(group, key, value);
 }
 
 static void
@@ -375,16 +375,16 @@ c_api_init(void)
     prof_win_show = c_api_win_show;
     prof_win_show_themed = c_api_win_show_themed;
     prof_send_stanza = c_api_send_stanza;
-    prof_settings_get_boolean = c_api_settings_get_boolean;
-    prof_settings_set_boolean = c_api_settings_set_boolean;
-    prof_settings_get_string = c_api_settings_get_string;
-    prof_settings_set_string = c_api_settings_set_string;
-    prof_settings_get_int = c_api_settings_get_int;
-    prof_settings_set_int = c_api_settings_set_int;
-    prof_settings_get_string_list = c_api_settings_get_string_list;
+    prof_settings_boolean_get = c_api_settings_boolean_get;
+    prof_settings_boolean_set = c_api_settings_boolean_set;
+    prof_settings_string_get = c_api_settings_string_get;
+    prof_settings_string_set = c_api_settings_string_set;
+    prof_settings_int_get = c_api_settings_int_get;
+    prof_settings_int_set = c_api_settings_int_set;
+    prof_settings_string_list_get = c_api_settings_string_list_get;
     prof_settings_string_list_add = c_api_settings_string_list_add;
     prof_settings_string_list_remove = c_api_settings_string_list_remove;
-    prof_settings_string_list_remove_all = c_api_settings_string_list_remove_all;
+    prof_settings_string_list_clear = c_api_settings_string_list_clear;
     prof_incoming_message = c_api_incoming_message;
     prof_disco_add_feature = c_api_disco_add_feature;
 }

@@ -399,33 +399,33 @@ api_send_stanza(const char *const stanza)
 }
 
 gboolean
-api_settings_get_boolean(const char *const group, const char *const key, gboolean def)
+api_settings_boolean_get(const char *const group, const char *const key, gboolean def)
 {
-    return plugin_settings_get_boolean(group, key, def);
+    return plugin_settings_boolean_get(group, key, def);
 }
 
 void
-api_settings_set_boolean(const char *const group, const char *const key, gboolean value)
+api_settings_boolean_set(const char *const group, const char *const key, gboolean value)
 {
-    plugin_settings_set_boolean(group, key, value);
+    plugin_settings_boolean_set(group, key, value);
 }
 
 char*
-api_settings_get_string(const char *const group, const char *const key, const char *const def)
+api_settings_string_get(const char *const group, const char *const key, const char *const def)
 {
-    return plugin_settings_get_string(group, key, def);
+    return plugin_settings_string_get(group, key, def);
 }
 
 void
-api_settings_set_string(const char *const group, const char *const key, const char *const value)
+api_settings_string_set(const char *const group, const char *const key, const char *const value)
 {
-    plugin_settings_set_string(group, key, value);
+    plugin_settings_string_set(group, key, value);
 }
 
 char**
-api_settings_get_string_list(const char *const group, const char *const key)
+api_settings_string_list_get(const char *const group, const char *const key)
 {
-    return plugin_settings_get_string_list(group, key);
+    return plugin_settings_string_list_get(group, key);
 }
 
 void
@@ -441,21 +441,21 @@ api_settings_string_list_remove(const char *const group, const char *const key, 
 }
 
 int
-api_settings_string_list_remove_all(const char *const group, const char *const key)
+api_settings_string_list_clear(const char *const group, const char *const key)
 {
-    return plugin_settings_string_list_remove_all(group, key);
+    return plugin_settings_string_list_clear(group, key);
 }
 
 int
-api_settings_get_int(const char *const group, const char *const key, int def)
+api_settings_int_get(const char *const group, const char *const key, int def)
 {
-    return plugin_settings_get_int(group, key, def);
+    return plugin_settings_int_get(group, key, def);
 }
 
 void
-api_settings_set_int(const char *const group, const char *const key, int value)
+api_settings_int_set(const char *const group, const char *const key, int value)
 {
-    plugin_settings_set_int(group, key, value);
+    plugin_settings_int_set(group, key, value);
 }
 
 void
