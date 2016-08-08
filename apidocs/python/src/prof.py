@@ -110,7 +110,7 @@ def register_command(name, min_args, max_args, synopsis, description, arguments,
 def register_timed(callback, interval): 
     """Register a function that Profanity will call periodically.
 
-    :param callback: the funciton to call
+    :param callback: the function to call
     :param interval: the time between each call to the function, in seconds
     :type callback: function
     :type interval: int
