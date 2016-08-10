@@ -71,12 +71,14 @@ def prof_on_disconnect(account_name, fulljid):
     pass
 
 
-def prof_pre_chat_message_display(barejid, message):
+def prof_pre_chat_message_display(barejid, resource, message):
     """Called before a chat message is displayed
 
     :param barejid: Jabber ID of the message sender
+    :param resource: resource of the message sender
     :param message: the received message
     :type barejid: str or unicode
+    :type resource: str or unicode
     :type message: str or unicode
     :return: the new message to display, or ``None`` to preserve the original message 
     :rtype: str or unicode
@@ -84,12 +86,14 @@ def prof_pre_chat_message_display(barejid, message):
     pass
 
 
-def prof_post_chat_message_display(barejid, message):
+def prof_post_chat_message_display(barejid, resource, message):
     """Called after a chat message is displayed
 
     :param barejid: Jabber ID of the message sender
+    :param resource: resource of the message sender
     :param message: the received message
     :type barejid: str or unicode
+    :type resource: str or unicode
     :type message: str or unicode
     """
     pass
@@ -119,13 +123,13 @@ def prof_post_chat_message_send(barejid, message):
     pass
 
 
-def prof_pre_room_message_display(room, nick, message):
+def prof_pre_room_message_display(barejid, nick, message):
     """Called before a chat room message is displayed
 
-    :param room: Jabber ID of the room
+    :param barejid: Jabber ID of the room
     :param nick: nickname of message sender
     :param message: the received message
-    :type room: str or unicode
+    :type barejid: str or unicode
     :type nick: str or unicode
     :type message: str or unicode
     :return: the new message to display, or ``None`` to preserve the original message 
@@ -134,25 +138,25 @@ def prof_pre_room_message_display(room, nick, message):
     pass
 
 
-def prof_post_room_message_display(room, nick, message):
+def prof_post_room_message_display(barejid, nick, message):
     """Called after a chat room message is displayed
 
-    :param room: Jabber ID of the room
+    :param barejid: Jabber ID of the room
     :param nick: nickname of the message sender 
     :param message: the received message
-    :type room: str or unicode
+    :type barejid: str or unicode
     :type nick: str or unicode
     :type message: str or unicode
     """
     pass
 
 
-def prof_pre_room_message_send(room, message):
+def prof_pre_room_message_send(barejid, message):
     """Called before a chat room message is sent
 
-    :param room: Jabber ID of the room
+    :param barejid: Jabber ID of the room
     :param message: the message to be sent
-    :type room: str or unicode
+    :type barejid: str or unicode
     :type message: str or unicode
     :return: the new message to send, or ``None`` to preserve the original message 
     :rtype: str or unicode
@@ -160,25 +164,25 @@ def prof_pre_room_message_send(room, message):
     pass
 
 
-def prof_post_room_message_send(room, message):
+def prof_post_room_message_send(barejid, message):
     """Called after a chat room message has been sent
 
-    :param room: Jabber ID of the room
+    :param barejid: Jabber ID of the room
     :param message: the sent message
-    :type room: str or unicode
+    :type barejid: str or unicode
     :type message: str or unicode
     """
     pass
 
 
-def prof_on_room_history_message(room, nick, message, timestamp):
+def prof_on_room_history_message(barejid, nick, message, timestamp):
     """Called when the server sends a chat room history message
 
-    :param room: Jabber ID of the room
+    :param barejid: Jabber ID of the room
     :param nick: nickname of the message sender
     :param message: the message to be sent
     :param timestamp: time the message was originally sent to the room, in ISO8601 format
-    :type room: str or unicode
+    :type barejid: str or unicode
     :type nick: str or unicode
     :type message: str or unicode
     :type timestamp: str or unicode
@@ -186,13 +190,13 @@ def prof_on_room_history_message(room, nick, message, timestamp):
     pass
 
 
-def prof_pre_priv_message_display(room, nick, message):
+def prof_pre_priv_message_display(barejid, nick, message):
     """Called before a private chat room message is displayed
 
-    :param room: Jabber ID of the room
+    :param barejid: Jabber ID of the room
     :param nick: nickname of message sender
     :param message: the received message
-    :type room: str or unicode
+    :type barejid: str or unicode
     :type nick: str or unicode
     :type message: str or unicode
     :return: the new message to display, or ``None`` to preserve the original message 
@@ -201,26 +205,26 @@ def prof_pre_priv_message_display(room, nick, message):
     pass
 
 
-def prof_post_priv_message_display(room, nick, message):
+def prof_post_priv_message_display(barejid, nick, message):
     """Called after a private chat room message is displayed
 
-    :param room: Jabber ID of the room
+    :param barejid: Jabber ID of the room
     :param nick: nickname of the message sender 
     :param message: the received message
-    :type room: str or unicode
+    :type barejid: str or unicode
     :type nick: str or unicode
     :type message: str or unicode
     """
     pass
 
 
-def prof_pre_priv_message_send(room, nick, message):
+def prof_pre_priv_message_send(barejid, nick, message):
     """Called before a private chat room message is sent
 
-    :param room: Jabber ID of the room
+    :param barejid: Jabber ID of the room
     :param nick: nickname of message recipient
     :param message: the message to be sent
-    :type room: str or unicode
+    :type barejid: str or unicode
     :type nick: str or unicode
     :type message: str or unicode
     :return: the new message to send, or ``None`` to preserve the original message 
@@ -229,13 +233,13 @@ def prof_pre_priv_message_send(room, nick, message):
     pass
 
 
-def prof_post_priv_message_send(room, nick, message):
+def prof_post_priv_message_send(barejid, nick, message):
     """Called after a private chat room message has been sent
 
-    :param room: Jabber ID of the room
+    :param barejid: Jabber ID of the room
     :param nick: nickname of the message recipient
     :param message: the sent message
-    :type room: str or unicode
+    :type barejid: str or unicode
     :type nick: str or unicode
     :type message: str or unicode
     """
@@ -347,10 +351,10 @@ def prof_on_chat_win_focus(barejid):
     pass
 
 
-def prof_on_room_win_focus(room):
+def prof_on_room_win_focus(barejid):
     """Called when a chat room window is focussed
 
-    :param room: Jabber ID of the room
-    :type room: str or unicode
+    :param barejid: Jabber ID of the room
+    :type barejid: str or unicode
     """
     pass

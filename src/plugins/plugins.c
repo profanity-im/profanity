@@ -393,7 +393,7 @@ plugins_on_disconnect(const char * const account_name, const char * const fullji
 }
 
 char*
-plugins_pre_chat_message_display(const char * const jid, const char *message)
+plugins_pre_chat_message_display(const char * const barejid, const char *const resource, const char *message)
 {
     char *new_message = NULL;
     char *curr_message = strdup(message);
@@ -402,7 +402,7 @@ plugins_pre_chat_message_display(const char * const jid, const char *message)
     GList *curr = values;
     while (curr) {
         ProfPlugin *plugin = curr->data;
-        new_message = plugin->pre_chat_message_display(plugin, jid, curr_message);
+        new_message = plugin->pre_chat_message_display(plugin, barejid, resource, curr_message);
         if (new_message) {
             free(curr_message);
             curr_message = strdup(new_message);
@@ -416,20 +416,20 @@ plugins_pre_chat_message_display(const char * const jid, const char *message)
 }
 
 void
-plugins_post_chat_message_display(const char * const jid, const char *message)
+plugins_post_chat_message_display(const char * const barejid, const char *const resource, const char *message)
 {
     GList *values = g_hash_table_get_values(plugins);
     GList *curr = values;
     while (curr) {
         ProfPlugin *plugin = curr->data;
-        plugin->post_chat_message_display(plugin, jid, message);
+        plugin->post_chat_message_display(plugin, barejid, resource, message);
         curr = g_list_next(curr);
     }
     g_list_free(values);
 }
 
 char*
-plugins_pre_chat_message_send(const char * const jid, const char *message)
+plugins_pre_chat_message_send(const char * const barejid, const char *message)
 {
     char *new_message = NULL;
     char *curr_message = strdup(message);
@@ -438,7 +438,7 @@ plugins_pre_chat_message_send(const char * const jid, const char *message)
     GList *curr = values;
     while (curr) {
         ProfPlugin *plugin = curr->data;
-        new_message = plugin->pre_chat_message_send(plugin, jid, curr_message);
+        new_message = plugin->pre_chat_message_send(plugin, barejid, curr_message);
         if (new_message) {
             free(curr_message);
             curr_message = strdup(new_message);
@@ -452,20 +452,20 @@ plugins_pre_chat_message_send(const char * const jid, const char *message)
 }
 
 void
-plugins_post_chat_message_send(const char * const jid, const char *message)
+plugins_post_chat_message_send(const char * const barejid, const char *message)
 {
     GList *values = g_hash_table_get_values(plugins);
     GList *curr = values;
     while (curr) {
         ProfPlugin *plugin = curr->data;
-        plugin->post_chat_message_send(plugin, jid, message);
+        plugin->post_chat_message_send(plugin, barejid, message);
         curr = g_list_next(curr);
     }
     g_list_free(values);
 }
 
 char*
-plugins_pre_room_message_display(const char * const room, const char * const nick, const char *message)
+plugins_pre_room_message_display(const char * const barejid, const char * const nick, const char *message)
 {
     char *new_message = NULL;
     char *curr_message = strdup(message);
@@ -474,7 +474,7 @@ plugins_pre_room_message_display(const char * const room, const char * const nic
     GList *curr = values;
     while (curr) {
         ProfPlugin *plugin = curr->data;
-        new_message = plugin->pre_room_message_display(plugin, room, nick, curr_message);
+        new_message = plugin->pre_room_message_display(plugin, barejid, nick, curr_message);
         if (new_message) {
             free(curr_message);
             curr_message = strdup(new_message);
@@ -488,20 +488,20 @@ plugins_pre_room_message_display(const char * const room, const char * const nic
 }
 
 void
-plugins_post_room_message_display(const char * const room, const char * const nick, const char *message)
+plugins_post_room_message_display(const char * const barejid, const char * const nick, const char *message)
 {
     GList *values = g_hash_table_get_values(plugins);
     GList *curr = values;
     while (curr) {
         ProfPlugin *plugin = curr->data;
-        plugin->post_room_message_display(plugin, room, nick, message);
+        plugin->post_room_message_display(plugin, barejid, nick, message);
         curr = g_list_next(curr);
     }
     g_list_free(values);
 }
 
 char*
-plugins_pre_room_message_send(const char * const room, const char *message)
+plugins_pre_room_message_send(const char * const barejid, const char *message)
 {
     char *new_message = NULL;
     char *curr_message = strdup(message);
@@ -510,7 +510,7 @@ plugins_pre_room_message_send(const char * const room, const char *message)
     GList *curr = values;
     while (curr) {
         ProfPlugin *plugin = curr->data;
-        new_message = plugin->pre_room_message_send(plugin, room, curr_message);
+        new_message = plugin->pre_room_message_send(plugin, barejid, curr_message);
         if (new_message) {
             free(curr_message);
             curr_message = strdup(new_message);
@@ -524,20 +524,20 @@ plugins_pre_room_message_send(const char * const room, const char *message)
 }
 
 void
-plugins_post_room_message_send(const char * const room, const char *message)
+plugins_post_room_message_send(const char * const barejid, const char *message)
 {
     GList *values = g_hash_table_get_values(plugins);
     GList *curr = values;
     while (curr) {
         ProfPlugin *plugin = curr->data;
-        plugin->post_room_message_send(plugin, room, message);
+        plugin->post_room_message_send(plugin, barejid, message);
         curr = g_list_next(curr);
     }
     g_list_free(values);
 }
 
 void
-plugins_on_room_history_message(const char *const room, const char *const nick, const char *const message,
+plugins_on_room_history_message(const char *const barejid, const char *const nick, const char *const message,
     GDateTime *timestamp)
 {
     char *timestamp_str = NULL;
@@ -551,7 +551,7 @@ plugins_on_room_history_message(const char *const room, const char *const nick, 
     GList *curr = values;
     while (curr) {
         ProfPlugin *plugin = curr->data;
-        plugin->on_room_history_message(plugin, room, nick, message, timestamp_str);
+        plugin->on_room_history_message(plugin, barejid, nick, message, timestamp_str);
         curr = g_list_next(curr);
     }
     g_list_free(values);
@@ -560,9 +560,9 @@ plugins_on_room_history_message(const char *const room, const char *const nick, 
 }
 
 char*
-plugins_pre_priv_message_display(const char * const jid, const char *message)
+plugins_pre_priv_message_display(const char * const fulljid, const char *message)
 {
-    Jid *jidp = jid_create(jid);
+    Jid *jidp = jid_create(fulljid);
     char *new_message = NULL;
     char *curr_message = strdup(message);
 
@@ -585,9 +585,9 @@ plugins_pre_priv_message_display(const char * const jid, const char *message)
 }
 
 void
-plugins_post_priv_message_display(const char * const jid, const char *message)
+plugins_post_priv_message_display(const char * const fulljid, const char *message)
 {
-    Jid *jidp = jid_create(jid);
+    Jid *jidp = jid_create(fulljid);
 
     GList *values = g_hash_table_get_values(plugins);
     GList *curr = values;
@@ -602,9 +602,9 @@ plugins_post_priv_message_display(const char * const jid, const char *message)
 }
 
 char*
-plugins_pre_priv_message_send(const char * const jid, const char * const message)
+plugins_pre_priv_message_send(const char * const fulljid, const char * const message)
 {
-    Jid *jidp = jid_create(jid);
+    Jid *jidp = jid_create(fulljid);
     char *new_message = NULL;
     char *curr_message = strdup(message);
 
@@ -627,9 +627,9 @@ plugins_pre_priv_message_send(const char * const jid, const char * const message
 }
 
 void
-plugins_post_priv_message_send(const char * const jid, const char * const message)
+plugins_post_priv_message_send(const char * const fulljid, const char * const message)
 {
-    Jid *jidp = jid_create(jid);
+    Jid *jidp = jid_create(fulljid);
 
     GList *values = g_hash_table_get_values(plugins);
     GList *curr = values;
@@ -812,13 +812,13 @@ plugins_on_chat_win_focus(const char *const barejid)
 }
 
 void
-plugins_on_room_win_focus(const char *const roomjid)
+plugins_on_room_win_focus(const char *const barejid)
 {
     GList *values = g_hash_table_get_values(plugins);
     GList *curr = values;
     while (curr) {
         ProfPlugin *plugin = curr->data;
-        plugin->on_room_win_focus(plugin, roomjid);
+        plugin->on_room_win_focus(plugin, barejid);
         curr = g_list_next(curr);
     }
     g_list_free(values);

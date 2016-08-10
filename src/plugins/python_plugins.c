@@ -277,10 +277,11 @@ python_on_disconnect_hook(ProfPlugin *plugin, const char *const account_name, co
 }
 
 char*
-python_pre_chat_message_display_hook(ProfPlugin *plugin, const char *const jid, const char *message)
+python_pre_chat_message_display_hook(ProfPlugin *plugin, const char *const barejid, const char *const resource,
+    const char *message)
 {
     disable_python_threads();
-    PyObject *p_args = Py_BuildValue("ss", jid, message);
+    PyObject *p_args = Py_BuildValue("sss", barejid, resource, message);
     PyObject *p_function;
 
     PyObject *p_module = plugin->module;
@@ -304,10 +305,10 @@ python_pre_chat_message_display_hook(ProfPlugin *plugin, const char *const jid, 
 }
 
 void
-python_post_chat_message_display_hook(ProfPlugin *plugin, const char *const jid, const char *message)
+python_post_chat_message_display_hook(ProfPlugin *plugin, const char *const barejid, const char *const resource, const char *message)
 {
     disable_python_threads();
-    PyObject *p_args = Py_BuildValue("ss", jid, message);
+    PyObject *p_args = Py_BuildValue("sss", barejid, resource, message);
     PyObject *p_function;
 
     PyObject *p_module = plugin->module;
@@ -325,10 +326,10 @@ python_post_chat_message_display_hook(ProfPlugin *plugin, const char *const jid,
 }
 
 char*
-python_pre_chat_message_send_hook(ProfPlugin *plugin, const char * const jid, const char *message)
+python_pre_chat_message_send_hook(ProfPlugin *plugin, const char * const barejid, const char *message)
 {
     disable_python_threads();
-    PyObject *p_args = Py_BuildValue("ss", jid, message);
+    PyObject *p_args = Py_BuildValue("ss", barejid, message);
     PyObject *p_function;
 
     PyObject *p_module = plugin->module;
@@ -352,10 +353,10 @@ python_pre_chat_message_send_hook(ProfPlugin *plugin, const char * const jid, co
 }
 
 void
-python_post_chat_message_send_hook(ProfPlugin *plugin, const char *const jid, const char *message)
+python_post_chat_message_send_hook(ProfPlugin *plugin, const char *const barejid, const char *message)
 {
     disable_python_threads();
-    PyObject *p_args = Py_BuildValue("ss", jid, message);
+    PyObject *p_args = Py_BuildValue("ss", barejid, message);
     PyObject *p_function;
 
     PyObject *p_module = plugin->module;
@@ -373,10 +374,10 @@ python_post_chat_message_send_hook(ProfPlugin *plugin, const char *const jid, co
 }
 
 char*
-python_pre_room_message_display_hook(ProfPlugin *plugin, const char * const room, const char * const nick, const char *message)
+python_pre_room_message_display_hook(ProfPlugin *plugin, const char * const barejid, const char * const nick, const char *message)
 {
     disable_python_threads();
-    PyObject *p_args = Py_BuildValue("sss", room, nick, message);
+    PyObject *p_args = Py_BuildValue("sss", barejid, nick, message);
     PyObject *p_function;
 
     PyObject *p_module = plugin->module;
@@ -400,11 +401,11 @@ python_pre_room_message_display_hook(ProfPlugin *plugin, const char * const room
 }
 
 void
-python_post_room_message_display_hook(ProfPlugin *plugin, const char *const room, const char *const nick,
+python_post_room_message_display_hook(ProfPlugin *plugin, const char *const barejid, const char *const nick,
     const char *message)
 {
     disable_python_threads();
-    PyObject *p_args = Py_BuildValue("sss", room, nick, message);
+    PyObject *p_args = Py_BuildValue("sss", barejid, nick, message);
     PyObject *p_function;
 
     PyObject *p_module = plugin->module;
@@ -422,10 +423,10 @@ python_post_room_message_display_hook(ProfPlugin *plugin, const char *const room
 }
 
 char*
-python_pre_room_message_send_hook(ProfPlugin *plugin, const char *const room, const char *message)
+python_pre_room_message_send_hook(ProfPlugin *plugin, const char *const barejid, const char *message)
 {
     disable_python_threads();
-    PyObject *p_args = Py_BuildValue("ss", room, message);
+    PyObject *p_args = Py_BuildValue("ss", barejid, message);
     PyObject *p_function;
 
     PyObject *p_module = plugin->module;
@@ -449,10 +450,10 @@ python_pre_room_message_send_hook(ProfPlugin *plugin, const char *const room, co
 }
 
 void
-python_post_room_message_send_hook(ProfPlugin *plugin, const char *const room, const char *message)
+python_post_room_message_send_hook(ProfPlugin *plugin, const char *const barejid, const char *message)
 {
     disable_python_threads();
-    PyObject *p_args = Py_BuildValue("ss", room, message);
+    PyObject *p_args = Py_BuildValue("ss", barejid, message);
     PyObject *p_function;
 
     PyObject *p_module = plugin->module;
@@ -470,11 +471,11 @@ python_post_room_message_send_hook(ProfPlugin *plugin, const char *const room, c
 }
 
 void
-python_on_room_history_message_hook(ProfPlugin *plugin, const char *const room, const char *const nick,
+python_on_room_history_message_hook(ProfPlugin *plugin, const char *const barejid, const char *const nick,
     const char *const message, const char *const timestamp)
 {
     disable_python_threads();
-    PyObject *p_args = Py_BuildValue("ssss", room, nick, message, timestamp);
+    PyObject *p_args = Py_BuildValue("ssss", barejid, nick, message, timestamp);
     PyObject *p_function;
 
     PyObject *p_module = plugin->module;
@@ -492,11 +493,11 @@ python_on_room_history_message_hook(ProfPlugin *plugin, const char *const room, 
 }
 
 char*
-python_pre_priv_message_display_hook(ProfPlugin *plugin, const char *const room, const char *const nick,
+python_pre_priv_message_display_hook(ProfPlugin *plugin, const char *const barejid, const char *const nick,
     const char *message)
 {
     disable_python_threads();
-    PyObject *p_args = Py_BuildValue("sss", room, nick, message);
+    PyObject *p_args = Py_BuildValue("sss", barejid, nick, message);
     PyObject *p_function;
 
     PyObject *p_module = plugin->module;
@@ -520,11 +521,11 @@ python_pre_priv_message_display_hook(ProfPlugin *plugin, const char *const room,
 }
 
 void
-python_post_priv_message_display_hook(ProfPlugin *plugin, const char *const room, const char *const nick,
+python_post_priv_message_display_hook(ProfPlugin *plugin, const char *const barejid, const char *const nick,
     const char *message)
 {
     disable_python_threads();
-    PyObject *p_args = Py_BuildValue("sss", room, nick, message);
+    PyObject *p_args = Py_BuildValue("sss", barejid, nick, message);
     PyObject *p_function;
 
     PyObject *p_module = plugin->module;
@@ -542,11 +543,11 @@ python_post_priv_message_display_hook(ProfPlugin *plugin, const char *const room
 }
 
 char*
-python_pre_priv_message_send_hook(ProfPlugin *plugin, const char *const room, const char *const nick,
+python_pre_priv_message_send_hook(ProfPlugin *plugin, const char *const barejid, const char *const nick,
     const char *const message)
 {
     disable_python_threads();
-    PyObject *p_args = Py_BuildValue("sss", room, nick, message);
+    PyObject *p_args = Py_BuildValue("sss", barejid, nick, message);
     PyObject *p_function;
 
     PyObject *p_module = plugin->module;
@@ -570,11 +571,11 @@ python_pre_priv_message_send_hook(ProfPlugin *plugin, const char *const room, co
 }
 
 void
-python_post_priv_message_send_hook(ProfPlugin *plugin, const char *const room, const char *const nick,
+python_post_priv_message_send_hook(ProfPlugin *plugin, const char *const barejid, const char *const nick,
     const char *const message)
 {
     disable_python_threads();
-    PyObject *p_args = Py_BuildValue("sss", room, nick, message);
+    PyObject *p_args = Py_BuildValue("sss", barejid, nick, message);
     PyObject *p_function;
 
     PyObject *p_module = plugin->module;
@@ -828,10 +829,10 @@ python_on_chat_win_focus_hook(ProfPlugin *plugin, const char *const barejid)
 }
 
 void
-python_on_room_win_focus_hook(ProfPlugin *plugin, const char *const roomjid)
+python_on_room_win_focus_hook(ProfPlugin *plugin, const char *const barejid)
 {
     disable_python_threads();
-    PyObject *p_args = Py_BuildValue("(s)", roomjid);
+    PyObject *p_args = Py_BuildValue("(s)", barejid);
     PyObject *p_function;
 
     PyObject *p_module = plugin->module;
