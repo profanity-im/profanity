@@ -51,27 +51,27 @@ void c_on_unload_hook(ProfPlugin *plugin);
 void c_on_connect_hook(ProfPlugin *plugin, const char *const account_name, const char *const fulljid);
 void c_on_disconnect_hook(ProfPlugin *plugin, const char *const account_name, const char *const fulljid);
 
-char* c_pre_chat_message_display_hook(ProfPlugin *plugin, const char *const jid, const char *message);
-void c_post_chat_message_display_hook(ProfPlugin *plugin, const char *const jid, const char *message);
-char* c_pre_chat_message_send_hook(ProfPlugin *plugin, const char *const jid, const char *message);
-void c_post_chat_message_send_hook(ProfPlugin *plugin, const char *const jid, const char *message);
+char* c_pre_chat_message_display_hook(ProfPlugin *plugin, const char *const barejid, const char *const resource, const char *message);
+void c_post_chat_message_display_hook(ProfPlugin *plugin, const char *const barejid, const char *const resource, const char *message);
+char* c_pre_chat_message_send_hook(ProfPlugin *plugin, const char *const barejid, const char *message);
+void c_post_chat_message_send_hook(ProfPlugin *plugin, const char *const barejid, const char *message);
 
-char* c_pre_room_message_display_hook(ProfPlugin *plugin, const char *const room, const char *const nick,
+char* c_pre_room_message_display_hook(ProfPlugin *plugin, const char *const barejid, const char *const nick,
     const char *message);
-void c_post_room_message_display_hook(ProfPlugin *plugin, const char *const room, const char *const nick,
+void c_post_room_message_display_hook(ProfPlugin *plugin, const char *const barejid, const char *const nick,
     const char *message);
-char* c_pre_room_message_send_hook(ProfPlugin *plugin, const char *const room, const char *message);
-void c_post_room_message_send_hook(ProfPlugin *plugin, const char *const room, const char *message);
-void c_on_room_history_message_hook(ProfPlugin *plugin, const char *const room, const char *const nick,
+char* c_pre_room_message_send_hook(ProfPlugin *plugin, const char *const barejid, const char *message);
+void c_post_room_message_send_hook(ProfPlugin *plugin, const char *const barejid, const char *message);
+void c_on_room_history_message_hook(ProfPlugin *plugin, const char *const barejid, const char *const nick,
     const char *const message, const char *const timestamp);
 
-char* c_pre_priv_message_display_hook(ProfPlugin *plugin, const char *const room, const char *const nick,
+char* c_pre_priv_message_display_hook(ProfPlugin *plugin, const char *const barejid, const char *const nick,
     const char *message);
-void  c_post_priv_message_display_hook(ProfPlugin *plugin, const char *const room, const char *const nick,
+void  c_post_priv_message_display_hook(ProfPlugin *plugin, const char *const barejid, const char *const nick,
     const char *message);
-char* c_pre_priv_message_send_hook(ProfPlugin *plugin, const char *const room, const char *const nick,
+char* c_pre_priv_message_send_hook(ProfPlugin *plugin, const char *const barejid, const char *const nick,
     const char *const message);
-void c_post_priv_message_send_hook(ProfPlugin *plugin, const char *const room, const char *const nick,
+void c_post_priv_message_send_hook(ProfPlugin *plugin, const char *const barejid, const char *const nick,
     const char * const message);
 
 char* c_on_message_stanza_send_hook(ProfPlugin *plugin, const char *const text);
@@ -89,6 +89,6 @@ void c_on_contact_presence_hook(ProfPlugin *plugin, const char *const barejid, c
     const char *const presence, const char *const status, const int priority);
 
 void c_on_chat_win_focus_hook(ProfPlugin *plugin, const char *const barejid);
-void c_on_room_win_focus_hook(ProfPlugin *plugin, const char *const roomjid);
+void c_on_room_win_focus_hook(ProfPlugin *plugin, const char *const barejid);
 
 #endif

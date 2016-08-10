@@ -206,124 +206,124 @@ c_on_disconnect_hook(ProfPlugin *plugin, const char *const account_name, const c
 }
 
 char*
-c_pre_chat_message_display_hook(ProfPlugin *plugin, const char *const jid, const char *message)
+c_pre_chat_message_display_hook(ProfPlugin *plugin, const char *const barejid, const char *const resource, const char *message)
 {
     void *f = NULL;
-    char* (*func)(const char *const __jid, const char *__message);
+    char* (*func)(const char *const __barejid, const char *const __resource, const char *__message);
     assert(plugin && plugin->module);
 
     if (NULL == (f = dlsym(plugin->module, "prof_pre_chat_message_display")))
         return NULL;
 
-    func = (char* (*)(const char *const, const char *))f;
-    return func(jid, message);
+    func = (char* (*)(const char *const, const char *const, const char *))f;
+    return func(barejid, resource, message);
 }
 
 void
-c_post_chat_message_display_hook(ProfPlugin *plugin, const char *const jid, const char *message)
+c_post_chat_message_display_hook(ProfPlugin *plugin, const char *const barejid, const char *const resource, const char *message)
 {
     void *f = NULL;
-    void (*func)(const char *const __jid, const char *__message);
+    void (*func)(const char *const __barejid, const char *const __resource, const char *__message);
     assert(plugin && plugin->module);
 
     if (NULL == (f = dlsym(plugin->module, "prof_post_chat_message_display")))
         return;
 
-    func = (void (*)(const char *const, const char *))f;
-    func(jid, message);
+    func = (void (*)(const char *const, const char *const, const char *))f;
+    func(barejid, resource, message);
 }
 
 char*
-c_pre_chat_message_send_hook(ProfPlugin *plugin, const char *const jid, const char *message)
+c_pre_chat_message_send_hook(ProfPlugin *plugin, const char *const barejid, const char *message)
 {
     void *f = NULL;
-    char* (*func)(const char *const __jid, const char *__message);
+    char* (*func)(const char *const __barejid, const char *__message);
     assert(plugin && plugin->module);
 
     if (NULL == (f = dlsym(plugin->module, "prof_pre_chat_message_send")))
         return NULL;
 
     func = (char* (*)(const char *const, const char *))f;
-    return func(jid, message);
+    return func(barejid, message);
 }
 
 void
-c_post_chat_message_send_hook(ProfPlugin *plugin, const char *const jid, const char *message)
+c_post_chat_message_send_hook(ProfPlugin *plugin, const char *const barejid, const char *message)
 {
     void *f = NULL;
-    void (*func)(const char *const __jid, const char *__message);
+    void (*func)(const char *const __barejid, const char *__message);
     assert(plugin && plugin->module);
 
     if (NULL == (f = dlsym(plugin->module, "prof_post_chat_message_send")))
         return;
 
     func = (void (*)(const char *const, const char *))f;
-    func(jid, message);
+    func(barejid, message);
 }
 
 char*
-c_pre_room_message_display_hook(ProfPlugin *plugin, const char *const room, const char *const nick, const char *message)
+c_pre_room_message_display_hook(ProfPlugin *plugin, const char *const barejid, const char *const nick, const char *message)
 {
     void *f = NULL;
-    char* (*func)(const char *const __room, const char *const __nick, const char *__message);
+    char* (*func)(const char *const __barejid, const char *const __nick, const char *__message);
     assert(plugin && plugin->module);
 
     if (NULL == (f = dlsym(plugin->module, "prof_pre_room_message_display")))
         return NULL;
 
     func = (char* (*)(const char *const, const char *const, const char *))f;
-    return func(room, nick, message);
+    return func(barejid, nick, message);
 }
 
 void
-c_post_room_message_display_hook(ProfPlugin *plugin, const char *const room, const char *const nick,
+c_post_room_message_display_hook(ProfPlugin *plugin, const char *const barejid, const char *const nick,
     const char *message)
 {
     void *f = NULL;
-    void (*func)(const char *const __room, const char *const __nick, const char *__message);
+    void (*func)(const char *const __barejid, const char *const __nick, const char *__message);
     assert(plugin && plugin->module);
 
     if (NULL == (f = dlsym(plugin->module, "prof_post_room_message_display")))
         return;
 
     func = (void (*)(const char *const, const char *const, const char *))f;
-    func(room, nick, message);
+    func(barejid, nick, message);
 }
 
 char*
-c_pre_room_message_send_hook(ProfPlugin *plugin, const char *const room, const char *message)
+c_pre_room_message_send_hook(ProfPlugin *plugin, const char *const barejid, const char *message)
 {
     void *f = NULL;
-    char* (*func)(const char *const __room, const char *__message);
+    char* (*func)(const char *const __barejid, const char *__message);
     assert(plugin && plugin->module);
 
     if (NULL == (f = dlsym(plugin->module, "prof_pre_room_message_send")))
         return NULL;
 
     func = (char* (*)(const char *const, const char *))f;
-    return func(room, message);
+    return func(barejid, message);
 }
 
 void
-c_post_room_message_send_hook(ProfPlugin *plugin, const char *const room, const char *message)
+c_post_room_message_send_hook(ProfPlugin *plugin, const char *const barejid, const char *message)
 {
     void *f = NULL;
-    void (*func)(const char *const __room, const char *__message);
+    void (*func)(const char *const __barejid, const char *__message);
     assert(plugin && plugin->module);
 
     if (NULL == (f = dlsym(plugin->module, "prof_post_room_message_send")))
         return;
 
     func = (void (*)(const char *const, const char *))f;
-    func(room, message);
+    func(barejid, message);
 }
 
 void
-c_on_room_history_message_hook(ProfPlugin *plugin, const char *const room, const char *const nick,
+c_on_room_history_message_hook(ProfPlugin *plugin, const char *const barejid, const char *const nick,
     const char *const message, const char *const timestamp)
 {
     void *f = NULL;
-    void (*func)(const char *const __room, const char *const __nick, const char *const __message,
+    void (*func)(const char *const __barejid, const char *const __nick, const char *const __message,
         const char *const __timestamp);
     assert(plugin && plugin->module);
 
@@ -331,64 +331,64 @@ c_on_room_history_message_hook(ProfPlugin *plugin, const char *const room, const
         return;
 
     func = (void (*)(const char *const, const char *const, const char *const, const char *const))f;
-    func(room, nick, message, timestamp);
+    func(barejid, nick, message, timestamp);
 }
 
 char*
-c_pre_priv_message_display_hook(ProfPlugin *plugin, const char *const room, const char *const nick, const char *message)
+c_pre_priv_message_display_hook(ProfPlugin *plugin, const char *const barejid, const char *const nick, const char *message)
 {
     void *f = NULL;
-    char* (*func)(const char *const __room, const char *const __nick, const char *__message);
+    char* (*func)(const char *const __barejid, const char *const __nick, const char *__message);
     assert(plugin && plugin->module);
 
     if (NULL == (f = dlsym(plugin->module, "prof_pre_priv_message_display")))
         return NULL;
 
     func = (char* (*)(const char *const, const char *const, const char *))f;
-    return func(room, nick, message);
+    return func(barejid, nick, message);
 }
 
 void
-c_post_priv_message_display_hook(ProfPlugin *plugin, const char *const room, const char *const nick,
+c_post_priv_message_display_hook(ProfPlugin *plugin, const char *const barejid, const char *const nick,
     const char *message)
 {
     void *f = NULL;
-    void (*func)(const char *const __room, const char *const __nick, const char *__message);
+    void (*func)(const char *const __barejid, const char *const __nick, const char *__message);
     assert(plugin && plugin->module);
 
     if (NULL == (f = dlsym(plugin->module, "prof_post_priv_message_display")))
         return;
 
     func = (void (*)(const char *const, const char *const, const char *))f;
-    func(room, nick, message);
+    func(barejid, nick, message);
 }
 
 char*
-c_pre_priv_message_send_hook(ProfPlugin *plugin, const char *const room, const char *const nick, const char *message)
+c_pre_priv_message_send_hook(ProfPlugin *plugin, const char *const barejid, const char *const nick, const char *message)
 {
     void *f = NULL;
-    char* (*func)(const char *const __room, const char *const __nick, const char *__message);
+    char* (*func)(const char *const __barejid, const char *const __nick, const char *__message);
     assert(plugin && plugin->module);
 
     if (NULL == (f = dlsym(plugin->module, "prof_pre_priv_message_send")))
         return NULL;
 
     func = (char* (*)(const char *const, const char *const, const char *))f;
-    return func(room, nick, message);
+    return func(barejid, nick, message);
 }
 
 void
-c_post_priv_message_send_hook(ProfPlugin *plugin, const char *const room, const char *const nick, const char *message)
+c_post_priv_message_send_hook(ProfPlugin *plugin, const char *const barejid, const char *const nick, const char *message)
 {
     void *f = NULL;
-    void (*func)(const char *const __room, const char *const __nick, const char *__message);
+    void (*func)(const char *const __barejid, const char *const __nick, const char *__message);
     assert(plugin && plugin->module);
 
     if (NULL == (f = dlsym(plugin->module, "prof_post_priv_message_send")))
         return;
 
     func = (void (*)(const char *const, const char *const, const char *))f;
-    func(room, nick, message);
+    func(barejid, nick, message);
 }
 
 char*
@@ -521,17 +521,17 @@ c_on_chat_win_focus_hook(ProfPlugin *plugin, const char *const barejid)
 }
 
 void
-c_on_room_win_focus_hook(ProfPlugin *plugin, const char *const roomjid)
+c_on_room_win_focus_hook(ProfPlugin *plugin, const char *const barejid)
 {
     void *f = NULL;
-    void (*func)(const char *const __roomjid);
+    void (*func)(const char *const __barejid);
     assert(plugin && plugin->module);
 
     if (NULL == (f = dlsym(plugin->module, "prof_on_room_win_focus")))
         return;
 
     func = (void (*)(const char *const))f;
-    func(roomjid);
+    func(barejid);
 }
 
 void

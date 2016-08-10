@@ -235,7 +235,7 @@ chatwin_incoming_msg(ProfChatWin *chatwin, const char *const resource, const cha
 {
     assert(chatwin != NULL);
 
-    char *plugin_message = plugins_pre_chat_message_display(chatwin->barejid, message);
+    char *plugin_message = plugins_pre_chat_message_display(chatwin->barejid, resource, message);
 
     ProfWin *window = (ProfWin*)chatwin;
     int num = wins_get_num(window);
@@ -287,7 +287,7 @@ chatwin_incoming_msg(ProfChatWin *chatwin, const char *const resource, const cha
 
     free(display_name);
 
-    plugins_post_chat_message_display(chatwin->barejid, plugin_message);
+    plugins_post_chat_message_display(chatwin->barejid, resource, plugin_message);
 
     free(plugin_message);
 }
