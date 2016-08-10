@@ -34,6 +34,7 @@
 
 #include <Python.h>
 
+#include "log.h"
 #include "config.h"
 #include "config/preferences.h"
 #include "config/files.h"
@@ -46,6 +47,12 @@
 
 static PyThreadState *thread_state;
 static GHashTable *loaded_modules;
+
+static void _python_undefined_error(ProfPlugin *plugin, char *hook, char *type);
+static void _python_type_error(ProfPlugin *plugin, char *hook, char *type);
+
+static char* _handle_string_or_none_result(ProfPlugin *plugin, PyObject *result, char *hook);
+static gboolean _handle_boolean_result(ProfPlugin *plugin, PyObject *result, char *hook);
 
 void
 allow_python_threads()
@@ -293,10 +300,7 @@ python_pre_chat_message_display_hook(ProfPlugin *plugin, const char *const barej
             python_check_error();
             Py_XDECREF(p_function);
             Py_XDECREF(p_args);
-            char *result_str = python_str_or_unicode_to_string(result);
-            allow_python_threads();
-
-            return result_str;
+            return _handle_string_or_none_result(plugin, result, "prof_pre_chat_message_display");
         }
     }
     Py_XDECREF(p_args);
@@ -341,10 +345,7 @@ python_pre_chat_message_send_hook(ProfPlugin *plugin, const char * const barejid
             python_check_error();
             Py_XDECREF(p_function);
             Py_XDECREF(p_args);
-            char *result_str = python_str_or_unicode_to_string(result);
-            allow_python_threads();
-
-            return result_str;
+            return _handle_string_or_none_result(plugin, result, "prof_pre_chat_message_send");
         }
     }
     Py_XDECREF(p_args);
@@ -389,10 +390,7 @@ python_pre_room_message_display_hook(ProfPlugin *plugin, const char * const bare
             python_check_error();
             Py_XDECREF(p_function);
             Py_XDECREF(p_args);
-            char *result_str = python_str_or_unicode_to_string(result);
-            allow_python_threads();
-
-            return result_str;
+            return _handle_string_or_none_result(plugin, result, "prof_pre_room_message_display");
         }
     }
     Py_XDECREF(p_args);
@@ -438,10 +436,7 @@ python_pre_room_message_send_hook(ProfPlugin *plugin, const char *const barejid,
             python_check_error();
             Py_XDECREF(p_function);
             Py_XDECREF(p_args);
-            char *result_str = python_str_or_unicode_to_string(result);
-            allow_python_threads();
-
-            return result_str;
+            return _handle_string_or_none_result(plugin, result, "prof_pre_room_message_send");
         }
     }
     Py_XDECREF(p_args);
@@ -509,10 +504,7 @@ python_pre_priv_message_display_hook(ProfPlugin *plugin, const char *const barej
             python_check_error();
             Py_XDECREF(p_function);
             Py_XDECREF(p_args);
-            char *result_str = python_str_or_unicode_to_string(result);
-            allow_python_threads();
-
-            return result_str;
+            return _handle_string_or_none_result(plugin, result, "prof_pre_priv_message_display");
         }
     }
     Py_XDECREF(p_args);
@@ -559,10 +551,7 @@ python_pre_priv_message_send_hook(ProfPlugin *plugin, const char *const barejid,
             python_check_error();
             Py_XDECREF(p_function);
             Py_XDECREF(p_args);
-            char *result_str = python_str_or_unicode_to_string(result);
-            allow_python_threads();
-
-            return result_str;
+            return _handle_string_or_none_result(plugin, result, "prof_pre_priv_message_send");
         }
     }
     Py_XDECREF(p_args);
@@ -608,10 +597,7 @@ python_on_message_stanza_send_hook(ProfPlugin *plugin, const char *const text)
             python_check_error();
             Py_XDECREF(p_function);
             Py_XDECREF(p_args);
-            char *result_str = python_str_or_unicode_to_string(result);
-            allow_python_threads();
-
-            return result_str;
+            return _handle_string_or_none_result(plugin, result, "prof_on_message_stanza_send");
         }
     }
     Py_XDECREF(p_args);
@@ -635,13 +621,7 @@ python_on_message_stanza_receive_hook(ProfPlugin *plugin, const char *const text
             python_check_error();
             Py_XDECREF(p_function);
             Py_XDECREF(p_args);
-            if (PyObject_IsTrue(result)) {
-                allow_python_threads();
-                return TRUE;
-            } else {
-                allow_python_threads();
-                return FALSE;
-            }
+            return _handle_boolean_result(plugin, result, "prof_on_message_stanza_receive");
         }
     }
     Py_XDECREF(p_args);
@@ -665,10 +645,7 @@ python_on_presence_stanza_send_hook(ProfPlugin *plugin, const char *const text)
             python_check_error();
             Py_XDECREF(p_function);
             Py_XDECREF(p_args);
-            char *result_str = python_str_or_unicode_to_string(result);
-            allow_python_threads();
-
-            return result_str;
+            return _handle_string_or_none_result(plugin, result, "prof_on_presence_stanza_send");
         }
     }
     Py_XDECREF(p_args);
@@ -692,13 +669,7 @@ python_on_presence_stanza_receive_hook(ProfPlugin *plugin, const char *const tex
             python_check_error();
             Py_XDECREF(p_function);
             Py_XDECREF(p_args);
-            if (PyObject_IsTrue(result)) {
-                allow_python_threads();
-                return TRUE;
-            } else {
-                allow_python_threads();
-                return FALSE;
-            }
+            return _handle_boolean_result(plugin, result, "prof_on_presence_stanza_receive");
         }
     }
     Py_XDECREF(p_args);
@@ -722,10 +693,7 @@ python_on_iq_stanza_send_hook(ProfPlugin *plugin, const char *const text)
             python_check_error();
             Py_XDECREF(p_function);
             Py_XDECREF(p_args);
-            char *result_str = python_str_or_unicode_to_string(result);
-            allow_python_threads();
-
-            return result_str;
+            return _handle_string_or_none_result(plugin, result, "prof_on_iq_stanza_send");
         }
     }
     Py_XDECREF(p_args);
@@ -749,13 +717,7 @@ python_on_iq_stanza_receive_hook(ProfPlugin *plugin, const char *const text)
             python_check_error();
             Py_XDECREF(p_function);
             Py_XDECREF(p_args);
-            if (PyObject_IsTrue(result)) {
-                allow_python_threads();
-                return TRUE;
-            } else {
-                allow_python_threads();
-                return FALSE;
-            }
+            return _handle_boolean_result(plugin, result, "prof_on_iq_stanza_receive");
         }
     }
     Py_XDECREF(p_args);
@@ -875,4 +837,76 @@ python_shutdown(void)
     disable_python_threads();
     g_hash_table_destroy(loaded_modules);
     Py_Finalize();
+}
+
+static void
+_python_undefined_error(ProfPlugin *plugin, char *hook, char *type)
+{
+    GString *err_msg = g_string_new("Plugin error - ");
+    char *module_name = g_strndup(plugin->name, strlen(plugin->name) - 2);
+    g_string_append(err_msg, module_name);
+    free(module_name);
+    g_string_append(err_msg, hook);
+    g_string_append(err_msg, "(): return value undefined, expected ");
+    g_string_append(err_msg, type);
+    log_error(err_msg->str);
+    cons_show_error(err_msg->str);
+    g_string_free(err_msg, TRUE);
+}
+
+static void
+_python_type_error(ProfPlugin *plugin, char *hook, char *type)
+{
+    GString *err_msg = g_string_new("Plugin error - ");
+    char *module_name = g_strndup(plugin->name, strlen(plugin->name) - 2);
+    g_string_append(err_msg, module_name);
+    free(module_name);
+    g_string_append(err_msg, hook);
+    g_string_append(err_msg, "(): incorrect return type, expected ");
+    g_string_append(err_msg, type);
+    log_error(err_msg->str);
+    cons_show_error(err_msg->str);
+    g_string_free(err_msg, TRUE);
+}
+
+static char*
+_handle_string_or_none_result(ProfPlugin *plugin, PyObject *result, char *hook)
+{
+    if (result == NULL) {
+        allow_python_threads();
+        _python_undefined_error(plugin, hook, "string, unicode or None");
+        return NULL;
+    }
+#if PY_MAJOR_VERSION >= 3
+    if (result != Py_None && !PyUnicode_Check(result) && !PyBytes_Check(result)) {
+        allow_python_threads();
+        _python_type_error(plugin, hook, "string, unicode or None");
+        return NULL;
+    }
+#else
+    if (result != Py_None && !PyUnicode_Check(result) && !PyString_Check(result)) {
+        allow_python_threads();
+        _python_type_error(plugin, hook, "string, unicode or None");
+        return NULL;
+    }
+#endif
+    char *result_str = python_str_or_unicode_to_string(result);
+    allow_python_threads();
+    return result_str;
+}
+
+static gboolean
+_handle_boolean_result(ProfPlugin *plugin, PyObject *result, char *hook)
+{
+    if (result == NULL) {
+        allow_python_threads();
+        _python_undefined_error(plugin, hook, "boolean");
+        return TRUE;
+    }
+    if (PyObject_IsTrue(result)) {
+        allow_python_threads();
+        return TRUE;
+    }
+    allow_python_threads();
+    return FALSE;
 }
