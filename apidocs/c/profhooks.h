@@ -72,78 +72,78 @@ void prof_post_chat_message_send(const char * const barejid, const char *message
 
 /**
 Called before a chat room message is displayed
-@param room Jabber ID of the room
+@param barejid Jabber ID of the room
 @param nick nickname of message sender
 @param message the received message
 @return the new message to display, or NULL to preserve the original message 
 */
-char* prof_pre_room_message_display(const char * const room, const char * const nick, const char *message);
+char* prof_pre_room_message_display(const char * const barejid, const char * const nick, const char *message);
 
 /**
 Called after a chat room message is displayed
-@param room Jabber ID of the room
+@param barejid Jabber ID of the room
 @param nick nickname of the message sender 
 @param message the received message
 */
-void prof_post_room_message_display(const char * const room, const char * const nick, const char *message);
+void prof_post_room_message_display(const char * const barejid, const char * const nick, const char *message);
 
 /**
 Called before a chat room message is sent
-@param room Jabber ID of the room
+@param barejid Jabber ID of the room
 @param message the message to be sent
 @return the new message to send, or NULL to preserve the original message 
 */
-char* prof_pre_room_message_send(const char * const room, const char *message);
+char* prof_pre_room_message_send(const char * const barejid, const char *message);
 
 /**
 Called after a chat room message has been sent
-@param room Jabber ID of the room
+@param barejid Jabber ID of the room
 @param message the sent message
 */
-void prof_post_room_message_send(const char * const room, const char *message);
+void prof_post_room_message_send(const char * const barejid, const char *message);
 
 /**
 Called when the server sends a chat room history message
-@param room Jabber ID of the room
+@param barejid Jabber ID of the room
 @param nick nickname of the message sender
 @param message the message to be sent
 @param timestamp time the message was originally sent to the room, in ISO8601 format
 */
-void prof_on_room_history_message(const char * const room, const char *const nick, const char *const message, const char *const timestamp);
+void prof_on_room_history_message(const char * const barejid, const char *const nick, const char *const message, const char *const timestamp);
 
 /**
 Called before a private chat room message is displayed
-@param room Jabber ID of the room
+@param barejid Jabber ID of the room
 @param nick nickname of message sender
 @param message the received message
 @return the new message to display, or NULL to preserve the original message 
 */
-char* prof_pre_priv_message_display(const char * const room, const char * const nick, const char *message);
+char* prof_pre_priv_message_display(const char * const barejid, const char * const nick, const char *message);
 
 /**
 Called after a private chat room message is displayed
-@param room Jabber ID of the room
+@param barejid Jabber ID of the room
 @param nick nickname of the message sender 
 @param message the received message
 */
-void prof_post_priv_message_display(const char * const room, const char * const nick, const char *message);
+void prof_post_priv_message_display(const char * const barejid, const char * const nick, const char *message);
 
 /**
 Called before a private chat room message is sent
-@param room Jabber ID of the room
+@param barejid Jabber ID of the room
 @param nick nickname of message recipient
 @param message the message to be sent
 @return the new message to send, or NULL to preserve the original message 
 */
-char* prof_pre_priv_message_send(const char * const room, const char * const nick, const char *message);
+char* prof_pre_priv_message_send(const char * const barejid, const char * const nick, const char *message);
 
 /**
 Called after a private chat room message has been sent
-@param room Jabber ID of the room
+@param barejid Jabber ID of the room
 @param nick nickname of the message recipient
 @param message the sent message
 */
-void prof_post_priv_message_send(const char * const room, const char * const nick, const char *message);
+void prof_post_priv_message_send(const char * const barejid, const char * const nick, const char *message);
 
 /**
 Called before an XMPP message stanza is sent
@@ -213,6 +213,6 @@ void prof_on_chat_win_focus(const char *const barejid);
 
 /**
 Called when a chat room window is focussed
-@param room Jabber ID of the room
+@param barejid Jabber ID of the room
 */
-void prof_on_room_win_focus(const char *const room);
+void prof_on_room_win_focus(const char *const barejid);

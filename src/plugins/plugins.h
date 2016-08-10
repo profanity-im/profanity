@@ -117,22 +117,22 @@ void plugins_on_shutdown(void);
 void plugins_on_connect(const char *const account_name, const char *const fulljid);
 void plugins_on_disconnect(const char *const account_name, const char *const fulljid);
 
-char* plugins_pre_chat_message_display(const char *const jid, const char *message);
-void plugins_post_chat_message_display(const char *const jid, const char *message);
-char* plugins_pre_chat_message_send(const char *const jid, const char *message);
-void plugins_post_chat_message_send(const char *const jid, const char *message);
+char* plugins_pre_chat_message_display(const char *const barejid, const char *message);
+void plugins_post_chat_message_display(const char *const barejid, const char *message);
+char* plugins_pre_chat_message_send(const char *const barejid, const char *message);
+void plugins_post_chat_message_send(const char *const barejid, const char *message);
 
-char* plugins_pre_room_message_display(const char *const room, const char *const nick, const char *message);
-void plugins_post_room_message_display(const char *const room, const char *const nick, const char *message);
-char* plugins_pre_room_message_send(const char *const room, const char *message);
-void plugins_post_room_message_send(const char *const room, const char *message);
-void plugins_on_room_history_message(const char *const room, const char *const nick, const char *const message,
+char* plugins_pre_room_message_display(const char *const barejid, const char *const nick, const char *message);
+void plugins_post_room_message_display(const char *const barejid, const char *const nick, const char *message);
+char* plugins_pre_room_message_send(const char *const barejid, const char *message);
+void plugins_post_room_message_send(const char *const barejid, const char *message);
+void plugins_on_room_history_message(const char *const barejid, const char *const nick, const char *const message,
     GDateTime *timestamp);
 
-char* plugins_pre_priv_message_display(const char *const jid, const char *message);
-void plugins_post_priv_message_display(const char *const jid, const char *message);
-char* plugins_pre_priv_message_send(const char *const jid, const char *const message);
-void plugins_post_priv_message_send(const char *const jid, const char *const message);
+char* plugins_pre_priv_message_display(const char *const fulljid, const char *message);
+void plugins_post_priv_message_display(const char *const fulljid, const char *message);
+char* plugins_pre_priv_message_send(const char *const fulljid, const char *const message);
+void plugins_post_priv_message_send(const char *const fulljid, const char *const message);
 
 void plugins_win_process_line(char *win, const char *const line);
 void plugins_close_win(const char *const plugin_name, const char *const tag);
@@ -151,7 +151,7 @@ void plugins_on_contact_presence(const char *const barejid, const char *const re
     const char *const status, const int priority);
 
 void plugins_on_chat_win_focus(const char *const barejid);
-void plugins_on_room_win_focus(const char *const roomjid);
+void plugins_on_room_win_focus(const char *const barejid);
 
 gboolean plugins_run_command(const char * const cmd);
 void plugins_run_timed(void);
