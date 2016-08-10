@@ -359,7 +359,7 @@ plugins_on_disconnect(const char * const account_name, const char * const fullji
 }
 
 char*
-plugins_pre_chat_message_display(const char * const barejid, const char *message)
+plugins_pre_chat_message_display(const char * const barejid, const char *const resource, const char *message)
 {
     char *new_message = NULL;
     char *curr_message = strdup(message);
@@ -368,7 +368,7 @@ plugins_pre_chat_message_display(const char * const barejid, const char *message
     GList *curr = values;
     while (curr) {
         ProfPlugin *plugin = curr->data;
-        new_message = plugin->pre_chat_message_display(plugin, barejid, curr_message);
+        new_message = plugin->pre_chat_message_display(plugin, barejid, resource, curr_message);
         if (new_message) {
             free(curr_message);
             curr_message = strdup(new_message);
@@ -382,13 +382,13 @@ plugins_pre_chat_message_display(const char * const barejid, const char *message
 }
 
 void
-plugins_post_chat_message_display(const char * const barejid, const char *message)
+plugins_post_chat_message_display(const char * const barejid, const char *const resource, const char *message)
 {
     GList *values = g_hash_table_get_values(plugins);
     GList *curr = values;
     while (curr) {
         ProfPlugin *plugin = curr->data;
-        plugin->post_chat_message_display(plugin, barejid, message);
+        plugin->post_chat_message_display(plugin, barejid, resource, message);
         curr = g_list_next(curr);
     }
     g_list_free(values);

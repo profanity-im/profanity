@@ -71,12 +71,14 @@ def prof_on_disconnect(account_name, fulljid):
     pass
 
 
-def prof_pre_chat_message_display(barejid, message):
+def prof_pre_chat_message_display(barejid, resource, message):
     """Called before a chat message is displayed
 
     :param barejid: Jabber ID of the message sender
+    :param resource: resource of the message sender
     :param message: the received message
     :type barejid: str or unicode
+    :type resource: str or unicode
     :type message: str or unicode
     :return: the new message to display, or ``None`` to preserve the original message 
     :rtype: str or unicode
@@ -84,12 +86,14 @@ def prof_pre_chat_message_display(barejid, message):
     pass
 
 
-def prof_post_chat_message_display(barejid, message):
+def prof_post_chat_message_display(barejid, resource, message):
     """Called after a chat message is displayed
 
     :param barejid: Jabber ID of the message sender
+    :param resource: resource of the message sender
     :param message: the received message
     :type barejid: str or unicode
+    :type resource: str or unicode
     :type message: str or unicode
     """
     pass

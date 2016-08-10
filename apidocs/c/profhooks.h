@@ -43,17 +43,19 @@ void prof_on_disconnect(const char * const account_name, const char * const full
 /**
 Called before a chat message is displayed
 @param barejid Jabber ID of the message sender
+@param resource resource of the message sender
 @param message the received message
 @return the new message to display, or NULL to preserve the original message 
 */
-char* prof_pre_chat_message_display(const char * const barejid, const char *message);
+char* prof_pre_chat_message_display(const char * const barejid, const char *const resource, const char *message);
 
 /**
 Called after a chat message is displayed
 @param barejid Jabber ID of the message sender
+@param resource resource of the message sender
 @param message the received message
 */
-void prof_post_chat_message_display(const char * const barejid, const char *message);
+void prof_post_chat_message_display(const char * const barejid, const char *const resource, const char *message);
 
 /**
 Called before a chat message is sent
