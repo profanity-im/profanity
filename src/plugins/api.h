@@ -91,6 +91,6 @@ int api_settings_string_list_clear(const char *const group, const char *const ke
 
 void api_incoming_message(const char *const barejid, const char *const resource, const char *const message);
 
-void api_disco_add_feature(char *feature);
+void api_disco_add_feature(char *plugin_name, char *feature);
 
 #endif

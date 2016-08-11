@@ -317,9 +317,11 @@ c_api_incoming_message(char *barejid, char *resource, char *message)
 }
 
 static void
-c_api_disco_add_feature(char *feature)
+c_api_disco_add_feature(const char *filename, char *feature)
 {
-    api_disco_add_feature(feature);
+    char *plugin_name = _c_plugin_name(filename);
+    api_disco_add_feature(plugin_name, feature);
+    free(plugin_name);
 }
 
 void
@@ -386,7 +388,7 @@ c_api_init(void)
     prof_settings_string_list_remove = c_api_settings_string_list_remove;
     prof_settings_string_list_clear = c_api_settings_string_list_clear;
     prof_incoming_message = c_api_incoming_message;
-    prof_disco_add_feature = c_api_disco_add_feature;
+    _prof_disco_add_feature = c_api_disco_add_feature;
 }
 
 static char *

@@ -88,4 +88,4 @@ int (*prof_settings_string_list_clear)(char *group, char *key) = NULL;
 
 void (*prof_incoming_message)(char *barejid, char *resource, char *message) = NULL;
 
-void (*prof_disco_add_feature)(char *feature) = NULL;
+void (*_prof_disco_add_feature)(const char *filename, char *feature) = NULL;

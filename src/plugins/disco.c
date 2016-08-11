@@ -37,29 +37,78 @@
 
 #include <glib.h>
 
-static GList *disco_features = NULL;
+static GHashTable *plugin_to_features = NULL;
+
+static void
+_free_features(GList *features)
+{
+    g_list_free_full(features, free);
+}
 
 void
-disco_add_feature(char* feature)
+disco_add_feature(const char *plugin_name, char* feature)
 {
-    if (feature == NULL) {
+    if (feature == NULL || plugin_name == NULL) {
         return;
     }
 
-    disco_features = g_list_append(disco_features, strdup(feature));
+    if (!plugin_to_features) {
+        plugin_to_features = g_hash_table_new_full(g_str_hash, g_str_equal, free, (GDestroyNotify)_free_features);
+    }
+
+    GList *features = g_hash_table_lookup(plugin_to_features, plugin_name);
+    if (!features) {
+        features = g_list_append(features, strdup(feature));
+        g_hash_table_insert(plugin_to_features, strdup(plugin_name), features);
+    } else {
+        features = g_list_append(features, strdup(feature));
+    }
+}
+
+void
+disco_remove_features(const char *plugin_name)
+{
+    if (!plugin_to_features) {
+        return;
+    }
+
+    if (!g_hash_table_contains(plugin_to_features, plugin_name)) {
+        return;
+    }
+
+    g_hash_table_remove(plugin_to_features, plugin_name);
 }
 
 GList*
 disco_get_features(void)
 {
-    return disco_features;
+    GList *result = NULL;
+    if (!plugin_to_features) {
+        return result;
+    }
+
+    GList *lists = g_hash_table_get_values(plugin_to_features);
+    GList *curr_list = lists;
+    while (curr_list) {
+        GList *features = curr_list->data;
+        GList *curr = features;
+        while (curr) {
+            result = g_list_append(result, curr->data);
+            curr = g_list_next(curr);
+        }
+        curr_list = g_list_next(curr_list);
+    }
+
+    g_list_free(lists);
+
+    return result;
 }
 
 void
 disco_close(void)
 {
-    if (disco_features) {
-        g_list_free_full(disco_features, free);
-        disco_features = NULL;
+    if (plugin_to_features) {
+        g_hash_table_destroy(plugin_to_features);
+        plugin_to_features = NULL;
     }
 }

@@ -468,13 +468,14 @@ api_incoming_message(const char *const barejid, const char *const resource, cons
 }
 
 void
-api_disco_add_feature(char *feature)
+api_disco_add_feature(char *plugin_name, char *feature)
 {
     if (feature == NULL) {
         return;
     }
 
-    disco_add_feature(feature);
+    disco_add_feature(plugin_name, feature);
+
     caps_reset_ver();
 
     // resend presence to update server's disco info data for this client
