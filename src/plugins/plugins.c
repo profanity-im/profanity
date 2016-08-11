@@ -40,6 +40,7 @@
 #include "common.h"
 #include "config/files.h"
 #include "config/preferences.h"
+#include "event/client_events.h"
 #include "plugins/callbacks.h"
 #include "plugins/autocompleters.h"
 #include "plugins/api.h"
@@ -207,6 +208,15 @@ plugins_unload(const char *const name)
 #endif
         prefs_remove_plugin(name);
         g_hash_table_remove(plugins, name);
+
+        caps_reset_ver();
+        // resend presence to update server's disco info data for this client
+        if (connection_get_status() == JABBER_CONNECTED) {
+            char* account_name = session_get_account_name();
+            resource_presence_t last_presence = accounts_get_last_presence(account_name);
+            char *msg = connection_get_presence_msg();
+            cl_ev_presence_send(last_presence, msg, 0);
+        }
     }
     return TRUE;
 }

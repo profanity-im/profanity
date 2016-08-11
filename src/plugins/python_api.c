@@ -974,11 +974,14 @@ python_api_disco_add_feature(PyObject *self, PyObject *args)
     }
 
     char *feature_str = python_str_or_unicode_to_string(feature);
+    char *plugin_name = _python_plugin_name();
 
     allow_python_threads();
-    api_disco_add_feature(feature_str);
+    api_disco_add_feature(plugin_name, feature_str);
     free(feature_str);
     disable_python_threads();
+
+    free(plugin_name);
 
     Py_RETURN_NONE;
 }

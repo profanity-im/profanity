@@ -653,6 +653,7 @@ caps_create_query_response_stanza(xmpp_ctx_t *const ctx)
 
         curr = g_list_next(curr);
     }
+    g_list_free(plugin_features);
 
     xmpp_stanza_release(feature_receipts);
     xmpp_stanza_release(feature_ping);

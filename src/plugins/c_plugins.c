@@ -44,6 +44,7 @@
 #include "config/files.h"
 #include "plugins/api.h"
 #include "plugins/callbacks.h"
+#include "plugins/disco.h"
 #include "plugins/plugins.h"
 #include "plugins/c_plugins.h"
 #include "plugins/c_api.h"
@@ -540,6 +541,8 @@ c_plugin_destroy(ProfPlugin *plugin)
     assert (plugin && plugin->module);
 
     callbacks_remove(plugin->name);
+
+    disco_remove_features(plugin->name);
 
     if (dlclose (plugin->module)) {
         log_warning ("dlclose failed to close `%s' with `%s'", plugin->name, dlerror ());
