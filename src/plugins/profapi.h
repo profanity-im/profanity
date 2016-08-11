@@ -41,6 +41,7 @@
 #define prof_completer_remove(key, items) _prof_completer_remove(__FILE__, key, items)
 #define prof_completer_clear(key) _prof_completer_clear(__FILE__, key)
 #define prof_win_create(win, input_handler) _prof_win_create(__FILE__, win, input_handler)
+#define prof_disco_add_feature(feature) _prof_disco_add_feature(__FILE__, feature)
 
 typedef char* PROF_WIN_TAG;
 typedef void(*CMD_CB)(char **args);
@@ -98,6 +99,6 @@ int (*prof_settings_string_list_clear)(char *group, char *key);
 
 void (*prof_incoming_message)(char *barejid, char *resource, char *message);
 
-void (*prof_disco_add_feature)(char *feature);
+void (*_prof_disco_add_feature)(const char *filename, char *feature);
 
 #endif

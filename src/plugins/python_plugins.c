@@ -40,6 +40,7 @@
 #include "config/files.h"
 #include "plugins/api.h"
 #include "plugins/callbacks.h"
+#include "plugins/disco.h"
 #include "plugins/plugins.h"
 #include "plugins/python_api.h"
 #include "plugins/python_plugins.h"
@@ -826,6 +827,7 @@ python_plugin_destroy(ProfPlugin *plugin)
 {
     disable_python_threads();
     callbacks_remove(plugin->name);
+    disco_remove_features(plugin->name);
     free(plugin->name);
     free(plugin);
     allow_python_threads();
