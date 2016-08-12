@@ -67,6 +67,7 @@ static GKeyFile *cache;
 static GHashTable *jid_to_ver;
 static GHashTable *jid_to_caps;
 
+static GList *prof_features;
 static char *my_sha1;
 
 static void _save_cache(void);
@@ -89,6 +90,18 @@ caps_init(void)
 
     jid_to_ver = g_hash_table_new_full(g_str_hash, g_str_equal, free, free);
     jid_to_caps = g_hash_table_new_full(g_str_hash, g_str_equal, free, (GDestroyNotify)caps_destroy);
+
+    prof_features = NULL;
+    prof_features = g_list_append(prof_features, strdup(STANZA_NS_CAPS));
+    prof_features = g_list_append(prof_features, strdup(XMPP_NS_DISCO_INFO));
+    prof_features = g_list_append(prof_features, strdup(XMPP_NS_DISCO_ITEMS));
+    prof_features = g_list_append(prof_features, strdup(STANZA_NS_MUC));
+    prof_features = g_list_append(prof_features, strdup(STANZA_NS_CONFERENCE));
+    prof_features = g_list_append(prof_features, strdup(STANZA_NS_VERSION));
+    prof_features = g_list_append(prof_features, strdup(STANZA_NS_CHATSTATES));
+    prof_features = g_list_append(prof_features, strdup(STANZA_NS_PING));
+    prof_features = g_list_append(prof_features, strdup(STANZA_NS_RECEIPTS));
+    prof_features = g_list_append(prof_features, strdup(STANZA_NS_LASTACTIVITY));
 
     my_sha1 = NULL;
 }
@@ -588,62 +601,22 @@ caps_create_query_response_stanza(xmpp_ctx_t *const ctx)
     }
     xmpp_stanza_set_attribute(identity, "name", name_str->str);
     g_string_free(name_str, TRUE);
-
-    xmpp_stanza_t *feature_caps = xmpp_stanza_new(ctx);
-    xmpp_stanza_set_name(feature_caps, STANZA_NAME_FEATURE);
-    xmpp_stanza_set_attribute(feature_caps, STANZA_ATTR_VAR, STANZA_NS_CAPS);
-
-    xmpp_stanza_t *feature_discoinfo = xmpp_stanza_new(ctx);
-    xmpp_stanza_set_name(feature_discoinfo, STANZA_NAME_FEATURE);
-    xmpp_stanza_set_attribute(feature_discoinfo, STANZA_ATTR_VAR, XMPP_NS_DISCO_INFO);
-
-    xmpp_stanza_t *feature_discoitems = xmpp_stanza_new(ctx);
-    xmpp_stanza_set_name(feature_discoitems, STANZA_NAME_FEATURE);
-    xmpp_stanza_set_attribute(feature_discoitems, STANZA_ATTR_VAR, XMPP_NS_DISCO_ITEMS);
-
-    xmpp_stanza_t *feature_muc = xmpp_stanza_new(ctx);
-    xmpp_stanza_set_name(feature_muc, STANZA_NAME_FEATURE);
-    xmpp_stanza_set_attribute(feature_muc, STANZA_ATTR_VAR, STANZA_NS_MUC);
-
-    xmpp_stanza_t *feature_conference = xmpp_stanza_new(ctx);
-    xmpp_stanza_set_name(feature_conference, STANZA_NAME_FEATURE);
-    xmpp_stanza_set_attribute(feature_conference, STANZA_ATTR_VAR, STANZA_NS_CONFERENCE);
-
-    xmpp_stanza_t *feature_version = xmpp_stanza_new(ctx);
-    xmpp_stanza_set_name(feature_version, STANZA_NAME_FEATURE);
-    xmpp_stanza_set_attribute(feature_version, STANZA_ATTR_VAR, STANZA_NS_VERSION);
-
-    xmpp_stanza_t *feature_chatstates = xmpp_stanza_new(ctx);
-    xmpp_stanza_set_name(feature_chatstates, STANZA_NAME_FEATURE);
-    xmpp_stanza_set_attribute(feature_chatstates, STANZA_ATTR_VAR, STANZA_NS_CHATSTATES);
-
-    xmpp_stanza_t *feature_ping = xmpp_stanza_new(ctx);
-    xmpp_stanza_set_name(feature_ping, STANZA_NAME_FEATURE);
-    xmpp_stanza_set_attribute(feature_ping, STANZA_ATTR_VAR, STANZA_NS_PING);
-
-    xmpp_stanza_t *feature_receipts = xmpp_stanza_new(ctx);
-    xmpp_stanza_set_name(feature_receipts, STANZA_NAME_FEATURE);
-    xmpp_stanza_set_attribute(feature_receipts, STANZA_ATTR_VAR, STANZA_NS_RECEIPTS);
-
-    xmpp_stanza_t *feature_last = xmpp_stanza_new(ctx);
-    xmpp_stanza_set_name(feature_last, STANZA_NAME_FEATURE);
-    xmpp_stanza_set_attribute(feature_last, STANZA_ATTR_VAR, STANZA_NS_LASTACTIVITY);
-
     xmpp_stanza_add_child(query, identity);
+    xmpp_stanza_release(identity);
 
-    xmpp_stanza_add_child(query, feature_caps);
-    xmpp_stanza_add_child(query, feature_chatstates);
-    xmpp_stanza_add_child(query, feature_discoinfo);
-    xmpp_stanza_add_child(query, feature_discoitems);
-    xmpp_stanza_add_child(query, feature_muc);
-    xmpp_stanza_add_child(query, feature_version);
-    xmpp_stanza_add_child(query, feature_last);
-    xmpp_stanza_add_child(query, feature_conference);
-    xmpp_stanza_add_child(query, feature_ping);
-    xmpp_stanza_add_child(query, feature_receipts);
+    GList *curr = prof_features;
+    while (curr) {
+        xmpp_stanza_t *feature = xmpp_stanza_new(ctx);
+        xmpp_stanza_set_name(feature, STANZA_NAME_FEATURE);
+        xmpp_stanza_set_attribute(feature, STANZA_ATTR_VAR, curr->data);
+        xmpp_stanza_add_child(query, feature);
+        xmpp_stanza_release(feature);
+
+        curr = g_list_next(curr);
+    }
 
     GList *plugin_features = plugins_get_disco_features();
-    GList *curr = plugin_features;
+    curr = plugin_features;
     while (curr) {
         xmpp_stanza_t *feature = xmpp_stanza_new(ctx);
         xmpp_stanza_set_name(feature, STANZA_NAME_FEATURE);
@@ -654,18 +627,6 @@ caps_create_query_response_stanza(xmpp_ctx_t *const ctx)
         curr = g_list_next(curr);
     }
     g_list_free(plugin_features);
-
-    xmpp_stanza_release(feature_receipts);
-    xmpp_stanza_release(feature_ping);
-    xmpp_stanza_release(feature_conference);
-    xmpp_stanza_release(feature_last);
-    xmpp_stanza_release(feature_version);
-    xmpp_stanza_release(feature_muc);
-    xmpp_stanza_release(feature_discoitems);
-    xmpp_stanza_release(feature_discoinfo);
-    xmpp_stanza_release(feature_chatstates);
-    xmpp_stanza_release(feature_caps);
-    xmpp_stanza_release(identity);
 
     return query;
 }
@@ -679,6 +640,8 @@ caps_close(void)
     g_hash_table_destroy(jid_to_caps);
     free(cache_loc);
     cache_loc = NULL;
+    g_list_free_full(prof_features, free);
+    prof_features = NULL;
 }
 
 void
