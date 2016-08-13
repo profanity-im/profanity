@@ -297,25 +297,18 @@ _caps_copy(Capabilities *caps)
 char*
 caps_create_sha1_str(xmpp_stanza_t *const query)
 {
-    const char *category = NULL;
-    const char *type = NULL;
-    const char *lang = NULL;
-    const char *name = NULL;
-    const char *feature_str = NULL;
     GSList *identities = NULL;
     GSList *features = NULL;
     GSList *form_names = NULL;
-    DataForm *form = NULL;
-    FormField *field = NULL;
     GHashTable *forms = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, (GDestroyNotify)form_destroy);
 
     xmpp_stanza_t *child = xmpp_stanza_get_children(query);
     while (child) {
         if (g_strcmp0(xmpp_stanza_get_name(child), STANZA_NAME_IDENTITY) == 0) {
-            category = xmpp_stanza_get_attribute(child, "category");
-            type = xmpp_stanza_get_attribute(child, "type");
-            lang = xmpp_stanza_get_attribute(child, "xml:lang");
-            name = xmpp_stanza_get_attribute(child, "name");
+            const char *category = xmpp_stanza_get_attribute(child, "category");
+            const char *type = xmpp_stanza_get_attribute(child, "type");
+            const char *lang = xmpp_stanza_get_attribute(child, "xml:lang");
+            const char *name = xmpp_stanza_get_attribute(child, "name");
 
             GString *identity_str = g_string_new(category);
             g_string_append(identity_str, "/");
@@ -334,11 +327,11 @@ caps_create_sha1_str(xmpp_stanza_t *const query)
             identities = g_slist_insert_sorted(identities, g_strdup(identity_str->str), (GCompareFunc)strcmp);
             g_string_free(identity_str, TRUE);
         } else if (g_strcmp0(xmpp_stanza_get_name(child), STANZA_NAME_FEATURE) == 0) {
-            feature_str = xmpp_stanza_get_attribute(child, "var");
+            const char *feature_str = xmpp_stanza_get_attribute(child, "var");
             features = g_slist_insert_sorted(features, g_strdup(feature_str), (GCompareFunc)strcmp);
         } else if (g_strcmp0(xmpp_stanza_get_name(child), STANZA_NAME_X) == 0) {
             if (g_strcmp0(xmpp_stanza_get_ns(child), STANZA_NS_DATA) == 0) {
-                form = form_create(child);
+                DataForm *form = form_create(child);
                 char *form_type = form_get_form_type_field(form);
                 form_names = g_slist_insert_sorted(form_names, g_strdup(form_type), (GCompareFunc)strcmp);
                 g_hash_table_insert(forms, g_strdup(form_type), form);
@@ -364,7 +357,7 @@ caps_create_sha1_str(xmpp_stanza_t *const query)
 
     curr = form_names;
     while (curr) {
-        form = g_hash_table_lookup(forms, curr->data);
+        DataForm *form = g_hash_table_lookup(forms, curr->data);
         char *form_type = form_get_form_type_field(form);
         g_string_append(s, form_type);
         g_string_append(s, "<");
@@ -372,7 +365,7 @@ caps_create_sha1_str(xmpp_stanza_t *const query)
         GSList *sorted_fields = form_get_non_form_type_fields_sorted(form);
         GSList *curr_field = sorted_fields;
         while (curr_field) {
-            field = curr_field->data;
+            FormField *field = curr_field->data;
             g_string_append(s, field->var);
             g_string_append(s, "<");
 
