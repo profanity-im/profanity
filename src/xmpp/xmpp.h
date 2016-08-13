@@ -88,12 +88,16 @@ typedef struct disco_identity_t {
     char *category;
 } DiscoIdentity;
 
-typedef struct entity_capabilities_t {
-    DiscoIdentity *identity;
+typedef struct software_version_t {
     char *software;
     char *software_version;
     char *os;
     char *os_version;
+} SoftwareVersion;
+
+typedef struct entity_capabilities_t {
+    DiscoIdentity *identity;
+    SoftwareVersion *software_version;
     GSList *features;
 } EntityCapabilities;
 

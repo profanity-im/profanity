@@ -786,24 +786,28 @@ win_show_occupant_info(ProfWin *window, const char *const room, Occupant *occupa
             win_newline(window);
         }
 
-        if (caps->software) {
-            win_vprint(window, '!', 0, NULL, NO_EOL, 0, "", "  Software: %s", caps->software);
-        }
         if (caps->software_version) {
-            win_vprint(window, '!', 0, NULL, NO_DATE | NO_EOL, 0, "", ", %s", caps->software_version);
+            SoftwareVersion *software_version = caps->software_version;
+            if (software_version->software) {
+                win_vprint(window, '!', 0, NULL, NO_EOL, 0, "", "  Software: %s", software_version->software);
+            }
+            if (software_version->software_version) {
+                win_vprint(window, '!', 0, NULL, NO_DATE | NO_EOL, 0, "", ", %s", software_version->software_version);
+            }
+            if (software_version->software || software_version->software_version) {
+                win_newline(window);
+            }
+            if (software_version->os) {
+                win_vprint(window, '!', 0, NULL, NO_EOL, 0, "", "  OS: %s", software_version->os);
+            }
+            if (software_version->os_version) {
+                win_vprint(window, '!', 0, NULL, NO_DATE | NO_EOL, 0, "", ", %s", software_version->os_version);
+            }
+            if (software_version->os || software_version->os_version) {
+                win_newline(window);
+            }
         }
-        if (caps->software || caps->software_version) {
-            win_newline(window);
-        }
-        if (caps->os) {
-            win_vprint(window, '!', 0, NULL, NO_EOL, 0, "", "  OS: %s", caps->os);
-        }
-        if (caps->os_version) {
-            win_vprint(window, '!', 0, NULL, NO_DATE | NO_EOL, 0, "", ", %s", caps->os_version);
-        }
-        if (caps->os || caps->os_version) {
-            win_newline(window);
-        }
+
         caps_destroy(caps);
     }
 
@@ -906,24 +910,28 @@ win_show_info(ProfWin *window, PContact contact)
                 win_newline(window);
             }
 
-            if (caps->software) {
-                win_vprint(window, '-', 0, NULL, NO_EOL, 0, "", "    Software: %s", caps->software);
-            }
             if (caps->software_version) {
-                win_vprint(window, '-', 0, NULL, NO_DATE | NO_EOL, 0, "", ", %s", caps->software_version);
+                SoftwareVersion *software_version = caps->software_version;
+                if (software_version->software) {
+                    win_vprint(window, '-', 0, NULL, NO_EOL, 0, "", "    Software: %s", software_version->software);
+                }
+                if (software_version->software_version) {
+                    win_vprint(window, '-', 0, NULL, NO_DATE | NO_EOL, 0, "", ", %s", software_version->software_version);
+                }
+                if (software_version->software || software_version->software_version) {
+                    win_newline(window);
+                }
+                if (software_version->os) {
+                    win_vprint(window, '-', 0, NULL, NO_EOL, 0, "", "    OS: %s", software_version->os);
+                }
+                if (software_version->os_version) {
+                    win_vprint(window, '-', 0, NULL, NO_DATE | NO_EOL, 0, "", ", %s", software_version->os_version);
+                }
+                if (software_version->os || software_version->os_version) {
+                    win_newline(window);
+                }
             }
-            if (caps->software || caps->software_version) {
-                win_newline(window);
-            }
-            if (caps->os) {
-                win_vprint(window, '-', 0, NULL, NO_EOL, 0, "", "    OS: %s", caps->os);
-            }
-            if (caps->os_version) {
-                win_vprint(window, '-', 0, NULL, NO_DATE | NO_EOL, 0, "", ", %s", caps->os_version);
-            }
-            if (caps->os || caps->os_version) {
-                win_newline(window);
-            }
+
             caps_destroy(caps);
         }
 

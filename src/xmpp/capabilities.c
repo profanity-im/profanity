@@ -130,18 +130,23 @@ caps_add_by_ver(const char *const ver, EntityCapabilities *caps)
             g_key_file_set_string(cache, ver, "type", identity->type);
         }
     }
-    if (caps->software) {
-        g_key_file_set_string(cache, ver, "software", caps->software);
-    }
+
     if (caps->software_version) {
-        g_key_file_set_string(cache, ver, "software_version", caps->software_version);
+        SoftwareVersion *software_version = caps->software_version;
+        if (software_version->software) {
+            g_key_file_set_string(cache, ver, "software", software_version->software);
+        }
+        if (software_version->software_version) {
+            g_key_file_set_string(cache, ver, "software_version", software_version->software_version);
+        }
+        if (software_version->os) {
+            g_key_file_set_string(cache, ver, "os", software_version->os);
+        }
+        if (software_version->os_version) {
+            g_key_file_set_string(cache, ver, "os_version", software_version->os_version);
+        }
     }
-    if (caps->os) {
-        g_key_file_set_string(cache, ver, "os", caps->os);
-    }
-    if (caps->os_version) {
-        g_key_file_set_string(cache, ver, "os_version", caps->os_version);
-    }
+
     if (caps->features) {
         GSList *curr_feature = caps->features;
         int num = g_slist_length(caps->features);
@@ -195,31 +200,18 @@ _caps_by_ver(const char *const ver)
         }
 
         char *software = g_key_file_get_string(cache, ver, "software", NULL);
-        if (software) {
-            new_caps->software = software;
-        } else {
-            new_caps->software = NULL;
-        }
-
         char *software_version = g_key_file_get_string(cache, ver, "software_version", NULL);
-        if (software_version) {
-            new_caps->software_version = software_version;
+        char *os = g_key_file_get_string(cache, ver, "os", NULL);
+        char *os_version = g_key_file_get_string(cache, ver, "os_version", NULL);
+        if (software || software_version || os || os_version) {
+            SoftwareVersion *software_versionp = malloc(sizeof(struct software_version_t));
+            software_versionp->software = software;
+            software_versionp->software_version = software_version;
+            software_versionp->os = os;
+            software_versionp->os_version = os_version;
+            new_caps->software_version = software_versionp;
         } else {
             new_caps->software_version = NULL;
-        }
-
-        char *os = g_key_file_get_string(cache, ver, "os", NULL);
-        if (os) {
-            new_caps->os = os;
-        } else {
-            new_caps->os = NULL;
-        }
-
-        char *os_version = g_key_file_get_string(cache, ver, "os_version", NULL);
-        if (os_version) {
-            new_caps->os_version = os_version;
-        } else {
-            new_caps->os_version = NULL;
         }
 
         gsize features_len = 0;
@@ -287,10 +279,15 @@ _caps_copy(EntityCapabilities *caps)
             result->identity = NULL;
         }
 
-        result->software = caps->software ? strdup(caps->software) : NULL;
-        result->software_version = caps->software_version ? strdup(caps->software_version) : NULL;
-        result->os = caps->os ? strdup(caps->os) : NULL;
-        result->os_version = caps->os_version ? strdup(caps->os_version) : NULL;
+        if (caps->software_version) {
+            SoftwareVersion *software_version = (SoftwareVersion*)malloc(sizeof(SoftwareVersion));
+            software_version->software = caps->software_version->software ? strdup(caps->software_version->software) : NULL;
+            software_version->software_version = caps->software_version->software_version ? strdup(caps->software_version->software_version) : NULL;
+            software_version->os = caps->software_version->os ? strdup(caps->software_version->os) : NULL;
+            software_version->os_version = caps->software_version->os_version ? strdup(caps->software_version->os_version) : NULL;
+        } else {
+            result->software_version = NULL;
+        }
 
         result->features = NULL;
         GSList *curr = caps->features;
@@ -522,26 +519,14 @@ caps_create(xmpp_stanza_t *query)
         new_caps->identity = NULL;
     }
 
-    if (software) {
-        new_caps->software = software;
-    } else {
-        new_caps->software = NULL;
+    if (software || software_version || os || os_version) {
+        SoftwareVersion *software_versionp = malloc(sizeof(struct software_version_t));
+        software_versionp->software = software;
+        software_versionp->software_version = software_version;
+        software_versionp->os = os;
+        software_versionp->os_version = os_version;
     }
-    if (software_version) {
-        new_caps->software_version = software_version;
-    } else {
-        new_caps->software_version = NULL;
-    }
-    if (os) {
-        new_caps->os = os;
-    } else {
-        new_caps->os = NULL;
-    }
-    if (os_version) {
-        new_caps->os_version = os_version;
-    } else {
-        new_caps->os_version = NULL;
-    }
+
     if (features) {
         new_caps->features = features;
     } else {
@@ -651,15 +636,23 @@ _disco_identity_destroy(DiscoIdentity *disco_identity)
     }
 }
 
+static void
+_software_version_destroy(SoftwareVersion *software_version)
+{
+    if (software_version) {
+        free(software_version->software);
+        free(software_version->software_version);
+        free(software_version->os);
+        free(software_version->os_version);
+    }
+}
+
 void
 caps_destroy(EntityCapabilities *caps)
 {
     if (caps) {
         _disco_identity_destroy(caps->identity);
-        free(caps->software);
-        free(caps->software_version);
-        free(caps->os);
-        free(caps->os_version);
+        _software_version_destroy(caps->software_version);
         if (caps->features) {
             g_slist_free_full(caps->features, free);
         }
