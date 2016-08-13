@@ -56,7 +56,6 @@ gboolean caps_cache_contains(const char *const ver);
 
 GList* caps_get_features(void);
 
-char* caps_create_sha1_str(xmpp_stanza_t *const query);
 EntityCapabilities* caps_create(xmpp_stanza_t *query);
 char* caps_get_my_sha1(xmpp_ctx_t *const ctx);
 

@@ -228,137 +228,36 @@ _caps_copy(EntityCapabilities *caps)
 {
     if (!caps) {
         return NULL;
+    }
+
+    EntityCapabilities *result = (EntityCapabilities *)malloc(sizeof(EntityCapabilities));
+
+    if (caps->identity) {
+        DiscoIdentity *identity = (DiscoIdentity*)malloc(sizeof(DiscoIdentity));
+        identity->category = caps->identity->category ? strdup(caps->identity->category) : NULL;
+        identity->type = caps->identity->type ? strdup(caps->identity->type) : NULL;
+        identity->name = caps->identity->name ? strdup(caps->identity->name) : NULL;
+        result->identity = identity;
     } else {
-        EntityCapabilities *result = (EntityCapabilities *)malloc(sizeof(EntityCapabilities));
-
-        if (caps->identity) {
-            DiscoIdentity *identity = (DiscoIdentity*)malloc(sizeof(DiscoIdentity));
-            identity->category = caps->identity->category ? strdup(caps->identity->category) : NULL;
-            identity->type = caps->identity->type ? strdup(caps->identity->type) : NULL;
-            identity->name = caps->identity->name ? strdup(caps->identity->name) : NULL;
-            result->identity = identity;
-        } else {
-            result->identity = NULL;
-        }
-
-        if (caps->software_version) {
-            SoftwareVersion *software_version = (SoftwareVersion*)malloc(sizeof(SoftwareVersion));
-            software_version->software = caps->software_version->software ? strdup(caps->software_version->software) : NULL;
-            software_version->software_version = caps->software_version->software_version ? strdup(caps->software_version->software_version) : NULL;
-            software_version->os = caps->software_version->os ? strdup(caps->software_version->os) : NULL;
-            software_version->os_version = caps->software_version->os_version ? strdup(caps->software_version->os_version) : NULL;
-        } else {
-            result->software_version = NULL;
-        }
-
-        result->features = NULL;
-        GSList *curr = caps->features;
-        while (curr) {
-            result->features = g_slist_append(result->features, strdup(curr->data));
-            curr = g_slist_next(curr);
-        }
-
-        return result;
-    }
-}
-
-char*
-caps_create_sha1_str(xmpp_stanza_t *const query)
-{
-    GSList *identities = NULL;
-    GSList *features = NULL;
-    GSList *form_names = NULL;
-    GHashTable *forms = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, (GDestroyNotify)form_destroy);
-
-    xmpp_stanza_t *child = xmpp_stanza_get_children(query);
-    while (child) {
-        if (g_strcmp0(xmpp_stanza_get_name(child), STANZA_NAME_IDENTITY) == 0) {
-            const char *category = xmpp_stanza_get_attribute(child, "category");
-            const char *type = xmpp_stanza_get_attribute(child, "type");
-            const char *lang = xmpp_stanza_get_attribute(child, "xml:lang");
-            const char *name = xmpp_stanza_get_attribute(child, "name");
-
-            GString *identity_str = g_string_new(category);
-            g_string_append(identity_str, "/");
-            if (type) {
-                g_string_append(identity_str, type);
-            }
-            g_string_append(identity_str, "/");
-            if (lang) {
-                g_string_append(identity_str, lang);
-            }
-            g_string_append(identity_str, "/");
-            if (name) {
-                g_string_append(identity_str, name);
-            }
-            g_string_append(identity_str, "<");
-            identities = g_slist_insert_sorted(identities, g_strdup(identity_str->str), (GCompareFunc)strcmp);
-            g_string_free(identity_str, TRUE);
-        } else if (g_strcmp0(xmpp_stanza_get_name(child), STANZA_NAME_FEATURE) == 0) {
-            const char *feature_str = xmpp_stanza_get_attribute(child, "var");
-            features = g_slist_insert_sorted(features, g_strdup(feature_str), (GCompareFunc)strcmp);
-        } else if (g_strcmp0(xmpp_stanza_get_name(child), STANZA_NAME_X) == 0) {
-            if (g_strcmp0(xmpp_stanza_get_ns(child), STANZA_NS_DATA) == 0) {
-                DataForm *form = form_create(child);
-                char *form_type = form_get_form_type_field(form);
-                form_names = g_slist_insert_sorted(form_names, g_strdup(form_type), (GCompareFunc)strcmp);
-                g_hash_table_insert(forms, g_strdup(form_type), form);
-            }
-        }
-        child = xmpp_stanza_get_next(child);
+        result->identity = NULL;
     }
 
-    GString *s = g_string_new("");
+    if (caps->software_version) {
+        SoftwareVersion *software_version = (SoftwareVersion*)malloc(sizeof(SoftwareVersion));
+        software_version->software = caps->software_version->software ? strdup(caps->software_version->software) : NULL;
+        software_version->software_version = caps->software_version->software_version ? strdup(caps->software_version->software_version) : NULL;
+        software_version->os = caps->software_version->os ? strdup(caps->software_version->os) : NULL;
+        software_version->os_version = caps->software_version->os_version ? strdup(caps->software_version->os_version) : NULL;
+    } else {
+        result->software_version = NULL;
+    }
 
-    GSList *curr = identities;
+    result->features = NULL;
+    GSList *curr = caps->features;
     while (curr) {
-        g_string_append(s, curr->data);
+        result->features = g_slist_append(result->features, strdup(curr->data));
         curr = g_slist_next(curr);
     }
-
-    curr = features;
-    while (curr) {
-        g_string_append(s, curr->data);
-        g_string_append(s, "<");
-        curr = g_slist_next(curr);
-    }
-
-    curr = form_names;
-    while (curr) {
-        DataForm *form = g_hash_table_lookup(forms, curr->data);
-        char *form_type = form_get_form_type_field(form);
-        g_string_append(s, form_type);
-        g_string_append(s, "<");
-
-        GSList *sorted_fields = form_get_non_form_type_fields_sorted(form);
-        GSList *curr_field = sorted_fields;
-        while (curr_field) {
-            FormField *field = curr_field->data;
-            g_string_append(s, field->var);
-            g_string_append(s, "<");
-
-            GSList *sorted_values = form_get_field_values_sorted(field);
-            GSList *curr_value = sorted_values;
-            while (curr_value) {
-                g_string_append(s, curr_value->data);
-                g_string_append(s, "<");
-                curr_value = g_slist_next(curr_value);
-            }
-            g_slist_free(sorted_values);
-            curr_field = g_slist_next(curr_field);
-        }
-        g_slist_free(sorted_fields);
-
-        curr = g_slist_next(curr);
-    }
-
-    char *result = p_sha1_hash(s->str);
-
-    g_string_free(s, TRUE);
-    g_slist_free_full(identities, g_free);
-    g_slist_free_full(features, g_free);
-    g_slist_free_full(form_names, g_free);
-    g_hash_table_destroy(forms);
 
     return result;
 }
@@ -503,7 +402,7 @@ caps_get_my_sha1(xmpp_ctx_t *const ctx)
 {
     if (my_sha1 == NULL) {
         xmpp_stanza_t *query = stanza_create_caps_query_element(ctx);
-        my_sha1 = caps_create_sha1_str(query);
+        my_sha1 = stanza_create_caps_sha1_from_query(query);
         xmpp_stanza_release(query);
     }
 

@@ -733,7 +733,7 @@ _caps_response_id_handler(xmpp_stanza_t *const stanza, void *const userdata)
     // validate sha1
     gchar **split = g_strsplit(node, "#", -1);
     char *given_sha1 = split[1];
-    char *generated_sha1 = caps_create_sha1_str(query);
+    char *generated_sha1 = stanza_create_caps_sha1_from_query(query);
 
     if (g_strcmp0(given_sha1, generated_sha1) != 0) {
         log_warning("Generated sha-1 does not match given:");
