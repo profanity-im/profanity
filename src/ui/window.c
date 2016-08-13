@@ -760,7 +760,7 @@ win_show_occupant_info(ProfWin *window, const char *const room, Occupant *occupa
     win_vprint(window, '!', 0, NULL, 0, 0, "", "  Role: %s", occupant_role);
 
     Jid *jidp = jid_create_from_bare_and_resource(room, occupant->nick);
-    Capabilities *caps = caps_lookup(jidp->fulljid);
+    EntityCapabilities *caps = caps_lookup(jidp->fulljid);
     jid_destroy(jidp);
 
     if (caps) {
@@ -878,7 +878,7 @@ win_show_info(ProfWin *window, PContact contact)
         win_newline(window);
 
         Jid *jidp = jid_create_from_bare_and_resource(barejid, resource->name);
-        Capabilities *caps = caps_lookup(jidp->fulljid);
+        EntityCapabilities *caps = caps_lookup(jidp->fulljid);
         jid_destroy(jidp);
 
         if (caps) {

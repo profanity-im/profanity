@@ -71,9 +71,9 @@ static GList *prof_features;
 static char *my_sha1;
 
 static void _save_cache(void);
-static Capabilities* _caps_by_ver(const char *const ver);
-static Capabilities* _caps_by_jid(const char *const jid);
-Capabilities* _caps_copy(Capabilities *caps);
+static EntityCapabilities* _caps_by_ver(const char *const ver);
+static EntityCapabilities* _caps_by_jid(const char *const jid);
+EntityCapabilities* _caps_copy(EntityCapabilities *caps);
 
 void
 caps_init(void)
@@ -107,7 +107,7 @@ caps_init(void)
 }
 
 void
-caps_add_by_ver(const char *const ver, Capabilities *caps)
+caps_add_by_ver(const char *const ver, EntityCapabilities *caps)
 {
     gboolean cached = g_key_file_has_group(cache, ver);
     if (!cached) {
@@ -149,7 +149,7 @@ caps_add_by_ver(const char *const ver, Capabilities *caps)
 }
 
 void
-caps_add_by_jid(const char *const jid, Capabilities *caps)
+caps_add_by_jid(const char *const jid, EntityCapabilities *caps)
 {
     g_hash_table_insert(jid_to_caps, strdup(jid), caps);
 }
@@ -166,11 +166,11 @@ caps_contains(const char *const ver)
     return (g_key_file_has_group(cache, ver));
 }
 
-static Capabilities*
+static EntityCapabilities*
 _caps_by_ver(const char *const ver)
 {
     if (g_key_file_has_group(cache, ver)) {
-        Capabilities *new_caps = malloc(sizeof(struct capabilities_t));
+        EntityCapabilities *new_caps = malloc(sizeof(struct entity_capabilities_t));
 
         char *category = g_key_file_get_string(cache, ver, "category", NULL);
         if (category) {
@@ -240,24 +240,24 @@ _caps_by_ver(const char *const ver)
     }
 }
 
-static Capabilities*
+static EntityCapabilities*
 _caps_by_jid(const char *const jid)
 {
     return g_hash_table_lookup(jid_to_caps, jid);
 }
 
-Capabilities*
+EntityCapabilities*
 caps_lookup(const char *const jid)
 {
     char *ver = g_hash_table_lookup(jid_to_ver, jid);
     if (ver) {
-        Capabilities *caps = _caps_by_ver(ver);
+        EntityCapabilities *caps = _caps_by_ver(ver);
         if (caps) {
             log_debug("Capabilities lookup %s, found by verification string %s.", jid, ver);
             return caps;
         }
     } else {
-        Capabilities *caps = _caps_by_jid(jid);
+        EntityCapabilities *caps = _caps_by_jid(jid);
         if (caps) {
             log_debug("Capabilities lookup %s, found by JID.", jid);
             return _caps_copy(caps);
@@ -268,13 +268,13 @@ caps_lookup(const char *const jid)
     return NULL;
 }
 
-Capabilities*
-_caps_copy(Capabilities *caps)
+EntityCapabilities*
+_caps_copy(EntityCapabilities *caps)
 {
     if (!caps) {
         return NULL;
     } else {
-        Capabilities *result = (Capabilities *)malloc(sizeof(Capabilities));
+        EntityCapabilities *result = (EntityCapabilities *)malloc(sizeof(EntityCapabilities));
         result->category = caps->category ? strdup(caps->category) : NULL;
         result->type = caps->type ? strdup(caps->type) : NULL;
         result->name = caps->name ? strdup(caps->name) : NULL;
@@ -395,17 +395,13 @@ caps_create_sha1_str(xmpp_stanza_t *const query)
     return result;
 }
 
-Capabilities*
+EntityCapabilities*
 caps_create(xmpp_stanza_t *query)
 {
-    const char *category = NULL;
-    const char *type = NULL;
-    const char *name = NULL;
     char *software = NULL;
     char *software_version = NULL;
     char *os = NULL;
     char *os_version = NULL;
-    GSList *features = NULL;
 
     xmpp_stanza_t *softwareinfo = xmpp_stanza_get_child_by_ns(query, STANZA_NS_DATA);
     if (softwareinfo) {
@@ -437,6 +433,7 @@ caps_create(xmpp_stanza_t *query)
 
     xmpp_stanza_t *child = xmpp_stanza_get_children(query);
     GSList *identity_stanzas = NULL;
+    GSList *features = NULL;
     while (child) {
         if (g_strcmp0(xmpp_stanza_get_name(child), "feature") == 0) {
             features = g_slist_append(features, strdup(xmpp_stanza_get_attribute(child, "var")));
@@ -495,13 +492,16 @@ caps_create(xmpp_stanza_t *query)
 
     g_slist_free(identity_stanzas);
 
+    const char *category = NULL;
+    const char *type = NULL;
+    const char *name = NULL;
     if (found) {
         category = xmpp_stanza_get_attribute(found, "category");
         type = xmpp_stanza_get_attribute(found, "type");
         name = xmpp_stanza_get_attribute(found, "name");
     }
 
-    Capabilities *new_caps = malloc(sizeof(struct capabilities_t));
+    EntityCapabilities *new_caps = malloc(sizeof(struct entity_capabilities_t));
 
     if (category) {
         new_caps->category = strdup(category);
@@ -638,7 +638,7 @@ caps_close(void)
 }
 
 void
-caps_destroy(Capabilities *caps)
+caps_destroy(EntityCapabilities *caps)
 {
     if (caps) {
         free(caps->category);

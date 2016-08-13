@@ -549,7 +549,7 @@ cons_show_caps(const char *const fulljid, resource_presence_t presence)
     ProfWin *console = wins_get_console();
     cons_show("");
 
-    Capabilities *caps = caps_lookup(fulljid);
+    EntityCapabilities *caps = caps_lookup(fulljid);
     if (caps) {
         const char *resource_presence = string_from_resource_presence(presence);
 
@@ -1002,7 +1002,7 @@ cons_show_account(ProfAccount *account)
             }
             win_vprint(console, '-', 0, NULL, NO_DATE, 0, "", "");
             Jid *jidp = jid_create_from_bare_and_resource(account->jid, resource->name);
-            Capabilities *caps = caps_lookup(jidp->fulljid);
+            EntityCapabilities *caps = caps_lookup(jidp->fulljid);
             jid_destroy(jidp);
 
             if (caps) {
