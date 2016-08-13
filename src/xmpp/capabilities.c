@@ -201,65 +201,6 @@ caps_cache_contains(const char *const ver)
     return (g_key_file_has_group(cache, ver));
 }
 
-static EntityCapabilities*
-_caps_by_ver(const char *const ver)
-{
-    if (g_key_file_has_group(cache, ver)) {
-        EntityCapabilities *new_caps = malloc(sizeof(struct entity_capabilities_t));
-
-        char *category = g_key_file_get_string(cache, ver, "category", NULL);
-        char *type = g_key_file_get_string(cache, ver, "type", NULL);
-        char *name = g_key_file_get_string(cache, ver, "name", NULL);
-        if (category || type || name) {
-            DiscoIdentity *identity = malloc(sizeof(struct disco_identity_t));
-            identity->category = category;
-            identity->type = type;
-            identity->name = name;
-            new_caps->identity = identity;
-        } else {
-            new_caps->identity = NULL;
-        }
-
-        char *software = g_key_file_get_string(cache, ver, "software", NULL);
-        char *software_version = g_key_file_get_string(cache, ver, "software_version", NULL);
-        char *os = g_key_file_get_string(cache, ver, "os", NULL);
-        char *os_version = g_key_file_get_string(cache, ver, "os_version", NULL);
-        if (software || software_version || os || os_version) {
-            SoftwareVersion *software_versionp = malloc(sizeof(struct software_version_t));
-            software_versionp->software = software;
-            software_versionp->software_version = software_version;
-            software_versionp->os = os;
-            software_versionp->os_version = os_version;
-            new_caps->software_version = software_versionp;
-        } else {
-            new_caps->software_version = NULL;
-        }
-
-        gsize features_len = 0;
-        gchar **features = g_key_file_get_string_list(cache, ver, "features", &features_len, NULL);
-        if (features && features_len > 0) {
-            GSList *features_list = NULL;
-            int i;
-            for (i = 0; i < features_len; i++) {
-                features_list = g_slist_append(features_list, strdup(features[i]));
-            }
-            new_caps->features = features_list;
-            g_strfreev(features);
-        } else {
-            new_caps->features = NULL;
-        }
-        return new_caps;
-    } else {
-        return NULL;
-    }
-}
-
-static EntityCapabilities*
-_caps_by_jid(const char *const jid)
-{
-    return g_hash_table_lookup(jid_to_caps, jid);
-}
-
 EntityCapabilities*
 caps_lookup(const char *const jid)
 {
@@ -589,6 +530,65 @@ caps_close(void)
     cache_loc = NULL;
     g_list_free_full(prof_features, free);
     prof_features = NULL;
+}
+
+static EntityCapabilities*
+_caps_by_ver(const char *const ver)
+{
+    if (!g_key_file_has_group(cache, ver)) {
+        return NULL;
+    }
+
+    EntityCapabilities *new_caps = malloc(sizeof(struct entity_capabilities_t));
+
+    char *category = g_key_file_get_string(cache, ver, "category", NULL);
+    char *type = g_key_file_get_string(cache, ver, "type", NULL);
+    char *name = g_key_file_get_string(cache, ver, "name", NULL);
+    if (category || type || name) {
+        DiscoIdentity *identity = malloc(sizeof(struct disco_identity_t));
+        identity->category = category;
+        identity->type = type;
+        identity->name = name;
+        new_caps->identity = identity;
+    } else {
+        new_caps->identity = NULL;
+    }
+
+    char *software = g_key_file_get_string(cache, ver, "software", NULL);
+    char *software_version = g_key_file_get_string(cache, ver, "software_version", NULL);
+    char *os = g_key_file_get_string(cache, ver, "os", NULL);
+    char *os_version = g_key_file_get_string(cache, ver, "os_version", NULL);
+    if (software || software_version || os || os_version) {
+        SoftwareVersion *software_versionp = malloc(sizeof(struct software_version_t));
+        software_versionp->software = software;
+        software_versionp->software_version = software_version;
+        software_versionp->os = os;
+        software_versionp->os_version = os_version;
+        new_caps->software_version = software_versionp;
+    } else {
+        new_caps->software_version = NULL;
+    }
+
+    gsize features_len = 0;
+    gchar **features = g_key_file_get_string_list(cache, ver, "features", &features_len, NULL);
+    if (features && features_len > 0) {
+        GSList *features_list = NULL;
+        int i;
+        for (i = 0; i < features_len; i++) {
+            features_list = g_slist_append(features_list, strdup(features[i]));
+        }
+        new_caps->features = features_list;
+        g_strfreev(features);
+    } else {
+        new_caps->features = NULL;
+    }
+    return new_caps;
+}
+
+static EntityCapabilities*
+_caps_by_jid(const char *const jid)
+{
+    return g_hash_table_lookup(jid_to_caps, jid);
 }
 
 static void
