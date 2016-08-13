@@ -82,27 +82,29 @@ typedef struct bookmark_t {
     gboolean autojoin;
 } Bookmark;
 
-typedef struct capabilities_t {
-    char *category;
-    char *type;
-    char *name;
-    char *software;
-    char *software_version;
-    char *os;
-    char *os_version;
-    GSList *features;
-} Capabilities;
-
-typedef struct disco_item_t {
-    char *jid;
-    char *name;
-} DiscoItem;
-
 typedef struct disco_identity_t {
     char *name;
     char *type;
     char *category;
 } DiscoIdentity;
+
+typedef struct software_version_t {
+    char *software;
+    char *software_version;
+    char *os;
+    char *os_version;
+} SoftwareVersion;
+
+typedef struct entity_capabilities_t {
+    DiscoIdentity *identity;
+    SoftwareVersion *software_version;
+    GSList *features;
+} EntityCapabilities;
+
+typedef struct disco_item_t {
+    char *jid;
+    char *name;
+} DiscoItem;
 
 void session_init(void);
 jabber_conn_status_t session_connect_with_details(const char *const jid, const char *const passwd,
@@ -173,9 +175,9 @@ void iq_room_role_list(const char * const room, char *role);
 void iq_autoping_check(void);
 void iq_http_upload_request(HTTPUpload *upload);
 
-Capabilities* caps_lookup(const char *const jid);
+EntityCapabilities* caps_lookup(const char *const jid);
 void caps_close(void);
-void caps_destroy(Capabilities *caps);
+void caps_destroy(EntityCapabilities *caps);
 void caps_reset_ver(void);
 
 gboolean bookmark_add(const char *jid, const char *nick, const char *password, const char *autojoin_str);

@@ -549,7 +549,7 @@ cons_show_caps(const char *const fulljid, resource_presence_t presence)
     ProfWin *console = wins_get_console();
     cons_show("");
 
-    Capabilities *caps = caps_lookup(fulljid);
+    EntityCapabilities *caps = caps_lookup(fulljid);
     if (caps) {
         const char *resource_presence = string_from_resource_presence(presence);
 
@@ -558,42 +558,47 @@ cons_show_caps(const char *const fulljid, resource_presence_t presence)
         win_print(console, '-', 0, NULL, NO_DATE, 0, "", ":");
 
         // show identity
-        if (caps->category || caps->type || caps->name) {
+        if (caps->identity) {
+            DiscoIdentity *identity = caps->identity;
             win_print(console, '-', 0, NULL, NO_EOL, 0, "", "Identity: ");
-            if (caps->name) {
-                win_print(console, '-', 0, NULL, NO_DATE | NO_EOL, 0, "", caps->name);
-                if (caps->category || caps->type) {
+            if (identity->name) {
+                win_print(console, '-', 0, NULL, NO_DATE | NO_EOL, 0, "", identity->name);
+                if (identity->category || identity->type) {
                     win_print(console, '-', 0, NULL, NO_DATE | NO_EOL, 0, "", " ");
                 }
             }
-            if (caps->type) {
-                win_print(console, '-', 0, NULL, NO_DATE | NO_EOL, 0, "", caps->type);
-                if (caps->category) {
+            if (identity->type) {
+                win_print(console, '-', 0, NULL, NO_DATE | NO_EOL, 0, "", identity->type);
+                if (identity->category) {
                     win_print(console, '-', 0, NULL, NO_DATE | NO_EOL, 0, "", " ");
                 }
             }
-            if (caps->category) {
-                win_print(console, '-', 0, NULL, NO_DATE | NO_EOL, 0, "", caps->category);
+            if (identity->category) {
+                win_print(console, '-', 0, NULL, NO_DATE | NO_EOL, 0, "", identity->category);
             }
             win_newline(console);
         }
-        if (caps->software) {
-            win_vprint(console, '-', 0, NULL, NO_EOL, 0, "", "Software: %s", caps->software);
-        }
+
         if (caps->software_version) {
-            win_vprint(console, '-', 0, NULL, NO_DATE | NO_EOL, 0, "", ", %s", caps->software_version);
-        }
-        if (caps->software || caps->software_version) {
-            win_newline(console);
-        }
-        if (caps->os) {
-            win_vprint(console, '-', 0, NULL, NO_EOL, 0, "", "OS: %s", caps->os);
-        }
-        if (caps->os_version) {
-            win_vprint(console, '-', 0, NULL, NO_DATE | NO_EOL, 0, "", ", %s", caps->os_version);
-        }
-        if (caps->os || caps->os_version) {
-            win_newline(console);
+            SoftwareVersion *software_version = caps->software_version;
+            if (software_version->software) {
+                win_vprint(console, '-', 0, NULL, NO_EOL, 0, "", "Software: %s", software_version->software);
+            }
+            if (software_version->software_version) {
+                win_vprint(console, '-', 0, NULL, NO_DATE | NO_EOL, 0, "", ", %s", software_version->software_version);
+            }
+            if (software_version->software || software_version->software_version) {
+                win_newline(console);
+            }
+            if (software_version->os) {
+                win_vprint(console, '-', 0, NULL, NO_EOL, 0, "", "OS: %s", software_version->os);
+            }
+            if (software_version->os_version) {
+                win_vprint(console, '-', 0, NULL, NO_DATE | NO_EOL, 0, "", ", %s", software_version->os_version);
+            }
+            if (software_version->os || software_version->os_version) {
+                win_newline(console);
+            }
         }
 
         if (caps->features) {
@@ -1002,48 +1007,54 @@ cons_show_account(ProfAccount *account)
             }
             win_vprint(console, '-', 0, NULL, NO_DATE, 0, "", "");
             Jid *jidp = jid_create_from_bare_and_resource(account->jid, resource->name);
-            Capabilities *caps = caps_lookup(jidp->fulljid);
+            EntityCapabilities *caps = caps_lookup(jidp->fulljid);
             jid_destroy(jidp);
 
             if (caps) {
                 // show identity
-                if (caps->category || caps->type || caps->name) {
+                if (caps->identity) {
+                    DiscoIdentity *identity = caps->identity;
                     win_print(console, '-', 0, NULL, NO_EOL, 0, "", "    Identity: ");
-                    if (caps->name) {
-                        win_print(console, '-', 0, NULL, NO_DATE | NO_EOL, 0, "", caps->name);
-                        if (caps->category || caps->type) {
+                    if (identity->name) {
+                        win_print(console, '-', 0, NULL, NO_DATE | NO_EOL, 0, "", identity->name);
+                        if (identity->category || identity->type) {
                             win_print(console, '-', 0, NULL, NO_DATE | NO_EOL, 0, "", " ");
                         }
                     }
-                    if (caps->type) {
-                        win_print(console, '-', 0, NULL, NO_DATE | NO_EOL, 0, "", caps->type);
-                        if (caps->category) {
+                    if (identity->type) {
+                        win_print(console, '-', 0, NULL, NO_DATE | NO_EOL, 0, "", identity->type);
+                        if (identity->category) {
                             win_print(console, '-', 0, NULL, NO_DATE | NO_EOL, 0, "", " ");
                         }
                     }
-                    if (caps->category) {
-                        win_print(console, '-', 0, NULL, NO_DATE | NO_EOL, 0, "", caps->category);
+                    if (identity->category) {
+                        win_print(console, '-', 0, NULL, NO_DATE | NO_EOL, 0, "", identity->category);
                     }
                     win_newline(console);
                 }
-                if (caps->software) {
-                    win_vprint(console, '-', 0, NULL, NO_EOL, 0, "", "    Software: %s", caps->software);
-                }
+
                 if (caps->software_version) {
-                    win_vprint(console, '-', 0, NULL, NO_DATE | NO_EOL, 0, "", ", %s", caps->software_version);
+                    SoftwareVersion *software_version = caps->software_version;
+                    if (software_version->software) {
+                        win_vprint(console, '-', 0, NULL, NO_EOL, 0, "", "    Software: %s", software_version->software);
+                    }
+                    if (software_version->software_version) {
+                        win_vprint(console, '-', 0, NULL, NO_DATE | NO_EOL, 0, "", ", %s", software_version->software_version);
+                    }
+                    if (software_version->software || software_version->software_version) {
+                        win_newline(console);
+                    }
+                    if (software_version->os) {
+                        win_vprint(console, '-', 0, NULL, NO_EOL, 0, "", "    OS: %s", software_version->os);
+                    }
+                    if (software_version->os_version) {
+                        win_vprint(console, '-', 0, NULL, NO_DATE | NO_EOL, 0, "", ", %s", software_version->os_version);
+                    }
+                    if (software_version->os || software_version->os_version) {
+                        win_newline(console);
+                    }
                 }
-                if (caps->software || caps->software_version) {
-                    win_newline(console);
-                }
-                if (caps->os) {
-                    win_vprint(console, '-', 0, NULL, NO_EOL, 0, "", "    OS: %s", caps->os);
-                }
-                if (caps->os_version) {
-                    win_vprint(console, '-', 0, NULL, NO_DATE | NO_EOL, 0, "", ", %s", caps->os_version);
-                }
-                if (caps->os || caps->os_version) {
-                    win_newline(console);
-                }
+
                 caps_destroy(caps);
             }
 

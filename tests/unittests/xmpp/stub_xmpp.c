@@ -203,13 +203,13 @@ void iq_last_activity_request(gchar *jid) {}
 void iq_autoping_check(void) {}
 
 // caps functions
-Capabilities* caps_lookup(const char * const jid)
+EntityCapabilities* caps_lookup(const char * const jid)
 {
     return NULL;
 }
 
 void caps_close(void) {}
-void caps_destroy(Capabilities *caps) {}
+void caps_destroy(EntityCapabilities *caps) {}
 void caps_reset_ver(void) {}
 
 gboolean bookmark_add(const char *jid, const char *nick, const char *password, const char *autojoin_str)
