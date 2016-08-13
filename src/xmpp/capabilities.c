@@ -633,6 +633,7 @@ _disco_identity_destroy(DiscoIdentity *disco_identity)
         free(disco_identity->category);
         free(disco_identity->name);
         free(disco_identity->type);
+        free(disco_identity);
     }
 }
 
@@ -644,6 +645,7 @@ _software_version_destroy(SoftwareVersion *software_version)
         free(software_version->software_version);
         free(software_version->os);
         free(software_version->os_version);
+        free(software_version);
     }
 }
 
