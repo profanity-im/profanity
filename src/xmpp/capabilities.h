@@ -54,8 +54,9 @@ void caps_add_by_jid(const char *const jid, EntityCapabilities *caps);
 void caps_map_jid_to_ver(const char *const jid, const char *const ver);
 gboolean caps_contains(const char *const ver);
 
+GList* caps_get_features(void);
+
 char* caps_create_sha1_str(xmpp_stanza_t *const query);
-xmpp_stanza_t* caps_create_query_response_stanza(xmpp_ctx_t *const ctx);
 EntityCapabilities* caps_create(xmpp_stanza_t *query);
 char* caps_get_my_sha1(xmpp_ctx_t *const ctx);
 

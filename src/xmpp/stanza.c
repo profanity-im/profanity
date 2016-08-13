@@ -36,6 +36,10 @@
 
 #include "config.h"
 
+#ifdef HAVE_GIT_VERSION
+#include "gitversion.h"
+#endif
+
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
@@ -1052,6 +1056,51 @@ stanza_create_room_config_submit_iq(xmpp_ctx_t *ctx, const char *const room, Dat
     return iq;
 }
 
+xmpp_stanza_t*
+stanza_create_caps_query_element(xmpp_ctx_t *ctx)
+{
+    xmpp_stanza_t *query = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(query, STANZA_NAME_QUERY);
+    xmpp_stanza_set_ns(query, XMPP_NS_DISCO_INFO);
+
+    xmpp_stanza_t *identity = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(identity, "identity");
+    xmpp_stanza_set_attribute(identity, "category", "client");
+    xmpp_stanza_set_attribute(identity, "type", "console");
+
+    GString *name_str = g_string_new("Profanity ");
+    g_string_append(name_str, PACKAGE_VERSION);
+    if (strcmp(PACKAGE_STATUS, "development") == 0) {
+#ifdef HAVE_GIT_VERSION
+        g_string_append(name_str, "dev.");
+        g_string_append(name_str, PROF_GIT_BRANCH);
+        g_string_append(name_str, ".");
+        g_string_append(name_str, PROF_GIT_REVISION);
+#else
+        g_string_append(name_str, "dev");
+#endif
+    }
+    xmpp_stanza_set_attribute(identity, "name", name_str->str);
+    g_string_free(name_str, TRUE);
+    xmpp_stanza_add_child(query, identity);
+    xmpp_stanza_release(identity);
+
+    GList *features = caps_get_features();
+    GList *curr = features;
+    while (curr) {
+        xmpp_stanza_t *feature = xmpp_stanza_new(ctx);
+        xmpp_stanza_set_name(feature, STANZA_NAME_FEATURE);
+        xmpp_stanza_set_attribute(feature, STANZA_ATTR_VAR, curr->data);
+        xmpp_stanza_add_child(query, feature);
+        xmpp_stanza_release(feature);
+
+        curr = g_list_next(curr);
+    }
+    g_list_free(features);
+
+    return query;
+}
+
 gboolean
 stanza_contains_chat_state(xmpp_stanza_t *stanza)
 {
@@ -1712,7 +1761,7 @@ stanza_attach_caps(xmpp_ctx_t *const ctx, xmpp_stanza_t *const presence)
     xmpp_stanza_t *caps = xmpp_stanza_new(ctx);
     xmpp_stanza_set_name(caps, STANZA_NAME_C);
     xmpp_stanza_set_ns(caps, STANZA_NS_CAPS);
-    xmpp_stanza_t *query = caps_create_query_response_stanza(ctx);
+    xmpp_stanza_t *query = stanza_create_caps_query_element(ctx);
 
     char *sha1 = caps_get_my_sha1(ctx);
     xmpp_stanza_set_attribute(caps, STANZA_ATTR_HASH, "sha-1");

@@ -1349,7 +1349,7 @@ _disco_info_get_handler(xmpp_stanza_t *const stanza)
         xmpp_stanza_set_id(response, xmpp_stanza_get_id(stanza));
         xmpp_stanza_set_attribute(response, STANZA_ATTR_TO, from);
         xmpp_stanza_set_type(response, STANZA_TYPE_RESULT);
-        xmpp_stanza_t *query = caps_create_query_response_stanza(ctx);
+        xmpp_stanza_t *query = stanza_create_caps_query_element(ctx);
         if (node_str) {
             xmpp_stanza_set_attribute(query, STANZA_ATTR_NODE, node_str);
         }
