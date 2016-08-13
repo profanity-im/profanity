@@ -293,6 +293,7 @@ void stanza_attach_status(xmpp_ctx_t *const ctx, xmpp_stanza_t *const presence, 
 
 xmpp_stanza_t* stanza_create_caps_query_element(xmpp_ctx_t *ctx);
 char* stanza_create_caps_sha1_from_query(xmpp_stanza_t *const query);
+EntityCapabilities* stanza_create_caps_from_query_element(xmpp_stanza_t *query);
 
 const char* stanza_get_presence_string_from_type(resource_presence_t presence_type);
 xmpp_stanza_t* stanza_create_software_version_iq(xmpp_ctx_t *ctx, const char *const fulljid);

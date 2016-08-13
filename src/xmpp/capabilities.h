@@ -53,10 +53,7 @@ void caps_add_by_ver(const char *const ver, EntityCapabilities *caps);
 void caps_add_by_jid(const char *const jid, EntityCapabilities *caps);
 void caps_map_jid_to_ver(const char *const jid, const char *const ver);
 gboolean caps_cache_contains(const char *const ver);
-
 GList* caps_get_features(void);
-
-EntityCapabilities* caps_create(xmpp_stanza_t *query);
 char* caps_get_my_sha1(xmpp_ctx_t *const ctx);
 
 #endif
