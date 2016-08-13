@@ -746,7 +746,7 @@ _caps_response_id_handler(xmpp_stanza_t *const stanza, void *const userdata)
             log_info("Capabilties already cached: %s", given_sha1);
         } else {
             log_info("Capabilities not cached: %s, storing", given_sha1);
-            Capabilities *capabilities = caps_create(query);
+            EntityCapabilities *capabilities = caps_create(query);
             caps_add_by_ver(given_sha1, capabilities);
             caps_destroy(capabilities);
         }
@@ -810,7 +810,7 @@ _caps_response_for_jid_id_handler(xmpp_stanza_t *const stanza, void *const userd
     }
 
     log_info("Associating capabilities with: %s", jid);
-    Capabilities *capabilities = caps_create(query);
+    EntityCapabilities *capabilities = caps_create(query);
     caps_add_by_jid(jid, capabilities);
 
     free(jid);
@@ -874,7 +874,7 @@ _caps_response_legacy_id_handler(xmpp_stanza_t *const stanza, void *const userda
             log_info("Capabilties already cached: %s", node);
         } else {
             log_info("Capabilities not cached: %s, storing", node);
-            Capabilities *capabilities = caps_create(query);
+            EntityCapabilities *capabilities = caps_create(query);
             caps_add_by_ver(node, capabilities);
             caps_destroy(capabilities);
         }

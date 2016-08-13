@@ -67,12 +67,13 @@ static GKeyFile *cache;
 static GHashTable *jid_to_ver;
 static GHashTable *jid_to_caps;
 
+static GList *prof_features;
 static char *my_sha1;
 
 static void _save_cache(void);
-static Capabilities* _caps_by_ver(const char *const ver);
-static Capabilities* _caps_by_jid(const char *const jid);
-Capabilities* _caps_copy(Capabilities *caps);
+static EntityCapabilities* _caps_by_ver(const char *const ver);
+static EntityCapabilities* _caps_by_jid(const char *const jid);
+EntityCapabilities* _caps_copy(EntityCapabilities *caps);
 
 void
 caps_init(void)
@@ -90,53 +91,79 @@ caps_init(void)
     jid_to_ver = g_hash_table_new_full(g_str_hash, g_str_equal, free, free);
     jid_to_caps = g_hash_table_new_full(g_str_hash, g_str_equal, free, (GDestroyNotify)caps_destroy);
 
+    prof_features = NULL;
+    prof_features = g_list_append(prof_features, strdup(STANZA_NS_CAPS));
+    prof_features = g_list_append(prof_features, strdup(XMPP_NS_DISCO_INFO));
+    prof_features = g_list_append(prof_features, strdup(XMPP_NS_DISCO_ITEMS));
+    prof_features = g_list_append(prof_features, strdup(STANZA_NS_MUC));
+    prof_features = g_list_append(prof_features, strdup(STANZA_NS_CONFERENCE));
+    prof_features = g_list_append(prof_features, strdup(STANZA_NS_VERSION));
+    prof_features = g_list_append(prof_features, strdup(STANZA_NS_CHATSTATES));
+    prof_features = g_list_append(prof_features, strdup(STANZA_NS_PING));
+    prof_features = g_list_append(prof_features, strdup(STANZA_NS_RECEIPTS));
+    prof_features = g_list_append(prof_features, strdup(STANZA_NS_LASTACTIVITY));
+
     my_sha1 = NULL;
 }
 
 void
-caps_add_by_ver(const char *const ver, Capabilities *caps)
+caps_add_by_ver(const char *const ver, EntityCapabilities *caps)
 {
-    gboolean cached = g_key_file_has_group(cache, ver);
-    if (!cached) {
-        if (caps->name) {
-            g_key_file_set_string(cache, ver, "name", caps->name);
-        }
-        if (caps->category) {
-            g_key_file_set_string(cache, ver, "category", caps->category);
-        }
-        if (caps->type) {
-            g_key_file_set_string(cache, ver, "type", caps->type);
-        }
-        if (caps->software) {
-            g_key_file_set_string(cache, ver, "software", caps->software);
-        }
-        if (caps->software_version) {
-            g_key_file_set_string(cache, ver, "software_version", caps->software_version);
-        }
-        if (caps->os) {
-            g_key_file_set_string(cache, ver, "os", caps->os);
-        }
-        if (caps->os_version) {
-            g_key_file_set_string(cache, ver, "os_version", caps->os_version);
-        }
-        if (caps->features) {
-            GSList *curr_feature = caps->features;
-            int num = g_slist_length(caps->features);
-            const gchar* features_list[num];
-            int curr = 0;
-            while (curr_feature) {
-                features_list[curr++] = curr_feature->data;
-                curr_feature = g_slist_next(curr_feature);
-            }
-            g_key_file_set_string_list(cache, ver, "features", features_list, num);
-        }
-
-        _save_cache();
+    if (ver == NULL || caps == NULL) {
+        return;
     }
+
+    gboolean cached = g_key_file_has_group(cache, ver);
+    if (cached) {
+        return;
+    }
+
+    if (caps->identity) {
+        DiscoIdentity *identity = caps->identity;
+        if (identity->name) {
+            g_key_file_set_string(cache, ver, "name", identity->name);
+        }
+        if (identity->category) {
+            g_key_file_set_string(cache, ver, "category", identity->category);
+        }
+        if (identity->type) {
+            g_key_file_set_string(cache, ver, "type", identity->type);
+        }
+    }
+
+    if (caps->software_version) {
+        SoftwareVersion *software_version = caps->software_version;
+        if (software_version->software) {
+            g_key_file_set_string(cache, ver, "software", software_version->software);
+        }
+        if (software_version->software_version) {
+            g_key_file_set_string(cache, ver, "software_version", software_version->software_version);
+        }
+        if (software_version->os) {
+            g_key_file_set_string(cache, ver, "os", software_version->os);
+        }
+        if (software_version->os_version) {
+            g_key_file_set_string(cache, ver, "os_version", software_version->os_version);
+        }
+    }
+
+    if (caps->features) {
+        GSList *curr_feature = caps->features;
+        int num = g_slist_length(caps->features);
+        const gchar* features_list[num];
+        int curr = 0;
+        while (curr_feature) {
+            features_list[curr++] = curr_feature->data;
+            curr_feature = g_slist_next(curr_feature);
+        }
+        g_key_file_set_string_list(cache, ver, "features", features_list, num);
+    }
+
+    _save_cache();
 }
 
 void
-caps_add_by_jid(const char *const jid, Capabilities *caps)
+caps_add_by_jid(const char *const jid, EntityCapabilities *caps)
 {
     g_hash_table_insert(jid_to_caps, strdup(jid), caps);
 }
@@ -153,59 +180,38 @@ caps_contains(const char *const ver)
     return (g_key_file_has_group(cache, ver));
 }
 
-static Capabilities*
+static EntityCapabilities*
 _caps_by_ver(const char *const ver)
 {
     if (g_key_file_has_group(cache, ver)) {
-        Capabilities *new_caps = malloc(sizeof(struct capabilities_t));
+        EntityCapabilities *new_caps = malloc(sizeof(struct entity_capabilities_t));
 
         char *category = g_key_file_get_string(cache, ver, "category", NULL);
-        if (category) {
-            new_caps->category = category;
-        } else {
-            new_caps->category = NULL;
-        }
-
         char *type = g_key_file_get_string(cache, ver, "type", NULL);
-        if (type) {
-            new_caps->type = type;
-        } else {
-            new_caps->type = NULL;
-        }
-
         char *name = g_key_file_get_string(cache, ver, "name", NULL);
-        if (name) {
-            new_caps->name = name;
+        if (category || type || name) {
+            DiscoIdentity *identity = malloc(sizeof(struct disco_identity_t));
+            identity->category = category;
+            identity->type = type;
+            identity->name = name;
+            new_caps->identity = identity;
         } else {
-            new_caps->name = NULL;
+            new_caps->identity = NULL;
         }
 
         char *software = g_key_file_get_string(cache, ver, "software", NULL);
-        if (software) {
-            new_caps->software = software;
-        } else {
-            new_caps->software = NULL;
-        }
-
         char *software_version = g_key_file_get_string(cache, ver, "software_version", NULL);
-        if (software_version) {
-            new_caps->software_version = software_version;
+        char *os = g_key_file_get_string(cache, ver, "os", NULL);
+        char *os_version = g_key_file_get_string(cache, ver, "os_version", NULL);
+        if (software || software_version || os || os_version) {
+            SoftwareVersion *software_versionp = malloc(sizeof(struct software_version_t));
+            software_versionp->software = software;
+            software_versionp->software_version = software_version;
+            software_versionp->os = os;
+            software_versionp->os_version = os_version;
+            new_caps->software_version = software_versionp;
         } else {
             new_caps->software_version = NULL;
-        }
-
-        char *os = g_key_file_get_string(cache, ver, "os", NULL);
-        if (os) {
-            new_caps->os = os;
-        } else {
-            new_caps->os = NULL;
-        }
-
-        char *os_version = g_key_file_get_string(cache, ver, "os_version", NULL);
-        if (os_version) {
-            new_caps->os_version = os_version;
-        } else {
-            new_caps->os_version = NULL;
         }
 
         gsize features_len = 0;
@@ -227,24 +233,24 @@ _caps_by_ver(const char *const ver)
     }
 }
 
-static Capabilities*
+static EntityCapabilities*
 _caps_by_jid(const char *const jid)
 {
     return g_hash_table_lookup(jid_to_caps, jid);
 }
 
-Capabilities*
+EntityCapabilities*
 caps_lookup(const char *const jid)
 {
     char *ver = g_hash_table_lookup(jid_to_ver, jid);
     if (ver) {
-        Capabilities *caps = _caps_by_ver(ver);
+        EntityCapabilities *caps = _caps_by_ver(ver);
         if (caps) {
             log_debug("Capabilities lookup %s, found by verification string %s.", jid, ver);
             return caps;
         }
     } else {
-        Capabilities *caps = _caps_by_jid(jid);
+        EntityCapabilities *caps = _caps_by_jid(jid);
         if (caps) {
             log_debug("Capabilities lookup %s, found by JID.", jid);
             return _caps_copy(caps);
@@ -255,20 +261,33 @@ caps_lookup(const char *const jid)
     return NULL;
 }
 
-Capabilities*
-_caps_copy(Capabilities *caps)
+EntityCapabilities*
+_caps_copy(EntityCapabilities *caps)
 {
     if (!caps) {
         return NULL;
     } else {
-        Capabilities *result = (Capabilities *)malloc(sizeof(Capabilities));
-        result->category = caps->category ? strdup(caps->category) : NULL;
-        result->type = caps->type ? strdup(caps->type) : NULL;
-        result->name = caps->name ? strdup(caps->name) : NULL;
-        result->software = caps->software ? strdup(caps->software) : NULL;
-        result->software_version = caps->software_version ? strdup(caps->software_version) : NULL;
-        result->os = caps->os ? strdup(caps->os) : NULL;
-        result->os_version = caps->os_version ? strdup(caps->os_version) : NULL;
+        EntityCapabilities *result = (EntityCapabilities *)malloc(sizeof(EntityCapabilities));
+
+        if (caps->identity) {
+            DiscoIdentity *identity = (DiscoIdentity*)malloc(sizeof(DiscoIdentity));
+            identity->category = caps->identity->category ? strdup(caps->identity->category) : NULL;
+            identity->type = caps->identity->type ? strdup(caps->identity->type) : NULL;
+            identity->name = caps->identity->name ? strdup(caps->identity->name) : NULL;
+            result->identity = identity;
+        } else {
+            result->identity = NULL;
+        }
+
+        if (caps->software_version) {
+            SoftwareVersion *software_version = (SoftwareVersion*)malloc(sizeof(SoftwareVersion));
+            software_version->software = caps->software_version->software ? strdup(caps->software_version->software) : NULL;
+            software_version->software_version = caps->software_version->software_version ? strdup(caps->software_version->software_version) : NULL;
+            software_version->os = caps->software_version->os ? strdup(caps->software_version->os) : NULL;
+            software_version->os_version = caps->software_version->os_version ? strdup(caps->software_version->os_version) : NULL;
+        } else {
+            result->software_version = NULL;
+        }
 
         result->features = NULL;
         GSList *curr = caps->features;
@@ -284,25 +303,18 @@ _caps_copy(Capabilities *caps)
 char*
 caps_create_sha1_str(xmpp_stanza_t *const query)
 {
-    const char *category = NULL;
-    const char *type = NULL;
-    const char *lang = NULL;
-    const char *name = NULL;
-    const char *feature_str = NULL;
     GSList *identities = NULL;
     GSList *features = NULL;
     GSList *form_names = NULL;
-    DataForm *form = NULL;
-    FormField *field = NULL;
     GHashTable *forms = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, (GDestroyNotify)form_destroy);
 
     xmpp_stanza_t *child = xmpp_stanza_get_children(query);
     while (child) {
         if (g_strcmp0(xmpp_stanza_get_name(child), STANZA_NAME_IDENTITY) == 0) {
-            category = xmpp_stanza_get_attribute(child, "category");
-            type = xmpp_stanza_get_attribute(child, "type");
-            lang = xmpp_stanza_get_attribute(child, "xml:lang");
-            name = xmpp_stanza_get_attribute(child, "name");
+            const char *category = xmpp_stanza_get_attribute(child, "category");
+            const char *type = xmpp_stanza_get_attribute(child, "type");
+            const char *lang = xmpp_stanza_get_attribute(child, "xml:lang");
+            const char *name = xmpp_stanza_get_attribute(child, "name");
 
             GString *identity_str = g_string_new(category);
             g_string_append(identity_str, "/");
@@ -321,11 +333,11 @@ caps_create_sha1_str(xmpp_stanza_t *const query)
             identities = g_slist_insert_sorted(identities, g_strdup(identity_str->str), (GCompareFunc)strcmp);
             g_string_free(identity_str, TRUE);
         } else if (g_strcmp0(xmpp_stanza_get_name(child), STANZA_NAME_FEATURE) == 0) {
-            feature_str = xmpp_stanza_get_attribute(child, "var");
+            const char *feature_str = xmpp_stanza_get_attribute(child, "var");
             features = g_slist_insert_sorted(features, g_strdup(feature_str), (GCompareFunc)strcmp);
         } else if (g_strcmp0(xmpp_stanza_get_name(child), STANZA_NAME_X) == 0) {
             if (g_strcmp0(xmpp_stanza_get_ns(child), STANZA_NS_DATA) == 0) {
-                form = form_create(child);
+                DataForm *form = form_create(child);
                 char *form_type = form_get_form_type_field(form);
                 form_names = g_slist_insert_sorted(form_names, g_strdup(form_type), (GCompareFunc)strcmp);
                 g_hash_table_insert(forms, g_strdup(form_type), form);
@@ -351,7 +363,7 @@ caps_create_sha1_str(xmpp_stanza_t *const query)
 
     curr = form_names;
     while (curr) {
-        form = g_hash_table_lookup(forms, curr->data);
+        DataForm *form = g_hash_table_lookup(forms, curr->data);
         char *form_type = form_get_form_type_field(form);
         g_string_append(s, form_type);
         g_string_append(s, "<");
@@ -359,7 +371,7 @@ caps_create_sha1_str(xmpp_stanza_t *const query)
         GSList *sorted_fields = form_get_non_form_type_fields_sorted(form);
         GSList *curr_field = sorted_fields;
         while (curr_field) {
-            field = curr_field->data;
+            FormField *field = curr_field->data;
             g_string_append(s, field->var);
             g_string_append(s, "<");
 
@@ -389,17 +401,13 @@ caps_create_sha1_str(xmpp_stanza_t *const query)
     return result;
 }
 
-Capabilities*
+EntityCapabilities*
 caps_create(xmpp_stanza_t *query)
 {
-    const char *category = NULL;
-    const char *type = NULL;
-    const char *name = NULL;
     char *software = NULL;
     char *software_version = NULL;
     char *os = NULL;
     char *os_version = NULL;
-    GSList *features = NULL;
 
     xmpp_stanza_t *softwareinfo = xmpp_stanza_get_child_by_ns(query, STANZA_NS_DATA);
     if (softwareinfo) {
@@ -431,6 +439,7 @@ caps_create(xmpp_stanza_t *query)
 
     xmpp_stanza_t *child = xmpp_stanza_get_children(query);
     GSList *identity_stanzas = NULL;
+    GSList *features = NULL;
     while (child) {
         if (g_strcmp0(xmpp_stanza_get_name(child), "feature") == 0) {
             features = g_slist_append(features, strdup(xmpp_stanza_get_attribute(child, "var")));
@@ -489,49 +498,35 @@ caps_create(xmpp_stanza_t *query)
 
     g_slist_free(identity_stanzas);
 
+    const char *category = NULL;
+    const char *type = NULL;
+    const char *name = NULL;
     if (found) {
         category = xmpp_stanza_get_attribute(found, "category");
         type = xmpp_stanza_get_attribute(found, "type");
         name = xmpp_stanza_get_attribute(found, "name");
     }
 
-    Capabilities *new_caps = malloc(sizeof(struct capabilities_t));
+    EntityCapabilities *new_caps = malloc(sizeof(struct entity_capabilities_t));
 
-    if (category) {
-        new_caps->category = strdup(category);
+    if (category || type || name) {
+        DiscoIdentity *identity = malloc(sizeof(struct disco_identity_t));
+        identity->category = category ? strdup(category) : NULL;
+        identity->type = type ? strdup(type) : NULL;
+        identity->name = name ? strdup(name) : NULL;
+        new_caps->identity = identity;
     } else {
-        new_caps->category = NULL;
+        new_caps->identity = NULL;
     }
-    if (type) {
-        new_caps->type = strdup(type);
-    } else {
-        new_caps->type = NULL;
+
+    if (software || software_version || os || os_version) {
+        SoftwareVersion *software_versionp = malloc(sizeof(struct software_version_t));
+        software_versionp->software = software;
+        software_versionp->software_version = software_version;
+        software_versionp->os = os;
+        software_versionp->os_version = os_version;
     }
-    if (name) {
-        new_caps->name = strdup(name);
-    } else {
-        new_caps->name = NULL;
-    }
-    if (software) {
-        new_caps->software = software;
-    } else {
-        new_caps->software = NULL;
-    }
-    if (software_version) {
-        new_caps->software_version = software_version;
-    } else {
-        new_caps->software_version = NULL;
-    }
-    if (os) {
-        new_caps->os = os;
-    } else {
-        new_caps->os = NULL;
-    }
-    if (os_version) {
-        new_caps->os_version = os_version;
-    } else {
-        new_caps->os_version = NULL;
-    }
+
     if (features) {
         new_caps->features = features;
     } else {
@@ -588,62 +583,22 @@ caps_create_query_response_stanza(xmpp_ctx_t *const ctx)
     }
     xmpp_stanza_set_attribute(identity, "name", name_str->str);
     g_string_free(name_str, TRUE);
-
-    xmpp_stanza_t *feature_caps = xmpp_stanza_new(ctx);
-    xmpp_stanza_set_name(feature_caps, STANZA_NAME_FEATURE);
-    xmpp_stanza_set_attribute(feature_caps, STANZA_ATTR_VAR, STANZA_NS_CAPS);
-
-    xmpp_stanza_t *feature_discoinfo = xmpp_stanza_new(ctx);
-    xmpp_stanza_set_name(feature_discoinfo, STANZA_NAME_FEATURE);
-    xmpp_stanza_set_attribute(feature_discoinfo, STANZA_ATTR_VAR, XMPP_NS_DISCO_INFO);
-
-    xmpp_stanza_t *feature_discoitems = xmpp_stanza_new(ctx);
-    xmpp_stanza_set_name(feature_discoitems, STANZA_NAME_FEATURE);
-    xmpp_stanza_set_attribute(feature_discoitems, STANZA_ATTR_VAR, XMPP_NS_DISCO_ITEMS);
-
-    xmpp_stanza_t *feature_muc = xmpp_stanza_new(ctx);
-    xmpp_stanza_set_name(feature_muc, STANZA_NAME_FEATURE);
-    xmpp_stanza_set_attribute(feature_muc, STANZA_ATTR_VAR, STANZA_NS_MUC);
-
-    xmpp_stanza_t *feature_conference = xmpp_stanza_new(ctx);
-    xmpp_stanza_set_name(feature_conference, STANZA_NAME_FEATURE);
-    xmpp_stanza_set_attribute(feature_conference, STANZA_ATTR_VAR, STANZA_NS_CONFERENCE);
-
-    xmpp_stanza_t *feature_version = xmpp_stanza_new(ctx);
-    xmpp_stanza_set_name(feature_version, STANZA_NAME_FEATURE);
-    xmpp_stanza_set_attribute(feature_version, STANZA_ATTR_VAR, STANZA_NS_VERSION);
-
-    xmpp_stanza_t *feature_chatstates = xmpp_stanza_new(ctx);
-    xmpp_stanza_set_name(feature_chatstates, STANZA_NAME_FEATURE);
-    xmpp_stanza_set_attribute(feature_chatstates, STANZA_ATTR_VAR, STANZA_NS_CHATSTATES);
-
-    xmpp_stanza_t *feature_ping = xmpp_stanza_new(ctx);
-    xmpp_stanza_set_name(feature_ping, STANZA_NAME_FEATURE);
-    xmpp_stanza_set_attribute(feature_ping, STANZA_ATTR_VAR, STANZA_NS_PING);
-
-    xmpp_stanza_t *feature_receipts = xmpp_stanza_new(ctx);
-    xmpp_stanza_set_name(feature_receipts, STANZA_NAME_FEATURE);
-    xmpp_stanza_set_attribute(feature_receipts, STANZA_ATTR_VAR, STANZA_NS_RECEIPTS);
-
-    xmpp_stanza_t *feature_last = xmpp_stanza_new(ctx);
-    xmpp_stanza_set_name(feature_last, STANZA_NAME_FEATURE);
-    xmpp_stanza_set_attribute(feature_last, STANZA_ATTR_VAR, STANZA_NS_LASTACTIVITY);
-
     xmpp_stanza_add_child(query, identity);
+    xmpp_stanza_release(identity);
 
-    xmpp_stanza_add_child(query, feature_caps);
-    xmpp_stanza_add_child(query, feature_chatstates);
-    xmpp_stanza_add_child(query, feature_discoinfo);
-    xmpp_stanza_add_child(query, feature_discoitems);
-    xmpp_stanza_add_child(query, feature_muc);
-    xmpp_stanza_add_child(query, feature_version);
-    xmpp_stanza_add_child(query, feature_last);
-    xmpp_stanza_add_child(query, feature_conference);
-    xmpp_stanza_add_child(query, feature_ping);
-    xmpp_stanza_add_child(query, feature_receipts);
+    GList *curr = prof_features;
+    while (curr) {
+        xmpp_stanza_t *feature = xmpp_stanza_new(ctx);
+        xmpp_stanza_set_name(feature, STANZA_NAME_FEATURE);
+        xmpp_stanza_set_attribute(feature, STANZA_ATTR_VAR, curr->data);
+        xmpp_stanza_add_child(query, feature);
+        xmpp_stanza_release(feature);
+
+        curr = g_list_next(curr);
+    }
 
     GList *plugin_features = plugins_get_disco_features();
-    GList *curr = plugin_features;
+    curr = plugin_features;
     while (curr) {
         xmpp_stanza_t *feature = xmpp_stanza_new(ctx);
         xmpp_stanza_set_name(feature, STANZA_NAME_FEATURE);
@@ -654,18 +609,6 @@ caps_create_query_response_stanza(xmpp_ctx_t *const ctx)
         curr = g_list_next(curr);
     }
     g_list_free(plugin_features);
-
-    xmpp_stanza_release(feature_receipts);
-    xmpp_stanza_release(feature_ping);
-    xmpp_stanza_release(feature_conference);
-    xmpp_stanza_release(feature_last);
-    xmpp_stanza_release(feature_version);
-    xmpp_stanza_release(feature_muc);
-    xmpp_stanza_release(feature_discoitems);
-    xmpp_stanza_release(feature_discoinfo);
-    xmpp_stanza_release(feature_chatstates);
-    xmpp_stanza_release(feature_caps);
-    xmpp_stanza_release(identity);
 
     return query;
 }
@@ -679,19 +622,39 @@ caps_close(void)
     g_hash_table_destroy(jid_to_caps);
     free(cache_loc);
     cache_loc = NULL;
+    g_list_free_full(prof_features, free);
+    prof_features = NULL;
+}
+
+static void
+_disco_identity_destroy(DiscoIdentity *disco_identity)
+{
+    if (disco_identity) {
+        free(disco_identity->category);
+        free(disco_identity->name);
+        free(disco_identity->type);
+        free(disco_identity);
+    }
+}
+
+static void
+_software_version_destroy(SoftwareVersion *software_version)
+{
+    if (software_version) {
+        free(software_version->software);
+        free(software_version->software_version);
+        free(software_version->os);
+        free(software_version->os_version);
+        free(software_version);
+    }
 }
 
 void
-caps_destroy(Capabilities *caps)
+caps_destroy(EntityCapabilities *caps)
 {
     if (caps) {
-        free(caps->category);
-        free(caps->type);
-        free(caps->name);
-        free(caps->software);
-        free(caps->software_version);
-        free(caps->os);
-        free(caps->os_version);
+        _disco_identity_destroy(caps->identity);
+        _software_version_destroy(caps->software_version);
         if (caps->features) {
             g_slist_free_full(caps->features, free);
         }
