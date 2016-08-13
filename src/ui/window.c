@@ -765,25 +765,27 @@ win_show_occupant_info(ProfWin *window, const char *const room, Occupant *occupa
 
     if (caps) {
         // show identity
-        if (caps->category || caps->type || caps->name) {
+        if (caps->identity) {
+            DiscoIdentity *identity = caps->identity;
             win_print(window, '!', 0, NULL, NO_EOL, 0, "", "  Identity: ");
-            if (caps->name) {
-                win_print(window, '!', 0, NULL, NO_DATE | NO_EOL, 0, "", caps->name);
-                if (caps->category || caps->type) {
+            if (identity->name) {
+                win_print(window, '!', 0, NULL, NO_DATE | NO_EOL, 0, "", identity->name);
+                if (identity->category || identity->type) {
                     win_print(window, '-', 0, NULL, NO_DATE | NO_EOL, 0, "", " ");
                 }
             }
-            if (caps->type) {
-                win_print(window, '!', 0, NULL, NO_DATE | NO_EOL, 0, "", caps->type);
-                if (caps->category) {
+            if (identity->type) {
+                win_print(window, '!', 0, NULL, NO_DATE | NO_EOL, 0, "", identity->type);
+                if (identity->category) {
                     win_print(window, '!', 0, NULL, NO_DATE | NO_EOL, 0, "", " ");
                 }
             }
-            if (caps->category) {
-                win_print(window, '!', 0, NULL, NO_DATE | NO_EOL, 0, "", caps->category);
+            if (identity->category) {
+                win_print(window, '!', 0, NULL, NO_DATE | NO_EOL, 0, "", identity->category);
             }
             win_newline(window);
         }
+
         if (caps->software) {
             win_vprint(window, '!', 0, NULL, NO_EOL, 0, "", "  Software: %s", caps->software);
         }
@@ -883,25 +885,27 @@ win_show_info(ProfWin *window, PContact contact)
 
         if (caps) {
             // show identity
-            if (caps->category || caps->type || caps->name) {
+            if (caps->identity) {
+                DiscoIdentity *identity = caps->identity;
                 win_print(window, '-', 0, NULL, NO_EOL, 0, "", "    Identity: ");
-                if (caps->name) {
-                    win_print(window, '-', 0, NULL, NO_DATE | NO_EOL, 0, "", caps->name);
-                    if (caps->category || caps->type) {
+                if (identity->name) {
+                    win_print(window, '-', 0, NULL, NO_DATE | NO_EOL, 0, "", identity->name);
+                    if (identity->category || identity->type) {
                         win_print(window, '-', 0, NULL, NO_DATE | NO_EOL, 0, "", " ");
                     }
                 }
-                if (caps->type) {
-                    win_print(window, '-', 0, NULL, NO_DATE | NO_EOL, 0, "", caps->type);
-                    if (caps->category) {
+                if (identity->type) {
+                    win_print(window, '-', 0, NULL, NO_DATE | NO_EOL, 0, "", identity->type);
+                    if (identity->category) {
                         win_print(window, '-', 0, NULL, NO_DATE | NO_EOL, 0, "", " ");
                     }
                 }
-                if (caps->category) {
-                    win_print(window, '-', 0, NULL, NO_DATE | NO_EOL, 0, "", caps->category);
+                if (identity->category) {
+                    win_print(window, '-', 0, NULL, NO_DATE | NO_EOL, 0, "", identity->category);
                 }
                 win_newline(window);
             }
+
             if (caps->software) {
                 win_vprint(window, '-', 0, NULL, NO_EOL, 0, "", "    Software: %s", caps->software);
             }

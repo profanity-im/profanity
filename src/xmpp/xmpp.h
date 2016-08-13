@@ -82,10 +82,14 @@ typedef struct bookmark_t {
     gboolean autojoin;
 } Bookmark;
 
-typedef struct entity_capabilities_t {
-    char *category;
-    char *type;
+typedef struct disco_identity_t {
     char *name;
+    char *type;
+    char *category;
+} DiscoIdentity;
+
+typedef struct entity_capabilities_t {
+    DiscoIdentity *identity;
     char *software;
     char *software_version;
     char *os;
@@ -97,12 +101,6 @@ typedef struct disco_item_t {
     char *jid;
     char *name;
 } DiscoItem;
-
-typedef struct disco_identity_t {
-    char *name;
-    char *type;
-    char *category;
-} DiscoIdentity;
 
 void session_init(void);
 jabber_conn_status_t session_connect_with_details(const char *const jid, const char *const passwd,

@@ -109,43 +109,52 @@ caps_init(void)
 void
 caps_add_by_ver(const char *const ver, EntityCapabilities *caps)
 {
-    gboolean cached = g_key_file_has_group(cache, ver);
-    if (!cached) {
-        if (caps->name) {
-            g_key_file_set_string(cache, ver, "name", caps->name);
-        }
-        if (caps->category) {
-            g_key_file_set_string(cache, ver, "category", caps->category);
-        }
-        if (caps->type) {
-            g_key_file_set_string(cache, ver, "type", caps->type);
-        }
-        if (caps->software) {
-            g_key_file_set_string(cache, ver, "software", caps->software);
-        }
-        if (caps->software_version) {
-            g_key_file_set_string(cache, ver, "software_version", caps->software_version);
-        }
-        if (caps->os) {
-            g_key_file_set_string(cache, ver, "os", caps->os);
-        }
-        if (caps->os_version) {
-            g_key_file_set_string(cache, ver, "os_version", caps->os_version);
-        }
-        if (caps->features) {
-            GSList *curr_feature = caps->features;
-            int num = g_slist_length(caps->features);
-            const gchar* features_list[num];
-            int curr = 0;
-            while (curr_feature) {
-                features_list[curr++] = curr_feature->data;
-                curr_feature = g_slist_next(curr_feature);
-            }
-            g_key_file_set_string_list(cache, ver, "features", features_list, num);
-        }
-
-        _save_cache();
+    if (ver == NULL || caps == NULL) {
+        return;
     }
+
+    gboolean cached = g_key_file_has_group(cache, ver);
+    if (cached) {
+        return;
+    }
+
+    if (caps->identity) {
+        DiscoIdentity *identity = caps->identity;
+        if (identity->name) {
+            g_key_file_set_string(cache, ver, "name", identity->name);
+        }
+        if (identity->category) {
+            g_key_file_set_string(cache, ver, "category", identity->category);
+        }
+        if (identity->type) {
+            g_key_file_set_string(cache, ver, "type", identity->type);
+        }
+    }
+    if (caps->software) {
+        g_key_file_set_string(cache, ver, "software", caps->software);
+    }
+    if (caps->software_version) {
+        g_key_file_set_string(cache, ver, "software_version", caps->software_version);
+    }
+    if (caps->os) {
+        g_key_file_set_string(cache, ver, "os", caps->os);
+    }
+    if (caps->os_version) {
+        g_key_file_set_string(cache, ver, "os_version", caps->os_version);
+    }
+    if (caps->features) {
+        GSList *curr_feature = caps->features;
+        int num = g_slist_length(caps->features);
+        const gchar* features_list[num];
+        int curr = 0;
+        while (curr_feature) {
+            features_list[curr++] = curr_feature->data;
+            curr_feature = g_slist_next(curr_feature);
+        }
+        g_key_file_set_string_list(cache, ver, "features", features_list, num);
+    }
+
+    _save_cache();
 }
 
 void
@@ -173,24 +182,16 @@ _caps_by_ver(const char *const ver)
         EntityCapabilities *new_caps = malloc(sizeof(struct entity_capabilities_t));
 
         char *category = g_key_file_get_string(cache, ver, "category", NULL);
-        if (category) {
-            new_caps->category = category;
-        } else {
-            new_caps->category = NULL;
-        }
-
         char *type = g_key_file_get_string(cache, ver, "type", NULL);
-        if (type) {
-            new_caps->type = type;
-        } else {
-            new_caps->type = NULL;
-        }
-
         char *name = g_key_file_get_string(cache, ver, "name", NULL);
-        if (name) {
-            new_caps->name = name;
+        if (category || type || name) {
+            DiscoIdentity *identity = malloc(sizeof(struct disco_identity_t));
+            identity->category = category;
+            identity->type = type;
+            identity->name = name;
+            new_caps->identity = identity;
         } else {
-            new_caps->name = NULL;
+            new_caps->identity = NULL;
         }
 
         char *software = g_key_file_get_string(cache, ver, "software", NULL);
@@ -275,9 +276,17 @@ _caps_copy(EntityCapabilities *caps)
         return NULL;
     } else {
         EntityCapabilities *result = (EntityCapabilities *)malloc(sizeof(EntityCapabilities));
-        result->category = caps->category ? strdup(caps->category) : NULL;
-        result->type = caps->type ? strdup(caps->type) : NULL;
-        result->name = caps->name ? strdup(caps->name) : NULL;
+
+        if (caps->identity) {
+            DiscoIdentity *identity = (DiscoIdentity*)malloc(sizeof(DiscoIdentity));
+            identity->category = caps->identity->category ? strdup(caps->identity->category) : NULL;
+            identity->type = caps->identity->type ? strdup(caps->identity->type) : NULL;
+            identity->name = caps->identity->name ? strdup(caps->identity->name) : NULL;
+            result->identity = identity;
+        } else {
+            result->identity = NULL;
+        }
+
         result->software = caps->software ? strdup(caps->software) : NULL;
         result->software_version = caps->software_version ? strdup(caps->software_version) : NULL;
         result->os = caps->os ? strdup(caps->os) : NULL;
@@ -503,21 +512,16 @@ caps_create(xmpp_stanza_t *query)
 
     EntityCapabilities *new_caps = malloc(sizeof(struct entity_capabilities_t));
 
-    if (category) {
-        new_caps->category = strdup(category);
+    if (category || type || name) {
+        DiscoIdentity *identity = malloc(sizeof(struct disco_identity_t));
+        identity->category = category ? strdup(category) : NULL;
+        identity->type = type ? strdup(type) : NULL;
+        identity->name = name ? strdup(name) : NULL;
+        new_caps->identity = identity;
     } else {
-        new_caps->category = NULL;
+        new_caps->identity = NULL;
     }
-    if (type) {
-        new_caps->type = strdup(type);
-    } else {
-        new_caps->type = NULL;
-    }
-    if (name) {
-        new_caps->name = strdup(name);
-    } else {
-        new_caps->name = NULL;
-    }
+
     if (software) {
         new_caps->software = software;
     } else {
@@ -637,13 +641,21 @@ caps_close(void)
     prof_features = NULL;
 }
 
+static void
+_disco_identity_destroy(DiscoIdentity *disco_identity)
+{
+    if (disco_identity) {
+        free(disco_identity->category);
+        free(disco_identity->name);
+        free(disco_identity->type);
+    }
+}
+
 void
 caps_destroy(EntityCapabilities *caps)
 {
     if (caps) {
-        free(caps->category);
-        free(caps->type);
-        free(caps->name);
+        _disco_identity_destroy(caps->identity);
         free(caps->software);
         free(caps->software_version);
         free(caps->os);

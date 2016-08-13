@@ -558,25 +558,27 @@ cons_show_caps(const char *const fulljid, resource_presence_t presence)
         win_print(console, '-', 0, NULL, NO_DATE, 0, "", ":");
 
         // show identity
-        if (caps->category || caps->type || caps->name) {
+        if (caps->identity) {
+            DiscoIdentity *identity = caps->identity;
             win_print(console, '-', 0, NULL, NO_EOL, 0, "", "Identity: ");
-            if (caps->name) {
-                win_print(console, '-', 0, NULL, NO_DATE | NO_EOL, 0, "", caps->name);
-                if (caps->category || caps->type) {
+            if (identity->name) {
+                win_print(console, '-', 0, NULL, NO_DATE | NO_EOL, 0, "", identity->name);
+                if (identity->category || identity->type) {
                     win_print(console, '-', 0, NULL, NO_DATE | NO_EOL, 0, "", " ");
                 }
             }
-            if (caps->type) {
-                win_print(console, '-', 0, NULL, NO_DATE | NO_EOL, 0, "", caps->type);
-                if (caps->category) {
+            if (identity->type) {
+                win_print(console, '-', 0, NULL, NO_DATE | NO_EOL, 0, "", identity->type);
+                if (identity->category) {
                     win_print(console, '-', 0, NULL, NO_DATE | NO_EOL, 0, "", " ");
                 }
             }
-            if (caps->category) {
-                win_print(console, '-', 0, NULL, NO_DATE | NO_EOL, 0, "", caps->category);
+            if (identity->category) {
+                win_print(console, '-', 0, NULL, NO_DATE | NO_EOL, 0, "", identity->category);
             }
             win_newline(console);
         }
+
         if (caps->software) {
             win_vprint(console, '-', 0, NULL, NO_EOL, 0, "", "Software: %s", caps->software);
         }
@@ -1007,25 +1009,27 @@ cons_show_account(ProfAccount *account)
 
             if (caps) {
                 // show identity
-                if (caps->category || caps->type || caps->name) {
+                if (caps->identity) {
+                    DiscoIdentity *identity = caps->identity;
                     win_print(console, '-', 0, NULL, NO_EOL, 0, "", "    Identity: ");
-                    if (caps->name) {
-                        win_print(console, '-', 0, NULL, NO_DATE | NO_EOL, 0, "", caps->name);
-                        if (caps->category || caps->type) {
+                    if (identity->name) {
+                        win_print(console, '-', 0, NULL, NO_DATE | NO_EOL, 0, "", identity->name);
+                        if (identity->category || identity->type) {
                             win_print(console, '-', 0, NULL, NO_DATE | NO_EOL, 0, "", " ");
                         }
                     }
-                    if (caps->type) {
-                        win_print(console, '-', 0, NULL, NO_DATE | NO_EOL, 0, "", caps->type);
-                        if (caps->category) {
+                    if (identity->type) {
+                        win_print(console, '-', 0, NULL, NO_DATE | NO_EOL, 0, "", identity->type);
+                        if (identity->category) {
                             win_print(console, '-', 0, NULL, NO_DATE | NO_EOL, 0, "", " ");
                         }
                     }
-                    if (caps->category) {
-                        win_print(console, '-', 0, NULL, NO_DATE | NO_EOL, 0, "", caps->category);
+                    if (identity->category) {
+                        win_print(console, '-', 0, NULL, NO_DATE | NO_EOL, 0, "", identity->category);
                     }
                     win_newline(console);
                 }
+
                 if (caps->software) {
                     win_vprint(console, '-', 0, NULL, NO_EOL, 0, "", "    Software: %s", caps->software);
                 }
