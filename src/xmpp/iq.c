@@ -742,7 +742,7 @@ _caps_response_id_handler(xmpp_stanza_t *const stanza, void *const userdata)
     } else {
         log_info("Valid SHA-1 hash found: %s", given_sha1);
 
-        if (caps_contains(given_sha1)) {
+        if (caps_cache_contains(given_sha1)) {
             log_info("Capabilties already cached: %s", given_sha1);
         } else {
             log_info("Capabilities not cached: %s, storing", given_sha1);
@@ -870,7 +870,7 @@ _caps_response_legacy_id_handler(xmpp_stanza_t *const stanza, void *const userda
     // nodes match
     if (g_strcmp0(expected_node, node) == 0) {
         log_info("Legacy capabilities, nodes match %s", node);
-        if (caps_contains(node)) {
+        if (caps_cache_contains(node)) {
             log_info("Capabilties already cached: %s", node);
         } else {
             log_info("Capabilities not cached: %s, storing", node);

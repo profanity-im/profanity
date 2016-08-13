@@ -196,7 +196,7 @@ caps_map_jid_to_ver(const char *const jid, const char *const ver)
 }
 
 gboolean
-caps_contains(const char *const ver)
+caps_cache_contains(const char *const ver)
 {
     return (g_key_file_has_group(cache, ver));
 }

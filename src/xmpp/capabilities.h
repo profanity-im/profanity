@@ -52,7 +52,7 @@ void caps_init(void);
 void caps_add_by_ver(const char *const ver, EntityCapabilities *caps);
 void caps_add_by_jid(const char *const jid, EntityCapabilities *caps);
 void caps_map_jid_to_ver(const char *const jid, const char *const ver);
-gboolean caps_contains(const char *const ver);
+gboolean caps_cache_contains(const char *const ver);
 
 GList* caps_get_features(void);
 
