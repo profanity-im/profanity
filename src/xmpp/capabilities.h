@@ -49,6 +49,10 @@
 
 void caps_init(void);
 
+EntityCapabilities* caps_create(const char *const category, const char *const type, const char *const name,
+    const char *const software, const char *const software_version,
+    const char *const os, const char *const os_version,
+    GSList *features);
 void caps_add_by_ver(const char *const ver, EntityCapabilities *caps);
 void caps_add_by_jid(const char *const jid, EntityCapabilities *caps);
 void caps_map_jid_to_ver(const char *const jid, const char *const ver);

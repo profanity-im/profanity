@@ -1743,13 +1743,13 @@ stanza_create_caps_from_query_element(xmpp_stanza_t *query)
                 formField = field->data;
                 if (formField->values) {
                     if (strcmp(formField->var, "software") == 0) {
-                        software = strdup(formField->values->data);
+                        software = formField->values->data;
                     } else if (strcmp(formField->var, "software_version") == 0) {
-                        software_version = strdup(formField->values->data);
+                        software_version = formField->values->data;
                     } else if (strcmp(formField->var, "os") == 0) {
-                        os = strdup(formField->values->data);
+                        os = formField->values->data;
                     } else if (strcmp(formField->var, "os_version") == 0) {
-                        os_version = strdup(formField->values->data);
+                        os_version = formField->values->data;
                     }
                 }
                 field = g_slist_next(field);
@@ -1829,33 +1829,10 @@ stanza_create_caps_from_query_element(xmpp_stanza_t *query)
         name = xmpp_stanza_get_attribute(found, "name");
     }
 
-    EntityCapabilities *new_caps = malloc(sizeof(struct entity_capabilities_t));
+    EntityCapabilities *result = caps_create(category, type, name, software, software_version, os, os_version, features);
+    g_slist_free_full(features, free);
 
-    if (category || type || name) {
-        DiscoIdentity *identity = malloc(sizeof(struct disco_identity_t));
-        identity->category = category ? strdup(category) : NULL;
-        identity->type = type ? strdup(type) : NULL;
-        identity->name = name ? strdup(name) : NULL;
-        new_caps->identity = identity;
-    } else {
-        new_caps->identity = NULL;
-    }
-
-    if (software || software_version || os || os_version) {
-        SoftwareVersion *software_versionp = malloc(sizeof(struct software_version_t));
-        software_versionp->software = software;
-        software_versionp->software_version = software_version;
-        software_versionp->os = os;
-        software_versionp->os_version = os_version;
-    }
-
-    if (features) {
-        new_caps->features = features;
-    } else {
-        new_caps->features = NULL;
-    }
-
-    return new_caps;
+    return result;
 }
 
 char*
