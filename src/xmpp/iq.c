@@ -733,7 +733,7 @@ _caps_response_id_handler(xmpp_stanza_t *const stanza, void *const userdata)
     // validate sha1
     gchar **split = g_strsplit(node, "#", -1);
     char *given_sha1 = split[1];
-    char *generated_sha1 = caps_create_sha1_str(query);
+    char *generated_sha1 = stanza_create_caps_sha1_from_query(query);
 
     if (g_strcmp0(given_sha1, generated_sha1) != 0) {
         log_warning("Generated sha-1 does not match given:");
@@ -742,11 +742,11 @@ _caps_response_id_handler(xmpp_stanza_t *const stanza, void *const userdata)
     } else {
         log_info("Valid SHA-1 hash found: %s", given_sha1);
 
-        if (caps_contains(given_sha1)) {
+        if (caps_cache_contains(given_sha1)) {
             log_info("Capabilties already cached: %s", given_sha1);
         } else {
             log_info("Capabilities not cached: %s, storing", given_sha1);
-            EntityCapabilities *capabilities = caps_create(query);
+            EntityCapabilities *capabilities = stanza_create_caps_from_query_element(query);
             caps_add_by_ver(given_sha1, capabilities);
             caps_destroy(capabilities);
         }
@@ -810,7 +810,7 @@ _caps_response_for_jid_id_handler(xmpp_stanza_t *const stanza, void *const userd
     }
 
     log_info("Associating capabilities with: %s", jid);
-    EntityCapabilities *capabilities = caps_create(query);
+    EntityCapabilities *capabilities = stanza_create_caps_from_query_element(query);
     caps_add_by_jid(jid, capabilities);
 
     free(jid);
@@ -870,11 +870,11 @@ _caps_response_legacy_id_handler(xmpp_stanza_t *const stanza, void *const userda
     // nodes match
     if (g_strcmp0(expected_node, node) == 0) {
         log_info("Legacy capabilities, nodes match %s", node);
-        if (caps_contains(node)) {
+        if (caps_cache_contains(node)) {
             log_info("Capabilties already cached: %s", node);
         } else {
             log_info("Capabilities not cached: %s, storing", node);
-            EntityCapabilities *capabilities = caps_create(query);
+            EntityCapabilities *capabilities = stanza_create_caps_from_query_element(query);
             caps_add_by_ver(node, capabilities);
             caps_destroy(capabilities);
         }
@@ -1349,7 +1349,7 @@ _disco_info_get_handler(xmpp_stanza_t *const stanza)
         xmpp_stanza_set_id(response, xmpp_stanza_get_id(stanza));
         xmpp_stanza_set_attribute(response, STANZA_ATTR_TO, from);
         xmpp_stanza_set_type(response, STANZA_TYPE_RESULT);
-        xmpp_stanza_t *query = caps_create_query_response_stanza(ctx);
+        xmpp_stanza_t *query = stanza_create_caps_query_element(ctx);
         if (node_str) {
             xmpp_stanza_set_attribute(query, STANZA_ATTR_NODE, node_str);
         }

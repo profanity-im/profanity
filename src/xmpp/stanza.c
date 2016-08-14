@@ -36,6 +36,10 @@
 
 #include "config.h"
 
+#ifdef HAVE_GIT_VERSION
+#include "gitversion.h"
+#endif
+
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
@@ -1052,6 +1056,51 @@ stanza_create_room_config_submit_iq(xmpp_ctx_t *ctx, const char *const room, Dat
     return iq;
 }
 
+xmpp_stanza_t*
+stanza_create_caps_query_element(xmpp_ctx_t *ctx)
+{
+    xmpp_stanza_t *query = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(query, STANZA_NAME_QUERY);
+    xmpp_stanza_set_ns(query, XMPP_NS_DISCO_INFO);
+
+    xmpp_stanza_t *identity = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(identity, "identity");
+    xmpp_stanza_set_attribute(identity, "category", "client");
+    xmpp_stanza_set_attribute(identity, "type", "console");
+
+    GString *name_str = g_string_new("Profanity ");
+    g_string_append(name_str, PACKAGE_VERSION);
+    if (strcmp(PACKAGE_STATUS, "development") == 0) {
+#ifdef HAVE_GIT_VERSION
+        g_string_append(name_str, "dev.");
+        g_string_append(name_str, PROF_GIT_BRANCH);
+        g_string_append(name_str, ".");
+        g_string_append(name_str, PROF_GIT_REVISION);
+#else
+        g_string_append(name_str, "dev");
+#endif
+    }
+    xmpp_stanza_set_attribute(identity, "name", name_str->str);
+    g_string_free(name_str, TRUE);
+    xmpp_stanza_add_child(query, identity);
+    xmpp_stanza_release(identity);
+
+    GList *features = caps_get_features();
+    GList *curr = features;
+    while (curr) {
+        xmpp_stanza_t *feature = xmpp_stanza_new(ctx);
+        xmpp_stanza_set_name(feature, STANZA_NAME_FEATURE);
+        xmpp_stanza_set_attribute(feature, STANZA_ATTR_VAR, curr->data);
+        xmpp_stanza_add_child(query, feature);
+        xmpp_stanza_release(feature);
+
+        curr = g_list_next(curr);
+    }
+    g_list_free(features);
+
+    return query;
+}
+
 gboolean
 stanza_contains_chat_state(xmpp_stanza_t *stanza)
 {
@@ -1082,6 +1131,107 @@ stanza_create_ping_iq(xmpp_ctx_t *ctx, const char *const target)
     xmpp_stanza_release(ping);
 
     return iq;
+}
+
+char*
+stanza_create_caps_sha1_from_query(xmpp_stanza_t *const query)
+{
+    GSList *identities = NULL;
+    GSList *features = NULL;
+    GSList *form_names = NULL;
+    GHashTable *forms = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, (GDestroyNotify)form_destroy);
+
+    xmpp_stanza_t *child = xmpp_stanza_get_children(query);
+    while (child) {
+        if (g_strcmp0(xmpp_stanza_get_name(child), STANZA_NAME_IDENTITY) == 0) {
+            const char *category = xmpp_stanza_get_attribute(child, "category");
+            const char *type = xmpp_stanza_get_attribute(child, "type");
+            const char *lang = xmpp_stanza_get_attribute(child, "xml:lang");
+            const char *name = xmpp_stanza_get_attribute(child, "name");
+
+            GString *identity_str = g_string_new(category);
+            g_string_append(identity_str, "/");
+            if (type) {
+                g_string_append(identity_str, type);
+            }
+            g_string_append(identity_str, "/");
+            if (lang) {
+                g_string_append(identity_str, lang);
+            }
+            g_string_append(identity_str, "/");
+            if (name) {
+                g_string_append(identity_str, name);
+            }
+            g_string_append(identity_str, "<");
+            identities = g_slist_insert_sorted(identities, g_strdup(identity_str->str), (GCompareFunc)strcmp);
+            g_string_free(identity_str, TRUE);
+        } else if (g_strcmp0(xmpp_stanza_get_name(child), STANZA_NAME_FEATURE) == 0) {
+            const char *feature_str = xmpp_stanza_get_attribute(child, "var");
+            features = g_slist_insert_sorted(features, g_strdup(feature_str), (GCompareFunc)strcmp);
+        } else if (g_strcmp0(xmpp_stanza_get_name(child), STANZA_NAME_X) == 0) {
+            if (g_strcmp0(xmpp_stanza_get_ns(child), STANZA_NS_DATA) == 0) {
+                DataForm *form = form_create(child);
+                char *form_type = form_get_form_type_field(form);
+                form_names = g_slist_insert_sorted(form_names, g_strdup(form_type), (GCompareFunc)strcmp);
+                g_hash_table_insert(forms, g_strdup(form_type), form);
+            }
+        }
+        child = xmpp_stanza_get_next(child);
+    }
+
+    GString *s = g_string_new("");
+
+    GSList *curr = identities;
+    while (curr) {
+        g_string_append(s, curr->data);
+        curr = g_slist_next(curr);
+    }
+
+    curr = features;
+    while (curr) {
+        g_string_append(s, curr->data);
+        g_string_append(s, "<");
+        curr = g_slist_next(curr);
+    }
+
+    curr = form_names;
+    while (curr) {
+        DataForm *form = g_hash_table_lookup(forms, curr->data);
+        char *form_type = form_get_form_type_field(form);
+        g_string_append(s, form_type);
+        g_string_append(s, "<");
+
+        GSList *sorted_fields = form_get_non_form_type_fields_sorted(form);
+        GSList *curr_field = sorted_fields;
+        while (curr_field) {
+            FormField *field = curr_field->data;
+            g_string_append(s, field->var);
+            g_string_append(s, "<");
+
+            GSList *sorted_values = form_get_field_values_sorted(field);
+            GSList *curr_value = sorted_values;
+            while (curr_value) {
+                g_string_append(s, curr_value->data);
+                g_string_append(s, "<");
+                curr_value = g_slist_next(curr_value);
+            }
+            g_slist_free(sorted_values);
+            curr_field = g_slist_next(curr_field);
+        }
+        g_slist_free(sorted_fields);
+
+        curr = g_slist_next(curr);
+    }
+
+    char *result = p_sha1_hash(s->str);
+
+    g_string_free(s, TRUE);
+    g_slist_free_full(identities, g_free);
+    g_slist_free_full(features, g_free);
+    g_slist_free_full(form_names, g_free);
+    g_hash_table_destroy(forms);
+
+    return result;
 }
 
 GDateTime*
@@ -1573,6 +1723,118 @@ stanza_parse_caps(xmpp_stanza_t *const stanza)
     return caps;
 }
 
+EntityCapabilities*
+stanza_create_caps_from_query_element(xmpp_stanza_t *query)
+{
+    char *software = NULL;
+    char *software_version = NULL;
+    char *os = NULL;
+    char *os_version = NULL;
+
+    xmpp_stanza_t *softwareinfo = xmpp_stanza_get_child_by_ns(query, STANZA_NS_DATA);
+    if (softwareinfo) {
+        DataForm *form = form_create(softwareinfo);
+        FormField *formField = NULL;
+
+        char *form_type = form_get_form_type_field(form);
+        if (g_strcmp0(form_type, STANZA_DATAFORM_SOFTWARE) == 0) {
+            GSList *field = form->fields;
+            while (field) {
+                formField = field->data;
+                if (formField->values) {
+                    if (strcmp(formField->var, "software") == 0) {
+                        software = formField->values->data;
+                    } else if (strcmp(formField->var, "software_version") == 0) {
+                        software_version = formField->values->data;
+                    } else if (strcmp(formField->var, "os") == 0) {
+                        os = formField->values->data;
+                    } else if (strcmp(formField->var, "os_version") == 0) {
+                        os_version = formField->values->data;
+                    }
+                }
+                field = g_slist_next(field);
+            }
+        }
+
+        form_destroy(form);
+    }
+
+    xmpp_stanza_t *child = xmpp_stanza_get_children(query);
+    GSList *identity_stanzas = NULL;
+    GSList *features = NULL;
+    while (child) {
+        if (g_strcmp0(xmpp_stanza_get_name(child), "feature") == 0) {
+            features = g_slist_append(features, strdup(xmpp_stanza_get_attribute(child, "var")));
+        }
+        if (g_strcmp0(xmpp_stanza_get_name(child), "identity") == 0) {
+            identity_stanzas = g_slist_append(identity_stanzas, child);
+        }
+
+        child = xmpp_stanza_get_next(child);
+    }
+
+    // find identity by locale
+    const gchar* const *langs = g_get_language_names();
+    int num_langs = g_strv_length((gchar**)langs);
+    xmpp_stanza_t *found = NULL;
+    GSList *curr_identity = identity_stanzas;
+    while (curr_identity) {
+        xmpp_stanza_t *id_stanza = curr_identity->data;
+        const char *stanza_lang = xmpp_stanza_get_attribute(id_stanza, "xml:lang");
+        if (stanza_lang) {
+            int i = 0;
+            for (i = 0; i < num_langs; i++) {
+                if (g_strcmp0(langs[i], stanza_lang) == 0) {
+                    found = id_stanza;
+                    break;
+                }
+            }
+        }
+        if (found) {
+            break;
+        }
+        curr_identity = g_slist_next(curr_identity);
+    }
+
+    // not lang match, use default with no lang
+    if (!found) {
+        curr_identity = identity_stanzas;
+        while (curr_identity) {
+            xmpp_stanza_t *id_stanza = curr_identity->data;
+            const char *stanza_lang = xmpp_stanza_get_attribute(id_stanza, "xml:lang");
+            if (!stanza_lang) {
+                found = id_stanza;
+                break;
+            }
+
+            curr_identity = g_slist_next(curr_identity);
+        }
+    }
+
+    // no matching lang, no identity without lang, use first
+    if (!found) {
+        if (identity_stanzas) {
+            found = identity_stanzas->data;
+        }
+    }
+
+    g_slist_free(identity_stanzas);
+
+    const char *category = NULL;
+    const char *type = NULL;
+    const char *name = NULL;
+    if (found) {
+        category = xmpp_stanza_get_attribute(found, "category");
+        type = xmpp_stanza_get_attribute(found, "type");
+        name = xmpp_stanza_get_attribute(found, "name");
+    }
+
+    EntityCapabilities *result = caps_create(category, type, name, software, software_version, os, os_version, features);
+    g_slist_free_full(features, free);
+
+    return result;
+}
+
 char*
 stanza_get_error_message(xmpp_stanza_t *stanza)
 {
@@ -1712,7 +1974,7 @@ stanza_attach_caps(xmpp_ctx_t *const ctx, xmpp_stanza_t *const presence)
     xmpp_stanza_t *caps = xmpp_stanza_new(ctx);
     xmpp_stanza_set_name(caps, STANZA_NAME_C);
     xmpp_stanza_set_ns(caps, STANZA_NS_CAPS);
-    xmpp_stanza_t *query = caps_create_query_response_stanza(ctx);
+    xmpp_stanza_t *query = stanza_create_caps_query_element(ctx);
 
     char *sha1 = caps_get_my_sha1(ctx);
     xmpp_stanza_set_attribute(caps, STANZA_ATTR_HASH, "sha-1");
