@@ -553,7 +553,7 @@ _handle_caps(const char *const jid, XMPPCaps *caps)
     if (g_strcmp0(caps->hash, "sha-1") == 0) {
         log_info("Hash %s supported", caps->hash);
         if (caps->ver) {
-            if (caps_contains(caps->ver)) {
+            if (caps_cache_contains(caps->ver)) {
                 log_info("Capabilities cache hit: %s, for %s.", caps->ver, jid);
                 caps_map_jid_to_ver(jid, caps->ver);
             } else {
@@ -666,7 +666,7 @@ _send_caps_request(char *node, char *caps_key, char *id, char *from)
 
     if (node) {
         log_debug("Node string: %s.", node);
-        if (!caps_contains(caps_key)) {
+        if (!caps_cache_contains(caps_key)) {
             log_debug("Capabilities not cached for '%s', sending discovery IQ.", from);
             xmpp_stanza_t *iq = stanza_create_disco_info_iq(ctx, id, from, node);
             iq_send_stanza(iq);
