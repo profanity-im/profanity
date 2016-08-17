@@ -113,16 +113,18 @@ caps_get_features(void)
 
     GList *curr = prof_features;
     while (curr) {
-        result = g_list_append(result, curr->data);
+        result = g_list_append(result, strdup(curr->data));
         curr = g_list_next(curr);
     }
 
     GList *plugin_features = plugins_get_disco_features();
     curr = plugin_features;
     while (curr) {
-        result = g_list_append(result, curr->data);
+        result = g_list_append(result, strdup(curr->data));
         curr = g_list_next(curr);
     }
+
+    g_list_free(plugin_features);
 
     return result;
 }
