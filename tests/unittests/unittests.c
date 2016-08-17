@@ -34,6 +34,7 @@
 #include "test_cmd_disconnect.h"
 #include "test_form.h"
 #include "test_callbacks.h"
+#include "test_plugins_disco.h"
 
 int main(int argc, char* argv[]) {
     const UnitTest all_tests[] = {
@@ -587,6 +588,14 @@ int main(int argc, char* argv[]) {
 
         unit_test(returns_no_commands),
         unit_test(returns_commands),
+
+        unit_test(returns_empty_list_when_none),
+        unit_test(returns_added_feature),
+        unit_test(resets_features_on_close),
+        unit_test(returns_all_added_features),
+        unit_test(does_not_add_duplicate_feature),
+        unit_test(removes_plugin_features),
+        unit_test(does_not_remove_feature_when_more_than_one_reference),
     };
 
     return run_tests(all_tests);
