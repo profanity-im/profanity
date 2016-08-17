@@ -1096,7 +1096,7 @@ stanza_create_caps_query_element(xmpp_ctx_t *ctx)
 
         curr = g_list_next(curr);
     }
-    g_list_free(features);
+    g_list_free_full(features, free);
 
     return query;
 }
