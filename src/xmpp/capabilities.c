@@ -105,8 +105,9 @@ caps_init(void)
     if (prefs_get_boolean(PREF_RECEIPTS_SEND)) {
         g_hash_table_add(prof_features, strdup(STANZA_NS_RECEIPTS));
     }
-    g_hash_table_add(prof_features, strdup(STANZA_NS_LASTACTIVITY));
-
+    if (prefs_get_boolean(PREF_LASTACTIVITY)) {
+        g_hash_table_add(prof_features, strdup(STANZA_NS_LASTACTIVITY));
+    }
     my_sha1 = NULL;
 }
 
