@@ -56,6 +56,7 @@
 #define JABBER_PRIORITY_MAX 127
 
 #define XMPP_FEATURE_BLOCKING "urn:xmpp:blocking"
+#define XMPP_FEATURE_RECEIPTS "urn:xmpp:receipts"
 
 typedef enum {
     JABBER_CONNECTING,
@@ -179,6 +180,8 @@ EntityCapabilities* caps_lookup(const char *const jid);
 void caps_close(void);
 void caps_destroy(EntityCapabilities *caps);
 void caps_reset_ver(void);
+void caps_add_feature(char *feature);
+void caps_remove_feature(char *feature);
 
 gboolean bookmark_add(const char *jid, const char *nick, const char *password, const char *autojoin_str);
 gboolean bookmark_update(const char *jid, const char *nick, const char *password, const char *autojoin_str);
