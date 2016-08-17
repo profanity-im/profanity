@@ -203,6 +203,8 @@ void iq_last_activity_request(gchar *jid) {}
 void iq_autoping_check(void) {}
 
 // caps functions
+void caps_add_feature(char *feature) {}
+void caps_remove_feature(char *feature) {}
 EntityCapabilities* caps_lookup(const char * const jid)
 {
     return NULL;
