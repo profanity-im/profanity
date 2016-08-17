@@ -67,7 +67,7 @@ static GKeyFile *cache;
 static GHashTable *jid_to_ver;
 static GHashTable *jid_to_caps;
 
-static GList *prof_features;
+static GHashTable *prof_features;
 static char *my_sha1;
 
 static void _save_cache(void);
@@ -91,17 +91,17 @@ caps_init(void)
     jid_to_ver = g_hash_table_new_full(g_str_hash, g_str_equal, free, free);
     jid_to_caps = g_hash_table_new_full(g_str_hash, g_str_equal, free, (GDestroyNotify)caps_destroy);
 
-    prof_features = NULL;
-    prof_features = g_list_append(prof_features, strdup(STANZA_NS_CAPS));
-    prof_features = g_list_append(prof_features, strdup(XMPP_NS_DISCO_INFO));
-    prof_features = g_list_append(prof_features, strdup(XMPP_NS_DISCO_ITEMS));
-    prof_features = g_list_append(prof_features, strdup(STANZA_NS_MUC));
-    prof_features = g_list_append(prof_features, strdup(STANZA_NS_CONFERENCE));
-    prof_features = g_list_append(prof_features, strdup(STANZA_NS_VERSION));
-    prof_features = g_list_append(prof_features, strdup(STANZA_NS_CHATSTATES));
-    prof_features = g_list_append(prof_features, strdup(STANZA_NS_PING));
-    prof_features = g_list_append(prof_features, strdup(STANZA_NS_RECEIPTS));
-    prof_features = g_list_append(prof_features, strdup(STANZA_NS_LASTACTIVITY));
+    prof_features = g_hash_table_new_full(g_str_hash, g_str_equal, free, NULL);
+    g_hash_table_add(prof_features, strdup(STANZA_NS_CAPS));
+    g_hash_table_add(prof_features, strdup(XMPP_NS_DISCO_INFO));
+    g_hash_table_add(prof_features, strdup(XMPP_NS_DISCO_ITEMS));
+    g_hash_table_add(prof_features, strdup(STANZA_NS_MUC));
+    g_hash_table_add(prof_features, strdup(STANZA_NS_CONFERENCE));
+    g_hash_table_add(prof_features, strdup(STANZA_NS_VERSION));
+    g_hash_table_add(prof_features, strdup(STANZA_NS_CHATSTATES));
+    g_hash_table_add(prof_features, strdup(STANZA_NS_PING));
+    g_hash_table_add(prof_features, strdup(STANZA_NS_RECEIPTS));
+    g_hash_table_add(prof_features, strdup(STANZA_NS_LASTACTIVITY));
 
     my_sha1 = NULL;
 }
@@ -111,11 +111,13 @@ caps_get_features(void)
 {
     GList *result = NULL;
 
-    GList *curr = prof_features;
+    GList *features_as_list = g_hash_table_get_keys(prof_features);
+    GList *curr = features_as_list;
     while (curr) {
         result = g_list_append(result, strdup(curr->data));
         curr = g_list_next(curr);
     }
+    g_list_free(features_as_list);
 
     GList *plugin_features = plugins_get_disco_features();
     curr = plugin_features;
@@ -294,7 +296,7 @@ caps_close(void)
     g_hash_table_destroy(jid_to_caps);
     free(cache_loc);
     cache_loc = NULL;
-    g_list_free_full(prof_features, free);
+    g_hash_table_destroy(prof_features);
     prof_features = NULL;
 }
 
