@@ -37,76 +37,112 @@
 
 #include <glib.h>
 
+// features to reference count map
+static GHashTable *features = NULL;
+
+// plugin to feature map
 static GHashTable *plugin_to_features = NULL;
 
 static void
-_free_features(GList *features)
+_free_features(GHashTable *features)
 {
-    g_list_free_full(features, free);
+    g_hash_table_destroy(features);
 }
 
 void
-disco_add_feature(const char *plugin_name, char* feature)
+disco_add_feature(const char *plugin_name, char *feature)
 {
     if (feature == NULL || plugin_name == NULL) {
         return;
     }
 
+    if (!features) {
+        features = g_hash_table_new_full(g_str_hash, g_str_equal, free, NULL);
+    }
     if (!plugin_to_features) {
         plugin_to_features = g_hash_table_new_full(g_str_hash, g_str_equal, free, (GDestroyNotify)_free_features);
     }
 
-    GList *features = g_hash_table_lookup(plugin_to_features, plugin_name);
-    if (!features) {
-        features = g_list_append(features, strdup(feature));
-        g_hash_table_insert(plugin_to_features, strdup(plugin_name), features);
+    GHashTable *plugin_features = g_hash_table_lookup(plugin_to_features, plugin_name);
+    gboolean added = FALSE;
+    if (plugin_features == NULL) {
+        plugin_features = g_hash_table_new_full(g_str_hash, g_str_equal, free, NULL);
+        g_hash_table_add(plugin_features, strdup(feature));
+        g_hash_table_insert(plugin_to_features, strdup(plugin_name), plugin_features);
+        added = TRUE;
+    } else if (!g_hash_table_contains(plugin_features, feature)) {
+        g_hash_table_add(plugin_features, strdup(feature));
+        added = TRUE;
+    }
+
+    if (added == FALSE) {
+        return;
+    }
+
+    if (!g_hash_table_contains(features, feature)) {
+        g_hash_table_insert(features, strdup(feature), GINT_TO_POINTER(1));
     } else {
-        features = g_list_append(features, strdup(feature));
+        void *refcountp = g_hash_table_lookup(features, feature);
+        int refcount = GPOINTER_TO_INT(refcountp);
+        refcount++;
+        g_hash_table_replace(features, strdup(feature), GINT_TO_POINTER(refcount));
     }
 }
 
 void
 disco_remove_features(const char *plugin_name)
 {
+    if (!features) {
+        return;
+    }
     if (!plugin_to_features) {
         return;
     }
 
-    if (!g_hash_table_contains(plugin_to_features, plugin_name)) {
+    GHashTable *plugin_features_set = g_hash_table_lookup(plugin_to_features, plugin_name);
+    if (!plugin_features_set) {
         return;
     }
 
-    g_hash_table_remove(plugin_to_features, plugin_name);
+    GList *plugin_feature_list = g_hash_table_get_keys(plugin_features_set);
+    GList *curr = plugin_feature_list;
+    while (curr) {
+        char *feature = curr->data;
+        if (g_hash_table_contains(features, feature)) {
+            void *refcountp = g_hash_table_lookup(features, feature);
+            int refcount = GPOINTER_TO_INT(refcountp);
+            if (refcount == 1) {
+                g_hash_table_remove(features, feature);
+            } else {
+                refcount--;
+                g_hash_table_replace(features, strdup(feature), GINT_TO_POINTER(refcount));
+            }
+        }
+
+        curr = g_list_next(curr);
+    }
+    g_list_free(plugin_feature_list);
+
 }
 
 GList*
 disco_get_features(void)
 {
-    GList *result = NULL;
-    if (!plugin_to_features) {
-        return result;
+    if (features == NULL) {
+        return NULL;
     }
 
-    GList *lists = g_hash_table_get_values(plugin_to_features);
-    GList *curr_list = lists;
-    while (curr_list) {
-        GList *features = curr_list->data;
-        GList *curr = features;
-        while (curr) {
-            result = g_list_append(result, curr->data);
-            curr = g_list_next(curr);
-        }
-        curr_list = g_list_next(curr_list);
-    }
-
-    g_list_free(lists);
-
-    return result;
+    return g_hash_table_get_keys(features);
 }
 
 void
 disco_close(void)
 {
+    if (features) {
+        g_hash_table_destroy(features);
+        features = NULL;
+    }
+
     if (plugin_to_features) {
         g_hash_table_destroy(plugin_to_features);
         plugin_to_features = NULL;
