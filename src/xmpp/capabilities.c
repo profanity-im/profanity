@@ -54,8 +54,10 @@
 
 #include "common.h"
 #include "log.h"
+#include "event/client_events.h"
 #include "plugins/plugins.h"
 #include "config/files.h"
+#include "config/preferences.h"
 #include "xmpp/xmpp.h"
 #include "xmpp/stanza.h"
 #include "xmpp/form.h"
@@ -100,10 +102,48 @@ caps_init(void)
     g_hash_table_add(prof_features, strdup(STANZA_NS_VERSION));
     g_hash_table_add(prof_features, strdup(STANZA_NS_CHATSTATES));
     g_hash_table_add(prof_features, strdup(STANZA_NS_PING));
-    g_hash_table_add(prof_features, strdup(STANZA_NS_RECEIPTS));
+    if (prefs_get_boolean(PREF_RECEIPTS_SEND)) {
+        g_hash_table_add(prof_features, strdup(STANZA_NS_RECEIPTS));
+    }
     g_hash_table_add(prof_features, strdup(STANZA_NS_LASTACTIVITY));
 
     my_sha1 = NULL;
+}
+
+void
+caps_add_feature(char *feature)
+{
+    if (g_hash_table_contains(prof_features, feature)) {
+        return;
+    }
+
+    g_hash_table_add(prof_features, strdup(feature));
+
+    caps_reset_ver();
+
+    // resend presence to update server's disco info data for this client
+    if (connection_get_status() == JABBER_CONNECTED) {
+        resource_presence_t last_presence = accounts_get_last_presence(session_get_account_name());
+        cl_ev_presence_send(last_presence, connection_get_presence_msg(), 0);
+    }
+}
+
+void
+caps_remove_feature(char *feature)
+{
+    if (!g_hash_table_contains(prof_features, feature)) {
+        return;
+    }
+
+    g_hash_table_remove(prof_features, feature);
+
+    caps_reset_ver();
+
+    // resend presence to update server's disco info data for this client
+    if (connection_get_status() == JABBER_CONNECTED) {
+        resource_presence_t last_presence = accounts_get_last_presence(session_get_account_name());
+        cl_ev_presence_send(last_presence, connection_get_presence_msg(), 0);
+    }
 }
 
 GList*
