@@ -57,6 +57,7 @@
 
 #define XMPP_FEATURE_BLOCKING "urn:xmpp:blocking"
 #define XMPP_FEATURE_RECEIPTS "urn:xmpp:receipts"
+#define XMPP_FEATURE_LASTACTIVITY "jabber:iq:last"
 
 typedef enum {
     JABBER_CONNECTING,
