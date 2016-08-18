@@ -41,6 +41,7 @@
 #include "log.h"
 #include "config/preferences.h"
 #include "xmpp/xmpp.h"
+#include "xmpp/stanza.h"
 #include "xmpp/chat_session.h"
 
 static GHashTable *sessions;
@@ -98,6 +99,40 @@ ChatSession*
 chat_session_get(const char *const barejid)
 {
     return g_hash_table_lookup(sessions, barejid);
+}
+
+char*
+chat_session_get_jid(const char *const barejid)
+{
+    ChatSession *session = chat_session_get(barejid);
+    char *jid = NULL;
+    if (session) {
+        Jid *jidp = jid_create_from_bare_and_resource(session->barejid, session->resource);
+        jid = strdup(jidp->fulljid);
+        jid_destroy(jidp);
+    } else {
+        jid = strdup(barejid);
+    }
+
+    return jid;
+}
+
+char*
+chat_session_get_state(const char *const barejid)
+{
+    ChatSession *session = chat_session_get(barejid);
+    char *state = NULL;
+    if (session) {
+        if (prefs_get_boolean(PREF_STATES) && session->send_states) {
+            state = STANZA_NAME_ACTIVE;
+        }
+    } else {
+        if (prefs_get_boolean(PREF_STATES)) {
+            state = STANZA_NAME_ACTIVE;
+        }
+    }
+
+    return state;
 }
 
 void

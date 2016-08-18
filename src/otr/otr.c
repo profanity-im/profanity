@@ -117,7 +117,7 @@ static void
 cb_inject_message(void *opdata, const char *accountname,
     const char *protocol, const char *recipient, const char *message)
 {
-    char *id = message_send_chat_otr(recipient, message);
+    char *id = message_send_chat_otr(recipient, message, FALSE);
     free(id);
 }
 
@@ -314,7 +314,7 @@ otr_on_message_recv(const char *const barejid, const char *const resource, const
                 memmove(whitespace_base, whitespace_base+tag_length, tag_length);
                 char *otr_query_message = otr_start_query();
                 cons_show("OTR Whitespace pattern detected. Attempting to start OTR session...");
-                char *id = message_send_chat_otr(barejid, otr_query_message);
+                char *id = message_send_chat_otr(barejid, otr_query_message, FALSE);
                 free(id);
             }
         }
@@ -328,7 +328,7 @@ otr_on_message_recv(const char *const barejid, const char *const resource, const
     if (policy == PROF_OTRPOLICY_ALWAYS && *decrypted == FALSE && !whitespace_base) {
         char *otr_query_message = otr_start_query();
         cons_show("Attempting to start OTR session...");
-        char *id = message_send_chat_otr(barejid, otr_query_message);
+        char *id = message_send_chat_otr(barejid, otr_query_message, FALSE);
         free(id);
     }
 
@@ -336,7 +336,7 @@ otr_on_message_recv(const char *const barejid, const char *const resource, const
 }
 
 gboolean
-otr_on_message_send(ProfChatWin *chatwin, const char *const message)
+otr_on_message_send(ProfChatWin *chatwin, const char *const message, gboolean request_receipt)
 {
     char *id = NULL;
     prof_otrpolicy_t policy = otr_get_policy(chatwin->barejid);
@@ -345,9 +345,9 @@ otr_on_message_send(ProfChatWin *chatwin, const char *const message)
     if (otr_is_secure(chatwin->barejid)) {
         char *encrypted = otr_encrypt_message(chatwin->barejid, message);
         if (encrypted) {
-            id = message_send_chat_otr(chatwin->barejid, encrypted);
+            id = message_send_chat_otr(chatwin->barejid, encrypted, request_receipt);
             chat_log_otr_msg_out(chatwin->barejid, message);
-            chatwin_outgoing_msg(chatwin, message, id, PROF_MSG_OTR);
+            chatwin_outgoing_msg(chatwin, message, id, PROF_MSG_OTR, request_receipt);
             otr_free_message(encrypted);
             free(id);
             return TRUE;
@@ -366,8 +366,8 @@ otr_on_message_send(ProfChatWin *chatwin, const char *const message)
     // tag and send for policy opportunistic
     if (policy == PROF_OTRPOLICY_OPPORTUNISTIC) {
         char *otr_tagged_msg = otr_tag_message(message);
-        id = message_send_chat_otr(chatwin->barejid, otr_tagged_msg);
-        chatwin_outgoing_msg(chatwin, message, id, PROF_MSG_PLAIN);
+        id = message_send_chat_otr(chatwin->barejid, otr_tagged_msg, request_receipt);
+        chatwin_outgoing_msg(chatwin, message, id, PROF_MSG_PLAIN, request_receipt);
         chat_log_msg_out(chatwin->barejid, message);
         free(otr_tagged_msg);
         free(id);

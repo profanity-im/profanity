@@ -91,21 +91,22 @@ connection_supports(const char *const feature)
 }
 
 // message functions
-char* message_send_chat(const char * const barejid, const char * const msg, const char *const oob_url)
+char* message_send_chat(const char * const barejid, const char * const msg, const char *const oob_url,
+    gboolean request_receipt)
 {
     check_expected(barejid);
     check_expected(msg);
     return NULL;
 }
 
-char* message_send_chat_otr(const char * const barejid, const char * const msg)
+char* message_send_chat_otr(const char * const barejid, const char * const msg, gboolean request_receipt)
 {
     check_expected(barejid);
     check_expected(msg);
     return NULL;
 }
 
-char* message_send_chat_pgp(const char * const barejid, const char * const msg)
+char* message_send_chat_pgp(const char * const barejid, const char * const msg, gboolean request_receipt)
 {
     return NULL;
 }
@@ -213,6 +214,10 @@ EntityCapabilities* caps_lookup(const char * const jid)
 void caps_close(void) {}
 void caps_destroy(EntityCapabilities *caps) {}
 void caps_reset_ver(void) {}
+gboolean caps_jid_has_feature(const char *const jid, const char *const feature)
+{
+    return FALSE;
+}
 
 gboolean bookmark_add(const char *jid, const char *nick, const char *password, const char *autojoin_str)
 {

@@ -72,7 +72,7 @@ void otr_poll(void);
 void otr_on_connect(ProfAccount *account);
 
 char* otr_on_message_recv(const char *const barejid, const char *const resource, const char *const message, gboolean *decrypted);
-gboolean otr_on_message_send(ProfChatWin *chatwin, const char *const message);
+gboolean otr_on_message_send(ProfChatWin *chatwin, const char *const message, gboolean request_receipt);
 
 void otr_keygen(ProfAccount *account);
 

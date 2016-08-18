@@ -133,7 +133,8 @@ void chatwin_incoming_msg(ProfChatWin *chatwin, const char *const resource, cons
     GDateTime *timestamp, gboolean win_created, prof_enc_t enc_mode);
 void chatwin_receipt_received(ProfChatWin *chatwin, const char *const id);
 void chatwin_recipient_gone(ProfChatWin *chatwin);
-void chatwin_outgoing_msg(ProfChatWin *chatwin, const char *const message, char *id, prof_enc_t enc_mode);
+void chatwin_outgoing_msg(ProfChatWin *chatwin, const char *const message, char *id, prof_enc_t enc_mode,
+    gboolean request_receipt);
 void chatwin_outgoing_carbon(ProfChatWin *chatwin, const char *const message, prof_enc_t enc_mode);
 void chatwin_contact_online(ProfChatWin *chatwin, Resource *resource, GDateTime *last_activity);
 void chatwin_contact_offline(ProfChatWin *chatwin, char *resource, char *status);
