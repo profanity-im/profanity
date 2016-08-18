@@ -131,47 +131,14 @@ message_handlers_init(void)
     xmpp_handler_add(conn, _message_handler, NULL, STANZA_NAME_MESSAGE, NULL, ctx);
 }
 
-static char*
-_session_jid(const char *const barejid)
-{
-    ChatSession *session = chat_session_get(barejid);
-    char *jid = NULL;
-    if (session) {
-        Jid *jidp = jid_create_from_bare_and_resource(session->barejid, session->resource);
-        jid = strdup(jidp->fulljid);
-        jid_destroy(jidp);
-    } else {
-        jid = strdup(barejid);
-    }
-
-    return jid;
-}
-
-static char*
-_session_state(const char *const barejid)
-{
-    ChatSession *session = chat_session_get(barejid);
-    char *state = NULL;
-    if (session) {
-        if (prefs_get_boolean(PREF_STATES) && session->send_states) {
-            state = STANZA_NAME_ACTIVE;
-        }
-    } else {
-        if (prefs_get_boolean(PREF_STATES)) {
-            state = STANZA_NAME_ACTIVE;
-        }
-    }
-
-    return state;
-}
-
 char*
-message_send_chat(const char *const barejid, const char *const msg, const char *const oob_url)
+message_send_chat(const char *const barejid, const char *const msg, const char *const oob_url,
+    gboolean request_receipt)
 {
     xmpp_ctx_t * const ctx = connection_get_ctx();
 
-    char *state = _session_state(barejid);
-    char *jid = _session_jid(barejid);
+    char *state = chat_session_get_state(barejid);
+    char *jid = chat_session_get_jid(barejid);
     char *id = create_unique_id("msg");
 
     xmpp_stanza_t *message = stanza_create_message(ctx, id, jid, STANZA_TYPE_CHAT, msg);
@@ -185,7 +152,7 @@ message_send_chat(const char *const barejid, const char *const msg, const char *
         stanza_attach_x_oob_url(ctx, message, oob_url);
     }
 
-    if (prefs_get_boolean(PREF_RECEIPTS_REQUEST)) {
+    if (request_receipt) {
         stanza_attach_receipt_request(ctx, message);
     }
 
@@ -196,12 +163,12 @@ message_send_chat(const char *const barejid, const char *const msg, const char *
 }
 
 char*
-message_send_chat_pgp(const char *const barejid, const char *const msg)
+message_send_chat_pgp(const char *const barejid, const char *const msg, gboolean request_receipt)
 {
     xmpp_ctx_t * const ctx = connection_get_ctx();
 
-    char *state = _session_state(barejid);
-    char *jid = _session_jid(barejid);
+    char *state = chat_session_get_state(barejid);
+    char *jid = chat_session_get_jid(barejid);
     char *id = create_unique_id("msg");
 
     xmpp_stanza_t *message = NULL;
@@ -240,7 +207,7 @@ message_send_chat_pgp(const char *const barejid, const char *const msg)
         stanza_attach_state(ctx, message, state);
     }
 
-    if (prefs_get_boolean(PREF_RECEIPTS_REQUEST)) {
+    if (request_receipt) {
         stanza_attach_receipt_request(ctx, message);
     }
 
@@ -251,12 +218,12 @@ message_send_chat_pgp(const char *const barejid, const char *const msg)
 }
 
 char*
-message_send_chat_otr(const char *const barejid, const char *const msg)
+message_send_chat_otr(const char *const barejid, const char *const msg, gboolean request_receipt)
 {
     xmpp_ctx_t * const ctx = connection_get_ctx();
 
-    char *state = _session_state(barejid);
-    char *jid = _session_jid(barejid);
+    char *state = chat_session_get_state(barejid);
+    char *jid = chat_session_get_jid(barejid);
     char *id = create_unique_id("msg");
 
     xmpp_stanza_t *message = stanza_create_message(ctx, id, barejid, STANZA_TYPE_CHAT, msg);
@@ -270,7 +237,7 @@ message_send_chat_otr(const char *const barejid, const char *const msg)
     stanza_attach_hints_no_copy(ctx, message);
     stanza_attach_hints_no_store(ctx, message);
 
-    if (prefs_get_boolean(PREF_RECEIPTS_REQUEST)) {
+    if (request_receipt) {
         stanza_attach_receipt_request(ctx, message);
     }
 

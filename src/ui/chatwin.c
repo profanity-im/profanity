@@ -293,7 +293,8 @@ chatwin_incoming_msg(ProfChatWin *chatwin, const char *const resource, const cha
 }
 
 void
-chatwin_outgoing_msg(ProfChatWin *chatwin, const char *const message, char *id, prof_enc_t enc_mode)
+chatwin_outgoing_msg(ProfChatWin *chatwin, const char *const message, char *id, prof_enc_t enc_mode,
+    gboolean request_receipt)
 {
     assert(chatwin != NULL);
 
@@ -304,7 +305,7 @@ chatwin_outgoing_msg(ProfChatWin *chatwin, const char *const message, char *id, 
         enc_char = prefs_get_pgp_char();
     }
 
-    if (prefs_get_boolean(PREF_RECEIPTS_REQUEST) && id) {
+    if (request_receipt && id) {
         win_print_with_receipt((ProfWin*)chatwin, enc_char, 0, NULL, 0, THEME_TEXT_ME, "me", message, id);
     } else {
         win_print((ProfWin*)chatwin, enc_char, 0, NULL, 0, THEME_TEXT_ME, "me", message);

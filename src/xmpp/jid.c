@@ -119,15 +119,17 @@ jid_create_from_bare_and_resource(const char *const room, const char *const nick
 void
 jid_destroy(Jid *jid)
 {
-    if (jid) {
-        g_free(jid->str);
-        g_free(jid->localpart);
-        g_free(jid->domainpart);
-        g_free(jid->resourcepart);
-        g_free(jid->barejid);
-        g_free(jid->fulljid);
-        free(jid);
+    if (jid == NULL) {
+        return;
     }
+
+    g_free(jid->str);
+    g_free(jid->localpart);
+    g_free(jid->domainpart);
+    g_free(jid->resourcepart);
+    g_free(jid->barejid);
+    g_free(jid->fulljid);
+    free(jid);
 }
 
 gboolean
