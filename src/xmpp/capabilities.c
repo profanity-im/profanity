@@ -307,6 +307,24 @@ caps_lookup(const char *const jid)
     return NULL;
 }
 
+gboolean
+caps_jid_has_feature(const char *const jid, const char *const feature)
+{
+    char *ver = g_hash_table_lookup(jid_to_ver, jid);
+    EntityCapabilities *caps = ver ? _caps_by_ver(ver) : _caps_by_jid(jid);
+
+    if (caps == NULL) {
+        return FALSE;
+    }
+
+    GSList *found = g_slist_find_custom(caps->features, feature, (GCompareFunc)g_strcmp0);
+    gboolean result = found != NULL;
+
+    caps_destroy(caps);
+
+    return result;
+}
+
 char*
 caps_get_my_sha1(xmpp_ctx_t *const ctx)
 {

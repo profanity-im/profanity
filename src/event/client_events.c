@@ -38,6 +38,7 @@
 #include <glib.h>
 
 #include "log.h"
+#include "config/preferences.h"
 #include "plugins/plugins.h"
 #include "ui/window_list.h"
 #include "ui/ui.h"
@@ -111,22 +112,38 @@ void
 cl_ev_send_msg(ProfChatWin *chatwin, const char *const msg, const char *const oob_url)
 {
     chat_state_active(chatwin->state);
+
+    gboolean request_receipt = FALSE;
+    if (prefs_get_boolean(PREF_RECEIPTS_REQUEST)) {
+        char *session_jid = chat_session_get_jid(chatwin->barejid);
+        if (session_jid) {
+            Jid *session_jidp = jid_create(session_jid);
+            if (session_jidp && session_jidp->resourcepart) {
+                if (caps_jid_has_feature(session_jid, XMPP_FEATURE_RECEIPTS)) {
+                    request_receipt = TRUE;
+                }
+            }
+            jid_destroy(session_jidp);
+            free(session_jid);
+        }
+    }
+
     char *plugin_msg = plugins_pre_chat_message_send(chatwin->barejid, msg);
 
 // OTR suported, PGP supported
 #ifdef HAVE_LIBOTR
 #ifdef HAVE_LIBGPGME
     if (chatwin->pgp_send) {
-        char *id = message_send_chat_pgp(chatwin->barejid, plugin_msg);
+        char *id = message_send_chat_pgp(chatwin->barejid, plugin_msg, request_receipt);
         chat_log_pgp_msg_out(chatwin->barejid, plugin_msg);
-        chatwin_outgoing_msg(chatwin, plugin_msg, id, PROF_MSG_PGP);
+        chatwin_outgoing_msg(chatwin, plugin_msg, id, PROF_MSG_PGP, request_receipt);
         free(id);
     } else {
-        gboolean handled = otr_on_message_send(chatwin, plugin_msg);
+        gboolean handled = otr_on_message_send(chatwin, plugin_msg, request_receipt);
         if (!handled) {
-            char *id = message_send_chat(chatwin->barejid, plugin_msg, oob_url);
+            char *id = message_send_chat(chatwin->barejid, plugin_msg, oob_url, request_receipt);
             chat_log_msg_out(chatwin->barejid, plugin_msg);
-            chatwin_outgoing_msg(chatwin, plugin_msg, id, PROF_MSG_PLAIN);
+            chatwin_outgoing_msg(chatwin, plugin_msg, id, PROF_MSG_PLAIN, request_receipt);
             free(id);
         }
     }

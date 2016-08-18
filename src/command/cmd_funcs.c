@@ -6616,7 +6616,7 @@ cmd_otr_start(ProfWin *window, const char *const command, gchar **args)
 
         if (!otr_is_secure(barejid)) {
             char *otr_query_message = otr_start_query();
-            char *id = message_send_chat_otr(barejid, otr_query_message);
+            char *id = message_send_chat_otr(barejid, otr_query_message, FALSE);
             free(id);
             return TRUE;
         }
@@ -6649,7 +6649,7 @@ cmd_otr_start(ProfWin *window, const char *const command, gchar **args)
         }
 
         char *otr_query_message = otr_start_query();
-        char *id = message_send_chat_otr(chatwin->barejid, otr_query_message);
+        char *id = message_send_chat_otr(chatwin->barejid, otr_query_message, FALSE);
         free(id);
         return TRUE;
     }

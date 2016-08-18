@@ -130,9 +130,10 @@ gboolean connection_send_stanza(const char *const stanza);
 GList* connection_get_available_resources(void);
 gboolean connection_supports(const char *const feature);
 
-char* message_send_chat(const char *const barejid, const char *const msg, const char *const oob_url);
-char* message_send_chat_otr(const char *const barejid, const char *const msg);
-char* message_send_chat_pgp(const char *const barejid, const char *const msg);
+char* message_send_chat(const char *const barejid, const char *const msg, const char *const oob_url,
+    gboolean request_receipt);
+char* message_send_chat_otr(const char *const barejid, const char *const msg, gboolean request_receipt);
+char* message_send_chat_pgp(const char *const barejid, const char *const msg, gboolean request_receipt);
 void message_send_private(const char *const fulljid, const char *const msg, const char *const oob_url);
 void message_send_groupchat(const char *const roomjid, const char *const msg, const char *const oob_url);
 void message_send_groupchat_subject(const char *const roomjid, const char *const subject);
@@ -183,6 +184,7 @@ void caps_destroy(EntityCapabilities *caps);
 void caps_reset_ver(void);
 void caps_add_feature(char *feature);
 void caps_remove_feature(char *feature);
+gboolean caps_jid_has_feature(const char *const jid, const char *const feature);
 
 gboolean bookmark_add(const char *jid, const char *nick, const char *password, const char *autojoin_str);
 gboolean bookmark_update(const char *jid, const char *nick, const char *password, const char *autojoin_str);
