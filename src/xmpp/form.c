@@ -67,7 +67,7 @@ _is_valid_form_element(xmpp_stanza_t *stanza)
         return FALSE;
     }
 
-    const char *type = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_TYPE);
+    const char *type = xmpp_stanza_get_type(stanza);
     if ((g_strcmp0(type, "form") != 0) &&
             (g_strcmp0(type, "submit") != 0) &&
             (g_strcmp0(type, "cancel") != 0) &&

@@ -218,7 +218,7 @@ roster_set_handler(xmpp_stanza_t *const stanza)
 
     // if from attribute exists and it is not current users barejid, ignore push
     Jid *my_jid = jid_create(connection_get_fulljid());
-    const char *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
+    const char *from = xmpp_stanza_get_from(stanza);
     if (from && (strcmp(from, my_jid->barejid) != 0)) {
         jid_destroy(my_jid);
         return;
@@ -276,7 +276,7 @@ roster_set_handler(xmpp_stanza_t *const stanza)
 void
 roster_result_handler(xmpp_stanza_t *const stanza)
 {
-    const char *id = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_ID);
+    const char *id = xmpp_stanza_get_id(stanza);
 
     if (g_strcmp0(id, "roster") != 0) {
         return;
