@@ -1158,15 +1158,9 @@ _ping_get_handler(xmpp_stanza_t *const stanza)
         return;
     }
 
-    xmpp_stanza_t *pong = xmpp_stanza_new(ctx);
-    xmpp_stanza_set_name(pong, STANZA_NAME_IQ);
+    xmpp_stanza_t *pong = xmpp_iq_new(ctx, STANZA_TYPE_RESULT, id);
     xmpp_stanza_set_to(pong, from);
     xmpp_stanza_set_from(pong, to);
-    xmpp_stanza_set_type(pong, STANZA_TYPE_RESULT);
-
-    if (id) {
-        xmpp_stanza_set_id(pong, id);
-    }
 
     iq_send_stanza(pong);
     xmpp_stanza_release(pong);
@@ -1186,13 +1180,8 @@ _version_get_handler(xmpp_stanza_t *const stanza)
     }
 
     if (from) {
-        xmpp_stanza_t *response = xmpp_stanza_new(ctx);
-        xmpp_stanza_set_name(response, STANZA_NAME_IQ);
-        if (id) {
-            xmpp_stanza_set_id(response, id);
-        }
+        xmpp_stanza_t *response = xmpp_iq_new(ctx, STANZA_TYPE_RESULT, id);
         xmpp_stanza_set_to(response, from);
-        xmpp_stanza_set_type(response, STANZA_TYPE_RESULT);
 
         xmpp_stanza_t *query = xmpp_stanza_new(ctx);
         xmpp_stanza_set_name(query, STANZA_NAME_QUERY);
@@ -1251,11 +1240,9 @@ _disco_items_get_handler(xmpp_stanza_t *const stanza)
     }
 
     if (from) {
-        xmpp_stanza_t *response = xmpp_stanza_new(ctx);
-        xmpp_stanza_set_name(response, STANZA_NAME_IQ);
-        xmpp_stanza_set_id(response, xmpp_stanza_get_id(stanza));
+        xmpp_stanza_t *response = xmpp_iq_new(ctx, STANZA_TYPE_RESULT, xmpp_stanza_get_id(stanza));
         xmpp_stanza_set_to(response, from);
-        xmpp_stanza_set_type(response, STANZA_TYPE_RESULT);
+
         xmpp_stanza_t *query = xmpp_stanza_new(ctx);
         xmpp_stanza_set_name(query, STANZA_NAME_QUERY);
         xmpp_stanza_set_ns(query, XMPP_NS_DISCO_ITEMS);
@@ -1282,11 +1269,8 @@ _last_activity_get_handler(xmpp_stanza_t *const stanza)
         char str[50];
         sprintf(str, "%d", idls_secs);
 
-        xmpp_stanza_t *response = xmpp_stanza_new(ctx);
-        xmpp_stanza_set_name(response, STANZA_NAME_IQ);
-        xmpp_stanza_set_id(response, xmpp_stanza_get_id(stanza));
+        xmpp_stanza_t *response = xmpp_iq_new(ctx, STANZA_TYPE_RESULT, xmpp_stanza_get_id(stanza));
         xmpp_stanza_set_to(response, from);
-        xmpp_stanza_set_type(response, STANZA_TYPE_RESULT);
 
         xmpp_stanza_t *query = xmpp_stanza_new(ctx);
         xmpp_stanza_set_name(query, STANZA_NAME_QUERY);
@@ -1300,11 +1284,8 @@ _last_activity_get_handler(xmpp_stanza_t *const stanza)
 
         xmpp_stanza_release(response);
     } else {
-        xmpp_stanza_t *response = xmpp_stanza_new(ctx);
-        xmpp_stanza_set_name(response, STANZA_NAME_IQ);
-        xmpp_stanza_set_id(response, xmpp_stanza_get_id(stanza));
+        xmpp_stanza_t *response = xmpp_iq_new(ctx, STANZA_TYPE_ERROR, xmpp_stanza_get_id(stanza));
         xmpp_stanza_set_to(response, from);
-        xmpp_stanza_set_type(response, STANZA_TYPE_ERROR);
 
         xmpp_stanza_t *error = xmpp_stanza_new(ctx);
         xmpp_stanza_set_name(error, STANZA_NAME_ERROR);
@@ -1344,11 +1325,9 @@ _disco_info_get_handler(xmpp_stanza_t *const stanza)
     }
 
     if (from) {
-        xmpp_stanza_t *response = xmpp_stanza_new(ctx);
-        xmpp_stanza_set_name(response, STANZA_NAME_IQ);
-        xmpp_stanza_set_id(response, xmpp_stanza_get_id(stanza));
+        xmpp_stanza_t *response = xmpp_iq_new(ctx, STANZA_TYPE_RESULT, xmpp_stanza_get_id(stanza));
         xmpp_stanza_set_to(response, from);
-        xmpp_stanza_set_type(response, STANZA_TYPE_RESULT);
+
         xmpp_stanza_t *query = stanza_create_caps_query_element(ctx);
         if (node_str) {
             xmpp_stanza_set_attribute(query, STANZA_ATTR_NODE, node_str);

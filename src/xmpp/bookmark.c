@@ -406,12 +406,9 @@ _send_bookmarks(void)
 {
     xmpp_ctx_t *ctx = connection_get_ctx();
 
-    xmpp_stanza_t *iq = xmpp_stanza_new(ctx);
-    xmpp_stanza_set_name(iq, STANZA_NAME_IQ);
     char *id = create_unique_id("bookmarks_update");
-    xmpp_stanza_set_id(iq, id);
+    xmpp_stanza_t *iq = xmpp_iq_new(ctx, STANZA_TYPE_SET, id);
     free(id);
-    xmpp_stanza_set_type(iq, STANZA_TYPE_SET);
 
     xmpp_stanza_t *query = xmpp_stanza_new(ctx);
     xmpp_stanza_set_name(query, STANZA_NAME_QUERY);

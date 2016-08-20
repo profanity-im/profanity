@@ -116,11 +116,8 @@ blocked_add(char *jid)
 
     xmpp_ctx_t *ctx = connection_get_ctx();
 
-    xmpp_stanza_t *iq = xmpp_stanza_new(ctx);
-    xmpp_stanza_set_name(iq, STANZA_NAME_IQ);
-    xmpp_stanza_set_type(iq, STANZA_TYPE_SET);
     char *id = create_unique_id("block");
-    xmpp_stanza_set_id(iq, id);
+    xmpp_stanza_t *iq = xmpp_iq_new(ctx, STANZA_TYPE_SET, id);
 
     xmpp_stanza_t *block = xmpp_stanza_new(ctx);
     xmpp_stanza_set_name(block, STANZA_NAME_BLOCK);
@@ -137,10 +134,10 @@ blocked_add(char *jid)
     xmpp_stanza_release(block);
 
     iq_id_handler_add(id, _block_add_result_handler, free, strdup(jid));
+    free(id);
 
     iq_send_stanza(iq);
     xmpp_stanza_release(iq);
-    free(id);
 
     return TRUE;
 }
@@ -155,11 +152,8 @@ blocked_remove(char *jid)
 
     xmpp_ctx_t *ctx = connection_get_ctx();
 
-    xmpp_stanza_t *iq = xmpp_stanza_new(ctx);
-    xmpp_stanza_set_name(iq, STANZA_NAME_IQ);
-    xmpp_stanza_set_type(iq, STANZA_TYPE_SET);
     char *id = create_unique_id("unblock");
-    xmpp_stanza_set_id(iq, id);
+    xmpp_stanza_t *iq = xmpp_iq_new(ctx, STANZA_TYPE_SET, id);
 
     xmpp_stanza_t *block = xmpp_stanza_new(ctx);
     xmpp_stanza_set_name(block, STANZA_NAME_UNBLOCK);
@@ -176,10 +170,10 @@ blocked_remove(char *jid)
     xmpp_stanza_release(block);
 
     iq_id_handler_add(id, _block_remove_result_handler, free, strdup(jid));
+    free(id);
 
     iq_send_stanza(iq);
     xmpp_stanza_release(iq);
-    free(id);
 
     return TRUE;
 }
