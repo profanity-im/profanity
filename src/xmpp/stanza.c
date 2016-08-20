@@ -443,29 +443,6 @@ stanza_attach_x_oob_url(xmpp_ctx_t *ctx, xmpp_stanza_t *stanza, const char *cons
 }
 
 xmpp_stanza_t*
-stanza_create_message(xmpp_ctx_t *ctx, char *id, const char *const recipient,
-    const char *const type, const char *const message)
-{
-    xmpp_stanza_t *msg = xmpp_stanza_new(ctx);
-    xmpp_stanza_set_name(msg, STANZA_NAME_MESSAGE);
-    xmpp_stanza_set_type(msg, type);
-    xmpp_stanza_set_to(msg, recipient);
-    xmpp_stanza_set_id(msg, id);
-
-    xmpp_stanza_t *body = xmpp_stanza_new(ctx);
-    xmpp_stanza_set_name(body, STANZA_NAME_BODY);
-
-    xmpp_stanza_t *text = xmpp_stanza_new(ctx);
-    xmpp_stanza_set_text(text, message);
-    xmpp_stanza_add_child(body, text);
-    xmpp_stanza_release(text);
-    xmpp_stanza_add_child(msg, body);
-    xmpp_stanza_release(body);
-
-    return msg;
-}
-
-xmpp_stanza_t*
 stanza_create_roster_remove_set(xmpp_ctx_t *ctx, const char *const barejid)
 {
     xmpp_stanza_t *iq = xmpp_stanza_new(ctx);

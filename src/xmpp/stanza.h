@@ -228,9 +228,6 @@ xmpp_stanza_t* stanza_attach_hints_no_store(xmpp_ctx_t *ctx, xmpp_stanza_t *stan
 xmpp_stanza_t* stanza_attach_receipt_request(xmpp_ctx_t *ctx, xmpp_stanza_t *stanza);
 xmpp_stanza_t* stanza_attach_x_oob_url(xmpp_ctx_t *ctx, xmpp_stanza_t *stanza, const char *const url);
 
-xmpp_stanza_t* stanza_create_message(xmpp_ctx_t *ctx, char *id,
-    const char *const recipient, const char *const type, const char *const message);
-
 xmpp_stanza_t* stanza_create_room_join_presence(xmpp_ctx_t *const ctx,
     const char *const full_room_jid, const char *const passwd);
 

@@ -141,7 +141,8 @@ message_send_chat(const char *const barejid, const char *const msg, const char *
     char *jid = chat_session_get_jid(barejid);
     char *id = create_unique_id("msg");
 
-    xmpp_stanza_t *message = stanza_create_message(ctx, id, jid, STANZA_TYPE_CHAT, msg);
+    xmpp_stanza_t *message = xmpp_message_new(ctx, STANZA_TYPE_CHAT, jid, id);
+    xmpp_message_set_body(message, msg);
     free(jid);
 
     if (state) {
@@ -179,7 +180,8 @@ message_send_chat_pgp(const char *const barejid, const char *const msg, gboolean
         Jid *jidp = jid_create(jid);
         char *encrypted = p_gpg_encrypt(jidp->barejid, msg, account->pgp_keyid);
         if (encrypted) {
-            message = stanza_create_message(ctx, id, jid, STANZA_TYPE_CHAT, "This message is encrypted.");
+            message = xmpp_message_new(ctx, STANZA_TYPE_CHAT, jid, id);
+            xmpp_message_set_body(message, "This message is encrypted.");
             xmpp_stanza_t *x = xmpp_stanza_new(ctx);
             xmpp_stanza_set_name(x, STANZA_NAME_X);
             xmpp_stanza_set_ns(x, STANZA_NS_ENCRYPTED);
@@ -191,15 +193,18 @@ message_send_chat_pgp(const char *const barejid, const char *const msg, gboolean
             xmpp_stanza_release(x);
             free(encrypted);
         } else {
-            message = stanza_create_message(ctx, id, jid, STANZA_TYPE_CHAT, msg);
+            message = xmpp_message_new(ctx, STANZA_TYPE_CHAT, jid, id);
+            xmpp_message_set_body(message, msg);
         }
         jid_destroy(jidp);
     } else {
-        message = stanza_create_message(ctx, id, jid, STANZA_TYPE_CHAT, msg);
+        message = xmpp_message_new(ctx, STANZA_TYPE_CHAT, jid, id);
+        xmpp_message_set_body(message, msg);
     }
     account_free(account);
 #else
-    message = stanza_create_message(ctx, id, jid, STANZA_TYPE_CHAT, msg);
+    message = xmpp_message_new(ctx, STANZA_TYPE_CHAT, jid, id);
+    xmpp_message_set_body(message, msg);
 #endif
     free(jid);
 
@@ -226,7 +231,9 @@ message_send_chat_otr(const char *const barejid, const char *const msg, gboolean
     char *jid = chat_session_get_jid(barejid);
     char *id = create_unique_id("msg");
 
-    xmpp_stanza_t *message = stanza_create_message(ctx, id, barejid, STANZA_TYPE_CHAT, msg);
+    xmpp_stanza_t *message = xmpp_message_new(ctx, STANZA_TYPE_CHAT, barejid, id);
+    xmpp_message_set_body(message, msg);
+
     free(jid);
 
     if (state) {
@@ -252,7 +259,10 @@ message_send_private(const char *const fulljid, const char *const msg, const cha
 {
     xmpp_ctx_t * const ctx = connection_get_ctx();
     char *id = create_unique_id("prv");
-    xmpp_stanza_t *message = stanza_create_message(ctx, id, fulljid, STANZA_TYPE_CHAT, msg);
+
+    xmpp_stanza_t *message = xmpp_message_new(ctx, STANZA_TYPE_CHAT, fulljid, id);
+    xmpp_message_set_body(message, msg);
+
     free(id);
 
     if (oob_url) {
@@ -268,7 +278,10 @@ message_send_groupchat(const char *const roomjid, const char *const msg, const c
 {
     xmpp_ctx_t * const ctx = connection_get_ctx();
     char *id = create_unique_id("muc");
-    xmpp_stanza_t *message = stanza_create_message(ctx, id, roomjid, STANZA_TYPE_GROUPCHAT, msg);
+
+    xmpp_stanza_t *message = xmpp_message_new(ctx, STANZA_TYPE_GROUPCHAT, roomjid, id);
+    xmpp_message_set_body(message, msg);
+
     free(id);
 
     if (oob_url) {
