@@ -239,7 +239,7 @@ _block_add_result_handler(xmpp_stanza_t *const stanza, void *const userdata)
 {
     char *jid = (char*)userdata;
 
-    const char *type = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_TYPE);
+    const char *type = xmpp_stanza_get_type(stanza);
     if (type == NULL) {
         log_info("Block response received for %s with no type attribute.", jid);
         free(jid);
@@ -263,7 +263,7 @@ _block_remove_result_handler(xmpp_stanza_t *const stanza, void *const userdata)
 {
     char *jid = (char*)userdata;
 
-    const char *type = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_TYPE);
+    const char *type = xmpp_stanza_get_type(stanza);
     if (type == NULL) {
         log_info("Unblock response received for %s with no type attribute.", jid);
         free(jid);

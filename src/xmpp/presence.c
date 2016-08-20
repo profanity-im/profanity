@@ -177,7 +177,7 @@ presence_subscription(const char *const jid, const jabber_subscr_t action)
     xmpp_stanza_set_id(presence, id);
     xmpp_stanza_set_name(presence, STANZA_NAME_PRESENCE);
     xmpp_stanza_set_type(presence, type);
-    xmpp_stanza_set_attribute(presence, STANZA_ATTR_TO, jidp->barejid);
+    xmpp_stanza_set_to(presence, jidp->barejid);
     _send_presence_stanza(presence);
     xmpp_stanza_release(presence);
 
@@ -310,7 +310,7 @@ _send_room_presence(xmpp_stanza_t *presence)
         if (nick) {
             char *full_room_jid = create_fulljid(room, nick);
 
-            xmpp_stanza_set_attribute(presence, STANZA_ATTR_TO, full_room_jid);
+            xmpp_stanza_set_to(presence, full_room_jid);
             log_debug("Sending presence to room: %s", full_room_jid);
             _send_presence_stanza(presence);
             free(full_room_jid);
@@ -397,7 +397,7 @@ static void
 _presence_error_handler(xmpp_stanza_t *const stanza)
 {
     const char *id = xmpp_stanza_get_id(stanza);
-    const char *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
+    const char *from = xmpp_stanza_get_from(stanza);
     xmpp_stanza_t *error_stanza = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_ERROR);
     xmpp_stanza_t *x = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_X);
     const char *xmlns = NULL;
@@ -406,7 +406,7 @@ _presence_error_handler(xmpp_stanza_t *const stanza)
     }
     const char *type = NULL;
     if (error_stanza) {
-        type = xmpp_stanza_get_attribute(error_stanza, STANZA_ATTR_TYPE);
+        type = xmpp_stanza_get_type(error_stanza);
     }
 
     // handle MUC join errors
@@ -467,7 +467,7 @@ _presence_error_handler(xmpp_stanza_t *const stanza)
 static void
 _unsubscribed_handler(xmpp_stanza_t *const stanza)
 {
-    const char *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
+    const char *from = xmpp_stanza_get_from(stanza);
     Jid *from_jid = jid_create(from);
     log_debug("Unsubscribed presence handler fired for %s", from);
 
@@ -480,7 +480,7 @@ _unsubscribed_handler(xmpp_stanza_t *const stanza)
 static void
 _subscribed_handler(xmpp_stanza_t *const stanza)
 {
-    const char *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
+    const char *from = xmpp_stanza_get_from(stanza);
     Jid *from_jid = jid_create(from);
     log_debug("Subscribed presence handler fired for %s", from);
 
@@ -493,7 +493,7 @@ _subscribed_handler(xmpp_stanza_t *const stanza)
 static void
 _subscribe_handler(xmpp_stanza_t *const stanza)
 {
-    const char *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
+    const char *from = xmpp_stanza_get_from(stanza);
     log_debug("Subscribe presence handler fired for %s", from);
 
     Jid *from_jid = jid_create(from);
@@ -514,7 +514,7 @@ _unavailable_handler(xmpp_stanza_t *const stanza)
 
     xmpp_conn_t *conn = connection_get_conn();
     const char *jid = xmpp_conn_get_jid(conn);
-    const char *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
+    const char *from = xmpp_stanza_get_from(stanza);
     log_debug("Unavailable presence handler fired for %s", from);
 
     Jid *my_jid = jid_create(jid);
@@ -615,7 +615,7 @@ _available_handler(xmpp_stanza_t *const stanza)
                 log_warning("Available presence handler fired with no from attribute.");
                 break;
             case STANZA_PARSE_ERROR_INVALID_FROM:
-                from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
+                from = xmpp_stanza_get_from(stanza);
                 log_warning("Available presence handler fired with invalid from attribute: %s", from);
                 break;
             default:
@@ -684,8 +684,8 @@ _muc_user_handler(xmpp_stanza_t *const stanza)
 {
     inp_nonblocking(TRUE);
 
-    const char *type = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_TYPE);
-    const char *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
+    const char *type = xmpp_stanza_get_type(stanza);
+    const char *from = xmpp_stanza_get_from(stanza);
 
     // handler still fires if error
     if (g_strcmp0(type, STANZA_TYPE_ERROR) == 0) {
