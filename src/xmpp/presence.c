@@ -172,10 +172,9 @@ presence_subscription(const char *const jid, const jabber_subscr_t action)
             break;
     }
 
-    xmpp_stanza_t *presence = xmpp_stanza_new(ctx);
+    xmpp_stanza_t *presence = xmpp_presence_new(ctx);
     char *id = create_unique_id("sub");
     xmpp_stanza_set_id(presence, id);
-    xmpp_stanza_set_name(presence, STANZA_NAME_PRESENCE);
     xmpp_stanza_set_type(presence, type);
     xmpp_stanza_set_to(presence, jidp->barejid);
     _send_presence_stanza(presence);
@@ -258,7 +257,7 @@ presence_send(const resource_presence_t presence_type, const char *const msg, co
     connection_set_presence_msg(msg);
     connection_set_priority(pri);
 
-    xmpp_stanza_t *presence = stanza_create_presence(ctx);
+    xmpp_stanza_t *presence = xmpp_presence_new(ctx);
     char *id = create_unique_id("presence");
     xmpp_stanza_set_id(presence, id);
     stanza_attach_show(ctx, presence, show);

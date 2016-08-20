@@ -554,8 +554,7 @@ xmpp_stanza_t*
 stanza_create_room_join_presence(xmpp_ctx_t *const ctx,
     const char *const full_room_jid, const char *const passwd)
 {
-    xmpp_stanza_t *presence = xmpp_stanza_new(ctx);
-    xmpp_stanza_set_name(presence, STANZA_NAME_PRESENCE);
+    xmpp_stanza_t *presence = xmpp_presence_new(ctx);
     xmpp_stanza_set_to(presence, full_room_jid);
     _stanza_add_unique_id(presence, "join");
 
@@ -584,9 +583,8 @@ xmpp_stanza_t*
 stanza_create_room_newnick_presence(xmpp_ctx_t *ctx,
     const char *const full_room_jid)
 {
-    xmpp_stanza_t *presence = xmpp_stanza_new(ctx);
+    xmpp_stanza_t *presence = xmpp_presence_new(ctx);
     _stanza_add_unique_id(presence, "sub");
-    xmpp_stanza_set_name(presence, STANZA_NAME_PRESENCE);
     xmpp_stanza_set_to(presence, full_room_jid);
 
     return presence;
@@ -600,8 +598,7 @@ stanza_create_room_leave_presence(xmpp_ctx_t *ctx, const char *const room,
     g_string_append(full_jid, "/");
     g_string_append(full_jid, nick);
 
-    xmpp_stanza_t *presence = xmpp_stanza_new(ctx);
-    xmpp_stanza_set_name(presence, STANZA_NAME_PRESENCE);
+    xmpp_stanza_t *presence = xmpp_presence_new(ctx);
     xmpp_stanza_set_type(presence, STANZA_TYPE_UNAVAILABLE);
     xmpp_stanza_set_to(presence, full_jid->str);
     _stanza_add_unique_id(presence, "leave");
@@ -865,15 +862,6 @@ stanza_create_room_kick_iq(xmpp_ctx_t *const ctx, const char *const room, const 
     xmpp_stanza_release(query);
 
     return iq;
-}
-
-xmpp_stanza_t*
-stanza_create_presence(xmpp_ctx_t *const ctx)
-{
-    xmpp_stanza_t *presence = xmpp_stanza_new(ctx);
-    xmpp_stanza_set_name(presence, STANZA_NAME_PRESENCE);
-
-    return presence;
 }
 
 xmpp_stanza_t*

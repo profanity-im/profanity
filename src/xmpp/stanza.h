@@ -237,8 +237,6 @@ xmpp_stanza_t* stanza_create_room_newnick_presence(xmpp_ctx_t *ctx,
 xmpp_stanza_t* stanza_create_room_leave_presence(xmpp_ctx_t *ctx,
     const char *const room, const char *const nick);
 
-xmpp_stanza_t* stanza_create_presence(xmpp_ctx_t *const ctx);
-
 xmpp_stanza_t* stanza_create_roster_iq(xmpp_ctx_t *ctx);
 xmpp_stanza_t* stanza_create_ping_iq(xmpp_ctx_t *ctx, const char *const target);
 xmpp_stanza_t* stanza_create_disco_info_iq(xmpp_ctx_t *ctx, const char *const id,
