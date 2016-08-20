@@ -504,12 +504,7 @@ _handle_captcha(xmpp_stanza_t *const stanza)
     }
 
     // XEP-0158
-    xmpp_stanza_t *body = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_BODY);
-    if (!body) {
-        return;
-    }
-
-    char *message = xmpp_stanza_get_text(body);
+    char *message = xmpp_message_get_body(stanza);
     if (!message) {
         return;
     }
@@ -539,13 +534,7 @@ _handle_groupchat(xmpp_stanza_t *const stanza)
 
     // handle room broadcasts
     if (!jid->resourcepart) {
-        xmpp_stanza_t *body = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_BODY);
-        if (!body) {
-            jid_destroy(jid);
-            return;
-        }
-
-        message = xmpp_stanza_get_text(body);
+        message = xmpp_message_get_body(stanza);
         if (!message) {
             jid_destroy(jid);
             return;
@@ -571,15 +560,7 @@ _handle_groupchat(xmpp_stanza_t *const stanza)
         return;
     }
 
-    xmpp_stanza_t *body = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_BODY);
-
-    // check for and deal with message
-    if (!body) {
-        jid_destroy(jid);
-        return;
-    }
-
-    message = xmpp_stanza_get_text(body);
+    message = xmpp_message_get_body(stanza);
     if (!message) {
         jid_destroy(jid);
         return;
@@ -674,12 +655,7 @@ _receipt_request_handler(xmpp_stanza_t *const stanza)
 void
 _private_chat_handler(xmpp_stanza_t *const stanza, const char *const fulljid)
 {
-    xmpp_stanza_t *body = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_BODY);
-    if (!body) {
-        return;
-    }
-
-    char *message = xmpp_stanza_get_text(body);
+    char *message = xmpp_message_get_body(stanza);
     if (!message) {
         return;
     }
@@ -722,28 +698,25 @@ _handle_carbons(xmpp_stanza_t *const stanza)
         Jid *my_jid = jid_create(connection_get_fulljid());
 
         // check for and deal with message
-        xmpp_stanza_t *body = xmpp_stanza_get_child_by_name(message, STANZA_NAME_BODY);
-        if (body) {
-            char *message_txt = xmpp_stanza_get_text(body);
-            if (message_txt) {
-                // check for pgp encrypted message
-                char *enc_message = NULL;
-                xmpp_stanza_t *x = xmpp_stanza_get_child_by_ns(message, STANZA_NS_ENCRYPTED);
-                if (x) {
-                    enc_message = xmpp_stanza_get_text(x);
-                }
-
-                // if we are the recipient, treat as standard incoming message
-                if(g_strcmp0(my_jid->barejid, jid_to->barejid) == 0){
-                    sv_ev_incoming_carbon(jid_from->barejid, jid_from->resourcepart, message_txt, enc_message);
-
-                // else treat as a sent message
-                } else {
-                    sv_ev_outgoing_carbon(jid_to->barejid, message_txt, enc_message);
-                }
-                xmpp_free(ctx, message_txt);
-                xmpp_free(ctx, enc_message);
+        char *message_txt = xmpp_message_get_body(message);
+        if (message_txt) {
+            // check for pgp encrypted message
+            char *enc_message = NULL;
+            xmpp_stanza_t *x = xmpp_stanza_get_child_by_ns(message, STANZA_NS_ENCRYPTED);
+            if (x) {
+                enc_message = xmpp_stanza_get_text(x);
             }
+
+            // if we are the recipient, treat as standard incoming message
+            if(g_strcmp0(my_jid->barejid, jid_to->barejid) == 0){
+                sv_ev_incoming_carbon(jid_from->barejid, jid_from->resourcepart, message_txt, enc_message);
+
+            // else treat as a sent message
+            } else {
+                sv_ev_outgoing_carbon(jid_to->barejid, message_txt, enc_message);
+            }
+            xmpp_free(ctx, message_txt);
+            xmpp_free(ctx, enc_message);
         }
 
         jid_destroy(jid_from);
