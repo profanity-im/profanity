@@ -319,12 +319,9 @@ stanza_disable_carbons(xmpp_ctx_t *ctx)
 xmpp_stanza_t*
 stanza_create_chat_state(xmpp_ctx_t *ctx, const char *const fulljid, const char *const state)
 {
-    xmpp_stanza_t *msg = xmpp_stanza_new(ctx);
-    xmpp_stanza_set_name(msg, STANZA_NAME_MESSAGE);
-    xmpp_stanza_set_type(msg, STANZA_TYPE_CHAT);
-    xmpp_stanza_set_to(msg, fulljid);
-    _stanza_add_unique_id(msg, NULL);
-
+    char *id = create_unique_id(NULL);
+    xmpp_stanza_t *msg = xmpp_message_new(ctx, STANZA_TYPE_CHAT, fulljid, id);
+    free(id);
 
     xmpp_stanza_t *chat_state = xmpp_stanza_new(ctx);
     xmpp_stanza_set_name(chat_state, state);
@@ -338,10 +335,7 @@ stanza_create_chat_state(xmpp_ctx_t *ctx, const char *const fulljid, const char 
 xmpp_stanza_t*
 stanza_create_room_subject_message(xmpp_ctx_t *ctx, const char *const room, const char *const subject)
 {
-    xmpp_stanza_t *msg = xmpp_stanza_new(ctx);
-    xmpp_stanza_set_name(msg, STANZA_NAME_MESSAGE);
-    xmpp_stanza_set_type(msg, STANZA_TYPE_GROUPCHAT);
-    xmpp_stanza_set_to(msg, room);
+    xmpp_stanza_t *msg = xmpp_message_new(ctx, STANZA_TYPE_GROUPCHAT, room, NULL);
 
     xmpp_stanza_t *subject_st = xmpp_stanza_new(ctx);
     xmpp_stanza_set_name(subject_st, STANZA_NAME_SUBJECT);
@@ -517,10 +511,9 @@ xmpp_stanza_t*
 stanza_create_invite(xmpp_ctx_t *ctx, const char *const room,
     const char *const contact, const char *const reason, const char *const password)
 {
-    xmpp_stanza_t *message = xmpp_stanza_new(ctx);
-    xmpp_stanza_set_name(message, STANZA_NAME_MESSAGE);
-    xmpp_stanza_set_to(message, contact);
-    _stanza_add_unique_id(message, NULL);
+    char *id = create_unique_id(NULL);
+    xmpp_stanza_t *message = xmpp_message_new(ctx, NULL, contact, id);
+    free(id);
 
     xmpp_stanza_t *x = xmpp_stanza_new(ctx);
     xmpp_stanza_set_name(x, STANZA_NAME_X);
@@ -544,10 +537,9 @@ xmpp_stanza_t*
 stanza_create_mediated_invite(xmpp_ctx_t *ctx, const char *const room,
     const char *const contact, const char *const reason)
 {
-    xmpp_stanza_t *message = xmpp_stanza_new(ctx);
-    xmpp_stanza_set_name(message, STANZA_NAME_MESSAGE);
-    xmpp_stanza_set_to(message, room);
-    _stanza_add_unique_id(message, NULL);
+    char *id = create_unique_id(NULL);
+    xmpp_stanza_t *message = xmpp_message_new(ctx, NULL, room, id);
+    free(id);
 
     xmpp_stanza_t *x = xmpp_stanza_new(ctx);
     xmpp_stanza_set_name(x, STANZA_NAME_X);

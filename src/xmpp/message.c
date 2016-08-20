@@ -602,12 +602,10 @@ void
 _message_send_receipt(const char *const fulljid, const char *const message_id)
 {
     xmpp_ctx_t * const ctx = connection_get_ctx();
-    xmpp_stanza_t *message = xmpp_stanza_new(ctx);
-    xmpp_stanza_set_name(message, STANZA_NAME_MESSAGE);
+
     char *id = create_unique_id("receipt");
-    xmpp_stanza_set_id(message, id);
+    xmpp_stanza_t *message = xmpp_message_new(ctx, NULL, fulljid, id);
     free(id);
-    xmpp_stanza_set_to(message, fulljid);
 
     xmpp_stanza_t *receipt = xmpp_stanza_new(ctx);
     xmpp_stanza_set_name(receipt, "received");
