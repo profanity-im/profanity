@@ -66,7 +66,6 @@
 #include "xmpp/muc.h"
 
 static void _stanza_add_unique_id(xmpp_stanza_t *stanza, char *prefix);
-static char* _stanza_text_to_str(xmpp_stanza_t *stanza);
 
 #if 0
 xmpp_stanza_t*
@@ -1193,7 +1192,7 @@ stanza_get_status(xmpp_stanza_t *stanza, char *def)
     xmpp_stanza_t *status = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_STATUS);
 
     if (status) {
-        return _stanza_text_to_str(status);
+        return stanza_text_strdup(status);
     } else if (def) {
         return strdup(def);
     } else {
@@ -1207,7 +1206,7 @@ stanza_get_show(xmpp_stanza_t *stanza, char *def)
     xmpp_stanza_t *show = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_SHOW);
 
     if (show) {
-        return _stanza_text_to_str(show);
+        return stanza_text_strdup(show);
     } else if (def) {
         return strdup(def);
     } else {
@@ -1438,7 +1437,7 @@ stanza_get_muc_destroy_alternative_password(xmpp_stanza_t *stanza)
         return NULL;
     }
 
-    return _stanza_text_to_str(password_st);
+    return stanza_text_strdup(password_st);
 }
 
 char*
@@ -1464,7 +1463,7 @@ stanza_get_muc_destroy_reason(xmpp_stanza_t *stanza)
         return NULL;
     }
 
-    return _stanza_text_to_str(reason_st);
+    return stanza_text_strdup(reason_st);
 }
 
 const char*
@@ -1526,7 +1525,7 @@ stanza_get_reason(xmpp_stanza_t *stanza)
         return NULL;
     }
 
-    return _stanza_text_to_str(reason_st);
+    return stanza_text_strdup(reason_st);
 }
 
 gboolean
@@ -1765,7 +1764,7 @@ stanza_get_error_message(xmpp_stanza_t *stanza)
 
     // check for text
     if (text_stanza) {
-        char *err_msg = _stanza_text_to_str(text_stanza);
+        char *err_msg = stanza_text_strdup(text_stanza);
         if (err_msg) {
             return err_msg;
         }
@@ -1933,6 +1932,21 @@ stanza_resource_from_presence(XMPPPresence *presence)
     return resource;
 }
 
+char*
+stanza_text_strdup(xmpp_stanza_t *stanza)
+{
+    xmpp_ctx_t *ctx = connection_get_ctx();
+
+    char *string = NULL;
+    char *stanza_text = xmpp_stanza_get_text(stanza);
+    if (stanza_text) {
+        string = strdup(stanza_text);
+        xmpp_free(ctx, stanza_text);
+    }
+
+    return string;
+}
+
 void
 stanza_free_caps(XMPPCaps *caps)
 {
@@ -2024,19 +2038,4 @@ _stanza_add_unique_id(xmpp_stanza_t *stanza, char *prefix)
     char *id = create_unique_id(prefix);
     xmpp_stanza_set_id(stanza, id);
     free(id);
-}
-
-static char*
-_stanza_text_to_str(xmpp_stanza_t *stanza)
-{
-    xmpp_ctx_t *ctx = connection_get_ctx();
-
-    char *string = NULL;
-    char *stanza_text = xmpp_stanza_get_text(stanza);
-    if (stanza_text) {
-        string = strdup(stanza_text);
-        xmpp_free(ctx, stanza_text);
-    }
-
-    return string;
 }

@@ -63,35 +63,32 @@
 #define BOOKMARK_TIMEOUT 5000
 
 static Autocomplete bookmark_ac;
-static GList *bookmark_list;
+static GHashTable *bookmarks;
 
 // id handlers
 static int _bookmark_result_id_handler(xmpp_stanza_t *const stanza, void *const userdata);
 
-static void _bookmark_item_destroy(gpointer item);
-static int _match_bookmark_by_jid(gconstpointer a, gconstpointer b);
+static void _bookmark_destroy(Bookmark *bookmark);
 static void _send_bookmarks(void);
 
 void
 bookmark_request(void)
 {
-    char *id;
-    xmpp_ctx_t *ctx = connection_get_ctx();
-    xmpp_stanza_t *iq;
-
-    id = strdup("bookmark_init_request");
+    if (bookmarks) {
+        g_hash_table_destroy(bookmarks);
+    }
+    bookmarks = g_hash_table_new_full(g_str_hash, g_str_equal, free, (GDestroyNotify)_bookmark_destroy);
 
     autocomplete_free(bookmark_ac);
     bookmark_ac = autocomplete_new();
-    if (bookmark_list) {
-        g_list_free_full(bookmark_list, _bookmark_item_destroy);
-        bookmark_list = NULL;
-    }
 
-    iq_id_handler_add(id, _bookmark_result_id_handler, free, id);
+    char *id = "bookmark_init_request";
+    iq_id_handler_add(id, _bookmark_result_id_handler, free, NULL);
 
-    iq = stanza_create_bookmarks_storage_request(ctx);
+    xmpp_ctx_t *ctx = connection_get_ctx();
+    xmpp_stanza_t *iq = stanza_create_bookmarks_storage_request(ctx);
     xmpp_stanza_set_id(iq, id);
+
     iq_send_stanza(iq);
     xmpp_stanza_release(iq);
 }
@@ -99,133 +96,119 @@ bookmark_request(void)
 gboolean
 bookmark_add(const char *jid, const char *nick, const char *password, const char *autojoin_str)
 {
-    if (autocomplete_contains(bookmark_ac, jid)) {
+    assert(jid != NULL);
+
+    if (g_hash_table_contains(bookmarks, jid)) {
         return FALSE;
-    } else {
-        Bookmark *item = malloc(sizeof(*item));
-        item->jid = strdup(jid);
-        if (nick) {
-            item->nick = strdup(nick);
-        } else {
-            item->nick = NULL;
-        }
-        if (password) {
-            item->password = strdup(password);
-        } else {
-            item->password = NULL;
-        }
-
-        if (g_strcmp0(autojoin_str, "on") == 0) {
-            item->autojoin = TRUE;
-        } else {
-            item->autojoin = FALSE;
-        }
-
-        bookmark_list = g_list_append(bookmark_list, item);
-        autocomplete_add(bookmark_ac, jid);
-        _send_bookmarks();
-
-        return TRUE;
     }
+
+    Bookmark *bookmark = malloc(sizeof(Bookmark));
+    bookmark->jid = strdup(jid);
+    if (nick) {
+        bookmark->nick = strdup(nick);
+    } else {
+        bookmark->nick = NULL;
+    }
+    if (password) {
+        bookmark->password = strdup(password);
+    } else {
+        bookmark->password = NULL;
+    }
+
+    if (g_strcmp0(autojoin_str, "on") == 0) {
+        bookmark->autojoin = TRUE;
+    } else {
+        bookmark->autojoin = FALSE;
+    }
+
+    g_hash_table_insert(bookmarks, strdup(jid), bookmark);
+    autocomplete_add(bookmark_ac, jid);
+
+    _send_bookmarks();
+
+    return TRUE;
 }
 
 gboolean
 bookmark_update(const char *jid, const char *nick, const char *password, const char *autojoin_str)
 {
-    Bookmark *item = malloc(sizeof(*item));
-    item->jid = strdup(jid);
-    item->nick = NULL;
-    item->password = NULL;
-    item->autojoin = FALSE;
+    assert(jid != NULL);
 
-    GList *found = g_list_find_custom(bookmark_list, item, _match_bookmark_by_jid);
-    _bookmark_item_destroy(item);
-    if (found == NULL) {
+    Bookmark *bookmark = g_hash_table_lookup(bookmarks, jid);
+    if (!bookmark) {
         return FALSE;
-    } else {
-        Bookmark *bm = found->data;
-        if (nick) {
-            free(bm->nick);
-            bm->nick = strdup(nick);
-        }
-        if (password) {
-            free(bm->password);
-            bm->password = strdup(password);
-        }
-        if (autojoin_str) {
-            if (g_strcmp0(autojoin_str, "on") == 0) {
-                bm->autojoin = TRUE;
-            } else if (g_strcmp0(autojoin_str, "off") == 0) {
-                bm->autojoin = FALSE;
-            }
-        }
-        _send_bookmarks();
-        return TRUE;
     }
+
+    if (nick) {
+        free(bookmark->nick);
+        bookmark->nick = strdup(nick);
+    }
+    if (password) {
+        free(bookmark->password);
+        bookmark->password = strdup(password);
+    }
+    if (autojoin_str) {
+        if (g_strcmp0(autojoin_str, "on") == 0) {
+            bookmark->autojoin = TRUE;
+        } else if (g_strcmp0(autojoin_str, "off") == 0) {
+            bookmark->autojoin = FALSE;
+        }
+    }
+
+    _send_bookmarks();
+    return TRUE;
 }
 
 gboolean
 bookmark_join(const char *jid)
 {
-    Bookmark *item = malloc(sizeof(*item));
-    item->jid = strdup(jid);
-    item->nick = NULL;
-    item->password = NULL;
-    item->autojoin = FALSE;
+    assert(jid != NULL);
 
-    GList *found = g_list_find_custom(bookmark_list, item, _match_bookmark_by_jid);
-    _bookmark_item_destroy(item);
-    if (found == NULL) {
+    Bookmark *bookmark = g_hash_table_lookup(bookmarks, jid);
+    if (!bookmark) {
         return FALSE;
-    } else {
-        char *account_name = session_get_account_name();
-        ProfAccount *account = accounts_get_account(account_name);
-        Bookmark *item = found->data;
-        if (!muc_active(item->jid)) {
-            char *nick = item->nick;
-            if (nick == NULL) {
-                nick = account->muc_nick;
-            }
-            presence_join_room(item->jid, nick, item->password);
-            muc_join(item->jid, nick, item->password, FALSE);
-            account_free(account);
-        } else if (muc_roster_complete(item->jid)) {
-            ui_room_join(item->jid, TRUE);
-            account_free(account);
-        }
-        return TRUE;
     }
+
+    char *account_name = session_get_account_name();
+    ProfAccount *account = accounts_get_account(account_name);
+    if (!muc_active(bookmark->jid)) {
+        char *nick = bookmark->nick;
+        if (!nick) {
+            nick = account->muc_nick;
+        }
+        presence_join_room(bookmark->jid, nick, bookmark->password);
+        muc_join(bookmark->jid, nick, bookmark->password, FALSE);
+        account_free(account);
+    } else if (muc_roster_complete(bookmark->jid)) {
+        ui_room_join(bookmark->jid, TRUE);
+        account_free(account);
+    }
+
+    return TRUE;
 }
 
 gboolean
 bookmark_remove(const char *jid)
 {
-    Bookmark *item = malloc(sizeof(*item));
-    item->jid = strdup(jid);
-    item->nick = NULL;
-    item->password = NULL;
-    item->autojoin = FALSE;
+    assert(jid != NULL);
 
-    GList *found = g_list_find_custom(bookmark_list, item, _match_bookmark_by_jid);
-    _bookmark_item_destroy(item);
-    gboolean removed = found != NULL;
-
-    if (removed) {
-        bookmark_list = g_list_remove_link(bookmark_list, found);
-        _bookmark_item_destroy(found->data);
-        g_list_free(found);
-        autocomplete_remove(bookmark_ac, jid);
-        _send_bookmarks();
-        return TRUE;
-    } else {
+    Bookmark *bookmark = g_hash_table_lookup(bookmarks, jid);
+    if (!bookmark) {
         return FALSE;
     }
+
+    g_hash_table_remove(bookmarks, jid);
+    autocomplete_remove(bookmark_ac, jid);
+
+    _send_bookmarks();
+
+    return TRUE;
 }
 
-const GList*
+GList*
 bookmark_get_list(void)
 {
-    return bookmark_list;
+    return g_hash_table_get_values(bookmarks);
 }
 
 char*
@@ -245,110 +228,70 @@ bookmark_autocomplete_reset(void)
 gboolean
 bookmark_exists(const char *const room)
 {
-    GSList *bookmarks = autocomplete_create_list(bookmark_ac);
-    GSList *curr = bookmarks;
-    while (curr) {
-        if (strcmp(curr->data, room) == 0) {
-            g_slist_free_full(bookmarks, g_free);
-            return TRUE;
-        } else {
-            curr = g_slist_next(curr);
-        }
-    }
-    g_slist_free_full(bookmarks, g_free);
-
-    return FALSE;
+    return g_hash_table_contains(bookmarks, room);
 }
 
 static int
 _bookmark_result_id_handler(xmpp_stanza_t *const stanza, void *const userdata)
 {
-    xmpp_ctx_t *ctx = connection_get_ctx();
-    char *id = (char *)userdata;
-    xmpp_stanza_t *ptr;
-    xmpp_stanza_t *nick_st;
-    xmpp_stanza_t *password_st;
-    const char *name;
-    const char *jid;
-    const char *autojoin;
-    char *nick;
-    char *password;
-    gboolean autojoin_val;
-    Jid *my_jid;
-    Bookmark *item;
-
-    g_free(id);
-
-    name = xmpp_stanza_get_name(stanza);
+    const char *name = xmpp_stanza_get_name(stanza);
     if (!name || strcmp(name, STANZA_NAME_IQ) != 0) {
         return 0;
     }
 
-    ptr = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_QUERY);
-    if (!ptr) {
+    xmpp_stanza_t *query = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_QUERY);
+    if (!query) {
         return 0;
     }
-    ptr = xmpp_stanza_get_child_by_name(ptr, STANZA_NAME_STORAGE);
-    if (!ptr) {
+    xmpp_stanza_t *storage = xmpp_stanza_get_child_by_name(query, STANZA_NAME_STORAGE);
+    if (!storage) {
         return 0;
     }
 
     if (bookmark_ac == NULL) {
         bookmark_ac = autocomplete_new();
     }
-    my_jid = jid_create(connection_get_fulljid());
 
-    ptr = xmpp_stanza_get_children(ptr);
-    while (ptr) {
-        name = xmpp_stanza_get_name(ptr);
+    xmpp_stanza_t *child = xmpp_stanza_get_children(storage);
+    while (child) {
+        name = xmpp_stanza_get_name(child);
         if (!name || strcmp(name, STANZA_NAME_CONFERENCE) != 0) {
-            ptr = xmpp_stanza_get_next(ptr);
+            child = xmpp_stanza_get_next(child);
             continue;
         }
-        jid = xmpp_stanza_get_attribute(ptr, STANZA_ATTR_JID);
+        const char *jid = xmpp_stanza_get_attribute(child, STANZA_ATTR_JID);
         if (!jid) {
-            ptr = xmpp_stanza_get_next(ptr);
+            child = xmpp_stanza_get_next(child);
             continue;
         }
 
         log_debug("Handle bookmark for %s", jid);
 
-        nick = NULL;
-        nick_st = xmpp_stanza_get_child_by_name(ptr, "nick");
+        char *nick = NULL;
+        xmpp_stanza_t *nick_st = xmpp_stanza_get_child_by_name(child, "nick");
         if (nick_st) {
-            char *tmp;
-            tmp = xmpp_stanza_get_text(nick_st);
-            if (tmp) {
-                nick = strdup(tmp);
-                xmpp_free(ctx, tmp);
-            }
+            nick = stanza_text_strdup(nick_st);
         }
 
-        password = NULL;
-        password_st = xmpp_stanza_get_child_by_name(ptr, "password");
+        char *password = NULL;
+        xmpp_stanza_t *password_st = xmpp_stanza_get_child_by_name(child, "password");
         if (password_st) {
-            char *tmp;
-            tmp = xmpp_stanza_get_text(password_st);
-            if (tmp) {
-                password = strdup(tmp);
-                xmpp_free(ctx, tmp);
-            }
+            password = stanza_text_strdup(password_st);
         }
 
-        autojoin = xmpp_stanza_get_attribute(ptr, "autojoin");
+        const char *autojoin = xmpp_stanza_get_attribute(child, "autojoin");
+        gboolean autojoin_val = FALSE;;
         if (autojoin && (strcmp(autojoin, "1") == 0 || strcmp(autojoin, "true") == 0)) {
             autojoin_val = TRUE;
-        } else {
-            autojoin_val = FALSE;
         }
 
         autocomplete_add(bookmark_ac, jid);
-        item = malloc(sizeof(*item));
-        item->jid = strdup(jid);
-        item->nick = nick;
-        item->password = password;
-        item->autojoin = autojoin_val;
-        bookmark_list = g_list_append(bookmark_list, item);
+        Bookmark *bookmark = malloc(sizeof(Bookmark));
+        bookmark->jid = strdup(jid);
+        bookmark->nick = nick;
+        bookmark->password = password;
+        bookmark->autojoin = autojoin_val;
+        g_hash_table_insert(bookmarks, strdup(jid), bookmark);
 
         if (autojoin_val) {
             Jid *room_jid;
@@ -369,36 +312,23 @@ _bookmark_result_id_handler(xmpp_stanza_t *const stanza, void *const userdata)
             account_free(account);
         }
 
-        ptr = xmpp_stanza_get_next(ptr);
+        child = xmpp_stanza_get_next(child);
     }
-
-    jid_destroy(my_jid);
 
     return 0;
 }
 
 static void
-_bookmark_item_destroy(gpointer item)
+_bookmark_destroy(Bookmark *bookmark)
 {
-    Bookmark *p = (Bookmark *)item;
-
-    if (p == NULL) {
+    if (!bookmark) {
         return;
     }
 
-    free(p->jid);
-    free(p->nick);
-    free(p->password);
-    free(p);
-}
-
-static int
-_match_bookmark_by_jid(gconstpointer a, gconstpointer b)
-{
-    Bookmark *bookmark_a = (Bookmark *) a;
-    Bookmark *bookmark_b = (Bookmark *) b;
-
-    return strcmp(bookmark_a->jid, bookmark_b->jid);
+    free(bookmark->jid);
+    free(bookmark->nick);
+    free(bookmark->password);
+    free(bookmark);
 }
 
 static void
@@ -418,6 +348,7 @@ _send_bookmarks(void)
     xmpp_stanza_set_name(storage, STANZA_NAME_STORAGE);
     xmpp_stanza_set_ns(storage, "storage:bookmarks");
 
+    GList *bookmark_list = g_hash_table_get_values(bookmarks);
     GList *curr = bookmark_list;
     while (curr) {
         Bookmark *bookmark = curr->data;
@@ -466,6 +397,8 @@ _send_bookmarks(void)
 
         curr = curr->next;
     }
+
+    g_list_free(bookmark_list);
 
     xmpp_stanza_add_child(query, storage);
     xmpp_stanza_add_child(iq, query);

@@ -190,7 +190,7 @@ gboolean bookmark_add(const char *jid, const char *nick, const char *password, c
 gboolean bookmark_update(const char *jid, const char *nick, const char *password, const char *autojoin_str);
 gboolean bookmark_remove(const char *jid);
 gboolean bookmark_join(const char *jid);
-const GList* bookmark_get_list(void);
+GList* bookmark_get_list(void);
 char* bookmark_find(const char *const search_str);
 void bookmark_autocomplete_reset(void);
 gboolean bookmark_exists(const char *const room);
