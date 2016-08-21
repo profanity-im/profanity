@@ -20,6 +20,7 @@
 - Autoping timeout preference (/autoping)
 - Window navigation by window title (/win)
 - Window closing by window title (/close)
+- Account theme setting (/account)
 - Allow sending XMPP stanzas in xmlconsole window (/xmlconsole)
 - Configure level of room message notifications in console window (/console)
 - Check ~/.config/profanity/inputrc for readline settings
