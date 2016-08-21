@@ -244,7 +244,7 @@ gboolean bookmark_join(const char *jid)
     return FALSE;
 }
 
-const GList * bookmark_get_list(void)
+GList * bookmark_get_list(void)
 {
     return (GList *)mock();
 }

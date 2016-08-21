@@ -315,6 +315,8 @@ Resource* stanza_resource_from_presence(XMPPPresence *presence);
 XMPPPresence* stanza_parse_presence(xmpp_stanza_t *stanza, int *err);
 void stanza_free_presence(XMPPPresence *presence);
 
+char* stanza_text_strdup(xmpp_stanza_t *stanza);
+
 XMPPCaps* stanza_parse_caps(xmpp_stanza_t *const stanza);
 void stanza_free_caps(XMPPCaps *caps);
 

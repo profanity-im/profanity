@@ -780,6 +780,8 @@ _muc_user_self_handler(xmpp_stanza_t *stanza)
         free(status_str);
         free(reason);
     }
+
+    jid_destroy(from_jid);
 }
 
 static void
@@ -858,6 +860,7 @@ _muc_user_occupant_handler(xmpp_stanza_t *stanza)
         free(reason);
     }
 
+    jid_destroy(from_jid);
     free(status_str);
 }
 
