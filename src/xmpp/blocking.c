@@ -63,10 +63,6 @@ static Autocomplete blocked_ac;
 void
 blocking_request(void)
 {
-    char *id = create_unique_id("blocked_list_request");
-    xmpp_ctx_t *ctx = connection_get_ctx();
-    xmpp_stanza_t *iq;
-
     if (blocked) {
         g_list_free_full(blocked, free);
         blocked = NULL;
@@ -77,13 +73,16 @@ blocking_request(void)
     }
     blocked_ac = autocomplete_new();
 
+    char *id = create_unique_id("blocked_list_request");
     iq_id_handler_add(id, _blocklist_result_handler, NULL, NULL);
 
-    iq = stanza_create_blocked_list_request(ctx);
+    xmpp_ctx_t *ctx = connection_get_ctx();
+    xmpp_stanza_t *iq = stanza_create_blocked_list_request(ctx);
     xmpp_stanza_set_id(iq, id);
+    free(id);
+
     iq_send_stanza(iq);
     xmpp_stanza_release(iq);
-    free(id);
 }
 
 GList*
@@ -234,7 +233,7 @@ _block_add_result_handler(xmpp_stanza_t *const stanza, void *const userdata)
     char *jid = (char*)userdata;
 
     const char *type = xmpp_stanza_get_type(stanza);
-    if (type == NULL) {
+    if (!type) {
         log_info("Block response received for %s with no type attribute.", jid);
         free(jid);
         return 0;
@@ -258,7 +257,7 @@ _block_remove_result_handler(xmpp_stanza_t *const stanza, void *const userdata)
     char *jid = (char*)userdata;
 
     const char *type = xmpp_stanza_get_type(stanza);
-    if (type == NULL) {
+    if (!type) {
         log_info("Unblock response received for %s with no type attribute.", jid);
         free(jid);
         return 0;

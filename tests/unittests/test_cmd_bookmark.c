@@ -126,8 +126,6 @@ void cmd_bookmark_list_shows_bookmarks(void **state)
 
     gboolean result = cmd_bookmark(&window, CMD_BOOKMARK, args);
     assert_true(result);
-
-    g_list_free_full(bookmarks, (GDestroyNotify)_free_bookmark);
 }
 
 void cmd_bookmark_add_shows_message_when_invalid_jid(void **state)

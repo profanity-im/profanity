@@ -4359,8 +4359,9 @@ cmd_bookmark(ProfWin *window, const char *const command, gchar **args)
             }
             return TRUE;
         } else if (strcmp(cmd, "list") == 0) {
-            const GList *bookmarks = bookmark_get_list();
+            GList *bookmarks = bookmark_get_list();
             cons_show_bookmarks(bookmarks);
+            g_list_free(bookmarks);
         } else {
             char *jid = args[1];
             if (jid == NULL) {
