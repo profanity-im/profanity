@@ -121,9 +121,8 @@ static struct cmd_t command_defs[] =
             "/help [<area>|<command>]")
         CMD_DESC(
             "Help on using Profanity. Passing no arguments list help areas. "
-            "For command help, optional arguments are shown using square brackets e.g. [argument], "
-            "arguments representing variables rather than a literal name are surrounded by angle brackets "
-            "e.g. <argument>. "
+            "For command help, optional arguments are shown using square brackets, "
+            "arguments representing variables rather than a literal name are surrounded by angle brackets. "
             "Arguments that may be one of a number of values are separated by a pipe "
             "e.g. val1|val2|val3.")
         CMD_ARGS(
@@ -393,7 +392,7 @@ static struct cmd_t command_defs[] =
         CMD_DESC(
             "Manage blocked users, calling with no arguments shows the current list of blocked users.")
         CMD_ARGS(
-            { "add [<jid>]",    "Block the specified Jabber ID, if in a chat window, and not jid specified, the current recipient will be blocked." },
+            { "add [<jid>]",    "Block the specified Jabber ID. If in a chat window and no jid is specified, the current recipient will be blocked." },
             { "remove <jid>",   "Remove the specified Jabber ID from the blocked list." })
         CMD_EXAMPLES(
             "/blocked add spammer@spam.org")
@@ -1341,8 +1340,8 @@ static struct cmd_t command_defs[] =
             { "chat on|off",                    "Notifications for regular chat messages." },
             { "chat current on|off",            "Whether to show regular chat message notifications when the window is focussed." },
             { "chat text on|off",               "Show message text in regular message notifications." },
-            { "room on|off",                    "Notifications for all chat room messages, 'mention' only notifies when your nick is mentioned." },
-            { "room mention on|off",            "Notifications for all chat room messages when your nick is mentioned." },
+            { "room on|off",                    "Notifications for all chat room messages." },
+            { "room mention on|off",            "Notifications for chat room messages when your nick is mentioned." },
             { "room mention case_sensitive",    "Set room mention notifications as case sensitive." },
             { "room mention case_insensitive",  "Set room mention notifications as case insensitive." },
             { "room mention word_whole",        "Set room mention notifications only on whole word match, i.e. when nickname is not part of a larger word." },
@@ -1735,7 +1734,7 @@ static struct cmd_t command_defs[] =
             { "where",           "Show the current log file location." },
             { "rotate on|off",   "Rotate log, default on." },
             { "maxsize <bytes>", "With rotate enabled, specifies the max log size, defaults to 1048580 (1MB)." },
-            { "shared on|off",   "Share logs between all instances, default: on. When off, the process id will be included in the log." })
+            { "shared on|off",   "Share logs between all instances, default: on. When off, the process id will be included in the log filename." })
         CMD_NOEXAMPLES
     },
 
@@ -1940,7 +1939,7 @@ static struct cmd_t command_defs[] =
             { "set <account> status <presence>",        "The presence status to use on login." },
             { "set <account> status last",              "Use your last status before logging out, when logging in." },
             { "set <account> <presence> <priority>",    "Set the priority (-128..127) to use for the specified presence." },
-            { "set <account> resource <resource>",      "The resource to be used for this account." },
+            { "set <account> resource <resource>",      "The resource to be used for this account, defaults to 'profanity'." },
             { "set <account> password <password>",      "Password for the account, note this is currently stored in plaintext if set." },
             { "set <account> eval_password <command>",  "Shell command evaluated to retrieve password for the account. Can be used to retrieve password from keyring." },
             { "set <account> muc <service>",            "The default MUC chat service to use, defaults to 'conference.<domainpart>' where the domain part is from the account JID." },
@@ -1969,7 +1968,7 @@ static struct cmd_t command_defs[] =
             "/account set me nick dennis",
             "/account set me status dnd",
             "/account set me dnd -1",
-            "/account rename me gtalk")
+            "/account rename me chattyme")
     },
 
     { "/plugins",
