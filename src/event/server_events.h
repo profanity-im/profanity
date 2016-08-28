@@ -87,5 +87,6 @@ void sv_ev_roster_update(const char *const barejid, const char *const name,
 void sv_ev_roster_received(void);
 int sv_ev_certfail(const char *const errormsg, TLSCertificate *cert);
 void sv_ev_lastactivity_response(const char *const from, const int seconds, const char *const msg);
+void sv_ev_bookmark_autojoin(Bookmark *bookmark);
 
 #endif

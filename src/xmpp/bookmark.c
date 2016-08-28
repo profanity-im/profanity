@@ -294,22 +294,7 @@ _bookmark_result_id_handler(xmpp_stanza_t *const stanza, void *const userdata)
         g_hash_table_insert(bookmarks, strdup(barejid), bookmark);
 
         if (autojoin_val) {
-            Jid *room_jid;
-
-            char *account_name = session_get_account_name();
-            ProfAccount *account = accounts_get_account(account_name);
-            if (nick == NULL) {
-                nick = account->muc_nick;
-            }
-
-            log_debug("Autojoin %s with nick=%s", barejid, nick);
-            room_jid = jid_create_from_bare_and_resource(barejid, nick);
-            if (!muc_active(room_jid->barejid)) {
-                presence_join_room(barejid, nick, password);
-                muc_join(barejid, nick, password, TRUE);
-            }
-            jid_destroy(room_jid);
-            account_free(account);
+            sv_ev_bookmark_autojoin(bookmark);
         }
 
         child = xmpp_stanza_get_next(child);
