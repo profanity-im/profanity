@@ -103,7 +103,7 @@ bookmark_add(const char *jid, const char *nick, const char *password, const char
     }
 
     Bookmark *bookmark = malloc(sizeof(Bookmark));
-    bookmark->jid = strdup(jid);
+    bookmark->barejid = strdup(jid);
     if (nick) {
         bookmark->nick = strdup(nick);
     } else {
@@ -171,16 +171,16 @@ bookmark_join(const char *jid)
 
     char *account_name = session_get_account_name();
     ProfAccount *account = accounts_get_account(account_name);
-    if (!muc_active(bookmark->jid)) {
+    if (!muc_active(bookmark->barejid)) {
         char *nick = bookmark->nick;
         if (!nick) {
             nick = account->muc_nick;
         }
-        presence_join_room(bookmark->jid, nick, bookmark->password);
-        muc_join(bookmark->jid, nick, bookmark->password, FALSE);
+        presence_join_room(bookmark->barejid, nick, bookmark->password);
+        muc_join(bookmark->barejid, nick, bookmark->password, FALSE);
         account_free(account);
-    } else if (muc_roster_complete(bookmark->jid)) {
-        ui_room_join(bookmark->jid, TRUE);
+    } else if (muc_roster_complete(bookmark->barejid)) {
+        ui_room_join(bookmark->barejid, TRUE);
         account_free(account);
     }
 
@@ -259,13 +259,13 @@ _bookmark_result_id_handler(xmpp_stanza_t *const stanza, void *const userdata)
             child = xmpp_stanza_get_next(child);
             continue;
         }
-        const char *jid = xmpp_stanza_get_attribute(child, STANZA_ATTR_JID);
-        if (!jid) {
+        const char *barejid = xmpp_stanza_get_attribute(child, STANZA_ATTR_JID);
+        if (!barejid) {
             child = xmpp_stanza_get_next(child);
             continue;
         }
 
-        log_debug("Handle bookmark for %s", jid);
+        log_debug("Handle bookmark for %s", barejid);
 
         char *nick = NULL;
         xmpp_stanza_t *nick_st = xmpp_stanza_get_child_by_name(child, "nick");
@@ -285,13 +285,13 @@ _bookmark_result_id_handler(xmpp_stanza_t *const stanza, void *const userdata)
             autojoin_val = TRUE;
         }
 
-        autocomplete_add(bookmark_ac, jid);
+        autocomplete_add(bookmark_ac, barejid);
         Bookmark *bookmark = malloc(sizeof(Bookmark));
-        bookmark->jid = strdup(jid);
+        bookmark->barejid = strdup(barejid);
         bookmark->nick = nick;
         bookmark->password = password;
         bookmark->autojoin = autojoin_val;
-        g_hash_table_insert(bookmarks, strdup(jid), bookmark);
+        g_hash_table_insert(bookmarks, strdup(barejid), bookmark);
 
         if (autojoin_val) {
             Jid *room_jid;
@@ -302,11 +302,11 @@ _bookmark_result_id_handler(xmpp_stanza_t *const stanza, void *const userdata)
                 nick = account->muc_nick;
             }
 
-            log_debug("Autojoin %s with nick=%s", jid, nick);
-            room_jid = jid_create_from_bare_and_resource(jid, nick);
+            log_debug("Autojoin %s with nick=%s", barejid, nick);
+            room_jid = jid_create_from_bare_and_resource(barejid, nick);
             if (!muc_active(room_jid->barejid)) {
-                presence_join_room(jid, nick, password);
-                muc_join(jid, nick, password, TRUE);
+                presence_join_room(barejid, nick, password);
+                muc_join(barejid, nick, password, TRUE);
             }
             jid_destroy(room_jid);
             account_free(account);
@@ -325,7 +325,7 @@ _bookmark_destroy(Bookmark *bookmark)
         return;
     }
 
-    free(bookmark->jid);
+    free(bookmark->barejid);
     free(bookmark->nick);
     free(bookmark->password);
     free(bookmark);
@@ -354,9 +354,9 @@ _send_bookmarks(void)
         Bookmark *bookmark = curr->data;
         xmpp_stanza_t *conference = xmpp_stanza_new(ctx);
         xmpp_stanza_set_name(conference, STANZA_NAME_CONFERENCE);
-        xmpp_stanza_set_attribute(conference, STANZA_ATTR_JID, bookmark->jid);
+        xmpp_stanza_set_attribute(conference, STANZA_ATTR_JID, bookmark->barejid);
 
-        Jid *jidp = jid_create(bookmark->jid);
+        Jid *jidp = jid_create(bookmark->barejid);
         if (jidp->localpart) {
             xmpp_stanza_set_attribute(conference, STANZA_ATTR_NAME, jidp->localpart);
         }
