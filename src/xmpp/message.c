@@ -686,6 +686,11 @@ _handle_carbons(xmpp_stanza_t *const stanza)
         return TRUE;
     }
 
+    if (g_strcmp0(name, "private") == 0) {
+        log_info("Carbon received with private element.");
+        return FALSE;
+    }
+
     if ((g_strcmp0(name, "received") != 0) && (g_strcmp0(name, "sent") != 0)) {
         log_warning("Carbon received with unrecognised stanza name: %s", name);
         return TRUE;
