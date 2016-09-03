@@ -32,5 +32,4 @@ install:
     - sudo make install
     - cd ..
     - rm -rf stabber
-    - ./bootstrap.sh
-script: ./configure --enable-python-plugins --enable-c-plugins && make && make check
+script: ./travis-build.sh
