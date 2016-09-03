@@ -38,6 +38,7 @@
 #include <gtk/gtk.h>
 #include <glib.h>
 #include <glib/gstdio.h>
+#include <stdlib.h>
 
 #include "log.h"
 #include "config/preferences.h"
