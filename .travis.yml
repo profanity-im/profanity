@@ -32,4 +32,5 @@ install:
     - sudo make install
     - cd ..
     - rm -rf stabber
+    - ./bootstrap.sh
 script: ./configure --disable-ruby-plugins --enable-python-plugins --enable-c-plugins --disable-lua-plugins && make && make check
