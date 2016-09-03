@@ -78,7 +78,7 @@ typedef enum {
 } jabber_invite_t;
 
 typedef struct bookmark_t {
-    char *jid;
+    char *barejid;
     char *nick;
     char *password;
     gboolean autojoin;

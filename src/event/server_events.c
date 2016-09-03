@@ -1082,3 +1082,25 @@ sv_ev_lastactivity_response(const char *const from, const int seconds, const cha
     g_free(date_fmt);
     jid_destroy(jidp);
 }
+
+void
+sv_ev_bookmark_autojoin(Bookmark *bookmark)
+{
+    char *nick = NULL;
+    if (bookmark->nick) {
+        nick = strdup(bookmark->nick);
+    } else {
+        char *account_name = session_get_account_name();
+        ProfAccount *account = accounts_get_account(account_name);
+        nick = strdup(account->muc_nick);
+        account_free(account);
+    }
+
+    log_debug("Autojoin %s with nick=%s", bookmark->barejid, nick);
+    if (!muc_active(bookmark->barejid)) {
+        presence_join_room(bookmark->barejid, nick, bookmark->password);
+        muc_join(bookmark->barejid, nick, bookmark->password, TRUE);
+    }
+
+    free(nick);
+}

@@ -62,7 +62,7 @@ void cmd_bookmark_shows_usage_when_no_args(void **state)
 
 static void _free_bookmark(Bookmark *bookmark)
 {
-    free(bookmark->jid);
+    free(bookmark->barejid);
     free(bookmark->nick);
     free(bookmark);
 }
@@ -70,7 +70,7 @@ static void _free_bookmark(Bookmark *bookmark)
 static gboolean
 _cmp_bookmark(Bookmark *bm1, Bookmark *bm2)
 {
-    if (strcmp(bm1->jid, bm2->jid) != 0) {
+    if (strcmp(bm1->barejid, bm2->barejid) != 0) {
         return FALSE;
     }
     if (strcmp(bm1->nick, bm2->nick) != 0) {
@@ -91,23 +91,23 @@ void cmd_bookmark_list_shows_bookmarks(void **state)
     window.type = WIN_CONSOLE;
 
     Bookmark *bm1 = malloc(sizeof(Bookmark));
-    bm1->jid = strdup("room1@conf.org");
+    bm1->barejid = strdup("room1@conf.org");
     bm1->nick = strdup("bob");
     bm1->autojoin = FALSE;
     Bookmark *bm2 = malloc(sizeof(Bookmark));
-    bm2->jid = strdup("room2@conf.org");
+    bm2->barejid = strdup("room2@conf.org");
     bm2->nick = strdup("steve");
     bm2->autojoin = TRUE;
     Bookmark *bm3 = malloc(sizeof(Bookmark));
-    bm3->jid = strdup("room3@conf.org");
+    bm3->barejid = strdup("room3@conf.org");
     bm3->nick = strdup("dave");
     bm3->autojoin = TRUE;
     Bookmark *bm4 = malloc(sizeof(Bookmark));
-    bm4->jid = strdup("room4@conf.org");
+    bm4->barejid = strdup("room4@conf.org");
     bm4->nick = strdup("james");
     bm4->autojoin = FALSE;
     Bookmark *bm5 = malloc(sizeof(Bookmark));
-    bm5->jid = strdup("room5@conf.org");
+    bm5->barejid = strdup("room5@conf.org");
     bm5->nick = strdup("mike");
     bm5->autojoin = FALSE;
 
