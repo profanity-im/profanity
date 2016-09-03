@@ -264,8 +264,8 @@ iq_autoping_check(void)
     unsigned long seconds_elapsed = elapsed * 1.0;
     gint timeout = prefs_get_autoping_timeout();
     if (timeout > 0 && seconds_elapsed >= timeout) {
-        cons_show("Autoping response timed out afer %u seconds.", timeout);
-        log_debug("Autoping check: timed out afer %u seconds, disconnecting", timeout);
+        cons_show("Autoping response timed out after %u seconds.", timeout);
+        log_debug("Autoping check: timed out after %u seconds, disconnecting", timeout);
         session_autoping_fail();
         autoping_wait = FALSE;
         g_timer_destroy(autoping_time);

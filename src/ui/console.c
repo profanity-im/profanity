@@ -698,10 +698,10 @@ cons_show_bookmarks(const GList *list)
 
             theme_item_t presence_colour = THEME_TEXT;
 
-            if (muc_active(item->jid)) {
+            if (muc_active(item->barejid)) {
                 presence_colour = THEME_ONLINE;
             }
-            win_vprint(console, '-', 0, NULL, NO_EOL, presence_colour, "", "  %s", item->jid);
+            win_vprint(console, '-', 0, NULL, NO_EOL, presence_colour, "", "  %s", item->barejid);
             if (item->nick) {
                 win_vprint(console, '-', 0, NULL, NO_DATE | NO_EOL, presence_colour, "", "/%s", item->nick);
             }
@@ -711,8 +711,8 @@ cons_show_bookmarks(const GList *list)
             if (item->password) {
                 win_print(console, '-', 0, NULL, NO_DATE | NO_EOL, presence_colour, "", " (private)");
             }
-            if (muc_active(item->jid)) {
-                ProfWin *roomwin = (ProfWin*)wins_get_muc(item->jid);
+            if (muc_active(item->barejid)) {
+                ProfWin *roomwin = (ProfWin*)wins_get_muc(item->barejid);
                 if (roomwin) {
                     int num = wins_get_num(roomwin);
                     win_vprint(console, '-', 0, NULL, NO_DATE | NO_EOL, presence_colour, "", " (win %d)", num);
