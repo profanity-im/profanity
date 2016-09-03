@@ -159,9 +159,9 @@ cl_ev_send_msg(ProfChatWin *chatwin, const char *const msg, const char *const oo
 #ifndef HAVE_LIBGPGME
     gboolean handled = otr_on_message_send(chatwin, plugin_msg);
     if (!handled) {
-        char *id = message_send_chat(chatwin->barejid, plugin_msg, oob_url);
+        char *id = message_send_chat(chatwin->barejid, plugin_msg, oob_url, request_receipt);
         chat_log_msg_out(chatwin->barejid, plugin_msg);
-        chatwin_outgoing_msg(chatwin, plugin_msg, id, PROF_MSG_PLAIN);
+        chatwin_outgoing_msg(chatwin, plugin_msg, id, PROF_MSG_PLAIN, request_receipt);
         free(id);
     }
 
@@ -177,12 +177,12 @@ cl_ev_send_msg(ProfChatWin *chatwin, const char *const msg, const char *const oo
     if (chatwin->pgp_send) {
         char *id = message_send_chat_pgp(chatwin->barejid, plugin_msg);
         chat_log_pgp_msg_out(chatwin->barejid, plugin_msg);
-        chatwin_outgoing_msg(chatwin, plugin_msg, id, PROF_MSG_PGP);
+        chatwin_outgoing_msg(chatwin, plugin_msg, id, PROF_MSG_PGP, request_receipt);
         free(id);
     } else {
-        char *id = message_send_chat(chatwin->barejid, plugin_msg, oob_url);
+        char *id = message_send_chat(chatwin->barejid, plugin_msg, oob_url, request_receipt);
         chat_log_msg_out(chatwin->barejid, plugin_msg);
-        chatwin_outgoing_msg(chatwin, plugin_msg, id, PROF_MSG_PLAIN);
+        chatwin_outgoing_msg(chatwin, plugin_msg, id, PROF_MSG_PLAIN, request_receipt);
         free(id);
     }
 
@@ -195,9 +195,9 @@ cl_ev_send_msg(ProfChatWin *chatwin, const char *const msg, const char *const oo
 // OTR unsupported, PGP unsupported
 #ifndef HAVE_LIBOTR
 #ifndef HAVE_LIBGPGME
-    char *id = message_send_chat(chatwin->barejid, plugin_msg, oob_url);
+    char *id = message_send_chat(chatwin->barejid, plugin_msg, oob_url, request_receipt);
     chat_log_msg_out(chatwin->barejid, plugin_msg);
-    chatwin_outgoing_msg(chatwin, plugin_msg, id, PROF_MSG_PLAIN);
+    chatwin_outgoing_msg(chatwin, plugin_msg, id, PROF_MSG_PLAIN, request_receipt);
     free(id);
 
     plugins_post_chat_message_send(chatwin->barejid, plugin_msg);
