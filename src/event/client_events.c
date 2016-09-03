@@ -157,7 +157,7 @@ cl_ev_send_msg(ProfChatWin *chatwin, const char *const msg, const char *const oo
 // OTR supported, PGP unsupported
 #ifdef HAVE_LIBOTR
 #ifndef HAVE_LIBGPGME
-    gboolean handled = otr_on_message_send(chatwin, plugin_msg);
+    gboolean handled = otr_on_message_send(chatwin, plugin_msg, request_receipt);
     if (!handled) {
         char *id = message_send_chat(chatwin->barejid, plugin_msg, oob_url, request_receipt);
         chat_log_msg_out(chatwin->barejid, plugin_msg);
@@ -175,7 +175,7 @@ cl_ev_send_msg(ProfChatWin *chatwin, const char *const msg, const char *const oo
 #ifndef HAVE_LIBOTR
 #ifdef HAVE_LIBGPGME
     if (chatwin->pgp_send) {
-        char *id = message_send_chat_pgp(chatwin->barejid, plugin_msg);
+        char *id = message_send_chat_pgp(chatwin->barejid, plugin_msg, request_receipt);
         chat_log_pgp_msg_out(chatwin->barejid, plugin_msg);
         chatwin_outgoing_msg(chatwin, plugin_msg, id, PROF_MSG_PGP, request_receipt);
         free(id);
