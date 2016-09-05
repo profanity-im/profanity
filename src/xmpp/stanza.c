@@ -244,6 +244,8 @@ stanza_create_http_upload_request(xmpp_ctx_t *ctx, const char *const id,
     free(filename_cpy);
     xmpp_stanza_add_child(filename, filename_txt);
     xmpp_stanza_add_child(request, filename);
+    xmpp_stanza_release(filename_txt);
+    xmpp_stanza_release(filename);
 
     xmpp_stanza_t *size = xmpp_stanza_new(ctx);
     xmpp_stanza_set_name(size, STANZA_NAME_SIZE);
@@ -255,6 +257,8 @@ stanza_create_http_upload_request(xmpp_ctx_t *ctx, const char *const id,
     }
     xmpp_stanza_add_child(size, size_txt);
     xmpp_stanza_add_child(request, size);
+    xmpp_stanza_release(size_txt);
+    xmpp_stanza_release(size);
 
     xmpp_stanza_t *content_type = xmpp_stanza_new(ctx);
     xmpp_stanza_set_name(content_type, STANZA_NAME_CONTENT_TYPE);
@@ -262,6 +266,8 @@ stanza_create_http_upload_request(xmpp_ctx_t *ctx, const char *const id,
     xmpp_stanza_set_text(content_type_txt, upload->mime_type);
     xmpp_stanza_add_child(content_type, content_type_txt);
     xmpp_stanza_add_child(request, content_type);
+    xmpp_stanza_release(content_type_txt);
+    xmpp_stanza_release(content_type);
 
     xmpp_stanza_add_child(iq, request);
     xmpp_stanza_release(request);
