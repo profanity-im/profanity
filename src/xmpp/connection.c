@@ -297,6 +297,7 @@ connection_jid_for_feature(const char *const feature)
         char *jid = curr->data;
         GHashTable *features = g_hash_table_lookup(conn.features_by_jid, jid);
         if (features && g_hash_table_lookup(features, feature)) {
+            g_list_free(jids);
             return jid;
         }
 
