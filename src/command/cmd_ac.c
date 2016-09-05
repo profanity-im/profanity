@@ -3003,25 +3003,21 @@ _complete_filepath(const char *const input, char *const startstr)
                 if (output_off) {
                     if (asprintf(&tmp, "%s/%s", directory, dir->d_name) == -1) {
                         free(foofile);
-                        free(directory);
                         return NULL;
                     }
                     if (asprintf(&acstring, "~/%s", tmp+output_off) == -1) {
                         free(foofile);
-                        free(directory);
                         return NULL;
                     }
                     free(tmp);
                 } else if (strcmp(directory, "/") == 0) {
                     if (asprintf(&acstring, "/%s", dir->d_name) == -1) {
                         free(foofile);
-                        free(directory);
                         return NULL;
                     }
                 } else {
                     if (asprintf(&acstring, "%s/%s", directory, dir->d_name) == -1) {
                         free(foofile);
-                        free(directory);
                         return NULL;
                     }
                 }
@@ -3030,9 +3026,10 @@ _complete_filepath(const char *const input, char *const startstr)
             }
             closedir(d);
         }
+    } else {
+        free(directory);
     }
     free(foofile);
-    free(directory);
 
     result = autocomplete_param_with_ac(input, startstr, filepath_ac, TRUE);
     if (result) {
