@@ -191,7 +191,7 @@ else
 fi
 
 # threading
-ACX_PTHREAD
+ACX_PTHREAD([], [AC_MSG_ERROR([pthread is required])])
 LIBS="$PTHREAD_LIBS $LIBS"
 CFLAGS="$CFLAGS $PTHREAD_CFLAGS"
 AS_IF([test "x$PTHREAD_CC" != x], [ CC="$PTHREAD_CC" ])

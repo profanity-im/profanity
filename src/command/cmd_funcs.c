@@ -6090,6 +6090,7 @@ cmd_plugins(ProfWin *window, const char *const command, gchar **args)
         }
         g_free(plugin_name);
 
+        free(filename);
         return TRUE;
     } else if (g_strcmp0(args[0], "load") == 0) {
         if (args[1] == NULL) {

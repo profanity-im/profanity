@@ -1992,10 +1992,10 @@ static struct cmd_t command_defs[] =
             { "reload [<plugin>]",   "Reload a plugin, passing no argument will reload all plugins." },
             { "python_version",      "Show the Python interpreter version." })
         CMD_EXAMPLES(
-            "/plugin install /home/steveharris/Downloads/metal.py",
-            "/plugin load browser.py",
-            "/plugin unload say.py",
-            "/plugin reload wikipedia.py")
+            "/plugins install /home/steveharris/Downloads/metal.py",
+            "/plugins load browser.py",
+            "/plugins unload say.py",
+            "/plugins reload wikipedia.py")
     },
 
     { "/prefs",
