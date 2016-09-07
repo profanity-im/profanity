@@ -96,19 +96,23 @@ else
 fi
 
 # c
-LT_INIT
-if test "x$enable_plugins" = xno; then
+if test "x$PLATFORM" = xcygwin; then
     AM_CONDITIONAL([BUILD_C_API], [false])
-elif test "x$enable_c_plugins" != xno; then
-    AC_CHECK_LIB([dl], [main],
-        [AM_CONDITIONAL([BUILD_C_API], [true]) LIBS="$LIBS -ldl" AC_DEFINE([HAVE_C], [1], [C support])],
-        [AS_IF(
-            [test "x$enable_c_plugins" = xyes],
-                [AC_MSG_ERROR([dl library needed to run C plugins])],
-            [AM_CONDITIONAL([BUILD_C_API], [false])])
-        ])
 else
-    AM_CONDITIONAL([BUILD_C_API], [false])
+    LT_INIT
+    if test "x$enable_plugins" = xno; then
+        AM_CONDITIONAL([BUILD_C_API], [false])
+    elif test "x$enable_c_plugins" != xno; then
+        AC_CHECK_LIB([dl], [main],
+            [AM_CONDITIONAL([BUILD_C_API], [true]) LIBS="$LIBS -ldl" AC_DEFINE([HAVE_C], [1], [C support])],
+            [AS_IF(
+                [test "x$enable_c_plugins" = xyes],
+                    [AC_MSG_ERROR([dl library needed to run C plugins])],
+                [AM_CONDITIONAL([BUILD_C_API], [false])])
+            ])
+    else
+        AM_CONDITIONAL([BUILD_C_API], [false])
+    fi
 fi
 
 # threading
