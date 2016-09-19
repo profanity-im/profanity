@@ -89,7 +89,13 @@ create_status_bar(void)
 
     int bracket_attrs = theme_attrs(THEME_STATUS_BRACKET);
 
-    status_bar = newwin(1, cols, rows-2, 0);
+    char *pos = prefs_get_string(PREF_INPUTWIN);
+    if (g_strcmp0(pos, "top") == 0) {
+        status_bar = newwin(1, cols, rows-1, 0);
+    } else {
+        status_bar = newwin(1, cols, rows-2, 0);
+    }
+    prefs_free_string(pos);
     wbkgd(status_bar, theme_attrs(THEME_STATUS_TEXT));
     wattron(status_bar, bracket_attrs);
     mvwprintw(status_bar, 0, cols - 34, _active);
@@ -122,7 +128,13 @@ status_bar_resize(void)
 
     int bracket_attrs = theme_attrs(THEME_STATUS_BRACKET);
 
-    mvwin(status_bar, rows-2, 0);
+    char *pos = prefs_get_string(PREF_INPUTWIN);
+    if (g_strcmp0(pos, "top") == 0) {
+        mvwin(status_bar, rows-1, 0);
+    } else {
+        mvwin(status_bar, rows-2, 0);
+    }
+    prefs_free_string(pos);
     wresize(status_bar, 1, cols);
     wbkgd(status_bar, theme_attrs(THEME_STATUS_TEXT));
     wattron(status_bar, bracket_attrs);

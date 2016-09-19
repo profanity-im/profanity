@@ -150,6 +150,8 @@ theme_init(const char *const theme_name)
     g_hash_table_insert(defaults, strdup("roster.room.trigger"),     strdup("green"));
     g_hash_table_insert(defaults, strdup("roster.room.mention"),     strdup("green"));
     g_hash_table_insert(defaults, strdup("occupants.header"),        strdup("yellow"));
+
+    _load_preferences();
 }
 
 gboolean
@@ -427,7 +429,7 @@ _load_preferences(void)
     _set_string_preference("roster.rooms.by", PREF_ROSTER_ROOMS_BY);
     _set_string_preference("roster.private", PREF_ROSTER_PRIVATE);
     _set_string_preference("roster.count", PREF_ROSTER_COUNT);
-
+    _set_string_preference("inputwin.position", PREF_INPUTWIN);
 
     if (g_key_file_has_key(theme, "ui", "occupants.size", NULL)) {
         gint occupants_size = g_key_file_get_integer(theme, "ui", "occupants.size", NULL);

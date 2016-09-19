@@ -1302,6 +1302,23 @@ static struct cmd_t command_defs[] =
         CMD_NOEXAMPLES
     },
 
+    { "/inputwin",
+        parse_args, 1, 1, &cons_inputwin_setting,
+        CMD_NOSUBFUNCS
+        CMD_MAINFUNC(cmd_inputwin)
+        CMD_TAGS(
+            CMD_TAG_UI)
+        CMD_SYN(
+            "/inputwin top",
+            "/inputwin bottom")
+        CMD_DESC(
+            "Where to display the input window.")
+        CMD_ARGS(
+            { "top", "Show the input window at the top of the screen." },
+            { "bottom", "Show the input window at the bottom of the screen." })
+        CMD_NOEXAMPLES
+    },
+
     { "/notify",
         parse_args_with_freetext, 0, 4, NULL,
         CMD_NOSUBFUNCS

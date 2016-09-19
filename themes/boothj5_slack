@@ -133,3 +133,4 @@ tls.show=true
 console.muc=first
 console.chat=all
 console.private=all
+inputwin.position=bottom
