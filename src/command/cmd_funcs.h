@@ -149,6 +149,7 @@ gboolean cmd_wrap(ProfWin *window, const char *const command, gchar **args);
 gboolean cmd_time(ProfWin *window, const char *const command, gchar **args);
 gboolean cmd_resource(ProfWin *window, const char *const command, gchar **args);
 gboolean cmd_inpblock(ProfWin *window, const char *const command, gchar **args);
+gboolean cmd_inputwin(ProfWin *window, const char *const command, gchar **args);
 gboolean cmd_encwarn(ProfWin *window, const char *const command, gchar **args);
 gboolean cmd_script(ProfWin *window, const char *const command, gchar **args);
 gboolean cmd_export(ProfWin *window, const char *const command, gchar **args);

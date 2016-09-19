@@ -282,7 +282,14 @@ _inp_win_update_virtual(void)
 {
     int wrows, wcols;
     getmaxyx(stdscr, wrows, wcols);
-    pnoutrefresh(inp_win, 0, pad_start, wrows-1, 0, wrows-1, wcols-2);
+    char *pos = prefs_get_string(PREF_INPUTWIN);
+    if (g_strcmp0(pos, "top") == 0) {
+        pnoutrefresh(inp_win, 0, pad_start, 0, 0, 0, wcols-2);
+    } else {
+        pnoutrefresh(inp_win, 0, pad_start, wrows-1, 0, wrows-1, wcols-2);
+    }
+    prefs_free_string(pos);
+
 }
 
 static void

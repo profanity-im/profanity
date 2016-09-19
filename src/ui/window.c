@@ -616,13 +616,32 @@ win_update_virtual(ProfWin *window)
             } else {
                 subwin_cols = win_roster_cols();
             }
-            pnoutrefresh(layout->base.win, layout->base.y_pos, 0, 1, 0, rows-3, (cols-subwin_cols)-1);
-            pnoutrefresh(layout->subwin, layout->sub_y_pos, 0, 1, (cols-subwin_cols), rows-3, cols-1);
+            char *pos = prefs_get_string(PREF_INPUTWIN);
+            if (g_strcmp0(pos, "top") == 0) {
+                pnoutrefresh(layout->base.win, layout->base.y_pos, 0, 2, 0, rows-2, (cols-subwin_cols)-1);
+                pnoutrefresh(layout->subwin, layout->sub_y_pos, 0, 2, (cols-subwin_cols), rows-2, cols-1);
+            } else {
+                pnoutrefresh(layout->base.win, layout->base.y_pos, 0, 1, 0, rows-3, (cols-subwin_cols)-1);
+                pnoutrefresh(layout->subwin, layout->sub_y_pos, 0, 1, (cols-subwin_cols), rows-3, cols-1);
+            }
+            prefs_free_string(pos);
         } else {
-            pnoutrefresh(layout->base.win, layout->base.y_pos, 0, 1, 0, rows-3, cols-1);
+            char *pos = prefs_get_string(PREF_INPUTWIN);
+            if (g_strcmp0(pos, "top") == 0) {
+                pnoutrefresh(layout->base.win, layout->base.y_pos, 0, 2, 0, rows-2, cols-1);
+            } else {
+                pnoutrefresh(layout->base.win, layout->base.y_pos, 0, 1, 0, rows-3, cols-1);
+            }
+            prefs_free_string(pos);
         }
     } else {
-        pnoutrefresh(window->layout->win, window->layout->y_pos, 0, 1, 0, rows-3, cols-1);
+        char *pos = prefs_get_string(PREF_INPUTWIN);
+        if (g_strcmp0(pos, "top") == 0) {
+            pnoutrefresh(window->layout->win, window->layout->y_pos, 0, 2, 0, rows-2, cols-1);
+        } else {
+            pnoutrefresh(window->layout->win, window->layout->y_pos, 0, 1, 0, rows-3, cols-1);
+        }
+        prefs_free_string(pos);
     }
 }
 
@@ -633,7 +652,13 @@ win_refresh_without_subwin(ProfWin *window)
     getmaxyx(stdscr, rows, cols);
 
     if ((window->type == WIN_MUC) || (window->type == WIN_CONSOLE)) {
-        pnoutrefresh(window->layout->win, window->layout->y_pos, 0, 1, 0, rows-3, cols-1);
+        char *pos = prefs_get_string(PREF_INPUTWIN);
+        if (g_strcmp0(pos, "top") == 0) {
+            pnoutrefresh(window->layout->win, window->layout->y_pos, 0, 2, 0, rows-2, cols-1);
+        } else {
+            pnoutrefresh(window->layout->win, window->layout->y_pos, 0, 1, 0, rows-3, cols-1);
+        }
+        prefs_free_string(pos);
     }
 }
 
@@ -647,13 +672,27 @@ win_refresh_with_subwin(ProfWin *window)
     if (window->type == WIN_MUC) {
         ProfLayoutSplit *layout = (ProfLayoutSplit*)window->layout;
         subwin_cols = win_occpuants_cols();
-        pnoutrefresh(layout->base.win, layout->base.y_pos, 0, 1, 0, rows-3, (cols-subwin_cols)-1);
-        pnoutrefresh(layout->subwin, layout->sub_y_pos, 0, 1, (cols-subwin_cols), rows-3, cols-1);
+        char *pos = prefs_get_string(PREF_INPUTWIN);
+        if (g_strcmp0(pos, "top") == 0) {
+            pnoutrefresh(layout->base.win, layout->base.y_pos, 0, 2, 0, rows-2, (cols-subwin_cols)-1);
+            pnoutrefresh(layout->subwin, layout->sub_y_pos, 0, 2, (cols-subwin_cols), rows-2, cols-1);
+        } else {
+            pnoutrefresh(layout->base.win, layout->base.y_pos, 0, 1, 0, rows-3, (cols-subwin_cols)-1);
+            pnoutrefresh(layout->subwin, layout->sub_y_pos, 0, 1, (cols-subwin_cols), rows-3, cols-1);
+        }
+        prefs_free_string(pos);
     } else if (window->type == WIN_CONSOLE) {
         ProfLayoutSplit *layout = (ProfLayoutSplit*)window->layout;
         subwin_cols = win_roster_cols();
-        pnoutrefresh(layout->base.win, layout->base.y_pos, 0, 1, 0, rows-3, (cols-subwin_cols)-1);
-        pnoutrefresh(layout->subwin, layout->sub_y_pos, 0, 1, (cols-subwin_cols), rows-3, cols-1);
+        char *pos = prefs_get_string(PREF_INPUTWIN);
+        if (g_strcmp0(pos, "top") == 0) {
+            pnoutrefresh(layout->base.win, layout->base.y_pos, 0, 2, 0, rows-2, (cols-subwin_cols)-1);
+            pnoutrefresh(layout->subwin, layout->sub_y_pos, 0, 2, (cols-subwin_cols), rows-2, cols-1);
+        } else {
+            pnoutrefresh(layout->base.win, layout->base.y_pos, 0, 1, 0, rows-3, (cols-subwin_cols)-1);
+            pnoutrefresh(layout->subwin, layout->sub_y_pos, 0, 1, (cols-subwin_cols), rows-3, cols-1);
+        }
+        prefs_free_string(pos);
     }
 }
 
