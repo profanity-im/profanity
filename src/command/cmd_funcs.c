@@ -1662,7 +1662,7 @@ cmd_theme(ProfWin *window, const char *const command, gchar **args)
             } else {
                 ui_hide_all_room_rosters();
             }
-            ui_redraw();
+            ui_resize();
             cons_show("Loaded theme: %s", args[1]);
         } else {
             cons_show("Couldn't find theme: %s", args[1]);
@@ -5518,6 +5518,20 @@ cmd_inpblock(ProfWin *window, const char *const command, gchar **args)
     }
 
     cons_bad_cmd_usage(command);
+
+    return TRUE;
+}
+
+gboolean
+cmd_inputwin(ProfWin *window, const char *const command, gchar **args)
+{
+    if ((g_strcmp0(args[0], "top") == 0) || (g_strcmp0(args[0], "bottom") == 0)) {
+        prefs_set_string(PREF_INPUTWIN, args[0]);
+        ui_resize();
+        cons_show("Set input window position to %s", args[0]);
+    } else {
+        cons_bad_cmd_usage(command);
+    }
 
     return TRUE;
 }

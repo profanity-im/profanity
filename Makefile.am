@@ -186,7 +186,7 @@ themes_sources = themes/*
 
 icons_sources = icons/*
 
-script_sources = bootstrap.sh configure-debug install-all.sh
+script_sources = bootstrap.sh configure-debug
 
 man_sources = docs/profanity.1
 

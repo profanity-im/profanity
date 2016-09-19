@@ -1211,6 +1211,7 @@ _get_group(preference_t pref)
         case PREF_RESOURCE_MESSAGE:
         case PREF_ENC_WARN:
         case PREF_INPBLOCK_DYNAMIC:
+        case PREF_INPUTWIN:
         case PREF_TLS_SHOW:
         case PREF_CONSOLE_MUC:
         case PREF_CONSOLE_PRIVATE:
@@ -1443,6 +1444,8 @@ _get_key(preference_t pref)
             return "resource.message";
         case PREF_INPBLOCK_DYNAMIC:
             return "inpblock.dynamic";
+        case PREF_INPUTWIN:
+            return "inputwin.position";
         case PREF_ENC_WARN:
             return "enc.warn";
         case PREF_PGP_LOG:
@@ -1571,6 +1574,8 @@ _get_default_string(preference_t pref)
         case PREF_CONSOLE_PRIVATE:
         case PREF_CONSOLE_CHAT:
             return "all";
+        case PREF_INPUTWIN:
+            return "bottom";
         default:
             return NULL;
     }

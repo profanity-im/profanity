@@ -1,7 +1,7 @@
 #                                               -*- Autoconf -*-
 # Process this file with autoconf to produce a configure script.
 
-AC_INIT([profanity], [0.5.0], [boothj5web@gmail.com])
+AC_INIT([profanity], [0.5.1], [boothj5web@gmail.com])
 AC_CONFIG_AUX_DIR([build-aux])
 AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_SRCDIR([src/main.c])
@@ -96,19 +96,23 @@ else
 fi
 
 # c
-LT_INIT
-if test "x$enable_plugins" = xno; then
+if test "x$PLATFORM" = xcygwin; then
     AM_CONDITIONAL([BUILD_C_API], [false])
-elif test "x$enable_c_plugins" != xno; then
-    AC_CHECK_LIB([dl], [main],
-        [AM_CONDITIONAL([BUILD_C_API], [true]) LIBS="$LIBS -ldl" AC_DEFINE([HAVE_C], [1], [C support])],
-        [AS_IF(
-            [test "x$enable_c_plugins" = xyes],
-                [AC_MSG_ERROR([dl library needed to run C plugins])],
-            [AM_CONDITIONAL([BUILD_C_API], [false])])
-        ])
 else
-    AM_CONDITIONAL([BUILD_C_API], [false])
+    LT_INIT
+    if test "x$enable_plugins" = xno; then
+        AM_CONDITIONAL([BUILD_C_API], [false])
+    elif test "x$enable_c_plugins" != xno; then
+        AC_CHECK_LIB([dl], [main],
+            [AM_CONDITIONAL([BUILD_C_API], [true]) LIBS="$LIBS -ldl" AC_DEFINE([HAVE_C], [1], [C support])],
+            [AS_IF(
+                [test "x$enable_c_plugins" = xyes],
+                    [AC_MSG_ERROR([dl library needed to run C plugins])],
+                [AM_CONDITIONAL([BUILD_C_API], [false])])
+            ])
+    else
+        AM_CONDITIONAL([BUILD_C_API], [false])
+    fi
 fi
 
 # threading
@@ -305,7 +309,6 @@ echo "AM_CFLAGS      : $AM_CFLAGS"
 echo "AM_CPPFLAGS    : $AM_CPPFLAGS"
 echo "AM_LDFLAGS     : $AM_LDFLAGS"
 echo "LIBS           : $LIBS"
-echo "XML Parser     : $PARSER"
 echo "Install themes : $THEMES_INSTALL"
 echo "Themes path    : $THEMES_PATH"
 echo "Icons path     : $ICONS_PATH"

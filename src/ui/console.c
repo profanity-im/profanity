@@ -1534,6 +1534,7 @@ cons_show_ui_prefs(void)
     cons_beep_setting();
     cons_flash_setting();
     cons_splash_setting();
+    cons_inputwin_setting();
     cons_wrap_setting();
     cons_winstidy_setting();
     cons_time_setting();
@@ -1749,6 +1750,14 @@ cons_inpblock_setting(void)
     } else {
         cons_show("Dynamic timeout (/inpblock)         : OFF");
     }
+}
+
+void
+cons_inputwin_setting(void)
+{
+    char *pos = prefs_get_string(PREF_INPUTWIN);
+    cons_show("Input window postion (/inputwin)    : %s", pos);
+    prefs_free_string(pos);
 }
 
 void

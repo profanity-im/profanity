@@ -15,3 +15,5 @@ Homepage: http://www.profanity.im
 Chat room: profanitydev@conference.jabber.org
 
 Mailing List: https://groups.google.com/forum/#!forum/profanitydev
+
+Plugins repository: https://github.com/boothj5/profanity-plugins

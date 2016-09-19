@@ -67,7 +67,13 @@ create_title_bar(void)
 {
     int cols = getmaxx(stdscr);
 
-    win = newwin(1, cols, 0, 0);
+    char *pos = prefs_get_string(PREF_INPUTWIN);
+    if (g_strcmp0(pos, "top") == 0) {
+        win = newwin(1, cols, 1, 0);
+    } else {
+        win = newwin(1, cols, 0, 0);
+    }
+    prefs_free_string(pos);
     wbkgd(win, theme_attrs(THEME_TITLE_TEXT));
     title_bar_console();
     title_bar_set_presence(CONTACT_OFFLINE);
@@ -100,6 +106,16 @@ void
 title_bar_resize(void)
 {
     int cols = getmaxx(stdscr);
+
+    werase(win);
+
+    char *pos = prefs_get_string(PREF_INPUTWIN);
+    if (g_strcmp0(pos, "top") == 0) {
+        mvwin(win, 1, 0);
+    } else {
+        mvwin(win, 0, 0);
+    }
+    prefs_free_string(pos);
 
     wresize(win, 1, cols);
     wbkgd(win, theme_attrs(THEME_TITLE_TEXT));
