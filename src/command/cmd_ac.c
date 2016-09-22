@@ -83,7 +83,7 @@ static char* _ban_autocomplete(ProfWin *window, const char *const input);
 static char* _affiliation_autocomplete(ProfWin *window, const char *const input);
 static char* _role_autocomplete(ProfWin *window, const char *const input);
 static char* _resource_autocomplete(ProfWin *window, const char *const input);
-static char* _titlebar_autocomplete(ProfWin *window, const char *const input);
+static char* _wintitle_autocomplete(ProfWin *window, const char *const input);
 static char* _inpblock_autocomplete(ProfWin *window, const char *const input);
 static char* _time_autocomplete(ProfWin *window, const char *const input);
 static char* _receipts_autocomplete(ProfWin *window, const char *const input);
@@ -123,7 +123,7 @@ static Autocomplete autoaway_ac;
 static Autocomplete autoaway_mode_ac;
 static Autocomplete autoaway_presence_ac;
 static Autocomplete autoconnect_ac;
-static Autocomplete titlebar_ac;
+static Autocomplete wintitle_ac;
 static Autocomplete theme_ac;
 static Autocomplete theme_load_ac;
 static Autocomplete account_ac;
@@ -281,9 +281,9 @@ cmd_ac_init(void)
     autocomplete_add(sub_ac, "sent");
     autocomplete_add(sub_ac, "received");
 
-    titlebar_ac = autocomplete_new();
-    autocomplete_add(titlebar_ac, "show");
-    autocomplete_add(titlebar_ac, "goodbye");
+    wintitle_ac = autocomplete_new();
+    autocomplete_add(wintitle_ac, "show");
+    autocomplete_add(wintitle_ac, "goodbye");
 
     log_ac = autocomplete_new();
     autocomplete_add(log_ac, "maxsize");
@@ -965,7 +965,7 @@ cmd_ac_reset(ProfWin *window)
     autocomplete_reset(roster_remove_all_ac);
     autocomplete_reset(roster_private_ac);
     autocomplete_reset(group_ac);
-    autocomplete_reset(titlebar_ac);
+    autocomplete_reset(wintitle_ac);
     autocomplete_reset(bookmark_ac);
     autocomplete_reset(bookmark_property_ac);
     autocomplete_reset(otr_ac);
@@ -1049,7 +1049,7 @@ cmd_ac_uninit(void)
     autocomplete_free(notify_mention_ac);
     autocomplete_free(notify_trigger_ac);
     autocomplete_free(sub_ac);
-    autocomplete_free(titlebar_ac);
+    autocomplete_free(wintitle_ac);
     autocomplete_free(log_ac);
     autocomplete_free(prefs_ac);
     autocomplete_free(autoaway_ac);
@@ -1242,7 +1242,7 @@ _cmd_ac_complete_params(ProfWin *window, const char *const input)
     g_hash_table_insert(ac_funcs, "/affiliation",   _affiliation_autocomplete);
     g_hash_table_insert(ac_funcs, "/role",          _role_autocomplete);
     g_hash_table_insert(ac_funcs, "/resource",      _resource_autocomplete);
-    g_hash_table_insert(ac_funcs, "/titlebar",      _titlebar_autocomplete);
+    g_hash_table_insert(ac_funcs, "/wintitle",      _wintitle_autocomplete);
     g_hash_table_insert(ac_funcs, "/inpblock",      _inpblock_autocomplete);
     g_hash_table_insert(ac_funcs, "/time",          _time_autocomplete);
     g_hash_table_insert(ac_funcs, "/receipts",      _receipts_autocomplete);
@@ -2076,21 +2076,21 @@ _resource_autocomplete(ProfWin *window, const char *const input)
 }
 
 static char*
-_titlebar_autocomplete(ProfWin *window, const char *const input)
+_wintitle_autocomplete(ProfWin *window, const char *const input)
 {
     char *found = NULL;
 
-    found = autocomplete_param_with_func(input, "/titlebar show", prefs_autocomplete_boolean_choice);
+    found = autocomplete_param_with_func(input, "/wintitle show", prefs_autocomplete_boolean_choice);
     if (found) {
         return found;
     }
 
-    found = autocomplete_param_with_func(input, "/titlebar goodbye", prefs_autocomplete_boolean_choice);
+    found = autocomplete_param_with_func(input, "/wintitle goodbye", prefs_autocomplete_boolean_choice);
     if (found) {
         return found;
     }
 
-    found = autocomplete_param_with_ac(input, "/titlebar", titlebar_ac, FALSE);
+    found = autocomplete_param_with_ac(input, "/wintitle", wintitle_ac, FALSE);
     if (found) {
         return found;
     }

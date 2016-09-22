@@ -1492,15 +1492,15 @@ static struct cmd_t command_defs[] =
         CMD_NOEXAMPLES
     },
 
-    { "/titlebar",
-        parse_args, 2, 2, &cons_titlebar_setting,
+    { "/wintitle",
+        parse_args, 2, 2, &cons_wintitle_setting,
         CMD_NOSUBFUNCS
-        CMD_MAINFUNC(cmd_titlebar)
+        CMD_MAINFUNC(cmd_wintitle)
         CMD_TAGS(
             CMD_TAG_UI)
         CMD_SYN(
-            "/titlebar show on|off",
-            "/titlebar goodbye on|off")
+            "/wintitle show on|off",
+            "/wintitle goodbye on|off")
         CMD_DESC(
             "Allow Profanity to modify the window title bar.")
         CMD_ARGS(

@@ -143,6 +143,19 @@ prefs_load(void)
         prefs_free_string(value);
     }
 
+    // move pre 0.5.0 titlebar settings to wintitle
+    if (g_key_file_has_key(prefs, PREF_GROUP_UI, "titlebar.show", NULL)) {
+        gboolean show = g_key_file_get_boolean(prefs, PREF_GROUP_UI, "titlebar.show", NULL);
+        g_key_file_set_boolean(prefs, PREF_GROUP_UI, "wintitle.show", show);
+        g_key_file_remove_key(prefs, PREF_GROUP_UI, "titlebar.show", NULL);
+    }
+    if (g_key_file_has_key(prefs, PREF_GROUP_UI, "titlebar.goodbye", NULL)) {
+        gboolean goodbye = g_key_file_get_boolean(prefs, PREF_GROUP_UI, "titlebar.goodbye", NULL);
+        g_key_file_set_boolean(prefs, PREF_GROUP_UI, "wintitle.goodbye", goodbye);
+        g_key_file_remove_key(prefs, PREF_GROUP_UI, "titlebar.goodbye", NULL);
+    }
+
+
     _save_prefs();
 
     boolean_choice_ac = autocomplete_new();
@@ -1162,8 +1175,8 @@ _get_group(preference_t pref)
         case PREF_BEEP:
         case PREF_THEME:
         case PREF_VERCHECK:
-        case PREF_TITLEBAR_SHOW:
-        case PREF_TITLEBAR_GOODBYE:
+        case PREF_WINTITLE_SHOW:
+        case PREF_WINTITLE_GOODBYE:
         case PREF_FLASH:
         case PREF_INTYPE:
         case PREF_HISTORY:
@@ -1282,10 +1295,10 @@ _get_key(preference_t pref)
             return "theme";
         case PREF_VERCHECK:
             return "vercheck";
-        case PREF_TITLEBAR_SHOW:
-            return "titlebar.show";
-        case PREF_TITLEBAR_GOODBYE:
-            return "titlebar.goodbye";
+        case PREF_WINTITLE_SHOW:
+            return "wintitle.show";
+        case PREF_WINTITLE_GOODBYE:
+            return "wintitle.goodbye";
         case PREF_FLASH:
             return "flash";
         case PREF_TRAY:

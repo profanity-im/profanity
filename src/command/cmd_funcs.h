@@ -128,7 +128,7 @@ gboolean cmd_status(ProfWin *window, const char *const command, gchar **args);
 gboolean cmd_sub(ProfWin *window, const char *const command, gchar **args);
 gboolean cmd_theme(ProfWin *window, const char *const command, gchar **args);
 gboolean cmd_tiny(ProfWin *window, const char *const command, gchar **args);
-gboolean cmd_titlebar(ProfWin *window, const char *const command, gchar **args);
+gboolean cmd_wintitle(ProfWin *window, const char *const command, gchar **args);
 gboolean cmd_vercheck(ProfWin *window, const char *const command, gchar **args);
 gboolean cmd_who(ProfWin *window, const char *const command, gchar **args);
 gboolean cmd_win(ProfWin *window, const char *const command, gchar **args);

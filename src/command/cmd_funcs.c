@@ -5057,7 +5057,7 @@ cmd_states(ProfWin *window, const char *const command, gchar **args)
 }
 
 gboolean
-cmd_titlebar(ProfWin *window, const char *const command, gchar **args)
+cmd_wintitle(ProfWin *window, const char *const command, gchar **args)
 {
     if (g_strcmp0(args[0], "show") != 0 && g_strcmp0(args[0], "goodbye") != 0) {
         cons_bad_cmd_usage(command);
@@ -5067,9 +5067,9 @@ cmd_titlebar(ProfWin *window, const char *const command, gchar **args)
         ui_clear_win_title();
     }
     if (g_strcmp0(args[0], "show") == 0) {
-        _cmd_set_boolean_preference(args[1], command, "Titlebar show", PREF_TITLEBAR_SHOW);
+        _cmd_set_boolean_preference(args[1], command, "Window title show", PREF_WINTITLE_SHOW);
     } else {
-        _cmd_set_boolean_preference(args[1], command, "Titlebar goodbye", PREF_TITLEBAR_GOODBYE);
+        _cmd_set_boolean_preference(args[1], command, "Window title goodbye", PREF_WINTITLE_GOODBYE);
     }
 
     return TRUE;

@@ -208,8 +208,8 @@ _init(char *log_level)
 static void
 _shutdown(void)
 {
-    if (prefs_get_boolean(PREF_TITLEBAR_SHOW)) {
-        if (prefs_get_boolean(PREF_TITLEBAR_GOODBYE)) {
+    if (prefs_get_boolean(PREF_WINTITLE_SHOW)) {
+        if (prefs_get_boolean(PREF_WINTITLE_GOODBYE)) {
             ui_goodbye_title();
         } else {
             ui_clear_win_title();

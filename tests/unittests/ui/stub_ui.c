@@ -428,7 +428,7 @@ void cons_encwarn_setting(void) {}
 void cons_time_setting(void) {}
 void cons_mouse_setting(void) {}
 void cons_statuses_setting(void) {}
-void cons_titlebar_setting(void) {}
+void cons_wintitle_setting(void) {}
 void cons_notify_setting(void) {}
 void cons_states_setting(void) {}
 void cons_outtype_setting(void) {}

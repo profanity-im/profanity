@@ -1339,17 +1339,17 @@ cons_vercheck_setting(void)
 }
 
 void
-cons_titlebar_setting(void)
+cons_wintitle_setting(void)
 {
-    if (prefs_get_boolean(PREF_TITLEBAR_SHOW)) {
-        cons_show("Titlebar show (/titlebar)           : ON");
+    if (prefs_get_boolean(PREF_WINTITLE_SHOW)) {
+        cons_show("Window title show (/wintitle)       : ON");
     } else {
-        cons_show("Titlebar show (/titlebar)           : OFF");
+        cons_show("Window title show (/wintitle)       : OFF");
     }
-    if (prefs_get_boolean(PREF_TITLEBAR_GOODBYE)) {
-        cons_show("Titlebar goodbye (/titlebar)        : ON");
+    if (prefs_get_boolean(PREF_WINTITLE_GOODBYE)) {
+        cons_show("Window title goodbye (/wintitle)    : ON");
     } else {
-        cons_show("Titlebar goodbye (/titlebar)        : OFF");
+        cons_show("Window title goodbye (/wintitle)    : OFF");
     }
 }
 
@@ -1544,7 +1544,7 @@ cons_show_ui_prefs(void)
     cons_occupants_setting();
     cons_roster_setting();
     cons_privileges_setting();
-    cons_titlebar_setting();
+    cons_wintitle_setting();
     cons_encwarn_setting();
     cons_presence_setting();
     cons_inpblock_setting();
