@@ -370,7 +370,7 @@ ui_handle_login_account_success(ProfAccount *account, gboolean secured)
             } else {
                 ui_hide_all_room_rosters();
             }
-            ui_redraw();
+            ui_resize();
         } else {
             cons_show("Couldn't find account theme: %s", account->theme);
         }

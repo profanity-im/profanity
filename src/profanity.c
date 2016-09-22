@@ -203,6 +203,7 @@ _init(char *log_level)
     tray_init();
 #endif
     inp_nonblocking(TRUE);
+    ui_resize();
 }
 
 static void

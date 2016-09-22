@@ -5523,15 +5523,133 @@ cmd_inpblock(ProfWin *window, const char *const command, gchar **args)
 }
 
 gboolean
+cmd_titlebar(ProfWin *window, const char *const command, gchar **args)
+{
+    if (g_strcmp0(args[0], "up") == 0) {
+        gboolean result = prefs_titlebar_pos_up();
+        if (result) {
+            ui_resize();
+            cons_winpos_setting();
+            cons_show("");
+        } else {
+            cons_show("Could not move title bar up.");
+        }
+
+        return TRUE;
+    }
+    if (g_strcmp0(args[0], "down") == 0) {
+        gboolean result = prefs_titlebar_pos_down();
+        if (result) {
+            ui_resize();
+            cons_winpos_setting();
+            cons_show("");
+        } else {
+            cons_show("Could not move title bar down.");
+        }
+
+        return TRUE;
+    }
+
+    cons_bad_cmd_usage(command);
+
+    return TRUE;
+}
+
+gboolean
+cmd_mainwin(ProfWin *window, const char *const command, gchar **args)
+{
+    if (g_strcmp0(args[0], "up") == 0) {
+        gboolean result = prefs_mainwin_pos_up();
+        if (result) {
+            ui_resize();
+            cons_winpos_setting();
+            cons_show("");
+        } else {
+            cons_show("Could not move main window up.");
+        }
+
+        return TRUE;
+    }
+    if (g_strcmp0(args[0], "down") == 0) {
+        gboolean result = prefs_mainwin_pos_down();
+        if (result) {
+            ui_resize();
+            cons_winpos_setting();
+            cons_show("");
+        } else {
+            cons_show("Could not move main window down.");
+        }
+
+        return TRUE;
+    }
+
+    cons_bad_cmd_usage(command);
+
+    return TRUE;
+}
+
+gboolean
+cmd_statusbar(ProfWin *window, const char *const command, gchar **args)
+{
+    if (g_strcmp0(args[0], "up") == 0) {
+        gboolean result = prefs_statusbar_pos_up();
+        if (result) {
+            ui_resize();
+            cons_winpos_setting();
+            cons_show("");
+        } else {
+            cons_show("Could not move status bar up.");
+        }
+
+        return TRUE;
+    }
+    if (g_strcmp0(args[0], "down") == 0) {
+        gboolean result = prefs_statusbar_pos_down();
+        if (result) {
+            ui_resize();
+            cons_winpos_setting();
+            cons_show("");
+        } else {
+            cons_show("Could not move status bar down.");
+        }
+
+        return TRUE;
+    }
+
+    cons_bad_cmd_usage(command);
+
+    return TRUE;
+}
+
+gboolean
 cmd_inputwin(ProfWin *window, const char *const command, gchar **args)
 {
-    if ((g_strcmp0(args[0], "top") == 0) || (g_strcmp0(args[0], "bottom") == 0)) {
-        prefs_set_string(PREF_INPUTWIN, args[0]);
-        ui_resize();
-        cons_show("Set input window position to %s", args[0]);
-    } else {
-        cons_bad_cmd_usage(command);
+    if (g_strcmp0(args[0], "up") == 0) {
+        gboolean result = prefs_inputwin_pos_up();
+        if (result) {
+            ui_resize();
+            cons_winpos_setting();
+            cons_show("");
+        } else {
+            cons_show("Could not move input window up.");
+        }
+
+        return TRUE;
     }
+    if (g_strcmp0(args[0], "down") == 0) {
+        gboolean result = prefs_inputwin_pos_down();
+        if (result) {
+            ui_resize();
+            cons_winpos_setting();
+            cons_show("");
+        } else {
+            cons_show("Could not move input window down.");
+        }
+
+        return TRUE;
+    }
+
+    cons_bad_cmd_usage(command);
 
     return TRUE;
 }

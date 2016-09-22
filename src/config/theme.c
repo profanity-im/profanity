@@ -429,7 +429,6 @@ _load_preferences(void)
     _set_string_preference("roster.rooms.by", PREF_ROSTER_ROOMS_BY);
     _set_string_preference("roster.private", PREF_ROSTER_PRIVATE);
     _set_string_preference("roster.count", PREF_ROSTER_COUNT);
-    _set_string_preference("inputwin.position", PREF_INPUTWIN);
 
     if (g_key_file_has_key(theme, "ui", "occupants.size", NULL)) {
         gint occupants_size = g_key_file_get_integer(theme, "ui", "occupants.size", NULL);
@@ -531,6 +530,14 @@ _load_preferences(void)
             g_free(ch);
         }
     }
+
+    int titlebar_pos = g_key_file_get_integer(theme, "ui", "titlebar.position", NULL);
+    int mainwin_pos = g_key_file_get_integer(theme, "ui", "mainwin.position", NULL);
+    int statusbar_pos = g_key_file_get_integer(theme, "ui", "statusbar.position", NULL);
+    int inputwin_pos = g_key_file_get_integer(theme, "ui", "inputwin.position", NULL);
+    ProfWinPlacement *placement = prefs_create_profwin_placement(titlebar_pos, mainwin_pos, statusbar_pos, inputwin_pos);
+    prefs_save_win_placement(placement);
+    prefs_free_win_placement(placement);
 }
 
 void

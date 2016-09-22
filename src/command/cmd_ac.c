@@ -194,7 +194,7 @@ static Autocomplete blocked_ac;
 static Autocomplete tray_ac;
 static Autocomplete presence_ac;
 static Autocomplete presence_setting_ac;
-static Autocomplete inputwin_ac;
+static Autocomplete winpos_ac;
 
 void
 cmd_ac_init(void)
@@ -737,9 +737,9 @@ cmd_ac_init(void)
     autocomplete_add(presence_setting_ac, "online");
     autocomplete_add(presence_setting_ac, "none");
 
-    inputwin_ac = autocomplete_new();
-    autocomplete_add(inputwin_ac, "top");
-    autocomplete_add(inputwin_ac, "bottom");
+    winpos_ac = autocomplete_new();
+    autocomplete_add(winpos_ac, "up");
+    autocomplete_add(winpos_ac, "down");
 }
 
 void
@@ -1003,7 +1003,7 @@ cmd_ac_reset(ProfWin *window)
     autocomplete_reset(tray_ac);
     autocomplete_reset(presence_ac);
     autocomplete_reset(presence_setting_ac);
-    autocomplete_reset(inputwin_ac);
+    autocomplete_reset(winpos_ac);
 
     autocomplete_reset(script_ac);
     if (script_show_ac) {
@@ -1126,7 +1126,7 @@ cmd_ac_uninit(void)
     autocomplete_free(tray_ac);
     autocomplete_free(presence_ac);
     autocomplete_free(presence_setting_ac);
-    autocomplete_free(inputwin_ac);
+    autocomplete_free(winpos_ac);
 }
 
 static char*
@@ -1207,8 +1207,8 @@ _cmd_ac_complete_params(ProfWin *window, const char *const input)
         }
     }
 
-    gchar *cmds[] = { "/prefs", "/disco", "/room", "/autoping", "/inputwin" };
-    Autocomplete completers[] = { prefs_ac, disco_ac, room_ac, autoping_ac, inputwin_ac };
+    gchar *cmds[] = { "/prefs", "/disco", "/room", "/autoping", "/titlebar", "/mainwin", "/statusbar", "/inputwin" };
+    Autocomplete completers[] = { prefs_ac, disco_ac, room_ac, autoping_ac, winpos_ac, winpos_ac, winpos_ac, winpos_ac };
 
     for (i = 0; i < ARRAY_SIZE(cmds); i++) {
         result = autocomplete_param_with_ac(input, cmds[i], completers[i], TRUE);

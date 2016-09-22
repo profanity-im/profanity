@@ -1302,20 +1302,71 @@ static struct cmd_t command_defs[] =
         CMD_NOEXAMPLES
     },
 
+    { "/titlebar",
+        parse_args, 1, 1, &cons_winpos_setting,
+        CMD_NOSUBFUNCS
+        CMD_MAINFUNC(cmd_titlebar)
+        CMD_TAGS(
+            CMD_TAG_UI)
+        CMD_SYN(
+            "/titlebar up",
+            "/titlebar down")
+        CMD_DESC(
+            "Move the title bar.")
+        CMD_ARGS(
+            { "up", "Move the title bar up the screen." },
+            { "down", "Move the title bar down the screen." })
+        CMD_NOEXAMPLES
+    },
+
+    { "/mainwin",
+        parse_args, 1, 1, &cons_winpos_setting,
+        CMD_NOSUBFUNCS
+        CMD_MAINFUNC(cmd_mainwin)
+        CMD_TAGS(
+            CMD_TAG_UI)
+        CMD_SYN(
+            "/mainwin up",
+            "/mainwin down")
+        CMD_DESC(
+            "Move the main window.")
+        CMD_ARGS(
+            { "up", "Move the main window up the screen." },
+            { "down", "Move the main window down the screen." })
+        CMD_NOEXAMPLES
+    },
+
+    { "/statusbar",
+        parse_args, 1, 1, &cons_winpos_setting,
+        CMD_NOSUBFUNCS
+        CMD_MAINFUNC(cmd_statusbar)
+        CMD_TAGS(
+            CMD_TAG_UI)
+        CMD_SYN(
+            "/statusbar up",
+            "/statusbar down")
+        CMD_DESC(
+            "Move the status bar.")
+        CMD_ARGS(
+            { "up", "Move the status bar up the screen." },
+            { "down", "Move the status bar down the screen." })
+        CMD_NOEXAMPLES
+    },
+
     { "/inputwin",
-        parse_args, 1, 1, &cons_inputwin_setting,
+        parse_args, 1, 1, &cons_winpos_setting,
         CMD_NOSUBFUNCS
         CMD_MAINFUNC(cmd_inputwin)
         CMD_TAGS(
             CMD_TAG_UI)
         CMD_SYN(
-            "/inputwin top",
-            "/inputwin bottom")
+            "/inputwin up",
+            "/inputwin down")
         CMD_DESC(
-            "Where to display the input window.")
+            "Move the input window.")
         CMD_ARGS(
-            { "top", "Show the input window at the top of the screen." },
-            { "bottom", "Show the input window at the bottom of the screen." })
+            { "up", "Move the input window up the screen." },
+            { "down", "Move the input window down the screen." })
         CMD_NOEXAMPLES
     },
 

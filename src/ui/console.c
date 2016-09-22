@@ -1534,7 +1534,7 @@ cons_show_ui_prefs(void)
     cons_beep_setting();
     cons_flash_setting();
     cons_splash_setting();
-    cons_inputwin_setting();
+    cons_winpos_setting();
     cons_wrap_setting();
     cons_winstidy_setting();
     cons_time_setting();
@@ -1753,11 +1753,14 @@ cons_inpblock_setting(void)
 }
 
 void
-cons_inputwin_setting(void)
+cons_winpos_setting(void)
 {
-    char *pos = prefs_get_string(PREF_INPUTWIN);
-    cons_show("Input window postion (/inputwin)    : %s", pos);
-    prefs_free_string(pos);
+    ProfWinPlacement *placement = prefs_get_win_placement();
+    cons_show("Title bar postion (/titlebar)       : %d", placement->titlebar_pos);
+    cons_show("Main window postion (/mainwin)      : %d", placement->mainwin_pos);
+    cons_show("Status bar postion (/statusbar)     : %d", placement->statusbar_pos);
+    cons_show("Input window postion (/inputwin)    : %d", placement->inputwin_pos);
+    prefs_free_win_placement(placement);
 }
 
 void
