@@ -1202,6 +1202,7 @@ prefs_mainwin_pos_up(void)
         } else if (placement->inputwin_pos == 1) {
             placement->inputwin_pos = 2;
         }
+
         prefs_save_win_placement(placement);
         prefs_free_win_placement(placement);
         return TRUE;
@@ -1215,6 +1216,7 @@ prefs_mainwin_pos_up(void)
         } else if (placement->inputwin_pos == 2) {
             placement->inputwin_pos = 3;
         }
+
         prefs_save_win_placement(placement);
         prefs_free_win_placement(placement);
         return TRUE;
@@ -1228,6 +1230,7 @@ prefs_mainwin_pos_up(void)
         } else if (placement->inputwin_pos == 3) {
             placement->inputwin_pos = 4;
         }
+
         prefs_save_win_placement(placement);
         prefs_free_win_placement(placement);
         return TRUE;
@@ -1250,6 +1253,7 @@ prefs_statusbar_pos_up(void)
         } else if (placement->inputwin_pos == 1) {
             placement->inputwin_pos = 2;
         }
+
         prefs_save_win_placement(placement);
         prefs_free_win_placement(placement);
         return TRUE;
@@ -1263,6 +1267,7 @@ prefs_statusbar_pos_up(void)
         } else if (placement->inputwin_pos == 2) {
             placement->inputwin_pos = 3;
         }
+
         prefs_save_win_placement(placement);
         prefs_free_win_placement(placement);
         return TRUE;
@@ -1276,6 +1281,9 @@ prefs_statusbar_pos_up(void)
         } else if (placement->inputwin_pos == 3) {
             placement->inputwin_pos = 4;
         }
+
+        prefs_save_win_placement(placement);
+        prefs_free_win_placement(placement);
         return TRUE;
     }
 
@@ -1296,6 +1304,7 @@ prefs_inputwin_pos_up(void)
         } else if (placement->inputwin_pos == 1) {
             placement->inputwin_pos = 2;
         }
+
         prefs_save_win_placement(placement);
         prefs_free_win_placement(placement);
         return TRUE;
@@ -1309,6 +1318,7 @@ prefs_inputwin_pos_up(void)
         } else if (placement->statusbar_pos == 2) {
             placement->statusbar_pos = 3;
         }
+
         prefs_save_win_placement(placement);
         prefs_free_win_placement(placement);
         return TRUE;
@@ -1322,6 +1332,7 @@ prefs_inputwin_pos_up(void)
         } else if (placement->statusbar_pos == 3) {
             placement->statusbar_pos = 4;
         }
+
         prefs_save_win_placement(placement);
         prefs_free_win_placement(placement);
         return TRUE;
@@ -1344,6 +1355,7 @@ prefs_titlebar_pos_down(void)
         } else if (placement->inputwin_pos == 2) {
             placement->inputwin_pos = 1;
         }
+
         prefs_save_win_placement(placement);
         prefs_free_win_placement(placement);
         return TRUE;
@@ -1357,6 +1369,7 @@ prefs_titlebar_pos_down(void)
         } else if (placement->inputwin_pos == 3) {
             placement->inputwin_pos = 2;
         }
+
         prefs_save_win_placement(placement);
         prefs_free_win_placement(placement);
         return TRUE;
@@ -1370,6 +1383,7 @@ prefs_titlebar_pos_down(void)
         } else if (placement->inputwin_pos == 4) {
             placement->inputwin_pos = 3;
         }
+
         prefs_save_win_placement(placement);
         prefs_free_win_placement(placement);
         return TRUE;
@@ -1392,6 +1406,7 @@ prefs_mainwin_pos_down(void)
         } else if (placement->inputwin_pos == 2) {
             placement->inputwin_pos = 1;
         }
+
         prefs_save_win_placement(placement);
         prefs_free_win_placement(placement);
         return TRUE;
@@ -1405,6 +1420,7 @@ prefs_mainwin_pos_down(void)
         } else if (placement->inputwin_pos == 3) {
             placement->inputwin_pos = 2;
         }
+
         prefs_save_win_placement(placement);
         prefs_free_win_placement(placement);
         return TRUE;
@@ -1418,6 +1434,7 @@ prefs_mainwin_pos_down(void)
         } else if (placement->inputwin_pos == 4) {
             placement->inputwin_pos = 3;
         }
+
         prefs_save_win_placement(placement);
         prefs_free_win_placement(placement);
         return TRUE;
@@ -1440,6 +1457,7 @@ prefs_statusbar_pos_down(void)
         } else if (placement->inputwin_pos == 2) {
             placement->inputwin_pos = 1;
         }
+
         prefs_save_win_placement(placement);
         prefs_free_win_placement(placement);
         return TRUE;
@@ -1453,6 +1471,7 @@ prefs_statusbar_pos_down(void)
         } else if (placement->inputwin_pos == 3) {
             placement->inputwin_pos = 2;
         }
+
         prefs_save_win_placement(placement);
         prefs_free_win_placement(placement);
         return TRUE;
@@ -1466,6 +1485,7 @@ prefs_statusbar_pos_down(void)
         } else if (placement->inputwin_pos == 4) {
             placement->inputwin_pos = 3;
         }
+
         prefs_save_win_placement(placement);
         prefs_free_win_placement(placement);
         return TRUE;
@@ -1489,6 +1509,7 @@ prefs_inputwin_pos_down(void)
         } else if (placement->inputwin_pos == 2) {
             placement->inputwin_pos = 1;
         }
+
         prefs_save_win_placement(placement);
         prefs_free_win_placement(placement);
         return TRUE;
@@ -1502,6 +1523,7 @@ prefs_inputwin_pos_down(void)
         } else if (placement->statusbar_pos == 3) {
             placement->statusbar_pos = 2;
         }
+
         prefs_save_win_placement(placement);
         prefs_free_win_placement(placement);
         return TRUE;
@@ -1515,6 +1537,7 @@ prefs_inputwin_pos_down(void)
         } else if (placement->statusbar_pos == 4) {
             placement->statusbar_pos = 3;
         }
+
         prefs_save_win_placement(placement);
         prefs_free_win_placement(placement);
         return TRUE;
