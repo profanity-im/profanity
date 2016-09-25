@@ -1339,17 +1339,17 @@ cons_vercheck_setting(void)
 }
 
 void
-cons_titlebar_setting(void)
+cons_wintitle_setting(void)
 {
-    if (prefs_get_boolean(PREF_TITLEBAR_SHOW)) {
-        cons_show("Titlebar show (/titlebar)           : ON");
+    if (prefs_get_boolean(PREF_WINTITLE_SHOW)) {
+        cons_show("Window title show (/wintitle)       : ON");
     } else {
-        cons_show("Titlebar show (/titlebar)           : OFF");
+        cons_show("Window title show (/wintitle)       : OFF");
     }
-    if (prefs_get_boolean(PREF_TITLEBAR_GOODBYE)) {
-        cons_show("Titlebar goodbye (/titlebar)        : ON");
+    if (prefs_get_boolean(PREF_WINTITLE_GOODBYE)) {
+        cons_show("Window title goodbye (/wintitle)    : ON");
     } else {
-        cons_show("Titlebar goodbye (/titlebar)        : OFF");
+        cons_show("Window title goodbye (/wintitle)    : OFF");
     }
 }
 
@@ -1534,6 +1534,7 @@ cons_show_ui_prefs(void)
     cons_beep_setting();
     cons_flash_setting();
     cons_splash_setting();
+    cons_winpos_setting();
     cons_wrap_setting();
     cons_winstidy_setting();
     cons_time_setting();
@@ -1543,7 +1544,7 @@ cons_show_ui_prefs(void)
     cons_occupants_setting();
     cons_roster_setting();
     cons_privileges_setting();
-    cons_titlebar_setting();
+    cons_wintitle_setting();
     cons_encwarn_setting();
     cons_presence_setting();
     cons_inpblock_setting();
@@ -1749,6 +1750,17 @@ cons_inpblock_setting(void)
     } else {
         cons_show("Dynamic timeout (/inpblock)         : OFF");
     }
+}
+
+void
+cons_winpos_setting(void)
+{
+    ProfWinPlacement *placement = prefs_get_win_placement();
+    cons_show("Title bar postion (/titlebar)       : %d", placement->titlebar_pos);
+    cons_show("Main window postion (/mainwin)      : %d", placement->mainwin_pos);
+    cons_show("Status bar postion (/statusbar)     : %d", placement->statusbar_pos);
+    cons_show("Input window postion (/inputwin)    : %d", placement->inputwin_pos);
+    prefs_free_win_placement(placement);
 }
 
 void

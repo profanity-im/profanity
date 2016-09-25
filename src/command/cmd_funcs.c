@@ -1662,7 +1662,7 @@ cmd_theme(ProfWin *window, const char *const command, gchar **args)
             } else {
                 ui_hide_all_room_rosters();
             }
-            ui_redraw();
+            ui_resize();
             cons_show("Loaded theme: %s", args[1]);
         } else {
             cons_show("Couldn't find theme: %s", args[1]);
@@ -4212,13 +4212,6 @@ cmd_room(ProfWin *window, const char *const command, gchar **args)
 gboolean
 cmd_occupants(ProfWin *window, const char *const command, gchar **args)
 {
-    jabber_conn_status_t conn_status = connection_get_status();
-
-    if (conn_status != JABBER_CONNECTED) {
-        cons_show("You are not currently connected.");
-        return TRUE;
-    }
-
     if (g_strcmp0(args[0], "size") == 0) {
         if (!args[1]) {
             cons_bad_cmd_usage(command);
@@ -4263,6 +4256,12 @@ cmd_occupants(ProfWin *window, const char *const command, gchar **args)
             cons_bad_cmd_usage(command);
             return TRUE;
         }
+    }
+
+    jabber_conn_status_t conn_status = connection_get_status();
+    if (conn_status != JABBER_CONNECTED) {
+        cons_show("You are not currently connected.");
+        return TRUE;
     }
 
     if (window->type != WIN_MUC) {
@@ -5057,7 +5056,7 @@ cmd_states(ProfWin *window, const char *const command, gchar **args)
 }
 
 gboolean
-cmd_titlebar(ProfWin *window, const char *const command, gchar **args)
+cmd_wintitle(ProfWin *window, const char *const command, gchar **args)
 {
     if (g_strcmp0(args[0], "show") != 0 && g_strcmp0(args[0], "goodbye") != 0) {
         cons_bad_cmd_usage(command);
@@ -5067,9 +5066,9 @@ cmd_titlebar(ProfWin *window, const char *const command, gchar **args)
         ui_clear_win_title();
     }
     if (g_strcmp0(args[0], "show") == 0) {
-        _cmd_set_boolean_preference(args[1], command, "Titlebar show", PREF_TITLEBAR_SHOW);
+        _cmd_set_boolean_preference(args[1], command, "Window title show", PREF_WINTITLE_SHOW);
     } else {
-        _cmd_set_boolean_preference(args[1], command, "Titlebar goodbye", PREF_TITLEBAR_GOODBYE);
+        _cmd_set_boolean_preference(args[1], command, "Window title goodbye", PREF_WINTITLE_GOODBYE);
     }
 
     return TRUE;
@@ -5514,6 +5513,130 @@ cmd_inpblock(ProfWin *window, const char *const command, gchar **args)
         }
 
         _cmd_set_boolean_preference(value, command, "Dynamic input blocking", PREF_INPBLOCK_DYNAMIC);
+        return TRUE;
+    }
+
+    cons_bad_cmd_usage(command);
+
+    return TRUE;
+}
+
+gboolean
+cmd_titlebar(ProfWin *window, const char *const command, gchar **args)
+{
+    if (g_strcmp0(args[0], "up") == 0) {
+        gboolean result = prefs_titlebar_pos_up();
+        if (result) {
+            ui_resize();
+            cons_show("Title bar moved up.");
+        } else {
+            cons_show("Could not move title bar up.");
+        }
+
+        return TRUE;
+    }
+    if (g_strcmp0(args[0], "down") == 0) {
+        gboolean result = prefs_titlebar_pos_down();
+        if (result) {
+            ui_resize();
+            cons_show("Title bar moved down.");
+        } else {
+            cons_show("Could not move title bar down.");
+        }
+
+        return TRUE;
+    }
+
+    cons_bad_cmd_usage(command);
+
+    return TRUE;
+}
+
+gboolean
+cmd_mainwin(ProfWin *window, const char *const command, gchar **args)
+{
+    if (g_strcmp0(args[0], "up") == 0) {
+        gboolean result = prefs_mainwin_pos_up();
+        if (result) {
+            ui_resize();
+            cons_show("Main window moved up.");
+        } else {
+            cons_show("Could not move main window up.");
+        }
+
+        return TRUE;
+    }
+    if (g_strcmp0(args[0], "down") == 0) {
+        gboolean result = prefs_mainwin_pos_down();
+        if (result) {
+            ui_resize();
+            cons_show("Main window moved down.");
+        } else {
+            cons_show("Could not move main window down.");
+        }
+
+        return TRUE;
+    }
+
+    cons_bad_cmd_usage(command);
+
+    return TRUE;
+}
+
+gboolean
+cmd_statusbar(ProfWin *window, const char *const command, gchar **args)
+{
+    if (g_strcmp0(args[0], "up") == 0) {
+        gboolean result = prefs_statusbar_pos_up();
+        if (result) {
+            ui_resize();
+            cons_show("Status bar moved up");
+        } else {
+            cons_show("Could not move status bar up.");
+        }
+
+        return TRUE;
+    }
+    if (g_strcmp0(args[0], "down") == 0) {
+        gboolean result = prefs_statusbar_pos_down();
+        if (result) {
+            ui_resize();
+            cons_show("Status bar moved down.");
+        } else {
+            cons_show("Could not move status bar down.");
+        }
+
+        return TRUE;
+    }
+
+    cons_bad_cmd_usage(command);
+
+    return TRUE;
+}
+
+gboolean
+cmd_inputwin(ProfWin *window, const char *const command, gchar **args)
+{
+    if (g_strcmp0(args[0], "up") == 0) {
+        gboolean result = prefs_inputwin_pos_up();
+        if (result) {
+            ui_resize();
+            cons_show("Input window moved up.");
+        } else {
+            cons_show("Could not move input window up.");
+        }
+
+        return TRUE;
+    }
+    if (g_strcmp0(args[0], "down") == 0) {
+        gboolean result = prefs_inputwin_pos_down();
+        if (result) {
+            ui_resize();
+            cons_show("Input window moved down.");
+        } else {
+            cons_show("Could not move input window down.");
+        }
+
         return TRUE;
     }
 

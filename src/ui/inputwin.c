@@ -62,6 +62,7 @@
 #include "config/preferences.h"
 #include "config/theme.h"
 #include "ui/ui.h"
+#include "ui/screen.h"
 #include "ui/statusbar.h"
 #include "ui/inputwin.h"
 #include "ui/window.h"
@@ -280,9 +281,9 @@ inp_put_back(void)
 static void
 _inp_win_update_virtual(void)
 {
-    int wrows, wcols;
-    getmaxyx(stdscr, wrows, wcols);
-    pnoutrefresh(inp_win, 0, pad_start, wrows-1, 0, wrows-1, wcols-2);
+    int wcols = getmaxx(stdscr);
+    int row = screen_inputwin_row();
+    pnoutrefresh(inp_win, 0, pad_start, row, 0, row, wcols-2);
 }
 
 static void

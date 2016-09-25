@@ -46,6 +46,7 @@
 #include "ui/inputwin.h"
 #include "ui/window_list.h"
 #include "ui/window.h"
+#include "ui/screen.h"
 #include "xmpp/roster_list.h"
 #include "xmpp/chat_session.h"
 
@@ -67,7 +68,8 @@ create_title_bar(void)
 {
     int cols = getmaxx(stdscr);
 
-    win = newwin(1, cols, 0, 0);
+    int row = screen_titlebar_row();
+    win = newwin(1, cols, row, 0);
     wbkgd(win, theme_attrs(THEME_TITLE_TEXT));
     title_bar_console();
     title_bar_set_presence(CONTACT_OFFLINE);
@@ -100,6 +102,11 @@ void
 title_bar_resize(void)
 {
     int cols = getmaxx(stdscr);
+
+    werase(win);
+
+    int row = screen_titlebar_row();
+    mvwin(win, row, 0);
 
     wresize(win, 1, cols);
     wbkgd(win, theme_attrs(THEME_TITLE_TEXT));

@@ -133,7 +133,7 @@ ui_update(void)
 
     win_update_virtual(current);
 
-    if (prefs_get_boolean(PREF_TITLEBAR_SHOW)) {
+    if (prefs_get_boolean(PREF_WINTITLE_SHOW)) {
         _ui_draw_term_title();
     }
     title_bar_update_virtual();
@@ -370,7 +370,7 @@ ui_handle_login_account_success(ProfAccount *account, gboolean secured)
             } else {
                 ui_hide_all_room_rosters();
             }
-            ui_redraw();
+            ui_resize();
         } else {
             cons_show("Couldn't find account theme: %s", account->theme);
         }

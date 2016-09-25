@@ -75,3 +75,9 @@ roster.room.mention=green
 roster.room.trigger=green
 occupants.header=yellow
 receipt.sent=red
+
+[ui]
+titlebar.position=1
+mainwin.position=2
+statusbar.position=3
+inputwin.position=4

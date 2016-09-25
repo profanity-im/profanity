@@ -20,6 +20,7 @@ core_sources = \
 	src/ui/ui.h src/ui/window.c src/ui/window.h src/ui/core.c \
 	src/ui/titlebar.c src/ui/statusbar.c src/ui/inputwin.c \
 	src/ui/titlebar.h src/ui/statusbar.h src/ui/inputwin.h \
+	src/ui/screen.h src/ui/screen.c \
 	src/ui/console.c src/ui/notifier.c \
 	src/ui/win_types.h \
 	src/ui/window_list.c src/ui/window_list.h \
@@ -186,7 +187,7 @@ themes_sources = themes/*
 
 icons_sources = icons/*
 
-script_sources = bootstrap.sh configure-debug install-all.sh
+script_sources = bootstrap.sh configure-debug
 
 man_sources = docs/profanity.1
 

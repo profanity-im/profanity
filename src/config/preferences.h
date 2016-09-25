@@ -49,8 +49,8 @@ typedef enum {
     PREF_BEEP,
     PREF_VERCHECK,
     PREF_THEME,
-    PREF_TITLEBAR_SHOW,
-    PREF_TITLEBAR_GOODBYE,
+    PREF_WINTITLE_SHOW,
+    PREF_WINTITLE_GOODBYE,
     PREF_FLASH,
     PREF_TRAY,
     PREF_TRAY_READ,
@@ -148,6 +148,13 @@ typedef struct prof_alias_t {
     gchar *value;
 } ProfAlias;
 
+typedef struct prof_winplacement_t {
+    int titlebar_pos;
+    int mainwin_pos;
+    int statusbar_pos;
+    int inputwin_pos;
+} ProfWinPlacement;
+
 void prefs_load(void);
 void prefs_close(void);
 
@@ -238,6 +245,20 @@ void prefs_free_aliases(GList *aliases);
 gboolean prefs_add_room_notify_trigger(const char * const text);
 gboolean prefs_remove_room_notify_trigger(const char * const text);
 GList* prefs_get_room_notify_triggers(void);
+
+ProfWinPlacement* prefs_get_win_placement(void);
+void prefs_free_win_placement(ProfWinPlacement *placement);
+
+gboolean prefs_titlebar_pos_up(void);
+gboolean prefs_titlebar_pos_down(void);
+gboolean prefs_mainwin_pos_up(void);
+gboolean prefs_mainwin_pos_down(void);
+gboolean prefs_statusbar_pos_up(void);
+gboolean prefs_statusbar_pos_down(void);
+gboolean prefs_inputwin_pos_up(void);
+gboolean prefs_inputwin_pos_down(void);
+ProfWinPlacement* prefs_create_profwin_placement(int titlebar, int mainwin, int statusbar, int inputwin);
+void prefs_save_win_placement(ProfWinPlacement *placement);
 
 gboolean prefs_get_boolean(preference_t pref);
 void prefs_set_boolean(preference_t pref, gboolean value);
