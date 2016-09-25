@@ -1142,47 +1142,24 @@ gboolean
 prefs_titlebar_pos_up(void)
 {
     ProfWinPlacement *placement = prefs_get_win_placement();
-    if (placement->titlebar_pos == 2) {
-        placement->titlebar_pos = 1;
-        if (placement->mainwin_pos == 1) {
-            placement->mainwin_pos = 2;
-        } else if (placement->statusbar_pos == 1) {
-            placement->statusbar_pos = 2;
-        } else if (placement->inputwin_pos == 1) {
-            placement->inputwin_pos = 2;
-        }
 
-        prefs_save_win_placement(placement);
-        prefs_free_win_placement(placement);
-        return TRUE;
-    }
-    if (placement->titlebar_pos == 3) {
-        placement->titlebar_pos = 2;
-        if (placement->mainwin_pos == 2) {
-            placement->mainwin_pos = 3;
-        } else if (placement->statusbar_pos == 2) {
-            placement->statusbar_pos = 3;
-        } else if (placement->inputwin_pos == 2) {
-            placement->inputwin_pos = 3;
-        }
+    int pos = 2;
+    for (pos = 2; pos<5; pos++) {
+        if (placement->titlebar_pos == pos) {
+            placement->titlebar_pos = pos-1;
 
-        prefs_save_win_placement(placement);
-        prefs_free_win_placement(placement);
-        return TRUE;
-    }
-    if (placement->titlebar_pos == 4) {
-        placement->titlebar_pos = 3;
-        if (placement->mainwin_pos == 3) {
-            placement->mainwin_pos = 4;
-        } else if (placement->statusbar_pos == 3) {
-            placement->statusbar_pos = 4;
-        } else if (placement->inputwin_pos == 3) {
-            placement->inputwin_pos = 4;
-        }
+            if (placement->mainwin_pos == pos-1) {
+                placement->mainwin_pos = pos;
+            } else if (placement->statusbar_pos == pos-1) {
+                placement->statusbar_pos = pos;
+            } else if (placement->inputwin_pos == pos-1) {
+                placement->inputwin_pos = pos;
+            }
 
-        prefs_save_win_placement(placement);
-        prefs_free_win_placement(placement);
-        return TRUE;
+            prefs_save_win_placement(placement);
+            prefs_free_win_placement(placement);
+            return TRUE;
+        }
     }
 
     prefs_free_win_placement(placement);
@@ -1193,47 +1170,24 @@ gboolean
 prefs_mainwin_pos_up(void)
 {
     ProfWinPlacement *placement = prefs_get_win_placement();
-    if (placement->mainwin_pos == 2) {
-        placement->mainwin_pos = 1;
-        if (placement->titlebar_pos == 1) {
-            placement->titlebar_pos = 2;
-        } else if (placement->statusbar_pos == 1) {
-            placement->statusbar_pos = 2;
-        } else if (placement->inputwin_pos == 1) {
-            placement->inputwin_pos = 2;
-        }
 
-        prefs_save_win_placement(placement);
-        prefs_free_win_placement(placement);
-        return TRUE;
-    }
-    if (placement->mainwin_pos == 3) {
-        placement->mainwin_pos = 2;
-        if (placement->titlebar_pos == 2) {
-            placement->titlebar_pos = 3;
-        } else if (placement->statusbar_pos == 2) {
-            placement->statusbar_pos = 3;
-        } else if (placement->inputwin_pos == 2) {
-            placement->inputwin_pos = 3;
-        }
+    int pos = 2;
+    for (pos = 2; pos<5; pos++) {
+        if (placement->mainwin_pos == pos) {
+            placement->mainwin_pos = pos-1;
 
-        prefs_save_win_placement(placement);
-        prefs_free_win_placement(placement);
-        return TRUE;
-    }
-    if (placement->mainwin_pos == 4) {
-        placement->mainwin_pos = 3;
-        if (placement->titlebar_pos == 3) {
-            placement->titlebar_pos = 4;
-        } else if (placement->statusbar_pos == 3) {
-            placement->statusbar_pos = 4;
-        } else if (placement->inputwin_pos == 3) {
-            placement->inputwin_pos = 4;
-        }
+            if (placement->titlebar_pos == pos-1) {
+                placement->titlebar_pos = pos;
+            } else if (placement->statusbar_pos == pos-1) {
+                placement->statusbar_pos = pos;
+            } else if (placement->inputwin_pos == pos-1) {
+                placement->inputwin_pos = pos;
+            }
 
-        prefs_save_win_placement(placement);
-        prefs_free_win_placement(placement);
-        return TRUE;
+            prefs_save_win_placement(placement);
+            prefs_free_win_placement(placement);
+            return TRUE;
+        }
     }
 
     prefs_free_win_placement(placement);
@@ -1244,47 +1198,24 @@ gboolean
 prefs_statusbar_pos_up(void)
 {
     ProfWinPlacement *placement = prefs_get_win_placement();
-    if (placement->statusbar_pos == 2) {
-        placement->statusbar_pos = 1;
-        if (placement->titlebar_pos == 1) {
-            placement->titlebar_pos = 2;
-        } else if (placement->mainwin_pos == 1) {
-            placement->mainwin_pos = 2;
-        } else if (placement->inputwin_pos == 1) {
-            placement->inputwin_pos = 2;
-        }
 
-        prefs_save_win_placement(placement);
-        prefs_free_win_placement(placement);
-        return TRUE;
-    }
-    if (placement->statusbar_pos == 3) {
-        placement->statusbar_pos = 2;
-        if (placement->titlebar_pos == 2) {
-            placement->titlebar_pos = 3;
-        } else if (placement->mainwin_pos == 2) {
-            placement->mainwin_pos = 3;
-        } else if (placement->inputwin_pos == 2) {
-            placement->inputwin_pos = 3;
-        }
+    int pos = 2;
+    for (pos = 2; pos<5; pos++) {
+        if (placement->statusbar_pos == pos) {
+            placement->statusbar_pos = pos-1;
 
-        prefs_save_win_placement(placement);
-        prefs_free_win_placement(placement);
-        return TRUE;
-    }
-    if (placement->statusbar_pos == 4) {
-        placement->statusbar_pos = 3;
-        if (placement->titlebar_pos == 3) {
-            placement->titlebar_pos = 4;
-        } else if (placement->mainwin_pos == 3) {
-            placement->mainwin_pos = 4;
-        } else if (placement->inputwin_pos == 3) {
-            placement->inputwin_pos = 4;
-        }
+            if (placement->titlebar_pos == pos-1) {
+                placement->titlebar_pos = pos;
+            } else if (placement->mainwin_pos == pos-1) {
+                placement->mainwin_pos = pos;
+            } else if (placement->inputwin_pos == pos-1) {
+                placement->inputwin_pos = pos;
+            }
 
-        prefs_save_win_placement(placement);
-        prefs_free_win_placement(placement);
-        return TRUE;
+            prefs_save_win_placement(placement);
+            prefs_free_win_placement(placement);
+            return TRUE;
+        }
     }
 
     prefs_free_win_placement(placement);
@@ -1295,47 +1226,24 @@ gboolean
 prefs_inputwin_pos_up(void)
 {
     ProfWinPlacement *placement = prefs_get_win_placement();
-    if (placement->inputwin_pos == 2) {
-        placement->inputwin_pos = 1;
-        if (placement->titlebar_pos == 1) {
-            placement->titlebar_pos = 2;
-        } else if (placement->mainwin_pos == 1) {
-            placement->mainwin_pos = 2;
-        } else if (placement->inputwin_pos == 1) {
-            placement->inputwin_pos = 2;
-        }
 
-        prefs_save_win_placement(placement);
-        prefs_free_win_placement(placement);
-        return TRUE;
-    }
-    if (placement->inputwin_pos == 3) {
-        placement->inputwin_pos = 2;
-        if (placement->titlebar_pos == 2) {
-            placement->titlebar_pos = 3;
-        } else if (placement->mainwin_pos == 2) {
-            placement->mainwin_pos = 3;
-        } else if (placement->statusbar_pos == 2) {
-            placement->statusbar_pos = 3;
-        }
+    int pos = 2;
+    for (pos = 2; pos<5; pos++) {
+        if (placement->inputwin_pos == pos) {
+            placement->inputwin_pos = pos-1;
 
-        prefs_save_win_placement(placement);
-        prefs_free_win_placement(placement);
-        return TRUE;
-    }
-    if (placement->inputwin_pos == 4) {
-        placement->inputwin_pos = 3;
-        if (placement->titlebar_pos == 3) {
-            placement->titlebar_pos = 4;
-        } else if (placement->mainwin_pos == 3) {
-            placement->mainwin_pos = 4;
-        } else if (placement->statusbar_pos == 3) {
-            placement->statusbar_pos = 4;
-        }
+            if (placement->titlebar_pos == pos-1) {
+                placement->titlebar_pos = pos;
+            } else if (placement->mainwin_pos == pos-1) {
+                placement->mainwin_pos = pos;
+            } else if (placement->statusbar_pos == pos-1) {
+                placement->statusbar_pos = pos;
+            }
 
-        prefs_save_win_placement(placement);
-        prefs_free_win_placement(placement);
-        return TRUE;
+            prefs_save_win_placement(placement);
+            prefs_free_win_placement(placement);
+            return TRUE;
+        }
     }
 
     prefs_free_win_placement(placement);
@@ -1346,47 +1254,24 @@ gboolean
 prefs_titlebar_pos_down(void)
 {
     ProfWinPlacement *placement = prefs_get_win_placement();
-    if (placement->titlebar_pos == 1) {
-        placement->titlebar_pos = 2;
-        if (placement->mainwin_pos == 2) {
-            placement->mainwin_pos = 1;
-        } else if (placement->statusbar_pos == 2) {
-            placement->statusbar_pos = 1;
-        } else if (placement->inputwin_pos == 2) {
-            placement->inputwin_pos = 1;
-        }
 
-        prefs_save_win_placement(placement);
-        prefs_free_win_placement(placement);
-        return TRUE;
-    }
-    if (placement->titlebar_pos == 2) {
-        placement->titlebar_pos = 3;
-        if (placement->mainwin_pos == 3) {
-            placement->mainwin_pos = 2;
-        } else if (placement->statusbar_pos == 3) {
-            placement->statusbar_pos = 2;
-        } else if (placement->inputwin_pos == 3) {
-            placement->inputwin_pos = 2;
-        }
+    int pos = 1;
+    for (pos = 1; pos<4; pos++) {
+        if (placement->titlebar_pos == pos) {
+            placement->titlebar_pos = pos+1;
 
-        prefs_save_win_placement(placement);
-        prefs_free_win_placement(placement);
-        return TRUE;
-    }
-    if (placement->titlebar_pos == 3) {
-        placement->titlebar_pos = 4;
-        if (placement->mainwin_pos == 4) {
-            placement->mainwin_pos = 3;
-        } else if (placement->statusbar_pos == 4) {
-            placement->statusbar_pos = 3;
-        } else if (placement->inputwin_pos == 4) {
-            placement->inputwin_pos = 3;
-        }
+            if (placement->mainwin_pos == pos+1) {
+                placement->mainwin_pos = pos;
+            } else if (placement->statusbar_pos == pos+1) {
+                placement->statusbar_pos = pos;
+            } else if (placement->inputwin_pos == pos+1) {
+                placement->inputwin_pos = pos;
+            }
 
-        prefs_save_win_placement(placement);
-        prefs_free_win_placement(placement);
-        return TRUE;
+            prefs_save_win_placement(placement);
+            prefs_free_win_placement(placement);
+            return TRUE;
+        }
     }
 
     prefs_free_win_placement(placement);
@@ -1397,47 +1282,24 @@ gboolean
 prefs_mainwin_pos_down(void)
 {
     ProfWinPlacement *placement = prefs_get_win_placement();
-    if (placement->mainwin_pos == 1) {
-        placement->mainwin_pos = 2;
-        if (placement->titlebar_pos == 2) {
-            placement->titlebar_pos = 1;
-        } else if (placement->statusbar_pos == 2) {
-            placement->statusbar_pos = 1;
-        } else if (placement->inputwin_pos == 2) {
-            placement->inputwin_pos = 1;
-        }
 
-        prefs_save_win_placement(placement);
-        prefs_free_win_placement(placement);
-        return TRUE;
-    }
-    if (placement->mainwin_pos == 2) {
-        placement->mainwin_pos = 3;
-        if (placement->titlebar_pos == 3) {
-            placement->titlebar_pos = 2;
-        } else if (placement->statusbar_pos == 3) {
-            placement->statusbar_pos = 2;
-        } else if (placement->inputwin_pos == 3) {
-            placement->inputwin_pos = 2;
-        }
+    int pos = 1;
+    for (pos = 1; pos<4; pos++) {
+        if (placement->mainwin_pos == pos) {
+            placement->mainwin_pos = pos+1;
 
-        prefs_save_win_placement(placement);
-        prefs_free_win_placement(placement);
-        return TRUE;
-    }
-    if (placement->mainwin_pos == 3) {
-        placement->mainwin_pos = 4;
-        if (placement->titlebar_pos == 4) {
-            placement->titlebar_pos = 3;
-        } else if (placement->statusbar_pos == 4) {
-            placement->statusbar_pos = 3;
-        } else if (placement->inputwin_pos == 4) {
-            placement->inputwin_pos = 3;
-        }
+            if (placement->titlebar_pos == pos+1) {
+                placement->titlebar_pos = pos;
+            } else if (placement->statusbar_pos == pos+1) {
+                placement->statusbar_pos = pos;
+            } else if (placement->inputwin_pos == pos+1) {
+                placement->inputwin_pos = pos;
+            }
 
-        prefs_save_win_placement(placement);
-        prefs_free_win_placement(placement);
-        return TRUE;
+            prefs_save_win_placement(placement);
+            prefs_free_win_placement(placement);
+            return TRUE;
+        }
     }
 
     prefs_free_win_placement(placement);
@@ -1448,47 +1310,24 @@ gboolean
 prefs_statusbar_pos_down(void)
 {
     ProfWinPlacement *placement = prefs_get_win_placement();
-    if (placement->statusbar_pos == 1) {
-        placement->statusbar_pos = 2;
-        if (placement->titlebar_pos == 2) {
-            placement->titlebar_pos = 1;
-        } else if (placement->mainwin_pos == 2) {
-            placement->mainwin_pos = 1;
-        } else if (placement->inputwin_pos == 2) {
-            placement->inputwin_pos = 1;
-        }
 
-        prefs_save_win_placement(placement);
-        prefs_free_win_placement(placement);
-        return TRUE;
-    }
-    if (placement->statusbar_pos == 2) {
-        placement->statusbar_pos = 3;
-        if (placement->titlebar_pos == 3) {
-            placement->titlebar_pos = 2;
-        } else if (placement->mainwin_pos == 3) {
-            placement->mainwin_pos = 2;
-        } else if (placement->inputwin_pos == 3) {
-            placement->inputwin_pos = 2;
-        }
+    int pos = 1;
+    for (pos = 1; pos<4; pos++) {
+        if (placement->statusbar_pos == pos) {
+            placement->statusbar_pos = pos+1;
 
-        prefs_save_win_placement(placement);
-        prefs_free_win_placement(placement);
-        return TRUE;
-    }
-    if (placement->statusbar_pos == 3) {
-        placement->statusbar_pos = 4;
-        if (placement->titlebar_pos == 4) {
-            placement->titlebar_pos = 3;
-        } else if (placement->mainwin_pos == 4) {
-            placement->mainwin_pos = 3;
-        } else if (placement->inputwin_pos == 4) {
-            placement->inputwin_pos = 3;
-        }
+            if (placement->titlebar_pos == pos+1) {
+                placement->titlebar_pos = pos;
+            } else if (placement->mainwin_pos == pos+1) {
+                placement->mainwin_pos = pos;
+            } else if (placement->inputwin_pos == pos+1) {
+                placement->inputwin_pos = pos;
+            }
 
-        prefs_save_win_placement(placement);
-        prefs_free_win_placement(placement);
-        return TRUE;
+            prefs_save_win_placement(placement);
+            prefs_free_win_placement(placement);
+            return TRUE;
+        }
     }
 
     prefs_free_win_placement(placement);
@@ -1500,47 +1339,24 @@ gboolean
 prefs_inputwin_pos_down(void)
 {
     ProfWinPlacement *placement = prefs_get_win_placement();
-    if (placement->inputwin_pos == 1) {
-        placement->inputwin_pos = 2;
-        if (placement->titlebar_pos == 2) {
-            placement->titlebar_pos = 1;
-        } else if (placement->mainwin_pos == 2) {
-            placement->mainwin_pos = 1;
-        } else if (placement->inputwin_pos == 2) {
-            placement->inputwin_pos = 1;
-        }
 
-        prefs_save_win_placement(placement);
-        prefs_free_win_placement(placement);
-        return TRUE;
-    }
-    if (placement->inputwin_pos == 2) {
-        placement->inputwin_pos = 3;
-        if (placement->titlebar_pos == 3) {
-            placement->titlebar_pos = 2;
-        } else if (placement->mainwin_pos == 3) {
-            placement->mainwin_pos = 2;
-        } else if (placement->statusbar_pos == 3) {
-            placement->statusbar_pos = 2;
-        }
+    int pos = 1;
+    for (pos = 1; pos<4; pos++) {
+        if (placement->inputwin_pos == pos) {
+            placement->inputwin_pos = pos+1;
 
-        prefs_save_win_placement(placement);
-        prefs_free_win_placement(placement);
-        return TRUE;
-    }
-    if (placement->inputwin_pos == 3) {
-        placement->inputwin_pos = 4;
-        if (placement->titlebar_pos == 4) {
-            placement->titlebar_pos = 3;
-        } else if (placement->mainwin_pos == 4) {
-            placement->mainwin_pos = 3;
-        } else if (placement->statusbar_pos == 4) {
-            placement->statusbar_pos = 3;
-        }
+            if (placement->titlebar_pos == pos+1) {
+                placement->titlebar_pos = pos;
+            } else if (placement->mainwin_pos == pos+1) {
+                placement->mainwin_pos = pos;
+            } else if (placement->statusbar_pos == pos+1) {
+                placement->statusbar_pos = pos;
+            }
 
-        prefs_save_win_placement(placement);
-        prefs_free_win_placement(placement);
-        return TRUE;
+            prefs_save_win_placement(placement);
+            prefs_free_win_placement(placement);
+            return TRUE;
+        }
     }
 
     prefs_free_win_placement(placement);
