@@ -4212,13 +4212,6 @@ cmd_room(ProfWin *window, const char *const command, gchar **args)
 gboolean
 cmd_occupants(ProfWin *window, const char *const command, gchar **args)
 {
-    jabber_conn_status_t conn_status = connection_get_status();
-
-    if (conn_status != JABBER_CONNECTED) {
-        cons_show("You are not currently connected.");
-        return TRUE;
-    }
-
     if (g_strcmp0(args[0], "size") == 0) {
         if (!args[1]) {
             cons_bad_cmd_usage(command);
@@ -4263,6 +4256,12 @@ cmd_occupants(ProfWin *window, const char *const command, gchar **args)
             cons_bad_cmd_usage(command);
             return TRUE;
         }
+    }
+
+    jabber_conn_status_t conn_status = connection_get_status();
+    if (conn_status != JABBER_CONNECTED) {
+        cons_show("You are not currently connected.");
+        return TRUE;
     }
 
     if (window->type != WIN_MUC) {
