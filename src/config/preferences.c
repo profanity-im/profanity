@@ -143,6 +143,18 @@ prefs_load(void)
         prefs_free_string(value);
     }
 
+    // move pre 0.6.0 titlebar settings to wintitle
+    if (g_key_file_has_key(prefs, PREF_GROUP_UI, "titlebar.show", NULL)) {
+        gboolean show = g_key_file_get_boolean(prefs, PREF_GROUP_UI, "titlebar.show", NULL);
+        g_key_file_set_boolean(prefs, PREF_GROUP_UI, "wintitle.show", show);
+        g_key_file_remove_key(prefs, PREF_GROUP_UI, "titlebar.show", NULL);
+    }
+    if (g_key_file_has_key(prefs, PREF_GROUP_UI, "titlebar.goodbye", NULL)) {
+        gboolean goodbye = g_key_file_get_boolean(prefs, PREF_GROUP_UI, "titlebar.goodbye", NULL);
+        g_key_file_set_boolean(prefs, PREF_GROUP_UI, "wintitle.goodbye", goodbye);
+        g_key_file_remove_key(prefs, PREF_GROUP_UI, "titlebar.goodbye", NULL);
+    }
+
     _save_prefs();
 
     boolean_choice_ac = autocomplete_new();
@@ -1049,6 +1061,308 @@ prefs_get_room_notify_triggers(void)
     return result;
 }
 
+ProfWinPlacement*
+prefs_create_profwin_placement(int titlebar, int mainwin, int statusbar, int inputwin)
+{
+    ProfWinPlacement *placement = malloc(sizeof(ProfWinPlacement));
+    placement->titlebar_pos = titlebar;
+    placement->mainwin_pos = mainwin;
+    placement->statusbar_pos = statusbar;
+    placement->inputwin_pos = inputwin;
+
+    return placement;
+}
+
+void
+prefs_free_win_placement(ProfWinPlacement *placement)
+{
+    free(placement);
+}
+
+ProfWinPlacement*
+prefs_get_win_placement(void)
+{
+    // read from settings file
+    int titlebar_pos = g_key_file_get_integer(prefs, PREF_GROUP_UI, "titlebar.position", NULL);
+    int mainwin_pos = g_key_file_get_integer(prefs, PREF_GROUP_UI, "mainwin.position", NULL);
+    int statusbar_pos = g_key_file_get_integer(prefs, PREF_GROUP_UI, "statusbar.position", NULL);
+    int inputwin_pos = g_key_file_get_integer(prefs, PREF_GROUP_UI, "inputwin.position", NULL);
+
+    // default if setting invalid, or not present
+    if (titlebar_pos < 1 || titlebar_pos > 4) {
+        titlebar_pos = 1;
+    }
+    if (mainwin_pos < 1 || mainwin_pos > 4) {
+        mainwin_pos = 2;
+    }
+    if (statusbar_pos < 1 || statusbar_pos > 4) {
+        statusbar_pos = 3;
+    }
+    if (inputwin_pos < 1 || inputwin_pos > 4) {
+        inputwin_pos = 4;
+    }
+
+    // return default if duplicates found
+    if (titlebar_pos == mainwin_pos) {
+        return prefs_create_profwin_placement(1, 2, 3, 4);
+    }
+    if (titlebar_pos == statusbar_pos) {
+        return prefs_create_profwin_placement(1, 2, 3, 4);
+    }
+    if (titlebar_pos == inputwin_pos) {
+        return prefs_create_profwin_placement(1, 2, 3, 4);
+    }
+
+    if (mainwin_pos == statusbar_pos) {
+        return prefs_create_profwin_placement(1, 2, 3, 4);
+    }
+    if (mainwin_pos == inputwin_pos) {
+        return prefs_create_profwin_placement(1, 2, 3, 4);
+    }
+
+    if (statusbar_pos == inputwin_pos) {
+        return prefs_create_profwin_placement(1, 2, 3, 4);
+    }
+
+    // return settings
+    return prefs_create_profwin_placement(titlebar_pos, mainwin_pos, statusbar_pos, inputwin_pos);
+}
+
+void
+prefs_save_win_placement(ProfWinPlacement *placement)
+{
+    g_key_file_set_integer(prefs, PREF_GROUP_UI, "titlebar.position", placement->titlebar_pos);
+    g_key_file_set_integer(prefs, PREF_GROUP_UI, "mainwin.position", placement->mainwin_pos);
+    g_key_file_set_integer(prefs, PREF_GROUP_UI, "statusbar.position", placement->statusbar_pos);
+    g_key_file_set_integer(prefs, PREF_GROUP_UI, "inputwin.position", placement->inputwin_pos);
+    _save_prefs();
+}
+
+gboolean
+prefs_titlebar_pos_up(void)
+{
+    ProfWinPlacement *placement = prefs_get_win_placement();
+
+    int pos = 2;
+    for (pos = 2; pos<5; pos++) {
+        if (placement->titlebar_pos == pos) {
+            placement->titlebar_pos = pos-1;
+
+            if (placement->mainwin_pos == pos-1) {
+                placement->mainwin_pos = pos;
+            } else if (placement->statusbar_pos == pos-1) {
+                placement->statusbar_pos = pos;
+            } else if (placement->inputwin_pos == pos-1) {
+                placement->inputwin_pos = pos;
+            }
+
+            prefs_save_win_placement(placement);
+            prefs_free_win_placement(placement);
+            return TRUE;
+        }
+    }
+
+    prefs_free_win_placement(placement);
+    return FALSE;
+}
+
+gboolean
+prefs_mainwin_pos_up(void)
+{
+    ProfWinPlacement *placement = prefs_get_win_placement();
+
+    int pos = 2;
+    for (pos = 2; pos<5; pos++) {
+        if (placement->mainwin_pos == pos) {
+            placement->mainwin_pos = pos-1;
+
+            if (placement->titlebar_pos == pos-1) {
+                placement->titlebar_pos = pos;
+            } else if (placement->statusbar_pos == pos-1) {
+                placement->statusbar_pos = pos;
+            } else if (placement->inputwin_pos == pos-1) {
+                placement->inputwin_pos = pos;
+            }
+
+            prefs_save_win_placement(placement);
+            prefs_free_win_placement(placement);
+            return TRUE;
+        }
+    }
+
+    prefs_free_win_placement(placement);
+    return FALSE;
+}
+
+gboolean
+prefs_statusbar_pos_up(void)
+{
+    ProfWinPlacement *placement = prefs_get_win_placement();
+
+    int pos = 2;
+    for (pos = 2; pos<5; pos++) {
+        if (placement->statusbar_pos == pos) {
+            placement->statusbar_pos = pos-1;
+
+            if (placement->titlebar_pos == pos-1) {
+                placement->titlebar_pos = pos;
+            } else if (placement->mainwin_pos == pos-1) {
+                placement->mainwin_pos = pos;
+            } else if (placement->inputwin_pos == pos-1) {
+                placement->inputwin_pos = pos;
+            }
+
+            prefs_save_win_placement(placement);
+            prefs_free_win_placement(placement);
+            return TRUE;
+        }
+    }
+
+    prefs_free_win_placement(placement);
+    return FALSE;
+}
+
+gboolean
+prefs_inputwin_pos_up(void)
+{
+    ProfWinPlacement *placement = prefs_get_win_placement();
+
+    int pos = 2;
+    for (pos = 2; pos<5; pos++) {
+        if (placement->inputwin_pos == pos) {
+            placement->inputwin_pos = pos-1;
+
+            if (placement->titlebar_pos == pos-1) {
+                placement->titlebar_pos = pos;
+            } else if (placement->mainwin_pos == pos-1) {
+                placement->mainwin_pos = pos;
+            } else if (placement->statusbar_pos == pos-1) {
+                placement->statusbar_pos = pos;
+            }
+
+            prefs_save_win_placement(placement);
+            prefs_free_win_placement(placement);
+            return TRUE;
+        }
+    }
+
+    prefs_free_win_placement(placement);
+    return FALSE;
+}
+
+gboolean
+prefs_titlebar_pos_down(void)
+{
+    ProfWinPlacement *placement = prefs_get_win_placement();
+
+    int pos = 1;
+    for (pos = 1; pos<4; pos++) {
+        if (placement->titlebar_pos == pos) {
+            placement->titlebar_pos = pos+1;
+
+            if (placement->mainwin_pos == pos+1) {
+                placement->mainwin_pos = pos;
+            } else if (placement->statusbar_pos == pos+1) {
+                placement->statusbar_pos = pos;
+            } else if (placement->inputwin_pos == pos+1) {
+                placement->inputwin_pos = pos;
+            }
+
+            prefs_save_win_placement(placement);
+            prefs_free_win_placement(placement);
+            return TRUE;
+        }
+    }
+
+    prefs_free_win_placement(placement);
+    return FALSE;
+}
+
+gboolean
+prefs_mainwin_pos_down(void)
+{
+    ProfWinPlacement *placement = prefs_get_win_placement();
+
+    int pos = 1;
+    for (pos = 1; pos<4; pos++) {
+        if (placement->mainwin_pos == pos) {
+            placement->mainwin_pos = pos+1;
+
+            if (placement->titlebar_pos == pos+1) {
+                placement->titlebar_pos = pos;
+            } else if (placement->statusbar_pos == pos+1) {
+                placement->statusbar_pos = pos;
+            } else if (placement->inputwin_pos == pos+1) {
+                placement->inputwin_pos = pos;
+            }
+
+            prefs_save_win_placement(placement);
+            prefs_free_win_placement(placement);
+            return TRUE;
+        }
+    }
+
+    prefs_free_win_placement(placement);
+    return FALSE;
+}
+
+gboolean
+prefs_statusbar_pos_down(void)
+{
+    ProfWinPlacement *placement = prefs_get_win_placement();
+
+    int pos = 1;
+    for (pos = 1; pos<4; pos++) {
+        if (placement->statusbar_pos == pos) {
+            placement->statusbar_pos = pos+1;
+
+            if (placement->titlebar_pos == pos+1) {
+                placement->titlebar_pos = pos;
+            } else if (placement->mainwin_pos == pos+1) {
+                placement->mainwin_pos = pos;
+            } else if (placement->inputwin_pos == pos+1) {
+                placement->inputwin_pos = pos;
+            }
+
+            prefs_save_win_placement(placement);
+            prefs_free_win_placement(placement);
+            return TRUE;
+        }
+    }
+
+    prefs_free_win_placement(placement);
+    return FALSE;
+}
+
+
+gboolean
+prefs_inputwin_pos_down(void)
+{
+    ProfWinPlacement *placement = prefs_get_win_placement();
+
+    int pos = 1;
+    for (pos = 1; pos<4; pos++) {
+        if (placement->inputwin_pos == pos) {
+            placement->inputwin_pos = pos+1;
+
+            if (placement->titlebar_pos == pos+1) {
+                placement->titlebar_pos = pos;
+            } else if (placement->mainwin_pos == pos+1) {
+                placement->mainwin_pos = pos;
+            } else if (placement->statusbar_pos == pos+1) {
+                placement->statusbar_pos = pos;
+            }
+
+            prefs_save_win_placement(placement);
+            prefs_free_win_placement(placement);
+            return TRUE;
+        }
+    }
+
+    prefs_free_win_placement(placement);
+    return FALSE;
+}
+
 gboolean
 prefs_add_alias(const char *const name, const char *const value)
 {
@@ -1162,8 +1476,8 @@ _get_group(preference_t pref)
         case PREF_BEEP:
         case PREF_THEME:
         case PREF_VERCHECK:
-        case PREF_TITLEBAR_SHOW:
-        case PREF_TITLEBAR_GOODBYE:
+        case PREF_WINTITLE_SHOW:
+        case PREF_WINTITLE_GOODBYE:
         case PREF_FLASH:
         case PREF_INTYPE:
         case PREF_HISTORY:
@@ -1211,7 +1525,6 @@ _get_group(preference_t pref)
         case PREF_RESOURCE_MESSAGE:
         case PREF_ENC_WARN:
         case PREF_INPBLOCK_DYNAMIC:
-        case PREF_INPUTWIN:
         case PREF_TLS_SHOW:
         case PREF_CONSOLE_MUC:
         case PREF_CONSOLE_PRIVATE:
@@ -1282,10 +1595,10 @@ _get_key(preference_t pref)
             return "theme";
         case PREF_VERCHECK:
             return "vercheck";
-        case PREF_TITLEBAR_SHOW:
-            return "titlebar.show";
-        case PREF_TITLEBAR_GOODBYE:
-            return "titlebar.goodbye";
+        case PREF_WINTITLE_SHOW:
+            return "wintitle.show";
+        case PREF_WINTITLE_GOODBYE:
+            return "wintitle.goodbye";
         case PREF_FLASH:
             return "flash";
         case PREF_TRAY:
@@ -1444,8 +1757,6 @@ _get_key(preference_t pref)
             return "resource.message";
         case PREF_INPBLOCK_DYNAMIC:
             return "inpblock.dynamic";
-        case PREF_INPUTWIN:
-            return "inputwin.position";
         case PREF_ENC_WARN:
             return "enc.warn";
         case PREF_PGP_LOG:
@@ -1574,8 +1885,6 @@ _get_default_string(preference_t pref)
         case PREF_CONSOLE_PRIVATE:
         case PREF_CONSOLE_CHAT:
             return "all";
-        case PREF_INPUTWIN:
-            return "bottom";
         default:
             return NULL;
     }
