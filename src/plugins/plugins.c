@@ -889,4 +889,6 @@ plugins_shutdown(void)
     plugin_settings_close();
     callbacks_close();
     disco_close();
+    g_hash_table_destroy(plugins);
+    plugins = NULL;
 }

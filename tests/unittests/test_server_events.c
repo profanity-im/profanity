@@ -17,6 +17,7 @@
 void console_shows_online_presence_when_set_online(void **state)
 {
     prefs_set_string(PREF_STATUSES_CONSOLE, "online");
+    plugins_init();
     roster_create();
     char *barejid = "test1@server";
     roster_add(barejid, "bob", NULL, "both", FALSE);
@@ -29,11 +30,13 @@ void console_shows_online_presence_when_set_online(void **state)
     sv_ev_contact_online(barejid, resource, NULL, NULL);
 
     roster_destroy();
+    plugins_shutdown();
 }
 
 void console_shows_online_presence_when_set_all(void **state)
 {
     prefs_set_string(PREF_STATUSES_CONSOLE, "all");
+    plugins_init();
     roster_create();
     char *barejid = "test1@server";
     roster_add(barejid, "bob", NULL, "both", FALSE);
@@ -46,11 +49,13 @@ void console_shows_online_presence_when_set_all(void **state)
     sv_ev_contact_online(barejid, resource, NULL, NULL);
 
     roster_destroy();
+    plugins_shutdown();
 }
 
 void console_shows_dnd_presence_when_set_all(void **state)
 {
     prefs_set_string(PREF_STATUSES_CONSOLE, "all");
+    plugins_init();
     roster_create();
     char *barejid = "test1@server";
     roster_add(barejid, "bob", NULL, "both", FALSE);
@@ -63,10 +68,12 @@ void console_shows_dnd_presence_when_set_all(void **state)
     sv_ev_contact_online(barejid, resource, NULL, NULL);
 
     roster_destroy();
+    plugins_shutdown();
 }
 
 void handle_offline_removes_chat_session(void **state)
 {
+    plugins_init();
     roster_create();
     chat_sessions_init();
     char *barejid = "friend@server.chat.com";
@@ -85,6 +92,7 @@ void handle_offline_removes_chat_session(void **state)
 
     roster_destroy();
     chat_sessions_clear();
+    plugins_shutdown();
 }
 
 void lost_connection_clears_chat_sessions(void **state)
