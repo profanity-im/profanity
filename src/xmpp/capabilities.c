@@ -310,8 +310,7 @@ caps_lookup(const char *const jid)
 gboolean
 caps_jid_has_feature(const char *const jid, const char *const feature)
 {
-    char *ver = g_hash_table_lookup(jid_to_ver, jid);
-    EntityCapabilities *caps = ver ? _caps_by_ver(ver) : _caps_by_jid(jid);
+    EntityCapabilities *caps = caps_lookup(jid);
 
     if (caps == NULL) {
         return FALSE;
