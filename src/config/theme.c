@@ -531,13 +531,18 @@ _load_preferences(void)
         }
     }
 
-    int titlebar_pos = g_key_file_get_integer(theme, "ui", "titlebar.position", NULL);
-    int mainwin_pos = g_key_file_get_integer(theme, "ui", "mainwin.position", NULL);
-    int statusbar_pos = g_key_file_get_integer(theme, "ui", "statusbar.position", NULL);
-    int inputwin_pos = g_key_file_get_integer(theme, "ui", "inputwin.position", NULL);
-    ProfWinPlacement *placement = prefs_create_profwin_placement(titlebar_pos, mainwin_pos, statusbar_pos, inputwin_pos);
-    prefs_save_win_placement(placement);
-    prefs_free_win_placement(placement);
+    if (g_key_file_has_key(theme, "ui", "titlebar.position", NULL) &&
+            g_key_file_has_key(theme, "ui", "mainwin.position", NULL) &&
+            g_key_file_has_key(theme, "ui", "statusbar.position", NULL) &&
+            g_key_file_has_key(theme, "ui", "inputwin.position", NULL)) {
+        int titlebar_pos = g_key_file_get_integer(theme, "ui", "titlebar.position", NULL);
+        int mainwin_pos = g_key_file_get_integer(theme, "ui", "mainwin.position", NULL);
+        int statusbar_pos = g_key_file_get_integer(theme, "ui", "statusbar.position", NULL);
+        int inputwin_pos = g_key_file_get_integer(theme, "ui", "inputwin.position", NULL);
+        ProfWinPlacement *placement = prefs_create_profwin_placement(titlebar_pos, mainwin_pos, statusbar_pos, inputwin_pos);
+        prefs_save_win_placement(placement);
+        prefs_free_win_placement(placement);
+    }
 }
 
 void

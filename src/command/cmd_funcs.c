@@ -5529,8 +5529,7 @@ cmd_titlebar(ProfWin *window, const char *const command, gchar **args)
         gboolean result = prefs_titlebar_pos_up();
         if (result) {
             ui_resize();
-            cons_winpos_setting();
-            cons_show("");
+            cons_show("Title bar moved up.");
         } else {
             cons_show("Could not move title bar up.");
         }
@@ -5541,8 +5540,7 @@ cmd_titlebar(ProfWin *window, const char *const command, gchar **args)
         gboolean result = prefs_titlebar_pos_down();
         if (result) {
             ui_resize();
-            cons_winpos_setting();
-            cons_show("");
+            cons_show("Title bar moved down.");
         } else {
             cons_show("Could not move title bar down.");
         }
@@ -5562,8 +5560,7 @@ cmd_mainwin(ProfWin *window, const char *const command, gchar **args)
         gboolean result = prefs_mainwin_pos_up();
         if (result) {
             ui_resize();
-            cons_winpos_setting();
-            cons_show("");
+            cons_show("Main window moved up.");
         } else {
             cons_show("Could not move main window up.");
         }
@@ -5574,8 +5571,7 @@ cmd_mainwin(ProfWin *window, const char *const command, gchar **args)
         gboolean result = prefs_mainwin_pos_down();
         if (result) {
             ui_resize();
-            cons_winpos_setting();
-            cons_show("");
+            cons_show("Main window moved down.");
         } else {
             cons_show("Could not move main window down.");
         }
@@ -5595,8 +5591,7 @@ cmd_statusbar(ProfWin *window, const char *const command, gchar **args)
         gboolean result = prefs_statusbar_pos_up();
         if (result) {
             ui_resize();
-            cons_winpos_setting();
-            cons_show("");
+            cons_show("Status bar moved up");
         } else {
             cons_show("Could not move status bar up.");
         }
@@ -5607,8 +5602,7 @@ cmd_statusbar(ProfWin *window, const char *const command, gchar **args)
         gboolean result = prefs_statusbar_pos_down();
         if (result) {
             ui_resize();
-            cons_winpos_setting();
-            cons_show("");
+            cons_show("Status bar moved down.");
         } else {
             cons_show("Could not move status bar down.");
         }
@@ -5628,8 +5622,7 @@ cmd_inputwin(ProfWin *window, const char *const command, gchar **args)
         gboolean result = prefs_inputwin_pos_up();
         if (result) {
             ui_resize();
-            cons_winpos_setting();
-            cons_show("");
+            cons_show("Input window moved up.");
         } else {
             cons_show("Could not move input window up.");
         }
@@ -5640,8 +5633,7 @@ cmd_inputwin(ProfWin *window, const char *const command, gchar **args)
         gboolean result = prefs_inputwin_pos_down();
         if (result) {
             ui_resize();
-            cons_winpos_setting();
-            cons_show("");
+            cons_show("Input window moved down.");
         } else {
             cons_show("Could not move input window down.");
         }
