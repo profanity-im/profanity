@@ -1104,24 +1104,24 @@ prefs_get_win_placement(void)
 
     // return default if duplicates found
     if (titlebar_pos == mainwin_pos) {
-        return prefs_create_profwin_placement(1, 2, 3, 5);
+        return prefs_create_profwin_placement(1, 2, 3, 4);
     }
     if (titlebar_pos == statusbar_pos) {
-        return prefs_create_profwin_placement(1, 2, 3, 5);
+        return prefs_create_profwin_placement(1, 2, 3, 4);
     }
     if (titlebar_pos == inputwin_pos) {
-        return prefs_create_profwin_placement(1, 2, 3, 5);
+        return prefs_create_profwin_placement(1, 2, 3, 4);
     }
 
     if (mainwin_pos == statusbar_pos) {
-        return prefs_create_profwin_placement(1, 2, 3, 5);
+        return prefs_create_profwin_placement(1, 2, 3, 4);
     }
     if (mainwin_pos == inputwin_pos) {
-        return prefs_create_profwin_placement(1, 2, 3, 5);
+        return prefs_create_profwin_placement(1, 2, 3, 4);
     }
 
     if (statusbar_pos == inputwin_pos) {
-        return prefs_create_profwin_placement(1, 2, 3, 5);
+        return prefs_create_profwin_placement(1, 2, 3, 4);
     }
 
     // return settings
