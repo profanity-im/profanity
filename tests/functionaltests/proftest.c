@@ -187,6 +187,8 @@ init_prof_test(void **state)
     assert_true(prof_output_exact("Word wrap disabled"));
     prof_input("/roster hide");
     assert_true(prof_output_exact("Roster disabled"));
+    prof_input("/occupants default hide");
+    assert_true(prof_output_exact("Occupant list disabled"));
     prof_input("/time console off");
     prof_input("/time console off");
     assert_true(prof_output_exact("Console time display disabled."));

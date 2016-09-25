@@ -1,7 +1,7 @@
 0.6.0
 =====
 
-- Allow positioning input window at top of screen (/inputwin)
+- Allow moving vertical window positions (/titlebar, /mainwin, /statusbar, /inputwin)
 
 0.5.0
 =====
