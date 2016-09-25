@@ -77,4 +77,8 @@ occupants.header=bold_green
 receipt.sent=bold_black
 
 [ui]
-inputwin.position=top
+titlebar.position=1
+inputwin.position=2
+statusbar.position=3
+mainwin.position=4
+
