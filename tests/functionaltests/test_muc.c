@@ -107,9 +107,7 @@ shows_role_and_affiliation_on_join(void **state)
 
     prof_input("/join testroom@conference.localhost");
 
-    prof_timeout(60);
     assert_true(prof_output_exact("-> You have joined the room as stabber, role: participant, affiliation: none"));
-    prof_timeout_reset();
 }
 
 void
