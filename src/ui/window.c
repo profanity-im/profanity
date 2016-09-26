@@ -561,7 +561,9 @@ win_sub_page_up(ProfWin *window)
 void
 win_clear(ProfWin *window)
 {
-    werase(window->layout->win);
+    int y = getcury(window->layout->win);
+    window->layout->y_pos = y;
+    window->layout->paged = 1;
     win_update_virtual(window);
 }
 
