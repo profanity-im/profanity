@@ -490,26 +490,32 @@ win_page_up(ProfWin *window)
 void
 win_page_down(ProfWin *window)
 {
-    int rows = getmaxy(stdscr);
-    int y = getcury(window->layout->win);
-    int page_space = rows - 4;
+    window->layout->paged = 0;
+
+    int win_rows = getmaxy(stdscr) - 4;
+    int win_curr_row = getcury(window->layout->win);
+    int curr_y_pos = window->layout->y_pos;
+    if (win_curr_row - curr_y_pos < win_rows) {
+        return;
+    }
+
     int *page_start = &(window->layout->y_pos);
 
-    *page_start += page_space;
+    *page_start += win_rows;
 
     // only got half a screen, show full screen
-    if ((y - (*page_start)) < page_space)
-        *page_start = y - page_space;
+    if ((win_curr_row - (*page_start)) < win_rows)
+        *page_start = win_curr_row - win_rows;
 
     // went past end, show full screen
-    else if (*page_start >= y)
-        *page_start = y - page_space - 1;
+    else if (*page_start >= win_curr_row)
+        *page_start = win_curr_row - win_rows - 1;
 
     window->layout->paged = 1;
     win_update_virtual(window);
 
     // switch off page if last line and space line visible
-    if ((y) - *page_start == page_space) {
+    if ((win_curr_row) - *page_start == win_rows) {
         window->layout->paged = 0;
     }
 }
@@ -563,7 +569,7 @@ win_clear(ProfWin *window)
 {
     int y = getcury(window->layout->win);
     window->layout->y_pos = y;
-    window->layout->paged = 1;
+    window->layout->paged = 0;
     win_update_virtual(window);
 }
 
@@ -668,11 +674,14 @@ win_move_to_end(ProfWin *window)
 {
     window->layout->paged = 0;
 
-    int rows = getmaxy(stdscr);
-    int y = getcury(window->layout->win);
-    int size = rows - 3;
+    int win_rows = getmaxy(stdscr) - 4;
+    int win_curr_row = getcury(window->layout->win);
+    int curr_y_pos = window->layout->y_pos;
+    if (win_curr_row - curr_y_pos < win_rows) {
+        return;
+    }
 
-    window->layout->y_pos = y - (size - 1);
+    window->layout->y_pos = win_curr_row - win_rows;
     if (window->layout->y_pos < 0) {
         window->layout->y_pos = 0;
     }
