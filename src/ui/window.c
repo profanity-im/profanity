@@ -91,7 +91,7 @@ _win_create_simple_layout(void)
     layout->base.win = newpad(PAD_SIZE, cols);
     wbkgd(layout->base.win, theme_attrs(THEME_TEXT));
     layout->base.buffer = buffer_create();
-    layout->base.y_pos = 0;
+    layout->base.display_start = 0;
     layout->base.paged = 0;
     scrollok(layout->base.win, TRUE);
 
@@ -108,7 +108,7 @@ _win_create_split_layout(void)
     layout->base.win = newpad(PAD_SIZE, cols);
     wbkgd(layout->base.win, theme_attrs(THEME_TEXT));
     layout->base.buffer = buffer_create();
-    layout->base.y_pos = 0;
+    layout->base.display_start = 0;
     layout->base.paged = 0;
     scrollok(layout->base.win, TRUE);
     layout->subwin = NULL;
@@ -175,7 +175,7 @@ win_create_muc(const char *const roomjid)
     layout->sub_y_pos = 0;
     layout->memcheck = LAYOUT_SPLIT_MEMCHECK;
     layout->base.buffer = buffer_create();
-    layout->base.y_pos = 0;
+    layout->base.display_start = 0;
     layout->base.paged = 0;
     scrollok(layout->base.win, TRUE);
     new_win->window.layout = (ProfLayout*)layout;
@@ -470,7 +470,7 @@ win_page_up(ProfWin *window)
     int rows = getmaxy(stdscr);
     int y = getcury(window->layout->win);
     int page_space = rows - 4;
-    int *page_start = &(window->layout->y_pos);
+    int *page_start = &(window->layout->display_start);
 
     *page_start -= page_space;
 
@@ -494,12 +494,12 @@ win_page_down(ProfWin *window)
 
     int win_rows = getmaxy(stdscr) - 4;
     int win_curr_row = getcury(window->layout->win);
-    int curr_y_pos = window->layout->y_pos;
+    int curr_y_pos = window->layout->display_start;
     if (win_curr_row - curr_y_pos < win_rows) {
         return;
     }
 
-    int *page_start = &(window->layout->y_pos);
+    int *page_start = &(window->layout->display_start);
 
     *page_start += win_rows;
 
@@ -526,7 +526,7 @@ win_line_up(ProfWin *window)
     int rows = getmaxy(stdscr);
     int y = getcury(window->layout->win);
     int page_space = rows - 4;
-    int *page_start = &(window->layout->y_pos);
+    int *page_start = &(window->layout->display_start);
 
     *page_start -= 1;
 
@@ -550,12 +550,12 @@ win_line_down(ProfWin *window)
 
     int win_rows = getmaxy(stdscr) - 4;
     int win_curr_row = getcury(window->layout->win);
-    int curr_y_pos = window->layout->y_pos;
+    int curr_y_pos = window->layout->display_start;
     if (win_curr_row - curr_y_pos < win_rows) {
         return;
     }
 
-    int *page_start = &(window->layout->y_pos);
+    int *page_start = &(window->layout->display_start);
 
     *page_start += 1;
 
@@ -624,7 +624,7 @@ void
 win_clear(ProfWin *window)
 {
     int y = getcury(window->layout->win);
-    window->layout->y_pos = y;
+    window->layout->display_start = y;
     window->layout->paged = 0;
     win_update_virtual(window);
 }
@@ -682,13 +682,13 @@ win_update_virtual(ProfWin *window)
             } else {
                 subwin_cols = win_roster_cols();
             }
-            pnoutrefresh(layout->base.win, layout->base.y_pos, 0, row_start, 0, row_end, (cols-subwin_cols)-1);
+            pnoutrefresh(layout->base.win, layout->base.display_start, 0, row_start, 0, row_end, (cols-subwin_cols)-1);
             pnoutrefresh(layout->subwin, layout->sub_y_pos, 0, row_start, (cols-subwin_cols), row_end, cols-1);
         } else {
-            pnoutrefresh(layout->base.win, layout->base.y_pos, 0, row_start, 0, row_end, cols-1);
+            pnoutrefresh(layout->base.win, layout->base.display_start, 0, row_start, 0, row_end, cols-1);
         }
     } else {
-        pnoutrefresh(window->layout->win, window->layout->y_pos, 0, row_start, 0, row_end, cols-1);
+        pnoutrefresh(window->layout->win, window->layout->display_start, 0, row_start, 0, row_end, cols-1);
     }
 }
 
@@ -700,7 +700,7 @@ win_refresh_without_subwin(ProfWin *window)
     if ((window->type == WIN_MUC) || (window->type == WIN_CONSOLE)) {
         int row_start = screen_mainwin_row_start();
         int row_end = screen_mainwin_row_end();
-        pnoutrefresh(window->layout->win, window->layout->y_pos, 0, row_start, 0, row_end, cols-1);
+        pnoutrefresh(window->layout->win, window->layout->display_start, 0, row_start, 0, row_end, cols-1);
     }
 }
 
@@ -715,12 +715,12 @@ win_refresh_with_subwin(ProfWin *window)
     if (window->type == WIN_MUC) {
         ProfLayoutSplit *layout = (ProfLayoutSplit*)window->layout;
         subwin_cols = win_occpuants_cols();
-        pnoutrefresh(layout->base.win, layout->base.y_pos, 0, row_start, 0, row_end, (cols-subwin_cols)-1);
+        pnoutrefresh(layout->base.win, layout->base.display_start, 0, row_start, 0, row_end, (cols-subwin_cols)-1);
         pnoutrefresh(layout->subwin, layout->sub_y_pos, 0, row_start, (cols-subwin_cols), row_end, cols-1);
     } else if (window->type == WIN_CONSOLE) {
         ProfLayoutSplit *layout = (ProfLayoutSplit*)window->layout;
         subwin_cols = win_roster_cols();
-        pnoutrefresh(layout->base.win, layout->base.y_pos, 0, row_start, 0, row_end, (cols-subwin_cols)-1);
+        pnoutrefresh(layout->base.win, layout->base.display_start, 0, row_start, 0, row_end, (cols-subwin_cols)-1);
         pnoutrefresh(layout->subwin, layout->sub_y_pos, 0, row_start, (cols-subwin_cols), row_end, cols-1);
     }
 }
@@ -732,14 +732,14 @@ win_move_to_end(ProfWin *window)
 
     int win_rows = getmaxy(stdscr) - 4;
     int win_curr_row = getcury(window->layout->win);
-    int curr_y_pos = window->layout->y_pos;
+    int curr_y_pos = window->layout->display_start;
     if (win_curr_row - curr_y_pos < win_rows) {
         return;
     }
 
-    window->layout->y_pos = win_curr_row - win_rows;
-    if (window->layout->y_pos < 0) {
-        window->layout->y_pos = 0;
+    window->layout->display_start = win_curr_row - win_rows;
+    if (window->layout->display_start < 0) {
+        window->layout->display_start = 0;
     }
 }
 

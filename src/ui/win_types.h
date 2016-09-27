@@ -109,7 +109,7 @@ typedef struct prof_layout_t {
     layout_type_t type;
     WINDOW *win;
     ProfBuff buffer;
-    int y_pos;
+    int display_start;
     int paged;
 } ProfLayout;
 
