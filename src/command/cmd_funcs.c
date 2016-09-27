@@ -6363,7 +6363,7 @@ cmd_pgp(ProfWin *window, const char *const command, gchar **args)
         }
 
         chatwin->pgp_send = TRUE;
-        ui_current_print_formatted_line('!', 0, "PGP encyption enabled.");
+        ui_current_print_formatted_line('!', 0, "PGP encryption enabled.");
         return TRUE;
     }
 
@@ -6386,7 +6386,7 @@ cmd_pgp(ProfWin *window, const char *const command, gchar **args)
         }
 
         chatwin->pgp_send = FALSE;
-        ui_current_print_formatted_line('!', 0, "PGP encyption disabled.");
+        ui_current_print_formatted_line('!', 0, "PGP encryption disabled.");
         return TRUE;
     }
 
