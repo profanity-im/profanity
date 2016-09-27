@@ -127,7 +127,7 @@ void
 ui_update(void)
 {
     ProfWin *current = wins_get_current();
-    if (current->layout->paged == 0) {
+    if (current->layout->scroll == TRUE) {
         win_move_to_end(current);
     }
 

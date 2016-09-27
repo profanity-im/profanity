@@ -92,7 +92,7 @@ _win_create_simple_layout(void)
     wbkgd(layout->base.win, theme_attrs(THEME_TEXT));
     layout->base.buffer = buffer_create();
     layout->base.display_start = 0;
-    layout->base.paged = 0;
+    layout->base.scroll = TRUE;
     scrollok(layout->base.win, TRUE);
 
     return &layout->base;
@@ -109,7 +109,7 @@ _win_create_split_layout(void)
     wbkgd(layout->base.win, theme_attrs(THEME_TEXT));
     layout->base.buffer = buffer_create();
     layout->base.display_start = 0;
-    layout->base.paged = 0;
+    layout->base.scroll = TRUE;
     scrollok(layout->base.win, TRUE);
     layout->subwin = NULL;
     layout->sub_y_pos = 0;
@@ -176,7 +176,7 @@ win_create_muc(const char *const roomjid)
     layout->memcheck = LAYOUT_SPLIT_MEMCHECK;
     layout->base.buffer = buffer_create();
     layout->base.display_start = 0;
-    layout->base.paged = 0;
+    layout->base.scroll = TRUE;
     scrollok(layout->base.win, TRUE);
     new_win->window.layout = (ProfLayout*)layout;
 
@@ -478,19 +478,19 @@ win_page_up(ProfWin *window)
     if (*page_start < 0)
         *page_start = 0;
 
-    window->layout->paged = 1;
+    window->layout->scroll = FALSE;
     win_update_virtual(window);
 
     // switch off page if last line and space line visible
     if ((y) - *page_start == page_space) {
-        window->layout->paged = 0;
+        window->layout->scroll = TRUE;
     }
 }
 
 void
 win_page_down(ProfWin *window)
 {
-    window->layout->paged = 0;
+    window->layout->scroll = TRUE;
 
     int win_rows = getmaxy(stdscr) - 4;
     int win_curr_row = getcury(window->layout->win);
@@ -511,12 +511,12 @@ win_page_down(ProfWin *window)
     else if (*page_start >= win_curr_row)
         *page_start = win_curr_row - win_rows - 1;
 
-    window->layout->paged = 1;
+    window->layout->scroll = FALSE;
     win_update_virtual(window);
 
     // switch off page if last line and space line visible
     if ((win_curr_row) - *page_start == win_rows) {
-        window->layout->paged = 0;
+        window->layout->scroll = TRUE;
     }
 }
 
@@ -534,19 +534,19 @@ win_line_up(ProfWin *window)
     if (*page_start < 0)
         *page_start = 0;
 
-    window->layout->paged = 1;
+    window->layout->scroll = FALSE;
     win_update_virtual(window);
 
     // switch off page if last line and space line visible
     if ((y) - *page_start == page_space) {
-        window->layout->paged = 0;
+        window->layout->scroll = TRUE;
     }
 }
 
 void
 win_line_down(ProfWin *window)
 {
-    window->layout->paged = 0;
+    window->layout->scroll = TRUE;
 
     int win_rows = getmaxy(stdscr) - 4;
     int win_curr_row = getcury(window->layout->win);
@@ -567,12 +567,12 @@ win_line_down(ProfWin *window)
     else if (*page_start >= win_curr_row)
         *page_start = win_curr_row - win_rows - 1;
 
-    window->layout->paged = 1;
+    window->layout->scroll = FALSE;
     win_update_virtual(window);
 
     // switch off page if last line and space line visible
     if ((win_curr_row) - *page_start == win_rows) {
-        window->layout->paged = 0;
+        window->layout->scroll = TRUE;
     }
 }
 
@@ -625,7 +625,7 @@ win_clear(ProfWin *window)
 {
     int y = getcury(window->layout->win);
     window->layout->display_start = y;
-    window->layout->paged = 0;
+    window->layout->scroll = TRUE;
     win_update_virtual(window);
 }
 
@@ -728,7 +728,7 @@ win_refresh_with_subwin(ProfWin *window)
 void
 win_move_to_end(ProfWin *window)
 {
-    window->layout->paged = 0;
+    window->layout->scroll = TRUE;
 
     int win_rows = getmaxy(stdscr) - 4;
     int win_curr_row = getcury(window->layout->win);
