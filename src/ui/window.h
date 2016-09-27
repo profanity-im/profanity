@@ -79,5 +79,7 @@ void win_page_up(ProfWin *window);
 void win_page_down(ProfWin *window);
 void win_sub_page_down(ProfWin *window);
 void win_sub_page_up(ProfWin *window);
+void win_line_up(ProfWin *window);
+void win_line_down(ProfWin *window);
 
 #endif

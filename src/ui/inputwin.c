@@ -113,6 +113,8 @@ static int _inp_rl_win_pageup_handler(int count, int key);
 static int _inp_rl_win_pagedown_handler(int count, int key);
 static int _inp_rl_subwin_pageup_handler(int count, int key);
 static int _inp_rl_subwin_pagedown_handler(int count, int key);
+static int _inp_rl_win_lineup_handler(int count, int key);
+static int _inp_rl_win_linedown_handler(int count, int key);
 static int _inp_rl_startup_hook(void);
 
 void
@@ -370,6 +372,9 @@ _inp_rl_addfuncs(void)
     rl_add_funmap_entry("prof_subwin_pageup", _inp_rl_subwin_pageup_handler);
     rl_add_funmap_entry("prof_subwin_pagedown", _inp_rl_subwin_pagedown_handler);
     rl_add_funmap_entry("prof_win_clear", _inp_rl_win_clear_handler);
+
+    rl_add_funmap_entry("prof_win_lineup", _inp_rl_win_lineup_handler);
+    rl_add_funmap_entry("prof_win_linedown", _inp_rl_win_linedown_handler);
 }
 
 // Readline callbacks
@@ -419,6 +424,9 @@ _inp_rl_startup_hook(void)
     rl_bind_keyseq("\\eOy", _inp_rl_win_pageup_handler);
     rl_bind_keyseq("\\e[6~", _inp_rl_win_pagedown_handler);
     rl_bind_keyseq("\\eOs", _inp_rl_win_pagedown_handler);
+
+    rl_bind_keyseq("\\ep", _inp_rl_win_lineup_handler);
+    rl_bind_keyseq("\\el", _inp_rl_win_linedown_handler);
 
     rl_bind_key('\t', _inp_rl_tab_handler);
 
@@ -608,6 +616,22 @@ _inp_rl_win_pagedown_handler(int count, int key)
 {
     ProfWin *current = wins_get_current();
     win_page_down(current);
+    return 0;
+}
+
+static int
+_inp_rl_win_lineup_handler(int count, int key)
+{
+    ProfWin *current = wins_get_current();
+    win_line_up(current);
+    return 0;
+}
+
+static int
+_inp_rl_win_linedown_handler(int count, int key)
+{
+    ProfWin *current = wins_get_current();
+    win_line_down(current);
     return 0;
 }
 
