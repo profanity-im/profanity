@@ -120,7 +120,7 @@ typedef struct prof_layout_simple_t {
 typedef struct prof_layout_split_t {
     ProfLayout base;
     WINDOW *subwin;
-    int sub_y_pos;
+    int display_start;
     unsigned long memcheck;
 } ProfLayoutSplit;
 
