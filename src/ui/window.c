@@ -467,22 +467,22 @@ win_free(ProfWin* window)
 void
 win_page_up(ProfWin *window)
 {
-    int rows = getmaxy(stdscr);
-    int y = getcury(window->layout->win);
-    int page_space = rows - 4;
     int *page_start = &(window->layout->display_start);
+    int page_rows = getmaxy(stdscr) - 4;
 
-    *page_start -= page_space;
+    *page_start -= page_rows;
 
     // went past beginning, show first page
-    if (*page_start < 0)
+    if (*page_start < 0) {
         *page_start = 0;
+    }
 
     window->layout->scroll = FALSE;
     win_update_virtual(window);
 
     // switch off page if last line and space line visible
-    if ((y) - *page_start == page_space) {
+    int curr_row = getcury(window->layout->win);
+    if (curr_row - *page_start == page_rows) {
         window->layout->scroll = TRUE;
     }
 }
@@ -492,30 +492,30 @@ win_page_down(ProfWin *window)
 {
     window->layout->scroll = TRUE;
 
-    int win_rows = getmaxy(stdscr) - 4;
-    int win_curr_row = getcury(window->layout->win);
-    int curr_y_pos = window->layout->display_start;
-    if (win_curr_row - curr_y_pos < win_rows) {
+    int *page_start = &(window->layout->display_start);
+    int page_rows = getmaxy(stdscr) - 4;
+    int curr_row = getcury(window->layout->win);
+
+    if (curr_row - *page_start < page_rows) {
         return;
     }
 
-    int *page_start = &(window->layout->display_start);
-
-    *page_start += win_rows;
+    *page_start += page_rows;
 
     // only got half a screen, show full screen
-    if ((win_curr_row - (*page_start)) < win_rows)
-        *page_start = win_curr_row - win_rows;
+    if (curr_row - *page_start < page_rows) {
+        *page_start = curr_row - page_rows;
 
     // went past end, show full screen
-    else if (*page_start >= win_curr_row)
-        *page_start = win_curr_row - win_rows - 1;
+    } else if (*page_start >= curr_row) {
+        *page_start = curr_row - page_rows - 1;
+    }
 
     window->layout->scroll = FALSE;
     win_update_virtual(window);
 
     // switch off page if last line and space line visible
-    if ((win_curr_row) - *page_start == win_rows) {
+    if (curr_row - *page_start == page_rows) {
         window->layout->scroll = TRUE;
     }
 }
@@ -523,22 +523,22 @@ win_page_down(ProfWin *window)
 void
 win_line_up(ProfWin *window)
 {
-    int rows = getmaxy(stdscr);
-    int y = getcury(window->layout->win);
-    int page_space = rows - 4;
     int *page_start = &(window->layout->display_start);
+    int page_rows = getmaxy(stdscr) - 4;
 
     *page_start -= 1;
 
     // went past beginning, show first page
-    if (*page_start < 0)
+    if (*page_start < 0) {
         *page_start = 0;
+    }
 
     window->layout->scroll = FALSE;
     win_update_virtual(window);
 
     // switch off page if last line and space line visible
-    if ((y) - *page_start == page_space) {
+    int curr_row = getcury(window->layout->win);
+    if (curr_row - *page_start == page_rows) {
         window->layout->scroll = TRUE;
     }
 }
@@ -548,30 +548,30 @@ win_line_down(ProfWin *window)
 {
     window->layout->scroll = TRUE;
 
-    int win_rows = getmaxy(stdscr) - 4;
-    int win_curr_row = getcury(window->layout->win);
-    int curr_y_pos = window->layout->display_start;
-    if (win_curr_row - curr_y_pos < win_rows) {
+    int *page_start = &(window->layout->display_start);
+    int page_rows = getmaxy(stdscr) - 4;
+    int curr_row = getcury(window->layout->win);
+
+    if (curr_row - *page_start < page_rows) {
         return;
     }
-
-    int *page_start = &(window->layout->display_start);
 
     *page_start += 1;
 
     // only got half a screen, show full screen
-    if ((win_curr_row - (*page_start)) < win_rows)
-        *page_start = win_curr_row - win_rows;
+    if (curr_row - *page_start < page_rows) {
+        *page_start = curr_row - page_rows;
 
     // went past end, show full screen
-    else if (*page_start >= win_curr_row)
-        *page_start = win_curr_row - win_rows - 1;
+    } else if (*page_start >= curr_row) {
+        *page_start = curr_row - page_rows - 1;
+    }
 
     window->layout->scroll = FALSE;
     win_update_virtual(window);
 
     // switch off page if last line and space line visible
-    if ((win_curr_row) - *page_start == win_rows) {
+    if (curr_row - *page_start == page_rows) {
         window->layout->scroll = TRUE;
     }
 }
@@ -579,52 +579,76 @@ win_line_down(ProfWin *window)
 void
 win_sub_page_down(ProfWin *window)
 {
-
-    if (window->layout->type == LAYOUT_SPLIT) {
-        int rows = getmaxy(stdscr);
-        int page_space = rows - 4;
-        ProfLayoutSplit *split_layout = (ProfLayoutSplit*)window->layout;
-        int sub_y = getcury(split_layout->subwin);
-        int *sub_y_pos = &(split_layout->display_start);
-
-        *sub_y_pos += page_space;
-
-        // only got half a screen, show full screen
-        if ((sub_y- (*sub_y_pos)) < page_space)
-            *sub_y_pos = sub_y - page_space;
-
-        // went past end, show full screen
-        else if (*sub_y_pos >= sub_y)
-            *sub_y_pos = sub_y - page_space - 1;
-
-        win_update_virtual(window);
+    if (window->layout->type != LAYOUT_SPLIT) {
+        return;
     }
+
+    ProfLayoutSplit *layout = (ProfLayoutSplit*)window->layout;
+
+    int *page_start = &(layout->display_start);
+    int page_rows = getmaxy(stdscr) - 4;
+
+    *page_start += page_rows;
+
+    int curr_row = getcury(layout->subwin);
+
+    // only got half a screen, show full screen
+    if (curr_row - *page_start < page_rows) {
+        *page_start = curr_row - page_rows;
+
+    // went past end, show full screen
+    } else if (*page_start >= curr_row) {
+        *page_start = curr_row - page_rows - 1;
+    }
+
+    win_update_virtual(window);
 }
 
 void
 win_sub_page_up(ProfWin *window)
 {
-    if (window->layout->type == LAYOUT_SPLIT) {
-        int rows = getmaxy(stdscr);
-        int page_space = rows - 4;
-        ProfLayoutSplit *split_layout = (ProfLayoutSplit*)window->layout;
-        int *sub_y_pos = &(split_layout->display_start);
+    if (window->layout->type != LAYOUT_SPLIT) {
+        return;
+    }
 
-        *sub_y_pos -= page_space;
+    ProfLayoutSplit *split_layout = (ProfLayoutSplit*)window->layout;
 
-        // went past beginning, show first page
-        if (*sub_y_pos < 0)
-            *sub_y_pos = 0;
+    int *page_start = &(split_layout->display_start);
+    int page_rows = getmaxy(stdscr) - 4;
 
-        win_update_virtual(window);
+    *page_start -= page_rows;
+
+    // went past beginning, show first page
+    if (*page_start < 0) {
+        *page_start = 0;
+    }
+
+    win_update_virtual(window);
+}
+
+void
+win_move_to_end(ProfWin *window)
+{
+    window->layout->scroll = TRUE;
+
+    int page_rows = getmaxy(stdscr) - 4;
+    int curr_row = getcury(window->layout->win);
+    int *page_start = &(window->layout->display_start);
+
+    if (curr_row - *page_start < page_rows) {
+        return;
+    }
+
+    *page_start = curr_row - page_rows;
+    if (*page_start < 0) {
+        *page_start = 0;
     }
 }
 
 void
 win_clear(ProfWin *window)
 {
-    int y = getcury(window->layout->win);
-    window->layout->display_start = y;
+    window->layout->display_start = getcury(window->layout->win);
     window->layout->scroll = TRUE;
     win_update_virtual(window);
 }
@@ -722,24 +746,6 @@ win_refresh_with_subwin(ProfWin *window)
         subwin_cols = win_roster_cols();
         pnoutrefresh(layout->base.win, layout->base.display_start, 0, row_start, 0, row_end, (cols-subwin_cols)-1);
         pnoutrefresh(layout->subwin, layout->display_start, 0, row_start, (cols-subwin_cols), row_end, cols-1);
-    }
-}
-
-void
-win_move_to_end(ProfWin *window)
-{
-    window->layout->scroll = TRUE;
-
-    int win_rows = getmaxy(stdscr) - 4;
-    int win_curr_row = getcury(window->layout->win);
-    int curr_y_pos = window->layout->display_start;
-    if (win_curr_row - curr_y_pos < win_rows) {
-        return;
-    }
-
-    window->layout->display_start = win_curr_row - win_rows;
-    if (window->layout->display_start < 0) {
-        window->layout->display_start = 0;
     }
 }
 
