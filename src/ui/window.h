@@ -54,7 +54,7 @@
 
 #define PAD_SIZE 1000
 
-void win_move_to_end(ProfWin *window);
+void win_scroll(ProfWin *window);
 void win_show_status_string(ProfWin *window, const char *const from,
     const char *const show, const char *const status,
     GDateTime *last_activity, const char *const pre,

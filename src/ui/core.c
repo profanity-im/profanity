@@ -128,7 +128,7 @@ ui_update(void)
 {
     ProfWin *current = wins_get_current();
     if (current->layout->scroll == TRUE) {
-        win_move_to_end(current);
+        win_scroll(current);
     }
 
     win_update_virtual(current);
