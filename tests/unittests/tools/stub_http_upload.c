@@ -36,6 +36,7 @@
 #define TOOLS_HTTP_UPLOAD_H
 
 #include <curl/curl.h>
+#include <pthread.h>
 
 // forward -> ui/win_types.h
 typedef struct prof_win_t ProfWin;
