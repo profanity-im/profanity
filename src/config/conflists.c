@@ -1,7 +1,7 @@
 /*
  * conflists.c
  *
- * Copyright (C) 2012 - 2015 James Booth <boothj5@gmail.com>
+ * Copyright (C) 2012 - 2016 James Booth <boothj5@gmail.com>
  *
  * This file is part of Profanity.
  *
@@ -16,7 +16,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Profanity.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Profanity.  If not, see <https://www.gnu.org/licenses/>.
  *
  * In addition, as a special exception, the copyright holders give permission to
  * link the code of portions of this program with the OpenSSL library under
@@ -64,7 +64,7 @@ conf_string_list_add(GKeyFile *keyfile, const char *const group, const char *con
         GList *curr = glist;
         i = 0;
         while (curr) {
-            new_list[i++] = strdup(curr->data);
+            new_list[i++] = curr->data;
             curr = g_list_next(curr);
         }
         new_list[i] = NULL;
@@ -73,7 +73,7 @@ conf_string_list_add(GKeyFile *keyfile, const char *const group, const char *con
     // list not found
     } else {
         const gchar* new_list[2];
-        new_list[0] = strdup(item);
+        new_list[0] = item;
         new_list[1] = NULL;
         g_key_file_set_string_list(keyfile, group, key, new_list, 1);
     }
@@ -114,7 +114,7 @@ conf_string_list_remove(GKeyFile *keyfile, const char *const group, const char *
                 GList *curr = glist;
                 i = 0;
                 while (curr) {
-                    new_list[i++] = strdup(curr->data);
+                    new_list[i++] = curr->data;
                     curr = g_list_next(curr);
                 }
                 new_list[i] = NULL;

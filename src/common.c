@@ -1,7 +1,7 @@
 /*
  * common.c
  *
- * Copyright (C) 2012 - 2015 James Booth <boothj5@gmail.com>
+ * Copyright (C) 2012 - 2016 James Booth <boothj5@gmail.com>
  *
  * This file is part of Profanity.
  *
@@ -16,7 +16,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Profanity.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Profanity.  If not, see <https://www.gnu.org/licenses/>.
  *
  * In addition, as a special exception, the copyright holders give permission to
  * link the code of portions of this program with the OpenSSL library under
@@ -33,11 +33,12 @@
  */
 #include "config.h"
 
+#include <errno.h>
 #include <sys/select.h>
 #include <assert.h>
-#include <errno.h>
 #include <stdlib.h>
 #include <stdint.h>
+#include <stdio.h>
 #include <string.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -46,11 +47,15 @@
 #include <curl/easy.h>
 #include <glib.h>
 
-#include "tools/p_sha1.h"
+#ifdef HAVE_NCURSESW_NCURSES_H
+#include <ncursesw/ncurses.h>
+#elif HAVE_NCURSES_H
+#include <ncurses.h>
+#endif
 
 #include "log.h"
 #include "common.h"
-
+#include "tools/p_sha1.h"
 
 struct curl_data_t
 {
@@ -149,6 +154,31 @@ mkdir_recursive(const char *dir)
     return result;
 }
 
+gboolean
+copy_file(const char *const sourcepath, const char *const targetpath)
+{
+    int ch;
+    FILE *source = fopen(sourcepath, "rb");
+    if (source == NULL) {
+        return FALSE;
+    }
+
+    FILE *target = fopen(targetpath, "wb");
+    if (target == NULL) {
+        fclose(source);
+        return FALSE;
+    }
+
+    while((ch = fgetc(source)) != EOF) {
+        fputc(ch, target);
+    }
+
+    fclose(source);
+    fclose(target);
+
+    return TRUE;
+}
+
 char*
 str_replace(const char *string, const char *substr,
     const char *replacement)
@@ -191,18 +221,6 @@ str_replace(const char *string, const char *substr,
     }
 
     return newstr;
-}
-
-gboolean
-str_contains_str(const char *const searchstr, const char *const substr)
-{
-    if (!searchstr) {
-        return FALSE;
-    }
-    if (!substr) {
-        return FALSE;
-    }
-    return g_strrstr(searchstr, substr) != NULL;
 }
 
 int
@@ -267,7 +285,7 @@ utf8_display_len(const char *const str)
 }
 
 char*
-prof_getline(FILE *stream)
+file_getline(FILE *stream)
 {
     char *buf;
     char *result;
@@ -362,113 +380,6 @@ release_is_new(char *found_version)
     }
 }
 
-gboolean
-valid_resource_presence_string(const char *const str)
-{
-    assert(str != NULL);
-    if ((strcmp(str, "online") == 0) || (strcmp(str, "chat") == 0) ||
-            (strcmp(str, "away") == 0) || (strcmp(str, "xa") == 0) ||
-            (strcmp(str, "dnd") == 0)) {
-        return TRUE;
-    } else {
-        return FALSE;
-    }
-}
-
-const char*
-string_from_resource_presence(resource_presence_t presence)
-{
-    switch(presence)
-    {
-        case RESOURCE_CHAT:
-            return "chat";
-        case RESOURCE_AWAY:
-            return "away";
-        case RESOURCE_XA:
-            return "xa";
-        case RESOURCE_DND:
-            return "dnd";
-        default:
-            return "online";
-    }
-}
-
-resource_presence_t
-resource_presence_from_string(const char *const str)
-{
-    if (str == NULL) {
-        return RESOURCE_ONLINE;
-    } else if (strcmp(str, "online") == 0) {
-        return RESOURCE_ONLINE;
-    } else if (strcmp(str, "chat") == 0) {
-        return RESOURCE_CHAT;
-    } else if (strcmp(str, "away") == 0) {
-        return RESOURCE_AWAY;
-    } else if (strcmp(str, "xa") == 0) {
-        return RESOURCE_XA;
-    } else if (strcmp(str, "dnd") == 0) {
-        return RESOURCE_DND;
-    } else {
-        return RESOURCE_ONLINE;
-    }
-}
-
-contact_presence_t
-contact_presence_from_resource_presence(resource_presence_t resource_presence)
-{
-    switch(resource_presence)
-    {
-        case RESOURCE_CHAT:
-            return CONTACT_CHAT;
-        case RESOURCE_AWAY:
-            return CONTACT_AWAY;
-        case RESOURCE_XA:
-            return CONTACT_XA;
-        case RESOURCE_DND:
-            return CONTACT_DND;
-        default:
-            return CONTACT_ONLINE;
-    }
-}
-
-gchar*
-xdg_get_config_home(void)
-{
-    gchar *xdg_config_home = getenv("XDG_CONFIG_HOME");
-    if (xdg_config_home)
-        g_strstrip(xdg_config_home);
-
-    if (xdg_config_home && (strcmp(xdg_config_home, "") != 0)) {
-        return strdup(xdg_config_home);
-    } else {
-        GString *default_path = g_string_new(getenv("HOME"));
-        g_string_append(default_path, "/.config");
-        gchar *result = strdup(default_path->str);
-        g_string_free(default_path, TRUE);
-
-        return result;
-    }
-}
-
-gchar*
-xdg_get_data_home(void)
-{
-    gchar *xdg_data_home = getenv("XDG_DATA_HOME");
-    if (xdg_data_home)
-        g_strstrip(xdg_data_home);
-
-    if (xdg_data_home && (strcmp(xdg_data_home, "") != 0)) {
-        return strdup(xdg_data_home);
-    } else {
-        GString *default_path = g_string_new(getenv("HOME"));
-        g_string_append(default_path, "/.local/share");
-        gchar *result = strdup(default_path->str);
-        g_string_free(default_path, TRUE);
-
-        return result;
-    }
-}
-
 char*
 create_unique_id(char *prefix)
 {
@@ -508,79 +419,6 @@ p_sha1_hash(char *str)
     free(input);
     return g_base64_encode(digest, sizeof(digest));
 }
-
-int
-cmp_win_num(gconstpointer a, gconstpointer b)
-{
-    int real_a = GPOINTER_TO_INT(a);
-    int real_b = GPOINTER_TO_INT(b);
-
-    if (real_a == 0) {
-        real_a = 10;
-    }
-
-    if (real_b == 0) {
-        real_b = 10;
-    }
-
-    if (real_a < real_b) {
-        return -1;
-    } else if (real_a == real_b) {
-        return 0;
-    } else {
-        return 1;
-    }
-}
-
-int
-get_next_available_win_num(GList *used)
-{
-    // only console used
-    if (g_list_length(used) == 1) {
-        return 2;
-    } else {
-        GList *sorted = NULL;
-        GList *curr = used;
-        while (curr) {
-            sorted = g_list_insert_sorted(sorted, curr->data, cmp_win_num);
-            curr = g_list_next(curr);
-        }
-
-        int result = 0;
-        int last_num = 1;
-        curr = sorted;
-        // skip console
-        curr = g_list_next(curr);
-        while (curr) {
-            int curr_num = GPOINTER_TO_INT(curr->data);
-
-            if (((last_num != 9) && ((last_num + 1) != curr_num)) ||
-                    ((last_num == 9) && (curr_num != 0))) {
-                result = last_num + 1;
-                if (result == 10) {
-                    result = 0;
-                }
-                g_list_free(sorted);
-                return (result);
-
-            } else {
-                last_num = curr_num;
-                if (last_num == 0) {
-                    last_num = 10;
-                }
-            }
-            curr = g_list_next(curr);
-        }
-        result = last_num + 1;
-        if (result == 10) {
-            result = 0;
-        }
-
-        g_list_free(sorted);
-        return result;
-    }
-}
-
 
 static size_t
 _data_callback(void *ptr, size_t size, size_t nmemb, void *data)
@@ -663,3 +501,32 @@ is_notify_enabled(void)
 
     return notify_enabled;
 }
+
+GSList*
+prof_occurrences(const char *const needle, const char *const haystack, int offset, gboolean whole_word, GSList **result)
+{
+    if (needle == NULL || haystack == NULL) {
+        return *result;
+    }
+
+    if (g_str_has_prefix(&haystack[offset], needle)) {
+        if (whole_word) {
+            char *prev = g_utf8_prev_char(&haystack[offset]);
+            char *next = g_utf8_next_char(&haystack[offset] + strlen(needle) - 1);
+            gunichar prevu = g_utf8_get_char(prev);
+            gunichar nextu = g_utf8_get_char(next);
+            if (!g_unichar_isalnum(prevu) && !g_unichar_isalnum(nextu)) {
+                *result = g_slist_append(*result, GINT_TO_POINTER(offset));
+            }
+        } else {
+            *result = g_slist_append(*result, GINT_TO_POINTER(offset));
+        }
+    }
+
+    if (haystack[offset+1] != '\0') {
+        *result = prof_occurrences(needle, haystack, offset+1, whole_word, result);
+    }
+
+    return *result;
+}
+

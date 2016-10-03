@@ -1,7 +1,7 @@
 /*
  * main.c
  *
- * Copyright (C) 2012 - 2015 James Booth <boothj5@gmail.com>
+ * Copyright (C) 2012 - 2016 James Booth <boothj5@gmail.com>
  *
  * This file is part of Profanity.
  *
@@ -16,7 +16,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Profanity.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Profanity.  If not, see <https://www.gnu.org/licenses/>.
  *
  * In addition, as a special exception, the copyright holders give permission to
  * link the code of portions of this program with the OpenSSL library under
@@ -43,7 +43,7 @@
 
 #include "profanity.h"
 #include "common.h"
-#include "command/command.h"
+#include "command/cmd_defs.h"
 
 static gboolean version = FALSE;
 static char *log = "INFO";
@@ -90,8 +90,8 @@ main(int argc, char **argv)
             g_print("Profanity, version %s\n", PACKAGE_VERSION);
         }
 
-        g_print("Copyright (C) 2012 - 2015 James Booth <%s>.\n", PACKAGE_BUGREPORT);
-        g_print("License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>\n");
+        g_print("Copyright (C) 2012 - 2016 James Booth <%s>.\n", PACKAGE_BUGREPORT);
+        g_print("License GPLv3+: GNU GPL version 3 or later <https://www.gnu.org/licenses/gpl.html>\n");
         g_print("\n");
         g_print("This is free software; you are free to change and redistribute it.\n");
         g_print("There is NO WARRANTY, to the extent permitted by law.\n");
@@ -122,6 +122,24 @@ main(int argc, char **argv)
         g_print("PGP support: Enabled\n");
 #else
         g_print("PGP support: Disabled\n");
+#endif
+
+#ifdef HAVE_C
+        g_print("C plugins: Enabled\n");
+#else
+        g_print("C plugins: Disabled\n");
+#endif
+
+#ifdef HAVE_PYTHON
+        g_print("Python plugins: Enabled\n");
+#else
+        g_print("Python plugins: Disabled\n");
+#endif
+
+#ifdef HAVE_GTK
+        g_print("GTK icons: Enabled\n");
+#else
+        g_print("GTK icons: Disabled\n");
 #endif
 
         return 0;

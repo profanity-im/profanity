@@ -71,9 +71,11 @@ int main(int argc, char* argv[]) {
         PROF_FUNC_TEST(send_disable_carbons),
         PROF_FUNC_TEST(receive_carbon),
         PROF_FUNC_TEST(receive_self_carbon),
+        PROF_FUNC_TEST(receive_private_carbon),
 
         PROF_FUNC_TEST(send_receipt_request),
         PROF_FUNC_TEST(send_receipt_on_request),
+        PROF_FUNC_TEST(does_not_send_receipt_request_to_barejid),
         PROF_FUNC_TEST(sends_new_item),
         PROF_FUNC_TEST(sends_new_item_nick),
         PROF_FUNC_TEST(sends_remove_item),

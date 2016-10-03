@@ -1,7 +1,7 @@
 /*
  * otr.h
  *
- * Copyright (C) 2012 - 2015 James Booth <boothj5@gmail.com>
+ * Copyright (C) 2012 - 2016 James Booth <boothj5@gmail.com>
  *
  * This file is part of Profanity.
  *
@@ -16,7 +16,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Profanity.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Profanity.  If not, see <https://www.gnu.org/licenses/>.
  *
  * In addition, as a special exception, the copyright holders give permission to
  * link the code of portions of this program with the OpenSSL library under
@@ -32,8 +32,8 @@
  *
  */
 
-#ifndef OTR_H
-#define OTR_H
+#ifndef OTR_OTR_H
+#define OTR_OTR_H
 
 #include <libotr/proto.h>
 #include <libotr/message.h>
@@ -72,7 +72,7 @@ void otr_poll(void);
 void otr_on_connect(ProfAccount *account);
 
 char* otr_on_message_recv(const char *const barejid, const char *const resource, const char *const message, gboolean *decrypted);
-gboolean otr_on_message_send(ProfChatWin *chatwin, const char *const message);
+gboolean otr_on_message_send(ProfChatWin *chatwin, const char *const message, gboolean request_receipt);
 
 void otr_keygen(ProfAccount *account);
 

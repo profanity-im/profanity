@@ -4,7 +4,7 @@
 #include <cmocka.h>
 #include <stdlib.h>
 
-#include "jid.h"
+#include "xmpp/jid.h"
 
 void create_jid_from_null_returns_null(void **state)
 {

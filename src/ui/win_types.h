@@ -1,7 +1,7 @@
 /*
  * win_types.h
  *
- * Copyright (C) 2012 - 2015 James Booth <boothj5@gmail.com>
+ * Copyright (C) 2012 - 2016 James Booth <boothj5@gmail.com>
  *
  * This file is part of Profanity.
  *
@@ -16,7 +16,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Profanity.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Profanity.  If not, see <https://www.gnu.org/licenses/>.
  *
  * In addition, as a special exception, the copyright holders give permission to
  * link the code of portions of this program with the OpenSSL library under
@@ -39,15 +39,16 @@
 
 #include <wchar.h>
 #include <glib.h>
+
 #ifdef HAVE_NCURSESW_NCURSES_H
 #include <ncursesw/ncurses.h>
 #elif HAVE_NCURSES_H
 #include <ncurses.h>
 #endif
 
-#include "xmpp/xmpp.h"
+#include "tools/autocomplete.h"
 #include "ui/buffer.h"
-#include "chat_state.h"
+#include "xmpp/chat_state.h"
 
 #define LAYOUT_SPLIT_MEMCHECK       12345671
 #define PROFCHATWIN_MEMCHECK        22374522
@@ -55,6 +56,49 @@
 #define PROFPRIVATEWIN_MEMCHECK     77437483
 #define PROFCONFWIN_MEMCHECK        64334685
 #define PROFXMLWIN_MEMCHECK         87333463
+#define PROFPLUGINWIN_MEMCHECK      43434777
+
+typedef enum {
+    FIELD_HIDDEN,
+    FIELD_TEXT_SINGLE,
+    FIELD_TEXT_PRIVATE,
+    FIELD_TEXT_MULTI,
+    FIELD_BOOLEAN,
+    FIELD_LIST_SINGLE,
+    FIELD_LIST_MULTI,
+    FIELD_JID_SINGLE,
+    FIELD_JID_MULTI,
+    FIELD_FIXED,
+    FIELD_UNKNOWN
+} form_field_type_t;
+
+typedef struct form_option_t {
+    char *label;
+    char *value;
+} FormOption;
+
+typedef struct form_field_t {
+    char *label;
+    char *type;
+    form_field_type_t type_t;
+    char *var;
+    char *description;
+    gboolean required;
+    GSList *values;
+    GSList *options;
+    Autocomplete value_ac;
+} FormField;
+
+typedef struct data_form_t {
+    char *type;
+    char *title;
+    char *instructions;
+    GSList *fields;
+    GHashTable *var_to_tag;
+    GHashTable *tag_to_var;
+    Autocomplete tag_ac;
+    gboolean modified;
+} DataForm;
 
 typedef enum {
     LAYOUT_SIMPLE,
@@ -86,7 +130,8 @@ typedef enum {
     WIN_MUC,
     WIN_MUC_CONFIG,
     WIN_PRIVATE,
-    WIN_XML
+    WIN_XML,
+    WIN_PLUGIN
 } win_type_t;
 
 typedef struct prof_win_t {
@@ -102,7 +147,6 @@ typedef struct prof_chat_win_t {
     ProfWin window;
     char *barejid;
     int unread;
-    gboolean notify;
     ChatState *state;
     gboolean is_otr;
     gboolean otr_is_trusted;
@@ -117,7 +161,8 @@ typedef struct prof_muc_win_t {
     ProfWin window;
     char *roomjid;
     int unread;
-    gboolean notify;
+    gboolean unread_mentions;
+    gboolean unread_triggers;
     gboolean showjid;
     unsigned long memcheck;
 } ProfMucWin;
@@ -133,13 +178,21 @@ typedef struct prof_private_win_t {
     ProfWin window;
     char *fulljid;
     int unread;
-    gboolean notify;
     unsigned long memcheck;
+    gboolean occupant_offline;
+    gboolean room_left;
 } ProfPrivateWin;
 
 typedef struct prof_xml_win_t {
     ProfWin window;
     unsigned long memcheck;
 } ProfXMLWin;
+
+typedef struct prof_plugin_win_t {
+    ProfWin super;
+    char *tag;
+    char *plugin_name;
+    unsigned long memcheck;
+} ProfPluginWin;
 
 #endif

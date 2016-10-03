@@ -16,8 +16,8 @@ compile_commands.json
 
 # autotools
 .libs/
-Makefile
-Makefile.in
+/Makefile
+/Makefile.in
 _configs.sed
 aclocal.m4
 autom4te.cache/
@@ -36,6 +36,7 @@ src/config.h.in~
 src/gitversion.h
 src/gitversion.h.in
 src/stamp-h1
+src/plugins/profapi.lo
 
 # binaries
 profanity
@@ -61,3 +62,22 @@ toc_fragment.html
 
 # valgrind files
 valgrind.out
+
+# Generate docs
+apidocs/python/_build/
+apidocs/python/modules.rst
+apidocs/python/prof.rst
+apidocs/python/src/prof.pyc
+apidocs/python/plugin.rst
+apidocs/python/src/plugin.pyc
+apidocs/c/html/
+apidocs/c/doxygen_sqlite3.db
+
+# Temp Vim files
+**/*.swp
+
+# Virtual envs
+python2/
+python3/
+
+.DS_Store

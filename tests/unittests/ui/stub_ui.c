@@ -164,9 +164,18 @@ void privwin_incoming_msg(ProfPrivateWin *privatewin, const char * const message
 void ui_disconnected(void) {}
 void chatwin_recipient_gone(ProfChatWin *chatwin) {}
 
-void chatwin_outgoing_msg(ProfChatWin *chatwin, const char * const message, char *id, prof_enc_t enc_mode) {}
-void chatwin_outgoing_carbon(ProfChatWin *chatwin, const char * const message) {}
+void chatwin_outgoing_msg(ProfChatWin *chatwin, const char * const message, char *id, prof_enc_t enc_mode,
+    gboolean request_receipt) {}
+void chatwin_outgoing_carbon(ProfChatWin *chatwin, const char * const message, prof_enc_t enc_mode) {}
 void privwin_outgoing_msg(ProfPrivateWin *privwin, const char * const message) {}
+
+void privwin_occupant_offline(ProfPrivateWin *privwin) {}
+void privwin_occupant_kicked(ProfPrivateWin *privwin, const char *const actor, const char *const reason) {}
+void privwin_occupant_banned(ProfPrivateWin *privwin, const char *const actor, const char *const reason) {}
+void privwin_occupant_online(ProfPrivateWin *privwin) {}
+void privwin_message_occupant_offline(ProfPrivateWin *privwin) {}
+
+void privwin_message_left_room(ProfPrivateWin *privwin) {}
 
 void ui_room_join(const char * const roomjid, gboolean focus) {}
 void ui_switch_to_room(const char * const roomjid) {}
@@ -185,7 +194,7 @@ void mucwin_occupant_role_and_affiliation_change(ProfMucWin *mucwin, const char 
     const char * const affiliation, const char * const actor, const char * const reason) {}
 void mucwin_roster(ProfMucWin *mucwin, GList *occupants, const char * const presence) {}
 void mucwin_history(ProfMucWin *mucwin, const char * const nick, GDateTime *timestamp, const char * const message) {}
-void mucwin_message(ProfMucWin *mucwin, const char * const nick, const char * const message) {}
+void mucwin_message(ProfMucWin *mucwin, const char *const nick, const char *const message, GSList *mentions, GList *triggers) {}
 void mucwin_subject(ProfMucWin *mucwin, const char * const nick, const char * const subject) {}
 void mucwin_requires_config(ProfMucWin *mucwin) {}
 void ui_room_destroy(const char * const roomjid) {}
@@ -257,7 +266,7 @@ void mucconfwin_show_form(ProfMucConfWin *confwin) {}
 void mucconfwin_show_form_field(ProfMucConfWin *confwin, DataForm *form, char *tag) {}
 void mucconfwin_form_help(ProfMucConfWin *confwin) {}
 void mucconfwin_field_help(ProfMucConfWin *confwin, char *tag) {}
-void ui_show_lines(ProfWin *window, const gchar** lines) {}
+void ui_show_lines(ProfWin *window, gchar** lines) {}
 void ui_redraw_all_room_rosters(void) {}
 void ui_show_all_room_rosters(void) {}
 void ui_hide_all_room_rosters(void) {}
@@ -295,8 +304,10 @@ gboolean ui_win_has_unsaved_form(int num)
     return FALSE;
 }
 
-void
-ui_write(char *line, int offset) {}
+void ui_status_bar_inactive(const int win) {}
+void ui_status_bar_active(const int win) {}
+void ui_status_bar_new(const int win) {}
+void ui_write(char *line, int offset) {}
 
 // console window actions
 
@@ -311,7 +322,7 @@ void cons_show(const char * const msg, ...)
 
 void cons_show_padded(int pad, const char * const msg, ...) {}
 
-void cons_show_help(Command *command) {}
+void cons_show_help(const char *const cmd, CommandHelp *help) {}
 
 void cons_about(void) {}
 void cons_help(void) {}
@@ -394,8 +405,8 @@ void cons_show_room_invite(const char * const invitor, const char * const room,
     const char * const reason) {}
 void cons_check_version(gboolean not_available_msg) {}
 void cons_show_typing(const char * const barejid) {}
-void cons_show_incoming_room_message(const char *const nick, const char *const room, const int win_index) {}
-void cons_show_incoming_message(const char * const short_from, const int win_index) {}
+void cons_show_incoming_room_message(const char *const nick, const char *const room, const int win_index, gboolean mention, GList *triggers, int unread) {}
+void cons_show_incoming_message(const char * const short_from, const int win_index, int unread) {}
 void cons_show_room_invites(GSList *invites) {}
 void cons_show_received_subs(void) {}
 void cons_show_sent_subs(void) {}
@@ -417,7 +428,7 @@ void cons_encwarn_setting(void) {}
 void cons_time_setting(void) {}
 void cons_mouse_setting(void) {}
 void cons_statuses_setting(void) {}
-void cons_titlebar_setting(void) {}
+void cons_wintitle_setting(void) {}
 void cons_notify_setting(void) {}
 void cons_states_setting(void) {}
 void cons_outtype_setting(void) {}
@@ -434,6 +445,8 @@ void cons_reconnect_setting(void) {}
 void cons_autoping_setting(void) {}
 void cons_autoconnect_setting(void) {}
 void cons_inpblock_setting(void) {}
+void cons_winpos_setting(void) {}
+void cons_tray_setting(void) {}
 
 void cons_show_contact_online(PContact contact, Resource *resource, GDateTime *last_activity)
 {
@@ -444,6 +457,7 @@ void cons_show_contact_online(PContact contact, Resource *resource, GDateTime *l
 
 void cons_show_contact_offline(PContact contact, char *resource, char *status) {}
 void cons_theme_colours(void) {}
+void cons_theme_properties(void) {}
 
 // title bar
 void title_bar_set_presence(contact_presence_t presence) {}
@@ -485,10 +499,14 @@ ProfWin* win_create_private(const char * const fulljid)
 {
     return NULL;
 }
+ProfWin* win_create_plugin(const char *const plugin_name, const char * const tag)
+{
+    return NULL;
+}
 
 void win_update_virtual(ProfWin *window) {}
 void win_free(ProfWin *window) {}
-gboolean win_notify(ProfWin *window)
+gboolean win_notify_remind(ProfWin *window)
 {
     return TRUE;
 }
@@ -531,3 +549,6 @@ void notify_remind(void) {}
 void notify_invite(const char * const from, const char * const room,
     const char * const reason) {}
 void notify_subscription(const char * const from) {}
+void notify(const char * const message, int timeout,
+    const char * const category) {}
+

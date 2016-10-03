@@ -1,7 +1,7 @@
 /*
  * accounts.c
  *
- * Copyright (C) 2012 - 2015 James Booth <boothj5@gmail.com>
+ * Copyright (C) 2012 - 2016 James Booth <boothj5@gmail.com>
  *
  * This file is part of Profanity.
  *
@@ -16,7 +16,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Profanity.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Profanity.  If not, see <https://www.gnu.org/licenses/>.
  *
  * In addition, as a special exception, the copyright holders give permission to
  * link the code of portions of this program with the OpenSSL library under
@@ -41,21 +41,21 @@
 #include "accounts.h"
 
 #include "common.h"
+#include "log.h"
+#include "config/files.h"
 #include "config/account.h"
 #include "config/conflists.h"
-#include "jid.h"
-#include "log.h"
 #include "tools/autocomplete.h"
 #include "xmpp/xmpp.h"
+#include "xmpp/jid.h"
 
-static gchar *accounts_loc;
+static char *accounts_loc;
 static GKeyFile *accounts;
 
 static Autocomplete all_ac;
 static Autocomplete enabled_ac;
 
 static void _save_accounts(void);
-static gchar* _get_accounts_file(void);
 
 void
 accounts_load(void)
@@ -63,7 +63,7 @@ accounts_load(void)
     log_info("Loading accounts");
     all_ac = autocomplete_new();
     enabled_ac = autocomplete_new();
-    accounts_loc = _get_accounts_file();
+    accounts_loc = files_get_data_path(FILE_ACCOUNTS);
 
     if (g_file_test(accounts_loc, G_FILE_TEST_EXISTS)) {
         g_chmod(accounts_loc, S_IRUSR | S_IWUSR);
@@ -272,6 +272,11 @@ accounts_get_account(const char *const name)
             startscript = g_key_file_get_string(accounts, name, "script.start", NULL);
         }
 
+        gchar *theme = NULL;
+        if (g_key_file_has_key(accounts, name, "theme", NULL)) {
+            theme = g_key_file_get_string(accounts, name, "theme", NULL);
+        }
+
         gchar *tls_policy = g_key_file_get_string(accounts, name, "tls.policy", NULL);
         if (tls_policy && ((g_strcmp0(tls_policy, "force") != 0) &&
                 (g_strcmp0(tls_policy, "allow") != 0) &&
@@ -284,7 +289,7 @@ accounts_get_account(const char *const name)
             server, port, resource, last_presence, login_presence,
             priority_online, priority_chat, priority_away, priority_xa,
             priority_dnd, muc_service, muc_nick, otr_policy, otr_manual,
-            otr_opportunistic, otr_always, pgp_keyid, startscript, tls_policy);
+            otr_opportunistic, otr_always, pgp_keyid, startscript, theme, tls_policy);
 
         g_free(jid);
         g_free(password);
@@ -298,6 +303,7 @@ accounts_get_account(const char *const name)
         g_free(otr_policy);
         g_free(pgp_keyid);
         g_free(startscript);
+        g_free(theme);
         g_free(tls_policy);
 
         return new_account;
@@ -491,6 +497,15 @@ accounts_set_script_start(const char *const account_name, const char *const valu
 }
 
 void
+accounts_set_theme(const char *const account_name, const char *const value)
+{
+    if (accounts_account_exists(account_name)) {
+        g_key_file_set_string(accounts, account_name, "theme", value);
+        _save_accounts();
+    }
+}
+
+void
 accounts_clear_password(const char *const account_name)
 {
     if (accounts_account_exists(account_name)) {
@@ -543,6 +558,16 @@ accounts_clear_script_start(const char *const account_name)
         _save_accounts();
     }
 }
+
+void
+accounts_clear_theme(const char *const account_name)
+{
+    if (accounts_account_exists(account_name)) {
+        g_key_file_remove_key(accounts, account_name, "theme", NULL);
+        _save_accounts();
+    }
+}
+
 void
 accounts_clear_otr(const char *const account_name)
 {
@@ -832,27 +857,13 @@ _save_accounts(void)
 {
     gsize g_data_size;
     gchar *g_accounts_data = g_key_file_to_data(accounts, &g_data_size, NULL);
-    gchar *xdg_data = xdg_get_data_home();
-    GString *base_str = g_string_new(xdg_data);
-    g_string_append(base_str, "/profanity/");
-    gchar *true_loc = get_file_or_linked(accounts_loc, base_str->str);
+
+    gchar *base = g_path_get_basename(accounts_loc);
+    gchar *true_loc = get_file_or_linked(accounts_loc, base);
     g_file_set_contents(true_loc, g_accounts_data, g_data_size, NULL);
     g_chmod(accounts_loc, S_IRUSR | S_IWUSR);
-    g_free(xdg_data);
+
+    g_free(base);
     free(true_loc);
     g_free(g_accounts_data);
-    g_string_free(base_str, TRUE);
-}
-
-static gchar*
-_get_accounts_file(void)
-{
-    gchar *xdg_data = xdg_get_data_home();
-    GString *logfile = g_string_new(xdg_data);
-    g_string_append(logfile, "/profanity/accounts");
-    gchar *result = strdup(logfile->str);
-    g_free(xdg_data);
-    g_string_free(logfile, TRUE);
-
-    return result;
 }

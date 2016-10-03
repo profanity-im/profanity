@@ -6,7 +6,7 @@
 #include <cmocka.h>
 #include <stdlib.h>
 
-#include "contact.h"
+#include "xmpp/contact.h"
 
 void contact_in_group(void **state)
 {

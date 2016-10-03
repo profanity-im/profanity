@@ -1,7 +1,7 @@
 /*
  * window.c
  *
- * Copyright (C) 2012 - 2015 James Booth <boothj5@gmail.com>
+ * Copyright (C) 2012 - 2016 James Booth <boothj5@gmail.com>
  *
  * This file is part of Profanity.
  *
@@ -16,7 +16,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Profanity.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Profanity.  If not, see <https://www.gnu.org/licenses/>.
  *
  * In addition, as a special exception, the copyright holders give permission to
  * link the code of portions of this program with the OpenSSL library under
@@ -41,6 +41,7 @@
 #include <wchar.h>
 
 #include <glib.h>
+
 #ifdef HAVE_NCURSESW_NCURSES_H
 #include <ncursesw/ncurses.h>
 #elif HAVE_NCURSES_H
@@ -49,10 +50,11 @@
 
 #include "config/theme.h"
 #include "config/preferences.h"
-#include "roster_list.h"
 #include "ui/ui.h"
 #include "ui/window.h"
+#include "ui/screen.h"
 #include "xmpp/xmpp.h"
+#include "xmpp/roster_list.h"
 
 #define CONS_WIN_TITLE "Profanity. Type /help for help information."
 #define XML_WIN_TITLE "XML Console"
@@ -141,7 +143,6 @@ win_create_chat(const char *const barejid)
     new_win->pgp_send = FALSE;
     new_win->history_shown = FALSE;
     new_win->unread = 0;
-    new_win->notify = FALSE;
     new_win->state = chat_state_new();
 
     new_win->memcheck = PROFCHATWIN_MEMCHECK;
@@ -181,7 +182,8 @@ win_create_muc(const char *const roomjid)
 
     new_win->roomjid = strdup(roomjid);
     new_win->unread = 0;
-    new_win->notify = FALSE;
+    new_win->unread_mentions = FALSE;
+    new_win->unread_triggers = FALSE;
     if (prefs_get_boolean(PREF_OCCUPANTS_JID)) {
         new_win->showjid = TRUE;
     } else {
@@ -217,7 +219,8 @@ win_create_private(const char *const fulljid)
 
     new_win->fulljid = strdup(fulljid);
     new_win->unread = 0;
-    new_win->notify = FALSE;
+    new_win->occupant_offline = FALSE;
+    new_win->room_left = FALSE;
 
     new_win->memcheck = PROFPRIVATEWIN_MEMCHECK;
 
@@ -236,6 +239,21 @@ win_create_xmlconsole(void)
     return &new_win->window;
 }
 
+ProfWin*
+win_create_plugin(const char *const plugin_name, const char *const tag)
+{
+    ProfPluginWin *new_win = malloc(sizeof(ProfPluginWin));
+    new_win->super.type = WIN_PLUGIN;
+    new_win->super.layout = _win_create_simple_layout();
+
+    new_win->tag = strdup(tag);
+    new_win->plugin_name = strdup(plugin_name);
+
+    new_win->memcheck = PROFPLUGINWIN_MEMCHECK;
+
+    return &new_win->super;
+}
+
 char*
 win_get_title(ProfWin *window)
 {
@@ -248,7 +266,7 @@ win_get_title(ProfWin *window)
     if (window->type == WIN_CHAT) {
         ProfChatWin *chatwin = (ProfChatWin*) window;
         assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
-        jabber_conn_status_t conn_status = jabber_get_connection_status();
+        jabber_conn_status_t conn_status = connection_get_status();
         if (conn_status == JABBER_CONNECTED) {
             PContact contact = roster_get_contact(chatwin->barejid);
             if (contact) {
@@ -285,6 +303,11 @@ win_get_title(ProfWin *window)
     }
     if (window->type == WIN_XML) {
         return strdup(XML_WIN_TITLE);
+    }
+    if (window->type == WIN_PLUGIN) {
+        ProfPluginWin *pluginwin = (ProfPluginWin*) window;
+        assert(pluginwin->memcheck == PROFPLUGINWIN_MEMCHECK);
+        return strdup(pluginwin->tag);
     }
 
     return NULL;
@@ -325,6 +348,15 @@ win_get_string(ProfWin *window)
         {
             ProfXMLWin *xmlwin = (ProfXMLWin*)window;
             return xmlwin_get_string(xmlwin);
+        }
+        case WIN_PLUGIN:
+        {
+            ProfPluginWin *pluginwin = (ProfPluginWin*)window;
+            GString *gstring = g_string_new("");
+            g_string_append_printf(gstring, "Plugin: %s", pluginwin->tag);
+            char *res = gstring->str;
+            g_string_free(gstring, FALSE);
+            return res;
         }
         default:
             return NULL;
@@ -390,27 +422,43 @@ win_free(ProfWin* window)
     }
     free(window->layout);
 
-    if (window->type == WIN_CHAT) {
+    switch (window->type) {
+    case WIN_CHAT:
+    {
         ProfChatWin *chatwin = (ProfChatWin*)window;
         free(chatwin->barejid);
         free(chatwin->resource_override);
         chat_state_free(chatwin->state);
+        break;
     }
-
-    if (window->type == WIN_MUC) {
+    case WIN_MUC:
+    {
         ProfMucWin *mucwin = (ProfMucWin*)window;
         free(mucwin->roomjid);
+        break;
     }
-
-    if (window->type == WIN_MUC_CONFIG) {
+    case WIN_MUC_CONFIG:
+    {
         ProfMucConfWin *mucconf = (ProfMucConfWin*)window;
         free(mucconf->roomjid);
         form_destroy(mucconf->form);
+        break;
     }
-
-    if (window->type == WIN_PRIVATE) {
+    case WIN_PRIVATE:
+    {
         ProfPrivateWin *privatewin = (ProfPrivateWin*)window;
         free(privatewin->fulljid);
+        break;
+    }
+    case WIN_PLUGIN:
+    {
+        ProfPluginWin *pluginwin = (ProfPluginWin*)window;
+        free(pluginwin->tag);
+        free(pluginwin->plugin_name);
+        break;
+    }
+    default:
+        break;
     }
 
     free(window);
@@ -557,9 +605,10 @@ win_resize(ProfWin *window)
 void
 win_update_virtual(ProfWin *window)
 {
-    int rows, cols;
-    getmaxyx(stdscr, rows, cols);
+    int cols = getmaxx(stdscr);
 
+    int row_start = screen_mainwin_row_start();
+    int row_end = screen_mainwin_row_end();
     if (window->layout->type == LAYOUT_SPLIT) {
         ProfLayoutSplit *layout = (ProfLayoutSplit*)window->layout;
         if (layout->subwin) {
@@ -569,44 +618,46 @@ win_update_virtual(ProfWin *window)
             } else {
                 subwin_cols = win_roster_cols();
             }
-            pnoutrefresh(layout->base.win, layout->base.y_pos, 0, 1, 0, rows-3, (cols-subwin_cols)-1);
-            pnoutrefresh(layout->subwin, layout->sub_y_pos, 0, 1, (cols-subwin_cols), rows-3, cols-1);
+            pnoutrefresh(layout->base.win, layout->base.y_pos, 0, row_start, 0, row_end, (cols-subwin_cols)-1);
+            pnoutrefresh(layout->subwin, layout->sub_y_pos, 0, row_start, (cols-subwin_cols), row_end, cols-1);
         } else {
-            pnoutrefresh(layout->base.win, layout->base.y_pos, 0, 1, 0, rows-3, cols-1);
+            pnoutrefresh(layout->base.win, layout->base.y_pos, 0, row_start, 0, row_end, cols-1);
         }
     } else {
-        pnoutrefresh(window->layout->win, window->layout->y_pos, 0, 1, 0, rows-3, cols-1);
+        pnoutrefresh(window->layout->win, window->layout->y_pos, 0, row_start, 0, row_end, cols-1);
     }
 }
 
 void
 win_refresh_without_subwin(ProfWin *window)
 {
-    int rows, cols;
-    getmaxyx(stdscr, rows, cols);
+    int cols = getmaxx(stdscr);
 
     if ((window->type == WIN_MUC) || (window->type == WIN_CONSOLE)) {
-        pnoutrefresh(window->layout->win, window->layout->y_pos, 0, 1, 0, rows-3, cols-1);
+        int row_start = screen_mainwin_row_start();
+        int row_end = screen_mainwin_row_end();
+        pnoutrefresh(window->layout->win, window->layout->y_pos, 0, row_start, 0, row_end, cols-1);
     }
 }
 
 void
 win_refresh_with_subwin(ProfWin *window)
 {
-    int rows, cols;
-    getmaxyx(stdscr, rows, cols);
+    int cols = getmaxx(stdscr);
     int subwin_cols = 0;
 
+    int row_start = screen_mainwin_row_start();
+    int row_end = screen_mainwin_row_end();
     if (window->type == WIN_MUC) {
         ProfLayoutSplit *layout = (ProfLayoutSplit*)window->layout;
         subwin_cols = win_occpuants_cols();
-        pnoutrefresh(layout->base.win, layout->base.y_pos, 0, 1, 0, rows-3, (cols-subwin_cols)-1);
-        pnoutrefresh(layout->subwin, layout->sub_y_pos, 0, 1, (cols-subwin_cols), rows-3, cols-1);
+        pnoutrefresh(layout->base.win, layout->base.y_pos, 0, row_start, 0, row_end, (cols-subwin_cols)-1);
+        pnoutrefresh(layout->subwin, layout->sub_y_pos, 0, row_start, (cols-subwin_cols), row_end, cols-1);
     } else if (window->type == WIN_CONSOLE) {
         ProfLayoutSplit *layout = (ProfLayoutSplit*)window->layout;
         subwin_cols = win_roster_cols();
-        pnoutrefresh(layout->base.win, layout->base.y_pos, 0, 1, 0, rows-3, (cols-subwin_cols)-1);
-        pnoutrefresh(layout->subwin, layout->sub_y_pos, 0, 1, (cols-subwin_cols), rows-3, cols-1);
+        pnoutrefresh(layout->base.win, layout->base.y_pos, 0, row_start, 0, row_end, (cols-subwin_cols)-1);
+        pnoutrefresh(layout->subwin, layout->sub_y_pos, 0, row_start, (cols-subwin_cols), row_end, cols-1);
     }
 }
 
@@ -664,6 +715,7 @@ win_show_contact(ProfWin *window, PContact contact)
     if (last_activity) {
         GDateTime *now = g_date_time_new_now_local();
         GTimeSpan span = g_date_time_difference(now, last_activity);
+        g_date_time_unref(now);
 
         int hours = span / G_TIME_SPAN_HOUR;
         span = span - hours * G_TIME_SPAN_HOUR;
@@ -712,48 +764,54 @@ win_show_occupant_info(ProfWin *window, const char *const room, Occupant *occupa
     win_vprint(window, '!', 0, NULL, 0, 0, "", "  Role: %s", occupant_role);
 
     Jid *jidp = jid_create_from_bare_and_resource(room, occupant->nick);
-    Capabilities *caps = caps_lookup(jidp->fulljid);
+    EntityCapabilities *caps = caps_lookup(jidp->fulljid);
     jid_destroy(jidp);
 
     if (caps) {
         // show identity
-        if (caps->category || caps->type || caps->name) {
+        if (caps->identity) {
+            DiscoIdentity *identity = caps->identity;
             win_print(window, '!', 0, NULL, NO_EOL, 0, "", "  Identity: ");
-            if (caps->name) {
-                win_print(window, '!', 0, NULL, NO_DATE | NO_EOL, 0, "", caps->name);
-                if (caps->category || caps->type) {
+            if (identity->name) {
+                win_print(window, '!', 0, NULL, NO_DATE | NO_EOL, 0, "", identity->name);
+                if (identity->category || identity->type) {
                     win_print(window, '-', 0, NULL, NO_DATE | NO_EOL, 0, "", " ");
                 }
             }
-            if (caps->type) {
-                win_print(window, '!', 0, NULL, NO_DATE | NO_EOL, 0, "", caps->type);
-                if (caps->category) {
+            if (identity->type) {
+                win_print(window, '!', 0, NULL, NO_DATE | NO_EOL, 0, "", identity->type);
+                if (identity->category) {
                     win_print(window, '!', 0, NULL, NO_DATE | NO_EOL, 0, "", " ");
                 }
             }
-            if (caps->category) {
-                win_print(window, '!', 0, NULL, NO_DATE | NO_EOL, 0, "", caps->category);
+            if (identity->category) {
+                win_print(window, '!', 0, NULL, NO_DATE | NO_EOL, 0, "", identity->category);
             }
             win_newline(window);
         }
-        if (caps->software) {
-            win_vprint(window, '!', 0, NULL, NO_EOL, 0, "", "  Software: %s", caps->software);
-        }
+
         if (caps->software_version) {
-            win_vprint(window, '!', 0, NULL, NO_DATE | NO_EOL, 0, "", ", %s", caps->software_version);
+            SoftwareVersion *software_version = caps->software_version;
+            if (software_version->software) {
+                win_vprint(window, '!', 0, NULL, NO_EOL, 0, "", "  Software: %s", software_version->software);
+            }
+            if (software_version->software_version) {
+                win_vprint(window, '!', 0, NULL, NO_DATE | NO_EOL, 0, "", ", %s", software_version->software_version);
+            }
+            if (software_version->software || software_version->software_version) {
+                win_newline(window);
+            }
+            if (software_version->os) {
+                win_vprint(window, '!', 0, NULL, NO_EOL, 0, "", "  OS: %s", software_version->os);
+            }
+            if (software_version->os_version) {
+                win_vprint(window, '!', 0, NULL, NO_DATE | NO_EOL, 0, "", ", %s", software_version->os_version);
+            }
+            if (software_version->os || software_version->os_version) {
+                win_newline(window);
+            }
         }
-        if (caps->software || caps->software_version) {
-            win_newline(window);
-        }
-        if (caps->os) {
-            win_vprint(window, '!', 0, NULL, NO_EOL, 0, "", "  OS: %s", caps->os);
-        }
-        if (caps->os_version) {
-            win_vprint(window, '!', 0, NULL, NO_DATE | NO_EOL, 0, "", ", %s", caps->os_version);
-        }
-        if (caps->os || caps->os_version) {
-            win_newline(window);
-        }
+
         caps_destroy(caps);
     }
 
@@ -830,48 +888,54 @@ win_show_info(ProfWin *window, PContact contact)
         win_newline(window);
 
         Jid *jidp = jid_create_from_bare_and_resource(barejid, resource->name);
-        Capabilities *caps = caps_lookup(jidp->fulljid);
+        EntityCapabilities *caps = caps_lookup(jidp->fulljid);
         jid_destroy(jidp);
 
         if (caps) {
             // show identity
-            if (caps->category || caps->type || caps->name) {
+            if (caps->identity) {
+                DiscoIdentity *identity = caps->identity;
                 win_print(window, '-', 0, NULL, NO_EOL, 0, "", "    Identity: ");
-                if (caps->name) {
-                    win_print(window, '-', 0, NULL, NO_DATE | NO_EOL, 0, "", caps->name);
-                    if (caps->category || caps->type) {
+                if (identity->name) {
+                    win_print(window, '-', 0, NULL, NO_DATE | NO_EOL, 0, "", identity->name);
+                    if (identity->category || identity->type) {
                         win_print(window, '-', 0, NULL, NO_DATE | NO_EOL, 0, "", " ");
                     }
                 }
-                if (caps->type) {
-                    win_print(window, '-', 0, NULL, NO_DATE | NO_EOL, 0, "", caps->type);
-                    if (caps->category) {
+                if (identity->type) {
+                    win_print(window, '-', 0, NULL, NO_DATE | NO_EOL, 0, "", identity->type);
+                    if (identity->category) {
                         win_print(window, '-', 0, NULL, NO_DATE | NO_EOL, 0, "", " ");
                     }
                 }
-                if (caps->category) {
-                    win_print(window, '-', 0, NULL, NO_DATE | NO_EOL, 0, "", caps->category);
+                if (identity->category) {
+                    win_print(window, '-', 0, NULL, NO_DATE | NO_EOL, 0, "", identity->category);
                 }
                 win_newline(window);
             }
-            if (caps->software) {
-                win_vprint(window, '-', 0, NULL, NO_EOL, 0, "", "    Software: %s", caps->software);
-            }
+
             if (caps->software_version) {
-                win_vprint(window, '-', 0, NULL, NO_DATE | NO_EOL, 0, "", ", %s", caps->software_version);
+                SoftwareVersion *software_version = caps->software_version;
+                if (software_version->software) {
+                    win_vprint(window, '-', 0, NULL, NO_EOL, 0, "", "    Software: %s", software_version->software);
+                }
+                if (software_version->software_version) {
+                    win_vprint(window, '-', 0, NULL, NO_DATE | NO_EOL, 0, "", ", %s", software_version->software_version);
+                }
+                if (software_version->software || software_version->software_version) {
+                    win_newline(window);
+                }
+                if (software_version->os) {
+                    win_vprint(window, '-', 0, NULL, NO_EOL, 0, "", "    OS: %s", software_version->os);
+                }
+                if (software_version->os_version) {
+                    win_vprint(window, '-', 0, NULL, NO_DATE | NO_EOL, 0, "", ", %s", software_version->os_version);
+                }
+                if (software_version->os || software_version->os_version) {
+                    win_newline(window);
+                }
             }
-            if (caps->software || caps->software_version) {
-                win_newline(window);
-            }
-            if (caps->os) {
-                win_vprint(window, '-', 0, NULL, NO_EOL, 0, "", "    OS: %s", caps->os);
-            }
-            if (caps->os_version) {
-                win_vprint(window, '-', 0, NULL, NO_DATE | NO_EOL, 0, "", ", %s", caps->os_version);
-            }
-            if (caps->os || caps->os_version) {
-                win_newline(window);
-            }
+
             caps_destroy(caps);
         }
 
@@ -1011,6 +1075,27 @@ win_mark_received(ProfWin *window, const char *const id)
 }
 
 void
+win_update_entry_message(ProfWin *window, const char *const id, const char *const message)
+{
+    ProfBuffEntry *entry = buffer_yield_entry_by_id(window->layout->buffer, id);
+    if (entry) {
+        free(entry->message);
+        entry->message = strdup(message);
+        win_redraw(window);
+    }
+}
+
+void
+win_update_entry_theme(ProfWin *window, const char *const id, theme_item_t theme_item)
+{
+    ProfBuffEntry *entry = buffer_yield_entry_by_id(window->layout->buffer, id);
+    if (entry) {
+        entry->theme_item = theme_item;
+        win_redraw(window);
+    }
+}
+
+void
 win_println(ProfWin *window, int pad, const char *const message)
 {
     win_print(window, '-', pad, NULL, 0, 0, "", message);
@@ -1086,6 +1171,7 @@ _win_print(ProfWin *window, const char show_char, int pad_indent, GDateTime *tim
     if ((flags & NO_DATE) == 0) {
         if (date_fmt && strlen(date_fmt)) {
             if ((flags & NO_COLOUR_DATE) == 0) {
+                wbkgdset(window->layout->win, theme_attrs(THEME_TIME));
                 wattron(window->layout->win, theme_attrs(THEME_TIME));
             }
             wprintw(window->layout->win, "%s %c ", date_fmt, show_char);
@@ -1095,7 +1181,7 @@ _win_print(ProfWin *window, const char show_char, int pad_indent, GDateTime *tim
         }
     }
 
-    if (strlen(from) > 0) {
+    if (from && strlen(from) > 0) {
         if (flags & NO_ME) {
             colour = theme_attrs(THEME_THEM);
         }
@@ -1108,6 +1194,7 @@ _win_print(ProfWin *window, const char show_char, int pad_indent, GDateTime *tim
             colour = theme_attrs(THEME_RECEIPT_SENT);
         }
 
+        wbkgdset(window->layout->win, colour);
         wattron(window->layout->win, colour);
         if (strncmp(message, "/me ", 4) == 0) {
             wprintw(window->layout->win, "*%s ", from);
@@ -1121,8 +1208,10 @@ _win_print(ProfWin *window, const char show_char, int pad_indent, GDateTime *tim
 
     if (!me_message) {
         if (receipt && !receipt->received) {
+            wbkgdset(window->layout->win, theme_attrs(THEME_RECEIPT_SENT));
             wattron(window->layout->win, theme_attrs(THEME_RECEIPT_SENT));
         } else {
+            wbkgdset(window->layout->win, theme_attrs(theme_item));
             wattron(window->layout->win, theme_attrs(theme_item));
         }
     }
@@ -1189,7 +1278,11 @@ _win_print_wrapped(WINDOW *win, const char *const message, size_t indent, int pa
             wordi = 0;
             int wordlen = 0;
             while (*curr_ch != ' ' && *curr_ch != '\n' && *curr_ch != '\0') {
-                size_t ch_len = mbrlen(curr_ch, 4, NULL);
+                size_t ch_len = mbrlen(curr_ch, MB_CUR_MAX, NULL);
+                if ((ch_len == (size_t)-2) || (ch_len == (size_t)-1)) {
+                    curr_ch++;
+                    continue;
+                }
                 int offset = 0;
                 while (offset < ch_len) {
                     word[wordi++] = curr_ch[offset++];
@@ -1299,21 +1392,39 @@ win_has_active_subwin(ProfWin *window)
 }
 
 gboolean
-win_notify(ProfWin *window)
+win_notify_remind(ProfWin *window)
 {
-    if (window->type == WIN_CHAT) {
+    switch (window->type) {
+    case WIN_CHAT:
+    {
         ProfChatWin *chatwin = (ProfChatWin*) window;
         assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
-        return chatwin->notify;
-    } else if (window->type == WIN_MUC) {
+
+        if (prefs_get_boolean(PREF_NOTIFY_CHAT) && chatwin->unread > 0) {
+            return TRUE;
+        } else {
+            return FALSE;
+        }
+    }
+    case WIN_MUC:
+    {
         ProfMucWin *mucwin = (ProfMucWin*) window;
         assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
-        return mucwin->notify;
-    } else if (window->type == WIN_PRIVATE) {
+
+        return prefs_do_room_notify_mention(mucwin->roomjid, mucwin->unread, mucwin->unread_mentions, mucwin->unread_triggers);
+    }
+    case WIN_PRIVATE:
+    {
         ProfPrivateWin *privatewin = (ProfPrivateWin*) window;
         assert(privatewin->memcheck == PROFPRIVATEWIN_MEMCHECK);
-        return privatewin->notify;
-    } else {
+
+        if (prefs_get_boolean(PREF_NOTIFY_CHAT) && privatewin->unread > 0) {
+            return TRUE;
+        } else {
+            return FALSE;
+        }
+    }
+    default:
         return FALSE;
     }
 }

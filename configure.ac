@@ -1,15 +1,18 @@
 #                                               -*- Autoconf -*-
 # Process this file with autoconf to produce a configure script.
 
-AC_INIT([profanity], [0.5.0], [boothj5web@gmail.com])
+AC_INIT([profanity], [0.6.0], [boothj5web@gmail.com])
+AC_CONFIG_AUX_DIR([build-aux])
 AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_SRCDIR([src/main.c])
 AC_CONFIG_HEADERS([src/config.h])
-AC_CONFIG_AUX_DIR([build-aux])
 AM_INIT_AUTOMAKE([foreign subdir-objects])
+# TODO Introduce with Ruby plugins, see https://github.com/boothj5/profanity/issues/779
+#AX_PREFIX_CONFIG_H([src/prof_config.h], [PROF], [src/config.h])
 
 ### Checks for programs.
 AC_PROG_CC
+AC_PROG_LIBTOOL
 
 ## Check for LFS
 AC_SYS_LARGEFILE
@@ -41,9 +44,18 @@ AS_IF([test "x$PLATFORM" = xcygwin],
 AS_IF([test "x$PLATFORM" = xosx],
     [AC_DEFINE([PLATFORM_OSX], [1], [OSx])])
 
+### Environment variables
+AC_ARG_VAR([PYTHON_FRAMEWORK], [Set base directory for Python Framework])
+
 ### Options
 AC_ARG_ENABLE([notifications],
     [AS_HELP_STRING([--enable-notifications], [enable desktop notifications])])
+AC_ARG_ENABLE([python-plugins],
+    [AS_HELP_STRING([--enable-python-plugins], [enable Python plugins])])
+AC_ARG_ENABLE([c-plugins],
+    [AS_HELP_STRING([--enable-c-plugins], [enable C plugins])])
+AC_ARG_ENABLE([plugins],
+    [AS_HELP_STRING([--enable-plugins], [enable plugins])])
 AC_ARG_ENABLE([otr],
     [AS_HELP_STRING([--enable-otr], [enable otr encryption])])
 AC_ARG_ENABLE([pgp],
@@ -52,6 +64,63 @@ AC_ARG_WITH([xscreensaver],
     [AS_HELP_STRING([--with-xscreensaver], [use libXScrnSaver to determine idle time])])
 AC_ARG_WITH([themes],
     [AS_HELP_STRING([--with-themes[[=PATH]]], [install themes (default yes)])])
+AC_ARG_ENABLE([icons],
+    [AS_HELP_STRING([--enable-icons], [enable GTK tray icons])])
+
+### plugins
+
+# python
+if test "x$enable_plugins" = xno; then
+    AM_CONDITIONAL([BUILD_PYTHON_API], [false])
+elif test "x$enable_python_plugins" != xno; then
+    AS_IF([test "x$PLATFORM" = xosx], [
+        AS_IF([test "x$PYTHON_FRAMEWORK" = x], [ PYTHON_FRAMEWORK="/Library/Frameworks/Python.framework" ])
+        AC_MSG_NOTICE([Symlinking Python.framework to $PYTHON_FRAMEWORK])
+        rm -f Python.framework
+        ln -s $PYTHON_FRAMEWORK Python.framework ])
+    AC_CHECK_PROG(PYTHON_CONFIG_EXISTS, python-config, yes, no)
+    if test "$PYTHON_CONFIG_EXISTS" == "yes"; then
+        AX_PYTHON_DEVEL
+        AM_CONDITIONAL([BUILD_PYTHON_API], [true])
+        AC_DEFINE([HAVE_PYTHON], [1], [Python support])
+    else
+        if test "x$enable_python_plugins" = xyes; then
+            AC_MSG_ERROR([Python not found, cannot enable Python plugins.])
+        else
+            AM_CONDITIONAL([BUILD_PYTHON_API], [false])
+            AC_MSG_NOTICE([Python development package not found, Python plugin support disabled.])
+        fi
+    fi
+    AS_IF([test "x$PLATFORM" = xosx], [rm -f Python.framework])
+else
+    AM_CONDITIONAL([BUILD_PYTHON_API], [false])
+fi
+
+# c
+if test "x$PLATFORM" = xcygwin; then
+    AM_CONDITIONAL([BUILD_C_API], [false])
+else
+    LT_INIT
+    if test "x$enable_plugins" = xno; then
+        AM_CONDITIONAL([BUILD_C_API], [false])
+    elif test "x$enable_c_plugins" != xno; then
+        AC_CHECK_LIB([dl], [main],
+            [AM_CONDITIONAL([BUILD_C_API], [true]) LIBS="$LIBS -ldl" AC_DEFINE([HAVE_C], [1], [C support])],
+            [AS_IF(
+                [test "x$enable_c_plugins" = xyes],
+                    [AC_MSG_ERROR([dl library needed to run C plugins])],
+                [AM_CONDITIONAL([BUILD_C_API], [false])])
+            ])
+    else
+        AM_CONDITIONAL([BUILD_C_API], [false])
+    fi
+fi
+
+# threading
+ACX_PTHREAD([], [AC_MSG_ERROR([pthread is required])])
+LIBS="$PTHREAD_LIBS $LIBS"
+CFLAGS="$CFLAGS $PTHREAD_CFLAGS"
+AS_IF([test "x$PTHREAD_CC" != x], [ CC="$PTHREAD_CC" ])
 
 ### Check for libmesode, fall back to libstrophe
 PKG_CHECK_MODULES([libmesode], [libmesode],
@@ -70,7 +139,6 @@ PKG_CHECK_MODULES([ncursesw], [ncursesw],
             	[AC_MSG_ERROR([ncurses is required for profanity])])])])])
 AM_CPPFLAGS="$AM_CPPFLAGS $NCURSES_CFLAGS"
 LIBS="$NCURSES_LIBS $LIBS"
-AS_IF([test "x$PLATFORM" = xosx], [LIBS="-lncurses $LIBS"])
 
 ### Check wide characters support in ncurses library
 CFLAGS_RESTORE="$CFLAGS"
@@ -95,7 +163,15 @@ AS_IF([test "x$ncurses_cv_wget_wch" != xyes],
 PKG_CHECK_MODULES([glib], [glib-2.0 >= 2.26], [],
     [AC_MSG_ERROR([glib 2.26 or higher is required for profanity])])
 PKG_CHECK_MODULES([curl], [libcurl], [],
-    [AC_MSG_ERROR([libcurl is required for profanity])])
+    [AC_CHECK_LIB([curl], [main], [],
+        [AC_MSG_ERROR([libcurl is required for profanity])])])
+
+AS_IF([test "x$enable_icons" != xno],
+    [PKG_CHECK_MODULES([GTK], [gtk+-2.0 >= 2.24.10],
+        [AC_DEFINE([HAVE_GTK], [1], [libgtk module])],
+        [AS_IF([test "x$enable_icons" = xyes],
+            [AC_MSG_ERROR([gtk+-2.0 or higher is required for icons])],
+            [AC_MSG_NOTICE([gtk+-2.0 not found, icons not enabled])])])])
 
 AS_IF([test "x$PLATFORM" = xosx],
       [AC_CHECK_FILE([/usr/local/opt/readline/lib],
@@ -113,8 +189,6 @@ AS_IF([test "x$PLATFORM" = xosx],
       [AC_CHECK_LIB([readline],[main],[],
               [AC_MSG_ERROR([libreadline is required for profanity])])],
       [AC_MSG_ERROR([libreadline is required for profanity])])
-
-AS_IF([test "x$PLATFORM" = xosx], [LIBS="-lcurl $LIBS"])
 
 ### Check for desktop notification support
 ### Linux/FreeBSD require libnotify
@@ -196,6 +270,9 @@ AS_IF([test "x$with_themes" = xno -o "x$with_themes" = xyes -o "x$with_themes" =
 AC_SUBST(THEMES_PATH)
 AM_CONDITIONAL([THEMES_INSTALL], "$THEMES_INSTALL")
 
+ICONS_PATH='${pkgdatadir}/icons'
+AC_SUBST(ICONS_PATH)
+
 ### cmocka is required only for tests, profanity shouldn't be linked with it
 ### TODO: pass cmocka_CFLAGS and cmocka_LIBS to Makefile.am
 PKG_CHECK_MODULES([cmocka], [cmocka], [],
@@ -216,10 +293,14 @@ AC_CHECK_HEADERS([ncurses.h], [], [])
 AM_CFLAGS="-Wall -Wno-deprecated-declarations"
 AS_IF([test "x$PACKAGE_STATUS" = xdevelopment],
     [AM_CFLAGS="$AM_CFLAGS -Wunused -Werror"])
-AM_CPPFLAGS="$AM_CPPFLAGS $glib_CFLAGS $curl_CFLAGS $libnotify_CFLAGS"
-AM_CPPFLAGS="$AM_CPPFLAGS -DTHEMES_PATH=\"\\\"$THEMES_PATH\\\"\""
-LIBS="$glib_LIBS $curl_LIBS $libnotify_LIBS $LIBS"
+AS_IF([test "x$PLATFORM" = xosx],
+    [AM_CFLAGS="$AM_CFLAGS -Qunused-arguments"])
+AM_LDFLAGS="$AM_LDFLAGS -export-dynamic"
+AM_CPPFLAGS="$AM_CPPFLAGS $glib_CFLAGS $curl_CFLAGS $libnotify_CFLAGS $PYTHON_CPPFLAGS ${GTK_CFLAGS}"
+AM_CPPFLAGS="$AM_CPPFLAGS -DTHEMES_PATH=\"\\\"$THEMES_PATH\\\"\" -DICONS_PATH=\"\\\"$ICONS_PATH\\\"\""
+LIBS="$glib_LIBS $curl_LIBS $libnotify_LIBS $PYTHON_LIBS $PYTHON_LDFLAGS ${GTK_LIBS} -lgio-2.0 $LIBS"
 
+AC_SUBST(AM_LDFLAGS)
 AC_SUBST(AM_CFLAGS)
 AC_SUBST(AM_CPPFLAGS)
 
@@ -234,9 +315,10 @@ echo "PLATFORM       : $host_os"
 echo "PACKAGE_STATUS : $PACKAGE_STATUS"
 echo "AM_CFLAGS      : $AM_CFLAGS"
 echo "AM_CPPFLAGS    : $AM_CPPFLAGS"
+echo "AM_LDFLAGS     : $AM_LDFLAGS"
 echo "LIBS           : $LIBS"
-echo "XML Parser     : $PARSER"
 echo "Install themes : $THEMES_INSTALL"
 echo "Themes path    : $THEMES_PATH"
+echo "Icons path     : $ICONS_PATH"
 echo ""
 echo "Now you can run \`make' to build profanity"

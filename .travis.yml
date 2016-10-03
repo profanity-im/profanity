@@ -3,7 +3,7 @@ install:
     - lsb_release -a
     - uname -a
     - sudo apt-get update
-    - sudo apt-get -y install libssl-dev libexpat1-dev libncursesw5-dev libglib2.0-dev libnotify-dev libcurl3-dev libxss-dev libotr2-dev libgpgme11-dev expect-dev tcl-dev
+    - sudo apt-get -y install libssl-dev libexpat1-dev libncursesw5-dev libglib2.0-dev libnotify-dev libcurl3-dev libxss-dev libotr2-dev libgpgme11-dev autoconf-archive expect-dev tcl-dev libtool python-dev
     - git clone git://github.com/boothj5/libmesode.git
     - cd libmesode
     - mkdir m4
@@ -32,5 +32,4 @@ install:
     - sudo make install
     - cd ..
     - rm -rf stabber
-    - ./bootstrap.sh
-script: ./configure && make && make check
+script: ./travis-build.sh

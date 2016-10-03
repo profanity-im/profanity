@@ -1,7 +1,7 @@
 /*
  * buffer.h
  *
- * Copyright (C) 2012 - 2015 James Booth <boothj5@gmail.com>
+ * Copyright (C) 2012 - 2016 James Booth <boothj5@gmail.com>
  *
  * This file is part of Profanity.
  *
@@ -16,7 +16,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Profanity.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Profanity.  If not, see <https://www.gnu.org/licenses/>.
  *
  * In addition, as a special exception, the copyright holders give permission to
  * link the code of portions of this program with the OpenSSL library under
@@ -35,10 +35,10 @@
 #ifndef UI_BUFFER_H
 #define UI_BUFFER_H
 
+#include <glib.h>
+
 #include "config.h"
 #include "config/theme.h"
-
-#include <glib.h>
 
 typedef struct delivery_receipt_t {
     char *id;
@@ -64,6 +64,7 @@ void buffer_push(ProfBuff buffer, const char show_char, int pad_indent, GDateTim
     const char *const from, const char *const message, DeliveryReceipt *receipt);
 int buffer_size(ProfBuff buffer);
 ProfBuffEntry* buffer_yield_entry(ProfBuff buffer, int entry);
+ProfBuffEntry* buffer_yield_entry_by_id(ProfBuff buffer, const char *const id);
 gboolean buffer_mark_received(ProfBuff buffer, const char *const id);
 
 #endif

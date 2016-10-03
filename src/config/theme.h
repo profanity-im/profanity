@@ -1,7 +1,7 @@
 /*
  * theme.h
  *
- * Copyright (C) 2012 - 2015 James Booth <boothj5@gmail.com>
+ * Copyright (C) 2012 - 2016 James Booth <boothj5@gmail.com>
  *
  * This file is part of Profanity.
  *
@@ -16,7 +16,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Profanity.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Profanity.  If not, see <https://www.gnu.org/licenses/>.
  *
  * In addition, as a special exception, the copyright holders give permission to
  * link the code of portions of this program with the OpenSSL library under
@@ -32,8 +32,8 @@
  *
  */
 
-#ifndef THEME_H
-#define THEME_H
+#ifndef CONFIG_THEME_H
+#define CONFIG_THEME_H
 
 #include "config.h"
 
@@ -46,6 +46,8 @@ typedef enum {
     THEME_SPLASH,
     THEME_ERROR,
     THEME_INCOMING,
+    THEME_MENTION,
+    THEME_TRIGGER,
     THEME_INPUT_TEXT,
     THEME_TIME,
     THEME_TITLE_TEXT,
@@ -68,6 +70,9 @@ typedef enum {
     THEME_THEM,
     THEME_ROOMINFO,
     THEME_ROOMMENTION,
+    THEME_ROOMMENTION_TERM,
+    THEME_ROOMTRIGGER,
+    THEME_ROOMTRIGGER_TERM,
     THEME_ONLINE,
     THEME_OFFLINE,
     THEME_AWAY,
@@ -105,6 +110,8 @@ typedef enum {
     THEME_ROSTER_XA_UNREAD,
     THEME_ROSTER_ROOM,
     THEME_ROSTER_ROOM_UNREAD,
+    THEME_ROSTER_ROOM_TRIGGER,
+    THEME_ROSTER_ROOM_MENTION,
     THEME_RECEIPT_SENT,
     THEME_NONE,
     THEME_WHITE,
@@ -128,10 +135,12 @@ typedef enum {
 void theme_init(const char *const theme_name);
 void theme_init_colours(void);
 gboolean theme_load(const char *const theme_name);
+gboolean theme_exists(const char *const theme_name);
 GSList* theme_list(void);
 void theme_close(void);
 int theme_attrs(theme_item_t attrs);
-
+char* theme_get_string(char *str);
+void theme_free_string(char *str);
 theme_item_t theme_main_presence_attrs(const char *const presence);
 theme_item_t theme_roster_unread_presence_attrs(const char *const presence);
 theme_item_t theme_roster_active_presence_attrs(const char *const presence);

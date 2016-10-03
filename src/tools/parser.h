@@ -1,7 +1,7 @@
 /*
  * parser.h
  *
- * Copyright (C) 2012 - 2015 James Booth <boothj5@gmail.com>
+ * Copyright (C) 2012 - 2016 James Booth <boothj5@gmail.com>
  *
  * This file is part of Profanity.
  *
@@ -16,7 +16,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Profanity.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Profanity.  If not, see <https://www.gnu.org/licenses/>.
  *
  * In addition, as a special exception, the copyright holders give permission to
  * link the code of portions of this program with the OpenSSL library under
@@ -32,8 +32,8 @@
  *
  */
 
-#ifndef PARSER_H
-#define PARSER_H
+#ifndef TOOLS_PARSER_H
+#define TOOLS_PARSER_H
 
 #include <glib.h>
 

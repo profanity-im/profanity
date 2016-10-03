@@ -1,7 +1,7 @@
 /*
  * profanity.h
  *
- * Copyright (C) 2012 - 2015 James Booth <boothj5@gmail.com>
+ * Copyright (C) 2012 - 2016 James Booth <boothj5@gmail.com>
  *
  * This file is part of Profanity.
  *
@@ -16,7 +16,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Profanity.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Profanity.  If not, see <https://www.gnu.org/licenses/>.
  *
  * In addition, as a special exception, the copyright holders give permission to
  * link the code of portions of this program with the OpenSSL library under
@@ -35,16 +35,12 @@
 #ifndef PROFANITY_H
 #define PROFANITY_H
 
-#include "resource.h"
-#include "xmpp/xmpp.h"
+#include <pthread.h>
+#include <glib.h>
 
 void prof_run(char *log_level, char *account_name);
-
-void prof_handle_idle(void);
-void prof_handle_activity(void);
-
-gboolean process_input(char *inp);
-
 void prof_set_quit(void);
+
+pthread_mutex_t lock;
 
 #endif

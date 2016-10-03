@@ -1,7 +1,7 @@
 /*
  * chatwin.c
  *
- * Copyright (C) 2012 - 2015 James Booth <boothj5@gmail.com>
+ * Copyright (C) 2012 - 2016 James Booth <boothj5@gmail.com>
  *
  * This file is part of Profanity.
  *
@@ -16,7 +16,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Profanity.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Profanity.  If not, see <https://www.gnu.org/licenses/>.
  *
  * In addition, as a special exception, the copyright holders give permission to
  * link the code of portions of this program with the OpenSSL library under
@@ -38,14 +38,15 @@
 #include <stdlib.h>
 #include <assert.h>
 
-#include "chat_session.h"
+#include "xmpp/chat_session.h"
 #include "window_list.h"
-#include "roster_list.h"
+#include "xmpp/roster_list.h"
 #include "log.h"
 #include "config/preferences.h"
 #include "ui/ui.h"
 #include "ui/window.h"
 #include "ui/titlebar.h"
+#include "plugins/plugins.h"
 #ifdef HAVE_LIBOTR
 #include "otr/otr.h"
 #endif
@@ -234,33 +235,33 @@ chatwin_incoming_msg(ProfChatWin *chatwin, const char *const resource, const cha
 {
     assert(chatwin != NULL);
 
+    char *plugin_message = plugins_pre_chat_message_display(chatwin->barejid, resource, message);
+
     ProfWin *window = (ProfWin*)chatwin;
     int num = wins_get_num(window);
 
     char *display_name = roster_get_msg_display_name(chatwin->barejid, resource);
 
     gboolean is_current = wins_is_current(window);
-    gboolean notify = prefs_do_chat_notify(is_current, message);
+    gboolean notify = prefs_do_chat_notify(is_current);
 
     // currently viewing chat window with sender
     if (wins_is_current(window)) {
-        win_print_incoming_message(window, timestamp, display_name, message, enc_mode);
+        win_print_incoming_message(window, timestamp, display_name, plugin_message, enc_mode);
         title_bar_set_typing(FALSE);
         status_bar_active(num);
 
     // not currently viewing chat window with sender
     } else {
         status_bar_new(num);
-        cons_show_incoming_message(display_name, num);
+        cons_show_incoming_message(display_name, num, chatwin->unread);
 
         if (prefs_get_boolean(PREF_FLASH)) {
             flash();
         }
 
         chatwin->unread++;
-        if (notify) {
-            chatwin->notify = TRUE;
-        }
+
         if (prefs_get_boolean(PREF_CHLOG) && prefs_get_boolean(PREF_HISTORY)) {
             _chatwin_history(chatwin, chatwin->barejid);
         }
@@ -273,34 +274,27 @@ chatwin_incoming_msg(ProfChatWin *chatwin, const char *const resource, const cha
             }
         }
 
-        win_print_incoming_message(window, timestamp, display_name, message, enc_mode);
+        win_print_incoming_message(window, timestamp, display_name, plugin_message, enc_mode);
     }
 
     if (prefs_get_boolean(PREF_BEEP)) {
         beep();
     }
 
-    if (!notify) {
-        free(display_name);
-        return;
-    }
-
-    int ui_index = num;
-    if (ui_index == 10) {
-        ui_index = 0;
-    }
-
-    if (prefs_get_boolean(PREF_NOTIFY_CHAT_TEXT)) {
-        notify_message(display_name, ui_index, message);
-    } else {
-        notify_message(display_name, ui_index, NULL);
+    if (notify) {
+        notify_message(display_name, num, plugin_message);
     }
 
     free(display_name);
+
+    plugins_post_chat_message_display(chatwin->barejid, resource, plugin_message);
+
+    free(plugin_message);
 }
 
 void
-chatwin_outgoing_msg(ProfChatWin *chatwin, const char *const message, char *id, prof_enc_t enc_mode)
+chatwin_outgoing_msg(ProfChatWin *chatwin, const char *const message, char *id, prof_enc_t enc_mode,
+    gboolean request_receipt)
 {
     assert(chatwin != NULL);
 
@@ -311,7 +305,7 @@ chatwin_outgoing_msg(ProfChatWin *chatwin, const char *const message, char *id, 
         enc_char = prefs_get_pgp_char();
     }
 
-    if (prefs_get_boolean(PREF_RECEIPTS_REQUEST) && id) {
+    if (request_receipt && id) {
         win_print_with_receipt((ProfWin*)chatwin, enc_char, 0, NULL, 0, THEME_TEXT_ME, "me", message, id);
     } else {
         win_print((ProfWin*)chatwin, enc_char, 0, NULL, 0, THEME_TEXT_ME, "me", message);
@@ -319,11 +313,16 @@ chatwin_outgoing_msg(ProfChatWin *chatwin, const char *const message, char *id, 
 }
 
 void
-chatwin_outgoing_carbon(ProfChatWin *chatwin, const char *const message)
+chatwin_outgoing_carbon(ProfChatWin *chatwin, const char *const message, prof_enc_t enc_mode)
 {
     assert(chatwin != NULL);
 
-    win_print((ProfWin*)chatwin, '-', 0, NULL, 0, THEME_TEXT_ME, "me", message);
+    char enc_char = '-';
+    if (enc_mode == PROF_MSG_PGP) {
+        enc_char = prefs_get_pgp_char();
+    }
+
+    win_print((ProfWin*)chatwin, enc_char, 0, NULL, 0, THEME_TEXT_ME, "me", message);
     int num = wins_get_num((ProfWin*)chatwin);
     status_bar_active(num);
 }
@@ -362,7 +361,7 @@ chatwin_get_string(ProfChatWin *chatwin)
 
     GString *res = g_string_new("Chat ");
 
-    jabber_conn_status_t conn_status = jabber_get_connection_status();
+    jabber_conn_status_t conn_status = connection_get_status();
     if (conn_status == JABBER_CONNECTED) {
         PContact contact = roster_get_contact(chatwin->barejid);
         if (contact == NULL) {
@@ -390,7 +389,7 @@ static void
 _chatwin_history(ProfChatWin *chatwin, const char *const contact)
 {
     if (!chatwin->history_shown) {
-        Jid *jid = jid_create(jabber_get_fulljid());
+        Jid *jid = jid_create(connection_get_fulljid());
         GSList *history = chat_log_get_previous(jid->barejid, contact);
         jid_destroy(jid);
         GSList *curr = history;

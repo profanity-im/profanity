@@ -1,7 +1,7 @@
 /*
  * accounts.h
  *
- * Copyright (C) 2012 - 2015 James Booth <boothj5@gmail.com>
+ * Copyright (C) 2012 - 2016 James Booth <boothj5@gmail.com>
  *
  * This file is part of Profanity.
  *
@@ -16,7 +16,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Profanity.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Profanity.  If not, see <https://www.gnu.org/licenses/>.
  *
  * In addition, as a special exception, the copyright holders give permission to
  * link the code of portions of this program with the OpenSSL library under
@@ -32,8 +32,8 @@
  *
  */
 
-#ifndef ACCOUNTS_H
-#define ACCOUNTS_H
+#ifndef CONFIG_ACCOUNTS_H
+#define CONFIG_ACCOUNTS_H
 
 #define MAX_PASSWORD_SIZE 64
 
@@ -84,6 +84,7 @@ gint accounts_get_priority_for_presence_type(const char *const account_name,
     resource_presence_t presence_type);
 void accounts_set_pgp_keyid(const char *const account_name, const char *const value);
 void accounts_set_script_start(const char *const account_name, const char *const value);
+void accounts_set_theme(const char *const account_name, const char *const value);
 void accounts_clear_password(const char *const account_name);
 void accounts_clear_eval_password(const char *const account_name);
 void accounts_clear_server(const char *const account_name);
@@ -91,6 +92,7 @@ void accounts_clear_port(const char *const account_name);
 void accounts_clear_otr(const char *const account_name);
 void accounts_clear_pgp_keyid(const char *const account_name);
 void accounts_clear_script_start(const char *const account_name);
+void accounts_clear_theme(const char *const account_name);
 void accounts_add_otr_policy(const char *const account_name, const char *const contact_jid, const char *const policy);
 
 #endif

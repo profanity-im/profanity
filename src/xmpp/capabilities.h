@@ -1,7 +1,7 @@
 /*
  * capabilities.h
  *
- * Copyright (C) 2012 - 2015 James Booth <boothj5@gmail.com>
+ * Copyright (C) 2012 - 2016 James Booth <boothj5@gmail.com>
  *
  * This file is part of Profanity.
  *
@@ -16,7 +16,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Profanity.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Profanity.  If not, see <https://www.gnu.org/licenses/>.
  *
  * In addition, as a special exception, the copyright holders give permission to
  * link the code of portions of this program with the OpenSSL library under
@@ -40,6 +40,7 @@
 #ifdef HAVE_LIBMESODE
 #include <mesode.h>
 #endif
+
 #ifdef HAVE_LIBSTROPHE
 #include <strophe.h>
 #endif
@@ -48,14 +49,15 @@
 
 void caps_init(void);
 
-void caps_add_by_ver(const char *const ver, Capabilities *caps);
-void caps_add_by_jid(const char *const jid, Capabilities *caps);
+EntityCapabilities* caps_create(const char *const category, const char *const type, const char *const name,
+    const char *const software, const char *const software_version,
+    const char *const os, const char *const os_version,
+    GSList *features);
+void caps_add_by_ver(const char *const ver, EntityCapabilities *caps);
+void caps_add_by_jid(const char *const jid, EntityCapabilities *caps);
 void caps_map_jid_to_ver(const char *const jid, const char *const ver);
-gboolean caps_contains(const char *const ver);
-
-char* caps_create_sha1_str(xmpp_stanza_t *const query);
-xmpp_stanza_t* caps_create_query_response_stanza(xmpp_ctx_t *const ctx);
-Capabilities* caps_create(xmpp_stanza_t *query);
+gboolean caps_cache_contains(const char *const ver);
+GList* caps_get_features(void);
 char* caps_get_my_sha1(xmpp_ctx_t *const ctx);
 
 #endif

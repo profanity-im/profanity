@@ -1,7 +1,7 @@
 /*
  * window.h
  *
- * Copyright (C) 2012 - 2015 James Booth <boothj5@gmail.com>
+ * Copyright (C) 2012 - 2016 James Booth <boothj5@gmail.com>
  *
  * This file is part of Profanity.
  *
@@ -16,7 +16,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Profanity.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Profanity.  If not, see <https://www.gnu.org/licenses/>.
  *
  * In addition, as a special exception, the copyright holders give permission to
  * link the code of portions of this program with the OpenSSL library under
@@ -39,18 +39,18 @@
 
 #include <wchar.h>
 
-#include "contact.h"
-#include "muc.h"
-#include "ui/ui.h"
-#include "ui/buffer.h"
-#include "xmpp/xmpp.h"
-#include "chat_state.h"
-
 #ifdef HAVE_NCURSESW_NCURSES_H
 #include <ncursesw/ncurses.h>
 #elif HAVE_NCURSES_H
 #include <ncurses.h>
 #endif
+
+#include "ui/ui.h"
+#include "ui/buffer.h"
+#include "xmpp/xmpp.h"
+#include "xmpp/chat_state.h"
+#include "xmpp/contact.h"
+#include "xmpp/muc.h"
 
 #define PAD_SIZE 1000
 
@@ -70,6 +70,8 @@ int win_occpuants_cols(void);
 void win_sub_print(WINDOW *win, char *msg, gboolean newline, gboolean wrap, int indent);
 void win_sub_newline_lazy(WINDOW *win);
 void win_mark_received(ProfWin *window, const char *const id);
+void win_update_entry_message(ProfWin *window, const char *const id, const char *const message);
+void win_update_entry_theme(ProfWin *window, const char *const id, theme_item_t theme_item);
 
 gboolean win_has_active_subwin(ProfWin *window);
 

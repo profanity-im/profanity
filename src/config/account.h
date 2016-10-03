@@ -1,7 +1,7 @@
 /*
  * account.h
  *
- * Copyright (C) 2012 - 2015 James Booth <boothj5@gmail.com>
+ * Copyright (C) 2012 - 2016 James Booth <boothj5@gmail.com>
  *
  * This file is part of Profanity.
  *
@@ -16,7 +16,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Profanity.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Profanity.  If not, see <https://www.gnu.org/licenses/>.
  *
  * In addition, as a special exception, the copyright holders give permission to
  * link the code of portions of this program with the OpenSSL library under
@@ -32,8 +32,8 @@
  *
  */
 
-#ifndef ACCOUNT_H
-#define ACCOUNT_H
+#ifndef CONFIG_ACCOUNT_H
+#define CONFIG_ACCOUNT_H
 
 #include "common.h"
 
@@ -61,6 +61,7 @@ typedef struct prof_account_t {
     GList *otr_always;
     gchar *pgp_keyid;
     gchar *startscript;
+    gchar *theme;
     gchar *tls_policy;
 } ProfAccount;
 
@@ -72,7 +73,7 @@ ProfAccount* account_new(const gchar *const name, const gchar *const jid,
     const gchar *const muc_service, const gchar *const muc_nick,
     const gchar *const otr_policy, GList *otr_manual, GList *otr_opportunistic,
     GList *otr_always, const gchar *const pgp_keyid, const char *const startscript,
-    gchar *tls_policy);
+    const char *const theme, gchar *tls_policy);
 char* account_create_full_jid(ProfAccount *account);
 gboolean account_eval_password(ProfAccount *account);
 void account_free(ProfAccount *account);

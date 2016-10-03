@@ -1,7 +1,7 @@
 /*
  * preferences.c
  *
- * Copyright (C) 2012 - 2015 James Booth <boothj5@gmail.com>
+ * Copyright (C) 2012 - 2016 James Booth <boothj5@gmail.com>
  *
  * This file is part of Profanity.
  *
@@ -16,7 +16,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Profanity.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Profanity.  If not, see <https://www.gnu.org/licenses/>.
  *
  * In addition, as a special exception, the copyright holders give permission to
  * link the code of portions of this program with the OpenSSL library under
@@ -45,6 +45,7 @@
 #include "log.h"
 #include "preferences.h"
 #include "tools/autocomplete.h"
+#include "config/files.h"
 #include "config/conflists.h"
 
 // preference groups refer to the sections in .profrc, for example [ui]
@@ -57,10 +58,11 @@
 #define PREF_GROUP_ALIAS "alias"
 #define PREF_GROUP_OTR "otr"
 #define PREF_GROUP_PGP "pgp"
+#define PREF_GROUP_MUC "muc"
 
 #define INPBLOCK_DEFAULT 1000
 
-static gchar *prefs_loc;
+static char *prefs_loc;
 static GKeyFile *prefs;
 gint log_maxsize = 0;
 
@@ -68,7 +70,6 @@ static Autocomplete boolean_choice_ac;
 static Autocomplete room_trigger_ac;
 
 static void _save_prefs(void);
-static gchar* _get_preferences_file(void);
 static const char* _get_group(preference_t pref);
 static const char* _get_key(preference_t pref);
 static gboolean _get_default_boolean(preference_t pref);
@@ -78,7 +79,7 @@ void
 prefs_load(void)
 {
     GError *err;
-    prefs_loc = _get_preferences_file();
+    prefs_loc = files_get_config_path(FILE_PROFRC);
 
     if (g_file_test(prefs_loc, G_FILE_TEST_EXISTS)) {
         g_chmod(prefs_loc, S_IRUSR | S_IWUSR);
@@ -139,6 +140,19 @@ prefs_load(void)
             g_key_file_set_boolean(prefs, PREF_GROUP_NOTIFICATIONS, "room", FALSE);
             g_key_file_set_boolean(prefs, PREF_GROUP_NOTIFICATIONS, "room.mention", TRUE);
         }
+        prefs_free_string(value);
+    }
+
+    // move pre 0.6.0 titlebar settings to wintitle
+    if (g_key_file_has_key(prefs, PREF_GROUP_UI, "titlebar.show", NULL)) {
+        gboolean show = g_key_file_get_boolean(prefs, PREF_GROUP_UI, "titlebar.show", NULL);
+        g_key_file_set_boolean(prefs, PREF_GROUP_UI, "wintitle.show", show);
+        g_key_file_remove_key(prefs, PREF_GROUP_UI, "titlebar.show", NULL);
+    }
+    if (g_key_file_has_key(prefs, PREF_GROUP_UI, "titlebar.goodbye", NULL)) {
+        gboolean goodbye = g_key_file_get_boolean(prefs, PREF_GROUP_UI, "titlebar.goodbye", NULL);
+        g_key_file_set_boolean(prefs, PREF_GROUP_UI, "wintitle.goodbye", goodbye);
+        g_key_file_remove_key(prefs, PREF_GROUP_UI, "titlebar.goodbye", NULL);
     }
 
     _save_prefs();
@@ -192,29 +206,49 @@ prefs_reset_room_trigger_ac(void)
 }
 
 gboolean
-prefs_do_chat_notify(gboolean current_win, const char *const message)
+prefs_do_chat_notify(gboolean current_win)
 {
-    gboolean notify_current = prefs_get_boolean(PREF_NOTIFY_CHAT_CURRENT);
-    gboolean notify_window = FALSE;
-    if (!current_win || (current_win && notify_current) ) {
-        notify_window = TRUE;
-    }
-    if (!notify_window) {
+    if (prefs_get_boolean(PREF_NOTIFY_CHAT) == FALSE) {
         return FALSE;
+    } else {
+        if ((current_win == FALSE) || ((current_win == TRUE) && prefs_get_boolean(PREF_NOTIFY_CHAT_CURRENT))) {
+            return TRUE;
+        } else {
+            return FALSE;
+        }
     }
+}
 
-    gboolean notify_message = prefs_get_boolean(PREF_NOTIFY_CHAT);
-    if (notify_message) {
-        return TRUE;
+GList*
+prefs_message_get_triggers(const char *const message)
+{
+    GList *result = NULL;
+
+    char *message_lower = g_utf8_strdown(message, -1);
+    gsize len = 0;
+    gchar **triggers = g_key_file_get_string_list(prefs, PREF_GROUP_NOTIFICATIONS, "room.trigger.list", &len, NULL);
+    int i;
+    for (i = 0; i < len; i++) {
+        char *trigger_lower = g_utf8_strdown(triggers[i], -1);
+        if (g_strrstr(message_lower, trigger_lower)) {
+            result = g_list_append(result, strdup(triggers[i]));
+        }
+        g_free(trigger_lower);
     }
+    g_strfreev(triggers);
+    g_free(message_lower);
 
-    return FALSE;
+    return result;
 }
 
 gboolean
-prefs_do_room_notify(gboolean current_win, const char *const roomjid, const char *const nick,
-    const char *const message)
+prefs_do_room_notify(gboolean current_win, const char *const roomjid, const char *const mynick,
+    const char *const theirnick, const char *const message, gboolean mention, gboolean trigger_found)
 {
+    if (g_strcmp0(mynick, theirnick) == 0) {
+        return FALSE;
+    }
+
     gboolean notify_current = prefs_get_boolean(PREF_NOTIFY_ROOM_CURRENT);
     gboolean notify_window = FALSE;
     if (!current_win || (current_win && notify_current) ) {
@@ -240,16 +274,8 @@ prefs_do_room_notify(gboolean current_win, const char *const roomjid, const char
     } else {
         notify_mention = prefs_get_boolean(PREF_NOTIFY_ROOM_MENTION);
     }
-    if (notify_mention) {
-        char *message_lower = g_utf8_strdown(message, -1);
-        char *nick_lower = g_utf8_strdown(nick, -1);
-        if (g_strrstr(message_lower, nick_lower)) {
-            g_free(message_lower);
-            g_free(nick_lower);
-            return TRUE;
-        }
-        g_free(message_lower);
-        g_free(nick_lower);
+    if (notify_mention && mention) {
+        return TRUE;
     }
 
     gboolean notify_trigger = FALSE;
@@ -258,27 +284,44 @@ prefs_do_room_notify(gboolean current_win, const char *const roomjid, const char
     } else {
         notify_trigger = prefs_get_boolean(PREF_NOTIFY_ROOM_TRIGGER);
     }
-    if (notify_trigger) {
-        gboolean trigger_found = FALSE;
-        char *message_lower = g_utf8_strdown(message, -1);
-        gsize len = 0;
-        gchar **triggers = g_key_file_get_string_list(prefs, PREF_GROUP_NOTIFICATIONS, "room.trigger.list", &len, NULL);
-        int i;
-        for (i = 0; i < len; i++) {
-            char *trigger_lower = g_utf8_strdown(triggers[i], -1);
-            if (g_strrstr(message_lower, trigger_lower)) {
-                trigger_found = TRUE;
-                g_free(trigger_lower);
-                break;
-            }
-            g_free(trigger_lower);
-        }
-        g_strfreev(triggers);
-        g_free(message_lower);
+    if (notify_trigger && trigger_found) {
+        return TRUE;
+    }
 
-        if (trigger_found) {
-            return TRUE;
-        }
+    return FALSE;
+}
+
+gboolean
+prefs_do_room_notify_mention(const char *const roomjid, int unread, gboolean mention, gboolean trigger)
+{
+    gboolean notify_room = FALSE;
+    if (g_key_file_has_key(prefs, roomjid, "notify", NULL)) {
+        notify_room = g_key_file_get_boolean(prefs, roomjid, "notify", NULL);
+    } else {
+        notify_room = prefs_get_boolean(PREF_NOTIFY_ROOM);
+    }
+    if (notify_room && unread > 0) {
+        return TRUE;
+    }
+
+    gboolean notify_mention = FALSE;
+    if (g_key_file_has_key(prefs, roomjid, "notify.mention", NULL)) {
+        notify_mention = g_key_file_get_boolean(prefs, roomjid, "notify.mention", NULL);
+    } else {
+        notify_mention = prefs_get_boolean(PREF_NOTIFY_ROOM_MENTION);
+    }
+    if (notify_mention && mention) {
+        return TRUE;
+    }
+
+    gboolean notify_trigger = FALSE;
+    if (g_key_file_has_key(prefs, roomjid, "notify.trigger", NULL)) {
+        notify_trigger = g_key_file_get_boolean(prefs, roomjid, "notify.trigger", NULL);
+    } else {
+        notify_trigger = prefs_get_boolean(PREF_NOTIFY_ROOM_TRIGGER);
+    }
+    if (notify_trigger && trigger) {
+        return TRUE;
     }
 
     return FALSE;
@@ -404,7 +447,6 @@ prefs_free_string(char *pref)
     }
 }
 
-
 void
 prefs_set_string(preference_t pref, char *value)
 {
@@ -517,7 +559,7 @@ gint
 prefs_get_autoping_timeout(void)
 {
     if (!g_key_file_has_key(prefs, PREF_GROUP_CONNECTION, "autoping.timeout", NULL)) {
-        return 10;
+        return 20;
     } else {
         return g_key_file_get_integer(prefs, PREF_GROUP_CONNECTION, "autoping.timeout", NULL);
     }
@@ -560,6 +602,58 @@ prefs_set_autoxa_time(gint value)
 {
     g_key_file_set_integer(prefs, PREF_GROUP_PRESENCE, "autoaway.xatime", value);
     _save_prefs();
+}
+
+void
+prefs_set_tray_timer(gint value)
+{
+    g_key_file_set_integer(prefs, PREF_GROUP_NOTIFICATIONS, "tray.timer", value);
+    _save_prefs();
+}
+
+gint
+prefs_get_tray_timer(void)
+{
+    gint result = g_key_file_get_integer(prefs, PREF_GROUP_NOTIFICATIONS, "tray.timer", NULL);
+
+    if (result == 0) {
+        return 5;
+    } else {
+        return result;
+    }
+}
+
+gchar**
+prefs_get_plugins(void)
+{
+    if (!g_key_file_has_group(prefs, "plugins")) {
+        return NULL;
+    }
+    if (!g_key_file_has_key(prefs, "plugins", "load", NULL)) {
+        return NULL;
+    }
+
+    return g_key_file_get_string_list(prefs, "plugins", "load", NULL, NULL);
+}
+
+void
+prefs_add_plugin(const char *const name)
+{
+    conf_string_list_add(prefs, "plugins", "load", name);
+    _save_prefs();
+}
+
+void
+prefs_remove_plugin(const char *const name)
+{
+    conf_string_list_remove(prefs, "plugins", "load", name);
+    _save_prefs();
+}
+
+void
+prefs_free_plugins(gchar **plugins)
+{
+    g_strfreev(plugins);
 }
 
 void
@@ -756,6 +850,108 @@ prefs_clear_roster_resource_char(void)
     _save_prefs();
 }
 
+char
+prefs_get_roster_private_char(void)
+{
+    char result = 0;
+
+    char *resultstr = g_key_file_get_string(prefs, PREF_GROUP_UI, "roster.private.char", NULL);
+    if (!resultstr) {
+        result =  0;
+    } else {
+        result = resultstr[0];
+    }
+    free(resultstr);
+
+    return result;
+}
+
+void
+prefs_set_roster_private_char(char ch)
+{
+    char str[2];
+    str[0] = ch;
+    str[1] = '\0';
+
+    g_key_file_set_string(prefs, PREF_GROUP_UI, "roster.private.char", str);
+    _save_prefs();
+}
+
+void
+prefs_clear_roster_private_char(void)
+{
+    g_key_file_remove_key(prefs, PREF_GROUP_UI, "roster.private.char", NULL);
+    _save_prefs();
+}
+
+char
+prefs_get_roster_room_char(void)
+{
+    char result = 0;
+
+    char *resultstr = g_key_file_get_string(prefs, PREF_GROUP_UI, "roster.rooms.char", NULL);
+    if (!resultstr) {
+        result =  0;
+    } else {
+        result = resultstr[0];
+    }
+    free(resultstr);
+
+    return result;
+}
+
+void
+prefs_set_roster_room_char(char ch)
+{
+    char str[2];
+    str[0] = ch;
+    str[1] = '\0';
+
+    g_key_file_set_string(prefs, PREF_GROUP_UI, "roster.rooms.char", str);
+    _save_prefs();
+}
+
+void
+prefs_clear_roster_room_char(void)
+{
+    g_key_file_remove_key(prefs, PREF_GROUP_UI, "roster.rooms.char", NULL);
+    _save_prefs();
+}
+
+char
+prefs_get_roster_room_private_char(void)
+{
+    char result = 0;
+
+    char *resultstr = g_key_file_get_string(prefs, PREF_GROUP_UI, "roster.rooms.private.char", NULL);
+    if (!resultstr) {
+        result =  0;
+    } else {
+        result = resultstr[0];
+    }
+    free(resultstr);
+
+    return result;
+}
+
+void
+prefs_set_roster_room_private_char(char ch)
+{
+    char str[2];
+    str[0] = ch;
+    str[1] = '\0';
+
+    g_key_file_set_string(prefs, PREF_GROUP_UI, "roster.rooms.private.char", str);
+    _save_prefs();
+}
+
+void
+prefs_clear_roster_room_private_char(void)
+{
+    g_key_file_remove_key(prefs, PREF_GROUP_UI, "roster.rooms.pruvate.char", NULL);
+    _save_prefs();
+}
+
 gint
 prefs_get_roster_contact_indent(void)
 {
@@ -865,6 +1061,308 @@ prefs_get_room_notify_triggers(void)
     return result;
 }
 
+ProfWinPlacement*
+prefs_create_profwin_placement(int titlebar, int mainwin, int statusbar, int inputwin)
+{
+    ProfWinPlacement *placement = malloc(sizeof(ProfWinPlacement));
+    placement->titlebar_pos = titlebar;
+    placement->mainwin_pos = mainwin;
+    placement->statusbar_pos = statusbar;
+    placement->inputwin_pos = inputwin;
+
+    return placement;
+}
+
+void
+prefs_free_win_placement(ProfWinPlacement *placement)
+{
+    free(placement);
+}
+
+ProfWinPlacement*
+prefs_get_win_placement(void)
+{
+    // read from settings file
+    int titlebar_pos = g_key_file_get_integer(prefs, PREF_GROUP_UI, "titlebar.position", NULL);
+    int mainwin_pos = g_key_file_get_integer(prefs, PREF_GROUP_UI, "mainwin.position", NULL);
+    int statusbar_pos = g_key_file_get_integer(prefs, PREF_GROUP_UI, "statusbar.position", NULL);
+    int inputwin_pos = g_key_file_get_integer(prefs, PREF_GROUP_UI, "inputwin.position", NULL);
+
+    // default if setting invalid, or not present
+    if (titlebar_pos < 1 || titlebar_pos > 4) {
+        titlebar_pos = 1;
+    }
+    if (mainwin_pos < 1 || mainwin_pos > 4) {
+        mainwin_pos = 2;
+    }
+    if (statusbar_pos < 1 || statusbar_pos > 4) {
+        statusbar_pos = 3;
+    }
+    if (inputwin_pos < 1 || inputwin_pos > 4) {
+        inputwin_pos = 4;
+    }
+
+    // return default if duplicates found
+    if (titlebar_pos == mainwin_pos) {
+        return prefs_create_profwin_placement(1, 2, 3, 4);
+    }
+    if (titlebar_pos == statusbar_pos) {
+        return prefs_create_profwin_placement(1, 2, 3, 4);
+    }
+    if (titlebar_pos == inputwin_pos) {
+        return prefs_create_profwin_placement(1, 2, 3, 4);
+    }
+
+    if (mainwin_pos == statusbar_pos) {
+        return prefs_create_profwin_placement(1, 2, 3, 4);
+    }
+    if (mainwin_pos == inputwin_pos) {
+        return prefs_create_profwin_placement(1, 2, 3, 4);
+    }
+
+    if (statusbar_pos == inputwin_pos) {
+        return prefs_create_profwin_placement(1, 2, 3, 4);
+    }
+
+    // return settings
+    return prefs_create_profwin_placement(titlebar_pos, mainwin_pos, statusbar_pos, inputwin_pos);
+}
+
+void
+prefs_save_win_placement(ProfWinPlacement *placement)
+{
+    g_key_file_set_integer(prefs, PREF_GROUP_UI, "titlebar.position", placement->titlebar_pos);
+    g_key_file_set_integer(prefs, PREF_GROUP_UI, "mainwin.position", placement->mainwin_pos);
+    g_key_file_set_integer(prefs, PREF_GROUP_UI, "statusbar.position", placement->statusbar_pos);
+    g_key_file_set_integer(prefs, PREF_GROUP_UI, "inputwin.position", placement->inputwin_pos);
+    _save_prefs();
+}
+
+gboolean
+prefs_titlebar_pos_up(void)
+{
+    ProfWinPlacement *placement = prefs_get_win_placement();
+
+    int pos = 2;
+    for (pos = 2; pos<5; pos++) {
+        if (placement->titlebar_pos == pos) {
+            placement->titlebar_pos = pos-1;
+
+            if (placement->mainwin_pos == pos-1) {
+                placement->mainwin_pos = pos;
+            } else if (placement->statusbar_pos == pos-1) {
+                placement->statusbar_pos = pos;
+            } else if (placement->inputwin_pos == pos-1) {
+                placement->inputwin_pos = pos;
+            }
+
+            prefs_save_win_placement(placement);
+            prefs_free_win_placement(placement);
+            return TRUE;
+        }
+    }
+
+    prefs_free_win_placement(placement);
+    return FALSE;
+}
+
+gboolean
+prefs_mainwin_pos_up(void)
+{
+    ProfWinPlacement *placement = prefs_get_win_placement();
+
+    int pos = 2;
+    for (pos = 2; pos<5; pos++) {
+        if (placement->mainwin_pos == pos) {
+            placement->mainwin_pos = pos-1;
+
+            if (placement->titlebar_pos == pos-1) {
+                placement->titlebar_pos = pos;
+            } else if (placement->statusbar_pos == pos-1) {
+                placement->statusbar_pos = pos;
+            } else if (placement->inputwin_pos == pos-1) {
+                placement->inputwin_pos = pos;
+            }
+
+            prefs_save_win_placement(placement);
+            prefs_free_win_placement(placement);
+            return TRUE;
+        }
+    }
+
+    prefs_free_win_placement(placement);
+    return FALSE;
+}
+
+gboolean
+prefs_statusbar_pos_up(void)
+{
+    ProfWinPlacement *placement = prefs_get_win_placement();
+
+    int pos = 2;
+    for (pos = 2; pos<5; pos++) {
+        if (placement->statusbar_pos == pos) {
+            placement->statusbar_pos = pos-1;
+
+            if (placement->titlebar_pos == pos-1) {
+                placement->titlebar_pos = pos;
+            } else if (placement->mainwin_pos == pos-1) {
+                placement->mainwin_pos = pos;
+            } else if (placement->inputwin_pos == pos-1) {
+                placement->inputwin_pos = pos;
+            }
+
+            prefs_save_win_placement(placement);
+            prefs_free_win_placement(placement);
+            return TRUE;
+        }
+    }
+
+    prefs_free_win_placement(placement);
+    return FALSE;
+}
+
+gboolean
+prefs_inputwin_pos_up(void)
+{
+    ProfWinPlacement *placement = prefs_get_win_placement();
+
+    int pos = 2;
+    for (pos = 2; pos<5; pos++) {
+        if (placement->inputwin_pos == pos) {
+            placement->inputwin_pos = pos-1;
+
+            if (placement->titlebar_pos == pos-1) {
+                placement->titlebar_pos = pos;
+            } else if (placement->mainwin_pos == pos-1) {
+                placement->mainwin_pos = pos;
+            } else if (placement->statusbar_pos == pos-1) {
+                placement->statusbar_pos = pos;
+            }
+
+            prefs_save_win_placement(placement);
+            prefs_free_win_placement(placement);
+            return TRUE;
+        }
+    }
+
+    prefs_free_win_placement(placement);
+    return FALSE;
+}
+
+gboolean
+prefs_titlebar_pos_down(void)
+{
+    ProfWinPlacement *placement = prefs_get_win_placement();
+
+    int pos = 1;
+    for (pos = 1; pos<4; pos++) {
+        if (placement->titlebar_pos == pos) {
+            placement->titlebar_pos = pos+1;
+
+            if (placement->mainwin_pos == pos+1) {
+                placement->mainwin_pos = pos;
+            } else if (placement->statusbar_pos == pos+1) {
+                placement->statusbar_pos = pos;
+            } else if (placement->inputwin_pos == pos+1) {
+                placement->inputwin_pos = pos;
+            }
+
+            prefs_save_win_placement(placement);
+            prefs_free_win_placement(placement);
+            return TRUE;
+        }
+    }
+
+    prefs_free_win_placement(placement);
+    return FALSE;
+}
+
+gboolean
+prefs_mainwin_pos_down(void)
+{
+    ProfWinPlacement *placement = prefs_get_win_placement();
+
+    int pos = 1;
+    for (pos = 1; pos<4; pos++) {
+        if (placement->mainwin_pos == pos) {
+            placement->mainwin_pos = pos+1;
+
+            if (placement->titlebar_pos == pos+1) {
+                placement->titlebar_pos = pos;
+            } else if (placement->statusbar_pos == pos+1) {
+                placement->statusbar_pos = pos;
+            } else if (placement->inputwin_pos == pos+1) {
+                placement->inputwin_pos = pos;
+            }
+
+            prefs_save_win_placement(placement);
+            prefs_free_win_placement(placement);
+            return TRUE;
+        }
+    }
+
+    prefs_free_win_placement(placement);
+    return FALSE;
+}
+
+gboolean
+prefs_statusbar_pos_down(void)
+{
+    ProfWinPlacement *placement = prefs_get_win_placement();
+
+    int pos = 1;
+    for (pos = 1; pos<4; pos++) {
+        if (placement->statusbar_pos == pos) {
+            placement->statusbar_pos = pos+1;
+
+            if (placement->titlebar_pos == pos+1) {
+                placement->titlebar_pos = pos;
+            } else if (placement->mainwin_pos == pos+1) {
+                placement->mainwin_pos = pos;
+            } else if (placement->inputwin_pos == pos+1) {
+                placement->inputwin_pos = pos;
+            }
+
+            prefs_save_win_placement(placement);
+            prefs_free_win_placement(placement);
+            return TRUE;
+        }
+    }
+
+    prefs_free_win_placement(placement);
+    return FALSE;
+}
+
+
+gboolean
+prefs_inputwin_pos_down(void)
+{
+    ProfWinPlacement *placement = prefs_get_win_placement();
+
+    int pos = 1;
+    for (pos = 1; pos<4; pos++) {
+        if (placement->inputwin_pos == pos) {
+            placement->inputwin_pos = pos+1;
+
+            if (placement->titlebar_pos == pos+1) {
+                placement->titlebar_pos = pos;
+            } else if (placement->mainwin_pos == pos+1) {
+                placement->mainwin_pos = pos;
+            } else if (placement->statusbar_pos == pos+1) {
+                placement->statusbar_pos = pos;
+            }
+
+            prefs_save_win_placement(placement);
+            prefs_free_win_placement(placement);
+            return TRUE;
+        }
+    }
+
+    prefs_free_win_placement(placement);
+    return FALSE;
+}
+
 gboolean
 prefs_add_alias(const char *const name, const char *const value)
 {
@@ -936,25 +1434,6 @@ prefs_get_aliases(void)
     }
 }
 
-gchar*
-prefs_get_inputrc(void)
-{
-    gchar *xdg_config = xdg_get_config_home();
-    GString *inputrc_file = g_string_new(xdg_config);
-    g_free(xdg_config);
-
-    g_string_append(inputrc_file, "/profanity/inputrc");
-
-    if (g_file_test(inputrc_file->str, G_FILE_TEST_IS_REGULAR)) {
-        gchar *result = strdup(inputrc_file->str);
-        g_string_free(inputrc_file, TRUE);
-
-        return result;
-    }
-
-    return NULL;
-}
-
 void
 _free_alias(ProfAlias *alias)
 {
@@ -974,29 +1453,15 @@ _save_prefs(void)
 {
     gsize g_data_size;
     gchar *g_prefs_data = g_key_file_to_data(prefs, &g_data_size, NULL);
-    gchar *xdg_config = xdg_get_config_home();
-    GString *base_str = g_string_new(xdg_config);
-    g_string_append(base_str, "/profanity/");
-    gchar *true_loc = get_file_or_linked(prefs_loc, base_str->str);
+    gchar *base = g_path_get_basename(prefs_loc);
+    gchar *true_loc = get_file_or_linked(prefs_loc, base);
+
     g_file_set_contents(true_loc, g_prefs_data, g_data_size, NULL);
     g_chmod(prefs_loc, S_IRUSR | S_IWUSR);
-    g_free(xdg_config);
+
+    g_free(base);
     free(true_loc);
     g_free(g_prefs_data);
-    g_string_free(base_str, TRUE);
-}
-
-static gchar*
-_get_preferences_file(void)
-{
-    gchar *xdg_config = xdg_get_config_home();
-    GString *prefs_file = g_string_new(xdg_config);
-    g_string_append(prefs_file, "/profanity/profrc");
-    gchar *result = strdup(prefs_file->str);
-    g_free(xdg_config);
-    g_string_free(prefs_file, TRUE);
-
-    return result;
 }
 
 // get the preference group for a specific preference
@@ -1011,8 +1476,8 @@ _get_group(preference_t pref)
         case PREF_BEEP:
         case PREF_THEME:
         case PREF_VERCHECK:
-        case PREF_TITLEBAR_SHOW:
-        case PREF_TITLEBAR_GOODBYE:
+        case PREF_WINTITLE_SHOW:
+        case PREF_WINTITLE_GOODBYE:
         case PREF_FLASH:
         case PREF_INTYPE:
         case PREF_HISTORY:
@@ -1044,20 +1509,26 @@ _get_group(preference_t pref)
         case PREF_ROSTER_ORDER:
         case PREF_ROSTER_UNREAD:
         case PREF_ROSTER_COUNT:
+        case PREF_ROSTER_COUNT_ZERO:
         case PREF_ROSTER_PRIORITY:
         case PREF_ROSTER_WRAP:
         case PREF_ROSTER_RESOURCE_JOIN:
         case PREF_ROSTER_CONTACTS:
+        case PREF_ROSTER_UNSUBSCRIBED:
         case PREF_ROSTER_ROOMS:
         case PREF_ROSTER_ROOMS_POS:
+        case PREF_ROSTER_ROOMS_BY:
         case PREF_ROSTER_ROOMS_ORDER:
         case PREF_ROSTER_ROOMS_UNREAD:
+        case PREF_ROSTER_PRIVATE:
         case PREF_RESOURCE_TITLE:
         case PREF_RESOURCE_MESSAGE:
         case PREF_ENC_WARN:
         case PREF_INPBLOCK_DYNAMIC:
         case PREF_TLS_SHOW:
         case PREF_CONSOLE_MUC:
+        case PREF_CONSOLE_PRIVATE:
+        case PREF_CONSOLE_CHAT:
             return PREF_GROUP_UI;
         case PREF_STATES:
         case PREF_OUTTYPE:
@@ -1074,6 +1545,10 @@ _get_group(preference_t pref)
         case PREF_NOTIFY_ROOM_TEXT:
         case PREF_NOTIFY_INVITE:
         case PREF_NOTIFY_SUB:
+        case PREF_NOTIFY_MENTION_CASE_SENSITIVE:
+        case PREF_NOTIFY_MENTION_WHOLE_WORD:
+        case PREF_TRAY:
+        case PREF_TRAY_READ:
             return PREF_GROUP_NOTIFICATIONS;
         case PREF_CHLOG:
         case PREF_GRLOG:
@@ -1098,6 +1573,8 @@ _get_group(preference_t pref)
             return PREF_GROUP_OTR;
         case PREF_PGP_LOG:
             return PREF_GROUP_PGP;
+        case PREF_BOOKMARK_INVITE:
+            return PREF_GROUP_MUC;
         default:
             return NULL;
     }
@@ -1118,12 +1595,16 @@ _get_key(preference_t pref)
             return "theme";
         case PREF_VERCHECK:
             return "vercheck";
-        case PREF_TITLEBAR_SHOW:
-            return "titlebar.show";
-        case PREF_TITLEBAR_GOODBYE:
-            return "titlebar.goodbye";
+        case PREF_WINTITLE_SHOW:
+            return "wintitle.show";
+        case PREF_WINTITLE_GOODBYE:
+            return "wintitle.goodbye";
         case PREF_FLASH:
             return "flash";
+        case PREF_TRAY:
+            return "tray";
+        case PREF_TRAY_READ:
+            return "tray.read";
         case PREF_INTYPE:
             return "intype";
         case PREF_HISTORY:
@@ -1176,6 +1657,10 @@ _get_key(preference_t pref)
             return "invite";
         case PREF_NOTIFY_SUB:
             return "sub";
+        case PREF_NOTIFY_MENTION_CASE_SENSITIVE:
+            return "room.mention.casesensitive";
+        case PREF_NOTIFY_MENTION_WHOLE_WORD:
+            return "room.mention.wholeword";
         case PREF_CHLOG:
             return "chlog";
         case PREF_GRLOG:
@@ -1242,6 +1727,8 @@ _get_key(preference_t pref)
             return "roster.unread";
         case PREF_ROSTER_COUNT:
             return "roster.count";
+        case PREF_ROSTER_COUNT_ZERO:
+            return "roster.count.zero";
         case PREF_ROSTER_PRIORITY:
             return "roster.priority";
         case PREF_ROSTER_WRAP:
@@ -1250,14 +1737,20 @@ _get_key(preference_t pref)
             return "roster.resource.join";
         case PREF_ROSTER_CONTACTS:
             return "roster.contacts";
+        case PREF_ROSTER_UNSUBSCRIBED:
+            return "roster.unsubscribed";
         case PREF_ROSTER_ROOMS:
             return "roster.rooms";
         case PREF_ROSTER_ROOMS_POS:
             return "roster.rooms.pos";
+        case PREF_ROSTER_ROOMS_BY:
+            return "roster.rooms.by";
         case PREF_ROSTER_ROOMS_ORDER:
             return "roster.rooms.order";
         case PREF_ROSTER_ROOMS_UNREAD:
             return "roster.rooms.unread";
+        case PREF_ROSTER_PRIVATE:
+            return "roster.private";
         case PREF_RESOURCE_TITLE:
             return "resource.title";
         case PREF_RESOURCE_MESSAGE:
@@ -1276,6 +1769,12 @@ _get_key(preference_t pref)
             return "lastactivity";
         case PREF_CONSOLE_MUC:
             return "console.muc";
+        case PREF_CONSOLE_PRIVATE:
+            return "console.private";
+        case PREF_CONSOLE_CHAT:
+            return "console.chat";
+        case PREF_BOOKMARK_INVITE:
+            return "bookmark.invite";
         default:
             return NULL;
     }
@@ -1312,13 +1811,17 @@ _get_default_boolean(preference_t pref)
         case PREF_ROSTER:
         case PREF_ROSTER_OFFLINE:
         case PREF_ROSTER_EMPTY:
-        case PREF_ROSTER_COUNT:
+        case PREF_ROSTER_COUNT_ZERO:
         case PREF_ROSTER_PRIORITY:
         case PREF_ROSTER_RESOURCE_JOIN:
         case PREF_ROSTER_CONTACTS:
+        case PREF_ROSTER_UNSUBSCRIBED:
         case PREF_ROSTER_ROOMS:
         case PREF_TLS_SHOW:
         case PREF_LASTACTIVITY:
+        case PREF_NOTIFY_MENTION_WHOLE_WORD:
+        case PREF_TRAY_READ:
+        case PREF_BOOKMARK_INVITE:
             return TRUE;
         default:
             return FALSE;
@@ -1344,16 +1847,22 @@ _get_default_string(preference_t pref)
             return "all";
         case PREF_ROSTER_BY:
             return "presence";
+        case PREF_ROSTER_COUNT:
+            return "unread";
         case PREF_ROSTER_ORDER:
             return "presence";
         case PREF_ROSTER_UNREAD:
             return "after";
         case PREF_ROSTER_ROOMS_POS:
             return "last";
+        case PREF_ROSTER_ROOMS_BY:
+            return "none";
         case PREF_ROSTER_ROOMS_ORDER:
             return "name";
         case PREF_ROSTER_ROOMS_UNREAD:
             return "after";
+        case PREF_ROSTER_PRIVATE:
+            return "room";
         case PREF_TIME_CONSOLE:
             return "%H:%M:%S";
         case PREF_TIME_CHAT:
@@ -1373,6 +1882,8 @@ _get_default_string(preference_t pref)
         case PREF_PGP_LOG:
             return "redact";
         case PREF_CONSOLE_MUC:
+        case PREF_CONSOLE_PRIVATE:
+        case PREF_CONSOLE_CHAT:
             return "all";
         default:
             return NULL;

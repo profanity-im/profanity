@@ -1,7 +1,7 @@
 /*
  * theme.c
  *
- * Copyright (C) 2012 - 2015 James Booth <boothj5@gmail.com>
+ * Copyright (C) 2012 - 2016 James Booth <boothj5@gmail.com>
  *
  * This file is part of Profanity.
  *
@@ -16,7 +16,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Profanity.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Profanity.  If not, see <https://www.gnu.org/licenses/>.
  *
  * In addition, as a special exception, the copyright holders give permission to
  * link the code of portions of this program with the OpenSSL library under
@@ -38,6 +38,7 @@
 #include <string.h>
 
 #include <glib.h>
+
 #ifdef HAVE_NCURSESW_NCURSES_H
 #include <ncursesw/ncurses.h>
 #elif HAVE_NCURSES_H
@@ -46,13 +47,15 @@
 
 #include "common.h"
 #include "log.h"
-#include "theme.h"
-#include "preferences.h"
+#include "config/files.h"
+#include "config/theme.h"
+#include "config/preferences.h"
 
 static GString *theme_loc;
 static GKeyFile *theme;
 static GHashTable *bold_items;
 static GHashTable *str_to_pair;
+static GHashTable *defaults;
 
 struct colour_string_t {
     char *str;
@@ -60,7 +63,6 @@ struct colour_string_t {
 };
 
 static void _load_preferences(void);
-static gchar* _get_themes_dir(void);
 void _theme_list_dir(const gchar *const dir, GSList **result);
 static GString* _theme_find(const char *const theme_name);
 static gboolean _theme_load_file(const char *const theme_name);
@@ -73,6 +75,99 @@ theme_init(const char *const theme_name)
     }
 
     str_to_pair = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, NULL);
+    defaults = g_hash_table_new_full(g_str_hash, g_str_equal, free, free);
+
+    g_hash_table_insert(defaults, strdup("main.text"),               strdup("white"));
+    g_hash_table_insert(defaults, strdup("main.text.me"),            strdup("white"));
+    g_hash_table_insert(defaults, strdup("main.text.them"),          strdup("white"));
+    g_hash_table_insert(defaults, strdup("main.splash"),             strdup("cyan"));
+    g_hash_table_insert(defaults, strdup("error"),                   strdup("red"));
+    g_hash_table_insert(defaults, strdup("incoming"),                strdup("yellow"));
+    g_hash_table_insert(defaults, strdup("mention"),                 strdup("yellow"));
+    g_hash_table_insert(defaults, strdup("trigger"),                 strdup("yellow"));
+    g_hash_table_insert(defaults, strdup("input.text"),              strdup("white"));
+    g_hash_table_insert(defaults, strdup("main.time"),               strdup("white"));
+    g_hash_table_insert(defaults, strdup("titlebar.text"),           strdup("white"));
+    g_hash_table_insert(defaults, strdup("titlebar.brackets"),       strdup("cyan"));
+    g_hash_table_insert(defaults, strdup("titlebar.unencrypted"),    strdup("red"));
+    g_hash_table_insert(defaults, strdup("titlebar.encrypted"),      strdup("white"));
+    g_hash_table_insert(defaults, strdup("titlebar.untrusted"),      strdup("yellow"));
+    g_hash_table_insert(defaults, strdup("titlebar.trusted"),        strdup("white"));
+    g_hash_table_insert(defaults, strdup("titlebar.online"),         strdup("white"));
+    g_hash_table_insert(defaults, strdup("titlebar.offline"),        strdup("white"));
+    g_hash_table_insert(defaults, strdup("titlebar.away"),           strdup("white"));
+    g_hash_table_insert(defaults, strdup("titlebar.chat"),           strdup("white"));
+    g_hash_table_insert(defaults, strdup("titlebar.dnd"),            strdup("white"));
+    g_hash_table_insert(defaults, strdup("titlebar.xa"),             strdup("white"));
+    g_hash_table_insert(defaults, strdup("statusbar.text"),          strdup("white"));
+    g_hash_table_insert(defaults, strdup("statusbar.brackets"),      strdup("cyan"));
+    g_hash_table_insert(defaults, strdup("statusbar.active"),        strdup("cyan"));
+    g_hash_table_insert(defaults, strdup("statusbar.new"),           strdup("white"));
+    g_hash_table_insert(defaults, strdup("me"),                      strdup("yellow"));
+    g_hash_table_insert(defaults, strdup("them"),                    strdup("green"));
+    g_hash_table_insert(defaults, strdup("receipt.sent"),            strdup("red"));
+    g_hash_table_insert(defaults, strdup("roominfo"),                strdup("yellow"));
+    g_hash_table_insert(defaults, strdup("roommention"),             strdup("yellow"));
+    g_hash_table_insert(defaults, strdup("roommention.term"),        strdup("yellow"));
+    g_hash_table_insert(defaults, strdup("roomtrigger"),             strdup("yellow"));
+    g_hash_table_insert(defaults, strdup("roomtrigger.term"),        strdup("yellow"));
+    g_hash_table_insert(defaults, strdup("online"),                  strdup("green"));
+    g_hash_table_insert(defaults, strdup("offline"),                 strdup("red"));
+    g_hash_table_insert(defaults, strdup("away"),                    strdup("cyan"));
+    g_hash_table_insert(defaults, strdup("chat"),                    strdup("green"));
+    g_hash_table_insert(defaults, strdup("dnd"),                     strdup("red"));
+    g_hash_table_insert(defaults, strdup("xa"),                      strdup("cyan"));
+    g_hash_table_insert(defaults, strdup("typing"),                  strdup("yellow"));
+    g_hash_table_insert(defaults, strdup("gone"),                    strdup("red"));
+    g_hash_table_insert(defaults, strdup("subscribed"),              strdup("green"));
+    g_hash_table_insert(defaults, strdup("unsubscribed"),            strdup("red"));
+    g_hash_table_insert(defaults, strdup("otr.started.trusted"),     strdup("green"));
+    g_hash_table_insert(defaults, strdup("otr.started.untrusted"),   strdup("yellow"));
+    g_hash_table_insert(defaults, strdup("otr.ended"),               strdup("red"));
+    g_hash_table_insert(defaults, strdup("otr.trusted"),             strdup("green"));
+    g_hash_table_insert(defaults, strdup("otr.untrusted"),           strdup("yellow"));
+    g_hash_table_insert(defaults, strdup("roster.header"),           strdup("yellow"));
+    g_hash_table_insert(defaults, strdup("roster.online"),           strdup("green"));
+    g_hash_table_insert(defaults, strdup("roster.offline"),          strdup("red"));
+    g_hash_table_insert(defaults, strdup("roster.chat"),             strdup("green"));
+    g_hash_table_insert(defaults, strdup("roster.away"),             strdup("cyan"));
+    g_hash_table_insert(defaults, strdup("roster.dnd"),              strdup("red"));
+    g_hash_table_insert(defaults, strdup("roster.xa"),               strdup("cyan"));
+    g_hash_table_insert(defaults, strdup("roster.online.active"),    strdup("green"));
+    g_hash_table_insert(defaults, strdup("roster.offline.active"),   strdup("red"));
+    g_hash_table_insert(defaults, strdup("roster.chat.active"),      strdup("green"));
+    g_hash_table_insert(defaults, strdup("roster.away.active"),      strdup("cyan"));
+    g_hash_table_insert(defaults, strdup("roster.dnd.active"),       strdup("red"));
+    g_hash_table_insert(defaults, strdup("roster.xa.active"),        strdup("cyan"));
+    g_hash_table_insert(defaults, strdup("roster.online.unread"),    strdup("green"));
+    g_hash_table_insert(defaults, strdup("roster.offline.unread"),   strdup("red"));
+    g_hash_table_insert(defaults, strdup("roster.chat.unread"),      strdup("green"));
+    g_hash_table_insert(defaults, strdup("roster.away.unread"),      strdup("cyan"));
+    g_hash_table_insert(defaults, strdup("roster.dnd.unread"),       strdup("red"));
+    g_hash_table_insert(defaults, strdup("roster.xa.unread"),        strdup("cyan"));
+    g_hash_table_insert(defaults, strdup("roster.room"),             strdup("green"));
+    g_hash_table_insert(defaults, strdup("roster.room.unread"),      strdup("green"));
+    g_hash_table_insert(defaults, strdup("roster.room.trigger"),     strdup("green"));
+    g_hash_table_insert(defaults, strdup("roster.room.mention"),     strdup("green"));
+    g_hash_table_insert(defaults, strdup("occupants.header"),        strdup("yellow"));
+
+    _load_preferences();
+}
+
+gboolean
+theme_exists(const char *const theme_name)
+{
+    if (g_strcmp0(theme_name, "default") == 0) {
+        return TRUE;
+    }
+
+    GString *new_theme_file = _theme_find(theme_name);
+    if (new_theme_file == NULL) {
+        return FALSE;
+    }
+
+    g_string_free(new_theme_file, TRUE);
+    return TRUE;
 }
 
 gboolean
@@ -124,7 +219,7 @@ GSList*
 theme_list(void)
 {
     GSList *result = NULL;
-    char *themes_dir = _get_themes_dir();
+    char *themes_dir = files_get_config_path(DIR_THEMES);
     _theme_list_dir(themes_dir, &result);
     free(themes_dir);
 #ifdef THEMES_PATH
@@ -151,6 +246,10 @@ theme_close(void)
     if (str_to_pair) {
         g_hash_table_destroy(str_to_pair);
         str_to_pair = NULL;
+    }
+    if (defaults) {
+        g_hash_table_destroy(defaults);
+        defaults = NULL;
     }
 }
 
@@ -284,29 +383,10 @@ _load_preferences(void)
     _set_boolean_preference("splash", PREF_SPLASH);
     _set_boolean_preference("wrap", PREF_WRAP);
     _set_boolean_preference("wins.autotidy", PREF_WINS_AUTO_TIDY);
-    _set_string_preference("time.console", PREF_TIME_CONSOLE);
-    _set_string_preference("time.chat", PREF_TIME_CHAT);
-    _set_string_preference("time.muc", PREF_TIME_MUC);
-    _set_string_preference("time.mucconfig", PREF_TIME_MUCCONFIG);
-    _set_string_preference("time.private", PREF_TIME_PRIVATE);
-    _set_string_preference("time.xmlconsole", PREF_TIME_XMLCONSOLE);
-    _set_string_preference("time.statusbar", PREF_TIME_STATUSBAR);
-    _set_string_preference("time.lastactivity", PREF_TIME_LASTACTIVITY);
-
     _set_boolean_preference("resource.title", PREF_RESOURCE_TITLE);
     _set_boolean_preference("resource.message", PREF_RESOURCE_MESSAGE);
-
-    _set_string_preference("statuses.console", PREF_STATUSES_CONSOLE);
-    _set_string_preference("statuses.chat", PREF_STATUSES_CHAT);
-    _set_string_preference("statuses.muc", PREF_STATUSES_MUC);
-
     _set_boolean_preference("occupants", PREF_OCCUPANTS);
     _set_boolean_preference("occupants.jid", PREF_OCCUPANTS_JID);
-    if (g_key_file_has_key(theme, "ui", "occupants.size", NULL)) {
-        gint occupants_size = g_key_file_get_integer(theme, "ui", "occupants.size", NULL);
-        prefs_set_occupants_size(occupants_size);
-    }
-
     _set_boolean_preference("roster", PREF_ROSTER);
     _set_boolean_preference("roster.offline", PREF_ROSTER_OFFLINE);
     _set_boolean_preference("roster.resource", PREF_ROSTER_RESOURCE);
@@ -315,20 +395,51 @@ _load_preferences(void)
     _set_boolean_preference("roster.status", PREF_ROSTER_STATUS);
     _set_boolean_preference("roster.empty", PREF_ROSTER_EMPTY);
     _set_boolean_preference("roster.wrap", PREF_ROSTER_WRAP);
+    _set_boolean_preference("roster.count.zero", PREF_ROSTER_COUNT_ZERO);
+    _set_boolean_preference("roster.priority", PREF_ROSTER_PRIORITY);
+    _set_boolean_preference("roster.contacts", PREF_ROSTER_CONTACTS);
+    _set_boolean_preference("roster.unsubscribed", PREF_ROSTER_UNSUBSCRIBED);
+    _set_boolean_preference("roster.rooms", PREF_ROSTER_ROOMS);
+    _set_boolean_preference("privileges", PREF_MUC_PRIVILEGES);
+    _set_boolean_preference("presence", PREF_PRESENCE);
+    _set_boolean_preference("intype", PREF_INTYPE);
+    _set_boolean_preference("enc.warn", PREF_ENC_WARN);
+    _set_boolean_preference("tls.show", PREF_TLS_SHOW);
+
+    _set_string_preference("time.console", PREF_TIME_CONSOLE);
+    _set_string_preference("time.chat", PREF_TIME_CHAT);
+    _set_string_preference("time.muc", PREF_TIME_MUC);
+    _set_string_preference("time.mucconfig", PREF_TIME_MUCCONFIG);
+    _set_string_preference("time.private", PREF_TIME_PRIVATE);
+    _set_string_preference("time.xmlconsole", PREF_TIME_XMLCONSOLE);
+    _set_string_preference("time.statusbar", PREF_TIME_STATUSBAR);
+    _set_string_preference("time.lastactivity", PREF_TIME_LASTACTIVITY);
+    _set_string_preference("statuses.console", PREF_STATUSES_CONSOLE);
+    _set_string_preference("statuses.chat", PREF_STATUSES_CHAT);
+    _set_string_preference("statuses.muc", PREF_STATUSES_MUC);
+    _set_string_preference("console.muc", PREF_CONSOLE_MUC);
+    _set_string_preference("console.private", PREF_CONSOLE_PRIVATE);
+    _set_string_preference("console.chat", PREF_CONSOLE_CHAT);
     _set_string_preference("roster.by", PREF_ROSTER_BY);
     _set_string_preference("roster.order", PREF_ROSTER_ORDER);
     _set_string_preference("roster.unread", PREF_ROSTER_UNREAD);
-    _set_boolean_preference("roster.count", PREF_ROSTER_COUNT);
-    _set_boolean_preference("roster.priority", PREF_ROSTER_PRIORITY);
-    _set_boolean_preference("roster.contacts", PREF_ROSTER_CONTACTS);
-    _set_boolean_preference("roster.rooms", PREF_ROSTER_ROOMS);
     _set_string_preference("roster.rooms.order", PREF_ROSTER_ROOMS_ORDER);
     _set_string_preference("roster.rooms.unread", PREF_ROSTER_ROOMS_UNREAD);
     _set_string_preference("roster.rooms.pos", PREF_ROSTER_ROOMS_POS);
+    _set_string_preference("roster.rooms.by", PREF_ROSTER_ROOMS_BY);
+    _set_string_preference("roster.private", PREF_ROSTER_PRIVATE);
+    _set_string_preference("roster.count", PREF_ROSTER_COUNT);
+
+    if (g_key_file_has_key(theme, "ui", "occupants.size", NULL)) {
+        gint occupants_size = g_key_file_get_integer(theme, "ui", "occupants.size", NULL);
+        prefs_set_occupants_size(occupants_size);
+    }
+
     if (g_key_file_has_key(theme, "ui", "roster.size", NULL)) {
         gint roster_size = g_key_file_get_integer(theme, "ui", "roster.size", NULL);
         prefs_set_roster_size(roster_size);
     }
+
     if (g_key_file_has_key(theme, "ui", "roster.header.char", NULL)) {
         gchar *ch = g_key_file_get_string(theme, "ui", "roster.header.char", NULL);
         if (ch && strlen(ch) > 0) {
@@ -338,6 +449,7 @@ _load_preferences(void)
     } else {
         prefs_clear_roster_header_char();
     }
+
     if (g_key_file_has_key(theme, "ui", "roster.contact.char", NULL)) {
         gchar *ch = g_key_file_get_string(theme, "ui", "roster.contact.char", NULL);
         if (ch && strlen(ch) > 0) {
@@ -347,6 +459,7 @@ _load_preferences(void)
     } else {
         prefs_clear_roster_contact_char();
     }
+
     if (g_key_file_has_key(theme, "ui", "roster.resource.char", NULL)) {
         gchar *ch = g_key_file_get_string(theme, "ui", "roster.resource.char", NULL);
         if (ch && strlen(ch) > 0) {
@@ -356,26 +469,51 @@ _load_preferences(void)
     } else {
         prefs_clear_roster_resource_char();
     }
+
+    if (g_key_file_has_key(theme, "ui", "roster.rooms.char", NULL)) {
+        gchar *ch = g_key_file_get_string(theme, "ui", "roster.rooms.char", NULL);
+        if (ch && strlen(ch) > 0) {
+            prefs_set_roster_room_char(ch[0]);
+            g_free(ch);
+        }
+    } else {
+        prefs_clear_roster_room_char();
+    }
+
+    if (g_key_file_has_key(theme, "ui", "roster.rooms.private.char", NULL)) {
+        gchar *ch = g_key_file_get_string(theme, "ui", "roster.rooms.private.char", NULL);
+        if (ch && strlen(ch) > 0) {
+            prefs_set_roster_room_private_char(ch[0]);
+            g_free(ch);
+        }
+    } else {
+        prefs_clear_roster_room_private_char();
+    }
+
+    if (g_key_file_has_key(theme, "ui", "roster.private.char", NULL)) {
+        gchar *ch = g_key_file_get_string(theme, "ui", "roster.private.char", NULL);
+        if (ch && strlen(ch) > 0) {
+            prefs_set_roster_private_char(ch[0]);
+            g_free(ch);
+        }
+    } else {
+        prefs_clear_roster_private_char();
+    }
+
     if (g_key_file_has_key(theme, "ui", "roster.contact.indent", NULL)) {
         gint contact_indent = g_key_file_get_integer(theme, "ui", "roster.contact.indent", NULL);
         prefs_set_roster_contact_indent(contact_indent);
     }
+
     if (g_key_file_has_key(theme, "ui", "roster.resource.indent", NULL)) {
         gint resource_indent = g_key_file_get_integer(theme, "ui", "roster.resource.indent", NULL);
         prefs_set_roster_resource_indent(resource_indent);
     }
+
     if (g_key_file_has_key(theme, "ui", "roster.presence.indent", NULL)) {
         gint presence_indent = g_key_file_get_integer(theme, "ui", "roster.presence.indent", NULL);
         prefs_set_roster_presence_indent(presence_indent);
     }
-
-    _set_boolean_preference("privileges", PREF_MUC_PRIVILEGES);
-
-    _set_boolean_preference("presence", PREF_PRESENCE);
-    _set_boolean_preference("intype", PREF_INTYPE);
-
-    _set_boolean_preference("enc.warn", PREF_ENC_WARN);
-    _set_boolean_preference("tls.show", PREF_TLS_SHOW);
 
     if (g_key_file_has_key(theme, "ui", "otr.char", NULL)) {
         gchar *ch = g_key_file_get_string(theme, "ui", "otr.char", NULL);
@@ -384,6 +522,7 @@ _load_preferences(void)
             g_free(ch);
         }
     }
+
     if (g_key_file_has_key(theme, "ui", "pgp.char", NULL)) {
         gchar *ch = g_key_file_get_string(theme, "ui", "pgp.char", NULL);
         if (ch && strlen(ch) > 0) {
@@ -392,17 +531,18 @@ _load_preferences(void)
         }
     }
 
-    _set_string_preference("console.muc", PREF_CONSOLE_MUC);
-}
-
-static gchar*
-_get_themes_dir(void)
-{
-    gchar *xdg_config = xdg_get_config_home();
-    GString *themes_dir = g_string_new(xdg_config);
-    g_free(xdg_config);
-    g_string_append(themes_dir, "/profanity/themes");
-    return g_string_free(themes_dir, FALSE);
+    if (g_key_file_has_key(theme, "ui", "titlebar.position", NULL) &&
+            g_key_file_has_key(theme, "ui", "mainwin.position", NULL) &&
+            g_key_file_has_key(theme, "ui", "statusbar.position", NULL) &&
+            g_key_file_has_key(theme, "ui", "inputwin.position", NULL)) {
+        int titlebar_pos = g_key_file_get_integer(theme, "ui", "titlebar.position", NULL);
+        int mainwin_pos = g_key_file_get_integer(theme, "ui", "mainwin.position", NULL);
+        int statusbar_pos = g_key_file_get_integer(theme, "ui", "statusbar.position", NULL);
+        int inputwin_pos = g_key_file_get_integer(theme, "ui", "inputwin.position", NULL);
+        ProfWinPlacement *placement = prefs_create_profwin_placement(titlebar_pos, mainwin_pos, statusbar_pos, inputwin_pos);
+        prefs_save_win_placement(placement);
+        prefs_free_win_placement(placement);
+    }
 }
 
 void
@@ -423,11 +563,11 @@ static GString*
 _theme_find(const char *const theme_name)
 {
     GString *path = NULL;
-    gchar *themes_dir = _get_themes_dir();
+    char *themes_dir = files_get_config_path(DIR_THEMES);
 
     if (themes_dir) {
         path = g_string_new(themes_dir);
-        g_free(themes_dir);
+        free(themes_dir);
         g_string_append(path, "/");
         g_string_append(path, theme_name);
         if (!g_file_test(path->str, G_FILE_TEST_EXISTS)) {
@@ -540,10 +680,11 @@ _theme_prep_bgnd(char *setting, char *def, GString *lookup_str)
 }
 
 static void
-_theme_prep_fgnd(char *setting, char *def, GString *lookup_str, gboolean *bold)
+_theme_prep_fgnd(char *setting, GString *lookup_str, gboolean *bold)
 {
     gchar *val = g_key_file_get_string(theme, "colours", setting, NULL);
     if (!val) {
+        char *def = g_hash_table_lookup(defaults, setting);
         g_string_append(lookup_str, def);
     } else {
         if (g_str_has_prefix(val, "bold_")) {
@@ -557,6 +698,25 @@ _theme_prep_fgnd(char *setting, char *def, GString *lookup_str, gboolean *bold)
     g_free(val);
 }
 
+char*
+theme_get_string(char *str)
+{
+    char *res = g_key_file_get_string(theme, "colours", str, NULL);
+    if (!res) {
+        return strdup(g_hash_table_lookup(defaults, str));
+    } else {
+        return res;
+    }
+}
+
+void
+theme_free_string(char *str)
+{
+    if (str) {
+        g_free(str);
+    }
+}
+
 int
 theme_attrs(theme_item_t attrs)
 {
@@ -567,72 +727,79 @@ theme_attrs(theme_item_t attrs)
 
     // get forground colour
     switch (attrs) {
-    case THEME_TEXT:                    _theme_prep_fgnd("main.text",               "white",    lookup_str, &bold); break;
-    case THEME_TEXT_ME:                 _theme_prep_fgnd("main.text.me",            "white",    lookup_str, &bold); break;
-    case THEME_TEXT_THEM:               _theme_prep_fgnd("main.text.them",          "white",    lookup_str, &bold); break;
-    case THEME_SPLASH:                  _theme_prep_fgnd("main.splash",             "cyan",     lookup_str, &bold); break;
-    case THEME_ERROR:                   _theme_prep_fgnd("error",                   "red",      lookup_str, &bold); break;
-    case THEME_INCOMING:                _theme_prep_fgnd("incoming",                "yellow",   lookup_str, &bold); break;
-    case THEME_INPUT_TEXT:              _theme_prep_fgnd("input.text",              "white",    lookup_str, &bold); break;
-    case THEME_TIME:                    _theme_prep_fgnd("main.time",               "white",    lookup_str, &bold); break;
-    case THEME_TITLE_TEXT:              _theme_prep_fgnd("titlebar.text",           "white",    lookup_str, &bold); break;
-    case THEME_TITLE_BRACKET:           _theme_prep_fgnd("titlebar.brackets",       "cyan",     lookup_str, &bold); break;
-    case THEME_TITLE_UNENCRYPTED:       _theme_prep_fgnd("titlebar.unencrypted",    "red",      lookup_str, &bold); break;
-    case THEME_TITLE_ENCRYPTED:         _theme_prep_fgnd("titlebar.encrypted",      "white",    lookup_str, &bold); break;
-    case THEME_TITLE_UNTRUSTED:         _theme_prep_fgnd("titlebar.untrusted",      "yellow",   lookup_str, &bold); break;
-    case THEME_TITLE_TRUSTED:           _theme_prep_fgnd("titlebar.trusted",        "white",    lookup_str, &bold); break;
-    case THEME_TITLE_ONLINE:            _theme_prep_fgnd("titlebar.online",         "white",    lookup_str, &bold); break;
-    case THEME_TITLE_OFFLINE:           _theme_prep_fgnd("titlebar.offline",        "white",    lookup_str, &bold); break;
-    case THEME_TITLE_AWAY:              _theme_prep_fgnd("titlebar.away",           "white",    lookup_str, &bold); break;
-    case THEME_TITLE_CHAT:              _theme_prep_fgnd("titlebar.chat",           "white",    lookup_str, &bold); break;
-    case THEME_TITLE_DND:               _theme_prep_fgnd("titlebar.dnd",            "white",    lookup_str, &bold); break;
-    case THEME_TITLE_XA:                _theme_prep_fgnd("titlebar.xa",             "white",    lookup_str, &bold); break;
-    case THEME_STATUS_TEXT:             _theme_prep_fgnd("statusbar.text",          "white",    lookup_str, &bold); break;
-    case THEME_STATUS_BRACKET:          _theme_prep_fgnd("statusbar.brackets",      "cyan",     lookup_str, &bold); break;
-    case THEME_STATUS_ACTIVE:           _theme_prep_fgnd("statusbar.active",        "cyan",     lookup_str, &bold); break;
-    case THEME_STATUS_NEW:              _theme_prep_fgnd("statusbar.new",           "white",    lookup_str, &bold); break;
-    case THEME_ME:                      _theme_prep_fgnd("me",                      "yellow",   lookup_str, &bold); break;
-    case THEME_THEM:                    _theme_prep_fgnd("them",                    "green",    lookup_str, &bold); break;
-    case THEME_RECEIPT_SENT:            _theme_prep_fgnd("receipt.sent",            "red",      lookup_str, &bold); break;
-    case THEME_ROOMINFO:                _theme_prep_fgnd("roominfo",                "yellow",   lookup_str, &bold); break;
-    case THEME_ROOMMENTION:             _theme_prep_fgnd("roommention",             "yellow",   lookup_str, &bold); break;
-    case THEME_ONLINE:                  _theme_prep_fgnd("online",                  "green",    lookup_str, &bold); break;
-    case THEME_OFFLINE:                 _theme_prep_fgnd("offline",                 "red",      lookup_str, &bold); break;
-    case THEME_AWAY:                    _theme_prep_fgnd("away",                    "cyan",     lookup_str, &bold); break;
-    case THEME_CHAT:                    _theme_prep_fgnd("chat",                    "green",    lookup_str, &bold); break;
-    case THEME_DND:                     _theme_prep_fgnd("dnd",                     "red",      lookup_str, &bold); break;
-    case THEME_XA:                      _theme_prep_fgnd("xa",                      "cyan",     lookup_str, &bold); break;
-    case THEME_TYPING:                  _theme_prep_fgnd("typing",                  "yellow",   lookup_str, &bold); break;
-    case THEME_GONE:                    _theme_prep_fgnd("gone",                    "red",      lookup_str, &bold); break;
-    case THEME_SUBSCRIBED:              _theme_prep_fgnd("subscribed",              "green",    lookup_str, &bold); break;
-    case THEME_UNSUBSCRIBED:            _theme_prep_fgnd("unsubscribed",            "red",      lookup_str, &bold); break;
-    case THEME_OTR_STARTED_TRUSTED:     _theme_prep_fgnd("otr.started.trusted",     "green",    lookup_str, &bold); break;
-    case THEME_OTR_STARTED_UNTRUSTED:   _theme_prep_fgnd("otr.started.untrusted",   "yellow",   lookup_str, &bold); break;
-    case THEME_OTR_ENDED:               _theme_prep_fgnd("otr.ended",               "red",      lookup_str, &bold); break;
-    case THEME_OTR_TRUSTED:             _theme_prep_fgnd("otr.trusted",             "green",    lookup_str, &bold); break;
-    case THEME_OTR_UNTRUSTED:           _theme_prep_fgnd("otr.untrusted",           "yellow",   lookup_str, &bold); break;
-    case THEME_ROSTER_HEADER:           _theme_prep_fgnd("roster.header",           "yellow",   lookup_str, &bold); break;
-    case THEME_ROSTER_ONLINE:           _theme_prep_fgnd("roster.online",           "green",    lookup_str, &bold); break;
-    case THEME_ROSTER_OFFLINE:          _theme_prep_fgnd("roster.offline",          "red",      lookup_str, &bold); break;
-    case THEME_ROSTER_CHAT:             _theme_prep_fgnd("roster.chat",             "green",    lookup_str, &bold); break;
-    case THEME_ROSTER_AWAY:             _theme_prep_fgnd("roster.away",             "cyan",     lookup_str, &bold); break;
-    case THEME_ROSTER_DND:              _theme_prep_fgnd("roster.dnd",              "red",      lookup_str, &bold); break;
-    case THEME_ROSTER_XA:               _theme_prep_fgnd("roster.xa",               "cyan",     lookup_str, &bold); break;
-    case THEME_ROSTER_ONLINE_ACTIVE:    _theme_prep_fgnd("roster.online.active",    "green",    lookup_str, &bold); break;
-    case THEME_ROSTER_OFFLINE_ACTIVE:   _theme_prep_fgnd("roster.offline.active",   "red",      lookup_str, &bold); break;
-    case THEME_ROSTER_CHAT_ACTIVE:      _theme_prep_fgnd("roster.chat.active",      "green",    lookup_str, &bold); break;
-    case THEME_ROSTER_AWAY_ACTIVE:      _theme_prep_fgnd("roster.away.active",      "cyan",     lookup_str, &bold); break;
-    case THEME_ROSTER_DND_ACTIVE:       _theme_prep_fgnd("roster.dnd.active",       "red",      lookup_str, &bold); break;
-    case THEME_ROSTER_XA_ACTIVE:        _theme_prep_fgnd("roster.xa.active",        "cyan",     lookup_str, &bold); break;
-    case THEME_ROSTER_ONLINE_UNREAD:    _theme_prep_fgnd("roster.online.unread",    "green",    lookup_str, &bold); break;
-    case THEME_ROSTER_OFFLINE_UNREAD:   _theme_prep_fgnd("roster.offline.unread",   "red",      lookup_str, &bold); break;
-    case THEME_ROSTER_CHAT_UNREAD:      _theme_prep_fgnd("roster.chat.unread",      "green",    lookup_str, &bold); break;
-    case THEME_ROSTER_AWAY_UNREAD:      _theme_prep_fgnd("roster.away.unread",      "cyan",     lookup_str, &bold); break;
-    case THEME_ROSTER_DND_UNREAD:       _theme_prep_fgnd("roster.dnd.unread",       "red",      lookup_str, &bold); break;
-    case THEME_ROSTER_XA_UNREAD:        _theme_prep_fgnd("roster.xa.unread",        "cyan",     lookup_str, &bold); break;
-    case THEME_ROSTER_ROOM:             _theme_prep_fgnd("roster.room",             "green",    lookup_str, &bold); break;
-    case THEME_ROSTER_ROOM_UNREAD:      _theme_prep_fgnd("roster.room.unread",      "green",    lookup_str, &bold); break;
-    case THEME_OCCUPANTS_HEADER:        _theme_prep_fgnd("occupants.header",        "yellow",   lookup_str, &bold); break;
+    case THEME_TEXT:                    _theme_prep_fgnd("main.text",               lookup_str, &bold); break;
+    case THEME_TEXT_ME:                 _theme_prep_fgnd("main.text.me",            lookup_str, &bold); break;
+    case THEME_TEXT_THEM:               _theme_prep_fgnd("main.text.them",          lookup_str, &bold); break;
+    case THEME_SPLASH:                  _theme_prep_fgnd("main.splash",             lookup_str, &bold); break;
+    case THEME_ERROR:                   _theme_prep_fgnd("error",                   lookup_str, &bold); break;
+    case THEME_INCOMING:                _theme_prep_fgnd("incoming",                lookup_str, &bold); break;
+    case THEME_MENTION:                 _theme_prep_fgnd("mention",                 lookup_str, &bold); break;
+    case THEME_TRIGGER:                 _theme_prep_fgnd("trigger",                 lookup_str, &bold); break;
+    case THEME_INPUT_TEXT:              _theme_prep_fgnd("input.text",              lookup_str, &bold); break;
+    case THEME_TIME:                    _theme_prep_fgnd("main.time",               lookup_str, &bold); break;
+    case THEME_TITLE_TEXT:              _theme_prep_fgnd("titlebar.text",           lookup_str, &bold); break;
+    case THEME_TITLE_BRACKET:           _theme_prep_fgnd("titlebar.brackets",       lookup_str, &bold); break;
+    case THEME_TITLE_UNENCRYPTED:       _theme_prep_fgnd("titlebar.unencrypted",    lookup_str, &bold); break;
+    case THEME_TITLE_ENCRYPTED:         _theme_prep_fgnd("titlebar.encrypted",      lookup_str, &bold); break;
+    case THEME_TITLE_UNTRUSTED:         _theme_prep_fgnd("titlebar.untrusted",      lookup_str, &bold); break;
+    case THEME_TITLE_TRUSTED:           _theme_prep_fgnd("titlebar.trusted",        lookup_str, &bold); break;
+    case THEME_TITLE_ONLINE:            _theme_prep_fgnd("titlebar.online",         lookup_str, &bold); break;
+    case THEME_TITLE_OFFLINE:           _theme_prep_fgnd("titlebar.offline",        lookup_str, &bold); break;
+    case THEME_TITLE_AWAY:              _theme_prep_fgnd("titlebar.away",           lookup_str, &bold); break;
+    case THEME_TITLE_CHAT:              _theme_prep_fgnd("titlebar.chat",           lookup_str, &bold); break;
+    case THEME_TITLE_DND:               _theme_prep_fgnd("titlebar.dnd",            lookup_str, &bold); break;
+    case THEME_TITLE_XA:                _theme_prep_fgnd("titlebar.xa",             lookup_str, &bold); break;
+    case THEME_STATUS_TEXT:             _theme_prep_fgnd("statusbar.text",          lookup_str, &bold); break;
+    case THEME_STATUS_BRACKET:          _theme_prep_fgnd("statusbar.brackets",      lookup_str, &bold); break;
+    case THEME_STATUS_ACTIVE:           _theme_prep_fgnd("statusbar.active",        lookup_str, &bold); break;
+    case THEME_STATUS_NEW:              _theme_prep_fgnd("statusbar.new",           lookup_str, &bold); break;
+    case THEME_ME:                      _theme_prep_fgnd("me",                      lookup_str, &bold); break;
+    case THEME_THEM:                    _theme_prep_fgnd("them",                    lookup_str, &bold); break;
+    case THEME_RECEIPT_SENT:            _theme_prep_fgnd("receipt.sent",            lookup_str, &bold); break;
+    case THEME_ROOMINFO:                _theme_prep_fgnd("roominfo",                lookup_str, &bold); break;
+    case THEME_ROOMMENTION:             _theme_prep_fgnd("roommention",             lookup_str, &bold); break;
+    case THEME_ROOMMENTION_TERM:        _theme_prep_fgnd("roommention.term",        lookup_str, &bold); break;
+    case THEME_ROOMTRIGGER:             _theme_prep_fgnd("roomtrigger",             lookup_str, &bold); break;
+    case THEME_ROOMTRIGGER_TERM:        _theme_prep_fgnd("roomtrigger.term",        lookup_str, &bold); break;
+    case THEME_ONLINE:                  _theme_prep_fgnd("online",                  lookup_str, &bold); break;
+    case THEME_OFFLINE:                 _theme_prep_fgnd("offline",                 lookup_str, &bold); break;
+    case THEME_AWAY:                    _theme_prep_fgnd("away",                    lookup_str, &bold); break;
+    case THEME_CHAT:                    _theme_prep_fgnd("chat",                    lookup_str, &bold); break;
+    case THEME_DND:                     _theme_prep_fgnd("dnd",                     lookup_str, &bold); break;
+    case THEME_XA:                      _theme_prep_fgnd("xa",                      lookup_str, &bold); break;
+    case THEME_TYPING:                  _theme_prep_fgnd("typing",                  lookup_str, &bold); break;
+    case THEME_GONE:                    _theme_prep_fgnd("gone",                    lookup_str, &bold); break;
+    case THEME_SUBSCRIBED:              _theme_prep_fgnd("subscribed",              lookup_str, &bold); break;
+    case THEME_UNSUBSCRIBED:            _theme_prep_fgnd("unsubscribed",            lookup_str, &bold); break;
+    case THEME_OTR_STARTED_TRUSTED:     _theme_prep_fgnd("otr.started.trusted",     lookup_str, &bold); break;
+    case THEME_OTR_STARTED_UNTRUSTED:   _theme_prep_fgnd("otr.started.untrusted",   lookup_str, &bold); break;
+    case THEME_OTR_ENDED:               _theme_prep_fgnd("otr.ended",               lookup_str, &bold); break;
+    case THEME_OTR_TRUSTED:             _theme_prep_fgnd("otr.trusted",             lookup_str, &bold); break;
+    case THEME_OTR_UNTRUSTED:           _theme_prep_fgnd("otr.untrusted",           lookup_str, &bold); break;
+    case THEME_ROSTER_HEADER:           _theme_prep_fgnd("roster.header",           lookup_str, &bold); break;
+    case THEME_ROSTER_ONLINE:           _theme_prep_fgnd("roster.online",           lookup_str, &bold); break;
+    case THEME_ROSTER_OFFLINE:          _theme_prep_fgnd("roster.offline",          lookup_str, &bold); break;
+    case THEME_ROSTER_CHAT:             _theme_prep_fgnd("roster.chat",             lookup_str, &bold); break;
+    case THEME_ROSTER_AWAY:             _theme_prep_fgnd("roster.away",             lookup_str, &bold); break;
+    case THEME_ROSTER_DND:              _theme_prep_fgnd("roster.dnd",              lookup_str, &bold); break;
+    case THEME_ROSTER_XA:               _theme_prep_fgnd("roster.xa",               lookup_str, &bold); break;
+    case THEME_ROSTER_ONLINE_ACTIVE:    _theme_prep_fgnd("roster.online.active",    lookup_str, &bold); break;
+    case THEME_ROSTER_OFFLINE_ACTIVE:   _theme_prep_fgnd("roster.offline.active",   lookup_str, &bold); break;
+    case THEME_ROSTER_CHAT_ACTIVE:      _theme_prep_fgnd("roster.chat.active",      lookup_str, &bold); break;
+    case THEME_ROSTER_AWAY_ACTIVE:      _theme_prep_fgnd("roster.away.active",      lookup_str, &bold); break;
+    case THEME_ROSTER_DND_ACTIVE:       _theme_prep_fgnd("roster.dnd.active",       lookup_str, &bold); break;
+    case THEME_ROSTER_XA_ACTIVE:        _theme_prep_fgnd("roster.xa.active",        lookup_str, &bold); break;
+    case THEME_ROSTER_ONLINE_UNREAD:    _theme_prep_fgnd("roster.online.unread",    lookup_str, &bold); break;
+    case THEME_ROSTER_OFFLINE_UNREAD:   _theme_prep_fgnd("roster.offline.unread",   lookup_str, &bold); break;
+    case THEME_ROSTER_CHAT_UNREAD:      _theme_prep_fgnd("roster.chat.unread",      lookup_str, &bold); break;
+    case THEME_ROSTER_AWAY_UNREAD:      _theme_prep_fgnd("roster.away.unread",      lookup_str, &bold); break;
+    case THEME_ROSTER_DND_UNREAD:       _theme_prep_fgnd("roster.dnd.unread",       lookup_str, &bold); break;
+    case THEME_ROSTER_XA_UNREAD:        _theme_prep_fgnd("roster.xa.unread",        lookup_str, &bold); break;
+    case THEME_ROSTER_ROOM:             _theme_prep_fgnd("roster.room",             lookup_str, &bold); break;
+    case THEME_ROSTER_ROOM_UNREAD:      _theme_prep_fgnd("roster.room.unread",      lookup_str, &bold); break;
+    case THEME_ROSTER_ROOM_TRIGGER:     _theme_prep_fgnd("roster.room.trigger",     lookup_str, &bold); break;
+    case THEME_ROSTER_ROOM_MENTION:     _theme_prep_fgnd("roster.room.mention",     lookup_str, &bold); break;
+    case THEME_OCCUPANTS_HEADER:        _theme_prep_fgnd("occupants.header",        lookup_str, &bold); break;
     case THEME_WHITE:                   g_string_append(lookup_str, "white");   bold = FALSE;   break;
     case THEME_WHITE_BOLD:              g_string_append(lookup_str, "white");   bold = TRUE;    break;
     case THEME_GREEN:                   g_string_append(lookup_str, "green");   bold = FALSE;   break;

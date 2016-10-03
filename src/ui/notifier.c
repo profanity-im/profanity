@@ -1,7 +1,7 @@
 /*
  * notifier.c
  *
- * Copyright (C) 2012 - 2015 James Booth <boothj5@gmail.com>
+ * Copyright (C) 2012 - 2016 James Booth <boothj5@gmail.com>
  *
  * This file is part of Profanity.
  *
@@ -16,7 +16,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Profanity.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Profanity.  If not, see <https://www.gnu.org/licenses/>.
  *
  * In addition, as a special exception, the copyright holders give permission to
  * link the code of portions of this program with the OpenSSL library under
@@ -38,20 +38,21 @@
 #include <stdlib.h>
 
 #include <glib.h>
+
 #ifdef HAVE_LIBNOTIFY
 #include <libnotify/notify.h>
 #endif
+
 #ifdef PLATFORM_CYGWIN
 #include <windows.h>
 #endif
 
 #include "log.h"
-#include "muc.h"
-#include "ui/ui.h"
-#include "window_list.h"
 #include "config/preferences.h"
-
-static void _notify(const char *const message, int timeout, const char *const category);
+#include "ui/ui.h"
+#include "ui/window_list.h"
+#include "xmpp/xmpp.h"
+#include "xmpp/muc.h"
 
 static GTimer *remind_timer;
 
@@ -78,7 +79,7 @@ notify_typing(const char *const name)
     char message[strlen(name) + 1 + 11];
     sprintf(message, "%s: typing...", name);
 
-    _notify(message, 10000, "Incoming message");
+    notify(message, 10000, "Incoming message");
 }
 
 void
@@ -92,35 +93,44 @@ notify_invite(const char *const from, const char *const room, const char *const 
         g_string_append_printf(message, "\n\"%s\"", reason);
     }
 
-    _notify(message->str, 10000, "Incoming message");
+    notify(message->str, 10000, "Incoming message");
 
     g_string_free(message, TRUE);
 }
 
 void
-notify_message(const char *const name, int win, const char *const text)
+notify_message(const char *const name, int num, const char *const text)
 {
+    int ui_index = num;
+    if (ui_index == 10) {
+        ui_index = 0;
+    }
+
     GString *message = g_string_new("");
-    g_string_append_printf(message, "%s (win %d)", name, win);
-    if (text) {
+    g_string_append_printf(message, "%s (win %d)", name, ui_index);
+    if (text && prefs_get_boolean(PREF_NOTIFY_CHAT_TEXT)) {
         g_string_append_printf(message, "\n%s", text);
     }
 
-    _notify(message->str, 10000, "incoming message");
-
+    notify(message->str, 10000, "incoming message");
     g_string_free(message, TRUE);
 }
 
 void
-notify_room_message(const char *const nick, const char *const room, int win, const char *const text)
+notify_room_message(const char *const nick, const char *const room, int num, const char *const text)
 {
+    int ui_index = num;
+    if (ui_index == 10) {
+        ui_index = 0;
+    }
+
     GString *message = g_string_new("");
-    g_string_append_printf(message, "%s in %s (win %d)", nick, room, win);
-    if (text) {
+    g_string_append_printf(message, "%s in %s (win %d)", nick, room, ui_index);
+    if (text && prefs_get_boolean(PREF_NOTIFY_ROOM_TEXT)) {
         g_string_append_printf(message, "\n%s", text);
     }
 
-    _notify(message->str, 10000, "incoming message");
+    notify(message->str, 10000, "incoming message");
 
     g_string_free(message, TRUE);
 }
@@ -130,7 +140,7 @@ notify_subscription(const char *const from)
 {
     GString *message = g_string_new("Subscription request: \n");
     g_string_append(message, from);
-    _notify(message->str, 10000, "Incoming message");
+    notify(message->str, 10000, "Incoming message");
     g_string_free(message, TRUE);
 }
 
@@ -140,14 +150,14 @@ notify_remind(void)
     gdouble elapsed = g_timer_elapsed(remind_timer, NULL);
     gint remind_period = prefs_get_notify_remind();
     if (remind_period > 0 && elapsed >= remind_period) {
-        gboolean notify = wins_get_notify();
+        gboolean donotify = wins_do_notify_remind();
         gint unread = wins_get_total_unread();
         gint open = muc_invites_count();
         gint subs = presence_sub_request_count();
 
         GString *text = g_string_new("");
 
-        if (notify && unread > 0) {
+        if (donotify && unread > 0) {
             if (unread == 1) {
                 g_string_append(text, "1 unread message");
             } else {
@@ -176,8 +186,8 @@ notify_remind(void)
             }
         }
 
-        if ((notify && unread > 0) || (open > 0) || (subs > 0)) {
-            _notify(text->str, 5000, "Incoming message");
+        if ((donotify && unread > 0) || (open > 0) || (subs > 0)) {
+            notify(text->str, 5000, "Incoming message");
         }
 
         g_string_free(text, TRUE);
@@ -186,8 +196,8 @@ notify_remind(void)
     }
 }
 
-static void
-_notify(const char *const message, int timeout, const char *const category)
+void
+notify(const char *const message, int timeout, const char *const category)
 {
 #ifdef HAVE_LIBNOTIFY
     log_debug("Attempting notification: %s", message);

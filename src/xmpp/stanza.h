@@ -1,7 +1,7 @@
 /*
  * stanza.h
  *
- * Copyright (C) 2012 - 2015 James Booth <boothj5@gmail.com>
+ * Copyright (C) 2012 - 2016 James Booth <boothj5@gmail.com>
  *
  * This file is part of Profanity.
  *
@@ -16,7 +16,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Profanity.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Profanity.  If not, see <https://www.gnu.org/licenses/>.
  *
  * In addition, as a special exception, the copyright holders give permission to
  * link the code of portions of this program with the OpenSSL library under
@@ -40,6 +40,7 @@
 #ifdef HAVE_LIBMESODE
 #include <mesode.h>
 #endif
+
 #ifdef HAVE_LIBSTROPHE
 #include <strophe.h>
 #endif
@@ -54,6 +55,9 @@
 
 #define STANZA_NAME_MESSAGE "message"
 #define STANZA_NAME_BODY "body"
+#define STANZA_NAME_BLOCK "block"
+#define STANZA_NAME_UNBLOCK "unblock"
+#define STANZA_NAME_BLOCKLIST "blocklist"
 #define STANZA_NAME_PRESENCE "presence"
 #define STANZA_NAME_PRIORITY "priority"
 #define STANZA_NAME_X "x"
@@ -61,6 +65,7 @@
 #define STANZA_NAME_STATUS "status"
 #define STANZA_NAME_IQ "iq"
 #define STANZA_NAME_QUERY "query"
+#define STANZA_NAME_REQUEST "request"
 #define STANZA_NAME_DELAY "delay"
 #define STANZA_NAME_ERROR "error"
 #define STANZA_NAME_PING "ping"
@@ -87,6 +92,13 @@
 #define STANZA_NAME_ACTOR "actor"
 #define STANZA_NAME_ENABLE "enable"
 #define STANZA_NAME_DISABLE "disable"
+#define STANZA_NAME_FILENAME "filename"
+#define STANZA_NAME_SIZE "size"
+#define STANZA_NAME_CONTENT_TYPE "content-type"
+#define STANZA_NAME_SLOT "slot"
+#define STANZA_NAME_PUT "put"
+#define STANZA_NAME_GET "get"
+#define STANZA_NAME_URL "url"
 
 // error conditions
 #define STANZA_NAME_BAD_REQUEST "bad-request"
@@ -171,6 +183,9 @@
 #define STANZA_NS_RECEIPTS "urn:xmpp:receipts"
 #define STANZA_NS_SIGNED "jabber:x:signed"
 #define STANZA_NS_ENCRYPTED "jabber:x:encrypted"
+#define STANZA_NS_HTTP_UPLOAD "urn:xmpp:http:upload"
+#define STANZA_NS_X_OOB "jabber:x:oob"
+#define STANZA_NS_BLOCKING "urn:xmpp:blocking"
 
 #define STANZA_DATAFORM_SOFTWARE "urn:xmpp:dataforms:softwareinfo"
 
@@ -195,6 +210,10 @@ typedef enum {
 
 xmpp_stanza_t* stanza_create_bookmarks_storage_request(xmpp_ctx_t *ctx);
 
+xmpp_stanza_t* stanza_create_blocked_list_request(xmpp_ctx_t *ctx);
+
+xmpp_stanza_t* stanza_create_http_upload_request(xmpp_ctx_t *ctx, const char *const id, const char *const jid, HTTPUpload *upload);
+
 xmpp_stanza_t* stanza_enable_carbons(xmpp_ctx_t *ctx);
 
 xmpp_stanza_t* stanza_disable_carbons(xmpp_ctx_t *ctx);
@@ -207,9 +226,7 @@ xmpp_stanza_t* stanza_attach_carbons_private(xmpp_ctx_t *ctx, xmpp_stanza_t *sta
 xmpp_stanza_t* stanza_attach_hints_no_copy(xmpp_ctx_t *ctx, xmpp_stanza_t *stanza);
 xmpp_stanza_t* stanza_attach_hints_no_store(xmpp_ctx_t *ctx, xmpp_stanza_t *stanza);
 xmpp_stanza_t* stanza_attach_receipt_request(xmpp_ctx_t *ctx, xmpp_stanza_t *stanza);
-
-xmpp_stanza_t* stanza_create_message(xmpp_ctx_t *ctx, char *id,
-    const char *const recipient, const char *const type, const char *const message);
+xmpp_stanza_t* stanza_attach_x_oob_url(xmpp_ctx_t *ctx, xmpp_stanza_t *stanza, const char *const url);
 
 xmpp_stanza_t* stanza_create_room_join_presence(xmpp_ctx_t *const ctx,
     const char *const full_room_jid, const char *const passwd);
@@ -219,8 +236,6 @@ xmpp_stanza_t* stanza_create_room_newnick_presence(xmpp_ctx_t *ctx,
 
 xmpp_stanza_t* stanza_create_room_leave_presence(xmpp_ctx_t *ctx,
     const char *const room, const char *const nick);
-
-xmpp_stanza_t* stanza_create_presence(xmpp_ctx_t *const ctx);
 
 xmpp_stanza_t* stanza_create_roster_iq(xmpp_ctx_t *ctx);
 xmpp_stanza_t* stanza_create_ping_iq(xmpp_ctx_t *ctx, const char *const target);
@@ -245,7 +260,7 @@ gboolean stanza_is_muc_self_presence(xmpp_stanza_t *const stanza,
 gboolean stanza_is_room_nick_change(xmpp_stanza_t *const stanza);
 gboolean stanza_muc_requires_config(xmpp_stanza_t *const stanza);
 
-char* stanza_get_new_nick(xmpp_stanza_t *const stanza);
+const char* stanza_get_new_nick(xmpp_stanza_t *const stanza);
 xmpp_stanza_t* stanza_create_instant_room_request_iq(xmpp_ctx_t *ctx, const char *const room_jid);
 xmpp_stanza_t* stanza_create_instant_room_destroy_iq(xmpp_ctx_t *ctx, const char *const room_jid);
 xmpp_stanza_t* stanza_create_room_config_request_iq(xmpp_ctx_t *ctx, const char *const room_jid);
@@ -264,16 +279,16 @@ xmpp_stanza_t* stanza_create_room_kick_iq(xmpp_ctx_t *const ctx, const char *con
     const char *const reason);
 
 int stanza_get_idle_time(xmpp_stanza_t *const stanza);
-char* stanza_get_caps_str(xmpp_stanza_t *const stanza);
-
-DataForm* stanza_create_form(xmpp_stanza_t *const stanza);
-void stanza_destroy_form(DataForm *form);
 
 void stanza_attach_priority(xmpp_ctx_t *const ctx, xmpp_stanza_t *const presence, const int pri);
 void stanza_attach_last_activity(xmpp_ctx_t *const ctx, xmpp_stanza_t *const presence, const int idle);
 void stanza_attach_caps(xmpp_ctx_t *const ctx, xmpp_stanza_t *const presence);
 void stanza_attach_show(xmpp_ctx_t *const ctx, xmpp_stanza_t *const presence, const char *const show);
 void stanza_attach_status(xmpp_ctx_t *const ctx, xmpp_stanza_t *const presence, const char *const status);
+
+xmpp_stanza_t* stanza_create_caps_query_element(xmpp_ctx_t *ctx);
+char* stanza_create_caps_sha1_from_query(xmpp_stanza_t *const query);
+EntityCapabilities* stanza_create_caps_from_query_element(xmpp_stanza_t *query);
 
 const char* stanza_get_presence_string_from_type(resource_presence_t presence_type);
 xmpp_stanza_t* stanza_create_software_version_iq(xmpp_ctx_t *ctx, const char *const fulljid);
@@ -290,15 +305,17 @@ char* stanza_get_error_message(xmpp_stanza_t *const stanza);
 
 GSList* stanza_get_status_codes_by_ns(xmpp_stanza_t *const stanza, char *ns);
 gboolean stanza_room_destroyed(xmpp_stanza_t *stanza);
-char* stanza_get_muc_destroy_alternative_room(xmpp_stanza_t *stanza);
+const char* stanza_get_muc_destroy_alternative_room(xmpp_stanza_t *stanza);
 char* stanza_get_muc_destroy_alternative_password(xmpp_stanza_t *stanza);
 char* stanza_get_muc_destroy_reason(xmpp_stanza_t *stanza);
-char* stanza_get_actor(xmpp_stanza_t *stanza);
+const char* stanza_get_actor(xmpp_stanza_t *stanza);
 char* stanza_get_reason(xmpp_stanza_t *stanza);
 
 Resource* stanza_resource_from_presence(XMPPPresence *presence);
 XMPPPresence* stanza_parse_presence(xmpp_stanza_t *stanza, int *err);
 void stanza_free_presence(XMPPPresence *presence);
+
+char* stanza_text_strdup(xmpp_stanza_t *stanza);
 
 XMPPCaps* stanza_parse_caps(xmpp_stanza_t *const stanza);
 void stanza_free_caps(XMPPCaps *caps);

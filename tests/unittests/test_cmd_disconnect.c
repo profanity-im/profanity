@@ -5,10 +5,10 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "chat_session.h"
-#include "command/commands.h"
+#include "xmpp/chat_session.h"
+#include "command/cmd_funcs.h"
 #include "xmpp/xmpp.h"
-#include "roster_list.h"
+#include "xmpp/roster_list.h"
 
 #include "ui/stub_ui.h"
 
@@ -21,8 +21,8 @@ void clears_chat_sessions(void **state)
     chat_session_recipient_active("bob@server.org", "laptop", FALSE);
     chat_session_recipient_active("mike@server.org", "work", FALSE);
 
-    will_return(jabber_get_connection_status, JABBER_CONNECTED);
-    will_return(jabber_get_fulljid, "myjid@myserver.com");
+    will_return(connection_get_status, JABBER_CONNECTED);
+    will_return(connection_get_fulljid, "myjid@myserver.com");
     expect_any_cons_show();
 
     gboolean result = cmd_disconnect(NULL, CMD_DISCONNECT, NULL);

@@ -6,27 +6,6 @@
   ...
 }
 
-# libotr
-
-{
-  otrl_init
-  Memcheck:Leak
-  ...
-  fun:_otr_init
-  fun:_init
-  fun:prof_run
-  ...
-}
-
-{
-  otrl_privkey_read
-  Memcheck:Leak
-  ...
-  fun:otrl_privkey_read_FILEp
-  fun:otrl_privkey_read
-  ...
-}
-
 # glib
 
 {

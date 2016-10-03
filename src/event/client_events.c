@@ -1,7 +1,7 @@
 /*
  * client_events.c
  *
- * Copyright (C) 2012 - 2015 James Booth <boothj5@gmail.com>
+ * Copyright (C) 2012 - 2016 James Booth <boothj5@gmail.com>
  *
  * This file is part of Profanity.
  *
@@ -16,7 +16,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Profanity.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Profanity.  If not, see <https://www.gnu.org/licenses/>.
  *
  * In addition, as a special exception, the copyright holders give permission to
  * link the code of portions of this program with the OpenSSL library under
@@ -38,14 +38,18 @@
 #include <glib.h>
 
 #include "log.h"
+#include "config/preferences.h"
+#include "plugins/plugins.h"
+#include "ui/window_list.h"
 #include "ui/ui.h"
-#include "window_list.h"
 #include "xmpp/xmpp.h"
-#include "roster_list.h"
-#include "chat_session.h"
+#include "xmpp/roster_list.h"
+#include "xmpp/chat_session.h"
+
 #ifdef HAVE_LIBOTR
 #include "otr/otr.h"
 #endif
+
 #ifdef HAVE_LIBGPGME
 #include "pgp/gpg.h"
 #endif
@@ -54,7 +58,7 @@ jabber_conn_status_t
 cl_ev_connect_jid(const char *const jid, const char *const passwd, const char *const altdomain, const int port, const char *const tls_policy)
 {
     cons_show("Connecting as %s", jid);
-    return jabber_connect_with_details(jid, passwd, altdomain, port, tls_policy);
+    return session_connect_with_details(jid, passwd, altdomain, port, tls_policy);
 }
 
 jabber_conn_status_t
@@ -64,18 +68,18 @@ cl_ev_connect_account(ProfAccount *account)
     cons_show("Connecting with account %s as %s", account->name, jid);
     free(jid);
 
-    return jabber_connect_with_account(account);
+    return session_connect_with_account(account);
 }
 
 void
 cl_ev_disconnect(void)
 {
-    const char *jid = jabber_get_fulljid();
+    const char *jid = connection_get_fulljid();
     cons_show("%s logged out successfully.", jid);
 
     ui_disconnected();
     ui_close_all_wins();
-    jabber_disconnect();
+    session_disconnect();
     roster_destroy();
     muc_invites_clear();
     chat_sessions_clear();
@@ -91,7 +95,7 @@ cl_ev_presence_send(const resource_presence_t presence_type, const char *const m
     char *signed_status = NULL;
 
 #ifdef HAVE_LIBGPGME
-    char *account_name = jabber_get_account_name();
+    char *account_name = session_get_account_name();
     ProfAccount *account = accounts_get_account(account_name);
     if (account->pgp_keyid) {
         signed_status = p_gpg_sign(msg, account->pgp_keyid);
@@ -105,27 +109,47 @@ cl_ev_presence_send(const resource_presence_t presence_type, const char *const m
 }
 
 void
-cl_ev_send_msg(ProfChatWin *chatwin, const char *const msg)
+cl_ev_send_msg(ProfChatWin *chatwin, const char *const msg, const char *const oob_url)
 {
     chat_state_active(chatwin->state);
+
+    gboolean request_receipt = FALSE;
+    if (prefs_get_boolean(PREF_RECEIPTS_REQUEST)) {
+        char *session_jid = chat_session_get_jid(chatwin->barejid);
+        if (session_jid) {
+            Jid *session_jidp = jid_create(session_jid);
+            if (session_jidp && session_jidp->resourcepart) {
+                if (caps_jid_has_feature(session_jid, XMPP_FEATURE_RECEIPTS)) {
+                    request_receipt = TRUE;
+                }
+            }
+            jid_destroy(session_jidp);
+            free(session_jid);
+        }
+    }
+
+    char *plugin_msg = plugins_pre_chat_message_send(chatwin->barejid, msg);
 
 // OTR suported, PGP supported
 #ifdef HAVE_LIBOTR
 #ifdef HAVE_LIBGPGME
     if (chatwin->pgp_send) {
-        char *id = message_send_chat_pgp(chatwin->barejid, msg);
-        chat_log_pgp_msg_out(chatwin->barejid, msg);
-        chatwin_outgoing_msg(chatwin, msg, id, PROF_MSG_PGP);
+        char *id = message_send_chat_pgp(chatwin->barejid, plugin_msg, request_receipt);
+        chat_log_pgp_msg_out(chatwin->barejid, plugin_msg);
+        chatwin_outgoing_msg(chatwin, plugin_msg, id, PROF_MSG_PGP, request_receipt);
         free(id);
     } else {
-        gboolean handled = otr_on_message_send(chatwin, msg);
+        gboolean handled = otr_on_message_send(chatwin, plugin_msg, request_receipt);
         if (!handled) {
-            char *id = message_send_chat(chatwin->barejid, msg);
-            chat_log_msg_out(chatwin->barejid, msg);
-            chatwin_outgoing_msg(chatwin, msg, id, PROF_MSG_PLAIN);
+            char *id = message_send_chat(chatwin->barejid, plugin_msg, oob_url, request_receipt);
+            chat_log_msg_out(chatwin->barejid, plugin_msg);
+            chatwin_outgoing_msg(chatwin, plugin_msg, id, PROF_MSG_PLAIN, request_receipt);
             free(id);
         }
     }
+
+    plugins_post_chat_message_send(chatwin->barejid, plugin_msg);
+    free(plugin_msg);
     return;
 #endif
 #endif
@@ -133,13 +157,16 @@ cl_ev_send_msg(ProfChatWin *chatwin, const char *const msg)
 // OTR supported, PGP unsupported
 #ifdef HAVE_LIBOTR
 #ifndef HAVE_LIBGPGME
-    gboolean handled = otr_on_message_send(chatwin, msg);
+    gboolean handled = otr_on_message_send(chatwin, plugin_msg, request_receipt);
     if (!handled) {
-        char *id = message_send_chat(chatwin->barejid, msg);
-        chat_log_msg_out(chatwin->barejid, msg);
-        chatwin_outgoing_msg(chatwin, msg, id, PROF_MSG_PLAIN);
+        char *id = message_send_chat(chatwin->barejid, plugin_msg, oob_url, request_receipt);
+        chat_log_msg_out(chatwin->barejid, plugin_msg);
+        chatwin_outgoing_msg(chatwin, plugin_msg, id, PROF_MSG_PLAIN, request_receipt);
         free(id);
     }
+
+    plugins_post_chat_message_send(chatwin->barejid, plugin_msg);
+    free(plugin_msg);
     return;
 #endif
 #endif
@@ -148,16 +175,19 @@ cl_ev_send_msg(ProfChatWin *chatwin, const char *const msg)
 #ifndef HAVE_LIBOTR
 #ifdef HAVE_LIBGPGME
     if (chatwin->pgp_send) {
-        char *id = message_send_chat_pgp(chatwin->barejid, msg);
-        chat_log_pgp_msg_out(chatwin->barejid, msg);
-        chatwin_outgoing_msg(chatwin, msg, id, PROF_MSG_PGP);
+        char *id = message_send_chat_pgp(chatwin->barejid, plugin_msg, request_receipt);
+        chat_log_pgp_msg_out(chatwin->barejid, plugin_msg);
+        chatwin_outgoing_msg(chatwin, plugin_msg, id, PROF_MSG_PGP, request_receipt);
         free(id);
     } else {
-        char *id = message_send_chat(chatwin->barejid, msg);
-        chat_log_msg_out(chatwin->barejid, msg);
-        chatwin_outgoing_msg(chatwin, msg, id, PROF_MSG_PLAIN);
+        char *id = message_send_chat(chatwin->barejid, plugin_msg, oob_url, request_receipt);
+        chat_log_msg_out(chatwin->barejid, plugin_msg);
+        chatwin_outgoing_msg(chatwin, plugin_msg, id, PROF_MSG_PLAIN, request_receipt);
         free(id);
     }
+
+    plugins_post_chat_message_send(chatwin->barejid, plugin_msg);
+    free(plugin_msg);
     return;
 #endif
 #endif
@@ -165,24 +195,43 @@ cl_ev_send_msg(ProfChatWin *chatwin, const char *const msg)
 // OTR unsupported, PGP unsupported
 #ifndef HAVE_LIBOTR
 #ifndef HAVE_LIBGPGME
-    char *id = message_send_chat(chatwin->barejid, msg);
-    chat_log_msg_out(chatwin->barejid, msg);
-    chatwin_outgoing_msg(chatwin, msg, id, PROF_MSG_PLAIN);
+    char *id = message_send_chat(chatwin->barejid, plugin_msg, oob_url, request_receipt);
+    chat_log_msg_out(chatwin->barejid, plugin_msg);
+    chatwin_outgoing_msg(chatwin, plugin_msg, id, PROF_MSG_PLAIN, request_receipt);
     free(id);
+
+    plugins_post_chat_message_send(chatwin->barejid, plugin_msg);
+    free(plugin_msg);
     return;
 #endif
 #endif
 }
 
 void
-cl_ev_send_muc_msg(ProfMucWin *mucwin, const char *const msg)
+cl_ev_send_muc_msg(ProfMucWin *mucwin, const char *const msg, const char *const oob_url)
 {
-    message_send_groupchat(mucwin->roomjid, msg);
+    char *plugin_msg = plugins_pre_room_message_send(mucwin->roomjid, msg);
+
+    message_send_groupchat(mucwin->roomjid, plugin_msg, oob_url);
+
+    plugins_post_room_message_send(mucwin->roomjid, plugin_msg);
+    free(plugin_msg);
 }
 
 void
-cl_ev_send_priv_msg(ProfPrivateWin *privwin, const char *const msg)
+cl_ev_send_priv_msg(ProfPrivateWin *privwin, const char *const msg, const char *const oob_url)
 {
-    message_send_private(privwin->fulljid, msg);
-    privwin_outgoing_msg(privwin, msg);
+    if (privwin->occupant_offline) {
+        privwin_message_occupant_offline(privwin);
+    } else if (privwin->room_left) {
+        privwin_message_left_room(privwin);
+    } else {
+        char *plugin_msg = plugins_pre_priv_message_send(privwin->fulljid, msg);
+
+        message_send_private(privwin->fulljid, plugin_msg, oob_url);
+        privwin_outgoing_msg(privwin, plugin_msg);
+
+        plugins_post_priv_message_send(privwin->fulljid, plugin_msg);
+        free(plugin_msg);
+    }
 }

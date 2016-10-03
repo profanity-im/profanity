@@ -1,7 +1,7 @@
 /*
  * server_events.h
  *
- * Copyright (C) 2012 - 2015 James Booth <boothj5@gmail.com>
+ * Copyright (C) 2012 - 2016 James Booth <boothj5@gmail.com>
  *
  * This file is part of Profanity.
  *
@@ -16,7 +16,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Profanity.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Profanity.  If not, see <https://www.gnu.org/licenses/>.
  *
  * In addition, as a special exception, the copyright holders give permission to
  * link the code of portions of this program with the OpenSSL library under
@@ -32,12 +32,12 @@
  *
  */
 
-#ifndef SERVER_EVENTS_H
-#define SERVER_EVENTS_H
+#ifndef EVENT_SERVER_EVENTS_H
+#define EVENT_SERVER_EVENTS_H
 
 #include "xmpp/xmpp.h"
 
-void sv_ev_login_account_success(char *account_name, int secured);
+void sv_ev_login_account_success(char *account_name, gboolean secured);
 void sv_ev_lost_connection(void);
 void sv_ev_failed_login(void);
 void sv_ev_room_invite(jabber_invite_t invite_type,
@@ -58,7 +58,7 @@ void sv_ev_inactive(char *barejid, char *resource);
 void sv_ev_activity(char *barejid, char *resource, gboolean send_states);
 void sv_ev_gone(const char *const barejid, const char *const resource);
 void sv_ev_subscription(const char *from, jabber_subscr_t type);
-void sv_ev_message_receipt(char *barejid, char *id);
+void sv_ev_message_receipt(const char *const barejid, const char *const id);
 void sv_ev_contact_offline(char *contact, char *resource, char *status);
 void sv_ev_contact_online(char *contact, Resource *resource, GDateTime *last_activity, char *pgpkey);
 void sv_ev_leave_room(const char *const room);
@@ -73,8 +73,8 @@ void sv_ev_room_occupent_kicked(const char *const room, const char *const nick, 
 void sv_ev_room_banned(const char *const room, const char *const actor, const char *const reason);
 void sv_ev_room_occupent_banned(const char *const room, const char *const nick, const char *const actor,
     const char *const reason);
-void sv_ev_outgoing_carbon(char *barejid, char *message);
-void sv_ev_incoming_carbon(char *barejid, char *resource, char *message);
+void sv_ev_outgoing_carbon(char *barejid, char *message, char *pgp_message);
+void sv_ev_incoming_carbon(char *barejid, char *resource, char *message, char *pgp_message);
 void sv_ev_xmpp_stanza(const char *const msg);
 void sv_ev_muc_self_online(const char *const room, const char *const nick, gboolean config_required,
     const char *const role, const char *const affiliation, const char *const actor, const char *const reason,
@@ -87,5 +87,6 @@ void sv_ev_roster_update(const char *const barejid, const char *const name,
 void sv_ev_roster_received(void);
 int sv_ev_certfail(const char *const errormsg, TLSCertificate *cert);
 void sv_ev_lastactivity_response(const char *const from, const int seconds, const char *const msg);
+void sv_ev_bookmark_autojoin(Bookmark *bookmark);
 
 #endif

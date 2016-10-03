@@ -1,7 +1,7 @@
 /*
  * mucwin.c
  *
- * Copyright (C) 2012 - 2015 James Booth <boothj5@gmail.com>
+ * Copyright (C) 2012 - 2016 James Booth <boothj5@gmail.com>
  *
  * This file is part of Profanity.
  *
@@ -16,7 +16,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Profanity.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Profanity.  If not, see <https://www.gnu.org/licenses/>.
  *
  * In addition, as a special exception, the copyright holders give permission to
  * link the code of portions of this program with the OpenSSL library under
@@ -32,14 +32,18 @@
  *
  */
 
+#define _GNU_SOURCE 1
+
 #include <string.h>
 #include <assert.h>
+#include <stdlib.h>
 
-#include "ui/win_types.h"
-#include "window_list.h"
 #include "log.h"
 #include "config/preferences.h"
+#include "plugins/plugins.h"
 #include "ui/window.h"
+#include "ui/win_types.h"
+#include "ui/window_list.h"
 
 void
 mucwin_role_change(ProfMucWin *mucwin, const char *const role, const char *const actor, const char *const reason)
@@ -353,19 +357,135 @@ mucwin_history(ProfMucWin *mucwin, const char *const nick, GDateTime *timestamp,
 
     win_print(window, '-', 0, timestamp, NO_COLOUR_DATE, 0, "", line->str);
     g_string_free(line, TRUE);
+
+    plugins_on_room_history_message(mucwin->roomjid, nick, message, timestamp);
+}
+
+static void
+_mucwin_print_mention(ProfWin *window, const char *const message, const char *const nick, GSList *mentions)
+{
+    int last_pos = 0;
+    int pos = 0;
+    GSList *curr = mentions;
+    while (curr) {
+        pos = GPOINTER_TO_INT(curr->data);
+
+        char *before_str = g_strndup(message + last_pos, pos - last_pos);
+        win_print(window, '-', 0, NULL, NO_DATE | NO_ME | NO_EOL, THEME_ROOMMENTION, "", before_str);
+        g_free(before_str);
+        char *nick_str = g_strndup(message + pos, strlen(nick));
+        win_print(window, '-', 0, NULL, NO_DATE | NO_ME | NO_EOL, THEME_ROOMMENTION_TERM, "", nick_str);
+        g_free(nick_str);
+
+        last_pos = pos + strlen(nick);
+
+        curr = g_slist_next(curr);
+    }
+    if (last_pos < strlen(message)) {
+        win_print(window, '-', 0, NULL, NO_DATE | NO_ME, THEME_ROOMMENTION, "", &message[last_pos]);
+    } else {
+        win_print(window, '-', 0, NULL, NO_DATE | NO_ME, THEME_ROOMMENTION, "", "");
+    }
+}
+
+gint
+_cmp_trigger_weight(gconstpointer a, gconstpointer b)
+{
+    int alen = strlen((char*)a);
+    int blen = strlen((char*)b);
+
+    if (alen > blen) return -1;
+    if (alen < blen) return 1;
+
+    return 0;
+}
+
+static void
+_mucwin_print_triggers(ProfWin *window, const char *const message, GList *triggers)
+{
+    GList *weighted_triggers = NULL;
+    GList *curr = triggers;
+    while (curr) {
+        weighted_triggers = g_list_insert_sorted(weighted_triggers, curr->data, (GCompareFunc)_cmp_trigger_weight);
+        curr = g_list_next(curr);
+    }
+
+    char *message_lower = g_utf8_strdown(message, -1);
+
+    // find earliest trigger in message
+    int first_trigger_pos = -1;
+    int first_trigger_len = -1;
+    curr = weighted_triggers;
+    while (curr) {
+        char *trigger_lower = g_utf8_strdown(curr->data, -1);
+        char *trigger_ptr = g_strstr_len(message_lower, -1, trigger_lower);
+
+        // not found, try next
+        if (trigger_ptr == NULL) {
+            curr = g_list_next(curr);
+            continue;
+        }
+
+        // found, repace vars if earlier than previous
+        int trigger_pos = trigger_ptr - message_lower;
+        if (first_trigger_pos == -1 || trigger_pos < first_trigger_pos) {
+            first_trigger_pos = trigger_pos;
+            first_trigger_len = strlen(trigger_lower);
+        }
+
+        g_free(trigger_lower);
+        curr = g_list_next(curr);
+    }
+
+    g_free(message_lower);
+    g_list_free(weighted_triggers);
+
+    // no triggers found
+    if (first_trigger_pos == -1) {
+        win_print(window, '-', 0, NULL, NO_DATE | NO_ME, THEME_ROOMTRIGGER, "", message);
+    } else {
+        if (first_trigger_pos > 0) {
+            char message_section[strlen(message) + 1];
+            int i = 0;
+            while (i < first_trigger_pos) {
+                message_section[i] = message[i];
+                i++;
+            }
+            message_section[i] = '\0';
+            win_print(window, '-', 0, NULL, NO_DATE | NO_ME | NO_EOL, THEME_ROOMTRIGGER, "", message_section);
+        }
+        char trigger_section[first_trigger_len + 1];
+        int i = 0;
+        while (i < first_trigger_len) {
+            trigger_section[i] = message[first_trigger_pos + i];
+            i++;
+        }
+        trigger_section[i] = '\0';
+
+        if (first_trigger_pos + first_trigger_len < strlen(message)) {
+            win_print(window, '-', 0, NULL, NO_DATE | NO_ME | NO_EOL, THEME_ROOMTRIGGER_TERM, "", trigger_section);
+            _mucwin_print_triggers(window, &message[first_trigger_pos + first_trigger_len], triggers);
+        } else {
+            win_print(window, '-', 0, NULL, NO_DATE | NO_ME, THEME_ROOMTRIGGER_TERM, "", trigger_section);
+        }
+    }
 }
 
 void
-mucwin_message(ProfMucWin *mucwin, const char *const nick, const char *const message)
+mucwin_message(ProfMucWin *mucwin, const char *const nick, const char *const message, GSList *mentions, GList *triggers)
 {
     assert(mucwin != NULL);
 
     ProfWin *window = (ProfWin*)mucwin;
-    char *my_nick = muc_nick(mucwin->roomjid);
+    char *mynick = muc_nick(mucwin->roomjid);
 
-    if (g_strcmp0(nick, my_nick) != 0) {
-        if (g_strrstr(message, my_nick)) {
-            win_print(window, '-', 0, NULL, NO_ME, THEME_ROOMMENTION, nick, message);
+    if (g_strcmp0(nick, mynick) != 0) {
+        if (g_slist_length(mentions) > 0) {
+            win_print(window, '-', 0, NULL, NO_ME | NO_EOL, THEME_ROOMMENTION, nick, "");
+            _mucwin_print_mention(window, message, mynick, mentions);
+        } else if (triggers) {
+            win_print(window, '-', 0, NULL, NO_ME | NO_EOL, THEME_ROOMTRIGGER, nick, "");
+            _mucwin_print_triggers(window, message, triggers);
         } else {
             win_print(window, '-', 0, NULL, NO_ME, THEME_TEXT_THEM, nick, message);
         }
@@ -487,7 +607,7 @@ mucwin_handle_affiliation_list(ProfMucWin *mucwin, const char *const affiliation
         win_vprint(window, '!', 0, NULL, 0, 0, "", "Affiliation: %s", affiliation);
         GSList *curr_jid = jids;
         while (curr_jid) {
-            char *jid = curr_jid->data;
+            const char *jid = curr_jid->data;
             win_vprint(window, '!', 0, NULL, 0, 0, "", "  %s", jid);
             curr_jid = g_slist_next(curr_jid);
         }
@@ -579,7 +699,7 @@ mucwin_handle_role_list(ProfMucWin *mucwin, const char *const role, GSList *nick
         win_vprint(window, '!', 0, NULL, 0, 0, "", "Role: %s", role);
         GSList *curr_nick = nicks;
         while (curr_nick) {
-            char *nick = curr_nick->data;
+            const char *nick = curr_nick->data;
             Occupant *occupant = muc_roster_item(mucwin->roomjid, nick);
             if (occupant) {
                 if (occupant->jid) {

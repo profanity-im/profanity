@@ -1,7 +1,7 @@
 /*
  * buffer.c
  *
- * Copyright (C) 2012 - 2015 James Booth <boothj5@gmail.com>
+ * Copyright (C) 2012 - 2016 James Booth <boothj5@gmail.com>
  *
  * This file is part of Profanity.
  *
@@ -16,7 +16,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Profanity.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Profanity.  If not, see <https://www.gnu.org/licenses/>.
  *
  * In addition, as a special exception, the copyright holders give permission to
  * link the code of portions of this program with the OpenSSL library under
@@ -88,7 +88,7 @@ buffer_push(ProfBuff buffer, const char show_char, int pad_indent, GDateTime *ti
     e->flags = flags;
     e->theme_item = theme_item;
     e->time = g_date_time_ref(time);
-    e->from = strdup(from);
+    e->from = from ? strdup(from) : NULL;
     e->message = strdup(message);
     e->receipt = receipt;
 
@@ -123,6 +123,21 @@ buffer_yield_entry(ProfBuff buffer, int entry)
 {
     GSList *node = g_slist_nth(buffer->entries, entry);
     return node->data;
+}
+
+ProfBuffEntry*
+buffer_yield_entry_by_id(ProfBuff buffer, const char *const id)
+{
+    GSList *entries = buffer->entries;
+    while (entries) {
+        ProfBuffEntry *entry = entries->data;
+        if (entry->receipt && g_strcmp0(entry->receipt->id, id) == 0) {
+            return entry;
+        }
+        entries = g_slist_next(entries);
+    }
+
+    return NULL;
 }
 
 static void

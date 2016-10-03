@@ -1,7 +1,7 @@
 /*
  * iq.h
  *
- * Copyright (C) 2012 - 2015 James Booth <boothj5@gmail.com>
+ * Copyright (C) 2012 - 2016 James Booth <boothj5@gmail.com>
  *
  * This file is part of Profanity.
  *
@@ -16,7 +16,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Profanity.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Profanity.  If not, see <https://www.gnu.org/licenses/>.
  *
  * In addition, as a special exception, the copyright holders give permission to
  * link the code of portions of this program with the OpenSSL library under
@@ -35,7 +35,18 @@
 #ifndef XMPP_IQ_H
 #define XMPP_IQ_H
 
-void iq_add_handlers(void);
-void iq_roster_request(void);
+typedef int(*ProfIdCallback)(xmpp_stanza_t *const stanza, void *const userdata);
+typedef void(*ProfIdFreeCallback)(void *userdata);
+
+void iq_handlers_init(void);
+void iq_send_stanza(xmpp_stanza_t *const stanza);
+void iq_id_handler_add(const char *const id, ProfIdCallback func, ProfIdFreeCallback free_func, void *userdata);
+void iq_disco_info_request_onconnect(gchar *jid);
+void iq_disco_items_request_onconnect(gchar *jid);
+void iq_send_caps_request(const char *const to, const char *const id, const char *const node, const char *const ver);
+void iq_send_caps_request_for_jid(const char *const to, const char *const id, const char *const node,
+    const char *const ver);
+void iq_send_caps_request_legacy(const char *const to, const char *const id, const char *const node,
+    const char *const ver);
 
 #endif

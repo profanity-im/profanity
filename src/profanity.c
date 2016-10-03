@@ -1,7 +1,7 @@
 /*
  * profanity.c
  *
- * Copyright (C) 2012 - 2015 James Booth <boothj5@gmail.com>
+ * Copyright (C) 2012 - 2016 James Booth <boothj5@gmail.com>
  *
  * This file is part of Profanity.
  *
@@ -16,7 +16,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Profanity.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Profanity.  If not, see <https://www.gnu.org/licenses/>.
  *
  * In addition, as a special exception, the copyright holders give permission to
  * link the code of portions of this program with the OpenSSL library under
@@ -37,57 +37,52 @@
 #include "gitversion.h"
 #endif
 
+#ifdef HAVE_GTK
+#include "ui/tray.h"
+#endif
+
 #include <locale.h>
 #include <signal.h>
 #include <stdlib.h>
 #include <string.h>
-#include <assert.h>
 
 #include <glib.h>
 
 #include "profanity.h"
-#include "chat_session.h"
-#include "chat_state.h"
+#include "common.h"
+#include "log.h"
+#include "config/files.h"
+#include "config/tlscerts.h"
 #include "config/accounts.h"
 #include "config/preferences.h"
 #include "config/theme.h"
-#include "config/scripts.h"
-#include "command/command.h"
-#include "common.h"
-#include "contact.h"
-#include "roster_list.h"
 #include "config/tlscerts.h"
-#include "log.h"
-#include "muc.h"
+#include "config/scripts.h"
+#include "command/cmd_defs.h"
+#include "plugins/plugins.h"
+#include "event/client_events.h"
+#include "ui/ui.h"
+#include "ui/window_list.h"
+#include "xmpp/resource.h"
+#include "xmpp/session.h"
+#include "xmpp/xmpp.h"
+#include "xmpp/muc.h"
+#include "xmpp/chat_session.h"
+#include "xmpp/chat_state.h"
+#include "xmpp/contact.h"
+#include "xmpp/roster_list.h"
+
 #ifdef HAVE_LIBOTR
 #include "otr/otr.h"
 #endif
+
 #ifdef HAVE_LIBGPGME
 #include "pgp/gpg.h"
 #endif
-#include "resource.h"
-#include "xmpp/xmpp.h"
-#include "ui/ui.h"
-#include "window_list.h"
-#include "event/client_events.h"
-#include "config/tlscerts.h"
 
-static void _check_autoaway(void);
 static void _init(char *log_level);
 static void _shutdown(void);
-static void _create_directories(void);
 static void _connect_default(const char * const account);
-
-typedef enum {
-    ACTIVITY_ST_ACTIVE,
-    ACTIVITY_ST_IDLE,
-    ACTIVITY_ST_AWAY,
-    ACTIVITY_ST_XA,
-} activity_state_t;
-
-activity_state_t activity_state;
-resource_presence_t saved_presence;
-char *saved_status;
 
 static gboolean cont = TRUE;
 static gboolean force_quit = FALSE;
@@ -96,18 +91,19 @@ void
 prof_run(char *log_level, char *account_name)
 {
     _init(log_level);
+    plugins_on_start();
     _connect_default(account_name);
+
     ui_update();
 
     log_info("Starting main event loop");
 
-    activity_state = ACTIVITY_ST_ACTIVE;
-    saved_status = NULL;
+    session_init_activity();
 
     char *line = NULL;
     while(cont && !force_quit) {
         log_stderr_handler();
-        _check_autoaway();
+        session_check_autoaway();
 
         line = inp_readline();
         if (line) {
@@ -122,10 +118,14 @@ prof_run(char *log_level, char *account_name)
 #ifdef HAVE_LIBOTR
         otr_poll();
 #endif
+        plugins_run_timed();
         notify_remind();
-        jabber_process_events(10);
+        session_process_events();
         iq_autoping_check();
         ui_update();
+#ifdef HAVE_GTK
+        tray_update();
+#endif
     }
 }
 
@@ -133,40 +133,6 @@ void
 prof_set_quit(void)
 {
     force_quit = TRUE;
-}
-
-void
-prof_handle_idle(void)
-{
-    jabber_conn_status_t status = jabber_get_connection_status();
-    if (status == JABBER_CONNECTED) {
-        GSList *recipients = wins_get_chat_recipients();
-        GSList *curr = recipients;
-
-        while (curr) {
-            char *barejid = curr->data;
-            ProfChatWin *chatwin = wins_get_chat(barejid);
-            chat_state_handle_idle(chatwin->barejid, chatwin->state);
-            curr = g_slist_next(curr);
-        }
-
-        if (recipients) {
-            g_slist_free(recipients);
-        }
-    }
-}
-
-void
-prof_handle_activity(void)
-{
-    jabber_conn_status_t status = jabber_get_connection_status();
-    ProfWin *current = wins_get_current();
-
-    if ((status == JABBER_CONNECTED) && (current->type == WIN_CHAT)) {
-        ProfChatWin *chatwin = (ProfChatWin*)current;
-        assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
-        chat_state_handle_typing(chatwin->barejid, chatwin->state);
-    }
 }
 
 static void
@@ -185,126 +151,6 @@ _connect_default(const char *const account)
 }
 
 static void
-_check_autoaway(void)
-{
-    jabber_conn_status_t conn_status = jabber_get_connection_status();
-    if (conn_status != JABBER_CONNECTED) {
-        return;
-    }
-
-    char *mode = prefs_get_string(PREF_AUTOAWAY_MODE);
-    gboolean check = prefs_get_boolean(PREF_AUTOAWAY_CHECK);
-    gint away_time = prefs_get_autoaway_time();
-    gint xa_time = prefs_get_autoxa_time();
-    int away_time_ms = away_time * 60000;
-    int xa_time_ms = xa_time * 60000;
-
-    char *account = jabber_get_account_name();
-    resource_presence_t curr_presence = accounts_get_last_presence(account);
-    char *curr_status = accounts_get_last_status(account);
-
-    unsigned long idle_ms = ui_get_idle_time();
-
-    switch (activity_state) {
-    case ACTIVITY_ST_ACTIVE:
-        if (idle_ms >= away_time_ms) {
-            if (g_strcmp0(mode, "away") == 0) {
-                if ((curr_presence == RESOURCE_ONLINE) || (curr_presence == RESOURCE_CHAT) || (curr_presence == RESOURCE_DND)) {
-                    activity_state = ACTIVITY_ST_AWAY;
-
-                    // save current presence
-                    saved_presence = curr_presence;
-                    if (saved_status) {
-                        free(saved_status);
-                    }
-                    saved_status = curr_status;
-
-                    // send away presence with last activity
-                    char *message = prefs_get_string(PREF_AUTOAWAY_MESSAGE);
-                    if (prefs_get_boolean(PREF_LASTACTIVITY)) {
-                        cl_ev_presence_send(RESOURCE_AWAY, message, idle_ms / 1000);
-                    } else {
-                        cl_ev_presence_send(RESOURCE_AWAY, message, 0);
-                    }
-
-                    int pri = accounts_get_priority_for_presence_type(account, RESOURCE_AWAY);
-                    if (message) {
-                        cons_show("Idle for %d minutes, status set to away (priority %d), \"%s\".", away_time, pri, message);
-                    } else {
-                        cons_show("Idle for %d minutes, status set to away (priority %d).", away_time, pri);
-                    }
-                    prefs_free_string(message);
-
-                    title_bar_set_presence(CONTACT_AWAY);
-                }
-            } else if (g_strcmp0(mode, "idle") == 0) {
-                activity_state = ACTIVITY_ST_IDLE;
-
-                // send current presence with last activity
-                cl_ev_presence_send(curr_presence, curr_status, idle_ms / 1000);
-            }
-        }
-        break;
-    case ACTIVITY_ST_IDLE:
-        if (check && (idle_ms < away_time_ms)) {
-            activity_state = ACTIVITY_ST_ACTIVE;
-
-            cons_show("No longer idle.");
-
-            // send current presence without last activity
-            cl_ev_presence_send(curr_presence, curr_status, 0);
-        }
-        break;
-    case ACTIVITY_ST_AWAY:
-        if (xa_time_ms > 0 && (idle_ms >= xa_time_ms)) {
-            activity_state = ACTIVITY_ST_XA;
-
-            // send extended away presence with last activity
-            char *message = prefs_get_string(PREF_AUTOXA_MESSAGE);
-            if (prefs_get_boolean(PREF_LASTACTIVITY)) {
-                cl_ev_presence_send(RESOURCE_XA, message, idle_ms / 1000);
-            } else {
-                cl_ev_presence_send(RESOURCE_XA, message, 0);
-            }
-
-            int pri = accounts_get_priority_for_presence_type(account, RESOURCE_XA);
-            if (message) {
-                cons_show("Idle for %d minutes, status set to xa (priority %d), \"%s\".", xa_time, pri, message);
-            } else {
-                cons_show("Idle for %d minutes, status set to xa (priority %d).", xa_time, pri);
-            }
-            prefs_free_string(message);
-
-            title_bar_set_presence(CONTACT_XA);
-        } else if (check && (idle_ms < away_time_ms)) {
-            activity_state = ACTIVITY_ST_ACTIVE;
-
-            cons_show("No longer idle.");
-
-            // send saved presence without last activity
-            cl_ev_presence_send(saved_presence, saved_status, 0);
-            contact_presence_t contact_pres = contact_presence_from_resource_presence(saved_presence);
-            title_bar_set_presence(contact_pres);
-        }
-        break;
-    case ACTIVITY_ST_XA:
-        if (check && (idle_ms < away_time_ms)) {
-            activity_state = ACTIVITY_ST_ACTIVE;
-
-            cons_show("No longer idle.");
-
-            // send saved presence without last activity
-            cl_ev_presence_send(saved_presence, saved_status, 0);
-            contact_presence_t contact_pres = contact_presence_from_resource_presence(saved_presence);
-            title_bar_set_presence(contact_pres);
-        }
-        break;
-    }
-
-    prefs_free_string(mode);
-}
-
-static void
 _init(char *log_level)
 {
     setlocale(LC_ALL, "");
@@ -313,7 +159,12 @@ _init(char *log_level)
     signal(SIGINT, SIG_IGN);
     signal(SIGTSTP, SIG_IGN);
     signal(SIGWINCH, ui_sigwinch_handler);
-    _create_directories();
+    if (pthread_mutex_init(&lock, NULL) != 0) {
+        log_error("Mutex init failed");
+        exit(1);
+    }
+    pthread_mutex_lock(&lock);
+    files_create_directories();
     log_level_t prof_log_level = log_level_from_string(log_level);
     prefs_load();
     log_init(prof_log_level);
@@ -334,7 +185,7 @@ _init(char *log_level)
     theme_init(theme);
     prefs_free_string(theme);
     ui_init();
-    jabber_init();
+    session_init();
     cmd_init();
     log_info("Initialising contact list");
     muc_init();
@@ -347,29 +198,36 @@ _init(char *log_level)
     p_gpg_init();
 #endif
     atexit(_shutdown);
+    plugins_init();
+#ifdef HAVE_GTK
+    tray_init();
+#endif
     inp_nonblocking(TRUE);
+    ui_resize();
 }
 
 static void
 _shutdown(void)
 {
-    if (prefs_get_boolean(PREF_TITLEBAR_SHOW)) {
-        if (prefs_get_boolean(PREF_TITLEBAR_GOODBYE)) {
+    if (prefs_get_boolean(PREF_WINTITLE_SHOW)) {
+        if (prefs_get_boolean(PREF_WINTITLE_GOODBYE)) {
             ui_goodbye_title();
         } else {
             ui_clear_win_title();
         }
     }
 
-    jabber_conn_status_t conn_status = jabber_get_connection_status();
+    jabber_conn_status_t conn_status = connection_get_status();
     if (conn_status == JABBER_CONNECTED) {
         cl_ev_disconnect();
     }
-
-    jabber_shutdown();
+#ifdef HAVE_GTK
+    tray_shutdown();
+#endif
+    session_shutdown();
+    plugins_on_shutdown();
     muc_close();
     caps_close();
-    ui_close();
 #ifdef HAVE_LIBOTR
     otr_shutdown();
 #endif
@@ -380,42 +238,10 @@ _shutdown(void)
     theme_close();
     accounts_close();
     tlscerts_close();
-    cmd_uninit();
     log_stderr_close();
     log_close();
+    plugins_shutdown();
+    cmd_uninit();
+    ui_close();
     prefs_close();
-    if (saved_status) {
-        free(saved_status);
-    }
-}
-
-static void
-_create_directories(void)
-{
-    gchar *xdg_config = xdg_get_config_home();
-    gchar *xdg_data = xdg_get_data_home();
-
-    GString *themes_dir = g_string_new(xdg_config);
-    g_string_append(themes_dir, "/profanity/themes");
-    GString *chatlogs_dir = g_string_new(xdg_data);
-    g_string_append(chatlogs_dir, "/profanity/chatlogs");
-    GString *logs_dir = g_string_new(xdg_data);
-    g_string_append(logs_dir, "/profanity/logs");
-
-    if (!mkdir_recursive(themes_dir->str)) {
-        log_error("Error while creating directory %s", themes_dir->str);
-    }
-    if (!mkdir_recursive(chatlogs_dir->str)) {
-        log_error("Error while creating directory %s", chatlogs_dir->str);
-    }
-    if (!mkdir_recursive(logs_dir->str)) {
-        log_error("Error while creating directory %s", logs_dir->str);
-    }
-
-    g_string_free(themes_dir, TRUE);
-    g_string_free(chatlogs_dir, TRUE);
-    g_string_free(logs_dir, TRUE);
-
-    g_free(xdg_config);
-    g_free(xdg_data);
 }

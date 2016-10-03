@@ -1,7 +1,7 @@
 /*
  * titlebar.c
  *
- * Copyright (C) 2012 - 2015 James Booth <boothj5@gmail.com>
+ * Copyright (C) 2012 - 2016 James Booth <boothj5@gmail.com>
  *
  * This file is part of Profanity.
  *
@@ -16,7 +16,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Profanity.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Profanity.  If not, see <https://www.gnu.org/licenses/>.
  *
  * In addition, as a special exception, the copyright holders give permission to
  * link the code of portions of this program with the OpenSSL library under
@@ -44,10 +44,11 @@
 #include "ui/ui.h"
 #include "ui/titlebar.h"
 #include "ui/inputwin.h"
-#include "window_list.h"
+#include "ui/window_list.h"
 #include "ui/window.h"
-#include "roster_list.h"
-#include "chat_session.h"
+#include "ui/screen.h"
+#include "xmpp/roster_list.h"
+#include "xmpp/chat_session.h"
 
 static WINDOW *win;
 static contact_presence_t current_presence;
@@ -67,7 +68,8 @@ create_title_bar(void)
 {
     int cols = getmaxx(stdscr);
 
-    win = newwin(1, cols, 0, 0);
+    int row = screen_titlebar_row();
+    win = newwin(1, cols, row, 0);
     wbkgd(win, theme_attrs(THEME_TITLE_TEXT));
     title_bar_console();
     title_bar_set_presence(CONTACT_OFFLINE);
@@ -100,6 +102,11 @@ void
 title_bar_resize(void)
 {
     int cols = getmaxx(stdscr);
+
+    werase(win);
+
+    int row = screen_titlebar_row();
+    mvwin(win, row, 0);
 
     wresize(win, 1, cols);
     wbkgd(win, theme_attrs(THEME_TITLE_TEXT));
@@ -403,7 +410,7 @@ _show_contact_presence(ProfChatWin *chatwin)
         theme_item_t presence_colour = THEME_TITLE_OFFLINE;
         const char *presence = "offline";
 
-        jabber_conn_status_t conn_status = jabber_get_connection_status();
+        jabber_conn_status_t conn_status = connection_get_status();
         if (conn_status == JABBER_CONNECTED) {
             PContact contact = roster_get_contact(chatwin->barejid);
             if (contact) {

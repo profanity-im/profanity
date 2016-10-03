@@ -1,7 +1,7 @@
 /*
  * log.c
  *
- * Copyright (C) 2012 - 2015 James Booth <boothj5@gmail.com>
+ * Copyright (C) 2012 - 2016 James Booth <boothj5@gmail.com>
  *
  * This file is part of Profanity.
  *
@@ -16,7 +16,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Profanity.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Profanity.  If not, see <https://www.gnu.org/licenses/>.
  *
  * In addition, as a special exception, the copyright holders give permission to
  * link the code of portions of this program with the OpenSSL library under
@@ -44,8 +44,8 @@
 #include "glib/gstdio.h"
 
 #include "log.h"
-
 #include "common.h"
+#include "config/files.h"
 #include "config/preferences.h"
 #include "xmpp/xmpp.h"
 
@@ -79,14 +79,12 @@ struct dated_chat_log {
 
 static gboolean _log_roll_needed(struct dated_chat_log *dated_log);
 static struct dated_chat_log* _create_log(const char *const other, const char *const login);
-static struct dated_chat_log* _create_groupchat_log(char *room, const char *const login);
+static struct dated_chat_log* _create_groupchat_log(const char *const room, const char *const login);
 static void _free_chat_log(struct dated_chat_log *dated_log);
 static gboolean _key_equals(void *key1, void *key2);
 static char* _get_log_filename(const char *const other, const char *const login, GDateTime *dt, gboolean create);
 static char* _get_groupchat_log_filename(const char *const room, const char *const login, GDateTime *dt,
     gboolean create);
-static gchar* _get_chatlog_dir(void);
-static gchar* _get_main_log_file(void);
 static void _rotate_log_file(void);
 static char* _log_string_from_level(log_level_t level);
 static void _chat_log_chat(const char *const login, const char *const other, const gchar *const msg,
@@ -145,7 +143,7 @@ log_init(log_level_t filter)
 {
     level_filter = filter;
     tz = g_time_zone_new_local();
-    gchar *log_file = _get_main_log_file();
+    char *log_file = files_get_log_file();
     logp = fopen(log_file, "a");
     g_chmod(log_file, S_IRUSR | S_IWUSR);
     mainlogfile = g_string_new(log_file);
@@ -226,7 +224,7 @@ log_level_from_string(char *log_level)
 static void
 _rotate_log_file(void)
 {
-    gchar *log_file = _get_main_log_file();
+    char *log_file = files_get_log_file();
     size_t len = strlen(log_file);
     char *log_file_new = malloc(len + 3);
 
@@ -265,7 +263,7 @@ void
 chat_log_msg_out(const char *const barejid, const char *const msg)
 {
     if (prefs_get_boolean(PREF_CHLOG)) {
-        const char *jid = jabber_get_fulljid();
+        const char *jid = connection_get_fulljid();
         Jid *jidp = jid_create(jid);
         _chat_log_chat(jidp->barejid, barejid, msg, PROF_OUT_LOG, NULL);
         jid_destroy(jidp);
@@ -276,7 +274,7 @@ void
 chat_log_otr_msg_out(const char *const barejid, const char *const msg)
 {
     if (prefs_get_boolean(PREF_CHLOG)) {
-        const char *jid = jabber_get_fulljid();
+        const char *jid = connection_get_fulljid();
         Jid *jidp = jid_create(jid);
         char *pref_otr_log = prefs_get_string(PREF_OTR_LOG);
         if (strcmp(pref_otr_log, "on") == 0) {
@@ -293,7 +291,7 @@ void
 chat_log_pgp_msg_out(const char *const barejid, const char *const msg)
 {
     if (prefs_get_boolean(PREF_CHLOG)) {
-        const char *jid = jabber_get_fulljid();
+        const char *jid = connection_get_fulljid();
         Jid *jidp = jid_create(jid);
         char *pref_pgp_log = prefs_get_string(PREF_PGP_LOG);
         if (strcmp(pref_pgp_log, "on") == 0) {
@@ -310,7 +308,7 @@ void
 chat_log_otr_msg_in(const char *const barejid, const char *const msg, gboolean was_decrypted, GDateTime *timestamp)
 {
     if (prefs_get_boolean(PREF_CHLOG)) {
-        const char *jid = jabber_get_fulljid();
+        const char *jid = connection_get_fulljid();
         Jid *jidp = jid_create(jid);
         char *pref_otr_log = prefs_get_string(PREF_OTR_LOG);
         if (!was_decrypted || (strcmp(pref_otr_log, "on") == 0)) {
@@ -327,7 +325,7 @@ void
 chat_log_pgp_msg_in(const char *const barejid, const char *const msg, GDateTime *timestamp)
 {
     if (prefs_get_boolean(PREF_CHLOG)) {
-        const char *jid = jabber_get_fulljid();
+        const char *jid = connection_get_fulljid();
         Jid *jidp = jid_create(jid);
         char *pref_pgp_log = prefs_get_string(PREF_PGP_LOG);
         if (strcmp(pref_pgp_log, "on") == 0) {
@@ -344,7 +342,7 @@ void
 chat_log_msg_in(const char *const barejid, const char *const msg, GDateTime *timestamp)
 {
     if (prefs_get_boolean(PREF_CHLOG)) {
-        const char *jid = jabber_get_fulljid();
+        const char *jid = connection_get_fulljid();
         Jid *jidp = jid_create(jid);
         _chat_log_chat(jidp->barejid, barejid, msg, PROF_IN_LOG, timestamp);
         jid_destroy(jidp);
@@ -405,18 +403,17 @@ _chat_log_chat(const char *const login, const char *const other, const char *con
 void
 groupchat_log_chat(const gchar *const login, const gchar *const room, const gchar *const nick, const gchar *const msg)
 {
-    gchar *room_copy = strdup(room);
-    struct dated_chat_log *dated_log = g_hash_table_lookup(groupchat_logs, room_copy);
+    struct dated_chat_log *dated_log = g_hash_table_lookup(groupchat_logs, room);
 
     // no log for room
     if (dated_log == NULL) {
-        dated_log = _create_groupchat_log(room_copy, login);
-        g_hash_table_insert(groupchat_logs, room_copy, dated_log);
+        dated_log = _create_groupchat_log(room, login);
+        g_hash_table_insert(groupchat_logs, strdup(room), dated_log);
 
     // log exists but needs rolling
     } else if (_log_roll_needed(dated_log)) {
-        dated_log = _create_groupchat_log(room_copy, login);
-        g_hash_table_replace(logs, room_copy, dated_log);
+        dated_log = _create_groupchat_log(room, login);
+        g_hash_table_replace(logs, strdup(room), dated_log);
     }
 
     GDateTime *dt = g_date_time_new_now_local();
@@ -472,7 +469,7 @@ chat_log_get_previous(const gchar *const login, const gchar *const recipient)
             g_string_free(header, FALSE);
 
             char *line;
-            while ((line = prof_getline(logp)) != NULL) {
+            while ((line = file_getline(logp)) != NULL) {
                 history = g_slist_append(history, line);
             }
 
@@ -516,7 +513,7 @@ _create_log(const char *const other, const char *const login)
 }
 
 static struct dated_chat_log*
-_create_groupchat_log(char *room, const char *const login)
+_create_groupchat_log(const char * const room, const char *const login)
 {
     GDateTime *now = g_date_time_new_now_local();
     char *filename = _get_groupchat_log_filename(room, login, now, TRUE);
@@ -572,7 +569,7 @@ gboolean _key_equals(void *key1, void *key2)
 static char*
 _get_log_filename(const char *const other, const char *const login, GDateTime *dt, gboolean create)
 {
-    gchar *chatlogs_dir = _get_chatlog_dir();
+    char *chatlogs_dir = files_get_data_path(DIR_CHATLOGS);
     GString *log_file = g_string_new(chatlogs_dir);
     free(chatlogs_dir);
 
@@ -603,9 +600,9 @@ _get_log_filename(const char *const other, const char *const login, GDateTime *d
 static char*
 _get_groupchat_log_filename(const char *const room, const char *const login, GDateTime *dt, gboolean create)
 {
-    gchar *chatlogs_dir = _get_chatlog_dir();
+    char *chatlogs_dir = files_get_data_path(DIR_CHATLOGS);
     GString *log_file = g_string_new(chatlogs_dir);
-    g_free(chatlogs_dir);
+    free(chatlogs_dir);
 
     gchar *login_dir = str_replace(login, "@", "_at_");
     g_string_append_printf(log_file, "/%s", login_dir);
@@ -632,36 +629,6 @@ _get_groupchat_log_filename(const char *const room, const char *const login, GDa
 
     char *result = strdup(log_file->str);
     g_string_free(log_file, TRUE);
-
-    return result;
-}
-
-static gchar*
-_get_chatlog_dir(void)
-{
-    gchar *xdg_data = xdg_get_data_home();
-    GString *chatlogs_dir = g_string_new(xdg_data);
-    g_string_append(chatlogs_dir, "/profanity/chatlogs");
-    gchar *result = strdup(chatlogs_dir->str);
-    free(xdg_data);
-    g_string_free(chatlogs_dir, TRUE);
-
-    return result;
-}
-
-static gchar*
-_get_main_log_file(void)
-{
-    gchar *xdg_data = xdg_get_data_home();
-    GString *logfile = g_string_new(xdg_data);
-    g_string_append(logfile, "/profanity/logs/profanity");
-    if (!prefs_get_boolean(PREF_LOG_SHARED)) {
-        g_string_append_printf(logfile, "%d", getpid());
-    }
-    g_string_append(logfile, ".log");
-    gchar *result = strdup(logfile->str);
-    free(xdg_data);
-    g_string_free(logfile, TRUE);
 
     return result;
 }

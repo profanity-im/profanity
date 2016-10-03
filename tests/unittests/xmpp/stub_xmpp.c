@@ -6,9 +6,11 @@
 #include "xmpp/xmpp.h"
 
 // connection functions
-void jabber_init(void) {}
+void session_init(void) {}
+void session_init_activity(void) {}
+void session_check_autoaway(void) {}
 
-jabber_conn_status_t jabber_connect_with_details(const char * const jid,
+jabber_conn_status_t session_connect_with_details(const char * const jid,
     const char * const passwd, const char * const altdomain, const int port, const char *const tls_policy)
 {
     check_expected(jid);
@@ -18,74 +20,99 @@ jabber_conn_status_t jabber_connect_with_details(const char * const jid,
     return (jabber_conn_status_t)mock();
 }
 
-jabber_conn_status_t jabber_connect_with_account(const ProfAccount * const account)
+jabber_conn_status_t session_connect_with_account(const ProfAccount * const account)
 {
     check_expected(account);
     return (jabber_conn_status_t)mock();
 }
 
-void jabber_disconnect(void) {}
-void jabber_shutdown(void) {}
-void jabber_process_events(int millis) {}
-const char * jabber_get_fulljid(void)
+void session_disconnect(void) {}
+void session_shutdown(void) {}
+void session_process_events(void) {}
+const char * connection_get_fulljid(void)
 {
     return (char *)mock();
 }
 
-const char * jabber_get_domain(void)
+const char * session_get_domain(void)
 {
     return NULL;
 }
 
-char* jabber_create_uuid(void)
+gboolean connection_is_secured(void)
+{
+    return 1;
+}
+
+TLSCertificate*
+connection_get_tls_peer_cert(void)
 {
     return NULL;
 }
 
-void jabber_free_uuid(char * uuid) {}
 
-jabber_conn_status_t jabber_get_connection_status(void)
+char* connection_create_uuid(void)
+{
+    return NULL;
+}
+
+void connection_free_uuid(char * uuid) {}
+
+jabber_conn_status_t connection_get_status(void)
 {
     return (jabber_conn_status_t)mock();
 }
 
-char* jabber_get_presence_message(void)
+char* connection_get_presence_msg(void)
 {
     return (char*)mock();
 }
 
-char* jabber_get_account_name(void)
+char* session_get_account_name(void)
 {
     return (char*)mock();
 }
 
-GList * jabber_get_available_resources(void)
+GList * session_get_available_resources(void)
 {
     return NULL;
+}
+
+gboolean
+connection_send_stanza(const char *const stanza)
+{
+    return TRUE;
+}
+
+gboolean
+connection_supports(const char *const feature)
+{
+    return FALSE;
 }
 
 // message functions
-char* message_send_chat(const char * const barejid, const char * const msg)
+char* message_send_chat(const char * const barejid, const char * const msg, const char *const oob_url,
+    gboolean request_receipt)
 {
     check_expected(barejid);
     check_expected(msg);
     return NULL;
 }
 
-char* message_send_chat_otr(const char * const barejid, const char * const msg)
+char* message_send_chat_otr(const char * const barejid, const char * const msg, gboolean request_receipt)
 {
     check_expected(barejid);
     check_expected(msg);
     return NULL;
 }
 
-char* message_send_chat_pgp(const char * const barejid, const char * const msg)
+char* message_send_chat_pgp(const char * const barejid, const char * const msg, gboolean request_receipt)
 {
     return NULL;
 }
 
-void message_send_private(const char * const fulljid, const char * const msg) {}
-void message_send_groupchat(const char * const roomjid, const char * const msg) {}
+void message_send_private(const char * const fulljid, const char * const msg, const char *const oob_url) {}
+void message_send_groupchat(const char * const roomjid, const char * const msg, const char *const oob_url) {}
 void message_send_groupchat_subject(const char * const roomjid, const char * const subject) {}
 
 void message_send_inactive(const char * const barejid) {}
@@ -116,7 +143,7 @@ char * presence_sub_request_find(const char * const search_str)
     return  NULL;
 }
 
-void presence_join_room(char *room, char *nick, char * passwd)
+void presence_join_room(const char *const room, const char *const nick, const char *const passwd)
 {
     check_expected(room);
     check_expected(nick);
@@ -152,6 +179,7 @@ void iq_room_list_request(gchar *conferencejid)
 void iq_disco_info_request(gchar *jid) {}
 void iq_disco_items_request(gchar *jid) {}
 void iq_set_autoping(int seconds) {}
+void iq_http_upload_request(HTTPUpload *upload) {}
 void iq_confirm_instant_room(const char * const room_jid) {}
 void iq_destroy_room(const char * const room_jid) {}
 void iq_request_room_config_form(const char * const room_jid) {}
@@ -176,13 +204,20 @@ void iq_last_activity_request(gchar *jid) {}
 void iq_autoping_check(void) {}
 
 // caps functions
-Capabilities* caps_lookup(const char * const jid)
+void caps_add_feature(char *feature) {}
+void caps_remove_feature(char *feature) {}
+EntityCapabilities* caps_lookup(const char * const jid)
 {
     return NULL;
 }
 
 void caps_close(void) {}
-void caps_destroy(Capabilities *caps) {}
+void caps_destroy(EntityCapabilities *caps) {}
+void caps_reset_ver(void) {}
+gboolean caps_jid_has_feature(const char *const jid, const char *const feature)
+{
+    return FALSE;
+}
 
 gboolean bookmark_add(const char *jid, const char *nick, const char *password, const char *autojoin_str)
 {
@@ -209,7 +244,7 @@ gboolean bookmark_join(const char *jid)
     return FALSE;
 }
 
-const GList * bookmark_get_list(void)
+GList * bookmark_get_list(void)
 {
     return (GList *)mock();
 }
@@ -228,6 +263,11 @@ void roster_send_name_change(const char * const barejid, const char * const new_
     check_expected(groups);
 }
 
+gboolean bookmark_exists(const char *const room)
+{
+    return FALSE;
+}
+
 void roster_send_add_to_group(const char * const group, PContact contact) {}
 void roster_send_remove_from_group(const char * const group, PContact contact) {}
 
@@ -241,3 +281,25 @@ void roster_send_remove(const char * const barejid)
 {
     check_expected(barejid);
 }
+
+GList* blocked_list(void)
+{
+    return NULL;
+}
+
+gboolean blocked_add(char *jid)
+{
+    return TRUE;
+}
+
+gboolean blocked_remove(char *jid)
+{
+    return TRUE;
+}
+
+char* blocked_ac_find(const char *const search_str)
+{
+    return NULL;
+}
+
+void blocked_ac_reset(void) {}

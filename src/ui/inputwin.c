@@ -1,7 +1,7 @@
 /*
  * inputwin.c
  *
- * Copyright (C) 2012 - 2015 James Booth <boothj5@gmail.com>
+ * Copyright (C) 2012 - 2016 James Booth <boothj5@gmail.com>
  *
  * This file is part of Profanity.
  *
@@ -16,7 +16,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Profanity.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Profanity.  If not, see <https://www.gnu.org/licenses/>.
  *
  * In addition, as a special exception, the copyright holders give permission to
  * link the code of portions of this program with the OpenSSL library under
@@ -35,13 +35,14 @@
 #define _XOPEN_SOURCE_EXTENDED
 #include "config.h"
 
+#include <stdio.h>
 #include <sys/select.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdio.h>
 #include <wchar.h>
 #include <sys/time.h>
 #include <errno.h>
+#include <pthread.h>
 
 #include <readline/readline.h>
 #include <readline/history.h>
@@ -52,21 +53,24 @@
 #include <ncurses.h>
 #endif
 
-#include "command/command.h"
+#include "profanity.h"
+#include "log.h"
 #include "common.h"
+#include "command/cmd_ac.h"
+#include "config/files.h"
 #include "config/accounts.h"
 #include "config/preferences.h"
 #include "config/theme.h"
-#include "log.h"
-#include "muc.h"
-#include "profanity.h"
-#include "roster_list.h"
 #include "ui/ui.h"
+#include "ui/screen.h"
 #include "ui/statusbar.h"
 #include "ui/inputwin.h"
 #include "ui/window.h"
-#include "window_list.h"
+#include "ui/window_list.h"
 #include "xmpp/xmpp.h"
+#include "xmpp/muc.h"
+#include "xmpp/roster_list.h"
+#include "xmpp/chat_state.h"
 
 static WINDOW *inp_win;
 static int pad_start = 0;
@@ -145,7 +149,9 @@ inp_readline(void)
     FD_ZERO(&fds);
     FD_SET(fileno(rl_instream), &fds);
     errno = 0;
+    pthread_mutex_unlock(&lock);
     r = select(FD_SETSIZE, &fds, NULL, NULL, &p_rl_timeout);
+    pthread_mutex_lock(&lock);
     if (r < 0) {
         if (errno != EINTR) {
             char *err_msg = strerror(errno);
@@ -161,7 +167,7 @@ inp_readline(void)
                 rl_line_buffer[0] != '/' &&
                 rl_line_buffer[0] != '\0' &&
                 rl_line_buffer[0] != '\n') {
-            prof_handle_activity();
+            chat_state_activity();
         }
 
         ui_reset_idle_time();
@@ -171,7 +177,7 @@ inp_readline(void)
         inp_nonblocking(TRUE);
     } else {
         inp_nonblocking(FALSE);
-        prof_handle_idle();
+        chat_state_idle();
     }
 
     if (inp_line) {
@@ -275,9 +281,9 @@ inp_put_back(void)
 static void
 _inp_win_update_virtual(void)
 {
-    int wrows, wcols;
-    getmaxyx(stdscr, wrows, wcols);
-    pnoutrefresh(inp_win, 0, pad_start, wrows-1, 0, wrows-1, wcols-2);
+    int wcols = getmaxx(stdscr);
+    int row = screen_inputwin_row();
+    pnoutrefresh(inp_win, 0, pad_start, row, 0, row, wcols-2);
 }
 
 static void
@@ -423,7 +429,7 @@ _inp_rl_startup_hook(void)
     rl_variable_bind("disable-completion", "on");
 
     // check for and load ~/.config/profanity/inputrc
-    char *inputrc = prefs_get_inputrc();
+    char *inputrc = files_get_inputrc_file();
     if (inputrc) {
         rl_read_init_file(inputrc);
         free(inputrc);
@@ -449,7 +455,7 @@ _inp_rl_getc(FILE *stream)
     int ch = rl_getc(stream);
     if (_inp_printable(ch)) {
         ProfWin *window = wins_get_current();
-        cmd_reset_autocomplete(window);
+        cmd_ac_reset(window);
     }
     return ch;
 }
@@ -479,7 +485,7 @@ _inp_rl_tab_handler(int count, int key)
         }
     } else if (strncmp(rl_line_buffer, "/", 1) == 0) {
         ProfWin *window = wins_get_current();
-        char *result = cmd_autocomplete(window, rl_line_buffer);
+        char *result = cmd_ac_complete(window, rl_line_buffer);
         if (result) {
             rl_replace_line(result, 1);
             rl_point = rl_end;

@@ -1,7 +1,7 @@
 /*
  * tlscerts.c
  *
- * Copyright (C) 2012 - 2015 James Booth <boothj5@gmail.com>
+ * Copyright (C) 2012 - 2016 James Booth <boothj5@gmail.com>
  *
  * This file is part of Profanity.
  *
@@ -16,7 +16,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Profanity.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Profanity.  If not, see <https://www.gnu.org/licenses/>.
  *
  * In addition, as a special exception, the copyright holders give permission to
  * link the code of portions of this program with the OpenSSL library under
@@ -38,15 +38,15 @@
 #include <glib.h>
 #include <glib/gstdio.h>
 
-#include "config/tlscerts.h"
 #include "log.h"
 #include "common.h"
+#include "config/files.h"
+#include "config/tlscerts.h"
 #include "tools/autocomplete.h"
 
-static gchar *tlscerts_loc;
+static char *tlscerts_loc;
 static GKeyFile *tlscerts;
 
-static gchar* _get_tlscerts_file(void);
 static void _save_tlscerts(void);
 
 static Autocomplete certs_ac;
@@ -57,7 +57,7 @@ void
 tlscerts_init(void)
 {
     log_info("Loading TLS certificates");
-    tlscerts_loc = _get_tlscerts_file();
+    tlscerts_loc = files_get_data_path(FILE_TLSCERTS);
 
     if (g_file_test(tlscerts_loc, G_FILE_TEST_EXISTS)) {
         g_chmod(tlscerts_loc, S_IRUSR | S_IWUSR);
@@ -411,6 +411,8 @@ tlscerts_free(TLSCertificate *cert)
 
         free(cert->key_alg);
         free(cert->signature_alg);
+
+        free(cert);
     }
 }
 
@@ -424,19 +426,6 @@ tlscerts_close(void)
     current_fp = NULL;
 
     autocomplete_free(certs_ac);
-}
-
-static gchar*
-_get_tlscerts_file(void)
-{
-    gchar *xdg_data = xdg_get_data_home();
-    GString *tlscerts_file = g_string_new(xdg_data);
-    g_string_append(tlscerts_file, "/profanity/tlscerts");
-    gchar *result = strdup(tlscerts_file->str);
-    g_free(xdg_data);
-    g_string_free(tlscerts_file, TRUE);
-
-    return result;
 }
 
 static void

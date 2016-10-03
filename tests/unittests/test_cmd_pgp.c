@@ -8,7 +8,8 @@
 
 #include "config.h"
 
-#include "command/commands.h"
+#include "command/cmd_funcs.h"
+#include "xmpp/xmpp.h"
 
 #include "ui/stub_ui.h"
 
@@ -31,7 +32,7 @@ void cmd_pgp_start_shows_message_when_connection(jabber_conn_status_t conn_statu
     ProfWin window;
     window.type = WIN_CHAT;
 
-    will_return(jabber_get_connection_status, conn_status);
+    will_return(connection_get_status, conn_status);
 
     expect_cons_show("You must be connected to start PGP encrpytion.");
 
@@ -54,23 +55,13 @@ void cmd_pgp_start_shows_message_when_connecting(void **state)
     cmd_pgp_start_shows_message_when_connection(JABBER_CONNECTING);
 }
 
-void cmd_pgp_start_shows_message_when_undefined(void **state)
-{
-    cmd_pgp_start_shows_message_when_connection(JABBER_UNDEFINED);
-}
-
-void cmd_pgp_start_shows_message_when_started(void **state)
-{
-    cmd_pgp_start_shows_message_when_connection(JABBER_STARTED);
-}
-
 void cmd_pgp_start_shows_message_when_no_arg_in_wintype(win_type_t wintype)
 {
     gchar *args[] = { "start", NULL };
     ProfWin window;
     window.type = wintype;
 
-    will_return(jabber_get_connection_status, JABBER_CONNECTED);
+    will_return(connection_get_status, JABBER_CONNECTED);
 
     expect_cons_show("You must be in a regular chat window to start PGP encrpytion.");
 

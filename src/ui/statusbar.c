@@ -1,7 +1,7 @@
 /*
  * statusbar.c
  *
- * Copyright (C) 2012 - 2015 James Booth <boothj5@gmail.com>
+ * Copyright (C) 2012 - 2016 James Booth <boothj5@gmail.com>
  *
  * This file is part of Profanity.
  *
@@ -16,7 +16,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Profanity.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Profanity.  If not, see <https://www.gnu.org/licenses/>.
  *
  * In addition, as a special exception, the copyright holders give permission to
  * link the code of portions of this program with the OpenSSL library under
@@ -45,10 +45,11 @@
 #endif
 
 #include "config/theme.h"
+#include "config/preferences.h"
 #include "ui/ui.h"
 #include "ui/statusbar.h"
 #include "ui/inputwin.h"
-#include "config/preferences.h"
+#include "ui/screen.h"
 
 #define TIME_CHECK 60000000
 
@@ -61,6 +62,7 @@ static int is_active[12];
 static GHashTable *remaining_active;
 static int is_new[12];
 static GHashTable *remaining_new;
+static GTimeZone *tz;
 static GDateTime *last_time;
 static int current;
 
@@ -73,8 +75,8 @@ static void _status_bar_draw(void);
 void
 create_status_bar(void)
 {
-    int rows, cols, i;
-    getmaxyx(stdscr, rows, cols);
+    int i;
+    int cols = getmaxx(stdscr);
 
     is_active[1] = TRUE;
     is_new[1] = FALSE;
@@ -88,17 +90,20 @@ create_status_bar(void)
 
     int bracket_attrs = theme_attrs(THEME_STATUS_BRACKET);
 
-    status_bar = newwin(1, cols, rows-2, 0);
+    int row = screen_statusbar_row();
+    status_bar = newwin(1, cols, row, 0);
     wbkgd(status_bar, theme_attrs(THEME_STATUS_TEXT));
     wattron(status_bar, bracket_attrs);
     mvwprintw(status_bar, 0, cols - 34, _active);
     mvwprintw(status_bar, 0, cols - 34 + ((current - 1) * 3), bracket);
     wattroff(status_bar, bracket_attrs);
 
+    tz = g_time_zone_new_local();
+
     if (last_time) {
         g_date_time_unref(last_time);
     }
-    last_time = g_date_time_new_now_local();
+    last_time = g_date_time_new_now(tz);
 
     _status_bar_draw();
 }
@@ -112,14 +117,14 @@ status_bar_update_virtual(void)
 void
 status_bar_resize(void)
 {
-    int rows, cols;
-    getmaxyx(stdscr, rows, cols);
+    int cols = getmaxx(stdscr);
 
     werase(status_bar);
 
     int bracket_attrs = theme_attrs(THEME_STATUS_BRACKET);
 
-    mvwin(status_bar, rows-2, 0);
+    int row = screen_statusbar_row();
+    mvwin(status_bar, row, 0);
     wresize(status_bar, 1, cols);
     wbkgd(status_bar, theme_attrs(THEME_STATUS_TEXT));
     wattron(status_bar, bracket_attrs);
@@ -451,7 +456,7 @@ _status_bar_draw(void)
     if (last_time) {
         g_date_time_unref(last_time);
     }
-    last_time = g_date_time_new_now_local();
+    last_time = g_date_time_new_now(tz);
 
     int bracket_attrs = theme_attrs(THEME_STATUS_BRACKET);
 

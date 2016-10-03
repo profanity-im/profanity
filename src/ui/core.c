@@ -1,7 +1,7 @@
 /*
  * core.c
  *
- * Copyright (C) 2012 - 2015 James Booth <boothj5@gmail.com>
+ * Copyright (C) 2012 - 2016 James Booth <boothj5@gmail.com>
  *
  * This file is part of Profanity.
  *
@@ -16,7 +16,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Profanity.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Profanity.  If not, see <https://www.gnu.org/licenses/>.
  *
  * In addition, as a special exception, the copyright holders give permission to
  * link the code of portions of this program with the OpenSSL library under
@@ -44,36 +44,40 @@
 #include <sys/ioctl.h>
 #include <unistd.h>
 
+#include <glib.h>
+
 #ifdef HAVE_LIBXSS
 #include <X11/extensions/scrnsaver.h>
 #endif
-#include <glib.h>
+
 #ifdef HAVE_NCURSESW_NCURSES_H
 #include <ncursesw/ncurses.h>
 #elif HAVE_NCURSES_H
 #include <ncurses.h>
 #endif
 
-#include "chat_session.h"
-#include "command/command.h"
+#include "log.h"
 #include "common.h"
+#include "command/cmd_defs.h"
+#include "command/cmd_ac.h"
 #include "config/preferences.h"
 #include "config/theme.h"
-#include "contact.h"
-#include "roster_list.h"
-#include "jid.h"
-#include "log.h"
-#include "muc.h"
-#ifdef HAVE_LIBOTR
-#include "otr/otr.h"
-#endif
 #include "ui/ui.h"
 #include "ui/titlebar.h"
 #include "ui/statusbar.h"
 #include "ui/inputwin.h"
 #include "ui/window.h"
-#include "window_list.h"
+#include "ui/window_list.h"
 #include "xmpp/xmpp.h"
+#include "xmpp/muc.h"
+#include "xmpp/chat_session.h"
+#include "xmpp/contact.h"
+#include "xmpp/roster_list.h"
+#include "xmpp/jid.h"
+
+#ifdef HAVE_LIBOTR
+#include "otr/otr.h"
+#endif
 
 static char *win_title;
 static int inp_size;
@@ -129,7 +133,7 @@ ui_update(void)
 
     win_update_virtual(current);
 
-    if (prefs_get_boolean(PREF_TITLEBAR_SHOW)) {
+    if (prefs_get_boolean(PREF_WINTITLE_SHOW)) {
         _ui_draw_term_title();
     }
     title_bar_update_virtual();
@@ -351,14 +355,33 @@ ui_group_removed(const char *const contact, const char *const group)
 }
 
 void
-ui_handle_login_account_success(ProfAccount *account, int secured)
+ui_handle_login_account_success(ProfAccount *account, gboolean secured)
 {
+    if (account->theme) {
+        if (theme_load(account->theme)) {
+            ui_load_colours();
+            if (prefs_get_boolean(PREF_ROSTER)) {
+                ui_show_roster();
+            } else {
+                ui_hide_roster();
+            }
+            if (prefs_get_boolean(PREF_OCCUPANTS)) {
+                ui_show_all_room_rosters();
+            } else {
+                ui_hide_all_room_rosters();
+            }
+            ui_resize();
+        } else {
+            cons_show("Couldn't find account theme: %s", account->theme);
+        }
+    }
+
     resource_presence_t resource_presence = accounts_get_login_presence(account->name);
     contact_presence_t contact_presence = contact_presence_from_resource_presence(resource_presence);
     cons_show_login_success(account, secured);
     title_bar_set_presence(contact_presence);
     title_bar_set_connected(TRUE);
-    title_bar_set_tls(secured ? TRUE : FALSE);
+    title_bar_set_tls(secured);
 
     GString *fulljid = g_string_new(account->jid);
     g_string_append(fulljid, "/");
@@ -374,7 +397,7 @@ ui_update_presence(const resource_presence_t resource_presence,
 {
     contact_presence_t contact_presence = contact_presence_from_resource_presence(resource_presence);
     title_bar_set_presence(contact_presence);
-    gint priority = accounts_get_priority_for_presence_type(jabber_get_account_name(), resource_presence);
+    gint priority = accounts_get_priority_for_presence_type(session_get_account_name(), resource_presence);
     if (message) {
         cons_show("Status set to %s (priority %d), \"%s\".", show, priority, message);
     } else {
@@ -492,7 +515,7 @@ int
 ui_close_all_wins(void)
 {
     int count = 0;
-    jabber_conn_status_t conn_status = jabber_get_connection_status();
+    jabber_conn_status_t conn_status = connection_get_status();
 
     GList *win_nums = wins_get_nums();
     GList *curr = win_nums;
@@ -519,7 +542,7 @@ int
 ui_close_read_wins(void)
 {
     int count = 0;
-    jabber_conn_status_t conn_status = jabber_get_connection_status();
+    jabber_conn_status_t conn_status = connection_get_status();
 
     GList *win_nums = wins_get_nums();
     GList *curr = win_nums;
@@ -631,12 +654,12 @@ ui_focus_win(ProfWin *window)
     ProfWin *old_current = wins_get_current();
     if (old_current->type == WIN_MUC_CONFIG) {
         ProfMucConfWin *confwin = (ProfMucConfWin*)old_current;
-        cmd_autocomplete_remove_form_fields(confwin->form);
+        cmd_ac_remove_form_fields(confwin->form);
     }
 
     if (window->type == WIN_MUC_CONFIG) {
         ProfMucConfWin *confwin = (ProfMucConfWin*)window;
-        cmd_autocomplete_add_form_fields(confwin->form);
+        cmd_ac_add_form_fields(confwin->form);
     }
 
     int i = wins_get_num(window);
@@ -659,7 +682,7 @@ ui_close_win(int index)
     if (window && window->type == WIN_MUC_CONFIG) {
         ProfMucConfWin *confwin = (ProfMucConfWin*)window;
         if (confwin->form) {
-            cmd_autocomplete_remove_form_fields(confwin->form);
+            cmd_ac_remove_form_fields(confwin->form);
         }
     }
 
@@ -672,7 +695,7 @@ ui_close_win(int index)
 void
 ui_prune_wins(void)
 {
-    jabber_conn_status_t conn_status = jabber_get_connection_status();
+    jabber_conn_status_t conn_status = connection_get_status();
     gboolean pruned = FALSE;
 
     GSList *wins = wins_get_prune_wins();
@@ -802,6 +825,15 @@ ui_room_join(const char *const roomjid, gboolean focus)
         char *nick = muc_nick(roomjid);
         win_vprint(console, '!', 0, NULL, 0, THEME_TYPING, "", "-> Autojoined %s as %s (%d).", roomjid, nick, num);
     }
+
+    GList *privwins = wins_get_private_chats(roomjid);
+    GList *curr = privwins;
+    while (curr) {
+        ProfPrivateWin *privwin = curr->data;
+        privwin_room_joined(privwin);
+        curr = g_list_next(curr);
+    }
+    g_list_free(privwins);
 }
 
 void
@@ -822,6 +854,15 @@ ui_room_destroy(const char *const roomjid)
         ui_close_win(num);
         cons_show("Room destroyed: %s", roomjid);
     }
+
+    GList *privwins = wins_get_private_chats(roomjid);
+    GList *curr = privwins;
+    while (curr) {
+        ProfPrivateWin *privwin = curr->data;
+        privwin_room_destroyed(privwin);
+        curr = g_list_next(curr);
+    }
+    g_list_free(privwins);
 }
 
 void
@@ -832,6 +873,16 @@ ui_leave_room(const char *const roomjid)
         int num = wins_get_num(window);
         ui_close_win(num);
     }
+
+    GList *privwins = wins_get_private_chats(roomjid);
+    GList *curr = privwins;
+    while (curr) {
+        ProfPrivateWin *privwin = curr->data;
+        privwin_room_left(privwin);
+        curr = g_list_next(curr);
+    }
+    g_list_free(privwins);
+
 }
 
 void
@@ -860,6 +911,15 @@ ui_room_destroyed(const char *const roomjid, const char *const reason, const cha
             }
         }
     }
+
+    GList *privwins = wins_get_private_chats(roomjid);
+    GList *curr = privwins;
+    while (curr) {
+        ProfPrivateWin *privwin = curr->data;
+        privwin_room_destroyed(privwin);
+        curr = g_list_next(curr);
+    }
+    g_list_free(privwins);
 }
 
 void
@@ -887,6 +947,15 @@ ui_room_kicked(const char *const roomjid, const char *const actor, const char *c
         win_vprint(console, '!', 0, NULL, 0, THEME_TYPING, "", "<- %s", message->str);
         g_string_free(message, TRUE);
     }
+
+    GList *privwins = wins_get_private_chats(roomjid);
+    GList *curr = privwins;
+    while (curr) {
+        ProfPrivateWin *privwin = curr->data;
+        privwin_room_kicked(privwin, actor, reason);
+        curr = g_list_next(curr);
+    }
+    g_list_free(privwins);
 }
 
 void
@@ -914,6 +983,15 @@ ui_room_banned(const char *const roomjid, const char *const actor, const char *c
         win_vprint(console, '!', 0, NULL, 0, THEME_TYPING, "", "<- %s", message->str);
         g_string_free(message, TRUE);
     }
+
+    GList *privwins = wins_get_private_chats(roomjid);
+    GList *curr = privwins;
+    while (curr) {
+        ProfPrivateWin *privwin = curr->data;
+        privwin_room_banned(privwin, actor, reason);
+        curr = g_list_next(curr);
+    }
+    g_list_free(privwins);
 }
 
 int
@@ -1029,10 +1107,10 @@ static void
 _ui_draw_term_title(void)
 {
     char new_win_title[100];
-    jabber_conn_status_t status = jabber_get_connection_status();
+    jabber_conn_status_t status = connection_get_status();
 
     if (status == JABBER_CONNECTED) {
-        const char * const jid = jabber_get_fulljid();
+        const char * const jid = connection_get_fulljid();
         gint unread = wins_get_total_unread();
 
         if (unread != 0) {
@@ -1154,7 +1232,7 @@ ui_handle_room_config_submit_result_error(const char *const roomjid, const char 
 }
 
 void
-ui_show_lines(ProfWin *window, const gchar** lines)
+ui_show_lines(ProfWin *window, gchar** lines)
 {
     if (lines) {
         int i;
@@ -1250,4 +1328,22 @@ ui_show_software_version(const char *const jid, const char *const  presence,
     if (os) {
         win_vprint(window, '-', 0, NULL, 0, 0, "", "OS      : %s", os);
     }
+}
+
+void
+ui_status_bar_inactive(const int win)
+{
+    status_bar_inactive(win);
+}
+
+void
+ui_status_bar_active(const int win)
+{
+    status_bar_active(win);
+}
+
+void
+ui_status_bar_new(const int win)
+{
+    status_bar_new(win);
 }

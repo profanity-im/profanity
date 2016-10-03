@@ -1,7 +1,7 @@
 /*
  * otrlibv3.c
  *
- * Copyright (C) 2012 - 2015 James Booth <boothj5@gmail.com>
+ * Copyright (C) 2012 - 2016 James Booth <boothj5@gmail.com>
  *
  * This file is part of Profanity.
  *
@@ -16,7 +16,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Profanity.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Profanity.  If not, see <https://www.gnu.org/licenses/>.
  *
  * In addition, as a special exception, the copyright holders give permission to
  * link the code of portions of this program with the OpenSSL library under
@@ -35,10 +35,10 @@
 #include <libotr/privkey.h>
 #include <libotr/message.h>
 
-#include "ui/ui.h"
-#include "window_list.h"
 #include "otr/otr.h"
 #include "otr/otrlib.h"
+#include "ui/ui.h"
+#include "ui/window_list.h"
 
 OtrlPolicy
 otrlib_policy(void)
