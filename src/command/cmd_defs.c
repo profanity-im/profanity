@@ -803,9 +803,9 @@ static struct cmd_t command_defs[] =
         CMD_SYN(
             "/bookmark",
             "/bookmark list",
-            "/bookmark add <room> [nick <nick>] [password <password>] [autojoin on|off]",
+            "/bookmark add [<room>] [nick <nick>] [password <password>] [autojoin on|off]",
             "/bookmark update <room> [nick <nick>] [password <password>] [autojoin on|off]",
-            "/bookmark remove <room>",
+            "/bookmark remove [<room>]",
             "/bookmark join <room>",
             "/bookmark invites on|off")
         CMD_DESC(
@@ -813,8 +813,8 @@ static struct cmd_t command_defs[] =
             "In a chat room, no arguments will bookmark the current room, setting autojoin to \"on\".")
         CMD_ARGS(
             { "list", "List all bookmarks." },
-            { "add <room>", "Add a bookmark." },
-            { "remove <room>", "Remove a bookmark." },
+            { "add [<room>]", "Add a bookmark, passing no room will bookmark the current room, setting autojoin to \"on\"." },
+            { "remove [<room>]", "Remove a bookmark, passing no room will remove the bookmark for the current room, if one exists." },
             { "update <room>", "Update the properties associated with a bookmark." },
             { "nick <nick>", "Nickname used in the chat room." },
             { "password <password>", "Password if required, may be stored in plaintext on your server." },
