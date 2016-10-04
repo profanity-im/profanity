@@ -137,7 +137,8 @@ void cmd_bookmark_add_shows_message_when_invalid_jid(void **state)
 
     will_return(connection_get_status, JABBER_CONNECTED);
 
-    expect_cons_show("Can't add bookmark with JID 'room'; should be 'room@domain.tld'");
+    expect_cons_show("Invalid room, must be of the form room@domain.tld");
+    expect_cons_show("");
 
     gboolean result = cmd_bookmark(&window, CMD_BOOKMARK, args);
     assert_true(result);
