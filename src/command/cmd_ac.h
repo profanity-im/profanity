@@ -40,6 +40,9 @@
 
 void cmd_ac_init(void);
 void cmd_ac_uninit(void);
+char* cmd_ac_complete(ProfWin *window, const char *const input);
+void cmd_ac_reset(ProfWin *window);
+gboolean cmd_ac_exists(char *cmd);
 
 void cmd_ac_add(const char *const value);
 void cmd_ac_add_help(const char *const value);
@@ -51,13 +54,7 @@ void cmd_ac_remove(const char *const value);
 void cmd_ac_remove_help(const char *const value);
 void cmd_ac_remove_alias_value(char *value);
 
-gboolean cmd_ac_exists(char *cmd);
-
 void cmd_ac_add_form_fields(DataForm *form);
 void cmd_ac_remove_form_fields(DataForm *form);
-
-char* cmd_ac_complete(ProfWin *window, const char *const input);
-
-void cmd_ac_reset(ProfWin *window);
 
 #endif
