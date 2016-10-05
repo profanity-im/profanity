@@ -745,17 +745,21 @@ cmd_ac_init(void)
 void
 cmd_ac_add(const char *const value)
 {
-    if (commands_ac) {
-        autocomplete_add(commands_ac, value);
+    if (commands_ac == NULL) {
+        return;
     }
+
+    autocomplete_add(commands_ac, value);
 }
 
 void
 cmd_ac_add_help(const char *const value)
 {
-    if (help_ac) {
-        autocomplete_add(help_ac, value);
+    if (help_ac == NULL) {
+        return;
     }
+
+    autocomplete_add(help_ac, value);
 }
 
 void
@@ -778,33 +782,40 @@ cmd_ac_add_alias(ProfAlias *alias)
 void
 cmd_ac_add_alias_value(char *value)
 {
-    if (aliases_ac) {
-        autocomplete_add(aliases_ac, value);
+    if (aliases_ac == NULL) {
+        return;
     }
+
+    autocomplete_add(aliases_ac, value);
 }
 
 void
 cmd_ac_remove_alias_value(char *value)
 {
-    if (aliases_ac) {
-        autocomplete_remove(aliases_ac, value);
+    if (aliases_ac == NULL) {
+        return;
     }
+    autocomplete_remove(aliases_ac, value);
 }
 
 void
 cmd_ac_remove(const char *const value)
 {
-    if (commands_ac) {
-        autocomplete_remove(commands_ac, value);
+    if (commands_ac == NULL) {
+        return;
     }
+
+    autocomplete_remove(commands_ac, value);
 }
 
 void
 cmd_ac_remove_help(const char *const value)
 {
-    if (help_ac) {
-        autocomplete_remove(help_ac, value);
+    if (help_ac == NULL) {
+        return;
     }
+
+    autocomplete_remove(help_ac, value);
 }
 
 gboolean
@@ -812,9 +823,9 @@ cmd_ac_exists(char *cmd)
 {
     if (commands_ac == NULL) {
         return FALSE;
-    } else {
-        return autocomplete_contains(commands_ac, cmd);
     }
+
+    return autocomplete_contains(commands_ac, cmd);
 }
 
 void
@@ -2310,20 +2321,18 @@ _time_autocomplete(ProfWin *window, const char *const input)
 static char*
 _kick_autocomplete(ProfWin *window, const char *const input)
 {
-    char *result = NULL;
-
-    if (window->type == WIN_MUC) {
-        ProfMucWin *mucwin = (ProfMucWin*)window;
-        assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
-        Autocomplete nick_ac = muc_roster_ac(mucwin->roomjid);
-
-        if (nick_ac) {
-            result = autocomplete_param_with_ac(input, "/kick", nick_ac, TRUE);
-            if (result) {
-                return result;
-            }
-        }
+    if (window->type != WIN_MUC) {
+        return NULL;
     }
+
+    ProfMucWin *mucwin = (ProfMucWin*)window;
+    assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
+    Autocomplete nick_ac = muc_roster_ac(mucwin->roomjid);
+    if (nick_ac == NULL) {
+        return NULL;
+    }
+
+    char *result = autocomplete_param_with_ac(input, "/kick", nick_ac, TRUE);
 
     return result;
 }
@@ -2331,20 +2340,18 @@ _kick_autocomplete(ProfWin *window, const char *const input)
 static char*
 _ban_autocomplete(ProfWin *window, const char *const input)
 {
-    char *result = NULL;
-
-    if (window->type == WIN_MUC) {
-        ProfMucWin *mucwin = (ProfMucWin*)window;
-        assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
-        Autocomplete jid_ac = muc_roster_jid_ac(mucwin->roomjid);
-
-        if (jid_ac) {
-            result = autocomplete_param_with_ac(input, "/ban", jid_ac, TRUE);
-            if (result) {
-                return result;
-            }
-        }
+    if (window->type != WIN_MUC) {
+        return NULL;
     }
+
+    ProfMucWin *mucwin = (ProfMucWin*)window;
+    assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
+    Autocomplete jid_ac = muc_roster_jid_ac(mucwin->roomjid);
+    if (jid_ac == NULL) {
+        return NULL;
+    }
+
+    char *result = autocomplete_param_with_ac(input, "/ban", jid_ac, TRUE);
 
     return result;
 }
@@ -2717,27 +2724,13 @@ _console_autocomplete(ProfWin *window, const char *const input)
 static char*
 _win_autocomplete(ProfWin *window, const char *const input)
 {
-    char *found = NULL;
-
-    found = autocomplete_param_with_func(input, "/win", win_autocomplete);
-    if (found) {
-        return found;
-    }
-
-    return NULL;
+    return autocomplete_param_with_func(input, "/win", win_autocomplete);
 }
 
 static char*
 _close_autocomplete(ProfWin *window, const char *const input)
 {
-    char *found = NULL;
-
-    found = autocomplete_param_with_func(input, "/close", win_close_autocomplete);
-    if (found) {
-        return found;
-    }
-
-    return NULL;
+    return autocomplete_param_with_func(input, "/close", win_close_autocomplete);
 }
 
 static char*
