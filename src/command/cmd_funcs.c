@@ -265,7 +265,7 @@ cmd_tls_revoke(ProfWin *window, const char *const command, gchar **args)
         if (res) {
             cons_show("Trusted certificate revoked: %s", args[1]);
         } else {
-            cons_show("Could not find certificate: %s", args[0]);
+            cons_show("Could not find certificate: %s", args[1]);
         }
     }
     return TRUE;
