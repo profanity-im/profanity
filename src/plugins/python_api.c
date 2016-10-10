@@ -340,6 +340,30 @@ python_api_completer_clear(PyObject *self, PyObject *args)
 }
 
 static PyObject*
+python_api_filepath_completer_add(PyObject *self, PyObject *args)
+{
+    PyObject *prefix = NULL;
+
+    if (!PyArg_ParseTuple(args, "O", &prefix)) {
+        Py_RETURN_NONE;
+    }
+
+    char *prefix_str = python_str_or_unicode_to_string(prefix);
+
+    char *plugin_name = _python_plugin_name();
+    log_debug("Filepath autocomplete added '%s' for %s", prefix_str, plugin_name);
+
+    allow_python_threads();
+    api_filepath_completer_add(plugin_name, prefix_str);
+    free(prefix_str);
+    disable_python_threads();
+
+    free(plugin_name);
+
+    Py_RETURN_NONE;
+}
+
+static PyObject*
 python_api_notify(PyObject *self, PyObject *args)
 {
     PyObject *message = NULL;
@@ -1063,6 +1087,7 @@ static PyMethodDef apiMethods[] = {
     { "completer_add", python_api_completer_add, METH_VARARGS, "Add items to an autocompleter." },
     { "completer_remove", python_api_completer_remove, METH_VARARGS, "Remove items from an autocompleter." },
     { "completer_clear", python_api_completer_clear, METH_VARARGS, "Remove all items from an autocompleter." },
+    { "filepath_completer_add", python_api_filepath_completer_add, METH_VARARGS, "Add filepath autocompleter" },
     { "send_line", python_api_send_line, METH_VARARGS, "Send a line of input." },
     { "notify", python_api_notify, METH_VARARGS, "Send desktop notification." },
     { "get_current_recipient", python_api_get_current_recipient, METH_VARARGS, "Return the jid of the recipient of the current window." },
