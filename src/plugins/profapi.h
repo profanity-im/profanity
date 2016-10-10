@@ -40,6 +40,7 @@
 #define prof_completer_add(key, items) _prof_completer_add(__FILE__, key, items)
 #define prof_completer_remove(key, items) _prof_completer_remove(__FILE__, key, items)
 #define prof_completer_clear(key) _prof_completer_clear(__FILE__, key)
+#define prof_filepath_completer_add(prefix) _prof_filepath_completer_add(__FILE__, prefix)
 #define prof_win_create(win, input_handler) _prof_win_create(__FILE__, win, input_handler)
 #define prof_disco_add_feature(feature) _prof_disco_add_feature(__FILE__, feature)
 
@@ -62,6 +63,7 @@ void (*_prof_register_timed)(const char *filename, TIMED_CB callback, int interv
 void (*_prof_completer_add)(const char *filename, const char *key, char **items);
 void (*_prof_completer_remove)(const char *filename, const char *key, char **items);
 void (*_prof_completer_clear)(const char *filename, const char *key);
+void (*_prof_filepath_completer_add)(const char *filename, const char *prefix);
 
 void (*prof_notify)(const char *message, int timeout_ms, const char *category);
 
