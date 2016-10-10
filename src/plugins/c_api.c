@@ -143,6 +143,17 @@ c_api_completer_clear(const char *filename, const char *key)
 }
 
 static void
+c_api_filepath_completer_add(const char *filename, const char *prefix)
+{
+    char *plugin_name = _c_plugin_name(filename);
+    log_debug("Filepath autocomplete added '%s' for %s", prefix, plugin_name);
+
+    api_filepath_completer_add(plugin_name, prefix);
+
+    free(plugin_name);
+}
+
+static void
 c_api_notify(const char *message, int timeout_ms, const char *category)
 {
     api_notify(message, category, timeout_ms);
@@ -360,6 +371,7 @@ c_api_init(void)
     _prof_completer_add = c_api_completer_add;
     _prof_completer_remove = c_api_completer_remove;
     _prof_completer_clear = c_api_completer_clear;
+    _prof_filepath_completer_add = c_api_filepath_completer_add;
     _prof_win_create = c_api_win_create;
     prof_notify = c_api_notify;
     prof_send_line = c_api_send_line;

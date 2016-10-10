@@ -59,6 +59,7 @@ void api_register_timed(const char *const plugin_name, void *callback, int inter
 void api_completer_add(const char *const plugin_name, const char *key, char **items);
 void api_completer_remove(const char *const plugin_name, const char *key, char **items);
 void api_completer_clear(const char *const plugin_name, const char *key);
+void api_filepath_completer_add(const char *const plugin_name, const char *prefix);
 
 void api_log_debug(const char *message);
 void api_log_info(const char *message);
