@@ -51,6 +51,7 @@ void (*_prof_register_timed)(const char *filename, TIMED_CB callback, int interv
 void (*_prof_completer_add)(const char *filename, const char *key, char **items) = NULL;
 void (*_prof_completer_remove)(const char *filename, const char *key, char **items) = NULL;
 void (*_prof_completer_clear)(const char *filename, const char *key) = NULL;
+void (*_prof_filepath_completer_add)(const char *filename, const char *prefix) = NULL;
 
 void (*prof_notify)(const char *message, int timeout_ms, const char *category) = NULL;
 
