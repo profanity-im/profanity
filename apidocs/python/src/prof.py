@@ -182,6 +182,20 @@ def completer_clear(key):
     pass
 
 
+def filepath_completer_add(prefix):
+    """Add filepath autocompletion for a command, or command argument.
+
+    :param prefix: the prefix from which filepath autocompletion will be triggered
+
+    Examples:
+    ::
+        prof.filepath_completer_add("/filecmd")
+
+        prof.filepath_completer_add("/mycommand open")
+    """
+    pass
+
+
 def send_line(line): 
     """Send a line of input to Profanity to execute.
 

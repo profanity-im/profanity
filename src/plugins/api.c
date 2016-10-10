@@ -179,6 +179,12 @@ api_completer_clear(const char *const plugin_name, const char *key)
 }
 
 void
+api_filepath_completer_add(const char *const plugin_name, const char *prefix)
+{
+    autocompleters_filepath_add(plugin_name, prefix);
+}
+
+void
 api_notify(const char *message, const char *category, int timeout_ms)
 {
     notify(message, timeout_ms, category);

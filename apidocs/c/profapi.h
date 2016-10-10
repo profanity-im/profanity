@@ -94,6 +94,13 @@ Remove all values from autocompletion for a command, or command argument.
 void prof_completer_clear(const char *key);
 
 /**
+Add filepath autocompletion for a command, or command argument.
+
+@param prefix the prefix from which filepath autocompletion will be triggered
+*/
+void prof_filepath_completer_add(const char *prefix);
+
+/**
 Send a desktop notification.
 @param message the message to display in the notification
 @param timeout_ms the length of time before the notification disappears in milliseconds
