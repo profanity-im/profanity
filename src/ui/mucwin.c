@@ -58,7 +58,7 @@ mucwin_role_change(ProfMucWin *mucwin, const char *const role, const char *const
     if (reason) {
         win_printf(window, '!', 0, NULL, NO_DATE | NO_EOL, THEME_ROOMINFO, "", ", reason: %s", reason);
     }
-    win_print(window, '!', 0, NULL, NO_DATE, THEME_ROOMINFO, "", "");
+    win_printf(window, '!', 0, NULL, NO_DATE, THEME_ROOMINFO, "", "");
 }
 
 void
@@ -75,7 +75,7 @@ mucwin_affiliation_change(ProfMucWin *mucwin, const char *const affiliation, con
     if (reason) {
         win_printf(window, '!', 0, NULL, NO_DATE | NO_EOL, THEME_ROOMINFO, "", ", reason: %s", reason);
     }
-    win_print(window, '!', 0, NULL, NO_DATE, THEME_ROOMINFO, "", "");
+    win_printf(window, '!', 0, NULL, NO_DATE, THEME_ROOMINFO, "", "");
 }
 
 void
@@ -92,7 +92,7 @@ mucwin_role_and_affiliation_change(ProfMucWin *mucwin, const char *const role, c
     if (reason) {
         win_printf(window, '!', 0, NULL, NO_DATE | NO_EOL, THEME_ROOMINFO, "", ", reason: %s", reason);
     }
-    win_print(window, '!', 0, NULL, NO_DATE, THEME_ROOMINFO, "", "");
+    win_printf(window, '!', 0, NULL, NO_DATE, THEME_ROOMINFO, "", "");
 }
 
 
@@ -110,7 +110,7 @@ mucwin_occupant_role_change(ProfMucWin *mucwin, const char *const nick, const ch
     if (reason) {
         win_printf(window, '!', 0, NULL, NO_DATE | NO_EOL, THEME_ROOMINFO, "", ", reason: %s", reason);
     }
-    win_print(window, '!', 0, NULL, NO_DATE, THEME_ROOMINFO, "", "");
+    win_printf(window, '!', 0, NULL, NO_DATE, THEME_ROOMINFO, "", "");
 }
 
 void
@@ -127,7 +127,7 @@ mucwin_occupant_affiliation_change(ProfMucWin *mucwin, const char *const nick, c
     if (reason) {
         win_printf(window, '!', 0, NULL, NO_DATE | NO_EOL, THEME_ROOMINFO, "", ", reason: %s", reason);
     }
-    win_print(window, '!', 0, NULL, NO_DATE, THEME_ROOMINFO, "", "");
+    win_printf(window, '!', 0, NULL, NO_DATE, THEME_ROOMINFO, "", "");
 }
 
 void
@@ -144,7 +144,7 @@ mucwin_occupant_role_and_affiliation_change(ProfMucWin *mucwin, const char *cons
     if (reason) {
         win_printf(window, '!', 0, NULL, NO_DATE | NO_EOL, THEME_ROOMINFO, "", ", reason: %s", reason);
     }
-    win_print(window, '!', 0, NULL, NO_DATE, THEME_ROOMINFO, "", "");
+    win_printf(window, '!', 0, NULL, NO_DATE, THEME_ROOMINFO, "", "");
 }
 
 void
@@ -154,7 +154,7 @@ mucwin_room_info_error(ProfMucWin *mucwin, const char *const error)
 
     ProfWin *window = (ProfWin*)mucwin;
     win_printf(window, '!', 0, NULL, 0, 0, "", "Room info request failed: %s", error);
-    win_print(window, '-', 0, NULL, 0, 0, "", "");
+    win_printf(window, '-', 0, NULL, 0, 0, "", "");
 }
 
 void
@@ -166,7 +166,7 @@ mucwin_room_disco_info(ProfMucWin *mucwin, GSList *identities, GSList *features)
     if ((identities && (g_slist_length(identities) > 0)) ||
         (features && (g_slist_length(features) > 0))) {
         if (identities) {
-            win_print(window, '!', 0, NULL, 0, 0, "", "Identities:");
+            win_printf(window, '!', 0, NULL, 0, 0, "", "Identities:");
         }
         while (identities) {
             DiscoIdentity *identity = identities->data;  // anme trpe, cat
@@ -182,19 +182,19 @@ mucwin_room_disco_info(ProfMucWin *mucwin, GSList *identities, GSList *features)
             if (identity->category) {
                 identity_str = g_string_append(identity_str, identity->category);
             }
-            win_print(window, '!', 0, NULL, 0, 0, "", identity_str->str);
+            win_printf(window, '!', 0, NULL, 0, 0, "", identity_str->str);
             g_string_free(identity_str, TRUE);
             identities = g_slist_next(identities);
         }
 
         if (features) {
-            win_print(window, '!', 0, NULL, 0, 0, "", "Features:");
+            win_printf(window, '!', 0, NULL, 0, 0, "", "Features:");
         }
         while (features) {
             win_printf(window, '!', 0, NULL, 0, 0, "", "  %s", features->data);
             features = g_slist_next(features);
         }
-        win_print(window, '-', 0, NULL, 0, 0, "", "");
+        win_printf(window, '-', 0, NULL, 0, 0, "", "");
     }
 }
 
@@ -206,7 +206,7 @@ mucwin_roster(ProfMucWin *mucwin, GList *roster, const char *const presence)
     ProfWin *window = (ProfWin*)mucwin;
     if ((roster == NULL) || (g_list_length(roster) == 0)) {
         if (presence == NULL) {
-            win_print(window, '!', 0, NULL, 0, THEME_ROOMINFO, "", "Room is empty.");
+            win_printf(window, '!', 0, NULL, 0, THEME_ROOMINFO, "", "Room is empty.");
         } else {
             win_printf(window, '!', 0, NULL, 0, THEME_ROOMINFO, "", "No occupants %s.", presence);
         }
@@ -226,12 +226,12 @@ mucwin_roster(ProfMucWin *mucwin, GList *roster, const char *const presence)
             win_printf(window, '!', 0, NULL, NO_DATE | NO_EOL, presence_colour, "", "%s", occupant->nick);
 
             if (roster->next) {
-                win_print(window, '!', 0, NULL, NO_DATE | NO_EOL, 0, "", ", ");
+                win_printf(window, '!', 0, NULL, NO_DATE | NO_EOL, 0, "", ", ");
             }
 
             roster = g_list_next(roster);
         }
-        win_print(window, '!', 0, NULL, NO_DATE, THEME_ONLINE, "", "");
+        win_printf(window, '!', 0, NULL, NO_DATE, THEME_ONLINE, "", "");
 
     }
 }
@@ -305,7 +305,7 @@ mucwin_occupant_online(ProfMucWin *mucwin, const char *const nick, const char *c
             win_printf(window, '!', 0, NULL, NO_DATE | NO_EOL, THEME_ONLINE, "", ", affiliation: %s", affiliation);
         }
     }
-    win_print(window, '!', 0, NULL, NO_DATE, THEME_ROOMINFO, "", "");
+    win_printf(window, '!', 0, NULL, NO_DATE, THEME_ROOMINFO, "", "");
 }
 
 void
@@ -355,7 +355,7 @@ mucwin_history(ProfMucWin *mucwin, const char *const nick, GDateTime *timestamp,
         g_string_append(line, message);
     }
 
-    win_print(window, '-', 0, timestamp, NO_COLOUR_DATE, 0, "", line->str);
+    win_printf(window, '-', 0, timestamp, NO_COLOUR_DATE, 0, "", line->str);
     g_string_free(line, TRUE);
 
     plugins_on_room_history_message(mucwin->roomjid, nick, message, timestamp);
@@ -371,10 +371,10 @@ _mucwin_print_mention(ProfWin *window, const char *const message, const char *co
         pos = GPOINTER_TO_INT(curr->data);
 
         char *before_str = g_strndup(message + last_pos, pos - last_pos);
-        win_print(window, '-', 0, NULL, NO_DATE | NO_ME | NO_EOL, THEME_ROOMMENTION, "", before_str);
+        win_printf(window, '-', 0, NULL, NO_DATE | NO_ME | NO_EOL, THEME_ROOMMENTION, "", before_str);
         g_free(before_str);
         char *nick_str = g_strndup(message + pos, strlen(nick));
-        win_print(window, '-', 0, NULL, NO_DATE | NO_ME | NO_EOL, THEME_ROOMMENTION_TERM, "", nick_str);
+        win_printf(window, '-', 0, NULL, NO_DATE | NO_ME | NO_EOL, THEME_ROOMMENTION_TERM, "", nick_str);
         g_free(nick_str);
 
         last_pos = pos + strlen(nick);
@@ -382,9 +382,9 @@ _mucwin_print_mention(ProfWin *window, const char *const message, const char *co
         curr = g_slist_next(curr);
     }
     if (last_pos < strlen(message)) {
-        win_print(window, '-', 0, NULL, NO_DATE | NO_ME, THEME_ROOMMENTION, "", &message[last_pos]);
+        win_printf(window, '-', 0, NULL, NO_DATE | NO_ME, THEME_ROOMMENTION, "", &message[last_pos]);
     } else {
-        win_print(window, '-', 0, NULL, NO_DATE | NO_ME, THEME_ROOMMENTION, "", "");
+        win_printf(window, '-', 0, NULL, NO_DATE | NO_ME, THEME_ROOMMENTION, "", "");
     }
 }
 
@@ -442,7 +442,7 @@ _mucwin_print_triggers(ProfWin *window, const char *const message, GList *trigge
 
     // no triggers found
     if (first_trigger_pos == -1) {
-        win_print(window, '-', 0, NULL, NO_DATE | NO_ME, THEME_ROOMTRIGGER, "", message);
+        win_printf(window, '-', 0, NULL, NO_DATE | NO_ME, THEME_ROOMTRIGGER, "", message);
     } else {
         if (first_trigger_pos > 0) {
             char message_section[strlen(message) + 1];
@@ -452,7 +452,7 @@ _mucwin_print_triggers(ProfWin *window, const char *const message, GList *trigge
                 i++;
             }
             message_section[i] = '\0';
-            win_print(window, '-', 0, NULL, NO_DATE | NO_ME | NO_EOL, THEME_ROOMTRIGGER, "", message_section);
+            win_printf(window, '-', 0, NULL, NO_DATE | NO_ME | NO_EOL, THEME_ROOMTRIGGER, "", message_section);
         }
         char trigger_section[first_trigger_len + 1];
         int i = 0;
@@ -463,10 +463,10 @@ _mucwin_print_triggers(ProfWin *window, const char *const message, GList *trigge
         trigger_section[i] = '\0';
 
         if (first_trigger_pos + first_trigger_len < strlen(message)) {
-            win_print(window, '-', 0, NULL, NO_DATE | NO_ME | NO_EOL, THEME_ROOMTRIGGER_TERM, "", trigger_section);
+            win_printf(window, '-', 0, NULL, NO_DATE | NO_ME | NO_EOL, THEME_ROOMTRIGGER_TERM, "", trigger_section);
             _mucwin_print_triggers(window, &message[first_trigger_pos + first_trigger_len], triggers);
         } else {
-            win_print(window, '-', 0, NULL, NO_DATE | NO_ME, THEME_ROOMTRIGGER_TERM, "", trigger_section);
+            win_printf(window, '-', 0, NULL, NO_DATE | NO_ME, THEME_ROOMTRIGGER_TERM, "", trigger_section);
         }
     }
 }
@@ -481,16 +481,16 @@ mucwin_message(ProfMucWin *mucwin, const char *const nick, const char *const mes
 
     if (g_strcmp0(nick, mynick) != 0) {
         if (g_slist_length(mentions) > 0) {
-            win_print(window, '-', 0, NULL, NO_ME | NO_EOL, THEME_ROOMMENTION, nick, "");
+            win_printf(window, '-', 0, NULL, NO_ME | NO_EOL, THEME_ROOMMENTION, nick, "");
             _mucwin_print_mention(window, message, mynick, mentions);
         } else if (triggers) {
-            win_print(window, '-', 0, NULL, NO_ME | NO_EOL, THEME_ROOMTRIGGER, nick, "");
+            win_printf(window, '-', 0, NULL, NO_ME | NO_EOL, THEME_ROOMTRIGGER, nick, "");
             _mucwin_print_triggers(window, message, triggers);
         } else {
-            win_print(window, '-', 0, NULL, NO_ME, THEME_TEXT_THEM, nick, message);
+            win_printf(window, '-', 0, NULL, NO_ME, THEME_TEXT_THEM, nick, message);
         }
     } else {
-        win_print(window, '-', 0, NULL, 0, THEME_TEXT_ME, nick, message);
+        win_printf(window, '-', 0, NULL, 0, THEME_TEXT_ME, nick, message);
     }
 }
 
@@ -506,12 +506,12 @@ mucwin_requires_config(ProfMucWin *mucwin)
         ui_index = 0;
     }
 
-    win_print(window, '-', 0, NULL, 0, 0, "", "");
+    win_printf(window, '-', 0, NULL, 0, 0, "", "");
     win_printf(window, '!', 0, NULL, 0, THEME_ROOMINFO, "", "Room locked, requires configuration.");
     win_printf(window, '!', 0, NULL, 0, THEME_ROOMINFO, "", "Use '/room accept' to accept the defaults");
     win_printf(window, '!', 0, NULL, 0, THEME_ROOMINFO, "", "Use '/room destroy' to cancel and destroy the room");
     win_printf(window, '!', 0, NULL, 0, THEME_ROOMINFO, "", "Use '/room config' to edit the room configuration");
-    win_print(window, '-', 0, NULL, 0, 0, "", "");
+    win_printf(window, '-', 0, NULL, 0, 0, "", "");
 
     // currently in groupchat window
     if (wins_is_current(window)) {
@@ -611,10 +611,10 @@ mucwin_handle_affiliation_list(ProfMucWin *mucwin, const char *const affiliation
             win_printf(window, '!', 0, NULL, 0, 0, "", "  %s", jid);
             curr_jid = g_slist_next(curr_jid);
         }
-        win_print(window, '!', 0, NULL, 0, 0, "", "");
+        win_printf(window, '!', 0, NULL, 0, 0, "", "");
     } else {
         win_printf(window, '!', 0, NULL, 0, 0, "", "No users found with affiliation: %s", affiliation);
-        win_print(window, '!', 0, NULL, 0, 0, "", "");
+        win_printf(window, '!', 0, NULL, 0, 0, "", "");
     }
 }
 
@@ -629,34 +629,34 @@ mucwin_show_affiliation_list(ProfMucWin *mucwin, muc_affiliation_t affiliation)
     if (!occupants) {
         switch (affiliation) {
             case MUC_AFFILIATION_OWNER:
-                win_print(window, '!', 0, NULL, 0, 0, "", "No owners found.");
+                win_printf(window, '!', 0, NULL, 0, 0, "", "No owners found.");
                 break;
             case MUC_AFFILIATION_ADMIN:
-                win_print(window, '!', 0, NULL, 0, 0, "", "No admins found.");
+                win_printf(window, '!', 0, NULL, 0, 0, "", "No admins found.");
                 break;
             case MUC_AFFILIATION_MEMBER:
-                win_print(window, '!', 0, NULL, 0, 0, "", "No members found.");
+                win_printf(window, '!', 0, NULL, 0, 0, "", "No members found.");
                 break;
             case MUC_AFFILIATION_OUTCAST:
-                win_print(window, '!', 0, NULL, 0, 0, "", "No outcasts found.");
+                win_printf(window, '!', 0, NULL, 0, 0, "", "No outcasts found.");
                 break;
             default:
                 break;
         }
-        win_print(window, '-', 0, NULL, 0, 0, "", "");
+        win_printf(window, '-', 0, NULL, 0, 0, "", "");
     } else {
         switch (affiliation) {
             case MUC_AFFILIATION_OWNER:
-                win_print(window, '!', 0, NULL, 0, 0, "", "Owners:");
+                win_printf(window, '!', 0, NULL, 0, 0, "", "Owners:");
                 break;
             case MUC_AFFILIATION_ADMIN:
-                win_print(window, '!', 0, NULL, 0, 0, "", "Admins:");
+                win_printf(window, '!', 0, NULL, 0, 0, "", "Admins:");
                 break;
             case MUC_AFFILIATION_MEMBER:
-                win_print(window, '!', 0, NULL, 0, 0, "", "Members:");
+                win_printf(window, '!', 0, NULL, 0, 0, "", "Members:");
                 break;
             case MUC_AFFILIATION_OUTCAST:
-                win_print(window, '!', 0, NULL, 0, 0, "", "Outcasts:");
+                win_printf(window, '!', 0, NULL, 0, 0, "", "Outcasts:");
                 break;
             default:
                 break;
@@ -676,7 +676,7 @@ mucwin_show_affiliation_list(ProfMucWin *mucwin, muc_affiliation_t affiliation)
             curr_occupant = g_slist_next(curr_occupant);
         }
 
-        win_print(window, '-', 0, NULL, 0, 0, "", "");
+        win_printf(window, '-', 0, NULL, 0, 0, "", "");
     }
 }
 
@@ -712,10 +712,10 @@ mucwin_handle_role_list(ProfMucWin *mucwin, const char *const role, GSList *nick
             }
             curr_nick = g_slist_next(curr_nick);
         }
-        win_print(window, '!', 0, NULL, 0, 0, "", "");
+        win_printf(window, '!', 0, NULL, 0, 0, "", "");
     } else {
         win_printf(window, '!', 0, NULL, 0, 0, "", "No occupants found with role: %s", role);
-        win_print(window, '!', 0, NULL, 0, 0, "", "");
+        win_printf(window, '!', 0, NULL, 0, 0, "", "");
     }
 }
 
@@ -730,28 +730,28 @@ mucwin_show_role_list(ProfMucWin *mucwin, muc_role_t role)
     if (!occupants) {
         switch (role) {
             case MUC_ROLE_MODERATOR:
-                win_print(window, '!', 0, NULL, 0, 0, "", "No moderators found.");
+                win_printf(window, '!', 0, NULL, 0, 0, "", "No moderators found.");
                 break;
             case MUC_ROLE_PARTICIPANT:
-                win_print(window, '!', 0, NULL, 0, 0, "", "No participants found.");
+                win_printf(window, '!', 0, NULL, 0, 0, "", "No participants found.");
                 break;
             case MUC_ROLE_VISITOR:
-                win_print(window, '!', 0, NULL, 0, 0, "", "No visitors found.");
+                win_printf(window, '!', 0, NULL, 0, 0, "", "No visitors found.");
                 break;
             default:
                 break;
         }
-        win_print(window, '-', 0, NULL, 0, 0, "", "");
+        win_printf(window, '-', 0, NULL, 0, 0, "", "");
     } else {
         switch (role) {
             case MUC_ROLE_MODERATOR:
-                win_print(window, '!', 0, NULL, 0, 0, "", "Moderators:");
+                win_printf(window, '!', 0, NULL, 0, 0, "", "Moderators:");
                 break;
             case MUC_ROLE_PARTICIPANT:
-                win_print(window, '!', 0, NULL, 0, 0, "", "Participants:");
+                win_printf(window, '!', 0, NULL, 0, 0, "", "Participants:");
                 break;
             case MUC_ROLE_VISITOR:
-                win_print(window, '!', 0, NULL, 0, 0, "", "Visitors:");
+                win_printf(window, '!', 0, NULL, 0, 0, "", "Visitors:");
                 break;
             default:
                 break;
@@ -771,7 +771,7 @@ mucwin_show_role_list(ProfMucWin *mucwin, muc_role_t role)
             curr_occupant = g_slist_next(curr_occupant);
         }
 
-        win_print(window, '-', 0, NULL, 0, 0, "", "");
+        win_printf(window, '-', 0, NULL, 0, 0, "", "");
     }
 }
 
@@ -807,7 +807,7 @@ mucwin_info(ProfMucWin *mucwin)
     win_printf(window, '!', 0, NULL, 0, 0, "", "Room: %s", mucwin->roomjid);
     win_printf(window, '!', 0, NULL, 0, 0, "", "Affiliation: %s", affiliation);
     win_printf(window, '!', 0, NULL, 0, 0, "", "Role: %s", role);
-    win_print(window, '-', 0, NULL, 0, 0, "", "");
+    win_printf(window, '-', 0, NULL, 0, 0, "", "");
 }
 
 void

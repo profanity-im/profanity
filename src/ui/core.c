@@ -435,7 +435,7 @@ ui_handle_otr_error(const char *const barejid, const char *const message)
 {
     ProfChatWin *chatwin = wins_get_chat(barejid);
     if (chatwin) {
-        win_print((ProfWin*)chatwin, '!', 0, NULL, 0, THEME_ERROR, "", message);
+        win_printf((ProfWin*)chatwin, '!', 0, NULL, 0, THEME_ERROR, "", message);
     } else {
         cons_show_error("%s - %s", barejid, message);
     }
@@ -752,7 +752,7 @@ ui_current_print_formatted_line(const char show_char, int attrs, const char *con
     va_start(arg, msg);
     GString *fmt_msg = g_string_new(NULL);
     g_string_vprintf(fmt_msg, msg, arg);
-    win_print(current, show_char, 0, NULL, 0, attrs, "", fmt_msg->str);
+    win_printf(current, show_char, 0, NULL, 0, attrs, "", fmt_msg->str);
     va_end(arg);
     g_string_free(fmt_msg, TRUE);
 }
@@ -760,14 +760,14 @@ ui_current_print_formatted_line(const char show_char, int attrs, const char *con
 void
 ui_win_error_line(ProfWin *window, const char *const msg)
 {
-    win_print(window, '-', 0, NULL, 0, THEME_ERROR, "", msg);
+    win_printf(window, '-', 0, NULL, 0, THEME_ERROR, "", msg);
 }
 
 void
 ui_current_error_line(const char *const msg)
 {
     ProfWin *current = wins_get_current();
-    win_print(current, '-', 0, NULL, 0, THEME_ERROR, "", msg);
+    win_printf(current, '-', 0, NULL, 0, THEME_ERROR, "", msg);
 }
 
 void
@@ -813,7 +813,7 @@ ui_room_join(const char *const roomjid, gboolean focus)
             win_printf(window, '!', 0, NULL, NO_DATE | NO_EOL, THEME_ROOMINFO, "", ", affiliation: %s", affiliation);
         }
     }
-    win_print(window, '!', 0, NULL, NO_DATE, THEME_ROOMINFO, "", "");
+    win_printf(window, '!', 0, NULL, NO_DATE, THEME_ROOMINFO, "", "");
 
 
     if (focus) {
@@ -1028,13 +1028,13 @@ ui_ask_pgp_passphrase(const char *hint, int prev_fail)
     win_println(current, 0, "");
 
     if (prev_fail) {
-        win_print(current, '!', 0, NULL, 0, 0, "", "Incorrect passphrase");
+        win_printf(current, '!', 0, NULL, 0, 0, "", "Incorrect passphrase");
     }
 
     if (hint) {
         win_printf(current, '!', 0, NULL, 0, 0, "", "Enter PGP key passphrase for %s", hint);
     } else {
-        win_print(current, '!', 0, NULL, 0, 0, "", "Enter PGP key passphrase");
+        win_printf(current, '!', 0, NULL, 0, 0, "", "Enter PGP key passphrase");
     }
 
     ui_update();
@@ -1158,7 +1158,7 @@ ui_handle_room_configuration_form_error(const char *const roomjid, const char *c
         g_string_append(message_str, message);
     }
 
-    win_print(window, '-', 0, NULL, 0, THEME_ERROR, "", message_str->str);
+    win_printf(window, '-', 0, NULL, 0, THEME_ERROR, "", message_str->str);
 
     g_string_free(message_str, TRUE);
 }
@@ -1182,7 +1182,7 @@ ui_handle_room_config_submit_result(const char *const roomjid)
 
         if (muc_window) {
             ui_focus_win((ProfWin*)muc_window);
-            win_print(muc_window, '!', 0, NULL, 0, THEME_ROOMINFO, "", "Room configuration successful");
+            win_printf(muc_window, '!', 0, NULL, 0, THEME_ROOMINFO, "", "Room configuration successful");
         } else {
             ProfWin *console = wins_get_console();
             ui_focus_win(console);
@@ -1211,13 +1211,13 @@ ui_handle_room_config_submit_result_error(const char *const roomjid, const char 
             if (message) {
                 win_printf(form_window, '!', 0, NULL, 0, THEME_ERROR, "", "Configuration error: %s", message);
             } else {
-                win_print(form_window, '!', 0, NULL, 0, THEME_ERROR, "", "Configuration error");
+                win_printf(form_window, '!', 0, NULL, 0, THEME_ERROR, "", "Configuration error");
             }
         } else if (muc_window) {
             if (message) {
                 win_printf(muc_window, '!', 0, NULL, 0, THEME_ERROR, "", "Configuration error: %s", message);
             } else {
-                win_print(muc_window, '!', 0, NULL, 0, THEME_ERROR, "", "Configuration error");
+                win_printf(muc_window, '!', 0, NULL, 0, THEME_ERROR, "", "Configuration error");
             }
         } else {
             if (message) {
@@ -1227,7 +1227,7 @@ ui_handle_room_config_submit_result_error(const char *const roomjid, const char 
             }
         }
     } else {
-        win_print(console, '!', 0, NULL, 0, THEME_ERROR, "", "Configuration error");
+        win_printf(console, '!', 0, NULL, 0, THEME_ERROR, "", "Configuration error");
     }
 }
 
@@ -1237,7 +1237,7 @@ ui_show_lines(ProfWin *window, gchar** lines)
     if (lines) {
         int i;
         for (i = 0; lines[i] != NULL; i++) {
-            win_print(window, '-', 0, NULL, 0, 0, "", lines[i]);
+            win_printf(window, '-', 0, NULL, 0, 0, "", lines[i]);
         }
     }
 }
@@ -1274,7 +1274,7 @@ ui_handle_software_version_error(const char *const roomjid, const char *const me
         g_string_append(message_str, message);
     }
 
-    win_print(window, '-', 0, NULL, 0, THEME_ERROR, "", message_str->str);
+    win_printf(window, '-', 0, NULL, 0, THEME_ERROR, "", message_str->str);
 
     g_string_free(message_str, TRUE);
 }
@@ -1317,7 +1317,7 @@ ui_show_software_version(const char *const jid, const char *const  presence,
         win_println(window, 0, "");
         theme_item_t presence_colour = theme_main_presence_attrs(presence);
         win_printf(window, '-', 0, NULL, NO_EOL, presence_colour, "", "%s", jid);
-        win_print(window, '-', 0, NULL, NO_DATE, 0, "", ":");
+        win_printf(window, '-', 0, NULL, NO_DATE, 0, "", ":");
     }
     if (name) {
         win_printf(window, '-', 0, NULL, 0, 0, "", "Name    : %s", name);

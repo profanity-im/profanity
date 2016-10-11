@@ -96,9 +96,9 @@ chatwin_otr_secured(ProfChatWin *chatwin, gboolean trusted)
 
     ProfWin *window = (ProfWin*) chatwin;
     if (trusted) {
-        win_print(window, '!', 0, NULL, 0, THEME_OTR_STARTED_TRUSTED, "", "OTR session started (trusted).");
+        win_printf(window, '!', 0, NULL, 0, THEME_OTR_STARTED_TRUSTED, "", "OTR session started (trusted).");
     } else {
-        win_print(window, '!', 0, NULL, 0, THEME_OTR_STARTED_UNTRUSTED, "", "OTR session started (untrusted).");
+        win_printf(window, '!', 0, NULL, 0, THEME_OTR_STARTED_UNTRUSTED, "", "OTR session started (untrusted).");
     }
 
     if (wins_is_current(window)) {
@@ -125,7 +125,7 @@ chatwin_otr_unsecured(ProfChatWin *chatwin)
     chatwin->otr_is_trusted = FALSE;
 
     ProfWin *window = (ProfWin*)chatwin;
-    win_print(window, '!', 0, NULL, 0, THEME_OTR_ENDED, "", "OTR session ended.");
+    win_printf(window, '!', 0, NULL, 0, THEME_OTR_ENDED, "", "OTR session ended.");
     if (wins_is_current(window)) {
         title_bar_switch();
     }
@@ -188,7 +188,7 @@ chatwin_otr_trust(ProfChatWin *chatwin)
     chatwin->otr_is_trusted = TRUE;
 
     ProfWin *window = (ProfWin*)chatwin;
-    win_print(window, '!', 0, NULL, 0, THEME_OTR_TRUSTED, "", "OTR session trusted.");
+    win_printf(window, '!', 0, NULL, 0, THEME_OTR_TRUSTED, "", "OTR session trusted.");
     if (wins_is_current(window)) {
         title_bar_switch();
     }
@@ -203,7 +203,7 @@ chatwin_otr_untrust(ProfChatWin *chatwin)
     chatwin->otr_is_trusted = FALSE;
 
     ProfWin *window = (ProfWin*)chatwin;
-    win_print(window, '!', 0, NULL, 0, THEME_OTR_UNTRUSTED, "", "OTR session untrusted.");
+    win_printf(window, '!', 0, NULL, 0, THEME_OTR_UNTRUSTED, "", "OTR session untrusted.");
     if (wins_is_current(window)) {
         title_bar_switch();
     }
@@ -308,7 +308,7 @@ chatwin_outgoing_msg(ProfChatWin *chatwin, const char *const message, char *id, 
     if (request_receipt && id) {
         win_print_with_receipt((ProfWin*)chatwin, enc_char, 0, NULL, 0, THEME_TEXT_ME, "me", message, id);
     } else {
-        win_print((ProfWin*)chatwin, enc_char, 0, NULL, 0, THEME_TEXT_ME, "me", message);
+        win_printf((ProfWin*)chatwin, enc_char, 0, NULL, 0, THEME_TEXT_ME, "me", message);
     }
 }
 
@@ -322,7 +322,7 @@ chatwin_outgoing_carbon(ProfChatWin *chatwin, const char *const message, prof_en
         enc_char = prefs_get_pgp_char();
     }
 
-    win_print((ProfWin*)chatwin, enc_char, 0, NULL, 0, THEME_TEXT_ME, "me", message);
+    win_printf((ProfWin*)chatwin, enc_char, 0, NULL, 0, THEME_TEXT_ME, "me", message);
     int num = wins_get_num((ProfWin*)chatwin);
     status_bar_active(num);
 }
@@ -401,11 +401,11 @@ _chatwin_history(ProfChatWin *chatwin, const char *const contact)
                 char mm[3]; memcpy(mm, &line[3], 2); mm[2] = '\0'; int imm = atoi(mm);
                 char ss[3]; memcpy(ss, &line[6], 2); ss[2] = '\0'; int iss = atoi(ss);
                 GDateTime *timestamp = g_date_time_new_local(2000, 1, 1, ihh, imm, iss);
-                win_print((ProfWin*)chatwin, '-', 0, timestamp, NO_COLOUR_DATE, 0, "", curr->data+11);
+                win_printf((ProfWin*)chatwin, '-', 0, timestamp, NO_COLOUR_DATE, 0, "", curr->data+11);
                 g_date_time_unref(timestamp);
             // header
             } else {
-                win_print((ProfWin*)chatwin, '-', 0, NULL, 0, 0, "", curr->data);
+                win_printf((ProfWin*)chatwin, '-', 0, NULL, 0, 0, "", curr->data);
             }
             curr = g_slist_next(curr);
         }

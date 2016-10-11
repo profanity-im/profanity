@@ -93,7 +93,7 @@ privwin_outgoing_msg(ProfPrivateWin *privwin, const char *const message)
 {
     assert(privwin != NULL);
 
-    win_print((ProfWin*)privwin, '-', 0, NULL, 0, THEME_TEXT_ME, "me", message);
+    win_printf((ProfWin*)privwin, '-', 0, NULL, 0, THEME_TEXT_ME, "me", message);
 }
 
 void
@@ -101,7 +101,7 @@ privwin_message_occupant_offline(ProfPrivateWin *privwin)
 {
     assert(privwin != NULL);
 
-    win_print((ProfWin*)privwin, '-', 0, NULL, 0, THEME_ERROR, NULL, "Unable to send message, occupant no longer present in room.");
+    win_printf((ProfWin*)privwin, '-', 0, NULL, 0, THEME_ERROR, NULL, "Unable to send message, occupant no longer present in room.");
 }
 
 void
@@ -109,7 +109,7 @@ privwin_message_left_room(ProfPrivateWin *privwin)
 {
     assert(privwin != NULL);
 
-    win_print((ProfWin*)privwin, '-', 0, NULL, 0, THEME_ERROR, NULL, "Unable to send message, you are no longer present in room.");
+    win_printf((ProfWin*)privwin, '-', 0, NULL, 0, THEME_ERROR, NULL, "Unable to send message, you are no longer present in room.");
 }
 
 void

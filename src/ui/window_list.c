@@ -835,7 +835,7 @@ wins_lost_connection(void)
     while (curr) {
         ProfWin *window = curr->data;
         if (window->type != WIN_CONSOLE) {
-            win_print(window, '-', 0, NULL, 0, THEME_ERROR, "", "Lost connection.");
+            win_printf(window, '-', 0, NULL, 0, THEME_ERROR, "", "Lost connection.");
 
             // if current win, set current_win_dirty
             if (wins_is_current(window)) {
