@@ -413,19 +413,19 @@ ui_handle_recipient_error(const char *const recipient, const char *const err_msg
 
     ProfChatWin *chatwin = wins_get_chat(recipient);
     if (chatwin) {
-        win_vprint((ProfWin*)chatwin, '!', 0, NULL, 0, THEME_ERROR, "", "Error from %s: %s", recipient, err_msg);
+        win_printf((ProfWin*)chatwin, '!', 0, NULL, 0, THEME_ERROR, "", "Error from %s: %s", recipient, err_msg);
         return;
     }
 
     ProfMucWin *mucwin = wins_get_muc(recipient);
     if (mucwin) {
-        win_vprint((ProfWin*)mucwin, '!', 0, NULL, 0, THEME_ERROR, "", "Error from %s: %s", recipient, err_msg);
+        win_printf((ProfWin*)mucwin, '!', 0, NULL, 0, THEME_ERROR, "", "Error from %s: %s", recipient, err_msg);
         return;
     }
 
     ProfPrivateWin *privatewin = wins_get_private(recipient);
     if (privatewin) {
-        win_vprint((ProfWin*)privatewin, '!', 0, NULL, 0, THEME_ERROR, "", "Error from %s: %s", recipient, err_msg);
+        win_printf((ProfWin*)privatewin, '!', 0, NULL, 0, THEME_ERROR, "", "Error from %s: %s", recipient, err_msg);
         return;
     }
 }
@@ -790,7 +790,7 @@ ui_print_system_msg_from_recipient(const char *const barejid, const char *messag
         }
     }
 
-    win_vprint(window, '-', 0, NULL, 0, 0, "", "*%s %s", barejid, message);
+    win_printf(window, '-', 0, NULL, 0, 0, "", "*%s %s", barejid, message);
 }
 
 void
@@ -802,15 +802,15 @@ ui_room_join(const char *const roomjid, gboolean focus)
     }
 
     char *nick = muc_nick(roomjid);
-    win_vprint(window, '!', 0, NULL, NO_EOL, THEME_ROOMINFO, "", "-> You have joined the room as %s", nick);
+    win_printf(window, '!', 0, NULL, NO_EOL, THEME_ROOMINFO, "", "-> You have joined the room as %s", nick);
     if (prefs_get_boolean(PREF_MUC_PRIVILEGES)) {
         char *role = muc_role_str(roomjid);
         char *affiliation = muc_affiliation_str(roomjid);
         if (role) {
-            win_vprint(window, '!', 0, NULL, NO_DATE | NO_EOL, THEME_ROOMINFO, "", ", role: %s", role);
+            win_printf(window, '!', 0, NULL, NO_DATE | NO_EOL, THEME_ROOMINFO, "", ", role: %s", role);
         }
         if (affiliation) {
-            win_vprint(window, '!', 0, NULL, NO_DATE | NO_EOL, THEME_ROOMINFO, "", ", affiliation: %s", affiliation);
+            win_printf(window, '!', 0, NULL, NO_DATE | NO_EOL, THEME_ROOMINFO, "", ", affiliation: %s", affiliation);
         }
     }
     win_print(window, '!', 0, NULL, NO_DATE, THEME_ROOMINFO, "", "");
@@ -823,7 +823,7 @@ ui_room_join(const char *const roomjid, gboolean focus)
         status_bar_active(num);
         ProfWin *console = wins_get_console();
         char *nick = muc_nick(roomjid);
-        win_vprint(console, '!', 0, NULL, 0, THEME_TYPING, "", "-> Autojoined %s as %s (%d).", roomjid, nick, num);
+        win_printf(console, '!', 0, NULL, 0, THEME_TYPING, "", "-> Autojoined %s as %s (%d).", roomjid, nick, num);
     }
 
     GList *privwins = wins_get_private_chats(roomjid);
@@ -898,16 +898,16 @@ ui_room_destroyed(const char *const roomjid, const char *const reason, const cha
         ProfWin *console = wins_get_console();
 
         if (reason) {
-            win_vprint(console, '!', 0, NULL, 0, THEME_TYPING, "", "<- Room destroyed: %s, reason: %s", roomjid, reason);
+            win_printf(console, '!', 0, NULL, 0, THEME_TYPING, "", "<- Room destroyed: %s, reason: %s", roomjid, reason);
         } else {
-            win_vprint(console, '!', 0, NULL, 0, THEME_TYPING, "", "<- Room destroyed: %s", roomjid);
+            win_printf(console, '!', 0, NULL, 0, THEME_TYPING, "", "<- Room destroyed: %s", roomjid);
         }
 
         if (new_jid) {
             if (password) {
-                win_vprint(console, '!', 0, NULL, 0, THEME_TYPING, "", "Replacement room: %s, password: %s", new_jid, password);
+                win_printf(console, '!', 0, NULL, 0, THEME_TYPING, "", "Replacement room: %s, password: %s", new_jid, password);
             } else {
-                win_vprint(console, '!', 0, NULL, 0, THEME_TYPING, "", "Replacement room: %s", new_jid);
+                win_printf(console, '!', 0, NULL, 0, THEME_TYPING, "", "Replacement room: %s", new_jid);
             }
         }
     }
@@ -944,7 +944,7 @@ ui_room_kicked(const char *const roomjid, const char *const actor, const char *c
         }
 
         ProfWin *console = wins_get_console();
-        win_vprint(console, '!', 0, NULL, 0, THEME_TYPING, "", "<- %s", message->str);
+        win_printf(console, '!', 0, NULL, 0, THEME_TYPING, "", "<- %s", message->str);
         g_string_free(message, TRUE);
     }
 
@@ -980,7 +980,7 @@ ui_room_banned(const char *const roomjid, const char *const actor, const char *c
         }
 
         ProfWin *console = wins_get_console();
-        win_vprint(console, '!', 0, NULL, 0, THEME_TYPING, "", "<- %s", message->str);
+        win_printf(console, '!', 0, NULL, 0, THEME_TYPING, "", "<- %s", message->str);
         g_string_free(message, TRUE);
     }
 
@@ -1032,7 +1032,7 @@ ui_ask_pgp_passphrase(const char *hint, int prev_fail)
     }
 
     if (hint) {
-        win_vprint(current, '!', 0, NULL, 0, 0, "", "Enter PGP key passphrase for %s", hint);
+        win_printf(current, '!', 0, NULL, 0, 0, "", "Enter PGP key passphrase for %s", hint);
     } else {
         win_print(current, '!', 0, NULL, 0, 0, "", "Enter PGP key passphrase");
     }
@@ -1209,21 +1209,21 @@ ui_handle_room_config_submit_result_error(const char *const roomjid, const char 
 
         if (form_window) {
             if (message) {
-                win_vprint(form_window, '!', 0, NULL, 0, THEME_ERROR, "", "Configuration error: %s", message);
+                win_printf(form_window, '!', 0, NULL, 0, THEME_ERROR, "", "Configuration error: %s", message);
             } else {
                 win_print(form_window, '!', 0, NULL, 0, THEME_ERROR, "", "Configuration error");
             }
         } else if (muc_window) {
             if (message) {
-                win_vprint(muc_window, '!', 0, NULL, 0, THEME_ERROR, "", "Configuration error: %s", message);
+                win_printf(muc_window, '!', 0, NULL, 0, THEME_ERROR, "", "Configuration error: %s", message);
             } else {
                 win_print(muc_window, '!', 0, NULL, 0, THEME_ERROR, "", "Configuration error");
             }
         } else {
             if (message) {
-                win_vprint(console, '!', 0, NULL, 0, THEME_ERROR, "", "Configuration error for %s: %s", roomjid, message);
+                win_printf(console, '!', 0, NULL, 0, THEME_ERROR, "", "Configuration error for %s: %s", roomjid, message);
             } else {
-                win_vprint(console, '!', 0, NULL, 0, THEME_ERROR, "", "Configuration error for %s", roomjid);
+                win_printf(console, '!', 0, NULL, 0, THEME_ERROR, "", "Configuration error for %s", roomjid);
             }
         }
     } else {
@@ -1316,17 +1316,17 @@ ui_show_software_version(const char *const jid, const char *const  presence,
     if (name || version || os) {
         win_println(window, 0, "");
         theme_item_t presence_colour = theme_main_presence_attrs(presence);
-        win_vprint(window, '-', 0, NULL, NO_EOL, presence_colour, "", "%s", jid);
+        win_printf(window, '-', 0, NULL, NO_EOL, presence_colour, "", "%s", jid);
         win_print(window, '-', 0, NULL, NO_DATE, 0, "", ":");
     }
     if (name) {
-        win_vprint(window, '-', 0, NULL, 0, 0, "", "Name    : %s", name);
+        win_printf(window, '-', 0, NULL, 0, 0, "", "Name    : %s", name);
     }
     if (version) {
-        win_vprint(window, '-', 0, NULL, 0, 0, "", "Version : %s", version);
+        win_printf(window, '-', 0, NULL, 0, 0, "", "Version : %s", version);
     }
     if (os) {
-        win_vprint(window, '-', 0, NULL, 0, 0, "", "OS      : %s", os);
+        win_printf(window, '-', 0, NULL, 0, 0, "", "OS      : %s", os);
     }
 }
 

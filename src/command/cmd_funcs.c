@@ -1479,7 +1479,7 @@ _cmd_help_cmd_list(const char *const tag)
     cons_show("");
     ProfWin *console = wins_get_console();
     if (tag) {
-        win_vprint(console, '-', 0, NULL, 0, THEME_WHITE_BOLD, "", "%s commands", tag);
+        win_printf(console, '-', 0, NULL, 0, THEME_WHITE_BOLD, "", "%s commands", tag);
     } else {
         win_print(console, '-', 0, NULL, 0, THEME_WHITE_BOLD, "", "All commands");
     }
@@ -3108,7 +3108,7 @@ cmd_status(ProfWin *window, const char *const command, gchar **args)
                 if (occupant) {
                     win_show_occupant(window, occupant);
                 } else {
-                    win_vprint(window, '-', 0, NULL, 0, 0, "", "No such participant \"%s\" in room.", usr);
+                    win_printf(window, '-', 0, NULL, 0, 0, "", "No such participant \"%s\" in room.", usr);
                 }
             } else {
                 ui_current_print_line("You must specify a nickname.");
@@ -3881,7 +3881,7 @@ cmd_kick(ProfWin *window, const char *const command, gchar **args)
             char *reason = args[1];
             iq_room_kick_occupant(mucwin->roomjid, nick, reason);
         } else {
-            win_vprint((ProfWin*) mucwin, '!', 0, NULL, 0, 0, "", "Occupant does not exist: %s", nick);
+            win_printf((ProfWin*) mucwin, '!', 0, NULL, 0, 0, "", "Occupant does not exist: %s", nick);
         }
     } else {
         cons_bad_cmd_usage(command);
@@ -3939,8 +3939,8 @@ cmd_subject(ProfWin *window, const char *const command, gchar **args)
     if (args[0] == NULL) {
         char *subject = muc_subject(mucwin->roomjid);
         if (subject) {
-            win_vprint(window, '!', 0, NULL, NO_EOL, THEME_ROOMINFO, "", "Room subject: ");
-            win_vprint(window, '!', 0, NULL, NO_DATE, 0, "", "%s", subject);
+            win_printf(window, '!', 0, NULL, NO_EOL, THEME_ROOMINFO, "", "Room subject: ");
+            win_printf(window, '!', 0, NULL, NO_DATE, 0, "", "%s", subject);
         } else {
             win_print(window, '!', 0, NULL, 0, THEME_ROOMINFO, "", "Room has no subject");
         }
@@ -3974,7 +3974,7 @@ cmd_subject(ProfWin *window, const char *const command, gchar **args)
                 message_send_groupchat_subject(mucwin->roomjid, new_subject->str);
                 g_string_free(new_subject, TRUE);
             } else {
-                win_vprint(window, '!', 0, NULL, NO_EOL, THEME_ROOMINFO, "", "Room does not have a subject, use /subject set <subject>");
+                win_printf(window, '!', 0, NULL, NO_EOL, THEME_ROOMINFO, "", "Room does not have a subject, use /subject set <subject>");
             }
         } else {
             cons_bad_cmd_usage(command);
@@ -3991,7 +3991,7 @@ cmd_subject(ProfWin *window, const char *const command, gchar **args)
                 message_send_groupchat_subject(mucwin->roomjid, new_subject->str);
                 g_string_free(new_subject, TRUE);
             } else {
-                win_vprint(window, '!', 0, NULL, NO_EOL, THEME_ROOMINFO, "", "Room does not have a subject, use /subject set <subject>");
+                win_printf(window, '!', 0, NULL, NO_EOL, THEME_ROOMINFO, "", "Room does not have a subject, use /subject set <subject>");
             }
         } else {
             cons_bad_cmd_usage(command);
@@ -4681,7 +4681,7 @@ cmd_tiny(ProfWin *window, const char *const command, gchar **args)
     }
 
     if (!tinyurl_valid(url)) {
-        win_vprint(window, '-', 0, NULL, 0, THEME_ERROR, "", "/tiny, badly formed URL: %s", url);
+        win_printf(window, '-', 0, NULL, 0, THEME_ERROR, "", "/tiny, badly formed URL: %s", url);
         return TRUE;
     }
 

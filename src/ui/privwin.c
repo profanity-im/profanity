@@ -119,7 +119,7 @@ privwin_occupant_offline(ProfPrivateWin *privwin)
 
     privwin->occupant_offline = TRUE;
     Jid *jidp = jid_create(privwin->fulljid);
-    win_vprint((ProfWin*)privwin, '-', 0, NULL, 0, THEME_OFFLINE, NULL, "<- %s has left the room.", jidp->resourcepart);
+    win_printf((ProfWin*)privwin, '-', 0, NULL, 0, THEME_OFFLINE, NULL, "<- %s has left the room.", jidp->resourcepart);
     jid_destroy(jidp);
 }
 
@@ -142,7 +142,7 @@ privwin_occupant_kicked(ProfPrivateWin *privwin, const char *const actor, const 
         g_string_append(message, reason);
     }
 
-    win_vprint((ProfWin*)privwin, '!', 0, NULL, 0, THEME_OFFLINE, NULL, "<- %s", message->str);
+    win_printf((ProfWin*)privwin, '!', 0, NULL, 0, THEME_OFFLINE, NULL, "<- %s", message->str);
     g_string_free(message, TRUE);
 }
 
@@ -165,7 +165,7 @@ privwin_occupant_banned(ProfPrivateWin *privwin, const char *const actor, const 
         g_string_append(message, reason);
     }
 
-    win_vprint((ProfWin*)privwin, '!', 0, NULL, 0, THEME_OFFLINE, NULL, "<- %s", message->str);
+    win_printf((ProfWin*)privwin, '!', 0, NULL, 0, THEME_OFFLINE, NULL, "<- %s", message->str);
     g_string_free(message, TRUE);
 }
 
@@ -176,7 +176,7 @@ privwin_occupant_online(ProfPrivateWin *privwin)
 
     privwin->occupant_offline = FALSE;
     Jid *jidp = jid_create(privwin->fulljid);
-    win_vprint((ProfWin*)privwin, '-', 0, NULL, 0, THEME_ONLINE, NULL, "-- %s has joined the room.", jidp->resourcepart);
+    win_printf((ProfWin*)privwin, '-', 0, NULL, 0, THEME_ONLINE, NULL, "-- %s has joined the room.", jidp->resourcepart);
     jid_destroy(jidp);
 }
 
@@ -187,7 +187,7 @@ privwin_room_destroyed(ProfPrivateWin *privwin)
 
     privwin->room_left = TRUE;
     Jid *jidp = jid_create(privwin->fulljid);
-    win_vprint((ProfWin*)privwin, '!', 0, NULL, 0, THEME_OFFLINE, NULL, "-- %s has been destroyed.", jidp->barejid);
+    win_printf((ProfWin*)privwin, '!', 0, NULL, 0, THEME_OFFLINE, NULL, "-- %s has been destroyed.", jidp->barejid);
     jid_destroy(jidp);
 }
 
@@ -198,7 +198,7 @@ privwin_room_joined(ProfPrivateWin *privwin)
 
     privwin->room_left = FALSE;
     Jid *jidp = jid_create(privwin->fulljid);
-    win_vprint((ProfWin*)privwin, '!', 0, NULL, 0, THEME_OFFLINE, NULL, "-- You have joined %s.", jidp->barejid);
+    win_printf((ProfWin*)privwin, '!', 0, NULL, 0, THEME_OFFLINE, NULL, "-- You have joined %s.", jidp->barejid);
     jid_destroy(jidp);
 }
 
@@ -209,7 +209,7 @@ privwin_room_left(ProfPrivateWin *privwin)
 
     privwin->room_left = TRUE;
     Jid *jidp = jid_create(privwin->fulljid);
-    win_vprint((ProfWin*)privwin, '!', 0, NULL, 0, THEME_OFFLINE, NULL, "-- You have left %s.", jidp->barejid);
+    win_printf((ProfWin*)privwin, '!', 0, NULL, 0, THEME_OFFLINE, NULL, "-- You have left %s.", jidp->barejid);
     jid_destroy(jidp);
 }
 
@@ -232,7 +232,7 @@ privwin_room_kicked(ProfPrivateWin *privwin, const char *const actor, const char
         g_string_append(message, reason);
     }
 
-    win_vprint((ProfWin*)privwin, '!', 0, NULL, 0, THEME_OFFLINE, "", "<- %s", message->str);
+    win_printf((ProfWin*)privwin, '!', 0, NULL, 0, THEME_OFFLINE, "", "<- %s", message->str);
     g_string_free(message, TRUE);
 }
 
@@ -255,7 +255,7 @@ privwin_room_banned(ProfPrivateWin *privwin, const char *const actor, const char
         g_string_append(message, reason);
     }
 
-    win_vprint((ProfWin*)privwin, '!', 0, NULL, 0, THEME_OFFLINE, "", "<- %s", message->str);
+    win_printf((ProfWin*)privwin, '!', 0, NULL, 0, THEME_OFFLINE, "", "<- %s", message->str);
     g_string_free(message, TRUE);
 }
 

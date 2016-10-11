@@ -227,7 +227,7 @@ chatwin_recipient_gone(ProfChatWin *chatwin)
         display_usr = chatwin->barejid;
     }
 
-    win_vprint((ProfWin*)chatwin, '!', 0, NULL, 0, THEME_GONE, "", "<- %s has left the conversation.", display_usr);
+    win_printf((ProfWin*)chatwin, '!', 0, NULL, 0, THEME_GONE, "", "<- %s has left the conversation.", display_usr);
 }
 
 void

@@ -51,12 +51,12 @@ mucwin_role_change(ProfMucWin *mucwin, const char *const role, const char *const
     assert(mucwin != NULL);
 
     ProfWin *window = (ProfWin*)mucwin;
-    win_vprint(window, '!', 0, NULL, NO_EOL, THEME_ROOMINFO, "", "Your role has been changed to: %s", role);
+    win_printf(window, '!', 0, NULL, NO_EOL, THEME_ROOMINFO, "", "Your role has been changed to: %s", role);
     if (actor) {
-        win_vprint(window, '!', 0, NULL, NO_DATE | NO_EOL, THEME_ROOMINFO, "", ", by: %s", actor);
+        win_printf(window, '!', 0, NULL, NO_DATE | NO_EOL, THEME_ROOMINFO, "", ", by: %s", actor);
     }
     if (reason) {
-        win_vprint(window, '!', 0, NULL, NO_DATE | NO_EOL, THEME_ROOMINFO, "", ", reason: %s", reason);
+        win_printf(window, '!', 0, NULL, NO_DATE | NO_EOL, THEME_ROOMINFO, "", ", reason: %s", reason);
     }
     win_print(window, '!', 0, NULL, NO_DATE, THEME_ROOMINFO, "", "");
 }
@@ -68,12 +68,12 @@ mucwin_affiliation_change(ProfMucWin *mucwin, const char *const affiliation, con
     assert(mucwin != NULL);
 
     ProfWin *window = (ProfWin*)mucwin;
-    win_vprint(window, '!', 0, NULL, NO_EOL, THEME_ROOMINFO, "", "Your affiliation has been changed to: %s", affiliation);
+    win_printf(window, '!', 0, NULL, NO_EOL, THEME_ROOMINFO, "", "Your affiliation has been changed to: %s", affiliation);
     if (actor) {
-        win_vprint(window, '!', 0, NULL, NO_DATE | NO_EOL, THEME_ROOMINFO, "", ", by: %s", actor);
+        win_printf(window, '!', 0, NULL, NO_DATE | NO_EOL, THEME_ROOMINFO, "", ", by: %s", actor);
     }
     if (reason) {
-        win_vprint(window, '!', 0, NULL, NO_DATE | NO_EOL, THEME_ROOMINFO, "", ", reason: %s", reason);
+        win_printf(window, '!', 0, NULL, NO_DATE | NO_EOL, THEME_ROOMINFO, "", ", reason: %s", reason);
     }
     win_print(window, '!', 0, NULL, NO_DATE, THEME_ROOMINFO, "", "");
 }
@@ -85,12 +85,12 @@ mucwin_role_and_affiliation_change(ProfMucWin *mucwin, const char *const role, c
     assert(mucwin != NULL);
 
     ProfWin *window = (ProfWin*)mucwin;
-    win_vprint(window, '!', 0, NULL, NO_EOL, THEME_ROOMINFO, "", "Your role and affiliation have been changed, role: %s, affiliation: %s", role, affiliation);
+    win_printf(window, '!', 0, NULL, NO_EOL, THEME_ROOMINFO, "", "Your role and affiliation have been changed, role: %s, affiliation: %s", role, affiliation);
     if (actor) {
-        win_vprint(window, '!', 0, NULL, NO_DATE | NO_EOL, THEME_ROOMINFO, "", ", by: %s", actor);
+        win_printf(window, '!', 0, NULL, NO_DATE | NO_EOL, THEME_ROOMINFO, "", ", by: %s", actor);
     }
     if (reason) {
-        win_vprint(window, '!', 0, NULL, NO_DATE | NO_EOL, THEME_ROOMINFO, "", ", reason: %s", reason);
+        win_printf(window, '!', 0, NULL, NO_DATE | NO_EOL, THEME_ROOMINFO, "", ", reason: %s", reason);
     }
     win_print(window, '!', 0, NULL, NO_DATE, THEME_ROOMINFO, "", "");
 }
@@ -103,12 +103,12 @@ mucwin_occupant_role_change(ProfMucWin *mucwin, const char *const nick, const ch
     assert(mucwin != NULL);
 
     ProfWin *window = (ProfWin*)mucwin;
-    win_vprint(window, '!', 0, NULL, NO_EOL, THEME_ROOMINFO, "", "%s's role has been changed to: %s", nick, role);
+    win_printf(window, '!', 0, NULL, NO_EOL, THEME_ROOMINFO, "", "%s's role has been changed to: %s", nick, role);
     if (actor) {
-        win_vprint(window, '!', 0, NULL, NO_DATE | NO_EOL, THEME_ROOMINFO, "", ", by: %s", actor);
+        win_printf(window, '!', 0, NULL, NO_DATE | NO_EOL, THEME_ROOMINFO, "", ", by: %s", actor);
     }
     if (reason) {
-        win_vprint(window, '!', 0, NULL, NO_DATE | NO_EOL, THEME_ROOMINFO, "", ", reason: %s", reason);
+        win_printf(window, '!', 0, NULL, NO_DATE | NO_EOL, THEME_ROOMINFO, "", ", reason: %s", reason);
     }
     win_print(window, '!', 0, NULL, NO_DATE, THEME_ROOMINFO, "", "");
 }
@@ -120,12 +120,12 @@ mucwin_occupant_affiliation_change(ProfMucWin *mucwin, const char *const nick, c
     assert(mucwin != NULL);
 
     ProfWin *window = (ProfWin*)mucwin;
-    win_vprint(window, '!', 0, NULL, NO_EOL, THEME_ROOMINFO, "", "%s's affiliation has been changed to: %s", nick, affiliation);
+    win_printf(window, '!', 0, NULL, NO_EOL, THEME_ROOMINFO, "", "%s's affiliation has been changed to: %s", nick, affiliation);
     if (actor) {
-        win_vprint(window, '!', 0, NULL, NO_DATE | NO_EOL, THEME_ROOMINFO, "", ", by: %s", actor);
+        win_printf(window, '!', 0, NULL, NO_DATE | NO_EOL, THEME_ROOMINFO, "", ", by: %s", actor);
     }
     if (reason) {
-        win_vprint(window, '!', 0, NULL, NO_DATE | NO_EOL, THEME_ROOMINFO, "", ", reason: %s", reason);
+        win_printf(window, '!', 0, NULL, NO_DATE | NO_EOL, THEME_ROOMINFO, "", ", reason: %s", reason);
     }
     win_print(window, '!', 0, NULL, NO_DATE, THEME_ROOMINFO, "", "");
 }
@@ -137,12 +137,12 @@ mucwin_occupant_role_and_affiliation_change(ProfMucWin *mucwin, const char *cons
     assert(mucwin != NULL);
 
     ProfWin *window = (ProfWin*)mucwin;
-    win_vprint(window, '!', 0, NULL, NO_EOL, THEME_ROOMINFO, "", "%s's role and affiliation have been changed, role: %s, affiliation: %s", nick, role, affiliation);
+    win_printf(window, '!', 0, NULL, NO_EOL, THEME_ROOMINFO, "", "%s's role and affiliation have been changed, role: %s, affiliation: %s", nick, role, affiliation);
     if (actor) {
-        win_vprint(window, '!', 0, NULL, NO_DATE | NO_EOL, THEME_ROOMINFO, "", ", by: %s", actor);
+        win_printf(window, '!', 0, NULL, NO_DATE | NO_EOL, THEME_ROOMINFO, "", ", by: %s", actor);
     }
     if (reason) {
-        win_vprint(window, '!', 0, NULL, NO_DATE | NO_EOL, THEME_ROOMINFO, "", ", reason: %s", reason);
+        win_printf(window, '!', 0, NULL, NO_DATE | NO_EOL, THEME_ROOMINFO, "", ", reason: %s", reason);
     }
     win_print(window, '!', 0, NULL, NO_DATE, THEME_ROOMINFO, "", "");
 }
@@ -153,7 +153,7 @@ mucwin_room_info_error(ProfMucWin *mucwin, const char *const error)
     assert(mucwin != NULL);
 
     ProfWin *window = (ProfWin*)mucwin;
-    win_vprint(window, '!', 0, NULL, 0, 0, "", "Room info request failed: %s", error);
+    win_printf(window, '!', 0, NULL, 0, 0, "", "Room info request failed: %s", error);
     win_print(window, '-', 0, NULL, 0, 0, "", "");
 }
 
@@ -191,7 +191,7 @@ mucwin_room_disco_info(ProfMucWin *mucwin, GSList *identities, GSList *features)
             win_print(window, '!', 0, NULL, 0, 0, "", "Features:");
         }
         while (features) {
-            win_vprint(window, '!', 0, NULL, 0, 0, "", "  %s", features->data);
+            win_printf(window, '!', 0, NULL, 0, 0, "", "  %s", features->data);
             features = g_slist_next(features);
         }
         win_print(window, '-', 0, NULL, 0, 0, "", "");
@@ -208,14 +208,14 @@ mucwin_roster(ProfMucWin *mucwin, GList *roster, const char *const presence)
         if (presence == NULL) {
             win_print(window, '!', 0, NULL, 0, THEME_ROOMINFO, "", "Room is empty.");
         } else {
-            win_vprint(window, '!', 0, NULL, 0, THEME_ROOMINFO, "", "No occupants %s.", presence);
+            win_printf(window, '!', 0, NULL, 0, THEME_ROOMINFO, "", "No occupants %s.", presence);
         }
     } else {
         int length = g_list_length(roster);
         if (presence == NULL) {
-            win_vprint(window, '!', 0, NULL, NO_EOL, THEME_ROOMINFO, "", "%d occupants: ", length);
+            win_printf(window, '!', 0, NULL, NO_EOL, THEME_ROOMINFO, "", "%d occupants: ", length);
         } else {
-            win_vprint(window, '!', 0, NULL, NO_EOL, THEME_ROOMINFO, "", "%d %s: ", length, presence);
+            win_printf(window, '!', 0, NULL, NO_EOL, THEME_ROOMINFO, "", "%d %s: ", length, presence);
         }
 
         while (roster) {
@@ -223,7 +223,7 @@ mucwin_roster(ProfMucWin *mucwin, GList *roster, const char *const presence)
             const char *presence_str = string_from_resource_presence(occupant->presence);
 
             theme_item_t presence_colour = theme_main_presence_attrs(presence_str);
-            win_vprint(window, '!', 0, NULL, NO_DATE | NO_EOL, presence_colour, "", "%s", occupant->nick);
+            win_printf(window, '!', 0, NULL, NO_DATE | NO_EOL, presence_colour, "", "%s", occupant->nick);
 
             if (roster->next) {
                 win_print(window, '!', 0, NULL, NO_DATE | NO_EOL, 0, "", ", ");
@@ -242,7 +242,7 @@ mucwin_occupant_offline(ProfMucWin *mucwin, const char *const nick)
     assert(mucwin != NULL);
 
     ProfWin *window = (ProfWin*)mucwin;
-    win_vprint(window, '!', 0, NULL, 0, THEME_OFFLINE, "", "<- %s has left the room.", nick);
+    win_printf(window, '!', 0, NULL, 0, THEME_OFFLINE, "", "<- %s has left the room.", nick);
 }
 
 void
@@ -263,7 +263,7 @@ mucwin_occupant_kicked(ProfMucWin *mucwin, const char *const nick, const char *c
         g_string_append(message, reason);
     }
 
-    win_vprint(window, '!', 0, NULL, 0, THEME_OFFLINE, "", "<- %s", message->str);
+    win_printf(window, '!', 0, NULL, 0, THEME_OFFLINE, "", "<- %s", message->str);
     g_string_free(message, TRUE);
 }
 
@@ -285,7 +285,7 @@ mucwin_occupant_banned(ProfMucWin *mucwin, const char *const nick, const char *c
         g_string_append(message, reason);
     }
 
-    win_vprint(window, '!', 0, NULL, 0, THEME_OFFLINE, "", "<- %s", message->str);
+    win_printf(window, '!', 0, NULL, 0, THEME_OFFLINE, "", "<- %s", message->str);
     g_string_free(message, TRUE);
 }
 
@@ -296,13 +296,13 @@ mucwin_occupant_online(ProfMucWin *mucwin, const char *const nick, const char *c
     assert(mucwin != NULL);
 
     ProfWin *window = (ProfWin*)mucwin;
-    win_vprint(window, '!', 0, NULL, NO_EOL, THEME_ONLINE, "", "-> %s has joined the room", nick);
+    win_printf(window, '!', 0, NULL, NO_EOL, THEME_ONLINE, "", "-> %s has joined the room", nick);
     if (prefs_get_boolean(PREF_MUC_PRIVILEGES)) {
         if (role) {
-            win_vprint(window, '!', 0, NULL, NO_DATE | NO_EOL, THEME_ONLINE, "", ", role: %s", role);
+            win_printf(window, '!', 0, NULL, NO_DATE | NO_EOL, THEME_ONLINE, "", ", role: %s", role);
         }
         if (affiliation) {
-            win_vprint(window, '!', 0, NULL, NO_DATE | NO_EOL, THEME_ONLINE, "", ", affiliation: %s", affiliation);
+            win_printf(window, '!', 0, NULL, NO_DATE | NO_EOL, THEME_ONLINE, "", ", affiliation: %s", affiliation);
         }
     }
     win_print(window, '!', 0, NULL, NO_DATE, THEME_ROOMINFO, "", "");
@@ -324,7 +324,7 @@ mucwin_occupant_nick_change(ProfMucWin *mucwin, const char *const old_nick, cons
     assert(mucwin != NULL);
 
     ProfWin *window = (ProfWin*)mucwin;
-    win_vprint(window, '!', 0, NULL, 0, THEME_THEM, "", "** %s is now known as %s", old_nick, nick);
+    win_printf(window, '!', 0, NULL, 0, THEME_THEM, "", "** %s is now known as %s", old_nick, nick);
 }
 
 void
@@ -333,7 +333,7 @@ mucwin_nick_change(ProfMucWin *mucwin, const char *const nick)
     assert(mucwin != NULL);
 
     ProfWin *window = (ProfWin*)mucwin;
-    win_vprint(window, '!', 0, NULL, 0, THEME_ME, "", "** You are now known as %s", nick);
+    win_printf(window, '!', 0, NULL, 0, THEME_ME, "", "** You are now known as %s", nick);
 }
 
 void
@@ -507,10 +507,10 @@ mucwin_requires_config(ProfMucWin *mucwin)
     }
 
     win_print(window, '-', 0, NULL, 0, 0, "", "");
-    win_vprint(window, '!', 0, NULL, 0, THEME_ROOMINFO, "", "Room locked, requires configuration.");
-    win_vprint(window, '!', 0, NULL, 0, THEME_ROOMINFO, "", "Use '/room accept' to accept the defaults");
-    win_vprint(window, '!', 0, NULL, 0, THEME_ROOMINFO, "", "Use '/room destroy' to cancel and destroy the room");
-    win_vprint(window, '!', 0, NULL, 0, THEME_ROOMINFO, "", "Use '/room config' to edit the room configuration");
+    win_printf(window, '!', 0, NULL, 0, THEME_ROOMINFO, "", "Room locked, requires configuration.");
+    win_printf(window, '!', 0, NULL, 0, THEME_ROOMINFO, "", "Use '/room accept' to accept the defaults");
+    win_printf(window, '!', 0, NULL, 0, THEME_ROOMINFO, "", "Use '/room destroy' to cancel and destroy the room");
+    win_printf(window, '!', 0, NULL, 0, THEME_ROOMINFO, "", "Use '/room config' to edit the room configuration");
     win_print(window, '-', 0, NULL, 0, 0, "", "");
 
     // currently in groupchat window
@@ -533,17 +533,17 @@ mucwin_subject(ProfMucWin *mucwin, const char *const nick, const char *const sub
 
     if (subject) {
         if (nick) {
-            win_vprint(window, '!', 0, NULL, NO_EOL, THEME_ROOMINFO, "", "*%s has set the room subject: ", nick);
-            win_vprint(window, '!', 0, NULL, NO_DATE, 0, "", "%s", subject);
+            win_printf(window, '!', 0, NULL, NO_EOL, THEME_ROOMINFO, "", "*%s has set the room subject: ", nick);
+            win_printf(window, '!', 0, NULL, NO_DATE, 0, "", "%s", subject);
         } else {
-            win_vprint(window, '!', 0, NULL, NO_EOL, THEME_ROOMINFO, "", "Room subject: ");
-            win_vprint(window, '!', 0, NULL, NO_DATE, 0, "", "%s", subject);
+            win_printf(window, '!', 0, NULL, NO_EOL, THEME_ROOMINFO, "", "Room subject: ");
+            win_printf(window, '!', 0, NULL, NO_DATE, 0, "", "%s", subject);
         }
     } else {
         if (nick) {
-            win_vprint(window, '!', 0, NULL, 0, THEME_ROOMINFO, "", "*%s has cleared the room subject.", nick);
+            win_printf(window, '!', 0, NULL, 0, THEME_ROOMINFO, "", "*%s has cleared the room subject.", nick);
         } else {
-            win_vprint(window, '!', 0, NULL, 0, THEME_ROOMINFO, "", "Room subject cleared");
+            win_printf(window, '!', 0, NULL, 0, THEME_ROOMINFO, "", "Room subject cleared");
         }
     }
 
@@ -563,7 +563,7 @@ mucwin_kick_error(ProfMucWin *mucwin, const char *const nick, const char *const 
     assert(mucwin != NULL);
 
     ProfWin *window = (ProfWin*)mucwin;
-    win_vprint(window, '!', 0, NULL, 0, THEME_ERROR, "", "Error kicking %s: %s", nick, error);
+    win_printf(window, '!', 0, NULL, 0, THEME_ERROR, "", "Error kicking %s: %s", nick, error);
 }
 
 void
@@ -574,8 +574,8 @@ mucwin_broadcast(ProfMucWin *mucwin, const char *const message)
     ProfWin *window = (ProfWin*)mucwin;
     int num = wins_get_num(window);
 
-    win_vprint(window, '!', 0, NULL, NO_EOL, THEME_ROOMINFO, "", "Room message: ");
-    win_vprint(window, '!', 0, NULL, NO_DATE, 0, "", "%s", message);
+    win_printf(window, '!', 0, NULL, NO_EOL, THEME_ROOMINFO, "", "Room message: ");
+    win_printf(window, '!', 0, NULL, NO_DATE, 0, "", "%s", message);
 
     // currently in groupchat window
     if (wins_is_current(window)) {
@@ -594,7 +594,7 @@ mucwin_affiliation_list_error(ProfMucWin *mucwin, const char *const affiliation,
     assert(mucwin != NULL);
 
     ProfWin *window = (ProfWin*)mucwin;
-    win_vprint(window, '!', 0, NULL, 0, THEME_ERROR, "", "Error retrieving %s list: %s", affiliation, error);
+    win_printf(window, '!', 0, NULL, 0, THEME_ERROR, "", "Error retrieving %s list: %s", affiliation, error);
 }
 
 void
@@ -604,16 +604,16 @@ mucwin_handle_affiliation_list(ProfMucWin *mucwin, const char *const affiliation
 
     ProfWin *window = (ProfWin*)mucwin;
     if (jids) {
-        win_vprint(window, '!', 0, NULL, 0, 0, "", "Affiliation: %s", affiliation);
+        win_printf(window, '!', 0, NULL, 0, 0, "", "Affiliation: %s", affiliation);
         GSList *curr_jid = jids;
         while (curr_jid) {
             const char *jid = curr_jid->data;
-            win_vprint(window, '!', 0, NULL, 0, 0, "", "  %s", jid);
+            win_printf(window, '!', 0, NULL, 0, 0, "", "  %s", jid);
             curr_jid = g_slist_next(curr_jid);
         }
         win_print(window, '!', 0, NULL, 0, 0, "", "");
     } else {
-        win_vprint(window, '!', 0, NULL, 0, 0, "", "No users found with affiliation: %s", affiliation);
+        win_printf(window, '!', 0, NULL, 0, 0, "", "No users found with affiliation: %s", affiliation);
         win_print(window, '!', 0, NULL, 0, 0, "", "");
     }
 }
@@ -667,9 +667,9 @@ mucwin_show_affiliation_list(ProfMucWin *mucwin, muc_affiliation_t affiliation)
             Occupant *occupant = curr_occupant->data;
             if (occupant->affiliation == affiliation) {
                 if (occupant->jid) {
-                    win_vprint(window, '!', 0, NULL, 0, 0, "", "  %s (%s)", occupant->nick, occupant->jid);
+                    win_printf(window, '!', 0, NULL, 0, 0, "", "  %s (%s)", occupant->nick, occupant->jid);
                 } else {
-                    win_vprint(window, '!', 0, NULL, 0, 0, "", "  %s", occupant->nick);
+                    win_printf(window, '!', 0, NULL, 0, 0, "", "  %s", occupant->nick);
                 }
             }
 
@@ -686,7 +686,7 @@ mucwin_role_list_error(ProfMucWin *mucwin, const char *const role, const char *c
     assert(mucwin != NULL);
 
     ProfWin *window = (ProfWin*)mucwin;
-    win_vprint(window, '!', 0, NULL, 0, THEME_ERROR, "", "Error retrieving %s list: %s", role, error);
+    win_printf(window, '!', 0, NULL, 0, THEME_ERROR, "", "Error retrieving %s list: %s", role, error);
 }
 
 void
@@ -696,25 +696,25 @@ mucwin_handle_role_list(ProfMucWin *mucwin, const char *const role, GSList *nick
 
     ProfWin *window = (ProfWin*)mucwin;
     if (nicks) {
-        win_vprint(window, '!', 0, NULL, 0, 0, "", "Role: %s", role);
+        win_printf(window, '!', 0, NULL, 0, 0, "", "Role: %s", role);
         GSList *curr_nick = nicks;
         while (curr_nick) {
             const char *nick = curr_nick->data;
             Occupant *occupant = muc_roster_item(mucwin->roomjid, nick);
             if (occupant) {
                 if (occupant->jid) {
-                    win_vprint(window, '!', 0, NULL, 0, 0, "", "  %s (%s)", nick, occupant->jid);
+                    win_printf(window, '!', 0, NULL, 0, 0, "", "  %s (%s)", nick, occupant->jid);
                 } else {
-                    win_vprint(window, '!', 0, NULL, 0, 0, "", "  %s", nick);
+                    win_printf(window, '!', 0, NULL, 0, 0, "", "  %s", nick);
                 }
             } else {
-                win_vprint(window, '!', 0, NULL, 0, 0, "", "  %s", nick);
+                win_printf(window, '!', 0, NULL, 0, 0, "", "  %s", nick);
             }
             curr_nick = g_slist_next(curr_nick);
         }
         win_print(window, '!', 0, NULL, 0, 0, "", "");
     } else {
-        win_vprint(window, '!', 0, NULL, 0, 0, "", "No occupants found with role: %s", role);
+        win_printf(window, '!', 0, NULL, 0, 0, "", "No occupants found with role: %s", role);
         win_print(window, '!', 0, NULL, 0, 0, "", "");
     }
 }
@@ -762,9 +762,9 @@ mucwin_show_role_list(ProfMucWin *mucwin, muc_role_t role)
             Occupant *occupant = curr_occupant->data;
             if (occupant->role == role) {
                 if (occupant->jid) {
-                    win_vprint(window, '!', 0, NULL, 0, 0, "", "  %s (%s)", occupant->nick, occupant->jid);
+                    win_printf(window, '!', 0, NULL, 0, 0, "", "  %s (%s)", occupant->nick, occupant->jid);
                 } else {
-                    win_vprint(window, '!', 0, NULL, 0, 0, "", "  %s", occupant->nick);
+                    win_printf(window, '!', 0, NULL, 0, 0, "", "  %s", occupant->nick);
                 }
             }
 
@@ -782,7 +782,7 @@ mucwin_affiliation_set_error(ProfMucWin *mucwin, const char *const jid, const ch
     assert(mucwin != NULL);
 
     ProfWin *window = (ProfWin*)mucwin;
-    win_vprint(window, '!', 0, NULL, 0, THEME_ERROR, "", "Error setting %s affiliation for %s: %s", affiliation, jid, error);
+    win_printf(window, '!', 0, NULL, 0, THEME_ERROR, "", "Error setting %s affiliation for %s: %s", affiliation, jid, error);
 }
 
 void
@@ -792,7 +792,7 @@ mucwin_role_set_error(ProfMucWin *mucwin, const char *const nick, const char *co
     assert(mucwin != NULL);
 
     ProfWin *window = (ProfWin*)mucwin;
-    win_vprint(window, '!', 0, NULL, 0, THEME_ERROR, "", "Error setting %s role for %s: %s", role, nick, error);
+    win_printf(window, '!', 0, NULL, 0, THEME_ERROR, "", "Error setting %s role for %s: %s", role, nick, error);
 }
 
 void
@@ -804,9 +804,9 @@ mucwin_info(ProfMucWin *mucwin)
     char *affiliation = muc_affiliation_str(mucwin->roomjid);
 
     ProfWin *window = (ProfWin*) mucwin;
-    win_vprint(window, '!', 0, NULL, 0, 0, "", "Room: %s", mucwin->roomjid);
-    win_vprint(window, '!', 0, NULL, 0, 0, "", "Affiliation: %s", affiliation);
-    win_vprint(window, '!', 0, NULL, 0, 0, "", "Role: %s", role);
+    win_printf(window, '!', 0, NULL, 0, 0, "", "Room: %s", mucwin->roomjid);
+    win_printf(window, '!', 0, NULL, 0, 0, "", "Affiliation: %s", affiliation);
+    win_printf(window, '!', 0, NULL, 0, 0, "", "Role: %s", role);
     win_print(window, '-', 0, NULL, 0, 0, "", "");
 }
 
