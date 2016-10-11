@@ -1039,6 +1039,12 @@ win_printf(ProfWin *window, const char show_char, int pad_indent, GDateTime *tim
 }
 
 void
+win_print_http_upload(ProfWin *window, const char *const message, char *url)
+{
+    win_print_with_receipt(window, '!', 0, NULL, 0, THEME_TEXT_ME, NULL, message, url);
+}
+
+void
 win_print_with_receipt(ProfWin *window, const char show_char, int pad_indent, GTimeVal *tstamp,
     int flags, theme_item_t theme_item, const char *const from, const char *const message, char *id)
 {
