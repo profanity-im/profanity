@@ -48,7 +48,7 @@ mucconfwin_show_form(ProfMucConfWin *confwin)
     ProfWin *window = (ProfWin*) confwin;
     if (confwin->form->title) {
         win_printf(window, '-', 0, NULL, NO_EOL, 0, "", "Form title: ");
-        win_printf(window, '-', 0, NULL, NO_DATE, 0, "", confwin->form->title);
+        win_printf(window, '-', 0, NULL, NO_DATE, 0, "", "%s", confwin->form->title);
     } else {
         win_printf(window, '-', 0, NULL, 0, 0, "", "Configuration for room %s.", confwin->roomjid);
     }
@@ -64,7 +64,7 @@ mucconfwin_show_form(ProfMucConfWin *confwin)
         if ((g_strcmp0(field->type, "fixed") == 0) && field->values) {
             if (field->values) {
                 char *value = field->values->data;
-                win_printf(window, '-', 0, NULL, 0, 0, "", value);
+                win_printf(window, '-', 0, NULL, 0, 0, "", "%s", value);
             }
         } else if (g_strcmp0(field->type, "hidden") != 0 && field->var) {
             char *tag = g_hash_table_lookup(confwin->form->var_to_tag, field->var);
@@ -111,7 +111,7 @@ mucconfwin_field_help(ProfMucConfWin *confwin, char *tag)
     ProfWin *window = (ProfWin*) confwin;
     FormField *field = form_get_field_by_tag(confwin->form, tag);
     if (field) {
-        win_printf(window, '-', 0, NULL, NO_EOL, 0, "", field->label);
+        win_printf(window, '-', 0, NULL, NO_EOL, 0, "", "%s", field->label);
         if (field->required) {
             win_printf(window, '-', 0, NULL, NO_DATE, 0, "", " (Required):");
         } else {
@@ -194,7 +194,7 @@ mucconfwin_form_help(ProfMucConfWin *confwin)
     if (confwin->form->instructions) {
         ProfWin *window = (ProfWin*) confwin;
         win_printf(window, '-', 0, NULL, 0, 0, "", "Supplied instructions:");
-        win_printf(window, '-', 0, NULL, 0, 0, "", confwin->form->instructions);
+        win_printf(window, '-', 0, NULL, 0, 0, "", "%s", confwin->form->instructions);
         win_printf(window, '-', 0, NULL, 0, 0, "", "");
     }
 }
@@ -223,7 +223,7 @@ _mucconfwin_form_field(ProfWin *window, char *tag, FormField *field)
                 if (g_strcmp0(field->var, "muc#roomconfig_roomsecret") == 0) {
                     win_printf(window, '-', 0, NULL, NO_DATE | NO_EOL, THEME_ONLINE, "", "[hidden]");
                 } else {
-                    win_printf(window, '-', 0, NULL, NO_DATE | NO_EOL, THEME_ONLINE, "", value);
+                    win_printf(window, '-', 0, NULL, NO_DATE | NO_EOL, THEME_ONLINE, "", "%s", value);
                 }
             }
         }
@@ -303,7 +303,7 @@ _mucconfwin_form_field(ProfWin *window, char *tag, FormField *field)
         if (curr_value) {
             char *value = curr_value->data;
             if (value) {
-                win_printf(window, '-', 0, NULL, NO_DATE | NO_EOL, THEME_ONLINE, "", value);
+                win_printf(window, '-', 0, NULL, NO_DATE | NO_EOL, THEME_ONLINE, "", "%s", value);
             }
         }
         win_newline(window);
@@ -320,7 +320,7 @@ _mucconfwin_form_field(ProfWin *window, char *tag, FormField *field)
         if (curr_value) {
             char *value = curr_value->data;
             if (value) {
-                win_printf(window, '-', 0, NULL, NO_DATE | NO_EOL, 0, "", value);
+                win_printf(window, '-', 0, NULL, NO_DATE | NO_EOL, 0, "", "%s", value);
             }
         }
         win_newline(window);

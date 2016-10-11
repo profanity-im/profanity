@@ -182,7 +182,7 @@ mucwin_room_disco_info(ProfMucWin *mucwin, GSList *identities, GSList *features)
             if (identity->category) {
                 identity_str = g_string_append(identity_str, identity->category);
             }
-            win_printf(window, '!', 0, NULL, 0, 0, "", identity_str->str);
+            win_printf(window, '!', 0, NULL, 0, 0, "", "%s", identity_str->str);
             g_string_free(identity_str, TRUE);
             identities = g_slist_next(identities);
         }
@@ -355,7 +355,7 @@ mucwin_history(ProfMucWin *mucwin, const char *const nick, GDateTime *timestamp,
         g_string_append(line, message);
     }
 
-    win_printf(window, '-', 0, timestamp, NO_COLOUR_DATE, 0, "", line->str);
+    win_printf(window, '-', 0, timestamp, NO_COLOUR_DATE, 0, "", "%s", line->str);
     g_string_free(line, TRUE);
 
     plugins_on_room_history_message(mucwin->roomjid, nick, message, timestamp);
@@ -371,10 +371,10 @@ _mucwin_print_mention(ProfWin *window, const char *const message, const char *co
         pos = GPOINTER_TO_INT(curr->data);
 
         char *before_str = g_strndup(message + last_pos, pos - last_pos);
-        win_printf(window, '-', 0, NULL, NO_DATE | NO_ME | NO_EOL, THEME_ROOMMENTION, "", before_str);
+        win_printf(window, '-', 0, NULL, NO_DATE | NO_ME | NO_EOL, THEME_ROOMMENTION, "", "%s", before_str);
         g_free(before_str);
         char *nick_str = g_strndup(message + pos, strlen(nick));
-        win_printf(window, '-', 0, NULL, NO_DATE | NO_ME | NO_EOL, THEME_ROOMMENTION_TERM, "", nick_str);
+        win_printf(window, '-', 0, NULL, NO_DATE | NO_ME | NO_EOL, THEME_ROOMMENTION_TERM, "", "%s", nick_str);
         g_free(nick_str);
 
         last_pos = pos + strlen(nick);
@@ -382,7 +382,7 @@ _mucwin_print_mention(ProfWin *window, const char *const message, const char *co
         curr = g_slist_next(curr);
     }
     if (last_pos < strlen(message)) {
-        win_printf(window, '-', 0, NULL, NO_DATE | NO_ME, THEME_ROOMMENTION, "", &message[last_pos]);
+        win_printf(window, '-', 0, NULL, NO_DATE | NO_ME, THEME_ROOMMENTION, "", "%s", &message[last_pos]);
     } else {
         win_printf(window, '-', 0, NULL, NO_DATE | NO_ME, THEME_ROOMMENTION, "", "");
     }
@@ -442,7 +442,7 @@ _mucwin_print_triggers(ProfWin *window, const char *const message, GList *trigge
 
     // no triggers found
     if (first_trigger_pos == -1) {
-        win_printf(window, '-', 0, NULL, NO_DATE | NO_ME, THEME_ROOMTRIGGER, "", message);
+        win_printf(window, '-', 0, NULL, NO_DATE | NO_ME, THEME_ROOMTRIGGER, "", "%s", message);
     } else {
         if (first_trigger_pos > 0) {
             char message_section[strlen(message) + 1];
@@ -452,7 +452,7 @@ _mucwin_print_triggers(ProfWin *window, const char *const message, GList *trigge
                 i++;
             }
             message_section[i] = '\0';
-            win_printf(window, '-', 0, NULL, NO_DATE | NO_ME | NO_EOL, THEME_ROOMTRIGGER, "", message_section);
+            win_printf(window, '-', 0, NULL, NO_DATE | NO_ME | NO_EOL, THEME_ROOMTRIGGER, "", "%s", message_section);
         }
         char trigger_section[first_trigger_len + 1];
         int i = 0;
@@ -463,10 +463,10 @@ _mucwin_print_triggers(ProfWin *window, const char *const message, GList *trigge
         trigger_section[i] = '\0';
 
         if (first_trigger_pos + first_trigger_len < strlen(message)) {
-            win_printf(window, '-', 0, NULL, NO_DATE | NO_ME | NO_EOL, THEME_ROOMTRIGGER_TERM, "", trigger_section);
+            win_printf(window, '-', 0, NULL, NO_DATE | NO_ME | NO_EOL, THEME_ROOMTRIGGER_TERM, "", "%s", trigger_section);
             _mucwin_print_triggers(window, &message[first_trigger_pos + first_trigger_len], triggers);
         } else {
-            win_printf(window, '-', 0, NULL, NO_DATE | NO_ME, THEME_ROOMTRIGGER_TERM, "", trigger_section);
+            win_printf(window, '-', 0, NULL, NO_DATE | NO_ME, THEME_ROOMTRIGGER_TERM, "", "%s", trigger_section);
         }
     }
 }
@@ -487,10 +487,10 @@ mucwin_message(ProfMucWin *mucwin, const char *const nick, const char *const mes
             win_printf(window, '-', 0, NULL, NO_ME | NO_EOL, THEME_ROOMTRIGGER, nick, "");
             _mucwin_print_triggers(window, message, triggers);
         } else {
-            win_printf(window, '-', 0, NULL, NO_ME, THEME_TEXT_THEM, nick, message);
+            win_printf(window, '-', 0, NULL, NO_ME, THEME_TEXT_THEM, nick, "%s", message);
         }
     } else {
-        win_printf(window, '-', 0, NULL, 0, THEME_TEXT_ME, nick, message);
+        win_printf(window, '-', 0, NULL, 0, THEME_TEXT_ME, nick, "%s", message);
     }
 }
 

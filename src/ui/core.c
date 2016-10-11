@@ -435,7 +435,7 @@ ui_handle_otr_error(const char *const barejid, const char *const message)
 {
     ProfChatWin *chatwin = wins_get_chat(barejid);
     if (chatwin) {
-        win_printf((ProfWin*)chatwin, '!', 0, NULL, 0, THEME_ERROR, "", message);
+        win_printf((ProfWin*)chatwin, '!', 0, NULL, 0, THEME_ERROR, "", "%s", message);
     } else {
         cons_show_error("%s - %s", barejid, message);
     }
@@ -752,7 +752,7 @@ ui_current_print_formatted_line(const char show_char, int attrs, const char *con
     va_start(arg, msg);
     GString *fmt_msg = g_string_new(NULL);
     g_string_vprintf(fmt_msg, msg, arg);
-    win_printf(current, show_char, 0, NULL, 0, attrs, "", fmt_msg->str);
+    win_printf(current, show_char, 0, NULL, 0, attrs, "", "%s", fmt_msg->str);
     va_end(arg);
     g_string_free(fmt_msg, TRUE);
 }
@@ -760,14 +760,14 @@ ui_current_print_formatted_line(const char show_char, int attrs, const char *con
 void
 ui_win_error_line(ProfWin *window, const char *const msg)
 {
-    win_printf(window, '-', 0, NULL, 0, THEME_ERROR, "", msg);
+    win_printf(window, '-', 0, NULL, 0, THEME_ERROR, "", "%s", msg);
 }
 
 void
 ui_current_error_line(const char *const msg)
 {
     ProfWin *current = wins_get_current();
-    win_printf(current, '-', 0, NULL, 0, THEME_ERROR, "", msg);
+    win_printf(current, '-', 0, NULL, 0, THEME_ERROR, "", "%s", msg);
 }
 
 void
@@ -1158,7 +1158,7 @@ ui_handle_room_configuration_form_error(const char *const roomjid, const char *c
         g_string_append(message_str, message);
     }
 
-    win_printf(window, '-', 0, NULL, 0, THEME_ERROR, "", message_str->str);
+    win_printf(window, '-', 0, NULL, 0, THEME_ERROR, "", "%s", message_str->str);
 
     g_string_free(message_str, TRUE);
 }
@@ -1237,7 +1237,7 @@ ui_show_lines(ProfWin *window, gchar** lines)
     if (lines) {
         int i;
         for (i = 0; lines[i] != NULL; i++) {
-            win_printf(window, '-', 0, NULL, 0, 0, "", lines[i]);
+            win_printf(window, '-', 0, NULL, 0, 0, "", "%s", lines[i]);
         }
     }
 }
@@ -1274,7 +1274,7 @@ ui_handle_software_version_error(const char *const roomjid, const char *const me
         g_string_append(message_str, message);
     }
 
-    win_printf(window, '-', 0, NULL, 0, THEME_ERROR, "", message_str->str);
+    win_printf(window, '-', 0, NULL, 0, THEME_ERROR, "", "%s", message_str->str);
 
     g_string_free(message_str, TRUE);
 }

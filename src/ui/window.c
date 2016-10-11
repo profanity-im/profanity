@@ -683,7 +683,7 @@ win_show_occupant(ProfWin *window, Occupant *occupant)
 
     theme_item_t presence_colour = theme_main_presence_attrs(presence_str);
 
-    win_printf(window, '-', 0, NULL, NO_EOL, presence_colour, "", occupant->nick);
+    win_printf(window, '-', 0, NULL, NO_EOL, presence_colour, "", "%s", occupant->nick);
     win_printf(window, '-', 0, NULL, NO_DATE | NO_EOL, presence_colour, "", " is %s", presence_str);
 
     if (occupant->status) {
@@ -705,9 +705,9 @@ win_show_contact(ProfWin *window, PContact contact)
     theme_item_t presence_colour = theme_main_presence_attrs(presence);
 
     if (name) {
-        win_printf(window, '-', 0, NULL, NO_EOL, presence_colour, "", name);
+        win_printf(window, '-', 0, NULL, NO_EOL, presence_colour, "", "%s", name);
     } else {
-        win_printf(window, '-', 0, NULL, NO_EOL, presence_colour, "", barejid);
+        win_printf(window, '-', 0, NULL, NO_EOL, presence_colour, "", "%s", barejid);
     }
 
     win_printf(window, '-', 0, NULL, NO_DATE | NO_EOL, presence_colour, "", " is %s", presence);
@@ -747,7 +747,7 @@ win_show_occupant_info(ProfWin *window, const char *const room, Occupant *occupa
 
     theme_item_t presence_colour = theme_main_presence_attrs(presence_str);
 
-    win_printf(window, '!', 0, NULL, NO_EOL, presence_colour, "", occupant->nick);
+    win_printf(window, '!', 0, NULL, NO_EOL, presence_colour, "", "%s", occupant->nick);
     win_printf(window, '!', 0, NULL, NO_DATE | NO_EOL, presence_colour, "", " is %s", presence_str);
 
     if (occupant->status) {
@@ -773,19 +773,19 @@ win_show_occupant_info(ProfWin *window, const char *const room, Occupant *occupa
             DiscoIdentity *identity = caps->identity;
             win_printf(window, '!', 0, NULL, NO_EOL, 0, "", "  Identity: ");
             if (identity->name) {
-                win_printf(window, '!', 0, NULL, NO_DATE | NO_EOL, 0, "", identity->name);
+                win_printf(window, '!', 0, NULL, NO_DATE | NO_EOL, 0, "", "%s", identity->name);
                 if (identity->category || identity->type) {
                     win_printf(window, '-', 0, NULL, NO_DATE | NO_EOL, 0, "", " ");
                 }
             }
             if (identity->type) {
-                win_printf(window, '!', 0, NULL, NO_DATE | NO_EOL, 0, "", identity->type);
+                win_printf(window, '!', 0, NULL, NO_DATE | NO_EOL, 0, "", "%s", identity->type);
                 if (identity->category) {
                     win_printf(window, '!', 0, NULL, NO_DATE | NO_EOL, 0, "", " ");
                 }
             }
             if (identity->category) {
-                win_printf(window, '!', 0, NULL, NO_DATE | NO_EOL, 0, "", identity->category);
+                win_printf(window, '!', 0, NULL, NO_DATE | NO_EOL, 0, "", "%s", identity->category);
             }
             win_newline(window);
         }
@@ -830,7 +830,7 @@ win_show_info(ProfWin *window, PContact contact)
     theme_item_t presence_colour = theme_main_presence_attrs(presence);
 
     win_printf(window, '-', 0, NULL, 0, 0, "", "");
-    win_printf(window, '-', 0, NULL, NO_EOL, presence_colour, "", barejid);
+    win_printf(window, '-', 0, NULL, NO_EOL, presence_colour, "", "%s", barejid);
     if (name) {
         win_printf(window, '-', 0, NULL, NO_DATE | NO_EOL, presence_colour, "", " (%s)", name);
     }
@@ -897,19 +897,19 @@ win_show_info(ProfWin *window, PContact contact)
                 DiscoIdentity *identity = caps->identity;
                 win_printf(window, '-', 0, NULL, NO_EOL, 0, "", "    Identity: ");
                 if (identity->name) {
-                    win_printf(window, '-', 0, NULL, NO_DATE | NO_EOL, 0, "", identity->name);
+                    win_printf(window, '-', 0, NULL, NO_DATE | NO_EOL, 0, "", "%s", identity->name);
                     if (identity->category || identity->type) {
                         win_printf(window, '-', 0, NULL, NO_DATE | NO_EOL, 0, "", " ");
                     }
                 }
                 if (identity->type) {
-                    win_printf(window, '-', 0, NULL, NO_DATE | NO_EOL, 0, "", identity->type);
+                    win_printf(window, '-', 0, NULL, NO_DATE | NO_EOL, 0, "", "%s", identity->type);
                     if (identity->category) {
                         win_printf(window, '-', 0, NULL, NO_DATE | NO_EOL, 0, "", " ");
                     }
                 }
                 if (identity->category) {
-                    win_printf(window, '-', 0, NULL, NO_DATE | NO_EOL, 0, "", identity->category);
+                    win_printf(window, '-', 0, NULL, NO_DATE | NO_EOL, 0, "", "%s", identity->category);
                 }
                 win_newline(window);
             }
@@ -1001,10 +1001,10 @@ win_print_incoming_message(ProfWin *window, GDateTime *timestamp,
             } else if (enc_mode == PROF_MSG_PGP) {
                 enc_char = prefs_get_pgp_char();
             }
-            win_printf(window, enc_char, 0, timestamp, NO_ME, THEME_TEXT_THEM, from, message);
+            win_printf(window, enc_char, 0, timestamp, NO_ME, THEME_TEXT_THEM, from, "%s", message);
             break;
         case WIN_PRIVATE:
-            win_printf(window, '-', 0, timestamp, NO_ME, THEME_TEXT_THEM, from, message);
+            win_printf(window, '-', 0, timestamp, NO_ME, THEME_TEXT_THEM, from, "%s", message);
             break;
         default:
             assert(FALSE);
@@ -1113,7 +1113,7 @@ win_update_entry_theme(ProfWin *window, const char *const id, theme_item_t theme
 void
 win_println(ProfWin *window, int pad, const char *const message)
 {
-    win_printf(window, '-', pad, NULL, 0, 0, "", message);
+    win_printf(window, '-', pad, NULL, 0, 0, "", "%s", message);
 }
 
 void
@@ -1123,7 +1123,7 @@ win_vprintln_ch(ProfWin *window, char ch, const char *const message, ...)
     va_start(arg, message);
     GString *fmt_msg = g_string_new(NULL);
     g_string_vprintf(fmt_msg, message, arg);
-    win_printf(window, ch, 0, NULL, 0, 0, "", fmt_msg->str);
+    win_printf(window, ch, 0, NULL, 0, 0, "", "%s", fmt_msg->str);
     g_string_free(fmt_msg, TRUE);
     va_end(arg);
 }

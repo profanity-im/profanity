@@ -93,7 +93,7 @@ privwin_outgoing_msg(ProfPrivateWin *privwin, const char *const message)
 {
     assert(privwin != NULL);
 
-    win_printf((ProfWin*)privwin, '-', 0, NULL, 0, THEME_TEXT_ME, "me", message);
+    win_printf((ProfWin*)privwin, '-', 0, NULL, 0, THEME_TEXT_ME, "me", "%s", message);
 }
 
 void

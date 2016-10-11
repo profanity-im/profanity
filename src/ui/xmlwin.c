@@ -46,11 +46,11 @@ xmlwin_show(ProfXMLWin *xmlwin, const char *const msg)
     ProfWin *window = (ProfWin*)xmlwin;
     if (g_str_has_prefix(msg, "SENT:")) {
         win_printf(window, '-', 0, NULL, 0, 0, "", "SENT:");
-        win_printf(window, '-', 0, NULL, 0, THEME_ONLINE, "", &msg[6]);
+        win_printf(window, '-', 0, NULL, 0, THEME_ONLINE, "", "%s", &msg[6]);
         win_printf(window, '-', 0, NULL, 0, THEME_ONLINE, "", "");
     } else if (g_str_has_prefix(msg, "RECV:")) {
         win_printf(window, '-', 0, NULL, 0, 0, "", "RECV:");
-        win_printf(window, '-', 0, NULL, 0, THEME_AWAY, "", &msg[6]);
+        win_printf(window, '-', 0, NULL, 0, THEME_AWAY, "", "%s", &msg[6]);
         win_printf(window, '-', 0, NULL, 0, THEME_AWAY, "", "");
     }
 }
