@@ -1041,27 +1041,21 @@ win_printf(ProfWin *window, const char show_char, int pad_indent, GDateTime *tim
 void
 win_print_http_upload(ProfWin *window, const char *const message, char *url)
 {
-    win_print_with_receipt(window, '!', 0, NULL, 0, THEME_TEXT_ME, NULL, message, url);
+    win_print_with_receipt(window, '!', NULL, message, url);
 }
 
 void
-win_print_with_receipt(ProfWin *window, const char show_char, int pad_indent, GTimeVal *tstamp,
-    int flags, theme_item_t theme_item, const char *const from, const char *const message, char *id)
+win_print_with_receipt(ProfWin *window, const char show_char, const char *const from, const char *const message,
+    char *id)
 {
-    GDateTime *time;
-
-    if (tstamp == NULL) {
-        time = g_date_time_new_now_local();
-    } else {
-        time = g_date_time_new_from_timeval_utc(tstamp);
-    }
+    GDateTime *time = g_date_time_new_now_local();
 
     DeliveryReceipt *receipt = malloc(sizeof(struct delivery_receipt_t));
     receipt->id = strdup(id);
     receipt->received = FALSE;
 
-    buffer_push(window->layout->buffer, show_char, pad_indent, time, flags, theme_item, from, message, receipt);
-    _win_print(window, show_char, pad_indent, time, flags, theme_item, from, message, receipt);
+    buffer_push(window->layout->buffer, show_char, 0, time, 0, THEME_TEXT_ME, from, message, receipt);
+    _win_print(window, show_char, 0, time, 0, THEME_TEXT_ME, from, message, receipt);
     // TODO: cross-reference.. this should be replaced by a real event-based system
     inp_nonblocking(TRUE);
     g_date_time_unref(time);

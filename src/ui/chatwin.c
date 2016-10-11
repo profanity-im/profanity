@@ -306,7 +306,7 @@ chatwin_outgoing_msg(ProfChatWin *chatwin, const char *const message, char *id, 
     }
 
     if (request_receipt && id) {
-        win_print_with_receipt((ProfWin*)chatwin, enc_char, 0, NULL, 0, THEME_TEXT_ME, "me", message, id);
+        win_print_with_receipt((ProfWin*)chatwin, enc_char, "me", message, id);
     } else {
         win_printf((ProfWin*)chatwin, enc_char, 0, NULL, 0, THEME_TEXT_ME, "me", message);
     }
