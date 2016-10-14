@@ -757,11 +757,11 @@ win_show_occupant_info(ProfWin *window, const char *const room, Occupant *occupa
     win_newline(window);
 
     if (occupant->jid) {
-        win_printf(window, '!', 0, NULL, 0, 0, "", "  Jid: %s", occupant->jid);
+        win_printf(window, '!', 0, NULL, 0, THEME_DEFAULT, "", "  Jid: %s", occupant->jid);
     }
 
-    win_printf(window, '!', 0, NULL, 0, 0, "", "  Affiliation: %s", occupant_affiliation);
-    win_printf(window, '!', 0, NULL, 0, 0, "", "  Role: %s", occupant_role);
+    win_printf(window, '!', 0, NULL, 0, THEME_DEFAULT, "", "  Affiliation: %s", occupant_affiliation);
+    win_printf(window, '!', 0, NULL, 0, THEME_DEFAULT, "", "  Role: %s", occupant_role);
 
     Jid *jidp = jid_create_from_bare_and_resource(room, occupant->nick);
     EntityCapabilities *caps = caps_lookup(jidp->fulljid);
@@ -771,21 +771,21 @@ win_show_occupant_info(ProfWin *window, const char *const room, Occupant *occupa
         // show identity
         if (caps->identity) {
             DiscoIdentity *identity = caps->identity;
-            win_printf(window, '!', 0, NULL, NO_EOL, 0, "", "  Identity: ");
+            win_printf(window, '!', 0, NULL, NO_EOL, THEME_DEFAULT, "", "  Identity: ");
             if (identity->name) {
-                win_printf(window, '!', 0, NULL, NO_DATE | NO_EOL, 0, "", "%s", identity->name);
+                win_printf(window, '!', 0, NULL, NO_DATE | NO_EOL, THEME_DEFAULT, "", "%s", identity->name);
                 if (identity->category || identity->type) {
-                    win_printf(window, '-', 0, NULL, NO_DATE | NO_EOL, 0, "", " ");
+                    win_printf(window, '-', 0, NULL, NO_DATE | NO_EOL, THEME_DEFAULT, "", " ");
                 }
             }
             if (identity->type) {
-                win_printf(window, '!', 0, NULL, NO_DATE | NO_EOL, 0, "", "%s", identity->type);
+                win_printf(window, '!', 0, NULL, NO_DATE | NO_EOL, THEME_DEFAULT, "", "%s", identity->type);
                 if (identity->category) {
-                    win_printf(window, '!', 0, NULL, NO_DATE | NO_EOL, 0, "", " ");
+                    win_printf(window, '!', 0, NULL, NO_DATE | NO_EOL, THEME_DEFAULT, "", " ");
                 }
             }
             if (identity->category) {
-                win_printf(window, '!', 0, NULL, NO_DATE | NO_EOL, 0, "", "%s", identity->category);
+                win_printf(window, '!', 0, NULL, NO_DATE | NO_EOL, THEME_DEFAULT, "", "%s", identity->category);
             }
             win_newline(window);
         }
@@ -793,19 +793,19 @@ win_show_occupant_info(ProfWin *window, const char *const room, Occupant *occupa
         if (caps->software_version) {
             SoftwareVersion *software_version = caps->software_version;
             if (software_version->software) {
-                win_printf(window, '!', 0, NULL, NO_EOL, 0, "", "  Software: %s", software_version->software);
+                win_printf(window, '!', 0, NULL, NO_EOL, THEME_DEFAULT, "", "  Software: %s", software_version->software);
             }
             if (software_version->software_version) {
-                win_printf(window, '!', 0, NULL, NO_DATE | NO_EOL, 0, "", ", %s", software_version->software_version);
+                win_printf(window, '!', 0, NULL, NO_DATE | NO_EOL, THEME_DEFAULT, "", ", %s", software_version->software_version);
             }
             if (software_version->software || software_version->software_version) {
                 win_newline(window);
             }
             if (software_version->os) {
-                win_printf(window, '!', 0, NULL, NO_EOL, 0, "", "  OS: %s", software_version->os);
+                win_printf(window, '!', 0, NULL, NO_EOL, THEME_DEFAULT, "", "  OS: %s", software_version->os);
             }
             if (software_version->os_version) {
-                win_printf(window, '!', 0, NULL, NO_DATE | NO_EOL, 0, "", ", %s", software_version->os_version);
+                win_printf(window, '!', 0, NULL, NO_DATE | NO_EOL, THEME_DEFAULT, "", ", %s", software_version->os_version);
             }
             if (software_version->os || software_version->os_version) {
                 win_newline(window);
@@ -834,7 +834,7 @@ win_show_info(ProfWin *window, PContact contact)
     if (name) {
         win_printf(window, '-', 0, NULL, NO_DATE | NO_EOL, presence_colour, "", " (%s)", name);
     }
-    win_printf(window, '-', 0, NULL, NO_DATE, 0, "", ":");
+    win_printf(window, '-', 0, NULL, NO_DATE, THEME_DEFAULT, "", ":");
 
     if (sub) {
         win_printf_line(window, THEME_DEFAULT, "Subscription: %s", sub);
@@ -895,21 +895,21 @@ win_show_info(ProfWin *window, PContact contact)
             // show identity
             if (caps->identity) {
                 DiscoIdentity *identity = caps->identity;
-                win_printf(window, '-', 0, NULL, NO_EOL, 0, "", "    Identity: ");
+                win_printf(window, '-', 0, NULL, NO_EOL, THEME_DEFAULT, "", "    Identity: ");
                 if (identity->name) {
-                    win_printf(window, '-', 0, NULL, NO_DATE | NO_EOL, 0, "", "%s", identity->name);
+                    win_printf(window, '-', 0, NULL, NO_DATE | NO_EOL, THEME_DEFAULT, "", "%s", identity->name);
                     if (identity->category || identity->type) {
-                        win_printf(window, '-', 0, NULL, NO_DATE | NO_EOL, 0, "", " ");
+                        win_printf(window, '-', 0, NULL, NO_DATE | NO_EOL, THEME_DEFAULT, "", " ");
                     }
                 }
                 if (identity->type) {
-                    win_printf(window, '-', 0, NULL, NO_DATE | NO_EOL, 0, "", "%s", identity->type);
+                    win_printf(window, '-', 0, NULL, NO_DATE | NO_EOL, THEME_DEFAULT, "", "%s", identity->type);
                     if (identity->category) {
-                        win_printf(window, '-', 0, NULL, NO_DATE | NO_EOL, 0, "", " ");
+                        win_printf(window, '-', 0, NULL, NO_DATE | NO_EOL, THEME_DEFAULT, "", " ");
                     }
                 }
                 if (identity->category) {
-                    win_printf(window, '-', 0, NULL, NO_DATE | NO_EOL, 0, "", "%s", identity->category);
+                    win_printf(window, '-', 0, NULL, NO_DATE | NO_EOL, THEME_DEFAULT, "", "%s", identity->category);
                 }
                 win_newline(window);
             }
@@ -917,19 +917,19 @@ win_show_info(ProfWin *window, PContact contact)
             if (caps->software_version) {
                 SoftwareVersion *software_version = caps->software_version;
                 if (software_version->software) {
-                    win_printf(window, '-', 0, NULL, NO_EOL, 0, "", "    Software: %s", software_version->software);
+                    win_printf(window, '-', 0, NULL, NO_EOL, THEME_DEFAULT, "", "    Software: %s", software_version->software);
                 }
                 if (software_version->software_version) {
-                    win_printf(window, '-', 0, NULL, NO_DATE | NO_EOL, 0, "", ", %s", software_version->software_version);
+                    win_printf(window, '-', 0, NULL, NO_DATE | NO_EOL, THEME_DEFAULT, "", ", %s", software_version->software_version);
                 }
                 if (software_version->software || software_version->software_version) {
                     win_newline(window);
                 }
                 if (software_version->os) {
-                    win_printf(window, '-', 0, NULL, NO_EOL, 0, "", "    OS: %s", software_version->os);
+                    win_printf(window, '-', 0, NULL, NO_EOL, THEME_DEFAULT, "", "    OS: %s", software_version->os);
                 }
                 if (software_version->os_version) {
-                    win_printf(window, '-', 0, NULL, NO_DATE | NO_EOL, 0, "", ", %s", software_version->os_version);
+                    win_printf(window, '-', 0, NULL, NO_DATE | NO_EOL, THEME_DEFAULT, "", ", %s", software_version->os_version);
                 }
                 if (software_version->os || software_version->os_version) {
                     win_newline(window);
@@ -1113,7 +1113,7 @@ win_update_entry_theme(ProfWin *window, const char *const id, theme_item_t theme
 void
 win_println(ProfWin *window, int pad, const char *const message)
 {
-    win_printf(window, '-', pad, NULL, 0, 0, "", "%s", message);
+    win_printf(window, '-', pad, NULL, 0, THEME_DEFAULT, "", "%s", message);
 }
 
 void
@@ -1123,7 +1123,7 @@ win_vprintln_ch(ProfWin *window, char ch, const char *const message, ...)
     va_start(arg, message);
     GString *fmt_msg = g_string_new(NULL);
     g_string_vprintf(fmt_msg, message, arg);
-    win_printf(window, ch, 0, NULL, 0, 0, "", "%s", fmt_msg->str);
+    win_printf(window, ch, 0, NULL, 0, THEME_DEFAULT, "", "%s", fmt_msg->str);
     g_string_free(fmt_msg, TRUE);
     va_end(arg);
 }
@@ -1131,7 +1131,7 @@ win_vprintln_ch(ProfWin *window, char ch, const char *const message, ...)
 void
 win_newline(ProfWin *window)
 {
-    win_printf(window, '-', 0, NULL, NO_DATE, 0, "", "");
+    win_printf(window, '-', 0, NULL, NO_DATE, THEME_DEFAULT, "", "");
 }
 
 static void

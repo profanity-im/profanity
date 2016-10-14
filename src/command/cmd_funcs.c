@@ -3881,7 +3881,7 @@ cmd_kick(ProfWin *window, const char *const command, gchar **args)
             char *reason = args[1];
             iq_room_kick_occupant(mucwin->roomjid, nick, reason);
         } else {
-            win_printf((ProfWin*) mucwin, '!', 0, NULL, 0, 0, "", "Occupant does not exist: %s", nick);
+            win_printf((ProfWin*) mucwin, '!', 0, NULL, 0, THEME_DEFAULT, "", "Occupant does not exist: %s", nick);
         }
     } else {
         cons_bad_cmd_usage(command);
@@ -3940,7 +3940,7 @@ cmd_subject(ProfWin *window, const char *const command, gchar **args)
         char *subject = muc_subject(mucwin->roomjid);
         if (subject) {
             win_printf(window, '!', 0, NULL, NO_EOL, THEME_ROOMINFO, "", "Room subject: ");
-            win_printf(window, '!', 0, NULL, NO_DATE, 0, "", "%s", subject);
+            win_printf(window, '!', 0, NULL, NO_DATE, THEME_DEFAULT, "", "%s", subject);
         } else {
             win_printf(window, '!', 0, NULL, 0, THEME_ROOMINFO, "", "Room has no subject");
         }
@@ -4050,7 +4050,7 @@ cmd_affiliation(ProfWin *window, const char *const command, gchar **args)
             iq_room_affiliation_list(mucwin->roomjid, "member");
             iq_room_affiliation_list(mucwin->roomjid, "outcast");
         } else if (g_strcmp0(affiliation, "none") == 0) {
-            win_printf((ProfWin*) mucwin, '!', 0, NULL, 0, 0, "", "Cannot list users with no affiliation.");
+            win_printf((ProfWin*) mucwin, '!', 0, NULL, 0, THEME_DEFAULT, "", "Cannot list users with no affiliation.");
         } else {
             iq_room_affiliation_list(mucwin->roomjid, affiliation);
         }
@@ -4118,7 +4118,7 @@ cmd_role(ProfWin *window, const char *const command, gchar **args)
             iq_room_role_list(mucwin->roomjid, "participant");
             iq_room_role_list(mucwin->roomjid, "visitor");
         } else if (g_strcmp0(role, "none") == 0) {
-            win_printf((ProfWin*) mucwin, '!', 0, NULL, 0, 0, "", "Cannot list users with no role.");
+            win_printf((ProfWin*) mucwin, '!', 0, NULL, 0, THEME_DEFAULT, "", "Cannot list users with no role.");
         } else {
             iq_room_role_list(mucwin->roomjid, role);
         }

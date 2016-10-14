@@ -47,8 +47,8 @@ mucconfwin_show_form(ProfMucConfWin *confwin)
 {
     ProfWin *window = (ProfWin*) confwin;
     if (confwin->form->title) {
-        win_printf(window, '-', 0, NULL, NO_EOL, 0, "", "Form title: ");
-        win_printf(window, '-', 0, NULL, NO_DATE, 0, "", "%s", confwin->form->title);
+        win_printf(window, '-', 0, NULL, NO_EOL, THEME_DEFAULT, "", "Form title: ");
+        win_printf(window, '-', 0, NULL, NO_DATE, THEME_DEFAULT, "", "%s", confwin->form->title);
     } else {
         win_printf_line(window, THEME_DEFAULT, "Configuration for room %s.", confwin->roomjid);
     }
@@ -111,11 +111,11 @@ mucconfwin_field_help(ProfMucConfWin *confwin, char *tag)
     ProfWin *window = (ProfWin*) confwin;
     FormField *field = form_get_field_by_tag(confwin->form, tag);
     if (field) {
-        win_printf(window, '-', 0, NULL, NO_EOL, 0, "", "%s", field->label);
+        win_printf(window, '-', 0, NULL, NO_EOL, THEME_DEFAULT, "", "%s", field->label);
         if (field->required) {
-            win_printf(window, '-', 0, NULL, NO_DATE, 0, "", " (Required):");
+            win_printf(window, '-', 0, NULL, NO_DATE, THEME_DEFAULT, "", " (Required):");
         } else {
-            win_printf(window, '-', 0, NULL, NO_DATE, 0, "", ":");
+            win_printf(window, '-', 0, NULL, NO_DATE, THEME_DEFAULT, "", ":");
         }
         if (field->description) {
             win_printf_line(window, THEME_DEFAULT, "  Description : %s", field->description);
@@ -203,11 +203,11 @@ static void
 _mucconfwin_form_field(ProfWin *window, char *tag, FormField *field)
 {
     win_printf(window, '-', 0, NULL, NO_EOL, THEME_AWAY, "", "[%s] ", tag);
-    win_printf(window, '-', 0, NULL, NO_EOL | NO_DATE, 0, "", "%s", field->label);
+    win_printf(window, '-', 0, NULL, NO_EOL | NO_DATE, THEME_DEFAULT, "", "%s", field->label);
     if (field->required) {
-        win_printf(window, '-', 0, NULL, NO_DATE | NO_EOL, 0, "", " (required): ");
+        win_printf(window, '-', 0, NULL, NO_DATE | NO_EOL, THEME_DEFAULT, "", " (required): ");
     } else {
-        win_printf(window, '-', 0, NULL, NO_DATE | NO_EOL, 0, "", ": ");
+        win_printf(window, '-', 0, NULL, NO_DATE | NO_EOL, THEME_DEFAULT, "", ": ");
     }
 
     GSList *values = field->values;
@@ -320,7 +320,7 @@ _mucconfwin_form_field(ProfWin *window, char *tag, FormField *field)
         if (curr_value) {
             char *value = curr_value->data;
             if (value) {
-                win_printf(window, '-', 0, NULL, NO_DATE | NO_EOL, 0, "", "%s", value);
+                win_printf(window, '-', 0, NULL, NO_DATE | NO_EOL, THEME_DEFAULT, "", "%s", value);
             }
         }
         win_newline(window);
