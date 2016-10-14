@@ -85,7 +85,7 @@ api_cons_show_themed(const char *const group, const char *const key, const char 
     char *parsed = str_replace(message, "\r\n", "\n");
     theme_item_t themeitem = plugin_themes_get(group, key, def);
     ProfWin *console = wins_get_console();
-    win_printf(console, '-', 0, NULL, 0, themeitem, "", "%s", parsed);
+    win_printf_line(console, themeitem, "%s", parsed);
 
     free(parsed);
 

@@ -39,6 +39,8 @@
 
 #include <glib.h>
 
+#define THEME_DEFAULT 0
+
 typedef enum {
     THEME_TEXT,
     THEME_TEXT_ME,

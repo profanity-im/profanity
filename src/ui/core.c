@@ -760,14 +760,14 @@ ui_current_print_formatted_line(const char show_char, int attrs, const char *con
 void
 ui_win_error_line(ProfWin *window, const char *const msg)
 {
-    win_printf(window, '-', 0, NULL, 0, THEME_ERROR, "", "%s", msg);
+    win_printf_line(window, THEME_ERROR, "%s", msg);
 }
 
 void
 ui_current_error_line(const char *const msg)
 {
     ProfWin *current = wins_get_current();
-    win_printf(current, '-', 0, NULL, 0, THEME_ERROR, "", "%s", msg);
+    win_printf_line(current, THEME_ERROR, "%s", msg);
 }
 
 void
@@ -790,7 +790,7 @@ ui_print_system_msg_from_recipient(const char *const barejid, const char *messag
         }
     }
 
-    win_printf(window, '-', 0, NULL, 0, 0, "", "*%s %s", barejid, message);
+    win_printf_line(window, THEME_DEFAULT, "*%s %s", barejid, message);
 }
 
 void
@@ -1158,7 +1158,7 @@ ui_handle_room_configuration_form_error(const char *const roomjid, const char *c
         g_string_append(message_str, message);
     }
 
-    win_printf(window, '-', 0, NULL, 0, THEME_ERROR, "", "%s", message_str->str);
+    win_printf_line(window, THEME_ERROR, "%s", message_str->str);
 
     g_string_free(message_str, TRUE);
 }
@@ -1237,7 +1237,7 @@ ui_show_lines(ProfWin *window, gchar** lines)
     if (lines) {
         int i;
         for (i = 0; lines[i] != NULL; i++) {
-            win_printf(window, '-', 0, NULL, 0, 0, "", "%s", lines[i]);
+            win_printf_line(window, THEME_DEFAULT, "%s", lines[i]);
         }
     }
 }
@@ -1274,7 +1274,7 @@ ui_handle_software_version_error(const char *const roomjid, const char *const me
         g_string_append(message_str, message);
     }
 
-    win_printf(window, '-', 0, NULL, 0, THEME_ERROR, "", "%s", message_str->str);
+    win_printf_line(window, THEME_ERROR, "%s", message_str->str);
 
     g_string_free(message_str, TRUE);
 }
@@ -1320,13 +1320,13 @@ ui_show_software_version(const char *const jid, const char *const  presence,
         win_printf(window, '-', 0, NULL, NO_DATE, 0, "", ":");
     }
     if (name) {
-        win_printf(window, '-', 0, NULL, 0, 0, "", "Name    : %s", name);
+        win_printf_line(window, THEME_DEFAULT, "Name    : %s", name);
     }
     if (version) {
-        win_printf(window, '-', 0, NULL, 0, 0, "", "Version : %s", version);
+        win_printf_line(window, THEME_DEFAULT, "Version : %s", version);
     }
     if (os) {
-        win_printf(window, '-', 0, NULL, 0, 0, "", "OS      : %s", os);
+        win_printf_line(window, THEME_DEFAULT, "OS      : %s", os);
     }
 }
 

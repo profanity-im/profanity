@@ -124,7 +124,7 @@ cons_show_help(const char *const cmd, CommandHelp *help)
     ProfWin *console = wins_get_console();
 
     cons_show("");
-    win_printf(console, '-', 0, NULL, 0, THEME_WHITE_BOLD, "", "%s", &cmd[1]);
+    win_printf_line(console, THEME_WHITE_BOLD, "%s", &cmd[1]);
     win_printf(console, '-', 0, NULL, NO_EOL, THEME_WHITE_BOLD, "", "");
     int i;
     for (i = 0; i < strlen(cmd) - 1 ; i++) {
@@ -133,11 +133,11 @@ cons_show_help(const char *const cmd, CommandHelp *help)
     win_printf(console, '-', 0, NULL, NO_DATE, THEME_WHITE_BOLD, "", "");
     cons_show("");
 
-    win_printf(console, '-', 0, NULL, 0, THEME_WHITE_BOLD, "", "Synopsis");
+    win_printf_line(console, THEME_WHITE_BOLD, "Synopsis");
     ui_show_lines(console, help->synopsis);
     cons_show("");
 
-    win_printf(console, '-', 0, NULL, 0, THEME_WHITE_BOLD, "", "Description");
+    win_printf_line(console, THEME_WHITE_BOLD, "Description");
     win_println(console, 0, help->desc);
 
     int maxlen = 0;
@@ -148,7 +148,7 @@ cons_show_help(const char *const cmd, CommandHelp *help)
 
     if (i > 0) {
         cons_show("");
-        win_printf(console, '-', 0, NULL, 0, THEME_WHITE_BOLD, "", "Arguments");
+        win_printf_line(console, THEME_WHITE_BOLD, "Arguments");
         for (i = 0; help->args[i][0] != NULL; i++) {
             win_printf(console, '-', maxlen + 3, NULL, 0, 0, "", "%-*s: %s", maxlen + 1, help->args[i][0], help->args[i][1]);
         }
@@ -156,7 +156,7 @@ cons_show_help(const char *const cmd, CommandHelp *help)
 
     if (g_strv_length((gchar**)help->examples) > 0) {
         cons_show("");
-        win_printf(console, '-', 0, NULL, 0, THEME_WHITE_BOLD, "", "Examples");
+        win_printf_line(console, THEME_WHITE_BOLD, "Arguments");
         ui_show_lines(console, help->examples);
     }
 }
@@ -181,7 +181,7 @@ cons_show_error(const char *const msg, ...)
     va_start(arg, msg);
     GString *fmt_msg = g_string_new(NULL);
     g_string_vprintf(fmt_msg, msg, arg);
-    win_printf(console, '-', 0, NULL, 0, THEME_ERROR, "", "%s", fmt_msg->str);
+    win_printf_line(console, THEME_ERROR, "%s", fmt_msg->str);
     g_string_free(fmt_msg, TRUE);
     va_end(arg);
 
@@ -296,7 +296,7 @@ cons_show_typing(const char *const barejid)
         display_usr = barejid;
     }
 
-    win_printf(console, '-', 0, NULL, 0, THEME_TYPING, "", "!! %s is typing a message...", display_usr);
+    win_printf_line(console, THEME_TYPING, "!! %s is typing a message...", display_usr);
     cons_alert();
 }
 
@@ -333,27 +333,27 @@ cons_show_incoming_room_message(const char *const nick, const char *const room, 
 
     if (g_strcmp0(muc_show, "all") == 0) {
         if (mention) {
-            win_printf(console, '-', 0, NULL, 0, THEME_MENTION, "", "<< room mention: %s in %s (win %d)", nick, room, ui_index);
+            win_printf_line(console, THEME_MENTION, "<< room mention: %s in %s (win %d)", nick, room, ui_index);
         } else if (triggers) {
             char *triggers_str = _room_triggers_to_string(triggers);
-            win_printf(console, '-', 0, NULL, 0, THEME_TRIGGER, "", "<< room trigger %s: %s in %s (win %d)", triggers_str, nick, room, ui_index);
+            win_printf_line(console, THEME_TRIGGER, "<< room trigger %s: %s in %s (win %d)", triggers_str, nick, room, ui_index);
             free(triggers_str);
         } else {
-            win_printf(console, '-', 0, NULL, 0, THEME_INCOMING, "", "<< room message: %s in %s (win %d)", nick, room, ui_index);
+            win_printf_line(console, THEME_INCOMING, "<< room message: %s in %s (win %d)", nick, room, ui_index);
         }
         cons_alert();
 
     } else if (g_strcmp0(muc_show, "first") == 0) {
         if (mention) {
-            win_printf(console, '-', 0, NULL, 0, THEME_MENTION, "", "<< room mention: %s in %s (win %d)", nick, room, ui_index);
+            win_printf_line(console, THEME_MENTION, "<< room mention: %s in %s (win %d)", nick, room, ui_index);
             cons_alert();
         } else if (triggers) {
             char *triggers_str = _room_triggers_to_string(triggers);
-            win_printf(console, '-', 0, NULL, 0, THEME_TRIGGER, "", "<< room trigger %s: %s in %s (win %d)", triggers_str, nick, room, ui_index);
+            win_printf_line(console, THEME_TRIGGER, "<< room trigger %s: %s in %s (win %d)", triggers_str, nick, room, ui_index);
             free(triggers_str);
             cons_alert();
         } else if (unread == 0) {
-            win_printf(console, '-', 0, NULL, 0, THEME_INCOMING, "", "<< room message: %s (win %d)", room, ui_index);
+            win_printf_line(console, THEME_INCOMING, "<< room message: %s (win %d)", room, ui_index);
             cons_alert();
         }
     }
@@ -372,10 +372,10 @@ cons_show_incoming_message(const char *const short_from, const int win_index, in
 
     char *chat_show = prefs_get_string(PREF_CONSOLE_CHAT);
     if (g_strcmp0(chat_show, "all") == 0) {
-        win_printf(console, '-', 0, NULL, 0, THEME_INCOMING, "", "<< chat message: %s (win %d)", short_from, ui_index);
+        win_printf_line(console, THEME_INCOMING, "<< chat message: %s (win %d)", short_from, ui_index);
         cons_alert();
     } else if ((g_strcmp0(chat_show, "first") == 0) && unread == 0) {
-        win_printf(console, '-', 0, NULL, 0, THEME_INCOMING, "", "<< chat message: %s (win %d)", short_from, ui_index);
+        win_printf_line(console, THEME_INCOMING, "<< chat message: %s (win %d)", short_from, ui_index);
         cons_alert();
     }
 
@@ -394,10 +394,10 @@ cons_show_incoming_private_message(const char *const nick, const char *const roo
 
     char *priv_show = prefs_get_string(PREF_CONSOLE_PRIVATE);
     if (g_strcmp0(priv_show, "all") == 0) {
-        win_printf(console, '-', 0, NULL, 0, THEME_INCOMING, "", "<< private message: %s in %s (win %d)", nick, room, ui_index);
+        win_printf_line(console, THEME_INCOMING, "<< private message: %s in %s (win %d)", nick, room, ui_index);
         cons_alert();
     } else if ((g_strcmp0(priv_show, "first") == 0) && unread == 0) {
-        win_printf(console, '-', 0, NULL, 0, THEME_INCOMING, "", "<< private message: %s in %s (win %d)", nick, room, ui_index);
+        win_printf_line(console, THEME_INCOMING, "<< private message: %s in %s (win %d)", nick, room, ui_index);
         cons_alert();
     }
 
@@ -417,16 +417,16 @@ cons_about(void)
 
         if (strcmp(PACKAGE_STATUS, "development") == 0) {
 #ifdef HAVE_GIT_VERSION
-            win_printf(console, '-', 0, NULL, 0, 0, "", "Welcome to Profanity, version %sdev.%s.%s", PACKAGE_VERSION, PROF_GIT_BRANCH, PROF_GIT_REVISION);
+            win_printf_line(console, THEME_DEFAULT, "Welcome to Profanity, version %sdev.%s.%s", PACKAGE_VERSION, PROF_GIT_BRANCH, PROF_GIT_REVISION);
 #else
-            win_printf(console, '-', 0, NULL, 0, 0, "", "Welcome to Profanity, version %sdev", PACKAGE_VERSION);
+            win_printf_line(console, THEME_DEFAULT, "Welcome to Profanity, version %sdev", PACKAGE_VERSION);
 #endif
         } else {
-            win_printf(console, '-', 0, NULL, 0, 0, "", "Welcome to Profanity, version %s", PACKAGE_VERSION);
+            win_printf_line(console, THEME_DEFAULT, "Welcome to Profanity, version %s", PACKAGE_VERSION);
         }
     }
 
-    win_printf(console, '-', 0, NULL, 0, 0, "", "Copyright (C) 2012 - 2016 James Booth <%s>.", PACKAGE_BUGREPORT);
+    win_printf_line(console, THEME_DEFAULT, "Copyright (C) 2012 - 2016 James Booth <%s>.", PACKAGE_BUGREPORT);
     win_println(console, 0, "License GPLv3+: GNU GPL version 3 or later <https://www.gnu.org/licenses/gpl.html>");
     win_println(console, 0, "");
     win_println(console, 0, "This is free software; you are free to change and redistribute it.");
@@ -455,7 +455,7 @@ cons_check_version(gboolean not_available_msg)
 
         if (relase_valid) {
             if (release_is_new(latest_release)) {
-                win_printf(console, '-', 0, NULL, 0, 0, "", "A new version of Profanity is available: %s", latest_release);
+                win_printf_line(console, THEME_DEFAULT, "A new version of Profanity is available: %s", latest_release);
                 win_println(console, 0, "Check <http://www.profanity.im> for details.");
                 win_println(console, 0, "");
             } else {
@@ -605,7 +605,7 @@ cons_show_caps(const char *const fulljid, resource_presence_t presence)
             win_println(console, 0, "Features:");
             GSList *feature = caps->features;
             while (feature) {
-                win_printf(console, '-', 0, NULL, 0, 0, "", " %s", feature->data);
+                win_printf_line(console, THEME_DEFAULT, " %s", feature->data);
                 feature = g_slist_next(feature);
             }
         }
@@ -863,7 +863,7 @@ cons_show_account_list(gchar **accounts)
                     (g_strcmp0(session_get_account_name(), accounts[i]) == 0)) {
                 resource_presence_t presence = accounts_get_last_presence(accounts[i]);
                 theme_item_t presence_colour = theme_main_presence_attrs(string_from_resource_presence(presence));
-                win_printf(console, '-', 0, NULL, 0, presence_colour, "", "%s", accounts[i]);
+                win_printf_line(console, presence_colour, "%s", accounts[i]);
             } else {
                 cons_show(accounts[i]);
             }
@@ -2078,7 +2078,7 @@ cons_navigation_help(void)
 {
     ProfWin *console = wins_get_console();
     cons_show("");
-    win_printf(console, '-', 0, NULL, 0, THEME_WHITE_BOLD, "", "Navigation");
+    win_printf_line(console, THEME_WHITE_BOLD, "Navigation");
     cons_show("Alt-1..Alt-0, F1..F10    : Choose window.");
     cons_show("Alt-LEFT, Alt-RIGHT      : Previous/next chat window.");
     cons_show("PAGEUP, PAGEDOWN         : Page the main window.");
@@ -2350,23 +2350,23 @@ _cons_splash_logo(void)
     ProfWin *console = wins_get_console();
     win_println(console, 0, "Welcome to");
 
-    win_printf(console, '-', 0, NULL, 0, THEME_SPLASH, "", "                   ___            _           ");
-    win_printf(console, '-', 0, NULL, 0, THEME_SPLASH, "", "                  / __)          (_)_         ");
-    win_printf(console, '-', 0, NULL, 0, THEME_SPLASH, "", " ____   ____ ___ | |__ ____ ____  _| |_ _   _ ");
-    win_printf(console, '-', 0, NULL, 0, THEME_SPLASH, "", "|  _ \\ / ___) _ \\|  __) _  |  _ \\| |  _) | | |");
-    win_printf(console, '-', 0, NULL, 0, THEME_SPLASH, "", "| | | | |  | |_| | | ( ( | | | | | | |_| |_| |");
-    win_printf(console, '-', 0, NULL, 0, THEME_SPLASH, "", "| ||_/|_|   \\___/|_|  \\_||_|_| |_|_|\\___)__  |");
-    win_printf(console, '-', 0, NULL, 0, THEME_SPLASH, "", "|_|                                    (____/ ");
-    win_printf(console, '-', 0, NULL, 0, THEME_SPLASH, "", "");
+    win_printf_line(console, THEME_SPLASH, "                   ___            _           ");
+    win_printf_line(console, THEME_SPLASH, "                  / __)          (_)_         ");
+    win_printf_line(console, THEME_SPLASH, " ____   ____ ___ | |__ ____ ____  _| |_ _   _ ");
+    win_printf_line(console, THEME_SPLASH, "|  _ \\ / ___) _ \\|  __) _  |  _ \\| |  _) | | |");
+    win_printf_line(console, THEME_SPLASH, "| | | | |  | |_| | | ( ( | | | | | | |_| |_| |");
+    win_printf_line(console, THEME_SPLASH, "| ||_/|_|   \\___/|_|  \\_||_|_| |_|_|\\___)__  |");
+    win_printf_line(console, THEME_SPLASH, "|_|                                    (____/ ");
+    win_printf_line(console, THEME_SPLASH, "");
 
     if (strcmp(PACKAGE_STATUS, "development") == 0) {
 #ifdef HAVE_GIT_VERSION
-        win_printf(console, '-', 0, NULL, 0, 0, "", "Version %sdev.%s.%s", PACKAGE_VERSION, PROF_GIT_BRANCH, PROF_GIT_REVISION);
+        win_printf_line(console, THEME_DEFAULT, "Version %sdev.%s.%s", PACKAGE_VERSION, PROF_GIT_BRANCH, PROF_GIT_REVISION);
 #else
-        win_printf(console, '-', 0, NULL, 0, 0, "", "Version %sdev", PACKAGE_VERSION);
+        win_printf_line(console, THEME_DEFAULT, "Version %sdev", PACKAGE_VERSION);
 #endif
     } else {
-        win_printf(console, '-', 0, NULL, 0, 0, "", "Version %s", PACKAGE_VERSION);
+        win_printf_line(console, THEME_DEFAULT, "Version %s", PACKAGE_VERSION);
     }
 }
 

@@ -405,7 +405,7 @@ _chatwin_history(ProfChatWin *chatwin, const char *const contact)
                 g_date_time_unref(timestamp);
             // header
             } else {
-                win_printf((ProfWin*)chatwin, '-', 0, NULL, 0, 0, "", "%s", curr->data);
+                win_printf_line((ProfWin*)chatwin, THEME_DEFAULT, "%s", curr->data);
             }
             curr = g_slist_next(curr);
         }

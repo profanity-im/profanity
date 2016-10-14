@@ -815,7 +815,7 @@ win_show_occupant_info(ProfWin *window, const char *const room, Occupant *occupa
         caps_destroy(caps);
     }
 
-    win_printf(window, '-', 0, NULL, 0, 0, "", "");
+    win_printf_line(window, THEME_DEFAULT, "");
 }
 
 void
@@ -829,7 +829,7 @@ win_show_info(ProfWin *window, PContact contact)
 
     theme_item_t presence_colour = theme_main_presence_attrs(presence);
 
-    win_printf(window, '-', 0, NULL, 0, 0, "", "");
+    win_printf_line(window, THEME_DEFAULT, "");
     win_printf(window, '-', 0, NULL, NO_EOL, presence_colour, "", "%s", barejid);
     if (name) {
         win_printf(window, '-', 0, NULL, NO_DATE | NO_EOL, presence_colour, "", " (%s)", name);
@@ -837,7 +837,7 @@ win_show_info(ProfWin *window, PContact contact)
     win_printf(window, '-', 0, NULL, NO_DATE, 0, "", ":");
 
     if (sub) {
-        win_printf(window, '-', 0, NULL, 0, 0, "", "Subscription: %s", sub);
+        win_printf_line(window, THEME_DEFAULT, "Subscription: %s", sub);
     }
 
     if (last_activity) {
@@ -851,10 +851,10 @@ win_show_info(ProfWin *window, PContact contact)
         int seconds = span / G_TIME_SPAN_SECOND;
 
         if (hours > 0) {
-          win_printf(window, '-', 0, NULL, 0, 0, "", "Last activity: %dh%dm%ds", hours, minutes, seconds);
+          win_printf_line(window, THEME_DEFAULT, "Last activity: %dh%dm%ds", hours, minutes, seconds);
         }
         else {
-          win_printf(window, '-', 0, NULL, 0, 0, "", "Last activity: %dm%ds", minutes, seconds);
+          win_printf_line(window, THEME_DEFAULT, "Last activity: %dm%ds", minutes, seconds);
         }
 
         g_date_time_unref(now);
@@ -863,7 +863,7 @@ win_show_info(ProfWin *window, PContact contact)
     GList *resources = p_contact_get_available_resources(contact);
     GList *ordered_resources = NULL;
     if (resources) {
-        win_printf(window, '-', 0, NULL, 0, 0, "", "Resources:");
+        win_printf_line(window, THEME_DEFAULT, "Resources:");
 
         // sort in order of availability
         GList *curr = resources;
