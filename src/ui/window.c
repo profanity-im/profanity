@@ -757,11 +757,11 @@ win_show_occupant_info(ProfWin *window, const char *const room, Occupant *occupa
     win_newline(window);
 
     if (occupant->jid) {
-        win_printf(window, '!', 0, NULL, 0, THEME_DEFAULT, "", "  Jid: %s", occupant->jid);
+        win_printf_line(window, THEME_DEFAULT, '!', "  Jid: %s", occupant->jid);
     }
 
-    win_printf(window, '!', 0, NULL, 0, THEME_DEFAULT, "", "  Affiliation: %s", occupant_affiliation);
-    win_printf(window, '!', 0, NULL, 0, THEME_DEFAULT, "", "  Role: %s", occupant_role);
+    win_printf_line(window, THEME_DEFAULT, '!', "  Affiliation: %s", occupant_affiliation);
+    win_printf_line(window, THEME_DEFAULT, '!', "  Role: %s", occupant_role);
 
     Jid *jidp = jid_create_from_bare_and_resource(room, occupant->nick);
     EntityCapabilities *caps = caps_lookup(jidp->fulljid);
@@ -1123,7 +1123,7 @@ win_vprintln_ch(ProfWin *window, char ch, const char *const message, ...)
     va_start(arg, message);
     GString *fmt_msg = g_string_new(NULL);
     g_string_vprintf(fmt_msg, message, arg);
-    win_printf(window, ch, 0, NULL, 0, THEME_DEFAULT, "", "%s", fmt_msg->str);
+    win_printf_line(window, THEME_DEFAULT, ch, "%s", fmt_msg->str);
     g_string_free(fmt_msg, TRUE);
     va_end(arg);
 }

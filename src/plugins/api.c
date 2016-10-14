@@ -368,7 +368,7 @@ api_win_show(const char *tag, const char *line)
     }
 
     ProfWin *window = (ProfWin*)pluginwin;
-    win_printf(window, '!', 0, NULL, 0, THEME_DEFAULT, "", "%s", line);
+    win_printf_line(window, THEME_DEFAULT, '!', "%s", line);
 
     return 1;
 }
@@ -393,7 +393,7 @@ api_win_show_themed(const char *tag, const char *const group, const char *const 
 
     theme_item_t themeitem = plugin_themes_get(group, key, def);
     ProfWin *window = (ProfWin*)pluginwin;
-    win_printf(window, '!', 0, NULL, 0, themeitem, "", "%s", line);
+    win_printf_line(window, themeitem, '!', "%s", line);
 
     return 1;
 }

@@ -96,9 +96,9 @@ chatwin_otr_secured(ProfChatWin *chatwin, gboolean trusted)
 
     ProfWin *window = (ProfWin*) chatwin;
     if (trusted) {
-        win_printf(window, '!', 0, NULL, 0, THEME_OTR_STARTED_TRUSTED, "", "OTR session started (trusted).");
+        win_printf_line(window, THEME_OTR_STARTED_TRUSTED, '!', "OTR session started (trusted).");
     } else {
-        win_printf(window, '!', 0, NULL, 0, THEME_OTR_STARTED_UNTRUSTED, "", "OTR session started (untrusted).");
+        win_printf_line(window, THEME_OTR_STARTED_UNTRUSTED, '!', "OTR session started (untrusted).");
     }
 
     if (wins_is_current(window)) {
@@ -125,7 +125,7 @@ chatwin_otr_unsecured(ProfChatWin *chatwin)
     chatwin->otr_is_trusted = FALSE;
 
     ProfWin *window = (ProfWin*)chatwin;
-    win_printf(window, '!', 0, NULL, 0, THEME_OTR_ENDED, "", "OTR session ended.");
+    win_printf_line(window, THEME_OTR_ENDED, '!', "OTR session ended.");
     if (wins_is_current(window)) {
         title_bar_switch();
     }
@@ -188,7 +188,7 @@ chatwin_otr_trust(ProfChatWin *chatwin)
     chatwin->otr_is_trusted = TRUE;
 
     ProfWin *window = (ProfWin*)chatwin;
-    win_printf(window, '!', 0, NULL, 0, THEME_OTR_TRUSTED, "", "OTR session trusted.");
+    win_printf_line(window, THEME_OTR_TRUSTED, '!', "OTR session trusted.");
     if (wins_is_current(window)) {
         title_bar_switch();
     }
@@ -203,7 +203,7 @@ chatwin_otr_untrust(ProfChatWin *chatwin)
     chatwin->otr_is_trusted = FALSE;
 
     ProfWin *window = (ProfWin*)chatwin;
-    win_printf(window, '!', 0, NULL, 0, THEME_OTR_UNTRUSTED, "", "OTR session untrusted.");
+    win_printf_line(window, THEME_OTR_UNTRUSTED, '!', "OTR session untrusted.");
     if (wins_is_current(window)) {
         title_bar_switch();
     }
@@ -227,7 +227,7 @@ chatwin_recipient_gone(ProfChatWin *chatwin)
         display_usr = chatwin->barejid;
     }
 
-    win_printf((ProfWin*)chatwin, '!', 0, NULL, 0, THEME_GONE, "", "<- %s has left the conversation.", display_usr);
+    win_printf_line((ProfWin*)chatwin, THEME_GONE, '!', "<- %s has left the conversation.", display_usr);
 }
 
 void
