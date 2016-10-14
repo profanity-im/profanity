@@ -815,7 +815,7 @@ win_show_occupant_info(ProfWin *window, const char *const room, Occupant *occupa
         caps_destroy(caps);
     }
 
-    win_printf_line(window, THEME_DEFAULT, "");
+    win_printf_line(window, THEME_DEFAULT, '-', "");
 }
 
 void
@@ -829,7 +829,7 @@ win_show_info(ProfWin *window, PContact contact)
 
     theme_item_t presence_colour = theme_main_presence_attrs(presence);
 
-    win_printf_line(window, THEME_DEFAULT, "");
+    win_printf_line(window, THEME_DEFAULT, '-', "");
     win_printf(window, '-', 0, NULL, NO_EOL, presence_colour, "", "%s", barejid);
     if (name) {
         win_printf(window, '-', 0, NULL, NO_DATE | NO_EOL, presence_colour, "", " (%s)", name);
@@ -837,7 +837,7 @@ win_show_info(ProfWin *window, PContact contact)
     win_printf(window, '-', 0, NULL, NO_DATE, THEME_DEFAULT, "", ":");
 
     if (sub) {
-        win_printf_line(window, THEME_DEFAULT, "Subscription: %s", sub);
+        win_printf_line(window, THEME_DEFAULT, '-', "Subscription: %s", sub);
     }
 
     if (last_activity) {
@@ -851,10 +851,10 @@ win_show_info(ProfWin *window, PContact contact)
         int seconds = span / G_TIME_SPAN_SECOND;
 
         if (hours > 0) {
-          win_printf_line(window, THEME_DEFAULT, "Last activity: %dh%dm%ds", hours, minutes, seconds);
+          win_printf_line(window, THEME_DEFAULT, '-', "Last activity: %dh%dm%ds", hours, minutes, seconds);
         }
         else {
-          win_printf_line(window, THEME_DEFAULT, "Last activity: %dm%ds", minutes, seconds);
+          win_printf_line(window, THEME_DEFAULT, '-', "Last activity: %dm%ds", minutes, seconds);
         }
 
         g_date_time_unref(now);
@@ -863,7 +863,7 @@ win_show_info(ProfWin *window, PContact contact)
     GList *resources = p_contact_get_available_resources(contact);
     GList *ordered_resources = NULL;
     if (resources) {
-        win_printf_line(window, THEME_DEFAULT, "Resources:");
+        win_printf_line(window, THEME_DEFAULT, '-', "Resources:");
 
         // sort in order of availability
         GList *curr = resources;
@@ -1038,7 +1038,7 @@ win_printf(ProfWin *window, const char show_char, int pad_indent, GDateTime *tim
 }
 
 void
-win_printf_line(ProfWin *window, theme_item_t theme_item, const char *const message, ...)
+win_printf_line(ProfWin *window, theme_item_t theme_item, const char ch, const char *const message, ...)
 {
     GDateTime *timestamp = g_date_time_new_now_local();
 
@@ -1047,9 +1047,9 @@ win_printf_line(ProfWin *window, theme_item_t theme_item, const char *const mess
     GString *fmt_msg = g_string_new(NULL);
     g_string_vprintf(fmt_msg, message, arg);
 
-    buffer_push(window->layout->buffer, '-', 0, timestamp, 0, theme_item, "", fmt_msg->str, NULL);
+    buffer_push(window->layout->buffer, ch, 0, timestamp, 0, theme_item, "", fmt_msg->str, NULL);
 
-    _win_print(window, '-', 0, timestamp, 0, theme_item, "", fmt_msg->str, NULL);
+    _win_print(window, ch, 0, timestamp, 0, theme_item, "", fmt_msg->str, NULL);
     inp_nonblocking(TRUE);
     g_date_time_unref(timestamp);
 

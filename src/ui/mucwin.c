@@ -154,7 +154,7 @@ mucwin_room_info_error(ProfMucWin *mucwin, const char *const error)
 
     ProfWin *window = (ProfWin*)mucwin;
     win_printf(window, '!', 0, NULL, 0, THEME_DEFAULT, "", "Room info request failed: %s", error);
-    win_printf_line(window, THEME_DEFAULT, "");
+    win_printf_line(window, THEME_DEFAULT, '-', "");
 }
 
 void
@@ -194,7 +194,7 @@ mucwin_room_disco_info(ProfMucWin *mucwin, GSList *identities, GSList *features)
             win_printf(window, '!', 0, NULL, 0, THEME_DEFAULT, "", "  %s", features->data);
             features = g_slist_next(features);
         }
-        win_printf_line(window, THEME_DEFAULT, "");
+        win_printf_line(window, THEME_DEFAULT, '-', "");
     }
 }
 
@@ -506,12 +506,12 @@ mucwin_requires_config(ProfMucWin *mucwin)
         ui_index = 0;
     }
 
-    win_printf_line(window, THEME_DEFAULT, "");
+    win_printf_line(window, THEME_DEFAULT, '-', "");
     win_printf(window, '!', 0, NULL, 0, THEME_ROOMINFO, "", "Room locked, requires configuration.");
     win_printf(window, '!', 0, NULL, 0, THEME_ROOMINFO, "", "Use '/room accept' to accept the defaults");
     win_printf(window, '!', 0, NULL, 0, THEME_ROOMINFO, "", "Use '/room destroy' to cancel and destroy the room");
     win_printf(window, '!', 0, NULL, 0, THEME_ROOMINFO, "", "Use '/room config' to edit the room configuration");
-    win_printf_line(window, THEME_DEFAULT, "");
+    win_printf_line(window, THEME_DEFAULT, '-', "");
 
     // currently in groupchat window
     if (wins_is_current(window)) {
@@ -643,7 +643,7 @@ mucwin_show_affiliation_list(ProfMucWin *mucwin, muc_affiliation_t affiliation)
             default:
                 break;
         }
-        win_printf_line(window, THEME_DEFAULT, "");
+        win_printf_line(window, THEME_DEFAULT, '-', "");
     } else {
         switch (affiliation) {
             case MUC_AFFILIATION_OWNER:
@@ -676,7 +676,7 @@ mucwin_show_affiliation_list(ProfMucWin *mucwin, muc_affiliation_t affiliation)
             curr_occupant = g_slist_next(curr_occupant);
         }
 
-        win_printf_line(window, THEME_DEFAULT, "");
+        win_printf_line(window, THEME_DEFAULT, '-', "");
     }
 }
 
@@ -741,7 +741,7 @@ mucwin_show_role_list(ProfMucWin *mucwin, muc_role_t role)
             default:
                 break;
         }
-        win_printf_line(window, THEME_DEFAULT, "");
+        win_printf_line(window, THEME_DEFAULT, '-', "");
     } else {
         switch (role) {
             case MUC_ROLE_MODERATOR:
@@ -771,7 +771,7 @@ mucwin_show_role_list(ProfMucWin *mucwin, muc_role_t role)
             curr_occupant = g_slist_next(curr_occupant);
         }
 
-        win_printf_line(window, THEME_DEFAULT, "");
+        win_printf_line(window, THEME_DEFAULT, '-', "");
     }
 }
 
@@ -807,7 +807,7 @@ mucwin_info(ProfMucWin *mucwin)
     win_printf(window, '!', 0, NULL, 0, THEME_DEFAULT, "", "Room: %s", mucwin->roomjid);
     win_printf(window, '!', 0, NULL, 0, THEME_DEFAULT, "", "Affiliation: %s", affiliation);
     win_printf(window, '!', 0, NULL, 0, THEME_DEFAULT, "", "Role: %s", role);
-    win_printf_line(window, THEME_DEFAULT, "");
+    win_printf_line(window, THEME_DEFAULT, '-', "");
 }
 
 void

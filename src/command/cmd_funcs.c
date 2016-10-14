@@ -1479,9 +1479,9 @@ _cmd_help_cmd_list(const char *const tag)
     cons_show("");
     ProfWin *console = wins_get_console();
     if (tag) {
-        win_printf_line(console, THEME_WHITE_BOLD, "%s commands", tag);
+        win_printf_line(console, THEME_WHITE_BOLD, '-', "%s commands", tag);
     } else {
-        win_printf_line(console, THEME_WHITE_BOLD, "All commands");
+        win_printf_line(console, THEME_WHITE_BOLD, '-', "All commands");
     }
 
     GList *ordered_commands = NULL;
@@ -3108,7 +3108,7 @@ cmd_status(ProfWin *window, const char *const command, gchar **args)
                 if (occupant) {
                     win_show_occupant(window, occupant);
                 } else {
-                    win_printf_line(window, THEME_DEFAULT, "No such participant \"%s\" in room.", usr);
+                    win_printf_line(window, THEME_DEFAULT, '-', "No such participant \"%s\" in room.", usr);
                 }
             } else {
                 ui_current_print_line("You must specify a nickname.");
@@ -4681,13 +4681,13 @@ cmd_tiny(ProfWin *window, const char *const command, gchar **args)
     }
 
     if (!tinyurl_valid(url)) {
-        win_printf_line(window, THEME_ERROR, "/tiny, badly formed URL: %s", url);
+        win_printf_line(window, THEME_ERROR, '-', "/tiny, badly formed URL: %s", url);
         return TRUE;
     }
 
     char *tiny = tinyurl_get(url);
     if (!tiny) {
-        win_printf_line(window, THEME_ERROR, "Couldn't create tinyurl.");
+        win_printf_line(window, THEME_ERROR, '-', "Couldn't create tinyurl.");
         return TRUE;
     }
 
