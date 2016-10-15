@@ -758,13 +758,6 @@ ui_current_print_formatted_line(const char show_char, int attrs, const char *con
 }
 
 void
-ui_current_error_line(const char *const msg)
-{
-    ProfWin *current = wins_get_current();
-    win_printf_line(current, THEME_ERROR, '-', "%s", msg);
-}
-
-void
 ui_print_system_msg_from_recipient(const char *const barejid, const char *message)
 {
     if (barejid == NULL || message == NULL)

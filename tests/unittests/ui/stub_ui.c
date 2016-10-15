@@ -125,8 +125,6 @@ void ui_current_print_formatted_line(const char show_char, int attrs, const char
     va_end(args);
 }
 
-void ui_current_error_line(const char * const msg) {}
-
 void ui_close_win(int index) {}
 
 int ui_win_unread(int index)
