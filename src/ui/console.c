@@ -113,7 +113,7 @@ cons_show_padded(int pad, const char *const msg, ...)
     va_start(arg, msg);
     GString *fmt_msg = g_string_new(NULL);
     g_string_vprintf(fmt_msg, msg, arg);
-    win_println(console, pad, fmt_msg->str);
+    win_println_indent(console, pad, fmt_msg->str);
     g_string_free(fmt_msg, TRUE);
     va_end(arg);
 }

@@ -363,7 +363,7 @@ void win_show_occupant(ProfWin *window, Occupant *occupant);
 void win_show_occupant_info(ProfWin *window, const char *const room, Occupant *occupant);
 void win_show_contact(ProfWin *window, PContact contact);
 void win_show_info(ProfWin *window, PContact contact);
-void win_println(ProfWin *window, int pad, const char *const message);
+void win_println_indent(ProfWin *window, int pad, const char *const message);
 void win_clear(ProfWin *window);
 char* win_to_string(ProfWin *window);
 

@@ -1110,7 +1110,7 @@ win_update_entry_theme(ProfWin *window, const char *const id, theme_item_t theme
 }
 
 void
-win_println(ProfWin *window, int pad, const char *const message)
+win_println_indent(ProfWin *window, int pad, const char *const message)
 {
     win_printf(window, '-', pad, NULL, 0, THEME_DEFAULT, "", "%s", message);
 }
