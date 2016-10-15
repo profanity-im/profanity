@@ -322,7 +322,7 @@ chatwin_outgoing_carbon(ProfChatWin *chatwin, const char *const message, prof_en
         enc_char = prefs_get_pgp_char();
     }
 
-    win_printf((ProfWin*)chatwin, enc_char, 0, NULL, 0, THEME_TEXT_ME, "me", "%s", message);
+    win_print_outgoing((ProfWin*)chatwin, enc_char, "%s", message);
     int num = wins_get_num((ProfWin*)chatwin);
     status_bar_active(num);
 }
