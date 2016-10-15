@@ -352,14 +352,14 @@ otr_on_message_send(ProfChatWin *chatwin, const char *const message, gboolean re
             free(id);
             return TRUE;
         } else {
-            ui_win_error_line((ProfWin*)chatwin, "Failed to encrypt and send message.");
+            win_println((ProfWin*)chatwin, THEME_ERROR, '-', "%s", "Failed to encrypt and send message.");
             return TRUE;
         }
     }
 
     // show error if not secure and policy always
     if (policy == PROF_OTRPOLICY_ALWAYS) {
-        ui_win_error_line((ProfWin*)chatwin, "Failed to send message. OTR policy set to: always");
+        win_println((ProfWin*)chatwin, THEME_ERROR, '-', "%s", "Failed to send message. OTR policy set to: always");
         return TRUE;
     }
 
