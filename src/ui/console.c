@@ -86,7 +86,7 @@ cons_debug(const char *const msg, ...)
         va_start(arg, msg);
         GString *fmt_msg = g_string_new(NULL);
         g_string_vprintf(fmt_msg, msg, arg);
-        win_println(console, 0, fmt_msg->str);
+        win_printf_line(console, THEME_DEFAULT, '-', "%s", fmt_msg->str);
         g_string_free(fmt_msg, TRUE);
         va_end(arg);
     }
@@ -100,7 +100,7 @@ cons_show(const char *const msg, ...)
     va_start(arg, msg);
     GString *fmt_msg = g_string_new(NULL);
     g_string_vprintf(fmt_msg, msg, arg);
-    win_println(console, 0, fmt_msg->str);
+    win_printf_line(console, THEME_DEFAULT, '-', "%s", fmt_msg->str);
     g_string_free(fmt_msg, TRUE);
     va_end(arg);
 }
@@ -138,7 +138,7 @@ cons_show_help(const char *const cmd, CommandHelp *help)
     cons_show("");
 
     win_printf_line(console, THEME_WHITE_BOLD, '-', "Description");
-    win_println(console, 0, help->desc);
+    win_printf_line(console, THEME_DEFAULT, '-', "%s", help->desc);
 
     int maxlen = 0;
     for (i = 0; help->args[i][0] != NULL; i++) {
@@ -427,13 +427,13 @@ cons_about(void)
     }
 
     win_printf_line(console, THEME_DEFAULT, '-', "Copyright (C) 2012 - 2016 James Booth <%s>.", PACKAGE_BUGREPORT);
-    win_println(console, 0, "License GPLv3+: GNU GPL version 3 or later <https://www.gnu.org/licenses/gpl.html>");
-    win_println(console, 0, "");
-    win_println(console, 0, "This is free software; you are free to change and redistribute it.");
-    win_println(console, 0, "There is NO WARRANTY, to the extent permitted by law.");
-    win_println(console, 0, "");
-    win_println(console, 0, "Type '/help' to show complete help.");
-    win_println(console, 0, "");
+    win_printf_line(console, THEME_DEFAULT, '-', "License GPLv3+: GNU GPL version 3 or later <https://www.gnu.org/licenses/gpl.html>");
+    win_printf_line(console, THEME_DEFAULT, '-', "");
+    win_printf_line(console, THEME_DEFAULT, '-', "This is free software; you are free to change and redistribute it.");
+    win_printf_line(console, THEME_DEFAULT, '-', "There is NO WARRANTY, to the extent permitted by law.");
+    win_printf_line(console, THEME_DEFAULT, '-', "");
+    win_printf_line(console, THEME_DEFAULT, '-', "Type '/help' to show complete help.");
+    win_printf_line(console, THEME_DEFAULT, '-', "");
 
     if (prefs_get_boolean(PREF_VERCHECK)) {
         cons_check_version(FALSE);
@@ -456,12 +456,12 @@ cons_check_version(gboolean not_available_msg)
         if (relase_valid) {
             if (release_is_new(latest_release)) {
                 win_printf_line(console, THEME_DEFAULT, '-', "A new version of Profanity is available: %s", latest_release);
-                win_println(console, 0, "Check <http://www.profanity.im> for details.");
-                win_println(console, 0, "");
+                win_printf_line(console, THEME_DEFAULT, '-', "Check <http://www.profanity.im> for details.");
+                win_printf_line(console, THEME_DEFAULT, '-', "");
             } else {
                 if (not_available_msg) {
-                    win_println(console, 0, "No new version available.");
-                    win_println(console, 0, "");
+                    win_printf_line(console, THEME_DEFAULT, '-', "No new version available.");
+                    win_printf_line(console, THEME_DEFAULT, '-', "");
                 }
             }
 
@@ -509,7 +509,7 @@ cons_show_wins(gboolean unread)
 
     GSList *curr = window_strings;
     while (curr) {
-        win_println(console, 0, curr->data);
+        win_printf_line(console, THEME_DEFAULT, '-', "%s", curr->data);
         curr = g_slist_next(curr);
     }
     g_slist_free_full(window_strings, free);
@@ -602,7 +602,7 @@ cons_show_caps(const char *const fulljid, resource_presence_t presence)
         }
 
         if (caps->features) {
-            win_println(console, 0, "Features:");
+            win_printf_line(console, THEME_DEFAULT, '-', "Features:");
             GSList *feature = caps->features;
             while (feature) {
                 win_printf_line(console, THEME_DEFAULT, '-', " %s", feature->data);
@@ -982,7 +982,7 @@ cons_show_account(ProfAccount *account)
 
         GList *curr = resources;
         if (curr) {
-            win_println(console, 0, "Resources:");
+            win_printf_line(console, THEME_DEFAULT, '-', "Resources:");
 
             // sort in order of availability
             while (curr) {
@@ -2348,7 +2348,7 @@ static void
 _cons_splash_logo(void)
 {
     ProfWin *console = wins_get_console();
-    win_println(console, 0, "Welcome to");
+    win_printf_line(console, THEME_DEFAULT, '-', "Welcome to");
 
     win_printf_line(console, THEME_SPLASH, '-', "                   ___            _           ");
     win_printf_line(console, THEME_SPLASH, '-', "                  / __)          (_)_         ");

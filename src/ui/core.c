@@ -739,7 +739,7 @@ ui_current_print_line(const char *const msg, ...)
     va_start(arg, msg);
     GString *fmt_msg = g_string_new(NULL);
     g_string_vprintf(fmt_msg, msg, arg);
-    win_println(window, 0, fmt_msg->str);
+    win_printf_line(window, THEME_DEFAULT, '-', "%s", fmt_msg->str);
     va_end(arg);
     g_string_free(fmt_msg, TRUE);
 }
@@ -1025,7 +1025,7 @@ ui_ask_pgp_passphrase(const char *hint, int prev_fail)
 {
     ProfWin *current = wins_get_current();
 
-    win_println(current, 0, "");
+    win_printf_line(current, THEME_DEFAULT, '-', "");
 
     if (prev_fail) {
         win_printf_line(current, THEME_DEFAULT, '!', "Incorrect passphrase");
@@ -1314,7 +1314,7 @@ ui_show_software_version(const char *const jid, const char *const  presence,
     }
 
     if (name || version || os) {
-        win_println(window, 0, "");
+        win_printf_line(window, THEME_DEFAULT, '-', "");
         theme_item_t presence_colour = theme_main_presence_attrs(presence);
         win_printf(window, '-', 0, NULL, NO_EOL, presence_colour, "", "%s", jid);
         win_printf(window, '-', 0, NULL, NO_DATE, 0, "", ":");

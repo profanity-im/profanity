@@ -83,7 +83,7 @@ mucconfwin_show_form_field(ProfMucConfWin *confwin, DataForm *form, char *tag)
     FormField *field = form_get_field_by_tag(form, tag);
     ProfWin *window = (ProfWin*)confwin;
     _mucconfwin_form_field(window, tag, field);
-    win_println(window, 0, "");
+    win_printf_line(window, THEME_DEFAULT, '-', "");
 }
 
 void

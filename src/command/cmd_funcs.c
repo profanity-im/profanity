@@ -3124,7 +3124,7 @@ cmd_status(ProfWin *window, const char *const command, gchar **args)
                 if (pcontact) {
                     win_show_contact(window, pcontact);
                 } else {
-                    win_println(window, 0, "Error getting contact info.");
+                    win_printf_line(window, THEME_DEFAULT, '-', "Error getting contact info.");
                 }
             }
             break;
@@ -3139,7 +3139,7 @@ cmd_status(ProfWin *window, const char *const command, gchar **args)
                 if (occupant) {
                     win_show_occupant(window, occupant);
                 } else {
-                    win_println(window, 0, "Error getting contact info.");
+                    win_printf_line(window, THEME_DEFAULT, '-', "Error getting contact info.");
                 }
                 jid_destroy(jid);
             }
@@ -3204,7 +3204,7 @@ cmd_info(ProfWin *window, const char *const command, gchar **args)
                 if (pcontact) {
                     win_show_info(window, pcontact);
                 } else {
-                    win_println(window, 0, "Error getting contact info.");
+                    win_printf_line(window, THEME_DEFAULT, '-', "Error getting contact info.");
                 }
             }
             break;
@@ -3219,7 +3219,7 @@ cmd_info(ProfWin *window, const char *const command, gchar **args)
                 if (occupant) {
                     win_show_occupant_info(window, jid->barejid, occupant);
                 } else {
-                    win_println(window, 0, "Error getting contact info.");
+                    win_printf_line(window, THEME_DEFAULT, '-', "Error getting contact info.");
                 }
                 jid_destroy(jid);
             }
@@ -3372,7 +3372,7 @@ cmd_software(ProfWin *window, const char *const command, gchar **args)
                     iq_send_software_version(fulljid->str);
                     g_string_free(fulljid, TRUE);
                 } else {
-                    win_println(window, 0, "Unknown resource for /software command.");
+                    win_printf_line(window, THEME_DEFAULT, '-', "Unknown resource for /software command.");
                 }
             }
             break;
@@ -5137,7 +5137,7 @@ cmd_notify(ProfWin *window, const char *const command, gchar **args)
     if (!args[0]) {
         ProfWin *current = wins_get_current();
         if (current->type == WIN_MUC) {
-            win_println(current, 0, "");
+            win_printf_line(current, THEME_DEFAULT, '-', "");
             ProfMucWin *mucwin = (ProfMucWin *)current;
 
             win_vprintln_ch(window, '!', "Notification settings for %s:", mucwin->roomjid);
@@ -5180,7 +5180,7 @@ cmd_notify(ProfWin *window, const char *const command, gchar **args)
                     win_vprintln_ch(window, '!', "  Triggers : OFF (global setting)");
                 }
             }
-            win_println(current, 0, "");
+            win_printf_line(current, THEME_DEFAULT, '-', "");
         } else {
             cons_show("");
             cons_notify_setting();

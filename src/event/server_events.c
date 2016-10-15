@@ -442,7 +442,7 @@ sv_ev_incoming_message(char *barejid, char *resource, char *message, char *pgp_m
 #ifdef HAVE_LIBGPGME
     if (pgp_message) {
         if (chatwin->is_otr) {
-            win_println((ProfWin*)chatwin, 0, "PGP encrypted message received whilst in OTR session.");
+            win_printf_line((ProfWin*)chatwin, THEME_DEFAULT, '-', "PGP encrypted message received whilst in OTR session.");
         } else { // PROF_ENC_NONE, PROF_ENC_PGP
             _sv_ev_incoming_pgp(chatwin, new_win, barejid, resource, message, pgp_message, timestamp);
         }
