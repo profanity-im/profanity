@@ -146,7 +146,7 @@ http_file_put(void *userdata)
     if (asprintf(&msg, "Uploading '%s': 0%%", upload->filename) == -1) {
         msg = strdup(FALLBACK_MSG);
     }
-    win_print_with_receipt(upload->window, '!', 0, NULL, 0, THEME_TEXT_ME, NULL, msg, upload->put_url);
+    win_print_http_upload(upload->window, msg, upload->put_url);
     free(msg);
 
     char *cert_path = prefs_get_string(PREF_TLS_CERTPATH);

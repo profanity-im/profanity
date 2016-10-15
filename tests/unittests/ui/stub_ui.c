@@ -125,9 +125,6 @@ void ui_current_print_formatted_line(const char show_char, int attrs, const char
     va_end(args);
 }
 
-void ui_current_error_line(const char * const msg) {}
-void ui_win_error_line(ProfWin *window, const char * const msg) {}
-
 void ui_close_win(int index) {}
 
 int ui_win_unread(int index)
@@ -520,8 +517,11 @@ void win_hide_subwin(ProfWin *window) {}
 void win_show_subwin(ProfWin *window) {}
 void win_refresh_without_subwin(ProfWin *window) {}
 void win_refresh_with_subwin(ProfWin *window) {}
-void win_print(ProfWin *window, const char show_char, int pad_indent, GDateTime *timestamp, int flags, theme_item_t theme_item, const char * const from, const char * const message) {}
-void win_vprint(ProfWin *window, const char show_char, int pad_indent, GDateTime *timestamp, int flags, theme_item_t theme_item, const char * const from, const char * const message, ...) {}
+void win_printf(ProfWin *window, const char show_char, int pad_indent, GDateTime *timestamp, int flags, theme_item_t theme_item, const char * const from, const char * const message, ...) {}
+void win_print(ProfWin *window, theme_item_t theme_item, const char ch, const char *const message, ...) {}
+void win_println(ProfWin *window, theme_item_t theme_item, const char ch, const char *const message, ...) {}
+void win_appendln(ProfWin *window, theme_item_t theme_item, const char *const message, ...) {}
+
 char* win_get_title(ProfWin *window)
 {
     return NULL;
@@ -530,10 +530,9 @@ void win_show_occupant(ProfWin *window, Occupant *occupant) {}
 void win_show_occupant_info(ProfWin *window, const char * const room, Occupant *occupant) {}
 void win_show_contact(ProfWin *window, PContact contact) {}
 void win_show_info(ProfWin *window, PContact contact) {}
-void win_println(ProfWin *window, int pad, const char * const message) {}
-void win_vprintln_ch(ProfWin *window, char ch, const char *const message, ...) {}
+void win_println_indent(ProfWin *window, int pad, const char * const message, ...) {}
 void win_clear(ProfWin *window) {}
-char* win_get_string(ProfWin *window)
+char* win_to_string(ProfWin *window)
 {
     return NULL;
 }
