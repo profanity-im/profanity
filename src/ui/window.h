@@ -59,6 +59,8 @@ void win_show_status_string(ProfWin *window, const char *const from,
     const char *const show, const char *const status,
     GDateTime *last_activity, const char *const pre,
     const char *const default_show);
+
+void win_print_outgoing(ProfWin *window, const char ch, const char *const message, ...);
 void win_print_incoming_message(ProfWin *window, GDateTime *timestamp,
     const char *const from, const char *const message, prof_enc_t enc_mode);
 

@@ -1009,6 +1009,26 @@ win_print_incoming_message(ProfWin *window, GDateTime *timestamp,
 }
 
 void
+win_print_outgoing(ProfWin *window, const char ch, const char *const message, ...)
+{
+    GDateTime *timestamp = g_date_time_new_now_local();
+
+    va_list arg;
+    va_start(arg, message);
+    GString *fmt_msg = g_string_new(NULL);
+    g_string_vprintf(fmt_msg, message, arg);
+
+    buffer_push(window->layout->buffer, ch, 0, timestamp, 0, THEME_TEXT_ME, "me", fmt_msg->str, NULL);
+
+    _win_print(window, ch, 0, timestamp, 0, THEME_TEXT_ME, "me", fmt_msg->str, NULL);
+    inp_nonblocking(TRUE);
+    g_date_time_unref(timestamp);
+
+    g_string_free(fmt_msg, TRUE);
+    va_end(arg);
+}
+
+void
 win_printf(ProfWin *window, const char show_char, int pad_indent, GDateTime *timestamp,
     int flags, theme_item_t theme_item, const char *const from, const char *const message, ...)
 {
