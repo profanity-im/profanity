@@ -5140,44 +5140,44 @@ cmd_notify(ProfWin *window, const char *const command, gchar **args)
             win_printf_line(current, THEME_DEFAULT, '-', "");
             ProfMucWin *mucwin = (ProfMucWin *)current;
 
-            win_vprintln_ch(window, '!', "Notification settings for %s:", mucwin->roomjid);
+            win_printf_line(window, THEME_DEFAULT, '!', "Notification settings for %s:", mucwin->roomjid);
             if (prefs_has_room_notify(mucwin->roomjid)) {
                 if (prefs_get_room_notify(mucwin->roomjid)) {
-                    win_vprintln_ch(window, '!', "  Message  : ON");
+                    win_printf_line(window, THEME_DEFAULT, '!', "  Message  : ON");
                 } else {
-                    win_vprintln_ch(window, '!', "  Message  : OFF");
+                    win_printf_line(window, THEME_DEFAULT, '!', "  Message  : OFF");
                 }
             } else {
                 if (prefs_get_boolean(PREF_NOTIFY_ROOM)) {
-                    win_vprintln_ch(window, '!', "  Message  : ON (global setting)");
+                    win_printf_line(window, THEME_DEFAULT, '!', "  Message  : ON (global setting)");
                 } else {
-                    win_vprintln_ch(window, '!', "  Message  : OFF (global setting)");
+                    win_printf_line(window, THEME_DEFAULT, '!', "  Message  : OFF (global setting)");
                 }
             }
             if (prefs_has_room_notify_mention(mucwin->roomjid)) {
                 if (prefs_get_room_notify_mention(mucwin->roomjid)) {
-                    win_vprintln_ch(window, '!', "  Mention  : ON");
+                    win_printf_line(window, THEME_DEFAULT, '!', "  Mention  : ON");
                 } else {
-                    win_vprintln_ch(window, '!', "  Mention  : OFF");
+                    win_printf_line(window, THEME_DEFAULT, '!', "  Mention  : OFF");
                 }
             } else {
                 if (prefs_get_boolean(PREF_NOTIFY_ROOM_MENTION)) {
-                    win_vprintln_ch(window, '!', "  Mention  : ON (global setting)");
+                    win_printf_line(window, THEME_DEFAULT, '!', "  Mention  : ON (global setting)");
                 } else {
-                    win_vprintln_ch(window, '!', "  Mention  : OFF (global setting)");
+                    win_printf_line(window, THEME_DEFAULT, '!', "  Mention  : OFF (global setting)");
                 }
             }
             if (prefs_has_room_notify_trigger(mucwin->roomjid)) {
                 if (prefs_get_room_notify_trigger(mucwin->roomjid)) {
-                    win_vprintln_ch(window, '!', "  Triggers : ON");
+                    win_printf_line(window, THEME_DEFAULT, '!', "  Triggers : ON");
                 } else {
-                    win_vprintln_ch(window, '!', "  Triggers : OFF");
+                    win_printf_line(window, THEME_DEFAULT, '!', "  Triggers : OFF");
                 }
             } else {
                 if (prefs_get_boolean(PREF_NOTIFY_ROOM_TRIGGER)) {
-                    win_vprintln_ch(window, '!', "  Triggers : ON (global setting)");
+                    win_printf_line(window, THEME_DEFAULT, '!', "  Triggers : ON (global setting)");
                 } else {
-                    win_vprintln_ch(window, '!', "  Triggers : OFF (global setting)");
+                    win_printf_line(window, THEME_DEFAULT, '!', "  Triggers : OFF (global setting)");
                 }
             }
             win_printf_line(current, THEME_DEFAULT, '-', "");
@@ -5394,7 +5394,7 @@ cmd_notify(ProfWin *window, const char *const command, gchar **args)
             } else {
                 ProfMucWin *mucwin = (ProfMucWin*)window;
                 prefs_set_room_notify(mucwin->roomjid, TRUE);
-                win_vprintln_ch(window, '!', "Notifications enabled for %s", mucwin->roomjid);
+                win_printf_line(window, THEME_DEFAULT, '!', "Notifications enabled for %s", mucwin->roomjid);
             }
         }
     } else if (g_strcmp0(args[0], "off") == 0) {
@@ -5409,7 +5409,7 @@ cmd_notify(ProfWin *window, const char *const command, gchar **args)
             } else {
                 ProfMucWin *mucwin = (ProfMucWin*)window;
                 prefs_set_room_notify(mucwin->roomjid, FALSE);
-                win_vprintln_ch(window, '!', "Notifications disabled for %s", mucwin->roomjid);
+                win_printf_line(window, THEME_DEFAULT, '!', "Notifications disabled for %s", mucwin->roomjid);
             }
         }
     } else if (g_strcmp0(args[0], "mention") == 0) {
@@ -5425,7 +5425,7 @@ cmd_notify(ProfWin *window, const char *const command, gchar **args)
                 } else {
                     ProfMucWin *mucwin = (ProfMucWin*)window;
                     prefs_set_room_notify_mention(mucwin->roomjid, TRUE);
-                    win_vprintln_ch(window, '!', "Mention notifications enabled for %s", mucwin->roomjid);
+                    win_printf_line(window, THEME_DEFAULT, '!', "Mention notifications enabled for %s", mucwin->roomjid);
                 }
             } else if (g_strcmp0(args[1], "off") == 0) {
                 ProfWin *window = wins_get_current();
@@ -5434,7 +5434,7 @@ cmd_notify(ProfWin *window, const char *const command, gchar **args)
                 } else {
                     ProfMucWin *mucwin = (ProfMucWin*)window;
                     prefs_set_room_notify_mention(mucwin->roomjid, FALSE);
-                    win_vprintln_ch(window, '!', "Mention notifications disabled for %s", mucwin->roomjid);
+                    win_printf_line(window, THEME_DEFAULT, '!', "Mention notifications disabled for %s", mucwin->roomjid);
                 }
             } else {
                 cons_bad_cmd_usage(command);
@@ -5453,7 +5453,7 @@ cmd_notify(ProfWin *window, const char *const command, gchar **args)
                 } else {
                     ProfMucWin *mucwin = (ProfMucWin*)window;
                     prefs_set_room_notify_trigger(mucwin->roomjid, TRUE);
-                    win_vprintln_ch(window, '!', "Custom trigger notifications enabled for %s", mucwin->roomjid);
+                    win_printf_line(window, THEME_DEFAULT, '!', "Custom trigger notifications enabled for %s", mucwin->roomjid);
                 }
             } else if (g_strcmp0(args[1], "off") == 0) {
                 ProfWin *window = wins_get_current();
@@ -5462,7 +5462,7 @@ cmd_notify(ProfWin *window, const char *const command, gchar **args)
                 } else {
                     ProfMucWin *mucwin = (ProfMucWin*)window;
                     prefs_set_room_notify_trigger(mucwin->roomjid, FALSE);
-                    win_vprintln_ch(window, '!', "Custom trigger notifications disabled for %s", mucwin->roomjid);
+                    win_printf_line(window, THEME_DEFAULT, '!', "Custom trigger notifications disabled for %s", mucwin->roomjid);
                 }
             } else {
                 cons_bad_cmd_usage(command);
@@ -5481,9 +5481,9 @@ cmd_notify(ProfWin *window, const char *const command, gchar **args)
                 ProfMucWin *mucwin = (ProfMucWin*)window;
                 gboolean res = prefs_reset_room_notify(mucwin->roomjid);
                 if (res) {
-                    win_vprintln_ch(window, '!', "Notification settings set to global defaults for %s", mucwin->roomjid);
+                    win_printf_line(window, THEME_DEFAULT, '!', "Notification settings set to global defaults for %s", mucwin->roomjid);
                 } else {
-                    win_vprintln_ch(window, '!', "No custom notification settings for %s", mucwin->roomjid);
+                    win_printf_line(window, THEME_DEFAULT, '!', "No custom notification settings for %s", mucwin->roomjid);
                 }
             }
         }

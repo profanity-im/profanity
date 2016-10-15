@@ -364,7 +364,6 @@ void win_show_occupant_info(ProfWin *window, const char *const room, Occupant *o
 void win_show_contact(ProfWin *window, PContact contact);
 void win_show_info(ProfWin *window, PContact contact);
 void win_println(ProfWin *window, int pad, const char *const message);
-void win_vprintln_ch(ProfWin *window, char ch, const char *const message, ...);
 void win_clear(ProfWin *window);
 char* win_to_string(ProfWin *window);
 
