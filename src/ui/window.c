@@ -683,10 +683,10 @@ win_show_occupant(ProfWin *window, Occupant *occupant)
     theme_item_t presence_colour = theme_main_presence_attrs(presence_str);
 
     win_print(window, presence_colour, '-', "%s", occupant->nick);
-    win_printf(window, '-', 0, NULL, NO_DATE | NO_EOL, presence_colour, "", " is %s", presence_str);
+    win_append(window, presence_colour, " is %s", presence_str);
 
     if (occupant->status) {
-        win_printf(window, '-', 0, NULL, NO_DATE | NO_EOL, presence_colour, "", ", \"%s\"", occupant->status);
+        win_append(window, presence_colour, ", \"%s\"", occupant->status);
     }
 
     win_appendln(window, presence_colour, "");
@@ -709,7 +709,7 @@ win_show_contact(ProfWin *window, PContact contact)
         win_print(window, presence_colour, '-', "%s", barejid);
     }
 
-    win_printf(window, '-', 0, NULL, NO_DATE | NO_EOL, presence_colour, "", " is %s", presence);
+    win_append(window, presence_colour, " is %s", presence);
 
     if (last_activity) {
         GDateTime *now = g_date_time_new_now_local();
@@ -723,15 +723,14 @@ win_show_contact(ProfWin *window, PContact contact)
         int seconds = span / G_TIME_SPAN_SECOND;
 
         if (hours > 0) {
-          win_printf(window, '-', 0, NULL, NO_DATE | NO_EOL, presence_colour, "", ", idle %dh%dm%ds", hours, minutes, seconds);
-        }
-        else {
-          win_printf(window, '-', 0, NULL, NO_DATE | NO_EOL, presence_colour, "", ", idle %dm%ds", minutes, seconds);
+            win_append(window, presence_colour, ", idle %dh%dm%ds", hours, minutes, seconds);
+        } else {
+            win_append(window, presence_colour, ", idle %dm%ds", minutes, seconds);
         }
     }
 
     if (status) {
-        win_printf(window, '-', 0, NULL, NO_DATE | NO_EOL, presence_colour, "", ", \"%s\"", p_contact_status(contact));
+        win_append(window, presence_colour, ", \"%s\"", p_contact_status(contact));
     }
 
     win_appendln(window, presence_colour, "");
@@ -747,10 +746,10 @@ win_show_occupant_info(ProfWin *window, const char *const room, Occupant *occupa
     theme_item_t presence_colour = theme_main_presence_attrs(presence_str);
 
     win_print(window, presence_colour, '!', "%s", occupant->nick);
-    win_printf(window, '!', 0, NULL, NO_DATE | NO_EOL, presence_colour, "", " is %s", presence_str);
+    win_append(window, presence_colour, " is %s", presence_str);
 
     if (occupant->status) {
-        win_printf(window, '!', 0, NULL, NO_DATE | NO_EOL, presence_colour, "", ", \"%s\"", occupant->status);
+        win_append(window, presence_colour, ", \"%s\"", occupant->status);
     }
 
     win_newline(window);
@@ -772,19 +771,19 @@ win_show_occupant_info(ProfWin *window, const char *const room, Occupant *occupa
             DiscoIdentity *identity = caps->identity;
             win_print(window, THEME_DEFAULT, '!', "  Identity: ");
             if (identity->name) {
-                win_printf(window, '!', 0, NULL, NO_DATE | NO_EOL, THEME_DEFAULT, "", "%s", identity->name);
+                win_append(window, THEME_DEFAULT, "%s", identity->name);
                 if (identity->category || identity->type) {
-                    win_printf(window, '-', 0, NULL, NO_DATE | NO_EOL, THEME_DEFAULT, "", " ");
+                    win_append(window, THEME_DEFAULT, " ");
                 }
             }
             if (identity->type) {
-                win_printf(window, '!', 0, NULL, NO_DATE | NO_EOL, THEME_DEFAULT, "", "%s", identity->type);
+                win_append(window, THEME_DEFAULT, "%s", identity->type);
                 if (identity->category) {
-                    win_printf(window, '!', 0, NULL, NO_DATE | NO_EOL, THEME_DEFAULT, "", " ");
+                    win_append(window, THEME_DEFAULT, " ");
                 }
             }
             if (identity->category) {
-                win_printf(window, '!', 0, NULL, NO_DATE | NO_EOL, THEME_DEFAULT, "", "%s", identity->category);
+                win_append(window, THEME_DEFAULT, "%s", identity->category);
             }
             win_newline(window);
         }
@@ -795,7 +794,7 @@ win_show_occupant_info(ProfWin *window, const char *const room, Occupant *occupa
                 win_print(window, THEME_DEFAULT, '!', "  Software: %s", software_version->software);
             }
             if (software_version->software_version) {
-                win_printf(window, '!', 0, NULL, NO_DATE | NO_EOL, THEME_DEFAULT, "", ", %s", software_version->software_version);
+                win_append(window, THEME_DEFAULT, ", %s", software_version->software_version);
             }
             if (software_version->software || software_version->software_version) {
                 win_newline(window);
@@ -804,7 +803,7 @@ win_show_occupant_info(ProfWin *window, const char *const room, Occupant *occupa
                 win_print(window, THEME_DEFAULT, '!', "  OS: %s", software_version->os);
             }
             if (software_version->os_version) {
-                win_printf(window, '!', 0, NULL, NO_DATE | NO_EOL, THEME_DEFAULT, "", ", %s", software_version->os_version);
+                win_append(window, THEME_DEFAULT, ", %s", software_version->os_version);
             }
             if (software_version->os || software_version->os_version) {
                 win_newline(window);
@@ -831,7 +830,7 @@ win_show_info(ProfWin *window, PContact contact)
     win_println(window, THEME_DEFAULT, '-', "");
     win_print(window, presence_colour, '-', "%s", barejid);
     if (name) {
-        win_printf(window, '-', 0, NULL, NO_DATE | NO_EOL, presence_colour, "", " (%s)", name);
+        win_append(window, presence_colour, " (%s)", name);
     }
     win_appendln(window, THEME_DEFAULT, ":");
 
@@ -882,7 +881,7 @@ win_show_info(ProfWin *window, PContact contact)
         theme_item_t presence_colour = theme_main_presence_attrs(resource_presence);
         win_print(window, presence_colour, '-', "  %s (%d), %s", resource->name, resource->priority, resource_presence);
         if (resource->status) {
-            win_printf(window, '-', 0, NULL, NO_DATE | NO_EOL, presence_colour, "", ", \"%s\"", resource->status);
+            win_append(window, presence_colour, ", \"%s\"", resource->status);
         }
         win_newline(window);
 
@@ -896,19 +895,19 @@ win_show_info(ProfWin *window, PContact contact)
                 DiscoIdentity *identity = caps->identity;
                 win_print(window, THEME_DEFAULT, '-', "    Identity: ");
                 if (identity->name) {
-                    win_printf(window, '-', 0, NULL, NO_DATE | NO_EOL, THEME_DEFAULT, "", "%s", identity->name);
+                    win_append(window, THEME_DEFAULT, "%s", identity->name);
                     if (identity->category || identity->type) {
-                        win_printf(window, '-', 0, NULL, NO_DATE | NO_EOL, THEME_DEFAULT, "", " ");
+                        win_append(window, THEME_DEFAULT, " ");
                     }
                 }
                 if (identity->type) {
-                    win_printf(window, '-', 0, NULL, NO_DATE | NO_EOL, THEME_DEFAULT, "", "%s", identity->type);
+                    win_append(window, THEME_DEFAULT, "%s", identity->type);
                     if (identity->category) {
-                        win_printf(window, '-', 0, NULL, NO_DATE | NO_EOL, THEME_DEFAULT, "", " ");
+                        win_append(window, THEME_DEFAULT, " ");
                     }
                 }
                 if (identity->category) {
-                    win_printf(window, '-', 0, NULL, NO_DATE | NO_EOL, THEME_DEFAULT, "", "%s", identity->category);
+                    win_append(window, THEME_DEFAULT, "%s", identity->category);
                 }
                 win_newline(window);
             }
@@ -919,7 +918,7 @@ win_show_info(ProfWin *window, PContact contact)
                     win_print(window, THEME_DEFAULT, '-', "    Software: %s", software_version->software);
                 }
                 if (software_version->software_version) {
-                    win_printf(window, '-', 0, NULL, NO_DATE | NO_EOL, THEME_DEFAULT, "", ", %s", software_version->software_version);
+                    win_append(window, THEME_DEFAULT, ", %s", software_version->software_version);
                 }
                 if (software_version->software || software_version->software_version) {
                     win_newline(window);
@@ -928,7 +927,7 @@ win_show_info(ProfWin *window, PContact contact)
                     win_print(window, THEME_DEFAULT, '-', "    OS: %s", software_version->os);
                 }
                 if (software_version->os_version) {
-                    win_printf(window, '-', 0, NULL, NO_DATE | NO_EOL, THEME_DEFAULT, "", ", %s", software_version->os_version);
+                    win_append(window, THEME_DEFAULT, ", %s", software_version->os_version);
                 }
                 if (software_version->os || software_version->os_version) {
                     win_newline(window);
@@ -962,9 +961,9 @@ win_show_status_string(ProfWin *window, const char *const from,
     win_print(window, presence_colour, '-', "%s %s", pre, from);
 
     if (show)
-        win_printf(window, '-', 0, NULL, NO_DATE | NO_EOL, presence_colour, "", " is %s", show);
+        win_append(window, presence_colour, " is %s", show);
     else
-        win_printf(window, '-', 0, NULL, NO_DATE | NO_EOL, presence_colour, "", " is %s", default_show);
+        win_append(window, presence_colour, " is %s", default_show);
 
     if (last_activity) {
         gchar *date_fmt = NULL;
@@ -973,13 +972,13 @@ win_show_status_string(ProfWin *window, const char *const from,
         prefs_free_string(time_pref);
         assert(date_fmt != NULL);
 
-        win_printf(window, '-', 0, NULL, NO_DATE | NO_EOL, presence_colour, "", ", last activity: %s", date_fmt);
+        win_append(window, presence_colour, ", last activity: %s", date_fmt);
 
         g_free(date_fmt);
     }
 
     if (status)
-        win_printf(window, '-', 0, NULL, NO_DATE | NO_EOL, presence_colour, "", ", \"%s\"", status);
+        win_append(window, presence_colour, ", \"%s\"", status);
 
     win_appendln(window, presence_colour, "");
 }
@@ -1075,6 +1074,26 @@ win_println(ProfWin *window, theme_item_t theme_item, const char ch, const char 
 }
 
 void
+win_append(ProfWin *window, theme_item_t theme_item, const char *const message, ...)
+{
+    GDateTime *timestamp = g_date_time_new_now_local();
+
+    va_list arg;
+    va_start(arg, message);
+    GString *fmt_msg = g_string_new(NULL);
+    g_string_vprintf(fmt_msg, message, arg);
+
+    buffer_push(window->layout->buffer, '-', 0, timestamp, NO_EOL, theme_item, "", fmt_msg->str, NULL);
+
+    _win_print(window, '-', 0, timestamp, NO_DATE | NO_EOL, theme_item, "", fmt_msg->str, NULL);
+    inp_nonblocking(TRUE);
+    g_date_time_unref(timestamp);
+
+    g_string_free(fmt_msg, TRUE);
+    va_end(arg);
+}
+
+void
 win_appendln(ProfWin *window, theme_item_t theme_item, const char *const message, ...)
 {
     GDateTime *timestamp = g_date_time_new_now_local();
@@ -1092,8 +1111,8 @@ win_appendln(ProfWin *window, theme_item_t theme_item, const char *const message
 
     g_string_free(fmt_msg, TRUE);
     va_end(arg);
-
 }
+
 void
 win_print_http_upload(ProfWin *window, const char *const message, char *url)
 {

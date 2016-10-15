@@ -53,10 +53,10 @@ mucwin_role_change(ProfMucWin *mucwin, const char *const role, const char *const
     ProfWin *window = (ProfWin*)mucwin;
     win_print(window, THEME_ROOMINFO, '!', "Your role has been changed to: %s", role);
     if (actor) {
-        win_printf(window, '!', 0, NULL, NO_DATE | NO_EOL, THEME_ROOMINFO, "", ", by: %s", actor);
+        win_append(window, THEME_ROOMINFO, ", by: %s", actor);
     }
     if (reason) {
-        win_printf(window, '!', 0, NULL, NO_DATE | NO_EOL, THEME_ROOMINFO, "", ", reason: %s", reason);
+        win_append(window, THEME_ROOMINFO, ", reason: %s", reason);
     }
     win_appendln(window, THEME_ROOMINFO, "");
 }
@@ -70,10 +70,10 @@ mucwin_affiliation_change(ProfMucWin *mucwin, const char *const affiliation, con
     ProfWin *window = (ProfWin*)mucwin;
     win_print(window, THEME_ROOMINFO, '!', "Your affiliation has been changed to: %s", affiliation);
     if (actor) {
-        win_printf(window, '!', 0, NULL, NO_DATE | NO_EOL, THEME_ROOMINFO, "", ", by: %s", actor);
+        win_append(window, THEME_ROOMINFO, ", by: %s", actor);
     }
     if (reason) {
-        win_printf(window, '!', 0, NULL, NO_DATE | NO_EOL, THEME_ROOMINFO, "", ", reason: %s", reason);
+        win_append(window, THEME_ROOMINFO, ", reason: %s", reason);
     }
     win_appendln(window, THEME_ROOMINFO, "");
 }
@@ -87,10 +87,10 @@ mucwin_role_and_affiliation_change(ProfMucWin *mucwin, const char *const role, c
     ProfWin *window = (ProfWin*)mucwin;
     win_print(window, THEME_ROOMINFO, '!', "Your role and affiliation have been changed, role: %s, affiliation: %s", role, affiliation);
     if (actor) {
-        win_printf(window, '!', 0, NULL, NO_DATE | NO_EOL, THEME_ROOMINFO, "", ", by: %s", actor);
+        win_append(window, THEME_ROOMINFO, ", by: %s", actor);
     }
     if (reason) {
-        win_printf(window, '!', 0, NULL, NO_DATE | NO_EOL, THEME_ROOMINFO, "", ", reason: %s", reason);
+        win_append(window, THEME_ROOMINFO, ", reason: %s", reason);
     }
     win_appendln(window, THEME_ROOMINFO, "");
 }
@@ -105,10 +105,10 @@ mucwin_occupant_role_change(ProfMucWin *mucwin, const char *const nick, const ch
     ProfWin *window = (ProfWin*)mucwin;
     win_print(window, THEME_ROOMINFO, '!', "%s's role has been changed to: %s", nick, role);
     if (actor) {
-        win_printf(window, '!', 0, NULL, NO_DATE | NO_EOL, THEME_ROOMINFO, "", ", by: %s", actor);
+        win_append(window, THEME_ROOMINFO, ", by: %s", actor);
     }
     if (reason) {
-        win_printf(window, '!', 0, NULL, NO_DATE | NO_EOL, THEME_ROOMINFO, "", ", reason: %s", reason);
+        win_append(window, THEME_ROOMINFO, ", reason: %s", reason);
     }
     win_appendln(window, THEME_ROOMINFO, "");
 }
@@ -122,10 +122,10 @@ mucwin_occupant_affiliation_change(ProfMucWin *mucwin, const char *const nick, c
     ProfWin *window = (ProfWin*)mucwin;
     win_print(window, THEME_ROOMINFO, '!', "%s's affiliation has been changed to: %s", nick, affiliation);
     if (actor) {
-        win_printf(window, '!', 0, NULL, NO_DATE | NO_EOL, THEME_ROOMINFO, "", ", by: %s", actor);
+        win_append(window, THEME_ROOMINFO, ", by: %s", actor);
     }
     if (reason) {
-        win_printf(window, '!', 0, NULL, NO_DATE | NO_EOL, THEME_ROOMINFO, "", ", reason: %s", reason);
+        win_append(window, THEME_ROOMINFO, ", reason: %s", reason);
     }
     win_appendln(window, THEME_ROOMINFO, "");
 }
@@ -139,10 +139,10 @@ mucwin_occupant_role_and_affiliation_change(ProfMucWin *mucwin, const char *cons
     ProfWin *window = (ProfWin*)mucwin;
     win_print(window, THEME_ROOMINFO, '!', "%s's role and affiliation have been changed, role: %s, affiliation: %s", nick, role, affiliation);
     if (actor) {
-        win_printf(window, '!', 0, NULL, NO_DATE | NO_EOL, THEME_ROOMINFO, "", ", by: %s", actor);
+        win_append(window, THEME_ROOMINFO, ", by: %s", actor);
     }
     if (reason) {
-        win_printf(window, '!', 0, NULL, NO_DATE | NO_EOL, THEME_ROOMINFO, "", ", reason: %s", reason);
+        win_append(window, THEME_ROOMINFO, ", reason: %s", reason);
     }
     win_appendln(window, THEME_ROOMINFO, "");
 }
@@ -223,10 +223,10 @@ mucwin_roster(ProfMucWin *mucwin, GList *roster, const char *const presence)
             const char *presence_str = string_from_resource_presence(occupant->presence);
 
             theme_item_t presence_colour = theme_main_presence_attrs(presence_str);
-            win_printf(window, '!', 0, NULL, NO_DATE | NO_EOL, presence_colour, "", "%s", occupant->nick);
+            win_append(window, presence_colour, "%s", occupant->nick);
 
             if (roster->next) {
-                win_printf(window, '!', 0, NULL, NO_DATE | NO_EOL, THEME_DEFAULT, "", ", ");
+                win_append(window, THEME_DEFAULT, ", ");
             }
 
             roster = g_list_next(roster);
@@ -298,10 +298,10 @@ mucwin_occupant_online(ProfMucWin *mucwin, const char *const nick, const char *c
     win_print(window, THEME_ONLINE, '!', "-> %s has joined the room", nick);
     if (prefs_get_boolean(PREF_MUC_PRIVILEGES)) {
         if (role) {
-            win_printf(window, '!', 0, NULL, NO_DATE | NO_EOL, THEME_ONLINE, "", ", role: %s", role);
+            win_append(window, THEME_ONLINE, ", role: %s", role);
         }
         if (affiliation) {
-            win_printf(window, '!', 0, NULL, NO_DATE | NO_EOL, THEME_ONLINE, "", ", affiliation: %s", affiliation);
+            win_append(window, THEME_ONLINE, ", affiliation: %s", affiliation);
         }
     }
     win_appendln(window, THEME_ROOMINFO, "");

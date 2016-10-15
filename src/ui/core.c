@@ -794,10 +794,10 @@ ui_room_join(const char *const roomjid, gboolean focus)
         char *role = muc_role_str(roomjid);
         char *affiliation = muc_affiliation_str(roomjid);
         if (role) {
-            win_printf(window, '!', 0, NULL, NO_DATE | NO_EOL, THEME_ROOMINFO, "", ", role: %s", role);
+            win_append(window, THEME_ROOMINFO, ", role: %s", role);
         }
         if (affiliation) {
-            win_printf(window, '!', 0, NULL, NO_DATE | NO_EOL, THEME_ROOMINFO, "", ", affiliation: %s", affiliation);
+            win_append(window, THEME_ROOMINFO, ", affiliation: %s", affiliation);
         }
     }
     win_appendln(window, THEME_ROOMINFO, "");

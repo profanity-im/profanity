@@ -355,12 +355,17 @@ void win_hide_subwin(ProfWin *window);
 void win_show_subwin(ProfWin *window);
 void win_refresh_without_subwin(ProfWin *window);
 void win_refresh_with_subwin(ProfWin *window);
+
 void win_printf(ProfWin *window, const char show_char, int pad_indent, GDateTime *timestamp, int flags,
     theme_item_t theme_item, const char *const from, const char *const message, ...);
+
 void win_print(ProfWin *window, theme_item_t theme_item, const char ch, const char *const message, ...);
 void win_println(ProfWin *window, theme_item_t theme_item, const char ch, const char *const message, ...);
-void win_appendln(ProfWin *window, theme_item_t theme_item, const char *const message, ...);
 void win_println_indent(ProfWin *window, int pad, const char *const message);
+
+void win_append(ProfWin *window, theme_item_t theme_item, const char *const message, ...);
+void win_appendln(ProfWin *window, theme_item_t theme_item, const char *const message, ...);
+
 char* win_get_title(ProfWin *window);
 void win_show_occupant(ProfWin *window, Occupant *occupant);
 void win_show_occupant_info(ProfWin *window, const char *const room, Occupant *occupant);

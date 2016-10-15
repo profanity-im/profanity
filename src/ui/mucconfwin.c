@@ -203,11 +203,11 @@ static void
 _mucconfwin_form_field(ProfWin *window, char *tag, FormField *field)
 {
     win_print(window, THEME_AWAY, '-', "[%s] ", tag);
-    win_printf(window, '-', 0, NULL, NO_EOL | NO_DATE, THEME_DEFAULT, "", "%s", field->label);
+    win_append(window, THEME_DEFAULT, "%s", field->label);
     if (field->required) {
-        win_printf(window, '-', 0, NULL, NO_DATE | NO_EOL, THEME_DEFAULT, "", " (required): ");
+        win_append(window, THEME_DEFAULT, " (required): ");
     } else {
-        win_printf(window, '-', 0, NULL, NO_DATE | NO_EOL, THEME_DEFAULT, "", ": ");
+        win_append(window, THEME_DEFAULT, ": ");
     }
 
     GSList *values = field->values;
@@ -221,9 +221,9 @@ _mucconfwin_form_field(ProfWin *window, char *tag, FormField *field)
             char *value = curr_value->data;
             if (value) {
                 if (g_strcmp0(field->var, "muc#roomconfig_roomsecret") == 0) {
-                    win_printf(window, '-', 0, NULL, NO_DATE | NO_EOL, THEME_ONLINE, "", "[hidden]");
+                    win_append(window, THEME_ONLINE, "[hidden]");
                 } else {
-                    win_printf(window, '-', 0, NULL, NO_DATE | NO_EOL, THEME_ONLINE, "", "%s", value);
+                    win_append(window, THEME_ONLINE, "%s", value);
                 }
             }
         }
@@ -233,7 +233,7 @@ _mucconfwin_form_field(ProfWin *window, char *tag, FormField *field)
         if (curr_value) {
             char *value = curr_value->data;
             if (value) {
-                win_printf(window, '-', 0, NULL, NO_DATE | NO_EOL, THEME_ONLINE, "", "[hidden]");
+                win_append(window, THEME_ONLINE, "[hidden]");
             }
         }
         win_newline(window);
@@ -303,7 +303,7 @@ _mucconfwin_form_field(ProfWin *window, char *tag, FormField *field)
         if (curr_value) {
             char *value = curr_value->data;
             if (value) {
-                win_printf(window, '-', 0, NULL, NO_DATE | NO_EOL, THEME_ONLINE, "", "%s", value);
+                win_append(window, THEME_ONLINE, "%s", value);
             }
         }
         win_newline(window);
@@ -320,7 +320,7 @@ _mucconfwin_form_field(ProfWin *window, char *tag, FormField *field)
         if (curr_value) {
             char *value = curr_value->data;
             if (value) {
-                win_printf(window, '-', 0, NULL, NO_DATE | NO_EOL, THEME_DEFAULT, "", "%s", value);
+                win_append(window, THEME_DEFAULT, "%s", value);
             }
         }
         win_newline(window);
