@@ -85,7 +85,7 @@ api_cons_show_themed(const char *const group, const char *const key, const char 
     char *parsed = str_replace(message, "\r\n", "\n");
     theme_item_t themeitem = plugin_themes_get(group, key, def);
     ProfWin *console = wins_get_console();
-    win_printf_line(console, themeitem, '-', "%s", parsed);
+    win_println(console, themeitem, '-', "%s", parsed);
 
     free(parsed);
 
@@ -368,7 +368,7 @@ api_win_show(const char *tag, const char *line)
     }
 
     ProfWin *window = (ProfWin*)pluginwin;
-    win_printf_line(window, THEME_DEFAULT, '!', "%s", line);
+    win_println(window, THEME_DEFAULT, '!', "%s", line);
 
     return 1;
 }
@@ -393,7 +393,7 @@ api_win_show_themed(const char *tag, const char *const group, const char *const 
 
     theme_item_t themeitem = plugin_themes_get(group, key, def);
     ProfWin *window = (ProfWin*)pluginwin;
-    win_printf_line(window, themeitem, '!', "%s", line);
+    win_println(window, themeitem, '!', "%s", line);
 
     return 1;
 }

@@ -280,7 +280,7 @@ wins_private_nick_change(const char *const roomjid, const char *const oldnick, c
 
         Jid *newjid = jid_create_from_bare_and_resource(roomjid, newnick);
         privwin->fulljid = strdup(newjid->fulljid);
-        win_printf_line((ProfWin*)privwin, THEME_THEM, '!', "** %s is now known as %s.", oldjid->resourcepart, newjid->resourcepart);
+        win_println((ProfWin*)privwin, THEME_THEM, '!', "** %s is now known as %s.", oldjid->resourcepart, newjid->resourcepart);
 
         autocomplete_remove(wins_ac, oldjid->fulljid);
         autocomplete_remove(wins_close_ac, oldjid->fulljid);
@@ -835,7 +835,7 @@ wins_lost_connection(void)
     while (curr) {
         ProfWin *window = curr->data;
         if (window->type != WIN_CONSOLE) {
-            win_printf_line(window, THEME_ERROR, '-', "Lost connection.");
+            win_println(window, THEME_ERROR, '-', "Lost connection.");
 
             // if current win, set current_win_dirty
             if (wins_is_current(window)) {

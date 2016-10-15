@@ -96,9 +96,9 @@ chatwin_otr_secured(ProfChatWin *chatwin, gboolean trusted)
 
     ProfWin *window = (ProfWin*) chatwin;
     if (trusted) {
-        win_printf_line(window, THEME_OTR_STARTED_TRUSTED, '!', "OTR session started (trusted).");
+        win_println(window, THEME_OTR_STARTED_TRUSTED, '!', "OTR session started (trusted).");
     } else {
-        win_printf_line(window, THEME_OTR_STARTED_UNTRUSTED, '!', "OTR session started (untrusted).");
+        win_println(window, THEME_OTR_STARTED_UNTRUSTED, '!', "OTR session started (untrusted).");
     }
 
     if (wins_is_current(window)) {
@@ -125,7 +125,7 @@ chatwin_otr_unsecured(ProfChatWin *chatwin)
     chatwin->otr_is_trusted = FALSE;
 
     ProfWin *window = (ProfWin*)chatwin;
-    win_printf_line(window, THEME_OTR_ENDED, '!', "OTR session ended.");
+    win_println(window, THEME_OTR_ENDED, '!', "OTR session ended.");
     if (wins_is_current(window)) {
         title_bar_switch();
     }
@@ -138,41 +138,41 @@ chatwin_otr_smp_event(ProfChatWin *chatwin, prof_otr_smp_event_t event, void *da
 
     switch (event) {
         case PROF_OTR_SMP_INIT:
-            win_printf_line((ProfWin*)chatwin, THEME_DEFAULT, '!',
+            win_println((ProfWin*)chatwin, THEME_DEFAULT, '!',
                 "%s wants to authenticate your identity, use '/otr secret <secret>'.", chatwin->barejid);
             break;
         case PROF_OTR_SMP_INIT_Q:
-            win_printf_line((ProfWin*)chatwin, THEME_DEFAULT, '!',
+            win_println((ProfWin*)chatwin, THEME_DEFAULT, '!',
                 "%s wants to authenticate your identity with the following question:", chatwin->barejid);
-            win_printf_line((ProfWin*)chatwin, THEME_DEFAULT, '!', "  %s", (char*)data);
-            win_printf_line((ProfWin*)chatwin, THEME_DEFAULT, '!', "use '/otr answer <answer>'.");
+            win_println((ProfWin*)chatwin, THEME_DEFAULT, '!', "  %s", (char*)data);
+            win_println((ProfWin*)chatwin, THEME_DEFAULT, '!', "use '/otr answer <answer>'.");
             break;
         case PROF_OTR_SMP_SENDER_FAIL:
-            win_printf_line((ProfWin*)chatwin, THEME_DEFAULT, '!',
+            win_println((ProfWin*)chatwin, THEME_DEFAULT, '!',
                 "Authentication failed, the secret you entered does not match the secret entered by %s.",
                 chatwin->barejid);
             break;
         case PROF_OTR_SMP_RECEIVER_FAIL:
-            win_printf_line((ProfWin*)chatwin, THEME_DEFAULT, '!',
+            win_println((ProfWin*)chatwin, THEME_DEFAULT, '!',
                 "Authentication failed, the secret entered by %s does not match yours.", chatwin->barejid);
             break;
         case PROF_OTR_SMP_ABORT:
-            win_printf_line((ProfWin*)chatwin, THEME_DEFAULT, '!', "SMP session aborted.");
+            win_println((ProfWin*)chatwin, THEME_DEFAULT, '!', "SMP session aborted.");
             break;
         case PROF_OTR_SMP_SUCCESS:
-            win_printf_line((ProfWin*)chatwin, THEME_DEFAULT, '!', "Authentication successful.");
+            win_println((ProfWin*)chatwin, THEME_DEFAULT, '!', "Authentication successful.");
             break;
         case PROF_OTR_SMP_SUCCESS_Q:
-            win_printf_line((ProfWin*)chatwin, THEME_DEFAULT, '!', "%s successfully authenticated you.", chatwin->barejid);
+            win_println((ProfWin*)chatwin, THEME_DEFAULT, '!', "%s successfully authenticated you.", chatwin->barejid);
             break;
         case PROF_OTR_SMP_FAIL_Q:
-            win_printf_line((ProfWin*)chatwin, THEME_DEFAULT, '!', "%s failed to authenticate you.", chatwin->barejid);
+            win_println((ProfWin*)chatwin, THEME_DEFAULT, '!', "%s failed to authenticate you.", chatwin->barejid);
             break;
         case PROF_OTR_SMP_AUTH:
-            win_printf_line((ProfWin*)chatwin, THEME_DEFAULT, '!', "Authenticating %s...", chatwin->barejid);
+            win_println((ProfWin*)chatwin, THEME_DEFAULT, '!', "Authenticating %s...", chatwin->barejid);
             break;
         case PROF_OTR_SMP_AUTH_WAIT:
-            win_printf_line((ProfWin*)chatwin, THEME_DEFAULT, '!', "Awaiting authentication from %s...", chatwin->barejid);
+            win_println((ProfWin*)chatwin, THEME_DEFAULT, '!', "Awaiting authentication from %s...", chatwin->barejid);
             break;
         default:
             break;
@@ -188,7 +188,7 @@ chatwin_otr_trust(ProfChatWin *chatwin)
     chatwin->otr_is_trusted = TRUE;
 
     ProfWin *window = (ProfWin*)chatwin;
-    win_printf_line(window, THEME_OTR_TRUSTED, '!', "OTR session trusted.");
+    win_println(window, THEME_OTR_TRUSTED, '!', "OTR session trusted.");
     if (wins_is_current(window)) {
         title_bar_switch();
     }
@@ -203,7 +203,7 @@ chatwin_otr_untrust(ProfChatWin *chatwin)
     chatwin->otr_is_trusted = FALSE;
 
     ProfWin *window = (ProfWin*)chatwin;
-    win_printf_line(window, THEME_OTR_UNTRUSTED, '!', "OTR session untrusted.");
+    win_println(window, THEME_OTR_UNTRUSTED, '!', "OTR session untrusted.");
     if (wins_is_current(window)) {
         title_bar_switch();
     }
@@ -227,7 +227,7 @@ chatwin_recipient_gone(ProfChatWin *chatwin)
         display_usr = chatwin->barejid;
     }
 
-    win_printf_line((ProfWin*)chatwin, THEME_GONE, '!', "<- %s has left the conversation.", display_usr);
+    win_println((ProfWin*)chatwin, THEME_GONE, '!', "<- %s has left the conversation.", display_usr);
 }
 
 void
@@ -405,7 +405,7 @@ _chatwin_history(ProfChatWin *chatwin, const char *const contact)
                 g_date_time_unref(timestamp);
             // header
             } else {
-                win_printf_line((ProfWin*)chatwin, THEME_DEFAULT, '-', "%s", curr->data);
+                win_println((ProfWin*)chatwin, THEME_DEFAULT, '-', "%s", curr->data);
             }
             curr = g_slist_next(curr);
         }

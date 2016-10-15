@@ -67,7 +67,7 @@ void
 cons_show_time(void)
 {
     ProfWin *console = wins_get_console();
-    win_printf(console, '-', 0, NULL, NO_EOL, THEME_DEFAULT, "", "");
+    win_print(console, THEME_DEFAULT, '-', "");
 }
 
 void
@@ -86,7 +86,7 @@ cons_debug(const char *const msg, ...)
         va_start(arg, msg);
         GString *fmt_msg = g_string_new(NULL);
         g_string_vprintf(fmt_msg, msg, arg);
-        win_printf_line(console, THEME_DEFAULT, '-', "%s", fmt_msg->str);
+        win_println(console, THEME_DEFAULT, '-', "%s", fmt_msg->str);
         g_string_free(fmt_msg, TRUE);
         va_end(arg);
     }
@@ -100,7 +100,7 @@ cons_show(const char *const msg, ...)
     va_start(arg, msg);
     GString *fmt_msg = g_string_new(NULL);
     g_string_vprintf(fmt_msg, msg, arg);
-    win_printf_line(console, THEME_DEFAULT, '-', "%s", fmt_msg->str);
+    win_println(console, THEME_DEFAULT, '-', "%s", fmt_msg->str);
     g_string_free(fmt_msg, TRUE);
     va_end(arg);
 }
@@ -124,8 +124,8 @@ cons_show_help(const char *const cmd, CommandHelp *help)
     ProfWin *console = wins_get_console();
 
     cons_show("");
-    win_printf_line(console, THEME_WHITE_BOLD, '-', "%s", &cmd[1]);
-    win_printf(console, '-', 0, NULL, NO_EOL, THEME_WHITE_BOLD, "", "");
+    win_println(console, THEME_WHITE_BOLD, '-', "%s", &cmd[1]);
+    win_print(console, THEME_WHITE_BOLD, '-', "");
     int i;
     for (i = 0; i < strlen(cmd) - 1 ; i++) {
         win_printf(console, '-', 0, NULL, NO_EOL | NO_DATE, THEME_WHITE_BOLD, "", "-");
@@ -133,12 +133,12 @@ cons_show_help(const char *const cmd, CommandHelp *help)
     win_printf(console, '-', 0, NULL, NO_DATE, THEME_WHITE_BOLD, "", "");
     cons_show("");
 
-    win_printf_line(console, THEME_WHITE_BOLD, '-', "Synopsis");
+    win_println(console, THEME_WHITE_BOLD, '-', "Synopsis");
     ui_show_lines(console, help->synopsis);
     cons_show("");
 
-    win_printf_line(console, THEME_WHITE_BOLD, '-', "Description");
-    win_printf_line(console, THEME_DEFAULT, '-', "%s", help->desc);
+    win_println(console, THEME_WHITE_BOLD, '-', "Description");
+    win_println(console, THEME_DEFAULT, '-', "%s", help->desc);
 
     int maxlen = 0;
     for (i = 0; help->args[i][0] != NULL; i++) {
@@ -148,7 +148,7 @@ cons_show_help(const char *const cmd, CommandHelp *help)
 
     if (i > 0) {
         cons_show("");
-        win_printf_line(console, THEME_WHITE_BOLD, '-', "Arguments");
+        win_println(console, THEME_WHITE_BOLD, '-', "Arguments");
         for (i = 0; help->args[i][0] != NULL; i++) {
             win_printf(console, '-', maxlen + 3, NULL, 0, THEME_DEFAULT, "", "%-*s: %s", maxlen + 1, help->args[i][0], help->args[i][1]);
         }
@@ -156,7 +156,7 @@ cons_show_help(const char *const cmd, CommandHelp *help)
 
     if (g_strv_length((gchar**)help->examples) > 0) {
         cons_show("");
-        win_printf_line(console, THEME_WHITE_BOLD, '-', "Arguments");
+        win_println(console, THEME_WHITE_BOLD, '-', "Arguments");
         ui_show_lines(console, help->examples);
     }
 }
@@ -181,7 +181,7 @@ cons_show_error(const char *const msg, ...)
     va_start(arg, msg);
     GString *fmt_msg = g_string_new(NULL);
     g_string_vprintf(fmt_msg, msg, arg);
-    win_printf_line(console, THEME_ERROR, '-', "%s", fmt_msg->str);
+    win_println(console, THEME_ERROR, '-', "%s", fmt_msg->str);
     g_string_free(fmt_msg, TRUE);
     va_end(arg);
 
@@ -296,7 +296,7 @@ cons_show_typing(const char *const barejid)
         display_usr = barejid;
     }
 
-    win_printf_line(console, THEME_TYPING, '-', "!! %s is typing a message...", display_usr);
+    win_println(console, THEME_TYPING, '-', "!! %s is typing a message...", display_usr);
     cons_alert();
 }
 
@@ -333,27 +333,27 @@ cons_show_incoming_room_message(const char *const nick, const char *const room, 
 
     if (g_strcmp0(muc_show, "all") == 0) {
         if (mention) {
-            win_printf_line(console, THEME_MENTION, '-', "<< room mention: %s in %s (win %d)", nick, room, ui_index);
+            win_println(console, THEME_MENTION, '-', "<< room mention: %s in %s (win %d)", nick, room, ui_index);
         } else if (triggers) {
             char *triggers_str = _room_triggers_to_string(triggers);
-            win_printf_line(console, THEME_TRIGGER, '-', "<< room trigger %s: %s in %s (win %d)", triggers_str, nick, room, ui_index);
+            win_println(console, THEME_TRIGGER, '-', "<< room trigger %s: %s in %s (win %d)", triggers_str, nick, room, ui_index);
             free(triggers_str);
         } else {
-            win_printf_line(console, THEME_INCOMING, '-', "<< room message: %s in %s (win %d)", nick, room, ui_index);
+            win_println(console, THEME_INCOMING, '-', "<< room message: %s in %s (win %d)", nick, room, ui_index);
         }
         cons_alert();
 
     } else if (g_strcmp0(muc_show, "first") == 0) {
         if (mention) {
-            win_printf_line(console, THEME_MENTION, '-', "<< room mention: %s in %s (win %d)", nick, room, ui_index);
+            win_println(console, THEME_MENTION, '-', "<< room mention: %s in %s (win %d)", nick, room, ui_index);
             cons_alert();
         } else if (triggers) {
             char *triggers_str = _room_triggers_to_string(triggers);
-            win_printf_line(console, THEME_TRIGGER, '-', "<< room trigger %s: %s in %s (win %d)", triggers_str, nick, room, ui_index);
+            win_println(console, THEME_TRIGGER, '-', "<< room trigger %s: %s in %s (win %d)", triggers_str, nick, room, ui_index);
             free(triggers_str);
             cons_alert();
         } else if (unread == 0) {
-            win_printf_line(console, THEME_INCOMING, '-', "<< room message: %s (win %d)", room, ui_index);
+            win_println(console, THEME_INCOMING, '-', "<< room message: %s (win %d)", room, ui_index);
             cons_alert();
         }
     }
@@ -372,10 +372,10 @@ cons_show_incoming_message(const char *const short_from, const int win_index, in
 
     char *chat_show = prefs_get_string(PREF_CONSOLE_CHAT);
     if (g_strcmp0(chat_show, "all") == 0) {
-        win_printf_line(console, THEME_INCOMING, '-', "<< chat message: %s (win %d)", short_from, ui_index);
+        win_println(console, THEME_INCOMING, '-', "<< chat message: %s (win %d)", short_from, ui_index);
         cons_alert();
     } else if ((g_strcmp0(chat_show, "first") == 0) && unread == 0) {
-        win_printf_line(console, THEME_INCOMING, '-', "<< chat message: %s (win %d)", short_from, ui_index);
+        win_println(console, THEME_INCOMING, '-', "<< chat message: %s (win %d)", short_from, ui_index);
         cons_alert();
     }
 
@@ -394,10 +394,10 @@ cons_show_incoming_private_message(const char *const nick, const char *const roo
 
     char *priv_show = prefs_get_string(PREF_CONSOLE_PRIVATE);
     if (g_strcmp0(priv_show, "all") == 0) {
-        win_printf_line(console, THEME_INCOMING, '-', "<< private message: %s in %s (win %d)", nick, room, ui_index);
+        win_println(console, THEME_INCOMING, '-', "<< private message: %s in %s (win %d)", nick, room, ui_index);
         cons_alert();
     } else if ((g_strcmp0(priv_show, "first") == 0) && unread == 0) {
-        win_printf_line(console, THEME_INCOMING, '-', "<< private message: %s in %s (win %d)", nick, room, ui_index);
+        win_println(console, THEME_INCOMING, '-', "<< private message: %s in %s (win %d)", nick, room, ui_index);
         cons_alert();
     }
 
@@ -417,23 +417,23 @@ cons_about(void)
 
         if (strcmp(PACKAGE_STATUS, "development") == 0) {
 #ifdef HAVE_GIT_VERSION
-            win_printf_line(console, THEME_DEFAULT, '-', "Welcome to Profanity, version %sdev.%s.%s", PACKAGE_VERSION, PROF_GIT_BRANCH, PROF_GIT_REVISION);
+            win_println(console, THEME_DEFAULT, '-', "Welcome to Profanity, version %sdev.%s.%s", PACKAGE_VERSION, PROF_GIT_BRANCH, PROF_GIT_REVISION);
 #else
-            win_printf_line(console, THEME_DEFAULT, "Welcome to Profanity, version %sdev", PACKAGE_VERSION);
+            win_println(console, THEME_DEFAULT, "Welcome to Profanity, version %sdev", PACKAGE_VERSION);
 #endif
         } else {
-            win_printf_line(console, THEME_DEFAULT, '-', "Welcome to Profanity, version %s", PACKAGE_VERSION);
+            win_println(console, THEME_DEFAULT, '-', "Welcome to Profanity, version %s", PACKAGE_VERSION);
         }
     }
 
-    win_printf_line(console, THEME_DEFAULT, '-', "Copyright (C) 2012 - 2016 James Booth <%s>.", PACKAGE_BUGREPORT);
-    win_printf_line(console, THEME_DEFAULT, '-', "License GPLv3+: GNU GPL version 3 or later <https://www.gnu.org/licenses/gpl.html>");
-    win_printf_line(console, THEME_DEFAULT, '-', "");
-    win_printf_line(console, THEME_DEFAULT, '-', "This is free software; you are free to change and redistribute it.");
-    win_printf_line(console, THEME_DEFAULT, '-', "There is NO WARRANTY, to the extent permitted by law.");
-    win_printf_line(console, THEME_DEFAULT, '-', "");
-    win_printf_line(console, THEME_DEFAULT, '-', "Type '/help' to show complete help.");
-    win_printf_line(console, THEME_DEFAULT, '-', "");
+    win_println(console, THEME_DEFAULT, '-', "Copyright (C) 2012 - 2016 James Booth <%s>.", PACKAGE_BUGREPORT);
+    win_println(console, THEME_DEFAULT, '-', "License GPLv3+: GNU GPL version 3 or later <https://www.gnu.org/licenses/gpl.html>");
+    win_println(console, THEME_DEFAULT, '-', "");
+    win_println(console, THEME_DEFAULT, '-', "This is free software; you are free to change and redistribute it.");
+    win_println(console, THEME_DEFAULT, '-', "There is NO WARRANTY, to the extent permitted by law.");
+    win_println(console, THEME_DEFAULT, '-', "");
+    win_println(console, THEME_DEFAULT, '-', "Type '/help' to show complete help.");
+    win_println(console, THEME_DEFAULT, '-', "");
 
     if (prefs_get_boolean(PREF_VERCHECK)) {
         cons_check_version(FALSE);
@@ -455,13 +455,13 @@ cons_check_version(gboolean not_available_msg)
 
         if (relase_valid) {
             if (release_is_new(latest_release)) {
-                win_printf_line(console, THEME_DEFAULT, '-', "A new version of Profanity is available: %s", latest_release);
-                win_printf_line(console, THEME_DEFAULT, '-', "Check <http://www.profanity.im> for details.");
-                win_printf_line(console, THEME_DEFAULT, '-', "");
+                win_println(console, THEME_DEFAULT, '-', "A new version of Profanity is available: %s", latest_release);
+                win_println(console, THEME_DEFAULT, '-', "Check <http://www.profanity.im> for details.");
+                win_println(console, THEME_DEFAULT, '-', "");
             } else {
                 if (not_available_msg) {
-                    win_printf_line(console, THEME_DEFAULT, '-', "No new version available.");
-                    win_printf_line(console, THEME_DEFAULT, '-', "");
+                    win_println(console, THEME_DEFAULT, '-', "No new version available.");
+                    win_println(console, THEME_DEFAULT, '-', "");
                 }
             }
 
@@ -475,7 +475,7 @@ void
 cons_show_login_success(ProfAccount *account, gboolean secured)
 {
     ProfWin *console = wins_get_console();
-    win_printf(console, '-', 0, NULL, NO_EOL, THEME_DEFAULT, "", "%s logged in successfully, ", account->jid);
+    win_print(console, THEME_DEFAULT, '-', "%s logged in successfully, ", account->jid);
 
     resource_presence_t presence = accounts_get_login_presence(account->name);
     const char *presence_str = string_from_resource_presence(presence);
@@ -509,7 +509,7 @@ cons_show_wins(gboolean unread)
 
     GSList *curr = window_strings;
     while (curr) {
-        win_printf_line(console, THEME_DEFAULT, '-', "%s", curr->data);
+        win_println(console, THEME_DEFAULT, '-', "%s", curr->data);
         curr = g_slist_next(curr);
     }
     g_slist_free_full(window_strings, free);
@@ -554,13 +554,13 @@ cons_show_caps(const char *const fulljid, resource_presence_t presence)
         const char *resource_presence = string_from_resource_presence(presence);
 
         theme_item_t presence_colour = theme_main_presence_attrs(resource_presence);
-        win_printf(console, '-', 0, NULL, NO_EOL, presence_colour, "", "%s", fulljid);
+        win_print(console, presence_colour, '-', "%s", fulljid);
         win_printf(console, '-', 0, NULL, NO_DATE, THEME_DEFAULT, "", ":");
 
         // show identity
         if (caps->identity) {
             DiscoIdentity *identity = caps->identity;
-            win_printf(console, '-', 0, NULL, NO_EOL, THEME_DEFAULT, "", "Identity: ");
+            win_print(console, THEME_DEFAULT, '-', "Identity: ");
             if (identity->name) {
                 win_printf(console, '-', 0, NULL, NO_DATE | NO_EOL, THEME_DEFAULT, "", "%s", identity->name);
                 if (identity->category || identity->type) {
@@ -582,7 +582,7 @@ cons_show_caps(const char *const fulljid, resource_presence_t presence)
         if (caps->software_version) {
             SoftwareVersion *software_version = caps->software_version;
             if (software_version->software) {
-                win_printf(console, '-', 0, NULL, NO_EOL, THEME_DEFAULT, "", "Software: %s", software_version->software);
+                win_print(console, THEME_DEFAULT, '-', "Software: %s", software_version->software);
             }
             if (software_version->software_version) {
                 win_printf(console, '-', 0, NULL, NO_DATE | NO_EOL, THEME_DEFAULT, "", ", %s", software_version->software_version);
@@ -591,7 +591,7 @@ cons_show_caps(const char *const fulljid, resource_presence_t presence)
                 win_newline(console);
             }
             if (software_version->os) {
-                win_printf(console, '-', 0, NULL, NO_EOL, THEME_DEFAULT, "", "OS: %s", software_version->os);
+                win_print(console, THEME_DEFAULT, '-', "OS: %s", software_version->os);
             }
             if (software_version->os_version) {
                 win_printf(console, '-', 0, NULL, NO_DATE | NO_EOL, THEME_DEFAULT, "", ", %s", software_version->os_version);
@@ -602,10 +602,10 @@ cons_show_caps(const char *const fulljid, resource_presence_t presence)
         }
 
         if (caps->features) {
-            win_printf_line(console, THEME_DEFAULT, '-', "Features:");
+            win_println(console, THEME_DEFAULT, '-', "Features:");
             GSList *feature = caps->features;
             while (feature) {
-                win_printf_line(console, THEME_DEFAULT, '-', " %s", feature->data);
+                win_println(console, THEME_DEFAULT, '-', " %s", feature->data);
                 feature = g_slist_next(feature);
             }
         }
@@ -667,7 +667,7 @@ cons_show_room_list(GSList *rooms, const char *const conference_node)
         cons_show("Chat rooms at %s:", conference_node);
         while (rooms) {
             DiscoItem *room = rooms->data;
-            win_printf(console, '-', 0, NULL, NO_EOL, THEME_DEFAULT, "", "  %s", room->jid);
+            win_print(console, THEME_DEFAULT, '-', "  %s", room->jid);
             if (room->name) {
                 win_printf(console, '-', 0, NULL, NO_DATE | NO_EOL, THEME_DEFAULT, "", ", (%s)", room->name);
             }
@@ -701,7 +701,7 @@ cons_show_bookmarks(const GList *list)
             if (muc_active(item->barejid)) {
                 presence_colour = THEME_ONLINE;
             }
-            win_printf(console, '-', 0, NULL, NO_EOL, presence_colour, "", "  %s", item->barejid);
+            win_print(console, presence_colour, '-', "  %s", item->barejid);
             if (item->nick) {
                 win_printf(console, '-', 0, NULL, NO_DATE | NO_EOL, presence_colour, "", "/%s", item->nick);
             }
@@ -784,7 +784,7 @@ cons_show_disco_items(GSList *items, const char *const jid)
         cons_show("Service discovery items for %s:", jid);
         while (items) {
             DiscoItem *item = items->data;
-            win_printf(console, '-', 0, NULL, NO_EOL, THEME_DEFAULT, "", "  %s", item->jid);
+            win_print(console, THEME_DEFAULT, '-', "  %s", item->jid);
             if (item->name) {
                 win_printf(console, '-', 0, NULL, NO_DATE | NO_EOL, THEME_DEFAULT, "", ", (%s)", item->name);
             }
@@ -863,7 +863,7 @@ cons_show_account_list(gchar **accounts)
                     (g_strcmp0(session_get_account_name(), accounts[i]) == 0)) {
                 resource_presence_t presence = accounts_get_last_presence(accounts[i]);
                 theme_item_t presence_colour = theme_main_presence_attrs(string_from_resource_presence(presence));
-                win_printf_line(console, presence_colour, '-', "%s", accounts[i]);
+                win_println(console, presence_colour, '-', "%s", accounts[i]);
             } else {
                 cons_show(accounts[i]);
             }
@@ -982,7 +982,7 @@ cons_show_account(ProfAccount *account)
 
         GList *curr = resources;
         if (curr) {
-            win_printf_line(console, THEME_DEFAULT, '-', "Resources:");
+            win_println(console, THEME_DEFAULT, '-', "Resources:");
 
             // sort in order of availability
             while (curr) {
@@ -1000,7 +1000,7 @@ cons_show_account(ProfAccount *account)
             Resource *resource = curr->data;
             const char *resource_presence = string_from_resource_presence(resource->presence);
             theme_item_t presence_colour = theme_main_presence_attrs(resource_presence);
-            win_printf(console, '-', 0, NULL, NO_EOL, presence_colour, "", "  %s (%d), %s", resource->name, resource->priority, resource_presence);
+            win_print(console, presence_colour, '-', "  %s (%d), %s", resource->name, resource->priority, resource_presence);
 
             if (resource->status) {
                 win_printf(console, '-', 0, NULL, NO_DATE | NO_EOL, presence_colour, "", ", \"%s\"", resource->status);
@@ -1014,7 +1014,7 @@ cons_show_account(ProfAccount *account)
                 // show identity
                 if (caps->identity) {
                     DiscoIdentity *identity = caps->identity;
-                    win_printf(console, '-', 0, NULL, NO_EOL, THEME_DEFAULT, "", "    Identity: ");
+                    win_print(console, THEME_DEFAULT, '-', "    Identity: ");
                     if (identity->name) {
                         win_printf(console, '-', 0, NULL, NO_DATE | NO_EOL, THEME_DEFAULT, "", "%s", identity->name);
                         if (identity->category || identity->type) {
@@ -1036,7 +1036,7 @@ cons_show_account(ProfAccount *account)
                 if (caps->software_version) {
                     SoftwareVersion *software_version = caps->software_version;
                     if (software_version->software) {
-                        win_printf(console, '-', 0, NULL, NO_EOL, THEME_DEFAULT, "", "    Software: %s", software_version->software);
+                        win_print(console, THEME_DEFAULT, '-', "    Software: %s", software_version->software);
                     }
                     if (software_version->software_version) {
                         win_printf(console, '-', 0, NULL, NO_DATE | NO_EOL, THEME_DEFAULT, "", ", %s", software_version->software_version);
@@ -1045,7 +1045,7 @@ cons_show_account(ProfAccount *account)
                         win_newline(console);
                     }
                     if (software_version->os) {
-                        win_printf(console, '-', 0, NULL, NO_EOL, THEME_DEFAULT, "", "    OS: %s", software_version->os);
+                        win_print(console, THEME_DEFAULT, '-', "    OS: %s", software_version->os);
                     }
                     if (software_version->os_version) {
                         win_printf(console, '-', 0, NULL, NO_DATE | NO_EOL, THEME_DEFAULT, "", ", %s", software_version->os_version);
@@ -2078,7 +2078,7 @@ cons_navigation_help(void)
 {
     ProfWin *console = wins_get_console();
     cons_show("");
-    win_printf_line(console, THEME_WHITE_BOLD, '-', "Navigation");
+    win_println(console, THEME_WHITE_BOLD, '-', "Navigation");
     cons_show("Alt-1..Alt-0, F1..F10    : Choose window.");
     cons_show("Alt-LEFT, Alt-RIGHT      : Previous/next chat window.");
     cons_show("PAGEUP, PAGEDOWN         : Page the main window.");
@@ -2184,7 +2184,7 @@ _cons_theme_bar_prop(theme_item_t theme, char *prop)
 
     GString *propstr = g_string_new(" ");
     g_string_append_printf(propstr, "%-24s", prop);
-    win_printf(console, '-', 0, NULL, NO_EOL, THEME_TEXT, "", "%s", propstr->str);
+    win_print(console, THEME_TEXT, '-', "%s", propstr->str);
     g_string_free(propstr, TRUE);
 
     GString *valstr = g_string_new(" ");
@@ -2203,7 +2203,7 @@ _cons_theme_prop(theme_item_t theme, char *prop)
 
     GString *propstr = g_string_new(" ");
     g_string_append_printf(propstr, "%-24s", prop);
-    win_printf(console, '-', 0, NULL, NO_EOL, THEME_TEXT, "", "%s", propstr->str);
+    win_print(console, THEME_TEXT, '-', "%s", propstr->str);
     g_string_free(propstr, TRUE);
 
     GString *valstr = g_string_new("");
@@ -2325,22 +2325,31 @@ cons_theme_colours(void)
 
     ProfWin *console = wins_get_console();
     cons_show("Available colours:");
-    win_printf(console, '-', 0, NULL, NO_EOL, THEME_WHITE, "",         " white   ");
-    win_printf(console, '-', 0, NULL, NO_DATE, THEME_WHITE_BOLD, "",   " bold_white");
-    win_printf(console, '-', 0, NULL, NO_EOL, THEME_GREEN, "",         " green   ");
-    win_printf(console, '-', 0, NULL, NO_DATE, THEME_GREEN_BOLD, "",   " bold_green");
-    win_printf(console, '-', 0, NULL, NO_EOL, THEME_RED, "",           " red     ");
-    win_printf(console, '-', 0, NULL, NO_DATE, THEME_RED_BOLD, "",     " bold_red");
-    win_printf(console, '-', 0, NULL, NO_EOL, THEME_YELLOW, "",        " yellow  ");
-    win_printf(console, '-', 0, NULL, NO_DATE, THEME_YELLOW_BOLD, "",  " bold_yellow");
-    win_printf(console, '-', 0, NULL, NO_EOL, THEME_BLUE, "",          " blue    ");
-    win_printf(console, '-', 0, NULL, NO_DATE, THEME_BLUE_BOLD, "",    " bold_blue");
-    win_printf(console, '-', 0, NULL, NO_EOL, THEME_CYAN, "",          " cyan    ");
-    win_printf(console, '-', 0, NULL, NO_DATE, THEME_CYAN_BOLD, "",    " bold_cyan");
-    win_printf(console, '-', 0, NULL, NO_EOL, THEME_MAGENTA, "",       " magenta ");
-    win_printf(console, '-', 0, NULL, NO_DATE, THEME_MAGENTA_BOLD, "", " bold_magenta");
-    win_printf(console, '-', 0, NULL, NO_EOL, THEME_BLACK, "",         " black   ");
-    win_printf(console, '-', 0, NULL, NO_DATE, THEME_BLACK_BOLD, "",   " bold_black");
+
+    win_print(console, THEME_WHITE, '-',                                " white   ");
+    win_printf(console, '-', 0, NULL, NO_DATE, THEME_WHITE_BOLD, "",    " bold_white");
+
+    win_print(console, THEME_GREEN, '-',                                " green   ");
+    win_printf(console, '-', 0, NULL, NO_DATE, THEME_GREEN_BOLD, "",    " bold_green");
+
+    win_print(console, THEME_RED, '-',                                  " red     ");
+    win_printf(console, '-', 0, NULL, NO_DATE, THEME_RED_BOLD, "",      " bold_red");
+
+    win_print(console, THEME_YELLOW, '-',                               " yellow  ");
+    win_printf(console, '-', 0, NULL, NO_DATE, THEME_YELLOW_BOLD, "",   " bold_yellow");
+
+    win_print(console, THEME_BLUE, '-',                                 " blue    ");
+    win_printf(console, '-', 0, NULL, NO_DATE, THEME_BLUE_BOLD, "",     " bold_blue");
+
+    win_print(console, THEME_CYAN, '-',                                 " cyan    ");
+    win_printf(console, '-', 0, NULL, NO_DATE, THEME_CYAN_BOLD, "",     " bold_cyan");
+
+    win_print(console, THEME_MAGENTA, '-',                              " magenta ");
+    win_printf(console, '-', 0, NULL, NO_DATE, THEME_MAGENTA_BOLD, "",  " bold_magenta");
+
+    win_print(console, THEME_BLACK, '-',                                " black   ");
+    win_printf(console, '-', 0, NULL, NO_DATE, THEME_BLACK_BOLD, "",    " bold_black");
+
     cons_show("");
 }
 
@@ -2348,25 +2357,25 @@ static void
 _cons_splash_logo(void)
 {
     ProfWin *console = wins_get_console();
-    win_printf_line(console, THEME_DEFAULT, '-', "Welcome to");
+    win_println(console, THEME_DEFAULT, '-', "Welcome to");
 
-    win_printf_line(console, THEME_SPLASH, '-', "                   ___            _           ");
-    win_printf_line(console, THEME_SPLASH, '-', "                  / __)          (_)_         ");
-    win_printf_line(console, THEME_SPLASH, '-', " ____   ____ ___ | |__ ____ ____  _| |_ _   _ ");
-    win_printf_line(console, THEME_SPLASH, '-', "|  _ \\ / ___) _ \\|  __) _  |  _ \\| |  _) | | |");
-    win_printf_line(console, THEME_SPLASH, '-', "| | | | |  | |_| | | ( ( | | | | | | |_| |_| |");
-    win_printf_line(console, THEME_SPLASH, '-', "| ||_/|_|   \\___/|_|  \\_||_|_| |_|_|\\___)__  |");
-    win_printf_line(console, THEME_SPLASH, '-', "|_|                                    (____/ ");
-    win_printf_line(console, THEME_SPLASH, '-', "");
+    win_println(console, THEME_SPLASH, '-', "                   ___            _           ");
+    win_println(console, THEME_SPLASH, '-', "                  / __)          (_)_         ");
+    win_println(console, THEME_SPLASH, '-', " ____   ____ ___ | |__ ____ ____  _| |_ _   _ ");
+    win_println(console, THEME_SPLASH, '-', "|  _ \\ / ___) _ \\|  __) _  |  _ \\| |  _) | | |");
+    win_println(console, THEME_SPLASH, '-', "| | | | |  | |_| | | ( ( | | | | | | |_| |_| |");
+    win_println(console, THEME_SPLASH, '-', "| ||_/|_|   \\___/|_|  \\_||_|_| |_|_|\\___)__  |");
+    win_println(console, THEME_SPLASH, '-', "|_|                                    (____/ ");
+    win_println(console, THEME_SPLASH, '-', "");
 
     if (strcmp(PACKAGE_STATUS, "development") == 0) {
 #ifdef HAVE_GIT_VERSION
-        win_printf_line(console, THEME_DEFAULT, '-', "Version %sdev.%s.%s", PACKAGE_VERSION, PROF_GIT_BRANCH, PROF_GIT_REVISION);
+        win_println(console, THEME_DEFAULT, '-', "Version %sdev.%s.%s", PACKAGE_VERSION, PROF_GIT_BRANCH, PROF_GIT_REVISION);
 #else
-        win_printf_line(console, THEME_DEFAULT, "Version %sdev", PACKAGE_VERSION);
+        win_println(console, THEME_DEFAULT, "Version %sdev", PACKAGE_VERSION);
 #endif
     } else {
-        win_printf_line(console, THEME_DEFAULT, '-', "Version %s", PACKAGE_VERSION);
+        win_println(console, THEME_DEFAULT, '-', "Version %s", PACKAGE_VERSION);
     }
 }
 
@@ -2393,7 +2402,7 @@ _show_roster_contacts(GSList *list, gboolean show_groups)
         } else {
             presence_colour = theme_main_presence_attrs("offline");
         }
-        win_printf(console, '-', 0, NULL, NO_EOL, presence_colour, "", "%s", title->str);
+        win_print(console, presence_colour, '-', "%s", title->str);
 
         g_string_free(title, TRUE);
 

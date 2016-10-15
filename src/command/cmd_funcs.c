@@ -1479,9 +1479,9 @@ _cmd_help_cmd_list(const char *const tag)
     cons_show("");
     ProfWin *console = wins_get_console();
     if (tag) {
-        win_printf_line(console, THEME_WHITE_BOLD, '-', "%s commands", tag);
+        win_println(console, THEME_WHITE_BOLD, '-', "%s commands", tag);
     } else {
-        win_printf_line(console, THEME_WHITE_BOLD, '-', "All commands");
+        win_println(console, THEME_WHITE_BOLD, '-', "All commands");
     }
 
     GList *ordered_commands = NULL;
@@ -3108,7 +3108,7 @@ cmd_status(ProfWin *window, const char *const command, gchar **args)
                 if (occupant) {
                     win_show_occupant(window, occupant);
                 } else {
-                    win_printf_line(window, THEME_DEFAULT, '-', "No such participant \"%s\" in room.", usr);
+                    win_println(window, THEME_DEFAULT, '-', "No such participant \"%s\" in room.", usr);
                 }
             } else {
                 ui_current_print_line("You must specify a nickname.");
@@ -3124,7 +3124,7 @@ cmd_status(ProfWin *window, const char *const command, gchar **args)
                 if (pcontact) {
                     win_show_contact(window, pcontact);
                 } else {
-                    win_printf_line(window, THEME_DEFAULT, '-', "Error getting contact info.");
+                    win_println(window, THEME_DEFAULT, '-', "Error getting contact info.");
                 }
             }
             break;
@@ -3139,7 +3139,7 @@ cmd_status(ProfWin *window, const char *const command, gchar **args)
                 if (occupant) {
                     win_show_occupant(window, occupant);
                 } else {
-                    win_printf_line(window, THEME_DEFAULT, '-', "Error getting contact info.");
+                    win_println(window, THEME_DEFAULT, '-', "Error getting contact info.");
                 }
                 jid_destroy(jid);
             }
@@ -3204,7 +3204,7 @@ cmd_info(ProfWin *window, const char *const command, gchar **args)
                 if (pcontact) {
                     win_show_info(window, pcontact);
                 } else {
-                    win_printf_line(window, THEME_DEFAULT, '-', "Error getting contact info.");
+                    win_println(window, THEME_DEFAULT, '-', "Error getting contact info.");
                 }
             }
             break;
@@ -3219,7 +3219,7 @@ cmd_info(ProfWin *window, const char *const command, gchar **args)
                 if (occupant) {
                     win_show_occupant_info(window, jid->barejid, occupant);
                 } else {
-                    win_printf_line(window, THEME_DEFAULT, '-', "Error getting contact info.");
+                    win_println(window, THEME_DEFAULT, '-', "Error getting contact info.");
                 }
                 jid_destroy(jid);
             }
@@ -3372,7 +3372,7 @@ cmd_software(ProfWin *window, const char *const command, gchar **args)
                     iq_send_software_version(fulljid->str);
                     g_string_free(fulljid, TRUE);
                 } else {
-                    win_printf_line(window, THEME_DEFAULT, '-', "Unknown resource for /software command.");
+                    win_println(window, THEME_DEFAULT, '-', "Unknown resource for /software command.");
                 }
             }
             break;
@@ -3881,7 +3881,7 @@ cmd_kick(ProfWin *window, const char *const command, gchar **args)
             char *reason = args[1];
             iq_room_kick_occupant(mucwin->roomjid, nick, reason);
         } else {
-            win_printf_line(window, THEME_DEFAULT, '!', "Occupant does not exist: %s", nick);
+            win_println(window, THEME_DEFAULT, '!', "Occupant does not exist: %s", nick);
         }
     } else {
         cons_bad_cmd_usage(command);
@@ -3939,10 +3939,10 @@ cmd_subject(ProfWin *window, const char *const command, gchar **args)
     if (args[0] == NULL) {
         char *subject = muc_subject(mucwin->roomjid);
         if (subject) {
-            win_printf(window, '!', 0, NULL, NO_EOL, THEME_ROOMINFO, "", "Room subject: ");
+            win_print(window, THEME_ROOMINFO, '!', "Room subject: ");
             win_printf(window, '!', 0, NULL, NO_DATE, THEME_DEFAULT, "", "%s", subject);
         } else {
-            win_printf_line(window, THEME_ROOMINFO, '!', "Room has no subject");
+            win_println(window, THEME_ROOMINFO, '!', "Room has no subject");
         }
         return TRUE;
     }
@@ -3974,7 +3974,7 @@ cmd_subject(ProfWin *window, const char *const command, gchar **args)
                 message_send_groupchat_subject(mucwin->roomjid, new_subject->str);
                 g_string_free(new_subject, TRUE);
             } else {
-                win_printf(window, '!', 0, NULL, NO_EOL, THEME_ROOMINFO, "", "Room does not have a subject, use /subject set <subject>");
+                win_print(window, THEME_ROOMINFO, '!', "Room does not have a subject, use /subject set <subject>");
             }
         } else {
             cons_bad_cmd_usage(command);
@@ -3991,7 +3991,7 @@ cmd_subject(ProfWin *window, const char *const command, gchar **args)
                 message_send_groupchat_subject(mucwin->roomjid, new_subject->str);
                 g_string_free(new_subject, TRUE);
             } else {
-                win_printf(window, '!', 0, NULL, NO_EOL, THEME_ROOMINFO, "", "Room does not have a subject, use /subject set <subject>");
+                win_print(window, THEME_ROOMINFO, '!', "Room does not have a subject, use /subject set <subject>");
             }
         } else {
             cons_bad_cmd_usage(command);
@@ -4050,7 +4050,7 @@ cmd_affiliation(ProfWin *window, const char *const command, gchar **args)
             iq_room_affiliation_list(mucwin->roomjid, "member");
             iq_room_affiliation_list(mucwin->roomjid, "outcast");
         } else if (g_strcmp0(affiliation, "none") == 0) {
-            win_printf_line(window, THEME_DEFAULT, '!', "Cannot list users with no affiliation.");
+            win_println(window, THEME_DEFAULT, '!', "Cannot list users with no affiliation.");
         } else {
             iq_room_affiliation_list(mucwin->roomjid, affiliation);
         }
@@ -4118,7 +4118,7 @@ cmd_role(ProfWin *window, const char *const command, gchar **args)
             iq_room_role_list(mucwin->roomjid, "participant");
             iq_room_role_list(mucwin->roomjid, "visitor");
         } else if (g_strcmp0(role, "none") == 0) {
-            win_printf_line(window, THEME_DEFAULT, '!', "Cannot list users with no role.");
+            win_println(window, THEME_DEFAULT, '!', "Cannot list users with no role.");
         } else {
             iq_room_role_list(mucwin->roomjid, role);
         }
@@ -4180,12 +4180,12 @@ cmd_room(ProfWin *window, const char *const command, gchar **args)
     if (g_strcmp0(args[0], "accept") == 0) {
         gboolean requires_config = muc_requires_config(mucwin->roomjid);
         if (!requires_config) {
-            win_printf_line(window, THEME_ROOMINFO, '!', "Current room does not require configuration.");
+            win_println(window, THEME_ROOMINFO, '!', "Current room does not require configuration.");
             return TRUE;
         } else {
             iq_confirm_instant_room(mucwin->roomjid);
             muc_set_requires_config(mucwin->roomjid, FALSE);
-            win_printf_line(window, THEME_ROOMINFO, '!', "Room unlocked.");
+            win_println(window, THEME_ROOMINFO, '!', "Room unlocked.");
             return TRUE;
         }
     }
@@ -4681,13 +4681,13 @@ cmd_tiny(ProfWin *window, const char *const command, gchar **args)
     }
 
     if (!tinyurl_valid(url)) {
-        win_printf_line(window, THEME_ERROR, '-', "/tiny, badly formed URL: %s", url);
+        win_println(window, THEME_ERROR, '-', "/tiny, badly formed URL: %s", url);
         return TRUE;
     }
 
     char *tiny = tinyurl_get(url);
     if (!tiny) {
-        win_printf_line(window, THEME_ERROR, '-', "Couldn't create tinyurl.");
+        win_println(window, THEME_ERROR, '-', "Couldn't create tinyurl.");
         return TRUE;
     }
 
@@ -5137,50 +5137,50 @@ cmd_notify(ProfWin *window, const char *const command, gchar **args)
     if (!args[0]) {
         ProfWin *current = wins_get_current();
         if (current->type == WIN_MUC) {
-            win_printf_line(current, THEME_DEFAULT, '-', "");
+            win_println(current, THEME_DEFAULT, '-', "");
             ProfMucWin *mucwin = (ProfMucWin *)current;
 
-            win_printf_line(window, THEME_DEFAULT, '!', "Notification settings for %s:", mucwin->roomjid);
+            win_println(window, THEME_DEFAULT, '!', "Notification settings for %s:", mucwin->roomjid);
             if (prefs_has_room_notify(mucwin->roomjid)) {
                 if (prefs_get_room_notify(mucwin->roomjid)) {
-                    win_printf_line(window, THEME_DEFAULT, '!', "  Message  : ON");
+                    win_println(window, THEME_DEFAULT, '!', "  Message  : ON");
                 } else {
-                    win_printf_line(window, THEME_DEFAULT, '!', "  Message  : OFF");
+                    win_println(window, THEME_DEFAULT, '!', "  Message  : OFF");
                 }
             } else {
                 if (prefs_get_boolean(PREF_NOTIFY_ROOM)) {
-                    win_printf_line(window, THEME_DEFAULT, '!', "  Message  : ON (global setting)");
+                    win_println(window, THEME_DEFAULT, '!', "  Message  : ON (global setting)");
                 } else {
-                    win_printf_line(window, THEME_DEFAULT, '!', "  Message  : OFF (global setting)");
+                    win_println(window, THEME_DEFAULT, '!', "  Message  : OFF (global setting)");
                 }
             }
             if (prefs_has_room_notify_mention(mucwin->roomjid)) {
                 if (prefs_get_room_notify_mention(mucwin->roomjid)) {
-                    win_printf_line(window, THEME_DEFAULT, '!', "  Mention  : ON");
+                    win_println(window, THEME_DEFAULT, '!', "  Mention  : ON");
                 } else {
-                    win_printf_line(window, THEME_DEFAULT, '!', "  Mention  : OFF");
+                    win_println(window, THEME_DEFAULT, '!', "  Mention  : OFF");
                 }
             } else {
                 if (prefs_get_boolean(PREF_NOTIFY_ROOM_MENTION)) {
-                    win_printf_line(window, THEME_DEFAULT, '!', "  Mention  : ON (global setting)");
+                    win_println(window, THEME_DEFAULT, '!', "  Mention  : ON (global setting)");
                 } else {
-                    win_printf_line(window, THEME_DEFAULT, '!', "  Mention  : OFF (global setting)");
+                    win_println(window, THEME_DEFAULT, '!', "  Mention  : OFF (global setting)");
                 }
             }
             if (prefs_has_room_notify_trigger(mucwin->roomjid)) {
                 if (prefs_get_room_notify_trigger(mucwin->roomjid)) {
-                    win_printf_line(window, THEME_DEFAULT, '!', "  Triggers : ON");
+                    win_println(window, THEME_DEFAULT, '!', "  Triggers : ON");
                 } else {
-                    win_printf_line(window, THEME_DEFAULT, '!', "  Triggers : OFF");
+                    win_println(window, THEME_DEFAULT, '!', "  Triggers : OFF");
                 }
             } else {
                 if (prefs_get_boolean(PREF_NOTIFY_ROOM_TRIGGER)) {
-                    win_printf_line(window, THEME_DEFAULT, '!', "  Triggers : ON (global setting)");
+                    win_println(window, THEME_DEFAULT, '!', "  Triggers : ON (global setting)");
                 } else {
-                    win_printf_line(window, THEME_DEFAULT, '!', "  Triggers : OFF (global setting)");
+                    win_println(window, THEME_DEFAULT, '!', "  Triggers : OFF (global setting)");
                 }
             }
-            win_printf_line(current, THEME_DEFAULT, '-', "");
+            win_println(current, THEME_DEFAULT, '-', "");
         } else {
             cons_show("");
             cons_notify_setting();
@@ -5394,7 +5394,7 @@ cmd_notify(ProfWin *window, const char *const command, gchar **args)
             } else {
                 ProfMucWin *mucwin = (ProfMucWin*)window;
                 prefs_set_room_notify(mucwin->roomjid, TRUE);
-                win_printf_line(window, THEME_DEFAULT, '!', "Notifications enabled for %s", mucwin->roomjid);
+                win_println(window, THEME_DEFAULT, '!', "Notifications enabled for %s", mucwin->roomjid);
             }
         }
     } else if (g_strcmp0(args[0], "off") == 0) {
@@ -5409,7 +5409,7 @@ cmd_notify(ProfWin *window, const char *const command, gchar **args)
             } else {
                 ProfMucWin *mucwin = (ProfMucWin*)window;
                 prefs_set_room_notify(mucwin->roomjid, FALSE);
-                win_printf_line(window, THEME_DEFAULT, '!', "Notifications disabled for %s", mucwin->roomjid);
+                win_println(window, THEME_DEFAULT, '!', "Notifications disabled for %s", mucwin->roomjid);
             }
         }
     } else if (g_strcmp0(args[0], "mention") == 0) {
@@ -5425,7 +5425,7 @@ cmd_notify(ProfWin *window, const char *const command, gchar **args)
                 } else {
                     ProfMucWin *mucwin = (ProfMucWin*)window;
                     prefs_set_room_notify_mention(mucwin->roomjid, TRUE);
-                    win_printf_line(window, THEME_DEFAULT, '!', "Mention notifications enabled for %s", mucwin->roomjid);
+                    win_println(window, THEME_DEFAULT, '!', "Mention notifications enabled for %s", mucwin->roomjid);
                 }
             } else if (g_strcmp0(args[1], "off") == 0) {
                 ProfWin *window = wins_get_current();
@@ -5434,7 +5434,7 @@ cmd_notify(ProfWin *window, const char *const command, gchar **args)
                 } else {
                     ProfMucWin *mucwin = (ProfMucWin*)window;
                     prefs_set_room_notify_mention(mucwin->roomjid, FALSE);
-                    win_printf_line(window, THEME_DEFAULT, '!', "Mention notifications disabled for %s", mucwin->roomjid);
+                    win_println(window, THEME_DEFAULT, '!', "Mention notifications disabled for %s", mucwin->roomjid);
                 }
             } else {
                 cons_bad_cmd_usage(command);
@@ -5453,7 +5453,7 @@ cmd_notify(ProfWin *window, const char *const command, gchar **args)
                 } else {
                     ProfMucWin *mucwin = (ProfMucWin*)window;
                     prefs_set_room_notify_trigger(mucwin->roomjid, TRUE);
-                    win_printf_line(window, THEME_DEFAULT, '!', "Custom trigger notifications enabled for %s", mucwin->roomjid);
+                    win_println(window, THEME_DEFAULT, '!', "Custom trigger notifications enabled for %s", mucwin->roomjid);
                 }
             } else if (g_strcmp0(args[1], "off") == 0) {
                 ProfWin *window = wins_get_current();
@@ -5462,7 +5462,7 @@ cmd_notify(ProfWin *window, const char *const command, gchar **args)
                 } else {
                     ProfMucWin *mucwin = (ProfMucWin*)window;
                     prefs_set_room_notify_trigger(mucwin->roomjid, FALSE);
-                    win_printf_line(window, THEME_DEFAULT, '!', "Custom trigger notifications disabled for %s", mucwin->roomjid);
+                    win_println(window, THEME_DEFAULT, '!', "Custom trigger notifications disabled for %s", mucwin->roomjid);
                 }
             } else {
                 cons_bad_cmd_usage(command);
@@ -5481,9 +5481,9 @@ cmd_notify(ProfWin *window, const char *const command, gchar **args)
                 ProfMucWin *mucwin = (ProfMucWin*)window;
                 gboolean res = prefs_reset_room_notify(mucwin->roomjid);
                 if (res) {
-                    win_printf_line(window, THEME_DEFAULT, '!', "Notification settings set to global defaults for %s", mucwin->roomjid);
+                    win_println(window, THEME_DEFAULT, '!', "Notification settings set to global defaults for %s", mucwin->roomjid);
                 } else {
-                    win_printf_line(window, THEME_DEFAULT, '!', "No custom notification settings for %s", mucwin->roomjid);
+                    win_println(window, THEME_DEFAULT, '!', "No custom notification settings for %s", mucwin->roomjid);
                 }
             }
         }
