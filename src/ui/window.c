@@ -517,7 +517,6 @@ win_page_down(ProfWin *window)
 void
 win_sub_page_down(ProfWin *window)
 {
-
     if (window->layout->type == LAYOUT_SPLIT) {
         int rows = getmaxy(stdscr);
         int page_space = rows - 4;
