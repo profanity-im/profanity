@@ -61,6 +61,8 @@
 
 #define CEILING(X) (X-(int)(X) > 0 ? (int)(X+1) : (int)(X))
 
+static void _win_printf(ProfWin *window, const char show_char, int pad_indent, GDateTime *timestamp,
+    int flags, theme_item_t theme_item, const char *const from, const char *const message, ...);
 static void _win_print(ProfWin *window, const char show_char, int pad_indent, GDateTime *time,
     int flags, theme_item_t theme_item, const char *const from, const char *const message, DeliveryReceipt *receipt);
 static void _win_print_wrapped(WINDOW *win, const char *const message, size_t indent, int pad_indent);
@@ -314,7 +316,7 @@ win_get_title(ProfWin *window)
 }
 
 char*
-win_get_string(ProfWin *window)
+win_to_string(ProfWin *window)
 {
     assert(window != NULL);
 
@@ -517,7 +519,6 @@ win_page_down(ProfWin *window)
 void
 win_sub_page_down(ProfWin *window)
 {
-
     if (window->layout->type == LAYOUT_SPLIT) {
         int rows = getmaxy(stdscr);
         int page_space = rows - 4;
@@ -683,14 +684,14 @@ win_show_occupant(ProfWin *window, Occupant *occupant)
 
     theme_item_t presence_colour = theme_main_presence_attrs(presence_str);
 
-    win_print(window, '-', 0, NULL, NO_EOL, presence_colour, "", occupant->nick);
-    win_vprint(window, '-', 0, NULL, NO_DATE | NO_EOL, presence_colour, "", " is %s", presence_str);
+    win_print(window, presence_colour, '-', "%s", occupant->nick);
+    win_append(window, presence_colour, " is %s", presence_str);
 
     if (occupant->status) {
-        win_vprint(window, '-', 0, NULL, NO_DATE | NO_EOL, presence_colour, "", ", \"%s\"", occupant->status);
+        win_append(window, presence_colour, ", \"%s\"", occupant->status);
     }
 
-    win_print(window, '-', 0, NULL, NO_DATE, presence_colour, "", "");
+    win_appendln(window, presence_colour, "");
 }
 
 void
@@ -705,12 +706,12 @@ win_show_contact(ProfWin *window, PContact contact)
     theme_item_t presence_colour = theme_main_presence_attrs(presence);
 
     if (name) {
-        win_print(window, '-', 0, NULL, NO_EOL, presence_colour, "", name);
+        win_print(window, presence_colour, '-', "%s", name);
     } else {
-        win_print(window, '-', 0, NULL, NO_EOL, presence_colour, "", barejid);
+        win_print(window, presence_colour, '-', "%s", barejid);
     }
 
-    win_vprint(window, '-', 0, NULL, NO_DATE | NO_EOL, presence_colour, "", " is %s", presence);
+    win_append(window, presence_colour, " is %s", presence);
 
     if (last_activity) {
         GDateTime *now = g_date_time_new_now_local();
@@ -724,18 +725,17 @@ win_show_contact(ProfWin *window, PContact contact)
         int seconds = span / G_TIME_SPAN_SECOND;
 
         if (hours > 0) {
-          win_vprint(window, '-', 0, NULL, NO_DATE | NO_EOL, presence_colour, "", ", idle %dh%dm%ds", hours, minutes, seconds);
-        }
-        else {
-          win_vprint(window, '-', 0, NULL, NO_DATE | NO_EOL, presence_colour, "", ", idle %dm%ds", minutes, seconds);
+            win_append(window, presence_colour, ", idle %dh%dm%ds", hours, minutes, seconds);
+        } else {
+            win_append(window, presence_colour, ", idle %dm%ds", minutes, seconds);
         }
     }
 
     if (status) {
-        win_vprint(window, '-', 0, NULL, NO_DATE | NO_EOL, presence_colour, "", ", \"%s\"", p_contact_status(contact));
+        win_append(window, presence_colour, ", \"%s\"", p_contact_status(contact));
     }
 
-    win_print(window, '-', 0, NULL, NO_DATE, presence_colour, "", "");
+    win_appendln(window, presence_colour, "");
 }
 
 void
@@ -747,21 +747,21 @@ win_show_occupant_info(ProfWin *window, const char *const room, Occupant *occupa
 
     theme_item_t presence_colour = theme_main_presence_attrs(presence_str);
 
-    win_print(window, '!', 0, NULL, NO_EOL, presence_colour, "", occupant->nick);
-    win_vprint(window, '!', 0, NULL, NO_DATE | NO_EOL, presence_colour, "", " is %s", presence_str);
+    win_print(window, presence_colour, '!', "%s", occupant->nick);
+    win_append(window, presence_colour, " is %s", presence_str);
 
     if (occupant->status) {
-        win_vprint(window, '!', 0, NULL, NO_DATE | NO_EOL, presence_colour, "", ", \"%s\"", occupant->status);
+        win_append(window, presence_colour, ", \"%s\"", occupant->status);
     }
 
     win_newline(window);
 
     if (occupant->jid) {
-        win_vprint(window, '!', 0, NULL, 0, 0, "", "  Jid: %s", occupant->jid);
+        win_println(window, THEME_DEFAULT, '!', "  Jid: %s", occupant->jid);
     }
 
-    win_vprint(window, '!', 0, NULL, 0, 0, "", "  Affiliation: %s", occupant_affiliation);
-    win_vprint(window, '!', 0, NULL, 0, 0, "", "  Role: %s", occupant_role);
+    win_println(window, THEME_DEFAULT, '!', "  Affiliation: %s", occupant_affiliation);
+    win_println(window, THEME_DEFAULT, '!', "  Role: %s", occupant_role);
 
     Jid *jidp = jid_create_from_bare_and_resource(room, occupant->nick);
     EntityCapabilities *caps = caps_lookup(jidp->fulljid);
@@ -771,21 +771,21 @@ win_show_occupant_info(ProfWin *window, const char *const room, Occupant *occupa
         // show identity
         if (caps->identity) {
             DiscoIdentity *identity = caps->identity;
-            win_print(window, '!', 0, NULL, NO_EOL, 0, "", "  Identity: ");
+            win_print(window, THEME_DEFAULT, '!', "  Identity: ");
             if (identity->name) {
-                win_print(window, '!', 0, NULL, NO_DATE | NO_EOL, 0, "", identity->name);
+                win_append(window, THEME_DEFAULT, "%s", identity->name);
                 if (identity->category || identity->type) {
-                    win_print(window, '-', 0, NULL, NO_DATE | NO_EOL, 0, "", " ");
+                    win_append(window, THEME_DEFAULT, " ");
                 }
             }
             if (identity->type) {
-                win_print(window, '!', 0, NULL, NO_DATE | NO_EOL, 0, "", identity->type);
+                win_append(window, THEME_DEFAULT, "%s", identity->type);
                 if (identity->category) {
-                    win_print(window, '!', 0, NULL, NO_DATE | NO_EOL, 0, "", " ");
+                    win_append(window, THEME_DEFAULT, " ");
                 }
             }
             if (identity->category) {
-                win_print(window, '!', 0, NULL, NO_DATE | NO_EOL, 0, "", identity->category);
+                win_append(window, THEME_DEFAULT, "%s", identity->category);
             }
             win_newline(window);
         }
@@ -793,19 +793,19 @@ win_show_occupant_info(ProfWin *window, const char *const room, Occupant *occupa
         if (caps->software_version) {
             SoftwareVersion *software_version = caps->software_version;
             if (software_version->software) {
-                win_vprint(window, '!', 0, NULL, NO_EOL, 0, "", "  Software: %s", software_version->software);
+                win_print(window, THEME_DEFAULT, '!', "  Software: %s", software_version->software);
             }
             if (software_version->software_version) {
-                win_vprint(window, '!', 0, NULL, NO_DATE | NO_EOL, 0, "", ", %s", software_version->software_version);
+                win_append(window, THEME_DEFAULT, ", %s", software_version->software_version);
             }
             if (software_version->software || software_version->software_version) {
                 win_newline(window);
             }
             if (software_version->os) {
-                win_vprint(window, '!', 0, NULL, NO_EOL, 0, "", "  OS: %s", software_version->os);
+                win_print(window, THEME_DEFAULT, '!', "  OS: %s", software_version->os);
             }
             if (software_version->os_version) {
-                win_vprint(window, '!', 0, NULL, NO_DATE | NO_EOL, 0, "", ", %s", software_version->os_version);
+                win_append(window, THEME_DEFAULT, ", %s", software_version->os_version);
             }
             if (software_version->os || software_version->os_version) {
                 win_newline(window);
@@ -815,7 +815,7 @@ win_show_occupant_info(ProfWin *window, const char *const room, Occupant *occupa
         caps_destroy(caps);
     }
 
-    win_print(window, '-', 0, NULL, 0, 0, "", "");
+    win_println(window, THEME_DEFAULT, '-', "");
 }
 
 void
@@ -829,15 +829,15 @@ win_show_info(ProfWin *window, PContact contact)
 
     theme_item_t presence_colour = theme_main_presence_attrs(presence);
 
-    win_print(window, '-', 0, NULL, 0, 0, "", "");
-    win_print(window, '-', 0, NULL, NO_EOL, presence_colour, "", barejid);
+    win_println(window, THEME_DEFAULT, '-', "");
+    win_print(window, presence_colour, '-', "%s", barejid);
     if (name) {
-        win_vprint(window, '-', 0, NULL, NO_DATE | NO_EOL, presence_colour, "", " (%s)", name);
+        win_append(window, presence_colour, " (%s)", name);
     }
-    win_print(window, '-', 0, NULL, NO_DATE, 0, "", ":");
+    win_appendln(window, THEME_DEFAULT, ":");
 
     if (sub) {
-        win_vprint(window, '-', 0, NULL, 0, 0, "", "Subscription: %s", sub);
+        win_println(window, THEME_DEFAULT, '-', "Subscription: %s", sub);
     }
 
     if (last_activity) {
@@ -851,10 +851,10 @@ win_show_info(ProfWin *window, PContact contact)
         int seconds = span / G_TIME_SPAN_SECOND;
 
         if (hours > 0) {
-          win_vprint(window, '-', 0, NULL, 0, 0, "", "Last activity: %dh%dm%ds", hours, minutes, seconds);
+          win_println(window, THEME_DEFAULT, '-', "Last activity: %dh%dm%ds", hours, minutes, seconds);
         }
         else {
-          win_vprint(window, '-', 0, NULL, 0, 0, "", "Last activity: %dm%ds", minutes, seconds);
+          win_println(window, THEME_DEFAULT, '-', "Last activity: %dm%ds", minutes, seconds);
         }
 
         g_date_time_unref(now);
@@ -863,7 +863,7 @@ win_show_info(ProfWin *window, PContact contact)
     GList *resources = p_contact_get_available_resources(contact);
     GList *ordered_resources = NULL;
     if (resources) {
-        win_print(window, '-', 0, NULL, 0, 0, "", "Resources:");
+        win_println(window, THEME_DEFAULT, '-', "Resources:");
 
         // sort in order of availability
         GList *curr = resources;
@@ -881,9 +881,9 @@ win_show_info(ProfWin *window, PContact contact)
         Resource *resource = curr->data;
         const char *resource_presence = string_from_resource_presence(resource->presence);
         theme_item_t presence_colour = theme_main_presence_attrs(resource_presence);
-        win_vprint(window, '-', 0, NULL, NO_EOL, presence_colour, "", "  %s (%d), %s", resource->name, resource->priority, resource_presence);
+        win_print(window, presence_colour, '-', "  %s (%d), %s", resource->name, resource->priority, resource_presence);
         if (resource->status) {
-            win_vprint(window, '-', 0, NULL, NO_DATE | NO_EOL, presence_colour, "", ", \"%s\"", resource->status);
+            win_append(window, presence_colour, ", \"%s\"", resource->status);
         }
         win_newline(window);
 
@@ -895,21 +895,21 @@ win_show_info(ProfWin *window, PContact contact)
             // show identity
             if (caps->identity) {
                 DiscoIdentity *identity = caps->identity;
-                win_print(window, '-', 0, NULL, NO_EOL, 0, "", "    Identity: ");
+                win_print(window, THEME_DEFAULT, '-', "    Identity: ");
                 if (identity->name) {
-                    win_print(window, '-', 0, NULL, NO_DATE | NO_EOL, 0, "", identity->name);
+                    win_append(window, THEME_DEFAULT, "%s", identity->name);
                     if (identity->category || identity->type) {
-                        win_print(window, '-', 0, NULL, NO_DATE | NO_EOL, 0, "", " ");
+                        win_append(window, THEME_DEFAULT, " ");
                     }
                 }
                 if (identity->type) {
-                    win_print(window, '-', 0, NULL, NO_DATE | NO_EOL, 0, "", identity->type);
+                    win_append(window, THEME_DEFAULT, "%s", identity->type);
                     if (identity->category) {
-                        win_print(window, '-', 0, NULL, NO_DATE | NO_EOL, 0, "", " ");
+                        win_append(window, THEME_DEFAULT, " ");
                     }
                 }
                 if (identity->category) {
-                    win_print(window, '-', 0, NULL, NO_DATE | NO_EOL, 0, "", identity->category);
+                    win_append(window, THEME_DEFAULT, "%s", identity->category);
                 }
                 win_newline(window);
             }
@@ -917,19 +917,19 @@ win_show_info(ProfWin *window, PContact contact)
             if (caps->software_version) {
                 SoftwareVersion *software_version = caps->software_version;
                 if (software_version->software) {
-                    win_vprint(window, '-', 0, NULL, NO_EOL, 0, "", "    Software: %s", software_version->software);
+                    win_print(window, THEME_DEFAULT, '-', "    Software: %s", software_version->software);
                 }
                 if (software_version->software_version) {
-                    win_vprint(window, '-', 0, NULL, NO_DATE | NO_EOL, 0, "", ", %s", software_version->software_version);
+                    win_append(window, THEME_DEFAULT, ", %s", software_version->software_version);
                 }
                 if (software_version->software || software_version->software_version) {
                     win_newline(window);
                 }
                 if (software_version->os) {
-                    win_vprint(window, '-', 0, NULL, NO_EOL, 0, "", "    OS: %s", software_version->os);
+                    win_print(window, THEME_DEFAULT, '-', "    OS: %s", software_version->os);
                 }
                 if (software_version->os_version) {
-                    win_vprint(window, '-', 0, NULL, NO_DATE | NO_EOL, 0, "", ", %s", software_version->os_version);
+                    win_append(window, THEME_DEFAULT, ", %s", software_version->os_version);
                 }
                 if (software_version->os || software_version->os_version) {
                     win_newline(window);
@@ -960,13 +960,12 @@ win_show_status_string(ProfWin *window, const char *const from,
         presence_colour = THEME_OFFLINE;
     }
 
-
-    win_vprint(window, '-', 0, NULL, NO_EOL, presence_colour, "", "%s %s", pre, from);
+    win_print(window, presence_colour, '-', "%s %s", pre, from);
 
     if (show)
-        win_vprint(window, '-', 0, NULL, NO_DATE | NO_EOL, presence_colour, "", " is %s", show);
+        win_append(window, presence_colour, " is %s", show);
     else
-        win_vprint(window, '-', 0, NULL, NO_DATE | NO_EOL, presence_colour, "", " is %s", default_show);
+        win_append(window, presence_colour, " is %s", default_show);
 
     if (last_activity) {
         gchar *date_fmt = NULL;
@@ -975,20 +974,19 @@ win_show_status_string(ProfWin *window, const char *const from,
         prefs_free_string(time_pref);
         assert(date_fmt != NULL);
 
-        win_vprint(window, '-', 0, NULL, NO_DATE | NO_EOL, presence_colour, "", ", last activity: %s", date_fmt);
+        win_append(window, presence_colour, ", last activity: %s", date_fmt);
 
         g_free(date_fmt);
     }
 
     if (status)
-        win_vprint(window, '-', 0, NULL, NO_DATE | NO_EOL, presence_colour, "", ", \"%s\"", status);
+        win_append(window, presence_colour, ", \"%s\"", status);
 
-    win_print(window, '-', 0, NULL, NO_DATE, presence_colour, "", "");
-
+    win_appendln(window, presence_colour, "");
 }
 
 void
-win_print_incoming_message(ProfWin *window, GDateTime *timestamp,
+win_print_incoming(ProfWin *window, GDateTime *timestamp,
     const char *const from, const char *const message, prof_enc_t enc_mode)
 {
     char enc_char = '-';
@@ -1001,10 +999,10 @@ win_print_incoming_message(ProfWin *window, GDateTime *timestamp,
             } else if (enc_mode == PROF_MSG_PGP) {
                 enc_char = prefs_get_pgp_char();
             }
-            win_print(window, enc_char, 0, timestamp, NO_ME, THEME_TEXT_THEM, from, message);
+            _win_printf(window, enc_char, 0, timestamp, NO_ME, THEME_TEXT_THEM, from, "%s", message);
             break;
         case WIN_PRIVATE:
-            win_print(window, '-', 0, timestamp, NO_ME, THEME_TEXT_THEM, from, message);
+            _win_printf(window, '-', 0, timestamp, NO_ME, THEME_TEXT_THEM, from, "%s", message);
             break;
         default:
             assert(FALSE);
@@ -1013,53 +1011,249 @@ win_print_incoming_message(ProfWin *window, GDateTime *timestamp,
 }
 
 void
-win_vprint(ProfWin *window, const char show_char, int pad_indent, GDateTime *timestamp,
-    int flags, theme_item_t theme_item, const char *const from, const char *const message, ...)
+win_print_them(ProfWin *window, theme_item_t theme_item, const char *const them)
 {
+    _win_printf(window, '-', 0, NULL, NO_ME | NO_EOL, theme_item, them, "");
+}
+
+void
+win_println_them_message(ProfWin *window, const char *const them, const char *const message, ...)
+{
+    GDateTime *timestamp = g_date_time_new_now_local();
+
     va_list arg;
     va_start(arg, message);
     GString *fmt_msg = g_string_new(NULL);
     g_string_vprintf(fmt_msg, message, arg);
-    win_print(window, show_char, pad_indent, timestamp, flags, theme_item, from, fmt_msg->str);
+
+    buffer_push(window->layout->buffer, '-', 0, timestamp, NO_ME, THEME_TEXT_THEM, them, fmt_msg->str, NULL);
+
+    _win_print(window, '-', 0, timestamp, NO_ME, THEME_TEXT_THEM, them, fmt_msg->str, NULL);
+    inp_nonblocking(TRUE);
+    g_date_time_unref(timestamp);
+
     g_string_free(fmt_msg, TRUE);
     va_end(arg);
 }
 
 void
-win_print(ProfWin *window, const char show_char, int pad_indent, GDateTime *timestamp,
-    int flags, theme_item_t theme_item, const char *const from, const char *const message)
+win_println_me_message(ProfWin *window, const char *const me, const char *const message, ...)
 {
-    if (timestamp == NULL) {
-        timestamp = g_date_time_new_now_local();
-    } else {
-        g_date_time_ref(timestamp);
-    }
+    GDateTime *timestamp = g_date_time_new_now_local();
 
-    buffer_push(window->layout->buffer, show_char, pad_indent, timestamp, flags, theme_item, from, message, NULL);
-    _win_print(window, show_char, pad_indent, timestamp, flags, theme_item, from, message, NULL);
-    // TODO: cross-reference.. this should be replaced by a real event-based system
+    va_list arg;
+    va_start(arg, message);
+    GString *fmt_msg = g_string_new(NULL);
+    g_string_vprintf(fmt_msg, message, arg);
+
+    buffer_push(window->layout->buffer, '-', 0, timestamp, 0, THEME_TEXT_ME, me, fmt_msg->str, NULL);
+
+    _win_print(window, '-', 0, timestamp, 0, THEME_TEXT_ME, me, fmt_msg->str, NULL);
     inp_nonblocking(TRUE);
     g_date_time_unref(timestamp);
+
+    g_string_free(fmt_msg, TRUE);
+    va_end(arg);
 }
 
 void
-win_print_with_receipt(ProfWin *window, const char show_char, int pad_indent, GTimeVal *tstamp,
-    int flags, theme_item_t theme_item, const char *const from, const char *const message, char *id)
+win_print_outgoing(ProfWin *window, const char ch, const char *const message, ...)
 {
-    GDateTime *time;
+    GDateTime *timestamp = g_date_time_new_now_local();
 
-    if (tstamp == NULL) {
-        time = g_date_time_new_now_local();
-    } else {
-        time = g_date_time_new_from_timeval_utc(tstamp);
-    }
+    va_list arg;
+    va_start(arg, message);
+    GString *fmt_msg = g_string_new(NULL);
+    g_string_vprintf(fmt_msg, message, arg);
+
+    buffer_push(window->layout->buffer, ch, 0, timestamp, 0, THEME_TEXT_ME, "me", fmt_msg->str, NULL);
+
+    _win_print(window, ch, 0, timestamp, 0, THEME_TEXT_ME, "me", fmt_msg->str, NULL);
+    inp_nonblocking(TRUE);
+    g_date_time_unref(timestamp);
+
+    g_string_free(fmt_msg, TRUE);
+    va_end(arg);
+}
+
+void
+win_print_history(ProfWin *window, GDateTime *timestamp, const char *const message, ...)
+{
+    g_date_time_ref(timestamp);
+
+    va_list arg;
+    va_start(arg, message);
+    GString *fmt_msg = g_string_new(NULL);
+    g_string_vprintf(fmt_msg, message, arg);
+
+    buffer_push(window->layout->buffer, '-', 0, timestamp, NO_COLOUR_DATE, THEME_DEFAULT, "", fmt_msg->str, NULL);
+
+    _win_print(window, '-', 0, timestamp, NO_COLOUR_DATE, THEME_DEFAULT, "", fmt_msg->str, NULL);
+    inp_nonblocking(TRUE);
+    g_date_time_unref(timestamp);
+
+    g_string_free(fmt_msg, TRUE);
+    va_end(arg);
+}
+
+void
+win_print(ProfWin *window, theme_item_t theme_item, const char ch, const char *const message, ...)
+{
+    GDateTime *timestamp = g_date_time_new_now_local();
+
+    va_list arg;
+    va_start(arg, message);
+    GString *fmt_msg = g_string_new(NULL);
+    g_string_vprintf(fmt_msg, message, arg);
+
+    buffer_push(window->layout->buffer, ch, 0, timestamp, NO_EOL, theme_item, "", fmt_msg->str, NULL);
+
+    _win_print(window, ch, 0, timestamp, NO_EOL, theme_item, "", fmt_msg->str, NULL);
+    inp_nonblocking(TRUE);
+    g_date_time_unref(timestamp);
+
+    g_string_free(fmt_msg, TRUE);
+    va_end(arg);
+}
+
+void
+win_println(ProfWin *window, theme_item_t theme_item, const char ch, const char *const message, ...)
+{
+    GDateTime *timestamp = g_date_time_new_now_local();
+
+    va_list arg;
+    va_start(arg, message);
+    GString *fmt_msg = g_string_new(NULL);
+    g_string_vprintf(fmt_msg, message, arg);
+
+    buffer_push(window->layout->buffer, ch, 0, timestamp, 0, theme_item, "", fmt_msg->str, NULL);
+
+    _win_print(window, ch, 0, timestamp, 0, theme_item, "", fmt_msg->str, NULL);
+    inp_nonblocking(TRUE);
+    g_date_time_unref(timestamp);
+
+    g_string_free(fmt_msg, TRUE);
+    va_end(arg);
+}
+
+void
+win_println_indent(ProfWin *window, int pad, const char *const message, ...)
+{
+    GDateTime *timestamp = g_date_time_new_now_local();
+
+    va_list arg;
+    va_start(arg, message);
+    GString *fmt_msg = g_string_new(NULL);
+    g_string_vprintf(fmt_msg, message, arg);
+
+    buffer_push(window->layout->buffer, '-', pad, timestamp, 0, THEME_DEFAULT, "", fmt_msg->str, NULL);
+
+    _win_print(window, '-', pad, timestamp, 0, THEME_DEFAULT, "", fmt_msg->str, NULL);
+    inp_nonblocking(TRUE);
+    g_date_time_unref(timestamp);
+
+    g_string_free(fmt_msg, TRUE);
+    va_end(arg);
+}
+
+void
+win_append(ProfWin *window, theme_item_t theme_item, const char *const message, ...)
+{
+    GDateTime *timestamp = g_date_time_new_now_local();
+
+    va_list arg;
+    va_start(arg, message);
+    GString *fmt_msg = g_string_new(NULL);
+    g_string_vprintf(fmt_msg, message, arg);
+
+    buffer_push(window->layout->buffer, '-', 0, timestamp, NO_DATE | NO_EOL, theme_item, "", fmt_msg->str, NULL);
+
+    _win_print(window, '-', 0, timestamp, NO_DATE | NO_EOL, theme_item, "", fmt_msg->str, NULL);
+    inp_nonblocking(TRUE);
+    g_date_time_unref(timestamp);
+
+    g_string_free(fmt_msg, TRUE);
+    va_end(arg);
+}
+
+void
+win_appendln(ProfWin *window, theme_item_t theme_item, const char *const message, ...)
+{
+    GDateTime *timestamp = g_date_time_new_now_local();
+
+    va_list arg;
+    va_start(arg, message);
+    GString *fmt_msg = g_string_new(NULL);
+    g_string_vprintf(fmt_msg, message, arg);
+
+    buffer_push(window->layout->buffer, '-', 0, timestamp, NO_DATE, theme_item, "", fmt_msg->str, NULL);
+
+    _win_print(window, '-', 0, timestamp, NO_DATE, theme_item, "", fmt_msg->str, NULL);
+    inp_nonblocking(TRUE);
+    g_date_time_unref(timestamp);
+
+    g_string_free(fmt_msg, TRUE);
+    va_end(arg);
+}
+
+void
+win_append_highlight(ProfWin *window, theme_item_t theme_item, const char *const message, ...)
+{
+    GDateTime *timestamp = g_date_time_new_now_local();
+
+    va_list arg;
+    va_start(arg, message);
+    GString *fmt_msg = g_string_new(NULL);
+    g_string_vprintf(fmt_msg, message, arg);
+
+    buffer_push(window->layout->buffer, '-', 0, timestamp, NO_DATE | NO_ME | NO_EOL, theme_item, "", fmt_msg->str, NULL);
+
+    _win_print(window, '-', 0, timestamp, NO_DATE | NO_ME | NO_EOL, theme_item, "", fmt_msg->str, NULL);
+    inp_nonblocking(TRUE);
+    g_date_time_unref(timestamp);
+
+    g_string_free(fmt_msg, TRUE);
+    va_end(arg);
+}
+
+void
+win_appendln_highlight(ProfWin *window, theme_item_t theme_item, const char *const message, ...)
+{
+    GDateTime *timestamp = g_date_time_new_now_local();
+
+    va_list arg;
+    va_start(arg, message);
+    GString *fmt_msg = g_string_new(NULL);
+    g_string_vprintf(fmt_msg, message, arg);
+
+    buffer_push(window->layout->buffer, '-', 0, timestamp, NO_DATE | NO_ME, theme_item, "", fmt_msg->str, NULL);
+
+    _win_print(window, '-', 0, timestamp, NO_DATE | NO_ME, theme_item, "", fmt_msg->str, NULL);
+    inp_nonblocking(TRUE);
+    g_date_time_unref(timestamp);
+
+    g_string_free(fmt_msg, TRUE);
+    va_end(arg);
+}
+
+void
+win_print_http_upload(ProfWin *window, const char *const message, char *url)
+{
+    win_print_with_receipt(window, '!', NULL, message, url);
+}
+
+void
+win_print_with_receipt(ProfWin *window, const char show_char, const char *const from, const char *const message,
+    char *id)
+{
+    GDateTime *time = g_date_time_new_now_local();
 
     DeliveryReceipt *receipt = malloc(sizeof(struct delivery_receipt_t));
     receipt->id = strdup(id);
     receipt->received = FALSE;
 
-    buffer_push(window->layout->buffer, show_char, pad_indent, time, flags, theme_item, from, message, receipt);
-    _win_print(window, show_char, pad_indent, time, flags, theme_item, from, message, receipt);
+    buffer_push(window->layout->buffer, show_char, 0, time, 0, THEME_TEXT_ME, from, message, receipt);
+    _win_print(window, show_char, 0, time, 0, THEME_TEXT_ME, from, message, receipt);
     // TODO: cross-reference.. this should be replaced by a real event-based system
     inp_nonblocking(TRUE);
     g_date_time_unref(time);
@@ -1096,27 +1290,34 @@ win_update_entry_theme(ProfWin *window, const char *const id, theme_item_t theme
 }
 
 void
-win_println(ProfWin *window, int pad, const char *const message)
+win_newline(ProfWin *window)
 {
-    win_print(window, '-', pad, NULL, 0, 0, "", message);
+    win_appendln(window, THEME_DEFAULT, "");
 }
 
-void
-win_vprintln_ch(ProfWin *window, char ch, const char *const message, ...)
+static void
+_win_printf(ProfWin *window, const char show_char, int pad_indent, GDateTime *timestamp,
+    int flags, theme_item_t theme_item, const char *const from, const char *const message, ...)
 {
+    if (timestamp == NULL) {
+        timestamp = g_date_time_new_now_local();
+    } else {
+        g_date_time_ref(timestamp);
+    }
+
     va_list arg;
     va_start(arg, message);
     GString *fmt_msg = g_string_new(NULL);
     g_string_vprintf(fmt_msg, message, arg);
-    win_print(window, ch, 0, NULL, 0, 0, "", fmt_msg->str);
+
+    buffer_push(window->layout->buffer, show_char, pad_indent, timestamp, flags, theme_item, from, fmt_msg->str, NULL);
+
+    _win_print(window, show_char, pad_indent, timestamp, flags, theme_item, from, fmt_msg->str, NULL);
+    inp_nonblocking(TRUE);
+    g_date_time_unref(timestamp);
+
     g_string_free(fmt_msg, TRUE);
     va_end(arg);
-}
-
-void
-win_newline(ProfWin *window)
-{
-    win_print(window, '-', 0, NULL, NO_DATE, 0, "", "");
 }
 
 static void

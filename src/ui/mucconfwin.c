@@ -47,12 +47,12 @@ mucconfwin_show_form(ProfMucConfWin *confwin)
 {
     ProfWin *window = (ProfWin*) confwin;
     if (confwin->form->title) {
-        win_print(window, '-', 0, NULL, NO_EOL, 0, "", "Form title: ");
-        win_print(window, '-', 0, NULL, NO_DATE, 0, "", confwin->form->title);
+        win_print(window, THEME_DEFAULT, '-', "Form title: ");
+        win_appendln(window, THEME_DEFAULT, "%s", confwin->form->title);
     } else {
-        win_vprint(window, '-', 0, NULL, 0, 0, "", "Configuration for room %s.", confwin->roomjid);
+        win_println(window, THEME_DEFAULT, '-', "Configuration for room %s.", confwin->roomjid);
     }
-    win_print(window, '-', 0, NULL, 0, 0, "", "");
+    win_println(window, THEME_DEFAULT, '-', "");
 
     mucconfwin_form_help(confwin);
 
@@ -64,7 +64,7 @@ mucconfwin_show_form(ProfMucConfWin *confwin)
         if ((g_strcmp0(field->type, "fixed") == 0) && field->values) {
             if (field->values) {
                 char *value = field->values->data;
-                win_print(window, '-', 0, NULL, 0, 0, "", value);
+                win_println(window, THEME_DEFAULT, '-', "%s", value);
             }
         } else if (g_strcmp0(field->type, "hidden") != 0 && field->var) {
             char *tag = g_hash_table_lookup(confwin->form->var_to_tag, field->var);
@@ -83,7 +83,7 @@ mucconfwin_show_form_field(ProfMucConfWin *confwin, DataForm *form, char *tag)
     FormField *field = form_get_field_by_tag(form, tag);
     ProfWin *window = (ProfWin*)confwin;
     _mucconfwin_form_field(window, tag, field);
-    win_println(window, 0, "");
+    win_println(window, THEME_DEFAULT, '-', "");
 }
 
 void
@@ -96,11 +96,11 @@ mucconfwin_handle_configuration(ProfMucConfWin *confwin, DataForm *form)
 
     mucconfwin_show_form(confwin);
 
-    win_print(window, '-', 0, NULL, 0, 0, "", "");
-    win_print(window, '-', 0, NULL, 0, 0, "", "Use '/form submit' to save changes.");
-    win_print(window, '-', 0, NULL, 0, 0, "", "Use '/form cancel' to cancel changes.");
-    win_print(window, '-', 0, NULL, 0, 0, "", "See '/form help' for more information.");
-    win_print(window, '-', 0, NULL, 0, 0, "", "");
+    win_println(window, THEME_DEFAULT, '-', "");
+    win_println(window, THEME_DEFAULT, '-', "Use '/form submit' to save changes.");
+    win_println(window, THEME_DEFAULT, '-', "Use '/form cancel' to cancel changes.");
+    win_println(window, THEME_DEFAULT, '-', "See '/form help' for more information.");
+    win_println(window, THEME_DEFAULT, '-', "");
 }
 
 void
@@ -111,16 +111,16 @@ mucconfwin_field_help(ProfMucConfWin *confwin, char *tag)
     ProfWin *window = (ProfWin*) confwin;
     FormField *field = form_get_field_by_tag(confwin->form, tag);
     if (field) {
-        win_print(window, '-', 0, NULL, NO_EOL, 0, "", field->label);
+        win_print(window, THEME_DEFAULT, '-', "%s", field->label);
         if (field->required) {
-            win_print(window, '-', 0, NULL, NO_DATE, 0, "", " (Required):");
+            win_appendln(window, THEME_DEFAULT, " (Required):");
         } else {
-            win_print(window, '-', 0, NULL, NO_DATE, 0, "", ":");
+            win_appendln(window, THEME_DEFAULT, ":");
         }
         if (field->description) {
-            win_vprint(window, '-', 0, NULL, 0, 0, "", "  Description : %s", field->description);
+            win_println(window, THEME_DEFAULT, '-', "  Description : %s", field->description);
         }
-        win_vprint(window, '-', 0, NULL, 0, 0, "", "  Type        : %s", field->type);
+        win_println(window, THEME_DEFAULT, '-', "  Type        : %s", field->type);
 
         int num_values = 0;
         GSList *curr_option = NULL;
@@ -129,51 +129,51 @@ mucconfwin_field_help(ProfMucConfWin *confwin, char *tag)
         switch (field->type_t) {
         case FIELD_TEXT_SINGLE:
         case FIELD_TEXT_PRIVATE:
-            win_vprint(window, '-', 0, NULL, 0, 0, "", "  Set         : /%s <value>", tag);
-            win_print(window, '-', 0, NULL, 0, 0, "", "  Where       : <value> is any text");
+            win_println(window, THEME_DEFAULT, '-', "  Set         : /%s <value>", tag);
+            win_println(window, THEME_DEFAULT, '-', "  Where       : <value> is any text");
             break;
         case FIELD_TEXT_MULTI:
             num_values = form_get_value_count(confwin->form, tag);
-            win_vprint(window, '-', 0, NULL, 0, 0, "", "  Add         : /%s add <value>", tag);
-            win_print(window, '-', 0, NULL, 0, 0, "", "  Where       : <value> is any text");
+            win_println(window, THEME_DEFAULT, '-', "  Add         : /%s add <value>", tag);
+            win_println(window, THEME_DEFAULT, '-', "  Where       : <value> is any text");
             if (num_values > 0) {
-                win_vprint(window, '-', 0, NULL, 0, 0, "", "  Remove      : /%s remove <value>", tag);
-                win_vprint(window, '-', 0, NULL, 0, 0, "", "  Where       : <value> between 'val1' and 'val%d'", num_values);
+                win_println(window, THEME_DEFAULT, '-', "  Remove      : /%s remove <value>", tag);
+                win_println(window, THEME_DEFAULT, '-', "  Where       : <value> between 'val1' and 'val%d'", num_values);
             }
             break;
         case FIELD_BOOLEAN:
-            win_vprint(window, '-', 0, NULL, 0, 0, "", "  Set         : /%s <value>", tag);
-            win_print(window, '-', 0, NULL, 0, 0, "", "  Where       : <value> is either 'on' or 'off'");
+            win_println(window, THEME_DEFAULT, '-', "  Set         : /%s <value>", tag);
+            win_println(window, THEME_DEFAULT, '-', "  Where       : <value> is either 'on' or 'off'");
             break;
         case FIELD_LIST_SINGLE:
-            win_vprint(window, '-', 0, NULL, 0, 0, "", "  Set         : /%s <value>", tag);
-            win_print(window, '-', 0, NULL, 0, 0, "", "  Where       : <value> is one of");
+            win_println(window, THEME_DEFAULT, '-', "  Set         : /%s <value>", tag);
+            win_println(window, THEME_DEFAULT, '-', "  Where       : <value> is one of");
             curr_option = field->options;
             while (curr_option) {
                 option = curr_option->data;
-                win_vprint(window, '-', 0, NULL, 0, 0, "", "                  %s", option->value);
+                win_println(window, THEME_DEFAULT, '-', "                  %s", option->value);
                 curr_option = g_slist_next(curr_option);
             }
             break;
         case FIELD_LIST_MULTI:
-            win_vprint(window, '-', 0, NULL, 0, 0, "", "  Add         : /%s add <value>", tag);
-            win_vprint(window, '-', 0, NULL, 0, 0, "", "  Remove      : /%s remove <value>", tag);
-            win_print(window, '-', 0, NULL, 0, 0, "", "  Where       : <value> is one of");
+            win_println(window, THEME_DEFAULT, '-', "  Add         : /%s add <value>", tag);
+            win_println(window, THEME_DEFAULT, '-', "  Remove      : /%s remove <value>", tag);
+            win_println(window, THEME_DEFAULT, '-', "  Where       : <value> is one of");
             curr_option = field->options;
             while (curr_option) {
                 option = curr_option->data;
-                win_vprint(window, '-', 0, NULL, 0, 0, "", "                  %s", option->value);
+                win_println(window, THEME_DEFAULT, '-', "                  %s", option->value);
                 curr_option = g_slist_next(curr_option);
             }
             break;
         case FIELD_JID_SINGLE:
-            win_vprint(window, '-', 0, NULL, 0, 0, "", "  Set         : /%s <value>", tag);
-            win_print(window, '-', 0, NULL, 0, 0, "", "  Where       : <value> is a valid Jabber ID");
+            win_println(window, THEME_DEFAULT, '-', "  Set         : /%s <value>", tag);
+            win_println(window, THEME_DEFAULT, '-', "  Where       : <value> is a valid Jabber ID");
             break;
         case FIELD_JID_MULTI:
-            win_vprint(window, '-', 0, NULL, 0, 0, "", "  Add         : /%s add <value>", tag);
-            win_vprint(window, '-', 0, NULL, 0, 0, "", "  Remove      : /%s remove <value>", tag);
-            win_print(window, '-', 0, NULL, 0, 0, "", "  Where       : <value> is a valid Jabber ID");
+            win_println(window, THEME_DEFAULT, '-', "  Add         : /%s add <value>", tag);
+            win_println(window, THEME_DEFAULT, '-', "  Remove      : /%s remove <value>", tag);
+            win_println(window, THEME_DEFAULT, '-', "  Where       : <value> is a valid Jabber ID");
             break;
         case FIELD_FIXED:
         case FIELD_UNKNOWN:
@@ -182,7 +182,7 @@ mucconfwin_field_help(ProfMucConfWin *confwin, char *tag)
             break;
         }
     } else {
-        win_vprint(window, '-', 0, NULL, 0, 0, "", "No such field %s", tag);
+        win_println(window, THEME_DEFAULT, '-', "No such field %s", tag);
     }
 }
 
@@ -193,21 +193,21 @@ mucconfwin_form_help(ProfMucConfWin *confwin)
 
     if (confwin->form->instructions) {
         ProfWin *window = (ProfWin*) confwin;
-        win_print(window, '-', 0, NULL, 0, 0, "", "Supplied instructions:");
-        win_print(window, '-', 0, NULL, 0, 0, "", confwin->form->instructions);
-        win_print(window, '-', 0, NULL, 0, 0, "", "");
+        win_println(window, THEME_DEFAULT, '-', "Supplied instructions:");
+        win_println(window, THEME_DEFAULT, '-', "%s", confwin->form->instructions);
+        win_println(window, THEME_DEFAULT, '-', "");
     }
 }
 
 static void
 _mucconfwin_form_field(ProfWin *window, char *tag, FormField *field)
 {
-    win_vprint(window, '-', 0, NULL, NO_EOL, THEME_AWAY, "", "[%s] ", tag);
-    win_vprint(window, '-', 0, NULL, NO_EOL | NO_DATE, 0, "", "%s", field->label);
+    win_print(window, THEME_AWAY, '-', "[%s] ", tag);
+    win_append(window, THEME_DEFAULT, "%s", field->label);
     if (field->required) {
-        win_print(window, '-', 0, NULL, NO_DATE | NO_EOL, 0, "", " (required): ");
+        win_append(window, THEME_DEFAULT, " (required): ");
     } else {
-        win_print(window, '-', 0, NULL, NO_DATE | NO_EOL, 0, "", ": ");
+        win_append(window, THEME_DEFAULT, ": ");
     }
 
     GSList *values = field->values;
@@ -221,9 +221,9 @@ _mucconfwin_form_field(ProfWin *window, char *tag, FormField *field)
             char *value = curr_value->data;
             if (value) {
                 if (g_strcmp0(field->var, "muc#roomconfig_roomsecret") == 0) {
-                    win_print(window, '-', 0, NULL, NO_DATE | NO_EOL, THEME_ONLINE, "", "[hidden]");
+                    win_append(window, THEME_ONLINE, "[hidden]");
                 } else {
-                    win_print(window, '-', 0, NULL, NO_DATE | NO_EOL, THEME_ONLINE, "", value);
+                    win_append(window, THEME_ONLINE, "%s", value);
                 }
             }
         }
@@ -233,7 +233,7 @@ _mucconfwin_form_field(ProfWin *window, char *tag, FormField *field)
         if (curr_value) {
             char *value = curr_value->data;
             if (value) {
-                win_print(window, '-', 0, NULL, NO_DATE | NO_EOL, THEME_ONLINE, "", "[hidden]");
+                win_append(window, THEME_ONLINE, "[hidden]");
             }
         }
         win_newline(window);
@@ -245,23 +245,23 @@ _mucconfwin_form_field(ProfWin *window, char *tag, FormField *field)
             char *value = curr_value->data;
             GString *val_tag = g_string_new("");
             g_string_printf(val_tag, "val%d", index++);
-            win_vprint(window, '-', 0, NULL, 0, THEME_ONLINE, "", "  [%s] %s", val_tag->str, value);
+            win_println(window, THEME_ONLINE, '-', "  [%s] %s", val_tag->str, value);
             g_string_free(val_tag, TRUE);
             curr_value = g_slist_next(curr_value);
         }
         break;
     case FIELD_BOOLEAN:
         if (curr_value == NULL) {
-            win_print(window, '-', 0, NULL, NO_DATE, THEME_OFFLINE, "", "FALSE");
+            win_appendln(window, THEME_OFFLINE, "FALSE");
         } else {
             char *value = curr_value->data;
             if (value == NULL) {
-                win_print(window, '-', 0, NULL, NO_DATE, THEME_OFFLINE, "", "FALSE");
+                win_appendln(window, THEME_OFFLINE, "FALSE");
             } else {
                 if (g_strcmp0(value, "0") == 0) {
-                    win_print(window, '-', 0, NULL, NO_DATE, THEME_OFFLINE, "", "FALSE");
+                    win_appendln(window, THEME_OFFLINE, "FALSE");
                 } else {
-                    win_print(window, '-', 0, NULL, NO_DATE, THEME_ONLINE, "", "TRUE");
+                    win_appendln(window, THEME_ONLINE, "TRUE");
                 }
             }
         }
@@ -275,9 +275,9 @@ _mucconfwin_form_field(ProfWin *window, char *tag, FormField *field)
             while (curr_option) {
                 FormOption *option = curr_option->data;
                 if (g_strcmp0(option->value, value) == 0) {
-                    win_vprint(window, '-', 0, NULL, 0, THEME_ONLINE, "", "  [%s] %s", option->value, option->label);
+                    win_println(window, THEME_ONLINE, '-', "  [%s] %s", option->value, option->label);
                 } else {
-                    win_vprint(window, '-', 0, NULL, 0, THEME_OFFLINE, "", "  [%s] %s", option->value, option->label);
+                    win_println(window, THEME_OFFLINE, '-', "  [%s] %s", option->value, option->label);
                 }
                 curr_option = g_slist_next(curr_option);
             }
@@ -291,9 +291,9 @@ _mucconfwin_form_field(ProfWin *window, char *tag, FormField *field)
             while (curr_option) {
                 FormOption *option = curr_option->data;
                 if (g_slist_find_custom(curr_value, option->value, (GCompareFunc)g_strcmp0)) {
-                    win_vprint(window, '-', 0, NULL, 0, THEME_ONLINE, "", "  [%s] %s", option->value, option->label);
+                    win_println(window, THEME_ONLINE, '-', "  [%s] %s", option->value, option->label);
                 } else {
-                    win_vprint(window, '-', 0, NULL, 0, THEME_OFFLINE, "", "  [%s] %s", option->value, option->label);
+                    win_println(window, THEME_OFFLINE, '-', "  [%s] %s", option->value, option->label);
                 }
                 curr_option = g_slist_next(curr_option);
             }
@@ -303,7 +303,7 @@ _mucconfwin_form_field(ProfWin *window, char *tag, FormField *field)
         if (curr_value) {
             char *value = curr_value->data;
             if (value) {
-                win_print(window, '-', 0, NULL, NO_DATE | NO_EOL, THEME_ONLINE, "", value);
+                win_append(window, THEME_ONLINE, "%s", value);
             }
         }
         win_newline(window);
@@ -312,7 +312,7 @@ _mucconfwin_form_field(ProfWin *window, char *tag, FormField *field)
         win_newline(window);
         while (curr_value) {
             char *value = curr_value->data;
-            win_vprint(window, '-', 0, NULL, 0, THEME_ONLINE, "", "  %s", value);
+            win_println(window, THEME_ONLINE, '-', "  %s", value);
             curr_value = g_slist_next(curr_value);
         }
         break;
@@ -320,7 +320,7 @@ _mucconfwin_form_field(ProfWin *window, char *tag, FormField *field)
         if (curr_value) {
             char *value = curr_value->data;
             if (value) {
-                win_print(window, '-', 0, NULL, NO_DATE | NO_EOL, 0, "", value);
+                win_append(window, THEME_DEFAULT, "%s", value);
             }
         }
         win_newline(window);
