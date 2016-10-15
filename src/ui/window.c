@@ -984,7 +984,7 @@ win_show_status_string(ProfWin *window, const char *const from,
 }
 
 void
-win_print_incoming_message(ProfWin *window, GDateTime *timestamp,
+win_print_incoming(ProfWin *window, GDateTime *timestamp,
     const char *const from, const char *const message, prof_enc_t enc_mode)
 {
     char enc_char = '-';

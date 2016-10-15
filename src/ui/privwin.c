@@ -60,7 +60,7 @@ privwin_incoming_msg(ProfPrivateWin *privatewin, const char *const message, GDat
 
     // currently viewing chat window with sender
     if (wins_is_current(window)) {
-        win_print_incoming_message(window, timestamp, jidp->resourcepart, message, PROF_MSG_PLAIN);
+        win_print_incoming(window, timestamp, jidp->resourcepart, message, PROF_MSG_PLAIN);
         title_bar_set_typing(FALSE);
         status_bar_active(num);
 
@@ -68,7 +68,7 @@ privwin_incoming_msg(ProfPrivateWin *privatewin, const char *const message, GDat
     } else {
         status_bar_new(num);
         cons_show_incoming_private_message(jidp->resourcepart, jidp->barejid, num, privatewin->unread);
-        win_print_incoming_message(window, timestamp, jidp->resourcepart, message, PROF_MSG_PLAIN);
+        win_print_incoming(window, timestamp, jidp->resourcepart, message, PROF_MSG_PLAIN);
 
         privatewin->unread++;
 

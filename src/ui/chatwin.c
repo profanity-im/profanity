@@ -247,7 +247,7 @@ chatwin_incoming_msg(ProfChatWin *chatwin, const char *const resource, const cha
 
     // currently viewing chat window with sender
     if (wins_is_current(window)) {
-        win_print_incoming_message(window, timestamp, display_name, plugin_message, enc_mode);
+        win_print_incoming(window, timestamp, display_name, plugin_message, enc_mode);
         title_bar_set_typing(FALSE);
         status_bar_active(num);
 
@@ -274,7 +274,7 @@ chatwin_incoming_msg(ProfChatWin *chatwin, const char *const resource, const cha
             }
         }
 
-        win_print_incoming_message(window, timestamp, display_name, plugin_message, enc_mode);
+        win_print_incoming(window, timestamp, display_name, plugin_message, enc_mode);
     }
 
     if (prefs_get_boolean(PREF_BEEP)) {
