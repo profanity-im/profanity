@@ -534,7 +534,7 @@ void win_show_info(ProfWin *window, PContact contact) {}
 void win_println(ProfWin *window, int pad, const char * const message) {}
 void win_vprintln_ch(ProfWin *window, char ch, const char *const message, ...) {}
 void win_clear(ProfWin *window) {}
-char* win_get_string(ProfWin *window)
+char* win_to_string(ProfWin *window)
 {
     return NULL;
 }

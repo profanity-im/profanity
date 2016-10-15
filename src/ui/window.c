@@ -314,7 +314,7 @@ win_get_title(ProfWin *window)
 }
 
 char*
-win_get_string(ProfWin *window)
+win_to_string(ProfWin *window)
 {
     assert(window != NULL);
 
