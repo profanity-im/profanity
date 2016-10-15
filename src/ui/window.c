@@ -1166,7 +1166,7 @@ win_append(ProfWin *window, theme_item_t theme_item, const char *const message, 
     GString *fmt_msg = g_string_new(NULL);
     g_string_vprintf(fmt_msg, message, arg);
 
-    buffer_push(window->layout->buffer, '-', 0, timestamp, NO_EOL, theme_item, "", fmt_msg->str, NULL);
+    buffer_push(window->layout->buffer, '-', 0, timestamp, NO_DATE | NO_EOL, theme_item, "", fmt_msg->str, NULL);
 
     _win_print(window, '-', 0, timestamp, NO_DATE | NO_EOL, theme_item, "", fmt_msg->str, NULL);
     inp_nonblocking(TRUE);
