@@ -113,7 +113,7 @@ cons_show_padded(int pad, const char *const msg, ...)
     va_start(arg, msg);
     GString *fmt_msg = g_string_new(NULL);
     g_string_vprintf(fmt_msg, msg, arg);
-    win_println_indent(console, pad, fmt_msg->str);
+    win_println_indent(console, pad, "%s", fmt_msg->str);
     g_string_free(fmt_msg, TRUE);
     va_end(arg);
 }
@@ -150,7 +150,7 @@ cons_show_help(const char *const cmd, CommandHelp *help)
         cons_show("");
         win_println(console, THEME_WHITE_BOLD, '-', "Arguments");
         for (i = 0; help->args[i][0] != NULL; i++) {
-            win_printf(console, '-', maxlen + 3, NULL, 0, THEME_DEFAULT, "", "%-*s: %s", maxlen + 1, help->args[i][0], help->args[i][1]);
+            win_println_indent(console, maxlen + 3, "%-*s: %s", maxlen + 1, help->args[i][0], help->args[i][1]);
         }
     }
 

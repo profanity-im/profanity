@@ -1114,6 +1114,26 @@ win_println(ProfWin *window, theme_item_t theme_item, const char ch, const char 
 }
 
 void
+win_println_indent(ProfWin *window, int pad, const char *const message, ...)
+{
+    GDateTime *timestamp = g_date_time_new_now_local();
+
+    va_list arg;
+    va_start(arg, message);
+    GString *fmt_msg = g_string_new(NULL);
+    g_string_vprintf(fmt_msg, message, arg);
+
+    buffer_push(window->layout->buffer, '-', pad, timestamp, 0, THEME_DEFAULT, "", fmt_msg->str, NULL);
+
+    _win_print(window, '-', pad, timestamp, 0, THEME_DEFAULT, "", fmt_msg->str, NULL);
+    inp_nonblocking(TRUE);
+    g_date_time_unref(timestamp);
+
+    g_string_free(fmt_msg, TRUE);
+    va_end(arg);
+}
+
+void
 win_append(ProfWin *window, theme_item_t theme_item, const char *const message, ...)
 {
     GDateTime *timestamp = g_date_time_new_now_local();
@@ -1204,12 +1224,6 @@ win_update_entry_theme(ProfWin *window, const char *const id, theme_item_t theme
         entry->theme_item = theme_item;
         win_redraw(window);
     }
-}
-
-void
-win_println_indent(ProfWin *window, int pad, const char *const message)
-{
-    win_printf(window, '-', pad, NULL, 0, THEME_DEFAULT, "", "%s", message);
 }
 
 void

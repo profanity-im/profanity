@@ -361,7 +361,7 @@ void win_printf(ProfWin *window, const char show_char, int pad_indent, GDateTime
 
 void win_print(ProfWin *window, theme_item_t theme_item, const char ch, const char *const message, ...);
 void win_println(ProfWin *window, theme_item_t theme_item, const char ch, const char *const message, ...);
-void win_println_indent(ProfWin *window, int pad, const char *const message);
+void win_println_indent(ProfWin *window, int pad, const char *const message, ...);
 
 void win_append(ProfWin *window, theme_item_t theme_item, const char *const message, ...);
 void win_appendln(ProfWin *window, theme_item_t theme_item, const char *const message, ...);
