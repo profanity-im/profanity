@@ -401,7 +401,7 @@ _chatwin_history(ProfChatWin *chatwin, const char *const contact)
                 char mm[3]; memcpy(mm, &line[3], 2); mm[2] = '\0'; int imm = atoi(mm);
                 char ss[3]; memcpy(ss, &line[6], 2); ss[2] = '\0'; int iss = atoi(ss);
                 GDateTime *timestamp = g_date_time_new_local(2000, 1, 1, ihh, imm, iss);
-                win_printf((ProfWin*)chatwin, '-', 0, timestamp, NO_COLOUR_DATE, THEME_DEFAULT, "", "%s", curr->data+11);
+                win_print_history((ProfWin*)chatwin, timestamp, "%s", curr->data+11);
                 g_date_time_unref(timestamp);
             // header
             } else {
