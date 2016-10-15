@@ -800,8 +800,7 @@ ui_room_join(const char *const roomjid, gboolean focus)
             win_printf(window, '!', 0, NULL, NO_DATE | NO_EOL, THEME_ROOMINFO, "", ", affiliation: %s", affiliation);
         }
     }
-    win_printf(window, '!', 0, NULL, NO_DATE, THEME_ROOMINFO, "", "");
-
+    win_appendln(window, THEME_ROOMINFO, "");
 
     if (focus) {
         ui_focus_win(window);
@@ -1304,7 +1303,7 @@ ui_show_software_version(const char *const jid, const char *const  presence,
         win_println(window, THEME_DEFAULT, '-', "");
         theme_item_t presence_colour = theme_main_presence_attrs(presence);
         win_print(window, presence_colour, '-', "%s", jid);
-        win_printf(window, '-', 0, NULL, NO_DATE, 0, "", ":");
+        win_appendln(window, THEME_DEFAULT, ":");
     }
     if (name) {
         win_println(window, THEME_DEFAULT, '-', "Name    : %s", name);

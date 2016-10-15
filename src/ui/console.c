@@ -130,7 +130,7 @@ cons_show_help(const char *const cmd, CommandHelp *help)
     for (i = 0; i < strlen(cmd) - 1 ; i++) {
         win_printf(console, '-', 0, NULL, NO_EOL | NO_DATE, THEME_WHITE_BOLD, "", "-");
     }
-    win_printf(console, '-', 0, NULL, NO_DATE, THEME_WHITE_BOLD, "", "");
+    win_appendln(console, THEME_WHITE_BOLD, "");
     cons_show("");
 
     win_println(console, THEME_WHITE_BOLD, '-', "Synopsis");
@@ -484,7 +484,7 @@ cons_show_login_success(ProfAccount *account, gboolean secured)
     win_printf(console, '-', 0, NULL, NO_DATE | NO_EOL, presence_colour, "", "%s", presence_str);
     win_printf(console, '-', 0, NULL, NO_DATE | NO_EOL, THEME_DEFAULT, "", " (priority %d)",
         accounts_get_priority_for_presence_type(account->name, presence));
-    win_printf(console, '-', 0, NULL, NO_DATE, THEME_DEFAULT, "", ".");
+    win_appendln(console, THEME_DEFAULT, ".");
     if (!secured) {
         cons_show_error("TLS connection not established");
     }
@@ -555,7 +555,7 @@ cons_show_caps(const char *const fulljid, resource_presence_t presence)
 
         theme_item_t presence_colour = theme_main_presence_attrs(resource_presence);
         win_print(console, presence_colour, '-', "%s", fulljid);
-        win_printf(console, '-', 0, NULL, NO_DATE, THEME_DEFAULT, "", ":");
+        win_appendln(console, THEME_DEFAULT, ":");
 
         // show identity
         if (caps->identity) {
@@ -788,7 +788,7 @@ cons_show_disco_items(GSList *items, const char *const jid)
             if (item->name) {
                 win_printf(console, '-', 0, NULL, NO_DATE | NO_EOL, THEME_DEFAULT, "", ", (%s)", item->name);
             }
-            win_printf(console, '-', 0, NULL, NO_DATE, THEME_DEFAULT, "", "");
+            win_appendln(console, THEME_DEFAULT, "");
             items = g_slist_next(items);
         }
     } else {
@@ -1005,7 +1005,7 @@ cons_show_account(ProfAccount *account)
             if (resource->status) {
                 win_printf(console, '-', 0, NULL, NO_DATE | NO_EOL, presence_colour, "", ", \"%s\"", resource->status);
             }
-            win_printf(console, '-', 0, NULL, NO_DATE, THEME_DEFAULT, "", "");
+            win_appendln(console, THEME_DEFAULT, "");
             Jid *jidp = jid_create_from_bare_and_resource(account->jid, resource->name);
             EntityCapabilities *caps = caps_lookup(jidp->fulljid);
             jid_destroy(jidp);
@@ -2192,7 +2192,7 @@ _cons_theme_bar_prop(theme_item_t theme, char *prop)
     g_string_append_printf(valstr, "%s ", setting);
     theme_free_string(setting);
     win_printf(console, '-', 0, NULL, NO_DATE | NO_EOL, theme, "", "%s", valstr->str);
-    win_printf(console, '-', 0, NULL, NO_DATE, THEME_TEXT, "", "");
+    win_appendln(console, THEME_TEXT, "");
     g_string_free(valstr, TRUE);
 }
 
@@ -2210,7 +2210,7 @@ _cons_theme_prop(theme_item_t theme, char *prop)
     char *setting = theme_get_string(prop);
     g_string_append_printf(valstr, "%s", setting);
     theme_free_string(setting);
-    win_printf(console, '-', 0, NULL, NO_DATE, theme, "", "%s", valstr->str);
+    win_appendln(console, theme, "%s", valstr->str);
     g_string_free(valstr, TRUE);
 }
 
@@ -2326,29 +2326,29 @@ cons_theme_colours(void)
     ProfWin *console = wins_get_console();
     cons_show("Available colours:");
 
-    win_print(console, THEME_WHITE, '-',                                " white   ");
-    win_printf(console, '-', 0, NULL, NO_DATE, THEME_WHITE_BOLD, "",    " bold_white");
+    win_print(console,      THEME_WHITE, '-',   " white   ");
+    win_appendln(console,   THEME_WHITE_BOLD,   " bold_white");
 
-    win_print(console, THEME_GREEN, '-',                                " green   ");
-    win_printf(console, '-', 0, NULL, NO_DATE, THEME_GREEN_BOLD, "",    " bold_green");
+    win_print(console,      THEME_GREEN, '-',   " green   ");
+    win_appendln(console,   THEME_GREEN_BOLD,   " bold_green");
 
-    win_print(console, THEME_RED, '-',                                  " red     ");
-    win_printf(console, '-', 0, NULL, NO_DATE, THEME_RED_BOLD, "",      " bold_red");
+    win_print(console,      THEME_RED, '-',     " red     ");
+    win_appendln(console,   THEME_RED_BOLD,     " bold_red");
 
-    win_print(console, THEME_YELLOW, '-',                               " yellow  ");
-    win_printf(console, '-', 0, NULL, NO_DATE, THEME_YELLOW_BOLD, "",   " bold_yellow");
+    win_print(console,      THEME_YELLOW, '-',  " yellow  ");
+    win_appendln(console,   THEME_YELLOW_BOLD,  " bold_yellow");
 
-    win_print(console, THEME_BLUE, '-',                                 " blue    ");
-    win_printf(console, '-', 0, NULL, NO_DATE, THEME_BLUE_BOLD, "",     " bold_blue");
+    win_print(console,      THEME_BLUE, '-',    " blue    ");
+    win_appendln(console,   THEME_BLUE_BOLD,    " bold_blue");
 
-    win_print(console, THEME_CYAN, '-',                                 " cyan    ");
-    win_printf(console, '-', 0, NULL, NO_DATE, THEME_CYAN_BOLD, "",     " bold_cyan");
+    win_print(console,      THEME_CYAN, '-',    " cyan    ");
+    win_appendln(console,   THEME_CYAN_BOLD,    " bold_cyan");
 
-    win_print(console, THEME_MAGENTA, '-',                              " magenta ");
-    win_printf(console, '-', 0, NULL, NO_DATE, THEME_MAGENTA_BOLD, "",  " bold_magenta");
+    win_print(console,      THEME_MAGENTA, '-', " magenta ");
+    win_appendln(console,   THEME_MAGENTA_BOLD, " bold_magenta");
 
-    win_print(console, THEME_BLACK, '-',                                " black   ");
-    win_printf(console, '-', 0, NULL, NO_DATE, THEME_BLACK_BOLD, "",    " bold_black");
+    win_print(console,      THEME_BLACK, '-',   " black   ");
+    win_appendln(console,   THEME_BLACK_BOLD,   " bold_black");
 
     cons_show("");
 }
@@ -2424,7 +2424,7 @@ _show_roster_contacts(GSList *list, gboolean show_groups)
         if (show_groups) {
             win_printf(console, '-', 0, NULL, NO_DATE | NO_EOL, presence_colour, "", "%s", sub->str);
         } else {
-            win_printf(console, '-', 0, NULL, NO_DATE, presence_colour, "", "%s", sub->str);
+            win_appendln(console, presence_colour, "%s", sub->str);
         }
 
         g_string_free(sub, TRUE);
@@ -2440,10 +2440,10 @@ _show_roster_contacts(GSList *list, gboolean show_groups)
                     }
                     groups = g_slist_next(groups);
                 }
-                win_printf(console, '-', 0, NULL, NO_DATE, THEME_DEFAULT, "", "%s", groups_str->str);
+                win_appendln(console, THEME_DEFAULT, "%s", groups_str->str);
                 g_string_free(groups_str, TRUE);
             } else {
-                 win_printf(console, '-', 0, NULL, NO_DATE, THEME_DEFAULT, "", " ");
+                win_appendln(console, THEME_DEFAULT, " ");
             }
         }
 

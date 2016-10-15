@@ -689,7 +689,7 @@ win_show_occupant(ProfWin *window, Occupant *occupant)
         win_printf(window, '-', 0, NULL, NO_DATE | NO_EOL, presence_colour, "", ", \"%s\"", occupant->status);
     }
 
-    win_printf(window, '-', 0, NULL, NO_DATE, presence_colour, "", "");
+    win_appendln(window, presence_colour, "");
 }
 
 void
@@ -734,7 +734,7 @@ win_show_contact(ProfWin *window, PContact contact)
         win_printf(window, '-', 0, NULL, NO_DATE | NO_EOL, presence_colour, "", ", \"%s\"", p_contact_status(contact));
     }
 
-    win_printf(window, '-', 0, NULL, NO_DATE, presence_colour, "", "");
+    win_appendln(window, presence_colour, "");
 }
 
 void
@@ -792,7 +792,7 @@ win_show_occupant_info(ProfWin *window, const char *const room, Occupant *occupa
         if (caps->software_version) {
             SoftwareVersion *software_version = caps->software_version;
             if (software_version->software) {
-                win_printf(window, '!', 0, NULL, NO_EOL, THEME_DEFAULT, "", "  Software: %s", software_version->software);
+                win_print(window, THEME_DEFAULT, '!', "  Software: %s", software_version->software);
             }
             if (software_version->software_version) {
                 win_printf(window, '!', 0, NULL, NO_DATE | NO_EOL, THEME_DEFAULT, "", ", %s", software_version->software_version);
@@ -801,7 +801,7 @@ win_show_occupant_info(ProfWin *window, const char *const room, Occupant *occupa
                 win_newline(window);
             }
             if (software_version->os) {
-                win_printf(window, '!', 0, NULL, NO_EOL, THEME_DEFAULT, "", "  OS: %s", software_version->os);
+                win_print(window, THEME_DEFAULT, '!', "  OS: %s", software_version->os);
             }
             if (software_version->os_version) {
                 win_printf(window, '!', 0, NULL, NO_DATE | NO_EOL, THEME_DEFAULT, "", ", %s", software_version->os_version);
@@ -829,11 +829,11 @@ win_show_info(ProfWin *window, PContact contact)
     theme_item_t presence_colour = theme_main_presence_attrs(presence);
 
     win_println(window, THEME_DEFAULT, '-', "");
-    win_printf(window, '-', 0, NULL, NO_EOL, presence_colour, "", "%s", barejid);
+    win_print(window, presence_colour, '-', "%s", barejid);
     if (name) {
         win_printf(window, '-', 0, NULL, NO_DATE | NO_EOL, presence_colour, "", " (%s)", name);
     }
-    win_printf(window, '-', 0, NULL, NO_DATE, THEME_DEFAULT, "", ":");
+    win_appendln(window, THEME_DEFAULT, ":");
 
     if (sub) {
         win_println(window, THEME_DEFAULT, '-', "Subscription: %s", sub);
@@ -880,7 +880,7 @@ win_show_info(ProfWin *window, PContact contact)
         Resource *resource = curr->data;
         const char *resource_presence = string_from_resource_presence(resource->presence);
         theme_item_t presence_colour = theme_main_presence_attrs(resource_presence);
-        win_printf(window, '-', 0, NULL, NO_EOL, presence_colour, "", "  %s (%d), %s", resource->name, resource->priority, resource_presence);
+        win_print(window, presence_colour, '-', "  %s (%d), %s", resource->name, resource->priority, resource_presence);
         if (resource->status) {
             win_printf(window, '-', 0, NULL, NO_DATE | NO_EOL, presence_colour, "", ", \"%s\"", resource->status);
         }
@@ -894,7 +894,7 @@ win_show_info(ProfWin *window, PContact contact)
             // show identity
             if (caps->identity) {
                 DiscoIdentity *identity = caps->identity;
-                win_printf(window, '-', 0, NULL, NO_EOL, THEME_DEFAULT, "", "    Identity: ");
+                win_print(window, THEME_DEFAULT, '-', "    Identity: ");
                 if (identity->name) {
                     win_printf(window, '-', 0, NULL, NO_DATE | NO_EOL, THEME_DEFAULT, "", "%s", identity->name);
                     if (identity->category || identity->type) {
@@ -916,7 +916,7 @@ win_show_info(ProfWin *window, PContact contact)
             if (caps->software_version) {
                 SoftwareVersion *software_version = caps->software_version;
                 if (software_version->software) {
-                    win_printf(window, '-', 0, NULL, NO_EOL, THEME_DEFAULT, "", "    Software: %s", software_version->software);
+                    win_print(window, THEME_DEFAULT, '-', "    Software: %s", software_version->software);
                 }
                 if (software_version->software_version) {
                     win_printf(window, '-', 0, NULL, NO_DATE | NO_EOL, THEME_DEFAULT, "", ", %s", software_version->software_version);
@@ -925,7 +925,7 @@ win_show_info(ProfWin *window, PContact contact)
                     win_newline(window);
                 }
                 if (software_version->os) {
-                    win_printf(window, '-', 0, NULL, NO_EOL, THEME_DEFAULT, "", "    OS: %s", software_version->os);
+                    win_print(window, THEME_DEFAULT, '-', "    OS: %s", software_version->os);
                 }
                 if (software_version->os_version) {
                     win_printf(window, '-', 0, NULL, NO_DATE | NO_EOL, THEME_DEFAULT, "", ", %s", software_version->os_version);
@@ -959,8 +959,7 @@ win_show_status_string(ProfWin *window, const char *const from,
         presence_colour = THEME_OFFLINE;
     }
 
-
-    win_printf(window, '-', 0, NULL, NO_EOL, presence_colour, "", "%s %s", pre, from);
+    win_print(window, presence_colour, '-', "%s %s", pre, from);
 
     if (show)
         win_printf(window, '-', 0, NULL, NO_DATE | NO_EOL, presence_colour, "", " is %s", show);
@@ -982,8 +981,7 @@ win_show_status_string(ProfWin *window, const char *const from,
     if (status)
         win_printf(window, '-', 0, NULL, NO_DATE | NO_EOL, presence_colour, "", ", \"%s\"", status);
 
-    win_printf(window, '-', 0, NULL, NO_DATE, presence_colour, "", "");
-
+    win_appendln(window, presence_colour, "");
 }
 
 void
@@ -1077,6 +1075,26 @@ win_println(ProfWin *window, theme_item_t theme_item, const char ch, const char 
 }
 
 void
+win_appendln(ProfWin *window, theme_item_t theme_item, const char *const message, ...)
+{
+    GDateTime *timestamp = g_date_time_new_now_local();
+
+    va_list arg;
+    va_start(arg, message);
+    GString *fmt_msg = g_string_new(NULL);
+    g_string_vprintf(fmt_msg, message, arg);
+
+    buffer_push(window->layout->buffer, '-', 0, timestamp, NO_EOL, theme_item, "", fmt_msg->str, NULL);
+
+    _win_print(window, '-', 0, timestamp, NO_DATE, theme_item, "", fmt_msg->str, NULL);
+    inp_nonblocking(TRUE);
+    g_date_time_unref(timestamp);
+
+    g_string_free(fmt_msg, TRUE);
+    va_end(arg);
+
+}
+void
 win_print_http_upload(ProfWin *window, const char *const message, char *url)
 {
     win_print_with_receipt(window, '!', NULL, message, url);
@@ -1138,7 +1156,7 @@ win_println_indent(ProfWin *window, int pad, const char *const message)
 void
 win_newline(ProfWin *window)
 {
-    win_printf(window, '-', 0, NULL, NO_DATE, THEME_DEFAULT, "", "");
+    win_appendln(window, THEME_DEFAULT, "");
 }
 
 static void

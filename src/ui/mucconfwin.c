@@ -48,7 +48,7 @@ mucconfwin_show_form(ProfMucConfWin *confwin)
     ProfWin *window = (ProfWin*) confwin;
     if (confwin->form->title) {
         win_print(window, THEME_DEFAULT, '-', "Form title: ");
-        win_printf(window, '-', 0, NULL, NO_DATE, THEME_DEFAULT, "", "%s", confwin->form->title);
+        win_appendln(window, THEME_DEFAULT, "%s", confwin->form->title);
     } else {
         win_println(window, THEME_DEFAULT, '-', "Configuration for room %s.", confwin->roomjid);
     }
@@ -113,9 +113,9 @@ mucconfwin_field_help(ProfMucConfWin *confwin, char *tag)
     if (field) {
         win_print(window, THEME_DEFAULT, '-', "%s", field->label);
         if (field->required) {
-            win_printf(window, '-', 0, NULL, NO_DATE, THEME_DEFAULT, "", " (Required):");
+            win_appendln(window, THEME_DEFAULT, " (Required):");
         } else {
-            win_printf(window, '-', 0, NULL, NO_DATE, THEME_DEFAULT, "", ":");
+            win_appendln(window, THEME_DEFAULT, ":");
         }
         if (field->description) {
             win_println(window, THEME_DEFAULT, '-', "  Description : %s", field->description);
@@ -252,16 +252,16 @@ _mucconfwin_form_field(ProfWin *window, char *tag, FormField *field)
         break;
     case FIELD_BOOLEAN:
         if (curr_value == NULL) {
-            win_printf(window, '-', 0, NULL, NO_DATE, THEME_OFFLINE, "", "FALSE");
+            win_appendln(window, THEME_OFFLINE, "FALSE");
         } else {
             char *value = curr_value->data;
             if (value == NULL) {
-                win_printf(window, '-', 0, NULL, NO_DATE, THEME_OFFLINE, "", "FALSE");
+                win_appendln(window, THEME_OFFLINE, "FALSE");
             } else {
                 if (g_strcmp0(value, "0") == 0) {
-                    win_printf(window, '-', 0, NULL, NO_DATE, THEME_OFFLINE, "", "FALSE");
+                    win_appendln(window, THEME_OFFLINE, "FALSE");
                 } else {
-                    win_printf(window, '-', 0, NULL, NO_DATE, THEME_ONLINE, "", "TRUE");
+                    win_appendln(window, THEME_ONLINE, "TRUE");
                 }
             }
         }

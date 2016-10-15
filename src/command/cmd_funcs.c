@@ -3940,7 +3940,7 @@ cmd_subject(ProfWin *window, const char *const command, gchar **args)
         char *subject = muc_subject(mucwin->roomjid);
         if (subject) {
             win_print(window, THEME_ROOMINFO, '!', "Room subject: ");
-            win_printf(window, '!', 0, NULL, NO_DATE, THEME_DEFAULT, "", "%s", subject);
+            win_appendln(window, THEME_DEFAULT, "%s", subject);
         } else {
             win_println(window, THEME_ROOMINFO, '!', "Room has no subject");
         }
