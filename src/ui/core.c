@@ -1289,21 +1289,3 @@ ui_show_software_version(const char *const jid, const char *const  presence,
         win_println(window, THEME_DEFAULT, '-', "OS      : %s", os);
     }
 }
-
-void
-ui_status_bar_inactive(const int win)
-{
-    status_bar_inactive(win);
-}
-
-void
-ui_status_bar_active(const int win)
-{
-    status_bar_active(win);
-}
-
-void
-ui_status_bar_new(const int win)
-{
-    status_bar_new(win);
-}
