@@ -75,7 +75,6 @@ void ui_print_system_msg_from_recipient(const char *const barejid, const char *m
 void ui_close_connected_win(int index);
 int ui_close_all_wins(void);
 int ui_close_read_wins(void);
-void ui_current_print_line(const char *const msg, ...);
 void ui_current_print_formatted_line(const char show_char, int attrs, const char *const msg, ...);
 void ui_close_win(int index);
 int ui_win_unread(int index);

@@ -467,7 +467,7 @@ ui_invalid_command_usage(const char *const cmd, void (*setting_func)(void))
         cons_show(msg->str);
         ProfWin *current = wins_get_current();
         if (current->type == WIN_CHAT) {
-            ui_current_print_line(msg->str);
+            win_println(current, THEME_DEFAULT, '-', "%s", msg->str);
         }
     }
 
@@ -729,19 +729,6 @@ ui_prune_wins(void)
     } else {
         cons_show("No prune needed.");
     }
-}
-
-void
-ui_current_print_line(const char *const msg, ...)
-{
-    ProfWin *window = wins_get_current();
-    va_list arg;
-    va_start(arg, msg);
-    GString *fmt_msg = g_string_new(NULL);
-    g_string_vprintf(fmt_msg, msg, arg);
-    win_println(window, THEME_DEFAULT, '-', "%s", fmt_msg->str);
-    va_end(arg);
-    g_string_free(fmt_msg, TRUE);
 }
 
 void

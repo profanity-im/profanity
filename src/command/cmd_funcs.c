@@ -1156,17 +1156,17 @@ cmd_sub(ProfWin *window, const char *const command, gchar **args)
         PContact contact = roster_get_contact(jidp->barejid);
         if ((contact == NULL) || (p_contact_subscription(contact) == NULL)) {
             if (window->type == WIN_CHAT) {
-                ui_current_print_line("No subscription information for %s.", jidp->barejid);
+                win_println(window, THEME_DEFAULT, '-', "No subscription information for %s.", jidp->barejid);
             } else {
                 cons_show("No subscription information for %s.", jidp->barejid);
             }
         } else {
             if (window->type == WIN_CHAT) {
                 if (p_contact_pending_out(contact)) {
-                    ui_current_print_line("%s subscription status: %s, request pending.",
+                    win_println(window, THEME_DEFAULT, '-', "%s subscription status: %s, request pending.",
                         jidp->barejid, p_contact_subscription(contact));
                 } else {
-                    ui_current_print_line("%s subscription status: %s.", jidp->barejid,
+                    win_println(window, THEME_DEFAULT, '-', "%s subscription status: %s.", jidp->barejid,
                         p_contact_subscription(contact));
                 }
             } else {
@@ -1382,7 +1382,7 @@ cmd_close(ProfWin *window, const char *const command, gchar **args)
 
         // check for unsaved form
         if (ui_win_has_unsaved_form(index)) {
-            ui_current_print_line("You have unsaved changes, use /form submit or /form cancel");
+            win_println(window, THEME_DEFAULT, '-', "You have unsaved changes, use /form submit or /form cancel");
             return TRUE;
         }
 
@@ -1417,7 +1417,7 @@ cmd_close(ProfWin *window, const char *const command, gchar **args)
 
         // check for unsaved form
         if (ui_win_has_unsaved_form(index)) {
-            ui_current_print_line("You have unsaved changes, use /form submit or /form cancel");
+            win_println(window, THEME_DEFAULT, '-', "You have unsaved changes, use /form submit or /form cancel");
             return TRUE;
         }
 
@@ -2078,7 +2078,7 @@ cmd_msg(ProfWin *window, const char *const command, gchar **args)
             g_string_free(full_jid, TRUE);
 
         } else {
-            ui_current_print_line("No such participant \"%s\" in room.", usr);
+            win_println(window, THEME_DEFAULT, '-', "No such participant \"%s\" in room.", usr);
         }
 
         return TRUE;
@@ -3111,12 +3111,12 @@ cmd_status(ProfWin *window, const char *const command, gchar **args)
                     win_println(window, THEME_DEFAULT, '-', "No such participant \"%s\" in room.", usr);
                 }
             } else {
-                ui_current_print_line("You must specify a nickname.");
+                win_println(window, THEME_DEFAULT, '-', "You must specify a nickname.");
             }
             break;
         case WIN_CHAT:
             if (usr) {
-                ui_current_print_line("No parameter required when in chat.");
+                win_println(window, THEME_DEFAULT, '-', "No parameter required when in chat.");
             } else {
                 ProfChatWin *chatwin = (ProfChatWin*)window;
                 assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
@@ -3130,7 +3130,7 @@ cmd_status(ProfWin *window, const char *const command, gchar **args)
             break;
         case WIN_PRIVATE:
             if (usr) {
-                ui_current_print_line("No parameter required when in chat.");
+                win_println(window, THEME_DEFAULT, '-', "No parameter required when in chat.");
             } else {
                 ProfPrivateWin *privatewin = (ProfPrivateWin*)window;
                 assert(privatewin->memcheck == PROFPRIVATEWIN_MEMCHECK);
@@ -3184,7 +3184,7 @@ cmd_info(ProfWin *window, const char *const command, gchar **args)
                 if (occupant) {
                     win_show_occupant_info(window, mucwin->roomjid, occupant);
                 } else {
-                    ui_current_print_line("No such occupant \"%s\" in room.", usr);
+                    win_println(window, THEME_DEFAULT, '-', "No such occupant \"%s\" in room.", usr);
                 }
             } else {
                 ProfMucWin *mucwin = (ProfMucWin*)window;
@@ -3196,7 +3196,7 @@ cmd_info(ProfWin *window, const char *const command, gchar **args)
             break;
         case WIN_CHAT:
             if (usr) {
-                ui_current_print_line("No parameter required when in chat.");
+                win_println(window, THEME_DEFAULT, '-', "No parameter required when in chat.");
             } else {
                 ProfChatWin *chatwin = (ProfChatWin*)window;
                 assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
@@ -3210,7 +3210,7 @@ cmd_info(ProfWin *window, const char *const command, gchar **args)
             break;
         case WIN_PRIVATE:
             if (usr) {
-                ui_current_print_line("No parameter required when in chat.");
+                win_println(window, THEME_DEFAULT, '-', "No parameter required when in chat.");
             } else {
                 ProfPrivateWin *privatewin = (ProfPrivateWin*)window;
                 assert(privatewin->memcheck == PROFPRIVATEWIN_MEMCHECK);
@@ -3573,7 +3573,7 @@ cmd_form_field(ProfWin *window, char *tag, gchar **args)
     DataForm *form = confwin->form;
     if (form) {
         if (!form_tag_exists(form, tag)) {
-            ui_current_print_line("Form does not contain a field with tag %s", tag);
+            win_println(window, THEME_DEFAULT, '-', "Form does not contain a field with tag %s", tag);
             return TRUE;
         }
 
@@ -3589,16 +3589,16 @@ cmd_form_field(ProfWin *window, char *tag, gchar **args)
             value = args[0];
             if (g_strcmp0(value, "on") == 0) {
                 form_set_value(form, tag, "1");
-                ui_current_print_line("Field updated...");
+                win_println(window, THEME_DEFAULT, '-', "Field updated...");
                 mucconfwin_show_form_field(confwin, form, tag);
             } else if (g_strcmp0(value, "off") == 0) {
                 form_set_value(form, tag, "0");
-                ui_current_print_line("Field updated...");
+                win_println(window, THEME_DEFAULT, '-', "Field updated...");
                 mucconfwin_show_form_field(confwin, form, tag);
             } else {
-                ui_current_print_line("Invalid command, usage:");
+                win_println(window, THEME_DEFAULT, '-', "Invalid command, usage:");
                 mucconfwin_field_help(confwin, tag);
-                ui_current_print_line("");
+                win_println(window, THEME_DEFAULT, '-', "");
             }
             break;
 
@@ -3607,24 +3607,24 @@ cmd_form_field(ProfWin *window, char *tag, gchar **args)
         case FIELD_JID_SINGLE:
             value = args[0];
             if (value == NULL) {
-                ui_current_print_line("Invalid command, usage:");
+                win_println(window, THEME_DEFAULT, '-', "Invalid command, usage:");
                 mucconfwin_field_help(confwin, tag);
-                ui_current_print_line("");
+                win_println(window, THEME_DEFAULT, '-', "");
             } else {
                 form_set_value(form, tag, value);
-                ui_current_print_line("Field updated...");
+                win_println(window, THEME_DEFAULT, '-', "Field updated...");
                 mucconfwin_show_form_field(confwin, form, tag);
             }
             break;
         case FIELD_LIST_SINGLE:
             value = args[0];
             if ((value == NULL) || !form_field_contains_option(form, tag, value)) {
-                ui_current_print_line("Invalid command, usage:");
+                win_println(window, THEME_DEFAULT, '-', "Invalid command, usage:");
                 mucconfwin_field_help(confwin, tag);
-                ui_current_print_line("");
+                win_println(window, THEME_DEFAULT, '-', "");
             } else {
                 form_set_value(form, tag, value);
-                ui_current_print_line("Field updated...");
+                win_println(window, THEME_DEFAULT, '-', "Field updated...");
                 mucconfwin_show_form_field(confwin, form, tag);
             }
             break;
@@ -3635,51 +3635,51 @@ cmd_form_field(ProfWin *window, char *tag, gchar **args)
                 value = args[1];
             }
             if ((g_strcmp0(cmd, "add") != 0) && (g_strcmp0(cmd, "remove"))) {
-                ui_current_print_line("Invalid command, usage:");
+                win_println(window, THEME_DEFAULT, '-', "Invalid command, usage:");
                 mucconfwin_field_help(confwin, tag);
-                ui_current_print_line("");
+                win_println(window, THEME_DEFAULT, '-', "");
                 break;
             }
             if (value == NULL) {
-                ui_current_print_line("Invalid command, usage:");
+                win_println(window, THEME_DEFAULT, '-', "Invalid command, usage:");
                 mucconfwin_field_help(confwin, tag);
-                ui_current_print_line("");
+                win_println(window, THEME_DEFAULT, '-', "");
                 break;
             }
             if (g_strcmp0(cmd, "add") == 0) {
                 form_add_value(form, tag, value);
-                ui_current_print_line("Field updated...");
+                win_println(window, THEME_DEFAULT, '-', "Field updated...");
                 mucconfwin_show_form_field(confwin, form, tag);
                 break;
             }
             if (g_strcmp0(args[0], "remove") == 0) {
                 if (!g_str_has_prefix(value, "val")) {
-                    ui_current_print_line("Invalid command, usage:");
+                    win_println(window, THEME_DEFAULT, '-', "Invalid command, usage:");
                     mucconfwin_field_help(confwin, tag);
-                    ui_current_print_line("");
+                    win_println(window, THEME_DEFAULT, '-', "");
                     break;
                 }
                 if (strlen(value) < 4) {
-                    ui_current_print_line("Invalid command, usage:");
+                    win_println(window, THEME_DEFAULT, '-', "Invalid command, usage:");
                     mucconfwin_field_help(confwin, tag);
-                    ui_current_print_line("");
+                    win_println(window, THEME_DEFAULT, '-', "");
                     break;
                 }
 
                 int index = strtol(&value[3], NULL, 10);
                 if ((index < 1) || (index > form_get_value_count(form, tag))) {
-                    ui_current_print_line("Invalid command, usage:");
+                    win_println(window, THEME_DEFAULT, '-', "Invalid command, usage:");
                     mucconfwin_field_help(confwin, tag);
-                    ui_current_print_line("");
+                    win_println(window, THEME_DEFAULT, '-', "");
                     break;
                 }
 
                 removed = form_remove_text_multi_value(form, tag, index);
                 if (removed) {
-                    ui_current_print_line("Field updated...");
+                    win_println(window, THEME_DEFAULT, '-', "Field updated...");
                     mucconfwin_show_form_field(confwin, form, tag);
                 } else {
-                    ui_current_print_line("Could not remove %s from %s", value, tag);
+                    win_println(window, THEME_DEFAULT, '-', "Could not remove %s from %s", value, tag);
                 }
             }
             break;
@@ -3689,15 +3689,15 @@ cmd_form_field(ProfWin *window, char *tag, gchar **args)
                 value = args[1];
             }
             if ((g_strcmp0(cmd, "add") != 0) && (g_strcmp0(cmd, "remove"))) {
-                ui_current_print_line("Invalid command, usage:");
+                win_println(window, THEME_DEFAULT, '-', "Invalid command, usage:");
                 mucconfwin_field_help(confwin, tag);
-                ui_current_print_line("");
+                win_println(window, THEME_DEFAULT, '-', "");
                 break;
             }
             if (value == NULL) {
-                ui_current_print_line("Invalid command, usage:");
+                win_println(window, THEME_DEFAULT, '-', "Invalid command, usage:");
                 mucconfwin_field_help(confwin, tag);
-                ui_current_print_line("");
+                win_println(window, THEME_DEFAULT, '-', "");
                 break;
             }
             if (g_strcmp0(args[0], "add") == 0) {
@@ -3705,15 +3705,15 @@ cmd_form_field(ProfWin *window, char *tag, gchar **args)
                 if (valid) {
                     added = form_add_unique_value(form, tag, value);
                     if (added) {
-                        ui_current_print_line("Field updated...");
+                        win_println(window, THEME_DEFAULT, '-', "Field updated...");
                         mucconfwin_show_form_field(confwin, form, tag);
                     } else {
-                        ui_current_print_line("Value %s already selected for %s", value, tag);
+                        win_println(window, THEME_DEFAULT, '-', "Value %s already selected for %s", value, tag);
                     }
                 } else {
-                    ui_current_print_line("Invalid command, usage:");
+                    win_println(window, THEME_DEFAULT, '-', "Invalid command, usage:");
                     mucconfwin_field_help(confwin, tag);
-                    ui_current_print_line("");
+                    win_println(window, THEME_DEFAULT, '-', "");
                 }
                 break;
             }
@@ -3722,15 +3722,15 @@ cmd_form_field(ProfWin *window, char *tag, gchar **args)
                 if (valid == TRUE) {
                     removed = form_remove_value(form, tag, value);
                     if (removed) {
-                        ui_current_print_line("Field updated...");
+                        win_println(window, THEME_DEFAULT, '-', "Field updated...");
                         mucconfwin_show_form_field(confwin, form, tag);
                     } else {
-                        ui_current_print_line("Value %s is not currently set for %s", value, tag);
+                        win_println(window, THEME_DEFAULT, '-', "Value %s is not currently set for %s", value, tag);
                     }
                 } else {
-                    ui_current_print_line("Invalid command, usage:");
+                    win_println(window, THEME_DEFAULT, '-', "Invalid command, usage:");
                     mucconfwin_field_help(confwin, tag);
-                    ui_current_print_line("");
+                    win_println(window, THEME_DEFAULT, '-', "");
                 }
             }
             break;
@@ -3740,34 +3740,34 @@ cmd_form_field(ProfWin *window, char *tag, gchar **args)
                 value = args[1];
             }
             if ((g_strcmp0(cmd, "add") != 0) && (g_strcmp0(cmd, "remove"))) {
-                ui_current_print_line("Invalid command, usage:");
+                win_println(window, THEME_DEFAULT, '-', "Invalid command, usage:");
                 mucconfwin_field_help(confwin, tag);
-                ui_current_print_line("");
+                win_println(window, THEME_DEFAULT, '-', "");
                 break;
             }
             if (value == NULL) {
-                ui_current_print_line("Invalid command, usage:");
+                win_println(window, THEME_DEFAULT, '-', "Invalid command, usage:");
                 mucconfwin_field_help(confwin, tag);
-                ui_current_print_line("");
+                win_println(window, THEME_DEFAULT, '-', "");
                 break;
             }
             if (g_strcmp0(args[0], "add") == 0) {
                 added = form_add_unique_value(form, tag, value);
                 if (added) {
-                    ui_current_print_line("Field updated...");
+                    win_println(window, THEME_DEFAULT, '-', "Field updated...");
                     mucconfwin_show_form_field(confwin, form, tag);
                 } else {
-                    ui_current_print_line("JID %s already exists in %s", value, tag);
+                    win_println(window, THEME_DEFAULT, '-', "JID %s already exists in %s", value, tag);
                 }
                 break;
             }
             if (g_strcmp0(args[0], "remove") == 0) {
                 removed = form_remove_value(form, tag, value);
                 if (removed) {
-                    ui_current_print_line("Field updated...");
+                    win_println(window, THEME_DEFAULT, '-', "Field updated...");
                     mucconfwin_show_form_field(confwin, form, tag);
                 } else {
-                    ui_current_print_line("Field %s does not contain %s", tag, value);
+                    win_println(window, THEME_DEFAULT, '-', "Field %s does not contain %s", tag, value);
                 }
             }
             break;
@@ -3827,7 +3827,7 @@ cmd_form(ProfWin *window, const char *const command, gchar **args)
 
             ui_show_lines((ProfWin*) confwin, help_text);
         }
-        ui_current_print_line("");
+        win_println(window, THEME_DEFAULT, '-', "");
         return TRUE;
     }
 
@@ -6700,7 +6700,7 @@ cmd_otr_theirfp(ProfWin *window, const char *const command, gchar **args)
     }
 
     if (window->type != WIN_CHAT) {
-        ui_current_print_line("You must be in a regular chat window to view a recipient's fingerprint.");
+        win_println(window, THEME_DEFAULT, '-', "You must be in a regular chat window to view a recipient's fingerprint.");
         return TRUE;
     }
 
@@ -6772,7 +6772,7 @@ cmd_otr_start(ProfWin *window, const char *const command, gchar **args)
     // no recipient, use current chat
     } else {
         if (window->type != WIN_CHAT) {
-            ui_current_print_line("You must be in a regular chat window to start an OTR session.");
+            win_println(window, THEME_DEFAULT, '-', "You must be in a regular chat window to start an OTR session.");
             return TRUE;
         }
 
@@ -6814,7 +6814,7 @@ cmd_otr_end(ProfWin *window, const char *const command, gchar **args)
     }
 
     if (window->type != WIN_CHAT) {
-        ui_current_print_line("You must be in a regular chat window to use OTR.");
+        win_println(window, THEME_DEFAULT, '-', "You must be in a regular chat window to use OTR.");
         return TRUE;
     }
 
@@ -6844,7 +6844,7 @@ cmd_otr_trust(ProfWin *window, const char *const command, gchar **args)
     }
 
     if (window->type != WIN_CHAT) {
-        ui_current_print_line("You must be in an OTR session to trust a recipient.");
+        win_println(window, THEME_DEFAULT, '-', "You must be in an OTR session to trust a recipient.");
         return TRUE;
     }
 
@@ -6874,7 +6874,7 @@ cmd_otr_untrust(ProfWin *window, const char *const command, gchar **args)
     }
 
     if (window->type != WIN_CHAT) {
-        ui_current_print_line("You must be in an OTR session to untrust a recipient.");
+        win_println(window, THEME_DEFAULT, '-', "You must be in an OTR session to untrust a recipient.");
         return TRUE;
     }
 
@@ -6904,7 +6904,7 @@ cmd_otr_secret(ProfWin *window, const char *const command, gchar **args)
     }
 
     if (window->type != WIN_CHAT) {
-        ui_current_print_line("You must be in an OTR session to trust a recipient.");
+        win_println(window, THEME_DEFAULT, '-', "You must be in an OTR session to trust a recipient.");
         return TRUE;
     }
 
@@ -6946,7 +6946,7 @@ cmd_otr_question(ProfWin *window, const char *const command, gchar **args)
     }
 
     if (window->type != WIN_CHAT) {
-        ui_current_print_line("You must be in an OTR session to trust a recipient.");
+        win_println(window, THEME_DEFAULT, '-', "You must be in an OTR session to trust a recipient.");
         return TRUE;
     }
 
@@ -6975,7 +6975,7 @@ cmd_otr_answer(ProfWin *window, const char *const command, gchar **args)
     }
 
     if (window->type != WIN_CHAT) {
-        ui_current_print_line("You must be in an OTR session to trust a recipient.");
+        win_println(window, THEME_DEFAULT, '-', "You must be in an OTR session to trust a recipient.");
         return TRUE;
     }
 
@@ -7097,7 +7097,7 @@ _cmd_execute_default(ProfWin *window, const char *inp)
 
     jabber_conn_status_t status = connection_get_status();
     if (status != JABBER_CONNECTED) {
-        ui_current_print_line("You are not currently connected.");
+        win_println(window, THEME_DEFAULT, '-', "You are not currently connected.");
         return TRUE;
     }
 

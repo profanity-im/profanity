@@ -250,7 +250,7 @@ test_cmd_otr_theirfp_from_wintype(win_type_t wintype)
 
     will_return(connection_get_status, JABBER_CONNECTED);
 
-    expect_ui_current_print_line("You must be in a regular chat window to view a recipient's fingerprint.");
+    expect_win_println("You must be in a regular chat window to view a recipient's fingerprint.");
 
     gboolean result = cmd_otr_theirfp(&window, CMD_OTR, args);
 
@@ -333,7 +333,7 @@ test_cmd_otr_start_from_wintype(win_type_t wintype)
 
     will_return(connection_get_status, JABBER_CONNECTED);
 
-    expect_ui_current_print_line("You must be in a regular chat window to start an OTR session.");
+    expect_win_println("You must be in a regular chat window to start an OTR session.");
 
     gboolean result = cmd_otr_start(&window, CMD_OTR, args);
     assert_true(result);
