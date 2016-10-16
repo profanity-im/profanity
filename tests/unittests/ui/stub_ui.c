@@ -48,14 +48,6 @@ expect_win_println(char *message)
     expect_string(win_println, output, message);
 }
 
-void
-expect_ui_current_print_formatted_line(char show_char, int attrs, char *message)
-{
-    expect_value(ui_current_print_formatted_line, show_char, show_char);
-    expect_value(ui_current_print_formatted_line, attrs, attrs);
-    expect_string(ui_current_print_formatted_line, output, message);
-}
-
 // stubs
 
 void ui_init(void) {}

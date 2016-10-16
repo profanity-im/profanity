@@ -4333,9 +4333,9 @@ cmd_bookmark(ProfWin *window, const char *const command, gchar **args)
         char *password = muc_password(mucwin->roomjid);
         gboolean added = bookmark_add(mucwin->roomjid, nick, password, "on");
         if (added) {
-            ui_current_print_formatted_line('!', 0, "Bookmark added for %s.", mucwin->roomjid);
+            win_println(window, THEME_DEFAULT, '!', "Bookmark added for %s.", mucwin->roomjid);
         } else {
-            ui_current_print_formatted_line('!', 0, "Bookmark already exists for %s.", mucwin->roomjid);
+            win_println(window, THEME_DEFAULT, '!', "Bookmark already exists for %s.", mucwin->roomjid);
         }
         return TRUE;
     }
@@ -4345,9 +4345,9 @@ cmd_bookmark(ProfWin *window, const char *const command, gchar **args)
         assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
         gboolean removed = bookmark_remove(mucwin->roomjid);
         if (removed) {
-            ui_current_print_formatted_line('!', 0, "Bookmark removed for %s.", mucwin->roomjid);
+            win_println(window, THEME_DEFAULT, '!', "Bookmark removed for %s.", mucwin->roomjid);
         } else {
-            ui_current_print_formatted_line('!', 0, "Bookmark does not exist for %s.", mucwin->roomjid);
+            win_println(window, THEME_DEFAULT, '!', "Bookmark does not exist for %s.", mucwin->roomjid);
         }
         return TRUE;
     }
@@ -6480,19 +6480,19 @@ cmd_pgp(ProfWin *window, const char *const command, gchar **args)
         }
 
         if (chatwin->is_otr) {
-            ui_current_print_formatted_line('!', 0, "You must end the OTR session to start PGP encryption.");
+            win_println(window, THEME_DEFAULT, '!', "You must end the OTR session to start PGP encryption.");
             return TRUE;
         }
 
         if (chatwin->pgp_send) {
-            ui_current_print_formatted_line('!', 0, "You have already started PGP encryption.");
+            win_println(window, THEME_DEFAULT, '!', "You have already started PGP encryption.");
             return TRUE;
         }
 
         ProfAccount *account = accounts_get_account(session_get_account_name());
         char *err_str = NULL;
         if (!p_gpg_valid_key(account->pgp_keyid, &err_str)) {
-            ui_current_print_formatted_line('!', 0, "Invalid PGP key ID %s: %s, cannot start PGP encryption.", account->pgp_keyid, err_str);
+            win_println(window, THEME_DEFAULT, '!', "Invalid PGP key ID %s: %s, cannot start PGP encryption.", account->pgp_keyid, err_str);
             free(err_str);
             account_free(account);
             return TRUE;
@@ -6501,12 +6501,12 @@ cmd_pgp(ProfWin *window, const char *const command, gchar **args)
         account_free(account);
 
         if (!p_gpg_available(chatwin->barejid)) {
-            ui_current_print_formatted_line('!', 0, "No PGP key found for %s.", chatwin->barejid);
+            win_println(window, THEME_DEFAULT, '!', "No PGP key found for %s.", chatwin->barejid);
             return TRUE;
         }
 
         chatwin->pgp_send = TRUE;
-        ui_current_print_formatted_line('!', 0, "PGP encryption enabled.");
+        win_println(window, THEME_DEFAULT, '!', "PGP encryption enabled.");
         return TRUE;
     }
 
@@ -6524,12 +6524,12 @@ cmd_pgp(ProfWin *window, const char *const command, gchar **args)
 
         ProfChatWin *chatwin = (ProfChatWin*)window;
         if (chatwin->pgp_send == FALSE) {
-            ui_current_print_formatted_line('!', 0, "PGP encryption is not currently enabled.");
+            win_println(window, THEME_DEFAULT, '!', "PGP encryption is not currently enabled.");
             return TRUE;
         }
 
         chatwin->pgp_send = FALSE;
-        ui_current_print_formatted_line('!', 0, "PGP encryption disabled.");
+        win_println(window, THEME_DEFAULT, '!', "PGP encryption disabled.");
         return TRUE;
     }
 
@@ -6676,12 +6676,12 @@ cmd_otr_myfp(ProfWin *window, const char *const command, gchar **args)
     }
 
     if (!otr_key_loaded()) {
-        ui_current_print_formatted_line('!', 0, "You have not generated or loaded a private key, use '/otr gen'");
+        win_println(window, THEME_DEFAULT, '!', "You have not generated or loaded a private key, use '/otr gen'");
         return TRUE;
     }
 
     char *fingerprint = otr_get_my_fingerprint();
-    ui_current_print_formatted_line('!', 0, "Your OTR fingerprint: %s", fingerprint);
+    win_println(window, THEME_DEFAULT, '!', "Your OTR fingerprint: %s", fingerprint);
     free(fingerprint);
     return TRUE;
 #else
@@ -6707,12 +6707,12 @@ cmd_otr_theirfp(ProfWin *window, const char *const command, gchar **args)
     ProfChatWin *chatwin = (ProfChatWin*)window;
     assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
     if (chatwin->is_otr == FALSE) {
-        ui_current_print_formatted_line('!', 0, "You are not currently in an OTR session.");
+        win_println(window, THEME_DEFAULT, '!', "You are not currently in an OTR session.");
         return TRUE;
     }
 
     char *fingerprint = otr_get_their_fingerprint(chatwin->barejid);
-    ui_current_print_formatted_line('!', 0, "%s's OTR fingerprint: %s", chatwin->barejid, fingerprint);
+    win_println(window, THEME_DEFAULT, '!', "%s's OTR fingerprint: %s", chatwin->barejid, fingerprint);
     free(fingerprint);
     return TRUE;
 #else
@@ -6745,17 +6745,17 @@ cmd_otr_start(ProfWin *window, const char *const command, gchar **args)
         ui_focus_win((ProfWin*)chatwin);
 
         if (chatwin->pgp_send) {
-            ui_current_print_formatted_line('!', 0, "You must disable PGP encryption before starting an OTR session.");
+            win_println(window, THEME_DEFAULT, '!', "You must disable PGP encryption before starting an OTR session.");
             return TRUE;
         }
 
         if (chatwin->is_otr) {
-            ui_current_print_formatted_line('!', 0, "You are already in an OTR session.");
+            win_println(window, THEME_DEFAULT, '!', "You are already in an OTR session.");
             return TRUE;
         }
 
         if (!otr_key_loaded()) {
-            ui_current_print_formatted_line('!', 0, "You have not generated or loaded a private key, use '/otr gen'");
+            win_println(window, THEME_DEFAULT, '!', "You have not generated or loaded a private key, use '/otr gen'");
             return TRUE;
         }
 
@@ -6779,17 +6779,17 @@ cmd_otr_start(ProfWin *window, const char *const command, gchar **args)
         ProfChatWin *chatwin = (ProfChatWin*)window;
         assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
         if (chatwin->pgp_send) {
-            ui_current_print_formatted_line('!', 0, "You must disable PGP encryption before starting an OTR session.");
+            win_println(window, THEME_DEFAULT, '!', "You must disable PGP encryption before starting an OTR session.");
             return TRUE;
         }
 
         if (chatwin->is_otr) {
-            ui_current_print_formatted_line('!', 0, "You are already in an OTR session.");
+            win_println(window, THEME_DEFAULT, '!', "You are already in an OTR session.");
             return TRUE;
         }
 
         if (!otr_key_loaded()) {
-            ui_current_print_formatted_line('!', 0, "You have not generated or loaded a private key, use '/otr gen'");
+            win_println(window, THEME_DEFAULT, '!', "You have not generated or loaded a private key, use '/otr gen'");
             return TRUE;
         }
 
@@ -6821,7 +6821,7 @@ cmd_otr_end(ProfWin *window, const char *const command, gchar **args)
     ProfChatWin *chatwin = (ProfChatWin*)window;
     assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
     if (chatwin->is_otr == FALSE) {
-        ui_current_print_formatted_line('!', 0, "You are not currently in an OTR session.");
+        win_println(window, THEME_DEFAULT, '!', "You are not currently in an OTR session.");
         return TRUE;
     }
 
@@ -6851,7 +6851,7 @@ cmd_otr_trust(ProfWin *window, const char *const command, gchar **args)
     ProfChatWin *chatwin = (ProfChatWin*)window;
     assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
     if (chatwin->is_otr == FALSE) {
-        ui_current_print_formatted_line('!', 0, "You are not currently in an OTR session.");
+        win_println(window, THEME_DEFAULT, '!', "You are not currently in an OTR session.");
         return TRUE;
     }
 
@@ -6881,7 +6881,7 @@ cmd_otr_untrust(ProfWin *window, const char *const command, gchar **args)
     ProfChatWin *chatwin = (ProfChatWin*)window;
     assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
     if (chatwin->is_otr == FALSE) {
-        ui_current_print_formatted_line('!', 0, "You are not currently in an OTR session.");
+        win_println(window, THEME_DEFAULT, '!', "You are not currently in an OTR session.");
         return TRUE;
     }
 
@@ -6911,7 +6911,7 @@ cmd_otr_secret(ProfWin *window, const char *const command, gchar **args)
     ProfChatWin *chatwin = (ProfChatWin*)window;
     assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
     if (chatwin->is_otr == FALSE) {
-        ui_current_print_formatted_line('!', 0, "You are not currently in an OTR session.");
+        win_println(window, THEME_DEFAULT, '!', "You are not currently in an OTR session.");
         return TRUE;
     }
 
@@ -6953,7 +6953,7 @@ cmd_otr_question(ProfWin *window, const char *const command, gchar **args)
     ProfChatWin *chatwin = (ProfChatWin*)window;
     assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
     if (chatwin->is_otr == FALSE) {
-        ui_current_print_formatted_line('!', 0, "You are not currently in an OTR session.");
+        win_println(window, THEME_DEFAULT, '!', "You are not currently in an OTR session.");
         return TRUE;
     }
 
@@ -6982,7 +6982,7 @@ cmd_otr_answer(ProfWin *window, const char *const command, gchar **args)
     ProfChatWin *chatwin = (ProfChatWin*)window;
     assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
     if (chatwin->is_otr == FALSE) {
-        ui_current_print_formatted_line('!', 0, "You are not currently in an OTR session.");
+        win_println(window, THEME_DEFAULT, '!', "You are not currently in an OTR session.");
         return TRUE;
     }
 
@@ -7014,7 +7014,7 @@ _cmd_execute(ProfWin *window, const char *const command, const char *const inp)
         gboolean result = FALSE;
         gchar **args = parse_args_with_freetext(inp, 1, 2, &result);
         if (!result) {
-            ui_current_print_formatted_line('!', 0, "Invalid command, see /form help");
+            win_println(window, THEME_DEFAULT, '!', "Invalid command, see /form help");
             result = TRUE;
         } else {
             gchar **tokens = g_strsplit(inp, " ", 2);

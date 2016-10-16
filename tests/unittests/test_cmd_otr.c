@@ -216,7 +216,7 @@ void cmd_otr_myfp_shows_message_when_no_key(void **state)
     will_return(connection_get_status, JABBER_CONNECTED);
     will_return(otr_key_loaded, FALSE);
 
-    expect_ui_current_print_formatted_line('!', 0, "You have not generated or loaded a private key, use '/otr gen'");
+    expect_win_println("You have not generated or loaded a private key, use '/otr gen'");
 
     gboolean result = cmd_otr_myfp(NULL, CMD_OTR, args);
     assert_true(result);
@@ -233,7 +233,7 @@ void cmd_otr_myfp_shows_my_fingerprint(void **state)
     will_return(otr_key_loaded, TRUE);
     will_return(otr_get_my_fingerprint, strdup(fingerprint));
 
-    expect_ui_current_print_formatted_line('!', 0, message->str);
+    expect_win_println(message->str);
 
     gboolean result = cmd_otr_myfp(NULL, CMD_OTR, args);
     assert_true(result);
@@ -286,7 +286,7 @@ void cmd_otr_theirfp_shows_message_when_non_otr_chat_window(void **state)
 
     will_return(connection_get_status, JABBER_CONNECTED);
 
-    expect_ui_current_print_formatted_line('!', 0, "You are not currently in an OTR session.");
+    expect_win_println("You are not currently in an OTR session.");
 
     gboolean result = cmd_otr_theirfp((ProfWin*)&chatwin, CMD_OTR, args);
 
@@ -316,7 +316,7 @@ void cmd_otr_theirfp_shows_fingerprint(void **state)
     expect_string(otr_get_their_fingerprint, recipient, recipient);
     will_return(otr_get_their_fingerprint, strdup(fingerprint));
 
-    expect_ui_current_print_formatted_line('!', 0, message->str);
+    expect_win_println(message->str);
 
     gboolean result = cmd_otr_theirfp((ProfWin*)&chatwin, CMD_OTR, args);
     assert_true(result);
@@ -370,7 +370,7 @@ void cmd_otr_start_shows_message_when_already_started(void **state)
     chatwin.pgp_send = FALSE;
     chatwin.is_otr = TRUE;
 
-    expect_ui_current_print_formatted_line('!', 0, "You are already in an OTR session.");
+    expect_win_println("You are already in an OTR session.");
 
     gboolean result = cmd_otr_start((ProfWin*)&chatwin, CMD_OTR, args);
     assert_true(result);
@@ -393,7 +393,7 @@ void cmd_otr_start_shows_message_when_no_key(void **state)
     chatwin.pgp_send = FALSE;
     chatwin.is_otr = FALSE;
 
-    expect_ui_current_print_formatted_line('!', 0, "You have not generated or loaded a private key, use '/otr gen'");
+    expect_win_println("You have not generated or loaded a private key, use '/otr gen'");
 
     gboolean result = cmd_otr_start((ProfWin*)&chatwin, CMD_OTR, args);
     assert_true(result);

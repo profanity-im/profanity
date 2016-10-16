@@ -732,19 +732,6 @@ ui_prune_wins(void)
 }
 
 void
-ui_current_print_formatted_line(const char show_char, int attrs, const char *const msg, ...)
-{
-    ProfWin *current = wins_get_current();
-    va_list arg;
-    va_start(arg, msg);
-    GString *fmt_msg = g_string_new(NULL);
-    g_string_vprintf(fmt_msg, msg, arg);
-    win_println(current, attrs, show_char, "%s", fmt_msg->str);
-    va_end(arg);
-    g_string_free(fmt_msg, TRUE);
-}
-
-void
 ui_print_system_msg_from_recipient(const char *const barejid, const char *message)
 {
     if (barejid == NULL || message == NULL)
