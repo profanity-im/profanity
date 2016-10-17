@@ -75,8 +75,6 @@ void ui_print_system_msg_from_recipient(const char *const barejid, const char *m
 void ui_close_connected_win(int index);
 int ui_close_all_wins(void);
 int ui_close_read_wins(void);
-void ui_current_print_line(const char *const msg, ...);
-void ui_current_print_formatted_line(const char show_char, int attrs, const char *const msg, ...);
 void ui_close_win(int index);
 int ui_win_unread(int index);
 char* ui_ask_password(void);
@@ -120,10 +118,8 @@ void ui_prune_wins(void);
 void ui_auto_away(char *message, gint time, resource_presence_t res_presence);
 void ui_handle_login_account_success(ProfAccount *account, gboolean secured);
 void ui_update_presence(const resource_presence_t resource_presence, const char *const message, const char *const show);
-void ui_write(char *line, int offset);
 void ui_invalid_command_usage(const char *const cmd, void (*setting_func)(void));
 gboolean ui_win_has_unsaved_form(int num);
-void ui_inp_history_append(char *inp);
 
 // Chat window
 ProfChatWin* chatwin_new(const char *const barejid);
@@ -246,8 +242,6 @@ void cons_show_otr_prefs(void);
 void cons_show_pgp_prefs(void);
 void cons_show_account(ProfAccount *account);
 void cons_debug(const char *const msg, ...);
-void cons_show_time(void);
-void cons_show_word(const char *const word);
 void cons_show_error(const char *const cmd, ...);
 void cons_show_contacts(GSList *list);
 void cons_show_roster(GSList *list);
@@ -262,8 +256,6 @@ void cons_show_scripts(GSList *scripts);
 void cons_show_script(const char *const script, GSList *commands);
 void cons_show_aliases(GList *aliases);
 void cons_show_login_success(ProfAccount *account, gboolean secured);
-void cons_show_software_version(const char *const jid, const char *const presence, const char *const name,
-    const char *const version, const char *const os);
 void cons_show_account_list(gchar **accounts);
 void cons_show_room_list(GSList *room, const char *const conference_node);
 void cons_show_bookmarks(const GList *list);

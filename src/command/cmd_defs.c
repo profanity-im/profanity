@@ -200,6 +200,7 @@ static struct cmd_t command_defs[] =
             "/tls certpath",
             "/tls certpath set <path>",
             "/tls certpath clear",
+            "/tls certpath default",
             "/tls show on|off")
         CMD_DESC(
             "Handle TLS certificates. ")
@@ -215,6 +216,7 @@ static struct cmd_t command_defs[] =
             { "certpath",             "Show the trusted certificate path." },
             { "certpath set <path>",  "Specify filesystem path containing trusted certificates." },
             { "certpath clear",       "Clear the trusted certificate path." },
+            { "certpath default",     "Use default system certificate path, if it can be found." },
             { "show on|off",          "Show or hide the TLS indicator in the titlebar." })
         CMD_NOEXAMPLES
     },
