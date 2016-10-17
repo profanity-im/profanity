@@ -467,7 +467,7 @@ ui_invalid_command_usage(const char *const cmd, void (*setting_func)(void))
         cons_show(msg->str);
         ProfWin *current = wins_get_current();
         if (current->type == WIN_CHAT) {
-            ui_current_print_line(msg->str);
+            win_println(current, THEME_DEFAULT, '-', "%s", msg->str);
         }
     }
 
@@ -729,32 +729,6 @@ ui_prune_wins(void)
     } else {
         cons_show("No prune needed.");
     }
-}
-
-void
-ui_current_print_line(const char *const msg, ...)
-{
-    ProfWin *window = wins_get_current();
-    va_list arg;
-    va_start(arg, msg);
-    GString *fmt_msg = g_string_new(NULL);
-    g_string_vprintf(fmt_msg, msg, arg);
-    win_println(window, THEME_DEFAULT, '-', "%s", fmt_msg->str);
-    va_end(arg);
-    g_string_free(fmt_msg, TRUE);
-}
-
-void
-ui_current_print_formatted_line(const char show_char, int attrs, const char *const msg, ...)
-{
-    ProfWin *current = wins_get_current();
-    va_list arg;
-    va_start(arg, msg);
-    GString *fmt_msg = g_string_new(NULL);
-    g_string_vprintf(fmt_msg, msg, arg);
-    win_println(current, attrs, show_char, "%s", fmt_msg->str);
-    va_end(arg);
-    g_string_free(fmt_msg, TRUE);
 }
 
 void
@@ -1314,22 +1288,4 @@ ui_show_software_version(const char *const jid, const char *const  presence,
     if (os) {
         win_println(window, THEME_DEFAULT, '-', "OS      : %s", os);
     }
-}
-
-void
-ui_status_bar_inactive(const int win)
-{
-    status_bar_inactive(win);
-}
-
-void
-ui_status_bar_active(const int win)
-{
-    status_bar_active(win);
-}
-
-void
-ui_status_bar_new(const int win)
-{
-    status_bar_new(win);
 }

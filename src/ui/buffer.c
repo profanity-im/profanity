@@ -79,7 +79,7 @@ buffer_free(ProfBuff buffer)
 }
 
 void
-buffer_push(ProfBuff buffer, const char show_char, int pad_indent, GDateTime *time,
+buffer_append(ProfBuff buffer, const char show_char, int pad_indent, GDateTime *time,
     int flags, theme_item_t theme_item, const char *const from, const char *const message, DeliveryReceipt *receipt)
 {
     ProfBuffEntry *e = malloc(sizeof(struct prof_buff_entry_t));
@@ -119,14 +119,14 @@ buffer_mark_received(ProfBuff buffer, const char *const id)
 }
 
 ProfBuffEntry*
-buffer_yield_entry(ProfBuff buffer, int entry)
+buffer_get_entry(ProfBuff buffer, int entry)
 {
     GSList *node = g_slist_nth(buffer->entries, entry);
     return node->data;
 }
 
 ProfBuffEntry*
-buffer_yield_entry_by_id(ProfBuff buffer, const char *const id)
+buffer_get_entry_by_id(ProfBuff buffer, const char *const id)
 {
     GSList *entries = buffer->entries;
     while (entries) {

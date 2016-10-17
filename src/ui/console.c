@@ -64,20 +64,6 @@ static void _cons_splash_logo(void);
 void _show_roster_contacts(GSList *list, gboolean show_groups);
 
 void
-cons_show_time(void)
-{
-    ProfWin *console = wins_get_console();
-    win_print(console, THEME_DEFAULT, '-', "");
-}
-
-void
-cons_show_word(const char *const word)
-{
-    ProfWin *console = wins_get_console();
-    win_append(console, THEME_DEFAULT, "%s", word);
-}
-
-void
 cons_debug(const char *const msg, ...)
 {
     ProfWin *console = wins_get_console();

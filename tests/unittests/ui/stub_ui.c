@@ -43,17 +43,9 @@ expect_any_cons_show_error(void)
 }
 
 void
-expect_ui_current_print_line(char *message)
+expect_win_println(char *message)
 {
-    expect_string(ui_current_print_line, output, message);
-}
-
-void
-expect_ui_current_print_formatted_line(char show_char, int attrs, char *message)
-{
-    expect_value(ui_current_print_formatted_line, show_char, show_char);
-    expect_value(ui_current_print_formatted_line, attrs, attrs);
-    expect_string(ui_current_print_formatted_line, output, message);
+    expect_string(win_println, output, message);
 }
 
 // stubs
@@ -517,9 +509,17 @@ void win_hide_subwin(ProfWin *window) {}
 void win_show_subwin(ProfWin *window) {}
 void win_refresh_without_subwin(ProfWin *window) {}
 void win_refresh_with_subwin(ProfWin *window) {}
-void win_printf(ProfWin *window, const char show_char, int pad_indent, GDateTime *timestamp, int flags, theme_item_t theme_item, const char * const from, const char * const message, ...) {}
+
+void win_println(ProfWin *window, theme_item_t theme, const char ch, const char *const message, ...)
+{
+    va_list args;
+    va_start(args, message);
+    vsnprintf(output, sizeof(output), message, args);
+    check_expected(output);
+    va_end(args);
+}
+
 void win_print(ProfWin *window, theme_item_t theme_item, const char ch, const char *const message, ...) {}
-void win_println(ProfWin *window, theme_item_t theme_item, const char ch, const char *const message, ...) {}
 void win_appendln(ProfWin *window, theme_item_t theme_item, const char *const message, ...) {}
 
 char* win_get_title(ProfWin *window)
