@@ -160,11 +160,11 @@ connection_connect(const char *const fulljid, const char *const passwd, const ch
     }
 
 #ifdef HAVE_LIBMESODE
-    char *cert_path = prefs_get_string(PREF_TLS_CERTPATH);
+    char *cert_path = prefs_get_tls_certpath();
     if (cert_path) {
         xmpp_conn_tlscert_path(conn.xmpp_conn, cert_path);
+        free(cert_path);
     }
-    prefs_free_string(cert_path);
 
     int connect_status = xmpp_connect_client(
         conn.xmpp_conn,

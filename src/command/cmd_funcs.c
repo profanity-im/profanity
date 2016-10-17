@@ -171,14 +171,18 @@ cmd_tls_certpath(ProfWin *window, const char *const command, gchar **args)
         }
         return TRUE;
     } else if (g_strcmp0(args[1], "clear") == 0) {
-        prefs_set_string(PREF_TLS_CERTPATH, NULL);
+        prefs_set_string(PREF_TLS_CERTPATH, "none");
         cons_show("Certificate path cleared");
         return TRUE;
+    } else if (g_strcmp0(args[1], "default") == 0) {
+        prefs_set_string(PREF_TLS_CERTPATH, NULL);
+        cons_show("Certificate path defaulted to finding system certpath.");
+        return TRUE;
     } else if (args[1] == NULL) {
-        char *path = prefs_get_string(PREF_TLS_CERTPATH);
+        char *path = prefs_get_tls_certpath();
         if (path) {
             cons_show("Trusted certificate path: %s", path);
-            prefs_free_string(path);
+            free(path);
         } else {
             cons_show("No trusted certificate path set.");
         }
