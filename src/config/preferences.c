@@ -448,6 +448,45 @@ prefs_set_string(preference_t pref, char *value)
     _save_prefs();
 }
 
+char*
+prefs_get_tls_certpath(void)
+{
+    const char *group = _get_group(PREF_TLS_CERTPATH);
+    const char *key = _get_key(PREF_TLS_CERTPATH);
+
+    char *setting = g_key_file_get_string(prefs, group, key, NULL);
+
+    if (g_strcmp0(setting, "none") == 0) {
+        prefs_free_string(setting);
+        return NULL;
+    }
+
+    if (setting == NULL) {
+        if (g_file_test("/etc/ssl/certs",  G_FILE_TEST_IS_DIR)) {
+            return strdup("/etc/ssl/certs");
+        }
+        if (g_file_test("/etc/pki/tls/certs",  G_FILE_TEST_IS_DIR)) {
+            return strdup("/etc/pki/tls/certs");
+        }
+        if (g_file_test("/etc/ssl",  G_FILE_TEST_IS_DIR)) {
+            return strdup("/etc/ssl");
+        }
+        if (g_file_test("/etc/pki/tls",  G_FILE_TEST_IS_DIR)) {
+            return strdup("/etc/pki/tls");
+        }
+        if (g_file_test("/system/etc/security/cacerts",  G_FILE_TEST_IS_DIR)) {
+            return strdup("/system/etc/security/cacerts");
+        }
+
+        return NULL;
+    }
+
+    char *result = strdup(setting);
+    prefs_free_string(setting);
+
+    return result;
+}
+
 gint
 prefs_get_gone(void)
 {

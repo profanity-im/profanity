@@ -682,6 +682,7 @@ cmd_ac_init(void)
     tls_certpath_ac = autocomplete_new();
     autocomplete_add(tls_certpath_ac, "set");
     autocomplete_add(tls_certpath_ac, "clear");
+    autocomplete_add(tls_certpath_ac, "default");
 
     script_ac = autocomplete_new();
     autocomplete_add(script_ac, "run");

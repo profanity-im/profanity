@@ -245,6 +245,8 @@ char* prefs_get_string(preference_t pref);
 void prefs_free_string(char *pref);
 void prefs_set_string(preference_t pref, char *value);
 
+char* prefs_get_tls_certpath(void);
+
 gboolean prefs_do_chat_notify(gboolean current_win);
 gboolean prefs_do_room_notify(gboolean current_win, const char *const roomjid, const char *const mynick,
     const char *const theirnick, const char *const message, gboolean mention, gboolean trigger_found);
