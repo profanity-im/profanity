@@ -81,6 +81,7 @@ theme_init(const char *const theme_name)
     g_hash_table_insert(defaults, strdup("main.text.me"),            strdup("white"));
     g_hash_table_insert(defaults, strdup("main.text.them"),          strdup("white"));
     g_hash_table_insert(defaults, strdup("main.splash"),             strdup("cyan"));
+    g_hash_table_insert(defaults, strdup("main.help.header"),        strdup("white"));
     g_hash_table_insert(defaults, strdup("error"),                   strdup("red"));
     g_hash_table_insert(defaults, strdup("incoming"),                strdup("yellow"));
     g_hash_table_insert(defaults, strdup("mention"),                 strdup("yellow"));
@@ -731,6 +732,7 @@ theme_attrs(theme_item_t attrs)
     case THEME_TEXT_ME:                 _theme_prep_fgnd("main.text.me",            lookup_str, &bold); break;
     case THEME_TEXT_THEM:               _theme_prep_fgnd("main.text.them",          lookup_str, &bold); break;
     case THEME_SPLASH:                  _theme_prep_fgnd("main.splash",             lookup_str, &bold); break;
+    case THEME_HELP_HEADER:             _theme_prep_fgnd("main.help.header",        lookup_str, &bold); break;
     case THEME_ERROR:                   _theme_prep_fgnd("error",                   lookup_str, &bold); break;
     case THEME_INCOMING:                _theme_prep_fgnd("incoming",                lookup_str, &bold); break;
     case THEME_MENTION:                 _theme_prep_fgnd("mention",                 lookup_str, &bold); break;
