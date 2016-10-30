@@ -22,6 +22,7 @@ main.text=bold_cyan
 main.text.me=yellow
 main.text.them=green
 main.splash=bold_yellow
+main.help.header=bold_yellow
 main.time=bold_green
 input.text=bold_blue
 subscribed=green
@@ -75,10 +76,4 @@ roster.room.mention=bold_green
 roster.room.trigger=bold_green
 occupants.header=bold_green
 receipt.sent=bold_black
-
-[ui]
-titlebar.position=1
-inputwin.position=2
-statusbar.position=3
-mainwin.position=4
 
