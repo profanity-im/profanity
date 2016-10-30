@@ -22,6 +22,7 @@ main.text=bold_white
 main.text.me=bold_white
 main.text.them=bold_white
 main.splash=bold_cyan
+main.help.header=bold_white
 main.time=bold_white
 input.text=bold_white
 subscribed=bold_green

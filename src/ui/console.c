@@ -110,20 +110,20 @@ cons_show_help(const char *const cmd, CommandHelp *help)
     ProfWin *console = wins_get_console();
 
     cons_show("");
-    win_println(console, THEME_WHITE_BOLD, '-', "%s", &cmd[1]);
-    win_print(console, THEME_WHITE_BOLD, '-', "");
+    win_println(console, THEME_HELP_HEADER, '-', "%s", &cmd[1]);
+    win_print(console, THEME_HELP_HEADER, '-', "");
     int i;
     for (i = 0; i < strlen(cmd) - 1 ; i++) {
-        win_append(console, THEME_WHITE_BOLD, "-");
+        win_append(console, THEME_HELP_HEADER, "-");
     }
-    win_appendln(console, THEME_WHITE_BOLD, "");
+    win_appendln(console, THEME_HELP_HEADER, "");
     cons_show("");
 
-    win_println(console, THEME_WHITE_BOLD, '-', "Synopsis");
+    win_println(console, THEME_HELP_HEADER, '-', "Synopsis");
     ui_show_lines(console, help->synopsis);
     cons_show("");
 
-    win_println(console, THEME_WHITE_BOLD, '-', "Description");
+    win_println(console, THEME_HELP_HEADER, '-', "Description");
     win_println(console, THEME_DEFAULT, '-', "%s", help->desc);
 
     int maxlen = 0;
@@ -134,7 +134,7 @@ cons_show_help(const char *const cmd, CommandHelp *help)
 
     if (i > 0) {
         cons_show("");
-        win_println(console, THEME_WHITE_BOLD, '-', "Arguments");
+        win_println(console, THEME_HELP_HEADER, '-', "Arguments");
         for (i = 0; help->args[i][0] != NULL; i++) {
             win_println_indent(console, maxlen + 3, "%-*s: %s", maxlen + 1, help->args[i][0], help->args[i][1]);
         }
@@ -142,7 +142,7 @@ cons_show_help(const char *const cmd, CommandHelp *help)
 
     if (g_strv_length((gchar**)help->examples) > 0) {
         cons_show("");
-        win_println(console, THEME_WHITE_BOLD, '-', "Arguments");
+        win_println(console, THEME_HELP_HEADER, '-', "Arguments");
         ui_show_lines(console, help->examples);
     }
 }
@@ -2063,7 +2063,7 @@ cons_navigation_help(void)
 {
     ProfWin *console = wins_get_console();
     cons_show("");
-    win_println(console, THEME_WHITE_BOLD, '-', "Navigation");
+    win_println(console, THEME_HELP_HEADER, '-', "Navigation");
     cons_show("Alt-1..Alt-0, F1..F10    : Choose window.");
     cons_show("Alt-LEFT, Alt-RIGHT      : Previous/next chat window.");
     cons_show("PAGEUP, PAGEDOWN         : Page the main window.");

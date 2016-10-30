@@ -991,7 +991,7 @@ sv_ev_certfail(const char *const errormsg, TLSCertificate *cert)
     }
 
     if (g_strcmp0(cmd, "/tls allow") == 0) {
-        cons_show("Coninuing with connection.");
+        cons_show("Continuing with connection.");
         tlscerts_set_current(cert->fingerprint);
         free(cmd);
         return 1;
