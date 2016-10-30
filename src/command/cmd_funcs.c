@@ -1483,9 +1483,9 @@ _cmd_help_cmd_list(const char *const tag)
     cons_show("");
     ProfWin *console = wins_get_console();
     if (tag) {
-        win_vprint(console, '-', 0, NULL, 0, THEME_WHITE_BOLD, "", "%s commands", tag);
+        win_vprint(console, '-', 0, NULL, 0, THEME_HELP_HEADER, "", "%s commands", tag);
     } else {
-        win_print(console, '-', 0, NULL, 0, THEME_WHITE_BOLD, "", "All commands");
+        win_print(console, '-', 0, NULL, 0, THEME_HELP_HEADER, "", "All commands");
     }
 
     GList *ordered_commands = NULL;
