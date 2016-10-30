@@ -22,6 +22,7 @@ main.text=black
 main.text.me=black
 main.text.them=green
 main.splash=blue
+main.help.header=black
 main.time=blue
 input.text=black
 subscribed=blue
