@@ -270,6 +270,12 @@ api_current_win_is_console(void)
     }
 }
 
+char*
+api_get_room_nick(const char *barejid)
+{
+    return muc_nick(barejid);
+}
+
 void
 api_log_debug(const char *message)
 {

@@ -63,6 +63,8 @@ int (*prof_current_win_is_console)(void) = NULL;
 char* (*prof_get_current_nick)(void) = NULL;
 char** (*prof_get_current_occupants)(void) = NULL;
 
+char* (*prof_get_room_nick)(const char *barejid) = NULL;
+
 void (*prof_log_debug)(const char *message) = NULL;
 void (*prof_log_info)(const char *message) = NULL;
 void (*prof_log_warning)(const char *message) = NULL;
