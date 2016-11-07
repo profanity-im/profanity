@@ -195,6 +195,12 @@ c_api_get_current_occupants(void)
     return api_get_current_occupants();
 }
 
+static char*
+c_api_get_room_nick(const char *barejid)
+{
+    return api_get_room_nick(barejid);
+}
+
 static void
 c_api_log_debug(const char *message)
 {
@@ -380,6 +386,7 @@ c_api_init(void)
     prof_current_win_is_console = c_api_current_win_is_console;
     prof_get_current_nick = c_api_get_current_nick;
     prof_get_current_occupants = c_api_get_current_occupants;
+    prof_get_room_nick = c_api_get_room_nick;
     prof_log_debug = c_api_log_debug;
     prof_log_info = c_api_log_info;
     prof_log_warning = c_api_log_warning;

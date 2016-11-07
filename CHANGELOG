@@ -6,6 +6,8 @@
 0.5.1
 =====
 
+- Add prof.get_room_nick plugins api function
+- Add main.help.header theme option
 - Look for system TLS certificate path by default (/tls certpath)
 - Allow plugins to complete file paths with prof.filepath_completer_add function
 - Bug fixes: https://github.com/boothj5/profanity/milestone/15?closed=1

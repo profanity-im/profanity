@@ -75,6 +75,8 @@ int (*prof_current_win_is_console)(void);
 char* (*prof_get_current_nick)(void);
 char** (*prof_get_current_occupants)(void);
 
+char* (*prof_get_room_nick)(const char *barejid);
+
 void (*prof_log_debug)(const char *message);
 void (*prof_log_info)(const char *message);
 void (*prof_log_warning)(const char *message);
