@@ -50,6 +50,8 @@ gboolean api_current_win_is_console(void);
 char* api_get_current_nick(void);
 char** api_get_current_occupants(void);
 
+char* api_get_room_nick(const char *barejid);
+
 void api_register_command(const char *const plugin_name, const char *command_name, int min_args, int max_args,
     char **synopsis, const char *description, char *arguments[][2], char **examples,
     void *callback, void(*callback_func)(PluginCommand *command, gchar **args), void(*callback_destroy)(void *callback));

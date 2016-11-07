@@ -475,6 +475,27 @@ python_api_current_win_is_console(PyObject *self, PyObject *args)
     }
 }
 
+static PyObject*
+python_api_get_room_nick(PyObject *self, PyObject *args)
+{
+    PyObject *barejid = NULL;
+    if (!PyArg_ParseTuple(args, "O", &barejid)) {
+        Py_RETURN_NONE;
+    }
+
+    char *barejid_str = python_str_or_unicode_to_string(barejid);
+
+    allow_python_threads();
+    char *nick = api_get_room_nick(barejid_str);
+    free(barejid_str);
+    disable_python_threads();
+    if (nick) {
+        return Py_BuildValue("s", nick);
+    } else {
+        Py_RETURN_NONE;
+    }
+}
+
 static PyObject *
 python_api_log_debug(PyObject *self, PyObject *args)
 {
@@ -1095,6 +1116,7 @@ static PyMethodDef apiMethods[] = {
     { "get_current_nick", python_api_get_current_nick, METH_VARARGS, "Return nickname in current room." },
     { "get_current_occupants", python_api_get_current_occupants, METH_VARARGS, "Return list of occupants in current room." },
     { "current_win_is_console", python_api_current_win_is_console, METH_VARARGS, "Returns whether the current window is the console." },
+    { "get_room_nick", python_api_get_room_nick, METH_VARARGS, "Return the nickname used in the specified room, or None if not in the room." },
     { "log_debug", python_api_log_debug, METH_VARARGS, "Log a debug message" },
     { "log_info", python_api_log_info, METH_VARARGS, "Log an info message" },
     { "log_warning", python_api_log_warning, METH_VARARGS, "Log a warning message" },
