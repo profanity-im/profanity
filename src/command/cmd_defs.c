@@ -1990,7 +1990,7 @@ static struct cmd_t command_defs[] =
             "/account clear <account> otr",
             "/account clear <account> pgpkeyid",
             "/account clear <account> startscript",
-            "/account clean <account> muc")
+            "/account clear <account> muc")
         CMD_DESC(
             "Commands for creating and managing accounts. "
             "Calling with no arguments will display information for the current account.")
