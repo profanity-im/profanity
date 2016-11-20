@@ -27,21 +27,6 @@ sends_room_join(void **state)
 }
 
 void
-sends_room_join_with_default_muc_service(void **state)
-{
-    prof_connect();
-
-    prof_input("/join testroom");
-
-    assert_true(stbbr_last_received(
-        "<presence id='*' to='testroom@conference.localhost/stabber'>"
-            "<x xmlns='http://jabber.org/protocol/muc'/>"
-            "<c hash='sha-1' xmlns='http://jabber.org/protocol/caps' ver='*' node='http://www.profanity.im'/>"
-        "</presence>"
-    ));
-}
-
-void
 sends_room_join_with_nick(void **state)
 {
     prof_connect();
