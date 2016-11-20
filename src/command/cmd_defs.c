@@ -1921,7 +1921,8 @@ static struct cmd_t command_defs[] =
             "/account clear <account> port",
             "/account clear <account> otr",
             "/account clear <account> pgpkeyid",
-            "/account clear <account> startscript")
+            "/account clear <account> startscript",
+            "/account clean <account> muc")
         CMD_DESC(
             "Commands for creating and managing accounts. "
             "Calling with no arguments will display information for the current account.")
@@ -1944,7 +1945,7 @@ static struct cmd_t command_defs[] =
             { "set <account> resource <resource>",      "The resource to be used for this account, defaults to 'profanity'." },
             { "set <account> password <password>",      "Password for the account, note this is currently stored in plaintext if set." },
             { "set <account> eval_password <command>",  "Shell command evaluated to retrieve password for the account. Can be used to retrieve password from keyring." },
-            { "set <account> muc <service>",            "The default MUC chat service to use, defaults to 'conference.<domainpart>' where the domain part is from the account JID." },
+            { "set <account> muc <service>",            "The default MUC chat service to use, defaults to the servers disco info response." },
             { "set <account> nick <nick>",              "The default nickname to use when joining chat rooms." },
             { "set <account> otr <policy>",             "Override global OTR policy for this account, see /otr." },
             { "set <account> pgpkeyid <pgpkeyid>",      "Set the ID of the PGP key for this account, see /pgp." },
@@ -1960,7 +1961,8 @@ static struct cmd_t command_defs[] =
             { "clear <account> otr",                    "Remove the OTR policy setting for this account." },
             { "clear <account> pgpkeyid",               "Remove pgpkeyid associated with this account." },
             { "clear <account> startscript",            "Remove startscript associated with this account." },
-            { "clear <account> theme",                  "Clear the theme setting for the account, the global theme will be used." })
+            { "clear <account> theme",                  "Clear the theme setting for the account, the global theme will be used." },
+            { "clear <account> muc",                    "Remove the default MUC service setting."})
         CMD_EXAMPLES(
             "/account add me",
             "/account set me jid me@chatty",
