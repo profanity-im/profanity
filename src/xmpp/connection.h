@@ -54,7 +54,6 @@ void connection_set_disco_items(GSList *items);
 xmpp_conn_t* connection_get_conn(void);
 xmpp_ctx_t* connection_get_ctx(void);
 char *connection_get_domain(void);
-char* connection_jid_for_feature(const char *const feature);
 GHashTable* connection_get_features(const char *const jid);
 
 void connection_clear_data(void);
