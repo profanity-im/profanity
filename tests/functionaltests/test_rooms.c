@@ -25,7 +25,7 @@ rooms_query(void **state)
 
     prof_connect();
 
-    prof_input("/rooms");
+    prof_input("/rooms conference.localhost");
 
     assert_true(prof_output_exact("chatroom@conference.localhost, (A chat room)"));
     assert_true(prof_output_exact("hangout@conference.localhost, (Another chat room)"));
