@@ -959,6 +959,10 @@ cmd_account_clear(ProfWin *window, const char *const command, gchar **args)
         accounts_clear_theme(account_name);
         cons_show("Removed theme for account %s", account_name);
         cons_show("");
+    } else if (strcmp(property, "muc") == 0) {
+        accounts_clear_muc(account_name);
+        cons_show("Removed MUC service for account %s", account_name);
+        cons_show("");
     } else {
         cons_show("Invalid property: %s", property);
         cons_show("");
@@ -3426,17 +3430,20 @@ cmd_join(ProfWin *window, const char *const command, gchar **args)
     if (args[0] == NULL) {
         char *account_name = session_get_account_name();
         ProfAccount *account = accounts_get_account(account_name);
+        if (account->muc_service) {
+            GString *room_str = g_string_new("");
+            char *uuid = connection_create_uuid();
+            g_string_append_printf(room_str, "private-chat-%s@%s", uuid, account->muc_service);
+            connection_free_uuid(uuid);
 
-        GString *room_str = g_string_new("");
-        char *uuid = connection_create_uuid();
-        g_string_append_printf(room_str, "private-chat-%s@%s", uuid, account->muc_service);
-        connection_free_uuid(uuid);
+            presence_join_room(room_str->str, account->muc_nick, NULL);
+            muc_join(room_str->str, account->muc_nick, NULL, FALSE);
 
-        presence_join_room(room_str->str, account->muc_nick, NULL);
-        muc_join(room_str->str, account->muc_nick, NULL, FALSE);
-
-        g_string_free(room_str, TRUE);
-        account_free(account);
+            g_string_free(room_str, TRUE);
+            account_free(account);
+        } else {
+            cons_show("Account MUC service property not found.");
+        }
 
         return TRUE;
     }
@@ -3451,7 +3458,6 @@ cmd_join(ProfWin *window, const char *const command, gchar **args)
     char *room = NULL;
     char *nick = NULL;
     char *passwd = NULL;
-    GString *room_str = g_string_new("");
     char *account_name = session_get_account_name();
     ProfAccount *account = accounts_get_account(account_name);
 
@@ -3460,11 +3466,18 @@ cmd_join(ProfWin *window, const char *const command, gchar **args)
         room = args[0];
 
     // server not supplied (room), use account preference
-    } else {
+    } else if (account->muc_service) {
+        GString *room_str = g_string_new("");
         g_string_append(room_str, args[0]);
         g_string_append(room_str, "@");
         g_string_append(room_str, account->muc_service);
         room = room_str->str;
+        g_string_free(room_str, FALSE);
+
+    // no account preference
+    } else {
+        cons_show("Account MUC service property not found.");
+        return TRUE;
     }
 
     // Additional args supplied
@@ -3502,7 +3515,6 @@ cmd_join(ProfWin *window, const char *const command, gchar **args)
     }
 
     jid_destroy(room_arg);
-    g_string_free(room_str, TRUE);
     account_free(account);
 
     return TRUE;
@@ -4307,13 +4319,18 @@ cmd_rooms(ProfWin *window, const char *const command, gchar **args)
         return TRUE;
     }
 
-    if (args[0] == NULL) {
-        ProfAccount *account = accounts_get_account(session_get_account_name());
-        iq_room_list_request(account->muc_service);
-        account_free(account);
-    } else {
+    if (args[0]) {
         iq_room_list_request(args[0]);
+        return TRUE;
     }
+
+    ProfAccount *account = accounts_get_account(session_get_account_name());
+    if (account->muc_service) {
+        iq_room_list_request(account->muc_service);
+    } else {
+        cons_show("Account MUC service property not found.");
+    }
+    account_free(account);
 
     return TRUE;
 }

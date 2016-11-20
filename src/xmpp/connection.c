@@ -290,6 +290,10 @@ connection_supports(const char *const feature)
 char*
 connection_jid_for_feature(const char *const feature)
 {
+    if (conn.features_by_jid == NULL) {
+        return NULL;
+    }
+
     GList *jids = g_hash_table_get_keys(conn.features_by_jid);
 
     GList *curr = jids;
