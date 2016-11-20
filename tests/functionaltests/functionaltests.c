@@ -99,7 +99,6 @@ int main(int argc, char* argv[]) {
         PROF_FUNC_TEST(display_software_version_result_in_chat),
 
         PROF_FUNC_TEST(sends_room_join),
-        PROF_FUNC_TEST(sends_room_join_with_default_muc_service),
         PROF_FUNC_TEST(sends_room_join_with_nick),
         PROF_FUNC_TEST(sends_room_join_with_password),
         PROF_FUNC_TEST(sends_room_join_with_nick_and_password),

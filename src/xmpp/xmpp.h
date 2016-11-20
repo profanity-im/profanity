@@ -58,6 +58,7 @@
 #define XMPP_FEATURE_BLOCKING "urn:xmpp:blocking"
 #define XMPP_FEATURE_RECEIPTS "urn:xmpp:receipts"
 #define XMPP_FEATURE_LASTACTIVITY "jabber:iq:last"
+#define XMPP_FEATURE_MUC "http://jabber.org/protocol/muc"
 
 typedef enum {
     JABBER_CONNECTING,
@@ -129,6 +130,7 @@ gboolean connection_is_secured(void);
 gboolean connection_send_stanza(const char *const stanza);
 GList* connection_get_available_resources(void);
 gboolean connection_supports(const char *const feature);
+char* connection_jid_for_feature(const char *const feature);
 
 char* message_send_chat(const char *const barejid, const char *const msg, const char *const oob_url,
     gboolean request_receipt);
