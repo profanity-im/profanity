@@ -184,8 +184,8 @@ EntityCapabilities* caps_lookup(const char *const jid);
 void caps_close(void);
 void caps_destroy(EntityCapabilities *caps);
 void caps_reset_ver(void);
-void caps_add_feature(char *feature);
-void caps_remove_feature(char *feature);
+void caps_add_prof_feature(char *feature);
+void caps_remove_prof_feature(char *feature);
 gboolean caps_jid_has_feature(const char *const jid, const char *const feature);
 
 gboolean bookmark_add(const char *jid, const char *nick, const char *password, const char *autojoin_str);

@@ -112,7 +112,7 @@ caps_init(void)
 }
 
 void
-caps_add_feature(char *feature)
+caps_add_prof_feature(char *feature)
 {
     if (g_hash_table_contains(prof_features, feature)) {
         return;
@@ -130,7 +130,7 @@ caps_add_feature(char *feature)
 }
 
 void
-caps_remove_feature(char *feature)
+caps_remove_prof_feature(char *feature)
 {
     if (!g_hash_table_contains(prof_features, feature)) {
         return;
@@ -148,7 +148,7 @@ caps_remove_feature(char *feature)
 }
 
 GList*
-caps_get_features(void)
+caps_get_prof_features(void)
 {
     GList *result = NULL;
 

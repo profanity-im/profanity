@@ -4570,10 +4570,10 @@ cmd_lastactivity(ProfWin *window, const char *const command, gchar **args)
     if ((g_strcmp0(args[0], "on") == 0) || (g_strcmp0(args[0], "off") == 0)) {
         _cmd_set_boolean_preference(args[0], command, "Last activity", PREF_LASTACTIVITY);
         if (g_strcmp0(args[0], "on") == 0) {
-            caps_add_feature(XMPP_FEATURE_LASTACTIVITY);
+            caps_add_prof_feature(XMPP_FEATURE_LASTACTIVITY);
         }
         if (g_strcmp0(args[0], "off") == 0) {
-            caps_remove_feature(XMPP_FEATURE_LASTACTIVITY);
+            caps_remove_prof_feature(XMPP_FEATURE_LASTACTIVITY);
         }
         return TRUE;
     }
@@ -6163,10 +6163,10 @@ cmd_receipts(ProfWin *window, const char *const command, gchar **args)
     if (g_strcmp0(args[0], "send") == 0) {
         _cmd_set_boolean_preference(args[1], command, "Send delivery receipts", PREF_RECEIPTS_SEND);
         if (g_strcmp0(args[1], "on") == 0) {
-            caps_add_feature(XMPP_FEATURE_RECEIPTS);
+            caps_add_prof_feature(XMPP_FEATURE_RECEIPTS);
         }
         if (g_strcmp0(args[1], "off") == 0) {
-            caps_remove_feature(XMPP_FEATURE_RECEIPTS);
+            caps_remove_prof_feature(XMPP_FEATURE_RECEIPTS);
         }
     } else if (g_strcmp0(args[0], "request") == 0) {
         _cmd_set_boolean_preference(args[1], command, "Request delivery receipts", PREF_RECEIPTS_REQUEST);

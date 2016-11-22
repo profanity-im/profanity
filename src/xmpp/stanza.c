@@ -1006,7 +1006,7 @@ stanza_create_caps_query_element(xmpp_ctx_t *ctx)
     xmpp_stanza_add_child(query, identity);
     xmpp_stanza_release(identity);
 
-    GList *features = caps_get_features();
+    GList *features = caps_get_prof_features();
     GList *curr = features;
     while (curr) {
         xmpp_stanza_t *feature = xmpp_stanza_new(ctx);
