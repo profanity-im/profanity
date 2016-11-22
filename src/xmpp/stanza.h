@@ -186,6 +186,7 @@
 #define STANZA_NS_HTTP_UPLOAD "urn:xmpp:http:upload"
 #define STANZA_NS_X_OOB "jabber:x:oob"
 #define STANZA_NS_BLOCKING "urn:xmpp:blocking"
+#define STANZA_NS_LASTMESSAGECORRECTION "urn:xmpp:message-correct:0"
 
 #define STANZA_DATAFORM_SOFTWARE "urn:xmpp:dataforms:softwareinfo"
 
