@@ -197,6 +197,7 @@ void accounts_clear_pgp_keyid(const char * const account_name) {}
 void accounts_clear_script_start(const char * const account_name) {}
 void accounts_clear_theme(const char * const account_name) {}
 void accounts_clear_muc(const char * const account_name) {}
+void accounts_clear_resource(const char * const account_name) {}
 void accounts_add_otr_policy(const char * const account_name, const char * const contact_jid, const char * const policy) {}
 char* accounts_get_last_activity(const char *const account_name)
 {

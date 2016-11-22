@@ -360,6 +360,7 @@ cmd_ac_init(void)
     autocomplete_add(account_clear_ac, "startscript");
     autocomplete_add(account_clear_ac, "theme");
     autocomplete_add(account_clear_ac, "muc");
+    autocomplete_add(account_clear_ac, "resource");
 
     account_default_ac = autocomplete_new();
     autocomplete_add(account_default_ac, "set");

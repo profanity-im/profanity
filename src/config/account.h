@@ -74,7 +74,7 @@ ProfAccount* account_new(const gchar *const name, const gchar *const jid,
     const gchar *const otr_policy, GList *otr_manual, GList *otr_opportunistic,
     GList *otr_always, const gchar *const pgp_keyid, const char *const startscript,
     const char *const theme, gchar *tls_policy);
-char* account_create_full_jid(ProfAccount *account);
+char* account_create_connect_jid(ProfAccount *account);
 gboolean account_eval_password(ProfAccount *account);
 void account_free(ProfAccount *account);
 
