@@ -49,7 +49,7 @@ struct jid_t {
 typedef struct jid_t Jid;
 
 Jid* jid_create(const gchar *const str);
-Jid* jid_create_from_bare_and_resource(const char *const room, const char *const nick);
+Jid* jid_create_from_bare_and_resource(const char *const barejid, const char *const resource);
 void jid_destroy(Jid *jid);
 
 gboolean jid_is_valid_room_form(Jid *jid);

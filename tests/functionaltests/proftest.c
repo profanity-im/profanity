@@ -285,7 +285,7 @@ prof_connect_with_roster(char *roster)
 
     // Allow time for profanity to connect
     exp_timeout = 30;
-    assert_true(prof_output_glob("stabber@localhost logged in successfully, *online* (priority 0)."));
+    assert_true(prof_output_glob("stabber@localhost/profanity logged in successfully, *online* (priority 0)."));
     exp_timeout = 10;
     stbbr_wait_for("prof_presence_*");
 }
