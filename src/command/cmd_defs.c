@@ -1990,7 +1990,8 @@ static struct cmd_t command_defs[] =
             "/account clear <account> otr",
             "/account clear <account> pgpkeyid",
             "/account clear <account> startscript",
-            "/account clear <account> muc")
+            "/account clear <account> muc",
+            "/account clear <account> resource")
         CMD_DESC(
             "Commands for creating and managing accounts. "
             "Calling with no arguments will display information for the current account.")
@@ -2030,6 +2031,7 @@ static struct cmd_t command_defs[] =
             { "clear <account> pgpkeyid",               "Remove pgpkeyid associated with this account." },
             { "clear <account> startscript",            "Remove startscript associated with this account." },
             { "clear <account> theme",                  "Clear the theme setting for the account, the global theme will be used." },
+            { "clear <account> resource",               "Remove the resource setting for this account."},
             { "clear <account> muc",                    "Remove the default MUC service setting."})
         CMD_EXAMPLES(
             "/account add me",

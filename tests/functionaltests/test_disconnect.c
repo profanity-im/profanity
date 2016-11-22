@@ -17,7 +17,7 @@ disconnect_ends_session(void **state)
     prof_connect();
 
     prof_input("/disconnect");
-    assert_true(prof_output_exact("stabber@localhost/profanity logged out successfully."));
+    assert_true(prof_output_exact("stabber@localhost logged out successfully."));
 
     prof_input("/roster");
     assert_true(prof_output_exact("You are not currently connected."));

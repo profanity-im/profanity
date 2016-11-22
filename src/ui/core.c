@@ -383,11 +383,7 @@ ui_handle_login_account_success(ProfAccount *account, gboolean secured)
     title_bar_set_connected(TRUE);
     title_bar_set_tls(secured);
 
-    GString *fulljid = g_string_new(account->jid);
-    g_string_append(fulljid, "/");
-    g_string_append(fulljid, account->resource);
-    status_bar_print_message(fulljid->str);
-    g_string_free(fulljid, TRUE);
+    status_bar_print_message(connection_get_fulljid());
     status_bar_update_virtual();
 }
 
