@@ -167,7 +167,7 @@ account_new(const gchar *const name, const gchar *const jid,
 }
 
 char*
-account_create_full_jid(ProfAccount *account)
+account_create_connect_jid(ProfAccount *account)
 {
     if (account->resource) {
         return create_fulljid(account->jid, account->resource);

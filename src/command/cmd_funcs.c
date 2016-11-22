@@ -416,7 +416,7 @@ cmd_connect(ProfWin *window, const char *const command, gchar **args)
             account->password = NULL;
         }
 
-        jid = account_create_full_jid(account);
+        jid = account_create_connect_jid(account);
         account_free(account);
 
     // connect with JID
@@ -962,6 +962,10 @@ cmd_account_clear(ProfWin *window, const char *const command, gchar **args)
     } else if (strcmp(property, "muc") == 0) {
         accounts_clear_muc(account_name);
         cons_show("Removed MUC service for account %s", account_name);
+        cons_show("");
+    } else if (strcmp(property, "resource") == 0) {
+        accounts_clear_resource(account_name);
+        cons_show("Removed resource for account %s", account_name);
         cons_show("");
     } else {
         cons_show("Invalid property: %s", property);
