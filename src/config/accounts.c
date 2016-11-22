@@ -585,6 +585,15 @@ accounts_clear_muc(const char *const account_name)
 }
 
 void
+accounts_clear_resource(const char *const account_name)
+{
+    if (accounts_account_exists(account_name)) {
+        g_key_file_remove_key(accounts, account_name, "resource", NULL);
+        _save_accounts();
+    }
+}
+
+void
 accounts_clear_otr(const char *const account_name)
 {
     if (accounts_account_exists(account_name)) {
