@@ -1953,7 +1953,7 @@ static struct cmd_t command_defs[] =
             { "clear",      cmd_account_clear })
         CMD_MAINFUNC(cmd_account)
         CMD_TAGS(
-            CMD_TAG_CONNECTION
+            CMD_TAG_CONNECTION,
             CMD_TAG_PRESENCE,
             CMD_TAG_CHAT,
             CMD_TAG_GROUPCHAT)
