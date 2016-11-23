@@ -146,6 +146,8 @@ win_create_chat(const char *const barejid)
     new_win->history_shown = FALSE;
     new_win->unread = 0;
     new_win->state = chat_state_new();
+    new_win->last_message = NULL;
+    new_win->last_id = NULL;
 
     new_win->memcheck = PROFCHATWIN_MEMCHECK;
 
@@ -191,6 +193,8 @@ win_create_muc(const char *const roomjid)
     } else {
         new_win->showjid = FALSE;
     }
+    new_win->last_id = NULL;
+    new_win->last_message = NULL;
 
     new_win->memcheck = PROFMUCWIN_MEMCHECK;
 

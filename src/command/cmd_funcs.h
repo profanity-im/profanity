@@ -160,6 +160,7 @@ gboolean cmd_charset(ProfWin *window, const char *const command, gchar **args);
 gboolean cmd_console(ProfWin *window, const char *const command, gchar **args);
 gboolean cmd_plugins(ProfWin *window, const char *const command, gchar **args);
 gboolean cmd_blocked(ProfWin *window, const char *const command, gchar **args);
+gboolean cmd_correct(ProfWin *window, const char *const command, gchar **args);
 
 gboolean cmd_account(ProfWin *window, const char *const command, gchar **args);
 gboolean cmd_account_list(ProfWin *window, const char *const command, gchar **args);

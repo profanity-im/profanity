@@ -572,7 +572,8 @@ _handle_groupchat(xmpp_stanza_t *const stanza)
         sv_ev_room_history(jid->barejid, jid->resourcepart, timestamp, message);
         g_date_time_unref(timestamp);
     } else {
-        sv_ev_room_message(jid->barejid, jid->resourcepart, message);
+        const char *const id = xmpp_stanza_get_id(stanza);
+        sv_ev_room_message(jid->barejid, jid->resourcepart, message, id);
     }
 
     xmpp_free(ctx, message);

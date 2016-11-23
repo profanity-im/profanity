@@ -155,6 +155,8 @@ typedef struct prof_chat_win_t {
     char *resource_override;
     gboolean history_shown;
     unsigned long memcheck;
+    char *last_id;
+    char *last_message;
 } ProfChatWin;
 
 typedef struct prof_muc_win_t {
@@ -165,6 +167,8 @@ typedef struct prof_muc_win_t {
     gboolean unread_triggers;
     gboolean showjid;
     unsigned long memcheck;
+    char *last_id;
+    char *last_message;
 } ProfMucWin;
 
 typedef struct prof_mucconf_win_t {

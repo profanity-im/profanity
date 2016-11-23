@@ -298,6 +298,15 @@ chatwin_outgoing_msg(ProfChatWin *chatwin, const char *const message, char *id, 
 {
     assert(chatwin != NULL);
 
+    if (chatwin->last_message) {
+        free(chatwin->last_message);
+    }
+    chatwin->last_message = strdup(message);
+    if (chatwin->last_id) {
+        free(chatwin->last_id);
+    }
+    chatwin->last_id = strdup(id);
+
     char enc_char = '-';
     if (enc_mode == PROF_MSG_OTR) {
         enc_char = prefs_get_otr_char();

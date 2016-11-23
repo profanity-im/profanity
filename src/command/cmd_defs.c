@@ -2253,8 +2253,23 @@ static struct cmd_t command_defs[] =
             "/export /path/to/output.csv",
             "/export ~/contacts.csv")
     },
-};
 
+    { "/correct",
+        parse_args_with_freetext, 1, 1, NULL,
+        CMD_NOSUBFUNCS
+        CMD_MAINFUNC(cmd_correct)
+        CMD_TAGS(
+            CMD_TAG_CHAT,
+            CMD_TAG_GROUPCHAT)
+        CMD_SYN(
+            "/correct <message>")
+        CMD_DESC(
+            "Correct and resend the last message.")
+        CMD_ARGS(
+            { "<message>", "The corrected message." })
+        CMD_NOEXAMPLES
+    }
+};
 
 /*
  * Initialise command autocompleter and history

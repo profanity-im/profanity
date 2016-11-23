@@ -48,7 +48,7 @@ void sv_ev_room_subject(const char *const room, const char *const nick, const ch
 void sv_ev_room_history(const char *const room_jid, const char *const nick,
     GDateTime *timestamp, const char *const message);
 void sv_ev_room_message(const char *const room_jid, const char *const nick,
-    const char *const message);
+    const char *const id, const char *const message);
 void sv_ev_incoming_message(char *barejid, char *resource, char *message, char *pgp_message, GDateTime *timestamp);
 void sv_ev_incoming_private_message(const char *const fulljid, char *message);
 void sv_ev_delayed_private_message(const char *const fulljid, char *message, GDateTime *timestamp);

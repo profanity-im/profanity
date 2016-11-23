@@ -237,7 +237,7 @@ sv_ev_room_history(const char *const room_jid, const char *const nick,
 }
 
 void
-sv_ev_room_message(const char *const room_jid, const char *const nick, const char *const message)
+sv_ev_room_message(const char *const room_jid, const char *const nick, const char *const message, const char *const id)
 {
     if (prefs_get_boolean(PREF_GRLOG)) {
         Jid *jid = jid_create(connection_get_fulljid());
@@ -266,7 +266,7 @@ sv_ev_room_message(const char *const room_jid, const char *const nick, const cha
 
     GList *triggers = prefs_message_get_triggers(new_message);
 
-    mucwin_message(mucwin, nick, new_message, mentions, triggers);
+    mucwin_message(mucwin, nick, id, new_message, mentions, triggers);
 
     g_slist_free(mentions);
 

@@ -98,6 +98,7 @@ static char* _sendfile_autocomplete(ProfWin *window, const char *const input);
 static char* _blocked_autocomplete(ProfWin *window, const char *const input);
 static char* _tray_autocomplete(ProfWin *window, const char *const input);
 static char* _presence_autocomplete(ProfWin *window, const char *const input);
+static char* _correct_autocomplete(ProfWin *window, const char *const input);
 
 static char* _script_autocomplete_func(const char *const prefix);
 
@@ -1377,6 +1378,7 @@ _cmd_ac_complete_params(ProfWin *window, const char *const input)
     g_hash_table_insert(ac_funcs, "/blocked",       _blocked_autocomplete);
     g_hash_table_insert(ac_funcs, "/tray",          _tray_autocomplete);
     g_hash_table_insert(ac_funcs, "/presence",      _presence_autocomplete);
+    g_hash_table_insert(ac_funcs, "/correct",       _correct_autocomplete);
 
     int len = strlen(input);
     char parsed[len+1];
@@ -2845,6 +2847,41 @@ static char*
 _sendfile_autocomplete(ProfWin *window, const char *const input)
 {
     return cmd_ac_complete_filepath(input, "/sendfile");
+}
+
+static char*
+_correct_autocomplete(ProfWin *window, const char *const input)
+{
+    char *last_message = NULL;
+    switch(window->type) {
+    case WIN_CHAT:
+    {
+        ProfChatWin *chatwin = (ProfChatWin*)window;
+        assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
+        last_message = chatwin->last_message;
+        break;
+    }
+    case WIN_MUC:
+    {
+        ProfMucWin *mucwin = (ProfMucWin*)window;
+        assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
+        last_message = mucwin->last_message;
+        break;
+    }
+    default:
+        break;
+    }
+
+    if (last_message == NULL) {
+        return NULL;
+    }
+
+    GString *result_str = g_string_new("/correct ");
+    g_string_append(result_str, last_message);
+    char *result = result_str->str;
+    g_string_free(result_str, FALSE);
+
+    return result;
 }
 
 static char*

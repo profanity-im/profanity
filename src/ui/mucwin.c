@@ -471,7 +471,8 @@ _mucwin_print_triggers(ProfWin *window, const char *const message, GList *trigge
 }
 
 void
-mucwin_message(ProfMucWin *mucwin, const char *const nick, const char *const message, GSList *mentions, GList *triggers)
+mucwin_message(ProfMucWin *mucwin, const char *const nick, const char *const id, const char *const message, GSList *mentions,
+    GList *triggers)
 {
     assert(mucwin != NULL);
 
@@ -489,6 +490,14 @@ mucwin_message(ProfMucWin *mucwin, const char *const nick, const char *const mes
             win_println_them_message(window, nick, "%s", message);
         }
     } else {
+        if (mucwin->last_message) {
+            free(mucwin->last_message);
+        }
+        mucwin->last_message = strdup(message);
+        if (mucwin->last_id) {
+            free(mucwin->last_id);
+        }
+        mucwin->last_id = strdup(id);
         win_println_me_message(window, mynick, "%s", message);
     }
 }

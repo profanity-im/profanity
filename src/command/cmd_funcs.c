@@ -7032,6 +7032,51 @@ cmd_encwarn(ProfWin *window, const char *const command, gchar **args)
     return TRUE;
 }
 
+gboolean
+cmd_correct(ProfWin *window, const char *const command, gchar **args)
+{
+    char *corrected = args[0];
+
+    if (window->type == WIN_CHAT) {
+        ProfChatWin *chatwin = (ProfChatWin*)window;
+        assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
+
+        if (chatwin->last_id == NULL || chatwin->last_message == NULL) {
+            cons_show("No last message to correct.");
+            return TRUE;
+        }
+
+        cons_debug("Chat message correction");
+        cons_debug("  ID        : %s", chatwin->last_id);
+        cons_debug("  Original  : %s", chatwin->last_message);
+        cons_debug("  Corrected : %s", corrected);
+
+        cl_ev_send_msg(chatwin, corrected, NULL);
+        return TRUE;
+    }
+
+    if (window->type == WIN_MUC) {
+        ProfMucWin *mucwin = (ProfMucWin*)window;
+        assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
+
+        if (mucwin->last_message == NULL) {
+            cons_show("No last message to correct.");
+            return TRUE;
+        }
+
+        cons_debug("MUC message correction");
+        cons_debug("  ID        : %s", mucwin->last_id);
+        cons_debug("  Original  : %s", mucwin->last_message);
+        cons_debug("  Corrected : %s", corrected);
+
+        cl_ev_send_muc_msg(mucwin, corrected, NULL);
+        return TRUE;
+    }
+
+    cons_show("Command /correct not valid in current window.");
+    return TRUE;
+}
+
 static gboolean
 _cmd_execute(ProfWin *window, const char *const command, const char *const inp)
 {
