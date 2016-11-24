@@ -47,12 +47,6 @@
 #include "otr/otr.h"
 #endif
 
-#define NO_ME           1
-#define NO_DATE         2
-#define NO_EOL          4
-#define NO_COLOUR_FROM  8
-#define NO_COLOUR_DATE  16
-
 typedef enum {
     PROF_MSG_PLAIN,
     PROF_MSG_OTR,

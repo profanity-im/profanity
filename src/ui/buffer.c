@@ -80,10 +80,12 @@ buffer_free(ProfBuff buffer)
 
 void
 buffer_append(ProfBuff buffer, const char show_char, int pad_indent, GDateTime *time,
-    int flags, theme_item_t theme_item, const char *const from, const char *const message, DeliveryReceipt *receipt)
+    int flags, gboolean show_date, gboolean colour_date, theme_item_t theme_item, const char *const from, const char *const message, DeliveryReceipt *receipt)
 {
     ProfBuffEntry *e = malloc(sizeof(struct prof_buff_entry_t));
     e->show_char = show_char;
+    e->show_date = show_date;
+    e->colour_date = colour_date;
     e->pad_indent = pad_indent;
     e->flags = flags;
     e->theme_item = theme_item;
