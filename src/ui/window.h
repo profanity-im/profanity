@@ -60,7 +60,7 @@ void win_show_status_string(ProfWin *window, const char *const from,
     GDateTime *last_activity, const char *const pre,
     const char *const default_show);
 
-void win_print_them(ProfWin *window, theme_item_t theme_item, const char *const them);
+void win_print_muc_occupant(ProfWin *window, theme_item_t theme_item, const char *const them);
 
 void win_print_muc_occupant_message(ProfWin *window, const char *const them, const char *const message, ...);
 void win_print_muc_self_message(ProfWin *window, const char *const me, const char *const message, ...);

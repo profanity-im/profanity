@@ -1015,7 +1015,7 @@ win_print_incoming(ProfWin *window, GDateTime *timestamp,
 }
 
 void
-win_print_them(ProfWin *window, theme_item_t theme_item, const char *const them)
+win_print_muc_occupant(ProfWin *window, theme_item_t theme_item, const char *const them)
 {
     _win_printf(window, '-', 0, NULL, NO_ME | NO_EOL, theme_item, them, "");
 }
