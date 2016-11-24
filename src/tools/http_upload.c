@@ -256,7 +256,6 @@ end:
                 msg = strdup(FALLBACK_MSG);
             }
             win_update_entry_message(upload->window, upload->put_url, msg);
-            //win_update_entry_theme(upload->window, upload->put_url, THEME_THEM);
             win_mark_received(upload->window, upload->put_url);
             free(msg);
 
