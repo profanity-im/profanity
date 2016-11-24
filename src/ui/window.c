@@ -1280,16 +1280,6 @@ win_update_entry_message(ProfWin *window, const char *const id, const char *cons
 }
 
 void
-win_update_entry_theme(ProfWin *window, const char *const id, theme_item_t theme_item)
-{
-    ProfBuffEntry *entry = buffer_get_entry_by_id(window->layout->buffer, id);
-    if (entry) {
-        entry->theme_item = theme_item;
-        win_redraw(window);
-    }
-}
-
-void
 win_newline(ProfWin *window)
 {
     win_appendln(window, THEME_DEFAULT, "");
