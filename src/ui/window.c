@@ -692,15 +692,15 @@ win_print(ProfWin *window, theme_item_t theme_item, const char ch, const char *c
     va_start(arg, message);
     GString *fmt_msg = g_string_new(NULL);
     g_string_vprintf(fmt_msg, message, arg);
+    va_end(arg);
 
     buffer_append(window->layout->buffer, ch, 0, timestamp, NO_EOL, theme_item, "", fmt_msg->str, NULL);
 
     _win_print(window, ch, 0, timestamp, NO_EOL, theme_item, "", fmt_msg->str, NULL);
-    inp_nonblocking(TRUE);
+    g_string_free(fmt_msg, TRUE);
     g_date_time_unref(timestamp);
 
-    g_string_free(fmt_msg, TRUE);
-    va_end(arg);
+    inp_nonblocking(TRUE);
 }
 
 void
@@ -712,15 +712,15 @@ win_println(ProfWin *window, theme_item_t theme_item, const char ch, const char 
     va_start(arg, message);
     GString *fmt_msg = g_string_new(NULL);
     g_string_vprintf(fmt_msg, message, arg);
+    va_end(arg);
 
     buffer_append(window->layout->buffer, ch, 0, timestamp, 0, theme_item, "", fmt_msg->str, NULL);
 
     _win_print(window, ch, 0, timestamp, 0, theme_item, "", fmt_msg->str, NULL);
-    inp_nonblocking(TRUE);
+    g_string_free(fmt_msg, TRUE);
     g_date_time_unref(timestamp);
 
-    g_string_free(fmt_msg, TRUE);
-    va_end(arg);
+    inp_nonblocking(TRUE);
 }
 
 void
@@ -732,15 +732,15 @@ win_println_indent(ProfWin *window, int pad, const char *const message, ...)
     va_start(arg, message);
     GString *fmt_msg = g_string_new(NULL);
     g_string_vprintf(fmt_msg, message, arg);
+    va_end(arg);
 
     buffer_append(window->layout->buffer, '-', pad, timestamp, 0, THEME_DEFAULT, "", fmt_msg->str, NULL);
 
     _win_print(window, '-', pad, timestamp, 0, THEME_DEFAULT, "", fmt_msg->str, NULL);
-    inp_nonblocking(TRUE);
+    g_string_free(fmt_msg, TRUE);
     g_date_time_unref(timestamp);
 
-    g_string_free(fmt_msg, TRUE);
-    va_end(arg);
+    inp_nonblocking(TRUE);
 }
 
 void
@@ -752,15 +752,15 @@ win_append(ProfWin *window, theme_item_t theme_item, const char *const message, 
     va_start(arg, message);
     GString *fmt_msg = g_string_new(NULL);
     g_string_vprintf(fmt_msg, message, arg);
+    va_end(arg);
 
     buffer_append(window->layout->buffer, '-', 0, timestamp, NO_DATE | NO_EOL, theme_item, "", fmt_msg->str, NULL);
 
     _win_print(window, '-', 0, timestamp, NO_DATE | NO_EOL, theme_item, "", fmt_msg->str, NULL);
-    inp_nonblocking(TRUE);
+    g_string_free(fmt_msg, TRUE);
     g_date_time_unref(timestamp);
 
-    g_string_free(fmt_msg, TRUE);
-    va_end(arg);
+    inp_nonblocking(TRUE);
 }
 
 void
@@ -772,15 +772,15 @@ win_appendln(ProfWin *window, theme_item_t theme_item, const char *const message
     va_start(arg, message);
     GString *fmt_msg = g_string_new(NULL);
     g_string_vprintf(fmt_msg, message, arg);
+    va_end(arg);
 
     buffer_append(window->layout->buffer, '-', 0, timestamp, NO_DATE, theme_item, "", fmt_msg->str, NULL);
 
     _win_print(window, '-', 0, timestamp, NO_DATE, theme_item, "", fmt_msg->str, NULL);
-    inp_nonblocking(TRUE);
+    g_string_free(fmt_msg, TRUE);
     g_date_time_unref(timestamp);
 
-    g_string_free(fmt_msg, TRUE);
-    va_end(arg);
+    inp_nonblocking(TRUE);
 }
 
 void
@@ -792,15 +792,15 @@ win_append_highlight(ProfWin *window, theme_item_t theme_item, const char *const
     va_start(arg, message);
     GString *fmt_msg = g_string_new(NULL);
     g_string_vprintf(fmt_msg, message, arg);
+    va_end(arg);
 
     buffer_append(window->layout->buffer, '-', 0, timestamp, NO_DATE | NO_ME | NO_EOL, theme_item, "", fmt_msg->str, NULL);
 
     _win_print(window, '-', 0, timestamp, NO_DATE | NO_ME | NO_EOL, theme_item, "", fmt_msg->str, NULL);
-    inp_nonblocking(TRUE);
+    g_string_free(fmt_msg, TRUE);
     g_date_time_unref(timestamp);
 
-    g_string_free(fmt_msg, TRUE);
-    va_end(arg);
+    inp_nonblocking(TRUE);
 }
 
 void
@@ -812,15 +812,15 @@ win_appendln_highlight(ProfWin *window, theme_item_t theme_item, const char *con
     va_start(arg, message);
     GString *fmt_msg = g_string_new(NULL);
     g_string_vprintf(fmt_msg, message, arg);
+    va_end(arg);
 
     buffer_append(window->layout->buffer, '-', 0, timestamp, NO_DATE | NO_ME, theme_item, "", fmt_msg->str, NULL);
 
     _win_print(window, '-', 0, timestamp, NO_DATE | NO_ME, theme_item, "", fmt_msg->str, NULL);
-    inp_nonblocking(TRUE);
+    g_string_free(fmt_msg, TRUE);
     g_date_time_unref(timestamp);
 
-    g_string_free(fmt_msg, TRUE);
-    va_end(arg);
+    inp_nonblocking(TRUE);
 }
 
 void
@@ -1150,15 +1150,15 @@ win_print_muc_occupant_message(ProfWin *window, const char *const them, const ch
     va_start(arg, message);
     GString *fmt_msg = g_string_new(NULL);
     g_string_vprintf(fmt_msg, message, arg);
+    va_end(arg);
 
     buffer_append(window->layout->buffer, '-', 0, timestamp, NO_ME, THEME_TEXT_THEM, them, fmt_msg->str, NULL);
 
     _win_print(window, '-', 0, timestamp, NO_ME, THEME_TEXT_THEM, them, fmt_msg->str, NULL);
-    inp_nonblocking(TRUE);
+    g_string_free(fmt_msg, TRUE);
     g_date_time_unref(timestamp);
 
-    g_string_free(fmt_msg, TRUE);
-    va_end(arg);
+    inp_nonblocking(TRUE);
 }
 
 void
@@ -1170,15 +1170,15 @@ win_print_muc_self_message(ProfWin *window, const char *const me, const char *co
     va_start(arg, message);
     GString *fmt_msg = g_string_new(NULL);
     g_string_vprintf(fmt_msg, message, arg);
+    va_end(arg);
 
     buffer_append(window->layout->buffer, '-', 0, timestamp, 0, THEME_TEXT_ME, me, fmt_msg->str, NULL);
 
     _win_print(window, '-', 0, timestamp, 0, THEME_TEXT_ME, me, fmt_msg->str, NULL);
-    inp_nonblocking(TRUE);
+    g_string_free(fmt_msg, TRUE);
     g_date_time_unref(timestamp);
 
-    g_string_free(fmt_msg, TRUE);
-    va_end(arg);
+    inp_nonblocking(TRUE);
 }
 
 void
@@ -1215,15 +1215,15 @@ win_print_outgoing(ProfWin *window, const char ch, const char *const message, ..
     va_start(arg, message);
     GString *fmt_msg = g_string_new(NULL);
     g_string_vprintf(fmt_msg, message, arg);
+    va_end(arg);
 
     buffer_append(window->layout->buffer, ch, 0, timestamp, 0, THEME_TEXT_ME, "me", fmt_msg->str, NULL);
 
     _win_print(window, ch, 0, timestamp, 0, THEME_TEXT_ME, "me", fmt_msg->str, NULL);
-    inp_nonblocking(TRUE);
+    g_string_free(fmt_msg, TRUE);
     g_date_time_unref(timestamp);
 
-    g_string_free(fmt_msg, TRUE);
-    va_end(arg);
+    inp_nonblocking(TRUE);
 }
 
 void
@@ -1235,15 +1235,15 @@ win_print_history(ProfWin *window, GDateTime *timestamp, const char *const messa
     va_start(arg, message);
     GString *fmt_msg = g_string_new(NULL);
     g_string_vprintf(fmt_msg, message, arg);
+    va_end(arg);
 
     buffer_append(window->layout->buffer, '-', 0, timestamp, NO_COLOUR_DATE, THEME_DEFAULT, "", fmt_msg->str, NULL);
 
     _win_print(window, '-', 0, timestamp, NO_COLOUR_DATE, THEME_DEFAULT, "", fmt_msg->str, NULL);
-    inp_nonblocking(TRUE);
+    g_string_free(fmt_msg, TRUE);
     g_date_time_unref(timestamp);
 
-    g_string_free(fmt_msg, TRUE);
-    va_end(arg);
+    inp_nonblocking(TRUE);
 }
 
 void
@@ -1263,10 +1263,11 @@ win_print_with_receipt(ProfWin *window, const char show_char, const char *const 
     receipt->received = FALSE;
 
     buffer_append(window->layout->buffer, show_char, 0, time, 0, THEME_TEXT_ME, from, message, receipt);
+
     _win_print(window, show_char, 0, time, 0, THEME_TEXT_ME, from, message, receipt);
-    // TODO: cross-reference.. this should be replaced by a real event-based system
-    inp_nonblocking(TRUE);
     g_date_time_unref(time);
+
+    inp_nonblocking(TRUE);
 }
 
 void
@@ -1312,15 +1313,15 @@ _win_printf(ProfWin *window, const char show_char, int pad_indent, GDateTime *ti
     va_start(arg, message);
     GString *fmt_msg = g_string_new(NULL);
     g_string_vprintf(fmt_msg, message, arg);
+    va_end(arg);
 
     buffer_append(window->layout->buffer, show_char, pad_indent, timestamp, flags, theme_item, from, fmt_msg->str, NULL);
 
     _win_print(window, show_char, pad_indent, timestamp, flags, theme_item, from, fmt_msg->str, NULL);
-    inp_nonblocking(TRUE);
+    g_string_free(fmt_msg, TRUE);
     g_date_time_unref(timestamp);
 
-    g_string_free(fmt_msg, TRUE);
-    va_end(arg);
+    inp_nonblocking(TRUE);
 }
 
 static void
