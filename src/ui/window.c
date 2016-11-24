@@ -1310,6 +1310,36 @@ win_update_message(ProfWin *window, const char *const id, const char *const mess
     win_redraw(window);
 }
 
+static gboolean
+_show_date(int flags)
+{
+    return (flags & NO_DATE) == 0;
+}
+
+static gboolean
+_colour_date(int flags)
+{
+    return (flags & NO_COLOUR_DATE) == 0;
+}
+
+static gboolean
+_from_them(int flags)
+{
+    return flags & NO_ME;
+}
+
+static gboolean
+_colour_from(int flags)
+{
+    return (flags & NO_COLOUR_FROM) == 0;
+}
+
+static gboolean
+_newline(int flags)
+{
+    return (flags & NO_EOL) == 0;
+}
+
 static void
 _win_print(ProfWin *window, const char show_char, int pad_indent, GDateTime *time, int flags, theme_item_t theme_item,
     const char *const from, const char *const message, DeliveryReceipt *receipt)
@@ -1359,26 +1389,26 @@ _win_print(ProfWin *window, const char show_char, int pad_indent, GDateTime *tim
         indent = 3 + strlen(date_fmt);
     }
 
-    if ((flags & NO_DATE) == 0) {
+    if (_show_date(flags)) {
         if (date_fmt && strlen(date_fmt)) {
-            if ((flags & NO_COLOUR_DATE) == 0) {
+            if (_colour_date(flags)) {
                 wbkgdset(window->layout->win, theme_attrs(THEME_TIME));
                 wattron(window->layout->win, theme_attrs(THEME_TIME));
             }
             wprintw(window->layout->win, "%s %c ", date_fmt, show_char);
-            if ((flags & NO_COLOUR_DATE) == 0) {
+            if (_colour_date(flags)) {
                 wattroff(window->layout->win, theme_attrs(THEME_TIME));
             }
         }
     }
 
     if (from && strlen(from) > 0) {
-        if (flags & NO_ME) {
+        if (_from_them(flags)) {
             colour = theme_attrs(THEME_THEM);
         }
 
-        if (flags & NO_COLOUR_FROM) {
-            colour = 0;
+        if (_colour_from(flags) == FALSE) {
+            colour = THEME_DEFAULT;
         }
 
         if (receipt && !receipt->received) {
@@ -1413,7 +1443,7 @@ _win_print(ProfWin *window, const char show_char, int pad_indent, GDateTime *tim
         wprintw(window->layout->win, "%s", message+offset);
     }
 
-    if ((flags & NO_EOL) == 0) {
+    if (_newline(flags)) {
         int curx = getcurx(window->layout->win);
         if (curx != 0) {
             wprintw(window->layout->win, "\n");
