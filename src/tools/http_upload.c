@@ -92,7 +92,7 @@ _xferinfo(void *userdata, curl_off_t dltotal, curl_off_t dlnow, curl_off_t ultot
     if (asprintf(&msg, "Uploading '%s': %d%%", upload->filename, ulperc) == -1) {
         msg = strdup(FALLBACK_MSG);
     }
-    win_update_entry_message(upload->window, upload->put_url, msg);
+    win_update_message(upload->window, upload->put_url, msg);
     free(msg);
 
     pthread_mutex_unlock(&lock);
@@ -245,7 +245,7 @@ end:
             if (asprintf(&msg, "Uploading '%s' failed: %s", upload->filename, err) == -1) {
                 msg = strdup(FALLBACK_MSG);
             }
-            win_update_entry_message(upload->window, upload->put_url, msg);
+            win_update_message(upload->window, upload->put_url, msg);
         }
         cons_show_error(msg);
         free(msg);
@@ -255,7 +255,7 @@ end:
             if (asprintf(&msg, "Uploading '%s': 100%%", upload->filename) == -1) {
                 msg = strdup(FALLBACK_MSG);
             }
-            win_update_entry_message(upload->window, upload->put_url, msg);
+            win_update_message(upload->window, upload->put_url, msg);
             win_mark_received(upload->window, upload->put_url);
             free(msg);
 

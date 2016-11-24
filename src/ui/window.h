@@ -80,8 +80,9 @@ int win_roster_cols(void);
 int win_occpuants_cols(void);
 void win_sub_print(WINDOW *win, char *msg, gboolean newline, gboolean wrap, int indent);
 void win_sub_newline_lazy(WINDOW *win);
+
 void win_mark_received(ProfWin *window, const char *const id);
-void win_update_entry_message(ProfWin *window, const char *const id, const char *const message);
+void win_update_message(ProfWin *window, const char *const id, const char *const message);
 
 gboolean win_has_active_subwin(ProfWin *window);
 

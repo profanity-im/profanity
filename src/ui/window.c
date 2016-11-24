@@ -1266,21 +1266,30 @@ win_print_with_receipt(ProfWin *window, const char show_char, const char *const 
 void
 win_mark_received(ProfWin *window, const char *const id)
 {
-    gboolean received = buffer_mark_received(window->layout->buffer, id);
-    if (received) {
-        win_redraw(window);
+    ProfBuffEntry *entry = buffer_get_entry_by_id(window->layout->buffer, id);
+    if (!entry) {
+        return;
     }
+
+    if (entry->receipt->received) {
+        return;
+    }
+
+    entry->receipt->received = TRUE;
+    win_redraw(window);
 }
 
 void
-win_update_entry_message(ProfWin *window, const char *const id, const char *const message)
+win_update_message(ProfWin *window, const char *const id, const char *const message)
 {
     ProfBuffEntry *entry = buffer_get_entry_by_id(window->layout->buffer, id);
-    if (entry) {
-        free(entry->message);
-        entry->message = strdup(message);
-        win_redraw(window);
+    if (!entry) {
+        return;
     }
+
+    free(entry->message);
+    entry->message = strdup(message);
+    win_redraw(window);
 }
 
 void

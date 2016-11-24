@@ -100,31 +100,6 @@ buffer_append(ProfBuff buffer, const char show_char, int pad_indent, GDateTime *
     buffer->entries = g_slist_append(buffer->entries, e);
 }
 
-gboolean
-buffer_mark_received(ProfBuff buffer, const char *const id)
-{
-    GSList *entries = buffer->entries;
-    while (entries) {
-        ProfBuffEntry *entry = entries->data;
-        if (entry->receipt && g_strcmp0(entry->receipt->id, id) == 0) {
-            if (!entry->receipt->received) {
-                entry->receipt->received = TRUE;
-                return TRUE;
-            }
-        }
-        entries = g_slist_next(entries);
-    }
-
-    return FALSE;
-}
-
-ProfBuffEntry*
-buffer_get_entry(ProfBuff buffer, int entry)
-{
-    GSList *node = g_slist_nth(buffer->entries, entry);
-    return node->data;
-}
-
 ProfBuffEntry*
 buffer_get_entry_by_id(ProfBuff buffer, const char *const id)
 {
@@ -138,6 +113,13 @@ buffer_get_entry_by_id(ProfBuff buffer, const char *const id)
     }
 
     return NULL;
+}
+
+ProfBuffEntry*
+buffer_get_entry(ProfBuff buffer, int entry)
+{
+    GSList *node = g_slist_nth(buffer->entries, entry);
+    return node->data;
 }
 
 static void
