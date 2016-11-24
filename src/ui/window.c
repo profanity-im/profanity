@@ -1596,7 +1596,7 @@ win_has_active_subwin(ProfWin *window)
 }
 
 gboolean
-win_notify_remind(ProfWin *window)
+win_do_notify_remind(ProfWin *window)
 {
     switch (window->type) {
     case WIN_CHAT:

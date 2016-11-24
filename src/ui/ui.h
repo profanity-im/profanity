@@ -341,7 +341,7 @@ ProfWin* win_create_private(const char *const fulljid);
 ProfWin* win_create_plugin(const char *const plugin_name, const char *const tag);
 void win_update_virtual(ProfWin *window);
 void win_free(ProfWin *window);
-gboolean win_notify_remind(ProfWin *window);
+gboolean win_do_notify_remind(ProfWin *window);
 int win_unread(ProfWin *window);
 void win_resize(ProfWin *window);
 void win_hide_subwin(ProfWin *window);
