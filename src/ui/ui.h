@@ -360,12 +360,13 @@ void win_append_highlight(ProfWin *window, theme_item_t theme_item, const char *
 void win_appendln_highlight(ProfWin *window, theme_item_t theme_item, const char *const message, ...);
 
 char* win_create_title(ProfWin *window);
+char* win_create_summary(ProfWin *window);
+
 void win_show_occupant(ProfWin *window, Occupant *occupant);
 void win_show_occupant_info(ProfWin *window, const char *const room, Occupant *occupant);
 void win_show_contact(ProfWin *window, PContact contact);
 void win_show_info(ProfWin *window, PContact contact);
 void win_clear(ProfWin *window);
-char* win_to_string(ProfWin *window);
 
 // desktop notifications
 void notifier_initialise(void);

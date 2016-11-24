@@ -1051,7 +1051,7 @@ wins_create_summary(gboolean unread)
             GString *line = g_string_new("");
 
             int ui_index = GPOINTER_TO_INT(curr->data);
-            char *winstring = win_to_string(window);
+            char *winstring = win_create_summary(window);
             if (!winstring) {
                 g_string_free(line, TRUE);
                 continue;

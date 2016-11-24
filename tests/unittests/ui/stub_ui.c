@@ -533,7 +533,7 @@ void win_show_contact(ProfWin *window, PContact contact) {}
 void win_show_info(ProfWin *window, PContact contact) {}
 void win_println_indent(ProfWin *window, int pad, const char * const message, ...) {}
 void win_clear(ProfWin *window) {}
-char* win_to_string(ProfWin *window)
+char* win_create_summary(ProfWin *window)
 {
     return NULL;
 }

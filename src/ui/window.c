@@ -322,7 +322,7 @@ win_create_title(ProfWin *window)
 }
 
 char*
-win_to_string(ProfWin *window)
+win_create_summary(ProfWin *window)
 {
     assert(window != NULL);
 
