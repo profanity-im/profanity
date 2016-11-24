@@ -1185,25 +1185,25 @@ void
 win_print_incoming(ProfWin *window, GDateTime *timestamp, const char *const from, const char *const message,
     prof_enc_t enc_mode)
 {
-    char enc_char = '-';
+    if (window->type == WIN_CHAT) {
+        char enc_char = '-';
+        if (enc_mode == PROF_MSG_OTR) {
+            enc_char = prefs_get_otr_char();
+        } else if (enc_mode == PROF_MSG_PGP) {
+            enc_char = prefs_get_pgp_char();
+        }
+        _win_printf(window, enc_char, 0, timestamp, NO_ME, THEME_TEXT_THEM, from, "%s", message);
 
-    switch (window->type)
-    {
-        case WIN_CHAT:
-            if (enc_mode == PROF_MSG_OTR) {
-                enc_char = prefs_get_otr_char();
-            } else if (enc_mode == PROF_MSG_PGP) {
-                enc_char = prefs_get_pgp_char();
-            }
-            _win_printf(window, enc_char, 0, timestamp, NO_ME, THEME_TEXT_THEM, from, "%s", message);
-            break;
-        case WIN_PRIVATE:
-            _win_printf(window, '-', 0, timestamp, NO_ME, THEME_TEXT_THEM, from, "%s", message);
-            break;
-        default:
-            assert(FALSE);
-            break;
+        return;
     }
+
+    if (window->type == WIN_PRIVATE) {
+        _win_printf(window, '-', 0, timestamp, NO_ME, THEME_TEXT_THEM, from, "%s", message);
+
+        return;
+    }
+
+    assert(FALSE);
 }
 
 void
