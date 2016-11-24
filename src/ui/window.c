@@ -61,10 +61,8 @@
 
 #define CEILING(X) (X-(int)(X) > 0 ? (int)(X+1) : (int)(X))
 
-static void _win_printf(ProfWin *window, const char show_char, int pad_indent, GDateTime *timestamp,
-    int flags, theme_item_t theme_item, const char *const from, const char *const message, ...);
-static void _win_print(ProfWin *window, const char show_char, int pad_indent, GDateTime *time,
-    int flags, theme_item_t theme_item, const char *const from, const char *const message, DeliveryReceipt *receipt);
+static void _win_print(ProfWin *window, const char show_char, int pad_indent, GDateTime *time, int flags,
+    theme_item_t theme_item, const char *const from, const char *const message, DeliveryReceipt *receipt);
 static void _win_print_wrapped(WINDOW *win, const char *const message, size_t indent, int pad_indent);
 
 int
@@ -1138,7 +1136,14 @@ win_show_status_string(ProfWin *window, const char *const from, const char *cons
 void
 win_print_muc_occupant(ProfWin *window, theme_item_t theme_item, const char *const them)
 {
-    _win_printf(window, '-', 0, NULL, NO_ME | NO_EOL, theme_item, them, "");
+    GDateTime *timestamp = g_date_time_new_now_local();
+
+    buffer_append(window->layout->buffer, '-', 0, timestamp, NO_ME | NO_EOL, theme_item, them, "", NULL);
+
+    _win_print(window, '-', 0, timestamp, NO_ME | NO_EOL, theme_item, them, "", NULL);
+    g_date_time_unref(timestamp);
+
+    inp_nonblocking(TRUE);
 }
 
 void
@@ -1185,25 +1190,31 @@ void
 win_print_incoming(ProfWin *window, GDateTime *timestamp, const char *const from, const char *const message,
     prof_enc_t enc_mode)
 {
+    if (window->type != WIN_CHAT && window->type != WIN_PRIVATE) {
+        assert(FALSE);
+    }
+
+    char ch = '-';
     if (window->type == WIN_CHAT) {
-        char enc_char = '-';
         if (enc_mode == PROF_MSG_OTR) {
-            enc_char = prefs_get_otr_char();
+            ch = prefs_get_otr_char();
         } else if (enc_mode == PROF_MSG_PGP) {
-            enc_char = prefs_get_pgp_char();
+            ch = prefs_get_pgp_char();
         }
-        _win_printf(window, enc_char, 0, timestamp, NO_ME, THEME_TEXT_THEM, from, "%s", message);
-
-        return;
     }
 
-    if (window->type == WIN_PRIVATE) {
-        _win_printf(window, '-', 0, timestamp, NO_ME, THEME_TEXT_THEM, from, "%s", message);
-
-        return;
+    if (timestamp == NULL) {
+        timestamp = g_date_time_new_now_local();
+    } else {
+        g_date_time_ref(timestamp);
     }
 
-    assert(FALSE);
+    buffer_append(window->layout->buffer, ch, 0, timestamp, NO_ME, THEME_TEXT_THEM, from, message, NULL);
+
+    _win_print(window, ch, 0, timestamp, NO_ME, THEME_TEXT_THEM, from, message, NULL);
+    g_date_time_unref(timestamp);
+
+    inp_nonblocking(TRUE);
 }
 
 void
@@ -1300,33 +1311,8 @@ win_update_message(ProfWin *window, const char *const id, const char *const mess
 }
 
 static void
-_win_printf(ProfWin *window, const char show_char, int pad_indent, GDateTime *timestamp,
-    int flags, theme_item_t theme_item, const char *const from, const char *const message, ...)
-{
-    if (timestamp == NULL) {
-        timestamp = g_date_time_new_now_local();
-    } else {
-        g_date_time_ref(timestamp);
-    }
-
-    va_list arg;
-    va_start(arg, message);
-    GString *fmt_msg = g_string_new(NULL);
-    g_string_vprintf(fmt_msg, message, arg);
-    va_end(arg);
-
-    buffer_append(window->layout->buffer, show_char, pad_indent, timestamp, flags, theme_item, from, fmt_msg->str, NULL);
-
-    _win_print(window, show_char, pad_indent, timestamp, flags, theme_item, from, fmt_msg->str, NULL);
-    g_string_free(fmt_msg, TRUE);
-    g_date_time_unref(timestamp);
-
-    inp_nonblocking(TRUE);
-}
-
-static void
-_win_print(ProfWin *window, const char show_char, int pad_indent, GDateTime *time,
-    int flags, theme_item_t theme_item, const char *const from, const char *const message, DeliveryReceipt *receipt)
+_win_print(ProfWin *window, const char show_char, int pad_indent, GDateTime *time, int flags, theme_item_t theme_item,
+    const char *const from, const char *const message, DeliveryReceipt *receipt)
 {
     // flags : 1st bit =  0/1 - me/not me
     //         2nd bit =  0/1 - date/no date
