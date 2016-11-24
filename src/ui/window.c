@@ -1021,7 +1021,7 @@ win_print_them(ProfWin *window, theme_item_t theme_item, const char *const them)
 }
 
 void
-win_println_them_message(ProfWin *window, const char *const them, const char *const message, ...)
+win_print_muc_occupant_message(ProfWin *window, const char *const them, const char *const message, ...)
 {
     GDateTime *timestamp = g_date_time_new_now_local();
 
@@ -1041,7 +1041,7 @@ win_println_them_message(ProfWin *window, const char *const them, const char *co
 }
 
 void
-win_println_me_message(ProfWin *window, const char *const me, const char *const message, ...)
+win_print_muc_self_message(ProfWin *window, const char *const me, const char *const message, ...)
 {
     GDateTime *timestamp = g_date_time_new_now_local();
 

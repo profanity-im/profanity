@@ -487,7 +487,7 @@ mucwin_message(ProfMucWin *mucwin, const char *const nick, const char *const id,
             win_print_them(window, THEME_ROOMTRIGGER, nick);
             _mucwin_print_triggers(window, message, triggers);
         } else {
-            win_println_them_message(window, nick, "%s", message);
+            win_print_muc_occupant_message(window, nick, "%s", message);
         }
     } else {
         if (mucwin->last_message) {
@@ -498,7 +498,7 @@ mucwin_message(ProfMucWin *mucwin, const char *const nick, const char *const id,
             free(mucwin->last_id);
         }
         mucwin->last_id = strdup(id);
-        win_println_me_message(window, mynick, "%s", message);
+        win_print_muc_self_message(window, mynick, "%s", message);
     }
 }
 
