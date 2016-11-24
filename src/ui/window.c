@@ -72,6 +72,7 @@ win_roster_cols(void)
 {
     int roster_win_percent = prefs_get_roster_size();
     int cols = getmaxx(stdscr);
+
     return CEILING( (((double)cols) / 100) * roster_win_percent);
 }
 
@@ -80,6 +81,7 @@ win_occpuants_cols(void)
 {
     int occupants_win_percent = prefs_get_occupants_size();
     int cols = getmaxx(stdscr);
+
     return CEILING( (((double)cols) / 100) * occupants_win_percent);
 }
 
@@ -261,7 +263,7 @@ win_create_plugin(const char *const plugin_name, const char *const tag)
 }
 
 char*
-win_get_title(ProfWin *window)
+win_create_title(ProfWin *window)
 {
     if (window == NULL) {
         return strdup(CONS_WIN_TITLE);

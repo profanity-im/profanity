@@ -337,7 +337,7 @@ mucconfwin_get_string(ProfMucConfWin *confwin)
 
     GString *res = g_string_new("");
 
-    char *title = win_get_title((ProfWin*)confwin);
+    char *title = win_create_title((ProfWin*)confwin);
     g_string_append(res, title);
     free(title);
 

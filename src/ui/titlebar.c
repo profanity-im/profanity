@@ -189,7 +189,7 @@ _title_bar_draw(void)
         waddch(win, ' ');
     }
 
-    char *title = win_get_title(current);
+    char *title = win_create_title(current);
     mvwprintw(win, 0, 0, " %s", title);
     free(title);
 
