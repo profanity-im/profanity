@@ -48,12 +48,12 @@ typedef struct delivery_receipt_t {
 typedef struct prof_buff_date_t {
     GDateTime *timestamp;
     gboolean colour_date;
-} ProfBufDate;
+} ProfBuffDate;
 
 typedef struct prof_buff_entry_t {
     char show_char;
     int pad_indent;
-    ProfBufDate* date;
+    ProfBuffDate* date;
     int flags;
     theme_item_t theme_item;
     char *from;
@@ -65,7 +65,7 @@ typedef struct prof_buff_t *ProfBuff;
 
 ProfBuff buffer_create();
 void buffer_free(ProfBuff buffer);
-void buffer_append(ProfBuff buffer, const char show_char, int pad_indent, ProfBufDate *date, int flags,
+void buffer_append(ProfBuff buffer, const char show_char, int pad_indent, ProfBuffDate *date, int flags,
     theme_item_t theme_item, const char *const from, const char *const message, DeliveryReceipt *receipt);
 int buffer_size(ProfBuff buffer);
 ProfBuffEntry* buffer_get_entry(ProfBuff buffer, int entry);
