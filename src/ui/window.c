@@ -64,7 +64,7 @@
 #define NO_EOL          1
 
 static void _win_print(ProfWin *window, const char show_char, int pad_indent, ProfBuffDate *date, ProfBuffFrom *from,
-    int flags, theme_item_t theme_item, const char *const message, DeliveryReceipt *receipt);
+    int flags, theme_item_t theme_item, const char *const message, ProfBuffReceipt *receipt);
 static void _win_print_wrapped(WINDOW *win, const char *const message, size_t indent, int pad_indent);
 
 int
@@ -1304,7 +1304,7 @@ void
 win_print_with_receipt(ProfWin *window, const char show_char, const char *const me, const char *const message,
     char *id)
 {
-    DeliveryReceipt *receipt = malloc(sizeof(struct delivery_receipt_t));
+    ProfBuffReceipt *receipt = malloc(sizeof(ProfBuffReceipt));
     receipt->id = strdup(id);
     receipt->received = FALSE;
 
@@ -1372,7 +1372,7 @@ _win_print(
     int flags,
     theme_item_t theme_item,
     const char *const message,
-    DeliveryReceipt *receipt)
+    ProfBuffReceipt *receipt)
 {
     // flags : 1st bit =  0/1 - me/not me
     //         2nd bit =  0/1 - eol/no eol
