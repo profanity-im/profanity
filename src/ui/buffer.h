@@ -50,13 +50,23 @@ typedef struct prof_buff_date_t {
     gboolean colour_date;
 } ProfBuffDate;
 
+typedef enum {
+    FROM_THEM,
+    FROM_ME
+} prof_buff_from_type_t;
+
+typedef struct prof_buff_from_t {
+    prof_buff_from_type_t type;
+    char *from;
+} ProfBuffFrom;
+
 typedef struct prof_buff_entry_t {
     char show_char;
     int pad_indent;
     ProfBuffDate* date;
+    ProfBuffFrom *from;
     int flags;
     theme_item_t theme_item;
-    char *from;
     char *message;
     DeliveryReceipt *receipt;
 } ProfBuffEntry;
@@ -65,8 +75,8 @@ typedef struct prof_buff_t *ProfBuff;
 
 ProfBuff buffer_create();
 void buffer_free(ProfBuff buffer);
-void buffer_append(ProfBuff buffer, const char show_char, int pad_indent, ProfBuffDate *date, int flags,
-    theme_item_t theme_item, const char *const from, const char *const message, DeliveryReceipt *receipt);
+void buffer_append(ProfBuff buffer, const char show_char, int pad_indent, ProfBuffDate *date, ProfBuffFrom *from,
+    int flags, theme_item_t theme_item, const char *const message, DeliveryReceipt *receipt);
 int buffer_size(ProfBuff buffer);
 ProfBuffEntry* buffer_get_entry(ProfBuff buffer, int entry);
 ProfBuffEntry* buffer_get_entry_by_id(ProfBuff buffer, const char *const id);
