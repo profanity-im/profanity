@@ -701,9 +701,7 @@ win_print(ProfWin *window, theme_item_t theme_item, const char ch, const char *c
     g_string_vprintf(fmt_msg, message, arg);
     va_end(arg);
 
-    ProfBuffDate *date = malloc(sizeof(ProfBuffDate));
-    date->timestamp = g_date_time_new_now_local();
-    date->colour_date = TRUE;
+    ProfBuffDate *date = buffer_date_new_now();
 
     buffer_append(window->layout->buffer, theme_item, date, ch, NULL, fmt_msg->str, 0, FALSE, NULL);
     g_date_time_unref(date->timestamp);
@@ -723,9 +721,7 @@ win_println(ProfWin *window, theme_item_t theme_item, const char ch, const char 
     g_string_vprintf(fmt_msg, message, arg);
     va_end(arg);
 
-    ProfBuffDate *date = malloc(sizeof(ProfBuffDate));
-    date->timestamp = g_date_time_new_now_local();
-    date->colour_date = TRUE;
+    ProfBuffDate *date = buffer_date_new_now();
 
     buffer_append(window->layout->buffer, theme_item, date, ch, NULL, fmt_msg->str, 0, TRUE, NULL);
     g_date_time_unref(date->timestamp);
@@ -745,9 +741,7 @@ win_println_indent(ProfWin *window, int pad, const char *const message, ...)
     g_string_vprintf(fmt_msg, message, arg);
     va_end(arg);
 
-    ProfBuffDate *date = malloc(sizeof(ProfBuffDate));
-    date->timestamp = g_date_time_new_now_local();
-    date->colour_date = TRUE;
+    ProfBuffDate *date = buffer_date_new_now();
 
     buffer_append(window->layout->buffer, THEME_DEFAULT, date, '-', NULL, fmt_msg->str, pad, TRUE, NULL);
     g_date_time_unref(date->timestamp);
@@ -1141,9 +1135,7 @@ win_show_status_string(ProfWin *window, const char *const from, const char *cons
 void
 win_print_muc_occupant(ProfWin *window, theme_item_t theme_item, const char *const them)
 {
-    ProfBuffDate *date = malloc(sizeof(ProfBuffDate));
-    date->timestamp = g_date_time_new_now_local();
-    date->colour_date = TRUE;
+    ProfBuffDate *date = buffer_date_new_now();
 
     ProfBuffFrom *from = NULL;
     if (them) {
@@ -1169,9 +1161,7 @@ win_print_muc_occupant_message(ProfWin *window, const char *const them, const ch
     g_string_vprintf(fmt_msg, message, arg);
     va_end(arg);
 
-    ProfBuffDate *date = malloc(sizeof(ProfBuffDate));
-    date->timestamp = g_date_time_new_now_local();
-    date->colour_date = TRUE;
+    ProfBuffDate *date = buffer_date_new_now();
 
     ProfBuffFrom *from = NULL;
     if (them) {
@@ -1198,9 +1188,7 @@ win_print_muc_self_message(ProfWin *window, const char *const me, const char *co
     g_string_vprintf(fmt_msg, message, arg);
     va_end(arg);
 
-    ProfBuffDate *date = malloc(sizeof(ProfBuffDate));
-    date->timestamp = g_date_time_new_now_local();
-    date->colour_date = TRUE;
+    ProfBuffDate *date = buffer_date_new_now();
 
     ProfBuffFrom *from = NULL;
     if (me) {
@@ -1235,9 +1223,7 @@ win_print_incoming(ProfWin *window, GDateTime *timestamp, const char *const them
         }
     }
 
-    ProfBuffDate *date = malloc(sizeof(ProfBuffDate));
-    date->timestamp = timestamp == NULL ? g_date_time_new_now_local() : g_date_time_ref(timestamp);
-    date->colour_date = TRUE;
+    ProfBuffDate *date = buffer_date_new(timestamp, TRUE);
 
     ProfBuffFrom *from = NULL;
     if (them) {
@@ -1263,9 +1249,7 @@ win_print_outgoing(ProfWin *window, const char ch, const char *const message, ..
     g_string_vprintf(fmt_msg, message, arg);
     va_end(arg);
 
-    ProfBuffDate *date = malloc(sizeof(ProfBuffDate));
-    date->timestamp = g_date_time_new_now_local();
-    date->colour_date = TRUE;
+    ProfBuffDate *date = buffer_date_new_now();
 
     ProfBuffFrom *from = malloc(sizeof(ProfBuffFrom));
     from->type = FROM_ME;
@@ -1289,9 +1273,7 @@ win_print_history(ProfWin *window, GDateTime *timestamp, const char *const messa
     g_string_vprintf(fmt_msg, message, arg);
     va_end(arg);
 
-    ProfBuffDate *date = malloc(sizeof(ProfBuffDate));
-    date->timestamp = g_date_time_ref(timestamp);
-    date->colour_date = FALSE;
+    ProfBuffDate *date = buffer_date_new(timestamp, FALSE);
 
     buffer_append(window->layout->buffer, THEME_DEFAULT, date, '-', NULL, fmt_msg->str, 0, TRUE, NULL);
     g_date_time_unref(date->timestamp);
@@ -1316,9 +1298,7 @@ win_print_with_receipt(ProfWin *window, const char show_char, const char *const 
     receipt->id = strdup(id);
     receipt->received = FALSE;
 
-    ProfBuffDate *date = malloc(sizeof(ProfBuffDate));
-    date->timestamp = g_date_time_new_now_local();
-    date->colour_date = TRUE;
+    ProfBuffDate *date = buffer_date_new_now();
 
     ProfBuffFrom *from = NULL;
     if (me) {

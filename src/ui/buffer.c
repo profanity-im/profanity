@@ -78,6 +78,26 @@ buffer_free(ProfBuff buffer)
     free(buffer);
 }
 
+ProfBuffDate*
+buffer_date_new(GDateTime *timestamp, gboolean colour)
+{
+    ProfBuffDate *date = malloc(sizeof(ProfBuffDate));
+    date->timestamp = timestamp == NULL ? g_date_time_new_now_local() : g_date_time_ref(timestamp);
+    date->colour_date = colour;
+
+    return date;
+}
+
+ProfBuffDate*
+buffer_date_new_now(void)
+{
+    ProfBuffDate *date = malloc(sizeof(ProfBuffDate));
+    date->timestamp = g_date_time_new_now_local();
+    date->colour_date = TRUE;
+
+    return date;
+}
+
 void
 buffer_append(
     ProfBuff buffer,

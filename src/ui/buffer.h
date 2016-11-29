@@ -76,6 +76,9 @@ typedef struct prof_buff_t *ProfBuff;
 ProfBuff buffer_create();
 void buffer_free(ProfBuff buffer);
 
+ProfBuffDate* buffer_date_new_now(void);
+ProfBuffDate* buffer_date_new(GDateTime *timestamp, gboolean colour);
+
 void buffer_append(
     ProfBuff buffer,
     theme_item_t theme_item,
