@@ -98,6 +98,26 @@ buffer_date_new_now(void)
     return date;
 }
 
+ProfBuffReceipt*
+buffer_receipt_new(char *id)
+{
+    ProfBuffReceipt *receipt = malloc(sizeof(ProfBuffReceipt));
+    receipt->id = strdup(id);
+    receipt->received = FALSE;
+
+    return receipt;
+}
+
+ProfBuffFrom*
+buffer_from_new(prof_buff_from_type_t type, const char *const from)
+{
+    ProfBuffFrom *result = malloc(sizeof(ProfBuffFrom));
+    result->type = type;
+    result->from = strdup(from);
+
+    return result;
+}
+
 void
 buffer_append(
     ProfBuff buffer,

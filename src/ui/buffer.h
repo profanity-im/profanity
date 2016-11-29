@@ -78,6 +78,8 @@ void buffer_free(ProfBuff buffer);
 
 ProfBuffDate* buffer_date_new_now(void);
 ProfBuffDate* buffer_date_new(GDateTime *timestamp, gboolean colour);
+ProfBuffReceipt* buffer_receipt_new(char *id);
+ProfBuffFrom* buffer_from_new(prof_buff_from_type_t type, const char *const from);
 
 void buffer_append(
     ProfBuff buffer,

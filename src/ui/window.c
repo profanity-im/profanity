@@ -1136,13 +1136,7 @@ void
 win_print_muc_occupant(ProfWin *window, theme_item_t theme_item, const char *const them)
 {
     ProfBuffDate *date = buffer_date_new_now();
-
-    ProfBuffFrom *from = NULL;
-    if (them) {
-        from = malloc(sizeof(ProfBuffFrom));
-        from->type = FROM_THEM;
-        from->from = strdup(them);
-    }
+    ProfBuffFrom *from = them ? buffer_from_new(FROM_THEM, them) : NULL;
 
     buffer_append(window->layout->buffer, theme_item, date, '-', from, "", 0, FALSE, NULL);
     g_date_time_unref(date->timestamp);
@@ -1162,13 +1156,7 @@ win_print_muc_occupant_message(ProfWin *window, const char *const them, const ch
     va_end(arg);
 
     ProfBuffDate *date = buffer_date_new_now();
-
-    ProfBuffFrom *from = NULL;
-    if (them) {
-        from = malloc(sizeof(ProfBuffFrom));
-        from->type = FROM_THEM;
-        from->from = strdup(them);
-    }
+    ProfBuffFrom *from = them ? buffer_from_new(FROM_THEM, them) : NULL;
 
     buffer_append(window->layout->buffer, THEME_TEXT_THEM, date, '-', from, fmt_msg->str, 0, TRUE, NULL);
     g_date_time_unref(date->timestamp);
@@ -1189,13 +1177,7 @@ win_print_muc_self_message(ProfWin *window, const char *const me, const char *co
     va_end(arg);
 
     ProfBuffDate *date = buffer_date_new_now();
-
-    ProfBuffFrom *from = NULL;
-    if (me) {
-        from = malloc(sizeof(ProfBuffFrom));
-        from->type = FROM_ME;
-        from->from = strdup(me);
-    }
+    ProfBuffFrom *from = me ? buffer_from_new(FROM_ME, me) : NULL;
 
     buffer_append(window->layout->buffer, THEME_TEXT_ME, date, '-', from, fmt_msg->str, 0, TRUE, NULL);
     g_date_time_unref(date->timestamp);
@@ -1224,13 +1206,7 @@ win_print_incoming(ProfWin *window, GDateTime *timestamp, const char *const them
     }
 
     ProfBuffDate *date = buffer_date_new(timestamp, TRUE);
-
-    ProfBuffFrom *from = NULL;
-    if (them) {
-        from = malloc(sizeof(ProfBuffFrom));
-        from->type = FROM_THEM;
-        from->from = strdup(them);
-    }
+    ProfBuffFrom *from = them ? buffer_from_new(FROM_THEM, them) : NULL;
 
     buffer_append(window->layout->buffer, THEME_TEXT_THEM, date, ch, from, message, 0, TRUE, NULL);
     g_date_time_unref(date->timestamp);
@@ -1250,10 +1226,7 @@ win_print_outgoing(ProfWin *window, const char ch, const char *const message, ..
     va_end(arg);
 
     ProfBuffDate *date = buffer_date_new_now();
-
-    ProfBuffFrom *from = malloc(sizeof(ProfBuffFrom));
-    from->type = FROM_ME;
-    from->from = strdup("me");
+    ProfBuffFrom *from = buffer_from_new(FROM_ME, "me");
 
     buffer_append(window->layout->buffer, THEME_TEXT_ME, date, ch, from, fmt_msg->str, 0, TRUE, NULL);
     g_date_time_unref(date->timestamp);
@@ -1291,21 +1264,11 @@ win_print_http_upload(ProfWin *window, const char *const message, char *url)
 }
 
 void
-win_print_with_receipt(ProfWin *window, const char show_char, const char *const me, const char *const message,
-    char *id)
+win_print_with_receipt(ProfWin *window, const char show_char, const char *const me, const char *const message, char *id)
 {
-    ProfBuffReceipt *receipt = malloc(sizeof(ProfBuffReceipt));
-    receipt->id = strdup(id);
-    receipt->received = FALSE;
-
+    ProfBuffReceipt *receipt = buffer_receipt_new(id);
     ProfBuffDate *date = buffer_date_new_now();
-
-    ProfBuffFrom *from = NULL;
-    if (me) {
-        from = malloc(sizeof(ProfBuffFrom));
-        from->type = FROM_ME;
-        from->from = strdup(me);
-    }
+    ProfBuffFrom *from = me ? buffer_from_new(FROM_ME, me) : NULL;
 
     buffer_append(window->layout->buffer, THEME_TEXT_ME, date, show_char, from, message, 0, TRUE, receipt);
     g_date_time_unref(date->timestamp);
