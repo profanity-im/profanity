@@ -79,8 +79,16 @@ buffer_free(ProfBuff buffer)
 }
 
 void
-buffer_append(ProfBuff buffer, const char show_char, int pad_indent, ProfBuffDate *date, ProfBuffFrom *from,
-    gboolean newline, theme_item_t theme_item, const char *const message, ProfBuffReceipt *receipt)
+buffer_append(
+    ProfBuff buffer,
+    theme_item_t theme_item,
+    ProfBuffDate *date,
+    const char show_char,
+    ProfBuffFrom *from,
+    const char *const message,
+    int pad_indent,
+    gboolean newline,
+    ProfBuffReceipt *receipt)
 {
     ProfBuffEntry *e = malloc(sizeof(struct prof_buff_entry_t));
     e->show_char = show_char;

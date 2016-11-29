@@ -61,13 +61,13 @@ typedef struct prof_buff_from_t {
 } ProfBuffFrom;
 
 typedef struct prof_buff_entry_t {
-    char show_char;
-    int pad_indent;
-    ProfBuffDate* date;
-    ProfBuffFrom *from;
-    gboolean newline;
     theme_item_t theme_item;
+    ProfBuffDate* date;
+    char show_char;
+    ProfBuffFrom *from;
     char *message;
+    int pad_indent;
+    gboolean newline;
     ProfBuffReceipt *receipt;
 } ProfBuffEntry;
 
@@ -75,8 +75,18 @@ typedef struct prof_buff_t *ProfBuff;
 
 ProfBuff buffer_create();
 void buffer_free(ProfBuff buffer);
-void buffer_append(ProfBuff buffer, const char show_char, int pad_indent, ProfBuffDate *date, ProfBuffFrom *from,
-    gboolean newline, theme_item_t theme_item, const char *const message, ProfBuffReceipt *receipt);
+
+void buffer_append(
+    ProfBuff buffer,
+    theme_item_t theme_item,
+    ProfBuffDate *date,
+    const char show_char,
+    ProfBuffFrom *from,
+    const char *const message,
+    int pad_indent,
+    gboolean newline,
+    ProfBuffReceipt *receipt);
+
 int buffer_size(ProfBuff buffer);
 ProfBuffEntry* buffer_get_entry(ProfBuff buffer, int entry);
 ProfBuffEntry* buffer_get_entry_by_id(ProfBuff buffer, const char *const id);
