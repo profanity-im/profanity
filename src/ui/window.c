@@ -704,7 +704,6 @@ win_print(ProfWin *window, theme_item_t theme_item, const char ch, const char *c
     ProfBuffDate *date = buffer_date_new_now();
 
     buffer_append(window->layout->buffer, theme_item, date, ch, NULL, fmt_msg->str, 0, FALSE, NULL);
-    g_date_time_unref(date->timestamp);
 
     _win_print(window, theme_item, date, ch, NULL, fmt_msg->str, 0, FALSE, NULL);
     g_string_free(fmt_msg, TRUE);
@@ -724,7 +723,6 @@ win_println(ProfWin *window, theme_item_t theme_item, const char ch, const char 
     ProfBuffDate *date = buffer_date_new_now();
 
     buffer_append(window->layout->buffer, theme_item, date, ch, NULL, fmt_msg->str, 0, TRUE, NULL);
-    g_date_time_unref(date->timestamp);
 
     _win_print(window, theme_item, date, ch, NULL, fmt_msg->str, 0, TRUE, NULL);
     g_string_free(fmt_msg, TRUE);
@@ -744,7 +742,6 @@ win_println_indent(ProfWin *window, int pad, const char *const message, ...)
     ProfBuffDate *date = buffer_date_new_now();
 
     buffer_append(window->layout->buffer, THEME_DEFAULT, date, '-', NULL, fmt_msg->str, pad, TRUE, NULL);
-    g_date_time_unref(date->timestamp);
 
     _win_print(window, THEME_DEFAULT, date, '-', NULL, fmt_msg->str, pad, TRUE, NULL);
     g_string_free(fmt_msg, TRUE);
@@ -1139,7 +1136,6 @@ win_print_muc_occupant(ProfWin *window, theme_item_t theme_item, const char *con
     ProfBuffFrom *from = them ? buffer_from_new(FROM_THEM, them) : NULL;
 
     buffer_append(window->layout->buffer, theme_item, date, '-', from, "", 0, FALSE, NULL);
-    g_date_time_unref(date->timestamp);
 
     _win_print(window, theme_item, date, '-', from, "", 0, FALSE, NULL);
 
@@ -1159,7 +1155,6 @@ win_print_muc_occupant_message(ProfWin *window, const char *const them, const ch
     ProfBuffFrom *from = them ? buffer_from_new(FROM_THEM, them) : NULL;
 
     buffer_append(window->layout->buffer, THEME_TEXT_THEM, date, '-', from, fmt_msg->str, 0, TRUE, NULL);
-    g_date_time_unref(date->timestamp);
 
     _win_print(window, THEME_TEXT_THEM, date, '-', from, fmt_msg->str, 0, TRUE, NULL);
     g_string_free(fmt_msg, TRUE);
@@ -1180,7 +1175,6 @@ win_print_muc_self_message(ProfWin *window, const char *const me, const char *co
     ProfBuffFrom *from = me ? buffer_from_new(FROM_ME, me) : NULL;
 
     buffer_append(window->layout->buffer, THEME_TEXT_ME, date, '-', from, fmt_msg->str, 0, TRUE, NULL);
-    g_date_time_unref(date->timestamp);
 
     _win_print(window, THEME_TEXT_ME, date, '-', from, fmt_msg->str, 0, TRUE, NULL);
     g_string_free(fmt_msg, TRUE);
@@ -1209,7 +1203,6 @@ win_print_incoming(ProfWin *window, GDateTime *timestamp, const char *const them
     ProfBuffFrom *from = them ? buffer_from_new(FROM_THEM, them) : NULL;
 
     buffer_append(window->layout->buffer, THEME_TEXT_THEM, date, ch, from, message, 0, TRUE, NULL);
-    g_date_time_unref(date->timestamp);
 
     _win_print(window, THEME_TEXT_THEM, date, ch, from, message, 0, TRUE, NULL);
 
@@ -1229,7 +1222,6 @@ win_print_outgoing(ProfWin *window, const char ch, const char *const message, ..
     ProfBuffFrom *from = buffer_from_new(FROM_ME, "me");
 
     buffer_append(window->layout->buffer, THEME_TEXT_ME, date, ch, from, fmt_msg->str, 0, TRUE, NULL);
-    g_date_time_unref(date->timestamp);
 
     _win_print(window, THEME_TEXT_ME, date, ch, from, fmt_msg->str, 0, TRUE, NULL);
     g_string_free(fmt_msg, TRUE);
@@ -1249,7 +1241,6 @@ win_print_history(ProfWin *window, GDateTime *timestamp, const char *const messa
     ProfBuffDate *date = buffer_date_new(timestamp, FALSE);
 
     buffer_append(window->layout->buffer, THEME_DEFAULT, date, '-', NULL, fmt_msg->str, 0, TRUE, NULL);
-    g_date_time_unref(date->timestamp);
 
     _win_print(window, THEME_DEFAULT, date, '-', NULL, fmt_msg->str, 0, TRUE, NULL);
     g_string_free(fmt_msg, TRUE);
@@ -1271,7 +1262,6 @@ win_print_with_receipt(ProfWin *window, const char show_char, const char *const 
     ProfBuffFrom *from = me ? buffer_from_new(FROM_ME, me) : NULL;
 
     buffer_append(window->layout->buffer, THEME_TEXT_ME, date, show_char, from, message, 0, TRUE, receipt);
-    g_date_time_unref(date->timestamp);
 
     _win_print(window, THEME_TEXT_ME, date, show_char, from, message, 0, TRUE, receipt);
 

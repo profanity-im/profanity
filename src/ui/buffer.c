@@ -136,10 +136,6 @@ buffer_append(
     e->newline = newline;
     e->theme_item = theme_item;
     e->date = date;
-    if (e->date && e->date->timestamp) {
-        g_date_time_ref(e->date->timestamp);
-
-    }
     e->from = from;
     e->message = strdup(message);
     e->receipt = receipt;
