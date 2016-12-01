@@ -82,7 +82,7 @@ chatwin_receipt_received(ProfChatWin *chatwin, const char *const id)
     assert(chatwin != NULL);
 
     ProfWin *win = (ProfWin*) chatwin;
-    win_mark_received(win, id);
+    win_receipt_received(win, id);
 }
 
 #ifdef HAVE_LIBOTR

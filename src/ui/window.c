@@ -1238,7 +1238,7 @@ win_complete_upload(ProfWin *window, const char *const url)
 }
 
 void
-win_mark_received(ProfWin *window, const char *const id)
+win_receipt_received(ProfWin *window, const char *const id)
 {
     ProfBuffEntry *entry = buffer_get_entry_by_outgoing_id(window->layout->entries, id);
     if (!entry) {
