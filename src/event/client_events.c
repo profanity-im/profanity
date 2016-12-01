@@ -234,9 +234,9 @@ cl_ev_send_priv_msg(ProfPrivateWin *privwin, const char *const msg, const char *
     } else {
         char *plugin_msg = plugins_pre_priv_message_send(privwin->fulljid, msg);
 
-        message_send_private(privwin->fulljid, plugin_msg, oob_url);
-        privwin_outgoing_msg(privwin, plugin_msg);
-
+        char *id = message_send_private(privwin->fulljid, plugin_msg, oob_url);
+        privwin_outgoing_msg(privwin, plugin_msg, id);
+        free(id);
         plugins_post_priv_message_send(privwin->fulljid, plugin_msg);
         free(plugin_msg);
     }

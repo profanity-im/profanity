@@ -200,7 +200,6 @@ typedef struct prof_plugin_win_t {
 } ProfPluginWin;
 
 typedef struct prof_buff_receipt_t {
-    char *id;
     gboolean received;
 } ProfBuffReceipt;
 
@@ -213,6 +212,12 @@ typedef struct prof_buff_date_t {
     GDateTime *timestamp;
     gboolean colour_date;
 } ProfBuffDate;
+
+typedef struct prof_buff_xmpp_t {
+    char *outgoing_id;
+    ProfBuffReceipt *receipt;
+    ProfBuffUpload *upload;
+} ProfBuffXMPP;
 
 typedef enum {
     FROM_THEM,
@@ -232,8 +237,7 @@ typedef struct prof_buff_entry_t {
     char *message;
     int pad_indent;
     gboolean newline;
-    ProfBuffReceipt *receipt;
-    ProfBuffUpload *upload;
+    ProfBuffXMPP *xmpp;
 } ProfBuffEntry;
 
 #endif

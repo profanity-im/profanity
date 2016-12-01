@@ -314,11 +314,7 @@ chatwin_outgoing_msg(ProfChatWin *chatwin, const char *const message, char *id, 
         enc_char = prefs_get_pgp_char();
     }
 
-    if (request_receipt && id) {
-        win_print_outgoing_receipt((ProfWin*)chatwin, enc_char, message, id);
-    } else {
-        win_print_outgoing((ProfWin*)chatwin, enc_char, message);
-    }
+    win_print_outgoing((ProfWin*)chatwin, enc_char, message, id, request_receipt);
 }
 
 void
@@ -331,7 +327,7 @@ chatwin_outgoing_carbon(ProfChatWin *chatwin, const char *const message, prof_en
         enc_char = prefs_get_pgp_char();
     }
 
-    win_print_outgoing((ProfWin*)chatwin, enc_char, message);
+    win_print_outgoing((ProfWin*)chatwin, enc_char, message, NULL, FALSE);
     int num = wins_get_num((ProfWin*)chatwin);
     status_bar_active(num);
 }

@@ -89,11 +89,11 @@ privwin_incoming_msg(ProfPrivateWin *privatewin, const char *const message, GDat
 }
 
 void
-privwin_outgoing_msg(ProfPrivateWin *privwin, const char *const message)
+privwin_outgoing_msg(ProfPrivateWin *privwin, const char *const message, const char *const id)
 {
     assert(privwin != NULL);
 
-    win_print_outgoing((ProfWin*)privwin, '-', message);
+    win_print_outgoing((ProfWin*)privwin, '-', message, id, FALSE);
 }
 
 void

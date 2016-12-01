@@ -64,7 +64,7 @@ void win_print_muc_occupant(ProfWin *window, theme_item_t theme_item, const char
 void win_print_muc_occupant_message(ProfWin *window, const char *const them, const char *const message, ...);
 void win_print_muc_self_message(ProfWin *window, const char *const me, const char *const message, ...);
 
-void win_print_outgoing(ProfWin *window, const char ch, const char *const message);
+void win_print_outgoing(ProfWin *window, const char ch, const char *const message, const char *const id, gboolean request_receipt);
 void win_print_incoming(ProfWin *window, GDateTime *timestamp,
     const char *const them, const char *const message, prof_enc_t enc_mode);
 void win_print_history(ProfWin *window, GDateTime *timestamp, const char *const message, ...);

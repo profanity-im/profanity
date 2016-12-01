@@ -71,6 +71,22 @@ buffer_date_new_now(void)
     return date;
 }
 
+ProfBuffXMPP*
+buffer_new_xmpp(const char *const outgoing_id, ProfBuffReceipt *receipt, ProfBuffUpload *upload)
+{
+    ProfBuffXMPP *xmpp = malloc(sizeof(ProfBuffXMPP));
+    if (outgoing_id) {
+        xmpp->outgoing_id = strdup(outgoing_id);
+    } else {
+        xmpp->outgoing_id = NULL;
+    }
+
+    xmpp->receipt = receipt;
+    xmpp->upload = upload;
+
+    return xmpp;
+}
+
 ProfBuffUpload*
 buffer_upload_new(char *url)
 {
@@ -82,10 +98,9 @@ buffer_upload_new(char *url)
 }
 
 ProfBuffReceipt*
-buffer_receipt_new(char *id)
+buffer_receipt_new(void)
 {
     ProfBuffReceipt *receipt = malloc(sizeof(ProfBuffReceipt));
-    receipt->id = strdup(id);
     receipt->received = FALSE;
 
     return receipt;
@@ -110,8 +125,7 @@ buffer_entry_create(
     const char *const message,
     int pad_indent,
     gboolean newline,
-    ProfBuffReceipt *receipt,
-    ProfBuffUpload *upload)
+    ProfBuffXMPP *xmpp)
 {
     ProfBuffEntry *entry = malloc(sizeof(struct prof_buff_entry_t));
     entry->show_char = show_char;
@@ -120,8 +134,7 @@ buffer_entry_create(
     entry->theme_item = theme_item;
     entry->date = date;
     entry->from = from;
-    entry->receipt = receipt;
-    entry->upload = upload;
+    entry->xmpp = xmpp;
     entry->message = strdup(message);
 
     return entry;
@@ -147,7 +160,7 @@ buffer_get_upload_entry(GSList *entries, const char *const url)
     GSList *curr = entries;
     while (curr) {
         ProfBuffEntry *entry = curr->data;
-        if (entry->upload && g_strcmp0(entry->upload->url, url) == 0) {
+        if (entry->xmpp && entry->xmpp->upload && g_strcmp0(entry->xmpp->upload->url, url) == 0) {
             return entry;
         }
         curr = g_slist_next(curr);
@@ -157,12 +170,12 @@ buffer_get_upload_entry(GSList *entries, const char *const url)
 }
 
 ProfBuffEntry*
-buffer_get_entry_by_id(GSList *entries, const char *const id)
+buffer_get_entry_by_outgoing_id(GSList *entries, const char *const id)
 {
     GSList *curr = entries;
     while (curr) {
         ProfBuffEntry *entry = curr->data;
-        if (entry->receipt && g_strcmp0(entry->receipt->id, id) == 0) {
+        if (entry->xmpp && g_strcmp0(entry->xmpp->outgoing_id, id) == 0) {
             return entry;
         }
         curr = g_slist_next(curr);
@@ -185,9 +198,16 @@ buffer_free_entry(ProfBuffEntry *entry)
         free(entry->from->from);
         free(entry->from);
     }
-    if (entry->receipt) {
-        free(entry->receipt->id);
-        free(entry->receipt);
+    if (entry->xmpp) {
+        free(entry->xmpp->outgoing_id);
+        if (entry->xmpp->receipt) {
+            free(entry->xmpp->receipt);
+        }
+        if (entry->xmpp->upload) {
+            free(entry->xmpp->upload->url);
+            free(entry->xmpp->upload);
+        }
+        free(entry->xmpp);
     }
     free(entry);
 }
