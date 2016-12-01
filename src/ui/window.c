@@ -1172,18 +1172,22 @@ win_print_incoming(ProfWin *window, GDateTime *timestamp, const char *const them
 }
 
 void
-win_print_outgoing(ProfWin *window, const char ch, const char *const message, ...)
+win_print_outgoing(ProfWin *window, const char ch, const char *const message)
 {
-    va_list args;
-    va_start(args, message);
-    GString *fmt_msg = g_string_new(NULL);
-    g_string_vprintf(fmt_msg, message, args);
-    va_end(args);
-
     ProfBuffDate *date = buffer_date_new_now();
     ProfBuffFrom *from = buffer_from_new(FROM_ME, "me");
-    ProfBuffEntry *entry = buffer_entry_create(THEME_TEXT_ME, date, ch, from, fmt_msg->str, 0, TRUE, NULL, NULL);
-    g_string_free(fmt_msg, TRUE);
+    ProfBuffEntry *entry = buffer_entry_create(THEME_TEXT_ME, date, ch, from, message, 0, TRUE, NULL, NULL);
+
+    buffer_append(window, entry);
+}
+
+void
+win_print_with_receipt(ProfWin *window, const char show_char, const char *const me, const char *const message, char *id)
+{
+    ProfBuffReceipt *receipt = buffer_receipt_new(id);
+    ProfBuffDate *date = buffer_date_new_now();
+    ProfBuffFrom *from = me ? buffer_from_new(FROM_ME, me) : NULL;
+    ProfBuffEntry *entry = buffer_entry_create(THEME_TEXT_ME, date, show_char, from, message, 0, TRUE, receipt, NULL);
 
     buffer_append(window, entry);
 }
@@ -1210,17 +1214,6 @@ win_print_upload(ProfWin *window, const char *const message, char *url)
     ProfBuffUpload *upload = buffer_upload_new(url);
     ProfBuffDate *date = buffer_date_new_now();
     ProfBuffEntry *entry = buffer_entry_create(THEME_TEXT_ME, date, '!', NULL, message, 0, TRUE, NULL, upload);
-
-    buffer_append(window, entry);
-}
-
-void
-win_print_with_receipt(ProfWin *window, const char show_char, const char *const me, const char *const message, char *id)
-{
-    ProfBuffReceipt *receipt = buffer_receipt_new(id);
-    ProfBuffDate *date = buffer_date_new_now();
-    ProfBuffFrom *from = me ? buffer_from_new(FROM_ME, me) : NULL;
-    ProfBuffEntry *entry = buffer_entry_create(THEME_TEXT_ME, date, show_char, from, message, 0, TRUE, receipt, NULL);
 
     buffer_append(window, entry);
 }
