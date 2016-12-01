@@ -1207,7 +1207,11 @@ win_print_history(ProfWin *window, GDateTime *timestamp, const char *const messa
 void
 win_print_http_upload(ProfWin *window, const char *const message, char *url)
 {
-    win_print_with_receipt(window, '!', NULL, message, url);
+    ProfBuffReceipt *receipt = buffer_receipt_new(url);
+    ProfBuffDate *date = buffer_date_new_now();
+    ProfBuffEntry *entry = buffer_entry_create(THEME_TEXT_ME, date, '!', NULL, message, 0, TRUE, receipt);
+
+    buffer_append(window, entry);
 }
 
 void
@@ -1219,6 +1223,22 @@ win_print_with_receipt(ProfWin *window, const char show_char, const char *const 
     ProfBuffEntry *entry = buffer_entry_create(THEME_TEXT_ME, date, show_char, from, message, 0, TRUE, receipt);
 
     buffer_append(window, entry);
+}
+
+void
+win_http_upload_complete(ProfWin *window, const char *const url)
+{
+    ProfBuffEntry *entry = buffer_get_entry_by_id(window->layout->entries, url);
+    if (!entry) {
+        return;
+    }
+
+    if (entry->receipt->received) {
+        return;
+    }
+
+    entry->receipt->received = TRUE;
+    win_redraw(window);
 }
 
 void
@@ -1258,30 +1278,36 @@ win_print_entry(ProfWin *window, ProfBuffEntry *entry)
     int colour = theme_attrs(THEME_ME);
     size_t indent = 0;
 
-    if (entry->date && entry->date->timestamp) {
-        char *time_pref = NULL;
-        switch (window->type) {
-        case WIN_CHAT:       time_pref = prefs_get_string(PREF_TIME_CHAT);       break;
-        case WIN_MUC:        time_pref = prefs_get_string(PREF_TIME_MUC);        break;
-        case WIN_MUC_CONFIG: time_pref = prefs_get_string(PREF_TIME_MUCCONFIG);  break;
-        case WIN_PRIVATE:    time_pref = prefs_get_string(PREF_TIME_PRIVATE);    break;
-        case WIN_XML:        time_pref = prefs_get_string(PREF_TIME_XMLCONSOLE); break;
-        default:             time_pref = prefs_get_string(PREF_TIME_CONSOLE);    break;
-        }
+    char *time_pref = NULL;
+    switch (window->type) {
+    case WIN_CHAT:       time_pref = prefs_get_string(PREF_TIME_CHAT);       break;
+    case WIN_MUC:        time_pref = prefs_get_string(PREF_TIME_MUC);        break;
+    case WIN_MUC_CONFIG: time_pref = prefs_get_string(PREF_TIME_MUCCONFIG);  break;
+    case WIN_PRIVATE:    time_pref = prefs_get_string(PREF_TIME_PRIVATE);    break;
+    case WIN_XML:        time_pref = prefs_get_string(PREF_TIME_XMLCONSOLE); break;
+    default:             time_pref = prefs_get_string(PREF_TIME_CONSOLE);    break;
+    }
 
-        gchar *date_fmt = NULL;
-        if (g_strcmp0(time_pref, "off") == 0) {
-            date_fmt = g_strdup("");
-        } else {
+    gchar *date_fmt = NULL;
+    if (g_strcmp0(time_pref, "off") == 0) {
+        date_fmt = g_strdup("");
+    } else {
+        if (entry->date && entry->date->timestamp) {
             date_fmt = g_date_time_format(entry->date->timestamp, time_pref);
+        } else {
+            GDateTime *indent_timestamp = g_date_time_new_now_local();
+            date_fmt = g_date_time_format(indent_timestamp, time_pref);
+            g_date_time_unref(indent_timestamp);
         }
-        prefs_free_string(time_pref);
-        assert(date_fmt != NULL);
+    }
+    prefs_free_string(time_pref);
+    assert(date_fmt != NULL);
 
-        if(strlen(date_fmt) != 0){
-            indent = 3 + strlen(date_fmt);
-        }
+    if(strlen(date_fmt) != 0){
+        indent = 3 + strlen(date_fmt);
+    }
 
+    if (entry->date && entry->date->timestamp) {
         if (date_fmt && strlen(date_fmt)) {
             if (entry->date->colour_date) {
                 wbkgdset(window->layout->win, theme_attrs(THEME_TIME));

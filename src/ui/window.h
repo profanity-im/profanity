@@ -70,6 +70,7 @@ void win_print_incoming(ProfWin *window, GDateTime *timestamp,
 void win_print_history(ProfWin *window, GDateTime *timestamp, const char *const message, ...);
 
 void win_print_http_upload(ProfWin *window, const char *const message, char *url);
+void win_http_upload_complete(ProfWin *window, const char *const url);
 
 void win_print_with_receipt(ProfWin *window, const char show_char, const char *const me, const char *const message,
     char *id);

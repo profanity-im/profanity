@@ -256,7 +256,7 @@ end:
                 msg = strdup(FALLBACK_MSG);
             }
             win_update_message(upload->window, upload->put_url, msg);
-            win_mark_received(upload->window, upload->put_url);
+            win_http_upload_complete(upload->window, upload->put_url);
             free(msg);
 
             switch (upload->window->type) {
