@@ -92,7 +92,8 @@ _xferinfo(void *userdata, curl_off_t dltotal, curl_off_t dlnow, curl_off_t ultot
     if (asprintf(&msg, "Uploading '%s': %d%%", upload->filename, ulperc) == -1) {
         msg = strdup(FALLBACK_MSG);
     }
-    win_update_message(upload->window, upload->put_url, msg);
+    win_update_upload(upload->window, upload->put_url, msg);
+    sleep(2);
     free(msg);
 
     pthread_mutex_unlock(&lock);
@@ -146,7 +147,7 @@ http_file_put(void *userdata)
     if (asprintf(&msg, "Uploading '%s': 0%%", upload->filename) == -1) {
         msg = strdup(FALLBACK_MSG);
     }
-    win_print_http_upload(upload->window, msg, upload->put_url);
+    win_print_upload(upload->window, msg, upload->put_url);
     free(msg);
 
     char *cert_path = prefs_get_string(PREF_TLS_CERTPATH);
@@ -245,7 +246,7 @@ end:
             if (asprintf(&msg, "Uploading '%s' failed: %s", upload->filename, err) == -1) {
                 msg = strdup(FALLBACK_MSG);
             }
-            win_update_message(upload->window, upload->put_url, msg);
+            win_update_upload(upload->window, upload->put_url, msg);
         }
         cons_show_error(msg);
         free(msg);
@@ -255,8 +256,8 @@ end:
             if (asprintf(&msg, "Uploading '%s': 100%%", upload->filename) == -1) {
                 msg = strdup(FALLBACK_MSG);
             }
-            win_update_message(upload->window, upload->put_url, msg);
-            win_http_upload_complete(upload->window, upload->put_url);
+            win_update_upload(upload->window, upload->put_url, msg);
+            win_complete_upload(upload->window, upload->put_url);
             free(msg);
 
             switch (upload->window->type) {

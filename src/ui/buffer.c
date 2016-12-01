@@ -71,6 +71,16 @@ buffer_date_new_now(void)
     return date;
 }
 
+ProfBuffUpload*
+buffer_upload_new(char *url)
+{
+    ProfBuffUpload *upload = malloc(sizeof(ProfBuffUpload));
+    upload->url = strdup(url);
+    upload->complete = FALSE;
+
+    return upload;
+}
+
 ProfBuffReceipt*
 buffer_receipt_new(char *id)
 {
@@ -100,7 +110,8 @@ buffer_entry_create(
     const char *const message,
     int pad_indent,
     gboolean newline,
-    ProfBuffReceipt *receipt)
+    ProfBuffReceipt *receipt,
+    ProfBuffUpload *upload)
 {
     ProfBuffEntry *entry = malloc(sizeof(struct prof_buff_entry_t));
     entry->show_char = show_char;
@@ -110,6 +121,7 @@ buffer_entry_create(
     entry->date = date;
     entry->from = from;
     entry->receipt = receipt;
+    entry->upload = upload;
     entry->message = strdup(message);
 
     return entry;
@@ -127,6 +139,21 @@ buffer_append(ProfWin *window, ProfBuffEntry *entry)
 
     win_print_entry(window, entry);
     inp_nonblocking(TRUE);
+}
+
+ProfBuffEntry*
+buffer_get_upload_entry(GSList *entries, const char *const url)
+{
+    GSList *curr = entries;
+    while (curr) {
+        ProfBuffEntry *entry = curr->data;
+        if (entry->upload && g_strcmp0(entry->upload->url, url) == 0) {
+            return entry;
+        }
+        curr = g_slist_next(curr);
+    }
+
+    return NULL;
 }
 
 ProfBuffEntry*

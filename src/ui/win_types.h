@@ -204,6 +204,11 @@ typedef struct prof_buff_receipt_t {
     gboolean received;
 } ProfBuffReceipt;
 
+typedef struct prof_buff_upload_t {
+    char *url;
+    gboolean complete;
+} ProfBuffUpload;
+
 typedef struct prof_buff_date_t {
     GDateTime *timestamp;
     gboolean colour_date;
@@ -228,6 +233,7 @@ typedef struct prof_buff_entry_t {
     int pad_indent;
     gboolean newline;
     ProfBuffReceipt *receipt;
+    ProfBuffUpload *upload;
 } ProfBuffEntry;
 
 #endif

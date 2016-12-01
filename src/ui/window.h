@@ -69,8 +69,9 @@ void win_print_incoming(ProfWin *window, GDateTime *timestamp,
     const char *const them, const char *const message, prof_enc_t enc_mode);
 void win_print_history(ProfWin *window, GDateTime *timestamp, const char *const message, ...);
 
-void win_print_http_upload(ProfWin *window, const char *const message, char *url);
-void win_http_upload_complete(ProfWin *window, const char *const url);
+void win_print_upload(ProfWin *window, const char *const message, char *url);
+void win_update_upload(ProfWin *window, const char *const url, const char *const message);
+void win_complete_upload(ProfWin *window, const char *const url);
 
 void win_print_with_receipt(ProfWin *window, const char show_char, const char *const me, const char *const message,
     char *id);
@@ -83,7 +84,6 @@ void win_sub_print(WINDOW *win, char *msg, gboolean newline, gboolean wrap, int 
 void win_sub_newline_lazy(WINDOW *win);
 
 void win_mark_received(ProfWin *window, const char *const id);
-void win_update_message(ProfWin *window, const char *const id, const char *const message);
 void win_print_entry(ProfWin *window, ProfBuffEntry *entry);
 
 gboolean win_has_active_subwin(ProfWin *window);

@@ -44,6 +44,7 @@
 ProfBuffDate* buffer_date_new_now(void);
 ProfBuffDate* buffer_date_new(GDateTime *timestamp, gboolean colour);
 ProfBuffReceipt* buffer_receipt_new(char *id);
+ProfBuffUpload* buffer_upload_new(char *url);
 ProfBuffFrom* buffer_from_new(prof_buff_from_type_t type, const char *const from);
 
 ProfBuffEntry* buffer_entry_create(
@@ -54,11 +55,13 @@ ProfBuffEntry* buffer_entry_create(
     const char *const message,
     int pad_indent,
     gboolean newline,
-    ProfBuffReceipt *receipt);
+    ProfBuffReceipt *receipt,
+    ProfBuffUpload *upload);
 
 void buffer_append(ProfWin *window, ProfBuffEntry *entry);
 
 ProfBuffEntry* buffer_get_entry_by_id(GSList *entries, const char *const id);
+ProfBuffEntry* buffer_get_upload_entry(GSList *entries, const char *const url);
 void buffer_free_entry(ProfBuffEntry *entry);
 
 #endif
