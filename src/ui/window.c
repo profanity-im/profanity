@@ -63,16 +63,7 @@
 
 #define NO_EOL          1
 
-static void _win_print(
-    ProfWin *window,
-    theme_item_t theme_item,
-    ProfBuffDate *date,
-    const char show_char,
-    ProfBuffFrom *from,
-    const char *const message,
-    int pad_indent,
-    gboolean newline,
-    ProfBuffReceipt *receipt);
+static void _win_print(ProfWin *window, ProfBuffEntry *entry);
 
 static void _win_print_wrapped(WINDOW *win, const char *const message, size_t indent, int pad_indent);
 
@@ -695,18 +686,19 @@ win_move_to_end(ProfWin *window)
 void
 win_print(ProfWin *window, theme_item_t theme_item, const char ch, const char *const message, ...)
 {
-    va_list arg;
-    va_start(arg, message);
-    GString *fmt_msg = g_string_new(NULL);
-    g_string_vprintf(fmt_msg, message, arg);
-    va_end(arg);
-
     ProfBuffDate *date = buffer_date_new_now();
 
-    buffer_append(window->layout->buffer, theme_item, date, ch, NULL, fmt_msg->str, 0, FALSE, NULL);
+    va_list args;
+    va_start(args, message);
+    GString *fmt_msg = g_string_new(NULL);
+    g_string_vprintf(fmt_msg, message, args);
+    va_end(args);
 
-    _win_print(window, theme_item, date, ch, NULL, fmt_msg->str, 0, FALSE, NULL);
+    ProfBuffEntry *entry = buffer_entry_create(theme_item, date, ch, NULL, fmt_msg->str, 0, FALSE, NULL);
     g_string_free(fmt_msg, TRUE);
+
+    buffer_append(window->layout->buffer, entry);
+    _win_print(window, entry);
 
     inp_nonblocking(TRUE);
 }
@@ -714,18 +706,19 @@ win_print(ProfWin *window, theme_item_t theme_item, const char ch, const char *c
 void
 win_println(ProfWin *window, theme_item_t theme_item, const char ch, const char *const message, ...)
 {
-    va_list arg;
-    va_start(arg, message);
-    GString *fmt_msg = g_string_new(NULL);
-    g_string_vprintf(fmt_msg, message, arg);
-    va_end(arg);
-
     ProfBuffDate *date = buffer_date_new_now();
 
-    buffer_append(window->layout->buffer, theme_item, date, ch, NULL, fmt_msg->str, 0, TRUE, NULL);
+    va_list args;
+    va_start(args, message);
+    GString *fmt_msg = g_string_new(NULL);
+    g_string_vprintf(fmt_msg, message, args);
+    va_end(args);
 
-    _win_print(window, theme_item, date, ch, NULL, fmt_msg->str, 0, TRUE, NULL);
+    ProfBuffEntry *entry = buffer_entry_create(theme_item, date, ch, NULL, fmt_msg->str, 0, TRUE, NULL);
     g_string_free(fmt_msg, TRUE);
+
+    buffer_append(window->layout->buffer, entry);
+    _win_print(window, entry);
 
     inp_nonblocking(TRUE);
 }
@@ -733,18 +726,19 @@ win_println(ProfWin *window, theme_item_t theme_item, const char ch, const char 
 void
 win_println_indent(ProfWin *window, int pad, const char *const message, ...)
 {
-    va_list arg;
-    va_start(arg, message);
-    GString *fmt_msg = g_string_new(NULL);
-    g_string_vprintf(fmt_msg, message, arg);
-    va_end(arg);
-
     ProfBuffDate *date = buffer_date_new_now();
 
-    buffer_append(window->layout->buffer, THEME_DEFAULT, date, '-', NULL, fmt_msg->str, pad, TRUE, NULL);
+    va_list args;
+    va_start(args, message);
+    GString *fmt_msg = g_string_new(NULL);
+    g_string_vprintf(fmt_msg, message, args);
+    va_end(args);
 
-    _win_print(window, THEME_DEFAULT, date, '-', NULL, fmt_msg->str, pad, TRUE, NULL);
+    ProfBuffEntry *entry = buffer_entry_create(THEME_DEFAULT, date, '-', NULL, fmt_msg->str, pad, TRUE, NULL);
     g_string_free(fmt_msg, TRUE);
+
+    buffer_append(window->layout->buffer, entry);
+    _win_print(window, entry);
 
     inp_nonblocking(TRUE);
 }
@@ -752,16 +746,17 @@ win_println_indent(ProfWin *window, int pad, const char *const message, ...)
 void
 win_append(ProfWin *window, theme_item_t theme_item, const char *const message, ...)
 {
-    va_list arg;
-    va_start(arg, message);
+    va_list args;
+    va_start(args, message);
     GString *fmt_msg = g_string_new(NULL);
-    g_string_vprintf(fmt_msg, message, arg);
-    va_end(arg);
+    g_string_vprintf(fmt_msg, message, args);
+    va_end(args);
 
-    buffer_append(window->layout->buffer, theme_item, NULL, '-', NULL, fmt_msg->str, 0, FALSE, NULL);
-
-    _win_print(window, theme_item, NULL, '-', NULL, fmt_msg->str, 0, FALSE, NULL);
+    ProfBuffEntry *entry = buffer_entry_create(theme_item, NULL, '-', NULL, fmt_msg->str, 0, FALSE, NULL);
     g_string_free(fmt_msg, TRUE);
+
+    buffer_append(window->layout->buffer, entry);
+    _win_print(window, entry);
 
     inp_nonblocking(TRUE);
 }
@@ -769,16 +764,17 @@ win_append(ProfWin *window, theme_item_t theme_item, const char *const message, 
 void
 win_appendln(ProfWin *window, theme_item_t theme_item, const char *const message, ...)
 {
-    va_list arg;
-    va_start(arg, message);
+    va_list args;
+    va_start(args, message);
     GString *fmt_msg = g_string_new(NULL);
-    g_string_vprintf(fmt_msg, message, arg);
-    va_end(arg);
+    g_string_vprintf(fmt_msg, message, args);
+    va_end(args);
 
-    buffer_append(window->layout->buffer, theme_item, NULL, '-', NULL, fmt_msg->str, 0, TRUE, NULL);
-
-    _win_print(window, theme_item, NULL, '-', NULL, fmt_msg->str, 0, TRUE, NULL);
+    ProfBuffEntry *entry = buffer_entry_create(theme_item, NULL, '-', NULL, fmt_msg->str, 0, TRUE, NULL);
     g_string_free(fmt_msg, TRUE);
+
+    buffer_append(window->layout->buffer, entry);
+    _win_print(window, entry);
 
     inp_nonblocking(TRUE);
 }
@@ -786,16 +782,17 @@ win_appendln(ProfWin *window, theme_item_t theme_item, const char *const message
 void
 win_append_highlight(ProfWin *window, theme_item_t theme_item, const char *const message, ...)
 {
-    va_list arg;
-    va_start(arg, message);
+    va_list args;
+    va_start(args, message);
     GString *fmt_msg = g_string_new(NULL);
-    g_string_vprintf(fmt_msg, message, arg);
-    va_end(arg);
+    g_string_vprintf(fmt_msg, message, args);
+    va_end(args);
 
-    buffer_append(window->layout->buffer, theme_item, NULL, '-', NULL, fmt_msg->str, 0, FALSE, NULL);
-
-    _win_print(window, theme_item, NULL, '-', NULL, fmt_msg->str, 0, FALSE, NULL);
+    ProfBuffEntry *entry = buffer_entry_create(theme_item, NULL, '-', NULL, fmt_msg->str, 0, FALSE, NULL);
     g_string_free(fmt_msg, TRUE);
+
+    buffer_append(window->layout->buffer, entry);
+    _win_print(window, entry);
 
     inp_nonblocking(TRUE);
 }
@@ -803,16 +800,17 @@ win_append_highlight(ProfWin *window, theme_item_t theme_item, const char *const
 void
 win_appendln_highlight(ProfWin *window, theme_item_t theme_item, const char *const message, ...)
 {
-    va_list arg;
-    va_start(arg, message);
+    va_list args;
+    va_start(args, message);
     GString *fmt_msg = g_string_new(NULL);
-    g_string_vprintf(fmt_msg, message, arg);
-    va_end(arg);
+    g_string_vprintf(fmt_msg, message, args);
+    va_end(args);
 
-    buffer_append(window->layout->buffer, theme_item, NULL, '-', NULL, fmt_msg->str, 0, TRUE, NULL);
-
-    _win_print(window, theme_item, NULL, '-', NULL, fmt_msg->str, 0, TRUE, NULL);
+    ProfBuffEntry *entry = buffer_entry_create(theme_item, NULL, '-', NULL, fmt_msg->str, 0, TRUE, NULL);
     g_string_free(fmt_msg, TRUE);
+
+    buffer_append(window->layout->buffer, entry);
+    _win_print(window, entry);
 
     inp_nonblocking(TRUE);
 }
@@ -1135,9 +1133,10 @@ win_print_muc_occupant(ProfWin *window, theme_item_t theme_item, const char *con
     ProfBuffDate *date = buffer_date_new_now();
     ProfBuffFrom *from = them ? buffer_from_new(FROM_THEM, them) : NULL;
 
-    buffer_append(window->layout->buffer, theme_item, date, '-', from, "", 0, FALSE, NULL);
+    ProfBuffEntry *entry = buffer_entry_create(theme_item, date, '-', from, "",  0, FALSE, NULL);
 
-    _win_print(window, theme_item, date, '-', from, "", 0, FALSE, NULL);
+    buffer_append(window->layout->buffer, entry);
+    _win_print(window, entry);
 
     inp_nonblocking(TRUE);
 }
@@ -1145,19 +1144,20 @@ win_print_muc_occupant(ProfWin *window, theme_item_t theme_item, const char *con
 void
 win_print_muc_occupant_message(ProfWin *window, const char *const them, const char *const message, ...)
 {
-    va_list arg;
-    va_start(arg, message);
-    GString *fmt_msg = g_string_new(NULL);
-    g_string_vprintf(fmt_msg, message, arg);
-    va_end(arg);
-
     ProfBuffDate *date = buffer_date_new_now();
     ProfBuffFrom *from = them ? buffer_from_new(FROM_THEM, them) : NULL;
 
-    buffer_append(window->layout->buffer, THEME_TEXT_THEM, date, '-', from, fmt_msg->str, 0, TRUE, NULL);
+    va_list args;
+    va_start(args, message);
+    GString *fmt_msg = g_string_new(NULL);
+    g_string_vprintf(fmt_msg, message, args);
+    va_end(args);
 
-    _win_print(window, THEME_TEXT_THEM, date, '-', from, fmt_msg->str, 0, TRUE, NULL);
+    ProfBuffEntry *entry = buffer_entry_create(THEME_TEXT_THEM, date, '-', from, fmt_msg->str, 0, TRUE, NULL);
     g_string_free(fmt_msg, TRUE);
+
+    buffer_append(window->layout->buffer, entry);
+    _win_print(window, entry);
 
     inp_nonblocking(TRUE);
 }
@@ -1165,19 +1165,20 @@ win_print_muc_occupant_message(ProfWin *window, const char *const them, const ch
 void
 win_print_muc_self_message(ProfWin *window, const char *const me, const char *const message, ...)
 {
-    va_list arg;
-    va_start(arg, message);
-    GString *fmt_msg = g_string_new(NULL);
-    g_string_vprintf(fmt_msg, message, arg);
-    va_end(arg);
-
     ProfBuffDate *date = buffer_date_new_now();
     ProfBuffFrom *from = me ? buffer_from_new(FROM_ME, me) : NULL;
 
-    buffer_append(window->layout->buffer, THEME_TEXT_ME, date, '-', from, fmt_msg->str, 0, TRUE, NULL);
+    va_list args;
+    va_start(args, message);
+    GString *fmt_msg = g_string_new(NULL);
+    g_string_vprintf(fmt_msg, message, args);
+    va_end(args);
 
-    _win_print(window, THEME_TEXT_ME, date, '-', from, fmt_msg->str, 0, TRUE, NULL);
+    ProfBuffEntry *entry = buffer_entry_create(THEME_TEXT_ME, date, '-', from, fmt_msg->str, 0, TRUE, NULL);
     g_string_free(fmt_msg, TRUE);
+
+    buffer_append(window->layout->buffer, entry);
+    _win_print(window, entry);
 
     inp_nonblocking(TRUE);
 }
@@ -1202,9 +1203,10 @@ win_print_incoming(ProfWin *window, GDateTime *timestamp, const char *const them
     ProfBuffDate *date = buffer_date_new(timestamp, TRUE);
     ProfBuffFrom *from = them ? buffer_from_new(FROM_THEM, them) : NULL;
 
-    buffer_append(window->layout->buffer, THEME_TEXT_THEM, date, ch, from, message, 0, TRUE, NULL);
+    ProfBuffEntry *entry = buffer_entry_create(THEME_TEXT_THEM, date, ch, from, message, 0, TRUE, NULL);
 
-    _win_print(window, THEME_TEXT_THEM, date, ch, from, message, 0, TRUE, NULL);
+    buffer_append(window->layout->buffer, entry);
+    _win_print(window, entry);
 
     inp_nonblocking(TRUE);
 }
@@ -1212,19 +1214,20 @@ win_print_incoming(ProfWin *window, GDateTime *timestamp, const char *const them
 void
 win_print_outgoing(ProfWin *window, const char ch, const char *const message, ...)
 {
-    va_list arg;
-    va_start(arg, message);
-    GString *fmt_msg = g_string_new(NULL);
-    g_string_vprintf(fmt_msg, message, arg);
-    va_end(arg);
-
     ProfBuffDate *date = buffer_date_new_now();
     ProfBuffFrom *from = buffer_from_new(FROM_ME, "me");
 
-    buffer_append(window->layout->buffer, THEME_TEXT_ME, date, ch, from, fmt_msg->str, 0, TRUE, NULL);
+    va_list args;
+    va_start(args, message);
+    GString *fmt_msg = g_string_new(NULL);
+    g_string_vprintf(fmt_msg, message, args);
+    va_end(args);
 
-    _win_print(window, THEME_TEXT_ME, date, ch, from, fmt_msg->str, 0, TRUE, NULL);
+    ProfBuffEntry *entry = buffer_entry_create(THEME_TEXT_ME, date, ch, from, fmt_msg->str, 0, TRUE, NULL);
     g_string_free(fmt_msg, TRUE);
+
+    buffer_append(window->layout->buffer, entry);
+    _win_print(window, entry);
 
     inp_nonblocking(TRUE);
 }
@@ -1232,18 +1235,19 @@ win_print_outgoing(ProfWin *window, const char ch, const char *const message, ..
 void
 win_print_history(ProfWin *window, GDateTime *timestamp, const char *const message, ...)
 {
-    va_list arg;
-    va_start(arg, message);
-    GString *fmt_msg = g_string_new(NULL);
-    g_string_vprintf(fmt_msg, message, arg);
-    va_end(arg);
-
     ProfBuffDate *date = buffer_date_new(timestamp, FALSE);
 
-    buffer_append(window->layout->buffer, THEME_DEFAULT, date, '-', NULL, fmt_msg->str, 0, TRUE, NULL);
+    va_list args;
+    va_start(args, message);
+    GString *fmt_msg = g_string_new(NULL);
+    g_string_vprintf(fmt_msg, message, args);
+    va_end(args);
 
-    _win_print(window, THEME_DEFAULT, date, '-', NULL, fmt_msg->str, 0, TRUE, NULL);
+    ProfBuffEntry *entry = buffer_entry_create(THEME_DEFAULT, date, '-', NULL, fmt_msg->str, 0, TRUE, NULL);
     g_string_free(fmt_msg, TRUE);
+
+    buffer_append(window->layout->buffer, entry);
+    _win_print(window, entry);
 
     inp_nonblocking(TRUE);
 }
@@ -1261,9 +1265,10 @@ win_print_with_receipt(ProfWin *window, const char show_char, const char *const 
     ProfBuffDate *date = buffer_date_new_now();
     ProfBuffFrom *from = me ? buffer_from_new(FROM_ME, me) : NULL;
 
-    buffer_append(window->layout->buffer, THEME_TEXT_ME, date, show_char, from, message, 0, TRUE, receipt);
+    ProfBuffEntry *entry = buffer_entry_create(THEME_TEXT_ME, date, show_char, from, message, 0, TRUE, receipt);
 
-    _win_print(window, THEME_TEXT_ME, date, show_char, from, message, 0, TRUE, receipt);
+    buffer_append(window->layout->buffer, entry);
+    _win_print(window, entry);
 
     inp_nonblocking(TRUE);
 }
@@ -1298,23 +1303,14 @@ win_update_message(ProfWin *window, const char *const id, const char *const mess
 }
 
 static void
-_win_print(
-    ProfWin *window,
-    theme_item_t theme_item,
-    ProfBuffDate *date,
-    const char show_char,
-    ProfBuffFrom *from,
-    const char *const message,
-    int pad_indent,
-    gboolean newline,
-    ProfBuffReceipt *receipt)
+_win_print(ProfWin *window, ProfBuffEntry *entry)
 {
     gboolean me_message = FALSE;
     int offset = 0;
     int colour = theme_attrs(THEME_ME);
     size_t indent = 0;
 
-    if (date && date->timestamp) {
+    if (entry->date && entry->date->timestamp) {
         char *time_pref = NULL;
         switch (window->type) {
         case WIN_CHAT:       time_pref = prefs_get_string(PREF_TIME_CHAT);       break;
@@ -1329,7 +1325,7 @@ _win_print(
         if (g_strcmp0(time_pref, "off") == 0) {
             date_fmt = g_strdup("");
         } else {
-            date_fmt = g_date_time_format(date->timestamp, time_pref);
+            date_fmt = g_date_time_format(entry->date->timestamp, time_pref);
         }
         prefs_free_string(time_pref);
         assert(date_fmt != NULL);
@@ -1339,12 +1335,12 @@ _win_print(
         }
 
         if (date_fmt && strlen(date_fmt)) {
-            if (date->colour_date) {
+            if (entry->date->colour_date) {
                 wbkgdset(window->layout->win, theme_attrs(THEME_TIME));
                 wattron(window->layout->win, theme_attrs(THEME_TIME));
             }
-            wprintw(window->layout->win, "%s %c ", date_fmt, show_char);
-            if (date->colour_date) {
+            wprintw(window->layout->win, "%s %c ", date_fmt, entry->show_char);
+            if (entry->date->colour_date) {
                 wattroff(window->layout->win, theme_attrs(THEME_TIME));
             }
         }
@@ -1352,44 +1348,44 @@ _win_print(
         g_free(date_fmt);
     }
 
-    if (from) {
-        if (from->type == FROM_THEM) {
+    if (entry->from) {
+        if (entry->from->type == FROM_THEM) {
             colour = theme_attrs(THEME_THEM);
         }
 
-        if (receipt && !receipt->received) {
+        if (entry->receipt && !entry->receipt->received) {
             colour = theme_attrs(THEME_RECEIPT_SENT);
         }
 
         wbkgdset(window->layout->win, colour);
         wattron(window->layout->win, colour);
-        if (strncmp(message, "/me ", 4) == 0) {
-            wprintw(window->layout->win, "*%s ", from->from);
+        if (strncmp(entry->message, "/me ", 4) == 0) {
+            wprintw(window->layout->win, "*%s ", entry->from->from);
             offset = 4;
             me_message = TRUE;
         } else {
-            wprintw(window->layout->win, "%s: ", from->from);
+            wprintw(window->layout->win, "%s: ", entry->from->from);
             wattroff(window->layout->win, colour);
         }
     }
 
     if (!me_message) {
-        if (receipt && !receipt->received) {
+        if (entry->receipt && !entry->receipt->received) {
             wbkgdset(window->layout->win, theme_attrs(THEME_RECEIPT_SENT));
             wattron(window->layout->win, theme_attrs(THEME_RECEIPT_SENT));
         } else {
-            wbkgdset(window->layout->win, theme_attrs(theme_item));
-            wattron(window->layout->win, theme_attrs(theme_item));
+            wbkgdset(window->layout->win, theme_attrs(entry->theme_item));
+            wattron(window->layout->win, theme_attrs(entry->theme_item));
         }
     }
 
     if (prefs_get_boolean(PREF_WRAP)) {
-        _win_print_wrapped(window->layout->win, message+offset, indent, pad_indent);
+        _win_print_wrapped(window->layout->win, entry->message+offset, indent, entry->pad_indent);
     } else {
-        wprintw(window->layout->win, "%s", message+offset);
+        wprintw(window->layout->win, "%s", entry->message+offset);
     }
 
-    if (newline) {
+    if (entry->newline) {
         int curx = getcurx(window->layout->win);
         if (curx != 0) {
             wprintw(window->layout->win, "\n");
@@ -1399,10 +1395,10 @@ _win_print(
     if (me_message) {
         wattroff(window->layout->win, colour);
     } else {
-        if (receipt && !receipt->received) {
+        if (entry->receipt && !entry->receipt->received) {
             wattroff(window->layout->win, theme_attrs(THEME_RECEIPT_SENT));
         } else {
-            wattroff(window->layout->win, theme_attrs(theme_item));
+            wattroff(window->layout->win, theme_attrs(entry->theme_item));
         }
     }
 }
@@ -1540,8 +1536,8 @@ win_redraw(ProfWin *window)
     size = buffer_size(window->layout->buffer);
 
     for (i = 0; i < size; i++) {
-        ProfBuffEntry *e = buffer_get_entry(window->layout->buffer, i);
-        _win_print(window, e->theme_item, e->date, e->show_char, e->from, e->message, e->pad_indent, e->newline, e->receipt);
+        ProfBuffEntry *entry = buffer_get_entry(window->layout->buffer, i);
+        _win_print(window, entry);
     }
 }
 

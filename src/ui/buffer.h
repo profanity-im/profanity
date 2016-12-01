@@ -81,8 +81,7 @@ ProfBuffDate* buffer_date_new(GDateTime *timestamp, gboolean colour);
 ProfBuffReceipt* buffer_receipt_new(char *id);
 ProfBuffFrom* buffer_from_new(prof_buff_from_type_t type, const char *const from);
 
-void buffer_append(
-    ProfBuff buffer,
+ProfBuffEntry* buffer_entry_create(
     theme_item_t theme_item,
     ProfBuffDate *date,
     const char show_char,
@@ -91,6 +90,8 @@ void buffer_append(
     int pad_indent,
     gboolean newline,
     ProfBuffReceipt *receipt);
+
+void buffer_append(ProfBuff buffer, ProfBuffEntry *entry);
 
 int buffer_size(ProfBuff buffer);
 ProfBuffEntry* buffer_get_entry(ProfBuff buffer, int entry);

@@ -118,9 +118,8 @@ buffer_from_new(prof_buff_from_type_t type, const char *const from)
     return result;
 }
 
-void
-buffer_append(
-    ProfBuff buffer,
+ProfBuffEntry*
+buffer_entry_create(
     theme_item_t theme_item,
     ProfBuffDate *date,
     const char show_char,
@@ -130,22 +129,28 @@ buffer_append(
     gboolean newline,
     ProfBuffReceipt *receipt)
 {
-    ProfBuffEntry *e = malloc(sizeof(struct prof_buff_entry_t));
-    e->show_char = show_char;
-    e->pad_indent = pad_indent;
-    e->newline = newline;
-    e->theme_item = theme_item;
-    e->date = date;
-    e->from = from;
-    e->message = strdup(message);
-    e->receipt = receipt;
+    ProfBuffEntry *entry = malloc(sizeof(struct prof_buff_entry_t));
+    entry->show_char = show_char;
+    entry->pad_indent = pad_indent;
+    entry->newline = newline;
+    entry->theme_item = theme_item;
+    entry->date = date;
+    entry->from = from;
+    entry->receipt = receipt;
+    entry->message = strdup(message);
 
+    return entry;
+}
+
+void
+buffer_append(ProfBuff buffer, ProfBuffEntry *entry)
+{
     if (g_slist_length(buffer->entries) == BUFF_SIZE) {
         _free_entry(buffer->entries->data);
         buffer->entries = g_slist_delete_link(buffer->entries, buffer->entries);
     }
 
-    buffer->entries = g_slist_append(buffer->entries, e);
+    buffer->entries = g_slist_append(buffer->entries, entry);
 }
 
 ProfBuffEntry*
