@@ -94,7 +94,7 @@ _win_create_simple_layout(void)
     layout->base.type = LAYOUT_SIMPLE;
     layout->base.win = newpad(PAD_SIZE, cols);
     wbkgd(layout->base.win, theme_attrs(THEME_TEXT));
-    layout->base.buffer = buffer_create();
+    layout->base.entries = NULL;
     layout->base.y_pos = 0;
     layout->base.paged = 0;
     scrollok(layout->base.win, TRUE);
@@ -111,7 +111,7 @@ _win_create_split_layout(void)
     layout->base.type = LAYOUT_SPLIT;
     layout->base.win = newpad(PAD_SIZE, cols);
     wbkgd(layout->base.win, theme_attrs(THEME_TEXT));
-    layout->base.buffer = buffer_create();
+    layout->base.entries = NULL;
     layout->base.y_pos = 0;
     layout->base.paged = 0;
     scrollok(layout->base.win, TRUE);
@@ -180,7 +180,7 @@ win_create_muc(const char *const roomjid)
     }
     layout->sub_y_pos = 0;
     layout->memcheck = LAYOUT_SPLIT_MEMCHECK;
-    layout->base.buffer = buffer_create();
+    layout->base.entries = NULL;
     layout->base.y_pos = 0;
     layout->base.paged = 0;
     scrollok(layout->base.win, TRUE);
@@ -422,10 +422,11 @@ win_free(ProfWin* window)
         if (layout->subwin) {
             delwin(layout->subwin);
         }
-        buffer_free(layout->base.buffer);
+
+        g_slist_free_full(layout->base.entries, (GDestroyNotify)buffer_free_entry);
         delwin(layout->base.win);
     } else {
-        buffer_free(window->layout->buffer);
+        g_slist_free_full(window->layout->entries, (GDestroyNotify)buffer_free_entry);
         delwin(window->layout->win);
     }
     free(window->layout);
@@ -697,7 +698,7 @@ win_print(ProfWin *window, theme_item_t theme_item, const char ch, const char *c
     ProfBuffEntry *entry = buffer_entry_create(theme_item, date, ch, NULL, fmt_msg->str, 0, FALSE, NULL);
     g_string_free(fmt_msg, TRUE);
 
-    buffer_append(window->layout->buffer, entry);
+    window->layout->entries = buffer_append(window->layout->entries, entry);
     _win_print(window, entry);
 
     inp_nonblocking(TRUE);
@@ -717,7 +718,7 @@ win_println(ProfWin *window, theme_item_t theme_item, const char ch, const char 
     ProfBuffEntry *entry = buffer_entry_create(theme_item, date, ch, NULL, fmt_msg->str, 0, TRUE, NULL);
     g_string_free(fmt_msg, TRUE);
 
-    buffer_append(window->layout->buffer, entry);
+    window->layout->entries = buffer_append(window->layout->entries, entry);
     _win_print(window, entry);
 
     inp_nonblocking(TRUE);
@@ -737,7 +738,7 @@ win_println_indent(ProfWin *window, int pad, const char *const message, ...)
     ProfBuffEntry *entry = buffer_entry_create(THEME_DEFAULT, date, '-', NULL, fmt_msg->str, pad, TRUE, NULL);
     g_string_free(fmt_msg, TRUE);
 
-    buffer_append(window->layout->buffer, entry);
+    window->layout->entries = buffer_append(window->layout->entries, entry);
     _win_print(window, entry);
 
     inp_nonblocking(TRUE);
@@ -755,7 +756,7 @@ win_append(ProfWin *window, theme_item_t theme_item, const char *const message, 
     ProfBuffEntry *entry = buffer_entry_create(theme_item, NULL, '-', NULL, fmt_msg->str, 0, FALSE, NULL);
     g_string_free(fmt_msg, TRUE);
 
-    buffer_append(window->layout->buffer, entry);
+    window->layout->entries = buffer_append(window->layout->entries, entry);
     _win_print(window, entry);
 
     inp_nonblocking(TRUE);
@@ -773,7 +774,7 @@ win_appendln(ProfWin *window, theme_item_t theme_item, const char *const message
     ProfBuffEntry *entry = buffer_entry_create(theme_item, NULL, '-', NULL, fmt_msg->str, 0, TRUE, NULL);
     g_string_free(fmt_msg, TRUE);
 
-    buffer_append(window->layout->buffer, entry);
+    window->layout->entries = buffer_append(window->layout->entries, entry);
     _win_print(window, entry);
 
     inp_nonblocking(TRUE);
@@ -791,7 +792,7 @@ win_append_highlight(ProfWin *window, theme_item_t theme_item, const char *const
     ProfBuffEntry *entry = buffer_entry_create(theme_item, NULL, '-', NULL, fmt_msg->str, 0, FALSE, NULL);
     g_string_free(fmt_msg, TRUE);
 
-    buffer_append(window->layout->buffer, entry);
+    window->layout->entries = buffer_append(window->layout->entries, entry);
     _win_print(window, entry);
 
     inp_nonblocking(TRUE);
@@ -809,7 +810,7 @@ win_appendln_highlight(ProfWin *window, theme_item_t theme_item, const char *con
     ProfBuffEntry *entry = buffer_entry_create(theme_item, NULL, '-', NULL, fmt_msg->str, 0, TRUE, NULL);
     g_string_free(fmt_msg, TRUE);
 
-    buffer_append(window->layout->buffer, entry);
+    window->layout->entries = buffer_append(window->layout->entries, entry);
     _win_print(window, entry);
 
     inp_nonblocking(TRUE);
@@ -1135,7 +1136,7 @@ win_print_muc_occupant(ProfWin *window, theme_item_t theme_item, const char *con
 
     ProfBuffEntry *entry = buffer_entry_create(theme_item, date, '-', from, "",  0, FALSE, NULL);
 
-    buffer_append(window->layout->buffer, entry);
+    window->layout->entries = buffer_append(window->layout->entries, entry);
     _win_print(window, entry);
 
     inp_nonblocking(TRUE);
@@ -1156,7 +1157,7 @@ win_print_muc_occupant_message(ProfWin *window, const char *const them, const ch
     ProfBuffEntry *entry = buffer_entry_create(THEME_TEXT_THEM, date, '-', from, fmt_msg->str, 0, TRUE, NULL);
     g_string_free(fmt_msg, TRUE);
 
-    buffer_append(window->layout->buffer, entry);
+    window->layout->entries = buffer_append(window->layout->entries, entry);
     _win_print(window, entry);
 
     inp_nonblocking(TRUE);
@@ -1177,7 +1178,7 @@ win_print_muc_self_message(ProfWin *window, const char *const me, const char *co
     ProfBuffEntry *entry = buffer_entry_create(THEME_TEXT_ME, date, '-', from, fmt_msg->str, 0, TRUE, NULL);
     g_string_free(fmt_msg, TRUE);
 
-    buffer_append(window->layout->buffer, entry);
+    window->layout->entries = buffer_append(window->layout->entries, entry);
     _win_print(window, entry);
 
     inp_nonblocking(TRUE);
@@ -1205,7 +1206,7 @@ win_print_incoming(ProfWin *window, GDateTime *timestamp, const char *const them
 
     ProfBuffEntry *entry = buffer_entry_create(THEME_TEXT_THEM, date, ch, from, message, 0, TRUE, NULL);
 
-    buffer_append(window->layout->buffer, entry);
+    window->layout->entries = buffer_append(window->layout->entries, entry);
     _win_print(window, entry);
 
     inp_nonblocking(TRUE);
@@ -1226,7 +1227,7 @@ win_print_outgoing(ProfWin *window, const char ch, const char *const message, ..
     ProfBuffEntry *entry = buffer_entry_create(THEME_TEXT_ME, date, ch, from, fmt_msg->str, 0, TRUE, NULL);
     g_string_free(fmt_msg, TRUE);
 
-    buffer_append(window->layout->buffer, entry);
+    window->layout->entries = buffer_append(window->layout->entries, entry);
     _win_print(window, entry);
 
     inp_nonblocking(TRUE);
@@ -1246,7 +1247,7 @@ win_print_history(ProfWin *window, GDateTime *timestamp, const char *const messa
     ProfBuffEntry *entry = buffer_entry_create(THEME_DEFAULT, date, '-', NULL, fmt_msg->str, 0, TRUE, NULL);
     g_string_free(fmt_msg, TRUE);
 
-    buffer_append(window->layout->buffer, entry);
+    window->layout->entries = buffer_append(window->layout->entries, entry);
     _win_print(window, entry);
 
     inp_nonblocking(TRUE);
@@ -1267,7 +1268,7 @@ win_print_with_receipt(ProfWin *window, const char show_char, const char *const 
 
     ProfBuffEntry *entry = buffer_entry_create(THEME_TEXT_ME, date, show_char, from, message, 0, TRUE, receipt);
 
-    buffer_append(window->layout->buffer, entry);
+    window->layout->entries = buffer_append(window->layout->entries, entry);
     _win_print(window, entry);
 
     inp_nonblocking(TRUE);
@@ -1276,7 +1277,7 @@ win_print_with_receipt(ProfWin *window, const char show_char, const char *const 
 void
 win_mark_received(ProfWin *window, const char *const id)
 {
-    ProfBuffEntry *entry = buffer_get_entry_by_id(window->layout->buffer, id);
+    ProfBuffEntry *entry = buffer_get_entry_by_id(window->layout->entries, id);
     if (!entry) {
         return;
     }
@@ -1292,7 +1293,7 @@ win_mark_received(ProfWin *window, const char *const id)
 void
 win_update_message(ProfWin *window, const char *const id, const char *const message)
 {
-    ProfBuffEntry *entry = buffer_get_entry_by_id(window->layout->buffer, id);
+    ProfBuffEntry *entry = buffer_get_entry_by_id(window->layout->entries, id);
     if (!entry) {
         return;
     }
@@ -1531,13 +1532,13 @@ _win_print_wrapped(WINDOW *win, const char *const message, size_t indent, int pa
 void
 win_redraw(ProfWin *window)
 {
-    int i, size;
     werase(window->layout->win);
-    size = buffer_size(window->layout->buffer);
 
-    for (i = 0; i < size; i++) {
-        ProfBuffEntry *entry = buffer_get_entry(window->layout->buffer, i);
+    GSList *curr = window->layout->entries;
+    while (curr) {
+        ProfBuffEntry *entry = curr->data;
         _win_print(window, entry);
+        curr = g_slist_next(curr);
     }
 }
 

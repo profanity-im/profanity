@@ -51,33 +51,6 @@
 
 #define BUFF_SIZE 1200
 
-struct prof_buff_t {
-    GSList *entries;
-};
-
-static void _free_entry(ProfBuffEntry *entry);
-
-ProfBuff
-buffer_create(void)
-{
-    ProfBuff new_buff = malloc(sizeof(struct prof_buff_t));
-    new_buff->entries = NULL;
-    return new_buff;
-}
-
-int
-buffer_size(ProfBuff buffer)
-{
-    return g_slist_length(buffer->entries);
-}
-
-void
-buffer_free(ProfBuff buffer)
-{
-    g_slist_free_full(buffer->entries, (GDestroyNotify)_free_entry);
-    free(buffer);
-}
-
 ProfBuffDate*
 buffer_date_new(GDateTime *timestamp, gboolean colour)
 {
@@ -142,41 +115,34 @@ buffer_entry_create(
     return entry;
 }
 
-void
-buffer_append(ProfBuff buffer, ProfBuffEntry *entry)
+GSList*
+buffer_append(GSList *entries, ProfBuffEntry *entry)
 {
-    if (g_slist_length(buffer->entries) == BUFF_SIZE) {
-        _free_entry(buffer->entries->data);
-        buffer->entries = g_slist_delete_link(buffer->entries, buffer->entries);
+    if (g_slist_length(entries) == BUFF_SIZE) {
+        buffer_free_entry(entries->data);
+        entries = g_slist_delete_link(entries, entries);
     }
 
-    buffer->entries = g_slist_append(buffer->entries, entry);
+    return g_slist_append(entries, entry);
 }
 
 ProfBuffEntry*
-buffer_get_entry_by_id(ProfBuff buffer, const char *const id)
+buffer_get_entry_by_id(GSList *entries, const char *const id)
 {
-    GSList *entries = buffer->entries;
-    while (entries) {
-        ProfBuffEntry *entry = entries->data;
+    GSList *curr = entries;
+    while (curr) {
+        ProfBuffEntry *entry = curr->data;
         if (entry->receipt && g_strcmp0(entry->receipt->id, id) == 0) {
             return entry;
         }
-        entries = g_slist_next(entries);
+        curr = g_slist_next(curr);
     }
 
     return NULL;
 }
 
-ProfBuffEntry*
-buffer_get_entry(ProfBuff buffer, int entry)
-{
-    GSList *node = g_slist_nth(buffer->entries, entry);
-    return node->data;
-}
-
-static void
-_free_entry(ProfBuffEntry *entry)
+void
+buffer_free_entry(ProfBuffEntry *entry)
 {
     free(entry->message);
     if (entry->date) {

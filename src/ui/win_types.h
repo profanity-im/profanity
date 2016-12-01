@@ -108,7 +108,7 @@ typedef enum {
 typedef struct prof_layout_t {
     layout_type_t type;
     WINDOW *win;
-    ProfBuff buffer;
+    GSList *entries;
     int y_pos;
     int paged;
 } ProfLayout;

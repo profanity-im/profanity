@@ -71,11 +71,6 @@ typedef struct prof_buff_entry_t {
     ProfBuffReceipt *receipt;
 } ProfBuffEntry;
 
-typedef struct prof_buff_t *ProfBuff;
-
-ProfBuff buffer_create();
-void buffer_free(ProfBuff buffer);
-
 ProfBuffDate* buffer_date_new_now(void);
 ProfBuffDate* buffer_date_new(GDateTime *timestamp, gboolean colour);
 ProfBuffReceipt* buffer_receipt_new(char *id);
@@ -91,11 +86,9 @@ ProfBuffEntry* buffer_entry_create(
     gboolean newline,
     ProfBuffReceipt *receipt);
 
-void buffer_append(ProfBuff buffer, ProfBuffEntry *entry);
+GSList* buffer_append(GSList *entries, ProfBuffEntry *entry);
 
-int buffer_size(ProfBuff buffer);
-ProfBuffEntry* buffer_get_entry(ProfBuff buffer, int entry);
-ProfBuffEntry* buffer_get_entry_by_id(ProfBuff buffer, const char *const id);
-gboolean buffer_mark_received(ProfBuff buffer, const char *const id);
+ProfBuffEntry* buffer_get_entry_by_id(GSList *entries, const char *const id);
+void buffer_free_entry(ProfBuffEntry *entry);
 
 #endif
