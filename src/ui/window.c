@@ -686,14 +686,13 @@ win_move_to_end(ProfWin *window)
 void
 win_print(ProfWin *window, theme_item_t theme_item, const char ch, const char *const message, ...)
 {
-    ProfBuffDate *date = buffer_date_new_now();
-
     va_list args;
     va_start(args, message);
     GString *fmt_msg = g_string_new(NULL);
     g_string_vprintf(fmt_msg, message, args);
     va_end(args);
 
+    ProfBuffDate *date = buffer_date_new_now();
     ProfBuffEntry *entry = buffer_entry_create(theme_item, date, ch, NULL, fmt_msg->str, 0, FALSE, NULL);
     g_string_free(fmt_msg, TRUE);
 
@@ -703,14 +702,13 @@ win_print(ProfWin *window, theme_item_t theme_item, const char ch, const char *c
 void
 win_println(ProfWin *window, theme_item_t theme_item, const char ch, const char *const message, ...)
 {
-    ProfBuffDate *date = buffer_date_new_now();
-
     va_list args;
     va_start(args, message);
     GString *fmt_msg = g_string_new(NULL);
     g_string_vprintf(fmt_msg, message, args);
     va_end(args);
 
+    ProfBuffDate *date = buffer_date_new_now();
     ProfBuffEntry *entry = buffer_entry_create(theme_item, date, ch, NULL, fmt_msg->str, 0, TRUE, NULL);
     g_string_free(fmt_msg, TRUE);
 
@@ -720,14 +718,13 @@ win_println(ProfWin *window, theme_item_t theme_item, const char ch, const char 
 void
 win_println_indent(ProfWin *window, int pad, const char *const message, ...)
 {
-    ProfBuffDate *date = buffer_date_new_now();
-
     va_list args;
     va_start(args, message);
     GString *fmt_msg = g_string_new(NULL);
     g_string_vprintf(fmt_msg, message, args);
     va_end(args);
 
+    ProfBuffDate *date = buffer_date_new_now();
     ProfBuffEntry *entry = buffer_entry_create(THEME_DEFAULT, date, '-', NULL, fmt_msg->str, pad, TRUE, NULL);
     g_string_free(fmt_msg, TRUE);
 
@@ -1111,7 +1108,6 @@ win_print_muc_occupant(ProfWin *window, theme_item_t theme_item, const char *con
 {
     ProfBuffDate *date = buffer_date_new_now();
     ProfBuffFrom *from = them ? buffer_from_new(FROM_THEM, them) : NULL;
-
     ProfBuffEntry *entry = buffer_entry_create(theme_item, date, '-', from, "",  0, FALSE, NULL);
 
     buffer_append(window, entry);
@@ -1120,15 +1116,14 @@ win_print_muc_occupant(ProfWin *window, theme_item_t theme_item, const char *con
 void
 win_print_muc_occupant_message(ProfWin *window, const char *const them, const char *const message, ...)
 {
-    ProfBuffDate *date = buffer_date_new_now();
-    ProfBuffFrom *from = them ? buffer_from_new(FROM_THEM, them) : NULL;
-
     va_list args;
     va_start(args, message);
     GString *fmt_msg = g_string_new(NULL);
     g_string_vprintf(fmt_msg, message, args);
     va_end(args);
 
+    ProfBuffDate *date = buffer_date_new_now();
+    ProfBuffFrom *from = them ? buffer_from_new(FROM_THEM, them) : NULL;
     ProfBuffEntry *entry = buffer_entry_create(THEME_TEXT_THEM, date, '-', from, fmt_msg->str, 0, TRUE, NULL);
     g_string_free(fmt_msg, TRUE);
 
@@ -1138,15 +1133,14 @@ win_print_muc_occupant_message(ProfWin *window, const char *const them, const ch
 void
 win_print_muc_self_message(ProfWin *window, const char *const me, const char *const message, ...)
 {
-    ProfBuffDate *date = buffer_date_new_now();
-    ProfBuffFrom *from = me ? buffer_from_new(FROM_ME, me) : NULL;
-
     va_list args;
     va_start(args, message);
     GString *fmt_msg = g_string_new(NULL);
     g_string_vprintf(fmt_msg, message, args);
     va_end(args);
 
+    ProfBuffDate *date = buffer_date_new_now();
+    ProfBuffFrom *from = me ? buffer_from_new(FROM_ME, me) : NULL;
     ProfBuffEntry *entry = buffer_entry_create(THEME_TEXT_ME, date, '-', from, fmt_msg->str, 0, TRUE, NULL);
     g_string_free(fmt_msg, TRUE);
 
@@ -1172,7 +1166,6 @@ win_print_incoming(ProfWin *window, GDateTime *timestamp, const char *const them
 
     ProfBuffDate *date = buffer_date_new(timestamp, TRUE);
     ProfBuffFrom *from = them ? buffer_from_new(FROM_THEM, them) : NULL;
-
     ProfBuffEntry *entry = buffer_entry_create(THEME_TEXT_THEM, date, ch, from, message, 0, TRUE, NULL);
 
     buffer_append(window, entry);
@@ -1181,15 +1174,14 @@ win_print_incoming(ProfWin *window, GDateTime *timestamp, const char *const them
 void
 win_print_outgoing(ProfWin *window, const char ch, const char *const message, ...)
 {
-    ProfBuffDate *date = buffer_date_new_now();
-    ProfBuffFrom *from = buffer_from_new(FROM_ME, "me");
-
     va_list args;
     va_start(args, message);
     GString *fmt_msg = g_string_new(NULL);
     g_string_vprintf(fmt_msg, message, args);
     va_end(args);
 
+    ProfBuffDate *date = buffer_date_new_now();
+    ProfBuffFrom *from = buffer_from_new(FROM_ME, "me");
     ProfBuffEntry *entry = buffer_entry_create(THEME_TEXT_ME, date, ch, from, fmt_msg->str, 0, TRUE, NULL);
     g_string_free(fmt_msg, TRUE);
 
@@ -1199,14 +1191,13 @@ win_print_outgoing(ProfWin *window, const char ch, const char *const message, ..
 void
 win_print_history(ProfWin *window, GDateTime *timestamp, const char *const message, ...)
 {
-    ProfBuffDate *date = buffer_date_new(timestamp, FALSE);
-
     va_list args;
     va_start(args, message);
     GString *fmt_msg = g_string_new(NULL);
     g_string_vprintf(fmt_msg, message, args);
     va_end(args);
 
+    ProfBuffDate *date = buffer_date_new(timestamp, FALSE);
     ProfBuffEntry *entry = buffer_entry_create(THEME_DEFAULT, date, '-', NULL, fmt_msg->str, 0, TRUE, NULL);
     g_string_free(fmt_msg, TRUE);
 
@@ -1225,7 +1216,6 @@ win_print_with_receipt(ProfWin *window, const char show_char, const char *const 
     ProfBuffReceipt *receipt = buffer_receipt_new(id);
     ProfBuffDate *date = buffer_date_new_now();
     ProfBuffFrom *from = me ? buffer_from_new(FROM_ME, me) : NULL;
-
     ProfBuffEntry *entry = buffer_entry_create(THEME_TEXT_ME, date, show_char, from, message, 0, TRUE, receipt);
 
     buffer_append(window, entry);
