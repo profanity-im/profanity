@@ -73,8 +73,7 @@ void win_print_upload(ProfWin *window, const char *const message, char *url);
 void win_update_upload(ProfWin *window, const char *const url, const char *const message);
 void win_complete_upload(ProfWin *window, const char *const url);
 
-void win_print_with_receipt(ProfWin *window, const char show_char, const char *const me, const char *const message,
-    char *id);
+void win_print_outgoing_receipt(ProfWin *window, const char show_char, const char *const message, char *id);
 
 void win_newline(ProfWin *window);
 void win_redraw(ProfWin *window);

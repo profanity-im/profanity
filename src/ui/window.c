@@ -1182,11 +1182,11 @@ win_print_outgoing(ProfWin *window, const char ch, const char *const message)
 }
 
 void
-win_print_with_receipt(ProfWin *window, const char show_char, const char *const me, const char *const message, char *id)
+win_print_outgoing_receipt(ProfWin *window, const char show_char, const char *const message, char *id)
 {
     ProfBuffReceipt *receipt = buffer_receipt_new(id);
     ProfBuffDate *date = buffer_date_new_now();
-    ProfBuffFrom *from = me ? buffer_from_new(FROM_ME, me) : NULL;
+    ProfBuffFrom *from = buffer_from_new(FROM_ME, "me");
     ProfBuffEntry *entry = buffer_entry_create(THEME_TEXT_ME, date, show_char, from, message, 0, TRUE, receipt, NULL);
 
     buffer_append(window, entry);

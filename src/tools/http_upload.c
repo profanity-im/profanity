@@ -93,7 +93,6 @@ _xferinfo(void *userdata, curl_off_t dltotal, curl_off_t dlnow, curl_off_t ultot
         msg = strdup(FALLBACK_MSG);
     }
     win_update_upload(upload->window, upload->put_url, msg);
-    sleep(2);
     free(msg);
 
     pthread_mutex_unlock(&lock);
