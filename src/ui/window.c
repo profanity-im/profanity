@@ -52,6 +52,7 @@
 #include "config/preferences.h"
 #include "ui/ui.h"
 #include "ui/window.h"
+#include "ui/buffer.h"
 #include "ui/screen.h"
 #include "xmpp/xmpp.h"
 #include "xmpp/roster_list.h"
@@ -62,8 +63,6 @@
 #define CEILING(X) (X-(int)(X) > 0 ? (int)(X+1) : (int)(X))
 
 #define NO_EOL          1
-
-static void _win_print(ProfWin *window, ProfBuffEntry *entry);
 
 static void _win_print_wrapped(WINDOW *win, const char *const message, size_t indent, int pad_indent);
 
@@ -698,8 +697,8 @@ win_print(ProfWin *window, theme_item_t theme_item, const char ch, const char *c
     ProfBuffEntry *entry = buffer_entry_create(theme_item, date, ch, NULL, fmt_msg->str, 0, FALSE, NULL);
     g_string_free(fmt_msg, TRUE);
 
-    window->layout->entries = buffer_append(window->layout->entries, entry);
-    _win_print(window, entry);
+    buffer_append(window, entry);
+    win_print_entry(window, entry);
 
     inp_nonblocking(TRUE);
 }
@@ -718,8 +717,8 @@ win_println(ProfWin *window, theme_item_t theme_item, const char ch, const char 
     ProfBuffEntry *entry = buffer_entry_create(theme_item, date, ch, NULL, fmt_msg->str, 0, TRUE, NULL);
     g_string_free(fmt_msg, TRUE);
 
-    window->layout->entries = buffer_append(window->layout->entries, entry);
-    _win_print(window, entry);
+    buffer_append(window, entry);
+    win_print_entry(window, entry);
 
     inp_nonblocking(TRUE);
 }
@@ -738,8 +737,8 @@ win_println_indent(ProfWin *window, int pad, const char *const message, ...)
     ProfBuffEntry *entry = buffer_entry_create(THEME_DEFAULT, date, '-', NULL, fmt_msg->str, pad, TRUE, NULL);
     g_string_free(fmt_msg, TRUE);
 
-    window->layout->entries = buffer_append(window->layout->entries, entry);
-    _win_print(window, entry);
+    buffer_append(window, entry);
+    win_print_entry(window, entry);
 
     inp_nonblocking(TRUE);
 }
@@ -756,8 +755,8 @@ win_append(ProfWin *window, theme_item_t theme_item, const char *const message, 
     ProfBuffEntry *entry = buffer_entry_create(theme_item, NULL, '-', NULL, fmt_msg->str, 0, FALSE, NULL);
     g_string_free(fmt_msg, TRUE);
 
-    window->layout->entries = buffer_append(window->layout->entries, entry);
-    _win_print(window, entry);
+    buffer_append(window, entry);
+    win_print_entry(window, entry);
 
     inp_nonblocking(TRUE);
 }
@@ -774,8 +773,8 @@ win_appendln(ProfWin *window, theme_item_t theme_item, const char *const message
     ProfBuffEntry *entry = buffer_entry_create(theme_item, NULL, '-', NULL, fmt_msg->str, 0, TRUE, NULL);
     g_string_free(fmt_msg, TRUE);
 
-    window->layout->entries = buffer_append(window->layout->entries, entry);
-    _win_print(window, entry);
+    buffer_append(window, entry);
+    win_print_entry(window, entry);
 
     inp_nonblocking(TRUE);
 }
@@ -792,8 +791,8 @@ win_append_highlight(ProfWin *window, theme_item_t theme_item, const char *const
     ProfBuffEntry *entry = buffer_entry_create(theme_item, NULL, '-', NULL, fmt_msg->str, 0, FALSE, NULL);
     g_string_free(fmt_msg, TRUE);
 
-    window->layout->entries = buffer_append(window->layout->entries, entry);
-    _win_print(window, entry);
+    buffer_append(window, entry);
+    win_print_entry(window, entry);
 
     inp_nonblocking(TRUE);
 }
@@ -810,8 +809,8 @@ win_appendln_highlight(ProfWin *window, theme_item_t theme_item, const char *con
     ProfBuffEntry *entry = buffer_entry_create(theme_item, NULL, '-', NULL, fmt_msg->str, 0, TRUE, NULL);
     g_string_free(fmt_msg, TRUE);
 
-    window->layout->entries = buffer_append(window->layout->entries, entry);
-    _win_print(window, entry);
+    buffer_append(window, entry);
+    win_print_entry(window, entry);
 
     inp_nonblocking(TRUE);
 }
@@ -1136,8 +1135,8 @@ win_print_muc_occupant(ProfWin *window, theme_item_t theme_item, const char *con
 
     ProfBuffEntry *entry = buffer_entry_create(theme_item, date, '-', from, "",  0, FALSE, NULL);
 
-    window->layout->entries = buffer_append(window->layout->entries, entry);
-    _win_print(window, entry);
+    buffer_append(window, entry);
+    win_print_entry(window, entry);
 
     inp_nonblocking(TRUE);
 }
@@ -1157,8 +1156,8 @@ win_print_muc_occupant_message(ProfWin *window, const char *const them, const ch
     ProfBuffEntry *entry = buffer_entry_create(THEME_TEXT_THEM, date, '-', from, fmt_msg->str, 0, TRUE, NULL);
     g_string_free(fmt_msg, TRUE);
 
-    window->layout->entries = buffer_append(window->layout->entries, entry);
-    _win_print(window, entry);
+    buffer_append(window, entry);
+    win_print_entry(window, entry);
 
     inp_nonblocking(TRUE);
 }
@@ -1178,8 +1177,8 @@ win_print_muc_self_message(ProfWin *window, const char *const me, const char *co
     ProfBuffEntry *entry = buffer_entry_create(THEME_TEXT_ME, date, '-', from, fmt_msg->str, 0, TRUE, NULL);
     g_string_free(fmt_msg, TRUE);
 
-    window->layout->entries = buffer_append(window->layout->entries, entry);
-    _win_print(window, entry);
+    buffer_append(window, entry);
+    win_print_entry(window, entry);
 
     inp_nonblocking(TRUE);
 }
@@ -1206,8 +1205,8 @@ win_print_incoming(ProfWin *window, GDateTime *timestamp, const char *const them
 
     ProfBuffEntry *entry = buffer_entry_create(THEME_TEXT_THEM, date, ch, from, message, 0, TRUE, NULL);
 
-    window->layout->entries = buffer_append(window->layout->entries, entry);
-    _win_print(window, entry);
+    buffer_append(window, entry);
+    win_print_entry(window, entry);
 
     inp_nonblocking(TRUE);
 }
@@ -1227,8 +1226,8 @@ win_print_outgoing(ProfWin *window, const char ch, const char *const message, ..
     ProfBuffEntry *entry = buffer_entry_create(THEME_TEXT_ME, date, ch, from, fmt_msg->str, 0, TRUE, NULL);
     g_string_free(fmt_msg, TRUE);
 
-    window->layout->entries = buffer_append(window->layout->entries, entry);
-    _win_print(window, entry);
+    buffer_append(window, entry);
+    win_print_entry(window, entry);
 
     inp_nonblocking(TRUE);
 }
@@ -1247,8 +1246,8 @@ win_print_history(ProfWin *window, GDateTime *timestamp, const char *const messa
     ProfBuffEntry *entry = buffer_entry_create(THEME_DEFAULT, date, '-', NULL, fmt_msg->str, 0, TRUE, NULL);
     g_string_free(fmt_msg, TRUE);
 
-    window->layout->entries = buffer_append(window->layout->entries, entry);
-    _win_print(window, entry);
+    buffer_append(window, entry);
+    win_print_entry(window, entry);
 
     inp_nonblocking(TRUE);
 }
@@ -1268,8 +1267,8 @@ win_print_with_receipt(ProfWin *window, const char show_char, const char *const 
 
     ProfBuffEntry *entry = buffer_entry_create(THEME_TEXT_ME, date, show_char, from, message, 0, TRUE, receipt);
 
-    window->layout->entries = buffer_append(window->layout->entries, entry);
-    _win_print(window, entry);
+    buffer_append(window, entry);
+    win_print_entry(window, entry);
 
     inp_nonblocking(TRUE);
 }
@@ -1303,8 +1302,8 @@ win_update_message(ProfWin *window, const char *const id, const char *const mess
     win_redraw(window);
 }
 
-static void
-_win_print(ProfWin *window, ProfBuffEntry *entry)
+void
+win_print_entry(ProfWin *window, ProfBuffEntry *entry)
 {
     gboolean me_message = FALSE;
     int offset = 0;
@@ -1537,7 +1536,7 @@ win_redraw(ProfWin *window)
     GSList *curr = window->layout->entries;
     while (curr) {
         ProfBuffEntry *entry = curr->data;
-        _win_print(window, entry);
+        win_print_entry(window, entry);
         curr = g_slist_next(curr);
     }
 }

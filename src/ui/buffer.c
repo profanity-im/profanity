@@ -115,15 +115,15 @@ buffer_entry_create(
     return entry;
 }
 
-GSList*
-buffer_append(GSList *entries, ProfBuffEntry *entry)
+void
+buffer_append(ProfWin *window, ProfBuffEntry *entry)
 {
-    if (g_slist_length(entries) == BUFF_SIZE) {
-        buffer_free_entry(entries->data);
-        entries = g_slist_delete_link(entries, entries);
+    if (g_slist_length(window->layout->entries) == BUFF_SIZE) {
+        buffer_free_entry(window->layout->entries->data);
+        window->layout->entries = g_slist_delete_link(window->layout->entries, window->layout->entries);
     }
 
-    return g_slist_append(entries, entry);
+    window->layout->entries = g_slist_append(window->layout->entries, entry);
 }
 
 ProfBuffEntry*

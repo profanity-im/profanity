@@ -42,6 +42,7 @@
 #include "command/cmd_funcs.h"
 #include "ui/win_types.h"
 #include "xmpp/muc.h"
+#include "config/theme.h"
 
 #ifdef HAVE_LIBOTR
 #include "otr/otr.h"

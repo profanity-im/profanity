@@ -39,37 +39,7 @@
 
 #include "config.h"
 #include "config/theme.h"
-
-typedef struct prof_buff_receipt_t {
-    char *id;
-    gboolean received;
-} ProfBuffReceipt;
-
-typedef struct prof_buff_date_t {
-    GDateTime *timestamp;
-    gboolean colour_date;
-} ProfBuffDate;
-
-typedef enum {
-    FROM_THEM,
-    FROM_ME
-} prof_buff_from_type_t;
-
-typedef struct prof_buff_from_t {
-    prof_buff_from_type_t type;
-    char *from;
-} ProfBuffFrom;
-
-typedef struct prof_buff_entry_t {
-    theme_item_t theme_item;
-    ProfBuffDate* date;
-    char show_char;
-    ProfBuffFrom *from;
-    char *message;
-    int pad_indent;
-    gboolean newline;
-    ProfBuffReceipt *receipt;
-} ProfBuffEntry;
+#include "ui/win_types.h"
 
 ProfBuffDate* buffer_date_new_now(void);
 ProfBuffDate* buffer_date_new(GDateTime *timestamp, gboolean colour);
@@ -86,7 +56,7 @@ ProfBuffEntry* buffer_entry_create(
     gboolean newline,
     ProfBuffReceipt *receipt);
 
-GSList* buffer_append(GSList *entries, ProfBuffEntry *entry);
+void buffer_append(ProfWin *window, ProfBuffEntry *entry);
 
 ProfBuffEntry* buffer_get_entry_by_id(GSList *entries, const char *const id);
 void buffer_free_entry(ProfBuffEntry *entry);

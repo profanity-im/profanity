@@ -36,6 +36,7 @@
 #define UI_WIN_TYPES_H
 
 #include "config.h"
+#include "config/theme.h"
 
 #include <wchar.h>
 #include <glib.h>
@@ -47,7 +48,6 @@
 #endif
 
 #include "tools/autocomplete.h"
-#include "ui/buffer.h"
 #include "xmpp/chat_state.h"
 
 #define LAYOUT_SPLIT_MEMCHECK       12345671
@@ -198,5 +198,36 @@ typedef struct prof_plugin_win_t {
     char *plugin_name;
     unsigned long memcheck;
 } ProfPluginWin;
+
+typedef struct prof_buff_receipt_t {
+    char *id;
+    gboolean received;
+} ProfBuffReceipt;
+
+typedef struct prof_buff_date_t {
+    GDateTime *timestamp;
+    gboolean colour_date;
+} ProfBuffDate;
+
+typedef enum {
+    FROM_THEM,
+    FROM_ME
+} prof_buff_from_type_t;
+
+typedef struct prof_buff_from_t {
+    prof_buff_from_type_t type;
+    char *from;
+} ProfBuffFrom;
+
+typedef struct prof_buff_entry_t {
+    theme_item_t theme_item;
+    ProfBuffDate* date;
+    char show_char;
+    ProfBuffFrom *from;
+    char *message;
+    int pad_indent;
+    gboolean newline;
+    ProfBuffReceipt *receipt;
+} ProfBuffEntry;
 
 #endif

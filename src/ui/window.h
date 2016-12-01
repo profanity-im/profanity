@@ -46,7 +46,6 @@
 #endif
 
 #include "ui/ui.h"
-#include "ui/buffer.h"
 #include "xmpp/xmpp.h"
 #include "xmpp/chat_state.h"
 #include "xmpp/contact.h"
@@ -84,6 +83,7 @@ void win_sub_newline_lazy(WINDOW *win);
 
 void win_mark_received(ProfWin *window, const char *const id);
 void win_update_message(ProfWin *window, const char *const id, const char *const message);
+void win_print_entry(ProfWin *window, ProfBuffEntry *entry);
 
 gboolean win_has_active_subwin(ProfWin *window);
 
