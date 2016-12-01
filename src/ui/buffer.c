@@ -124,6 +124,9 @@ buffer_append(ProfWin *window, ProfBuffEntry *entry)
     }
 
     window->layout->entries = g_slist_append(window->layout->entries, entry);
+
+    win_print_entry(window, entry);
+    inp_nonblocking(TRUE);
 }
 
 ProfBuffEntry*
