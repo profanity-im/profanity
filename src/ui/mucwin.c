@@ -354,7 +354,7 @@ mucwin_history(ProfMucWin *mucwin, const char *const nick, GDateTime *timestamp,
         g_string_append(line, message);
     }
 
-    win_print_history(window, timestamp, "%s", line->str);
+    win_print_history(window, timestamp, line->str);
     g_string_free(line, TRUE);
 
     plugins_on_room_history_message(mucwin->roomjid, nick, message, timestamp);
@@ -487,7 +487,7 @@ mucwin_message(ProfMucWin *mucwin, const char *const nick, const char *const id,
             win_print_muc_occupant(window, THEME_ROOMTRIGGER, nick);
             _mucwin_print_triggers(window, message, triggers);
         } else {
-            win_print_muc_occupant_message(window, nick, "%s", message);
+            win_print_muc_occupant_message(window, nick, message);
         }
     } else {
         if (mucwin->last_message) {
@@ -498,7 +498,7 @@ mucwin_message(ProfMucWin *mucwin, const char *const nick, const char *const id,
             free(mucwin->last_id);
         }
         mucwin->last_id = strdup(id);
-        win_print_muc_self_message(window, mynick, "%s", message);
+        win_print_muc_self_message(window, mynick, message);
     }
 }
 
