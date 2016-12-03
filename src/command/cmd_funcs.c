@@ -2084,7 +2084,7 @@ cmd_msg(ProfWin *window, const char *const command, gchar **args)
             ui_focus_win((ProfWin*)privwin);
 
             if (msg) {
-                cl_ev_send_priv_msg(privwin, msg, NULL);
+                cl_ev_send_priv_msg(privwin, msg, FALSE);
             }
 
             g_string_free(full_jid, TRUE);
@@ -2109,7 +2109,7 @@ cmd_msg(ProfWin *window, const char *const command, gchar **args)
         ui_focus_win((ProfWin*)chatwin);
 
         if (msg) {
-            cl_ev_send_msg(chatwin, msg, NULL);
+            cl_ev_send_msg(chatwin, msg, FALSE);
         } else {
 #ifdef HAVE_LIBOTR
             if (otr_is_secure(barejid)) {
@@ -4721,21 +4721,21 @@ cmd_tiny(ProfWin *window, const char *const command, gchar **args)
     {
         ProfChatWin *chatwin = (ProfChatWin*)window;
         assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
-        cl_ev_send_msg(chatwin, tiny, NULL);
+        cl_ev_send_msg(chatwin, tiny, FALSE);
         break;
     }
     case WIN_PRIVATE:
     {
         ProfPrivateWin *privatewin = (ProfPrivateWin*)window;
         assert(privatewin->memcheck == PROFPRIVATEWIN_MEMCHECK);
-        cl_ev_send_priv_msg(privatewin, tiny, NULL);
+        cl_ev_send_priv_msg(privatewin, tiny, FALSE);
         break;
     }
     case WIN_MUC:
     {
         ProfMucWin *mucwin = (ProfMucWin*)window;
         assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
-        cl_ev_send_muc_msg(mucwin, tiny, NULL);
+        cl_ev_send_muc_msg(mucwin, tiny, FALSE);
         break;
     }
     default:
@@ -7051,7 +7051,7 @@ cmd_correct(ProfWin *window, const char *const command, gchar **args)
         cons_debug("  Original  : %s", chatwin->last_message);
         cons_debug("  Corrected : %s", corrected);
 
-        cl_ev_send_msg(chatwin, corrected, NULL);
+        cl_ev_send_msg(chatwin, corrected, FALSE);
         return TRUE;
     }
 
@@ -7069,7 +7069,7 @@ cmd_correct(ProfWin *window, const char *const command, gchar **args)
         cons_debug("  Original  : %s", mucwin->last_message);
         cons_debug("  Corrected : %s", corrected);
 
-        cl_ev_send_muc_msg(mucwin, corrected, NULL);
+        cl_ev_send_muc_msg(mucwin, corrected, FALSE);
         return TRUE;
     }
 
@@ -7176,21 +7176,21 @@ _cmd_execute_default(ProfWin *window, const char *inp)
     {
         ProfChatWin *chatwin = (ProfChatWin*)window;
         assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
-        cl_ev_send_msg(chatwin, inp, NULL);
+        cl_ev_send_msg(chatwin, inp, FALSE);
         break;
     }
     case WIN_PRIVATE:
     {
         ProfPrivateWin *privatewin = (ProfPrivateWin*)window;
         assert(privatewin->memcheck == PROFPRIVATEWIN_MEMCHECK);
-        cl_ev_send_priv_msg(privatewin, inp, NULL);
+        cl_ev_send_priv_msg(privatewin, inp, FALSE);
         break;
     }
     case WIN_MUC:
     {
         ProfMucWin *mucwin = (ProfMucWin*)window;
         assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
-        cl_ev_send_muc_msg(mucwin, inp, NULL);
+        cl_ev_send_muc_msg(mucwin, inp, FALSE);
         break;
     }
     case WIN_XML:

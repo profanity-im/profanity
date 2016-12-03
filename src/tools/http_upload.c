@@ -125,7 +125,7 @@ _data_callback(void *ptr, size_t size, size_t nmemb, void *data)
     return realsize;
 }
 
-void *
+void*
 http_file_put(void *userdata)
 {
     HTTPUpload *upload = (HTTPUpload *)userdata;
@@ -166,13 +166,13 @@ http_file_put(void *userdata)
     headers = curl_slist_append(headers, "Expect:");
     curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
 
-    #if LIBCURL_VERSION_NUM >= 0x072000
+#if LIBCURL_VERSION_NUM >= 0x072000
     curl_easy_setopt(curl, CURLOPT_XFERINFOFUNCTION, _xferinfo);
     curl_easy_setopt(curl, CURLOPT_XFERINFODATA, upload);
-    #else
+#else
     curl_easy_setopt(curl, CURLOPT_PROGRESSFUNCTION, _older_progress);
     curl_easy_setopt(curl, CURLOPT_PROGRESSDATA, upload);
-    #endif
+#endif
     curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0L);
 
     struct curl_data_t output;
@@ -214,12 +214,6 @@ http_file_put(void *userdata)
                 err = NULL;
             }
         }
-
-        #if 0
-        printf("HTTP Status: %lu\n", http_code);
-        printf("%s\n", output.buffer);
-        printf("%lu bytes retrieved\n", (long)output.size);
-        #endif
     }
 
 end:
@@ -264,21 +258,21 @@ end:
             {
                 ProfChatWin *chatwin = (ProfChatWin*)(upload->window);
                 assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
-                cl_ev_send_msg(chatwin, upload->get_url, upload->get_url);
+                cl_ev_send_msg(chatwin, upload->get_url, TRUE);
                 break;
             }
             case WIN_PRIVATE:
             {
                 ProfPrivateWin *privatewin = (ProfPrivateWin*)(upload->window);
                 assert(privatewin->memcheck == PROFPRIVATEWIN_MEMCHECK);
-                cl_ev_send_priv_msg(privatewin, upload->get_url, upload->get_url);
+                cl_ev_send_priv_msg(privatewin, upload->get_url, TRUE);
                 break;
             }
             case WIN_MUC:
             {
                 ProfMucWin *mucwin = (ProfMucWin*)(upload->window);
                 assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
-                cl_ev_send_muc_msg(mucwin, upload->get_url, upload->get_url);
+                cl_ev_send_muc_msg(mucwin, upload->get_url, TRUE);
                 break;
             }
             default:

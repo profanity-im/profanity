@@ -132,8 +132,7 @@ message_handlers_init(void)
 }
 
 char*
-message_send_chat(const char *const barejid, const char *const msg, const char *const oob_url,
-    gboolean request_receipt)
+message_send_chat(const char *const barejid, const char *const msg, gboolean request_receipt, gboolean upload)
 {
     xmpp_ctx_t * const ctx = connection_get_ctx();
 
@@ -149,8 +148,8 @@ message_send_chat(const char *const barejid, const char *const msg, const char *
         stanza_attach_state(ctx, message, state);
     }
 
-    if (oob_url) {
-        stanza_attach_x_oob_url(ctx, message, oob_url);
+    if (upload) {
+        stanza_attach_x_oob_url(ctx, message, msg);
     }
 
     if (request_receipt) {
@@ -255,7 +254,7 @@ message_send_chat_otr(const char *const barejid, const char *const msg, gboolean
 }
 
 char *
-message_send_private(const char *const fulljid, const char *const msg, const char *const oob_url)
+message_send_private(const char *const fulljid, const char *const msg, gboolean upload)
 {
     xmpp_ctx_t * const ctx = connection_get_ctx();
     char *id = create_unique_id("prv");
@@ -263,8 +262,8 @@ message_send_private(const char *const fulljid, const char *const msg, const cha
     xmpp_stanza_t *message = xmpp_message_new(ctx, STANZA_TYPE_CHAT, fulljid, id);
     xmpp_message_set_body(message, msg);
 
-    if (oob_url) {
-        stanza_attach_x_oob_url(ctx, message, oob_url);
+    if (upload) {
+        stanza_attach_x_oob_url(ctx, message, msg);
     }
 
     _send_message_stanza(message);
@@ -274,7 +273,7 @@ message_send_private(const char *const fulljid, const char *const msg, const cha
 }
 
 void
-message_send_groupchat(const char *const roomjid, const char *const msg, const char *const oob_url)
+message_send_groupchat(const char *const roomjid, const char *const msg, gboolean upload)
 {
     xmpp_ctx_t * const ctx = connection_get_ctx();
     char *id = create_unique_id("muc");
@@ -284,8 +283,8 @@ message_send_groupchat(const char *const roomjid, const char *const msg, const c
 
     free(id);
 
-    if (oob_url) {
-        stanza_attach_x_oob_url(ctx, message, oob_url);
+    if (upload) {
+        stanza_attach_x_oob_url(ctx, message, msg);
     }
 
     _send_message_stanza(message);
