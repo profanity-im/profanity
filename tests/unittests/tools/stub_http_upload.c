@@ -42,7 +42,7 @@ typedef struct prof_win_t ProfWin;
 
 typedef struct http_upload_t {
     char *filename;
-    off_t filesize;
+    size_t filesize;
     curl_off_t bytes_sent;
     char *mime_type;
     char *get_url;
@@ -57,7 +57,7 @@ typedef struct http_upload_t {
 void* http_file_put(void *userdata) {}
 
 char* file_mime_type(const char* const file_name) {}
-off_t file_size(const char* const file_name) {}
+size_t file_size(const char* const file_name) {}
 int is_regular_file(const char *filename) {}
 
 #endif

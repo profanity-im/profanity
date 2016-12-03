@@ -251,7 +251,7 @@ stanza_create_http_upload_request(xmpp_ctx_t *ctx, const char *const id,
     xmpp_stanza_set_name(size, STANZA_NAME_SIZE);
     xmpp_stanza_t *size_txt = xmpp_stanza_new(ctx);
     char* filesize = NULL;
-    if (asprintf(&filesize, "%jd", (intmax_t)(upload->filesize)) != -1) {
+    if (asprintf(&filesize, "%zu", upload->filesize) != -1) {
         xmpp_stanza_set_text(size_txt, filesize);
         free(filesize);
     }

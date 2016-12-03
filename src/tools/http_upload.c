@@ -324,7 +324,7 @@ file_mime_type(const char* const file_name)
     return out_mime_type;
 }
 
-off_t file_size(const char* const filename)
+size_t file_size(const char* const filename)
 {
     struct stat st;
     stat(filename, &st);
