@@ -68,6 +68,8 @@ void win_print_outgoing(ProfWin *window, const char ch, const char *const messag
 void win_print_incoming(ProfWin *window, GDateTime *timestamp,
     const char *const them, const char *const message, prof_enc_t enc_mode);
 void win_print_history(ProfWin *window, GDateTime *timestamp, const char *const message);
+void win_correct(ProfWin *window, const char ch, const char *const message, const char *const id, gboolean request_receipt,
+    const char *const correct_id);
 
 void win_print_upload(ProfWin *window, const char *const message, char *url);
 void win_update_upload(ProfWin *window, const char *const url, const char *const message);

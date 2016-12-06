@@ -132,7 +132,7 @@ GList* connection_get_available_resources(void);
 gboolean connection_supports(const char *const feature);
 char* connection_jid_for_feature(const char *const feature);
 
-char* message_send_chat(const char *const barejid, const char *const msg, gboolean request_receipt, gboolean upload);
+char* message_send_chat(const char *const barejid, const char *const msg, gboolean request_receipt, gboolean upload, char *correct_id);
 char* message_send_chat_otr(const char *const barejid, const char *const msg, gboolean request_receipt);
 char* message_send_chat_pgp(const char *const barejid, const char *const msg, gboolean request_receipt);
 char* message_send_private(const char *const fulljid, const char *const msg, gboolean upload);

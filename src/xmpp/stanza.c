@@ -406,6 +406,19 @@ stanza_attach_receipt_request(xmpp_ctx_t *ctx, xmpp_stanza_t *stanza)
 }
 
 xmpp_stanza_t*
+stanza_attach_correction(xmpp_ctx_t *ctx, xmpp_stanza_t *stanza, char *correct_id)
+{
+    xmpp_stanza_t *replace = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(replace, "replace");
+    xmpp_stanza_set_id(replace, correct_id);
+    xmpp_stanza_set_ns(replace, STANZA_NS_LASTMESSAGECORRECTION);
+    xmpp_stanza_add_child(stanza, replace);
+    xmpp_stanza_release(replace);
+
+    return stanza;
+}
+
+xmpp_stanza_t*
 stanza_attach_x_oob_url(xmpp_ctx_t *ctx, xmpp_stanza_t *stanza, const char *const url)
 {
     xmpp_stanza_t *x_oob = xmpp_stanza_new(ctx);

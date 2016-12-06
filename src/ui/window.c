@@ -1173,6 +1173,46 @@ win_print_outgoing(ProfWin *window, const char ch, const char *const message, co
 }
 
 void
+win_correct(ProfWin *window, const char ch, const char *const message, const char *const id, gboolean request_receipt,
+    const char *const correct_id)
+{
+    ProfBuffEntry *entry = buffer_get_entry_by_outgoing_id(window->layout->entries, correct_id);
+    if (!entry) {
+        return;
+    }
+
+    if (entry->date) {
+        if (entry->date->timestamp) {
+            g_date_time_unref(entry->date->timestamp);
+        }
+        free(entry->date);
+    }
+
+    entry->date = buffer_date_new_now();
+    entry->show_char = ch;
+
+    if (entry->message) {
+        free(entry->message);
+    }
+    entry->message = strdup(message);
+
+    if (entry->xmpp->outgoing_id) {
+        free(entry->xmpp->outgoing_id);
+    }
+    entry->xmpp->outgoing_id = strdup(id);
+
+    if (request_receipt) {
+        if (entry->xmpp->receipt) {
+            entry->xmpp->receipt->received = FALSE;
+        } else {
+            entry->xmpp->receipt = buffer_receipt_new();
+        }
+    }
+
+    win_redraw(window);
+}
+
+void
 win_print_history(ProfWin *window, GDateTime *timestamp, const char *const message)
 {
     ProfBuffDate *date = buffer_date_new(timestamp, FALSE);

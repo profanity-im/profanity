@@ -292,12 +292,9 @@ chatwin_incoming_msg(ProfChatWin *chatwin, const char *const resource, const cha
     free(plugin_message);
 }
 
-void
-chatwin_outgoing_msg(ProfChatWin *chatwin, const char *const message, char *id, prof_enc_t enc_mode,
-    gboolean request_receipt)
+static void
+_chatwin_set_last_message(ProfChatWin *chatwin, const char *const id, const char *const message)
 {
-    assert(chatwin != NULL);
-
     if (chatwin->last_message) {
         free(chatwin->last_message);
     }
@@ -306,6 +303,22 @@ chatwin_outgoing_msg(ProfChatWin *chatwin, const char *const message, char *id, 
         free(chatwin->last_id);
     }
     chatwin->last_id = strdup(id);
+}
+
+void
+chatwin_outgoing_msg(ProfChatWin *chatwin, const char *const message, char *id, prof_enc_t enc_mode,
+    gboolean request_receipt, char *correct_id)
+{
+    assert(chatwin != NULL);
+
+    if (correct_id) {
+        win_correct((ProfWin*)chatwin, '+', message, id, request_receipt, correct_id);
+        _chatwin_set_last_message(chatwin, id, message);
+
+        return;
+    }
+
+    _chatwin_set_last_message(chatwin, id, message);
 
     char enc_char = '-';
     if (enc_mode == PROF_MSG_OTR) {

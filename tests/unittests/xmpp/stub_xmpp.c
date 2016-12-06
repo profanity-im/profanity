@@ -91,7 +91,7 @@ connection_supports(const char *const feature)
 }
 
 // message functions
-char* message_send_chat(const char * const barejid, const char * const msg, gboolean request_receipt, gboolean upload)
+char* message_send_chat(const char * const barejid, const char * const msg, gboolean request_receipt, gboolean upload, char *correct)
 {
     check_expected(barejid);
     check_expected(msg);

@@ -132,7 +132,7 @@ message_handlers_init(void)
 }
 
 char*
-message_send_chat(const char *const barejid, const char *const msg, gboolean request_receipt, gboolean upload)
+message_send_chat(const char *const barejid, const char *const msg, gboolean request_receipt, gboolean upload, char *correct_id)
 {
     xmpp_ctx_t * const ctx = connection_get_ctx();
 
@@ -154,6 +154,10 @@ message_send_chat(const char *const barejid, const char *const msg, gboolean req
 
     if (request_receipt) {
         stanza_attach_receipt_request(ctx, message);
+    }
+
+    if (correct_id) {
+        stanza_attach_correction(ctx, message, correct_id);
     }
 
     _send_message_stanza(message);

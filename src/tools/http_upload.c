@@ -258,7 +258,7 @@ end:
             {
                 ProfChatWin *chatwin = (ProfChatWin*)(upload->window);
                 assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
-                cl_ev_send_msg(chatwin, upload->get_url, TRUE);
+                cl_ev_send_msg(chatwin, upload->get_url, TRUE, FALSE);
                 break;
             }
             case WIN_PRIVATE:

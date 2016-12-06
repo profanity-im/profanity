@@ -2109,7 +2109,7 @@ cmd_msg(ProfWin *window, const char *const command, gchar **args)
         ui_focus_win((ProfWin*)chatwin);
 
         if (msg) {
-            cl_ev_send_msg(chatwin, msg, FALSE);
+            cl_ev_send_msg(chatwin, msg, FALSE, FALSE);
         } else {
 #ifdef HAVE_LIBOTR
             if (otr_is_secure(barejid)) {
@@ -4721,7 +4721,7 @@ cmd_tiny(ProfWin *window, const char *const command, gchar **args)
     {
         ProfChatWin *chatwin = (ProfChatWin*)window;
         assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
-        cl_ev_send_msg(chatwin, tiny, FALSE);
+        cl_ev_send_msg(chatwin, tiny, FALSE, FALSE);
         break;
     }
     case WIN_PRIVATE:
@@ -7051,7 +7051,7 @@ cmd_correct(ProfWin *window, const char *const command, gchar **args)
         cons_debug("  Original  : %s", chatwin->last_message);
         cons_debug("  Corrected : %s", corrected);
 
-        cl_ev_send_msg(chatwin, corrected, FALSE);
+        cl_ev_send_msg(chatwin, corrected, FALSE, TRUE);
         return TRUE;
     }
 
@@ -7176,7 +7176,7 @@ _cmd_execute_default(ProfWin *window, const char *inp)
     {
         ProfChatWin *chatwin = (ProfChatWin*)window;
         assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
-        cl_ev_send_msg(chatwin, inp, FALSE);
+        cl_ev_send_msg(chatwin, inp, FALSE, FALSE);
         break;
     }
     case WIN_PRIVATE:

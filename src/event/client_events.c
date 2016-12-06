@@ -115,7 +115,7 @@ cl_ev_presence_send(const resource_presence_t presence_type, const char *const m
 }
 
 void
-cl_ev_send_msg(ProfChatWin *chatwin, const char *const msg, gboolean upload)
+cl_ev_send_msg(ProfChatWin *chatwin, const char *const msg, gboolean upload, gboolean correct)
 {
     chat_state_active(chatwin->state);
 
@@ -134,6 +134,11 @@ cl_ev_send_msg(ProfChatWin *chatwin, const char *const msg, gboolean upload)
         }
     }
 
+    char *correct_id = NULL;
+    if (correct) {
+        correct_id = chatwin->last_id;
+    }
+
     char *plugin_msg = plugins_pre_chat_message_send(chatwin->barejid, msg);
 
 // OTR suported, PGP supported
@@ -142,14 +147,14 @@ cl_ev_send_msg(ProfChatWin *chatwin, const char *const msg, gboolean upload)
     if (chatwin->pgp_send) {
         char *id = message_send_chat_pgp(chatwin->barejid, plugin_msg, request_receipt);
         chat_log_pgp_msg_out(chatwin->barejid, plugin_msg);
-        chatwin_outgoing_msg(chatwin, plugin_msg, id, PROF_MSG_PGP, request_receipt);
+        chatwin_outgoing_msg(chatwin, plugin_msg, id, PROF_MSG_PGP, request_receipt, NULL);
         free(id);
     } else {
         gboolean handled = otr_on_message_send(chatwin, plugin_msg, request_receipt);
         if (!handled) {
-            char *id = message_send_chat(chatwin->barejid, plugin_msg, request_receipt, upload);
+            char *id = message_send_chat(chatwin->barejid, plugin_msg, request_receipt, upload, correct_id);
             chat_log_msg_out(chatwin->barejid, plugin_msg);
-            chatwin_outgoing_msg(chatwin, plugin_msg, id, PROF_MSG_PLAIN, request_receipt);
+            chatwin_outgoing_msg(chatwin, plugin_msg, id, PROF_MSG_PLAIN, request_receipt, correct_id);
             free(id);
         }
     }
@@ -165,9 +170,9 @@ cl_ev_send_msg(ProfChatWin *chatwin, const char *const msg, gboolean upload)
 #ifndef HAVE_LIBGPGME
     gboolean handled = otr_on_message_send(chatwin, plugin_msg, request_receipt);
     if (!handled) {
-        char *id = message_send_chat(chatwin->barejid, plugin_msg, request_receipt, upload);
+        char *id = message_send_chat(chatwin->barejid, plugin_msg, request_receipt, upload, correct_id);
         chat_log_msg_out(chatwin->barejid, plugin_msg);
-        chatwin_outgoing_msg(chatwin, plugin_msg, id, PROF_MSG_PLAIN, request_receipt);
+        chatwin_outgoing_msg(chatwin, plugin_msg, id, PROF_MSG_PLAIN, request_receipt. correct_id);
         free(id);
     }
 
@@ -183,12 +188,12 @@ cl_ev_send_msg(ProfChatWin *chatwin, const char *const msg, gboolean upload)
     if (chatwin->pgp_send) {
         char *id = message_send_chat_pgp(chatwin->barejid, plugin_msg, request_receipt);
         chat_log_pgp_msg_out(chatwin->barejid, plugin_msg);
-        chatwin_outgoing_msg(chatwin, plugin_msg, id, PROF_MSG_PGP, request_receipt);
+        chatwin_outgoing_msg(chatwin, plugin_msg, id, PROF_MSG_PGP, request_receipt, NULL);
         free(id);
     } else {
-        char *id = message_send_chat(chatwin->barejid, plugin_msg, request_receipt, upload);
+        char *id = message_send_chat(chatwin->barejid, plugin_msg, request_receipt, upload, correct_id);
         chat_log_msg_out(chatwin->barejid, plugin_msg);
-        chatwin_outgoing_msg(chatwin, plugin_msg, id, PROF_MSG_PLAIN, request_receipt);
+        chatwin_outgoing_msg(chatwin, plugin_msg, id, PROF_MSG_PLAIN, request_receipt, correct_id);
         free(id);
     }
 
@@ -201,9 +206,9 @@ cl_ev_send_msg(ProfChatWin *chatwin, const char *const msg, gboolean upload)
 // OTR unsupported, PGP unsupported
 #ifndef HAVE_LIBOTR
 #ifndef HAVE_LIBGPGME
-    char *id = message_send_chat(chatwin->barejid, plugin_msg, request_receipt, upload);
+    char *id = message_send_chat(chatwin->barejid, plugin_msg, request_receipt, upload, correct_id);
     chat_log_msg_out(chatwin->barejid, plugin_msg);
-    chatwin_outgoing_msg(chatwin, plugin_msg, id, PROF_MSG_PLAIN, request_receipt);
+    chatwin_outgoing_msg(chatwin, plugin_msg, id, PROF_MSG_PLAIN, request_receipt, correct_id);
     free(id);
 
     plugins_post_chat_message_send(chatwin->barejid, plugin_msg);
