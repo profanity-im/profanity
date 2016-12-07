@@ -172,7 +172,7 @@ cl_ev_send_msg(ProfChatWin *chatwin, const char *const msg, gboolean upload, gbo
     if (!handled) {
         char *id = message_send_chat(chatwin->barejid, plugin_msg, request_receipt, upload, correct_id);
         chat_log_msg_out(chatwin->barejid, plugin_msg);
-        chatwin_outgoing_msg(chatwin, plugin_msg, id, PROF_MSG_PLAIN, request_receipt. correct_id);
+        chatwin_outgoing_msg(chatwin, plugin_msg, id, PROF_MSG_PLAIN, request_receipt, correct_id);
         free(id);
     }
 
