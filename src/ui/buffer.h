@@ -67,7 +67,9 @@ ProfBuffEntry* buffer_entry_create(
 void buffer_append(ProfWin *window, ProfBuffEntry *entry);
 
 ProfBuffEntry* buffer_get_entry_by_outgoing_id(GSList *entries, const char *const id);
+ProfBuffEntry* buffer_get_entry_by_incoming_id(GSList *entries, const char *const id);
 ProfBuffEntry* buffer_get_upload_entry(GSList *entries, const char *const url);
+
 void buffer_free_entry(ProfBuffEntry *entry);
 
 #endif

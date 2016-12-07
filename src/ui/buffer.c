@@ -204,6 +204,21 @@ buffer_get_entry_by_outgoing_id(GSList *entries, const char *const id)
     return NULL;
 }
 
+ProfBuffEntry*
+buffer_get_entry_by_incoming_id(GSList *entries, const char *const id)
+{
+    GSList *curr = entries;
+    while (curr) {
+        ProfBuffEntry *entry = curr->data;
+        if (entry->xmpp && g_strcmp0(entry->xmpp->incoming_id, id) == 0) {
+            return entry;
+        }
+        curr = g_slist_next(curr);
+    }
+
+    return NULL;
+}
+
 void
 buffer_free_entry(ProfBuffEntry *entry)
 {

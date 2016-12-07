@@ -313,7 +313,7 @@ chatwin_outgoing_msg(ProfChatWin *chatwin, const char *const message, char *id, 
     assert(chatwin != NULL);
 
     if (correct_id) {
-        win_correct((ProfWin*)chatwin, '+', message, id, request_receipt, correct_id);
+        win_correct_outgoing((ProfWin*)chatwin, '+', message, id, request_receipt, correct_id);
         _chatwin_set_last_message(chatwin, id, message);
 
         return;
