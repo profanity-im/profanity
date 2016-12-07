@@ -43,9 +43,14 @@
 
 ProfBuffDate* buffer_date_new_now(void);
 ProfBuffDate* buffer_date_new(GDateTime *timestamp, gboolean colour);
+
 ProfBuffReceipt* buffer_receipt_new(void);
+
 ProfBuffUpload* buffer_upload_new(char *url);
-ProfBuffXMPP* buffer_new_xmpp(const char *const outgoing_id, ProfBuffReceipt *receipt, ProfBuffUpload *upload);
+
+ProfBuffXMPP* buffer_new_xmpp_out(const char *const outgoing_id, ProfBuffReceipt *receipt);
+ProfBuffXMPP* buffer_new_xmpp_in(const char *const incoming_id);
+ProfBuffXMPP* buffer_new_xmpp_upload(ProfBuffUpload *upload);
 
 ProfBuffFrom* buffer_from_new(prof_buff_from_type_t type, const char *const from);
 

@@ -1150,9 +1150,10 @@ win_print_incoming(ProfWin *window, GDateTime *timestamp, const char *const them
         }
     }
 
+    ProfBuffXMPP *xmpp = buffer_new_xmpp_in(id);
     ProfBuffDate *date = buffer_date_new(timestamp, TRUE);
     ProfBuffFrom *from = them ? buffer_from_new(FROM_THEM, them) : NULL;
-    ProfBuffEntry *entry = buffer_entry_create(THEME_TEXT_THEM, date, ch, from, message, 0, TRUE, NULL);
+    ProfBuffEntry *entry = buffer_entry_create(THEME_TEXT_THEM, date, ch, from, message, 0, TRUE, xmpp);
 
     buffer_append(window, entry);
 }
@@ -1164,7 +1165,7 @@ win_print_outgoing(ProfWin *window, const char ch, const char *const message, co
     if (request_receipt) {
         receipt = buffer_receipt_new();
     }
-    ProfBuffXMPP *xmpp = buffer_new_xmpp(id, receipt, NULL);
+    ProfBuffXMPP *xmpp = buffer_new_xmpp_out(id, receipt);
     ProfBuffDate *date = buffer_date_new_now();
     ProfBuffFrom *from = buffer_from_new(FROM_ME, "me");
     ProfBuffEntry *entry = buffer_entry_create(THEME_TEXT_ME, date, ch, from, message, 0, TRUE, xmpp);
@@ -1225,7 +1226,7 @@ void
 win_print_upload(ProfWin *window, const char *const message, char *url)
 {
     ProfBuffUpload *upload = buffer_upload_new(url);
-    ProfBuffXMPP *xmpp = buffer_new_xmpp(NULL, NULL, upload);
+    ProfBuffXMPP *xmpp = buffer_new_xmpp_upload(upload);
     ProfBuffDate *date = buffer_date_new_now();
     ProfBuffEntry *entry = buffer_entry_create(THEME_TEXT_ME, date, '!', NULL, message, 0, TRUE, xmpp);
 

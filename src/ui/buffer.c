@@ -72,16 +72,36 @@ buffer_date_new_now(void)
 }
 
 ProfBuffXMPP*
-buffer_new_xmpp(const char *const outgoing_id, ProfBuffReceipt *receipt, ProfBuffUpload *upload)
+buffer_new_xmpp_out(const char *const outgoing_id, ProfBuffReceipt *receipt)
 {
     ProfBuffXMPP *xmpp = malloc(sizeof(ProfBuffXMPP));
-    if (outgoing_id) {
-        xmpp->outgoing_id = strdup(outgoing_id);
-    } else {
-        xmpp->outgoing_id = NULL;
-    }
-
+    xmpp->outgoing_id = outgoing_id ? strdup(outgoing_id) : NULL;
+    xmpp->incoming_id = NULL;
     xmpp->receipt = receipt;
+    xmpp->upload = NULL;
+
+    return xmpp;
+}
+
+ProfBuffXMPP*
+buffer_new_xmpp_in(const char *const incoming_id)
+{
+    ProfBuffXMPP *xmpp = malloc(sizeof(ProfBuffXMPP));
+    xmpp->incoming_id = incoming_id ? strdup(incoming_id) : NULL;
+    xmpp->outgoing_id = NULL;
+    xmpp->receipt = NULL;
+    xmpp->upload = NULL;
+
+    return xmpp;
+}
+
+ProfBuffXMPP*
+buffer_new_xmpp_upload(ProfBuffUpload *upload)
+{
+    ProfBuffXMPP *xmpp = malloc(sizeof(ProfBuffXMPP));
+    xmpp->incoming_id = NULL;
+    xmpp->outgoing_id = NULL;
+    xmpp->receipt = NULL;
     xmpp->upload = upload;
 
     return xmpp;
@@ -200,6 +220,7 @@ buffer_free_entry(ProfBuffEntry *entry)
     }
     if (entry->xmpp) {
         free(entry->xmpp->outgoing_id);
+        free(entry->xmpp->incoming_id);
         if (entry->xmpp->receipt) {
             free(entry->xmpp->receipt);
         }

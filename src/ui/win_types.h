@@ -215,6 +215,7 @@ typedef struct prof_buff_date_t {
 
 typedef struct prof_buff_xmpp_t {
     char *outgoing_id;
+    char *incoming_id;
     ProfBuffReceipt *receipt;
     ProfBuffUpload *upload;
 } ProfBuffXMPP;
