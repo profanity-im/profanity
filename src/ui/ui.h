@@ -118,8 +118,8 @@ gboolean ui_win_has_unsaved_form(int num);
 
 // Chat window
 ProfChatWin* chatwin_new(const char *const barejid);
-void chatwin_incoming_msg(ProfChatWin *chatwin, const char *const resource, const char *const message,
-    GDateTime *timestamp, gboolean win_created, prof_enc_t enc_mode);
+void chatwin_incoming_msg(ProfChatWin *chatwin, const char *const resource, const char *const id,
+    const char *const message, GDateTime *timestamp, gboolean win_created, prof_enc_t enc_mode);
 void chatwin_receipt_received(ProfChatWin *chatwin, const char *const id);
 void chatwin_recipient_gone(ProfChatWin *chatwin);
 void chatwin_outgoing_msg(ProfChatWin *chatwin, const char *const message, char *id, prof_enc_t enc_mode,

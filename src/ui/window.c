@@ -1134,8 +1134,8 @@ win_print_muc_self_message(ProfWin *window, const char *const me, const char *co
 }
 
 void
-win_print_incoming(ProfWin *window, GDateTime *timestamp, const char *const them, const char *const message,
-    prof_enc_t enc_mode)
+win_print_incoming(ProfWin *window, GDateTime *timestamp, const char *const them, const char *const id,
+    const char *const message, prof_enc_t enc_mode)
 {
     if (window->type != WIN_CHAT && window->type != WIN_PRIVATE) {
         assert(FALSE);

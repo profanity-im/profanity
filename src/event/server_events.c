@@ -382,16 +382,16 @@ sv_ev_outgoing_carbon(char *barejid, char *message, char *pgp_message)
 
 #ifdef HAVE_LIBGPGME
 static void
-_sv_ev_incoming_pgp(ProfChatWin *chatwin, gboolean new_win, char *barejid, char *resource, char *message, char *pgp_message, GDateTime *timestamp)
+_sv_ev_incoming_pgp(ProfChatWin *chatwin, gboolean new_win, char *barejid, char *resource, const char *const id, char *message, char *pgp_message, GDateTime *timestamp)
 {
     char *decrypted = p_gpg_decrypt(pgp_message);
     if (decrypted) {
-        chatwin_incoming_msg(chatwin, resource, decrypted, timestamp, new_win, PROF_MSG_PGP);
+        chatwin_incoming_msg(chatwin, resource, id, decrypted, timestamp, new_win, PROF_MSG_PGP);
         chat_log_pgp_msg_in(barejid, decrypted, timestamp);
         chatwin->pgp_recv = TRUE;
         p_gpg_free_decrypted(decrypted);
     } else {
-        chatwin_incoming_msg(chatwin, resource, message, timestamp, new_win, PROF_MSG_PLAIN);
+        chatwin_incoming_msg(chatwin, resource, id, message, timestamp, new_win, PROF_MSG_PLAIN);
         chat_log_msg_in(barejid, message, timestamp);
         chatwin->pgp_recv = FALSE;
     }
@@ -400,16 +400,17 @@ _sv_ev_incoming_pgp(ProfChatWin *chatwin, gboolean new_win, char *barejid, char 
 
 #ifdef HAVE_LIBOTR
 static void
-_sv_ev_incoming_otr(ProfChatWin *chatwin, gboolean new_win, char *barejid, char *resource, char *message, GDateTime *timestamp)
+_sv_ev_incoming_otr(ProfChatWin *chatwin, gboolean new_win, char *barejid, char *resource, const char *const id,
+    char *message, GDateTime *timestamp)
 {
     gboolean decrypted = FALSE;
     char *otr_res = otr_on_message_recv(barejid, resource, message, &decrypted);
     if (otr_res) {
         if (decrypted) {
-            chatwin_incoming_msg(chatwin, resource, otr_res, timestamp, new_win, PROF_MSG_OTR);
+            chatwin_incoming_msg(chatwin, resource, id, otr_res, timestamp, new_win, PROF_MSG_OTR);
             chatwin->pgp_send = FALSE;
         } else {
-            chatwin_incoming_msg(chatwin, resource, otr_res, timestamp, new_win, PROF_MSG_PLAIN);
+            chatwin_incoming_msg(chatwin, resource, id, otr_res, timestamp, new_win, PROF_MSG_PLAIN);
         }
         chat_log_otr_msg_in(barejid, otr_res, decrypted, timestamp);
         otr_free_message(otr_res);
@@ -419,15 +420,17 @@ _sv_ev_incoming_otr(ProfChatWin *chatwin, gboolean new_win, char *barejid, char 
 #endif
 
 static void
-_sv_ev_incoming_plain(ProfChatWin *chatwin, gboolean new_win, char *barejid, char *resource, char *message, GDateTime *timestamp)
+_sv_ev_incoming_plain(ProfChatWin *chatwin, gboolean new_win, char *barejid, char *resource, const char *const id,
+    char *message, GDateTime *timestamp)
 {
-    chatwin_incoming_msg(chatwin, resource, message, timestamp, new_win, PROF_MSG_PLAIN);
+    chatwin_incoming_msg(chatwin, resource, id, message, timestamp, new_win, PROF_MSG_PLAIN);
     chat_log_msg_in(barejid, message, timestamp);
     chatwin->pgp_recv = FALSE;
 }
 
 void
-sv_ev_incoming_message(char *barejid, char *resource, char *message, char *pgp_message, GDateTime *timestamp)
+sv_ev_incoming_message(char *barejid, char *resource, const char *const id, char *message, char *pgp_message,
+    GDateTime *timestamp)
 {
     gboolean new_win = FALSE;
     ProfChatWin *chatwin = wins_get_chat(barejid);
@@ -444,10 +447,10 @@ sv_ev_incoming_message(char *barejid, char *resource, char *message, char *pgp_m
         if (chatwin->is_otr) {
             win_println((ProfWin*)chatwin, THEME_DEFAULT, '-', "PGP encrypted message received whilst in OTR session.");
         } else { // PROF_ENC_NONE, PROF_ENC_PGP
-            _sv_ev_incoming_pgp(chatwin, new_win, barejid, resource, message, pgp_message, timestamp);
+            _sv_ev_incoming_pgp(chatwin, new_win, barejid, resource, id, message, pgp_message, timestamp);
         }
     } else {
-        _sv_ev_incoming_otr(chatwin, new_win, barejid, resource, message, timestamp);
+        _sv_ev_incoming_otr(chatwin, new_win, barejid, resource, id, message, timestamp);
     }
     rosterwin_roster();
     return;
@@ -457,7 +460,7 @@ sv_ev_incoming_message(char *barejid, char *resource, char *message, char *pgp_m
 // OTR supported, PGP unsupported
 #ifdef HAVE_LIBOTR
 #ifndef HAVE_LIBGPGME
-    _sv_ev_incoming_otr(chatwin, new_win, barejid, resource, message, timestamp);
+    _sv_ev_incoming_otr(chatwin, new_win, barejid, resource, id, message, timestamp);
     rosterwin_roster();
     return;
 #endif
@@ -467,9 +470,9 @@ sv_ev_incoming_message(char *barejid, char *resource, char *message, char *pgp_m
 #ifndef HAVE_LIBOTR
 #ifdef HAVE_LIBGPGME
     if (pgp_message) {
-        _sv_ev_incoming_pgp(chatwin, new_win, barejid, resource, message, pgp_message, timestamp);
+        _sv_ev_incoming_pgp(chatwin, new_win, barejid, resource, id, message, pgp_message, timestamp);
     } else {
-        _sv_ev_incoming_plain(chatwin, new_win, barejid, resource, message, timestamp);
+        _sv_ev_incoming_plain(chatwin, new_win, barejid, resource, id, message, timestamp);
     }
     rosterwin_roster();
     return;
@@ -479,7 +482,7 @@ sv_ev_incoming_message(char *barejid, char *resource, char *message, char *pgp_m
 // OTR unsupported, PGP unsupported
 #ifndef HAVE_LIBOTR
 #ifndef HAVE_LIBGPGME
-    _sv_ev_incoming_plain(chatwin, new_win, barejid, resource, message, timestamp);
+    _sv_ev_incoming_plain(chatwin, new_win, barejid, resource, id, message, timestamp);
     rosterwin_roster();
     return;
 #endif
@@ -499,12 +502,12 @@ sv_ev_incoming_carbon(char *barejid, char *resource, char *message, char *pgp_me
 
 #ifdef HAVE_LIBGPGME
     if (pgp_message) {
-        _sv_ev_incoming_pgp(chatwin, new_win, barejid, resource, message, pgp_message, NULL);
+        _sv_ev_incoming_pgp(chatwin, new_win, barejid, resource, NULL, message, pgp_message, NULL);
     } else {
-        _sv_ev_incoming_plain(chatwin, new_win, barejid, resource, message, NULL);
+        _sv_ev_incoming_plain(chatwin, new_win, barejid, resource, NULL, message, NULL);
     }
 #else
-    _sv_ev_incoming_plain(chatwin, new_win, barejid, resource, message, NULL);
+    _sv_ev_incoming_plain(chatwin, new_win, barejid, resource, NULL, message, NULL);
 #endif
     rosterwin_roster();
 }

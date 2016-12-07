@@ -473,7 +473,7 @@ api_settings_int_set(const char *const group, const char *const key, int value)
 void
 api_incoming_message(const char *const barejid, const char *const resource, const char *const message)
 {
-    sv_ev_incoming_message((char*)barejid, (char*)resource, (char*)message, NULL, NULL);
+    sv_ev_incoming_message((char*)barejid, (char*)resource, NULL, (char*)message, NULL, NULL);
 
     // TODO handle all states
     sv_ev_activity((char*)barejid, (char*)resource, FALSE);

@@ -802,12 +802,13 @@ _handle_chat(xmpp_stanza_t *const stanza)
     if (body) {
         char *message = xmpp_stanza_get_text(body);
         if (message) {
+            const char *id = xmpp_stanza_get_id(stanza);
             char *enc_message = NULL;
             xmpp_stanza_t *x = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_ENCRYPTED);
             if (x) {
                 enc_message = xmpp_stanza_get_text(x);
             }
-            sv_ev_incoming_message(jid->barejid, jid->resourcepart, message, enc_message, timestamp);
+            sv_ev_incoming_message(jid->barejid, jid->resourcepart, id, message, enc_message, timestamp);
             xmpp_free(ctx, enc_message);
 
             _receipt_request_handler(stanza);
