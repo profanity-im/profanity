@@ -1217,7 +1217,7 @@ void
 win_correct_incoming(ProfWin *window, const char ch, const char *const message, const char *const id,
     const char *const correct_id)
 {
-    ProfBuffEntry *entry = buffer_get_entry_by_outgoing_id(window->layout->entries, correct_id);
+    ProfBuffEntry *entry = buffer_get_entry_by_incoming_id(window->layout->entries, correct_id);
     if (!entry) {
         return;
     }

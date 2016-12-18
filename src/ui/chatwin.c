@@ -231,8 +231,9 @@ chatwin_recipient_gone(ProfChatWin *chatwin)
 }
 
 void
-chatwin_incoming_msg(ProfChatWin *chatwin, const char *const resource, const char *const id, const char *const message,
-    GDateTime *timestamp, gboolean win_created, prof_enc_t enc_mode)
+chatwin_incoming_msg(ProfChatWin *chatwin, const char *const resource, const char *const id,
+    const char *const correct_id, const char *const message, GDateTime *timestamp, gboolean win_created,
+    prof_enc_t enc_mode)
 {
     assert(chatwin != NULL);
 
@@ -248,7 +249,11 @@ chatwin_incoming_msg(ProfChatWin *chatwin, const char *const resource, const cha
 
     // currently viewing chat window with sender
     if (wins_is_current(window)) {
-        win_print_incoming(window, timestamp, display_name, id, plugin_message, enc_mode);
+        if (correct_id && win_created == FALSE) {
+            win_correct_incoming(window, '+', message, id, correct_id);
+        } else {
+            win_print_incoming(window, timestamp, display_name, id, plugin_message, enc_mode);
+        }
         title_bar_set_typing(FALSE);
         status_bar_active(num);
 
@@ -275,7 +280,11 @@ chatwin_incoming_msg(ProfChatWin *chatwin, const char *const resource, const cha
             }
         }
 
-        win_print_incoming(window, timestamp, display_name, id, plugin_message, enc_mode);
+        if (correct_id && win_created == FALSE) {
+            win_correct_incoming(window, '+', message, id, correct_id);
+        } else {
+            win_print_incoming(window, timestamp, display_name, id, plugin_message, enc_mode);
+        }
     }
 
     if (prefs_get_boolean(PREF_BEEP)) {

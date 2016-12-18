@@ -808,7 +808,13 @@ _handle_chat(xmpp_stanza_t *const stanza)
             if (x) {
                 enc_message = xmpp_stanza_get_text(x);
             }
-            sv_ev_incoming_message(jid->barejid, jid->resourcepart, id, message, enc_message, timestamp);
+            const char *correct_id = NULL;
+            xmpp_stanza_t *replace = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_LASTMESSAGECORRECTION);
+            if (replace) {
+                correct_id = xmpp_stanza_get_id(replace);
+            }
+
+            sv_ev_incoming_message(jid->barejid, jid->resourcepart, id, correct_id, message, enc_message, timestamp);
             xmpp_free(ctx, enc_message);
 
             _receipt_request_handler(stanza);

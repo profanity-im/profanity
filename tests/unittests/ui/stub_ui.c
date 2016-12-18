@@ -146,7 +146,7 @@ void ui_contact_online(char *barejid, Resource *resource, GDateTime *last_activi
 
 void ui_contact_typing(const char * const barejid, const char * const resource) {}
 void chatwin_incoming_msg(ProfChatWin *chatwin, const char * const resource, const char *const id,
-    const char * const message, GDateTime *timestamp, gboolean win_created, prof_enc_t enc_mode) {}
+    const char *const correct_id, const char * const message, GDateTime *timestamp, gboolean win_created, prof_enc_t enc_mode) {}
 void chatwin_receipt_received(ProfChatWin *chatwin, const char * const id) {}
 
 void privwin_incoming_msg(ProfPrivateWin *privatewin, const char * const message, GDateTime *timestamp) {}
