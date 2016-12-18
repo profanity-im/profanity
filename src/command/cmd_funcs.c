@@ -7077,7 +7077,7 @@ cmd_correct(ProfWin *window, const char *const command, gchar **args)
         assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
 
         if (mucwin->last_message == NULL) {
-            cons_show("No last message to correct.");
+            win_println(window, THEME_DEFAULT, '!', "No last message to correct.");
             return TRUE;
         }
 
