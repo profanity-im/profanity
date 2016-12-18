@@ -59,6 +59,7 @@
 #define XMPP_FEATURE_RECEIPTS "urn:xmpp:receipts"
 #define XMPP_FEATURE_LASTACTIVITY "jabber:iq:last"
 #define XMPP_FEATURE_MUC "http://jabber.org/protocol/muc"
+#define XMPP_FEATURE_LASTMESSAGECORRECTION "urn:xmpp:message-correct:0"
 
 typedef enum {
     JABBER_CONNECTING,

@@ -7042,14 +7042,31 @@ cmd_correct(ProfWin *window, const char *const command, gchar **args)
         assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
 
         if (chatwin->last_id == NULL || chatwin->last_message == NULL) {
-            cons_show("No last message to correct.");
+            win_println(window, THEME_DEFAULT, '!', "No last message to correct.");
             return TRUE;
         }
 
-        cons_debug("Chat message correction");
-        cons_debug("  ID        : %s", chatwin->last_id);
-        cons_debug("  Original  : %s", chatwin->last_message);
-        cons_debug("  Corrected : %s", corrected);
+        char *session_jid = chat_session_get_jid(chatwin->barejid);
+        if (session_jid == NULL) {
+            win_println(window, THEME_DEFAULT, '!', "Cannot determine if recipeint supports last message correction.");
+            free(session_jid);
+            return TRUE;
+        }
+
+        Jid *session_jidp = jid_create(session_jid);
+        if (session_jidp == NULL || session_jidp->resourcepart == NULL) {
+            win_println(window, THEME_DEFAULT, '!', "Cannot determine if recipeint supports last message correction.");
+            jid_destroy(session_jidp);
+            free(session_jid);
+            return TRUE;
+        }
+
+        if (caps_jid_has_feature(session_jid, XMPP_FEATURE_LASTMESSAGECORRECTION) == FALSE) {
+            win_println(window, THEME_DEFAULT, '!', "Recipient does not support last message correction.");
+            jid_destroy(session_jidp);
+            free(session_jid);
+            return TRUE;
+        }
 
         cl_ev_send_msg(chatwin, corrected, FALSE, TRUE);
         return TRUE;
