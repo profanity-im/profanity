@@ -96,9 +96,10 @@ cl_ev_disconnect(void)
 }
 
 void
-cl_ev_presence_send(const resource_presence_t presence_type, const char *const msg, const int idle_secs)
+cl_ev_presence_send(const resource_presence_t presence_type, const int idle_secs)
 {
     char *signed_status = NULL;
+    char *msg = connection_get_presence_msg();
 
 #ifdef HAVE_LIBGPGME
     char *account_name = session_get_account_name();
@@ -109,7 +110,7 @@ cl_ev_presence_send(const resource_presence_t presence_type, const char *const m
     account_free(account);
 #endif
 
-    presence_send(presence_type, msg, idle_secs, signed_status);
+    presence_send(presence_type, idle_secs, signed_status);
 
     free(signed_status);
 }

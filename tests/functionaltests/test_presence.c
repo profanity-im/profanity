@@ -228,6 +228,33 @@ presence_includes_priority(void **state)
 }
 
 void
+presence_keeps_status(void **state)
+{
+    prof_connect();
+
+    prof_input("/chat \"Free to talk\"");
+    assert_true(stbbr_received(
+        "<presence id='prof_presence_4'>"
+            "<show>chat</show>"
+            "<status>Free to talk</status>"
+            "<c hash='sha-1' xmlns='http://jabber.org/protocol/caps' ver='*' node='http://www.profanity.im'/>"
+        "</presence>"
+    ));
+    assert_true(prof_output_exact("Status set to chat (priority 0), \"Free to talk\"."));
+
+    prof_input("/priority 25");
+    assert_true(stbbr_received(
+        "<presence id='prof_presence_5'>"
+            "<show>chat</show>"
+            "<status>Free to talk</status>"
+            "<priority>25</priority>"
+            "<c hash='sha-1' xmlns='http://jabber.org/protocol/caps' ver='*' node='http://www.profanity.im'/>"
+        "</presence>"
+    ));
+    assert_true(prof_output_exact("Priority set to 25."));
+}
+
+void
 presence_received(void **state)
 {
     prof_connect();
