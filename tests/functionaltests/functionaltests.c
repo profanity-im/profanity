@@ -52,6 +52,7 @@ int main(int argc, char* argv[]) {
         PROF_FUNC_TEST(presence_chat_with_message),
         PROF_FUNC_TEST(presence_set_priority),
         PROF_FUNC_TEST(presence_includes_priority),
+        PROF_FUNC_TEST(presence_keeps_status),
         PROF_FUNC_TEST(presence_received),
         PROF_FUNC_TEST(presence_missing_resource_defaults),
 

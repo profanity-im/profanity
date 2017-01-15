@@ -46,7 +46,6 @@ jabber_conn_status_t connection_connect(const char *const fulljid, const char *c
 void connection_disconnect(void);
 void connection_set_disconnected(void);
 
-void connection_set_presence_msg(const char *const message);
 void connection_set_priority(const int priority);
 void connection_set_priority(int priority);
 void connection_set_disco_items(GSList *items);
