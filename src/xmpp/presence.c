@@ -191,20 +191,19 @@ presence_reset_sub_request_search(void)
 }
 
 void
-presence_send(const resource_presence_t presence_type, const char *const msg, const int idle, char *signed_status)
+presence_send(const resource_presence_t presence_type, const int idle, char *signed_status)
 {
     if (connection_get_status() != JABBER_CONNECTED) {
         log_warning("Error setting presence, not connected.");
         return;
     }
 
+    char *msg = connection_get_presence_msg();
     if (msg) {
         log_debug("Updating presence: %s, \"%s\"", string_from_resource_presence(presence_type), msg);
     } else {
         log_debug("Updating presence: %s", string_from_resource_presence(presence_type));
     }
-
-    connection_set_presence_msg(msg);
 
     const int pri = accounts_get_priority_for_presence_type(session_get_account_name(), presence_type);
     connection_set_priority(pri);

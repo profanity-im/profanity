@@ -58,6 +58,7 @@
 #define XMPP_FEATURE_BLOCKING "urn:xmpp:blocking"
 #define XMPP_FEATURE_RECEIPTS "urn:xmpp:receipts"
 #define XMPP_FEATURE_LASTACTIVITY "jabber:iq:last"
+#define XMPP_FEATURE_MUC "http://jabber.org/protocol/muc"
 
 typedef enum {
     JABBER_CONNECTING,
@@ -119,6 +120,7 @@ char* session_get_account_name(void);
 
 jabber_conn_status_t connection_get_status(void);
 char *connection_get_presence_msg(void);
+void connection_set_presence_msg(const char *const message);
 const char* connection_get_fulljid(void);
 char* connection_create_uuid(void);
 void connection_free_uuid(char *uuid);
@@ -129,6 +131,7 @@ gboolean connection_is_secured(void);
 gboolean connection_send_stanza(const char *const stanza);
 GList* connection_get_available_resources(void);
 gboolean connection_supports(const char *const feature);
+char* connection_jid_for_feature(const char *const feature);
 
 char* message_send_chat(const char *const barejid, const char *const msg, const char *const oob_url,
     gboolean request_receipt);
@@ -151,7 +154,7 @@ char* presence_sub_request_find(const char *const search_str);
 void presence_join_room(const char *const room, const char *const nick, const char *const passwd);
 void presence_change_room_nick(const char *const room, const char *const nick);
 void presence_leave_chat_room(const char *const room_jid);
-void presence_send(resource_presence_t status, const char *const msg, int idle, char *signed_status);
+void presence_send(resource_presence_t status, int idle, char *signed_status);
 gboolean presence_sub_request_exists(const char *const bare_jid);
 
 void iq_enable_carbons(void);

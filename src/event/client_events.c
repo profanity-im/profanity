@@ -64,9 +64,13 @@ cl_ev_connect_jid(const char *const jid, const char *const passwd, const char *c
 jabber_conn_status_t
 cl_ev_connect_account(ProfAccount *account)
 {
-    char *jid = account_create_full_jid(account);
-    cons_show("Connecting with account %s as %s", account->name, jid);
-    free(jid);
+    if (account->resource) {
+        cons_show("Connecting with account %s as %s/%s", account->name, account->jid, account->resource);
+    } else if (g_strcmp0(account->name, account->jid) == 0) {
+        cons_show("Connecting with account %s", account->name);
+    } else {
+        cons_show("Connecting with account %s as %s", account->name, account->jid);
+    }
 
     return session_connect_with_account(account);
 }
@@ -75,7 +79,9 @@ void
 cl_ev_disconnect(void)
 {
     const char *jid = connection_get_fulljid();
-    cons_show("%s logged out successfully.", jid);
+    Jid *jidp = jid_create(jid);
+    cons_show("%s logged out successfully.", jidp->barejid);
+    jid_destroy(jidp);
 
     ui_disconnected();
     ui_close_all_wins();
@@ -90,9 +96,10 @@ cl_ev_disconnect(void)
 }
 
 void
-cl_ev_presence_send(const resource_presence_t presence_type, const char *const msg, const int idle_secs)
+cl_ev_presence_send(const resource_presence_t presence_type, const int idle_secs)
 {
     char *signed_status = NULL;
+    char *msg = connection_get_presence_msg();
 
 #ifdef HAVE_LIBGPGME
     char *account_name = session_get_account_name();
@@ -103,7 +110,7 @@ cl_ev_presence_send(const resource_presence_t presence_type, const char *const m
     account_free(account);
 #endif
 
-    presence_send(presence_type, msg, idle_secs, signed_status);
+    presence_send(presence_type, idle_secs, signed_status);
 
     free(signed_status);
 }

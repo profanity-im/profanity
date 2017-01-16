@@ -108,26 +108,21 @@ connection_shutdown(void)
 }
 
 jabber_conn_status_t
-connection_connect(const char *const fulljid, const char *const passwd, const char *const altdomain, int port,
+connection_connect(const char *const jid, const char *const passwd, const char *const altdomain, int port,
     const char *const tls_policy)
 {
-    assert(fulljid != NULL);
+    assert(jid != NULL);
     assert(passwd != NULL);
 
-    Jid *jid = jid_create(fulljid);
-    if (jid == NULL) {
-        log_error("Malformed JID not able to connect: %s", fulljid);
+    Jid *jidp = jid_create(jid);
+    if (jidp == NULL) {
+        log_error("Malformed JID not able to connect: %s", jid);
         conn.conn_status = JABBER_DISCONNECTED;
-        return conn.conn_status;
-    } else if (jid->fulljid == NULL) {
-        log_error("Full JID required to connect, received: %s", fulljid);
-        conn.conn_status = JABBER_DISCONNECTED;
-        jid_destroy(jid);
         return conn.conn_status;
     }
-    jid_destroy(jid);
+    jid_destroy(jidp);
 
-    log_info("Connecting as %s", fulljid);
+    log_info("Connecting as %s", jid);
 
     if (conn.xmpp_log) {
         free(conn.xmpp_log);
@@ -150,7 +145,7 @@ connection_connect(const char *const fulljid, const char *const passwd, const ch
         log_warning("Failed to get libstrophe conn during connect");
         return JABBER_DISCONNECTED;
     }
-    xmpp_conn_set_jid(conn.xmpp_conn, fulljid);
+    xmpp_conn_set_jid(conn.xmpp_conn, jid);
     xmpp_conn_set_pass(conn.xmpp_conn, passwd);
 
     if (!tls_policy || (g_strcmp0(tls_policy, "force") == 0)) {
@@ -290,6 +285,10 @@ connection_supports(const char *const feature)
 char*
 connection_jid_for_feature(const char *const feature)
 {
+    if (conn.features_by_jid == NULL) {
+        return NULL;
+    }
+
     GList *jids = g_hash_table_get_keys(conn.features_by_jid);
 
     GList *curr = jids;
@@ -345,7 +344,12 @@ connection_get_ctx(void)
 const char*
 connection_get_fulljid(void)
 {
-    return xmpp_conn_get_jid(conn.xmpp_conn);
+    const char *jid = xmpp_conn_get_bound_jid(conn.xmpp_conn);
+    if (jid) {
+        return jid;
+    } else {
+        return xmpp_conn_get_jid(conn.xmpp_conn);
+    }
 }
 
 GHashTable*
