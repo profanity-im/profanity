@@ -214,8 +214,7 @@ plugins_unload(const char *const name)
         if (connection_get_status() == JABBER_CONNECTED) {
             char* account_name = session_get_account_name();
             resource_presence_t last_presence = accounts_get_last_presence(account_name);
-            char *msg = connection_get_presence_msg();
-            cl_ev_presence_send(last_presence, msg, 0);
+            cl_ev_presence_send(last_presence, 0);
         }
     }
     return TRUE;
