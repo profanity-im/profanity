@@ -126,7 +126,7 @@ caps_add_prof_feature(char *feature)
     // resend presence to update server's disco info data for this client
     if (connection_get_status() == JABBER_CONNECTED) {
         resource_presence_t last_presence = accounts_get_last_presence(session_get_account_name());
-        cl_ev_presence_send(last_presence, connection_get_presence_msg(), 0);
+        cl_ev_presence_send(last_presence, 0);
     }
 }
 
@@ -144,7 +144,7 @@ caps_remove_prof_feature(char *feature)
     // resend presence to update server's disco info data for this client
     if (connection_get_status() == JABBER_CONNECTED) {
         resource_presence_t last_presence = accounts_get_last_presence(session_get_account_name());
-        cl_ev_presence_send(last_presence, connection_get_presence_msg(), 0);
+        cl_ev_presence_send(last_presence, 0);
     }
 }
 
