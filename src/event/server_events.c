@@ -135,19 +135,23 @@ sv_ev_roster_received(void)
             GTimeSpan diff_micros = g_date_time_difference(nowdt, lastdt);
             int diff_secs = (diff_micros / 1000) / 1000;
             if (prefs_get_boolean(PREF_LASTACTIVITY)) {
-                cl_ev_presence_send(conn_presence, NULL, diff_secs);
+                connection_set_presence_msg(NULL);
+                cl_ev_presence_send(conn_presence, diff_secs);
             } else {
-                cl_ev_presence_send(conn_presence, NULL, 0);
+                connection_set_presence_msg(NULL);
+                cl_ev_presence_send(conn_presence, 0);
             }
             g_date_time_unref(lastdt);
         } else {
-            cl_ev_presence_send(conn_presence, NULL, 0);
+            connection_set_presence_msg(NULL);
+            cl_ev_presence_send(conn_presence, 0);
         }
 
         free(last_activity_str);
         g_date_time_unref(nowdt);
     } else {
-        cl_ev_presence_send(conn_presence, NULL, 0);
+        connection_set_presence_msg(NULL);
+        cl_ev_presence_send(conn_presence, 0);
     }
 
     const char *fulljid = connection_get_fulljid();

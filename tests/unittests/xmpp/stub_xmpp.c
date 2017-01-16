@@ -78,6 +78,8 @@ GList * session_get_available_resources(void)
     return NULL;
 }
 
+void connection_set_presence_msg(const char *const message) {}
+
 gboolean
 connection_send_stanza(const char *const stanza)
 {
@@ -153,10 +155,9 @@ void presence_join_room(const char *const room, const char *const nick, const ch
 void presence_change_room_nick(const char * const room, const char * const nick) {}
 void presence_leave_chat_room(const char * const room_jid) {}
 
-void presence_send(resource_presence_t status, const char * const msg, int idle, char *signed_status)
+void presence_send(resource_presence_t status, int idle, char *signed_status)
 {
     check_expected(status);
-    check_expected(msg);
     check_expected(idle);
     check_expected(signed_status);
 }

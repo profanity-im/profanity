@@ -860,8 +860,7 @@ _account_set_presence_priority(char *account_name, char *presence, char *priorit
         char *connected_account = session_get_account_name();
         resource_presence_t last_presence = accounts_get_last_presence(connected_account);
         if (presence_type == last_presence) {
-            char *message = connection_get_presence_msg();
-            cl_ev_presence_send(last_presence, message, 0);
+            cl_ev_presence_send(last_presence, 0);
         }
     }
     cons_show("Updated %s priority for account %s: %s", presence, account_name, priority);
@@ -5961,7 +5960,7 @@ cmd_priority(ProfWin *window, const char *const command, gchar **args)
     if (res) {
         accounts_set_priority_all(session_get_account_name(), intval);
         resource_presence_t last_presence = accounts_get_last_presence(session_get_account_name());
-        cl_ev_presence_send(last_presence, connection_get_presence_msg(), 0);
+        cl_ev_presence_send(last_presence, 0);
         cons_show("Priority set to %d.", intval);
     } else {
         cons_show(err_msg);
@@ -7198,7 +7197,8 @@ _update_presence(const resource_presence_t resource_presence,
     if (conn_status != JABBER_CONNECTED) {
         cons_show("You are not currently connected.");
     } else {
-        cl_ev_presence_send(resource_presence, msg, 0);
+        connection_set_presence_msg(msg);
+        cl_ev_presence_send(resource_presence, 0);
         ui_update_presence(resource_presence, msg, show);
     }
 }
