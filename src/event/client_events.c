@@ -99,12 +99,12 @@ void
 cl_ev_presence_send(const resource_presence_t presence_type, const int idle_secs)
 {
     char *signed_status = NULL;
-    char *msg = connection_get_presence_msg();
 
 #ifdef HAVE_LIBGPGME
     char *account_name = session_get_account_name();
     ProfAccount *account = accounts_get_account(account_name);
     if (account->pgp_keyid) {
+        char *msg = connection_get_presence_msg();
         signed_status = p_gpg_sign(msg, account->pgp_keyid);
     }
     account_free(account);
