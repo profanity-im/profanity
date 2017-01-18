@@ -96,4 +96,6 @@ void api_incoming_message(const char *const barejid, const char *const resource,
 
 void api_disco_add_feature(char *plugin_name, char *feature);
 
+void api_encryption_reset(const char *const barejid);
+
 #endif
