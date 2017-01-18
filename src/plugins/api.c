@@ -497,3 +497,29 @@ api_disco_add_feature(char *plugin_name, char *feature)
     }
 }
 
+void
+api_encryption_reset(const char *const barejid)
+{
+    if (barejid == NULL) {
+        return;
+    }
+
+    ProfChatWin *chatwin = wins_get_chat(barejid);
+    if (chatwin == NULL) {
+        return;
+    }
+
+#ifdef HAVE_LIBGPGME
+    if (chatwin->pgp_send) {
+        chatwin->pgp_send = FALSE;
+        win_println((ProfWin*)chatwin, THEME_DEFAULT, '!', "PGP encryption disabled.");
+    }
+#endif
+
+#ifdef HAVE_LIBOTR
+    if (chatwin->is_otr) {
+        chatwin_otr_unsecured(chatwin);
+        otr_end_session(chatwin->barejid);
+    }
+#endif
+}
