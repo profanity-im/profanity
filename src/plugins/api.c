@@ -509,13 +509,17 @@ api_encryption_reset(const char *const barejid)
         return;
     }
 
+#ifdef HAVE_LIBGPGME
     if (chatwin->pgp_send) {
         chatwin->pgp_send = FALSE;
         ui_current_print_formatted_line('!', 0, "PGP encryption disabled.");
     }
+#endif
 
+#ifdef HAVE_LIBOTR
     if (chatwin->is_otr) {
         chatwin_otr_unsecured(chatwin);
         otr_end_session(chatwin->barejid);
     }
+#endif
 }
