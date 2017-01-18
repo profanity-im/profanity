@@ -341,6 +341,12 @@ c_api_disco_add_feature(const char *filename, char *feature)
     free(plugin_name);
 }
 
+static void
+c_api_encryption_reset(const char *barejid)
+{
+    api_encryption_reset(barejid);
+}
+
 void
 c_command_callback(PluginCommand *command, gchar **args)
 {
@@ -408,6 +414,7 @@ c_api_init(void)
     prof_settings_string_list_clear = c_api_settings_string_list_clear;
     prof_incoming_message = c_api_incoming_message;
     _prof_disco_add_feature = c_api_disco_add_feature;
+    prof_encryption_reset = c_api_encryption_reset;
 }
 
 static char *

@@ -497,3 +497,25 @@ api_disco_add_feature(char *plugin_name, char *feature)
     }
 }
 
+void
+api_encryption_reset(const char *const barejid)
+{
+    if (barejid == NULL) {
+        return;
+    }
+
+    ProfChatWin *chatwin = wins_get_chat(barejid);
+    if (chatwin == NULL) {
+        return;
+    }
+
+    if (chatwin->pgp_send) {
+        chatwin->pgp_send = FALSE;
+        ui_current_print_formatted_line('!', 0, "PGP encryption disabled.");
+    }
+
+    if (chatwin->is_otr) {
+        chatwin_otr_unsecured(chatwin);
+        otr_end_session(chatwin->barejid);
+    }
+}
