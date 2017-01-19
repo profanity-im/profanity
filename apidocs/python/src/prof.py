@@ -262,6 +262,14 @@ def get_current_occupants():
     pass
 
 
+def get_room_nick(barejid):
+    """Retrieve current nickname used in chat room.
+
+    :return: Room nickname.
+    :rtype: str
+    """
+
+
 def current_win_is_console():
     """Determine whether or not the Console window is currently focussed.
 
@@ -597,6 +605,7 @@ def incoming_message(barejid, resource, message):
         prof.incoming_message("bob@server.org", "laptop", "Hello there")
     """
 
+
 def disco_add_feature(feature):
     """Add a service discovery feature the list supported by Profanity.\n
     If a session is already connected, a presence update will be sent to allow any client/server caches to update their feature list for Profanity
@@ -609,3 +618,15 @@ def disco_add_feature(feature):
         prof.disco_add_feature("urn:xmpp:omemo:0:devicelist+notify")
     """
     pass
+
+
+def encryption_reset(barejid):
+    """End any encrypted session with the specified user
+
+    :param barejid: Jabber ID of the recipient
+    :type barejid: str or unicode
+
+    Example:
+    ::
+        prof.encryption_reset("alice@server.org")
+    """
