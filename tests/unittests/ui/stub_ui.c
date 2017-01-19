@@ -75,6 +75,9 @@ void chatwin_otr_untrust(ProfChatWin *chatwin) {}
 void chatwin_otr_smp_event(ProfChatWin *chatwin, prof_otr_smp_event_t event, void *data) {}
 #endif
 
+void chatwin_set_enctext(ProfChatWin *chatwin, const char *const enctext) {}
+void chatwin_unset_enctext(ProfChatWin *chatwin) {}
+
 void ui_sigwinch_handler(int sig) {}
 
 unsigned long ui_get_idle_time(void)

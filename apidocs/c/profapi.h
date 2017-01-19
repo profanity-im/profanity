@@ -339,3 +339,19 @@ End any encrypted session with the specified user.
 @param barejid Jabber ID of the recipient
 */
 void prof_encryption_reset(char *barejid);
+
+/**
+Set the text to display in the titlebar encryption indicator.
+@param barejid Jabber ID of the recipient
+@param enctext The text to display
+@return 1 on success, 0 on failure
+*/
+int prof_chat_set_titlebar_enctext(char *barejid, char *enctext);
+
+/**
+Let profanity decide what to show in the titlebar encryption indicator
+@param barejid Jabber ID of the recipient
+@return 1 on success, 0 on failure
+*/
+int prof_chat_unset_titlebar_enctext(char *barejid);
+

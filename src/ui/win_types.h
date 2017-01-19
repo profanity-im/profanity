@@ -155,6 +155,7 @@ typedef struct prof_chat_win_t {
     char *resource_override;
     gboolean history_shown;
     unsigned long memcheck;
+    char *enctext;
 } ProfChatWin;
 
 typedef struct prof_muc_win_t {

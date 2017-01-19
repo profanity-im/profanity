@@ -312,6 +312,20 @@ _show_privacy(ProfChatWin *chatwin)
     int trusted_attrs = theme_attrs(THEME_TITLE_TRUSTED);
     int untrusted_attrs = theme_attrs(THEME_TITLE_UNTRUSTED);
 
+    if (chatwin->enctext) {
+        wprintw(win, " ");
+        wattron(win, bracket_attrs);
+        wprintw(win, "[");
+        wattroff(win, bracket_attrs);
+        wattron(win, encrypted_attrs);
+        wprintw(win, chatwin->enctext);
+        wattroff(win, encrypted_attrs);
+        wattron(win, bracket_attrs);
+        wprintw(win, "]");
+
+        return;
+    }
+
     if (chatwin->is_otr) {
         wprintw(win, " ");
         wattron(win, bracket_attrs);
@@ -346,7 +360,11 @@ _show_privacy(ProfChatWin *chatwin)
             wprintw(win, "]");
             wattroff(win, bracket_attrs);
         }
-    } else if (chatwin->pgp_send || chatwin->pgp_recv) {
+
+        return;
+    }
+
+    if (chatwin->pgp_send || chatwin->pgp_recv) {
         GString *pgpmsg = g_string_new("PGP ");
         if (chatwin->pgp_send && !chatwin->pgp_recv) {
             g_string_append(pgpmsg, "send");
@@ -366,19 +384,21 @@ _show_privacy(ProfChatWin *chatwin)
         wprintw(win, "]");
         wattroff(win, bracket_attrs);
         g_string_free(pgpmsg, TRUE);
-    } else {
-        if (prefs_get_boolean(PREF_ENC_WARN)) {
-            wprintw(win, " ");
-            wattron(win, bracket_attrs);
-            wprintw(win, "[");
-            wattroff(win, bracket_attrs);
-            wattron(win, unencrypted_attrs);
-            wprintw(win, "unencrypted");
-            wattroff(win, unencrypted_attrs);
-            wattron(win, bracket_attrs);
-            wprintw(win, "]");
-            wattroff(win, bracket_attrs);
-        }
+
+        return;
+    }
+
+    if (prefs_get_boolean(PREF_ENC_WARN)) {
+        wprintw(win, " ");
+        wattron(win, bracket_attrs);
+        wprintw(win, "[");
+        wattroff(win, bracket_attrs);
+        wattron(win, unencrypted_attrs);
+        wprintw(win, "unencrypted");
+        wattroff(win, unencrypted_attrs);
+        wattron(win, bracket_attrs);
+        wprintw(win, "]");
+        wattroff(win, bracket_attrs);
     }
 }
 
