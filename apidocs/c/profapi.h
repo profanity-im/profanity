@@ -145,6 +145,13 @@ Retrieve nicknames of all occupants in a chat room, when in a chat room window.
 char** prof_get_current_occupants(void);
 
 /**
+Retrieve current nickname used in chat room.
+@param barejid The room's Jabber ID
+@return Room nickname.
+*/
+char* prof_get_room_nick(const char *barejid);
+
+/**
 Write to the Profanity log at level DEBUG.
 @param message The message to log
 */
@@ -326,3 +333,9 @@ If a session is already connected, a presence update will be sent to allow any c
 @param feature the service discovery feature to be added
 */
 void prof_disco_add_feature(char *feature);
+
+/**
+End any encrypted session with the specified user.
+@param barejid Jabber ID of the recipient
+*/
+void prof_encryption_reset(char *barejid);

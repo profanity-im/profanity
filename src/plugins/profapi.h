@@ -105,4 +105,6 @@ void (*prof_incoming_message)(char *barejid, char *resource, char *message);
 
 void (*_prof_disco_add_feature)(const char *filename, char *feature);
 
+void (*prof_encryption_reset)(const char *barejid);
+
 #endif
