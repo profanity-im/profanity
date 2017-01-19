@@ -5,6 +5,7 @@
 - Add main.help.header theme option
 - Look for system TLS certificate path by default (/tls certpath)
 - Allow plugins to complete file paths with prof.filepath_completer_add function
+- Add encryption settings functions to plugins api
 - Bug fixes: https://github.com/boothj5/profanity/milestone/15?closed=1
 
 0.5.0
