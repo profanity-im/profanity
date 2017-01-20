@@ -347,6 +347,18 @@ c_api_encryption_reset(const char *barejid)
     api_encryption_reset(barejid);
 }
 
+static int
+c_api_chat_set_titlebar_enctext(const char *barejid, const char *enctext)
+{
+    return api_chat_set_titlebar_enctext(barejid, enctext);
+}
+
+static int
+c_api_chat_unset_titlebar_enctext(const char *barejid)
+{
+    return api_chat_unset_titlebar_enctext(barejid);
+}
+
 void
 c_command_callback(PluginCommand *command, gchar **args)
 {
@@ -415,6 +427,8 @@ c_api_init(void)
     prof_incoming_message = c_api_incoming_message;
     _prof_disco_add_feature = c_api_disco_add_feature;
     prof_encryption_reset = c_api_encryption_reset;
+    prof_chat_set_titlebar_enctext = c_api_chat_set_titlebar_enctext;
+    prof_chat_unset_titlebar_enctext = c_api_chat_unset_titlebar_enctext;
 }
 
 static char *

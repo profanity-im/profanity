@@ -107,4 +107,7 @@ void (*_prof_disco_add_feature)(const char *filename, char *feature);
 
 void (*prof_encryption_reset)(const char *barejid);
 
+int (*prof_chat_set_titlebar_enctext)(const char *barejid, const char *enctext);
+int (*prof_chat_unset_titlebar_enctext)(const char *barejid);
+
 #endif

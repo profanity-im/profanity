@@ -385,6 +385,24 @@ chatwin_get_string(ProfChatWin *chatwin)
     return resstr;
 }
 
+void
+chatwin_set_enctext(ProfChatWin *chatwin, const char *const enctext)
+{
+    if (chatwin->enctext) {
+        free(chatwin->enctext);
+    }
+    chatwin->enctext = strdup(enctext);
+}
+
+void
+chatwin_unset_enctext(ProfChatWin *chatwin)
+{
+    if (chatwin->enctext) {
+        free(chatwin->enctext);
+        chatwin->enctext = NULL;
+    }
+}
+
 static void
 _chatwin_history(ProfChatWin *chatwin, const char *const contact)
 {

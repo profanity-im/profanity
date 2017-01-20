@@ -94,3 +94,7 @@ void (*prof_incoming_message)(char *barejid, char *resource, char *message) = NU
 void (*_prof_disco_add_feature)(const char *filename, char *feature) = NULL;
 
 void (*prof_encryption_reset)(const char *barejid) = NULL;
+
+int (*prof_chat_set_titlebar_enctext)(const char *barejid, const char *enctext) = NULL;
+int (*prof_chat_unset_titlebar_enctext)(const char *barejid) = NULL;
+
