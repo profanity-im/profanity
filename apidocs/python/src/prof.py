@@ -630,3 +630,35 @@ def encryption_reset(barejid):
     ::
         prof.encryption_reset("alice@server.org")
     """
+
+
+def chat_set_titlebar_enctext(barejid, enctext):
+    """Set the text to display in the titlebar encryption indicator.
+
+    :param barejid: Jabber ID of the recipient
+    :param enctext: The text to display
+    :type barejid: str or unicode
+    :type enctext: str or unicode
+    :return: ``True`` if the text was set successfully, ``False`` otherwise
+    :rtype: boolean
+
+    
+    Example:
+    ::
+        prof.chat_set_titlebar_enctext("bob@chat.org", "safe")
+    """
+
+
+def chat_unset_titlebar_enctext(barejid):
+    """Let profanity decide what to show in the titlebar encryption indicator.
+
+    :param barejid: Jabber ID of the recipient
+    :type barejid: str or unicode
+    :return: ``True`` if the text was unset successfully, ``False`` otherwise
+    :rtype: boolean
+
+    Example:
+    ::
+        prof.chat_unset_titlebar_enctext("bob@chat.org")
+    """
+

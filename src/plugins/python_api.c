@@ -1049,6 +1049,53 @@ python_api_encryption_reset(PyObject *self, PyObject *args)
     Py_RETURN_NONE;
 }
 
+static PyObject*
+python_api_chat_set_titlebar_enctext(PyObject *self, PyObject *args)
+{
+    PyObject *barejid = NULL;
+    PyObject *enctext = NULL;
+    if (!PyArg_ParseTuple(args, "OO", &barejid, &enctext)) {
+        Py_RETURN_NONE;
+    }
+
+    char *barejid_str = python_str_or_unicode_to_string(barejid);
+    char *enctext_str = python_str_or_unicode_to_string(enctext);
+
+    allow_python_threads();
+    int res = api_chat_set_titlebar_enctext(barejid_str, enctext_str);
+    free(barejid_str);
+    free(enctext_str);
+    disable_python_threads();
+
+    if (res) {
+        return Py_BuildValue("O", Py_True);
+    } else {
+        return Py_BuildValue("O", Py_False);
+    }
+}
+
+static PyObject*
+python_api_chat_unset_titlebar_enctext(PyObject *self, PyObject *args)
+{
+    PyObject *barejid = NULL;
+    if (!PyArg_ParseTuple(args, "O", &barejid)) {
+        Py_RETURN_NONE;
+    }
+
+    char *barejid_str = python_str_or_unicode_to_string(barejid);
+
+    allow_python_threads();
+    int res = api_chat_unset_titlebar_enctext(barejid_str);
+    free(barejid_str);
+    disable_python_threads();
+
+    if (res) {
+        return Py_BuildValue("O", Py_True);
+    } else {
+        return Py_BuildValue("O", Py_False);
+    }
+}
+
 void
 python_command_callback(PluginCommand *command, gchar **args)
 {
@@ -1158,6 +1205,8 @@ static PyMethodDef apiMethods[] = {
     { "incoming_message", python_api_incoming_message, METH_VARARGS, "Show an incoming message." },
     { "disco_add_feature", python_api_disco_add_feature, METH_VARARGS, "Add a feature to disco info response." },
     { "encryption_reset", python_api_encryption_reset, METH_VARARGS, "End encrypted chat session with barejid, if one exists" },
+    { "chat_set_titlebar_enctext", python_api_chat_set_titlebar_enctext, METH_VARARGS, "Set the encryption status in the title bar for the specified contact" },
+    { "chat_unset_titlebar_enctext", python_api_chat_unset_titlebar_enctext, METH_VARARGS, "Reset the encryption status in the title bar for the specified recipient" },
     { NULL, NULL, 0, NULL }
 };
 
