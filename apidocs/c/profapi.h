@@ -341,7 +341,7 @@ End any encrypted session with the specified user.
 void prof_encryption_reset(char *barejid);
 
 /**
-Set the text to display in the titlebar encryption indicator.
+Set the text to display in the titlebar encryption indicator for recipient.
 @param barejid Jabber ID of the recipient
 @param enctext The text to display
 @return 1 on success, 0 on failure
@@ -349,9 +349,68 @@ Set the text to display in the titlebar encryption indicator.
 int prof_chat_set_titlebar_enctext(char *barejid, char *enctext);
 
 /**
-Let profanity decide what to show in the titlebar encryption indicator
+Let profanity decide what to show in the titlebar encryption indicator for recipient.
 @param barejid Jabber ID of the recipient
 @return 1 on success, 0 on failure
 */
 int prof_chat_unset_titlebar_enctext(char *barejid);
 
+/**
+Set the incoming message prefix character for specified contact.
+@param barejid Jabber ID of the recipient
+@param ch The character to display
+@return 1 on success, 0 on failure
+*/
+int prof_chat_set_incoming_char(char *barejid, char *ch);
+
+/**
+Reset the incoming message prefix character for specified contact.
+@param barejid Jabber ID of the recipient
+@return 1 on success, 0 on failure
+*/
+int prof_chat_unset_incoming_char(char *barejid);
+
+/**
+Set the outgoing message prefix character for specified contact.
+@param barejid Jabber ID of the recipient
+@param ch The character to display
+@return 1 on success, 0 on failure
+*/
+int prof_chat_set_outgoing_char(char *barejid, char *ch);
+
+/**
+Reset the outgoing message prefix character for specified contact.
+@param barejid Jabber ID of the recipient
+@return 1 on success, 0 on failure
+*/
+int prof_chat_unset_outgoing_char(char *barejid);
+
+/**
+Set the text to display in the titlebar encryption indicator for room.
+@param roomjid Jabber ID of the room
+@param enctext The text to display
+@return 1 on success, 0 on failure
+*/
+int prof_room_set_titlebar_enctext(char *roomjid, char *enctext);
+
+/**
+Let profanity decide what to show in the titlebar encryption indicator for room.
+@param roomjid Jabber ID of the room
+@return 1 on success, 0 on failure
+*/
+int prof_room_unset_titlebar_enctext(char *roomjid);
+
+/**
+Set the message prefix character for specified room.
+@param roomjid Jabber ID of the room
+@param ch The character to display
+@return 1 on success, 0 on failure
+*/
+int prof_room_set_message_char(char *roomjid, char *ch);
+
+/**
+Reset the message prefix character for specified room.
+@param roomjid Jabber ID of the room
+@return 1 on success, 0 on failure
+*/
+int prof_room_unset_message_char(char *roomjid);
