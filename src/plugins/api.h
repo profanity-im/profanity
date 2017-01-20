@@ -98,4 +98,7 @@ void api_disco_add_feature(char *plugin_name, char *feature);
 
 void api_encryption_reset(const char *const barejid);
 
+int api_chat_set_titlebar_enctext(const char *const barejid, const char *const enctext);
+int api_chat_unset_titlebar_enctext(const char *const barejid);
+
 #endif
