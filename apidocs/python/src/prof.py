@@ -662,3 +662,65 @@ def chat_unset_titlebar_enctext(barejid):
         prof.chat_unset_titlebar_enctext("bob@chat.org")
     """
 
+
+def chat_set_incoming_char(barejid, ch):
+    """Set the incoming message prefix character for specified contact.
+
+    :param barejid: Jabber ID of the recipient
+    :param enctext: The character to display
+    :type barejid: str or unicode
+    :type enctext: str or unicode
+    :return: ``True`` if the character was set successfully, ``False`` otherwise
+    :rtype: boolean
+
+    
+    Example:
+    ::
+        prof.chat_set_incoming_char("kristine@chat.org", "*")
+    """
+
+
+def chat_unset_incoming_char(barejid):
+    """Reset the incoming message prefix character for specified contact.
+
+    :param barejid: Jabber ID of the recipient
+    :type barejid: str or unicode
+    :return: ``True`` if the char was unset successfully, ``False`` otherwise
+    :rtype: boolean
+
+    Example:
+    ::
+        prof.chat_unset_incoming_char("kristine@chat.org")
+    """
+
+
+def chat_set_outgoing_char(barejid, ch):
+    """Set the outgoing message prefix character for specified contact.
+
+    :param barejid: Jabber ID of the recipient
+    :param enctext: The character to display
+    :type barejid: str or unicode
+    :type enctext: str or unicode
+    :return: ``True`` if the character was set successfully, ``False`` otherwise
+    :rtype: boolean
+
+    
+    Example:
+    ::
+        prof.chat_set_outgoing_char("david@chat.org", "+")
+    """
+
+
+def chat_unset_outgoing_char(barejid):
+    """Reset the outgoing message prefix character for specified contact.
+
+    :param barejid: Jabber ID of the recipient
+    :type barejid: str or unicode
+    :return: ``True`` if the char was unset successfully, ``False`` otherwise
+    :rtype: boolean
+
+    Example:
+    ::
+        prof.chat_unset_outgoing_char("david@chat.org")
+    """
+

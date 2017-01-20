@@ -349,9 +349,38 @@ Set the text to display in the titlebar encryption indicator.
 int prof_chat_set_titlebar_enctext(char *barejid, char *enctext);
 
 /**
-Let profanity decide what to show in the titlebar encryption indicator
+Let profanity decide what to show in the titlebar encryption indicator.
 @param barejid Jabber ID of the recipient
 @return 1 on success, 0 on failure
 */
 int prof_chat_unset_titlebar_enctext(char *barejid);
 
+/**
+Set the incoming message prefix character for specified contact.
+@param barejid Jabber ID of the recipient
+@param ch The character to display
+@return 1 on success, 0 on failure
+*/
+int prof_chat_set_incoming_char(char *barejid, char *ch);
+
+/**
+Reset the incoming message prefix character for specified contact.
+@param barejid Jabber ID of the recipient
+@return 1 on success, 0 on failure
+*/
+int prof_chat_unset_incoming_char(char *barejid);
+
+/**
+Set the outgoing message prefix character for specified contact.
+@param barejid Jabber ID of the recipient
+@param ch The character to display
+@return 1 on success, 0 on failure
+*/
+int prof_chat_set_outgoing_char(char *barejid, char *ch);
+
+/**
+Reset the outgoing message prefix character for specified contact.
+@param barejid Jabber ID of the recipient
+@return 1 on success, 0 on failure
+*/
+int prof_chat_unset_outgoing_char(char *barejid);

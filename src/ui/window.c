@@ -144,6 +144,8 @@ win_create_chat(const char *const barejid)
     new_win->unread = 0;
     new_win->state = chat_state_new();
     new_win->enctext = NULL;
+    new_win->incoming_char = NULL;
+    new_win->outgoing_char = NULL;
 
     new_win->memcheck = PROFCHATWIN_MEMCHECK;
 
@@ -429,6 +431,8 @@ win_free(ProfWin* window)
         free(chatwin->barejid);
         free(chatwin->resource_override);
         free(chatwin->enctext);
+        free(chatwin->incoming_char);
+        free(chatwin->outgoing_char);
         chat_state_free(chatwin->state);
         break;
     }
@@ -994,13 +998,18 @@ win_print_incoming_message(ProfWin *window, GDateTime *timestamp,
     switch (window->type)
     {
         case WIN_CHAT:
-            if (enc_mode == PROF_MSG_OTR) {
+        {
+            ProfChatWin *chatwin = (ProfChatWin*)window;
+            if (chatwin->incoming_char) {
+                enc_char = chatwin->incoming_char[0];
+            } else if (enc_mode == PROF_MSG_OTR) {
                 enc_char = prefs_get_otr_char();
             } else if (enc_mode == PROF_MSG_PGP) {
                 enc_char = prefs_get_pgp_char();
             }
             win_print(window, enc_char, 0, timestamp, NO_ME, THEME_TEXT_THEM, from, message);
             break;
+        }
         case WIN_PRIVATE:
             win_print(window, '-', 0, timestamp, NO_ME, THEME_TEXT_THEM, from, message);
             break;
