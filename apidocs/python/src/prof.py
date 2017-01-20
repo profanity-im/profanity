@@ -268,6 +268,7 @@ def get_room_nick(barejid):
     :return: Room nickname.
     :rtype: str
     """
+    pass
 
 
 def current_win_is_console():
@@ -498,6 +499,7 @@ def settings_string_list_get(group, key):
     ::
         prof.settings_get_string_list("someplugin", "somelist")
     """
+    pass
 
 
 def settings_string_list_add(group, key, value):
@@ -516,6 +518,7 @@ def settings_string_list_add(group, key, value):
     ::
         prof.settings_string_list_add("someplugin", "somelist", "anelement")
     """
+    pass
 
 
 def settings_string_list_remove(group, key, value):
@@ -535,6 +538,7 @@ def settings_string_list_remove(group, key, value):
     ::
         prof.settings_string_list_remove("someplugin", "somelist", "anelement")
     """
+    pass
 
 
 def settings_string_list_clear(group, key):
@@ -552,6 +556,7 @@ def settings_string_list_clear(group, key):
     ::
         prof.settings_string_list_remove_all("someplugin", "somelist")
     """
+    pass
 
 
 def settings_int_get(group, key, default):
@@ -604,6 +609,7 @@ def incoming_message(barejid, resource, message):
     ::
         prof.incoming_message("bob@server.org", "laptop", "Hello there")
     """
+    pass
 
 
 def disco_add_feature(feature):
@@ -630,10 +636,11 @@ def encryption_reset(barejid):
     ::
         prof.encryption_reset("alice@server.org")
     """
+    pass
 
 
 def chat_set_titlebar_enctext(barejid, enctext):
-    """Set the text to display in the titlebar encryption indicator.
+    """Set the text to display in the titlebar encryption indicator for recipient.
 
     :param barejid: Jabber ID of the recipient
     :param enctext: The text to display
@@ -642,15 +649,15 @@ def chat_set_titlebar_enctext(barejid, enctext):
     :return: ``True`` if the text was set successfully, ``False`` otherwise
     :rtype: boolean
 
-    
     Example:
     ::
         prof.chat_set_titlebar_enctext("bob@chat.org", "safe")
     """
+    pass
 
 
 def chat_unset_titlebar_enctext(barejid):
-    """Let profanity decide what to show in the titlebar encryption indicator.
+    """Let profanity decide what to show in the titlebar encryption indicator for recipient.
 
     :param barejid: Jabber ID of the recipient
     :type barejid: str or unicode
@@ -661,6 +668,7 @@ def chat_unset_titlebar_enctext(barejid):
     ::
         prof.chat_unset_titlebar_enctext("bob@chat.org")
     """
+    pass
 
 
 def chat_set_incoming_char(barejid, ch):
@@ -673,11 +681,11 @@ def chat_set_incoming_char(barejid, ch):
     :return: ``True`` if the character was set successfully, ``False`` otherwise
     :rtype: boolean
 
-    
     Example:
     ::
         prof.chat_set_incoming_char("kristine@chat.org", "*")
     """
+    pass
 
 
 def chat_unset_incoming_char(barejid):
@@ -692,6 +700,7 @@ def chat_unset_incoming_char(barejid):
     ::
         prof.chat_unset_incoming_char("kristine@chat.org")
     """
+    pass
 
 
 def chat_set_outgoing_char(barejid, ch):
@@ -704,11 +713,11 @@ def chat_set_outgoing_char(barejid, ch):
     :return: ``True`` if the character was set successfully, ``False`` otherwise
     :rtype: boolean
 
-    
     Example:
     ::
         prof.chat_set_outgoing_char("david@chat.org", "+")
     """
+    pass
 
 
 def chat_unset_outgoing_char(barejid):
@@ -723,4 +732,68 @@ def chat_unset_outgoing_char(barejid):
     ::
         prof.chat_unset_outgoing_char("david@chat.org")
     """
+    pass
 
+
+def room_set_titlebar_enctext(roomjid, enctext):
+    """Set the text to display in the titlebar encryption indicator for room.
+
+    :param roomjid: Jabber ID of the room
+    :param enctext: The text to display
+    :type roomjid: str or unicode
+    :type enctext: str or unicode
+    :return: ``True`` if the text was set successfully, ``False`` otherwise
+    :rtype: boolean
+
+    Example:
+    ::
+        prof.room_set_titlebar_enctext("generalchat@conference.service.com", "secret")
+    """
+    pass
+
+
+def room_unset_titlebar_enctext(roomjid):
+    """Let profanity decide what to show in the titlebar encryption indicator for room.
+
+    :param roomjid: Jabber ID of the room
+    :type roomjid: str or unicode
+    :return: ``True`` if the text was unset successfully, ``False`` otherwise
+    :rtype: boolean
+
+    Example:
+    ::
+        prof.room_unset_titlebar_enctext("generalchat@conference.service.com")
+    """
+    pass
+
+
+def room_set_message_char(roomjid, ch):
+    """Set the message prefix character for specified room.
+
+    :param roomjid: Jabber ID of the room
+    :param enctext: The character to display
+    :type roomjid: str or unicode
+    :type enctext: str or unicode
+    :return: ``True`` if the character was set successfully, ``False`` otherwise
+    :rtype: boolean
+
+    Example:
+    ::
+        prof.room_set_message_char("ohnoes@conference.chat.org", "^")
+    """
+    pass
+
+
+def room_unset_message_char(roomjid):
+    """Reset the message prefix character for specified room.
+
+    :param roomjid: Jabber ID of the room
+    :type roomjid: str or unicode
+    :return: ``True`` if the char was unset successfully, ``False`` otherwise
+    :rtype: boolean
+
+    Example:
+    ::
+        prof.room_unset_message_char("ohnoes@conference.chat.org")
+    """
+    pass

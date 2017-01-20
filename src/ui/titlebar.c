@@ -61,6 +61,7 @@ static void _title_bar_draw(void);
 static void _show_self_presence(void);
 static void _show_contact_presence(ProfChatWin *chatwin);
 static void _show_privacy(ProfChatWin *chatwin);
+static void _show_muc_privacy(ProfMucWin *mucwin);
 
 void
 create_title_bar(void)
@@ -195,6 +196,10 @@ _title_bar_draw(void)
         if (typing) {
             wprintw(win, " (typing...)");
         }
+    } else if (current && current->type == WIN_MUC) {
+        ProfMucWin *mucwin = (ProfMucWin*) current;
+        assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
+        _show_muc_privacy(mucwin);
     }
 
     _show_self_presence();
@@ -300,6 +305,27 @@ _show_self_presence(void)
         wattron(win, bracket_attrs);
         mvwaddch(win, 0, cols - (tls_start - 4), ']');
         wattroff(win, bracket_attrs);
+    }
+}
+
+static void
+_show_muc_privacy(ProfMucWin *mucwin)
+{
+    int bracket_attrs = theme_attrs(THEME_TITLE_BRACKET);
+    int encrypted_attrs = theme_attrs(THEME_TITLE_ENCRYPTED);
+
+    if (mucwin->enctext) {
+        wprintw(win, " ");
+        wattron(win, bracket_attrs);
+        wprintw(win, "[");
+        wattroff(win, bracket_attrs);
+        wattron(win, encrypted_attrs);
+        wprintw(win, mucwin->enctext);
+        wattroff(win, encrypted_attrs);
+        wattron(win, bracket_attrs);
+        wprintw(win, "]");
+
+        return;
     }
 }
 

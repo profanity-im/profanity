@@ -101,3 +101,7 @@ int (*prof_chat_set_incoming_char)(const char *barejid, const char *ch) = NULL;
 int (*prof_chat_unset_incoming_char)(const char *barejid) = NULL;
 int (*prof_chat_set_outgoing_char)(const char *barejid, const char *ch) = NULL;
 int (*prof_chat_unset_outgoing_char)(const char *barejid) = NULL;
+int (*prof_room_set_titlebar_enctext)(const char *roomjid, const char *enctext) = NULL;
+int (*prof_room_unset_titlebar_enctext)(const char *roomjid) = NULL;
+int (*prof_room_set_message_char)(const char *roomjid, const char *ch) = NULL;
+int (*prof_room_unset_message_char)(const char *roomjid) = NULL;

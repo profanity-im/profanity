@@ -230,6 +230,11 @@ void mucwin_occupant_presence(ProfMucWin *mucwin, const char * const nick, const
 void mucwin_update_occupants(ProfMucWin *mucwin) {}
 void mucwin_show_occupants(ProfMucWin *mucwin) {}
 void mucwin_hide_occupants(ProfMucWin *mucwin) {}
+void mucwin_set_enctext(ProfMucWin *mucwin, const char *const enctext) {}
+void mucwin_unset_enctext(ProfMucWin *mucwin) {}
+void mucwin_set_message_char(ProfMucWin *mucwin, const char *const ch) {}
+void mucwin_unset_message_char(ProfMucWin *mucwin) {}
+
 void ui_show_roster(void) {}
 void ui_hide_roster(void) {}
 void ui_roster_add(const char * const barejid, const char * const name) {}

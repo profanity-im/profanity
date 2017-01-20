@@ -645,3 +645,83 @@ api_chat_unset_outgoing_char(const char *const barejid)
 
     return 1;
 }
+
+int
+api_room_set_titlebar_enctext(const char *const roomjid, const char *const enctext)
+{
+    if (enctext == NULL) {
+        return 0;
+    }
+
+    if (roomjid == NULL) {
+        return 0;
+    }
+
+    ProfMucWin *mucwin = wins_get_muc(roomjid);
+    if (mucwin == NULL) {
+        return 0;
+    }
+
+    mucwin_set_enctext(mucwin, enctext);
+
+    return 1;
+}
+
+int
+api_room_unset_titlebar_enctext(const char *const roomjid)
+{
+    if (roomjid == NULL) {
+        return 0;
+    }
+
+    ProfMucWin *mucwin = wins_get_muc(roomjid);
+    if (mucwin == NULL) {
+        return 0;
+    }
+
+    mucwin_unset_enctext(mucwin);
+
+    return 1;
+}
+
+int
+api_room_set_message_char(const char *const roomjid, const char *const ch)
+{
+    if (ch == NULL) {
+        return 0;
+    }
+
+    if (strlen(ch) != 1) {
+        return 0;
+    }
+
+    if (roomjid == NULL) {
+        return 0;
+    }
+
+    ProfMucWin *mucwin = wins_get_muc(roomjid);
+    if (mucwin == NULL) {
+        return 0;
+    }
+
+    mucwin_set_message_char(mucwin, ch);
+
+    return 1;
+}
+
+int
+api_room_unset_message_char(const char *const roomjid)
+{
+    if (roomjid == NULL) {
+        return 0;
+    }
+
+    ProfMucWin *mucwin = wins_get_muc(roomjid);
+    if (mucwin == NULL) {
+        return 0;
+    }
+
+    mucwin_unset_message_char(mucwin);
+
+    return 1;
+}

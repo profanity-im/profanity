@@ -191,6 +191,8 @@ win_create_muc(const char *const roomjid)
     } else {
         new_win->showjid = FALSE;
     }
+    new_win->enctext = NULL;
+    new_win->message_char = NULL;
 
     new_win->memcheck = PROFMUCWIN_MEMCHECK;
 
@@ -440,6 +442,8 @@ win_free(ProfWin* window)
     {
         ProfMucWin *mucwin = (ProfMucWin*)window;
         free(mucwin->roomjid);
+        free(mucwin->enctext);
+        free(mucwin->message_char);
         break;
     }
     case WIN_MUC_CONFIG:
