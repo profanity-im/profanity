@@ -140,6 +140,8 @@ void chatwin_otr_trust(ProfChatWin *chatwin);
 void chatwin_otr_untrust(ProfChatWin *chatwin);
 void chatwin_otr_smp_event(ProfChatWin *chatwin, prof_otr_smp_event_t event, void *data);
 #endif
+void chatwin_set_enctext(ProfChatWin *chatwin, const char *const enctext);
+void chatwin_unset_enctext(ProfChatWin *chatwin);
 
 // MUC window
 void mucwin_role_change(ProfMucWin *mucwin, const char *const role, const char *const actor, const char *const reason);
