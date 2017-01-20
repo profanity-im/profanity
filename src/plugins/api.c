@@ -561,3 +561,87 @@ api_chat_unset_titlebar_enctext(const char *const barejid)
 
     return 1;
 }
+
+int
+api_chat_set_incoming_char(const char *const barejid, const char *const ch)
+{
+    if (ch == NULL) {
+        return 0;
+    }
+
+    if (strlen(ch) != 1) {
+        return 0;
+    }
+
+    if (barejid == NULL) {
+        return 0;
+    }
+
+    ProfChatWin *chatwin = wins_get_chat(barejid);
+    if (chatwin == NULL) {
+        return 0;
+    }
+
+    chatwin_set_incoming_char(chatwin, ch);
+
+    return 1;
+}
+
+int
+api_chat_unset_incoming_char(const char *const barejid)
+{
+    if (barejid == NULL) {
+        return 0;
+    }
+
+    ProfChatWin *chatwin = wins_get_chat(barejid);
+    if (chatwin == NULL) {
+        return 0;
+    }
+
+    chatwin_unset_incoming_char(chatwin);
+
+    return 1;
+}
+
+int
+api_chat_set_outgoing_char(const char *const barejid, const char *const ch)
+{
+    if (ch == NULL) {
+        return 0;
+    }
+
+    if (strlen(ch) != 1) {
+        return 0;
+    }
+
+    if (barejid == NULL) {
+        return 0;
+    }
+
+    ProfChatWin *chatwin = wins_get_chat(barejid);
+    if (chatwin == NULL) {
+        return 0;
+    }
+
+    chatwin_set_outgoing_char(chatwin, ch);
+
+    return 1;
+}
+
+int
+api_chat_unset_outgoing_char(const char *const barejid)
+{
+    if (barejid == NULL) {
+        return 0;
+    }
+
+    ProfChatWin *chatwin = wins_get_chat(barejid);
+    if (chatwin == NULL) {
+        return 0;
+    }
+
+    chatwin_unset_outgoing_char(chatwin);
+
+    return 1;
+}

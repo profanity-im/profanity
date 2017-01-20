@@ -359,6 +359,30 @@ c_api_chat_unset_titlebar_enctext(const char *barejid)
     return api_chat_unset_titlebar_enctext(barejid);
 }
 
+static int
+c_api_chat_set_incoming_char(const char *barejid, const char *ch)
+{
+    return api_chat_set_incoming_char(barejid, ch);
+}
+
+static int
+c_api_chat_unset_incoming_char(const char *barejid)
+{
+    return api_chat_unset_incoming_char(barejid);
+}
+
+static int
+c_api_chat_set_outgoing_char(const char *barejid, const char *ch)
+{
+    return api_chat_set_outgoing_char(barejid, ch);
+}
+
+static int
+c_api_chat_unset_outgoing_char(const char *barejid)
+{
+    return api_chat_unset_outgoing_char(barejid);
+}
+
 void
 c_command_callback(PluginCommand *command, gchar **args)
 {
@@ -429,6 +453,10 @@ c_api_init(void)
     prof_encryption_reset = c_api_encryption_reset;
     prof_chat_set_titlebar_enctext = c_api_chat_set_titlebar_enctext;
     prof_chat_unset_titlebar_enctext = c_api_chat_unset_titlebar_enctext;
+    prof_chat_set_incoming_char = c_api_chat_set_incoming_char;
+    prof_chat_unset_incoming_char = c_api_chat_unset_incoming_char;
+    prof_chat_set_outgoing_char = c_api_chat_set_outgoing_char;
+    prof_chat_unset_outgoing_char = c_api_chat_unset_outgoing_char;
 }
 
 static char *

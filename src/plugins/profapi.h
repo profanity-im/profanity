@@ -109,5 +109,9 @@ void (*prof_encryption_reset)(const char *barejid);
 
 int (*prof_chat_set_titlebar_enctext)(const char *barejid, const char *enctext);
 int (*prof_chat_unset_titlebar_enctext)(const char *barejid);
+int (*prof_chat_set_incoming_char)(const char *barejid, const char *ch);
+int (*prof_chat_unset_incoming_char)(const char *barejid);
+int (*prof_chat_set_outgoing_char)(const char *barejid, const char *ch);
+int (*prof_chat_unset_outgoing_char)(const char *barejid);
 
 #endif
