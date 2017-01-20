@@ -168,6 +168,8 @@ typedef struct prof_muc_win_t {
     gboolean unread_triggers;
     gboolean showjid;
     unsigned long memcheck;
+    char *enctext;
+    char *message_char;
 } ProfMucWin;
 
 typedef struct prof_mucconf_win_t {

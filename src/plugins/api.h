@@ -104,5 +104,9 @@ int api_chat_set_incoming_char(const char *const barejid, const char *const ch);
 int api_chat_unset_incoming_char(const char *const barejid);
 int api_chat_set_outgoing_char(const char *const barejid, const char *const ch);
 int api_chat_unset_outgoing_char(const char *const barejid);
+int api_room_set_titlebar_enctext(const char *const roomjid, const char *const enctext);
+int api_room_unset_titlebar_enctext(const char *const roomjid);
+int api_room_set_message_char(const char *const roomjid, const char *const ch);
+int api_room_unset_message_char(const char *const roomjid);
 
 #endif

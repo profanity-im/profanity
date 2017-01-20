@@ -383,6 +383,30 @@ c_api_chat_unset_outgoing_char(const char *barejid)
     return api_chat_unset_outgoing_char(barejid);
 }
 
+static int
+c_api_room_set_titlebar_enctext(const char *roomjid, const char *enctext)
+{
+    return api_room_set_titlebar_enctext(roomjid, enctext);
+}
+
+static int
+c_api_room_unset_titlebar_enctext(const char *roomjid)
+{
+    return api_room_unset_titlebar_enctext(roomjid);
+}
+
+static int
+c_api_room_set_message_char(const char *roomjid, const char *ch)
+{
+    return api_room_set_message_char(roomjid, ch);
+}
+
+static int
+c_api_room_unset_message_char(const char *roomjid)
+{
+    return api_room_unset_message_char(roomjid);
+}
+
 void
 c_command_callback(PluginCommand *command, gchar **args)
 {
@@ -457,6 +481,10 @@ c_api_init(void)
     prof_chat_unset_incoming_char = c_api_chat_unset_incoming_char;
     prof_chat_set_outgoing_char = c_api_chat_set_outgoing_char;
     prof_chat_unset_outgoing_char = c_api_chat_unset_outgoing_char;
+    prof_room_set_titlebar_enctext = c_api_room_set_titlebar_enctext;
+    prof_room_unset_titlebar_enctext = c_api_room_unset_titlebar_enctext;
+    prof_room_set_message_char = c_api_room_set_message_char;
+    prof_room_unset_message_char = c_api_room_unset_message_char;
 }
 
 static char *

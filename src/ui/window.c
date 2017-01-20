@@ -194,6 +194,8 @@ win_create_muc(const char *const roomjid)
     } else {
         new_win->showjid = FALSE;
     }
+    new_win->enctext = NULL;
+    new_win->message_char = NULL;
 
     new_win->memcheck = PROFMUCWIN_MEMCHECK;
 
@@ -443,6 +445,8 @@ win_free(ProfWin* window)
     {
         ProfMucWin *mucwin = (ProfMucWin*)window;
         free(mucwin->roomjid);
+        free(mucwin->enctext);
+        free(mucwin->message_char);
         break;
     }
     case WIN_MUC_CONFIG:
@@ -1022,13 +1026,13 @@ win_print_incoming(ProfWin *window, GDateTime *timestamp,
 }
 
 void
-win_print_them(ProfWin *window, theme_item_t theme_item, const char *const them)
+win_print_them(ProfWin *window, theme_item_t theme_item, char ch, const char *const them)
 {
-    _win_printf(window, '-', 0, NULL, NO_ME | NO_EOL, theme_item, them, "");
+    _win_printf(window, ch, 0, NULL, NO_ME | NO_EOL, theme_item, them, "");
 }
 
 void
-win_println_them_message(ProfWin *window, const char *const them, const char *const message, ...)
+win_println_them_message(ProfWin *window, char ch, const char *const them, const char *const message, ...)
 {
     GDateTime *timestamp = g_date_time_new_now_local();
 
@@ -1037,9 +1041,9 @@ win_println_them_message(ProfWin *window, const char *const them, const char *co
     GString *fmt_msg = g_string_new(NULL);
     g_string_vprintf(fmt_msg, message, arg);
 
-    buffer_append(window->layout->buffer, '-', 0, timestamp, NO_ME, THEME_TEXT_THEM, them, fmt_msg->str, NULL);
+    buffer_append(window->layout->buffer, ch, 0, timestamp, NO_ME, THEME_TEXT_THEM, them, fmt_msg->str, NULL);
 
-    _win_print(window, '-', 0, timestamp, NO_ME, THEME_TEXT_THEM, them, fmt_msg->str, NULL);
+    _win_print(window, ch, 0, timestamp, NO_ME, THEME_TEXT_THEM, them, fmt_msg->str, NULL);
     inp_nonblocking(TRUE);
     g_date_time_unref(timestamp);
 
@@ -1048,7 +1052,7 @@ win_println_them_message(ProfWin *window, const char *const them, const char *co
 }
 
 void
-win_println_me_message(ProfWin *window, const char *const me, const char *const message, ...)
+win_println_me_message(ProfWin *window, char ch, const char *const me, const char *const message, ...)
 {
     GDateTime *timestamp = g_date_time_new_now_local();
 
@@ -1057,9 +1061,9 @@ win_println_me_message(ProfWin *window, const char *const me, const char *const 
     GString *fmt_msg = g_string_new(NULL);
     g_string_vprintf(fmt_msg, message, arg);
 
-    buffer_append(window->layout->buffer, '-', 0, timestamp, 0, THEME_TEXT_ME, me, fmt_msg->str, NULL);
+    buffer_append(window->layout->buffer, ch, 0, timestamp, 0, THEME_TEXT_ME, me, fmt_msg->str, NULL);
 
-    _win_print(window, '-', 0, timestamp, 0, THEME_TEXT_ME, me, fmt_msg->str, NULL);
+    _win_print(window, ch, 0, timestamp, 0, THEME_TEXT_ME, me, fmt_msg->str, NULL);
     inp_nonblocking(TRUE);
     g_date_time_unref(timestamp);
 

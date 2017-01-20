@@ -193,6 +193,10 @@ void mucwin_role_list_error(ProfMucWin *mucwin, const char *const role, const ch
 void mucwin_handle_role_list(ProfMucWin *mucwin, const char *const role, GSList *nicks);
 void mucwin_kick_error(ProfMucWin *mucwin, const char *const nick, const char *const error);
 char* mucwin_get_string(ProfMucWin *mucwin);
+void mucwin_set_enctext(ProfMucWin *mucwin, const char *const enctext);
+void mucwin_unset_enctext(ProfMucWin *mucwin);
+void mucwin_set_message_char(ProfMucWin *mucwin, const char *const ch);
+void mucwin_unset_message_char(ProfMucWin *mucwin);
 
 // MUC private chat window
 void privwin_incoming_msg(ProfPrivateWin *privatewin, const char *const message, GDateTime *timestamp);

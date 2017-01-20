@@ -1190,6 +1190,100 @@ python_api_chat_unset_outgoing_char(PyObject *self, PyObject *args)
     }
 }
 
+static PyObject*
+python_api_room_set_titlebar_enctext(PyObject *self, PyObject *args)
+{
+    PyObject *roomjid = NULL;
+    PyObject *enctext = NULL;
+    if (!PyArg_ParseTuple(args, "OO", &roomjid, &enctext)) {
+        Py_RETURN_NONE;
+    }
+
+    char *roomjid_str = python_str_or_unicode_to_string(roomjid);
+    char *enctext_str = python_str_or_unicode_to_string(enctext);
+
+    allow_python_threads();
+    int res = api_room_set_titlebar_enctext(roomjid_str, enctext_str);
+    free(roomjid_str);
+    free(enctext_str);
+    disable_python_threads();
+
+    if (res) {
+        return Py_BuildValue("O", Py_True);
+    } else {
+        return Py_BuildValue("O", Py_False);
+    }
+}
+
+static PyObject*
+python_api_room_unset_titlebar_enctext(PyObject *self, PyObject *args)
+{
+    PyObject *roomjid = NULL;
+    if (!PyArg_ParseTuple(args, "O", &roomjid)) {
+        Py_RETURN_NONE;
+    }
+
+    char *roomjid_str = python_str_or_unicode_to_string(roomjid);
+
+    allow_python_threads();
+    int res = api_room_unset_titlebar_enctext(roomjid_str);
+    free(roomjid_str);
+    disable_python_threads();
+
+    if (res) {
+        return Py_BuildValue("O", Py_True);
+    } else {
+        return Py_BuildValue("O", Py_False);
+    }
+}
+
+static PyObject*
+python_api_room_set_message_char(PyObject *self, PyObject *args)
+{
+    PyObject *roomjid = NULL;
+    PyObject *ch = NULL;
+    if (!PyArg_ParseTuple(args, "OO", &roomjid, &ch)) {
+        Py_RETURN_NONE;
+    }
+
+    char *roomjid_str = python_str_or_unicode_to_string(roomjid);
+    char *ch_str = python_str_or_unicode_to_string(ch);
+
+    allow_python_threads();
+    int res = api_room_set_message_char(roomjid_str, ch_str);
+    free(roomjid_str);
+    free(ch_str);
+    disable_python_threads();
+
+    if (res) {
+        return Py_BuildValue("O", Py_True);
+    } else {
+        return Py_BuildValue("O", Py_False);
+    }
+}
+
+static PyObject*
+python_api_room_unset_message_char(PyObject *self, PyObject *args)
+{
+    PyObject *roomjid = NULL;
+    if (!PyArg_ParseTuple(args, "O", &roomjid)) {
+        Py_RETURN_NONE;
+    }
+
+    char *roomjid_str = python_str_or_unicode_to_string(roomjid);
+
+    allow_python_threads();
+    int res = api_room_unset_message_char(roomjid_str);
+    free(roomjid_str);
+    disable_python_threads();
+
+    if (res) {
+        return Py_BuildValue("O", Py_True);
+    } else {
+        return Py_BuildValue("O", Py_False);
+    }
+}
+
 void
 python_command_callback(PluginCommand *command, gchar **args)
 {
@@ -1305,6 +1399,10 @@ static PyMethodDef apiMethods[] = {
     { "chat_unset_incoming_char", python_api_chat_unset_incoming_char, METH_VARARGS, "Reset the incoming message prefix character for specified contact" },
     { "chat_set_outgoing_char", python_api_chat_set_outgoing_char, METH_VARARGS, "Set the outgoing message prefix character for specified contact" },
     { "chat_unset_outgoing_char", python_api_chat_unset_outgoing_char, METH_VARARGS, "Reset the outgoing message prefix character for specified contact" },
+    { "room_set_titlebar_enctext", python_api_room_set_titlebar_enctext, METH_VARARGS, "Set the encryption status in the title bar for the specified room" },
+    { "room_unset_titlebar_enctext", python_api_room_unset_titlebar_enctext, METH_VARARGS, "Reset the encryption status in the title bar for the specified room" },
+    { "room_set_message_char", python_api_room_set_message_char, METH_VARARGS, "Set the message prefix character for specified room" },
+    { "room_unset_message_char", python_api_room_unset_message_char, METH_VARARGS, "Reset the message prefix character for specified room" },
     { NULL, NULL, 0, NULL }
 };
 
