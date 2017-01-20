@@ -523,3 +523,41 @@ api_encryption_reset(const char *const barejid)
     }
 #endif
 }
+
+int
+api_chat_set_titlebar_enctext(const char *const barejid, const char *const enctext)
+{
+    if (enctext == NULL) {
+        return 0;
+    }
+
+    if (barejid == NULL) {
+        return 0;
+    }
+
+    ProfChatWin *chatwin = wins_get_chat(barejid);
+    if (chatwin == NULL) {
+        return 0;
+    }
+
+    chatwin_set_enctext(chatwin, enctext);
+
+    return 1;
+}
+
+int
+api_chat_unset_titlebar_enctext(const char *const barejid)
+{
+    if (barejid == NULL) {
+        return 0;
+    }
+
+    ProfChatWin *chatwin = wins_get_chat(barejid);
+    if (chatwin == NULL) {
+        return 0;
+    }
+
+    chatwin_unset_enctext(chatwin);
+
+    return 1;
+}

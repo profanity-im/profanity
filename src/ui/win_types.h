@@ -157,6 +157,7 @@ typedef struct prof_chat_win_t {
     unsigned long memcheck;
     char *last_id;
     char *last_message;
+    char *enctext;
 } ProfChatWin;
 
 typedef struct prof_muc_win_t {
