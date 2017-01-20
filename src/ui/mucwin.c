@@ -478,18 +478,23 @@ mucwin_message(ProfMucWin *mucwin, const char *const nick, const char *const mes
     ProfWin *window = (ProfWin*)mucwin;
     char *mynick = muc_nick(mucwin->roomjid);
 
+    char ch = '-';
+    if (mucwin->message_char) {
+        ch = mucwin->message_char[0];
+    }
+
     if (g_strcmp0(nick, mynick) != 0) {
         if (g_slist_length(mentions) > 0) {
-            win_print_them(window, THEME_ROOMMENTION, nick);
+            win_print_them(window, THEME_ROOMMENTION, ch, nick);
             _mucwin_print_mention(window, message, mynick, mentions);
         } else if (triggers) {
-            win_print_them(window, THEME_ROOMTRIGGER, nick);
+            win_print_them(window, THEME_ROOMTRIGGER, ch, nick);
             _mucwin_print_triggers(window, message, triggers);
         } else {
-            win_println_them_message(window, nick, "%s", message);
+            win_println_them_message(window, ch, nick, "%s", message);
         }
     } else {
-        win_println_me_message(window, mynick, "%s", message);
+        win_println_me_message(window, ch, mynick, "%s", message);
     }
 }
 
@@ -859,4 +864,40 @@ mucwin_get_string(ProfMucWin *mucwin)
     g_string_free(res, FALSE);
 
     return resstr;
+}
+
+void
+mucwin_set_enctext(ProfMucWin *mucwin, const char *const enctext)
+{
+    if (mucwin->enctext) {
+        free(mucwin->enctext);
+    }
+    mucwin->enctext = strdup(enctext);
+}
+
+void
+mucwin_unset_enctext(ProfMucWin *mucwin)
+{
+    if (mucwin->enctext) {
+        free(mucwin->enctext);
+        mucwin->enctext = NULL;
+    }
+}
+
+void
+mucwin_set_message_char(ProfMucWin *mucwin, const char *const ch)
+{
+    if (mucwin->message_char) {
+        free(mucwin->message_char);
+    }
+    mucwin->message_char = strdup(ch);
+}
+
+void
+mucwin_unset_message_char(ProfMucWin *mucwin)
+{
+    if (mucwin->message_char) {
+        free(mucwin->message_char);
+        mucwin->message_char = NULL;
+    }
 }
