@@ -118,4 +118,12 @@ int (*prof_room_unset_titlebar_enctext)(const char *roomjid);
 int (*prof_room_set_message_char)(const char *roomjid, const char *ch);
 int (*prof_room_unset_message_char)(const char *roomjid);
 
+int (*prof_chat_show)(const char *const barejid, const char *const message);
+int (*prof_chat_show_themed)(const char *const barejid, const char *const group, const char *const item, const char *const def,
+    const char *const ch, const char *const message);
+
+int (*prof_room_show)(const char *const roomjid, const char *const message);
+int (*prof_room_show_themed)(const char *const roomjid, const char *const group, const char *const item, const char *const def,
+    const char *const ch, const char *const message);
+
 #endif

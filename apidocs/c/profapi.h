@@ -23,16 +23,16 @@ typedef void(*WINDOW_CB)(PROF_WIN_TAG win, char *line);
 /**	Highlights the console window in the status bar. */
 void prof_cons_alert(void);
 
-/**	
+/**
 Show a message in the console window.
 @param message the message to print
 @return 1 on success, 0 on failure
 */
 int prof_cons_show(const char * const message);
 
-/**	
+/**
 Show a message in the console, using the specified theme.
-Themes can be must be specified in ~/.local/share/profanity/plugin_themes
+Themes are specified in ~/.local/share/profanity/plugin_themes
 @param group the group name in the themes file
 @param item the item name within the group
 @param def default colour if the theme cannot be found
@@ -206,7 +206,7 @@ int prof_win_show(PROF_WIN_TAG win, char *message);
 
 /**	
 Show a message in the plugin window, using the specified theme.
-Themes must be specified in ~/.local/share/profanity/plugin_themes
+Themes are specified in ~/.local/share/profanity/plugin_themes
 @param tag The {@link PROF_WIN_TAG} of the window to display the message
 @param group the group name in the themes file
 @param key the item name within the group
@@ -414,3 +414,45 @@ Reset the message prefix character for specified room.
 @return 1 on success, 0 on failure
 */
 int prof_room_unset_message_char(char *roomjid);
+
+/**
+Show a message in a chat window.
+@param barejid Jabber ID of the recipient
+@param message the message to print
+@return 1 on success, 0 on failure
+*/
+int prof_chat_show(char *barejid, char *message);
+
+/**
+Show a message in a chat window, using the specified theme, and prefix character
+Themes are specified in ~/.local/share/profanity/plugin_themes
+@param barejid Jabber ID of the recipient
+@param group the group name in the themes file or NULL
+@param item the item name within the group or NULL
+@param def default colour if the theme cannot be found
+@param ch The character to prefix the message, or NULL for default behaviour
+@param message the message to print
+@return 1 on success, 0 on failure
+*/
+int prof_chat_show_themed(char *barejid, char *group, char *item, char *def, char *ch, char *message);
+
+/**
+Show a message in a chat room window.
+@param barejid Jabber ID of the room
+@param message the message to print
+@return 1 on success, 0 on failure
+*/
+int prof_room_show(char *roomjid, char *message);
+
+/**
+Show a message in a chat room window, using the specified theme, and prefix character
+Themes are specified in ~/.local/share/profanity/plugin_themes
+@param barejid Jabber ID of the room
+@param group the group name in the themes file or NULL
+@param item the item name within the group or NULL
+@param def default colour if the theme cannot be found
+@param ch The character to prefix the message, or NULL for default behaviour
+@param message the message to print
+@return 1 on success, 0 on failure
+*/
+int prof_room_show_themed(char *roomjid, char *group, char *item, char *def, char *ch, char *message);

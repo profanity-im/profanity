@@ -31,7 +31,7 @@ def cons_show(message):
 
 def cons_show_themed(group, key, default, message): 
     """Show a message in the console, using the specified theme.\n
-    Themes can be must be specified in ``~/.local/share/profanity/plugin_themes``
+    Themes are specified in ``~/.local/share/profanity/plugin_themes``
 
     :param group: the group name in the themes file
     :param key: the item name within the group
@@ -376,7 +376,7 @@ def win_show(tag, message):
 
 def win_show_themed(tag, group, key, default, message): 
     """Show a message in the plugin window, using the specified theme.\n
-    Themes must be specified in ``~/.local/share/profanity/plugin_themes``
+    Themes are specified in ``~/.local/share/profanity/plugin_themes``
 
     :param tag: The tag of the window to display the message
     :type tag: str or unicode
@@ -795,5 +795,91 @@ def room_unset_message_char(roomjid):
     Example:
     ::
         prof.room_unset_message_char("ohnoes@conference.chat.org")
+    """
+    pass
+
+
+def chat_show(barejid, message):
+    """Show a message in a chat window.
+
+    :param barejid: Jabber ID of the recipient
+    :param message: the message to print
+    :type barejid: str or unicode
+    :type message: str or unicode
+    :return: ``True`` if the message was printed, ``False`` otherwise
+    :rtype: boolean
+
+    Example:
+    ::
+        prof.chat_show("bob@server.org", "From a plugin in the chat window for bob")
+    """
+    pass
+
+
+def chat_show_themed(barejid, group, key, default, ch, message):
+    """Show a message a chat window, using the specified theme and prefix character.\n
+    Themes are specified in ``~/.local/share/profanity/plugin_themes``
+
+    :param barejid: Jabber ID of the recipient
+    :param group: the group name in the themes file or ``None``
+    :param key: the item name within the group or ``None``
+    :param default: default colour if the theme cannot be found or ``None``
+    :param ch: The prefix character to show, or ``None`` for default behaviour
+    :param message: the message to print
+    :type barejid: str or unicode
+    :type group: str, unicode or None
+    :type key: str, unicode or None
+    :type default: str, unicode or None
+    :type ch: str or unicode
+    :type message: str or unicode
+    :return: ``True`` if the message was printed, ``False`` otherwise
+    :rtype: boolean
+
+    Example:
+    ::
+        prof.chat_show_themed("bob@server.org", "myplugin", "text", None, "!", "Plugin themed message")
+    """
+    pass
+
+
+def room_show(roomjid, message):
+    """Show a message in a chat room window.
+
+    :param roomjid: Jabber ID of the room
+    :param message: the message to print
+    :type roomjid: str or unicode
+    :type message: str or unicode
+    :return: ``True`` if the message was printed, ``False`` otherwise
+    :rtype: boolean
+
+    Example:
+    ::
+        prof.room_show("chat@conference.chat.org", "From a plugin in the chat room window")
+    """
+    pass
+
+
+def room_show_themed(roomjid, group, key, default, ch, message):
+    """Show a message a chat room window, using the specified theme and prefix character.\n
+    Themes are specified in ``~/.local/share/profanity/plugin_themes``
+
+    :param roomjid: Jabber ID of the room
+    :param group: the group name in the themes file or ``None``
+    :param key: the item name within the group or ``None``
+    :param default: default colour if the theme cannot be found or ``None``
+    :param ch: The prefix character to show, or ``None`` for default behaviour
+    :param message: the message to print
+    :type roomjid: str or unicode
+    :type group: str, unicode or None
+    :type key: str, unicode or None
+    :type default: str, unicode or None
+    :type ch: str or unicode
+    :type message: str or unicode
+    :return: ``True`` if the message was printed, ``False`` otherwise
+    :rtype: boolean
+
+    Example:
+    ::
+        prof.room_show_themed("chat@conference.chat.org", "myplugin", "text", None, "!", "Plugin themed message")
     """
     pass
