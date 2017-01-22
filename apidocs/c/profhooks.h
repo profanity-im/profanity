@@ -61,7 +61,7 @@ void prof_post_chat_message_display(const char * const barejid, const char *cons
 Called before a chat message is sent
 @param barejid Jabber ID of the message recipient
 @param message the message to be sent
-@return the new message to send, or NULL to preserve the original message 
+@return the modified or original message to send, or NULL to cancel sending of the message
 */
 char* prof_pre_chat_message_send(const char * const barejid, const char *message);
 
@@ -93,7 +93,7 @@ void prof_post_room_message_display(const char * const barejid, const char * con
 Called before a chat room message is sent
 @param barejid Jabber ID of the room
 @param message the message to be sent
-@return the new message to send, or NULL to preserve the original message 
+@return the modified or original message to send, or NULL to cancel sending of the message
 */
 char* prof_pre_room_message_send(const char * const barejid, const char *message);
 
@@ -135,7 +135,7 @@ Called before a private chat room message is sent
 @param barejid Jabber ID of the room
 @param nick nickname of message recipient
 @param message the message to be sent
-@return the new message to send, or NULL to preserve the original message 
+@return the modified or original message to send, or NULL to cancel sending of the message
 */
 char* prof_pre_priv_message_send(const char * const barejid, const char * const nick, const char *message);
 
