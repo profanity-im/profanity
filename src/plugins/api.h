@@ -109,4 +109,12 @@ int api_room_unset_titlebar_enctext(const char *const roomjid);
 int api_room_set_message_char(const char *const roomjid, const char *const ch);
 int api_room_unset_message_char(const char *const roomjid);
 
+int api_chat_show(const char *const barejid, const char *const message);
+int api_chat_show_themed(const char *const barejid, const char *const group, const char *const key, const char *const def,
+    const char *const ch, const char *const message);
+
+int api_room_show(const char *const roomjid, const char *message);
+int api_room_show_themed(const char *const roomjid, const char *const group, const char *const key, const char *const def,
+    const char *const ch, const char *const message);
+
 #endif

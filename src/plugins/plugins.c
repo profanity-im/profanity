@@ -413,11 +413,18 @@ plugins_pre_chat_message_send(const char * const barejid, const char *message)
     GList *curr = values;
     while (curr) {
         ProfPlugin *plugin = curr->data;
-        new_message = plugin->pre_chat_message_send(plugin, barejid, curr_message);
-        if (new_message) {
-            free(curr_message);
-            curr_message = strdup(new_message);
-            free(new_message);
+        if (plugin->contains_hook(plugin, "prof_pre_chat_message_send")) {
+            new_message = plugin->pre_chat_message_send(plugin, barejid, curr_message);
+            if (new_message) {
+                free(curr_message);
+                curr_message = strdup(new_message);
+                free(new_message);
+            } else {
+                free(curr_message);
+                g_list_free(values);
+
+                return NULL;
+            }
         }
         curr = g_list_next(curr);
     }
@@ -485,11 +492,18 @@ plugins_pre_room_message_send(const char * const barejid, const char *message)
     GList *curr = values;
     while (curr) {
         ProfPlugin *plugin = curr->data;
-        new_message = plugin->pre_room_message_send(plugin, barejid, curr_message);
-        if (new_message) {
-            free(curr_message);
-            curr_message = strdup(new_message);
-            free(new_message);
+        if (plugin->contains_hook(plugin, "prof_pre_room_message_send")) {
+            new_message = plugin->pre_room_message_send(plugin, barejid, curr_message);
+            if (new_message) {
+                free(curr_message);
+                curr_message = strdup(new_message);
+                free(new_message);
+            } else {
+                free(curr_message);
+                g_list_free(values);
+
+                return NULL;
+            }
         }
         curr = g_list_next(curr);
     }
@@ -587,11 +601,19 @@ plugins_pre_priv_message_send(const char * const fulljid, const char * const mes
     GList *curr = values;
     while (curr) {
         ProfPlugin *plugin = curr->data;
-        new_message = plugin->pre_priv_message_send(plugin, jidp->barejid, jidp->resourcepart, curr_message);
-        if (new_message) {
-            free(curr_message);
-            curr_message = strdup(new_message);
-            free(new_message);
+        if (plugin->contains_hook(plugin, "prof_pre_priv_message_send")) {
+            new_message = plugin->pre_priv_message_send(plugin, jidp->barejid, jidp->resourcepart, curr_message);
+            if (new_message) {
+                free(curr_message);
+                curr_message = strdup(new_message);
+                free(new_message);
+            } else {
+                free(curr_message);
+                g_list_free(values);
+                jid_destroy(jidp);
+
+                return NULL;
+            }
         }
         curr = g_list_next(curr);
     }
