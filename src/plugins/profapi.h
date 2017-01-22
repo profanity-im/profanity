@@ -109,5 +109,21 @@ void (*prof_encryption_reset)(const char *barejid);
 
 int (*prof_chat_set_titlebar_enctext)(const char *barejid, const char *enctext);
 int (*prof_chat_unset_titlebar_enctext)(const char *barejid);
+int (*prof_chat_set_incoming_char)(const char *barejid, const char *ch);
+int (*prof_chat_unset_incoming_char)(const char *barejid);
+int (*prof_chat_set_outgoing_char)(const char *barejid, const char *ch);
+int (*prof_chat_unset_outgoing_char)(const char *barejid);
+int (*prof_room_set_titlebar_enctext)(const char *roomjid, const char *enctext);
+int (*prof_room_unset_titlebar_enctext)(const char *roomjid);
+int (*prof_room_set_message_char)(const char *roomjid, const char *ch);
+int (*prof_room_unset_message_char)(const char *roomjid);
+
+int (*prof_chat_show)(const char *const barejid, const char *const message);
+int (*prof_chat_show_themed)(const char *const barejid, const char *const group, const char *const item, const char *const def,
+    const char *const ch, const char *const message);
+
+int (*prof_room_show)(const char *const roomjid, const char *const message);
+int (*prof_room_show_themed)(const char *const roomjid, const char *const group, const char *const item, const char *const def,
+    const char *const ch, const char *const message);
 
 #endif

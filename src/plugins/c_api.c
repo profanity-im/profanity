@@ -359,6 +359,80 @@ c_api_chat_unset_titlebar_enctext(const char *barejid)
     return api_chat_unset_titlebar_enctext(barejid);
 }
 
+static int
+c_api_chat_set_incoming_char(const char *barejid, const char *ch)
+{
+    return api_chat_set_incoming_char(barejid, ch);
+}
+
+static int
+c_api_chat_unset_incoming_char(const char *barejid)
+{
+    return api_chat_unset_incoming_char(barejid);
+}
+
+static int
+c_api_chat_set_outgoing_char(const char *barejid, const char *ch)
+{
+    return api_chat_set_outgoing_char(barejid, ch);
+}
+
+static int
+c_api_chat_unset_outgoing_char(const char *barejid)
+{
+    return api_chat_unset_outgoing_char(barejid);
+}
+
+static int
+c_api_room_set_titlebar_enctext(const char *roomjid, const char *enctext)
+{
+    return api_room_set_titlebar_enctext(roomjid, enctext);
+}
+
+static int
+c_api_room_unset_titlebar_enctext(const char *roomjid)
+{
+    return api_room_unset_titlebar_enctext(roomjid);
+}
+
+static int
+c_api_room_set_message_char(const char *roomjid, const char *ch)
+{
+    return api_room_set_message_char(roomjid, ch);
+}
+
+static int
+c_api_room_unset_message_char(const char *roomjid)
+{
+    return api_room_unset_message_char(roomjid);
+}
+
+static int
+c_api_chat_show(const char *const barejid, const char *const message)
+{
+    return api_chat_show(barejid, message);
+}
+
+static int
+c_api_chat_show_themed(const char *const barejid, const char *const group, const char *const item, const char *const def,
+    const char *const ch, const char *const message)
+{
+    return api_chat_show_themed(barejid, group, item, def, ch, message);
+}
+
+static int
+c_api_room_show(const char *const roomjid, const char *const message)
+{
+    return api_room_show(roomjid, message);
+}
+
+static int
+c_api_room_show_themed(const char *const roomjid, const char *const group, const char *const item, const char *const def,
+    const char *const ch, const char *const message)
+{
+    return api_room_show_themed(roomjid, group, item, def, ch, message);
+}
+
 void
 c_command_callback(PluginCommand *command, gchar **args)
 {
@@ -429,6 +503,18 @@ c_api_init(void)
     prof_encryption_reset = c_api_encryption_reset;
     prof_chat_set_titlebar_enctext = c_api_chat_set_titlebar_enctext;
     prof_chat_unset_titlebar_enctext = c_api_chat_unset_titlebar_enctext;
+    prof_chat_set_incoming_char = c_api_chat_set_incoming_char;
+    prof_chat_unset_incoming_char = c_api_chat_unset_incoming_char;
+    prof_chat_set_outgoing_char = c_api_chat_set_outgoing_char;
+    prof_chat_unset_outgoing_char = c_api_chat_unset_outgoing_char;
+    prof_room_set_titlebar_enctext = c_api_room_set_titlebar_enctext;
+    prof_room_unset_titlebar_enctext = c_api_room_unset_titlebar_enctext;
+    prof_room_set_message_char = c_api_room_set_message_char;
+    prof_room_unset_message_char = c_api_room_unset_message_char;
+    prof_chat_show = c_api_chat_show;
+    prof_chat_show_themed = c_api_chat_show_themed;
+    prof_room_show = c_api_room_show;
+    prof_room_show_themed = c_api_room_show_themed;
 }
 
 static char *

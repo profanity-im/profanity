@@ -31,7 +31,7 @@ def cons_show(message):
 
 def cons_show_themed(group, key, default, message): 
     """Show a message in the console, using the specified theme.\n
-    Themes can be must be specified in ``~/.local/share/profanity/plugin_themes``
+    Themes are specified in ``~/.local/share/profanity/plugin_themes``
 
     :param group: the group name in the themes file
     :param key: the item name within the group
@@ -268,6 +268,7 @@ def get_room_nick(barejid):
     :return: Room nickname.
     :rtype: str
     """
+    pass
 
 
 def current_win_is_console():
@@ -375,7 +376,7 @@ def win_show(tag, message):
 
 def win_show_themed(tag, group, key, default, message): 
     """Show a message in the plugin window, using the specified theme.\n
-    Themes must be specified in ``~/.local/share/profanity/plugin_themes``
+    Themes are specified in ``~/.local/share/profanity/plugin_themes``
 
     :param tag: The tag of the window to display the message
     :type tag: str or unicode
@@ -498,6 +499,7 @@ def settings_string_list_get(group, key):
     ::
         prof.settings_get_string_list("someplugin", "somelist")
     """
+    pass
 
 
 def settings_string_list_add(group, key, value):
@@ -516,6 +518,7 @@ def settings_string_list_add(group, key, value):
     ::
         prof.settings_string_list_add("someplugin", "somelist", "anelement")
     """
+    pass
 
 
 def settings_string_list_remove(group, key, value):
@@ -535,6 +538,7 @@ def settings_string_list_remove(group, key, value):
     ::
         prof.settings_string_list_remove("someplugin", "somelist", "anelement")
     """
+    pass
 
 
 def settings_string_list_clear(group, key):
@@ -552,6 +556,7 @@ def settings_string_list_clear(group, key):
     ::
         prof.settings_string_list_remove_all("someplugin", "somelist")
     """
+    pass
 
 
 def settings_int_get(group, key, default):
@@ -604,6 +609,7 @@ def incoming_message(barejid, resource, message):
     ::
         prof.incoming_message("bob@server.org", "laptop", "Hello there")
     """
+    pass
 
 
 def disco_add_feature(feature):
@@ -630,10 +636,11 @@ def encryption_reset(barejid):
     ::
         prof.encryption_reset("alice@server.org")
     """
+    pass
 
 
 def chat_set_titlebar_enctext(barejid, enctext):
-    """Set the text to display in the titlebar encryption indicator.
+    """Set the text to display in the titlebar encryption indicator for recipient.
 
     :param barejid: Jabber ID of the recipient
     :param enctext: The text to display
@@ -642,15 +649,15 @@ def chat_set_titlebar_enctext(barejid, enctext):
     :return: ``True`` if the text was set successfully, ``False`` otherwise
     :rtype: boolean
 
-    
     Example:
     ::
         prof.chat_set_titlebar_enctext("bob@chat.org", "safe")
     """
+    pass
 
 
 def chat_unset_titlebar_enctext(barejid):
-    """Let profanity decide what to show in the titlebar encryption indicator.
+    """Let profanity decide what to show in the titlebar encryption indicator for recipient.
 
     :param barejid: Jabber ID of the recipient
     :type barejid: str or unicode
@@ -661,4 +668,218 @@ def chat_unset_titlebar_enctext(barejid):
     ::
         prof.chat_unset_titlebar_enctext("bob@chat.org")
     """
+    pass
 
+
+def chat_set_incoming_char(barejid, ch):
+    """Set the incoming message prefix character for specified contact.
+
+    :param barejid: Jabber ID of the recipient
+    :param enctext: The character to display
+    :type barejid: str or unicode
+    :type enctext: str or unicode
+    :return: ``True`` if the character was set successfully, ``False`` otherwise
+    :rtype: boolean
+
+    Example:
+    ::
+        prof.chat_set_incoming_char("kristine@chat.org", "*")
+    """
+    pass
+
+
+def chat_unset_incoming_char(barejid):
+    """Reset the incoming message prefix character for specified contact.
+
+    :param barejid: Jabber ID of the recipient
+    :type barejid: str or unicode
+    :return: ``True`` if the char was unset successfully, ``False`` otherwise
+    :rtype: boolean
+
+    Example:
+    ::
+        prof.chat_unset_incoming_char("kristine@chat.org")
+    """
+    pass
+
+
+def chat_set_outgoing_char(barejid, ch):
+    """Set the outgoing message prefix character for specified contact.
+
+    :param barejid: Jabber ID of the recipient
+    :param enctext: The character to display
+    :type barejid: str or unicode
+    :type enctext: str or unicode
+    :return: ``True`` if the character was set successfully, ``False`` otherwise
+    :rtype: boolean
+
+    Example:
+    ::
+        prof.chat_set_outgoing_char("david@chat.org", "+")
+    """
+    pass
+
+
+def chat_unset_outgoing_char(barejid):
+    """Reset the outgoing message prefix character for specified contact.
+
+    :param barejid: Jabber ID of the recipient
+    :type barejid: str or unicode
+    :return: ``True`` if the char was unset successfully, ``False`` otherwise
+    :rtype: boolean
+
+    Example:
+    ::
+        prof.chat_unset_outgoing_char("david@chat.org")
+    """
+    pass
+
+
+def room_set_titlebar_enctext(roomjid, enctext):
+    """Set the text to display in the titlebar encryption indicator for room.
+
+    :param roomjid: Jabber ID of the room
+    :param enctext: The text to display
+    :type roomjid: str or unicode
+    :type enctext: str or unicode
+    :return: ``True`` if the text was set successfully, ``False`` otherwise
+    :rtype: boolean
+
+    Example:
+    ::
+        prof.room_set_titlebar_enctext("generalchat@conference.service.com", "secret")
+    """
+    pass
+
+
+def room_unset_titlebar_enctext(roomjid):
+    """Let profanity decide what to show in the titlebar encryption indicator for room.
+
+    :param roomjid: Jabber ID of the room
+    :type roomjid: str or unicode
+    :return: ``True`` if the text was unset successfully, ``False`` otherwise
+    :rtype: boolean
+
+    Example:
+    ::
+        prof.room_unset_titlebar_enctext("generalchat@conference.service.com")
+    """
+    pass
+
+
+def room_set_message_char(roomjid, ch):
+    """Set the message prefix character for specified room.
+
+    :param roomjid: Jabber ID of the room
+    :param enctext: The character to display
+    :type roomjid: str or unicode
+    :type enctext: str or unicode
+    :return: ``True`` if the character was set successfully, ``False`` otherwise
+    :rtype: boolean
+
+    Example:
+    ::
+        prof.room_set_message_char("ohnoes@conference.chat.org", "^")
+    """
+    pass
+
+
+def room_unset_message_char(roomjid):
+    """Reset the message prefix character for specified room.
+
+    :param roomjid: Jabber ID of the room
+    :type roomjid: str or unicode
+    :return: ``True`` if the char was unset successfully, ``False`` otherwise
+    :rtype: boolean
+
+    Example:
+    ::
+        prof.room_unset_message_char("ohnoes@conference.chat.org")
+    """
+    pass
+
+
+def chat_show(barejid, message):
+    """Show a message in a chat window.
+
+    :param barejid: Jabber ID of the recipient
+    :param message: the message to print
+    :type barejid: str or unicode
+    :type message: str or unicode
+    :return: ``True`` if the message was printed, ``False`` otherwise
+    :rtype: boolean
+
+    Example:
+    ::
+        prof.chat_show("bob@server.org", "From a plugin in the chat window for bob")
+    """
+    pass
+
+
+def chat_show_themed(barejid, group, key, default, ch, message):
+    """Show a message a chat window, using the specified theme and prefix character.\n
+    Themes are specified in ``~/.local/share/profanity/plugin_themes``
+
+    :param barejid: Jabber ID of the recipient
+    :param group: the group name in the themes file or ``None``
+    :param key: the item name within the group or ``None``
+    :param default: default colour if the theme cannot be found or ``None``
+    :param ch: The prefix character to show, or ``None`` for default behaviour
+    :param message: the message to print
+    :type barejid: str or unicode
+    :type group: str, unicode or None
+    :type key: str, unicode or None
+    :type default: str, unicode or None
+    :type ch: str or unicode
+    :type message: str or unicode
+    :return: ``True`` if the message was printed, ``False`` otherwise
+    :rtype: boolean
+
+    Example:
+    ::
+        prof.chat_show_themed("bob@server.org", "myplugin", "text", None, "!", "Plugin themed message")
+    """
+    pass
+
+
+def room_show(roomjid, message):
+    """Show a message in a chat room window.
+
+    :param roomjid: Jabber ID of the room
+    :param message: the message to print
+    :type roomjid: str or unicode
+    :type message: str or unicode
+    :return: ``True`` if the message was printed, ``False`` otherwise
+    :rtype: boolean
+
+    Example:
+    ::
+        prof.room_show("chat@conference.chat.org", "From a plugin in the chat room window")
+    """
+    pass
+
+
+def room_show_themed(roomjid, group, key, default, ch, message):
+    """Show a message a chat room window, using the specified theme and prefix character.\n
+    Themes are specified in ``~/.local/share/profanity/plugin_themes``
+
+    :param roomjid: Jabber ID of the room
+    :param group: the group name in the themes file or ``None``
+    :param key: the item name within the group or ``None``
+    :param default: default colour if the theme cannot be found or ``None``
+    :param ch: The prefix character to show, or ``None`` for default behaviour
+    :param message: the message to print
+    :type roomjid: str or unicode
+    :type group: str, unicode or None
+    :type key: str, unicode or None
+    :type default: str, unicode or None
+    :type ch: str or unicode
+    :type message: str or unicode
+    :return: ``True`` if the message was printed, ``False`` otherwise
+    :rtype: boolean
+
+    Example:
+    ::
+        prof.room_show_themed("chat@conference.chat.org", "myplugin", "text", None, "!", "Plugin themed message")
+    """
+    pass

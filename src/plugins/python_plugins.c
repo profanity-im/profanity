@@ -125,6 +125,7 @@ python_plugin_create(const char *const filename)
         plugin->lang = LANG_PYTHON;
         plugin->module = p_module;
         plugin->init_func = python_init_hook;
+        plugin->contains_hook = python_contains_hook;
         plugin->on_start_func = python_on_start_hook;
         plugin->on_shutdown_func = python_on_shutdown_hook;
         plugin->on_unload_func = python_on_unload_hook;
@@ -182,6 +183,22 @@ python_init_hook(ProfPlugin *plugin, const char *const version, const char *cons
     }
     Py_XDECREF(p_args);
     allow_python_threads();
+}
+
+gboolean
+python_contains_hook(ProfPlugin *plugin, const char *const hook)
+{
+    disable_python_threads();
+    gboolean res = FALSE;
+
+    PyObject *p_module = plugin->module;
+    if (PyObject_HasAttrString(p_module, hook)) {
+        res = TRUE;
+    }
+
+    allow_python_threads();
+
+    return res;
 }
 
 void

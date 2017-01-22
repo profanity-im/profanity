@@ -150,6 +150,8 @@ win_create_chat(const char *const barejid)
     new_win->last_message = NULL;
     new_win->last_id = NULL;
     new_win->enctext = NULL;
+    new_win->incoming_char = NULL;
+    new_win->outgoing_char = NULL;
 
     new_win->memcheck = PROFCHATWIN_MEMCHECK;
 
@@ -197,6 +199,8 @@ win_create_muc(const char *const roomjid)
     }
     new_win->last_id = NULL;
     new_win->last_message = NULL;
+    new_win->enctext = NULL;
+    new_win->message_char = NULL;
 
     new_win->memcheck = PROFMUCWIN_MEMCHECK;
 
@@ -438,6 +442,8 @@ win_free(ProfWin* window)
         free(chatwin->barejid);
         free(chatwin->resource_override);
         free(chatwin->enctext);
+        free(chatwin->incoming_char);
+        free(chatwin->outgoing_char);
         chat_state_free(chatwin->state);
         break;
     }
@@ -445,6 +451,8 @@ win_free(ProfWin* window)
     {
         ProfMucWin *mucwin = (ProfMucWin*)window;
         free(mucwin->roomjid);
+        free(mucwin->enctext);
+        free(mucwin->message_char);
         break;
     }
     case WIN_MUC_CONFIG:
@@ -1106,31 +1114,31 @@ win_appendln_highlight(ProfWin *window, theme_item_t theme_item, const char *con
 }
 
 void
-win_print_muc_occupant(ProfWin *window, theme_item_t theme_item, const char *const them)
+win_print_muc_occupant(ProfWin *window, theme_item_t theme_item, char ch, const char *const them)
 {
     ProfBuffDate *date = buffer_date_new_now();
     ProfBuffFrom *from = them ? buffer_from_new(FROM_THEM, them) : NULL;
-    ProfBuffEntry *entry = buffer_entry_create(theme_item, date, '-', from, "",  0, FALSE, NULL);
+    ProfBuffEntry *entry = buffer_entry_create(theme_item, date, ch, from, "",  0, FALSE, NULL);
 
     buffer_append(window, entry);
 }
 
 void
-win_print_muc_occupant_message(ProfWin *window, const char *const them, const char *const message)
+win_print_muc_occupant_message(ProfWin *window, char ch, const char *const them, const char *const message)
 {
     ProfBuffDate *date = buffer_date_new_now();
     ProfBuffFrom *from = them ? buffer_from_new(FROM_THEM, them) : NULL;
-    ProfBuffEntry *entry = buffer_entry_create(THEME_TEXT_THEM, date, '-', from, message, 0, TRUE, NULL);
+    ProfBuffEntry *entry = buffer_entry_create(THEME_TEXT_THEM, date, ch, from, message, 0, TRUE, NULL);
 
     buffer_append(window, entry);
 }
 
 void
-win_print_muc_self_message(ProfWin *window, const char *const me, const char *const message)
+win_print_muc_self_message(ProfWin *window, char ch, const char *const me, const char *const message)
 {
     ProfBuffDate *date = buffer_date_new_now();
     ProfBuffFrom *from = me ? buffer_from_new(FROM_ME, me) : NULL;
-    ProfBuffEntry *entry = buffer_entry_create(THEME_TEXT_ME, date, '-', from, message, 0, TRUE, NULL);
+    ProfBuffEntry *entry = buffer_entry_create(THEME_TEXT_ME, date, ch, from, message, 0, TRUE, NULL);
 
     buffer_append(window, entry);
 }
@@ -1145,7 +1153,10 @@ win_print_incoming(ProfWin *window, GDateTime *timestamp, const char *const them
 
     char ch = '-';
     if (window->type == WIN_CHAT) {
-        if (enc_mode == PROF_MSG_OTR) {
+        ProfChatWin *chatwin = (ProfChatWin*)window;
+        if (chatwin->incoming_char) {
+            ch = chatwin->incoming_char[0];
+        } else if (enc_mode == PROF_MSG_OTR) {
             ch = prefs_get_otr_char();
         } else if (enc_mode == PROF_MSG_PGP) {
             ch = prefs_get_pgp_char();

@@ -69,6 +69,10 @@ void chatwin_otr_smp_event(ProfChatWin *chatwin, prof_otr_smp_event_t event, voi
 
 void chatwin_set_enctext(ProfChatWin *chatwin, const char *const enctext) {}
 void chatwin_unset_enctext(ProfChatWin *chatwin) {}
+void chatwin_set_incoming_char(ProfChatWin *chatwin, const char *const ch) {}
+void chatwin_unset_incoming_char(ProfChatWin *chatwin) {}
+void chatwin_set_outgoing_char(ProfChatWin *chatwin, const char *const ch) {}
+void chatwin_unset_outgoing_char(ProfChatWin *chatwin) {}
 
 void ui_sigwinch_handler(int sig) {}
 
@@ -217,6 +221,11 @@ void mucwin_occupant_presence(ProfMucWin *mucwin, const char * const nick, const
 void mucwin_update_occupants(ProfMucWin *mucwin) {}
 void mucwin_show_occupants(ProfMucWin *mucwin) {}
 void mucwin_hide_occupants(ProfMucWin *mucwin) {}
+void mucwin_set_enctext(ProfMucWin *mucwin, const char *const enctext) {}
+void mucwin_unset_enctext(ProfMucWin *mucwin) {}
+void mucwin_set_message_char(ProfMucWin *mucwin, const char *const ch) {}
+void mucwin_unset_message_char(ProfMucWin *mucwin) {}
+
 void ui_show_roster(void) {}
 void ui_hide_roster(void) {}
 void ui_roster_add(const char * const barejid, const char * const name) {}

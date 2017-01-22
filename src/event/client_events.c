@@ -141,6 +141,9 @@ cl_ev_send_msg(ProfChatWin *chatwin, const char *const msg, gboolean upload, gbo
     }
 
     char *plugin_msg = plugins_pre_chat_message_send(chatwin->barejid, msg);
+    if (plugin_msg == NULL) {
+        return;
+    }
 
 // OTR suported, PGP supported
 #ifdef HAVE_LIBOTR
@@ -223,6 +226,9 @@ void
 cl_ev_send_muc_msg(ProfMucWin *mucwin, const char *const msg, gboolean upload)
 {
     char *plugin_msg = plugins_pre_room_message_send(mucwin->roomjid, msg);
+    if (plugin_msg == NULL) {
+        return;
+    }
 
     message_send_groupchat(mucwin->roomjid, plugin_msg, upload);
 

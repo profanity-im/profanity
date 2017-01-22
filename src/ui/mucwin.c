@@ -479,15 +479,20 @@ mucwin_message(ProfMucWin *mucwin, const char *const nick, const char *const id,
     ProfWin *window = (ProfWin*)mucwin;
     char *mynick = muc_nick(mucwin->roomjid);
 
+    char ch = '-';
+    if (mucwin->message_char) {
+        ch = mucwin->message_char[0];
+    }
+
     if (g_strcmp0(nick, mynick) != 0) {
         if (g_slist_length(mentions) > 0) {
-            win_print_muc_occupant(window, THEME_ROOMMENTION, nick);
+            win_print_muc_occupant(window, THEME_ROOMMENTION, ch, nick);
             _mucwin_print_mention(window, message, mynick, mentions);
         } else if (triggers) {
-            win_print_muc_occupant(window, THEME_ROOMTRIGGER, nick);
+            win_print_muc_occupant(window, THEME_ROOMTRIGGER, ch, nick);
             _mucwin_print_triggers(window, message, triggers);
         } else {
-            win_print_muc_occupant_message(window, nick, message);
+            win_print_muc_occupant_message(window, ch, nick, message);
         }
     } else {
         if (mucwin->last_message) {
@@ -498,7 +503,7 @@ mucwin_message(ProfMucWin *mucwin, const char *const nick, const char *const id,
             free(mucwin->last_id);
         }
         mucwin->last_id = strdup(id);
-        win_print_muc_self_message(window, mynick, message);
+        win_print_muc_self_message(window, ch, mynick, message);
     }
 }
 
@@ -868,4 +873,40 @@ mucwin_get_string(ProfMucWin *mucwin)
     g_string_free(res, FALSE);
 
     return resstr;
+}
+
+void
+mucwin_set_enctext(ProfMucWin *mucwin, const char *const enctext)
+{
+    if (mucwin->enctext) {
+        free(mucwin->enctext);
+    }
+    mucwin->enctext = strdup(enctext);
+}
+
+void
+mucwin_unset_enctext(ProfMucWin *mucwin)
+{
+    if (mucwin->enctext) {
+        free(mucwin->enctext);
+        mucwin->enctext = NULL;
+    }
+}
+
+void
+mucwin_set_message_char(ProfMucWin *mucwin, const char *const ch)
+{
+    if (mucwin->message_char) {
+        free(mucwin->message_char);
+    }
+    mucwin->message_char = strdup(ch);
+}
+
+void
+mucwin_unset_message_char(ProfMucWin *mucwin)
+{
+    if (mucwin->message_char) {
+        free(mucwin->message_char);
+        mucwin->message_char = NULL;
+    }
 }
