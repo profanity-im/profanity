@@ -483,6 +483,7 @@ void
 api_disco_add_feature(char *plugin_name, char *feature)
 {
     if (feature == NULL) {
+        log_warning("%s", "api_disco_add_feature failed, feature is NULL");
         return;
     }
 
@@ -501,11 +502,13 @@ void
 api_encryption_reset(const char *const barejid)
 {
     if (barejid == NULL) {
+        log_warning("%s", "api_encryption_reset failed, barejid is NULL");
         return;
     }
 
     ProfChatWin *chatwin = wins_get_chat(barejid);
     if (chatwin == NULL) {
+        log_warning("%s", "api_encryption_reset failed, could not find chat window for %s", barejid);
         return;
     }
 
@@ -528,15 +531,18 @@ int
 api_chat_set_titlebar_enctext(const char *const barejid, const char *const enctext)
 {
     if (enctext == NULL) {
+        log_warning("%s", "api_chat_set_titlebar_enctext failed, enctext is NULL");
         return 0;
     }
 
     if (barejid == NULL) {
+        log_warning("%s", "api_chat_set_titlebar_enctext failed, barejid is NULL");
         return 0;
     }
 
     ProfChatWin *chatwin = wins_get_chat(barejid);
     if (chatwin == NULL) {
+        log_warning("%s", "api_chat_set_titlebar_enctext failed, could not find chat window for %s", barejid);
         return 0;
     }
 
@@ -549,11 +555,13 @@ int
 api_chat_unset_titlebar_enctext(const char *const barejid)
 {
     if (barejid == NULL) {
+        log_warning("%s", "api_chat_unset_titlebar_enctext failed, barejid is NULL");
         return 0;
     }
 
     ProfChatWin *chatwin = wins_get_chat(barejid);
     if (chatwin == NULL) {
+        log_warning("%s", "api_chat_unset_titlebar_enctext failed, could not find chat window for %s", barejid);
         return 0;
     }
 
@@ -566,19 +574,23 @@ int
 api_chat_set_incoming_char(const char *const barejid, const char *const ch)
 {
     if (ch == NULL) {
+        log_warning("%s", "api_chat_set_incoming_char failed, ch is NULL");
         return 0;
     }
 
     if (strlen(ch) != 1) {
+        log_warning("%s", "api_chat_set_incoming_char failed, ch must be a string of length 1");
         return 0;
     }
 
     if (barejid == NULL) {
+        log_warning("%s", "api_chat_set_incoming_char failed, barejid is NULL");
         return 0;
     }
 
     ProfChatWin *chatwin = wins_get_chat(barejid);
     if (chatwin == NULL) {
+        log_warning("%s", "api_chat_set_incoming_char failed, could not find chat window for %s", barejid);
         return 0;
     }
 
@@ -591,11 +603,13 @@ int
 api_chat_unset_incoming_char(const char *const barejid)
 {
     if (barejid == NULL) {
+        log_warning("%s", "api_chat_unset_incoming_char failed, barejid is NULL");
         return 0;
     }
 
     ProfChatWin *chatwin = wins_get_chat(barejid);
     if (chatwin == NULL) {
+        log_warning("%s", "api_chat_unset_incoming_char failed, could not find chat window for %s", barejid);
         return 0;
     }
 
@@ -608,19 +622,23 @@ int
 api_chat_set_outgoing_char(const char *const barejid, const char *const ch)
 {
     if (ch == NULL) {
+        log_warning("%s", "api_chat_set_outgoing_char failed, ch is NULL");
         return 0;
     }
 
     if (strlen(ch) != 1) {
+        log_warning("%s", "api_chat_set_outgoing_char failed, ch must be a string of length 1");
         return 0;
     }
 
     if (barejid == NULL) {
+        log_warning("%s", "api_chat_set_outgoing_char failed, barejid is NULL");
         return 0;
     }
 
     ProfChatWin *chatwin = wins_get_chat(barejid);
     if (chatwin == NULL) {
+        log_warning("%s", "api_chat_set_outgoing_char failed, could not find chat window for %s", barejid);
         return 0;
     }
 
@@ -633,11 +651,13 @@ int
 api_chat_unset_outgoing_char(const char *const barejid)
 {
     if (barejid == NULL) {
+        log_warning("%s", "api_chat_unset_outgoing_char failed, barejid is NULL");
         return 0;
     }
 
     ProfChatWin *chatwin = wins_get_chat(barejid);
     if (chatwin == NULL) {
+        log_warning("%s", "api_chat_unset_outgoing_char failed, could not find chat window for %s", barejid);
         return 0;
     }
 
@@ -650,15 +670,18 @@ int
 api_room_set_titlebar_enctext(const char *const roomjid, const char *const enctext)
 {
     if (enctext == NULL) {
+        log_warning("%s", "api_room_set_titlebar_enctext failed, enctext is NULL");
         return 0;
     }
 
     if (roomjid == NULL) {
+        log_warning("%s", "api_room_set_titlebar_enctext failed, roomjid is NULL");
         return 0;
     }
 
     ProfMucWin *mucwin = wins_get_muc(roomjid);
     if (mucwin == NULL) {
+        log_warning("%s", "api_room_set_titlebar_enctext failed, coudl not find room window for %s", roomjid);
         return 0;
     }
 
@@ -671,11 +694,13 @@ int
 api_room_unset_titlebar_enctext(const char *const roomjid)
 {
     if (roomjid == NULL) {
+        log_warning("%s", "api_room_unset_titlebar_enctext failed, roomjid is NULL");
         return 0;
     }
 
     ProfMucWin *mucwin = wins_get_muc(roomjid);
     if (mucwin == NULL) {
+        log_warning("%s", "api_room_unset_titlebar_enctext failed, coudl not find room window for %s", roomjid);
         return 0;
     }
 
@@ -688,19 +713,23 @@ int
 api_room_set_message_char(const char *const roomjid, const char *const ch)
 {
     if (ch == NULL) {
+        log_warning("%s", "api_room_set_message_char failed, ch is NULL");
         return 0;
     }
 
     if (strlen(ch) != 1) {
+        log_warning("%s", "api_room_set_message_char failed, ch must be a string of length 1");
         return 0;
     }
 
     if (roomjid == NULL) {
+        log_warning("%s", "api_room_set_message_char failed, roomjid is NULL");
         return 0;
     }
 
     ProfMucWin *mucwin = wins_get_muc(roomjid);
     if (mucwin == NULL) {
+        log_warning("%s", "api_room_set_message_char failed, could not find room window for %s", roomjid);
         return 0;
     }
 
@@ -713,15 +742,147 @@ int
 api_room_unset_message_char(const char *const roomjid)
 {
     if (roomjid == NULL) {
+        log_warning("%s", "api_room_unset_message_char failed, roomjid is NULL");
         return 0;
     }
 
     ProfMucWin *mucwin = wins_get_muc(roomjid);
     if (mucwin == NULL) {
+        log_warning("%s", "api_room_unset_message_char failed, could not find room window for %s", roomjid);
         return 0;
     }
 
     mucwin_unset_message_char(mucwin);
+
+    return 1;
+}
+
+int
+api_chat_show(const char *const barejid, const char *message)
+{
+    if (message == NULL) {
+        log_warning("%s", "api_chat_show failed, message is NULL");
+        return 0;
+    }
+
+    if (barejid == NULL) {
+        log_warning("%s", "api_chat_show failed, barejid is NULL");
+        return 0;
+    }
+
+    ProfChatWin *chatwin = wins_get_chat(barejid);
+    if (chatwin == NULL) {
+        log_warning("%s", "api_chat_show failed, could not find chat window for %s", barejid);
+        return 0;
+    }
+
+    char *parsed = str_replace(message, "\r\n", "\n");
+    win_println((ProfWin*)chatwin, THEME_TEXT, '-', "%s", parsed);
+    free(parsed);
+
+    return 1;
+}
+
+int
+api_chat_show_themed(const char *const barejid, const char *const group, const char *const key, const char *const def,
+    const char *const ch, const char *const message)
+{
+    if (message == NULL) {
+        log_warning("%s", "api_chat_show_themed failed, message is NULL");
+        return 0;
+    }
+
+    if (barejid == NULL) {
+        log_warning("%s", "api_chat_show_themed failed, barejid is NULL");
+        return 0;
+    }
+
+    char show_ch = '-';
+    if (ch) {
+        if (strlen(ch) != 1) {
+            log_warning("%s", "api_chat_show_themed failed, ch must be a string of length 1");
+            return 0;
+        } else {
+            show_ch = ch[0];
+        }
+    }
+
+    ProfChatWin *chatwin = wins_get_chat(barejid);
+    if (chatwin == NULL) {
+        log_warning("%s", "api_chat_show_themed failed, could not find chat window for %s", barejid);
+        return 0;
+    }
+
+    char *parsed = str_replace(message, "\r\n", "\n");
+    theme_item_t themeitem = plugin_themes_get(group, key, def);
+
+    win_println((ProfWin*)chatwin, themeitem, show_ch, "%s", parsed);
+    free(parsed);
+
+    return 1;
+}
+
+int
+api_room_show(const char *const roomjid, const char *message)
+{
+    if (message == NULL) {
+        log_warning("%s", "api_room_show failed, message is NULL");
+        return 0;
+    }
+
+    if (roomjid == NULL) {
+        log_warning("%s", "api_room_show failed, roomjid is NULL");
+        return 0;
+    }
+
+    ProfMucWin *mucwin = wins_get_muc(roomjid);
+    if (mucwin == NULL) {
+        log_warning("%s", "api_room_show failed, could not find room window for %s", roomjid);
+        return 0;
+    }
+
+    char *parsed = str_replace(message, "\r\n", "\n");
+    win_println((ProfWin*)mucwin, THEME_TEXT, '-', "%s", parsed);
+    free(parsed);
+
+    return 1;
+}
+
+int
+api_room_show_themed(const char *const roomjid, const char *const group, const char *const key, const char *const def,
+    const char *const ch, const char *const message)
+{
+    if (message == NULL) {
+        log_warning("%s", "api_room_show_themed failed, message is NULL");
+        return 0;
+    }
+
+    if (roomjid == NULL) {
+        log_warning("%s", "api_room_show_themed failed, roomjid is NULL");
+        return 0;
+    }
+
+    char show_ch = '-';
+    if (ch) {
+        if (strlen(ch) != 1) {
+            log_warning("%s", "api_room_show_themed failed, ch must be a string of length 1");
+            return 0;
+        } else {
+            show_ch = ch[0];
+        }
+    }
+
+    ProfMucWin *mucwin = wins_get_muc(roomjid);
+    if (mucwin == NULL) {
+        log_warning("%s", "api_room_show_themed failed, could not find room window for %s", roomjid);
+        return 0;
+    }
+
+    char *parsed = str_replace(message, "\r\n", "\n");
+    theme_item_t themeitem = plugin_themes_get(group, key, def);
+
+    win_println((ProfWin*)mucwin, themeitem, show_ch, "%s", parsed);
+    free(parsed);
 
     return 1;
 }
