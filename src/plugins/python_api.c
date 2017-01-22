@@ -1284,6 +1284,130 @@ python_api_room_unset_message_char(PyObject *self, PyObject *args)
     }
 }
 
+static PyObject*
+python_api_chat_show(PyObject *self, PyObject *args)
+{
+    PyObject *barejid = NULL;
+    PyObject *message = NULL;
+    if (!PyArg_ParseTuple(args, "OO", &barejid, &message)) {
+        Py_RETURN_NONE;
+    }
+
+    char *barejid_str = python_str_or_unicode_to_string(barejid);
+    char *message_str = python_str_or_unicode_to_string(message);
+
+    allow_python_threads();
+    int res = api_chat_show(barejid_str, message_str);
+    free(barejid_str);
+    free(message_str);
+    disable_python_threads();
+
+    if (res) {
+        return Py_BuildValue("O", Py_True);
+    } else {
+        return Py_BuildValue("O", Py_False);
+    }
+}
+
+static PyObject*
+python_api_chat_show_themed(PyObject *self, PyObject *args)
+{
+    PyObject *barejid = NULL;
+    PyObject *group = NULL;
+    PyObject *key = NULL;
+    PyObject *def = NULL;
+    PyObject *ch = NULL;
+    PyObject *message = NULL;
+    if (!PyArg_ParseTuple(args, "OOOOOO", &barejid, &group, &key, &def, &ch, &message)) {
+        Py_RETURN_NONE;
+    }
+
+    char *barejid_str = python_str_or_unicode_to_string(barejid);
+    char *group_str = python_str_or_unicode_to_string(group);
+    char *key_str = python_str_or_unicode_to_string(key);
+    char *def_str = python_str_or_unicode_to_string(def);
+    char *ch_str = python_str_or_unicode_to_string(ch);
+    char *message_str = python_str_or_unicode_to_string(message);
+
+    allow_python_threads();
+    int res = api_chat_show_themed(barejid_str, group_str, key_str, def_str, ch_str, message_str);
+    free(barejid_str);
+    free(group_str);
+    free(key_str);
+    free(def_str);
+    free(ch_str);
+    free(message_str);
+    disable_python_threads();
+
+    if (res) {
+        return Py_BuildValue("O", Py_True);
+    } else {
+        return Py_BuildValue("O", Py_False);
+    }
+}
+
+static PyObject*
+python_api_room_show(PyObject *self, PyObject *args)
+{
+    PyObject *roomjid = NULL;
+    PyObject *message = NULL;
+    if (!PyArg_ParseTuple(args, "OO", &roomjid, &message)) {
+        Py_RETURN_NONE;
+    }
+
+    char *roomjid_str = python_str_or_unicode_to_string(roomjid);
+    char *message_str = python_str_or_unicode_to_string(message);
+
+    allow_python_threads();
+    int res = api_room_show(roomjid_str, message_str);
+    free(roomjid_str);
+    free(message_str);
+    disable_python_threads();
+
+    if (res) {
+        return Py_BuildValue("O", Py_True);
+    } else {
+        return Py_BuildValue("O", Py_False);
+    }
+}
+
+static PyObject*
+python_api_room_show_themed(PyObject *self, PyObject *args)
+{
+    PyObject *roomjid = NULL;
+    PyObject *group = NULL;
+    PyObject *key = NULL;
+    PyObject *def = NULL;
+    PyObject *ch = NULL;
+    PyObject *message = NULL;
+    if (!PyArg_ParseTuple(args, "OOOOOO", &roomjid, &group, &key, &def, &ch, &message)) {
+        Py_RETURN_NONE;
+    }
+
+    char *roomjid_str = python_str_or_unicode_to_string(roomjid);
+    char *group_str = python_str_or_unicode_to_string(group);
+    char *key_str = python_str_or_unicode_to_string(key);
+    char *def_str = python_str_or_unicode_to_string(def);
+    char *ch_str = python_str_or_unicode_to_string(ch);
+    char *message_str = python_str_or_unicode_to_string(message);
+
+    allow_python_threads();
+    int res = api_room_show_themed(roomjid_str, group_str, key_str, def_str, ch_str, message_str);
+    free(roomjid_str);
+    free(group_str);
+    free(key_str);
+    free(def_str);
+    free(ch_str);
+    free(message_str);
+    disable_python_threads();
+
+    if (res) {
+        return Py_BuildValue("O", Py_True);
+    } else {
+        return Py_BuildValue("O", Py_False);
+    }
+}
+
 void
 python_command_callback(PluginCommand *command, gchar **args)
 {
@@ -1403,6 +1527,10 @@ static PyMethodDef apiMethods[] = {
     { "room_unset_titlebar_enctext", python_api_room_unset_titlebar_enctext, METH_VARARGS, "Reset the encryption status in the title bar for the specified room" },
     { "room_set_message_char", python_api_room_set_message_char, METH_VARARGS, "Set the message prefix character for specified room" },
     { "room_unset_message_char", python_api_room_unset_message_char, METH_VARARGS, "Reset the message prefix character for specified room" },
+    { "chat_show", python_api_chat_show, METH_VARARGS, "Print a line in a chat window" },
+    { "chat_show_themed", python_api_chat_show_themed, METH_VARARGS, "Print a themed line in a chat window" },
+    { "room_show", python_api_room_show, METH_VARARGS, "Print a line in a chat room window" },
+    { "room_show_themed", python_api_room_show_themed, METH_VARARGS, "Print a themed line in a chat room window" },
     { NULL, NULL, 0, NULL }
 };
 

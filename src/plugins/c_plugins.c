@@ -81,6 +81,7 @@ c_plugin_create(const char *const filename)
     plugin->lang = LANG_C;
     plugin->module = handle;
     plugin->init_func = c_init_hook;
+    plugin->contains_hook = c_contains_hook;
     plugin->on_start_func = c_on_start_hook;
     plugin->on_shutdown_func = c_on_shutdown_hook;
     plugin->on_unload_func = c_on_unload_hook;
@@ -134,6 +135,16 @@ c_init_hook(ProfPlugin *plugin, const char *const version, const char *const sta
 
     // FIXME maybe we want to make it boolean to see if it succeeded or not?
     func(version, status, account_name, fulljid);
+}
+
+gboolean
+c_contains_hook(ProfPlugin *plugin, const char *const hook)
+{
+    if (dlsym(plugin->module, hook)) {
+        return TRUE;
+    } else {
+        return FALSE;
+    }
 }
 
 void

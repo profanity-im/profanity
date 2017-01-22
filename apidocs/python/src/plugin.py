@@ -106,7 +106,7 @@ def prof_pre_chat_message_send(barejid, message):
     :param message: the message to be sent
     :type barejid: str or unicode
     :type message: str or unicode
-    :return: the new message to send, or ``None`` to preserve the original message 
+    :return: the modified or original message to send, or ``None`` to cancel sending of the message
     :rtype: str or unicode
     """
     pass
@@ -158,7 +158,7 @@ def prof_pre_room_message_send(barejid, message):
     :param message: the message to be sent
     :type barejid: str or unicode
     :type message: str or unicode
-    :return: the new message to send, or ``None`` to preserve the original message 
+    :return: the modified or original message to send, or ``None`` to cancel sending of the message
     :rtype: str or unicode
     """
     pass
@@ -227,7 +227,7 @@ def prof_pre_priv_message_send(barejid, nick, message):
     :type barejid: str or unicode
     :type nick: str or unicode
     :type message: str or unicode
-    :return: the new message to send, or ``None`` to preserve the original message 
+    :return: the modified or original message to send, or ``None`` to cancel sending of the message
     :rtype: str or unicode
     """
     pass
