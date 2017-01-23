@@ -70,7 +70,7 @@ receive_carbon(void **state)
     assert_true(prof_output_exact("unencrypted"));
 
     stbbr_send(
-        "<message type='chat' to='stabber@localhost/profanity' from='buddy1@localhost'>"
+        "<message type='chat' to='stabber@localhost/profanity' from='stabber@localhost'>"
             "<received xmlns='urn:xmpp:carbons:2'>"
                 "<forwarded xmlns='urn:xmpp:forward:0'>"
                     "<message id='prof_msg_7' xmlns='jabber:client' type='chat' lang='en' to='stabber@localhost/profanity' from='buddy1@localhost/mobile'>"
