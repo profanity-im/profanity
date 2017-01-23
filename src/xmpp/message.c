@@ -714,6 +714,14 @@ _handle_carbons(xmpp_stanza_t *const stanza)
         return TRUE;
     }
 
+    Jid *my_jid = jid_create(connection_get_fulljid());
+    const char *const stanza_from = xmpp_stanza_get_from(stanza);
+    Jid *msg_jid = jid_create(stanza_from);
+    if (g_strcmp0(my_jid->barejid, msg_jid->barejid) != 0) {
+        log_warning("Invalid carbon received, from: %s", stanza_from);
+        return TRUE;
+    }
+
     const gchar *to = xmpp_stanza_get_to(message);
     const gchar *from = xmpp_stanza_get_from(message);
 
@@ -722,7 +730,6 @@ _handle_carbons(xmpp_stanza_t *const stanza)
 
     Jid *jid_from = jid_create(from);
     Jid *jid_to = jid_create(to);
-    Jid *my_jid = jid_create(connection_get_fulljid());
 
     // check for pgp encrypted message
     char *enc_message = NULL;
