@@ -1580,7 +1580,7 @@ static struct cmd_t command_defs[] =
         CMD_EXAMPLES(
             "/alias add friends /who online friends",
             "/alias add /q /quit",
-            "/alias a /away \"I'm in a meeting.\"",
+            "/alias add a /away \"I'm in a meeting.\"",
             "/alias remove q",
             "/alias list")
     },
