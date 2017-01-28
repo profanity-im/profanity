@@ -509,13 +509,18 @@ prof_occurrences(const char *const needle, const char *const haystack, int offse
         return *result;
     }
 
-    if (g_str_has_prefix(&haystack[offset], needle)) {
+    gchar *haystack_curr = g_utf8_offset_to_pointer(haystack, offset);
+    if (g_str_has_prefix(haystack_curr, needle)) {
         if (whole_word) {
-            char *prev = g_utf8_prev_char(&haystack[offset]);
-            char *next = g_utf8_next_char(&haystack[offset] + strlen(needle) - 1);
-            gunichar prevu = g_utf8_get_char(prev);
-            gunichar nextu = g_utf8_get_char(next);
-            if (!g_unichar_isalnum(prevu) && !g_unichar_isalnum(nextu)) {
+            gchar *needle_last_ch = g_utf8_offset_to_pointer(needle, g_utf8_strlen(needle, -1)- 1);
+            int needle_last_ch_len = mblen(needle_last_ch, MB_CUR_MAX);
+
+            gchar *haystack_before_ch = g_utf8_prev_char(haystack_curr);
+            gchar *haystack_after_ch = g_utf8_next_char(haystack_curr + strlen(needle) - needle_last_ch_len);
+
+            gunichar before = g_utf8_get_char(haystack_before_ch);
+            gunichar after = g_utf8_get_char(haystack_after_ch);
+            if (!g_unichar_isalnum(before) && !g_unichar_isalnum(after)) {
                 *result = g_slist_append(*result, GINT_TO_POINTER(offset));
             }
         } else {
@@ -523,8 +528,9 @@ prof_occurrences(const char *const needle, const char *const haystack, int offse
         }
     }
 
-    if (haystack[offset+1] != '\0') {
-        *result = prof_occurrences(needle, haystack, offset+1, whole_word, result);
+    offset++;
+    if (g_strcmp0(g_utf8_offset_to_pointer(haystack, offset), "\0") != 0) {
+        *result = prof_occurrences(needle, haystack, offset, whole_word, result);
     }
 
     return *result;

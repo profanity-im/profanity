@@ -444,6 +444,13 @@ void prof_whole_occurrences_tests(void **state)
     assert_true(_lists_equal(prof_occurrences("boothj5", "boothj5, hi",  0, TRUE, &actual), expected)); g_slist_free(actual); actual = NULL;
     g_slist_free(expected); expected = NULL;
 
+    expected = g_slist_append(expected, GINT_TO_POINTER(0));
+    assert_true(_lists_equal(prof_occurrences("我能吞下玻璃而", "我能吞下玻璃而",      0, TRUE, &actual), expected)); g_slist_free(actual); actual = NULL;
+    assert_true(_lists_equal(prof_occurrences("我能吞下玻璃而", "我能吞下玻璃而 hi",   0, TRUE, &actual), expected)); g_slist_free(actual); actual = NULL;
+    assert_true(_lists_equal(prof_occurrences("我能吞下玻璃而", "我能吞下玻璃而: hi",  0, TRUE, &actual), expected)); g_slist_free(actual); actual = NULL;
+    assert_true(_lists_equal(prof_occurrences("我能吞下玻璃而", "我能吞下玻璃而, hi",  0, TRUE, &actual), expected)); g_slist_free(actual); actual = NULL;
+    g_slist_free(expected); expected = NULL;
+
     expected = g_slist_append(expected, GINT_TO_POINTER(6));
     assert_true(_lists_equal(prof_occurrences("boothj5", "hello boothj5",        0, TRUE, &actual), expected)); g_slist_free(actual); actual = NULL;
     assert_true(_lists_equal(prof_occurrences("boothj5", "hello boothj5 there",  0, TRUE, &actual), expected)); g_slist_free(actual); actual = NULL;
@@ -451,10 +458,23 @@ void prof_whole_occurrences_tests(void **state)
     g_slist_free(expected); expected = NULL;
 
     expected = g_slist_append(expected, GINT_TO_POINTER(6));
+    assert_true(_lists_equal(prof_occurrences("我能吞下玻璃而", "hello 我能吞下玻璃而",        0, TRUE, &actual), expected)); g_slist_free(actual); actual = NULL;
+    assert_true(_lists_equal(prof_occurrences("我能吞下玻璃而", "hello 我能吞下玻璃而 there",  0, TRUE, &actual), expected)); g_slist_free(actual); actual = NULL;
+    assert_true(_lists_equal(prof_occurrences("我能吞下玻璃而", "heyy @我能吞下玻璃而, there", 0, TRUE, &actual), expected)); g_slist_free(actual); actual = NULL;
+    g_slist_free(expected); expected = NULL;
+
+    expected = g_slist_append(expected, GINT_TO_POINTER(6));
     expected = g_slist_append(expected, GINT_TO_POINTER(26));
     assert_true(_lists_equal(prof_occurrences("boothj5", "hello boothj5 some more a boothj5 stuff",  0, TRUE, &actual), expected)); g_slist_free(actual); actual = NULL;
     assert_true(_lists_equal(prof_occurrences("boothj5", "hello boothj5 there ands #boothj5",        0, TRUE, &actual), expected)); g_slist_free(actual); actual = NULL;
     assert_true(_lists_equal(prof_occurrences("boothj5", "heyy @boothj5, there hows boothj5?",       0, TRUE, &actual), expected)); g_slist_free(actual); actual = NULL;
+    g_slist_free(expected); expected = NULL;
+
+    expected = g_slist_append(expected, GINT_TO_POINTER(6));
+    expected = g_slist_append(expected, GINT_TO_POINTER(26));
+    assert_true(_lists_equal(prof_occurrences("我能吞下玻璃而", "hello 我能吞下玻璃而 some more a 我能吞下玻璃而 stuff",  0, TRUE, &actual), expected)); g_slist_free(actual); actual = NULL;
+    assert_true(_lists_equal(prof_occurrences("我能吞下玻璃而", "hello 我能吞下玻璃而 there ands #我能吞下玻璃而",        0, TRUE, &actual), expected)); g_slist_free(actual); actual = NULL;
+    assert_true(_lists_equal(prof_occurrences("我能吞下玻璃而", "heyy @我能吞下玻璃而, there hows 我能吞下玻璃而?",       0, TRUE, &actual), expected)); g_slist_free(actual); actual = NULL;
     g_slist_free(expected); expected = NULL;
 
     expected = g_slist_append(expected, GINT_TO_POINTER(6));
@@ -487,5 +507,17 @@ void prof_whole_occurrences_tests(void **state)
     assert_true(_lists_equal(prof_occurrences("k",       "ick",                 0, TRUE, &actual), expected)); g_slist_free(actual); actual = NULL;
     assert_true(_lists_equal(prof_occurrences("k",       "kk",                  0, TRUE, &actual), expected)); g_slist_free(actual); actual = NULL;
     assert_true(_lists_equal(prof_occurrences("k",       "kkkkkkk",                  0, TRUE, &actual), expected)); g_slist_free(actual); actual = NULL;
+    g_slist_free(expected); expected = NULL;
+
+    expected = NULL;
+    assert_true(_lists_equal(prof_occurrences("我能吞下玻璃而", "我能吞下玻璃而hello",        0, TRUE, &actual), expected)); g_slist_free(actual); actual = NULL;
+    assert_true(_lists_equal(prof_occurrences("我能吞下玻璃而", "hey我能吞下玻璃而",          0, TRUE, &actual), expected)); g_slist_free(actual); actual = NULL;
+    assert_true(_lists_equal(prof_occurrences("我能吞下玻璃而", "hey我能吞下玻璃而hithere",   0, TRUE, &actual), expected)); g_slist_free(actual); actual = NULL;
+    assert_true(_lists_equal(prof_occurrences("我能吞下玻璃而", "hey 我能吞下玻璃而hithere",  0, TRUE, &actual), expected)); g_slist_free(actual); actual = NULL;
+    assert_true(_lists_equal(prof_occurrences("我能吞下玻璃而", "hey @我能吞下玻璃而hithere", 0, TRUE, &actual), expected)); g_slist_free(actual); actual = NULL;
+    assert_true(_lists_equal(prof_occurrences("我能吞下玻璃而", "hey我能吞下玻璃而 hithere",  0, TRUE, &actual), expected)); g_slist_free(actual); actual = NULL;
+    assert_true(_lists_equal(prof_occurrences("我能吞下玻璃而", "hey我能吞下玻璃而, hithere", 0, TRUE, &actual), expected)); g_slist_free(actual); actual = NULL;
+    assert_true(_lists_equal(prof_occurrences("我能吞下玻璃而", "我能吞下玻璃而我能吞下玻璃而",      0, TRUE, &actual), expected)); g_slist_free(actual); actual = NULL;
+    assert_true(_lists_equal(prof_occurrences("我能吞下玻璃而", "我能吞下玻璃而fill我能吞下玻璃而",  0, TRUE, &actual), expected)); g_slist_free(actual); actual = NULL;
     g_slist_free(expected); expected = NULL;
 }
