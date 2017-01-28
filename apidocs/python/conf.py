@@ -48,7 +48,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'Profanity Python Plugins API'
-copyright = u'2016, boothj5'
+copyright = u'2016 - 2017, boothj5'
 author = u'boothj5'
 
 # The version info for the project you're documenting, acts as replacement for
