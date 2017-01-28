@@ -6,6 +6,7 @@
 #include <setjmp.h>
 #include <cmocka.h>
 #include <sys/stat.h>
+#include <locale.h>
 
 #include "config.h"
 #include "xmpp/chat_session.h"
@@ -37,6 +38,7 @@
 #include "test_plugins_disco.h"
 
 int main(int argc, char* argv[]) {
+    setlocale(LC_ALL, "");
     const UnitTest all_tests[] = {
 
         unit_test(replace_one_substr),
