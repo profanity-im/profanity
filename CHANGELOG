@@ -4,6 +4,8 @@
 - Add prof.get_room_nick plugins api function
 - Add main.help.header theme option
 - Look for system TLS certificate path by default (/tls certpath)
+- Use service discovery to set account muc property
+- Allow clearing account muc and resource properties
 - Allow plugins to complete file paths with prof.filepath_completer_add function
 - Add encryption settings functions to plugins api
 - Allow plugins to block message sending on pre message send hooks
