@@ -687,6 +687,13 @@ _handle_carbons(xmpp_stanza_t * const stanza)
         return FALSE;
     }
 
+    Jid *my_jid = jid_create(jabber_get_fulljid());
+    const char *const stanza_from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
+    if (g_strcmp0(my_jid->barejid, stanza_from) != 0) {
+        log_warning("Invalid carbon received, from: %s", stanza_from);
+        return TRUE;
+    }
+
     char *name = xmpp_stanza_get_name(carbons);
     if ((g_strcmp0(name, "received") == 0) || (g_strcmp0(name, "sent")) == 0) {
         xmpp_stanza_t *forwarded = xmpp_stanza_get_child_by_ns(carbons, STANZA_NS_FORWARD);
