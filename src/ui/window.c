@@ -442,6 +442,8 @@ win_free(ProfWin* window)
         free(chatwin->enctext);
         free(chatwin->incoming_char);
         free(chatwin->outgoing_char);
+        free(chatwin->last_id);
+        free(chatwin->last_message);
         chat_state_free(chatwin->state);
         break;
     }
