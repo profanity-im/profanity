@@ -1227,7 +1227,7 @@ win_correct_outgoing(ProfWin *window, const char ch, const char *const message, 
 }
 
 void
-win_correct_incoming(ProfWin *window, const char ch, const char *const message, const char *const id,
+win_correct_incoming(ProfWin *window, const char *const message, const char *const id,
     const char *const correct_id)
 {
     ProfBuffEntry *entry = buffer_get_entry_by_incoming_id(window->layout->entries, correct_id);
@@ -1243,7 +1243,7 @@ win_correct_incoming(ProfWin *window, const char ch, const char *const message, 
     }
 
     entry->date = buffer_date_new_now();
-    entry->show_char = ch;
+    entry->show_char = prefs_get_correction_char();
 
     if (entry->message) {
         free(entry->message);

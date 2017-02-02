@@ -250,7 +250,7 @@ chatwin_incoming_msg(ProfChatWin *chatwin, const char *const resource, const cha
     // currently viewing chat window with sender
     if (wins_is_current(window)) {
         if (correct_id && win_created == FALSE) {
-            win_correct_incoming(window, '+', message, id, correct_id);
+            win_correct_incoming(window, message, id, correct_id);
         } else {
             win_print_incoming(window, timestamp, display_name, id, plugin_message, enc_mode);
         }
@@ -281,7 +281,7 @@ chatwin_incoming_msg(ProfChatWin *chatwin, const char *const resource, const cha
         }
 
         if (correct_id && win_created == FALSE) {
-            win_correct_incoming(window, '+', message, id, correct_id);
+            win_correct_incoming(window, message, id, correct_id);
         } else {
             win_print_incoming(window, timestamp, display_name, id, plugin_message, enc_mode);
         }
@@ -322,7 +322,9 @@ chatwin_outgoing_msg(ProfChatWin *chatwin, const char *const message, char *id, 
     assert(chatwin != NULL);
 
     if (correct_id) {
-        win_correct_outgoing((ProfWin*)chatwin, '+', message, id, request_receipt, correct_id);
+        char corr_char = prefs_get_correction_char();
+
+        win_correct_outgoing((ProfWin*)chatwin, corr_char, message, id, request_receipt, correct_id);
         _chatwin_set_last_message(chatwin, id, message);
 
         return;
