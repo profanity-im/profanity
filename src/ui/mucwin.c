@@ -495,14 +495,6 @@ mucwin_message(ProfMucWin *mucwin, const char *const nick, const char *const id,
             win_print_muc_occupant_message(window, ch, nick, message);
         }
     } else {
-        if (mucwin->last_message) {
-            free(mucwin->last_message);
-        }
-        mucwin->last_message = strdup(message);
-        if (mucwin->last_id) {
-            free(mucwin->last_id);
-        }
-        mucwin->last_id = strdup(id);
         win_print_muc_self_message(window, ch, mynick, message);
     }
 }

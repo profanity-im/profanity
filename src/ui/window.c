@@ -197,8 +197,6 @@ win_create_muc(const char *const roomjid)
     } else {
         new_win->showjid = FALSE;
     }
-    new_win->last_id = NULL;
-    new_win->last_message = NULL;
     new_win->enctext = NULL;
     new_win->message_char = NULL;
 

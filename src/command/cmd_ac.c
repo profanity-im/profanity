@@ -2861,13 +2861,6 @@ _correct_autocomplete(ProfWin *window, const char *const input)
         last_message = chatwin->last_message;
         break;
     }
-    case WIN_MUC:
-    {
-        ProfMucWin *mucwin = (ProfMucWin*)window;
-        assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
-        last_message = mucwin->last_message;
-        break;
-    }
     default:
         break;
     }

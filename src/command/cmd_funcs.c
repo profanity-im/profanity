@@ -7071,25 +7071,7 @@ cmd_correct(ProfWin *window, const char *const command, gchar **args)
         return TRUE;
     }
 
-    if (window->type == WIN_MUC) {
-        ProfMucWin *mucwin = (ProfMucWin*)window;
-        assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
-
-        if (mucwin->last_message == NULL) {
-            win_println(window, THEME_DEFAULT, '!', "No last message to correct.");
-            return TRUE;
-        }
-
-        cons_debug("MUC message correction");
-        cons_debug("  ID        : %s", mucwin->last_id);
-        cons_debug("  Original  : %s", mucwin->last_message);
-        cons_debug("  Corrected : %s", corrected);
-
-        cl_ev_send_muc_msg(mucwin, corrected, FALSE);
-        return TRUE;
-    }
-
-    cons_show("Command /correct not valid in current window.");
+    win_println(window, THEME_DEFAULT, '!', "Command /correct only valid in regular chat windows.");
     return TRUE;
 }
 
