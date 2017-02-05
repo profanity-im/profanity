@@ -190,6 +190,27 @@ plugins_load(const char *const name)
     }
 }
 
+void
+plugins_unload_all(void)
+{
+    GList *plugin_names = g_hash_table_get_keys(plugins);
+    GList *plugin_names_dup = NULL;
+    GList *curr = plugin_names;
+    while (curr) {
+        plugin_names_dup = g_list_append(plugin_names_dup, strdup(curr->data));
+        curr = g_list_next(curr);
+    }
+    g_list_free(plugin_names);
+
+    curr = plugin_names_dup;
+    while (curr) {
+        plugins_unload(curr->data);
+        curr = g_list_next(curr);
+    }
+
+    g_list_free_full(plugin_names_dup, free);
+}
+
 gboolean
 plugins_unload(const char *const name)
 {
