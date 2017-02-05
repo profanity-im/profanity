@@ -6214,49 +6214,77 @@ cmd_xa(ProfWin *window, const char *const command, gchar **args)
 gboolean
 cmd_plugins_install(ProfWin *window, const char *const command, gchar **args)
 {
-    char *filename = args[1];
-    if (filename == NULL) {
+    char *path = args[1];
+    if (path == NULL) {
         cons_bad_cmd_usage(command);
         return TRUE;
     }
 
     // expand ~ to $HOME
-    if (filename[0] == '~' && filename[1] == '/') {
-        if (asprintf(&filename, "%s/%s", getenv("HOME"), filename+2) == -1) {
+    if (path[0] == '~' && path[1] == '/') {
+        if (asprintf(&path, "%s/%s", getenv("HOME"), path+2) == -1) {
             return TRUE;
         }
     } else {
-        filename = strdup(filename);
+        path = strdup(path);
     }
 
-    if (access(filename, R_OK) != 0) {
-        cons_show("File not found: %s", filename);
-        free(filename);
+    if (access(path, R_OK) != 0) {
+        cons_show("File not found: %s", path);
+        free(path);
         return TRUE;
     }
 
-    if (!is_regular_file(filename)) {
-        cons_show("Not a file: %s", filename);
-        free(filename);
+    if (is_regular_file(path)) {
+        if (!g_str_has_suffix(path, ".py") && !g_str_has_suffix(path, ".so")) {
+            cons_show("Plugins must have one of the following extensions: '.py' '.so'");
+            free(path);
+            return TRUE;
+        }
+
+        gchar *plugin_name = g_path_get_basename(path);
+        gboolean result = plugins_install(plugin_name, path);
+        if (result) {
+            cons_show("Plugin installed: %s", plugin_name);
+        } else {
+            cons_show("Failed to install plugin: %s", plugin_name);
+        }
+        g_free(plugin_name);
+
+        free(path);
         return TRUE;
     }
 
-    if (!g_str_has_suffix(filename, ".py") && !g_str_has_suffix(filename, ".so")) {
-        cons_show("Plugins must have one of the following extensions: '.py' '.so'");
-        free(filename);
+    if (is_dir(path)) {
+        PluginsInstallResult* result = plugins_install_all(path);
+        if (result->installed || result->failed) {
+            if (result->installed) {
+                cons_show("");
+                cons_show("Installed plugins:");
+                GSList *curr = result->installed;
+                while (curr) {
+                    cons_show("  %s", curr->data);
+                    curr = g_slist_next(curr);
+                }
+            }
+            if (result->failed) {
+                cons_show("");
+                cons_show("Failed installs:");
+                GSList *curr = result->failed;
+                while (curr) {
+                    cons_show("  %s", curr->data);
+                    curr = g_slist_next(curr);
+                }
+            }
+        } else {
+            cons_show("No plugins found in: %s", path);
+        }
+        free(path);
+        plugins_free_install_result(result);
         return TRUE;
     }
 
-    gchar *plugin_name = g_path_get_basename(filename);
-    gboolean result = plugins_install(plugin_name, filename);
-    if (result) {
-        cons_show("Plugin installed: %s", plugin_name);
-    } else {
-        cons_show("Failed to install plugin: %s", plugin_name);
-    }
-    g_free(plugin_name);
-
-    free(filename);
+    cons_show("Argument must be a file or directory.");
     return TRUE;
 }
 

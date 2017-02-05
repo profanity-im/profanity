@@ -129,6 +129,43 @@ plugins_init(void)
     return;
 }
 
+void
+plugins_free_install_result(PluginsInstallResult *result)
+{
+    if (!result) {
+        return;
+    }
+    g_slist_free_full(result->installed, free);
+    g_slist_free_full(result->failed, free);
+}
+
+PluginsInstallResult*
+plugins_install_all(const char *const path)
+{
+    PluginsInstallResult *result = malloc(sizeof(PluginsInstallResult));
+    result->installed = NULL;
+    result->failed = NULL;
+    GSList *contents = NULL;
+    get_file_paths_recursive(path, &contents);
+
+    GSList *curr = contents;
+    while (curr) {
+        if (g_str_has_suffix(curr->data, ".py") || g_str_has_suffix(curr->data, ".so")) {
+            gchar *plugin_name = g_path_get_basename(curr->data);
+            if (plugins_install(plugin_name, curr->data)) {
+                result->installed = g_slist_append(result->installed, strdup(curr->data));
+            } else {
+                result->failed = g_slist_append(result->failed, strdup(curr->data));
+            }
+        }
+        curr = g_slist_next(curr);
+    }
+
+    g_slist_free_full(contents, g_free);
+
+    return result;
+}
+
 gboolean
 plugins_install(const char *const plugin_name, const char *const filename)
 {
