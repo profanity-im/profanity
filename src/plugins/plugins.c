@@ -153,6 +153,23 @@ plugins_install(const char *const plugin_name, const char *const filename)
     return result;
 }
 
+GSList*
+plugins_load_all(void)
+{
+    GSList *plugins = plugins_unloaded_list();
+    GSList *loaded = NULL;
+    GSList *curr = plugins;
+    while (curr) {
+        if (plugins_load(curr->data)) {
+            loaded = g_slist_append(loaded, strdup(curr->data));
+        }
+        curr = g_slist_next(curr);
+    }
+    g_slist_free_full(plugins, g_free);
+
+    return loaded;
+}
+
 gboolean
 plugins_load(const char *const name)
 {
@@ -190,9 +207,10 @@ plugins_load(const char *const name)
     }
 }
 
-void
+gboolean
 plugins_unload_all(void)
 {
+    gboolean result = FALSE;
     GList *plugin_names = g_hash_table_get_keys(plugins);
     GList *plugin_names_dup = NULL;
     GList *curr = plugin_names;
@@ -204,11 +222,15 @@ plugins_unload_all(void)
 
     curr = plugin_names_dup;
     while (curr) {
-        plugins_unload(curr->data);
+        if (plugins_unload(curr->data)) {
+            result = TRUE;
+        }
         curr = g_list_next(curr);
     }
 
     g_list_free_full(plugin_names_dup, free);
+
+    return result;
 }
 
 gboolean

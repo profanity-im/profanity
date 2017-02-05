@@ -109,8 +109,9 @@ void plugins_shutdown(void);
 
 gboolean plugins_install(const char *const plugin_name, const char *const filename);
 gboolean plugins_load(const char *const name);
+GSList* plugins_load_all(void);
 gboolean plugins_unload(const char *const name);
-void plugins_unload_all(void);
+gboolean plugins_unload_all(void);
 gboolean plugins_reload(const char *const name);
 void plugins_reload_all(void);
 

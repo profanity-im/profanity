@@ -6264,9 +6264,21 @@ gboolean
 cmd_plugins_load(ProfWin *window, const char *const command, gchar **args)
 {
     if (args[1] == NULL) {
-        cons_bad_cmd_usage(command);
+        GSList *loaded = plugins_load_all();
+        if (loaded) {
+            cons_show("Loaded plugins:");
+            GSList *curr = loaded;
+            while (curr) {
+                cons_show("  %s", curr->data);
+                curr = g_slist_next(curr);
+            }
+            g_slist_free_full(loaded, g_free);
+        } else {
+            cons_show("No plugins loaded.");
+        }
         return TRUE;
     }
+
     gboolean res = plugins_load(args[1]);
     if (res) {
         cons_show("Loaded plugin: %s", args[1]);
@@ -6281,8 +6293,12 @@ gboolean
 cmd_plugins_unload(ProfWin *window, const char *const command, gchar **args)
 {
     if (args[1] == NULL) {
-        plugins_unload_all();
-        cons_show("Unloaded all plugins");
+        gboolean res = plugins_unload_all();
+        if (res) {
+            cons_show("Unloaded all plugins.");
+        } else {
+            cons_show("No plugins unloaded.");
+        }
         return TRUE;
     }
 
