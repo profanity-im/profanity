@@ -160,6 +160,7 @@ gboolean cmd_charset(ProfWin *window, const char *const command, gchar **args);
 gboolean cmd_console(ProfWin *window, const char *const command, gchar **args);
 
 gboolean cmd_plugins(ProfWin *window, const char *const command, gchar **args);
+gboolean cmd_plugins_sourcepath(ProfWin *window, const char *const command, gchar **args);
 gboolean cmd_plugins_install(ProfWin *window, const char *const command, gchar **args);
 gboolean cmd_plugins_load(ProfWin *window, const char *const command, gchar **args);
 gboolean cmd_plugins_unload(ProfWin *window, const char *const command, gchar **args);

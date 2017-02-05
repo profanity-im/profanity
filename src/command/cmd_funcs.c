@@ -6212,16 +6212,69 @@ cmd_xa(ProfWin *window, const char *const command, gchar **args)
 }
 
 gboolean
+cmd_plugins_sourcepath(ProfWin *window, const char *const command, gchar **args)
+{
+    if (args[1] == NULL) {
+        char *sourcepath = prefs_get_string(PREF_PLUGINS_SOURCEPATH);
+        if (sourcepath) {
+            cons_show("Current plugins sourcepath: %s", sourcepath);
+            prefs_free_string(sourcepath);
+        } else {
+            cons_show("Plugins sourcepath not currently set.");
+        }
+        return TRUE;
+    }
+
+    if (g_strcmp0(args[1], "clear") == 0) {
+        prefs_set_string(PREF_PLUGINS_SOURCEPATH, NULL);
+        cons_show("Plugins sourcepath cleared.");
+        return TRUE;
+    }
+
+    if (g_strcmp0(args[1], "set") == 0) {
+        char *path = args[2];
+        if (path == NULL) {
+            cons_bad_cmd_usage(command);
+            return TRUE;
+        }
+
+        // expand ~ to $HOME
+        if (path[0] == '~' && path[1] == '/') {
+            if (asprintf(&path, "%s/%s", getenv("HOME"), path+2) == -1) {
+                return TRUE;
+            }
+        } else {
+            path = strdup(path);
+        }
+
+        if (!is_dir(path)) {
+            cons_show("Plugins sourcepath must be a directory.");
+            return TRUE;
+        }
+
+        cons_show("Setting plugins sourcepath: %s", path);
+        prefs_set_string(PREF_PLUGINS_SOURCEPATH, path);
+        return TRUE;
+    }
+
+    cons_bad_cmd_usage(command);
+    return TRUE;
+}
+
+gboolean
 cmd_plugins_install(ProfWin *window, const char *const command, gchar **args)
 {
     char *path = args[1];
     if (path == NULL) {
-        cons_bad_cmd_usage(command);
-        return TRUE;
-    }
-
-    // expand ~ to $HOME
-    if (path[0] == '~' && path[1] == '/') {
+        char* sourcepath = prefs_get_string(PREF_PLUGINS_SOURCEPATH);
+        if (sourcepath) {
+            path = strdup(sourcepath);
+            prefs_free_string(sourcepath);
+        } else {
+            cons_show("Either a path must be provided or the sourcepath property must be set, see /help plugins");
+            return TRUE;
+        }
+    } else if (path[0] == '~' && path[1] == '/') {
         if (asprintf(&path, "%s/%s", getenv("HOME"), path+2) == -1) {
             return TRUE;
         }

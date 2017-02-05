@@ -2046,8 +2046,9 @@ static struct cmd_t command_defs[] =
     },
 
     { "/plugins",
-        parse_args, 0, 2, NULL,
+        parse_args, 0, 3, NULL,
         CMD_SUBFUNCS(
+            { "sourcepath",     cmd_plugins_sourcepath },
             { "install",        cmd_plugins_install },
             { "load",           cmd_plugins_load },
             { "unload",         cmd_plugins_unload },
@@ -2057,7 +2058,9 @@ static struct cmd_t command_defs[] =
         CMD_NOTAGS
         CMD_SYN(
             "/plugins",
-            "/plugins install <path>",
+            "/plugins sourcepath set <path>",
+            "/plugins sourcepath clear",
+            "/plugins install [<path>]",
             "/plugins unload [<plugin>]",
             "/plugins load [<plugin>]",
             "/plugins reload [<plugin>]",
@@ -2065,12 +2068,16 @@ static struct cmd_t command_defs[] =
         CMD_DESC(
             "Manage plugins. Passing no arguments lists currently loaded plugins.")
         CMD_ARGS(
-            { "install <file>",      "Install file to plugins directory, and load or reload the plugin." },
-            { "load [<plugin>]",       "Load a plugin that already exists in the plugin directory, passing no argument loads all found plugins." },
-            { "unload [<plugin>]",   "Unload a loaded plugin, passing no argument will unload all plugins." },
-            { "reload [<plugin>]",   "Reload a plugin, passing no argument will reload all plugins." },
-            { "python_version",      "Show the Python interpreter version." })
+            { "sourcepath set <path>",  "Set the default path to install plugins from, will be used if no arg is passed to /plugins install." },
+            { "sourcepath clear",       "Clear the default plugins source path." },
+            { "install [<path>]",       "Install a plugin, or all plugins found in a directory (recursive). Passing no argument will use the sourcepath if one is set." },
+            { "load [<plugin>]",        "Load a plugin that already exists in the plugin directory, passing no argument loads all found plugins." },
+            { "unload [<plugin>]",      "Unload a loaded plugin, passing no argument will unload all plugins." },
+            { "reload [<plugin>]",      "Reload a plugin, passing no argument will reload all plugins." },
+            { "python_version",         "Show the Python interpreter version." })
         CMD_EXAMPLES(
+            "/plugins sourcepath set /home/meee/projects/profanity-plugins",
+            "/plugins install",
             "/plugins install /home/steveharris/Downloads/metal.py",
             "/plugins load browser.py",
             "/plugins unload say.py",
