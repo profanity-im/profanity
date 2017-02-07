@@ -59,6 +59,7 @@
 #define PREF_GROUP_OTR "otr"
 #define PREF_GROUP_PGP "pgp"
 #define PREF_GROUP_MUC "muc"
+#define PREF_GROUP_PLUGINS "plugins"
 
 #define INPBLOCK_DEFAULT 1000
 
@@ -665,27 +666,27 @@ prefs_get_tray_timer(void)
 gchar**
 prefs_get_plugins(void)
 {
-    if (!g_key_file_has_group(prefs, "plugins")) {
+    if (!g_key_file_has_group(prefs, PREF_GROUP_PLUGINS)) {
         return NULL;
     }
-    if (!g_key_file_has_key(prefs, "plugins", "load", NULL)) {
+    if (!g_key_file_has_key(prefs, PREF_GROUP_PLUGINS, "load", NULL)) {
         return NULL;
     }
 
-    return g_key_file_get_string_list(prefs, "plugins", "load", NULL, NULL);
+    return g_key_file_get_string_list(prefs, PREF_GROUP_PLUGINS, "load", NULL, NULL);
 }
 
 void
 prefs_add_plugin(const char *const name)
 {
-    conf_string_list_add(prefs, "plugins", "load", name);
+    conf_string_list_add(prefs, PREF_GROUP_PLUGINS, "load", name);
     _save_prefs();
 }
 
 void
 prefs_remove_plugin(const char *const name)
 {
-    conf_string_list_remove(prefs, "plugins", "load", name);
+    conf_string_list_remove(prefs, PREF_GROUP_PLUGINS, "load", name);
     _save_prefs();
 }
 
@@ -1614,6 +1615,8 @@ _get_group(preference_t pref)
             return PREF_GROUP_PGP;
         case PREF_BOOKMARK_INVITE:
             return PREF_GROUP_MUC;
+        case PREF_PLUGINS_SOURCEPATH:
+            return PREF_GROUP_PLUGINS;
         default:
             return NULL;
     }
@@ -1814,6 +1817,8 @@ _get_key(preference_t pref)
             return "console.chat";
         case PREF_BOOKMARK_INVITE:
             return "bookmark.invite";
+        case PREF_PLUGINS_SOURCEPATH:
+            return "sourcepath";
         default:
             return NULL;
     }

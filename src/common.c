@@ -536,3 +536,45 @@ prof_occurrences(const char *const needle, const char *const haystack, int offse
     return *result;
 }
 
+int
+is_regular_file(const char *path)
+{
+    struct stat st;
+    stat(path, &st);
+    return S_ISREG(st.st_mode);
+}
+
+int
+is_dir(const char *path)
+{
+    struct stat st;
+    stat(path, &st);
+    return S_ISDIR(st.st_mode);
+}
+
+void
+get_file_paths_recursive(const char *path, GSList **contents)
+{
+    if (!is_dir(path)) {
+        return;
+    }
+
+    GDir* directory = g_dir_open(path, 0, NULL);
+    const gchar *entry = g_dir_read_name(directory);
+    while (entry) {
+        GString *full = g_string_new(path);
+        if (!g_str_has_suffix(full->str, "/")) {
+            g_string_append(full, "/");
+        }
+        g_string_append(full, entry);
+
+        if (is_dir(full->str)) {
+            get_file_paths_recursive(full->str, contents);
+        } else if (is_regular_file(full->str)) {
+            *contents = g_slist_append(*contents, full->str);
+        }
+
+        g_string_free(full, FALSE);
+        entry = g_dir_read_name(directory);
+    }
+}

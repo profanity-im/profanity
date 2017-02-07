@@ -163,6 +163,43 @@ plugins_init(void)
     return;
 }
 
+void
+plugins_free_install_result(PluginsInstallResult *result)
+{
+    if (!result) {
+        return;
+    }
+    g_slist_free_full(result->installed, free);
+    g_slist_free_full(result->failed, free);
+}
+
+PluginsInstallResult*
+plugins_install_all(const char *const path)
+{
+    PluginsInstallResult *result = malloc(sizeof(PluginsInstallResult));
+    result->installed = NULL;
+    result->failed = NULL;
+    GSList *contents = NULL;
+    get_file_paths_recursive(path, &contents);
+
+    GSList *curr = contents;
+    while (curr) {
+        if (g_str_has_suffix(curr->data, ".py") || g_str_has_suffix(curr->data, ".so")) {
+            gchar *plugin_name = g_path_get_basename(curr->data);
+            if (plugins_install(plugin_name, curr->data)) {
+                result->installed = g_slist_append(result->installed, strdup(curr->data));
+            } else {
+                result->failed = g_slist_append(result->failed, strdup(curr->data));
+            }
+        }
+        curr = g_slist_next(curr);
+    }
+
+    g_slist_free_full(contents, g_free);
+
+    return result;
+}
+
 gboolean
 plugins_install(const char *const plugin_name, const char *const filename)
 {
@@ -185,6 +222,23 @@ plugins_install(const char *const plugin_name, const char *const filename)
     }
 
     return result;
+}
+
+GSList*
+plugins_load_all(void)
+{
+    GSList *plugins = plugins_unloaded_list();
+    GSList *loaded = NULL;
+    GSList *curr = plugins;
+    while (curr) {
+        if (plugins_load(curr->data)) {
+            loaded = g_slist_append(loaded, strdup(curr->data));
+        }
+        curr = g_slist_next(curr);
+    }
+    g_slist_free_full(plugins, g_free);
+
+    return loaded;
 }
 
 gboolean
@@ -222,6 +276,32 @@ plugins_load(const char *const name)
         log_info("Failed to load plugin: %s", name);
         return FALSE;
     }
+}
+
+gboolean
+plugins_unload_all(void)
+{
+    gboolean result = FALSE;
+    GList *plugin_names = g_hash_table_get_keys(plugins);
+    GList *plugin_names_dup = NULL;
+    GList *curr = plugin_names;
+    while (curr) {
+        plugin_names_dup = g_list_append(plugin_names_dup, strdup(curr->data));
+        curr = g_list_next(curr);
+    }
+    g_list_free(plugin_names);
+
+    curr = plugin_names_dup;
+    while (curr) {
+        if (plugins_unload(curr->data)) {
+            result = TRUE;
+        }
+        curr = g_list_next(curr);
+    }
+
+    g_list_free_full(plugin_names_dup, free);
+
+    return result;
 }
 
 gboolean

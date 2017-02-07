@@ -263,7 +263,7 @@ endif
 
 man_MANS = $(man_sources)
 
-EXTRA_DIST = $(man_sources) $(icons_sources) $(themes_sources) $(script_sources) profrc.example LICENSE.txt
+EXTRA_DIST = $(man_sources) $(icons_sources) $(themes_sources) $(script_sources) profrc.example LICENSE.txt README.md CHANGELOG
 
 if INCLUDE_GIT_VERSION
 EXTRA_DIST += .git/HEAD .git/index

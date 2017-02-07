@@ -52,6 +52,7 @@
 #include "config/preferences.h"
 #include "ui/ui.h"
 #include "ui/window.h"
+#include "common.h"
 
 #define FALLBACK_MIMETYPE "application/octet-stream"
 #define FALLBACK_CONTENTTYPE_HEADER "Content-Type: application/octet-stream"
@@ -329,11 +330,4 @@ off_t file_size(const char* const filename)
     struct stat st;
     stat(filename, &st);
     return st.st_size;
-}
-
-int is_regular_file(const char *filename)
-{
-    struct stat st;
-    stat(filename, &st);
-    return S_ISREG(st.st_mode);
 }

@@ -123,4 +123,8 @@ gboolean is_notify_enabled(void);
 GSList* prof_occurrences(const char *const needle, const char *const haystack, int offset, gboolean whole_word,
     GSList **result);
 
+int is_regular_file(const char *path);
+int is_dir(const char *path);
+void get_file_paths_recursive(const char *directory, GSList **contents);
+
 #endif
