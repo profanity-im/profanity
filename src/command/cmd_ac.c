@@ -184,6 +184,7 @@ static Autocomplete console_ac;
 static Autocomplete console_msg_ac;
 static Autocomplete autoping_ac;
 static Autocomplete plugins_ac;
+static Autocomplete plugins_sourcepath_ac;
 static Autocomplete plugins_load_ac;
 static Autocomplete plugins_unload_ac;
 static Autocomplete plugins_reload_ac;
@@ -714,6 +715,11 @@ cmd_ac_init(void)
     autocomplete_add(plugins_ac, "unload");
     autocomplete_add(plugins_ac, "reload");
     autocomplete_add(plugins_ac, "python_version");
+    autocomplete_add(plugins_ac, "sourcepath");
+
+    plugins_sourcepath_ac = autocomplete_new();
+    autocomplete_add(plugins_sourcepath_ac, "set");
+    autocomplete_add(plugins_sourcepath_ac, "clear");
 
     filepath_ac = autocomplete_new();
 
@@ -1011,6 +1017,7 @@ cmd_ac_reset(ProfWin *window)
     autocomplete_reset(console_msg_ac);
     autocomplete_reset(autoping_ac);
     autocomplete_reset(plugins_ac);
+    autocomplete_reset(plugins_sourcepath_ac);
     autocomplete_reset(blocked_ac);
     autocomplete_reset(tray_ac);
     autocomplete_reset(presence_ac);
@@ -2025,8 +2032,19 @@ _plugins_autocomplete(ProfWin *window, const char *const input)
 {
     char *result = NULL;
 
+    if (strncmp(input, "/plugins sourcepath set ", 24) == 0) {
+        return cmd_ac_complete_filepath(input, "/plugins sourcepath set");
+    }
+
     if (strncmp(input, "/plugins install ", 17) == 0) {
         return cmd_ac_complete_filepath(input, "/plugins install");
+    }
+
+    if (strncmp(input, "/plugins sourcepath ", 20) == 0) {
+        result = autocomplete_param_with_ac(input, "/plugins sourcepath", plugins_sourcepath_ac, TRUE);
+        if (result) {
+            return result;
+        }
     }
 
     if (strncmp(input, "/plugins load ", 14) == 0) {
