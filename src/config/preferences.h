@@ -141,6 +141,7 @@ typedef enum {
     PREF_CONSOLE_PRIVATE,
     PREF_CONSOLE_CHAT,
     PREF_BOOKMARK_INVITE,
+    PREF_PLUGINS_SOURCEPATH,
 } preference_t;
 
 typedef struct prof_alias_t {

@@ -158,7 +158,15 @@ gboolean cmd_script(ProfWin *window, const char *const command, gchar **args);
 gboolean cmd_export(ProfWin *window, const char *const command, gchar **args);
 gboolean cmd_charset(ProfWin *window, const char *const command, gchar **args);
 gboolean cmd_console(ProfWin *window, const char *const command, gchar **args);
+
 gboolean cmd_plugins(ProfWin *window, const char *const command, gchar **args);
+gboolean cmd_plugins_sourcepath(ProfWin *window, const char *const command, gchar **args);
+gboolean cmd_plugins_install(ProfWin *window, const char *const command, gchar **args);
+gboolean cmd_plugins_load(ProfWin *window, const char *const command, gchar **args);
+gboolean cmd_plugins_unload(ProfWin *window, const char *const command, gchar **args);
+gboolean cmd_plugins_reload(ProfWin *window, const char *const command, gchar **args);
+gboolean cmd_plugins_python_version(ProfWin *window, const char *const command, gchar **args);
+
 gboolean cmd_blocked(ProfWin *window, const char *const command, gchar **args);
 gboolean cmd_correct(ProfWin *window, const char *const command, gchar **args);
 
