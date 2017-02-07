@@ -62,6 +62,5 @@ void* http_file_put(void *userdata);
 
 char* file_mime_type(const char* const file_name);
 off_t file_size(const char* const file_name);
-int is_regular_file(const char *filename);
 
 #endif

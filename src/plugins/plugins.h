@@ -42,6 +42,11 @@ typedef enum {
     LANG_C
 } lang_t;
 
+typedef struct prof_plugins_install_t {
+    GSList *installed;
+    GSList *failed;
+} PluginsInstallResult;
+
 typedef struct prof_plugin_t {
     char *name;
     lang_t lang;
@@ -107,9 +112,14 @@ char* plugins_autocomplete(const char *const input);
 void plugins_reset_autocomplete(void);
 void plugins_shutdown(void);
 
+void plugins_free_install_result(PluginsInstallResult *result);
+
 gboolean plugins_install(const char *const plugin_name, const char *const filename);
+PluginsInstallResult* plugins_install_all(const char *const path);
 gboolean plugins_load(const char *const name);
+GSList* plugins_load_all(void);
 gboolean plugins_unload(const char *const name);
+gboolean plugins_unload_all(void);
 gboolean plugins_reload(const char *const name);
 void plugins_reload_all(void);
 
