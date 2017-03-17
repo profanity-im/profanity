@@ -54,6 +54,11 @@ void autocomplete_add_all(Autocomplete ac, char **items);
 void autocomplete_remove(Autocomplete ac, const char *const item);
 void autocomplete_remove_all(Autocomplete ac, char **items);
 
+// find the next item prefixed with search string, ignoring accents
+gchar* autocomplete_complete_ignore_accents(Autocomplete ac,
+					    const gchar *search_str,
+					    gboolean quote);
+
 // find the next item prefixed with search string
 gchar* autocomplete_complete(Autocomplete ac, const gchar *search_str, gboolean quote);
 

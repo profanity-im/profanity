@@ -36,6 +36,19 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "config.h"
+
+#ifdef HAVE_ICU_I18N
+#include <unicode/utypes.h>
+#include <unicode/localpointer.h>
+#include <unicode/urep.h>
+#include <unicode/parseerr.h>
+#include <unicode/uenum.h>
+#include <unicode/uset.h>
+#include <unicode/utrans.h>
+#include <unicode/ustring.h>
+#endif
+
 #include "common.h"
 #include "tools/autocomplete.h"
 #include "tools/parser.h"
@@ -44,9 +57,12 @@ struct autocomplete_t {
     GSList *items;
     GSList *last_found;
     gchar *search_str;
+#ifdef HAVE_ICU_I18N
+    UTransliterator *utrans;
+#endif
 };
 
-static gchar* _search_from(Autocomplete ac, GSList *curr, gboolean quote);
+static gchar* _search_from(Autocomplete ac, GSList *curr, gboolean quote, gboolean ignore_accents);
 
 Autocomplete
 autocomplete_new(void)
@@ -55,7 +71,16 @@ autocomplete_new(void)
     new->items = NULL;
     new->last_found = NULL;
     new->search_str = NULL;
-
+#ifdef HAVE_ICU_I18N
+    U_STRING_DECL(u_str, "NFD; [:M:] Remove; NFC", 22);
+    UErrorCode code = U_ZERO_ERROR;
+    new->utrans = utrans_openU(u_str, -1, UTRANS_FORWARD, NULL,
+			       -1 /* NULL-terminated */, NULL, &code);
+    if(!new->utrans){
+	printf("%s\n", u_errorName(code));
+	abort();
+    }
+#endif
     return new;
 }
 
@@ -82,6 +107,9 @@ autocomplete_free(Autocomplete ac)
 {
     if (ac) {
         autocomplete_clear(ac);
+#ifdef HAVE_ICU_I18N
+	utrans_close(ac->utrans);
+#endif
         free(ac);
     }
 }
@@ -98,6 +126,38 @@ autocomplete_length(Autocomplete ac)
     }
 }
 
+#ifdef HAVE_ICU_I20N
+static int ucompare(gconstpointer a, gconstpointer b, gpointer data)
+{
+  UChar ua[strlen (a) + 1];
+  UChar ub[strlen (b) + 1];
+  UTransliterator *utrans = data;
+
+  UErrorCode code = U_ZERO_ERROR;
+  u_strFromUTF8 (ua, sizeof (ua), NULL, a, -1, &code);
+  if (U_FAILURE (code)) {
+      goto fallback;
+  }
+  u_strFromUTF8 (ub, sizeof (ub), NULL, b, -1, &code);
+  if (U_FAILURE (code)) {
+      goto fallback;
+  }
+  int32_t limit = u_strlen (ua);
+  utrans_transUChars (utrans, ua, NULL, sizeof (ua), 0, &limit, &code);
+  if (U_FAILURE (code)) {
+      goto fallback;
+  }
+  limit = u_strlen (ub);
+  utrans_transUChars (utrans, ub, NULL, sizeof (ub), 0, &limit, &code);
+  if (U_FAILURE (code)) {
+      goto fallback;
+  }
+  return u_strcmp(ua, ub);
+fallback:
+  return strcmp (a, b);
+}
+#endif
+
 void
 autocomplete_add(Autocomplete ac, const char *item)
 {
@@ -111,7 +171,11 @@ autocomplete_add(Autocomplete ac, const char *item)
         }
 
         item_cpy = strdup(item);
+#ifdef HAVE_ICU_I18N
+        ac->items = g_slist_insert_sorted_with_data(ac->items, item_cpy, ucompare, ac->utrans);
+#else
         ac->items = g_slist_insert_sorted(ac->items, item_cpy, (GCompareFunc)strcmp);
+#endif
     }
 
     return;
@@ -186,8 +250,9 @@ autocomplete_contains(Autocomplete ac, const char *value)
     return FALSE;
 }
 
-gchar*
-autocomplete_complete(Autocomplete ac, const gchar *search_str, gboolean quote)
+static gchar*
+autocomplete_complete_internal(Autocomplete ac, const gchar *search_str, gboolean quote,
+		      gboolean ignore_accents)
 {
     gchar *found = NULL;
 
@@ -208,20 +273,20 @@ autocomplete_complete(Autocomplete ac, const gchar *search_str, gboolean quote)
         }
 
         ac->search_str = strdup(search_str);
-        found = _search_from(ac, ac->items, quote);
+        found = _search_from(ac, ac->items, quote, ignore_accents);
 
         return found;
 
     // subsequent search attempt
     } else {
         // search from here+1 to end
-        found = _search_from(ac, g_slist_next(ac->last_found), quote);
+        found = _search_from(ac, g_slist_next(ac->last_found), quote, ignore_accents);
         if (found) {
             return found;
         }
 
         // search from beginning
-        found = _search_from(ac, ac->items, quote);
+        found = _search_from(ac, ac->items, quote, ignore_accents);
         if (found) {
             return found;
         }
@@ -231,6 +296,19 @@ autocomplete_complete(Autocomplete ac, const gchar *search_str, gboolean quote)
 
         return NULL;
     }
+}
+
+gchar*
+autocomplete_complete_ignore_accents(Autocomplete ac, const gchar *search_str,
+				     gboolean quote)
+{
+  return autocomplete_complete_internal(ac, search_str, quote, TRUE);
+}
+
+gchar*
+autocomplete_complete(Autocomplete ac, const gchar *search_str, gboolean quote)
+{
+  return autocomplete_complete_internal(ac, search_str, quote, FALSE);
 }
 
 char*
@@ -328,12 +406,34 @@ autocomplete_param_no_with_func(const char *const input, char *command, int arg_
 }
 
 static gchar*
-_search_from(Autocomplete ac, GSList *curr, gboolean quote)
+_search_from(Autocomplete ac, GSList *curr, gboolean quote, gboolean ignore_accents)
 {
     while(curr) {
+	char *cmp_against = curr->data;
+	if(ignore_accents) {
+#ifdef HAVE_ICU_I18N
+	    const size_t len = strlen (cmp_against);
+	    UChar utf16[len + 1];
+	    char utf8[len + 1];
 
+	    UErrorCode code = U_ZERO_ERROR;
+	    u_strFromUTF8 (utf16, sizeof (utf16), NULL, cmp_against, -1, &code);
+	    if (U_SUCCESS(code)) {
+		int32_t limit = u_strlen (utf16);
+		utrans_transUChars (ac->utrans, utf16, NULL, sizeof (utf16), 0,
+				    &limit, &code);
+		if (U_SUCCESS(code)) {
+		    int32_t written = 0;
+		    u_strToUTF8 (utf8, sizeof (utf8), &written, utf16, -1, &code);
+		    if (U_SUCCESS(code)) {
+			cmp_against = utf8;
+		    }
+		}
+	    }
+#endif
+	}
         // match found
-        if (strncmp(curr->data, ac->search_str, strlen(ac->search_str)) == 0) {
+        if (strncmp(cmp_against, ac->search_str, strlen(ac->search_str)) == 0) {
 
             // set pointer to last found
             ac->last_found = curr;
@@ -351,7 +451,7 @@ _search_from(Autocomplete ac, GSList *curr, gboolean quote)
 
             // otherwise just return the string
             } else {
-                return strdup(curr->data);
+		return strdup(curr->data);
             }
         }
 

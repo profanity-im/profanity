@@ -128,6 +128,11 @@ PKG_CHECK_MODULES([libmesode], [libmesode],
         [LIBS="$libstrophe_LIBS $LIBS" CFLAGS="$CFLAGS $libstrophe_CFLAGS" AC_DEFINE([HAVE_LIBSTROPHE], [1], [libstrophe])],
         [AC_MSG_ERROR([Neither libmesode or libstrophe found, either is required for profanity])])])
 
+### Check for icu
+PKG_CHECK_MODULES([icu_i18n], [icu-i18n],
+    [LIBS="$icu_i18n_LIBS $LIBS" CFLAGS="$CFLAGS $icu_i18n_CFLAGS" AC_DEFINE([HAVE_ICU_I18N], [1], [icu_i18n])],
+    [AC_MSG_WARN([icu_i18n is not available])])
+
 ### Check for ncurses library
 PKG_CHECK_MODULES([ncursesw], [ncursesw],
     [NCURSES_CFLAGS="$ncursesw_CFLAGS"; NCURSES_LIBS="$ncursesw_LIBS"; NCURSES="ncursesw"],
