@@ -126,7 +126,7 @@ autocomplete_length(Autocomplete ac)
     }
 }
 
-#ifdef HAVE_ICU_I20N
+#ifdef HAVE_ICU_I18N
 static int ucompare(gconstpointer a, gconstpointer b, gpointer data)
 {
   UChar ua[strlen (a) + 1];
