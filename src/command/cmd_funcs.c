@@ -4756,24 +4756,14 @@ cmd_clear(ProfWin *window, const char *const command, gchar **args)
 gboolean
 cmd_leave(ProfWin *window, const char *const command, gchar **args)
 {
-    jabber_conn_status_t conn_status = connection_get_status();
-    int index = wins_get_current_num();
-
-    if (window->type != WIN_MUC) {
-        cons_show("You can only use the /leave command in a chat room.");
+    if (window->type != WIN_MUC && window->type != WIN_CHAT && window->type != WIN_PRIVATE) {
+        cons_show("The /leave command is only valid in chat, or chat room windows.");
         cons_alert();
         return TRUE;
     }
 
-    // handle leaving rooms, or chat
-    if (conn_status == JABBER_CONNECTED) {
-        ui_close_connected_win(index);
-    }
-
-    // close the window
-    ui_close_win(index);
-
-    return TRUE;
+    // use /close behaviour
+    return cmd_close(window, "/leave", args);
 }
 
 gboolean
