@@ -476,7 +476,7 @@ roster_contact_autocomplete(const char *const search_str)
 {
     assert(roster != NULL);
 
-    return autocomplete_complete(roster->name_ac, search_str, TRUE);
+    return autocomplete_complete_ignore_accents(roster->name_ac, search_str, TRUE);
 }
 
 char*
