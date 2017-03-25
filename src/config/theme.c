@@ -1,7 +1,7 @@
 /*
  * theme.c
  *
- * Copyright (C) 2012 - 2016 James Booth <boothj5@gmail.com>
+ * Copyright (C) 2012 - 2017 James Booth <boothj5@gmail.com>
  *
  * This file is part of Profanity.
  *
@@ -104,6 +104,7 @@ theme_init(const char *const theme_name)
     g_hash_table_insert(defaults, strdup("statusbar.brackets"),      strdup("cyan"));
     g_hash_table_insert(defaults, strdup("statusbar.active"),        strdup("cyan"));
     g_hash_table_insert(defaults, strdup("statusbar.new"),           strdup("white"));
+    g_hash_table_insert(defaults, strdup("statusbar.time"),          strdup("white"));
     g_hash_table_insert(defaults, strdup("me"),                      strdup("yellow"));
     g_hash_table_insert(defaults, strdup("them"),                    strdup("green"));
     g_hash_table_insert(defaults, strdup("receipt.sent"),            strdup("red"));
@@ -755,6 +756,7 @@ theme_attrs(theme_item_t attrs)
     case THEME_STATUS_BRACKET:          _theme_prep_fgnd("statusbar.brackets",      lookup_str, &bold); break;
     case THEME_STATUS_ACTIVE:           _theme_prep_fgnd("statusbar.active",        lookup_str, &bold); break;
     case THEME_STATUS_NEW:              _theme_prep_fgnd("statusbar.new",           lookup_str, &bold); break;
+    case THEME_STATUS_TIME:             _theme_prep_fgnd("statusbar.time",          lookup_str, &bold); break;
     case THEME_ME:                      _theme_prep_fgnd("me",                      lookup_str, &bold); break;
     case THEME_THEM:                    _theme_prep_fgnd("them",                    lookup_str, &bold); break;
     case THEME_RECEIPT_SENT:            _theme_prep_fgnd("receipt.sent",            lookup_str, &bold); break;
@@ -843,6 +845,7 @@ theme_attrs(theme_item_t attrs)
     case THEME_STATUS_BRACKET:
     case THEME_STATUS_ACTIVE:
     case THEME_STATUS_NEW:
+    case THEME_STATUS_TIME:
         _theme_prep_bgnd("statusbar", "blue", lookup_str);
         break;
     default:

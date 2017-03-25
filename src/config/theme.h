@@ -1,7 +1,7 @@
 /*
  * theme.h
  *
- * Copyright (C) 2012 - 2016 James Booth <boothj5@gmail.com>
+ * Copyright (C) 2012 - 2017 James Booth <boothj5@gmail.com>
  *
  * This file is part of Profanity.
  *
@@ -69,6 +69,7 @@ typedef enum {
     THEME_STATUS_BRACKET,
     THEME_STATUS_ACTIVE,
     THEME_STATUS_NEW,
+    THEME_STATUS_TIME,
     THEME_ME,
     THEME_THEM,
     THEME_ROOMINFO,

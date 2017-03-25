@@ -1,7 +1,7 @@
 /*
  * autocomplete.c
  *
- * Copyright (C) 2012 - 2016 James Booth <boothj5@gmail.com>
+ * Copyright (C) 2012 - 2017 James Booth <boothj5@gmail.com>
  *
  * This file is part of Profanity.
  *
@@ -35,6 +35,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <glib.h>
 
 #include "common.h"
 #include "tools/autocomplete.h"
@@ -330,10 +331,17 @@ autocomplete_param_no_with_func(const char *const input, char *command, int arg_
 static gchar*
 _search_from(Autocomplete ac, GSList *curr, gboolean quote)
 {
+    gchar *search_str_ascii = g_str_to_ascii(ac->search_str, NULL);
+    gchar *search_str_lower = g_ascii_strdown(search_str_ascii, -1);
+    g_free(search_str_ascii);
+
     while(curr) {
+        gchar *curr_ascii = g_str_to_ascii(curr->data, NULL);
+        gchar *curr_lower = g_ascii_strdown(curr_ascii, -1);
+        g_free(curr_ascii);
 
         // match found
-        if (strncmp(curr->data, ac->search_str, strlen(ac->search_str)) == 0) {
+        if (strncmp(curr_lower, search_str_lower, strlen(search_str_lower)) == 0) {
 
             // set pointer to last found
             ac->last_found = curr;
@@ -347,16 +355,22 @@ _search_from(Autocomplete ac, GSList *curr, gboolean quote)
                 gchar *result = quoted->str;
                 g_string_free(quoted, FALSE);
 
+                g_free(search_str_lower);
+                g_free(curr_lower);
                 return result;
 
             // otherwise just return the string
             } else {
+                g_free(search_str_lower);
+                g_free(curr_lower);
                 return strdup(curr->data);
             }
         }
 
+        g_free(curr_lower);
         curr = g_slist_next(curr);
     }
 
+    g_free(search_str_lower);
     return NULL;
 }

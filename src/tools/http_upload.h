@@ -1,7 +1,7 @@
 /*
  * http_upload.h
  *
- * Copyright (C) 2012 - 2016 James Booth <boothj5@gmail.com>
+ * Copyright (C) 2012 - 2017 James Booth <boothj5@gmail.com>
  *
  * This file is part of Profanity.
  *
@@ -62,6 +62,5 @@ void* http_file_put(void *userdata);
 
 char* file_mime_type(const char* const file_name);
 off_t file_size(const char* const file_name);
-int is_regular_file(const char *filename);
 
 #endif

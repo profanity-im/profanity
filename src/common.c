@@ -1,7 +1,7 @@
 /*
  * common.c
  *
- * Copyright (C) 2012 - 2016 James Booth <boothj5@gmail.com>
+ * Copyright (C) 2012 - 2017 James Booth <boothj5@gmail.com>
  *
  * This file is part of Profanity.
  *
@@ -66,54 +66,6 @@ struct curl_data_t
 static unsigned long unique_id = 0;
 
 static size_t _data_callback(void *ptr, size_t size, size_t nmemb, void *data);
-
-// taken from glib 2.30.3
-gchar*
-p_utf8_substring(const gchar *str, glong start_pos, glong end_pos)
-{
-    gchar *start, *end, *out;
-
-    start = g_utf8_offset_to_pointer (str, start_pos);
-    end = g_utf8_offset_to_pointer (start, end_pos - start_pos);
-
-    out = g_malloc (end - start + 1);
-    memcpy (out, start, end - start);
-    out[end - start] = 0;
-
-    return out;
-}
-
-void
-p_slist_free_full(GSList *items, GDestroyNotify free_func)
-{
-    g_slist_foreach (items, (GFunc) free_func, NULL);
-    g_slist_free (items);
-}
-
-void
-p_list_free_full(GList *items, GDestroyNotify free_func)
-{
-    g_list_foreach (items, (GFunc) free_func, NULL);
-    g_list_free (items);
-}
-
-gboolean
-p_hash_table_add(GHashTable *hash_table, gpointer key)
-{
-    // doesn't handle when key exists, but value == NULL
-    gpointer found = g_hash_table_lookup(hash_table, key);
-    g_hash_table_replace(hash_table, key, key);
-
-    return (found == NULL);
-}
-
-gboolean
-p_hash_table_contains(GHashTable *hash_table, gconstpointer key)
-{
-    // doesn't handle when key exists, but value == NULL
-    gpointer found = g_hash_table_lookup(hash_table, key);
-    return (found != NULL);
-}
 
 gboolean
 create_dir(char *name)
@@ -509,13 +461,18 @@ prof_occurrences(const char *const needle, const char *const haystack, int offse
         return *result;
     }
 
-    if (g_str_has_prefix(&haystack[offset], needle)) {
+    gchar *haystack_curr = g_utf8_offset_to_pointer(haystack, offset);
+    if (g_str_has_prefix(haystack_curr, needle)) {
         if (whole_word) {
-            char *prev = g_utf8_prev_char(&haystack[offset]);
-            char *next = g_utf8_next_char(&haystack[offset] + strlen(needle) - 1);
-            gunichar prevu = g_utf8_get_char(prev);
-            gunichar nextu = g_utf8_get_char(next);
-            if (!g_unichar_isalnum(prevu) && !g_unichar_isalnum(nextu)) {
+            gchar *needle_last_ch = g_utf8_offset_to_pointer(needle, g_utf8_strlen(needle, -1)- 1);
+            int needle_last_ch_len = mblen(needle_last_ch, MB_CUR_MAX);
+
+            gchar *haystack_before_ch = g_utf8_prev_char(haystack_curr);
+            gchar *haystack_after_ch = g_utf8_next_char(haystack_curr + strlen(needle) - needle_last_ch_len);
+
+            gunichar before = g_utf8_get_char(haystack_before_ch);
+            gunichar after = g_utf8_get_char(haystack_after_ch);
+            if (!g_unichar_isalnum(before) && !g_unichar_isalnum(after)) {
                 *result = g_slist_append(*result, GINT_TO_POINTER(offset));
             }
         } else {
@@ -523,10 +480,53 @@ prof_occurrences(const char *const needle, const char *const haystack, int offse
         }
     }
 
-    if (haystack[offset+1] != '\0') {
-        *result = prof_occurrences(needle, haystack, offset+1, whole_word, result);
+    offset++;
+    if (g_strcmp0(g_utf8_offset_to_pointer(haystack, offset), "\0") != 0) {
+        *result = prof_occurrences(needle, haystack, offset, whole_word, result);
     }
 
     return *result;
 }
 
+int
+is_regular_file(const char *path)
+{
+    struct stat st;
+    stat(path, &st);
+    return S_ISREG(st.st_mode);
+}
+
+int
+is_dir(const char *path)
+{
+    struct stat st;
+    stat(path, &st);
+    return S_ISDIR(st.st_mode);
+}
+
+void
+get_file_paths_recursive(const char *path, GSList **contents)
+{
+    if (!is_dir(path)) {
+        return;
+    }
+
+    GDir* directory = g_dir_open(path, 0, NULL);
+    const gchar *entry = g_dir_read_name(directory);
+    while (entry) {
+        GString *full = g_string_new(path);
+        if (!g_str_has_suffix(full->str, "/")) {
+            g_string_append(full, "/");
+        }
+        g_string_append(full, entry);
+
+        if (is_dir(full->str)) {
+            get_file_paths_recursive(full->str, contents);
+        } else if (is_regular_file(full->str)) {
+            *contents = g_slist_append(*contents, full->str);
+        }
+
+        g_string_free(full, FALSE);
+        entry = g_dir_read_name(directory);
+    }
+}
