@@ -459,6 +459,7 @@ _status_bar_draw(void)
     last_time = g_date_time_new_now(tz);
 
     int bracket_attrs = theme_attrs(THEME_STATUS_BRACKET);
+    int time_attrs = theme_attrs(THEME_STATUS_TIME);
 
     char *time_pref = prefs_get_string(PREF_TIME_STATUSBAR);
     if (g_strcmp0(time_pref, "off") != 0) {
@@ -468,7 +469,9 @@ _status_bar_draw(void)
         wattron(status_bar, bracket_attrs);
         mvwaddch(status_bar, 0, 1, '[');
         wattroff(status_bar, bracket_attrs);
+        wattron(status_bar, time_attrs);
         mvwprintw(status_bar, 0, 2, date_fmt);
+        wattroff(status_bar, time_attrs);
         wattron(status_bar, bracket_attrs);
         mvwaddch(status_bar, 0, 2 + len, ']');
         wattroff(status_bar, bracket_attrs);

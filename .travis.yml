@@ -1,9 +1,11 @@
+dist: trusty
+sudo: required
 language: c
 install:
     - lsb_release -a
     - uname -a
     - sudo apt-get update
-    - sudo apt-get -y install libssl-dev libexpat1-dev libncursesw5-dev libglib2.0-dev libnotify-dev libcurl3-dev libxss-dev libotr2-dev libgpgme11-dev autoconf-archive expect-dev tcl-dev libtool python-dev
+    - sudo apt-get -y install libssl-dev libexpat1-dev libncursesw5-dev libglib2.0-dev libnotify-dev libcurl3-dev libxss-dev libotr5-dev libgpgme11-dev autoconf-archive expect-dev tcl-dev libtool python-dev libgtk2.0-dev
     - git clone git://github.com/boothj5/libmesode.git
     - cd libmesode
     - mkdir m4

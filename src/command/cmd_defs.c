@@ -576,7 +576,7 @@ static struct cmd_t command_defs[] =
         CMD_SYN(
             "/leave")
         CMD_DESC(
-            "Leave the current chat room.")
+            "Leave the current chat or room.")
         CMD_NOARGS
         CMD_NOEXAMPLES
     },
