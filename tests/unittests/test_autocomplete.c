@@ -117,3 +117,55 @@ void add_two_same_updates(void **state)
     autocomplete_clear(ac);
     g_slist_free_full(result, g_free);
 }
+
+void complete_accented_with_accented(void **state)
+{
+    Autocomplete ac = autocomplete_new();
+    autocomplete_add(ac, "èâîô");
+
+    char *result = autocomplete_complete(ac, "èâ", TRUE);
+
+    assert_string_equal("èâîô", result);
+
+    autocomplete_clear(ac);
+}
+
+void complete_accented_with_base(void **state)
+{
+    Autocomplete ac = autocomplete_new();
+    autocomplete_add(ac, "èâîô");
+
+    char *result = autocomplete_complete(ac, "ea", TRUE);
+
+    assert_string_equal("èâîô", result);
+
+    autocomplete_clear(ac);
+}
+
+void complete_both_with_accented(void **state)
+{
+    Autocomplete ac = autocomplete_new();
+    autocomplete_add(ac, "eaooooo");
+    autocomplete_add(ac, "èâîô");
+
+    char *result1 = autocomplete_complete(ac, "èâ", TRUE);
+    char *result2 = autocomplete_complete(ac, result1, TRUE);
+
+    assert_string_equal("èâîô", result2);
+
+    autocomplete_clear(ac);
+}
+
+void complete_both_with_base(void **state)
+{
+    Autocomplete ac = autocomplete_new();
+    autocomplete_add(ac, "eaooooo");
+    autocomplete_add(ac, "èâîô");
+
+    char *result1 = autocomplete_complete(ac, "ea", TRUE);
+    char *result2 = autocomplete_complete(ac, result1, TRUE);
+
+    assert_string_equal("èâîô", result2);
+
+    autocomplete_clear(ac);
+}
