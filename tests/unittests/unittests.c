@@ -90,6 +90,11 @@ int main(int argc, char* argv[]) {
         unit_test(add_two_adds_two),
         unit_test(add_two_same_adds_one),
         unit_test(add_two_same_updates),
+        unit_test(complete_accented_with_accented),
+        unit_test(complete_accented_with_base),
+        unit_test(complete_both_with_accented),
+        unit_test(complete_both_with_base),
+        unit_test(complete_ignores_case),
 
         unit_test(create_jid_from_null_returns_null),
         unit_test(create_jid_from_empty_string_returns_null),

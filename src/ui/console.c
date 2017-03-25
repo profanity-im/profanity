@@ -2224,6 +2224,7 @@ cons_theme_properties(void)
     _cons_theme_bar_prop(THEME_STATUS_BRACKET, "statusbar.brackets");
     _cons_theme_bar_prop(THEME_STATUS_ACTIVE, "statusbar.active");
     _cons_theme_bar_prop(THEME_STATUS_NEW, "statusbar.new");
+    _cons_theme_bar_prop(THEME_STATUS_TIME, "statusbar.time");
 
     _cons_theme_prop(THEME_TIME, "main.time");
     _cons_theme_prop(THEME_TEXT, "main.text");
