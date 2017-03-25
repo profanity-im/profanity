@@ -169,3 +169,15 @@ void complete_both_with_base(void **state)
 
     autocomplete_clear(ac);
 }
+
+void complete_ignores_case(void **state)
+{
+    Autocomplete ac = autocomplete_new();
+    autocomplete_add(ac, "MyBuddy");
+
+    char *result = autocomplete_complete(ac, "myb", TRUE);
+
+    assert_string_equal("MyBuddy", result);
+
+    autocomplete_clear(ac);
+}
