@@ -129,7 +129,7 @@ autocompleters_filepath_add(const char *const plugin_name, const char *prefix)
 }
 
 char*
-autocompleters_complete(const char * const input)
+autocompleters_complete(const char * const input, gboolean previous)
 {
     char *result = NULL;
 
@@ -141,7 +141,7 @@ autocompleters_complete(const char * const input)
         GList *keys = g_hash_table_get_keys(key_to_ac);
         GList *curr = keys;
         while (curr) {
-            result = autocomplete_param_with_ac(input, curr->data, g_hash_table_lookup(key_to_ac, curr->data), TRUE);
+            result = autocomplete_param_with_ac(input, curr->data, g_hash_table_lookup(key_to_ac, curr->data), TRUE, previous);
             if (result) {
                 g_list_free(ac_hashes);
                 g_list_free(keys);
@@ -164,7 +164,7 @@ autocompleters_complete(const char * const input)
         while (curr_prefix) {
             char *prefix = curr_prefix->data;
             if (g_str_has_prefix(input, prefix)) {
-                result = cmd_ac_complete_filepath(input, prefix);
+                result = cmd_ac_complete_filepath(input, prefix, previous);
                 if (result) {
                     g_list_free(filepath_hashes);
                     g_list_free(prefixes);

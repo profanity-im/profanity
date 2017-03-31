@@ -57,51 +57,51 @@
 #include "pgp/gpg.h"
 #endif
 
-static char* _sub_autocomplete(ProfWin *window, const char *const input);
-static char* _notify_autocomplete(ProfWin *window, const char *const input);
-static char* _theme_autocomplete(ProfWin *window, const char *const input);
-static char* _autoaway_autocomplete(ProfWin *window, const char *const input);
-static char* _autoconnect_autocomplete(ProfWin *window, const char *const input);
-static char* _account_autocomplete(ProfWin *window, const char *const input);
-static char* _who_autocomplete(ProfWin *window, const char *const input);
-static char* _roster_autocomplete(ProfWin *window, const char *const input);
-static char* _group_autocomplete(ProfWin *window, const char *const input);
-static char* _bookmark_autocomplete(ProfWin *window, const char *const input);
-static char* _otr_autocomplete(ProfWin *window, const char *const input);
-static char* _pgp_autocomplete(ProfWin *window, const char *const input);
-static char* _connect_autocomplete(ProfWin *window, const char *const input);
-static char* _alias_autocomplete(ProfWin *window, const char *const input);
-static char* _join_autocomplete(ProfWin *window, const char *const input);
-static char* _log_autocomplete(ProfWin *window, const char *const input);
-static char* _form_autocomplete(ProfWin *window, const char *const input);
-static char* _form_field_autocomplete(ProfWin *window, const char *const input);
-static char* _occupants_autocomplete(ProfWin *window, const char *const input);
-static char* _kick_autocomplete(ProfWin *window, const char *const input);
-static char* _ban_autocomplete(ProfWin *window, const char *const input);
-static char* _affiliation_autocomplete(ProfWin *window, const char *const input);
-static char* _role_autocomplete(ProfWin *window, const char *const input);
-static char* _resource_autocomplete(ProfWin *window, const char *const input);
-static char* _wintitle_autocomplete(ProfWin *window, const char *const input);
-static char* _inpblock_autocomplete(ProfWin *window, const char *const input);
-static char* _time_autocomplete(ProfWin *window, const char *const input);
-static char* _receipts_autocomplete(ProfWin *window, const char *const input);
-static char* _help_autocomplete(ProfWin *window, const char *const input);
-static char* _wins_autocomplete(ProfWin *window, const char *const input);
-static char* _tls_autocomplete(ProfWin *window, const char *const input);
-static char* _script_autocomplete(ProfWin *window, const char *const input);
-static char* _subject_autocomplete(ProfWin *window, const char *const input);
-static char* _console_autocomplete(ProfWin *window, const char *const input);
-static char* _win_autocomplete(ProfWin *window, const char *const input);
-static char* _close_autocomplete(ProfWin *window, const char *const input);
-static char* _plugins_autocomplete(ProfWin *window, const char *const input);
-static char* _sendfile_autocomplete(ProfWin *window, const char *const input);
-static char* _blocked_autocomplete(ProfWin *window, const char *const input);
-static char* _tray_autocomplete(ProfWin *window, const char *const input);
-static char* _presence_autocomplete(ProfWin *window, const char *const input);
+static char* _sub_autocomplete(ProfWin *window, const char *const input, gboolean previous);
+static char* _notify_autocomplete(ProfWin *window, const char *const input, gboolean previous);
+static char* _theme_autocomplete(ProfWin *window, const char *const input, gboolean previous);
+static char* _autoaway_autocomplete(ProfWin *window, const char *const input, gboolean previous);
+static char* _autoconnect_autocomplete(ProfWin *window, const char *const input, gboolean previous);
+static char* _account_autocomplete(ProfWin *window, const char *const input, gboolean previous);
+static char* _who_autocomplete(ProfWin *window, const char *const input, gboolean previous);
+static char* _roster_autocomplete(ProfWin *window, const char *const input, gboolean previous);
+static char* _group_autocomplete(ProfWin *window, const char *const input, gboolean previous);
+static char* _bookmark_autocomplete(ProfWin *window, const char *const input, gboolean previous);
+static char* _otr_autocomplete(ProfWin *window, const char *const input, gboolean previous);
+static char* _pgp_autocomplete(ProfWin *window, const char *const input, gboolean previous);
+static char* _connect_autocomplete(ProfWin *window, const char *const input, gboolean previous);
+static char* _alias_autocomplete(ProfWin *window, const char *const input, gboolean previous);
+static char* _join_autocomplete(ProfWin *window, const char *const input, gboolean previous);
+static char* _log_autocomplete(ProfWin *window, const char *const input, gboolean previous);
+static char* _form_autocomplete(ProfWin *window, const char *const input, gboolean previous);
+static char* _form_field_autocomplete(ProfWin *window, const char *const input, gboolean previous);
+static char* _occupants_autocomplete(ProfWin *window, const char *const input, gboolean previous);
+static char* _kick_autocomplete(ProfWin *window, const char *const input, gboolean previous);
+static char* _ban_autocomplete(ProfWin *window, const char *const input, gboolean previous);
+static char* _affiliation_autocomplete(ProfWin *window, const char *const input, gboolean previous);
+static char* _role_autocomplete(ProfWin *window, const char *const input, gboolean previous);
+static char* _resource_autocomplete(ProfWin *window, const char *const input, gboolean previous);
+static char* _wintitle_autocomplete(ProfWin *window, const char *const input, gboolean previous);
+static char* _inpblock_autocomplete(ProfWin *window, const char *const input, gboolean previous);
+static char* _time_autocomplete(ProfWin *window, const char *const input, gboolean previous);
+static char* _receipts_autocomplete(ProfWin *window, const char *const input, gboolean previous);
+static char* _help_autocomplete(ProfWin *window, const char *const input, gboolean previous);
+static char* _wins_autocomplete(ProfWin *window, const char *const input, gboolean previous);
+static char* _tls_autocomplete(ProfWin *window, const char *const input, gboolean previous);
+static char* _script_autocomplete(ProfWin *window, const char *const input, gboolean previous);
+static char* _subject_autocomplete(ProfWin *window, const char *const input, gboolean previous);
+static char* _console_autocomplete(ProfWin *window, const char *const input, gboolean previous);
+static char* _win_autocomplete(ProfWin *window, const char *const input, gboolean previous);
+static char* _close_autocomplete(ProfWin *window, const char *const input, gboolean previous);
+static char* _plugins_autocomplete(ProfWin *window, const char *const input, gboolean previous);
+static char* _sendfile_autocomplete(ProfWin *window, const char *const input, gboolean previous);
+static char* _blocked_autocomplete(ProfWin *window, const char *const input, gboolean previous);
+static char* _tray_autocomplete(ProfWin *window, const char *const input, gboolean previous);
+static char* _presence_autocomplete(ProfWin *window, const char *const input, gboolean previous);
 
-static char* _script_autocomplete_func(const char *const prefix);
+static char* _script_autocomplete_func(const char *const prefix, gboolean previous);
 
-static char* _cmd_ac_complete_params(ProfWin *window, const char *const input);
+static char* _cmd_ac_complete_params(ProfWin *window, const char *const input, gboolean previous);
 
 static Autocomplete commands_ac;
 static Autocomplete who_room_ac;
@@ -842,16 +842,16 @@ cmd_ac_add_form_fields(DataForm *form)
         return;
     }
 
-    GSList *fields = autocomplete_create_list(form->tag_ac);
-    GSList *curr_field = fields;
+    GList *fields = autocomplete_create_list(form->tag_ac);
+    GList *curr_field = fields;
     while (curr_field) {
         GString *field_str = g_string_new("/");
         g_string_append(field_str, curr_field->data);
         cmd_ac_add(field_str->str);
         g_string_free(field_str, TRUE);
-        curr_field = g_slist_next(curr_field);
+        curr_field = g_list_next(curr_field);
     }
-    g_slist_free_full(fields, free);
+    g_list_free_full(fields, free);
 }
 
 void
@@ -861,32 +861,32 @@ cmd_ac_remove_form_fields(DataForm *form)
         return;
     }
 
-    GSList *fields = autocomplete_create_list(form->tag_ac);
-    GSList *curr_field = fields;
+    GList *fields = autocomplete_create_list(form->tag_ac);
+    GList *curr_field = fields;
     while (curr_field) {
         GString *field_str = g_string_new("/");
         g_string_append(field_str, curr_field->data);
         cmd_ac_remove(field_str->str);
         g_string_free(field_str, TRUE);
-        curr_field = g_slist_next(curr_field);
+        curr_field = g_list_next(curr_field);
     }
-    g_slist_free_full(fields, free);
+    g_list_free_full(fields, free);
 }
 
 char*
-cmd_ac_complete(ProfWin *window, const char *const input)
+cmd_ac_complete(ProfWin *window, const char *const input, gboolean previous)
 {
     // autocomplete command
     if ((strncmp(input, "/", 1) == 0) && (!str_contains(input, strlen(input), ' '))) {
         char *found = NULL;
-        found = autocomplete_complete(commands_ac, input, TRUE);
+        found = autocomplete_complete(commands_ac, input, TRUE, previous);
         if (found) {
             return found;
         }
 
     // autocomplete parameters
     } else {
-        char *found = _cmd_ac_complete_params(window, input);
+        char *found = _cmd_ac_complete_params(window, input, previous);
         if (found) {
             return found;
         }
@@ -1149,7 +1149,7 @@ cmd_ac_uninit(void)
 }
 
 char*
-cmd_ac_complete_filepath(const char *const input, char *const startstr)
+cmd_ac_complete_filepath(const char *const input, char *const startstr, gboolean previous)
 {
     static char* last_directory = NULL;
 
@@ -1247,7 +1247,7 @@ cmd_ac_complete_filepath(const char *const input, char *const startstr)
     }
     free(foofile);
 
-    result = autocomplete_param_with_ac(input, startstr, filepath_ac, TRUE);
+    result = autocomplete_param_with_ac(input, startstr, filepath_ac, TRUE, previous);
     if (result) {
         return result;
     }
@@ -1256,7 +1256,7 @@ cmd_ac_complete_filepath(const char *const input, char *const startstr)
 }
 
 static char*
-_cmd_ac_complete_params(ProfWin *window, const char *const input)
+_cmd_ac_complete_params(ProfWin *window, const char *const input, gboolean previous)
 {
     int i;
     char *result = NULL;
@@ -1269,7 +1269,7 @@ _cmd_ac_complete_params(ProfWin *window, const char *const input)
         "/lastactivity" };
 
     for (i = 0; i < ARRAY_SIZE(boolean_choices); i++) {
-        result = autocomplete_param_with_func(input, boolean_choices[i], prefs_autocomplete_boolean_choice);
+        result = autocomplete_param_with_func(input, boolean_choices[i], prefs_autocomplete_boolean_choice, previous);
         if (result) {
             return result;
         }
@@ -1286,7 +1286,7 @@ _cmd_ac_complete_params(ProfWin *window, const char *const input)
             // Remove quote character before and after names when doing autocomplete
             char *unquoted = strip_arg_quotes(input);
             for (i = 0; i < ARRAY_SIZE(nick_choices); i++) {
-                result = autocomplete_param_with_ac(unquoted, nick_choices[i], nick_ac, TRUE);
+                result = autocomplete_param_with_ac(unquoted, nick_choices[i], nick_ac, TRUE, previous);
                 if (result) {
                     free(unquoted);
                     return result;
@@ -1301,7 +1301,7 @@ _cmd_ac_complete_params(ProfWin *window, const char *const input)
         // Remove quote character before and after names when doing autocomplete
         char *unquoted = strip_arg_quotes(input);
         for (i = 0; i < ARRAY_SIZE(contact_choices); i++) {
-            result = autocomplete_param_with_func(unquoted, contact_choices[i], roster_contact_autocomplete);
+            result = autocomplete_param_with_func(unquoted, contact_choices[i], roster_contact_autocomplete, previous);
             if (result) {
                 free(unquoted);
                 return result;
@@ -1311,7 +1311,7 @@ _cmd_ac_complete_params(ProfWin *window, const char *const input)
 
         gchar *resource_choices[] = { "/caps", "/software", "/ping" };
         for (i = 0; i < ARRAY_SIZE(resource_choices); i++) {
-            result = autocomplete_param_with_func(input, resource_choices[i], roster_fulljid_autocomplete);
+            result = autocomplete_param_with_func(input, resource_choices[i], roster_fulljid_autocomplete, previous);
             if (result) {
                 return result;
             }
@@ -1319,7 +1319,7 @@ _cmd_ac_complete_params(ProfWin *window, const char *const input)
     }
 
     if (conn_status == JABBER_CONNECTED) {
-        result = autocomplete_param_with_func(input, "/invite", roster_contact_autocomplete);
+        result = autocomplete_param_with_func(input, "/invite", roster_contact_autocomplete, previous);
         if (result) {
             return result;
         }
@@ -1327,7 +1327,7 @@ _cmd_ac_complete_params(ProfWin *window, const char *const input)
 
     gchar *invite_choices[] = { "/decline", "/join" };
     for (i = 0; i < ARRAY_SIZE(invite_choices); i++) {
-        result = autocomplete_param_with_func(input, invite_choices[i], muc_invites_find);
+        result = autocomplete_param_with_func(input, invite_choices[i], muc_invites_find, previous);
         if (result) {
             return result;
         }
@@ -1337,7 +1337,7 @@ _cmd_ac_complete_params(ProfWin *window, const char *const input)
     Autocomplete completers[] = { prefs_ac, disco_ac, room_ac, autoping_ac, winpos_ac, winpos_ac, winpos_ac, winpos_ac };
 
     for (i = 0; i < ARRAY_SIZE(cmds); i++) {
-        result = autocomplete_param_with_ac(input, cmds[i], completers[i], TRUE);
+        result = autocomplete_param_with_ac(input, cmds[i], completers[i], TRUE, previous);
         if (result) {
             return result;
         }
@@ -1398,9 +1398,9 @@ _cmd_ac_complete_params(ProfWin *window, const char *const input)
     }
     parsed[i] = '\0';
 
-    char * (*ac_func)(ProfWin*, const char * const) = g_hash_table_lookup(ac_funcs, parsed);
+    char * (*ac_func)(ProfWin*, const char * const, gboolean) = g_hash_table_lookup(ac_funcs, parsed);
     if (ac_func) {
-        result = ac_func(window, input);
+        result = ac_func(window, input, previous);
         if (result) {
             g_hash_table_destroy(ac_funcs);
             return result;
@@ -1408,13 +1408,13 @@ _cmd_ac_complete_params(ProfWin *window, const char *const input)
     }
     g_hash_table_destroy(ac_funcs);
 
-    result = plugins_autocomplete(input);
+    result = plugins_autocomplete(input, previous);
     if (result) {
         return result;
     }
 
     if (g_str_has_prefix(input, "/field")) {
-        result = _form_field_autocomplete(window, input);
+        result = _form_field_autocomplete(window, input, previous);
         if (result) {
             return result;
         }
@@ -1424,18 +1424,18 @@ _cmd_ac_complete_params(ProfWin *window, const char *const input)
 }
 
 static char*
-_sub_autocomplete(ProfWin *window, const char *const input)
+_sub_autocomplete(ProfWin *window, const char *const input, gboolean previous)
 {
     char *result = NULL;
-    result = autocomplete_param_with_func(input, "/sub allow", presence_sub_request_find);
+    result = autocomplete_param_with_func(input, "/sub allow", presence_sub_request_find, previous);
     if (result) {
         return result;
     }
-    result = autocomplete_param_with_func(input, "/sub deny", presence_sub_request_find);
+    result = autocomplete_param_with_func(input, "/sub deny", presence_sub_request_find, previous);
     if (result) {
         return result;
     }
-    result = autocomplete_param_with_ac(input, "/sub", sub_ac, TRUE);
+    result = autocomplete_param_with_ac(input, "/sub", sub_ac, TRUE, previous);
     if (result) {
         return result;
     }
@@ -1444,15 +1444,15 @@ _sub_autocomplete(ProfWin *window, const char *const input)
 }
 
 static char*
-_tray_autocomplete(ProfWin *window, const char *const input)
+_tray_autocomplete(ProfWin *window, const char *const input, gboolean previous)
 {
     char *result = NULL;
-    result = autocomplete_param_with_func(input, "/tray read", prefs_autocomplete_boolean_choice);
+    result = autocomplete_param_with_func(input, "/tray read", prefs_autocomplete_boolean_choice, previous);
     if (result) {
         return result;
     }
 
-    result = autocomplete_param_with_ac(input, "/tray", tray_ac, FALSE);
+    result = autocomplete_param_with_ac(input, "/tray", tray_ac, FALSE, previous);
     if (result) {
         return result;
     }
@@ -1461,12 +1461,12 @@ _tray_autocomplete(ProfWin *window, const char *const input)
 }
 
 static char*
-_who_autocomplete(ProfWin *window, const char *const input)
+_who_autocomplete(ProfWin *window, const char *const input, gboolean previous)
 {
     char *result = NULL;
 
     if (window->type == WIN_MUC) {
-        result = autocomplete_param_with_ac(input, "/who", who_room_ac, TRUE);
+        result = autocomplete_param_with_ac(input, "/who", who_room_ac, TRUE, previous);
         if (result) {
             return result;
         }
@@ -1479,14 +1479,14 @@ _who_autocomplete(ProfWin *window, const char *const input)
                 "/who unavailable" };
 
             for (i = 0; i < ARRAY_SIZE(group_commands); i++) {
-                result = autocomplete_param_with_func(input, group_commands[i], roster_group_autocomplete);
+                result = autocomplete_param_with_func(input, group_commands[i], roster_group_autocomplete, previous);
                 if (result) {
                     return result;
                 }
             }
         }
 
-        result = autocomplete_param_with_ac(input, "/who", who_roster_ac, TRUE);
+        result = autocomplete_param_with_ac(input, "/who", who_roster_ac, TRUE, previous);
         if (result) {
             return result;
         }
@@ -1496,135 +1496,135 @@ _who_autocomplete(ProfWin *window, const char *const input)
 }
 
 static char*
-_roster_autocomplete(ProfWin *window, const char *const input)
+_roster_autocomplete(ProfWin *window, const char *const input, gboolean previous)
 {
     char *result = NULL;
-    result = autocomplete_param_with_ac(input, "/roster room private char", roster_char_ac, TRUE);
+    result = autocomplete_param_with_ac(input, "/roster room private char", roster_char_ac, TRUE, previous);
     if (result) {
         return result;
     }
-    result = autocomplete_param_with_ac(input, "/roster room private", roster_header_ac, TRUE);
+    result = autocomplete_param_with_ac(input, "/roster room private", roster_header_ac, TRUE, previous);
     if (result) {
         return result;
     }
-    result = autocomplete_param_with_ac(input, "/roster header char", roster_char_ac, TRUE);
+    result = autocomplete_param_with_ac(input, "/roster header char", roster_char_ac, TRUE, previous);
     if (result) {
         return result;
     }
-    result = autocomplete_param_with_ac(input, "/roster contact char", roster_char_ac, TRUE);
+    result = autocomplete_param_with_ac(input, "/roster contact char", roster_char_ac, TRUE, previous);
     if (result) {
         return result;
     }
-    result = autocomplete_param_with_ac(input, "/roster room char", roster_char_ac, TRUE);
+    result = autocomplete_param_with_ac(input, "/roster room char", roster_char_ac, TRUE, previous);
     if (result) {
         return result;
     }
-    result = autocomplete_param_with_ac(input, "/roster private char", roster_char_ac, TRUE);
+    result = autocomplete_param_with_ac(input, "/roster private char", roster_char_ac, TRUE, previous);
     if (result) {
         return result;
     }
-    result = autocomplete_param_with_ac(input, "/roster resource char", roster_char_ac, TRUE);
+    result = autocomplete_param_with_ac(input, "/roster resource char", roster_char_ac, TRUE, previous);
     if (result) {
         return result;
     }
-    result = autocomplete_param_with_func(input, "/roster resource join", prefs_autocomplete_boolean_choice);
+    result = autocomplete_param_with_func(input, "/roster resource join", prefs_autocomplete_boolean_choice, previous);
     if (result) {
         return result;
     }
-    result = autocomplete_param_with_ac(input, "/roster room position", roster_room_position_ac, TRUE);
+    result = autocomplete_param_with_ac(input, "/roster room position", roster_room_position_ac, TRUE, previous);
     if (result) {
         return result;
     }
-    result = autocomplete_param_with_ac(input, "/roster room by", roster_room_by_ac, TRUE);
+    result = autocomplete_param_with_ac(input, "/roster room by", roster_room_by_ac, TRUE, previous);
     if (result) {
         return result;
     }
-    result = autocomplete_param_with_ac(input, "/roster room order", roster_room_order_ac, TRUE);
+    result = autocomplete_param_with_ac(input, "/roster room order", roster_room_order_ac, TRUE, previous);
     if (result) {
         return result;
     }
-    result = autocomplete_param_with_ac(input, "/roster room unread", roster_unread_ac, TRUE);
+    result = autocomplete_param_with_ac(input, "/roster room unread", roster_unread_ac, TRUE, previous);
     if (result) {
         return result;
     }
-    result = autocomplete_param_with_func(input, "/roster count zero", prefs_autocomplete_boolean_choice);
+    result = autocomplete_param_with_func(input, "/roster count zero", prefs_autocomplete_boolean_choice, previous);
     if (result) {
         return result;
     }
 
     jabber_conn_status_t conn_status = connection_get_status();
     if (conn_status == JABBER_CONNECTED) {
-        result = autocomplete_param_with_func(input, "/roster nick", roster_barejid_autocomplete);
+        result = autocomplete_param_with_func(input, "/roster nick", roster_barejid_autocomplete, previous);
         if (result) {
             return result;
         }
-        result = autocomplete_param_with_func(input, "/roster clearnick", roster_barejid_autocomplete);
+        result = autocomplete_param_with_func(input, "/roster clearnick", roster_barejid_autocomplete, previous);
         if (result) {
             return result;
         }
-        result = autocomplete_param_with_func(input, "/roster remove", roster_barejid_autocomplete);
+        result = autocomplete_param_with_func(input, "/roster remove", roster_barejid_autocomplete, previous);
         if (result) {
             return result;
         }
     }
 
-    result = autocomplete_param_with_ac(input, "/roster remove_all", roster_remove_all_ac, TRUE);
+    result = autocomplete_param_with_ac(input, "/roster remove_all", roster_remove_all_ac, TRUE, previous);
     if (result) {
         return result;
     }
-    result = autocomplete_param_with_ac(input, "/roster show", roster_show_ac, TRUE);
+    result = autocomplete_param_with_ac(input, "/roster show", roster_show_ac, TRUE, previous);
     if (result) {
         return result;
     }
-    result = autocomplete_param_with_ac(input, "/roster hide", roster_show_ac, TRUE);
+    result = autocomplete_param_with_ac(input, "/roster hide", roster_show_ac, TRUE, previous);
     if (result) {
         return result;
     }
-    result = autocomplete_param_with_ac(input, "/roster by", roster_by_ac, TRUE);
+    result = autocomplete_param_with_ac(input, "/roster by", roster_by_ac, TRUE, previous);
     if (result) {
         return result;
     }
-    result = autocomplete_param_with_ac(input, "/roster count", roster_count_ac, TRUE);
+    result = autocomplete_param_with_ac(input, "/roster count", roster_count_ac, TRUE, previous);
     if (result) {
         return result;
     }
-    result = autocomplete_param_with_ac(input, "/roster order", roster_order_ac, TRUE);
+    result = autocomplete_param_with_ac(input, "/roster order", roster_order_ac, TRUE, previous);
     if (result) {
         return result;
     }
-    result = autocomplete_param_with_ac(input, "/roster unread", roster_unread_ac, TRUE);
+    result = autocomplete_param_with_ac(input, "/roster unread", roster_unread_ac, TRUE, previous);
     if (result) {
         return result;
     }
-    result = autocomplete_param_with_ac(input, "/roster room", roster_room_ac, TRUE);
+    result = autocomplete_param_with_ac(input, "/roster room", roster_room_ac, TRUE, previous);
     if (result) {
         return result;
     }
-    result = autocomplete_param_with_func(input, "/roster wrap", prefs_autocomplete_boolean_choice);
+    result = autocomplete_param_with_func(input, "/roster wrap", prefs_autocomplete_boolean_choice, previous);
     if (result) {
         return result;
     }
-    result = autocomplete_param_with_ac(input, "/roster header", roster_header_ac, TRUE);
+    result = autocomplete_param_with_ac(input, "/roster header", roster_header_ac, TRUE, previous);
     if (result) {
         return result;
     }
-    result = autocomplete_param_with_ac(input, "/roster contact", roster_contact_ac, TRUE);
+    result = autocomplete_param_with_ac(input, "/roster contact", roster_contact_ac, TRUE, previous);
     if (result) {
         return result;
     }
-    result = autocomplete_param_with_ac(input, "/roster resource", roster_resource_ac, TRUE);
+    result = autocomplete_param_with_ac(input, "/roster resource", roster_resource_ac, TRUE, previous);
     if (result) {
         return result;
     }
-    result = autocomplete_param_with_ac(input, "/roster presence", roster_presence_ac, TRUE);
+    result = autocomplete_param_with_ac(input, "/roster presence", roster_presence_ac, TRUE, previous);
     if (result) {
         return result;
     }
-    result = autocomplete_param_with_ac(input, "/roster private", roster_private_ac, TRUE);
+    result = autocomplete_param_with_ac(input, "/roster private", roster_private_ac, TRUE, previous);
     if (result) {
         return result;
     }
-    result = autocomplete_param_with_ac(input, "/roster", roster_ac, TRUE);
+    result = autocomplete_param_with_ac(input, "/roster", roster_ac, TRUE, previous);
     if (result) {
         return result;
     }
@@ -1633,36 +1633,36 @@ _roster_autocomplete(ProfWin *window, const char *const input)
 }
 
 static char*
-_group_autocomplete(ProfWin *window, const char *const input)
+_group_autocomplete(ProfWin *window, const char *const input, gboolean previous)
 {
     char *result = NULL;
 
     jabber_conn_status_t conn_status = connection_get_status();
 
     if (conn_status == JABBER_CONNECTED) {
-        result = autocomplete_param_with_func(input, "/group show", roster_group_autocomplete);
+        result = autocomplete_param_with_func(input, "/group show", roster_group_autocomplete, previous);
         if (result) {
             return result;
         }
-        result = autocomplete_param_no_with_func(input, "/group add", 4, roster_contact_autocomplete);
+        result = autocomplete_param_no_with_func(input, "/group add", 4, roster_contact_autocomplete, previous);
         if (result) {
             return result;
         }
-        result = autocomplete_param_no_with_func(input, "/group remove", 4, roster_contact_autocomplete);
+        result = autocomplete_param_no_with_func(input, "/group remove", 4, roster_contact_autocomplete, previous);
         if (result) {
             return result;
         }
-        result = autocomplete_param_with_func(input, "/group add", roster_group_autocomplete);
+        result = autocomplete_param_with_func(input, "/group add", roster_group_autocomplete, previous);
         if (result) {
             return result;
         }
-        result = autocomplete_param_with_func(input, "/group remove", roster_group_autocomplete);
+        result = autocomplete_param_with_func(input, "/group remove", roster_group_autocomplete, previous);
         if (result) {
             return result;
         }
     }
 
-    result = autocomplete_param_with_ac(input, "/group", group_ac, TRUE);
+    result = autocomplete_param_with_ac(input, "/group", group_ac, TRUE, previous);
     if (result) {
         return result;
     }
@@ -1671,16 +1671,16 @@ _group_autocomplete(ProfWin *window, const char *const input)
 }
 
 static char*
-_blocked_autocomplete(ProfWin *window, const char *const input)
+_blocked_autocomplete(ProfWin *window, const char *const input, gboolean previous)
 {
     char *result = NULL;
 
-    result = autocomplete_param_with_func(input, "/blocked remove", blocked_ac_find);
+    result = autocomplete_param_with_func(input, "/blocked remove", blocked_ac_find, previous);
     if (result) {
         return result;
     }
 
-    result = autocomplete_param_with_ac(input, "/blocked", blocked_ac, FALSE);
+    result = autocomplete_param_with_ac(input, "/blocked", blocked_ac, FALSE, previous);
     if (result) {
         return result;
     }
@@ -1689,7 +1689,7 @@ _blocked_autocomplete(ProfWin *window, const char *const input)
 }
 
 static char*
-_bookmark_autocomplete(ProfWin *window, const char *const input)
+_bookmark_autocomplete(ProfWin *window, const char *const input, gboolean previous)
 {
     char *found = NULL;
 
@@ -1702,7 +1702,7 @@ _bookmark_autocomplete(ProfWin *window, const char *const input)
         if ((num_args == 2 && space_at_end) || (num_args == 3 && !space_at_end)) {
             GString *beginning = g_string_new("/bookmark");
             g_string_append_printf(beginning, " %s %s", args[0], args[1]);
-            found = autocomplete_param_with_ac(input, beginning->str, bookmark_property_ac, TRUE);
+            found = autocomplete_param_with_ac(input, beginning->str, bookmark_property_ac, TRUE, previous);
             g_string_free(beginning, TRUE);
             if (found) {
                 g_strfreev(args);
@@ -1713,7 +1713,7 @@ _bookmark_autocomplete(ProfWin *window, const char *const input)
                 || (num_args == 4 && (g_strcmp0(args[2], "autojoin") == 0) && !space_at_end))  {
             GString *beginning = g_string_new("/bookmark");
             g_string_append_printf(beginning, " %s %s %s", args[0], args[1], args[2]);
-            found = autocomplete_param_with_func(input, beginning->str, prefs_autocomplete_boolean_choice);
+            found = autocomplete_param_with_func(input, beginning->str, prefs_autocomplete_boolean_choice, previous);
             g_string_free(beginning, TRUE);
             if (found) {
                 g_strfreev(args);
@@ -1723,7 +1723,7 @@ _bookmark_autocomplete(ProfWin *window, const char *const input)
         if ((num_args == 4 && space_at_end) || (num_args == 5 && !space_at_end)) {
             GString *beginning = g_string_new("/bookmark");
             g_string_append_printf(beginning, " %s %s %s %s", args[0], args[1], args[2], args[3]);
-            found = autocomplete_param_with_ac(input, beginning->str, bookmark_property_ac, TRUE);
+            found = autocomplete_param_with_ac(input, beginning->str, bookmark_property_ac, TRUE, previous);
             g_string_free(beginning, TRUE);
             if (found) {
                 g_strfreev(args);
@@ -1734,7 +1734,7 @@ _bookmark_autocomplete(ProfWin *window, const char *const input)
                 || (num_args == 6 && (g_strcmp0(args[4], "autojoin") == 0) && !space_at_end))  {
             GString *beginning = g_string_new("/bookmark");
             g_string_append_printf(beginning, " %s %s %s %s %s", args[0], args[1], args[2], args[3], args[4]);
-            found = autocomplete_param_with_func(input, beginning->str, prefs_autocomplete_boolean_choice);
+            found = autocomplete_param_with_func(input, beginning->str, prefs_autocomplete_boolean_choice, previous);
             g_string_free(beginning, TRUE);
             if (found) {
                 g_strfreev(args);
@@ -1744,7 +1744,7 @@ _bookmark_autocomplete(ProfWin *window, const char *const input)
         if ((num_args == 6 && space_at_end) || (num_args == 7 && !space_at_end)) {
             GString *beginning = g_string_new("/bookmark");
             g_string_append_printf(beginning, " %s %s %s %s %s %s", args[0], args[1], args[2], args[3], args[4], args[5]);
-            found = autocomplete_param_with_ac(input, beginning->str, bookmark_property_ac, TRUE);
+            found = autocomplete_param_with_ac(input, beginning->str, bookmark_property_ac, TRUE, previous);
             g_string_free(beginning, TRUE);
             if (found) {
                 g_strfreev(args);
@@ -1755,7 +1755,7 @@ _bookmark_autocomplete(ProfWin *window, const char *const input)
                 || (num_args == 8 && (g_strcmp0(args[6], "autojoin") == 0) && !space_at_end))  {
             GString *beginning = g_string_new("/bookmark");
             g_string_append_printf(beginning, " %s %s %s %s %s %s %s", args[0], args[1], args[2], args[3], args[4], args[5], args[6]);
-            found = autocomplete_param_with_func(input, beginning->str, prefs_autocomplete_boolean_choice);
+            found = autocomplete_param_with_func(input, beginning->str, prefs_autocomplete_boolean_choice, previous);
             g_string_free(beginning, TRUE);
             if (found) {
                 g_strfreev(args);
@@ -1766,34 +1766,34 @@ _bookmark_autocomplete(ProfWin *window, const char *const input)
 
     g_strfreev(args);
 
-    found = autocomplete_param_with_func(input, "/bookmark remove", bookmark_find);
+    found = autocomplete_param_with_func(input, "/bookmark remove", bookmark_find, previous);
     if (found) {
         return found;
     }
-    found = autocomplete_param_with_func(input, "/bookmark join", bookmark_find);
+    found = autocomplete_param_with_func(input, "/bookmark join", bookmark_find, previous);
     if (found) {
         return found;
     }
-    found = autocomplete_param_with_func(input, "/bookmark update", bookmark_find);
+    found = autocomplete_param_with_func(input, "/bookmark update", bookmark_find, previous);
     if (found) {
         return found;
     }
-    found = autocomplete_param_with_func(input, "/bookmark invites", prefs_autocomplete_boolean_choice);
+    found = autocomplete_param_with_func(input, "/bookmark invites", prefs_autocomplete_boolean_choice, previous);
     if (found) {
         return found;
     }
 
-    found = autocomplete_param_with_ac(input, "/bookmark", bookmark_ac, TRUE);
+    found = autocomplete_param_with_ac(input, "/bookmark", bookmark_ac, TRUE, previous);
     return found;
 }
 
 static char*
-_notify_autocomplete(ProfWin *window, const char *const input)
+_notify_autocomplete(ProfWin *window, const char *const input, gboolean previous)
 {
     int i = 0;
     char *result = NULL;
 
-    result = autocomplete_param_with_func(input, "/notify room trigger remove", prefs_autocomplete_room_trigger);
+    result = autocomplete_param_with_func(input, "/notify room trigger remove", prefs_autocomplete_room_trigger, previous);
     if (result) {
         return result;
     }
@@ -1801,46 +1801,46 @@ _notify_autocomplete(ProfWin *window, const char *const input)
     gchar *boolean_choices1[] = { "/notify room current", "/notify chat current", "/notify typing current",
         "/notify room text", "/notify chat text" };
     for (i = 0; i < ARRAY_SIZE(boolean_choices1); i++) {
-        result = autocomplete_param_with_func(input, boolean_choices1[i], prefs_autocomplete_boolean_choice);
+        result = autocomplete_param_with_func(input, boolean_choices1[i], prefs_autocomplete_boolean_choice, previous);
         if (result) {
             return result;
         }
     }
 
-    result = autocomplete_param_with_ac(input, "/notify room mention", notify_mention_ac, TRUE);
+    result = autocomplete_param_with_ac(input, "/notify room mention", notify_mention_ac, TRUE, previous);
     if (result) {
         return result;
     }
 
-    result = autocomplete_param_with_ac(input, "/notify room trigger", notify_trigger_ac, TRUE);
+    result = autocomplete_param_with_ac(input, "/notify room trigger", notify_trigger_ac, TRUE, previous);
     if (result) {
         return result;
     }
 
-    result = autocomplete_param_with_ac(input, "/notify room", notify_room_ac, TRUE);
+    result = autocomplete_param_with_ac(input, "/notify room", notify_room_ac, TRUE, previous);
     if (result) {
         return result;
     }
 
-    result = autocomplete_param_with_ac(input, "/notify chat", notify_chat_ac, TRUE);
+    result = autocomplete_param_with_ac(input, "/notify chat", notify_chat_ac, TRUE, previous);
     if (result) {
         return result;
     }
 
-    result = autocomplete_param_with_ac(input, "/notify typing", notify_typing_ac, TRUE);
+    result = autocomplete_param_with_ac(input, "/notify typing", notify_typing_ac, TRUE, previous);
     if (result) {
         return result;
     }
 
     gchar *boolean_choices2[] = { "/notify invite", "/notify sub", "/notify mention", "/notify trigger"};
     for (i = 0; i < ARRAY_SIZE(boolean_choices2); i++) {
-        result = autocomplete_param_with_func(input, boolean_choices2[i], prefs_autocomplete_boolean_choice);
+        result = autocomplete_param_with_func(input, boolean_choices2[i], prefs_autocomplete_boolean_choice, previous);
         if (result) {
             return result;
         }
     }
 
-    result = autocomplete_param_with_ac(input, "/notify", notify_ac, TRUE);
+    result = autocomplete_param_with_ac(input, "/notify", notify_ac, TRUE, previous);
     if (result) {
         return result;
     }
@@ -1849,30 +1849,30 @@ _notify_autocomplete(ProfWin *window, const char *const input)
 }
 
 static char*
-_autoaway_autocomplete(ProfWin *window, const char *const input)
+_autoaway_autocomplete(ProfWin *window, const char *const input, gboolean previous)
 {
     char *result = NULL;
 
-    result = autocomplete_param_with_ac(input, "/autoaway mode", autoaway_mode_ac, TRUE);
+    result = autocomplete_param_with_ac(input, "/autoaway mode", autoaway_mode_ac, TRUE, previous);
     if (result) {
         return result;
     }
 
-    result = autocomplete_param_with_ac(input, "/autoaway time", autoaway_presence_ac, TRUE);
+    result = autocomplete_param_with_ac(input, "/autoaway time", autoaway_presence_ac, TRUE, previous);
     if (result) {
         return result;
     }
 
-    result = autocomplete_param_with_ac(input, "/autoaway message", autoaway_presence_ac, TRUE);
+    result = autocomplete_param_with_ac(input, "/autoaway message", autoaway_presence_ac, TRUE, previous);
     if (result) {
         return result;
     }
 
-    result = autocomplete_param_with_func(input, "/autoaway check", prefs_autocomplete_boolean_choice);
+    result = autocomplete_param_with_func(input, "/autoaway check", prefs_autocomplete_boolean_choice, previous);
     if (result) {
         return result;
     }
-    result = autocomplete_param_with_ac(input, "/autoaway", autoaway_ac, TRUE);
+    result = autocomplete_param_with_ac(input, "/autoaway", autoaway_ac, TRUE, previous);
     if (result) {
         return result;
     }
@@ -1881,19 +1881,19 @@ _autoaway_autocomplete(ProfWin *window, const char *const input)
 }
 
 static char*
-_log_autocomplete(ProfWin *window, const char *const input)
+_log_autocomplete(ProfWin *window, const char *const input, gboolean previous)
 {
     char *result = NULL;
 
-    result = autocomplete_param_with_func(input, "/log rotate", prefs_autocomplete_boolean_choice);
+    result = autocomplete_param_with_func(input, "/log rotate", prefs_autocomplete_boolean_choice, previous);
     if (result) {
         return result;
     }
-    result = autocomplete_param_with_func(input, "/log shared", prefs_autocomplete_boolean_choice);
+    result = autocomplete_param_with_func(input, "/log shared", prefs_autocomplete_boolean_choice, previous);
     if (result) {
         return result;
     }
-    result = autocomplete_param_with_ac(input, "/log", log_ac, TRUE);
+    result = autocomplete_param_with_ac(input, "/log", log_ac, TRUE, previous);
     if (result) {
         return result;
     }
@@ -1902,16 +1902,16 @@ _log_autocomplete(ProfWin *window, const char *const input)
 }
 
 static char*
-_autoconnect_autocomplete(ProfWin *window, const char *const input)
+_autoconnect_autocomplete(ProfWin *window, const char *const input, gboolean previous)
 {
     char *result = NULL;
 
-    result = autocomplete_param_with_func(input, "/autoconnect set", accounts_find_enabled);
+    result = autocomplete_param_with_func(input, "/autoconnect set", accounts_find_enabled, previous);
     if (result) {
         return result;
     }
 
-    result = autocomplete_param_with_ac(input, "/autoconnect", autoconnect_ac, TRUE);
+    result = autocomplete_param_with_ac(input, "/autoconnect", autoconnect_ac, TRUE, previous);
     if (result) {
         return result;
     }
@@ -1920,20 +1920,20 @@ _autoconnect_autocomplete(ProfWin *window, const char *const input)
 }
 
 static char*
-_otr_autocomplete(ProfWin *window, const char *const input)
+_otr_autocomplete(ProfWin *window, const char *const input, gboolean previous)
 {
     char *found = NULL;
 
     jabber_conn_status_t conn_status = connection_get_status();
 
     if (conn_status == JABBER_CONNECTED) {
-        found = autocomplete_param_with_func(input, "/otr start", roster_contact_autocomplete);
+        found = autocomplete_param_with_func(input, "/otr start", roster_contact_autocomplete, previous);
         if (found) {
             return found;
         }
     }
 
-    found = autocomplete_param_with_ac(input, "/otr log", otr_log_ac, TRUE);
+    found = autocomplete_param_with_ac(input, "/otr log", otr_log_ac, TRUE, previous);
     if (found) {
         return found;
     }
@@ -1950,7 +1950,7 @@ _otr_autocomplete(ProfWin *window, const char *const input)
                 g_string_append(beginning, args[1]);
             }
 
-            found = autocomplete_param_with_func(input, beginning->str, roster_contact_autocomplete);
+            found = autocomplete_param_with_func(input, beginning->str, roster_contact_autocomplete, previous);
             g_string_free(beginning, TRUE);
             if (found) {
                 g_strfreev(args);
@@ -1960,12 +1960,12 @@ _otr_autocomplete(ProfWin *window, const char *const input)
         g_strfreev(args);
     }
 
-    found = autocomplete_param_with_ac(input, "/otr policy", otr_policy_ac, TRUE);
+    found = autocomplete_param_with_ac(input, "/otr policy", otr_policy_ac, TRUE, previous);
     if (found) {
         return found;
     }
 
-    found = autocomplete_param_with_ac(input, "/otr", otr_ac, TRUE);
+    found = autocomplete_param_with_ac(input, "/otr", otr_ac, TRUE, previous);
     if (found) {
         return found;
     }
@@ -1974,20 +1974,20 @@ _otr_autocomplete(ProfWin *window, const char *const input)
 }
 
 static char*
-_pgp_autocomplete(ProfWin *window, const char *const input)
+_pgp_autocomplete(ProfWin *window, const char *const input, gboolean previous)
 {
     char *found = NULL;
 
     jabber_conn_status_t conn_status = connection_get_status();
 
     if (conn_status == JABBER_CONNECTED) {
-        found = autocomplete_param_with_func(input, "/pgp start", roster_contact_autocomplete);
+        found = autocomplete_param_with_func(input, "/pgp start", roster_contact_autocomplete, previous);
         if (found) {
             return found;
         }
     }
 
-    found = autocomplete_param_with_ac(input, "/pgp log", pgp_log_ac, TRUE);
+    found = autocomplete_param_with_ac(input, "/pgp log", pgp_log_ac, TRUE, previous);
     if (found) {
         return found;
     }
@@ -2002,7 +2002,7 @@ _pgp_autocomplete(ProfWin *window, const char *const input)
             g_string_append(beginning, " ");
             g_string_append(beginning, args[1]);
         }
-        found = autocomplete_param_with_func(input, beginning->str, p_gpg_autocomplete_key);
+        found = autocomplete_param_with_func(input, beginning->str, p_gpg_autocomplete_key, previous);
         g_string_free(beginning, TRUE);
         if (found) {
             g_strfreev(args);
@@ -2013,13 +2013,13 @@ _pgp_autocomplete(ProfWin *window, const char *const input)
 #endif
 
     if (conn_status == JABBER_CONNECTED) {
-        found = autocomplete_param_with_func(input, "/pgp setkey", roster_barejid_autocomplete);
+        found = autocomplete_param_with_func(input, "/pgp setkey", roster_barejid_autocomplete, previous);
         if (found) {
             return found;
         }
     }
 
-    found = autocomplete_param_with_ac(input, "/pgp", pgp_ac, TRUE);
+    found = autocomplete_param_with_ac(input, "/pgp", pgp_ac, TRUE, previous);
     if (found) {
         return found;
     }
@@ -2028,20 +2028,20 @@ _pgp_autocomplete(ProfWin *window, const char *const input)
 }
 
 static char*
-_plugins_autocomplete(ProfWin *window, const char *const input)
+_plugins_autocomplete(ProfWin *window, const char *const input, gboolean previous)
 {
     char *result = NULL;
 
     if (strncmp(input, "/plugins sourcepath set ", 24) == 0) {
-        return cmd_ac_complete_filepath(input, "/plugins sourcepath set");
+        return cmd_ac_complete_filepath(input, "/plugins sourcepath set", previous);
     }
 
     if (strncmp(input, "/plugins install ", 17) == 0) {
-        return cmd_ac_complete_filepath(input, "/plugins install");
+        return cmd_ac_complete_filepath(input, "/plugins install", previous);
     }
 
     if (strncmp(input, "/plugins sourcepath ", 20) == 0) {
-        result = autocomplete_param_with_ac(input, "/plugins sourcepath", plugins_sourcepath_ac, TRUE);
+        result = autocomplete_param_with_ac(input, "/plugins sourcepath", plugins_sourcepath_ac, TRUE, previous);
         if (result) {
             return result;
         }
@@ -2058,7 +2058,7 @@ _plugins_autocomplete(ProfWin *window, const char *const input)
             }
             g_slist_free_full(plugins, g_free);
         }
-        result = autocomplete_param_with_ac(input, "/plugins load", plugins_load_ac, TRUE);
+        result = autocomplete_param_with_ac(input, "/plugins load", plugins_load_ac, TRUE, previous);
         if (result) {
             return result;
         }
@@ -2075,7 +2075,7 @@ _plugins_autocomplete(ProfWin *window, const char *const input)
             }
             g_list_free(plugins);
         }
-        result = autocomplete_param_with_ac(input, "/plugins reload", plugins_reload_ac, TRUE);
+        result = autocomplete_param_with_ac(input, "/plugins reload", plugins_reload_ac, TRUE, previous);
         if (result) {
             return result;
         }
@@ -2092,13 +2092,13 @@ _plugins_autocomplete(ProfWin *window, const char *const input)
             }
             g_list_free(plugins);
         }
-        result = autocomplete_param_with_ac(input, "/plugins unload", plugins_unload_ac, TRUE);
+        result = autocomplete_param_with_ac(input, "/plugins unload", plugins_unload_ac, TRUE, previous);
         if (result) {
             return result;
         }
     }
 
-    result = autocomplete_param_with_ac(input, "/plugins", plugins_ac, TRUE);
+    result = autocomplete_param_with_ac(input, "/plugins", plugins_ac, TRUE, previous);
     if (result) {
         return result;
     }
@@ -2107,7 +2107,7 @@ _plugins_autocomplete(ProfWin *window, const char *const input)
 }
 
 static char*
-_theme_autocomplete(ProfWin *window, const char *const input)
+_theme_autocomplete(ProfWin *window, const char *const input, gboolean previous)
 {
     char *result = NULL;
     if (strncmp(input, "/theme load ", 12) == 0) {
@@ -2122,12 +2122,12 @@ _theme_autocomplete(ProfWin *window, const char *const input)
             g_slist_free_full(themes, g_free);
             autocomplete_add(theme_load_ac, "default");
         }
-        result = autocomplete_param_with_ac(input, "/theme load", theme_load_ac, TRUE);
+        result = autocomplete_param_with_ac(input, "/theme load", theme_load_ac, TRUE, previous);
         if (result) {
             return result;
         }
     }
-    result = autocomplete_param_with_ac(input, "/theme", theme_ac, TRUE);
+    result = autocomplete_param_with_ac(input, "/theme", theme_ac, TRUE, previous);
     if (result) {
         return result;
     }
@@ -2136,7 +2136,7 @@ _theme_autocomplete(ProfWin *window, const char *const input)
 }
 
 static char*
-_script_autocomplete_func(const char *const prefix)
+_script_autocomplete_func(const char *const prefix, gboolean previous)
 {
     if (script_show_ac == NULL) {
         script_show_ac = autocomplete_new();
@@ -2149,29 +2149,29 @@ _script_autocomplete_func(const char *const prefix)
         g_slist_free_full(scripts, g_free);
     }
 
-    return autocomplete_complete(script_show_ac, prefix, FALSE);
+    return autocomplete_complete(script_show_ac, prefix, FALSE, previous);
 }
 
 
 static char*
-_script_autocomplete(ProfWin *window, const char *const input)
+_script_autocomplete(ProfWin *window, const char *const input, gboolean previous)
 {
     char *result = NULL;
     if (strncmp(input, "/script show ", 13) == 0) {
-        result = autocomplete_param_with_func(input, "/script show", _script_autocomplete_func);
+        result = autocomplete_param_with_func(input, "/script show", _script_autocomplete_func, previous);
         if (result) {
             return result;
         }
     }
 
     if (strncmp(input, "/script run ", 12) == 0) {
-        result = autocomplete_param_with_func(input, "/script run", _script_autocomplete_func);
+        result = autocomplete_param_with_func(input, "/script run", _script_autocomplete_func, previous);
         if (result) {
             return result;
         }
     }
 
-    result = autocomplete_param_with_ac(input, "/script", script_ac, TRUE);
+    result = autocomplete_param_with_ac(input, "/script", script_ac, TRUE, previous);
     if (result) {
         return result;
     }
@@ -2180,7 +2180,7 @@ _script_autocomplete(ProfWin *window, const char *const input)
 }
 
 static char*
-_resource_autocomplete(ProfWin *window, const char *const input)
+_resource_autocomplete(ProfWin *window, const char *const input, gboolean previous)
 {
     char *found = NULL;
 
@@ -2191,24 +2191,24 @@ _resource_autocomplete(ProfWin *window, const char *const input)
         PContact contact = roster_get_contact(chatwin->barejid);
         if (contact) {
             Autocomplete ac = p_contact_resource_ac(contact);
-            found = autocomplete_param_with_ac(input, "/resource set", ac, FALSE);
+            found = autocomplete_param_with_ac(input, "/resource set", ac, FALSE, previous);
             if (found) {
                 return found;
             }
         }
     }
 
-    found = autocomplete_param_with_func(input, "/resource title", prefs_autocomplete_boolean_choice);
+    found = autocomplete_param_with_func(input, "/resource title", prefs_autocomplete_boolean_choice, previous);
     if (found) {
         return found;
     }
 
-    found = autocomplete_param_with_func(input, "/resource message", prefs_autocomplete_boolean_choice);
+    found = autocomplete_param_with_func(input, "/resource message", prefs_autocomplete_boolean_choice, previous);
     if (found) {
         return found;
     }
 
-    found = autocomplete_param_with_ac(input, "/resource", resource_ac, FALSE);
+    found = autocomplete_param_with_ac(input, "/resource", resource_ac, FALSE, previous);
     if (found) {
         return found;
     }
@@ -2217,21 +2217,21 @@ _resource_autocomplete(ProfWin *window, const char *const input)
 }
 
 static char*
-_wintitle_autocomplete(ProfWin *window, const char *const input)
+_wintitle_autocomplete(ProfWin *window, const char *const input, gboolean previous)
 {
     char *found = NULL;
 
-    found = autocomplete_param_with_func(input, "/wintitle show", prefs_autocomplete_boolean_choice);
+    found = autocomplete_param_with_func(input, "/wintitle show", prefs_autocomplete_boolean_choice, previous);
     if (found) {
         return found;
     }
 
-    found = autocomplete_param_with_func(input, "/wintitle goodbye", prefs_autocomplete_boolean_choice);
+    found = autocomplete_param_with_func(input, "/wintitle goodbye", prefs_autocomplete_boolean_choice, previous);
     if (found) {
         return found;
     }
 
-    found = autocomplete_param_with_ac(input, "/wintitle", wintitle_ac, FALSE);
+    found = autocomplete_param_with_ac(input, "/wintitle", wintitle_ac, FALSE, previous);
     if (found) {
         return found;
     }
@@ -2240,16 +2240,16 @@ _wintitle_autocomplete(ProfWin *window, const char *const input)
 }
 
 static char*
-_inpblock_autocomplete(ProfWin *window, const char *const input)
+_inpblock_autocomplete(ProfWin *window, const char *const input, gboolean previous)
 {
     char *found = NULL;
 
-    found = autocomplete_param_with_func(input, "/inpblock dynamic", prefs_autocomplete_boolean_choice);
+    found = autocomplete_param_with_func(input, "/inpblock dynamic", prefs_autocomplete_boolean_choice, previous);
     if (found) {
         return found;
     }
 
-    found = autocomplete_param_with_ac(input, "/inpblock", inpblock_ac, FALSE);
+    found = autocomplete_param_with_ac(input, "/inpblock", inpblock_ac, FALSE, previous);
     if (found) {
         return found;
     }
@@ -2258,7 +2258,7 @@ _inpblock_autocomplete(ProfWin *window, const char *const input)
 }
 
 static char*
-_form_autocomplete(ProfWin *window, const char *const input)
+_form_autocomplete(ProfWin *window, const char *const input, gboolean previous)
 {
     if (window->type != WIN_MUC_CONFIG) {
         return NULL;
@@ -2269,13 +2269,13 @@ _form_autocomplete(ProfWin *window, const char *const input)
     ProfMucConfWin *confwin = (ProfMucConfWin*)window;
     DataForm *form = confwin->form;
     if (form) {
-        found = autocomplete_param_with_ac(input, "/form help", form->tag_ac, TRUE);
+        found = autocomplete_param_with_ac(input, "/form help", form->tag_ac, TRUE, previous);
         if (found) {
             return found;
         }
     }
 
-    found = autocomplete_param_with_ac(input, "/form", form_ac, TRUE);
+    found = autocomplete_param_with_ac(input, "/form", form_ac, TRUE, previous);
     if (found) {
         return found;
     }
@@ -2284,7 +2284,7 @@ _form_autocomplete(ProfWin *window, const char *const input)
 }
 
 static char*
-_form_field_autocomplete(ProfWin *window, const char *const input)
+_form_field_autocomplete(ProfWin *window, const char *const input, gboolean previous)
 {
     if (window->type != WIN_MUC_CONFIG) {
         return NULL;
@@ -2311,13 +2311,13 @@ _form_field_autocomplete(ProfWin *window, const char *const input)
 
             if (((g_strcmp0(split[1], "add") == 0) || (g_strcmp0(split[1], "remove") == 0))
                     && field_type == FIELD_LIST_MULTI) {
-                found = autocomplete_param_with_ac(input, beginning->str, value_ac, TRUE);
+                found = autocomplete_param_with_ac(input, beginning->str, value_ac, TRUE, previous);
 
             } else if ((g_strcmp0(split[1], "remove") == 0) && field_type == FIELD_TEXT_MULTI) {
-                found = autocomplete_param_with_ac(input, beginning->str, value_ac, TRUE);
+                found = autocomplete_param_with_ac(input, beginning->str, value_ac, TRUE, previous);
 
             } else if ((g_strcmp0(split[1], "remove") == 0) && field_type == FIELD_JID_MULTI) {
-                found = autocomplete_param_with_ac(input, beginning->str, value_ac, TRUE);
+                found = autocomplete_param_with_ac(input, beginning->str, value_ac, TRUE, previous);
             }
 
             g_string_free(beginning, TRUE);
@@ -2332,15 +2332,15 @@ _form_field_autocomplete(ProfWin *window, const char *const input)
             switch (field_type)
             {
                 case FIELD_BOOLEAN:
-                    found = autocomplete_param_with_func(input, split[0], prefs_autocomplete_boolean_choice);
+                    found = autocomplete_param_with_func(input, split[0], prefs_autocomplete_boolean_choice, previous);
                     break;
                 case FIELD_LIST_SINGLE:
-                    found = autocomplete_param_with_ac(input, split[0], value_ac, TRUE);
+                    found = autocomplete_param_with_ac(input, split[0], value_ac, TRUE, previous);
                     break;
                 case FIELD_LIST_MULTI:
                 case FIELD_JID_MULTI:
                 case FIELD_TEXT_MULTI:
-                    found = autocomplete_param_with_ac(input, split[0], form_field_multi_ac, TRUE);
+                    found = autocomplete_param_with_ac(input, split[0], form_field_multi_ac, TRUE, previous);
                     break;
                 default:
                     break;
@@ -2354,36 +2354,36 @@ _form_field_autocomplete(ProfWin *window, const char *const input)
 }
 
 static char*
-_occupants_autocomplete(ProfWin *window, const char *const input)
+_occupants_autocomplete(ProfWin *window, const char *const input, gboolean previous)
 {
     char *found = NULL;
 
-    found = autocomplete_param_with_ac(input, "/occupants default show", occupants_show_ac, TRUE);
+    found = autocomplete_param_with_ac(input, "/occupants default show", occupants_show_ac, TRUE, previous);
     if (found) {
         return found;
     }
 
-    found = autocomplete_param_with_ac(input, "/occupants default hide", occupants_show_ac, TRUE);
+    found = autocomplete_param_with_ac(input, "/occupants default hide", occupants_show_ac, TRUE, previous);
     if (found) {
         return found;
     }
 
-    found = autocomplete_param_with_ac(input, "/occupants default", occupants_default_ac, TRUE);
+    found = autocomplete_param_with_ac(input, "/occupants default", occupants_default_ac, TRUE, previous);
     if (found) {
         return found;
     }
 
-    found = autocomplete_param_with_ac(input, "/occupants show", occupants_show_ac, TRUE);
+    found = autocomplete_param_with_ac(input, "/occupants show", occupants_show_ac, TRUE, previous);
     if (found) {
         return found;
     }
 
-    found = autocomplete_param_with_ac(input, "/occupants hide", occupants_show_ac, TRUE);
+    found = autocomplete_param_with_ac(input, "/occupants hide", occupants_show_ac, TRUE, previous);
     if (found) {
         return found;
     }
 
-    found = autocomplete_param_with_ac(input, "/occupants", occupants_ac, TRUE);
+    found = autocomplete_param_with_ac(input, "/occupants", occupants_ac, TRUE, previous);
     if (found) {
         return found;
     }
@@ -2392,51 +2392,51 @@ _occupants_autocomplete(ProfWin *window, const char *const input)
 }
 
 static char*
-_time_autocomplete(ProfWin *window, const char *const input)
+_time_autocomplete(ProfWin *window, const char *const input, gboolean previous)
 {
     char *found = NULL;
 
-    found = autocomplete_param_with_ac(input, "/time statusbar", time_format_ac, TRUE);
+    found = autocomplete_param_with_ac(input, "/time statusbar", time_format_ac, TRUE, previous);
     if (found) {
         return found;
     }
 
-    found = autocomplete_param_with_ac(input, "/time lastactivity", time_format_ac, TRUE);
+    found = autocomplete_param_with_ac(input, "/time lastactivity", time_format_ac, TRUE, previous);
     if (found) {
         return found;
     }
 
-    found = autocomplete_param_with_ac(input, "/time console", time_format_ac, TRUE);
+    found = autocomplete_param_with_ac(input, "/time console", time_format_ac, TRUE, previous);
     if (found) {
         return found;
     }
 
-    found = autocomplete_param_with_ac(input, "/time chat", time_format_ac, TRUE);
+    found = autocomplete_param_with_ac(input, "/time chat", time_format_ac, TRUE, previous);
     if (found) {
         return found;
     }
 
-    found = autocomplete_param_with_ac(input, "/time muc", time_format_ac, TRUE);
+    found = autocomplete_param_with_ac(input, "/time muc", time_format_ac, TRUE, previous);
     if (found) {
         return found;
     }
 
-    found = autocomplete_param_with_ac(input, "/time mucconfig", time_format_ac, TRUE);
+    found = autocomplete_param_with_ac(input, "/time mucconfig", time_format_ac, TRUE, previous);
     if (found) {
         return found;
     }
 
-    found = autocomplete_param_with_ac(input, "/time private", time_format_ac, TRUE);
+    found = autocomplete_param_with_ac(input, "/time private", time_format_ac, TRUE, previous);
     if (found) {
         return found;
     }
 
-    found = autocomplete_param_with_ac(input, "/time xml", time_format_ac, TRUE);
+    found = autocomplete_param_with_ac(input, "/time xml", time_format_ac, TRUE, previous);
     if (found) {
         return found;
     }
 
-    found = autocomplete_param_with_ac(input, "/time", time_ac, TRUE);
+    found = autocomplete_param_with_ac(input, "/time", time_ac, TRUE, previous);
     if (found) {
         return found;
     }
@@ -2445,7 +2445,7 @@ _time_autocomplete(ProfWin *window, const char *const input)
 }
 
 static char*
-_kick_autocomplete(ProfWin *window, const char *const input)
+_kick_autocomplete(ProfWin *window, const char *const input, gboolean previous)
 {
     if (window->type != WIN_MUC) {
         return NULL;
@@ -2458,13 +2458,13 @@ _kick_autocomplete(ProfWin *window, const char *const input)
         return NULL;
     }
 
-    char *result = autocomplete_param_with_ac(input, "/kick", nick_ac, TRUE);
+    char *result = autocomplete_param_with_ac(input, "/kick", nick_ac, TRUE, previous);
 
     return result;
 }
 
 static char*
-_ban_autocomplete(ProfWin *window, const char *const input)
+_ban_autocomplete(ProfWin *window, const char *const input, gboolean previous)
 {
     if (window->type != WIN_MUC) {
         return NULL;
@@ -2477,13 +2477,13 @@ _ban_autocomplete(ProfWin *window, const char *const input)
         return NULL;
     }
 
-    char *result = autocomplete_param_with_ac(input, "/ban", jid_ac, TRUE);
+    char *result = autocomplete_param_with_ac(input, "/ban", jid_ac, TRUE, previous);
 
     return result;
 }
 
 static char*
-_affiliation_autocomplete(ProfWin *window, const char *const input)
+_affiliation_autocomplete(ProfWin *window, const char *const input, gboolean previous)
 {
     char *result = NULL;
 
@@ -2503,7 +2503,7 @@ _affiliation_autocomplete(ProfWin *window, const char *const input)
                 g_string_append(beginning, args[1]);
             }
 
-            result = autocomplete_param_with_ac(input, beginning->str, jid_ac, TRUE);
+            result = autocomplete_param_with_ac(input, beginning->str, jid_ac, TRUE, previous);
             g_string_free(beginning, TRUE);
             if (result) {
                 g_strfreev(args);
@@ -2514,17 +2514,17 @@ _affiliation_autocomplete(ProfWin *window, const char *const input)
         g_strfreev(args);
     }
 
-    result = autocomplete_param_with_ac(input, "/affiliation set", affiliation_ac, TRUE);
+    result = autocomplete_param_with_ac(input, "/affiliation set", affiliation_ac, TRUE, previous);
     if (result) {
         return result;
     }
 
-    result = autocomplete_param_with_ac(input, "/affiliation list", affiliation_ac, TRUE);
+    result = autocomplete_param_with_ac(input, "/affiliation list", affiliation_ac, TRUE, previous);
     if (result) {
         return result;
     }
 
-    result = autocomplete_param_with_ac(input, "/affiliation", privilege_cmd_ac, TRUE);
+    result = autocomplete_param_with_ac(input, "/affiliation", privilege_cmd_ac, TRUE, previous);
     if (result) {
         return result;
     }
@@ -2533,7 +2533,7 @@ _affiliation_autocomplete(ProfWin *window, const char *const input)
 }
 
 static char*
-_role_autocomplete(ProfWin *window, const char *const input)
+_role_autocomplete(ProfWin *window, const char *const input, gboolean previous)
 {
     char *result = NULL;
 
@@ -2553,7 +2553,7 @@ _role_autocomplete(ProfWin *window, const char *const input)
                 g_string_append(beginning, args[1]);
             }
 
-            result = autocomplete_param_with_ac(input, beginning->str, nick_ac, TRUE);
+            result = autocomplete_param_with_ac(input, beginning->str, nick_ac, TRUE, previous);
             g_string_free(beginning, TRUE);
             if (result) {
                 g_strfreev(args);
@@ -2564,68 +2564,17 @@ _role_autocomplete(ProfWin *window, const char *const input)
         g_strfreev(args);
     }
 
-    result = autocomplete_param_with_ac(input, "/role set", role_ac, TRUE);
+    result = autocomplete_param_with_ac(input, "/role set", role_ac, TRUE, previous);
     if (result) {
         return result;
     }
 
-    result = autocomplete_param_with_ac(input, "/role list", role_ac, TRUE);
+    result = autocomplete_param_with_ac(input, "/role list", role_ac, TRUE, previous);
     if (result) {
         return result;
     }
 
-    result = autocomplete_param_with_ac(input, "/role", privilege_cmd_ac, TRUE);
-    if (result) {
-        return result;
-    }
-
-    return result;
-}
-
-static char*
-_wins_autocomplete(ProfWin *window, const char *const input)
-{
-    char *result = NULL;
-
-    result = autocomplete_param_with_func(input, "/wins autotidy", prefs_autocomplete_boolean_choice);
-    if (result) {
-        return result;
-    }
-
-    result = autocomplete_param_with_ac(input, "/wins", wins_ac, TRUE);
-    if (result) {
-        return result;
-    }
-
-    return NULL;
-}
-
-static char*
-_tls_autocomplete(ProfWin *window, const char *const input)
-{
-    char *result = NULL;
-
-    result = autocomplete_param_with_func(input, "/tls revoke", tlscerts_complete);
-    if (result) {
-        return result;
-    }
-
-    result = autocomplete_param_with_func(input, "/tls cert", tlscerts_complete);
-    if (result) {
-        return result;
-    }
-
-    result = autocomplete_param_with_ac(input, "/tls certpath", tls_certpath_ac, TRUE);
-    if (result) {
-        return result;
-    }
-
-    result = autocomplete_param_with_func(input, "/tls show", prefs_autocomplete_boolean_choice);
-    if (result) {
-        return result;
-    }
-
-    result = autocomplete_param_with_ac(input, "/tls", tls_ac, TRUE);
+    result = autocomplete_param_with_ac(input, "/role", privilege_cmd_ac, TRUE, previous);
     if (result) {
         return result;
     }
@@ -2634,21 +2583,16 @@ _tls_autocomplete(ProfWin *window, const char *const input)
 }
 
 static char*
-_receipts_autocomplete(ProfWin *window, const char *const input)
+_wins_autocomplete(ProfWin *window, const char *const input, gboolean previous)
 {
     char *result = NULL;
 
-    result = autocomplete_param_with_func(input, "/receipts send", prefs_autocomplete_boolean_choice);
+    result = autocomplete_param_with_func(input, "/wins autotidy", prefs_autocomplete_boolean_choice, previous);
     if (result) {
         return result;
     }
 
-    result = autocomplete_param_with_func(input, "/receipts request", prefs_autocomplete_boolean_choice);
-    if (result) {
-        return result;
-    }
-
-    result = autocomplete_param_with_ac(input, "/receipts", receipts_ac, TRUE);
+    result = autocomplete_param_with_ac(input, "/wins", wins_ac, TRUE, previous);
     if (result) {
         return result;
     }
@@ -2657,16 +2601,54 @@ _receipts_autocomplete(ProfWin *window, const char *const input)
 }
 
 static char*
-_alias_autocomplete(ProfWin *window, const char *const input)
+_tls_autocomplete(ProfWin *window, const char *const input, gboolean previous)
 {
     char *result = NULL;
 
-    result = autocomplete_param_with_ac(input, "/alias remove", aliases_ac, TRUE);
+    result = autocomplete_param_with_func(input, "/tls revoke", tlscerts_complete, previous);
     if (result) {
         return result;
     }
 
-    result = autocomplete_param_with_ac(input, "/alias", alias_ac, TRUE);
+    result = autocomplete_param_with_func(input, "/tls cert", tlscerts_complete, previous);
+    if (result) {
+        return result;
+    }
+
+    result = autocomplete_param_with_ac(input, "/tls certpath", tls_certpath_ac, TRUE, previous);
+    if (result) {
+        return result;
+    }
+
+    result = autocomplete_param_with_func(input, "/tls show", prefs_autocomplete_boolean_choice, previous);
+    if (result) {
+        return result;
+    }
+
+    result = autocomplete_param_with_ac(input, "/tls", tls_ac, TRUE, previous);
+    if (result) {
+        return result;
+    }
+
+    return result;
+}
+
+static char*
+_receipts_autocomplete(ProfWin *window, const char *const input, gboolean previous)
+{
+    char *result = NULL;
+
+    result = autocomplete_param_with_func(input, "/receipts send", prefs_autocomplete_boolean_choice, previous);
+    if (result) {
+        return result;
+    }
+
+    result = autocomplete_param_with_func(input, "/receipts request", prefs_autocomplete_boolean_choice, previous);
+    if (result) {
+        return result;
+    }
+
+    result = autocomplete_param_with_ac(input, "/receipts", receipts_ac, TRUE, previous);
     if (result) {
         return result;
     }
@@ -2675,7 +2657,25 @@ _alias_autocomplete(ProfWin *window, const char *const input)
 }
 
 static char*
-_connect_autocomplete(ProfWin *window, const char *const input)
+_alias_autocomplete(ProfWin *window, const char *const input, gboolean previous)
+{
+    char *result = NULL;
+
+    result = autocomplete_param_with_ac(input, "/alias remove", aliases_ac, TRUE, previous);
+    if (result) {
+        return result;
+    }
+
+    result = autocomplete_param_with_ac(input, "/alias", alias_ac, TRUE, previous);
+    if (result) {
+        return result;
+    }
+
+    return NULL;
+}
+
+static char*
+_connect_autocomplete(ProfWin *window, const char *const input, gboolean previous)
 {
     char *found = NULL;
     gboolean result = FALSE;
@@ -2688,7 +2688,7 @@ _connect_autocomplete(ProfWin *window, const char *const input)
         if ((num_args == 1 && space_at_end) || (num_args == 2 && !space_at_end)) {
             GString *beginning = g_string_new("/connect");
             g_string_append_printf(beginning, " %s", args[0]);
-            found = autocomplete_param_with_ac(input, beginning->str, connect_property_ac, TRUE);
+            found = autocomplete_param_with_ac(input, beginning->str, connect_property_ac, TRUE, previous);
             g_string_free(beginning, TRUE);
             if (found) {
                 g_strfreev(args);
@@ -2699,7 +2699,7 @@ _connect_autocomplete(ProfWin *window, const char *const input)
                 || (num_args == 3 && (g_strcmp0(args[1], "tls") == 0) && !space_at_end))  {
             GString *beginning = g_string_new("/connect");
             g_string_append_printf(beginning, " %s %s", args[0], args[1]);
-            found = autocomplete_param_with_ac(input, beginning->str, tls_property_ac, TRUE);
+            found = autocomplete_param_with_ac(input, beginning->str, tls_property_ac, TRUE, previous);
             g_string_free(beginning, TRUE);
             if (found) {
                 g_strfreev(args);
@@ -2709,7 +2709,7 @@ _connect_autocomplete(ProfWin *window, const char *const input)
         if ((num_args == 3 && space_at_end) || (num_args == 4 && !space_at_end)) {
             GString *beginning = g_string_new("/connect");
             g_string_append_printf(beginning, " %s %s %s", args[0], args[1], args[2]);
-            found = autocomplete_param_with_ac(input, beginning->str, connect_property_ac, TRUE);
+            found = autocomplete_param_with_ac(input, beginning->str, connect_property_ac, TRUE, previous);
             g_string_free(beginning, TRUE);
             if (found) {
                 g_strfreev(args);
@@ -2720,7 +2720,7 @@ _connect_autocomplete(ProfWin *window, const char *const input)
                 || (num_args == 5 && (g_strcmp0(args[3], "tls") == 0) && !space_at_end))  {
             GString *beginning = g_string_new("/connect");
             g_string_append_printf(beginning, " %s %s %s %s", args[0], args[1], args[2], args[3]);
-            found = autocomplete_param_with_ac(input, beginning->str, tls_property_ac, TRUE);
+            found = autocomplete_param_with_ac(input, beginning->str, tls_property_ac, TRUE, previous);
             g_string_free(beginning, TRUE);
             if (found) {
                 g_strfreev(args);
@@ -2730,7 +2730,7 @@ _connect_autocomplete(ProfWin *window, const char *const input)
         if ((num_args == 5 && space_at_end) || (num_args == 6 && !space_at_end)) {
             GString *beginning = g_string_new("/connect");
             g_string_append_printf(beginning, " %s %s %s %s %s", args[0], args[1], args[2], args[3], args[4]);
-            found = autocomplete_param_with_ac(input, beginning->str, connect_property_ac, TRUE);
+            found = autocomplete_param_with_ac(input, beginning->str, connect_property_ac, TRUE, previous);
             g_string_free(beginning, TRUE);
             if (found) {
                 g_strfreev(args);
@@ -2741,7 +2741,7 @@ _connect_autocomplete(ProfWin *window, const char *const input)
                 || (num_args == 7 && (g_strcmp0(args[5], "tls") == 0) && !space_at_end))  {
             GString *beginning = g_string_new("/connect");
             g_string_append_printf(beginning, " %s %s %s %s %s %s", args[0], args[1], args[2], args[3], args[4], args[5]);
-            found = autocomplete_param_with_ac(input, beginning->str, tls_property_ac, TRUE);
+            found = autocomplete_param_with_ac(input, beginning->str, tls_property_ac, TRUE, previous);
             g_string_free(beginning, TRUE);
             if (found) {
                 g_strfreev(args);
@@ -2752,7 +2752,7 @@ _connect_autocomplete(ProfWin *window, const char *const input)
 
     g_strfreev(args);
 
-    found = autocomplete_param_with_func(input, "/connect", accounts_find_enabled);
+    found = autocomplete_param_with_func(input, "/connect", accounts_find_enabled, previous);
     if (found) {
         return found;
     }
@@ -2761,16 +2761,16 @@ _connect_autocomplete(ProfWin *window, const char *const input)
 }
 
 static char*
-_help_autocomplete(ProfWin *window, const char *const input)
+_help_autocomplete(ProfWin *window, const char *const input, gboolean previous)
 {
     char *result = NULL;
 
-    result = autocomplete_param_with_ac(input, "/help commands", help_commands_ac, TRUE);
+    result = autocomplete_param_with_ac(input, "/help commands", help_commands_ac, TRUE, previous);
     if (result) {
         return result;
     }
 
-    result = autocomplete_param_with_ac(input, "/help", help_ac, TRUE);
+    result = autocomplete_param_with_ac(input, "/help", help_ac, TRUE, previous);
     if (result) {
         return result;
     }
@@ -2779,7 +2779,7 @@ _help_autocomplete(ProfWin *window, const char *const input)
 }
 
 static char*
-_join_autocomplete(ProfWin *window, const char *const input)
+_join_autocomplete(ProfWin *window, const char *const input, gboolean previous)
 {
     char *found = NULL;
     gboolean result = FALSE;
@@ -2792,7 +2792,7 @@ _join_autocomplete(ProfWin *window, const char *const input)
         if ((num_args == 1 && space_at_end) || (num_args == 2 && !space_at_end)) {
             GString *beginning = g_string_new("/join");
             g_string_append_printf(beginning, " %s", args[0]);
-            found = autocomplete_param_with_ac(input, beginning->str, join_property_ac, TRUE);
+            found = autocomplete_param_with_ac(input, beginning->str, join_property_ac, TRUE, previous);
             g_string_free(beginning, TRUE);
             if (found) {
                 g_strfreev(args);
@@ -2802,7 +2802,7 @@ _join_autocomplete(ProfWin *window, const char *const input)
         if ((num_args == 3 && space_at_end) || (num_args == 4 && !space_at_end)) {
             GString *beginning = g_string_new("/join");
             g_string_append_printf(beginning, " %s %s %s", args[0], args[1], args[2]);
-            found = autocomplete_param_with_ac(input, beginning->str, join_property_ac, TRUE);
+            found = autocomplete_param_with_ac(input, beginning->str, join_property_ac, TRUE, previous);
             g_string_free(beginning, TRUE);
             if (found) {
                 g_strfreev(args);
@@ -2813,7 +2813,7 @@ _join_autocomplete(ProfWin *window, const char *const input)
 
     g_strfreev(args);
 
-    found = autocomplete_param_with_func(input, "/join", bookmark_find);
+    found = autocomplete_param_with_func(input, "/join", bookmark_find, previous);
     if (found) {
         return found;
     }
@@ -2822,24 +2822,24 @@ _join_autocomplete(ProfWin *window, const char *const input)
 }
 
 static char*
-_console_autocomplete(ProfWin *window, const char *const input)
+_console_autocomplete(ProfWin *window, const char *const input, gboolean previous)
 {
     char *result = NULL;
 
-    result = autocomplete_param_with_ac(input, "/console chat", console_msg_ac, TRUE);
+    result = autocomplete_param_with_ac(input, "/console chat", console_msg_ac, TRUE, previous);
     if (result) {
         return result;
     }
-    result = autocomplete_param_with_ac(input, "/console muc", console_msg_ac, TRUE);
+    result = autocomplete_param_with_ac(input, "/console muc", console_msg_ac, TRUE, previous);
     if (result) {
         return result;
     }
-    result = autocomplete_param_with_ac(input, "/console private", console_msg_ac, TRUE);
+    result = autocomplete_param_with_ac(input, "/console private", console_msg_ac, TRUE, previous);
     if (result) {
         return result;
     }
 
-    result = autocomplete_param_with_ac(input, "/console", console_ac, TRUE);
+    result = autocomplete_param_with_ac(input, "/console", console_ac, TRUE, previous);
     if (result) {
         return result;
     }
@@ -2848,25 +2848,25 @@ _console_autocomplete(ProfWin *window, const char *const input)
 }
 
 static char*
-_win_autocomplete(ProfWin *window, const char *const input)
+_win_autocomplete(ProfWin *window, const char *const input, gboolean previous)
 {
-    return autocomplete_param_with_func(input, "/win", win_autocomplete);
+    return autocomplete_param_with_func(input, "/win", win_autocomplete, previous);
 }
 
 static char*
-_close_autocomplete(ProfWin *window, const char *const input)
+_close_autocomplete(ProfWin *window, const char *const input, gboolean previous)
 {
-    return autocomplete_param_with_func(input, "/close", win_close_autocomplete);
+    return autocomplete_param_with_func(input, "/close", win_close_autocomplete, previous);
 }
 
 static char*
-_sendfile_autocomplete(ProfWin *window, const char *const input)
+_sendfile_autocomplete(ProfWin *window, const char *const input, gboolean previous)
 {
-    return cmd_ac_complete_filepath(input, "/sendfile");
+    return cmd_ac_complete_filepath(input, "/sendfile", previous);
 }
 
 static char*
-_subject_autocomplete(ProfWin *window, const char *const input)
+_subject_autocomplete(ProfWin *window, const char *const input, gboolean previous)
 {
     char *result = NULL;
 
@@ -2895,7 +2895,7 @@ _subject_autocomplete(ProfWin *window, const char *const input)
         return result;
     }
 
-    result = autocomplete_param_with_ac(input, "/subject", subject_ac, TRUE);
+    result = autocomplete_param_with_ac(input, "/subject", subject_ac, TRUE, previous);
     if (result) {
         return result;
     }
@@ -2904,7 +2904,7 @@ _subject_autocomplete(ProfWin *window, const char *const input)
 }
 
 static char*
-_account_autocomplete(ProfWin *window, const char *const input)
+_account_autocomplete(ProfWin *window, const char *const input, gboolean previous)
 {
     char *found = NULL;
     gboolean result = FALSE;
@@ -2916,7 +2916,7 @@ _account_autocomplete(ProfWin *window, const char *const input)
         if ((num_args == 2 && space_at_end) || (num_args == 3 && !space_at_end)) {
             GString *beginning = g_string_new("/account");
             g_string_append_printf(beginning, " %s %s", args[0], args[1]);
-            found = autocomplete_param_with_ac(input, beginning->str, account_set_ac, TRUE);
+            found = autocomplete_param_with_ac(input, beginning->str, account_set_ac, TRUE, previous);
             g_string_free(beginning, TRUE);
             if (found) {
                 g_strfreev(args);
@@ -2927,7 +2927,7 @@ _account_autocomplete(ProfWin *window, const char *const input)
                 || (num_args == 4 && (g_strcmp0(args[2], "otr") == 0) && !space_at_end))  {
             GString *beginning = g_string_new("/account");
             g_string_append_printf(beginning, " %s %s %s", args[0], args[1], args[2]);
-            found = autocomplete_param_with_ac(input, beginning->str, otr_policy_ac, TRUE);
+            found = autocomplete_param_with_ac(input, beginning->str, otr_policy_ac, TRUE, previous);
             g_string_free(beginning, TRUE);
             if (found) {
                 g_strfreev(args);
@@ -2938,7 +2938,7 @@ _account_autocomplete(ProfWin *window, const char *const input)
                 || (num_args == 4 && (g_strcmp0(args[2], "status") == 0) && !space_at_end))  {
             GString *beginning = g_string_new("/account");
             g_string_append_printf(beginning, " %s %s %s", args[0], args[1], args[2]);
-            found = autocomplete_param_with_ac(input, beginning->str, account_status_ac, TRUE);
+            found = autocomplete_param_with_ac(input, beginning->str, account_status_ac, TRUE, previous);
             g_string_free(beginning, TRUE);
             if (found) {
                 g_strfreev(args);
@@ -2949,7 +2949,7 @@ _account_autocomplete(ProfWin *window, const char *const input)
                 || (num_args == 4 && (g_strcmp0(args[2], "tls") == 0) && !space_at_end))  {
             GString *beginning = g_string_new("/account");
             g_string_append_printf(beginning, " %s %s %s", args[0], args[1], args[2]);
-            found = autocomplete_param_with_ac(input, beginning->str, tls_property_ac, TRUE);
+            found = autocomplete_param_with_ac(input, beginning->str, tls_property_ac, TRUE, previous);
             g_string_free(beginning, TRUE);
             if (found) {
                 g_strfreev(args);
@@ -2960,7 +2960,7 @@ _account_autocomplete(ProfWin *window, const char *const input)
                 || (num_args == 4 && (g_strcmp0(args[2], "startscript") == 0) && !space_at_end))  {
             GString *beginning = g_string_new("/account");
             g_string_append_printf(beginning, " %s %s %s", args[0], args[1], args[2]);
-            found = autocomplete_param_with_func(input, beginning->str, _script_autocomplete_func);
+            found = autocomplete_param_with_func(input, beginning->str, _script_autocomplete_func, previous);
             g_string_free(beginning, TRUE);
             if (found) {
                 g_strfreev(args);
@@ -2982,7 +2982,7 @@ _account_autocomplete(ProfWin *window, const char *const input)
                 g_slist_free_full(themes, g_free);
                 autocomplete_add(theme_load_ac, "default");
             }
-            found = autocomplete_param_with_ac(input, beginning->str, theme_load_ac, TRUE);
+            found = autocomplete_param_with_ac(input, beginning->str, theme_load_ac, TRUE, previous);
             g_string_free(beginning, TRUE);
             if (found) {
                 g_strfreev(args);
@@ -2994,7 +2994,7 @@ _account_autocomplete(ProfWin *window, const char *const input)
                 || (num_args == 4 && (g_strcmp0(args[2], "pgpkeyid") == 0) && !space_at_end))  {
             GString *beginning = g_string_new("/account");
             g_string_append_printf(beginning, " %s %s %s", args[0], args[1], args[2]);
-            found = autocomplete_param_with_func(input, beginning->str, p_gpg_autocomplete_key);
+            found = autocomplete_param_with_func(input, beginning->str, p_gpg_autocomplete_key, previous);
             g_string_free(beginning, TRUE);
             if (found) {
                 g_strfreev(args);
@@ -3007,7 +3007,7 @@ _account_autocomplete(ProfWin *window, const char *const input)
     if ((strncmp(input, "/account clear", 14) == 0) && (result == TRUE)) {
         GString *beginning = g_string_new("/account clear ");
         g_string_append(beginning, args[1]);
-        found = autocomplete_param_with_ac(input, beginning->str, account_clear_ac, TRUE);
+        found = autocomplete_param_with_ac(input, beginning->str, account_clear_ac, TRUE, previous);
         g_string_free(beginning, TRUE);
         if (found) {
             g_strfreev(args);
@@ -3017,7 +3017,7 @@ _account_autocomplete(ProfWin *window, const char *const input)
 
     g_strfreev(args);
 
-    found = autocomplete_param_with_ac(input, "/account default", account_default_ac, TRUE);
+    found = autocomplete_param_with_ac(input, "/account default", account_default_ac, TRUE, previous);
     if(found){
         return found;
     }
@@ -3028,42 +3028,42 @@ _account_autocomplete(ProfWin *window, const char *const input)
         "/account default set" };
 
     for (i = 0; i < ARRAY_SIZE(account_choice); i++) {
-        found = autocomplete_param_with_func(input, account_choice[i], accounts_find_all);
+        found = autocomplete_param_with_func(input, account_choice[i], accounts_find_all, previous);
         if (found) {
             return found;
         }
     }
 
-    found = autocomplete_param_with_ac(input, "/account", account_ac, TRUE);
+    found = autocomplete_param_with_ac(input, "/account", account_ac, TRUE, previous);
     return found;
 }
 
 static char*
-_presence_autocomplete(ProfWin *window, const char *const input)
+_presence_autocomplete(ProfWin *window, const char *const input, gboolean previous)
 {
     char *found = NULL;
 
-    found = autocomplete_param_with_func(input, "/presence titlebar", prefs_autocomplete_boolean_choice);
+    found = autocomplete_param_with_func(input, "/presence titlebar", prefs_autocomplete_boolean_choice, previous);
     if (found) {
         return found;
     }
 
-    found = autocomplete_param_with_ac(input, "/presence console", presence_setting_ac, TRUE);
+    found = autocomplete_param_with_ac(input, "/presence console", presence_setting_ac, TRUE, previous);
     if (found) {
         return found;
     }
 
-    found = autocomplete_param_with_ac(input, "/presence chat", presence_setting_ac, TRUE);
+    found = autocomplete_param_with_ac(input, "/presence chat", presence_setting_ac, TRUE, previous);
     if (found) {
         return found;
     }
 
-    found = autocomplete_param_with_ac(input, "/presence room", presence_setting_ac, TRUE);
+    found = autocomplete_param_with_ac(input, "/presence room", presence_setting_ac, TRUE, previous);
     if (found) {
         return found;
     }
 
-    found = autocomplete_param_with_ac(input, "/presence", presence_ac, TRUE);
+    found = autocomplete_param_with_ac(input, "/presence", presence_ac, TRUE, previous);
     if (found) {
         return found;
     }

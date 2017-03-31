@@ -13,3 +13,4 @@ void complete_accented_with_base(void **state);
 void complete_both_with_accented(void **state);
 void complete_both_with_base(void **state);
 void complete_ignores_case(void **state);
+void complete_previous(void **state);

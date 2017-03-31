@@ -2133,16 +2133,16 @@ cmd_group(ProfWin *window, const char *const command, gchar **args)
 
     // list all groups
     if (args[0] == NULL) {
-        GSList *groups = roster_get_groups();
-        GSList *curr = groups;
+        GList *groups = roster_get_groups();
+        GList *curr = groups;
         if (curr) {
             cons_show("Groups:");
             while (curr) {
                 cons_show("  %s", curr->data);
-                curr = g_slist_next(curr);
+                curr = g_list_next(curr);
             }
 
-            g_slist_free_full(groups, g_free);
+            g_list_free_full(groups, g_free);
         } else {
             cons_show("No groups.");
         }
@@ -3562,9 +3562,9 @@ cmd_invite(ProfWin *window, const char *const command, gchar **args)
 gboolean
 cmd_invites(ProfWin *window, const char *const command, gchar **args)
 {
-    GSList *invites = muc_invites();
+    GList *invites = muc_invites();
     cons_show_room_invites(invites);
-    g_slist_free_full(invites, g_free);
+    g_list_free_full(invites, g_free);
     return TRUE;
 }
 
