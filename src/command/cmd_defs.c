@@ -126,11 +126,11 @@ static struct cmd_t command_defs[] =
             "Arguments that may be one of a number of values are separated by a pipe "
             "e.g. val1|val2|val3.")
         CMD_ARGS(
-            { "<area>",    "Summary help for commands in a certain area of functionality." },
-            { "<command>", "Full help for a specific command, for example '/help connect'." },
-            { "search <search_term>",    "Search commands for search_term." })
+            { "<area>",                 "Summary help for commands in a certain area of functionality." },
+            { "<command>",              "Full help for a specific command, for example '/help connect'." },
+            { "search <search_term>",   "Search commands for search_term." })
         CMD_EXAMPLES(
-            "/help search presence show",
+            "/help search presence online",
             "/help commands",
             "/help presence",
             "/help who")
