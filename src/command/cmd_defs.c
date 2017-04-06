@@ -2298,6 +2298,7 @@ _cmd_index(Command *cmd) {
     }
 
     gchar **tokens = g_str_tokenize_and_fold(index_source->str, NULL, NULL);
+    g_string_free(index_source, TRUE);
 
     GString *index = g_string_new("");
     i = 0;
@@ -2305,6 +2306,7 @@ _cmd_index(Command *cmd) {
         index = g_string_append(index, tokens[i]);
         index = g_string_append(index, " ");
     }
+    g_strfreev(tokens);
 
     char *res = index->str;
     g_string_free(index, FALSE);
@@ -2331,7 +2333,10 @@ cmd_search_index(char *term)
             }
             curr = g_list_next(curr);
         }
+        g_list_free(index_keys);
     }
+
+    g_strfreev(processed_terms);
 
     return results;
 }
@@ -2379,6 +2384,7 @@ void
 cmd_uninit(void)
 {
     cmd_ac_uninit();
+    g_hash_table_destroy(search_index);
 }
 
 gboolean
