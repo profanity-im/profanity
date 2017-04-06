@@ -204,7 +204,8 @@ cmd_ac_init(void)
     help_ac = autocomplete_new();
     autocomplete_add(help_ac, "commands");
     autocomplete_add(help_ac, "navigation");
-    autocomplete_add(help_ac, "search");
+    autocomplete_add(help_ac, "search_all");
+    autocomplete_add(help_ac, "search_any");
 
     help_commands_ac = autocomplete_new();
     autocomplete_add(help_commands_ac, "chat");

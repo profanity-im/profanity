@@ -118,7 +118,7 @@ static struct cmd_t command_defs[] =
         CMD_MAINFUNC(cmd_help)
         CMD_NOTAGS
         CMD_SYN(
-            "/help [<area>|<command>|search] [<search_term>]")
+            "/help [<area>|<command>|search_all|search_any] [<search_terms>]")
         CMD_DESC(
             "Help on using Profanity. Passing no arguments list help areas. "
             "For command help, optional arguments are shown using square brackets, "
@@ -126,11 +126,12 @@ static struct cmd_t command_defs[] =
             "Arguments that may be one of a number of values are separated by a pipe "
             "e.g. val1|val2|val3.")
         CMD_ARGS(
-            { "<area>",                 "Summary help for commands in a certain area of functionality." },
-            { "<command>",              "Full help for a specific command, for example '/help connect'." },
-            { "search <search_term>",   "Search commands for search_term." })
+            { "<area>",                     "Summary help for commands in a certain area of functionality." },
+            { "<command>",                  "Full help for a specific command, for example '/help connect'." },
+            { "search_all <search_terms>",  "Search commands for returning matches that contain all of the search terms." },
+            { "search_any <search_terms>",  "Search commands for returning matches that contain any of the search terms." })
         CMD_EXAMPLES(
-            "/help search presence online",
+            "/help search_all presence online",
             "/help commands",
             "/help presence",
             "/help who")
@@ -2315,7 +2316,34 @@ _cmd_index(Command *cmd) {
 }
 
 GList*
-cmd_search_index(char *term)
+cmd_search_index_any(char *term)
+{
+    GList *results = NULL;
+
+    gchar **processed_terms = g_str_tokenize_and_fold(term, NULL, NULL);
+    int terms_len = g_strv_length(processed_terms);
+
+    int i = 0;
+    for (i = 0; i < terms_len; i++) {
+        GList *index_keys = g_hash_table_get_keys(search_index);
+        GList *curr = index_keys;
+        while (curr) {
+            char *index_entry = g_hash_table_lookup(search_index, curr->data);
+            if (g_str_match_string(processed_terms[i], index_entry, FALSE)) {
+                results = g_list_append(results, curr->data);
+            }
+            curr = g_list_next(curr);
+        }
+        g_list_free(index_keys);
+    }
+
+    g_strfreev(processed_terms);
+
+    return results;
+}
+
+GList*
+cmd_search_index_all(char *term)
 {
     GList *results = NULL;
 

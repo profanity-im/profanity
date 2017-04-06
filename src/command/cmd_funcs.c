@@ -1565,11 +1565,31 @@ cmd_help(ProfWin *window, const char *const command, gchar **args)
     int num_args = g_strv_length(args);
     if (num_args == 0) {
         cons_help();
-    } else if (strcmp(args[0], "search") == 0) {
+    } else if (strcmp(args[0], "search_all") == 0) {
         if (args[1] == NULL) {
             cons_bad_cmd_usage(command);
         } else {
-            GList *cmds = cmd_search_index(args[1]);
+            GList *cmds = cmd_search_index_all(args[1]);
+            if (cmds == NULL) {
+                cons_show("No commands found.");
+            } else {
+                GList *curr = cmds;
+                GList *results = NULL;
+                while (curr) {
+                    results = g_list_insert_sorted(results, curr->data, (GCompareFunc)g_strcmp0);
+                    curr = g_list_next(curr);
+                }
+                cons_show("Search results:");
+                _cmd_list_commands(results);
+                g_list_free(results);
+            }
+            g_list_free(cmds);
+        }
+    } else if (strcmp(args[0], "search_any") == 0) {
+        if (args[1] == NULL) {
+            cons_bad_cmd_usage(command);
+        } else {
+            GList *cmds = cmd_search_index_any(args[1]);
             if (cmds == NULL) {
                 cons_show("No commands found.");
             } else {
