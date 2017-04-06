@@ -1485,6 +1485,41 @@ cmd_win(ProfWin *window, const char *const command, gchar **args)
 }
 
 static void
+_cmd_list_commands(GList *commands) {
+    int maxlen = 0;
+    GList *curr = commands;
+    while (curr) {
+        gchar *cmd = curr->data;
+        int len = strlen(cmd);
+        if (len > maxlen) maxlen = len;
+        curr = g_list_next(curr);
+    }
+
+    GString *cmds = g_string_new("");
+    curr = commands;
+    int count = 0;
+    while (curr) {
+        gchar *cmd = curr->data;
+        if (count == 5) {
+            cons_show(cmds->str);
+            g_string_free(cmds, TRUE);
+            cmds = g_string_new("");
+            count = 0;
+        }
+        g_string_append_printf(cmds, "%-*s", maxlen + 1, cmd);
+        curr = g_list_next(curr);
+        count++;
+    }
+    cons_show(cmds->str);
+    g_string_free(cmds, TRUE);
+    g_list_free(curr);
+
+    cons_show("");
+    cons_show("Use /help [command] without the leading slash, for help on a specific command");
+    cons_show("");
+}
+
+static void
 _cmd_help_cmd_list(const char *const tag)
 {
     cons_show("");
@@ -1520,38 +1555,8 @@ _cmd_help_cmd_list(const char *const tag)
         }
     }
 
-    int maxlen = 0;
-    GList *curr = ordered_commands;
-    while (curr) {
-        gchar *cmd = curr->data;
-        int len = strlen(cmd);
-        if (len > maxlen) maxlen = len;
-        curr = g_list_next(curr);
-    }
-
-    GString *cmds = g_string_new("");
-    curr = ordered_commands;
-    int count = 0;
-    while (curr) {
-        gchar *cmd = curr->data;
-        if (count == 5) {
-            cons_show(cmds->str);
-            g_string_free(cmds, TRUE);
-            cmds = g_string_new("");
-            count = 0;
-        }
-        g_string_append_printf(cmds, "%-*s", maxlen + 1, cmd);
-        curr = g_list_next(curr);
-        count++;
-    }
-    cons_show(cmds->str);
-    g_string_free(cmds, TRUE);
+    _cmd_list_commands(ordered_commands);
     g_list_free(ordered_commands);
-    g_list_free(curr);
-
-    cons_show("");
-    cons_show("Use /help [command] without the leading slash, for help on a specific command");
-    cons_show("");
 }
 
 gboolean
@@ -1560,6 +1565,26 @@ cmd_help(ProfWin *window, const char *const command, gchar **args)
     int num_args = g_strv_length(args);
     if (num_args == 0) {
         cons_help();
+    } else if (strcmp(args[0], "search") == 0) {
+        if (args[1] == NULL) {
+            cons_bad_cmd_usage(command);
+        } else {
+            GList *cmds = cmd_search_index(args[1]);
+            if (cmds == NULL) {
+                cons_show("No commands found.");
+            } else {
+                GList *curr = cmds;
+                GList *results = NULL;
+                while (curr) {
+                    results = g_list_insert_sorted(results, curr->data, (GCompareFunc)g_strcmp0);
+                    curr = g_list_next(curr);
+                }
+                cons_show("Search results:");
+                _cmd_list_commands(results);
+                g_list_free(results);
+            }
+            g_list_free(cmds);
+        }
     } else if (strcmp(args[0], "commands") == 0) {
         if (args[1]) {
             if (!cmd_valid_tag(args[1])) {

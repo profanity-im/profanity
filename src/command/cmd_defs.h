@@ -49,4 +49,6 @@ gboolean cmd_valid_tag(const char *const str);
 
 void command_docgen(void);
 
+GList* cmd_search_index(char *term);
+
 #endif

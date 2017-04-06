@@ -142,7 +142,7 @@ cons_show_help(const char *const cmd, CommandHelp *help)
 
     if (g_strv_length((gchar**)help->examples) > 0) {
         cons_show("");
-        win_println(console, THEME_HELP_HEADER, '-', "Arguments");
+        win_println(console, THEME_HELP_HEADER, '-', "Examples");
         ui_show_lines(console, help->examples);
     }
 }
