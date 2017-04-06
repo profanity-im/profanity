@@ -2319,24 +2319,29 @@ cmd_search_index(char *term)
 {
     GList *results = NULL;
 
-    gchar **processed_terms = g_str_tokenize_and_fold(term, NULL, NULL);
-    int terms_len = g_strv_length(processed_terms);
+    gchar **terms = g_str_tokenize_and_fold(term, NULL, NULL);
+    int terms_len = g_strv_length(terms);
 
-    int i = 0;
-    for (i = 0; i < terms_len; i++) {
-        GList *index_keys = g_hash_table_get_keys(search_index);
-        GList *curr = index_keys;
-        while (curr) {
-            char *index_entry = g_hash_table_lookup(search_index, curr->data);
-            if (g_str_match_string(processed_terms[i], index_entry, FALSE)) {
-                results = g_list_append(results, curr->data);
+    GList *commands = g_hash_table_get_keys(search_index);
+    GList *curr = commands;
+    while (curr) {
+        char *command = curr->data;
+        int matches = 0;
+        int i = 0;
+        for (i = 0; i < terms_len; i++) {
+            char *command_index = g_hash_table_lookup(search_index, command);
+            if (g_str_match_string(terms[i], command_index, FALSE)) {
+                matches++;
             }
-            curr = g_list_next(curr);
         }
-        g_list_free(index_keys);
+        if (matches == terms_len) {
+            results = g_list_append(results, command);
+        }
+        curr = g_list_next(curr);
     }
 
-    g_strfreev(processed_terms);
+    g_list_free(commands);
+    g_strfreev(terms);
 
     return results;
 }
