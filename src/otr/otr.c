@@ -36,6 +36,7 @@
 #include <libotr/privkey.h>
 #include <libotr/message.h>
 #include <libotr/sm.h>
+#include <gcrypt.h>
 #include <glib.h>
 
 #include "log.h"
@@ -169,10 +170,48 @@ otr_start_query(void)
     return otrlib_start_query();
 }
 
+static log_level_t
+_gcry_log_level_get(int level)
+{
+    log_level_t prof_level = PROF_LEVEL_DEBUG;
+
+    switch (level) {
+    case GCRY_LOG_DEBUG:
+        prof_level = PROF_LEVEL_DEBUG; break;
+    case GCRY_LOG_INFO:
+        prof_level = PROF_LEVEL_INFO; break;
+    case GCRY_LOG_WARN:
+        prof_level = PROF_LEVEL_WARN; break;
+    case GCRY_LOG_ERROR:
+    case GCRY_LOG_FATAL:
+    case GCRY_LOG_BUG:
+        prof_level = PROF_LEVEL_ERROR; break;
+    }
+
+    return prof_level;
+}
+
+static void
+_gcry_log_handler(void *data, int level, const char *fmt, va_list arg_ptr)
+{
+    GString *fmt_msg = g_string_new(NULL);
+    char *tail;
+
+    g_string_vprintf(fmt_msg, fmt, arg_ptr);
+    /* remove trailing \n if exists */
+    tail = &fmt_msg->str[fmt_msg->len - strlen("\n")];
+    if (strcmp("\n", tail) == 0)
+        *tail = '\0';
+    log_msg(_gcry_log_level_get(level), "gcry", fmt_msg->str);
+    g_string_free(fmt_msg, TRUE);
+}
+
 void
 otr_init(void)
 {
     log_info("Initialising OTR");
+    /* Make libgcrypt print log messages to the log file instead of stderr. */
+    gcry_set_log_handler(&_gcry_log_handler, NULL);
     OTRL_INIT;
 
     jid = NULL;

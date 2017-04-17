@@ -253,6 +253,13 @@ if test "x$enable_otr" != xno; then
             [AC_MSG_NOTICE([libotr not found, otr encryption support not enabled])])])
 fi
 
+AM_COND_IF([BUILD_OTR],
+    [AC_CHECK_LIB([gcrypt], [gcry_set_log_handler],
+        [AC_CHECK_HEADERS([gcrypt.h], [LIBS="-lgcrypt $LIBS"],
+            [grypt.h not found. Try to install libgcrypt-devel package])],
+        [libgcrypt not found])],
+    [])
+
 AS_IF([test "x$with_themes" = xno],
     [THEMES_INSTALL="false"],
     [THEMES_INSTALL="true"])
