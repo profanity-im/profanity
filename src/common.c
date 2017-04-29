@@ -467,13 +467,13 @@ prof_occurrences(const char *const needle, const char *const haystack, int offse
             gchar *needle_last_ch = g_utf8_offset_to_pointer(needle, g_utf8_strlen(needle, -1)- 1);
             int needle_last_ch_len = mblen(needle_last_ch, MB_CUR_MAX);
 
-            gunichar before = NULL;
+            gunichar before = 0;
             gchar *haystack_before_ch = g_utf8_find_prev_char(haystack, haystack_curr);
             if (haystack_before_ch) {
                 before = g_utf8_get_char(haystack_before_ch);
             }
 
-            gunichar after = NULL;
+            gunichar after = 0;
             gchar *haystack_after_ch = g_utf8_find_next_char(haystack_curr + strlen(needle) - needle_last_ch_len, NULL);
             if (haystack_after_ch) {
                 after = g_utf8_get_char(haystack_after_ch);
