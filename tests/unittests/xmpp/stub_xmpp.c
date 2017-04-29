@@ -128,7 +128,7 @@ void message_send_invite(const char * const room, const char * const contact,
 // presence functions
 void presence_subscription(const char * const jid, const jabber_subscr_t action) {}
 
-GSList* presence_get_subscription_requests(void)
+GList* presence_get_subscription_requests(void)
 {
     return NULL;
 }
@@ -140,7 +140,7 @@ gint presence_sub_request_count(void)
 
 void presence_reset_sub_request_search(void) {}
 
-char * presence_sub_request_find(const char * const search_str)
+char * presence_sub_request_find(const char * const search_str, gboolean previous)
 {
     return  NULL;
 }
@@ -250,7 +250,7 @@ GList * bookmark_get_list(void)
     return (GList *)mock();
 }
 
-char * bookmark_find(const char * const search_str)
+char * bookmark_find(const char * const search_str, gboolean previous)
 {
     return NULL;
 }
@@ -298,7 +298,7 @@ gboolean blocked_remove(char *jid)
     return TRUE;
 }
 
-char* blocked_ac_find(const char *const search_str)
+char* blocked_ac_find(const char *const search_str, gboolean previous)
 {
     return NULL;
 }

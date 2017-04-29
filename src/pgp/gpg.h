@@ -67,7 +67,7 @@ void p_gpg_verify(const char *const barejid, const char *const sign);
 char* p_gpg_encrypt(const char *const barejid, const char *const message, const char *const fp);
 char* p_gpg_decrypt(const char *const cipher);
 void p_gpg_free_decrypted(char *decrypted);
-char* p_gpg_autocomplete_key(const char *const search_str);
+char* p_gpg_autocomplete_key(const char *const search_str, gboolean previous);
 void p_gpg_autocomplete_key_reset(void);
 char* p_gpg_format_fp_str(char *fp);
 

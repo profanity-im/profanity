@@ -120,10 +120,10 @@ char* muc_roster_nick_change_complete(const char *const room, const char *const 
 void muc_invites_add(const char *const room, const char *const password);
 void muc_invites_remove(const char *const room);
 gint muc_invites_count(void);
-GSList* muc_invites(void);
+GList* muc_invites(void);
 gboolean muc_invites_contain(const char *const room);
 void muc_invites_reset_ac(void);
-char* muc_invites_find(const char *const search_str);
+char* muc_invites_find(const char *const search_str, gboolean previous);
 void muc_invites_clear(void);
 char* muc_invite_password(const char *const room);
 
@@ -133,7 +133,7 @@ char* muc_subject(const char *const room);
 void muc_pending_broadcasts_add(const char *const room, const char *const message);
 GList* muc_pending_broadcasts(const char *const room);
 
-char* muc_autocomplete(ProfWin *window, const char *const input);
+char* muc_autocomplete(ProfWin *window, const char *const input, gboolean previous);
 void muc_autocomplete_reset(const char *const room);
 
 gboolean muc_requires_config(const char *const room);

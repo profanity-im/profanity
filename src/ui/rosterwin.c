@@ -138,13 +138,13 @@ rosterwin_roster(void)
             _rosterwin_contacts_by_presence(layout, "dnd", "Do not disturb");
             _rosterwin_contacts_by_presence(layout, "offline", "Offline");
         } else if (g_strcmp0(by, "group") == 0) {
-            GSList *groups = roster_get_groups();
-            GSList *curr_group = groups;
+            GList *groups = roster_get_groups();
+            GList *curr_group = groups;
             while (curr_group) {
                 _rosterwin_contacts_by_group(layout, curr_group->data);
-                curr_group = g_slist_next(curr_group);
+                curr_group = g_list_next(curr_group);
             }
-            g_slist_free_full(groups, free);
+            g_list_free_full(groups, free);
             _rosterwin_contacts_by_group(layout, NULL);
         } else {
             _rosterwin_contacts_all(layout);
