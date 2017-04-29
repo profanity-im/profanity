@@ -113,12 +113,12 @@ static gboolean _cmd_has_tag(Command *pcmd, const char *const tag);
 static struct cmd_t command_defs[] =
 {
     { "/help",
-        parse_args, 0, 2, NULL,
+        parse_args_with_freetext, 0, 2, NULL,
         CMD_NOSUBFUNCS
         CMD_MAINFUNC(cmd_help)
         CMD_NOTAGS
         CMD_SYN(
-            "/help [<area>|<command>]")
+            "/help [<area>|<command>|search_all|search_any] [<search_terms>]")
         CMD_DESC(
             "Help on using Profanity. Passing no arguments list help areas. "
             "For command help, optional arguments are shown using square brackets, "
@@ -126,9 +126,12 @@ static struct cmd_t command_defs[] =
             "Arguments that may be one of a number of values are separated by a pipe "
             "e.g. val1|val2|val3.")
         CMD_ARGS(
-            { "<area>",    "Summary help for commands in a certain area of functionality." },
-            { "<command>", "Full help for a specific command, for example '/help connect'." })
+            { "<area>",                     "Summary help for commands in a certain area of functionality." },
+            { "<command>",                  "Full help for a specific command, for example '/help connect'." },
+            { "search_all <search_terms>",  "Search commands for returning matches that contain all of the search terms." },
+            { "search_any <search_terms>",  "Search commands for returning matches that contain any of the search terms." })
         CMD_EXAMPLES(
+            "/help search_all presence online",
             "/help commands",
             "/help presence",
             "/help who")
@@ -576,7 +579,7 @@ static struct cmd_t command_defs[] =
         CMD_SYN(
             "/leave")
         CMD_DESC(
-            "Leave the current chat room.")
+            "Leave the current chat or room.")
         CMD_NOARGS
         CMD_NOEXAMPLES
     },
@@ -2264,9 +2267,112 @@ static struct cmd_t command_defs[] =
         CMD_EXAMPLES(
             "/export /path/to/output.csv",
             "/export ~/contacts.csv")
-    },
+    }
 };
 
+static GHashTable *search_index;
+
+char*
+_cmd_index(Command *cmd) {
+    GString *index_source = g_string_new("");
+    index_source = g_string_append(index_source, cmd->cmd);
+    index_source = g_string_append(index_source, " ");
+    index_source = g_string_append(index_source, cmd->help.desc);
+    index_source = g_string_append(index_source, " ");
+
+    int len = g_strv_length(cmd->help.tags);
+    int i = 0;
+    for (i = 0; i < len; i++) {
+        index_source = g_string_append(index_source, cmd->help.tags[i]);
+        index_source = g_string_append(index_source, " ");
+    }
+    len = g_strv_length(cmd->help.synopsis);
+    for (i = 0; i < len; i++) {
+        index_source = g_string_append(index_source, cmd->help.synopsis[i]);
+        index_source = g_string_append(index_source, " ");
+    }
+    for (i = 0; cmd->help.args[i][0] != NULL; i++) {
+        index_source = g_string_append(index_source, cmd->help.args[i][0]);
+        index_source = g_string_append(index_source, " ");
+        index_source = g_string_append(index_source, cmd->help.args[i][1]);
+        index_source = g_string_append(index_source, " ");
+    }
+
+    gchar **tokens = g_str_tokenize_and_fold(index_source->str, NULL, NULL);
+    g_string_free(index_source, TRUE);
+
+    GString *index = g_string_new("");
+    i = 0;
+    for (i = 0; i < g_strv_length(tokens); i++) {
+        index = g_string_append(index, tokens[i]);
+        index = g_string_append(index, " ");
+    }
+    g_strfreev(tokens);
+
+    char *res = index->str;
+    g_string_free(index, FALSE);
+
+    return res;
+}
+
+GList*
+cmd_search_index_any(char *term)
+{
+    GList *results = NULL;
+
+    gchar **processed_terms = g_str_tokenize_and_fold(term, NULL, NULL);
+    int terms_len = g_strv_length(processed_terms);
+
+    int i = 0;
+    for (i = 0; i < terms_len; i++) {
+        GList *index_keys = g_hash_table_get_keys(search_index);
+        GList *curr = index_keys;
+        while (curr) {
+            char *index_entry = g_hash_table_lookup(search_index, curr->data);
+            if (g_str_match_string(processed_terms[i], index_entry, FALSE)) {
+                results = g_list_append(results, curr->data);
+            }
+            curr = g_list_next(curr);
+        }
+        g_list_free(index_keys);
+    }
+
+    g_strfreev(processed_terms);
+
+    return results;
+}
+
+GList*
+cmd_search_index_all(char *term)
+{
+    GList *results = NULL;
+
+    gchar **terms = g_str_tokenize_and_fold(term, NULL, NULL);
+    int terms_len = g_strv_length(terms);
+
+    GList *commands = g_hash_table_get_keys(search_index);
+    GList *curr = commands;
+    while (curr) {
+        char *command = curr->data;
+        int matches = 0;
+        int i = 0;
+        for (i = 0; i < terms_len; i++) {
+            char *command_index = g_hash_table_lookup(search_index, command);
+            if (g_str_match_string(terms[i], command_index, FALSE)) {
+                matches++;
+            }
+        }
+        if (matches == terms_len) {
+            results = g_list_append(results, command);
+        }
+        curr = g_list_next(curr);
+    }
+
+    g_list_free(commands);
+    g_strfreev(terms);
+
+    return results;
+}
 
 /*
  * Initialise command autocompleter and history
@@ -2278,6 +2384,8 @@ cmd_init(void)
 
     cmd_ac_init();
 
+    search_index = g_hash_table_new_full(g_str_hash, g_str_equal, free, free);
+
     // load command defs into hash table
     commands = g_hash_table_new(g_str_hash, g_str_equal);
     unsigned int i;
@@ -2286,6 +2394,9 @@ cmd_init(void)
 
         // add to hash
         g_hash_table_insert(commands, pcmd->cmd, pcmd);
+
+        // add to search index
+        g_hash_table_insert(search_index, strdup(pcmd->cmd), strdup(_cmd_index(pcmd)));
 
         // add to commands and help autocompleters
         cmd_ac_add_cmd(pcmd);
@@ -2306,6 +2417,7 @@ void
 cmd_uninit(void)
 {
     cmd_ac_uninit();
+    g_hash_table_destroy(search_index);
 }
 
 gboolean

@@ -67,54 +67,6 @@ static unsigned long unique_id = 0;
 
 static size_t _data_callback(void *ptr, size_t size, size_t nmemb, void *data);
 
-// taken from glib 2.30.3
-gchar*
-p_utf8_substring(const gchar *str, glong start_pos, glong end_pos)
-{
-    gchar *start, *end, *out;
-
-    start = g_utf8_offset_to_pointer (str, start_pos);
-    end = g_utf8_offset_to_pointer (start, end_pos - start_pos);
-
-    out = g_malloc (end - start + 1);
-    memcpy (out, start, end - start);
-    out[end - start] = 0;
-
-    return out;
-}
-
-void
-p_slist_free_full(GSList *items, GDestroyNotify free_func)
-{
-    g_slist_foreach (items, (GFunc) free_func, NULL);
-    g_slist_free (items);
-}
-
-void
-p_list_free_full(GList *items, GDestroyNotify free_func)
-{
-    g_list_foreach (items, (GFunc) free_func, NULL);
-    g_list_free (items);
-}
-
-gboolean
-p_hash_table_add(GHashTable *hash_table, gpointer key)
-{
-    // doesn't handle when key exists, but value == NULL
-    gpointer found = g_hash_table_lookup(hash_table, key);
-    g_hash_table_replace(hash_table, key, key);
-
-    return (found == NULL);
-}
-
-gboolean
-p_hash_table_contains(GHashTable *hash_table, gconstpointer key)
-{
-    // doesn't handle when key exists, but value == NULL
-    gpointer found = g_hash_table_lookup(hash_table, key);
-    return (found != NULL);
-}
-
 gboolean
 create_dir(char *name)
 {
@@ -515,11 +467,18 @@ prof_occurrences(const char *const needle, const char *const haystack, int offse
             gchar *needle_last_ch = g_utf8_offset_to_pointer(needle, g_utf8_strlen(needle, -1)- 1);
             int needle_last_ch_len = mblen(needle_last_ch, MB_CUR_MAX);
 
-            gchar *haystack_before_ch = g_utf8_prev_char(haystack_curr);
-            gchar *haystack_after_ch = g_utf8_next_char(haystack_curr + strlen(needle) - needle_last_ch_len);
+            gunichar before = 0;
+            gchar *haystack_before_ch = g_utf8_find_prev_char(haystack, haystack_curr);
+            if (haystack_before_ch) {
+                before = g_utf8_get_char(haystack_before_ch);
+            }
 
-            gunichar before = g_utf8_get_char(haystack_before_ch);
-            gunichar after = g_utf8_get_char(haystack_after_ch);
+            gunichar after = 0;
+            gchar *haystack_after_ch = g_utf8_find_next_char(haystack_curr + strlen(needle) - needle_last_ch_len, NULL);
+            if (haystack_after_ch) {
+                after = g_utf8_get_char(haystack_after_ch);
+            }
+
             if (!g_unichar_isalnum(before) && !g_unichar_isalnum(after)) {
                 *result = g_slist_append(*result, GINT_TO_POINTER(offset));
             }

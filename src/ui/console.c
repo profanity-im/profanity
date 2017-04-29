@@ -142,7 +142,7 @@ cons_show_help(const char *const cmd, CommandHelp *help)
 
     if (g_strv_length((gchar**)help->examples) > 0) {
         cons_show("");
-        win_println(console, THEME_HELP_HEADER, '-', "Arguments");
+        win_println(console, THEME_HELP_HEADER, '-', "Examples");
         ui_show_lines(console, help->examples);
     }
 }
@@ -505,7 +505,7 @@ cons_show_wins(gboolean unread)
 }
 
 void
-cons_show_room_invites(GSList *invites)
+cons_show_room_invites(GList *invites)
 {
     cons_show("");
     if (invites == NULL) {
@@ -514,7 +514,7 @@ cons_show_room_invites(GSList *invites)
         cons_show("Chat room invites, use /join or /decline commands:");
         while (invites) {
             cons_show("  %s", invites->data);
-            invites = g_slist_next(invites);
+            invites = g_list_next(invites);
         }
     }
 
@@ -608,17 +608,17 @@ cons_show_caps(const char *const fulljid, resource_presence_t presence)
 void
 cons_show_received_subs(void)
 {
-    GSList *received = presence_get_subscription_requests();
+    GList *received = presence_get_subscription_requests();
     if (received == NULL) {
         cons_show("No outstanding subscription requests.");
     } else {
         cons_show("Outstanding subscription requests from:",
-            g_slist_length(received));
+            g_list_length(received));
         while (received) {
             cons_show("  %s", received->data);
-            received = g_slist_next(received);
+            received = g_list_next(received);
         }
-        g_slist_free_full(received, g_free);
+        g_list_free_full(received, g_free);
     }
 
     cons_alert();
@@ -2224,6 +2224,7 @@ cons_theme_properties(void)
     _cons_theme_bar_prop(THEME_STATUS_BRACKET, "statusbar.brackets");
     _cons_theme_bar_prop(THEME_STATUS_ACTIVE, "statusbar.active");
     _cons_theme_bar_prop(THEME_STATUS_NEW, "statusbar.new");
+    _cons_theme_bar_prop(THEME_STATUS_TIME, "statusbar.time");
 
     _cons_theme_prop(THEME_TIME, "main.time");
     _cons_theme_prop(THEME_TEXT, "main.text");
