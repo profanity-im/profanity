@@ -141,7 +141,7 @@ presence_subscription(const char *const jid, const jabber_subscr_t action)
     xmpp_stanza_release(presence);
 }
 
-GSList*
+GList*
 presence_get_subscription_requests(void)
 {
     return autocomplete_create_list(sub_requests_ac);
@@ -160,9 +160,9 @@ presence_clear_sub_requests(void)
 }
 
 char*
-presence_sub_request_find(const char *const search_str)
+presence_sub_request_find(const char *const search_str, gboolean previous)
 {
-    return autocomplete_complete(sub_requests_ac, search_str, TRUE);
+    return autocomplete_complete(sub_requests_ac, search_str, TRUE, previous);
 }
 
 gboolean
@@ -170,16 +170,16 @@ presence_sub_request_exists(const char *const bare_jid)
 {
     gboolean result = FALSE;
 
-    GSList *requests = autocomplete_create_list(sub_requests_ac);
-    GSList *curr = requests;
+    GList *requests = autocomplete_create_list(sub_requests_ac);
+    GList *curr = requests;
     while (curr) {
         if (strcmp(curr->data, bare_jid) == 0) {
             result = TRUE;
             break;
         }
-        curr = g_slist_next(curr);
+        curr = g_list_next(curr);
     }
-    g_slist_free_full(requests, free);
+    g_list_free_full(requests, free);
 
     return result;
 }

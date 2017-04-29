@@ -120,7 +120,7 @@ muc_invites_count(void)
     return autocomplete_length(invite_ac);
 }
 
-GSList*
+GList*
 muc_invites(void)
 {
     return autocomplete_create_list(invite_ac);
@@ -135,17 +135,17 @@ muc_invite_password(const char *const room)
 gboolean
 muc_invites_contain(const char *const room)
 {
-    GSList *invites = autocomplete_create_list(invite_ac);
-    GSList *curr = invites;
+    GList *invites = autocomplete_create_list(invite_ac);
+    GList *curr = invites;
     while (curr) {
         if (strcmp(curr->data, room) == 0) {
-            g_slist_free_full(invites, g_free);
+            g_list_free_full(invites, g_free);
             return TRUE;
         } else {
-            curr = g_slist_next(curr);
+            curr = g_list_next(curr);
         }
     }
-    g_slist_free_full(invites, g_free);
+    g_list_free_full(invites, g_free);
 
     return FALSE;
 }
@@ -157,9 +157,9 @@ muc_invites_reset_ac(void)
 }
 
 char*
-muc_invites_find(const char *const search_str)
+muc_invites_find(const char *const search_str, gboolean previous)
 {
-    return autocomplete_complete(invite_ac, search_str, TRUE);
+    return autocomplete_complete(invite_ac, search_str, TRUE, previous);
 }
 
 void
@@ -663,7 +663,7 @@ muc_roster_nick_change_complete(const char *const room, const char *const nick)
 }
 
 char*
-muc_autocomplete(ProfWin *window, const char *const input)
+muc_autocomplete(ProfWin *window, const char *const input, gboolean previous)
 {
     if (window->type == WIN_MUC) {
         ProfMucWin *mucwin = (ProfMucWin*)window;
@@ -686,7 +686,7 @@ muc_autocomplete(ProfWin *window, const char *const input)
                 }
             }
 
-            char *result = autocomplete_complete(chat_room->nick_ac, search_str, FALSE);
+            char *result = autocomplete_complete(chat_room->nick_ac, search_str, FALSE, previous);
             if (result) {
                 GString *replace_with = g_string_new(chat_room->autocomplete_prefix);
                 g_string_append(replace_with, result);
