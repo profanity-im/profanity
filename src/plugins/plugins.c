@@ -403,9 +403,9 @@ plugins_loaded_list(void)
 }
 
 char *
-plugins_autocomplete(const char * const input)
+plugins_autocomplete(const char * const input, gboolean previous)
 {
-    return autocompleters_complete(input);
+    return autocompleters_complete(input, previous);
 }
 
 void

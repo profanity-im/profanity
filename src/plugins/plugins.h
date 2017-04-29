@@ -110,7 +110,7 @@ typedef struct prof_plugin_t {
 void plugins_init(void);
 GSList *plugins_unloaded_list(void);
 GList *plugins_loaded_list(void);
-char* plugins_autocomplete(const char *const input);
+char* plugins_autocomplete(const char *const input, gboolean previous);
 void plugins_reset_autocomplete(void);
 void plugins_shutdown(void);
 
