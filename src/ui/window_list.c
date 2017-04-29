@@ -1073,15 +1073,15 @@ wins_create_summary(gboolean unread)
 }
 
 char*
-win_autocomplete(const char *const search_str)
+win_autocomplete(const char *const search_str, gboolean previous)
 {
-    return autocomplete_complete(wins_ac, search_str, TRUE);
+    return autocomplete_complete(wins_ac, search_str, TRUE, previous);
 }
 
 char*
-win_close_autocomplete(const char *const search_str)
+win_close_autocomplete(const char *const search_str, gboolean previous)
 {
-    return autocomplete_complete(wins_close_ac, search_str, TRUE);
+    return autocomplete_complete(wins_close_ac, search_str, TRUE, previous);
 }
 
 void
