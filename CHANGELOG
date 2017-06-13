@@ -2,6 +2,12 @@
 =====
 
 - Allow moving vertical window positions (/titlebar, /mainwin, /statusbar, /inputwin)
+- Allow loading/unloading all pluguns (/plugins)
+- Allow installing plugins from directory (/plugins)
+- Theme option for status bar time (statusbar.time)
+- Case/accent insensitive autocompletion
+- Shift tab to select previous autocomplete suggestion
+- Allow searching help (/help search_all|search_any)
 
 0.5.1
 =====
