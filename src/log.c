@@ -360,7 +360,12 @@ _chat_log_chat(const char *const login, const char *const other, const char *con
         dated_log = _create_log(other, login);
         g_hash_table_insert(logs, strdup(other), dated_log);
 
-    // log exists but needs rolling
+    // log entry exists but file removed
+    } else if (!g_file_test(dated_log->filename, G_FILE_TEST_EXISTS)) {
+        dated_log = _create_log(other, login);
+        g_hash_table_replace(logs, strdup(other), dated_log);
+
+    // log file needs rolling
     } else if (_log_roll_needed(dated_log)) {
         dated_log = _create_log(other, login);
         g_hash_table_replace(logs, strdup(other), dated_log);
