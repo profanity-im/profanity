@@ -55,7 +55,7 @@ ping_not_supported(void **state)
     stbbr_for_id("prof_disco_info_onconnect_2",
         "<iq id='prof_disco_info_onconnect_2' to='stabber@localhost/profanity' type='result' from='localhost'>"
             "<query xmlns='http://jabber.org/protocol/disco#info'>"
-                "<identity category='server' type='im' name='Prosody'/>"
+                "<identity category='server' type='im' name='Stabber'/>"
             "</query>"
         "</iq>"
     );
