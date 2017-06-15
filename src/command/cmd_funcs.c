@@ -5868,6 +5868,11 @@ cmd_ping(ProfWin *window, const char *const command, gchar **args)
         return TRUE;
     }
 
+    if (args[0] != NULL && caps_jid_has_feature(args[0], XMPP_FEATURE_PING) == FALSE) {
+        cons_show("%s does not support ping requests.", args[0]);
+        return TRUE;
+    }
+
     iq_send_ping(args[0]);
 
     if (args[0] == NULL) {
