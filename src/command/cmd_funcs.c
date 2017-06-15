@@ -5863,6 +5863,11 @@ cmd_ping(ProfWin *window, const char *const command, gchar **args)
         return TRUE;
     }
 
+    if (args[0] == NULL && connection_supports(XMPP_FEATURE_PING) == FALSE) {
+        cons_show("Server does not support ping requests.");
+        return TRUE;
+    }
+
     iq_send_ping(args[0]);
 
     if (args[0] == NULL) {

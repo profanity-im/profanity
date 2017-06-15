@@ -36,6 +36,7 @@ int main(int argc, char* argv[]) {
         PROF_FUNC_TEST(connect_shows_presence_updates),
 
         PROF_FUNC_TEST(ping_multiple),
+        PROF_FUNC_TEST(ping_not_supported),
         PROF_FUNC_TEST(ping_responds),
 
         PROF_FUNC_TEST(rooms_query),

@@ -14,6 +14,15 @@
 void
 ping_multiple(void **state)
 {
+    stbbr_for_id("prof_disco_info_onconnect_2",
+        "<iq id='prof_disco_info_onconnect_2' to='stabber@localhost/profanity' type='result' from='localhost'>"
+            "<query xmlns='http://jabber.org/protocol/disco#info'>"
+                "<identity category='server' type='im' name='Prosody'/>"
+                "<feature var='urn:xmpp:ping'/>"
+            "</query>"
+        "</iq>"
+    );
+
     stbbr_for_id("prof_ping_4",
         "<iq id='prof_ping_4' type='result' to='stabber@localhost/profanity'/>"
     );
@@ -38,6 +47,23 @@ ping_multiple(void **state)
         "</iq>"
     ));
     assert_true(prof_output_exact("Ping response from server"));
+}
+
+void
+ping_not_supported(void **state)
+{
+    stbbr_for_id("prof_disco_info_onconnect_2",
+        "<iq id='prof_disco_info_onconnect_2' to='stabber@localhost/profanity' type='result' from='localhost'>"
+            "<query xmlns='http://jabber.org/protocol/disco#info'>"
+                "<identity category='server' type='im' name='Prosody'/>"
+            "</query>"
+        "</iq>"
+    );
+
+    prof_connect();
+
+    prof_input("/ping");
+    assert_true(prof_output_exact("Server does not support ping requests."));
 }
 
 void

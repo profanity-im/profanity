@@ -55,6 +55,7 @@
 #define JABBER_PRIORITY_MIN -128
 #define JABBER_PRIORITY_MAX 127
 
+#define XMPP_FEATURE_PING "urn:xmpp:ping"
 #define XMPP_FEATURE_BLOCKING "urn:xmpp:blocking"
 #define XMPP_FEATURE_RECEIPTS "urn:xmpp:receipts"
 #define XMPP_FEATURE_LASTACTIVITY "jabber:iq:last"
