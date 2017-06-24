@@ -568,6 +568,7 @@ cmd_ac_init(void)
     tls_property_ac = autocomplete_new();
     autocomplete_add(tls_property_ac, "force");
     autocomplete_add(tls_property_ac, "allow");
+    autocomplete_add(tls_property_ac, "legacy");
     autocomplete_add(tls_property_ac, "disable");
 
     join_property_ac = autocomplete_new();

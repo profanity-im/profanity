@@ -158,7 +158,7 @@ static struct cmd_t command_defs[] =
             CMD_TAG_CONNECTION)
         CMD_SYN(
             "/connect [<account>]",
-            "/connect <account> [server <server>] [port <port>] [tls force|allow|disable]")
+            "/connect <account> [server <server>] [port <port>] [tls force|allow|legacy|disable]")
         CMD_DESC(
             "Login to a chat service. "
             "If no account is specified, the default is used if one is configured. "
@@ -169,6 +169,7 @@ static struct cmd_t command_defs[] =
             { "port <port>",       "The port to use if different to the default (5222, or 5223 for SSL)." },
             { "tls force",         "Force TLS connection, and fail if one cannot be established, this is default behaviour." },
             { "tls allow",         "Use TLS for the connection if it is available." },
+            { "tls legacy",        "Use legacy TLS for the connection. It means server doesn't support STARTTLS and TLS is forced just after TCP connection is established." },
             { "tls disable",       "Disable TLS for the connection." })
         CMD_EXAMPLES(
             "/connect",
@@ -1984,7 +1985,7 @@ static struct cmd_t command_defs[] =
             "/account set <account> otr <policy>",
             "/account set <account> pgpkeyid <pgpkeyid>",
             "/account set <account> startscript <script>",
-            "/account set <account> tls force|allow|disable",
+            "/account set <account> tls force|allow|legacy|disable",
             "/account set <account> theme <theme>",
             "/account clear <account> password",
             "/account clear <account> eval_password",
@@ -2024,6 +2025,7 @@ static struct cmd_t command_defs[] =
             { "set <account> startscript <script>",     "Set the script to execute after connecting." },
             { "set <account> tls force",                "Force TLS connection, and fail if one cannot be established, this is default behaviour." },
             { "set <account> tls allow",                "Use TLS for the connection if it is available." },
+            { "set <account> tls legacy",               "Use legacy TLS for the connection. It means server doesn't support STARTTLS and TLS is forced just after TCP connection is established." },
             { "set <account> tls disable",              "Disable TLS for the connection." },
             { "set <account> <theme>",                  "Set the UI theme for the account." },
             { "clear <account> server",                 "Remove the server setting for this account." },
