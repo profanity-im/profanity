@@ -2384,7 +2384,7 @@ cmd_init(void)
 
     cmd_ac_init();
 
-    search_index = g_hash_table_new_full(g_str_hash, g_str_equal, free, free);
+    search_index = g_hash_table_new_full(g_str_hash, g_str_equal, free, g_free);
 
     // load command defs into hash table
     commands = g_hash_table_new(g_str_hash, g_str_equal);
@@ -2396,7 +2396,7 @@ cmd_init(void)
         g_hash_table_insert(commands, pcmd->cmd, pcmd);
 
         // add to search index
-        g_hash_table_insert(search_index, strdup(pcmd->cmd), strdup(_cmd_index(pcmd)));
+        g_hash_table_insert(search_index, strdup(pcmd->cmd), _cmd_index(pcmd));
 
         // add to commands and help autocompleters
         cmd_ac_add_cmd(pcmd);
