@@ -350,7 +350,8 @@ cmd_connect(ProfWin *window, const char *const command, gchar **args)
     if (tls_policy &&
             (g_strcmp0(tls_policy, "force") != 0) &&
             (g_strcmp0(tls_policy, "allow") != 0) &&
-            (g_strcmp0(tls_policy, "disable") != 0)) {
+            (g_strcmp0(tls_policy, "disable") != 0) &&
+            (g_strcmp0(tls_policy, "legacy") != 0)) {
         cons_bad_cmd_usage(command);
         cons_show("");
         return TRUE;
@@ -813,8 +814,9 @@ _account_set_tls(char *account_name, char *policy)
 {
     if ((g_strcmp0(policy, "force") != 0)
             && (g_strcmp0(policy, "allow") != 0)
-            && (g_strcmp0(policy, "disable") != 0)) {
-        cons_show("TLS policy must be one of: force, allow or disable.");
+            && (g_strcmp0(policy, "disable") != 0)
+            && (g_strcmp0(policy, "legacy") != 0)) {
+        cons_show("TLS policy must be one of: force, allow, legacy or disable.");
     } else {
         accounts_set_tls_policy(account_name, policy);
         cons_show("Updated TLS policy for account %s: %s", account_name, policy);
