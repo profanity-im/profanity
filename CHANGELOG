@@ -8,6 +8,7 @@
 - Case/accent insensitive autocompletion
 - Shift tab to select previous autocomplete suggestion
 - Allow searching help (/help search_all|search_any)
+- Support for Legacy SSL
 
 0.5.1
 =====
