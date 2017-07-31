@@ -6467,7 +6467,7 @@ cmd_plugins_python_version(ProfWin *window, const char *const command, gchar **a
     cons_show("Python version:");
     cons_show("%s", version);
 #else
-    cons_show("This build does not support pytyon plugins.");
+    cons_show("This build does not support python plugins.");
 #endif
     return TRUE;
 }
