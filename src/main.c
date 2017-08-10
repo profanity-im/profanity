@@ -41,6 +41,14 @@
 #include "gitversion.h"
 #endif
 
+#ifdef HAVE_LIBOTR
+#include "otr/otr.h"
+#endif
+
+#ifdef HAVE_LIBGPGME
+#include "pgp/gpg.h"
+#endif
+
 #ifdef HAVE_PYTHON
 #include "plugins/python_plugins.h"
 #endif
@@ -117,13 +125,15 @@ main(int argc, char **argv)
         }
 
 #ifdef HAVE_LIBOTR
-        g_print("OTR support: Enabled\n");
+        char *otr_version = otr_libotr_version();
+        g_print("OTR support: Enabled (libotr %s)\n", otr_version);
 #else
         g_print("OTR support: Disabled\n");
 #endif
 
 #ifdef HAVE_LIBGPGME
-        g_print("PGP support: Enabled\n");
+        const char *pgp_version = p_gpg_libver();
+        g_print("PGP support: Enabled (libgpgme %s)\n", pgp_version);
 #else
         g_print("PGP support: Disabled\n");
 #endif

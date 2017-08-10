@@ -56,7 +56,7 @@
 #define PGP_MESSAGE_HEADER "-----BEGIN PGP MESSAGE-----"
 #define PGP_MESSAGE_FOOTER "-----END PGP MESSAGE-----"
 
-static const char *libversion;
+static const char *libversion = NULL;
 static GHashTable *pubkeys;
 
 static gchar *pubsloc;
@@ -420,6 +420,9 @@ p_gpg_pubkeys(void)
 const char*
 p_gpg_libver(void)
 {
+    if (libversion == NULL) {
+        libversion = gpgme_check_version(NULL);
+    }
     return libversion;
 }
 
