@@ -41,6 +41,10 @@
 #include "gitversion.h"
 #endif
 
+#ifdef HAVE_PYTHON
+#include "plugins/python_plugins.h"
+#endif
+
 #include "profanity.h"
 #include "common.h"
 #include "command/cmd_defs.h"
@@ -131,7 +135,9 @@ main(int argc, char **argv)
 #endif
 
 #ifdef HAVE_PYTHON
-        g_print("Python plugins: Enabled\n");
+        gchar *python_version = python_get_version_number();
+        g_print("Python plugins: Enabled (%s)\n", python_version);
+        g_free(python_version);
 #else
         g_print("Python plugins: Disabled\n");
 #endif

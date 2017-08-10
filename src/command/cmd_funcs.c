@@ -6463,7 +6463,7 @@ gboolean
 cmd_plugins_python_version(ProfWin *window, const char *const command, gchar **args)
 {
 #ifdef HAVE_PYTHON
-    const char *version = python_get_version();
+    const char *version = python_get_version_string();
     cons_show("Python version:");
     cons_show("%s", version);
 #else

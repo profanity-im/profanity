@@ -43,7 +43,8 @@ void python_check_error(void);
 void allow_python_threads();
 void disable_python_threads();
 
-const char* python_get_version(void);
+const char* python_get_version_string(void);
+gchar* python_get_version_number(void);
 
 void python_init_hook(ProfPlugin *plugin, const char *const version, const char *const status,
     const char *const account_name, const char *const fulljid);

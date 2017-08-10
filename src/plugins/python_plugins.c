@@ -74,9 +74,20 @@ _unref_module(PyObject *module)
 }
 
 const char*
-python_get_version(void)
+python_get_version_string(void)
 {
     return Py_GetVersion();
+}
+
+gchar*
+python_get_version_number(void)
+{
+    const char *version_str = Py_GetVersion();
+    gchar **split = g_strsplit(version_str, " ", 0);
+    gchar *version_number = g_strdup(split[0]);
+    g_strfreev(split);
+
+    return version_number;
 }
 
 void
