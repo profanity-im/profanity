@@ -29,19 +29,14 @@ AS_CASE([$host_os],
 PACKAGE_STATUS="development"
 
 ### Get git branch and revision if in development
-if test "x$PACKAGE_STATUS" = xdevelopment; then
-    AM_CONDITIONAL([INCLUDE_GIT_VERSION], [true])
-    AC_DEFINE([HAVE_GIT_VERSION], [1], [Include git info])
-else
-    AM_CONDITIONAL([INCLUDE_GIT_VERSION], [false])
-fi
+AS_IF([test "x$PACKAGE_STATUS" = xdevelopment],
+    [AM_CONDITIONAL([INCLUDE_GIT_VERSION], [true]) AC_DEFINE([HAVE_GIT_VERSION], [1], [Include git info])],
+    [AM_CONDITIONAL([INCLUDE_GIT_VERSION], [false])])
 
 AC_DEFINE_UNQUOTED([PACKAGE_STATUS], ["$PACKAGE_STATUS"], [Status of this build])
 
-AS_IF([test "x$PLATFORM" = xcygwin],
-    [AC_DEFINE([PLATFORM_CYGWIN], [1], [Cygwin])])
-AS_IF([test "x$PLATFORM" = xosx],
-    [AC_DEFINE([PLATFORM_OSX], [1], [OSx])])
+AS_IF([test "x$PLATFORM" = xcygwin], [AC_DEFINE([PLATFORM_CYGWIN], [1], [Cygwin])])
+AS_IF([test "x$PLATFORM" = xosx], [AC_DEFINE([PLATFORM_OSX], [1], [OSx])])
 
 ### Environment variables
 AC_ARG_VAR([PYTHON_FRAMEWORK], [Set base directory for Python Framework])
@@ -69,51 +64,48 @@ AC_ARG_ENABLE([icons],
 ### plugins
 
 # python
-if test "x$enable_plugins" = xno; then
-    AM_CONDITIONAL([BUILD_PYTHON_API], [false])
-elif test "x$enable_python_plugins" != xno; then
-    AS_IF([test "x$PLATFORM" = xosx], [
-        AS_IF([test "x$PYTHON_FRAMEWORK" = x], [ PYTHON_FRAMEWORK="/Library/Frameworks/Python.framework" ])
+AS_IF(
+[test "x$enable_plugins" = xno],
+    [AM_CONDITIONAL([BUILD_PYTHON_API], [false])],
+[test "x$enable_python_plugins" != xno], 
+    [AS_IF(
+    [test "x$PLATFORM" = xosx], 
+        [AS_IF([test "x$PYTHON_FRAMEWORK" = x], [ PYTHON_FRAMEWORK="/Library/Frameworks/Python.framework" ])
         AC_MSG_NOTICE([Symlinking Python.framework to $PYTHON_FRAMEWORK])
         rm -f Python.framework
         ln -s $PYTHON_FRAMEWORK Python.framework ])
     AC_CHECK_PROG(PYTHON_CONFIG_EXISTS, python-config, yes, no)
-    if test "$PYTHON_CONFIG_EXISTS" == "yes"; then
-        AX_PYTHON_DEVEL
-        AM_CONDITIONAL([BUILD_PYTHON_API], [true])
-        AC_DEFINE([HAVE_PYTHON], [1], [Python support])
-    else
-        if test "x$enable_python_plugins" = xyes; then
-            AC_MSG_ERROR([Python not found, cannot enable Python plugins.])
-        else
-            AM_CONDITIONAL([BUILD_PYTHON_API], [false])
-            AC_MSG_NOTICE([Python development package not found, Python plugin support disabled.])
-        fi
-    fi
-    AS_IF([test "x$PLATFORM" = xosx], [rm -f Python.framework])
-else
-    AM_CONDITIONAL([BUILD_PYTHON_API], [false])
-fi
+    AS_IF(
+    [test "$PYTHON_CONFIG_EXISTS" == "yes"], 
+        [AX_PYTHON_DEVEL
+        AM_CONDITIONAL([BUILD_PYTHON_API], [true]) 
+        AC_DEFINE([HAVE_PYTHON], [1], [Python support])],
+    [AS_IF(
+    [test "x$enable_python_plugins" = xyes],
+        [AC_MSG_ERROR([Python not found, cannot enable Python plugins.])],
+    [AM_CONDITIONAL([BUILD_PYTHON_API], [false]) 
+    AC_MSG_NOTICE([Python development package not found, Python plugin support disabled.])]
+    )])
+    AS_IF([test "x$PLATFORM" = xosx], [rm -f Python.framework])],
+[AM_CONDITIONAL([BUILD_PYTHON_API], [false])])
 
 # c
-if test "x$PLATFORM" = xcygwin; then
-    AM_CONDITIONAL([BUILD_C_API], [false])
-else
-    LT_INIT
-    if test "x$enable_plugins" = xno; then
-        AM_CONDITIONAL([BUILD_C_API], [false])
-    elif test "x$enable_c_plugins" != xno; then
-        AC_CHECK_LIB([dl], [main],
-            [AM_CONDITIONAL([BUILD_C_API], [true]) LIBS="$LIBS -ldl" AC_DEFINE([HAVE_C], [1], [C support])],
-            [AS_IF(
-                [test "x$enable_c_plugins" = xyes],
-                    [AC_MSG_ERROR([dl library needed to run C plugins])],
-                [AM_CONDITIONAL([BUILD_C_API], [false])])
-            ])
-    else
-        AM_CONDITIONAL([BUILD_C_API], [false])
-    fi
-fi
+AS_IF(
+[test "x$PLATFORM" = xcygwin],
+    [AM_CONDITIONAL([BUILD_C_API], [false])],
+[LT_INIT
+AS_IF(
+[test "x$enable_plugins" = xno],
+    [AM_CONDITIONAL([BUILD_C_API], [false])],
+[test "x$enable_c_plugins" != xno],
+    [AC_CHECK_LIB([dl], [main],
+        [AM_CONDITIONAL([BUILD_C_API], [true]) LIBS="$LIBS -ldl" AC_DEFINE([HAVE_C], [1], [C support])],
+        [AS_IF(
+            [test "x$enable_c_plugins" = xyes],
+                [AC_MSG_ERROR([dl library needed to run C plugins])],
+            [AM_CONDITIONAL([BUILD_C_API], [false])])
+        ])],
+[AM_CONDITIONAL([BUILD_C_API], [false])])])
 
 # threading
 ACX_PTHREAD([], [AC_MSG_ERROR([pthread is required])])
@@ -204,22 +196,22 @@ AS_IF([test "x$PLATFORM" = xosx],
                     [AC_MSG_ERROR([libnotify is required but does not exist])],
                     [AC_MSG_NOTICE([libnotify support will be disabled])])])])])
 
-# TODO: rewrite this
-if test "x$with_xscreensaver" = xyes; then
-    AC_CHECK_LIB([Xss], [main], [],
+AS_IF(
+[test "x$with_xscreensaver" = xyes],
+    [AC_CHECK_LIB([Xss], [main], [],
         [AC_MSG_ERROR([libXss is required for x autoaway support])])
     AC_CHECK_LIB([X11], [main], [],
-        [AC_MSG_ERROR([libX11 is required for x autoaway support])])
-elif test "x$with_xscreensaver" = x; then
-    AC_CHECK_LIB([Xss], [main], [],
+        [AC_MSG_ERROR([libX11 is required for x autoaway support])])],
+[test "x$with_xscreensaver" = x],
+    [AC_CHECK_LIB([Xss], [main], [],
         [AC_MSG_NOTICE([libXss not found, falling back to profanity auto-away])])
     AC_CHECK_LIB([X11], [main], [],
-        [AC_MSG_NOTICE([libX11 not found, falling back to profanity auto-away])])
-fi
+        [AC_MSG_NOTICE([libX11 not found, falling back to profanity auto-away])])])
 
 AM_CONDITIONAL([BUILD_PGP], [false])
-if test "x$enable_pgp" != xno; then
-    AC_CHECK_LIB([gpgme], [main],
+AS_IF(
+[test "x$enable_pgp" != xno],
+    [AC_CHECK_LIB([gpgme], [main],
         [AM_CONDITIONAL([BUILD_PGP], [true])
          AC_DEFINE([HAVE_LIBGPGME], [1], [Have libgpgme])
          AC_PATH_PROG([GPGME_CONFIG], [gpgme-config], ["failed"])
@@ -228,14 +220,14 @@ if test "x$enable_pgp" != xno; then
             [LIBS="`$GPGME_CONFIG --libs` $LIBS" AM_CPPFLAGS="`$GPGME_CONFIG --cflags` $AM_CPPFLAGS"])],
         [AS_IF([test "x$enable_pgp" = xyes],
             [AC_MSG_ERROR([libgpgme is required for pgp support])],
-            [AC_MSG_NOTICE([libgpgme not found, pgp support not enabled])])])
-fi
+            [AC_MSG_NOTICE([libgpgme not found, pgp support not enabled])])])])
 
 AM_CONDITIONAL([BUILD_OTR], [false])
 AM_CONDITIONAL([BUILD_OTR3], [false])
 AM_CONDITIONAL([BUILD_OTR4], [false])
-if test "x$enable_otr" != xno; then
-    AC_SEARCH_LIBS([otrl_init], [otr],
+AS_IF(
+[test "x$enable_otr" != xno],
+    [AC_SEARCH_LIBS([otrl_init], [otr],
         [AC_COMPILE_IFELSE(
             [AC_LANG_PROGRAM([[
             #include <libotr/version.h>
@@ -250,8 +242,7 @@ if test "x$enable_otr" != xno; then
             [AM_CONDITIONAL([BUILD_OTR], [true]) AM_CONDITIONAL([BUILD_OTR3], [true]) AC_DEFINE([HAVE_LIBOTR], [1], [Have libotr])])],
         [AS_IF([test "x$enable_otr" = xyes],
             [AC_MSG_ERROR([libotr is required for otr encryption support])],
-            [AC_MSG_NOTICE([libotr not found, otr encryption support not enabled])])])
-fi
+            [AC_MSG_NOTICE([libotr not found, otr encryption support not enabled])])])])
 
 AS_IF([test "x$with_themes" = xno],
     [THEMES_INSTALL="false"],
