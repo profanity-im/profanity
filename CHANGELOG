@@ -2,7 +2,7 @@
 =====
 
 - Allow moving vertical window positions (/titlebar, /mainwin, /statusbar, /inputwin)
-- Allow loading/unloading all pluguns (/plugins)
+- Allow loading/unloading all plugins (/plugins)
 - Allow installing plugins from directory (/plugins)
 - Theme option for status bar time (statusbar.time)
 - Case/accent insensitive autocompletion
