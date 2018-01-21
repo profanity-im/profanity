@@ -427,6 +427,7 @@ _load_preferences(void)
     _set_string_preference("roster.unread", PREF_ROSTER_UNREAD);
     _set_string_preference("roster.rooms.order", PREF_ROSTER_ROOMS_ORDER);
     _set_string_preference("roster.rooms.unread", PREF_ROSTER_ROOMS_UNREAD);
+    _set_string_preference("roster.rooms.server", PREF_ROSTER_ROOMS_SERVER);
     _set_string_preference("roster.rooms.pos", PREF_ROSTER_ROOMS_POS);
     _set_string_preference("roster.rooms.by", PREF_ROSTER_ROOMS_BY);
     _set_string_preference("roster.private", PREF_ROSTER_PRIVATE);

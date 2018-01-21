@@ -143,6 +143,7 @@ static Autocomplete roster_presence_ac;
 static Autocomplete roster_char_ac;
 static Autocomplete roster_remove_all_ac;
 static Autocomplete roster_room_ac;
+static Autocomplete roster_room_show_ac;
 static Autocomplete roster_room_position_ac;
 static Autocomplete roster_room_by_ac;
 static Autocomplete roster_room_order_ac;
@@ -469,6 +470,11 @@ cmd_ac_init(void)
     autocomplete_add(roster_room_ac, "order");
     autocomplete_add(roster_room_ac, "unread");
     autocomplete_add(roster_room_ac, "private");
+    autocomplete_add(roster_room_ac, "show");
+    autocomplete_add(roster_room_ac, "hide");
+
+    roster_room_show_ac = autocomplete_new();
+    autocomplete_add(roster_room_show_ac, "server");
 
     roster_room_by_ac = autocomplete_new();
     autocomplete_add(roster_room_by_ac, "service");
@@ -979,6 +985,7 @@ cmd_ac_reset(ProfWin *window)
     autocomplete_reset(roster_count_ac);
     autocomplete_reset(roster_order_ac);
     autocomplete_reset(roster_room_ac);
+    autocomplete_reset(roster_room_show_ac);
     autocomplete_reset(roster_room_by_ac);
     autocomplete_reset(roster_unread_ac);
     autocomplete_reset(roster_room_position_ac);
@@ -1098,6 +1105,7 @@ cmd_ac_uninit(void)
     autocomplete_free(roster_count_ac);
     autocomplete_free(roster_order_ac);
     autocomplete_free(roster_room_ac);
+    autocomplete_free(roster_room_show_ac);
     autocomplete_free(roster_room_by_ac);
     autocomplete_free(roster_unread_ac);
     autocomplete_free(roster_room_position_ac);
@@ -1547,6 +1555,14 @@ _roster_autocomplete(ProfWin *window, const char *const input, gboolean previous
         return result;
     }
     result = autocomplete_param_with_ac(input, "/roster room unread", roster_unread_ac, TRUE, previous);
+    if (result) {
+        return result;
+    }
+    result = autocomplete_param_with_ac(input, "/roster room show", roster_room_show_ac, TRUE, previous);
+    if (result) {
+        return result;
+    }
+    result = autocomplete_param_with_ac(input, "/roster room hide", roster_room_show_ac, TRUE, previous);
     if (result) {
         return result;
     }

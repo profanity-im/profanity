@@ -2869,6 +2869,30 @@ cmd_roster(ProfWin *window, const char *const command, gchar **args)
                 cons_bad_cmd_usage(command);
                 return TRUE;
             }
+        } else if (g_strcmp0(args[1], "show") == 0) {
+            if (g_strcmp0(args[2], "server") == 0) {
+                cons_show("Roster room server enabled.");
+                prefs_set_boolean(PREF_ROSTER_ROOMS_SERVER, TRUE);
+                if (conn_status == JABBER_CONNECTED) {
+                    rosterwin_roster();
+                }
+                return TRUE;            
+            } else {
+                cons_bad_cmd_usage(command);
+                return TRUE;
+            }
+        } else if (g_strcmp0(args[1], "hide") == 0) {
+            if (g_strcmp0(args[2], "server") == 0) {
+                cons_show("Roster room server disabled.");
+                prefs_set_boolean(PREF_ROSTER_ROOMS_SERVER, FALSE);
+                if (conn_status == JABBER_CONNECTED) {
+                    rosterwin_roster();
+                }
+                return TRUE;            
+            } else {
+                cons_bad_cmd_usage(command);
+                return TRUE;
+            }
         } else {
             cons_bad_cmd_usage(command);
             return TRUE;
