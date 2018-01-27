@@ -1864,6 +1864,7 @@ _get_default_boolean(preference_t pref)
         case PREF_ROSTER_CONTACTS:
         case PREF_ROSTER_UNSUBSCRIBED:
         case PREF_ROSTER_ROOMS:
+        case PREF_ROSTER_ROOMS_SERVER:
         case PREF_TLS_SHOW:
         case PREF_LASTACTIVITY:
         case PREF_NOTIFY_MENTION_WHOLE_WORD:
