@@ -297,13 +297,13 @@ iq_set_autoping(const int seconds)
 }
 
 void
-iq_room_list_request(gchar *conferencejid, GPatternSpec *glob)
+iq_room_list_request(gchar *conferencejid, gchar *filter)
 {
     xmpp_ctx_t * const ctx = connection_get_ctx();
     char *id = create_unique_id("confreq");
     xmpp_stanza_t *iq = stanza_create_disco_items_iq(ctx, id, conferencejid);
 
-    iq_id_handler_add(id, _room_list_id_handler, (ProfIdFreeCallback)g_pattern_spec_free, glob);
+    iq_id_handler_add(id, _room_list_id_handler, NULL, filter);
 
     iq_send_stanza(iq);
     xmpp_stanza_release(iq);
@@ -913,14 +913,17 @@ _room_list_id_handler(xmpp_stanza_t *const stanza, void *const userdata)
 
     xmpp_stanza_t *child = xmpp_stanza_get_children(query);
     if (child == NULL) {
-        return 0;
-    }
-
-    GPatternSpec *glob = (GPatternSpec*)userdata;
-    if (child == NULL) {
         cons_show("No rooms found for service: %s", from);
         return 0;
     }
+
+    GPatternSpec *glob = NULL;
+    gchar *filter = (gchar*)userdata;
+    if (filter != NULL) {
+        glob = g_pattern_spec_new(filter);
+        g_free(filter);
+    }
+
     gboolean matched = FALSE;
     cons_show("Chat rooms at: %s", from);
     while (child) {
@@ -951,6 +954,8 @@ _room_list_id_handler(xmpp_stanza_t *const stanza, void *const userdata)
     if (glob && matched == FALSE) {
         cons_show("  No rooms found matching pattern.");
     }
+
+    g_pattern_spec_free(glob);
 
     return 0;
 }

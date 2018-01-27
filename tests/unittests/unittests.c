@@ -313,7 +313,8 @@ int main(int argc, char* argv[]) {
         unit_test(cmd_rooms_shows_message_when_disconnecting),
         unit_test(cmd_rooms_shows_message_when_connecting),
         unit_test(cmd_rooms_uses_account_default_when_no_arg),
-        unit_test(cmd_rooms_arg_used_when_passed),
+        unit_test(cmd_rooms_service_arg_used_when_passed),
+        unit_test(cmd_rooms_filter_arg_used_when_passed),
 
         unit_test(cmd_account_shows_usage_when_not_connected_and_no_args),
         unit_test(cmd_account_shows_account_when_connected_and_no_args),

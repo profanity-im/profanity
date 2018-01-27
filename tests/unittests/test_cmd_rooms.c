@@ -54,18 +54,39 @@ void cmd_rooms_uses_account_default_when_no_arg(void **state)
     will_return(accounts_get_account, account);
 
     expect_string(iq_room_list_request, conferencejid, "default_conf_server");
+    expect_any(iq_room_list_request, filter);
 
     gboolean result = cmd_rooms(NULL, CMD_ROOMS, args);
     assert_true(result);
 }
 
-void cmd_rooms_arg_used_when_passed(void **state)
+void cmd_rooms_service_arg_used_when_passed(void **state)
 {
-    gchar *args[] = { "conf_server_arg" };
+    gchar *args[] = { "service", "conf_server_arg", NULL };
 
     will_return(connection_get_status, JABBER_CONNECTED);
 
     expect_string(iq_room_list_request, conferencejid, "conf_server_arg");
+    expect_any(iq_room_list_request, filter);
+
+    gboolean result = cmd_rooms(NULL, CMD_ROOMS, args);
+    assert_true(result);
+}
+
+void cmd_rooms_filter_arg_used_when_passed(void **state)
+{
+    gchar *args[] = { "filter", "text", NULL };
+
+    ProfAccount *account = account_new("testaccount", NULL, NULL, NULL, TRUE, NULL, 0, NULL, NULL, NULL,
+        0, 0, 0, 0, 0, strdup("default_conf_server"), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+
+    will_return(connection_get_status, JABBER_CONNECTED);
+    will_return(session_get_account_name, "account_name");
+    expect_any(accounts_get_account, name);
+    will_return(accounts_get_account, account);
+
+    expect_any(iq_room_list_request, conferencejid);
+    expect_string(iq_room_list_request, filter, "text");
 
     gboolean result = cmd_rooms(NULL, CMD_ROOMS, args);
     assert_true(result);

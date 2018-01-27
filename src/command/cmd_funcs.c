@@ -4393,8 +4393,8 @@ cmd_rooms(ProfWin *window, const char *const command, gchar **args)
         return TRUE;
     }
 
-    char *service = NULL;
-    char *match = NULL;
+    gchar *service = NULL;
+    gchar *filter = NULL;
     if (args[0] != NULL) {
         if (g_strcmp0(args[0], "service") == 0) {
             if (args[1] == NULL) {
@@ -4403,13 +4403,13 @@ cmd_rooms(ProfWin *window, const char *const command, gchar **args)
                 return TRUE;
             }
             service = g_strdup(args[1]);
-        } else if (g_strcmp0(args[0], "match") == 0) {
+        } else if (g_strcmp0(args[0], "filter") == 0) {
             if (args[1] == NULL) {
                 cons_bad_cmd_usage(command);
                 cons_show("");
                 return TRUE;
             }
-            match = g_strdup(args[1]);
+            filter = g_strdup(args[1]);
         } else {
             cons_bad_cmd_usage(command);
             cons_show("");
@@ -4422,32 +4422,26 @@ cmd_rooms(ProfWin *window, const char *const command, gchar **args)
                 cons_bad_cmd_usage(command);
                 cons_show("");
                 g_free(service);
-                g_free(match);
+                g_free(filter);
                 return TRUE;
             }
             g_free(service);
             service = g_strdup(args[3]);
-        } else if (g_strcmp0(args[2], "match") == 0) {
+        } else if (g_strcmp0(args[2], "filter") == 0) {
             if (args[3] == NULL) {
                 cons_bad_cmd_usage(command);
                 cons_show("");
                 g_free(service);
-                g_free(match);
+                g_free(filter);
                 return TRUE;
             }
-            g_free(match);
-            match = g_strdup(args[3]);
+            g_free(filter);
+            filter = g_strdup(args[3]);
         } else {
             cons_bad_cmd_usage(command);
             cons_show("");
             return TRUE;
         }
-    }
-
-    GPatternSpec *glob = NULL;
-    if (match != NULL) {
-        glob = g_pattern_spec_new(match);
-        g_free(match);
     }
 
     if (service == NULL) {
@@ -4459,12 +4453,12 @@ cmd_rooms(ProfWin *window, const char *const command, gchar **args)
             cons_show("Account MUC service property not found.");
             account_free(account);
             g_free(service);
-            g_free(match);
+            g_free(filter);
             return TRUE;
         }
     }
 
-    iq_room_list_request(service, glob);
+    iq_room_list_request(service, filter);
 
     g_free(service);
 

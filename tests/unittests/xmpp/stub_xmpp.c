@@ -172,9 +172,10 @@ void iq_disable_carbons() {};
 void iq_enable_carbons() {};
 void iq_send_software_version(const char * const fulljid) {}
 
-void iq_room_list_request(gchar *conferencejid)
+void iq_room_list_request(gchar *conferencejid, gchar *filter)
 {
     check_expected(conferencejid);
+    check_expected(filter);
 }
 
 void iq_disco_info_request(gchar *jid) {}

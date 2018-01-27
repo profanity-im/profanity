@@ -595,7 +595,7 @@ cmd_ac_init(void)
 
     rooms_ac = autocomplete_new();
     autocomplete_add(rooms_ac, "service");
-    autocomplete_add(rooms_ac, "match");
+    autocomplete_add(rooms_ac, "filter");
 
     affiliation_ac = autocomplete_new();
     autocomplete_add(affiliation_ac, "owner");
