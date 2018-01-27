@@ -119,12 +119,16 @@ static int _caps_response_id_handler(xmpp_stanza_t *const stanza, void *const us
 static int _caps_response_for_jid_id_handler(xmpp_stanza_t *const stanza, void *const userdata);
 static int _caps_response_legacy_id_handler(xmpp_stanza_t *const stanza, void *const userdata);
 static int _auto_pong_id_handler(xmpp_stanza_t *const stanza, void *const userdata);
+static int _room_list_id_handler(xmpp_stanza_t *const stanza, void *const userdata);
 
 static void _iq_free_room_data(ProfRoomInfoData *roominfo);
 static void _iq_free_affiliation_set(ProfPrivilegeSet *affiliation_set);
 
 // scheduled
 static int _autoping_timed_send(xmpp_conn_t *const conn, void *const userdata);
+
+static void _identity_destroy(DiscoIdentity *identity);
+static void _item_destroy(DiscoItem *item);
 
 static gboolean autoping_wait = FALSE;
 static GTimer *autoping_time = NULL;
@@ -293,10 +297,14 @@ iq_set_autoping(const int seconds)
 }
 
 void
-iq_room_list_request(gchar *conferencejid)
+iq_room_list_request(gchar *conferencejid, GPatternSpec *glob)
 {
     xmpp_ctx_t * const ctx = connection_get_ctx();
-    xmpp_stanza_t *iq = stanza_create_disco_items_iq(ctx, "confreq", conferencejid);
+    char *id = create_unique_id("confreq");
+    xmpp_stanza_t *iq = stanza_create_disco_items_iq(ctx, id, conferencejid);
+
+    iq_id_handler_add(id, _room_list_id_handler, (ProfIdFreeCallback)g_pattern_spec_free, glob);
+
     iq_send_stanza(iq);
     xmpp_stanza_release(iq);
 }
@@ -887,6 +895,63 @@ _caps_response_legacy_id_handler(xmpp_stanza_t *const stanza, void *const userda
     }
 
     free(expected_node);
+    return 0;
+}
+
+static int
+_room_list_id_handler(xmpp_stanza_t *const stanza, void *const userdata)
+{
+    const char *id = xmpp_stanza_get_id(stanza);
+    const char *from = xmpp_stanza_get_from(stanza);
+
+    log_debug("Response to query: %s", id);
+
+    xmpp_stanza_t *query = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_QUERY);
+    if (query == NULL) {
+        return 0;
+    }
+
+    xmpp_stanza_t *child = xmpp_stanza_get_children(query);
+    if (child == NULL) {
+        return 0;
+    }
+
+    GPatternSpec *glob = (GPatternSpec*)userdata;
+    if (child == NULL) {
+        cons_show("No rooms found for service: %s", from);
+        return 0;
+    }
+    gboolean matched = FALSE;
+    cons_show("Chat rooms at: %s", from);
+    while (child) {
+        const char *stanza_name = xmpp_stanza_get_name(child);
+        if (stanza_name && (g_strcmp0(stanza_name, STANZA_NAME_ITEM) == 0)) {
+            const char *item_jid = xmpp_stanza_get_attribute(child, STANZA_ATTR_JID);
+            const char *item_name = xmpp_stanza_get_attribute(child, STANZA_ATTR_NAME);
+            if ((item_jid) && ((glob == NULL) ||
+                ((g_pattern_match(glob, strlen(item_jid), item_jid, NULL)) ||
+                (item_name && g_pattern_match(glob, strlen(item_name), item_name, NULL))))) {
+
+                if (glob) {
+                    matched = TRUE;
+                }
+                GString *item = g_string_new(item_jid);
+                if (item_name) {
+                    g_string_append(item, " (");
+                    g_string_append(item, item_name);
+                    g_string_append(item, ")");
+                }
+                cons_show("  %s", item->str);
+                g_string_free(item, TRUE);
+            }
+        }
+        child = xmpp_stanza_get_next(child);
+    }
+
+    if (glob && matched == FALSE) {
+        cons_show("  No rooms found matching pattern.");
+    }
+
     return 0;
 }
 
@@ -1992,8 +2057,7 @@ _disco_items_result_handler(xmpp_stanza_t *const stanza)
     const char *from = xmpp_stanza_get_from(stanza);
     GSList *items = NULL;
 
-    if ((g_strcmp0(id, "confreq") != 0) &&
-            (g_strcmp0(id, "discoitemsreq") != 0) &&
+    if ((g_strcmp0(id, "discoitemsreq") != 0) &&
             (g_strcmp0(id, "discoitemsreq_onconnect") != 0)) {
         return;
     }
@@ -2030,9 +2094,7 @@ _disco_items_result_handler(xmpp_stanza_t *const stanza)
         child = xmpp_stanza_get_next(child);
     }
 
-    if (g_strcmp0(id, "confreq") == 0) {
-        cons_show_room_list(items, from);
-    } else if (g_strcmp0(id, "discoitemsreq") == 0) {
+    if (g_strcmp0(id, "discoitemsreq") == 0) {
         cons_show_disco_items(items, from);
     } else if (g_strcmp0(id, "discoitemsreq_onconnect") == 0) {
         connection_set_disco_items(items);

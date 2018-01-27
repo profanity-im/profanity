@@ -788,20 +788,27 @@ static struct cmd_t command_defs[] =
     },
 
     { "/rooms",
-        parse_args, 0, 1, NULL,
+        parse_args, 0, 4, NULL,
         CMD_NOSUBFUNCS
         CMD_MAINFUNC(cmd_rooms)
         CMD_TAGS(
             CMD_TAG_GROUPCHAT)
         CMD_SYN(
-            "/rooms [<service>]")
+            "/rooms",
+            "/rooms match <glob>",
+            "/rooms service <service>",
+            "/rooms service <service> match <glob>")
         CMD_DESC(
             "List the chat rooms available at the specified conference service. "
-            "If no argument is supplied, the account preference 'muc.service' is used, 'conference.<domain-part>' by default.")
+            "If no argument is supplied, the account preference 'muc.service' is used, 'conference.<domain-part>' by default. "
+            "The match argument accepts a glob and returns only room names that match.")
         CMD_ARGS(
-            { "<service>", "The conference service to query." })
+            { "service <service>", "The conference service to query." },
+            { "match <glob>", "The string to match before displaying results."})
         CMD_EXAMPLES(
-            "/rooms conference.jabber.org")
+            "/rooms",
+            "/rooms match *development*",
+            "/rooms service conference.jabber.org")
     },
 
     { "/bookmark",

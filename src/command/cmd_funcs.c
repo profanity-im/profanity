@@ -4393,18 +4393,80 @@ cmd_rooms(ProfWin *window, const char *const command, gchar **args)
         return TRUE;
     }
 
-    if (args[0]) {
-        iq_room_list_request(args[0]);
-        return TRUE;
+    char *service = NULL;
+    char *match = NULL;
+    if (args[0] != NULL) {
+        if (g_strcmp0(args[0], "service") == 0) {
+            if (args[1] == NULL) {
+                cons_bad_cmd_usage(command);
+                cons_show("");
+                return TRUE;
+            }
+            service = g_strdup(args[1]);
+        } else if (g_strcmp0(args[0], "match") == 0) {
+            if (args[1] == NULL) {
+                cons_bad_cmd_usage(command);
+                cons_show("");
+                return TRUE;
+            }
+            match = g_strdup(args[1]);
+        } else {
+            cons_bad_cmd_usage(command);
+            cons_show("");
+            return TRUE;
+        }
+    }
+    if (g_strv_length(args) >=3 ) {
+        if (g_strcmp0(args[2], "service") == 0) {
+            if (args[3] == NULL) {
+                cons_bad_cmd_usage(command);
+                cons_show("");
+                g_free(service);
+                g_free(match);
+                return TRUE;
+            }
+            g_free(service);
+            service = g_strdup(args[3]);
+        } else if (g_strcmp0(args[2], "match") == 0) {
+            if (args[3] == NULL) {
+                cons_bad_cmd_usage(command);
+                cons_show("");
+                g_free(service);
+                g_free(match);
+                return TRUE;
+            }
+            g_free(match);
+            match = g_strdup(args[3]);
+        } else {
+            cons_bad_cmd_usage(command);
+            cons_show("");
+            return TRUE;
+        }
     }
 
-    ProfAccount *account = accounts_get_account(session_get_account_name());
-    if (account->muc_service) {
-        iq_room_list_request(account->muc_service);
-    } else {
-        cons_show("Account MUC service property not found.");
+    GPatternSpec *glob = NULL;
+    if (match != NULL) {
+        glob = g_pattern_spec_new(match);
+        g_free(match);
     }
-    account_free(account);
+
+    if (service == NULL) {
+        ProfAccount *account = accounts_get_account(session_get_account_name());
+        if (account->muc_service) {
+            service = g_strdup(account->muc_service);
+            account_free(account);
+        } else {
+            cons_show("Account MUC service property not found.");
+            account_free(account);
+            g_free(service);
+            g_free(match);
+            return TRUE;
+        }
+    }
+
+    iq_room_list_request(service, glob);
+
+    g_free(service);
 
     return TRUE;
 }

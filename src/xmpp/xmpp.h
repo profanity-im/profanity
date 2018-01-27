@@ -161,7 +161,7 @@ gboolean presence_sub_request_exists(const char *const bare_jid);
 void iq_enable_carbons(void);
 void iq_disable_carbons(void);
 void iq_send_software_version(const char *const fulljid);
-void iq_room_list_request(gchar *conferencejid);
+void iq_room_list_request(gchar *conferencejid, GPatternSpec *glob);
 void iq_disco_info_request(gchar *jid);
 void iq_disco_items_request(gchar *jid);
 void iq_last_activity_request(gchar *jid);
