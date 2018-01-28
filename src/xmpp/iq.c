@@ -921,7 +921,6 @@ _room_list_id_handler(xmpp_stanza_t *const stanza, void *const userdata)
     gchar *filter = (gchar*)userdata;
     if (filter != NULL) {
         glob = g_pattern_spec_new(filter);
-        g_free(filter);
     }
 
     gboolean matched = FALSE;
@@ -952,10 +951,11 @@ _room_list_id_handler(xmpp_stanza_t *const stanza, void *const userdata)
     }
 
     if (glob && matched == FALSE) {
-        cons_show("  No rooms found matching pattern.");
+        cons_show("  No rooms found matching pattern: %s", filter);
     }
 
     g_pattern_spec_free(glob);
+    g_free(filter);
 
     return 0;
 }
