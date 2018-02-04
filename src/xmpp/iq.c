@@ -901,6 +901,7 @@ _caps_response_legacy_id_handler(xmpp_stanza_t *const stanza, void *const userda
 static int
 _room_list_id_handler(xmpp_stanza_t *const stanza, void *const userdata)
 {
+    gchar *filter = (gchar*)userdata;
     const char *id = xmpp_stanza_get_id(stanza);
     const char *from = xmpp_stanza_get_from(stanza);
 
@@ -908,31 +909,55 @@ _room_list_id_handler(xmpp_stanza_t *const stanza, void *const userdata)
 
     xmpp_stanza_t *query = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_QUERY);
     if (query == NULL) {
+        g_free(filter);
         return 0;
     }
 
+    cons_show("");
+    if (filter) {
+        cons_show("Rooms list response received: %s, filter: %s", from, filter);
+    } else {
+        cons_show("Rooms list response received: %s", from);
+    }
     xmpp_stanza_t *child = xmpp_stanza_get_children(query);
     if (child == NULL) {
-        cons_show("No rooms found for service: %s", from);
+        cons_show("  No rooms found.");
+        g_free(filter);
         return 0;
     }
 
     GPatternSpec *glob = NULL;
-    gchar *filter = (gchar*)userdata;
     if (filter != NULL) {
-        glob = g_pattern_spec_new(filter);
+        gchar *filter_lower = g_utf8_strdown(filter, -1);
+        GString *glob_str = g_string_new("*");
+        g_string_append(glob_str, filter_lower);
+        g_free(filter_lower);
+        g_string_append(glob_str, "*");
+        glob = g_pattern_spec_new(glob_str->str);
+        g_string_free(glob_str, TRUE);
     }
 
     gboolean matched = FALSE;
-    cons_show("Chat rooms at: %s", from);
     while (child) {
         const char *stanza_name = xmpp_stanza_get_name(child);
         if (stanza_name && (g_strcmp0(stanza_name, STANZA_NAME_ITEM) == 0)) {
             const char *item_jid = xmpp_stanza_get_attribute(child, STANZA_ATTR_JID);
+            gchar *item_jid_lower = NULL;
+            if (item_jid) {
+                Jid *jidp = jid_create(item_jid);
+                if (jidp && jidp->localpart) {
+                    item_jid_lower = g_utf8_strdown(jidp->localpart, -1);
+                }
+                jid_destroy(jidp);
+            }
             const char *item_name = xmpp_stanza_get_attribute(child, STANZA_ATTR_NAME);
-            if ((item_jid) && ((glob == NULL) ||
-                ((g_pattern_match(glob, strlen(item_jid), item_jid, NULL)) ||
-                (item_name && g_pattern_match(glob, strlen(item_name), item_name, NULL))))) {
+            gchar *item_name_lower = NULL;
+            if (item_name) {
+                item_name_lower = g_utf8_strdown(item_name, -1);
+            }
+            if ((item_jid_lower) && ((glob == NULL) ||
+                ((g_pattern_match(glob, strlen(item_jid_lower), item_jid_lower, NULL)) ||
+                (item_name_lower && g_pattern_match(glob, strlen(item_name_lower), item_name_lower, NULL))))) {
 
                 if (glob) {
                     matched = TRUE;
@@ -946,12 +971,14 @@ _room_list_id_handler(xmpp_stanza_t *const stanza, void *const userdata)
                 cons_show("  %s", item->str);
                 g_string_free(item, TRUE);
             }
+            g_free(item_jid_lower);
+            g_free(item_name_lower);
         }
         child = xmpp_stanza_get_next(child);
     }
 
     if (glob && matched == FALSE) {
-        cons_show("  No rooms found matching pattern: %s", filter);
+        cons_show("  No rooms found matching filter: %s", filter);
     }
 
     g_pattern_spec_free(glob);

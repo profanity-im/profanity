@@ -795,21 +795,21 @@ static struct cmd_t command_defs[] =
             CMD_TAG_GROUPCHAT)
         CMD_SYN(
             "/rooms",
-            "/rooms filter <glob>",
+            "/rooms filter <text>",
             "/rooms service <service>",
-            "/rooms service <service> filter <glob>")
+            "/rooms service <service> filter <text>")
         CMD_DESC(
             "List the chat rooms available at the specified conference service. "
             "If no argument is supplied, the account preference 'muc.service' is used, 'conference.<domain-part>' by default. "
-            "The filter argument accepts a glob (including * and ?) and filters the results.")
+            "The filter argument only shows rooms that contain the provided text, case insensitive.")
         CMD_ARGS(
             { "service <service>", "The conference service to query." },
-            { "filter <glob>", "The glob to filter results by."})
+            { "filter <text>", "The text to filter results by."})
         CMD_EXAMPLES(
             "/rooms",
-            "/rooms filter *development*",
+            "/rooms filter development",
             "/rooms service conference.jabber.org",
-            "/rooms service conference.jabber.org filter *xsf*")
+            "/rooms service conference.jabber.org filter \"News Room\"")
     },
 
     { "/bookmark",

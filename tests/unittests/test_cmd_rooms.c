@@ -53,6 +53,9 @@ void cmd_rooms_uses_account_default_when_no_arg(void **state)
     expect_any(accounts_get_account, name);
     will_return(accounts_get_account, account);
 
+    expect_cons_show("");
+    expect_cons_show("Room list request sent: default_conf_server");
+
     expect_string(iq_room_list_request, conferencejid, "default_conf_server");
     expect_any(iq_room_list_request, filter);
 
@@ -65,6 +68,9 @@ void cmd_rooms_service_arg_used_when_passed(void **state)
     gchar *args[] = { "service", "conf_server_arg", NULL };
 
     will_return(connection_get_status, JABBER_CONNECTED);
+
+    expect_cons_show("");
+    expect_cons_show("Room list request sent: conf_server_arg");
 
     expect_string(iq_room_list_request, conferencejid, "conf_server_arg");
     expect_any(iq_room_list_request, filter);
@@ -84,6 +90,9 @@ void cmd_rooms_filter_arg_used_when_passed(void **state)
     will_return(session_get_account_name, "account_name");
     expect_any(accounts_get_account, name);
     will_return(accounts_get_account, account);
+
+    expect_cons_show("");
+    expect_cons_show("Room list request sent: default_conf_server, filter: 'text'");
 
     expect_any(iq_room_list_request, conferencejid);
     expect_string(iq_room_list_request, filter, "text");

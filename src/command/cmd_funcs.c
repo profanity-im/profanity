@@ -4458,6 +4458,12 @@ cmd_rooms(ProfWin *window, const char *const command, gchar **args)
         }
     }
 
+    cons_show("");
+    if (filter) {
+        cons_show("Room list request sent: %s, filter: '%s'", service, filter);
+    } else {
+        cons_show("Room list request sent: %s", service);
+    }
     iq_room_list_request(service, filter);
 
     g_free(service);
