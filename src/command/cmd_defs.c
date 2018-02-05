@@ -806,7 +806,7 @@ static struct cmd_t command_defs[] =
         CMD_ARGS(
             { "service <service>",  "The conference service to query." },
             { "filter <text>",      "The text to filter results by."},
-            { "cache on|off",       "Enable or disable caching of rooms list response."},
+            { "cache on|off",       "Enable or disable caching of rooms list response, enabled by default."},
             { "cache clear",        "Clear the rooms response cache if enabled."})
         CMD_EXAMPLES(
             "/rooms",
