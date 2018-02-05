@@ -1248,6 +1248,16 @@ cons_occupants_setting(void)
 }
 
 void
+cons_rooms_cache_setting(void)
+{
+    if (prefs_get_boolean(PREF_ROOM_LIST_CACHE)) {
+        cons_show("Room list cache (/rooms cache)  : ON");
+    } else {
+        cons_show("Room list cache (/rooms cache)  : OFF");
+    }
+}
+
+void
 cons_autoconnect_setting(void)
 {
     char *pref_connect_account = prefs_get_string(PREF_CONNECT_ACCOUNT);
@@ -1906,6 +1916,7 @@ cons_show_connection_prefs(void)
     cons_reconnect_setting();
     cons_autoping_setting();
     cons_autoconnect_setting();
+    cons_rooms_cache_setting();
 
     cons_alert();
 }

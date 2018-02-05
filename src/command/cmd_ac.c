@@ -162,7 +162,9 @@ static Autocomplete alias_ac;
 static Autocomplete aliases_ac;
 static Autocomplete join_property_ac;
 static Autocomplete room_ac;
-static Autocomplete rooms_ac;
+static Autocomplete rooms_all_ac;
+static Autocomplete rooms_list_ac;
+static Autocomplete rooms_cache_ac;
 static Autocomplete affiliation_ac;
 static Autocomplete role_ac;
 static Autocomplete privilege_cmd_ac;
@@ -593,9 +595,19 @@ cmd_ac_init(void)
     autocomplete_add(room_ac, "destroy");
     autocomplete_add(room_ac, "config");
 
-    rooms_ac = autocomplete_new();
-    autocomplete_add(rooms_ac, "service");
-    autocomplete_add(rooms_ac, "filter");
+    rooms_all_ac = autocomplete_new();
+    autocomplete_add(rooms_all_ac, "service");
+    autocomplete_add(rooms_all_ac, "filter");
+    autocomplete_add(rooms_all_ac, "cache");
+
+    rooms_list_ac = autocomplete_new();
+    autocomplete_add(rooms_list_ac, "service");
+    autocomplete_add(rooms_list_ac, "filter");
+
+    rooms_cache_ac = autocomplete_new();
+    autocomplete_add(rooms_cache_ac, "on");
+    autocomplete_add(rooms_cache_ac, "off");
+    autocomplete_add(rooms_cache_ac, "clear");
 
     affiliation_ac = autocomplete_new();
     autocomplete_add(affiliation_ac, "owner");
@@ -1011,7 +1023,9 @@ cmd_ac_reset(ProfWin *window)
     autocomplete_reset(aliases_ac);
     autocomplete_reset(join_property_ac);
     autocomplete_reset(room_ac);
-    autocomplete_reset(rooms_ac);
+    autocomplete_reset(rooms_all_ac);
+    autocomplete_reset(rooms_list_ac);
+    autocomplete_reset(rooms_cache_ac);
     autocomplete_reset(affiliation_ac);
     autocomplete_reset(role_ac);
     autocomplete_reset(privilege_cmd_ac);
@@ -1131,7 +1145,9 @@ cmd_ac_uninit(void)
     autocomplete_free(aliases_ac);
     autocomplete_free(join_property_ac);
     autocomplete_free(room_ac);
-    autocomplete_free(rooms_ac);
+    autocomplete_free(rooms_all_ac);
+    autocomplete_free(rooms_list_ac);
+    autocomplete_free(rooms_cache_ac);
     autocomplete_free(affiliation_ac);
     autocomplete_free(role_ac);
     autocomplete_free(privilege_cmd_ac);
@@ -3111,16 +3127,28 @@ _rooms_autocomplete(ProfWin *window, const char *const input, gboolean previous)
         gboolean space_at_end = g_str_has_suffix(input, " ");
         int num_args = g_strv_length(args);
         if (num_args <= 1) {
-            found = autocomplete_param_with_ac(input, "/rooms", rooms_ac, TRUE, previous);
+            found = autocomplete_param_with_ac(input, "/rooms", rooms_all_ac, TRUE, previous);
             if (found) {
                 g_strfreev(args);
                 return found;
             }
         }
+        if ((num_args == 1 && g_strcmp0(args[0], "cache") == 0 && space_at_end) || 
+                (num_args == 2 && g_strcmp0(args[0], "cache") == 0)) {
+            found = autocomplete_param_with_ac(input, "/rooms cache", rooms_cache_ac, TRUE, previous);
+            if (found) {
+                g_strfreev(args);
+                return found;
+            }
+        }
+        if ((num_args >= 2) && g_strcmp0(args[0], "cache") == 0) {
+            g_strfreev(args);
+            return NULL;
+        }
         if ((num_args == 2 && space_at_end) || (num_args == 3 && !space_at_end)) {
             GString *beginning = g_string_new("/rooms");
             g_string_append_printf(beginning, " %s %s", args[0], args[1]);
-            found = autocomplete_param_with_ac(input, beginning->str, rooms_ac, TRUE, previous);
+            found = autocomplete_param_with_ac(input, beginning->str, rooms_list_ac, TRUE, previous);
             g_string_free(beginning, TRUE);
             if (found) {
                 g_strfreev(args);

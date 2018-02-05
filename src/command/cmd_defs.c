@@ -797,14 +797,17 @@ static struct cmd_t command_defs[] =
             "/rooms",
             "/rooms filter <text>",
             "/rooms service <service>",
-            "/rooms service <service> filter <text>")
+            "/rooms service <service> filter <text>",
+            "/rooms cache on|off|clear")
         CMD_DESC(
             "List the chat rooms available at the specified conference service. "
             "If no argument is supplied, the account preference 'muc.service' is used, 'conference.<domain-part>' by default. "
             "The filter argument only shows rooms that contain the provided text, case insensitive.")
         CMD_ARGS(
-            { "service <service>", "The conference service to query." },
-            { "filter <text>", "The text to filter results by."})
+            { "service <service>",  "The conference service to query." },
+            { "filter <text>",      "The text to filter results by."},
+            { "cache on|off",       "Enable or disable caching of rooms list response."},
+            { "cache clear",        "Clear the rooms response cache if enabled."})
         CMD_EXAMPLES(
             "/rooms",
             "/rooms filter development",
