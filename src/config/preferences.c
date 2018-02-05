@@ -1615,6 +1615,7 @@ _get_group(preference_t pref)
         case PREF_PGP_LOG:
             return PREF_GROUP_PGP;
         case PREF_BOOKMARK_INVITE:
+        case PREF_ROOM_LIST_CACHE:
             return PREF_GROUP_MUC;
         case PREF_PLUGINS_SOURCEPATH:
             return PREF_GROUP_PLUGINS;
@@ -1822,6 +1823,8 @@ _get_key(preference_t pref)
             return "bookmark.invite";
         case PREF_PLUGINS_SOURCEPATH:
             return "sourcepath";
+        case PREF_ROOM_LIST_CACHE:
+            return "rooms.cache";
         default:
             return NULL;
     }
@@ -1870,6 +1873,7 @@ _get_default_boolean(preference_t pref)
         case PREF_NOTIFY_MENTION_WHOLE_WORD:
         case PREF_TRAY_READ:
         case PREF_BOOKMARK_INVITE:
+        case PREF_ROOM_LIST_CACHE:
             return TRUE;
         default:
             return FALSE;

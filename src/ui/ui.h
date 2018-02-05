@@ -316,6 +316,7 @@ void cons_autoaway_setting(void);
 void cons_reconnect_setting(void);
 void cons_autoping_setting(void);
 void cons_autoconnect_setting(void);
+void cons_room_cache_setting(void);
 void cons_inpblock_setting(void);
 void cons_winpos_setting(void);
 void cons_show_contact_online(PContact contact, Resource *resource, GDateTime *last_activity);

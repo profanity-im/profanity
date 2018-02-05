@@ -2876,7 +2876,7 @@ cmd_roster(ProfWin *window, const char *const command, gchar **args)
                 if (conn_status == JABBER_CONNECTED) {
                     rosterwin_roster();
                 }
-                return TRUE;            
+                return TRUE;
             } else {
                 cons_bad_cmd_usage(command);
                 return TRUE;
@@ -2888,7 +2888,7 @@ cmd_roster(ProfWin *window, const char *const command, gchar **args)
                 if (conn_status == JABBER_CONNECTED) {
                     rosterwin_roster();
                 }
-                return TRUE;            
+                return TRUE;
             } else {
                 cons_bad_cmd_usage(command);
                 return TRUE;
@@ -4410,6 +4410,28 @@ cmd_rooms(ProfWin *window, const char *const command, gchar **args)
                 return TRUE;
             }
             filter = g_strdup(args[1]);
+        } else if (g_strcmp0(args[0], "cache") == 0) {
+            if (g_strv_length(args) != 2) {
+                cons_bad_cmd_usage(command);
+                cons_show("");
+                return TRUE;
+            } else if (g_strcmp0(args[1], "on") == 0) {
+                prefs_set_boolean(PREF_ROOM_LIST_CACHE, TRUE);
+                cons_show("Rooms list cache enabled.");
+                return TRUE;
+            } else if (g_strcmp0(args[1], "off") == 0) {
+                prefs_set_boolean(PREF_ROOM_LIST_CACHE, FALSE);
+                cons_show("Rooms list cache disabled.");
+                return TRUE;
+            } else if (g_strcmp0(args[1], "clear") == 0) {
+                iq_rooms_cache_clear();
+                cons_show("Rooms list cache cleared.");
+                return TRUE;
+            } else {
+                cons_bad_cmd_usage(command);
+                cons_show("");
+                return TRUE;
+            }
         } else {
             cons_bad_cmd_usage(command);
             cons_show("");

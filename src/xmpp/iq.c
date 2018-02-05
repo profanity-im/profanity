@@ -133,6 +133,7 @@ static void _item_destroy(DiscoItem *item);
 static gboolean autoping_wait = FALSE;
 static GTimer *autoping_time = NULL;
 static GHashTable *id_handlers;
+static GHashTable *rooms_cache = NULL;
 
 static int
 _iq_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza, void *const userdata)
@@ -236,6 +237,7 @@ iq_handlers_init(void)
         g_hash_table_destroy(id_handlers);
     }
     id_handlers = g_hash_table_new_full(g_str_hash, g_str_equal, free, NULL);
+    rooms_cache = g_hash_table_new_full(g_str_hash, g_str_equal, free, (GDestroyNotify)xmpp_stanza_release);
 }
 
 void
@@ -297,8 +299,24 @@ iq_set_autoping(const int seconds)
 }
 
 void
+iq_rooms_cache_clear(void)
+{
+    if (rooms_cache) {
+        g_hash_table_remove_all(rooms_cache);
+    }
+}
+
+void
 iq_room_list_request(gchar *conferencejid, gchar *filter)
 {
+    if (g_hash_table_contains(rooms_cache, conferencejid)) {
+        log_debug("Rooms request cached for: %s", conferencejid);
+        _room_list_id_handler(g_hash_table_lookup(rooms_cache, conferencejid), filter);
+        return;
+    }
+
+    log_debug("Rooms request not cached for: %s", conferencejid);
+
     xmpp_ctx_t * const ctx = connection_get_ctx();
     char *id = create_unique_id("confreq");
     xmpp_stanza_t *iq = stanza_create_disco_items_iq(ctx, id, conferencejid);
@@ -905,6 +923,10 @@ _room_list_id_handler(xmpp_stanza_t *const stanza, void *const userdata)
     const char *id = xmpp_stanza_get_id(stanza);
     const char *from = xmpp_stanza_get_from(stanza);
 
+    if (prefs_get_boolean(PREF_ROOM_LIST_CACHE) && !g_hash_table_contains(rooms_cache, from)) {
+        g_hash_table_insert(rooms_cache, strdup(from), xmpp_stanza_copy(stanza));
+    }
+
     log_debug("Response to query: %s", id);
 
     xmpp_stanza_t *query = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_QUERY);
@@ -981,7 +1003,9 @@ _room_list_id_handler(xmpp_stanza_t *const stanza, void *const userdata)
         cons_show("  No rooms found matching filter: %s", filter);
     }
 
-    g_pattern_spec_free(glob);
+    if (glob) {
+        g_pattern_spec_free(glob);
+    }
     g_free(filter);
 
     return 0;
