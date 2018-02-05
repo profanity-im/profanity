@@ -117,6 +117,11 @@ GSList* muc_occupants_by_affiliation(const char *const room, muc_affiliation_t a
 void muc_occupant_nick_change_start(const char *const room, const char *const new_nick, const char *const old_nick);
 char* muc_roster_nick_change_complete(const char *const room, const char *const nick);
 
+void muc_confserver_add(const char *const server);
+void muc_confserver_reset_ac(void);
+char* muc_confserver_find(const char *const search_str, gboolean previous);
+void muc_confserver_clear(void);
+
 void muc_invites_add(const char *const room, const char *const password);
 void muc_invites_remove(const char *const room);
 gint muc_invites_count(void);

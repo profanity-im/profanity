@@ -98,6 +98,12 @@ bookmark_add(const char *jid, const char *nick, const char *password, const char
 {
     assert(jid != NULL);
 
+    Jid *jidp = jid_create(jid);
+    if (jidp->domainpart) {
+        muc_confserver_add(jidp->domainpart);
+    }
+    jid_destroy(jidp);
+
     if (g_hash_table_contains(bookmarks, jid)) {
         return FALSE;
     }
@@ -296,6 +302,12 @@ _bookmark_result_id_handler(xmpp_stanza_t *const stanza, void *const userdata)
         if (autojoin_val) {
             sv_ev_bookmark_autojoin(bookmark);
         }
+
+        Jid *jidp = jid_create(barejid);
+        if (jidp->domainpart) {
+            muc_confserver_add(jidp->domainpart);
+        }
+        jid_destroy(jidp);
 
         child = xmpp_stanza_get_next(child);
     }

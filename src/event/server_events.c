@@ -181,6 +181,7 @@ sv_ev_lost_connection(void)
 #endif
 
     muc_invites_clear();
+    muc_confserver_clear();
     chat_sessions_clear();
     ui_disconnected();
     roster_destroy();
@@ -796,6 +797,12 @@ sv_ev_muc_self_online(const char *const room, const char *const nick, gboolean c
         } else {
             ui_room_join(room, TRUE);
         }
+
+        Jid *jidp = jid_create(room);
+        if (jidp->domainpart) {
+            muc_confserver_add(jidp->domainpart);
+        }
+        jid_destroy(jidp);
 
         iq_room_info_request(room, FALSE);
 

@@ -940,6 +940,7 @@ cmd_ac_reset(ProfWin *window)
     }
 
     muc_invites_reset_ac();
+    muc_confserver_reset_ac();
     accounts_reset_all_search();
     accounts_reset_enabled_search();
     tlscerts_reset_ac();
@@ -3133,17 +3134,21 @@ _rooms_autocomplete(ProfWin *window, const char *const input, gboolean previous)
                 return found;
             }
         }
-        if ((num_args == 1 && g_strcmp0(args[0], "cache") == 0 && space_at_end) || 
-                (num_args == 2 && g_strcmp0(args[0], "cache") == 0)) {
-            found = autocomplete_param_with_ac(input, "/rooms cache", rooms_cache_ac, TRUE, previous);
+        if ((num_args == 1 && g_strcmp0(args[0], "service") == 0 && space_at_end) ||
+                (num_args == 2 && g_strcmp0(args[0], "service") == 0 && !space_at_end)) {
+            found = autocomplete_param_with_func(input, "/rooms service", muc_confserver_find, previous);
             if (found) {
                 g_strfreev(args);
                 return found;
             }
         }
-        if ((num_args >= 2) && g_strcmp0(args[0], "cache") == 0) {
-            g_strfreev(args);
-            return NULL;
+        if ((num_args == 1 && g_strcmp0(args[0], "cache") == 0 && space_at_end) ||
+                (num_args == 2 && g_strcmp0(args[0], "cache") == 0 && !space_at_end)) {
+            found = autocomplete_param_with_ac(input, "/rooms cache", rooms_cache_ac, TRUE, previous);
+            if (found) {
+                g_strfreev(args);
+                return found;
+            }
         }
         if ((num_args == 2 && space_at_end) || (num_args == 3 && !space_at_end)) {
             GString *beginning = g_string_new("/rooms");
@@ -3154,6 +3159,21 @@ _rooms_autocomplete(ProfWin *window, const char *const input, gboolean previous)
                 g_strfreev(args);
                 return found;
             }
+        }
+        if ((num_args == 3 && g_strcmp0(args[2], "service") == 0 && space_at_end) ||
+                (num_args == 4 && g_strcmp0(args[2], "service") == 0 && !space_at_end)) {
+            GString *beginning = g_string_new("/rooms");
+            g_string_append_printf(beginning, " %s %s %s", args[0], args[1], args[2]);
+            found = autocomplete_param_with_func(input, beginning->str, muc_confserver_find, previous);
+            g_string_free(beginning, TRUE);
+            if (found) {
+                g_strfreev(args);
+                return found;
+            }
+        }
+        if ((num_args >= 2) && g_strcmp0(args[0], "cache") == 0) {
+            g_strfreev(args);
+            return NULL;
         }
     }
 

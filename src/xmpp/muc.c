@@ -69,6 +69,7 @@ typedef struct _muc_room_t {
 GHashTable *rooms = NULL;
 GHashTable *invite_passwords = NULL;
 Autocomplete invite_ac;
+Autocomplete confservers_ac;
 
 static void _free_room(ChatRoom *room);
 static gint _compare_occupants(Occupant *a, Occupant *b);
@@ -84,6 +85,7 @@ void
 muc_init(void)
 {
     invite_ac = autocomplete_new();
+    confservers_ac = autocomplete_new();
     rooms = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, (GDestroyNotify)_free_room);
     invite_passwords = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, g_free);
 }
@@ -92,10 +94,17 @@ void
 muc_close(void)
 {
     autocomplete_free(invite_ac);
+    autocomplete_free(confservers_ac);
     g_hash_table_destroy(rooms);
     g_hash_table_destroy(invite_passwords);
     rooms = NULL;
     invite_passwords = NULL;
+}
+
+void
+muc_confserver_add(const char *const server)
+{
+    autocomplete_add(confservers_ac, server);
 }
 
 void
@@ -156,10 +165,22 @@ muc_invites_reset_ac(void)
     autocomplete_reset(invite_ac);
 }
 
+void
+muc_confserver_reset_ac(void)
+{
+    autocomplete_reset(confservers_ac);
+}
+
 char*
 muc_invites_find(const char *const search_str, gboolean previous)
 {
     return autocomplete_complete(invite_ac, search_str, TRUE, previous);
+}
+
+char*
+muc_confserver_find(const char *const search_str, gboolean previous)
+{
+    return autocomplete_complete(confservers_ac, search_str, TRUE, previous);
 }
 
 void
@@ -169,6 +190,12 @@ muc_invites_clear(void)
     if (invite_passwords) {
         g_hash_table_remove_all(invite_passwords);
     }
+}
+
+void
+muc_confserver_clear(void)
+{
+    autocomplete_clear(confservers_ac);
 }
 
 void

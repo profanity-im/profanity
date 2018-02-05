@@ -88,6 +88,7 @@ cl_ev_disconnect(void)
     session_disconnect();
     roster_destroy();
     muc_invites_clear();
+    muc_confserver_clear();
     chat_sessions_clear();
     tlscerts_clear_current();
 #ifdef HAVE_LIBGPGME
