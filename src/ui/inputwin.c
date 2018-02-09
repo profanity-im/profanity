@@ -87,7 +87,7 @@ static char *inp_line = NULL;
 static gboolean get_password = FALSE;
 
 static void _inp_win_update_virtual(void);
-static int _inp_printable(const wint_t ch);
+static int _inp_edited(const wint_t ch);
 static void _inp_win_handle_scroll(void);
 static int _inp_offset_to_col(char *str, int offset);
 static void _inp_write(char *line, int offset);
@@ -301,8 +301,24 @@ _inp_write(char *line, int offset)
 }
 
 static int
-_inp_printable(const wint_t ch)
+_inp_edited(const wint_t ch)
 {
+    // backspace
+    if (ch == 127) {
+        return 1;
+    }
+
+    // ctrl-w
+    if (ch == 23) {
+        return 1;
+    }
+
+    // enter
+    if (ch == 13) {
+        return 1;
+    }
+
+    // printable
     char bytes[MB_CUR_MAX+1];
     size_t utf_len = wcrtomb(bytes, ch, (mbstate_t*)NULL);
     bytes[utf_len] = '\0';
@@ -472,7 +488,7 @@ _inp_rl_getc(FILE *stream)
 
     shift_tab = FALSE;
 
-    if (_inp_printable(ch)) {
+    if (_inp_edited(ch)) {
         ProfWin *window = wins_get_current();
         cmd_ac_reset(window);
     }
