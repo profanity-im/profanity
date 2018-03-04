@@ -4500,9 +4500,7 @@ cmd_bookmark(ProfWin *window, const char *const command, gchar **args)
 
     if (conn_status != JABBER_CONNECTED) {
         cons_show("You are not currently connected.");
-        if (window->type != WIN_CONSOLE) {
-            cons_alert();
-        }
+        cons_alert();
         return TRUE;
     }
 
@@ -4541,9 +4539,7 @@ cmd_bookmark(ProfWin *window, const char *const command, gchar **args)
 
     if (cmd == NULL) {
         cons_bad_cmd_usage(command);
-        if (window->type != WIN_CONSOLE) {
-            cons_alert();
-        }
+        cons_alert();
         return TRUE;
     }
 
@@ -4558,9 +4554,7 @@ cmd_bookmark(ProfWin *window, const char *const command, gchar **args)
             cons_bad_cmd_usage(command);
             cons_show("");
         }
-        if (window->type != WIN_CONSOLE) {
-            cons_alert();
-        }
+        cons_alert();
         return TRUE;
     }
 
@@ -4575,17 +4569,13 @@ cmd_bookmark(ProfWin *window, const char *const command, gchar **args)
     if (jid == NULL) {
         cons_bad_cmd_usage(command);
         cons_show("");
-        if (window->type != WIN_CONSOLE) {
-            cons_alert();
-        }
+        cons_alert();
         return TRUE;
     }
     if (strchr(jid, '@') == NULL) {
         cons_show("Invalid room, must be of the form room@domain.tld");
         cons_show("");
-        if (window->type != WIN_CONSOLE) {
-            cons_alert();
-        }
+        cons_alert();
         return TRUE;
     }
 
@@ -4596,9 +4586,7 @@ cmd_bookmark(ProfWin *window, const char *const command, gchar **args)
         } else {
             cons_show("No bookmark exists for %s.", jid);
         }
-        if (window->type != WIN_CONSOLE) {
-            cons_alert();
-        }
+        cons_alert();
         return TRUE;
     }
 
@@ -4607,9 +4595,7 @@ cmd_bookmark(ProfWin *window, const char *const command, gchar **args)
         if (!joined) {
             cons_show("No bookmark exists for %s.", jid);
         }
-        if (window->type != WIN_CONSOLE) {
-            cons_alert();
-        }
+        cons_alert();
         return TRUE;
     }
 
@@ -4620,9 +4606,7 @@ cmd_bookmark(ProfWin *window, const char *const command, gchar **args)
     if (!parsed) {
         cons_bad_cmd_usage(command);
         cons_show("");
-        if (window->type != WIN_CONSOLE) {
-            cons_alert();
-        }
+        cons_alert();
         return TRUE;
     }
 
@@ -4632,9 +4616,7 @@ cmd_bookmark(ProfWin *window, const char *const command, gchar **args)
         cons_bad_cmd_usage(command);
         cons_show("");
         options_destroy(options);
-        if (window->type != WIN_CONSOLE) {
-            cons_alert();
-        }
+        cons_alert();
         return TRUE;
     }
 
@@ -4649,9 +4631,7 @@ cmd_bookmark(ProfWin *window, const char *const command, gchar **args)
             cons_show("Bookmark already exists, use /bookmark update to edit.");
         }
         options_destroy(options);
-        if (window->type != WIN_CONSOLE) {
-            cons_alert();
-        }
+        cons_alert();
         return TRUE;
     }
 
@@ -4663,17 +4643,13 @@ cmd_bookmark(ProfWin *window, const char *const command, gchar **args)
             cons_show("No bookmark exists for %s.", jid);
         }
         options_destroy(options);
-        if (window->type != WIN_CONSOLE) {
-            cons_alert();
-        }
+        cons_alert();
         return TRUE;
     }
 
     cons_bad_cmd_usage(command);
     options_destroy(options);
-    if (window->type != WIN_CONSOLE) {
-        cons_alert();
-    }
+    cons_alert();
 
     return TRUE;
 }
