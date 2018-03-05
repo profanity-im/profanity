@@ -4500,11 +4500,15 @@ cmd_bookmark(ProfWin *window, const char *const command, gchar **args)
 
     if (conn_status != JABBER_CONNECTED) {
         cons_show("You are not currently connected.");
+        cons_alert();
         return TRUE;
     }
 
+    int num_args = g_strv_length(args);
     gchar *cmd = args[0];
-    if (window->type == WIN_MUC && (cmd == NULL || g_strcmp0(cmd, "add") == 0)) {
+    if (window->type == WIN_MUC
+            && num_args < 2
+            && (cmd == NULL || g_strcmp0(cmd, "add") == 0)) {
         // default to current nickname, password, and autojoin "on"
         ProfMucWin *mucwin = (ProfMucWin*)window;
         assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
@@ -4519,7 +4523,9 @@ cmd_bookmark(ProfWin *window, const char *const command, gchar **args)
         return TRUE;
     }
 
-    if (window->type == WIN_MUC && g_strcmp0(cmd, "remove") == 0) {
+    if (window->type == WIN_MUC
+            && num_args < 2
+            && g_strcmp0(cmd, "remove") == 0) {
         ProfMucWin *mucwin = (ProfMucWin*)window;
         assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
         gboolean removed = bookmark_remove(mucwin->roomjid);
@@ -4533,6 +4539,7 @@ cmd_bookmark(ProfWin *window, const char *const command, gchar **args)
 
     if (cmd == NULL) {
         cons_bad_cmd_usage(command);
+        cons_alert();
         return TRUE;
     }
 
@@ -4547,6 +4554,7 @@ cmd_bookmark(ProfWin *window, const char *const command, gchar **args)
             cons_bad_cmd_usage(command);
             cons_show("");
         }
+        cons_alert();
         return TRUE;
     }
 
@@ -4561,11 +4569,13 @@ cmd_bookmark(ProfWin *window, const char *const command, gchar **args)
     if (jid == NULL) {
         cons_bad_cmd_usage(command);
         cons_show("");
+        cons_alert();
         return TRUE;
     }
     if (strchr(jid, '@') == NULL) {
         cons_show("Invalid room, must be of the form room@domain.tld");
         cons_show("");
+        cons_alert();
         return TRUE;
     }
 
@@ -4576,6 +4586,7 @@ cmd_bookmark(ProfWin *window, const char *const command, gchar **args)
         } else {
             cons_show("No bookmark exists for %s.", jid);
         }
+        cons_alert();
         return TRUE;
     }
 
@@ -4584,6 +4595,7 @@ cmd_bookmark(ProfWin *window, const char *const command, gchar **args)
         if (!joined) {
             cons_show("No bookmark exists for %s.", jid);
         }
+        cons_alert();
         return TRUE;
     }
 
@@ -4594,6 +4606,7 @@ cmd_bookmark(ProfWin *window, const char *const command, gchar **args)
     if (!parsed) {
         cons_bad_cmd_usage(command);
         cons_show("");
+        cons_alert();
         return TRUE;
     }
 
@@ -4603,6 +4616,7 @@ cmd_bookmark(ProfWin *window, const char *const command, gchar **args)
         cons_bad_cmd_usage(command);
         cons_show("");
         options_destroy(options);
+        cons_alert();
         return TRUE;
     }
 
@@ -4617,6 +4631,7 @@ cmd_bookmark(ProfWin *window, const char *const command, gchar **args)
             cons_show("Bookmark already exists, use /bookmark update to edit.");
         }
         options_destroy(options);
+        cons_alert();
         return TRUE;
     }
 
@@ -4628,11 +4643,13 @@ cmd_bookmark(ProfWin *window, const char *const command, gchar **args)
             cons_show("No bookmark exists for %s.", jid);
         }
         options_destroy(options);
+        cons_alert();
         return TRUE;
     }
 
     cons_bad_cmd_usage(command);
     options_destroy(options);
+    cons_alert();
 
     return TRUE;
 }
