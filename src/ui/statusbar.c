@@ -51,14 +51,13 @@
 #include "ui/inputwin.h"
 #include "ui/screen.h"
 
-#define TIME_CHECK 60000000
-
 typedef struct _status_bar_t {
-    char *time;
+    gchar *time;
     char *message;
     GList *tabs;
 } StatusBar;
 
+static GTimeZone *tz;
 static StatusBar *statusbar;
 static WINDOW *statusbar_win;
 //static char *message = NULL;
@@ -80,13 +79,18 @@ static WINDOW *statusbar_win;
 static void _status_bar_draw(void);
 
 void
-create_status_bar(void)
+status_bar_init(void)
 {
+    tz = g_time_zone_new_local();
+
     statusbar = malloc(sizeof(StatusBar));
+    statusbar->time = NULL;
+
     int row = screen_statusbar_row();
     int cols = getmaxx(stdscr);
     statusbar_win = newwin(1, cols, row, 0);
     wbkgd(statusbar_win, theme_attrs(THEME_STATUS_TEXT));
+
     _status_bar_draw();
 
 //    int i;
@@ -120,6 +124,19 @@ create_status_bar(void)
 //    last_time = g_date_time_new_now(tz);
 //
 //    _status_bar_draw();
+}
+
+void
+status_bar_close(void)
+{
+    if (tz) {
+        g_time_zone_unref(tz);
+    }
+    if (statusbar) {
+        if (statusbar->time) {
+            g_free(statusbar->time);
+        }
+    }
 }
 
 void
@@ -475,6 +492,34 @@ status_bar_clear_message(void)
 static void
 _status_bar_draw(void)
 {
+    char *time_pref = prefs_get_string(PREF_TIME_STATUSBAR);
+    if (g_strcmp0(time_pref, "off") != 0) {
+        if (statusbar->time) {
+            g_free(statusbar->time);
+            statusbar->time = NULL;
+        }
+
+        GDateTime *datetime = g_date_time_new_now(tz);
+        statusbar->time  = g_date_time_format(datetime, time_pref);
+        assert(statusbar->time != NULL);
+        g_date_time_unref(datetime);
+
+        int bracket_attrs = theme_attrs(THEME_STATUS_BRACKET);
+        int time_attrs = theme_attrs(THEME_STATUS_TIME);
+
+        size_t len = strlen(statusbar->time);
+        wattron(statusbar_win, bracket_attrs);
+        mvwaddch(statusbar_win, 0, 1, '[');
+        wattroff(statusbar_win, bracket_attrs);
+        wattron(statusbar_win, time_attrs);
+        mvwprintw(statusbar_win, 0, 2, statusbar->time);
+        wattroff(statusbar_win, time_attrs);
+        wattron(statusbar_win, bracket_attrs);
+        mvwaddch(statusbar_win, 0, 2 + len, ']');
+        wattroff(statusbar_win, bracket_attrs);
+    }
+    prefs_free_string(time_pref);
+
     wnoutrefresh(statusbar_win);
     inp_put_back();
 

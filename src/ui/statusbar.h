@@ -35,7 +35,8 @@
 #ifndef UI_STATUSBAR_H
 #define UI_STATUSBAR_H
 
-void create_status_bar(void);
+void status_bar_init(void);
+void status_bar_close(void);
 void status_bar_update_virtual(void);
 void status_bar_resize(void);
 void status_bar_clear(void);

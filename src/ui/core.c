@@ -102,7 +102,7 @@ ui_init(void)
     ui_load_colours();
     refresh();
     create_title_bar();
-    create_status_bar();
+    status_bar_init();
     status_bar_active(1);
     create_input_window();
     wins_init();
@@ -183,6 +183,7 @@ ui_close(void)
     notifier_uninit();
     wins_destroy();
     inp_close();
+    status_bar_close();
     endwin();
 }
 
