@@ -684,8 +684,9 @@ cons_show_bookmarks(const GList *list)
             Bookmark *item = list->data;
 
             theme_item_t presence_colour = THEME_TEXT;
+            ProfWin *roomwin = (ProfWin*)wins_get_muc(item->barejid);
 
-            if (muc_active(item->barejid)) {
+            if (muc_active(item->barejid) && roomwin) {
                 presence_colour = THEME_ONLINE;
             }
             win_print(console, presence_colour, '-', "  %s", item->barejid);
@@ -698,12 +699,9 @@ cons_show_bookmarks(const GList *list)
             if (item->password) {
                 win_append(console, presence_colour, " (private)");
             }
-            if (muc_active(item->barejid)) {
-                ProfWin *roomwin = (ProfWin*)wins_get_muc(item->barejid);
-                if (roomwin) {
-                    int num = wins_get_num(roomwin);
-                    win_append(console, presence_colour, " (win %d)", num);
-                }
+            if (muc_active(item->barejid) && roomwin) {
+                int num = wins_get_num(roomwin);
+                win_append(console, presence_colour, " (win %d)", num);
             }
             win_newline(console);
             list = g_list_next(list);
