@@ -85,6 +85,7 @@ status_bar_init(void)
 
     statusbar = malloc(sizeof(StatusBar));
     statusbar->time = NULL;
+    statusbar->message = NULL;
 
     int row = screen_statusbar_row();
     int cols = getmaxx(stdscr);
@@ -135,6 +136,10 @@ status_bar_close(void)
         if (statusbar->time) {
             g_free(statusbar->time);
         }
+        if (statusbar->message) {
+            free(statusbar->message);
+        }
+        free(statusbar);
     }
 }
 
@@ -341,14 +346,20 @@ status_bar_new(const int win)
 void
 status_bar_get_password(void)
 {
-//    status_bar_print_message("Enter password:");
-//
-//    _status_bar_draw();
+    status_bar_print_message("Enter password:");
 }
 
 void
 status_bar_print_message(const char *const msg)
 {
+    if (statusbar->message) {
+        free(statusbar->message);
+        statusbar->message = NULL;
+    }
+    statusbar->message = strdup(msg);
+
+    _status_bar_draw();
+
 //    werase(status_bar);
 //
 //    if (message) {
@@ -409,22 +420,12 @@ status_bar_clear(void)
 void
 status_bar_clear_message(void)
 {
-//    if (message) {
-//        free(message);
-//        message = NULL;
-//    }
-//
-//    werase(status_bar);
-//
-//    int cols = getmaxx(stdscr);
-//    int bracket_attrs = theme_attrs(THEME_STATUS_BRACKET);
-//
-//    wattron(status_bar, bracket_attrs);
-//    mvwprintw(status_bar, 0, cols - 34, _active);
-//    mvwprintw(status_bar, 0, cols - 34 + ((current - 1) * 3), bracket);
-//    wattroff(status_bar, bracket_attrs);
-//
-//    _status_bar_draw();
+    if (statusbar->message) {
+        free(statusbar->message);
+        statusbar->message = NULL;
+    }
+
+    _status_bar_draw();
 }
 
 //static void
@@ -493,8 +494,11 @@ _status_bar_draw(void)
 {
     wbkgd(statusbar_win, theme_attrs(THEME_STATUS_TEXT));
 
+    int pos = 1;
+
     char *time_pref = prefs_get_string(PREF_TIME_STATUSBAR);
     if (g_strcmp0(time_pref, "off") != 0) {
+        // time
         if (statusbar->time) {
             g_free(statusbar->time);
             statusbar->time = NULL;
@@ -510,14 +514,27 @@ _status_bar_draw(void)
 
         size_t len = strlen(statusbar->time);
         wattron(statusbar_win, bracket_attrs);
-        mvwaddch(statusbar_win, 0, 1, '[');
+        mvwaddch(statusbar_win, 0, pos, '[');
+        pos++;
         wattroff(statusbar_win, bracket_attrs);
         wattron(statusbar_win, time_attrs);
-        mvwprintw(statusbar_win, 0, 2, statusbar->time);
+        mvwprintw(statusbar_win, 0, pos, statusbar->time);
+        pos += len;
         wattroff(statusbar_win, time_attrs);
         wattron(statusbar_win, bracket_attrs);
-        mvwaddch(statusbar_win, 0, 2 + len, ']');
+        mvwaddch(statusbar_win, 0, pos, ']');
         wattroff(statusbar_win, bracket_attrs);
+        pos += 2;
+
+        // message
+        if (statusbar->message) {
+            mvwprintw(statusbar_win, 0, pos, statusbar->message);
+        }
+    } else {
+        // message
+        if (statusbar->message) {
+            mvwprintw(statusbar_win, 0, pos, statusbar->message);
+        }
     }
     prefs_free_string(time_pref);
 
