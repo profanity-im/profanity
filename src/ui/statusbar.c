@@ -89,7 +89,6 @@ status_bar_init(void)
     int row = screen_statusbar_row();
     int cols = getmaxx(stdscr);
     statusbar_win = newwin(1, cols, row, 0);
-    wbkgd(statusbar_win, theme_attrs(THEME_STATUS_TEXT));
 
     _status_bar_draw();
 
@@ -153,7 +152,7 @@ status_bar_resize(void)
     int row = screen_statusbar_row();
     mvwin(statusbar_win, row, 0);
     wresize(statusbar_win, 1, cols);
-    wbkgd(statusbar_win, theme_attrs(THEME_STATUS_TEXT));
+
     _status_bar_draw();
 
 //    int cols = getmaxx(stdscr);
@@ -492,6 +491,8 @@ status_bar_clear_message(void)
 static void
 _status_bar_draw(void)
 {
+    wbkgd(statusbar_win, theme_attrs(THEME_STATUS_TEXT));
+
     char *time_pref = prefs_get_string(PREF_TIME_STATUSBAR);
     if (g_strcmp0(time_pref, "off") != 0) {
         if (statusbar->time) {
