@@ -210,7 +210,10 @@ win_create_muc_config(const char *const roomjid, DataForm *form)
 {
     ProfMucConfWin *new_win = malloc(sizeof(ProfMucConfWin));
     new_win->window.type = WIN_MUC_CONFIG;
-    new_win->window.tab_name = strdup(roomjid);
+    GString *tab_str = g_string_new(roomjid);
+    g_string_append(tab_str, " config");
+    new_win->window.tab_name = strdup(tab_str->str);
+    g_string_free(tab_str, TRUE);
     new_win->window.layout = _win_create_simple_layout();
 
     new_win->roomjid = strdup(roomjid);
@@ -257,7 +260,7 @@ win_create_plugin(const char *const plugin_name, const char *const tag)
 {
     ProfPluginWin *new_win = malloc(sizeof(ProfPluginWin));
     new_win->window.type = WIN_PLUGIN;
-    new_win->window.tab_name = strdup(plugin_name);
+    new_win->window.tab_name = strdup(tag);
     new_win->window.layout = _win_create_simple_layout();
 
     new_win->tag = strdup(tag);

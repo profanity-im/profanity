@@ -99,6 +99,7 @@ static char* _blocked_autocomplete(ProfWin *window, const char *const input, gbo
 static char* _tray_autocomplete(ProfWin *window, const char *const input, gboolean previous);
 static char* _presence_autocomplete(ProfWin *window, const char *const input, gboolean previous);
 static char* _rooms_autocomplete(ProfWin *window, const char *const input, gboolean previous);
+static char* _statusbar_autocomplete(ProfWin *window, const char *const input, gboolean previous);
 
 static char* _script_autocomplete_func(const char *const prefix, gboolean previous);
 
@@ -199,6 +200,8 @@ static Autocomplete tray_ac;
 static Autocomplete presence_ac;
 static Autocomplete presence_setting_ac;
 static Autocomplete winpos_ac;
+static Autocomplete statusbar_ac;
+static Autocomplete statusbar_show_ac;
 
 void
 cmd_ac_init(void)
@@ -774,6 +777,16 @@ cmd_ac_init(void)
     winpos_ac = autocomplete_new();
     autocomplete_add(winpos_ac, "up");
     autocomplete_add(winpos_ac, "down");
+
+    statusbar_ac = autocomplete_new();
+    autocomplete_add(statusbar_ac, "up");
+    autocomplete_add(statusbar_ac, "down");
+    autocomplete_add(statusbar_ac, "show");
+    autocomplete_add(statusbar_ac, "hide");
+
+    statusbar_show_ac = autocomplete_new();
+    autocomplete_add(statusbar_show_ac, "empty");
+    autocomplete_add(statusbar_show_ac, "name");
 }
 
 void
@@ -1055,6 +1068,8 @@ cmd_ac_reset(ProfWin *window)
     autocomplete_reset(presence_ac);
     autocomplete_reset(presence_setting_ac);
     autocomplete_reset(winpos_ac);
+    autocomplete_reset(statusbar_ac);
+    autocomplete_reset(statusbar_show_ac);
 
     autocomplete_reset(script_ac);
     if (script_show_ac) {
@@ -1182,6 +1197,8 @@ cmd_ac_uninit(void)
     autocomplete_free(presence_ac);
     autocomplete_free(presence_setting_ac);
     autocomplete_free(winpos_ac);
+    autocomplete_free(statusbar_ac);
+    autocomplete_free(statusbar_show_ac);
 }
 
 char*
@@ -1369,8 +1386,8 @@ _cmd_ac_complete_params(ProfWin *window, const char *const input, gboolean previ
         }
     }
 
-    gchar *cmds[] = { "/prefs", "/disco", "/room", "/autoping", "/titlebar", "/mainwin", "/statusbar", "/inputwin" };
-    Autocomplete completers[] = { prefs_ac, disco_ac, room_ac, autoping_ac, winpos_ac, winpos_ac, winpos_ac, winpos_ac };
+    gchar *cmds[] = { "/prefs", "/disco", "/room", "/autoping", "/titlebar", "/mainwin", "/inputwin" };
+    Autocomplete completers[] = { prefs_ac, disco_ac, room_ac, autoping_ac, winpos_ac, winpos_ac, winpos_ac };
 
     for (i = 0; i < ARRAY_SIZE(cmds); i++) {
         result = autocomplete_param_with_ac(input, cmds[i], completers[i], TRUE, previous);
@@ -1421,6 +1438,7 @@ _cmd_ac_complete_params(ProfWin *window, const char *const input, gboolean previ
     g_hash_table_insert(ac_funcs, "/tray",          _tray_autocomplete);
     g_hash_table_insert(ac_funcs, "/presence",      _presence_autocomplete);
     g_hash_table_insert(ac_funcs, "/rooms",         _rooms_autocomplete);
+    g_hash_table_insert(ac_funcs, "/statusbar",     _statusbar_autocomplete);
 
     int len = strlen(input);
     char parsed[len+1];
@@ -3178,6 +3196,29 @@ _rooms_autocomplete(ProfWin *window, const char *const input, gboolean previous)
     }
 
     g_strfreev(args);
+
+    return NULL;
+}
+
+static char*
+_statusbar_autocomplete(ProfWin *window, const char *const input, gboolean previous)
+{
+    char *found = NULL;
+
+    found = autocomplete_param_with_ac(input, "/statusbar", statusbar_ac, TRUE, previous);
+    if (found) {
+        return found;
+    }
+
+    found = autocomplete_param_with_ac(input, "/statusbar show", statusbar_show_ac, TRUE, previous);
+    if (found) {
+        return found;
+    }
+
+    found = autocomplete_param_with_ac(input, "/statusbar hide", statusbar_show_ac, TRUE, previous);
+    if (found) {
+        return found;
+    }
 
     return NULL;
 }

@@ -1570,6 +1570,8 @@ _get_group(preference_t pref)
         case PREF_CONSOLE_MUC:
         case PREF_CONSOLE_PRIVATE:
         case PREF_CONSOLE_CHAT:
+        case PREF_STATUSBAR_SHOW_EMPTY:
+        case PREF_STATUSBAR_SHOW_NAME:
             return PREF_GROUP_UI;
         case PREF_STATES:
         case PREF_OUTTYPE:
@@ -1825,6 +1827,10 @@ _get_key(preference_t pref)
             return "sourcepath";
         case PREF_ROOM_LIST_CACHE:
             return "rooms.cache";
+        case PREF_STATUSBAR_SHOW_EMPTY:
+            return "statusbar.show.empty";
+        case PREF_STATUSBAR_SHOW_NAME:
+            return "statusbar.show.name";
         default:
             return NULL;
     }

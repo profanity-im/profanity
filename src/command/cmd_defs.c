@@ -1358,20 +1358,29 @@ static struct cmd_t command_defs[] =
     },
 
     { "/statusbar",
-        parse_args, 1, 1, &cons_winpos_setting,
+        parse_args, 1, 2, &cons_statusbar_setting,
         CMD_NOSUBFUNCS
         CMD_MAINFUNC(cmd_statusbar)
         CMD_TAGS(
             CMD_TAG_UI)
         CMD_SYN(
+            "/statusbar show empty|name",
+            "/statusbar hide empty|name",
+//            "/statusbar maxtabs <value>",
             "/statusbar up",
             "/statusbar down")
         CMD_DESC(
-            "Move the status bar.")
+            "Manage statusbar display preferences.")
         CMD_ARGS(
-            { "up", "Move the status bar up the screen." },
-            { "down", "Move the status bar down the screen." })
-        CMD_NOEXAMPLES
+//            { "maxtabs <value>",    "Set the maximum number of tabs to display, <value> must be between 0 and 10" },
+            { "show|hide empty",    "Show or hide empty tabs." },
+            { "show|hide name",     "Show or hide names in tabs." },
+            { "up",                 "Move the status bar up the screen." },
+            { "down",               "Move the status bar down the screen." })
+        CMD_EXAMPLES(
+//            "/statusbar maxtabs 5",
+            "/statusbar show empty",
+            "/statusbar hide name")
     },
 
     { "/inputwin",

@@ -5792,6 +5792,44 @@ cmd_mainwin(ProfWin *window, const char *const command, gchar **args)
 gboolean
 cmd_statusbar(ProfWin *window, const char *const command, gchar **args)
 {
+    if (g_strcmp0(args[0], "show") == 0) {
+        if (g_strcmp0(args[1], "empty") == 0) {
+            prefs_set_boolean(PREF_STATUSBAR_SHOW_EMPTY, TRUE);
+            cons_show("Enabled showing empty tabs.");
+            ui_resize();
+            return TRUE;
+        }
+        if (g_strcmp0(args[1], "name") == 0) {
+            prefs_set_boolean(PREF_STATUSBAR_SHOW_NAME, TRUE);
+            cons_show("Enabled showing tab names.");
+            ui_resize();
+            return TRUE;
+        }
+        cons_bad_cmd_usage(command);
+        return TRUE;
+    }
+
+    if (g_strcmp0(args[0], "hide") == 0) {
+        if (g_strcmp0(args[1], "empty") == 0) {
+            prefs_set_boolean(PREF_STATUSBAR_SHOW_EMPTY, FALSE);
+            cons_show("Disabled showing empty tabs.");
+            ui_resize();
+            return TRUE;
+        }
+        if (g_strcmp0(args[1], "name") == 0) {
+            prefs_set_boolean(PREF_STATUSBAR_SHOW_NAME, FALSE);
+            cons_show("Disabled showing tab names.");
+            ui_resize();
+            return TRUE;
+        }
+        cons_bad_cmd_usage(command);
+        return TRUE;
+    }
+
+    if (g_strcmp0(args[0], "maxtabs") == 0) {
+
+    }
+
     if (g_strcmp0(args[0], "up") == 0) {
         gboolean result = prefs_statusbar_pos_up();
         if (result) {

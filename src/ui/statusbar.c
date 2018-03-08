@@ -63,9 +63,7 @@ typedef struct _status_bar_t {
     int current_tab;
 } StatusBar;
 
-#define MAX_TABS 5
-#define SHOW_EMPTY_TABS FALSE
-#define SHOW_NAME TRUE
+#define MAX_TABS 10
 
 static GTimeZone *tz;
 static StatusBar *statusbar;
@@ -229,8 +227,6 @@ status_bar_clear(void)
         statusbar->message = NULL;
     }
 
-    werase(statusbar_win);
-
     _status_bar_draw();
 }
 
@@ -248,8 +244,11 @@ status_bar_clear_message(void)
 static int
 _tabs_width(void)
 {
-    if (SHOW_NAME) {
-        if (SHOW_EMPTY_TABS) {
+    gboolean show_empty = prefs_get_boolean(PREF_STATUSBAR_SHOW_EMPTY);
+    gboolean show_name = prefs_get_boolean(PREF_STATUSBAR_SHOW_NAME);
+
+    if (show_name) {
+        if (show_empty) {
             int width = 4;
             int i = 0;
             for (i = 1; i <= MAX_TABS; i++) {
@@ -275,7 +274,7 @@ _tabs_width(void)
             return width;
         }
     } else {
-        if (SHOW_EMPTY_TABS) {
+        if (show_empty) {
             return MAX_TABS * 3 + 4;
         } else {
             return g_hash_table_size(statusbar->tabs) * 3 + 4;
@@ -286,6 +285,7 @@ _tabs_width(void)
 static void
 _status_bar_draw(void)
 {
+    werase(statusbar_win);
     wbkgd(statusbar_win, theme_attrs(THEME_STATUS_TEXT));
 
     int pos = 1;
@@ -337,12 +337,15 @@ _status_bar_draw(void)
     pos = cols - _tabs_width();
     int bracket_attrs = theme_attrs(THEME_STATUS_BRACKET);
 
+    gboolean show_empty = prefs_get_boolean(PREF_STATUSBAR_SHOW_EMPTY);
+    gboolean show_name = prefs_get_boolean(PREF_STATUSBAR_SHOW_NAME);
+
     int i = 1;
     for (i = 1; i <= MAX_TABS; i++) {
         int display_num = i == 10 ? 0 : i;
 
         StatusBarTab *tab = g_hash_table_lookup(statusbar->tabs, GINT_TO_POINTER(i));
-        if (tab || (tab == NULL && SHOW_EMPTY_TABS)) {
+        if (tab || (tab == NULL && show_empty)) {
             wattron(statusbar_win, bracket_attrs);
             if (i == statusbar->current_tab) {
                 mvwprintw(statusbar_win, 0, pos, "-");
@@ -356,7 +359,7 @@ _status_bar_draw(void)
                     int status_attrs = theme_attrs(THEME_STATUS_NEW);
                     wattron(statusbar_win, status_attrs);
                     mvwprintw(statusbar_win, 0, pos, "%d", display_num);
-                    if (SHOW_NAME) {
+                    if (show_name) {
                         pos++;
                         mvwprintw(statusbar_win, 0, pos, ":");
                         pos++;
@@ -368,7 +371,7 @@ _status_bar_draw(void)
                     int status_attrs = theme_attrs(THEME_STATUS_ACTIVE);
                     wattron(statusbar_win, status_attrs);
                     mvwprintw(statusbar_win, 0, pos, "%d", display_num);
-                    if (SHOW_NAME) {
+                    if (show_name) {
                         pos++;
                         mvwprintw(statusbar_win, 0, pos, ":");
                         pos++;

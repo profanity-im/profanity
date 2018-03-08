@@ -144,6 +144,8 @@ typedef enum {
     PREF_BOOKMARK_INVITE,
     PREF_PLUGINS_SOURCEPATH,
     PREF_ROOM_LIST_CACHE,
+    PREF_STATUSBAR_SHOW_EMPTY,
+    PREF_STATUSBAR_SHOW_NAME,
 } preference_t;
 
 typedef struct prof_alias_t {

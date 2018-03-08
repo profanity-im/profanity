@@ -1748,6 +1748,22 @@ cons_inpblock_setting(void)
 }
 
 void
+cons_statusbar_setting(void)
+{
+    cons_winpos_setting();
+    if (prefs_get_boolean(PREF_STATUSBAR_SHOW_EMPTY)) {
+        cons_show("Show empty tabs (/statusbar)        : ON");
+    } else {
+        cons_show("Show empty tabs (/statusbar)        : OFF");
+    }
+    if (prefs_get_boolean(PREF_STATUSBAR_SHOW_NAME)) {
+        cons_show("Show tab names (/statusbar)         : ON");
+    } else {
+        cons_show("Show tab names (/statusbar)         : OFF");
+    }
+}
+
+void
 cons_winpos_setting(void)
 {
     ProfWinPlacement *placement = prefs_get_win_placement();
