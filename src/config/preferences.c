@@ -663,6 +663,23 @@ prefs_get_tray_timer(void)
     }
 }
 
+gint
+prefs_get_statusbartabs(void)
+{
+    if (!g_key_file_has_key(prefs, PREF_GROUP_UI, "statusbar.tabs", NULL)) {
+        return 10;
+    } else {
+        return g_key_file_get_integer(prefs, PREF_GROUP_UI, "statusbar.tabs", NULL);
+    }
+}
+
+void
+prefs_set_statusbartabs(gint value)
+{
+    g_key_file_set_integer(prefs, PREF_GROUP_UI, "statusbar.tabs", value);
+    _save_prefs();
+}
+
 gchar**
 prefs_get_plugins(void)
 {

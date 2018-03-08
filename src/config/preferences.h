@@ -190,6 +190,9 @@ gint prefs_get_autoping_timeout(void);
 gint prefs_get_inpblock(void);
 void prefs_set_inpblock(gint value);
 
+void prefs_set_statusbartabs(gint value);
+gint prefs_get_statusbartabs(void);
+
 void prefs_set_occupants_size(gint value);
 gint prefs_get_occupants_size(void);
 void prefs_set_roster_size(gint value);

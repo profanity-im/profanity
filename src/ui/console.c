@@ -1544,6 +1544,7 @@ cons_show_ui_prefs(void)
     cons_presence_setting();
     cons_inpblock_setting();
     cons_tlsshow_setting();
+    cons_statusbar_setting();
 
     cons_alert();
 }
@@ -1750,7 +1751,6 @@ cons_inpblock_setting(void)
 void
 cons_statusbar_setting(void)
 {
-    cons_winpos_setting();
     if (prefs_get_boolean(PREF_STATUSBAR_SHOW_EMPTY)) {
         cons_show("Show empty tabs (/statusbar)        : ON");
     } else {
@@ -1761,6 +1761,8 @@ cons_statusbar_setting(void)
     } else {
         cons_show("Show tab names (/statusbar)         : OFF");
     }
+    cons_show("Max tabs (/statusbar)               : %d", prefs_get_statusbartabs());
+
 }
 
 void

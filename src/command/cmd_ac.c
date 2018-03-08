@@ -783,6 +783,7 @@ cmd_ac_init(void)
     autocomplete_add(statusbar_ac, "down");
     autocomplete_add(statusbar_ac, "show");
     autocomplete_add(statusbar_ac, "hide");
+    autocomplete_add(statusbar_ac, "maxtabs");
 
     statusbar_show_ac = autocomplete_new();
     autocomplete_add(statusbar_show_ac, "empty");

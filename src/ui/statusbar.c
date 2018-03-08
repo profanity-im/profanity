@@ -63,24 +63,13 @@ typedef struct _status_bar_t {
     int current_tab;
 } StatusBar;
 
-#define MAX_TABS 10
-
 static GTimeZone *tz;
 static StatusBar *statusbar;
 static WINDOW *statusbar_win;
 
 static void _status_bar_draw(void);
-
-void
-_destroy_tab(StatusBarTab *tab)
-{
-    if (tab) {
-        if (tab->display_name) {
-            free(tab->display_name);
-        }
-        free(tab);
-    }
-}
+static void _destroy_tab(StatusBarTab *tab);
+static int _tabs_width(void);
 
 void
 status_bar_init(void)
@@ -241,47 +230,6 @@ status_bar_clear_message(void)
     _status_bar_draw();
 }
 
-static int
-_tabs_width(void)
-{
-    gboolean show_empty = prefs_get_boolean(PREF_STATUSBAR_SHOW_EMPTY);
-    gboolean show_name = prefs_get_boolean(PREF_STATUSBAR_SHOW_NAME);
-
-    if (show_name) {
-        if (show_empty) {
-            int width = 4;
-            int i = 0;
-            for (i = 1; i <= MAX_TABS; i++) {
-                StatusBarTab *tab = g_hash_table_lookup(statusbar->tabs, GINT_TO_POINTER(i));
-                if (tab) {
-                    width += strlen(tab->display_name);
-                    width += 4;
-                } else {
-                    width += 3;
-                }
-            }
-            return width;
-        } else {
-            int width = 4;
-            int i = 0;
-            for (i = 1; i <= MAX_TABS; i++) {
-                StatusBarTab *tab = g_hash_table_lookup(statusbar->tabs, GINT_TO_POINTER(i));
-                if (tab) {
-                    width += strlen(tab->display_name);
-                    width += 4;
-                }
-            }
-            return width;
-        }
-    } else {
-        if (show_empty) {
-            return MAX_TABS * 3 + 4;
-        } else {
-            return g_hash_table_size(statusbar->tabs) * 3 + 4;
-        }
-    }
-}
-
 static void
 _status_bar_draw(void)
 {
@@ -339,9 +287,10 @@ _status_bar_draw(void)
 
     gboolean show_empty = prefs_get_boolean(PREF_STATUSBAR_SHOW_EMPTY);
     gboolean show_name = prefs_get_boolean(PREF_STATUSBAR_SHOW_NAME);
+    gint max_tabs = prefs_get_statusbartabs();
 
     int i = 1;
-    for (i = 1; i <= MAX_TABS; i++) {
+    for (i = 1; i <= max_tabs; i++) {
         int display_num = i == 10 ? 0 : i;
 
         StatusBarTab *tab = g_hash_table_lookup(statusbar->tabs, GINT_TO_POINTER(i));
@@ -408,4 +357,57 @@ _status_bar_draw(void)
 
     wnoutrefresh(statusbar_win);
     inp_put_back();
+}
+
+static void
+_destroy_tab(StatusBarTab *tab)
+{
+    if (tab) {
+        if (tab->display_name) {
+            free(tab->display_name);
+        }
+        free(tab);
+    }
+}
+
+static int
+_tabs_width(void)
+{
+    gboolean show_empty = prefs_get_boolean(PREF_STATUSBAR_SHOW_EMPTY);
+    gboolean show_name = prefs_get_boolean(PREF_STATUSBAR_SHOW_NAME);
+    gint max_tabs = prefs_get_statusbartabs();
+
+    if (show_name) {
+        if (show_empty) {
+            int width = 4;
+            int i = 0;
+            for (i = 1; i <= max_tabs; i++) {
+                StatusBarTab *tab = g_hash_table_lookup(statusbar->tabs, GINT_TO_POINTER(i));
+                if (tab) {
+                    width += strlen(tab->display_name);
+                    width += 4;
+                } else {
+                    width += 3;
+                }
+            }
+            return width;
+        } else {
+            int width = 4;
+            int i = 0;
+            for (i = 1; i <= max_tabs; i++) {
+                StatusBarTab *tab = g_hash_table_lookup(statusbar->tabs, GINT_TO_POINTER(i));
+                if (tab) {
+                    width += strlen(tab->display_name);
+                    width += 4;
+                }
+            }
+            return width;
+        }
+    } else {
+        if (show_empty) {
+            return max_tabs * 3 + 4;
+        } else {
+            return g_hash_table_size(statusbar->tabs) * 3 + 4;
+        }
+    }
 }
