@@ -136,6 +136,7 @@ typedef enum {
 
 typedef struct prof_win_t {
     win_type_t type;
+    char *tab_name;
     ProfLayout *layout;
 } ProfWin;
 
@@ -194,7 +195,7 @@ typedef struct prof_xml_win_t {
 } ProfXMLWin;
 
 typedef struct prof_plugin_win_t {
-    ProfWin super;
+    ProfWin window;
     char *tag;
     char *plugin_name;
     unsigned long memcheck;

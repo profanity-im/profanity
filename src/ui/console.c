@@ -2161,7 +2161,7 @@ cons_alert(void)
 {
     ProfWin *current = wins_get_current();
     if (current->type != WIN_CONSOLE) {
-        status_bar_new(1);
+        status_bar_new(1, "console");
     }
 }
 

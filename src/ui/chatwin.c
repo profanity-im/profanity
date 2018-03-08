@@ -105,7 +105,7 @@ chatwin_otr_secured(ProfChatWin *chatwin, gboolean trusted)
          title_bar_switch();
     } else {
         int num = wins_get_num(window);
-        status_bar_new(num);
+        status_bar_new(num, window->tab_name);
 
         int ui_index = num;
         if (ui_index == 10) {
@@ -249,11 +249,11 @@ chatwin_incoming_msg(ProfChatWin *chatwin, const char *const resource, const cha
     if (wins_is_current(window)) {
         win_print_incoming(window, timestamp, display_name, plugin_message, enc_mode);
         title_bar_set_typing(FALSE);
-        status_bar_active(num);
+        status_bar_active(num, window->tab_name);
 
     // not currently viewing chat window with sender
     } else {
-        status_bar_new(num);
+        status_bar_new(num, window->tab_name);
         cons_show_incoming_message(display_name, num, chatwin->unread);
 
         if (prefs_get_boolean(PREF_FLASH)) {
@@ -324,9 +324,11 @@ chatwin_outgoing_carbon(ProfChatWin *chatwin, const char *const message, prof_en
         enc_char = prefs_get_pgp_char();
     }
 
-    win_print_outgoing((ProfWin*)chatwin, enc_char, "%s", message);
-    int num = wins_get_num((ProfWin*)chatwin);
-    status_bar_active(num);
+    ProfWin *window = (ProfWin*)chatwin;
+
+    win_print_outgoing(window, enc_char, "%s", message);
+    int num = wins_get_num(window);
+    status_bar_active(num, window->tab_name);
 }
 
 void

@@ -2095,7 +2095,7 @@ cmd_who(ProfWin *window, const char *const command, gchar **args)
     }
 
     if (window->type != WIN_CONSOLE && window->type != WIN_MUC) {
-        status_bar_new(1);
+        status_bar_new(1, "console");
     }
 
     return TRUE;

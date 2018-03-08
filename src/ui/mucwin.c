@@ -519,11 +519,11 @@ mucwin_requires_config(ProfMucWin *mucwin)
 
     // currently in groupchat window
     if (wins_is_current(window)) {
-        status_bar_active(num);
+        status_bar_active(num, window->tab_name);
 
     // not currently on groupchat window
     } else {
-        status_bar_new(num);
+        status_bar_new(num, window->tab_name);
     }
 }
 
@@ -553,11 +553,11 @@ mucwin_subject(ProfMucWin *mucwin, const char *const nick, const char *const sub
 
     // currently in groupchat window
     if (wins_is_current(window)) {
-        status_bar_active(num);
+        status_bar_active(num, window->tab_name);
 
     // not currently on groupchat window
     } else {
-        status_bar_active(num);
+        status_bar_new(num, window->tab_name);
     }
 }
 
@@ -583,11 +583,11 @@ mucwin_broadcast(ProfMucWin *mucwin, const char *const message)
 
     // currently in groupchat window
     if (wins_is_current(window)) {
-        status_bar_active(num);
+        status_bar_active(num, window->tab_name);
 
     // not currently on groupchat window
     } else {
-        status_bar_new(num);
+        status_bar_new(num, window->tab_name);
     }
 }
 

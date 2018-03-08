@@ -282,7 +282,7 @@ sv_ev_room_message(const char *const room_jid, const char *const nick, const cha
     // currently in groupchat window
     if (wins_is_current(window)) {
         is_current = TRUE;
-        status_bar_active(num);
+        status_bar_active(num, window->tab_name);
 
         if ((g_strcmp0(mynick, nick) != 0) && (prefs_get_boolean(PREF_BEEP))) {
             beep();
@@ -290,7 +290,7 @@ sv_ev_room_message(const char *const room_jid, const char *const nick, const cha
 
     // not currently on groupchat window
     } else {
-        status_bar_new(num);
+        status_bar_new(num, window->tab_name);
 
         if ((g_strcmp0(mynick, nick) != 0) && (prefs_get_boolean(PREF_FLASH))) {
             flash();

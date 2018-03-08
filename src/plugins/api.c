@@ -333,7 +333,7 @@ api_win_create(
     // set status bar active
     ProfPluginWin *pluginwin = wins_get_plugin(tag);
     int num = wins_get_num((ProfWin*)pluginwin);
-    status_bar_active(num);
+    status_bar_active(num, pluginwin->plugin_name);
 }
 
 int

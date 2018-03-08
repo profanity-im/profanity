@@ -45,7 +45,6 @@
 #include "config/theme.h"
 #include "plugins/plugins.h"
 #include "ui/ui.h"
-#include "ui/statusbar.h"
 #include "ui/window_list.h"
 #include "xmpp/xmpp.h"
 #include "xmpp/roster_list.h"
@@ -862,9 +861,9 @@ wins_swap(int source_win, int target_win)
             g_hash_table_insert(windows, GINT_TO_POINTER(target_win), source);
             status_bar_inactive(source_win);
             if (win_unread(source) > 0) {
-                status_bar_new(target_win);
+                status_bar_new(target_win, source->tab_name);
             } else {
-                status_bar_active(target_win);
+                status_bar_active(target_win, source->tab_name);
             }
             if (wins_get_current_num() == source_win) {
                 wins_set_current_by_num(target_win);
@@ -879,14 +878,14 @@ wins_swap(int source_win, int target_win)
             g_hash_table_insert(windows, GINT_TO_POINTER(source_win), target);
             g_hash_table_insert(windows, GINT_TO_POINTER(target_win), source);
             if (win_unread(source) > 0) {
-                status_bar_new(target_win);
+                status_bar_new(target_win, source->tab_name);
             } else {
-                status_bar_active(target_win);
+                status_bar_active(target_win, source->tab_name);
             }
             if (win_unread(target) > 0) {
-                status_bar_new(source_win);
+                status_bar_new(source_win, target->tab_name);
             } else {
-                status_bar_active(source_win);
+                status_bar_active(source_win, target->tab_name);
             }
             if ((wins_get_current_num() == source_win) || (wins_get_current_num() == target_win)) {
                 ui_focus_win(console);
@@ -1003,16 +1002,16 @@ wins_tidy(void)
             if (num == 10) {
                 g_hash_table_insert(new_windows, GINT_TO_POINTER(0), window);
                 if (win_unread(window) > 0) {
-                    status_bar_new(0);
+                    status_bar_new(0, window->tab_name);
                 } else {
-                    status_bar_active(0);
+                    status_bar_active(0, window->tab_name);
                 }
             } else {
                 g_hash_table_insert(new_windows, GINT_TO_POINTER(num), window);
                 if (win_unread(window) > 0) {
-                    status_bar_new(num);
+                    status_bar_new(num, window->tab_name);
                 } else {
-                    status_bar_active(num);
+                    status_bar_active(num, window->tab_name);
                 }
             }
             num++;
