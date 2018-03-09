@@ -844,7 +844,7 @@ wins_lost_connection(void)
     g_list_free(values);
 }
 
-gboolean
+void
 wins_swap(int source_win, int target_win)
 {
     ProfWin *source = g_hash_table_lookup(windows, GINT_TO_POINTER(source_win));
@@ -869,7 +869,6 @@ wins_swap(int source_win, int target_win)
                 wins_set_current_by_num(target_win);
                 ui_focus_win(console);
             }
-            return TRUE;
 
         // target window occupied
         } else {
@@ -894,10 +893,7 @@ wins_swap(int source_win, int target_win)
             if ((wins_get_current_num() == source_win) || (wins_get_current_num() == target_win)) {
                 ui_focus_win(console);
             }
-            return TRUE;
         }
-    } else {
-        return FALSE;
     }
 }
 

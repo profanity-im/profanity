@@ -1269,21 +1269,34 @@ cmd_wins_swap(ProfWin *window, const char *const command, gchar **args)
 
     int source_win = atoi(args[1]);
     int target_win = atoi(args[2]);
+
     if ((source_win == 1) || (target_win == 1)) {
         cons_show("Cannot move console window.");
-    } else if (source_win == 10 || target_win == 10) {
-        cons_show("Window 10 does not exist");
-    } else if (source_win != target_win) {
-        gboolean swapped = wins_swap(source_win, target_win);
-        if (swapped) {
-            cons_show("Swapped windows %d <-> %d", source_win, target_win);
-        } else {
-            cons_show("Window %d does not exist", source_win);
-        }
-    } else {
-        cons_show("Same source and target window supplied.");
+        return TRUE;
     }
 
+    if (source_win == 10 || target_win == 10) {
+        cons_show("Window 10 does not exist");
+        return TRUE;
+    }
+
+    if (source_win == target_win) {
+        cons_show("Same source and target window supplied.");
+        return TRUE;
+    }
+
+    if (wins_get_by_num(source_win) == NULL) {
+        cons_show("Window %d does not exist", source_win);
+        return TRUE;
+    }
+
+    if (wins_get_by_num(target_win) == NULL) {
+        cons_show("Window %d does not exist", target_win);
+        return TRUE;
+    }
+
+    wins_swap(source_win, target_win);
+    cons_show("Swapped windows %d <-> %d", source_win, target_win);
     return TRUE;
 }
 
