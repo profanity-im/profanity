@@ -238,9 +238,7 @@ wins_close_plugin(char *tag)
     int index = wins_get_num(toclose);
     ui_close_win(index);
 
-    if (prefs_get_boolean(PREF_WINS_AUTO_TIDY)) {
-        wins_tidy();
-    }
+    wins_tidy();
 }
 
 GList*

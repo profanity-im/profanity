@@ -205,10 +205,8 @@ gboolean cmd_otr_answer(ProfWin *window, const char *const command, gchar **args
 
 gboolean cmd_wins(ProfWin *window, const char *const command, gchar **args);
 gboolean cmd_wins_unread(ProfWin *window, const char *const command, gchar **args);
-gboolean cmd_wins_tidy(ProfWin *window, const char *const command, gchar **args);
 gboolean cmd_wins_prune(ProfWin *window, const char *const command, gchar **args);
 gboolean cmd_wins_swap(ProfWin *window, const char *const command, gchar **args);
-gboolean cmd_wins_autotidy(ProfWin *window, const char *const command, gchar **args);
 
 gboolean cmd_form_field(ProfWin *window, char *tag, gchar **args);
 

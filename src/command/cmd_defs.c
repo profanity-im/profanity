@@ -962,18 +962,14 @@ static struct cmd_t command_defs[] =
         parse_args, 0, 3, NULL,
         CMD_SUBFUNCS(
             { "unread",     cmd_wins_unread },
-            { "tidy",       cmd_wins_tidy },
             { "prune",      cmd_wins_prune },
-            { "swap",       cmd_wins_swap },
-            { "autotidy",   cmd_wins_autotidy })
+            { "swap",       cmd_wins_swap })
         CMD_MAINFUNC(cmd_wins)
         CMD_TAGS(
             CMD_TAG_UI)
         CMD_SYN(
             "/wins",
             "/wins unread",
-            "/wins tidy",
-            "/wins autotidy on|off",
             "/wins prune",
             "/wins swap <source> <target>")
         CMD_DESC(
@@ -981,9 +977,7 @@ static struct cmd_t command_defs[] =
             "Passing no argument will list all currently active windows and information about their usage.")
         CMD_ARGS(
             { "unread",                 "List windows with unread messages." },
-            { "tidy",                   "Move windows so there are no gaps." },
-            { "autotidy on|off",        "Automatically remove gaps when closing windows." },
-            { "prune",                  "Close all windows with no unread messages, and then tidy so there are no gaps." },
+            { "prune",                  "Close all windows with no unread messages." },
             { "swap <source> <target>", "Swap windows, target may be an empty position." })
         CMD_NOEXAMPLES
     },
@@ -1364,8 +1358,8 @@ static struct cmd_t command_defs[] =
         CMD_TAGS(
             CMD_TAG_UI)
         CMD_SYN(
-            "/statusbar show empty|name",
-            "/statusbar hide empty|name",
+            "/statusbar show name",
+            "/statusbar hide name",
             "/statusbar maxtabs <value>",
             "/statusbar chat user|jid",
             "/statusbar room room|jid",
@@ -1375,7 +1369,6 @@ static struct cmd_t command_defs[] =
             "Manage statusbar display preferences.")
         CMD_ARGS(
             { "maxtabs <value>",    "Set the maximum number of tabs to display, <value> must be between 0 and 10" },
-            { "show|hide empty",    "Show or hide empty tabs." },
             { "show|hide name",     "Show or hide names in tabs." },
             { "chat user|jid",      "Show only the users name, or the full jid if no nick is present for chat tabs." },
             { "room room|jid",      "Show only the rooms name, or the full jid for room tabs." },
@@ -1383,7 +1376,7 @@ static struct cmd_t command_defs[] =
             { "down",               "Move the status bar down the screen." })
         CMD_EXAMPLES(
             "/statusbar maxtabs 5",
-            "/statusbar show empty",
+            "/statusbar hide name",
             "/statusbar chat jid",
             "/statusbar hide name")
     },

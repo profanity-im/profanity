@@ -1124,15 +1124,6 @@ cons_wrap_setting(void)
 }
 
 void
-cons_winstidy_setting(void)
-{
-    if (prefs_get_boolean(PREF_WINS_AUTO_TIDY))
-        cons_show("Window Auto Tidy (/wins)            : ON");
-    else
-        cons_show("Window Auto Tidy (/wins)            : OFF");
-}
-
-void
 cons_encwarn_setting(void)
 {
     if (prefs_get_boolean(PREF_ENC_WARN)) {
@@ -1531,7 +1522,6 @@ cons_show_ui_prefs(void)
     cons_splash_setting();
     cons_winpos_setting();
     cons_wrap_setting();
-    cons_winstidy_setting();
     cons_time_setting();
     cons_resource_setting();
     cons_vercheck_setting();
@@ -1751,11 +1741,6 @@ cons_inpblock_setting(void)
 void
 cons_statusbar_setting(void)
 {
-    if (prefs_get_boolean(PREF_STATUSBAR_SHOW_EMPTY)) {
-        cons_show("Show empty tabs (/statusbar)        : ON");
-    } else {
-        cons_show("Show empty tabs (/statusbar)        : OFF");
-    }
     if (prefs_get_boolean(PREF_STATUSBAR_SHOW_NAME)) {
         cons_show("Show tab names (/statusbar)         : ON");
     } else {

@@ -1253,17 +1253,6 @@ cmd_wins_unread(ProfWin *window, const char *const command, gchar **args)
 }
 
 gboolean
-cmd_wins_tidy(ProfWin *window, const char *const command, gchar **args)
-{
-    if (wins_tidy()) {
-        cons_show("Windows tidied.");
-    } else {
-        cons_show("No tidy needed.");
-    }
-    return TRUE;
-}
-
-gboolean
 cmd_wins_prune(ProfWin *window, const char *const command, gchar **args)
 {
     ui_prune_wins();
@@ -1293,23 +1282,6 @@ cmd_wins_swap(ProfWin *window, const char *const command, gchar **args)
         }
     } else {
         cons_show("Same source and target window supplied.");
-    }
-
-    return TRUE;
-}
-
-gboolean
-cmd_wins_autotidy(ProfWin *window, const char *const command, gchar **args)
-{
-    if (g_strcmp0(args[1], "on") == 0) {
-        cons_show("Window autotidy enabled");
-        prefs_set_boolean(PREF_WINS_AUTO_TIDY, TRUE);
-        wins_tidy();
-    } else if (g_strcmp0(args[1], "off") == 0) {
-        cons_show("Window autotidy disabled");
-        prefs_set_boolean(PREF_WINS_AUTO_TIDY, FALSE);
-    } else {
-        cons_bad_cmd_usage(command);
     }
 
     return TRUE;
@@ -1407,11 +1379,7 @@ cmd_close(ProfWin *window, const char *const command, gchar **args)
         // close the window
         ui_close_win(index);
         cons_show("Closed window %d", index);
-
-        // Tidy up the window list.
-        if (prefs_get_boolean(PREF_WINS_AUTO_TIDY)) {
-            wins_tidy();
-        }
+        wins_tidy();
 
         rosterwin_roster();
         return TRUE;
@@ -1442,11 +1410,7 @@ cmd_close(ProfWin *window, const char *const command, gchar **args)
         // close the window
         ui_close_win(index);
         cons_show("Closed window %s", args[0]);
-
-        // Tidy up the window list.
-        if (prefs_get_boolean(PREF_WINS_AUTO_TIDY)) {
-            wins_tidy();
-        }
+        wins_tidy();
 
         rosterwin_roster();
         return TRUE;
@@ -5793,12 +5757,6 @@ gboolean
 cmd_statusbar(ProfWin *window, const char *const command, gchar **args)
 {
     if (g_strcmp0(args[0], "show") == 0) {
-        if (g_strcmp0(args[1], "empty") == 0) {
-            prefs_set_boolean(PREF_STATUSBAR_SHOW_EMPTY, TRUE);
-            cons_show("Enabled showing empty tabs.");
-            ui_resize();
-            return TRUE;
-        }
         if (g_strcmp0(args[1], "name") == 0) {
             prefs_set_boolean(PREF_STATUSBAR_SHOW_NAME, TRUE);
             cons_show("Enabled showing tab names.");
@@ -5810,12 +5768,6 @@ cmd_statusbar(ProfWin *window, const char *const command, gchar **args)
     }
 
     if (g_strcmp0(args[0], "hide") == 0) {
-        if (g_strcmp0(args[1], "empty") == 0) {
-            prefs_set_boolean(PREF_STATUSBAR_SHOW_EMPTY, FALSE);
-            cons_show("Disabled showing empty tabs.");
-            ui_resize();
-            return TRUE;
-        }
         if (g_strcmp0(args[1], "name") == 0) {
             prefs_set_boolean(PREF_STATUSBAR_SHOW_NAME, FALSE);
             cons_show("Disabled showing tab names.");

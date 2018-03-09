@@ -391,8 +391,6 @@ cmd_ac_init(void)
     wins_ac = autocomplete_new();
     autocomplete_add(wins_ac, "unread");
     autocomplete_add(wins_ac, "prune");
-    autocomplete_add(wins_ac, "tidy");
-    autocomplete_add(wins_ac, "autotidy");
     autocomplete_add(wins_ac, "swap");
 
     roster_ac = autocomplete_new();
@@ -798,7 +796,6 @@ cmd_ac_init(void)
     autocomplete_add(statusbar_room_ac, "jid");
 
     statusbar_show_ac = autocomplete_new();
-    autocomplete_add(statusbar_show_ac, "empty");
     autocomplete_add(statusbar_show_ac, "name");
 }
 
@@ -1335,7 +1332,7 @@ _cmd_ac_complete_params(ProfWin *window, const char *const input, gboolean previ
 
     // autocomplete boolean settings
     gchar *boolean_choices[] = { "/beep", "/intype", "/states", "/outtype", "/flash", "/splash", "/chlog", "/grlog",
-        "/history", "/vercheck", "/privileges", "/wrap", "/winstidy", "/carbons", "/encwarn",
+        "/history", "/vercheck", "/privileges", "/wrap", "/carbons", "/encwarn",
         "/lastactivity" };
 
     for (i = 0; i < ARRAY_SIZE(boolean_choices); i++) {
@@ -2666,11 +2663,6 @@ static char*
 _wins_autocomplete(ProfWin *window, const char *const input, gboolean previous)
 {
     char *result = NULL;
-
-    result = autocomplete_param_with_func(input, "/wins autotidy", prefs_autocomplete_boolean_choice, previous);
-    if (result) {
-        return result;
-    }
 
     result = autocomplete_param_with_ac(input, "/wins", wins_ac, TRUE, previous);
     if (result) {

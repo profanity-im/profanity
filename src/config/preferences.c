@@ -1547,7 +1547,6 @@ _get_group(preference_t pref)
         case PREF_MUC_PRIVILEGES:
         case PREF_PRESENCE:
         case PREF_WRAP:
-        case PREF_WINS_AUTO_TIDY:
         case PREF_TIME_CONSOLE:
         case PREF_TIME_CHAT:
         case PREF_TIME_MUC:
@@ -1587,7 +1586,6 @@ _get_group(preference_t pref)
         case PREF_CONSOLE_MUC:
         case PREF_CONSOLE_PRIVATE:
         case PREF_CONSOLE_CHAT:
-        case PREF_STATUSBAR_SHOW_EMPTY:
         case PREF_STATUSBAR_SHOW_NAME:
         case PREF_STATUSBAR_CHAT:
         case PREF_STATUSBAR_ROOM:
@@ -1754,8 +1752,6 @@ _get_key(preference_t pref)
             return "presence";
         case PREF_WRAP:
             return "wrap";
-        case PREF_WINS_AUTO_TIDY:
-            return "wins.autotidy";
         case PREF_TIME_CONSOLE:
             return "time.console";
         case PREF_TIME_CHAT:
@@ -1846,8 +1842,6 @@ _get_key(preference_t pref)
             return "sourcepath";
         case PREF_ROOM_LIST_CACHE:
             return "rooms.cache";
-        case PREF_STATUSBAR_SHOW_EMPTY:
-            return "statusbar.show.empty";
         case PREF_STATUSBAR_SHOW_NAME:
             return "statusbar.show.name";
         case PREF_STATUSBAR_CHAT:
@@ -1883,7 +1877,6 @@ _get_default_boolean(preference_t pref)
         case PREF_MUC_PRIVILEGES:
         case PREF_PRESENCE:
         case PREF_WRAP:
-        case PREF_WINS_AUTO_TIDY:
         case PREF_INPBLOCK_DYNAMIC:
         case PREF_RESOURCE_TITLE:
         case PREF_RESOURCE_MESSAGE:

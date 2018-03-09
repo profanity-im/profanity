@@ -384,7 +384,6 @@ _load_preferences(void)
     _set_boolean_preference("flash", PREF_FLASH);
     _set_boolean_preference("splash", PREF_SPLASH);
     _set_boolean_preference("wrap", PREF_WRAP);
-    _set_boolean_preference("wins.autotidy", PREF_WINS_AUTO_TIDY);
     _set_boolean_preference("resource.title", PREF_RESOURCE_TITLE);
     _set_boolean_preference("resource.message", PREF_RESOURCE_MESSAGE);
     _set_boolean_preference("occupants", PREF_OCCUPANTS);

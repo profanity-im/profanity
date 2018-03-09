@@ -292,7 +292,6 @@ _status_bar_draw(void)
     pos = cols - _tabs_width();
     int bracket_attrs = theme_attrs(THEME_STATUS_BRACKET);
 
-    gboolean show_empty = prefs_get_boolean(PREF_STATUSBAR_SHOW_EMPTY);
     gboolean show_name = prefs_get_boolean(PREF_STATUSBAR_SHOW_NAME);
     gint max_tabs = prefs_get_statusbartabs();
 
@@ -301,7 +300,7 @@ _status_bar_draw(void)
         int display_num = i == 10 ? 0 : i;
 
         StatusBarTab *tab = g_hash_table_lookup(statusbar->tabs, GINT_TO_POINTER(i));
-        if (tab || (tab == NULL && show_empty)) {
+        if (tab) {
             wattron(statusbar_win, bracket_attrs);
             if (i == statusbar->current_tab) {
                 mvwprintw(statusbar_win, 0, pos, "-");
@@ -382,46 +381,24 @@ _destroy_tab(StatusBarTab *tab)
 static int
 _tabs_width(void)
 {
-    gboolean show_empty = prefs_get_boolean(PREF_STATUSBAR_SHOW_EMPTY);
     gboolean show_name = prefs_get_boolean(PREF_STATUSBAR_SHOW_NAME);
     gint max_tabs = prefs_get_statusbartabs();
 
     if (show_name) {
-        if (show_empty) {
-            int width = 4;
-            int i = 0;
-            for (i = 1; i <= max_tabs; i++) {
-                StatusBarTab *tab = g_hash_table_lookup(statusbar->tabs, GINT_TO_POINTER(i));
-                if (tab) {
-                    char *display_name = _display_name(tab);
-                    width += strlen(display_name);
-                    width += 4;
-                    free(display_name);
-                } else {
-                    width += 3;
-                }
+        int width = 4;
+        int i = 0;
+        for (i = 1; i <= max_tabs; i++) {
+            StatusBarTab *tab = g_hash_table_lookup(statusbar->tabs, GINT_TO_POINTER(i));
+            if (tab) {
+                char *display_name = _display_name(tab);
+                width += strlen(display_name);
+                width += 4;
+                free(display_name);
             }
-            return width;
-        } else {
-            int width = 4;
-            int i = 0;
-            for (i = 1; i <= max_tabs; i++) {
-                StatusBarTab *tab = g_hash_table_lookup(statusbar->tabs, GINT_TO_POINTER(i));
-                if (tab) {
-                    char *display_name = _display_name(tab);
-                    width += strlen(display_name);
-                    width += 4;
-                    free(display_name);
-                }
-            }
-            return width;
         }
+        return width;
     } else {
-        if (show_empty) {
-            return max_tabs * 3 + 4;
-        } else {
-            return g_hash_table_size(statusbar->tabs) * 3 + 4;
-        }
+        return g_hash_table_size(statusbar->tabs) * 3 + 4;
     }
 }
 
