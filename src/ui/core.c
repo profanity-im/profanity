@@ -103,7 +103,7 @@ ui_init(void)
     refresh();
     create_title_bar();
     status_bar_init();
-    status_bar_active(1, "console");
+    status_bar_active(1, WIN_CONSOLE, "console");
     create_input_window();
     wins_init();
     notifier_initialise();
@@ -287,7 +287,7 @@ ui_contact_typing(const char *const barejid, const char *const resource)
             title_bar_set_typing(TRUE);
 
             int num = wins_get_num(window);
-            status_bar_active(num, window->tab_name);
+            status_bar_active(num, WIN_CHAT, chatwin->barejid);
        }
     }
 
@@ -673,7 +673,10 @@ ui_focus_win(ProfWin *window)
         title_bar_switch();
     }
     status_bar_current(i);
-    status_bar_active(i, window->tab_name);
+
+    char *identifier = win_get_tab_identifier(window);
+    status_bar_active(i, window->type, identifier);
+    free(identifier);
 }
 
 void
@@ -690,7 +693,7 @@ ui_close_win(int index)
     wins_close_by_num(index);
     title_bar_console();
     status_bar_current(1);
-    status_bar_active(1, "console");
+    status_bar_active(1, WIN_CONSOLE, "console");
 }
 
 void
@@ -744,12 +747,13 @@ ui_print_system_msg_from_recipient(const char *const barejid, const char *messag
         int num = 0;
         window = wins_new_chat(barejid);
         if (window) {
+            chatwin = (ProfChatWin*)window;
             num = wins_get_num(window);
-            status_bar_active(num, window->tab_name);
+            status_bar_active(num, WIN_CHAT, chatwin->barejid);
         } else {
             num = 0;
             window = wins_get_console();
-            status_bar_active(1, window->tab_name);
+            status_bar_active(1, WIN_CONSOLE, "console");
         }
     }
 
@@ -760,10 +764,10 @@ void
 ui_room_join(const char *const roomjid, gboolean focus)
 {
     ProfMucWin *mucwin = wins_get_muc(roomjid);
-    ProfWin *window = (ProfWin*)mucwin;
-    if (!window) {
-        window = wins_new_muc(roomjid);
+    if (mucwin == NULL) {
+        mucwin = (ProfMucWin*)wins_new_muc(roomjid);
     }
+    ProfWin *window = (ProfWin*)mucwin;
 
     char *nick = muc_nick(roomjid);
     win_print(window, THEME_ROOMINFO, '!', "-> You have joined the room as %s", nick);
@@ -783,7 +787,7 @@ ui_room_join(const char *const roomjid, gboolean focus)
         ui_focus_win(window);
     } else {
         int num = wins_get_num(window);
-        status_bar_active(num, window->tab_name);
+        status_bar_active(num, WIN_MUC, mucwin->roomjid);
         ProfWin *console = wins_get_console();
         char *nick = muc_nick(roomjid);
         win_println(console, THEME_TYPING, '!', "-> Autojoined %s as %s (%d).", roomjid, nick, num);

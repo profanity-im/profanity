@@ -201,6 +201,8 @@ static Autocomplete presence_ac;
 static Autocomplete presence_setting_ac;
 static Autocomplete winpos_ac;
 static Autocomplete statusbar_ac;
+static Autocomplete statusbar_chat_ac;
+static Autocomplete statusbar_room_ac;
 static Autocomplete statusbar_show_ac;
 
 void
@@ -784,6 +786,16 @@ cmd_ac_init(void)
     autocomplete_add(statusbar_ac, "show");
     autocomplete_add(statusbar_ac, "hide");
     autocomplete_add(statusbar_ac, "maxtabs");
+    autocomplete_add(statusbar_ac, "chat");
+    autocomplete_add(statusbar_ac, "room");
+
+    statusbar_chat_ac = autocomplete_new();
+    autocomplete_add(statusbar_chat_ac, "user");
+    autocomplete_add(statusbar_chat_ac, "jid");
+
+    statusbar_room_ac = autocomplete_new();
+    autocomplete_add(statusbar_room_ac, "room");
+    autocomplete_add(statusbar_room_ac, "jid");
 
     statusbar_show_ac = autocomplete_new();
     autocomplete_add(statusbar_show_ac, "empty");
@@ -1070,6 +1082,8 @@ cmd_ac_reset(ProfWin *window)
     autocomplete_reset(presence_setting_ac);
     autocomplete_reset(winpos_ac);
     autocomplete_reset(statusbar_ac);
+    autocomplete_reset(statusbar_chat_ac);
+    autocomplete_reset(statusbar_room_ac);
     autocomplete_reset(statusbar_show_ac);
 
     autocomplete_reset(script_ac);
@@ -1199,6 +1213,8 @@ cmd_ac_uninit(void)
     autocomplete_free(presence_setting_ac);
     autocomplete_free(winpos_ac);
     autocomplete_free(statusbar_ac);
+    autocomplete_free(statusbar_chat_ac);
+    autocomplete_free(statusbar_room_ac);
     autocomplete_free(statusbar_show_ac);
 }
 
@@ -3217,6 +3233,16 @@ _statusbar_autocomplete(ProfWin *window, const char *const input, gboolean previ
     }
 
     found = autocomplete_param_with_ac(input, "/statusbar hide", statusbar_show_ac, TRUE, previous);
+    if (found) {
+        return found;
+    }
+
+    found = autocomplete_param_with_ac(input, "/statusbar chat", statusbar_chat_ac, TRUE, previous);
+    if (found) {
+        return found;
+    }
+
+    found = autocomplete_param_with_ac(input, "/statusbar room", statusbar_room_ac, TRUE, previous);
     if (found) {
         return found;
     }

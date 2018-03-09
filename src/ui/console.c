@@ -1761,8 +1761,16 @@ cons_statusbar_setting(void)
     } else {
         cons_show("Show tab names (/statusbar)         : OFF");
     }
+
     cons_show("Max tabs (/statusbar)               : %d", prefs_get_statusbartabs());
 
+    char *pref_chat = prefs_get_string(PREF_STATUSBAR_CHAT);
+    cons_show("Chat tab display (/statusbar)       : %s", pref_chat);
+    prefs_free_string(pref_chat);
+
+    char *pref_room = prefs_get_string(PREF_STATUSBAR_ROOM);
+    cons_show("Room tab display (/statusbar)       : %s", pref_room);
+    prefs_free_string(pref_room);
 }
 
 void
@@ -2179,7 +2187,7 @@ cons_alert(void)
 {
     ProfWin *current = wins_get_current();
     if (current->type != WIN_CONSOLE) {
-        status_bar_new(1, "console");
+        status_bar_new(1, WIN_CONSOLE, "console");
     }
 }
 

@@ -2095,7 +2095,7 @@ cmd_who(ProfWin *window, const char *const command, gchar **args)
     }
 
     if (window->type != WIN_CONSOLE && window->type != WIN_MUC) {
-        status_bar_new(1, "console");
+        status_bar_new(1, WIN_CONSOLE, "console");
     }
 
     return TRUE;
@@ -5848,6 +5848,7 @@ cmd_statusbar(ProfWin *window, const char *const command, gchar **args)
             } else {
                 cons_show("Status bar tabs set to %d.", intval);
             }
+            ui_resize();
             return TRUE;
         } else {
             cons_show(err_msg);
@@ -5855,6 +5856,40 @@ cmd_statusbar(ProfWin *window, const char *const command, gchar **args)
             free(err_msg);
             return TRUE;
         }
+    }
+
+    if (g_strcmp0(args[0], "chat") == 0) {
+        if (g_strcmp0(args[1], "jid") == 0) {
+            prefs_set_string(PREF_STATUSBAR_CHAT, "jid");
+            cons_show("Using jid for chat tabs.");
+            ui_resize();
+            return TRUE;
+        }
+        if (g_strcmp0(args[1], "user") == 0) {
+            prefs_set_string(PREF_STATUSBAR_CHAT, "user");
+            cons_show("Using user for chat tabs.");
+            ui_resize();
+            return TRUE;
+        }
+        cons_bad_cmd_usage(command);
+        return TRUE;
+    }
+
+    if (g_strcmp0(args[0], "room") == 0) {
+        if (g_strcmp0(args[1], "jid") == 0) {
+            prefs_set_string(PREF_STATUSBAR_ROOM, "jid");
+            cons_show("Using jid for room tabs.");
+            ui_resize();
+            return TRUE;
+        }
+        if (g_strcmp0(args[1], "room") == 0) {
+            prefs_set_string(PREF_STATUSBAR_ROOM, "room");
+            cons_show("Using room name for room tabs.");
+            ui_resize();
+            return TRUE;
+        }
+        cons_bad_cmd_usage(command);
+        return TRUE;
     }
 
     if (g_strcmp0(args[0], "up") == 0) {

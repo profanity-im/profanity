@@ -62,11 +62,11 @@ privwin_incoming_msg(ProfPrivateWin *privatewin, const char *const message, GDat
     if (wins_is_current(window)) {
         win_print_incoming(window, timestamp, jidp->resourcepart, message, PROF_MSG_PLAIN);
         title_bar_set_typing(FALSE);
-        status_bar_active(num, window->tab_name);
+        status_bar_active(num, WIN_PRIVATE, privatewin->fulljid);
 
     // not currently viewing chat window with sender
     } else {
-        status_bar_new(num, window->tab_name);
+        status_bar_new(num, WIN_PRIVATE, privatewin->fulljid);
         cons_show_incoming_private_message(jidp->resourcepart, jidp->barejid, num, privatewin->unread);
         win_print_incoming(window, timestamp, jidp->resourcepart, message, PROF_MSG_PLAIN);
 

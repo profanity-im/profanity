@@ -332,8 +332,8 @@ void title_bar_set_presence(contact_presence_t presence);
 
 // status bar
 void status_bar_inactive(const int win);
-void status_bar_active(const int win, char *name);
-void status_bar_new(const int win, char *name);
+void status_bar_active(const int win, win_type_t wintype, char *identifier);
+void status_bar_new(const int win, win_type_t wintype, char *identifier);
 void status_bar_set_all_inactive(void);
 
 // roster window
@@ -376,6 +376,7 @@ void win_show_occupant_info(ProfWin *window, const char *const room, Occupant *o
 void win_show_contact(ProfWin *window, PContact contact);
 void win_show_info(ProfWin *window, PContact contact);
 void win_clear(ProfWin *window);
+char* win_get_tab_identifier(ProfWin *window);
 char* win_to_string(ProfWin *window);
 
 // desktop notifications

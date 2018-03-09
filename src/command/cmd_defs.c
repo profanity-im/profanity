@@ -1367,6 +1367,8 @@ static struct cmd_t command_defs[] =
             "/statusbar show empty|name",
             "/statusbar hide empty|name",
             "/statusbar maxtabs <value>",
+            "/statusbar chat user|jid",
+            "/statusbar room room|jid",
             "/statusbar up",
             "/statusbar down")
         CMD_DESC(
@@ -1375,11 +1377,14 @@ static struct cmd_t command_defs[] =
             { "maxtabs <value>",    "Set the maximum number of tabs to display, <value> must be between 0 and 10" },
             { "show|hide empty",    "Show or hide empty tabs." },
             { "show|hide name",     "Show or hide names in tabs." },
+            { "chat user|jid",      "Show only the users name, or the full jid if no nick is present for chat tabs." },
+            { "room room|jid",      "Show only the rooms name, or the full jid for room tabs." },
             { "up",                 "Move the status bar up the screen." },
             { "down",               "Move the status bar down the screen." })
         CMD_EXAMPLES(
             "/statusbar maxtabs 5",
             "/statusbar show empty",
+            "/statusbar chat jid",
             "/statusbar hide name")
     },
 

@@ -136,7 +136,6 @@ typedef enum {
 
 typedef struct prof_win_t {
     win_type_t type;
-    char *tab_name;
     ProfLayout *layout;
 } ProfWin;
 

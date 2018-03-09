@@ -856,15 +856,17 @@ wins_swap(int source_win, int target_win)
         ProfWin *target = g_hash_table_lookup(windows, GINT_TO_POINTER(target_win));
 
         // target window empty
-        if (!target) {
+        if (target == NULL) {
             g_hash_table_steal(windows, GINT_TO_POINTER(source_win));
             g_hash_table_insert(windows, GINT_TO_POINTER(target_win), source);
             status_bar_inactive(source_win);
+            char *identifier = win_get_tab_identifier(source);
             if (win_unread(source) > 0) {
-                status_bar_new(target_win, source->tab_name);
+                status_bar_new(target_win, source->type, identifier);
             } else {
-                status_bar_active(target_win, source->tab_name);
+                status_bar_active(target_win, source->type, identifier);
             }
+            free(identifier);
             if (wins_get_current_num() == source_win) {
                 wins_set_current_by_num(target_win);
                 ui_focus_win(console);
@@ -877,16 +879,20 @@ wins_swap(int source_win, int target_win)
             g_hash_table_steal(windows, GINT_TO_POINTER(target_win));
             g_hash_table_insert(windows, GINT_TO_POINTER(source_win), target);
             g_hash_table_insert(windows, GINT_TO_POINTER(target_win), source);
+            char *source_identifier = win_get_tab_identifier(source);
+            char *target_identifier = win_get_tab_identifier(target);
             if (win_unread(source) > 0) {
-                status_bar_new(target_win, source->tab_name);
+                status_bar_new(target_win, source->type, source_identifier);
             } else {
-                status_bar_active(target_win, source->tab_name);
+                status_bar_active(target_win, source->type, source_identifier);
             }
             if (win_unread(target) > 0) {
-                status_bar_new(source_win, target->tab_name);
+                status_bar_new(source_win, target->type, target_identifier);
             } else {
-                status_bar_active(source_win, target->tab_name);
+                status_bar_active(source_win, target->type, target_identifier);
             }
+            free(source_identifier);
+            free(target_identifier);
             if ((wins_get_current_num() == source_win) || (wins_get_current_num() == target_win)) {
                 ui_focus_win(console);
             }
@@ -998,22 +1004,24 @@ wins_tidy(void)
         GList *curr = keys;
         while (curr) {
             ProfWin *window = g_hash_table_lookup(windows, curr->data);
+            char *identifier = win_get_tab_identifier(window);
             g_hash_table_steal(windows, curr->data);
             if (num == 10) {
                 g_hash_table_insert(new_windows, GINT_TO_POINTER(0), window);
                 if (win_unread(window) > 0) {
-                    status_bar_new(0, window->tab_name);
+                    status_bar_new(0, window->type, identifier);
                 } else {
-                    status_bar_active(0, window->tab_name);
+                    status_bar_active(0, window->type, identifier);
                 }
             } else {
                 g_hash_table_insert(new_windows, GINT_TO_POINTER(num), window);
                 if (win_unread(window) > 0) {
-                    status_bar_new(num, window->tab_name);
+                    status_bar_new(num, window->type, identifier);
                 } else {
-                    status_bar_active(num, window->tab_name);
+                    status_bar_active(num, window->type, identifier);
                 }
             }
+            free(identifier);
             num++;
             curr = g_list_next(curr);
         }

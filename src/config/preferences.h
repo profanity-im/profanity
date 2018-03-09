@@ -146,6 +146,8 @@ typedef enum {
     PREF_ROOM_LIST_CACHE,
     PREF_STATUSBAR_SHOW_EMPTY,
     PREF_STATUSBAR_SHOW_NAME,
+    PREF_STATUSBAR_CHAT,
+    PREF_STATUSBAR_ROOM,
 } preference_t;
 
 typedef struct prof_alias_t {

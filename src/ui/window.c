@@ -125,7 +125,6 @@ win_create_console(void)
 {
     ProfConsoleWin *new_win = malloc(sizeof(ProfConsoleWin));
     new_win->window.type = WIN_CONSOLE;
-    new_win->window.tab_name = strdup("console");
     new_win->window.layout = _win_create_split_layout();
 
     return &new_win->window;
@@ -136,7 +135,6 @@ win_create_chat(const char *const barejid)
 {
     ProfChatWin *new_win = malloc(sizeof(ProfChatWin));
     new_win->window.type = WIN_CHAT;
-    new_win->window.tab_name = strdup(barejid);
     new_win->window.layout = _win_create_simple_layout();
 
     new_win->barejid = strdup(barejid);
@@ -164,8 +162,7 @@ win_create_muc(const char *const roomjid)
     int cols = getmaxx(stdscr);
 
     new_win->window.type = WIN_MUC;
-    new_win->window.tab_name = strdup(roomjid);
-
+    new_win->window.layout = _win_create_simple_layout();
     ProfLayoutSplit *layout = malloc(sizeof(ProfLayoutSplit));
     layout->base.type = LAYOUT_SPLIT;
 
@@ -210,12 +207,7 @@ win_create_muc_config(const char *const roomjid, DataForm *form)
 {
     ProfMucConfWin *new_win = malloc(sizeof(ProfMucConfWin));
     new_win->window.type = WIN_MUC_CONFIG;
-    GString *tab_str = g_string_new(roomjid);
-    g_string_append(tab_str, " config");
-    new_win->window.tab_name = strdup(tab_str->str);
-    g_string_free(tab_str, TRUE);
     new_win->window.layout = _win_create_simple_layout();
-
     new_win->roomjid = strdup(roomjid);
     new_win->form = form;
 
@@ -229,9 +221,7 @@ win_create_private(const char *const fulljid)
 {
     ProfPrivateWin *new_win = malloc(sizeof(ProfPrivateWin));
     new_win->window.type = WIN_PRIVATE;
-    new_win->window.tab_name = strdup(fulljid);
     new_win->window.layout = _win_create_simple_layout();
-
     new_win->fulljid = strdup(fulljid);
     new_win->unread = 0;
     new_win->occupant_offline = FALSE;
@@ -247,7 +237,6 @@ win_create_xmlconsole(void)
 {
     ProfXMLWin *new_win = malloc(sizeof(ProfXMLWin));
     new_win->window.type = WIN_XML;
-    new_win->window.tab_name = strdup("xmlconsole");
     new_win->window.layout = _win_create_simple_layout();
 
     new_win->memcheck = PROFXMLWIN_MEMCHECK;
@@ -260,7 +249,6 @@ win_create_plugin(const char *const plugin_name, const char *const tag)
 {
     ProfPluginWin *new_win = malloc(sizeof(ProfPluginWin));
     new_win->window.type = WIN_PLUGIN;
-    new_win->window.tab_name = strdup(tag);
     new_win->window.layout = _win_create_simple_layout();
 
     new_win->tag = strdup(tag);
@@ -328,6 +316,50 @@ win_get_title(ProfWin *window)
     }
 
     return NULL;
+}
+
+char*
+win_get_tab_identifier(ProfWin *window)
+{
+    assert(window != NULL);
+
+    switch (window->type) {
+        case WIN_CONSOLE:
+        {
+            return strdup("console");
+        }
+        case WIN_CHAT:
+        {
+            ProfChatWin *chatwin = (ProfChatWin*)window;
+            return strdup(chatwin->barejid);
+        }
+        case WIN_MUC:
+        {
+            ProfMucWin *mucwin = (ProfMucWin*)window;
+            return strdup(mucwin->roomjid);
+        }
+        case WIN_MUC_CONFIG:
+        {
+            ProfMucConfWin *mucconfwin = (ProfMucConfWin*)window;
+            return strdup(mucconfwin->roomjid);
+        }
+        case WIN_PRIVATE:
+        {
+            ProfPrivateWin *privwin = (ProfPrivateWin*)window;
+            return strdup(privwin->fulljid);
+        }
+        case WIN_PLUGIN:
+        {
+            ProfPluginWin *pluginwin = (ProfPluginWin*)window;
+            return strdup(pluginwin->tag);
+        }
+        case WIN_XML:
+        {
+            return strdup("xmlconsole");
+        }
+        default:
+            return strdup("UNKNOWN");
+    }
 }
 
 char*
@@ -426,7 +458,6 @@ win_show_subwin(ProfWin *window)
 void
 win_free(ProfWin* window)
 {
-    free(window->tab_name);
     if (window->layout->type == LAYOUT_SPLIT) {
         ProfLayoutSplit *layout = (ProfLayoutSplit*)window->layout;
         if (layout->subwin) {
