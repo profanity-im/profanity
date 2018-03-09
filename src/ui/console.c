@@ -1746,6 +1746,11 @@ cons_statusbar_setting(void)
     } else {
         cons_show("Show tab names (/statusbar)         : OFF");
     }
+    if (prefs_get_boolean(PREF_STATUSBAR_SHOW_NUMBER)) {
+        cons_show("Show tab numbers (/statusbar)       : ON");
+    } else {
+        cons_show("Show tab numbers (/statusbar)       : OFF");
+    }
 
     cons_show("Max tabs (/statusbar)               : %d", prefs_get_statusbartabs());
 

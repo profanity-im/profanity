@@ -5776,14 +5776,36 @@ cmd_statusbar(ProfWin *window, const char *const command, gchar **args)
             ui_resize();
             return TRUE;
         }
+        if (g_strcmp0(args[1], "number") == 0) {
+            prefs_set_boolean(PREF_STATUSBAR_SHOW_NUMBER, TRUE);
+            cons_show("Enabled showing tab numbers.");
+            ui_resize();
+            return TRUE;
+        }
         cons_bad_cmd_usage(command);
         return TRUE;
     }
 
     if (g_strcmp0(args[0], "hide") == 0) {
         if (g_strcmp0(args[1], "name") == 0) {
+            if (prefs_get_boolean(PREF_STATUSBAR_SHOW_NUMBER) == FALSE) {
+                cons_show("Cannot disable both names and numbers in statusbar.");
+                cons_show("Use '/statusbar maxtabs 0' to hide tabs.");
+                return TRUE;
+            }
             prefs_set_boolean(PREF_STATUSBAR_SHOW_NAME, FALSE);
             cons_show("Disabled showing tab names.");
+            ui_resize();
+            return TRUE;
+        }
+        if (g_strcmp0(args[1], "number") == 0) {
+            if (prefs_get_boolean(PREF_STATUSBAR_SHOW_NAME) == FALSE) {
+                cons_show("Cannot disable both names and numbers in statusbar.");
+                cons_show("Use '/statusbar maxtabs 0' to hide tabs.");
+                return TRUE;
+            }
+            prefs_set_boolean(PREF_STATUSBAR_SHOW_NUMBER, FALSE);
+            cons_show("Disabled showing tab numbers.");
             ui_resize();
             return TRUE;
         }
