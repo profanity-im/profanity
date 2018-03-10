@@ -263,6 +263,9 @@ status_bar_draw(void)
     _status_bar_draw_maintext(pos);
 
     pos = getmaxx(stdscr) - _tabs_width();
+    if (pos < 0) {
+        pos = 0;
+    }
     gint max_tabs = prefs_get_statusbartabs();
     int i = 1;
     for (i = 1; i <= max_tabs; i++) {
