@@ -388,7 +388,7 @@ ui_handle_login_account_success(ProfAccount *account, gboolean secured)
     title_bar_set_connected(TRUE);
     title_bar_set_tls(secured);
 
-    status_bar_set_prompt(connection_get_fulljid());
+    status_bar_set_fulljid(connection_get_fulljid());
 }
 
 void
@@ -481,7 +481,7 @@ ui_disconnected(void)
     title_bar_set_connected(FALSE);
     title_bar_set_tls(FALSE);
     title_bar_set_presence(CONTACT_OFFLINE);
-    status_bar_clear_prompt();
+    status_bar_clear_fulljid();
     ui_hide_roster();
 }
 

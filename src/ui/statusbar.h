@@ -39,8 +39,10 @@ void status_bar_init(void);
 void status_bar_draw(void);
 void status_bar_close(void);
 void status_bar_resize(void);
-void status_bar_clear_prompt(void);
 void status_bar_set_prompt(const char *const prompt);
+void status_bar_clear_prompt(void);
+void status_bar_set_fulljid(const char *const fulljid);
+void status_bar_clear_fulljid(void);
 void status_bar_current(int i);
 
 #endif

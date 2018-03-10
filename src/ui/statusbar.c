@@ -62,6 +62,7 @@ typedef struct _status_bar_tab_t {
 typedef struct _status_bar_t {
     gchar *time;
     char *prompt;
+    char *fulljid;
     GHashTable *tabs;
     int current_tab;
 } StatusBar;
@@ -71,7 +72,7 @@ static StatusBar *statusbar;
 static WINDOW *statusbar_win;
 
 static int _status_bar_draw_time(int pos);
-static void _status_bar_draw_prompt(int pos);
+static void _status_bar_draw_maintext(int pos);
 static int _status_bar_draw_bracket(gboolean current, int pos, char* ch);
 static int _status_bar_draw_extended_tabs(int pos);
 static int _status_bar_draw_tab(StatusBarTab *tab, int pos, int num);
@@ -88,6 +89,7 @@ status_bar_init(void)
     statusbar = malloc(sizeof(StatusBar));
     statusbar->time = NULL;
     statusbar->prompt = NULL;
+    statusbar->fulljid = NULL;
     statusbar->tabs = g_hash_table_new_full(g_direct_hash, g_direct_equal, NULL, (GDestroyNotify)_destroy_tab);
     StatusBarTab *console = malloc(sizeof(StatusBarTab));
     console->window_type = WIN_CONSOLE;
@@ -114,6 +116,12 @@ status_bar_close(void)
         }
         if (statusbar->prompt) {
             free(statusbar->prompt);
+        }
+        if (statusbar->fulljid) {
+            free(statusbar->fulljid);
+        }
+        if (statusbar->tabs) {
+            g_hash_table_destroy(statusbar->tabs);
         }
         free(statusbar);
     }
@@ -220,6 +228,29 @@ status_bar_clear_prompt(void)
 }
 
 void
+status_bar_set_fulljid(const char *const fulljid)
+{
+    if (statusbar->fulljid) {
+        free(statusbar->fulljid);
+        statusbar->fulljid = NULL;
+    }
+    statusbar->fulljid = strdup(fulljid);
+
+    status_bar_draw();
+}
+
+void
+status_bar_clear_fulljid(void)
+{
+    if (statusbar->fulljid) {
+        free(statusbar->fulljid);
+        statusbar->fulljid = NULL;
+    }
+
+    status_bar_draw();
+}
+
+void
 status_bar_draw(void)
 {
     werase(statusbar_win);
@@ -229,7 +260,7 @@ status_bar_draw(void)
 
     pos = _status_bar_draw_time(pos);
 
-    _status_bar_draw_prompt(pos);
+    _status_bar_draw_maintext(pos);
 
     pos = getmaxx(stdscr) - _tabs_width();
     gint max_tabs = prefs_get_statusbartabs();
@@ -389,10 +420,31 @@ _status_bar_draw_time(int pos)
 }
 
 static void
-_status_bar_draw_prompt(int pos)
+_status_bar_draw_maintext(int pos)
 {
     if (statusbar->prompt) {
         mvwprintw(statusbar_win, 0, pos, statusbar->prompt);
+        return;
+    }
+
+    if (statusbar->fulljid) {
+        char *pref = prefs_get_string(PREF_STATUSBAR_SELF);
+        if (g_strcmp0(pref, "off") == 0) {
+            return;
+        }
+        if (g_strcmp0(pref, "user") == 0) {
+            Jid *jidp = jid_create(statusbar->fulljid);
+            mvwprintw(statusbar_win, 0, pos, jidp->localpart);
+            jid_destroy(jidp);
+            return;
+        }
+        if (g_strcmp0(pref, "barejid") == 0) {
+            Jid *jidp = jid_create(statusbar->fulljid);
+            mvwprintw(statusbar_win, 0, pos, jidp->barejid);
+            jid_destroy(jidp);
+            return;
+        }
+        mvwprintw(statusbar_win, 0, pos, statusbar->fulljid);
     }
 }
 
