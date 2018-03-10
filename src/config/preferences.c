@@ -663,6 +663,23 @@ prefs_get_tray_timer(void)
     }
 }
 
+gint
+prefs_get_statusbartabs(void)
+{
+    if (!g_key_file_has_key(prefs, PREF_GROUP_UI, "statusbar.tabs", NULL)) {
+        return 10;
+    } else {
+        return g_key_file_get_integer(prefs, PREF_GROUP_UI, "statusbar.tabs", NULL);
+    }
+}
+
+void
+prefs_set_statusbartabs(gint value)
+{
+    g_key_file_set_integer(prefs, PREF_GROUP_UI, "statusbar.tabs", value);
+    _save_prefs();
+}
+
 gchar**
 prefs_get_plugins(void)
 {
@@ -1530,7 +1547,6 @@ _get_group(preference_t pref)
         case PREF_MUC_PRIVILEGES:
         case PREF_PRESENCE:
         case PREF_WRAP:
-        case PREF_WINS_AUTO_TIDY:
         case PREF_TIME_CONSOLE:
         case PREF_TIME_CHAT:
         case PREF_TIME_MUC:
@@ -1570,6 +1586,11 @@ _get_group(preference_t pref)
         case PREF_CONSOLE_MUC:
         case PREF_CONSOLE_PRIVATE:
         case PREF_CONSOLE_CHAT:
+        case PREF_STATUSBAR_SHOW_NAME:
+        case PREF_STATUSBAR_SHOW_NUMBER:
+        case PREF_STATUSBAR_SELF:
+        case PREF_STATUSBAR_CHAT:
+        case PREF_STATUSBAR_ROOM:
             return PREF_GROUP_UI;
         case PREF_STATES:
         case PREF_OUTTYPE:
@@ -1733,8 +1754,6 @@ _get_key(preference_t pref)
             return "presence";
         case PREF_WRAP:
             return "wrap";
-        case PREF_WINS_AUTO_TIDY:
-            return "wins.autotidy";
         case PREF_TIME_CONSOLE:
             return "time.console";
         case PREF_TIME_CHAT:
@@ -1825,6 +1844,16 @@ _get_key(preference_t pref)
             return "sourcepath";
         case PREF_ROOM_LIST_CACHE:
             return "rooms.cache";
+        case PREF_STATUSBAR_SHOW_NAME:
+            return "statusbar.show.name";
+        case PREF_STATUSBAR_SHOW_NUMBER:
+            return "statusbar.show.number";
+        case PREF_STATUSBAR_SELF:
+            return "statusbar.self";
+        case PREF_STATUSBAR_CHAT:
+            return "statusbar.chat";
+        case PREF_STATUSBAR_ROOM:
+            return "statusbar.room";
         default:
             return NULL;
     }
@@ -1854,7 +1883,6 @@ _get_default_boolean(preference_t pref)
         case PREF_MUC_PRIVILEGES:
         case PREF_PRESENCE:
         case PREF_WRAP:
-        case PREF_WINS_AUTO_TIDY:
         case PREF_INPBLOCK_DYNAMIC:
         case PREF_RESOURCE_TITLE:
         case PREF_RESOURCE_MESSAGE:
@@ -1874,6 +1902,7 @@ _get_default_boolean(preference_t pref)
         case PREF_TRAY_READ:
         case PREF_BOOKMARK_INVITE:
         case PREF_ROOM_LIST_CACHE:
+        case PREF_STATUSBAR_SHOW_NUMBER:
             return TRUE;
         default:
             return FALSE;
@@ -1937,6 +1966,12 @@ _get_default_string(preference_t pref)
         case PREF_CONSOLE_PRIVATE:
         case PREF_CONSOLE_CHAT:
             return "all";
+        case PREF_STATUSBAR_SELF:
+            return "fulljid";
+        case PREF_STATUSBAR_CHAT:
+            return "user";
+        case PREF_STATUSBAR_ROOM:
+            return "room";
         default:
             return NULL;
     }

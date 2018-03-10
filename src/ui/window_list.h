@@ -87,7 +87,7 @@ gboolean wins_tidy(void);
 GSList* wins_create_summary(gboolean unread);
 void wins_destroy(void);
 GList* wins_get_nums(void);
-gboolean wins_swap(int source_win, int target_win);
+void wins_swap(int source_win, int target_win);
 void wins_hide_subwin(ProfWin *window);
 void wins_show_subwin(ProfWin *window);
 

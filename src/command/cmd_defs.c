@@ -962,18 +962,14 @@ static struct cmd_t command_defs[] =
         parse_args, 0, 3, NULL,
         CMD_SUBFUNCS(
             { "unread",     cmd_wins_unread },
-            { "tidy",       cmd_wins_tidy },
             { "prune",      cmd_wins_prune },
-            { "swap",       cmd_wins_swap },
-            { "autotidy",   cmd_wins_autotidy })
+            { "swap",       cmd_wins_swap })
         CMD_MAINFUNC(cmd_wins)
         CMD_TAGS(
             CMD_TAG_UI)
         CMD_SYN(
             "/wins",
             "/wins unread",
-            "/wins tidy",
-            "/wins autotidy on|off",
             "/wins prune",
             "/wins swap <source> <target>")
         CMD_DESC(
@@ -981,9 +977,7 @@ static struct cmd_t command_defs[] =
             "Passing no argument will list all currently active windows and information about their usage.")
         CMD_ARGS(
             { "unread",                 "List windows with unread messages." },
-            { "tidy",                   "Move windows so there are no gaps." },
-            { "autotidy on|off",        "Automatically remove gaps when closing windows." },
-            { "prune",                  "Close all windows with no unread messages, and then tidy so there are no gaps." },
+            { "prune",                  "Close all windows with no unread messages." },
             { "swap <source> <target>", "Swap windows, target may be an empty position." })
         CMD_NOEXAMPLES
     },
@@ -1358,20 +1352,37 @@ static struct cmd_t command_defs[] =
     },
 
     { "/statusbar",
-        parse_args, 1, 1, &cons_winpos_setting,
+        parse_args, 1, 2, &cons_statusbar_setting,
         CMD_NOSUBFUNCS
         CMD_MAINFUNC(cmd_statusbar)
         CMD_TAGS(
             CMD_TAG_UI)
         CMD_SYN(
+            "/statusbar show name|number",
+            "/statusbar hide name|number",
+            "/statusbar maxtabs <value>",
+            "/statusbar self user|barejid|fulljid|off",
+            "/statusbar chat user|jid",
+            "/statusbar room room|jid",
             "/statusbar up",
             "/statusbar down")
         CMD_DESC(
-            "Move the status bar.")
+            "Manage statusbar display preferences.")
         CMD_ARGS(
-            { "up", "Move the status bar up the screen." },
-            { "down", "Move the status bar down the screen." })
-        CMD_NOEXAMPLES
+            { "maxtabs <value>",            "Set the maximum number of tabs to display, <value> must be between 0 and 10" },
+            { "show|hide name",             "Show or hide names in tabs." },
+            { "show|hide number",           "Show or hide numbers in tabs." },
+            { "self user|barejid|fulljid",  "Show account user name, barejid, fulljid as status bar title." },
+            { "self off",                   "Disable showing self as status bar title." },
+            { "chat user|jid",              "Show users name, or the fulljid if no nick is present for chat tabs." },
+            { "room room|jid",              "Show room name, or the fulljid for room tabs." },
+            { "up",                         "Move the status bar up the screen." },
+            { "down",                       "Move the status bar down the screen." })
+        CMD_EXAMPLES(
+            "/statusbar maxtabs 5",
+            "/statusbar self user",
+            "/statusbar chat jid",
+            "/statusbar hide name")
     },
 
     { "/inputwin",

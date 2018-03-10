@@ -194,7 +194,7 @@ typedef struct prof_xml_win_t {
 } ProfXMLWin;
 
 typedef struct prof_plugin_win_t {
-    ProfWin super;
+    ProfWin window;
     char *tag;
     char *plugin_name;
     unsigned long memcheck;

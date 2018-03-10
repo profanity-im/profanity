@@ -1253,17 +1253,6 @@ cmd_wins_unread(ProfWin *window, const char *const command, gchar **args)
 }
 
 gboolean
-cmd_wins_tidy(ProfWin *window, const char *const command, gchar **args)
-{
-    if (wins_tidy()) {
-        cons_show("Windows tidied.");
-    } else {
-        cons_show("No tidy needed.");
-    }
-    return TRUE;
-}
-
-gboolean
 cmd_wins_prune(ProfWin *window, const char *const command, gchar **args)
 {
     ui_prune_wins();
@@ -1280,38 +1269,34 @@ cmd_wins_swap(ProfWin *window, const char *const command, gchar **args)
 
     int source_win = atoi(args[1]);
     int target_win = atoi(args[2]);
+
     if ((source_win == 1) || (target_win == 1)) {
         cons_show("Cannot move console window.");
-    } else if (source_win == 10 || target_win == 10) {
+        return TRUE;
+    }
+
+    if (source_win == 10 || target_win == 10) {
         cons_show("Window 10 does not exist");
-    } else if (source_win != target_win) {
-        gboolean swapped = wins_swap(source_win, target_win);
-        if (swapped) {
-            cons_show("Swapped windows %d <-> %d", source_win, target_win);
-        } else {
-            cons_show("Window %d does not exist", source_win);
-        }
-    } else {
+        return TRUE;
+    }
+
+    if (source_win == target_win) {
         cons_show("Same source and target window supplied.");
+        return TRUE;
     }
 
-    return TRUE;
-}
-
-gboolean
-cmd_wins_autotidy(ProfWin *window, const char *const command, gchar **args)
-{
-    if (g_strcmp0(args[1], "on") == 0) {
-        cons_show("Window autotidy enabled");
-        prefs_set_boolean(PREF_WINS_AUTO_TIDY, TRUE);
-        wins_tidy();
-    } else if (g_strcmp0(args[1], "off") == 0) {
-        cons_show("Window autotidy disabled");
-        prefs_set_boolean(PREF_WINS_AUTO_TIDY, FALSE);
-    } else {
-        cons_bad_cmd_usage(command);
+    if (wins_get_by_num(source_win) == NULL) {
+        cons_show("Window %d does not exist", source_win);
+        return TRUE;
     }
 
+    if (wins_get_by_num(target_win) == NULL) {
+        cons_show("Window %d does not exist", target_win);
+        return TRUE;
+    }
+
+    wins_swap(source_win, target_win);
+    cons_show("Swapped windows %d <-> %d", source_win, target_win);
     return TRUE;
 }
 
@@ -1407,11 +1392,7 @@ cmd_close(ProfWin *window, const char *const command, gchar **args)
         // close the window
         ui_close_win(index);
         cons_show("Closed window %d", index);
-
-        // Tidy up the window list.
-        if (prefs_get_boolean(PREF_WINS_AUTO_TIDY)) {
-            wins_tidy();
-        }
+        wins_tidy();
 
         rosterwin_roster();
         return TRUE;
@@ -1442,11 +1423,7 @@ cmd_close(ProfWin *window, const char *const command, gchar **args)
         // close the window
         ui_close_win(index);
         cons_show("Closed window %s", args[0]);
-
-        // Tidy up the window list.
-        if (prefs_get_boolean(PREF_WINS_AUTO_TIDY)) {
-            wins_tidy();
-        }
+        wins_tidy();
 
         rosterwin_roster();
         return TRUE;
@@ -2095,7 +2072,7 @@ cmd_who(ProfWin *window, const char *const command, gchar **args)
     }
 
     if (window->type != WIN_CONSOLE && window->type != WIN_MUC) {
-        status_bar_new(1);
+        status_bar_new(1, WIN_CONSOLE, "console");
     }
 
     return TRUE;
@@ -3942,6 +3919,7 @@ cmd_form(ProfWin *window, const char *const command, gchar **args)
         }
         ui_focus_win(new_current);
         wins_close_by_num(num);
+        wins_tidy();
     }
 
     return TRUE;
@@ -5792,6 +5770,145 @@ cmd_mainwin(ProfWin *window, const char *const command, gchar **args)
 gboolean
 cmd_statusbar(ProfWin *window, const char *const command, gchar **args)
 {
+    if (g_strcmp0(args[0], "show") == 0) {
+        if (g_strcmp0(args[1], "name") == 0) {
+            prefs_set_boolean(PREF_STATUSBAR_SHOW_NAME, TRUE);
+            cons_show("Enabled showing tab names.");
+            ui_resize();
+            return TRUE;
+        }
+        if (g_strcmp0(args[1], "number") == 0) {
+            prefs_set_boolean(PREF_STATUSBAR_SHOW_NUMBER, TRUE);
+            cons_show("Enabled showing tab numbers.");
+            ui_resize();
+            return TRUE;
+        }
+        cons_bad_cmd_usage(command);
+        return TRUE;
+    }
+
+    if (g_strcmp0(args[0], "hide") == 0) {
+        if (g_strcmp0(args[1], "name") == 0) {
+            if (prefs_get_boolean(PREF_STATUSBAR_SHOW_NUMBER) == FALSE) {
+                cons_show("Cannot disable both names and numbers in statusbar.");
+                cons_show("Use '/statusbar maxtabs 0' to hide tabs.");
+                return TRUE;
+            }
+            prefs_set_boolean(PREF_STATUSBAR_SHOW_NAME, FALSE);
+            cons_show("Disabled showing tab names.");
+            ui_resize();
+            return TRUE;
+        }
+        if (g_strcmp0(args[1], "number") == 0) {
+            if (prefs_get_boolean(PREF_STATUSBAR_SHOW_NAME) == FALSE) {
+                cons_show("Cannot disable both names and numbers in statusbar.");
+                cons_show("Use '/statusbar maxtabs 0' to hide tabs.");
+                return TRUE;
+            }
+            prefs_set_boolean(PREF_STATUSBAR_SHOW_NUMBER, FALSE);
+            cons_show("Disabled showing tab numbers.");
+            ui_resize();
+            return TRUE;
+        }
+        cons_bad_cmd_usage(command);
+        return TRUE;
+    }
+
+    if (g_strcmp0(args[0], "maxtabs") == 0) {
+        if (args[1] == NULL) {
+            cons_bad_cmd_usage(command);
+            return TRUE;
+        }
+
+        char *value = args[1];
+        int intval = 0;
+        char *err_msg = NULL;
+        gboolean res = strtoi_range(value, &intval, 0, INT_MAX, &err_msg);
+        if (res) {
+            if (intval < 0 || intval > 10) {
+                cons_bad_cmd_usage(command);
+                return TRUE;
+            }
+
+            prefs_set_statusbartabs(intval);
+            if (intval == 0) {
+                cons_show("Status bar tabs disabled.");
+            } else {
+                cons_show("Status bar tabs set to %d.", intval);
+            }
+            ui_resize();
+            return TRUE;
+        } else {
+            cons_show(err_msg);
+            cons_bad_cmd_usage(command);
+            free(err_msg);
+            return TRUE;
+        }
+    }
+
+    if (g_strcmp0(args[0], "self") == 0) {
+        if (g_strcmp0(args[1], "barejid") == 0) {
+            prefs_set_string(PREF_STATUSBAR_SELF, "barejid");
+            cons_show("Using barejid for statusbar title.");
+            ui_resize();
+            return TRUE;
+        }
+        if (g_strcmp0(args[1], "fulljid") == 0) {
+            prefs_set_string(PREF_STATUSBAR_SELF, "fulljid");
+            cons_show("Using fulljid for statusbar title.");
+            ui_resize();
+            return TRUE;
+        }
+        if (g_strcmp0(args[1], "user") == 0) {
+            prefs_set_string(PREF_STATUSBAR_SELF, "user");
+            cons_show("Using user for statusbar title.");
+            ui_resize();
+            return TRUE;
+        }
+        if (g_strcmp0(args[1], "off") == 0) {
+            prefs_set_string(PREF_STATUSBAR_SELF, "off");
+            cons_show("Disabling statusbar title.");
+            ui_resize();
+            return TRUE;
+        }
+        cons_bad_cmd_usage(command);
+        return TRUE;
+    }
+
+    if (g_strcmp0(args[0], "chat") == 0) {
+        if (g_strcmp0(args[1], "jid") == 0) {
+            prefs_set_string(PREF_STATUSBAR_CHAT, "jid");
+            cons_show("Using jid for chat tabs.");
+            ui_resize();
+            return TRUE;
+        }
+        if (g_strcmp0(args[1], "user") == 0) {
+            prefs_set_string(PREF_STATUSBAR_CHAT, "user");
+            cons_show("Using user for chat tabs.");
+            ui_resize();
+            return TRUE;
+        }
+        cons_bad_cmd_usage(command);
+        return TRUE;
+    }
+
+    if (g_strcmp0(args[0], "room") == 0) {
+        if (g_strcmp0(args[1], "jid") == 0) {
+            prefs_set_string(PREF_STATUSBAR_ROOM, "jid");
+            cons_show("Using jid for room tabs.");
+            ui_resize();
+            return TRUE;
+        }
+        if (g_strcmp0(args[1], "room") == 0) {
+            prefs_set_string(PREF_STATUSBAR_ROOM, "room");
+            cons_show("Using room name for room tabs.");
+            ui_resize();
+            return TRUE;
+        }
+        cons_bad_cmd_usage(command);
+        return TRUE;
+    }
+
     if (g_strcmp0(args[0], "up") == 0) {
         gboolean result = prefs_statusbar_pos_up();
         if (result) {

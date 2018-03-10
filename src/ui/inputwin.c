@@ -251,7 +251,7 @@ inp_get_line(void)
         line = inp_readline();
         ui_update();
     }
-    status_bar_clear();
+    status_bar_clear_prompt();
     return line;
 }
 
@@ -269,7 +269,7 @@ inp_get_password(void)
         ui_update();
     }
     get_password = FALSE;
-    status_bar_clear();
+    status_bar_clear_prompt();
     return password;
 }
 

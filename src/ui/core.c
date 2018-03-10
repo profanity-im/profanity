@@ -102,8 +102,8 @@ ui_init(void)
     ui_load_colours();
     refresh();
     create_title_bar();
-    create_status_bar();
-    status_bar_active(1);
+    status_bar_init();
+    status_bar_active(1, WIN_CONSOLE, "console");
     create_input_window();
     wins_init();
     notifier_initialise();
@@ -137,7 +137,7 @@ ui_update(void)
         _ui_draw_term_title();
     }
     title_bar_update_virtual();
-    status_bar_update_virtual();
+    status_bar_draw();
     inp_put_back();
     doupdate();
 
@@ -183,6 +183,7 @@ ui_close(void)
     notifier_uninit();
     wins_destroy();
     inp_close();
+    status_bar_close();
     endwin();
 }
 
@@ -286,7 +287,7 @@ ui_contact_typing(const char *const barejid, const char *const resource)
             title_bar_set_typing(TRUE);
 
             int num = wins_get_num(window);
-            status_bar_active(num);
+            status_bar_active(num, WIN_CHAT, chatwin->barejid);
        }
     }
 
@@ -387,8 +388,7 @@ ui_handle_login_account_success(ProfAccount *account, gboolean secured)
     title_bar_set_connected(TRUE);
     title_bar_set_tls(secured);
 
-    status_bar_print_message(connection_get_fulljid());
-    status_bar_update_virtual();
+    status_bar_set_fulljid(connection_get_fulljid());
 }
 
 void
@@ -481,8 +481,7 @@ ui_disconnected(void)
     title_bar_set_connected(FALSE);
     title_bar_set_tls(FALSE);
     title_bar_set_presence(CONTACT_OFFLINE);
-    status_bar_clear_message();
-    status_bar_update_virtual();
+    status_bar_clear_fulljid();
     ui_hide_roster();
 }
 
@@ -672,7 +671,10 @@ ui_focus_win(ProfWin *window)
         title_bar_switch();
     }
     status_bar_current(i);
-    status_bar_active(i);
+
+    char *identifier = win_get_tab_identifier(window);
+    status_bar_active(i, window->type, identifier);
+    free(identifier);
 }
 
 void
@@ -689,7 +691,7 @@ ui_close_win(int index)
     wins_close_by_num(index);
     title_bar_console();
     status_bar_current(1);
-    status_bar_active(1);
+    status_bar_active(1, WIN_CONSOLE, "console");
 }
 
 void
@@ -737,17 +739,19 @@ ui_print_system_msg_from_recipient(const char *const barejid, const char *messag
     if (barejid == NULL || message == NULL)
         return;
 
-    ProfWin *window = (ProfWin*)wins_get_chat(barejid);
+    ProfChatWin *chatwin = wins_get_chat(barejid);
+    ProfWin *window = (ProfWin*)chatwin;
     if (window == NULL) {
         int num = 0;
         window = wins_new_chat(barejid);
         if (window) {
+            chatwin = (ProfChatWin*)window;
             num = wins_get_num(window);
-            status_bar_active(num);
+            status_bar_active(num, WIN_CHAT, chatwin->barejid);
         } else {
             num = 0;
             window = wins_get_console();
-            status_bar_active(1);
+            status_bar_active(1, WIN_CONSOLE, "console");
         }
     }
 
@@ -757,10 +761,11 @@ ui_print_system_msg_from_recipient(const char *const barejid, const char *messag
 void
 ui_room_join(const char *const roomjid, gboolean focus)
 {
-    ProfWin *window = (ProfWin*)wins_get_muc(roomjid);
-    if (!window) {
-        window = wins_new_muc(roomjid);
+    ProfMucWin *mucwin = wins_get_muc(roomjid);
+    if (mucwin == NULL) {
+        mucwin = (ProfMucWin*)wins_new_muc(roomjid);
     }
+    ProfWin *window = (ProfWin*)mucwin;
 
     char *nick = muc_nick(roomjid);
     win_print(window, THEME_ROOMINFO, '!', "-> You have joined the room as %s", nick);
@@ -780,7 +785,7 @@ ui_room_join(const char *const roomjid, gboolean focus)
         ui_focus_win(window);
     } else {
         int num = wins_get_num(window);
-        status_bar_active(num);
+        status_bar_active(num, WIN_MUC, mucwin->roomjid);
         ProfWin *console = wins_get_console();
         char *nick = muc_nick(roomjid);
         win_println(console, THEME_TYPING, '!', "-> Autojoined %s as %s (%d).", roomjid, nick, num);
@@ -968,15 +973,14 @@ ui_win_unread(int index)
 char*
 ui_ask_password(void)
 {
-    status_bar_get_password();
-    status_bar_update_virtual();
+    status_bar_set_prompt("Enter password:");
     return inp_get_password();
 }
 
 char*
 ui_get_line(void)
 {
-    status_bar_update_virtual();
+    status_bar_draw();
     return inp_get_line();
 }
 
@@ -999,8 +1003,7 @@ ui_ask_pgp_passphrase(const char *hint, int prev_fail)
 
     ui_update();
 
-    status_bar_get_password();
-    status_bar_update_virtual();
+    status_bar_set_prompt("Enter password:");
     return inp_get_password();
 }
 

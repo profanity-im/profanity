@@ -448,6 +448,7 @@ void cons_autoconnect_setting(void) {}
 void cons_rooms_cache_setting(void) {}
 void cons_inpblock_setting(void) {}
 void cons_winpos_setting(void) {}
+void cons_statusbar_setting(void) {}
 void cons_tray_setting(void) {}
 
 void cons_show_contact_online(PContact contact, Resource *resource, GDateTime *last_activity)
@@ -466,8 +467,8 @@ void title_bar_set_presence(contact_presence_t presence) {}
 
 // status bar
 void status_bar_inactive(const int win) {}
-void status_bar_active(const int win) {}
-void status_bar_new(const int win) {}
+void status_bar_active(const int win, win_type_t type, char *identifier) {}
+void status_bar_new(const int win, win_type_t type, char *identifier) {}
 void status_bar_set_all_inactive(void) {}
 
 // roster window
@@ -502,6 +503,11 @@ ProfWin* win_create_private(const char * const fulljid)
     return NULL;
 }
 ProfWin* win_create_plugin(const char *const plugin_name, const char * const tag)
+{
+    return NULL;
+}
+
+char* win_get_tab_identifier(ProfWin *window)
 {
     return NULL;
 }

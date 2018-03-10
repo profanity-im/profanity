@@ -1124,15 +1124,6 @@ cons_wrap_setting(void)
 }
 
 void
-cons_winstidy_setting(void)
-{
-    if (prefs_get_boolean(PREF_WINS_AUTO_TIDY))
-        cons_show("Window Auto Tidy (/wins)            : ON");
-    else
-        cons_show("Window Auto Tidy (/wins)            : OFF");
-}
-
-void
 cons_encwarn_setting(void)
 {
     if (prefs_get_boolean(PREF_ENC_WARN)) {
@@ -1531,7 +1522,6 @@ cons_show_ui_prefs(void)
     cons_splash_setting();
     cons_winpos_setting();
     cons_wrap_setting();
-    cons_winstidy_setting();
     cons_time_setting();
     cons_resource_setting();
     cons_vercheck_setting();
@@ -1544,6 +1534,7 @@ cons_show_ui_prefs(void)
     cons_presence_setting();
     cons_inpblock_setting();
     cons_tlsshow_setting();
+    cons_statusbar_setting();
 
     cons_alert();
 }
@@ -1745,6 +1736,39 @@ cons_inpblock_setting(void)
     } else {
         cons_show("Dynamic timeout (/inpblock)         : OFF");
     }
+}
+
+void
+cons_statusbar_setting(void)
+{
+    if (prefs_get_boolean(PREF_STATUSBAR_SHOW_NAME)) {
+        cons_show("Show tab names (/statusbar)         : ON");
+    } else {
+        cons_show("Show tab names (/statusbar)         : OFF");
+    }
+    if (prefs_get_boolean(PREF_STATUSBAR_SHOW_NUMBER)) {
+        cons_show("Show tab numbers (/statusbar)       : ON");
+    } else {
+        cons_show("Show tab numbers (/statusbar)       : OFF");
+    }
+
+    cons_show("Max tabs (/statusbar)               : %d", prefs_get_statusbartabs());
+
+    char *pref_self = prefs_get_string(PREF_STATUSBAR_SELF);
+    if (g_strcmp0(pref_self, "off") == 0) {
+        cons_show("Self statusbar display (/statusbar) : OFF");
+    } else {
+        cons_show("Self statusbar display (/statusbar) : %s", pref_self);
+    }
+    prefs_free_string(pref_self);
+
+    char *pref_chat = prefs_get_string(PREF_STATUSBAR_CHAT);
+    cons_show("Chat tab display (/statusbar)       : %s", pref_chat);
+    prefs_free_string(pref_chat);
+
+    char *pref_room = prefs_get_string(PREF_STATUSBAR_ROOM);
+    cons_show("Room tab display (/statusbar)       : %s", pref_room);
+    prefs_free_string(pref_room);
 }
 
 void
@@ -2161,7 +2185,7 @@ cons_alert(void)
 {
     ProfWin *current = wins_get_current();
     if (current->type != WIN_CONSOLE) {
-        status_bar_new(1);
+        status_bar_new(1, WIN_CONSOLE, "console");
     }
 }
 

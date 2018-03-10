@@ -162,7 +162,7 @@ win_create_muc(const char *const roomjid)
     int cols = getmaxx(stdscr);
 
     new_win->window.type = WIN_MUC;
-
+    new_win->window.layout = _win_create_simple_layout();
     ProfLayoutSplit *layout = malloc(sizeof(ProfLayoutSplit));
     layout->base.type = LAYOUT_SPLIT;
 
@@ -208,7 +208,6 @@ win_create_muc_config(const char *const roomjid, DataForm *form)
     ProfMucConfWin *new_win = malloc(sizeof(ProfMucConfWin));
     new_win->window.type = WIN_MUC_CONFIG;
     new_win->window.layout = _win_create_simple_layout();
-
     new_win->roomjid = strdup(roomjid);
     new_win->form = form;
 
@@ -223,7 +222,6 @@ win_create_private(const char *const fulljid)
     ProfPrivateWin *new_win = malloc(sizeof(ProfPrivateWin));
     new_win->window.type = WIN_PRIVATE;
     new_win->window.layout = _win_create_simple_layout();
-
     new_win->fulljid = strdup(fulljid);
     new_win->unread = 0;
     new_win->occupant_offline = FALSE;
@@ -250,15 +248,15 @@ ProfWin*
 win_create_plugin(const char *const plugin_name, const char *const tag)
 {
     ProfPluginWin *new_win = malloc(sizeof(ProfPluginWin));
-    new_win->super.type = WIN_PLUGIN;
-    new_win->super.layout = _win_create_simple_layout();
+    new_win->window.type = WIN_PLUGIN;
+    new_win->window.layout = _win_create_simple_layout();
 
     new_win->tag = strdup(tag);
     new_win->plugin_name = strdup(plugin_name);
 
     new_win->memcheck = PROFPLUGINWIN_MEMCHECK;
 
-    return &new_win->super;
+    return &new_win->window;
 }
 
 char*
@@ -318,6 +316,50 @@ win_get_title(ProfWin *window)
     }
 
     return NULL;
+}
+
+char*
+win_get_tab_identifier(ProfWin *window)
+{
+    assert(window != NULL);
+
+    switch (window->type) {
+        case WIN_CONSOLE:
+        {
+            return strdup("console");
+        }
+        case WIN_CHAT:
+        {
+            ProfChatWin *chatwin = (ProfChatWin*)window;
+            return strdup(chatwin->barejid);
+        }
+        case WIN_MUC:
+        {
+            ProfMucWin *mucwin = (ProfMucWin*)window;
+            return strdup(mucwin->roomjid);
+        }
+        case WIN_MUC_CONFIG:
+        {
+            ProfMucConfWin *mucconfwin = (ProfMucConfWin*)window;
+            return strdup(mucconfwin->roomjid);
+        }
+        case WIN_PRIVATE:
+        {
+            ProfPrivateWin *privwin = (ProfPrivateWin*)window;
+            return strdup(privwin->fulljid);
+        }
+        case WIN_PLUGIN:
+        {
+            ProfPluginWin *pluginwin = (ProfPluginWin*)window;
+            return strdup(pluginwin->tag);
+        }
+        case WIN_XML:
+        {
+            return strdup("xmlconsole");
+        }
+        default:
+            return strdup("UNKNOWN");
+    }
 }
 
 char*

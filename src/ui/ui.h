@@ -297,7 +297,6 @@ void cons_occupants_setting(void);
 void cons_roster_setting(void);
 void cons_presence_setting(void);
 void cons_wrap_setting(void);
-void cons_winstidy_setting(void);
 void cons_time_setting(void);
 void cons_wintitle_setting(void);
 void cons_notify_setting(void);
@@ -318,6 +317,7 @@ void cons_autoping_setting(void);
 void cons_autoconnect_setting(void);
 void cons_room_cache_setting(void);
 void cons_inpblock_setting(void);
+void cons_statusbar_setting(void);
 void cons_winpos_setting(void);
 void cons_show_contact_online(PContact contact, Resource *resource, GDateTime *last_activity);
 void cons_show_contact_offline(PContact contact, char *resource, char *status);
@@ -331,8 +331,8 @@ void title_bar_set_presence(contact_presence_t presence);
 
 // status bar
 void status_bar_inactive(const int win);
-void status_bar_active(const int win);
-void status_bar_new(const int win);
+void status_bar_active(const int win, win_type_t wintype, char *identifier);
+void status_bar_new(const int win, win_type_t wintype, char *identifier);
 void status_bar_set_all_inactive(void);
 
 // roster window
@@ -375,6 +375,7 @@ void win_show_occupant_info(ProfWin *window, const char *const room, Occupant *o
 void win_show_contact(ProfWin *window, PContact contact);
 void win_show_info(ProfWin *window, PContact contact);
 void win_clear(ProfWin *window);
+char* win_get_tab_identifier(ProfWin *window);
 char* win_to_string(ProfWin *window);
 
 // desktop notifications

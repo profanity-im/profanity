@@ -142,4 +142,10 @@ titlebar.position=1
 mainwin.position=2
 statusbar.position=3
 inputwin.position=4
+statusbar.self=user
+statusbar.chat=user
+statusbar.room=room
+statusbar.tabs=8
+statusbar.show.name=true
+statusbar.show.number=true
 
