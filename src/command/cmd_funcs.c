@@ -3919,6 +3919,7 @@ cmd_form(ProfWin *window, const char *const command, gchar **args)
         }
         ui_focus_win(new_current);
         wins_close_by_num(num);
+        wins_tidy();
     }
 
     return TRUE;
