@@ -1902,7 +1902,6 @@ _get_default_boolean(preference_t pref)
         case PREF_TRAY_READ:
         case PREF_BOOKMARK_INVITE:
         case PREF_ROOM_LIST_CACHE:
-        case PREF_STATUSBAR_SHOW_NAME:
         case PREF_STATUSBAR_SHOW_NUMBER:
             return TRUE;
         default:
