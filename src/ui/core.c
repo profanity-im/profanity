@@ -137,7 +137,7 @@ ui_update(void)
         _ui_draw_term_title();
     }
     title_bar_update_virtual();
-    status_bar_update_virtual();
+    status_bar_draw();
     inp_put_back();
     doupdate();
 
@@ -388,8 +388,7 @@ ui_handle_login_account_success(ProfAccount *account, gboolean secured)
     title_bar_set_connected(TRUE);
     title_bar_set_tls(secured);
 
-    status_bar_print_message(connection_get_fulljid());
-    status_bar_update_virtual();
+    status_bar_set_prompt(connection_get_fulljid());
 }
 
 void
@@ -482,8 +481,7 @@ ui_disconnected(void)
     title_bar_set_connected(FALSE);
     title_bar_set_tls(FALSE);
     title_bar_set_presence(CONTACT_OFFLINE);
-    status_bar_clear_message();
-    status_bar_update_virtual();
+    status_bar_clear_prompt();
     ui_hide_roster();
 }
 
@@ -975,15 +973,14 @@ ui_win_unread(int index)
 char*
 ui_ask_password(void)
 {
-    status_bar_get_password();
-    status_bar_update_virtual();
+    status_bar_set_prompt("Enter password:");
     return inp_get_password();
 }
 
 char*
 ui_get_line(void)
 {
-    status_bar_update_virtual();
+    status_bar_draw();
     return inp_get_line();
 }
 
@@ -1006,8 +1003,7 @@ ui_ask_pgp_passphrase(const char *hint, int prev_fail)
 
     ui_update();
 
-    status_bar_get_password();
-    status_bar_update_virtual();
+    status_bar_set_prompt("Enter password:");
     return inp_get_password();
 }
 

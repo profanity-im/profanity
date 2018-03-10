@@ -61,7 +61,7 @@ typedef struct _status_bar_tab_t {
 
 typedef struct _status_bar_t {
     gchar *time;
-    char *message;
+    char *prompt;
     GHashTable *tabs;
     int current_tab;
 } StatusBar;
@@ -70,9 +70,8 @@ static GTimeZone *tz;
 static StatusBar *statusbar;
 static WINDOW *statusbar_win;
 
-static void _status_bar_draw(void);
 static int _status_bar_draw_time(int pos);
-static void _status_bar_draw_message(int pos);
+static void _status_bar_draw_prompt(int pos);
 static int _status_bar_draw_bracket(gboolean current, int pos, char* ch);
 static int _status_bar_draw_extended_tabs(int pos);
 static int _status_bar_draw_tab(StatusBarTab *tab, int pos, int num);
@@ -88,7 +87,7 @@ status_bar_init(void)
 
     statusbar = malloc(sizeof(StatusBar));
     statusbar->time = NULL;
-    statusbar->message = NULL;
+    statusbar->prompt = NULL;
     statusbar->tabs = g_hash_table_new_full(g_direct_hash, g_direct_equal, NULL, (GDestroyNotify)_destroy_tab);
     StatusBarTab *console = malloc(sizeof(StatusBarTab));
     console->window_type = WIN_CONSOLE;
@@ -100,7 +99,7 @@ status_bar_init(void)
     int cols = getmaxx(stdscr);
     statusbar_win = newwin(1, cols, row, 0);
 
-    _status_bar_draw();
+    status_bar_draw();
 }
 
 void
@@ -113,17 +112,11 @@ status_bar_close(void)
         if (statusbar->time) {
             g_free(statusbar->time);
         }
-        if (statusbar->message) {
-            free(statusbar->message);
+        if (statusbar->prompt) {
+            free(statusbar->prompt);
         }
         free(statusbar);
     }
-}
-
-void
-status_bar_update_virtual(void)
-{
-    _status_bar_draw();
 }
 
 void
@@ -135,7 +128,7 @@ status_bar_resize(void)
     mvwin(statusbar_win, row, 0);
     wresize(statusbar_win, 1, cols);
 
-    _status_bar_draw();
+    status_bar_draw();
 }
 
 void
@@ -153,7 +146,7 @@ status_bar_current(int i)
         statusbar->current_tab = i;
     }
 
-    _status_bar_draw();
+    status_bar_draw();
 }
 
 void
@@ -166,7 +159,7 @@ status_bar_inactive(const int win)
 
     g_hash_table_remove(statusbar->tabs, GINT_TO_POINTER(true_win));
 
-    _status_bar_draw();
+    status_bar_draw();
 }
 
 void
@@ -183,7 +176,7 @@ status_bar_active(const int win, win_type_t wintype, char *identifier)
     tab->window_type = wintype;
     g_hash_table_replace(statusbar->tabs, GINT_TO_POINTER(true_win), tab);
 
-    _status_bar_draw();
+    status_bar_draw();
 }
 
 void
@@ -200,51 +193,34 @@ status_bar_new(const int win, win_type_t wintype, char* identifier)
     tab->window_type = wintype;
     g_hash_table_replace(statusbar->tabs, GINT_TO_POINTER(true_win), tab);
 
-    _status_bar_draw();
+    status_bar_draw();
 }
 
 void
-status_bar_get_password(void)
+status_bar_set_prompt(const char *const prompt)
 {
-    status_bar_print_message("Enter password:");
-}
-
-void
-status_bar_print_message(const char *const msg)
-{
-    if (statusbar->message) {
-        free(statusbar->message);
-        statusbar->message = NULL;
+    if (statusbar->prompt) {
+        free(statusbar->prompt);
+        statusbar->prompt = NULL;
     }
-    statusbar->message = strdup(msg);
+    statusbar->prompt = strdup(prompt);
 
-    _status_bar_draw();
+    status_bar_draw();
 }
 
 void
-status_bar_clear(void)
+status_bar_clear_prompt(void)
 {
-    if (statusbar->message) {
-        free(statusbar->message);
-        statusbar->message = NULL;
+    if (statusbar->prompt) {
+        free(statusbar->prompt);
+        statusbar->prompt = NULL;
     }
 
-    _status_bar_draw();
+    status_bar_draw();
 }
 
 void
-status_bar_clear_message(void)
-{
-    if (statusbar->message) {
-        free(statusbar->message);
-        statusbar->message = NULL;
-    }
-
-    _status_bar_draw();
-}
-
-static void
-_status_bar_draw(void)
+status_bar_draw(void)
 {
     werase(statusbar_win);
     wbkgd(statusbar_win, theme_attrs(THEME_STATUS_TEXT));
@@ -253,7 +229,7 @@ _status_bar_draw(void)
 
     pos = _status_bar_draw_time(pos);
 
-    _status_bar_draw_message(pos);
+    _status_bar_draw_prompt(pos);
 
     pos = getmaxx(stdscr) - _tabs_width();
     gint max_tabs = prefs_get_statusbartabs();
@@ -413,10 +389,10 @@ _status_bar_draw_time(int pos)
 }
 
 static void
-_status_bar_draw_message(int pos)
+_status_bar_draw_prompt(int pos)
 {
-    if (statusbar->message) {
-        mvwprintw(statusbar_win, 0, pos, statusbar->message);
+    if (statusbar->prompt) {
+        mvwprintw(statusbar_win, 0, pos, statusbar->prompt);
     }
 }
 

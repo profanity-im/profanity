@@ -5846,6 +5846,35 @@ cmd_statusbar(ProfWin *window, const char *const command, gchar **args)
         }
     }
 
+    if (g_strcmp0(args[0], "self") == 0) {
+        if (g_strcmp0(args[1], "barejid") == 0) {
+            prefs_set_string(PREF_STATUSBAR_SELF, "barejid");
+            cons_show("Using barejid for statusbar title.");
+            ui_resize();
+            return TRUE;
+        }
+        if (g_strcmp0(args[1], "fulljid") == 0) {
+            prefs_set_string(PREF_STATUSBAR_SELF, "fulljid");
+            cons_show("Using fulljid for statusbar title.");
+            ui_resize();
+            return TRUE;
+        }
+        if (g_strcmp0(args[1], "user") == 0) {
+            prefs_set_string(PREF_STATUSBAR_SELF, "user");
+            cons_show("Using user for statusbar title.");
+            ui_resize();
+            return TRUE;
+        }
+        if (g_strcmp0(args[1], "off") == 0) {
+            prefs_set_string(PREF_STATUSBAR_SELF, "off");
+            cons_show("Disabling statusbar title.");
+            ui_resize();
+            return TRUE;
+        }
+        cons_bad_cmd_usage(command);
+        return TRUE;
+    }
+
     if (g_strcmp0(args[0], "chat") == 0) {
         if (g_strcmp0(args[1], "jid") == 0) {
             prefs_set_string(PREF_STATUSBAR_CHAT, "jid");

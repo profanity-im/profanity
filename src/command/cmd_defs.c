@@ -1361,6 +1361,7 @@ static struct cmd_t command_defs[] =
             "/statusbar show name|number",
             "/statusbar hide name|number",
             "/statusbar maxtabs <value>",
+            "/statusbar self user|barejid|fulljid|off",
             "/statusbar chat user|jid",
             "/statusbar room room|jid",
             "/statusbar up",
@@ -1368,16 +1369,18 @@ static struct cmd_t command_defs[] =
         CMD_DESC(
             "Manage statusbar display preferences.")
         CMD_ARGS(
-            { "maxtabs <value>",    "Set the maximum number of tabs to display, <value> must be between 0 and 10" },
-            { "show|hide name",     "Show or hide names in tabs." },
-            { "show|hide number",   "Show or hide numbers in tabs." },
-            { "chat user|jid",      "Show only the users name, or the full jid if no nick is present for chat tabs." },
-            { "room room|jid",      "Show only the rooms name, or the full jid for room tabs." },
-            { "up",                 "Move the status bar up the screen." },
-            { "down",               "Move the status bar down the screen." })
+            { "maxtabs <value>",            "Set the maximum number of tabs to display, <value> must be between 0 and 10" },
+            { "show|hide name",             "Show or hide names in tabs." },
+            { "show|hide number",           "Show or hide numbers in tabs." },
+            { "self user|barejid|fulljid",  "Show account user name, barejid, fulljid as status bar title." },
+            { "self off",                   "Disable showing self as status bar title." },
+            { "chat user|jid",              "Show users name, or the fulljid if no nick is present for chat tabs." },
+            { "room room|jid",              "Show room name, or the fulljid for room tabs." },
+            { "up",                         "Move the status bar up the screen." },
+            { "down",                       "Move the status bar down the screen." })
         CMD_EXAMPLES(
             "/statusbar maxtabs 5",
-            "/statusbar hide name",
+            "/statusbar self user",
             "/statusbar chat jid",
             "/statusbar hide name")
     },

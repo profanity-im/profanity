@@ -1588,6 +1588,7 @@ _get_group(preference_t pref)
         case PREF_CONSOLE_CHAT:
         case PREF_STATUSBAR_SHOW_NAME:
         case PREF_STATUSBAR_SHOW_NUMBER:
+        case PREF_STATUSBAR_SELF:
         case PREF_STATUSBAR_CHAT:
         case PREF_STATUSBAR_ROOM:
             return PREF_GROUP_UI;
@@ -1847,6 +1848,8 @@ _get_key(preference_t pref)
             return "statusbar.show.name";
         case PREF_STATUSBAR_SHOW_NUMBER:
             return "statusbar.show.number";
+        case PREF_STATUSBAR_SELF:
+            return "statusbar.self";
         case PREF_STATUSBAR_CHAT:
             return "statusbar.chat";
         case PREF_STATUSBAR_ROOM:
@@ -1964,6 +1967,8 @@ _get_default_string(preference_t pref)
         case PREF_CONSOLE_PRIVATE:
         case PREF_CONSOLE_CHAT:
             return "all";
+        case PREF_STATUSBAR_SELF:
+            return "fulljid";
         case PREF_STATUSBAR_CHAT:
             return "user";
         case PREF_STATUSBAR_ROOM:
