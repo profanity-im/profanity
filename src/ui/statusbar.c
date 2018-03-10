@@ -74,10 +74,12 @@ static void _status_bar_draw(void);
 static int _status_bar_draw_time(int pos);
 static void _status_bar_draw_message(int pos);
 static int _status_bar_draw_bracket(gboolean current, int pos, char* ch);
-static int _status_bar_draw_tab(StatusBarTab *tab, int pos, int display_num, gboolean is_current);
+static int _status_bar_draw_extended_tabs(int pos);
+static int _status_bar_draw_tab(StatusBarTab *tab, int pos, int num);
 static void _destroy_tab(StatusBarTab *tab);
 static int _tabs_width(void);
 static char* _display_name(StatusBarTab *tab);
+static gboolean _extended_new(void);
 
 void
 status_bar_init(void)
@@ -259,24 +261,67 @@ _status_bar_draw(void)
     for (i = 1; i <= max_tabs; i++) {
         StatusBarTab *tab = g_hash_table_lookup(statusbar->tabs, GINT_TO_POINTER(i));
         if (tab) {
-            int display_num = i == 10 ? 0 : i;
-            gboolean is_current = i == statusbar->current_tab;
-            pos = _status_bar_draw_tab(tab, pos, display_num, is_current);
+            pos = _status_bar_draw_tab(tab, pos, i);
         }
     }
 
-    pos = _status_bar_draw_bracket(FALSE, pos, "[");
-    mvwprintw(statusbar_win, 0, pos, " ");
-    pos++;
-    pos = _status_bar_draw_bracket(FALSE, pos, "]");
+    pos = _status_bar_draw_extended_tabs(pos);
 
     wnoutrefresh(statusbar_win);
     inp_put_back();
 }
 
-static int
-_status_bar_draw_tab(StatusBarTab *tab, int pos, int display_num, gboolean is_current)
+static gboolean
+_extended_new(void)
 {
+    gint max_tabs = prefs_get_statusbartabs();
+    int tabs_count = g_hash_table_size(statusbar->tabs);
+    if (tabs_count <= max_tabs) {
+        return FALSE;
+    }
+
+    int i = 0;
+    for (i = max_tabs + 1; i <= tabs_count; i++) {
+        StatusBarTab *tab = g_hash_table_lookup(statusbar->tabs, GINT_TO_POINTER(i));
+        if (tab && tab->highlight) {
+            return TRUE;
+        }
+    }
+
+    return FALSE;
+}
+
+static int
+_status_bar_draw_extended_tabs(int pos)
+{
+    gint max_tabs = prefs_get_statusbartabs();
+
+    if (g_hash_table_size(statusbar->tabs) > max_tabs) {
+        gboolean is_current = statusbar->current_tab > max_tabs;
+
+        pos = _status_bar_draw_bracket(is_current, pos, "[");
+
+        int status_attrs = theme_attrs(THEME_STATUS_ACTIVE);
+        if (_extended_new()) {
+            status_attrs = theme_attrs(THEME_STATUS_NEW);
+        }
+        wattron(statusbar_win, status_attrs);
+        mvwprintw(statusbar_win, 0, pos, ">");
+        wattroff(statusbar_win, status_attrs);
+        pos++;
+
+        pos = _status_bar_draw_bracket(is_current, pos, "]");
+    }
+
+    return pos;
+}
+
+static int
+_status_bar_draw_tab(StatusBarTab *tab, int pos, int num)
+{
+    int display_num = num == 10 ? 0 : num;
+    gboolean is_current = num == statusbar->current_tab;
+
     gboolean show_number = prefs_get_boolean(PREF_STATUSBAR_SHOW_NUMBER);
     gboolean show_name = prefs_get_boolean(PREF_STATUSBAR_SHOW_NAME);
 
@@ -394,7 +439,7 @@ _tabs_width(void)
     gint max_tabs = prefs_get_statusbartabs();
 
     if (show_name && show_number) {
-        int width = 4;
+        int width = g_hash_table_size(statusbar->tabs) > max_tabs ? 4 : 1;
         int i = 0;
         for (i = 1; i <= max_tabs; i++) {
             StatusBarTab *tab = g_hash_table_lookup(statusbar->tabs, GINT_TO_POINTER(i));
@@ -409,7 +454,7 @@ _tabs_width(void)
     }
 
     if (show_name && !show_number) {
-        int width = 4;
+        int width = g_hash_table_size(statusbar->tabs) > max_tabs ? 4 : 1;
         int i = 0;
         for (i = 1; i <= max_tabs; i++) {
             StatusBarTab *tab = g_hash_table_lookup(statusbar->tabs, GINT_TO_POINTER(i));
@@ -423,7 +468,10 @@ _tabs_width(void)
         return width;
     }
 
-    return g_hash_table_size(statusbar->tabs) * 3 + 4;
+    if (g_hash_table_size(statusbar->tabs) > max_tabs) {
+        return max_tabs * 3 + (g_hash_table_size(statusbar->tabs) > max_tabs ? 4 : 1);
+    }
+    return g_hash_table_size(statusbar->tabs) * 3 + (g_hash_table_size(statusbar->tabs) > max_tabs ? 4 : 1);
 }
 
 static char*
