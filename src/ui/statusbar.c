@@ -71,6 +71,10 @@ static StatusBar *statusbar;
 static WINDOW *statusbar_win;
 
 static void _status_bar_draw(void);
+static int _status_bar_draw_time(int pos);
+static void _status_bar_draw_message(int pos);
+static int _status_bar_draw_bracket(gboolean current, int pos, char* ch);
+static int _status_bar_draw_tab(StatusBarTab *tab, int pos, int display_num, gboolean is_current);
 static void _destroy_tab(StatusBarTab *tab);
 static int _tabs_width(void);
 static char* _display_name(StatusBarTab *tab);
@@ -245,117 +249,130 @@ _status_bar_draw(void)
 
     int pos = 1;
 
-    char *time_pref = prefs_get_string(PREF_TIME_STATUSBAR);
-    if (g_strcmp0(time_pref, "off") != 0) {
-        // time
-        if (statusbar->time) {
-            g_free(statusbar->time);
-            statusbar->time = NULL;
-        }
+    pos = _status_bar_draw_time(pos);
 
-        GDateTime *datetime = g_date_time_new_now(tz);
-        statusbar->time  = g_date_time_format(datetime, time_pref);
-        assert(statusbar->time != NULL);
-        g_date_time_unref(datetime);
+    _status_bar_draw_message(pos);
 
-        int bracket_attrs = theme_attrs(THEME_STATUS_BRACKET);
-        int time_attrs = theme_attrs(THEME_STATUS_TIME);
-
-        size_t len = strlen(statusbar->time);
-        wattron(statusbar_win, bracket_attrs);
-        mvwaddch(statusbar_win, 0, pos, '[');
-        pos++;
-        wattroff(statusbar_win, bracket_attrs);
-        wattron(statusbar_win, time_attrs);
-        mvwprintw(statusbar_win, 0, pos, statusbar->time);
-        pos += len;
-        wattroff(statusbar_win, time_attrs);
-        wattron(statusbar_win, bracket_attrs);
-        mvwaddch(statusbar_win, 0, pos, ']');
-        wattroff(statusbar_win, bracket_attrs);
-        pos += 2;
-
-        // message
-        if (statusbar->message) {
-            mvwprintw(statusbar_win, 0, pos, statusbar->message);
-        }
-    } else {
-        // message
-        if (statusbar->message) {
-            mvwprintw(statusbar_win, 0, pos, statusbar->message);
-        }
-    }
-    prefs_free_string(time_pref);
-
-    // tabs
-    int cols = getmaxx(stdscr);
-    pos = cols - _tabs_width();
-    int bracket_attrs = theme_attrs(THEME_STATUS_BRACKET);
-
-    gboolean show_number = prefs_get_boolean(PREF_STATUSBAR_SHOW_NUMBER);
-    gboolean show_name = prefs_get_boolean(PREF_STATUSBAR_SHOW_NAME);
+    pos = getmaxx(stdscr) - _tabs_width();
     gint max_tabs = prefs_get_statusbartabs();
-
     int i = 1;
     for (i = 1; i <= max_tabs; i++) {
-        int display_num = i == 10 ? 0 : i;
-
         StatusBarTab *tab = g_hash_table_lookup(statusbar->tabs, GINT_TO_POINTER(i));
         if (tab) {
-            wattron(statusbar_win, bracket_attrs);
-            if (i == statusbar->current_tab) {
-                mvwprintw(statusbar_win, 0, pos, "-");
-            } else {
-                mvwprintw(statusbar_win, 0, pos, "[");
-            }
-            wattroff(statusbar_win, bracket_attrs);
-            pos++;
-            char *display_name = _display_name(tab);
-            int status_attrs = 0;
-            if (tab->highlight) {
-                status_attrs = theme_attrs(THEME_STATUS_NEW);
-            } else {
-                status_attrs = theme_attrs(THEME_STATUS_ACTIVE);
-            }
-            wattron(statusbar_win, status_attrs);
-            if (show_number) {
-                mvwprintw(statusbar_win, 0, pos, "%d", display_num);
-                pos++;
-            }
-            if (show_number && show_name) {
-                mvwprintw(statusbar_win, 0, pos, ":");
-                pos++;
-            }
-            if (show_name) {
-                mvwprintw(statusbar_win, 0, pos, display_name);
-                pos += strlen(display_name);
-            }
-            wattroff(statusbar_win, status_attrs);
-            free(display_name);
-            wattron(statusbar_win, bracket_attrs);
-            if (i == statusbar->current_tab) {
-                mvwprintw(statusbar_win, 0, pos, "-");
-            } else {
-                mvwprintw(statusbar_win, 0, pos, "]");
-            }
-            pos++;
-            wattroff(statusbar_win, bracket_attrs);
+            int display_num = i == 10 ? 0 : i;
+            gboolean is_current = i == statusbar->current_tab;
+            pos = _status_bar_draw_tab(tab, pos, display_num, is_current);
         }
     }
 
-    wattron(statusbar_win, bracket_attrs);
-    mvwprintw(statusbar_win, 0, pos, "[");
-    wattroff(statusbar_win, bracket_attrs);
-    pos++;
+    pos = _status_bar_draw_bracket(FALSE, pos, "[");
     mvwprintw(statusbar_win, 0, pos, " ");
     pos++;
-    wattron(statusbar_win, bracket_attrs);
-    mvwprintw(statusbar_win, 0, pos, "]");
-    wattroff(statusbar_win, bracket_attrs);
-    pos++;
+    pos = _status_bar_draw_bracket(FALSE, pos, "]");
 
     wnoutrefresh(statusbar_win);
     inp_put_back();
+}
+
+static int
+_status_bar_draw_tab(StatusBarTab *tab, int pos, int display_num, gboolean is_current)
+{
+    gboolean show_number = prefs_get_boolean(PREF_STATUSBAR_SHOW_NUMBER);
+    gboolean show_name = prefs_get_boolean(PREF_STATUSBAR_SHOW_NAME);
+
+    pos = _status_bar_draw_bracket(is_current, pos, "[");
+
+    int status_attrs = 0;
+    if (tab->highlight) {
+        status_attrs = theme_attrs(THEME_STATUS_NEW);
+    } else {
+        status_attrs = theme_attrs(THEME_STATUS_ACTIVE);
+    }
+    wattron(statusbar_win, status_attrs);
+    if (show_number) {
+        mvwprintw(statusbar_win, 0, pos, "%d", display_num);
+        pos++;
+    }
+    if (show_number && show_name) {
+        mvwprintw(statusbar_win, 0, pos, ":");
+        pos++;
+    }
+    if (show_name) {
+        char *display_name = _display_name(tab);
+        mvwprintw(statusbar_win, 0, pos, display_name);
+        pos += strlen(display_name);
+        free(display_name);
+    }
+    wattroff(statusbar_win, status_attrs);
+
+    pos = _status_bar_draw_bracket(is_current, pos, "]");
+
+    return pos;
+}
+
+static int
+_status_bar_draw_bracket(gboolean current, int pos, char* ch)
+{
+    int bracket_attrs = theme_attrs(THEME_STATUS_BRACKET);
+    wattron(statusbar_win, bracket_attrs);
+    if (current) {
+        mvwprintw(statusbar_win, 0, pos, "-");
+    } else {
+        mvwprintw(statusbar_win, 0, pos, ch);
+    }
+    wattroff(statusbar_win, bracket_attrs);
+    pos++;
+
+    return pos;
+}
+
+static int
+_status_bar_draw_time(int pos)
+{
+    char *time_pref = prefs_get_string(PREF_TIME_STATUSBAR);
+    if (g_strcmp0(time_pref, "off") == 0) {
+        prefs_free_string(time_pref);
+        return pos;
+    }
+
+    if (statusbar->time) {
+        g_free(statusbar->time);
+        statusbar->time = NULL;
+    }
+
+    GDateTime *datetime = g_date_time_new_now(tz);
+    statusbar->time  = g_date_time_format(datetime, time_pref);
+    assert(statusbar->time != NULL);
+    g_date_time_unref(datetime);
+
+    int bracket_attrs = theme_attrs(THEME_STATUS_BRACKET);
+    int time_attrs = theme_attrs(THEME_STATUS_TIME);
+
+    size_t len = strlen(statusbar->time);
+    wattron(statusbar_win, bracket_attrs);
+    mvwaddch(statusbar_win, 0, pos, '[');
+    pos++;
+    wattroff(statusbar_win, bracket_attrs);
+    wattron(statusbar_win, time_attrs);
+    mvwprintw(statusbar_win, 0, pos, statusbar->time);
+    pos += len;
+    wattroff(statusbar_win, time_attrs);
+    wattron(statusbar_win, bracket_attrs);
+    mvwaddch(statusbar_win, 0, pos, ']');
+    wattroff(statusbar_win, bracket_attrs);
+    pos += 2;
+
+    prefs_free_string(time_pref);
+
+    return pos;
+}
+
+static void
+_status_bar_draw_message(int pos)
+{
+    if (statusbar->message) {
+        mvwprintw(statusbar_win, 0, pos, statusbar->message);
+    }
 }
 
 static void
