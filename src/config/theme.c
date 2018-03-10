@@ -407,6 +407,8 @@ _load_preferences(void)
     _set_boolean_preference("intype", PREF_INTYPE);
     _set_boolean_preference("enc.warn", PREF_ENC_WARN);
     _set_boolean_preference("tls.show", PREF_TLS_SHOW);
+    _set_boolean_preference("statusbar.show.name", PREF_STATUSBAR_SHOW_NAME);
+    _set_boolean_preference("statusbar.show.nuumber", PREF_STATUSBAR_SHOW_NUMBER);
 
     _set_string_preference("time.console", PREF_TIME_CONSOLE);
     _set_string_preference("time.chat", PREF_TIME_CHAT);
@@ -431,6 +433,14 @@ _load_preferences(void)
     _set_string_preference("roster.rooms.by", PREF_ROSTER_ROOMS_BY);
     _set_string_preference("roster.private", PREF_ROSTER_PRIVATE);
     _set_string_preference("roster.count", PREF_ROSTER_COUNT);
+    _set_string_preference("statusbar.self", PREF_STATUSBAR_SELF);
+    _set_string_preference("statusbar.chat", PREF_STATUSBAR_CHAT);
+    _set_string_preference("statusbar.room", PREF_STATUSBAR_ROOM);
+
+    if (g_key_file_has_key(theme, "ui", "statusbar.tabs", NULL)) {
+        gint tabs_size = g_key_file_get_integer(theme, "ui", "statusbar.tabs", NULL);
+        prefs_set_statusbartabs(tabs_size);
+    }
 
     if (g_key_file_has_key(theme, "ui", "occupants.size", NULL)) {
         gint occupants_size = g_key_file_get_integer(theme, "ui", "occupants.size", NULL);
