@@ -533,8 +533,6 @@ mucwin_subject(ProfMucWin *mucwin, const char *const nick, const char *const sub
     assert(mucwin != NULL);
 
     ProfWin *window = (ProfWin*)mucwin;
-    int num = wins_get_num(window);
-
     if (subject) {
         if (nick) {
             win_print(window, THEME_ROOMINFO, '!', "*%s has set the room subject: ", nick);
@@ -549,15 +547,6 @@ mucwin_subject(ProfMucWin *mucwin, const char *const nick, const char *const sub
         } else {
             win_println(window, THEME_ROOMINFO, '!', "Room subject cleared");
         }
-    }
-
-    // currently in groupchat window
-    if (wins_is_current(window)) {
-        status_bar_active(num, WIN_MUC, mucwin->roomjid);
-
-    // not currently on groupchat window
-    } else {
-        status_bar_new(num, WIN_MUC, mucwin->roomjid);
     }
 }
 
