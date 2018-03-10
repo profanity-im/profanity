@@ -302,6 +302,9 @@ static int
 _status_bar_draw_extended_tabs(int pos)
 {
     gint max_tabs = prefs_get_statusbartabs();
+    if (max_tabs == 0) {
+        return pos;
+    }
 
     if (g_hash_table_size(statusbar->tabs) > max_tabs) {
         gboolean is_current = statusbar->current_tab > max_tabs;
