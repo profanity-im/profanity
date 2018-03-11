@@ -1754,6 +1754,13 @@ cons_statusbar_setting(void)
 
     cons_show("Max tabs (/statusbar)               : %d", prefs_get_statusbartabs());
 
+    gint pref_len = prefs_get_statusbartablen();
+    if (pref_len == 0) {
+        cons_show("Max tab length (/statusbar)         : OFF");
+    } else {
+        cons_show("Max tab length (/statusbar)         : %d", pref_len);
+    }
+
     char *pref_self = prefs_get_string(PREF_STATUSBAR_SELF);
     if (g_strcmp0(pref_self, "off") == 0) {
         cons_show("Self statusbar display (/statusbar) : OFF");

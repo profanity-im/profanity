@@ -785,6 +785,7 @@ cmd_ac_init(void)
     autocomplete_add(statusbar_ac, "show");
     autocomplete_add(statusbar_ac, "hide");
     autocomplete_add(statusbar_ac, "maxtabs");
+    autocomplete_add(statusbar_ac, "tablen");
     autocomplete_add(statusbar_ac, "self");
     autocomplete_add(statusbar_ac, "chat");
     autocomplete_add(statusbar_ac, "room");

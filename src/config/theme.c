@@ -442,6 +442,11 @@ _load_preferences(void)
         prefs_set_statusbartabs(tabs_size);
     }
 
+    if (g_key_file_has_key(theme, "ui", "statusbar.tablen", NULL)) {
+        gint tab_len = g_key_file_get_integer(theme, "ui", "statusbar.tablen", NULL);
+        prefs_set_statusbartabs(tab_len);
+    }
+
     if (g_key_file_has_key(theme, "ui", "occupants.size", NULL)) {
         gint occupants_size = g_key_file_get_integer(theme, "ui", "occupants.size", NULL);
         prefs_set_occupants_size(occupants_size);

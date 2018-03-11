@@ -1361,6 +1361,7 @@ static struct cmd_t command_defs[] =
             "/statusbar show name|number",
             "/statusbar hide name|number",
             "/statusbar maxtabs <value>",
+            "/statusbar tablen <value>",
             "/statusbar self user|barejid|fulljid|off",
             "/statusbar chat user|jid",
             "/statusbar room room|jid",
@@ -1370,6 +1371,7 @@ static struct cmd_t command_defs[] =
             "Manage statusbar display preferences.")
         CMD_ARGS(
             { "maxtabs <value>",            "Set the maximum number of tabs to display, <value> must be between 0 and 10" },
+            { "tablen <value>",             "Set the maximum number of characters to show as the tab name, 0 sets to unlimited." },
             { "show|hide name",             "Show or hide names in tabs." },
             { "show|hide number",           "Show or hide numbers in tabs." },
             { "self user|barejid|fulljid",  "Show account user name, barejid, fulljid as status bar title." },
@@ -1379,7 +1381,8 @@ static struct cmd_t command_defs[] =
             { "up",                         "Move the status bar up the screen." },
             { "down",                       "Move the status bar down the screen." })
         CMD_EXAMPLES(
-            "/statusbar maxtabs 5",
+            "/statusbar maxtabs 8",
+            "/statusbar tablen 5",
             "/statusbar self user",
             "/statusbar chat jid",
             "/statusbar hide name")

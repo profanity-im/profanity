@@ -511,42 +511,40 @@ _tabs_width(void)
 static char*
 _display_name(StatusBarTab *tab)
 {
+    char *fullname = NULL;
+
     if (tab->window_type == WIN_CONSOLE) {
-        return strdup("console");
-    }
-    if (tab->window_type == WIN_XML) {
-        return strdup("xmlconsole");
-    }
-    if (tab->window_type == WIN_PLUGIN) {
-        return strdup(tab->identifier);
-    }
-    if (tab->window_type == WIN_CHAT) {
+        fullname = strdup("console");
+    } else if (tab->window_type == WIN_XML) {
+        fullname = strdup("xmlconsole");
+    } else if (tab->window_type == WIN_PLUGIN) {
+        fullname = strdup(tab->identifier);
+    } else if (tab->window_type == WIN_CHAT) {
         PContact contact = roster_get_contact(tab->identifier);
         if (contact && p_contact_name(contact)) {
-            return strdup(p_contact_name(contact));
-        }
-        char *pref = prefs_get_string(PREF_STATUSBAR_CHAT);
-        if (g_strcmp0("user", pref) == 0) {
-            Jid *jidp = jid_create(tab->identifier);
-            char *user = strdup(jidp->localpart);
-            jid_destroy(jidp);
-            return user;
+            fullname = strdup(p_contact_name(contact));
         } else {
-            return strdup(tab->identifier);
+            char *pref = prefs_get_string(PREF_STATUSBAR_CHAT);
+            if (g_strcmp0("user", pref) == 0) {
+                Jid *jidp = jid_create(tab->identifier);
+                char *user = strdup(jidp->localpart);
+                jid_destroy(jidp);
+                fullname = user;
+            } else {
+                fullname = strdup(tab->identifier);
+            }
         }
-    }
-    if (tab->window_type == WIN_MUC) {
+    } else if (tab->window_type == WIN_MUC) {
         char *pref = prefs_get_string(PREF_STATUSBAR_ROOM);
         if (g_strcmp0("room", pref) == 0) {
             Jid *jidp = jid_create(tab->identifier);
             char *room = strdup(jidp->localpart);
             jid_destroy(jidp);
-            return room;
+            fullname = room;
         } else {
-            return strdup(tab->identifier);
+            fullname = strdup(tab->identifier);
         }
-    }
-    if (tab->window_type == WIN_MUC_CONFIG) {
+    } else if (tab->window_type == WIN_MUC_CONFIG) {
         char *pref = prefs_get_string(PREF_STATUSBAR_ROOM);
         GString *display_str = g_string_new("");
         if (g_strcmp0("room", pref) == 0) {
@@ -559,9 +557,8 @@ _display_name(StatusBarTab *tab)
         g_string_append(display_str, " conf");
         char *result = strdup(display_str->str);
         g_string_free(display_str, TRUE);
-        return result;
-    }
-    if (tab->window_type == WIN_PRIVATE) {
+        fullname = result;
+    } else if (tab->window_type == WIN_PRIVATE) {
         char *pref = prefs_get_string(PREF_STATUSBAR_ROOM);
         if (g_strcmp0("room", pref) == 0) {
             GString *display_str = g_string_new("");
@@ -572,10 +569,29 @@ _display_name(StatusBarTab *tab)
             jid_destroy(jidp);
             char *result = strdup(display_str->str);
             g_string_free(display_str, TRUE);
-            return result;
+            fullname = result;
         } else {
-            return strdup(tab->identifier);
+            fullname = strdup(tab->identifier);
         }
+    } else {
+        fullname = strdup("window");
     }
-    return strdup("window");
+
+    gint tablen = prefs_get_statusbartablen();
+    if (tablen == 0) {
+        return fullname;
+    }
+
+    int namelen = utf8_display_len(fullname);
+    if (namelen < tablen) {
+        return fullname;
+    }
+
+    gchar *trimmed = g_utf8_substring(fullname, 0, tablen);
+    free(fullname);
+    char *trimmedname = strdup(trimmed);
+    g_free(trimmed);
+
+    return trimmedname;
+
 }

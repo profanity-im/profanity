@@ -5846,6 +5846,38 @@ cmd_statusbar(ProfWin *window, const char *const command, gchar **args)
         }
     }
 
+    if (g_strcmp0(args[0], "tablen") == 0) {
+        if (args[1] == NULL) {
+            cons_bad_cmd_usage(command);
+            return TRUE;
+        }
+
+        char *value = args[1];
+        int intval = 0;
+        char *err_msg = NULL;
+        gboolean res = strtoi_range(value, &intval, 0, INT_MAX, &err_msg);
+        if (res) {
+            if (intval < 0) {
+                cons_bad_cmd_usage(command);
+                return TRUE;
+            }
+
+            prefs_set_statusbartablen(intval);
+            if (intval == 0) {
+                cons_show("Maximum tab length disabled.");
+            } else {
+                cons_show("Maximum tab length set to %d.", intval);
+            }
+            ui_resize();
+            return TRUE;
+        } else {
+            cons_show(err_msg);
+            cons_bad_cmd_usage(command);
+            free(err_msg);
+            return TRUE;
+        }
+    }
+
     if (g_strcmp0(args[0], "self") == 0) {
         if (g_strcmp0(args[1], "barejid") == 0) {
             prefs_set_string(PREF_STATUSBAR_SELF, "barejid");
