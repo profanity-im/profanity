@@ -358,7 +358,7 @@ _status_bar_draw_tab(StatusBarTab *tab, int pos, int num)
     if (show_name) {
         char *display_name = _display_name(tab);
         mvwprintw(statusbar_win, 0, pos, display_name);
-        pos += strlen(display_name);
+        pos += utf8_display_len(display_name);
         free(display_name);
     }
     wattroff(statusbar_win, status_attrs);
@@ -479,7 +479,7 @@ _tabs_width(void)
             StatusBarTab *tab = g_hash_table_lookup(statusbar->tabs, GINT_TO_POINTER(i));
             if (tab) {
                 char *display_name = _display_name(tab);
-                width += strlen(display_name);
+                width += utf8_display_len(display_name);
                 width += 4;
                 free(display_name);
             }
@@ -494,7 +494,7 @@ _tabs_width(void)
             StatusBarTab *tab = g_hash_table_lookup(statusbar->tabs, GINT_TO_POINTER(i));
             if (tab) {
                 char *display_name = _display_name(tab);
-                width += strlen(display_name);
+                width += utf8_display_len(display_name);
                 width += 2;
                 free(display_name);
             }
