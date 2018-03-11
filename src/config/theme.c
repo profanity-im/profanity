@@ -444,7 +444,7 @@ _load_preferences(void)
 
     if (g_key_file_has_key(theme, "ui", "statusbar.tablen", NULL)) {
         gint tab_len = g_key_file_get_integer(theme, "ui", "statusbar.tablen", NULL);
-        prefs_set_statusbartabs(tab_len);
+        prefs_set_statusbartablen(tab_len);
     }
 
     if (g_key_file_has_key(theme, "ui", "occupants.size", NULL)) {
