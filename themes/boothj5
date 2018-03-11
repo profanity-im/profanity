@@ -145,8 +145,8 @@ inputwin.position=4
 statusbar.self=user
 statusbar.chat=user
 statusbar.room=room
-statusbar.tabs=8
-statusbar.tablen=0
+statusbar.tabs=10
+statusbar.tablen=5
 statusbar.show.name=true
 statusbar.show.number=true
 
