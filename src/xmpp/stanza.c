@@ -2038,6 +2038,28 @@ stanza_parse_presence(xmpp_stanza_t *stanza, int *err)
     return result;
 }
 
+xmpp_stanza_t*
+stanza_create_command_iq(xmpp_ctx_t *ctx, const char *const target,
+    const char *const node)
+{
+    char *id = create_unique_id("command");
+    xmpp_stanza_t *iq = xmpp_iq_new(ctx, STANZA_TYPE_SET, id);
+    free(id);
+    xmpp_stanza_set_to(iq, target);
+
+    xmpp_stanza_t *command = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(command, STANZA_NAME_COMMAND);
+
+    xmpp_stanza_set_ns(command, STANZA_NS_COMMAND);
+    xmpp_stanza_set_attribute(command, "node", node);
+    xmpp_stanza_set_attribute(command, "action", "execute");
+
+    xmpp_stanza_add_child(iq, command);
+    xmpp_stanza_release(command);
+
+    return iq;
+}
+
 static void
 _stanza_add_unique_id(xmpp_stanza_t *stanza, char *prefix)
 {

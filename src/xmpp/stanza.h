@@ -99,6 +99,7 @@
 #define STANZA_NAME_PUT "put"
 #define STANZA_NAME_GET "get"
 #define STANZA_NAME_URL "url"
+#define STANZA_NAME_COMMAND "command"
 
 // error conditions
 #define STANZA_NAME_BAD_REQUEST "bad-request"
@@ -186,6 +187,7 @@
 #define STANZA_NS_HTTP_UPLOAD "urn:xmpp:http:upload"
 #define STANZA_NS_X_OOB "jabber:x:oob"
 #define STANZA_NS_BLOCKING "urn:xmpp:blocking"
+#define STANZA_NS_COMMAND "http://jabber.org/protocol/commands"
 
 #define STANZA_DATAFORM_SOFTWARE "urn:xmpp:dataforms:softwareinfo"
 
@@ -277,6 +279,8 @@ xmpp_stanza_t* stanza_create_room_role_list_iq(xmpp_ctx_t *ctx, const char *cons
 xmpp_stanza_t* stanza_create_room_subject_message(xmpp_ctx_t *ctx, const char *const room, const char *const subject);
 xmpp_stanza_t* stanza_create_room_kick_iq(xmpp_ctx_t *const ctx, const char *const room, const char *const nick,
     const char *const reason);
+
+xmpp_stanza_t* stanza_create_command_iq(xmpp_ctx_t *ctx, const char *const target, const char *const node);
 
 int stanza_get_idle_time(xmpp_stanza_t *const stanza);
 

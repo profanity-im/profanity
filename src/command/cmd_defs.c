@@ -2298,6 +2298,21 @@ static struct cmd_t command_defs[] =
         CMD_EXAMPLES(
             "/export /path/to/output.csv",
             "/export ~/contacts.csv")
+    },
+
+    { "/command",
+        parse_args, 1, 1, NULL,
+        CMD_NOSUBFUNCS
+        CMD_MAINFUNC(cmd_command)
+        CMD_NOTAGS
+        CMD_SYN(
+            "/command <cmd>")
+        CMD_DESC(
+            "Execute an ad hoc command")
+        CMD_ARGS(
+            { "<cmd>", "Command to be executed" })
+        CMD_EXAMPLES(
+            "/command ping")
     }
 };
 

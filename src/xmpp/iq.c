@@ -120,6 +120,7 @@ static int _caps_response_for_jid_id_handler(xmpp_stanza_t *const stanza, void *
 static int _caps_response_legacy_id_handler(xmpp_stanza_t *const stanza, void *const userdata);
 static int _auto_pong_id_handler(xmpp_stanza_t *const stanza, void *const userdata);
 static int _room_list_id_handler(xmpp_stanza_t *const stanza, void *const userdata);
+static int _command_response_handler(xmpp_stanza_t *const stanza, void *const userdata);
 
 static void _iq_free_room_data(ProfRoomInfoData *roominfo);
 static void _iq_free_affiliation_set(ProfPrivilegeSet *affiliation_set);
@@ -696,6 +697,19 @@ iq_send_ping(const char *const target)
     xmpp_stanza_release(iq);
 }
 
+void
+iq_send_command(const char *const target, const char *const command)
+{
+    xmpp_ctx_t * const ctx = connection_get_ctx();
+    xmpp_stanza_t *iq = stanza_create_command_iq(ctx, target, command);
+    const char *id = xmpp_stanza_get_id(iq);
+
+    iq_id_handler_add(id, _command_response_handler, free, strdup(command));
+
+    iq_send_stanza(iq);
+    xmpp_stanza_release(iq);
+}
+
 static void
 _error_handler(xmpp_stanza_t *const stanza)
 {
@@ -1007,6 +1021,14 @@ _room_list_id_handler(xmpp_stanza_t *const stanza, void *const userdata)
         g_pattern_spec_free(glob);
     }
     g_free(filter);
+
+    return 0;
+}
+
+static int
+_command_response_handler(xmpp_stanza_t *const stanza, void *const userdata)
+{
+    cons_show("Plop", NULL);
 
     return 0;
 }

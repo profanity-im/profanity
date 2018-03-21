@@ -60,6 +60,7 @@
 #define XMPP_FEATURE_RECEIPTS "urn:xmpp:receipts"
 #define XMPP_FEATURE_LASTACTIVITY "jabber:iq:last"
 #define XMPP_FEATURE_MUC "http://jabber.org/protocol/muc"
+#define XMPP_FEATURE_COMMANDS "http://jabber.org/protocol/commands"
 
 typedef enum {
     JABBER_CONNECTING,
@@ -182,6 +183,7 @@ void iq_room_role_set(const char *const room, const char *const nick, char *role
 void iq_room_role_list(const char * const room, char *role);
 void iq_autoping_check(void);
 void iq_http_upload_request(HTTPUpload *upload);
+void iq_send_command(const char *const target, const char *const command);
 
 EntityCapabilities* caps_lookup(const char *const jid);
 void caps_close(void);
