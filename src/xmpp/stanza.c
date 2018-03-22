@@ -2045,7 +2045,7 @@ xmpp_stanza_t*
 stanza_create_command_exec_iq(xmpp_ctx_t *ctx, const char *const target,
     const char *const node)
 {
-    char *id = create_unique_id("command");
+    char *id = connection_create_stanza_id("cmdexec");
     xmpp_stanza_t *iq = xmpp_iq_new(ctx, STANZA_TYPE_SET, id);
     free(id);
     xmpp_stanza_set_to(iq, target);

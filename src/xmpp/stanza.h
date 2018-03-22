@@ -157,6 +157,7 @@
 #define STANZA_ATTR_REASON "reason"
 #define STANZA_ATTR_AUTOJOIN "autojoin"
 #define STANZA_ATTR_PASSWORD "password"
+#define STANZA_ATTR_STATUS "status"
 
 #define STANZA_TEXT_AWAY "away"
 #define STANZA_TEXT_DND "dnd"

@@ -1095,7 +1095,54 @@ _command_list_result_handler(xmpp_stanza_t *const stanza, void *const userdata)
 static int
 _command_exec_response_handler(xmpp_stanza_t *const stanza, void *const userdata)
 {
-    cons_show("%s", NULL, __func__);
+    const char *id = xmpp_stanza_get_id(stanza);
+    const char *type = xmpp_stanza_get_type(stanza);
+    char *from = strdup(xmpp_stanza_get_from(stanza));
+    const char *const command = userdata;
+
+    if (id) {
+        log_debug("IQ command exec response handler fired, id: %s.", id);
+    } else {
+        log_debug("IQ command exec response handler fired.");
+    }
+
+    // handle error responses
+    if (g_strcmp0(type, STANZA_TYPE_ERROR) == 0) {
+        char *error_message = stanza_get_error_message(stanza);
+        log_debug("Error executing command %s for %s: %s", command, from, error_message);
+        ProfWin *win = wins_get_by_string(from);
+        if (win) {
+            win_command_list_error(win, error_message);
+        }
+        free(error_message);
+        free(from);
+        return 0;
+    }
+
+    xmpp_stanza_t *cmd = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_COMMAND);
+    if (!cmd) {
+        /* TODO */
+    }
+
+    ProfWin *win = wins_get_by_string(from);
+
+    const char *status = xmpp_stanza_get_attribute(cmd, STANZA_ATTR_STATUS);
+    if (g_strcmp0(status, "completed") == 0) {
+        if (win) {
+            xmpp_stanza_t *note = xmpp_stanza_get_child_by_name(cmd, "note");
+            if (note) {
+                const char *type = xmpp_stanza_get_attribute(note, "type");
+                const char *value = xmpp_stanza_get_text(note);
+                win_handle_command_exec_result_note(win, type, value);
+            }
+        }
+    } else if (g_strcmp0(status, "executing") == 0) {
+    } else if (g_strcmp0(status, "canceled") == 0) {
+    } else {
+        /* TODO */
+    }
+
+    free(from);
 
     return 0;
 }

@@ -7509,9 +7509,9 @@ cmd_command_exec(ProfWin *window, const char *const command, gchar **args)
 
     ProfMucWin *mucwin = (ProfMucWin*)window;
 
-    iq_command_exec(mucwin->roomjid, args[0]);
+    iq_command_exec(mucwin->roomjid, args[1]);
 
-    cons_show("Execute %s...", args[0]);
+    cons_show("Execute %s...", args[1]);
     return TRUE;
 }
 

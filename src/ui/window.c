@@ -1752,3 +1752,10 @@ win_handle_command_list(ProfWin *window, GSList *cmds)
         win_println(window, THEME_DEFAULT, '!', "");
     }
 }
+
+void
+win_handle_command_exec_result_note(ProfWin *window, const char *const type, const char *const value)
+{
+    assert(window != NULL);
+    win_println(window, THEME_DEFAULT, '!', value);
+}
