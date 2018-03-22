@@ -205,6 +205,8 @@ void iq_room_role_list(const char * const room, char *role) {}
 void iq_last_activity_request(gchar *jid) {}
 void iq_autoping_check(void) {}
 void iq_rooms_cache_clear(void) {}
+void iq_command_list(const char *const target) {}
+void iq_command_exec(const char *const target, const char *const command) {}
 
 // caps functions
 void caps_add_feature(char *feature) {}

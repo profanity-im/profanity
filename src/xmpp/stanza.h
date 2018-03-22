@@ -280,7 +280,7 @@ xmpp_stanza_t* stanza_create_room_subject_message(xmpp_ctx_t *ctx, const char *c
 xmpp_stanza_t* stanza_create_room_kick_iq(xmpp_ctx_t *const ctx, const char *const room, const char *const nick,
     const char *const reason);
 
-xmpp_stanza_t* stanza_create_command_iq(xmpp_ctx_t *ctx, const char *const target, const char *const node);
+xmpp_stanza_t* stanza_create_command_exec_iq(xmpp_ctx_t *ctx, const char *const target, const char *const node);
 
 int stanza_get_idle_time(xmpp_stanza_t *const stanza);
 
@@ -296,7 +296,7 @@ EntityCapabilities* stanza_create_caps_from_query_element(xmpp_stanza_t *query);
 
 const char* stanza_get_presence_string_from_type(resource_presence_t presence_type);
 xmpp_stanza_t* stanza_create_software_version_iq(xmpp_ctx_t *ctx, const char *const fulljid);
-xmpp_stanza_t* stanza_create_disco_items_iq(xmpp_ctx_t *ctx, const char *const id, const char *const jid);
+xmpp_stanza_t* stanza_create_disco_items_iq(xmpp_ctx_t *ctx, const char *const id, const char *const jid, const char *const node);
 
 char* stanza_get_status(xmpp_stanza_t *stanza, char *def);
 char* stanza_get_show(xmpp_stanza_t *stanza, char *def);

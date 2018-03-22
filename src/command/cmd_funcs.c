@@ -7470,7 +7470,7 @@ cmd_encwarn(ProfWin *window, const char *const command, gchar **args)
 }
 
 gboolean
-cmd_command(ProfWin *window, const char *const command, gchar **args)
+cmd_command_list(ProfWin *window, const char *const command, gchar **args)
 {
     jabber_conn_status_t conn_status = connection_get_status();
 
@@ -7479,14 +7479,37 @@ cmd_command(ProfWin *window, const char *const command, gchar **args)
         return TRUE;
     }
 
-    if (args[0] == NULL && connection_supports(XMPP_FEATURE_COMMANDS) == FALSE) {
+    if (connection_supports(XMPP_FEATURE_COMMANDS) == FALSE) {
         cons_show("Server does not support ad hoc commands.");
         return TRUE;
     }
 
     ProfMucWin *mucwin = (ProfMucWin*)window;
 
-    iq_send_command(mucwin->roomjid, args[0]);
+    iq_command_list(mucwin->roomjid);
+
+    cons_show("List available ad hoc commands");
+    return TRUE;
+}
+
+gboolean
+cmd_command_exec(ProfWin *window, const char *const command, gchar **args)
+{
+    jabber_conn_status_t conn_status = connection_get_status();
+
+    if (conn_status != JABBER_CONNECTED) {
+        cons_show("You are not currently connected.");
+        return TRUE;
+    }
+
+    if (connection_supports(XMPP_FEATURE_COMMANDS) == FALSE) {
+        cons_show("Server does not support ad hoc commands.");
+        return TRUE;
+    }
+
+    ProfMucWin *mucwin = (ProfMucWin*)window;
+
+    iq_command_exec(mucwin->roomjid, args[0]);
 
     cons_show("Execute %s...", args[0]);
     return TRUE;

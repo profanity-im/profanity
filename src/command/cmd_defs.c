@@ -2300,19 +2300,24 @@ static struct cmd_t command_defs[] =
             "/export ~/contacts.csv")
     },
 
-    { "/command",
-        parse_args, 1, 1, NULL,
-        CMD_NOSUBFUNCS
-        CMD_MAINFUNC(cmd_command)
+    { "/cmd",
+        parse_args, 1, 3, NULL,
+        CMD_SUBFUNCS(
+            { "list", cmd_command_list },
+            { "exec", cmd_command_exec })
+        CMD_NOMAINFUNC
         CMD_NOTAGS
         CMD_SYN(
-            "/command <cmd>")
+            "/otr list",
+            "/otr exec <command>")
         CMD_DESC(
-            "Execute an ad hoc command")
+            "Execute ad hoc commands.")
         CMD_ARGS(
-            { "<cmd>", "Command to be executed" })
+            { "list",           "List supported ad hoc commands." },
+            { "exec <command>", "Execute a command." })
         CMD_EXAMPLES(
-            "/command ping")
+            "/cmd list",
+            "/cmd exec ping")
     }
 };
 

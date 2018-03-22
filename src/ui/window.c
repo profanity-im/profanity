@@ -1724,3 +1724,31 @@ win_sub_newline_lazy(WINDOW *win)
         wmove(win, cury+1, 0);
     }
 }
+
+void
+win_command_list_error(ProfWin *window, const char *const error)
+{
+    assert(window != NULL);
+
+    win_println(window, THEME_ERROR, '!', "Error retrieving command list: %s", error);
+}
+
+void
+win_handle_command_list(ProfWin *window, GSList *cmds)
+{
+    assert(window != NULL);
+
+    if (cmds) {
+        win_println(window, THEME_DEFAULT, '!', "Ad hoc commands:");
+        GSList *curr_cmd = cmds;
+        while (curr_cmd) {
+            const char *cmd = curr_cmd->data;
+            win_println(window, THEME_DEFAULT, '!', "  %s", cmd);
+            curr_cmd = g_slist_next(curr_cmd);
+        }
+        win_println(window, THEME_DEFAULT, '!', "");
+    } else {
+        win_println(window, THEME_DEFAULT, '!', "No commands found");
+        win_println(window, THEME_DEFAULT, '!', "");
+    }
+}
