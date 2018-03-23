@@ -1112,7 +1112,7 @@ _command_exec_response_handler(xmpp_stanza_t *const stanza, void *const userdata
         log_debug("Error executing command %s for %s: %s", command, from, error_message);
         ProfWin *win = wins_get_by_string(from);
         if (win) {
-            win_command_list_error(win, error_message);
+            win_command_exec_error(win, command, error_message);
         }
         free(error_message);
         free(from);

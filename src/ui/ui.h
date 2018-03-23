@@ -378,6 +378,7 @@ void win_clear(ProfWin *window);
 char* win_get_tab_identifier(ProfWin *window);
 char* win_to_string(ProfWin *window);
 void win_command_list_error(ProfWin *window, const char *const error);
+void win_command_exec_error(ProfWin *window, const char *const command, const char *const error, ...);
 void win_handle_command_list(ProfWin *window, GSList *cmds);
 void win_handle_command_exec_result_note(ProfWin *window, const char *const type, const char *const value);
 

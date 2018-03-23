@@ -1734,6 +1734,21 @@ win_command_list_error(ProfWin *window, const char *const error)
 }
 
 void
+win_command_exec_error(ProfWin *window, const char *const command, const char *const error, ...)
+{
+    assert(window != NULL);
+    va_list arg;
+    va_start(arg, error);
+    GString *msg = g_string_new(NULL);
+    g_string_vprintf(msg, error, arg);
+
+    win_println(window, THEME_ERROR, '!', "Error executing command %s: %s", command, msg);
+
+    g_string_free(msg, TRUE);
+    va_end(arg);
+}
+
+void
 win_handle_command_list(ProfWin *window, GSList *cmds)
 {
     assert(window != NULL);
