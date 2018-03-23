@@ -1097,7 +1097,7 @@ _command_exec_response_handler(xmpp_stanza_t *const stanza, void *const userdata
 {
     const char *id = xmpp_stanza_get_id(stanza);
     const char *type = xmpp_stanza_get_type(stanza);
-    char *from = strdup(xmpp_stanza_get_from(stanza));
+    const char *from = xmpp_stanza_get_from(stanza);
     const char *const command = userdata;
 
     if (id) {
@@ -1115,7 +1115,6 @@ _command_exec_response_handler(xmpp_stanza_t *const stanza, void *const userdata
             win_command_exec_error(win, command, error_message);
         }
         free(error_message);
-        free(from);
         return 0;
     }
 
@@ -1136,13 +1135,31 @@ _command_exec_response_handler(xmpp_stanza_t *const stanza, void *const userdata
                 win_handle_command_exec_result_note(win, type, value);
             }
         }
-    } else if (g_strcmp0(status, "executing") == 0) {
-    } else if (g_strcmp0(status, "canceled") == 0) {
-    } else {
-        /* TODO */
+        return 0;
     }
 
-    free(from);
+    if (g_strcmp0(status, "executing") == 0) {
+        xmpp_stanza_t *x = xmpp_stanza_get_child_by_ns(cmd, STANZA_NS_DATA);
+        if (x == NULL) {
+            /* TODO */
+            return 0;
+        }
+
+        const char *form_type = xmpp_stanza_get_type(x);
+        if (g_strcmp0(form_type, "form") != 0) {
+            /* TODO */
+            return 0;
+        }
+
+        DataForm *form = form_create(x);
+        ProfMucConfWin *confwin = (ProfMucConfWin*)wins_new_muc_config(from, form);
+        mucconfwin_handle_configuration(confwin, form);
+    }
+
+    if (g_strcmp0(status, "canceled") == 0) {
+    }
+
+    /* TODO */
 
     return 0;
 }

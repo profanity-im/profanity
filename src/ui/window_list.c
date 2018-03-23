@@ -364,7 +364,7 @@ wins_get_by_num(int i)
 }
 
 ProfWin*
-wins_get_by_string(char *str)
+wins_get_by_string(const char *str)
 {
     if (g_strcmp0(str, "console") == 0) {
         ProfWin *conswin = wins_get_console();

@@ -68,7 +68,7 @@ ProfWin* wins_get_current(void);
 void wins_set_current_by_num(int i);
 
 ProfWin* wins_get_by_num(int i);
-ProfWin* wins_get_by_string(char *str);
+ProfWin* wins_get_by_string(const char *str);
 
 ProfWin* wins_get_next(void);
 ProfWin* wins_get_previous(void);
