@@ -146,7 +146,7 @@ statusbar.self=user
 statusbar.chat=user
 statusbar.room=room
 statusbar.tabs=10
-statusbar.tablen=5
+statusbar.tablen=7
 statusbar.show.name=true
 statusbar.show.number=true
 
