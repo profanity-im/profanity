@@ -1152,8 +1152,8 @@ _command_exec_response_handler(xmpp_stanza_t *const stanza, void *const userdata
         }
 
         DataForm *form = form_create(x);
-        ProfMucConfWin *confwin = (ProfMucConfWin*)wins_new_muc_config(from, form);
-        mucconfwin_handle_configuration(confwin, form);
+        ProfConfWin *confwin = (ProfConfWin*)wins_new_config(from, form);
+        confwin_handle_configuration(confwin, form);
     }
 
     if (g_strcmp0(status, "canceled") == 0) {
@@ -1693,8 +1693,8 @@ _room_config_id_handler(xmpp_stanza_t *const stanza, void *const userdata)
     }
 
     DataForm *form = form_create(x);
-    ProfMucConfWin *confwin = (ProfMucConfWin*)wins_new_muc_config(from, form);
-    mucconfwin_handle_configuration(confwin, form);
+    ProfConfWin *confwin = (ProfConfWin*)wins_new_config(from, form);
+    confwin_handle_configuration(confwin, form);
 
     return 0;
 }

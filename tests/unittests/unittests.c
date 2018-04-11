@@ -557,7 +557,7 @@ int main(int argc, char* argv[]) {
         unit_test(cmd_pgp_start_shows_message_when_connecting),
         unit_test(cmd_pgp_start_shows_message_when_no_arg_in_console),
         unit_test(cmd_pgp_start_shows_message_when_no_arg_in_muc),
-        unit_test(cmd_pgp_start_shows_message_when_no_arg_in_mucconf),
+        unit_test(cmd_pgp_start_shows_message_when_no_arg_in_conf),
         unit_test(cmd_pgp_start_shows_message_when_no_arg_in_private),
         unit_test(cmd_pgp_start_shows_message_when_no_arg_in_xmlconsole),
 #else

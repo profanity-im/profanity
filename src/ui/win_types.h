@@ -128,7 +128,7 @@ typedef enum {
     WIN_CONSOLE,
     WIN_CHAT,
     WIN_MUC,
-    WIN_MUC_CONFIG,
+    WIN_CONFIG,
     WIN_PRIVATE,
     WIN_XML,
     WIN_PLUGIN
@@ -172,12 +172,12 @@ typedef struct prof_muc_win_t {
     char *message_char;
 } ProfMucWin;
 
-typedef struct prof_mucconf_win_t {
+typedef struct prof_conf_win_t {
     ProfWin window;
     char *roomjid;
     DataForm *form;
     unsigned long memcheck;
-} ProfMucConfWin;
+} ProfConfWin;
 
 typedef struct prof_private_win_t {
     ProfWin window;

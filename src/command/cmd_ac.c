@@ -664,7 +664,7 @@ cmd_ac_init(void)
     autocomplete_add(time_ac, "console");
     autocomplete_add(time_ac, "chat");
     autocomplete_add(time_ac, "muc");
-    autocomplete_add(time_ac, "mucconfig");
+    autocomplete_add(time_ac, "config");
     autocomplete_add(time_ac, "private");
     autocomplete_add(time_ac, "xml");
     autocomplete_add(time_ac, "statusbar");
@@ -1107,8 +1107,8 @@ cmd_ac_reset(ProfWin *window)
         muc_jid_autocomplete_reset(mucwin->roomjid);
     }
 
-    if (window->type == WIN_MUC_CONFIG) {
-        ProfMucConfWin *confwin = (ProfMucConfWin*)window;
+    if (window->type == WIN_CONFIG) {
+        ProfConfWin *confwin = (ProfConfWin*)window;
         assert(confwin->memcheck == PROFCONFWIN_MEMCHECK);
         if (confwin->form) {
             form_reset_autocompleters(confwin->form);
@@ -2349,13 +2349,13 @@ _inpblock_autocomplete(ProfWin *window, const char *const input, gboolean previo
 static char*
 _form_autocomplete(ProfWin *window, const char *const input, gboolean previous)
 {
-    if (window->type != WIN_MUC_CONFIG) {
+    if (window->type != WIN_CONFIG) {
         return NULL;
     }
 
     char *found = NULL;
 
-    ProfMucConfWin *confwin = (ProfMucConfWin*)window;
+    ProfConfWin *confwin = (ProfConfWin*)window;
     DataForm *form = confwin->form;
     if (form) {
         found = autocomplete_param_with_ac(input, "/form help", form->tag_ac, TRUE, previous);
@@ -2375,13 +2375,13 @@ _form_autocomplete(ProfWin *window, const char *const input, gboolean previous)
 static char*
 _form_field_autocomplete(ProfWin *window, const char *const input, gboolean previous)
 {
-    if (window->type != WIN_MUC_CONFIG) {
+    if (window->type != WIN_CONFIG) {
         return NULL;
     }
 
     char *found = NULL;
 
-    ProfMucConfWin *confwin = (ProfMucConfWin*)window;
+    ProfConfWin *confwin = (ProfConfWin*)window;
     DataForm *form = confwin->form;
     if (form == NULL) {
         return NULL;
@@ -2510,7 +2510,7 @@ _time_autocomplete(ProfWin *window, const char *const input, gboolean previous)
         return found;
     }
 
-    found = autocomplete_param_with_ac(input, "/time mucconfig", time_format_ac, TRUE, previous);
+    found = autocomplete_param_with_ac(input, "/time config", time_format_ac, TRUE, previous);
     if (found) {
         return found;
     }

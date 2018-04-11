@@ -1265,8 +1265,8 @@ static struct cmd_t command_defs[] =
         CMD_TAGS(
             CMD_TAG_UI)
         CMD_SYN(
-            "/time console|chat|muc|mucconfig|private|xml set <format>",
-            "/time console|chat|muc|mucconfig|private|xml off",
+            "/time console|chat|muc|config|private|xml set <format>",
+            "/time console|chat|muc|config|private|xml off",
             "/time statusbar set <format>",
             "/time statusbar off",
             "/time lastactivity set <format>")
@@ -1283,8 +1283,8 @@ static struct cmd_t command_defs[] =
             { "chat off",                  "Do not show time in chat windows." },
             { "muc set <format>",          "Set time format for chat room windows." },
             { "muc off",                   "Do not show time in chat room windows." },
-            { "mucconfig set <format>",    "Set time format for chat room config windows." },
-            { "mucconfig off",             "Do not show time in chat room config windows." },
+            { "config set <format>",       "Set time format for chat room config windows." },
+            { "config off",                "Do not show time in chat room config windows." },
             { "private set <format>",      "Set time format for private chat windows." },
             { "private off",               "Do not show time in private chat windows." },
             { "xml set <format>",          "Set time format for XML console window." },

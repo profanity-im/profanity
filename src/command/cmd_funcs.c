@@ -3632,11 +3632,11 @@ cmd_decline(ProfWin *window, const char *const command, gchar **args)
 gboolean
 cmd_form_field(ProfWin *window, char *tag, gchar **args)
 {
-    if (window->type != WIN_MUC_CONFIG) {
+    if (window->type != WIN_CONFIG) {
         return TRUE;
     }
 
-    ProfMucConfWin *confwin = (ProfMucConfWin*)window;
+    ProfConfWin *confwin = (ProfConfWin*)window;
     DataForm *form = confwin->form;
     if (form) {
         if (!form_tag_exists(form, tag)) {
@@ -3657,14 +3657,14 @@ cmd_form_field(ProfWin *window, char *tag, gchar **args)
             if (g_strcmp0(value, "on") == 0) {
                 form_set_value(form, tag, "1");
                 win_println(window, THEME_DEFAULT, '-', "Field updated...");
-                mucconfwin_show_form_field(confwin, form, tag);
+                confwin_show_form_field(confwin, form, tag);
             } else if (g_strcmp0(value, "off") == 0) {
                 form_set_value(form, tag, "0");
                 win_println(window, THEME_DEFAULT, '-', "Field updated...");
-                mucconfwin_show_form_field(confwin, form, tag);
+                confwin_show_form_field(confwin, form, tag);
             } else {
                 win_println(window, THEME_DEFAULT, '-', "Invalid command, usage:");
-                mucconfwin_field_help(confwin, tag);
+                confwin_field_help(confwin, tag);
                 win_println(window, THEME_DEFAULT, '-', "");
             }
             break;
@@ -3675,24 +3675,24 @@ cmd_form_field(ProfWin *window, char *tag, gchar **args)
             value = args[0];
             if (value == NULL) {
                 win_println(window, THEME_DEFAULT, '-', "Invalid command, usage:");
-                mucconfwin_field_help(confwin, tag);
+                confwin_field_help(confwin, tag);
                 win_println(window, THEME_DEFAULT, '-', "");
             } else {
                 form_set_value(form, tag, value);
                 win_println(window, THEME_DEFAULT, '-', "Field updated...");
-                mucconfwin_show_form_field(confwin, form, tag);
+                confwin_show_form_field(confwin, form, tag);
             }
             break;
         case FIELD_LIST_SINGLE:
             value = args[0];
             if ((value == NULL) || !form_field_contains_option(form, tag, value)) {
                 win_println(window, THEME_DEFAULT, '-', "Invalid command, usage:");
-                mucconfwin_field_help(confwin, tag);
+                confwin_field_help(confwin, tag);
                 win_println(window, THEME_DEFAULT, '-', "");
             } else {
                 form_set_value(form, tag, value);
                 win_println(window, THEME_DEFAULT, '-', "Field updated...");
-                mucconfwin_show_form_field(confwin, form, tag);
+                confwin_show_form_field(confwin, form, tag);
             }
             break;
 
@@ -3703,32 +3703,32 @@ cmd_form_field(ProfWin *window, char *tag, gchar **args)
             }
             if ((g_strcmp0(cmd, "add") != 0) && (g_strcmp0(cmd, "remove"))) {
                 win_println(window, THEME_DEFAULT, '-', "Invalid command, usage:");
-                mucconfwin_field_help(confwin, tag);
+                confwin_field_help(confwin, tag);
                 win_println(window, THEME_DEFAULT, '-', "");
                 break;
             }
             if (value == NULL) {
                 win_println(window, THEME_DEFAULT, '-', "Invalid command, usage:");
-                mucconfwin_field_help(confwin, tag);
+                confwin_field_help(confwin, tag);
                 win_println(window, THEME_DEFAULT, '-', "");
                 break;
             }
             if (g_strcmp0(cmd, "add") == 0) {
                 form_add_value(form, tag, value);
                 win_println(window, THEME_DEFAULT, '-', "Field updated...");
-                mucconfwin_show_form_field(confwin, form, tag);
+                confwin_show_form_field(confwin, form, tag);
                 break;
             }
             if (g_strcmp0(args[0], "remove") == 0) {
                 if (!g_str_has_prefix(value, "val")) {
                     win_println(window, THEME_DEFAULT, '-', "Invalid command, usage:");
-                    mucconfwin_field_help(confwin, tag);
+                    confwin_field_help(confwin, tag);
                     win_println(window, THEME_DEFAULT, '-', "");
                     break;
                 }
                 if (strlen(value) < 4) {
                     win_println(window, THEME_DEFAULT, '-', "Invalid command, usage:");
-                    mucconfwin_field_help(confwin, tag);
+                    confwin_field_help(confwin, tag);
                     win_println(window, THEME_DEFAULT, '-', "");
                     break;
                 }
@@ -3736,7 +3736,7 @@ cmd_form_field(ProfWin *window, char *tag, gchar **args)
                 int index = strtol(&value[3], NULL, 10);
                 if ((index < 1) || (index > form_get_value_count(form, tag))) {
                     win_println(window, THEME_DEFAULT, '-', "Invalid command, usage:");
-                    mucconfwin_field_help(confwin, tag);
+                    confwin_field_help(confwin, tag);
                     win_println(window, THEME_DEFAULT, '-', "");
                     break;
                 }
@@ -3744,7 +3744,7 @@ cmd_form_field(ProfWin *window, char *tag, gchar **args)
                 removed = form_remove_text_multi_value(form, tag, index);
                 if (removed) {
                     win_println(window, THEME_DEFAULT, '-', "Field updated...");
-                    mucconfwin_show_form_field(confwin, form, tag);
+                    confwin_show_form_field(confwin, form, tag);
                 } else {
                     win_println(window, THEME_DEFAULT, '-', "Could not remove %s from %s", value, tag);
                 }
@@ -3757,13 +3757,13 @@ cmd_form_field(ProfWin *window, char *tag, gchar **args)
             }
             if ((g_strcmp0(cmd, "add") != 0) && (g_strcmp0(cmd, "remove"))) {
                 win_println(window, THEME_DEFAULT, '-', "Invalid command, usage:");
-                mucconfwin_field_help(confwin, tag);
+                confwin_field_help(confwin, tag);
                 win_println(window, THEME_DEFAULT, '-', "");
                 break;
             }
             if (value == NULL) {
                 win_println(window, THEME_DEFAULT, '-', "Invalid command, usage:");
-                mucconfwin_field_help(confwin, tag);
+                confwin_field_help(confwin, tag);
                 win_println(window, THEME_DEFAULT, '-', "");
                 break;
             }
@@ -3773,13 +3773,13 @@ cmd_form_field(ProfWin *window, char *tag, gchar **args)
                     added = form_add_unique_value(form, tag, value);
                     if (added) {
                         win_println(window, THEME_DEFAULT, '-', "Field updated...");
-                        mucconfwin_show_form_field(confwin, form, tag);
+                        confwin_show_form_field(confwin, form, tag);
                     } else {
                         win_println(window, THEME_DEFAULT, '-', "Value %s already selected for %s", value, tag);
                     }
                 } else {
                     win_println(window, THEME_DEFAULT, '-', "Invalid command, usage:");
-                    mucconfwin_field_help(confwin, tag);
+                    confwin_field_help(confwin, tag);
                     win_println(window, THEME_DEFAULT, '-', "");
                 }
                 break;
@@ -3790,13 +3790,13 @@ cmd_form_field(ProfWin *window, char *tag, gchar **args)
                     removed = form_remove_value(form, tag, value);
                     if (removed) {
                         win_println(window, THEME_DEFAULT, '-', "Field updated...");
-                        mucconfwin_show_form_field(confwin, form, tag);
+                        confwin_show_form_field(confwin, form, tag);
                     } else {
                         win_println(window, THEME_DEFAULT, '-', "Value %s is not currently set for %s", value, tag);
                     }
                 } else {
                     win_println(window, THEME_DEFAULT, '-', "Invalid command, usage:");
-                    mucconfwin_field_help(confwin, tag);
+                    confwin_field_help(confwin, tag);
                     win_println(window, THEME_DEFAULT, '-', "");
                 }
             }
@@ -3808,13 +3808,13 @@ cmd_form_field(ProfWin *window, char *tag, gchar **args)
             }
             if ((g_strcmp0(cmd, "add") != 0) && (g_strcmp0(cmd, "remove"))) {
                 win_println(window, THEME_DEFAULT, '-', "Invalid command, usage:");
-                mucconfwin_field_help(confwin, tag);
+                confwin_field_help(confwin, tag);
                 win_println(window, THEME_DEFAULT, '-', "");
                 break;
             }
             if (value == NULL) {
                 win_println(window, THEME_DEFAULT, '-', "Invalid command, usage:");
-                mucconfwin_field_help(confwin, tag);
+                confwin_field_help(confwin, tag);
                 win_println(window, THEME_DEFAULT, '-', "");
                 break;
             }
@@ -3822,7 +3822,7 @@ cmd_form_field(ProfWin *window, char *tag, gchar **args)
                 added = form_add_unique_value(form, tag, value);
                 if (added) {
                     win_println(window, THEME_DEFAULT, '-', "Field updated...");
-                    mucconfwin_show_form_field(confwin, form, tag);
+                    confwin_show_form_field(confwin, form, tag);
                 } else {
                     win_println(window, THEME_DEFAULT, '-', "JID %s already exists in %s", value, tag);
                 }
@@ -3832,7 +3832,7 @@ cmd_form_field(ProfWin *window, char *tag, gchar **args)
                 removed = form_remove_value(form, tag, value);
                 if (removed) {
                     win_println(window, THEME_DEFAULT, '-', "Field updated...");
-                    mucconfwin_show_form_field(confwin, form, tag);
+                    confwin_show_form_field(confwin, form, tag);
                 } else {
                     win_println(window, THEME_DEFAULT, '-', "Field %s does not contain %s", tag, value);
                 }
@@ -3857,7 +3857,7 @@ cmd_form(ProfWin *window, const char *const command, gchar **args)
         return TRUE;
     }
 
-    if (window->type != WIN_MUC_CONFIG) {
+    if (window->type != WIN_CONFIG) {
         cons_show("Command '/form' does not apply to this window.");
         return TRUE;
     }
@@ -3870,20 +3870,20 @@ cmd_form(ProfWin *window, const char *const command, gchar **args)
         return TRUE;
     }
 
-    ProfMucConfWin *confwin = (ProfMucConfWin*)window;
+    ProfConfWin *confwin = (ProfConfWin*)window;
     assert(confwin->memcheck == PROFCONFWIN_MEMCHECK);
 
     if (g_strcmp0(args[0], "show") == 0) {
-        mucconfwin_show_form(confwin);
+        confwin_show_form(confwin);
         return TRUE;
     }
 
     if (g_strcmp0(args[0], "help") == 0) {
         char *tag = args[1];
         if (tag) {
-            mucconfwin_field_help(confwin, tag);
+            confwin_field_help(confwin, tag);
         } else {
-            mucconfwin_form_help(confwin);
+            confwin_form_help(confwin);
 
             gchar **help_text = NULL;
             Command *command = cmd_get("/form");
@@ -4264,7 +4264,7 @@ cmd_room(ProfWin *window, const char *const command, gchar **args)
     }
 
     if (g_strcmp0(args[0], "config") == 0) {
-        ProfMucConfWin *confwin = wins_get_muc_conf(mucwin->roomjid);
+        ProfConfWin *confwin = wins_get_conf(mucwin->roomjid);
 
         if (confwin) {
             ui_focus_win((ProfWin*)confwin);
@@ -5159,20 +5159,20 @@ cmd_time(ProfWin *window, const char *const command, gchar **args)
             cons_bad_cmd_usage(command);
             return TRUE;
         }
-    } else if (g_strcmp0(args[0], "mucconfig") == 0) {
+    } else if (g_strcmp0(args[0], "config") == 0) {
         if (args[1] == NULL) {
-            char *format = prefs_get_string(PREF_TIME_MUCCONFIG);
-            cons_show("MUC config time format: '%s'.", format);
+            char *format = prefs_get_string(PREF_TIME_CONFIG);
+            cons_show("config time format: '%s'.", format);
             prefs_free_string(format);
             return TRUE;
         } else if (g_strcmp0(args[1], "set") == 0 && args[2] != NULL) {
-            prefs_set_string(PREF_TIME_MUCCONFIG, args[2]);
-            cons_show("MUC config time format set to '%s'.", args[2]);
+            prefs_set_string(PREF_TIME_CONFIG, args[2]);
+            cons_show("config time format set to '%s'.", args[2]);
             wins_resize_all();
             return TRUE;
         } else if (g_strcmp0(args[1], "off") == 0) {
-            prefs_set_string(PREF_TIME_MUCCONFIG, "off");
-            cons_show("MUC config time display disabled.");
+            prefs_set_string(PREF_TIME_CONFIG, "off");
+            cons_show("config time display disabled.");
             wins_resize_all();
             return TRUE;
         } else {
@@ -7518,7 +7518,7 @@ cmd_command_exec(ProfWin *window, const char *const command, gchar **args)
 static gboolean
 _cmd_execute(ProfWin *window, const char *const command, const char *const inp)
 {
-    if (g_str_has_prefix(command, "/field") && window->type == WIN_MUC_CONFIG) {
+    if (g_str_has_prefix(command, "/field") && window->type == WIN_CONFIG) {
         gboolean result = FALSE;
         gchar **args = parse_args_with_freetext(inp, 1, 2, &result);
         if (!result) {

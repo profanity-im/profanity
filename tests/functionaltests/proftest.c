@@ -183,8 +183,8 @@ init_prof_test(void **state)
     assert_true(prof_output_exact("Chat time display disabled."));
     prof_input("/time muc off");
     assert_true(prof_output_exact("MUC time display disabled."));
-    prof_input("/time mucconfig off");
-    assert_true(prof_output_exact("MUC config time display disabled."));
+    prof_input("/time config off");
+    assert_true(prof_output_exact("config time display disabled."));
     prof_input("/time private off");
     assert_true(prof_output_exact("Private chat time display disabled."));
     prof_input("/time xml off");

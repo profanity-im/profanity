@@ -544,7 +544,7 @@ _display_name(StatusBarTab *tab)
         } else {
             fullname = strdup(tab->identifier);
         }
-    } else if (tab->window_type == WIN_MUC_CONFIG) {
+    } else if (tab->window_type == WIN_CONFIG) {
         char *pref = prefs_get_string(PREF_STATUSBAR_ROOM);
         GString *display_str = g_string_new("");
         if (g_strcmp0("room", pref) == 0) {
