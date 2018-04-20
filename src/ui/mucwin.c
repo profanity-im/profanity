@@ -483,7 +483,7 @@ mucwin_message(ProfMucWin *mucwin, const char *const nick, const char *const mes
         ch = mucwin->message_char[0];
     }
 
-    if (g_strcmp0(nick, mynick) != 0) {
+    if ((g_strcmp0(nick, mynick) != 0) && (strncmp(message, "/me ", 4) != 0)) {
         if (g_slist_length(mentions) > 0) {
             win_print_them(window, THEME_ROOMMENTION, ch, nick);
             _mucwin_print_mention(window, message, mynick, mentions);
