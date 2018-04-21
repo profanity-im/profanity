@@ -209,6 +209,60 @@ shows_message(void **state)
 }
 
 void
+shows_me_message_from_occupant(void **state)
+{
+    prof_connect();
+
+    stbbr_for_id("prof_join_4",
+        "<presence id='prof_join_4' lang='en' to='stabber@localhost/profanity' from='testroom@conference.localhost/stabber'>"
+            "<c hash='sha-1' xmlns='http://jabber.org/protocol/caps' node='http://www.profanity.im' ver='*'/>"
+            "<x xmlns='http://jabber.org/protocol/muc#user'>"
+                "<item role='participant' jid='stabber@localhost/profanity' affiliation='none'/>"
+            "</x>"
+            "<status code='110'/>"
+        "</presence>"
+    );
+
+    prof_input("/join testroom@conference.localhost");
+    assert_true(prof_output_exact("-> You have joined the room as stabber, role: participant, affiliation: none"));
+
+    stbbr_send(
+        "<message type='groupchat' to='stabber@localhost/profanity' from='testroom@conference.localhost/testoccupant'>"
+            "<body>/me did something</body>"
+        "</message>"
+    );
+
+    assert_true(prof_output_exact("*testoccupant did something"));
+}
+
+void
+shows_me_message_from_self(void **state)
+{
+    prof_connect();
+
+    stbbr_for_id("prof_join_4",
+        "<presence id='prof_join_4' lang='en' to='stabber@localhost/profanity' from='testroom@conference.localhost/stabber'>"
+            "<c hash='sha-1' xmlns='http://jabber.org/protocol/caps' node='http://www.profanity.im' ver='*'/>"
+            "<x xmlns='http://jabber.org/protocol/muc#user'>"
+                "<item role='participant' jid='stabber@localhost/profanity' affiliation='none'/>"
+            "</x>"
+            "<status code='110'/>"
+        "</presence>"
+    );
+
+    prof_input("/join testroom@conference.localhost");
+    assert_true(prof_output_exact("-> You have joined the room as stabber, role: participant, affiliation: none"));
+
+    stbbr_send(
+        "<message type='groupchat' to='stabber@localhost/profanity' from='testroom@conference.localhost/stabber'>"
+            "<body>/me did something</body>"
+        "</message>"
+    );
+
+    assert_true(prof_output_exact("*stabber did something"));
+}
+
+void
 shows_all_messages_in_console_when_window_not_focussed(void **state)
 {
     prof_connect();

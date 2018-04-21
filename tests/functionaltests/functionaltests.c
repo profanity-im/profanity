@@ -101,6 +101,8 @@ int main(int argc, char* argv[]) {
         PROF_FUNC_TEST(shows_history_message),
         PROF_FUNC_TEST(shows_occupant_join),
         PROF_FUNC_TEST(shows_message),
+        PROF_FUNC_TEST(shows_me_message_from_occupant),
+        PROF_FUNC_TEST(shows_me_message_from_self),
         PROF_FUNC_TEST(shows_all_messages_in_console_when_window_not_focussed),
         PROF_FUNC_TEST(shows_first_message_in_console_when_window_not_focussed),
         PROF_FUNC_TEST(shows_no_message_in_console_when_window_not_focussed),
