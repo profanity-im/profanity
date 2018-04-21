@@ -296,8 +296,9 @@ plugins_unload(const char *const name)
             resource_presence_t last_presence = accounts_get_last_presence(account_name);
             cl_ev_presence_send(last_presence, 0);
         }
+        return TRUE;
     }
-    return TRUE;
+    return FALSE;
 }
 
 void
