@@ -184,11 +184,6 @@ plugins_install(const char *const plugin_name, const char *const filename, GStri
         return FALSE;
     }
 
-    ProfPlugin *plugin = g_hash_table_lookup(plugins, plugin_name);
-    if (plugin) {
-        plugins_unload(plugin_name);
-    }
-
     gboolean result = copy_file(filename, target_path->str);
     g_string_free(target_path, TRUE);
 
