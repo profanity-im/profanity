@@ -34,6 +34,7 @@
 
 #include <string.h>
 #include <stdlib.h>
+#include <gio/gio.h>
 
 #include "log.h"
 #include "config.h"
@@ -166,6 +167,20 @@ plugins_install_all(const char *const path)
     g_slist_free_full(contents, g_free);
 
     return result;
+}
+
+gboolean
+plugins_uninstall(const char *const plugin_name)
+{
+    plugins_unload(plugin_name);
+    char *plugins_dir = files_get_data_path(DIR_PLUGINS);   
+    GString *target_path = g_string_new(plugins_dir);
+    free(plugins_dir);
+    g_string_append(target_path, "/");
+    g_string_append(target_path, plugin_name);
+    GFile *file = g_file_new_for_path(target_path->str);
+    GError *error = NULL;
+    return g_file_delete(file, NULL, &error);
 }
 
 gboolean

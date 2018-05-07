@@ -115,6 +115,8 @@ void plugins_shutdown(void);
 void plugins_free_install_result(PluginsInstallResult *result);
 
 gboolean plugins_install(const char *const plugin_name, const char *const filename, GString * error_message);
+gboolean plugins_uninstall(const char *const plugin_name);
+gboolean plugins_update(const char *const plugin_name, const char *const filename, GString * error_message);
 PluginsInstallResult* plugins_install_all(const char *const path);
 gboolean plugins_load(const char *const name);
 GSList* plugins_load_all(void);
