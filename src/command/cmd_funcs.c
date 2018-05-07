@@ -6664,6 +6664,23 @@ cmd_plugins_install(ProfWin *window, const char *const command, gchar **args)
 }
 
 gboolean
+cmd_plugins_uninstall(ProfWin *window, const char *const command, gchar **args)
+{
+    if (args[1] == NULL) {
+        return FALSE;
+    }
+
+    gboolean res = plugins_uninstall(args[1]);
+    if (res) {
+        cons_show("Uninstalled plugin: %s", args[1]);
+    } else {
+        cons_show("Failed to uninstall plugin: %s", args[1]);
+    }
+
+    return TRUE;
+}
+
+gboolean
 cmd_plugins_load(ProfWin *window, const char *const command, gchar **args)
 {
     if (args[1] == NULL) {
