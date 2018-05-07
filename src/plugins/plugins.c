@@ -149,10 +149,12 @@ plugins_install_all(const char *const path)
     get_file_paths_recursive(path, &contents);
 
     GSList *curr = contents;
+    GString *error_message = NULL;
     while (curr) {
+        error_message = g_string_new(NULL);
         if (g_str_has_suffix(curr->data, ".py") || g_str_has_suffix(curr->data, ".so")) {
             gchar *plugin_name = g_path_get_basename(curr->data);
-            if (plugins_install(plugin_name, curr->data)) {
+            if (plugins_install(plugin_name, curr->data, error_message)) {
                 result->installed = g_slist_append(result->installed, strdup(curr->data));
             } else {
                 result->failed = g_slist_append(result->failed, strdup(curr->data));
@@ -167,7 +169,7 @@ plugins_install_all(const char *const path)
 }
 
 gboolean
-plugins_install(const char *const plugin_name, const char *const filename)
+plugins_install(const char *const plugin_name, const char *const filename, GString *error_message)
 {
     char *plugins_dir = files_get_data_path(DIR_PLUGINS);
     GString *target_path = g_string_new(plugins_dir);
@@ -175,9 +177,10 @@ plugins_install(const char *const plugin_name, const char *const filename)
     g_string_append(target_path, "/");
     g_string_append(target_path, plugin_name);
 
-    if (g_file_test (filename,G_FILE_TEST_EXISTS))
+    if (g_file_test (target_path->str, G_FILE_TEST_EXISTS))
     {
         log_info("Failed to install plugin: %s, file exists", plugin_name);
+        g_string_assign(error_message, "File exists");
         return FALSE;
     }
 
