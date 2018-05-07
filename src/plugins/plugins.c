@@ -184,13 +184,12 @@ plugins_install(const char *const plugin_name, const char *const filename, GStri
         return FALSE;
     }
 
-    gboolean result = copy_file(filename, target_path->str);
+    gboolean result = copy_file(filename, target_path->str, false);
     g_string_free(target_path, TRUE);
 
     if (result) {
         result = plugins_load(plugin_name);
     }
-
     return result;
 }
 
