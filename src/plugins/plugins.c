@@ -175,6 +175,12 @@ plugins_install(const char *const plugin_name, const char *const filename)
     g_string_append(target_path, "/");
     g_string_append(target_path, plugin_name);
 
+    if (g_file_test (filename,G_FILE_TEST_EXISTS))
+    {
+        log_info("Failed to install plugin: %s, file exists", plugin_name);
+        return FALSE;
+    }
+
     ProfPlugin *plugin = g_hash_table_lookup(plugins, plugin_name);
     if (plugin) {
         plugins_unload(plugin_name);
