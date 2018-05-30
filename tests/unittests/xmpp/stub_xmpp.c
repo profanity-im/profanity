@@ -185,8 +185,8 @@ void iq_http_upload_request(HTTPUpload *upload) {}
 void iq_confirm_instant_room(const char * const room_jid) {}
 void iq_destroy_room(const char * const room_jid) {}
 void iq_request_room_config_form(const char * const room_jid) {}
-void iq_submit_room_config(const char * const room, DataForm *form) {}
-void iq_room_config_cancel(const char * const room_jid) {}
+void iq_submit_room_config(ProfConfWin *confwin) {}
+void iq_room_config_cancel(ProfConfWin *confwin) {}
 void iq_send_ping(const char * const target) {}
 void iq_send_caps_request(const char * const to, const char * const id,
     const char * const node, const char * const ver) {}

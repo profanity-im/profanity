@@ -346,7 +346,7 @@ ProfWin* win_create_console(void);
 ProfWin* win_create_xmlconsole(void);
 ProfWin* win_create_chat(const char *const barejid);
 ProfWin* win_create_muc(const char *const roomjid);
-ProfWin* win_create_config(const char *const title, DataForm *form);
+ProfWin* win_create_config(const char *const title, DataForm *form, ProfConfWinCallback submit, ProfConfWinCallback cancel);
 ProfWin* win_create_private(const char *const fulljid);
 ProfWin* win_create_plugin(const char *const plugin_name, const char *const tag);
 void win_update_virtual(ProfWin *window);
@@ -380,6 +380,7 @@ char* win_to_string(ProfWin *window);
 void win_command_list_error(ProfWin *window, const char *const error);
 void win_command_exec_error(ProfWin *window, const char *const command, const char *const error, ...);
 void win_handle_command_list(ProfWin *window, GSList *cmds);
+void win_handle_command_exec_status(ProfWin *window, const char *const type, const char *const value);
 void win_handle_command_exec_result_note(ProfWin *window, const char *const type, const char *const value);
 
 // desktop notifications

@@ -586,10 +586,10 @@ iq_request_room_config_form(const char *const room_jid)
 }
 
 void
-iq_submit_room_config(const char *const room, DataForm *form)
+iq_submit_room_config(ProfConfWin *confwin)
 {
     xmpp_ctx_t * const ctx = connection_get_ctx();
-    xmpp_stanza_t *iq = stanza_create_room_config_submit_iq(ctx, room, form);
+    xmpp_stanza_t *iq = stanza_create_room_config_submit_iq(ctx, confwin->roomjid, confwin->form);
 
     const char *id = xmpp_stanza_get_id(iq);
     iq_id_handler_add(id, _room_config_submit_id_handler, NULL, NULL);
@@ -599,10 +599,10 @@ iq_submit_room_config(const char *const room, DataForm *form)
 }
 
 void
-iq_room_config_cancel(const char *const room_jid)
+iq_room_config_cancel(ProfConfWin *confwin)
 {
     xmpp_ctx_t * const ctx = connection_get_ctx();
-    xmpp_stanza_t *iq = stanza_create_room_config_cancel_iq(ctx, room_jid);
+    xmpp_stanza_t *iq = stanza_create_room_config_cancel_iq(ctx, confwin->roomjid);
     iq_send_stanza(iq);
     xmpp_stanza_release(iq);
 }
@@ -1106,60 +1106,70 @@ _command_exec_response_handler(xmpp_stanza_t *const stanza, void *const userdata
         log_debug("IQ command exec response handler fired.");
     }
 
+    ProfWin *win = wins_get_by_string(from);
+    if (win == NULL) {
+        /* No more window associated with this command.
+         * Fallback to console. */
+        win = wins_get_console();
+    }
+
     // handle error responses
     if (g_strcmp0(type, STANZA_TYPE_ERROR) == 0) {
         char *error_message = stanza_get_error_message(stanza);
         log_debug("Error executing command %s for %s: %s", command, from, error_message);
-        ProfWin *win = wins_get_by_string(from);
-        if (win) {
-            win_command_exec_error(win, command, error_message);
-        }
+        win_command_exec_error(win, command, error_message);
         free(error_message);
         return 0;
     }
 
     xmpp_stanza_t *cmd = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_COMMAND);
     if (!cmd) {
-        /* TODO */
-    }
-
-    ProfWin *win = wins_get_by_string(from);
-
-    const char *status = xmpp_stanza_get_attribute(cmd, STANZA_ATTR_STATUS);
-    if (g_strcmp0(status, "completed") == 0) {
-        if (win) {
-            xmpp_stanza_t *note = xmpp_stanza_get_child_by_name(cmd, "note");
-            if (note) {
-                const char *type = xmpp_stanza_get_attribute(note, "type");
-                const char *value = xmpp_stanza_get_text(note);
-                win_handle_command_exec_result_note(win, type, value);
-            }
-        }
+        log_error("No command element for command response");
+        win_command_exec_error(win, command, "Malformed command response");
         return 0;
     }
 
-    if (g_strcmp0(status, "executing") == 0) {
+
+    const char *status = xmpp_stanza_get_attribute(cmd, STANZA_ATTR_STATUS);
+    if (g_strcmp0(status, "completed") == 0) {
+        win_handle_command_exec_status(win, command, "completed");
+        xmpp_stanza_t *note = xmpp_stanza_get_child_by_name(cmd, "note");
+        if (note) {
+            const char *type = xmpp_stanza_get_attribute(note, "type");
+            const char *value = xmpp_stanza_get_text(note);
+            win_handle_command_exec_result_note(win, type, value);
+        }
+    } else if (g_strcmp0(status, "executing") == 0) {
+        win_handle_command_exec_status(win, command, "executing");
+
+        /* Looking for a jabber:x:data type form */
         xmpp_stanza_t *x = xmpp_stanza_get_child_by_ns(cmd, STANZA_NS_DATA);
         if (x == NULL) {
-            /* TODO */
             return 0;
         }
 
         const char *form_type = xmpp_stanza_get_type(x);
         if (g_strcmp0(form_type, "form") != 0) {
-            /* TODO */
+            log_error("Unsupported payload in command response");
+            win_command_exec_error(win, command, "Unsupported command response");
             return 0;
         }
 
         DataForm *form = form_create(x);
-        ProfConfWin *confwin = (ProfConfWin*)wins_new_config(from, form);
+        ProfConfWin *confwin = (ProfConfWin*)wins_new_config(from, form, NULL, NULL);
         confwin_handle_configuration(confwin, form);
+    } else if (g_strcmp0(status, "canceled") == 0) {
+        win_handle_command_exec_status(win, command, "canceled");
+        xmpp_stanza_t *note = xmpp_stanza_get_child_by_name(cmd, "note");
+        if (note) {
+            const char *type = xmpp_stanza_get_attribute(note, "type");
+            const char *value = xmpp_stanza_get_text(note);
+            win_handle_command_exec_result_note(win, type, value);
+        }
+    } else {
+        log_error("Unsupported command status %s", status);
+        win_command_exec_error(win, command, "Malformed command response");
     }
-
-    if (g_strcmp0(status, "canceled") == 0) {
-    }
-
-    /* TODO */
 
     return 0;
 }
@@ -1693,7 +1703,7 @@ _room_config_id_handler(xmpp_stanza_t *const stanza, void *const userdata)
     }
 
     DataForm *form = form_create(x);
-    ProfConfWin *confwin = (ProfConfWin*)wins_new_config(from, form);
+    ProfConfWin *confwin = (ProfConfWin*)wins_new_config(from, form, iq_submit_room_config, iq_room_config_cancel);
     confwin_handle_configuration(confwin, form);
 
     return 0;

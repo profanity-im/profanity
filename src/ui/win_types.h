@@ -172,12 +172,17 @@ typedef struct prof_muc_win_t {
     char *message_char;
 } ProfMucWin;
 
-typedef struct prof_conf_win_t {
+typedef struct prof_conf_win_t ProfConfWin;
+typedef void (*ProfConfWinCallback)(ProfConfWin *);
+
+struct prof_conf_win_t {
     ProfWin window;
     char *roomjid;
     DataForm *form;
     unsigned long memcheck;
-} ProfConfWin;
+    ProfConfWinCallback submit;
+    ProfConfWinCallback cancel;
+};
 
 typedef struct prof_private_win_t {
     ProfWin window;

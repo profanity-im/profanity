@@ -657,12 +657,12 @@ wins_new_muc(const char *const roomjid)
 }
 
 ProfWin*
-wins_new_config(const char *const roomjid, DataForm *form)
+wins_new_config(const char *const roomjid, DataForm *form, ProfConfWinCallback submit, ProfConfWinCallback cancel)
 {
     GList *keys = g_hash_table_get_keys(windows);
     int result = _wins_get_next_available_num(keys);
     g_list_free(keys);
-    ProfWin *newwin = win_create_config(roomjid, form);
+    ProfWin *newwin = win_create_config(roomjid, form, submit, cancel);
     g_hash_table_insert(windows, GINT_TO_POINTER(result), newwin);
     return newwin;
 }
