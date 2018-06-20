@@ -346,7 +346,7 @@ ProfWin* win_create_console(void);
 ProfWin* win_create_xmlconsole(void);
 ProfWin* win_create_chat(const char *const barejid);
 ProfWin* win_create_muc(const char *const roomjid);
-ProfWin* win_create_config(const char *const title, DataForm *form, ProfConfWinCallback submit, ProfConfWinCallback cancel);
+ProfWin* win_create_config(const char *const title, DataForm *form, ProfConfWinCallback submit, ProfConfWinCallback cancel, const void *userdata);
 ProfWin* win_create_private(const char *const fulljid);
 ProfWin* win_create_plugin(const char *const plugin_name, const char *const tag);
 void win_update_virtual(ProfWin *window);

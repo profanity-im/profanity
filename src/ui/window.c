@@ -203,7 +203,7 @@ win_create_muc(const char *const roomjid)
 }
 
 ProfWin*
-win_create_config(const char *const roomjid, DataForm *form, ProfConfWinCallback submit, ProfConfWinCallback cancel)
+win_create_config(const char *const roomjid, DataForm *form, ProfConfWinCallback submit, ProfConfWinCallback cancel, const void *userdata)
 {
     ProfConfWin *new_win = malloc(sizeof(ProfConfWin));
     new_win->window.type = WIN_CONFIG;
@@ -212,6 +212,7 @@ win_create_config(const char *const roomjid, DataForm *form, ProfConfWinCallback
     new_win->form = form;
     new_win->submit = submit;
     new_win->cancel = cancel;
+    new_win->userdata = userdata;
 
     new_win->memcheck = PROFCONFWIN_MEMCHECK;
 

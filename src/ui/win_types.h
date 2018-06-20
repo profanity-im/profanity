@@ -182,6 +182,7 @@ struct prof_conf_win_t {
     unsigned long memcheck;
     ProfConfWinCallback submit;
     ProfConfWinCallback cancel;
+    const void *userdata;
 };
 
 typedef struct prof_private_win_t {

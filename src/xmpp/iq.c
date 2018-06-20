@@ -88,6 +88,11 @@ typedef struct privilege_set_t {
     char *privilege;
 } ProfPrivilegeSet;
 
+typedef struct command_config_data_t {
+    char *sessionid;
+    char *command;
+} CommandConfigData;
+
 static int _iq_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza, void *const userdata);
 
 static void _error_handler(xmpp_stanza_t *const stanza);
@@ -724,6 +729,36 @@ iq_command_exec(const char *const target, const char *const command)
     xmpp_stanza_release(iq);
 }
 
+void
+iq_submit_command_config(ProfConfWin *confwin)
+{
+    xmpp_ctx_t * const ctx = connection_get_ctx();
+    CommandConfigData *data = (CommandConfigData *)confwin->userdata;
+    xmpp_stanza_t *iq = stanza_create_command_config_submit_iq(ctx, confwin->roomjid, data->command, data->sessionid, confwin->form);
+
+    const char *id = xmpp_stanza_get_id(iq);
+    iq_id_handler_add(id,  _command_exec_response_handler, NULL, NULL);
+
+    iq_send_stanza(iq);
+    xmpp_stanza_release(iq);
+    free(data->sessionid);
+    free(data->command);
+    free(data);
+}
+
+void
+iq_cancel_command_config(ProfConfWin *confwin)
+{
+    xmpp_ctx_t * const ctx = connection_get_ctx();
+    CommandConfigData *data = (CommandConfigData *)confwin->userdata;
+    xmpp_stanza_t *iq = stanza_create_room_config_cancel_iq(ctx, confwin->roomjid);
+    iq_send_stanza(iq);
+    xmpp_stanza_release(iq);
+    free(data->sessionid);
+    free(data->command);
+    free(data);
+}
+
 static void
 _error_handler(xmpp_stanza_t *const stanza)
 {
@@ -1098,7 +1133,7 @@ _command_exec_response_handler(xmpp_stanza_t *const stanza, void *const userdata
     const char *id = xmpp_stanza_get_id(stanza);
     const char *type = xmpp_stanza_get_type(stanza);
     const char *from = xmpp_stanza_get_from(stanza);
-    const char *const command = userdata;
+    char *command = userdata;
 
     if (id) {
         log_debug("IQ command exec response handler fired, id: %s.", id);
@@ -1156,7 +1191,10 @@ _command_exec_response_handler(xmpp_stanza_t *const stanza, void *const userdata
         }
 
         DataForm *form = form_create(x);
-        ProfConfWin *confwin = (ProfConfWin*)wins_new_config(from, form, NULL, NULL);
+        CommandConfigData *data = malloc(sizeof(CommandConfigData));
+        data->sessionid = strdup(xmpp_stanza_get_attribute(cmd, "sessionid"));
+        data->command = command;
+        ProfConfWin *confwin = (ProfConfWin*)wins_new_config(from, form, iq_submit_command_config, iq_cancel_command_config, data);
         confwin_handle_configuration(confwin, form);
     } else if (g_strcmp0(status, "canceled") == 0) {
         win_handle_command_exec_status(win, command, "canceled");
@@ -1703,7 +1741,7 @@ _room_config_id_handler(xmpp_stanza_t *const stanza, void *const userdata)
     }
 
     DataForm *form = form_create(x);
-    ProfConfWin *confwin = (ProfConfWin*)wins_new_config(from, form, iq_submit_room_config, iq_room_config_cancel);
+    ProfConfWin *confwin = (ProfConfWin*)wins_new_config(from, form, iq_submit_room_config, iq_room_config_cancel, NULL);
     confwin_handle_configuration(confwin, form);
 
     return 0;

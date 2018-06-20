@@ -494,7 +494,7 @@ ProfWin* win_create_muc(const char * const roomjid)
 {
     return NULL;
 }
-ProfWin* win_create_config(const char * const title, DataForm *form)
+ProfWin* win_create_config(const char *const title, DataForm *form, ProfConfWinCallback submit, ProfConfWinCallback cancel, const void *userdata)
 {
     return NULL;
 }
