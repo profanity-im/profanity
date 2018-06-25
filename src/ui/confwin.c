@@ -258,7 +258,7 @@ _confwin_form_field(ProfWin *window, char *tag, FormField *field)
             if (value == NULL) {
                 win_appendln(window, THEME_OFFLINE, "FALSE");
             } else {
-                if (g_strcmp0(value, "0") == 0) {
+                if (g_strcmp0(value, "0") == 0 || g_strcmp0(value, "false") == 0) {
                     win_appendln(window, THEME_OFFLINE, "FALSE");
                 } else {
                     win_appendln(window, THEME_ONLINE, "TRUE");
