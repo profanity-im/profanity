@@ -275,7 +275,7 @@ AC_CHECK_LIB([stabber], [stbbr_start], [AM_CONDITIONAL([HAVE_STABBER], [true])],
     [AC_MSG_NOTICE([libstabber not found, will not be able to run functional tests])])
 AM_CONDITIONAL([HAVE_EXPECT], [false])
 AC_CHECK_LIB([expect], [main], [AM_CONDITIONAL([HAVE_EXPECT], [true])],
-    [AC_MSG_NOTICE([libexpect not found, will not be able to run functional tests])])
+    [AC_MSG_NOTICE([libexpect not found, will not be able to run functional tests])], [-ltcl])
 
 ### Check for ncursesw/ncurses.h first, Arch linux uses ncurses.h for ncursesw
 AC_CHECK_HEADERS([ncursesw/ncurses.h], [], [])
