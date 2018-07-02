@@ -1118,9 +1118,11 @@ _command_list_result_handler(xmpp_stanza_t *const stanza, void *const userdata)
     }
 
     ProfWin *win = wins_get_by_string(from);
-    if (win) {
-        win_handle_command_list(win, cmds);
+    if (win == NULL) {
+	    win = wins_get_console();
     }
+
+    win_handle_command_list(win, cmds);
     g_slist_free(cmds);
     free(from);
 

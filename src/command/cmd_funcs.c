@@ -7484,9 +7484,12 @@ cmd_command_list(ProfWin *window, const char *const command, gchar **args)
         return TRUE;
     }
 
-    ProfMucWin *mucwin = (ProfMucWin*)window;
-
-    iq_command_list(mucwin->roomjid);
+    char *jid = args[1];
+    if (jid == NULL) {
+        ProfMucWin *mucwin = (ProfMucWin*)window;
+        jid = mucwin->roomjid;
+    }
+    iq_command_list(jid);
 
     cons_show("List available ad hoc commands");
     return TRUE;
@@ -7507,9 +7510,13 @@ cmd_command_exec(ProfWin *window, const char *const command, gchar **args)
         return TRUE;
     }
 
-    ProfMucWin *mucwin = (ProfMucWin*)window;
+    char *jid = args[2];
+    if (jid == NULL) {
+        ProfMucWin *mucwin = (ProfMucWin*)window;
+        jid = mucwin->roomjid;
+    }
 
-    iq_command_exec(mucwin->roomjid, args[1]);
+    iq_command_exec(jid, args[1]);
 
     cons_show("Execute %s...", args[1]);
     return TRUE;
