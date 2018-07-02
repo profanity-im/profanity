@@ -2308,8 +2308,8 @@ static struct cmd_t command_defs[] =
         CMD_NOMAINFUNC
         CMD_NOTAGS
         CMD_SYN(
-            "/otr list",
-            "/otr exec <command>")
+            "/cmd list",
+            "/cmd exec <command>")
         CMD_DESC(
             "Execute ad hoc commands.")
         CMD_ARGS(
