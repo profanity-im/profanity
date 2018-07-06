@@ -228,7 +228,7 @@ _rotate_log_file(void)
     size_t len = strlen(log_file);
     char *log_file_new = malloc(len + 3);
 
-    strncpy(log_file_new, log_file, len);
+    memcpy(log_file_new, log_file, len);
     log_file_new[len] = '.';
     log_file_new[len+1] = '1';
     log_file_new[len+2] = 0;
