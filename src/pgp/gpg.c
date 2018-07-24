@@ -792,7 +792,7 @@ _remove_header_footer(char *str, const char *const footer)
     int pos = 0;
     int newlines = 0;
 
-    while (newlines < 3) {
+    while (newlines < 2) {
         if (str[pos] == '\n') {
             newlines++;
         }
