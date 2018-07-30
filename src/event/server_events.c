@@ -896,8 +896,8 @@ sv_ev_muc_occupant_online(const char *const room, const char *const nick, const 
         ProfMucWin *mucwin = wins_get_muc(room);
         if (mucwin) {
             mucwin_occupant_nick_change(mucwin, old_nick, nick);
+            wins_private_nick_change(mucwin->roomjid, old_nick, nick);
         }
-        wins_private_nick_change(mucwin->roomjid, old_nick, nick);
         free(old_nick);
 
         occupantswin_occupants(room);
@@ -914,11 +914,13 @@ sv_ev_muc_occupant_online(const char *const room, const char *const nick, const 
         }
         prefs_free_string(muc_status_pref);
 
-        Jid *jidp = jid_create_from_bare_and_resource(mucwin->roomjid, nick);
-        ProfPrivateWin *privwin = wins_get_private(jidp->fulljid);
-        jid_destroy(jidp);
-        if (privwin) {
-            privwin_occupant_online(privwin);
+        if (mucwin) {
+            Jid *jidp = jid_create_from_bare_and_resource(mucwin->roomjid, nick);
+            ProfPrivateWin *privwin = wins_get_private(jidp->fulljid);
+            jid_destroy(jidp);
+            if (privwin) {
+                privwin_occupant_online(privwin);
+            }
         }
 
         occupantswin_occupants(room);
