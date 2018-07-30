@@ -266,20 +266,15 @@ connection_send_stanza(const char *const stanza)
 gboolean
 connection_supports(const char *const feature)
 {
-    GList *jids = g_hash_table_get_keys(conn.features_by_jid);
-
-    GList *curr = jids;
-    while (curr) {
-        char *jid = curr->data;
-        GHashTable *features = g_hash_table_lookup(conn.features_by_jid, jid);
-        if (features && g_hash_table_lookup(features, feature)) {
-            return TRUE;
-        }
-
-        curr = g_list_next(curr);
+    if (conn.features_by_jid == NULL || conn.domain == NULL) {
+        return FALSE;
     }
 
-    g_list_free(jids);
+    // check for feature only on main component
+    GHashTable *features = connection_get_features(conn.domain);
+    if (features && g_hash_table_lookup(features, feature)) {
+        return TRUE;
+    }
 
     return FALSE;
 }
