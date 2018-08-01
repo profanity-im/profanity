@@ -1,7 +1,7 @@
 /*
  * http_upload.c
  *
- * Copyright (C) 2012 - 2016 James Booth <boothj5@gmail.com>
+ * Copyright (C) 2012 - 2018 James Booth <boothj5@gmail.com>
  *
  * This file is part of Profanity.
  *
@@ -52,6 +52,7 @@
 #include "config/preferences.h"
 #include "ui/ui.h"
 #include "ui/window.h"
+#include "common.h"
 
 #define FALLBACK_MIMETYPE "application/octet-stream"
 #define FALLBACK_CONTENTTYPE_HEADER "Content-Type: application/octet-stream"
@@ -146,7 +147,7 @@ http_file_put(void *userdata)
     if (asprintf(&msg, "Uploading '%s': 0%%", upload->filename) == -1) {
         msg = strdup(FALLBACK_MSG);
     }
-    win_print_with_receipt(upload->window, '!', 0, NULL, 0, THEME_TEXT_ME, NULL, msg, upload->put_url);
+    win_print_http_upload(upload->window, msg, upload->put_url);
     free(msg);
 
     char *cert_path = prefs_get_string(PREF_TLS_CERTPATH);
@@ -256,7 +257,6 @@ end:
                 msg = strdup(FALLBACK_MSG);
             }
             win_update_entry_message(upload->window, upload->put_url, msg);
-            //win_update_entry_theme(upload->window, upload->put_url, THEME_THEM);
             win_mark_received(upload->window, upload->put_url);
             free(msg);
 
@@ -330,11 +330,4 @@ off_t file_size(const char* const filename)
     struct stat st;
     stat(filename, &st);
     return st.st_size;
-}
-
-int is_regular_file(const char *filename)
-{
-    struct stat st;
-    stat(filename, &st);
-    return S_ISREG(st.st_mode);
 }

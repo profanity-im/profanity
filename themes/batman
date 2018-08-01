@@ -12,6 +12,7 @@ main.text=white
 input.text=yellow
 main.time=white
 main.splash=yellow
+main.help.header=bold_white
 online=green
 away=yellow
 chat=green

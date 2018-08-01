@@ -1,7 +1,7 @@
 /*
  * core.c
  *
- * Copyright (C) 2012 - 2016 James Booth <boothj5@gmail.com>
+ * Copyright (C) 2012 - 2018 James Booth <boothj5@gmail.com>
  *
  * This file is part of Profanity.
  *
@@ -102,8 +102,8 @@ ui_init(void)
     ui_load_colours();
     refresh();
     create_title_bar();
-    create_status_bar();
-    status_bar_active(1);
+    status_bar_init();
+    status_bar_active(1, WIN_CONSOLE, "console");
     create_input_window();
     wins_init();
     notifier_initialise();
@@ -137,7 +137,7 @@ ui_update(void)
         _ui_draw_term_title();
     }
     title_bar_update_virtual();
-    status_bar_update_virtual();
+    status_bar_draw();
     inp_put_back();
     doupdate();
 
@@ -183,6 +183,7 @@ ui_close(void)
     notifier_uninit();
     wins_destroy();
     inp_close();
+    status_bar_close();
     endwin();
 }
 
@@ -286,7 +287,7 @@ ui_contact_typing(const char *const barejid, const char *const resource)
             title_bar_set_typing(TRUE);
 
             int num = wins_get_num(window);
-            status_bar_active(num);
+            status_bar_active(num, WIN_CHAT, chatwin->barejid);
        }
     }
 
@@ -298,8 +299,12 @@ ui_contact_typing(const char *const barejid, const char *const resource)
         if ( !is_current || (is_current && prefs_get_boolean(PREF_NOTIFY_TYPING_CURRENT)) ) {
             PContact contact = roster_get_contact(barejid);
             char const *display_usr = NULL;
-            if (p_contact_name(contact)) {
-                display_usr = p_contact_name(contact);
+            if (contact) {
+                if (p_contact_name(contact)) {
+                    display_usr = p_contact_name(contact);
+                } else {
+                    display_usr = barejid;
+                }
             } else {
                 display_usr = barejid;
             }
@@ -383,12 +388,7 @@ ui_handle_login_account_success(ProfAccount *account, gboolean secured)
     title_bar_set_connected(TRUE);
     title_bar_set_tls(secured);
 
-    GString *fulljid = g_string_new(account->jid);
-    g_string_append(fulljid, "/");
-    g_string_append(fulljid, account->resource);
-    status_bar_print_message(fulljid->str);
-    g_string_free(fulljid, TRUE);
-    status_bar_update_virtual();
+    status_bar_set_fulljid(connection_get_fulljid());
 }
 
 void
@@ -413,19 +413,19 @@ ui_handle_recipient_error(const char *const recipient, const char *const err_msg
 
     ProfChatWin *chatwin = wins_get_chat(recipient);
     if (chatwin) {
-        win_vprint((ProfWin*)chatwin, '!', 0, NULL, 0, THEME_ERROR, "", "Error from %s: %s", recipient, err_msg);
+        win_println((ProfWin*)chatwin, THEME_ERROR, '!', "Error from %s: %s", recipient, err_msg);
         return;
     }
 
     ProfMucWin *mucwin = wins_get_muc(recipient);
     if (mucwin) {
-        win_vprint((ProfWin*)mucwin, '!', 0, NULL, 0, THEME_ERROR, "", "Error from %s: %s", recipient, err_msg);
+        win_println((ProfWin*)mucwin, THEME_ERROR, '!', "Error from %s: %s", recipient, err_msg);
         return;
     }
 
     ProfPrivateWin *privatewin = wins_get_private(recipient);
     if (privatewin) {
-        win_vprint((ProfWin*)privatewin, '!', 0, NULL, 0, THEME_ERROR, "", "Error from %s: %s", recipient, err_msg);
+        win_println((ProfWin*)privatewin, THEME_ERROR, '!', "Error from %s: %s", recipient, err_msg);
         return;
     }
 }
@@ -435,7 +435,7 @@ ui_handle_otr_error(const char *const barejid, const char *const message)
 {
     ProfChatWin *chatwin = wins_get_chat(barejid);
     if (chatwin) {
-        win_print((ProfWin*)chatwin, '!', 0, NULL, 0, THEME_ERROR, "", message);
+        win_println((ProfWin*)chatwin, THEME_ERROR, '!', "%s", message);
     } else {
         cons_show_error("%s - %s", barejid, message);
     }
@@ -467,7 +467,7 @@ ui_invalid_command_usage(const char *const cmd, void (*setting_func)(void))
         cons_show(msg->str);
         ProfWin *current = wins_get_current();
         if (current->type == WIN_CHAT) {
-            ui_current_print_line(msg->str);
+            win_println(current, THEME_DEFAULT, '-', "%s", msg->str);
         }
     }
 
@@ -481,8 +481,7 @@ ui_disconnected(void)
     title_bar_set_connected(FALSE);
     title_bar_set_tls(FALSE);
     title_bar_set_presence(CONTACT_OFFLINE);
-    status_bar_clear_message();
-    status_bar_update_virtual();
+    status_bar_clear_fulljid();
     ui_hide_roster();
 }
 
@@ -672,7 +671,10 @@ ui_focus_win(ProfWin *window)
         title_bar_switch();
     }
     status_bar_current(i);
-    status_bar_active(i);
+
+    char *identifier = win_get_tab_identifier(window);
+    status_bar_active(i, window->type, identifier);
+    free(identifier);
 }
 
 void
@@ -689,7 +691,7 @@ ui_close_win(int index)
     wins_close_by_num(index);
     title_bar_console();
     status_bar_current(1);
-    status_bar_active(1);
+    status_bar_active(1, WIN_CONSOLE, "console");
 }
 
 void
@@ -732,98 +734,61 @@ ui_prune_wins(void)
 }
 
 void
-ui_current_print_line(const char *const msg, ...)
-{
-    ProfWin *window = wins_get_current();
-    va_list arg;
-    va_start(arg, msg);
-    GString *fmt_msg = g_string_new(NULL);
-    g_string_vprintf(fmt_msg, msg, arg);
-    win_println(window, 0, fmt_msg->str);
-    va_end(arg);
-    g_string_free(fmt_msg, TRUE);
-}
-
-void
-ui_current_print_formatted_line(const char show_char, int attrs, const char *const msg, ...)
-{
-    ProfWin *current = wins_get_current();
-    va_list arg;
-    va_start(arg, msg);
-    GString *fmt_msg = g_string_new(NULL);
-    g_string_vprintf(fmt_msg, msg, arg);
-    win_print(current, show_char, 0, NULL, 0, attrs, "", fmt_msg->str);
-    va_end(arg);
-    g_string_free(fmt_msg, TRUE);
-}
-
-void
-ui_win_error_line(ProfWin *window, const char *const msg)
-{
-    win_print(window, '-', 0, NULL, 0, THEME_ERROR, "", msg);
-}
-
-void
-ui_current_error_line(const char *const msg)
-{
-    ProfWin *current = wins_get_current();
-    win_print(current, '-', 0, NULL, 0, THEME_ERROR, "", msg);
-}
-
-void
 ui_print_system_msg_from_recipient(const char *const barejid, const char *message)
 {
     if (barejid == NULL || message == NULL)
         return;
 
-    ProfWin *window = (ProfWin*)wins_get_chat(barejid);
+    ProfChatWin *chatwin = wins_get_chat(barejid);
+    ProfWin *window = (ProfWin*)chatwin;
     if (window == NULL) {
         int num = 0;
         window = wins_new_chat(barejid);
         if (window) {
+            chatwin = (ProfChatWin*)window;
             num = wins_get_num(window);
-            status_bar_active(num);
+            status_bar_active(num, WIN_CHAT, chatwin->barejid);
         } else {
             num = 0;
             window = wins_get_console();
-            status_bar_active(1);
+            status_bar_active(1, WIN_CONSOLE, "console");
         }
     }
 
-    win_vprint(window, '-', 0, NULL, 0, 0, "", "*%s %s", barejid, message);
+    win_println(window, THEME_DEFAULT, '-', "*%s %s", barejid, message);
 }
 
 void
 ui_room_join(const char *const roomjid, gboolean focus)
 {
-    ProfWin *window = (ProfWin*)wins_get_muc(roomjid);
-    if (!window) {
-        window = wins_new_muc(roomjid);
+    ProfMucWin *mucwin = wins_get_muc(roomjid);
+    if (mucwin == NULL) {
+        mucwin = (ProfMucWin*)wins_new_muc(roomjid);
     }
+    ProfWin *window = (ProfWin*)mucwin;
 
     char *nick = muc_nick(roomjid);
-    win_vprint(window, '!', 0, NULL, NO_EOL, THEME_ROOMINFO, "", "-> You have joined the room as %s", nick);
+    win_print(window, THEME_ROOMINFO, '!', "-> You have joined the room as %s", nick);
     if (prefs_get_boolean(PREF_MUC_PRIVILEGES)) {
         char *role = muc_role_str(roomjid);
         char *affiliation = muc_affiliation_str(roomjid);
         if (role) {
-            win_vprint(window, '!', 0, NULL, NO_DATE | NO_EOL, THEME_ROOMINFO, "", ", role: %s", role);
+            win_append(window, THEME_ROOMINFO, ", role: %s", role);
         }
         if (affiliation) {
-            win_vprint(window, '!', 0, NULL, NO_DATE | NO_EOL, THEME_ROOMINFO, "", ", affiliation: %s", affiliation);
+            win_append(window, THEME_ROOMINFO, ", affiliation: %s", affiliation);
         }
     }
-    win_print(window, '!', 0, NULL, NO_DATE, THEME_ROOMINFO, "", "");
-
+    win_appendln(window, THEME_ROOMINFO, "");
 
     if (focus) {
         ui_focus_win(window);
     } else {
         int num = wins_get_num(window);
-        status_bar_active(num);
+        status_bar_active(num, WIN_MUC, mucwin->roomjid);
         ProfWin *console = wins_get_console();
         char *nick = muc_nick(roomjid);
-        win_vprint(console, '!', 0, NULL, 0, THEME_TYPING, "", "-> Autojoined %s as %s (%d).", roomjid, nick, num);
+        win_println(console, THEME_TYPING, '!', "-> Autojoined %s as %s (%d).", roomjid, nick, num);
     }
 
     GList *privwins = wins_get_private_chats(roomjid);
@@ -898,16 +863,16 @@ ui_room_destroyed(const char *const roomjid, const char *const reason, const cha
         ProfWin *console = wins_get_console();
 
         if (reason) {
-            win_vprint(console, '!', 0, NULL, 0, THEME_TYPING, "", "<- Room destroyed: %s, reason: %s", roomjid, reason);
+            win_println(console, THEME_TYPING, '!', "<- Room destroyed: %s, reason: %s", roomjid, reason);
         } else {
-            win_vprint(console, '!', 0, NULL, 0, THEME_TYPING, "", "<- Room destroyed: %s", roomjid);
+            win_println(console, THEME_TYPING, '!', "<- Room destroyed: %s", roomjid);
         }
 
         if (new_jid) {
             if (password) {
-                win_vprint(console, '!', 0, NULL, 0, THEME_TYPING, "", "Replacement room: %s, password: %s", new_jid, password);
+                win_println(console, THEME_TYPING, '!', "Replacement room: %s, password: %s", new_jid, password);
             } else {
-                win_vprint(console, '!', 0, NULL, 0, THEME_TYPING, "", "Replacement room: %s", new_jid);
+                win_println(console, THEME_TYPING, '!', "Replacement room: %s", new_jid);
             }
         }
     }
@@ -944,7 +909,7 @@ ui_room_kicked(const char *const roomjid, const char *const actor, const char *c
         }
 
         ProfWin *console = wins_get_console();
-        win_vprint(console, '!', 0, NULL, 0, THEME_TYPING, "", "<- %s", message->str);
+        win_println(console, THEME_TYPING, '!', "<- %s", message->str);
         g_string_free(message, TRUE);
     }
 
@@ -980,7 +945,7 @@ ui_room_banned(const char *const roomjid, const char *const actor, const char *c
         }
 
         ProfWin *console = wins_get_console();
-        win_vprint(console, '!', 0, NULL, 0, THEME_TYPING, "", "<- %s", message->str);
+        win_println(console, THEME_TYPING, '!', "<- %s", message->str);
         g_string_free(message, TRUE);
     }
 
@@ -1008,15 +973,14 @@ ui_win_unread(int index)
 char*
 ui_ask_password(void)
 {
-    status_bar_get_password();
-    status_bar_update_virtual();
+    status_bar_set_prompt("Enter password:");
     return inp_get_password();
 }
 
 char*
 ui_get_line(void)
 {
-    status_bar_update_virtual();
+    status_bar_draw();
     return inp_get_line();
 }
 
@@ -1025,22 +989,21 @@ ui_ask_pgp_passphrase(const char *hint, int prev_fail)
 {
     ProfWin *current = wins_get_current();
 
-    win_println(current, 0, "");
+    win_println(current, THEME_DEFAULT, '-', "");
 
     if (prev_fail) {
-        win_print(current, '!', 0, NULL, 0, 0, "", "Incorrect passphrase");
+        win_println(current, THEME_DEFAULT, '!', "Incorrect passphrase");
     }
 
     if (hint) {
-        win_vprint(current, '!', 0, NULL, 0, 0, "", "Enter PGP key passphrase for %s", hint);
+        win_println(current, THEME_DEFAULT, '!', "Enter PGP key passphrase for %s", hint);
     } else {
-        win_print(current, '!', 0, NULL, 0, 0, "", "Enter PGP key passphrase");
+        win_println(current, THEME_DEFAULT, '!', "Enter PGP key passphrase");
     }
 
     ui_update();
 
-    status_bar_get_password();
-    status_bar_update_virtual();
+    status_bar_set_prompt("Enter password:");
     return inp_get_password();
 }
 
@@ -1158,7 +1121,7 @@ ui_handle_room_configuration_form_error(const char *const roomjid, const char *c
         g_string_append(message_str, message);
     }
 
-    win_print(window, '-', 0, NULL, 0, THEME_ERROR, "", message_str->str);
+    win_println(window, THEME_ERROR, '-', "%s", message_str->str);
 
     g_string_free(message_str, TRUE);
 }
@@ -1182,7 +1145,7 @@ ui_handle_room_config_submit_result(const char *const roomjid)
 
         if (muc_window) {
             ui_focus_win((ProfWin*)muc_window);
-            win_print(muc_window, '!', 0, NULL, 0, THEME_ROOMINFO, "", "Room configuration successful");
+            win_println(muc_window, THEME_ROOMINFO, '!', "Room configuration successful");
         } else {
             ProfWin *console = wins_get_console();
             ui_focus_win(console);
@@ -1209,25 +1172,25 @@ ui_handle_room_config_submit_result_error(const char *const roomjid, const char 
 
         if (form_window) {
             if (message) {
-                win_vprint(form_window, '!', 0, NULL, 0, THEME_ERROR, "", "Configuration error: %s", message);
+                win_println(form_window, THEME_ERROR, '!', "Configuration error: %s", message);
             } else {
-                win_print(form_window, '!', 0, NULL, 0, THEME_ERROR, "", "Configuration error");
+                win_println(form_window, THEME_ERROR, '!', "Configuration error");
             }
         } else if (muc_window) {
             if (message) {
-                win_vprint(muc_window, '!', 0, NULL, 0, THEME_ERROR, "", "Configuration error: %s", message);
+                win_println(muc_window, THEME_ERROR, '!', "Configuration error: %s", message);
             } else {
-                win_print(muc_window, '!', 0, NULL, 0, THEME_ERROR, "", "Configuration error");
+                win_println(muc_window, THEME_ERROR, '!', "Configuration error");
             }
         } else {
             if (message) {
-                win_vprint(console, '!', 0, NULL, 0, THEME_ERROR, "", "Configuration error for %s: %s", roomjid, message);
+                win_println(console, THEME_ERROR, '!', "Configuration error for %s: %s", roomjid, message);
             } else {
-                win_vprint(console, '!', 0, NULL, 0, THEME_ERROR, "", "Configuration error for %s", roomjid);
+                win_println(console, THEME_ERROR, '!', "Configuration error for %s", roomjid);
             }
         }
     } else {
-        win_print(console, '!', 0, NULL, 0, THEME_ERROR, "", "Configuration error");
+        win_println(console, THEME_ERROR, '!', "Configuration error");
     }
 }
 
@@ -1237,7 +1200,7 @@ ui_show_lines(ProfWin *window, gchar** lines)
     if (lines) {
         int i;
         for (i = 0; lines[i] != NULL; i++) {
-            win_print(window, '-', 0, NULL, 0, 0, "", lines[i]);
+            win_println(window, THEME_DEFAULT, '-', "%s", lines[i]);
         }
     }
 }
@@ -1274,7 +1237,7 @@ ui_handle_software_version_error(const char *const roomjid, const char *const me
         g_string_append(message_str, message);
     }
 
-    win_print(window, '-', 0, NULL, 0, THEME_ERROR, "", message_str->str);
+    win_println(window, THEME_ERROR, '-', "%s", message_str->str);
 
     g_string_free(message_str, TRUE);
 }
@@ -1314,36 +1277,18 @@ ui_show_software_version(const char *const jid, const char *const  presence,
     }
 
     if (name || version || os) {
-        win_println(window, 0, "");
+        win_println(window, THEME_DEFAULT, '-', "");
         theme_item_t presence_colour = theme_main_presence_attrs(presence);
-        win_vprint(window, '-', 0, NULL, NO_EOL, presence_colour, "", "%s", jid);
-        win_print(window, '-', 0, NULL, NO_DATE, 0, "", ":");
+        win_print(window, presence_colour, '-', "%s", jid);
+        win_appendln(window, THEME_DEFAULT, ":");
     }
     if (name) {
-        win_vprint(window, '-', 0, NULL, 0, 0, "", "Name    : %s", name);
+        win_println(window, THEME_DEFAULT, '-', "Name    : %s", name);
     }
     if (version) {
-        win_vprint(window, '-', 0, NULL, 0, 0, "", "Version : %s", version);
+        win_println(window, THEME_DEFAULT, '-', "Version : %s", version);
     }
     if (os) {
-        win_vprint(window, '-', 0, NULL, 0, 0, "", "OS      : %s", os);
+        win_println(window, THEME_DEFAULT, '-', "OS      : %s", os);
     }
-}
-
-void
-ui_status_bar_inactive(const int win)
-{
-    status_bar_inactive(win);
-}
-
-void
-ui_status_bar_active(const int win)
-{
-    status_bar_active(win);
-}
-
-void
-ui_status_bar_new(const int win)
-{
-    status_bar_new(win);
 }

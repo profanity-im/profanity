@@ -35,8 +35,11 @@ int main(int argc, char* argv[]) {
         PROF_FUNC_TEST(connect_bad_password),
         PROF_FUNC_TEST(connect_shows_presence_updates),
 
-        PROF_FUNC_TEST(ping_multiple),
-        PROF_FUNC_TEST(ping_responds),
+        PROF_FUNC_TEST(ping_server),
+        PROF_FUNC_TEST(ping_server_not_supported),
+        PROF_FUNC_TEST(ping_responds_to_server_request),
+        PROF_FUNC_TEST(ping_jid),
+        PROF_FUNC_TEST(ping_jid_not_supported),
 
         PROF_FUNC_TEST(rooms_query),
 
@@ -52,6 +55,7 @@ int main(int argc, char* argv[]) {
         PROF_FUNC_TEST(presence_chat_with_message),
         PROF_FUNC_TEST(presence_set_priority),
         PROF_FUNC_TEST(presence_includes_priority),
+        PROF_FUNC_TEST(presence_keeps_status),
         PROF_FUNC_TEST(presence_received),
         PROF_FUNC_TEST(presence_missing_resource_defaults),
 
@@ -89,7 +93,6 @@ int main(int argc, char* argv[]) {
         PROF_FUNC_TEST(display_software_version_result_in_chat),
 
         PROF_FUNC_TEST(sends_room_join),
-        PROF_FUNC_TEST(sends_room_join_with_default_muc_service),
         PROF_FUNC_TEST(sends_room_join_with_nick),
         PROF_FUNC_TEST(sends_room_join_with_password),
         PROF_FUNC_TEST(sends_room_join_with_nick_and_password),
@@ -98,6 +101,8 @@ int main(int argc, char* argv[]) {
         PROF_FUNC_TEST(shows_history_message),
         PROF_FUNC_TEST(shows_occupant_join),
         PROF_FUNC_TEST(shows_message),
+        PROF_FUNC_TEST(shows_me_message_from_occupant),
+        PROF_FUNC_TEST(shows_me_message_from_self),
         PROF_FUNC_TEST(shows_all_messages_in_console_when_window_not_focussed),
         PROF_FUNC_TEST(shows_first_message_in_console_when_window_not_focussed),
         PROF_FUNC_TEST(shows_no_message_in_console_when_window_not_focussed),

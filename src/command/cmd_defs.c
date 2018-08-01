@@ -1,7 +1,7 @@
 /*
  * cmd_defs.c
  *
- * Copyright (C) 2012 - 2016 James Booth <boothj5@gmail.com>
+ * Copyright (C) 2012 - 2018 James Booth <boothj5@gmail.com>
  *
  * This file is part of Profanity.
  *
@@ -113,12 +113,12 @@ static gboolean _cmd_has_tag(Command *pcmd, const char *const tag);
 static struct cmd_t command_defs[] =
 {
     { "/help",
-        parse_args, 0, 2, NULL,
+        parse_args_with_freetext, 0, 2, NULL,
         CMD_NOSUBFUNCS
         CMD_MAINFUNC(cmd_help)
         CMD_NOTAGS
         CMD_SYN(
-            "/help [<area>|<command>]")
+            "/help [<area>|<command>|search_all|search_any] [<search_terms>]")
         CMD_DESC(
             "Help on using Profanity. Passing no arguments list help areas. "
             "For command help, optional arguments are shown using square brackets, "
@@ -126,9 +126,12 @@ static struct cmd_t command_defs[] =
             "Arguments that may be one of a number of values are separated by a pipe "
             "e.g. val1|val2|val3.")
         CMD_ARGS(
-            { "<area>",    "Summary help for commands in a certain area of functionality." },
-            { "<command>", "Full help for a specific command, for example '/help connect'." })
+            { "<area>",                     "Summary help for commands in a certain area of functionality." },
+            { "<command>",                  "Full help for a specific command, for example '/help connect'." },
+            { "search_all <search_terms>",  "Search commands for returning matches that contain all of the search terms." },
+            { "search_any <search_terms>",  "Search commands for returning matches that contain any of the search terms." })
         CMD_EXAMPLES(
+            "/help search_all presence online",
             "/help commands",
             "/help presence",
             "/help who")
@@ -155,7 +158,7 @@ static struct cmd_t command_defs[] =
             CMD_TAG_CONNECTION)
         CMD_SYN(
             "/connect [<account>]",
-            "/connect <account> [server <server>] [port <port>] [tls force|allow|disable]")
+            "/connect <account> [server <server>] [port <port>] [tls force|allow|legacy|disable]")
         CMD_DESC(
             "Login to a chat service. "
             "If no account is specified, the default is used if one is configured. "
@@ -166,6 +169,7 @@ static struct cmd_t command_defs[] =
             { "port <port>",       "The port to use if different to the default (5222, or 5223 for SSL)." },
             { "tls force",         "Force TLS connection, and fail if one cannot be established, this is default behaviour." },
             { "tls allow",         "Use TLS for the connection if it is available." },
+            { "tls legacy",        "Use legacy TLS for the connection. It means server doesn't support STARTTLS and TLS is forced just after TCP connection is established." },
             { "tls disable",       "Disable TLS for the connection." })
         CMD_EXAMPLES(
             "/connect",
@@ -200,6 +204,7 @@ static struct cmd_t command_defs[] =
             "/tls certpath",
             "/tls certpath set <path>",
             "/tls certpath clear",
+            "/tls certpath default",
             "/tls show on|off")
         CMD_DESC(
             "Handle TLS certificates. ")
@@ -215,6 +220,7 @@ static struct cmd_t command_defs[] =
             { "certpath",             "Show the trusted certificate path." },
             { "certpath set <path>",  "Specify filesystem path containing trusted certificates." },
             { "certpath clear",       "Clear the trusted certificate path." },
+            { "certpath default",     "Use default system certificate path, if it can be found." },
             { "show on|off",          "Show or hide the TLS indicator in the titlebar." })
         CMD_NOEXAMPLES
     },
@@ -281,6 +287,8 @@ static struct cmd_t command_defs[] =
             "/roster room by service|none",
             "/roster room order name|unread",
             "/roster room unread before|after|off",
+            "/roster room show server",
+            "/roster room hide server",
             "/roster private room|group|off",
             "/roster private char <char>|none",
             "/roster header char <char>|none",
@@ -346,6 +354,8 @@ static struct cmd_t command_defs[] =
             { "room unread before",         "Show unread message count before room." },
             { "room unread after",          "Show unread message count after room." },
             { "room unread off",            "Do not show unread message count for rooms." },
+            { "room show server",           "Show the conference server with room JIDs." },
+            { "room hide server",           "Do not show the conference server with room JIDs." },
             { "private room",               "Show room private chats with the room." },
             { "private group",              "Show room private chats as a separate roster group." },
             { "private off",                "Do not show room private chats." },
@@ -574,7 +584,7 @@ static struct cmd_t command_defs[] =
         CMD_SYN(
             "/leave")
         CMD_DESC(
-            "Leave the current chat room.")
+            "Leave the current chat or room.")
         CMD_NOARGS
         CMD_NOEXAMPLES
     },
@@ -778,20 +788,31 @@ static struct cmd_t command_defs[] =
     },
 
     { "/rooms",
-        parse_args, 0, 1, NULL,
+        parse_args, 0, 4, NULL,
         CMD_NOSUBFUNCS
         CMD_MAINFUNC(cmd_rooms)
         CMD_TAGS(
             CMD_TAG_GROUPCHAT)
         CMD_SYN(
-            "/rooms [<service>]")
+            "/rooms",
+            "/rooms filter <text>",
+            "/rooms service <service>",
+            "/rooms service <service> filter <text>",
+            "/rooms cache on|off|clear")
         CMD_DESC(
             "List the chat rooms available at the specified conference service. "
-            "If no argument is supplied, the account preference 'muc.service' is used, 'conference.<domain-part>' by default.")
+            "If no argument is supplied, the account preference 'muc.service' is used, 'conference.<domain-part>' by default. "
+            "The filter argument only shows rooms that contain the provided text, case insensitive.")
         CMD_ARGS(
-            { "<service>", "The conference service to query." })
+            { "service <service>",  "The conference service to query." },
+            { "filter <text>",      "The text to filter results by."},
+            { "cache on|off",       "Enable or disable caching of rooms list response, enabled by default."},
+            { "cache clear",        "Clear the rooms response cache if enabled."})
         CMD_EXAMPLES(
-            "/rooms conference.jabber.org")
+            "/rooms",
+            "/rooms filter development",
+            "/rooms service conference.jabber.org",
+            "/rooms service conference.jabber.org filter \"News Room\"")
     },
 
     { "/bookmark",
@@ -803,9 +824,9 @@ static struct cmd_t command_defs[] =
         CMD_SYN(
             "/bookmark",
             "/bookmark list",
-            "/bookmark add <room> [nick <nick>] [password <password>] [autojoin on|off]",
+            "/bookmark add [<room>] [nick <nick>] [password <password>] [autojoin on|off]",
             "/bookmark update <room> [nick <nick>] [password <password>] [autojoin on|off]",
-            "/bookmark remove <room>",
+            "/bookmark remove [<room>]",
             "/bookmark join <room>",
             "/bookmark invites on|off")
         CMD_DESC(
@@ -813,8 +834,8 @@ static struct cmd_t command_defs[] =
             "In a chat room, no arguments will bookmark the current room, setting autojoin to \"on\".")
         CMD_ARGS(
             { "list", "List all bookmarks." },
-            { "add <room>", "Add a bookmark." },
-            { "remove <room>", "Remove a bookmark." },
+            { "add [<room>]", "Add a bookmark, passing no room will bookmark the current room, setting autojoin to \"on\"." },
+            { "remove [<room>]", "Remove a bookmark, passing no room will remove the bookmark for the current room, if one exists." },
             { "update <room>", "Update the properties associated with a bookmark." },
             { "nick <nick>", "Nickname used in the chat room." },
             { "password <password>", "Password if required, may be stored in plaintext on your server." },
@@ -941,18 +962,14 @@ static struct cmd_t command_defs[] =
         parse_args, 0, 3, NULL,
         CMD_SUBFUNCS(
             { "unread",     cmd_wins_unread },
-            { "tidy",       cmd_wins_tidy },
             { "prune",      cmd_wins_prune },
-            { "swap",       cmd_wins_swap },
-            { "autotidy",   cmd_wins_autotidy })
+            { "swap",       cmd_wins_swap })
         CMD_MAINFUNC(cmd_wins)
         CMD_TAGS(
             CMD_TAG_UI)
         CMD_SYN(
             "/wins",
             "/wins unread",
-            "/wins tidy",
-            "/wins autotidy on|off",
             "/wins prune",
             "/wins swap <source> <target>")
         CMD_DESC(
@@ -960,9 +977,7 @@ static struct cmd_t command_defs[] =
             "Passing no argument will list all currently active windows and information about their usage.")
         CMD_ARGS(
             { "unread",                 "List windows with unread messages." },
-            { "tidy",                   "Move windows so there are no gaps." },
-            { "autotidy on|off",        "Automatically remove gaps when closing windows." },
-            { "prune",                  "Close all windows with no unread messages, and then tidy so there are no gaps." },
+            { "prune",                  "Close all windows with no unread messages." },
             { "swap <source> <target>", "Swap windows, target may be an empty position." })
         CMD_NOEXAMPLES
     },
@@ -1337,20 +1352,40 @@ static struct cmd_t command_defs[] =
     },
 
     { "/statusbar",
-        parse_args, 1, 1, &cons_winpos_setting,
+        parse_args, 1, 2, &cons_statusbar_setting,
         CMD_NOSUBFUNCS
         CMD_MAINFUNC(cmd_statusbar)
         CMD_TAGS(
             CMD_TAG_UI)
         CMD_SYN(
+            "/statusbar show name|number",
+            "/statusbar hide name|number",
+            "/statusbar maxtabs <value>",
+            "/statusbar tablen <value>",
+            "/statusbar self user|barejid|fulljid|off",
+            "/statusbar chat user|jid",
+            "/statusbar room room|jid",
             "/statusbar up",
             "/statusbar down")
         CMD_DESC(
-            "Move the status bar.")
+            "Manage statusbar display preferences.")
         CMD_ARGS(
-            { "up", "Move the status bar up the screen." },
-            { "down", "Move the status bar down the screen." })
-        CMD_NOEXAMPLES
+            { "maxtabs <value>",            "Set the maximum number of tabs to display, <value> must be between 0 and 10" },
+            { "tablen <value>",             "Set the maximum number of characters to show as the tab name, 0 sets to unlimited." },
+            { "show|hide name",             "Show or hide names in tabs." },
+            { "show|hide number",           "Show or hide numbers in tabs." },
+            { "self user|barejid|fulljid",  "Show account user name, barejid, fulljid as status bar title." },
+            { "self off",                   "Disable showing self as status bar title." },
+            { "chat user|jid",              "Show users name, or the fulljid if no nick is present for chat tabs." },
+            { "room room|jid",              "Show room name, or the fulljid for room tabs." },
+            { "up",                         "Move the status bar up the screen." },
+            { "down",                       "Move the status bar down the screen." })
+        CMD_EXAMPLES(
+            "/statusbar maxtabs 8",
+            "/statusbar tablen 5",
+            "/statusbar self user",
+            "/statusbar chat jid",
+            "/statusbar hide name")
     },
 
     { "/inputwin",
@@ -1578,7 +1613,7 @@ static struct cmd_t command_defs[] =
         CMD_EXAMPLES(
             "/alias add friends /who online friends",
             "/alias add /q /quit",
-            "/alias a /away \"I'm in a meeting.\"",
+            "/alias add a /away \"I'm in a meeting.\"",
             "/alias remove q",
             "/alias list")
     },
@@ -1951,7 +1986,7 @@ static struct cmd_t command_defs[] =
             { "clear",      cmd_account_clear })
         CMD_MAINFUNC(cmd_account)
         CMD_TAGS(
-            CMD_TAG_CONNECTION
+            CMD_TAG_CONNECTION,
             CMD_TAG_PRESENCE,
             CMD_TAG_CHAT,
             CMD_TAG_GROUPCHAT)
@@ -1979,7 +2014,7 @@ static struct cmd_t command_defs[] =
             "/account set <account> otr <policy>",
             "/account set <account> pgpkeyid <pgpkeyid>",
             "/account set <account> startscript <script>",
-            "/account set <account> tls force|allow|disable",
+            "/account set <account> tls force|allow|legacy|disable",
             "/account set <account> theme <theme>",
             "/account clear <account> password",
             "/account clear <account> eval_password",
@@ -1987,7 +2022,9 @@ static struct cmd_t command_defs[] =
             "/account clear <account> port",
             "/account clear <account> otr",
             "/account clear <account> pgpkeyid",
-            "/account clear <account> startscript")
+            "/account clear <account> startscript",
+            "/account clear <account> muc",
+            "/account clear <account> resource")
         CMD_DESC(
             "Commands for creating and managing accounts. "
             "Calling with no arguments will display information for the current account.")
@@ -2010,13 +2047,14 @@ static struct cmd_t command_defs[] =
             { "set <account> resource <resource>",      "The resource to be used for this account, defaults to 'profanity'." },
             { "set <account> password <password>",      "Password for the account, note this is currently stored in plaintext if set." },
             { "set <account> eval_password <command>",  "Shell command evaluated to retrieve password for the account. Can be used to retrieve password from keyring." },
-            { "set <account> muc <service>",            "The default MUC chat service to use, defaults to 'conference.<domainpart>' where the domain part is from the account JID." },
+            { "set <account> muc <service>",            "The default MUC chat service to use, defaults to the servers disco info response." },
             { "set <account> nick <nick>",              "The default nickname to use when joining chat rooms." },
             { "set <account> otr <policy>",             "Override global OTR policy for this account, see /otr." },
             { "set <account> pgpkeyid <pgpkeyid>",      "Set the ID of the PGP key for this account, see /pgp." },
             { "set <account> startscript <script>",     "Set the script to execute after connecting." },
             { "set <account> tls force",                "Force TLS connection, and fail if one cannot be established, this is default behaviour." },
             { "set <account> tls allow",                "Use TLS for the connection if it is available." },
+            { "set <account> tls legacy",               "Use legacy TLS for the connection. It means server doesn't support STARTTLS and TLS is forced just after TCP connection is established." },
             { "set <account> tls disable",              "Disable TLS for the connection." },
             { "set <account> <theme>",                  "Set the UI theme for the account." },
             { "clear <account> server",                 "Remove the server setting for this account." },
@@ -2026,7 +2064,9 @@ static struct cmd_t command_defs[] =
             { "clear <account> otr",                    "Remove the OTR policy setting for this account." },
             { "clear <account> pgpkeyid",               "Remove pgpkeyid associated with this account." },
             { "clear <account> startscript",            "Remove startscript associated with this account." },
-            { "clear <account> theme",                  "Clear the theme setting for the account, the global theme will be used." })
+            { "clear <account> theme",                  "Clear the theme setting for the account, the global theme will be used." },
+            { "clear <account> resource",               "Remove the resource setting for this account."},
+            { "clear <account> muc",                    "Remove the default MUC service setting."})
         CMD_EXAMPLES(
             "/account add me",
             "/account set me jid me@chatty",
@@ -2040,26 +2080,38 @@ static struct cmd_t command_defs[] =
     },
 
     { "/plugins",
-        parse_args, 0, 2, NULL,
-        CMD_NOSUBFUNCS
+        parse_args, 0, 3, NULL,
+        CMD_SUBFUNCS(
+            { "sourcepath",     cmd_plugins_sourcepath },
+            { "install",        cmd_plugins_install },
+            { "load",           cmd_plugins_load },
+            { "unload",         cmd_plugins_unload },
+            { "reload",         cmd_plugins_reload },
+            { "python_version", cmd_plugins_python_version })
         CMD_MAINFUNC(cmd_plugins)
         CMD_NOTAGS
         CMD_SYN(
             "/plugins",
-            "/plugins install <path>",
-            "/plugins unload <plugin>",
-            "/plugins load <plugin>",
+            "/plugins sourcepath set <path>",
+            "/plugins sourcepath clear",
+            "/plugins install [<path>]",
+            "/plugins unload [<plugin>]",
+            "/plugins load [<plugin>]",
             "/plugins reload [<plugin>]",
             "/plugins python_version")
         CMD_DESC(
             "Manage plugins. Passing no arguments lists currently loaded plugins.")
         CMD_ARGS(
-            { "install <file>",      "Install file to plugins directory, and load or reload the plugin." },
-            { "load <plugin>",       "Load a plugin that already exists in the plugin directory." },
-            { "unload <plugin>",     "Unload a loaded plugin." },
-            { "reload [<plugin>]",   "Reload a plugin, passing no argument will reload all plugins." },
-            { "python_version",      "Show the Python interpreter version." })
+            { "sourcepath set <path>",  "Set the default path to install plugins from, will be used if no arg is passed to /plugins install." },
+            { "sourcepath clear",       "Clear the default plugins source path." },
+            { "install [<path>]",       "Install a plugin, or all plugins found in a directory (recursive). Passing no argument will use the sourcepath if one is set." },
+            { "load [<plugin>]",        "Load a plugin that already exists in the plugin directory, passing no argument loads all found plugins." },
+            { "unload [<plugin>]",      "Unload a loaded plugin, passing no argument will unload all plugins." },
+            { "reload [<plugin>]",      "Reload a plugin, passing no argument will reload all plugins." },
+            { "python_version",         "Show the Python interpreter version." })
         CMD_EXAMPLES(
+            "/plugins sourcepath set /home/meee/projects/profanity-plugins",
+            "/plugins install",
             "/plugins install /home/steveharris/Downloads/metal.py",
             "/plugins load browser.py",
             "/plugins unload say.py",
@@ -2246,9 +2298,112 @@ static struct cmd_t command_defs[] =
         CMD_EXAMPLES(
             "/export /path/to/output.csv",
             "/export ~/contacts.csv")
-    },
+    }
 };
 
+static GHashTable *search_index;
+
+char*
+_cmd_index(Command *cmd) {
+    GString *index_source = g_string_new("");
+    index_source = g_string_append(index_source, cmd->cmd);
+    index_source = g_string_append(index_source, " ");
+    index_source = g_string_append(index_source, cmd->help.desc);
+    index_source = g_string_append(index_source, " ");
+
+    int len = g_strv_length(cmd->help.tags);
+    int i = 0;
+    for (i = 0; i < len; i++) {
+        index_source = g_string_append(index_source, cmd->help.tags[i]);
+        index_source = g_string_append(index_source, " ");
+    }
+    len = g_strv_length(cmd->help.synopsis);
+    for (i = 0; i < len; i++) {
+        index_source = g_string_append(index_source, cmd->help.synopsis[i]);
+        index_source = g_string_append(index_source, " ");
+    }
+    for (i = 0; cmd->help.args[i][0] != NULL; i++) {
+        index_source = g_string_append(index_source, cmd->help.args[i][0]);
+        index_source = g_string_append(index_source, " ");
+        index_source = g_string_append(index_source, cmd->help.args[i][1]);
+        index_source = g_string_append(index_source, " ");
+    }
+
+    gchar **tokens = g_str_tokenize_and_fold(index_source->str, NULL, NULL);
+    g_string_free(index_source, TRUE);
+
+    GString *index = g_string_new("");
+    i = 0;
+    for (i = 0; i < g_strv_length(tokens); i++) {
+        index = g_string_append(index, tokens[i]);
+        index = g_string_append(index, " ");
+    }
+    g_strfreev(tokens);
+
+    char *res = index->str;
+    g_string_free(index, FALSE);
+
+    return res;
+}
+
+GList*
+cmd_search_index_any(char *term)
+{
+    GList *results = NULL;
+
+    gchar **processed_terms = g_str_tokenize_and_fold(term, NULL, NULL);
+    int terms_len = g_strv_length(processed_terms);
+
+    int i = 0;
+    for (i = 0; i < terms_len; i++) {
+        GList *index_keys = g_hash_table_get_keys(search_index);
+        GList *curr = index_keys;
+        while (curr) {
+            char *index_entry = g_hash_table_lookup(search_index, curr->data);
+            if (g_str_match_string(processed_terms[i], index_entry, FALSE)) {
+                results = g_list_append(results, curr->data);
+            }
+            curr = g_list_next(curr);
+        }
+        g_list_free(index_keys);
+    }
+
+    g_strfreev(processed_terms);
+
+    return results;
+}
+
+GList*
+cmd_search_index_all(char *term)
+{
+    GList *results = NULL;
+
+    gchar **terms = g_str_tokenize_and_fold(term, NULL, NULL);
+    int terms_len = g_strv_length(terms);
+
+    GList *commands = g_hash_table_get_keys(search_index);
+    GList *curr = commands;
+    while (curr) {
+        char *command = curr->data;
+        int matches = 0;
+        int i = 0;
+        for (i = 0; i < terms_len; i++) {
+            char *command_index = g_hash_table_lookup(search_index, command);
+            if (g_str_match_string(terms[i], command_index, FALSE)) {
+                matches++;
+            }
+        }
+        if (matches == terms_len) {
+            results = g_list_append(results, command);
+        }
+        curr = g_list_next(curr);
+    }
+
+    g_list_free(commands);
+    g_strfreev(terms);
+
+    return results;
+}
 
 /*
  * Initialise command autocompleter and history
@@ -2260,6 +2415,8 @@ cmd_init(void)
 
     cmd_ac_init();
 
+    search_index = g_hash_table_new_full(g_str_hash, g_str_equal, free, g_free);
+
     // load command defs into hash table
     commands = g_hash_table_new(g_str_hash, g_str_equal);
     unsigned int i;
@@ -2268,6 +2425,9 @@ cmd_init(void)
 
         // add to hash
         g_hash_table_insert(commands, pcmd->cmd, pcmd);
+
+        // add to search index
+        g_hash_table_insert(search_index, strdup(pcmd->cmd), _cmd_index(pcmd));
 
         // add to commands and help autocompleters
         cmd_ac_add_cmd(pcmd);
@@ -2288,6 +2448,7 @@ void
 cmd_uninit(void)
 {
     cmd_ac_uninit();
+    g_hash_table_destroy(search_index);
 }
 
 gboolean

@@ -1,7 +1,7 @@
 /*
  * xmpp.h
  *
- * Copyright (C) 2012 - 2016 James Booth <boothj5@gmail.com>
+ * Copyright (C) 2012 - 2018 James Booth <boothj5@gmail.com>
  *
  * This file is part of Profanity.
  *
@@ -55,9 +55,11 @@
 #define JABBER_PRIORITY_MIN -128
 #define JABBER_PRIORITY_MAX 127
 
+#define XMPP_FEATURE_PING "urn:xmpp:ping"
 #define XMPP_FEATURE_BLOCKING "urn:xmpp:blocking"
 #define XMPP_FEATURE_RECEIPTS "urn:xmpp:receipts"
 #define XMPP_FEATURE_LASTACTIVITY "jabber:iq:last"
+#define XMPP_FEATURE_MUC "http://jabber.org/protocol/muc"
 
 typedef enum {
     JABBER_CONNECTING,
@@ -119,6 +121,7 @@ char* session_get_account_name(void);
 
 jabber_conn_status_t connection_get_status(void);
 char *connection_get_presence_msg(void);
+void connection_set_presence_msg(const char *const message);
 const char* connection_get_fulljid(void);
 char* connection_create_uuid(void);
 void connection_free_uuid(char *uuid);
@@ -129,6 +132,7 @@ gboolean connection_is_secured(void);
 gboolean connection_send_stanza(const char *const stanza);
 GList* connection_get_available_resources(void);
 gboolean connection_supports(const char *const feature);
+char* connection_jid_for_feature(const char *const feature);
 
 char* message_send_chat(const char *const barejid, const char *const msg, const char *const oob_url,
     gboolean request_receipt);
@@ -144,20 +148,21 @@ void message_send_gone(const char *const jid);
 void message_send_invite(const char *const room, const char *const contact, const char *const reason);
 
 void presence_subscription(const char *const jid, const jabber_subscr_t action);
-GSList* presence_get_subscription_requests(void);
+GList* presence_get_subscription_requests(void);
 gint presence_sub_request_count(void);
 void presence_reset_sub_request_search(void);
-char* presence_sub_request_find(const char *const search_str);
+char* presence_sub_request_find(const char *const search_str, gboolean previous);
 void presence_join_room(const char *const room, const char *const nick, const char *const passwd);
 void presence_change_room_nick(const char *const room, const char *const nick);
 void presence_leave_chat_room(const char *const room_jid);
-void presence_send(resource_presence_t status, const char *const msg, int idle, char *signed_status);
+void presence_send(resource_presence_t status, int idle, char *signed_status);
 gboolean presence_sub_request_exists(const char *const bare_jid);
 
 void iq_enable_carbons(void);
 void iq_disable_carbons(void);
 void iq_send_software_version(const char *const fulljid);
-void iq_room_list_request(gchar *conferencejid);
+void iq_rooms_cache_clear(void);
+void iq_room_list_request(gchar *conferencejid, gchar *filter);
 void iq_disco_info_request(gchar *jid);
 void iq_disco_items_request(gchar *jid);
 void iq_last_activity_request(gchar *jid);
@@ -191,7 +196,7 @@ gboolean bookmark_update(const char *jid, const char *nick, const char *password
 gboolean bookmark_remove(const char *jid);
 gboolean bookmark_join(const char *jid);
 GList* bookmark_get_list(void);
-char* bookmark_find(const char *const search_str);
+char* bookmark_find(const char *const search_str, gboolean previous);
 void bookmark_autocomplete_reset(void);
 gboolean bookmark_exists(const char *const room);
 
@@ -204,7 +209,7 @@ void roster_send_remove(const char *const barejid);
 GList* blocked_list(void);
 gboolean blocked_add(char *jid);
 gboolean blocked_remove(char *jid);
-char* blocked_ac_find(const char *const search_str);
+char* blocked_ac_find(const char *const search_str, gboolean previous);
 void blocked_ac_reset(void);
 
 void form_destroy(DataForm *form);

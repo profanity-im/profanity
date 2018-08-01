@@ -1,7 +1,7 @@
 /*
  * c_api.c
  *
- * Copyright (C) 2012 - 2016 James Booth <boothj5@gmail.com>
+ * Copyright (C) 2012 - 2018 James Booth <boothj5@gmail.com>
  *
  * This file is part of Profanity.
  *
@@ -143,6 +143,17 @@ c_api_completer_clear(const char *filename, const char *key)
 }
 
 static void
+c_api_filepath_completer_add(const char *filename, const char *prefix)
+{
+    char *plugin_name = _c_plugin_name(filename);
+    log_debug("Filepath autocomplete added '%s' for %s", prefix, plugin_name);
+
+    api_filepath_completer_add(plugin_name, prefix);
+
+    free(plugin_name);
+}
+
+static void
 c_api_notify(const char *message, int timeout_ms, const char *category)
 {
     api_notify(message, category, timeout_ms);
@@ -182,6 +193,12 @@ static char**
 c_api_get_current_occupants(void)
 {
     return api_get_current_occupants();
+}
+
+static char*
+c_api_get_room_nick(const char *barejid)
+{
+    return api_get_room_nick(barejid);
 }
 
 static void
@@ -324,6 +341,98 @@ c_api_disco_add_feature(const char *filename, char *feature)
     free(plugin_name);
 }
 
+static void
+c_api_encryption_reset(const char *barejid)
+{
+    api_encryption_reset(barejid);
+}
+
+static int
+c_api_chat_set_titlebar_enctext(const char *barejid, const char *enctext)
+{
+    return api_chat_set_titlebar_enctext(barejid, enctext);
+}
+
+static int
+c_api_chat_unset_titlebar_enctext(const char *barejid)
+{
+    return api_chat_unset_titlebar_enctext(barejid);
+}
+
+static int
+c_api_chat_set_incoming_char(const char *barejid, const char *ch)
+{
+    return api_chat_set_incoming_char(barejid, ch);
+}
+
+static int
+c_api_chat_unset_incoming_char(const char *barejid)
+{
+    return api_chat_unset_incoming_char(barejid);
+}
+
+static int
+c_api_chat_set_outgoing_char(const char *barejid, const char *ch)
+{
+    return api_chat_set_outgoing_char(barejid, ch);
+}
+
+static int
+c_api_chat_unset_outgoing_char(const char *barejid)
+{
+    return api_chat_unset_outgoing_char(barejid);
+}
+
+static int
+c_api_room_set_titlebar_enctext(const char *roomjid, const char *enctext)
+{
+    return api_room_set_titlebar_enctext(roomjid, enctext);
+}
+
+static int
+c_api_room_unset_titlebar_enctext(const char *roomjid)
+{
+    return api_room_unset_titlebar_enctext(roomjid);
+}
+
+static int
+c_api_room_set_message_char(const char *roomjid, const char *ch)
+{
+    return api_room_set_message_char(roomjid, ch);
+}
+
+static int
+c_api_room_unset_message_char(const char *roomjid)
+{
+    return api_room_unset_message_char(roomjid);
+}
+
+static int
+c_api_chat_show(const char *const barejid, const char *const message)
+{
+    return api_chat_show(barejid, message);
+}
+
+static int
+c_api_chat_show_themed(const char *const barejid, const char *const group, const char *const item, const char *const def,
+    const char *const ch, const char *const message)
+{
+    return api_chat_show_themed(barejid, group, item, def, ch, message);
+}
+
+static int
+c_api_room_show(const char *const roomjid, const char *const message)
+{
+    return api_room_show(roomjid, message);
+}
+
+static int
+c_api_room_show_themed(const char *const roomjid, const char *const group, const char *const item, const char *const def,
+    const char *const ch, const char *const message)
+{
+    return api_room_show_themed(roomjid, group, item, def, ch, message);
+}
+
 void
 c_command_callback(PluginCommand *command, gchar **args)
 {
@@ -360,6 +469,7 @@ c_api_init(void)
     _prof_completer_add = c_api_completer_add;
     _prof_completer_remove = c_api_completer_remove;
     _prof_completer_clear = c_api_completer_clear;
+    _prof_filepath_completer_add = c_api_filepath_completer_add;
     _prof_win_create = c_api_win_create;
     prof_notify = c_api_notify;
     prof_send_line = c_api_send_line;
@@ -368,6 +478,7 @@ c_api_init(void)
     prof_current_win_is_console = c_api_current_win_is_console;
     prof_get_current_nick = c_api_get_current_nick;
     prof_get_current_occupants = c_api_get_current_occupants;
+    prof_get_room_nick = c_api_get_room_nick;
     prof_log_debug = c_api_log_debug;
     prof_log_info = c_api_log_info;
     prof_log_warning = c_api_log_warning;
@@ -389,6 +500,21 @@ c_api_init(void)
     prof_settings_string_list_clear = c_api_settings_string_list_clear;
     prof_incoming_message = c_api_incoming_message;
     _prof_disco_add_feature = c_api_disco_add_feature;
+    prof_encryption_reset = c_api_encryption_reset;
+    prof_chat_set_titlebar_enctext = c_api_chat_set_titlebar_enctext;
+    prof_chat_unset_titlebar_enctext = c_api_chat_unset_titlebar_enctext;
+    prof_chat_set_incoming_char = c_api_chat_set_incoming_char;
+    prof_chat_unset_incoming_char = c_api_chat_unset_incoming_char;
+    prof_chat_set_outgoing_char = c_api_chat_set_outgoing_char;
+    prof_chat_unset_outgoing_char = c_api_chat_unset_outgoing_char;
+    prof_room_set_titlebar_enctext = c_api_room_set_titlebar_enctext;
+    prof_room_unset_titlebar_enctext = c_api_room_unset_titlebar_enctext;
+    prof_room_set_message_char = c_api_room_set_message_char;
+    prof_room_unset_message_char = c_api_room_unset_message_char;
+    prof_chat_show = c_api_chat_show;
+    prof_chat_show_themed = c_api_chat_show_themed;
+    prof_room_show = c_api_room_show;
+    prof_room_show_themed = c_api_room_show_themed;
 }
 
 static char *

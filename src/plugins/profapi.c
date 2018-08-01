@@ -1,7 +1,7 @@
 /*
  * prof_api.c
  *
- * Copyright (C) 2012 - 2016 James Booth <boothj5@gmail.com>
+ * Copyright (C) 2012 - 2018 James Booth <boothj5@gmail.com>
  *
  * This file is part of Profanity.
  *
@@ -51,6 +51,7 @@ void (*_prof_register_timed)(const char *filename, TIMED_CB callback, int interv
 void (*_prof_completer_add)(const char *filename, const char *key, char **items) = NULL;
 void (*_prof_completer_remove)(const char *filename, const char *key, char **items) = NULL;
 void (*_prof_completer_clear)(const char *filename, const char *key) = NULL;
+void (*_prof_filepath_completer_add)(const char *filename, const char *prefix) = NULL;
 
 void (*prof_notify)(const char *message, int timeout_ms, const char *category) = NULL;
 
@@ -61,6 +62,8 @@ char* (*prof_get_current_muc)(void) = NULL;
 int (*prof_current_win_is_console)(void) = NULL;
 char* (*prof_get_current_nick)(void) = NULL;
 char** (*prof_get_current_occupants)(void) = NULL;
+
+char* (*prof_get_room_nick)(const char *barejid) = NULL;
 
 void (*prof_log_debug)(const char *message) = NULL;
 void (*prof_log_info)(const char *message) = NULL;
@@ -89,3 +92,24 @@ int (*prof_settings_string_list_clear)(char *group, char *key) = NULL;
 void (*prof_incoming_message)(char *barejid, char *resource, char *message) = NULL;
 
 void (*_prof_disco_add_feature)(const char *filename, char *feature) = NULL;
+
+void (*prof_encryption_reset)(const char *barejid) = NULL;
+
+int (*prof_chat_set_titlebar_enctext)(const char *barejid, const char *enctext) = NULL;
+int (*prof_chat_unset_titlebar_enctext)(const char *barejid) = NULL;
+int (*prof_chat_set_incoming_char)(const char *barejid, const char *ch) = NULL;
+int (*prof_chat_unset_incoming_char)(const char *barejid) = NULL;
+int (*prof_chat_set_outgoing_char)(const char *barejid, const char *ch) = NULL;
+int (*prof_chat_unset_outgoing_char)(const char *barejid) = NULL;
+int (*prof_room_set_titlebar_enctext)(const char *roomjid, const char *enctext) = NULL;
+int (*prof_room_unset_titlebar_enctext)(const char *roomjid) = NULL;
+int (*prof_room_set_message_char)(const char *roomjid, const char *ch) = NULL;
+int (*prof_room_unset_message_char)(const char *roomjid) = NULL;
+
+int (*prof_chat_show)(const char *const barejid, const char *const message) = NULL;
+int (*prof_chat_show_themed)(const char *const barejid, const char *const group, const char *const item, const char *const def,
+    const char *const ch, const char *const message) = NULL;
+
+int (*prof_room_show)(const char *const roomjid, const char *const message) = NULL;
+int (*prof_room_show_themed)(const char *const roomjid, const char *const group, const char *const item, const char *const def,
+    const char *const ch, const char *const message) = NULL;

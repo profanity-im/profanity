@@ -1,7 +1,7 @@
 /*
  * titlebar.c
  *
- * Copyright (C) 2012 - 2016 James Booth <boothj5@gmail.com>
+ * Copyright (C) 2012 - 2018 James Booth <boothj5@gmail.com>
  *
  * This file is part of Profanity.
  *
@@ -62,6 +62,7 @@ static void _title_bar_draw(void);
 static void _show_self_presence(void);
 static void _show_contact_presence(ProfChatWin *chatwin);
 static void _show_privacy(ProfChatWin *chatwin);
+static void _show_muc_privacy(ProfMucWin *mucwin);
 
 void
 create_title_bar(void)
@@ -202,6 +203,10 @@ _title_bar_draw(void)
         if (typing) {
             wprintw(win, " (typing...)");
         }
+    } else if (current && current->type == WIN_MUC) {
+        ProfMucWin *mucwin = (ProfMucWin*) current;
+        assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
+        _show_muc_privacy(mucwin);
     }
 
     _show_self_presence();
@@ -311,6 +316,27 @@ _show_self_presence(void)
 }
 
 static void
+_show_muc_privacy(ProfMucWin *mucwin)
+{
+    int bracket_attrs = theme_attrs(THEME_TITLE_BRACKET);
+    int encrypted_attrs = theme_attrs(THEME_TITLE_ENCRYPTED);
+
+    if (mucwin->enctext) {
+        wprintw(win, " ");
+        wattron(win, bracket_attrs);
+        wprintw(win, "[");
+        wattroff(win, bracket_attrs);
+        wattron(win, encrypted_attrs);
+        wprintw(win, mucwin->enctext);
+        wattroff(win, encrypted_attrs);
+        wattron(win, bracket_attrs);
+        wprintw(win, "]");
+
+        return;
+    }
+}
+
+static void
 _show_privacy(ProfChatWin *chatwin)
 {
     int bracket_attrs = theme_attrs(THEME_TITLE_BRACKET);
@@ -318,6 +344,20 @@ _show_privacy(ProfChatWin *chatwin)
     int unencrypted_attrs = theme_attrs(THEME_TITLE_UNENCRYPTED);
     int trusted_attrs = theme_attrs(THEME_TITLE_TRUSTED);
     int untrusted_attrs = theme_attrs(THEME_TITLE_UNTRUSTED);
+
+    if (chatwin->enctext) {
+        wprintw(win, " ");
+        wattron(win, bracket_attrs);
+        wprintw(win, "[");
+        wattroff(win, bracket_attrs);
+        wattron(win, encrypted_attrs);
+        wprintw(win, chatwin->enctext);
+        wattroff(win, encrypted_attrs);
+        wattron(win, bracket_attrs);
+        wprintw(win, "]");
+
+        return;
+    }
 
     if (chatwin->is_otr) {
         wprintw(win, " ");
@@ -353,7 +393,11 @@ _show_privacy(ProfChatWin *chatwin)
             wprintw(win, "]");
             wattroff(win, bracket_attrs);
         }
-    } else if (chatwin->pgp_send || chatwin->pgp_recv) {
+
+        return;
+    }
+
+    if (chatwin->pgp_send || chatwin->pgp_recv) {
         GString *pgpmsg = g_string_new("PGP ");
         if (chatwin->pgp_send && !chatwin->pgp_recv) {
             g_string_append(pgpmsg, "send");
@@ -373,19 +417,21 @@ _show_privacy(ProfChatWin *chatwin)
         wprintw(win, "]");
         wattroff(win, bracket_attrs);
         g_string_free(pgpmsg, TRUE);
-    } else {
-        if (prefs_get_boolean(PREF_ENC_WARN)) {
-            wprintw(win, " ");
-            wattron(win, bracket_attrs);
-            wprintw(win, "[");
-            wattroff(win, bracket_attrs);
-            wattron(win, unencrypted_attrs);
-            wprintw(win, "unencrypted");
-            wattroff(win, unencrypted_attrs);
-            wattron(win, bracket_attrs);
-            wprintw(win, "]");
-            wattroff(win, bracket_attrs);
-        }
+
+        return;
+    }
+
+    if (prefs_get_boolean(PREF_ENC_WARN)) {
+        wprintw(win, " ");
+        wattron(win, bracket_attrs);
+        wprintw(win, "[");
+        wattroff(win, bracket_attrs);
+        wattron(win, unencrypted_attrs);
+        wprintw(win, "unencrypted");
+        wattroff(win, unencrypted_attrs);
+        wattron(win, bracket_attrs);
+        wprintw(win, "]");
+        wattroff(win, bracket_attrs);
     }
 }
 

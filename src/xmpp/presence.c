@@ -1,7 +1,7 @@
 /*
  * presence.c
  *
- * Copyright (C) 2012 - 2016 James Booth <boothj5@gmail.com>
+ * Copyright (C) 2012 - 2018 James Booth <boothj5@gmail.com>
  *
  * This file is part of Profanity.
  *
@@ -141,7 +141,7 @@ presence_subscription(const char *const jid, const jabber_subscr_t action)
     xmpp_stanza_release(presence);
 }
 
-GSList*
+GList*
 presence_get_subscription_requests(void)
 {
     return autocomplete_create_list(sub_requests_ac);
@@ -160,9 +160,9 @@ presence_clear_sub_requests(void)
 }
 
 char*
-presence_sub_request_find(const char *const search_str)
+presence_sub_request_find(const char *const search_str, gboolean previous)
 {
-    return autocomplete_complete(sub_requests_ac, search_str, TRUE);
+    return autocomplete_complete(sub_requests_ac, search_str, TRUE, previous);
 }
 
 gboolean
@@ -170,16 +170,16 @@ presence_sub_request_exists(const char *const bare_jid)
 {
     gboolean result = FALSE;
 
-    GSList *requests = autocomplete_create_list(sub_requests_ac);
-    GSList *curr = requests;
+    GList *requests = autocomplete_create_list(sub_requests_ac);
+    GList *curr = requests;
     while (curr) {
         if (strcmp(curr->data, bare_jid) == 0) {
             result = TRUE;
             break;
         }
-        curr = g_slist_next(curr);
+        curr = g_list_next(curr);
     }
-    g_slist_free_full(requests, free);
+    g_list_free_full(requests, free);
 
     return result;
 }
@@ -191,20 +191,19 @@ presence_reset_sub_request_search(void)
 }
 
 void
-presence_send(const resource_presence_t presence_type, const char *const msg, const int idle, char *signed_status)
+presence_send(const resource_presence_t presence_type, const int idle, char *signed_status)
 {
     if (connection_get_status() != JABBER_CONNECTED) {
         log_warning("Error setting presence, not connected.");
         return;
     }
 
+    char *msg = connection_get_presence_msg();
     if (msg) {
         log_debug("Updating presence: %s, \"%s\"", string_from_resource_presence(presence_type), msg);
     } else {
         log_debug("Updating presence: %s", string_from_resource_presence(presence_type));
     }
-
-    connection_set_presence_msg(msg);
 
     const int pri = accounts_get_priority_for_presence_type(session_get_account_name(), presence_type);
     connection_set_priority(pri);

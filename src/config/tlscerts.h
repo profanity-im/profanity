@@ -1,7 +1,7 @@
 /*
  * tlscerts.h
  *
- * Copyright (C) 2012 - 2016 James Booth <boothj5@gmail.com>
+ * Copyright (C) 2012 - 2018 James Booth <boothj5@gmail.com>
  *
  * This file is part of Profanity.
  *
@@ -89,7 +89,7 @@ void tlscerts_free(TLSCertificate *cert);
 
 GList* tlscerts_list(void);
 
-char* tlscerts_complete(const char *const prefix);
+char* tlscerts_complete(const char *const prefix, gboolean previous);
 
 void tlscerts_reset_ac(void);
 

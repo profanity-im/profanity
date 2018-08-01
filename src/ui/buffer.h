@@ -1,7 +1,7 @@
 /*
  * buffer.h
  *
- * Copyright (C) 2012 - 2016 James Booth <boothj5@gmail.com>
+ * Copyright (C) 2012 - 2018 James Booth <boothj5@gmail.com>
  *
  * This file is part of Profanity.
  *
@@ -60,11 +60,11 @@ typedef struct prof_buff_t *ProfBuff;
 
 ProfBuff buffer_create();
 void buffer_free(ProfBuff buffer);
-void buffer_push(ProfBuff buffer, const char show_char, int pad_indent, GDateTime *time, int flags, theme_item_t theme_item,
+void buffer_append(ProfBuff buffer, const char show_char, int pad_indent, GDateTime *time, int flags, theme_item_t theme_item,
     const char *const from, const char *const message, DeliveryReceipt *receipt);
 int buffer_size(ProfBuff buffer);
-ProfBuffEntry* buffer_yield_entry(ProfBuff buffer, int entry);
-ProfBuffEntry* buffer_yield_entry_by_id(ProfBuff buffer, const char *const id);
+ProfBuffEntry* buffer_get_entry(ProfBuff buffer, int entry);
+ProfBuffEntry* buffer_get_entry_by_id(ProfBuff buffer, const char *const id);
 gboolean buffer_mark_received(ProfBuff buffer, const char *const id);
 
 #endif

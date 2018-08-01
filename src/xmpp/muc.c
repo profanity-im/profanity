@@ -1,7 +1,7 @@
 /*
  * muc.c
  *
- * Copyright (C) 2012 - 2016 James Booth <boothj5@gmail.com>
+ * Copyright (C) 2012 - 2018 James Booth <boothj5@gmail.com>
  *
  * This file is part of Profanity.
  *
@@ -69,6 +69,7 @@ typedef struct _muc_room_t {
 GHashTable *rooms = NULL;
 GHashTable *invite_passwords = NULL;
 Autocomplete invite_ac;
+Autocomplete confservers_ac;
 
 static void _free_room(ChatRoom *room);
 static gint _compare_occupants(Occupant *a, Occupant *b);
@@ -84,6 +85,7 @@ void
 muc_init(void)
 {
     invite_ac = autocomplete_new();
+    confservers_ac = autocomplete_new();
     rooms = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, (GDestroyNotify)_free_room);
     invite_passwords = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, g_free);
 }
@@ -92,10 +94,17 @@ void
 muc_close(void)
 {
     autocomplete_free(invite_ac);
+    autocomplete_free(confservers_ac);
     g_hash_table_destroy(rooms);
     g_hash_table_destroy(invite_passwords);
     rooms = NULL;
     invite_passwords = NULL;
+}
+
+void
+muc_confserver_add(const char *const server)
+{
+    autocomplete_add(confservers_ac, server);
 }
 
 void
@@ -120,7 +129,7 @@ muc_invites_count(void)
     return autocomplete_length(invite_ac);
 }
 
-GSList*
+GList*
 muc_invites(void)
 {
     return autocomplete_create_list(invite_ac);
@@ -135,17 +144,17 @@ muc_invite_password(const char *const room)
 gboolean
 muc_invites_contain(const char *const room)
 {
-    GSList *invites = autocomplete_create_list(invite_ac);
-    GSList *curr = invites;
+    GList *invites = autocomplete_create_list(invite_ac);
+    GList *curr = invites;
     while (curr) {
         if (strcmp(curr->data, room) == 0) {
-            g_slist_free_full(invites, g_free);
+            g_list_free_full(invites, g_free);
             return TRUE;
         } else {
-            curr = g_slist_next(curr);
+            curr = g_list_next(curr);
         }
     }
-    g_slist_free_full(invites, g_free);
+    g_list_free_full(invites, g_free);
 
     return FALSE;
 }
@@ -156,10 +165,22 @@ muc_invites_reset_ac(void)
     autocomplete_reset(invite_ac);
 }
 
-char*
-muc_invites_find(const char *const search_str)
+void
+muc_confserver_reset_ac(void)
 {
-    return autocomplete_complete(invite_ac, search_str, TRUE);
+    autocomplete_reset(confservers_ac);
+}
+
+char*
+muc_invites_find(const char *const search_str, gboolean previous)
+{
+    return autocomplete_complete(invite_ac, search_str, TRUE, previous);
+}
+
+char*
+muc_confserver_find(const char *const search_str, gboolean previous)
+{
+    return autocomplete_complete(confservers_ac, search_str, TRUE, previous);
 }
 
 void
@@ -169,6 +190,12 @@ muc_invites_clear(void)
     if (invite_passwords) {
         g_hash_table_remove_all(invite_passwords);
     }
+}
+
+void
+muc_confserver_clear(void)
+{
+    autocomplete_clear(confservers_ac);
 }
 
 void
@@ -663,45 +690,49 @@ muc_roster_nick_change_complete(const char *const room, const char *const nick)
 }
 
 char*
-muc_autocomplete(ProfWin *window, const char *const input)
+muc_autocomplete(ProfWin *window, const char *const input, gboolean previous)
 {
-    if (window->type == WIN_MUC) {
-        ProfMucWin *mucwin = (ProfMucWin*)window;
-        assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
-        ChatRoom *chat_room = g_hash_table_lookup(rooms, mucwin->roomjid);
+    if (window->type != WIN_MUC) {
+        return NULL;
+    }
 
-        if (chat_room && chat_room->nick_ac) {
-            const char * search_str = NULL;
+    ProfMucWin *mucwin = (ProfMucWin*)window;
+    assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
+    ChatRoom *chat_room = g_hash_table_lookup(rooms, mucwin->roomjid);
+    if (chat_room == NULL || chat_room->nick_ac == NULL) {
+        return NULL;
+    }
 
-            gchar *last_space = g_strrstr(input, " ");
-            if (!last_space) {
-                search_str = input;
-                if (!chat_room->autocomplete_prefix) {
-                    chat_room->autocomplete_prefix = strdup("");
-                }
-            } else {
-                search_str = last_space+1;
-                if (!chat_room->autocomplete_prefix) {
-                    chat_room->autocomplete_prefix = g_strndup(input, search_str - input);
-                }
-            }
+    const char * search_str = NULL;
 
-            char *result = autocomplete_complete(chat_room->nick_ac, search_str, FALSE);
-            if (result) {
-                GString *replace_with = g_string_new(chat_room->autocomplete_prefix);
-                g_string_append(replace_with, result);
-                if (!last_space || (*(last_space+1) == '\0')) {
-                    g_string_append(replace_with, ": ");
-                }
-                g_free(result);
-                result = replace_with->str;
-                g_string_free(replace_with, FALSE);
-                return result;
-            }
+    gchar *last_space = g_strrstr(input, " ");
+    if (!last_space) {
+        search_str = input;
+        if (!chat_room->autocomplete_prefix) {
+            chat_room->autocomplete_prefix = strdup("");
+        }
+    } else {
+        search_str = last_space+1;
+        if (!chat_room->autocomplete_prefix) {
+            chat_room->autocomplete_prefix = g_strndup(input, search_str - input);
         }
     }
 
-    return NULL;
+    char *result = autocomplete_complete(chat_room->nick_ac, search_str, FALSE, previous);
+    if (result == NULL) {
+        return NULL;
+    }
+
+    GString *replace_with = g_string_new(chat_room->autocomplete_prefix);
+    g_string_append(replace_with, result);
+
+    if (strlen(chat_room->autocomplete_prefix) == 0) {
+        g_string_append(replace_with, ": ");
+    }
+    g_free(result);
+    result = replace_with->str;
+    g_string_free(replace_with, FALSE);
+    return result;
 }
 
 void

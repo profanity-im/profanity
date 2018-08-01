@@ -1,7 +1,7 @@
 /*
  * theme.h
  *
- * Copyright (C) 2012 - 2016 James Booth <boothj5@gmail.com>
+ * Copyright (C) 2012 - 2018 James Booth <boothj5@gmail.com>
  *
  * This file is part of Profanity.
  *
@@ -39,11 +39,14 @@
 
 #include <glib.h>
 
+#define THEME_DEFAULT 0
+
 typedef enum {
     THEME_TEXT,
     THEME_TEXT_ME,
     THEME_TEXT_THEM,
     THEME_SPLASH,
+    THEME_HELP_HEADER,
     THEME_ERROR,
     THEME_INCOMING,
     THEME_MENTION,
@@ -66,6 +69,7 @@ typedef enum {
     THEME_STATUS_BRACKET,
     THEME_STATUS_ACTIVE,
     THEME_STATUS_NEW,
+    THEME_STATUS_TIME,
     THEME_ME,
     THEME_THEM,
     THEME_ROOMINFO,

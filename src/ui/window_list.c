@@ -1,7 +1,7 @@
 /*
  * window_list.c
  *
- * Copyright (C) 2012 - 2016 James Booth <boothj5@gmail.com>
+ * Copyright (C) 2012 - 2018 James Booth <boothj5@gmail.com>
  *
  * This file is part of Profanity.
  *
@@ -45,7 +45,6 @@
 #include "config/theme.h"
 #include "plugins/plugins.h"
 #include "ui/ui.h"
-#include "ui/statusbar.h"
 #include "ui/window_list.h"
 #include "xmpp/xmpp.h"
 #include "xmpp/roster_list.h"
@@ -239,9 +238,7 @@ wins_close_plugin(char *tag)
     int index = wins_get_num(toclose);
     ui_close_win(index);
 
-    if (prefs_get_boolean(PREF_WINS_AUTO_TIDY)) {
-        wins_tidy();
-    }
+    wins_tidy();
 }
 
 GList*
@@ -280,7 +277,7 @@ wins_private_nick_change(const char *const roomjid, const char *const oldnick, c
 
         Jid *newjid = jid_create_from_bare_and_resource(roomjid, newnick);
         privwin->fulljid = strdup(newjid->fulljid);
-        win_vprint((ProfWin*)privwin, '!', 0, NULL, 0, THEME_THEM, NULL, "** %s is now known as %s.", oldjid->resourcepart, newjid->resourcepart);
+        win_println((ProfWin*)privwin, THEME_THEM, '!', "** %s is now known as %s.", oldjid->resourcepart, newjid->resourcepart);
 
         autocomplete_remove(wins_ac, oldjid->fulljid);
         autocomplete_remove(wins_close_ac, oldjid->fulljid);
@@ -835,7 +832,7 @@ wins_lost_connection(void)
     while (curr) {
         ProfWin *window = curr->data;
         if (window->type != WIN_CONSOLE) {
-            win_print(window, '-', 0, NULL, 0, THEME_ERROR, "", "Lost connection.");
+            win_println(window, THEME_ERROR, '-', "Lost connection.");
 
             // if current win, set current_win_dirty
             if (wins_is_current(window)) {
@@ -847,7 +844,7 @@ wins_lost_connection(void)
     g_list_free(values);
 }
 
-gboolean
+void
 wins_swap(int source_win, int target_win)
 {
     ProfWin *source = g_hash_table_lookup(windows, GINT_TO_POINTER(source_win));
@@ -857,20 +854,21 @@ wins_swap(int source_win, int target_win)
         ProfWin *target = g_hash_table_lookup(windows, GINT_TO_POINTER(target_win));
 
         // target window empty
-        if (!target) {
+        if (target == NULL) {
             g_hash_table_steal(windows, GINT_TO_POINTER(source_win));
             g_hash_table_insert(windows, GINT_TO_POINTER(target_win), source);
             status_bar_inactive(source_win);
+            char *identifier = win_get_tab_identifier(source);
             if (win_unread(source) > 0) {
-                status_bar_new(target_win);
+                status_bar_new(target_win, source->type, identifier);
             } else {
-                status_bar_active(target_win);
+                status_bar_active(target_win, source->type, identifier);
             }
+            free(identifier);
             if (wins_get_current_num() == source_win) {
                 wins_set_current_by_num(target_win);
                 ui_focus_win(console);
             }
-            return TRUE;
 
         // target window occupied
         } else {
@@ -878,23 +876,24 @@ wins_swap(int source_win, int target_win)
             g_hash_table_steal(windows, GINT_TO_POINTER(target_win));
             g_hash_table_insert(windows, GINT_TO_POINTER(source_win), target);
             g_hash_table_insert(windows, GINT_TO_POINTER(target_win), source);
+            char *source_identifier = win_get_tab_identifier(source);
+            char *target_identifier = win_get_tab_identifier(target);
             if (win_unread(source) > 0) {
-                status_bar_new(target_win);
+                status_bar_new(target_win, source->type, source_identifier);
             } else {
-                status_bar_active(target_win);
+                status_bar_active(target_win, source->type, source_identifier);
             }
             if (win_unread(target) > 0) {
-                status_bar_new(source_win);
+                status_bar_new(source_win, target->type, target_identifier);
             } else {
-                status_bar_active(source_win);
+                status_bar_active(source_win, target->type, target_identifier);
             }
+            free(source_identifier);
+            free(target_identifier);
             if ((wins_get_current_num() == source_win) || (wins_get_current_num() == target_win)) {
                 ui_focus_win(console);
             }
-            return TRUE;
         }
-    } else {
-        return FALSE;
     }
 }
 
@@ -999,22 +998,24 @@ wins_tidy(void)
         GList *curr = keys;
         while (curr) {
             ProfWin *window = g_hash_table_lookup(windows, curr->data);
+            char *identifier = win_get_tab_identifier(window);
             g_hash_table_steal(windows, curr->data);
             if (num == 10) {
                 g_hash_table_insert(new_windows, GINT_TO_POINTER(0), window);
                 if (win_unread(window) > 0) {
-                    status_bar_new(0);
+                    status_bar_new(0, window->type, identifier);
                 } else {
-                    status_bar_active(0);
+                    status_bar_active(0, window->type, identifier);
                 }
             } else {
                 g_hash_table_insert(new_windows, GINT_TO_POINTER(num), window);
                 if (win_unread(window) > 0) {
-                    status_bar_new(num);
+                    status_bar_new(num, window->type, identifier);
                 } else {
-                    status_bar_active(num);
+                    status_bar_active(num, window->type, identifier);
                 }
             }
+            free(identifier);
             num++;
             curr = g_list_next(curr);
         }
@@ -1051,7 +1052,7 @@ wins_create_summary(gboolean unread)
             GString *line = g_string_new("");
 
             int ui_index = GPOINTER_TO_INT(curr->data);
-            char *winstring = win_get_string(window);
+            char *winstring = win_to_string(window);
             if (!winstring) {
                 g_string_free(line, TRUE);
                 continue;
@@ -1073,15 +1074,15 @@ wins_create_summary(gboolean unread)
 }
 
 char*
-win_autocomplete(const char *const search_str)
+win_autocomplete(const char *const search_str, gboolean previous)
 {
-    return autocomplete_complete(wins_ac, search_str, TRUE);
+    return autocomplete_complete(wins_ac, search_str, TRUE, previous);
 }
 
 char*
-win_close_autocomplete(const char *const search_str)
+win_close_autocomplete(const char *const search_str, gboolean previous)
 {
-    return autocomplete_complete(wins_close_ac, search_str, TRUE);
+    return autocomplete_complete(wins_close_ac, search_str, TRUE, previous);
 }
 
 void

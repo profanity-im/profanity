@@ -1,7 +1,7 @@
 /*
  * rosterwin.c
  *
- * Copyright (C) 2012 - 2016 James Booth <boothj5@gmail.com>
+ * Copyright (C) 2012 - 2018 James Booth <boothj5@gmail.com>
  *
  * This file is part of Profanity.
  *
@@ -138,13 +138,13 @@ rosterwin_roster(void)
             _rosterwin_contacts_by_presence(layout, "dnd", "Do not disturb");
             _rosterwin_contacts_by_presence(layout, "offline", "Offline");
         } else if (g_strcmp0(by, "group") == 0) {
-            GSList *groups = roster_get_groups();
-            GSList *curr_group = groups;
+            GList *groups = roster_get_groups();
+            GList *curr_group = groups;
             while (curr_group) {
                 _rosterwin_contacts_by_group(layout, curr_group->data);
-                curr_group = g_slist_next(curr_group);
+                curr_group = g_list_next(curr_group);
             }
-            g_slist_free_full(groups, free);
+            g_list_free_full(groups, free);
             _rosterwin_contacts_by_group(layout, NULL);
         } else {
             _rosterwin_contacts_all(layout);
@@ -762,7 +762,14 @@ _rosterwin_room(ProfLayoutSplit *layout, ProfMucWin *mucwin)
         g_string_append(msg, jidp->localpart);
         jid_destroy(jidp);
     } else {
-        g_string_append(msg, mucwin->roomjid);
+        gboolean show_server = prefs_get_boolean(PREF_ROSTER_ROOMS_SERVER);
+        if (show_server) {
+            g_string_append(msg, mucwin->roomjid);
+        } else {
+            Jid *jidp = jid_create(mucwin->roomjid);
+            g_string_append(msg, jidp->localpart);
+            jid_destroy(jidp);
+        }
     }
     prefs_free_string(roombypref);
     if ((g_strcmp0(unreadpos, "after") == 0) && mucwin->unread > 0) {

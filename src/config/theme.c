@@ -1,7 +1,7 @@
 /*
  * theme.c
  *
- * Copyright (C) 2012 - 2016 James Booth <boothj5@gmail.com>
+ * Copyright (C) 2012 - 2018 James Booth <boothj5@gmail.com>
  *
  * This file is part of Profanity.
  *
@@ -81,6 +81,7 @@ theme_init(const char *const theme_name)
     g_hash_table_insert(defaults, strdup("main.text.me"),            strdup("white"));
     g_hash_table_insert(defaults, strdup("main.text.them"),          strdup("white"));
     g_hash_table_insert(defaults, strdup("main.splash"),             strdup("cyan"));
+    g_hash_table_insert(defaults, strdup("main.help.header"),        strdup("white"));
     g_hash_table_insert(defaults, strdup("error"),                   strdup("red"));
     g_hash_table_insert(defaults, strdup("incoming"),                strdup("yellow"));
     g_hash_table_insert(defaults, strdup("mention"),                 strdup("yellow"));
@@ -103,6 +104,7 @@ theme_init(const char *const theme_name)
     g_hash_table_insert(defaults, strdup("statusbar.brackets"),      strdup("cyan"));
     g_hash_table_insert(defaults, strdup("statusbar.active"),        strdup("cyan"));
     g_hash_table_insert(defaults, strdup("statusbar.new"),           strdup("white"));
+    g_hash_table_insert(defaults, strdup("statusbar.time"),          strdup("white"));
     g_hash_table_insert(defaults, strdup("me"),                      strdup("yellow"));
     g_hash_table_insert(defaults, strdup("them"),                    strdup("green"));
     g_hash_table_insert(defaults, strdup("receipt.sent"),            strdup("red"));
@@ -382,7 +384,6 @@ _load_preferences(void)
     _set_boolean_preference("flash", PREF_FLASH);
     _set_boolean_preference("splash", PREF_SPLASH);
     _set_boolean_preference("wrap", PREF_WRAP);
-    _set_boolean_preference("wins.autotidy", PREF_WINS_AUTO_TIDY);
     _set_boolean_preference("resource.title", PREF_RESOURCE_TITLE);
     _set_boolean_preference("resource.message", PREF_RESOURCE_MESSAGE);
     _set_boolean_preference("occupants", PREF_OCCUPANTS);
@@ -400,11 +401,14 @@ _load_preferences(void)
     _set_boolean_preference("roster.contacts", PREF_ROSTER_CONTACTS);
     _set_boolean_preference("roster.unsubscribed", PREF_ROSTER_UNSUBSCRIBED);
     _set_boolean_preference("roster.rooms", PREF_ROSTER_ROOMS);
+    _set_boolean_preference("roster.rooms.server", PREF_ROSTER_ROOMS_SERVER);
     _set_boolean_preference("privileges", PREF_MUC_PRIVILEGES);
     _set_boolean_preference("presence", PREF_PRESENCE);
     _set_boolean_preference("intype", PREF_INTYPE);
     _set_boolean_preference("enc.warn", PREF_ENC_WARN);
     _set_boolean_preference("tls.show", PREF_TLS_SHOW);
+    _set_boolean_preference("statusbar.show.name", PREF_STATUSBAR_SHOW_NAME);
+    _set_boolean_preference("statusbar.show.nuumber", PREF_STATUSBAR_SHOW_NUMBER);
 
     _set_string_preference("time.console", PREF_TIME_CONSOLE);
     _set_string_preference("time.chat", PREF_TIME_CHAT);
@@ -429,6 +433,19 @@ _load_preferences(void)
     _set_string_preference("roster.rooms.by", PREF_ROSTER_ROOMS_BY);
     _set_string_preference("roster.private", PREF_ROSTER_PRIVATE);
     _set_string_preference("roster.count", PREF_ROSTER_COUNT);
+    _set_string_preference("statusbar.self", PREF_STATUSBAR_SELF);
+    _set_string_preference("statusbar.chat", PREF_STATUSBAR_CHAT);
+    _set_string_preference("statusbar.room", PREF_STATUSBAR_ROOM);
+
+    if (g_key_file_has_key(theme, "ui", "statusbar.tabs", NULL)) {
+        gint tabs_size = g_key_file_get_integer(theme, "ui", "statusbar.tabs", NULL);
+        prefs_set_statusbartabs(tabs_size);
+    }
+
+    if (g_key_file_has_key(theme, "ui", "statusbar.tablen", NULL)) {
+        gint tab_len = g_key_file_get_integer(theme, "ui", "statusbar.tablen", NULL);
+        prefs_set_statusbartablen(tab_len);
+    }
 
     if (g_key_file_has_key(theme, "ui", "occupants.size", NULL)) {
         gint occupants_size = g_key_file_get_integer(theme, "ui", "occupants.size", NULL);
@@ -731,6 +748,7 @@ theme_attrs(theme_item_t attrs)
     case THEME_TEXT_ME:                 _theme_prep_fgnd("main.text.me",            lookup_str, &bold); break;
     case THEME_TEXT_THEM:               _theme_prep_fgnd("main.text.them",          lookup_str, &bold); break;
     case THEME_SPLASH:                  _theme_prep_fgnd("main.splash",             lookup_str, &bold); break;
+    case THEME_HELP_HEADER:             _theme_prep_fgnd("main.help.header",        lookup_str, &bold); break;
     case THEME_ERROR:                   _theme_prep_fgnd("error",                   lookup_str, &bold); break;
     case THEME_INCOMING:                _theme_prep_fgnd("incoming",                lookup_str, &bold); break;
     case THEME_MENTION:                 _theme_prep_fgnd("mention",                 lookup_str, &bold); break;
@@ -753,6 +771,7 @@ theme_attrs(theme_item_t attrs)
     case THEME_STATUS_BRACKET:          _theme_prep_fgnd("statusbar.brackets",      lookup_str, &bold); break;
     case THEME_STATUS_ACTIVE:           _theme_prep_fgnd("statusbar.active",        lookup_str, &bold); break;
     case THEME_STATUS_NEW:              _theme_prep_fgnd("statusbar.new",           lookup_str, &bold); break;
+    case THEME_STATUS_TIME:             _theme_prep_fgnd("statusbar.time",          lookup_str, &bold); break;
     case THEME_ME:                      _theme_prep_fgnd("me",                      lookup_str, &bold); break;
     case THEME_THEM:                    _theme_prep_fgnd("them",                    lookup_str, &bold); break;
     case THEME_RECEIPT_SENT:            _theme_prep_fgnd("receipt.sent",            lookup_str, &bold); break;
@@ -841,6 +860,7 @@ theme_attrs(theme_item_t attrs)
     case THEME_STATUS_BRACKET:
     case THEME_STATUS_ACTIVE:
     case THEME_STATUS_NEW:
+    case THEME_STATUS_TIME:
         _theme_prep_bgnd("statusbar", "blue", lookup_str);
         break;
     default:

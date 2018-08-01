@@ -1,7 +1,7 @@
 /*
  * xmlwin.c
  *
- * Copyright (C) 2012 - 2016 James Booth <boothj5@gmail.com>
+ * Copyright (C) 2012 - 2018 James Booth <boothj5@gmail.com>
  *
  * This file is part of Profanity.
  *
@@ -45,13 +45,13 @@ xmlwin_show(ProfXMLWin *xmlwin, const char *const msg)
 
     ProfWin *window = (ProfWin*)xmlwin;
     if (g_str_has_prefix(msg, "SENT:")) {
-        win_print(window, '-', 0, NULL, 0, 0, "", "SENT:");
-        win_print(window, '-', 0, NULL, 0, THEME_ONLINE, "", &msg[6]);
-        win_print(window, '-', 0, NULL, 0, THEME_ONLINE, "", "");
+        win_println(window, THEME_DEFAULT, '-', "SENT:");
+        win_println(window, THEME_ONLINE, '-', "%s", &msg[6]);
+        win_println(window, THEME_ONLINE, '-', "");
     } else if (g_str_has_prefix(msg, "RECV:")) {
-        win_print(window, '-', 0, NULL, 0, 0, "", "RECV:");
-        win_print(window, '-', 0, NULL, 0, THEME_AWAY, "", &msg[6]);
-        win_print(window, '-', 0, NULL, 0, THEME_AWAY, "", "");
+        win_println(window, THEME_DEFAULT, '-', "RECV:");
+        win_println(window, THEME_AWAY, '-', "%s", &msg[6]);
+        win_println(window, THEME_AWAY, '-', "");
     }
 }
 

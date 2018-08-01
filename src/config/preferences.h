@@ -1,7 +1,7 @@
 /*
  * preferences.h
  *
- * Copyright (C) 2012 - 2016 James Booth <boothj5@gmail.com>
+ * Copyright (C) 2012 - 2018 James Booth <boothj5@gmail.com>
  *
  * This file is part of Profanity.
  *
@@ -84,11 +84,11 @@ typedef enum {
     PREF_ROSTER_ROOMS_BY,
     PREF_ROSTER_ROOMS_ORDER,
     PREF_ROSTER_ROOMS_UNREAD,
+    PREF_ROSTER_ROOMS_SERVER,
     PREF_ROSTER_PRIVATE,
     PREF_MUC_PRIVILEGES,
     PREF_PRESENCE,
     PREF_WRAP,
-    PREF_WINS_AUTO_TIDY,
     PREF_TIME_CONSOLE,
     PREF_TIME_CHAT,
     PREF_TIME_MUC,
@@ -141,6 +141,13 @@ typedef enum {
     PREF_CONSOLE_PRIVATE,
     PREF_CONSOLE_CHAT,
     PREF_BOOKMARK_INVITE,
+    PREF_PLUGINS_SOURCEPATH,
+    PREF_ROOM_LIST_CACHE,
+    PREF_STATUSBAR_SHOW_NAME,
+    PREF_STATUSBAR_SHOW_NUMBER,
+    PREF_STATUSBAR_SELF,
+    PREF_STATUSBAR_CHAT,
+    PREF_STATUSBAR_ROOM,
 } preference_t;
 
 typedef struct prof_alias_t {
@@ -161,10 +168,10 @@ void prefs_close(void);
 char* prefs_find_login(char *prefix);
 void prefs_reset_login_search(void);
 
-char* prefs_autocomplete_boolean_choice(const char *const prefix);
+char* prefs_autocomplete_boolean_choice(const char *const prefix, gboolean previous);
 void prefs_reset_boolean_choice(void);
 
-char* prefs_autocomplete_room_trigger(const char *const prefix);
+char* prefs_autocomplete_room_trigger(const char *const prefix, gboolean previous);
 void prefs_reset_room_trigger_ac(void);
 
 gint prefs_get_gone(void);
@@ -184,6 +191,11 @@ void prefs_set_autoping_timeout(gint value);
 gint prefs_get_autoping_timeout(void);
 gint prefs_get_inpblock(void);
 void prefs_set_inpblock(gint value);
+
+void prefs_set_statusbartabs(gint value);
+gint prefs_get_statusbartabs(void);
+void prefs_set_statusbartablen(gint value);
+gint prefs_get_statusbartablen(void);
 
 void prefs_set_occupants_size(gint value);
 gint prefs_get_occupants_size(void);
@@ -265,6 +277,8 @@ void prefs_set_boolean(preference_t pref, gboolean value);
 char* prefs_get_string(preference_t pref);
 void prefs_free_string(char *pref);
 void prefs_set_string(preference_t pref, char *value);
+
+char* prefs_get_tls_certpath(void);
 
 gboolean prefs_do_chat_notify(gboolean current_win);
 gboolean prefs_do_room_notify(gboolean current_win, const char *const roomjid, const char *const mynick,

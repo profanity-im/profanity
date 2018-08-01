@@ -806,16 +806,13 @@ void cmd_account_set_priority_updates_presence_when_account_connected_with_prese
     expect_any(accounts_get_account, name);
     will_return(accounts_get_account, account);
 #endif
-
-    will_return(connection_get_presence_msg, "Free to chat");
-
     expect_value(presence_send, status, RESOURCE_ONLINE);
-    expect_string(presence_send, msg, "Free to chat");
     expect_value(presence_send, idle, 0);
     expect_value(presence_send, signed_status, NULL);
 
     expect_cons_show("Updated online priority for account a_account: 10");
     expect_cons_show("");
+
 
     gboolean result = cmd_account_set(NULL, CMD_ACCOUNT, args);
     assert_true(result);

@@ -1,7 +1,7 @@
 /*
  * gpg.c
  *
- * Copyright (C) 2012 - 2016 James Booth <boothj5@gmail.com>
+ * Copyright (C) 2012 - 2018 James Booth <boothj5@gmail.com>
  *
  * This file is part of Profanity.
  *
@@ -56,7 +56,7 @@
 #define PGP_MESSAGE_HEADER "-----BEGIN PGP MESSAGE-----"
 #define PGP_MESSAGE_FOOTER "-----END PGP MESSAGE-----"
 
-static const char *libversion;
+static const char *libversion = NULL;
 static GHashTable *pubkeys;
 
 static gchar *pubsloc;
@@ -420,6 +420,9 @@ p_gpg_pubkeys(void)
 const char*
 p_gpg_libver(void)
 {
+    if (libversion == NULL) {
+        libversion = gpgme_check_version(NULL);
+    }
     return libversion;
 }
 
@@ -749,9 +752,9 @@ p_gpg_free_decrypted(char *decrypted)
 }
 
 char*
-p_gpg_autocomplete_key(const char *const search_str)
+p_gpg_autocomplete_key(const char *const search_str, gboolean previous)
 {
-    return autocomplete_complete(key_ac, search_str, TRUE);
+    return autocomplete_complete(key_ac, search_str, TRUE, previous);
 }
 
 void

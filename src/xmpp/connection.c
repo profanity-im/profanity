@@ -1,7 +1,7 @@
 /*
  * connection.c
  *
- * Copyright (C) 2012 - 2016 James Booth <boothj5@gmail.com>
+ * Copyright (C) 2012 - 2018 James Booth <boothj5@gmail.com>
  *
  * This file is part of Profanity.
  *
@@ -108,26 +108,21 @@ connection_shutdown(void)
 }
 
 jabber_conn_status_t
-connection_connect(const char *const fulljid, const char *const passwd, const char *const altdomain, int port,
+connection_connect(const char *const jid, const char *const passwd, const char *const altdomain, int port,
     const char *const tls_policy)
 {
-    assert(fulljid != NULL);
+    assert(jid != NULL);
     assert(passwd != NULL);
 
-    Jid *jid = jid_create(fulljid);
-    if (jid == NULL) {
-        log_error("Malformed JID not able to connect: %s", fulljid);
+    Jid *jidp = jid_create(jid);
+    if (jidp == NULL) {
+        log_error("Malformed JID not able to connect: %s", jid);
         conn.conn_status = JABBER_DISCONNECTED;
-        return conn.conn_status;
-    } else if (jid->fulljid == NULL) {
-        log_error("Full JID required to connect, received: %s", fulljid);
-        conn.conn_status = JABBER_DISCONNECTED;
-        jid_destroy(jid);
         return conn.conn_status;
     }
-    jid_destroy(jid);
+    jid_destroy(jidp);
 
-    log_info("Connecting as %s", fulljid);
+    log_info("Connecting as %s", jid);
 
     if (conn.xmpp_log) {
         free(conn.xmpp_log);
@@ -150,21 +145,23 @@ connection_connect(const char *const fulljid, const char *const passwd, const ch
         log_warning("Failed to get libstrophe conn during connect");
         return JABBER_DISCONNECTED;
     }
-    xmpp_conn_set_jid(conn.xmpp_conn, fulljid);
+    xmpp_conn_set_jid(conn.xmpp_conn, jid);
     xmpp_conn_set_pass(conn.xmpp_conn, passwd);
 
     if (!tls_policy || (g_strcmp0(tls_policy, "force") == 0)) {
         xmpp_conn_set_flags(conn.xmpp_conn, XMPP_CONN_FLAG_MANDATORY_TLS);
     } else if (g_strcmp0(tls_policy, "disable") == 0) {
         xmpp_conn_set_flags(conn.xmpp_conn, XMPP_CONN_FLAG_DISABLE_TLS);
+    } else if (g_strcmp0(tls_policy, "legacy") == 0) {
+        xmpp_conn_set_flags(conn.xmpp_conn, XMPP_CONN_FLAG_LEGACY_SSL);
     }
 
 #ifdef HAVE_LIBMESODE
-    char *cert_path = prefs_get_string(PREF_TLS_CERTPATH);
+    char *cert_path = prefs_get_tls_certpath();
     if (cert_path) {
         xmpp_conn_tlscert_path(conn.xmpp_conn, cert_path);
+        free(cert_path);
     }
-    prefs_free_string(cert_path);
 
     int connect_status = xmpp_connect_client(
         conn.xmpp_conn,
@@ -290,6 +287,10 @@ connection_supports(const char *const feature)
 char*
 connection_jid_for_feature(const char *const feature)
 {
+    if (conn.features_by_jid == NULL) {
+        return NULL;
+    }
+
     GList *jids = g_hash_table_get_keys(conn.features_by_jid);
 
     GList *curr = jids;
@@ -345,7 +346,12 @@ connection_get_ctx(void)
 const char*
 connection_get_fulljid(void)
 {
-    return xmpp_conn_get_jid(conn.xmpp_conn);
+    const char *jid = xmpp_conn_get_bound_jid(conn.xmpp_conn);
+    if (jid) {
+        return jid;
+    } else {
+        return xmpp_conn_get_jid(conn.xmpp_conn);
+    }
 }
 
 GHashTable*

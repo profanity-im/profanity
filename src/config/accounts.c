@@ -1,7 +1,7 @@
 /*
  * accounts.c
  *
- * Copyright (C) 2012 - 2016 James Booth <boothj5@gmail.com>
+ * Copyright (C) 2012 - 2018 James Booth <boothj5@gmail.com>
  *
  * This file is part of Profanity.
  *
@@ -96,15 +96,15 @@ accounts_close(void)
 }
 
 char*
-accounts_find_enabled(const char *const prefix)
+accounts_find_enabled(const char *const prefix, gboolean previous)
 {
-    return autocomplete_complete(enabled_ac, prefix, TRUE);
+    return autocomplete_complete(enabled_ac, prefix, TRUE, previous);
 }
 
 char*
-accounts_find_all(const char *const prefix)
+accounts_find_all(const char *const prefix, gboolean previous)
 {
-    return autocomplete_complete(all_ac, prefix, TRUE);
+    return autocomplete_complete(all_ac, prefix, TRUE, previous);
 }
 
 void
@@ -133,45 +133,45 @@ accounts_add(const char *account_name, const char *altdomain, const int port, co
         }
     }
 
-    // doesn't yet exist
-    if (!g_key_file_has_group(accounts, account_name)) {
-        g_key_file_set_boolean(accounts, account_name, "enabled", TRUE);
-        g_key_file_set_string(accounts, account_name, "jid", barejid);
-        g_key_file_set_string(accounts, account_name, "resource", resource);
-        if (altdomain) {
-            g_key_file_set_string(accounts, account_name, "server", altdomain);
-        }
-        if (port != 0) {
-            g_key_file_set_integer(accounts, account_name, "port", port);
-        }
-        if (tls_policy) {
-            g_key_file_set_string(accounts, account_name, "tls.policy", tls_policy);
-        }
-
-        Jid *jidp = jid_create(barejid);
-        GString *muc_service = g_string_new("conference.");
-        g_string_append(muc_service, jidp->domainpart);
-        g_key_file_set_string(accounts, account_name, "muc.service", muc_service->str);
-        g_string_free(muc_service, TRUE);
-        if (jidp->localpart == NULL) {
-            g_key_file_set_string(accounts, account_name, "muc.nick", jidp->domainpart);
-        } else {
-            g_key_file_set_string(accounts, account_name, "muc.nick", jidp->localpart);
-        }
-        jid_destroy(jidp);
-
-        g_key_file_set_string(accounts, account_name, "presence.last", "online");
-        g_key_file_set_string(accounts, account_name, "presence.login", "online");
-        g_key_file_set_integer(accounts, account_name, "priority.online", 0);
-        g_key_file_set_integer(accounts, account_name, "priority.chat", 0);
-        g_key_file_set_integer(accounts, account_name, "priority.away", 0);
-        g_key_file_set_integer(accounts, account_name, "priority.xa", 0);
-        g_key_file_set_integer(accounts, account_name, "priority.dnd", 0);
-
-        _save_accounts();
-        autocomplete_add(all_ac, account_name);
-        autocomplete_add(enabled_ac, account_name);
+    if (g_key_file_has_group(accounts, account_name)) {
+        jid_destroy(jid);
+        return;
     }
+
+    g_key_file_set_boolean(accounts, account_name, "enabled", TRUE);
+    g_key_file_set_string(accounts, account_name, "jid", barejid);
+    g_key_file_set_string(accounts, account_name, "resource", resource);
+    if (altdomain) {
+        g_key_file_set_string(accounts, account_name, "server", altdomain);
+    }
+    if (port != 0) {
+        g_key_file_set_integer(accounts, account_name, "port", port);
+    }
+    if (tls_policy) {
+        g_key_file_set_string(accounts, account_name, "tls.policy", tls_policy);
+    }
+
+    Jid *jidp = jid_create(barejid);
+
+    if (jidp->localpart == NULL) {
+        g_key_file_set_string(accounts, account_name, "muc.nick", jidp->domainpart);
+    } else {
+        g_key_file_set_string(accounts, account_name, "muc.nick", jidp->localpart);
+    }
+
+    jid_destroy(jidp);
+
+    g_key_file_set_string(accounts, account_name, "presence.last", "online");
+    g_key_file_set_string(accounts, account_name, "presence.login", "online");
+    g_key_file_set_integer(accounts, account_name, "priority.online", 0);
+    g_key_file_set_integer(accounts, account_name, "priority.chat", 0);
+    g_key_file_set_integer(accounts, account_name, "priority.away", 0);
+    g_key_file_set_integer(accounts, account_name, "priority.xa", 0);
+    g_key_file_set_integer(accounts, account_name, "priority.dnd", 0);
+
+    _save_accounts();
+    autocomplete_add(all_ac, account_name);
+    autocomplete_add(enabled_ac, account_name);
 
     jid_destroy(jid);
 }
@@ -223,7 +223,18 @@ accounts_get_account(const char *const name)
         int priority_xa = g_key_file_get_integer(accounts, name, "priority.xa", NULL);
         int priority_dnd = g_key_file_get_integer(accounts, name, "priority.dnd", NULL);
 
-        gchar *muc_service = g_key_file_get_string(accounts, name, "muc.service", NULL);
+        gchar *muc_service = NULL;
+        if (g_key_file_has_key(accounts, name, "muc.service", NULL)) {
+            muc_service = g_key_file_get_string(accounts, name, "muc.service", NULL);
+        } else {
+            jabber_conn_status_t conn_status = connection_get_status();
+            if (conn_status == JABBER_CONNECTED) {
+                char* conf_jid = connection_jid_for_feature(XMPP_FEATURE_MUC);
+                if (conf_jid) {
+                    muc_service = strdup(conf_jid);
+                }
+            }
+        }
         gchar *muc_nick = g_key_file_get_string(accounts, name, "muc.nick", NULL);
 
         gchar *otr_policy = NULL;
@@ -280,7 +291,8 @@ accounts_get_account(const char *const name)
         gchar *tls_policy = g_key_file_get_string(accounts, name, "tls.policy", NULL);
         if (tls_policy && ((g_strcmp0(tls_policy, "force") != 0) &&
                 (g_strcmp0(tls_policy, "allow") != 0) &&
-                (g_strcmp0(tls_policy, "disable") != 0))) {
+                (g_strcmp0(tls_policy, "disable") != 0) &&
+                (g_strcmp0(tls_policy, "legacy") != 0))) {
             g_free(tls_policy);
             tls_policy = NULL;
         }
@@ -416,10 +428,6 @@ accounts_set_jid(const char *const account_name, const char *const value)
                 g_key_file_set_string(accounts, account_name, "resource", jid->resourcepart);
             }
 
-            GString *muc_service = g_string_new("conference.");
-            g_string_append(muc_service, jid->domainpart);
-            g_key_file_set_string(accounts, account_name, "muc.service", muc_service->str);
-            g_string_free(muc_service, TRUE);
             if (jid->localpart == NULL) {
                 g_key_file_set_string(accounts, account_name, "muc.nick", jid->domainpart);
             } else {
@@ -564,6 +572,24 @@ accounts_clear_theme(const char *const account_name)
 {
     if (accounts_account_exists(account_name)) {
         g_key_file_remove_key(accounts, account_name, "theme", NULL);
+        _save_accounts();
+    }
+}
+
+void
+accounts_clear_muc(const char *const account_name)
+{
+    if (accounts_account_exists(account_name)) {
+        g_key_file_remove_key(accounts, account_name, "muc.service", NULL);
+        _save_accounts();
+    }
+}
+
+void
+accounts_clear_resource(const char *const account_name)
+{
+    if (accounts_account_exists(account_name)) {
+        g_key_file_remove_key(accounts, account_name, "resource", NULL);
         _save_accounts();
     }
 }

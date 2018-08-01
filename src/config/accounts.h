@@ -1,7 +1,7 @@
 /*
  * accounts.h
  *
- * Copyright (C) 2012 - 2016 James Booth <boothj5@gmail.com>
+ * Copyright (C) 2012 - 2018 James Booth <boothj5@gmail.com>
  *
  * This file is part of Profanity.
  *
@@ -43,8 +43,8 @@
 void accounts_load(void);
 void accounts_close(void);
 
-char* accounts_find_all(const char *const prefix);
-char* accounts_find_enabled(const char *const prefix);
+char* accounts_find_all(const char *const prefix, gboolean previous);
+char* accounts_find_enabled(const char *const prefix, gboolean previous);
 void accounts_reset_all_search(void);
 void accounts_reset_enabled_search(void);
 void accounts_add(const char *jid, const char *altdomain, const int port, const char *const tls_policy);
@@ -93,6 +93,8 @@ void accounts_clear_otr(const char *const account_name);
 void accounts_clear_pgp_keyid(const char *const account_name);
 void accounts_clear_script_start(const char *const account_name);
 void accounts_clear_theme(const char *const account_name);
+void accounts_clear_muc(const char *const account_name);
+void accounts_clear_resource(const char *const account_name);
 void accounts_add_otr_policy(const char *const account_name, const char *const contact_jid, const char *const policy);
 
 #endif

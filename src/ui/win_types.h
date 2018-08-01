@@ -1,7 +1,7 @@
 /*
  * win_types.h
  *
- * Copyright (C) 2012 - 2016 James Booth <boothj5@gmail.com>
+ * Copyright (C) 2012 - 2018 James Booth <boothj5@gmail.com>
  *
  * This file is part of Profanity.
  *
@@ -155,6 +155,9 @@ typedef struct prof_chat_win_t {
     char *resource_override;
     gboolean history_shown;
     unsigned long memcheck;
+    char *enctext;
+    char *incoming_char;
+    char *outgoing_char;
 } ProfChatWin;
 
 typedef struct prof_muc_win_t {
@@ -165,6 +168,8 @@ typedef struct prof_muc_win_t {
     gboolean unread_triggers;
     gboolean showjid;
     unsigned long memcheck;
+    char *enctext;
+    char *message_char;
 } ProfMucWin;
 
 typedef struct prof_mucconf_win_t {
@@ -189,7 +194,7 @@ typedef struct prof_xml_win_t {
 } ProfXMLWin;
 
 typedef struct prof_plugin_win_t {
-    ProfWin super;
+    ProfWin window;
     char *tag;
     char *plugin_name;
     unsigned long memcheck;

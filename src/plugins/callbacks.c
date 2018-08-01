@@ -1,7 +1,7 @@
 /*
  * callbacks.c
  *
- * Copyright (C) 2012 - 2016 James Booth <boothj5@gmail.com>
+ * Copyright (C) 2012 - 2018 James Booth <boothj5@gmail.com>
  *
  * This file is part of Profanity.
  *
@@ -200,7 +200,6 @@ callbacks_add_timed(const char *const plugin_name, PluginTimedFunction *timed_fu
     GList *timed_function_list = g_hash_table_lookup(p_timed_functions, plugin_name);
     if (timed_function_list) {
         timed_function_list = g_list_append(timed_function_list, timed_function);
-        g_hash_table_replace(p_timed_functions, strdup(plugin_name), timed_function_list);
     } else {
         timed_function_list = g_list_append(timed_function_list, timed_function);
         g_hash_table_insert(p_timed_functions, strdup(plugin_name), timed_function_list);
@@ -229,7 +228,6 @@ callbacks_remove_win(const char *const plugin_name, const char *const tag)
         g_hash_table_remove(window_callbacks, tag);
     }
 }
-
 
 void
 callbacks_add_window_handler(const char *const plugin_name, const char *tag, PluginWindowCallback *window_callback)

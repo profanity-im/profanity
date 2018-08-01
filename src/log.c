@@ -1,7 +1,7 @@
 /*
  * log.c
  *
- * Copyright (C) 2012 - 2016 James Booth <boothj5@gmail.com>
+ * Copyright (C) 2012 - 2018 James Booth <boothj5@gmail.com>
  *
  * This file is part of Profanity.
  *
@@ -228,7 +228,7 @@ _rotate_log_file(void)
     size_t len = strlen(log_file);
     char *log_file_new = malloc(len + 3);
 
-    strncpy(log_file_new, log_file, len);
+    memcpy(log_file_new, log_file, len);
     log_file_new[len] = '.';
     log_file_new[len+1] = '1';
     log_file_new[len+2] = 0;
@@ -360,7 +360,12 @@ _chat_log_chat(const char *const login, const char *const other, const char *con
         dated_log = _create_log(other, login);
         g_hash_table_insert(logs, strdup(other), dated_log);
 
-    // log exists but needs rolling
+    // log entry exists but file removed
+    } else if (!g_file_test(dated_log->filename, G_FILE_TEST_EXISTS)) {
+        dated_log = _create_log(other, login);
+        g_hash_table_replace(logs, strdup(other), dated_log);
+
+    // log file needs rolling
     } else if (_log_roll_needed(dated_log)) {
         dated_log = _create_log(other, login);
         g_hash_table_replace(logs, strdup(other), dated_log);

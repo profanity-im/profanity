@@ -1,7 +1,7 @@
 /*
  * session.c
  *
- * Copyright (C) 2012 - 2016 James Booth <boothj5@gmail.com>
+ * Copyright (C) 2012 - 2018 James Booth <boothj5@gmail.com>
  *
  * This file is part of Profanity.
  *
@@ -118,15 +118,22 @@ session_connect_with_account(const ProfAccount *const account)
     }
     saved_account.passwd = strdup(account->password);
 
-    // connect with fulljid
-    Jid *jidp = jid_create_from_bare_and_resource(account->jid, account->resource);
+    char *jid = NULL;
+    if (account->resource) {
+        Jid *jidp = jid_create_from_bare_and_resource(account->jid, account->resource);
+        jid = strdup(jidp->fulljid);
+        jid_destroy(jidp);
+    } else {
+        jid = strdup(account->jid);
+    }
+
     jabber_conn_status_t result = connection_connect(
-        jidp->fulljid,
+        jid,
         account->password,
         account->server,
         account->port,
         account->tls_policy);
-    jid_destroy(jidp);
+    free(jid);
 
     return result;
 }
@@ -211,6 +218,8 @@ session_disconnect(void)
         plugins_on_disconnect(account_name, fulljid);
 
         accounts_set_last_activity(session_get_account_name());
+
+        iq_rooms_cache_clear();
 
         connection_disconnect();
 
@@ -405,10 +414,11 @@ session_check_autoaway(void)
 
                     // send away presence with last activity
                     char *message = prefs_get_string(PREF_AUTOAWAY_MESSAGE);
+                    connection_set_presence_msg(message);
                     if (prefs_get_boolean(PREF_LASTACTIVITY)) {
-                        cl_ev_presence_send(RESOURCE_AWAY, message, idle_ms / 1000);
+                        cl_ev_presence_send(RESOURCE_AWAY, idle_ms / 1000);
                     } else {
-                        cl_ev_presence_send(RESOURCE_AWAY, message, 0);
+                        cl_ev_presence_send(RESOURCE_AWAY, 0);
                     }
 
                     int pri = accounts_get_priority_for_presence_type(account, RESOURCE_AWAY);
@@ -425,7 +435,8 @@ session_check_autoaway(void)
                 activity_state = ACTIVITY_ST_IDLE;
 
                 // send current presence with last activity
-                cl_ev_presence_send(curr_presence, curr_status, idle_ms / 1000);
+                connection_set_presence_msg(curr_status);
+                cl_ev_presence_send(curr_presence, idle_ms / 1000);
             }
         }
         break;
@@ -436,7 +447,8 @@ session_check_autoaway(void)
             cons_show("No longer idle.");
 
             // send current presence without last activity
-            cl_ev_presence_send(curr_presence, curr_status, 0);
+            connection_set_presence_msg(curr_status);
+            cl_ev_presence_send(curr_presence, 0);
         }
         break;
     case ACTIVITY_ST_AWAY:
@@ -445,10 +457,11 @@ session_check_autoaway(void)
 
             // send extended away presence with last activity
             char *message = prefs_get_string(PREF_AUTOXA_MESSAGE);
+            connection_set_presence_msg(message);
             if (prefs_get_boolean(PREF_LASTACTIVITY)) {
-                cl_ev_presence_send(RESOURCE_XA, message, idle_ms / 1000);
+                cl_ev_presence_send(RESOURCE_XA, idle_ms / 1000);
             } else {
-                cl_ev_presence_send(RESOURCE_XA, message, 0);
+                cl_ev_presence_send(RESOURCE_XA, 0);
             }
 
             int pri = accounts_get_priority_for_presence_type(account, RESOURCE_XA);
@@ -466,7 +479,8 @@ session_check_autoaway(void)
             cons_show("No longer idle.");
 
             // send saved presence without last activity
-            cl_ev_presence_send(saved_presence, saved_status, 0);
+            connection_set_presence_msg(saved_status);
+            cl_ev_presence_send(saved_presence, 0);
             contact_presence_t contact_pres = contact_presence_from_resource_presence(saved_presence);
             title_bar_set_presence(contact_pres);
         }
@@ -478,7 +492,8 @@ session_check_autoaway(void)
             cons_show("No longer idle.");
 
             // send saved presence without last activity
-            cl_ev_presence_send(saved_presence, saved_status, 0);
+            connection_set_presence_msg(saved_status);
+            cl_ev_presence_send(saved_presence, 0);
             contact_presence_t contact_pres = contact_presence_from_resource_presence(saved_presence);
             title_bar_set_presence(contact_pres);
         }
@@ -499,10 +514,16 @@ _session_reconnect(void)
         return;
     }
 
-    char *fulljid = create_fulljid(account->jid, account->resource);
+    char *jid = NULL;
+    if (account->resource) {
+        jid = create_fulljid(account->jid, account->resource);
+    } else {
+        jid = strdup(account->jid);
+    }
+
     log_debug("Attempting reconnect with account %s", account->name);
-    connection_connect(fulljid, saved_account.passwd, account->server, account->port, account->tls_policy);
-    free(fulljid);
+    connection_connect(jid, saved_account.passwd, account->server, account->port, account->tls_policy);
+    free(jid);
     account_free(account);
     g_timer_start(reconnect_timer);
 }

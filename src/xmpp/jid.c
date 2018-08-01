@@ -1,7 +1,7 @@
 /*
  * jid.c
  *
- * Copyright (C) 2012 - 2016 James Booth <boothj5@gmail.com>
+ * Copyright (C) 2012 - 2018 James Booth <boothj5@gmail.com>
  *
  * This file is part of Profanity.
  *
@@ -106,10 +106,10 @@ jid_create(const gchar *const str)
 }
 
 Jid*
-jid_create_from_bare_and_resource(const char *const room, const char *const nick)
+jid_create_from_bare_and_resource(const char *const barejid, const char *const resource)
 {
     Jid *result;
-    char *jid = create_fulljid(room, nick);
+    char *jid = create_fulljid(barejid, resource);
     result = jid_create(jid);
     free(jid);
 

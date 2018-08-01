@@ -78,6 +78,8 @@ GList * session_get_available_resources(void)
     return NULL;
 }
 
+void connection_set_presence_msg(const char *const message) {}
+
 gboolean
 connection_send_stanza(const char *const stanza)
 {
@@ -126,7 +128,7 @@ void message_send_invite(const char * const room, const char * const contact,
 // presence functions
 void presence_subscription(const char * const jid, const jabber_subscr_t action) {}
 
-GSList* presence_get_subscription_requests(void)
+GList* presence_get_subscription_requests(void)
 {
     return NULL;
 }
@@ -138,7 +140,7 @@ gint presence_sub_request_count(void)
 
 void presence_reset_sub_request_search(void) {}
 
-char * presence_sub_request_find(const char * const search_str)
+char * presence_sub_request_find(const char * const search_str, gboolean previous)
 {
     return  NULL;
 }
@@ -153,10 +155,9 @@ void presence_join_room(const char *const room, const char *const nick, const ch
 void presence_change_room_nick(const char * const room, const char * const nick) {}
 void presence_leave_chat_room(const char * const room_jid) {}
 
-void presence_send(resource_presence_t status, const char * const msg, int idle, char *signed_status)
+void presence_send(resource_presence_t status, int idle, char *signed_status)
 {
     check_expected(status);
-    check_expected(msg);
     check_expected(idle);
     check_expected(signed_status);
 }
@@ -171,9 +172,10 @@ void iq_disable_carbons() {};
 void iq_enable_carbons() {};
 void iq_send_software_version(const char * const fulljid) {}
 
-void iq_room_list_request(gchar *conferencejid)
+void iq_room_list_request(gchar *conferencejid, gchar *filter)
 {
     check_expected(conferencejid);
+    check_expected(filter);
 }
 
 void iq_disco_info_request(gchar *jid) {}
@@ -202,6 +204,7 @@ void iq_room_role_set(const char * const room, const char * const nick, char *ro
 void iq_room_role_list(const char * const room, char *role) {}
 void iq_last_activity_request(gchar *jid) {}
 void iq_autoping_check(void) {}
+void iq_rooms_cache_clear(void) {}
 
 // caps functions
 void caps_add_feature(char *feature) {}
@@ -249,7 +252,7 @@ GList * bookmark_get_list(void)
     return (GList *)mock();
 }
 
-char * bookmark_find(const char * const search_str)
+char * bookmark_find(const char * const search_str, gboolean previous)
 {
     return NULL;
 }
@@ -297,7 +300,7 @@ gboolean blocked_remove(char *jid)
     return TRUE;
 }
 
-char* blocked_ac_find(const char *const search_str)
+char* blocked_ac_find(const char *const search_str, gboolean previous)
 {
     return NULL;
 }

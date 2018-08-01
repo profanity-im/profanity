@@ -1,7 +1,7 @@
 /*
  * tlscerts.c
  *
- * Copyright (C) 2012 - 2016 James Booth <boothj5@gmail.com>
+ * Copyright (C) 2012 - 2018 James Booth <boothj5@gmail.com>
  *
  * This file is part of Profanity.
  *
@@ -368,9 +368,9 @@ tlscerts_get_trusted(const char * const fingerprint)
 }
 
 char*
-tlscerts_complete(const char *const prefix)
+tlscerts_complete(const char *const prefix, gboolean previous)
 {
-    return autocomplete_complete(certs_ac, prefix, TRUE);
+    return autocomplete_complete(certs_ac, prefix, TRUE, previous);
 }
 
 void

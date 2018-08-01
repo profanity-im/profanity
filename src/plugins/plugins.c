@@ -1,7 +1,7 @@
 /*
  * plugins.c
  *
- * Copyright (C) 2012 - 2016 James Booth <boothj5@gmail.com>
+ * Copyright (C) 2012 - 2018 James Booth <boothj5@gmail.com>
  *
  * This file is part of Profanity.
  *
@@ -129,6 +129,43 @@ plugins_init(void)
     return;
 }
 
+void
+plugins_free_install_result(PluginsInstallResult *result)
+{
+    if (!result) {
+        return;
+    }
+    g_slist_free_full(result->installed, free);
+    g_slist_free_full(result->failed, free);
+}
+
+PluginsInstallResult*
+plugins_install_all(const char *const path)
+{
+    PluginsInstallResult *result = malloc(sizeof(PluginsInstallResult));
+    result->installed = NULL;
+    result->failed = NULL;
+    GSList *contents = NULL;
+    get_file_paths_recursive(path, &contents);
+
+    GSList *curr = contents;
+    while (curr) {
+        if (g_str_has_suffix(curr->data, ".py") || g_str_has_suffix(curr->data, ".so")) {
+            gchar *plugin_name = g_path_get_basename(curr->data);
+            if (plugins_install(plugin_name, curr->data)) {
+                result->installed = g_slist_append(result->installed, strdup(curr->data));
+            } else {
+                result->failed = g_slist_append(result->failed, strdup(curr->data));
+            }
+        }
+        curr = g_slist_next(curr);
+    }
+
+    g_slist_free_full(contents, g_free);
+
+    return result;
+}
+
 gboolean
 plugins_install(const char *const plugin_name, const char *const filename)
 {
@@ -151,6 +188,23 @@ plugins_install(const char *const plugin_name, const char *const filename)
     }
 
     return result;
+}
+
+GSList*
+plugins_load_all(void)
+{
+    GSList *plugins = plugins_unloaded_list();
+    GSList *loaded = NULL;
+    GSList *curr = plugins;
+    while (curr) {
+        if (plugins_load(curr->data)) {
+            loaded = g_slist_append(loaded, strdup(curr->data));
+        }
+        curr = g_slist_next(curr);
+    }
+    g_slist_free_full(plugins, g_free);
+
+    return loaded;
 }
 
 gboolean
@@ -191,6 +245,32 @@ plugins_load(const char *const name)
 }
 
 gboolean
+plugins_unload_all(void)
+{
+    gboolean result = FALSE;
+    GList *plugin_names = g_hash_table_get_keys(plugins);
+    GList *plugin_names_dup = NULL;
+    GList *curr = plugin_names;
+    while (curr) {
+        plugin_names_dup = g_list_append(plugin_names_dup, strdup(curr->data));
+        curr = g_list_next(curr);
+    }
+    g_list_free(plugin_names);
+
+    curr = plugin_names_dup;
+    while (curr) {
+        if (plugins_unload(curr->data)) {
+            result = TRUE;
+        }
+        curr = g_list_next(curr);
+    }
+
+    g_list_free_full(plugin_names_dup, free);
+
+    return result;
+}
+
+gboolean
 plugins_unload(const char *const name)
 {
     ProfPlugin *plugin = g_hash_table_lookup(plugins, name);
@@ -214,8 +294,7 @@ plugins_unload(const char *const name)
         if (connection_get_status() == JABBER_CONNECTED) {
             char* account_name = session_get_account_name();
             resource_presence_t last_presence = accounts_get_last_presence(account_name);
-            char *msg = connection_get_presence_msg();
-            cl_ev_presence_send(last_presence, msg, 0);
+            cl_ev_presence_send(last_presence, 0);
         }
     }
     return TRUE;
@@ -290,9 +369,9 @@ plugins_loaded_list(void)
 }
 
 char *
-plugins_autocomplete(const char * const input)
+plugins_autocomplete(const char * const input, gboolean previous)
 {
-    return autocompleters_complete(input);
+    return autocompleters_complete(input, previous);
 }
 
 void
@@ -414,11 +493,18 @@ plugins_pre_chat_message_send(const char * const barejid, const char *message)
     GList *curr = values;
     while (curr) {
         ProfPlugin *plugin = curr->data;
-        new_message = plugin->pre_chat_message_send(plugin, barejid, curr_message);
-        if (new_message) {
-            free(curr_message);
-            curr_message = strdup(new_message);
-            free(new_message);
+        if (plugin->contains_hook(plugin, "prof_pre_chat_message_send")) {
+            new_message = plugin->pre_chat_message_send(plugin, barejid, curr_message);
+            if (new_message) {
+                free(curr_message);
+                curr_message = strdup(new_message);
+                free(new_message);
+            } else {
+                free(curr_message);
+                g_list_free(values);
+
+                return NULL;
+            }
         }
         curr = g_list_next(curr);
     }
@@ -486,11 +572,18 @@ plugins_pre_room_message_send(const char * const barejid, const char *message)
     GList *curr = values;
     while (curr) {
         ProfPlugin *plugin = curr->data;
-        new_message = plugin->pre_room_message_send(plugin, barejid, curr_message);
-        if (new_message) {
-            free(curr_message);
-            curr_message = strdup(new_message);
-            free(new_message);
+        if (plugin->contains_hook(plugin, "prof_pre_room_message_send")) {
+            new_message = plugin->pre_room_message_send(plugin, barejid, curr_message);
+            if (new_message) {
+                free(curr_message);
+                curr_message = strdup(new_message);
+                free(new_message);
+            } else {
+                free(curr_message);
+                g_list_free(values);
+
+                return NULL;
+            }
         }
         curr = g_list_next(curr);
     }
@@ -588,11 +681,19 @@ plugins_pre_priv_message_send(const char * const fulljid, const char * const mes
     GList *curr = values;
     while (curr) {
         ProfPlugin *plugin = curr->data;
-        new_message = plugin->pre_priv_message_send(plugin, jidp->barejid, jidp->resourcepart, curr_message);
-        if (new_message) {
-            free(curr_message);
-            curr_message = strdup(new_message);
-            free(new_message);
+        if (plugin->contains_hook(plugin, "prof_pre_priv_message_send")) {
+            new_message = plugin->pre_priv_message_send(plugin, jidp->barejid, jidp->resourcepart, curr_message);
+            if (new_message) {
+                free(curr_message);
+                curr_message = strdup(new_message);
+                free(new_message);
+            } else {
+                free(curr_message);
+                g_list_free(values);
+                jid_destroy(jidp);
+
+                return NULL;
+            }
         }
         curr = g_list_next(curr);
     }

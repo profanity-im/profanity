@@ -1,7 +1,7 @@
 /*
  * server_events.c
  *
- * Copyright (C) 2012 - 2016 James Booth <boothj5@gmail.com>
+ * Copyright (C) 2012 - 2018 James Booth <boothj5@gmail.com>
  *
  * This file is part of Profanity.
  *
@@ -135,19 +135,23 @@ sv_ev_roster_received(void)
             GTimeSpan diff_micros = g_date_time_difference(nowdt, lastdt);
             int diff_secs = (diff_micros / 1000) / 1000;
             if (prefs_get_boolean(PREF_LASTACTIVITY)) {
-                cl_ev_presence_send(conn_presence, NULL, diff_secs);
+                connection_set_presence_msg(NULL);
+                cl_ev_presence_send(conn_presence, diff_secs);
             } else {
-                cl_ev_presence_send(conn_presence, NULL, 0);
+                connection_set_presence_msg(NULL);
+                cl_ev_presence_send(conn_presence, 0);
             }
             g_date_time_unref(lastdt);
         } else {
-            cl_ev_presence_send(conn_presence, NULL, 0);
+            connection_set_presence_msg(NULL);
+            cl_ev_presence_send(conn_presence, 0);
         }
 
         free(last_activity_str);
         g_date_time_unref(nowdt);
     } else {
-        cl_ev_presence_send(conn_presence, NULL, 0);
+        connection_set_presence_msg(NULL);
+        cl_ev_presence_send(conn_presence, 0);
     }
 
     const char *fulljid = connection_get_fulljid();
@@ -177,6 +181,7 @@ sv_ev_lost_connection(void)
 #endif
 
     muc_invites_clear();
+    muc_confserver_clear();
     chat_sessions_clear();
     ui_disconnected();
     roster_destroy();
@@ -277,7 +282,7 @@ sv_ev_room_message(const char *const room_jid, const char *const nick, const cha
     // currently in groupchat window
     if (wins_is_current(window)) {
         is_current = TRUE;
-        status_bar_active(num);
+        status_bar_active(num, WIN_MUC, mucwin->roomjid);
 
         if ((g_strcmp0(mynick, nick) != 0) && (prefs_get_boolean(PREF_BEEP))) {
             beep();
@@ -285,7 +290,7 @@ sv_ev_room_message(const char *const room_jid, const char *const nick, const cha
 
     // not currently on groupchat window
     } else {
-        status_bar_new(num);
+        status_bar_new(num, WIN_MUC, mucwin->roomjid);
 
         if ((g_strcmp0(mynick, nick) != 0) && (prefs_get_boolean(PREF_FLASH))) {
             flash();
@@ -442,7 +447,7 @@ sv_ev_incoming_message(char *barejid, char *resource, char *message, char *pgp_m
 #ifdef HAVE_LIBGPGME
     if (pgp_message) {
         if (chatwin->is_otr) {
-            win_println((ProfWin*)chatwin, 0, "PGP encrypted message received whilst in OTR session.");
+            win_println((ProfWin*)chatwin, THEME_DEFAULT, '-', "PGP encrypted message received whilst in OTR session.");
         } else { // PROF_ENC_NONE, PROF_ENC_PGP
             _sv_ev_incoming_pgp(chatwin, new_win, barejid, resource, message, pgp_message, timestamp);
         }
@@ -793,6 +798,12 @@ sv_ev_muc_self_online(const char *const room, const char *const nick, gboolean c
             ui_room_join(room, TRUE);
         }
 
+        Jid *jidp = jid_create(room);
+        if (jidp->domainpart) {
+            muc_confserver_add(jidp->domainpart);
+        }
+        jid_destroy(jidp);
+
         iq_room_info_request(room, FALSE);
 
         if (muc_invites_contain(room)) {
@@ -885,8 +896,8 @@ sv_ev_muc_occupant_online(const char *const room, const char *const nick, const 
         ProfMucWin *mucwin = wins_get_muc(room);
         if (mucwin) {
             mucwin_occupant_nick_change(mucwin, old_nick, nick);
+            wins_private_nick_change(mucwin->roomjid, old_nick, nick);
         }
-        wins_private_nick_change(mucwin->roomjid, old_nick, nick);
         free(old_nick);
 
         occupantswin_occupants(room);
@@ -903,11 +914,13 @@ sv_ev_muc_occupant_online(const char *const room, const char *const nick, const 
         }
         prefs_free_string(muc_status_pref);
 
-        Jid *jidp = jid_create_from_bare_and_resource(mucwin->roomjid, nick);
-        ProfPrivateWin *privwin = wins_get_private(jidp->fulljid);
-        jid_destroy(jidp);
-        if (privwin) {
-            privwin_occupant_online(privwin);
+        if (mucwin) {
+            Jid *jidp = jid_create_from_bare_and_resource(mucwin->roomjid, nick);
+            ProfPrivateWin *privwin = wins_get_private(jidp->fulljid);
+            jid_destroy(jidp);
+            if (privwin) {
+                privwin_occupant_online(privwin);
+            }
         }
 
         occupantswin_occupants(room);
@@ -988,7 +1001,7 @@ sv_ev_certfail(const char *const errormsg, TLSCertificate *cert)
     }
 
     if (g_strcmp0(cmd, "/tls allow") == 0) {
-        cons_show("Coninuing with connection.");
+        cons_show("Continuing with connection.");
         tlscerts_set_current(cert->fingerprint);
         free(cmd);
         return 1;

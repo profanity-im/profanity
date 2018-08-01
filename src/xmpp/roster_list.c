@@ -1,7 +1,7 @@
 /*
  * roster_list.c
  *
- * Copyright (C) 2012 - 2016 James Booth <boothj5@gmail.com>
+ * Copyright (C) 2012 - 2018 James Booth <boothj5@gmail.com>
  *
  * This file is part of Profanity.
  *
@@ -472,19 +472,19 @@ roster_has_pending_subscriptions(void)
 }
 
 char*
-roster_contact_autocomplete(const char *const search_str)
+roster_contact_autocomplete(const char *const search_str, gboolean previous)
 {
     assert(roster != NULL);
 
-    return autocomplete_complete(roster->name_ac, search_str, TRUE);
+    return autocomplete_complete(roster->name_ac, search_str, TRUE, previous);
 }
 
 char*
-roster_fulljid_autocomplete(const char *const search_str)
+roster_fulljid_autocomplete(const char *const search_str, gboolean previous)
 {
     assert(roster != NULL);
 
-    return autocomplete_complete(roster->fulljid_ac, search_str, TRUE);
+    return autocomplete_complete(roster->fulljid_ac, search_str, TRUE, previous);
 }
 
 GSList*
@@ -526,7 +526,7 @@ roster_get_group(const char *const group, roster_ord_t order)
     return result;
 }
 
-GSList*
+GList*
 roster_get_groups(void)
 {
     assert(roster != NULL);
@@ -535,19 +535,19 @@ roster_get_groups(void)
 }
 
 char*
-roster_group_autocomplete(const char *const search_str)
+roster_group_autocomplete(const char *const search_str, gboolean previous)
 {
     assert(roster != NULL);
 
-    return autocomplete_complete(roster->groups_ac, search_str, TRUE);
+    return autocomplete_complete(roster->groups_ac, search_str, TRUE, previous);
 }
 
 char*
-roster_barejid_autocomplete(const char *const search_str)
+roster_barejid_autocomplete(const char *const search_str, gboolean previous)
 {
     assert(roster != NULL);
 
-    return autocomplete_complete(roster->barejid_ac, search_str, TRUE);
+    return autocomplete_complete(roster->barejid_ac, search_str, TRUE, previous);
 }
 
 static gboolean

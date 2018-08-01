@@ -1,7 +1,7 @@
 /*
  * prof_api.h
  *
- * Copyright (C) 2012 - 2016 James Booth <boothj5@gmail.com>
+ * Copyright (C) 2012 - 2018 James Booth <boothj5@gmail.com>
  *
  * This file is part of Profanity.
  *
@@ -40,6 +40,7 @@
 #define prof_completer_add(key, items) _prof_completer_add(__FILE__, key, items)
 #define prof_completer_remove(key, items) _prof_completer_remove(__FILE__, key, items)
 #define prof_completer_clear(key) _prof_completer_clear(__FILE__, key)
+#define prof_filepath_completer_add(prefix) _prof_filepath_completer_add(__FILE__, prefix)
 #define prof_win_create(win, input_handler) _prof_win_create(__FILE__, win, input_handler)
 #define prof_disco_add_feature(feature) _prof_disco_add_feature(__FILE__, feature)
 
@@ -62,6 +63,7 @@ void (*_prof_register_timed)(const char *filename, TIMED_CB callback, int interv
 void (*_prof_completer_add)(const char *filename, const char *key, char **items);
 void (*_prof_completer_remove)(const char *filename, const char *key, char **items);
 void (*_prof_completer_clear)(const char *filename, const char *key);
+void (*_prof_filepath_completer_add)(const char *filename, const char *prefix);
 
 void (*prof_notify)(const char *message, int timeout_ms, const char *category);
 
@@ -72,6 +74,8 @@ char* (*prof_get_current_muc)(void);
 int (*prof_current_win_is_console)(void);
 char* (*prof_get_current_nick)(void);
 char** (*prof_get_current_occupants)(void);
+
+char* (*prof_get_room_nick)(const char *barejid);
 
 void (*prof_log_debug)(const char *message);
 void (*prof_log_info)(const char *message);
@@ -100,5 +104,26 @@ int (*prof_settings_string_list_clear)(char *group, char *key);
 void (*prof_incoming_message)(char *barejid, char *resource, char *message);
 
 void (*_prof_disco_add_feature)(const char *filename, char *feature);
+
+void (*prof_encryption_reset)(const char *barejid);
+
+int (*prof_chat_set_titlebar_enctext)(const char *barejid, const char *enctext);
+int (*prof_chat_unset_titlebar_enctext)(const char *barejid);
+int (*prof_chat_set_incoming_char)(const char *barejid, const char *ch);
+int (*prof_chat_unset_incoming_char)(const char *barejid);
+int (*prof_chat_set_outgoing_char)(const char *barejid, const char *ch);
+int (*prof_chat_unset_outgoing_char)(const char *barejid);
+int (*prof_room_set_titlebar_enctext)(const char *roomjid, const char *enctext);
+int (*prof_room_unset_titlebar_enctext)(const char *roomjid);
+int (*prof_room_set_message_char)(const char *roomjid, const char *ch);
+int (*prof_room_unset_message_char)(const char *roomjid);
+
+int (*prof_chat_show)(const char *const barejid, const char *const message);
+int (*prof_chat_show_themed)(const char *const barejid, const char *const group, const char *const item, const char *const def,
+    const char *const ch, const char *const message);
+
+int (*prof_room_show)(const char *const roomjid, const char *const message);
+int (*prof_room_show_themed)(const char *const roomjid, const char *const group, const char *const item, const char *const def,
+    const char *const ch, const char *const message);
 
 #endif

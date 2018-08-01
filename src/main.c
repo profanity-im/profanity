@@ -1,7 +1,7 @@
 /*
  * main.c
  *
- * Copyright (C) 2012 - 2016 James Booth <boothj5@gmail.com>
+ * Copyright (C) 2012 - 2018 James Booth <boothj5@gmail.com>
  *
  * This file is part of Profanity.
  *
@@ -39,6 +39,18 @@
 
 #ifdef HAVE_GIT_VERSION
 #include "gitversion.h"
+#endif
+
+#ifdef HAVE_LIBOTR
+#include "otr/otr.h"
+#endif
+
+#ifdef HAVE_LIBGPGME
+#include "pgp/gpg.h"
+#endif
+
+#ifdef HAVE_PYTHON
+#include "plugins/python_plugins.h"
 #endif
 
 #include "profanity.h"
@@ -90,7 +102,7 @@ main(int argc, char **argv)
             g_print("Profanity, version %s\n", PACKAGE_VERSION);
         }
 
-        g_print("Copyright (C) 2012 - 2016 James Booth <%s>.\n", PACKAGE_BUGREPORT);
+        g_print("Copyright (C) 2012 - 2018 James Booth <%s>.\n", PACKAGE_BUGREPORT);
         g_print("License GPLv3+: GNU GPL version 3 or later <https://www.gnu.org/licenses/gpl.html>\n");
         g_print("\n");
         g_print("This is free software; you are free to change and redistribute it.\n");
@@ -113,13 +125,15 @@ main(int argc, char **argv)
         }
 
 #ifdef HAVE_LIBOTR
-        g_print("OTR support: Enabled\n");
+        char *otr_version = otr_libotr_version();
+        g_print("OTR support: Enabled (libotr %s)\n", otr_version);
 #else
         g_print("OTR support: Disabled\n");
 #endif
 
 #ifdef HAVE_LIBGPGME
-        g_print("PGP support: Enabled\n");
+        const char *pgp_version = p_gpg_libver();
+        g_print("PGP support: Enabled (libgpgme %s)\n", pgp_version);
 #else
         g_print("PGP support: Disabled\n");
 #endif
@@ -131,7 +145,9 @@ main(int argc, char **argv)
 #endif
 
 #ifdef HAVE_PYTHON
-        g_print("Python plugins: Enabled\n");
+        gchar *python_version = python_get_version_number();
+        g_print("Python plugins: Enabled (%s)\n", python_version);
+        g_free(python_version);
 #else
         g_print("Python plugins: Disabled\n");
 #endif

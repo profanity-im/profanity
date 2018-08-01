@@ -1,7 +1,7 @@
 /*
  * account.c
  *
- * Copyright (C) 2012 - 2016 James Booth <boothj5@gmail.com>
+ * Copyright (C) 2012 - 2018 James Booth <boothj5@gmail.com>
  *
  * This file is part of Profanity.
  *
@@ -115,17 +115,10 @@ account_new(const gchar *const name, const gchar *const jid,
     new_account->priority_xa = priority_xa;
     new_account->priority_dnd = priority_dnd;
 
-    if (muc_service == NULL) {
-        GString *g_muc_service = g_string_new("conference.");
-        Jid *jidp = jid_create(new_account->jid);
-        g_string_append(g_muc_service, jidp->domainpart);
-
-        new_account->muc_service = g_muc_service->str;
-
-        g_string_free(g_muc_service, FALSE);
-        jid_destroy(jidp);
-    } else {
+    if (muc_service) {
         new_account->muc_service = strdup(muc_service);
+    } else {
+        new_account->muc_service = NULL;
     }
 
     if (muc_nick == NULL) {
@@ -174,7 +167,7 @@ account_new(const gchar *const name, const gchar *const jid,
 }
 
 char*
-account_create_full_jid(ProfAccount *account)
+account_create_connect_jid(ProfAccount *account)
 {
     if (account->resource) {
         return create_fulljid(account->jid, account->resource);
@@ -224,25 +217,27 @@ account_eval_password(ProfAccount *account)
 void
 account_free(ProfAccount *account)
 {
-    if (account) {
-        free(account->name);
-        free(account->jid);
-        free(account->password);
-        free(account->eval_password);
-        free(account->resource);
-        free(account->server);
-        free(account->last_presence);
-        free(account->login_presence);
-        free(account->muc_service);
-        free(account->muc_nick);
-        free(account->otr_policy);
-        free(account->pgp_keyid);
-        free(account->startscript);
-        free(account->theme);
-        free(account->tls_policy);
-        g_list_free_full(account->otr_manual, g_free);
-        g_list_free_full(account->otr_opportunistic, g_free);
-        g_list_free_full(account->otr_always, g_free);
-        free(account);
+    if (account == NULL) {
+        return;
     }
+
+    free(account->name);
+    free(account->jid);
+    free(account->password);
+    free(account->eval_password);
+    free(account->resource);
+    free(account->server);
+    free(account->last_presence);
+    free(account->login_presence);
+    free(account->muc_service);
+    free(account->muc_nick);
+    free(account->otr_policy);
+    free(account->pgp_keyid);
+    free(account->startscript);
+    free(account->theme);
+    free(account->tls_policy);
+    g_list_free_full(account->otr_manual, g_free);
+    g_list_free_full(account->otr_opportunistic, g_free);
+    g_list_free_full(account->otr_always, g_free);
+    free(account);
 }

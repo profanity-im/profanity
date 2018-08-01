@@ -1,7 +1,7 @@
 /*
  * inputwin.c
  *
- * Copyright (C) 2012 - 2016 James Booth <boothj5@gmail.com>
+ * Copyright (C) 2012 - 2018 James Booth <boothj5@gmail.com>
  *
  * This file is part of Profanity.
  *
@@ -87,7 +87,7 @@ static char *inp_line = NULL;
 static gboolean get_password = FALSE;
 
 static void _inp_win_update_virtual(void);
-static int _inp_printable(const wint_t ch);
+static int _inp_edited(const wint_t ch);
 static void _inp_win_handle_scroll(void);
 static int _inp_offset_to_col(char *str, int offset);
 static void _inp_write(char *line, int offset);
@@ -96,6 +96,7 @@ static void _inp_rl_addfuncs(void);
 static int _inp_rl_getc(FILE *stream);
 static void _inp_rl_linehandler(char *line);
 static int _inp_rl_tab_handler(int count, int key);
+static int _inp_rl_shift_tab_handler(int count, int key);
 static int _inp_rl_win_clear_handler(int count, int key);
 static int _inp_rl_win_1_handler(int count, int key);
 static int _inp_rl_win_2_handler(int count, int key);
@@ -250,7 +251,7 @@ inp_get_line(void)
         line = inp_readline();
         ui_update();
     }
-    status_bar_clear();
+    status_bar_clear_prompt();
     return line;
 }
 
@@ -268,7 +269,7 @@ inp_get_password(void)
         ui_update();
     }
     get_password = FALSE;
-    status_bar_clear();
+    status_bar_clear_prompt();
     return password;
 }
 
@@ -300,8 +301,24 @@ _inp_write(char *line, int offset)
 }
 
 static int
-_inp_printable(const wint_t ch)
+_inp_edited(const wint_t ch)
 {
+    // backspace
+    if (ch == 127) {
+        return 1;
+    }
+
+    // ctrl-w
+    if (ch == 23) {
+        return 1;
+    }
+
+    // enter
+    if (ch == 13) {
+        return 1;
+    }
+
+    // printable
     char bytes[MB_CUR_MAX+1];
     size_t utf_len = wcrtomb(bytes, ch, (mbstate_t*)NULL);
     bytes[utf_len] = '\0';
@@ -421,6 +438,7 @@ _inp_rl_startup_hook(void)
     rl_bind_keyseq("\\eOs", _inp_rl_win_pagedown_handler);
 
     rl_bind_key('\t', _inp_rl_tab_handler);
+    rl_bind_keyseq("\\e[Z", _inp_rl_shift_tab_handler);
 
     // unbind unwanted mappings
     rl_bind_keyseq("\\e=", NULL);
@@ -449,11 +467,28 @@ _inp_rl_linehandler(char *line)
     inp_line = line;
 }
 
+static gboolean shift_tab = FALSE;
+
 static int
 _inp_rl_getc(FILE *stream)
 {
     int ch = rl_getc(stream);
-    if (_inp_printable(ch)) {
+
+    // 27, 91, 90 = Shift tab
+    if (ch == 27) {
+        shift_tab = TRUE;
+        return ch;
+    }
+    if (shift_tab && ch == 91) {
+        return ch;
+    }
+    if (shift_tab && ch == 90) {
+        return ch;
+    }
+
+    shift_tab = FALSE;
+
+    if (_inp_edited(ch)) {
         ProfWin *window = wins_get_current();
         cmd_ac_reset(window);
     }
@@ -477,7 +512,7 @@ _inp_rl_tab_handler(int count, int key)
 
     ProfWin *current = wins_get_current();
     if ((strncmp(rl_line_buffer, "/", 1) != 0) && (current->type == WIN_MUC)) {
-        char *result = muc_autocomplete(current, rl_line_buffer);
+        char *result = muc_autocomplete(current, rl_line_buffer, FALSE);
         if (result) {
             rl_replace_line(result, 1);
             rl_point = rl_end;
@@ -485,7 +520,35 @@ _inp_rl_tab_handler(int count, int key)
         }
     } else if (strncmp(rl_line_buffer, "/", 1) == 0) {
         ProfWin *window = wins_get_current();
-        char *result = cmd_ac_complete(window, rl_line_buffer);
+        char *result = cmd_ac_complete(window, rl_line_buffer, FALSE);
+        if (result) {
+            rl_replace_line(result, 1);
+            rl_point = rl_end;
+            free(result);
+        }
+    }
+
+    return 0;
+}
+
+static int
+_inp_rl_shift_tab_handler(int count, int key)
+{
+    if (rl_point != rl_end || !rl_line_buffer) {
+        return 0;
+    }
+
+    ProfWin *current = wins_get_current();
+    if ((strncmp(rl_line_buffer, "/", 1) != 0) && (current->type == WIN_MUC)) {
+        char *result = muc_autocomplete(current, rl_line_buffer, TRUE);
+        if (result) {
+            rl_replace_line(result, 1);
+            rl_point = rl_end;
+            free(result);
+        }
+    } else if (strncmp(rl_line_buffer, "/", 1) == 0) {
+        ProfWin *window = wins_get_current();
+        char *result = cmd_ac_complete(window, rl_line_buffer, TRUE);
         if (result) {
             rl_replace_line(result, 1);
             rl_point = rl_end;

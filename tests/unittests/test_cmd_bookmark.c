@@ -24,10 +24,12 @@
 
 static void test_with_connection_status(jabber_conn_status_t status)
 {
+    ProfWin window;
+    window.type = WIN_CONSOLE;
     will_return(connection_get_status, status);
     expect_cons_show("You are not currently connected.");
 
-    gboolean result = cmd_bookmark(NULL, CMD_BOOKMARK, NULL);
+    gboolean result = cmd_bookmark(&window, CMD_BOOKMARK, NULL);
     assert_true(result);
 }
 
@@ -137,7 +139,8 @@ void cmd_bookmark_add_shows_message_when_invalid_jid(void **state)
 
     will_return(connection_get_status, JABBER_CONNECTED);
 
-    expect_cons_show("Can't add bookmark with JID 'room'; should be 'room@domain.tld'");
+    expect_cons_show("Invalid room, must be of the form room@domain.tld");
+    expect_cons_show("");
 
     gboolean result = cmd_bookmark(&window, CMD_BOOKMARK, args);
     assert_true(result);
@@ -162,6 +165,85 @@ void cmd_bookmark_add_adds_bookmark_with_jid(void **state)
 
     gboolean result = cmd_bookmark(&window, CMD_BOOKMARK, args);
     assert_true(result);
+}
+
+void cmd_bookmark_uses_roomjid_in_room(void **state)
+{
+    muc_init();
+
+    gchar *args[] = { NULL };
+    ProfMucWin muc_win;
+    muc_win.window.type = WIN_MUC;
+    muc_win.memcheck = PROFMUCWIN_MEMCHECK;
+    muc_win.roomjid = "room@conf.server";
+
+    will_return(connection_get_status, JABBER_CONNECTED);
+
+    expect_string(bookmark_add, jid, muc_win.roomjid);
+    expect_any(bookmark_add, nick);
+    expect_any(bookmark_add, password);
+    expect_any(bookmark_add, autojoin_str);
+    will_return(bookmark_add, TRUE);
+
+    expect_win_println("Bookmark added for room@conf.server.");
+
+    gboolean result = cmd_bookmark(&muc_win, CMD_BOOKMARK, args);
+    assert_true(result);
+
+    muc_close();
+}
+
+void cmd_bookmark_add_uses_roomjid_in_room(void **state)
+{
+    muc_init();
+
+    gchar *args[] = { "add", NULL };
+    ProfMucWin muc_win;
+    muc_win.window.type = WIN_MUC;
+    muc_win.memcheck = PROFMUCWIN_MEMCHECK;
+    muc_win.roomjid = "room@conf.server";
+
+    will_return(connection_get_status, JABBER_CONNECTED);
+
+    expect_string(bookmark_add, jid, muc_win.roomjid);
+    expect_any(bookmark_add, nick);
+    expect_any(bookmark_add, password);
+    expect_any(bookmark_add, autojoin_str);
+    will_return(bookmark_add, TRUE);
+
+    expect_win_println("Bookmark added for room@conf.server.");
+
+    gboolean result = cmd_bookmark(&muc_win, CMD_BOOKMARK, args);
+    assert_true(result);
+
+    muc_close();
+}
+
+void cmd_bookmark_add_uses_supplied_jid_in_room(void **state)
+{
+    muc_init();
+
+    char *jid = "room1@conf.server";
+    gchar *args[] = { "add", jid, NULL };
+    ProfMucWin muc_win;
+    muc_win.window.type = WIN_MUC;
+    muc_win.memcheck = PROFMUCWIN_MEMCHECK;
+    muc_win.roomjid = "room2@conf.server";
+
+    will_return(connection_get_status, JABBER_CONNECTED);
+
+    expect_string(bookmark_add, jid, jid);
+    expect_any(bookmark_add, nick);
+    expect_any(bookmark_add, password);
+    expect_any(bookmark_add, autojoin_str);
+    will_return(bookmark_add, TRUE);
+
+    expect_cons_show("Bookmark added for room1@conf.server.");
+
+    gboolean result = cmd_bookmark(&muc_win, CMD_BOOKMARK, args);
+    assert_true(result);
+
+    muc_close();
 }
 
 void cmd_bookmark_add_adds_bookmark_with_jid_nick(void **state)
@@ -263,4 +345,51 @@ void cmd_bookmark_remove_shows_message_when_no_bookmark(void **state)
 
     gboolean result = cmd_bookmark(&window, CMD_BOOKMARK, args);
     assert_true(result);
+}
+
+void cmd_bookmark_remove_uses_roomjid_in_room(void **state)
+{
+    muc_init();
+
+    gchar *args[] = { "remove", NULL };
+    ProfMucWin muc_win;
+    muc_win.window.type = WIN_MUC;
+    muc_win.memcheck = PROFMUCWIN_MEMCHECK;
+    muc_win.roomjid = "room@conf.server";
+
+    will_return(connection_get_status, JABBER_CONNECTED);
+
+    expect_string(bookmark_remove, jid, muc_win.roomjid);
+    will_return(bookmark_remove, TRUE);
+
+    expect_win_println("Bookmark removed for room@conf.server.");
+
+    gboolean result = cmd_bookmark(&muc_win, CMD_BOOKMARK, args);
+    assert_true(result);
+
+    muc_close();
+}
+
+void cmd_bookmark_remove_uses_supplied_jid_in_room(void **state)
+{
+    muc_init();
+
+    char *jid = "room1@conf.server";
+    gchar *args[] = { "remove", jid, NULL };
+    ProfMucWin muc_win;
+    muc_win.window.type = WIN_MUC;
+    muc_win.memcheck = PROFMUCWIN_MEMCHECK;
+    muc_win.roomjid = "room2@conf.server";
+
+    will_return(connection_get_status, JABBER_CONNECTED);
+
+    expect_string(bookmark_remove, jid, jid);
+    will_return(bookmark_remove, TRUE);
+
+    expect_cons_show("Bookmark removed for room1@conf.server.");
+
+    gboolean result = cmd_bookmark(&muc_win, CMD_BOOKMARK, args);
+    assert_true(result);
+
+    muc_close();
 }

@@ -1,7 +1,7 @@
 /*
  * preferences.c
  *
- * Copyright (C) 2012 - 2016 James Booth <boothj5@gmail.com>
+ * Copyright (C) 2012 - 2018 James Booth <boothj5@gmail.com>
  *
  * This file is part of Profanity.
  *
@@ -59,6 +59,7 @@
 #define PREF_GROUP_OTR "otr"
 #define PREF_GROUP_PGP "pgp"
 #define PREF_GROUP_MUC "muc"
+#define PREF_GROUP_PLUGINS "plugins"
 
 #define INPBLOCK_DEFAULT 1000
 
@@ -182,9 +183,9 @@ prefs_close(void)
 }
 
 char*
-prefs_autocomplete_boolean_choice(const char *const prefix)
+prefs_autocomplete_boolean_choice(const char *const prefix, gboolean previous)
 {
-    return autocomplete_complete(boolean_choice_ac, prefix, TRUE);
+    return autocomplete_complete(boolean_choice_ac, prefix, TRUE, previous);
 }
 
 void
@@ -194,9 +195,9 @@ prefs_reset_boolean_choice(void)
 }
 
 char*
-prefs_autocomplete_room_trigger(const char *const prefix)
+prefs_autocomplete_room_trigger(const char *const prefix, gboolean previous)
 {
-    return autocomplete_complete(room_trigger_ac, prefix, TRUE);
+    return autocomplete_complete(room_trigger_ac, prefix, TRUE, previous);
 }
 
 void
@@ -460,6 +461,45 @@ prefs_set_string(preference_t pref, char *value)
     _save_prefs();
 }
 
+char*
+prefs_get_tls_certpath(void)
+{
+    const char *group = _get_group(PREF_TLS_CERTPATH);
+    const char *key = _get_key(PREF_TLS_CERTPATH);
+
+    char *setting = g_key_file_get_string(prefs, group, key, NULL);
+
+    if (g_strcmp0(setting, "none") == 0) {
+        prefs_free_string(setting);
+        return NULL;
+    }
+
+    if (setting == NULL) {
+        if (g_file_test("/etc/ssl/certs",  G_FILE_TEST_IS_DIR)) {
+            return strdup("/etc/ssl/certs");
+        }
+        if (g_file_test("/etc/pki/tls/certs",  G_FILE_TEST_IS_DIR)) {
+            return strdup("/etc/pki/tls/certs");
+        }
+        if (g_file_test("/etc/ssl",  G_FILE_TEST_IS_DIR)) {
+            return strdup("/etc/ssl");
+        }
+        if (g_file_test("/etc/pki/tls",  G_FILE_TEST_IS_DIR)) {
+            return strdup("/etc/pki/tls");
+        }
+        if (g_file_test("/system/etc/security/cacerts",  G_FILE_TEST_IS_DIR)) {
+            return strdup("/system/etc/security/cacerts");
+        }
+
+        return NULL;
+    }
+
+    char *result = strdup(setting);
+    prefs_free_string(setting);
+
+    return result;
+}
+
 gint
 prefs_get_gone(void)
 {
@@ -623,30 +663,64 @@ prefs_get_tray_timer(void)
     }
 }
 
+gint
+prefs_get_statusbartabs(void)
+{
+    if (!g_key_file_has_key(prefs, PREF_GROUP_UI, "statusbar.tabs", NULL)) {
+        return 10;
+    } else {
+        return g_key_file_get_integer(prefs, PREF_GROUP_UI, "statusbar.tabs", NULL);
+    }
+}
+
+void
+prefs_set_statusbartabs(gint value)
+{
+    g_key_file_set_integer(prefs, PREF_GROUP_UI, "statusbar.tabs", value);
+    _save_prefs();
+}
+
+gint
+prefs_get_statusbartablen(void)
+{
+    if (!g_key_file_has_key(prefs, PREF_GROUP_UI, "statusbar.tablen", NULL)) {
+        return 0;
+    } else {
+        return g_key_file_get_integer(prefs, PREF_GROUP_UI, "statusbar.tablen", NULL);
+    }
+}
+
+void
+prefs_set_statusbartablen(gint value)
+{
+    g_key_file_set_integer(prefs, PREF_GROUP_UI, "statusbar.tablen", value);
+    _save_prefs();
+}
+
 gchar**
 prefs_get_plugins(void)
 {
-    if (!g_key_file_has_group(prefs, "plugins")) {
+    if (!g_key_file_has_group(prefs, PREF_GROUP_PLUGINS)) {
         return NULL;
     }
-    if (!g_key_file_has_key(prefs, "plugins", "load", NULL)) {
+    if (!g_key_file_has_key(prefs, PREF_GROUP_PLUGINS, "load", NULL)) {
         return NULL;
     }
 
-    return g_key_file_get_string_list(prefs, "plugins", "load", NULL, NULL);
+    return g_key_file_get_string_list(prefs, PREF_GROUP_PLUGINS, "load", NULL, NULL);
 }
 
 void
 prefs_add_plugin(const char *const name)
 {
-    conf_string_list_add(prefs, "plugins", "load", name);
+    conf_string_list_add(prefs, PREF_GROUP_PLUGINS, "load", name);
     _save_prefs();
 }
 
 void
 prefs_remove_plugin(const char *const name)
 {
-    conf_string_list_remove(prefs, "plugins", "load", name);
+    conf_string_list_remove(prefs, PREF_GROUP_PLUGINS, "load", name);
     _save_prefs();
 }
 
@@ -1490,7 +1564,6 @@ _get_group(preference_t pref)
         case PREF_MUC_PRIVILEGES:
         case PREF_PRESENCE:
         case PREF_WRAP:
-        case PREF_WINS_AUTO_TIDY:
         case PREF_TIME_CONSOLE:
         case PREF_TIME_CHAT:
         case PREF_TIME_MUC:
@@ -1520,6 +1593,7 @@ _get_group(preference_t pref)
         case PREF_ROSTER_ROOMS_BY:
         case PREF_ROSTER_ROOMS_ORDER:
         case PREF_ROSTER_ROOMS_UNREAD:
+        case PREF_ROSTER_ROOMS_SERVER:
         case PREF_ROSTER_PRIVATE:
         case PREF_RESOURCE_TITLE:
         case PREF_RESOURCE_MESSAGE:
@@ -1529,6 +1603,11 @@ _get_group(preference_t pref)
         case PREF_CONSOLE_MUC:
         case PREF_CONSOLE_PRIVATE:
         case PREF_CONSOLE_CHAT:
+        case PREF_STATUSBAR_SHOW_NAME:
+        case PREF_STATUSBAR_SHOW_NUMBER:
+        case PREF_STATUSBAR_SELF:
+        case PREF_STATUSBAR_CHAT:
+        case PREF_STATUSBAR_ROOM:
             return PREF_GROUP_UI;
         case PREF_STATES:
         case PREF_OUTTYPE:
@@ -1574,7 +1653,10 @@ _get_group(preference_t pref)
         case PREF_PGP_LOG:
             return PREF_GROUP_PGP;
         case PREF_BOOKMARK_INVITE:
+        case PREF_ROOM_LIST_CACHE:
             return PREF_GROUP_MUC;
+        case PREF_PLUGINS_SOURCEPATH:
+            return PREF_GROUP_PLUGINS;
         default:
             return NULL;
     }
@@ -1689,8 +1771,6 @@ _get_key(preference_t pref)
             return "presence";
         case PREF_WRAP:
             return "wrap";
-        case PREF_WINS_AUTO_TIDY:
-            return "wins.autotidy";
         case PREF_TIME_CONSOLE:
             return "time.console";
         case PREF_TIME_CHAT:
@@ -1749,6 +1829,8 @@ _get_key(preference_t pref)
             return "roster.rooms.order";
         case PREF_ROSTER_ROOMS_UNREAD:
             return "roster.rooms.unread";
+        case PREF_ROSTER_ROOMS_SERVER:
+            return "roster.rooms.server";
         case PREF_ROSTER_PRIVATE:
             return "roster.private";
         case PREF_RESOURCE_TITLE:
@@ -1775,6 +1857,20 @@ _get_key(preference_t pref)
             return "console.chat";
         case PREF_BOOKMARK_INVITE:
             return "bookmark.invite";
+        case PREF_PLUGINS_SOURCEPATH:
+            return "sourcepath";
+        case PREF_ROOM_LIST_CACHE:
+            return "rooms.cache";
+        case PREF_STATUSBAR_SHOW_NAME:
+            return "statusbar.show.name";
+        case PREF_STATUSBAR_SHOW_NUMBER:
+            return "statusbar.show.number";
+        case PREF_STATUSBAR_SELF:
+            return "statusbar.self";
+        case PREF_STATUSBAR_CHAT:
+            return "statusbar.chat";
+        case PREF_STATUSBAR_ROOM:
+            return "statusbar.room";
         default:
             return NULL;
     }
@@ -1804,7 +1900,6 @@ _get_default_boolean(preference_t pref)
         case PREF_MUC_PRIVILEGES:
         case PREF_PRESENCE:
         case PREF_WRAP:
-        case PREF_WINS_AUTO_TIDY:
         case PREF_INPBLOCK_DYNAMIC:
         case PREF_RESOURCE_TITLE:
         case PREF_RESOURCE_MESSAGE:
@@ -1817,11 +1912,14 @@ _get_default_boolean(preference_t pref)
         case PREF_ROSTER_CONTACTS:
         case PREF_ROSTER_UNSUBSCRIBED:
         case PREF_ROSTER_ROOMS:
+        case PREF_ROSTER_ROOMS_SERVER:
         case PREF_TLS_SHOW:
         case PREF_LASTACTIVITY:
         case PREF_NOTIFY_MENTION_WHOLE_WORD:
         case PREF_TRAY_READ:
         case PREF_BOOKMARK_INVITE:
+        case PREF_ROOM_LIST_CACHE:
+        case PREF_STATUSBAR_SHOW_NUMBER:
             return TRUE;
         default:
             return FALSE;
@@ -1885,6 +1983,12 @@ _get_default_string(preference_t pref)
         case PREF_CONSOLE_PRIVATE:
         case PREF_CONSOLE_CHAT:
             return "all";
+        case PREF_STATUSBAR_SELF:
+            return "fulljid";
+        case PREF_STATUSBAR_CHAT:
+            return "user";
+        case PREF_STATUSBAR_ROOM:
+            return "room";
         default:
             return NULL;
     }

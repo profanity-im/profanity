@@ -1,7 +1,7 @@
 /*
  * bookmark.c
  *
- * Copyright (C) 2012 - 2016 James Booth <boothj5@gmail.com>
+ * Copyright (C) 2012 - 2018 James Booth <boothj5@gmail.com>
  *
  * This file is part of Profanity.
  *
@@ -97,6 +97,12 @@ gboolean
 bookmark_add(const char *jid, const char *nick, const char *password, const char *autojoin_str)
 {
     assert(jid != NULL);
+
+    Jid *jidp = jid_create(jid);
+    if (jidp->domainpart) {
+        muc_confserver_add(jidp->domainpart);
+    }
+    jid_destroy(jidp);
 
     if (g_hash_table_contains(bookmarks, jid)) {
         return FALSE;
@@ -212,9 +218,9 @@ bookmark_get_list(void)
 }
 
 char*
-bookmark_find(const char *const search_str)
+bookmark_find(const char *const search_str, gboolean previous)
 {
-    return autocomplete_complete(bookmark_ac, search_str, TRUE);
+    return autocomplete_complete(bookmark_ac, search_str, TRUE, previous);
 }
 
 void
@@ -296,6 +302,12 @@ _bookmark_result_id_handler(xmpp_stanza_t *const stanza, void *const userdata)
         if (autojoin_val) {
             sv_ev_bookmark_autojoin(bookmark);
         }
+
+        Jid *jidp = jid_create(barejid);
+        if (jidp->domainpart) {
+            muc_confserver_add(jidp->domainpart);
+        }
+        jid_destroy(jidp);
 
         child = xmpp_stanza_get_next(child);
     }

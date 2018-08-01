@@ -1,7 +1,7 @@
 /*
  * c_plugins.h
  *
- * Copyright (C) 2012 - 2016 James Booth <boothj5@gmail.com>
+ * Copyright (C) 2012 - 2018 James Booth <boothj5@gmail.com>
  *
  * This file is part of Profanity.
  *
@@ -45,6 +45,9 @@ void c_shutdown(void);
 
 void c_init_hook(ProfPlugin *plugin, const char *const version, const char *const status, const char *const account_name,
     const char *const fulljid);
+
+gboolean c_contains_hook(ProfPlugin *plugin, const char *const hook);
+
 void c_on_start_hook(ProfPlugin *plugin);
 void c_on_shutdown_hook(ProfPlugin *plugin);
 void c_on_unload_hook(ProfPlugin *plugin);

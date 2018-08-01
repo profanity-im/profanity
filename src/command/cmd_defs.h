@@ -1,7 +1,7 @@
 /*
  * cmd_defs.h
  *
- * Copyright (C) 2012 - 2016 James Booth <boothj5@gmail.com>
+ * Copyright (C) 2012 - 2018 James Booth <boothj5@gmail.com>
  *
  * This file is part of Profanity.
  *
@@ -48,5 +48,8 @@ GList* cmd_get_ordered(const char *const tag);
 gboolean cmd_valid_tag(const char *const str);
 
 void command_docgen(void);
+
+GList* cmd_search_index_all(char *term);
+GList* cmd_search_index_any(char *term);
 
 #endif

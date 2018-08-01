@@ -1,7 +1,7 @@
 /*
  * connection.h
  *
- * Copyright (C) 2012 - 2016 James Booth <boothj5@gmail.com>
+ * Copyright (C) 2012 - 2018 James Booth <boothj5@gmail.com>
  *
  * This file is part of Profanity.
  *
@@ -46,7 +46,6 @@ jabber_conn_status_t connection_connect(const char *const fulljid, const char *c
 void connection_disconnect(void);
 void connection_set_disconnected(void);
 
-void connection_set_presence_msg(const char *const message);
 void connection_set_priority(const int priority);
 void connection_set_priority(int priority);
 void connection_set_disco_items(GSList *items);
@@ -54,7 +53,6 @@ void connection_set_disco_items(GSList *items);
 xmpp_conn_t* connection_get_conn(void);
 xmpp_ctx_t* connection_get_ctx(void);
 char *connection_get_domain(void);
-char* connection_jid_for_feature(const char *const feature);
 GHashTable* connection_get_features(const char *const jid);
 
 void connection_clear_data(void);

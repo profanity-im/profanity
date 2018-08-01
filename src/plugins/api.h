@@ -1,7 +1,7 @@
 /*
  * api.h
  *
- * Copyright (C) 2012 - 2016 James Booth <boothj5@gmail.com>
+ * Copyright (C) 2012 - 2018 James Booth <boothj5@gmail.com>
  *
  * This file is part of Profanity.
  *
@@ -50,6 +50,8 @@ gboolean api_current_win_is_console(void);
 char* api_get_current_nick(void);
 char** api_get_current_occupants(void);
 
+char* api_get_room_nick(const char *barejid);
+
 void api_register_command(const char *const plugin_name, const char *command_name, int min_args, int max_args,
     char **synopsis, const char *description, char *arguments[][2], char **examples,
     void *callback, void(*callback_func)(PluginCommand *command, gchar **args), void(*callback_destroy)(void *callback));
@@ -59,6 +61,7 @@ void api_register_timed(const char *const plugin_name, void *callback, int inter
 void api_completer_add(const char *const plugin_name, const char *key, char **items);
 void api_completer_remove(const char *const plugin_name, const char *key, char **items);
 void api_completer_clear(const char *const plugin_name, const char *key);
+void api_filepath_completer_add(const char *const plugin_name, const char *prefix);
 
 void api_log_debug(const char *message);
 void api_log_info(const char *message);
@@ -92,5 +95,26 @@ int api_settings_string_list_clear(const char *const group, const char *const ke
 void api_incoming_message(const char *const barejid, const char *const resource, const char *const message);
 
 void api_disco_add_feature(char *plugin_name, char *feature);
+
+void api_encryption_reset(const char *const barejid);
+
+int api_chat_set_titlebar_enctext(const char *const barejid, const char *const enctext);
+int api_chat_unset_titlebar_enctext(const char *const barejid);
+int api_chat_set_incoming_char(const char *const barejid, const char *const ch);
+int api_chat_unset_incoming_char(const char *const barejid);
+int api_chat_set_outgoing_char(const char *const barejid, const char *const ch);
+int api_chat_unset_outgoing_char(const char *const barejid);
+int api_room_set_titlebar_enctext(const char *const roomjid, const char *const enctext);
+int api_room_unset_titlebar_enctext(const char *const roomjid);
+int api_room_set_message_char(const char *const roomjid, const char *const ch);
+int api_room_unset_message_char(const char *const roomjid);
+
+int api_chat_show(const char *const barejid, const char *const message);
+int api_chat_show_themed(const char *const barejid, const char *const group, const char *const key, const char *const def,
+    const char *const ch, const char *const message);
+
+int api_room_show(const char *const roomjid, const char *message);
+int api_room_show_themed(const char *const roomjid, const char *const group, const char *const key, const char *const def,
+    const char *const ch, const char *const message);
 
 #endif

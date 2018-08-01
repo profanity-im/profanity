@@ -1,7 +1,7 @@
 /*
  * autocompleters.c
  *
- * Copyright (C) 2012 - 2016 James Booth <boothj5@gmail.com>
+ * Copyright (C) 2012 - 2018 James Booth <boothj5@gmail.com>
  *
  * This file is part of Profanity.
  *
@@ -37,8 +37,10 @@
 #include <glib.h>
 
 #include "tools/autocomplete.h"
+#include "command/cmd_ac.h"
 
 static GHashTable *plugin_to_acs;
+static GHashTable *plugin_to_filepath_acs;
 
 static void
 _free_autocompleters(GHashTable *key_to_ac)
@@ -46,10 +48,17 @@ _free_autocompleters(GHashTable *key_to_ac)
     g_hash_table_destroy(key_to_ac);
 }
 
+static void
+_free_filepath_autocompleters(GHashTable *prefixes)
+{
+    g_hash_table_destroy(prefixes);
+}
+
 void
 autocompleters_init(void)
 {
     plugin_to_acs = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, (GDestroyNotify)_free_autocompleters);
+    plugin_to_filepath_acs = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, (GDestroyNotify)_free_filepath_autocompleters);
 }
 
 void
@@ -106,8 +115,21 @@ autocompleters_clear(const char *const plugin_name, const char *key)
     autocomplete_clear(ac);
 }
 
-char *
-autocompleters_complete(const char * const input)
+void
+autocompleters_filepath_add(const char *const plugin_name, const char *prefix)
+{
+    GHashTable *prefixes = g_hash_table_lookup(plugin_to_filepath_acs, plugin_name);
+    if (prefixes) {
+        g_hash_table_add(prefixes, strdup(prefix));
+    } else {
+        prefixes = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, NULL);
+        g_hash_table_add(prefixes, strdup(prefix));
+        g_hash_table_insert(plugin_to_filepath_acs, strdup(plugin_name), prefixes);
+    }
+}
+
+char*
+autocompleters_complete(const char * const input, gboolean previous)
 {
     char *result = NULL;
 
@@ -119,8 +141,9 @@ autocompleters_complete(const char * const input)
         GList *keys = g_hash_table_get_keys(key_to_ac);
         GList *curr = keys;
         while (curr) {
-            result = autocomplete_param_with_ac(input, curr->data, g_hash_table_lookup(key_to_ac, curr->data), TRUE);
+            result = autocomplete_param_with_ac(input, curr->data, g_hash_table_lookup(key_to_ac, curr->data), TRUE, previous);
             if (result) {
+                g_list_free(ac_hashes);
                 g_list_free(keys);
                 return result;
             }
@@ -131,6 +154,31 @@ autocompleters_complete(const char * const input)
         curr_hash = g_list_next(curr_hash);
     }
     g_list_free(ac_hashes);
+
+    GList *filepath_hashes = g_hash_table_get_values(plugin_to_filepath_acs);
+    curr_hash = filepath_hashes;
+    while (curr_hash) {
+        GHashTable *prefixes_hash = curr_hash->data;
+        GList *prefixes = g_hash_table_get_keys(prefixes_hash);
+        GList *curr_prefix = prefixes;
+        while (curr_prefix) {
+            char *prefix = curr_prefix->data;
+            if (g_str_has_prefix(input, prefix)) {
+                result = cmd_ac_complete_filepath(input, prefix, previous);
+                if (result) {
+                    g_list_free(filepath_hashes);
+                    g_list_free(prefixes);
+                    return result;
+                }
+            }
+
+            curr_prefix = g_list_next(curr_prefix);
+        }
+        g_list_free(prefixes);
+
+        curr_hash = g_list_next(curr_hash);
+    }
+    g_list_free(filepath_hashes);
 
     return NULL;
 }

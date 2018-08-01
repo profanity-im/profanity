@@ -6,6 +6,9 @@
 #include <setjmp.h>
 #include <cmocka.h>
 #include <sys/stat.h>
+#include <stdlib.h>
+#include <locale.h>
+#include <langinfo.h>
 
 #include "config.h"
 #include "xmpp/chat_session.h"
@@ -37,6 +40,21 @@
 #include "test_plugins_disco.h"
 
 int main(int argc, char* argv[]) {
+    setlocale(LC_ALL, "en_GB.UTF-8");
+    char *codeset = nl_langinfo(CODESET);
+    char *lang = getenv("LANG");
+
+    printf("Charset information:\n");
+
+    if (lang) {
+        printf("  LANG:       %s\n", lang);
+    }
+    if (codeset) {
+        printf("  CODESET:    %s\n", codeset);
+    }
+    printf("  MB_CUR_MAX: %d\n", MB_CUR_MAX);
+    printf("  MB_LEN_MAX: %d\n", MB_LEN_MAX);
+
     const UnitTest all_tests[] = {
 
         unit_test(replace_one_substr),
@@ -88,6 +106,12 @@ int main(int argc, char* argv[]) {
         unit_test(add_two_adds_two),
         unit_test(add_two_same_adds_one),
         unit_test(add_two_same_updates),
+        unit_test(complete_accented_with_accented),
+        unit_test(complete_accented_with_base),
+        unit_test(complete_both_with_accented),
+        unit_test(complete_both_with_base),
+        unit_test(complete_ignores_case),
+        unit_test(complete_previous),
 
         unit_test(create_jid_from_null_returns_null),
         unit_test(create_jid_from_empty_string_returns_null),
@@ -289,7 +313,8 @@ int main(int argc, char* argv[]) {
         unit_test(cmd_rooms_shows_message_when_disconnecting),
         unit_test(cmd_rooms_shows_message_when_connecting),
         unit_test(cmd_rooms_uses_account_default_when_no_arg),
-        unit_test(cmd_rooms_arg_used_when_passed),
+        unit_test(cmd_rooms_service_arg_used_when_passed),
+        unit_test(cmd_rooms_filter_arg_used_when_passed),
 
         unit_test(cmd_account_shows_usage_when_not_connected_and_no_args),
         unit_test(cmd_account_shows_account_when_connected_and_no_args),
@@ -468,6 +493,11 @@ int main(int argc, char* argv[]) {
         unit_test(cmd_bookmark_list_shows_bookmarks),
         unit_test(cmd_bookmark_add_shows_message_when_invalid_jid),
         unit_test(cmd_bookmark_add_adds_bookmark_with_jid),
+        unit_test(cmd_bookmark_uses_roomjid_in_room),
+        unit_test(cmd_bookmark_add_uses_roomjid_in_room),
+        unit_test(cmd_bookmark_add_uses_supplied_jid_in_room),
+        unit_test(cmd_bookmark_remove_uses_roomjid_in_room),
+        unit_test(cmd_bookmark_remove_uses_supplied_jid_in_room),
         unit_test(cmd_bookmark_add_adds_bookmark_with_jid_nick),
         unit_test(cmd_bookmark_add_adds_bookmark_with_jid_autojoin),
         unit_test(cmd_bookmark_add_adds_bookmark_with_jid_nick_autojoin),

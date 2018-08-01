@@ -1,7 +1,7 @@
 /*
  * python_api.c
  *
- * Copyright (C) 2012 - 2016 James Booth <boothj5@gmail.com>
+ * Copyright (C) 2012 - 2018 James Booth <boothj5@gmail.com>
  *
  * This file is part of Profanity.
  *
@@ -340,6 +340,30 @@ python_api_completer_clear(PyObject *self, PyObject *args)
 }
 
 static PyObject*
+python_api_filepath_completer_add(PyObject *self, PyObject *args)
+{
+    PyObject *prefix = NULL;
+
+    if (!PyArg_ParseTuple(args, "O", &prefix)) {
+        Py_RETURN_NONE;
+    }
+
+    char *prefix_str = python_str_or_unicode_to_string(prefix);
+
+    char *plugin_name = _python_plugin_name();
+    log_debug("Filepath autocomplete added '%s' for %s", prefix_str, plugin_name);
+
+    allow_python_threads();
+    api_filepath_completer_add(plugin_name, prefix_str);
+    free(prefix_str);
+    disable_python_threads();
+
+    free(plugin_name);
+
+    Py_RETURN_NONE;
+}
+
+static PyObject*
 python_api_notify(PyObject *self, PyObject *args)
 {
     PyObject *message = NULL;
@@ -448,6 +472,27 @@ python_api_current_win_is_console(PyObject *self, PyObject *args)
         return Py_BuildValue("O", Py_True);
     } else {
         return Py_BuildValue("O", Py_False);
+    }
+}
+
+static PyObject*
+python_api_get_room_nick(PyObject *self, PyObject *args)
+{
+    PyObject *barejid = NULL;
+    if (!PyArg_ParseTuple(args, "O", &barejid)) {
+        Py_RETURN_NONE;
+    }
+
+    char *barejid_str = python_str_or_unicode_to_string(barejid);
+
+    allow_python_threads();
+    char *nick = api_get_room_nick(barejid_str);
+    free(barejid_str);
+    disable_python_threads();
+    if (nick) {
+        return Py_BuildValue("s", nick);
+    } else {
+        Py_RETURN_NONE;
     }
 }
 
@@ -986,6 +1031,383 @@ python_api_disco_add_feature(PyObject *self, PyObject *args)
     Py_RETURN_NONE;
 }
 
+static PyObject*
+python_api_encryption_reset(PyObject *self, PyObject *args)
+{
+    PyObject *barejid = NULL;
+    if (!PyArg_ParseTuple(args, "O", &barejid)) {
+        Py_RETURN_NONE;
+    }
+
+    char *barejid_str = python_str_or_unicode_to_string(barejid);
+
+    allow_python_threads();
+    api_encryption_reset(barejid_str);
+    free(barejid_str);
+    disable_python_threads();
+
+    Py_RETURN_NONE;
+}
+
+static PyObject*
+python_api_chat_set_titlebar_enctext(PyObject *self, PyObject *args)
+{
+    PyObject *barejid = NULL;
+    PyObject *enctext = NULL;
+    if (!PyArg_ParseTuple(args, "OO", &barejid, &enctext)) {
+        Py_RETURN_NONE;
+    }
+
+    char *barejid_str = python_str_or_unicode_to_string(barejid);
+    char *enctext_str = python_str_or_unicode_to_string(enctext);
+
+    allow_python_threads();
+    int res = api_chat_set_titlebar_enctext(barejid_str, enctext_str);
+    free(barejid_str);
+    free(enctext_str);
+    disable_python_threads();
+
+    if (res) {
+        return Py_BuildValue("O", Py_True);
+    } else {
+        return Py_BuildValue("O", Py_False);
+    }
+}
+
+static PyObject*
+python_api_chat_unset_titlebar_enctext(PyObject *self, PyObject *args)
+{
+    PyObject *barejid = NULL;
+    if (!PyArg_ParseTuple(args, "O", &barejid)) {
+        Py_RETURN_NONE;
+    }
+
+    char *barejid_str = python_str_or_unicode_to_string(barejid);
+
+    allow_python_threads();
+    int res = api_chat_unset_titlebar_enctext(barejid_str);
+    free(barejid_str);
+    disable_python_threads();
+
+    if (res) {
+        return Py_BuildValue("O", Py_True);
+    } else {
+        return Py_BuildValue("O", Py_False);
+    }
+}
+
+static PyObject*
+python_api_chat_set_incoming_char(PyObject *self, PyObject *args)
+{
+    PyObject *barejid = NULL;
+    PyObject *ch = NULL;
+    if (!PyArg_ParseTuple(args, "OO", &barejid, &ch)) {
+        Py_RETURN_NONE;
+    }
+
+    char *barejid_str = python_str_or_unicode_to_string(barejid);
+    char *ch_str = python_str_or_unicode_to_string(ch);
+
+    allow_python_threads();
+    int res = api_chat_set_incoming_char(barejid_str, ch_str);
+    free(barejid_str);
+    free(ch_str);
+    disable_python_threads();
+
+    if (res) {
+        return Py_BuildValue("O", Py_True);
+    } else {
+        return Py_BuildValue("O", Py_False);
+    }
+}
+
+static PyObject*
+python_api_chat_unset_incoming_char(PyObject *self, PyObject *args)
+{
+    PyObject *barejid = NULL;
+    if (!PyArg_ParseTuple(args, "O", &barejid)) {
+        Py_RETURN_NONE;
+    }
+
+    char *barejid_str = python_str_or_unicode_to_string(barejid);
+
+    allow_python_threads();
+    int res = api_chat_unset_incoming_char(barejid_str);
+    free(barejid_str);
+    disable_python_threads();
+
+    if (res) {
+        return Py_BuildValue("O", Py_True);
+    } else {
+        return Py_BuildValue("O", Py_False);
+    }
+}
+
+static PyObject*
+python_api_chat_set_outgoing_char(PyObject *self, PyObject *args)
+{
+    PyObject *barejid = NULL;
+    PyObject *ch = NULL;
+    if (!PyArg_ParseTuple(args, "OO", &barejid, &ch)) {
+        Py_RETURN_NONE;
+    }
+
+    char *barejid_str = python_str_or_unicode_to_string(barejid);
+    char *ch_str = python_str_or_unicode_to_string(ch);
+
+    allow_python_threads();
+    int res = api_chat_set_outgoing_char(barejid_str, ch_str);
+    free(barejid_str);
+    free(ch_str);
+    disable_python_threads();
+
+    if (res) {
+        return Py_BuildValue("O", Py_True);
+    } else {
+        return Py_BuildValue("O", Py_False);
+    }
+}
+
+static PyObject*
+python_api_chat_unset_outgoing_char(PyObject *self, PyObject *args)
+{
+    PyObject *barejid = NULL;
+    if (!PyArg_ParseTuple(args, "O", &barejid)) {
+        Py_RETURN_NONE;
+    }
+
+    char *barejid_str = python_str_or_unicode_to_string(barejid);
+
+    allow_python_threads();
+    int res = api_chat_unset_outgoing_char(barejid_str);
+    free(barejid_str);
+    disable_python_threads();
+
+    if (res) {
+        return Py_BuildValue("O", Py_True);
+    } else {
+        return Py_BuildValue("O", Py_False);
+    }
+}
+
+static PyObject*
+python_api_room_set_titlebar_enctext(PyObject *self, PyObject *args)
+{
+    PyObject *roomjid = NULL;
+    PyObject *enctext = NULL;
+    if (!PyArg_ParseTuple(args, "OO", &roomjid, &enctext)) {
+        Py_RETURN_NONE;
+    }
+
+    char *roomjid_str = python_str_or_unicode_to_string(roomjid);
+    char *enctext_str = python_str_or_unicode_to_string(enctext);
+
+    allow_python_threads();
+    int res = api_room_set_titlebar_enctext(roomjid_str, enctext_str);
+    free(roomjid_str);
+    free(enctext_str);
+    disable_python_threads();
+
+    if (res) {
+        return Py_BuildValue("O", Py_True);
+    } else {
+        return Py_BuildValue("O", Py_False);
+    }
+}
+
+static PyObject*
+python_api_room_unset_titlebar_enctext(PyObject *self, PyObject *args)
+{
+    PyObject *roomjid = NULL;
+    if (!PyArg_ParseTuple(args, "O", &roomjid)) {
+        Py_RETURN_NONE;
+    }
+
+    char *roomjid_str = python_str_or_unicode_to_string(roomjid);
+
+    allow_python_threads();
+    int res = api_room_unset_titlebar_enctext(roomjid_str);
+    free(roomjid_str);
+    disable_python_threads();
+
+    if (res) {
+        return Py_BuildValue("O", Py_True);
+    } else {
+        return Py_BuildValue("O", Py_False);
+    }
+}
+
+static PyObject*
+python_api_room_set_message_char(PyObject *self, PyObject *args)
+{
+    PyObject *roomjid = NULL;
+    PyObject *ch = NULL;
+    if (!PyArg_ParseTuple(args, "OO", &roomjid, &ch)) {
+        Py_RETURN_NONE;
+    }
+
+    char *roomjid_str = python_str_or_unicode_to_string(roomjid);
+    char *ch_str = python_str_or_unicode_to_string(ch);
+
+    allow_python_threads();
+    int res = api_room_set_message_char(roomjid_str, ch_str);
+    free(roomjid_str);
+    free(ch_str);
+    disable_python_threads();
+
+    if (res) {
+        return Py_BuildValue("O", Py_True);
+    } else {
+        return Py_BuildValue("O", Py_False);
+    }
+}
+
+static PyObject*
+python_api_room_unset_message_char(PyObject *self, PyObject *args)
+{
+    PyObject *roomjid = NULL;
+    if (!PyArg_ParseTuple(args, "O", &roomjid)) {
+        Py_RETURN_NONE;
+    }
+
+    char *roomjid_str = python_str_or_unicode_to_string(roomjid);
+
+    allow_python_threads();
+    int res = api_room_unset_message_char(roomjid_str);
+    free(roomjid_str);
+    disable_python_threads();
+
+    if (res) {
+        return Py_BuildValue("O", Py_True);
+    } else {
+        return Py_BuildValue("O", Py_False);
+    }
+}
+
+static PyObject*
+python_api_chat_show(PyObject *self, PyObject *args)
+{
+    PyObject *barejid = NULL;
+    PyObject *message = NULL;
+    if (!PyArg_ParseTuple(args, "OO", &barejid, &message)) {
+        Py_RETURN_NONE;
+    }
+
+    char *barejid_str = python_str_or_unicode_to_string(barejid);
+    char *message_str = python_str_or_unicode_to_string(message);
+
+    allow_python_threads();
+    int res = api_chat_show(barejid_str, message_str);
+    free(barejid_str);
+    free(message_str);
+    disable_python_threads();
+
+    if (res) {
+        return Py_BuildValue("O", Py_True);
+    } else {
+        return Py_BuildValue("O", Py_False);
+    }
+}
+
+static PyObject*
+python_api_chat_show_themed(PyObject *self, PyObject *args)
+{
+    PyObject *barejid = NULL;
+    PyObject *group = NULL;
+    PyObject *key = NULL;
+    PyObject *def = NULL;
+    PyObject *ch = NULL;
+    PyObject *message = NULL;
+    if (!PyArg_ParseTuple(args, "OOOOOO", &barejid, &group, &key, &def, &ch, &message)) {
+        Py_RETURN_NONE;
+    }
+
+    char *barejid_str = python_str_or_unicode_to_string(barejid);
+    char *group_str = python_str_or_unicode_to_string(group);
+    char *key_str = python_str_or_unicode_to_string(key);
+    char *def_str = python_str_or_unicode_to_string(def);
+    char *ch_str = python_str_or_unicode_to_string(ch);
+    char *message_str = python_str_or_unicode_to_string(message);
+
+    allow_python_threads();
+    int res = api_chat_show_themed(barejid_str, group_str, key_str, def_str, ch_str, message_str);
+    free(barejid_str);
+    free(group_str);
+    free(key_str);
+    free(def_str);
+    free(ch_str);
+    free(message_str);
+    disable_python_threads();
+
+    if (res) {
+        return Py_BuildValue("O", Py_True);
+    } else {
+        return Py_BuildValue("O", Py_False);
+    }
+}
+
+static PyObject*
+python_api_room_show(PyObject *self, PyObject *args)
+{
+    PyObject *roomjid = NULL;
+    PyObject *message = NULL;
+    if (!PyArg_ParseTuple(args, "OO", &roomjid, &message)) {
+        Py_RETURN_NONE;
+    }
+
+    char *roomjid_str = python_str_or_unicode_to_string(roomjid);
+    char *message_str = python_str_or_unicode_to_string(message);
+
+    allow_python_threads();
+    int res = api_room_show(roomjid_str, message_str);
+    free(roomjid_str);
+    free(message_str);
+    disable_python_threads();
+
+    if (res) {
+        return Py_BuildValue("O", Py_True);
+    } else {
+        return Py_BuildValue("O", Py_False);
+    }
+}
+
+static PyObject*
+python_api_room_show_themed(PyObject *self, PyObject *args)
+{
+    PyObject *roomjid = NULL;
+    PyObject *group = NULL;
+    PyObject *key = NULL;
+    PyObject *def = NULL;
+    PyObject *ch = NULL;
+    PyObject *message = NULL;
+    if (!PyArg_ParseTuple(args, "OOOOOO", &roomjid, &group, &key, &def, &ch, &message)) {
+        Py_RETURN_NONE;
+    }
+
+    char *roomjid_str = python_str_or_unicode_to_string(roomjid);
+    char *group_str = python_str_or_unicode_to_string(group);
+    char *key_str = python_str_or_unicode_to_string(key);
+    char *def_str = python_str_or_unicode_to_string(def);
+    char *ch_str = python_str_or_unicode_to_string(ch);
+    char *message_str = python_str_or_unicode_to_string(message);
+
+    allow_python_threads();
+    int res = api_room_show_themed(roomjid_str, group_str, key_str, def_str, ch_str, message_str);
+    free(roomjid_str);
+    free(group_str);
+    free(key_str);
+    free(def_str);
+    free(ch_str);
+    free(message_str);
+    disable_python_threads();
+
+    if (res) {
+        return Py_BuildValue("O", Py_True);
+    } else {
+        return Py_BuildValue("O", Py_False);
+    }
+}
+
 void
 python_command_callback(PluginCommand *command, gchar **args)
 {
@@ -1063,6 +1485,7 @@ static PyMethodDef apiMethods[] = {
     { "completer_add", python_api_completer_add, METH_VARARGS, "Add items to an autocompleter." },
     { "completer_remove", python_api_completer_remove, METH_VARARGS, "Remove items from an autocompleter." },
     { "completer_clear", python_api_completer_clear, METH_VARARGS, "Remove all items from an autocompleter." },
+    { "filepath_completer_add", python_api_filepath_completer_add, METH_VARARGS, "Add filepath autocompleter" },
     { "send_line", python_api_send_line, METH_VARARGS, "Send a line of input." },
     { "notify", python_api_notify, METH_VARARGS, "Send desktop notification." },
     { "get_current_recipient", python_api_get_current_recipient, METH_VARARGS, "Return the jid of the recipient of the current window." },
@@ -1070,6 +1493,7 @@ static PyMethodDef apiMethods[] = {
     { "get_current_nick", python_api_get_current_nick, METH_VARARGS, "Return nickname in current room." },
     { "get_current_occupants", python_api_get_current_occupants, METH_VARARGS, "Return list of occupants in current room." },
     { "current_win_is_console", python_api_current_win_is_console, METH_VARARGS, "Returns whether the current window is the console." },
+    { "get_room_nick", python_api_get_room_nick, METH_VARARGS, "Return the nickname used in the specified room, or None if not in the room." },
     { "log_debug", python_api_log_debug, METH_VARARGS, "Log a debug message" },
     { "log_info", python_api_log_info, METH_VARARGS, "Log an info message" },
     { "log_warning", python_api_log_warning, METH_VARARGS, "Log a warning message" },
@@ -1092,6 +1516,21 @@ static PyMethodDef apiMethods[] = {
     { "settings_string_list_clear", python_api_settings_string_list_clear, METH_VARARGS, "Remove all items from string list setting." },
     { "incoming_message", python_api_incoming_message, METH_VARARGS, "Show an incoming message." },
     { "disco_add_feature", python_api_disco_add_feature, METH_VARARGS, "Add a feature to disco info response." },
+    { "encryption_reset", python_api_encryption_reset, METH_VARARGS, "End encrypted chat session with barejid, if one exists" },
+    { "chat_set_titlebar_enctext", python_api_chat_set_titlebar_enctext, METH_VARARGS, "Set the encryption status in the title bar for the specified contact" },
+    { "chat_unset_titlebar_enctext", python_api_chat_unset_titlebar_enctext, METH_VARARGS, "Reset the encryption status in the title bar for the specified recipient" },
+    { "chat_set_incoming_char", python_api_chat_set_incoming_char, METH_VARARGS, "Set the incoming message prefix character for specified contact" },
+    { "chat_unset_incoming_char", python_api_chat_unset_incoming_char, METH_VARARGS, "Reset the incoming message prefix character for specified contact" },
+    { "chat_set_outgoing_char", python_api_chat_set_outgoing_char, METH_VARARGS, "Set the outgoing message prefix character for specified contact" },
+    { "chat_unset_outgoing_char", python_api_chat_unset_outgoing_char, METH_VARARGS, "Reset the outgoing message prefix character for specified contact" },
+    { "room_set_titlebar_enctext", python_api_room_set_titlebar_enctext, METH_VARARGS, "Set the encryption status in the title bar for the specified room" },
+    { "room_unset_titlebar_enctext", python_api_room_unset_titlebar_enctext, METH_VARARGS, "Reset the encryption status in the title bar for the specified room" },
+    { "room_set_message_char", python_api_room_set_message_char, METH_VARARGS, "Set the message prefix character for specified room" },
+    { "room_unset_message_char", python_api_room_unset_message_char, METH_VARARGS, "Reset the message prefix character for specified room" },
+    { "chat_show", python_api_chat_show, METH_VARARGS, "Print a line in a chat window" },
+    { "chat_show_themed", python_api_chat_show_themed, METH_VARARGS, "Print a themed line in a chat window" },
+    { "room_show", python_api_room_show, METH_VARARGS, "Print a line in a chat room window" },
+    { "room_show_themed", python_api_room_show_themed, METH_VARARGS, "Print a themed line in a chat room window" },
     { NULL, NULL, 0, NULL }
 };
 

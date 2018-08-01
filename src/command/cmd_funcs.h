@@ -1,7 +1,7 @@
 /*
  * cmd_funcs.h
  *
- * Copyright (C) 2012 - 2016 James Booth <boothj5@gmail.com>
+ * Copyright (C) 2012 - 2018 James Booth <boothj5@gmail.com>
  *
  * This file is part of Profanity.
  *
@@ -158,7 +158,15 @@ gboolean cmd_script(ProfWin *window, const char *const command, gchar **args);
 gboolean cmd_export(ProfWin *window, const char *const command, gchar **args);
 gboolean cmd_charset(ProfWin *window, const char *const command, gchar **args);
 gboolean cmd_console(ProfWin *window, const char *const command, gchar **args);
+
 gboolean cmd_plugins(ProfWin *window, const char *const command, gchar **args);
+gboolean cmd_plugins_sourcepath(ProfWin *window, const char *const command, gchar **args);
+gboolean cmd_plugins_install(ProfWin *window, const char *const command, gchar **args);
+gboolean cmd_plugins_load(ProfWin *window, const char *const command, gchar **args);
+gboolean cmd_plugins_unload(ProfWin *window, const char *const command, gchar **args);
+gboolean cmd_plugins_reload(ProfWin *window, const char *const command, gchar **args);
+gboolean cmd_plugins_python_version(ProfWin *window, const char *const command, gchar **args);
+
 gboolean cmd_blocked(ProfWin *window, const char *const command, gchar **args);
 
 gboolean cmd_account(ProfWin *window, const char *const command, gchar **args);
@@ -197,10 +205,8 @@ gboolean cmd_otr_answer(ProfWin *window, const char *const command, gchar **args
 
 gboolean cmd_wins(ProfWin *window, const char *const command, gchar **args);
 gboolean cmd_wins_unread(ProfWin *window, const char *const command, gchar **args);
-gboolean cmd_wins_tidy(ProfWin *window, const char *const command, gchar **args);
 gboolean cmd_wins_prune(ProfWin *window, const char *const command, gchar **args);
 gboolean cmd_wins_swap(ProfWin *window, const char *const command, gchar **args);
-gboolean cmd_wins_autotidy(ProfWin *window, const char *const command, gchar **args);
 
 gboolean cmd_form_field(ProfWin *window, char *tag, gchar **args);
 

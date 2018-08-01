@@ -43,17 +43,9 @@ expect_any_cons_show_error(void)
 }
 
 void
-expect_ui_current_print_line(char *message)
+expect_win_println(char *message)
 {
-    expect_string(ui_current_print_line, output, message);
-}
-
-void
-expect_ui_current_print_formatted_line(char show_char, int attrs, char *message)
-{
-    expect_value(ui_current_print_formatted_line, show_char, show_char);
-    expect_value(ui_current_print_formatted_line, attrs, attrs);
-    expect_string(ui_current_print_formatted_line, output, message);
+    expect_string(win_println, output, message);
 }
 
 // stubs
@@ -74,6 +66,13 @@ void chatwin_otr_trust(ProfChatWin *chatwin) {}
 void chatwin_otr_untrust(ProfChatWin *chatwin) {}
 void chatwin_otr_smp_event(ProfChatWin *chatwin, prof_otr_smp_event_t event, void *data) {}
 #endif
+
+void chatwin_set_enctext(ProfChatWin *chatwin, const char *const enctext) {}
+void chatwin_unset_enctext(ProfChatWin *chatwin) {}
+void chatwin_set_incoming_char(ProfChatWin *chatwin, const char *const ch) {}
+void chatwin_unset_incoming_char(ProfChatWin *chatwin) {}
+void chatwin_set_outgoing_char(ProfChatWin *chatwin, const char *const ch) {}
+void chatwin_unset_outgoing_char(ProfChatWin *chatwin) {}
 
 void ui_sigwinch_handler(int sig) {}
 
@@ -124,9 +123,6 @@ void ui_current_print_formatted_line(const char show_char, int attrs, const char
     check_expected(output);
     va_end(args);
 }
-
-void ui_current_error_line(const char * const msg) {}
-void ui_win_error_line(ProfWin *window, const char * const msg) {}
 
 void ui_close_win(int index) {}
 
@@ -223,6 +219,11 @@ void mucwin_occupant_presence(ProfMucWin *mucwin, const char * const nick, const
 void mucwin_update_occupants(ProfMucWin *mucwin) {}
 void mucwin_show_occupants(ProfMucWin *mucwin) {}
 void mucwin_hide_occupants(ProfMucWin *mucwin) {}
+void mucwin_set_enctext(ProfMucWin *mucwin, const char *const enctext) {}
+void mucwin_unset_enctext(ProfMucWin *mucwin) {}
+void mucwin_set_message_char(ProfMucWin *mucwin, const char *const ch) {}
+void mucwin_unset_message_char(ProfMucWin *mucwin) {}
+
 void ui_show_roster(void) {}
 void ui_hide_roster(void) {}
 void ui_roster_add(const char * const barejid, const char * const name) {}
@@ -407,7 +408,7 @@ void cons_check_version(gboolean not_available_msg) {}
 void cons_show_typing(const char * const barejid) {}
 void cons_show_incoming_room_message(const char *const nick, const char *const room, const int win_index, gboolean mention, GList *triggers, int unread) {}
 void cons_show_incoming_message(const char * const short_from, const int win_index, int unread) {}
-void cons_show_room_invites(GSList *invites) {}
+void cons_show_room_invites(GList *invites) {}
 void cons_show_received_subs(void) {}
 void cons_show_sent_subs(void) {}
 void cons_alert(void) {}
@@ -444,8 +445,10 @@ void cons_autoaway_setting(void) {}
 void cons_reconnect_setting(void) {}
 void cons_autoping_setting(void) {}
 void cons_autoconnect_setting(void) {}
+void cons_rooms_cache_setting(void) {}
 void cons_inpblock_setting(void) {}
 void cons_winpos_setting(void) {}
+void cons_statusbar_setting(void) {}
 void cons_tray_setting(void) {}
 
 void cons_show_contact_online(PContact contact, Resource *resource, GDateTime *last_activity)
@@ -464,8 +467,8 @@ void title_bar_set_presence(contact_presence_t presence) {}
 
 // status bar
 void status_bar_inactive(const int win) {}
-void status_bar_active(const int win) {}
-void status_bar_new(const int win) {}
+void status_bar_active(const int win, win_type_t type, char *identifier) {}
+void status_bar_new(const int win, win_type_t type, char *identifier) {}
 void status_bar_set_all_inactive(void) {}
 
 // roster window
@@ -504,6 +507,11 @@ ProfWin* win_create_plugin(const char *const plugin_name, const char * const tag
     return NULL;
 }
 
+char* win_get_tab_identifier(ProfWin *window)
+{
+    return NULL;
+}
+
 void win_update_virtual(ProfWin *window) {}
 void win_free(ProfWin *window) {}
 gboolean win_notify_remind(ProfWin *window)
@@ -520,8 +528,19 @@ void win_hide_subwin(ProfWin *window) {}
 void win_show_subwin(ProfWin *window) {}
 void win_refresh_without_subwin(ProfWin *window) {}
 void win_refresh_with_subwin(ProfWin *window) {}
-void win_print(ProfWin *window, const char show_char, int pad_indent, GDateTime *timestamp, int flags, theme_item_t theme_item, const char * const from, const char * const message) {}
-void win_vprint(ProfWin *window, const char show_char, int pad_indent, GDateTime *timestamp, int flags, theme_item_t theme_item, const char * const from, const char * const message, ...) {}
+
+void win_println(ProfWin *window, theme_item_t theme, const char ch, const char *const message, ...)
+{
+    va_list args;
+    va_start(args, message);
+    vsnprintf(output, sizeof(output), message, args);
+    check_expected(output);
+    va_end(args);
+}
+
+void win_print(ProfWin *window, theme_item_t theme_item, const char ch, const char *const message, ...) {}
+void win_appendln(ProfWin *window, theme_item_t theme_item, const char *const message, ...) {}
+
 char* win_get_title(ProfWin *window)
 {
     return NULL;
@@ -530,10 +549,9 @@ void win_show_occupant(ProfWin *window, Occupant *occupant) {}
 void win_show_occupant_info(ProfWin *window, const char * const room, Occupant *occupant) {}
 void win_show_contact(ProfWin *window, PContact contact) {}
 void win_show_info(ProfWin *window, PContact contact) {}
-void win_println(ProfWin *window, int pad, const char * const message) {}
-void win_vprintln_ch(ProfWin *window, char ch, const char *const message, ...) {}
+void win_println_indent(ProfWin *window, int pad, const char * const message, ...) {}
 void win_clear(ProfWin *window) {}
-char* win_get_string(ProfWin *window)
+char* win_to_string(ProfWin *window)
 {
     return NULL;
 }

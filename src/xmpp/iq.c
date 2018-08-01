@@ -1,7 +1,7 @@
 /*
  * iq.c
  *
- * Copyright (C) 2012 - 2016 James Booth <boothj5@gmail.com>
+ * Copyright (C) 2012 - 2018 James Booth <boothj5@gmail.com>
  *
  * This file is part of Profanity.
  *
@@ -119,6 +119,7 @@ static int _caps_response_id_handler(xmpp_stanza_t *const stanza, void *const us
 static int _caps_response_for_jid_id_handler(xmpp_stanza_t *const stanza, void *const userdata);
 static int _caps_response_legacy_id_handler(xmpp_stanza_t *const stanza, void *const userdata);
 static int _auto_pong_id_handler(xmpp_stanza_t *const stanza, void *const userdata);
+static int _room_list_id_handler(xmpp_stanza_t *const stanza, void *const userdata);
 
 static void _iq_free_room_data(ProfRoomInfoData *roominfo);
 static void _iq_free_affiliation_set(ProfPrivilegeSet *affiliation_set);
@@ -126,9 +127,13 @@ static void _iq_free_affiliation_set(ProfPrivilegeSet *affiliation_set);
 // scheduled
 static int _autoping_timed_send(xmpp_conn_t *const conn, void *const userdata);
 
+static void _identity_destroy(DiscoIdentity *identity);
+static void _item_destroy(DiscoItem *item);
+
 static gboolean autoping_wait = FALSE;
 static GTimer *autoping_time = NULL;
 static GHashTable *id_handlers;
+static GHashTable *rooms_cache = NULL;
 
 static int
 _iq_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza, void *const userdata)
@@ -232,6 +237,7 @@ iq_handlers_init(void)
         g_hash_table_destroy(id_handlers);
     }
     id_handlers = g_hash_table_new_full(g_str_hash, g_str_equal, free, NULL);
+    rooms_cache = g_hash_table_new_full(g_str_hash, g_str_equal, free, (GDestroyNotify)xmpp_stanza_release);
 }
 
 void
@@ -293,10 +299,30 @@ iq_set_autoping(const int seconds)
 }
 
 void
-iq_room_list_request(gchar *conferencejid)
+iq_rooms_cache_clear(void)
 {
+    if (rooms_cache) {
+        g_hash_table_remove_all(rooms_cache);
+    }
+}
+
+void
+iq_room_list_request(gchar *conferencejid, gchar *filter)
+{
+    if (g_hash_table_contains(rooms_cache, conferencejid)) {
+        log_debug("Rooms request cached for: %s", conferencejid);
+        _room_list_id_handler(g_hash_table_lookup(rooms_cache, conferencejid), filter);
+        return;
+    }
+
+    log_debug("Rooms request not cached for: %s", conferencejid);
+
     xmpp_ctx_t * const ctx = connection_get_ctx();
-    xmpp_stanza_t *iq = stanza_create_disco_items_iq(ctx, "confreq", conferencejid);
+    char *id = create_unique_id("confreq");
+    xmpp_stanza_t *iq = stanza_create_disco_items_iq(ctx, id, conferencejid);
+
+    iq_id_handler_add(id, _room_list_id_handler, NULL, filter);
+
     iq_send_stanza(iq);
     xmpp_stanza_release(iq);
 }
@@ -891,6 +917,101 @@ _caps_response_legacy_id_handler(xmpp_stanza_t *const stanza, void *const userda
 }
 
 static int
+_room_list_id_handler(xmpp_stanza_t *const stanza, void *const userdata)
+{
+    gchar *filter = (gchar*)userdata;
+    const char *id = xmpp_stanza_get_id(stanza);
+    const char *from = xmpp_stanza_get_from(stanza);
+
+    if (prefs_get_boolean(PREF_ROOM_LIST_CACHE) && !g_hash_table_contains(rooms_cache, from)) {
+        g_hash_table_insert(rooms_cache, strdup(from), xmpp_stanza_copy(stanza));
+    }
+
+    log_debug("Response to query: %s", id);
+
+    xmpp_stanza_t *query = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_QUERY);
+    if (query == NULL) {
+        g_free(filter);
+        return 0;
+    }
+
+    cons_show("");
+    if (filter) {
+        cons_show("Rooms list response received: %s, filter: %s", from, filter);
+    } else {
+        cons_show("Rooms list response received: %s", from);
+    }
+    xmpp_stanza_t *child = xmpp_stanza_get_children(query);
+    if (child == NULL) {
+        cons_show("  No rooms found.");
+        g_free(filter);
+        return 0;
+    }
+
+    GPatternSpec *glob = NULL;
+    if (filter != NULL) {
+        gchar *filter_lower = g_utf8_strdown(filter, -1);
+        GString *glob_str = g_string_new("*");
+        g_string_append(glob_str, filter_lower);
+        g_free(filter_lower);
+        g_string_append(glob_str, "*");
+        glob = g_pattern_spec_new(glob_str->str);
+        g_string_free(glob_str, TRUE);
+    }
+
+    gboolean matched = FALSE;
+    while (child) {
+        const char *stanza_name = xmpp_stanza_get_name(child);
+        if (stanza_name && (g_strcmp0(stanza_name, STANZA_NAME_ITEM) == 0)) {
+            const char *item_jid = xmpp_stanza_get_attribute(child, STANZA_ATTR_JID);
+            gchar *item_jid_lower = NULL;
+            if (item_jid) {
+                Jid *jidp = jid_create(item_jid);
+                if (jidp && jidp->localpart) {
+                    item_jid_lower = g_utf8_strdown(jidp->localpart, -1);
+                }
+                jid_destroy(jidp);
+            }
+            const char *item_name = xmpp_stanza_get_attribute(child, STANZA_ATTR_NAME);
+            gchar *item_name_lower = NULL;
+            if (item_name) {
+                item_name_lower = g_utf8_strdown(item_name, -1);
+            }
+            if ((item_jid_lower) && ((glob == NULL) ||
+                ((g_pattern_match(glob, strlen(item_jid_lower), item_jid_lower, NULL)) ||
+                (item_name_lower && g_pattern_match(glob, strlen(item_name_lower), item_name_lower, NULL))))) {
+
+                if (glob) {
+                    matched = TRUE;
+                }
+                GString *item = g_string_new(item_jid);
+                if (item_name) {
+                    g_string_append(item, " (");
+                    g_string_append(item, item_name);
+                    g_string_append(item, ")");
+                }
+                cons_show("  %s", item->str);
+                g_string_free(item, TRUE);
+            }
+            g_free(item_jid_lower);
+            g_free(item_name_lower);
+        }
+        child = xmpp_stanza_get_next(child);
+    }
+
+    if (glob && matched == FALSE) {
+        cons_show("  No rooms found matching filter: %s", filter);
+    }
+
+    if (glob) {
+        g_pattern_spec_free(glob);
+    }
+    g_free(filter);
+
+    return 0;
+}
+
+static int
 _enable_carbons_id_handler(xmpp_stanza_t *const stanza, void *const userdata)
 {
     const char *type = xmpp_stanza_get_type(stanza);
@@ -964,6 +1085,15 @@ static int
 _autoping_timed_send(xmpp_conn_t *const conn, void *const userdata)
 {
     if (connection_get_status() != JABBER_CONNECTED) {
+        return 1;
+    }
+
+    if (connection_supports(XMPP_FEATURE_PING) == FALSE) {
+        log_warning("Server doesn't advertise %s feature, disabling autoping.", XMPP_FEATURE_PING);
+        prefs_set_autoping(0);
+        cons_show_error("Server ping not supported, autoping disabled.");
+        xmpp_conn_t *conn = connection_get_conn();
+        xmpp_timed_handler_delete(conn, _autoping_timed_send);
         return 1;
     }
 
@@ -1983,8 +2113,7 @@ _disco_items_result_handler(xmpp_stanza_t *const stanza)
     const char *from = xmpp_stanza_get_from(stanza);
     GSList *items = NULL;
 
-    if ((g_strcmp0(id, "confreq") != 0) &&
-            (g_strcmp0(id, "discoitemsreq") != 0) &&
+    if ((g_strcmp0(id, "discoitemsreq") != 0) &&
             (g_strcmp0(id, "discoitemsreq_onconnect") != 0)) {
         return;
     }
@@ -2021,9 +2150,7 @@ _disco_items_result_handler(xmpp_stanza_t *const stanza)
         child = xmpp_stanza_get_next(child);
     }
 
-    if (g_strcmp0(id, "confreq") == 0) {
-        cons_show_room_list(items, from);
-    } else if (g_strcmp0(id, "discoitemsreq") == 0) {
+    if (g_strcmp0(id, "discoitemsreq") == 0) {
         cons_show_disco_items(items, from);
     } else if (g_strcmp0(id, "discoitemsreq_onconnect") == 0) {
         connection_set_disco_items(items);
