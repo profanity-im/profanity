@@ -162,6 +162,7 @@ plugins_install_all(const char *const path)
             }
         }
         curr = g_slist_next(curr);
+        g_string_free(error_message, TRUE);
     }
 
     g_slist_free_full(contents, g_free);
@@ -180,7 +181,11 @@ plugins_uninstall(const char *const plugin_name)
     g_string_append(target_path, plugin_name);
     GFile *file = g_file_new_for_path(target_path->str);
     GError *error = NULL;
-    return g_file_delete(file, NULL, &error);
+    gboolean result = g_file_delete(file, NULL, &error);
+    g_object_unref(file);
+    g_error_free(error);
+    g_string_free(target_path, TRUE);
+    return result;
 }
 
 gboolean
