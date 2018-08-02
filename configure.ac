@@ -22,6 +22,7 @@ AC_CANONICAL_HOST
 PLATFORM="unknown"
 AS_CASE([$host_os],
     [freebsd*], [PLATFORM="freebsd"],
+    [openbsd*], [PLATFORM="openbsd"],
     [darwin*], [PLATFORM="osx"],
     [cygwin], [PLATFORM="cygwin"],
     [PLATFORM="nix"])
@@ -172,7 +173,7 @@ AS_IF([test "x$enable_icons" != xno],
             [AC_MSG_ERROR([gtk+-2.0 or higher is required for icons])],
             [AC_MSG_NOTICE([gtk+-2.0 not found, icons not enabled])])])])
 
-AS_IF([test "x$PLATFORM" != xosx],
+AS_IF([test "x$PLATFORM" != xosx -n "x$PLATFORM" != xopenbsd],
     [AC_CHECK_LIB([readline], [main], [],
         [AC_MSG_ERROR([libreadline is required for profanity])])],
     [AC_CHECK_FILE([/usr/local/opt/readline/lib],
@@ -180,7 +181,17 @@ AS_IF([test "x$PLATFORM" != xosx],
             AM_CPPFLAGS="-I/usr/local/opt/readline/include $AM_CPPFLAGS"
             AM_LDFLAGS="-L/usr/local/opt/readline/lib $AM_LDFLAGS"
             AC_SUBST(AM_LDFLAGS)],
-        [AC_MSG_ERROR([libreadline is required for profanity])])])
+        [AC_MSG_ERROR([libreadline is required for profanity])])],
+      [test "x$PLATFORM" = xopenbsd],
+      [AC_CHECK_FILE([/usr/local/include/ereadline],
+          [LIBS="-lereadline $LIBS"
+              AM_CPPFLAGS="-I/usr/local/include/ereadline $AM_CPPFLAGS"
+              AM_LDFLAGS="-L/usr/local/lib $AM_LDFLAGS"
+              AC_SUBST(AM_LDFLAGS)])],
+      [test "x$PLATFORM" = xnix],
+      [AC_CHECK_LIB([readline],[main],[],
+              [AC_MSG_ERROR([libreadline is required for profanity])])],
+      [AC_MSG_ERROR([libreadline is required for profanity])])
 
 ### Check for desktop notification support
 ### Linux/FreeBSD require libnotify
