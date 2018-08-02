@@ -173,12 +173,15 @@ AS_IF([test "x$enable_icons" != xno],
             [AC_MSG_ERROR([gtk+-2.0 or higher is required for icons])],
             [AC_MSG_NOTICE([gtk+-2.0 not found, icons not enabled])])])])
 
-AS_IF([test "x$PLATFORM" = xosx],
-      [AC_CHECK_FILE([/usr/local/opt/readline/lib],
-          [LIBS="-lreadline $LIBS"
-              AM_CPPFLAGS="-I/usr/local/opt/readline/include $AM_CPPFLAGS"
-              AM_LDFLAGS="-L/usr/local/opt/readline/lib $AM_LDFLAGS"
-              AC_SUBST(AM_LDFLAGS)])],
+AS_IF([test "x$PLATFORM" != xosx -n "x$PLATFORM" != xopenbsd],
+    [AC_CHECK_LIB([readline], [main], [],
+        [AC_MSG_ERROR([libreadline is required for profanity])])],
+    [AC_CHECK_FILE([/usr/local/opt/readline/lib],
+        [LIBS="-lreadline $LIBS"
+            AM_CPPFLAGS="-I/usr/local/opt/readline/include $AM_CPPFLAGS"
+            AM_LDFLAGS="-L/usr/local/opt/readline/lib $AM_LDFLAGS"
+            AC_SUBST(AM_LDFLAGS)],
+        [AC_MSG_ERROR([libreadline is required for profanity])])],
       [test "x$PLATFORM" = xopenbsd],
       [AC_CHECK_FILE([/usr/local/include/ereadline],
           [LIBS="-lereadline $LIBS"
