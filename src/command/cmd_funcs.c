@@ -6700,8 +6700,8 @@ cmd_plugins_update(ProfWin *window, const char *const command, gchar **args)
         GString* error_message = g_string_new(NULL);
         gchar *plugin_name = g_path_get_basename(path);
         gboolean result = plugins_unload(plugin_name);
-        result |= plugins_uninstall(plugin_name);
-        result |= plugins_install(plugin_name, path, error_message);
+        result && plugins_uninstall(plugin_name);
+        result && plugins_install(plugin_name, path, error_message);
         if (result) {
             cons_show("Plugin installed: %s", plugin_name);
         } else {
