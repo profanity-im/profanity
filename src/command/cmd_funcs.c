@@ -6625,7 +6625,7 @@ cmd_plugins_install(ProfWin *window, const char *const command, gchar **args)
             cons_show("Failed to install plugin: %s. %s", plugin_name, error_message->str);
         }
         g_free(plugin_name);
-
+        g_string_free(error_message, TRUE);
         free(path);
         return TRUE;
     }
@@ -6699,24 +6699,31 @@ cmd_plugins_update(ProfWin *window, const char *const command, gchar **args)
 
         GString* error_message = g_string_new(NULL);
         gchar *plugin_name = g_path_get_basename(path);
-        gboolean result = plugins_unload(plugin_name);
-        result && plugins_uninstall(plugin_name);
-        result && plugins_install(plugin_name, path, error_message);
-        if (result) {
-            cons_show("Plugin installed: %s", plugin_name);
+        if (plugins_unload(plugin_name)) {
+            if (plugins_uninstall(plugin_name)) {
+                if (plugins_install(plugin_name, path, error_message)) {
+                    cons_show("Plugin installed: %s", plugin_name);
+                } else {
+                    cons_show("Failed to install plugin: %s. %s", plugin_name, error_message->str);
+                }
+            } else {
+                cons_show("Failed to uninstall plugin: %s.", plugin_name);
+            }
         } else {
-            cons_show("Failed to install plugin: %s. %s", plugin_name, error_message->str);
+            cons_show("Failed to unload plugin: %s.", plugin_name);
         }
         g_free(plugin_name);
-
+        g_string_free(error_message, TRUE);
         free(path);
         return TRUE;
     }
 
     if (is_dir(path)) {
+        free(path);
         return FALSE;
     }
 
+    free(path);
     cons_show("Argument must be a file or directory.");
     return TRUE;
 }

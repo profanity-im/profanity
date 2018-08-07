@@ -113,16 +113,10 @@ copy_file(const char *const sourcepath, const char *const targetpath, const gboo
     GFile *source = g_file_new_for_path(sourcepath);
     GFile *dest = g_file_new_for_path(targetpath);
     GError *error = NULL;
-    gboolean success = false;
-    
-    if (overwrite_existing)
-    {
-        success = g_file_copy (source, dest, G_FILE_COPY_OVERWRITE, NULL, NULL, NULL, &error);
-    } 
-    else 
-    {
-        success = g_file_copy (source, dest, G_FILE_COPY_NONE, NULL, NULL, NULL, &error);
-    }
+    GFileCopyFlags flags = overwrite_existing ? G_FILE_COPY_OVERWRITE : G_FILE_COPY_NONE;
+    gboolean success = g_file_copy (source, dest, flags, NULL, NULL, NULL, &error);
+    g_object_unref(source);
+    g_object_unref(dest);
     return success;
 }
 
