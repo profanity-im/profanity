@@ -56,14 +56,13 @@
 #include "log.h"
 #include "common.h"
 #include "tools/p_sha1.h"
+#include "xmpp/xmpp.h"
 
 struct curl_data_t
 {
     char *buffer;
     size_t size;
 };
-
-static unsigned long unique_id = 0;
 
 static size_t _data_callback(void *ptr, size_t size, size_t nmemb, void *data);
 
@@ -337,23 +336,20 @@ create_unique_id(char *prefix)
 {
     char *result = NULL;
     GString *result_str = g_string_new("");
+    char *uuid = connection_create_uuid();
 
-    unique_id++;
     if (prefix) {
-        g_string_printf(result_str, "prof_%s_%lu", prefix, unique_id);
+        g_string_printf(result_str, "prof_%s_%s", prefix, uuid);
     } else {
-        g_string_printf(result_str, "prof_%lu", unique_id);
+        g_string_printf(result_str, "prof_%s", uuid);
     }
+
+    connection_free_uuid(uuid);
+
     result = result_str->str;
     g_string_free(result_str, FALSE);
 
     return result;
-}
-
-void
-reset_unique_id(void)
-{
-    unique_id = 0;
 }
 
 char*
