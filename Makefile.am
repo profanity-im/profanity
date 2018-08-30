@@ -233,15 +233,21 @@ tests_unittests_unittests_SOURCES = $(unittest_sources)
 tests_unittests_unittests_CFLAGS = -w
 tests_unittests_unittests_LDADD = -lcmocka
 
-if HAVE_STABBER
-if HAVE_EXPECT
-TESTS += tests/functionaltests/functionaltests
-check_PROGRAMS += tests/functionaltests/functionaltests
-tests_functionaltests_functionaltests_SOURCES = $(functionaltest_sources)
-tests_functionaltests_functionaltests_CFLAGS = -I/usr/include/tcl8.6 -I/usr/include/tcl8.5
-tests_functionaltests_functionaltests_LDADD = -lcmocka -lstabber -lexpect -ltcl
-endif
-endif
+# Functional test were commented out because of:
+# https://github.com/boothj5/profanity/pull/1010
+# An issue was raised for stabber:
+# https://github.com/boothj5/stabber/issues/5
+# Once this issue is resolved functional tests should be enabled again
+#
+#if HAVE_STABBER
+#if HAVE_EXPECT
+#TESTS += tests/functionaltests/functionaltests
+#check_PROGRAMS += tests/functionaltests/functionaltests
+#tests_functionaltests_functionaltests_SOURCES = $(functionaltest_sources)
+#tests_functionaltests_functionaltests_CFLAGS = -I/usr/include/tcl8.6 -I/usr/include/tcl8.5
+#tests_functionaltests_functionaltests_LDADD = -lcmocka -lstabber -lexpect -ltcl
+#endif
+#endif
 
 man_MANS = $(man_sources)
 
