@@ -91,7 +91,7 @@ void
 roster_send_add_new(const char *const barejid, const char *const name)
 {
     xmpp_ctx_t * const ctx = connection_get_ctx();
-    char *id = create_unique_id("roster");
+    char *id = connection_create_stanza_id("roster");
     xmpp_stanza_t *iq = stanza_create_roster_set(ctx, id, barejid, name, NULL);
     free(id);
     iq_send_stanza(iq);
@@ -111,7 +111,7 @@ void
 roster_send_name_change(const char *const barejid, const char *const new_name, GSList *groups)
 {
     xmpp_ctx_t * const ctx = connection_get_ctx();
-    char *id = create_unique_id("roster");
+    char *id = connection_create_stanza_id("roster");
     xmpp_stanza_t *iq = stanza_create_roster_set(ctx, id, barejid, new_name, groups);
     free(id);
     iq_send_stanza(iq);
@@ -130,7 +130,7 @@ roster_send_add_to_group(const char *const group, PContact contact)
 
     new_groups = g_slist_append(new_groups, strdup(group));
     // add an id handler to handle the response
-    char *unique_id = create_unique_id(NULL);
+    char *unique_id = connection_create_stanza_id(NULL);
     GroupData *data = malloc(sizeof(GroupData));
     data->group = strdup(group);
     if (p_contact_name(contact)) {
@@ -174,7 +174,7 @@ roster_send_remove_from_group(const char *const group, PContact contact)
     xmpp_ctx_t * const ctx = connection_get_ctx();
 
     // add an id handler to handle the response
-    char *unique_id = create_unique_id(NULL);
+    char *unique_id = connection_create_stanza_id(NULL);
     GroupData *data = malloc(sizeof(GroupData));
     data->group = strdup(group);
     if (p_contact_name(contact)) {
