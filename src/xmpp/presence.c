@@ -128,7 +128,7 @@ presence_subscription(const char *const jid, const jabber_subscr_t action)
     xmpp_ctx_t * const ctx = connection_get_ctx();
     xmpp_stanza_t *presence = xmpp_presence_new(ctx);
 
-    char *id = create_unique_id("sub");
+    char *id = connection_create_stanza_id("sub");
     xmpp_stanza_set_id(presence, id);
     free(id);
 
@@ -211,7 +211,7 @@ presence_send(const resource_presence_t presence_type, const int idle, char *sig
     xmpp_ctx_t * const ctx = connection_get_ctx();
     xmpp_stanza_t *presence = xmpp_presence_new(ctx);
 
-    char *id = create_unique_id("presence");
+    char *id = connection_create_stanza_id("presence");
     xmpp_stanza_set_id(presence, id);
     free(id);
 
@@ -579,7 +579,7 @@ _handle_caps(const char *const jid, XMPPCaps *caps)
                 caps_map_jid_to_ver(jid, caps->ver);
             } else {
                 log_info("Capabilities cache miss: %s, for %s, sending service discovery request", caps->ver, jid);
-                char *id = create_unique_id("caps");
+                char *id = connection_create_stanza_id("caps");
                 iq_send_caps_request(jid, id, caps->node, caps->ver);
                 free(id);
             }
@@ -588,14 +588,14 @@ _handle_caps(const char *const jid, XMPPCaps *caps)
     // unsupported hash, xep-0115, associate with JID, no cache
     } else if (caps->hash) {
         log_info("Hash %s not supported: %s, sending service discovery request", caps->hash, jid);
-        char *id = create_unique_id("caps");
+        char *id = connection_create_stanza_id("caps");
         iq_send_caps_request_for_jid(jid, id, caps->node, caps->ver);
         free(id);
 
    // no hash, legacy caps, cache against node#ver
    } else if (caps->node && caps->ver) {
         log_info("No hash specified: %s, legacy request made for %s#%s", jid, caps->node, caps->ver);
-        char *id = create_unique_id("caps");
+        char *id = connection_create_stanza_id("caps");
         iq_send_caps_request_legacy(jid, id, caps->node, caps->ver);
         free(id);
     } else {

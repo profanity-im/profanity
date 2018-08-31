@@ -139,7 +139,7 @@ message_send_chat(const char *const barejid, const char *const msg, const char *
 
     char *state = chat_session_get_state(barejid);
     char *jid = chat_session_get_jid(barejid);
-    char *id = create_unique_id("msg");
+    char *id = connection_create_stanza_id("msg");
 
     xmpp_stanza_t *message = xmpp_message_new(ctx, STANZA_TYPE_CHAT, jid, id);
     xmpp_message_set_body(message, msg);
@@ -170,7 +170,7 @@ message_send_chat_pgp(const char *const barejid, const char *const msg, gboolean
 
     char *state = chat_session_get_state(barejid);
     char *jid = chat_session_get_jid(barejid);
-    char *id = create_unique_id("msg");
+    char *id = connection_create_stanza_id("msg");
 
     xmpp_stanza_t *message = NULL;
 #ifdef HAVE_LIBGPGME
@@ -229,7 +229,7 @@ message_send_chat_otr(const char *const barejid, const char *const msg, gboolean
 
     char *state = chat_session_get_state(barejid);
     char *jid = chat_session_get_jid(barejid);
-    char *id = create_unique_id("msg");
+    char *id = connection_create_stanza_id("msg");
 
     xmpp_stanza_t *message = xmpp_message_new(ctx, STANZA_TYPE_CHAT, barejid, id);
     xmpp_message_set_body(message, msg);
@@ -258,7 +258,7 @@ void
 message_send_private(const char *const fulljid, const char *const msg, const char *const oob_url)
 {
     xmpp_ctx_t * const ctx = connection_get_ctx();
-    char *id = create_unique_id("prv");
+    char *id = connection_create_stanza_id("prv");
 
     xmpp_stanza_t *message = xmpp_message_new(ctx, STANZA_TYPE_CHAT, fulljid, id);
     xmpp_message_set_body(message, msg);
@@ -277,7 +277,7 @@ void
 message_send_groupchat(const char *const roomjid, const char *const msg, const char *const oob_url)
 {
     xmpp_ctx_t * const ctx = connection_get_ctx();
-    char *id = create_unique_id("muc");
+    char *id = connection_create_stanza_id("muc");
 
     xmpp_stanza_t *message = xmpp_message_new(ctx, STANZA_TYPE_GROUPCHAT, roomjid, id);
     xmpp_message_set_body(message, msg);
@@ -584,7 +584,7 @@ _message_send_receipt(const char *const fulljid, const char *const message_id)
 {
     xmpp_ctx_t * const ctx = connection_get_ctx();
 
-    char *id = create_unique_id("receipt");
+    char *id = connection_create_stanza_id("receipt");
     xmpp_stanza_t *message = xmpp_message_new(ctx, NULL, fulljid, id);
     free(id);
 
