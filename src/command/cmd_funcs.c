@@ -70,6 +70,7 @@
 #include "ui/ui.h"
 #include "ui/window_list.h"
 #include "xmpp/xmpp.h"
+#include "xmpp/connection.h"
 #include "xmpp/contact.h"
 #include "xmpp/roster_list.h"
 #include "xmpp/jid.h"
@@ -7508,6 +7509,11 @@ cmd_command_list(ProfWin *window, const char *const command, gchar **args)
             jid = privatewin->fulljid;
             break;
         }
+        case WIN_CONSOLE:
+        {
+            jid = connection_get_domain();
+            break;
+        }
         default:
             cons_show("Cannot send ad hoc commands.");
             return TRUE;
@@ -7557,6 +7563,11 @@ cmd_command_exec(ProfWin *window, const char *const command, gchar **args)
             ProfPrivateWin *privatewin = (ProfPrivateWin*)window;
             assert(privatewin->memcheck == PROFPRIVATEWIN_MEMCHECK);
             jid = privatewin->fulljid;
+            break;
+        }
+        case WIN_CONSOLE:
+        {
+            jid = connection_get_domain();
             break;
         }
         default:
