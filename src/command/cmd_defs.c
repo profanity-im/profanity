@@ -424,7 +424,7 @@ static struct cmd_t command_defs[] =
             "View, add to, and remove from roster groups. "
             "Passing no argument will list all roster groups.")
         CMD_ARGS(
-            { "show <group>",             "List all roster items a group." },
+            { "show <group>",             "List all roster items in a group." },
             { "add <group> <contact>",    "Add a contact to a group." },
             { "remove <group> <contact>", "Remove a contact from a group." })
         CMD_EXAMPLES(
