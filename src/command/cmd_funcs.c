@@ -204,7 +204,7 @@ cmd_tls_trust(ProfWin *window, const char *const command, gchar **args)
 #ifdef HAVE_LIBMESODE
     jabber_conn_status_t conn_status = connection_get_status();
     if (conn_status != JABBER_CONNECTED) {
-        cons_show("You are not currently connected.");
+        cons_show("You are currently not connected.");
         return TRUE;
     }
     if (!connection_is_secured()) {
