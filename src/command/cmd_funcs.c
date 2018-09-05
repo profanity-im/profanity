@@ -7486,9 +7486,34 @@ cmd_command_list(ProfWin *window, const char *const command, gchar **args)
 
     char *jid = args[1];
     if (jid == NULL) {
-        ProfMucWin *mucwin = (ProfMucWin*)window;
-        jid = mucwin->roomjid;
+        switch (window->type) {
+        case WIN_MUC:
+        {
+            ProfMucWin *mucwin = (ProfMucWin*)window;
+            assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
+            jid = mucwin->roomjid;
+            break;
+        }
+        case WIN_CHAT:
+        {
+            ProfChatWin *chatwin = (ProfChatWin*)window;
+            assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
+            jid = chatwin->barejid;
+            break;
+        }
+        case WIN_PRIVATE:
+        {
+            ProfPrivateWin *privatewin = (ProfPrivateWin*)window;
+            assert(privatewin->memcheck == PROFPRIVATEWIN_MEMCHECK);
+            jid = privatewin->fulljid;
+            break;
+        }
+        default:
+            cons_show("Cannot send ad hoc commands.");
+            return TRUE;
+        }
     }
+
     iq_command_list(jid);
 
     cons_show("List available ad hoc commands");
@@ -7512,8 +7537,32 @@ cmd_command_exec(ProfWin *window, const char *const command, gchar **args)
 
     char *jid = args[2];
     if (jid == NULL) {
-        ProfMucWin *mucwin = (ProfMucWin*)window;
-        jid = mucwin->roomjid;
+        switch (window->type) {
+        case WIN_MUC:
+        {
+            ProfMucWin *mucwin = (ProfMucWin*)window;
+            assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
+            jid = mucwin->roomjid;
+            break;
+        }
+        case WIN_CHAT:
+        {
+            ProfChatWin *chatwin = (ProfChatWin*)window;
+            assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
+            jid = chatwin->barejid;
+            break;
+        }
+        case WIN_PRIVATE:
+        {
+            ProfPrivateWin *privatewin = (ProfPrivateWin*)window;
+            assert(privatewin->memcheck == PROFPRIVATEWIN_MEMCHECK);
+            jid = privatewin->fulljid;
+            break;
+        }
+        default:
+            cons_show("Cannot send ad hoc commands.");
+            return TRUE;
+        }
     }
 
     iq_command_exec(jid, args[1]);
