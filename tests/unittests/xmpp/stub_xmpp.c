@@ -39,6 +39,11 @@ const char * session_get_domain(void)
     return NULL;
 }
 
+const char * connection_get_domain(void)
+{
+    return NULL;
+}
+
 gboolean connection_is_secured(void)
 {
     return 1;
