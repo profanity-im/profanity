@@ -217,7 +217,7 @@ void privwin_room_kicked(ProfPrivateWin *privwin, const char *const actor, const
 void privwin_room_banned(ProfPrivateWin *privwin, const char *const actor, const char *const reason);
 void privwin_room_joined(ProfPrivateWin *privwin);
 
-// room config window
+// config window
 void confwin_handle_configuration(ProfConfWin *confwin, DataForm *form);
 void confwin_show_form(ProfConfWin *confwin);
 void confwin_show_form_field(ProfConfWin *confwin, DataForm *form, char *tag);
