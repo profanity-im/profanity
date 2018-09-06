@@ -159,9 +159,13 @@ CFLAGS="$CFLAGS_RESTORE"
 AS_IF([test "x$ncurses_cv_wget_wch" != xyes],
     [AC_MSG_ERROR([ncurses does not support wide characters])])
 
-### Check for other profanity dependencies
+### Check for glib libraries
 PKG_CHECK_MODULES([glib], [glib-2.0 >= 2.40], [],
     [AC_MSG_ERROR([glib 2.40 or higher is required for profanity])])
+PKG_CHECK_MODULES([gio], [gio-2.0], [],
+    [AC_MSG_ERROR([libgio-2.0 from glib-2.0 is required for profanity])])
+
+### Check for other profanity dependencies
 PKG_CHECK_MODULES([curl], [libcurl], [],
     [AC_CHECK_LIB([curl], [main], [],
         [AC_MSG_ERROR([libcurl is required for profanity])])])
@@ -297,9 +301,9 @@ AS_IF([test "x$PACKAGE_STATUS" = xdevelopment],
 AS_IF([test "x$PLATFORM" = xosx],
     [AM_CFLAGS="$AM_CFLAGS -Qunused-arguments"])
 AM_LDFLAGS="$AM_LDFLAGS -export-dynamic"
-AM_CPPFLAGS="$AM_CPPFLAGS $glib_CFLAGS $curl_CFLAGS $libnotify_CFLAGS $PYTHON_CPPFLAGS ${GTK_CFLAGS}"
+AM_CPPFLAGS="$AM_CPPFLAGS $glib_CFLAGS $gio_CFLAGS $curl_CFLAGS $libnotify_CFLAGS $PYTHON_CPPFLAGS ${GTK_CFLAGS}"
 AM_CPPFLAGS="$AM_CPPFLAGS -DTHEMES_PATH=\"\\\"$THEMES_PATH\\\"\" -DICONS_PATH=\"\\\"$ICONS_PATH\\\"\""
-LIBS="$glib_LIBS $curl_LIBS $libnotify_LIBS $PYTHON_LIBS $PYTHON_LDFLAGS ${GTK_LIBS} -lgio-2.0 $LIBS"
+LIBS="$glib_LIBS $gio_LIBS $curl_LIBS $libnotify_LIBS $PYTHON_LIBS $PYTHON_LDFLAGS ${GTK_LIBS} $LIBS"
 
 AC_SUBST(AM_LDFLAGS)
 AC_SUBST(AM_CFLAGS)

@@ -46,6 +46,7 @@
 #include <curl/curl.h>
 #include <curl/easy.h>
 #include <glib.h>
+#include <gio/gio.h>
 
 #ifdef HAVE_NCURSESW_NCURSES_H
 #include <ncursesw/ncurses.h>
@@ -105,28 +106,16 @@ mkdir_recursive(const char *dir)
 }
 
 gboolean
-copy_file(const char *const sourcepath, const char *const targetpath)
+copy_file(const char *const sourcepath, const char *const targetpath, const gboolean overwrite_existing)
 {
-    int ch;
-    FILE *source = fopen(sourcepath, "rb");
-    if (source == NULL) {
-        return FALSE;
-    }
-
-    FILE *target = fopen(targetpath, "wb");
-    if (target == NULL) {
-        fclose(source);
-        return FALSE;
-    }
-
-    while((ch = fgetc(source)) != EOF) {
-        fputc(ch, target);
-    }
-
-    fclose(source);
-    fclose(target);
-
-    return TRUE;
+    GFile *source = g_file_new_for_path(sourcepath);
+    GFile *dest = g_file_new_for_path(targetpath);
+    GError *error = NULL;
+    GFileCopyFlags flags = overwrite_existing ? G_FILE_COPY_OVERWRITE : G_FILE_COPY_NONE;
+    gboolean success = g_file_copy (source, dest, flags, NULL, NULL, NULL, &error);
+    g_object_unref(source);
+    g_object_unref(dest);
+    return success;
 }
 
 char*
