@@ -55,7 +55,6 @@
 
 #include "log.h"
 #include "common.h"
-#include <strophe.h>
 
 struct curl_data_t
 {
@@ -328,21 +327,6 @@ release_is_new(char *found_version)
     } else {
         return FALSE;
     }
-}
-
-char*
-p_sha1_hash(char *str)
-{
-   unsigned char *digest = (unsigned char*)malloc(XMPP_SHA1_DIGEST_SIZE);
-   assert(digest != NULL);
-
-   xmpp_sha1_digest((unsigned char*)str, strlen(str), digest);
-
-   char *b64 = g_base64_encode(digest, XMPP_SHA1_DIGEST_SIZE);
-   assert(b64 != NULL);
-   free(digest);
-
-   return b64;
 }
 
 static size_t
