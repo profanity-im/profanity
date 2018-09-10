@@ -1178,9 +1178,48 @@ _command_exec_response_handler(xmpp_stanza_t *const stanza, void *const userdata
         }
         xmpp_stanza_t *x = xmpp_stanza_get_child_by_ns(cmd, STANZA_NS_DATA);
         if (x) {
-            DataForm *form = form_create(x);
-            ProfConfWin *confwin = (ProfConfWin*)wins_new_config(from, form, NULL, NULL, NULL);
-            confwin_handle_configuration(confwin, form);
+            xmpp_stanza_t *roster = xmpp_stanza_get_child_by_ns(x, XMPP_NS_ROSTER);
+            if (roster) {
+                /* Special handling of xep-0133 roster in response */
+                GSList *list = NULL;
+                xmpp_stanza_t *child = xmpp_stanza_get_children(roster);
+                while (child) {
+                    const char *barejid = xmpp_stanza_get_attribute(child, STANZA_ATTR_JID);
+                    gchar *barejid_lower = g_utf8_strdown(barejid, -1);
+                    const char *name = xmpp_stanza_get_attribute(child, STANZA_ATTR_NAME);
+                    const char *sub = xmpp_stanza_get_attribute(child, STANZA_ATTR_SUBSCRIPTION);
+                    const char *ask = xmpp_stanza_get_attribute(child, STANZA_ATTR_ASK);
+
+                    GSList *groups = NULL;
+                    xmpp_stanza_t *group_element = xmpp_stanza_get_children(child);
+
+                    while (group_element) {
+                        if (strcmp(xmpp_stanza_get_name(group_element), STANZA_NAME_GROUP) == 0) {
+                            char *groupname = xmpp_stanza_get_text(group_element);
+                            if (groupname) {
+                                groups = g_slist_append(groups, groupname);
+                            }
+                        }
+                        group_element = xmpp_stanza_get_next(group_element);
+                    }
+
+                    gboolean pending_out = FALSE;
+                    if (ask && (strcmp(ask, "subscribe") == 0)) {
+                        pending_out = TRUE;
+                    }
+
+                    PContact contact = p_contact_new(barejid_lower, name, groups, sub, NULL, pending_out);
+                    list = g_slist_append(list, contact);
+                    child = xmpp_stanza_get_next(child);
+                }
+
+                cons_show_roster(list);
+                g_slist_free(list);
+            } else {
+                DataForm *form = form_create(x);
+                ProfConfWin *confwin = (ProfConfWin*)wins_new_config(from, form, NULL, NULL, NULL);
+                confwin_handle_configuration(confwin, form);
+            }
         }
     } else if (g_strcmp0(status, "executing") == 0) {
         win_handle_command_exec_status(win, command, "executing");
