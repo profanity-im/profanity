@@ -97,7 +97,9 @@ confwin_handle_configuration(ProfConfWin *confwin, DataForm *form)
     confwin_show_form(confwin);
 
     win_println(window, THEME_DEFAULT, '-', "");
-    win_println(window, THEME_DEFAULT, '-', "Use '/form submit' to save changes.");
+    if (confwin->submit != NULL) {
+        win_println(window, THEME_DEFAULT, '-', "Use '/form submit' to save changes.");
+    }
     win_println(window, THEME_DEFAULT, '-', "Use '/form cancel' to cancel changes.");
     win_println(window, THEME_DEFAULT, '-', "See '/form help' for more information.");
     win_println(window, THEME_DEFAULT, '-', "");
