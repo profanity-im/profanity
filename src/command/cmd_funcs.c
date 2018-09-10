@@ -3899,11 +3899,11 @@ cmd_form(ProfWin *window, const char *const command, gchar **args)
         return TRUE;
     }
 
-    if (g_strcmp0(args[0], "submit") == 0) {
+    if (g_strcmp0(args[0], "submit") == 0 && confwin->submit != NULL) {
         confwin->submit(confwin);
     }
 
-    if (g_strcmp0(args[0], "cancel") == 0) {
+    if (g_strcmp0(args[0], "cancel") == 0 && confwin->cancel != NULL) {
         confwin->cancel(confwin);
     }
 

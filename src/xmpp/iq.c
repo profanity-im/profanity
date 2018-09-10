@@ -1176,6 +1176,12 @@ _command_exec_response_handler(xmpp_stanza_t *const stanza, void *const userdata
             const char *value = xmpp_stanza_get_text(note);
             win_handle_command_exec_result_note(win, type, value);
         }
+        xmpp_stanza_t *x = xmpp_stanza_get_child_by_ns(cmd, STANZA_NS_DATA);
+        if (x) {
+            DataForm *form = form_create(x);
+            ProfConfWin *confwin = (ProfConfWin*)wins_new_config(from, form, NULL, NULL, NULL);
+            confwin_handle_configuration(confwin, form);
+        }
     } else if (g_strcmp0(status, "executing") == 0) {
         win_handle_command_exec_status(win, command, "executing");
 
