@@ -737,7 +737,7 @@ iq_submit_command_config(ProfConfWin *confwin)
     xmpp_stanza_t *iq = stanza_create_command_config_submit_iq(ctx, confwin->roomjid, data->command, data->sessionid, confwin->form);
 
     const char *id = xmpp_stanza_get_id(iq);
-    iq_id_handler_add(id,  _command_exec_response_handler, NULL, NULL);
+    iq_id_handler_add(id,  _command_exec_response_handler, free, strdup(data->command));
 
     iq_send_stanza(iq);
     xmpp_stanza_release(iq);
