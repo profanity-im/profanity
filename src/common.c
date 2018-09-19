@@ -56,7 +56,6 @@
 
 #include "log.h"
 #include "common.h"
-#include "tools/p_sha1.h"
 
 struct curl_data_t
 {
@@ -317,22 +316,6 @@ release_is_new(char *found_version)
     } else {
         return FALSE;
     }
-}
-
-char*
-p_sha1_hash(char *str)
-{
-    P_SHA1_CTX ctx;
-    uint8_t digest[20];
-    uint8_t *input = (uint8_t*)malloc(strlen(str) + 1);
-    memcpy(input, str, strlen(str) + 1);
-
-    P_SHA1_Init(&ctx);
-    P_SHA1_Update(&ctx, input, strlen(str));
-    P_SHA1_Final(&ctx, digest);
-
-    free(input);
-    return g_base64_encode(digest, sizeof(digest));
 }
 
 static size_t

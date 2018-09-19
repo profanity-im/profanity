@@ -45,6 +45,7 @@
 #include <stdio.h>
 #include <libgen.h>
 #include <inttypes.h>
+#include <assert.h>
 
 #include <glib.h>
 
@@ -66,6 +67,7 @@
 #include "xmpp/muc.h"
 
 static void _stanza_add_unique_id(xmpp_stanza_t *stanza, char *prefix);
+static char* _stanza_create_sha1_hash(char *str);
 
 #if 0
 xmpp_stanza_t*
@@ -1143,7 +1145,7 @@ stanza_create_caps_sha1_from_query(xmpp_stanza_t *const query)
         curr = g_slist_next(curr);
     }
 
-    char *result = p_sha1_hash(s->str);
+    char *result = _stanza_create_sha1_hash(s->str);
 
     g_string_free(s, TRUE);
     g_slist_free_full(identities, g_free);
@@ -2044,4 +2046,19 @@ _stanza_add_unique_id(xmpp_stanza_t *stanza, char *prefix)
     char *id = connection_create_stanza_id(prefix);
     xmpp_stanza_set_id(stanza, id);
     free(id);
+}
+
+static char*
+_stanza_create_sha1_hash(char *str)
+{
+   unsigned char *digest = (unsigned char*)malloc(XMPP_SHA1_DIGEST_SIZE);
+   assert(digest != NULL);
+
+   xmpp_sha1_digest((unsigned char*)str, strlen(str), digest);
+
+   char *b64 = g_base64_encode(digest, XMPP_SHA1_DIGEST_SIZE);
+   assert(b64 != NULL);
+   free(digest);
+
+   return b64;
 }

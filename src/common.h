@@ -92,8 +92,6 @@ char* file_getline(FILE *stream);
 char* release_get_latest(void);
 gboolean release_is_new(char *found_version);
 
-char* p_sha1_hash(char *str);
-
 char* get_file_or_linked(char *loc, char *basedir);
 char* strip_arg_quotes(const char *const input);
 gboolean is_notify_enabled(void);

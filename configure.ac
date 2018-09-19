@@ -123,11 +123,11 @@ CFLAGS="$CFLAGS $PTHREAD_CFLAGS"
 AS_IF([test "x$PTHREAD_CC" != x], [ CC="$PTHREAD_CC" ])
 
 ### Check for libmesode, fall back to libstrophe
-PKG_CHECK_MODULES([libmesode], [libmesode],
+PKG_CHECK_MODULES([libmesode], [libmesode >= 0.9.2],
     [LIBS="$libmesode_LIBS $LIBS" CFLAGS="$CFLAGS $libmesode_CFLAGS" AC_DEFINE([HAVE_LIBMESODE], [1], [libmesode])],
-    [PKG_CHECK_MODULES([libstrophe], [libstrophe],
+    [PKG_CHECK_MODULES([libstrophe], [libstrophe >= 0.9.2],
         [LIBS="$libstrophe_LIBS $LIBS" CFLAGS="$CFLAGS $libstrophe_CFLAGS" AC_DEFINE([HAVE_LIBSTROPHE], [1], [libstrophe])],
-        [AC_MSG_ERROR([Neither libmesode or libstrophe found, either is required for profanity])])])
+        [AC_MSG_ERROR([Neither libmesode or libstrophe in version >= 0.9.2 found, either is required for profanity])])])
 
 ### Check for ncurses library
 PKG_CHECK_MODULES([ncursesw], [ncursesw],
