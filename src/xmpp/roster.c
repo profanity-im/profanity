@@ -75,9 +75,6 @@ static int _group_add_id_handler(xmpp_stanza_t *const stanza, void *const userda
 static int _group_remove_id_handler(xmpp_stanza_t *const stanza, void *const userdata);
 static void _free_group_data(GroupData *data);
 
-// helper functions
-GSList* _get_groups_from_item(xmpp_stanza_t *item);
-
 void
 roster_request(void)
 {
@@ -254,7 +251,7 @@ roster_set_handler(xmpp_stanza_t *const stanza)
             pending_out = TRUE;
         }
 
-        GSList *groups = _get_groups_from_item(item);
+        GSList *groups = roster_get_groups_from_item(item);
 
         // update the local roster
         PContact contact = roster_get_contact(barejid_lower);
@@ -301,7 +298,7 @@ roster_result_handler(xmpp_stanza_t *const stanza)
             pending_out = TRUE;
         }
 
-        GSList *groups = _get_groups_from_item(item);
+        GSList *groups = roster_get_groups_from_item(item);
 
         gboolean added = roster_add(barejid_lower, name, groups, sub, pending_out);
         if (!added) {
@@ -318,7 +315,7 @@ roster_result_handler(xmpp_stanza_t *const stanza)
 }
 
 GSList*
-_get_groups_from_item(xmpp_stanza_t *item)
+roster_get_groups_from_item(xmpp_stanza_t *item)
 {
     GSList *groups = NULL;
     xmpp_stanza_t *group_element = xmpp_stanza_get_children(item);

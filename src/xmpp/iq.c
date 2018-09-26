@@ -1191,17 +1191,7 @@ _command_exec_response_handler(xmpp_stanza_t *const stanza, void *const userdata
                     const char *ask = xmpp_stanza_get_attribute(child, STANZA_ATTR_ASK);
 
                     GSList *groups = NULL;
-                    xmpp_stanza_t *group_element = xmpp_stanza_get_children(child);
-
-                    while (group_element) {
-                        if (strcmp(xmpp_stanza_get_name(group_element), STANZA_NAME_GROUP) == 0) {
-                            char *groupname = xmpp_stanza_get_text(group_element);
-                            if (groupname) {
-                                groups = g_slist_append(groups, groupname);
-                            }
-                        }
-                        group_element = xmpp_stanza_get_next(group_element);
-                    }
+                    groups = roster_get_groups_from_item(child);
 
                     gboolean pending_out = FALSE;
                     if (ask && (strcmp(ask, "subscribe") == 0)) {
@@ -1209,7 +1199,7 @@ _command_exec_response_handler(xmpp_stanza_t *const stanza, void *const userdata
                     }
 
                     PContact contact = p_contact_new(barejid_lower, name, groups, sub, NULL, pending_out);
-                    list = g_slist_append(list, contact);
+                    list = g_slist_insert_sorted(list, contact, (GCompareFunc)roster_compare_name);
                     child = xmpp_stanza_get_next(child);
                 }
 

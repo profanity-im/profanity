@@ -73,8 +73,6 @@ static gboolean _key_equals(void *key1, void *key2);
 static gboolean _datetimes_equal(GDateTime *dt1, GDateTime *dt2);
 static void _replace_name(const char *const current_name, const char *const new_name, const char *const barejid);
 static void _add_name_and_barejid(const char *const name, const char *const barejid);
-static gint _compare_name(PContact a, PContact b);
-static gint _compare_presence(PContact a, PContact b);
 
 void
 roster_create(void)
@@ -397,7 +395,7 @@ roster_get_contacts_by_presence(const char *const presence)
     while (g_hash_table_iter_next(&iter, &key, &value)) {
         PContact contact = (PContact)value;
         if (g_strcmp0(p_contact_presence(contact), presence) == 0) {
-            result = g_slist_insert_sorted(result, value, (GCompareFunc)_compare_name);
+            result = g_slist_insert_sorted(result, value, (GCompareFunc)roster_compare_name);
         }
     }
 
@@ -417,9 +415,9 @@ roster_get_contacts(roster_ord_t order)
 
     GCompareFunc cmp_func;
     if (order == ROSTER_ORD_PRESENCE) {
-        cmp_func = (GCompareFunc) _compare_presence;
+        cmp_func = (GCompareFunc) roster_compare_presence;
     } else {
-        cmp_func = (GCompareFunc) _compare_name;
+        cmp_func = (GCompareFunc) roster_compare_name;
     }
 
     g_hash_table_iter_init(&iter, roster->contacts);
@@ -444,7 +442,7 @@ roster_get_contacts_online(void)
     g_hash_table_iter_init(&iter, roster->contacts);
     while (g_hash_table_iter_next(&iter, &key, &value)) {
         if(strcmp(p_contact_presence(value), "offline"))
-            result = g_slist_insert_sorted(result, value, (GCompareFunc)_compare_name);
+            result = g_slist_insert_sorted(result, value, (GCompareFunc)roster_compare_name);
     }
 
     // return all contact structs
@@ -499,9 +497,9 @@ roster_get_group(const char *const group, roster_ord_t order)
 
     GCompareFunc cmp_func;
     if (order == ROSTER_ORD_PRESENCE) {
-        cmp_func = (GCompareFunc) _compare_presence;
+        cmp_func = (GCompareFunc) roster_compare_presence;
     } else {
-        cmp_func = (GCompareFunc) _compare_name;
+        cmp_func = (GCompareFunc) roster_compare_name;
     }
 
     g_hash_table_iter_init(&iter, roster->contacts);
@@ -605,8 +603,8 @@ _add_name_and_barejid(const char *const name, const char *const barejid)
     }
 }
 
-static gint
-_compare_name(PContact a, PContact b)
+gint
+roster_compare_name(PContact a, PContact b)
 {
     const char * utf8_str_a = NULL;
     const char * utf8_str_b = NULL;
@@ -645,8 +643,8 @@ _get_presence_weight(const char *presence)
     }
 }
 
-static gint
-_compare_presence(PContact a, PContact b)
+gint
+roster_compare_presence(PContact a, PContact b)
 {
     const char *presence_a = p_contact_presence(a);
     const char *presence_b = p_contact_presence(b);
@@ -663,6 +661,6 @@ _compare_presence(PContact a, PContact b)
 
     // otherwise order by name
     } else {
-        return _compare_name(a, b);
+        return roster_compare_name(a, b);
     }
 }
