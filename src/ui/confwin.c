@@ -1,5 +1,5 @@
 /*
- * mucconfwin.c
+ * confwin.c
  *
  * Copyright (C) 2012 - 2018 James Booth <boothj5@gmail.com>
  *
@@ -40,10 +40,10 @@
 #include "ui/win_types.h"
 #include "ui/window_list.h"
 
-static void _mucconfwin_form_field(ProfWin *window, char *tag, FormField *field);
+static void _confwin_form_field(ProfWin *window, char *tag, FormField *field);
 
 void
-mucconfwin_show_form(ProfMucConfWin *confwin)
+confwin_show_form(ProfConfWin *confwin)
 {
     ProfWin *window = (ProfWin*) confwin;
     if (confwin->form->title) {
@@ -54,7 +54,7 @@ mucconfwin_show_form(ProfMucConfWin *confwin)
     }
     win_println(window, THEME_DEFAULT, '-', "");
 
-    mucconfwin_form_help(confwin);
+    confwin_form_help(confwin);
 
     GSList *fields = confwin->form->fields;
     GSList *curr_field = fields;
@@ -68,7 +68,7 @@ mucconfwin_show_form(ProfMucConfWin *confwin)
             }
         } else if (g_strcmp0(field->type, "hidden") != 0 && field->var) {
             char *tag = g_hash_table_lookup(confwin->form->var_to_tag, field->var);
-            _mucconfwin_form_field(window, tag, field);
+            _confwin_form_field(window, tag, field);
         }
 
         curr_field = g_slist_next(curr_field);
@@ -76,35 +76,37 @@ mucconfwin_show_form(ProfMucConfWin *confwin)
 }
 
 void
-mucconfwin_show_form_field(ProfMucConfWin *confwin, DataForm *form, char *tag)
+confwin_show_form_field(ProfConfWin *confwin, DataForm *form, char *tag)
 {
     assert(confwin != NULL);
 
     FormField *field = form_get_field_by_tag(form, tag);
     ProfWin *window = (ProfWin*)confwin;
-    _mucconfwin_form_field(window, tag, field);
+    _confwin_form_field(window, tag, field);
     win_println(window, THEME_DEFAULT, '-', "");
 }
 
 void
-mucconfwin_handle_configuration(ProfMucConfWin *confwin, DataForm *form)
+confwin_handle_configuration(ProfConfWin *confwin, DataForm *form)
 {
     assert(confwin != NULL);
 
     ProfWin *window = (ProfWin*)confwin;
     ui_focus_win(window);
 
-    mucconfwin_show_form(confwin);
+    confwin_show_form(confwin);
 
     win_println(window, THEME_DEFAULT, '-', "");
-    win_println(window, THEME_DEFAULT, '-', "Use '/form submit' to save changes.");
+    if (confwin->submit != NULL) {
+        win_println(window, THEME_DEFAULT, '-', "Use '/form submit' to save changes.");
+    }
     win_println(window, THEME_DEFAULT, '-', "Use '/form cancel' to cancel changes.");
     win_println(window, THEME_DEFAULT, '-', "See '/form help' for more information.");
     win_println(window, THEME_DEFAULT, '-', "");
 }
 
 void
-mucconfwin_field_help(ProfMucConfWin *confwin, char *tag)
+confwin_field_help(ProfConfWin *confwin, char *tag)
 {
     assert(confwin != NULL);
 
@@ -187,7 +189,7 @@ mucconfwin_field_help(ProfMucConfWin *confwin, char *tag)
 }
 
 void
-mucconfwin_form_help(ProfMucConfWin *confwin)
+confwin_form_help(ProfConfWin *confwin)
 {
     assert(confwin != NULL);
 
@@ -200,7 +202,7 @@ mucconfwin_form_help(ProfMucConfWin *confwin)
 }
 
 static void
-_mucconfwin_form_field(ProfWin *window, char *tag, FormField *field)
+_confwin_form_field(ProfWin *window, char *tag, FormField *field)
 {
     win_print(window, THEME_AWAY, '-', "[%s] ", tag);
     win_append(window, THEME_DEFAULT, "%s", field->label);
@@ -258,7 +260,7 @@ _mucconfwin_form_field(ProfWin *window, char *tag, FormField *field)
             if (value == NULL) {
                 win_appendln(window, THEME_OFFLINE, "FALSE");
             } else {
-                if (g_strcmp0(value, "0") == 0) {
+                if (g_strcmp0(value, "0") == 0 || g_strcmp0(value, "false") == 0) {
                     win_appendln(window, THEME_OFFLINE, "FALSE");
                 } else {
                     win_appendln(window, THEME_ONLINE, "TRUE");
@@ -331,7 +333,7 @@ _mucconfwin_form_field(ProfWin *window, char *tag, FormField *field)
 }
 
 char*
-mucconfwin_get_string(ProfMucConfWin *confwin)
+confwin_get_string(ProfConfWin *confwin)
 {
     assert(confwin != NULL);
 

@@ -99,6 +99,7 @@
 #define STANZA_NAME_PUT "put"
 #define STANZA_NAME_GET "get"
 #define STANZA_NAME_URL "url"
+#define STANZA_NAME_COMMAND "command"
 
 // error conditions
 #define STANZA_NAME_BAD_REQUEST "bad-request"
@@ -156,6 +157,7 @@
 #define STANZA_ATTR_REASON "reason"
 #define STANZA_ATTR_AUTOJOIN "autojoin"
 #define STANZA_ATTR_PASSWORD "password"
+#define STANZA_ATTR_STATUS "status"
 
 #define STANZA_TEXT_AWAY "away"
 #define STANZA_TEXT_DND "dnd"
@@ -186,6 +188,7 @@
 #define STANZA_NS_HTTP_UPLOAD "urn:xmpp:http:upload"
 #define STANZA_NS_X_OOB "jabber:x:oob"
 #define STANZA_NS_BLOCKING "urn:xmpp:blocking"
+#define STANZA_NS_COMMAND "http://jabber.org/protocol/commands"
 
 #define STANZA_DATAFORM_SOFTWARE "urn:xmpp:dataforms:softwareinfo"
 
@@ -278,6 +281,9 @@ xmpp_stanza_t* stanza_create_room_subject_message(xmpp_ctx_t *ctx, const char *c
 xmpp_stanza_t* stanza_create_room_kick_iq(xmpp_ctx_t *const ctx, const char *const room, const char *const nick,
     const char *const reason);
 
+xmpp_stanza_t* stanza_create_command_exec_iq(xmpp_ctx_t *ctx, const char *const target, const char *const node);
+xmpp_stanza_t* stanza_create_command_config_submit_iq(xmpp_ctx_t *ctx, const char *const room, const char *const node, const char *const sessionid, DataForm *form);
+
 int stanza_get_idle_time(xmpp_stanza_t *const stanza);
 
 void stanza_attach_priority(xmpp_ctx_t *const ctx, xmpp_stanza_t *const presence, const int pri);
@@ -292,7 +298,7 @@ EntityCapabilities* stanza_create_caps_from_query_element(xmpp_stanza_t *query);
 
 const char* stanza_get_presence_string_from_type(resource_presence_t presence_type);
 xmpp_stanza_t* stanza_create_software_version_iq(xmpp_ctx_t *ctx, const char *const fulljid);
-xmpp_stanza_t* stanza_create_disco_items_iq(xmpp_ctx_t *ctx, const char *const id, const char *const jid);
+xmpp_stanza_t* stanza_create_disco_items_iq(xmpp_ctx_t *ctx, const char *const id, const char *const jid, const char *const node);
 
 char* stanza_get_status(xmpp_stanza_t *stanza, char *def);
 char* stanza_get_show(xmpp_stanza_t *stanza, char *def);

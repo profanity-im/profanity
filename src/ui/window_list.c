@@ -139,16 +139,16 @@ wins_get_chat_unsubscribed(void)
     return result;
 }
 
-ProfMucConfWin*
-wins_get_muc_conf(const char *const roomjid)
+ProfConfWin*
+wins_get_conf(const char *const roomjid)
 {
     GList *values = g_hash_table_get_values(windows);
     GList *curr = values;
 
     while (curr) {
         ProfWin *window = curr->data;
-        if (window->type == WIN_MUC_CONFIG) {
-            ProfMucConfWin *confwin = (ProfMucConfWin*)window;
+        if (window->type == WIN_CONFIG) {
+            ProfConfWin *confwin = (ProfConfWin*)window;
             if (g_strcmp0(confwin->roomjid, roomjid) == 0) {
                 g_list_free(values);
                 return confwin;
@@ -364,7 +364,7 @@ wins_get_by_num(int i)
 }
 
 ProfWin*
-wins_get_by_string(char *str)
+wins_get_by_string(const char *str)
 {
     if (g_strcmp0(str, "console") == 0) {
         ProfWin *conswin = wins_get_console();
@@ -584,7 +584,7 @@ wins_close_by_num(int i)
                 autocomplete_remove(wins_close_ac, pluginwin->tag);
                 break;
             }
-            case WIN_MUC_CONFIG:
+            case WIN_CONFIG:
             default:
                 break;
             }
@@ -657,12 +657,12 @@ wins_new_muc(const char *const roomjid)
 }
 
 ProfWin*
-wins_new_muc_config(const char *const roomjid, DataForm *form)
+wins_new_config(const char *const roomjid, DataForm *form, ProfConfWinCallback submit, ProfConfWinCallback cancel, const void *userdata)
 {
     GList *keys = g_hash_table_get_keys(windows);
     int result = _wins_get_next_available_num(keys);
     g_list_free(keys);
-    ProfWin *newwin = win_create_muc_config(roomjid, form);
+    ProfWin *newwin = win_create_config(roomjid, form, submit, cancel, userdata);
     g_hash_table_insert(windows, GINT_TO_POINTER(result), newwin);
     return newwin;
 }
@@ -812,7 +812,7 @@ wins_get_prune_wins(void)
         ProfWin *window = curr->data;
         if (win_unread(window) == 0 &&
                 window->type != WIN_MUC &&
-                window->type != WIN_MUC_CONFIG &&
+                window->type != WIN_CONFIG &&
                 window->type != WIN_XML &&
                 window->type != WIN_CONSOLE) {
             result = g_slist_append(result, window);

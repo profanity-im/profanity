@@ -88,6 +88,11 @@ typedef struct privilege_set_t {
     char *privilege;
 } ProfPrivilegeSet;
 
+typedef struct command_config_data_t {
+    char *sessionid;
+    char *command;
+} CommandConfigData;
+
 static int _iq_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza, void *const userdata);
 
 static void _error_handler(xmpp_stanza_t *const stanza);
@@ -120,6 +125,8 @@ static int _caps_response_for_jid_id_handler(xmpp_stanza_t *const stanza, void *
 static int _caps_response_legacy_id_handler(xmpp_stanza_t *const stanza, void *const userdata);
 static int _auto_pong_id_handler(xmpp_stanza_t *const stanza, void *const userdata);
 static int _room_list_id_handler(xmpp_stanza_t *const stanza, void *const userdata);
+static int _command_list_result_handler(xmpp_stanza_t *const stanza, void *const userdata);
+static int _command_exec_response_handler(xmpp_stanza_t *const stanza, void *const userdata);
 
 static void _iq_free_room_data(ProfRoomInfoData *roominfo);
 static void _iq_free_affiliation_set(ProfPrivilegeSet *affiliation_set);
@@ -319,7 +326,7 @@ iq_room_list_request(gchar *conferencejid, gchar *filter)
 
     xmpp_ctx_t * const ctx = connection_get_ctx();
     char *id = connection_create_stanza_id("confreq");
-    xmpp_stanza_t *iq = stanza_create_disco_items_iq(ctx, id, conferencejid);
+    xmpp_stanza_t *iq = stanza_create_disco_items_iq(ctx, id, conferencejid, NULL);
 
     iq_id_handler_add(id, _room_list_id_handler, NULL, filter);
 
@@ -521,7 +528,7 @@ void
 iq_disco_items_request(gchar *jid)
 {
     xmpp_ctx_t * const ctx = connection_get_ctx();
-    xmpp_stanza_t *iq = stanza_create_disco_items_iq(ctx, "discoitemsreq", jid);
+    xmpp_stanza_t *iq = stanza_create_disco_items_iq(ctx, "discoitemsreq", jid, NULL);
     iq_send_stanza(iq);
     xmpp_stanza_release(iq);
 }
@@ -530,7 +537,7 @@ void
 iq_disco_items_request_onconnect(gchar *jid)
 {
     xmpp_ctx_t * const ctx = connection_get_ctx();
-    xmpp_stanza_t *iq = stanza_create_disco_items_iq(ctx, "discoitemsreq_onconnect", jid);
+    xmpp_stanza_t *iq = stanza_create_disco_items_iq(ctx, "discoitemsreq_onconnect", jid, NULL);
     iq_send_stanza(iq);
     xmpp_stanza_release(iq);
 }
@@ -584,10 +591,10 @@ iq_request_room_config_form(const char *const room_jid)
 }
 
 void
-iq_submit_room_config(const char *const room, DataForm *form)
+iq_submit_room_config(ProfConfWin *confwin)
 {
     xmpp_ctx_t * const ctx = connection_get_ctx();
-    xmpp_stanza_t *iq = stanza_create_room_config_submit_iq(ctx, room, form);
+    xmpp_stanza_t *iq = stanza_create_room_config_submit_iq(ctx, confwin->roomjid, confwin->form);
 
     const char *id = xmpp_stanza_get_id(iq);
     iq_id_handler_add(id, _room_config_submit_id_handler, NULL, NULL);
@@ -597,10 +604,10 @@ iq_submit_room_config(const char *const room, DataForm *form)
 }
 
 void
-iq_room_config_cancel(const char *const room_jid)
+iq_room_config_cancel(ProfConfWin *confwin)
 {
     xmpp_ctx_t * const ctx = connection_get_ctx();
-    xmpp_stanza_t *iq = stanza_create_room_config_cancel_iq(ctx, room_jid);
+    xmpp_stanza_t *iq = stanza_create_room_config_cancel_iq(ctx, confwin->roomjid);
     iq_send_stanza(iq);
     xmpp_stanza_release(iq);
 }
@@ -694,6 +701,62 @@ iq_send_ping(const char *const target)
 
     iq_send_stanza(iq);
     xmpp_stanza_release(iq);
+}
+
+void
+iq_command_list(const char *const target)
+{
+    xmpp_ctx_t * const ctx = connection_get_ctx();
+    const char *id = connection_create_stanza_id("cmdlist");
+    xmpp_stanza_t *iq = stanza_create_disco_items_iq(ctx, id, target, STANZA_NS_COMMAND);
+
+    iq_id_handler_add(id, _command_list_result_handler, NULL, NULL);
+
+    iq_send_stanza(iq);
+    xmpp_stanza_release(iq);
+}
+
+void
+iq_command_exec(const char *const target, const char *const command)
+{
+    xmpp_ctx_t * const ctx = connection_get_ctx();
+    xmpp_stanza_t *iq = stanza_create_command_exec_iq(ctx, target, command);
+    const char *id = xmpp_stanza_get_id(iq);
+
+    iq_id_handler_add(id, _command_exec_response_handler, free, strdup(command));
+
+    iq_send_stanza(iq);
+    xmpp_stanza_release(iq);
+}
+
+void
+iq_submit_command_config(ProfConfWin *confwin)
+{
+    xmpp_ctx_t * const ctx = connection_get_ctx();
+    CommandConfigData *data = (CommandConfigData *)confwin->userdata;
+    xmpp_stanza_t *iq = stanza_create_command_config_submit_iq(ctx, confwin->roomjid, data->command, data->sessionid, confwin->form);
+
+    const char *id = xmpp_stanza_get_id(iq);
+    iq_id_handler_add(id,  _command_exec_response_handler, free, strdup(data->command));
+
+    iq_send_stanza(iq);
+    xmpp_stanza_release(iq);
+    free(data->sessionid);
+    free(data->command);
+    free(data);
+}
+
+void
+iq_cancel_command_config(ProfConfWin *confwin)
+{
+    xmpp_ctx_t * const ctx = connection_get_ctx();
+    CommandConfigData *data = (CommandConfigData *)confwin->userdata;
+    xmpp_stanza_t *iq = stanza_create_room_config_cancel_iq(ctx, confwin->roomjid);
+    iq_send_stanza(iq);
+    xmpp_stanza_release(iq);
+    free(data->sessionid);
+    free(data->command);
+    free(data);
 }
 
 static void
@@ -1007,6 +1070,181 @@ _room_list_id_handler(xmpp_stanza_t *const stanza, void *const userdata)
         g_pattern_spec_free(glob);
     }
     g_free(filter);
+
+    return 0;
+}
+
+static int
+_command_list_result_handler(xmpp_stanza_t *const stanza, void *const userdata)
+{
+    const char *id = xmpp_stanza_get_id(stanza);
+    const char *type = xmpp_stanza_get_type(stanza);
+    char *from = strdup(xmpp_stanza_get_from(stanza));
+
+    if (id) {
+        log_debug("IQ command list result handler fired, id: %s.", id);
+    } else {
+        log_debug("IQ command list result handler fired.");
+    }
+
+    // handle error responses
+    if (g_strcmp0(type, STANZA_TYPE_ERROR) == 0) {
+        char *error_message = stanza_get_error_message(stanza);
+        log_debug("Error retrieving command list for %s: %s", from, error_message);
+        ProfWin *win = wins_get_by_string(from);
+        if (win) {
+            win_command_list_error(win, error_message);
+        }
+        free(error_message);
+        free(from);
+        return 0;
+    }
+
+    GSList *cmds = NULL;
+
+    xmpp_stanza_t *query = xmpp_stanza_get_child_by_ns(stanza, XMPP_NS_DISCO_ITEMS);
+    if (query) {
+        xmpp_stanza_t *child = xmpp_stanza_get_children(query);
+        while (child) {
+            const char *name = xmpp_stanza_get_name(child);
+            if (g_strcmp0(name, "item") == 0) {
+                const char *node = xmpp_stanza_get_attribute(child, STANZA_ATTR_NODE);
+                if (node) {
+                    cmds = g_slist_insert_sorted(cmds, (gpointer)node, (GCompareFunc)g_strcmp0);
+                }
+            }
+            child = xmpp_stanza_get_next(child);
+        }
+    }
+
+    ProfWin *win = wins_get_by_string(from);
+    if (win == NULL) {
+	    win = wins_get_console();
+    }
+
+    win_handle_command_list(win, cmds);
+    g_slist_free(cmds);
+    free(from);
+
+    return 0;
+}
+
+static int
+_command_exec_response_handler(xmpp_stanza_t *const stanza, void *const userdata)
+{
+    const char *id = xmpp_stanza_get_id(stanza);
+    const char *type = xmpp_stanza_get_type(stanza);
+    const char *from = xmpp_stanza_get_from(stanza);
+    char *command = userdata;
+
+    if (id) {
+        log_debug("IQ command exec response handler fired, id: %s.", id);
+    } else {
+        log_debug("IQ command exec response handler fired.");
+    }
+
+    ProfWin *win = wins_get_by_string(from);
+    if (win == NULL) {
+        /* No more window associated with this command.
+         * Fallback to console. */
+        win = wins_get_console();
+    }
+
+    // handle error responses
+    if (g_strcmp0(type, STANZA_TYPE_ERROR) == 0) {
+        char *error_message = stanza_get_error_message(stanza);
+        log_debug("Error executing command %s for %s: %s", command, from, error_message);
+        win_command_exec_error(win, command, error_message);
+        free(error_message);
+        return 0;
+    }
+
+    xmpp_stanza_t *cmd = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_COMMAND);
+    if (!cmd) {
+        log_error("No command element for command response");
+        win_command_exec_error(win, command, "Malformed command response");
+        return 0;
+    }
+
+
+    const char *status = xmpp_stanza_get_attribute(cmd, STANZA_ATTR_STATUS);
+    if (g_strcmp0(status, "completed") == 0) {
+        win_handle_command_exec_status(win, command, "completed");
+        xmpp_stanza_t *note = xmpp_stanza_get_child_by_name(cmd, "note");
+        if (note) {
+            const char *type = xmpp_stanza_get_attribute(note, "type");
+            const char *value = xmpp_stanza_get_text(note);
+            win_handle_command_exec_result_note(win, type, value);
+        }
+        xmpp_stanza_t *x = xmpp_stanza_get_child_by_ns(cmd, STANZA_NS_DATA);
+        if (x) {
+            xmpp_stanza_t *roster = xmpp_stanza_get_child_by_ns(x, XMPP_NS_ROSTER);
+            if (roster) {
+                /* Special handling of xep-0133 roster in response */
+                GSList *list = NULL;
+                xmpp_stanza_t *child = xmpp_stanza_get_children(roster);
+                while (child) {
+                    const char *barejid = xmpp_stanza_get_attribute(child, STANZA_ATTR_JID);
+                    gchar *barejid_lower = g_utf8_strdown(barejid, -1);
+                    const char *name = xmpp_stanza_get_attribute(child, STANZA_ATTR_NAME);
+                    const char *sub = xmpp_stanza_get_attribute(child, STANZA_ATTR_SUBSCRIPTION);
+                    const char *ask = xmpp_stanza_get_attribute(child, STANZA_ATTR_ASK);
+
+                    GSList *groups = NULL;
+                    groups = roster_get_groups_from_item(child);
+
+                    gboolean pending_out = FALSE;
+                    if (ask && (strcmp(ask, "subscribe") == 0)) {
+                        pending_out = TRUE;
+                    }
+
+                    PContact contact = p_contact_new(barejid_lower, name, groups, sub, NULL, pending_out);
+                    list = g_slist_insert_sorted(list, contact, (GCompareFunc)roster_compare_name);
+                    child = xmpp_stanza_get_next(child);
+                }
+
+                cons_show_roster(list);
+                g_slist_free(list);
+            } else {
+                DataForm *form = form_create(x);
+                ProfConfWin *confwin = (ProfConfWin*)wins_new_config(from, form, NULL, NULL, NULL);
+                confwin_handle_configuration(confwin, form);
+            }
+        }
+    } else if (g_strcmp0(status, "executing") == 0) {
+        win_handle_command_exec_status(win, command, "executing");
+
+        /* Looking for a jabber:x:data type form */
+        xmpp_stanza_t *x = xmpp_stanza_get_child_by_ns(cmd, STANZA_NS_DATA);
+        if (x == NULL) {
+            return 0;
+        }
+
+        const char *form_type = xmpp_stanza_get_type(x);
+        if (g_strcmp0(form_type, "form") != 0) {
+            log_error("Unsupported payload in command response");
+            win_command_exec_error(win, command, "Unsupported command response");
+            return 0;
+        }
+
+        DataForm *form = form_create(x);
+        CommandConfigData *data = malloc(sizeof(CommandConfigData));
+        data->sessionid = strdup(xmpp_stanza_get_attribute(cmd, "sessionid"));
+        data->command = command;
+        ProfConfWin *confwin = (ProfConfWin*)wins_new_config(from, form, iq_submit_command_config, iq_cancel_command_config, data);
+        confwin_handle_configuration(confwin, form);
+    } else if (g_strcmp0(status, "canceled") == 0) {
+        win_handle_command_exec_status(win, command, "canceled");
+        xmpp_stanza_t *note = xmpp_stanza_get_child_by_name(cmd, "note");
+        if (note) {
+            const char *type = xmpp_stanza_get_attribute(note, "type");
+            const char *value = xmpp_stanza_get_text(note);
+            win_handle_command_exec_result_note(win, type, value);
+        }
+    } else {
+        log_error("Unsupported command status %s", status);
+        win_command_exec_error(win, command, "Malformed command response");
+    }
 
     return 0;
 }
@@ -1540,8 +1778,8 @@ _room_config_id_handler(xmpp_stanza_t *const stanza, void *const userdata)
     }
 
     DataForm *form = form_create(x);
-    ProfMucConfWin *confwin = (ProfMucConfWin*)wins_new_muc_config(from, form);
-    mucconfwin_handle_configuration(confwin, form);
+    ProfConfWin *confwin = (ProfConfWin*)wins_new_config(from, form, iq_submit_room_config, iq_room_config_cancel, NULL);
+    confwin_handle_configuration(confwin, form);
 
     return 0;
 }

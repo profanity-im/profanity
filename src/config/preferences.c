@@ -123,7 +123,7 @@ prefs_load(void)
         g_key_file_set_string(prefs, PREF_GROUP_UI, "time.console", val);
         g_key_file_set_string(prefs, PREF_GROUP_UI, "time.chat", val);
         g_key_file_set_string(prefs, PREF_GROUP_UI, "time.muc", val);
-        g_key_file_set_string(prefs, PREF_GROUP_UI, "time.mucconfig", val);
+        g_key_file_set_string(prefs, PREF_GROUP_UI, "time.config", val);
         g_key_file_set_string(prefs, PREF_GROUP_UI, "time.private", val);
         g_key_file_set_string(prefs, PREF_GROUP_UI, "time.xmlconsole", val);
         g_key_file_remove_key(prefs, PREF_GROUP_UI, "time", NULL);
@@ -1567,7 +1567,7 @@ _get_group(preference_t pref)
         case PREF_TIME_CONSOLE:
         case PREF_TIME_CHAT:
         case PREF_TIME_MUC:
-        case PREF_TIME_MUCCONFIG:
+        case PREF_TIME_CONFIG:
         case PREF_TIME_PRIVATE:
         case PREF_TIME_XMLCONSOLE:
         case PREF_TIME_STATUSBAR:
@@ -1777,8 +1777,8 @@ _get_key(preference_t pref)
             return "time.chat";
         case PREF_TIME_MUC:
             return "time.muc";
-        case PREF_TIME_MUCCONFIG:
-            return "time.mucconfig";
+        case PREF_TIME_CONFIG:
+            return "time.config";
         case PREF_TIME_PRIVATE:
             return "time.private";
         case PREF_TIME_XMLCONSOLE:
@@ -1967,7 +1967,7 @@ _get_default_string(preference_t pref)
             return "%H:%M:%S";
         case PREF_TIME_MUC:
             return "%H:%M:%S";
-        case PREF_TIME_MUCCONFIG:
+        case PREF_TIME_CONFIG:
             return "%H:%M:%S";
         case PREF_TIME_PRIVATE:
             return "%H:%M:%S";

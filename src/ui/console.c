@@ -1282,12 +1282,12 @@ cons_time_setting(void)
         cons_show("Time MUC (/time)                    : %s", pref_time_muc);
     prefs_free_string(pref_time_muc);
 
-    char *pref_time_mucconf = prefs_get_string(PREF_TIME_MUCCONFIG);
-    if (g_strcmp0(pref_time_mucconf, "off") == 0)
-        cons_show("Time MUC config (/time)             : OFF");
+    char *pref_time_conf = prefs_get_string(PREF_TIME_CONFIG);
+    if (g_strcmp0(pref_time_conf, "off") == 0)
+        cons_show("Time config (/time)             : OFF");
     else
-        cons_show("Time MUC config (/time)             : %s", pref_time_mucconf);
-    prefs_free_string(pref_time_mucconf);
+        cons_show("Time config (/time)             : %s", pref_time_conf);
+    prefs_free_string(pref_time_conf);
 
     char *pref_time_private = prefs_get_string(PREF_TIME_PRIVATE);
     if (g_strcmp0(pref_time_private, "off") == 0)

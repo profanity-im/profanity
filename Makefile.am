@@ -29,7 +29,7 @@ core_sources = \
 	src/ui/chatwin.c \
 	src/ui/mucwin.c \
 	src/ui/privwin.c \
-	src/ui/mucconfwin.c \
+	src/ui/confwin.c \
 	src/ui/xmlwin.c \
 	src/command/cmd_defs.h src/command/cmd_defs.c \
 	src/command/cmd_funcs.h src/command/cmd_funcs.c \

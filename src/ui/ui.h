@@ -217,13 +217,13 @@ void privwin_room_kicked(ProfPrivateWin *privwin, const char *const actor, const
 void privwin_room_banned(ProfPrivateWin *privwin, const char *const actor, const char *const reason);
 void privwin_room_joined(ProfPrivateWin *privwin);
 
-// MUC room config window
-void mucconfwin_handle_configuration(ProfMucConfWin *confwin, DataForm *form);
-void mucconfwin_show_form(ProfMucConfWin *confwin);
-void mucconfwin_show_form_field(ProfMucConfWin *confwin, DataForm *form, char *tag);
-void mucconfwin_form_help(ProfMucConfWin *confwin);
-void mucconfwin_field_help(ProfMucConfWin *confwin, char *tag);
-char* mucconfwin_get_string(ProfMucConfWin *confwin);
+// config window
+void confwin_handle_configuration(ProfConfWin *confwin, DataForm *form);
+void confwin_show_form(ProfConfWin *confwin);
+void confwin_show_form_field(ProfConfWin *confwin, DataForm *form, char *tag);
+void confwin_form_help(ProfConfWin *confwin);
+void confwin_field_help(ProfConfWin *confwin, char *tag);
+char* confwin_get_string(ProfConfWin *confwin);
 
 // xml console
 void xmlwin_show(ProfXMLWin *xmlwin, const char *const msg);
@@ -346,7 +346,7 @@ ProfWin* win_create_console(void);
 ProfWin* win_create_xmlconsole(void);
 ProfWin* win_create_chat(const char *const barejid);
 ProfWin* win_create_muc(const char *const roomjid);
-ProfWin* win_create_muc_config(const char *const title, DataForm *form);
+ProfWin* win_create_config(const char *const title, DataForm *form, ProfConfWinCallback submit, ProfConfWinCallback cancel, const void *userdata);
 ProfWin* win_create_private(const char *const fulljid);
 ProfWin* win_create_plugin(const char *const plugin_name, const char *const tag);
 void win_update_virtual(ProfWin *window);
@@ -377,6 +377,11 @@ void win_show_info(ProfWin *window, PContact contact);
 void win_clear(ProfWin *window);
 char* win_get_tab_identifier(ProfWin *window);
 char* win_to_string(ProfWin *window);
+void win_command_list_error(ProfWin *window, const char *const error);
+void win_command_exec_error(ProfWin *window, const char *const command, const char *const error, ...);
+void win_handle_command_list(ProfWin *window, GSList *cmds);
+void win_handle_command_exec_status(ProfWin *window, const char *const type, const char *const value);
+void win_handle_command_exec_result_note(ProfWin *window, const char *const type, const char *const value);
 
 // desktop notifications
 void notifier_initialise(void);

@@ -79,9 +79,9 @@ void cmd_pgp_start_shows_message_when_no_arg_in_muc(void **state)
     cmd_pgp_start_shows_message_when_no_arg_in_wintype(WIN_MUC);
 }
 
-void cmd_pgp_start_shows_message_when_no_arg_in_mucconf(void **state)
+void cmd_pgp_start_shows_message_when_no_arg_in_conf(void **state)
 {
-    cmd_pgp_start_shows_message_when_no_arg_in_wintype(WIN_MUC_CONFIG);
+    cmd_pgp_start_shows_message_when_no_arg_in_wintype(WIN_CONFIG);
 }
 
 void cmd_pgp_start_shows_message_when_no_arg_in_private(void **state)

@@ -413,7 +413,7 @@ _load_preferences(void)
     _set_string_preference("time.console", PREF_TIME_CONSOLE);
     _set_string_preference("time.chat", PREF_TIME_CHAT);
     _set_string_preference("time.muc", PREF_TIME_MUC);
-    _set_string_preference("time.mucconfig", PREF_TIME_MUCCONFIG);
+    _set_string_preference("time.config", PREF_TIME_CONFIG);
     _set_string_preference("time.private", PREF_TIME_PRIVATE);
     _set_string_preference("time.xmlconsole", PREF_TIME_XMLCONSOLE);
     _set_string_preference("time.statusbar", PREF_TIME_STATUSBAR);

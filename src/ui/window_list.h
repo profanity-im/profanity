@@ -42,7 +42,7 @@ void wins_init(void);
 ProfWin* wins_new_xmlconsole(void);
 ProfWin* wins_new_chat(const char *const barejid);
 ProfWin* wins_new_muc(const char *const roomjid);
-ProfWin* wins_new_muc_config(const char *const roomjid, DataForm *form);
+ProfWin* wins_new_config(const char *const roomjid, DataForm *form, ProfConfWinCallback submit, ProfConfWinCallback cancel, const void *userdata);
 ProfWin* wins_new_private(const char *const fulljid);
 ProfWin* wins_new_plugin(const char *const plugin_name, const char *const tag);
 
@@ -56,7 +56,7 @@ ProfWin* wins_get_console(void);
 ProfChatWin* wins_get_chat(const char *const barejid);
 GList* wins_get_chat_unsubscribed(void);
 ProfMucWin* wins_get_muc(const char *const roomjid);
-ProfMucConfWin* wins_get_muc_conf(const char *const roomjid);
+ProfConfWin* wins_get_conf(const char *const roomjid);
 ProfPrivateWin* wins_get_private(const char *const fulljid);
 ProfPluginWin* wins_get_plugin(const char *const tag);
 ProfXMLWin* wins_get_xmlconsole(void);
@@ -68,7 +68,7 @@ ProfWin* wins_get_current(void);
 void wins_set_current_by_num(int i);
 
 ProfWin* wins_get_by_num(int i);
-ProfWin* wins_get_by_string(char *str);
+ProfWin* wins_get_by_string(const char *str);
 
 ProfWin* wins_get_next(void);
 ProfWin* wins_get_previous(void);

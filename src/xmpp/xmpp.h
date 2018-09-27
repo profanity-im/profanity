@@ -60,6 +60,7 @@
 #define XMPP_FEATURE_RECEIPTS "urn:xmpp:receipts"
 #define XMPP_FEATURE_LASTACTIVITY "jabber:iq:last"
 #define XMPP_FEATURE_MUC "http://jabber.org/protocol/muc"
+#define XMPP_FEATURE_COMMANDS "http://jabber.org/protocol/commands"
 
 typedef enum {
     JABBER_CONNECTING,
@@ -170,8 +171,8 @@ void iq_set_autoping(int seconds);
 void iq_confirm_instant_room(const char *const room_jid);
 void iq_destroy_room(const char *const room_jid);
 void iq_request_room_config_form(const char *const room_jid);
-void iq_submit_room_config(const char *const room, DataForm *form);
-void iq_room_config_cancel(const char *const room_jid);
+void iq_submit_room_config(ProfConfWin *confwin);
+void iq_room_config_cancel(ProfConfWin *confwin);
 void iq_send_ping(const char *const target);
 void iq_room_info_request(const char *const room, gboolean display_result);
 void iq_room_affiliation_list(const char *const room, char *affiliation);
@@ -182,6 +183,8 @@ void iq_room_role_set(const char *const room, const char *const nick, char *role
 void iq_room_role_list(const char * const room, char *role);
 void iq_autoping_check(void);
 void iq_http_upload_request(HTTPUpload *upload);
+void iq_command_list(const char *const target);
+void iq_command_exec(const char *const target, const char *const command);
 
 EntityCapabilities* caps_lookup(const char *const jid);
 void caps_close(void);

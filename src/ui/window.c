@@ -203,13 +203,16 @@ win_create_muc(const char *const roomjid)
 }
 
 ProfWin*
-win_create_muc_config(const char *const roomjid, DataForm *form)
+win_create_config(const char *const roomjid, DataForm *form, ProfConfWinCallback submit, ProfConfWinCallback cancel, const void *userdata)
 {
-    ProfMucConfWin *new_win = malloc(sizeof(ProfMucConfWin));
-    new_win->window.type = WIN_MUC_CONFIG;
+    ProfConfWin *new_win = malloc(sizeof(ProfConfWin));
+    new_win->window.type = WIN_CONFIG;
     new_win->window.layout = _win_create_simple_layout();
     new_win->roomjid = strdup(roomjid);
     new_win->form = form;
+    new_win->submit = submit;
+    new_win->cancel = cancel;
+    new_win->userdata = userdata;
 
     new_win->memcheck = PROFCONFWIN_MEMCHECK;
 
@@ -289,8 +292,8 @@ win_get_title(ProfWin *window)
         assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
         return strdup(mucwin->roomjid);
     }
-    if (window->type == WIN_MUC_CONFIG) {
-        ProfMucConfWin *confwin = (ProfMucConfWin*) window;
+    if (window->type == WIN_CONFIG) {
+        ProfConfWin *confwin = (ProfConfWin*) window;
         assert(confwin->memcheck == PROFCONFWIN_MEMCHECK);
         GString *title = g_string_new(confwin->roomjid);
         g_string_append(title, " config");
@@ -338,10 +341,10 @@ win_get_tab_identifier(ProfWin *window)
             ProfMucWin *mucwin = (ProfMucWin*)window;
             return strdup(mucwin->roomjid);
         }
-        case WIN_MUC_CONFIG:
+        case WIN_CONFIG:
         {
-            ProfMucConfWin *mucconfwin = (ProfMucConfWin*)window;
-            return strdup(mucconfwin->roomjid);
+            ProfConfWin *confwin = (ProfConfWin*)window;
+            return strdup(confwin->roomjid);
         }
         case WIN_PRIVATE:
         {
@@ -383,10 +386,10 @@ win_to_string(ProfWin *window)
             ProfMucWin *mucwin = (ProfMucWin*)window;
             return mucwin_get_string(mucwin);
         }
-        case WIN_MUC_CONFIG:
+        case WIN_CONFIG:
         {
-            ProfMucConfWin *mucconfwin = (ProfMucConfWin*)window;
-            return mucconfwin_get_string(mucconfwin);
+            ProfConfWin *confwin = (ProfConfWin*)window;
+            return confwin_get_string(confwin);
         }
         case WIN_PRIVATE:
         {
@@ -491,11 +494,11 @@ win_free(ProfWin* window)
         free(mucwin->message_char);
         break;
     }
-    case WIN_MUC_CONFIG:
+    case WIN_CONFIG:
     {
-        ProfMucConfWin *mucconf = (ProfMucConfWin*)window;
-        free(mucconf->roomjid);
-        form_destroy(mucconf->form);
+        ProfConfWin *conf = (ProfConfWin*)window;
+        free(conf->roomjid);
+        form_destroy(conf->form);
         break;
     }
     case WIN_PRIVATE:
@@ -1389,8 +1392,8 @@ _win_print(ProfWin *window, const char show_char, int pad_indent, GDateTime *tim
         case WIN_MUC:
             time_pref = prefs_get_string(PREF_TIME_MUC);
             break;
-        case WIN_MUC_CONFIG:
-            time_pref = prefs_get_string(PREF_TIME_MUCCONFIG);
+        case WIN_CONFIG:
+            time_pref = prefs_get_string(PREF_TIME_CONFIG);
             break;
         case WIN_PRIVATE:
             time_pref = prefs_get_string(PREF_TIME_PRIVATE);
@@ -1723,4 +1726,61 @@ win_sub_newline_lazy(WINDOW *win)
         int cury = getcury(win);
         wmove(win, cury+1, 0);
     }
+}
+
+void
+win_command_list_error(ProfWin *window, const char *const error)
+{
+    assert(window != NULL);
+
+    win_println(window, THEME_ERROR, '!', "Error retrieving command list: %s", error);
+}
+
+void
+win_command_exec_error(ProfWin *window, const char *const command, const char *const error, ...)
+{
+    assert(window != NULL);
+    va_list arg;
+    va_start(arg, error);
+    GString *msg = g_string_new(NULL);
+    g_string_vprintf(msg, error, arg);
+
+    win_println(window, THEME_ERROR, '!', "Error executing command %s: %s", command, msg->str);
+
+    g_string_free(msg, TRUE);
+    va_end(arg);
+}
+
+void
+win_handle_command_list(ProfWin *window, GSList *cmds)
+{
+    assert(window != NULL);
+
+    if (cmds) {
+        win_println(window, THEME_DEFAULT, '!', "Ad hoc commands:");
+        GSList *curr_cmd = cmds;
+        while (curr_cmd) {
+            const char *cmd = curr_cmd->data;
+            win_println(window, THEME_DEFAULT, '!', "  %s", cmd);
+            curr_cmd = g_slist_next(curr_cmd);
+        }
+        win_println(window, THEME_DEFAULT, '!', "");
+    } else {
+        win_println(window, THEME_DEFAULT, '!', "No commands found");
+        win_println(window, THEME_DEFAULT, '!', "");
+    }
+}
+
+void
+win_handle_command_exec_status(ProfWin *window, const char *const command, const char *const value)
+{
+    assert(window != NULL);
+    win_println(window, THEME_DEFAULT, '!', "%s %s", command, value);
+}
+
+void
+win_handle_command_exec_result_note(ProfWin *window, const char *const type, const char *const value)
+{
+    assert(window != NULL);
+    win_println(window, THEME_DEFAULT, '!', value);
 }
