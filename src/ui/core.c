@@ -632,8 +632,8 @@ ui_win_has_unsaved_form(int num)
 {
     ProfWin *window = wins_get_by_num(num);
 
-    if (window->type == WIN_MUC_CONFIG) {
-        ProfMucConfWin *confwin = (ProfMucConfWin*)window;
+    if (window->type == WIN_CONFIG) {
+        ProfConfWin *confwin = (ProfConfWin*)window;
         assert(confwin->memcheck == PROFCONFWIN_MEMCHECK);
         return confwin->form->modified;
     } else {
@@ -651,13 +651,13 @@ ui_focus_win(ProfWin *window)
     }
 
     ProfWin *old_current = wins_get_current();
-    if (old_current->type == WIN_MUC_CONFIG) {
-        ProfMucConfWin *confwin = (ProfMucConfWin*)old_current;
+    if (old_current->type == WIN_CONFIG) {
+        ProfConfWin *confwin = (ProfConfWin*)old_current;
         cmd_ac_remove_form_fields(confwin->form);
     }
 
-    if (window->type == WIN_MUC_CONFIG) {
-        ProfMucConfWin *confwin = (ProfMucConfWin*)window;
+    if (window->type == WIN_CONFIG) {
+        ProfConfWin *confwin = (ProfConfWin*)window;
         cmd_ac_add_form_fields(confwin->form);
     }
 
@@ -681,8 +681,8 @@ void
 ui_close_win(int index)
 {
     ProfWin *window = wins_get_by_num(index);
-    if (window && window->type == WIN_MUC_CONFIG) {
-        ProfMucConfWin *confwin = (ProfMucConfWin*)window;
+    if (window && window->type == WIN_CONFIG) {
+        ProfConfWin *confwin = (ProfConfWin*)window;
         if (confwin->form) {
             cmd_ac_remove_form_fields(confwin->form);
         }
@@ -1135,7 +1135,7 @@ ui_handle_room_config_submit_result(const char *const roomjid)
 
         GString *form_recipient = g_string_new(roomjid);
         g_string_append(form_recipient, " config");
-        form_window = (ProfWin*) wins_get_muc_conf(form_recipient->str);
+        form_window = (ProfWin*) wins_get_conf(form_recipient->str);
         g_string_free(form_recipient, TRUE);
 
         if (form_window) {
@@ -1167,7 +1167,7 @@ ui_handle_room_config_submit_result_error(const char *const roomjid, const char 
 
         GString *form_recipient = g_string_new(roomjid);
         g_string_append(form_recipient, " config");
-        form_window = (ProfWin*) wins_get_muc_conf(form_recipient->str);
+        form_window = (ProfWin*) wins_get_conf(form_recipient->str);
         g_string_free(form_recipient, TRUE);
 
         if (form_window) {

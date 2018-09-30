@@ -82,7 +82,7 @@ typedef enum {
 
 gboolean create_dir(char *name);
 gboolean mkdir_recursive(const char *dir);
-gboolean copy_file(const char *const src, const char *const target);
+gboolean copy_file(const char *const src, const char *const target, const gboolean overwrite_existing);
 char* str_replace(const char *string, const char *substr, const char *replacement);
 int str_contains(const char str[], int size, char ch);
 gboolean strtoi_range(char *str, int *saveptr, int min, int max, char **err_msg);
@@ -91,8 +91,6 @@ char* file_getline(FILE *stream);
 
 char* release_get_latest(void);
 gboolean release_is_new(char *found_version);
-
-char* p_sha1_hash(char *str);
 
 char* get_file_or_linked(char *loc, char *basedir);
 char* strip_arg_quotes(const char *const input);

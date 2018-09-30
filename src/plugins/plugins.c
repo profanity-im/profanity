@@ -34,6 +34,7 @@
 
 #include <string.h>
 #include <stdlib.h>
+#include <gio/gio.h>
 
 #include "log.h"
 #include "config.h"
@@ -149,16 +150,19 @@ plugins_install_all(const char *const path)
     get_file_paths_recursive(path, &contents);
 
     GSList *curr = contents;
+    GString *error_message = NULL;
     while (curr) {
+        error_message = g_string_new(NULL);
         if (g_str_has_suffix(curr->data, ".py") || g_str_has_suffix(curr->data, ".so")) {
             gchar *plugin_name = g_path_get_basename(curr->data);
-            if (plugins_install(plugin_name, curr->data)) {
+            if (plugins_install(plugin_name, curr->data, error_message)) {
                 result->installed = g_slist_append(result->installed, strdup(curr->data));
             } else {
                 result->failed = g_slist_append(result->failed, strdup(curr->data));
             }
         }
         curr = g_slist_next(curr);
+        g_string_free(error_message, TRUE);
     }
 
     g_slist_free_full(contents, g_free);
@@ -167,7 +171,25 @@ plugins_install_all(const char *const path)
 }
 
 gboolean
-plugins_install(const char *const plugin_name, const char *const filename)
+plugins_uninstall(const char *const plugin_name)
+{
+    plugins_unload(plugin_name);
+    char *plugins_dir = files_get_data_path(DIR_PLUGINS);   
+    GString *target_path = g_string_new(plugins_dir);
+    free(plugins_dir);
+    g_string_append(target_path, "/");
+    g_string_append(target_path, plugin_name);
+    GFile *file = g_file_new_for_path(target_path->str);
+    GError *error = NULL;
+    gboolean result = g_file_delete(file, NULL, &error);
+    g_object_unref(file);
+    g_error_free(error);
+    g_string_free(target_path, TRUE);
+    return result;
+}
+
+gboolean
+plugins_install(const char *const plugin_name, const char *const filename, GString *error_message)
 {
     char *plugins_dir = files_get_data_path(DIR_PLUGINS);
     GString *target_path = g_string_new(plugins_dir);
@@ -175,18 +197,19 @@ plugins_install(const char *const plugin_name, const char *const filename)
     g_string_append(target_path, "/");
     g_string_append(target_path, plugin_name);
 
-    ProfPlugin *plugin = g_hash_table_lookup(plugins, plugin_name);
-    if (plugin) {
-        plugins_unload(plugin_name);
+    if (g_file_test (target_path->str, G_FILE_TEST_EXISTS))
+    {
+        log_info("Failed to install plugin: %s, file exists", plugin_name);
+        g_string_assign(error_message, "File exists");
+        return FALSE;
     }
 
-    gboolean result = copy_file(filename, target_path->str);
+    gboolean result = copy_file(filename, target_path->str, false);
     g_string_free(target_path, TRUE);
 
     if (result) {
         result = plugins_load(plugin_name);
     }
-
     return result;
 }
 

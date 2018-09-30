@@ -46,6 +46,7 @@
 #include <curl/curl.h>
 #include <curl/easy.h>
 #include <glib.h>
+#include <gio/gio.h>
 
 #ifdef HAVE_NCURSESW_NCURSES_H
 #include <ncursesw/ncurses.h>
@@ -55,7 +56,6 @@
 
 #include "log.h"
 #include "common.h"
-#include "tools/p_sha1.h"
 
 struct curl_data_t
 {
@@ -105,28 +105,16 @@ mkdir_recursive(const char *dir)
 }
 
 gboolean
-copy_file(const char *const sourcepath, const char *const targetpath)
+copy_file(const char *const sourcepath, const char *const targetpath, const gboolean overwrite_existing)
 {
-    int ch;
-    FILE *source = fopen(sourcepath, "rb");
-    if (source == NULL) {
-        return FALSE;
-    }
-
-    FILE *target = fopen(targetpath, "wb");
-    if (target == NULL) {
-        fclose(source);
-        return FALSE;
-    }
-
-    while((ch = fgetc(source)) != EOF) {
-        fputc(ch, target);
-    }
-
-    fclose(source);
-    fclose(target);
-
-    return TRUE;
+    GFile *source = g_file_new_for_path(sourcepath);
+    GFile *dest = g_file_new_for_path(targetpath);
+    GError *error = NULL;
+    GFileCopyFlags flags = overwrite_existing ? G_FILE_COPY_OVERWRITE : G_FILE_COPY_NONE;
+    gboolean success = g_file_copy (source, dest, flags, NULL, NULL, NULL, &error);
+    g_object_unref(source);
+    g_object_unref(dest);
+    return success;
 }
 
 char*
@@ -328,22 +316,6 @@ release_is_new(char *found_version)
     } else {
         return FALSE;
     }
-}
-
-char*
-p_sha1_hash(char *str)
-{
-    P_SHA1_CTX ctx;
-    uint8_t digest[20];
-    uint8_t *input = (uint8_t*)malloc(strlen(str) + 1);
-    memcpy(input, str, strlen(str) + 1);
-
-    P_SHA1_Init(&ctx);
-    P_SHA1_Update(&ctx, input, strlen(str));
-    P_SHA1_Final(&ctx, digest);
-
-    free(input);
-    return g_base64_encode(digest, sizeof(digest));
 }
 
 static size_t

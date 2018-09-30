@@ -424,7 +424,7 @@ static struct cmd_t command_defs[] =
             "View, add to, and remove from roster groups. "
             "Passing no argument will list all roster groups.")
         CMD_ARGS(
-            { "show <group>",             "List all roster items a group." },
+            { "show <group>",             "List all roster items in a group." },
             { "add <group> <contact>",    "Add a contact to a group." },
             { "remove <group> <contact>", "Remove a contact from a group." })
         CMD_EXAMPLES(
@@ -1265,8 +1265,8 @@ static struct cmd_t command_defs[] =
         CMD_TAGS(
             CMD_TAG_UI)
         CMD_SYN(
-            "/time console|chat|muc|mucconfig|private|xml set <format>",
-            "/time console|chat|muc|mucconfig|private|xml off",
+            "/time console|chat|muc|config|private|xml set <format>",
+            "/time console|chat|muc|config|private|xml off",
             "/time statusbar set <format>",
             "/time statusbar off",
             "/time lastactivity set <format>")
@@ -1283,8 +1283,8 @@ static struct cmd_t command_defs[] =
             { "chat off",                  "Do not show time in chat windows." },
             { "muc set <format>",          "Set time format for chat room windows." },
             { "muc off",                   "Do not show time in chat room windows." },
-            { "mucconfig set <format>",    "Set time format for chat room config windows." },
-            { "mucconfig off",             "Do not show time in chat room config windows." },
+            { "config set <format>",       "Set time format for config windows." },
+            { "config off",                "Do not show time in config windows." },
             { "private set <format>",      "Set time format for private chat windows." },
             { "private off",               "Do not show time in private chat windows." },
             { "xml set <format>",          "Set time format for XML console window." },
@@ -2084,6 +2084,8 @@ static struct cmd_t command_defs[] =
         CMD_SUBFUNCS(
             { "sourcepath",     cmd_plugins_sourcepath },
             { "install",        cmd_plugins_install },
+            { "uninstall",      cmd_plugins_uninstall },
+            { "update",         cmd_plugins_update },
             { "load",           cmd_plugins_load },
             { "unload",         cmd_plugins_unload },
             { "reload",         cmd_plugins_reload },
@@ -2095,6 +2097,8 @@ static struct cmd_t command_defs[] =
             "/plugins sourcepath set <path>",
             "/plugins sourcepath clear",
             "/plugins install [<path>]",
+            "/plugins uninstall [<plugin>]",
+            "/plugins update [<path>]",
             "/plugins unload [<plugin>]",
             "/plugins load [<plugin>]",
             "/plugins reload [<plugin>]",
@@ -2105,6 +2109,8 @@ static struct cmd_t command_defs[] =
             { "sourcepath set <path>",  "Set the default path to install plugins from, will be used if no arg is passed to /plugins install." },
             { "sourcepath clear",       "Clear the default plugins source path." },
             { "install [<path>]",       "Install a plugin, or all plugins found in a directory (recursive). Passing no argument will use the sourcepath if one is set." },
+            { "uninstall [<plugin>]",   "Uninstall a plugin." },
+            { "update [<path>]",        "Updates an installed plugin" },
             { "load [<plugin>]",        "Load a plugin that already exists in the plugin directory, passing no argument loads all found plugins." },
             { "unload [<plugin>]",      "Unload a loaded plugin, passing no argument will unload all plugins." },
             { "reload [<plugin>]",      "Reload a plugin, passing no argument will reload all plugins." },
@@ -2113,6 +2119,8 @@ static struct cmd_t command_defs[] =
             "/plugins sourcepath set /home/meee/projects/profanity-plugins",
             "/plugins install",
             "/plugins install /home/steveharris/Downloads/metal.py",
+            "/plugins update /home/steveharris/Downloads/metal.py",
+            "/plugins uninstall browser.py",
             "/plugins load browser.py",
             "/plugins unload say.py",
             "/plugins reload wikipedia.py")
@@ -2298,6 +2306,26 @@ static struct cmd_t command_defs[] =
         CMD_EXAMPLES(
             "/export /path/to/output.csv",
             "/export ~/contacts.csv")
+    },
+
+    { "/cmd",
+        parse_args, 1, 3, NULL,
+        CMD_SUBFUNCS(
+            { "list", cmd_command_list },
+            { "exec", cmd_command_exec })
+        CMD_NOMAINFUNC
+        CMD_NOTAGS
+        CMD_SYN(
+            "/cmd list [<jid>]",
+            "/cmd exec <command> [<jid>]")
+        CMD_DESC(
+            "Execute ad hoc commands.")
+        CMD_ARGS(
+            { "list",           "List supported ad hoc commands." },
+            { "exec <command>", "Execute a command." })
+        CMD_EXAMPLES(
+            "/cmd list",
+            "/cmd exec ping")
     }
 };
 

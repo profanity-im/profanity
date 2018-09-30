@@ -34,7 +34,7 @@ const char * connection_get_fulljid(void)
     return (char *)mock();
 }
 
-const char * session_get_domain(void)
+const char * connection_get_domain(void)
 {
     return NULL;
 }
@@ -185,8 +185,8 @@ void iq_http_upload_request(HTTPUpload *upload) {}
 void iq_confirm_instant_room(const char * const room_jid) {}
 void iq_destroy_room(const char * const room_jid) {}
 void iq_request_room_config_form(const char * const room_jid) {}
-void iq_submit_room_config(const char * const room, DataForm *form) {}
-void iq_room_config_cancel(const char * const room_jid) {}
+void iq_submit_room_config(ProfConfWin *confwin) {}
+void iq_room_config_cancel(ProfConfWin *confwin) {}
 void iq_send_ping(const char * const target) {}
 void iq_send_caps_request(const char * const to, const char * const id,
     const char * const node, const char * const ver) {}
@@ -205,6 +205,8 @@ void iq_room_role_list(const char * const room, char *role) {}
 void iq_last_activity_request(gchar *jid) {}
 void iq_autoping_check(void) {}
 void iq_rooms_cache_clear(void) {}
+void iq_command_list(const char *const target) {}
+void iq_command_exec(const char *const target, const char *const command) {}
 
 // caps functions
 void caps_add_feature(char *feature) {}

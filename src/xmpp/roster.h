@@ -38,5 +38,6 @@
 void roster_request(void);
 void roster_set_handler(xmpp_stanza_t *const stanza);
 void roster_result_handler(xmpp_stanza_t *const stanza);
+GSList* roster_get_groups_from_item(xmpp_stanza_t *const item);
 
 #endif

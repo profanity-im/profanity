@@ -29,7 +29,7 @@ core_sources = \
 	src/ui/chatwin.c \
 	src/ui/mucwin.c \
 	src/ui/privwin.c \
-	src/ui/mucconfwin.c \
+	src/ui/confwin.c \
 	src/ui/xmlwin.c \
 	src/command/cmd_defs.h src/command/cmd_defs.c \
 	src/command/cmd_funcs.h src/command/cmd_funcs.c \
@@ -38,7 +38,6 @@ core_sources = \
 	src/tools/parser.h \
 	src/tools/http_upload.c \
 	src/tools/http_upload.h \
-	src/tools/p_sha1.h src/tools/p_sha1.c \
 	src/tools/autocomplete.c src/tools/autocomplete.h \
 	src/tools/tinyurl.c src/tools/tinyurl.h \
 	src/config/files.c src/config/files.h \
@@ -75,7 +74,6 @@ unittest_sources = \
 	src/command/cmd_ac.h src/command/cmd_ac.c \
 	src/tools/parser.c \
 	src/tools/parser.h \
-	src/tools/p_sha1.h src/tools/p_sha1.c \
 	src/tools/autocomplete.c src/tools/autocomplete.h \
 	src/tools/tinyurl.c src/tools/tinyurl.h \
 	src/config/accounts.h \

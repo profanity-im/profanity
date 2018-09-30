@@ -45,6 +45,7 @@
 #include <stdio.h>
 #include <libgen.h>
 #include <inttypes.h>
+#include <assert.h>
 
 #include <glib.h>
 
@@ -66,6 +67,7 @@
 #include "xmpp/muc.h"
 
 static void _stanza_add_unique_id(xmpp_stanza_t *stanza, char *prefix);
+static char* _stanza_create_sha1_hash(char *str);
 
 #if 0
 xmpp_stanza_t*
@@ -924,7 +926,7 @@ stanza_create_disco_info_iq(xmpp_ctx_t *ctx, const char *const id, const char *c
 
 xmpp_stanza_t*
 stanza_create_disco_items_iq(xmpp_ctx_t *ctx, const char *const id,
-    const char *const jid)
+    const char *const jid, const char *const node)
 {
     xmpp_stanza_t *iq = xmpp_iq_new(ctx, STANZA_TYPE_GET, id);
     xmpp_stanza_set_to(iq, jid);
@@ -932,6 +934,9 @@ stanza_create_disco_items_iq(xmpp_ctx_t *ctx, const char *const id,
     xmpp_stanza_t *query = xmpp_stanza_new(ctx);
     xmpp_stanza_set_name(query, STANZA_NAME_QUERY);
     xmpp_stanza_set_ns(query, XMPP_NS_DISCO_ITEMS);
+    if (node) {
+        xmpp_stanza_set_attribute(query, STANZA_ATTR_NODE, node);
+    }
 
     xmpp_stanza_add_child(iq, query);
     xmpp_stanza_release(query);
@@ -1143,7 +1148,7 @@ stanza_create_caps_sha1_from_query(xmpp_stanza_t *const query)
         curr = g_slist_next(curr);
     }
 
-    char *result = p_sha1_hash(s->str);
+    char *result = _stanza_create_sha1_hash(s->str);
 
     g_string_free(s, TRUE);
     g_slist_free_full(identities, g_free);
@@ -2038,10 +2043,72 @@ stanza_parse_presence(xmpp_stanza_t *stanza, int *err)
     return result;
 }
 
+xmpp_stanza_t*
+stanza_create_command_exec_iq(xmpp_ctx_t *ctx, const char *const target,
+    const char *const node)
+{
+    char *id = connection_create_stanza_id("cmdexec");
+    xmpp_stanza_t *iq = xmpp_iq_new(ctx, STANZA_TYPE_SET, id);
+    free(id);
+    xmpp_stanza_set_to(iq, target);
+
+    xmpp_stanza_t *command = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(command, STANZA_NAME_COMMAND);
+
+    xmpp_stanza_set_ns(command, STANZA_NS_COMMAND);
+    xmpp_stanza_set_attribute(command, "node", node);
+    xmpp_stanza_set_attribute(command, "action", "execute");
+
+    xmpp_stanza_add_child(iq, command);
+    xmpp_stanza_release(command);
+
+    return iq;
+}
+
+xmpp_stanza_t*
+stanza_create_command_config_submit_iq(xmpp_ctx_t *ctx, const char *const room,
+    const char *const node, const char *const sessionid, DataForm *form)
+{
+    char *id = connection_create_stanza_id("commandconf_submit");
+    xmpp_stanza_t *iq = xmpp_iq_new(ctx, STANZA_TYPE_SET, id);
+    free(id);
+    xmpp_stanza_set_to(iq, room);
+
+    xmpp_stanza_t *command = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(command, STANZA_NAME_COMMAND);
+    xmpp_stanza_set_ns(command, STANZA_NS_COMMAND);
+    xmpp_stanza_set_attribute(command, "node", node);
+    xmpp_stanza_set_attribute(command, "sessionid", sessionid);
+
+    xmpp_stanza_t *x = form_create_submission(form);
+    xmpp_stanza_add_child(command, x);
+    xmpp_stanza_release(x);
+
+    xmpp_stanza_add_child(iq, command);
+    xmpp_stanza_release(command);
+
+    return iq;
+}
+
 static void
 _stanza_add_unique_id(xmpp_stanza_t *stanza, char *prefix)
 {
     char *id = connection_create_stanza_id(prefix);
     xmpp_stanza_set_id(stanza, id);
     free(id);
+}
+
+static char*
+_stanza_create_sha1_hash(char *str)
+{
+   unsigned char *digest = (unsigned char*)malloc(XMPP_SHA1_DIGEST_SIZE);
+   assert(digest != NULL);
+
+   xmpp_sha1_digest((unsigned char*)str, strlen(str), digest);
+
+   char *b64 = g_base64_encode(digest, XMPP_SHA1_DIGEST_SIZE);
+   assert(b64 != NULL);
+   free(digest);
+
+   return b64;
 }
