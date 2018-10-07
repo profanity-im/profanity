@@ -4,11 +4,20 @@
 - Allow moving vertical window positions (/titlebar, /mainwin, /statusbar, /inputwin)
 - Allow loading/unloading all plugins (/plugins)
 - Allow installing plugins from directory (/plugins)
+- Allow uninstallation of plugins (/plugins uninstall)
+- Allow update of plugins (/plugins update)
 - Theme option for status bar time (statusbar.time)
 - Case/accent insensitive autocompletion
 - Shift tab to select previous autocomplete suggestion
 - Allow searching help (/help search_all|search_any)
 - Support for Legacy SSL
+- Allow caching of rooms (/rooms cache)
+- Add autocompletion for servername when listing rooms (/rooms service)
+- Allow showing/disabling tab number in statusbar (/statusbar show)
+- Adjust configure for OpenBSD
+- Use UUIDs instead of counter for messages
+- Support basic ad-hoc commands(xep-0050) (/command)
+- Bug fixes: https://github.com/boothj5/profanity/milestone/16?closed=1
 
 0.5.1
 =====
