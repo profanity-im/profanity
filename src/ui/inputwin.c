@@ -98,6 +98,7 @@ static void _inp_rl_linehandler(char *line);
 static int _inp_rl_tab_handler(int count, int key);
 static int _inp_rl_shift_tab_handler(int count, int key);
 static int _inp_rl_win_clear_handler(int count, int key);
+static int _inp_rl_win_close_handler(int count, int key);
 static int _inp_rl_win_1_handler(int count, int key);
 static int _inp_rl_win_2_handler(int count, int key);
 static int _inp_rl_win_3_handler(int count, int key);
@@ -387,6 +388,7 @@ _inp_rl_addfuncs(void)
     rl_add_funmap_entry("prof_subwin_pageup", _inp_rl_subwin_pageup_handler);
     rl_add_funmap_entry("prof_subwin_pagedown", _inp_rl_subwin_pagedown_handler);
     rl_add_funmap_entry("prof_win_clear", _inp_rl_win_clear_handler);
+    rl_add_funmap_entry("prof_win_close", _inp_rl_win_close_handler);
 }
 
 // Readline callbacks
@@ -500,6 +502,15 @@ _inp_rl_win_clear_handler(int count, int key)
 {
     ProfWin *win = wins_get_current();
     win_clear(win);
+    return 0;
+}
+
+static int
+_inp_rl_win_close_handler(int count, int key)
+{
+    ProfWin *win = wins_get_current();
+    gchar* args = 0;
+    cmd_close(win, 0, &args);
     return 0;
 }
 
