@@ -21,9 +21,9 @@ typedef struct http_upload_t {
 
 //GSList *upload_processes;
 
-void* http_file_put(void *userdata) {}
+void* http_file_put(void *userdata) { return NULL; }
 
-char* file_mime_type(const char* const file_name) {}
-off_t file_size(const char* const file_name) {}
+char* file_mime_type(const char* const file_name) { return NULL; }
+off_t file_size(const char* const file_name) { return 0; }
 
 #endif
