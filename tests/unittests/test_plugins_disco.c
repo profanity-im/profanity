@@ -64,11 +64,11 @@ returns_all_added_features(void **state)
     GList *features = disco_get_features();
 
     assert_int_equal(g_list_length(features), 5);
-    assert_true(g_list_find_custom(features, "first:feature", g_strcmp0));
-    assert_true(g_list_find_custom(features, "second:feature", g_strcmp0));
-    assert_true(g_list_find_custom(features, "third:feature", g_strcmp0));
-    assert_true(g_list_find_custom(features, "fourth:feature", g_strcmp0));
-    assert_true(g_list_find_custom(features, "fifth:feature", g_strcmp0));
+    assert_true(g_list_find_custom(features, "first:feature", (GCompareFunc)g_strcmp0));
+    assert_true(g_list_find_custom(features, "second:feature", (GCompareFunc)g_strcmp0));
+    assert_true(g_list_find_custom(features, "third:feature", (GCompareFunc)g_strcmp0));
+    assert_true(g_list_find_custom(features, "fourth:feature", (GCompareFunc)g_strcmp0));
+    assert_true(g_list_find_custom(features, "fifth:feature", (GCompareFunc)g_strcmp0));
 
     g_list_free(features);
     disco_close();

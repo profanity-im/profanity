@@ -228,7 +228,6 @@ endif
 TESTS = tests/unittests/unittests
 check_PROGRAMS = tests/unittests/unittests
 tests_unittests_unittests_SOURCES = $(unittest_sources)
-tests_unittests_unittests_CFLAGS = -w
 tests_unittests_unittests_LDADD = -lcmocka
 
 # Functional test were commented out because of:

@@ -13,6 +13,8 @@
 #include "ui/ui.h"
 #include "ui/stub_ui.h"
 #include "xmpp/muc.h"
+#include "plugins/plugins.h"
+#include "ui/window_list.h"
 
 void console_shows_online_presence_when_set_online(void **state)
 {
