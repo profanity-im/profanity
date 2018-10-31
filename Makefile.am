@@ -181,9 +181,9 @@ endif
 otr_unittest_sources = \
 	tests/unittests/otr/stub_otr.c
 
-themes_sources = themes/*
+themes_sources = $(top_srcdir)/themes/*
 
-icons_sources = icons/*
+icons_sources = $(top_srcdir)/icons/*
 
 script_sources = bootstrap.sh configure-debug
 
@@ -203,6 +203,8 @@ if BUILD_OTR4
 core_sources += $(otr4_sources)
 endif
 endif
+
+AM_CFLAGS = @AM_CFLAGS@ -I$(srcdir)/src
 
 bin_PROGRAMS = profanity
 profanity_SOURCES = $(core_sources) $(main_source)
@@ -241,7 +243,7 @@ tests_unittests_unittests_LDADD = -lcmocka
 #TESTS += tests/functionaltests/functionaltests
 #check_PROGRAMS += tests/functionaltests/functionaltests
 #tests_functionaltests_functionaltests_SOURCES = $(functionaltest_sources)
-#tests_functionaltests_functionaltests_CFLAGS = -I/usr/include/tcl8.6 -I/usr/include/tcl8.5
+#tests_functionaltests_functionaltests_CFLAGS = $(AM_CFLAGS) -I/usr/include/tcl8.6 -I/usr/include/tcl8.5
 #tests_functionaltests_functionaltests_LDADD = -lcmocka -lstabber -lexpect -ltcl
 #endif
 #endif
