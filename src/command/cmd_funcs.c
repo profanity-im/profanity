@@ -393,6 +393,14 @@ cmd_connect(ProfWin *window, const char *const command, gchar **args)
     // connect with account
     ProfAccount *account = accounts_get_account(lower);
     if (account) {
+        // override account options with connect options
+        if (altdomain != NULL)
+            account_set_server(account, altdomain);
+        if (port != 0)
+            account_set_port(account, port);
+        if (tls_policy != NULL)
+            account_set_tls_policy(account, tls_policy);
+
         // use password if set
         if (account->password) {
             conn_status = cl_ev_connect_account(account);
