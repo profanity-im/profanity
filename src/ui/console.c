@@ -2391,7 +2391,7 @@ _cons_splash_logo(void)
     win_println(console, THEME_SPLASH, '-', "                 / __)          (_)_         ");
     win_println(console, THEME_SPLASH, '-', " ____   ___ ___ | |__ ____ ____  _| |_ _   _ ");
     win_println(console, THEME_SPLASH, '-', "|  _ \\ / __) _ \\|  __) _  |  _ \\| |  _) | | |");
-    win_println(console, THEME_SPLASH, '-', "| | ) | | ( (_) | | ( ( ( | | | | | |_| |_| |");
+    win_println(console, THEME_SPLASH, '-', "| | ) | | | (_) | | | ( | | | | | | |_| |_| |");
     win_println(console, THEME_SPLASH, '-', "| ||_/|_|  \\___/|_|  \\_||_|_| |_|_|\\___)__  |");
     win_println(console, THEME_SPLASH, '-', "|_|                                   (____/ ");
     win_println(console, THEME_SPLASH, '-', "");
