@@ -2387,13 +2387,13 @@ _cons_splash_logo(void)
     ProfWin *console = wins_get_console();
     win_println(console, THEME_DEFAULT, '-', "Welcome to");
 
-    win_println(console, THEME_SPLASH, '-', "                   ___            _           ");
-    win_println(console, THEME_SPLASH, '-', "                  / __)          (_)_         ");
-    win_println(console, THEME_SPLASH, '-', " ____   ____ ___ | |__ ____ ____  _| |_ _   _ ");
-    win_println(console, THEME_SPLASH, '-', "|  _ \\ / ___) _ \\|  __) _  |  _ \\| |  _) | | |");
-    win_println(console, THEME_SPLASH, '-', "| | | | |  | |_| | | ( ( | | | | | | |_| |_| |");
-    win_println(console, THEME_SPLASH, '-', "| ||_/|_|   \\___/|_|  \\_||_|_| |_|_|\\___)__  |");
-    win_println(console, THEME_SPLASH, '-', "|_|                                    (____/ ");
+    win_println(console, THEME_SPLASH, '-', "                  ___            _           ");
+    win_println(console, THEME_SPLASH, '-', "                 / __)          (_)_         ");
+    win_println(console, THEME_SPLASH, '-', " ____   ___ ___ | |__ ____ ____  _| |_ _   _ ");
+    win_println(console, THEME_SPLASH, '-', "|  _ \\ / __) _ \\|  __) _  |  _ \\| |  _) | | |");
+    win_println(console, THEME_SPLASH, '-', "| | ) | | | (_) | | | ( | | | | | | |_| |_| |");
+    win_println(console, THEME_SPLASH, '-', "| ||_/|_|  \\___/|_|  \\_||_|_| |_|_|\\___)__  |");
+    win_println(console, THEME_SPLASH, '-', "|_|                                   (____/ ");
     win_println(console, THEME_SPLASH, '-', "");
 
     if (strcmp(PACKAGE_STATUS, "development") == 0) {
