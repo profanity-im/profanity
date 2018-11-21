@@ -384,7 +384,7 @@ static struct cmd_t command_defs[] =
             "/roster add someone@contacts.org",
             "/roster add someone@contacts.org Buddy",
             "/roster remove someone@contacts.org",
-            "/roster nick myfriend@chat.org My Friend",
+            "/roster nick myfriend@chat.org \"My Friend\"",
             "/roster clearnick kai@server.com",
             "/roster size 15")
     },
