@@ -52,8 +52,8 @@ int main(int argc, char* argv[]) {
     if (codeset) {
         printf("  CODESET:    %s\n", codeset);
     }
-    printf("  MB_CUR_MAX: %d\n", MB_CUR_MAX);
-    printf("  MB_LEN_MAX: %d\n", MB_LEN_MAX);
+    printf("  MB_CUR_MAX: %d\n", (int)MB_CUR_MAX);
+    printf("  MB_LEN_MAX: %d\n", (int)MB_LEN_MAX);
 
     const UnitTest all_tests[] = {
 

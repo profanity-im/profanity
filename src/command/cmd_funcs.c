@@ -351,6 +351,7 @@ cmd_connect(ProfWin *window, const char *const command, gchar **args)
     if (tls_policy &&
             (g_strcmp0(tls_policy, "force") != 0) &&
             (g_strcmp0(tls_policy, "allow") != 0) &&
+            (g_strcmp0(tls_policy, "trust") != 0) &&
             (g_strcmp0(tls_policy, "disable") != 0) &&
             (g_strcmp0(tls_policy, "legacy") != 0)) {
         cons_bad_cmd_usage(command);
@@ -392,6 +393,14 @@ cmd_connect(ProfWin *window, const char *const command, gchar **args)
     // connect with account
     ProfAccount *account = accounts_get_account(lower);
     if (account) {
+        // override account options with connect options
+        if (altdomain != NULL)
+            account_set_server(account, altdomain);
+        if (port != 0)
+            account_set_port(account, port);
+        if (tls_policy != NULL)
+            account_set_tls_policy(account, tls_policy);
+
         // use password if set
         if (account->password) {
             conn_status = cl_ev_connect_account(account);
@@ -815,6 +824,7 @@ _account_set_tls(char *account_name, char *policy)
 {
     if ((g_strcmp0(policy, "force") != 0)
             && (g_strcmp0(policy, "allow") != 0)
+            && (g_strcmp0(policy, "trust") != 0)
             && (g_strcmp0(policy, "disable") != 0)
             && (g_strcmp0(policy, "legacy") != 0)) {
         cons_show("TLS policy must be one of: force, allow, legacy or disable.");

@@ -150,6 +150,9 @@ connection_connect(const char *const jid, const char *const passwd, const char *
 
     if (!tls_policy || (g_strcmp0(tls_policy, "force") == 0)) {
         xmpp_conn_set_flags(conn.xmpp_conn, XMPP_CONN_FLAG_MANDATORY_TLS);
+    } else if (g_strcmp0(tls_policy, "trust") == 0) {
+        xmpp_conn_set_flags(conn.xmpp_conn, XMPP_CONN_FLAG_MANDATORY_TLS);
+        xmpp_conn_set_flags(conn.xmpp_conn, XMPP_CONN_FLAG_TRUST_TLS);
     } else if (g_strcmp0(tls_policy, "disable") == 0) {
         xmpp_conn_set_flags(conn.xmpp_conn, XMPP_CONN_FLAG_DISABLE_TLS);
     } else if (g_strcmp0(tls_policy, "legacy") == 0) {

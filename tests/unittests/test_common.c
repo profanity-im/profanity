@@ -1,3 +1,4 @@
+#include "xmpp/resource.h"
 #include "common.h"
 #include <stdarg.h>
 #include <stddef.h>
@@ -316,8 +317,8 @@ _lists_equal(GSList *a, GSList *b)
             return FALSE;
         }
 
-        curra = g_list_next(curra);
-        currb = g_list_next(currb);
+        curra = g_slist_next(curra);
+        currb = g_slist_next(currb);
     }
 
     return TRUE;

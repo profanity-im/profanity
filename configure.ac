@@ -248,19 +248,17 @@ AM_CONDITIONAL([BUILD_OTR], [false])
 AM_CONDITIONAL([BUILD_OTR3], [false])
 AM_CONDITIONAL([BUILD_OTR4], [false])
 if test "x$enable_otr" != xno; then
-    AC_SEARCH_LIBS([otrl_init], [otr],
-        [AC_COMPILE_IFELSE(
-            [AC_LANG_PROGRAM([[
-            #include <libotr/version.h>
-            ]],[[
-            #if OTRL_VERSION_MAJOR == 4
-            // OK
-            #else
-            # assume version 3
-            #endif
-            ]])],
-            [AM_CONDITIONAL([BUILD_OTR], [true]) AM_CONDITIONAL([BUILD_OTR4], [true]) AC_DEFINE([HAVE_LIBOTR], [1], [Have libotr])],
-            [AM_CONDITIONAL([BUILD_OTR], [true]) AM_CONDITIONAL([BUILD_OTR3], [true]) AC_DEFINE([HAVE_LIBOTR], [1], [Have libotr])])],
+    AM_CONDITIONAL([BUILD_OTR], [true])
+    PKG_CHECK_MODULES([libotr], [libotr >= 4.0],
+        [AM_CONDITIONAL([BUILD_OTR4], [true])],
+        [AC_MSG_NOTICE([libotr >= 4.0 not found, checking for libotr-3.x...])
+         PKG_CHECK_MODULES([libotr], [libotr >= 3.0],
+            [AM_CONDITIONAL([BUILD_OTR3], [true])],
+            [AM_CONDITIONAL([BUILD_OTR], [false])])])
+
+    AM_COND_IF([BUILD_OTR],
+        [LIBS="$libotr_LIBS $LIBS" CFLAGS="$CFLAGS $libotr_CFLAGS"
+         AC_DEFINE([HAVE_LIBOTR], [1], [Have libotr])],
         [AS_IF([test "x$enable_otr" = xyes],
             [AC_MSG_ERROR([libotr is required for otr encryption support])],
             [AC_MSG_NOTICE([libotr not found, otr encryption support not enabled])])])

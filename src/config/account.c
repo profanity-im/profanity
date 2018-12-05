@@ -241,3 +241,20 @@ account_free(ProfAccount *account)
     g_list_free_full(account->otr_always, g_free);
     free(account);
 }
+
+void account_set_server(ProfAccount *account, const char *server)
+{
+    free(account->server);
+    account->server = strdup(server);
+}
+
+void account_set_port(ProfAccount *account, int port)
+{
+    account->port = port;
+}
+
+void account_set_tls_policy(ProfAccount *account, const char *tls_policy)
+{
+    free(account->tls_policy);
+    account->tls_policy = strdup(tls_policy);
+}

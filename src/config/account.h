@@ -77,5 +77,8 @@ ProfAccount* account_new(const gchar *const name, const gchar *const jid,
 char* account_create_connect_jid(ProfAccount *account);
 gboolean account_eval_password(ProfAccount *account);
 void account_free(ProfAccount *account);
+void account_set_server(ProfAccount *account, const char *server);
+void account_set_port(ProfAccount *account, int port);
+void account_set_tls_policy(ProfAccount *account, const char *tls_policy);
 
 #endif
