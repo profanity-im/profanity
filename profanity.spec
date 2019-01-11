@@ -1,5 +1,5 @@
 Name:		profanity
-Version:	0.5.1
+Version:	0.6.0
 Release:	2%{?dist}
 Summary:	A console based XMPP client
 
@@ -9,6 +9,8 @@ URL:		http://www.profanity.im/
 Source0:	%{name}-%{version}.tar.gz
 
 BuildRequires:	libstrophe-devel
+# or:
+#BuildRequires:	libmesode-devel
 BuildRequires:	libcurl-devel
 BuildRequires:	ncurses-devel
 BuildRequires:	openssl-devel
