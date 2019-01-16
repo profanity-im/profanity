@@ -9,13 +9,13 @@ Usually release candidates are tagged 0.6.0.rc1, 0.6.0.rc2 and tested for a week
 * Run manual valgrind tests for new features
 * Build and simple tests in Virtual machines ideally all dists including OSX and Windows (Cygwin)
 
-* Update Inline help
+* Update Inline command help (./src/command/cmd_defs.c)
 * Check copright dates in all files (Copywright 2012-2019)
 
 * Generate HTML docs (the docgen argument only works when package status is development)
     `./profanity docgen`
 
-* Update plugin docs
+* Update plugin API docs (./apidocs/c and ./apidocs/python) need to run the `gen.sh` and commit the results to the website git repo
 * Update CHANGELOG
 * Update profrc.example
 
