@@ -2078,7 +2078,9 @@ stanza_create_command_config_submit_iq(xmpp_ctx_t *ctx, const char *const room,
     xmpp_stanza_set_name(command, STANZA_NAME_COMMAND);
     xmpp_stanza_set_ns(command, STANZA_NS_COMMAND);
     xmpp_stanza_set_attribute(command, "node", node);
-    xmpp_stanza_set_attribute(command, "sessionid", sessionid);
+    if (sessionid != NULL) {
+        xmpp_stanza_set_attribute(command, "sessionid", sessionid);
+    }
 
     xmpp_stanza_t *x = form_create_submission(form);
     xmpp_stanza_add_child(command, x);
