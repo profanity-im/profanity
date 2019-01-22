@@ -1,7 +1,7 @@
 /*
  * confwin.c
  *
- * Copyright (C) 2012 - 2018 James Booth <boothj5@gmail.com>
+ * Copyright (C) 2012 - 2019 James Booth <boothj5@gmail.com>
  *
  * This file is part of Profanity.
  *
