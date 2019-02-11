@@ -1,7 +1,7 @@
 /*
  * iq.c
  *
- * Copyright (C) 2012 - 2018 James Booth <boothj5@gmail.com>
+ * Copyright (C) 2012 - 2019 James Booth <boothj5@gmail.com>
  *
  * This file is part of Profanity.
  *
@@ -1226,10 +1226,15 @@ _command_exec_response_handler(xmpp_stanza_t *const stanza, void *const userdata
             win_command_exec_error(win, command, "Unsupported command response");
             return 0;
         }
+        const char *sessionid = xmpp_stanza_get_attribute(cmd, "sessionid");
 
         DataForm *form = form_create(x);
         CommandConfigData *data = malloc(sizeof(CommandConfigData));
-        data->sessionid = strdup(xmpp_stanza_get_attribute(cmd, "sessionid"));
+        if (sessionid == NULL) {
+            data->sessionid = NULL;
+        } else {
+            data->sessionid = strdup(sessionid);
+        }
         data->command = command;
         ProfConfWin *confwin = (ProfConfWin*)wins_new_config(from, form, iq_submit_command_config, iq_cancel_command_config, data);
         confwin_handle_configuration(confwin, form);
