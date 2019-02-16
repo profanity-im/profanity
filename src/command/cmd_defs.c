@@ -1009,7 +1009,7 @@ static struct cmd_t command_defs[] =
         CMD_EXAMPLES(
             "/sub request myfriend@jabber.org",
             "/sub allow myfriend@jabber.org",
-            "/sub request",
+            "/sub received",
             "/sub sent")
     },
 
