@@ -1935,7 +1935,7 @@ static struct cmd_t command_defs[] =
             "/autoaway message away|xa <message>|off",
             "/autoaway check on|off")
         CMD_DESC(
-            "Manage autoway settings for idle time.")
+            "Manage autoaway settings for idle time.")
         CMD_ARGS(
             { "mode idle",              "Sends idle time, status remains online." },
             { "mode away",              "Sends away and xa presence as well as idle time." },
