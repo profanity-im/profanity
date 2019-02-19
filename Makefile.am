@@ -70,6 +70,7 @@ unittest_sources = \
 	src/otr/otr.h \
 	src/pgp/gpg.h \
 	src/omemo/omemo.h \
+	src/omemo/crypto.h \
 	src/command/cmd_defs.h src/command/cmd_defs.c \
 	src/command/cmd_funcs.h src/command/cmd_funcs.c \
 	src/command/cmd_ac.h src/command/cmd_ac.c \
@@ -170,7 +171,7 @@ otr4_sources = \
 	src/otr/otrlib.h src/otr/otrlibv4.c src/otr/otr.h src/otr/otr.c
 
 omemo_sources = \
-	src/omemo/omemo.h src/omemo/omemo.c
+	src/omemo/omemo.h src/omemo/omemo.c src/omemo/crypto.h src/omemo/crypto.c
 
 if BUILD_PYTHON_API
 core_sources += $(python_sources)
