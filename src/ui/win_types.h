@@ -152,6 +152,7 @@ typedef struct prof_chat_win_t {
     gboolean otr_is_trusted;
     gboolean pgp_send;
     gboolean pgp_recv;
+    gboolean is_omemo;
     char *resource_override;
     gboolean history_shown;
     unsigned long memcheck;

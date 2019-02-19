@@ -270,7 +270,7 @@ AM_CONDITIONAL([BUILD_OMEMO], [false])
 if test "x$enable_omemo" != xno; then
     AC_CHECK_LIB([signal-protocol-c], [signal_context_create],
         [AM_CONDITIONAL([BUILD_OMEMO], [true])
-         AC_DEFINE([HAVE_LIBSIGNAL_PROTOCOL], [1], [Have omemo]),
+         AC_DEFINE([HAVE_OMEMO], [1], [Have omemo]),
          LIBS="-lsignal-protocol-c $LIBS"],
         [AS_IF([test "x$enable_omemo" = xyes],
             [AC_MSG_ERROR([libsignal-protocol-c is required for omemo support])],
@@ -278,7 +278,7 @@ if test "x$enable_omemo" != xno; then
 
     AC_CHECK_LIB([sodium], [sodium_init],
         [AM_CONDITIONAL([BUILD_OMEMO], [true])
-         AC_DEFINE([HAVE_LIBSIGNAL_PROTOCOL], [1], [Have omemo]),
+         AC_DEFINE([HAVE_OMEMO], [1], [Have omemo]),
          LIBS="-lsodium $LIBS"],
         [AS_IF([test "x$enable_omemo" = xyes],
             [AC_MSG_ERROR([libsodium is required for omemo support])],

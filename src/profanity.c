@@ -80,6 +80,10 @@
 #include "pgp/gpg.h"
 #endif
 
+#ifdef HAVE_OMEMO
+#include "omemo/omemo.h"
+#endif
+
 static void _init(char *log_level);
 static void _shutdown(void);
 static void _connect_default(const char * const account);
@@ -196,6 +200,9 @@ _init(char *log_level)
 #endif
 #ifdef HAVE_LIBGPGME
     p_gpg_init();
+#endif
+#ifdef HAVE_OMEMO
+    omemo_init();
 #endif
     atexit(_shutdown);
     plugins_init();

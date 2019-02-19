@@ -143,6 +143,7 @@ win_create_chat(const char *const barejid)
     new_win->otr_is_trusted = FALSE;
     new_win->pgp_recv = FALSE;
     new_win->pgp_send = FALSE;
+    new_win->is_omemo = FALSE;
     new_win->history_shown = FALSE;
     new_win->unread = 0;
     new_win->state = chat_state_new();

@@ -85,7 +85,7 @@
 #include "pgp/gpg.h"
 #endif
 
-#ifdef HAVE_LIBSIGNAL_PROTOCOL
+#ifdef HAVE_OMEMO
 #include "omemo/omemo.h"
 #endif
 
@@ -7878,20 +7878,19 @@ _cmd_set_boolean_preference(gchar *arg, const char *const command,
 }
 
 gboolean
-cmd_omemo_init(ProfWin *window, const char *const command, gchar **args)
+cmd_omemo_gen(ProfWin *window, const char *const command, gchar **args)
 {
-#ifdef HAVE_LIBSIGNAL_PROTOCOL
+#ifdef HAVE_OMEMO
     if (connection_get_status() != JABBER_CONNECTED) {
-        cons_show("You must be connected with an account to initialize omemo");
+        cons_show("You must be connected with an account to initialize OMEMO");
         return TRUE;
     }
 
     ProfAccount *account = accounts_get_account(session_get_account_name());
-    omemo_init(account);
-    cons_show("Initialized omemo");
+    omemo_generate_crypto_materials(account);
     return TRUE;
 #else
-    cons_show("This version of Profanity has not been built with Omemo support enabled");
+    cons_show("This version of Profanity has not been built with OMEMO support enabled");
     return TRUE;
 #endif
 }
