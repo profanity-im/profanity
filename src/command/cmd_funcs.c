@@ -85,6 +85,10 @@
 #include "pgp/gpg.h"
 #endif
 
+#ifdef HAVE_LIBSIGNAL_PROTOCOL
+#include "omemo/omemo.h"
+#endif
+
 #ifdef HAVE_GTK
 #include "ui/tray.h"
 #endif
@@ -7871,4 +7875,23 @@ _cmd_set_boolean_preference(gchar *arg, const char *const command,
 
     g_string_free(enabled, TRUE);
     g_string_free(disabled, TRUE);
+}
+
+gboolean
+cmd_omemo_init(ProfWin *window, const char *const command, gchar **args)
+{
+#ifdef HAVE_LIBSIGNAL_PROTOCOL
+    if (connection_get_status() != JABBER_CONNECTED) {
+        cons_show("You must be connected with an account to initialize omemo");
+        return TRUE;
+    }
+
+    ProfAccount *account = accounts_get_account(session_get_account_name());
+    omemo_init(account);
+    cons_show("Initialized omemo");
+    return TRUE;
+#else
+    cons_show("This version of Profanity has not been built with Omemo support enabled");
+    return TRUE;
+#endif
 }

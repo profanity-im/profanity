@@ -60,6 +60,8 @@ AC_ARG_ENABLE([otr],
     [AS_HELP_STRING([--enable-otr], [enable otr encryption])])
 AC_ARG_ENABLE([pgp],
     [AS_HELP_STRING([--enable-pgp], [enable pgp])])
+AC_ARG_ENABLE([omemo],
+    [AS_HELP_STRING([--enable-omemo], [enable omemo encryption])])
 AC_ARG_WITH([xscreensaver],
     [AS_HELP_STRING([--with-xscreensaver], [use libXScrnSaver to determine idle time])])
 AC_ARG_WITH([themes],
@@ -262,6 +264,17 @@ if test "x$enable_otr" != xno; then
         [AS_IF([test "x$enable_otr" = xyes],
             [AC_MSG_ERROR([libotr is required for otr encryption support])],
             [AC_MSG_NOTICE([libotr not found, otr encryption support not enabled])])])
+fi
+
+AM_CONDITIONAL([BUILD_OMEMO], [false])
+if test "x$enable_omemo" != xno; then
+    AC_CHECK_LIB([signal-protocol-c], [signal_context_create],
+        [AM_CONDITIONAL([BUILD_OMEMO], [true])
+         AC_DEFINE([HAVE_LIBSIGNAL_PROTOCOL], [1], [Have omemo]),
+         LIBS="-lsignal-protocol-c $LIBS"],
+        [AS_IF([test "x$enable_omemo" = xyes],
+            [AC_MSG_ERROR([libsignal-protocol-c is required for omemo support])],
+            [AC_MSG_NOTICE([libsignal-protocol-c not found, omemo support not enabled])])])
 fi
 
 AS_IF([test "x$with_themes" = xno],

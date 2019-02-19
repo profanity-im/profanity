@@ -2328,7 +2328,25 @@ static struct cmd_t command_defs[] =
         CMD_EXAMPLES(
             "/cmd list",
             "/cmd exec ping")
-    }
+    },
+
+    { "/omemo",
+        parse_args, 1, 3, NULL,
+        CMD_SUBFUNCS(
+            { "init", cmd_omemo_init })
+        CMD_NOMAINFUNC
+        CMD_TAGS(
+            CMD_TAG_CHAT,
+            CMD_TAG_UI)
+        CMD_SYN(
+            "/omemo init")
+        CMD_DESC(
+            "Omemo commands to manage keys, and perform encryption during chat sessions.")
+        CMD_ARGS(
+            { "init", "Initialize omemo" })
+        CMD_EXAMPLES(
+            "/omemo init")
+    },
 };
 
 static GHashTable *search_index;

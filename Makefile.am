@@ -69,6 +69,7 @@ unittest_sources = \
 	src/ui/ui.h \
 	src/otr/otr.h \
 	src/pgp/gpg.h \
+	src/omemo/omemo.h \
 	src/command/cmd_defs.h src/command/cmd_defs.c \
 	src/command/cmd_funcs.h src/command/cmd_funcs.c \
 	src/command/cmd_ac.h src/command/cmd_ac.c \
@@ -168,6 +169,9 @@ otr3_sources = \
 otr4_sources = \
 	src/otr/otrlib.h src/otr/otrlibv4.c src/otr/otr.h src/otr/otr.c
 
+omemo_sources = \
+	src/omemo/omemo.h src/omemo/omemo.c
+
 if BUILD_PYTHON_API
 core_sources += $(python_sources)
 unittest_sources += $(python_sources)
@@ -202,6 +206,10 @@ endif
 if BUILD_OTR4
 core_sources += $(otr4_sources)
 endif
+endif
+
+if BUILD_OMEMO
+core_sources += $(omemo_sources)
 endif
 
 AM_CFLAGS = @AM_CFLAGS@ -I$(srcdir)/src
