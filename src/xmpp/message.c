@@ -181,7 +181,7 @@ message_send_chat_pgp(const char *const barejid, const char *const msg, gboolean
         char *encrypted = p_gpg_encrypt(jidp->barejid, msg, account->pgp_keyid);
         if (encrypted) {
             message = xmpp_message_new(ctx, STANZA_TYPE_CHAT, jid, id);
-            xmpp_message_set_body(message, "This message is encrypted.");
+            xmpp_message_set_body(message, "This message is encrypted (XEP-0027).");
             xmpp_stanza_t *x = xmpp_stanza_new(ctx);
             xmpp_stanza_set_name(x, STANZA_NAME_X);
             xmpp_stanza_set_ns(x, STANZA_NS_ENCRYPTED);
