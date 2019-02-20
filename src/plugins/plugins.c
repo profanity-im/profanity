@@ -270,7 +270,7 @@ plugins_load(const char *const name)
 gboolean
 plugins_unload_all(void)
 {
-    gboolean result = FALSE;
+    gboolean result = TRUE;
     GList *plugin_names = g_hash_table_get_keys(plugins);
     GList *plugin_names_dup = NULL;
     GList *curr = plugin_names;
@@ -282,8 +282,8 @@ plugins_unload_all(void)
 
     curr = plugin_names_dup;
     while (curr) {
-        if (plugins_unload(curr->data)) {
-            result = TRUE;
+        if (!plugins_unload(curr->data)) {
+            result = FALSE;
         }
         curr = g_list_next(curr);
     }
