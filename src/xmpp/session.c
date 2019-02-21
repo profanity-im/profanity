@@ -60,6 +60,10 @@
 #include "xmpp/chat_session.h"
 #include "xmpp/jid.h"
 
+#ifdef HAVE_OMEMO
+#include "xmpp/omemo.h"
+#endif
+
 // for auto reconnect
 static struct {
     char *name;
@@ -313,6 +317,9 @@ session_login_success(gboolean secured)
     roster_request();
     bookmark_request();
     blocking_request();
+#ifdef HAVE_OMEMO
+    omemo_devicelist_publish();
+#endif
 
     // items discovery
     char *domain = connection_get_domain();

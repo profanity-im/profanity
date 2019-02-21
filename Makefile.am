@@ -171,7 +171,8 @@ otr4_sources = \
 	src/otr/otrlib.h src/otr/otrlibv4.c src/otr/otr.h src/otr/otr.c
 
 omemo_sources = \
-	src/omemo/omemo.h src/omemo/omemo.c src/omemo/crypto.h src/omemo/crypto.c
+	src/omemo/omemo.h src/omemo/omemo.c src/omemo/crypto.h src/omemo/crypto.c \
+	src/xmpp/omemo.h src/xmpp/omemo.c
 
 if BUILD_PYTHON_API
 core_sources += $(python_sources)

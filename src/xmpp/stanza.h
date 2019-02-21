@@ -284,6 +284,8 @@ xmpp_stanza_t* stanza_create_room_kick_iq(xmpp_ctx_t *const ctx, const char *con
 xmpp_stanza_t* stanza_create_command_exec_iq(xmpp_ctx_t *ctx, const char *const target, const char *const node);
 xmpp_stanza_t* stanza_create_command_config_submit_iq(xmpp_ctx_t *ctx, const char *const room, const char *const node, const char *const sessionid, DataForm *form);
 
+xmpp_stanza_t* stanza_create_omemo_devicelist_pubsub_subscription(xmpp_ctx_t *ctx, const char *const jid);
+
 int stanza_get_idle_time(xmpp_stanza_t *const stanza);
 
 void stanza_attach_priority(xmpp_ctx_t *const ctx, xmpp_stanza_t *const presence, const int pri);

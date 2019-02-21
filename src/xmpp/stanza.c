@@ -2092,6 +2092,31 @@ stanza_create_command_config_submit_iq(xmpp_ctx_t *ctx, const char *const room,
     return iq;
 }
 
+xmpp_stanza_t*
+stanza_create_omemo_devicelist_pubsub_subscription(xmpp_ctx_t *ctx, const char *const jid)
+{
+    char *id = connection_create_stanza_id("omemo_devicelist_subscribe");
+    xmpp_stanza_t *iq = xmpp_iq_new(ctx, STANZA_TYPE_SET, id);
+    free(id);
+
+    xmpp_stanza_t *pubsub = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(pubsub, STANZA_NAME_PUBSUB);
+    xmpp_stanza_set_ns(pubsub, STANZA_NS_PUBSUB);
+
+    xmpp_stanza_t *subscribe = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(subscribe, "subscribe");
+    xmpp_stanza_set_attribute(subscribe, "node", "eu.siacs.conversations.axolotl.devicelist");
+    xmpp_stanza_set_attribute(subscribe, "jid", jid);
+
+    xmpp_stanza_add_child(pubsub, subscribe);
+    xmpp_stanza_add_child(iq, pubsub);
+
+    xmpp_stanza_release(subscribe);
+    xmpp_stanza_release(pubsub);
+
+    return iq;
+}
+
 static void
 _stanza_add_unique_id(xmpp_stanza_t *stanza, char *prefix)
 {
