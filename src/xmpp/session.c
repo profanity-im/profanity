@@ -61,6 +61,7 @@
 #include "xmpp/jid.h"
 
 #ifdef HAVE_OMEMO
+#include "omemo/omemo.h"
 #include "xmpp/omemo.h"
 #endif
 
@@ -318,7 +319,10 @@ session_login_success(gboolean secured)
     bookmark_request();
     blocking_request();
 #ifdef HAVE_OMEMO
-    omemo_devicelist_publish();
+    omemo_devicelist_subscribe();
+    if (omemo_loaded()) {
+        omemo_devicelist_publish();
+    }
 #endif
 
     // items discovery

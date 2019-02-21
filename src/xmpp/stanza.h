@@ -82,6 +82,7 @@
 #define STANZA_NAME_PUBSUB "pubsub"
 #define STANZA_NAME_PUBLISH "publish"
 #define STANZA_NAME_PUBLISH_OPTIONS "publish-options"
+#define STANZA_NAME_SUBSCRIBE "subscribe"
 #define STANZA_NAME_FIELD "field"
 #define STANZA_NAME_STORAGE "storage"
 #define STANZA_NAME_NICK "nick"
@@ -284,7 +285,9 @@ xmpp_stanza_t* stanza_create_room_kick_iq(xmpp_ctx_t *const ctx, const char *con
 xmpp_stanza_t* stanza_create_command_exec_iq(xmpp_ctx_t *ctx, const char *const target, const char *const node);
 xmpp_stanza_t* stanza_create_command_config_submit_iq(xmpp_ctx_t *ctx, const char *const room, const char *const node, const char *const sessionid, DataForm *form);
 
-xmpp_stanza_t* stanza_create_omemo_devicelist_pubsub_subscription(xmpp_ctx_t *ctx, const char *const jid);
+xmpp_stanza_t* stanza_create_omemo_devicelist_subscribe(xmpp_ctx_t *ctx, const char *const jid);
+xmpp_stanza_t* stanza_create_omemo_devicelist_publish(xmpp_ctx_t *ctx, GList *const ids);
+xmpp_stanza_t* stanza_create_omemo_bundle_publish(xmpp_ctx_t *ctx, uint32_t device_id, const unsigned char * const identity_key, size_t identity_key_length, const unsigned char * const signed_prekey, size_t signed_prekey_length, const unsigned char * const signed_prekey_signature, size_t signed_prekey_signature_length, GList *const prekeys, GList *const prekeys_id, GList *const prekeys_length);
 
 int stanza_get_idle_time(xmpp_stanza_t *const stanza);
 

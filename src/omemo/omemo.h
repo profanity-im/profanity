@@ -4,3 +4,13 @@ typedef struct omemo_context_t omemo_context;
 
 void omemo_init(void);
 void omemo_generate_crypto_materials(ProfAccount *account);
+
+GList * const omemo_device_list(void);
+uint32_t omemo_device_id(void);
+void omemo_identity_key(unsigned char **output, size_t *length);
+void omemo_signed_prekey(unsigned char **output, size_t *length);
+void omemo_signed_prekey_signature(unsigned char **output, size_t *length);
+void omemo_prekeys(GList ** const prekeys, GList ** const ids, GList ** const lengths);
+
+void omemo_start_session(ProfAccount *account, char *barejid);
+gboolean omemo_loaded(void);
