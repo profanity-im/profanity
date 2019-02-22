@@ -7887,7 +7887,12 @@ cmd_omemo_gen(ProfWin *window, const char *const command, gchar **args)
 {
 #ifdef HAVE_OMEMO
     if (connection_get_status() != JABBER_CONNECTED) {
-        cons_show("You must be connected with an account to initialize OMEMO");
+        cons_show("You must be connected with an account to initialize OMEMO.");
+        return TRUE;
+    }
+
+    if (omemo_loaded()) {
+        cons_show("OMEMO crytographic materials have already been generated.");
         return TRUE;
     }
 
