@@ -386,12 +386,11 @@ cmd_connect(ProfWin *window, const char *const command, gchar **args)
         }
     }
 
-    char *lower = g_utf8_strdown(user, -1);
     char *jid;
     g_free(def);
 
     // connect with account
-    ProfAccount *account = accounts_get_account(lower);
+    ProfAccount *account = accounts_get_account(user);
     if (account) {
         // override account options with connect options
         if (altdomain != NULL)
@@ -414,7 +413,7 @@ cmd_connect(ProfWin *window, const char *const command, gchar **args)
                 account->password = NULL;
             } else {
                 cons_show("Error evaluating password, see logs for details.");
-                g_free(lower);
+                g_free(user);
                 account_free(account);
                 return TRUE;
             }
@@ -432,7 +431,7 @@ cmd_connect(ProfWin *window, const char *const command, gchar **args)
 
     // connect with JID
     } else {
-        jid = strdup(lower);
+        jid = g_utf8_strdown(user, -1);
         char *passwd = ui_ask_password();
         conn_status = cl_ev_connect_jid(jid, passwd, altdomain, port, tls_policy);
         free(passwd);
@@ -444,7 +443,6 @@ cmd_connect(ProfWin *window, const char *const command, gchar **args)
     }
 
     options_destroy(options);
-    g_free(lower);
     free(jid);
 
     return TRUE;
