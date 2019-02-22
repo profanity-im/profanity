@@ -7308,6 +7308,11 @@ cmd_otr_start(ProfWin *window, const char *const command, gchar **args)
             return TRUE;
         }
 
+        if (chatwin->is_omemo) {
+            win_println(window, THEME_DEFAULT, '!', "You must disable OMEMO before starting an OTR session.");
+            return TRUE;
+        }
+
         if (chatwin->is_otr) {
             win_println(window, THEME_DEFAULT, '!', "You are already in an OTR session.");
             return TRUE;
