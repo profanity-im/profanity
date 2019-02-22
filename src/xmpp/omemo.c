@@ -1,28 +1,34 @@
+#include <glib.h>
+
 #include "xmpp/connection.h"
+#include "xmpp/message.h"
 #include "xmpp/iq.h"
 #include "xmpp/stanza.h"
 
 #include "omemo/omemo.h"
 
+static int _omemo_receive_devicelist(xmpp_stanza_t *const stanza, void *const userdata);
+
 void
 omemo_devicelist_subscribe(void)
 {
-    xmpp_ctx_t * const ctx = connection_get_ctx();
-    char *barejid = xmpp_jid_bare(ctx, session_get_account_name());
-    xmpp_stanza_t *iq = stanza_create_omemo_devicelist_subscribe(ctx, barejid);
-    iq_send_stanza(iq);
-    xmpp_stanza_release(iq);
+    message_pubsub_event_handler_add(STANZA_NS_OMEMO_DEVICELIST, _omemo_receive_devicelist, NULL, NULL);
 
-    free(barejid);
+    caps_add_feature(XMPP_FEATURE_OMEMO_DEVICELIST_NOTIFY);
 }
 
 void
-omemo_devicelist_publish(void)
+omemo_devicelist_publish(GList *device_list)
 {
     xmpp_ctx_t * const ctx = connection_get_ctx();
-    xmpp_stanza_t *iq = stanza_create_omemo_devicelist_publish(ctx, omemo_device_list());
+    xmpp_stanza_t *iq = stanza_create_omemo_devicelist_publish(ctx, device_list);
     iq_send_stanza(iq);
     xmpp_stanza_release(iq);
+}
+
+void
+omemo_devicelist_fetch(void)
+{
 }
 
 void
@@ -52,4 +58,48 @@ omemo_bundle_publish(void)
     free(identity_key);
     free(signed_prekey);
     free(signed_prekey_signature);
+}
+
+void
+omemo_bundles_fetch(const char * const jid)
+{
+}
+
+static int
+_omemo_receive_devicelist(xmpp_stanza_t *const stanza, void *const userdata)
+{
+    GList *device_list = NULL;
+    const char *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
+    if (!from) {
+        return 1;
+    }
+
+    xmpp_stanza_t *event = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_PUBSUB_EVENT);
+    if (!event) {
+        return 1;
+    }
+
+    xmpp_stanza_t *items = xmpp_stanza_get_child_by_name(event, "items");
+    if (!items) {
+        return 1;
+    }
+
+    xmpp_stanza_t *item = xmpp_stanza_get_child_by_name(items, "item");
+    if (!item) {
+        return 1;
+    }
+
+    xmpp_stanza_t *list = xmpp_stanza_get_child_by_ns(item, STANZA_NS_OMEMO);
+    if (!list) {
+        return 1;
+    }
+
+    xmpp_stanza_t *device;
+    for (device = xmpp_stanza_get_children(list); device != NULL; device = xmpp_stanza_get_next(device)) {
+        const char *id = xmpp_stanza_get_id(device);
+        device_list = g_list_append(device_list, GINT_TO_POINTER(strtoul(id, NULL, 10)));
+    }
+    omemo_set_device_list(from, device_list);
+
+    return 1;
 }

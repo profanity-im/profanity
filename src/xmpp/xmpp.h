@@ -61,6 +61,7 @@
 #define XMPP_FEATURE_LASTACTIVITY "jabber:iq:last"
 #define XMPP_FEATURE_MUC "http://jabber.org/protocol/muc"
 #define XMPP_FEATURE_COMMANDS "http://jabber.org/protocol/commands"
+#define XMPP_FEATURE_OMEMO_DEVICELIST_NOTIFY "eu.siacs.conversations.axolotl.devicelist+notify"
 
 typedef enum {
     JABBER_CONNECTING,

@@ -76,7 +76,6 @@ static void _handel_muc_user(xmpp_stanza_t *const stanza);
 static void _handle_conference(xmpp_stanza_t *const stanza);
 static void _handle_captcha(xmpp_stanza_t *const stanza);
 static void _handle_receipt_received(xmpp_stanza_t *const stanza);
-static void _handle_pubsub_event(xmpp_stanza_t *const stanza);
 static void _handle_chat(xmpp_stanza_t *const stanza);
 
 static void _send_message_stanza(xmpp_stanza_t *const stanza);
@@ -129,7 +128,20 @@ _message_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza, void *con
 
     xmpp_stanza_t *event = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_PUBSUB_EVENT);
     if (event) {
-        _handle_pubsub_event(event);
+        xmpp_stanza_t *child = xmpp_stanza_get_children(event);
+        if (child) {
+            const char *node = xmpp_stanza_get_attribute(child, STANZA_ATTR_NODE);
+            if (node) {
+                ProfMessageHandler *handler = g_hash_table_lookup(pubsub_event_handlers, node);
+                if (handler) {
+                    int keep = handler->func(stanza, handler->userdata);
+                    if (!keep) {
+                        free(handler);
+                        g_hash_table_remove(pubsub_event_handlers, node);
+                    }
+                }
+            }
+        }
     }
 
     _handle_chat(stanza);
@@ -663,25 +675,6 @@ _handle_receipt_received(xmpp_stanza_t *const stanza)
     Jid *jidp = jid_create(fulljid);
     sv_ev_message_receipt(jidp->barejid, id);
     jid_destroy(jidp);
-}
-
-static void
-_handle_pubsub_event(xmpp_stanza_t *const event)
-{
-    xmpp_stanza_t *child = xmpp_stanza_get_children(event);
-    if (child) {
-        const char *node = xmpp_stanza_get_attribute(event, STANZA_ATTR_NODE);
-        if (node) {
-            ProfMessageHandler *handler = g_hash_table_lookup(pubsub_event_handlers, node);
-            if (handler) {
-                int keep = handler->func(event, handler->userdata);
-                if (!keep) {
-                    free(handler);
-                    g_hash_table_remove(pubsub_event_handlers, node);
-                }
-            }
-        }
-    }
 }
 
 void

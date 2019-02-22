@@ -321,7 +321,7 @@ session_login_success(gboolean secured)
 #ifdef HAVE_OMEMO
     omemo_devicelist_subscribe();
     if (omemo_loaded()) {
-        omemo_devicelist_publish();
+        /* TODO: update devicelist */
     }
 #endif
 

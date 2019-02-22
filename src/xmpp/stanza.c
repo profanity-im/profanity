@@ -2105,7 +2105,7 @@ stanza_create_omemo_devicelist_subscribe(xmpp_ctx_t *ctx, const char *const jid)
 
     xmpp_stanza_t *subscribe = xmpp_stanza_new(ctx);
     xmpp_stanza_set_name(subscribe, STANZA_NAME_SUBSCRIBE);
-    xmpp_stanza_set_attribute(subscribe, "node", "eu.siacs.conversations.axolotl.devicelist");
+    xmpp_stanza_set_attribute(subscribe, "node", STANZA_NS_OMEMO_DEVICELIST);
     xmpp_stanza_set_attribute(subscribe, "jid", jid);
 
     xmpp_stanza_add_child(pubsub, subscribe);
@@ -2130,7 +2130,7 @@ stanza_create_omemo_devicelist_publish(xmpp_ctx_t *ctx, GList *const ids)
 
     xmpp_stanza_t *publish = xmpp_stanza_new(ctx);
     xmpp_stanza_set_name(publish, STANZA_NAME_PUBLISH);
-    xmpp_stanza_set_attribute(publish, "node", "eu.siacs.conversations.axolotl.devicelist");
+    xmpp_stanza_set_attribute(publish, "node", STANZA_NS_OMEMO_DEVICELIST);
 
     xmpp_stanza_t *item = xmpp_stanza_new(ctx);
     xmpp_stanza_set_name(item, STANZA_NAME_ITEM);

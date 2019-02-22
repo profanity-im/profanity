@@ -11,6 +11,8 @@
 #include "omemo/crypto.h"
 #include "omemo/omemo.h"
 #include "ui/ui.h"
+#include "xmpp/xmpp.h"
+#include "xmpp/connection.h"
 #include "xmpp/omemo.h"
 
 static gboolean loaded;
@@ -23,7 +25,7 @@ struct omemo_context_t {
     pthread_mutex_t lock;
     signal_context *signal;
     uint32_t device_id;
-    GList *device_list;
+    GHashTable *device_list;
     ratchet_identity_key_pair *identity_key_pair;
     uint32_t registration_id;
     signal_protocol_key_helper_pre_key_list_node *pre_keys_head;
@@ -72,14 +74,23 @@ omemo_init(void)
     signal_context_set_locking_functions(omemo_ctx.signal, lock, unlock);
 
     loaded = FALSE;
-    omemo_ctx.device_list = NULL;
+    omemo_ctx.device_list = g_hash_table_new_full(g_str_hash, g_str_equal, free, (GDestroyNotify)g_list_free);
 }
 
 void
 omemo_generate_crypto_materials(ProfAccount *account)
 {
+    xmpp_ctx_t * const ctx = connection_get_ctx();
+    char *barejid = xmpp_jid_bare(ctx, session_get_account_name());
+
+    GList *device_list = g_hash_table_lookup(omemo_ctx.device_list, barejid);
+    g_hash_table_steal(omemo_ctx.device_list, barejid);
+
     omemo_ctx.device_id = randombytes_uniform(0x80000000);
-    omemo_ctx.device_list = g_list_append(omemo_ctx.device_list, GINT_TO_POINTER(omemo_ctx.device_id));
+
+    device_list = g_list_append(device_list, GINT_TO_POINTER(omemo_ctx.device_id));
+    g_hash_table_insert(omemo_ctx.device_list, strdup(barejid), device_list);
+
     signal_protocol_key_helper_generate_identity_key_pair(&omemo_ctx.identity_key_pair, omemo_ctx.signal);
     signal_protocol_key_helper_generate_registration_id(&omemo_ctx.registration_id, 0, omemo_ctx.signal);
     signal_protocol_key_helper_generate_pre_keys(&omemo_ctx.pre_keys_head, randombytes_random(), 100, omemo_ctx.signal);
@@ -91,7 +102,7 @@ omemo_generate_crypto_materials(ProfAccount *account)
 
     loaded = TRUE;
 
-    omemo_devicelist_publish();
+    omemo_devicelist_publish(device_list);
     omemo_bundle_publish();
 }
 
@@ -105,12 +116,6 @@ gboolean
 omemo_loaded(void)
 {
     return loaded;
-}
-
-GList * const
-omemo_device_list(void)
-{
-    return omemo_ctx.device_list;
 }
 
 uint32_t
@@ -165,6 +170,13 @@ omemo_prekeys(GList ** const prekeys, GList ** const ids, GList ** const lengths
         *ids = g_list_append(*ids, GINT_TO_POINTER(session_pre_key_get_id(prekey)));
         *lengths = g_list_append(*lengths, GINT_TO_POINTER(length));
     }
+}
+
+void
+omemo_set_device_list(const char *const jid, GList * const device_list)
+{
+    /* TODO handle self device_list to ensure we still are on the list */
+    g_hash_table_insert(omemo_ctx.device_list, strdup(jid), device_list);
 }
 
 static void

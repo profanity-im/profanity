@@ -191,6 +191,8 @@
 #define STANZA_NS_X_OOB "jabber:x:oob"
 #define STANZA_NS_BLOCKING "urn:xmpp:blocking"
 #define STANZA_NS_COMMAND "http://jabber.org/protocol/commands"
+#define STANZA_NS_OMEMO "eu.siacs.conversations.axolotl"
+#define STANZA_NS_OMEMO_DEVICELIST "eu.siacs.conversations.axolotl.devicelist"
 
 #define STANZA_DATAFORM_SOFTWARE "urn:xmpp:dataforms:softwareinfo"
 
