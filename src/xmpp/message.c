@@ -62,6 +62,12 @@
 #include "xmpp/connection.h"
 #include "xmpp/xmpp.h"
 
+typedef struct p_message_handle_t {
+    ProfMessageCallback func;
+    ProfMessageFreeCallback free_func;
+    void *userdata;
+} ProfMessageHandler;
+
 static int _message_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza, void *const userdata);
 
 static void _handle_error(xmpp_stanza_t *const stanza);
@@ -70,9 +76,12 @@ static void _handel_muc_user(xmpp_stanza_t *const stanza);
 static void _handle_conference(xmpp_stanza_t *const stanza);
 static void _handle_captcha(xmpp_stanza_t *const stanza);
 static void _handle_receipt_received(xmpp_stanza_t *const stanza);
+static void _handle_pubsub_event(xmpp_stanza_t *const stanza);
 static void _handle_chat(xmpp_stanza_t *const stanza);
 
 static void _send_message_stanza(xmpp_stanza_t *const stanza);
+
+static GHashTable *pubsub_event_handlers;
 
 static int
 _message_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza, void *const userdata)
@@ -118,6 +127,11 @@ _message_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza, void *con
         _handle_receipt_received(stanza);
     }
 
+    xmpp_stanza_t *event = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_PUBSUB_EVENT);
+    if (event) {
+        _handle_pubsub_event(event);
+    }
+
     _handle_chat(stanza);
 
     return 1;
@@ -129,6 +143,33 @@ message_handlers_init(void)
     xmpp_conn_t * const conn = connection_get_conn();
     xmpp_ctx_t * const ctx = connection_get_ctx();
     xmpp_handler_add(conn, _message_handler, NULL, STANZA_NAME_MESSAGE, NULL, ctx);
+
+    if (pubsub_event_handlers) {
+        GList *keys = g_hash_table_get_keys(pubsub_event_handlers);
+        GList *curr = keys;
+        while (curr) {
+            ProfMessageHandler *handler = g_hash_table_lookup(pubsub_event_handlers, curr->data);
+            if (handler->free_func && handler->userdata) {
+                handler->free_func(handler->userdata);
+            }
+            curr = g_list_next(curr);
+        }
+        g_list_free(keys);
+        g_hash_table_destroy(pubsub_event_handlers);
+    }
+
+    pubsub_event_handlers = g_hash_table_new_full(g_str_hash, g_str_equal, free, NULL);
+}
+
+void
+message_pubsub_event_handler_add(const char *const node, ProfMessageCallback func, ProfMessageFreeCallback free_func, void *userdata)
+{
+    ProfMessageHandler *handler = malloc(sizeof(ProfMessageHandler));
+    handler->func = func;
+    handler->free_func = free_func;
+    handler->userdata = userdata;
+
+    g_hash_table_insert(pubsub_event_handlers, strdup(node), handler);
 }
 
 char*
@@ -622,6 +663,25 @@ _handle_receipt_received(xmpp_stanza_t *const stanza)
     Jid *jidp = jid_create(fulljid);
     sv_ev_message_receipt(jidp->barejid, id);
     jid_destroy(jidp);
+}
+
+static void
+_handle_pubsub_event(xmpp_stanza_t *const event)
+{
+    xmpp_stanza_t *child = xmpp_stanza_get_children(event);
+    if (child) {
+        const char *node = xmpp_stanza_get_attribute(event, STANZA_ATTR_NODE);
+        if (node) {
+            ProfMessageHandler *handler = g_hash_table_lookup(pubsub_event_handlers, node);
+            if (handler) {
+                int keep = handler->func(event, handler->userdata);
+                if (!keep) {
+                    free(handler);
+                    g_hash_table_remove(pubsub_event_handlers, node);
+                }
+            }
+        }
+    }
 }
 
 void

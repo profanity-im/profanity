@@ -180,6 +180,7 @@
 #define STANZA_NS_CONFERENCE "jabber:x:conference"
 #define STANZA_NS_CAPTCHA "urn:xmpp:captcha"
 #define STANZA_NS_PUBSUB "http://jabber.org/protocol/pubsub"
+#define STANZA_NS_PUBSUB_EVENT "http://jabber.org/protocol/pubsub#event"
 #define STANZA_NS_CARBONS "urn:xmpp:carbons:2"
 #define STANZA_NS_HINTS "urn:xmpp:hints"
 #define STANZA_NS_FORWARD "urn:xmpp:forward:0"
