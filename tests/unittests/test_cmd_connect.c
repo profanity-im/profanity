@@ -89,24 +89,44 @@ void cmd_connect_fail_message(void **state)
     assert_true(result);
 }
 
-void cmd_connect_lowercases_argument(void **state)
+void cmd_connect_lowercases_argument_with_no_account(void **state)
 {
     gchar *args[] = { "USER@server.ORG", NULL };
 
     will_return(connection_get_status, JABBER_DISCONNECTED);
 
-    expect_string(accounts_get_account, name, "user@server.org");
+    expect_string(accounts_get_account, name, "USER@server.ORG");
     will_return(accounts_get_account, NULL);
 
     will_return(ui_ask_password, strdup("password"));
 
     expect_cons_show("Connecting as user@server.org");
 
-    expect_any(session_connect_with_details, jid);
-    expect_any(session_connect_with_details, passwd);
-    expect_any(session_connect_with_details, altdomain);
-    expect_any(session_connect_with_details, port);
+    expect_string(session_connect_with_details, jid, "user@server.org");
+    expect_string(session_connect_with_details, passwd, "password");
+    expect_value(session_connect_with_details, altdomain, NULL);
+    expect_value(session_connect_with_details, port, 0);
     will_return(session_connect_with_details, JABBER_CONNECTING);
+
+    gboolean result = cmd_connect(NULL, CMD_CONNECT, args);
+    assert_true(result);
+}
+
+void cmd_connect_lowercases_argument_with_account(void **state)
+{
+gchar *args[] = { "Jabber_org", NULL };
+    ProfAccount *account = account_new("Jabber_org", "me@jabber.org", "password", NULL,
+        TRUE, NULL, 0, NULL, NULL, NULL, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+
+    will_return(connection_get_status, JABBER_DISCONNECTED);
+
+    expect_any(accounts_get_account, name);
+    will_return(accounts_get_account, account);
+
+    expect_cons_show("Connecting with account Jabber_org as me@jabber.org");
+
+    expect_memory(session_connect_with_account, account, account, sizeof(account));
+    will_return(session_connect_with_account, JABBER_CONNECTING);
 
     gboolean result = cmd_connect(NULL, CMD_CONNECT, args);
     assert_true(result);
