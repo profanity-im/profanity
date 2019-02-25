@@ -193,6 +193,7 @@
 #define STANZA_NS_COMMAND "http://jabber.org/protocol/commands"
 #define STANZA_NS_OMEMO "eu.siacs.conversations.axolotl"
 #define STANZA_NS_OMEMO_DEVICELIST "eu.siacs.conversations.axolotl.devicelist"
+#define STANZA_NS_OMEMO_BUNDLES "eu.siacs.conversations.axolotl.bundles"
 
 #define STANZA_DATAFORM_SOFTWARE "urn:xmpp:dataforms:softwareinfo"
 
@@ -292,6 +293,7 @@ xmpp_stanza_t* stanza_create_omemo_devicelist_request(xmpp_ctx_t *ctx, const cha
 xmpp_stanza_t* stanza_create_omemo_devicelist_subscribe(xmpp_ctx_t *ctx, const char *const jid);
 xmpp_stanza_t* stanza_create_omemo_devicelist_publish(xmpp_ctx_t *ctx, GList *const ids);
 xmpp_stanza_t* stanza_create_omemo_bundle_publish(xmpp_ctx_t *ctx, uint32_t device_id, const unsigned char * const identity_key, size_t identity_key_length, const unsigned char * const signed_prekey, size_t signed_prekey_length, const unsigned char * const signed_prekey_signature, size_t signed_prekey_signature_length, GList *const prekeys, GList *const prekeys_id, GList *const prekeys_length);
+xmpp_stanza_t* stanza_create_omemo_bundle_request(xmpp_ctx_t *ctx, const char *const id, const char *const jid, uint32_t device_id);
 
 int stanza_get_idle_time(xmpp_stanza_t *const stanza);
 

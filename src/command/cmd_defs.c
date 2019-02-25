@@ -2333,7 +2333,8 @@ static struct cmd_t command_defs[] =
     { "/omemo",
         parse_args, 1, 3, NULL,
         CMD_SUBFUNCS(
-            { "gen", cmd_omemo_gen })
+            { "gen", cmd_omemo_gen },
+            { "start", cmd_omemo_start })
         CMD_NOMAINFUNC
         CMD_TAGS(
             CMD_TAG_CHAT,

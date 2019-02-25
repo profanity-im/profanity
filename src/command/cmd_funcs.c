@@ -7904,3 +7904,56 @@ cmd_omemo_gen(ProfWin *window, const char *const command, gchar **args)
     return TRUE;
 #endif
 }
+
+gboolean
+cmd_omemo_start(ProfWin *window, const char *const command, gchar **args)
+{
+#ifdef HAVE_OMEMO
+    if (connection_get_status() != JABBER_CONNECTED) {
+        cons_show("You must be connected with an account to load OMEMO information.");
+        return TRUE;
+    }
+
+    // recipient supplied
+    if (args[1]) {
+        char *contact = args[1];
+        char *barejid = roster_barejid_from_name(contact);
+        if (barejid == NULL) {
+            barejid = contact;
+        }
+
+        ProfChatWin *chatwin = wins_get_chat(barejid);
+        if (!chatwin) {
+            chatwin = chatwin_new(barejid);
+        }
+        ui_focus_win((ProfWin*)chatwin);
+
+        if (chatwin->pgp_send) {
+            win_println(window, THEME_DEFAULT, '!', "You must disable PGP encryption before starting an OMEMO session.");
+            return TRUE;
+        }
+
+        if (chatwin->is_otr) {
+            win_println(window, THEME_DEFAULT, '!', "You must disable OTR encryption before starting an OMEMO session.");
+            return TRUE;
+        }
+
+        if (chatwin->is_omemo) {
+            win_println(window, THEME_DEFAULT, '!', "You are already in an OMEMO session.");
+            return TRUE;
+        }
+
+        if (!omemo_loaded()) {
+            win_println(window, THEME_DEFAULT, '!', "You have not generated or loaded a cryptographic materials, use '/omemo init'");
+            return TRUE;
+        }
+
+        omemo_start_session(barejid);
+    }
+
+    return TRUE;
+#else
+    cons_show("This version of Profanity has not been built with OMEMO support enabled");
+    return TRUE;
+#endif
+}

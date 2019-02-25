@@ -2284,6 +2284,31 @@ stanza_create_omemo_bundle_publish(xmpp_ctx_t *ctx, uint32_t device_id,
     return iq;
 }
 
+xmpp_stanza_t*
+stanza_create_omemo_bundle_request(xmpp_ctx_t *ctx, const char *const id, const char *const jid, uint32_t device_id)
+{
+    xmpp_stanza_t *iq = xmpp_iq_new(ctx, STANZA_TYPE_GET, id);
+    xmpp_stanza_set_to(iq, jid);
+
+    xmpp_stanza_t *pubsub = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(pubsub, STANZA_NAME_PUBSUB);
+    xmpp_stanza_set_ns(pubsub, STANZA_NS_PUBSUB);
+
+    xmpp_stanza_t *items = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(items, "items");
+    char *node = g_strdup_printf("%s:%d", STANZA_NS_OMEMO_BUNDLES, device_id);
+    xmpp_stanza_set_attribute(items, "node", node);
+    g_free(node);
+
+    xmpp_stanza_add_child(pubsub, items);
+    xmpp_stanza_add_child(iq, pubsub);
+
+    xmpp_stanza_release(items);
+    xmpp_stanza_release(pubsub);
+
+    return iq;
+}
+
 static void
 _stanza_add_unique_id(xmpp_stanza_t *stanza, char *prefix)
 {

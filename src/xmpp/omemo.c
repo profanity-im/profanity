@@ -71,8 +71,80 @@ omemo_bundle_publish(void)
 }
 
 void
-omemo_bundles_fetch(const char * const jid)
+omemo_bundle_request(const char * const jid, uint32_t device_id, ProfIqCallback func, ProfIqFreeCallback free_func, void *userdata)
 {
+    xmpp_ctx_t * const ctx = connection_get_ctx();
+    char *id = connection_create_stanza_id("devicelist_request");
+
+    xmpp_stanza_t *iq = stanza_create_omemo_bundle_request(ctx, id, jid, device_id);
+    iq_id_handler_add(id, func, free_func, userdata);
+
+    iq_send_stanza(iq);
+
+    free(id);
+    xmpp_stanza_release(iq);
+}
+
+int
+omemo_start_device_session_handle_bundle(xmpp_stanza_t *const stanza, void *const userdata)
+{
+    const char *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
+    if (!from) {
+        return 1;
+    }
+
+    if (!g_strcmp0(from, userdata)) {
+        return 1;
+    }
+
+    xmpp_stanza_t *pubsub = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_PUBSUB);
+    if (!pubsub) {
+        return 1;
+    }
+
+    xmpp_stanza_t *items = xmpp_stanza_get_child_by_name(pubsub, "items");
+    if (!items) {
+        return 1;
+    }
+    const char *node = xmpp_stanza_get_attribute(items, "node");
+    char *device_id_str = strstr(node, ":");
+    if (!device_id_str) {
+        return 1;
+    }
+
+    uint32_t device_id = strtoul(device_id_str, NULL, 10);
+
+    xmpp_stanza_t *item = xmpp_stanza_get_child_by_name(items, "item");
+    if (!item) {
+        return 1;
+    }
+
+    xmpp_stanza_t *bundle = xmpp_stanza_get_child_by_ns(item, STANZA_NS_OMEMO);
+    if (!bundle) {
+        return 1;
+    }
+
+    xmpp_stanza_t *prekeys = xmpp_stanza_get_child_by_name(bundle, "prekeys");
+    if (!prekeys) {
+        return 1;
+    }
+
+    /* Should be random */
+    xmpp_stanza_t *prekey = xmpp_stanza_get_children(prekeys);
+    if (!prekey) {
+        return 1;
+    }
+
+    xmpp_stanza_t *prekey_text = xmpp_stanza_get_children(prekey);
+    if (!prekey_text) {
+        return 1;
+    }
+
+    size_t prekey_len;
+    unsigned char *prekey_raw = g_base64_decode(xmpp_stanza_get_text(prekey_text), &prekey_len);
+
+    omemo_start_device_session(from, device_id, prekey_raw, prekey_len);
+    return 1;
 }
 
 static int

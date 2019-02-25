@@ -4,10 +4,12 @@
 #include <pthread.h>
 #include <signal/key_helper.h>
 #include <signal/signal_protocol.h>
+#include <signal/session_builder.h>
 #include <sodium.h>
 
 #include "config/account.h"
 #include "log.h"
+#include "omemo/store.h"
 #include "omemo/crypto.h"
 #include "omemo/omemo.h"
 #include "ui/ui.h"
@@ -30,6 +32,11 @@ struct omemo_context_t {
     uint32_t registration_id;
     signal_protocol_key_helper_pre_key_list_node *pre_keys_head;
     session_signed_pre_key *signed_pre_key;
+    signal_protocol_store_context *store;
+    GHashTable *session_store;
+    GHashTable *pre_key_store;
+    GHashTable *signed_pre_key_store;
+    identity_key_store_t identity_key_store;
 };
 
 static omemo_context omemo_ctx;
@@ -73,6 +80,53 @@ omemo_init(void)
 
     signal_context_set_locking_functions(omemo_ctx.signal, lock, unlock);
 
+    signal_protocol_store_context_create(&omemo_ctx.store, omemo_ctx.signal);
+
+    omemo_ctx.session_store = session_store_new();
+    signal_protocol_session_store session_store = {
+        .load_session_func = load_session,
+        .get_sub_device_sessions_func = get_sub_device_sessions,
+        .store_session_func = store_session,
+        .contains_session_func = contains_session,
+        .delete_session_func = delete_session,
+        .delete_all_sessions_func = delete_all_sessions,
+        .destroy_func = NULL,
+        .user_data = omemo_ctx.session_store
+    };
+    signal_protocol_store_context_set_session_store(omemo_ctx.store, &session_store);
+
+    omemo_ctx.pre_key_store = pre_key_store_new();
+    signal_protocol_pre_key_store pre_key_store = {
+        .load_pre_key = load_pre_key,
+        .store_pre_key = store_pre_key,
+        .contains_pre_key = contains_pre_key,
+        .remove_pre_key = remove_pre_key,
+        .destroy_func = NULL,
+        .user_data = omemo_ctx.pre_key_store
+    };
+    signal_protocol_store_context_set_pre_key_store(omemo_ctx.store, &pre_key_store);
+
+    omemo_ctx.signed_pre_key_store = signed_pre_key_store_new();
+    signal_protocol_signed_pre_key_store signed_pre_key_store = {
+        .load_signed_pre_key = load_signed_pre_key,
+        .store_signed_pre_key = store_signed_pre_key,
+        .contains_signed_pre_key = contains_signed_pre_key,
+        .remove_signed_pre_key = remove_signed_pre_key,
+        .destroy_func = NULL,
+        .user_data = omemo_ctx.pre_key_store
+    };
+    signal_protocol_store_context_set_signed_pre_key_store(omemo_ctx.store, &signed_pre_key_store);
+
+    identity_key_store_new(&omemo_ctx.identity_key_store);
+    signal_protocol_identity_key_store identity_key_store = {
+        .get_identity_key_pair = get_identity_key_pair,
+        .get_local_registration_id = get_local_registration_id,
+        .save_identity = save_identity,
+        .is_trusted_identity = is_trusted_identity,
+    };
+    signal_protocol_store_context_set_identity_key_store(omemo_ctx.store, &identity_key_store);
+
+
     loaded = FALSE;
     omemo_ctx.device_list = g_hash_table_new_full(g_str_hash, g_str_equal, free, (GDestroyNotify)g_list_free);
 }
@@ -103,9 +157,19 @@ omemo_generate_crypto_materials(ProfAccount *account)
 }
 
 void
-omemo_start_session(ProfAccount *account, char *barejid)
+omemo_start_session(const char *const barejid)
 {
+    GList *device_list = g_hash_table_lookup(omemo_ctx.device_list, barejid);
+    if (!device_list) {
+        omemo_devicelist_request(barejid);
+        /* TODO handle response */
+        return;
+    }
 
+    GList *device_id;
+    for (device_id = device_list; device_id != NULL; device_id = device_id->next) {
+        omemo_bundle_request(barejid, GPOINTER_TO_INT(device_id->data), omemo_start_device_session_handle_bundle, free, strdup(barejid));
+    }
 }
 
 gboolean
@@ -151,7 +215,7 @@ omemo_signed_prekey_signature(unsigned char **output, size_t *length)
 }
 
 void
-omemo_prekeys(GList ** const prekeys, GList ** const ids, GList ** const lengths)
+omemo_prekeys(GList **prekeys, GList **ids, GList **lengths)
 {
     signal_protocol_key_helper_pre_key_list_node *p;
     for (p = omemo_ctx.pre_keys_head; p != NULL; p = signal_protocol_key_helper_key_list_next(p)) {
@@ -182,6 +246,18 @@ omemo_set_device_list(const char *const jid, GList * device_list)
     }
 
     g_hash_table_insert(omemo_ctx.device_list, strdup(jid), device_list);
+}
+
+void
+omemo_start_device_session(const char *const jid, uint32_t device_id, const unsigned char *const prekey, size_t prekey_len)
+{
+    signal_protocol_address address = {
+        jid, strlen(jid), device_id
+    };
+
+    session_builder *builder;
+    session_builder_create(&builder, omemo_ctx.store, &address, omemo_ctx.signal);
+    //session_builder_process_pre_key_bundle(builder, prekey);
 }
 
 static void
