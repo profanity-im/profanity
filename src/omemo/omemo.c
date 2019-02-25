@@ -173,9 +173,18 @@ omemo_prekeys(GList ** const prekeys, GList ** const ids, GList ** const lengths
 }
 
 void
-omemo_set_device_list(const char *const jid, GList * const device_list)
+omemo_set_device_list(const char *const jid, GList * device_list)
 {
-    /* TODO handle self device_list to ensure we still are on the list */
+    xmpp_ctx_t * const ctx = connection_get_ctx();
+    char *barejid = xmpp_jid_bare(ctx, session_get_account_name());
+
+    if (g_strcmp0(jid, barejid) == 0) {
+        if (!g_list_find(device_list, GINT_TO_POINTER(omemo_ctx.device_id))) {
+            device_list = g_list_append(device_list, GINT_TO_POINTER(omemo_ctx.device_id));
+            omemo_devicelist_publish(device_list);
+        }
+    }
+
     g_hash_table_insert(omemo_ctx.device_list, strdup(jid), device_list);
 }
 
