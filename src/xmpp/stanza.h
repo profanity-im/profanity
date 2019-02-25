@@ -288,6 +288,7 @@ xmpp_stanza_t* stanza_create_room_kick_iq(xmpp_ctx_t *const ctx, const char *con
 xmpp_stanza_t* stanza_create_command_exec_iq(xmpp_ctx_t *ctx, const char *const target, const char *const node);
 xmpp_stanza_t* stanza_create_command_config_submit_iq(xmpp_ctx_t *ctx, const char *const room, const char *const node, const char *const sessionid, DataForm *form);
 
+xmpp_stanza_t* stanza_create_omemo_devicelist_request(xmpp_ctx_t *ctx, const char *const id, const char *const jid);
 xmpp_stanza_t* stanza_create_omemo_devicelist_subscribe(xmpp_ctx_t *ctx, const char *const jid);
 xmpp_stanza_t* stanza_create_omemo_devicelist_publish(xmpp_ctx_t *ctx, GList *const ids);
 xmpp_stanza_t* stanza_create_omemo_bundle_publish(xmpp_ctx_t *ctx, uint32_t device_id, const unsigned char * const identity_key, size_t identity_key_length, const unsigned char * const signed_prekey, size_t signed_prekey_length, const unsigned char * const signed_prekey_signature, size_t signed_prekey_signature_length, GList *const prekeys, GList *const prekeys_id, GList *const prekeys_length);

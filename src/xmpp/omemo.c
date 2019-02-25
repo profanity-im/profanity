@@ -27,8 +27,18 @@ omemo_devicelist_publish(GList *device_list)
 }
 
 void
-omemo_devicelist_fetch(void)
+omemo_devicelist_request(const char * const jid)
 {
+    xmpp_ctx_t * const ctx = connection_get_ctx();
+    char *id = connection_create_stanza_id("devicelist_request");
+
+    xmpp_stanza_t *iq = stanza_create_omemo_devicelist_request(ctx, id, jid);
+    iq_id_handler_add(id, _omemo_receive_devicelist, NULL, NULL);
+
+    iq_send_stanza(iq);
+
+    free(id);
+    xmpp_stanza_release(iq);
 }
 
 void
@@ -74,12 +84,22 @@ _omemo_receive_devicelist(xmpp_stanza_t *const stanza, void *const userdata)
         return 1;
     }
 
+    xmpp_stanza_t *root = NULL;
     xmpp_stanza_t *event = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_PUBSUB_EVENT);
-    if (!event) {
+    if (event) {
+        root = event;
+    }
+
+    xmpp_stanza_t *pubsub = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_PUBSUB);
+    if (pubsub) {
+        root = pubsub;
+    }
+
+    if (!root) {
         return 1;
     }
 
-    xmpp_stanza_t *items = xmpp_stanza_get_child_by_name(event, "items");
+    xmpp_stanza_t *items = xmpp_stanza_get_child_by_name(root, "items");
     if (!items) {
         return 1;
     }

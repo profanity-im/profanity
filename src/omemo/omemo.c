@@ -83,13 +83,7 @@ omemo_generate_crypto_materials(ProfAccount *account)
     xmpp_ctx_t * const ctx = connection_get_ctx();
     char *barejid = xmpp_jid_bare(ctx, session_get_account_name());
 
-    GList *device_list = g_hash_table_lookup(omemo_ctx.device_list, barejid);
-    g_hash_table_steal(omemo_ctx.device_list, barejid);
-
     omemo_ctx.device_id = randombytes_uniform(0x80000000);
-
-    device_list = g_list_append(device_list, GINT_TO_POINTER(omemo_ctx.device_id));
-    g_hash_table_insert(omemo_ctx.device_list, strdup(barejid), device_list);
 
     signal_protocol_key_helper_generate_identity_key_pair(&omemo_ctx.identity_key_pair, omemo_ctx.signal);
     signal_protocol_key_helper_generate_registration_id(&omemo_ctx.registration_id, 0, omemo_ctx.signal);
@@ -102,7 +96,9 @@ omemo_generate_crypto_materials(ProfAccount *account)
 
     loaded = TRUE;
 
-    omemo_devicelist_publish(device_list);
+    /* Ensure we get our current device list, and it gets updated with our
+     * device_id */
+    omemo_devicelist_request(barejid);
     omemo_bundle_publish();
 }
 

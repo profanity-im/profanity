@@ -2093,6 +2093,30 @@ stanza_create_command_config_submit_iq(xmpp_ctx_t *ctx, const char *const room,
 }
 
 xmpp_stanza_t*
+stanza_create_omemo_devicelist_request(xmpp_ctx_t *ctx, const char *const id,
+    const char *const jid)
+{
+    xmpp_stanza_t *iq = xmpp_iq_new(ctx, STANZA_TYPE_GET, id);
+    xmpp_stanza_set_to(iq, jid);
+
+    xmpp_stanza_t *pubsub = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(pubsub, STANZA_NAME_PUBSUB);
+    xmpp_stanza_set_ns(pubsub, STANZA_NS_PUBSUB);
+
+    xmpp_stanza_t *items = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(items, "items");
+    xmpp_stanza_set_attribute(items, "node", STANZA_NS_OMEMO_DEVICELIST);
+
+    xmpp_stanza_add_child(pubsub, items);
+    xmpp_stanza_add_child(iq, pubsub);
+
+    xmpp_stanza_release(items);
+    xmpp_stanza_release(pubsub);
+
+    return iq;
+}
+
+xmpp_stanza_t*
 stanza_create_omemo_devicelist_subscribe(xmpp_ctx_t *ctx, const char *const jid)
 {
     char *id = connection_create_stanza_id("omemo_devicelist_subscribe");
