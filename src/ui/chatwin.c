@@ -305,6 +305,8 @@ chatwin_outgoing_msg(ProfChatWin *chatwin, const char *const message, char *id, 
         enc_char = prefs_get_otr_char();
     } else if (enc_mode == PROF_MSG_PGP) {
         enc_char = prefs_get_pgp_char();
+    } else if (enc_mode == PROF_MSG_OMEMO) {
+        enc_char = prefs_get_omemo_char();
     }
 
     if (request_receipt && id) {

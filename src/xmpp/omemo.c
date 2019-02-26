@@ -93,7 +93,7 @@ omemo_start_device_session_handle_bundle(xmpp_stanza_t *const stanza, void *cons
         return 1;
     }
 
-    if (!g_strcmp0(from, userdata)) {
+    if (g_strcmp0(from, userdata) != 0) {
         return 1;
     }
 
@@ -112,7 +112,7 @@ omemo_start_device_session_handle_bundle(xmpp_stanza_t *const stanza, void *cons
         return 1;
     }
 
-    uint32_t device_id = strtoul(device_id_str, NULL, 10);
+    uint32_t device_id = strtoul(++device_id_str, NULL, 10);
 
     xmpp_stanza_t *item = xmpp_stanza_get_child_by_name(items, "item");
     if (!item) {

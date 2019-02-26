@@ -7949,6 +7949,7 @@ cmd_omemo_start(ProfWin *window, const char *const command, gchar **args)
         }
 
         omemo_start_session(barejid);
+        chatwin->is_omemo = TRUE;
     }
 
     return TRUE;

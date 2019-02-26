@@ -1,6 +1,8 @@
 #include <signal/signal_protocol_types.h>
 
-#define SG_CIPHER_AES_GCM_NOPADDING 1000
+#define AES128_GCM_KEY_LENGTH 16
+#define AES128_GCM_IV_LENGTH 16
+#define AES128_GCM_TAG_LENGTH 16
 
 int omemo_crypto_init(void);
 /**
@@ -134,3 +136,13 @@ int omemo_decrypt_func(signal_buffer **output,
     const uint8_t *iv, size_t iv_len,
     const uint8_t *ciphertext, size_t ciphertext_len,
     void *user_data);
+
+int aes128gcm_encrypt(unsigned char *ciphertext,
+    size_t *ciphertext_len, const unsigned char *const cleartext,
+    size_t cleatext_len, const unsigned char *const iv,
+    const unsigned char *const key);
+
+int aes128gcm_decrypt(unsigned char *plaintext,
+    size_t *plaintext_len, const unsigned char *const ciphertext,
+    size_t ciphertext_len, const unsigned char *const iv,
+    const unsigned char *const key);

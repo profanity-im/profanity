@@ -52,6 +52,7 @@
 #include "pgp/gpg.h"
 #include "plugins/plugins.h"
 #include "ui/ui.h"
+#include "ui/window_list.h"
 #include "xmpp/chat_session.h"
 #include "xmpp/muc.h"
 #include "xmpp/session.h"
@@ -61,6 +62,10 @@
 #include "xmpp/stanza.h"
 #include "xmpp/connection.h"
 #include "xmpp/xmpp.h"
+
+#ifdef HAVE_OMEMO
+#include "omemo/omemo.h"
+#endif
 
 typedef struct p_message_handle_t {
     ProfMessageCallback func;
@@ -77,6 +82,7 @@ static void _handle_conference(xmpp_stanza_t *const stanza);
 static void _handle_captcha(xmpp_stanza_t *const stanza);
 static void _handle_receipt_received(xmpp_stanza_t *const stanza);
 static void _handle_chat(xmpp_stanza_t *const stanza);
+static void _handle_omemo(xmpp_stanza_t *const stanza);
 
 static void _send_message_stanza(xmpp_stanza_t *const stanza);
 
@@ -143,6 +149,13 @@ _message_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza, void *con
             }
         }
     }
+
+#ifdef HAVE_OMEMO
+    xmpp_stanza_t *omemo = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_OMEMO);
+    if (omemo) {
+        _handle_omemo(stanza);
+    }
+#endif
 
     _handle_chat(stanza);
 
@@ -306,6 +319,99 @@ message_send_chat_otr(const char *const barejid, const char *const msg, gboolean
 
     return id;
 }
+
+#ifdef HAVE_OMEMO
+char*
+message_send_chat_omemo(const char *const jid, uint32_t sid, GList *keys,
+    const unsigned char *const iv, size_t iv_len,
+    const unsigned char *const ciphertext, size_t ciphertext_len,
+    gboolean request_receipt)
+{
+    xmpp_ctx_t * const ctx = connection_get_ctx();
+    char *id = connection_create_stanza_id("msg");
+
+    xmpp_stanza_t *message = xmpp_message_new(ctx, STANZA_TYPE_CHAT, jid, id);
+
+    xmpp_stanza_t *encrypted = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(encrypted, "encrypted");
+    xmpp_stanza_set_ns(encrypted, STANZA_NS_OMEMO);
+
+    xmpp_stanza_t *header = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(header, "header");
+    char *sid_text = g_strdup_printf("%d", sid);
+    xmpp_stanza_set_attribute(header, "sid", sid_text);
+    g_free(sid_text);
+
+    GList *key_iter;
+    for (key_iter = keys; key_iter != NULL; key_iter = key_iter->next) {
+        omemo_key_t *key = (omemo_key_t *)key_iter->data;
+
+        xmpp_stanza_t *key_stanza = xmpp_stanza_new(ctx);
+        xmpp_stanza_set_name(key_stanza, "key");
+        char *rid = g_strdup_printf("%d", key->device_id);
+        xmpp_stanza_set_attribute(key_stanza, "rid", rid);
+        g_free(rid);
+        if (key->prekey) {
+            xmpp_stanza_set_attribute(key_stanza, "prekey", "true");
+        }
+
+        gchar *key_raw = g_base64_encode(key->data, key->length);
+        xmpp_stanza_t *key_text = xmpp_stanza_new(ctx);
+        xmpp_stanza_set_text(key_text, key_raw);
+        g_free(key_raw);
+
+        xmpp_stanza_add_child(key_stanza, key_text);
+        xmpp_stanza_add_child(header, key_stanza);
+        xmpp_stanza_release(key_text);
+        xmpp_stanza_release(key_stanza);
+    }
+
+    xmpp_stanza_t *iv_stanza = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(iv_stanza, "iv");
+
+    gchar *iv_raw = g_base64_encode(iv, iv_len);
+    xmpp_stanza_t *iv_text = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_text(iv_text, iv_raw);
+    g_free(iv_raw);
+
+    xmpp_stanza_add_child(iv_stanza, iv_text);
+    xmpp_stanza_add_child(header, iv_stanza);
+    xmpp_stanza_release(iv_text);
+    xmpp_stanza_release(iv_stanza);
+
+    xmpp_stanza_add_child(encrypted, header);
+    xmpp_stanza_release(header);
+
+    xmpp_stanza_t *payload = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(payload, "payload");
+
+    gchar *ciphertext_raw = g_base64_encode(ciphertext, ciphertext_len);
+    xmpp_stanza_t *payload_text = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_text(payload_text, ciphertext_raw);
+    g_free(ciphertext_raw);
+
+    xmpp_stanza_add_child(payload, payload_text);
+    xmpp_stanza_add_child(encrypted, payload);
+    xmpp_stanza_release(payload_text);
+    xmpp_stanza_release(payload);
+
+    xmpp_stanza_add_child(message, encrypted);
+    xmpp_stanza_release(encrypted);
+
+    stanza_attach_carbons_private(ctx, message);
+    stanza_attach_hints_no_copy(ctx, message);
+    stanza_attach_hints_no_store(ctx, message);
+
+    if (request_receipt) {
+        stanza_attach_receipt_request(ctx, message);
+    }
+
+    _send_message_stanza(message);
+    xmpp_stanza_release(message);
+
+    return id;
+}
+#endif
 
 void
 message_send_private(const char *const fulljid, const char *const msg, const char *const oob_url)
@@ -828,7 +934,8 @@ _handle_chat(xmpp_stanza_t *const stanza)
     // ignore handled namespaces
     xmpp_stanza_t *conf = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_CONFERENCE);
     xmpp_stanza_t *captcha = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_CAPTCHA);
-    if (conf || captcha) {
+    xmpp_stanza_t *omemo = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_OMEMO);
+    if (conf || captcha || omemo) {
         return;
     }
 
@@ -894,6 +1001,100 @@ _handle_chat(xmpp_stanza_t *const stanza)
 
     if (timestamp) g_date_time_unref(timestamp);
     jid_destroy(jid);
+}
+
+static void
+_handle_omemo(xmpp_stanza_t *const stanza)
+{
+    xmpp_stanza_t *encrypted = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_OMEMO);
+    if (!encrypted) {
+        return;
+    }
+
+    xmpp_stanza_t *header = xmpp_stanza_get_child_by_name(encrypted, "header");
+    if (!header) {
+        return;
+    }
+
+    const char *sid_text = xmpp_stanza_get_attribute(header, "sid");
+    if (!sid_text) {
+        return;
+    }
+    uint32_t sid = strtoul(sid_text, NULL, 10);
+
+    xmpp_stanza_t *iv = xmpp_stanza_get_child_by_name(header, "iv");
+    if (!iv) {
+        return;
+    }
+    const char *iv_text = xmpp_stanza_get_text(iv);
+    if (!iv_text) {
+        return;
+    }
+    size_t iv_len;
+    const unsigned char *iv_raw = g_base64_decode(iv_text, &iv_len);
+
+    xmpp_stanza_t *payload = xmpp_stanza_get_child_by_name(encrypted, "payload");
+    if (!payload) {
+        return;
+    }
+    const char *payload_text = xmpp_stanza_get_text(payload);
+    if (!payload_text) {
+        return;
+    }
+    size_t payload_len;
+    const unsigned char *payload_raw = g_base64_decode(payload_text, &payload_len);
+
+    GList *keys = NULL;
+    xmpp_stanza_t *key_stanza;
+    for (key_stanza = xmpp_stanza_get_children(header); key_stanza != NULL; key_stanza = xmpp_stanza_get_next(key_stanza)) {
+        if (g_strcmp0(xmpp_stanza_get_name(key_stanza), "key") != 0) {
+            continue;
+        }
+
+        omemo_key_t *key = malloc(sizeof(omemo_key_t));
+        const char *key_text = xmpp_stanza_get_text(key_stanza);
+        if (!key_text) {
+            goto skip;
+        }
+
+
+        const char *rid_text = xmpp_stanza_get_attribute(key_stanza, "rid");
+        key->device_id = strtoul(rid_text, NULL, 10);
+        if (!key->device_id) {
+            goto skip;
+        }
+        key->data = g_base64_decode(key_text, &key->length);
+        key->prekey = g_strcmp0(xmpp_stanza_get_attribute(key_stanza, "prekey"), "true") == 0;
+        keys = g_list_append(keys, key);
+        continue;
+
+skip:
+        free(key);
+    }
+
+    const char *from = xmpp_stanza_get_from(stanza);
+    Jid *jid = jid_create(from);
+    GDateTime *timestamp = stanza_get_delay(stanza);
+
+    char *plaintext = omemo_on_message_recv(jid->barejid, sid, iv_raw, iv_len, keys, payload_raw, payload_len);
+    if (!plaintext) {
+        goto out;
+    }
+
+    gboolean new_win = FALSE;
+    ProfChatWin *chatwin = wins_get_chat(jid->barejid);
+    if (!chatwin) {
+        ProfWin *window = wins_new_chat(jid->barejid);
+        chatwin = (ProfChatWin*)window;
+        new_win = TRUE;
+    }
+
+    chat_log_omemo_msg_in(jid->barejid, plaintext, timestamp);
+    chatwin_incoming_msg(chatwin, jid->resourcepart, plaintext, timestamp, new_win, PROF_MSG_OMEMO);
+
+out:
+    jid_destroy(jid);
+    if (timestamp) g_date_time_unref(timestamp);
 }
 
 static void

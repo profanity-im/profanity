@@ -58,6 +58,7 @@
 #define PREF_GROUP_ALIAS "alias"
 #define PREF_GROUP_OTR "otr"
 #define PREF_GROUP_PGP "pgp"
+#define PREF_GROUP_OMEMO "omemo"
 #define PREF_GROUP_MUC "muc"
 #define PREF_GROUP_PLUGINS "plugins"
 
@@ -819,6 +820,33 @@ prefs_set_pgp_char(char ch)
     str[1] = '\0';
 
     g_key_file_set_string(prefs, PREF_GROUP_PGP, "pgp.char", str);
+    _save_prefs();
+}
+
+char
+prefs_get_omemo_char(void)
+{
+    char result = '~';
+
+    char *resultstr = g_key_file_get_string(prefs, PREF_GROUP_OMEMO, "omemo.char", NULL);
+    if (!resultstr) {
+        result =  '~';
+    } else {
+        result = resultstr[0];
+    }
+    free(resultstr);
+
+    return result;
+}
+
+void
+prefs_set_omemo_char(char ch)
+{
+    char str[2];
+    str[0] = ch;
+    str[1] = '\0';
+
+    g_key_file_set_string(prefs, PREF_GROUP_OMEMO, "omemo.char", str);
     _save_prefs();
 }
 

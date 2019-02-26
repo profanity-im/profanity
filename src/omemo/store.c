@@ -39,12 +39,16 @@ load_session(signal_buffer **record, const signal_protocol_address *address,
     device_store = g_hash_table_lookup(session_store, address->name);
     if (!device_store) {
         *record = NULL;
-        return SG_SUCCESS;
+        return 0;
     }
 
     signal_buffer *original = g_hash_table_lookup(device_store, GINT_TO_POINTER(address->device_id));
+    if (!original) {
+        *record = NULL;
+        return 0;
+    }
     *record = signal_buffer_copy(original);
-    return SG_SUCCESS;
+    return 1;
 }
 
 int
@@ -208,8 +212,8 @@ get_identity_key_pair(signal_buffer **public_data, signal_buffer **private_data,
 {
     identity_key_store_t *identity_key_store = (identity_key_store_t *)user_data;
 
-    *public_data = identity_key_store->public;
-    *private_data = identity_key_store->private;
+    *public_data = signal_buffer_copy(identity_key_store->public);
+    *private_data = signal_buffer_copy(identity_key_store->private);
 
     return SG_SUCCESS;
 }

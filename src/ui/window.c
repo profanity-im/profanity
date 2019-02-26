@@ -1058,6 +1058,8 @@ win_print_incoming(ProfWin *window, GDateTime *timestamp,
                 enc_char = prefs_get_otr_char();
             } else if (enc_mode == PROF_MSG_PGP) {
                 enc_char = prefs_get_pgp_char();
+            } else if (enc_mode == PROF_MSG_OMEMO) {
+                enc_char = prefs_get_omemo_char();
             }
             _win_printf(window, enc_char, 0, timestamp, NO_ME, THEME_TEXT_THEM, from, "%s", message);
             break;
