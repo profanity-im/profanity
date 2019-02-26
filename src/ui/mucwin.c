@@ -361,7 +361,7 @@ mucwin_history(ProfMucWin *mucwin, const char *const nick, GDateTime *timestamp,
 }
 
 static void
-_mucwin_print_mention(ProfWin *window, const char *const message, const char *const nick, GSList *mentions)
+_mucwin_print_mention(ProfWin *window, const char *const message, const char *const from, const char *const mynick, GSList *mentions, const char *const ch)
 {
     int last_pos = 0;
     int pos = 0;
@@ -370,13 +370,20 @@ _mucwin_print_mention(ProfWin *window, const char *const message, const char *co
         pos = GPOINTER_TO_INT(curr->data);
 
         char *before_str = g_strndup(message + last_pos, pos - last_pos);
-        win_append_highlight(window, THEME_ROOMMENTION, "%s", before_str);
+        if (strncmp(before_str, "/me ", 4) == 0) {
+            win_print_them(window, THEME_ROOMMENTION, *ch, "");
+            win_append_highlight(window, THEME_ROOMMENTION, "*%s ", from);
+            win_append_highlight(window, THEME_ROOMMENTION, "%s", before_str + 4);
+        } else {
+            win_print_them(window, THEME_ROOMMENTION, *ch, from);
+            win_append_highlight(window, THEME_ROOMMENTION, "%s", before_str);
+        }
         g_free(before_str);
-        char *nick_str = g_strndup(message + pos, strlen(nick));
-        win_append_highlight(window, THEME_ROOMMENTION_TERM, "%s", nick_str);
-        g_free(nick_str);
+        char *mynick_str = g_strndup(message + pos, strlen(mynick));
+        win_append_highlight(window, THEME_ROOMMENTION_TERM, "%s", mynick_str);
+        g_free(mynick_str);
 
-        last_pos = pos + strlen(nick);
+        last_pos = pos + strlen(mynick);
 
         curr = g_slist_next(curr);
     }
@@ -485,8 +492,7 @@ mucwin_message(ProfMucWin *mucwin, const char *const nick, const char *const mes
 
     if (g_strcmp0(nick, mynick) != 0) {
         if (g_slist_length(mentions) > 0) {
-            win_print_them(window, THEME_ROOMMENTION, ch, nick);
-            _mucwin_print_mention(window, message, mynick, mentions);
+            _mucwin_print_mention(window, message, nick, mynick, mentions, &ch);
         } else if (triggers) {
             win_print_them(window, THEME_ROOMTRIGGER, ch, nick);
             _mucwin_print_triggers(window, message, triggers);
