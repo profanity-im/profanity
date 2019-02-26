@@ -134,16 +134,60 @@ omemo_start_device_session_handle_bundle(xmpp_stanza_t *const stanza, void *cons
     if (!prekey) {
         return 1;
     }
-
+    const char *prekey_id_text = xmpp_stanza_get_attribute(prekey, "preKeyId");
+    if (!prekey_id_text) {
+        return 1;
+    }
+    uint32_t prekey_id = strtoul(prekey_id_text, NULL, 10);
     xmpp_stanza_t *prekey_text = xmpp_stanza_get_children(prekey);
     if (!prekey_text) {
         return 1;
     }
-
     size_t prekey_len;
     unsigned char *prekey_raw = g_base64_decode(xmpp_stanza_get_text(prekey_text), &prekey_len);
 
-    omemo_start_device_session(from, device_id, prekey_raw, prekey_len);
+    xmpp_stanza_t *signed_prekey = xmpp_stanza_get_child_by_name(bundle, "signedPreKeyPublic");
+    if (!signed_prekey) {
+        return 1;
+    }
+    const char *signed_prekey_id_text = xmpp_stanza_get_attribute(signed_prekey, "signedPreKeyId");
+    if (!signed_prekey_id_text) {
+        return 1;
+    }
+    uint32_t signed_prekey_id = strtoul(signed_prekey_id_text, NULL, 10);
+    xmpp_stanza_t *signed_prekey_text = xmpp_stanza_get_children(signed_prekey);
+    if (!signed_prekey_text) {
+        return 1;
+    }
+    size_t signed_prekey_len;
+    unsigned char *signed_prekey_raw = g_base64_decode(xmpp_stanza_get_text(signed_prekey_text), &signed_prekey_len);
+
+    xmpp_stanza_t *signed_prekey_signature = xmpp_stanza_get_child_by_name(bundle, "signedPreKeySignature");
+    if (!signed_prekey_signature) {
+        return 1;
+    }
+    xmpp_stanza_t *signed_prekey_signature_text = xmpp_stanza_get_children(signed_prekey_signature);
+    if (!signed_prekey_signature_text) {
+        return 1;
+    }
+    size_t signed_prekey_signature_len;
+    unsigned char *signed_prekey_signature_raw = g_base64_decode(xmpp_stanza_get_text(signed_prekey_signature_text), &signed_prekey_signature_len);
+
+    xmpp_stanza_t *identity_key = xmpp_stanza_get_child_by_name(bundle, "identityKey");
+    if (!identity_key) {
+        return 1;
+    }
+    xmpp_stanza_t *identity_key_text = xmpp_stanza_get_children(identity_key);
+    if (!identity_key_text) {
+        return 1;
+    }
+    size_t identity_key_len;
+    unsigned char *identity_key_raw = g_base64_decode(xmpp_stanza_get_text(identity_key_text), &identity_key_len);
+
+    omemo_start_device_session(from, device_id, prekey_id, prekey_raw,
+        prekey_len, signed_prekey_id, signed_prekey_raw, signed_prekey_len,
+        signed_prekey_signature_raw, signed_prekey_signature_len,
+        identity_key_raw, identity_key_len);
     return 1;
 }
 

@@ -249,15 +249,30 @@ omemo_set_device_list(const char *const jid, GList * device_list)
 }
 
 void
-omemo_start_device_session(const char *const jid, uint32_t device_id, const unsigned char *const prekey, size_t prekey_len)
+omemo_start_device_session(const char *const jid, uint32_t device_id,
+    uint32_t prekey_id, const unsigned char *const prekey_raw, size_t prekey_len,
+    uint32_t signed_prekey_id, const unsigned char *const signed_prekey_raw,
+    size_t signed_prekey_len, const unsigned char *const signature,
+    size_t signature_len, const unsigned char *const identity_key_raw,
+    size_t identity_key_len)
 {
+    session_pre_key_bundle *bundle;
     signal_protocol_address address = {
         jid, strlen(jid), device_id
     };
 
     session_builder *builder;
     session_builder_create(&builder, omemo_ctx.store, &address, omemo_ctx.signal);
-    //session_builder_process_pre_key_bundle(builder, prekey);
+
+    ec_public_key *prekey;
+    curve_decode_point(&prekey, prekey_raw, prekey_len, omemo_ctx.signal);
+    ec_public_key *signed_prekey;
+    curve_decode_point(&signed_prekey, signed_prekey_raw, signed_prekey_len, omemo_ctx.signal);
+    ec_public_key *identity_key;
+    curve_decode_point(&identity_key, identity_key_raw, identity_key_len, omemo_ctx.signal);
+
+    session_pre_key_bundle_create(&bundle, 0, device_id, prekey_id, prekey, signed_prekey_id, signed_prekey, signature, signature_len, identity_key);
+    session_builder_process_pre_key_bundle(builder, bundle);
 }
 
 static void
