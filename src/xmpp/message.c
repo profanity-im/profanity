@@ -327,6 +327,7 @@ message_send_chat_omemo(const char *const jid, uint32_t sid, GList *keys,
     const unsigned char *const ciphertext, size_t ciphertext_len,
     gboolean request_receipt)
 {
+    char *state = chat_session_get_state(barejid);
     xmpp_ctx_t * const ctx = connection_get_ctx();
     char *id = connection_create_stanza_id("msg");
 
@@ -405,6 +406,10 @@ message_send_chat_omemo(const char *const jid, uint32_t sid, GList *keys,
     xmpp_stanza_add_child(body, body_text);
     xmpp_stanza_release(body_text);
     xmpp_stanza_add_child(message, body);
+
+    if (state) {
+        stanza_attach_state(ctx, message, state);
+    }
 
     stanza_attach_carbons_private(ctx, message);
     stanza_attach_hints_no_copy(ctx, message);
