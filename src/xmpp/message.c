@@ -398,6 +398,14 @@ message_send_chat_omemo(const char *const jid, uint32_t sid, GList *keys,
     xmpp_stanza_add_child(message, encrypted);
     xmpp_stanza_release(encrypted);
 
+    xmpp_stanza_t *body = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(body, "body");
+    xmpp_stanza_t *body_text = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_text(body_text, "You received a message encrypted with OMEMO but your client doesn't support OMEMO.");
+    xmpp_stanza_add_child(body, body_text);
+    xmpp_stanza_release(body_text);
+    xmpp_stanza_add_child(message, body);
+
     stanza_attach_carbons_private(ctx, message);
     stanza_attach_hints_no_copy(ctx, message);
     stanza_attach_hints_no_store(ctx, message);
