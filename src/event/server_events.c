@@ -442,7 +442,7 @@ _sv_ev_incoming_plain(ProfChatWin *chatwin, gboolean new_win, char *barejid, cha
 }
 
 void
-sv_ev_incoming_message(char *barejid, char *resource, char *message, char *pgp_message, GDateTime *timestamp)
+sv_ev_incoming_message(char *barejid, char *resource, char *message, char *pgp_message, GDateTime *timestamp, gboolean omemo)
 {
     gboolean new_win = FALSE;
     ProfChatWin *chatwin = wins_get_chat(barejid);
