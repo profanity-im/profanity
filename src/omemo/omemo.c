@@ -1,5 +1,7 @@
 #include <sys/time.h>
+#include <sys/stat.h>
 
+#include <errno.h>
 #include <glib.h>
 #include <pthread.h>
 #include <signal/key_helper.h>
@@ -18,9 +20,11 @@
 #include "xmpp/xmpp.h"
 #include "xmpp/connection.h"
 #include "xmpp/omemo.h"
+#include "config/files.h"
 
 static gboolean loaded;
 
+static void omemo_generate_short_term_crypto_materials(ProfAccount *account);
 static void lock(void *user_data);
 static void unlock(void *user_data);
 static void omemo_log(int level, const char *message, size_t len, void *user_data);
@@ -41,6 +45,8 @@ struct omemo_context_t {
     GHashTable *signed_pre_key_store;
     identity_key_store_t identity_key_store;
     GHashTable *device_ids;
+    GString *identity_filename;
+    GKeyFile *identity_keyfile;
 };
 
 static omemo_context omemo_ctx;
@@ -142,15 +148,98 @@ omemo_init(void)
 }
 
 void
-omemo_generate_crypto_materials(ProfAccount *account)
+omemo_on_connect(ProfAccount *account)
 {
     xmpp_ctx_t * const ctx = connection_get_ctx();
     char *barejid = xmpp_jid_bare(ctx, session_get_account_name());
+    char *omemodir = files_get_data_path(DIR_OMEMO);
+    GString *basedir = g_string_new(omemodir);
+    free(omemodir);
+    gchar *account_dir = str_replace(barejid, "@", "_at_");
+    g_string_append(basedir, "/");
+    g_string_append(basedir, account_dir);
+    g_string_append(basedir, "/");
+    free(account_dir);
+
+    omemo_ctx.identity_filename = g_string_new(basedir->str);
+    g_string_append(omemo_ctx.identity_filename, "identity.txt");
+
+    errno = 0;
+    int res = g_mkdir_with_parents(basedir->str, S_IRWXU);
+    if (res == -1) {
+        char *errmsg = strerror(errno);
+        if (errmsg) {
+            log_error("Error creating directory: %s, %s", omemo_ctx.identity_filename->str, errmsg);
+        } else {
+            log_error("Error creating directory: %s", omemo_ctx.identity_filename->str);
+        }
+    }
+
+    omemo_ctx.identity_keyfile = g_key_file_new();
+    if (g_key_file_load_from_file(omemo_ctx.identity_keyfile, omemo_ctx.identity_filename->str, G_KEY_FILE_KEEP_COMMENTS, NULL)) {
+        omemo_ctx.device_id = g_key_file_get_uint64(omemo_ctx.identity_keyfile, OMEMO_STORE_GROUP_IDENTITY, OMEMO_STORE_KEY_DEVICE_ID, NULL);
+        omemo_ctx.registration_id = g_key_file_get_uint64(omemo_ctx.identity_keyfile, OMEMO_STORE_GROUP_IDENTITY, OMEMO_STORE_KEY_REGISTRATION_ID, NULL);
+
+        char *identity_key_public_b64 = g_key_file_get_string(omemo_ctx.identity_keyfile, OMEMO_STORE_GROUP_IDENTITY, OMEMO_STORE_KEY_IDENTITY_KEY_PUBLIC, NULL);
+        size_t identity_key_public_len;
+        unsigned char *identity_key_public = g_base64_decode(identity_key_public_b64, &identity_key_public_len);
+        omemo_ctx.identity_key_store.public = signal_buffer_create(identity_key_public, identity_key_public_len);
+
+        char *identity_key_private_b64 = g_key_file_get_string(omemo_ctx.identity_keyfile, OMEMO_STORE_GROUP_IDENTITY, OMEMO_STORE_KEY_IDENTITY_KEY_PRIVATE, NULL);
+        size_t identity_key_private_len;
+        unsigned char *identity_key_private = g_base64_decode(identity_key_private_b64, &identity_key_private_len);
+        omemo_ctx.identity_key_store.private = signal_buffer_create(identity_key_private, identity_key_private_len);
+        signal_buffer_create(identity_key_private, identity_key_private_len);
+
+        ec_public_key *public_key;
+        curve_decode_point(&public_key, identity_key_public, identity_key_public_len, omemo_ctx.signal);
+        ec_private_key *private_key;
+        curve_decode_private_point(&private_key, identity_key_private, identity_key_private_len, omemo_ctx.signal);
+        ratchet_identity_key_pair_create(&omemo_ctx.identity_key_pair, public_key, private_key);
+
+        g_free(identity_key_public);
+        g_free(identity_key_private);
+
+        omemo_generate_short_term_crypto_materials(account);
+    }
+}
+
+void
+omemo_generate_crypto_materials(ProfAccount *account)
+{
+    GError *error = NULL;
+
+    if (loaded) {
+        return;
+    }
 
     omemo_ctx.device_id = randombytes_uniform(0x80000000);
 
     signal_protocol_key_helper_generate_identity_key_pair(&omemo_ctx.identity_key_pair, omemo_ctx.signal);
     signal_protocol_key_helper_generate_registration_id(&omemo_ctx.registration_id, 0, omemo_ctx.signal);
+
+    ec_public_key_serialize(&omemo_ctx.identity_key_store.public, ratchet_identity_key_pair_get_public(omemo_ctx.identity_key_pair));
+    ec_private_key_serialize(&omemo_ctx.identity_key_store.private, ratchet_identity_key_pair_get_private(omemo_ctx.identity_key_pair));
+
+    g_key_file_set_uint64(omemo_ctx.identity_keyfile, OMEMO_STORE_GROUP_IDENTITY, OMEMO_STORE_KEY_DEVICE_ID, omemo_ctx.device_id);
+    g_key_file_set_uint64(omemo_ctx.identity_keyfile, OMEMO_STORE_GROUP_IDENTITY, OMEMO_STORE_KEY_REGISTRATION_ID, omemo_ctx.registration_id);
+    char *identity_key_public = g_base64_encode(signal_buffer_data(omemo_ctx.identity_key_store.public), signal_buffer_len(omemo_ctx.identity_key_store.public));
+    g_key_file_set_string(omemo_ctx.identity_keyfile, OMEMO_STORE_GROUP_IDENTITY, OMEMO_STORE_KEY_IDENTITY_KEY_PUBLIC, identity_key_public);
+    g_free(identity_key_public);
+    char *identity_key_private = g_base64_encode(signal_buffer_data(omemo_ctx.identity_key_store.private), signal_buffer_len(omemo_ctx.identity_key_store.private));
+    g_key_file_set_string(omemo_ctx.identity_keyfile, OMEMO_STORE_GROUP_IDENTITY, OMEMO_STORE_KEY_IDENTITY_KEY_PRIVATE, identity_key_private);
+    g_free(identity_key_private);
+
+    if (!g_key_file_save_to_file(omemo_ctx.identity_keyfile, omemo_ctx.identity_filename->str, &error)) {
+        log_error("Error saving OMEMO identity to: %s, %s", omemo_ctx.identity_filename->str, error->message);
+    }
+
+    omemo_generate_short_term_crypto_materials(account);
+}
+
+static void
+omemo_generate_short_term_crypto_materials(ProfAccount *account)
+{
     signal_protocol_key_helper_generate_pre_keys(&omemo_ctx.pre_keys_head, randombytes_random(), 100, omemo_ctx.signal);
 
     struct timeval tv;
@@ -158,14 +247,14 @@ omemo_generate_crypto_materials(ProfAccount *account)
     unsigned long long timestamp = (unsigned long long)(tv.tv_sec) * 1000 + (unsigned long long)(tv.tv_usec) / 1000;
     signal_protocol_key_helper_generate_signed_pre_key(&omemo_ctx.signed_pre_key, omemo_ctx.identity_key_pair, 5, timestamp, omemo_ctx.signal);
 
-    ec_public_key_serialize(&omemo_ctx.identity_key_store.public, ratchet_identity_key_pair_get_public(omemo_ctx.identity_key_pair));
-    ec_private_key_serialize(&omemo_ctx.identity_key_store.private, ratchet_identity_key_pair_get_private(omemo_ctx.identity_key_pair));
-
     loaded = TRUE;
 
     /* Ensure we get our current device list, and it gets updated with our
      * device_id */
+    xmpp_ctx_t * const ctx = connection_get_ctx();
+    char *barejid = xmpp_jid_bare(ctx, session_get_account_name());
     omemo_devicelist_request(barejid);
+
     omemo_bundle_publish();
 }
 

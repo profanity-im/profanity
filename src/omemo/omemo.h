@@ -15,6 +15,7 @@ typedef struct omemo_key {
 } omemo_key_t;
 
 void omemo_init(void);
+void omemo_on_connect(ProfAccount *account);
 void omemo_generate_crypto_materials(ProfAccount *account);
 
 uint32_t omemo_device_id(void);

@@ -59,6 +59,10 @@
 #include "pgp/gpg.h"
 #endif
 
+#ifdef HAVE_OMEMO
+#include "omemo/omemo.h"
+#endif
+
 #include "ui/ui.h"
 
 void
@@ -74,6 +78,10 @@ sv_ev_login_account_success(char *account_name, gboolean secured)
 
 #ifdef HAVE_LIBGPGME
     p_gpg_on_connect(account->jid);
+#endif
+
+#ifdef HAVE_OMEMO
+    omemo_on_connect(account);
 #endif
 
     ui_handle_login_account_success(account, secured);
