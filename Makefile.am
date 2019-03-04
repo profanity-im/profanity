@@ -185,7 +185,7 @@ themes_sources = $(top_srcdir)/themes/*
 
 icons_sources = $(top_srcdir)/icons/*
 
-script_sources = bootstrap.sh configure-debug
+script_sources = bootstrap.sh
 
 man_sources = docs/profanity.1
 
@@ -250,7 +250,20 @@ tests_unittests_unittests_LDADD = -lcmocka
 
 man_MANS = $(man_sources)
 
-EXTRA_DIST = $(man_sources) $(icons_sources) $(themes_sources) $(script_sources) profrc.example LICENSE.txt README.md CHANGELOG
+EXTRA_DIST = $(man_sources) $(icons_sources) $(themes_sources) $(script_sources) profrc.example theme_template LICENSE.txt README.md CHANGELOG
+
+# Ship API documentation with `make dist`
+EXTRA_DIST += \
+	apidocs/c/c-prof.conf \
+	apidocs/c/gen.sh \
+	apidocs/c/profapi.h \
+	apidocs/c/profhooks.h \
+	apidocs/python/conf.py \
+	apidocs/python/gen.sh \
+	apidocs/python/index.rst \
+	apidocs/python/Makefile \
+	apidocs/python/src/plugin.py \
+	apidocs/python/src/prof.py
 
 if INCLUDE_GIT_VERSION
 EXTRA_DIST += .git/HEAD .git/index
