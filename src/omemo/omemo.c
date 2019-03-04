@@ -28,6 +28,10 @@ static void omemo_generate_short_term_crypto_materials(ProfAccount *account);
 static void lock(void *user_data);
 static void unlock(void *user_data);
 static void omemo_log(int level, const char *message, size_t len, void *user_data);
+static gboolean handle_own_device_list(const char *const jid, GList *device_list);
+static gboolean handle_device_list_start_session(const char *const jid, GList *device_list);
+
+typedef gboolean (*OmemoDeviceListHandler)(const char *const jid, GList *device_list);
 
 struct omemo_context_t {
     pthread_mutexattr_t attr;
@@ -35,6 +39,7 @@ struct omemo_context_t {
     signal_context *signal;
     uint32_t device_id;
     GHashTable *device_list;
+    GHashTable *device_list_handler;
     ratchet_identity_key_pair *identity_key_pair;
     uint32_t registration_id;
     signal_protocol_key_helper_pre_key_list_node *pre_keys_head;
@@ -145,6 +150,7 @@ omemo_init(void)
 
     loaded = FALSE;
     omemo_ctx.device_list = g_hash_table_new_full(g_str_hash, g_str_equal, free, (GDestroyNotify)g_list_free);
+    omemo_ctx.device_list_handler = g_hash_table_new_full(g_str_hash, g_str_equal, free, NULL);
 }
 
 void
@@ -253,7 +259,9 @@ omemo_generate_short_term_crypto_materials(ProfAccount *account)
      * device_id */
     xmpp_ctx_t * const ctx = connection_get_ctx();
     char *barejid = xmpp_jid_bare(ctx, session_get_account_name());
+    g_hash_table_insert(omemo_ctx.device_list_handler, strdup(barejid), handle_own_device_list);
     omemo_devicelist_request(barejid);
+    free(barejid);
 
     omemo_bundle_publish();
 }
@@ -264,7 +272,7 @@ omemo_start_session(const char *const barejid)
     GList *device_list = g_hash_table_lookup(omemo_ctx.device_list, barejid);
     if (!device_list) {
         omemo_devicelist_request(barejid);
-        /* TODO handle response */
+        g_hash_table_insert(omemo_ctx.device_list_handler, strdup(barejid), handle_device_list_start_session);
         return;
     }
 
@@ -338,16 +346,19 @@ void
 omemo_set_device_list(const char *const jid, GList * device_list)
 {
     xmpp_ctx_t * const ctx = connection_get_ctx();
-    char *barejid = xmpp_jid_bare(ctx, session_get_account_name());
+    char *barejid = xmpp_jid_bare(ctx, jid);
 
-    if (g_strcmp0(jid, barejid) == 0) {
-        if (!g_list_find(device_list, GINT_TO_POINTER(omemo_ctx.device_id))) {
-            device_list = g_list_append(device_list, GINT_TO_POINTER(omemo_ctx.device_id));
-            omemo_devicelist_publish(device_list);
+    g_hash_table_insert(omemo_ctx.device_list, strdup(barejid), device_list);
+
+    OmemoDeviceListHandler handler = g_hash_table_lookup(omemo_ctx.device_list_handler, barejid);
+    if (handler) {
+        gboolean keep = handler(barejid, device_list);
+        if (!keep) {
+            g_hash_table_remove(omemo_ctx.device_list_handler, barejid);
         }
     }
 
-    g_hash_table_insert(omemo_ctx.device_list, strdup(jid), device_list);
+    free(barejid);
 }
 
 void
@@ -534,4 +545,27 @@ static void
 omemo_log(int level, const char *message, size_t len, void *user_data)
 {
         cons_show(message);
+}
+
+static gboolean
+handle_own_device_list(const char *const jid, GList *device_list)
+{
+    if (!g_list_find(device_list, GINT_TO_POINTER(omemo_ctx.device_id))) {
+        gpointer original_jid;
+        g_hash_table_steal_extended(omemo_ctx.device_list, jid, &original_jid, NULL);
+        free(original_jid);
+        device_list = g_list_append(device_list, GINT_TO_POINTER(omemo_ctx.device_id));
+        g_hash_table_insert(omemo_ctx.device_list, strdup(jid), device_list);
+        omemo_devicelist_publish(device_list);
+    }
+
+    return TRUE;
+}
+
+static gboolean
+handle_device_list_start_session(const char *const jid, GList *device_list)
+{
+    omemo_start_session(jid);
+
+    return FALSE;
 }
