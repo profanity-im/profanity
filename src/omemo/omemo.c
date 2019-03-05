@@ -279,6 +279,7 @@ omemo_generate_short_term_crypto_materials(ProfAccount *account)
 void
 omemo_start_session(const char *const barejid)
 {
+    log_info("Start OMEMO session with %s", barejid);
     GList *device_list = g_hash_table_lookup(omemo_ctx.device_list, barejid);
     if (!device_list) {
         omemo_devicelist_request(barejid);
@@ -397,6 +398,7 @@ omemo_start_device_session(const char *const jid, uint32_t device_id,
     size_t signature_len, const unsigned char *const identity_key_raw,
     size_t identity_key_len)
 {
+    log_info("Start OMEMO session with %s device %d", jid, device_id);
     session_pre_key_bundle *bundle;
     signal_protocol_address *address;
 
