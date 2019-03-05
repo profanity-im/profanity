@@ -2251,7 +2251,7 @@ stanza_create_omemo_bundle_publish(xmpp_ctx_t *ctx, uint32_t device_id,
         xmpp_stanza_t *prekey = xmpp_stanza_new(ctx);
         xmpp_stanza_set_name(prekey, "preKeyPublic");
         char *id = g_strdup_printf("%d", GPOINTER_TO_INT(i->data));
-        xmpp_stanza_set_attribute(prekey, "id", id);
+        xmpp_stanza_set_attribute(prekey, "preKeyId", id);
         g_free(id);
 
         xmpp_stanza_t *prekey_text = xmpp_stanza_new(ctx);

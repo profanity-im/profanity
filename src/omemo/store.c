@@ -96,9 +96,19 @@ store_session(const signal_protocol_address *address, uint8_t *record,
 int
 contains_session(const signal_protocol_address *address, void *user_data)
 {
-    signal_buffer *record;
-    load_session(&record, address, user_data);
-    return record != NULL;
+    GHashTable *session_store = (GHashTable *)user_data;
+    GHashTable *device_store = NULL;
+
+    device_store = g_hash_table_lookup(session_store, address->name);
+    if (!device_store) {
+        return 0;
+    }
+
+    if (!g_hash_table_lookup(device_store, GINT_TO_POINTER(address->device_id))) {
+        return 0;
+    }
+
+    return 1;
 }
 
 int
@@ -134,9 +144,15 @@ delete_all_sessions(const char *name, size_t name_len, void *user_data)
 int
 load_pre_key(signal_buffer **record, uint32_t pre_key_id, void *user_data)
 {
+    signal_buffer *original;
     GHashTable *pre_key_store = (GHashTable *)user_data;
 
-    *record = g_hash_table_lookup(pre_key_store, GINT_TO_POINTER(pre_key_id));
+    original = g_hash_table_lookup(pre_key_store, GINT_TO_POINTER(pre_key_id));
+    if (original == NULL) {
+        return SG_ERR_INVALID_KEY_ID;
+    }
+
+    *record = signal_buffer_copy(original);
     return SG_SUCCESS;
 }
 
@@ -154,10 +170,9 @@ store_pre_key(uint32_t pre_key_id, uint8_t *record, size_t record_len,
 int
 contains_pre_key(uint32_t pre_key_id, void *user_data)
 {
-    signal_buffer *record;
-    load_pre_key(&record, pre_key_id, user_data);
+    GHashTable *pre_key_store = (GHashTable *)user_data;
 
-    return record != NULL;
+    return g_hash_table_lookup(pre_key_store, GINT_TO_POINTER(pre_key_id)) != NULL;
 }
 
 int
@@ -172,9 +187,15 @@ int
 load_signed_pre_key(signal_buffer **record, uint32_t signed_pre_key_id,
     void *user_data)
 {
+    signal_buffer *original;
     GHashTable *signed_pre_key_store = (GHashTable *)user_data;
 
-    *record = g_hash_table_lookup(signed_pre_key_store, GINT_TO_POINTER(signed_pre_key_id));
+    original = g_hash_table_lookup(signed_pre_key_store, GINT_TO_POINTER(signed_pre_key_id));
+    if (!original) {
+        return SG_ERR_INVALID_KEY_ID;
+    }
+
+    *record = signal_buffer_copy(original);
     return SG_SUCCESS;
 }
 
@@ -192,10 +213,9 @@ store_signed_pre_key(uint32_t signed_pre_key_id, uint8_t *record,
 int
 contains_signed_pre_key(uint32_t signed_pre_key_id, void *user_data)
 {
-    signal_buffer *record;
-    load_signed_pre_key(&record, signed_pre_key_id, user_data);
+    GHashTable *signed_pre_key_store = (GHashTable *)user_data;
 
-    return record != NULL;
+    return g_hash_table_lookup(signed_pre_key_store, GINT_TO_POINTER(signed_pre_key_id)) != NULL;
 }
 
 int
@@ -251,7 +271,7 @@ is_trusted_identity(const signal_protocol_address *address, uint8_t *key_data,
     signal_buffer *buffer = signal_buffer_create(key_data, key_len);
     signal_buffer *original = g_hash_table_lookup(identity_key_store->identity_key_store, node);
 
-    return original == NULL || signal_buffer_compare(buffer, original);
+    return original == NULL || signal_buffer_compare(buffer, original) == 0;
 }
 
 int

@@ -42,8 +42,7 @@ struct omemo_context_t {
     GHashTable *device_list_handler;
     ratchet_identity_key_pair *identity_key_pair;
     uint32_t registration_id;
-    signal_protocol_key_helper_pre_key_list_node *pre_keys_head;
-    session_signed_pre_key *signed_pre_key;
+    uint32_t signed_pre_key_id;
     signal_protocol_store_context *store;
     GHashTable *session_store;
     GHashTable *pre_key_store;
@@ -132,7 +131,7 @@ omemo_init(void)
         .contains_signed_pre_key = contains_signed_pre_key,
         .remove_signed_pre_key = remove_signed_pre_key,
         .destroy_func = NULL,
-        .user_data = omemo_ctx.pre_key_store
+        .user_data = omemo_ctx.signed_pre_key_store
     };
     signal_protocol_store_context_set_signed_pre_key_store(omemo_ctx.store, &signed_pre_key_store);
 
@@ -246,12 +245,23 @@ omemo_generate_crypto_materials(ProfAccount *account)
 static void
 omemo_generate_short_term_crypto_materials(ProfAccount *account)
 {
-    signal_protocol_key_helper_generate_pre_keys(&omemo_ctx.pre_keys_head, randombytes_random(), 100, omemo_ctx.signal);
+    signal_protocol_key_helper_pre_key_list_node *pre_keys_head;
+    signal_protocol_key_helper_generate_pre_keys(&pre_keys_head, randombytes_random(), 100, omemo_ctx.signal);
 
+    session_signed_pre_key *signed_pre_key;
     struct timeval tv;
     gettimeofday(&tv, NULL);
     unsigned long long timestamp = (unsigned long long)(tv.tv_sec) * 1000 + (unsigned long long)(tv.tv_usec) / 1000;
-    signal_protocol_key_helper_generate_signed_pre_key(&omemo_ctx.signed_pre_key, omemo_ctx.identity_key_pair, 5, timestamp, omemo_ctx.signal);
+
+    omemo_ctx.signed_pre_key_id = 1;
+    signal_protocol_key_helper_generate_signed_pre_key(&signed_pre_key, omemo_ctx.identity_key_pair, omemo_ctx.signed_pre_key_id, timestamp, omemo_ctx.signal);
+
+    signal_protocol_key_helper_pre_key_list_node *p;
+    for (p = pre_keys_head; p != NULL; p = signal_protocol_key_helper_key_list_next(p)) {
+        session_pre_key *prekey = signal_protocol_key_helper_key_list_element(p);
+        signal_protocol_pre_key_store_key(omemo_ctx.store, prekey);
+    }
+    signal_protocol_signed_pre_key_store_key(omemo_ctx.store, signed_pre_key);
 
     loaded = TRUE;
 
@@ -308,8 +318,11 @@ omemo_identity_key(unsigned char **output, size_t *length)
 void
 omemo_signed_prekey(unsigned char **output, size_t *length)
 {
+    session_signed_pre_key *signed_pre_key;
     signal_buffer *buffer = NULL;
-    ec_public_key_serialize(&buffer, ec_key_pair_get_public(session_signed_pre_key_get_key_pair(omemo_ctx.signed_pre_key)));
+
+    signal_protocol_signed_pre_key_load_key(omemo_ctx.store, &signed_pre_key, omemo_ctx.signed_pre_key_id);
+    ec_public_key_serialize(&buffer, ec_key_pair_get_public(session_signed_pre_key_get_key_pair(signed_pre_key)));
     *length = signal_buffer_len(buffer);
     *output = malloc(*length);
     memcpy(*output, signal_buffer_data(buffer), *length);
@@ -319,25 +332,36 @@ omemo_signed_prekey(unsigned char **output, size_t *length)
 void
 omemo_signed_prekey_signature(unsigned char **output, size_t *length)
 {
-    *length = session_signed_pre_key_get_signature_len(omemo_ctx.signed_pre_key);
+    session_signed_pre_key *signed_pre_key;
+
+    signal_protocol_signed_pre_key_load_key(omemo_ctx.store, &signed_pre_key, omemo_ctx.signed_pre_key_id);
+    *length = session_signed_pre_key_get_signature_len(signed_pre_key);
     *output = malloc(*length);
-    memcpy(*output, session_signed_pre_key_get_signature(omemo_ctx.signed_pre_key), *length);
+    memcpy(*output, session_signed_pre_key_get_signature(signed_pre_key), *length);
 }
 
 void
 omemo_prekeys(GList **prekeys, GList **ids, GList **lengths)
 {
-    signal_protocol_key_helper_pre_key_list_node *p;
-    for (p = omemo_ctx.pre_keys_head; p != NULL; p = signal_protocol_key_helper_key_list_next(p)) {
-        session_pre_key *prekey = signal_protocol_key_helper_key_list_element(p);
-        signal_buffer *buffer = NULL;
-        ec_public_key_serialize(&buffer, ec_key_pair_get_public(session_pre_key_get_key_pair(prekey)));
-        size_t length = signal_buffer_len(buffer);
+    GHashTableIter iter;
+    gpointer id;
+
+    g_hash_table_iter_init(&iter, omemo_ctx.pre_key_store);
+    while (g_hash_table_iter_next(&iter, &id, NULL)) {
+        session_pre_key *pre_key;
+        int ret;
+        ret = signal_protocol_pre_key_load_key(omemo_ctx.store, &pre_key, GPOINTER_TO_INT(id));
+        if (ret != SG_SUCCESS) {
+            continue;
+        }
+
+        signal_buffer *public_key;
+        ec_public_key_serialize(&public_key, ec_key_pair_get_public(session_pre_key_get_key_pair(pre_key)));
+        size_t length = signal_buffer_len(public_key);
         unsigned char *prekey_value = malloc(length);
-        memcpy(prekey_value, signal_buffer_data(buffer), length);
-        signal_buffer_free(buffer);
+        memcpy(prekey_value, signal_buffer_data(public_key), length);
         *prekeys = g_list_append(*prekeys, prekey_value);
-        *ids = g_list_append(*ids, GINT_TO_POINTER(session_pre_key_get_id(prekey)));
+        *ids = g_list_append(*ids, GINT_TO_POINTER(id));
         *lengths = g_list_append(*lengths, GINT_TO_POINTER(length));
     }
 }
@@ -349,6 +373,10 @@ omemo_set_device_list(const char *const jid, GList * device_list)
     char *barejid = xmpp_jid_bare(ctx, jid);
 
     g_hash_table_insert(omemo_ctx.device_list, strdup(barejid), device_list);
+    if (strchr(barejid, '@') == NULL) {
+        // barejid is server so we should handle it as our own device list
+        g_hash_table_insert(omemo_ctx.device_list_handler, strdup(barejid), handle_own_device_list);
+    }
 
     OmemoDeviceListHandler handler = g_hash_table_lookup(omemo_ctx.device_list_handler, barejid);
     if (handler) {
@@ -397,16 +425,13 @@ omemo_on_message_send(ProfChatWin *chatwin, const char *const message, gboolean 
     int res;
     xmpp_ctx_t * const ctx = connection_get_ctx();
     char *barejid = xmpp_jid_bare(ctx, session_get_account_name());
-    GList *device_ids = NULL;
 
     GList *recipient_device_id = g_hash_table_lookup(omemo_ctx.device_list, chatwin->barejid);
     if (!recipient_device_id) {
         return FALSE;
     }
-    device_ids = g_list_copy(recipient_device_id);
 
     GList *sender_device_id = g_hash_table_lookup(omemo_ctx.device_list, barejid);
-    device_ids = g_list_concat(device_ids, g_list_copy(sender_device_id));
 
     /* TODO generate fresh AES-GCM materials */
     /* TODO encrypt message */
@@ -430,7 +455,7 @@ omemo_on_message_send(ProfChatWin *chatwin, const char *const message, gboolean 
 
     GList *keys = NULL;
     GList *device_ids_iter;
-    for (device_ids_iter = device_ids; device_ids_iter != NULL; device_ids_iter = device_ids_iter->next) {
+    for (device_ids_iter = recipient_device_id; device_ids_iter != NULL; device_ids_iter = device_ids_iter->next) {
         int res;
         ciphertext_message *ciphertext;
         session_cipher *cipher;
@@ -452,7 +477,33 @@ omemo_on_message_send(ProfChatWin *chatwin, const char *const message, gboolean 
         key->data = signal_buffer_data(buffer);
         key->length = signal_buffer_len(buffer);
         key->device_id = GPOINTER_TO_INT(device_ids_iter->data);
-        key->prekey = TRUE;
+        key->prekey = ciphertext_message_get_type(ciphertext) == CIPHERTEXT_PREKEY_TYPE;
+        keys = g_list_append(keys, key);
+    }
+
+    for (device_ids_iter = sender_device_id; device_ids_iter != NULL; device_ids_iter = device_ids_iter->next) {
+        int res;
+        ciphertext_message *ciphertext;
+        session_cipher *cipher;
+        signal_protocol_address address = {
+            barejid, strlen(barejid), GPOINTER_TO_INT(device_ids_iter->data)
+        };
+
+        res = session_cipher_create(&cipher, omemo_ctx.store, &address, omemo_ctx.signal);
+        if (res != 0) {
+            continue;
+        }
+
+        res = session_cipher_encrypt(cipher, key, AES128_GCM_KEY_LENGTH, &ciphertext);
+        if (res != 0) {
+            continue;
+        }
+        signal_buffer *buffer = ciphertext_message_get_serialized(ciphertext);
+        omemo_key_t *key = malloc(sizeof(omemo_key_t));
+        key->data = signal_buffer_data(buffer);
+        key->length = signal_buffer_len(buffer);
+        key->device_id = GPOINTER_TO_INT(device_ids_iter->data);
+        key->prekey = ciphertext_message_get_type(ciphertext) == CIPHERTEXT_PREKEY_TYPE;
         keys = g_list_append(keys, key);
     }
 
@@ -465,7 +516,6 @@ omemo_on_message_send(ProfChatWin *chatwin, const char *const message, gboolean 
     free(ciphertext);
     sodium_free(key);
     sodium_free(iv);
-    g_list_free(device_ids);
 
     return TRUE;
 }
@@ -544,7 +594,7 @@ unlock(void *user_data)
 static void
 omemo_log(int level, const char *message, size_t len, void *user_data)
 {
-        cons_show(message);
+        cons_show("OMEMO: %s", message);
 }
 
 static gboolean
@@ -557,6 +607,11 @@ handle_own_device_list(const char *const jid, GList *device_list)
         device_list = g_list_append(device_list, GINT_TO_POINTER(omemo_ctx.device_id));
         g_hash_table_insert(omemo_ctx.device_list, strdup(jid), device_list);
         omemo_devicelist_publish(device_list);
+    }
+
+    GList *device_id;
+    for (device_id = device_list; device_id != NULL; device_id = device_id->next) {
+        omemo_bundle_request(jid, GPOINTER_TO_INT(device_id->data), omemo_start_device_session_handle_bundle, free, strdup(jid));
     }
 
     return TRUE;

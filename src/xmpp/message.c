@@ -840,6 +840,7 @@ _private_chat_handler(xmpp_stanza_t *const stanza, const char *const fulljid)
 static gboolean
 _handle_carbons(xmpp_stanza_t *const stanza)
 {
+    char *message_txt;
     xmpp_stanza_t *carbons = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_CARBONS);
     if (!carbons) {
         return FALSE;
@@ -873,10 +874,19 @@ _handle_carbons(xmpp_stanza_t *const stanza)
         return TRUE;
     }
 
-    char *message_txt = xmpp_message_get_body(message);
+    // check omemo encryption
+    gboolean omemo = FALSE;
+#ifdef HAVE_OMEMO
+    message_txt = omemo_receive_message(message);
+    omemo = message_txt != NULL;
+#endif
+
     if (!message_txt) {
-        log_warning("Carbon received with no message.");
-        return TRUE;
+        message_txt = xmpp_message_get_body(message);
+        if (!message_txt) {
+            log_warning("Carbon received with no message.");
+            return TRUE;
+        }
     }
 
     Jid *my_jid = jid_create(connection_get_fulljid());
@@ -904,7 +914,7 @@ _handle_carbons(xmpp_stanza_t *const stanza)
 
     // if we are the recipient, treat as standard incoming message
     if (g_strcmp0(my_jid->barejid, jid_to->barejid) == 0) {
-        sv_ev_incoming_carbon(jid_from->barejid, jid_from->resourcepart, message_txt, enc_message);
+        sv_ev_incoming_carbon(jid_from->barejid, jid_from->resourcepart, message_txt, enc_message, omemo);
 
     // else treat as a sent message
     } else {
