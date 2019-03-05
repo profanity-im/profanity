@@ -594,7 +594,21 @@ unlock(void *user_data)
 static void
 omemo_log(int level, const char *message, size_t len, void *user_data)
 {
-        cons_show("OMEMO: %s", message);
+    switch (level) {
+        case SG_LOG_ERROR:
+            log_error("OMEMO: %s", message);
+            break;
+        case SG_LOG_WARNING:
+            log_warning("OMEMO: %s", message);
+            break;
+        case SG_LOG_NOTICE:
+        case SG_LOG_INFO:
+            log_info("OMEMO: %s", message);
+            break;
+        case SG_LOG_DEBUG:
+            log_debug("OMEMO: %s", message);
+            break;
+    }
 }
 
 static gboolean
