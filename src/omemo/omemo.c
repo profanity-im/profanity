@@ -573,8 +573,23 @@ omemo_on_message_recv(const char *const from, uint32_t sid,
 
     if (key->prekey) {
         pre_key_signal_message *message;
-        omemo_bundle_request(from, sid, omemo_start_device_session_handle_bundle, free, strdup(from));
+
         pre_key_signal_message_deserialize(&message, key->data, key->length, omemo_ctx.signal);
+
+        /* Replace used pre_key in bundle */
+        uint32_t pre_key_id = pre_key_signal_message_get_pre_key_id(message);
+        g_hash_table_remove(omemo_ctx.pre_key_store, GINT_TO_POINTER(pre_key_id));
+        ec_key_pair *ec_pair;
+        session_pre_key *new_pre_key;
+        curve_generate_key_pair(omemo_ctx.signal, &ec_pair);
+        session_pre_key_create(&new_pre_key, pre_key_id, ec_pair);
+        g_hash_table_insert(omemo_ctx.pre_key_store, GINT_TO_POINTER(pre_key_id), new_pre_key);
+        omemo_bundle_publish();
+
+        /* Start a new session */
+        omemo_bundle_request(from, sid, omemo_start_device_session_handle_bundle, free, strdup(from));
+
+        /* Try to decrypt message anyway, it will fail */
         res = session_cipher_decrypt_pre_key_signal_message(cipher, message, NULL, &plaintext_key);
     } else {
         signal_message *message;
