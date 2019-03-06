@@ -69,6 +69,7 @@ static char* _group_autocomplete(ProfWin *window, const char *const input, gbool
 static char* _bookmark_autocomplete(ProfWin *window, const char *const input, gboolean previous);
 static char* _otr_autocomplete(ProfWin *window, const char *const input, gboolean previous);
 static char* _pgp_autocomplete(ProfWin *window, const char *const input, gboolean previous);
+static char* _omemo_autocomplete(ProfWin *window, const char *const input, gboolean previous);
 static char* _connect_autocomplete(ProfWin *window, const char *const input, gboolean previous);
 static char* _alias_autocomplete(ProfWin *window, const char *const input, gboolean previous);
 static char* _join_autocomplete(ProfWin *window, const char *const input, gboolean previous);
@@ -157,6 +158,7 @@ static Autocomplete bookmark_property_ac;
 static Autocomplete otr_ac;
 static Autocomplete otr_log_ac;
 static Autocomplete otr_policy_ac;
+static Autocomplete omemo_ac;
 static Autocomplete connect_property_ac;
 static Autocomplete tls_property_ac;
 static Autocomplete alias_ac;
@@ -573,6 +575,10 @@ cmd_ac_init(void)
     autocomplete_add(otr_policy_ac, "manual");
     autocomplete_add(otr_policy_ac, "opportunistic");
     autocomplete_add(otr_policy_ac, "always");
+
+    omemo_ac = autocomplete_new();
+    autocomplete_add(omemo_ac, "gen");
+    autocomplete_add(omemo_ac, "start");
 
     connect_property_ac = autocomplete_new();
     autocomplete_add(connect_property_ac, "server");
@@ -1052,6 +1058,7 @@ cmd_ac_reset(ProfWin *window)
     autocomplete_reset(otr_ac);
     autocomplete_reset(otr_log_ac);
     autocomplete_reset(otr_policy_ac);
+    autocomplete_reset(omemo_ac);
     autocomplete_reset(connect_property_ac);
     autocomplete_reset(tls_property_ac);
     autocomplete_reset(alias_ac);
@@ -1179,6 +1186,7 @@ cmd_ac_uninit(void)
     autocomplete_free(otr_ac);
     autocomplete_free(otr_log_ac);
     autocomplete_free(otr_policy_ac);
+    autocomplete_free(omemo_ac);
     autocomplete_free(connect_property_ac);
     autocomplete_free(tls_property_ac);
     autocomplete_free(alias_ac);
@@ -1438,6 +1446,7 @@ _cmd_ac_complete_params(ProfWin *window, const char *const input, gboolean previ
     g_hash_table_insert(ac_funcs, "/autoconnect",   _autoconnect_autocomplete);
     g_hash_table_insert(ac_funcs, "/otr",           _otr_autocomplete);
     g_hash_table_insert(ac_funcs, "/pgp",           _pgp_autocomplete);
+    g_hash_table_insert(ac_funcs, "/omemo",         _omemo_autocomplete);
     g_hash_table_insert(ac_funcs, "/connect",       _connect_autocomplete);
     g_hash_table_insert(ac_funcs, "/alias",         _alias_autocomplete);
     g_hash_table_insert(ac_funcs, "/join",          _join_autocomplete);
@@ -2110,6 +2119,28 @@ _pgp_autocomplete(ProfWin *window, const char *const input, gboolean previous)
     }
 
     found = autocomplete_param_with_ac(input, "/pgp", pgp_ac, TRUE, previous);
+    if (found) {
+        return found;
+    }
+
+    return NULL;
+}
+
+static char*
+_omemo_autocomplete(ProfWin *window, const char *const input, gboolean previous)
+{
+    char *found = NULL;
+
+    jabber_conn_status_t conn_status = connection_get_status();
+
+    if (conn_status == JABBER_CONNECTED) {
+        found = autocomplete_param_with_func(input, "/omemo start", roster_contact_autocomplete, previous);
+        if (found) {
+            return found;
+        }
+    }
+
+    found = autocomplete_param_with_ac(input, "/omemo", omemo_ac, TRUE, previous);
     if (found) {
         return found;
     }
