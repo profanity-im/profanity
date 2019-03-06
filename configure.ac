@@ -276,14 +276,6 @@ if test "x$enable_omemo" != xno; then
             [AC_MSG_ERROR([libsignal-protocol-c is required for omemo support])],
             [AC_MSG_NOTICE([libsignal-protocol-c not found, omemo support not enabled])])])
 
-    AC_CHECK_LIB([sodium], [sodium_init],
-        [AM_CONDITIONAL([BUILD_OMEMO], [true])
-         AC_DEFINE([HAVE_OMEMO], [1], [Have omemo]),
-         LIBS="-lsodium $LIBS"],
-        [AS_IF([test "x$enable_omemo" = xyes],
-            [AC_MSG_ERROR([libsodium is required for omemo support])],
-            [AC_MSG_NOTICE([libsodium not found, omemo support not enabled])])])
-
     AC_CHECK_LIB([gcrypt], [gcry_check_version],
         [AM_CONDITIONAL([BUILD_OMEMO], [true])
          AC_DEFINE([HAVE_OMEMO], [1], [Have omemo]),

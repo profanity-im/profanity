@@ -1,19 +1,15 @@
 #include <assert.h>
 #include <signal/signal_protocol.h>
 #include <signal/signal_protocol_types.h>
-#include <sodium.h>
 #include <gcrypt.h>
 
+#include "log.h"
 #include "omemo/omemo.h"
 #include "omemo/crypto.h"
 
 int
 omemo_crypto_init(void)
 {
-    if (sodium_init() < 0) {
-        return -1;
-    }
-
     if (!gcry_check_version(GCRYPT_VERSION)) {
         return -1;
     }
@@ -26,74 +22,114 @@ omemo_crypto_init(void)
 int
 omemo_random_func(uint8_t *data, size_t len, void *user_data)
 {
-    randombytes_buf(data, len);
+    gcry_randomize(data, len, GCRY_VERY_STRONG_RANDOM);
     return 0;
 }
 
 int
 omemo_hmac_sha256_init_func(void **hmac_context, const uint8_t *key, size_t key_len, void *user_data)
 {
-    *hmac_context = sodium_malloc(sizeof(crypto_auth_hmacsha256_state));
-    return crypto_auth_hmacsha256_init(*hmac_context, key, key_len);
+    gcry_error_t res;
+    gcry_mac_hd_t hd;
+
+    res = gcry_mac_open(&hd, GCRY_MAC_HMAC_SHA256, 0, NULL);
+    if (res != GPG_ERR_NO_ERROR) {
+        log_error("OMEMO: %s", gcry_strerror(res));
+        return OMEMO_ERR_GCRYPT;
+    }
+
+    *hmac_context = hd;
+    res = gcry_mac_setkey(hd, key, key_len);
+    if (res != GPG_ERR_NO_ERROR) {
+        log_error("OMEMO: %s", gcry_strerror(res));
+        return OMEMO_ERR_GCRYPT;
+    }
+
+    return 0;
 }
 
 int
 omemo_hmac_sha256_update_func(void *hmac_context, const uint8_t *data, size_t data_len, void *user_data)
 {
-    return crypto_auth_hmacsha256_update(hmac_context, data, data_len);
+    gcry_error_t res;
+
+    res = gcry_mac_write(hmac_context, data, data_len);
+    if (res != GPG_ERR_NO_ERROR) {
+        log_error("OMEMO: %s", gcry_strerror(res));
+        return OMEMO_ERR_GCRYPT;
+    }
+
+    return 0;
 }
 
 int
 omemo_hmac_sha256_final_func(void *hmac_context, signal_buffer **output, void *user_data)
 {
-    int ret;
-    unsigned char out[crypto_auth_hmacsha256_BYTES];
+    gcry_error_t res;
+    size_t mac_len = 32;
+    unsigned char out[mac_len];
 
-    if ((ret = crypto_auth_hmacsha256_final(hmac_context, out)) != 0) {
-        return ret;
+    res = gcry_mac_read(hmac_context, out, &mac_len);
+    if (res != GPG_ERR_NO_ERROR) {
+        log_error("OMEMO: %s", gcry_strerror(res));
+        return OMEMO_ERR_GCRYPT;
     }
 
-    *output = signal_buffer_create(out, crypto_auth_hmacsha256_BYTES);
+    *output = signal_buffer_create(out, mac_len);
     return 0;
 }
 
 void
 omemo_hmac_sha256_cleanup_func(void *hmac_context, void *user_data)
 {
-    sodium_free(hmac_context);
+    gcry_mac_close(hmac_context);
 }
 
 int
 omemo_sha512_digest_init_func(void **digest_context, void *user_data)
 {
-    *digest_context = sodium_malloc(sizeof(crypto_hash_sha512_state));
-    return crypto_hash_sha512_init(*digest_context);
+    gcry_error_t res;
+    gcry_md_hd_t hd;
+
+    res = gcry_md_open(&hd, GCRY_MD_SHA512, 0);
+    if (res != GPG_ERR_NO_ERROR) {
+        log_error("OMEMO: %s", gcry_strerror(res));
+        return OMEMO_ERR_GCRYPT;
+    }
+
+    *digest_context = hd;
+
+    return 0;
 }
 
 int
 omemo_sha512_digest_update_func(void *digest_context, const uint8_t *data, size_t data_len, void *user_data)
 {
-    return crypto_hash_sha512_update(digest_context, data, data_len);
+    gcry_md_write(digest_context, data, data_len);
+
+    return 0;
 }
 
 int
 omemo_sha512_digest_final_func(void *digest_context, signal_buffer **output, void *user_data)
 {
-    int ret;
-    unsigned char out[crypto_hash_sha512_BYTES];
+    gcry_error_t res;
+    unsigned char out[64];
 
-    if ((ret = crypto_hash_sha512_final(digest_context, out)) != 0) {
-        return ret;
+    res = gcry_md_extract(digest_context, GCRY_MD_SHA512, out, 64);
+    if (res != GPG_ERR_NO_ERROR) {
+        log_error("OMEMO: %s", gcry_strerror(res));
+        return OMEMO_ERR_GCRYPT;
     }
 
-    *output = signal_buffer_create(out, crypto_hash_sha512_BYTES);
+    *output = signal_buffer_create(out, 64);
     return 0;
 }
 
 void
 omemo_sha512_digest_cleanup_func(void *digest_context, void *user_data)
 {
-    sodium_free(digest_context);
+    gcry_md_close(digest_context);
 }
 
 int

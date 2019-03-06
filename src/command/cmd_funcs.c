@@ -7944,7 +7944,7 @@ cmd_omemo_start(ProfWin *window, const char *const command, gchar **args)
         }
 
         if (!omemo_loaded()) {
-            win_println(window, THEME_DEFAULT, '!', "You have not generated or loaded a cryptographic materials, use '/omemo init'");
+            win_println(window, THEME_DEFAULT, '!', "You have not generated or loaded a cryptographic materials, use '/omemo gen'");
             return TRUE;
         }
 

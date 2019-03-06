@@ -4,6 +4,7 @@
 #include "config/account.h"
 
 #define OMEMO_ERR_UNSUPPORTED_CRYPTO -10000
+#define OMEMO_ERR_GCRYPT -20000
 
 typedef struct omemo_context_t omemo_context;
 

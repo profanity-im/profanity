@@ -9,7 +9,7 @@
 #include <signal/signal_protocol.h>
 #include <signal/session_builder.h>
 #include <signal/session_cipher.h>
-#include <sodium.h>
+#include <gcrypt.h>
 
 #include "config/account.h"
 #include "log.h"
@@ -218,7 +218,8 @@ omemo_generate_crypto_materials(ProfAccount *account)
         return;
     }
 
-    omemo_ctx.device_id = randombytes_uniform(0x80000000);
+    gcry_randomize(&omemo_ctx.device_id, 4, GCRY_VERY_STRONG_RANDOM);
+    omemo_ctx.device_id &= 0x7fffffff;
 
     signal_protocol_key_helper_generate_identity_key_pair(&omemo_ctx.identity_key_pair, omemo_ctx.signal);
     signal_protocol_key_helper_generate_registration_id(&omemo_ctx.registration_id, 0, omemo_ctx.signal);
@@ -245,8 +246,11 @@ omemo_generate_crypto_materials(ProfAccount *account)
 static void
 omemo_generate_short_term_crypto_materials(ProfAccount *account)
 {
+    unsigned int start;
+
+    gcry_randomize(&start, sizeof(unsigned int), GCRY_VERY_STRONG_RANDOM);
     signal_protocol_key_helper_pre_key_list_node *pre_keys_head;
-    signal_protocol_key_helper_generate_pre_keys(&pre_keys_head, randombytes_random(), 100, omemo_ctx.signal);
+    signal_protocol_key_helper_generate_pre_keys(&pre_keys_head, start, 100, omemo_ctx.signal);
 
     session_signed_pre_key *signed_pre_key;
     struct timeval tv;
@@ -442,13 +446,11 @@ omemo_on_message_send(ProfChatWin *chatwin, const char *const message, gboolean 
     unsigned char *ciphertext;
     size_t ciphertext_len;
 
-    key = sodium_malloc(AES128_GCM_KEY_LENGTH);
-    iv = sodium_malloc(AES128_GCM_IV_LENGTH);
     ciphertext_len = strlen(message) + AES128_GCM_TAG_LENGTH;
     ciphertext = malloc(ciphertext_len);
 
-    randombytes_buf(key, 16);
-    randombytes_buf(iv, 16);
+    key = gcry_random_bytes_secure(16, GCRY_VERY_STRONG_RANDOM);
+    iv = gcry_random_bytes_secure(16, GCRY_VERY_STRONG_RANDOM);
 
     res = aes128gcm_encrypt(ciphertext, &ciphertext_len, (const unsigned char * const)message, strlen(message), iv, key);
     if (res != 0) {
@@ -516,8 +518,8 @@ omemo_on_message_send(ProfChatWin *chatwin, const char *const message, gboolean 
     free(id);
     g_list_free_full(keys, free);
     free(ciphertext);
-    sodium_free(key);
-    sodium_free(iv);
+    gcry_free(key);
+    gcry_free(iv);
 
     return TRUE;
 }
