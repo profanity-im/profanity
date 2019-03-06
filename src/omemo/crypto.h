@@ -137,10 +137,10 @@ int omemo_decrypt_func(signal_buffer **output,
     const uint8_t *ciphertext, size_t ciphertext_len,
     void *user_data);
 
-int aes128gcm_encrypt(unsigned char *ciphertext,
-    size_t *ciphertext_len, const unsigned char *const cleartext,
-    size_t cleatext_len, const unsigned char *const iv,
-    const unsigned char *const key);
+int aes128gcm_encrypt(unsigned char *ciphertext, size_t *ciphertext_len,
+    unsigned char *tag, size_t *tag_len,
+    const unsigned char *const plaintext, size_t plaintext_len,
+    const unsigned char *const iv, const unsigned char *const key);
 
 int aes128gcm_decrypt(unsigned char *plaintext,
     size_t *plaintext_len, const unsigned char *const ciphertext,

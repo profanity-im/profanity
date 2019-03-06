@@ -444,18 +444,26 @@ omemo_on_message_send(ProfChatWin *chatwin, const char *const message, gboolean 
     unsigned char *key;
     unsigned char *iv;
     unsigned char *ciphertext;
-    size_t ciphertext_len;
+    unsigned char *tag;
+    unsigned char *key_tag;
+    size_t ciphertext_len, tag_len;
 
-    ciphertext_len = strlen(message) + AES128_GCM_TAG_LENGTH;
+    ciphertext_len = strlen(message);
     ciphertext = malloc(ciphertext_len);
+    tag_len = AES128_GCM_TAG_LENGTH;
+    tag = gcry_malloc_secure(tag_len);
+    key_tag = gcry_malloc_secure(AES128_GCM_KEY_LENGTH + AES128_GCM_TAG_LENGTH);
 
-    key = gcry_random_bytes_secure(16, GCRY_VERY_STRONG_RANDOM);
-    iv = gcry_random_bytes_secure(16, GCRY_VERY_STRONG_RANDOM);
+    key = gcry_random_bytes_secure(AES128_GCM_KEY_LENGTH, GCRY_VERY_STRONG_RANDOM);
+    iv = gcry_random_bytes_secure(AES128_GCM_IV_LENGTH, GCRY_VERY_STRONG_RANDOM);
 
-    res = aes128gcm_encrypt(ciphertext, &ciphertext_len, (const unsigned char * const)message, strlen(message), iv, key);
+    res = aes128gcm_encrypt(ciphertext, &ciphertext_len, tag, &tag_len, (const unsigned char * const)message, strlen(message), iv, key);
     if (res != 0) {
         return FALSE;
     }
+
+    memcpy(key_tag, key, AES128_GCM_KEY_LENGTH);
+    memcpy(key_tag + AES128_GCM_KEY_LENGTH, tag, AES128_GCM_TAG_LENGTH);
 
     GList *keys = NULL;
     GList *device_ids_iter;
@@ -472,7 +480,7 @@ omemo_on_message_send(ProfChatWin *chatwin, const char *const message, gboolean 
             continue;
         }
 
-        res = session_cipher_encrypt(cipher, key, AES128_GCM_KEY_LENGTH, &ciphertext);
+        res = session_cipher_encrypt(cipher, key_tag, AES128_GCM_KEY_LENGTH + AES128_GCM_TAG_LENGTH, &ciphertext);
         if (res != 0) {
             continue;
         }
@@ -498,7 +506,7 @@ omemo_on_message_send(ProfChatWin *chatwin, const char *const message, gboolean 
             continue;
         }
 
-        res = session_cipher_encrypt(cipher, key, AES128_GCM_KEY_LENGTH, &ciphertext);
+        res = session_cipher_encrypt(cipher, key_tag, AES128_GCM_KEY_LENGTH + AES128_GCM_TAG_LENGTH, &ciphertext);
         if (res != 0) {
             continue;
         }
@@ -520,6 +528,8 @@ omemo_on_message_send(ProfChatWin *chatwin, const char *const message, gboolean 
     free(ciphertext);
     gcry_free(key);
     gcry_free(iv);
+    gcry_free(tag);
+    gcry_free(key_tag);
 
     return TRUE;
 }

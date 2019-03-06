@@ -261,7 +261,7 @@ out:
 }
 
 int
-aes128gcm_encrypt(unsigned char *ciphertext, size_t *ciphertext_len, const unsigned char *const plaintext, size_t plaintext_len, const unsigned char *const iv, const unsigned char *const key)
+aes128gcm_encrypt(unsigned char *ciphertext, size_t *ciphertext_len, unsigned char *tag, size_t *tag_len, const unsigned char *const plaintext, size_t plaintext_len, const unsigned char *const iv, const unsigned char *const key)
 {
     gcry_error_t res;
     gcry_cipher_hd_t hd;
@@ -284,7 +284,7 @@ aes128gcm_encrypt(unsigned char *ciphertext, size_t *ciphertext_len, const unsig
         goto out;
     }
 
-    res = gcry_cipher_gettag(hd, ciphertext + plaintext_len, AES128_GCM_TAG_LENGTH);
+    res = gcry_cipher_gettag(hd, tag, *tag_len);
     if (res != GPG_ERR_NO_ERROR) {
         goto out;
     }
