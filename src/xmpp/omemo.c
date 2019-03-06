@@ -129,22 +129,26 @@ omemo_start_device_session_handle_bundle(xmpp_stanza_t *const stanza, void *cons
         return 1;
     }
 
-    /* Should be random */
-    xmpp_stanza_t *prekey = xmpp_stanza_get_children(prekeys);
-    if (!prekey) {
-        return 1;
+    GList *prekeys_list = NULL;
+    xmpp_stanza_t *prekey;
+    for (prekey = xmpp_stanza_get_children(prekeys); prekey != NULL; prekey = xmpp_stanza_get_next(prekey)) {
+        omemo_key_t *key = malloc(sizeof(omemo_key_t));
+
+        const char *prekey_id_text = xmpp_stanza_get_attribute(prekey, "preKeyId");
+        if (!prekey_id_text) {
+            return 1;
+        }
+        key->id = strtoul(prekey_id_text, NULL, 10);
+        xmpp_stanza_t *prekey_text = xmpp_stanza_get_children(prekey);
+        if (!prekey_text) {
+            return 1;
+        }
+        key->data = g_base64_decode(xmpp_stanza_get_text(prekey_text), &key->length);
+        key->prekey = TRUE;
+        key->device_id = device_id;
+
+        prekeys_list = g_list_append(prekeys_list, key);
     }
-    const char *prekey_id_text = xmpp_stanza_get_attribute(prekey, "preKeyId");
-    if (!prekey_id_text) {
-        return 1;
-    }
-    uint32_t prekey_id = strtoul(prekey_id_text, NULL, 10);
-    xmpp_stanza_t *prekey_text = xmpp_stanza_get_children(prekey);
-    if (!prekey_text) {
-        return 1;
-    }
-    size_t prekey_len;
-    unsigned char *prekey_raw = g_base64_decode(xmpp_stanza_get_text(prekey_text), &prekey_len);
 
     xmpp_stanza_t *signed_prekey = xmpp_stanza_get_child_by_name(bundle, "signedPreKeyPublic");
     if (!signed_prekey) {
@@ -184,10 +188,9 @@ omemo_start_device_session_handle_bundle(xmpp_stanza_t *const stanza, void *cons
     size_t identity_key_len;
     unsigned char *identity_key_raw = g_base64_decode(xmpp_stanza_get_text(identity_key_text), &identity_key_len);
 
-    omemo_start_device_session(from, device_id, prekey_id, prekey_raw,
-        prekey_len, signed_prekey_id, signed_prekey_raw, signed_prekey_len,
-        signed_prekey_signature_raw, signed_prekey_signature_len,
-        identity_key_raw, identity_key_len);
+    omemo_start_device_session(from, device_id, prekeys_list, signed_prekey_id,
+        signed_prekey_raw, signed_prekey_len, signed_prekey_signature_raw,
+        signed_prekey_signature_len, identity_key_raw, identity_key_len);
     return 1;
 }
 

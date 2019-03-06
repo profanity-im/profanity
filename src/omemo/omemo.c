@@ -30,6 +30,7 @@ static void unlock(void *user_data);
 static void omemo_log(int level, const char *message, size_t len, void *user_data);
 static gboolean handle_own_device_list(const char *const jid, GList *device_list);
 static gboolean handle_device_list_start_session(const char *const jid, GList *device_list);
+static void free_omemo_key(omemo_key_t *key);
 
 typedef gboolean (*OmemoDeviceListHandler)(const char *const jid, GList *device_list);
 
@@ -396,11 +397,10 @@ omemo_set_device_list(const char *const jid, GList * device_list)
 
 void
 omemo_start_device_session(const char *const jid, uint32_t device_id,
-    uint32_t prekey_id, const unsigned char *const prekey_raw, size_t prekey_len,
-    uint32_t signed_prekey_id, const unsigned char *const signed_prekey_raw,
-    size_t signed_prekey_len, const unsigned char *const signature,
-    size_t signature_len, const unsigned char *const identity_key_raw,
-    size_t identity_key_len)
+    GList *prekeys, uint32_t signed_prekey_id,
+    const unsigned char *const signed_prekey_raw, size_t signed_prekey_len,
+    const unsigned char *const signature, size_t signature_len,
+    const unsigned char *const identity_key_raw, size_t identity_key_len)
 {
     log_info("Start OMEMO session with %s device %d", jid, device_id);
     session_pre_key_bundle *bundle;
@@ -414,15 +414,22 @@ omemo_start_device_session(const char *const jid, uint32_t device_id,
     session_builder *builder;
     session_builder_create(&builder, omemo_ctx.store, address, omemo_ctx.signal);
 
-    ec_public_key *prekey;
-    curve_decode_point(&prekey, prekey_raw, prekey_len, omemo_ctx.signal);
+    int prekey_index;
+    gcry_randomize(&prekey_index, sizeof(int), GCRY_STRONG_RANDOM);
+    prekey_index %= g_list_length(prekeys);
+    omemo_key_t *prekey = g_list_nth_data(prekeys, prekey_index);
+
+    ec_public_key *prekey_public;
+    curve_decode_point(&prekey_public, prekey->data, prekey->length, omemo_ctx.signal);
     ec_public_key *signed_prekey;
     curve_decode_point(&signed_prekey, signed_prekey_raw, signed_prekey_len, omemo_ctx.signal);
     ec_public_key *identity_key;
     curve_decode_point(&identity_key, identity_key_raw, identity_key_len, omemo_ctx.signal);
 
-    session_pre_key_bundle_create(&bundle, 0, device_id, prekey_id, prekey, signed_prekey_id, signed_prekey, signature, signature_len, identity_key);
+    session_pre_key_bundle_create(&bundle, 0, device_id, prekey->id, prekey_public, signed_prekey_id, signed_prekey, signature, signature_len, identity_key);
     session_builder_process_pre_key_bundle(builder, bundle);
+
+    g_list_free_full(prekeys, (GDestroyNotify)free_omemo_key);
 }
 
 gboolean
@@ -661,4 +668,15 @@ handle_device_list_start_session(const char *const jid, GList *device_list)
     omemo_start_session(jid);
 
     return FALSE;
+}
+
+static void
+free_omemo_key(omemo_key_t *key)
+{
+    if (key == NULL) {
+        return;
+    }
+
+    free((void *)key->data);
+    free(key);
 }
