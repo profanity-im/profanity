@@ -573,6 +573,7 @@ omemo_on_message_recv(const char *const from, uint32_t sid,
 
     if (key->prekey) {
         pre_key_signal_message *message;
+        omemo_bundle_request(from, sid, omemo_start_device_session_handle_bundle, free, strdup(from));
         pre_key_signal_message_deserialize(&message, key->data, key->length, omemo_ctx.signal);
         res = session_cipher_decrypt_pre_key_signal_message(cipher, message, NULL, &plaintext_key);
     } else {
