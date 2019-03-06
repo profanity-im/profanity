@@ -577,10 +577,20 @@ omemo_on_message_recv(const char *const from, uint32_t sid,
         return NULL;
     }
 
+    if (signal_buffer_len(plaintext_key) != AES128_GCM_KEY_LENGTH + AES128_GCM_TAG_LENGTH) {
+        log_error("OMEMO: invalid key length");
+        signal_buffer_free(plaintext_key);
+        return NULL;
+    }
+
     size_t plaintext_len = payload_len;
     unsigned char *plaintext = malloc(plaintext_len + 1);
-    res = aes128gcm_decrypt(plaintext, &plaintext_len, payload, payload_len, iv, signal_buffer_data(plaintext_key));
+    res = aes128gcm_decrypt(plaintext, &plaintext_len, payload, payload_len, iv,
+        signal_buffer_data(plaintext_key),
+        signal_buffer_data(plaintext_key) + AES128_GCM_KEY_LENGTH);
     if (res != 0) {
+        log_error("OMEMO: cannot decrypt message: %s", gcry_strerror(res));
+        signal_buffer_free(plaintext_key);
         free(plaintext);
         return NULL;
     }

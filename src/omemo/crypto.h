@@ -145,4 +145,4 @@ int aes128gcm_encrypt(unsigned char *ciphertext, size_t *ciphertext_len,
 int aes128gcm_decrypt(unsigned char *plaintext,
     size_t *plaintext_len, const unsigned char *const ciphertext,
     size_t ciphertext_len, const unsigned char *const iv,
-    const unsigned char *const key);
+    const unsigned char *const key, const unsigned char *const tag);
