@@ -8003,12 +8003,60 @@ cmd_omemo_fingerprint(ProfWin *window, const char *const command, gchar **args)
         return TRUE;
     }
 
-    char *fingerprint = omemo_own_fingerprint();
-    char *formated_fingerprint = omemo_format_fingerprint(fingerprint);
-    cons_show("%s", formated_fingerprint);
-
+    char *fingerprint = omemo_own_fingerprint(TRUE);
+    cons_show("%s", fingerprint);
     free(fingerprint);
-    free(formated_fingerprint);
+
+    return TRUE;
+#else
+    cons_show("This version of Profanity has not been built with OMEMO support enabled");
+    return TRUE;
+#endif
+}
+
+gboolean
+cmd_omemo_trust(ProfWin *window, const char *const command, gchar **args)
+{
+#ifdef HAVE_OMEMO
+    if (connection_get_status() != JABBER_CONNECTED) {
+        cons_show("You must be connected with an account to load OMEMO information.");
+        return TRUE;
+    }
+
+    if (!args[1]) {
+        cons_bad_cmd_usage(command);
+        return TRUE;
+    }
+
+    if (!omemo_loaded()) {
+        win_println(window, THEME_DEFAULT, '!', "You have not generated or loaded a cryptographic materials, use '/omemo gen'");
+        return TRUE;
+    }
+
+    char *fingerprint;
+    char *barejid;
+
+    /* Contact not provided */
+    if (!args[2]) {
+        fingerprint = args[1];
+
+        if (window->type != WIN_CHAT) {
+            win_println(window, THEME_DEFAULT, '-', "You must be in a regular chat window to trust a device without providing the contact.");
+            return TRUE;
+        }
+
+        ProfChatWin *chatwin = (ProfChatWin*)window;
+        assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
+        barejid = chatwin->barejid;
+    } else {
+        char *contact = args[2];
+        barejid = roster_barejid_from_name(contact);
+        if (barejid == NULL) {
+            barejid = contact;
+        }
+    }
+
+    omemo_trust(barejid, fingerprint);
 
     return TRUE;
 #else

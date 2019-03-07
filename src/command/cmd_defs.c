@@ -2331,10 +2331,11 @@ static struct cmd_t command_defs[] =
     },
 
     { "/omemo",
-        parse_args, 1, 2, NULL,
+        parse_args, 1, 3, NULL,
         CMD_SUBFUNCS(
             { "gen", cmd_omemo_gen },
             { "start", cmd_omemo_start },
+            { "trust", cmd_omemo_trust },
             { "fingerprint", cmd_omemo_fingerprint })
         CMD_NOMAINFUNC
         CMD_TAGS(
@@ -2343,6 +2344,7 @@ static struct cmd_t command_defs[] =
         CMD_SYN(
             "/omemo gen",
             "/omemo start [<contact>]",
+            "/omemo trust [<contact>] <fingerprint>",
             "/omemo fingerprint")
         CMD_DESC(
             "Omemo commands to manage keys, and perform encryption during chat sessions.")
@@ -2352,7 +2354,8 @@ static struct cmd_t command_defs[] =
             { "fingerprint",       "Show current device fingerprint." })
         CMD_EXAMPLES(
             "/omemo gen",
-            "/omemo start buddy@buddychat.org")
+            "/omemo start buddy@buddychat.org",
+            "/omemo trust c4f9c875-144d7a3b-0c4a05b6-ca3be51a-a037f329-0bd3ae62-07f99719-55559d2a")
     },
 };
 
