@@ -26,6 +26,8 @@ void omemo_signed_prekey(unsigned char **output, size_t *length);
 void omemo_signed_prekey_signature(unsigned char **output, size_t *length);
 void omemo_prekeys(GList **prekeys, GList **ids, GList **lengths);
 void omemo_set_device_list(const char *const jid, GList * device_list);
+GKeyFile *omemo_identity_keyfile(void);
+void omemo_identity_keyfile_save(void);
 GKeyFile *omemo_sessions_keyfile(void);
 void omemo_sessions_keyfile_save(void);
 char *omemo_fingerprint(const unsigned char *const identity_key_public, size_t len);

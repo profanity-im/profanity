@@ -3,6 +3,7 @@
 #include "config.h"
 
 #define OMEMO_STORE_GROUP_IDENTITY "identity"
+#define OMEMO_STORE_GROUP_TRUST "trust"
 #define OMEMO_STORE_KEY_DEVICE_ID "device_id"
 #define OMEMO_STORE_KEY_REGISTRATION_ID "registration_id"
 #define OMEMO_STORE_KEY_IDENTITY_KEY_PUBLIC "identity_key_public"
@@ -12,7 +13,7 @@ typedef struct {
    signal_buffer *public;
    signal_buffer *private;
    uint32_t registration_id;
-   GHashTable * identity_key_store;
+   GHashTable *trusted;
 } identity_key_store_t;
 
 GHashTable * session_store_new(void);
