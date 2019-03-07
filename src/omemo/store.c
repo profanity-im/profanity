@@ -1,6 +1,7 @@
 #include <glib.h>
 #include <signal/signal_protocol.h>
 
+#include "omemo/omemo.h"
 #include "omemo/store.h"
 
 GHashTable *
@@ -90,6 +91,13 @@ store_session(const signal_protocol_address *address, uint8_t *record,
 
     signal_buffer *buffer = signal_buffer_create(record, record_len);
     g_hash_table_insert(device_store, GINT_TO_POINTER(address->device_id), buffer);
+
+
+    char *record_b64 = g_base64_encode(record, record_len);
+    g_key_file_set_string(omemo_sessions_keyfile(), address->name, g_strdup_printf("%d", address->device_id), record_b64);
+
+    omemo_sessions_keyfile_save();
+
     return SG_SUCCESS;
 }
 
