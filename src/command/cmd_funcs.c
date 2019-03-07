@@ -7988,3 +7988,31 @@ cmd_omemo_start(ProfWin *window, const char *const command, gchar **args)
     return TRUE;
 #endif
 }
+
+gboolean
+cmd_omemo_fingerprint(ProfWin *window, const char *const command, gchar **args)
+{
+#ifdef HAVE_OMEMO
+    if (connection_get_status() != JABBER_CONNECTED) {
+        cons_show("You must be connected with an account to load OMEMO information.");
+        return TRUE;
+    }
+
+    if (!omemo_loaded()) {
+        win_println(window, THEME_DEFAULT, '!', "You have not generated or loaded a cryptographic materials, use '/omemo gen'");
+        return TRUE;
+    }
+
+    char *fingerprint = omemo_own_fingerprint();
+    char *formated_fingerprint = omemo_format_fingerprint(fingerprint);
+    cons_show("%s", formated_fingerprint);
+
+    free(fingerprint);
+    free(formated_fingerprint);
+
+    return TRUE;
+#else
+    cons_show("This version of Profanity has not been built with OMEMO support enabled");
+    return TRUE;
+#endif
+}

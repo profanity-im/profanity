@@ -2334,19 +2334,22 @@ static struct cmd_t command_defs[] =
         parse_args, 1, 2, NULL,
         CMD_SUBFUNCS(
             { "gen", cmd_omemo_gen },
-            { "start", cmd_omemo_start })
+            { "start", cmd_omemo_start },
+            { "fingerprint", cmd_omemo_fingerprint })
         CMD_NOMAINFUNC
         CMD_TAGS(
             CMD_TAG_CHAT,
             CMD_TAG_UI)
         CMD_SYN(
             "/omemo gen",
-            "/omemo start [<contact>]")
+            "/omemo start [<contact>]",
+            "/omemo fingerprint")
         CMD_DESC(
             "Omemo commands to manage keys, and perform encryption during chat sessions.")
         CMD_ARGS(
             { "gen",               "Generate OMEMO crytographic materials for current account." },
-            { "start [<contact>]", "Start an OMEMO session with contact, or current recipient if omitted." })
+            { "start [<contact>]", "Start an OMEMO session with contact, or current recipient if omitted." },
+            { "fingerprint",       "Show current device fingerprint." })
         CMD_EXAMPLES(
             "/omemo gen",
             "/omemo start buddy@buddychat.org")

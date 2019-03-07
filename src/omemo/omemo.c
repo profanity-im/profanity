@@ -679,6 +679,57 @@ omemo_on_message_recv(const char *const from, uint32_t sid,
 
 }
 
+char *
+omemo_format_fingerprint(const char *const fingerprint)
+{
+    char *output = malloc(strlen(fingerprint) + strlen(fingerprint) / 8 + 1);
+
+    int i, j;
+    for (i = 0, j = 0; i < strlen(fingerprint); i++) {
+        if (i > 0 && i % 8 == 0) {
+            output[j++] = '-';
+        }
+        output[j++] = fingerprint[i];
+    }
+
+    output[strlen(fingerprint) + strlen(fingerprint) / 8] = '\0';
+
+    return output;
+}
+
+char *
+omemo_own_fingerprint()
+{
+    signal_buffer *public = omemo_ctx.identity_key_store.public;
+    /* Skip first byte corresponding to signal base type */
+    return omemo_fingerprint(signal_buffer_data(public) + 1, signal_buffer_len(public) - 1);
+}
+
+char *
+omemo_fingerprint(const unsigned char *const identity_key_public, size_t len)
+{
+    int i;
+    char *fingerprint = malloc(len * 2 + 1);
+
+    for (i = 0; i < len; i++) {
+        fingerprint[i * 2] = (identity_key_public[i] & 0xf0) >> 4;
+        fingerprint[i * 2] += 0x30;
+        if (fingerprint[i * 2] > 0x39) {
+            fingerprint[i * 2] += 0x27;
+        }
+
+        fingerprint[(i * 2) + 1] = identity_key_public[i] & 0x0f;
+        fingerprint[(i * 2) + 1] += 0x30;
+        if (fingerprint[(i * 2) + 1] > 0x39) {
+            fingerprint[(i * 2) + 1] += 0x27;
+        }
+    }
+
+    fingerprint[len * 2] = '\0';
+
+    return fingerprint;
+}
+
 static void
 lock(void *user_data)
 {
