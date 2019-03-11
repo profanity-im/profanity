@@ -138,6 +138,12 @@ main(int argc, char **argv)
         g_print("PGP support: Disabled\n");
 #endif
 
+#ifdef HAVE_OMEMO
+        g_print("OMEMO support: Enabled\n");
+#else
+        g_print("OMEMO support: Disabled\n");
+#endif
+
 #ifdef HAVE_C
         g_print("C plugins: Enabled\n");
 #else
