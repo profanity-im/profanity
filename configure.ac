@@ -266,23 +266,27 @@ if test "x$enable_otr" != xno; then
             [AC_MSG_NOTICE([libotr not found, otr encryption support not enabled])])])
 fi
 
-AM_CONDITIONAL([BUILD_OMEMO], [false])
+AM_CONDITIONAL([BUILD_OMEMO], [true])
 if test "x$enable_omemo" != xno; then
-    AC_CHECK_LIB([signal-protocol-c], [signal_context_create],
-        [AM_CONDITIONAL([BUILD_OMEMO], [true])
-         AC_DEFINE([HAVE_OMEMO], [1], [Have omemo]),
-         LIBS="-lsignal-protocol-c $LIBS"],
-        [AS_IF([test "x$enable_omemo" = xyes],
-            [AC_MSG_ERROR([libsignal-protocol-c is required for omemo support])],
-            [AC_MSG_NOTICE([libsignal-protocol-c not found, omemo support not enabled])])])
+    PKG_CHECK_MODULES([libsignal], [libsignal-protocol-c >= 2.3.2],
+        [LIBS="-lsignal-protocol-c $LIBS"],
+        [AC_MSG_NOTICE([libsignal >= 2.3.2 not found, checking for libsignal 2.3.x...])
+         PKG_CHECK_MODULES([libsignal], [libsignal-protocol-c >= 2.3.0],
+            [LIBS="-lsignal-protocol-c $LIBS"
+             AC_DEFINE([HAVE_LIBSIGNAL_LT_2_3_2], [1], [Have libsignal-protocol-c < 2.3.2])],
+            [AM_CONDITIONAL([BUILD_OMEMO], [false])
+             AS_IF([test "x$enable_omemo" = xyes],
+                   [AC_MSG_ERROR([libsignal-protocol-c is required for omemo support])],
+                   [AC_MSG_NOTICE([libsignal-protocol-c not found, omemo support not enabled])])])])
 
     AC_CHECK_LIB([gcrypt], [gcry_check_version],
-        [AM_CONDITIONAL([BUILD_OMEMO], [true])
-         AC_DEFINE([HAVE_OMEMO], [1], [Have omemo]),
-         LIBS="-lgcrypt $LIBS"],
-        [AS_IF([test "x$enable_omemo" = xyes],
-            [AC_MSG_ERROR([gcrypt is required for omemo support])],
-            [AC_MSG_NOTICE([gcrypt not found, omemo support not enabled])])])
+        [LIBS="-lgcrypt $LIBS"],
+        [AM_CONDITIONAL([BUILD_OMEMO], [false])
+         AS_IF([test "x$enable_omemo" = xyes],
+               [AC_MSG_ERROR([gcrypt is required for omemo support])],
+               [AC_MSG_NOTICE([gcrypt not found, omemo support not enabled])])])
+
+   AM_COND_IF([BUILD_OMEMO], [AC_DEFINE([HAVE_OMEMO], [1], [Have OMEMO])])
 fi
 
 AS_IF([test "x$with_themes" = xno],

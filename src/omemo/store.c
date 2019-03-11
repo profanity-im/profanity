@@ -1,6 +1,7 @@
 #include <glib.h>
 #include <signal/signal_protocol.h>
 
+#include "config.h"
 #include "omemo/omemo.h"
 #include "omemo/store.h"
 
@@ -30,9 +31,15 @@ identity_key_store_new(identity_key_store_t *identity_key_store)
     identity_key_store->public = NULL;
 }
 
+#ifdef HAVE_LIBSIGNAL_LT_2_3_2
 int
 load_session(signal_buffer **record, const signal_protocol_address *address,
     void *user_data)
+#else
+int
+load_session(signal_buffer **record, signal_buffer **user_record,
+    const signal_protocol_address *address, void *user_data)
+#endif
 {
     GHashTable *session_store = (GHashTable *)user_data;
     GHashTable *device_store = NULL;
@@ -76,9 +83,17 @@ get_sub_device_sessions(signal_int_list **sessions, const char *name,
     return SG_SUCCESS;
 }
 
+#ifdef HAVE_LIBSIGNAL_LT_2_3_2
 int
 store_session(const signal_protocol_address *address, uint8_t *record,
     size_t record_len, void *user_data)
+#else
+int
+store_session(const signal_protocol_address *address,
+    uint8_t *record, size_t record_len,
+    uint8_t *user_record, size_t user_record_len,
+    void *user_data)
+#endif
 {
     GHashTable *session_store = (GHashTable *)user_data;
     GHashTable *device_store = NULL;

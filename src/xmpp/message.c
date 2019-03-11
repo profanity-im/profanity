@@ -836,7 +836,7 @@ _private_chat_handler(xmpp_stanza_t *const stanza, const char *const fulljid)
 static gboolean
 _handle_carbons(xmpp_stanza_t *const stanza)
 {
-    char *message_txt;
+    char *message_txt = NULL;
     xmpp_stanza_t *carbons = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_CARBONS);
     if (!carbons) {
         return FALSE;
