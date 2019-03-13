@@ -8049,7 +8049,8 @@ cmd_omemo_trust(ProfWin *window, const char *const command, gchar **args)
         assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
         barejid = chatwin->barejid;
     } else {
-        char *contact = args[2];
+        fingerprint = args[2];
+        char *contact = args[1];
         barejid = roster_barejid_from_name(contact);
         if (barejid == NULL) {
             barejid = contact;

@@ -440,6 +440,15 @@ omemo_start_device_session(const char *const jid, uint32_t device_id,
 
     gboolean trusted = is_trusted_identity(&address, (uint8_t *)identity_key_raw, identity_key_len, &omemo_ctx.identity_key_store);
 
+    xmpp_ctx_t * const ctx = connection_get_ctx();
+    char *ownjid = xmpp_jid_bare(ctx, session_get_account_name());
+    if (g_strcmp0(jid, ownjid) == 0) {
+        char *fingerprint = omemo_fingerprint(identity_key, TRUE);
+
+        cons_show("Available device identity: %s%s", fingerprint, trusted ? " (trusted)" : "");
+        free(fingerprint);
+    }
+
     ProfChatWin *chatwin = wins_get_chat(jid);
     if (chatwin) {
         char *fingerprint = omemo_fingerprint(identity_key, TRUE);
