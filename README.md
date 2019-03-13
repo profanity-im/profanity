@@ -14,4 +14,6 @@ Homepage: http://www.profanity.im
 
 Mailing List: https://groups.google.com/forum/#!forum/profanitydev
 
+MUC: profanity@rooms.dismail.de
+
 Plugins repository: https://github.com/boothj5/profanity-plugins
