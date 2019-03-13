@@ -167,12 +167,10 @@ omemo_init(void)
 void
 omemo_on_connect(ProfAccount *account)
 {
-    xmpp_ctx_t * const ctx = connection_get_ctx();
-    char *barejid = xmpp_jid_bare(ctx, session_get_account_name());
     char *omemodir = files_get_data_path(DIR_OMEMO);
     GString *basedir = g_string_new(omemodir);
     free(omemodir);
-    gchar *account_dir = str_replace(barejid, "@", "_at_");
+    gchar *account_dir = str_replace(account->jid, "@", "_at_");
     g_string_append(basedir, "/");
     g_string_append(basedir, account_dir);
     g_string_append(basedir, "/");
@@ -265,11 +263,8 @@ omemo_generate_short_term_crypto_materials(ProfAccount *account)
 
     /* Ensure we get our current device list, and it gets updated with our
      * device_id */
-    xmpp_ctx_t * const ctx = connection_get_ctx();
-    char *barejid = xmpp_jid_bare(ctx, session_get_account_name());
-    g_hash_table_insert(omemo_ctx.device_list_handler, strdup(barejid), handle_own_device_list);
-    omemo_devicelist_request(barejid);
-    free(barejid);
+    g_hash_table_insert(omemo_ctx.device_list_handler, strdup(account->jid), handle_own_device_list);
+    omemo_devicelist_request(account->jid);
 
     omemo_bundle_publish();
 }
@@ -367,26 +362,25 @@ omemo_prekeys(GList **prekeys, GList **ids, GList **lengths)
 }
 
 void
-omemo_set_device_list(const char *const jid, GList * device_list)
+omemo_set_device_list(const char *const from, GList * device_list)
 {
-    xmpp_ctx_t * const ctx = connection_get_ctx();
-    char *barejid = xmpp_jid_bare(ctx, jid);
+    Jid *jid = jid_create(from);
 
-    g_hash_table_insert(omemo_ctx.device_list, strdup(barejid), device_list);
-    if (strchr(barejid, '@') == NULL) {
+    g_hash_table_insert(omemo_ctx.device_list, strdup(jid->barejid), device_list);
+    if (strchr(jid->barejid, '@') == NULL) {
         // barejid is server so we should handle it as our own device list
-        g_hash_table_insert(omemo_ctx.device_list_handler, strdup(barejid), handle_own_device_list);
+        g_hash_table_insert(omemo_ctx.device_list_handler, strdup(jid->barejid), handle_own_device_list);
     }
 
-    OmemoDeviceListHandler handler = g_hash_table_lookup(omemo_ctx.device_list_handler, barejid);
+    OmemoDeviceListHandler handler = g_hash_table_lookup(omemo_ctx.device_list_handler, jid->barejid);
     if (handler) {
-        gboolean keep = handler(barejid, device_list);
+        gboolean keep = handler(jid->barejid, device_list);
         if (!keep) {
-            g_hash_table_remove(omemo_ctx.device_list_handler, barejid);
+            g_hash_table_remove(omemo_ctx.device_list_handler, jid->barejid);
         }
     }
 
-    free(barejid);
+    free(jid);
 }
 
 GKeyFile *
@@ -440,9 +434,8 @@ omemo_start_device_session(const char *const jid, uint32_t device_id,
 
     gboolean trusted = is_trusted_identity(&address, (uint8_t *)identity_key_raw, identity_key_len, &omemo_ctx.identity_key_store);
 
-    xmpp_ctx_t * const ctx = connection_get_ctx();
-    char *ownjid = xmpp_jid_bare(ctx, session_get_account_name());
-    if (g_strcmp0(jid, ownjid) == 0) {
+    Jid *ownjid = jid_create(session_get_account_name());
+    if (g_strcmp0(jid, ownjid->barejid) == 0) {
         char *fingerprint = omemo_fingerprint(identity_key, TRUE);
 
         cons_show("Available device identity: %s%s", fingerprint, trusted ? " (trusted)" : "");
@@ -504,22 +497,22 @@ omemo_start_device_session(const char *const jid, uint32_t device_id,
     }
 
 out:
-        g_list_free_full(prekeys, (GDestroyNotify)free_omemo_key);
+    g_list_free_full(prekeys, (GDestroyNotify)free_omemo_key);
+    free(ownjid);
 }
 
 gboolean
 omemo_on_message_send(ProfChatWin *chatwin, const char *const message, gboolean request_receipt)
 {
     int res;
-    xmpp_ctx_t * const ctx = connection_get_ctx();
-    char *barejid = xmpp_jid_bare(ctx, session_get_account_name());
+    Jid *jid = jid_create(session_get_account_name());
 
     GList *recipient_device_id = g_hash_table_lookup(omemo_ctx.device_list, chatwin->barejid);
     if (!recipient_device_id) {
         return FALSE;
     }
 
-    GList *sender_device_id = g_hash_table_lookup(omemo_ctx.device_list, barejid);
+    GList *sender_device_id = g_hash_table_lookup(omemo_ctx.device_list, jid->barejid);
 
     /* TODO generate fresh AES-GCM materials */
     /* TODO encrypt message */
@@ -585,8 +578,8 @@ omemo_on_message_send(ProfChatWin *chatwin, const char *const message, gboolean 
         ciphertext_message *ciphertext;
         session_cipher *cipher;
         signal_protocol_address address = {
-            .name = barejid,
-            .name_len = strlen(barejid),
+            .name = jid->barejid,
+            .name_len = strlen(jid->barejid),
             .device_id = GPOINTER_TO_INT(device_ids_iter->data)
         };
 
