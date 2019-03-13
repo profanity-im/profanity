@@ -396,6 +396,18 @@ stanza_attach_hints_no_store(xmpp_ctx_t *ctx, xmpp_stanza_t *stanza)
 }
 
 xmpp_stanza_t*
+stanza_attach_hints_store(xmpp_ctx_t *ctx, xmpp_stanza_t *stanza)
+{
+    xmpp_stanza_t *store = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(store, "store");
+    xmpp_stanza_set_ns(store, STANZA_NS_HINTS);
+    xmpp_stanza_add_child(stanza, store);
+    xmpp_stanza_release(store);
+
+    return stanza;
+}
+
+xmpp_stanza_t*
 stanza_attach_receipt_request(xmpp_ctx_t *ctx, xmpp_stanza_t *stanza)
 {
     xmpp_stanza_t *receipet_request = xmpp_stanza_new(ctx);

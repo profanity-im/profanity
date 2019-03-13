@@ -404,6 +404,8 @@ message_send_chat_omemo(const char *const jid, uint32_t sid, GList *keys,
         stanza_attach_state(ctx, message, state);
     }
 
+    stanza_attach_hints_store(ctx, message);
+
     if (request_receipt) {
         stanza_attach_receipt_request(ctx, message);
     }

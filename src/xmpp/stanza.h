@@ -233,6 +233,7 @@ xmpp_stanza_t* stanza_attach_state(xmpp_ctx_t *ctx, xmpp_stanza_t *stanza, const
 xmpp_stanza_t* stanza_attach_carbons_private(xmpp_ctx_t *ctx, xmpp_stanza_t *stanza);
 xmpp_stanza_t* stanza_attach_hints_no_copy(xmpp_ctx_t *ctx, xmpp_stanza_t *stanza);
 xmpp_stanza_t* stanza_attach_hints_no_store(xmpp_ctx_t *ctx, xmpp_stanza_t *stanza);
+xmpp_stanza_t* stanza_attach_hints_store(xmpp_ctx_t *ctx, xmpp_stanza_t *stanza);
 xmpp_stanza_t* stanza_attach_receipt_request(xmpp_ctx_t *ctx, xmpp_stanza_t *stanza);
 xmpp_stanza_t* stanza_attach_x_oob_url(xmpp_ctx_t *ctx, xmpp_stanza_t *stanza, const char *const url);
 
