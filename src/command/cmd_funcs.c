@@ -7915,6 +7915,11 @@ cmd_omemo_start(ProfWin *window, const char *const command, gchar **args)
         return TRUE;
     }
 
+    if (!omemo_loaded()) {
+        win_println(window, THEME_DEFAULT, '!', "You have not generated or loaded a cryptographic materials, use '/omemo gen'");
+        return TRUE;
+    }
+
     // recipient supplied
     if (args[1]) {
         char *contact = args[1];
@@ -7944,11 +7949,6 @@ cmd_omemo_start(ProfWin *window, const char *const command, gchar **args)
             return TRUE;
         }
 
-        if (!omemo_loaded()) {
-            win_println(window, THEME_DEFAULT, '!', "You have not generated or loaded a cryptographic materials, use '/omemo gen'");
-            return TRUE;
-        }
-
         omemo_start_session(barejid);
         chatwin->is_omemo = TRUE;
     } else {
@@ -7971,11 +7971,6 @@ cmd_omemo_start(ProfWin *window, const char *const command, gchar **args)
 
         if (chatwin->is_omemo) {
             win_println(window, THEME_DEFAULT, '!', "You are already in an OMEMO session.");
-            return TRUE;
-        }
-
-        if (!omemo_loaded()) {
-            win_println(window, THEME_DEFAULT, '!', "You have not generated or loaded a cryptographic materials, use '/omemo gen'");
             return TRUE;
         }
 
