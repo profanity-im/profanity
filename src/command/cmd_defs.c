@@ -2336,6 +2336,7 @@ static struct cmd_t command_defs[] =
             { "gen", cmd_omemo_gen },
             { "start", cmd_omemo_start },
             { "trust", cmd_omemo_trust },
+            { "untrust", cmd_omemo_untrust },
             { "fingerprint", cmd_omemo_fingerprint })
         CMD_NOMAINFUNC
         CMD_TAGS(
@@ -2355,7 +2356,8 @@ static struct cmd_t command_defs[] =
         CMD_EXAMPLES(
             "/omemo gen",
             "/omemo start buddy@buddychat.org",
-            "/omemo trust c4f9c875-144d7a3b-0c4a05b6-ca3be51a-a037f329-0bd3ae62-07f99719-55559d2a")
+            "/omemo trust c4f9c875-144d7a3b-0c4a05b6-ca3be51a-a037f329-0bd3ae62-07f99719-55559d2a",
+            "/omemo untrust c4f9c875-144d7a3b-0c4a05b6-ca3be51a-a037f329-0bd3ae62-07f99719-55559d2a")
     },
 };
 

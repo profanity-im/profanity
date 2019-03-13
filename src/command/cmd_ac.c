@@ -580,6 +580,7 @@ cmd_ac_init(void)
     autocomplete_add(omemo_ac, "gen");
     autocomplete_add(omemo_ac, "start");
     autocomplete_add(omemo_ac, "trust");
+    autocomplete_add(omemo_ac, "untrust");
     autocomplete_add(omemo_ac, "fingerprint");
 
     connect_property_ac = autocomplete_new();

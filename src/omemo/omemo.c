@@ -857,6 +857,28 @@ omemo_trust(const char *const jid, const char *const fingerprint_formatted)
     omemo_bundle_request(jid, device_id, omemo_start_device_session_handle_bundle, free, strdup(jid));
 }
 
+void
+omemo_untrust(const char *const jid, const char *const fingerprint_formatted)
+{
+    size_t len;
+    unsigned char *fingerprint = omemo_fingerprint_decode(fingerprint_formatted, &len);
+
+    GHashTableIter iter;
+    gpointer key, value;
+
+    g_hash_table_iter_init(&iter, omemo_ctx.identity_key_store.trusted);
+    while (g_hash_table_iter_next(&iter, &key, &value)) {
+        signal_buffer *buffer = value;
+        unsigned char *original = signal_buffer_data(buffer);
+        /* Skip DJB_TYPE byte */
+        original++;
+        if ((signal_buffer_len(buffer) - 1) == len && memcmp(original, fingerprint, len) == 0) {
+            g_hash_table_remove(omemo_ctx.identity_key_store.trusted, key);
+        }
+    }
+    free(fingerprint);
+}
+
 static void
 lock(void *user_data)
 {
