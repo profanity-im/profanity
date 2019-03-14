@@ -723,10 +723,16 @@ _handle_groupchat(xmpp_stanza_t *const stanza)
         return;
     }
 
-    message = xmpp_message_get_body(stanza);
+#ifdef HAVE_OMEMO
+    message = omemo_receive_message(stanza);
+#endif
+
     if (!message) {
-        jid_destroy(jid);
-        return;
+        message = xmpp_message_get_body(stanza);
+        if (!message) {
+            jid_destroy(jid);
+            return;
+        }
     }
 
     // determine if the notifications happened whilst offline

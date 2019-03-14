@@ -168,6 +168,7 @@ typedef struct prof_muc_win_t {
     gboolean unread_mentions;
     gboolean unread_triggers;
     gboolean showjid;
+    gboolean is_omemo;
     unsigned long memcheck;
     char *enctext;
     char *message_char;

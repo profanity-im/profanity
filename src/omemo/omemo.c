@@ -20,6 +20,7 @@
 #include "ui/ui.h"
 #include "ui/window_list.h"
 #include "xmpp/connection.h"
+#include "xmpp/muc.h"
 #include "xmpp/omemo.h"
 #include "xmpp/xmpp.h"
 
@@ -387,7 +388,7 @@ omemo_set_device_list(const char *const from, GList * device_list)
         }
     }
 
-    free(jid);
+    jid_destroy(jid);
 }
 
 GKeyFile *
@@ -515,18 +516,20 @@ omemo_start_device_session(const char *const jid, uint32_t device_id,
 
 out:
     g_list_free_full(prekeys, (GDestroyNotify)free_omemo_key);
-    free(ownjid);
+    jid_destroy(ownjid);
 }
 
 gboolean
 omemo_on_message_send(ProfChatWin *chatwin, const char *const message, gboolean request_receipt)
 {
     int res;
+    gboolean ret = FALSE;
     Jid *jid = jid_create(connection_get_fulljid());
+    GList *keys = NULL;
 
     GList *recipient_device_id = g_hash_table_lookup(omemo_ctx.device_list, chatwin->barejid);
     if (!recipient_device_id) {
-        return FALSE;
+        goto out;
     }
 
     GList *sender_device_id = g_hash_table_lookup(omemo_ctx.device_list, jid->barejid);
@@ -552,13 +555,12 @@ omemo_on_message_send(ProfChatWin *chatwin, const char *const message, gboolean 
     res = aes128gcm_encrypt(ciphertext, &ciphertext_len, tag, &tag_len, (const unsigned char * const)message, strlen(message), iv, key);
     if (res != 0) {
         log_error("OMEMO: cannot encrypt message");
-        return FALSE;
+        goto out;
     }
 
     memcpy(key_tag, key, AES128_GCM_KEY_LENGTH);
     memcpy(key_tag + AES128_GCM_KEY_LENGTH, tag, AES128_GCM_TAG_LENGTH);
 
-    GList *keys = NULL;
     GList *device_ids_iter;
     for (device_ids_iter = recipient_device_id; device_ids_iter != NULL; device_ids_iter = device_ids_iter->next) {
         int res;
@@ -623,7 +625,10 @@ omemo_on_message_send(ProfChatWin *chatwin, const char *const message, gboolean 
     char *id = message_send_chat_omemo(chatwin->barejid, omemo_ctx.device_id, keys, iv, AES128_GCM_IV_LENGTH, ciphertext, ciphertext_len, request_receipt);
     chat_log_omemo_msg_out(chatwin->barejid, message);
     chatwin_outgoing_msg(chatwin, message, id, PROF_MSG_OMEMO, request_receipt);
+    ret = TRUE;
 
+out:
+    jid_destroy(jid);
     free(id);
     g_list_free_full(keys, free);
     free(ciphertext);
@@ -632,14 +637,22 @@ omemo_on_message_send(ProfChatWin *chatwin, const char *const message, gboolean 
     gcry_free(tag);
     gcry_free(key_tag);
 
-    return TRUE;
+    return ret;
 }
 
 char *
-omemo_on_message_recv(const char *const from, uint32_t sid,
+omemo_on_message_recv(const char *const from_jid, uint32_t sid,
     const unsigned char *const iv, size_t iv_len, GList *keys,
-    const unsigned char *const payload, size_t payload_len)
+    const unsigned char *const payload, size_t payload_len, gboolean muc)
 {
+    unsigned char *plaintext = NULL;
+    Jid *sender;
+    Jid *from = jid_create(from_jid);
+    if (!from) {
+        log_error("Invalid jid %s", from_jid);
+        goto out;
+    }
+
     int res;
     GList *key_iter;
     omemo_key_t *key = NULL;
@@ -652,21 +665,35 @@ omemo_on_message_recv(const char *const from, uint32_t sid,
 
     if (!key) {
         log_warning("OMEMO: Received a message with no corresponding key");
-        return NULL;
+        goto out;
+    }
+
+    if (muc) {
+        GList *roster = muc_roster(from->barejid);
+        GList *iter;
+        for (iter = roster; iter != NULL; iter = iter->next) {
+            Occupant *occupant = (Occupant *)iter->data;
+            if (g_strcmp0(occupant->nick, from->resourcepart) == 0) {
+                sender = jid_create(occupant->jid);
+                break;
+            }
+        }
+    } else {
+        sender = jid_create(from->barejid);
     }
 
     session_cipher *cipher;
     signal_buffer *plaintext_key;
     signal_protocol_address address = {
-        .name = from,
-        .name_len = strlen(from),
+        .name = sender->barejid,
+        .name_len = strlen(sender->barejid),
         .device_id = sid
     };
 
     res = session_cipher_create(&cipher, omemo_ctx.store, &address, omemo_ctx.signal);
     if (res != 0) {
         log_error("OMEMO: cannot create session cipher");
-        return NULL;
+        goto out;
     }
 
     if (key->prekey) {
@@ -687,7 +714,7 @@ omemo_on_message_recv(const char *const from, uint32_t sid,
 
         if (res == 0) {
             /* Start a new session */
-            omemo_bundle_request(from, sid, omemo_start_device_session_handle_bundle, free, strdup(from));
+            omemo_bundle_request(sender->barejid, sid, omemo_start_device_session_handle_bundle, free, strdup(sender->barejid));
         }
     } else {
         log_debug("OMEMO: decrypting message with existing session");
@@ -707,7 +734,7 @@ omemo_on_message_recv(const char *const from, uint32_t sid,
     }
 
     size_t plaintext_len = payload_len;
-    unsigned char *plaintext = malloc(plaintext_len + 1);
+    plaintext = malloc(plaintext_len + 1);
     res = aes128gcm_decrypt(plaintext, &plaintext_len, payload, payload_len, iv,
         signal_buffer_data(plaintext_key),
         signal_buffer_data(plaintext_key) + AES128_GCM_KEY_LENGTH);
@@ -720,6 +747,9 @@ omemo_on_message_recv(const char *const from, uint32_t sid,
 
     plaintext[plaintext_len] = '\0';
 
+out:
+    jid_destroy(from);
+    jid_destroy(sender);
     return (char *)plaintext;
 }
 

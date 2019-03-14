@@ -197,6 +197,8 @@ omemo_start_device_session_handle_bundle(xmpp_stanza_t *const stanza, void *cons
 char *
 omemo_receive_message(xmpp_stanza_t *const stanza)
 {
+    const char *type = xmpp_stanza_get_type(stanza);
+
     xmpp_stanza_t *encrypted = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_OMEMO);
     if (!encrypted) {
         return NULL;
@@ -264,11 +266,10 @@ skip:
     }
 
     const char *from = xmpp_stanza_get_from(stanza);
-    Jid *jid = jid_create(from);
 
-    char *plaintext = omemo_on_message_recv(jid->barejid, sid, iv_raw, iv_len, keys, payload_raw, payload_len);
-
-    jid_destroy(jid);
+    char *plaintext = omemo_on_message_recv(from, sid, iv_raw, iv_len,
+        keys, payload_raw, payload_len,
+        g_strcmp0(type, STANZA_TYPE_GROUPCHAT) == 0);
 
     return plaintext;
 }

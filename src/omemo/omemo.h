@@ -40,4 +40,4 @@ void omemo_start_device_session(const char *const jid, uint32_t device_id, GList
 
 gboolean omemo_loaded(void);
 gboolean omemo_on_message_send(ProfChatWin *chatwin, const char *const message, gboolean request_receipt);
-char * omemo_on_message_recv(const char *const from, uint32_t sid, const unsigned char *const iv, size_t iv_len, GList *keys, const unsigned char *const payload, size_t payload_len);
+char * omemo_on_message_recv(const char *const from, uint32_t sid, const unsigned char *const iv, size_t iv_len, GList *keys, const unsigned char *const payload, size_t payload_len, gboolean muc);
