@@ -203,6 +203,8 @@ omemo_on_connect(ProfAccount *account)
     if (g_key_file_load_from_file(omemo_ctx.sessions_keyfile, omemo_ctx.sessions_filename->str, G_KEY_FILE_KEEP_COMMENTS, NULL)) {
         load_sessions();
     }
+
+    omemo_devicelist_subscribe();
 }
 
 void
@@ -368,13 +370,14 @@ omemo_prekeys(GList **prekeys, GList **ids, GList **lengths)
 void
 omemo_set_device_list(const char *const from, GList * device_list)
 {
-    Jid *jid = jid_create(from);
+    Jid *jid;
+    if (from) {
+        jid = jid_create(from);
+    } else {
+        jid = jid_create(connection_get_fulljid());
+    }
 
     g_hash_table_insert(omemo_ctx.device_list, strdup(jid->barejid), device_list);
-    if (strchr(jid->barejid, '@') == NULL) {
-        // barejid is server so we should handle it as our own device list
-        g_hash_table_insert(omemo_ctx.device_list_handler, strdup(jid->barejid), handle_own_device_list);
-    }
 
     OmemoDeviceListHandler handler = g_hash_table_lookup(omemo_ctx.device_list_handler, jid->barejid);
     if (handler) {

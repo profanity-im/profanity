@@ -74,7 +74,7 @@ void
 omemo_bundle_request(const char * const jid, uint32_t device_id, ProfIqCallback func, ProfIqFreeCallback free_func, void *userdata)
 {
     xmpp_ctx_t * const ctx = connection_get_ctx();
-    char *id = connection_create_stanza_id("devicelist_request");
+    char *id = connection_create_stanza_id("bundle_request");
 
     xmpp_stanza_t *iq = stanza_create_omemo_bundle_request(ctx, id, jid, device_id);
     iq_id_handler_add(id, func, free_func, userdata);
@@ -278,9 +278,6 @@ _omemo_receive_devicelist(xmpp_stanza_t *const stanza, void *const userdata)
 {
     GList *device_list = NULL;
     const char *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
-    if (!from) {
-        return 1;
-    }
 
     xmpp_stanza_t *root = NULL;
     xmpp_stanza_t *event = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_PUBSUB_EVENT);
@@ -303,19 +300,17 @@ _omemo_receive_devicelist(xmpp_stanza_t *const stanza, void *const userdata)
     }
 
     xmpp_stanza_t *item = xmpp_stanza_get_child_by_name(items, "item");
-    if (!item) {
-        return 1;
-    }
+    if (item) {
+        xmpp_stanza_t *list = xmpp_stanza_get_child_by_ns(item, STANZA_NS_OMEMO);
+        if (!list) {
+            return 1;
+        }
 
-    xmpp_stanza_t *list = xmpp_stanza_get_child_by_ns(item, STANZA_NS_OMEMO);
-    if (!list) {
-        return 1;
-    }
-
-    xmpp_stanza_t *device;
-    for (device = xmpp_stanza_get_children(list); device != NULL; device = xmpp_stanza_get_next(device)) {
-        const char *id = xmpp_stanza_get_id(device);
-        device_list = g_list_append(device_list, GINT_TO_POINTER(strtoul(id, NULL, 10)));
+        xmpp_stanza_t *device;
+        for (device = xmpp_stanza_get_children(list); device != NULL; device = xmpp_stanza_get_next(device)) {
+            const char *id = xmpp_stanza_get_id(device);
+            device_list = g_list_append(device_list, GINT_TO_POINTER(strtoul(id, NULL, 10)));
+        }
     }
     omemo_set_device_list(from, device_list);
 

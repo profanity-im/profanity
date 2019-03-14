@@ -291,6 +291,12 @@ session_get_account_name(void)
 void
 session_login_success(gboolean secured)
 {
+    chat_sessions_init();
+
+    message_handlers_init();
+    presence_handlers_init();
+    iq_handlers_init();
+
     // logged in with account
     if (saved_account.name) {
         log_debug("Connection handler: logged in with account name: %s", saved_account.name);
@@ -309,21 +315,9 @@ session_login_success(gboolean secured)
         _session_free_saved_details();
     }
 
-    chat_sessions_init();
-
-    message_handlers_init();
-    presence_handlers_init();
-    iq_handlers_init();
-
     roster_request();
     bookmark_request();
     blocking_request();
-#ifdef HAVE_OMEMO
-    omemo_devicelist_subscribe();
-    if (omemo_loaded()) {
-        /* TODO: update devicelist */
-    }
-#endif
 
     // items discovery
     char *domain = connection_get_domain();
