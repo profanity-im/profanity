@@ -438,7 +438,12 @@ omemo_start_device_session(const char *const jid, uint32_t device_id,
     if (g_strcmp0(jid, ownjid->barejid) == 0) {
         char *fingerprint = omemo_fingerprint(identity_key, TRUE);
 
-        cons_show("Available device identity: %s%s", fingerprint, trusted ? " (trusted)" : "");
+        cons_show("Available device identity for %s: %s%s", ownjid->barejid, fingerprint, trusted ? " (trusted)" : "");
+        if (trusted) {
+            cons_show("You can untrust it with '/omemo untrust %s <fingerprint>'", ownjid->barejid);
+        } else {
+            cons_show("You can trust it with '/omemo trust %s <fingerprint>'", ownjid->barejid);
+        }
         free(fingerprint);
     }
 
@@ -447,6 +452,11 @@ omemo_start_device_session(const char *const jid, uint32_t device_id,
         char *fingerprint = omemo_fingerprint(identity_key, TRUE);
 
         win_println((ProfWin *)chatwin, THEME_DEFAULT, '-', "Available device identity: %s%s", fingerprint, trusted ? " (trusted)" : "");
+        if (trusted) {
+            win_println((ProfWin *)chatwin, THEME_DEFAULT, '-', "You can untrust it with '/omemo untrust <fingerprint>'");
+        } else {
+            win_println((ProfWin *)chatwin, THEME_DEFAULT, '-', "You can trust it with '/omemo trust <fingerprint>'");
+        }
         free(fingerprint);
     }
 
