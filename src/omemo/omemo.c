@@ -212,6 +212,7 @@ omemo_generate_crypto_materials(ProfAccount *account)
         return;
     }
 
+    log_info("Generate long term OMEMO cryptography metarials");
     gcry_randomize(&omemo_ctx.device_id, 4, GCRY_VERY_STRONG_RANDOM);
     omemo_ctx.device_id &= 0x7fffffff;
     log_info("OMEMO: device id: %d", omemo_ctx.device_id);
@@ -240,6 +241,8 @@ static void
 omemo_generate_short_term_crypto_materials(ProfAccount *account)
 {
     unsigned int start;
+
+    log_info("Generate short term OMEMO cryptography metarials");
 
     gcry_randomize(&start, sizeof(unsigned int), GCRY_VERY_STRONG_RANDOM);
     signal_protocol_key_helper_pre_key_list_node *pre_keys_head;
@@ -959,6 +962,7 @@ free_omemo_key(omemo_key_t *key)
 static void
 load_identity(void)
 {
+    log_info("Loading OMEMO identity");
     omemo_ctx.device_id = g_key_file_get_uint64(omemo_ctx.identity_keyfile, OMEMO_STORE_GROUP_IDENTITY, OMEMO_STORE_KEY_DEVICE_ID, NULL);
     log_info("OMEMO: device id: %d", omemo_ctx.device_id);
     omemo_ctx.registration_id = g_key_file_get_uint64(omemo_ctx.identity_keyfile, OMEMO_STORE_GROUP_IDENTITY, OMEMO_STORE_KEY_REGISTRATION_ID, NULL);
