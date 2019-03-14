@@ -434,7 +434,7 @@ omemo_start_device_session(const char *const jid, uint32_t device_id,
 
     gboolean trusted = is_trusted_identity(&address, (uint8_t *)identity_key_raw, identity_key_len, &omemo_ctx.identity_key_store);
 
-    Jid *ownjid = jid_create(session_get_account_name());
+    Jid *ownjid = jid_create(connection_get_fulljid());
     if (g_strcmp0(jid, ownjid->barejid) == 0) {
         char *fingerprint = omemo_fingerprint(identity_key, TRUE);
 
@@ -515,7 +515,7 @@ gboolean
 omemo_on_message_send(ProfChatWin *chatwin, const char *const message, gboolean request_receipt)
 {
     int res;
-    Jid *jid = jid_create(session_get_account_name());
+    Jid *jid = jid_create(connection_get_fulljid());
 
     GList *recipient_device_id = g_hash_table_lookup(omemo_ctx.device_list, chatwin->barejid);
     if (!recipient_device_id) {
