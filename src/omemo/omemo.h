@@ -36,6 +36,7 @@ void omemo_trust(const char *const jid, const char *const fingerprint);
 void omemo_untrust(const char *const jid, const char *const fingerprint);
 
 void omemo_start_session(const char *const barejid);
+void omemo_start_muc_sessions(const char *const barejid);
 void omemo_start_device_session(const char *const jid, uint32_t device_id, GList *prekeys, uint32_t signed_prekey_id, const unsigned char *const signed_prekey, size_t signed_prekey_len, const unsigned char *const signature, size_t signature_len, const unsigned char *const identity_key, size_t identity_key_len);
 
 gboolean omemo_loaded(void);

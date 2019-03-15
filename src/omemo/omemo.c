@@ -294,6 +294,19 @@ omemo_start_session(const char *const barejid)
     }
 }
 
+void
+omemo_start_muc_sessions(const char *const barejid)
+{
+    GList *roster = muc_roster(barejid);
+    GList *iter;
+    for (iter = roster; iter != NULL; iter = iter->next) {
+        Occupant *occupant = (Occupant *)iter->data;
+        Jid *jid = jid_create(occupant->jid);
+        omemo_start_session(jid->barejid);
+        jid_destroy(jid);
+    }
+}
+
 gboolean
 omemo_loaded(void)
 {
