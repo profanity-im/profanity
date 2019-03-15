@@ -675,21 +675,20 @@ omemo_on_message_recv(const char *const from, uint32_t sid,
 
         pre_key_signal_message_deserialize(&message, key->data, key->length, omemo_ctx.signal);
 
+        res = session_cipher_decrypt_pre_key_signal_message(cipher, message, NULL, &plaintext_key);
         /* Replace used pre_key in bundle */
         uint32_t pre_key_id = pre_key_signal_message_get_pre_key_id(message);
-        g_hash_table_remove(omemo_ctx.pre_key_store, GINT_TO_POINTER(pre_key_id));
         ec_key_pair *ec_pair;
         session_pre_key *new_pre_key;
         curve_generate_key_pair(omemo_ctx.signal, &ec_pair);
         session_pre_key_create(&new_pre_key, pre_key_id, ec_pair);
-        g_hash_table_insert(omemo_ctx.pre_key_store, GINT_TO_POINTER(pre_key_id), new_pre_key);
+        signal_protocol_pre_key_store_key(omemo_ctx.store, new_pre_key);
         omemo_bundle_publish();
 
-        /* Start a new session */
-        omemo_bundle_request(from, sid, omemo_start_device_session_handle_bundle, free, strdup(from));
-
-        /* Try to decrypt message anyway, it will fail */
-        res = session_cipher_decrypt_pre_key_signal_message(cipher, message, NULL, &plaintext_key);
+        if (res == 0) {
+            /* Start a new session */
+            omemo_bundle_request(from, sid, omemo_start_device_session_handle_bundle, free, strdup(from));
+        }
     } else {
         log_debug("OMEMO: decrypting message with existing session");
         signal_message *message;
@@ -697,7 +696,7 @@ omemo_on_message_recv(const char *const from, uint32_t sid,
         res = session_cipher_decrypt_signal_message(cipher, message, NULL, &plaintext_key);
     }
     if (res != 0) {
-        log_debug("OMEMO: cannot to decrypt message key");
+        log_error("OMEMO: cannot decrypt message key");
         return NULL;
     }
 
