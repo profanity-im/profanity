@@ -308,11 +308,11 @@ session_login_success(gboolean secured)
         accounts_add(saved_details.name, saved_details.altdomain, saved_details.port, saved_details.tls_policy);
         accounts_set_jid(saved_details.name, saved_details.jid);
 
-        sv_ev_login_account_success(saved_details.name, secured);
         saved_account.name = strdup(saved_details.name);
         saved_account.passwd = strdup(saved_details.passwd);
 
         _session_free_saved_details();
+        sv_ev_login_account_success(saved_account.name, secured);
     }
 
     roster_request();
