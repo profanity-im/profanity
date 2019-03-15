@@ -7978,7 +7978,7 @@ cmd_omemo_start(ProfWin *window, const char *const command, gchar **args)
 
             /* TODO: Check room is configured correctly, no anonymous and access to
              * full jid */
-            omemo_start_muc_sessions(mucwin->barejid);
+            omemo_start_muc_sessions(mucwin->roomjid);
 
             mucwin->is_omemo = TRUE;
         } else {

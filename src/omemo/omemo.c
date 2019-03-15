@@ -295,9 +295,9 @@ omemo_start_session(const char *const barejid)
 }
 
 void
-omemo_start_muc_sessions(const char *const barejid)
+omemo_start_muc_sessions(const char *const roomjid)
 {
-    GList *roster = muc_roster(barejid);
+    GList *roster = muc_roster(roomjid);
     GList *iter;
     for (iter = roster; iter != NULL; iter = iter->next) {
         Occupant *occupant = (Occupant *)iter->data;
