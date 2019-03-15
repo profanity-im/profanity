@@ -441,6 +441,16 @@ _sv_ev_incoming_otr(ProfChatWin *chatwin, gboolean new_win, char *barejid, char 
 }
 #endif
 
+#ifdef HAVE_OMEMO
+static void
+_sv_ev_incoming_omemo(ProfChatWin *chatwin, gboolean new_win, char *barejid, char *resource, char *message, GDateTime *timestamp)
+{
+    chatwin_incoming_msg(chatwin, resource, message, timestamp, new_win, PROF_MSG_OMEMO);
+    chat_log_omemo_msg_in(barejid, message, timestamp);
+    chatwin->pgp_recv = FALSE;
+}
+#endif
+
 static void
 _sv_ev_incoming_plain(ProfChatWin *chatwin, gboolean new_win, char *barejid, char *resource, char *message, GDateTime *timestamp)
 {
@@ -460,9 +470,10 @@ sv_ev_incoming_message(char *barejid, char *resource, char *message, char *pgp_m
         new_win = TRUE;
     }
 
-// OTR suported, PGP supported
+// OTR suported, PGP supported, OMEMO unsupported
 #ifdef HAVE_LIBOTR
 #ifdef HAVE_LIBGPGME
+#ifndef HAVE_OMEMO
     if (pgp_message) {
         if (chatwin->is_otr) {
             win_println((ProfWin*)chatwin, THEME_DEFAULT, '-', "PGP encrypted message received whilst in OTR session.");
@@ -476,19 +487,23 @@ sv_ev_incoming_message(char *barejid, char *resource, char *message, char *pgp_m
     return;
 #endif
 #endif
+#endif
 
-// OTR supported, PGP unsupported
+// OTR supported, PGP unsupported, OMEMO unsupported
 #ifdef HAVE_LIBOTR
 #ifndef HAVE_LIBGPGME
+#ifndef HAVE_OMEMO
     _sv_ev_incoming_otr(chatwin, new_win, barejid, resource, message, timestamp);
     rosterwin_roster();
     return;
 #endif
 #endif
+#endif
 
-// OTR unsupported, PGP supported
+// OTR unsupported, PGP supported, OMEMO unsupported
 #ifndef HAVE_LIBOTR
 #ifdef HAVE_LIBGPGME
+#ifndef HAVE_OMEMO
     if (pgp_message) {
         _sv_ev_incoming_pgp(chatwin, new_win, barejid, resource, message, pgp_message, timestamp);
     } else {
@@ -498,13 +513,84 @@ sv_ev_incoming_message(char *barejid, char *resource, char *message, char *pgp_m
     return;
 #endif
 #endif
+#endif
 
-// OTR unsupported, PGP unsupported
+// OTR suported, PGP supported, OMEMO supported
+#ifdef HAVE_LIBOTR
+#ifdef HAVE_LIBGPGME
+#ifdef HAVE_OMEMO
+    if (pgp_message) {
+        if (chatwin->is_otr) {
+            win_println((ProfWin*)chatwin, THEME_DEFAULT, '-', "PGP encrypted message received whilst in OTR session.");
+        } else { // PROF_ENC_NONE, PROF_ENC_PGP
+            _sv_ev_incoming_pgp(chatwin, new_win, barejid, resource, message, pgp_message, timestamp);
+        }
+    } else if (omemo) {
+        _sv_ev_incoming_omemo(chatwin, new_win, barejid, resource, message, timestamp);
+    } else {
+        _sv_ev_incoming_otr(chatwin, new_win, barejid, resource, message, timestamp);
+    }
+    rosterwin_roster();
+    return;
+#endif
+#endif
+#endif
+
+// OTR supported, PGP unsupported, OMEMO supported
+#ifdef HAVE_LIBOTR
+#ifndef HAVE_LIBGPGME
+#ifdef HAVE_OMEMO
+    if (omemo) {
+        _sv_ev_incoming_omemo(chatwin, new_win, barejid, resource, message, timestamp);
+    } else {
+        _sv_ev_incoming_otr(chatwin, new_win, barejid, resource, message, timestamp);
+    }
+    rosterwin_roster();
+    return;
+#endif
+#endif
+#endif
+
+// OTR unsupported, PGP supported, OMEMO supported
+#ifndef HAVE_LIBOTR
+#ifdef HAVE_LIBGPGME
+#ifdef HAVE_OMEMO
+    if (pgp_message) {
+        _sv_ev_incoming_pgp(chatwin, new_win, barejid, resource, message, pgp_message, timestamp);
+    } else if (omemo) {
+        _sv_ev_incoming_omemo(chatwin, new_win, barejid, resource, message, timestamp);
+    } else {
+        _sv_ev_incoming_plain(chatwin, new_win, barejid, resource, message, timestamp);
+    }
+    rosterwin_roster();
+    return;
+#endif
+#endif
+#endif
+
+// OTR unsupported, PGP unsupported, OMEMO supported
 #ifndef HAVE_LIBOTR
 #ifndef HAVE_LIBGPGME
+#ifdef HAVE_OMEMO
+    if (omemo) {
+        _sv_ev_incoming_omemo(chatwin, new_win, barejid, resource, message, timestamp);
+    } else {
+        _sv_ev_incoming_plain(chatwin, new_win, barejid, resource, message, timestamp);
+    }
+    rosterwin_roster();
+    return;
+#endif
+#endif
+#endif
+
+// OTR unsupported, PGP unsupported, OMEMO unsupported
+#ifndef HAVE_LIBOTR
+#ifndef HAVE_LIBGPGME
+#ifndef HAVE_OMEMO
     _sv_ev_incoming_plain(chatwin, new_win, barejid, resource, message, timestamp);
     rosterwin_roster();
     return;
+#endif
 #endif
 #endif
 }
