@@ -7952,30 +7952,32 @@ cmd_omemo_start(ProfWin *window, const char *const command, gchar **args)
         omemo_start_session(barejid);
         chatwin->is_omemo = TRUE;
     } else {
-        if (window->type != WIN_CHAT) {
+        if (window->type == WIN_CHAT) {
+            ProfChatWin *chatwin = (ProfChatWin*)window;
+            assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
+            if (chatwin->pgp_send) {
+                win_println(window, THEME_DEFAULT, '!', "You must disable PGP encryption before starting an OMEMO session.");
+                return TRUE;
+            }
+
+            if (chatwin->is_otr) {
+                win_println(window, THEME_DEFAULT, '!', "You must disable OTR encryption before starting an OMEMO session.");
+                return TRUE;
+            }
+
+            if (chatwin->is_omemo) {
+                win_println(window, THEME_DEFAULT, '!', "You are already in an OMEMO session.");
+                return TRUE;
+            }
+
+            omemo_start_session(chatwin->barejid);
+            chatwin->is_omemo = TRUE;
+        } else if (window->type == WIN_MUC) {
+        } else {
             win_println(window, THEME_DEFAULT, '-', "You must be in a regular chat window to start an OMEMO session.");
             return TRUE;
         }
 
-        ProfChatWin *chatwin = (ProfChatWin*)window;
-        assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
-        if (chatwin->pgp_send) {
-            win_println(window, THEME_DEFAULT, '!', "You must disable PGP encryption before starting an OMEMO session.");
-            return TRUE;
-        }
-
-        if (chatwin->is_otr) {
-            win_println(window, THEME_DEFAULT, '!', "You must disable OTR encryption before starting an OMEMO session.");
-            return TRUE;
-        }
-
-        if (chatwin->is_omemo) {
-            win_println(window, THEME_DEFAULT, '!', "You are already in an OMEMO session.");
-            return TRUE;
-        }
-
-        omemo_start_session(chatwin->barejid);
-        chatwin->is_omemo = TRUE;
     }
 
     return TRUE;
