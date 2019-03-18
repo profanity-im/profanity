@@ -260,21 +260,26 @@ sv_ev_room_history(const char *const room_jid, const char *const nick,
 }
 
 void
-sv_ev_room_message(const char *const room_jid, const char *const nick, const char *const message)
+sv_ev_room_message(const char *const room_jid, const char *const nick, const char *const message, gboolean omemo)
 {
-    if (prefs_get_boolean(PREF_GRLOG)) {
-        Jid *jid = jid_create(connection_get_fulljid());
-        groupchat_log_chat(jid->barejid, room_jid, nick, message);
-        jid_destroy(jid);
-    }
-
     ProfMucWin *mucwin = wins_get_muc(room_jid);
     if (!mucwin) {
         return;
     }
 
-    char *new_message = plugins_pre_room_message_display(room_jid, nick, message);
     char *mynick = muc_nick(mucwin->roomjid);
+    if (g_strcmp0(mynick, nick) == 0) {
+        /* Ignore message reflection */
+        return;
+    }
+
+    if (omemo) {
+        groupchat_log_omemo_msg_in(room_jid, nick, message);
+    } else {
+        groupchat_log_msg_in(room_jid, nick, message);
+    }
+
+    char *new_message = plugins_pre_room_message_display(room_jid, nick, message);
 
     gboolean whole_word = prefs_get_boolean(PREF_NOTIFY_MENTION_WHOLE_WORD);
     gboolean case_sensitive = prefs_get_boolean(PREF_NOTIFY_MENTION_CASE_SENSITIVE);
@@ -289,7 +294,11 @@ sv_ev_room_message(const char *const room_jid, const char *const nick, const cha
 
     GList *triggers = prefs_message_get_triggers(new_message);
 
-    mucwin_message(mucwin, nick, new_message, mentions, triggers);
+    if (omemo) {
+        mucwin_incoming_msg(mucwin, nick, new_message, mentions, triggers, PROF_MSG_OMEMO);
+    } else {
+        mucwin_incoming_msg(mucwin, nick, new_message, mentions, triggers, PROF_MSG_PLAIN);
+    }
 
     g_slist_free(mentions);
 
@@ -607,15 +616,50 @@ sv_ev_incoming_carbon(char *barejid, char *resource, char *message, char *pgp_me
     }
 
 #ifdef HAVE_LIBGPGME
+#ifndef HAVE_OMEMO
     if (pgp_message) {
         _sv_ev_incoming_pgp(chatwin, new_win, barejid, resource, message, pgp_message, NULL);
     } else {
         _sv_ev_incoming_plain(chatwin, new_win, barejid, resource, message, NULL);
     }
-#else
-    _sv_ev_incoming_plain(chatwin, new_win, barejid, resource, message, NULL);
-#endif
     rosterwin_roster();
+    return;
+#endif
+#endif
+
+#ifdef HAVE_LIBGPGME
+#ifdef HAVE_OMEMO
+    if (pgp_message) {
+        _sv_ev_incoming_pgp(chatwin, new_win, barejid, resource, message, pgp_message, NULL);
+    } else if (omemo) {
+        _sv_ev_incoming_omemo(chatwin, new_win, barejid, resource, message, NULL);
+    } else {
+        _sv_ev_incoming_plain(chatwin, new_win, barejid, resource, message, NULL);
+    }
+    rosterwin_roster();
+    return;
+#endif
+#endif
+
+#ifndef HAVE_LIBGPGME
+#ifdef HAVE_OMEMO
+    if (omemo) {
+        _sv_ev_incoming_omemo(chatwin, new_win, barejid, resource, message, NULL);
+    } else {
+        _sv_ev_incoming_plain(chatwin, new_win, barejid, resource, message, NULL);
+    }
+    rosterwin_roster();
+    return;
+#endif
+#endif
+
+#ifndef HAVE_LIBGPGME
+#ifndef HAVE_OMEMO
+    _sv_ev_incoming_plain(chatwin, new_win, barejid, resource, message, NULL);
+    rosterwin_roster();
+    return;
+#endif
+#endif
 }
 
 void

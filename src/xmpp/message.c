@@ -729,8 +729,11 @@ _handle_groupchat(xmpp_stanza_t *const stanza)
         return;
     }
 
+    // check omemo encryption
+    gboolean omemo = FALSE;
 #ifdef HAVE_OMEMO
     message = omemo_receive_message(stanza);
+    omemo = message != NULL;
 #endif
 
     if (!message) {
@@ -744,10 +747,10 @@ _handle_groupchat(xmpp_stanza_t *const stanza)
     // determine if the notifications happened whilst offline
     GDateTime *timestamp = stanza_get_delay(stanza);
     if (timestamp) {
-        sv_ev_room_history(jid->barejid, jid->resourcepart, timestamp, message);
+        sv_ev_room_history(jid->barejid, jid->resourcepart, timestamp, message, omemo);
         g_date_time_unref(timestamp);
     } else {
-        sv_ev_room_message(jid->barejid, jid->resourcepart, message);
+        sv_ev_room_message(jid->barejid, jid->resourcepart, message, omemo);
     }
 
     xmpp_free(ctx, message);

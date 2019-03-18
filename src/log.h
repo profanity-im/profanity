@@ -82,7 +82,10 @@ void chat_log_close(void);
 GSList* chat_log_get_previous(const gchar *const login, const gchar *const recipient);
 
 void groupchat_log_init(void);
-void groupchat_log_chat(const gchar *const login, const gchar *const room, const gchar *const nick,
-    const gchar *const msg);
+
+void groupchat_log_msg_out(const gchar *const room, const gchar *const msg);
+void groupchat_log_msg_in(const gchar *const room, const gchar *const nick, const gchar *const msg);
+void groupchat_log_omemo_msg_out(const gchar *const room, const gchar *const msg);
+void groupchat_log_omemo_msg_in(const gchar *const room, const gchar *const nick, const gchar *const msg);
 
 #endif
