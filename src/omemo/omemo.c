@@ -1,6 +1,7 @@
 #include <sys/time.h>
 #include <sys/stat.h>
 
+#include <assert.h>
 #include <errno.h>
 #include <glib.h>
 #include <pthread.h>
@@ -168,6 +169,7 @@ omemo_init(void)
 void
 omemo_on_connect(ProfAccount *account)
 {
+    GError *error = NULL;
     char *omemodir = files_get_data_path(DIR_OMEMO);
     GString *basedir = g_string_new(omemodir);
     free(omemodir);
@@ -194,18 +196,26 @@ omemo_on_connect(ProfAccount *account)
         }
     }
 
+    omemo_devicelist_subscribe();
+
     omemo_ctx.identity_keyfile = g_key_file_new();
-    if (g_key_file_load_from_file(omemo_ctx.identity_keyfile, omemo_ctx.identity_filename->str, G_KEY_FILE_KEEP_COMMENTS, NULL)) {
+    omemo_ctx.sessions_keyfile = g_key_file_new();
+
+    if (g_key_file_load_from_file(omemo_ctx.identity_keyfile, omemo_ctx.identity_filename->str, G_KEY_FILE_KEEP_COMMENTS, &error)) {
         load_identity();
         omemo_generate_short_term_crypto_materials(account);
+    } else if (error->code != G_FILE_ERROR_NOENT) {
+        log_warning("OMEMO: error loading identity from: %s, %s", omemo_ctx.identity_filename->str, error->message);
+        return;
     }
 
-    omemo_ctx.sessions_keyfile = g_key_file_new();
-    if (g_key_file_load_from_file(omemo_ctx.sessions_keyfile, omemo_ctx.sessions_filename->str, G_KEY_FILE_KEEP_COMMENTS, NULL)) {
+    error = NULL;
+    if (g_key_file_load_from_file(omemo_ctx.sessions_keyfile, omemo_ctx.sessions_filename->str, G_KEY_FILE_KEEP_COMMENTS, &error)) {
         load_sessions();
+    } else if (error->code != G_FILE_ERROR_NOENT) {
+        log_warning("OMEMO: error loading sessions from: %s, %s", omemo_ctx.sessions_filename->str, error->message);
     }
 
-    omemo_devicelist_subscribe();
 }
 
 void
@@ -533,22 +543,15 @@ out:
 }
 
 gboolean
-omemo_on_message_send(ProfChatWin *chatwin, const char *const message, gboolean request_receipt)
+omemo_on_message_send(ProfWin *win, const char *const message, gboolean request_receipt, gboolean muc)
 {
     int res;
     gboolean ret = FALSE;
     Jid *jid = jid_create(connection_get_fulljid());
     GList *keys = NULL;
 
-    GList *recipient_device_id = g_hash_table_lookup(omemo_ctx.device_list, chatwin->barejid);
-    if (!recipient_device_id) {
-        goto out;
-    }
-
     GList *sender_device_id = g_hash_table_lookup(omemo_ctx.device_list, jid->barejid);
 
-    /* TODO generate fresh AES-GCM materials */
-    /* TODO encrypt message */
     unsigned char *key;
     unsigned char *iv;
     unsigned char *ciphertext;
@@ -574,36 +577,71 @@ omemo_on_message_send(ProfChatWin *chatwin, const char *const message, gboolean 
     memcpy(key_tag, key, AES128_GCM_KEY_LENGTH);
     memcpy(key_tag + AES128_GCM_KEY_LENGTH, tag, AES128_GCM_TAG_LENGTH);
 
-    GList *device_ids_iter;
-    for (device_ids_iter = recipient_device_id; device_ids_iter != NULL; device_ids_iter = device_ids_iter->next) {
-        int res;
-        ciphertext_message *ciphertext;
-        session_cipher *cipher;
-        signal_protocol_address address = {
-            .name = chatwin->barejid,
-            .name_len = strlen(chatwin->barejid),
-            .device_id = GPOINTER_TO_INT(device_ids_iter->data)
-        };
-
-        res = session_cipher_create(&cipher, omemo_ctx.store, &address, omemo_ctx.signal);
-        if (res != 0) {
-            log_error("OMEMO: cannot create cipher for %s device id %d", address.name, address.device_id);
-            continue;
+    GList *recipients = NULL;
+    if (muc) {
+        ProfMucWin *mucwin = (ProfMucWin *)win;
+        assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
+        GList *roster = muc_roster(mucwin->roomjid);
+        GList *iter;
+        for (iter = roster; iter != NULL; iter = iter->next) {
+            Occupant *occupant = (Occupant *)iter->data;
+            Jid *jid = jid_create(occupant->jid);
+            if (!jid->barejid) {
+                log_warning("OMEMO: missing barejid for MUC %s occupant %s", mucwin->roomjid, occupant->nick);
+            } else {
+                recipients = g_list_append(recipients, strdup(jid->barejid));
+            }
+            jid_destroy(jid);
         }
-
-        res = session_cipher_encrypt(cipher, key_tag, AES128_GCM_KEY_LENGTH + AES128_GCM_TAG_LENGTH, &ciphertext);
-        if (res != 0) {
-            log_error("OMEMO: cannot encrypt key for %s device id %d", address.name, address.device_id);
-            continue;
-        }
-        signal_buffer *buffer = ciphertext_message_get_serialized(ciphertext);
-        omemo_key_t *key = malloc(sizeof(omemo_key_t));
-        key->data = signal_buffer_data(buffer);
-        key->length = signal_buffer_len(buffer);
-        key->device_id = GPOINTER_TO_INT(device_ids_iter->data);
-        key->prekey = ciphertext_message_get_type(ciphertext) == CIPHERTEXT_PREKEY_TYPE;
-        keys = g_list_append(keys, key);
+    } else {
+        ProfChatWin *chatwin = (ProfChatWin *)win;
+        assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
+        recipients = g_list_append(recipients, strdup(chatwin->barejid));
     }
+
+    GList *device_ids_iter;
+
+    GList *recipients_iter;
+    for (recipients_iter = recipients; recipients_iter != NULL; recipients_iter = recipients_iter->next) {
+        GList *recipient_device_id = NULL;
+        recipient_device_id = g_hash_table_lookup(omemo_ctx.device_list, recipients_iter->data);
+        if (!recipient_device_id) {
+            log_warning("OMEMO: cannot find device ids for %s", recipients_iter->data);
+            continue;
+        }
+
+        for (device_ids_iter = recipient_device_id; device_ids_iter != NULL; device_ids_iter = device_ids_iter->next) {
+            int res;
+            ciphertext_message *ciphertext;
+            session_cipher *cipher;
+            signal_protocol_address address = {
+                .name = recipients_iter->data,
+                .name_len = strlen(recipients_iter->data),
+                .device_id = GPOINTER_TO_INT(device_ids_iter->data)
+            };
+
+            res = session_cipher_create(&cipher, omemo_ctx.store, &address, omemo_ctx.signal);
+            if (res != 0) {
+                log_error("OMEMO: cannot create cipher for %s device id %d", address.name, address.device_id);
+                continue;
+            }
+
+            res = session_cipher_encrypt(cipher, key_tag, AES128_GCM_KEY_LENGTH + AES128_GCM_TAG_LENGTH, &ciphertext);
+            if (res != 0) {
+                log_error("OMEMO: cannot encrypt key for %s device id %d", address.name, address.device_id);
+                continue;
+            }
+            signal_buffer *buffer = ciphertext_message_get_serialized(ciphertext);
+            omemo_key_t *key = malloc(sizeof(omemo_key_t));
+            key->data = signal_buffer_data(buffer);
+            key->length = signal_buffer_len(buffer);
+            key->device_id = GPOINTER_TO_INT(device_ids_iter->data);
+            key->prekey = ciphertext_message_get_type(ciphertext) == CIPHERTEXT_PREKEY_TYPE;
+            keys = g_list_append(keys, key);
+        }
+    }
+
+    g_list_free_full(recipients, free);
 
     for (device_ids_iter = sender_device_id; device_ids_iter != NULL; device_ids_iter = device_ids_iter->next) {
         int res;
@@ -635,14 +673,23 @@ omemo_on_message_send(ProfChatWin *chatwin, const char *const message, gboolean 
         keys = g_list_append(keys, key);
     }
 
-    char *id = message_send_chat_omemo(chatwin->barejid, omemo_ctx.device_id, keys, iv, AES128_GCM_IV_LENGTH, ciphertext, ciphertext_len, request_receipt);
-    chat_log_omemo_msg_out(chatwin->barejid, message);
-    chatwin_outgoing_msg(chatwin, message, id, PROF_MSG_OMEMO, request_receipt);
+    if (muc) {
+        ProfMucWin *mucwin = (ProfMucWin *)win;
+        assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
+        char *id = message_send_chat_omemo(mucwin->roomjid, omemo_ctx.device_id, keys, iv, AES128_GCM_IV_LENGTH, ciphertext, ciphertext_len, request_receipt, TRUE);
+        free(id);
+    } else {
+        ProfChatWin *chatwin = (ProfChatWin *)win;
+        assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
+        char *id = message_send_chat_omemo(chatwin->barejid, omemo_ctx.device_id, keys, iv, AES128_GCM_IV_LENGTH, ciphertext, ciphertext_len, request_receipt, FALSE);
+        chat_log_omemo_msg_out(chatwin->barejid, message);
+        chatwin_outgoing_msg(chatwin, message, id, PROF_MSG_OMEMO, request_receipt);
+        free(id);
+    }
     ret = TRUE;
 
 out:
     jid_destroy(jid);
-    free(id);
     g_list_free_full(keys, free);
     free(ciphertext);
     gcry_free(key);
@@ -659,7 +706,7 @@ omemo_on_message_recv(const char *const from_jid, uint32_t sid,
     const unsigned char *const payload, size_t payload_len, gboolean muc)
 {
     unsigned char *plaintext = NULL;
-    Jid *sender;
+    Jid *sender = NULL;
     Jid *from = jid_create(from_jid);
     if (!from) {
         log_error("Invalid jid %s", from_jid);

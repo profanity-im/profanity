@@ -318,13 +318,19 @@ char*
 message_send_chat_omemo(const char *const jid, uint32_t sid, GList *keys,
     const unsigned char *const iv, size_t iv_len,
     const unsigned char *const ciphertext, size_t ciphertext_len,
-    gboolean request_receipt)
+    gboolean request_receipt, gboolean muc)
 {
     char *state = chat_session_get_state(jid);
     xmpp_ctx_t * const ctx = connection_get_ctx();
-    char *id = connection_create_stanza_id("msg");
-
-    xmpp_stanza_t *message = xmpp_message_new(ctx, STANZA_TYPE_CHAT, jid, id);
+    char *id;
+    xmpp_stanza_t *message;
+    if (muc) {
+        id = connection_create_stanza_id("muc");
+        message = xmpp_message_new(ctx, STANZA_TYPE_GROUPCHAT, jid, id);
+    } else {
+        id = connection_create_stanza_id("msg");
+        message = xmpp_message_new(ctx, STANZA_TYPE_CHAT, jid, id);
+    }
 
     xmpp_stanza_t *encrypted = xmpp_stanza_new(ctx);
     xmpp_stanza_set_name(encrypted, "encrypted");
