@@ -734,6 +734,10 @@ omemo_on_message_recv(const char *const from_jid, uint32_t sid,
                 break;
             }
         }
+        if (!sender) {
+            log_warning("OMEMO: cannot find MUC message sender fulljid");
+            goto out;
+        }
     } else {
         sender = jid_create(from->barejid);
     }
