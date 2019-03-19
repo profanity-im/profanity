@@ -321,6 +321,21 @@ _show_muc_privacy(ProfMucWin *mucwin)
     int bracket_attrs = theme_attrs(THEME_TITLE_BRACKET);
     int encrypted_attrs = theme_attrs(THEME_TITLE_ENCRYPTED);
 
+    if (mucwin->is_omemo) {
+        wprintw(win, " ");
+        wattron(win, bracket_attrs);
+        wprintw(win, "[");
+        wattroff(win, bracket_attrs);
+        wattron(win, encrypted_attrs);
+        wprintw(win, "OMEMO");
+        wattroff(win, encrypted_attrs);
+        wattron(win, bracket_attrs);
+        wprintw(win, "]");
+        wattroff(win, bracket_attrs);
+
+        return;
+    }
+
     if (mucwin->enctext) {
         wprintw(win, " ");
         wattron(win, bracket_attrs);
