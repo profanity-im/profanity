@@ -60,7 +60,6 @@
 #define XMPP_FEATURE_RECEIPTS "urn:xmpp:receipts"
 #define XMPP_FEATURE_LASTACTIVITY "jabber:iq:last"
 #define XMPP_FEATURE_MUC "http://jabber.org/protocol/muc"
-#define XMPP_FEATURE_MUC_NONANONYMOUS "http://jabber.org/protocol/muc#muc_nonanonymous"
 #define XMPP_FEATURE_COMMANDS "http://jabber.org/protocol/commands"
 #define XMPP_FEATURE_OMEMO_DEVICELIST_NOTIFY "eu.siacs.conversations.axolotl.devicelist+notify"
 #define XMPP_FEATURE_PUBSUB "http://jabber.org/protocol/pubsub"

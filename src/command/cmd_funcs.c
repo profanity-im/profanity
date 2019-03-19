@@ -7978,10 +7978,6 @@ cmd_omemo_start(ProfWin *window, const char *const command, gchar **args)
 
             /* TODO: Check room is configured correctly, no anonymous and access to
              * full jid */
-            if (!caps_jid_has_feature(mucwin->roomjid, XMPP_FEATURE_MUC_NONANONYMOUS)) {
-                win_println(window, THEME_DEFAULT, '!', "MUC is anonymous, can't enable OMEMO.");
-                return TRUE;
-            }
             omemo_start_muc_sessions(mucwin->roomjid);
 
             mucwin->is_omemo = TRUE;
