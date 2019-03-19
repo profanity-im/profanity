@@ -421,6 +421,21 @@ _show_privacy(ProfChatWin *chatwin)
         return;
     }
 
+    if (chatwin->is_omemo) {
+        wprintw(win, " ");
+        wattron(win, bracket_attrs);
+        wprintw(win, "[");
+        wattroff(win, bracket_attrs);
+        wattron(win, encrypted_attrs);
+        wprintw(win, "OMEMO");
+        wattroff(win, encrypted_attrs);
+        wattron(win, bracket_attrs);
+        wprintw(win, "]");
+        wattroff(win, bracket_attrs);
+
+        return;
+    }
+
     if (prefs_get_boolean(PREF_ENC_WARN)) {
         wprintw(win, " ");
         wattron(win, bracket_attrs);
