@@ -7996,6 +7996,47 @@ cmd_omemo_start(ProfWin *window, const char *const command, gchar **args)
 }
 
 gboolean
+cmd_omemo_end(ProfWin *window, const char *const command, gchar **args)
+{
+#ifdef HAVE_OMEMO
+    if (connection_get_status() != JABBER_CONNECTED) {
+        cons_show("You must be connected with an account to load OMEMO information.");
+        return TRUE;
+    }
+
+    if (window->type == WIN_CHAT) {
+        ProfChatWin *chatwin = (ProfChatWin*)window;
+        assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
+
+        if (!chatwin->is_omemo) {
+            win_println(window, THEME_DEFAULT, '!', "You are not currently in an OMEMO session.");
+            return TRUE;
+        }
+
+        chatwin->is_omemo = FALSE;
+    } else if (window->type == WIN_MUC) {
+        ProfMucWin *mucwin = (ProfMucWin*)window;
+        assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
+
+        if (!mucwin->is_omemo) {
+            win_println(window, THEME_DEFAULT, '!', "You are not currently in an OMEMO session.");
+            return TRUE;
+        }
+
+        mucwin->is_omemo = FALSE;
+    } else {
+        win_println(window, THEME_DEFAULT, '-', "You must be in a regular chat window to start an OMEMO session.");
+        return TRUE;
+    }
+
+    return TRUE;
+#else
+    cons_show("This version of Profanity has not been built with OMEMO support enabled");
+    return TRUE;
+#endif
+}
+
+gboolean
 cmd_omemo_fingerprint(ProfWin *window, const char *const command, gchar **args)
 {
 #ifdef HAVE_OMEMO

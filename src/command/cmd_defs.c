@@ -2335,6 +2335,7 @@ static struct cmd_t command_defs[] =
         CMD_SUBFUNCS(
             { "gen", cmd_omemo_gen },
             { "start", cmd_omemo_start },
+            { "end", cmd_omemo_end },
             { "trust", cmd_omemo_trust },
             { "untrust", cmd_omemo_untrust },
             { "fingerprint", cmd_omemo_fingerprint })
@@ -2346,12 +2347,14 @@ static struct cmd_t command_defs[] =
             "/omemo gen",
             "/omemo start [<contact>]",
             "/omemo trust [<contact>] <fingerprint>",
+            "/omemo end",
             "/omemo fingerprint")
         CMD_DESC(
             "Omemo commands to manage keys, and perform encryption during chat sessions.")
         CMD_ARGS(
             { "gen",               "Generate OMEMO crytographic materials for current account." },
             { "start [<contact>]", "Start an OMEMO session with contact, or current recipient if omitted." },
+            { "end",               "End the current OMEMO session," },
             { "fingerprint",       "Show current device fingerprint." })
         CMD_EXAMPLES(
             "/omemo gen",
