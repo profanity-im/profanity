@@ -290,6 +290,8 @@ xmpp_stanza_t* stanza_create_room_kick_iq(xmpp_ctx_t *const ctx, const char *con
 xmpp_stanza_t* stanza_create_command_exec_iq(xmpp_ctx_t *ctx, const char *const target, const char *const node);
 xmpp_stanza_t* stanza_create_command_config_submit_iq(xmpp_ctx_t *ctx, const char *const room, const char *const node, const char *const sessionid, DataForm *form);
 
+void stanza_attach_publish_options(xmpp_ctx_t *const ctx, xmpp_stanza_t *const publish, const char *const option, const char *const value);
+
 xmpp_stanza_t* stanza_create_omemo_devicelist_request(xmpp_ctx_t *ctx, const char *const id, const char *const jid);
 xmpp_stanza_t* stanza_create_omemo_devicelist_subscribe(xmpp_ctx_t *ctx, const char *const jid);
 xmpp_stanza_t* stanza_create_omemo_devicelist_publish(xmpp_ctx_t *ctx, GList *const ids);

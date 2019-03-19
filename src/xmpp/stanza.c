@@ -1833,6 +1833,45 @@ stanza_get_error_message(xmpp_stanza_t *stanza)
 }
 
 void
+stanza_attach_publish_options(xmpp_ctx_t *const ctx, xmpp_stanza_t *const iq, const char *const option, const char *const value)
+{
+    xmpp_stanza_t *publish_options = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(publish_options, STANZA_NAME_PUBLISH_OPTIONS);
+
+    xmpp_stanza_t *x = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(x, STANZA_NAME_X);
+    xmpp_stanza_set_ns(x, STANZA_NS_DATA);
+    xmpp_stanza_set_type(x, "submit");
+    xmpp_stanza_add_child(publish_options, x);
+
+    xmpp_stanza_t *form_type = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(form_type, STANZA_NAME_FIELD);
+    xmpp_stanza_set_attribute(form_type, STANZA_ATTR_VAR, "FORM_TYPE");
+    xmpp_stanza_set_type(form_type, "hidden");
+    xmpp_stanza_t *form_type_value = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(form_type_value, STANZA_NAME_VALUE);
+    xmpp_stanza_t *form_type_value_text = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_text(form_type_value_text, XMPP_FEATURE_PUBSUB_PUBLISH_OPTIONS);
+    xmpp_stanza_add_child(form_type_value, form_type_value_text);
+    xmpp_stanza_add_child(form_type, form_type_value);
+    xmpp_stanza_add_child(x, form_type);
+
+    xmpp_stanza_t *access_model = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(access_model, STANZA_NAME_FIELD);
+    xmpp_stanza_set_attribute(access_model, STANZA_ATTR_VAR, option);
+    xmpp_stanza_t *access_model_value = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(access_model_value, STANZA_NAME_VALUE);
+    xmpp_stanza_t *access_model_value_text = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_text(access_model_value_text, value);
+    xmpp_stanza_add_child(access_model_value, access_model_value_text);
+    xmpp_stanza_add_child(access_model, access_model_value);
+    xmpp_stanza_add_child(x, access_model);
+
+    xmpp_stanza_t *pubsub = xmpp_stanza_get_child_by_ns(iq, STANZA_NS_PUBSUB);
+    xmpp_stanza_add_child(pubsub, publish_options);
+}
+
+void
 stanza_attach_priority(xmpp_ctx_t *const ctx, xmpp_stanza_t *const presence, const int pri)
 {
     if (pri == 0) {

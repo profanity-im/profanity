@@ -63,6 +63,8 @@
 #define XMPP_FEATURE_MUC_NONANONYMOUS "http://jabber.org/protocol/muc#muc_nonanonymous"
 #define XMPP_FEATURE_COMMANDS "http://jabber.org/protocol/commands"
 #define XMPP_FEATURE_OMEMO_DEVICELIST_NOTIFY "eu.siacs.conversations.axolotl.devicelist+notify"
+#define XMPP_FEATURE_PUBSUB "http://jabber.org/protocol/pubsub"
+#define XMPP_FEATURE_PUBSUB_PUBLISH_OPTIONS "http://jabber.org/protocol/pubsub#publish-options"
 
 typedef enum {
     JABBER_CONNECTING,
