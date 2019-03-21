@@ -2274,7 +2274,9 @@ stanza_create_omemo_bundle_publish(xmpp_ctx_t *ctx, uint32_t device_id,
     xmpp_stanza_set_attribute(signed_prekey_public_stanza, "signedPreKeyId", "1");
 
     xmpp_stanza_t *signed_prekey_public_stanza_text= xmpp_stanza_new(ctx);
-    xmpp_stanza_set_text(signed_prekey_public_stanza_text, g_base64_encode(signed_prekey, signed_prekey_length));
+    char *signed_prekey_b64 = g_base64_encode(signed_prekey, signed_prekey_length);
+    xmpp_stanza_set_text(signed_prekey_public_stanza_text, signed_prekey_b64);
+    g_free(signed_prekey_b64);
     xmpp_stanza_add_child(signed_prekey_public_stanza, signed_prekey_public_stanza_text);
     xmpp_stanza_release(signed_prekey_public_stanza_text);
 
@@ -2282,7 +2284,9 @@ stanza_create_omemo_bundle_publish(xmpp_ctx_t *ctx, uint32_t device_id,
     xmpp_stanza_set_name(signed_prekey_signature_stanza , "signedPreKeySignature");
 
     xmpp_stanza_t *signed_prekey_signature_stanza_text= xmpp_stanza_new(ctx);
-    xmpp_stanza_set_text(signed_prekey_signature_stanza_text, g_base64_encode(signed_prekey_signature, signed_prekey_signature_length));
+    char *signed_prekey_signature_b64 = g_base64_encode(signed_prekey_signature, signed_prekey_signature_length);
+    xmpp_stanza_set_text(signed_prekey_signature_stanza_text, signed_prekey_signature_b64);
+    g_free(signed_prekey_signature_b64);
     xmpp_stanza_add_child(signed_prekey_signature_stanza, signed_prekey_signature_stanza_text);
     xmpp_stanza_release(signed_prekey_signature_stanza_text);
 
@@ -2290,7 +2294,9 @@ stanza_create_omemo_bundle_publish(xmpp_ctx_t *ctx, uint32_t device_id,
     xmpp_stanza_set_name(identity_key_stanza , "identityKey");
 
     xmpp_stanza_t *identity_key_stanza_text= xmpp_stanza_new(ctx);
-    xmpp_stanza_set_text(identity_key_stanza_text, g_base64_encode(identity_key, identity_key_length));
+    char *identity_key_b64 = g_base64_encode(identity_key, identity_key_length);
+    xmpp_stanza_set_text(identity_key_stanza_text, identity_key_b64);
+    g_free(identity_key_b64);
     xmpp_stanza_add_child(identity_key_stanza, identity_key_stanza_text);
     xmpp_stanza_release(identity_key_stanza_text);
 
@@ -2306,7 +2312,9 @@ stanza_create_omemo_bundle_publish(xmpp_ctx_t *ctx, uint32_t device_id,
         g_free(id);
 
         xmpp_stanza_t *prekey_text = xmpp_stanza_new(ctx);
-        xmpp_stanza_set_text(prekey_text, g_base64_encode(p->data, GPOINTER_TO_INT(l->data)));
+        char *prekey_b64 = g_base64_encode(p->data, GPOINTER_TO_INT(l->data));
+        xmpp_stanza_set_text(prekey_text, prekey_b64);
+        g_free(prekey_b64);
 
         xmpp_stanza_add_child(prekey, prekey_text);
         xmpp_stanza_add_child(prekeys_stanza, prekey);

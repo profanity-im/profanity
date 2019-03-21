@@ -9,7 +9,7 @@
 typedef struct omemo_context_t omemo_context;
 
 typedef struct omemo_key {
-    const unsigned char *data;
+    unsigned char *data;
     size_t length;
     gboolean prekey;
     uint32_t device_id;
@@ -18,7 +18,9 @@ typedef struct omemo_key {
 
 void omemo_init(void);
 void omemo_on_connect(ProfAccount *account);
+void omemo_on_disconnect(void);
 void omemo_generate_crypto_materials(ProfAccount *account);
+void omemo_key_free(omemo_key_t *key);
 
 uint32_t omemo_device_id(void);
 void omemo_identity_key(unsigned char **output, size_t *length);

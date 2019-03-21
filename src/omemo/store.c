@@ -109,7 +109,10 @@ store_session(const signal_protocol_address *address,
 
 
     char *record_b64 = g_base64_encode(record, record_len);
-    g_key_file_set_string(omemo_sessions_keyfile(), address->name, g_strdup_printf("%d", address->device_id), record_b64);
+    char *device_id = g_strdup_printf("%d", address->device_id);
+    g_key_file_set_string(omemo_sessions_keyfile(), address->name, device_id, record_b64);
+    free(device_id);
+    g_free(record_b64);
 
     omemo_sessions_keyfile_save();
 
@@ -283,9 +286,10 @@ save_identity(const signal_protocol_address *address, uint8_t *key_data,
 
     char *key_b64 = g_base64_encode(key_data, key_len);
     g_key_file_set_string(omemo_identity_keyfile(), OMEMO_STORE_GROUP_TRUST, node, key_b64);
+    g_free(key_b64);
 
     omemo_identity_keyfile_save();
-    free(node);
+    g_free(node);
 
     return SG_SUCCESS;
 }
@@ -294,13 +298,19 @@ int
 is_trusted_identity(const signal_protocol_address *address, uint8_t *key_data,
     size_t key_len, void *user_data)
 {
+    int ret;
     identity_key_store_t *identity_key_store = (identity_key_store_t *)user_data;
     char *node = g_strdup_printf("%s:%d", address->name, address->device_id);
 
     signal_buffer *buffer = signal_buffer_create(key_data, key_len);
     signal_buffer *original = g_hash_table_lookup(identity_key_store->trusted, node);
+    g_free(node);
 
-    return original != NULL && signal_buffer_compare(buffer, original) == 0;
+    ret = original != NULL && signal_buffer_compare(buffer, original) == 0;
+
+    signal_buffer_free(buffer);
+
+    return ret;
 }
 
 int

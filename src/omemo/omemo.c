@@ -35,7 +35,6 @@ static void unlock(void *user_data);
 static void omemo_log(int level, const char *message, size_t len, void *user_data);
 static gboolean handle_own_device_list(const char *const jid, GList *device_list);
 static gboolean handle_device_list_start_session(const char *const jid, GList *device_list);
-static void free_omemo_key(omemo_key_t *key);
 static char * omemo_fingerprint(ec_public_key *identity, gboolean formatted);
 static unsigned char *omemo_fingerprint_decode(const char *const fingerprint, size_t *len);
 static void cache_device_identity(const char *const jid, uint32_t device_id, ec_public_key *identity);
@@ -196,6 +195,8 @@ omemo_on_connect(ProfAccount *account)
         }
     }
 
+    g_string_free(basedir, TRUE);
+
     omemo_devicelist_subscribe();
 
     omemo_ctx.identity_keyfile = g_key_file_new();
@@ -216,6 +217,28 @@ omemo_on_connect(ProfAccount *account)
         log_warning("OMEMO: error loading sessions from: %s, %s", omemo_ctx.sessions_filename->str, error->message);
     }
 
+}
+
+void
+omemo_on_disconnect(void)
+{
+    signal_protocol_signed_pre_key_remove_key(omemo_ctx.store, omemo_ctx.signed_pre_key_id);
+    g_hash_table_free(omemo_ctx.signed_pre_key_store);
+
+    GHashTableIter iter;
+    gpointer id;
+
+    g_hash_table_iter_init(&iter, omemo_ctx.pre_key_store);
+    while (g_hash_table_iter_next(&iter, &id, NULL)) {
+        signal_protocol_pre_key_remove_key(omemo_ctx.store, GPOINTER_TO_INT(id));
+    }
+
+    g_hash_table_free(omemo_ctx.pre_key_store);
+
+    g_string_free(omemo_ctx.identity_filename, TRUE);
+    g_key_file_free(omemo_ctx.identity_keyfile);
+    g_string_free(omemo_ctx.sessions_filename, TRUE);
+    g_key_file_free(omemo_ctx.sessions_keyfile);
 }
 
 void
@@ -261,6 +284,13 @@ omemo_generate_short_term_crypto_materials(ProfAccount *account)
     signal_protocol_key_helper_pre_key_list_node *pre_keys_head;
     signal_protocol_key_helper_generate_pre_keys(&pre_keys_head, start, 100, omemo_ctx.signal);
 
+    signal_protocol_key_helper_pre_key_list_node *p;
+    for (p = pre_keys_head; p != NULL; p = signal_protocol_key_helper_key_list_next(p)) {
+        session_pre_key *prekey = signal_protocol_key_helper_key_list_element(p);
+        signal_protocol_pre_key_store_key(omemo_ctx.store, prekey);
+    }
+    signal_protocol_key_helper_key_list_free(pre_keys_head);
+
     session_signed_pre_key *signed_pre_key;
     struct timeval tv;
     gettimeofday(&tv, NULL);
@@ -268,13 +298,8 @@ omemo_generate_short_term_crypto_materials(ProfAccount *account)
 
     omemo_ctx.signed_pre_key_id = 1;
     signal_protocol_key_helper_generate_signed_pre_key(&signed_pre_key, omemo_ctx.identity_key_pair, omemo_ctx.signed_pre_key_id, timestamp, omemo_ctx.signal);
-
-    signal_protocol_key_helper_pre_key_list_node *p;
-    for (p = pre_keys_head; p != NULL; p = signal_protocol_key_helper_key_list_next(p)) {
-        session_pre_key *prekey = signal_protocol_key_helper_key_list_element(p);
-        signal_protocol_pre_key_store_key(omemo_ctx.store, prekey);
-    }
     signal_protocol_signed_pre_key_store_key(omemo_ctx.store, signed_pre_key);
+    SIGNAL_UNREF(signed_pre_key);
 
     loaded = TRUE;
 
@@ -315,6 +340,7 @@ omemo_start_muc_sessions(const char *const roomjid)
         omemo_start_session(jid->barejid);
         jid_destroy(jid);
     }
+    g_list_free(roster);
 }
 
 gboolean
@@ -348,6 +374,7 @@ omemo_signed_prekey(unsigned char **output, size_t *length)
 
     signal_protocol_signed_pre_key_load_key(omemo_ctx.store, &signed_pre_key, omemo_ctx.signed_pre_key_id);
     ec_public_key_serialize(&buffer, ec_key_pair_get_public(session_signed_pre_key_get_key_pair(signed_pre_key)));
+    SIGNAL_UNREF(signed_pre_key);
     *length = signal_buffer_len(buffer);
     *output = malloc(*length);
     memcpy(*output, signal_buffer_data(buffer), *length);
@@ -363,6 +390,7 @@ omemo_signed_prekey_signature(unsigned char **output, size_t *length)
     *length = session_signed_pre_key_get_signature_len(signed_pre_key);
     *output = malloc(*length);
     memcpy(*output, session_signed_pre_key_get_signature(signed_pre_key), *length);
+    SIGNAL_UNREF(signed_pre_key);
 }
 
 void
@@ -382,9 +410,12 @@ omemo_prekeys(GList **prekeys, GList **ids, GList **lengths)
 
         signal_buffer *public_key;
         ec_public_key_serialize(&public_key, ec_key_pair_get_public(session_pre_key_get_key_pair(pre_key)));
+        SIGNAL_UNREF(pre_key);
         size_t length = signal_buffer_len(public_key);
         unsigned char *prekey_value = malloc(length);
         memcpy(prekey_value, signal_buffer_data(public_key), length);
+        signal_buffer_free(public_key);
+
         *prekeys = g_list_append(*prekeys, prekey_value);
         *ids = g_list_append(*ids, GINT_TO_POINTER(id));
         *lengths = g_list_append(*lengths, GINT_TO_POINTER(length));
@@ -454,7 +485,7 @@ omemo_start_device_session(const char *const jid, uint32_t device_id,
     const unsigned char *const identity_key_raw, size_t identity_key_len)
 {
     signal_protocol_address address = {
-        .name = strdup(jid),
+        .name = jid,
         .name_len = strlen(jid),
         .device_id = device_id,
     };
@@ -538,7 +569,7 @@ omemo_start_device_session(const char *const jid, uint32_t device_id,
     }
 
 out:
-    g_list_free_full(prekeys, (GDestroyNotify)free_omemo_key);
+    SIGNAL_UNREF(identity_key);
     jid_destroy(ownjid);
 }
 
@@ -591,6 +622,7 @@ omemo_on_message_send(ProfWin *win, const char *const message, gboolean request_
             }
             jid_destroy(jid);
         }
+        g_list_free(roster);
     } else {
         ProfChatWin *chatwin = (ProfChatWin *)win;
         assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
@@ -625,17 +657,20 @@ omemo_on_message_send(ProfWin *win, const char *const message, gboolean request_
             }
 
             res = session_cipher_encrypt(cipher, key_tag, AES128_GCM_KEY_LENGTH + AES128_GCM_TAG_LENGTH, &ciphertext);
+            session_cipher_free(cipher);
             if (res != 0) {
                 log_error("OMEMO: cannot encrypt key for %s device id %d", address.name, address.device_id);
                 continue;
             }
             signal_buffer *buffer = ciphertext_message_get_serialized(ciphertext);
             omemo_key_t *key = malloc(sizeof(omemo_key_t));
-            key->data = signal_buffer_data(buffer);
             key->length = signal_buffer_len(buffer);
+            key->data = malloc(key->length);
+            memcpy(key->data, signal_buffer_data(buffer), key->length);
             key->device_id = GPOINTER_TO_INT(device_ids_iter->data);
             key->prekey = ciphertext_message_get_type(ciphertext) == CIPHERTEXT_PREKEY_TYPE;
             keys = g_list_append(keys, key);
+            SIGNAL_UNREF(ciphertext);
         }
     }
 
@@ -660,17 +695,20 @@ omemo_on_message_send(ProfWin *win, const char *const message, gboolean request_
             }
 
             res = session_cipher_encrypt(cipher, key_tag, AES128_GCM_KEY_LENGTH + AES128_GCM_TAG_LENGTH, &ciphertext);
+            session_cipher_free(cipher);
             if (res != 0) {
                 log_error("OMEMO: cannot encrypt key for %s device id %d", address.name, address.device_id);
                 continue;
             }
             signal_buffer *buffer = ciphertext_message_get_serialized(ciphertext);
             omemo_key_t *key = malloc(sizeof(omemo_key_t));
-            key->data = signal_buffer_data(buffer);
             key->length = signal_buffer_len(buffer);
+            key->data = malloc(key->length);
+            memcpy(key->data, signal_buffer_data(buffer), key->length);
             key->device_id = GPOINTER_TO_INT(device_ids_iter->data);
             key->prekey = ciphertext_message_get_type(ciphertext) == CIPHERTEXT_PREKEY_TYPE;
             keys = g_list_append(keys, key);
+            SIGNAL_UNREF(ciphertext);
         }
     }
 
@@ -686,7 +724,7 @@ omemo_on_message_send(ProfWin *win, const char *const message, gboolean request_
 
 out:
     jid_destroy(jid);
-    g_list_free_full(keys, free);
+    g_list_free_full(keys, (GDestroyNotify)omemo_key_free);
     free(ciphertext);
     gcry_free(key);
     gcry_free(iv);
@@ -734,6 +772,7 @@ omemo_on_message_recv(const char *const from_jid, uint32_t sid,
                 break;
             }
         }
+        g_list_free(roster);
         if (!sender) {
             log_warning("OMEMO: cannot find MUC message sender fulljid");
             goto out;
@@ -770,6 +809,9 @@ omemo_on_message_recv(const char *const from_jid, uint32_t sid,
         curve_generate_key_pair(omemo_ctx.signal, &ec_pair);
         session_pre_key_create(&new_pre_key, pre_key_id, ec_pair);
         signal_protocol_pre_key_store_key(omemo_ctx.store, new_pre_key);
+        SIGNAL_UNREF(new_pre_key);
+        SIGNAL_UNREF(message);
+        SIGNAL_UNREF(ec_pair);
         omemo_bundle_publish();
 
         if (res == 0) {
@@ -781,16 +823,19 @@ omemo_on_message_recv(const char *const from_jid, uint32_t sid,
         signal_message *message;
         signal_message_deserialize(&message, key->data, key->length, omemo_ctx.signal);
         res = session_cipher_decrypt_signal_message(cipher, message, NULL, &plaintext_key);
+        SIGNAL_UNREF(message);
     }
+
+    session_cipher_free(cipher);
     if (res != 0) {
         log_error("OMEMO: cannot decrypt message key");
-        return NULL;
+        goto out;
     }
 
     if (signal_buffer_len(plaintext_key) != AES128_GCM_KEY_LENGTH + AES128_GCM_TAG_LENGTH) {
         log_error("OMEMO: invalid key length");
         signal_buffer_free(plaintext_key);
-        return NULL;
+        goto out;
     }
 
     size_t plaintext_len = payload_len;
@@ -798,11 +843,12 @@ omemo_on_message_recv(const char *const from_jid, uint32_t sid,
     res = aes128gcm_decrypt(plaintext, &plaintext_len, payload, payload_len, iv,
         signal_buffer_data(plaintext_key),
         signal_buffer_data(plaintext_key) + AES128_GCM_KEY_LENGTH);
+    signal_buffer_free(plaintext_key);
     if (res != 0) {
         log_error("OMEMO: cannot decrypt message: %s", gcry_strerror(res));
-        signal_buffer_free(plaintext_key);
         free(plaintext);
-        return NULL;
+        plaintext = NULL;
+        goto out;
     }
 
     plaintext[plaintext_len] = '\0';
@@ -1040,14 +1086,14 @@ handle_device_list_start_session(const char *const jid, GList *device_list)
     return FALSE;
 }
 
-static void
-free_omemo_key(omemo_key_t *key)
+void
+omemo_key_free(omemo_key_t *key)
 {
     if (key == NULL) {
         return;
     }
 
-    free((void *)key->data);
+    free(key->data);
     free(key);
 }
 
@@ -1062,13 +1108,14 @@ load_identity(void)
     char *identity_key_public_b64 = g_key_file_get_string(omemo_ctx.identity_keyfile, OMEMO_STORE_GROUP_IDENTITY, OMEMO_STORE_KEY_IDENTITY_KEY_PUBLIC, NULL);
     size_t identity_key_public_len;
     unsigned char *identity_key_public = g_base64_decode(identity_key_public_b64, &identity_key_public_len);
+    g_free(identity_key_public_b64);
     omemo_ctx.identity_key_store.public = signal_buffer_create(identity_key_public, identity_key_public_len);
 
     char *identity_key_private_b64 = g_key_file_get_string(omemo_ctx.identity_keyfile, OMEMO_STORE_GROUP_IDENTITY, OMEMO_STORE_KEY_IDENTITY_KEY_PRIVATE, NULL);
     size_t identity_key_private_len;
     unsigned char *identity_key_private = g_base64_decode(identity_key_private_b64, &identity_key_private_len);
+    g_free(identity_key_private_b64);
     omemo_ctx.identity_key_store.private = signal_buffer_create(identity_key_private, identity_key_private_len);
-    signal_buffer_create(identity_key_private, identity_key_private_len);
 
     ec_public_key *public_key;
     curve_decode_point(&public_key, identity_key_public, identity_key_public_len, omemo_ctx.signal);
@@ -1086,11 +1133,13 @@ load_identity(void)
             char *key_b64 = g_key_file_get_string(omemo_ctx.identity_keyfile, OMEMO_STORE_GROUP_TRUST, keys[i], NULL);
             size_t key_len;
             unsigned char *key = g_base64_decode(key_b64, &key_len);
+            g_free(key_b64);
             signal_buffer *buffer = signal_buffer_create(key, key_len);
-            g_hash_table_insert(omemo_ctx.identity_key_store.trusted, keys[i], buffer);
-            free(key_b64);
+            g_free(key);
+            g_hash_table_insert(omemo_ctx.identity_key_store.trusted, strdup(keys[i]), buffer);
         }
     }
+    g_strfreev(keys);
 }
 
 static void
@@ -1115,11 +1164,14 @@ load_sessions(void)
                 char *record_b64 = g_key_file_get_string(omemo_ctx.sessions_keyfile, groups[i], keys[j], NULL);
                 size_t record_len;
                 unsigned char *record = g_base64_decode(record_b64, &record_len);
+                g_free(record_b64);
                 signal_buffer *buffer = signal_buffer_create(record, record_len);
+                g_free(record);
                 g_hash_table_insert(device_store, GINT_TO_POINTER(id), buffer);
-                free(record_b64);
             }
+            g_strfreev(keys);
         }
+        free(groups);
     }
 }
 
