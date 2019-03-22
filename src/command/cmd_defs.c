@@ -2334,6 +2334,7 @@ static struct cmd_t command_defs[] =
         parse_args, 1, 3, NULL,
         CMD_SUBFUNCS(
             { "gen", cmd_omemo_gen },
+            { "log", cmd_omemo_log },
             { "start", cmd_omemo_start },
             { "end", cmd_omemo_end },
             { "trust", cmd_omemo_trust },
@@ -2345,6 +2346,7 @@ static struct cmd_t command_defs[] =
             CMD_TAG_UI)
         CMD_SYN(
             "/omemo gen",
+            "/omemo log on|off|redact",
             "/omemo start [<contact>]",
             "/omemo trust [<contact>] <fingerprint>",
             "/omemo end",
@@ -2355,6 +2357,8 @@ static struct cmd_t command_defs[] =
             { "gen",               "Generate OMEMO crytographic materials for current account." },
             { "start [<contact>]", "Start an OMEMO session with contact, or current recipient if omitted." },
             { "end",               "End the current OMEMO session," },
+            { "log on|off",        "Enable or disable plaintext logging of OMEMO encrypted messages." },
+            { "log redact",        "Log OMEMO encrypted messages, but replace the contents with [redacted]. This is the default." },
             { "fingerprint",       "Show current device fingerprint." })
         CMD_EXAMPLES(
             "/omemo gen",

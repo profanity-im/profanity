@@ -7996,6 +7996,36 @@ cmd_omemo_start(ProfWin *window, const char *const command, gchar **args)
 }
 
 gboolean
+cmd_omemo_log(ProfWin *window, const char *const command, gchar **args)
+{
+#ifdef HAVE_OMEMO
+    char *choice = args[1];
+    if (g_strcmp0(choice, "on") == 0) {
+        prefs_set_string(PREF_OMEMO_LOG, "on");
+        cons_show("OMEMO messages will be logged as plaintext.");
+        if (!prefs_get_boolean(PREF_CHLOG)) {
+            cons_show("Chat logging is currently disabled, use '/chlog on' to enable.");
+        }
+    } else if (g_strcmp0(choice, "off") == 0) {
+        prefs_set_string(PREF_OMEMO_LOG, "off");
+        cons_show("OMEMO message logging disabled.");
+    } else if (g_strcmp0(choice, "redact") == 0) {
+        prefs_set_string(PREF_OMEMO_LOG, "redact");
+        cons_show("OMEMO messages will be logged as '[redacted]'.");
+        if (!prefs_get_boolean(PREF_CHLOG)) {
+            cons_show("Chat logging is currently disabled, use '/chlog on' to enable.");
+        }
+    } else {
+        cons_bad_cmd_usage(command);
+    }
+    return TRUE;
+#else
+    cons_show("This version of Profanity has not been built with OMEMO support enabled");
+    return TRUE;
+#endif
+}
+
+gboolean
 cmd_omemo_end(ProfWin *window, const char *const command, gchar **args)
 {
 #ifdef HAVE_OMEMO

@@ -159,6 +159,7 @@ static Autocomplete otr_ac;
 static Autocomplete otr_log_ac;
 static Autocomplete otr_policy_ac;
 static Autocomplete omemo_ac;
+static Autocomplete omemo_log_ac;
 static Autocomplete connect_property_ac;
 static Autocomplete tls_property_ac;
 static Autocomplete alias_ac;
@@ -578,11 +579,17 @@ cmd_ac_init(void)
 
     omemo_ac = autocomplete_new();
     autocomplete_add(omemo_ac, "gen");
+    autocomplete_add(omemo_ac, "log");
     autocomplete_add(omemo_ac, "start");
     autocomplete_add(omemo_ac, "end");
     autocomplete_add(omemo_ac, "trust");
     autocomplete_add(omemo_ac, "untrust");
     autocomplete_add(omemo_ac, "fingerprint");
+
+    omemo_log_ac = autocomplete_new();
+    autocomplete_add(omemo_log_ac, "on");
+    autocomplete_add(omemo_log_ac, "off");
+    autocomplete_add(omemo_log_ac, "redact");
 
     connect_property_ac = autocomplete_new();
     autocomplete_add(connect_property_ac, "server");
@@ -1063,6 +1070,7 @@ cmd_ac_reset(ProfWin *window)
     autocomplete_reset(otr_log_ac);
     autocomplete_reset(otr_policy_ac);
     autocomplete_reset(omemo_ac);
+    autocomplete_reset(omemo_log_ac);
     autocomplete_reset(connect_property_ac);
     autocomplete_reset(tls_property_ac);
     autocomplete_reset(alias_ac);
@@ -1191,6 +1199,7 @@ cmd_ac_uninit(void)
     autocomplete_free(otr_log_ac);
     autocomplete_free(otr_policy_ac);
     autocomplete_free(omemo_ac);
+    autocomplete_free(omemo_log_ac);
     autocomplete_free(connect_property_ac);
     autocomplete_free(tls_property_ac);
     autocomplete_free(alias_ac);
@@ -2142,6 +2151,11 @@ _omemo_autocomplete(ProfWin *window, const char *const input, gboolean previous)
         if (found) {
             return found;
         }
+    }
+
+    found = autocomplete_param_with_ac(input, "/omemo log", omemo_log_ac, TRUE, previous);
+    if (found) {
+        return found;
     }
 
     found = autocomplete_param_with_ac(input, "/omemo", omemo_ac, TRUE, previous);
