@@ -812,6 +812,7 @@ void
 ui_room_destroy(const char *const roomjid)
 {
     ProfWin *window = (ProfWin*)wins_get_muc(roomjid);
+    GList *privwins = wins_get_private_chats(roomjid);
     if (window == NULL) {
         log_error("Received room destroy result, but no window open for %s.", roomjid);
     } else {
@@ -820,7 +821,6 @@ ui_room_destroy(const char *const roomjid)
         cons_show("Room destroyed: %s", roomjid);
     }
 
-    GList *privwins = wins_get_private_chats(roomjid);
     GList *curr = privwins;
     while (curr) {
         ProfPrivateWin *privwin = curr->data;
@@ -834,12 +834,12 @@ void
 ui_leave_room(const char *const roomjid)
 {
     ProfWin *window = (ProfWin*)wins_get_muc(roomjid);
+    GList *privwins = wins_get_private_chats(roomjid);
     if (window) {
         int num = wins_get_num(window);
         ui_close_win(num);
     }
 
-    GList *privwins = wins_get_private_chats(roomjid);
     GList *curr = privwins;
     while (curr) {
         ProfPrivateWin *privwin = curr->data;
@@ -855,6 +855,7 @@ ui_room_destroyed(const char *const roomjid, const char *const reason, const cha
     const char *const password)
 {
     ProfWin *window = (ProfWin*)wins_get_muc(roomjid);
+    GList *privwins = wins_get_private_chats(roomjid);
     if (window == NULL) {
         log_error("Received room destroy, but no window open for %s.", roomjid);
     } else {
@@ -877,7 +878,6 @@ ui_room_destroyed(const char *const roomjid, const char *const reason, const cha
         }
     }
 
-    GList *privwins = wins_get_private_chats(roomjid);
     GList *curr = privwins;
     while (curr) {
         ProfPrivateWin *privwin = curr->data;
@@ -891,6 +891,7 @@ void
 ui_room_kicked(const char *const roomjid, const char *const actor, const char *const reason)
 {
     ProfWin *window = (ProfWin*)wins_get_muc(roomjid);
+    GList *privwins = wins_get_private_chats(roomjid);
     if (window == NULL) {
         log_error("Received kick, but no window open for %s.", roomjid);
     } else {
@@ -913,7 +914,6 @@ ui_room_kicked(const char *const roomjid, const char *const actor, const char *c
         g_string_free(message, TRUE);
     }
 
-    GList *privwins = wins_get_private_chats(roomjid);
     GList *curr = privwins;
     while (curr) {
         ProfPrivateWin *privwin = curr->data;
@@ -927,6 +927,7 @@ void
 ui_room_banned(const char *const roomjid, const char *const actor, const char *const reason)
 {
     ProfWin *window = (ProfWin*)wins_get_muc(roomjid);
+    GList *privwins = wins_get_private_chats(roomjid);
     if (window == NULL) {
         log_error("Received ban, but no window open for %s.", roomjid);
     } else {
@@ -949,7 +950,6 @@ ui_room_banned(const char *const roomjid, const char *const actor, const char *c
         g_string_free(message, TRUE);
     }
 
-    GList *privwins = wins_get_private_chats(roomjid);
     GList *curr = privwins;
     while (curr) {
         ProfPrivateWin *privwin = curr->data;
