@@ -1685,6 +1685,8 @@ _get_group(preference_t pref)
             return PREF_GROUP_MUC;
         case PREF_PLUGINS_SOURCEPATH:
             return PREF_GROUP_PLUGINS;
+        case PREF_OMEMO_LOG:
+            return PREF_GROUP_OMEMO;
         default:
             return NULL;
     }
@@ -1899,6 +1901,8 @@ _get_key(preference_t pref)
             return "statusbar.chat";
         case PREF_STATUSBAR_ROOM:
             return "statusbar.room";
+        case PREF_OMEMO_LOG:
+            return "log";
         default:
             return NULL;
     }
@@ -2017,6 +2021,8 @@ _get_default_string(preference_t pref)
             return "user";
         case PREF_STATUSBAR_ROOM:
             return "room";
+        case PREF_OMEMO_LOG:
+            return "redact";
         default:
             return NULL;
     }
