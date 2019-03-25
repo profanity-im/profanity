@@ -23,9 +23,7 @@ omemo_devicelist_publish(GList *device_list)
     xmpp_ctx_t * const ctx = connection_get_ctx();
     xmpp_stanza_t *iq = stanza_create_omemo_devicelist_publish(ctx, device_list);
 
-    if (connection_supports(XMPP_FEATURE_PUBSUB_PUBLISH_OPTIONS)) {
-        stanza_attach_publish_options(ctx, iq, "pubsub#access_model", "open");
-    }
+    stanza_attach_publish_options(ctx, iq, "pubsub#access_model", "open");
 
     iq_send_stanza(iq);
     xmpp_stanza_release(iq);
@@ -72,9 +70,7 @@ omemo_bundle_publish(void)
     g_list_free(lengths);
     g_list_free(ids);
 
-    if (connection_supports(XMPP_FEATURE_PUBSUB_PUBLISH_OPTIONS)) {
-        stanza_attach_publish_options(ctx, iq, "pubsub#access_model", "open");
-    }
+    stanza_attach_publish_options(ctx, iq, "pubsub#access_model", "open");
 
     iq_send_stanza(iq);
     xmpp_stanza_release(iq);
