@@ -63,6 +63,7 @@ struct omemo_context_t {
     GString *sessions_filename;
     GKeyFile *sessions_keyfile;
     GHashTable *known_devices;
+    Autocomplete fingerprint_ac;
 };
 
 static omemo_context omemo_ctx;
@@ -163,6 +164,8 @@ omemo_init(void)
     omemo_ctx.device_list = g_hash_table_new_full(g_str_hash, g_str_equal, free, (GDestroyNotify)g_list_free);
     omemo_ctx.device_list_handler = g_hash_table_new_full(g_str_hash, g_str_equal, free, NULL);
     omemo_ctx.known_devices = g_hash_table_new_full(g_str_hash, g_str_equal, free, (GDestroyNotify)g_hash_table_free);
+
+    omemo_ctx.fingerprint_ac = autocomplete_new();
 }
 
 void
@@ -1114,6 +1117,18 @@ omemo_key_free(omemo_key_t *key)
     free(key);
 }
 
+char*
+omemo_fingerprint_autocomplete(const char *const search_str, gboolean previous)
+{
+    return autocomplete_complete(omemo_ctx.fingerprint_ac, search_str, FALSE, previous);
+}
+
+void
+omemo_fingerprint_autocomplete_reset(void)
+{
+    autocomplete_reset(omemo_ctx.fingerprint_ac);
+}
+
 static void
 load_identity(void)
 {
@@ -1203,7 +1218,12 @@ cache_device_identity(const char *const jid, uint32_t device_id, ec_public_key *
 
     char *fingerprint = omemo_fingerprint(identity, FALSE);
     log_info("OMEMO: cache identity for %s:%d: %s", jid, device_id, fingerprint);
-    g_hash_table_insert(known_identities, fingerprint, GINT_TO_POINTER(device_id));
+    g_hash_table_insert(known_identities, strdup(fingerprint), GINT_TO_POINTER(device_id));
+
+    char *formatted_fingerprint = omemo_format_fingerprint(fingerprint);
+    autocomplete_add(omemo_ctx.fingerprint_ac, formatted_fingerprint);
+    free(formatted_fingerprint);
+    free(fingerprint);
 }
 
 static void

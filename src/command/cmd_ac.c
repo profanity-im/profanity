@@ -57,6 +57,10 @@
 #include "pgp/gpg.h"
 #endif
 
+#ifdef HAVE_OMEMO
+#include "omemo/omemo.h"
+#endif
+
 static char* _sub_autocomplete(ProfWin *window, const char *const input, gboolean previous);
 static char* _notify_autocomplete(ProfWin *window, const char *const input, gboolean previous);
 static char* _theme_autocomplete(ProfWin *window, const char *const input, gboolean previous);
@@ -999,6 +1003,9 @@ cmd_ac_reset(ProfWin *window)
     presence_reset_sub_request_search();
 #ifdef HAVE_LIBGPGME
     p_gpg_autocomplete_key_reset();
+#endif
+#ifdef HAVE_OMEMO
+    omemo_fingerprint_autocomplete_reset();
 #endif
     autocomplete_reset(help_ac);
     autocomplete_reset(help_commands_ac);
@@ -2157,6 +2164,25 @@ _omemo_autocomplete(ProfWin *window, const char *const input, gboolean previous)
     if (found) {
         return found;
     }
+
+#ifdef HAVE_OMEMO
+    if (window->type == WIN_CHAT) {
+        found = autocomplete_param_with_func(input, "/omemo trust", omemo_fingerprint_autocomplete, previous);
+        if (found) {
+            return found;
+        }
+    } else {
+        found = autocomplete_param_with_func(input, "/omemo trust", roster_contact_autocomplete, previous);
+        if (found) {
+            return found;
+        }
+
+        found = autocomplete_param_no_with_func(input, "/omemo trust", 4, omemo_fingerprint_autocomplete, previous);
+        if (found) {
+            return found;
+        }
+    }
+#endif
 
     found = autocomplete_param_with_ac(input, "/omemo log", omemo_log_ac, TRUE, previous);
     if (found) {
