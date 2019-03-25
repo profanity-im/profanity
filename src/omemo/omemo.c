@@ -496,32 +496,6 @@ omemo_start_device_session(const char *const jid, uint32_t device_id,
 
     gboolean trusted = is_trusted_identity(&address, (uint8_t *)identity_key_raw, identity_key_len, &omemo_ctx.identity_key_store);
 
-    Jid *ownjid = jid_create(connection_get_fulljid());
-    if (g_strcmp0(jid, ownjid->barejid) == 0) {
-        char *fingerprint = omemo_fingerprint(identity_key, TRUE);
-
-        cons_show("Available device identity for %s: %s%s", ownjid->barejid, fingerprint, trusted ? " (trusted)" : "");
-        if (trusted) {
-            cons_show("You can untrust it with '/omemo untrust %s <fingerprint>'", ownjid->barejid);
-        } else {
-            cons_show("You can trust it with '/omemo trust %s <fingerprint>'", ownjid->barejid);
-        }
-        free(fingerprint);
-    }
-
-    ProfChatWin *chatwin = wins_get_chat(jid);
-    if (chatwin) {
-        char *fingerprint = omemo_fingerprint(identity_key, TRUE);
-
-        win_println((ProfWin *)chatwin, THEME_DEFAULT, '-', "Available device identity: %s%s", fingerprint, trusted ? " (trusted)" : "");
-        if (trusted) {
-            win_println((ProfWin *)chatwin, THEME_DEFAULT, '-', "You can untrust it with '/omemo untrust <fingerprint>'");
-        } else {
-            win_println((ProfWin *)chatwin, THEME_DEFAULT, '-', "You can trust it with '/omemo trust <fingerprint>'");
-        }
-        free(fingerprint);
-    }
-
     if (!trusted) {
         goto out;
     }
@@ -570,7 +544,6 @@ omemo_start_device_session(const char *const jid, uint32_t device_id,
 
 out:
     SIGNAL_UNREF(identity_key);
-    jid_destroy(ownjid);
 }
 
 char *
@@ -882,6 +855,50 @@ omemo_own_fingerprint(gboolean formatted)
 {
     ec_public_key *identity = ratchet_identity_key_pair_get_public(omemo_ctx.identity_key_pair);
     return omemo_fingerprint(identity, formatted);
+}
+
+GList *
+omemo_known_device_identities(const char *const jid)
+{
+    GHashTable *known_identities = g_hash_table_lookup(omemo_ctx.known_devices, jid);
+    if (!known_identities) {
+        return NULL;
+    }
+
+    return g_hash_table_get_keys(known_identities);
+}
+
+gboolean
+omemo_is_trusted_identity(const char *const jid, const char *const fingerprint)
+{
+    GHashTable *known_identities = g_hash_table_lookup(omemo_ctx.known_devices, jid);
+    if (!known_identities) {
+        return FALSE;
+    }
+
+    void *device_id = g_hash_table_lookup(known_identities, fingerprint);
+    if (!device_id) {
+        return FALSE;
+    }
+
+    signal_protocol_address address = {
+        .name = jid,
+        .name_len = strlen(jid),
+        .device_id = GPOINTER_TO_INT(device_id),
+    };
+
+    size_t fingerprint_len;
+    unsigned char *fingerprint_raw = omemo_fingerprint_decode(fingerprint, &fingerprint_len);
+    unsigned char djb_type[] = {'\x05'};
+    signal_buffer *buffer = signal_buffer_create(djb_type, 1);
+    buffer = signal_buffer_append(buffer, fingerprint_raw, fingerprint_len);
+
+    gboolean trusted = is_trusted_identity(&address, signal_buffer_data(buffer), signal_buffer_len(buffer), &omemo_ctx.identity_key_store);
+
+    free(fingerprint_raw);
+    signal_buffer_free(buffer);
+
+    return trusted;
 }
 
 static char *

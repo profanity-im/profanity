@@ -2350,7 +2350,7 @@ static struct cmd_t command_defs[] =
             "/omemo start [<contact>]",
             "/omemo trust [<contact>] <fingerprint>",
             "/omemo end",
-            "/omemo fingerprint")
+            "/omemo fingerprint [<contact>]")
         CMD_DESC(
             "Omemo commands to manage keys, and perform encryption during chat sessions.")
         CMD_ARGS(
@@ -2359,7 +2359,7 @@ static struct cmd_t command_defs[] =
             { "end",               "End the current OMEMO session," },
             { "log on|off",        "Enable or disable plaintext logging of OMEMO encrypted messages." },
             { "log redact",        "Log OMEMO encrypted messages, but replace the contents with [redacted]. This is the default." },
-            { "fingerprint",       "Show current device fingerprint." })
+            { "fingerprint",       "Show contact fingerprints." })
         CMD_EXAMPLES(
             "/omemo gen",
             "/omemo start buddy@buddychat.org",

@@ -2153,6 +2153,11 @@ _omemo_autocomplete(ProfWin *window, const char *const input, gboolean previous)
         }
     }
 
+    found = autocomplete_param_with_func(input, "/omemo fingerprint", roster_contact_autocomplete, previous);
+    if (found) {
+        return found;
+    }
+
     found = autocomplete_param_with_ac(input, "/omemo log", omemo_log_ac, TRUE, previous);
     if (found) {
         return found;

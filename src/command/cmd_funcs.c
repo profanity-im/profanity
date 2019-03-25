@@ -8080,9 +8080,49 @@ cmd_omemo_fingerprint(ProfWin *window, const char *const command, gchar **args)
         return TRUE;
     }
 
-    char *fingerprint = omemo_own_fingerprint(TRUE);
-    cons_show("%s", fingerprint);
-    free(fingerprint);
+    Jid *jid;
+    if (!args[1]) {
+        if (window->type == WIN_CONSOLE) {
+            char *fingerprint = omemo_own_fingerprint(TRUE);
+            cons_show("Your OMEMO fingerprint: %s", fingerprint);
+            free(fingerprint);
+            return TRUE;
+        } else if (window->type == WIN_CHAT) {
+            ProfChatWin *chatwin = (ProfChatWin*)window;
+            jid = jid_create(chatwin->barejid);
+        } else {
+            win_println(window, THEME_DEFAULT, '-', "You must be in a regular chat window to print fingerprint without providing the contact.");
+            return TRUE;
+        }
+    } else {
+        jid = jid_create(args[1]);
+        if (!jid) {
+            cons_show("%s is not a valid jid", args[1]);
+            return TRUE;
+        }
+    }
+
+    GList *fingerprints = omemo_known_device_identities(jid->barejid);
+    GList *fingerprint;
+
+    if (!fingerprints) {
+        win_println(window, THEME_DEFAULT, '-', "There is no known fingerprints for %s", jid->barejid);
+        return TRUE;
+    }
+
+    for (fingerprint = fingerprints; fingerprint != NULL; fingerprint = fingerprint->next) {
+        char *formatted_fingerprint = omemo_format_fingerprint(fingerprint->data);
+        gboolean trusted = omemo_is_trusted_identity(jid->barejid, fingerprint->data);
+
+        win_println(window, THEME_DEFAULT, '-', "%s's OMEMO fingerprint: %s%s", jid->barejid, formatted_fingerprint, trusted ? " (trusted)" : "");
+
+        free(formatted_fingerprint);
+    }
+
+    g_list_free(fingerprints);
+
+    win_println(window, THEME_DEFAULT, '-', "You can trust it with '/omemo trust <fingerprint>'");
+    win_println(window, THEME_DEFAULT, '-', "You can untrust it with '/omemo untrust <fingerprint>'");
 
     return TRUE;
 #else
