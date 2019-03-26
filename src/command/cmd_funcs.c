@@ -8176,6 +8176,23 @@ cmd_omemo_trust(ProfWin *window, const char *const command, gchar **args)
 
     omemo_trust(barejid, fingerprint);
 
+    char *unformatted_fingerprint = malloc(strlen(fingerprint));
+    int i;
+    int j;
+    for (i = 0, j = 0; fingerprint[i] != '\0'; i++) {
+        if (!g_ascii_isxdigit(fingerprint[i])) {
+            continue;
+        }
+        unformatted_fingerprint[j++] = fingerprint[i];
+    }
+
+    unformatted_fingerprint[j] = '\0';
+    gboolean trusted = omemo_is_trusted_identity(barejid, unformatted_fingerprint);
+
+    win_println(window, THEME_DEFAULT, '-', "%s's OMEMO fingerprint: %s%s", barejid, fingerprint, trusted ? " (trusted)" : "");
+
+    free(unformatted_fingerprint);
+
     return TRUE;
 #else
     cons_show("This version of Profanity has not been built with OMEMO support enabled");
@@ -8227,6 +8244,23 @@ cmd_omemo_untrust(ProfWin *window, const char *const command, gchar **args)
     }
 
     omemo_untrust(barejid, fingerprint);
+
+    char *unformatted_fingerprint = malloc(strlen(fingerprint));
+    int i;
+    int j;
+    for (i = 0, j = 0; fingerprint[i] != '\0'; i++) {
+        if (!g_ascii_isxdigit(fingerprint[i])) {
+            continue;
+        }
+        unformatted_fingerprint[j++] = fingerprint[i];
+    }
+
+    unformatted_fingerprint[j] = '\0';
+    gboolean trusted = omemo_is_trusted_identity(barejid, unformatted_fingerprint);
+
+    win_println(window, THEME_DEFAULT, '-', "%s's OMEMO fingerprint: %s%s", barejid, fingerprint, trusted ? " (trusted)" : "");
+
+    free(unformatted_fingerprint);
 
     return TRUE;
 #else
