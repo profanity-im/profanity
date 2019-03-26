@@ -175,6 +175,9 @@ omemo_sources = \
 	src/omemo/omemo.h src/omemo/omemo.c src/omemo/crypto.h src/omemo/crypto.c \
 	src/omemo/store.h src/omemo/store.c src/xmpp/omemo.h src/xmpp/omemo.c
 
+omemo_unittest_sources = \
+	tests/unittests/omemo/stub_omemo.c
+
 if BUILD_PYTHON_API
 core_sources += $(python_sources)
 unittest_sources += $(python_sources)
@@ -213,6 +216,7 @@ endif
 
 if BUILD_OMEMO
 core_sources += $(omemo_sources)
+unittest_sources += $(omemo_unittest_sources)
 endif
 
 AM_CFLAGS = @AM_CFLAGS@ -I$(srcdir)/src
