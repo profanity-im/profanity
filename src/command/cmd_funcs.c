@@ -8086,7 +8086,7 @@ cmd_omemo_fingerprint(ProfWin *window, const char *const command, gchar **args)
             char *fingerprint = omemo_own_fingerprint(TRUE);
             cons_show("Your OMEMO fingerprint: %s", fingerprint);
             free(fingerprint);
-            return TRUE;
+            jid = jid_create(connection_get_fulljid());
         } else if (window->type == WIN_CHAT) {
             ProfChatWin *chatwin = (ProfChatWin*)window;
             jid = jid_create(chatwin->barejid);
