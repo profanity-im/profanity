@@ -1082,9 +1082,7 @@ static gboolean
 handle_own_device_list(const char *const jid, GList *device_list)
 {
     if (!g_list_find(device_list, GINT_TO_POINTER(omemo_ctx.device_id))) {
-        gpointer original_jid;
-        g_hash_table_steal_extended(omemo_ctx.device_list, jid, &original_jid, NULL);
-        free(original_jid);
+        device_list = g_list_copy(device_list);
         device_list = g_list_append(device_list, GINT_TO_POINTER(omemo_ctx.device_id));
         g_hash_table_insert(omemo_ctx.device_list, strdup(jid), device_list);
         omemo_devicelist_publish(device_list);
