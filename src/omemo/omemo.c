@@ -72,6 +72,31 @@ void
 omemo_init(void)
 {
     log_info("OMEMO: initialising");
+    if (omemo_crypto_init() != 0) {
+        cons_show("Error initializing OMEMO crypto");
+    }
+
+    pthread_mutexattr_init(&omemo_ctx.attr);
+    pthread_mutexattr_settype(&omemo_ctx.attr, PTHREAD_MUTEX_RECURSIVE);
+    pthread_mutex_init(&omemo_ctx.lock, &omemo_ctx.attr);
+
+    omemo_ctx.fingerprint_ac = autocomplete_new();
+}
+
+void
+omemo_on_connect(ProfAccount *account)
+{
+    GError *error = NULL;
+
+    if (signal_context_create(&omemo_ctx.signal, &omemo_ctx) != 0) {
+        cons_show("Error initializing OMEMO context");
+        return;
+    }
+
+    if (signal_context_set_log_function(omemo_ctx.signal, omemo_log) != 0) {
+        cons_show("Error initializing OMEMO log");
+    }
+
     signal_crypto_provider crypto_provider = {
         .random_func = omemo_random_func,
         .hmac_sha256_init_func = omemo_hmac_sha256_init_func,
@@ -86,23 +111,6 @@ omemo_init(void)
         .decrypt_func = omemo_decrypt_func,
         .user_data = NULL
     };
-
-    if (omemo_crypto_init() != 0) {
-        cons_show("Error initializing OMEMO crypto");
-    }
-
-    pthread_mutexattr_init(&omemo_ctx.attr);
-    pthread_mutexattr_settype(&omemo_ctx.attr, PTHREAD_MUTEX_RECURSIVE);
-    pthread_mutex_init(&omemo_ctx.lock, &omemo_ctx.attr);
-
-    if (signal_context_create(&omemo_ctx.signal, &omemo_ctx) != 0) {
-        cons_show("Error initializing OMEMO context");
-        return;
-    }
-
-    if (signal_context_set_log_function(omemo_ctx.signal, omemo_log) != 0) {
-        cons_show("Error initializing OMEMO log");
-    }
 
     if (signal_context_set_crypto_provider(omemo_ctx.signal, &crypto_provider) != 0) {
         cons_show("Error initializing OMEMO crypto");
@@ -166,12 +174,7 @@ omemo_init(void)
     omemo_ctx.known_devices = g_hash_table_new_full(g_str_hash, g_str_equal, free, (GDestroyNotify)g_hash_table_free);
 
     omemo_ctx.fingerprint_ac = autocomplete_new();
-}
 
-void
-omemo_on_connect(ProfAccount *account)
-{
-    GError *error = NULL;
     char *omemodir = files_get_data_path(DIR_OMEMO);
     GString *basedir = g_string_new(omemodir);
     free(omemodir);
