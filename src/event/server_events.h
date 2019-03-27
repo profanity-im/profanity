@@ -73,7 +73,7 @@ void sv_ev_room_occupent_kicked(const char *const room, const char *const nick, 
 void sv_ev_room_banned(const char *const room, const char *const actor, const char *const reason);
 void sv_ev_room_occupent_banned(const char *const room, const char *const nick, const char *const actor,
     const char *const reason);
-void sv_ev_outgoing_carbon(char *barejid, char *message, char *pgp_message);
+void sv_ev_outgoing_carbon(char *barejid, char *message, char *pgp_message, gboolean omemo);
 void sv_ev_incoming_carbon(char *barejid, char *resource, char *message, char *pgp_message, gboolean omemo);
 void sv_ev_xmpp_stanza(const char *const msg);
 void sv_ev_muc_self_online(const char *const room, const char *const nick, gboolean config_required,

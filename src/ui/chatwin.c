@@ -324,6 +324,8 @@ chatwin_outgoing_carbon(ProfChatWin *chatwin, const char *const message, prof_en
     char enc_char = '-';
     if (enc_mode == PROF_MSG_PGP) {
         enc_char = prefs_get_pgp_char();
+    } else if (enc_mode == PROF_MSG_OMEMO) {
+        enc_char = prefs_get_omemo_char();
     }
 
     ProfWin *window = (ProfWin*)chatwin;

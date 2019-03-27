@@ -387,7 +387,7 @@ sv_ev_delayed_private_message(const char *const fulljid, char *message, GDateTim
 }
 
 void
-sv_ev_outgoing_carbon(char *barejid, char *message, char *pgp_message)
+sv_ev_outgoing_carbon(char *barejid, char *message, char *pgp_message, gboolean omemo)
 {
     ProfChatWin *chatwin = wins_get_chat(barejid);
     if (!chatwin) {
@@ -397,6 +397,7 @@ sv_ev_outgoing_carbon(char *barejid, char *message, char *pgp_message)
     chat_state_active(chatwin->state);
 
 #ifdef HAVE_LIBGPGME
+#ifndef HAVE_OMEMO
     if (pgp_message) {
         char *decrypted = p_gpg_decrypt(pgp_message);
         if (decrypted) {
@@ -407,8 +408,43 @@ sv_ev_outgoing_carbon(char *barejid, char *message, char *pgp_message)
     } else {
         chatwin_outgoing_carbon(chatwin, message, PROF_MSG_PLAIN);
     }
-#else
+    return;
+#endif
+#endif
+
+#ifndef HAVE_LIBGPGME
+#ifdef HAVE_OMEMO
+    if (omemo) {
+        chatwin_outgoing_carbon(chatwin, message, PROF_MSG_OMEMO);
+    } else {
+        chatwin_outgoing_carbon(chatwin, message, PROF_MSG_PLAIN);
+    }
+    return;
+#endif
+#endif
+
+#ifdef HAVE_LIBGPGME
+#ifdef HAVE_OMEMO
+    if (omemo) {
+        chatwin_outgoing_carbon(chatwin, message, PROF_MSG_OMEMO);
+    } else if (pgp_message) {
+        char *decrypted = p_gpg_decrypt(pgp_message);
+        if (decrypted) {
+            chatwin_outgoing_carbon(chatwin, decrypted, PROF_MSG_PGP);
+        } else {
+            chatwin_outgoing_carbon(chatwin, message, PROF_MSG_PLAIN);
+        }
+    } else {
+        chatwin_outgoing_carbon(chatwin, message, PROF_MSG_PLAIN);
+    }
+    return;
+#endif
+#endif
+
+#ifndef HAVE_LIBGPGME
+#ifndef HAVE_OMEMO
     chatwin_outgoing_carbon(chatwin, message, PROF_MSG_PLAIN);
+#endif
 #endif
 }
 

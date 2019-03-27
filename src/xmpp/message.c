@@ -932,7 +932,7 @@ _handle_carbons(xmpp_stanza_t *const stanza)
 
     // else treat as a sent message
     } else {
-        sv_ev_outgoing_carbon(jid_to->barejid, message_txt, enc_message);
+        sv_ev_outgoing_carbon(jid_to->barejid, message_txt, enc_message, omemo);
     }
 
     xmpp_ctx_t *ctx = connection_get_ctx();
