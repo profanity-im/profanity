@@ -1,13 +1,18 @@
 #include <glib.h>
 
+#include "log.h"
 #include "xmpp/connection.h"
-#include "xmpp/message.h"
+#include "xmpp/form.h"
 #include "xmpp/iq.h"
+#include "xmpp/message.h"
 #include "xmpp/stanza.h"
 
 #include "omemo/omemo.h"
 
 static int _omemo_receive_devicelist(xmpp_stanza_t *const stanza, void *const userdata);
+static int _omemo_bundle_publish_result(xmpp_stanza_t *const stanza, void *const userdata);
+static int _omemo_bundle_publish_configure(xmpp_stanza_t *const stanza, void *const userdata);
+static int _omemo_bundle_publish_configure_result(xmpp_stanza_t *const stanza, void *const userdata);
 
 void
 omemo_devicelist_subscribe(void)
@@ -45,7 +50,7 @@ omemo_devicelist_request(const char * const jid)
 }
 
 void
-omemo_bundle_publish(void)
+omemo_bundle_publish(gboolean first)
 {
     xmpp_ctx_t * const ctx = connection_get_ctx();
     unsigned char *identity_key = NULL;
@@ -61,10 +66,11 @@ omemo_bundle_publish(void)
     omemo_signed_prekey_signature(&signed_prekey_signature, &signed_prekey_signature_length);
     omemo_prekeys(&prekeys, &ids, &lengths);
 
-    xmpp_stanza_t *iq = stanza_create_omemo_bundle_publish(ctx, omemo_device_id(),
-        identity_key, identity_key_length, signed_prekey, signed_prekey_length,
-        signed_prekey_signature,  signed_prekey_signature_length,
-        prekeys, ids, lengths);
+    char *id = connection_create_stanza_id("omemo_bundle_publish");
+    xmpp_stanza_t *iq = stanza_create_omemo_bundle_publish(ctx, id,
+        omemo_device_id(), identity_key, identity_key_length, signed_prekey,
+        signed_prekey_length, signed_prekey_signature,
+        signed_prekey_signature_length, prekeys, ids, lengths);
 
     g_list_free_full(prekeys, free);
     g_list_free(lengths);
@@ -72,12 +78,15 @@ omemo_bundle_publish(void)
 
     stanza_attach_publish_options(ctx, iq, "pubsub#access_model", "open");
 
-    iq_send_stanza(iq);
-    xmpp_stanza_release(iq);
+    iq_id_handler_add(id, _omemo_bundle_publish_result, NULL, GINT_TO_POINTER(first));
 
+    iq_send_stanza(iq);
+
+    xmpp_stanza_release(iq);
     free(identity_key);
     free(signed_prekey);
     free(signed_prekey_signature);
+    free(id);
 }
 
 void
@@ -322,19 +331,19 @@ _omemo_receive_devicelist(xmpp_stanza_t *const stanza, void *const userdata)
     }
 
     if (!root) {
-        return 1;
+        return 0;
     }
 
     xmpp_stanza_t *items = xmpp_stanza_get_child_by_name(root, "items");
     if (!items) {
-        return 1;
+        return 0;
     }
 
     xmpp_stanza_t *item = xmpp_stanza_get_child_by_name(items, "item");
     if (item) {
         xmpp_stanza_t *list = xmpp_stanza_get_child_by_ns(item, STANZA_NS_OMEMO);
         if (!list) {
-            return 1;
+            return 0;
         }
 
         xmpp_stanza_t *device;
@@ -345,5 +354,85 @@ _omemo_receive_devicelist(xmpp_stanza_t *const stanza, void *const userdata)
     }
     omemo_set_device_list(from, device_list);
 
-    return 1;
+    return 0;
+}
+
+static int
+_omemo_bundle_publish_result(xmpp_stanza_t *const stanza, void *const userdata)
+{
+    const char *type = xmpp_stanza_get_type(stanza);
+
+    if (g_strcmp0(type, STANZA_TYPE_ERROR) != 0) {
+        return 0;
+    }
+
+    if (!GPOINTER_TO_INT(userdata)) {
+        log_error("OMEMO: definitely cannot publish bundle with an open access model");
+        return 0;
+    }
+
+    log_info("OMEMO: cannot publish bundle with open access model, trying to configure node");
+    xmpp_ctx_t * const ctx = connection_get_ctx();
+    Jid *jid = jid_create(connection_get_fulljid());
+    char *id = connection_create_stanza_id("omemo_bundle_node_configure_request");
+    char *node = g_strdup_printf("%s:%d", STANZA_NS_OMEMO_BUNDLES, omemo_device_id());
+    xmpp_stanza_t *iq = stanza_create_pubsub_configure_request(ctx, id, jid->barejid, node);
+    g_free(node);
+
+    iq_id_handler_add(id, _omemo_bundle_publish_configure, NULL, userdata);
+
+    iq_send_stanza(iq);
+
+    xmpp_stanza_release(iq);
+    free(id);
+    jid_destroy(jid);
+    return 0;
+}
+
+static int
+_omemo_bundle_publish_configure(xmpp_stanza_t *const stanza, void *const userdata)
+{
+    /* TODO handle error */
+    xmpp_stanza_t *pubsub = xmpp_stanza_get_child_by_name(stanza, "pubsub");
+    xmpp_stanza_t *configure = xmpp_stanza_get_child_by_name(pubsub, STANZA_NAME_CONFIGURE);
+    xmpp_stanza_t *x = xmpp_stanza_get_child_by_name(configure, "x");
+
+    DataForm* form = form_create(x);
+    char *tag = g_hash_table_lookup(form->var_to_tag, "pubsub#access_model");
+    if (!tag) {
+        log_info("OMEMO: cannot configure bundle to an open access model");
+        return 0;
+    }
+    form_set_value(form, tag, "open");
+
+    xmpp_ctx_t * const ctx = connection_get_ctx();
+    Jid *jid = jid_create(connection_get_fulljid());
+    char *id = connection_create_stanza_id("omemo_bundle_node_configure_submit");
+    char *node = g_strdup_printf("%s:%d", STANZA_NS_OMEMO_BUNDLES, omemo_device_id());
+    xmpp_stanza_t *iq = stanza_create_pubsub_configure_submit(ctx, id, jid->barejid, node, form);
+    g_free(node);
+
+    iq_id_handler_add(id, _omemo_bundle_publish_configure_result, NULL, userdata);
+
+    iq_send_stanza(iq);
+
+    xmpp_stanza_release(iq);
+    free(id);
+    jid_destroy(jid);
+    return 0;
+}
+
+static int
+_omemo_bundle_publish_configure_result(xmpp_stanza_t *const stanza, void *const userdata)
+{
+    const char *type = xmpp_stanza_get_type(stanza);
+
+    if (g_strcmp0(type, STANZA_TYPE_ERROR) == 0) {
+        log_error("OMEMO: cannot configure bundle to an open access model");
+        return 0;
+    }
+
+    omemo_bundle_publish(TRUE);
+
+    return 0;
 }

@@ -2156,7 +2156,7 @@ stanza_create_omemo_devicelist_request(xmpp_ctx_t *ctx, const char *const id,
 
     xmpp_stanza_t *items = xmpp_stanza_new(ctx);
     xmpp_stanza_set_name(items, "items");
-    xmpp_stanza_set_attribute(items, "node", STANZA_NS_OMEMO_DEVICELIST);
+    xmpp_stanza_set_attribute(items, STANZA_ATTR_NODE, STANZA_NS_OMEMO_DEVICELIST);
 
     xmpp_stanza_add_child(pubsub, items);
     xmpp_stanza_add_child(iq, pubsub);
@@ -2180,7 +2180,7 @@ stanza_create_omemo_devicelist_subscribe(xmpp_ctx_t *ctx, const char *const jid)
 
     xmpp_stanza_t *subscribe = xmpp_stanza_new(ctx);
     xmpp_stanza_set_name(subscribe, STANZA_NAME_SUBSCRIBE);
-    xmpp_stanza_set_attribute(subscribe, "node", STANZA_NS_OMEMO_DEVICELIST);
+    xmpp_stanza_set_attribute(subscribe, STANZA_ATTR_NODE, STANZA_NS_OMEMO_DEVICELIST);
     xmpp_stanza_set_attribute(subscribe, "jid", jid);
 
     xmpp_stanza_add_child(pubsub, subscribe);
@@ -2205,7 +2205,7 @@ stanza_create_omemo_devicelist_publish(xmpp_ctx_t *ctx, GList *const ids)
 
     xmpp_stanza_t *publish = xmpp_stanza_new(ctx);
     xmpp_stanza_set_name(publish, STANZA_NAME_PUBLISH);
-    xmpp_stanza_set_attribute(publish, "node", STANZA_NS_OMEMO_DEVICELIST);
+    xmpp_stanza_set_attribute(publish, STANZA_ATTR_NODE, STANZA_NS_OMEMO_DEVICELIST);
 
     xmpp_stanza_t *item = xmpp_stanza_new(ctx);
     xmpp_stanza_set_name(item, STANZA_NAME_ITEM);
@@ -2241,15 +2241,14 @@ stanza_create_omemo_devicelist_publish(xmpp_ctx_t *ctx, GList *const ids)
 }
 
 xmpp_stanza_t*
-stanza_create_omemo_bundle_publish(xmpp_ctx_t *ctx, uint32_t device_id,
+stanza_create_omemo_bundle_publish(xmpp_ctx_t *ctx, const char *const id,
+    uint32_t device_id,
     const unsigned char * const identity_key, size_t identity_key_length,
     const unsigned char * const signed_prekey, size_t signed_prekey_length,
     const unsigned char * const signed_prekey_signature, size_t signed_prekey_signature_length,
     GList *const prekeys, GList *const prekeys_id, GList *const prekeys_length)
 {
-    char *id = connection_create_stanza_id("omemo_bundle_publish");
     xmpp_stanza_t *iq = xmpp_iq_new(ctx, STANZA_TYPE_SET, id);
-    free(id);
 
     xmpp_stanza_t *pubsub = xmpp_stanza_new(ctx);
     xmpp_stanza_set_name(pubsub, STANZA_NAME_PUBSUB);
@@ -2258,7 +2257,7 @@ stanza_create_omemo_bundle_publish(xmpp_ctx_t *ctx, uint32_t device_id,
     xmpp_stanza_t *publish = xmpp_stanza_new(ctx);
     xmpp_stanza_set_name(publish, STANZA_NAME_PUBLISH);
     char *node = g_strdup_printf("%s:%d", "eu.siacs.conversations.axolotl.bundles", device_id);
-    xmpp_stanza_set_attribute(publish, "node", node);
+    xmpp_stanza_set_attribute(publish, STANZA_ATTR_NODE, node);
     g_free(node);
 
     xmpp_stanza_t *item = xmpp_stanza_new(ctx);
@@ -2356,13 +2355,63 @@ stanza_create_omemo_bundle_request(xmpp_ctx_t *ctx, const char *const id, const 
     xmpp_stanza_t *items = xmpp_stanza_new(ctx);
     xmpp_stanza_set_name(items, "items");
     char *node = g_strdup_printf("%s:%d", STANZA_NS_OMEMO_BUNDLES, device_id);
-    xmpp_stanza_set_attribute(items, "node", node);
+    xmpp_stanza_set_attribute(items, STANZA_ATTR_NODE, node);
     g_free(node);
 
     xmpp_stanza_add_child(pubsub, items);
     xmpp_stanza_add_child(iq, pubsub);
 
     xmpp_stanza_release(items);
+    xmpp_stanza_release(pubsub);
+
+    return iq;
+}
+
+xmpp_stanza_t*
+stanza_create_pubsub_configure_request(xmpp_ctx_t *ctx, const char *const id, const char *const jid, const char *const node)
+{
+    xmpp_stanza_t *iq = xmpp_iq_new(ctx, STANZA_TYPE_GET, id);
+    xmpp_stanza_set_to(iq, jid);
+
+    xmpp_stanza_t *pubsub = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(pubsub, STANZA_NAME_PUBSUB);
+    xmpp_stanza_set_ns(pubsub, STANZA_NS_PUBSUB_OWNER);
+
+    xmpp_stanza_t *configure = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(configure, STANZA_NAME_CONFIGURE);
+    xmpp_stanza_set_attribute(configure, STANZA_ATTR_NODE, node);
+
+    xmpp_stanza_add_child(pubsub, configure);
+    xmpp_stanza_add_child(iq, pubsub);
+
+    xmpp_stanza_release(configure);
+    xmpp_stanza_release(pubsub);
+
+    return iq;
+}
+
+xmpp_stanza_t*
+stanza_create_pubsub_configure_submit(xmpp_ctx_t *ctx, const char *const id, const char *const jid, const char *const node, DataForm *form)
+{
+    xmpp_stanza_t *iq = xmpp_iq_new(ctx, STANZA_TYPE_SET, id);
+    xmpp_stanza_set_to(iq, jid);
+
+    xmpp_stanza_t *pubsub = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(pubsub, STANZA_NAME_PUBSUB);
+    xmpp_stanza_set_ns(pubsub, STANZA_NS_PUBSUB_OWNER);
+
+    xmpp_stanza_t *configure = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(configure, STANZA_NAME_CONFIGURE);
+    xmpp_stanza_set_attribute(configure, STANZA_ATTR_NODE, node);
+
+    xmpp_stanza_t *x = form_create_submission(form);
+
+    xmpp_stanza_add_child(configure, x);
+    xmpp_stanza_add_child(pubsub, configure);
+    xmpp_stanza_add_child(iq, pubsub);
+
+    xmpp_stanza_release(x);
+    xmpp_stanza_release(configure);
     xmpp_stanza_release(pubsub);
 
     return iq;

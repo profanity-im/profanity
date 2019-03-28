@@ -101,6 +101,7 @@
 #define STANZA_NAME_GET "get"
 #define STANZA_NAME_URL "url"
 #define STANZA_NAME_COMMAND "command"
+#define STANZA_NAME_CONFIGURE "configure"
 
 // error conditions
 #define STANZA_NAME_BAD_REQUEST "bad-request"
@@ -180,6 +181,7 @@
 #define STANZA_NS_CONFERENCE "jabber:x:conference"
 #define STANZA_NS_CAPTCHA "urn:xmpp:captcha"
 #define STANZA_NS_PUBSUB "http://jabber.org/protocol/pubsub"
+#define STANZA_NS_PUBSUB_OWNER "http://jabber.org/protocol/pubsub#owner"
 #define STANZA_NS_PUBSUB_EVENT "http://jabber.org/protocol/pubsub#event"
 #define STANZA_NS_CARBONS "urn:xmpp:carbons:2"
 #define STANZA_NS_HINTS "urn:xmpp:hints"
@@ -295,8 +297,11 @@ void stanza_attach_publish_options(xmpp_ctx_t *const ctx, xmpp_stanza_t *const p
 xmpp_stanza_t* stanza_create_omemo_devicelist_request(xmpp_ctx_t *ctx, const char *const id, const char *const jid);
 xmpp_stanza_t* stanza_create_omemo_devicelist_subscribe(xmpp_ctx_t *ctx, const char *const jid);
 xmpp_stanza_t* stanza_create_omemo_devicelist_publish(xmpp_ctx_t *ctx, GList *const ids);
-xmpp_stanza_t* stanza_create_omemo_bundle_publish(xmpp_ctx_t *ctx, uint32_t device_id, const unsigned char * const identity_key, size_t identity_key_length, const unsigned char * const signed_prekey, size_t signed_prekey_length, const unsigned char * const signed_prekey_signature, size_t signed_prekey_signature_length, GList *const prekeys, GList *const prekeys_id, GList *const prekeys_length);
+xmpp_stanza_t* stanza_create_omemo_bundle_publish(xmpp_ctx_t *ctx, const char *const id, uint32_t device_id, const unsigned char * const identity_key, size_t identity_key_length, const unsigned char * const signed_prekey, size_t signed_prekey_length, const unsigned char * const signed_prekey_signature, size_t signed_prekey_signature_length, GList *const prekeys, GList *const prekeys_id, GList *const prekeys_length);
 xmpp_stanza_t* stanza_create_omemo_bundle_request(xmpp_ctx_t *ctx, const char *const id, const char *const jid, uint32_t device_id);
+
+xmpp_stanza_t* stanza_create_pubsub_configure_request(xmpp_ctx_t *ctx, const char *const id, const char *const jid, const char *const node);
+xmpp_stanza_t* stanza_create_pubsub_configure_submit(xmpp_ctx_t *ctx, const char *const id, const char *const jid, const char *const node, DataForm *form);
 
 int stanza_get_idle_time(xmpp_stanza_t *const stanza);
 

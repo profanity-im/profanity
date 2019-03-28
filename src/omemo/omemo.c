@@ -314,7 +314,7 @@ omemo_generate_short_term_crypto_materials(ProfAccount *account)
     g_hash_table_insert(omemo_ctx.device_list_handler, strdup(account->jid), handle_own_device_list);
     omemo_devicelist_request(account->jid);
 
-    omemo_bundle_publish();
+    omemo_bundle_publish(true);
 }
 
 void
@@ -791,7 +791,7 @@ omemo_on_message_recv(const char *const from_jid, uint32_t sid,
         SIGNAL_UNREF(new_pre_key);
         SIGNAL_UNREF(message);
         SIGNAL_UNREF(ec_pair);
-        omemo_bundle_publish();
+        omemo_bundle_publish(true);
 
         if (res == 0) {
             /* Start a new session */
