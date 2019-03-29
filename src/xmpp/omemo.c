@@ -107,9 +107,14 @@ omemo_bundle_request(const char * const jid, uint32_t device_id, ProfIqCallback 
 int
 omemo_start_device_session_handle_bundle(xmpp_stanza_t *const stanza, void *const userdata)
 {
-    const char *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
-    if (!from) {
-        return 1;
+    char *from = NULL;
+    const char *from_attr = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
+    if (!from_attr) {
+        Jid *jid = jid_create(connection_get_fulljid());
+        from = strdup(jid->barejid);
+        jid_destroy(jid);
+    } else {
+        from = strdup(from_attr);
     }
 
     if (g_strcmp0(from, userdata) != 0) {
@@ -219,6 +224,7 @@ omemo_start_device_session_handle_bundle(xmpp_stanza_t *const stanza, void *cons
         signed_prekey_raw, signed_prekey_len, signed_prekey_signature_raw,
         signed_prekey_signature_len, identity_key_raw, identity_key_len);
 
+    free(from);
     g_list_free_full(prekeys_list, (GDestroyNotify)omemo_key_free);
     g_free(signed_prekey_raw);
     g_free(identity_key_raw);
