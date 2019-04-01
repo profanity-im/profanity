@@ -27,20 +27,20 @@
 
 static gboolean loaded;
 
-static void omemo_publish_crypto_materials(ProfAccount *account);
+static void _omemo_publish_crypto_materials(ProfAccount *account);
 static void _generate_pre_keys(int count);
 static void _generate_signed_pre_key(void);
-static void load_identity(void);
-static void load_sessions(void);
-static void lock(void *user_data);
-static void unlock(void *user_data);
-static void omemo_log(int level, const char *message, size_t len, void *user_data);
-static gboolean handle_own_device_list(const char *const jid, GList *device_list);
-static gboolean handle_device_list_start_session(const char *const jid, GList *device_list);
-static char * omemo_fingerprint(ec_public_key *identity, gboolean formatted);
-static unsigned char *omemo_fingerprint_decode(const char *const fingerprint, size_t *len);
-static void cache_device_identity(const char *const jid, uint32_t device_id, ec_public_key *identity);
-static void g_hash_table_free(GHashTable *hash_table);
+static void _load_identity(void);
+static void _load_sessions(void);
+static void _lock(void *user_data);
+static void _unlock(void *user_data);
+static void _omemo_log(int level, const char *message, size_t len, void *user_data);
+static gboolean _handle_own_device_list(const char *const jid, GList *device_list);
+static gboolean _handle_device_list_start_session(const char *const jid, GList *device_list);
+static char * _omemo_fingerprint(ec_public_key *identity, gboolean formatted);
+static unsigned char *_omemo_fingerprint_decode(const char *const fingerprint, size_t *len);
+static void _cache_device_identity(const char *const jid, uint32_t device_id, ec_public_key *identity);
+static void _g_hash_table_free(GHashTable *hash_table);
 
 typedef gboolean (*OmemoDeviceListHandler)(const char *const jid, GList *device_list);
 
@@ -95,7 +95,7 @@ omemo_on_connect(ProfAccount *account)
         return;
     }
 
-    if (signal_context_set_log_function(omemo_ctx.signal, omemo_log) != 0) {
+    if (signal_context_set_log_function(omemo_ctx.signal, _omemo_log) != 0) {
         cons_show("Error initializing OMEMO log");
     }
 
@@ -119,7 +119,7 @@ omemo_on_connect(ProfAccount *account)
         return;
     }
 
-    signal_context_set_locking_functions(omemo_ctx.signal, lock, unlock);
+    signal_context_set_locking_functions(omemo_ctx.signal, _lock, _unlock);
 
     signal_protocol_store_context_create(&omemo_ctx.store, omemo_ctx.signal);
 
@@ -173,7 +173,7 @@ omemo_on_connect(ProfAccount *account)
     loaded = FALSE;
     omemo_ctx.device_list = g_hash_table_new_full(g_str_hash, g_str_equal, free, (GDestroyNotify)g_list_free);
     omemo_ctx.device_list_handler = g_hash_table_new_full(g_str_hash, g_str_equal, free, NULL);
-    omemo_ctx.known_devices = g_hash_table_new_full(g_str_hash, g_str_equal, free, (GDestroyNotify)g_hash_table_free);
+    omemo_ctx.known_devices = g_hash_table_new_full(g_str_hash, g_str_equal, free, (GDestroyNotify)_g_hash_table_free);
 
     omemo_ctx.fingerprint_ac = autocomplete_new();
 
@@ -211,8 +211,8 @@ omemo_on_connect(ProfAccount *account)
     omemo_ctx.sessions_keyfile = g_key_file_new();
 
     if (g_key_file_load_from_file(omemo_ctx.identity_keyfile, omemo_ctx.identity_filename->str, G_KEY_FILE_KEEP_COMMENTS, &error)) {
-        load_identity();
-        omemo_publish_crypto_materials(account);
+        _load_identity();
+        _omemo_publish_crypto_materials(account);
     } else if (error->code != G_FILE_ERROR_NOENT) {
         log_warning("OMEMO: error loading identity from: %s, %s", omemo_ctx.identity_filename->str, error->message);
         return;
@@ -220,7 +220,7 @@ omemo_on_connect(ProfAccount *account)
 
     error = NULL;
     if (g_key_file_load_from_file(omemo_ctx.sessions_keyfile, omemo_ctx.sessions_filename->str, G_KEY_FILE_KEEP_COMMENTS, &error)) {
-        load_sessions();
+        _load_sessions();
     } else if (error->code != G_FILE_ERROR_NOENT) {
         log_warning("OMEMO: error loading sessions from: %s, %s", omemo_ctx.sessions_filename->str, error->message);
     }
@@ -231,7 +231,7 @@ void
 omemo_on_disconnect(void)
 {
     signal_protocol_signed_pre_key_remove_key(omemo_ctx.store, omemo_ctx.signed_pre_key_id);
-    g_hash_table_free(omemo_ctx.signed_pre_key_store);
+    _g_hash_table_free(omemo_ctx.signed_pre_key_store);
 
     GHashTableIter iter;
     gpointer id;
@@ -241,7 +241,7 @@ omemo_on_disconnect(void)
         signal_protocol_pre_key_remove_key(omemo_ctx.store, GPOINTER_TO_INT(id));
     }
 
-    g_hash_table_free(omemo_ctx.pre_key_store);
+    _g_hash_table_free(omemo_ctx.pre_key_store);
 
     g_string_free(omemo_ctx.identity_filename, TRUE);
     g_key_file_free(omemo_ctx.identity_keyfile);
@@ -291,15 +291,15 @@ omemo_generate_crypto_materials(ProfAccount *account)
 
     loaded = TRUE;
 
-    omemo_publish_crypto_materials(account);
+    _omemo_publish_crypto_materials(account);
 }
 
 static void
-omemo_publish_crypto_materials(ProfAccount *account)
+_omemo_publish_crypto_materials(ProfAccount *account)
 {
     /* Ensure we get our current device list, and it gets updated with our
      * device_id */
-    g_hash_table_insert(omemo_ctx.device_list_handler, strdup(account->jid), handle_own_device_list);
+    g_hash_table_insert(omemo_ctx.device_list_handler, strdup(account->jid), _handle_own_device_list);
     omemo_devicelist_request(account->jid);
 
     omemo_bundle_publish(true);
@@ -313,7 +313,7 @@ omemo_start_session(const char *const barejid)
     if (!device_list) {
         log_info("OMEMO: missing device list for %s", barejid);
         omemo_devicelist_request(barejid);
-        g_hash_table_insert(omemo_ctx.device_list_handler, strdup(barejid), handle_device_list_start_session);
+        g_hash_table_insert(omemo_ctx.device_list_handler, strdup(barejid), _handle_device_list_start_session);
         return;
     }
 
@@ -496,7 +496,7 @@ omemo_start_device_session(const char *const jid, uint32_t device_id,
 
     ec_public_key *identity_key;
     curve_decode_point(&identity_key, identity_key_raw, identity_key_len, omemo_ctx.signal);
-    cache_device_identity(jid, device_id, identity_key);
+    _cache_device_identity(jid, device_id, identity_key);
 
     gboolean trusted = is_trusted_identity(&address, (uint8_t *)identity_key_raw, identity_key_len, &omemo_ctx.identity_key_store);
 
@@ -858,7 +858,7 @@ char *
 omemo_own_fingerprint(gboolean formatted)
 {
     ec_public_key *identity = ratchet_identity_key_pair_get_public(omemo_ctx.identity_key_pair);
-    return omemo_fingerprint(identity, formatted);
+    return _omemo_fingerprint(identity, formatted);
 }
 
 GList *
@@ -892,7 +892,7 @@ omemo_is_trusted_identity(const char *const jid, const char *const fingerprint)
     };
 
     size_t fingerprint_len;
-    unsigned char *fingerprint_raw = omemo_fingerprint_decode(fingerprint, &fingerprint_len);
+    unsigned char *fingerprint_raw = _omemo_fingerprint_decode(fingerprint, &fingerprint_len);
     unsigned char djb_type[] = {'\x05'};
     signal_buffer *buffer = signal_buffer_create(djb_type, 1);
     buffer = signal_buffer_append(buffer, fingerprint_raw, fingerprint_len);
@@ -906,7 +906,7 @@ omemo_is_trusted_identity(const char *const jid, const char *const fingerprint)
 }
 
 static char *
-omemo_fingerprint(ec_public_key *identity, gboolean formatted)
+_omemo_fingerprint(ec_public_key *identity, gboolean formatted)
 {
     int i;
     signal_buffer *identity_public_key;
@@ -948,7 +948,7 @@ omemo_fingerprint(ec_public_key *identity, gboolean formatted)
 }
 
 static unsigned char *
-omemo_fingerprint_decode(const char *const fingerprint, size_t *len)
+_omemo_fingerprint_decode(const char *const fingerprint, size_t *len)
 {
     unsigned char *output = malloc(strlen(fingerprint) / 2 + 1);
 
@@ -1012,7 +1012,7 @@ omemo_trust(const char *const jid, const char *const fingerprint_formatted)
         .name_len = strlen(jid),
         .device_id = device_id,
     };
-    unsigned char *fingerprint_raw = omemo_fingerprint_decode(fingerprint_formatted, &len);
+    unsigned char *fingerprint_raw = _omemo_fingerprint_decode(fingerprint_formatted, &len);
     unsigned char djb_type[] = {'\x05'};
     signal_buffer *buffer = signal_buffer_create(djb_type, 1);
     buffer = signal_buffer_append(buffer, fingerprint_raw, len);
@@ -1027,7 +1027,7 @@ void
 omemo_untrust(const char *const jid, const char *const fingerprint_formatted)
 {
     size_t len;
-    unsigned char *fingerprint = omemo_fingerprint_decode(fingerprint_formatted, &len);
+    unsigned char *fingerprint = _omemo_fingerprint_decode(fingerprint_formatted, &len);
 
     GHashTableIter iter;
     gpointer key, value;
@@ -1046,21 +1046,21 @@ omemo_untrust(const char *const jid, const char *const fingerprint_formatted)
 }
 
 static void
-lock(void *user_data)
+_lock(void *user_data)
 {
     omemo_context *ctx = (omemo_context *)user_data;
     pthread_mutex_lock(&ctx->lock);
 }
 
 static void
-unlock(void *user_data)
+_unlock(void *user_data)
 {
     omemo_context *ctx = (omemo_context *)user_data;
     pthread_mutex_unlock(&ctx->lock);
 }
 
 static void
-omemo_log(int level, const char *message, size_t len, void *user_data)
+_omemo_log(int level, const char *message, size_t len, void *user_data)
 {
     switch (level) {
         case SG_LOG_ERROR:
@@ -1080,7 +1080,7 @@ omemo_log(int level, const char *message, size_t len, void *user_data)
 }
 
 static gboolean
-handle_own_device_list(const char *const jid, GList *device_list)
+_handle_own_device_list(const char *const jid, GList *device_list)
 {
     if (!g_list_find(device_list, GINT_TO_POINTER(omemo_ctx.device_id))) {
         device_list = g_list_copy(device_list);
@@ -1098,7 +1098,7 @@ handle_own_device_list(const char *const jid, GList *device_list)
 }
 
 static gboolean
-handle_device_list_start_session(const char *const jid, GList *device_list)
+_handle_device_list_start_session(const char *const jid, GList *device_list)
 {
     omemo_start_session(jid);
 
@@ -1129,7 +1129,7 @@ omemo_fingerprint_autocomplete_reset(void)
 }
 
 static void
-load_identity(void)
+_load_identity(void)
 {
     log_info("Loading OMEMO identity");
 
@@ -1229,7 +1229,7 @@ load_identity(void)
 }
 
 static void
-load_sessions(void)
+_load_sessions(void)
 {
     int i;
     char **groups = g_key_file_get_groups(omemo_ctx.sessions_keyfile, NULL);
@@ -1262,7 +1262,7 @@ load_sessions(void)
 }
 
 static void
-cache_device_identity(const char *const jid, uint32_t device_id, ec_public_key *identity)
+_cache_device_identity(const char *const jid, uint32_t device_id, ec_public_key *identity)
 {
     GHashTable *known_identities = g_hash_table_lookup(omemo_ctx.known_devices, jid);
     if (!known_identities) {
@@ -1270,7 +1270,7 @@ cache_device_identity(const char *const jid, uint32_t device_id, ec_public_key *
         g_hash_table_insert(omemo_ctx.known_devices, strdup(jid), known_identities);
     }
 
-    char *fingerprint = omemo_fingerprint(identity, FALSE);
+    char *fingerprint = _omemo_fingerprint(identity, FALSE);
     log_info("OMEMO: cache identity for %s:%d: %s", jid, device_id, fingerprint);
     g_hash_table_insert(known_identities, strdup(fingerprint), GINT_TO_POINTER(device_id));
 
@@ -1281,7 +1281,7 @@ cache_device_identity(const char *const jid, uint32_t device_id, ec_public_key *
 }
 
 static void
-g_hash_table_free(GHashTable *hash_table)
+_g_hash_table_free(GHashTable *hash_table)
 {
     g_hash_table_remove_all(hash_table);
     g_hash_table_unref(hash_table);
