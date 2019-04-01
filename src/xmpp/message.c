@@ -142,7 +142,6 @@ _message_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza, void *con
                 if (handler) {
                     int keep = handler->func(stanza, handler->userdata);
                     if (!keep) {
-                        free(handler);
                         g_hash_table_remove(pubsub_event_handlers, node);
                     }
                 }
@@ -176,7 +175,7 @@ message_handlers_init(void)
         g_hash_table_destroy(pubsub_event_handlers);
     }
 
-    pubsub_event_handlers = g_hash_table_new_full(g_str_hash, g_str_equal, free, NULL);
+    pubsub_event_handlers = g_hash_table_new_full(g_str_hash, g_str_equal, free, free);
 }
 
 void

@@ -337,19 +337,19 @@ _omemo_receive_devicelist(xmpp_stanza_t *const stanza, void *const userdata)
     }
 
     if (!root) {
-        return 0;
+        return 1;
     }
 
     xmpp_stanza_t *items = xmpp_stanza_get_child_by_name(root, "items");
     if (!items) {
-        return 0;
+        return 1;
     }
 
     xmpp_stanza_t *item = xmpp_stanza_get_child_by_name(items, "item");
     if (item) {
         xmpp_stanza_t *list = xmpp_stanza_get_child_by_ns(item, STANZA_NS_OMEMO);
         if (!list) {
-            return 0;
+            return 1;
         }
 
         xmpp_stanza_t *device;
@@ -360,7 +360,7 @@ _omemo_receive_devicelist(xmpp_stanza_t *const stanza, void *const userdata)
     }
     omemo_set_device_list(from, device_list);
 
-    return 0;
+    return 1;
 }
 
 static int
