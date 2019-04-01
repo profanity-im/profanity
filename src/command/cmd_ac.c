@@ -244,6 +244,7 @@ cmd_ac_init(void)
     autocomplete_add(prefs_ac, "presence");
     autocomplete_add(prefs_ac, "otr");
     autocomplete_add(prefs_ac, "pgp");
+    autocomplete_add(prefs_ac, "omemo");
 
     notify_ac = autocomplete_new();
     autocomplete_add(notify_ac, "chat");

@@ -2134,7 +2134,7 @@ static struct cmd_t command_defs[] =
         CMD_MAINFUNC(cmd_prefs)
         CMD_NOTAGS
         CMD_SYN(
-            "/prefs [ui|desktop|chat|log|conn|presence|otr|pgp]")
+            "/prefs [ui|desktop|chat|log|conn|presence|otr|pgp|omemo]")
         CMD_DESC(
             "Show preferences for different areas of functionality. "
             "Passing no arguments shows all preferences.")
@@ -2146,7 +2146,8 @@ static struct cmd_t command_defs[] =
             { "conn",     "Connection handling preferences." },
             { "presence", "Chat presence preferences." },
             { "otr",      "Off The Record preferences." },
-            { "pgp",      "OpenPGP preferences." })
+            { "pgp",      "OpenPGP preferences." },
+            { "omemo",    "OMEMO preferences." })
         CMD_NOEXAMPLES
     },
 

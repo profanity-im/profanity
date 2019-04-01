@@ -1679,6 +1679,10 @@ cmd_prefs(ProfWin *window, const char *const command, gchar **args)
         cons_show("");
         cons_show_pgp_prefs();
         cons_show("");
+    } else if (strcmp(args[0], "omemo") == 0) {
+        cons_show("");
+        cons_show_omemo_prefs();
+        cons_show("");
     } else {
         cons_bad_cmd_usage(command);
     }
