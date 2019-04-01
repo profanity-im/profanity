@@ -3,6 +3,8 @@
 #include "config.h"
 
 #define OMEMO_STORE_GROUP_IDENTITY "identity"
+#define OMEMO_STORE_GROUP_PREKEYS "prekeys"
+#define OMEMO_STORE_GROUP_SIGNED_PREKEYS "signed_prekeys"
 #define OMEMO_STORE_GROUP_TRUST "trust"
 #define OMEMO_STORE_KEY_DEVICE_ID "device_id"
 #define OMEMO_STORE_KEY_REGISTRATION_ID "registration_id"

@@ -190,6 +190,16 @@ store_pre_key(uint32_t pre_key_id, uint8_t *record, size_t record_len,
 
     signal_buffer *buffer = signal_buffer_create(record, record_len);
     g_hash_table_insert(pre_key_store, GINT_TO_POINTER(pre_key_id), buffer);
+
+    /* Long term storage */
+    char *pre_key_id_str = g_strdup_printf("%d", pre_key_id);
+    char *record_b64 = g_base64_encode(record, record_len);
+    g_key_file_set_string(omemo_identity_keyfile(), OMEMO_STORE_GROUP_PREKEYS, pre_key_id_str, record_b64);
+    g_free(pre_key_id_str);
+    g_free(record_b64);
+
+    omemo_identity_keyfile_save();
+
     return SG_SUCCESS;
 }
 
@@ -206,7 +216,16 @@ remove_pre_key(uint32_t pre_key_id, void *user_data)
 {
     GHashTable *pre_key_store = (GHashTable *)user_data;
 
-    return g_hash_table_remove(pre_key_store, GINT_TO_POINTER(pre_key_id));
+    int ret = g_hash_table_remove(pre_key_store, GINT_TO_POINTER(pre_key_id));
+
+    /* Long term storage */
+    char *pre_key_id_str = g_strdup_printf("%d", pre_key_id);
+    g_key_file_remove_key(omemo_identity_keyfile(), OMEMO_STORE_GROUP_PREKEYS, pre_key_id_str, NULL);
+    g_free(pre_key_id_str);
+
+    omemo_identity_keyfile_save();
+
+    return ret;
 }
 
 int
@@ -233,6 +252,16 @@ store_signed_pre_key(uint32_t signed_pre_key_id, uint8_t *record,
 
     signal_buffer *buffer = signal_buffer_create(record, record_len);
     g_hash_table_insert(signed_pre_key_store, GINT_TO_POINTER(signed_pre_key_id), buffer);
+
+    /* Long term storage */
+    char *signed_pre_key_id_str = g_strdup_printf("%d", signed_pre_key_id);
+    char *record_b64 = g_base64_encode(record, record_len);
+    g_key_file_set_string(omemo_identity_keyfile(), OMEMO_STORE_GROUP_SIGNED_PREKEYS, signed_pre_key_id_str, record_b64);
+    g_free(signed_pre_key_id_str);
+    g_free(record_b64);
+
+    omemo_identity_keyfile_save();
+
     return SG_SUCCESS;
 }
 
@@ -249,7 +278,16 @@ remove_signed_pre_key(uint32_t signed_pre_key_id, void *user_data)
 {
     GHashTable *signed_pre_key_store = (GHashTable *)user_data;
 
-    return g_hash_table_remove(signed_pre_key_store, GINT_TO_POINTER(signed_pre_key_id));
+    int ret = g_hash_table_remove(signed_pre_key_store, GINT_TO_POINTER(signed_pre_key_id));
+
+    /* Long term storage */
+    char *signed_pre_key_id_str = g_strdup_printf("%d", signed_pre_key_id);
+    g_key_file_remove_key(omemo_identity_keyfile(), OMEMO_STORE_GROUP_PREKEYS, signed_pre_key_id_str, NULL);
+    g_free(signed_pre_key_id_str);
+
+    omemo_identity_keyfile_save();
+
+    return ret;
 }
 
 int
@@ -284,6 +322,7 @@ save_identity(const signal_protocol_address *address, uint8_t *key_data,
     signal_buffer *buffer = signal_buffer_create(key_data, key_len);
     g_hash_table_insert(identity_key_store->trusted, strdup(node), buffer);
 
+    /* Long term storage */
     char *key_b64 = g_base64_encode(key_data, key_len);
     g_key_file_set_string(omemo_identity_keyfile(), OMEMO_STORE_GROUP_TRUST, node, key_b64);
     g_free(key_b64);

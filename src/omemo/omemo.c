@@ -27,7 +27,7 @@
 
 static gboolean loaded;
 
-static void omemo_generate_short_term_crypto_materials(ProfAccount *account);
+static void omemo_publish_crypto_materials(ProfAccount *account);
 static void load_identity(void);
 static void load_sessions(void);
 static void lock(void *user_data);
@@ -210,7 +210,7 @@ omemo_on_connect(ProfAccount *account)
 
     if (g_key_file_load_from_file(omemo_ctx.identity_keyfile, omemo_ctx.identity_filename->str, G_KEY_FILE_KEEP_COMMENTS, &error)) {
         load_identity();
-        omemo_generate_short_term_crypto_materials(account);
+        omemo_publish_crypto_materials(account);
     } else if (error->code != G_FILE_ERROR_NOENT) {
         log_warning("OMEMO: error loading identity from: %s, %s", omemo_ctx.identity_filename->str, error->message);
         return;
@@ -255,37 +255,32 @@ omemo_generate_crypto_materials(ProfAccount *account)
     }
 
     log_info("Generate long term OMEMO cryptography metarials");
+
+    /* Device ID */
     gcry_randomize(&omemo_ctx.device_id, 4, GCRY_VERY_STRONG_RANDOM);
     omemo_ctx.device_id &= 0x7fffffff;
+    g_key_file_set_uint64(omemo_ctx.identity_keyfile, OMEMO_STORE_GROUP_IDENTITY, OMEMO_STORE_KEY_DEVICE_ID, omemo_ctx.device_id);
     log_info("OMEMO: device id: %d", omemo_ctx.device_id);
 
+    /* Identity key */
     signal_protocol_key_helper_generate_identity_key_pair(&omemo_ctx.identity_key_pair, omemo_ctx.signal);
-    signal_protocol_key_helper_generate_registration_id(&omemo_ctx.registration_id, 0, omemo_ctx.signal);
 
     ec_public_key_serialize(&omemo_ctx.identity_key_store.public, ratchet_identity_key_pair_get_public(omemo_ctx.identity_key_pair));
-    ec_private_key_serialize(&omemo_ctx.identity_key_store.private, ratchet_identity_key_pair_get_private(omemo_ctx.identity_key_pair));
-
-    g_key_file_set_uint64(omemo_ctx.identity_keyfile, OMEMO_STORE_GROUP_IDENTITY, OMEMO_STORE_KEY_DEVICE_ID, omemo_ctx.device_id);
-    g_key_file_set_uint64(omemo_ctx.identity_keyfile, OMEMO_STORE_GROUP_IDENTITY, OMEMO_STORE_KEY_REGISTRATION_ID, omemo_ctx.registration_id);
     char *identity_key_public = g_base64_encode(signal_buffer_data(omemo_ctx.identity_key_store.public), signal_buffer_len(omemo_ctx.identity_key_store.public));
     g_key_file_set_string(omemo_ctx.identity_keyfile, OMEMO_STORE_GROUP_IDENTITY, OMEMO_STORE_KEY_IDENTITY_KEY_PUBLIC, identity_key_public);
     g_free(identity_key_public);
+
+    ec_private_key_serialize(&omemo_ctx.identity_key_store.private, ratchet_identity_key_pair_get_private(omemo_ctx.identity_key_pair));
     char *identity_key_private = g_base64_encode(signal_buffer_data(omemo_ctx.identity_key_store.private), signal_buffer_len(omemo_ctx.identity_key_store.private));
     g_key_file_set_string(omemo_ctx.identity_keyfile, OMEMO_STORE_GROUP_IDENTITY, OMEMO_STORE_KEY_IDENTITY_KEY_PRIVATE, identity_key_private);
     g_free(identity_key_private);
 
-    omemo_identity_keyfile_save();
+    /* Registration ID */
+    signal_protocol_key_helper_generate_registration_id(&omemo_ctx.registration_id, 0, omemo_ctx.signal);
+    g_key_file_set_uint64(omemo_ctx.identity_keyfile, OMEMO_STORE_GROUP_IDENTITY, OMEMO_STORE_KEY_REGISTRATION_ID, omemo_ctx.registration_id);
 
-    omemo_generate_short_term_crypto_materials(account);
-}
-
-static void
-omemo_generate_short_term_crypto_materials(ProfAccount *account)
-{
+    /* Pre keys */
     unsigned int start;
-
-    log_info("Generate short term OMEMO cryptography metarials");
-
     gcry_randomize(&start, sizeof(unsigned int), GCRY_VERY_STRONG_RANDOM);
     signal_protocol_key_helper_pre_key_list_node *pre_keys_head;
     signal_protocol_key_helper_generate_pre_keys(&pre_keys_head, start, 100, omemo_ctx.signal);
@@ -297,6 +292,7 @@ omemo_generate_short_term_crypto_materials(ProfAccount *account)
     }
     signal_protocol_key_helper_key_list_free(pre_keys_head);
 
+    /* Signed pre key */
     session_signed_pre_key *signed_pre_key;
     struct timeval tv;
     gettimeofday(&tv, NULL);
@@ -307,8 +303,16 @@ omemo_generate_short_term_crypto_materials(ProfAccount *account)
     signal_protocol_signed_pre_key_store_key(omemo_ctx.store, signed_pre_key);
     SIGNAL_UNREF(signed_pre_key);
 
+    omemo_identity_keyfile_save();
+
     loaded = TRUE;
 
+    omemo_publish_crypto_materials(account);
+}
+
+static void
+omemo_publish_crypto_materials(ProfAccount *account)
+{
     /* Ensure we get our current device list, and it gets updated with our
      * device_id */
     g_hash_table_insert(omemo_ctx.device_list_handler, strdup(account->jid), handle_own_device_list);
@@ -378,7 +382,12 @@ omemo_signed_prekey(unsigned char **output, size_t *length)
     session_signed_pre_key *signed_pre_key;
     signal_buffer *buffer = NULL;
 
-    signal_protocol_signed_pre_key_load_key(omemo_ctx.store, &signed_pre_key, omemo_ctx.signed_pre_key_id);
+    if (signal_protocol_signed_pre_key_load_key(omemo_ctx.store, &signed_pre_key, omemo_ctx.signed_pre_key_id) != SG_SUCCESS) {
+        *output = NULL;
+        *length = 0;
+        return;
+    }
+
     ec_public_key_serialize(&buffer, ec_key_pair_get_public(session_signed_pre_key_get_key_pair(signed_pre_key)));
     SIGNAL_UNREF(signed_pre_key);
     *length = signal_buffer_len(buffer);
@@ -392,7 +401,12 @@ omemo_signed_prekey_signature(unsigned char **output, size_t *length)
 {
     session_signed_pre_key *signed_pre_key;
 
-    signal_protocol_signed_pre_key_load_key(omemo_ctx.store, &signed_pre_key, omemo_ctx.signed_pre_key_id);
+    if (signal_protocol_signed_pre_key_load_key(omemo_ctx.store, &signed_pre_key, omemo_ctx.signed_pre_key_id) != SG_SUCCESS) {
+        *output = NULL;
+        *length = 0;
+        return;
+    }
+
     *length = session_signed_pre_key_get_signature_len(signed_pre_key);
     *output = malloc(*length);
     memcpy(*output, session_signed_pre_key_get_signature(signed_pre_key), *length);
@@ -1134,10 +1148,15 @@ static void
 load_identity(void)
 {
     log_info("Loading OMEMO identity");
+
+    /* Device ID */
     omemo_ctx.device_id = g_key_file_get_uint64(omemo_ctx.identity_keyfile, OMEMO_STORE_GROUP_IDENTITY, OMEMO_STORE_KEY_DEVICE_ID, NULL);
     log_info("OMEMO: device id: %d", omemo_ctx.device_id);
+
+    /* Registration ID */
     omemo_ctx.registration_id = g_key_file_get_uint64(omemo_ctx.identity_keyfile, OMEMO_STORE_GROUP_IDENTITY, OMEMO_STORE_KEY_REGISTRATION_ID, NULL);
 
+    /* Identity key */
     char *identity_key_public_b64 = g_key_file_get_string(omemo_ctx.identity_keyfile, OMEMO_STORE_GROUP_IDENTITY, OMEMO_STORE_KEY_IDENTITY_KEY_PUBLIC, NULL);
     size_t identity_key_public_len;
     unsigned char *identity_key_public = g_base64_decode(identity_key_public_b64, &identity_key_public_len);
@@ -1159,7 +1178,42 @@ load_identity(void)
     g_free(identity_key_public);
     g_free(identity_key_private);
 
-    char **keys = g_key_file_get_keys(omemo_ctx.identity_keyfile, OMEMO_STORE_GROUP_TRUST, NULL, NULL);
+    char **keys = NULL;
+    /* Pre keys */
+    keys = g_key_file_get_keys(omemo_ctx.identity_keyfile, OMEMO_STORE_GROUP_PREKEYS, NULL, NULL);
+    if (keys) {
+        int i;
+        for (i = 0; keys[i] != NULL; i++) {
+            char *pre_key_b64 = g_key_file_get_string(omemo_ctx.identity_keyfile, OMEMO_STORE_GROUP_PREKEYS, keys[i], NULL);
+            size_t pre_key_len;
+            unsigned char *pre_key = g_base64_decode(pre_key_b64, &pre_key_len);
+            g_free(pre_key_b64);
+            signal_buffer *buffer = signal_buffer_create(pre_key, pre_key_len);
+            g_free(pre_key);
+            g_hash_table_insert(omemo_ctx.pre_key_store, GINT_TO_POINTER(strtoul(keys[i], NULL, 10)), buffer);
+        }
+    }
+    g_strfreev(keys);
+
+    /* Signed pre keys */
+    keys = g_key_file_get_keys(omemo_ctx.identity_keyfile, OMEMO_STORE_GROUP_SIGNED_PREKEYS, NULL, NULL);
+    if (keys) {
+        int i;
+        for (i = 0; keys[i] != NULL; i++) {
+            char *signed_pre_key_b64 = g_key_file_get_string(omemo_ctx.identity_keyfile, OMEMO_STORE_GROUP_SIGNED_PREKEYS, keys[i], NULL);
+            size_t signed_pre_key_len;
+            unsigned char *signed_pre_key = g_base64_decode(signed_pre_key_b64, &signed_pre_key_len);
+            g_free(signed_pre_key_b64);
+            signal_buffer *buffer = signal_buffer_create(signed_pre_key, signed_pre_key_len);
+            g_free(signed_pre_key);
+            g_hash_table_insert(omemo_ctx.signed_pre_key_store, GINT_TO_POINTER(strtoul(keys[i], NULL, 10)), buffer);
+            omemo_ctx.signed_pre_key_id = strtoul(keys[i], NULL, 10);
+        }
+    }
+    g_strfreev(keys);
+
+    /* Trusted keys */
+    keys = g_key_file_get_keys(omemo_ctx.identity_keyfile, OMEMO_STORE_GROUP_TRUST, NULL, NULL);
     if (keys) {
         int i;
         for (i = 0; keys[i] != NULL; i++) {
@@ -1173,6 +1227,8 @@ load_identity(void)
         }
     }
     g_strfreev(keys);
+
+    loaded = TRUE;
 }
 
 static void
