@@ -28,6 +28,8 @@
 static gboolean loaded;
 
 static void omemo_publish_crypto_materials(ProfAccount *account);
+static void _generate_pre_keys(int count);
+static void _generate_signed_pre_key(void);
 static void load_identity(void);
 static void load_sessions(void);
 static void lock(void *user_data);
@@ -280,28 +282,10 @@ omemo_generate_crypto_materials(ProfAccount *account)
     g_key_file_set_uint64(omemo_ctx.identity_keyfile, OMEMO_STORE_GROUP_IDENTITY, OMEMO_STORE_KEY_REGISTRATION_ID, omemo_ctx.registration_id);
 
     /* Pre keys */
-    unsigned int start;
-    gcry_randomize(&start, sizeof(unsigned int), GCRY_VERY_STRONG_RANDOM);
-    signal_protocol_key_helper_pre_key_list_node *pre_keys_head;
-    signal_protocol_key_helper_generate_pre_keys(&pre_keys_head, start, 100, omemo_ctx.signal);
-
-    signal_protocol_key_helper_pre_key_list_node *p;
-    for (p = pre_keys_head; p != NULL; p = signal_protocol_key_helper_key_list_next(p)) {
-        session_pre_key *prekey = signal_protocol_key_helper_key_list_element(p);
-        signal_protocol_pre_key_store_key(omemo_ctx.store, prekey);
-    }
-    signal_protocol_key_helper_key_list_free(pre_keys_head);
+    _generate_pre_keys(100);
 
     /* Signed pre key */
-    session_signed_pre_key *signed_pre_key;
-    struct timeval tv;
-    gettimeofday(&tv, NULL);
-    unsigned long long timestamp = (unsigned long long)(tv.tv_sec) * 1000 + (unsigned long long)(tv.tv_usec) / 1000;
-
-    omemo_ctx.signed_pre_key_id = 1;
-    signal_protocol_key_helper_generate_signed_pre_key(&signed_pre_key, omemo_ctx.identity_key_pair, omemo_ctx.signed_pre_key_id, timestamp, omemo_ctx.signal);
-    signal_protocol_signed_pre_key_store_key(omemo_ctx.store, signed_pre_key);
-    SIGNAL_UNREF(signed_pre_key);
+    _generate_signed_pre_key();
 
     omemo_identity_keyfile_save();
 
@@ -1179,10 +1163,11 @@ load_identity(void)
     g_free(identity_key_private);
 
     char **keys = NULL;
+    int i;
     /* Pre keys */
+    i = 0;
     keys = g_key_file_get_keys(omemo_ctx.identity_keyfile, OMEMO_STORE_GROUP_PREKEYS, NULL, NULL);
     if (keys) {
-        int i;
         for (i = 0; keys[i] != NULL; i++) {
             char *pre_key_b64 = g_key_file_get_string(omemo_ctx.identity_keyfile, OMEMO_STORE_GROUP_PREKEYS, keys[i], NULL);
             size_t pre_key_len;
@@ -1192,13 +1177,19 @@ load_identity(void)
             g_free(pre_key);
             g_hash_table_insert(omemo_ctx.pre_key_store, GINT_TO_POINTER(strtoul(keys[i], NULL, 10)), buffer);
         }
+
+        g_strfreev(keys);
     }
-    g_strfreev(keys);
+
+    /* Ensure we have at least 100 pre keys */
+    if (i < 100) {
+        _generate_pre_keys(100 - i);
+    }
 
     /* Signed pre keys */
+    i = 0;
     keys = g_key_file_get_keys(omemo_ctx.identity_keyfile, OMEMO_STORE_GROUP_SIGNED_PREKEYS, NULL, NULL);
     if (keys) {
-        int i;
         for (i = 0; keys[i] != NULL; i++) {
             char *signed_pre_key_b64 = g_key_file_get_string(omemo_ctx.identity_keyfile, OMEMO_STORE_GROUP_SIGNED_PREKEYS, keys[i], NULL);
             size_t signed_pre_key_len;
@@ -1209,8 +1200,12 @@ load_identity(void)
             g_hash_table_insert(omemo_ctx.signed_pre_key_store, GINT_TO_POINTER(strtoul(keys[i], NULL, 10)), buffer);
             omemo_ctx.signed_pre_key_id = strtoul(keys[i], NULL, 10);
         }
+        g_strfreev(keys);
     }
-    g_strfreev(keys);
+
+    if (i == 0) {
+        _generate_signed_pre_key();
+    }
 
     /* Trusted keys */
     keys = g_key_file_get_keys(omemo_ctx.identity_keyfile, OMEMO_STORE_GROUP_TRUST, NULL, NULL);
@@ -1229,6 +1224,8 @@ load_identity(void)
     g_strfreev(keys);
 
     loaded = TRUE;
+
+    omemo_identity_keyfile_save();
 }
 
 static void
@@ -1288,4 +1285,34 @@ g_hash_table_free(GHashTable *hash_table)
 {
     g_hash_table_remove_all(hash_table);
     g_hash_table_unref(hash_table);
+}
+
+static void
+_generate_pre_keys(int count)
+{
+    unsigned int start;
+    gcry_randomize(&start, sizeof(unsigned int), GCRY_VERY_STRONG_RANDOM);
+    signal_protocol_key_helper_pre_key_list_node *pre_keys_head;
+    signal_protocol_key_helper_generate_pre_keys(&pre_keys_head, start, count, omemo_ctx.signal);
+
+    signal_protocol_key_helper_pre_key_list_node *p;
+    for (p = pre_keys_head; p != NULL; p = signal_protocol_key_helper_key_list_next(p)) {
+        session_pre_key *prekey = signal_protocol_key_helper_key_list_element(p);
+        signal_protocol_pre_key_store_key(omemo_ctx.store, prekey);
+    }
+    signal_protocol_key_helper_key_list_free(pre_keys_head);
+}
+
+static void
+_generate_signed_pre_key(void)
+{
+    session_signed_pre_key *signed_pre_key;
+    struct timeval tv;
+    gettimeofday(&tv, NULL);
+    unsigned long long timestamp = (unsigned long long)(tv.tv_sec) * 1000 + (unsigned long long)(tv.tv_usec) / 1000;
+
+    omemo_ctx.signed_pre_key_id = 1;
+    signal_protocol_key_helper_generate_signed_pre_key(&signed_pre_key, omemo_ctx.identity_key_pair, omemo_ctx.signed_pre_key_id, timestamp, omemo_ctx.signal);
+    signal_protocol_signed_pre_key_store_key(omemo_ctx.store, signed_pre_key);
+    SIGNAL_UNREF(signed_pre_key);
 }
