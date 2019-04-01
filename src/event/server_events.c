@@ -260,7 +260,7 @@ sv_ev_room_history(const char *const room_jid, const char *const nick,
 }
 
 void
-sv_ev_room_message(const char *const room_jid, const char *const nick, const char *const message, gboolean omemo)
+sv_ev_room_message(const char *const room_jid, const char *const nick, const char *const message, const char *const id, gboolean omemo)
 {
     ProfMucWin *mucwin = wins_get_muc(room_jid);
     if (!mucwin) {
@@ -268,10 +268,6 @@ sv_ev_room_message(const char *const room_jid, const char *const nick, const cha
     }
 
     char *mynick = muc_nick(mucwin->roomjid);
-    if (g_strcmp0(mynick, nick) == 0) {
-        /* Ignore message reflection */
-        return;
-    }
 
     if (omemo) {
         groupchat_log_omemo_msg_in(room_jid, nick, message);
@@ -295,9 +291,9 @@ sv_ev_room_message(const char *const room_jid, const char *const nick, const cha
     GList *triggers = prefs_message_get_triggers(new_message);
 
     if (omemo) {
-        mucwin_incoming_msg(mucwin, nick, new_message, mentions, triggers, PROF_MSG_OMEMO);
+        mucwin_incoming_msg(mucwin, nick, new_message, id, mentions, triggers, PROF_MSG_OMEMO);
     } else {
-        mucwin_incoming_msg(mucwin, nick, new_message, mentions, triggers, PROF_MSG_PLAIN);
+        mucwin_incoming_msg(mucwin, nick, new_message, id, mentions, triggers, PROF_MSG_PLAIN);
     }
 
     g_slist_free(mentions);

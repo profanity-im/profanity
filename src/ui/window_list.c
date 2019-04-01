@@ -561,6 +561,7 @@ wins_close_by_num(int i)
                 ProfMucWin *mucwin = (ProfMucWin*)window;
                 autocomplete_remove(wins_ac, mucwin->roomjid);
                 autocomplete_remove(wins_close_ac, mucwin->roomjid);
+                g_hash_table_remove_all(mucwin->sent_messages);
                 break;
             }
             case WIN_PRIVATE:

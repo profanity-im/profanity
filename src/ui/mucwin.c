@@ -478,9 +478,11 @@ _mucwin_print_triggers(ProfWin *window, const char *const message, GList *trigge
 }
 
 void
-mucwin_outgoing_msg(ProfMucWin *mucwin, const char *const message, prof_enc_t enc_mode)
+mucwin_outgoing_msg(ProfMucWin *mucwin, const char *const message, const char *const id, prof_enc_t enc_mode)
 {
     assert(mucwin != NULL);
+
+    g_hash_table_insert(mucwin->sent_messages, strdup(id), NULL);
 
     ProfWin *window = (ProfWin*)mucwin;
     char *mynick = muc_nick(mucwin->roomjid);
@@ -500,9 +502,14 @@ mucwin_outgoing_msg(ProfMucWin *mucwin, const char *const message, prof_enc_t en
 }
 
 void
-mucwin_incoming_msg(ProfMucWin *mucwin, const char *const nick, const char *const message, GSList *mentions, GList *triggers, prof_enc_t enc_mode)
+mucwin_incoming_msg(ProfMucWin *mucwin, const char *const nick, const char *const message, const char *const id, GSList *mentions, GList *triggers, prof_enc_t enc_mode)
 {
     assert(mucwin != NULL);
+
+    if (g_hash_table_remove(mucwin->sent_messages, id)) {
+        /* Ignore reflection messages */
+        return;
+    }
 
     ProfWin *window = (ProfWin*)mucwin;
     char *mynick = muc_nick(mucwin->roomjid);

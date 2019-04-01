@@ -2417,6 +2417,21 @@ stanza_create_pubsub_configure_submit(xmpp_ctx_t *ctx, const char *const id, con
     return iq;
 }
 
+xmpp_stanza_t*
+stanza_attach_origin_id(xmpp_ctx_t *ctx, xmpp_stanza_t *stanza, const char *const id)
+{
+    xmpp_stanza_t *origin_id = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(origin_id, STANZA_NAME_ORIGIN_ID);
+    xmpp_stanza_set_ns(origin_id, STANZA_NS_STABLE_ID);
+    xmpp_stanza_set_attribute(origin_id, STANZA_ATTR_ID, id);
+
+    xmpp_stanza_add_child(stanza, origin_id);
+
+    xmpp_stanza_release(origin_id);
+
+    return stanza;
+}
+
 static void
 _stanza_add_unique_id(xmpp_stanza_t *stanza, char *prefix)
 {

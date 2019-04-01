@@ -353,12 +353,13 @@ cl_ev_send_muc_msg(ProfMucWin *mucwin, const char *const msg, const char *const 
     if (mucwin->is_omemo) {
         char *id = omemo_on_message_send((ProfWin *)mucwin, plugin_msg, FALSE, TRUE);
         groupchat_log_omemo_msg_out(mucwin->roomjid, plugin_msg);
-        mucwin_outgoing_msg(mucwin, plugin_msg, PROF_MSG_OMEMO);
+        mucwin_outgoing_msg(mucwin, plugin_msg, id, PROF_MSG_OMEMO);
         free(id);
     } else {
-        message_send_groupchat(mucwin->roomjid, plugin_msg, oob_url);
+        char *id = message_send_groupchat(mucwin->roomjid, plugin_msg, oob_url);
         groupchat_log_msg_out(mucwin->roomjid, plugin_msg);
-        mucwin_outgoing_msg(mucwin, plugin_msg, PROF_MSG_PLAIN);
+        mucwin_outgoing_msg(mucwin, plugin_msg, id, PROF_MSG_PLAIN);
+        free(id);
     }
 
     plugins_post_room_message_send(mucwin->roomjid, plugin_msg);
@@ -367,9 +368,10 @@ cl_ev_send_muc_msg(ProfMucWin *mucwin, const char *const msg, const char *const 
 #endif
 
 #ifndef HAVE_OMEMO
-    message_send_groupchat(mucwin->roomjid, plugin_msg, oob_url);
+    char *id = message_send_groupchat(mucwin->roomjid, plugin_msg, oob_url);
     groupchat_log_msg_out(mucwin->roomjid, plugin_msg);
-    mucwin_outgoing_msg(mucwin, plugin_msg, id, PROF_MSG_PLAIN, request_receipt);
+    mucwin_outgoing_msg(mucwin, plugin_msg, id, PROF_MSG_PLAIN);
+    free(id);
 
     plugins_post_room_message_send(mucwin->roomjid, plugin_msg);
     free(plugin_msg);

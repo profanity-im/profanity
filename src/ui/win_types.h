@@ -172,6 +172,7 @@ typedef struct prof_muc_win_t {
     unsigned long memcheck;
     char *enctext;
     char *message_char;
+    GHashTable *sent_messages;
 } ProfMucWin;
 
 typedef struct prof_conf_win_t ProfConfWin;

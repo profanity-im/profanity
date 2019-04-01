@@ -326,6 +326,7 @@ message_send_chat_omemo(const char *const jid, uint32_t sid, GList *keys,
     if (muc) {
         id = connection_create_stanza_id("muc");
         message = xmpp_message_new(ctx, STANZA_TYPE_GROUPCHAT, jid, id);
+        stanza_attach_origin_id(ctx, message, id);
     } else {
         id = connection_create_stanza_id("msg");
         message = xmpp_message_new(ctx, STANZA_TYPE_CHAT, jid, id);
@@ -442,16 +443,15 @@ message_send_private(const char *const fulljid, const char *const msg, const cha
     xmpp_stanza_release(message);
 }
 
-void
+char*
 message_send_groupchat(const char *const roomjid, const char *const msg, const char *const oob_url)
 {
     xmpp_ctx_t * const ctx = connection_get_ctx();
     char *id = connection_create_stanza_id("muc");
 
     xmpp_stanza_t *message = xmpp_message_new(ctx, STANZA_TYPE_GROUPCHAT, roomjid, id);
+    stanza_attach_origin_id(ctx, message, id);
     xmpp_message_set_body(message, msg);
-
-    free(id);
 
     if (oob_url) {
         stanza_attach_x_oob_url(ctx, message, oob_url);
@@ -459,6 +459,8 @@ message_send_groupchat(const char *const roomjid, const char *const msg, const c
 
     _send_message_stanza(message);
     xmpp_stanza_release(message);
+
+    return id;
 }
 
 void
@@ -687,6 +689,14 @@ _handle_groupchat(xmpp_stanza_t *const stanza)
 {
     xmpp_ctx_t *ctx = connection_get_ctx();
     char *message = NULL;
+
+    const char *id = xmpp_stanza_get_id(stanza);
+
+    xmpp_stanza_t *origin = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_STABLE_ID);
+    if (origin && g_strcmp0(xmpp_stanza_get_name(origin), STANZA_NAME_ORIGIN_ID) == 0) {
+        id = xmpp_stanza_get_attribute(origin, STANZA_ATTR_ID);
+    }
+
     const char *room_jid = xmpp_stanza_get_from(stanza);
     Jid *jid = jid_create(room_jid);
 
@@ -750,7 +760,7 @@ _handle_groupchat(xmpp_stanza_t *const stanza)
         sv_ev_room_history(jid->barejid, jid->resourcepart, timestamp, message, omemo);
         g_date_time_unref(timestamp);
     } else {
-        sv_ev_room_message(jid->barejid, jid->resourcepart, message, omemo);
+        sv_ev_room_message(jid->barejid, jid->resourcepart, message, id, omemo);
     }
 
     xmpp_free(ctx, message);
