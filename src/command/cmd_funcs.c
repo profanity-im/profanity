@@ -87,6 +87,7 @@
 
 #ifdef HAVE_OMEMO
 #include "omemo/omemo.h"
+#include "xmpp/omemo.h"
 #endif
 
 #ifdef HAVE_GTK
@@ -8262,6 +8263,24 @@ cmd_omemo_untrust(ProfWin *window, const char *const command, gchar **args)
 
     free(unformatted_fingerprint);
 
+    return TRUE;
+#else
+    cons_show("This version of Profanity has not been built with OMEMO support enabled");
+    return TRUE;
+#endif
+}
+
+gboolean
+cmd_omemo_clear_device_list(ProfWin *window, const char *const command, gchar **args)
+{
+#ifdef HAVE_OMEMO
+    if (connection_get_status() != JABBER_CONNECTED) {
+        cons_show("You must be connected with an account to initialize OMEMO.");
+        return TRUE;
+    }
+
+    omemo_devicelist_publish(NULL);
+    cons_show("Cleared OMEMO device list");
     return TRUE;
 #else
     cons_show("This version of Profanity has not been built with OMEMO support enabled");

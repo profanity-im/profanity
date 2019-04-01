@@ -221,5 +221,6 @@ gboolean cmd_omemo_end(ProfWin *window, const char *const command, gchar **args)
 gboolean cmd_omemo_fingerprint(ProfWin *window, const char *const command, gchar **args);
 gboolean cmd_omemo_trust(ProfWin *window, const char *const command, gchar **args);
 gboolean cmd_omemo_untrust(ProfWin *window, const char *const command, gchar **args);
+gboolean cmd_omemo_clear_device_list(ProfWin *window, const char *const command, gchar **args);
 
 #endif

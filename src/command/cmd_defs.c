@@ -2339,7 +2339,8 @@ static struct cmd_t command_defs[] =
             { "end", cmd_omemo_end },
             { "trust", cmd_omemo_trust },
             { "untrust", cmd_omemo_untrust },
-            { "fingerprint", cmd_omemo_fingerprint })
+            { "fingerprint", cmd_omemo_fingerprint },
+            { "clear_device_list", cmd_omemo_clear_device_list })
         CMD_NOMAINFUNC
         CMD_TAGS(
             CMD_TAG_CHAT,
@@ -2350,7 +2351,8 @@ static struct cmd_t command_defs[] =
             "/omemo start [<contact>]",
             "/omemo trust [<contact>] <fingerprint>",
             "/omemo end",
-            "/omemo fingerprint [<contact>]")
+            "/omemo fingerprint [<contact>]",
+            "/omemo clear_device_list")
         CMD_DESC(
             "Omemo commands to manage keys, and perform encryption during chat sessions.")
         CMD_ARGS(
@@ -2359,12 +2361,13 @@ static struct cmd_t command_defs[] =
             { "end",               "End the current OMEMO session," },
             { "log on|off",        "Enable or disable plaintext logging of OMEMO encrypted messages." },
             { "log redact",        "Log OMEMO encrypted messages, but replace the contents with [redacted]. This is the default." },
-            { "fingerprint",       "Show contact fingerprints." })
+            { "fingerprint",       "Show contact fingerprints." },
+            { "clear_device_list", "Clear your own device list on server side. Each client will reannounce itself when connected back."})
         CMD_EXAMPLES(
             "/omemo gen",
             "/omemo start buddy@buddychat.org",
             "/omemo trust c4f9c875-144d7a3b-0c4a05b6-ca3be51a-a037f329-0bd3ae62-07f99719-55559d2a",
-            "/omemo untrust c4f9c875-144d7a3b-0c4a05b6-ca3be51a-a037f329-0bd3ae62-07f99719-55559d2a")
+            "/omemo untrust buddy@buddychat.org c4f9c875-144d7a3b-0c4a05b6-ca3be51a-a037f329-0bd3ae62-07f99719-55559d2a")
     },
 };
 
