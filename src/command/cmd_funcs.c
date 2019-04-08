@@ -387,6 +387,7 @@ cmd_connect(ProfWin *window, const char *const command, gchar **args)
     }
 
     char *jid;
+    user = strdup(user);
     g_free(def);
 
     // connect with account
@@ -413,7 +414,6 @@ cmd_connect(ProfWin *window, const char *const command, gchar **args)
                 account->password = NULL;
             } else {
                 cons_show("Error evaluating password, see logs for details.");
-                g_free(user);
                 account_free(account);
                 return TRUE;
             }
@@ -444,6 +444,7 @@ cmd_connect(ProfWin *window, const char *const command, gchar **args)
 
     options_destroy(options);
     free(jid);
+    free(user);
 
     return TRUE;
 }
