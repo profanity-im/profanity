@@ -177,6 +177,14 @@ sv_ev_roster_received(void)
 }
 
 void
+sv_ev_connection_features_received(void)
+{
+#ifdef HAVE_OMEMO
+    omemo_publish_crypto_materials();
+#endif
+}
+
+void
 sv_ev_lost_connection(void)
 {
     cons_show_error("Lost connection.");

@@ -63,6 +63,7 @@ typedef struct prof_conn_t {
     char *domain;
     GHashTable *available_resources;
     GHashTable *features_by_jid;
+    GHashTable *requested_features;
 } ProfConnection;
 
 static ProfConnection conn;
@@ -89,6 +90,7 @@ connection_init(void)
     conn.domain = NULL;
     conn.features_by_jid = NULL;
     conn.available_resources = g_hash_table_new_full(g_str_hash, g_str_equal, free, (GDestroyNotify)resource_destroy);
+    conn.requested_features = g_hash_table_new_full(g_str_hash, g_str_equal, free, NULL);
 }
 
 void
@@ -231,6 +233,10 @@ connection_clear_data(void)
     if (conn.available_resources) {
         g_hash_table_remove_all(conn.available_resources);
     }
+
+    if (conn.requested_features) {
+        g_hash_table_remove_all(conn.requested_features);
+    }
 }
 
 #ifdef HAVE_LIBMESODE
@@ -314,11 +320,20 @@ connection_jid_for_feature(const char *const feature)
 }
 
 void
+connection_request_features(void)
+{
+    /* We don't record it as a requested feature to avoid triggering th
+     * sv_ev_connection_features_received too soon */
+    iq_disco_info_request_onconnect(conn.domain);
+}
+
+void
 connection_set_disco_items(GSList *items)
 {
     GSList *curr = items;
     while (curr) {
         DiscoItem *item = curr->data;
+        g_hash_table_insert(conn.requested_features, strdup(item->jid), NULL);
         g_hash_table_insert(conn.features_by_jid, strdup(item->jid),
             g_hash_table_new_full(g_str_hash, g_str_equal, free, NULL));
 
@@ -354,6 +369,14 @@ connection_get_fulljid(void)
         return jid;
     } else {
         return xmpp_conn_get_jid(conn.xmpp_conn);
+    }
+}
+
+void
+connection_features_received(const char *const jid)
+{
+    if (g_hash_table_remove(conn.requested_features, jid) && g_hash_table_size(conn.requested_features) == 0) {
+        sv_ev_connection_features_received();
     }
 }
 

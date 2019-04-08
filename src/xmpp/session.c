@@ -320,8 +320,8 @@ session_login_success(gboolean secured)
     blocking_request();
 
     // items discovery
+    connection_request_features();
     char *domain = connection_get_domain();
-    iq_disco_info_request_onconnect(domain);
     iq_disco_items_request_onconnect(domain);
 
     if (prefs_get_boolean(PREF_CARBONS)){

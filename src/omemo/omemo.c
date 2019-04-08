@@ -27,7 +27,6 @@
 
 static gboolean loaded;
 
-static void _omemo_publish_crypto_materials(ProfAccount *account);
 static void _generate_pre_keys(int count);
 static void _generate_signed_pre_key(void);
 static void _load_identity(void);
@@ -212,7 +211,6 @@ omemo_on_connect(ProfAccount *account)
 
     if (g_key_file_load_from_file(omemo_ctx.identity_keyfile, omemo_ctx.identity_filename->str, G_KEY_FILE_KEEP_COMMENTS, &error)) {
         _load_identity();
-        _omemo_publish_crypto_materials(account);
     } else if (error->code != G_FILE_ERROR_NOENT) {
         log_warning("OMEMO: error loading identity from: %s, %s", omemo_ctx.identity_filename->str, error->message);
         return;
@@ -291,18 +289,27 @@ omemo_generate_crypto_materials(ProfAccount *account)
 
     loaded = TRUE;
 
-    _omemo_publish_crypto_materials(account);
+    omemo_publish_crypto_materials();
 }
 
-static void
-_omemo_publish_crypto_materials(ProfAccount *account)
+void
+omemo_publish_crypto_materials(void)
 {
+    if (loaded != TRUE) {
+        log_error("OMEMO: cannot publish crypto materials before they are generated");
+        return;
+    }
+
+    Jid *jid = jid_create(connection_get_fulljid());
+
     /* Ensure we get our current device list, and it gets updated with our
      * device_id */
-    g_hash_table_insert(omemo_ctx.device_list_handler, strdup(account->jid), _handle_own_device_list);
-    omemo_devicelist_request(account->jid);
+    g_hash_table_insert(omemo_ctx.device_list_handler, strdup(jid->barejid), _handle_own_device_list);
+    omemo_devicelist_request(jid->barejid);
 
     omemo_bundle_publish(true);
+
+    jid_destroy(jid);
 }
 
 void

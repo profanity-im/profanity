@@ -2291,6 +2291,8 @@ _disco_info_response_id_handler_onconnect(xmpp_stanza_t *const stanza, void *con
         }
     }
 
+    connection_features_received(from);
+
     return 0;
 }
 

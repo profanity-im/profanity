@@ -21,6 +21,7 @@ void omemo_on_connect(ProfAccount *account);
 void omemo_on_disconnect(void);
 void omemo_generate_crypto_materials(ProfAccount *account);
 void omemo_key_free(omemo_key_t *key);
+void omemo_publish_crypto_materials(void);
 
 uint32_t omemo_device_id(void);
 void omemo_identity_key(unsigned char **output, size_t *length);
