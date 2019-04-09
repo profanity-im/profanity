@@ -30,6 +30,7 @@ static gboolean loaded;
 static void _generate_pre_keys(int count);
 static void _generate_signed_pre_key(void);
 static void _load_identity(void);
+static void _load_trust(void);
 static void _load_sessions(void);
 static void _lock(void *user_data);
 static void _unlock(void *user_data);
@@ -61,6 +62,8 @@ struct omemo_context_t {
     GHashTable *device_ids;
     GString *identity_filename;
     GKeyFile *identity_keyfile;
+    GString *trust_filename;
+    GKeyFile *trust_keyfile;
     GString *sessions_filename;
     GKeyFile *sessions_keyfile;
     GHashTable *known_devices;
@@ -187,6 +190,8 @@ omemo_on_connect(ProfAccount *account)
 
     omemo_ctx.identity_filename = g_string_new(basedir->str);
     g_string_append(omemo_ctx.identity_filename, "identity.txt");
+    omemo_ctx.trust_filename = g_string_new(basedir->str);
+    g_string_append(omemo_ctx.trust_filename, "trust.txt");
     omemo_ctx.sessions_filename = g_string_new(basedir->str);
     g_string_append(omemo_ctx.sessions_filename, "sessions.txt");
 
@@ -207,6 +212,7 @@ omemo_on_connect(ProfAccount *account)
     omemo_devicelist_subscribe();
 
     omemo_ctx.identity_keyfile = g_key_file_new();
+    omemo_ctx.trust_keyfile = g_key_file_new();
     omemo_ctx.sessions_keyfile = g_key_file_new();
 
     if (g_key_file_load_from_file(omemo_ctx.identity_keyfile, omemo_ctx.identity_filename->str, G_KEY_FILE_KEEP_COMMENTS, &error)) {
@@ -217,12 +223,18 @@ omemo_on_connect(ProfAccount *account)
     }
 
     error = NULL;
+    if (g_key_file_load_from_file(omemo_ctx.trust_keyfile, omemo_ctx.trust_filename->str, G_KEY_FILE_KEEP_COMMENTS, &error)) {
+        _load_trust();
+    } else if (error->code != G_FILE_ERROR_NOENT) {
+        log_warning("OMEMO: error loading trust from: %s, %s", omemo_ctx.sessions_filename->str, error->message);
+    }
+
+    error = NULL;
     if (g_key_file_load_from_file(omemo_ctx.sessions_keyfile, omemo_ctx.sessions_filename->str, G_KEY_FILE_KEEP_COMMENTS, &error)) {
         _load_sessions();
     } else if (error->code != G_FILE_ERROR_NOENT) {
         log_warning("OMEMO: error loading sessions from: %s, %s", omemo_ctx.sessions_filename->str, error->message);
     }
-
 }
 
 void
@@ -243,6 +255,8 @@ omemo_on_disconnect(void)
 
     g_string_free(omemo_ctx.identity_filename, TRUE);
     g_key_file_free(omemo_ctx.identity_keyfile);
+    g_string_free(omemo_ctx.trust_filename, TRUE);
+    g_key_file_free(omemo_ctx.trust_keyfile);
     g_string_free(omemo_ctx.sessions_filename, TRUE);
     g_key_file_free(omemo_ctx.sessions_keyfile);
 }
@@ -469,6 +483,22 @@ omemo_identity_keyfile_save(void)
 
     if (!g_key_file_save_to_file(omemo_ctx.identity_keyfile, omemo_ctx.identity_filename->str, &error)) {
         log_error("OMEMO: error saving identity to: %s, %s", omemo_ctx.identity_filename->str, error->message);
+    }
+}
+
+GKeyFile *
+omemo_trust_keyfile(void)
+{
+    return omemo_ctx.trust_keyfile;
+}
+
+void
+omemo_trust_keyfile_save(void)
+{
+    GError *error = NULL;
+
+    if (!g_key_file_save_to_file(omemo_ctx.trust_keyfile, omemo_ctx.trust_filename->str, &error)) {
+        log_error("OMEMO: error saving trust to: %s, %s", omemo_ctx.trust_filename->str, error->message);
     }
 }
 
@@ -1039,14 +1069,19 @@ omemo_untrust(const char *const jid, const char *const fingerprint_formatted)
     GHashTableIter iter;
     gpointer key, value;
 
-    g_hash_table_iter_init(&iter, omemo_ctx.identity_key_store.trusted);
+    GHashTable *trusted = g_hash_table_lookup(omemo_ctx.identity_key_store.trusted, jid);
+    if (!trusted) {
+        return;
+    }
+
+    g_hash_table_iter_init(&iter, trusted);
     while (g_hash_table_iter_next(&iter, &key, &value)) {
         signal_buffer *buffer = value;
         unsigned char *original = signal_buffer_data(buffer);
         /* Skip DJB_TYPE byte */
         original++;
         if ((signal_buffer_len(buffer) - 1) == len && memcmp(original, fingerprint, len) == 0) {
-            g_hash_table_remove(omemo_ctx.identity_key_store.trusted, key);
+            g_hash_table_remove(trusted, key);
         }
     }
     free(fingerprint);
@@ -1214,25 +1249,41 @@ _load_identity(void)
         _generate_signed_pre_key();
     }
 
-    /* Trusted keys */
-    keys = g_key_file_get_keys(omemo_ctx.identity_keyfile, OMEMO_STORE_GROUP_TRUST, NULL, NULL);
-    if (keys) {
-        int i;
-        for (i = 0; keys[i] != NULL; i++) {
-            char *key_b64 = g_key_file_get_string(omemo_ctx.identity_keyfile, OMEMO_STORE_GROUP_TRUST, keys[i], NULL);
-            size_t key_len;
-            unsigned char *key = g_base64_decode(key_b64, &key_len);
-            g_free(key_b64);
-            signal_buffer *buffer = signal_buffer_create(key, key_len);
-            g_free(key);
-            g_hash_table_insert(omemo_ctx.identity_key_store.trusted, strdup(keys[i]), buffer);
-        }
-    }
-    g_strfreev(keys);
-
     loaded = TRUE;
 
     omemo_identity_keyfile_save();
+}
+
+static void
+_load_trust(void)
+{
+    char **keys = NULL;
+    char **groups = g_key_file_get_groups(omemo_ctx.trust_keyfile, NULL);
+    if (groups) {
+        int i;
+        for (i = 0; groups[i] != NULL; i++) {
+
+            keys = g_key_file_get_keys(omemo_ctx.trust_keyfile, groups[i], NULL, NULL);
+            int j;
+            for (j = 0; keys[j] != NULL; j++) {
+                char *key_b64 = g_key_file_get_string(omemo_ctx.trust_keyfile, groups[i], keys[j], NULL);
+                size_t key_len;
+                unsigned char *key = g_base64_decode(key_b64, &key_len);
+                g_free(key_b64);
+                signal_buffer *buffer = signal_buffer_create(key, key_len);
+                g_free(key);
+                uint32_t device_id = strtoul(keys[j], NULL, 10);
+                GHashTable *trusted = g_hash_table_lookup(omemo_ctx.identity_key_store.trusted, groups[i]);
+                if (!trusted) {
+                    trusted = g_hash_table_new_full(g_direct_hash, g_direct_equal, NULL, (GDestroyNotify)signal_buffer_free);
+                    g_hash_table_insert(omemo_ctx.identity_key_store.trusted, strdup(groups[i]), trusted);
+                }
+                g_hash_table_insert(trusted, GINT_TO_POINTER(device_id), buffer);
+            }
+            g_strfreev(keys);
+        }
+        g_strfreev(groups);
+    }
 }
 
 static void
@@ -1264,7 +1315,7 @@ _load_sessions(void)
             }
             g_strfreev(keys);
         }
-        free(groups);
+        g_strfreev(groups);
     }
 }
 
