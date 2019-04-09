@@ -910,6 +910,21 @@ omemo_known_device_identities(const char *const jid)
 }
 
 gboolean
+omemo_is_trusted_jid(const char *const jid)
+{
+    GHashTable *trusted = g_hash_table_lookup(omemo_ctx.identity_key_store.trusted, jid);
+    if (!trusted) {
+        return FALSE;
+    }
+
+    if (g_hash_table_size(trusted) > 0) {
+        return TRUE;
+    }
+
+    return FALSE;
+}
+
+gboolean
 omemo_is_trusted_identity(const char *const jid, const char *const fingerprint)
 {
     GHashTable *known_identities = g_hash_table_lookup(omemo_ctx.known_devices, jid);
@@ -1262,6 +1277,13 @@ _load_trust(void)
     if (groups) {
         int i;
         for (i = 0; groups[i] != NULL; i++) {
+            GHashTable *trusted;
+
+            trusted = g_hash_table_lookup(omemo_ctx.identity_key_store.trusted, groups[i]);
+            if (!trusted) {
+                trusted = g_hash_table_new_full(g_direct_hash, g_direct_equal, NULL, (GDestroyNotify)signal_buffer_free);
+                g_hash_table_insert(omemo_ctx.identity_key_store.trusted, strdup(groups[i]), trusted);
+            }
 
             keys = g_key_file_get_keys(omemo_ctx.trust_keyfile, groups[i], NULL, NULL);
             int j;
@@ -1273,11 +1295,6 @@ _load_trust(void)
                 signal_buffer *buffer = signal_buffer_create(key, key_len);
                 g_free(key);
                 uint32_t device_id = strtoul(keys[j], NULL, 10);
-                GHashTable *trusted = g_hash_table_lookup(omemo_ctx.identity_key_store.trusted, groups[i]);
-                if (!trusted) {
-                    trusted = g_hash_table_new_full(g_direct_hash, g_direct_equal, NULL, (GDestroyNotify)signal_buffer_free);
-                    g_hash_table_insert(omemo_ctx.identity_key_store.trusted, strdup(groups[i]), trusted);
-                }
                 g_hash_table_insert(trusted, GINT_TO_POINTER(device_id), buffer);
             }
             g_strfreev(keys);
@@ -1299,7 +1316,7 @@ _load_sessions(void)
             device_store = g_hash_table_lookup(omemo_ctx.session_store, groups[i]);
             if (!device_store) {
                 device_store = g_hash_table_new_full(g_direct_hash, g_direct_equal, NULL, (GDestroyNotify)signal_buffer_free);
-                g_hash_table_insert(omemo_ctx.session_store, groups[i], device_store);
+                g_hash_table_insert(omemo_ctx.session_store, strdup(groups[i]), device_store);
             }
 
             char **keys = g_key_file_get_keys(omemo_ctx.sessions_keyfile, groups[i], NULL, NULL);
