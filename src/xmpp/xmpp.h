@@ -35,6 +35,8 @@
 #ifndef XMPP_XMPP_H
 #define XMPP_XMPP_H
 
+#include <stdint.h>
+
 #include "config.h"
 
 #ifdef HAVE_LIBMESODE
