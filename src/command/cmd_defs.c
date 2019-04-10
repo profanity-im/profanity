@@ -2357,16 +2357,16 @@ static struct cmd_t command_defs[] =
             "/omemo char <char>",
             "/omemo clear_device_list")
         CMD_DESC(
-            "Omemo commands to manage keys, and perform encryption during chat sessions.")
+            "OMEMO commands to manage keys, and perform encryption during chat sessions.")
         CMD_ARGS(
-            { "gen",               "Generate OMEMO crytographic materials for current account." },
-            { "start [<contact>]", "Start an OMEMO session with contact, or current recipient if omitted." },
-            { "end",               "End the current OMEMO session," },
-            { "log on|off",        "Enable or disable plaintext logging of OMEMO encrypted messages." },
-            { "log redact",        "Log OMEMO encrypted messages, but replace the contents with [redacted]. This is the default." },
-            { "fingerprint",       "Show contact fingerprints." },
-            { "char <char>",       "Set the character to be displayed next to OMEMO encrypted messages." },
-            { "clear_device_list", "Clear your own device list on server side. Each client will reannounce itself when connected back."})
+            { "gen",                     "Generate OMEMO crytographic materials for current account." },
+            { "start [<contact>]",       "Start an OMEMO session with contact, or current recipient if omitted." },
+            { "end",                     "End the current OMEMO session." },
+            { "log on|off",              "Enable or disable plaintext logging of OMEMO encrypted messages." },
+            { "log redact",              "Log OMEMO encrypted messages, but replace the contents with [redacted]. This is the default." },
+            { "fingerprint [<contact>]", "Show contact fingerprints, or current recipient if omitted." },
+            { "char <char>",             "Set the character to be displayed next to OMEMO encrypted messages." },
+            { "clear_device_list",       "Clear your own device list on server side. Each client will reannounce itself when connected back."})
         CMD_EXAMPLES(
             "/omemo gen",
             "/omemo start buddy@buddychat.org",
