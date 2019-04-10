@@ -266,8 +266,9 @@ if test "x$enable_otr" != xno; then
             [AC_MSG_NOTICE([libotr not found, otr encryption support not enabled])])])
 fi
 
-AM_CONDITIONAL([BUILD_OMEMO], [true])
+AM_CONDITIONAL([BUILD_OMEMO], [false])
 if test "x$enable_omemo" != xno; then
+   AM_CONDITIONAL([BUILD_OMEMO], [true])
     PKG_CHECK_MODULES([libsignal], [libsignal-protocol-c >= 2.3.2],
         [LIBS="-lsignal-protocol-c $LIBS"],
         [AC_MSG_NOTICE([libsignal >= 2.3.2 not found, checking for libsignal 2.3.x...])
