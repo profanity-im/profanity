@@ -225,7 +225,11 @@ remove_pre_key(uint32_t pre_key_id, void *user_data)
 
     omemo_identity_keyfile_save();
 
-    return ret;
+    if (ret > 0) {
+        return SG_SUCCESS;
+    } else {
+        return SG_ERR_INVALID_KEY_ID;
+    }
 }
 
 int
