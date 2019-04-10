@@ -8051,6 +8051,25 @@ cmd_omemo_start(ProfWin *window, const char *const command, gchar **args)
 }
 
 gboolean
+cmd_omemo_char(ProfWin *window, const char *const command, gchar **args)
+{
+#ifdef HAVE_OMEMO
+    if (args[1] == NULL) {
+        cons_bad_cmd_usage(command);
+    } else if (strlen(args[1]) != 1) {
+        cons_bad_cmd_usage(command);
+    } else {
+        prefs_set_omemo_char(args[1][0]);
+        cons_show("OMEMO char set to %c.", args[1][0]);
+    }
+    return TRUE;
+#else
+    cons_show("This version of Profanity has not been built with OMEMO support enabled");
+    return TRUE;
+#endif
+}
+
+gboolean
 cmd_omemo_log(ProfWin *window, const char *const command, gchar **args)
 {
 #ifdef HAVE_OMEMO
