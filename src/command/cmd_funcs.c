@@ -8169,10 +8169,15 @@ cmd_omemo_fingerprint(ProfWin *window, const char *const command, gchar **args)
             return TRUE;
         }
     } else {
-        jid = jid_create(args[1]);
-        if (!jid) {
-            cons_show("%s is not a valid jid", args[1]);
-            return TRUE;
+        char *barejid = roster_barejid_from_name(args[1]);
+        if (barejid) {
+            jid = jid_create(barejid);
+        } else {
+            jid = jid_create(args[1]);
+            if (!jid) {
+                cons_show("%s is not a valid jid", args[1]);
+                return TRUE;
+            }
         }
     }
 
