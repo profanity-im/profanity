@@ -23,6 +23,7 @@
 #include "xmpp/connection.h"
 #include "xmpp/muc.h"
 #include "xmpp/omemo.h"
+#include "xmpp/roster_list.h"
 #include "xmpp/xmpp.h"
 
 static gboolean loaded;
@@ -304,6 +305,7 @@ omemo_generate_crypto_materials(ProfAccount *account)
     loaded = TRUE;
 
     omemo_publish_crypto_materials();
+    omemo_start_sessions();
 }
 
 void
@@ -324,6 +326,20 @@ omemo_publish_crypto_materials(void)
     omemo_bundle_publish(true);
 
     jid_destroy(jid);
+}
+
+void
+omemo_start_sessions(void)
+{
+    GSList *contacts = roster_get_contacts(ROSTER_ORD_NAME);
+    if (contacts) {
+        GSList *curr = contacts;
+        for (curr = contacts; curr != NULL; curr = g_slist_next(curr)){
+            PContact contact = curr->data;
+            const char *jid = p_contact_barejid(contact);
+            omemo_start_session(jid);
+        }
+    }
 }
 
 void
@@ -1267,6 +1283,7 @@ _load_identity(void)
     loaded = TRUE;
 
     omemo_identity_keyfile_save();
+    omemo_start_sessions();
 }
 
 static void
