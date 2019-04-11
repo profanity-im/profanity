@@ -478,9 +478,11 @@ _mucwin_print_triggers(ProfWin *window, const char *const message, GList *trigge
 }
 
 void
-mucwin_message(ProfMucWin *mucwin, const char *const nick, const char *const message, GSList *mentions, GList *triggers)
+mucwin_outgoing_msg(ProfMucWin *mucwin, const char *const message, const char *const id, prof_enc_t enc_mode)
 {
     assert(mucwin != NULL);
+
+    g_hash_table_insert(mucwin->sent_messages, strdup(id), NULL);
 
     ProfWin *window = (ProfWin*)mucwin;
     char *mynick = muc_nick(mucwin->roomjid);
@@ -488,19 +490,48 @@ mucwin_message(ProfMucWin *mucwin, const char *const nick, const char *const mes
     char ch = '-';
     if (mucwin->message_char) {
         ch = mucwin->message_char[0];
+    } else if (enc_mode == PROF_MSG_OTR) {
+        ch = prefs_get_otr_char();
+    } else if (enc_mode == PROF_MSG_PGP) {
+        ch = prefs_get_pgp_char();
+    } else if (enc_mode == PROF_MSG_OMEMO) {
+        ch = prefs_get_omemo_char();
     }
 
-    if (g_strcmp0(nick, mynick) != 0) {
-        if (g_slist_length(mentions) > 0) {
-            _mucwin_print_mention(window, message, nick, mynick, mentions, &ch);
-        } else if (triggers) {
-            win_print_them(window, THEME_ROOMTRIGGER, ch, nick);
-            _mucwin_print_triggers(window, message, triggers);
-        } else {
-            win_println_them_message(window, ch, nick, "%s", message);
-        }
+    win_println_me_message(window, ch, mynick, "%s", message);
+}
+
+void
+mucwin_incoming_msg(ProfMucWin *mucwin, const char *const nick, const char *const message, const char *const id, GSList *mentions, GList *triggers, prof_enc_t enc_mode)
+{
+    assert(mucwin != NULL);
+
+    if (g_hash_table_remove(mucwin->sent_messages, id)) {
+        /* Ignore reflection messages */
+        return;
+    }
+
+    ProfWin *window = (ProfWin*)mucwin;
+    char *mynick = muc_nick(mucwin->roomjid);
+
+    char ch = '-';
+    if (mucwin->message_char) {
+        ch = mucwin->message_char[0];
+    } else if (enc_mode == PROF_MSG_OTR) {
+        ch = prefs_get_otr_char();
+    } else if (enc_mode == PROF_MSG_PGP) {
+        ch = prefs_get_pgp_char();
+    } else if (enc_mode == PROF_MSG_OMEMO) {
+        ch = prefs_get_omemo_char();
+    }
+
+    if (g_slist_length(mentions) > 0) {
+        _mucwin_print_mention(window, message, nick, mynick, mentions, &ch);
+    } else if (triggers) {
+        win_print_them(window, THEME_ROOMTRIGGER, ch, nick);
+        _mucwin_print_triggers(window, message, triggers);
     } else {
-        win_println_me_message(window, ch, mynick, "%s", message);
+        win_println_them_message(window, ch, nick, "%s", message);
     }
 }
 

@@ -114,7 +114,10 @@ char* message_send_chat_pgp(const char * const barejid, const char * const msg, 
 }
 
 void message_send_private(const char * const fulljid, const char * const msg, const char *const oob_url) {}
-void message_send_groupchat(const char * const roomjid, const char * const msg, const char *const oob_url) {}
+char* message_send_groupchat(const char * const roomjid, const char * const msg, const char *const oob_url)
+{
+    return NULL;
+}
 void message_send_groupchat_subject(const char * const roomjid, const char * const subject) {}
 
 void message_send_inactive(const char * const barejid) {}

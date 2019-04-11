@@ -148,6 +148,7 @@ typedef enum {
     PREF_STATUSBAR_SELF,
     PREF_STATUSBAR_CHAT,
     PREF_STATUSBAR_ROOM,
+    PREF_OMEMO_LOG,
 } preference_t;
 
 typedef struct prof_alias_t {
@@ -216,6 +217,8 @@ char prefs_get_otr_char(void);
 void prefs_set_otr_char(char ch);
 char prefs_get_pgp_char(void);
 void prefs_set_pgp_char(char ch);
+char prefs_get_omemo_char(void);
+void prefs_set_omemo_char(char ch);
 
 char prefs_get_roster_header_char(void);
 void prefs_set_roster_header_char(char ch);

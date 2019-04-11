@@ -60,6 +60,8 @@ AC_ARG_ENABLE([otr],
     [AS_HELP_STRING([--enable-otr], [enable otr encryption])])
 AC_ARG_ENABLE([pgp],
     [AS_HELP_STRING([--enable-pgp], [enable pgp])])
+AC_ARG_ENABLE([omemo],
+    [AS_HELP_STRING([--enable-omemo], [enable OMEMO encryption])])
 AC_ARG_WITH([xscreensaver],
     [AS_HELP_STRING([--with-xscreensaver], [use libXScrnSaver to determine idle time])])
 AC_ARG_WITH([themes],
@@ -262,6 +264,30 @@ if test "x$enable_otr" != xno; then
         [AS_IF([test "x$enable_otr" = xyes],
             [AC_MSG_ERROR([libotr is required for otr encryption support])],
             [AC_MSG_NOTICE([libotr not found, otr encryption support not enabled])])])
+fi
+
+AM_CONDITIONAL([BUILD_OMEMO], [false])
+if test "x$enable_omemo" != xno; then
+   AM_CONDITIONAL([BUILD_OMEMO], [true])
+    PKG_CHECK_MODULES([libsignal], [libsignal-protocol-c >= 2.3.2],
+        [LIBS="-lsignal-protocol-c $LIBS"],
+        [AC_MSG_NOTICE([libsignal >= 2.3.2 not found, checking for libsignal 2.3.x...])
+         PKG_CHECK_MODULES([libsignal], [libsignal-protocol-c >= 2.3.0],
+            [LIBS="-lsignal-protocol-c $LIBS"
+             AC_DEFINE([HAVE_LIBSIGNAL_LT_2_3_2], [1], [Have libsignal-protocol-c < 2.3.2])],
+            [AM_CONDITIONAL([BUILD_OMEMO], [false])
+             AS_IF([test "x$enable_omemo" = xyes],
+                   [AC_MSG_ERROR([libsignal-protocol-c is required for OMEMO support])],
+                   [AC_MSG_NOTICE([libsignal-protocol-c not found, OMEMO support not enabled])])])])
+
+    AC_CHECK_LIB([gcrypt], [gcry_check_version],
+        [LIBS="-lgcrypt $LIBS"],
+        [AM_CONDITIONAL([BUILD_OMEMO], [false])
+         AS_IF([test "x$enable_omemo" = xyes],
+               [AC_MSG_ERROR([gcrypt is required for OMEMO support])],
+               [AC_MSG_NOTICE([gcrypt not found, OMEMO support not enabled])])])
+
+   AM_COND_IF([BUILD_OMEMO], [AC_DEFINE([HAVE_OMEMO], [1], [Have OMEMO])])
 fi
 
 AS_IF([test "x$with_themes" = xno],

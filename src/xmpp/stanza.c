@@ -396,6 +396,18 @@ stanza_attach_hints_no_store(xmpp_ctx_t *ctx, xmpp_stanza_t *stanza)
 }
 
 xmpp_stanza_t*
+stanza_attach_hints_store(xmpp_ctx_t *ctx, xmpp_stanza_t *stanza)
+{
+    xmpp_stanza_t *store = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(store, "store");
+    xmpp_stanza_set_ns(store, STANZA_NS_HINTS);
+    xmpp_stanza_add_child(stanza, store);
+    xmpp_stanza_release(store);
+
+    return stanza;
+}
+
+xmpp_stanza_t*
 stanza_attach_receipt_request(xmpp_ctx_t *ctx, xmpp_stanza_t *stanza)
 {
     xmpp_stanza_t *receipet_request = xmpp_stanza_new(ctx);
@@ -1821,6 +1833,45 @@ stanza_get_error_message(xmpp_stanza_t *stanza)
 }
 
 void
+stanza_attach_publish_options(xmpp_ctx_t *const ctx, xmpp_stanza_t *const iq, const char *const option, const char *const value)
+{
+    xmpp_stanza_t *publish_options = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(publish_options, STANZA_NAME_PUBLISH_OPTIONS);
+
+    xmpp_stanza_t *x = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(x, STANZA_NAME_X);
+    xmpp_stanza_set_ns(x, STANZA_NS_DATA);
+    xmpp_stanza_set_type(x, "submit");
+    xmpp_stanza_add_child(publish_options, x);
+
+    xmpp_stanza_t *form_type = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(form_type, STANZA_NAME_FIELD);
+    xmpp_stanza_set_attribute(form_type, STANZA_ATTR_VAR, "FORM_TYPE");
+    xmpp_stanza_set_type(form_type, "hidden");
+    xmpp_stanza_t *form_type_value = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(form_type_value, STANZA_NAME_VALUE);
+    xmpp_stanza_t *form_type_value_text = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_text(form_type_value_text, XMPP_FEATURE_PUBSUB_PUBLISH_OPTIONS);
+    xmpp_stanza_add_child(form_type_value, form_type_value_text);
+    xmpp_stanza_add_child(form_type, form_type_value);
+    xmpp_stanza_add_child(x, form_type);
+
+    xmpp_stanza_t *access_model = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(access_model, STANZA_NAME_FIELD);
+    xmpp_stanza_set_attribute(access_model, STANZA_ATTR_VAR, option);
+    xmpp_stanza_t *access_model_value = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(access_model_value, STANZA_NAME_VALUE);
+    xmpp_stanza_t *access_model_value_text = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_text(access_model_value_text, value);
+    xmpp_stanza_add_child(access_model_value, access_model_value_text);
+    xmpp_stanza_add_child(access_model, access_model_value);
+    xmpp_stanza_add_child(x, access_model);
+
+    xmpp_stanza_t *pubsub = xmpp_stanza_get_child_by_ns(iq, STANZA_NS_PUBSUB);
+    xmpp_stanza_add_child(pubsub, publish_options);
+}
+
+void
 stanza_attach_priority(xmpp_ctx_t *const ctx, xmpp_stanza_t *const presence, const int pri)
 {
     if (pri == 0) {
@@ -2090,6 +2141,295 @@ stanza_create_command_config_submit_iq(xmpp_ctx_t *ctx, const char *const room,
     xmpp_stanza_release(command);
 
     return iq;
+}
+
+xmpp_stanza_t*
+stanza_create_omemo_devicelist_request(xmpp_ctx_t *ctx, const char *const id,
+    const char *const jid)
+{
+    xmpp_stanza_t *iq = xmpp_iq_new(ctx, STANZA_TYPE_GET, id);
+    xmpp_stanza_set_to(iq, jid);
+
+    xmpp_stanza_t *pubsub = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(pubsub, STANZA_NAME_PUBSUB);
+    xmpp_stanza_set_ns(pubsub, STANZA_NS_PUBSUB);
+
+    xmpp_stanza_t *items = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(items, "items");
+    xmpp_stanza_set_attribute(items, STANZA_ATTR_NODE, STANZA_NS_OMEMO_DEVICELIST);
+
+    xmpp_stanza_add_child(pubsub, items);
+    xmpp_stanza_add_child(iq, pubsub);
+
+    xmpp_stanza_release(items);
+    xmpp_stanza_release(pubsub);
+
+    return iq;
+}
+
+xmpp_stanza_t*
+stanza_create_omemo_devicelist_subscribe(xmpp_ctx_t *ctx, const char *const jid)
+{
+    char *id = connection_create_stanza_id("omemo_devicelist_subscribe");
+    xmpp_stanza_t *iq = xmpp_iq_new(ctx, STANZA_TYPE_SET, id);
+    free(id);
+
+    xmpp_stanza_t *pubsub = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(pubsub, STANZA_NAME_PUBSUB);
+    xmpp_stanza_set_ns(pubsub, STANZA_NS_PUBSUB);
+
+    xmpp_stanza_t *subscribe = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(subscribe, STANZA_NAME_SUBSCRIBE);
+    xmpp_stanza_set_attribute(subscribe, STANZA_ATTR_NODE, STANZA_NS_OMEMO_DEVICELIST);
+    xmpp_stanza_set_attribute(subscribe, "jid", jid);
+
+    xmpp_stanza_add_child(pubsub, subscribe);
+    xmpp_stanza_add_child(iq, pubsub);
+
+    xmpp_stanza_release(subscribe);
+    xmpp_stanza_release(pubsub);
+
+    return iq;
+}
+
+xmpp_stanza_t*
+stanza_create_omemo_devicelist_publish(xmpp_ctx_t *ctx, GList *const ids)
+{
+    char *id = connection_create_stanza_id("omemo_devicelist_publish");
+    xmpp_stanza_t *iq = xmpp_iq_new(ctx, STANZA_TYPE_SET, id);
+    free(id);
+
+    xmpp_stanza_t *pubsub = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(pubsub, STANZA_NAME_PUBSUB);
+    xmpp_stanza_set_ns(pubsub, STANZA_NS_PUBSUB);
+
+    xmpp_stanza_t *publish = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(publish, STANZA_NAME_PUBLISH);
+    xmpp_stanza_set_attribute(publish, STANZA_ATTR_NODE, STANZA_NS_OMEMO_DEVICELIST);
+
+    xmpp_stanza_t *item = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(item, STANZA_NAME_ITEM);
+    xmpp_stanza_set_attribute(item, "id", "current");
+
+    xmpp_stanza_t *list = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(list, "list");
+    xmpp_stanza_set_ns(list, "eu.siacs.conversations.axolotl");
+
+    GList *i;
+    for (i = ids; i != NULL; i = i->next) {
+        xmpp_stanza_t *device = xmpp_stanza_new(ctx);
+        xmpp_stanza_set_name(device, "device");
+        char *id = g_strdup_printf("%d", GPOINTER_TO_INT(i->data));
+        xmpp_stanza_set_attribute(device, "id", id);
+        g_free(id);
+
+        xmpp_stanza_add_child(list, device);
+        xmpp_stanza_release(device);
+    }
+
+    xmpp_stanza_add_child(item, list);
+    xmpp_stanza_add_child(publish, item);
+    xmpp_stanza_add_child(pubsub, publish);
+    xmpp_stanza_add_child(iq, pubsub);
+
+    xmpp_stanza_release(list);
+    xmpp_stanza_release(item);
+    xmpp_stanza_release(publish);
+    xmpp_stanza_release(pubsub);
+
+    return iq;
+}
+
+xmpp_stanza_t*
+stanza_create_omemo_bundle_publish(xmpp_ctx_t *ctx, const char *const id,
+    uint32_t device_id,
+    const unsigned char * const identity_key, size_t identity_key_length,
+    const unsigned char * const signed_prekey, size_t signed_prekey_length,
+    const unsigned char * const signed_prekey_signature, size_t signed_prekey_signature_length,
+    GList *const prekeys, GList *const prekeys_id, GList *const prekeys_length)
+{
+    xmpp_stanza_t *iq = xmpp_iq_new(ctx, STANZA_TYPE_SET, id);
+
+    xmpp_stanza_t *pubsub = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(pubsub, STANZA_NAME_PUBSUB);
+    xmpp_stanza_set_ns(pubsub, STANZA_NS_PUBSUB);
+
+    xmpp_stanza_t *publish = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(publish, STANZA_NAME_PUBLISH);
+    char *node = g_strdup_printf("%s:%d", "eu.siacs.conversations.axolotl.bundles", device_id);
+    xmpp_stanza_set_attribute(publish, STANZA_ATTR_NODE, node);
+    g_free(node);
+
+    xmpp_stanza_t *item = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(item, STANZA_NAME_ITEM);
+    xmpp_stanza_set_attribute(item, "id", "current");
+
+    xmpp_stanza_t *bundle = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(bundle, "bundle");
+    xmpp_stanza_set_ns(bundle, "eu.siacs.conversations.axolotl");
+
+    xmpp_stanza_t *signed_prekey_public_stanza = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(signed_prekey_public_stanza , "signedPreKeyPublic");
+    xmpp_stanza_set_attribute(signed_prekey_public_stanza, "signedPreKeyId", "1");
+
+    xmpp_stanza_t *signed_prekey_public_stanza_text= xmpp_stanza_new(ctx);
+    char *signed_prekey_b64 = g_base64_encode(signed_prekey, signed_prekey_length);
+    xmpp_stanza_set_text(signed_prekey_public_stanza_text, signed_prekey_b64);
+    g_free(signed_prekey_b64);
+    xmpp_stanza_add_child(signed_prekey_public_stanza, signed_prekey_public_stanza_text);
+    xmpp_stanza_release(signed_prekey_public_stanza_text);
+
+    xmpp_stanza_t *signed_prekey_signature_stanza = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(signed_prekey_signature_stanza , "signedPreKeySignature");
+
+    xmpp_stanza_t *signed_prekey_signature_stanza_text= xmpp_stanza_new(ctx);
+    char *signed_prekey_signature_b64 = g_base64_encode(signed_prekey_signature, signed_prekey_signature_length);
+    xmpp_stanza_set_text(signed_prekey_signature_stanza_text, signed_prekey_signature_b64);
+    g_free(signed_prekey_signature_b64);
+    xmpp_stanza_add_child(signed_prekey_signature_stanza, signed_prekey_signature_stanza_text);
+    xmpp_stanza_release(signed_prekey_signature_stanza_text);
+
+    xmpp_stanza_t *identity_key_stanza = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(identity_key_stanza , "identityKey");
+
+    xmpp_stanza_t *identity_key_stanza_text= xmpp_stanza_new(ctx);
+    char *identity_key_b64 = g_base64_encode(identity_key, identity_key_length);
+    xmpp_stanza_set_text(identity_key_stanza_text, identity_key_b64);
+    g_free(identity_key_b64);
+    xmpp_stanza_add_child(identity_key_stanza, identity_key_stanza_text);
+    xmpp_stanza_release(identity_key_stanza_text);
+
+    xmpp_stanza_t *prekeys_stanza = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(prekeys_stanza, "prekeys");
+
+    GList *p, *i, *l;
+    for (p = prekeys, i = prekeys_id, l = prekeys_length; p != NULL; p = p->next, i = i->next, l = l->next) {
+        xmpp_stanza_t *prekey = xmpp_stanza_new(ctx);
+        xmpp_stanza_set_name(prekey, "preKeyPublic");
+        char *id = g_strdup_printf("%d", GPOINTER_TO_INT(i->data));
+        xmpp_stanza_set_attribute(prekey, "preKeyId", id);
+        g_free(id);
+
+        xmpp_stanza_t *prekey_text = xmpp_stanza_new(ctx);
+        char *prekey_b64 = g_base64_encode(p->data, GPOINTER_TO_INT(l->data));
+        xmpp_stanza_set_text(prekey_text, prekey_b64);
+        g_free(prekey_b64);
+
+        xmpp_stanza_add_child(prekey, prekey_text);
+        xmpp_stanza_add_child(prekeys_stanza, prekey);
+        xmpp_stanza_release(prekey_text);
+        xmpp_stanza_release(prekey);
+    }
+
+    xmpp_stanza_add_child(bundle, signed_prekey_public_stanza);
+    xmpp_stanza_add_child(bundle, signed_prekey_signature_stanza);
+    xmpp_stanza_add_child(bundle, identity_key_stanza);
+    xmpp_stanza_add_child(bundle, prekeys_stanza);
+    xmpp_stanza_add_child(item, bundle);
+    xmpp_stanza_add_child(publish, item);
+    xmpp_stanza_add_child(pubsub, publish);
+    xmpp_stanza_add_child(iq, pubsub);
+
+    xmpp_stanza_release(signed_prekey_public_stanza);
+    xmpp_stanza_release(signed_prekey_signature_stanza);
+    xmpp_stanza_release(identity_key_stanza);
+    xmpp_stanza_release(prekeys_stanza);
+    xmpp_stanza_release(bundle);
+    xmpp_stanza_release(item);
+    xmpp_stanza_release(publish);
+    xmpp_stanza_release(pubsub);
+
+    return iq;
+}
+
+xmpp_stanza_t*
+stanza_create_omemo_bundle_request(xmpp_ctx_t *ctx, const char *const id, const char *const jid, uint32_t device_id)
+{
+    xmpp_stanza_t *iq = xmpp_iq_new(ctx, STANZA_TYPE_GET, id);
+    xmpp_stanza_set_to(iq, jid);
+
+    xmpp_stanza_t *pubsub = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(pubsub, STANZA_NAME_PUBSUB);
+    xmpp_stanza_set_ns(pubsub, STANZA_NS_PUBSUB);
+
+    xmpp_stanza_t *items = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(items, "items");
+    char *node = g_strdup_printf("%s:%d", STANZA_NS_OMEMO_BUNDLES, device_id);
+    xmpp_stanza_set_attribute(items, STANZA_ATTR_NODE, node);
+    g_free(node);
+
+    xmpp_stanza_add_child(pubsub, items);
+    xmpp_stanza_add_child(iq, pubsub);
+
+    xmpp_stanza_release(items);
+    xmpp_stanza_release(pubsub);
+
+    return iq;
+}
+
+xmpp_stanza_t*
+stanza_create_pubsub_configure_request(xmpp_ctx_t *ctx, const char *const id, const char *const jid, const char *const node)
+{
+    xmpp_stanza_t *iq = xmpp_iq_new(ctx, STANZA_TYPE_GET, id);
+    xmpp_stanza_set_to(iq, jid);
+
+    xmpp_stanza_t *pubsub = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(pubsub, STANZA_NAME_PUBSUB);
+    xmpp_stanza_set_ns(pubsub, STANZA_NS_PUBSUB_OWNER);
+
+    xmpp_stanza_t *configure = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(configure, STANZA_NAME_CONFIGURE);
+    xmpp_stanza_set_attribute(configure, STANZA_ATTR_NODE, node);
+
+    xmpp_stanza_add_child(pubsub, configure);
+    xmpp_stanza_add_child(iq, pubsub);
+
+    xmpp_stanza_release(configure);
+    xmpp_stanza_release(pubsub);
+
+    return iq;
+}
+
+xmpp_stanza_t*
+stanza_create_pubsub_configure_submit(xmpp_ctx_t *ctx, const char *const id, const char *const jid, const char *const node, DataForm *form)
+{
+    xmpp_stanza_t *iq = xmpp_iq_new(ctx, STANZA_TYPE_SET, id);
+    xmpp_stanza_set_to(iq, jid);
+
+    xmpp_stanza_t *pubsub = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(pubsub, STANZA_NAME_PUBSUB);
+    xmpp_stanza_set_ns(pubsub, STANZA_NS_PUBSUB_OWNER);
+
+    xmpp_stanza_t *configure = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(configure, STANZA_NAME_CONFIGURE);
+    xmpp_stanza_set_attribute(configure, STANZA_ATTR_NODE, node);
+
+    xmpp_stanza_t *x = form_create_submission(form);
+
+    xmpp_stanza_add_child(configure, x);
+    xmpp_stanza_add_child(pubsub, configure);
+    xmpp_stanza_add_child(iq, pubsub);
+
+    xmpp_stanza_release(x);
+    xmpp_stanza_release(configure);
+    xmpp_stanza_release(pubsub);
+
+    return iq;
+}
+
+xmpp_stanza_t*
+stanza_attach_origin_id(xmpp_ctx_t *ctx, xmpp_stanza_t *stanza, const char *const id)
+{
+    xmpp_stanza_t *origin_id = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(origin_id, STANZA_NAME_ORIGIN_ID);
+    xmpp_stanza_set_ns(origin_id, STANZA_NS_STABLE_ID);
+    xmpp_stanza_set_attribute(origin_id, STANZA_ATTR_ID, id);
+
+    xmpp_stanza_add_child(stanza, origin_id);
+
+    xmpp_stanza_release(origin_id);
+
+    return stanza;
 }
 
 static void

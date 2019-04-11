@@ -56,7 +56,8 @@
 typedef enum {
     PROF_MSG_PLAIN,
     PROF_MSG_OTR,
-    PROF_MSG_PGP
+    PROF_MSG_PGP,
+    PROF_MSG_OMEMO
 } prof_enc_t;
 
 // core UI
@@ -161,7 +162,8 @@ void mucwin_occupant_role_and_affiliation_change(ProfMucWin *mucwin, const char 
     const char *const role, const char *const affiliation, const char *const actor, const char *const reason);
 void mucwin_roster(ProfMucWin *mucwin, GList *occupants, const char *const presence);
 void mucwin_history(ProfMucWin *mucwin, const char *const nick, GDateTime *timestamp, const char *const message);
-void mucwin_message(ProfMucWin *mucwin, const char *const nick, const char *const message, GSList *mentions, GList *triggers);
+void mucwin_outgoing_msg(ProfMucWin *mucwin, const char *const message, const char *const id, prof_enc_t enc_mode);
+void mucwin_incoming_msg(ProfMucWin *mucwin, const char *const nick, const char *const message, const char *const id, GSList *mentions, GList *triggers, prof_enc_t enc_mode);
 void mucwin_subject(ProfMucWin *mucwin, const char *const nick, const char *const subject);
 void mucwin_requires_config(ProfMucWin *mucwin);
 void mucwin_info(ProfMucWin *mucwin);
@@ -250,6 +252,7 @@ void cons_show_presence_prefs(void);
 void cons_show_connection_prefs(void);
 void cons_show_otr_prefs(void);
 void cons_show_pgp_prefs(void);
+void cons_show_omemo_prefs(void);
 void cons_show_account(ProfAccount *account);
 void cons_debug(const char *const msg, ...);
 void cons_show_error(const char *const cmd, ...);

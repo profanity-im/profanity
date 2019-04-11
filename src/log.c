@@ -48,6 +48,7 @@
 #include "config/files.h"
 #include "config/preferences.h"
 #include "xmpp/xmpp.h"
+#include "xmpp/muc.h"
 
 #define PROF "prof"
 
@@ -89,6 +90,8 @@ static void _rotate_log_file(void);
 static char* _log_string_from_level(log_level_t level);
 static void _chat_log_chat(const char *const login, const char *const other, const gchar *const msg,
     chat_log_direction_t direction, GDateTime *timestamp);
+static void _groupchat_log_chat(const gchar *const login, const gchar *const room, const gchar *const nick,
+    const gchar *const msg);
 
 void
 log_debug(const char *const msg, ...)
@@ -305,6 +308,23 @@ chat_log_pgp_msg_out(const char *const barejid, const char *const msg)
 }
 
 void
+chat_log_omemo_msg_out(const char *const barejid, const char *const msg)
+{
+    if (prefs_get_boolean(PREF_CHLOG)) {
+        const char *jid = connection_get_fulljid();
+        Jid *jidp = jid_create(jid);
+        char *pref_omemo_log = prefs_get_string(PREF_OMEMO_LOG);
+        if (strcmp(pref_omemo_log, "on") == 0) {
+            _chat_log_chat(jidp->barejid, barejid, msg, PROF_OUT_LOG, NULL);
+        } else if (strcmp(pref_omemo_log, "redact") == 0) {
+            _chat_log_chat(jidp->barejid, barejid, "[redacted]", PROF_OUT_LOG, NULL);
+        }
+        prefs_free_string(pref_omemo_log);
+        jid_destroy(jidp);
+    }
+}
+
+void
 chat_log_otr_msg_in(const char *const barejid, const char *const msg, gboolean was_decrypted, GDateTime *timestamp)
 {
     if (prefs_get_boolean(PREF_CHLOG)) {
@@ -334,6 +354,23 @@ chat_log_pgp_msg_in(const char *const barejid, const char *const msg, GDateTime 
             _chat_log_chat(jidp->barejid, barejid, "[redacted]", PROF_IN_LOG, timestamp);
         }
         prefs_free_string(pref_pgp_log);
+        jid_destroy(jidp);
+    }
+}
+
+void
+chat_log_omemo_msg_in(const char *const barejid, const char *const msg, GDateTime *timestamp)
+{
+    if (prefs_get_boolean(PREF_CHLOG)) {
+        const char *jid = connection_get_fulljid();
+        Jid *jidp = jid_create(jid);
+        char *pref_omemo_log = prefs_get_string(PREF_OMEMO_LOG);
+        if (strcmp(pref_omemo_log, "on") == 0) {
+            _chat_log_chat(jidp->barejid, barejid, msg, PROF_IN_LOG, timestamp);
+        } else if (strcmp(pref_omemo_log, "redact") == 0) {
+            _chat_log_chat(jidp->barejid, barejid, "[redacted]", PROF_IN_LOG, timestamp);
+        }
+        prefs_free_string(pref_omemo_log);
         jid_destroy(jidp);
     }
 }
@@ -406,7 +443,66 @@ _chat_log_chat(const char *const login, const char *const other, const char *con
 }
 
 void
-groupchat_log_chat(const gchar *const login, const gchar *const room, const gchar *const nick, const gchar *const msg)
+groupchat_log_msg_out(const gchar *const room, const gchar *const msg)
+{
+    if (prefs_get_boolean(PREF_GRLOG)) {
+        const char *jid = connection_get_fulljid();
+        Jid *jidp = jid_create(jid);
+        char *mynick = muc_nick(room);
+        _groupchat_log_chat(jidp->barejid, room, mynick, msg);
+        jid_destroy(jidp);
+    }
+}
+
+void
+groupchat_log_msg_in(const gchar *const room, const gchar *const nick, const gchar *const msg)
+{
+    if (prefs_get_boolean(PREF_GRLOG)) {
+        const char *jid = connection_get_fulljid();
+        Jid *jidp = jid_create(jid);
+        _groupchat_log_chat(jidp->barejid, room, nick, msg);
+        jid_destroy(jidp);
+    }
+}
+
+void
+groupchat_log_omemo_msg_out(const gchar *const room, const gchar *const msg)
+{
+    if (prefs_get_boolean(PREF_CHLOG)) {
+        const char *jid = connection_get_fulljid();
+        Jid *jidp = jid_create(jid);
+        char *pref_omemo_log = prefs_get_string(PREF_OMEMO_LOG);
+        char *mynick = muc_nick(room);
+        if (strcmp(pref_omemo_log, "on") == 0) {
+            _groupchat_log_chat(jidp->barejid, room, mynick, msg);
+        } else if (strcmp(pref_omemo_log, "redact") == 0) {
+            _groupchat_log_chat(jidp->barejid, room, mynick, "[redacted]");
+        }
+        prefs_free_string(pref_omemo_log);
+        jid_destroy(jidp);
+    }
+}
+
+void
+groupchat_log_omemo_msg_in(const gchar *const room, const gchar *const nick, const gchar *const msg)
+{
+    if (prefs_get_boolean(PREF_CHLOG)) {
+        const char *jid = connection_get_fulljid();
+        Jid *jidp = jid_create(jid);
+        char *pref_omemo_log = prefs_get_string(PREF_OMEMO_LOG);
+        if (strcmp(pref_omemo_log, "on") == 0) {
+            _groupchat_log_chat(jidp->barejid, room, nick, msg);
+        } else if (strcmp(pref_omemo_log, "redact") == 0) {
+            _groupchat_log_chat(jidp->barejid, room, nick, "[redacted]");
+        }
+        prefs_free_string(pref_omemo_log);
+        jid_destroy(jidp);
+    }
+}
+
+void
+_groupchat_log_chat(const gchar *const login, const gchar *const room, const gchar *const nick,
+    const gchar *const msg)
 {
     struct dated_chat_log *dated_log = g_hash_table_lookup(groupchat_logs, room);
 

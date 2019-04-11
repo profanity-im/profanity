@@ -137,7 +137,7 @@ roster_send_add_to_group(const char *const group, PContact contact)
     }
 
     xmpp_ctx_t * const ctx = connection_get_ctx();
-    iq_id_handler_add(unique_id, _group_add_id_handler, (ProfIdFreeCallback)_free_group_data, data);
+    iq_id_handler_add(unique_id, _group_add_id_handler, (ProfIqFreeCallback)_free_group_data, data);
     xmpp_stanza_t *iq = stanza_create_roster_set(ctx, unique_id, p_contact_barejid(contact),
         p_contact_name(contact), new_groups);
     iq_send_stanza(iq);
@@ -180,7 +180,7 @@ roster_send_remove_from_group(const char *const group, PContact contact)
         data->name = strdup(p_contact_barejid(contact));
     }
 
-    iq_id_handler_add(unique_id, _group_remove_id_handler, (ProfIdFreeCallback)_free_group_data, data);
+    iq_id_handler_add(unique_id, _group_remove_id_handler, (ProfIqFreeCallback)_free_group_data, data);
     xmpp_stanza_t *iq = stanza_create_roster_set(ctx, unique_id, p_contact_barejid(contact),
         p_contact_name(contact), new_groups);
     iq_send_stanza(iq);

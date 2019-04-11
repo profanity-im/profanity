@@ -50,6 +50,7 @@
 #define DIR_CHATLOGS "chatlogs"
 #define DIR_OTR "otr"
 #define DIR_PGP "pgp"
+#define DIR_OMEMO "omemo"
 #define DIR_PLUGINS "plugins"
 
 void files_create_directories(void);

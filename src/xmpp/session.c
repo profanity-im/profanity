@@ -60,6 +60,11 @@
 #include "xmpp/chat_session.h"
 #include "xmpp/jid.h"
 
+#ifdef HAVE_OMEMO
+#include "omemo/omemo.h"
+#include "xmpp/omemo.h"
+#endif
+
 // for auto reconnect
 static struct {
     char *name;
@@ -286,6 +291,12 @@ session_get_account_name(void)
 void
 session_login_success(gboolean secured)
 {
+    chat_sessions_init();
+
+    message_handlers_init();
+    presence_handlers_init();
+    iq_handlers_init();
+
     // logged in with account
     if (saved_account.name) {
         log_debug("Connection handler: logged in with account name: %s", saved_account.name);
@@ -297,26 +308,20 @@ session_login_success(gboolean secured)
         accounts_add(saved_details.name, saved_details.altdomain, saved_details.port, saved_details.tls_policy);
         accounts_set_jid(saved_details.name, saved_details.jid);
 
-        sv_ev_login_account_success(saved_details.name, secured);
         saved_account.name = strdup(saved_details.name);
         saved_account.passwd = strdup(saved_details.passwd);
 
         _session_free_saved_details();
+        sv_ev_login_account_success(saved_account.name, secured);
     }
-
-    chat_sessions_init();
-
-    message_handlers_init();
-    presence_handlers_init();
-    iq_handlers_init();
 
     roster_request();
     bookmark_request();
     blocking_request();
 
     // items discovery
+    connection_request_features();
     char *domain = connection_get_domain();
-    iq_disco_info_request_onconnect(domain);
     iq_disco_items_request_onconnect(domain);
 
     if (prefs_get_boolean(PREF_CARBONS)){

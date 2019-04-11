@@ -82,6 +82,7 @@
 #define STANZA_NAME_PUBSUB "pubsub"
 #define STANZA_NAME_PUBLISH "publish"
 #define STANZA_NAME_PUBLISH_OPTIONS "publish-options"
+#define STANZA_NAME_SUBSCRIBE "subscribe"
 #define STANZA_NAME_FIELD "field"
 #define STANZA_NAME_STORAGE "storage"
 #define STANZA_NAME_NICK "nick"
@@ -100,6 +101,8 @@
 #define STANZA_NAME_GET "get"
 #define STANZA_NAME_URL "url"
 #define STANZA_NAME_COMMAND "command"
+#define STANZA_NAME_CONFIGURE "configure"
+#define STANZA_NAME_ORIGIN_ID "origin-id"
 
 // error conditions
 #define STANZA_NAME_BAD_REQUEST "bad-request"
@@ -179,6 +182,8 @@
 #define STANZA_NS_CONFERENCE "jabber:x:conference"
 #define STANZA_NS_CAPTCHA "urn:xmpp:captcha"
 #define STANZA_NS_PUBSUB "http://jabber.org/protocol/pubsub"
+#define STANZA_NS_PUBSUB_OWNER "http://jabber.org/protocol/pubsub#owner"
+#define STANZA_NS_PUBSUB_EVENT "http://jabber.org/protocol/pubsub#event"
 #define STANZA_NS_CARBONS "urn:xmpp:carbons:2"
 #define STANZA_NS_HINTS "urn:xmpp:hints"
 #define STANZA_NS_FORWARD "urn:xmpp:forward:0"
@@ -189,6 +194,10 @@
 #define STANZA_NS_X_OOB "jabber:x:oob"
 #define STANZA_NS_BLOCKING "urn:xmpp:blocking"
 #define STANZA_NS_COMMAND "http://jabber.org/protocol/commands"
+#define STANZA_NS_OMEMO "eu.siacs.conversations.axolotl"
+#define STANZA_NS_OMEMO_DEVICELIST "eu.siacs.conversations.axolotl.devicelist"
+#define STANZA_NS_OMEMO_BUNDLES "eu.siacs.conversations.axolotl.bundles"
+#define STANZA_NS_STABLE_ID "urn:xmpp:sid:0"
 
 #define STANZA_DATAFORM_SOFTWARE "urn:xmpp:dataforms:softwareinfo"
 
@@ -228,8 +237,10 @@ xmpp_stanza_t* stanza_attach_state(xmpp_ctx_t *ctx, xmpp_stanza_t *stanza, const
 xmpp_stanza_t* stanza_attach_carbons_private(xmpp_ctx_t *ctx, xmpp_stanza_t *stanza);
 xmpp_stanza_t* stanza_attach_hints_no_copy(xmpp_ctx_t *ctx, xmpp_stanza_t *stanza);
 xmpp_stanza_t* stanza_attach_hints_no_store(xmpp_ctx_t *ctx, xmpp_stanza_t *stanza);
+xmpp_stanza_t* stanza_attach_hints_store(xmpp_ctx_t *ctx, xmpp_stanza_t *stanza);
 xmpp_stanza_t* stanza_attach_receipt_request(xmpp_ctx_t *ctx, xmpp_stanza_t *stanza);
 xmpp_stanza_t* stanza_attach_x_oob_url(xmpp_ctx_t *ctx, xmpp_stanza_t *stanza, const char *const url);
+xmpp_stanza_t* stanza_attach_origin_id(xmpp_ctx_t *ctx, xmpp_stanza_t *stanza, const char *const id);
 
 xmpp_stanza_t* stanza_create_room_join_presence(xmpp_ctx_t *const ctx,
     const char *const full_room_jid, const char *const passwd);
@@ -283,6 +294,17 @@ xmpp_stanza_t* stanza_create_room_kick_iq(xmpp_ctx_t *const ctx, const char *con
 
 xmpp_stanza_t* stanza_create_command_exec_iq(xmpp_ctx_t *ctx, const char *const target, const char *const node);
 xmpp_stanza_t* stanza_create_command_config_submit_iq(xmpp_ctx_t *ctx, const char *const room, const char *const node, const char *const sessionid, DataForm *form);
+
+void stanza_attach_publish_options(xmpp_ctx_t *const ctx, xmpp_stanza_t *const publish, const char *const option, const char *const value);
+
+xmpp_stanza_t* stanza_create_omemo_devicelist_request(xmpp_ctx_t *ctx, const char *const id, const char *const jid);
+xmpp_stanza_t* stanza_create_omemo_devicelist_subscribe(xmpp_ctx_t *ctx, const char *const jid);
+xmpp_stanza_t* stanza_create_omemo_devicelist_publish(xmpp_ctx_t *ctx, GList *const ids);
+xmpp_stanza_t* stanza_create_omemo_bundle_publish(xmpp_ctx_t *ctx, const char *const id, uint32_t device_id, const unsigned char * const identity_key, size_t identity_key_length, const unsigned char * const signed_prekey, size_t signed_prekey_length, const unsigned char * const signed_prekey_signature, size_t signed_prekey_signature_length, GList *const prekeys, GList *const prekeys_id, GList *const prekeys_length);
+xmpp_stanza_t* stanza_create_omemo_bundle_request(xmpp_ctx_t *ctx, const char *const id, const char *const jid, uint32_t device_id);
+
+xmpp_stanza_t* stanza_create_pubsub_configure_request(xmpp_ctx_t *ctx, const char *const id, const char *const jid, const char *const node);
+xmpp_stanza_t* stanza_create_pubsub_configure_submit(xmpp_ctx_t *ctx, const char *const id, const char *const jid, const char *const node, DataForm *form);
 
 int stanza_get_idle_time(xmpp_stanza_t *const stanza);
 

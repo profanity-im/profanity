@@ -143,6 +143,7 @@ win_create_chat(const char *const barejid)
     new_win->otr_is_trusted = FALSE;
     new_win->pgp_recv = FALSE;
     new_win->pgp_send = FALSE;
+    new_win->is_omemo = FALSE;
     new_win->history_shown = FALSE;
     new_win->unread = 0;
     new_win->state = chat_state_new();
@@ -196,6 +197,8 @@ win_create_muc(const char *const roomjid)
     }
     new_win->enctext = NULL;
     new_win->message_char = NULL;
+    new_win->is_omemo = FALSE;
+    new_win->sent_messages = g_hash_table_new_full(g_str_hash, g_str_equal, free, NULL);
 
     new_win->memcheck = PROFMUCWIN_MEMCHECK;
 
@@ -1057,6 +1060,8 @@ win_print_incoming(ProfWin *window, GDateTime *timestamp,
                 enc_char = prefs_get_otr_char();
             } else if (enc_mode == PROF_MSG_PGP) {
                 enc_char = prefs_get_pgp_char();
+            } else if (enc_mode == PROF_MSG_OMEMO) {
+                enc_char = prefs_get_omemo_char();
             }
             _win_printf(window, enc_char, 0, timestamp, NO_ME, THEME_TEXT_THEM, from, "%s", message);
             break;

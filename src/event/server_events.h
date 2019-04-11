@@ -46,10 +46,10 @@ void sv_ev_room_invite(jabber_invite_t invite_type,
 void sv_ev_room_broadcast(const char *const room_jid, const char *const message);
 void sv_ev_room_subject(const char *const room, const char *const nick, const char *const subject);
 void sv_ev_room_history(const char *const room_jid, const char *const nick,
-    GDateTime *timestamp, const char *const message);
+    GDateTime *timestamp, const char *const message, gboolean omemo);
 void sv_ev_room_message(const char *const room_jid, const char *const nick,
-    const char *const message);
-void sv_ev_incoming_message(char *barejid, char *resource, char *message, char *pgp_message, GDateTime *timestamp);
+    const char *const message, const char *const id, gboolean omemo);
+void sv_ev_incoming_message(char *barejid, char *resource, char *message, char *pgp_message, GDateTime *timestamp, gboolean omemo);
 void sv_ev_incoming_private_message(const char *const fulljid, char *message);
 void sv_ev_delayed_private_message(const char *const fulljid, char *message, GDateTime *timestamp);
 void sv_ev_typing(char *barejid, char *resource);
@@ -73,8 +73,8 @@ void sv_ev_room_occupent_kicked(const char *const room, const char *const nick, 
 void sv_ev_room_banned(const char *const room, const char *const actor, const char *const reason);
 void sv_ev_room_occupent_banned(const char *const room, const char *const nick, const char *const actor,
     const char *const reason);
-void sv_ev_outgoing_carbon(char *barejid, char *message, char *pgp_message);
-void sv_ev_incoming_carbon(char *barejid, char *resource, char *message, char *pgp_message);
+void sv_ev_outgoing_carbon(char *barejid, char *message, char *pgp_message, gboolean omemo);
+void sv_ev_incoming_carbon(char *barejid, char *resource, char *message, char *pgp_message, gboolean omemo);
 void sv_ev_xmpp_stanza(const char *const msg);
 void sv_ev_muc_self_online(const char *const room, const char *const nick, gboolean config_required,
     const char *const role, const char *const affiliation, const char *const actor, const char *const reason,
@@ -85,6 +85,7 @@ void sv_ev_muc_occupant_online(const char *const room, const char *const nick, c
 void sv_ev_roster_update(const char *const barejid, const char *const name,
     GSList *groups, const char *const subscription, gboolean pending_out);
 void sv_ev_roster_received(void);
+void sv_ev_connection_features_received(void);
 int sv_ev_certfail(const char *const errormsg, TLSCertificate *cert);
 void sv_ev_lastactivity_response(const char *const from, const int seconds, const char *const msg);
 void sv_ev_bookmark_autojoin(Bookmark *bookmark);

@@ -152,6 +152,7 @@ typedef struct prof_chat_win_t {
     gboolean otr_is_trusted;
     gboolean pgp_send;
     gboolean pgp_recv;
+    gboolean is_omemo;
     char *resource_override;
     gboolean history_shown;
     unsigned long memcheck;
@@ -167,9 +168,11 @@ typedef struct prof_muc_win_t {
     gboolean unread_mentions;
     gboolean unread_triggers;
     gboolean showjid;
+    gboolean is_omemo;
     unsigned long memcheck;
     char *enctext;
     char *message_char;
+    GHashTable *sent_messages;
 } ProfMucWin;
 
 typedef struct prof_conf_win_t ProfConfWin;
