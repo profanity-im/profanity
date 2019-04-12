@@ -14,17 +14,17 @@ trap error_handler ERR
 ./bootstrap.sh
 
 echo
-echo "--> Building with ./configure --enable-notifications --enable-icons --enable-otr --enable-pgp --enable-plugins --enable-c-plugins --enable-python-plugins --with-xscreensaver"
+echo "--> Building with ./configure --enable-notifications --enable-icons --enable-otr --enable-pgp --enable-omemo --enable-plugins --enable-c-plugins --enable-python-plugins --with-xscreensaver"
 echo
-./configure --enable-notifications --enable-icons --enable-otr --enable-pgp --enable-plugins --enable-c-plugins --enable-python-plugins --with-xscreensaver
+./configure --enable-notifications --enable-icons --enable-otr --enable-pgp --enable-omemo --enable-plugins --enable-c-plugins --enable-python-plugins --with-xscreensaver
 make
 ./profanity -v
 make clean
 
 echo
-echo "--> Building with ./configure --disable-notifications --disable-icons --disable-otr --disable-pgp --disable-plugins --disable-c-plugins --disable-python-plugins --without-xscreensaver"
+echo "--> Building with ./configure --disable-notifications --disable-icons --disable-otr --disable-pgp --disable-omemo --disable-plugins --disable-c-plugins --disable-python-plugins --without-xscreensaver"
 echo
-./configure --disable-notifications --disable-icons --disable-otr --disable-pgp --disable-plugins --disable-c-plugins --disable-python-plugins --without-xscreensaver
+./configure --disable-notifications --disable-icons --disable-otr --disable-pgp --disable-omemo --disable-plugins --disable-c-plugins --disable-python-plugins --without-xscreensaver
 make
 ./profanity -v
 make clean
@@ -62,9 +62,25 @@ make
 make clean
 
 echo
+echo "--> Building with ./configure --disable-omemo"
+echo
+./configure --disable-omemo
+make
+./profanity -v
+make clean
+
+echo
 echo "--> Building with ./configure --disable-pgp --disable-otr"
 echo
 ./configure --disable-pgp --disable-otr
+make
+./profanity -v
+make clean
+
+echo
+echo "--> Building with ./configure --disable-pgp --disable-otr --disable-omemo"
+echo
+./configure --disable-pgp --disable-otr --disable-omemo
 make
 ./profanity -v
 make clean
