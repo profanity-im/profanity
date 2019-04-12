@@ -124,16 +124,17 @@ accounts_add(const char *account_name, const char *altdomain, const int port, co
 {
     // set account name and resource
     const char *barejid = account_name;
-    const char *resource = "profanity";
+    char *resource = jid_random_resource();
     Jid *jid = jid_create(account_name);
     if (jid) {
         barejid = jid->barejid;
         if (jid->resourcepart) {
-            resource = jid->resourcepart;
+            resource = g_strdup(jid->resourcepart);
         }
     }
 
     if (g_key_file_has_group(accounts, account_name)) {
+        g_free(resource);
         jid_destroy(jid);
         return;
     }
@@ -174,6 +175,7 @@ accounts_add(const char *account_name, const char *altdomain, const int port, co
     autocomplete_add(enabled_ac, account_name);
 
     jid_destroy(jid);
+    g_free(resource);
 }
 
 int
