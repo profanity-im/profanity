@@ -5,7 +5,7 @@ install:
     - lsb_release -a
     - uname -a
     - sudo apt-get update
-    - sudo apt-get -y install libssl-dev libexpat1-dev libncursesw5-dev libglib2.0-dev libnotify-dev libcurl3-dev libxss-dev libotr5-dev libgpgme11-dev autoconf-archive expect-dev tcl-dev libtool python-dev libgtk2.0-dev libgcrypt20-dev
+    - sudo apt-get -y install libssl-dev libexpat1-dev libncursesw5-dev libglib2.0-dev libnotify-dev libcurl3-dev libxss-dev libotr5-dev libgpgme11-dev autoconf-archive expect-dev tcl-dev libtool python-dev libgtk2.0-dev libgcrypt20-dev libcmocka-dev
     - git clone git://github.com/boothj5/libmesode.git
     - cd libmesode
     - mkdir m4
@@ -15,16 +15,6 @@ install:
     - sudo make install
     - cd ..
     - rm -rf libmesode
-    - wget https://cmocka.org/files/1.0/cmocka-1.0.0.tar.xz
-    - tar -xvf cmocka-1.0.0.tar.xz
-    - cd cmocka-1.0.0
-    - mkdir build
-    - cd build
-    - cmake -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Debug ..
-    - make
-    - sudo make install
-    - cd ../..
-    - rm -rf cmocka-1.0.0
     - sudo apt-get install libmicrohttpd-dev
     - git clone git://github.com/boothj5/stabber.git
     - cd stabber
