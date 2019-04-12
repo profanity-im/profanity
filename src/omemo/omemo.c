@@ -247,17 +247,7 @@ omemo_on_disconnect(void)
         return;
     }
 
-    signal_protocol_signed_pre_key_remove_key(omemo_ctx.store, omemo_ctx.signed_pre_key_id);
     _g_hash_table_free(omemo_ctx.signed_pre_key_store);
-
-    GHashTableIter iter;
-    gpointer id;
-
-    g_hash_table_iter_init(&iter, omemo_ctx.pre_key_store);
-    while (g_hash_table_iter_next(&iter, &id, NULL)) {
-        signal_protocol_pre_key_remove_key(omemo_ctx.store, GPOINTER_TO_INT(id));
-    }
-
     _g_hash_table_free(omemo_ctx.pre_key_store);
 
     g_string_free(omemo_ctx.identity_filename, TRUE);
