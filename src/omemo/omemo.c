@@ -241,6 +241,10 @@ omemo_on_connect(ProfAccount *account)
 void
 omemo_on_disconnect(void)
 {
+    if (!loaded) {
+        return;
+    }
+
     signal_protocol_signed_pre_key_remove_key(omemo_ctx.store, omemo_ctx.signed_pre_key_id);
     _g_hash_table_free(omemo_ctx.signed_pre_key_store);
 
