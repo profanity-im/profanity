@@ -34,4 +34,5 @@ install:
     - sudo make install
     - cd ../../
     - rm -rf libsignal-protocol-c
+    - cat /usr/include/gcrypt.h
 script: ./travis-build.sh
