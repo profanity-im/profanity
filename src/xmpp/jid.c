@@ -194,3 +194,22 @@ jid_fulljid_or_barejid(Jid *jid)
         return jid->barejid;
     }
 }
+
+char*
+jid_random_resource(void)
+{
+    GRand *prng;
+    char rand[5];
+    char alphabet[] = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
+    prng = g_rand_new();
+
+    int i;
+    for (i = 0; i < 4; i++) {
+        rand[i] = alphabet[g_rand_int_range(prng, 0, sizeof(alphabet))];
+    }
+    rand[4] = '\0';
+    g_rand_free(prng);
+
+    return g_strdup_printf("profanity.%s", rand);
+}
