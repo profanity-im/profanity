@@ -30,7 +30,7 @@ static gboolean loaded;
 
 static void _generate_pre_keys(int count);
 static void _generate_signed_pre_key(void);
-static void _load_identity(void);
+static gboolean _load_identity(void);
 static void _load_trust(void);
 static void _load_sessions(void);
 static void _lock(void *user_data);
@@ -217,7 +217,9 @@ omemo_on_connect(ProfAccount *account)
     omemo_ctx.sessions_keyfile = g_key_file_new();
 
     if (g_key_file_load_from_file(omemo_ctx.identity_keyfile, omemo_ctx.identity_filename->str, G_KEY_FILE_KEEP_COMMENTS, &error)) {
-        _load_identity();
+        if (!_load_identity()) {
+            return;
+        }
     } else if (error->code != G_FILE_ERROR_NOENT) {
         log_warning("OMEMO: error loading identity from: %s, %s", omemo_ctx.identity_filename->str, error->message);
         return;
@@ -1205,26 +1207,49 @@ omemo_fingerprint_autocomplete_reset(void)
     autocomplete_reset(omemo_ctx.fingerprint_ac);
 }
 
-static void
+static gboolean
 _load_identity(void)
 {
+    GError *error = NULL;
     log_info("Loading OMEMO identity");
 
     /* Device ID */
-    omemo_ctx.device_id = g_key_file_get_uint64(omemo_ctx.identity_keyfile, OMEMO_STORE_GROUP_IDENTITY, OMEMO_STORE_KEY_DEVICE_ID, NULL);
+    error = NULL;
+    omemo_ctx.device_id = g_key_file_get_uint64(omemo_ctx.identity_keyfile, OMEMO_STORE_GROUP_IDENTITY, OMEMO_STORE_KEY_DEVICE_ID, &error);
+    if (error != NULL) {
+        log_error("OMEMO: cannot load device id: %s", error->message);
+        return FALSE;
+    }
     log_info("OMEMO: device id: %d", omemo_ctx.device_id);
 
     /* Registration ID */
-    omemo_ctx.registration_id = g_key_file_get_uint64(omemo_ctx.identity_keyfile, OMEMO_STORE_GROUP_IDENTITY, OMEMO_STORE_KEY_REGISTRATION_ID, NULL);
+    error = NULL;
+    omemo_ctx.registration_id = g_key_file_get_uint64(omemo_ctx.identity_keyfile, OMEMO_STORE_GROUP_IDENTITY, OMEMO_STORE_KEY_REGISTRATION_ID, &error);
+    if (error != NULL) {
+        log_error("OMEMO: cannot load registration id: %s", error->message);
+        return FALSE;
+    }
 
     /* Identity key */
-    char *identity_key_public_b64 = g_key_file_get_string(omemo_ctx.identity_keyfile, OMEMO_STORE_GROUP_IDENTITY, OMEMO_STORE_KEY_IDENTITY_KEY_PUBLIC, NULL);
+    error = NULL;
+    char *identity_key_public_b64 = g_key_file_get_string(omemo_ctx.identity_keyfile, OMEMO_STORE_GROUP_IDENTITY, OMEMO_STORE_KEY_IDENTITY_KEY_PUBLIC, &error);
+    if (!identity_key_public_b64) {
+        log_error("OMEMO: cannot load identity public key: %s", error->message);
+        return FALSE;
+    }
+
     size_t identity_key_public_len;
     unsigned char *identity_key_public = g_base64_decode(identity_key_public_b64, &identity_key_public_len);
     g_free(identity_key_public_b64);
     omemo_ctx.identity_key_store.public = signal_buffer_create(identity_key_public, identity_key_public_len);
 
-    char *identity_key_private_b64 = g_key_file_get_string(omemo_ctx.identity_keyfile, OMEMO_STORE_GROUP_IDENTITY, OMEMO_STORE_KEY_IDENTITY_KEY_PRIVATE, NULL);
+    error = NULL;
+    char *identity_key_private_b64 = g_key_file_get_string(omemo_ctx.identity_keyfile, OMEMO_STORE_GROUP_IDENTITY, OMEMO_STORE_KEY_IDENTITY_KEY_PRIVATE, &error);
+    if (!identity_key_private_b64) {
+        log_error("OMEMO: cannot load identity private key: %s", error->message);
+        return FALSE;
+    }
+
     size_t identity_key_private_len;
     unsigned char *identity_key_private = g_base64_decode(identity_key_private_b64, &identity_key_private_len);
     g_free(identity_key_private_b64);
@@ -1288,6 +1313,8 @@ _load_identity(void)
 
     omemo_identity_keyfile_save();
     omemo_start_sessions();
+
+    return TRUE;
 }
 
 static void
