@@ -5,7 +5,7 @@ install:
     - lsb_release -a
     - uname -a
     - sudo apt-get update
-    - sudo apt-get -y install libssl-dev libexpat1-dev libncursesw5-dev libglib2.0-dev libnotify-dev libcurl3-dev libxss-dev libotr5-dev libgpgme11-dev autoconf-archive expect-dev tcl-dev libtool python-dev libgtk2.0-dev libgcrypt20-dev libsignal-protocol-c-dev
+    - sudo apt-get -y install libssl-dev libexpat1-dev libncursesw5-dev libglib2.0-dev libnotify-dev libcurl3-dev libxss-dev libotr5-dev libgpgme11-dev autoconf-archive expect-dev tcl-dev libtool python-dev libgtk2.0-dev libgcrypt20-dev
     - git clone git://github.com/boothj5/libmesode.git
     - cd libmesode
     - mkdir m4
@@ -34,4 +34,14 @@ install:
     - sudo make install
     - cd ..
     - rm -rf stabber
+    - git clone https://github.com/signalapp/libsignal-protocol-c.git
+    - cd libsignal-protocol-c
+    - git checkout v2.3.2
+    - mkdir build
+    - cd build
+    - cmake -DBUILD_SHARED_LIBS=1 -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release ../
+    - make
+    - sudo make install
+    - cd ../../
+    - rm -rf libsignal-protocol-c
 script: ./travis-build.sh
