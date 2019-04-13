@@ -280,12 +280,12 @@ if test "x$enable_omemo" != xno; then
                    [AC_MSG_ERROR([libsignal-protocol-c is required for OMEMO support])],
                    [AC_MSG_NOTICE([libsignal-protocol-c not found, OMEMO support not enabled])])])])
 
-    AC_CHECK_LIB([gcrypt], [gcry_check_version],
+    AC_CHECK_LIB([gcrypt], [gcry_md_extract],
         [LIBS="-lgcrypt $LIBS"],
         [AM_CONDITIONAL([BUILD_OMEMO], [false])
          AS_IF([test "x$enable_omemo" = xyes],
-               [AC_MSG_ERROR([gcrypt is required for OMEMO support])],
-               [AC_MSG_NOTICE([gcrypt not found, OMEMO support not enabled])])])
+               [AC_MSG_ERROR([gcrypt >= 1.7.0 is required for OMEMO support])],
+               [AC_MSG_NOTICE([gcrypt >= 1.7.0 not found, OMEMO support not enabled])])])
 
    AM_COND_IF([BUILD_OMEMO], [AC_DEFINE([HAVE_OMEMO], [1], [Have OMEMO])])
 fi
