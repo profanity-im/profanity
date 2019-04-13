@@ -5,7 +5,7 @@ install:
     - lsb_release -a
     - uname -a
     - sudo apt-get update
-    - sudo apt-get -y install libssl-dev libexpat1-dev libncursesw5-dev libglib2.0-dev libnotify-dev libcurl3-dev libxss-dev libotr5-dev libgpgme11-dev autoconf-archive expect-dev tcl-dev libtool python-dev libgtk2.0-dev libgcrypt20-dev libcmocka-dev
+    - sudo apt-get -y install libssl-dev libexpat1-dev libncursesw5-dev libglib2.0-dev libnotify-dev libcurl3-dev libxss-dev libotr5-dev libgpgme11-dev autoconf-archive expect-dev tcl-dev libtool python-dev libgtk2.0-dev libcmocka-dev
     - git clone git://github.com/boothj5/libmesode.git
     - cd libmesode
     - mkdir m4
@@ -34,5 +34,13 @@ install:
     - sudo make install
     - cd ../../
     - rm -rf libsignal-protocol-c
+    - wget https://www.gnupg.org/ftp/gcrypt/libgcrypt/libgcrypt-1.7.0.tar.bz2
+    - tar xfv libgcrypt-1.7.0.tar.bz2
+    - cd libgcrypt-1.7.0
+    - ./configure --prefix=/usr
+    - make
+    - sudo make install
+    - cd ..
+    - rm -rf libgcrypt-1.7.0
     - cat /usr/include/gcrypt.h
 script: ./travis-build.sh
