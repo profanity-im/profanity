@@ -1,4 +1,4 @@
-dist: bionic
+dist: xenial
 sudo: required
 language: c
 install:
