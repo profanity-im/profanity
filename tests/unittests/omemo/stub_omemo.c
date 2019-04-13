@@ -66,3 +66,4 @@ void omemo_trust(const char *const jid, const char *const fingerprint_formatted)
 void omemo_untrust(const char *const jid, const char *const fingerprint_formatted) {}
 void omemo_devicelist_publish(GList *device_list) {}
 void omemo_publish_crypto_materials(void) {}
+void omemo_start_sessions(void) {}
