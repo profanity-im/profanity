@@ -1,6 +1,9 @@
 # Build the latest openSUSE Tumbleweed image
 FROM opensuse/tumbleweed
 
+# expect - for functional tests
+# libmicrohttpd - for stabber
+# glibc-locale - to have en_US locale
 RUN zypper --non-interactive in --no-recommends \
   git \
   gcc \
@@ -11,6 +14,7 @@ RUN zypper --non-interactive in --no-recommends \
   libtool \
   glib2-devel \
   gtk2-devel \
+  expect-devel \
   libXss-devel \
   libcurl-devel \
   libexpat-devel \
@@ -28,7 +32,13 @@ RUN zypper --non-interactive in --no-recommends \
   readline-devel \
   libsignal-protocol-c-devel \
   libgcrypt-devel \
-  libmicrohttpd-devel
+  libmicrohttpd-devel \
+  glibc-locale
+
+# https://github.com/openSUSE/docker-containers-build/issues/26
+ENV LANG en_US.UTF-8
+ENV LANGUAGE en_US:en
+ENV LC_ALL en_US.UTF-8
 
 RUN mkdir -p /usr/src
 WORKDIR /usr/src

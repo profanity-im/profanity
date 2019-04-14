@@ -133,4 +133,3 @@ make
 make check
 ./profanity -v
 make clean
-
