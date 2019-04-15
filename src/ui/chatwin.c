@@ -50,6 +50,9 @@
 #ifdef HAVE_LIBOTR
 #include "otr/otr.h"
 #endif
+#ifdef HAVE_OMEMO
+#include "omemo/omemo.h"
+#endif
 
 static void _chatwin_history(ProfChatWin *chatwin, const char *const contact);
 
@@ -72,6 +75,13 @@ chatwin_new(const char *const barejid)
             win_show_status_string(window, barejid, show, status, NULL, "--", "offline");
         }
     }
+
+#ifdef HAVE_OMEMO
+    if (omemo_automatic_start(barejid)) {
+        omemo_start_session(barejid);
+        chatwin->is_omemo = TRUE;
+    }
+#endif
 
     return chatwin;
 }

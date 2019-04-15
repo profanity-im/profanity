@@ -2152,7 +2152,7 @@ cmd_msg(ProfWin *window, const char *const command, gchar **args)
 
 #ifdef HAVE_OMEMO
 #ifndef HAVE_LIBOTR
-        if (omemo_is_trusted_jid(barejid)) {
+        if (omemo_automatic_start(barejid)) {
             omemo_start_session(barejid);
             chatwin->is_omemo = TRUE;
         }
@@ -2167,10 +2167,10 @@ cmd_msg(ProfWin *window, const char *const command, gchar **args)
 
 #ifdef HAVE_OMEMO
 #ifdef HAVE_LIBOTR
-        if (omemo_is_trusted_jid(barejid) && otr_is_secure(barejid)) {
+        if (omemo_automatic_start(barejid) && otr_is_secure(barejid)) {
             win_println(window, THEME_DEFAULT, '!', "Chat could be either OMEMO or OTR encrypted. Use '/omemo start %s' or '/otr start %s' to start a session.", usr, usr);
             return TRUE;
-        } else if (omemo_is_trusted_jid(barejid)) {
+        } else if (omemo_automatic_start(barejid)) {
             omemo_start_session(barejid);
             chatwin->is_omemo = TRUE;
         }
@@ -8005,6 +8005,7 @@ cmd_omemo_start(ProfWin *window, const char *const command, gchar **args)
             return TRUE;
         }
 
+        accounts_add_omemo_state(session_get_account_name(), barejid, TRUE);
         omemo_start_session(barejid);
         chatwin->is_omemo = TRUE;
     } else {
@@ -8026,6 +8027,7 @@ cmd_omemo_start(ProfWin *window, const char *const command, gchar **args)
                 return TRUE;
             }
 
+            accounts_add_omemo_state(session_get_account_name(), chatwin->barejid, TRUE);
             omemo_start_session(chatwin->barejid);
             chatwin->is_omemo = TRUE;
         } else if (window->type == WIN_MUC) {
@@ -8033,6 +8035,7 @@ cmd_omemo_start(ProfWin *window, const char *const command, gchar **args)
             assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
 
             if (muc_anonymity_type(mucwin->roomjid) == MUC_ANONYMITY_TYPE_NONANONYMOUS) {
+                accounts_add_omemo_state(session_get_account_name(), mucwin->roomjid, TRUE);
                 omemo_start_muc_sessions(mucwin->roomjid);
                 mucwin->is_omemo = TRUE;
             } else {
@@ -8119,6 +8122,7 @@ cmd_omemo_end(ProfWin *window, const char *const command, gchar **args)
         }
 
         chatwin->is_omemo = FALSE;
+        accounts_add_omemo_state(session_get_account_name(), chatwin->barejid, FALSE);
     } else if (window->type == WIN_MUC) {
         ProfMucWin *mucwin = (ProfMucWin*)window;
         assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
@@ -8129,6 +8133,7 @@ cmd_omemo_end(ProfWin *window, const char *const command, gchar **args)
         }
 
         mucwin->is_omemo = FALSE;
+        accounts_add_omemo_state(session_get_account_name(), mucwin->roomjid, FALSE);
     } else {
         win_println(window, THEME_DEFAULT, '-', "You must be in a regular chat window to start an OMEMO session.");
         return TRUE;
@@ -8360,6 +8365,34 @@ cmd_omemo_clear_device_list(ProfWin *window, const char *const command, gchar **
 
     omemo_devicelist_publish(NULL);
     cons_show("Cleared OMEMO device list");
+    return TRUE;
+#else
+    cons_show("This version of Profanity has not been built with OMEMO support enabled");
+    return TRUE;
+#endif
+}
+
+gboolean
+cmd_omemo_policy(ProfWin *window, const char *const command, gchar **args)
+{
+#ifdef HAVE_OMEMO
+    if (args[1] == NULL) {
+        char *policy = prefs_get_string(PREF_OMEMO_POLICY);
+        cons_show("OMEMO policy is now set to: %s", policy);
+        prefs_free_string(policy);
+        return TRUE;
+    }
+
+    char *choice = args[1];
+    if ((g_strcmp0(choice, "manual") != 0) &&
+            (g_strcmp0(choice, "automatic") != 0) &&
+            (g_strcmp0(choice, "always") != 0)) {
+        cons_show("OMEMO policy can be set to: manual, automatic or always.");
+        return TRUE;
+    }
+
+    prefs_set_string(PREF_OMEMO_POLICY, choice);
+    cons_show("OMEMO policy is now set to: %s", choice);
     return TRUE;
 #else
     cons_show("This version of Profanity has not been built with OMEMO support enabled");

@@ -52,7 +52,8 @@ account_new(const gchar *const name, const gchar *const jid,
     int priority_away, int priority_xa, int priority_dnd,
     const gchar *const muc_service, const gchar *const muc_nick,
     const gchar *const otr_policy, GList *otr_manual, GList *otr_opportunistic,
-    GList *otr_always, const gchar *const pgp_keyid, const char *const startscript,
+    GList *otr_always,  const gchar *const omemo_policy, GList *omemo_enabled,
+    GList *omemo_disabled, const gchar *const pgp_keyid, const char *const startscript,
     const char *const theme, gchar *tls_policy)
 {
     ProfAccount *new_account = malloc(sizeof(ProfAccount));
@@ -138,6 +139,15 @@ account_new(const gchar *const name, const gchar *const jid,
     new_account->otr_manual = otr_manual;
     new_account->otr_opportunistic = otr_opportunistic;
     new_account->otr_always = otr_always;
+
+    if (omemo_policy) {
+        new_account->omemo_policy = strdup(omemo_policy);
+    } else {
+        new_account->omemo_policy = NULL;
+    }
+
+    new_account->omemo_enabled = omemo_enabled;
+    new_account->omemo_disabled = omemo_disabled;
 
     if (pgp_keyid != NULL) {
         new_account->pgp_keyid = strdup(pgp_keyid);
@@ -232,6 +242,7 @@ account_free(ProfAccount *account)
     free(account->muc_service);
     free(account->muc_nick);
     free(account->otr_policy);
+    free(account->omemo_policy);
     free(account->pgp_keyid);
     free(account->startscript);
     free(account->theme);
@@ -239,6 +250,8 @@ account_free(ProfAccount *account)
     g_list_free_full(account->otr_manual, g_free);
     g_list_free_full(account->otr_opportunistic, g_free);
     g_list_free_full(account->otr_always, g_free);
+    g_list_free_full(account->omemo_enabled, g_free);
+    g_list_free_full(account->omemo_disabled, g_free);
     free(account);
 }
 

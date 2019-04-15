@@ -2004,6 +2004,10 @@ cons_show_omemo_prefs(void)
     cons_show("OMEMO preferences:");
     cons_show("");
 
+    char *policy_value = prefs_get_string(PREF_OMEMO_POLICY);
+    cons_show("OMEMO policy (/omemo policy) : %s", policy_value);
+    prefs_free_string(policy_value);
+
     char *log_value = prefs_get_string(PREF_OMEMO_LOG);
     if (strcmp(log_value, "on") == 0) {
         cons_show("OMEMO logging (/omemo log)   : ON");

@@ -275,6 +275,31 @@ accounts_get_account(const char *const name)
             g_strfreev(always);
         }
 
+        gchar *omemo_policy = NULL;
+        if (g_key_file_has_key(accounts, name, "omemo.policy", NULL)) {
+            omemo_policy = g_key_file_get_string(accounts, name, "omemo.policy", NULL);
+        }
+
+        GList *omemo_enabled = NULL;
+        gchar **enabled_list = g_key_file_get_string_list(accounts, name, "omemo.enabled", &length, NULL);
+        if (enabled_list) {
+            int i = 0;
+            for (i = 0; i < length; i++) {
+                omemo_enabled = g_list_append(omemo_enabled, strdup(enabled_list[i]));
+            }
+            g_strfreev(enabled_list);
+        }
+
+        GList *omemo_disabled = NULL;
+        gchar **disabled_list = g_key_file_get_string_list(accounts, name, "omemo.disabled", &length, NULL);
+        if (disabled_list) {
+            int i = 0;
+            for (i = 0; i < length; i++) {
+                omemo_disabled = g_list_append(omemo_disabled, strdup(disabled_list[i]));
+            }
+            g_strfreev(disabled_list);
+        }
+
         gchar *pgp_keyid = NULL;
         if (g_key_file_has_key(accounts, name, "pgp.keyid", NULL)) {
             pgp_keyid = g_key_file_get_string(accounts, name, "pgp.keyid", NULL);
@@ -304,7 +329,8 @@ accounts_get_account(const char *const name)
             server, port, resource, last_presence, login_presence,
             priority_online, priority_chat, priority_away, priority_xa,
             priority_dnd, muc_service, muc_nick, otr_policy, otr_manual,
-            otr_opportunistic, otr_always, pgp_keyid, startscript, theme, tls_policy);
+            otr_opportunistic, otr_always, omemo_policy, omemo_enabled,
+            omemo_disabled,  pgp_keyid, startscript, theme, tls_policy);
 
         g_free(jid);
         g_free(password);
@@ -316,6 +342,7 @@ accounts_get_account(const char *const name)
         g_free(muc_service);
         g_free(muc_nick);
         g_free(otr_policy);
+        g_free(omemo_policy);
         g_free(pgp_keyid);
         g_free(startscript);
         g_free(theme);
@@ -385,6 +412,9 @@ accounts_rename(const char *const account_name, const char *const new_name)
         "otr.manual",
         "otr.opportunistic",
         "otr.always",
+        "omemo.policy",
+        "omemo.enabled",
+        "omemo.disabled",
         "pgp.keyid",
         "last.activity",
         "script.start",
@@ -634,6 +664,32 @@ accounts_add_otr_policy(const char *const account_name, const char *const contac
 }
 
 void
+accounts_add_omemo_state(const char *const account_name, const char *const contact_jid, gboolean enabled)
+{
+    if (accounts_account_exists(account_name)) {
+        if (enabled) {
+            conf_string_list_add(accounts, account_name, "omemo.enabled", contact_jid);
+            conf_string_list_remove(accounts, account_name, "omemo.disabled", contact_jid);
+        } else {
+            conf_string_list_add(accounts, account_name, "omemo.disabled", contact_jid);
+            conf_string_list_remove(accounts, account_name, "omemo.enabled", contact_jid);
+        }
+
+        _save_accounts();
+    }
+}
+
+void
+accounts_clear_omemo_state(const char *const account_name, const char *const contact_jid)
+{
+    if (accounts_account_exists(account_name)) {
+        conf_string_list_remove(accounts, account_name, "omemo.enabled", contact_jid);
+        conf_string_list_remove(accounts, account_name, "omemo.disabled", contact_jid);
+        _save_accounts();
+    }
+}
+
+void
 accounts_set_muc_service(const char *const account_name, const char *const value)
 {
     if (accounts_account_exists(account_name)) {
@@ -656,6 +712,15 @@ accounts_set_otr_policy(const char *const account_name, const char *const value)
 {
     if (accounts_account_exists(account_name)) {
         g_key_file_set_string(accounts, account_name, "otr.policy", value);
+        _save_accounts();
+    }
+}
+
+void
+accounts_set_omemo_policy(const char *const account_name, const char *const value)
+{
+    if (accounts_account_exists(account_name)) {
+        g_key_file_set_string(accounts, account_name, "omemo.policy", value);
         _save_accounts();
     }
 }

@@ -1686,6 +1686,7 @@ _get_group(preference_t pref)
         case PREF_PLUGINS_SOURCEPATH:
             return PREF_GROUP_PLUGINS;
         case PREF_OMEMO_LOG:
+        case PREF_OMEMO_POLICY:
             return PREF_GROUP_OMEMO;
         default:
             return NULL;
@@ -1903,6 +1904,8 @@ _get_key(preference_t pref)
             return "statusbar.room";
         case PREF_OMEMO_LOG:
             return "log";
+        case PREF_OMEMO_POLICY:
+            return "policy";
         default:
             return NULL;
     }
@@ -2023,6 +2026,8 @@ _get_default_string(preference_t pref)
             return "room";
         case PREF_OMEMO_LOG:
             return "redact";
+        case PREF_OMEMO_POLICY:
+            return "automatic";
         default:
             return NULL;
     }
