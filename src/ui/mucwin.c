@@ -506,7 +506,7 @@ mucwin_incoming_msg(ProfMucWin *mucwin, const char *const nick, const char *cons
 {
     assert(mucwin != NULL);
 
-    if (g_hash_table_remove(mucwin->sent_messages, id)) {
+    if (id && g_hash_table_remove(mucwin->sent_messages, id)) {
         /* Ignore reflection messages */
         return;
     }
