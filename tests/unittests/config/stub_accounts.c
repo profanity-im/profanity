@@ -203,3 +203,4 @@ char* accounts_get_last_activity(const char *const account_name)
 {
     return NULL;
 }
+void accounts_add_omemo_state(const char *const account_name, const char *const contact_jid, gboolean enabled) {}

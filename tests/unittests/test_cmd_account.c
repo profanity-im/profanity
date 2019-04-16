@@ -33,7 +33,7 @@ void cmd_account_shows_usage_when_not_connected_and_no_args(void **state)
 void cmd_account_shows_account_when_connected_and_no_args(void **state)
 {
     ProfAccount *account = account_new("jabber_org", "me@jabber.org", NULL, NULL,
-        TRUE, NULL, 0, NULL, NULL, NULL, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+        TRUE, NULL, 0, NULL, NULL, NULL, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
     gchar *args[] = { NULL };
 
     will_return(connection_get_status, JABBER_CONNECTED);
@@ -93,7 +93,7 @@ void cmd_account_show_shows_account_when_exists(void **state)
 {
     gchar *args[] = { "show", "account_name", NULL };
     ProfAccount *account = account_new("jabber_org", "me@jabber.org", NULL, NULL,
-        TRUE, NULL, 0, NULL, NULL, NULL, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+        TRUE, NULL, 0, NULL, NULL, NULL, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
 
     expect_any(accounts_get_account, name);
     will_return(accounts_get_account, account);
@@ -409,7 +409,7 @@ void cmd_account_set_password_sets_password(void **state)
 {
     gchar *args[] = { "set", "a_account", "password", "a_password", NULL };
     ProfAccount *account = account_new("a_account", NULL, NULL, NULL,
-    TRUE, NULL, 0, NULL, NULL, NULL, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+    TRUE, NULL, 0, NULL, NULL, NULL, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
 
 
     expect_any(accounts_account_exists, account_name);
@@ -432,7 +432,7 @@ void cmd_account_set_eval_password_sets_eval_password(void **state)
 {
     gchar *args[] = { "set", "a_account", "eval_password", "a_password", NULL };
     ProfAccount *account = account_new("a_account", NULL, NULL, NULL,
-    TRUE, NULL, 0, NULL, NULL, NULL, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+    TRUE, NULL, 0, NULL, NULL, NULL, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
 
     expect_any(accounts_account_exists, account_name);
     will_return(accounts_account_exists, TRUE);
@@ -453,7 +453,7 @@ void cmd_account_set_eval_password_sets_eval_password(void **state)
 void cmd_account_set_password_when_eval_password_set(void **state) {
     gchar *args[] = { "set", "a_account", "password", "a_password", NULL };
     ProfAccount *account = account_new("a_account", NULL, NULL, "a_password",
-    TRUE, NULL, 0, NULL, NULL, NULL, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+    TRUE, NULL, 0, NULL, NULL, NULL, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
 
     expect_any(accounts_account_exists, account_name);
     will_return(accounts_account_exists, TRUE);
@@ -470,7 +470,7 @@ void cmd_account_set_password_when_eval_password_set(void **state) {
 void cmd_account_set_eval_password_when_password_set(void **state) {
     gchar *args[] = { "set", "a_account", "eval_password", "a_password", NULL };
     ProfAccount *account = account_new("a_account", NULL, "a_password", NULL,
-    TRUE, NULL, 0, NULL, NULL, NULL, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+    TRUE, NULL, 0, NULL, NULL, NULL, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
 
     expect_any(accounts_account_exists, account_name);
     will_return(accounts_account_exists, TRUE);
@@ -800,7 +800,7 @@ void cmd_account_set_priority_updates_presence_when_account_connected_with_prese
 
 #ifdef HAVE_LIBGPGME
     ProfAccount *account = account_new("a_account", "a_jid", NULL, NULL, TRUE, NULL, 5222, "a_resource",
-        NULL, NULL, 10, 10, 10, 10, 10, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+        NULL, NULL, 10, 10, 10, 10, 10, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
 
     will_return(session_get_account_name, "a_account");
     expect_any(accounts_get_account, name);
