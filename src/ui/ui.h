@@ -149,6 +149,7 @@ void chatwin_set_outgoing_char(ProfChatWin *chatwin, const char *const ch);
 void chatwin_unset_outgoing_char(ProfChatWin *chatwin);
 
 // MUC window
+ProfMucWin* mucwin_new(const char *const barejid);
 void mucwin_role_change(ProfMucWin *mucwin, const char *const role, const char *const actor, const char *const reason);
 void mucwin_affiliation_change(ProfMucWin *mucwin, const char *const affiliation, const char *const actor,
     const char *const reason);

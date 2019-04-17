@@ -763,7 +763,7 @@ ui_room_join(const char *const roomjid, gboolean focus)
 {
     ProfMucWin *mucwin = wins_get_muc(roomjid);
     if (mucwin == NULL) {
-        mucwin = (ProfMucWin*)wins_new_muc(roomjid);
+        mucwin = mucwin_new(roomjid);
     }
     ProfWin *window = (ProfWin*)mucwin;
 

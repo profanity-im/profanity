@@ -72,6 +72,10 @@
 #include "xmpp/roster.h"
 #include "xmpp/muc.h"
 
+#ifdef HAVE_OMEMO
+#include "omemo/omemo.h"
+#endif
+
 typedef struct p_room_info_data_t {
     char *room;
     gboolean display;
@@ -2100,8 +2104,16 @@ _room_info_response_id_handler(xmpp_stanza_t *const stanza, void *const userdata
 
         muc_set_features(cb_data->room, features);
         ProfMucWin *mucwin = wins_get_muc(cb_data->room);
-        if (mucwin && cb_data->display) {
-            mucwin_room_disco_info(mucwin, identities, features);
+        if (mucwin) {
+#ifdef HAVE_OMEMO
+            if (muc_anonymity_type(mucwin->roomjid) == MUC_ANONYMITY_TYPE_NONANONYMOUS && omemo_automatic_start(cb_data->room)) {
+                omemo_start_muc_sessions(cb_data->room);
+                mucwin->is_omemo = TRUE;
+            }
+#endif
+            if (cb_data->display) {
+                mucwin_room_disco_info(mucwin, identities, features);
+            }
         }
 
         g_slist_free_full(features, free);

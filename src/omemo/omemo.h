@@ -6,6 +6,12 @@
 #define OMEMO_ERR_UNSUPPORTED_CRYPTO -10000
 #define OMEMO_ERR_GCRYPT -20000
 
+typedef enum {
+    PROF_OMEMOPOLICY_MANUAL,
+    PROF_OMEMOPOLICY_AUTOMATIC,
+    PROF_OMEMOPOLICY_ALWAYS
+} prof_omemopolicy_t;
+
 typedef struct omemo_context_t omemo_context;
 
 typedef struct omemo_key {
@@ -40,10 +46,10 @@ char *omemo_own_fingerprint(gboolean formatted);
 void omemo_trust(const char *const jid, const char *const fingerprint);
 void omemo_untrust(const char *const jid, const char *const fingerprint);
 GList *omemo_known_device_identities(const char *const jid);
-gboolean omemo_is_trusted_jid(const char *const jid);
 gboolean omemo_is_trusted_identity(const char *const jid, const char *const fingerprint);
 char *omemo_fingerprint_autocomplete(const char *const search_str, gboolean previous);
 void omemo_fingerprint_autocomplete_reset(void);
+gboolean omemo_automatic_start(const char *const recipient);
 
 void omemo_start_sessions(void);
 void omemo_start_session(const char *const barejid);

@@ -14,6 +14,7 @@
 
 #include "config/account.h"
 #include "config/files.h"
+#include "config/preferences.h"
 #include "log.h"
 #include "omemo/crypto.h"
 #include "omemo/omemo.h"
@@ -363,9 +364,13 @@ omemo_start_muc_sessions(const char *const roomjid)
     GList *iter;
     for (iter = roster; iter != NULL; iter = iter->next) {
         Occupant *occupant = (Occupant *)iter->data;
-        Jid *jid = jid_create(occupant->jid);
-        omemo_start_session(jid->barejid);
-        jid_destroy(jid);
+        if (occupant->jid != NULL) {
+            Jid *jid = jid_create(occupant->jid);
+            omemo_start_session(jid->barejid);
+            jid_destroy(jid);
+        } else {
+            log_error("OMEMO: cannot get real jid for %s in %s", occupant->nick, roomjid);
+        }
     }
     g_list_free(roster);
 }
@@ -922,21 +927,6 @@ omemo_known_device_identities(const char *const jid)
 }
 
 gboolean
-omemo_is_trusted_jid(const char *const jid)
-{
-    GHashTable *trusted = g_hash_table_lookup(omemo_ctx.identity_key_store.trusted, jid);
-    if (!trusted) {
-        return FALSE;
-    }
-
-    if (g_hash_table_size(trusted) > 0) {
-        return TRUE;
-    }
-
-    return FALSE;
-}
-
-gboolean
 omemo_is_trusted_identity(const char *const jid, const char *const fingerprint)
 {
     GHashTable *known_identities = g_hash_table_lookup(omemo_ctx.known_devices, jid);
@@ -1195,6 +1185,67 @@ void
 omemo_fingerprint_autocomplete_reset(void)
 {
     autocomplete_reset(omemo_ctx.fingerprint_ac);
+}
+
+gboolean
+omemo_automatic_start(const char *const recipient)
+{
+    gboolean result;
+    char *account_name = session_get_account_name();
+    ProfAccount *account = accounts_get_account(account_name);
+    prof_omemopolicy_t policy;
+
+    if (account->omemo_policy) {
+        // check default account setting
+        if (g_strcmp0(account->omemo_policy, "manual") == 0) {
+            policy = PROF_OMEMOPOLICY_MANUAL;
+        }
+        if (g_strcmp0(account->omemo_policy, "opportunistic") == 0) {
+            policy = PROF_OMEMOPOLICY_AUTOMATIC;
+        }
+        if (g_strcmp0(account->omemo_policy, "always") == 0) {
+            policy = PROF_OMEMOPOLICY_ALWAYS;
+        }
+    } else {
+        // check global setting
+        char *pref_omemo_policy = prefs_get_string(PREF_OMEMO_POLICY);
+
+        // pref defaults to manual
+        policy = PROF_OMEMOPOLICY_AUTOMATIC;
+
+        if (strcmp(pref_omemo_policy, "manual") == 0) {
+            policy = PROF_OMEMOPOLICY_MANUAL;
+        } else if (strcmp(pref_omemo_policy, "always") == 0) {
+            policy = PROF_OMEMOPOLICY_ALWAYS;
+        }
+
+        prefs_free_string(pref_omemo_policy);
+    }
+
+    switch (policy) {
+        case PROF_OMEMOPOLICY_MANUAL:
+            result = FALSE;
+            break;
+        case PROF_OMEMOPOLICY_AUTOMATIC:
+            if (g_list_find_custom(account->omemo_enabled, recipient, (GCompareFunc)g_strcmp0)) {
+                result = TRUE;
+            } else if (g_list_find_custom(account->omemo_disabled, recipient, (GCompareFunc)g_strcmp0)) {
+                result = FALSE;
+            } else {
+                return FALSE;
+            }
+            break;
+        case PROF_OMEMOPOLICY_ALWAYS:
+            if (g_list_find_custom(account->omemo_disabled, recipient, (GCompareFunc)g_strcmp0)) {
+                result = FALSE;
+            } else {
+                return TRUE;
+            }
+            break;
+    }
+
+    account_free(account);
+    return result;
 }
 
 static gboolean

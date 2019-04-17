@@ -22,7 +22,7 @@ omemo_format_fingerprint(const char *const fingerprint)
 void omemo_generate_crypto_materials(ProfAccount *account) {}
 
 gboolean
-omemo_is_trusted_jid(const char *const jid)
+omemo_automatic_start(const char *const jid)
 {
     return TRUE;
 }

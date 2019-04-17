@@ -44,6 +44,25 @@
 #include "ui/window.h"
 #include "ui/win_types.h"
 #include "ui/window_list.h"
+#ifdef HAVE_OMEMO
+#include "omemo/omemo.h"
+#endif
+
+ProfMucWin*
+mucwin_new(const char *const barejid)
+{
+    ProfWin *window = wins_new_muc(barejid);
+    ProfMucWin *mucwin = (ProfMucWin *)window;
+
+#ifdef HAVE_OMEMO
+    if (muc_anonymity_type(mucwin->roomjid) == MUC_ANONYMITY_TYPE_NONANONYMOUS && omemo_automatic_start(barejid)) {
+        omemo_start_muc_sessions(barejid);
+        mucwin->is_omemo = TRUE;
+    }
+#endif
+
+    return mucwin;
+}
 
 void
 mucwin_role_change(ProfMucWin *mucwin, const char *const role, const char *const actor, const char *const reason)
