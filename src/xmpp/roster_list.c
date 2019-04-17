@@ -67,7 +67,15 @@ typedef struct prof_roster_t {
     GHashTable *group_count;
 } ProfRoster;
 
+typedef struct pending_presence {
+    char *barejid;
+    Resource *resource;
+    GDateTime *last_activity;
+} ProfPendingPresence;
+
 static ProfRoster *roster = NULL;
+static gboolean roster_received = FALSE;
+static GSList *roster_pending_presence = NULL;
 
 static gboolean _key_equals(void *key1, void *key2);
 static gboolean _datetimes_equal(GDateTime *dt1, GDateTime *dt2);
@@ -87,6 +95,9 @@ roster_create(void)
     roster->name_to_barejid = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, g_free);
     roster->groups_ac = autocomplete_new();
     roster->group_count = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, NULL);
+
+    roster_received = FALSE;
+    roster_pending_presence = NULL;
 }
 
 void
@@ -113,6 +124,18 @@ roster_update_presence(const char *const barejid, Resource *resource, GDateTime 
 
     assert(barejid != NULL);
     assert(resource != NULL);
+
+    if (!roster_received) {
+        ProfPendingPresence *presence = malloc(sizeof(ProfPendingPresence));
+        presence->barejid = strdup(barejid);
+        presence->resource = resource;
+        presence->last_activity = last_activity;
+        if (last_activity) {
+            g_date_time_ref(last_activity);
+        }
+        roster_pending_presence = g_slist_append(roster_pending_presence, presence);
+        return FALSE;
+    }
 
     PContact contact = roster_get_contact(barejid);
     if (contact == NULL) {
@@ -663,4 +686,24 @@ roster_compare_presence(PContact a, PContact b)
     } else {
         return roster_compare_name(a, b);
     }
+}
+
+void
+roster_process_pending_presence(void)
+{
+    roster_received = TRUE;
+
+    GSList *iter;
+    for (iter = roster_pending_presence; iter != NULL; iter = iter->next) {
+        ProfPendingPresence *presence = iter->data;
+        roster_update_presence(presence->barejid, presence->resource, presence->last_activity);
+        free(presence->barejid);
+        /* seems like resource isn't free on the calling side */
+        if (presence->last_activity) {
+            g_date_time_unref(presence->last_activity);
+        }
+    }
+
+    g_slist_free(roster_pending_presence);
+    roster_pending_presence = NULL;
 }
