@@ -55,7 +55,7 @@ mucwin_new(const char *const barejid)
     ProfMucWin *mucwin = (ProfMucWin *)window;
 
 #ifdef HAVE_OMEMO
-    if (omemo_automatic_start(barejid)) {
+    if (muc_anonymity_type(mucwin->roomjid) == MUC_ANONYMITY_TYPE_NONANONYMOUS && omemo_automatic_start(barejid)) {
         omemo_start_muc_sessions(barejid);
         mucwin->is_omemo = TRUE;
     }
