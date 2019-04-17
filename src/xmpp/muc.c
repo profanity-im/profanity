@@ -64,6 +64,7 @@ typedef struct _muc_room_t {
     GHashTable *nick_changes;
     gboolean roster_received;
     muc_member_type_t member_type;
+    muc_anonymity_type_t anonymity_type;
 } ChatRoom;
 
 GHashTable *rooms = NULL;
@@ -223,6 +224,7 @@ muc_join(const char *const room, const char *const nick, const char *const passw
     new_room->pending_nick_change = FALSE;
     new_room->autojoin = autojoin;
     new_room->member_type = MUC_MEMBER_TYPE_UNKNOWN;
+    new_room->anonymity_type = MUC_ANONYMITY_TYPE_UNKNOWN;
 
     g_hash_table_insert(rooms, strdup(room), new_room);
 }
@@ -263,6 +265,13 @@ muc_set_features(const char *const room, GSList *features)
             chat_room->member_type = MUC_MEMBER_TYPE_MEMBERS_ONLY;
         } else {
             chat_room->member_type = MUC_MEMBER_TYPE_PUBLIC;
+        }
+        if (g_slist_find_custom(features, "muc_nonanonymous", (GCompareFunc)g_strcmp0)) {
+            chat_room->anonymity_type = MUC_ANONYMITY_TYPE_NONANONYMOUS;
+        } else if (g_slist_find_custom(features, "muc_semianonymous", (GCompareFunc)g_strcmp0)) {
+            chat_room->anonymity_type = MUC_ANONYMITY_TYPE_SEMIANONYMOUS;
+        } else {
+            chat_room->anonymity_type = MUC_ANONYMITY_TYPE_UNKNOWN;
         }
     }
 }
@@ -832,6 +841,17 @@ muc_member_type(const char *const room)
         return chat_room->member_type;
     } else {
         return MUC_MEMBER_TYPE_UNKNOWN;
+    }
+}
+
+muc_anonymity_type_t
+muc_anonymity_type(const char *const room)
+{
+    ChatRoom *chat_room = g_hash_table_lookup(rooms, room);
+    if (chat_room) {
+        return chat_room->anonymity_type;
+    } else {
+        return MUC_ANONYMITY_TYPE_UNKNOWN;
     }
 }
 

@@ -63,6 +63,12 @@ typedef enum {
     MUC_MEMBER_TYPE_MEMBERS_ONLY
 } muc_member_type_t;
 
+typedef enum {
+    MUC_ANONYMITY_TYPE_UNKNOWN,
+    MUC_ANONYMITY_TYPE_NONANONYMOUS,
+    MUC_ANONYMITY_TYPE_SEMIANONYMOUS
+} muc_anonymity_type_t;
+
 typedef struct _muc_occupant_t {
     char *nick;
     gchar *nick_collate_key;
@@ -150,5 +156,6 @@ char* muc_role_str(const char *const room);
 char* muc_affiliation_str(const char *const room);
 
 muc_member_type_t muc_member_type(const char *const room);
+muc_anonymity_type_t muc_anonymity_type(const char *const room);
 
 #endif
