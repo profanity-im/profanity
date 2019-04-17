@@ -412,7 +412,7 @@ cons_about(void)
         }
     }
 
-    win_println(console, THEME_DEFAULT, '-', "Copyright (C) 2012 - 2018 James Booth <%s>.", PACKAGE_BUGREPORT);
+    win_println(console, THEME_DEFAULT, '-', "Copyright (C) 2012 - 2019 James Booth <%s>.", PACKAGE_BUGREPORT);
     win_println(console, THEME_DEFAULT, '-', "License GPLv3+: GNU GPL version 3 or later <https://www.gnu.org/licenses/gpl.html>");
     win_println(console, THEME_DEFAULT, '-', "");
     win_println(console, THEME_DEFAULT, '-', "This is free software; you are free to change and redistribute it.");
