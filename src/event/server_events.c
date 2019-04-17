@@ -521,6 +521,13 @@ sv_ev_incoming_message(char *barejid, char *resource, char *message, char *pgp_m
         ProfWin *window = wins_new_chat(barejid);
         chatwin = (ProfChatWin*)window;
         new_win = TRUE;
+
+#ifdef HAVE_OMEMO
+        if (omemo_automatic_start(barejid)) {
+            omemo_start_session(barejid);
+            chatwin->is_omemo = TRUE;
+        }
+#endif
     }
 
 // OTR suported, PGP supported, OMEMO unsupported
@@ -657,6 +664,13 @@ sv_ev_incoming_carbon(char *barejid, char *resource, char *message, char *pgp_me
         ProfWin *window = wins_new_chat(barejid);
         chatwin = (ProfChatWin*)window;
         new_win = TRUE;
+
+#ifdef HAVE_OMEMO
+        if (omemo_automatic_start(barejid)) {
+            omemo_start_session(barejid);
+            chatwin->is_omemo = TRUE;
+        }
+#endif
     }
 
 #ifdef HAVE_LIBGPGME
