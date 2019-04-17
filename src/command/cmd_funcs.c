@@ -8032,14 +8032,14 @@ cmd_omemo_start(ProfWin *window, const char *const command, gchar **args)
             ProfMucWin *mucwin = (ProfMucWin*)window;
             assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
 
-            /* TODO: Check room is configured correctly, no anonymous and access to
-             * full jid */
-            omemo_start_muc_sessions(mucwin->roomjid);
-
-            mucwin->is_omemo = TRUE;
+            if (muc_anonymity_type(mucwin->roomjid) == MUC_ANONYMITY_TYPE_NONANONYMOUS) {
+                omemo_start_muc_sessions(mucwin->roomjid);
+                mucwin->is_omemo = TRUE;
+            } else {
+                win_println(window, THEME_DEFAULT, '!', "MUC must be non-anonymous (i.e. be configured to present real jid to anyone) in order to support OMEMO.");
+            }
         } else {
             win_println(window, THEME_DEFAULT, '-', "You must be in a regular chat window to start an OMEMO session.");
-            return TRUE;
         }
 
     }
