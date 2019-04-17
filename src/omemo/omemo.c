@@ -364,9 +364,13 @@ omemo_start_muc_sessions(const char *const roomjid)
     GList *iter;
     for (iter = roster; iter != NULL; iter = iter->next) {
         Occupant *occupant = (Occupant *)iter->data;
-        Jid *jid = jid_create(occupant->jid);
-        omemo_start_session(jid->barejid);
-        jid_destroy(jid);
+        if (occupant->jid != NULL) {
+            Jid *jid = jid_create(occupant->jid);
+            omemo_start_session(jid->barejid);
+            jid_destroy(jid);
+        } else {
+            log_error("OMEMO: cannot get real jid for %s in %s", occupant->nick, roomjid);
+        }
     }
     g_list_free(roster);
 }
