@@ -7951,6 +7951,7 @@ cmd_omemo_gen(ProfWin *window, const char *const command, gchar **args)
         return TRUE;
     }
 
+    cons_show("Generating OMEMO crytographic materials, it may take a while...");
     ProfAccount *account = accounts_get_account(session_get_account_name());
     omemo_generate_crypto_materials(account);
     cons_show("OMEMO crytographic materials generated.");
