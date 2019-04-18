@@ -4370,6 +4370,37 @@ cmd_occupants(ProfWin *window, const char *const command, gchar **args)
         }
     }
 
+    if (g_strcmp0(args[0], "indent") == 0) {
+        if (!args[1]) {
+            cons_bad_cmd_usage(command);
+            return TRUE;
+        } else {
+            int intval = 0;
+            char *err_msg = NULL;
+            gboolean res = strtoi_range(args[1], &intval, 0, 10, &err_msg);
+            if (res) {
+                prefs_set_occupants_indent(intval);
+                cons_show("Occupants indent set to: %d", intval);
+
+                // get the list of joined rooms
+                GList *rooms = muc_rooms();
+                GList *curr = rooms;
+                while (curr) {
+                    char* roomjid = curr->data;
+                    ProfMucWin *mw = wins_get_muc(roomjid);
+                    if (mw != NULL)
+                       mucwin_update_occupants(mw);
+
+                    curr = g_list_next(curr);
+                }
+            } else {
+                cons_show(err_msg);
+                free(err_msg);
+            }
+            return TRUE;
+        }
+    }
+
     if (g_strcmp0(args[0], "default") == 0) {
         if (g_strcmp0(args[1], "show") == 0) {
             if (g_strcmp0(args[2], "jid") == 0) {
@@ -4408,38 +4439,6 @@ cmd_occupants(ProfWin *window, const char *const command, gchar **args)
 
     ProfMucWin *mucwin = (ProfMucWin*)window;
     assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
-
-    if (g_strcmp0(args[0], "indent") == 0) {
-        if (!args[1]) {
-            cons_bad_cmd_usage(command);
-            return TRUE;
-        } else {
-            int intval = 0;
-            char *err_msg = NULL;
-            gboolean res = strtoi_range(args[1], &intval, 0, 10, &err_msg);
-            if (res) {
-                prefs_set_occupants_indent(intval);
-                cons_show("Occupants indent set to: %d", intval);
-
-                // get the list of joined rooms
-                GList *rooms = muc_rooms();
-                GList *curr = rooms;
-                while (curr) {
-                    char* roomjid = curr->data;
-                    ProfMucWin *mw = wins_get_muc(roomjid);
-                    if (mw != NULL)
-                       mucwin_update_occupants(mw);
-
-                    curr = g_list_next(curr);
-                }
-            } else {
-                cons_show(err_msg);
-                free(err_msg);
-            }
-            return TRUE;
-        }
-    }
-
 
     if (g_strcmp0(args[0], "show") == 0) {
         if (g_strcmp0(args[1], "jid") == 0) {

@@ -49,9 +49,7 @@ _occuptantswin_occupant(ProfLayoutSplit *layout, Occupant *occupant, gboolean sh
     GString *msg = g_string_new(" ");
 
     int indent = prefs_get_occupants_indent();
-    int current_indent = 0;
     if (indent > 0) {
-        current_indent += indent;
         while (indent > 0) {
             g_string_append(msg, " ");
             indent--;
