@@ -235,7 +235,7 @@ profanity_icons_DATA = $(icons_sources)
 
 if BUILD_C_API
 lib_LTLIBRARIES = libprofanity.la
-libprofanity_la_LDFLAGS=-avoid-version -shared -no-undefined
+libprofanity_la_LDFLAGS = -version-info 0:0:0 -shared -no-undefined
 libprofanity_la_SOURCES = src/plugins/profapi.c
 
 library_includedir=$(includedir)
