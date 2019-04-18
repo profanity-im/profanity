@@ -753,7 +753,8 @@ static struct cmd_t command_defs[] =
         CMD_SYN(
             "/occupants show|hide [jid]",
             "/occupants default show|hide [jid]",
-            "/occupants size [<percent>]")
+            "/occupants size [<percent>]",
+            "/occupants indent <indent>")
         CMD_DESC(
             "Show or hide room occupants, and occupants panel display settings.")
         CMD_ARGS(
@@ -763,7 +764,8 @@ static struct cmd_t command_defs[] =
             { "hide jid",              "Hide jid in the occupants panel in current room." },
             { "default show|hide",     "Whether occupants are shown by default in new rooms." },
             { "default show|hide jid", "Whether occupants jids are shown by default in new rooms." },
-            { "size <percent>",        "Percentage of the screen taken by the occupants list in rooms (1-99)." })
+            { "size <percent>",        "Percentage of the screen taken by the occupants list in rooms (1-99)." },
+            { "indent <indent>",       "Indent contact line by <indent> spaces (0 to 10)." })
         CMD_NOEXAMPLES
     },
 

@@ -452,6 +452,11 @@ _load_preferences(void)
         prefs_set_occupants_size(occupants_size);
     }
 
+    if (g_key_file_has_key(theme, "ui", "occupants.indent", NULL)) {
+        gint occupants_indent = g_key_file_get_integer(theme, "ui", "occupants.indent", NULL);
+        prefs_set_occupants_indent(occupants_indent);
+    }
+
     if (g_key_file_has_key(theme, "ui", "roster.size", NULL)) {
         gint roster_size = g_key_file_get_integer(theme, "ui", "roster.size", NULL);
         prefs_set_roster_size(roster_size);

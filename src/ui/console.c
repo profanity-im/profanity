@@ -1232,6 +1232,9 @@ cons_occupants_setting(void)
     else
         cons_show("Occupant jids (/occupants)          : hide");
 
+    gint occupant_indent = prefs_get_occupants_indent();
+    cons_show("Occupant indent (/occupants)        : %d", occupant_indent);
+
     int size = prefs_get_occupants_size();
     cons_show("Occupants size (/occupants)         : %d", size);
 }

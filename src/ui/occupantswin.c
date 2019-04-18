@@ -46,7 +46,18 @@ _occuptantswin_occupant(ProfLayoutSplit *layout, Occupant *occupant, gboolean sh
     theme_item_t presence_colour = theme_main_presence_attrs(presence_str);
     wattron(layout->subwin, theme_attrs(presence_colour));
 
-    GString *msg = g_string_new("   ");
+    GString *msg = g_string_new(" ");
+
+    int indent = prefs_get_occupants_indent();
+    int current_indent = 0;
+    if (indent > 0) {
+        current_indent += indent;
+        while (indent > 0) {
+            g_string_append(msg, " ");
+            indent--;
+        }
+    }
+
     g_string_append(msg, occupant->nick);
     win_sub_print(layout->subwin, msg->str, TRUE, FALSE, 0);
     g_string_free(msg, TRUE);

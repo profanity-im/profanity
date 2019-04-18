@@ -246,6 +246,8 @@ gint prefs_get_roster_resource_indent(void);
 void prefs_set_roster_resource_indent(gint value);
 gint prefs_get_roster_presence_indent(void);
 void prefs_set_roster_presence_indent(gint value);
+gint prefs_get_occupants_indent(void);
+void prefs_set_occupants_indent(gint value);
 
 void prefs_add_login(const char *jid);
 

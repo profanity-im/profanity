@@ -750,6 +750,28 @@ prefs_get_occupants_size(void)
     }
 }
 
+gint
+prefs_get_occupants_indent(void)
+{
+    if (!g_key_file_has_key(prefs, PREF_GROUP_UI, "occupants.indent", NULL)) {
+        return 2;
+    }
+
+    gint result = g_key_file_get_integer(prefs, PREF_GROUP_UI, "occupants.indent", NULL);
+    if (result < 0) {
+        result = 0;
+    }
+
+    return result;
+}
+
+void
+prefs_set_occupants_indent(gint value)
+{
+    g_key_file_set_integer(prefs, PREF_GROUP_UI, "occupants.indent", value);
+    _save_prefs();
+}
+
 void
 prefs_set_roster_size(gint value)
 {
