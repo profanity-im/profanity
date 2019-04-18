@@ -372,7 +372,7 @@ static struct cmd_t command_defs[] =
             { "resource indent <indent>",   "Indent resource line by <indent> spaces (0 to 10)." },
             { "resource join on|off",       "Join resource with previous line when only one available resource." },
             { "presence indent <indent>",   "Indent presence line by <indent> spaces (-1 to 10), a value of -1 will show presence on the previous line." },
-            { "size <precent>",             "Percentage of the screen taken up by the roster (1-99)." },
+            { "size <percent>",             "Percentage of the screen taken up by the roster (1-99)." },
             { "wrap on|off",                "Enable or disable line wrapping in roster panel." },
             { "add <jid> [<nick>]",         "Add a new item to the roster." },
             { "remove <jid>",               "Removes an item from the roster." },
