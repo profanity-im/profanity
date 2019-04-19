@@ -683,6 +683,7 @@ cmd_ac_init(void)
     autocomplete_add(occupants_ac, "hide");
     autocomplete_add(occupants_ac, "default");
     autocomplete_add(occupants_ac, "size");
+    autocomplete_add(occupants_ac, "indent");
 
     occupants_default_ac = autocomplete_new();
     autocomplete_add(occupants_default_ac, "show");
