@@ -478,6 +478,7 @@ void rosterwin_roster(void) {}
 
 // occupants window
 void occupantswin_occupants(const char * const room) {}
+void occupantswin_occupants_all(void) {}
 
 // window interface
 ProfWin* win_create_console(void)
