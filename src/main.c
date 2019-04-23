@@ -102,7 +102,7 @@ main(int argc, char **argv)
             g_print("Profanity, version %s\n", PACKAGE_VERSION);
         }
 
-        g_print("Copyright (C) 2012 - 2018 James Booth <%s>.\n", PACKAGE_BUGREPORT);
+        g_print("Copyright (C) 2012 - 2019 James Booth <%s>.\n", PACKAGE_BUGREPORT);
         g_print("License GPLv3+: GNU GPL version 3 or later <https://www.gnu.org/licenses/gpl.html>\n");
         g_print("\n");
         g_print("This is free software; you are free to change and redistribute it.\n");
