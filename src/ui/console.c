@@ -1232,6 +1232,11 @@ cons_occupants_setting(void)
     else
         cons_show("Occupant jids (/occupants)          : hide");
 
+    if (prefs_get_boolean(PREF_OCCUPANTS_WRAP))
+        cons_show("Occupants wrap (/occupants)         : ON");
+    else
+        cons_show("Occupants wrap (/occupants)         : OFF");
+
     gint occupant_indent = prefs_get_occupants_indent();
     cons_show("Occupant indent (/occupants)        : %d", occupant_indent);
 

@@ -687,6 +687,7 @@ cmd_ac_init(void)
     autocomplete_add(occupants_ac, "size");
     autocomplete_add(occupants_ac, "indent");
     autocomplete_add(occupants_ac, "header");
+    autocomplete_add(occupants_ac, "wrap");
 
     occupants_default_ac = autocomplete_new();
     autocomplete_add(occupants_default_ac, "show");
@@ -2588,6 +2589,11 @@ _occupants_autocomplete(ProfWin *window, const char *const input, gboolean previ
     }
 
     found = autocomplete_param_with_ac(input, "/occupants header", occupants_header_ac, TRUE, previous);
+    if (found) {
+        return found;
+    }
+
+    found = autocomplete_param_with_func(input, "/occupants wrap", prefs_autocomplete_boolean_choice, previous);
     if (found) {
         return found;
     }
