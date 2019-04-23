@@ -1641,6 +1641,7 @@ _get_group(preference_t pref)
         case PREF_HISTORY:
         case PREF_OCCUPANTS:
         case PREF_OCCUPANTS_JID:
+        case PREF_OCCUPANTS_WRAP:
         case PREF_STATUSES:
         case PREF_STATUSES_CONSOLE:
         case PREF_STATUSES_CHAT:
@@ -1788,6 +1789,8 @@ _get_key(preference_t pref)
             return "occupants";
         case PREF_OCCUPANTS_JID:
             return "occupants.jid";
+        case PREF_OCCUPANTS_WRAP:
+            return "occupants.wrap";
         case PREF_MUC_PRIVILEGES:
             return "privileges";
         case PREF_STATUSES:

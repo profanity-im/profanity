@@ -4391,6 +4391,17 @@ cmd_occupants(ProfWin *window, const char *const command, gchar **args)
         }
     }
 
+    if (g_strcmp0(args[0], "wrap") == 0) {
+        if (!args[1]) {
+            cons_bad_cmd_usage(command);
+            return TRUE;
+        } else {
+            _cmd_set_boolean_preference(args[1], command, "Occupants panel line wrap", PREF_OCCUPANTS_WRAP);
+             occupantswin_occupants_all();
+            return TRUE;
+        }
+    }
+
     if (g_strcmp0(args[0], "default") == 0) {
         if (g_strcmp0(args[1], "show") == 0) {
             if (g_strcmp0(args[2], "jid") == 0) {

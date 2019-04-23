@@ -150,6 +150,7 @@ typedef enum {
     PREF_STATUSBAR_ROOM,
     PREF_OMEMO_LOG,
     PREF_OMEMO_POLICY,
+    PREF_OCCUPANTS_WRAP,
 } preference_t;
 
 typedef struct prof_alias_t {
