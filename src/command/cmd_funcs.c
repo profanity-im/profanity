@@ -4426,6 +4426,49 @@ cmd_occupants(ProfWin *window, const char *const command, gchar **args)
         }
     }
 
+    // header settings
+    if (g_strcmp0(args[0], "header") == 0) {
+        if (g_strcmp0(args[1], "char") == 0) {
+            if (!args[2]) {
+                cons_bad_cmd_usage(command);
+            } else if (g_strcmp0(args[2], "none") == 0) {
+                prefs_clear_occupants_header_char();
+                cons_show("Occupants header char removed.");
+                // get the list of joined rooms
+                GList *rooms = muc_rooms();
+                GList *curr = rooms;
+                while (curr) {
+                    char* roomjid = curr->data;
+                    ProfMucWin *mw = wins_get_muc(roomjid);
+                    if (mw != NULL)
+                        mucwin_update_occupants(mw);
+
+                    curr = g_list_next(curr);
+                }
+
+            } else {
+                prefs_set_occupants_header_char(args[2][0]);
+                cons_show("Occupants header char set to %c.", args[2][0]);
+
+                //TODO:func like rosterwin_roster();
+                // get the list of joined rooms
+                GList *rooms = muc_rooms();
+                GList *curr = rooms;
+                while (curr) {
+                    char* roomjid = curr->data;
+                    ProfMucWin *mw = wins_get_muc(roomjid);
+                    if (mw != NULL)
+                       mucwin_update_occupants(mw);
+
+                    curr = g_list_next(curr);
+                }
+            }
+        } else {
+            cons_bad_cmd_usage(command);
+        }
+        return TRUE;
+    }
+
     jabber_conn_status_t conn_status = connection_get_status();
     if (conn_status != JABBER_CONNECTED) {
         cons_show("You are not currently connected.");

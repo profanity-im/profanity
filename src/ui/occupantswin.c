@@ -90,10 +90,22 @@ occupantswin_occupants(const char *const roomjid)
 
             werase(layout->subwin);
 
+            GString *prefix = g_string_new(" ");
+
+            char ch = prefs_get_occupants_header_char();
+            if (ch) {
+                g_string_append_printf(prefix, "%c", ch);
+            }
+
             if (prefs_get_boolean(PREF_MUC_PRIVILEGES)) {
+
+                GString *role = g_string_new(prefix->str);
+                g_string_append(role, "Moderators");
+
                 wattron(layout->subwin, theme_attrs(THEME_OCCUPANTS_HEADER));
-                win_sub_print(layout->subwin, " -Moderators", TRUE, FALSE, 0);
+                win_sub_print(layout->subwin, role->str, TRUE, FALSE, 0);
                 wattroff(layout->subwin, theme_attrs(THEME_OCCUPANTS_HEADER));
+                g_string_free(role, TRUE);
                 GList *roster_curr = occupants;
                 while (roster_curr) {
                     Occupant *occupant = roster_curr->data;
@@ -103,9 +115,13 @@ occupantswin_occupants(const char *const roomjid)
                     roster_curr = g_list_next(roster_curr);
                 }
 
+                role = g_string_new(prefix->str);
+                g_string_append(role, "Participants");
+
                 wattron(layout->subwin, theme_attrs(THEME_OCCUPANTS_HEADER));
-                win_sub_print(layout->subwin, " -Participants", TRUE, FALSE, 0);
+                win_sub_print(layout->subwin, role->str, TRUE, FALSE, 0);
                 wattroff(layout->subwin, theme_attrs(THEME_OCCUPANTS_HEADER));
+                g_string_free(role, TRUE);
                 roster_curr = occupants;
                 while (roster_curr) {
                     Occupant *occupant = roster_curr->data;
@@ -115,9 +131,13 @@ occupantswin_occupants(const char *const roomjid)
                     roster_curr = g_list_next(roster_curr);
                 }
 
+                role = g_string_new(prefix->str);
+                g_string_append(role, "Visitors");
+
                 wattron(layout->subwin, theme_attrs(THEME_OCCUPANTS_HEADER));
-                win_sub_print(layout->subwin, " -Visitors", TRUE, FALSE, 0);
+                win_sub_print(layout->subwin, role->str, TRUE, FALSE, 0);
                 wattroff(layout->subwin, theme_attrs(THEME_OCCUPANTS_HEADER));
+                g_string_free(role, TRUE);
                 roster_curr = occupants;
                 while (roster_curr) {
                     Occupant *occupant = roster_curr->data;
@@ -127,9 +147,14 @@ occupantswin_occupants(const char *const roomjid)
                     roster_curr = g_list_next(roster_curr);
                 }
             } else {
+                GString *role = g_string_new(prefix->str);
+                g_string_append(role, "Occupants\n");
+
                 wattron(layout->subwin, theme_attrs(THEME_OCCUPANTS_HEADER));
-                win_sub_print(layout->subwin, " -Occupants\n", TRUE, FALSE, 0);
+                win_sub_print(layout->subwin, role->str, TRUE, FALSE, 0);
                 wattroff(layout->subwin, theme_attrs(THEME_OCCUPANTS_HEADER));
+                g_string_free(role, TRUE);
+
                 GList *roster_curr = occupants;
                 while (roster_curr) {
                     Occupant *occupant = roster_curr->data;
@@ -137,6 +162,8 @@ occupantswin_occupants(const char *const roomjid)
                     roster_curr = g_list_next(roster_curr);
                 }
             }
+
+            g_string_free(prefix, TRUE);
         }
 
         g_list_free(occupants);

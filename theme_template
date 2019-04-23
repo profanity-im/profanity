@@ -133,6 +133,7 @@ occupants=
 occupants.size=
 occupants.jid=
 occupants.indent=
+occupants.header.char=
 wins.autotidy=
 otr.char=
 pgp.char=

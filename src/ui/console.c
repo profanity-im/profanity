@@ -1237,6 +1237,12 @@ cons_occupants_setting(void)
 
     int size = prefs_get_occupants_size();
     cons_show("Occupants size (/occupants)         : %d", size);
+
+    char header_ch = prefs_get_occupants_header_char();
+    if (header_ch)
+        cons_show("Occupants header char (/occupants)  : %c", header_ch);
+    else
+        cons_show("Occupants header char (/occupants)  : none");
 }
 
 void
