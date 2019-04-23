@@ -1287,9 +1287,9 @@ cons_time_setting(void)
 
     char *pref_time_conf = prefs_get_string(PREF_TIME_CONFIG);
     if (g_strcmp0(pref_time_conf, "off") == 0)
-        cons_show("Time config (/time)             : OFF");
+        cons_show("Time config (/time)                 : OFF");
     else
-        cons_show("Time config (/time)             : %s", pref_time_conf);
+        cons_show("Time config (/time)                 : %s", pref_time_conf);
     prefs_free_string(pref_time_conf);
 
     char *pref_time_private = prefs_get_string(PREF_TIME_PRIVATE);
