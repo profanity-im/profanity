@@ -169,3 +169,20 @@ occupantswin_occupants(const char *const roomjid)
         g_list_free(occupants);
     }
 }
+
+void
+occupantswin_occupants_all(void)
+{
+    GList *rooms = muc_rooms();
+    GList *curr = rooms;
+
+    while (curr) {
+        char* roomjid = curr->data;
+        ProfMucWin *mw = wins_get_muc(roomjid);
+        if (mw != NULL) {
+            mucwin_update_occupants(mw);
+        }
+
+        curr = g_list_next(curr);
+    }
+}

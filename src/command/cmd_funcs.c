@@ -4382,17 +4382,7 @@ cmd_occupants(ProfWin *window, const char *const command, gchar **args)
                 prefs_set_occupants_indent(intval);
                 cons_show("Occupants indent set to: %d", intval);
 
-                // get the list of joined rooms
-                GList *rooms = muc_rooms();
-                GList *curr = rooms;
-                while (curr) {
-                    char* roomjid = curr->data;
-                    ProfMucWin *mw = wins_get_muc(roomjid);
-                    if (mw != NULL)
-                       mucwin_update_occupants(mw);
-
-                    curr = g_list_next(curr);
-                }
+                occupantswin_occupants_all();
             } else {
                 cons_show(err_msg);
                 free(err_msg);
@@ -4434,34 +4424,13 @@ cmd_occupants(ProfWin *window, const char *const command, gchar **args)
             } else if (g_strcmp0(args[2], "none") == 0) {
                 prefs_clear_occupants_header_char();
                 cons_show("Occupants header char removed.");
-                // get the list of joined rooms
-                GList *rooms = muc_rooms();
-                GList *curr = rooms;
-                while (curr) {
-                    char* roomjid = curr->data;
-                    ProfMucWin *mw = wins_get_muc(roomjid);
-                    if (mw != NULL)
-                        mucwin_update_occupants(mw);
 
-                    curr = g_list_next(curr);
-                }
-
+                occupantswin_occupants_all();
             } else {
                 prefs_set_occupants_header_char(args[2][0]);
                 cons_show("Occupants header char set to %c.", args[2][0]);
 
-                //TODO:func like rosterwin_roster();
-                // get the list of joined rooms
-                GList *rooms = muc_rooms();
-                GList *curr = rooms;
-                while (curr) {
-                    char* roomjid = curr->data;
-                    ProfMucWin *mw = wins_get_muc(roomjid);
-                    if (mw != NULL)
-                       mucwin_update_occupants(mw);
-
-                    curr = g_list_next(curr);
-                }
+                occupantswin_occupants_all();
             }
         } else {
             cons_bad_cmd_usage(command);
