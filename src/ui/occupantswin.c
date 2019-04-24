@@ -107,6 +107,7 @@ occupantswin_occupants(const char *const roomjid)
                 g_string_append(role, "Moderators");
 
                 wattron(layout->subwin, theme_attrs(THEME_OCCUPANTS_HEADER));
+                win_sub_newline_lazy(layout->subwin);
                 win_sub_print(layout->subwin, role->str, TRUE, FALSE, 0);
                 wattroff(layout->subwin, theme_attrs(THEME_OCCUPANTS_HEADER));
                 g_string_free(role, TRUE);
@@ -123,6 +124,7 @@ occupantswin_occupants(const char *const roomjid)
                 g_string_append(role, "Participants");
 
                 wattron(layout->subwin, theme_attrs(THEME_OCCUPANTS_HEADER));
+                win_sub_newline_lazy(layout->subwin);
                 win_sub_print(layout->subwin, role->str, TRUE, FALSE, 0);
                 wattroff(layout->subwin, theme_attrs(THEME_OCCUPANTS_HEADER));
                 g_string_free(role, TRUE);
@@ -139,6 +141,7 @@ occupantswin_occupants(const char *const roomjid)
                 g_string_append(role, "Visitors");
 
                 wattron(layout->subwin, theme_attrs(THEME_OCCUPANTS_HEADER));
+                win_sub_newline_lazy(layout->subwin);
                 win_sub_print(layout->subwin, role->str, TRUE, FALSE, 0);
                 wattroff(layout->subwin, theme_attrs(THEME_OCCUPANTS_HEADER));
                 g_string_free(role, TRUE);
@@ -155,6 +158,7 @@ occupantswin_occupants(const char *const roomjid)
                 g_string_append(role, "Occupants\n");
 
                 wattron(layout->subwin, theme_attrs(THEME_OCCUPANTS_HEADER));
+                win_sub_newline_lazy(layout->subwin);
                 win_sub_print(layout->subwin, role->str, TRUE, FALSE, 0);
                 wattroff(layout->subwin, theme_attrs(THEME_OCCUPANTS_HEADER));
                 g_string_free(role, TRUE);
