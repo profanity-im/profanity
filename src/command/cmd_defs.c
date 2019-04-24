@@ -755,7 +755,8 @@ static struct cmd_t command_defs[] =
             "/occupants default show|hide [jid]",
             "/occupants size [<percent>]",
             "/occupants indent <indent>",
-            "/occupants header char <char>|none")
+            "/occupants header char <char>|none",
+            "/occupants wrap on|off")
         CMD_DESC(
             "Show or hide room occupants, and occupants panel display settings.")
         CMD_ARGS(
@@ -768,7 +769,8 @@ static struct cmd_t command_defs[] =
             { "size <percent>",        "Percentage of the screen taken by the occupants list in rooms (1-99)." },
             { "indent <indent>",       "Indent contact line by <indent> spaces (0 to 10)." },
             { "header char <char>",    "Prefix occupants headers with specified character." },
-            { "header char none",      "Remove occupants header character prefix." })
+            { "header char none",      "Remove occupants header character prefix." },
+            { "wrap on|off",           "Enable or disable line wrapping in occupants panel." })
         CMD_NOEXAMPLES
     },
 
