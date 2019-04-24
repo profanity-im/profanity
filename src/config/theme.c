@@ -409,7 +409,7 @@ _load_preferences(void)
     _set_boolean_preference("enc.warn", PREF_ENC_WARN);
     _set_boolean_preference("tls.show", PREF_TLS_SHOW);
     _set_boolean_preference("statusbar.show.name", PREF_STATUSBAR_SHOW_NAME);
-    _set_boolean_preference("statusbar.show.nuumber", PREF_STATUSBAR_SHOW_NUMBER);
+    _set_boolean_preference("statusbar.show.number", PREF_STATUSBAR_SHOW_NUMBER);
 
     _set_string_preference("time.console", PREF_TIME_CONSOLE);
     _set_string_preference("time.chat", PREF_TIME_CHAT);
