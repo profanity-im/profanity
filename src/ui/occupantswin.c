@@ -58,22 +58,22 @@ _occuptantswin_occupant(ProfLayoutSplit *layout, Occupant *occupant, gboolean sh
         }
     }
 
-    GString *msg = g_string_new("");
-    g_string_append(msg, spaces->str);
+    GString *msg = g_string_new(spaces->str);
 
     gboolean wrap = prefs_get_boolean(PREF_OCCUPANTS_WRAP);
 
     g_string_append(msg, occupant->nick);
-    win_sub_print(layout->subwin, msg->str, TRUE, wrap, current_indent);
+    win_sub_newline_lazy(layout->subwin);
+    win_sub_print(layout->subwin, msg->str, FALSE, wrap, current_indent);
     g_string_free(msg, TRUE);
 
     if (showjid && occupant->jid) {
-        GString *msg = g_string_new("");
-        g_string_append(msg, spaces->str);
+        GString *msg = g_string_new(spaces->str);
         g_string_append(msg, " ");
 
         g_string_append(msg, occupant->jid);
-        win_sub_print(layout->subwin, msg->str, TRUE, wrap, current_indent);
+        win_sub_newline_lazy(layout->subwin);
+        win_sub_print(layout->subwin, msg->str, FALSE, wrap, current_indent);
         g_string_free(msg, TRUE);
     }
 
