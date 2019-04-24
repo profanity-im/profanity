@@ -132,6 +132,7 @@ roster.private.char=
 occupants=
 occupants.size=
 occupants.jid=
+occupants.wrap=
 occupants.indent=
 occupants.header.char=
 wins.autotidy=
