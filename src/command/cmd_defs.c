@@ -767,8 +767,8 @@ static struct cmd_t command_defs[] =
             { "default show|hide jid", "Whether occupants jids are shown by default in new rooms." },
             { "size <percent>",        "Percentage of the screen taken by the occupants list in rooms (1-99)." },
             { "indent <indent>",       "Indent contact line by <indent> spaces (0 to 10)." },
-            { "header char <char>",    "Prefix roster headers with specified character." },
-            { "header char none",      "Remove roster header character prefix." })
+            { "header char <char>",    "Prefix occupants headers with specified character." },
+            { "header char none",      "Remove occupants header character prefix." })
         CMD_NOEXAMPLES
     },
 
