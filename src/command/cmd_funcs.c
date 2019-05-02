@@ -4402,6 +4402,23 @@ cmd_occupants(ProfWin *window, const char *const command, gchar **args)
         }
     }
 
+    if (g_strcmp0(args[0], "char") == 0) {
+        if (!args[1]) {
+            cons_bad_cmd_usage(command);
+        } else if (g_strcmp0(args[1], "none") == 0) {
+            prefs_clear_occupants_char();
+            cons_show("Occupants char removed.");
+
+            occupantswin_occupants_all();
+        } else {
+            prefs_set_occupants_char(args[1][0]);
+            cons_show("Occupants char set to %c.", args[1][0]);
+
+            occupantswin_occupants_all();
+        }
+        return TRUE;
+    }
+
     if (g_strcmp0(args[0], "default") == 0) {
         if (g_strcmp0(args[1], "show") == 0) {
             if (g_strcmp0(args[2], "jid") == 0) {

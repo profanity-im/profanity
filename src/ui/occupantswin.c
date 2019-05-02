@@ -60,6 +60,11 @@ _occuptantswin_occupant(ProfLayoutSplit *layout, Occupant *occupant, gboolean sh
 
     GString *msg = g_string_new(spaces->str);
 
+    char ch = prefs_get_occupants_char();
+    if (ch) {
+        g_string_append_printf(msg, "%c", ch);
+    }
+
     gboolean wrap = prefs_get_boolean(PREF_OCCUPANTS_WRAP);
 
     g_string_append(msg, occupant->nick);

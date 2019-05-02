@@ -1237,6 +1237,12 @@ cons_occupants_setting(void)
     else
         cons_show("Occupants wrap (/occupants)         : OFF");
 
+    char occupants_ch = prefs_get_occupants_char();
+    if (occupants_ch)
+        cons_show("Occupants char (/occupants)         : %c", occupants_ch);
+    else
+        cons_show("Occupants char (/occupants)         : none");
+
     gint occupant_indent = prefs_get_occupants_indent();
     cons_show("Occupant indent (/occupants)        : %d", occupant_indent);
 

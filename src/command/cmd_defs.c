@@ -752,6 +752,7 @@ static struct cmd_t command_defs[] =
             CMD_TAG_UI)
         CMD_SYN(
             "/occupants show|hide [jid]",
+            "/occupants char <char>|none",
             "/occupants default show|hide [jid]",
             "/occupants size [<percent>]",
             "/occupants indent <indent>",
@@ -761,6 +762,8 @@ static struct cmd_t command_defs[] =
             "Show or hide room occupants, and occupants panel display settings.")
         CMD_ARGS(
             { "show",                  "Show the occupants panel in current room." },
+            { "char <char>",           "Prefix occupants with specified character." },
+            { "char none",             "Remove occupants character prefix." },
             { "hide",                  "Hide the occupants panel in current room." },
             { "show jid",              "Show jid in the occupants panel in current room." },
             { "hide jid",              "Hide jid in the occupants panel in current room." },

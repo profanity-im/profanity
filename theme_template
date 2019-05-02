@@ -131,6 +131,7 @@ roster.private=
 roster.private.char=
 occupants=
 occupants.size=
+occupants.char=
 occupants.jid=
 occupants.wrap=
 occupants.indent=
