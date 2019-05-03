@@ -1,4 +1,4 @@
-Profanity [![Build Status](https://travis-ci.org/boothj5/profanity.png?branch=master)](https://travis-ci.org/boothj5/profanity)
+Profanity [![Build Status](https://api.travis-ci.org/profanity-im/profanity.png?branch=master)](https://travis-ci.org/profanity-im/profanity)
 =========
 
 Profanity is a console based XMPP client inspired by [Irssi](http://www.irssi.org/),
