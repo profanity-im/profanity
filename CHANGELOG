@@ -19,7 +19,7 @@
 - Support basic ad-hoc commands(xep-0050) (/command)
 - Add option to trust server's certificate (/connect, /account)
 - Add possibility to close windows via prof_win_close inputrc hook
-- Bug fixes: https://github.com/boothj5/profanity/milestone/16?closed=1
+- Bug fixes: https://github.com/profanity-im/profanity/milestone/16?closed=1
 
 0.5.1
 =====
@@ -33,7 +33,7 @@
 - Add encryption settings functions to plugins api
 - Allow plugins to block message sending on pre message send hooks
 - Fix CVE-2017-5592 (incorrect implementation of Message Carbons allowing social engineering attacks)
-- Bug fixes: https://github.com/boothj5/profanity/milestone/15?closed=1
+- Bug fixes: https://github.com/profanity-im/profanity/milestone/15?closed=1
 
 0.5.0
 =====

@@ -248,9 +248,9 @@ tests_unittests_unittests_SOURCES = $(unittest_sources)
 tests_unittests_unittests_LDADD = -lcmocka
 
 # Functional test were commented out because of:
-# https://github.com/boothj5/profanity/pull/1010
+# https://github.com/profanity-im/profanity/pull/1010
 # An issue was raised for stabber:
-# https://github.com/boothj5/stabber/issues/5
+# https://github.com/profanity-im/stabber/issues/5
 # Once this issue is resolved functional tests should be enabled again
 #
 #if HAVE_STABBER

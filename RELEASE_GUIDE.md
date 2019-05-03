@@ -68,5 +68,5 @@ PACKAGE_STATUS="development"
 
 ## Updating website
   * Make changes to the git repo incuding uploading the new artefacts at:
-        https://github.com/boothj5/www_profanity_im
+        https://github.com/profanity-im/profanity-im.github.io
   * Email boothj5web@gmail.com to get them published to the website

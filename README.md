@@ -16,4 +16,4 @@ Mailing List: https://groups.google.com/forum/#!forum/profanitydev
 
 MUC: profanity@rooms.dismail.de
 
-Plugins repository: https://github.com/boothj5/profanity-plugins
+Plugins repository: https://github.com/profanity-im/profanity-plugins
