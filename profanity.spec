@@ -5,7 +5,7 @@ Summary:	A console based XMPP client
 
 Group:		Application/System
 License:	GPL
-URL:		http://www.profanity.im/
+URL:		https://profanity-im.github.io/
 Source0:	%{name}-%{version}.tar.gz
 
 BuildRequires:	libstrophe-devel
