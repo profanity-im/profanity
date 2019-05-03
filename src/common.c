@@ -269,7 +269,7 @@ file_getline(FILE *stream)
 char*
 release_get_latest(void)
 {
-    char *url = "http://www.profanity.im/profanity_version.txt";
+    char *url = "https://profanity-im.github.io/profanity_version.txt";
 
     CURL *handle = curl_easy_init();
     struct curl_data_t output;

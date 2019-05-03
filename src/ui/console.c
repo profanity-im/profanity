@@ -442,7 +442,7 @@ cons_check_version(gboolean not_available_msg)
         if (relase_valid) {
             if (release_is_new(latest_release)) {
                 win_println(console, THEME_DEFAULT, '-', "A new version of Profanity is available: %s", latest_release);
-                win_println(console, THEME_DEFAULT, '-', "Check <http://www.profanity.im> for details.");
+                win_println(console, THEME_DEFAULT, '-', "Check <https://profanity-im.github.io> for details.");
                 win_println(console, THEME_DEFAULT, '-', "");
             } else {
                 if (not_available_msg) {
