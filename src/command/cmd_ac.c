@@ -184,6 +184,7 @@ static Autocomplete occupants_ac;
 static Autocomplete occupants_default_ac;
 static Autocomplete occupants_show_ac;
 static Autocomplete occupants_header_ac;
+static Autocomplete occupants_header_char_ac;
 static Autocomplete occupants_char_ac;
 static Autocomplete time_ac;
 static Autocomplete time_format_ac;
@@ -688,6 +689,7 @@ cmd_ac_init(void)
     autocomplete_add(occupants_ac, "indent");
     autocomplete_add(occupants_ac, "header");
     autocomplete_add(occupants_ac, "wrap");
+    autocomplete_add(occupants_ac, "char");
 
     occupants_default_ac = autocomplete_new();
     autocomplete_add(occupants_default_ac, "show");
@@ -696,11 +698,14 @@ cmd_ac_init(void)
     occupants_show_ac = autocomplete_new();
     autocomplete_add(occupants_show_ac, "jid");
 
+    occupants_char_ac = autocomplete_new();
+    autocomplete_add(occupants_char_ac, "none");
+
     occupants_header_ac = autocomplete_new();
     autocomplete_add(occupants_header_ac, "char");
 
-    occupants_char_ac = autocomplete_new();
-    autocomplete_add(occupants_char_ac, "none");
+    occupants_header_char_ac = autocomplete_new();
+    autocomplete_add(occupants_header_char_ac, "none");
 
     time_ac = autocomplete_new();
     autocomplete_add(time_ac, "console");
@@ -1115,10 +1120,11 @@ cmd_ac_reset(ProfWin *window)
     autocomplete_reset(form_ac);
     autocomplete_reset(form_field_multi_ac);
     autocomplete_reset(occupants_ac);
+    autocomplete_reset(occupants_char_ac);
     autocomplete_reset(occupants_default_ac);
     autocomplete_reset(occupants_show_ac);
     autocomplete_reset(occupants_header_ac);
-    autocomplete_reset(occupants_char_ac);
+    autocomplete_reset(occupants_header_char_ac);
     autocomplete_reset(time_ac);
     autocomplete_reset(time_format_ac);
     autocomplete_reset(resource_ac);
@@ -1247,6 +1253,7 @@ cmd_ac_uninit(void)
     autocomplete_free(form_ac);
     autocomplete_free(form_field_multi_ac);
     autocomplete_free(occupants_ac);
+    autocomplete_free(occupants_char_ac);
     autocomplete_free(occupants_default_ac);
     autocomplete_free(occupants_show_ac);
     autocomplete_free(occupants_header_ac);
@@ -2559,6 +2566,11 @@ _occupants_autocomplete(ProfWin *window, const char *const input, gboolean previ
     char *found = NULL;
 
     found = autocomplete_param_with_ac(input, "/occupants default show", occupants_show_ac, TRUE, previous);
+    if (found) {
+        return found;
+    }
+
+    found = autocomplete_param_with_ac(input, "/occupants char", occupants_char_ac, TRUE, previous);
     if (found) {
         return found;
     }

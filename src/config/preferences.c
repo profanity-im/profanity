@@ -750,6 +750,40 @@ prefs_get_occupants_size(void)
     }
 }
 
+char
+prefs_get_occupants_char(void)
+{
+    char result = 0;
+
+    char *resultstr = g_key_file_get_string(prefs, PREF_GROUP_UI, "occupants.char", NULL);
+    if (!resultstr) {
+        result =  0;
+    } else {
+        result = resultstr[0];
+    }
+    free(resultstr);
+
+    return result;
+}
+
+void
+prefs_set_occupants_char(char ch)
+{
+    char str[2];
+    str[0] = ch;
+    str[1] = '\0';
+
+    g_key_file_set_string(prefs, PREF_GROUP_UI, "occupants.char", str);
+    _save_prefs();
+}
+
+void
+prefs_clear_occupants_char(void)
+{
+    g_key_file_remove_key(prefs, PREF_GROUP_UI, "occupants.char", NULL);
+    _save_prefs();
+}
+
 gint
 prefs_get_occupants_indent(void)
 {

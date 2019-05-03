@@ -453,6 +453,16 @@ _load_preferences(void)
         prefs_set_occupants_size(occupants_size);
     }
 
+    if (g_key_file_has_key(theme, "ui", "occupants.char", NULL)) {
+        gchar *ch = g_key_file_get_string(theme, "ui", "occupants.char", NULL);
+        if (ch && strlen(ch) > 0) {
+            prefs_set_occupants_char(ch[0]);
+            g_free(ch);
+        }
+    } else {
+        prefs_clear_occupants_char();
+    }
+
     if (g_key_file_has_key(theme, "ui", "occupants.indent", NULL)) {
         gint occupants_indent = g_key_file_get_integer(theme, "ui", "occupants.indent", NULL);
         prefs_set_occupants_indent(occupants_indent);
