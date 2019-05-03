@@ -21,7 +21,7 @@ sends_room_join(void **state)
     assert_true(stbbr_last_received(
         "<presence id='*' to='testroom@conference.localhost/stabber'>"
             "<x xmlns='http://jabber.org/protocol/muc'/>"
-            "<c hash='sha-1' xmlns='http://jabber.org/protocol/caps' ver='*' node='http://www.profanity.im'/>"
+            "<c hash='sha-1' xmlns='http://jabber.org/protocol/caps' ver='*' node='http://profanity-im.github.io'/>"
         "</presence>"
     ));
 }
@@ -36,7 +36,7 @@ sends_room_join_with_nick(void **state)
     assert_true(stbbr_last_received(
         "<presence id='*' to='testroom@conference.localhost/testnick'>"
             "<x xmlns='http://jabber.org/protocol/muc'/>"
-            "<c hash='sha-1' xmlns='http://jabber.org/protocol/caps' ver='*' node='http://www.profanity.im'/>"
+            "<c hash='sha-1' xmlns='http://jabber.org/protocol/caps' ver='*' node='http://profanity-im.github.io'/>"
         "</presence>"
     ));
 }
@@ -53,7 +53,7 @@ sends_room_join_with_password(void **state)
             "<x xmlns='http://jabber.org/protocol/muc'>"
                 "<password>testpassword</password>"
             "</x>"
-            "<c hash='sha-1' xmlns='http://jabber.org/protocol/caps' ver='*' node='http://www.profanity.im'/>"
+            "<c hash='sha-1' xmlns='http://jabber.org/protocol/caps' ver='*' node='http://profanity-im.github.io'/>"
         "</presence>"
     ));
 }
@@ -70,7 +70,7 @@ sends_room_join_with_nick_and_password(void **state)
             "<x xmlns='http://jabber.org/protocol/muc'>"
                 "<password>testpassword</password>"
             "</x>"
-            "<c hash='sha-1' xmlns='http://jabber.org/protocol/caps' ver='*' node='http://www.profanity.im'/>"
+            "<c hash='sha-1' xmlns='http://jabber.org/protocol/caps' ver='*' node='http://profanity-im.github.io'/>"
         "</presence>"
     ));
 }
@@ -82,7 +82,7 @@ shows_role_and_affiliation_on_join(void **state)
 
     stbbr_for_id("prof_join_4",
         "<presence id='prof_join_4' lang='en' to='stabber@localhost/profanity' from='testroom@conference.localhost/stabber'>"
-            "<c hash='sha-1' xmlns='http://jabber.org/protocol/caps' node='http://www.profanity.im' ver='*'/>"
+            "<c hash='sha-1' xmlns='http://jabber.org/protocol/caps' node='http://profanity-im.github.io' ver='*'/>"
             "<x xmlns='http://jabber.org/protocol/muc#user'>"
                 "<item role='participant' jid='stabber@localhost/profanity' affiliation='none'/>"
             "</x>"
@@ -102,7 +102,7 @@ shows_subject_on_join(void **state)
 
     stbbr_for_id("prof_join_4",
         "<presence id='prof_join_4' lang='en' to='stabber@localhost/profanity' from='testroom@conference.localhost/stabber'>"
-            "<c hash='sha-1' xmlns='http://jabber.org/protocol/caps' node='http://www.profanity.im' ver='*'/>"
+            "<c hash='sha-1' xmlns='http://jabber.org/protocol/caps' node='http://profanity-im.github.io' ver='*'/>"
             "<x xmlns='http://jabber.org/protocol/muc#user'>"
                 "<item role='participant' jid='stabber@localhost/profanity' affiliation='none'/>"
             "</x>"
@@ -130,7 +130,7 @@ shows_history_message(void **state)
 
     stbbr_for_id("prof_join_4",
         "<presence id='prof_join_4' lang='en' to='stabber@localhost/profanity' from='testroom@conference.localhost/stabber'>"
-            "<c hash='sha-1' xmlns='http://jabber.org/protocol/caps' node='http://www.profanity.im' ver='*'/>"
+            "<c hash='sha-1' xmlns='http://jabber.org/protocol/caps' node='http://profanity-im.github.io' ver='*'/>"
             "<x xmlns='http://jabber.org/protocol/muc#user'>"
                 "<item role='participant' jid='stabber@localhost/profanity' affiliation='none'/>"
             "</x>"
@@ -159,7 +159,7 @@ shows_occupant_join(void **state)
 
     stbbr_for_id("prof_join_4",
         "<presence id='prof_join_4' lang='en' to='stabber@localhost/profanity' from='testroom@conference.localhost/stabber'>"
-            "<c hash='sha-1' xmlns='http://jabber.org/protocol/caps' node='http://www.profanity.im' ver='*'/>"
+            "<c hash='sha-1' xmlns='http://jabber.org/protocol/caps' node='http://profanity-im.github.io' ver='*'/>"
             "<x xmlns='http://jabber.org/protocol/muc#user'>"
                 "<item role='participant' jid='stabber@localhost/profanity' affiliation='none'/>"
             "</x>"
@@ -188,7 +188,7 @@ shows_message(void **state)
 
     stbbr_for_id("prof_join_4",
         "<presence id='prof_join_4' lang='en' to='stabber@localhost/profanity' from='testroom@conference.localhost/stabber'>"
-            "<c hash='sha-1' xmlns='http://jabber.org/protocol/caps' node='http://www.profanity.im' ver='*'/>"
+            "<c hash='sha-1' xmlns='http://jabber.org/protocol/caps' node='http://profanity-im.github.io' ver='*'/>"
             "<x xmlns='http://jabber.org/protocol/muc#user'>"
                 "<item role='participant' jid='stabber@localhost/profanity' affiliation='none'/>"
             "</x>"
@@ -215,7 +215,7 @@ shows_me_message_from_occupant(void **state)
 
     stbbr_for_id("prof_join_4",
         "<presence id='prof_join_4' lang='en' to='stabber@localhost/profanity' from='testroom@conference.localhost/stabber'>"
-            "<c hash='sha-1' xmlns='http://jabber.org/protocol/caps' node='http://www.profanity.im' ver='*'/>"
+            "<c hash='sha-1' xmlns='http://jabber.org/protocol/caps' node='http://profanity-im.github.io' ver='*'/>"
             "<x xmlns='http://jabber.org/protocol/muc#user'>"
                 "<item role='participant' jid='stabber@localhost/profanity' affiliation='none'/>"
             "</x>"
@@ -242,7 +242,7 @@ shows_me_message_from_self(void **state)
 
     stbbr_for_id("prof_join_4",
         "<presence id='prof_join_4' lang='en' to='stabber@localhost/profanity' from='testroom@conference.localhost/stabber'>"
-            "<c hash='sha-1' xmlns='http://jabber.org/protocol/caps' node='http://www.profanity.im' ver='*'/>"
+            "<c hash='sha-1' xmlns='http://jabber.org/protocol/caps' node='http://profanity-im.github.io' ver='*'/>"
             "<x xmlns='http://jabber.org/protocol/muc#user'>"
                 "<item role='participant' jid='stabber@localhost/profanity' affiliation='none'/>"
             "</x>"
@@ -269,7 +269,7 @@ shows_all_messages_in_console_when_window_not_focussed(void **state)
 
     stbbr_for_id("prof_join_4",
         "<presence id='prof_join_4' lang='en' to='stabber@localhost/profanity' from='testroom@conference.localhost/stabber'>"
-            "<c hash='sha-1' xmlns='http://jabber.org/protocol/caps' node='http://www.profanity.im' ver='*'/>"
+            "<c hash='sha-1' xmlns='http://jabber.org/protocol/caps' node='http://profanity-im.github.io' ver='*'/>"
             "<x xmlns='http://jabber.org/protocol/muc#user'>"
                 "<item role='participant' jid='stabber@localhost/profanity' affiliation='none'/>"
             "</x>"
@@ -310,7 +310,7 @@ shows_first_message_in_console_when_window_not_focussed(void **state)
 
     stbbr_for_id("prof_join_4",
         "<presence id='prof_join_4' lang='en' to='stabber@localhost/profanity' from='testroom@conference.localhost/stabber'>"
-            "<c hash='sha-1' xmlns='http://jabber.org/protocol/caps' node='http://www.profanity.im' ver='*'/>"
+            "<c hash='sha-1' xmlns='http://jabber.org/protocol/caps' node='http://profanity-im.github.io' ver='*'/>"
             "<x xmlns='http://jabber.org/protocol/muc#user'>"
                 "<item role='participant' jid='stabber@localhost/profanity' affiliation='none'/>"
             "</x>"
@@ -356,7 +356,7 @@ shows_no_message_in_console_when_window_not_focussed(void **state)
 
     stbbr_for_id("prof_join_4",
         "<presence id='prof_join_4' lang='en' to='stabber@localhost/profanity' from='testroom@conference.localhost/stabber'>"
-            "<c hash='sha-1' xmlns='http://jabber.org/protocol/caps' node='http://www.profanity.im' ver='*'/>"
+            "<c hash='sha-1' xmlns='http://jabber.org/protocol/caps' node='http://profanity-im.github.io' ver='*'/>"
             "<x xmlns='http://jabber.org/protocol/muc#user'>"
                 "<item role='participant' jid='stabber@localhost/profanity' affiliation='none'/>"
             "</x>"

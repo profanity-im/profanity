@@ -28,7 +28,7 @@ connect_jid_sends_presence_after_receiving_roster(void **state)
 
     assert_true(stbbr_received(
         "<presence id='*'>"
-            "<c hash='sha-1' xmlns='http://jabber.org/protocol/caps' ver='*' node='http://www.profanity.im'/>"
+            "<c hash='sha-1' xmlns='http://jabber.org/protocol/caps' ver='*' node='http://profanity-im.github.io'/>"
         "</presence>"
     ));
 }

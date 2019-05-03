@@ -36,7 +36,7 @@ send_receipt_request(void **state)
 
     stbbr_for_id("prof_caps_4",
         "<iq from='buddy1@localhost/laptop' to='stabber@localhost' id='prof_caps_4' type='result'>"
-            "<query xmlns='http://jabber.org/protocol/disco#info' node='http://www.profanity.im#hAkb1xZdJV9BQpgGNw8zG5Xsals='>"
+            "<query xmlns='http://jabber.org/protocol/disco#info' node='http://profanity-im.github.io#hAkb1xZdJV9BQpgGNw8zG5Xsals='>"
                 "<identity category='client' name='Profanity 0.5.0' type='console'/>"
                 "<feature var='urn:xmpp:receipts'/>"
             "</query>"
@@ -47,7 +47,7 @@ send_receipt_request(void **state)
         "<presence to='stabber@localhost' from='buddy1@localhost/laptop'>"
             "<priority>15</priority>"
             "<status>My status</status>"
-            "<c hash='sha-256' xmlns='http://jabber.org/protocol/caps' node='http://www.profanity.im' ver='hAkb1xZdJV9BQpgGNw8zG5Xsals='/>"
+            "<c hash='sha-256' xmlns='http://jabber.org/protocol/caps' node='http://profanity-im.github.io' ver='hAkb1xZdJV9BQpgGNw8zG5Xsals='/>"
         "</presence>"
     );
 

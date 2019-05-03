@@ -244,7 +244,7 @@ prof_connect_with_roster(char *roster)
     stbbr_for_id("prof_presence_1",
         "<presence id='prof_presence_1' lang='en' to='stabber@localhost/profanity' from='stabber@localhost/profanity'>"
             "<priority>0</priority>"
-            "<c hash='sha-1' xmlns='http://jabber.org/protocol/caps' node='http://www.profanity.im' ver='f8mrtdyAmhnj8Ca+630bThSL718='/>"
+            "<c hash='sha-1' xmlns='http://jabber.org/protocol/caps' node='http://profanity-im.github.io/' ver='f8mrtdyAmhnj8Ca+630bThSL718='/>"
         "</presence>"
     );
 

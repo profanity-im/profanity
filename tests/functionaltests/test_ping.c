@@ -86,7 +86,7 @@ void ping_jid(void **state)
 {
     stbbr_for_id("prof_caps_4",
         "<iq id='prof_caps_4' to='stabber@localhost/profanity' type='result' from='buddy1@localhost/mobile'>"
-            "<query xmlns='http://jabber.org/protocol/disco#info' node='http://www.profanity.im#LpT2xs3nun7jC2sq4gg3WRDQFZ4='>"
+            "<query xmlns='http://jabber.org/protocol/disco#info' node='http://profanity-im.github.io#LpT2xs3nun7jC2sq4gg3WRDQFZ4='>"
                 "<identity category='client' type='console' name='Profanity0.6.0'/>"
                 "<feature var='urn:xmpp:ping'/>"
                 "<feature var='http://jabber.org/protocol/disco#info'/>"
@@ -104,7 +104,7 @@ void ping_jid(void **state)
             "<c "
                 "hash='sha-1' "
                 "xmlns='http://jabber.org/protocol/caps' "
-                "node='http://www.profanity.im' "
+                "node='http://profanity-im.github.io' "
                 "ver='LpT2xs3nun7jC2sq4gg3WRDQFZ4='"
             "/>"
         "</presence>"
@@ -113,7 +113,7 @@ void ping_jid(void **state)
 
     assert_true(stbbr_received(
         "<iq id='prof_caps_4' to='buddy1@localhost/mobile' type='get'>"
-            "<query xmlns='http://jabber.org/protocol/disco#info' node='http://www.profanity.im#LpT2xs3nun7jC2sq4gg3WRDQFZ4='/>"
+            "<query xmlns='http://jabber.org/protocol/disco#info' node='http://profanity-im.github.io#LpT2xs3nun7jC2sq4gg3WRDQFZ4='/>"
         "</iq>"
     ));
 
@@ -135,7 +135,7 @@ void ping_jid_not_supported(void **state)
 {
     stbbr_for_id("prof_caps_4",
         "<iq id='prof_caps_4' to='stabber@localhost/profanity' type='result' from='buddy1@localhost/mobile'>"
-            "<query xmlns='http://jabber.org/protocol/disco#info' node='http://www.profanity.im#LpT2xs3nun7jC2sq4gg3WRDQFZ4='>"
+            "<query xmlns='http://jabber.org/protocol/disco#info' node='http://profanity-im.github.io#LpT2xs3nun7jC2sq4gg3WRDQFZ4='>"
                 "<identity category='client' type='console' name='Profanity0.6.0'/>"
                 "<feature var='http://jabber.org/protocol/disco#info'/>"
                 "<feature var='http://jabber.org/protocol/caps'/>"
@@ -152,7 +152,7 @@ void ping_jid_not_supported(void **state)
             "<c "
                 "hash='sha-1' "
                 "xmlns='http://jabber.org/protocol/caps' "
-                "node='http://www.profanity.im' "
+                "node='http://profanity-im.github.io' "
                 "ver='LpT2xs3nun7jC2sq4gg3WRDQFZ4='"
             "/>"
         "</presence>"
@@ -161,7 +161,7 @@ void ping_jid_not_supported(void **state)
 
     assert_true(stbbr_received(
         "<iq id='prof_caps_4' to='buddy1@localhost/mobile' type='get'>"
-            "<query xmlns='http://jabber.org/protocol/disco#info' node='http://www.profanity.im#LpT2xs3nun7jC2sq4gg3WRDQFZ4='/>"
+            "<query xmlns='http://jabber.org/protocol/disco#info' node='http://profanity-im.github.io#LpT2xs3nun7jC2sq4gg3WRDQFZ4='/>"
         "</iq>"
     ));
 
