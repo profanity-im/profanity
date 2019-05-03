@@ -1034,7 +1034,7 @@ static struct cmd_t command_defs[] =
         CMD_ARGS(
             { "<url>", "The url to make tiny." })
         CMD_EXAMPLES(
-            "Example: /tiny http://www.profanity.im")
+            "Example: /tiny https://profanity-im.github.io/")
     },
 
     { "/who",
