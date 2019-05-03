@@ -1954,7 +1954,7 @@ stanza_attach_caps(xmpp_ctx_t *const ctx, xmpp_stanza_t *const presence)
 
     char *sha1 = caps_get_my_sha1(ctx);
     xmpp_stanza_set_attribute(caps, STANZA_ATTR_HASH, "sha-1");
-    xmpp_stanza_set_attribute(caps, STANZA_ATTR_NODE, "http://www.profanity.im");
+    xmpp_stanza_set_attribute(caps, STANZA_ATTR_NODE, "https://profanity-im.github.io");
     xmpp_stanza_set_attribute(caps, STANZA_ATTR_VER, sha1);
     xmpp_stanza_add_child(presence, caps);
     xmpp_stanza_release(caps);
