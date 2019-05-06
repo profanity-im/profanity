@@ -221,7 +221,7 @@ sv_ev_lost_connection(void)
 #ifdef HAVE_LIBGPGME
     p_gpg_on_disconnect();
 #endif
-#ifdef HAVE_LIBGPGME
+#ifdef HAVE_OMEMO
     omemo_on_disconnect();
 #endif
 }
