@@ -215,9 +215,14 @@ sv_ev_lost_connection(void)
     muc_confserver_clear();
     chat_sessions_clear();
     ui_disconnected();
+    ui_close_all_wins();
     roster_destroy();
+    tlscerts_clear_current();
 #ifdef HAVE_LIBGPGME
     p_gpg_on_disconnect();
+#endif
+#ifdef HAVE_LIBGPGME
+    omemo_on_disconnect();
 #endif
 }
 
