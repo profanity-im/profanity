@@ -29,7 +29,7 @@
 void log_init(log_level_t filter) {}
 log_level_t log_get_filter(void)
 {
-    return (log_level_t)mock();
+    return mock_type(log_level_t);
 }
 void log_reinit(void) {}
 void log_close(void) {}
@@ -46,7 +46,7 @@ char * get_log_file_location(void)
 
 log_level_t log_level_from_string(char *log_level)
 {
-    return (log_level_t)mock();
+    return mock_type(log_level_t);
 }
 
 void log_stderr_init(log_level_t level) {}

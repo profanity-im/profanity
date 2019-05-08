@@ -48,13 +48,13 @@ ProfAccount* accounts_get_account(const char * const name)
 gboolean accounts_enable(const char * const name)
 {
     check_expected(name);
-    return (gboolean)mock();
+    return mock_type(gboolean);
 }
 
 gboolean accounts_disable(const char * const name)
 {
     check_expected(name);
-    return (gboolean)mock();
+    return mock_type(gboolean);
 }
 
 gboolean accounts_rename(const char * const account_name,
@@ -62,13 +62,13 @@ gboolean accounts_rename(const char * const account_name,
 {
     check_expected(account_name);
     check_expected(new_name);
-    return (gboolean)mock();
+    return mock_type(gboolean);
 }
 
 gboolean accounts_account_exists(const char * const account_name)
 {
     check_expected(account_name);
-    return (gboolean)mock();
+    return mock_type(gboolean);
 }
 
 void accounts_set_jid(const char * const account_name, const char * const value)
@@ -148,7 +148,7 @@ char * accounts_get_last_status(const char * const account_name)
 resource_presence_t accounts_get_last_presence(const char * const account_name)
 {
     check_expected(account_name);
-    return (resource_presence_t)mock();
+    return mock_type(resource_presence_t);
 }
 
 void accounts_set_priority_online(const char * const account_name, const gint value)

@@ -57,7 +57,7 @@ void otr_keygen(ProfAccount *account)
 
 gboolean otr_key_loaded(void)
 {
-    return (gboolean)mock();
+    return mock_type(gboolean);
 }
 
 char* otr_tag_message(const char * const msg)
