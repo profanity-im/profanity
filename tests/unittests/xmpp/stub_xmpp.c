@@ -31,7 +31,7 @@ void session_shutdown(void) {}
 void session_process_events(void) {}
 const char * connection_get_fulljid(void)
 {
-    return (char *)mock();
+    return mock_ptr_type(char *);
 }
 
 const char * connection_get_domain(void)
@@ -65,12 +65,12 @@ jabber_conn_status_t connection_get_status(void)
 
 char* connection_get_presence_msg(void)
 {
-    return (char*)mock();
+    return mock_ptr_type(char*);
 }
 
 char* session_get_account_name(void)
 {
-    return (char*)mock();
+    return mock_ptr_type(char*);
 }
 
 GList * session_get_available_resources(void)
@@ -254,7 +254,7 @@ gboolean bookmark_join(const char *jid)
 
 GList * bookmark_get_list(void)
 {
-    return (GList *)mock();
+    return mock_ptr_type(GList *);
 }
 
 char * bookmark_find(const char * const search_str, gboolean previous)

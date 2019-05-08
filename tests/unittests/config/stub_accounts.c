@@ -36,13 +36,13 @@ int  accounts_remove(const char *jid)
 
 gchar** accounts_get_list(void)
 {
-    return (gchar **)mock();
+    return mock_ptr_type(gchar **);
 }
 
 ProfAccount* accounts_get_account(const char * const name)
 {
     check_expected(name);
-    return (ProfAccount*)mock();
+    return mock_ptr_type(ProfAccount*);
 }
 
 gboolean accounts_enable(const char * const name)

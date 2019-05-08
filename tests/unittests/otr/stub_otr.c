@@ -31,12 +31,12 @@ void otr_shutdown(void) {}
 
 char* otr_libotr_version(void)
 {
-    return (char*)mock();
+    return mock_ptr_type(char*);
 }
 
 char* otr_start_query(void)
 {
-    return (char*)mock();
+    return mock_ptr_type(char*);
 }
 
 void otr_poll(void) {}
@@ -86,13 +86,13 @@ void otr_end_session(const char * const recipient) {}
 
 char * otr_get_my_fingerprint(void)
 {
-    return (char *)mock();
+    return mock_ptr_type(char *);
 }
 
 char * otr_get_their_fingerprint(const char * const recipient)
 {
     check_expected(recipient);
-    return (char *)mock();
+    return mock_ptr_type(char *);
 }
 
 char * otr_encrypt_message(const char * const to, const char * const message)
