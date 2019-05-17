@@ -483,7 +483,7 @@ void occupantswin_occupants_all(void) {}
 // window interface
 ProfWin* win_create_console(void)
 {
-    return (ProfWin*)mock();
+    return mock_ptr_type(ProfWin*);
 }
 ProfWin* win_create_xmlconsole(void)
 {
@@ -491,7 +491,7 @@ ProfWin* win_create_xmlconsole(void)
 }
 ProfWin* win_create_chat(const char * const barejid)
 {
-    return (ProfWin*)mock();
+    return mock_ptr_type(ProfWin*);
 }
 ProfWin* win_create_muc(const char * const roomjid)
 {

@@ -17,13 +17,13 @@ jabber_conn_status_t session_connect_with_details(const char * const jid,
     check_expected(passwd);
     check_expected(altdomain);
     check_expected(port);
-    return (jabber_conn_status_t)mock();
+    return mock_type(jabber_conn_status_t);
 }
 
 jabber_conn_status_t session_connect_with_account(const ProfAccount * const account)
 {
     check_expected(account);
-    return (jabber_conn_status_t)mock();
+    return mock_type(jabber_conn_status_t);
 }
 
 void session_disconnect(void) {}
@@ -31,7 +31,7 @@ void session_shutdown(void) {}
 void session_process_events(void) {}
 const char * connection_get_fulljid(void)
 {
-    return (char *)mock();
+    return mock_ptr_type(char *);
 }
 
 const char * connection_get_domain(void)
@@ -60,17 +60,17 @@ void connection_free_uuid(char * uuid) {}
 
 jabber_conn_status_t connection_get_status(void)
 {
-    return (jabber_conn_status_t)mock();
+    return mock_type(jabber_conn_status_t);
 }
 
 char* connection_get_presence_msg(void)
 {
-    return (char*)mock();
+    return mock_ptr_type(char*);
 }
 
 char* session_get_account_name(void)
 {
-    return (char*)mock();
+    return mock_ptr_type(char*);
 }
 
 GList * session_get_available_resources(void)
@@ -233,7 +233,7 @@ gboolean bookmark_add(const char *jid, const char *nick, const char *password, c
     check_expected(nick);
     check_expected(password);
     check_expected(autojoin_str);
-    return (gboolean)mock();
+    return mock_type(gboolean);
 }
 
 gboolean bookmark_update(const char *jid, const char *nick, const char *password, const char *autojoin_str)
@@ -244,7 +244,7 @@ gboolean bookmark_update(const char *jid, const char *nick, const char *password
 gboolean bookmark_remove(const char *jid)
 {
     check_expected(jid);
-    return (gboolean)mock();
+    return mock_type(gboolean);
 }
 
 gboolean bookmark_join(const char *jid)
@@ -254,7 +254,7 @@ gboolean bookmark_join(const char *jid)
 
 GList * bookmark_get_list(void)
 {
-    return (GList *)mock();
+    return mock_ptr_type(GList *);
 }
 
 char * bookmark_find(const char * const search_str, gboolean previous)
