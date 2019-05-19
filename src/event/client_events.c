@@ -39,12 +39,11 @@
 
 #include "log.h"
 #include "config/preferences.h"
+#include "event/common.h"
 #include "plugins/plugins.h"
 #include "ui/window_list.h"
-#include "ui/ui.h"
-#include "xmpp/xmpp.h"
-#include "xmpp/roster_list.h"
 #include "xmpp/chat_session.h"
+#include "xmpp/xmpp.h"
 
 #ifdef HAVE_LIBOTR
 #include "otr/otr.h"
@@ -87,20 +86,7 @@ cl_ev_disconnect(void)
     cons_show("%s logged out successfully.", jidp->barejid);
     jid_destroy(jidp);
 
-    ui_disconnected();
-    ui_close_all_wins();
-    session_disconnect();
-    roster_destroy();
-    muc_invites_clear();
-    muc_confserver_clear();
-    chat_sessions_clear();
-    tlscerts_clear_current();
-#ifdef HAVE_LIBGPGME
-    p_gpg_on_disconnect();
-#endif
-#ifdef HAVE_OMEMO
-    omemo_on_disconnect();
-#endif
+    ev_disconnect_cleanup();
 }
 
 void

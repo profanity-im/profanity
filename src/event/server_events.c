@@ -45,6 +45,7 @@
 #include "config/account.h"
 #include "config/scripts.h"
 #include "event/client_events.h"
+#include "event/common.h"
 #include "plugins/plugins.h"
 #include "ui/window_list.h"
 #include "xmpp/muc.h"
@@ -211,19 +212,7 @@ sv_ev_lost_connection(void)
     }
 #endif
 
-    muc_invites_clear();
-    muc_confserver_clear();
-    chat_sessions_clear();
-    ui_disconnected();
-    ui_close_all_wins();
-    roster_destroy();
-    tlscerts_clear_current();
-#ifdef HAVE_LIBGPGME
-    p_gpg_on_disconnect();
-#endif
-#ifdef HAVE_OMEMO
-    omemo_on_disconnect();
-#endif
+    ev_disconnect_cleanup();
 }
 
 void

@@ -15,6 +15,7 @@ core_sources = \
 	src/xmpp/bookmark.c src/xmpp/bookmark.h \
 	src/xmpp/blocking.c src/xmpp/blocking.h \
 	src/xmpp/form.c src/xmpp/form.h \
+	src/event/common.c src/event/common.h \
 	src/event/server_events.c src/event/server_events.h \
 	src/event/client_events.c src/event/client_events.h \
 	src/ui/ui.h src/ui/window.c src/ui/window.h src/ui/core.c \
@@ -95,6 +96,7 @@ unittest_sources = \
 	src/plugins/settings.c src/plugins/settings.h \
 	src/plugins/disco.c src/plugins/disco.h \
 	src/ui/window_list.c src/ui/window_list.h \
+	src/event/common.c src/event/common.h \
 	src/event/server_events.c src/event/server_events.h \
 	src/event/client_events.c src/event/client_events.h \
 	src/ui/tray.h src/ui/tray.c \
