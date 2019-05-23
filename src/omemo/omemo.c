@@ -851,10 +851,14 @@ omemo_on_message_recv(const char *const from_jid, uint32_t sid,
         }
     } else {
         log_debug("OMEMO: decrypting message with existing session");
-        signal_message *message;
-        signal_message_deserialize(&message, key->data, key->length, omemo_ctx.signal);
-        res = session_cipher_decrypt_signal_message(cipher, message, NULL, &plaintext_key);
-        SIGNAL_UNREF(message);
+        signal_message *message = NULL;
+        res = signal_message_deserialize(&message, key->data, key->length, omemo_ctx.signal);
+        if (res < 0) {
+            log_error("OMEMO: cannot deserialize message");
+        } else {
+            res = session_cipher_decrypt_signal_message(cipher, message, NULL, &plaintext_key);
+            SIGNAL_UNREF(message);
+        }
     }
 
     session_cipher_free(cipher);
