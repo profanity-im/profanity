@@ -86,6 +86,7 @@ cl_ev_disconnect(void)
     cons_show("%s logged out successfully.", jidp->barejid);
     jid_destroy(jidp);
 
+    ui_close_all_wins();
     ev_disconnect_cleanup();
 }
 

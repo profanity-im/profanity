@@ -51,7 +51,6 @@ void
 ev_disconnect_cleanup(void)
 {
     ui_disconnected();
-    ui_close_all_wins();
     session_disconnect();
     roster_destroy();
     muc_invites_clear();
