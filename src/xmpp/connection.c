@@ -57,7 +57,9 @@ typedef struct prof_conn_t {
     xmpp_log_t *xmpp_log;
     xmpp_ctx_t *xmpp_ctx;
     xmpp_conn_t *xmpp_conn;
+    gboolean xmpp_in_event_loop;
     jabber_conn_status_t conn_status;
+    xmpp_conn_event_t conn_last_event;
     char *presence_message;
     int priority;
     char *domain;
@@ -85,7 +87,9 @@ connection_init(void)
     xmpp_initialize();
     conn.xmpp_conn = NULL;
     conn.xmpp_ctx = NULL;
+    conn.xmpp_in_event_loop = FALSE;
     conn.conn_status = JABBER_DISCONNECTED;
+    conn.conn_last_event = XMPP_CONN_DISCONNECT;
     conn.presence_message = NULL;
     conn.domain = NULL;
     conn.features_by_jid = NULL;
@@ -96,7 +100,9 @@ connection_init(void)
 void
 connection_check_events(void)
 {
+    conn.xmpp_in_event_loop = TRUE;
     xmpp_run_once(conn.xmpp_ctx, 10);
+    conn.xmpp_in_event_loop = FALSE;
 }
 
 void
@@ -196,21 +202,30 @@ connection_connect(const char *const jid, const char *const passwd, const char *
 void
 connection_disconnect(void)
 {
-    conn.conn_status = JABBER_DISCONNECTING;
-    xmpp_disconnect(conn.xmpp_conn);
+    // don't disconnect already disconnected connection,
+    // or we get infinite loop otherwise
+    if (conn.conn_last_event == XMPP_CONN_CONNECT) {
+        conn.conn_status = JABBER_DISCONNECTING;
+        xmpp_disconnect(conn.xmpp_conn);
 
-    while (conn.conn_status == JABBER_DISCONNECTING) {
-        session_process_events();
+        while (conn.conn_status == JABBER_DISCONNECTING) {
+            session_process_events();
+        }
+    } else {
+        conn.conn_status = JABBER_DISCONNECTED;
     }
 
-    if (conn.xmpp_conn) {
-        xmpp_conn_release(conn.xmpp_conn);
-        conn.xmpp_conn = NULL;
-    }
+    // can't free libstrophe objects while we're in the event loop
+    if (!conn.xmpp_in_event_loop) {
+        if (conn.xmpp_conn) {
+            xmpp_conn_release(conn.xmpp_conn);
+            conn.xmpp_conn = NULL;
+        }
 
-    if (conn.xmpp_ctx) {
-        xmpp_ctx_free(conn.xmpp_ctx);
-        conn.xmpp_ctx = NULL;
+        if (conn.xmpp_ctx) {
+            xmpp_ctx_free(conn.xmpp_ctx);
+            conn.xmpp_ctx = NULL;
+        }
     }
 }
 
@@ -470,6 +485,8 @@ static void
 _connection_handler(xmpp_conn_t *const xmpp_conn, const xmpp_conn_event_t status, const int error,
     xmpp_stream_error_t *const stream_error, void *const userdata)
 {
+    conn.conn_last_event = status;
+
     switch (status) {
 
     // login success
