@@ -113,14 +113,11 @@ session_connect_with_account(const ProfAccount *const account)
 
     log_info("Connecting using account: %s", account->name);
 
+    _session_free_saved_account();
+    _session_free_saved_details();
+
     // save account name and password for reconnect
-    if (saved_account.name) {
-        free(saved_account.name);
-    }
     saved_account.name = strdup(account->name);
-    if (saved_account.passwd) {
-        free(saved_account.passwd);
-    }
     saved_account.passwd = strdup(account->password);
 
     char *jid = NULL;
@@ -149,6 +146,9 @@ session_connect_with_details(const char *const jid, const char *const passwd, co
 {
     assert(jid != NULL);
     assert(passwd != NULL);
+
+    _session_free_saved_account();
+    _session_free_saved_details();
 
     // save details for reconnect, remember name for account creating on success
     saved_details.name = strdup(jid);
@@ -196,20 +196,6 @@ session_connect_with_details(const char *const jid, const char *const passwd, co
 void
 session_autoping_fail(void)
 {
-    if (connection_get_status() == JABBER_CONNECTED) {
-        log_info("Closing connection");
-
-        char *account_name = session_get_account_name();
-        const char *fulljid = connection_get_fulljid();
-        plugins_on_disconnect(account_name, fulljid);
-
-        accounts_set_last_activity(session_get_account_name());
-
-        connection_disconnect();
-    }
-
-    connection_set_disconnected();
-
     session_lost_connection();
 }
 
@@ -230,11 +216,7 @@ session_disconnect(void)
 
         connection_disconnect();
 
-        _session_free_saved_account();
-        _session_free_saved_details();
-
         connection_clear_data();
-
         chat_sessions_clear();
         presence_clear_sub_requests();
     }
@@ -359,6 +341,7 @@ session_login_failed(void)
 void
 session_lost_connection(void)
 {
+    /* this callback also clears all cached data */
     sv_ev_lost_connection();
     if (prefs_get_reconnect() != 0) {
         assert(reconnect_timer == NULL);
@@ -367,10 +350,6 @@ session_lost_connection(void)
         _session_free_saved_account();
         _session_free_saved_details();
     }
-
-    connection_clear_data();
-    chat_sessions_clear();
-    presence_clear_sub_requests();
 }
 
 void
