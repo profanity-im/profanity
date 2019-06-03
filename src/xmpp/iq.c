@@ -263,6 +263,16 @@ iq_id_handler_add(const char *const id, ProfIqCallback func, ProfIqFreeCallback 
 }
 
 void
+iq_autoping_timer_cancel(void)
+{
+    autoping_wait = FALSE;
+    if (autoping_time) {
+        g_timer_destroy(autoping_time);
+        autoping_time = NULL;
+    }
+}
+
+void
 iq_autoping_check(void)
 {
     if (connection_get_status() != JABBER_CONNECTED) {
@@ -283,10 +293,8 @@ iq_autoping_check(void)
     if (timeout > 0 && seconds_elapsed >= timeout) {
         cons_show("Autoping response timed out after %u seconds.", timeout);
         log_debug("Autoping check: timed out after %u seconds, disconnecting", timeout);
+        iq_autoping_timer_cancel();
         session_autoping_fail();
-        autoping_wait = FALSE;
-        g_timer_destroy(autoping_time);
-        autoping_time = NULL;
     }
 }
 
@@ -1371,11 +1379,7 @@ _autoping_timed_send(xmpp_conn_t *const conn, void *const userdata)
 static int
 _auto_pong_id_handler(xmpp_stanza_t *const stanza, void *const userdata)
 {
-    autoping_wait = FALSE;
-    if (autoping_time) {
-        g_timer_destroy(autoping_time);
-        autoping_time = NULL;
-    }
+    iq_autoping_timer_cancel();
 
     const char *id = xmpp_stanza_get_id(stanza);
     if (id == NULL) {

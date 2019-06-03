@@ -187,6 +187,7 @@ void iq_room_affiliation_set(const char *const room, const char *const jid, char
 void iq_room_kick_occupant(const char *const room, const char *const nick, const char *const reason);
 void iq_room_role_set(const char *const room, const char *const nick, char *role, const char *const reason);
 void iq_room_role_list(const char * const room, char *role);
+void iq_autoping_timer_cancel(void);
 void iq_autoping_check(void);
 void iq_http_upload_request(HTTPUpload *upload);
 void iq_command_list(const char *const target);
