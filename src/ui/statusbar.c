@@ -187,7 +187,10 @@ _create_tab(const int win, win_type_t wintype, char *identifier, gboolean highli
     tab->display_name = NULL;
 
     if (tab->window_type == WIN_CHAT) {
-        PContact contact = roster_get_contact(tab->identifier);
+        PContact contact = NULL;
+        if (roster_exists()) {
+            contact = roster_get_contact(tab->identifier);
+        }
         if (contact && p_contact_name(contact)) {
             tab->display_name = strdup(p_contact_name(contact));
         } else {
@@ -601,5 +604,4 @@ _display_name(StatusBarTab *tab)
     g_free(trimmed);
 
     return trimmedname;
-
 }
