@@ -1,10 +1,47 @@
 sudo: required
-language: c
+language: bash
+
 services:
-  - docker
+  - docker # Linux tests are run in Docker containers.
+
+addons:
+  homebrew:
+    brewfile: Brewfile.travis # mac OS dependencies.
+    # libsignal-protocol-c is still not in the Travis CI Homebrew snapshot, the
+    # line below could be removed when the snapshot has been updated to speed up
+    # the OSX job.
+    update: true
+
+matrix:
+  include:
+    - os: linux
+      env: BUILD_FLAVOR=tumbleweed
+    - os: linux
+      env: BUILD_FLAVOR=debian
+    - os: linux
+      env: BUILD_FLAVOR=arch
+    - os: osx
+      env:
+        # Ensure that "keg-only" Homebrew versions are used.
+        - PKG_CONFIG_PATH="/usr/local/opt/ncurses/lib/pkgconfig:$PKG_CONFIG_PATH"
+        - PKG_CONFIG_PATH="/usr/local/opt/expat/lib/pkgconfig:$PKG_CONFIG_PATH"
+        - PKG_CONFIG_PATH="/usr/local/opt/curl/lib/pkgconfig:$PKG_CONFIG_PATH"
+        - PKG_CONFIG_PATH="/usr/local/opt/openssl/lib/pkgconfig:$PKG_CONFIG_PATH"
+        - PKG_CONFIG_PATH="/usr/local/opt/libffi/lib/pkgconfig:$PKG_CONFIG_PATH"
 
 before_install:
-  - docker build -f Dockerfile -t profanity .
+  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then
+      docker build -f Dockerfile."$BUILD_FLAVOR" -t profanity .;
+    fi
 
 script:
-- docker run -it profanity ./travis-build.sh
+  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then
+      docker run -it profanity ./travis-build.sh;
+    fi
+  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then
+      ./travis-build.sh;
+    fi
+
+after_failure:
+  - cat ./config.log
+  - env
