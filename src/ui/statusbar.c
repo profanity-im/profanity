@@ -173,7 +173,7 @@ status_bar_inactive(const int win)
 }
 
 void
-status_bar_active(const int win, win_type_t wintype, char *identifier)
+_create_tab(const int win, win_type_t wintype, char *identifier, gboolean highlight)
 {
     int true_win = win;
     if (true_win == 0) {
@@ -182,7 +182,7 @@ status_bar_active(const int win, win_type_t wintype, char *identifier)
 
     StatusBarTab *tab = malloc(sizeof(StatusBarTab));
     tab->identifier = strdup(identifier);
-    tab->highlight = FALSE;
+    tab->highlight = highlight;
     tab->window_type = wintype;
     tab->display_name = NULL;
 
@@ -208,38 +208,15 @@ status_bar_active(const int win, win_type_t wintype, char *identifier)
 }
 
 void
+status_bar_active(const int win, win_type_t wintype, char *identifier)
+{
+    _create_tab(win, wintype, identifier, FALSE);
+}
+
+void
 status_bar_new(const int win, win_type_t wintype, char* identifier)
 {
-    int true_win = win;
-    if (true_win == 0) {
-        true_win = 10;
-    }
-
-    StatusBarTab *tab = malloc(sizeof(StatusBarTab));
-    tab->identifier = strdup(identifier);
-    tab->highlight = TRUE;
-    tab->window_type = wintype;
-    tab->display_name = NULL;
-
-    if (tab->window_type == WIN_CHAT) {
-        PContact contact = roster_get_contact(tab->identifier);
-        if (contact && p_contact_name(contact)) {
-            tab->display_name = strdup(p_contact_name(contact));
-        } else {
-            char *pref = prefs_get_string(PREF_STATUSBAR_CHAT);
-            if (g_strcmp0("user", pref) == 0) {
-                Jid *jidp = jid_create(tab->identifier);
-                tab->display_name = strdup(jidp->localpart);
-                jid_destroy(jidp);
-            } else {
-                tab->display_name = strdup(tab->identifier);
-            }
-        }
-    }
-
-    g_hash_table_replace(statusbar->tabs, GINT_TO_POINTER(true_win), tab);
-
-    status_bar_draw();
+    _create_tab(win, wintype, identifier, TRUE);
 }
 
 void
