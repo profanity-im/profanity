@@ -15,6 +15,7 @@ titlebar.dnd=white
 titlebar.xa=white
 statusbar=blue
 statusbar.text=white
+statusbar.time=white
 statusbar.brackets=cyan
 statusbar.active=cyan
 statusbar.new=white

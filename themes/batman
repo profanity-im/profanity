@@ -5,6 +5,7 @@ statusbar=yellow
 titlebar.text=black
 titlebar.brackets=black
 statusbar.text=magenta
+statusbar.time=magenta
 statusbar.brackets=black
 statusbar.active=magenta
 statusbar.new=magenta

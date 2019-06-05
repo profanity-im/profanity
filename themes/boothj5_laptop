@@ -15,6 +15,7 @@ titlebar.dnd=bold_red
 titlebar.chat=bold_green
 statusbar=blue
 statusbar.text=bold_white
+statusbar.time=bold_white
 statusbar.brackets=bold_white
 statusbar.active=bold_cyan
 statusbar.new=bold_white

@@ -15,6 +15,7 @@ titlebar.dnd=
 titlebar.xa=
 statusbar=
 statusbar.text=
+statusbar.time=
 statusbar.brackets=
 statusbar.active=
 statusbar.new=
