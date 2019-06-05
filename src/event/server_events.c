@@ -263,7 +263,7 @@ sv_ev_room_subject(const char *const room, const char *const nick, const char *c
 {
     muc_set_subject(room, subject);
     ProfMucWin *mucwin = wins_get_muc(room);
-    if (mucwin && muc_roster_complete(room)) {
+    if (mucwin && muc_roster_complete(room) && _success_connections_counter == 1) {
         mucwin_subject(mucwin, nick, subject);
     }
 }
