@@ -273,20 +273,21 @@ sv_ev_room_history(const char *const room_jid, const char *const nick,
     GDateTime *timestamp, const char *const message)
 {
     ProfMucWin *mucwin = wins_get_muc(room_jid);
-
-    // if this is the first successful connection
-    if (_success_connections_counter == 1) {
-        // save timestamp of last received muc message
-        // so we dont display, if there was no activity in channel, once we reconnect
-        if (_last_muc_message) {
-            g_date_time_unref(_last_muc_message);
+    if (mucwin) {
+        // if this is the first successful connection
+        if (_success_connections_counter == 1) {
+            // save timestamp of last received muc message
+            // so we dont display, if there was no activity in channel, once we reconnect
+            if (_last_muc_message) {
+                g_date_time_unref(_last_muc_message);
+            }
+            _last_muc_message  = g_date_time_new_now_local();
         }
-        _last_muc_message  = g_date_time_new_now_local();
-    }
 
-    gboolean younger = g_date_time_compare(_last_muc_message, timestamp) < 0 ? TRUE : FALSE;
-    if (mucwin && (_success_connections_counter == 1 || younger )) {
-        mucwin_history(mucwin, nick, timestamp, message);
+        gboolean younger = g_date_time_compare(_last_muc_message, timestamp) < 0 ? TRUE : FALSE;
+        if (_success_connections_counter == 1 || younger ) {
+            mucwin_history(mucwin, nick, timestamp, message);
+        }
     }
 }
 
