@@ -846,6 +846,27 @@ wins_lost_connection(void)
 }
 
 void
+wins_reestablished_connection(void)
+{
+    GList *values = g_hash_table_get_values(windows);
+    GList *curr = values;
+
+    while (curr) {
+        ProfWin *window = curr->data;
+        if (window->type != WIN_CONSOLE) {
+            win_println(window, THEME_TEXT, '-', "Connection re-established.");
+
+            // if current win, set current_win_dirty
+            if (wins_is_current(window)) {
+                win_update_virtual(window);
+            }
+        }
+        curr = g_list_next(curr);
+    }
+    g_list_free(values);
+}
+
+void
 wins_swap(int source_win, int target_win)
 {
     ProfWin *source = g_hash_table_lookup(windows, GINT_TO_POINTER(source_win));
