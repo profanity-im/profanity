@@ -707,3 +707,11 @@ roster_process_pending_presence(void)
     g_slist_free(roster_pending_presence);
     roster_pending_presence = NULL;
 }
+
+gboolean
+roster_exists(void) {
+    if (roster != NULL) {
+        return TRUE;
+    }
+    return FALSE;
+}

@@ -73,5 +73,6 @@ char* roster_get_msg_display_name(const char *const barejid, const char *const r
 gint roster_compare_name(PContact a, PContact b);
 gint roster_compare_presence(PContact a, PContact b);
 void roster_process_pending_presence(void);
+gboolean roster_exists(void);
 
 #endif
