@@ -1,4 +1,4 @@
-0.6.0
+0.6.0 (2019-02-18)
 =====
 
 - Allow moving vertical window positions (/titlebar, /mainwin, /statusbar, /inputwin)
@@ -21,7 +21,7 @@
 - Add possibility to close windows via prof_win_close inputrc hook
 - Bug fixes: https://github.com/profanity-im/profanity/milestone/16?closed=1
 
-0.5.1
+0.5.1 (2017-01-28)
 =====
 
 - Add prof.get_room_nick plugins api function
@@ -35,7 +35,7 @@
 - Fix CVE-2017-5592 (incorrect implementation of Message Carbons allowing social engineering attacks)
 - Bug fixes: https://github.com/profanity-im/profanity/milestone/15?closed=1
 
-0.5.0
+0.5.0 (2016-09-15)
 =====
 
 - Plugins API supporting C and Python plugins
@@ -64,7 +64,7 @@
 - Custom readline functions for navigation key bindings
 - Autocomplete command arguments when no characters entered
 
-0.4.7
+0.4.7 (2015-09-20)
 =====
 
 - GNU Readline
@@ -80,7 +80,7 @@
 - Reformatted help
 - devel: Added functional tests using libexpect and libstabber
 
-0.4.6
+0.4.6 (2015-03-03)
 =====
 
 - 16 colour support (/theme colours)
