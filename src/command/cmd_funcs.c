@@ -6555,11 +6555,15 @@ cmd_autoconnect(ProfWin *window, const char *const command, gchar **args)
         prefs_set_string(PREF_CONNECT_ACCOUNT, NULL);
         cons_show("Autoconnect account disabled.");
     } else if (strcmp(args[0], "set") == 0) {
-        if (accounts_account_exists(args[1])) {
-            prefs_set_string(PREF_CONNECT_ACCOUNT, args[1]);
-            cons_show("Autoconnect account set to: %s.", args[1]);
+        if (args[1] == NULL || strlen(args[1]) == 0) {
+            cons_bad_cmd_usage(command);
         } else {
-            cons_show_error("Account '%s' does not exist.", args[1]);
+            if (accounts_account_exists(args[1])) {
+                prefs_set_string(PREF_CONNECT_ACCOUNT, args[1]);
+                cons_show("Autoconnect account set to: %s.", args[1]);
+            } else {
+                cons_show_error("Account '%s' does not exist.", args[1]);
+            }
         }
     } else {
         cons_bad_cmd_usage(command);
