@@ -574,6 +574,14 @@ _load_preferences(void)
         }
     }
 
+    if (g_key_file_has_key(theme, "ui", "omemo.char", NULL)) {
+        gchar *ch = g_key_file_get_string(theme, "ui", "omemo.char", NULL);
+        if (ch && strlen(ch) > 0) {
+            prefs_set_omemo_char(ch[0]);
+            g_free(ch);
+        }
+    }
+
     if (g_key_file_has_key(theme, "ui", "titlebar.position", NULL) &&
             g_key_file_has_key(theme, "ui", "mainwin.position", NULL) &&
             g_key_file_has_key(theme, "ui", "statusbar.position", NULL) &&
