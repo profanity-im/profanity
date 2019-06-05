@@ -140,6 +140,7 @@ occupants.header.char=
 wins.autotidy=
 otr.char=
 pgp.char=
+omemo.char=
 console.muc=
 console.chat=
 console.private=

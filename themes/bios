@@ -130,6 +130,7 @@ occupants.jid=false
 wins.autotidy=true
 otr.char=@
 pgp.char=%
+omemo.char=*
 tls.show=true
 console.muc=first
 titlebar.position=1
