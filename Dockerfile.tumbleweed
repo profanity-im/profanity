@@ -5,35 +5,35 @@ FROM opensuse/tumbleweed
 # libmicrohttpd - for stabber
 # glibc-locale - to have en_US locale
 RUN zypper --non-interactive in --no-recommends \
-  git \
-  gcc \
   autoconf \
   autoconf-archive \
-  make \
   automake \
-  libtool \
-  glib2-devel \
-  gtk2-devel \
   expect-devel \
+  gcc \
+  git \
+  glib2-devel \
+  glibc-locale \
+  gtk2-devel \
   libXss-devel \
+  libcmocka-devel \
   libcurl-devel \
   libexpat-devel \
+  libgcrypt-devel \
   libgpgme-devel \
   libmesode-devel \
+  libmicrohttpd-devel \
   libnotify-devel \
   libotr-devel \
-  libuuid-devel \
-  libcmocka-devel \
-  ncurses-devel \
-  python3-devel \
-  python3 \
-  python-devel \
-  python \
-  readline-devel \
   libsignal-protocol-c-devel \
-  libgcrypt-devel \
-  libmicrohttpd-devel \
-  glibc-locale
+  libtool \
+  libuuid-devel \
+  make \
+  ncurses-devel \
+  python \
+  python-devel \
+  python3 \
+  python3-devel \
+  readline-devel
 
 # https://github.com/openSUSE/docker-containers-build/issues/26
 ENV LANG en_US.UTF-8

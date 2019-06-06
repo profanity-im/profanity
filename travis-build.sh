@@ -13,123 +13,63 @@ trap error_handler ERR
 
 ./bootstrap.sh
 
-echo
-echo "--> Building with ./configure --enable-notifications --enable-icons --enable-otr --enable-pgp --enable-omemo --enable-plugins --enable-c-plugins --enable-python-plugins --with-xscreensaver"
-echo
-./configure --enable-notifications --enable-icons --enable-otr --enable-pgp --enable-omemo --enable-plugins --enable-c-plugins --enable-python-plugins --with-xscreensaver
-make
-./profanity -v
-make clean
+tests=()
+case $(uname | tr '[:upper:]' '[:lower:]') in
+    linux*)
+        tests=(
+        "--enable-notifications --enable-icons --enable-otr --enable-pgp
+        --enable-omemo --enable-plugins --enable-c-plugins
+        --enable-python-plugins --with-xscreensaver"
+        "--disable-notifications --disable-icons --disable-otr --disable-pgp
+        --disable-omemo --disable-plugins --disable-c-plugins
+        --disable-python-plugins --without-xscreensaver"
+        "--disable-notifications"
+        "--disable-icons"
+        "--disable-otr"
+        "--disable-pgp"
+        "--disable-omemo"
+        "--disable-pgp --disable-otr"
+        "--disable-pgp --disable-otr --disable-omemo"
+        "--disable-plugins"
+        "--disable-python-plugins"
+        "--disable-c-plugins"
+        "--disable-c-plugins --disable-python-plugins"
+        "--without-xscreensaver"
+        "")
+        ;;
+    darwin*)
+        tests=(
+        "--enable-notifications --enable-icons --enable-otr --enable-pgp
+        --enable-omemo --enable-plugins --enable-c-plugins
+        --enable-python-plugins"
+        "--disable-notifications --disable-icons --disable-otr --disable-pgp
+        --disable-omemo --disable-plugins --disable-c-plugins
+        --disable-python-plugins"
+        "--disable-notifications"
+        "--disable-icons"
+        "--disable-otr"
+        "--disable-pgp"
+        "--disable-omemo"
+        "--disable-pgp --disable-otr"
+        "--disable-pgp --disable-otr --disable-omemo"
+        "--disable-plugins"
+        "--disable-python-plugins"
+        "--disable-c-plugins"
+        "--disable-c-plugins --disable-python-plugins"
+        "")
+        ;;
+esac
 
-echo
-echo "--> Building with ./configure --disable-notifications --disable-icons --disable-otr --disable-pgp --disable-omemo --disable-plugins --disable-c-plugins --disable-python-plugins --without-xscreensaver"
-echo
-./configure --disable-notifications --disable-icons --disable-otr --disable-pgp --disable-omemo --disable-plugins --disable-c-plugins --disable-python-plugins --without-xscreensaver
-make
-./profanity -v
-make clean
+for flags in "${tests[@]}"
+do
+    echo
+    echo "--> Building with ./configure $flags"
+    echo
+    # shellcheck disable=SC2086
+    ./configure $flags
+    make
+    ./profanity -v
+    make clean
 
-echo
-echo "--> Building with ./configure --disable-notifications"
-echo
-./configure --disable-notifications
-make
-./profanity -v
-make clean
-
-echo
-echo "--> Building with ./configure --disable-icons"
-echo
-./configure --disable-icons
-make
-./profanity -v
-make clean
-
-echo
-echo "--> Building with ./configure --disable-otr"
-echo
-./configure --disable-otr
-make
-./profanity -v
-make clean
-
-echo
-echo "--> Building with ./configure --disable-pgp"
-echo
-./configure --disable-pgp
-make
-./profanity -v
-make clean
-
-echo
-echo "--> Building with ./configure --disable-omemo"
-echo
-./configure --disable-omemo
-make
-./profanity -v
-make clean
-
-echo
-echo "--> Building with ./configure --disable-pgp --disable-otr"
-echo
-./configure --disable-pgp --disable-otr
-make
-./profanity -v
-make clean
-
-echo
-echo "--> Building with ./configure --disable-pgp --disable-otr --disable-omemo"
-echo
-./configure --disable-pgp --disable-otr --disable-omemo
-make
-./profanity -v
-make clean
-
-echo
-echo "--> Building with ./configure --disable-plugins"
-echo
-./configure --disable-plugins
-make
-./profanity -v
-make clean
-
-echo
-echo "--> Building with ./configure --disable-python-plugins"
-echo
-./configure --disable-python-plugins
-make
-./profanity -v
-make clean
-
-echo
-echo "--> Building with ./configure --disable-c-plugins"
-echo
-./configure --disable-c-plugins
-make
-./profanity -v
-make clean
-
-echo
-echo "--> Building with ./configure --disable-c-plugins --disable-python-plugins"
-echo
-./configure --disable-c-plugins --disable-python-plugins
-make
-./profanity -v
-make clean
-
-echo
-echo "--> Building with ./configure --without-xscreensaver"
-echo
-./configure --without-xscreensaver
-make
-./profanity -v
-make clean
-
-echo
-echo "--> Building with ./configure"
-echo
-./configure
-make
-make check
-./profanity -v
-make clean
+    echo "$flags"
+done
