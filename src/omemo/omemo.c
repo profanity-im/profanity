@@ -724,6 +724,8 @@ omemo_on_message_send(ProfWin *win, const char *const message, gboolean request_
 
     GList *device_ids_iter;
 
+    omemo_ctx.identity_key_store.recv = false;
+
     GList *recipients_iter;
     for (recipients_iter = recipients; recipients_iter != NULL; recipients_iter = recipients_iter->next) {
         GList *recipient_device_id = NULL;
@@ -888,6 +890,8 @@ omemo_on_message_recv(const char *const from_jid, uint32_t sid,
         goto out;
     }
 
+    omemo_ctx.identity_key_store.recv = true;
+
     if (key->prekey) {
         log_debug("OMEMO: decrypting message with prekey");
         pre_key_signal_message *message;
@@ -922,6 +926,9 @@ omemo_on_message_recv(const char *const from_jid, uint32_t sid,
             SIGNAL_UNREF(message);
         }
     }
+
+    omemo_ctx.identity_key_store.recv = false;
+    *trusted = omemo_ctx.identity_key_store.trusted_msg;
 
     session_cipher_free(cipher);
     if (res != 0) {
