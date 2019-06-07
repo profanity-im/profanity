@@ -8060,6 +8060,8 @@ cmd_omemo_start(ProfWin *window, const char *const command, gchar **args)
         return TRUE;
     }
 
+    ProfChatWin *chatwin = NULL;
+
     // recipient supplied
     if (args[1]) {
         char *contact = args[1];
@@ -8068,12 +8070,19 @@ cmd_omemo_start(ProfWin *window, const char *const command, gchar **args)
             barejid = contact;
         }
 
-        ProfChatWin *chatwin = wins_get_chat(barejid);
+        chatwin = wins_get_chat(barejid);
         if (!chatwin) {
             chatwin = chatwin_new(barejid);
         }
         ui_focus_win((ProfWin*)chatwin);
+    } else {
+      if (window->type == WIN_CHAT) {
+        chatwin = (ProfChatWin*)window;
+        assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
+      }
+    }
 
+    if (chatwin) {
         if (chatwin->pgp_send) {
             win_println((ProfWin*)chatwin, THEME_DEFAULT, '!', "You must disable PGP encryption before starting an OMEMO session.");
             return TRUE;
@@ -8085,50 +8094,26 @@ cmd_omemo_start(ProfWin *window, const char *const command, gchar **args)
         }
 
         if (chatwin->is_omemo) {
-            win_println((ProfWin*)chatwin, THEME_DEFAULT, '!', "You are already in an OMEMO session");
+            win_println((ProfWin*)chatwin, THEME_DEFAULT, '!', "You are already in an OMEMO session.");
             return TRUE;
         }
 
-        accounts_add_omemo_state(session_get_account_name(), barejid, TRUE);
-        omemo_start_session(barejid);
+        accounts_add_omemo_state(session_get_account_name(), chatwin->barejid, TRUE);
+        omemo_start_session(chatwin->barejid);
         chatwin->is_omemo = TRUE;
-    } else {
-        if (window->type == WIN_CHAT) {
-            ProfChatWin *chatwin = (ProfChatWin*)window;
-            assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
-            if (chatwin->pgp_send) {
-                win_println(window, THEME_DEFAULT, '!', "You must disable PGP encryption before starting an OMEMO session.");
-                return TRUE;
-            }
+    } else if (window->type == WIN_MUC) {
+        ProfMucWin *mucwin = (ProfMucWin*)window;
+        assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
 
-            if (chatwin->is_otr) {
-                win_println(window, THEME_DEFAULT, '!', "You must disable OTR encryption before starting an OMEMO session.");
-                return TRUE;
-            }
-
-            if (chatwin->is_omemo) {
-                win_println(window, THEME_DEFAULT, '!', "You are already in an OMEMO session.");
-                return TRUE;
-            }
-
-            accounts_add_omemo_state(session_get_account_name(), chatwin->barejid, TRUE);
-            omemo_start_session(chatwin->barejid);
-            chatwin->is_omemo = TRUE;
-        } else if (window->type == WIN_MUC) {
-            ProfMucWin *mucwin = (ProfMucWin*)window;
-            assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
-
-            if (muc_anonymity_type(mucwin->roomjid) == MUC_ANONYMITY_TYPE_NONANONYMOUS) {
-                accounts_add_omemo_state(session_get_account_name(), mucwin->roomjid, TRUE);
-                omemo_start_muc_sessions(mucwin->roomjid);
-                mucwin->is_omemo = TRUE;
-            } else {
-                win_println(window, THEME_DEFAULT, '!', "MUC must be non-anonymous (i.e. be configured to present real jid to anyone) in order to support OMEMO.");
-            }
+        if (muc_anonymity_type(mucwin->roomjid) == MUC_ANONYMITY_TYPE_NONANONYMOUS) {
+            accounts_add_omemo_state(session_get_account_name(), mucwin->roomjid, TRUE);
+            omemo_start_muc_sessions(mucwin->roomjid);
+            mucwin->is_omemo = TRUE;
         } else {
-            win_println(window, THEME_DEFAULT, '-', "You must be in a regular chat window to start an OMEMO session.");
+            win_println(window, THEME_DEFAULT, '!', "MUC must be non-anonymous (i.e. be configured to present real jid to anyone) in order to support OMEMO.");
         }
-
+    } else {
+        win_println(window, THEME_DEFAULT, '-', "You must be in a regular chat window to start an OMEMO session.");
     }
 
     return TRUE;
