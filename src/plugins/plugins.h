@@ -118,11 +118,11 @@ gboolean plugins_install(const char *const plugin_name, const char *const filena
 gboolean plugins_uninstall(const char *const plugin_name);
 gboolean plugins_update(const char *const plugin_name, const char *const filename, GString * error_message);
 PluginsInstallResult* plugins_install_all(const char *const path);
-gboolean plugins_load(const char *const name);
+gboolean plugins_load(const char *const name, GString *error_message);
 GSList* plugins_load_all(void);
 gboolean plugins_unload(const char *const name);
 gboolean plugins_unload_all(void);
-gboolean plugins_reload(const char *const name);
+gboolean plugins_reload(const char *const name, GString *error_message);
 void plugins_reload_all(void);
 
 void plugins_on_start(void);

@@ -208,7 +208,7 @@ plugins_install(const char *const plugin_name, const char *const filename, GStri
     g_string_free(target_path, TRUE);
 
     if (result) {
-        result = plugins_load(plugin_name);
+        result = plugins_load(plugin_name, error_message);
     }
     return result;
 }
@@ -219,11 +219,14 @@ plugins_load_all(void)
     GSList *plugins = plugins_unloaded_list();
     GSList *loaded = NULL;
     GSList *curr = plugins;
+    GString *error_message = NULL;
     while (curr) {
-        if (plugins_load(curr->data)) {
+        error_message = g_string_new(NULL);
+        if (plugins_load(curr->data, error_message)) {
             loaded = g_slist_append(loaded, strdup(curr->data));
         }
         curr = g_slist_next(curr);
+        g_string_free(error_message, TRUE);
     }
     g_slist_free_full(plugins, g_free);
 
@@ -231,7 +234,7 @@ plugins_load_all(void)
 }
 
 gboolean
-plugins_load(const char *const name)
+plugins_load(const char *const name, GString *error_message)
 {
     ProfPlugin *plugin = g_hash_table_lookup(plugins, name);
     if (plugin) {
@@ -239,16 +242,21 @@ plugins_load(const char *const name)
         return FALSE;
     }
 
-#ifdef HAVE_PYTHON
     if (g_str_has_suffix(name, ".py")) {
+#ifdef HAVE_PYTHON
         plugin = python_plugin_create(name);
-    }
+#else
+        g_string_assign(error_message, "Python plugins support is disabled.");
 #endif
-#ifdef HAVE_C
+    }
+
     if (g_str_has_suffix(name, ".so")) {
+#ifdef HAVE_C
         plugin = c_plugin_create(name);
-    }
+#else
+        g_string_assign(error_message, "C plugins support is disabled.");
 #endif
+    }
     if (plugin) {
         g_hash_table_insert(plugins, strdup(name), plugin);
         if (connection_get_status() == JABBER_CONNECTED) {
@@ -336,9 +344,12 @@ plugins_reload_all(void)
     }
     g_list_free(plugin_names);
 
+    GString *error_message = NULL;
     curr = plugin_names_dup;
     while (curr) {
-        plugins_reload(curr->data);
+        error_message = g_string_new(NULL);
+        plugins_reload(curr->data, error_message);
+        g_string_free(error_message, TRUE);
         curr = g_list_next(curr);
     }
 
@@ -346,11 +357,11 @@ plugins_reload_all(void)
 }
 
 gboolean
-plugins_reload(const char *const name)
+plugins_reload(const char *const name, GString *error_message)
 {
     gboolean res = plugins_unload(name);
     if (res) {
-        res = plugins_load(name);
+        res = plugins_load(name, error_message);
     }
 
     return res;
