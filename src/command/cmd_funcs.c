@@ -8075,17 +8075,17 @@ cmd_omemo_start(ProfWin *window, const char *const command, gchar **args)
         ui_focus_win((ProfWin*)chatwin);
 
         if (chatwin->pgp_send) {
-            win_println(window, THEME_DEFAULT, '!', "You must disable PGP encryption before starting an OMEMO session.");
+            win_println((ProfWin*)chatwin, THEME_DEFAULT, '!', "You must disable PGP encryption before starting an OMEMO session.");
             return TRUE;
         }
 
         if (chatwin->is_otr) {
-            win_println(window, THEME_DEFAULT, '!', "You must disable OTR encryption before starting an OMEMO session.");
+            win_println((ProfWin*)chatwin, THEME_DEFAULT, '!', "You must disable OTR encryption before starting an OMEMO session.");
             return TRUE;
         }
 
         if (chatwin->is_omemo) {
-            win_println(window, THEME_DEFAULT, '!', "You are already in an OMEMO session.");
+            win_println((ProfWin*)chatwin, THEME_DEFAULT, '!', "You are already in an OMEMO session");
             return TRUE;
         }
 
