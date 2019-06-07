@@ -749,8 +749,9 @@ _handle_groupchat(xmpp_stanza_t *const stanza)
 
     // check omemo encryption
     gboolean omemo = FALSE;
+    gboolean trusted = FALSE;
 #ifdef HAVE_OMEMO
-    message = omemo_receive_message(stanza);
+    message = omemo_receive_message(stanza, &trusted);
     omemo = message != NULL;
 #endif
 
@@ -765,10 +766,10 @@ _handle_groupchat(xmpp_stanza_t *const stanza)
     // determine if the notifications happened whilst offline
     GDateTime *timestamp = stanza_get_delay(stanza);
     if (timestamp) {
-        sv_ev_room_history(jid->barejid, jid->resourcepart, timestamp, message, omemo);
+        sv_ev_room_history(jid->barejid, jid->resourcepart, timestamp, message, omemo, trusted);
         g_date_time_unref(timestamp);
     } else {
-        sv_ev_room_message(jid->barejid, jid->resourcepart, message, id, omemo);
+        sv_ev_room_message(jid->barejid, jid->resourcepart, message, id, omemo, trusted);
     }
 
     xmpp_free(ctx, message);
@@ -907,8 +908,9 @@ _handle_carbons(xmpp_stanza_t *const stanza)
 
     // check omemo encryption
     gboolean omemo = FALSE;
+    gboolean trusted = FALSE;
 #ifdef HAVE_OMEMO
-    message_txt = omemo_receive_message(message);
+    message_txt = omemo_receive_message(message, &trusted);
     omemo = message_txt != NULL;
 #endif
 
@@ -945,11 +947,11 @@ _handle_carbons(xmpp_stanza_t *const stanza)
 
     // if we are the recipient, treat as standard incoming message
     if (g_strcmp0(my_jid->barejid, jid_to->barejid) == 0) {
-        sv_ev_incoming_carbon(jid_from->barejid, jid_from->resourcepart, message_txt, enc_message, omemo);
+        sv_ev_incoming_carbon(jid_from->barejid, jid_from->resourcepart, message_txt, enc_message, omemo, trusted);
 
     // else treat as a sent message
     } else {
-        sv_ev_outgoing_carbon(jid_to->barejid, message_txt, enc_message, omemo);
+        sv_ev_outgoing_carbon(jid_to->barejid, message_txt, enc_message, omemo, trusted);
     }
 
     xmpp_ctx_t *ctx = connection_get_ctx();
@@ -981,8 +983,9 @@ _handle_chat(xmpp_stanza_t *const stanza)
 
     // check omemo encryption
     gboolean omemo = FALSE;
+    gboolean trusted = FALSE;
 #ifdef HAVE_OMEMO
-    message = omemo_receive_message(stanza);
+    message = omemo_receive_message(stanza, &trusted);
     omemo = message != NULL;
 #endif
 
@@ -1025,7 +1028,7 @@ _handle_chat(xmpp_stanza_t *const stanza)
         if (x) {
             enc_message = xmpp_stanza_get_text(x);
         }
-        sv_ev_incoming_message(jid->barejid, jid->resourcepart, message, enc_message, timestamp, omemo);
+        sv_ev_incoming_message(jid->barejid, jid->resourcepart, message, enc_message, timestamp, omemo, trusted);
         xmpp_free(ctx, enc_message);
 
         _receipt_request_handler(stanza);

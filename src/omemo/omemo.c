@@ -832,7 +832,7 @@ out:
 char *
 omemo_on_message_recv(const char *const from_jid, uint32_t sid,
     const unsigned char *const iv, size_t iv_len, GList *keys,
-    const unsigned char *const payload, size_t payload_len, gboolean muc)
+    const unsigned char *const payload, size_t payload_len, gboolean muc, gboolean *trusted)
 {
     unsigned char *plaintext = NULL;
     Jid *sender = NULL;

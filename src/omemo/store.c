@@ -395,10 +395,6 @@ is_trusted_identity(const signal_protocol_address *address, uint8_t *key_data,
     int ret;
     identity_key_store_t *identity_key_store = (identity_key_store_t *)user_data;
 
-    if (identity_key_store->recv) {
-        return true;
-    }
-
     GHashTable *trusted = g_hash_table_lookup(identity_key_store->trusted, address->name);
     if (!trusted) {
         if (identity_key_store->recv) {
@@ -416,7 +412,13 @@ is_trusted_identity(const signal_protocol_address *address, uint8_t *key_data,
 
     signal_buffer_free(buffer);
 
-    return ret;
+
+    if (identity_key_store->recv) {
+        identity_key_store->trusted = ret;
+        return 1;
+    } else {
+        return ret;
+    }
 }
 
 int
