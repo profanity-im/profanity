@@ -2183,39 +2183,6 @@ _omemo_autocomplete(ProfWin *window, const char *const input, gboolean previous)
 {
     char *found = NULL;
 
-    jabber_conn_status_t conn_status = connection_get_status();
-
-    if (conn_status == JABBER_CONNECTED) {
-        found = autocomplete_param_with_func(input, "/omemo start", roster_contact_autocomplete, previous);
-        if (found) {
-            return found;
-        }
-    }
-
-    found = autocomplete_param_with_func(input, "/omemo fingerprint", roster_contact_autocomplete, previous);
-    if (found) {
-        return found;
-    }
-
-#ifdef HAVE_OMEMO
-    if (window->type == WIN_CHAT) {
-        found = autocomplete_param_with_func(input, "/omemo trust", omemo_fingerprint_autocomplete, previous);
-        if (found) {
-            return found;
-        }
-    } else {
-        found = autocomplete_param_with_func(input, "/omemo trust", roster_contact_autocomplete, previous);
-        if (found) {
-            return found;
-        }
-
-        found = autocomplete_param_no_with_func(input, "/omemo trust", 4, omemo_fingerprint_autocomplete, previous);
-        if (found) {
-            return found;
-        }
-    }
-#endif
-
     found = autocomplete_param_with_ac(input, "/omemo log", omemo_log_ac, TRUE, previous);
     if (found) {
         return found;
@@ -2224,6 +2191,40 @@ _omemo_autocomplete(ProfWin *window, const char *const input, gboolean previous)
     found = autocomplete_param_with_ac(input, "/omemo policy", omemo_policy_ac, TRUE, previous);
     if (found) {
         return found;
+    }
+
+    jabber_conn_status_t conn_status = connection_get_status();
+
+    if (conn_status == JABBER_CONNECTED) {
+        found = autocomplete_param_with_func(input, "/omemo start", roster_contact_autocomplete, previous);
+        if (found) {
+            return found;
+        }
+
+        found = autocomplete_param_with_func(input, "/omemo fingerprint", roster_contact_autocomplete, previous);
+        if (found) {
+            return found;
+        }
+
+
+#ifdef HAVE_OMEMO
+        if (window->type == WIN_CHAT) {
+            found = autocomplete_param_with_func(input, "/omemo trust", omemo_fingerprint_autocomplete, previous);
+            if (found) {
+                return found;
+            }
+        } else {
+            found = autocomplete_param_with_func(input, "/omemo trust", roster_contact_autocomplete, previous);
+            if (found) {
+                return found;
+            }
+
+            found = autocomplete_param_no_with_func(input, "/omemo trust", 4, omemo_fingerprint_autocomplete, previous);
+            if (found) {
+                return found;
+            }
+        }
+#endif
     }
 
     found = autocomplete_param_with_ac(input, "/omemo", omemo_ac, TRUE, previous);
