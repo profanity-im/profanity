@@ -6912,12 +6912,14 @@ cmd_plugins_load(ProfWin *window, const char *const command, gchar **args)
         return TRUE;
     }
 
-    gboolean res = plugins_load(args[1]);
+    GString* error_message = g_string_new(NULL);
+    gboolean res = plugins_load(args[1], error_message);
     if (res) {
         cons_show("Loaded plugin: %s", args[1]);
     } else {
-        cons_show("Failed to load plugin: %s", args[1]);
+        cons_show("Failed to load plugin: %s. %s", args[1], error_message->str);
     }
+    g_string_free(error_message, TRUE);
 
     return TRUE;
 }
@@ -6954,12 +6956,14 @@ cmd_plugins_reload(ProfWin *window, const char *const command, gchar **args)
         return TRUE;
     }
 
-    gboolean res = plugins_reload(args[1]);
+    GString* error_message = g_string_new(NULL);
+    gboolean res = plugins_reload(args[1], error_message);
     if (res) {
         cons_show("Reloaded plugin: %s", args[1]);
     } else {
-        cons_show("Failed to reload plugin: %s", args[1]);
+        cons_show("Failed to reload plugin: %s, %s", args[1], error_message);
     }
+    g_string_free(error_message, TRUE);
 
     return TRUE;
 }
