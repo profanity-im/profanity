@@ -227,14 +227,17 @@ log_level_from_string(char *log_level)
 static void
 _rotate_log_file(void)
 {
-    char *log_file = files_get_log_file();
+    gchar *log_file = files_get_log_file();
     size_t len = strlen(log_file);
-    char *log_file_new = malloc(len + 3);
+    gchar *log_file_new = malloc(len + 4);
+    int i = 1;
 
-    memcpy(log_file_new, log_file, len);
-    log_file_new[len] = '.';
-    log_file_new[len+1] = '1';
-    log_file_new[len+2] = 0;
+    // find an empty name. from .log -> log.01 -> log.99
+    for(; i<100; i++) {
+        g_sprintf(log_file_new, "%s.%02d", log_file, i);
+        if (!g_file_test(log_file_new, G_FILE_TEST_EXISTS))
+            break;
+    }
 
     log_close();
     rename(log_file, log_file_new);
