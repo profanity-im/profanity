@@ -148,7 +148,14 @@ delete_session(const signal_protocol_address *address, void *user_data)
         return SG_SUCCESS;
     }
 
-    return g_hash_table_remove(device_store, GINT_TO_POINTER(address->device_id));
+    g_hash_table_remove(device_store, GINT_TO_POINTER(address->device_id));
+
+    char *device_id_str = g_strdup_printf("%d", address->device_id);
+    g_key_file_remove_key(omemo_sessions_keyfile(), address->name, device_id_str, NULL);
+    g_free(device_id_str);
+    omemo_sessions_keyfile_save();
+
+    return SG_SUCCESS;
 }
 
 int
