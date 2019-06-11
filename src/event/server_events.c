@@ -67,7 +67,6 @@
 #include "ui/ui.h"
 
 gint _success_connections_counter = 0;
-GDateTime *_last_muc_message;
 
 void
 sv_ev_login_account_success(char *account_name, gboolean secured)
@@ -278,13 +277,13 @@ sv_ev_room_history(const char *const room_jid, const char *const nick,
         if (_success_connections_counter == 1) {
             // save timestamp of last received muc message
             // so we dont display, if there was no activity in channel, once we reconnect
-            if (_last_muc_message) {
-                g_date_time_unref(_last_muc_message);
+            if (mucwin->last_msg_timestamp) {
+                g_date_time_unref(mucwin->last_msg_timestamp);
             }
-            _last_muc_message  = g_date_time_new_now_local();
+            mucwin->last_msg_timestamp  = g_date_time_new_now_local();
         }
 
-        gboolean younger = g_date_time_compare(_last_muc_message, timestamp) < 0 ? TRUE : FALSE;
+        gboolean younger = g_date_time_compare(mucwin->last_msg_timestamp, timestamp) < 0 ? TRUE : FALSE;
         if (_success_connections_counter == 1 || younger ) {
             mucwin_history(mucwin, nick, timestamp, message);
         }
@@ -364,10 +363,10 @@ sv_ev_room_message(const char *const room_jid, const char *const nick, const cha
     }
 
     // save timestamp of last received muc message
-    if (_last_muc_message) {
-        g_date_time_unref(_last_muc_message);
+    if (mucwin->last_msg_timestamp) {
+        g_date_time_unref(mucwin->last_msg_timestamp);
     }
-    _last_muc_message  = g_date_time_new_now_local();
+    mucwin->last_msg_timestamp  = g_date_time_new_now_local();
 
     if (prefs_do_room_notify(is_current, mucwin->roomjid, mynick, nick, new_message, mention, triggers != NULL)) {
         Jid *jidp = jid_create(mucwin->roomjid);
