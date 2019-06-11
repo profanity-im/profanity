@@ -83,6 +83,7 @@ void wins_resize_all(void);
 GSList* wins_get_chat_recipients(void);
 GSList* wins_get_prune_wins(void);
 void wins_lost_connection(void);
+void wins_reestablished_connection(void);
 gboolean wins_tidy(void);
 GSList* wins_create_summary(gboolean unread);
 void wins_destroy(void);

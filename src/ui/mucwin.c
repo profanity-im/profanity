@@ -54,6 +54,8 @@ mucwin_new(const char *const barejid)
     ProfWin *window = wins_new_muc(barejid);
     ProfMucWin *mucwin = (ProfMucWin *)window;
 
+    mucwin->last_msg_timestamp = NULL;
+
 #ifdef HAVE_OMEMO
     if (muc_anonymity_type(mucwin->roomjid) == MUC_ANONYMITY_TYPE_NONANONYMOUS && omemo_automatic_start(barejid)) {
         omemo_start_muc_sessions(barejid);

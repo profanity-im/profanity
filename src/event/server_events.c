@@ -66,6 +66,8 @@
 
 #include "ui/ui.h"
 
+gint _success_connections_counter = 0;
+
 void
 sv_ev_login_account_success(char *account_name, gboolean secured)
 {
@@ -99,6 +101,15 @@ sv_ev_login_account_success(char *account_name, gboolean secured)
     g_list_free(rooms);
 
     log_info("%s logged in successfully", account->jid);
+
+    // if we have been connected before
+    if (_success_connections_counter > 0)
+    {
+        cons_show("Connection re-established.");
+        wins_reestablished_connection();
+    }
+
+    _success_connections_counter++;
 
     if (account->startscript) {
         scripts_exec(account->startscript);
@@ -249,7 +260,7 @@ sv_ev_room_subject(const char *const room, const char *const nick, const char *c
 {
     muc_set_subject(room, subject);
     ProfMucWin *mucwin = wins_get_muc(room);
-    if (mucwin && muc_roster_complete(room)) {
+    if (mucwin && muc_roster_complete(room) && _success_connections_counter == 1) {
         mucwin_subject(mucwin, nick, subject);
     }
 }
@@ -260,7 +271,20 @@ sv_ev_room_history(const char *const room_jid, const char *const nick,
 {
     ProfMucWin *mucwin = wins_get_muc(room_jid);
     if (mucwin) {
-        mucwin_history(mucwin, nick, timestamp, message);
+        // if this is the first successful connection
+        if (_success_connections_counter == 1) {
+            // save timestamp of last received muc message
+            // so we dont display, if there was no activity in channel, once we reconnect
+            if (mucwin->last_msg_timestamp) {
+                g_date_time_unref(mucwin->last_msg_timestamp);
+            }
+            mucwin->last_msg_timestamp  = g_date_time_new_now_local();
+        }
+
+        gboolean younger = g_date_time_compare(mucwin->last_msg_timestamp, timestamp) < 0 ? TRUE : FALSE;
+        if (_success_connections_counter == 1 || younger ) {
+            mucwin_history(mucwin, nick, timestamp, message);
+        }
     }
 }
 
@@ -335,6 +359,12 @@ sv_ev_room_message(const char *const room_jid, const char *const nick, const cha
             mucwin->unread_triggers = TRUE;
         }
     }
+
+    // save timestamp of last received muc message
+    if (mucwin->last_msg_timestamp) {
+        g_date_time_unref(mucwin->last_msg_timestamp);
+    }
+    mucwin->last_msg_timestamp  = g_date_time_new_now_local();
 
     if (prefs_do_room_notify(is_current, mucwin->roomjid, mynick, nick, new_message, mention, triggers != NULL)) {
         Jid *jidp = jid_create(mucwin->roomjid);
