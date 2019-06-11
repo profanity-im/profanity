@@ -87,15 +87,13 @@ sv_ev_login_account_success(char *account_name, gboolean secured)
 
     ui_handle_login_account_success(account, secured);
 
-    // attempt to rejoin rooms with passwords
+    // attempt to rejoin all rooms
     GList *rooms = muc_rooms();
     GList *curr = rooms;
     while (curr) {
         char *password = muc_password(curr->data);
-        if (password) {
-            char *nick = muc_nick(curr->data);
-            presence_join_room(curr->data, nick, password);
-        }
+        char *nick = muc_nick(curr->data);
+        presence_join_room(curr->data, nick, password);
         curr = g_list_next(curr);
     }
     g_list_free(rooms);
