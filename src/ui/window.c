@@ -1048,6 +1048,11 @@ win_print_incoming(ProfWin *window, GDateTime *timestamp,
     const char *const from, const char *const message, prof_enc_t enc_mode)
 {
     char enc_char = '-';
+    int flags = NO_ME;
+
+    if (!trusted) {
+        flags != NO_TRUST;
+    }
 
     switch (window->type)
     {
@@ -1063,11 +1068,11 @@ win_print_incoming(ProfWin *window, GDateTime *timestamp,
             } else if (enc_mode == PROF_MSG_OMEMO) {
                 enc_char = prefs_get_omemo_char();
             }
-            _win_printf(window, enc_char, 0, timestamp, NO_ME, THEME_TEXT_THEM, from, "%s", message);
+            _win_printf(window, enc_char, 0, timestamp, flags, THEME_TEXT_THEM, from, "%s", message);
             break;
         }
         case WIN_PRIVATE:
-            _win_printf(window, '-', 0, timestamp, NO_ME, THEME_TEXT_THEM, from, "%s", message);
+            _win_printf(window, '-', 0, timestamp, flags, THEME_TEXT_THEM, from, "%s", message);
             break;
         default:
             assert(FALSE);
@@ -1384,6 +1389,7 @@ _win_print(ProfWin *window, const char show_char, int pad_indent, GDateTime *tim
     //         3rd bit =  0/1 - eol/no eol
     //         4th bit =  0/1 - color from/no color from
     //         5th bit =  0/1 - color date/no date
+    //         6th bit =  0/1 - not trusted/trusted
     gboolean me_message = FALSE;
     int offset = 0;
     int colour = theme_attrs(THEME_ME);
@@ -1460,6 +1466,10 @@ _win_print(ProfWin *window, const char show_char, int pad_indent, GDateTime *tim
             wprintw(window->layout->win, "%s: ", from);
             wattroff(window->layout->win, colour);
         }
+    }
+
+    if (flags & NO_TRUST) {
+        colour = theme_attrs(THEME_NO_TRUST);
     }
 
     if (!me_message) {

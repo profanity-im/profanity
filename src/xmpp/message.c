@@ -696,6 +696,7 @@ static void
 _handle_groupchat(xmpp_stanza_t *const stanza)
 {
     xmpp_ctx_t *ctx = connection_get_ctx();
+    int flags = 0;
     char *message = NULL;
 
     const char *id = xmpp_stanza_get_id(stanza);
@@ -748,11 +749,15 @@ _handle_groupchat(xmpp_stanza_t *const stanza)
     }
 
     // check omemo encryption
-    gboolean omemo = FALSE;
-    gboolean trusted = FALSE;
 #ifdef HAVE_OMEMO
+    gboolean trusted = FALSE;
     message = omemo_receive_message(stanza, &trusted);
-    omemo = message != NULL;
+    if (message != NULL) {
+        flags |= MSG_ENC_OMEMO;
+        if (trusted) {
+            flags |= MSG_TRUSTED;
+        }
+    }
 #endif
 
     if (!message) {
@@ -766,10 +771,10 @@ _handle_groupchat(xmpp_stanza_t *const stanza)
     // determine if the notifications happened whilst offline
     GDateTime *timestamp = stanza_get_delay(stanza);
     if (timestamp) {
-        sv_ev_room_history(jid->barejid, jid->resourcepart, timestamp, message, omemo, trusted);
+        sv_ev_room_history(jid->barejid, jid->resourcepart, timestamp, message, flags);
         g_date_time_unref(timestamp);
     } else {
-        sv_ev_room_message(jid->barejid, jid->resourcepart, message, id, omemo, trusted);
+        sv_ev_room_message(jid->barejid, jid->resourcepart, message, id, flags);
     }
 
     xmpp_free(ctx, message);
@@ -873,6 +878,7 @@ static gboolean
 _handle_carbons(xmpp_stanza_t *const stanza)
 {
     char *message_txt = NULL;
+    int flags = 0;
     xmpp_stanza_t *carbons = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_CARBONS);
     if (!carbons) {
         return FALSE;
@@ -907,11 +913,15 @@ _handle_carbons(xmpp_stanza_t *const stanza)
     }
 
     // check omemo encryption
-    gboolean omemo = FALSE;
-    gboolean trusted = FALSE;
 #ifdef HAVE_OMEMO
+    gboolean trusted = FALSE;
     message_txt = omemo_receive_message(message, &trusted);
-    omemo = message_txt != NULL;
+    if (message_txt != NULL) {
+        flags != MSG_ENC_OMEMO;
+        if (trusted) {
+            flags |= MSG_TRUSTED;
+        }
+    }
 #endif
 
     if (!message_txt) {
@@ -947,11 +957,11 @@ _handle_carbons(xmpp_stanza_t *const stanza)
 
     // if we are the recipient, treat as standard incoming message
     if (g_strcmp0(my_jid->barejid, jid_to->barejid) == 0) {
-        sv_ev_incoming_carbon(jid_from->barejid, jid_from->resourcepart, message_txt, enc_message, omemo, trusted);
+        sv_ev_incoming_carbon(jid_from->barejid, jid_from->resourcepart, message_txt, enc_message, flags);
 
     // else treat as a sent message
     } else {
-        sv_ev_outgoing_carbon(jid_to->barejid, message_txt, enc_message, omemo, trusted);
+        sv_ev_outgoing_carbon(jid_to->barejid, message_txt, enc_message, flags);
     }
 
     xmpp_ctx_t *ctx = connection_get_ctx();

@@ -35,6 +35,11 @@
 #ifndef XMPP_MESSAGE_H
 #define XMPP_MESSAGE_H
 
+#define PROF_MSG_ENC_OTR     1
+#define PROF_MSG_ENC_PGP     2
+#define PROF_MSG_ENC_OMEMO   4
+#define PROF_MSG_TRUSTED     8
+
 typedef int(*ProfMessageCallback)(xmpp_stanza_t *const stanza, void *const userdata);
 typedef void(*ProfMessageFreeCallback)(void *userdata);
 

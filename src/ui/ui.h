@@ -53,13 +53,6 @@
 #define NO_COLOUR_FROM  8
 #define NO_COLOUR_DATE  16
 
-typedef enum {
-    PROF_MSG_PLAIN,
-    PROF_MSG_OTR,
-    PROF_MSG_PGP,
-    PROF_MSG_OMEMO
-} prof_enc_t;
-
 // core UI
 void ui_init(void);
 void ui_load_colours(void);

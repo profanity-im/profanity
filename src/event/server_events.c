@@ -268,7 +268,7 @@ sv_ev_room_subject(const char *const room, const char *const nick, const char *c
 
 void
 sv_ev_room_history(const char *const room_jid, const char *const nick,
-    GDateTime *timestamp, const char *const message)
+    GDateTime *timestamp, const char *const message, int flags)
 {
     ProfMucWin *mucwin = wins_get_muc(room_jid);
     if (mucwin) {
@@ -290,7 +290,7 @@ sv_ev_room_history(const char *const room_jid, const char *const nick,
 }
 
 void
-sv_ev_room_message(const char *const room_jid, const char *const nick, const char *const message, const char *const id, gboolean omemo)
+sv_ev_room_message(const char *const room_jid, const char *const nick, const char *const message, const char *const id, int flags)
 {
     ProfMucWin *mucwin = wins_get_muc(room_jid);
     if (!mucwin) {
@@ -299,7 +299,7 @@ sv_ev_room_message(const char *const room_jid, const char *const nick, const cha
 
     char *mynick = muc_nick(mucwin->roomjid);
 
-    if (omemo) {
+    if (flags & MSG_ENC_OMEMO) {
         groupchat_log_omemo_msg_in(room_jid, nick, message);
     } else {
         groupchat_log_msg_in(room_jid, nick, message);
@@ -320,8 +320,8 @@ sv_ev_room_message(const char *const room_jid, const char *const nick, const cha
 
     GList *triggers = prefs_message_get_triggers(new_message);
 
-    if (omemo) {
-        mucwin_incoming_msg(mucwin, nick, new_message, id, mentions, triggers, PROF_MSG_OMEMO);
+    if (flags & MSG_ENC_OMEMO) {
+        mucwin_incoming_msg(mucwin, nick, new_message, id, mentions, triggers, flags);
     } else {
         mucwin_incoming_msg(mucwin, nick, new_message, id, mentions, triggers, PROF_MSG_PLAIN);
     }

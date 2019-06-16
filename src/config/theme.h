@@ -133,7 +133,8 @@ typedef enum {
     THEME_BLACK,
     THEME_BLACK_BOLD,
     THEME_MAGENTA,
-    THEME_MAGENTA_BOLD
+    THEME_MAGENTA_BOLD,
+    THEME_NO_TRUST,
 } theme_item_t;
 
 void theme_init(const char *const theme_name);
