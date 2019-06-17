@@ -37,6 +37,8 @@
 
 #include <glib.h>
 
+#include "xmpp/message.h"
+
 // log levels
 typedef enum {
     PROF_LEVEL_DEBUG,
@@ -73,10 +75,10 @@ void chat_log_otr_msg_out(const char *const barejid, const char *const msg);
 void chat_log_pgp_msg_out(const char *const barejid, const char *const msg);
 void chat_log_omemo_msg_out(const char *const barejid, const char *const msg);
 
-void chat_log_msg_in(const char *const barejid, const char *const msg, GDateTime *timestamp);
-void chat_log_otr_msg_in(const char *const barejid, const char *const msg, gboolean was_decrypted, GDateTime *timestamp);
-void chat_log_pgp_msg_in(const char *const barejid, const char *const msg, GDateTime *timestamp);
-void chat_log_omemo_msg_in(const char *const barejid, const char *const msg, GDateTime *timestamp);
+void chat_log_msg_in(prof_message_t *message);
+void chat_log_otr_msg_in(prof_message_t *message);
+void chat_log_pgp_msg_in(prof_message_t *message);
+void chat_log_omemo_msg_in(prof_message_t *message);
 
 void chat_log_close(void);
 GSList* chat_log_get_previous(const gchar *const login, const gchar *const recipient);

@@ -471,12 +471,18 @@ api_settings_int_set(const char *const group, const char *const key, int value)
 }
 
 void
-api_incoming_message(const char *const barejid, const char *const resource, const char *const message)
+api_incoming_message(const char *const barejid, const char *const resource, const char *const plain)
 {
-    sv_ev_incoming_message((char*)barejid, (char*)resource, (char*)message, NULL, NULL, FALSE);
+    prof_message_t *message = message_init();
+    message->jid = jid_create_from_bare_and_resource(barejid, resource);
+    message->plain = strdup(plain);
+
+    sv_ev_incoming_message(message);
 
     // TODO handle all states
     sv_ev_activity((char*)barejid, (char*)resource, FALSE);
+
+    message_free(message);
 }
 
 void

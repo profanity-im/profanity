@@ -241,23 +241,24 @@ chatwin_recipient_gone(ProfChatWin *chatwin)
 }
 
 void
-chatwin_incoming_msg(ProfChatWin *chatwin, const char *const resource, const char *const message, GDateTime *timestamp, gboolean win_created, prof_enc_t enc_mode)
+chatwin_incoming_msg(ProfChatWin *chatwin, prof_message_t *message, gboolean win_created)
 {
     assert(chatwin != NULL);
+    char *old_plain = message->plain;
 
-    char *plugin_message = plugins_pre_chat_message_display(chatwin->barejid, resource, message);
+    message->plain = plugins_pre_chat_message_display(chatwin->barejid, message->jid->resourcepart, message->plain);
 
     ProfWin *window = (ProfWin*)chatwin;
     int num = wins_get_num(window);
 
-    char *display_name = roster_get_msg_display_name(chatwin->barejid, resource);
+    char *display_name = roster_get_msg_display_name(chatwin->barejid, message->jid->resourcepart);
 
     gboolean is_current = wins_is_current(window);
     gboolean notify = prefs_do_chat_notify(is_current);
 
     // currently viewing chat window with sender
     if (wins_is_current(window)) {
-        win_print_incoming(window, timestamp, display_name, plugin_message, enc_mode);
+        win_print_incoming(window, display_name, message);
         title_bar_set_typing(FALSE);
         status_bar_active(num, WIN_CHAT, chatwin->barejid);
 
@@ -277,14 +278,14 @@ chatwin_incoming_msg(ProfChatWin *chatwin, const char *const resource, const cha
         }
 
         // show users status first, when receiving message via delayed delivery
-        if (timestamp && win_created) {
+        if (message->timestamp && win_created) {
             PContact pcontact = roster_get_contact(chatwin->barejid);
             if (pcontact) {
                 win_show_contact(window, pcontact);
             }
         }
 
-        win_print_incoming(window, timestamp, display_name, plugin_message, enc_mode);
+        win_print_incoming(window, display_name, message);
     }
 
     if (prefs_get_boolean(PREF_BEEP)) {
@@ -292,14 +293,15 @@ chatwin_incoming_msg(ProfChatWin *chatwin, const char *const resource, const cha
     }
 
     if (notify) {
-        notify_message(display_name, num, plugin_message);
+        notify_message(display_name, num, message->plain);
     }
 
     free(display_name);
 
-    plugins_post_chat_message_display(chatwin->barejid, resource, plugin_message);
+    plugins_post_chat_message_display(chatwin->barejid, message->jid->resourcepart, message->plain);
 
-    free(plugin_message);
+    free(message->plain);
+    message->plain = old_plain;
 }
 
 void
@@ -311,11 +313,11 @@ chatwin_outgoing_msg(ProfChatWin *chatwin, const char *const message, char *id, 
     char enc_char = '-';
     if (chatwin->outgoing_char) {
         enc_char = chatwin->outgoing_char[0];
-    } else if (enc_mode == PROF_MSG_OTR) {
+    } else if (enc_mode == PROF_MSG_ENC_OTR) {
         enc_char = prefs_get_otr_char();
-    } else if (enc_mode == PROF_MSG_PGP) {
+    } else if (enc_mode == PROF_MSG_ENC_PGP) {
         enc_char = prefs_get_pgp_char();
-    } else if (enc_mode == PROF_MSG_OMEMO) {
+    } else if (enc_mode == PROF_MSG_ENC_OMEMO) {
         enc_char = prefs_get_omemo_char();
     }
 
@@ -332,9 +334,9 @@ chatwin_outgoing_carbon(ProfChatWin *chatwin, const char *const message, prof_en
     assert(chatwin != NULL);
 
     char enc_char = '-';
-    if (enc_mode == PROF_MSG_PGP) {
+    if (enc_mode == PROF_MSG_ENC_PGP) {
         enc_char = prefs_get_pgp_char();
-    } else if (enc_mode == PROF_MSG_OMEMO) {
+    } else if (enc_mode == PROF_MSG_ENC_OMEMO) {
         enc_char = prefs_get_omemo_char();
     }
 

@@ -383,7 +383,7 @@ mucwin_history(ProfMucWin *mucwin, const char *const nick, GDateTime *timestamp,
 }
 
 static void
-_mucwin_print_mention(ProfWin *window, const char *const message, const char *const from, const char *const mynick, GSList *mentions, const char *const ch)
+_mucwin_print_mention(ProfWin *window, const char *const message, const char *const from, const char *const mynick, GSList *mentions, const char *const ch, int flags)
 {
     int last_pos = 0;
     int pos = 0;
@@ -393,11 +393,11 @@ _mucwin_print_mention(ProfWin *window, const char *const message, const char *co
 
         char *before_str = g_strndup(message + last_pos, pos - last_pos);
         if (strncmp(before_str, "/me ", 4) == 0) {
-            win_print_them(window, THEME_ROOMMENTION, *ch, "");
+            win_print_them(window, THEME_ROOMMENTION, *ch, flags, "");
             win_append_highlight(window, THEME_ROOMMENTION, "*%s ", from);
             win_append_highlight(window, THEME_ROOMMENTION, "%s", before_str + 4);
         } else {
-            win_print_them(window, THEME_ROOMMENTION, *ch, from);
+            win_print_them(window, THEME_ROOMMENTION, *ch, flags, from);
             win_append_highlight(window, THEME_ROOMMENTION, "%s", before_str);
         }
         g_free(before_str);
@@ -512,11 +512,11 @@ mucwin_outgoing_msg(ProfMucWin *mucwin, const char *const message, const char *c
     char ch = '-';
     if (mucwin->message_char) {
         ch = mucwin->message_char[0];
-    } else if (enc_mode == PROF_MSG_OTR) {
+    } else if (enc_mode == PROF_MSG_ENC_OTR) {
         ch = prefs_get_otr_char();
-    } else if (enc_mode == PROF_MSG_PGP) {
+    } else if (enc_mode == PROF_MSG_ENC_PGP) {
         ch = prefs_get_pgp_char();
-    } else if (enc_mode == PROF_MSG_OMEMO) {
+    } else if (enc_mode == PROF_MSG_ENC_OMEMO) {
         ch = prefs_get_omemo_char();
     }
 
@@ -524,13 +524,18 @@ mucwin_outgoing_msg(ProfMucWin *mucwin, const char *const message, const char *c
 }
 
 void
-mucwin_incoming_msg(ProfMucWin *mucwin, const char *const nick, const char *const message, const char *const id, GSList *mentions, GList *triggers, prof_enc_t enc_mode)
+mucwin_incoming_msg(ProfMucWin *mucwin, prof_message_t *message, GSList *mentions, GList *triggers)
 {
     assert(mucwin != NULL);
+    int flags = 0;
 
-    if (id && g_hash_table_remove(mucwin->sent_messages, id)) {
+    if (message->id && g_hash_table_remove(mucwin->sent_messages, message->id)) {
         /* Ignore reflection messages */
         return;
+    }
+
+    if (!message->trusted) {
+        flags |= NO_TRUST;
     }
 
     ProfWin *window = (ProfWin*)mucwin;
@@ -539,21 +544,21 @@ mucwin_incoming_msg(ProfMucWin *mucwin, const char *const nick, const char *cons
     char ch = '-';
     if (mucwin->message_char) {
         ch = mucwin->message_char[0];
-    } else if (enc_mode == PROF_MSG_OTR) {
+    } else if (message->enc == PROF_MSG_ENC_OTR) {
         ch = prefs_get_otr_char();
-    } else if (enc_mode == PROF_MSG_PGP) {
+    } else if (message->enc == PROF_MSG_ENC_PGP) {
         ch = prefs_get_pgp_char();
-    } else if (enc_mode == PROF_MSG_OMEMO) {
+    } else if (message->enc == PROF_MSG_ENC_OMEMO) {
         ch = prefs_get_omemo_char();
     }
 
     if (g_slist_length(mentions) > 0) {
-        _mucwin_print_mention(window, message, nick, mynick, mentions, &ch);
+        _mucwin_print_mention(window, message->plain, message->jid->resourcepart, mynick, mentions, &ch, flags);
     } else if (triggers) {
-        win_print_them(window, THEME_ROOMTRIGGER, ch, nick);
-        _mucwin_print_triggers(window, message, triggers);
+        win_print_them(window, THEME_ROOMTRIGGER, ch, flags, message->jid->resourcepart);
+        _mucwin_print_triggers(window, message->plain, triggers);
     } else {
-        win_println_them_message(window, ch, nick, "%s", message);
+        win_println_them_message(window, ch, flags, message->jid->resourcepart, "%s", message->plain);
     }
 }
 

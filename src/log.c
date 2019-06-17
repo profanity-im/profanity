@@ -329,16 +329,16 @@ chat_log_omemo_msg_out(const char *const barejid, const char *const msg)
 }
 
 void
-chat_log_otr_msg_in(const char *const barejid, const char *const msg, gboolean was_decrypted, GDateTime *timestamp)
+chat_log_otr_msg_in(prof_message_t *message)
 {
     if (prefs_get_boolean(PREF_CHLOG)) {
         const char *jid = connection_get_fulljid();
         Jid *jidp = jid_create(jid);
         char *pref_otr_log = prefs_get_string(PREF_OTR_LOG);
-        if (!was_decrypted || (strcmp(pref_otr_log, "on") == 0)) {
-            _chat_log_chat(jidp->barejid, barejid, msg, PROF_IN_LOG, timestamp);
+        if (message->enc == PROF_MSG_ENC_PLAIN || (strcmp(pref_otr_log, "on") == 0)) {
+            _chat_log_chat(jidp->barejid, message->jid->barejid, message->plain, PROF_IN_LOG, message->timestamp);
         } else if (strcmp(pref_otr_log, "redact") == 0) {
-            _chat_log_chat(jidp->barejid, barejid, "[redacted]", PROF_IN_LOG, timestamp);
+            _chat_log_chat(jidp->barejid, message->jid->barejid, "[redacted]", PROF_IN_LOG, message->timestamp);
         }
         prefs_free_string(pref_otr_log);
         jid_destroy(jidp);
@@ -346,16 +346,16 @@ chat_log_otr_msg_in(const char *const barejid, const char *const msg, gboolean w
 }
 
 void
-chat_log_pgp_msg_in(const char *const barejid, const char *const msg, GDateTime *timestamp)
+chat_log_pgp_msg_in(prof_message_t *message)
 {
     if (prefs_get_boolean(PREF_CHLOG)) {
         const char *jid = connection_get_fulljid();
         Jid *jidp = jid_create(jid);
         char *pref_pgp_log = prefs_get_string(PREF_PGP_LOG);
         if (strcmp(pref_pgp_log, "on") == 0) {
-            _chat_log_chat(jidp->barejid, barejid, msg, PROF_IN_LOG, timestamp);
+            _chat_log_chat(jidp->barejid, message->jid->barejid, message->plain, PROF_IN_LOG, message->timestamp);
         } else if (strcmp(pref_pgp_log, "redact") == 0) {
-            _chat_log_chat(jidp->barejid, barejid, "[redacted]", PROF_IN_LOG, timestamp);
+            _chat_log_chat(jidp->barejid, message->jid->barejid, "[redacted]", PROF_IN_LOG, message->timestamp);
         }
         prefs_free_string(pref_pgp_log);
         jid_destroy(jidp);
@@ -363,16 +363,16 @@ chat_log_pgp_msg_in(const char *const barejid, const char *const msg, GDateTime 
 }
 
 void
-chat_log_omemo_msg_in(const char *const barejid, const char *const msg, GDateTime *timestamp)
+chat_log_omemo_msg_in(prof_message_t *message)
 {
     if (prefs_get_boolean(PREF_CHLOG)) {
         const char *jid = connection_get_fulljid();
         Jid *jidp = jid_create(jid);
         char *pref_omemo_log = prefs_get_string(PREF_OMEMO_LOG);
         if (strcmp(pref_omemo_log, "on") == 0) {
-            _chat_log_chat(jidp->barejid, barejid, msg, PROF_IN_LOG, timestamp);
+            _chat_log_chat(jidp->barejid, message->jid->barejid, message->plain, PROF_IN_LOG, message->timestamp);
         } else if (strcmp(pref_omemo_log, "redact") == 0) {
-            _chat_log_chat(jidp->barejid, barejid, "[redacted]", PROF_IN_LOG, timestamp);
+            _chat_log_chat(jidp->barejid, message->jid->barejid, "[redacted]", PROF_IN_LOG, message->timestamp);
         }
         prefs_free_string(pref_omemo_log);
         jid_destroy(jidp);
@@ -380,12 +380,12 @@ chat_log_omemo_msg_in(const char *const barejid, const char *const msg, GDateTim
 }
 
 void
-chat_log_msg_in(const char *const barejid, const char *const msg, GDateTime *timestamp)
+chat_log_msg_in(prof_message_t *message)
 {
     if (prefs_get_boolean(PREF_CHLOG)) {
         const char *jid = connection_get_fulljid();
         Jid *jidp = jid_create(jid);
-        _chat_log_chat(jidp->barejid, barejid, msg, PROF_IN_LOG, timestamp);
+        _chat_log_chat(jidp->barejid, message->jid->barejid, message->plain, PROF_IN_LOG, message->timestamp);
         jid_destroy(jidp);
     }
 }

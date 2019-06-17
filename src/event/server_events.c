@@ -267,10 +267,9 @@ sv_ev_room_subject(const char *const room, const char *const nick, const char *c
 }
 
 void
-sv_ev_room_history(const char *const room_jid, const char *const nick,
-    GDateTime *timestamp, const char *const message, int flags)
+sv_ev_room_history(prof_message_t *message)
 {
-    ProfMucWin *mucwin = wins_get_muc(room_jid);
+    ProfMucWin *mucwin = wins_get_muc(message->jid->barejid);
     if (mucwin) {
         // if this is the first successful connection
         if (_success_connections_counter == 1) {
@@ -282,34 +281,35 @@ sv_ev_room_history(const char *const room_jid, const char *const nick,
             mucwin->last_msg_timestamp  = g_date_time_new_now_local();
         }
 
-        gboolean younger = g_date_time_compare(mucwin->last_msg_timestamp, timestamp) < 0 ? TRUE : FALSE;
+        gboolean younger = g_date_time_compare(mucwin->last_msg_timestamp, message->timestamp) < 0 ? TRUE : FALSE;
         if (_success_connections_counter == 1 || younger ) {
-            mucwin_history(mucwin, nick, timestamp, message);
+            mucwin_history(mucwin, message->jid->resourcepart, message->timestamp, message->plain);
         }
     }
 }
 
 void
-sv_ev_room_message(const char *const room_jid, const char *const nick, const char *const message, const char *const id, int flags)
+sv_ev_room_message(prof_message_t *message)
 {
-    ProfMucWin *mucwin = wins_get_muc(room_jid);
+    ProfMucWin *mucwin = wins_get_muc(message->jid->barejid);
     if (!mucwin) {
         return;
     }
 
     char *mynick = muc_nick(mucwin->roomjid);
 
-    if (flags & MSG_ENC_OMEMO) {
-        groupchat_log_omemo_msg_in(room_jid, nick, message);
+    if (message->enc == PROF_MSG_ENC_OMEMO) {
+        groupchat_log_omemo_msg_in(message->jid->barejid, message->jid->resourcepart, message->plain);
     } else {
-        groupchat_log_msg_in(room_jid, nick, message);
+        groupchat_log_msg_in(message->jid->barejid, message->jid->resourcepart, message->plain);
     }
 
-    char *new_message = plugins_pre_room_message_display(room_jid, nick, message);
+    char *old_plain = message->plain;
+    message->plain = plugins_pre_room_message_display(message->jid->barejid, message->jid->resourcepart, message->plain);
 
     gboolean whole_word = prefs_get_boolean(PREF_NOTIFY_MENTION_WHOLE_WORD);
     gboolean case_sensitive = prefs_get_boolean(PREF_NOTIFY_MENTION_CASE_SENSITIVE);
-    char *message_search = case_sensitive ? strdup(new_message) : g_utf8_strdown(new_message, -1);
+    char *message_search = case_sensitive ? strdup(message->plain) : g_utf8_strdown(message->plain, -1);
     char *mynick_search = case_sensitive ? strdup(mynick) : g_utf8_strdown(mynick, -1);
 
     GSList *mentions = NULL;
@@ -318,13 +318,9 @@ sv_ev_room_message(const char *const room_jid, const char *const nick, const cha
     g_free(message_search);
     g_free(mynick_search);
 
-    GList *triggers = prefs_message_get_triggers(new_message);
+    GList *triggers = prefs_message_get_triggers(message->plain);
 
-    if (flags & MSG_ENC_OMEMO) {
-        mucwin_incoming_msg(mucwin, nick, new_message, id, mentions, triggers, flags);
-    } else {
-        mucwin_incoming_msg(mucwin, nick, new_message, id, mentions, triggers, PROF_MSG_PLAIN);
-    }
+    mucwin_incoming_msg(mucwin, message, mentions, triggers);
 
     g_slist_free(mentions);
 
@@ -337,7 +333,7 @@ sv_ev_room_message(const char *const room_jid, const char *const nick, const cha
         is_current = TRUE;
         status_bar_active(num, WIN_MUC, mucwin->roomjid);
 
-        if ((g_strcmp0(mynick, nick) != 0) && (prefs_get_boolean(PREF_BEEP))) {
+        if ((g_strcmp0(mynick, message->jid->resourcepart) != 0) && (prefs_get_boolean(PREF_BEEP))) {
             beep();
         }
 
@@ -345,11 +341,11 @@ sv_ev_room_message(const char *const room_jid, const char *const nick, const cha
     } else {
         status_bar_new(num, WIN_MUC, mucwin->roomjid);
 
-        if ((g_strcmp0(mynick, nick) != 0) && (prefs_get_boolean(PREF_FLASH))) {
+        if ((g_strcmp0(mynick, message->jid->resourcepart) != 0) && (prefs_get_boolean(PREF_FLASH))) {
             flash();
         }
 
-        cons_show_incoming_room_message(nick, mucwin->roomjid, num, mention, triggers, mucwin->unread);
+        cons_show_incoming_room_message(message->jid->resourcepart, mucwin->roomjid, num, mention, triggers, mucwin->unread);
 
         mucwin->unread++;
 
@@ -367,9 +363,9 @@ sv_ev_room_message(const char *const room_jid, const char *const nick, const cha
     }
     mucwin->last_msg_timestamp  = g_date_time_new_now_local();
 
-    if (prefs_do_room_notify(is_current, mucwin->roomjid, mynick, nick, new_message, mention, triggers != NULL)) {
+    if (prefs_do_room_notify(is_current, mucwin->roomjid, mynick, message->jid->resourcepart, message->plain, mention, triggers != NULL)) {
         Jid *jidp = jid_create(mucwin->roomjid);
-        notify_room_message(nick, jidp->localpart, num, new_message);
+        notify_room_message(message->jid->resourcepart, jidp->localpart, num, message->plain);
         jid_destroy(jidp);
     }
 
@@ -379,43 +375,48 @@ sv_ev_room_message(const char *const room_jid, const char *const nick, const cha
 
     rosterwin_roster();
 
-    plugins_post_room_message_display(room_jid, nick, new_message);
-    free(new_message);
+    plugins_post_room_message_display(message->jid->barejid, message->jid->resourcepart, message->plain);
+    free(message->plain);
+    message->plain = old_plain;
 }
 
 void
-sv_ev_incoming_private_message(const char *const fulljid, char *message)
+sv_ev_incoming_private_message(prof_message_t *message)
 {
-    char *plugin_message =  plugins_pre_priv_message_display(fulljid, message);
+    char *old_plain = message->plain;
+    message->plain = plugins_pre_priv_message_display(message->jid->fulljid, message->plain);
 
-    ProfPrivateWin *privatewin = wins_get_private(fulljid);
+    ProfPrivateWin *privatewin = wins_get_private(message->jid->fulljid);
     if (privatewin == NULL) {
-        ProfWin *window = wins_new_private(fulljid);
+        ProfWin *window = wins_new_private(message->jid->fulljid);
         privatewin = (ProfPrivateWin*)window;
     }
-    privwin_incoming_msg(privatewin, plugin_message, NULL);
+    privwin_incoming_msg(privatewin, message);
 
-    plugins_post_priv_message_display(fulljid, plugin_message);
+    plugins_post_priv_message_display(message->jid->fulljid, message->plain);
 
-    free(plugin_message);
+    free(message->plain);
+    message->plain = old_plain;
     rosterwin_roster();
 }
 
 void
-sv_ev_delayed_private_message(const char *const fulljid, char *message, GDateTime *timestamp)
+sv_ev_delayed_private_message(prof_message_t *message)
 {
-    char *new_message = plugins_pre_priv_message_display(fulljid, message);
+    char *old_plain = message->plain;
+    message->plain = plugins_pre_priv_message_display(message->jid->fulljid, message->plain);
 
-    ProfPrivateWin *privatewin = wins_get_private(fulljid);
+    ProfPrivateWin *privatewin = wins_get_private(message->jid->fulljid);
     if (privatewin == NULL) {
-        ProfWin *window = wins_new_private(fulljid);
+        ProfWin *window = wins_new_private(message->jid->fulljid);
         privatewin = (ProfPrivateWin*)window;
     }
-    privwin_incoming_msg(privatewin, new_message, timestamp);
+    privwin_incoming_msg(privatewin, message);
 
-    plugins_post_priv_message_display(fulljid, new_message);
+    plugins_post_priv_message_display(message->jid->fulljid, message->plain);
 
-    free(new_message);
+    free(message->plain);
+    message->plain = old_plain;
 }
 
 void
@@ -433,12 +434,12 @@ sv_ev_outgoing_carbon(char *barejid, char *message, char *pgp_message, gboolean 
     if (pgp_message) {
         char *decrypted = p_gpg_decrypt(pgp_message);
         if (decrypted) {
-            chatwin_outgoing_carbon(chatwin, decrypted, PROF_MSG_PGP);
+            chatwin_outgoing_carbon(chatwin, decrypted, PROF_MSG_ENC_PGP);
         } else {
-            chatwin_outgoing_carbon(chatwin, message, PROF_MSG_PLAIN);
+            chatwin_outgoing_carbon(chatwin, message, PROF_MSG_ENC_PLAIN);
         }
     } else {
-        chatwin_outgoing_carbon(chatwin, message, PROF_MSG_PLAIN);
+        chatwin_outgoing_carbon(chatwin, message, PROF_MSG_ENC_PLAIN);
     }
     return;
 #endif
@@ -447,9 +448,9 @@ sv_ev_outgoing_carbon(char *barejid, char *message, char *pgp_message, gboolean 
 #ifndef HAVE_LIBGPGME
 #ifdef HAVE_OMEMO
     if (omemo) {
-        chatwin_outgoing_carbon(chatwin, message, PROF_MSG_OMEMO);
+        chatwin_outgoing_carbon(chatwin, message, PROF_MSG_ENC_OMEMO);
     } else {
-        chatwin_outgoing_carbon(chatwin, message, PROF_MSG_PLAIN);
+        chatwin_outgoing_carbon(chatwin, message, PROF_MSG_ENC_PLAIN);
     }
     return;
 #endif
@@ -458,16 +459,16 @@ sv_ev_outgoing_carbon(char *barejid, char *message, char *pgp_message, gboolean 
 #ifdef HAVE_LIBGPGME
 #ifdef HAVE_OMEMO
     if (omemo) {
-        chatwin_outgoing_carbon(chatwin, message, PROF_MSG_OMEMO);
+        chatwin_outgoing_carbon(chatwin, message, PROF_MSG_ENC_OMEMO);
     } else if (pgp_message) {
         char *decrypted = p_gpg_decrypt(pgp_message);
         if (decrypted) {
-            chatwin_outgoing_carbon(chatwin, decrypted, PROF_MSG_PGP);
+            chatwin_outgoing_carbon(chatwin, decrypted, PROF_MSG_ENC_PGP);
         } else {
-            chatwin_outgoing_carbon(chatwin, message, PROF_MSG_PLAIN);
+            chatwin_outgoing_carbon(chatwin, message, PROF_MSG_ENC_PLAIN);
         }
     } else {
-        chatwin_outgoing_carbon(chatwin, message, PROF_MSG_PLAIN);
+        chatwin_outgoing_carbon(chatwin, message, PROF_MSG_ENC_PLAIN);
     }
     return;
 #endif
@@ -475,24 +476,27 @@ sv_ev_outgoing_carbon(char *barejid, char *message, char *pgp_message, gboolean 
 
 #ifndef HAVE_LIBGPGME
 #ifndef HAVE_OMEMO
-    chatwin_outgoing_carbon(chatwin, message, PROF_MSG_PLAIN);
+    chatwin_outgoing_carbon(chatwin, message, PROF_MSG_ENC_PLAIN);
 #endif
 #endif
 }
 
 #ifdef HAVE_LIBGPGME
 static void
-_sv_ev_incoming_pgp(ProfChatWin *chatwin, gboolean new_win, char *barejid, char *resource, char *message, char *pgp_message, GDateTime *timestamp)
+_sv_ev_incoming_pgp(ProfChatWin *chatwin, gboolean new_win, prof_message_t *message)
 {
-    char *decrypted = p_gpg_decrypt(pgp_message);
-    if (decrypted) {
-        chatwin_incoming_msg(chatwin, resource, decrypted, timestamp, new_win, PROF_MSG_PGP);
-        chat_log_pgp_msg_in(barejid, decrypted, timestamp);
+    message->plain = p_gpg_decrypt(message->encrypted);
+    if (message->plain) {
+        message->enc = PROF_MSG_ENC_PGP;
+        chatwin_incoming_msg(chatwin, message, new_win);
+        chat_log_pgp_msg_in(message);
         chatwin->pgp_recv = TRUE;
-        p_gpg_free_decrypted(decrypted);
+        p_gpg_free_decrypted(message->plain);
+        message->plain = NULL;
     } else {
-        chatwin_incoming_msg(chatwin, resource, message, timestamp, new_win, PROF_MSG_PLAIN);
-        chat_log_msg_in(barejid, message, timestamp);
+        message->enc = PROF_MSG_ENC_PLAIN;
+        chatwin_incoming_msg(chatwin, message, new_win);
+        chat_log_msg_in(message);
         chatwin->pgp_recv = FALSE;
     }
 }
@@ -500,19 +504,23 @@ _sv_ev_incoming_pgp(ProfChatWin *chatwin, gboolean new_win, char *barejid, char 
 
 #ifdef HAVE_LIBOTR
 static void
-_sv_ev_incoming_otr(ProfChatWin *chatwin, gboolean new_win, char *barejid, char *resource, char *message, GDateTime *timestamp)
+_sv_ev_incoming_otr(ProfChatWin *chatwin, gboolean new_win, prof_message_t *message)
 {
     gboolean decrypted = FALSE;
-    char *otr_res = otr_on_message_recv(barejid, resource, message, &decrypted);
-    if (otr_res) {
+    message->plain = otr_on_message_recv(message->jid->barejid, message->jid->resourcepart, message->body, &decrypted);
+    if (message->plain) {
         if (decrypted) {
-            chatwin_incoming_msg(chatwin, resource, otr_res, timestamp, new_win, PROF_MSG_OTR);
+            message->enc = PROF_MSG_ENC_OTR;
             chatwin->pgp_send = FALSE;
         } else {
-            chatwin_incoming_msg(chatwin, resource, otr_res, timestamp, new_win, PROF_MSG_PLAIN);
+            message->enc = PROF_MSG_ENC_PLAIN;
         }
-        chat_log_otr_msg_in(barejid, otr_res, decrypted, timestamp);
-        otr_free_message(otr_res);
+
+        chatwin_incoming_msg(chatwin, message, new_win);
+
+        chat_log_otr_msg_in(message);
+        otr_free_message(message->plain);
+        message->plain = NULL;
         chatwin->pgp_recv = FALSE;
     }
 }
@@ -520,35 +528,36 @@ _sv_ev_incoming_otr(ProfChatWin *chatwin, gboolean new_win, char *barejid, char 
 
 #ifdef HAVE_OMEMO
 static void
-_sv_ev_incoming_omemo(ProfChatWin *chatwin, gboolean new_win, char *barejid, char *resource, char *message, GDateTime *timestamp)
+_sv_ev_incoming_omemo(ProfChatWin *chatwin, gboolean new_win, prof_message_t *message)
 {
-    chatwin_incoming_msg(chatwin, resource, message, timestamp, new_win, PROF_MSG_OMEMO);
-    chat_log_omemo_msg_in(barejid, message, timestamp);
+    chatwin_incoming_msg(chatwin, message, new_win);
+    chat_log_omemo_msg_in(message);
     chatwin->pgp_recv = FALSE;
 }
 #endif
 
 static void
-_sv_ev_incoming_plain(ProfChatWin *chatwin, gboolean new_win, char *barejid, char *resource, char *message, GDateTime *timestamp)
+_sv_ev_incoming_plain(ProfChatWin *chatwin, gboolean new_win, prof_message_t *message)
 {
-    chatwin_incoming_msg(chatwin, resource, message, timestamp, new_win, PROF_MSG_PLAIN);
-    chat_log_msg_in(barejid, message, timestamp);
+    message->plain = strdup(message->body);
+    chatwin_incoming_msg(chatwin, message, new_win);
+    chat_log_msg_in(message);
     chatwin->pgp_recv = FALSE;
 }
 
 void
-sv_ev_incoming_message(char *barejid, char *resource, char *message, char *pgp_message, GDateTime *timestamp, gboolean omemo)
+sv_ev_incoming_message(prof_message_t *message)
 {
     gboolean new_win = FALSE;
-    ProfChatWin *chatwin = wins_get_chat(barejid);
+    ProfChatWin *chatwin = wins_get_chat(message->jid->barejid);
     if (!chatwin) {
-        ProfWin *window = wins_new_chat(barejid);
+        ProfWin *window = wins_new_chat(message->jid->barejid);
         chatwin = (ProfChatWin*)window;
         new_win = TRUE;
 
 #ifdef HAVE_OMEMO
-        if (omemo_automatic_start(barejid)) {
-            omemo_start_session(barejid);
+        if (omemo_automatic_start(message->jid->barejid)) {
+            omemo_start_session(message->jid->barejid);
             chatwin->is_omemo = TRUE;
         }
 #endif
@@ -558,14 +567,14 @@ sv_ev_incoming_message(char *barejid, char *resource, char *message, char *pgp_m
 #ifdef HAVE_LIBOTR
 #ifdef HAVE_LIBGPGME
 #ifndef HAVE_OMEMO
-    if (pgp_message) {
+    if (message->encrypted) {
         if (chatwin->is_otr) {
             win_println((ProfWin*)chatwin, THEME_DEFAULT, '-', "PGP encrypted message received whilst in OTR session.");
-        } else { // PROF_ENC_NONE, PROF_ENC_PGP
-            _sv_ev_incoming_pgp(chatwin, new_win, barejid, resource, message, pgp_message, timestamp);
+        } else {
+            _sv_ev_incoming_pgp(chatwin, new_win, message);
         }
     } else {
-        _sv_ev_incoming_otr(chatwin, new_win, barejid, resource, message, timestamp);
+        _sv_ev_incoming_otr(chatwin, new_win, message);
     }
     rosterwin_roster();
     return;
@@ -577,7 +586,7 @@ sv_ev_incoming_message(char *barejid, char *resource, char *message, char *pgp_m
 #ifdef HAVE_LIBOTR
 #ifndef HAVE_LIBGPGME
 #ifndef HAVE_OMEMO
-    _sv_ev_incoming_otr(chatwin, new_win, barejid, resource, message, timestamp);
+    _sv_ev_incoming_otr(chatwin, new_win, message);
     rosterwin_roster();
     return;
 #endif
@@ -588,10 +597,10 @@ sv_ev_incoming_message(char *barejid, char *resource, char *message, char *pgp_m
 #ifndef HAVE_LIBOTR
 #ifdef HAVE_LIBGPGME
 #ifndef HAVE_OMEMO
-    if (pgp_message) {
-        _sv_ev_incoming_pgp(chatwin, new_win, barejid, resource, message, pgp_message, timestamp);
+    if (message->encrypted) {
+        _sv_ev_incoming_pgp(chatwin, new_win, message);
     } else {
-        _sv_ev_incoming_plain(chatwin, new_win, barejid, resource, message, timestamp);
+        _sv_ev_incoming_plain(chatwin, new_win, message);
     }
     rosterwin_roster();
     return;
@@ -603,16 +612,16 @@ sv_ev_incoming_message(char *barejid, char *resource, char *message, char *pgp_m
 #ifdef HAVE_LIBOTR
 #ifdef HAVE_LIBGPGME
 #ifdef HAVE_OMEMO
-    if (pgp_message) {
+    if (message->encrypted) {
         if (chatwin->is_otr) {
             win_println((ProfWin*)chatwin, THEME_DEFAULT, '-', "PGP encrypted message received whilst in OTR session.");
-        } else { // PROF_ENC_NONE, PROF_ENC_PGP
-            _sv_ev_incoming_pgp(chatwin, new_win, barejid, resource, message, pgp_message, timestamp);
+        } else {
+            _sv_ev_incoming_pgp(chatwin, new_win, message);
         }
-    } else if (omemo) {
-        _sv_ev_incoming_omemo(chatwin, new_win, barejid, resource, message, timestamp);
+    } else if (message->enc == PROF_MSG_ENC_OMEMO) {
+        _sv_ev_incoming_omemo(chatwin, new_win, message);
     } else {
-        _sv_ev_incoming_otr(chatwin, new_win, barejid, resource, message, timestamp);
+        _sv_ev_incoming_otr(chatwin, new_win, message);
     }
     rosterwin_roster();
     return;
@@ -624,10 +633,10 @@ sv_ev_incoming_message(char *barejid, char *resource, char *message, char *pgp_m
 #ifdef HAVE_LIBOTR
 #ifndef HAVE_LIBGPGME
 #ifdef HAVE_OMEMO
-    if (omemo) {
-        _sv_ev_incoming_omemo(chatwin, new_win, barejid, resource, message, timestamp);
+    if (message->enc == PROF_MSG_ENC_OMEMO) {
+        _sv_ev_incoming_omemo(chatwin, new_win, message);
     } else {
-        _sv_ev_incoming_otr(chatwin, new_win, barejid, resource, message, timestamp);
+        _sv_ev_incoming_otr(chatwin, new_win, message);
     }
     rosterwin_roster();
     return;
@@ -639,12 +648,12 @@ sv_ev_incoming_message(char *barejid, char *resource, char *message, char *pgp_m
 #ifndef HAVE_LIBOTR
 #ifdef HAVE_LIBGPGME
 #ifdef HAVE_OMEMO
-    if (pgp_message) {
-        _sv_ev_incoming_pgp(chatwin, new_win, barejid, resource, message, pgp_message, timestamp);
-    } else if (omemo) {
-        _sv_ev_incoming_omemo(chatwin, new_win, barejid, resource, message, timestamp);
+    if (message->encrypted) {
+        _sv_ev_incoming_pgp(chatwin, new_win, message);
+    } else if (message->enc == PROF_MSG_ENC_OMEMO) {
+        _sv_ev_incoming_omemo(chatwin, new_win, message);
     } else {
-        _sv_ev_incoming_plain(chatwin, new_win, barejid, resource, message, timestamp);
+        _sv_ev_incoming_plain(chatwin, new_win, message);
     }
     rosterwin_roster();
     return;
@@ -656,10 +665,10 @@ sv_ev_incoming_message(char *barejid, char *resource, char *message, char *pgp_m
 #ifndef HAVE_LIBOTR
 #ifndef HAVE_LIBGPGME
 #ifdef HAVE_OMEMO
-    if (omemo) {
-        _sv_ev_incoming_omemo(chatwin, new_win, barejid, resource, message, timestamp);
+    if (message->enc == PROF_MSG_ENC_OMEMO) {
+        _sv_ev_incoming_omemo(chatwin, new_win, message);
     } else {
-        _sv_ev_incoming_plain(chatwin, new_win, barejid, resource, message, timestamp);
+        _sv_ev_incoming_plain(chatwin, new_win, message);
     }
     rosterwin_roster();
     return;
@@ -671,7 +680,7 @@ sv_ev_incoming_message(char *barejid, char *resource, char *message, char *pgp_m
 #ifndef HAVE_LIBOTR
 #ifndef HAVE_LIBGPGME
 #ifndef HAVE_OMEMO
-    _sv_ev_incoming_plain(chatwin, new_win, barejid, resource, message, timestamp);
+    _sv_ev_incoming_plain(chatwin, new_win, message);
     rosterwin_roster();
     return;
 #endif
@@ -680,18 +689,18 @@ sv_ev_incoming_message(char *barejid, char *resource, char *message, char *pgp_m
 }
 
 void
-sv_ev_incoming_carbon(char *barejid, char *resource, char *message, char *pgp_message, gboolean omemo)
+sv_ev_incoming_carbon(prof_message_t *message)
 {
     gboolean new_win = FALSE;
-    ProfChatWin *chatwin = wins_get_chat(barejid);
+    ProfChatWin *chatwin = wins_get_chat(message->jid->barejid);
     if (!chatwin) {
-        ProfWin *window = wins_new_chat(barejid);
+        ProfWin *window = wins_new_chat(message->jid->barejid);
         chatwin = (ProfChatWin*)window;
         new_win = TRUE;
 
 #ifdef HAVE_OMEMO
-        if (omemo_automatic_start(barejid)) {
-            omemo_start_session(barejid);
+        if (omemo_automatic_start(message->jid->barejid)) {
+            omemo_start_session(message->jid->barejid);
             chatwin->is_omemo = TRUE;
         }
 #endif
@@ -699,10 +708,10 @@ sv_ev_incoming_carbon(char *barejid, char *resource, char *message, char *pgp_me
 
 #ifdef HAVE_LIBGPGME
 #ifndef HAVE_OMEMO
-    if (pgp_message) {
-        _sv_ev_incoming_pgp(chatwin, new_win, barejid, resource, message, pgp_message, NULL);
+    if (message->encrypted) {
+        _sv_ev_incoming_pgp(chatwin, new_win, message);
     } else {
-        _sv_ev_incoming_plain(chatwin, new_win, barejid, resource, message, NULL);
+        _sv_ev_incoming_plain(chatwin, new_win, message);
     }
     rosterwin_roster();
     return;
@@ -711,12 +720,12 @@ sv_ev_incoming_carbon(char *barejid, char *resource, char *message, char *pgp_me
 
 #ifdef HAVE_LIBGPGME
 #ifdef HAVE_OMEMO
-    if (pgp_message) {
-        _sv_ev_incoming_pgp(chatwin, new_win, barejid, resource, message, pgp_message, NULL);
-    } else if (omemo) {
-        _sv_ev_incoming_omemo(chatwin, new_win, barejid, resource, message, NULL);
+    if (message->encrypted) {
+        _sv_ev_incoming_pgp(chatwin, new_win, message);
+    } else if (message->enc == PROF_MSG_ENC_OMEMO) {
+        _sv_ev_incoming_omemo(chatwin, new_win, message);
     } else {
-        _sv_ev_incoming_plain(chatwin, new_win, barejid, resource, message, NULL);
+        _sv_ev_incoming_plain(chatwin, new_win, message);
     }
     rosterwin_roster();
     return;
@@ -725,10 +734,10 @@ sv_ev_incoming_carbon(char *barejid, char *resource, char *message, char *pgp_me
 
 #ifndef HAVE_LIBGPGME
 #ifdef HAVE_OMEMO
-    if (omemo) {
-        _sv_ev_incoming_omemo(chatwin, new_win, barejid, resource, message, NULL);
+    if (message->enc == PROF_MSG_ENC_OMEMO) {
+        _sv_ev_incoming_omemo(chatwin, new_win, message);
     } else {
-        _sv_ev_incoming_plain(chatwin, new_win, barejid, resource, message, NULL);
+        _sv_ev_incoming_plain(chatwin, new_win, message);
     }
     rosterwin_roster();
     return;
@@ -737,7 +746,7 @@ sv_ev_incoming_carbon(char *barejid, char *resource, char *message, char *pgp_me
 
 #ifndef HAVE_LIBGPGME
 #ifndef HAVE_OMEMO
-    _sv_ev_incoming_plain(chatwin, new_win, barejid, resource, message, NULL);
+    _sv_ev_incoming_plain(chatwin, new_win, message);
     rosterwin_roster();
     return;
 #endif

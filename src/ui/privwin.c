@@ -43,7 +43,7 @@
 #include "ui/window_list.h"
 
 void
-privwin_incoming_msg(ProfPrivateWin *privatewin, const char *const message, GDateTime *timestamp)
+privwin_incoming_msg(ProfPrivateWin *privatewin, prof_message_t *message)
 {
     assert(privatewin != NULL);
 
@@ -60,7 +60,7 @@ privwin_incoming_msg(ProfPrivateWin *privatewin, const char *const message, GDat
 
     // currently viewing chat window with sender
     if (wins_is_current(window)) {
-        win_print_incoming(window, timestamp, jidp->resourcepart, message, PROF_MSG_PLAIN);
+        win_print_incoming(window, jidp->resourcepart, message);
         title_bar_set_typing(FALSE);
         status_bar_active(num, WIN_PRIVATE, privatewin->fulljid);
 
@@ -68,7 +68,7 @@ privwin_incoming_msg(ProfPrivateWin *privatewin, const char *const message, GDat
     } else {
         status_bar_new(num, WIN_PRIVATE, privatewin->fulljid);
         cons_show_incoming_private_message(jidp->resourcepart, jidp->barejid, num, privatewin->unread);
-        win_print_incoming(window, timestamp, jidp->resourcepart, message, PROF_MSG_PLAIN);
+        win_print_incoming(window, jidp->resourcepart, message);
 
         privatewin->unread++;
 
@@ -82,7 +82,7 @@ privwin_incoming_msg(ProfPrivateWin *privatewin, const char *const message, GDat
     }
 
     if (notify) {
-        notify_message(jidp->resourcepart, num, message);
+        notify_message(jidp->resourcepart, num, message->plain);
     }
 
     jid_destroy(jidp);

@@ -414,7 +414,7 @@ is_trusted_identity(const signal_protocol_address *address, uint8_t *key_data,
 
 
     if (identity_key_store->recv) {
-        identity_key_store->trusted = ret;
+        identity_key_store->trusted_msg = ret;
         return 1;
     } else {
         return ret;

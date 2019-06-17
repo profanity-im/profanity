@@ -1044,14 +1044,13 @@ win_show_status_string(ProfWin *window, const char *const from,
 }
 
 void
-win_print_incoming(ProfWin *window, GDateTime *timestamp,
-    const char *const from, const char *const message, prof_enc_t enc_mode)
+win_print_incoming(ProfWin *window, const char *const from, prof_message_t *message)
 {
     char enc_char = '-';
     int flags = NO_ME;
 
-    if (!trusted) {
-        flags != NO_TRUST;
+    if (!message->trusted) {
+        flags |= NO_TRUST;
     }
 
     switch (window->type)
@@ -1061,18 +1060,18 @@ win_print_incoming(ProfWin *window, GDateTime *timestamp,
             ProfChatWin *chatwin = (ProfChatWin*)window;
             if (chatwin->incoming_char) {
                 enc_char = chatwin->incoming_char[0];
-            } else if (enc_mode == PROF_MSG_OTR) {
+            } else if (message->enc == PROF_MSG_ENC_OTR) {
                 enc_char = prefs_get_otr_char();
-            } else if (enc_mode == PROF_MSG_PGP) {
+            } else if (message->enc == PROF_MSG_ENC_PGP) {
                 enc_char = prefs_get_pgp_char();
-            } else if (enc_mode == PROF_MSG_OMEMO) {
+            } else if (message->enc == PROF_MSG_ENC_OMEMO) {
                 enc_char = prefs_get_omemo_char();
             }
-            _win_printf(window, enc_char, 0, timestamp, flags, THEME_TEXT_THEM, from, "%s", message);
+            _win_printf(window, enc_char, 0, message->timestamp, flags, THEME_TEXT_THEM, from, "%s", message->plain);
             break;
         }
         case WIN_PRIVATE:
-            _win_printf(window, '-', 0, timestamp, flags, THEME_TEXT_THEM, from, "%s", message);
+            _win_printf(window, '-', 0, message->timestamp, flags, THEME_TEXT_THEM, from, "%s", message->plain);
             break;
         default:
             assert(FALSE);
@@ -1081,13 +1080,13 @@ win_print_incoming(ProfWin *window, GDateTime *timestamp,
 }
 
 void
-win_print_them(ProfWin *window, theme_item_t theme_item, char ch, const char *const them)
+win_print_them(ProfWin *window, theme_item_t theme_item, char ch, int flags, const char *const them)
 {
-    _win_printf(window, ch, 0, NULL, NO_ME | NO_EOL, theme_item, them, "");
+    _win_printf(window, ch, 0, NULL, flags | NO_ME | NO_EOL, theme_item, them, "");
 }
 
 void
-win_println_them_message(ProfWin *window, char ch, const char *const them, const char *const message, ...)
+win_println_them_message(ProfWin *window, char ch, int flags, const char *const them, const char *const message, ...)
 {
     GDateTime *timestamp = g_date_time_new_now_local();
 
@@ -1096,9 +1095,9 @@ win_println_them_message(ProfWin *window, char ch, const char *const them, const
     GString *fmt_msg = g_string_new(NULL);
     g_string_vprintf(fmt_msg, message, arg);
 
-    buffer_append(window->layout->buffer, ch, 0, timestamp, NO_ME, THEME_TEXT_THEM, them, fmt_msg->str, NULL);
+    buffer_append(window->layout->buffer, ch, 0, timestamp, flags | NO_ME, THEME_TEXT_THEM, them, fmt_msg->str, NULL);
 
-    _win_print(window, ch, 0, timestamp, NO_ME, THEME_TEXT_THEM, them, fmt_msg->str, NULL);
+    _win_print(window, ch, 0, timestamp, flags | NO_ME, THEME_TEXT_THEM, them, fmt_msg->str, NULL);
     inp_nonblocking(TRUE);
     g_date_time_unref(timestamp);
 
