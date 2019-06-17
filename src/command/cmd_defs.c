@@ -570,10 +570,10 @@ static struct cmd_t command_defs[] =
             { "password <password>", "Password if the room requires one." })
         CMD_EXAMPLES(
             "/join",
-            "/join jdev@conference.jabber.org",
-            "/join jdev@conference.jabber.org nick mynick",
+            "/join profanity@rooms.dismail.de",
+            "/join profanity@rooms.dismail.de nick mynick",
             "/join private@conference.jabber.org nick mynick password mypassword",
-            "/join jdev")
+            "/join mychannel")
     },
 
     { "/leave",
