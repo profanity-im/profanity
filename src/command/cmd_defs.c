@@ -1277,8 +1277,8 @@ static struct cmd_t command_defs[] =
         CMD_TAGS(
             CMD_TAG_UI)
         CMD_SYN(
-            "/time console|chat|muc|config|private|xml set <format>",
-            "/time console|chat|muc|config|private|xml off",
+            "/time all|console|chat|muc|config|private|xml set <format>",
+            "/time all|console|chat|muc|config|private|xml off",
             "/time statusbar set <format>",
             "/time statusbar off",
             "/time lastactivity set <format>")
@@ -1303,13 +1303,16 @@ static struct cmd_t command_defs[] =
             { "xml off",                   "Do not show time in XML console window." },
             { "statusbar set <format>",    "Change time format in statusbar." },
             { "statusbar off",             "Do not show time in status bar." },
-            { "lastactivity set <format>", "Change time format for last activity." })
+            { "lastactivity set <format>", "Change time format for last activity." },
+            { "all set <format>",          "Set time for: console, chat, muc, config, private and xml windows." },
+            { "all off",                   "Do not show time for: console, chat, muc, config, private and xml windows." })
         CMD_EXAMPLES(
             "/time console set %H:%M:%S",
             "/time chat set \"%d-%m-%y %H:%M:%S\"",
             "/time xml off",
             "/time statusbar set %H:%M",
-            "/time lastactivity set \"%d-%m-%y %H:%M:%S\"")
+            "/time lastactivity set \"%d-%m-%y %H:%M:%S\"",
+            "/time all set \"%d-%m-%y %H:%M:%S\"")
     },
 
     { "/inpblock",

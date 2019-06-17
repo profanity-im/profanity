@@ -717,6 +717,7 @@ cmd_ac_init(void)
     autocomplete_add(time_ac, "xml");
     autocomplete_add(time_ac, "statusbar");
     autocomplete_add(time_ac, "lastactivity");
+    autocomplete_add(time_ac, "all");
 
     time_format_ac = autocomplete_new();
     autocomplete_add(time_format_ac, "set");
@@ -2661,6 +2662,11 @@ _time_autocomplete(ProfWin *window, const char *const input, gboolean previous)
     }
 
     found = autocomplete_param_with_ac(input, "/time xml", time_format_ac, TRUE, previous);
+    if (found) {
+        return found;
+    }
+
+    found = autocomplete_param_with_ac(input, "/time all", time_format_ac, TRUE, previous);
     if (found) {
         return found;
     }

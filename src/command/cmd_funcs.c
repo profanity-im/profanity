@@ -5359,6 +5359,44 @@ cmd_time(ProfWin *window, const char *const command, gchar **args)
             cons_bad_cmd_usage(command);
             return TRUE;
         }
+    } else if (g_strcmp0(args[0], "all") == 0) {
+        if (args[1] == NULL) {
+            cons_time_setting();
+            return TRUE;
+        } else if (g_strcmp0(args[1], "set") == 0 && args[2] != NULL) {
+            prefs_set_string(PREF_TIME_CONSOLE, args[2]);
+            cons_show("Console time format set to '%s'.", args[2]);
+            prefs_set_string(PREF_TIME_CHAT, args[2]);
+            cons_show("Chat time format set to '%s'.", args[2]);
+            prefs_set_string(PREF_TIME_MUC, args[2]);
+            cons_show("MUC time format set to '%s'.", args[2]);
+            prefs_set_string(PREF_TIME_CONFIG, args[2]);
+            cons_show("config time format set to '%s'.", args[2]);
+            prefs_set_string(PREF_TIME_PRIVATE, args[2]);
+            cons_show("Private chat time format set to '%s'.", args[2]);
+            prefs_set_string(PREF_TIME_XMLCONSOLE, args[2]);
+            cons_show("XML Console time format set to '%s'.", args[2]);
+            wins_resize_all();
+            return TRUE;
+        } else if (g_strcmp0(args[1], "off") == 0) {
+            prefs_set_string(PREF_TIME_CONSOLE, "off");
+            cons_show("Console time display disabled.");
+            prefs_set_string(PREF_TIME_CHAT, "off");
+            cons_show("Chat time display disabled.");
+            prefs_set_string(PREF_TIME_MUC, "off");
+            cons_show("MUC time display disabled.");
+            prefs_set_string(PREF_TIME_CONFIG, "off");
+            cons_show("config time display disabled.");
+            prefs_set_string(PREF_TIME_PRIVATE, "off");
+            cons_show("config time display disabled.");
+            prefs_set_string(PREF_TIME_XMLCONSOLE, "off");
+            cons_show("XML Console time display disabled.");
+            ui_redraw();
+            return TRUE;
+        } else {
+            cons_bad_cmd_usage(command);
+            return TRUE;
+        }
     } else {
         cons_bad_cmd_usage(command);
         return TRUE;
