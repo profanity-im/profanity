@@ -117,6 +117,7 @@ typedef enum {
     THEME_ROSTER_ROOM_TRIGGER,
     THEME_ROSTER_ROOM_MENTION,
     THEME_RECEIPT_SENT,
+    THEME_UNTRUSTED,
     THEME_NONE,
     THEME_WHITE,
     THEME_WHITE_BOLD,
@@ -134,7 +135,6 @@ typedef enum {
     THEME_BLACK_BOLD,
     THEME_MAGENTA,
     THEME_MAGENTA_BOLD,
-    THEME_NO_TRUST,
 } theme_item_t;
 
 void theme_init(const char *const theme_name);

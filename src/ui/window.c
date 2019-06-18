@@ -1050,7 +1050,7 @@ win_print_incoming(ProfWin *window, const char *const from, prof_message_t *mess
     int flags = NO_ME;
 
     if (!message->trusted) {
-        flags |= NO_TRUST;
+        flags |= UNTRUSTED;
     }
 
     switch (window->type)
@@ -1388,7 +1388,7 @@ _win_print(ProfWin *window, const char show_char, int pad_indent, GDateTime *tim
     //         3rd bit =  0/1 - eol/no eol
     //         4th bit =  0/1 - color from/no color from
     //         5th bit =  0/1 - color date/no date
-    //         6th bit =  0/1 - not trusted/trusted
+    //         6th bit =  0/1 - trusted/untrusted
     gboolean me_message = FALSE;
     int offset = 0;
     int colour = theme_attrs(THEME_ME);
@@ -1467,14 +1467,13 @@ _win_print(ProfWin *window, const char show_char, int pad_indent, GDateTime *tim
         }
     }
 
-    if (flags & NO_TRUST) {
-        colour = theme_attrs(THEME_NO_TRUST);
-    }
-
     if (!me_message) {
         if (receipt && !receipt->received) {
             wbkgdset(window->layout->win, theme_attrs(THEME_RECEIPT_SENT));
             wattron(window->layout->win, theme_attrs(THEME_RECEIPT_SENT));
+        } else if (flags & UNTRUSTED) {
+            wbkgdset(window->layout->win, theme_attrs(THEME_UNTRUSTED));
+            wattron(window->layout->win, theme_attrs(THEME_UNTRUSTED));
         } else {
             wbkgdset(window->layout->win, theme_attrs(theme_item));
             wattron(window->layout->win, theme_attrs(theme_item));

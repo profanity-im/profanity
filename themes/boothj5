@@ -77,6 +77,7 @@ roster.room.mention=bold_cyan
 roster.room.trigger=bold_blue
 occupants.header=bold_yellow
 receipt.sent=bold_black
+receipt.sent=bold_red
 
 [ui]
 beep=false

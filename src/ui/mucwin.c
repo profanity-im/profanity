@@ -535,7 +535,7 @@ mucwin_incoming_msg(ProfMucWin *mucwin, prof_message_t *message, GSList *mention
     }
 
     if (!message->trusted) {
-        flags |= NO_TRUST;
+        flags |= UNTRUSTED;
     }
 
     ProfWin *window = (ProfWin*)mucwin;

@@ -53,7 +53,7 @@
 #define NO_EOL          4
 #define NO_COLOUR_FROM  8
 #define NO_COLOUR_DATE  16
-#define NO_TRUST        32
+#define UNTRUSTED       32
 
 
 // core UI
