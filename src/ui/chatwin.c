@@ -241,7 +241,7 @@ chatwin_recipient_gone(ProfChatWin *chatwin)
 }
 
 void
-chatwin_incoming_msg(ProfChatWin *chatwin, prof_message_t *message, gboolean win_created)
+chatwin_incoming_msg(ProfChatWin *chatwin, ProfMessage *message, gboolean win_created)
 {
     assert(chatwin != NULL);
     char *old_plain = message->plain;

@@ -120,7 +120,7 @@ gboolean ui_win_has_unsaved_form(int num);
 
 // Chat window
 ProfChatWin* chatwin_new(const char *const barejid);
-void chatwin_incoming_msg(ProfChatWin *chatwin, prof_message_t *message, gboolean win_created);
+void chatwin_incoming_msg(ProfChatWin *chatwin, ProfMessage *message, gboolean win_created);
 void chatwin_receipt_received(ProfChatWin *chatwin, const char *const id);
 void chatwin_recipient_gone(ProfChatWin *chatwin);
 void chatwin_outgoing_msg(ProfChatWin *chatwin, const char *const message, char *id, prof_enc_t enc_mode,
@@ -159,7 +159,7 @@ void mucwin_occupant_role_and_affiliation_change(ProfMucWin *mucwin, const char 
 void mucwin_roster(ProfMucWin *mucwin, GList *occupants, const char *const presence);
 void mucwin_history(ProfMucWin *mucwin, const char *const nick, GDateTime *timestamp, const char *const message);
 void mucwin_outgoing_msg(ProfMucWin *mucwin, const char *const message, const char *const id, prof_enc_t enc_mode);
-void mucwin_incoming_msg(ProfMucWin *mucwin, prof_message_t *message, GSList *mentions, GList *triggers);
+void mucwin_incoming_msg(ProfMucWin *mucwin, ProfMessage *message, GSList *mentions, GList *triggers);
 void mucwin_subject(ProfMucWin *mucwin, const char *const nick, const char *const subject);
 void mucwin_requires_config(ProfMucWin *mucwin);
 void mucwin_info(ProfMucWin *mucwin);
@@ -197,7 +197,7 @@ void mucwin_set_message_char(ProfMucWin *mucwin, const char *const ch);
 void mucwin_unset_message_char(ProfMucWin *mucwin);
 
 // MUC private chat window
-void privwin_incoming_msg(ProfPrivateWin *privatewin, prof_message_t *message);
+void privwin_incoming_msg(ProfPrivateWin *privatewin, ProfMessage *message);
 void privwin_outgoing_msg(ProfPrivateWin *privwin, const char *const message);
 void privwin_message_occupant_offline(ProfPrivateWin *privwin);
 

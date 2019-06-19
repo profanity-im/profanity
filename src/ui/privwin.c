@@ -43,7 +43,7 @@
 #include "ui/window_list.h"
 
 void
-privwin_incoming_msg(ProfPrivateWin *privatewin, prof_message_t *message)
+privwin_incoming_msg(ProfPrivateWin *privatewin, ProfMessage *message)
 {
     assert(privatewin != NULL);
 

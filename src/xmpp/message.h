@@ -44,7 +44,7 @@ typedef enum {
     PROF_MSG_ENC_OMEMO
 } prof_enc_t;
 
-typedef struct {
+typedef struct prof_message_t {
    Jid *jid;
    char *id;
    /* The raw body from xmpp message, either plaintext or OTR encrypted text */
@@ -56,13 +56,13 @@ typedef struct {
    GDateTime *timestamp;
    prof_enc_t enc;
    gboolean trusted;
-} prof_message_t;
+} ProfMessage;
 
 typedef int(*ProfMessageCallback)(xmpp_stanza_t *const stanza, void *const userdata);
 typedef void(*ProfMessageFreeCallback)(void *userdata);
 
-prof_message_t *message_init(void);
-void message_free(prof_message_t *message);
+ProfMessage *message_init(void);
+void message_free(ProfMessage *message);
 void message_handlers_init(void);
 void message_handlers_clear(void);
 void message_pubsub_event_handler_add(const char *const node, ProfMessageCallback func, ProfMessageFreeCallback free_func, void *userdata);

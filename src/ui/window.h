@@ -65,7 +65,7 @@ void win_println_them_message(ProfWin *window, char ch, int flags, const char *c
 void win_println_me_message(ProfWin *window, char ch, const char *const me, const char *const message, ...);
 
 void win_print_outgoing(ProfWin *window, const char ch, const char *const message, ...);
-void win_print_incoming(ProfWin *window, const char *const from, prof_message_t *message);
+void win_print_incoming(ProfWin *window, const char *const from, ProfMessage *message);
 void win_print_history(ProfWin *window, GDateTime *timestamp, const char *const message, ...);
 
 void win_print_http_upload(ProfWin *window, const char *const message, char *url);

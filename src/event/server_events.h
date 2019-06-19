@@ -46,11 +46,11 @@ void sv_ev_room_invite(jabber_invite_t invite_type,
     const char *const reason, const char *const password);
 void sv_ev_room_broadcast(const char *const room_jid, const char *const message);
 void sv_ev_room_subject(const char *const room, const char *const nick, const char *const subject);
-void sv_ev_room_history(prof_message_t *message);
-void sv_ev_room_message(prof_message_t *message);
-void sv_ev_incoming_message(prof_message_t *message);
-void sv_ev_incoming_private_message(prof_message_t *message);
-void sv_ev_delayed_private_message(prof_message_t *message);
+void sv_ev_room_history(ProfMessage *message);
+void sv_ev_room_message(ProfMessage *message);
+void sv_ev_incoming_message(ProfMessage *message);
+void sv_ev_incoming_private_message(ProfMessage *message);
+void sv_ev_delayed_private_message(ProfMessage *message);
 void sv_ev_typing(char *barejid, char *resource);
 void sv_ev_paused(char *barejid, char *resource);
 void sv_ev_inactive(char *barejid, char *resource);
@@ -72,8 +72,8 @@ void sv_ev_room_occupent_kicked(const char *const room, const char *const nick, 
 void sv_ev_room_banned(const char *const room, const char *const actor, const char *const reason);
 void sv_ev_room_occupent_banned(const char *const room, const char *const nick, const char *const actor,
     const char *const reason);
-void sv_ev_outgoing_carbon(prof_message_t *message);
-void sv_ev_incoming_carbon(prof_message_t *message);
+void sv_ev_outgoing_carbon(ProfMessage *message);
+void sv_ev_incoming_carbon(ProfMessage *message);
 void sv_ev_xmpp_stanza(const char *const msg);
 void sv_ev_muc_self_online(const char *const room, const char *const nick, gboolean config_required,
     const char *const role, const char *const affiliation, const char *const actor, const char *const reason,

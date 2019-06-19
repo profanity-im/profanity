@@ -179,10 +179,10 @@ message_handlers_init(void)
     pubsub_event_handlers = g_hash_table_new_full(g_str_hash, g_str_equal, free, free);
 }
 
-prof_message_t *
+ProfMessage *
 message_init(void)
 {
-    prof_message_t *message = malloc(sizeof(prof_message_t));
+    ProfMessage *message = malloc(sizeof(ProfMessage));
 
     message->jid = NULL;
     message->id = NULL;
@@ -196,7 +196,7 @@ message_init(void)
 }
 
 void
-message_free(prof_message_t *message)
+message_free(ProfMessage *message)
 {
     xmpp_ctx_t *ctx = connection_get_ctx();
     if (message->jid) {
@@ -796,7 +796,7 @@ _handle_groupchat(xmpp_stanza_t *const stanza)
         return;
     }
 
-    prof_message_t *message = message_init();
+    ProfMessage *message = message_init();
     message->jid = jid;
     message->id = strdup(id);
 
@@ -898,7 +898,7 @@ static void
 _private_chat_handler(xmpp_stanza_t *const stanza)
 {
     // standard chat message, use jid without resource
-    prof_message_t *message = message_init();
+    ProfMessage *message = message_init();
 
     const gchar *from = xmpp_stanza_get_from(stanza);
     message->jid = jid_create(from);
@@ -966,7 +966,7 @@ _handle_carbons(xmpp_stanza_t *const stanza)
         return TRUE;
     }
 
-    prof_message_t *message = message_init();
+    ProfMessage *message = message_init();
 
     // check omemo encryption
 #ifdef HAVE_OMEMO
@@ -1054,7 +1054,7 @@ _handle_chat(xmpp_stanza_t *const stanza)
     }
 
     // standard chat message, use jid without resource
-    prof_message_t *message = message_init();
+    ProfMessage *message = message_init();
     message->jid = jid;
 
     message->timestamp = stanza_get_delay(stanza);

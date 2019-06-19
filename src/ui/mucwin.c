@@ -524,7 +524,7 @@ mucwin_outgoing_msg(ProfMucWin *mucwin, const char *const message, const char *c
 }
 
 void
-mucwin_incoming_msg(ProfMucWin *mucwin, prof_message_t *message, GSList *mentions, GList *triggers)
+mucwin_incoming_msg(ProfMucWin *mucwin, ProfMessage *message, GSList *mentions, GList *triggers)
 {
     assert(mucwin != NULL);
     int flags = 0;

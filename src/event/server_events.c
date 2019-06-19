@@ -267,7 +267,7 @@ sv_ev_room_subject(const char *const room, const char *const nick, const char *c
 }
 
 void
-sv_ev_room_history(prof_message_t *message)
+sv_ev_room_history(ProfMessage *message)
 {
     ProfMucWin *mucwin = wins_get_muc(message->jid->barejid);
     if (mucwin) {
@@ -289,7 +289,7 @@ sv_ev_room_history(prof_message_t *message)
 }
 
 void
-sv_ev_room_message(prof_message_t *message)
+sv_ev_room_message(ProfMessage *message)
 {
     ProfMucWin *mucwin = wins_get_muc(message->jid->barejid);
     if (!mucwin) {
@@ -381,7 +381,7 @@ sv_ev_room_message(prof_message_t *message)
 }
 
 void
-sv_ev_incoming_private_message(prof_message_t *message)
+sv_ev_incoming_private_message(ProfMessage *message)
 {
     char *old_plain = message->plain;
     message->plain = plugins_pre_priv_message_display(message->jid->fulljid, message->plain);
@@ -401,7 +401,7 @@ sv_ev_incoming_private_message(prof_message_t *message)
 }
 
 void
-sv_ev_delayed_private_message(prof_message_t *message)
+sv_ev_delayed_private_message(ProfMessage *message)
 {
     char *old_plain = message->plain;
     message->plain = plugins_pre_priv_message_display(message->jid->fulljid, message->plain);
@@ -483,7 +483,7 @@ sv_ev_outgoing_carbon(char *barejid, char *message, char *pgp_message, gboolean 
 
 #ifdef HAVE_LIBGPGME
 static void
-_sv_ev_incoming_pgp(ProfChatWin *chatwin, gboolean new_win, prof_message_t *message)
+_sv_ev_incoming_pgp(ProfChatWin *chatwin, gboolean new_win, ProfMessage *message)
 {
     message->plain = p_gpg_decrypt(message->encrypted);
     if (message->plain) {
@@ -504,7 +504,7 @@ _sv_ev_incoming_pgp(ProfChatWin *chatwin, gboolean new_win, prof_message_t *mess
 
 #ifdef HAVE_LIBOTR
 static void
-_sv_ev_incoming_otr(ProfChatWin *chatwin, gboolean new_win, prof_message_t *message)
+_sv_ev_incoming_otr(ProfChatWin *chatwin, gboolean new_win, ProfMessage *message)
 {
     gboolean decrypted = FALSE;
     message->plain = otr_on_message_recv(message->jid->barejid, message->jid->resourcepart, message->body, &decrypted);
@@ -528,7 +528,7 @@ _sv_ev_incoming_otr(ProfChatWin *chatwin, gboolean new_win, prof_message_t *mess
 
 #ifdef HAVE_OMEMO
 static void
-_sv_ev_incoming_omemo(ProfChatWin *chatwin, gboolean new_win, prof_message_t *message)
+_sv_ev_incoming_omemo(ProfChatWin *chatwin, gboolean new_win, ProfMessage *message)
 {
     chatwin_incoming_msg(chatwin, message, new_win);
     chat_log_omemo_msg_in(message);
@@ -537,7 +537,7 @@ _sv_ev_incoming_omemo(ProfChatWin *chatwin, gboolean new_win, prof_message_t *me
 #endif
 
 static void
-_sv_ev_incoming_plain(ProfChatWin *chatwin, gboolean new_win, prof_message_t *message)
+_sv_ev_incoming_plain(ProfChatWin *chatwin, gboolean new_win, ProfMessage *message)
 {
     message->plain = strdup(message->body);
     chatwin_incoming_msg(chatwin, message, new_win);
@@ -546,7 +546,7 @@ _sv_ev_incoming_plain(ProfChatWin *chatwin, gboolean new_win, prof_message_t *me
 }
 
 void
-sv_ev_incoming_message(prof_message_t *message)
+sv_ev_incoming_message(ProfMessage *message)
 {
     gboolean new_win = FALSE;
     ProfChatWin *chatwin = wins_get_chat(message->jid->barejid);
@@ -689,7 +689,7 @@ sv_ev_incoming_message(prof_message_t *message)
 }
 
 void
-sv_ev_incoming_carbon(prof_message_t *message)
+sv_ev_incoming_carbon(ProfMessage *message)
 {
     gboolean new_win = FALSE;
     ProfChatWin *chatwin = wins_get_chat(message->jid->barejid);

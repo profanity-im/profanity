@@ -152,10 +152,10 @@ void ui_contact_online(char *barejid, Resource *resource, GDateTime *last_activi
 }
 
 void ui_contact_typing(const char * const barejid, const char * const resource) {}
-void chatwin_incoming_msg(ProfChatWin *chatwin, prof_message_t *message, gboolean win_created) {}
+void chatwin_incoming_msg(ProfChatWin *chatwin, ProfMessage *message, gboolean win_created) {}
 void chatwin_receipt_received(ProfChatWin *chatwin, const char * const id) {}
 
-void privwin_incoming_msg(ProfPrivateWin *privatewin, prof_message_t *message) {}
+void privwin_incoming_msg(ProfPrivateWin *privatewin, ProfMessage *message) {}
 
 void ui_disconnected(void) {}
 void chatwin_recipient_gone(ProfChatWin *chatwin) {}
@@ -190,7 +190,7 @@ void mucwin_occupant_role_and_affiliation_change(ProfMucWin *mucwin, const char 
     const char * const affiliation, const char * const actor, const char * const reason) {}
 void mucwin_roster(ProfMucWin *mucwin, GList *occupants, const char * const presence) {}
 void mucwin_history(ProfMucWin *mucwin, const char * const nick, GDateTime *timestamp, const char * const message) {}
-void mucwin_incoming_msg(ProfMucWin *mucwin, prof_message_t *message, GSList *mentions, GList *triggers) {}
+void mucwin_incoming_msg(ProfMucWin *mucwin, ProfMessage *message, GSList *mentions, GList *triggers) {}
 void mucwin_outgoing_msg(ProfMucWin *mucwin, const char *const message, const char *const id, prof_enc_t enc_mode) {}
 void mucwin_subject(ProfMucWin *mucwin, const char * const nick, const char * const subject) {}
 void mucwin_requires_config(ProfMucWin *mucwin) {}

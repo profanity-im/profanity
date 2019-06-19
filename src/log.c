@@ -329,7 +329,7 @@ chat_log_omemo_msg_out(const char *const barejid, const char *const msg)
 }
 
 void
-chat_log_otr_msg_in(prof_message_t *message)
+chat_log_otr_msg_in(ProfMessage *message)
 {
     if (prefs_get_boolean(PREF_CHLOG)) {
         const char *jid = connection_get_fulljid();
@@ -346,7 +346,7 @@ chat_log_otr_msg_in(prof_message_t *message)
 }
 
 void
-chat_log_pgp_msg_in(prof_message_t *message)
+chat_log_pgp_msg_in(ProfMessage *message)
 {
     if (prefs_get_boolean(PREF_CHLOG)) {
         const char *jid = connection_get_fulljid();
@@ -363,7 +363,7 @@ chat_log_pgp_msg_in(prof_message_t *message)
 }
 
 void
-chat_log_omemo_msg_in(prof_message_t *message)
+chat_log_omemo_msg_in(ProfMessage *message)
 {
     if (prefs_get_boolean(PREF_CHLOG)) {
         const char *jid = connection_get_fulljid();
@@ -380,7 +380,7 @@ chat_log_omemo_msg_in(prof_message_t *message)
 }
 
 void
-chat_log_msg_in(prof_message_t *message)
+chat_log_msg_in(ProfMessage *message)
 {
     if (prefs_get_boolean(PREF_CHLOG)) {
         const char *jid = connection_get_fulljid();

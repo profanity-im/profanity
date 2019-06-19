@@ -1044,7 +1044,7 @@ win_show_status_string(ProfWin *window, const char *const from,
 }
 
 void
-win_print_incoming(ProfWin *window, const char *const from, prof_message_t *message)
+win_print_incoming(ProfWin *window, const char *const from, ProfMessage *message)
 {
     char enc_char = '-';
     int flags = NO_ME;
