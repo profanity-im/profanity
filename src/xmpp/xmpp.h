@@ -169,6 +169,7 @@ void iq_enable_carbons(void);
 void iq_disable_carbons(void);
 void iq_send_software_version(const char *const fulljid);
 void iq_rooms_cache_clear(void);
+void iq_handlers_clear();
 void iq_room_list_request(gchar *conferencejid, gchar *filter);
 void iq_disco_info_request(gchar *jid);
 void iq_disco_items_request(gchar *jid);

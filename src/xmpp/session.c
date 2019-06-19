@@ -213,6 +213,7 @@ session_disconnect(void)
         accounts_set_last_activity(session_get_account_name());
 
         iq_rooms_cache_clear();
+        iq_handlers_clear();
 
         connection_disconnect();
 

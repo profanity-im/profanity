@@ -252,6 +252,14 @@ iq_handlers_init(void)
 }
 
 void
+iq_handlers_clear()
+{
+    if (id_handlers) {
+        g_hash_table_remove_all(id_handlers);
+    }
+}
+
+void
 iq_id_handler_add(const char *const id, ProfIqCallback func, ProfIqFreeCallback free_func, void *userdata)
 {
     ProfIqHandler *handler = malloc(sizeof(ProfIqHandler));
