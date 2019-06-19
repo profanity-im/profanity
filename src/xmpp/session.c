@@ -216,6 +216,7 @@ session_disconnect(void)
         iq_handlers_clear();
 
         connection_disconnect();
+        message_handlers_clear();
 
         connection_clear_data();
         chat_sessions_clear();

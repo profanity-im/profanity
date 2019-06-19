@@ -179,6 +179,14 @@ message_handlers_init(void)
 }
 
 void
+message_handlers_clear(void)
+{
+    if (pubsub_event_handlers) {
+        g_hash_table_remove_all(pubsub_event_handlers);
+    }
+}
+
+void
 message_pubsub_event_handler_add(const char *const node, ProfMessageCallback func, ProfMessageFreeCallback free_func, void *userdata)
 {
     ProfMessageHandler *handler = malloc(sizeof(ProfMessageHandler));
