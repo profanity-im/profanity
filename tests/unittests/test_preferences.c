@@ -14,6 +14,7 @@ void statuses_console_defaults_to_all(void **state)
 
     assert_non_null(setting);
     assert_string_equal("all", setting);
+    prefs_free_string(setting);
 }
 
 void statuses_chat_defaults_to_all(void **state)
@@ -22,6 +23,7 @@ void statuses_chat_defaults_to_all(void **state)
 
     assert_non_null(setting);
     assert_string_equal("all", setting);
+    prefs_free_string(setting);
 }
 
 void statuses_muc_defaults_to_all(void **state)
@@ -30,4 +32,5 @@ void statuses_muc_defaults_to_all(void **state)
 
     assert_non_null(setting);
     assert_string_equal("all", setting);
+    prefs_free_string(setting);
 }
