@@ -387,6 +387,7 @@ omemo_start_sessions(void)
             const char *jid = p_contact_barejid(contact);
             omemo_start_session(jid);
         }
+        g_slist_free(contacts);
     }
 }
 
