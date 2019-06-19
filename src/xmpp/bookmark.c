@@ -318,14 +318,12 @@ _bookmark_result_id_handler(xmpp_stanza_t *const stanza, void *const userdata)
 static void
 _bookmark_destroy(Bookmark *bookmark)
 {
-    if (!bookmark) {
-        return;
+    if (bookmark) {
+        free(bookmark->barejid);
+        free(bookmark->nick);
+        free(bookmark->password);
+        free(bookmark);
     }
-
-    free(bookmark->barejid);
-    free(bookmark->nick);
-    free(bookmark->password);
-    free(bookmark);
 }
 
 static void
