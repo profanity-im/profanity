@@ -305,6 +305,7 @@ omemo_on_disconnect(void)
     g_key_file_free(omemo_ctx.trust_keyfile);
     g_string_free(omemo_ctx.sessions_filename, TRUE);
     g_key_file_free(omemo_ctx.sessions_keyfile);
+    _g_hash_table_free(omemo_ctx.session_store);
     g_string_free(omemo_ctx.known_devices_filename, TRUE);
     g_key_file_free(omemo_ctx.known_devices_keyfile);
 }
