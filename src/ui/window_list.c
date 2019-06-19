@@ -562,6 +562,10 @@ wins_close_by_num(int i)
                 autocomplete_remove(wins_ac, mucwin->roomjid);
                 autocomplete_remove(wins_close_ac, mucwin->roomjid);
                 g_hash_table_remove_all(mucwin->sent_messages);
+
+                if (mucwin->last_msg_timestamp) {
+                    g_date_time_unref(mucwin->last_msg_timestamp);
+                }
                 break;
             }
             case WIN_PRIVATE:
