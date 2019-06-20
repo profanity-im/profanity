@@ -39,6 +39,7 @@ typedef int(*ProfMessageCallback)(xmpp_stanza_t *const stanza, void *const userd
 typedef void(*ProfMessageFreeCallback)(void *userdata);
 
 void message_handlers_init(void);
+void message_handlers_clear(void);
 void message_pubsub_event_handler_add(const char *const node, ProfMessageCallback func, ProfMessageFreeCallback free_func, void *userdata);
 
 #endif

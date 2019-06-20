@@ -203,6 +203,7 @@ _create_tab(const int win, win_type_t wintype, char *identifier, gboolean highli
             } else {
                 tab->display_name = strdup(tab->identifier);
             }
+            prefs_free_string(pref);
         }
     }
 
@@ -452,21 +453,27 @@ _status_bar_draw_maintext(int pos)
         return;
     }
 
+    gboolean stop = FALSE;
+
     if (statusbar->fulljid) {
         char *pref = prefs_get_string(PREF_STATUSBAR_SELF);
+
         if (g_strcmp0(pref, "off") == 0) {
-            return;
-        }
-        if (g_strcmp0(pref, "user") == 0) {
+            stop = true;
+        } else if (g_strcmp0(pref, "user") == 0) {
             Jid *jidp = jid_create(statusbar->fulljid);
             mvwprintw(statusbar_win, 0, pos, jidp->localpart);
             jid_destroy(jidp);
-            return;
-        }
-        if (g_strcmp0(pref, "barejid") == 0) {
+            stop = true;
+        } else if (g_strcmp0(pref, "barejid") == 0) {
             Jid *jidp = jid_create(statusbar->fulljid);
             mvwprintw(statusbar_win, 0, pos, jidp->barejid);
             jid_destroy(jidp);
+            stop = true;
+        }
+
+        prefs_free_string(pref);
+        if (stop) {
             return;
         }
         mvwprintw(statusbar_win, 0, pos, statusbar->fulljid);
@@ -556,9 +563,11 @@ _display_name(StatusBarTab *tab)
         } else {
             fullname = strdup(tab->identifier);
         }
+        prefs_free_string(pref);
     } else if (tab->window_type == WIN_CONFIG) {
         char *pref = prefs_get_string(PREF_STATUSBAR_ROOM);
         GString *display_str = g_string_new("");
+
         if (g_strcmp0("room", pref) == 0) {
             Jid *jidp = jid_create(tab->identifier);
             g_string_append(display_str, jidp->localpart);
@@ -566,6 +575,8 @@ _display_name(StatusBarTab *tab)
         } else {
             g_string_append(display_str, tab->identifier);
         }
+
+        prefs_free_string(pref);
         g_string_append(display_str, " conf");
         char *result = strdup(display_str->str);
         g_string_free(display_str, TRUE);
@@ -585,6 +596,7 @@ _display_name(StatusBarTab *tab)
         } else {
             fullname = strdup(tab->identifier);
         }
+        prefs_free_string(pref);
     } else {
         fullname = strdup("window");
     }

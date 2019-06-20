@@ -67,6 +67,7 @@ void cmd_presence_console_sets_all(void **state)
     assert_non_null(setting);
     assert_string_equal("all", setting);
     assert_true(result);
+    prefs_free_string(setting);
 }
 
 void cmd_presence_console_sets_online(void **state)
@@ -81,6 +82,7 @@ void cmd_presence_console_sets_online(void **state)
     assert_non_null(setting);
     assert_string_equal("online", setting);
     assert_true(result);
+    prefs_free_string(setting);
 }
 
 void cmd_presence_console_sets_none(void **state)
@@ -95,6 +97,7 @@ void cmd_presence_console_sets_none(void **state)
     assert_non_null(setting);
     assert_string_equal("none", setting);
     assert_true(result);
+    prefs_free_string(setting);
 }
 
 void cmd_presence_chat_sets_all(void **state)
@@ -109,6 +112,7 @@ void cmd_presence_chat_sets_all(void **state)
     assert_non_null(setting);
     assert_string_equal("all", setting);
     assert_true(result);
+    prefs_free_string(setting);
 }
 
 void cmd_presence_chat_sets_online(void **state)
@@ -123,6 +127,7 @@ void cmd_presence_chat_sets_online(void **state)
     assert_non_null(setting);
     assert_string_equal("online", setting);
     assert_true(result);
+    prefs_free_string(setting);
 }
 
 void cmd_presence_chat_sets_none(void **state)
@@ -137,6 +142,7 @@ void cmd_presence_chat_sets_none(void **state)
     assert_non_null(setting);
     assert_string_equal("none", setting);
     assert_true(result);
+    prefs_free_string(setting);
 }
 
 void cmd_presence_room_sets_all(void **state)
@@ -151,6 +157,7 @@ void cmd_presence_room_sets_all(void **state)
     assert_non_null(setting);
     assert_string_equal("all", setting);
     assert_true(result);
+    prefs_free_string(setting);
 }
 
 void cmd_presence_room_sets_online(void **state)
@@ -165,6 +172,7 @@ void cmd_presence_room_sets_online(void **state)
     assert_non_null(setting);
     assert_string_equal("online", setting);
     assert_true(result);
+    prefs_free_string(setting);
 }
 
 void cmd_presence_room_sets_none(void **state)
@@ -179,4 +187,5 @@ void cmd_presence_room_sets_none(void **state)
     assert_non_null(setting);
     assert_string_equal("none", setting);
     assert_true(result);
+    prefs_free_string(setting);
 }
