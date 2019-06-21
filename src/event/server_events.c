@@ -420,26 +420,35 @@ sv_ev_delayed_private_message(ProfMessage *message)
 }
 
 void
-sv_ev_outgoing_carbon(char *barejid, char *message, char *pgp_message, gboolean omemo)
+sv_ev_outgoing_carbon(ProfMessage *message)
 {
-    ProfChatWin *chatwin = wins_get_chat(barejid);
+    ProfChatWin *chatwin = wins_get_chat(message->jid->barejid);
     if (!chatwin) {
-        chatwin = chatwin_new(barejid);
+        chatwin = chatwin_new(message->jid->barejid);
     }
 
     chat_state_active(chatwin->state);
 
 #ifdef HAVE_LIBGPGME
 #ifndef HAVE_OMEMO
-    if (pgp_message) {
-        char *decrypted = p_gpg_decrypt(pgp_message);
-        if (decrypted) {
-            chatwin_outgoing_carbon(chatwin, decrypted, PROF_MSG_ENC_PGP);
+    if (message->encrypted) {
+        message->plain = p_gpg_decrypt(message->encrypted);
+        if (message->plain) {
+            message->enc = PROF_MSG_ENC_PGP;
+            chatwin_outgoing_carbon(chatwin, message);
         } else {
-            chatwin_outgoing_carbon(chatwin, message, PROF_MSG_ENC_PLAIN);
+            if (!message->body) {
+                log_error("Couldn't decrypt GPG message and body was empty");
+                return;
+            }
+            message->enc = PROF_MSG_ENC_PLAIN;
+            message->plain = strdup(message->body);
+            chatwin_outgoing_carbon(chatwin, message);
         }
     } else {
-        chatwin_outgoing_carbon(chatwin, message, PROF_MSG_ENC_PLAIN);
+        message->enc = PROF_MSG_ENC_PLAIN;
+        message->plain = strdup(message->body);
+        chatwin_outgoing_carbon(chatwin, message);
     }
     return;
 #endif
@@ -447,10 +456,12 @@ sv_ev_outgoing_carbon(char *barejid, char *message, char *pgp_message, gboolean 
 
 #ifndef HAVE_LIBGPGME
 #ifdef HAVE_OMEMO
-    if (omemo) {
-        chatwin_outgoing_carbon(chatwin, message, PROF_MSG_ENC_OMEMO);
+    if (message->enc == PROF_MSG_ENC_OMEMO) {
+        chatwin_outgoing_carbon(chatwin, message);
     } else {
-        chatwin_outgoing_carbon(chatwin, message, PROF_MSG_ENC_PLAIN);
+        message->enc = PROF_MSG_ENC_PLAIN;
+        message->plain = strdup(message->body);
+        chatwin_outgoing_carbon(chatwin, message);
     }
     return;
 #endif
@@ -458,17 +469,26 @@ sv_ev_outgoing_carbon(char *barejid, char *message, char *pgp_message, gboolean 
 
 #ifdef HAVE_LIBGPGME
 #ifdef HAVE_OMEMO
-    if (omemo) {
-        chatwin_outgoing_carbon(chatwin, message, PROF_MSG_ENC_OMEMO);
-    } else if (pgp_message) {
-        char *decrypted = p_gpg_decrypt(pgp_message);
-        if (decrypted) {
-            chatwin_outgoing_carbon(chatwin, decrypted, PROF_MSG_ENC_PGP);
+    if (message->enc == PROF_MSG_ENC_OMEMO) {
+        chatwin_outgoing_carbon(chatwin, message);
+    } else if (message->encrypted) {
+        message->plain = p_gpg_decrypt(message->encrypted);
+        if (message->plain) {
+            message->enc = PROF_MSG_ENC_PGP;
+            chatwin_outgoing_carbon(chatwin, message);
         } else {
-            chatwin_outgoing_carbon(chatwin, message, PROF_MSG_ENC_PLAIN);
+            if (!message->body) {
+                log_error("Couldn't decrypt GPG message and body was empty");
+                return;
+            }
+            message->enc = PROF_MSG_ENC_PLAIN;
+            message->plain = strdup(message->body);
+            chatwin_outgoing_carbon(chatwin, message);
         }
     } else {
-        chatwin_outgoing_carbon(chatwin, message, PROF_MSG_ENC_PLAIN);
+        message->enc = PROF_MSG_ENC_PLAIN;
+        message->plain = strdup(message->body);
+        chatwin_outgoing_carbon(chatwin, message);
     }
     return;
 #endif
@@ -476,7 +496,11 @@ sv_ev_outgoing_carbon(char *barejid, char *message, char *pgp_message, gboolean 
 
 #ifndef HAVE_LIBGPGME
 #ifndef HAVE_OMEMO
-    chatwin_outgoing_carbon(chatwin, message, PROF_MSG_ENC_PLAIN);
+    if (message->body) {
+        message->enc = PROF_MSG_ENC_PLAIN;
+        message->plain = strdup(message->body);
+        chatwin_outgoing_carbon(chatwin, message);
+    }
 #endif
 #endif
 }
@@ -494,7 +518,12 @@ _sv_ev_incoming_pgp(ProfChatWin *chatwin, gboolean new_win, ProfMessage *message
         p_gpg_free_decrypted(message->plain);
         message->plain = NULL;
     } else {
+        if (!message->body) {
+            log_error("Couldn't decrypt GPG message and body was empty");
+            return;
+        }
         message->enc = PROF_MSG_ENC_PLAIN;
+        message->plain = strdup(message->body);
         chatwin_incoming_msg(chatwin, message, new_win);
         chat_log_msg_in(message);
         chatwin->pgp_recv = FALSE;
@@ -539,10 +568,13 @@ _sv_ev_incoming_omemo(ProfChatWin *chatwin, gboolean new_win, ProfMessage *messa
 static void
 _sv_ev_incoming_plain(ProfChatWin *chatwin, gboolean new_win, ProfMessage *message)
 {
-    message->plain = strdup(message->body);
-    chatwin_incoming_msg(chatwin, message, new_win);
-    chat_log_msg_in(message);
-    chatwin->pgp_recv = FALSE;
+    if (message->body) {
+        message->enc = PROF_MSG_ENC_PLAIN;
+        message->plain = strdup(message->body);
+        chatwin_incoming_msg(chatwin, message, new_win);
+        chat_log_msg_in(message);
+        chatwin->pgp_recv = FALSE;
+    }
 }
 
 void

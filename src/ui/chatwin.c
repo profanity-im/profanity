@@ -329,20 +329,20 @@ chatwin_outgoing_msg(ProfChatWin *chatwin, const char *const message, char *id, 
 }
 
 void
-chatwin_outgoing_carbon(ProfChatWin *chatwin, const char *const message, prof_enc_t enc_mode)
+chatwin_outgoing_carbon(ProfChatWin *chatwin, ProfMessage *message)
 {
     assert(chatwin != NULL);
 
     char enc_char = '-';
-    if (enc_mode == PROF_MSG_ENC_PGP) {
+    if (message->enc == PROF_MSG_ENC_PGP) {
         enc_char = prefs_get_pgp_char();
-    } else if (enc_mode == PROF_MSG_ENC_OMEMO) {
+    } else if (message->enc == PROF_MSG_ENC_OMEMO) {
         enc_char = prefs_get_omemo_char();
     }
 
     ProfWin *window = (ProfWin*)chatwin;
 
-    win_print_outgoing(window, enc_char, "%s", message);
+    win_print_outgoing(window, enc_char, "%s", message->plain);
     int num = wins_get_num(window);
     status_bar_active(num, WIN_CHAT, chatwin->barejid);
 }

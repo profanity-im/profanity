@@ -162,7 +162,7 @@ void chatwin_recipient_gone(ProfChatWin *chatwin) {}
 
 void chatwin_outgoing_msg(ProfChatWin *chatwin, const char * const message, char *id, prof_enc_t enc_mode,
     gboolean request_receipt) {}
-void chatwin_outgoing_carbon(ProfChatWin *chatwin, const char * const message, prof_enc_t enc_mode) {}
+void chatwin_outgoing_carbon(ProfChatWin *chatwin, ProfMessage *message) {}
 void privwin_outgoing_msg(ProfPrivateWin *privwin, const char * const message) {}
 
 void privwin_occupant_offline(ProfPrivateWin *privwin) {}
