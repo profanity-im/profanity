@@ -798,7 +798,9 @@ _handle_groupchat(xmpp_stanza_t *const stanza)
 
     ProfMessage *message = message_init();
     message->jid = jid;
-    message->id = strdup(id);
+    if (id) {
+        message->id = strdup(id);
+    }
 
     message->body = xmpp_message_get_body(stanza);
 
