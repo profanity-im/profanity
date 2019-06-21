@@ -191,6 +191,7 @@ message_init(void)
     message->plain = NULL;
     message->enc = PROF_MSG_ENC_PLAIN;
     message->timestamp = NULL;
+    message->trusted = true;
 
     return message;
 }
