@@ -800,6 +800,8 @@ _handle_groupchat(xmpp_stanza_t *const stanza)
     message->jid = jid;
     message->id = strdup(id);
 
+    message->body = xmpp_message_get_body(stanza);
+
     // check omemo encryption
 #ifdef HAVE_OMEMO
     message->plain = omemo_receive_message(stanza, &message->trusted);
@@ -808,7 +810,12 @@ _handle_groupchat(xmpp_stanza_t *const stanza)
     }
 #endif
 
-    message->body = xmpp_message_get_body(stanza);
+    if (!message->plain && !message->body) {
+        log_error("Message received without body for room: %s", jid->str);
+        goto out;
+    } else if (!message->plain) {
+        message->plain = strdup(message->body);
+    }
 
     // determine if the notifications happened whilst offline
     message->timestamp = stanza_get_delay(stanza);
@@ -818,6 +825,7 @@ _handle_groupchat(xmpp_stanza_t *const stanza)
         sv_ev_room_message(message);
     }
 
+out:
     message_free(message);
 }
 
