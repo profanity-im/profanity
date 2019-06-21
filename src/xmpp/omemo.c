@@ -237,7 +237,7 @@ omemo_start_device_session_handle_bundle(xmpp_stanza_t *const stanza, void *cons
 }
 
 char *
-omemo_receive_message(xmpp_stanza_t *const stanza)
+omemo_receive_message(xmpp_stanza_t *const stanza, gboolean *trusted)
 {
     const char *type = xmpp_stanza_get_type(stanza);
 
@@ -312,7 +312,7 @@ skip:
 
     char *plaintext = omemo_on_message_recv(from, sid, iv_raw, iv_len,
         keys, payload_raw, payload_len,
-        g_strcmp0(type, STANZA_TYPE_GROUPCHAT) == 0);
+        g_strcmp0(type, STANZA_TYPE_GROUPCHAT) == 0, trusted);
 
     g_list_free_full(keys, (GDestroyNotify)omemo_key_free);
     g_free(iv_raw);

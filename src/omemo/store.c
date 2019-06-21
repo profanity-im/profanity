@@ -362,6 +362,11 @@ save_identity(const signal_protocol_address *address, uint8_t *key_data,
 {
     identity_key_store_t *identity_key_store = (identity_key_store_t *)user_data;
 
+    if (identity_key_store->recv && !identity_key_store->trusted_msg) {
+        /* Do not trust identity automatically */
+        return SG_SUCCESS;
+    }
+
     signal_buffer *buffer = signal_buffer_create(key_data, key_len);
 
     GHashTable *trusted = g_hash_table_lookup(identity_key_store->trusted, strdup(address->name));
@@ -392,7 +397,12 @@ is_trusted_identity(const signal_protocol_address *address, uint8_t *key_data,
 
     GHashTable *trusted = g_hash_table_lookup(identity_key_store->trusted, address->name);
     if (!trusted) {
-        return 0;
+        if (identity_key_store->recv) {
+            identity_key_store->trusted_msg = false;
+            return 1;
+        } else {
+            return 0;
+        }
     }
 
     signal_buffer *buffer = signal_buffer_create(key_data, key_len);
@@ -402,7 +412,13 @@ is_trusted_identity(const signal_protocol_address *address, uint8_t *key_data,
 
     signal_buffer_free(buffer);
 
-    return ret;
+
+    if (identity_key_store->recv) {
+        identity_key_store->trusted_msg = ret;
+        return 1;
+    } else {
+        return ret;
+    }
 }
 
 int

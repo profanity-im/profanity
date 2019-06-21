@@ -48,6 +48,8 @@ typedef struct {
    signal_buffer *private;
    uint32_t registration_id;
    GHashTable *trusted;
+   bool recv;
+   bool trusted_msg;
 } identity_key_store_t;
 
 GHashTable * session_store_new(void);

@@ -41,6 +41,7 @@
 #include "config/account.h"
 #include "command/cmd_funcs.h"
 #include "ui/win_types.h"
+#include "xmpp/message.h"
 #include "xmpp/muc.h"
 
 #ifdef HAVE_LIBOTR
@@ -52,13 +53,8 @@
 #define NO_EOL          4
 #define NO_COLOUR_FROM  8
 #define NO_COLOUR_DATE  16
+#define UNTRUSTED       32
 
-typedef enum {
-    PROF_MSG_PLAIN,
-    PROF_MSG_OTR,
-    PROF_MSG_PGP,
-    PROF_MSG_OMEMO
-} prof_enc_t;
 
 // core UI
 void ui_init(void);
@@ -124,8 +120,7 @@ gboolean ui_win_has_unsaved_form(int num);
 
 // Chat window
 ProfChatWin* chatwin_new(const char *const barejid);
-void chatwin_incoming_msg(ProfChatWin *chatwin, const char *const resource, const char *const message,
-    GDateTime *timestamp, gboolean win_created, prof_enc_t enc_mode);
+void chatwin_incoming_msg(ProfChatWin *chatwin, ProfMessage *message, gboolean win_created);
 void chatwin_receipt_received(ProfChatWin *chatwin, const char *const id);
 void chatwin_recipient_gone(ProfChatWin *chatwin);
 void chatwin_outgoing_msg(ProfChatWin *chatwin, const char *const message, char *id, prof_enc_t enc_mode,
@@ -164,7 +159,7 @@ void mucwin_occupant_role_and_affiliation_change(ProfMucWin *mucwin, const char 
 void mucwin_roster(ProfMucWin *mucwin, GList *occupants, const char *const presence);
 void mucwin_history(ProfMucWin *mucwin, const char *const nick, GDateTime *timestamp, const char *const message);
 void mucwin_outgoing_msg(ProfMucWin *mucwin, const char *const message, const char *const id, prof_enc_t enc_mode);
-void mucwin_incoming_msg(ProfMucWin *mucwin, const char *const nick, const char *const message, const char *const id, GSList *mentions, GList *triggers, prof_enc_t enc_mode);
+void mucwin_incoming_msg(ProfMucWin *mucwin, ProfMessage *message, GSList *mentions, GList *triggers);
 void mucwin_subject(ProfMucWin *mucwin, const char *const nick, const char *const subject);
 void mucwin_requires_config(ProfMucWin *mucwin);
 void mucwin_info(ProfMucWin *mucwin);
@@ -202,7 +197,7 @@ void mucwin_set_message_char(ProfMucWin *mucwin, const char *const ch);
 void mucwin_unset_message_char(ProfMucWin *mucwin);
 
 // MUC private chat window
-void privwin_incoming_msg(ProfPrivateWin *privatewin, const char *const message, GDateTime *timestamp);
+void privwin_incoming_msg(ProfPrivateWin *privatewin, ProfMessage *message);
 void privwin_outgoing_msg(ProfPrivateWin *privwin, const char *const message);
 void privwin_message_occupant_offline(ProfPrivateWin *privwin);
 

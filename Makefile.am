@@ -101,6 +101,7 @@ unittest_sources = \
 	src/event/client_events.c src/event/client_events.h \
 	src/ui/tray.h src/ui/tray.c \
 	tests/unittests/xmpp/stub_xmpp.c \
+	tests/unittests/xmpp/stub_message.c \
 	tests/unittests/ui/stub_ui.c tests/unittests/ui/stub_ui.h \
 	tests/unittests/log/stub_log.c \
 	tests/unittests/config/stub_accounts.c \
