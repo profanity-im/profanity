@@ -1004,17 +1004,19 @@ _handle_carbons(xmpp_stanza_t *const stanza)
         message->encrypted = xmpp_stanza_get_text(x);
     }
 
-    // if we are the recipient, treat as standard incoming message
-    if (g_strcmp0(my_jid->barejid, jid_to->barejid) == 0) {
-        jid_destroy(jid_to);
-        message->jid = jid_from;
-        sv_ev_incoming_carbon(message);
+    if (message->plain || message->encrypted || message->body) {
+        // if we are the recipient, treat as standard incoming message
+        if (g_strcmp0(my_jid->barejid, jid_to->barejid) == 0) {
+            jid_destroy(jid_to);
+            message->jid = jid_from;
+            sv_ev_incoming_carbon(message);
 
-    // else treat as a sent message
-    } else {
-        jid_destroy(jid_from);
-        message->jid = jid_to;
-        sv_ev_outgoing_carbon(message);
+        // else treat as a sent message
+        } else {
+            jid_destroy(jid_from);
+            message->jid = jid_to;
+            sv_ev_outgoing_carbon(message);
+        }
     }
 
     message_free(message);
