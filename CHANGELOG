@@ -1,3 +1,43 @@
+Unreleased
+=====
+
+- Fix plugin unload return code if just one plugin fails (#995)
+- Fix several typos
+- Fix some display indentation issues (#1073)
+- Fail plugin unload if the plugin doesnt exist
+- Improve encrypted message stub header by mentioning the encryption method
+- Fix GPG encryption (#997)
+- Redraw sceen after entry of PGP key (#906)
+- Fix support for case-sensitive account names (#725)
+- Fix /me display when highlighting user in MUCs (#950)
+- Fix `make dist` (0f0659a)
+- Fix use after free bug (#1044)
+- Fix segfault on connect with default account (#1046)
+- Implement OMEMO support (#1039, #658, #1070)
+- Add random string at the end of the default resource (#1053)
+- Fix handling of messages without ID in MUC (#1061)
+- Add library versioning to libprofanity (#973)
+- Add more customization: occupants indent (/occupants) (#690, #1072)
+- Add more customization: occupants header char (/occupants) (#690, #1074)
+- Add more customization: occupants wrap (/occupants) (#690, 125ca2f)
+- Add more customization: occupants char (/occupants) (#690, #1084)
+- Fix formatting for privileges on (a666f0d)
+- Fix usage of statusbar number in theme (#1078)
+- Fix Debian 32bit tests (#1091)
+- Fix unit tests (#1092)
+- Fix infinite loop on connection loss (#1103)
+- Don't clear saved account data in session_disconnect (#1106)
+- Cancel autoping timer on disconnect or connection loss (#1105)
+- Fix SIGABRT on connection loss (#1083)
+- Only print room history for new messages upon reconnect (#704, #1110)
+- Check if valid account before setting autoconnect (#1112)
+- Improve plugin load error message, in case built without support (cc697de)
+- Iterate up to 100 logfiles (#519)
+- Fix rejoining of MUCs upon reconnect (#1120)
+- Add option to set all window related time formats (#632, #1120)
+- Fix several memory leaks (#1130)
+- For details see https://github.com/profanity-im/profanity/milestone/17
+
 0.6.0 (2019-02-18)
 =====
 
