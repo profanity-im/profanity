@@ -890,15 +890,26 @@ omemo_on_message_recv(const char *const from_jid, uint32_t sid,
         goto out;
     }
 
-    omemo_ctx.identity_key_store.recv = true;
-
     if (key->prekey) {
         log_debug("OMEMO: decrypting message with prekey");
         pre_key_signal_message *message;
+        ec_public_key *their_identity_key;
+        signal_buffer *identity_buffer = NULL;
+
+        omemo_ctx.identity_key_store.recv = true;
 
         pre_key_signal_message_deserialize(&message, key->data, key->length, omemo_ctx.signal);
+        their_identity_key = pre_key_signal_message_get_identity_key(message);
 
         res = session_cipher_decrypt_pre_key_signal_message(cipher, message, NULL, &plaintext_key);
+
+        omemo_ctx.identity_key_store.recv = false;
+
+        /* Perform a real check of the identity */
+        ec_public_key_serialize(&identity_buffer, their_identity_key);
+        *trusted = is_trusted_identity(&address, signal_buffer_data(identity_buffer),
+                signal_buffer_len(identity_buffer), &omemo_ctx.identity_key_store);
+
         /* Replace used pre_key in bundle */
         uint32_t pre_key_id = pre_key_signal_message_get_pre_key_id(message);
         ec_key_pair *ec_pair;
@@ -918,17 +929,17 @@ omemo_on_message_recv(const char *const from_jid, uint32_t sid,
     } else {
         log_debug("OMEMO: decrypting message with existing session");
         signal_message *message = NULL;
+
         res = signal_message_deserialize(&message, key->data, key->length, omemo_ctx.signal);
+
         if (res < 0) {
             log_error("OMEMO: cannot deserialize message");
         } else {
             res = session_cipher_decrypt_signal_message(cipher, message, NULL, &plaintext_key);
+            *trusted = true;
             SIGNAL_UNREF(message);
         }
     }
-
-    omemo_ctx.identity_key_store.recv = false;
-    *trusted = omemo_ctx.identity_key_store.trusted_msg;
 
     session_cipher_free(cipher);
     if (res != 0) {
