@@ -938,6 +938,7 @@ _private_chat_handler(xmpp_stanza_t *const stanza)
         sv_ev_incoming_private_message(message);
     }
 
+out:
     message_free(message);
 }
 
