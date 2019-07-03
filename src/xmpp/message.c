@@ -923,7 +923,7 @@ _private_chat_handler(xmpp_stanza_t *const stanza)
 #endif
 
     if (!message->plain && !message->body) {
-        log_error("Message received without body from: %s", jid->str);
+        log_error("Message received without body from: %s", message->jid->str);
         goto out;
     } else if (!message->plain) {
         message->plain = strdup(message->body);
