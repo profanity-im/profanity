@@ -36,5 +36,9 @@
 #define EVENT_COMMON_H
 
 void ev_disconnect_cleanup(void);
+void ev_inc_connection_counter(void);
+void ev_reset_connection_counter(void);
+gboolean ev_was_connected_already(void);
+gboolean ev_is_first_connect(void);
 
 #endif

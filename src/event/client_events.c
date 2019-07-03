@@ -89,6 +89,8 @@ cl_ev_disconnect(void)
 
     ui_close_all_wins();
     ev_disconnect_cleanup();
+    // on intentional disconnect reset the counter
+    ev_reset_connection_counter();
 }
 
 void

@@ -67,8 +67,6 @@
 
 #include "ui/ui.h"
 
-gint _success_connections_counter = 0;
-
 void
 sv_ev_login_account_success(char *account_name, gboolean secured)
 {
@@ -104,13 +102,13 @@ sv_ev_login_account_success(char *account_name, gboolean secured)
     log_info("%s logged in successfully", account->jid);
 
     // if we have been connected before
-    if (_success_connections_counter > 0)
+    if (ev_was_connected_already())
     {
         cons_show("Connection re-established.");
         wins_reestablished_connection();
     }
 
-    _success_connections_counter++;
+    ev_inc_connection_counter();
 
     if (account->startscript) {
         scripts_exec(account->startscript);
@@ -261,7 +259,7 @@ sv_ev_room_subject(const char *const room, const char *const nick, const char *c
 {
     muc_set_subject(room, subject);
     ProfMucWin *mucwin = wins_get_muc(room);
-    if (mucwin && muc_roster_complete(room) && _success_connections_counter == 1) {
+    if (mucwin && muc_roster_complete(room) && ev_is_first_connect()) {
         mucwin_subject(mucwin, nick, subject);
     }
 }
@@ -272,7 +270,7 @@ sv_ev_room_history(ProfMessage *message)
     ProfMucWin *mucwin = wins_get_muc(message->jid->barejid);
     if (mucwin) {
         // if this is the first successful connection
-        if (_success_connections_counter == 1) {
+        if (ev_is_first_connect()) {
             // save timestamp of last received muc message
             // so we dont display, if there was no activity in channel, once we reconnect
             if (mucwin->last_msg_timestamp) {
@@ -282,7 +280,7 @@ sv_ev_room_history(ProfMessage *message)
         }
 
         gboolean younger = g_date_time_compare(mucwin->last_msg_timestamp, message->timestamp) < 0 ? TRUE : FALSE;
-        if (_success_connections_counter == 1 || younger ) {
+        if (ev_is_first_connect() || younger ) {
             mucwin_history(mucwin, message->jid->resourcepart, message->timestamp, message->plain);
         }
     }

@@ -47,6 +47,8 @@
 #include "omemo/omemo.h"
 #endif
 
+static gint _success_connections_counter = 0;
+
 void
 ev_disconnect_cleanup(void)
 {
@@ -66,3 +68,32 @@ ev_disconnect_cleanup(void)
 #endif
 }
 
+gboolean
+ev_was_connected_already(void)
+{
+    if (_success_connections_counter > 0)
+        return TRUE;
+    else
+        return FALSE;
+}
+
+gboolean
+ev_is_first_connect(void)
+{
+    if (_success_connections_counter == 1)
+        return TRUE;
+    else
+        return FALSE;
+}
+
+void
+ev_inc_connection_counter(void)
+{
+    _success_connections_counter++;
+}
+
+void
+ev_reset_connection_counter(void)
+{
+    _success_connections_counter = 0;
+}
