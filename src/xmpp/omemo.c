@@ -168,13 +168,18 @@ omemo_start_device_session_handle_bundle(xmpp_stanza_t *const stanza, void *cons
 
         const char *prekey_id_text = xmpp_stanza_get_attribute(prekey, "preKeyId");
         if (!prekey_id_text) {
+            omemo_key_free(key);
             goto out;
         }
+
         key->id = strtoul(prekey_id_text, NULL, 10);
         xmpp_stanza_t *prekey_text = xmpp_stanza_get_children(prekey);
+
         if (!prekey_text) {
+            omemo_key_free(key);
             goto out;
         }
+
         char *prekey_b64 = xmpp_stanza_get_text(prekey_text);
         key->data = g_base64_decode(prekey_b64, &key->length);
         free(prekey_b64);
