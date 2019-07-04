@@ -226,8 +226,6 @@ omemo_on_connect(ProfAccount *account)
     omemo_ctx.device_list_handler = g_hash_table_new_full(g_str_hash, g_str_equal, free, NULL);
     omemo_ctx.known_devices = g_hash_table_new_full(g_str_hash, g_str_equal, free, (GDestroyNotify)_g_hash_table_free);
 
-    omemo_ctx.fingerprint_ac = autocomplete_new();
-
     char *omemodir = files_get_data_path(DIR_OMEMO);
     GString *basedir = g_string_new(omemodir);
     free(omemodir);
