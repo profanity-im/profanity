@@ -120,12 +120,10 @@ roster_destroy(void)
 gboolean
 roster_update_presence(const char *const barejid, Resource *resource, GDateTime *last_activity)
 {
-    assert(roster != NULL);
-
     assert(barejid != NULL);
     assert(resource != NULL);
 
-    if (!roster_received) {
+    if (roster == NULL || !roster_received) {
         ProfPendingPresence *presence = malloc(sizeof(ProfPendingPresence));
         presence->barejid = strdup(barejid);
         presence->resource = resource;
