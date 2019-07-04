@@ -128,6 +128,15 @@ omemo_init(void)
 }
 
 void
+omemo_close(void)
+{
+    if (omemo_ctx.fingerprint_ac) {
+        autocomplete_free(omemo_ctx.fingerprint_ac);
+        omemo_ctx.fingerprint_ac = NULL;
+    }
+}
+
+void
 omemo_on_connect(ProfAccount *account)
 {
     GError *error = NULL;
