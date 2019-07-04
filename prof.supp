@@ -1,3 +1,13 @@
+# profanity suppressions file
+#
+# I recommend to use valgrind like this:
+# G_DEBUG=gc-friendly G_SLICE=always-malloc valgrind --leak-check=full --log-file=out ./profanity
+#
+# This file is a combination of our own rules and
+# * the glib2 suppressions file that usually can be found at /usr/share/glib-2.0/valgrind/glib.supp
+# * python suppressions file from http://svn.python.org/projects/python/trunk/Misc/valgrind-python.supp
+#
+
 {
   _dl_init
   Memcheck:Leak
@@ -15,3 +25,1154 @@
   fun:start_thread
   fun:clone
 }
+
+## glib 2.60.4 suppressions file:
+
+# GLib Valgrind suppressions file
+#
+# This provides a list of suppressions for all of GLib (including GIO), for all
+# Valgrind tools (memcheck, drd, helgrind, etc.) for the false positives and
+# deliberate one-time leaks which GLib causes to be reported when running under
+# Valgrind.
+#
+# When running an application which links to GLib under Valgrind, you can pass
+# this suppression file to Valgrind using --suppressions=/path/to/glib-2.0.supp.
+#
+# http://valgrind.org/docs/manual/manual-core.html#manual-core.suppress
+#
+# Note that there is currently no way for Valgrind to load this automatically
+# (https://bugs.kde.org/show_bug.cgi?id=160905), so the best GLib can currently
+# do is to install this file as part of its development package.
+#
+# This file should be updated if GLib introduces a new deliberate one-time leak,
+# or another false race positive in Valgrind: please file bugs at:
+#
+# https://gitlab.gnome.org/GNOME/glib/issues/new
+
+{
+	gnutls-init-calloc
+	Memcheck:Leak
+	fun:calloc
+	...
+	fun:gtls_gnutls_init
+}
+
+{
+	gnutls-init-realloc
+	Memcheck:Leak
+	fun:realloc
+	...
+	fun:gtls_gnutls_init
+}
+
+{
+	g-tls-backend-gnutls-init
+	Memcheck:Leak
+	fun:g_once_impl
+	fun:g_tls_backend_gnutls_init
+}
+
+{
+	p11-tokens-init
+	Memcheck:Leak
+	fun:calloc
+	...
+	fun:create_tokens_inlock
+	fun:initialize_module_inlock_reentrant
+}
+
+# One-time allocation from libc for getpwnam() results
+{
+	g-local-vfs-getpwnam
+	Memcheck:Leak
+	fun:malloc
+	...
+	fun:getpwnam
+	fun:g_local_vfs_parse_name
+}
+
+{
+	glib-init-malloc
+	Memcheck:Leak
+	fun:malloc
+	...
+	fun:g_quark_init
+	...
+	fun:glib_init_ctor
+}
+
+{
+	glib-init-calloc
+	Memcheck:Leak
+	fun:calloc
+	...
+	fun:g_quark_init
+	...
+	fun:glib_init_ctor
+}
+
+{
+	gobject-init-malloc
+	Memcheck:Leak
+	fun:malloc
+	...
+	fun:gobject_init_ctor
+}
+
+{
+	gobject-init-realloc
+	Memcheck:Leak
+	fun:realloc
+	...
+	fun:gobject_init_ctor
+}
+
+{
+	gobject-init-calloc
+	Memcheck:Leak
+	fun:calloc
+	...
+	fun:gobject_init_ctor
+}
+
+{
+	g-type-register-dynamic
+	Memcheck:Leak
+	fun:malloc
+	...
+	fun:g_type_register_dynamic
+}
+
+{
+	g-type-register-static
+	Memcheck:Leak
+	fun:malloc
+	...
+	fun:g_type_register_static
+}
+
+{
+	g-type-register-static-realloc
+	Memcheck:Leak
+	fun:realloc
+	...
+	fun:g_type_register_static
+}
+
+{
+	g-type-register-static-calloc
+	Memcheck:Leak
+	fun:calloc
+	...
+	fun:g_type_register_static
+}
+
+{
+	g-type-add-interface-dynamic
+	Memcheck:Leak
+	fun:malloc
+	...
+	fun:g_type_add_interface_dynamic
+}
+
+{
+	g-type-add-interface-static
+	Memcheck:Leak
+	fun:malloc
+	...
+	fun:g_type_add_interface_static
+}
+
+{
+	g-test-rand-init
+	Memcheck:Leak
+	fun:calloc
+	...
+	fun:g_rand_new_with_seed_array
+	fun:test_run_seed
+	...
+	fun:g_test_run
+}
+
+{
+	g-test-rand-init2
+	Memcheck:Leak
+	fun:calloc
+	...
+	fun:g_rand_new_with_seed_array
+	...
+	fun:get_global_random
+	...
+	fun:g_test_init
+}
+
+{
+	g-quark-table-new
+	Memcheck:Leak
+	fun:g_hash_table_new
+	...
+	fun:quark_new
+}
+
+{
+	g-quark-table-resize
+	Memcheck:Leak
+	fun:g_hash_table_resize
+	...
+	fun:quark_new
+}
+
+{
+	g-type-interface-init
+	Memcheck:Leak
+	fun:malloc
+	...
+	fun:type_iface_vtable_base_init_Wm
+}
+
+{
+	g-type-class-init-calloc
+	Memcheck:Leak
+	fun:calloc
+	...
+	fun:g_type_create_instance
+	...
+	fun:type_class_init_Wm
+}
+
+{
+	g-type-class-init
+	Memcheck:Leak
+	fun:g_type_create_instance
+	...
+	fun:type_class_init_Wm
+}
+
+{
+	g-io-module-default-singleton-malloc
+	Memcheck:Leak
+	fun:malloc
+	...
+	fun:g_type_create_instance
+	...
+	fun:_g_io_module_get_default
+}
+
+{
+	g-io-module-default-singleton-calloc
+	Memcheck:Leak
+	fun:calloc
+	...
+	fun:g_type_create_instance
+	...
+	fun:_g_io_module_get_default
+}
+
+# This one seems to show up sometimes with g_type_create_instance() at the top
+# of the stack, as well.
+{
+	g-io-module-default-singleton
+	Memcheck:Leak
+	fun:g_type_create_instance
+	...
+	fun:_g_io_module_get_default
+}
+
+{
+	g-io-module-default-singleton-module
+	Memcheck:Leak
+	fun:calloc
+	...
+	fun:g_module_open
+	...
+	fun:_g_io_module_get_default
+}
+
+{
+	g-io-module-default-singleton-name
+	Memcheck:Leak
+	fun:malloc
+	...
+	fun:g_strdup
+	...
+	fun:_g_io_module_get_default*
+}
+
+{
+	g-get-language-names-malloc
+	Memcheck:Leak
+	fun:malloc
+	...
+	fun:g_get_language_names
+}
+
+{
+	g-get-language-names-calloc
+	Memcheck:Leak
+	fun:calloc
+	...
+	fun:g_get_language_names
+}
+
+{
+	g-static-mutex
+	Memcheck:Leak
+	fun:malloc
+	...
+	fun:g_static_mutex_get_mutex_impl
+}
+
+{
+	g-system-thread-init
+	Memcheck:Leak
+	fun:calloc
+	...
+	fun:g_system_thread_new
+}
+
+{
+	g-io-module-default-proxy-resolver-gnome
+	Memcheck:Leak
+	fun:calloc
+	...
+	fun:g_proxy_resolver_gnome_init
+	...
+	fun:_g_io_module_get_default
+}
+
+# One-time getaddrinfo() configuration loading
+{
+	g-threaded-resolver-getaddrinfo-config
+	Memcheck:Leak
+	fun:malloc
+	...
+	fun:__resolv_conf_allocate
+	...
+	fun:getaddrinfo
+	fun:do_lookup_by_name
+}
+
+# memcheck checks that the third argument to ioctl() is a valid pointer, but
+# some ioctls use that argument as an integer
+{
+   ioctl-with-non-pointer-param
+   Memcheck:Param
+   ioctl(generic)
+   fun:ioctl
+   fun:btrfs_reflink_with_progress
+}
+
+{
+	g-private-get
+	drd:ConflictingAccess
+	fun:g_private_get
+}
+{
+	g-private-get-helgrind
+	Helgrind:Race
+	fun:g_private_get
+}
+
+
+{
+	g-private-set
+	drd:ConflictingAccess
+	fun:g_private_set
+}
+{
+	g-private-set-helgrind
+	Helgrind:Race
+	fun:g_private_set
+}
+
+{
+	g-type-construct-free
+	drd:ConflictingAccess
+	fun:g_type_free_instance
+}
+{
+	g-type-construct-free-helgrind
+	Helgrind:Race
+	fun:g_type_free_instance
+}
+
+{
+	g-variant-unref
+	drd:ConflictingAccess
+	fun:g_variant_unref
+}
+{
+	g-variant-unref-helgrind
+	Helgrind:Race
+	fun:g_variant_unref
+}
+
+{
+	g-unix-signals-main
+	drd:ConflictingAccess
+	fun:_g_main_create_unix_signal_watch
+}
+{
+	g-unix-signals-dispatch
+	drd:ConflictingAccess
+	...
+	fun:dispatch_unix_signals*
+}
+{
+	g-unix-signals-dispatch-helgrind
+	Helgrind:Race
+	...
+	fun:dispatch_unix_signals*
+}
+{
+	g-unix-signals-other
+	drd:ConflictingAccess
+	fun:g_unix_signal_watch*
+}
+{
+	g-unix-signals-other-helgrind
+	Helgrind:Race
+	fun:g_unix_signal_watch*
+}
+{
+	g-unix-signals-handler
+	drd:ConflictingAccess
+	fun:g_unix_signal_handler*
+}
+{
+	g-unix-signals-handler-helgrind
+	Helgrind:Race
+	fun:g_unix_signal_handler*
+}
+{
+	g-unix-signals-worker
+	drd:ConflictingAccess
+	fun:glib_worker_main
+}
+{
+	g-unix-signals-worker-helgrind
+	Helgrind:Race
+	fun:glib_worker_main
+}
+
+{
+	g-wakeup-acknowledge
+	drd:ConflictingAccess
+	fun:read
+	fun:g_wakeup_acknowledge
+}
+
+{
+	g-type-fundamental
+	drd:ConflictingAccess
+	fun:g_type_fundamental
+}
+{
+	g-type-fundamental-helgrind
+	Helgrind:Race
+	fun:g_type_fundamental
+}
+{
+	g-type-class-peek-static
+	drd:ConflictingAccess
+	fun:g_type_class_peek_static
+}
+{
+	g-type-class-peek-static-helgrind
+	Helgrind:Race
+	fun:g_type_class_peek_static
+}
+{
+	g-type-is-a
+	drd:ConflictingAccess
+	...
+	fun:g_type_is_a
+}
+{
+	g-type-is-a-helgrind
+	Helgrind:Race
+	...
+	fun:g_type_is_a
+}
+
+{
+	g-inet-address-get-type
+	drd:ConflictingAccess
+	fun:g_inet_address_get_type
+}
+{
+	g-inet-address-get-type-helgrind
+	Helgrind:Race
+	fun:g_inet_address_get_type
+}
+
+# From: https://github.com/fredericgermain/valgrind/blob/master/glibc-2.X-drd.supp
+{
+	drd-libc-stdio
+	drd:ConflictingAccess
+	obj:*/lib*/libc-*
+}
+{
+	drd-libc-recv
+	drd:ConflictingAccess
+	fun:recv
+}
+{
+	drd-libc-send
+	drd:ConflictingAccess
+	fun:send
+}
+
+# GSources do an opportunistic ref count check
+{
+	g-source-set-ready-time
+	drd:ConflictingAccess
+	fun:g_source_set_ready_time
+}
+{
+	g-source-set-ready-time-helgrind
+	Helgrind:Race
+	fun:g_source_set_ready_time
+}
+
+{
+	g-source-iter-next
+	Helgrind:Race
+	fun:g_source_iter_next
+	fun:g_main_context_*
+	fun:g_main_context_iterate
+}
+
+{
+	g-object-instance-private
+	drd:ConflictingAccess
+	fun:*_get_instance_private
+}
+{
+	g-object-instance-private-helgrind
+	Helgrind:Race
+	fun:*_get_instance_private
+}
+
+# GLib legitimately calls pthread_cond_signal without a mutex held
+{
+	g-task-thread-complete
+	drd:CondErr
+	...
+	fun:g_cond_signal
+	fun:g_task_thread_complete
+}
+{
+	g-task-thread-complete
+	Helgrind:Misc
+	...
+	fun:g_cond_signal
+	fun:g_task_thread_complete
+}
+
+# False positive, but I can't explain how (FIXME)
+{
+	g-task-cond
+	Helgrind:Misc
+	...
+	fun:g_cond_clear
+	fun:g_task_finalize
+}
+
+# Real race, but is_cancelled() is an opportunistic function anyway
+{
+	g-cancellable-is-cancelled
+	Helgrind:Race
+	fun:g_cancellable_is_cancelled
+}
+
+# False positive
+{
+	g-main-context-cond
+	Helgrind:Misc
+	...
+	fun:g_cond_clear
+	fun:g_main_context_unref
+}
+
+# False positives
+{
+	g-source-unlocked
+	Helgrind:Race
+	fun:g_source_*_unlocked
+}
+{
+	g-source-internal
+	Helgrind:Race
+	fun:g_source_*_internal
+}
+
+# False positive
+{
+	g_object_real_dispose
+	Helgrind:Race
+	fun:g_object_real_dispose
+}
+
+# False positive
+{
+	g_object_new_valist
+	Helgrind:Race
+	...
+	fun:g_object_new_valist
+}
+
+# g_set_user_dirs() deliberately leaks the previous cached g_get_user_*() values.
+{
+	g_set_user_dirs_str
+	Memcheck:Leak
+	fun:malloc
+	...
+	fun:set_str_if_different
+	fun:g_set_user_dirs
+}
+
+# g_set_user_dirs() deliberately leaks the previous cached g_get_user_*() values.
+{
+	g_set_user_dirs_strv
+	Memcheck:Leak
+	fun:malloc
+	...
+	fun:set_strv_if_different
+	fun:g_set_user_dirs
+}
+
+# g_get_system_data_dirs() caches a one-time allocation
+{
+	g_get_system_data_dirs
+	Memcheck:Leak
+	fun:malloc
+	...
+	fun:g_build_system_data_dirs
+	fun:g_get_system_data_dirs
+}
+
+# g_get_user_data_dir() caches a one-time allocation
+{
+	g_get_user_data_dir
+	Memcheck:Leak
+	fun:realloc
+	...
+	fun:g_build_user_data_dir
+	fun:g_get_user_data_dir
+}
+
+# gdesktopappinfo.c caches a one-time allocation global table of @desktop_file_dirs.
+{
+	desktop_file_dirs_malloc
+	Memcheck:Leak
+	fun:malloc
+	...
+	fun:desktop_file_dirs_lock
+}
+
+# gdesktopappinfo.c caches a one-time allocation global table of @desktop_file_dirs.
+{
+	desktop_file_dirs_realloc
+	Memcheck:Leak
+	fun:realloc
+	...
+	fun:desktop_file_dirs_lock
+}
+
+# gdesktopappinfo.c caches a one-time allocation global table of @desktop_file_dirs.
+{
+	desktop_file_dir_unindexed_setup_search
+	Memcheck:Leak
+	fun:malloc
+	...
+	fun:desktop_file_dir_unindexed_setup_search
+	fun:desktop_file_dir_unindexed_setup_search
+}
+
+# g_io_extension_point_register() caches a one-time allocation global table of @extension_points.
+{
+	g_io_extension_point_register
+	Memcheck:Leak
+	fun:calloc
+	...
+	fun:g_io_extension_point_register
+}
+
+# g_strerror() caches a one-time allocation global table of @errors.
+{
+	g_strerror
+	Memcheck:Leak
+	fun:malloc
+	...
+	fun:g_locale_to_utf8
+	fun:g_strerror
+}
+
+# g_socket_connection_factory_register_type() caches a one-time allocation global table of @connection_types.
+{
+	g_socket_connection_factory_register_type
+	Memcheck:Leak
+	fun:calloc
+	...
+	fun:g_socket_connection_factory_register_type
+}
+
+# g_dbus_error_quark() never unregisters itself as a GDBusError domain, as it’s always available
+{
+	g_dbus_error_quark
+	Memcheck:Leak
+	fun:calloc
+	...
+	fun:g_dbus_error_register_error_domain
+	fun:g_dbus_error_quark
+}
+
+# Thread-private data allocated once per thread
+{
+	g_private_set_alloc0
+	Memcheck:Leak
+	fun:malloc
+	...
+	fun:g_private_set_alloc0
+}
+
+# Thread-private GMainContext stack
+{
+	g_main_context_push_thread_default
+	Memcheck:Leak
+	fun:malloc
+	...
+	fun:g_queue_new
+	fun:g_main_context_push_thread_default
+}
+
+# One-time allocations for #GFileInfo attribute cache
+{
+	g_file_info_attribute_cache
+	Memcheck:Leak
+	fun:malloc
+	...
+	fun:ensure_attribute_hash
+	...
+	fun:g_file_*
+}
+{
+	g_file_info_attribute_cache2
+	Memcheck:Leak
+	fun:calloc
+	...
+	fun:ensure_attribute_hash
+	...
+	fun:g_file_*
+}
+{
+	g_file_info_attribute_cache3
+	Memcheck:Leak
+	fun:malloc
+	...
+	fun:lookup_namespace
+	...
+	fun:g_file_*
+}
+{
+	g_file_info_attribute_cache4
+	Memcheck:Leak
+	fun:calloc
+	...
+	fun:lookup_namespace
+	...
+	fun:g_file_*
+}
+
+## python suppressions file:
+#
+# This is a valgrind suppression file that should be used when using valgrind.
+#
+#  Here's an example of running valgrind:
+#
+#	cd python/dist/src
+#	valgrind --tool=memcheck --suppressions=Misc/valgrind-python.supp \
+#		./python -E -tt ./Lib/test/regrtest.py -u bsddb,network
+#
+# You must edit Objects/obmalloc.c and uncomment Py_USING_MEMORY_DEBUGGER
+# to use the preferred suppressions with Py_ADDRESS_IN_RANGE.
+#
+# If you do not want to recompile Python, you can uncomment
+# suppressions for PyObject_Free and PyObject_Realloc.
+#
+# See Misc/README.valgrind for more information.
+
+# all tool names: Addrcheck,Memcheck,cachegrind,helgrind,massif
+{
+   ADDRESS_IN_RANGE/Invalid read of size 4
+   Memcheck:Addr4
+   fun:Py_ADDRESS_IN_RANGE
+}
+
+{
+   ADDRESS_IN_RANGE/Invalid read of size 4
+   Memcheck:Value4
+   fun:Py_ADDRESS_IN_RANGE
+}
+
+{
+   ADDRESS_IN_RANGE/Invalid read of size 8 (x86_64 aka amd64)
+   Memcheck:Value8
+   fun:Py_ADDRESS_IN_RANGE
+}
+
+{
+   ADDRESS_IN_RANGE/Conditional jump or move depends on uninitialised value
+   Memcheck:Cond
+   fun:Py_ADDRESS_IN_RANGE
+}
+
+#
+# Leaks (including possible leaks)
+#    Hmmm, I wonder if this masks some real leaks.  I think it does.
+#    Will need to fix that.
+#
+
+{
+   Suppress leaking the GIL.  Happens once per process, see comment in ceval.c.
+   Memcheck:Leak
+   fun:malloc
+   fun:PyThread_allocate_lock
+   fun:PyEval_InitThreads
+}
+
+{
+   Suppress leaking the GIL after a fork.
+   Memcheck:Leak
+   fun:malloc
+   fun:PyThread_allocate_lock
+   fun:PyEval_ReInitThreads
+}
+
+{
+   Suppress leaking the autoTLSkey.  This looks like it shouldn't leak though.
+   Memcheck:Leak
+   fun:malloc
+   fun:PyThread_create_key
+   fun:_PyGILState_Init
+   fun:Py_InitializeEx
+   fun:Py_Main
+}
+
+{
+   Hmmm, is this a real leak or like the GIL?
+   Memcheck:Leak
+   fun:malloc
+   fun:PyThread_ReInitTLS
+}
+
+{
+   Handle PyMalloc confusing valgrind (possibly leaked)
+   Memcheck:Leak
+   fun:realloc
+   fun:_PyObject_GC_Resize
+   fun:COMMENT_THIS_LINE_TO_DISABLE_LEAK_WARNING
+}
+
+{
+   Handle PyMalloc confusing valgrind (possibly leaked)
+   Memcheck:Leak
+   fun:malloc
+   fun:_PyObject_GC_New
+   fun:COMMENT_THIS_LINE_TO_DISABLE_LEAK_WARNING
+}
+
+{
+   Handle PyMalloc confusing valgrind (possibly leaked)
+   Memcheck:Leak
+   fun:malloc
+   fun:_PyObject_GC_NewVar
+   fun:COMMENT_THIS_LINE_TO_DISABLE_LEAK_WARNING
+}
+
+#
+# Non-python specific leaks
+#
+
+{
+   Handle pthread issue (possibly leaked)
+   Memcheck:Leak
+   fun:calloc
+   fun:allocate_dtv
+   fun:_dl_allocate_tls_storage
+   fun:_dl_allocate_tls
+}
+
+{
+   Handle pthread issue (possibly leaked)
+   Memcheck:Leak
+   fun:memalign
+   fun:_dl_allocate_tls_storage
+   fun:_dl_allocate_tls
+}
+
+###{
+###   ADDRESS_IN_RANGE/Invalid read of size 4
+###   Memcheck:Addr4
+###   fun:PyObject_Free
+###}
+###
+###{
+###   ADDRESS_IN_RANGE/Invalid read of size 4
+###   Memcheck:Value4
+###   fun:PyObject_Free
+###}
+###
+###{
+###   ADDRESS_IN_RANGE/Conditional jump or move depends on uninitialised value
+###   Memcheck:Cond
+###   fun:PyObject_Free
+###}
+
+###{
+###   ADDRESS_IN_RANGE/Invalid read of size 4
+###   Memcheck:Addr4
+###   fun:PyObject_Realloc
+###}
+###
+###{
+###   ADDRESS_IN_RANGE/Invalid read of size 4
+###   Memcheck:Value4
+###   fun:PyObject_Realloc
+###}
+###
+###{
+###   ADDRESS_IN_RANGE/Conditional jump or move depends on uninitialised value
+###   Memcheck:Cond
+###   fun:PyObject_Realloc
+###}
+
+###
+### All the suppressions below are for errors that occur within libraries
+### that Python uses.  The problems to not appear to be related to Python's
+### use of the libraries.
+###
+
+{
+   Generic ubuntu ld problems
+   Memcheck:Addr8
+   obj:/lib/ld-2.4.so
+   obj:/lib/ld-2.4.so
+   obj:/lib/ld-2.4.so
+   obj:/lib/ld-2.4.so
+}
+
+{
+   Generic gentoo ld problems
+   Memcheck:Cond
+   obj:/lib/ld-2.3.4.so
+   obj:/lib/ld-2.3.4.so
+   obj:/lib/ld-2.3.4.so
+   obj:/lib/ld-2.3.4.so
+}
+
+{
+   DBM problems, see test_dbm
+   Memcheck:Param
+   write(buf)
+   fun:write
+   obj:/usr/lib/libdb1.so.2
+   obj:/usr/lib/libdb1.so.2
+   obj:/usr/lib/libdb1.so.2
+   obj:/usr/lib/libdb1.so.2
+   fun:dbm_close
+}
+
+{
+   DBM problems, see test_dbm
+   Memcheck:Value8
+   fun:memmove
+   obj:/usr/lib/libdb1.so.2
+   obj:/usr/lib/libdb1.so.2
+   obj:/usr/lib/libdb1.so.2
+   obj:/usr/lib/libdb1.so.2
+   fun:dbm_store
+   fun:dbm_ass_sub
+}
+
+{
+   DBM problems, see test_dbm
+   Memcheck:Cond
+   obj:/usr/lib/libdb1.so.2
+   obj:/usr/lib/libdb1.so.2
+   obj:/usr/lib/libdb1.so.2
+   fun:dbm_store
+   fun:dbm_ass_sub
+}
+
+{
+   DBM problems, see test_dbm
+   Memcheck:Cond
+   fun:memmove
+   obj:/usr/lib/libdb1.so.2
+   obj:/usr/lib/libdb1.so.2
+   obj:/usr/lib/libdb1.so.2
+   obj:/usr/lib/libdb1.so.2
+   fun:dbm_store
+   fun:dbm_ass_sub
+}
+
+{
+   GDBM problems, see test_gdbm
+   Memcheck:Param
+   write(buf)
+   fun:write
+   fun:gdbm_open
+
+}
+
+{
+   ZLIB problems, see test_gzip
+   Memcheck:Cond
+   obj:/lib/libz.so.1.2.3
+   obj:/lib/libz.so.1.2.3
+   fun:deflate
+}
+
+{
+   Avoid problems w/readline doing a putenv and leaking on exit
+   Memcheck:Leak
+   fun:malloc
+   fun:xmalloc
+   fun:sh_set_lines_and_columns
+   fun:_rl_get_screen_size
+   fun:_rl_init_terminal_io
+   obj:/lib/libreadline.so.4.3
+   fun:rl_initialize
+}
+
+###
+### These occur from somewhere within the SSL, when running
+###  test_socket_sll.  They are too general to leave on by default.
+###
+###{
+###   somewhere in SSL stuff
+###   Memcheck:Cond
+###   fun:memset
+###}
+###{
+###   somewhere in SSL stuff
+###   Memcheck:Value4
+###   fun:memset
+###}
+###
+###{
+###   somewhere in SSL stuff
+###   Memcheck:Cond
+###   fun:MD5_Update
+###}
+###
+###{
+###   somewhere in SSL stuff
+###   Memcheck:Value4
+###   fun:MD5_Update
+###}
+
+#
+# All of these problems come from using test_socket_ssl
+#
+{
+   from test_socket_ssl
+   Memcheck:Cond
+   fun:BN_bin2bn
+}
+
+{
+   from test_socket_ssl
+   Memcheck:Cond
+   fun:BN_num_bits_word
+}
+
+{
+   from test_socket_ssl
+   Memcheck:Value4
+   fun:BN_num_bits_word
+}
+
+{
+   from test_socket_ssl
+   Memcheck:Cond
+   fun:BN_mod_exp_mont_word
+}
+
+{
+   from test_socket_ssl
+   Memcheck:Cond
+   fun:BN_mod_exp_mont
+}
+
+{
+   from test_socket_ssl
+   Memcheck:Param
+   write(buf)
+   fun:write
+   obj:/usr/lib/libcrypto.so.0.9.7
+}
+
+{
+   from test_socket_ssl
+   Memcheck:Cond
+   fun:RSA_verify
+}
+
+{
+   from test_socket_ssl
+   Memcheck:Value4
+   fun:RSA_verify
+}
+
+{
+   from test_socket_ssl
+   Memcheck:Value4
+   fun:DES_set_key_unchecked
+}
+
+{
+   from test_socket_ssl
+   Memcheck:Value4
+   fun:DES_encrypt2
+}
+
+{
+   from test_socket_ssl
+   Memcheck:Cond
+   obj:/usr/lib/libssl.so.0.9.7
+}
+
+{
+   from test_socket_ssl
+   Memcheck:Value4
+   obj:/usr/lib/libssl.so.0.9.7
+}
+
+{
+   from test_socket_ssl
+   Memcheck:Cond
+   fun:BUF_MEM_grow_clean
+}
+
+{
+   from test_socket_ssl
+   Memcheck:Cond
+   fun:memcpy
+   fun:ssl3_read_bytes
+}
+
+{
+   from test_socket_ssl
+   Memcheck:Cond
+   fun:SHA1_Update
+}
+
+{
+   from test_socket_ssl
+   Memcheck:Value4
+   fun:SHA1_Update
+}
+
