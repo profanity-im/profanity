@@ -134,6 +134,7 @@ static int _command_exec_response_handler(xmpp_stanza_t *const stanza, void *con
 
 static void _iq_free_room_data(ProfRoomInfoData *roominfo);
 static void _iq_free_affiliation_set(ProfPrivilegeSet *affiliation_set);
+static void _iq_id_handler_free(ProfIqHandler *handler);
 
 // scheduled
 static int _autoping_timed_send(xmpp_conn_t *const conn, void *const userdata);
@@ -247,7 +248,7 @@ iq_handlers_init(void)
         g_list_free(keys);
         g_hash_table_destroy(id_handlers);
     }
-    id_handlers = g_hash_table_new_full(g_str_hash, g_str_equal, free, NULL);
+    id_handlers = g_hash_table_new_full(g_str_hash, g_str_equal, free, (GDestroyNotify)_iq_id_handler_free);
     rooms_cache = g_hash_table_new_full(g_str_hash, g_str_equal, free, (GDestroyNotify)xmpp_stanza_release);
 }
 
@@ -257,6 +258,19 @@ iq_handlers_clear()
     if (id_handlers) {
         g_hash_table_remove_all(id_handlers);
     }
+}
+
+static void
+_iq_id_handler_free(ProfIqHandler *handler)
+{
+    if (handler == NULL) {
+        return;
+    }
+    if (handler->free_func && handler->userdata) {
+        handler->free_func(handler->userdata);
+    }
+    free(handler);
+    handler = NULL;
 }
 
 void
