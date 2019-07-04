@@ -111,8 +111,13 @@ omemo_bundle_request(const char * const jid, uint32_t device_id, ProfIqCallback 
 int
 omemo_start_device_session_handle_bundle(xmpp_stanza_t *const stanza, void *const userdata)
 {
+    GList *prekeys_list = NULL;
+    unsigned char *signed_prekey_raw = NULL;
+    unsigned char *signed_prekey_signature_raw = NULL;
     char *from = NULL;
+
     const char *from_attr = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
+
     if (!from_attr) {
         Jid *jid = jid_create(connection_get_fulljid());
         from = strdup(jid->barejid);
@@ -122,55 +127,59 @@ omemo_start_device_session_handle_bundle(xmpp_stanza_t *const stanza, void *cons
     }
 
     if (g_strcmp0(from, userdata) != 0) {
-        return 1;
+        goto out;
     }
 
     xmpp_stanza_t *pubsub = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_PUBSUB);
     if (!pubsub) {
-        return 1;
+        goto out;
     }
 
     xmpp_stanza_t *items = xmpp_stanza_get_child_by_name(pubsub, "items");
     if (!items) {
-        return 1;
+        goto out;
     }
     const char *node = xmpp_stanza_get_attribute(items, "node");
     char *device_id_str = strstr(node, ":");
     if (!device_id_str) {
-        return 1;
+        goto out;
     }
 
     uint32_t device_id = strtoul(++device_id_str, NULL, 10);
 
     xmpp_stanza_t *item = xmpp_stanza_get_child_by_name(items, "item");
     if (!item) {
-        return 1;
+        goto out;
     }
 
     xmpp_stanza_t *bundle = xmpp_stanza_get_child_by_ns(item, STANZA_NS_OMEMO);
     if (!bundle) {
-        return 1;
+        goto out;
     }
 
     xmpp_stanza_t *prekeys = xmpp_stanza_get_child_by_name(bundle, "prekeys");
     if (!prekeys) {
-        return 1;
+        goto out;
     }
 
-    GList *prekeys_list = NULL;
     xmpp_stanza_t *prekey;
     for (prekey = xmpp_stanza_get_children(prekeys); prekey != NULL; prekey = xmpp_stanza_get_next(prekey)) {
         omemo_key_t *key = malloc(sizeof(omemo_key_t));
 
         const char *prekey_id_text = xmpp_stanza_get_attribute(prekey, "preKeyId");
         if (!prekey_id_text) {
-            return 1;
+            omemo_key_free(key);
+            goto out;
         }
+
         key->id = strtoul(prekey_id_text, NULL, 10);
         xmpp_stanza_t *prekey_text = xmpp_stanza_get_children(prekey);
+
         if (!prekey_text) {
-            return 1;
+            omemo_key_free(key);
+            goto out;
         }
+
         char *prekey_b64 = xmpp_stanza_get_text(prekey_text);
         key->data = g_base64_decode(prekey_b64, &key->length);
         free(prekey_b64);
@@ -182,42 +191,44 @@ omemo_start_device_session_handle_bundle(xmpp_stanza_t *const stanza, void *cons
 
     xmpp_stanza_t *signed_prekey = xmpp_stanza_get_child_by_name(bundle, "signedPreKeyPublic");
     if (!signed_prekey) {
-        return 1;
+        goto out;
     }
     const char *signed_prekey_id_text = xmpp_stanza_get_attribute(signed_prekey, "signedPreKeyId");
     if (!signed_prekey_id_text) {
-        return 1;
+        goto out;
     }
+
     uint32_t signed_prekey_id = strtoul(signed_prekey_id_text, NULL, 10);
     xmpp_stanza_t *signed_prekey_text = xmpp_stanza_get_children(signed_prekey);
     if (!signed_prekey_text) {
-        return 1;
+        goto out;
     }
+
     size_t signed_prekey_len;
     char *signed_prekey_b64 = xmpp_stanza_get_text(signed_prekey_text);
-    unsigned char *signed_prekey_raw = g_base64_decode(signed_prekey_b64, &signed_prekey_len);
+    signed_prekey_raw = g_base64_decode(signed_prekey_b64, &signed_prekey_len);
     free(signed_prekey_b64);
 
     xmpp_stanza_t *signed_prekey_signature = xmpp_stanza_get_child_by_name(bundle, "signedPreKeySignature");
     if (!signed_prekey_signature) {
-        return 1;
+        goto out;
     }
     xmpp_stanza_t *signed_prekey_signature_text = xmpp_stanza_get_children(signed_prekey_signature);
     if (!signed_prekey_signature_text) {
-        return 1;
+        goto out;
     }
     size_t signed_prekey_signature_len;
     char *signed_prekey_signature_b64 = xmpp_stanza_get_text(signed_prekey_signature_text);
-    unsigned char *signed_prekey_signature_raw = g_base64_decode(signed_prekey_signature_b64, &signed_prekey_signature_len);
+    signed_prekey_signature_raw = g_base64_decode(signed_prekey_signature_b64, &signed_prekey_signature_len);
     free(signed_prekey_signature_b64);
 
     xmpp_stanza_t *identity_key = xmpp_stanza_get_child_by_name(bundle, "identityKey");
     if (!identity_key) {
-        return 1;
+        goto out;
     }
     xmpp_stanza_t *identity_key_text = xmpp_stanza_get_children(identity_key);
     if (!identity_key_text) {
-        return 1;
+        goto out;
     }
     size_t identity_key_len;
     char *identity_key_b64 = xmpp_stanza_get_text(identity_key_text);
@@ -228,11 +239,19 @@ omemo_start_device_session_handle_bundle(xmpp_stanza_t *const stanza, void *cons
         signed_prekey_raw, signed_prekey_len, signed_prekey_signature_raw,
         signed_prekey_signature_len, identity_key_raw, identity_key_len);
 
-    free(from);
-    g_list_free_full(prekeys_list, (GDestroyNotify)omemo_key_free);
-    g_free(signed_prekey_raw);
     g_free(identity_key_raw);
-    g_free(signed_prekey_signature_raw);
+
+out:
+    free(from);
+    if (signed_prekey_raw) {
+        g_free(signed_prekey_raw);
+    }
+    if (signed_prekey_signature_raw) {
+        g_free(signed_prekey_signature_raw);
+    }
+    if (prekeys_list) {
+        g_list_free_full(prekeys_list, (GDestroyNotify)omemo_key_free);
+    }
     return 1;
 }
 
@@ -292,12 +311,12 @@ omemo_receive_message(xmpp_stanza_t *const stanza, gboolean *trusted)
             goto skip;
         }
 
-
         const char *rid_text = xmpp_stanza_get_attribute(key_stanza, "rid");
         key->device_id = strtoul(rid_text, NULL, 10);
         if (!key->device_id) {
             goto skip;
         }
+
         key->data = g_base64_decode(key_text, &key->length);
         free(key_text);
         key->prekey = g_strcmp0(xmpp_stanza_get_attribute(key_stanza, "prekey"), "true") == 0;

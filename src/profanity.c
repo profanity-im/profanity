@@ -242,6 +242,9 @@ _shutdown(void)
 #ifdef HAVE_LIBGPGME
     p_gpg_close();
 #endif
+#ifdef HAVE_OMEMO
+    omemo_close();
+#endif
     chat_log_close();
     theme_close();
     accounts_close();

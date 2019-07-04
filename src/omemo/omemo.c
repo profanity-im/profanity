@@ -128,6 +128,15 @@ omemo_init(void)
 }
 
 void
+omemo_close(void)
+{
+    if (omemo_ctx.fingerprint_ac) {
+        autocomplete_free(omemo_ctx.fingerprint_ac);
+        omemo_ctx.fingerprint_ac = NULL;
+    }
+}
+
+void
 omemo_on_connect(ProfAccount *account)
 {
     GError *error = NULL;
@@ -217,8 +226,6 @@ omemo_on_connect(ProfAccount *account)
     omemo_ctx.device_list_handler = g_hash_table_new_full(g_str_hash, g_str_equal, free, NULL);
     omemo_ctx.known_devices = g_hash_table_new_full(g_str_hash, g_str_equal, free, (GDestroyNotify)_g_hash_table_free);
 
-    omemo_ctx.fingerprint_ac = autocomplete_new();
-
     char *omemodir = files_get_data_path(DIR_OMEMO);
     GString *basedir = g_string_new(omemodir);
     free(omemodir);
@@ -298,6 +305,7 @@ omemo_on_disconnect(void)
 
     _g_hash_table_free(omemo_ctx.signed_pre_key_store);
     _g_hash_table_free(omemo_ctx.pre_key_store);
+    _g_hash_table_free(omemo_ctx.device_list_handler);
 
     g_string_free(omemo_ctx.identity_filename, TRUE);
     g_key_file_free(omemo_ctx.identity_keyfile);
