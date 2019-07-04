@@ -305,6 +305,7 @@ omemo_on_disconnect(void)
 
     _g_hash_table_free(omemo_ctx.signed_pre_key_store);
     _g_hash_table_free(omemo_ctx.pre_key_store);
+    _g_hash_table_free(omemo_ctx.device_list_handler);
 
     g_string_free(omemo_ctx.identity_filename, TRUE);
     g_key_file_free(omemo_ctx.identity_keyfile);
