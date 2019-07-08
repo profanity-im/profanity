@@ -214,7 +214,6 @@ _iq_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza, void *const us
         if (handler) {
             int keep = handler->func(stanza, handler->userdata);
             if (!keep) {
-                free(handler);
                 g_hash_table_remove(id_handlers, id);
             }
         }
@@ -235,19 +234,8 @@ iq_handlers_init(void)
         xmpp_timed_handler_add(conn, _autoping_timed_send, millis, ctx);
     }
 
-    if (id_handlers) {
-        GList *keys = g_hash_table_get_keys(id_handlers);
-        GList *curr = keys;
-        while (curr) {
-            ProfIqHandler *handler = g_hash_table_lookup(id_handlers, curr->data);
-            if (handler->free_func && handler->userdata) {
-                handler->free_func(handler->userdata);
-            }
-            curr = g_list_next(curr);
-        }
-        g_list_free(keys);
-        g_hash_table_destroy(id_handlers);
-    }
+    iq_handlers_clear();
+
     id_handlers = g_hash_table_new_full(g_str_hash, g_str_equal, free, (GDestroyNotify)_iq_id_handler_free);
     rooms_cache = g_hash_table_new_full(g_str_hash, g_str_equal, free, (GDestroyNotify)xmpp_stanza_release);
 }
@@ -257,6 +245,7 @@ iq_handlers_clear()
 {
     if (id_handlers) {
         g_hash_table_remove_all(id_handlers);
+        id_handlers = NULL;
     }
 }
 
@@ -344,6 +333,7 @@ iq_rooms_cache_clear(void)
 {
     if (rooms_cache) {
         g_hash_table_remove_all(rooms_cache);
+        rooms_cache = NULL;
     }
 }
 
