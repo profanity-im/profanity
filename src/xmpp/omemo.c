@@ -165,6 +165,7 @@ omemo_start_device_session_handle_bundle(xmpp_stanza_t *const stanza, void *cons
     xmpp_stanza_t *prekey;
     for (prekey = xmpp_stanza_get_children(prekeys); prekey != NULL; prekey = xmpp_stanza_get_next(prekey)) {
         omemo_key_t *key = malloc(sizeof(omemo_key_t));
+        key->data = NULL;
 
         const char *prekey_id_text = xmpp_stanza_get_attribute(prekey, "preKeyId");
         if (!prekey_id_text) {
