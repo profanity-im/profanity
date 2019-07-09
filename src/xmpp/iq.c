@@ -2069,8 +2069,6 @@ _room_info_response_id_handler(xmpp_stanza_t *const stanza, void *const userdata
             mucwin_room_info_error(mucwin, error_message);
             free(error_message);
         }
-        free(cb_data->room);
-        free(cb_data);
         return 0;
     }
 
@@ -2135,9 +2133,6 @@ _room_info_response_id_handler(xmpp_stanza_t *const stanza, void *const userdata
         g_slist_free_full(features, free);
         g_slist_free_full(identities, (GDestroyNotify)_identity_destroy);
     }
-
-    free(cb_data->room);
-    free(cb_data);
 
     return 0;
 }
@@ -2448,8 +2443,8 @@ iq_send_stanza(xmpp_stanza_t *const stanza)
         xmpp_send_raw_string(conn, "%s", text);
     }
     xmpp_free(connection_get_ctx(), text);
-
 }
+
 static void
 _iq_free_room_data(ProfRoomInfoData *roominfo)
 {
