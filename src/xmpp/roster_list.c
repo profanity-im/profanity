@@ -688,6 +688,15 @@ roster_compare_presence(PContact a, PContact b)
     }
 }
 
+static void
+_pendingPresence_free(ProfPendingPresence *presence)
+{
+    if (!presence)
+        return;
+    free(presence->barejid);
+    free(presence);
+}
+
 void
 roster_process_pending_presence(void)
 {
@@ -704,7 +713,7 @@ roster_process_pending_presence(void)
         }
     }
 
-    g_slist_free(roster_pending_presence);
+    g_slist_free_full(roster_pending_presence, (GDestroyNotify)_pendingPresence_free);
     roster_pending_presence = NULL;
 }
 
