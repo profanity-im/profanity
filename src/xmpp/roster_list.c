@@ -706,7 +706,6 @@ roster_process_pending_presence(void)
     for (iter = roster_pending_presence; iter != NULL; iter = iter->next) {
         ProfPendingPresence *presence = iter->data;
         roster_update_presence(presence->barejid, presence->resource, presence->last_activity);
-        free(presence->barejid);
         /* seems like resource isn't free on the calling side */
         if (presence->last_activity) {
             g_date_time_unref(presence->last_activity);
