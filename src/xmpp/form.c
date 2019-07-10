@@ -82,14 +82,7 @@ _is_valid_form_element(xmpp_stanza_t *stanza)
 static DataForm*
 _form_new(void)
 {
-    DataForm *form = malloc(sizeof(DataForm));
-    form->type = NULL;
-    form->title = NULL;
-    form->instructions = NULL;
-    form->fields = NULL;
-    form->var_to_tag = NULL;
-    form->tag_to_var = NULL;
-    form->tag_ac = NULL;
+    DataForm *form = calloc(1, sizeof(DataForm));
 
     return form;
 }
@@ -97,14 +90,7 @@ _form_new(void)
 static FormField*
 _field_new(void)
 {
-    FormField *field = malloc(sizeof(FormField));
-    field->label = NULL;
-    field->type = NULL;
-    field->var = NULL;
-    field->description = NULL;
-    field->required = FALSE;
-    field->values = NULL;
-    field->options = NULL;
+    FormField *field = calloc(1, sizeof(FormField));
 
     return field;
 }
