@@ -1363,14 +1363,14 @@ omemo_automatic_start(const char *const recipient)
             } else if (g_list_find_custom(account->omemo_disabled, recipient, (GCompareFunc)g_strcmp0)) {
                 result = FALSE;
             } else {
-                return FALSE;
+                result = FALSE;
             }
             break;
         case PROF_OMEMOPOLICY_ALWAYS:
             if (g_list_find_custom(account->omemo_disabled, recipient, (GCompareFunc)g_strcmp0)) {
                 result = FALSE;
             } else {
-                return TRUE;
+                result = TRUE;
             }
             break;
     }
