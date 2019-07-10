@@ -93,7 +93,7 @@ status_bar_init(void)
     statusbar->prompt = NULL;
     statusbar->fulljid = NULL;
     statusbar->tabs = g_hash_table_new_full(g_direct_hash, g_direct_equal, NULL, (GDestroyNotify)_destroy_tab);
-    StatusBarTab *console = malloc(sizeof(StatusBarTab));
+    StatusBarTab *console = calloc(1, sizeof(StatusBarTab));
     console->window_type = WIN_CONSOLE;
     console->identifier = strdup("console");
     console->display_name = NULL;
