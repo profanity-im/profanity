@@ -290,6 +290,7 @@ connection_send_stanza(const char *const stanza)
 gboolean
 connection_supports(const char *const feature)
 {
+    gboolean ret = FALSE;
     GList *jids = g_hash_table_get_keys(conn.features_by_jid);
 
     GList *curr = jids;
@@ -297,7 +298,8 @@ connection_supports(const char *const feature)
         char *jid = curr->data;
         GHashTable *features = g_hash_table_lookup(conn.features_by_jid, jid);
         if (features && g_hash_table_lookup(features, feature)) {
-            return TRUE;
+            ret = TRUE;
+            break;
         }
 
         curr = g_list_next(curr);
@@ -305,7 +307,7 @@ connection_supports(const char *const feature)
 
     g_list_free(jids);
 
-    return FALSE;
+    return ret;
 }
 
 char*

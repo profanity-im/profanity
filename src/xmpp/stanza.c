@@ -1869,6 +1869,15 @@ stanza_attach_publish_options(xmpp_ctx_t *const ctx, xmpp_stanza_t *const iq, co
 
     xmpp_stanza_t *pubsub = xmpp_stanza_get_child_by_ns(iq, STANZA_NS_PUBSUB);
     xmpp_stanza_add_child(pubsub, publish_options);
+
+    xmpp_stanza_release(access_model_value_text);
+    xmpp_stanza_release(access_model_value);
+    xmpp_stanza_release(access_model);
+    xmpp_stanza_release(form_type_value_text);
+    xmpp_stanza_release(form_type_value);
+    xmpp_stanza_release(form_type);
+    xmpp_stanza_release(x);
+    xmpp_stanza_release(publish_options);
 }
 
 void
