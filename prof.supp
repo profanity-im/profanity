@@ -1176,3 +1176,13 @@
    fun:SHA1_Update
 }
 
+
+# gcrypt initialization
+{
+  gcry_rngcsprng_randomize
+  Memcheck:Leak
+  fun:malloc
+  ...
+  fun:omemo_crypto_init
+  ...
+}

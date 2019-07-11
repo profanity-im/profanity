@@ -55,6 +55,11 @@ omemo_crypto_init(void)
 
     gcry_control(GCRYCTL_INITIALIZATION_FINISHED, 0);
 
+    /* Ask for a first random buffer to ensure CSPRNG is initialized.
+     * Thus we control the memleak produced by gcrypt initialization and we can
+     * suppress it without having false negatives */
+    gcry_free(gcry_random_bytes_secure(1, GCRY_VERY_STRONG_RANDOM));
+
     return 0;
 }
 
