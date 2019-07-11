@@ -47,6 +47,12 @@ omemo_crypto_init(void)
         return -1;
     }
 
+    gcry_control(GCRYCTL_SUSPEND_SECMEM_WARN);
+
+    gcry_control(GCRYCTL_INIT_SECMEM, 16384, 0);
+
+    gcry_control(GCRYCTL_RESUME_SECMEM_WARN);
+
     gcry_control(GCRYCTL_INITIALIZATION_FINISHED, 0);
 
     return 0;
