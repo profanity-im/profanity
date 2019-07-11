@@ -883,7 +883,6 @@ _caps_response_for_jid_id_handler(xmpp_stanza_t *const stanza, void *const userd
     const char *type = xmpp_stanza_get_type(stanza);
     // ignore non result
     if ((g_strcmp0(type, "get") == 0) || (g_strcmp0(type, "set") == 0)) {
-        free(jid);
         return 1;
     }
 
@@ -896,7 +895,6 @@ _caps_response_for_jid_id_handler(xmpp_stanza_t *const stanza, void *const userd
     const char *from = xmpp_stanza_get_from(stanza);
     if (!from) {
         log_info("No from attribute");
-        free(jid);
         return 0;
     }
 
@@ -905,28 +903,23 @@ _caps_response_for_jid_id_handler(xmpp_stanza_t *const stanza, void *const userd
         char *error_message = stanza_get_error_message(stanza);
         log_warning("Error received for capabilities response from %s: ", from, error_message);
         free(error_message);
-        free(jid);
         return 0;
     }
 
     if (query == NULL) {
         log_info("No query element found.");
-        free(jid);
         return 0;
     }
 
     const char *node = xmpp_stanza_get_attribute(query, STANZA_ATTR_NODE);
     if (node == NULL) {
         log_info("No node attribute found");
-        free(jid);
         return 0;
     }
 
     log_info("Associating capabilities with: %s", jid);
     EntityCapabilities *capabilities = stanza_create_caps_from_query_element(query);
     caps_add_by_jid(jid, capabilities);
-
-    free(jid);
 
     return 0;
 }
@@ -941,7 +934,6 @@ _caps_response_legacy_id_handler(xmpp_stanza_t *const stanza, void *const userda
     const char *type = xmpp_stanza_get_type(stanza);
     // ignore non result
     if ((g_strcmp0(type, "get") == 0) || (g_strcmp0(type, "set") == 0)) {
-        free(expected_node);
         return 1;
     }
 
@@ -954,7 +946,6 @@ _caps_response_legacy_id_handler(xmpp_stanza_t *const stanza, void *const userda
     const char *from = xmpp_stanza_get_from(stanza);
     if (!from) {
         log_info("No from attribute");
-        free(expected_node);
         return 0;
     }
 
@@ -963,20 +954,17 @@ _caps_response_legacy_id_handler(xmpp_stanza_t *const stanza, void *const userda
         char *error_message = stanza_get_error_message(stanza);
         log_warning("Error received for capabilities response from %s: ", from, error_message);
         free(error_message);
-        free(expected_node);
         return 0;
     }
 
     if (query == NULL) {
         log_info("No query element found.");
-        free(expected_node);
         return 0;
     }
 
     const char *node = xmpp_stanza_get_attribute(query, STANZA_ATTR_NODE);
     if (node == NULL) {
         log_info("No node attribute found");
-        free(expected_node);
         return 0;
     }
 
@@ -999,7 +987,6 @@ _caps_response_legacy_id_handler(xmpp_stanza_t *const stanza, void *const userda
         log_info("Legacy Capabilities nodes do not match, expeceted %s, given %s.", expected_node, node);
     }
 
-    free(expected_node);
     return 0;
 }
 
@@ -1018,7 +1005,6 @@ _room_list_id_handler(xmpp_stanza_t *const stanza, void *const userdata)
 
     xmpp_stanza_t *query = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_QUERY);
     if (query == NULL) {
-        g_free(filter);
         return 0;
     }
 
@@ -1031,7 +1017,6 @@ _room_list_id_handler(xmpp_stanza_t *const stanza, void *const userdata)
     xmpp_stanza_t *child = xmpp_stanza_get_children(query);
     if (child == NULL) {
         cons_show("  No rooms found.");
-        g_free(filter);
         return 0;
     }
 
@@ -1040,7 +1025,6 @@ _room_list_id_handler(xmpp_stanza_t *const stanza, void *const userdata)
         gchar *filter_lower = g_utf8_strdown(filter, -1);
         GString *glob_str = g_string_new("*");
         g_string_append(glob_str, filter_lower);
-        g_free(filter_lower);
         g_string_append(glob_str, "*");
         glob = g_pattern_spec_new(glob_str->str);
         g_string_free(glob_str, TRUE);
@@ -1093,7 +1077,6 @@ _room_list_id_handler(xmpp_stanza_t *const stanza, void *const userdata)
     if (glob) {
         g_pattern_spec_free(glob);
     }
-    g_free(filter);
 
     return 0;
 }
@@ -1327,7 +1310,6 @@ _manual_pong_id_handler(xmpp_stanza_t *const stanza, void *const userdata)
         }
 
         free(error_message);
-        g_date_time_unref(sent);
         return 0;
     }
 
@@ -1336,7 +1318,6 @@ _manual_pong_id_handler(xmpp_stanza_t *const stanza, void *const userdata)
     GTimeSpan elapsed = g_date_time_difference(now, sent);
     int elapsed_millis = elapsed / 1000;
 
-    g_date_time_unref(sent);
     g_date_time_unref(now);
 
     if (from == NULL) {
@@ -1524,7 +1505,6 @@ _version_result_id_handler(xmpp_stanza_t *const stanza, void *const userdata)
     ui_show_software_version(jidp->fulljid, presence, name_str, version_str, os_str);
 
     jid_destroy(jidp);
-    free(userdata);
 
     if (name_str) xmpp_free(ctx, name_str);
     if (version_str) xmpp_free(ctx, version_str);
@@ -1834,10 +1814,6 @@ _room_affiliation_set_result_id_handler(xmpp_stanza_t *const stanza, void *const
         free(error_message);
     }
 
-    free(affiliation_set->item);
-    free(affiliation_set->privilege);
-    free(affiliation_set);
-
     return 0;
 }
 
@@ -1866,10 +1842,6 @@ _room_role_set_result_id_handler(xmpp_stanza_t *const stanza, void *const userda
         free(error_message);
     }
 
-    free(role_set->item);
-    free(role_set->privilege);
-    free(role_set);
-
     return 0;
 }
 
@@ -1896,7 +1868,6 @@ _room_affiliation_list_result_id_handler(xmpp_stanza_t *const stanza, void *cons
             mucwin_affiliation_list_error(mucwin, affiliation, error_message);
         }
         free(error_message);
-        free(affiliation);
         return 0;
     }
     GSList *jids = NULL;
@@ -1921,7 +1892,6 @@ _room_affiliation_list_result_id_handler(xmpp_stanza_t *const stanza, void *cons
     if (mucwin) {
         mucwin_handle_affiliation_list(mucwin, affiliation, jids);
     }
-    free(affiliation);
     g_slist_free(jids);
 
     return 0;
@@ -1950,7 +1920,6 @@ _room_role_list_result_id_handler(xmpp_stanza_t *const stanza, void *const userd
             mucwin_role_list_error(mucwin, role, error_message);
         }
         free(error_message);
-        free(role);
         return 0;
     }
     GSList *nicks = NULL;
@@ -1974,7 +1943,6 @@ _room_role_list_result_id_handler(xmpp_stanza_t *const stanza, void *const userd
     if (mucwin) {
         mucwin_handle_role_list(mucwin, role, nicks);
     }
-    free(role);
     g_slist_free(nicks);
 
     return 0;
@@ -2027,8 +1995,6 @@ _room_kick_result_id_handler(xmpp_stanza_t *const stanza, void *const userdata)
         mucwin_kick_error(mucwin, nick, error_message);
         free(error_message);
     }
-
-    free(nick);
 
     return 0;
 }
