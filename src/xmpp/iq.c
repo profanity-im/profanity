@@ -765,9 +765,6 @@ iq_submit_command_config(ProfConfWin *confwin)
 
     iq_send_stanza(iq);
     xmpp_stanza_release(iq);
-    free(data->sessionid);
-    free(data->command);
-    free(data);
 }
 
 void
@@ -778,9 +775,6 @@ iq_cancel_command_config(ProfConfWin *confwin)
     xmpp_stanza_t *iq = stanza_create_room_config_cancel_iq(ctx, confwin->roomjid);
     iq_send_stanza(iq);
     xmpp_stanza_release(iq);
-    free(data->sessionid);
-    free(data->command);
-    free(data);
 }
 
 static void
