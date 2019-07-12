@@ -7818,6 +7818,11 @@ cmd_command_exec(ProfWin *window, const char *const command, gchar **args)
         return TRUE;
     }
 
+    if (args[1] == NULL) {
+        cons_bad_cmd_usage(command);
+        return TRUE;
+    }
+
     char *jid = args[2];
     if (jid == NULL) {
         switch (window->type) {
