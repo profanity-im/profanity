@@ -771,7 +771,6 @@ void
 iq_cancel_command_config(ProfConfWin *confwin)
 {
     xmpp_ctx_t * const ctx = connection_get_ctx();
-    CommandConfigData *data = (CommandConfigData *)confwin->userdata;
     xmpp_stanza_t *iq = stanza_create_room_config_cancel_iq(ctx, confwin->roomjid);
     iq_send_stanza(iq);
     xmpp_stanza_release(iq);
