@@ -1290,11 +1290,15 @@ cmd_ac_uninit(void)
     autocomplete_free(statusbar_show_ac);
 }
 
+static void
+_filepath_item_free(char **ptr) {
+    char *item = *ptr;
+    free(item);
+}
+
 char*
 cmd_ac_complete_filepath(const char *const input, char *const startstr, gboolean previous)
 {
-    static char* last_directory = NULL;
-
     unsigned int output_off = 0;
 
     char *result = NULL;
@@ -1339,55 +1343,56 @@ cmd_ac_complete_filepath(const char *const input, char *const startstr, gboolean
     free(inpcp);
     free(inpcp2);
 
-    if (!last_directory || strcmp(last_directory, directory) != 0) {
-        free(last_directory);
-        last_directory = directory;
-        autocomplete_reset(filepath_ac);
+    struct dirent *dir;
+    GArray *files = g_array_new(TRUE, FALSE, sizeof(char *));
+    g_array_set_clear_func(files, (GDestroyNotify)_filepath_item_free);
 
-        struct dirent *dir;
-
-        DIR *d = opendir(directory);
-        if (d) {
-            while ((dir = readdir(d)) != NULL) {
-                if (strcmp(dir->d_name, ".") == 0) {
-                    continue;
-                } else if (strcmp(dir->d_name, "..") == 0) {
-                    continue;
-                } else if (*(dir->d_name) == '.' && *foofile != '.') {
-                    // only show hidden files on explicit request
-                    continue;
-                }
-                char * acstring;
-                if (output_off) {
-                    if (asprintf(&tmp, "%s/%s", directory, dir->d_name) == -1) {
-                        free(foofile);
-                        return NULL;
-                    }
-                    if (asprintf(&acstring, "~/%s", tmp+output_off) == -1) {
-                        free(foofile);
-                        return NULL;
-                    }
-                    free(tmp);
-                } else if (strcmp(directory, "/") == 0) {
-                    if (asprintf(&acstring, "/%s", dir->d_name) == -1) {
-                        free(foofile);
-                        return NULL;
-                    }
-                } else {
-                    if (asprintf(&acstring, "%s/%s", directory, dir->d_name) == -1) {
-                        free(foofile);
-                        return NULL;
-                    }
-                }
-                autocomplete_add(filepath_ac, acstring);
-                free(acstring);
+    DIR *d = opendir(directory);
+    if (d) {
+        while ((dir = readdir(d)) != NULL) {
+            if (strcmp(dir->d_name, ".") == 0) {
+                continue;
+            } else if (strcmp(dir->d_name, "..") == 0) {
+                continue;
+            } else if (*(dir->d_name) == '.' && *foofile != '.') {
+                // only show hidden files on explicit request
+                continue;
             }
-            closedir(d);
+
+            char *acstring;
+            if (output_off) {
+                if (asprintf(&tmp, "%s/%s", directory, dir->d_name) == -1) {
+                    free(foofile);
+                    return NULL;
+                }
+                if (asprintf(&acstring, "~/%s", tmp+output_off) == -1) {
+                    free(foofile);
+                   return NULL;
+                }
+                free(tmp);
+            } else if (strcmp(directory, "/") == 0) {
+                if (asprintf(&acstring, "/%s", dir->d_name) == -1) {
+                    free(foofile);
+                    return NULL;
+                }
+            } else {
+                if (asprintf(&acstring, "%s/%s", directory, dir->d_name) == -1) {
+                    free(foofile);
+                    return NULL;
+                }
+            }
+
+            char *acstring_cpy = strdup(acstring);
+            g_array_append_val(files, acstring_cpy);
+            free(acstring);
         }
-    } else {
-        free(directory);
+        closedir(d);
     }
+    free(directory);
     free(foofile);
+
+    autocomplete_update(filepath_ac, (char **)files->data);
+    g_array_free(files, TRUE);
 
     result = autocomplete_param_with_ac(input, startstr, filepath_ac, TRUE, previous);
     if (result) {
