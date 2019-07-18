@@ -68,6 +68,7 @@ do
     # shellcheck disable=SC2086
     ./configure $flags
     make
+    make check
     ./profanity -v
     make clean
 
