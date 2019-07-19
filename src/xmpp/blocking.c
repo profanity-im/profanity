@@ -235,18 +235,15 @@ _block_add_result_handler(xmpp_stanza_t *const stanza, void *const userdata)
     const char *type = xmpp_stanza_get_type(stanza);
     if (!type) {
         log_info("Block response received for %s with no type attribute.", jid);
-        free(jid);
         return 0;
     }
 
     if (g_strcmp0(type, "result") != 0) {
         log_info("Block response received for %s with unrecognised type attribute.", jid);
-        free(jid);
         return 0;
     }
 
     cons_show("User %s successfully blocked.", jid);
-    free(jid);
 
     return 0;
 }
@@ -259,18 +256,15 @@ _block_remove_result_handler(xmpp_stanza_t *const stanza, void *const userdata)
     const char *type = xmpp_stanza_get_type(stanza);
     if (!type) {
         log_info("Unblock response received for %s with no type attribute.", jid);
-        free(jid);
         return 0;
     }
 
     if (g_strcmp0(type, "result") != 0) {
         log_info("Unblock response received for %s with unrecognised type attribute.", jid);
-        free(jid);
         return 0;
     }
 
     cons_show("User %s successfully unblocked.", jid);
-    free(jid);
 
     return 0;
 }
