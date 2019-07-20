@@ -66,8 +66,10 @@ void
 autocomplete_clear(Autocomplete ac)
 {
     if (ac) {
-        g_list_free_full(ac->items, free);
-        ac->items = NULL;
+        if (ac->items) {
+            g_list_free_full(ac->items, free);
+            ac->items = NULL;
+        }
 
         autocomplete_reset(ac);
     }
@@ -98,6 +100,35 @@ autocomplete_length(Autocomplete ac)
         return 0;
     } else {
         return g_list_length(ac->items);
+    }
+}
+
+void
+autocomplete_update(Autocomplete ac, char **items)
+{
+    gchar *last_found = NULL;
+    gchar *search_str = NULL;
+
+    if (ac->last_found) {
+        last_found = strdup(ac->last_found->data);
+    }
+
+    if (ac->search_str) {
+        search_str = strdup(ac->search_str);
+    }
+
+    autocomplete_clear(ac);
+    autocomplete_add_all(ac, items);
+
+    if (last_found) {
+        // NULL if last_found was removed on update.
+        ac->last_found = g_list_find_custom(ac->items, last_found, (GCompareFunc)strcmp);
+        free(last_found);
+    }
+
+    if (search_str) {
+        ac->search_str = strdup(search_str);
+        free(search_str);
     }
 }
 
