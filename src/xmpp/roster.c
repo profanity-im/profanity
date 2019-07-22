@@ -151,7 +151,6 @@ _group_add_id_handler(xmpp_stanza_t *const stanza, void *const userdata)
     if (userdata) {
         GroupData *data = userdata;
         ui_group_added(data->name, data->group);
-        _free_group_data(data);
     }
     return 0;
 }
@@ -194,9 +193,6 @@ _group_remove_id_handler(xmpp_stanza_t *const stanza, void *const userdata)
     if (userdata) {
         GroupData *data = userdata;
         ui_group_removed(data->name, data->group);
-        free(data->name);
-        free(data->group);
-        free(userdata);
     }
     return 0;
 }
