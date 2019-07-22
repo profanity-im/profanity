@@ -742,14 +742,12 @@ ui_print_system_msg_from_recipient(const char *const barejid, const char *messag
     ProfChatWin *chatwin = wins_get_chat(barejid);
     ProfWin *window = (ProfWin*)chatwin;
     if (window == NULL) {
-        int num = 0;
         window = wins_new_chat(barejid);
         if (window) {
             chatwin = (ProfChatWin*)window;
-            num = wins_get_num(window);
+            int num = wins_get_num(window);
             status_bar_active(num, WIN_CHAT, chatwin->barejid);
         } else {
-            num = 0;
             window = wins_get_console();
             status_bar_active(1, WIN_CONSOLE, "console");
         }
