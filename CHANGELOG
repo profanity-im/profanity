@@ -35,7 +35,8 @@ Unreleased
 - Iterate up to 100 logfiles (#519)
 - Fix rejoining of MUCs upon reconnect (#1120)
 - Add option to set all window related time formats (#632, #1120)
-- Fix several memory leaks (#1130)
+- Always check for directory changes with sendfile auto completion (#1154)
+- Fix several memory leaks (#1130, + plenty commits)
 - For details see https://github.com/profanity-im/profanity/milestone/17
 
 0.6.0 (2019-02-18)
