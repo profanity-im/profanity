@@ -5406,6 +5406,10 @@ cmd_time(ProfWin *window, const char *const command, gchar **args)
 gboolean
 cmd_states(ProfWin *window, const char *const command, gchar **args)
 {
+    if (args[0] == NULL) {
+        return FALSE;
+    }
+
     _cmd_set_boolean_preference(args[0], command, "Sending chat states", PREF_STATES);
 
     // if disabled, disable outtype and gone
@@ -5439,6 +5443,10 @@ cmd_wintitle(ProfWin *window, const char *const command, gchar **args)
 gboolean
 cmd_outtype(ProfWin *window, const char *const command, gchar **args)
 {
+    if (args[0] == NULL) {
+        return FALSE;
+    }
+
     _cmd_set_boolean_preference(args[0], command, "Sending typing notifications", PREF_OUTTYPE);
 
     // if enabled, enable states
@@ -6612,6 +6620,10 @@ cmd_autoconnect(ProfWin *window, const char *const command, gchar **args)
 gboolean
 cmd_chlog(ProfWin *window, const char *const command, gchar **args)
 {
+    if (args[0] == NULL) {
+        return FALSE;
+    }
+
     _cmd_set_boolean_preference(args[0], command, "Chat logging", PREF_CHLOG);
 
     // if set to off, disable history
@@ -6633,6 +6645,10 @@ cmd_grlog(ProfWin *window, const char *const command, gchar **args)
 gboolean
 cmd_history(ProfWin *window, const char *const command, gchar **args)
 {
+    if (args[0] == NULL) {
+        return FALSE;
+    }
+
     _cmd_set_boolean_preference(args[0], command, "Chat history", PREF_HISTORY);
 
     // if set to on, set chlog
@@ -6646,6 +6662,10 @@ cmd_history(ProfWin *window, const char *const command, gchar **args)
 gboolean
 cmd_carbons(ProfWin *window, const char *const command, gchar **args)
 {
+    if (args[0] == NULL) {
+        return FALSE;
+    }
+
     _cmd_set_boolean_preference(args[0], command, "Message carbons preference", PREF_CARBONS);
 
     jabber_conn_status_t conn_status = connection_get_status();
