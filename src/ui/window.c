@@ -1557,7 +1557,7 @@ _win_print_wrapped(WINDOW *win, const char *const message, size_t indent, int pa
             wordlen = utf8_display_len(word);
 
             int curx = getcurx(win);
-            int cury = getcury(win);
+            int cury;
             int maxx = getmaxx(win);
 
             // wrap required

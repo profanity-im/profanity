@@ -389,7 +389,7 @@ omemo_start_sessions(void)
 {
     GSList *contacts = roster_get_contacts(ROSTER_ORD_NAME);
     if (contacts) {
-        GSList *curr = contacts;
+        GSList *curr;
         for (curr = contacts; curr != NULL; curr = g_slist_next(curr)){
             PContact contact = curr->data;
             const char *jid = p_contact_barejid(contact);
