@@ -420,6 +420,7 @@ cmd_connect(ProfWin *window, const char *const command, gchar **args)
             } else {
                 cons_show("Error evaluating password, see logs for details.");
                 account_free(account);
+                free(user);
                 return TRUE;
             }
 
@@ -6776,11 +6777,13 @@ cmd_plugins_sourcepath(ProfWin *window, const char *const command, gchar **args)
 
         if (!is_dir(path)) {
             cons_show("Plugins sourcepath must be a directory.");
+            free(path);
             return TRUE;
         }
 
         cons_show("Setting plugins sourcepath: %s", path);
         prefs_set_string(PREF_PLUGINS_SOURCEPATH, path);
+        free(path);
         return TRUE;
     }
 
@@ -6865,6 +6868,7 @@ cmd_plugins_install(ProfWin *window, const char *const command, gchar **args)
         return TRUE;
     }
 
+    free(path);
     cons_show("Argument must be a file or directory.");
     return TRUE;
 }
