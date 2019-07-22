@@ -232,10 +232,9 @@ void
 roster_change_name(PContact contact, const char *const new_name)
 {
     assert(roster != NULL);
-
     assert(contact != NULL);
 
-    const char *current_name = NULL;
+    char *current_name = NULL;
     const char *barejid = p_contact_barejid(contact);
 
     if (p_contact_name(contact)) {
@@ -244,6 +243,7 @@ roster_change_name(PContact contact, const char *const new_name)
 
     p_contact_set_name(contact, new_name);
     _replace_name(current_name, new_name, barejid);
+    free(current_name);
 }
 
 void
