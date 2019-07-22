@@ -2427,7 +2427,6 @@ _cmd_index(Command *cmd) {
     g_string_free(index_source, TRUE);
 
     GString *index = g_string_new("");
-    i = 0;
     for (i = 0; i < g_strv_length(tokens); i++) {
         index = g_string_append(index, tokens[i]);
         index = g_string_append(index, " ");
