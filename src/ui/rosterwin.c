@@ -335,7 +335,6 @@ _rosterwin_unsubscribed_item(ProfLayoutSplit *layout, ProfChatWin *chatwin)
     g_string_append(msg, name);
     if ((g_strcmp0(unreadpos, "after") == 0) && unread > 0) {
         g_string_append_printf(msg, " (%d)", unread);
-        unread = 0;
     }
     prefs_free_string(unreadpos);
 

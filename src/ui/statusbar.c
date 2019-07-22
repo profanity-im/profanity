@@ -295,7 +295,7 @@ status_bar_draw(void)
         }
     }
 
-    pos = _status_bar_draw_extended_tabs(pos);
+    _status_bar_draw_extended_tabs(pos);
 
     wnoutrefresh(statusbar_win);
     inp_put_back();
