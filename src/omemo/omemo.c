@@ -1166,6 +1166,7 @@ omemo_trust(const char *const jid, const char *const fingerprint_formatted)
         .name_len = strlen(jid),
         .device_id = device_id,
     };
+
     unsigned char *fingerprint_raw = _omemo_fingerprint_decode(fingerprint_formatted, &len);
     unsigned char djb_type[] = {'\x05'};
     signal_buffer *buffer = signal_buffer_create(djb_type, 1);
@@ -1188,6 +1189,7 @@ omemo_untrust(const char *const jid, const char *const fingerprint_formatted)
 
     GHashTable *trusted = g_hash_table_lookup(omemo_ctx.identity_key_store.trusted, jid);
     if (!trusted) {
+        free(identity);
         return;
     }
 
