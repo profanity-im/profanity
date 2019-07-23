@@ -692,7 +692,7 @@ otr_get_policy(const char *const recipient)
 
     // check default account setting
     if (account->otr_policy) {
-        prof_otrpolicy_t result;
+        prof_otrpolicy_t result = PROF_OTRPOLICY_MANUAL;
         if (g_strcmp0(account->otr_policy, "manual") == 0) {
             result = PROF_OTRPOLICY_MANUAL;
         }
