@@ -1235,7 +1235,7 @@ _command_exec_response_handler(xmpp_stanza_t *const stanza, void *const userdata
         } else {
             data->sessionid = strdup(sessionid);
         }
-        data->command = command;
+        data->command = strdup(command);
         ProfConfWin *confwin = (ProfConfWin*)wins_new_config(from, form, iq_submit_command_config, iq_cancel_command_config, data);
         confwin_handle_configuration(confwin, form);
     } else if (g_strcmp0(status, "canceled") == 0) {
