@@ -378,7 +378,7 @@ save_identity(const signal_protocol_address *address, uint8_t *key_data,
 
     signal_buffer *buffer = signal_buffer_create(key_data, key_len);
 
-    GHashTable *trusted = g_hash_table_lookup(identity_key_store->trusted, strdup(address->name));
+    GHashTable *trusted = g_hash_table_lookup(identity_key_store->trusted, address->name);
     if (!trusted) {
         trusted = g_hash_table_new_full(g_direct_hash, g_direct_equal, NULL, (GDestroyNotify)signal_buffer_free);
         g_hash_table_insert(identity_key_store->trusted, strdup(address->name), trusted);
@@ -388,7 +388,7 @@ save_identity(const signal_protocol_address *address, uint8_t *key_data,
     /* Long term storage */
     char *key_b64 = g_base64_encode(key_data, key_len);
     char *device_id = g_strdup_printf("%d", address->device_id);
-    g_key_file_set_string(omemo_trust_keyfile(), address->name, strdup(device_id), key_b64);
+    g_key_file_set_string(omemo_trust_keyfile(), address->name, device_id, key_b64);
     g_free(device_id);
     g_free(key_b64);
 
