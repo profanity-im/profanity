@@ -1,4 +1,4 @@
-Unreleased
+0.7.0 (2019-07-31)
 =====
 
 - Fix plugin unload return code if just one plugin fails (#995)
