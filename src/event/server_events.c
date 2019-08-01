@@ -863,9 +863,13 @@ sv_ev_subscription(const char *barejid, jabber_subscr_t type)
         }
         break;
     case PRESENCE_SUBSCRIBED:
-        cons_show("Subscription received from %s", barejid);
         log_info("Subscription received from %s", barejid);
-        ui_print_system_msg_from_recipient(barejid, "Subscribed");
+        cons_show("Subscription received from %s", barejid);
+
+        PContact contact = roster_get_contact(barejid);
+        if (contact == NULL) {
+            ui_print_system_msg_from_recipient(barejid, "Subscribed");
+        }
         break;
     case PRESENCE_UNSUBSCRIBED:
         cons_show("%s deleted subscription", barejid);
