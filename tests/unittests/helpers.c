@@ -45,7 +45,7 @@ void load_preferences(void **state)
     create_config_dir(state);
     FILE *f = fopen("./tests/files/xdg_config_home/profanity/profrc", "ab+");
     if (f) {
-        prefs_load();
+        prefs_load(NULL);
     }
     fclose(f);
 }

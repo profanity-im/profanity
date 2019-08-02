@@ -2,6 +2,7 @@
  * profanity.h
  *
  * Copyright (C) 2012 - 2019 James Booth <boothj5@gmail.com>
+ * Copyright (C) 2019 Michael Vetter <jubalh@iodoru.org>
  *
  * This file is part of Profanity.
  *
@@ -38,7 +39,7 @@
 #include <pthread.h>
 #include <glib.h>
 
-void prof_run(char *log_level, char *account_name);
+void prof_run(char *log_level, char *account_name, char * config_file);
 void prof_set_quit(void);
 
 pthread_mutex_t lock;

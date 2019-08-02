@@ -85,7 +85,7 @@
 #include "omemo/omemo.h"
 #endif
 
-static void _init(char *log_level);
+static void _init(char *log_level, char *config_file);
 static void _shutdown(void);
 static void _connect_default(const char * const account);
 
@@ -93,9 +93,9 @@ static gboolean cont = TRUE;
 static gboolean force_quit = FALSE;
 
 void
-prof_run(char *log_level, char *account_name)
+prof_run(char *log_level, char *account_name, char *config_file)
 {
-    _init(log_level);
+    _init(log_level, config_file);
     plugins_on_start();
     _connect_default(account_name);
 
@@ -156,7 +156,7 @@ _connect_default(const char *const account)
 }
 
 static void
-_init(char *log_level)
+_init(char *log_level, char *config_file)
 {
     setlocale(LC_ALL, "");
     // ignore SIGPIPE
@@ -171,7 +171,7 @@ _init(char *log_level)
     pthread_mutex_lock(&lock);
     files_create_directories();
     log_level_t prof_log_level = log_level_from_string(log_level);
-    prefs_load();
+    prefs_load(config_file);
     log_init(prof_log_level);
     log_stderr_init(PROF_LEVEL_ERROR);
     if (strcmp(PACKAGE_STATUS, "development") == 0) {
