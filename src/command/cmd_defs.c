@@ -2393,6 +2393,19 @@ static struct cmd_t command_defs[] =
             "/omemo untrust buddy@buddychat.org c4f9c875-144d7a3b-0c4a05b6-ca3be51a-a037f329-0bd3ae62-07f99719-55559d2a",
             "/omemo char *")
     },
+
+    { "/save",
+        parse_args, 0, 0, NULL,
+        CMD_NOSUBFUNCS
+        CMD_MAINFUNC(cmd_save)
+        CMD_NOTAGS
+        CMD_SYN(
+            "/save")
+        CMD_DESC(
+            "Save preferences to configuration file.")
+        CMD_NOARGS
+        CMD_NOEXAMPLES
+    },
 };
 
 static GHashTable *search_index;

@@ -2,6 +2,7 @@
  * cmd_funcs.c
  *
  * Copyright (C) 2012 - 2019 James Booth <boothj5@gmail.com>
+ * Copyright (C) 2019 Michael Vetter <jubalh@iodoru.org>
  *
  * This file is part of Profanity.
  *
@@ -8534,4 +8535,13 @@ cmd_omemo_policy(ProfWin *window, const char *const command, gchar **args)
     cons_show("This version of Profanity has not been built with OMEMO support enabled");
     return TRUE;
 #endif
+}
+
+gboolean
+cmd_save(ProfWin *window, const char *const command, gchar **args)
+{
+    log_info("Saving preferences to configuration file");
+    cons_show("Saving preferences.");
+    prefs_save();
+    return TRUE;
 }

@@ -176,6 +176,12 @@ prefs_load(void)
 }
 
 void
+prefs_save(void)
+{
+    _save_prefs();
+}
+
+void
 prefs_close(void)
 {
     autocomplete_free(boolean_choice_ac);
@@ -334,21 +340,18 @@ void
 prefs_set_room_notify(const char *const roomjid, gboolean value)
 {
     g_key_file_set_boolean(prefs, roomjid, "notify", value);
-    _save_prefs();
 }
 
 void
 prefs_set_room_notify_mention(const char *const roomjid, gboolean value)
 {
     g_key_file_set_boolean(prefs, roomjid, "notify.mention", value);
-    _save_prefs();
 }
 
 void
 prefs_set_room_notify_trigger(const char *const roomjid, gboolean value)
 {
     g_key_file_set_boolean(prefs, roomjid, "notify.trigger", value);
-    _save_prefs();
 }
 
 gboolean
@@ -392,7 +395,6 @@ prefs_reset_room_notify(const char *const roomjid)
 {
     if (g_key_file_has_group(prefs, roomjid)) {
         g_key_file_remove_group(prefs, roomjid, NULL);
-        _save_prefs();
         return TRUE;
     }
 
@@ -419,7 +421,6 @@ prefs_set_boolean(preference_t pref, gboolean value)
     const char *group = _get_group(pref);
     const char *key = _get_key(pref);
     g_key_file_set_boolean(prefs, group, key, value);
-    _save_prefs();
 }
 
 char*
@@ -460,7 +461,6 @@ prefs_set_string(preference_t pref, char *value)
     } else {
         g_key_file_set_string(prefs, group, key, value);
     }
-    _save_prefs();
 }
 
 char*
@@ -512,7 +512,6 @@ void
 prefs_set_gone(gint value)
 {
     g_key_file_set_integer(prefs, PREF_GROUP_CHATSTATES, "gone", value);
-    _save_prefs();
 }
 
 gint
@@ -525,7 +524,6 @@ void
 prefs_set_notify_remind(gint value)
 {
     g_key_file_set_integer(prefs, PREF_GROUP_NOTIFICATIONS, "remind", value);
-    _save_prefs();
 }
 
 gint
@@ -542,7 +540,6 @@ prefs_set_max_log_size(gint value)
 {
     log_maxsize = value;
     g_key_file_set_integer(prefs, PREF_GROUP_LOGGING, "maxsize", value);
-    _save_prefs();
 }
 
 gint
@@ -560,7 +557,6 @@ void
 prefs_set_inpblock(gint value)
 {
     g_key_file_set_integer(prefs, PREF_GROUP_UI, "inpblock", value);
-    _save_prefs();
 }
 
 gint
@@ -577,7 +573,6 @@ void
 prefs_set_reconnect(gint value)
 {
     g_key_file_set_integer(prefs, PREF_GROUP_CONNECTION, "reconnect", value);
-    _save_prefs();
 }
 
 gint
@@ -594,7 +589,6 @@ void
 prefs_set_autoping(gint value)
 {
     g_key_file_set_integer(prefs, PREF_GROUP_CONNECTION, "autoping", value);
-    _save_prefs();
 }
 
 gint
@@ -611,7 +605,6 @@ void
 prefs_set_autoping_timeout(gint value)
 {
     g_key_file_set_integer(prefs, PREF_GROUP_CONNECTION, "autoping.timeout", value);
-    _save_prefs();
 }
 
 gint
@@ -636,21 +629,18 @@ void
 prefs_set_autoaway_time(gint value)
 {
     g_key_file_set_integer(prefs, PREF_GROUP_PRESENCE, "autoaway.awaytime", value);
-    _save_prefs();
 }
 
 void
 prefs_set_autoxa_time(gint value)
 {
     g_key_file_set_integer(prefs, PREF_GROUP_PRESENCE, "autoaway.xatime", value);
-    _save_prefs();
 }
 
 void
 prefs_set_tray_timer(gint value)
 {
     g_key_file_set_integer(prefs, PREF_GROUP_NOTIFICATIONS, "tray.timer", value);
-    _save_prefs();
 }
 
 gint
@@ -679,7 +669,6 @@ void
 prefs_set_statusbartabs(gint value)
 {
     g_key_file_set_integer(prefs, PREF_GROUP_UI, "statusbar.tabs", value);
-    _save_prefs();
 }
 
 gint
@@ -696,7 +685,6 @@ void
 prefs_set_statusbartablen(gint value)
 {
     g_key_file_set_integer(prefs, PREF_GROUP_UI, "statusbar.tablen", value);
-    _save_prefs();
 }
 
 gchar**
@@ -736,7 +724,6 @@ void
 prefs_set_occupants_size(gint value)
 {
     g_key_file_set_integer(prefs, PREF_GROUP_UI, "occupants.size", value);
-    _save_prefs();
 }
 
 gint
@@ -775,14 +762,12 @@ prefs_set_occupants_char(char ch)
     str[1] = '\0';
 
     g_key_file_set_string(prefs, PREF_GROUP_UI, "occupants.char", str);
-    _save_prefs();
 }
 
 void
 prefs_clear_occupants_char(void)
 {
     g_key_file_remove_key(prefs, PREF_GROUP_UI, "occupants.char", NULL);
-    _save_prefs();
 }
 
 gint
@@ -804,7 +789,6 @@ void
 prefs_set_occupants_indent(gint value)
 {
     g_key_file_set_integer(prefs, PREF_GROUP_UI, "occupants.indent", value);
-    _save_prefs();
 }
 
 char
@@ -831,21 +815,18 @@ prefs_set_occupants_header_char(char ch)
     str[1] = '\0';
 
     g_key_file_set_string(prefs, PREF_GROUP_UI, "occupants.header.char", str);
-    _save_prefs();
 }
 
 void
 prefs_clear_occupants_header_char(void)
 {
     g_key_file_remove_key(prefs, PREF_GROUP_UI, "occupants.header.char", NULL);
-    _save_prefs();
 }
 
 void
 prefs_set_roster_size(gint value)
 {
     g_key_file_set_integer(prefs, PREF_GROUP_UI, "roster.size", value);
-    _save_prefs();
 }
 
 gint
@@ -884,7 +865,6 @@ prefs_set_otr_char(char ch)
     str[1] = '\0';
 
     g_key_file_set_string(prefs, PREF_GROUP_OTR, "otr.char", str);
-    _save_prefs();
 }
 
 char
@@ -911,7 +891,6 @@ prefs_set_pgp_char(char ch)
     str[1] = '\0';
 
     g_key_file_set_string(prefs, PREF_GROUP_PGP, "pgp.char", str);
-    _save_prefs();
 }
 
 char
@@ -938,7 +917,6 @@ prefs_set_omemo_char(char ch)
     str[1] = '\0';
 
     g_key_file_set_string(prefs, PREF_GROUP_OMEMO, "omemo.char", str);
-    _save_prefs();
 }
 
 char
@@ -965,14 +943,12 @@ prefs_set_roster_header_char(char ch)
     str[1] = '\0';
 
     g_key_file_set_string(prefs, PREF_GROUP_UI, "roster.header.char", str);
-    _save_prefs();
 }
 
 void
 prefs_clear_roster_header_char(void)
 {
     g_key_file_remove_key(prefs, PREF_GROUP_UI, "roster.header.char", NULL);
-    _save_prefs();
 }
 
 char
@@ -999,14 +975,12 @@ prefs_set_roster_contact_char(char ch)
     str[1] = '\0';
 
     g_key_file_set_string(prefs, PREF_GROUP_UI, "roster.contact.char", str);
-    _save_prefs();
 }
 
 void
 prefs_clear_roster_contact_char(void)
 {
     g_key_file_remove_key(prefs, PREF_GROUP_UI, "roster.contact.char", NULL);
-    _save_prefs();
 }
 
 char
@@ -1033,14 +1007,12 @@ prefs_set_roster_resource_char(char ch)
     str[1] = '\0';
 
     g_key_file_set_string(prefs, PREF_GROUP_UI, "roster.resource.char", str);
-    _save_prefs();
 }
 
 void
 prefs_clear_roster_resource_char(void)
 {
     g_key_file_remove_key(prefs, PREF_GROUP_UI, "roster.resource.char", NULL);
-    _save_prefs();
 }
 
 char
@@ -1067,14 +1039,12 @@ prefs_set_roster_private_char(char ch)
     str[1] = '\0';
 
     g_key_file_set_string(prefs, PREF_GROUP_UI, "roster.private.char", str);
-    _save_prefs();
 }
 
 void
 prefs_clear_roster_private_char(void)
 {
     g_key_file_remove_key(prefs, PREF_GROUP_UI, "roster.private.char", NULL);
-    _save_prefs();
 }
 
 char
@@ -1101,14 +1071,12 @@ prefs_set_roster_room_char(char ch)
     str[1] = '\0';
 
     g_key_file_set_string(prefs, PREF_GROUP_UI, "roster.rooms.char", str);
-    _save_prefs();
 }
 
 void
 prefs_clear_roster_room_char(void)
 {
     g_key_file_remove_key(prefs, PREF_GROUP_UI, "roster.rooms.char", NULL);
-    _save_prefs();
 }
 
 char
@@ -1135,14 +1103,12 @@ prefs_set_roster_room_private_char(char ch)
     str[1] = '\0';
 
     g_key_file_set_string(prefs, PREF_GROUP_UI, "roster.rooms.private.char", str);
-    _save_prefs();
 }
 
 void
 prefs_clear_roster_room_private_char(void)
 {
     g_key_file_remove_key(prefs, PREF_GROUP_UI, "roster.rooms.pruvate.char", NULL);
-    _save_prefs();
 }
 
 gint
@@ -1164,7 +1130,6 @@ void
 prefs_set_roster_contact_indent(gint value)
 {
     g_key_file_set_integer(prefs, PREF_GROUP_UI, "roster.contact.indent", value);
-    _save_prefs();
 }
 
 gint
@@ -1186,7 +1151,6 @@ void
 prefs_set_roster_resource_indent(gint value)
 {
     g_key_file_set_integer(prefs, PREF_GROUP_UI, "roster.resource.indent", value);
-    _save_prefs();
 }
 
 gint
@@ -1208,14 +1172,12 @@ void
 prefs_set_roster_presence_indent(gint value)
 {
     g_key_file_set_integer(prefs, PREF_GROUP_UI, "roster.presence.indent", value);
-    _save_prefs();
 }
 
 gboolean
 prefs_add_room_notify_trigger(const char * const text)
 {
     gboolean res = conf_string_list_add(prefs, PREF_GROUP_NOTIFICATIONS, "room.trigger.list", text);
-    _save_prefs();
 
     if (res) {
         autocomplete_add(room_trigger_ac, text);
@@ -1563,7 +1525,6 @@ prefs_add_alias(const char *const name, const char *const value)
         return FALSE;
     } else {
         g_key_file_set_string(prefs, PREF_GROUP_ALIAS, name, value);
-        _save_prefs();
         return TRUE;
     }
 }
@@ -1582,7 +1543,6 @@ prefs_remove_alias(const char *const name)
         return FALSE;
     } else {
         g_key_file_remove_key(prefs, PREF_GROUP_ALIAS, name, NULL);
-        _save_prefs();
         return TRUE;
     }
 }

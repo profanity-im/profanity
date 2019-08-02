@@ -2,6 +2,7 @@
  * cmd_funcs.h
  *
  * Copyright (C) 2012 - 2019 James Booth <boothj5@gmail.com>
+ * Copyright (C) 2019 Michael Vetter <jubalh@iodoru.org>
  *
  * This file is part of Profanity.
  *
@@ -225,4 +226,5 @@ gboolean cmd_omemo_untrust(ProfWin *window, const char *const command, gchar **a
 gboolean cmd_omemo_policy(ProfWin *window, const char *const command, gchar **args);
 gboolean cmd_omemo_clear_device_list(ProfWin *window, const char *const command, gchar **args);
 
+gboolean cmd_save(ProfWin *window, const char *const command, gchar **args);
 #endif

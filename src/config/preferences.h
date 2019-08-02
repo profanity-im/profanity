@@ -2,6 +2,7 @@
  * preferences.h
  *
  * Copyright (C) 2012 - 2019 James Booth <boothj5@gmail.com>
+ * Copyright (C) 2019 Michael Vetter <jubalh@iodoru.org>
  *
  * This file is part of Profanity.
  *
@@ -166,6 +167,7 @@ typedef struct prof_winplacement_t {
 } ProfWinPlacement;
 
 void prefs_load(void);
+void prefs_save(void);
 void prefs_close(void);
 
 char* prefs_find_login(char *prefix);
