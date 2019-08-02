@@ -166,7 +166,7 @@ typedef struct prof_winplacement_t {
     int inputwin_pos;
 } ProfWinPlacement;
 
-void prefs_load(void);
+void prefs_load(char *config_file);
 void prefs_save(void);
 void prefs_close(void);
 

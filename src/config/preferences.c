@@ -79,10 +79,15 @@ static gboolean _get_default_boolean(preference_t pref);
 static char* _get_default_string(preference_t pref);
 
 void
-prefs_load(void)
+prefs_load(char *config_file)
 {
     GError *err;
-    prefs_loc = files_get_config_path(FILE_PROFRC);
+
+    if (config_file == NULL) {
+        prefs_loc = files_get_config_path(FILE_PROFRC);
+    } else {
+        prefs_loc = config_file;
+    }
 
     if (g_file_test(prefs_loc, G_FILE_TEST_EXISTS)) {
         g_chmod(prefs_loc, S_IRUSR | S_IWUSR);
