@@ -1174,6 +1174,12 @@ stanza_create_caps_sha1_from_query(xmpp_stanza_t *const query)
 GDateTime*
 stanza_get_delay(xmpp_stanza_t *const stanza)
 {
+    return stanza_get_delay_from(stanza, NULL);
+}
+
+GDateTime*
+stanza_get_delay_from(xmpp_stanza_t *const stanza, gchar **from)
+{
     GTimeVal utc_stamp;
     // first check for XEP-0203 delayed delivery
     xmpp_stanza_t *delay = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_DELAY);
@@ -1185,6 +1191,9 @@ stanza_get_delay(xmpp_stanza_t *const stanza)
                 GDateTime *utc_datetime = g_date_time_new_from_timeval_utc(&utc_stamp);
                 GDateTime *local_datetime = g_date_time_to_local(utc_datetime);
                 g_date_time_unref(utc_datetime);
+                if (from) {
+                    *from = g_strdup(xmpp_stanza_get_attribute(delay, STANZA_ATTR_FROM));
+                }
                 return local_datetime;
             }
         }
@@ -1201,11 +1210,17 @@ stanza_get_delay(xmpp_stanza_t *const stanza)
                 GDateTime *utc_datetime = g_date_time_new_from_timeval_utc(&utc_stamp);
                 GDateTime *local_datetime = g_date_time_to_local(utc_datetime);
                 g_date_time_unref(utc_datetime);
+                if (from) {
+                    *from = g_strdup(xmpp_stanza_get_attribute(x, STANZA_ATTR_FROM));
+                }
                 return local_datetime;
             }
         }
     }
 
+    if (from) {
+        *from = NULL;
+    }
     return NULL;
 }
 
