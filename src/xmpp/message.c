@@ -821,12 +821,14 @@ _handle_groupchat(xmpp_stanza_t *const stanza)
     }
 
     // determine if the notifications happened whilst offline
-    message->timestamp = stanza_get_delay(stanza);
-    if (message->timestamp) {
+    gchar *from;
+    message->timestamp = stanza_get_delay_from(stanza, &from);
+    if (message->timestamp && g_strcmp0(jid->barejid, from) == 0) {
         sv_ev_room_history(message);
     } else {
         sv_ev_room_message(message);
     }
+    g_free(from);
 
 out:
     message_free(message);
