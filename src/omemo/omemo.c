@@ -325,7 +325,7 @@ omemo_generate_crypto_materials(ProfAccount *account)
         return;
     }
 
-    log_info("Generate long term OMEMO cryptography metarials");
+    log_info("Generate long term OMEMO cryptography materials");
 
     /* Device ID */
     gcry_randomize(&omemo_ctx.device_id, 4, GCRY_VERY_STRONG_RANDOM);
