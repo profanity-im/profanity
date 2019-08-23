@@ -303,15 +303,7 @@ roster_update(const char *const barejid, const char *const name, GSList *groups,
     p_contact_set_subscription(contact, subscription);
     p_contact_set_pending_out(contact, pending_out);
 
-    const char * const new_name = name;
-    char * current_name = NULL;
-    if (p_contact_name(contact)) {
-        current_name = strdup(p_contact_name(contact));
-    }
-
-    p_contact_set_name(contact, new_name);
-    _replace_name(current_name, new_name, barejid);
-    free(current_name);
+    roster_change_name(contact, name);
 
     GSList *curr_new_group = groups;
     while (curr_new_group) {
