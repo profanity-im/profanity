@@ -861,7 +861,7 @@ omemo_on_message_recv(const char *const from_jid, uint32_t sid,
     }
 
     if (!key) {
-        log_warning("OMEMO: Received a message with no corresponding key");
+        log_warning("OMEMO: received a message with no corresponding key");
         goto out;
     }
 
