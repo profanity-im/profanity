@@ -103,7 +103,8 @@ main(int argc, char **argv)
             g_print("Profanity, version %s\n", PACKAGE_VERSION);
         }
 
-        g_print("Copyright (C) 2012 - 2019 James Booth <%s>.\n", PACKAGE_BUGREPORT);
+        // lets use fixed email instead of PACKAGE_BUGREPORT
+        g_print("Copyright (C) 2012 - 2019 James Booth <boothj5web@gmail.com>.\n");
         g_print("Copyright (C) 2019 Michael Vetter <jubalh@iodoru.org>.\n");
         g_print("License GPLv3+: GNU GPL version 3 or later <https://www.gnu.org/licenses/gpl.html>\n");
         g_print("\n");
