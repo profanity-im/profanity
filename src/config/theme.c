@@ -58,11 +58,6 @@ static GKeyFile *theme;
 static GHashTable *bold_items;
 static GHashTable *defaults;
 
-struct colour_string_t {
-    char *str;
-    NCURSES_COLOR_T colour;
-};
-
 static void _load_preferences(void);
 void _theme_list_dir(const gchar *const dir, GSList **result);
 static GString* _theme_find(const char *const theme_name);
