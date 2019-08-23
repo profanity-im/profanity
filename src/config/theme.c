@@ -52,6 +52,7 @@
 #include "config/theme.h"
 #include "config/preferences.h"
 #include "config/color.h"
+#include "ui/ui.h"
 
 static GString *theme_loc;
 static GKeyFile *theme;
@@ -809,7 +810,7 @@ theme_attrs(theme_item_t attrs)
     // lookup colour pair
     result = color_pair_cache_get(lookup_str->str);
     if (result < 0) {
-        log_error("Invalid color <%s>", lookup_str->str);
+        cons_show("Unable to load colour theme");
         result = 0;
     }
     g_string_free(lookup_str, TRUE);

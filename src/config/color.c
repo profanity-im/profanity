@@ -398,6 +398,13 @@ int color_pair_cache_get(const char *pair_name)
         return -1;
     }
 
+    if (COLORS < 256) {
+        if (fg > 7 || bg > 7) {
+            log_error("Color: trying to load 256 colour theme without capable terminal");
+            return -1;
+        }
+    }
+
     /* try to find pair in cache */
     for (i = 0; i < cache.size; i++) {
         if (fg == cache.pairs[i].fg && bg == cache.pairs[i].bg) {
