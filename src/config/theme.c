@@ -176,6 +176,8 @@ theme_exists(const char *const theme_name)
 gboolean
 theme_load(const char *const theme_name)
 {
+    color_pair_cache_reset();
+
     if (_theme_load_file(theme_name)) {
         _load_preferences();
         return TRUE;
