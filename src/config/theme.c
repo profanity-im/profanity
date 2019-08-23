@@ -51,11 +51,11 @@
 #include "config/files.h"
 #include "config/theme.h"
 #include "config/preferences.h"
+#include "config/color.h"
 
 static GString *theme_loc;
 static GKeyFile *theme;
 static GHashTable *bold_items;
-static GHashTable *str_to_pair;
 static GHashTable *defaults;
 
 struct colour_string_t {
@@ -75,7 +75,6 @@ theme_init(const char *const theme_name)
         log_error("Theme initialisation failed");
     }
 
-    str_to_pair = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, NULL);
     defaults = g_hash_table_new_full(g_str_hash, g_str_equal, free, free);
 
     g_hash_table_insert(defaults, strdup("main.text"),               strdup("white"));
@@ -247,117 +246,17 @@ theme_close(void)
         g_hash_table_destroy(bold_items);
         bold_items = NULL;
     }
-    if (str_to_pair) {
-        g_hash_table_destroy(str_to_pair);
-        str_to_pair = NULL;
-    }
     if (defaults) {
         g_hash_table_destroy(defaults);
         defaults = NULL;
     }
 }
 
-static void
-_theme_init_pair(short pair, short fgnd, short bgnd, char *pair_str)
-{
-    init_pair(pair, fgnd, bgnd);
-    g_hash_table_insert(str_to_pair, strdup(pair_str), GINT_TO_POINTER((int)pair));
-}
-
 void
 theme_init_colours(void)
 {
     assume_default_colors(-1, -1);
-    g_hash_table_insert(str_to_pair, strdup("default_default"), 0);
-
-    _theme_init_pair(1, -1, COLOR_BLACK,                "default_black");
-    _theme_init_pair(2, -1, COLOR_BLUE,                 "default_blue");
-    _theme_init_pair(3, -1, COLOR_GREEN,                "default_green");
-    _theme_init_pair(4, -1, COLOR_RED,                  "default_red");
-    _theme_init_pair(5, -1, COLOR_CYAN,                 "default_cyan");
-    _theme_init_pair(6, -1, COLOR_MAGENTA,              "default_magenta");
-    _theme_init_pair(7, -1, COLOR_WHITE,                "default_white");
-    _theme_init_pair(8, -1, COLOR_YELLOW,               "default_yellow");
-
-    _theme_init_pair(9,  COLOR_BLACK, -1,               "black_default");
-    _theme_init_pair(10, COLOR_BLACK, COLOR_BLACK,      "black_black");
-    _theme_init_pair(11, COLOR_BLACK, COLOR_BLUE,       "black_blue");
-    _theme_init_pair(12, COLOR_BLACK, COLOR_GREEN,      "black_green");
-    _theme_init_pair(13, COLOR_BLACK, COLOR_RED,        "black_red");
-    _theme_init_pair(14, COLOR_BLACK, COLOR_CYAN,       "black_cyan");
-    _theme_init_pair(15, COLOR_BLACK, COLOR_MAGENTA,    "black_magenta");
-    _theme_init_pair(16, COLOR_BLACK, COLOR_WHITE,      "black_white");
-    _theme_init_pair(17, COLOR_BLACK, COLOR_YELLOW,     "black_yellow");
-
-    _theme_init_pair(18, COLOR_BLUE, -1,                "blue_default");
-    _theme_init_pair(19, COLOR_BLUE, COLOR_BLACK,       "blue_black");
-    _theme_init_pair(20, COLOR_BLUE, COLOR_BLUE,        "blue_blue");
-    _theme_init_pair(21, COLOR_BLUE, COLOR_GREEN,       "blue_green");
-    _theme_init_pair(22, COLOR_BLUE, COLOR_RED,         "blue_red");
-    _theme_init_pair(23, COLOR_BLUE, COLOR_CYAN,        "blue_cyan");
-    _theme_init_pair(24, COLOR_BLUE, COLOR_MAGENTA,     "blue_magenta");
-    _theme_init_pair(25, COLOR_BLUE, COLOR_WHITE,       "blue_white");
-    _theme_init_pair(26, COLOR_BLUE, COLOR_YELLOW,      "blue_yellow");
-
-    _theme_init_pair(27, COLOR_GREEN, -1,               "green_default");
-    _theme_init_pair(28, COLOR_GREEN, COLOR_BLACK,      "green_black");
-    _theme_init_pair(29, COLOR_GREEN, COLOR_BLUE,       "green_blue");
-    _theme_init_pair(30, COLOR_GREEN, COLOR_GREEN,      "green_green");
-    _theme_init_pair(31, COLOR_GREEN, COLOR_RED,        "green_red");
-    _theme_init_pair(32, COLOR_GREEN, COLOR_CYAN,       "green_cyan");
-    _theme_init_pair(33, COLOR_GREEN, COLOR_MAGENTA,    "green_magenta");
-    _theme_init_pair(34, COLOR_GREEN, COLOR_WHITE,      "green_white");
-    _theme_init_pair(35, COLOR_GREEN, COLOR_YELLOW,     "green_yellow");
-
-    _theme_init_pair(36, COLOR_RED, -1,                 "red_default");
-    _theme_init_pair(37, COLOR_RED, COLOR_BLACK,        "red_black");
-    _theme_init_pair(38, COLOR_RED, COLOR_BLUE,         "red_blue");
-    _theme_init_pair(39, COLOR_RED, COLOR_GREEN,        "red_green");
-    _theme_init_pair(40, COLOR_RED, COLOR_RED,          "red_red");
-    _theme_init_pair(41, COLOR_RED, COLOR_CYAN,         "red_cyan");
-    _theme_init_pair(42, COLOR_RED, COLOR_MAGENTA,      "red_magenta");
-    _theme_init_pair(43, COLOR_RED, COLOR_WHITE,        "red_white");
-    _theme_init_pair(44, COLOR_RED, COLOR_YELLOW,       "red_yellow");
-
-    _theme_init_pair(45, COLOR_CYAN, -1,                "cyan_default");
-    _theme_init_pair(46, COLOR_CYAN, COLOR_BLACK,       "cyan_black");
-    _theme_init_pair(47, COLOR_CYAN, COLOR_BLUE,        "cyan_blue");
-    _theme_init_pair(48, COLOR_CYAN, COLOR_GREEN,       "cyan_green");
-    _theme_init_pair(49, COLOR_CYAN, COLOR_RED,         "cyan_red");
-    _theme_init_pair(50, COLOR_CYAN, COLOR_CYAN,        "cyan_cyan");
-    _theme_init_pair(51, COLOR_CYAN, COLOR_MAGENTA,     "cyan_magenta");
-    _theme_init_pair(52, COLOR_CYAN, COLOR_WHITE,       "cyan_white");
-    _theme_init_pair(53, COLOR_CYAN, COLOR_YELLOW,      "cyan_yellow");
-
-    _theme_init_pair(54, COLOR_MAGENTA, -1,             "magenta_default");
-    _theme_init_pair(55, COLOR_MAGENTA, COLOR_BLACK,    "magenta_black");
-    _theme_init_pair(56, COLOR_MAGENTA, COLOR_BLUE,     "magenta_blue");
-    _theme_init_pair(57, COLOR_MAGENTA, COLOR_GREEN,    "magenta_green");
-    _theme_init_pair(58, COLOR_MAGENTA, COLOR_RED,      "magenta_red");
-    _theme_init_pair(59, COLOR_MAGENTA, COLOR_CYAN,     "magenta_cyan");
-    _theme_init_pair(60, COLOR_MAGENTA, COLOR_MAGENTA,  "magenta_magenta");
-    _theme_init_pair(61, COLOR_MAGENTA, COLOR_WHITE,    "magenta_white");
-    _theme_init_pair(62, COLOR_MAGENTA, COLOR_YELLOW,   "magenta_yellow");
-
-    _theme_init_pair(63, COLOR_WHITE, -1,               "white_default");
-    _theme_init_pair(64, COLOR_WHITE, COLOR_BLACK,      "white_black");
-    _theme_init_pair(65, COLOR_WHITE, COLOR_BLUE,       "white_blue");
-    _theme_init_pair(66, COLOR_WHITE, COLOR_GREEN,      "white_green");
-    _theme_init_pair(67, COLOR_WHITE, COLOR_RED,        "white_red");
-    _theme_init_pair(68, COLOR_WHITE, COLOR_CYAN,       "white_cyan");
-    _theme_init_pair(69, COLOR_WHITE, COLOR_MAGENTA,    "white_magenta");
-    _theme_init_pair(70, COLOR_WHITE, COLOR_WHITE,      "white_white");
-    _theme_init_pair(71, COLOR_WHITE, COLOR_YELLOW,     "white_yellow");
-
-    _theme_init_pair(72, COLOR_YELLOW, -1,              "yellow_default");
-    _theme_init_pair(73, COLOR_YELLOW, COLOR_BLACK,     "yellow_black");
-    _theme_init_pair(74, COLOR_YELLOW, COLOR_BLUE,      "yellow_blue");
-    _theme_init_pair(75, COLOR_YELLOW, COLOR_GREEN,     "yellow_green");
-    _theme_init_pair(76, COLOR_YELLOW, COLOR_RED,       "yellow_red");
-    _theme_init_pair(77, COLOR_YELLOW, COLOR_CYAN,      "yellow_cyan");
-    _theme_init_pair(78, COLOR_YELLOW, COLOR_MAGENTA,   "yellow_magenta");
-    _theme_init_pair(79, COLOR_YELLOW, COLOR_WHITE,     "yellow_white");
-    _theme_init_pair(80, COLOR_YELLOW, COLOR_YELLOW,    "yellow_yellow");
+    color_pair_cache_reset();
 }
 
 static void
@@ -906,7 +805,11 @@ theme_attrs(theme_item_t attrs)
     }
 
     // lookup colour pair
-    result = GPOINTER_TO_INT(g_hash_table_lookup(str_to_pair, lookup_str->str));
+    result = color_pair_cache_get(lookup_str->str);
+    if (result < 0) {
+	g_warning("invalid color <%s>", lookup_str->str);
+	result = 0;
+    }
     g_string_free(lookup_str, TRUE);
     if (bold) {
         return COLOR_PAIR(result) | A_BOLD;

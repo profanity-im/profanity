@@ -48,6 +48,7 @@ core_sources = \
 	src/config/account.c src/config/account.h \
 	src/config/preferences.c src/config/preferences.h \
 	src/config/theme.c src/config/theme.h \
+	src/config/color.c src/config/color.h \
 	src/config/scripts.c src/config/scripts.h \
 	src/plugins/plugins.h src/plugins/plugins.c \
 	src/plugins/api.h src/plugins/api.c \
