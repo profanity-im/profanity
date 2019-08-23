@@ -365,6 +365,11 @@ void color_pair_cache_reset(void)
      * compile-time constant
      */
     cache.capacity = COLOR_PAIRS;
+
+    /* when we run unit tests COLOR_PAIRS will be -1 */
+    if (cache.capacity < 0)
+        cache.capacity = 8;
+
     cache.pairs = g_malloc0(sizeof(*cache.pairs)*cache.capacity);
 
     /* default_default */
