@@ -46,6 +46,7 @@
 #endif
 
 #include "config/color.h"
+#include "log.h"
 
 static
 struct color_pair_cache
