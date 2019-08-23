@@ -2428,6 +2428,13 @@ cons_theme_colours(void)
     win_print(console,      THEME_BLACK, '-',   " black   ");
     win_appendln(console,   THEME_BLACK_BOLD,   " bold_black");
 
+    if (COLORS >= 256) {
+        cons_show("Your terminal supports 256 colours.");
+        cons_show("But only basic colours are printed here.");
+        cons_show("To use them use their Xterm colour name.");
+        cons_show("See https://jonasjacek.github.io/colors/");
+    }
+
     cons_show("");
 }
 
