@@ -199,6 +199,7 @@ callbacks_add_timed(const char *const plugin_name, PluginTimedFunction *timed_fu
 {
     GList *timed_function_list = g_hash_table_lookup(p_timed_functions, plugin_name);
     if (timed_function_list) {
+        // we assign this so we dont get: -Werror=unused-result
         timed_function_list = g_list_append(timed_function_list, timed_function);
     } else {
         timed_function_list = g_list_append(timed_function_list, timed_function);
