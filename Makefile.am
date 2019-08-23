@@ -87,6 +87,7 @@ unittest_sources = \
 	src/config/tlscerts.c src/config/tlscerts.h \
 	src/config/preferences.c src/config/preferences.h \
 	src/config/theme.c src/config/theme.h \
+	src/config/color.c src/config/color.h \
 	src/config/scripts.c src/config/scripts.h \
 	src/config/conflists.c src/config/conflists.h \
 	src/plugins/plugins.h src/plugins/plugins.c \
