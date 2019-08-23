@@ -333,18 +333,21 @@ static int find_col(const char *col_name, int n)
      */
 
     if (n >= sizeof(name)) {
-	/* truncate */
-	g_warning("<%s,%d> bigger than %zu", col_name, n, sizeof(name));
-	n = sizeof(name)-1;
+        /* truncate */
+        log_error("Color: <%s,%d> bigger than %zu", col_name, n, sizeof(name));
+        n = sizeof(name)-1;
     }
     memcpy(name, col_name, n);
 
-    if (g_ascii_strcasecmp(name, "default") == 0)
-	return -1;
+    if (g_ascii_strcasecmp(name, "default") == 0) {
+        return -1;
+    }
 
-    for (i = 0; i < COLOR_NAME_SIZE; i++)
-	if (g_ascii_strcasecmp(name, color_names[i]) == 0)
-	    return i;
+    for (i = 0; i < COLOR_NAME_SIZE; i++) {
+        if (g_ascii_strcasecmp(name, color_names[i]) == 0) {
+            return i;
+        }
+    }
 
     return COL_ERR;
 }
@@ -383,15 +386,15 @@ int color_pair_cache_get(const char *pair_name)
 
     sep = strchr(pair_name, '_');
     if (!sep) {
-	g_warning("color pair %s missing _", pair_name);
-	return -1;
+        log_error("Color: color pair %s missing", pair_name);
+        return -1;
     }
 
     fg = find_col(pair_name, sep - pair_name);
     bg = find_col(sep+1, strlen(sep));
     if (fg == COL_ERR || bg == COL_ERR) {
-	g_warning("bad color name %s", pair_name);
-	return -1;
+        log_error("Color: bad color name %s", pair_name);
+        return -1;
     }
 
     /* try to find pair in cache */
@@ -402,8 +405,8 @@ int color_pair_cache_get(const char *pair_name)
     /* otherwise cache new pair */
 
     if (cache.size >= cache.capacity) {
-	g_warning("reached ncurses color pair cache of %d", COLOR_PAIRS);
-	return -1;
+        log_error("Color: reached ncurses color pair cache of %d", COLOR_PAIRS);
+        return -1;
     }
 
     i = cache.size;

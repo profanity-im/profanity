@@ -807,8 +807,8 @@ theme_attrs(theme_item_t attrs)
     // lookup colour pair
     result = color_pair_cache_get(lookup_str->str);
     if (result < 0) {
-	g_warning("invalid color <%s>", lookup_str->str);
-	result = 0;
+        log_error("Invalid color <%s>", lookup_str->str);
+        result = 0;
     }
     g_string_free(lookup_str, TRUE);
     if (bold) {
