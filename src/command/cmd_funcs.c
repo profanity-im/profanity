@@ -4309,12 +4309,6 @@ cmd_room(ProfWin *window, const char *const command, gchar **args)
 
     ProfMucWin *mucwin = (ProfMucWin*)window;
     assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
-    int num = wins_get_num(window);
-
-    int ui_index = num;
-    if (ui_index == 10) {
-        ui_index = 0;
-    }
 
     if (g_strcmp0(args[0], "accept") == 0) {
         gboolean requires_config = muc_requires_config(mucwin->roomjid);
