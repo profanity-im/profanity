@@ -355,8 +355,8 @@ static int find_col(const char *col_name, int n)
 void color_pair_cache_reset(void)
 {
     if (cache.pairs) {
-	free(cache.pairs);
-	memset(&cache, 0, sizeof(cache));
+        free(cache.pairs);
+        memset(&cache, 0, sizeof(cache));
     }
 
     /*
@@ -398,9 +398,11 @@ int color_pair_cache_get(const char *pair_name)
     }
 
     /* try to find pair in cache */
-    for (i = 0; i < cache.size; i++)
-	if (fg == cache.pairs[i].fg && bg == cache.pairs[i].bg)
-	    return i;
+    for (i = 0; i < cache.size; i++) {
+        if (fg == cache.pairs[i].fg && bg == cache.pairs[i].bg) {
+            return i;
+        }
+    }
 
     /* otherwise cache new pair */
 
