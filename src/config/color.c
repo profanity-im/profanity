@@ -371,11 +371,14 @@ void color_pair_cache_reset(void)
         cache.capacity = 8;
 
     cache.pairs = g_malloc0(sizeof(*cache.pairs)*cache.capacity);
-
-    /* default_default */
-    cache.pairs[0].fg = -1;
-    cache.pairs[0].bg = -1;
-    cache.size = 1;
+    if (cache.pairs) {
+        /* default_default */
+        cache.pairs[0].fg = -1;
+        cache.pairs[0].bg = -1;
+        cache.size = 1;
+    } else {
+        log_error("Color: unable to allocate memory");
+    }
 }
 
 /**
