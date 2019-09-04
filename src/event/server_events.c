@@ -734,6 +734,10 @@ sv_ev_incoming_carbon(ProfMessage *message)
 #endif
     }
 
+    if (message->plain) {
+        chat_log_msg_out(message->jid->barejid, message->plain);
+    }
+
 #ifdef HAVE_LIBGPGME
 #ifndef HAVE_OMEMO
     if (message->encrypted) {
