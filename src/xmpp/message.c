@@ -1008,6 +1008,13 @@ _handle_carbons(xmpp_stanza_t *const stanza)
     Jid *jid_from = jid_create(from);
     Jid *jid_to = jid_create(to);
 
+    if (!message->plain && !message->body) {
+        log_error("Message received without body from: %s", jid_from->fulljid);
+        goto out;
+    } else if (!message->plain) {
+        message->plain = strdup(message->body);
+    }
+
     // check for pgp encrypted message
     xmpp_stanza_t *x = xmpp_stanza_get_child_by_ns(message_stanza, STANZA_NS_ENCRYPTED);
     if (x) {
@@ -1029,9 +1036,9 @@ _handle_carbons(xmpp_stanza_t *const stanza)
         }
     }
 
+out:
     message_free(message);
     jid_destroy(my_jid);
-
     return TRUE;
 }
 
