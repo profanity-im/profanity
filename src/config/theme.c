@@ -677,6 +677,7 @@ theme_attrs(theme_item_t attrs)
     // get forground colour
     switch (attrs) {
     case THEME_TEXT:                    _theme_prep_fgnd("main.text",               lookup_str, &bold); break;
+    case THEME_TEXT_HISTORY:            _theme_prep_fgnd("main.text.history",       lookup_str, &bold); break;
     case THEME_TEXT_ME:                 _theme_prep_fgnd("main.text.me",            lookup_str, &bold); break;
     case THEME_TEXT_THEM:               _theme_prep_fgnd("main.text.them",          lookup_str, &bold); break;
     case THEME_SPLASH:                  _theme_prep_fgnd("main.splash",             lookup_str, &bold); break;
