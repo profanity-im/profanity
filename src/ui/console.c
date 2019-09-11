@@ -2330,6 +2330,7 @@ cons_theme_properties(void)
     _cons_theme_prop(THEME_TEXT_ME, "main.text.me");
     _cons_theme_prop(THEME_THEM, "them");
     _cons_theme_prop(THEME_TEXT_THEM, "main.text.them");
+    _cons_theme_prop(THEME_TEXT_HISTORY, "main.text.history");
 
     _cons_theme_prop(THEME_CHAT, "chat");
     _cons_theme_prop(THEME_ONLINE, "online");
