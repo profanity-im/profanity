@@ -73,6 +73,7 @@ theme_init(const char *const theme_name)
     defaults = g_hash_table_new_full(g_str_hash, g_str_equal, free, free);
 
     g_hash_table_insert(defaults, strdup("main.text"),               strdup("white"));
+    g_hash_table_insert(defaults, strdup("main.text.history"),       strdup("white"));
     g_hash_table_insert(defaults, strdup("main.text.me"),            strdup("white"));
     g_hash_table_insert(defaults, strdup("main.text.them"),          strdup("white"));
     g_hash_table_insert(defaults, strdup("main.splash"),             strdup("cyan"));
