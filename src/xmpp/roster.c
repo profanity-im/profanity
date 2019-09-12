@@ -213,6 +213,7 @@ roster_set_handler(xmpp_stanza_t *const stanza)
     Jid *my_jid = jid_create(connection_get_fulljid());
     const char *from = xmpp_stanza_get_from(stanza);
     if (from && (strcmp(from, my_jid->barejid) != 0)) {
+        log_warning("Received alleged roster push from: %s", from);
         jid_destroy(my_jid);
         return;
     }
