@@ -790,24 +790,34 @@ log_stderr_handler(void)
     }
 }
 
+static int log_stderr_nonblock_set(int fd)
+{
+    int rc;
+
+    rc = fcntl(fd, F_GETFL);
+    if (rc >= 0)
+        rc = fcntl(fd, F_SETFL, rc | O_NONBLOCK);
+
+    return rc;
+}
+
 void
 log_stderr_init(log_level_t level)
 {
     int rc;
-    int flags;
 
     rc = pipe(stderr_pipe);
     if (rc != 0)
         goto err;
 
-    flags = fcntl(stderr_pipe[0], F_GETFL);
-    rc = fcntl(stderr_pipe[0], F_SETFL, flags | O_NONBLOCK);
-    if (rc != 0)
-        goto err_close;
-
     close(STDERR_FILENO);
     rc = dup2(stderr_pipe[1], STDERR_FILENO);
     if (rc < 0)
+        goto err_close;
+
+    rc = log_stderr_nonblock_set(stderr_pipe[0])
+      ?: log_stderr_nonblock_set(stderr_pipe[1]);
+    if (rc != 0)
         goto err_close;
 
     stderr_buf = malloc(STDERR_BUFSIZE);
