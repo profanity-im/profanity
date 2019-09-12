@@ -24,6 +24,7 @@ main.text.me=default
 main.text.them=default
 main.splash=yellow
 main.help.header=yellow
+main.text.history=default
 main.time=default
 input.text=default
 subscribed=green
