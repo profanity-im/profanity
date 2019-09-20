@@ -336,9 +336,13 @@ _status_bar_draw_extended_tabs(int pos)
 
         pos = _status_bar_draw_bracket(is_current, pos, "[");
 
-        int status_attrs = theme_attrs(THEME_STATUS_ACTIVE);
-        if (_extended_new()) {
+        int status_attrs;
+        if (is_current) {
+            status_attrs = theme_attrs(THEME_STATUS_CURRENT);
+        } else if (_extended_new()) {
             status_attrs = theme_attrs(THEME_STATUS_NEW);
+        } else {
+            status_attrs = theme_attrs(THEME_STATUS_ACTIVE);
         }
         wattron(statusbar_win, status_attrs);
         mvwprintw(statusbar_win, 0, pos, ">");
@@ -362,8 +366,10 @@ _status_bar_draw_tab(StatusBarTab *tab, int pos, int num)
 
     pos = _status_bar_draw_bracket(is_current, pos, "[");
 
-    int status_attrs = 0;
-    if (tab->highlight) {
+    int status_attrs;
+    if (is_current) {
+        status_attrs = theme_attrs(THEME_STATUS_CURRENT);
+    } else if (tab->highlight) {
         status_attrs = theme_attrs(THEME_STATUS_NEW);
     } else {
         status_attrs = theme_attrs(THEME_STATUS_ACTIVE);
