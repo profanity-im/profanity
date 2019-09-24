@@ -99,6 +99,7 @@ theme_init(const char *const theme_name)
     g_hash_table_insert(defaults, strdup("statusbar.text"),          strdup("white"));
     g_hash_table_insert(defaults, strdup("statusbar.brackets"),      strdup("cyan"));
     g_hash_table_insert(defaults, strdup("statusbar.active"),        strdup("cyan"));
+    g_hash_table_insert(defaults, strdup("statusbar.current"),       strdup("cyan"));
     g_hash_table_insert(defaults, strdup("statusbar.new"),           strdup("white"));
     g_hash_table_insert(defaults, strdup("statusbar.time"),          strdup("white"));
     g_hash_table_insert(defaults, strdup("me"),                      strdup("yellow"));
@@ -704,6 +705,7 @@ theme_attrs(theme_item_t attrs)
     case THEME_STATUS_TEXT:             _theme_prep_fgnd("statusbar.text",          lookup_str, &bold); break;
     case THEME_STATUS_BRACKET:          _theme_prep_fgnd("statusbar.brackets",      lookup_str, &bold); break;
     case THEME_STATUS_ACTIVE:           _theme_prep_fgnd("statusbar.active",        lookup_str, &bold); break;
+    case THEME_STATUS_CURRENT:          _theme_prep_fgnd("statusbar.current",       lookup_str, &bold); break;
     case THEME_STATUS_NEW:              _theme_prep_fgnd("statusbar.new",           lookup_str, &bold); break;
     case THEME_STATUS_TIME:             _theme_prep_fgnd("statusbar.time",          lookup_str, &bold); break;
     case THEME_ME:                      _theme_prep_fgnd("me",                      lookup_str, &bold); break;
@@ -794,6 +796,7 @@ theme_attrs(theme_item_t attrs)
     case THEME_STATUS_TEXT:
     case THEME_STATUS_BRACKET:
     case THEME_STATUS_ACTIVE:
+    case THEME_STATUS_CURRENT:
     case THEME_STATUS_NEW:
     case THEME_STATUS_TIME:
         _theme_prep_bgnd("statusbar", "blue", lookup_str);
