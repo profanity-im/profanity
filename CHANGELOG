@@ -3,7 +3,7 @@
 
 - Fix copyright/info displayed email
 - Fix typos in OMEMO logs
-- Fix crash when jid has no not part (#1153, #1193)
+- Fix crash when jid has no node part (#1153, #1193)
 
 0.7.0 (2019-07-31)
 =====
