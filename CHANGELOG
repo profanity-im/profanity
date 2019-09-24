@@ -1,3 +1,10 @@
+0.7.1 (2019-09-24)
+=====
+
+- Fix copyright/info displayed email
+- Fix typos in OMEMO logs
+- Fix crash when jid has no not part (#1153, #1193)
+
 0.7.0 (2019-07-31)
 =====
 
