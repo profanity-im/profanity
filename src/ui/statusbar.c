@@ -338,10 +338,13 @@ _status_bar_draw_extended_tabs(int pos)
 
         int status_attrs;
         if (is_current) {
+            // currently selected
             status_attrs = theme_attrs(THEME_STATUS_CURRENT);
         } else if (_extended_new()) {
+            // new one
             status_attrs = theme_attrs(THEME_STATUS_NEW);
         } else {
+            // all other
             status_attrs = theme_attrs(THEME_STATUS_ACTIVE);
         }
         wattron(statusbar_win, status_attrs);
