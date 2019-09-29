@@ -3246,7 +3246,11 @@ cmd_status(ProfWin *window, const char *const command, gchar **args)
             break;
         case WIN_CHAT:
             if (usr) {
-                win_println(window, THEME_DEFAULT, '-', "No parameter required when in chat.");
+                char *usr_jid = roster_barejid_from_name(usr);
+                if (usr_jid == NULL) {
+                    usr_jid = usr;
+                }
+                cons_show_status(usr_jid);
             } else {
                 ProfChatWin *chatwin = (ProfChatWin*)window;
                 assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
@@ -3260,7 +3264,11 @@ cmd_status(ProfWin *window, const char *const command, gchar **args)
             break;
         case WIN_PRIVATE:
             if (usr) {
-                win_println(window, THEME_DEFAULT, '-', "No parameter required when in chat.");
+                char *usr_jid = roster_barejid_from_name(usr);
+                if (usr_jid == NULL) {
+                    usr_jid = usr;
+                }
+                cons_show_status(usr_jid);
             } else {
                 ProfPrivateWin *privatewin = (ProfPrivateWin*)window;
                 assert(privatewin->memcheck == PROFPRIVATEWIN_MEMCHECK);
