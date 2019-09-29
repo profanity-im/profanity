@@ -3216,6 +3216,16 @@ cmd_resource(ProfWin *window, const char *const command, gchar **args)
     }
 }
 
+static void
+_cmd_status_show_status(char* usr)
+{
+    char *usr_jid = roster_barejid_from_name(usr);
+    if (usr_jid == NULL) {
+        usr_jid = usr;
+    }
+    cons_show_status(usr_jid);
+}
+
 gboolean
 cmd_status(ProfWin *window, const char *const command, gchar **args)
 {
@@ -3246,11 +3256,7 @@ cmd_status(ProfWin *window, const char *const command, gchar **args)
             break;
         case WIN_CHAT:
             if (usr) {
-                char *usr_jid = roster_barejid_from_name(usr);
-                if (usr_jid == NULL) {
-                    usr_jid = usr;
-                }
-                cons_show_status(usr_jid);
+                _cmd_status_show_status(usr);
             } else {
                 ProfChatWin *chatwin = (ProfChatWin*)window;
                 assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
@@ -3264,11 +3270,7 @@ cmd_status(ProfWin *window, const char *const command, gchar **args)
             break;
         case WIN_PRIVATE:
             if (usr) {
-                char *usr_jid = roster_barejid_from_name(usr);
-                if (usr_jid == NULL) {
-                    usr_jid = usr;
-                }
-                cons_show_status(usr_jid);
+                _cmd_status_show_status(usr);
             } else {
                 ProfPrivateWin *privatewin = (ProfPrivateWin*)window;
                 assert(privatewin->memcheck == PROFPRIVATEWIN_MEMCHECK);
@@ -3284,11 +3286,7 @@ cmd_status(ProfWin *window, const char *const command, gchar **args)
             break;
         case WIN_CONSOLE:
             if (usr) {
-                char *usr_jid = roster_barejid_from_name(usr);
-                if (usr_jid == NULL) {
-                    usr_jid = usr;
-                }
-                cons_show_status(usr_jid);
+                _cmd_status_show_status(usr);
             } else {
                 cons_bad_cmd_usage(command);
             }
