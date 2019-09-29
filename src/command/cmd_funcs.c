@@ -3300,6 +3300,21 @@ cmd_status(ProfWin *window, const char *const command, gchar **args)
     return TRUE;
 }
 
+static void
+_cmd_info_show_conact(char *usr)
+{
+    char *usr_jid = roster_barejid_from_name(usr);
+    if (usr_jid == NULL) {
+        usr_jid = usr;
+    }
+    PContact pcontact = roster_get_contact(usr_jid);
+    if (pcontact) {
+        cons_show_info(pcontact);
+    } else {
+        cons_show("No such contact \"%s\" in roster.", usr);
+    }
+}
+
 gboolean
 cmd_info(ProfWin *window, const char *const command, gchar **args)
 {
@@ -3334,7 +3349,7 @@ cmd_info(ProfWin *window, const char *const command, gchar **args)
             break;
         case WIN_CHAT:
             if (usr) {
-                win_println(window, THEME_DEFAULT, '-', "No parameter required when in chat.");
+                _cmd_info_show_conact(usr);
             } else {
                 ProfChatWin *chatwin = (ProfChatWin*)window;
                 assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
@@ -3348,7 +3363,7 @@ cmd_info(ProfWin *window, const char *const command, gchar **args)
             break;
         case WIN_PRIVATE:
             if (usr) {
-                win_println(window, THEME_DEFAULT, '-', "No parameter required when in chat.");
+                _cmd_info_show_conact(usr);
             } else {
                 ProfPrivateWin *privatewin = (ProfPrivateWin*)window;
                 assert(privatewin->memcheck == PROFPRIVATEWIN_MEMCHECK);
@@ -3364,16 +3379,7 @@ cmd_info(ProfWin *window, const char *const command, gchar **args)
             break;
         case WIN_CONSOLE:
             if (usr) {
-                char *usr_jid = roster_barejid_from_name(usr);
-                if (usr_jid == NULL) {
-                    usr_jid = usr;
-                }
-                PContact pcontact = roster_get_contact(usr_jid);
-                if (pcontact) {
-                    cons_show_info(pcontact);
-                } else {
-                    cons_show("No such contact \"%s\" in roster.", usr);
-                }
+                _cmd_info_show_conact(usr);
             } else {
                 cons_bad_cmd_usage(command);
             }
