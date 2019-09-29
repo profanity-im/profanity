@@ -19,6 +19,7 @@ statusbar.time=
 statusbar.brackets=
 statusbar.active=
 statusbar.new=
+statusbar.current=
 main.text=
 main.text.me=
 main.text.them=
