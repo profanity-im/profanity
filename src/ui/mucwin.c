@@ -569,10 +569,6 @@ mucwin_requires_config(ProfMucWin *mucwin)
 
     ProfWin *window = (ProfWin*)mucwin;
     int num = wins_get_num(window);
-    int ui_index = num;
-    if (ui_index == 10) {
-        ui_index = 0;
-    }
 
     win_println(window, THEME_DEFAULT, '-', "");
     win_println(window, THEME_ROOMINFO, '!', "Room locked, requires configuration.");
