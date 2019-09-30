@@ -109,6 +109,16 @@ static int _inp_rl_win_7_handler(int count, int key);
 static int _inp_rl_win_8_handler(int count, int key);
 static int _inp_rl_win_9_handler(int count, int key);
 static int _inp_rl_win_0_handler(int count, int key);
+static int _inp_rl_win_11_handler(int count, int key);
+static int _inp_rl_win_12_handler(int count, int key);
+static int _inp_rl_win_13_handler(int count, int key);
+static int _inp_rl_win_14_handler(int count, int key);
+static int _inp_rl_win_15_handler(int count, int key);
+static int _inp_rl_win_16_handler(int count, int key);
+static int _inp_rl_win_17_handler(int count, int key);
+static int _inp_rl_win_18_handler(int count, int key);
+static int _inp_rl_win_19_handler(int count, int key);
+static int _inp_rl_win_20_handler(int count, int key);
 static int _inp_rl_win_prev_handler(int count, int key);
 static int _inp_rl_win_next_handler(int count, int key);
 static int _inp_rl_win_pageup_handler(int count, int key);
@@ -381,6 +391,16 @@ _inp_rl_addfuncs(void)
     rl_add_funmap_entry("prof_win_8", _inp_rl_win_8_handler);
     rl_add_funmap_entry("prof_win_9", _inp_rl_win_9_handler);
     rl_add_funmap_entry("prof_win_0", _inp_rl_win_0_handler);
+    rl_add_funmap_entry("prof_win_11", _inp_rl_win_11_handler);
+    rl_add_funmap_entry("prof_win_12", _inp_rl_win_12_handler);
+    rl_add_funmap_entry("prof_win_13", _inp_rl_win_13_handler);
+    rl_add_funmap_entry("prof_win_14", _inp_rl_win_14_handler);
+    rl_add_funmap_entry("prof_win_15", _inp_rl_win_15_handler);
+    rl_add_funmap_entry("prof_win_16", _inp_rl_win_16_handler);
+    rl_add_funmap_entry("prof_win_17", _inp_rl_win_17_handler);
+    rl_add_funmap_entry("prof_win_18", _inp_rl_win_18_handler);
+    rl_add_funmap_entry("prof_win_19", _inp_rl_win_19_handler);
+    rl_add_funmap_entry("prof_win_20", _inp_rl_win_20_handler);
     rl_add_funmap_entry("prof_win_prev", _inp_rl_win_prev_handler);
     rl_add_funmap_entry("prof_win_next", _inp_rl_win_next_handler);
     rl_add_funmap_entry("prof_win_pageup", _inp_rl_win_pageup_handler);
@@ -406,6 +426,16 @@ _inp_rl_startup_hook(void)
     rl_bind_keyseq("\\e8", _inp_rl_win_8_handler);
     rl_bind_keyseq("\\e9", _inp_rl_win_9_handler);
     rl_bind_keyseq("\\e0", _inp_rl_win_0_handler);
+    rl_bind_keyseq("\\eq", _inp_rl_win_11_handler);
+    rl_bind_keyseq("\\ew", _inp_rl_win_12_handler);
+    rl_bind_keyseq("\\ee", _inp_rl_win_13_handler);
+    rl_bind_keyseq("\\er", _inp_rl_win_14_handler);
+    rl_bind_keyseq("\\et", _inp_rl_win_15_handler);
+    rl_bind_keyseq("\\ey", _inp_rl_win_16_handler);
+    rl_bind_keyseq("\\eu", _inp_rl_win_17_handler);
+    rl_bind_keyseq("\\ei", _inp_rl_win_18_handler);
+    rl_bind_keyseq("\\eo", _inp_rl_win_19_handler);
+    rl_bind_keyseq("\\ep", _inp_rl_win_20_handler);
 
     rl_bind_keyseq("\\eOP", _inp_rl_win_1_handler);
     rl_bind_keyseq("\\eOQ", _inp_rl_win_2_handler);
@@ -646,6 +676,76 @@ static int
 _inp_rl_win_0_handler(int count, int key)
 {
     _go_to_win(0);
+    return 0;
+}
+
+static int
+_inp_rl_win_11_handler(int count, int key)
+{
+    _go_to_win(11);
+    return 0;
+}
+
+static int
+_inp_rl_win_12_handler(int count, int key)
+{
+    _go_to_win(12);
+    return 0;
+}
+
+static int
+_inp_rl_win_13_handler(int count, int key)
+{
+    _go_to_win(13);
+    return 0;
+}
+
+static int
+_inp_rl_win_14_handler(int count, int key)
+{
+    _go_to_win(14);
+    return 0;
+}
+
+static int
+_inp_rl_win_15_handler(int count, int key)
+{
+    _go_to_win(15);
+    return 0;
+}
+
+static int
+_inp_rl_win_16_handler(int count, int key)
+{
+    _go_to_win(16);
+    return 0;
+}
+
+static int
+_inp_rl_win_17_handler(int count, int key)
+{
+    _go_to_win(17);
+    return 0;
+}
+
+static int
+_inp_rl_win_18_handler(int count, int key)
+{
+    _go_to_win(18);
+    return 0;
+}
+
+static int
+_inp_rl_win_19_handler(int count, int key)
+{
+    _go_to_win(19);
+    return 0;
+}
+
+static int
+_inp_rl_win_20_handler(int count, int key)
+{
+    _go_to_win(20);
     return 0;
 }
 
