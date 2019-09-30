@@ -1130,3 +1130,29 @@ wins_destroy(void)
     autocomplete_free(wins_ac);
     autocomplete_free(wins_close_ac);
 }
+
+ProfWin*
+wins_get_next_unread(void)
+{
+    // get and sort win nums
+    GList *values = g_hash_table_get_values(windows);
+    values = g_list_sort(values, _wins_cmp_num);
+    GList *curr = values;
+
+    while (curr) {
+        if (current == GPOINTER_TO_INT(curr->data)) {
+            break;
+        }
+
+        ProfWin *window = curr->data;
+        if (win_unread(window) > 0) {
+            g_list_free(values);
+            return window;
+        }
+
+        curr = g_list_next(curr);
+    }
+
+    g_list_free(values);
+    return NULL;
+}

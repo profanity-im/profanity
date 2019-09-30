@@ -121,6 +121,7 @@ static int _inp_rl_win_19_handler(int count, int key);
 static int _inp_rl_win_20_handler(int count, int key);
 static int _inp_rl_win_prev_handler(int count, int key);
 static int _inp_rl_win_next_handler(int count, int key);
+static int _inp_rl_win_next_unread_handler(int count, int key);
 static int _inp_rl_win_pageup_handler(int count, int key);
 static int _inp_rl_win_pagedown_handler(int count, int key);
 static int _inp_rl_subwin_pageup_handler(int count, int key);
@@ -403,6 +404,7 @@ _inp_rl_addfuncs(void)
     rl_add_funmap_entry("prof_win_20", _inp_rl_win_20_handler);
     rl_add_funmap_entry("prof_win_prev", _inp_rl_win_prev_handler);
     rl_add_funmap_entry("prof_win_next", _inp_rl_win_next_handler);
+    rl_add_funmap_entry("prof_win_next_unread", _inp_rl_win_next_unread_handler);
     rl_add_funmap_entry("prof_win_pageup", _inp_rl_win_pageup_handler);
     rl_add_funmap_entry("prof_win_pagedown", _inp_rl_win_pagedown_handler);
     rl_add_funmap_entry("prof_subwin_pageup", _inp_rl_subwin_pageup_handler);
@@ -455,6 +457,8 @@ _inp_rl_startup_hook(void)
     rl_bind_keyseq("\\e[1;9C", _inp_rl_win_next_handler);
     rl_bind_keyseq("\\e[1;3C", _inp_rl_win_next_handler);
     rl_bind_keyseq("\\e\\e[C", _inp_rl_win_next_handler);
+
+    rl_bind_keyseq("\\ea", _inp_rl_win_next_unread_handler);
 
     rl_bind_keyseq("\\e\\e[5~", _inp_rl_subwin_pageup_handler);
     rl_bind_keyseq("\\e[5;3~", _inp_rl_subwin_pageup_handler);
@@ -763,6 +767,16 @@ static int
 _inp_rl_win_next_handler(int count, int key)
 {
     ProfWin *window = wins_get_next();
+    if (window) {
+        ui_focus_win(window);
+    }
+    return 0;
+}
+
+static int
+_inp_rl_win_next_unread_handler(int count, int key)
+{
+    ProfWin *window = wins_get_next_unread();
     if (window) {
         ui_focus_win(window);
     }
