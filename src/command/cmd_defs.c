@@ -402,7 +402,7 @@ static struct cmd_t command_defs[] =
             "/blocked add [<jid>]",
             "/blocked remove <jid>")
         CMD_DESC(
-            "Manage blocked users, calling with no arguments shows the current list of blocked users."
+            "Manage blocked users (XEP-0191), calling with no arguments shows the current list of blocked users."
             "To blog a certain user in a MUC use the following as jid: room@conference.example.org/spammy-user")
         CMD_ARGS(
             { "add [<jid>]",    "Block the specified Jabber ID. If in a chat window and no jid is specified, the current recipient will be blocked." },
