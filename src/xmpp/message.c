@@ -823,7 +823,9 @@ _handle_groupchat(xmpp_stanza_t *const stanza)
     // determine if the notifications happened whilst offline
     gchar *from;
     message->timestamp = stanza_get_delay_from(stanza, &from);
-    if (message->timestamp && g_strcmp0(jid->barejid, from) == 0) {
+    // checking the domainpart is a workaround for some prosody versions (gh#1190)
+    if (message->timestamp && (g_strcmp0(jid->barejid, from) == 0
+                || g_strcmp0(jid->domainpart, from) == 0)) {
         sv_ev_room_history(message);
     } else {
         sv_ev_room_message(message);
