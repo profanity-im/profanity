@@ -425,6 +425,10 @@ sv_ev_outgoing_carbon(ProfMessage *message)
 
     chat_state_active(chatwin->state);
 
+    if (message->plain) {
+        chat_log_msg_out(message->jid->barejid, message->plain);
+    }
+
 #ifdef HAVE_LIBGPGME
 #ifndef HAVE_OMEMO
     if (message->encrypted) {
@@ -732,10 +736,6 @@ sv_ev_incoming_carbon(ProfMessage *message)
             chatwin->is_omemo = TRUE;
         }
 #endif
-    }
-
-    if (message->plain) {
-        chat_log_msg_out(message->jid->barejid, message->plain);
     }
 
 #ifdef HAVE_LIBGPGME
