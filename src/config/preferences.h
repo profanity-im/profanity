@@ -169,6 +169,7 @@ typedef struct prof_winplacement_t {
 void prefs_load(char *config_file);
 void prefs_save(void);
 void prefs_close(void);
+void prefs_reload(void);
 
 char* prefs_find_login(char *prefix);
 void prefs_reset_login_search(void);

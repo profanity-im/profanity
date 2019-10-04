@@ -78,25 +78,9 @@ static const char* _get_key(preference_t pref);
 static gboolean _get_default_boolean(preference_t pref);
 static char* _get_default_string(preference_t pref);
 
-void
-prefs_load(char *config_file)
+void _prefs_load(void)
 {
-    GError *err;
-
-    if (config_file == NULL) {
-        prefs_loc = files_get_config_path(FILE_PROFRC);
-    } else {
-        prefs_loc = config_file;
-    }
-
-    if (g_file_test(prefs_loc, G_FILE_TEST_EXISTS)) {
-        g_chmod(prefs_loc, S_IRUSR | S_IWUSR);
-    }
-
-    prefs = g_key_file_new();
-    g_key_file_load_from_file(prefs, prefs_loc, G_KEY_FILE_KEEP_COMMENTS, NULL);
-
-    err = NULL;
+    GError *err = NULL;
     log_maxsize = g_key_file_get_integer(prefs, PREF_GROUP_LOGGING, "maxsize", &err);
     if (err) {
         log_maxsize = 0;
@@ -178,6 +162,38 @@ prefs_load(char *config_file)
         autocomplete_add(room_trigger_ac, triggers[i]);
     }
     g_strfreev(triggers);
+}
+
+void
+prefs_reload(void)
+{
+    g_key_file_free(prefs);
+    prefs = NULL;
+
+    prefs = g_key_file_new();
+    g_key_file_load_from_file(prefs, prefs_loc, G_KEY_FILE_KEEP_COMMENTS, NULL);
+
+    _prefs_load();
+}
+
+void
+prefs_load(char *config_file)
+{
+
+    if (config_file == NULL) {
+        prefs_loc = files_get_config_path(FILE_PROFRC);
+    } else {
+        prefs_loc = config_file;
+    }
+
+    if (g_file_test(prefs_loc, G_FILE_TEST_EXISTS)) {
+        g_chmod(prefs_loc, S_IRUSR | S_IWUSR);
+    }
+
+    prefs = g_key_file_new();
+    g_key_file_load_from_file(prefs, prefs_loc, G_KEY_FILE_KEEP_COMMENTS, NULL);
+
+    _prefs_load();
 }
 
 void

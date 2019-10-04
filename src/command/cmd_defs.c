@@ -2408,6 +2408,19 @@ static struct cmd_t command_defs[] =
         CMD_NOARGS
         CMD_NOEXAMPLES
     },
+
+    { "/reload",
+        parse_args, 0, 0, NULL,
+        CMD_NOSUBFUNCS
+        CMD_MAINFUNC(cmd_reload)
+        CMD_NOTAGS
+        CMD_SYN(
+            "/reload")
+        CMD_DESC(
+            "Reload preferences from configuration file.")
+        CMD_NOARGS
+        CMD_NOEXAMPLES
+    },
 };
 
 static GHashTable *search_index;

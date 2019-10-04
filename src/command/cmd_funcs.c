@@ -8551,3 +8551,12 @@ cmd_save(ProfWin *window, const char *const command, gchar **args)
     prefs_save();
     return TRUE;
 }
+
+gboolean
+cmd_reload(ProfWin *window, const char *const command, gchar **args)
+{
+    log_info("Reloading preferences");
+    cons_show("Reloading preferences.");
+    prefs_reload();
+    return TRUE;
+}
