@@ -443,7 +443,11 @@ int
 is_regular_file(const char *path)
 {
     struct stat st;
-    stat(path, &st);
+    int ret = stat(path, &st);
+    if (ret != 0) {
+        perror(NULL);
+        return 0;
+    }
     return S_ISREG(st.st_mode);
 }
 
@@ -451,7 +455,11 @@ int
 is_dir(const char *path)
 {
     struct stat st;
-    stat(path, &st);
+    int ret = stat(path, &st);
+    if (ret != 0) {
+        perror(NULL);
+        return 0;
+    }
     return S_ISDIR(st.st_mode);
 }
 
