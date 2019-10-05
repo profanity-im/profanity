@@ -106,6 +106,7 @@ static char* _tray_autocomplete(ProfWin *window, const char *const input, gboole
 static char* _presence_autocomplete(ProfWin *window, const char *const input, gboolean previous);
 static char* _rooms_autocomplete(ProfWin *window, const char *const input, gboolean previous);
 static char* _statusbar_autocomplete(ProfWin *window, const char *const input, gboolean previous);
+static char* _clear_autocomplete(ProfWin *window, const char *const input, gboolean previous);
 
 static char* _script_autocomplete_func(const char *const prefix, gboolean previous);
 
@@ -217,6 +218,7 @@ static Autocomplete statusbar_self_ac;
 static Autocomplete statusbar_chat_ac;
 static Autocomplete statusbar_room_ac;
 static Autocomplete statusbar_show_ac;
+static Autocomplete clear_ac;
 
 void
 cmd_ac_init(void)
@@ -807,6 +809,9 @@ cmd_ac_init(void)
     autocomplete_add(blocked_ac, "add");
     autocomplete_add(blocked_ac, "remove");
 
+    clear_ac = autocomplete_new();
+    autocomplete_add(clear_ac, "persist_history");
+
     tray_ac = autocomplete_new();
     autocomplete_add(tray_ac, "on");
     autocomplete_add(tray_ac, "off");
@@ -1151,6 +1156,7 @@ cmd_ac_reset(ProfWin *window)
     autocomplete_reset(statusbar_chat_ac);
     autocomplete_reset(statusbar_room_ac);
     autocomplete_reset(statusbar_show_ac);
+    autocomplete_reset(clear_ac);
 
     autocomplete_reset(script_ac);
     if (script_show_ac) {
@@ -1288,6 +1294,7 @@ cmd_ac_uninit(void)
     autocomplete_free(statusbar_chat_ac);
     autocomplete_free(statusbar_room_ac);
     autocomplete_free(statusbar_show_ac);
+    autocomplete_free(clear_ac);
 }
 
 static void
@@ -1540,6 +1547,7 @@ _cmd_ac_complete_params(ProfWin *window, const char *const input, gboolean previ
     g_hash_table_insert(ac_funcs, "/presence",      _presence_autocomplete);
     g_hash_table_insert(ac_funcs, "/rooms",         _rooms_autocomplete);
     g_hash_table_insert(ac_funcs, "/statusbar",     _statusbar_autocomplete);
+    g_hash_table_insert(ac_funcs, "/clear",         _clear_autocomplete);
 
     int len = strlen(input);
     char parsed[len+1];
@@ -3411,6 +3419,24 @@ _statusbar_autocomplete(ProfWin *window, const char *const input, gboolean previ
     found = autocomplete_param_with_ac(input, "/statusbar room", statusbar_room_ac, TRUE, previous);
     if (found) {
         return found;
+    }
+
+    return NULL;
+}
+
+static char*
+_clear_autocomplete(ProfWin *window, const char *const input, gboolean previous)
+{
+    char *result = NULL;
+
+    result = autocomplete_param_with_ac(input, "/clear", clear_ac, TRUE, previous);
+    if (result) {
+        return result;
+    }
+
+    result = autocomplete_param_with_func(input, "/clear persist_history", prefs_autocomplete_boolean_choice, previous);
+    if (result) {
+        return result;
     }
 
     return NULL;

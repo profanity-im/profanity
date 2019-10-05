@@ -5047,7 +5047,29 @@ cmd_tiny(ProfWin *window, const char *const command, gchar **args)
 gboolean
 cmd_clear(ProfWin *window, const char *const command, gchar **args)
 {
-    win_clear(window);
+    if (args[0] == NULL) {
+        win_clear(window);
+        return TRUE;
+    } else {
+        if ((g_strcmp0(args[0], "persist_history") == 0) ) {
+
+            if (args[1] != NULL) {
+                if ((g_strcmp0(args[1], "on") == 0) || (g_strcmp0(args[1], "off") == 0)) {
+                    _cmd_set_boolean_preference(args[1], command, "Persistant history", PREF_CLEAR_PERSIST_HISTORY);
+                    return TRUE;
+                }
+            } else {
+                if (prefs_get_boolean(PREF_CLEAR_PERSIST_HISTORY)) {
+                    win_println(window, THEME_DEFAULT, '!', "  Persistantly clear screen  : ON");
+                } else {
+                    win_println(window, THEME_DEFAULT, '!', "  Persistantly clear screen  : OFF");
+                }
+                return TRUE;
+            }
+        }
+    }
+    cons_bad_cmd_usage(command);
+
     return TRUE;
 }
 

@@ -1107,17 +1107,23 @@ static struct cmd_t command_defs[] =
     },
 
     { "/clear",
-        parse_args, 0, 0, NULL,
+        parse_args, 0, 2, NULL,
         CMD_NOSUBFUNCS
         CMD_MAINFUNC(cmd_clear)
         CMD_TAGS(
             CMD_TAG_UI)
         CMD_SYN(
-            "/clear")
+            "/clear",
+            "/clear persist_history <on|off>")
         CMD_DESC(
-            "Clear the current window.")
-        CMD_NOARGS
-        CMD_NOEXAMPLES
+            "Clear the current window. "
+            "If you set persist_history you can still access the history by pressing PAGE UP.")
+        CMD_ARGS(
+            { "persist_history on|off", "Whether or not to clear the screen persistently"})
+        CMD_EXAMPLES(
+            "/clear",
+            "/clear persist_history",
+            "/clear persist_history on")
     },
 
     { "/quit",
