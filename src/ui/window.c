@@ -620,7 +620,15 @@ win_sub_page_up(ProfWin *window)
 void
 win_clear(ProfWin *window)
 {
-    werase(window->layout->win);
+    if (!prefs_get_boolean(PREF_CLEAR_PERSIST_HISTORY)) {
+        werase(window->layout->win);
+        return;
+    }
+
+    int y = getcury(window->layout->win);
+    int *page_start = &(window->layout->y_pos);
+    *page_start = y;
+    window->layout->paged = 1;
     win_update_virtual(window);
 }
 

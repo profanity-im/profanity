@@ -1646,6 +1646,7 @@ _get_group(preference_t pref)
 {
     switch (pref)
     {
+        case PREF_CLEAR_PERSIST_HISTORY:
         case PREF_SPLASH:
         case PREF_BEEP:
         case PREF_THEME:
@@ -1773,6 +1774,8 @@ _get_key(preference_t pref)
 {
     switch (pref)
     {
+        case PREF_CLEAR_PERSIST_HISTORY:
+            return "clear.persist_history";
         case PREF_SPLASH:
             return "splash";
         case PREF_BEEP:

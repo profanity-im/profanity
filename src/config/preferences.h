@@ -46,6 +46,7 @@
 // represents all settings in .profrc
 // each enum value is mapped to a group and key in .profrc (see preferences.c)
 typedef enum {
+    PREF_CLEAR_PERSIST_HISTORY,
     PREF_SPLASH,
     PREF_BEEP,
     PREF_VERCHECK,
