@@ -6819,12 +6819,6 @@ cmd_plugins_install(ProfWin *window, const char *const command, gchar **args)
         path = strdup(path);
     }
 
-    if (access(path, R_OK) != 0) {
-        cons_show("File not found: %s", path);
-        free(path);
-        return TRUE;
-    }
-
     if (is_regular_file(path)) {
         if (!g_str_has_suffix(path, ".py") && !g_str_has_suffix(path, ".so")) {
             cons_show("Plugins must have one of the following extensions: '.py' '.so'");
@@ -6844,9 +6838,7 @@ cmd_plugins_install(ProfWin *window, const char *const command, gchar **args)
         g_string_free(error_message, TRUE);
         free(path);
         return TRUE;
-    }
-
-    if (is_dir(path)) {
+    } else if (is_dir(path)) {
         PluginsInstallResult* result = plugins_install_all(path);
         if (result->installed || result->failed) {
             if (result->installed) {
@@ -6873,10 +6865,11 @@ cmd_plugins_install(ProfWin *window, const char *const command, gchar **args)
         free(path);
         plugins_free_install_result(result);
         return TRUE;
+    } else {
+        cons_show("Argument must be a file or directory.");
     }
 
     free(path);
-    cons_show("Argument must be a file or directory.");
     return TRUE;
 }
 
