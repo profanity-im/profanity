@@ -1880,6 +1880,11 @@ _room_affiliation_list_result_id_handler(xmpp_stanza_t *const stanza, void *cons
             if (g_strcmp0(name, "item") == 0) {
                 const char *jid = xmpp_stanza_get_attribute(child, STANZA_ATTR_JID);
                 if (jid) {
+                    if (g_strcmp0(affiliation, "member") == 0
+                            || g_strcmp0(affiliation, "owner") == 0
+                            || g_strcmp0(affiliation, "admin") == 0) {
+                        muc_members_add(from, jid);
+                    }
                     jids = g_slist_insert_sorted(jids, (gpointer)jid, (GCompareFunc)g_strcmp0);
                 }
             }

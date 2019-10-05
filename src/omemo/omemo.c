@@ -421,19 +421,14 @@ omemo_start_session(const char *const barejid)
 void
 omemo_start_muc_sessions(const char *const roomjid)
 {
-    GList *roster = muc_roster(roomjid);
+    GList *members = muc_members(roomjid);
     GList *iter;
-    for (iter = roster; iter != NULL; iter = iter->next) {
-        Occupant *occupant = (Occupant *)iter->data;
-        if (occupant->jid != NULL) {
-            Jid *jid = jid_create(occupant->jid);
-            omemo_start_session(jid->barejid);
-            jid_destroy(jid);
-        } else {
-            log_error("OMEMO: cannot get real jid for %s in %s", occupant->nick, roomjid);
-        }
+    for (iter = members; iter != NULL; iter = iter->next) {
+        Jid *jid = jid_create(iter->data);
+        omemo_start_session(jid->barejid);
+        jid_destroy(jid);
     }
-    g_list_free(roster);
+    g_list_free(members);
 }
 
 gboolean
@@ -712,19 +707,14 @@ omemo_on_message_send(ProfWin *win, const char *const message, gboolean request_
     if (muc) {
         ProfMucWin *mucwin = (ProfMucWin *)win;
         assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
-        GList *roster = muc_roster(mucwin->roomjid);
+        GList *members = muc_members(mucwin->roomjid);
         GList *iter;
-        for (iter = roster; iter != NULL; iter = iter->next) {
-            Occupant *occupant = (Occupant *)iter->data;
-            Jid *jid = jid_create(occupant->jid);
-            if (!jid->barejid) {
-                log_warning("OMEMO: missing barejid for MUC %s occupant %s", mucwin->roomjid, occupant->nick);
-            } else {
-                recipients = g_list_append(recipients, strdup(jid->barejid));
-            }
+        for (iter = members; iter != NULL; iter = iter->next) {
+            Jid *jid = jid_create(iter->data);
+            recipients = g_list_append(recipients, strdup(jid->barejid));
             jid_destroy(jid);
         }
-        g_list_free(roster);
+        g_list_free(members);
     } else {
         ProfChatWin *chatwin = (ProfChatWin *)win;
         assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);

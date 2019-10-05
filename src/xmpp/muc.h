@@ -159,4 +159,9 @@ char* muc_affiliation_str(const char *const room);
 muc_member_type_t muc_member_type(const char *const room);
 muc_anonymity_type_t muc_anonymity_type(const char *const room);
 
+GList* muc_members(const char *const room);
+void muc_members_add(const char *const room, const char *const jid);
+void muc_members_remove(const char *const room, const char *const jid);
+void muc_members_update(const char *const room, const char *const jid, const char *const affiliation);
+
 #endif

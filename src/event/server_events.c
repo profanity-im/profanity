@@ -1199,6 +1199,10 @@ sv_ev_muc_occupant_online(const char *const room, const char *const nick, const 
 
     gboolean updated = muc_roster_add(room, nick, jid, role, affiliation, show, status);
 
+    if (affiliation != NULL) {
+        muc_members_update(room, jid, affiliation);
+    }
+
     // not yet finished joining room
     if (!muc_roster_complete(room)) {
         return;
@@ -1424,6 +1428,9 @@ sv_ev_bookmark_autojoin(Bookmark *bookmark)
     if (!muc_active(bookmark->barejid)) {
         presence_join_room(bookmark->barejid, nick, bookmark->password);
         muc_join(bookmark->barejid, nick, bookmark->password, TRUE);
+        iq_room_affiliation_list(bookmark->barejid, "member");
+        iq_room_affiliation_list(bookmark->barejid, "admin");
+        iq_room_affiliation_list(bookmark->barejid, "owner");
     }
 
     free(nick);

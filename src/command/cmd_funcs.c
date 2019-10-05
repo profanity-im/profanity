@@ -3675,6 +3675,9 @@ cmd_join(ProfWin *window, const char *const command, gchar **args)
     if (!muc_active(room)) {
         presence_join_room(room, nick, passwd);
         muc_join(room, nick, passwd, FALSE);
+        iq_room_affiliation_list(room, "member");
+        iq_room_affiliation_list(room, "admin");
+        iq_room_affiliation_list(room, "owner");
     } else if (muc_roster_complete(room)) {
         ui_switch_to_room(room);
     }
@@ -8213,12 +8216,13 @@ cmd_omemo_start(ProfWin *window, const char *const command, gchar **args)
         ProfMucWin *mucwin = (ProfMucWin*)window;
         assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
 
-        if (muc_anonymity_type(mucwin->roomjid) == MUC_ANONYMITY_TYPE_NONANONYMOUS) {
+        if (muc_anonymity_type(mucwin->roomjid) == MUC_ANONYMITY_TYPE_NONANONYMOUS
+                && muc_member_type(mucwin->roomjid) == MUC_MEMBER_TYPE_MEMBERS_ONLY) {
             accounts_add_omemo_state(session_get_account_name(), mucwin->roomjid, TRUE);
             omemo_start_muc_sessions(mucwin->roomjid);
             mucwin->is_omemo = TRUE;
         } else {
-            win_println(window, THEME_DEFAULT, '!', "MUC must be non-anonymous (i.e. be configured to present real jid to anyone) in order to support OMEMO.");
+            win_println(window, THEME_DEFAULT, '!', "MUC must be non-anonymous (i.e. be configured to present real jid to anyone) and members-only in order to support OMEMO.");
         }
     } else {
         win_println(window, THEME_DEFAULT, '-', "You must be in a regular chat window to start an OMEMO session.");
