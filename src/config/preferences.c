@@ -207,8 +207,12 @@ prefs_close(void)
 {
     autocomplete_free(boolean_choice_ac);
     autocomplete_free(room_trigger_ac);
+
     g_key_file_free(prefs);
     prefs = NULL;
+
+    free(prefs_loc);
+    prefs_loc = NULL;
 }
 
 char*
