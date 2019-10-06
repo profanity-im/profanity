@@ -415,6 +415,7 @@ parse_options(gchar **args, gchar **opt_keys, gboolean *res)
         // check if option valid
         if (g_list_find_custom(keys, args[curr], (GCompareFunc)g_strcmp0) == NULL) {
             *res = FALSE;
+            g_list_free(found_keys);
             g_list_free(keys);
             return options;
         }
@@ -422,6 +423,7 @@ parse_options(gchar **args, gchar **opt_keys, gboolean *res)
         // check if duplicate
         if (g_list_find_custom(found_keys, args[curr], (GCompareFunc)g_strcmp0)) {
             *res = FALSE;
+            g_list_free(found_keys);
             g_list_free(keys);
             return options;
         }
@@ -429,6 +431,7 @@ parse_options(gchar **args, gchar **opt_keys, gboolean *res)
         // check value given
         if (args[curr+1] == NULL) {
             *res = FALSE;
+            g_list_free(found_keys);
             g_list_free(keys);
             return options;
         }
