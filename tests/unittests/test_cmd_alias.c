@@ -70,6 +70,8 @@ void cmd_alias_add_adds_alias(void **state)
 
     char *returned_val = prefs_get_alias("hc");
     assert_string_equal("/help commands", returned_val);
+
+    free(returned_val);
 }
 
 void cmd_alias_add_shows_message_when_exists(void **state)
@@ -99,6 +101,8 @@ void cmd_alias_remove_removes_alias(void **state)
 
     char *returned_val = prefs_get_alias("hn");
     assert_null(returned_val);
+    
+    free(returned_val);
 }
 
 void cmd_alias_remove_shows_message_when_no_alias(void **state)
