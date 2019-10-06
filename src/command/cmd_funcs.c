@@ -348,6 +348,7 @@ cmd_connect(ProfWin *window, const char *const command, gchar **args)
     if (!parsed) {
         cons_bad_cmd_usage(command);
         cons_show("");
+        options_destroy(options);
         return TRUE;
     }
 
@@ -362,6 +363,7 @@ cmd_connect(ProfWin *window, const char *const command, gchar **args)
             (g_strcmp0(tls_policy, "legacy") != 0)) {
         cons_bad_cmd_usage(command);
         cons_show("");
+        options_destroy(options);
         return TRUE;
     }
 
@@ -375,6 +377,7 @@ cmd_connect(ProfWin *window, const char *const command, gchar **args)
             cons_show("");
             free(err_msg);
             port = 0;
+            options_destroy(options);
             return TRUE;
         }
     }
@@ -388,6 +391,7 @@ cmd_connect(ProfWin *window, const char *const command, gchar **args)
         } else {
             cons_show("No default account.");
             g_free(def);
+            options_destroy(options);
             return TRUE;
         }
     }
@@ -422,6 +426,7 @@ cmd_connect(ProfWin *window, const char *const command, gchar **args)
                 cons_show("Error evaluating password, see logs for details.");
                 account_free(account);
                 free(user);
+                options_destroy(options);
                 return TRUE;
             }
 
