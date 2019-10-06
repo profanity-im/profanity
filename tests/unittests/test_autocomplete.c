@@ -11,21 +11,21 @@
 void clear_empty(void **state)
 {
     Autocomplete ac = autocomplete_new();
-    autocomplete_clear(ac);
+    autocomplete_free(ac);
 }
 
 void reset_after_create(void **state)
 {
     Autocomplete ac = autocomplete_new();
     autocomplete_reset(ac);
-    autocomplete_clear(ac);
+    autocomplete_free(ac);
 }
 
 void find_after_create(void **state)
 {
     Autocomplete ac = autocomplete_new();
     autocomplete_complete(ac, "hello", TRUE, FALSE);
-    autocomplete_clear(ac);
+    autocomplete_free(ac);
 }
 
 void get_after_create_returns_null(void **state)
@@ -35,7 +35,7 @@ void get_after_create_returns_null(void **state)
 
     assert_null(result);
 
-    autocomplete_clear(ac);
+    autocomplete_free(ac);
     g_list_free_full(result, free);
 }
 
@@ -47,7 +47,7 @@ void add_one_and_complete(void **state)
 
     assert_string_equal("Hello", result);
 
-    autocomplete_clear(ac);
+    autocomplete_free(ac);
 }
 
 void add_two_and_complete_returns_first(void **state)
@@ -59,7 +59,7 @@ void add_two_and_complete_returns_first(void **state)
 
     assert_string_equal("Hello", result);
 
-    autocomplete_clear(ac);
+    autocomplete_free(ac);
 }
 
 void add_two_and_complete_returns_second(void **state)
@@ -72,7 +72,7 @@ void add_two_and_complete_returns_second(void **state)
 
     assert_string_equal("Help", result2);
 
-    autocomplete_clear(ac);
+    autocomplete_free(ac);
 }
 
 void add_two_adds_two(void **state)
@@ -84,7 +84,7 @@ void add_two_adds_two(void **state)
 
     assert_int_equal(2, g_list_length(result));
 
-    autocomplete_clear(ac);
+    autocomplete_free(ac);
     g_list_free_full(result, free);
 }
 
@@ -97,7 +97,7 @@ void add_two_same_adds_one(void **state)
 
     assert_int_equal(1, g_list_length(result));
 
-    autocomplete_clear(ac);
+    autocomplete_free(ac);
     g_list_free_full(result, free);
 }
 
@@ -114,7 +114,7 @@ void add_two_same_updates(void **state)
 
     assert_string_equal("Hello", str);
 
-    autocomplete_clear(ac);
+    autocomplete_free(ac);
     g_list_free_full(result, free);
 }
 
@@ -127,7 +127,7 @@ void complete_accented_with_accented(void **state)
 
     assert_string_equal("èâîô", result);
 
-    autocomplete_clear(ac);
+    autocomplete_free(ac);
 }
 
 void complete_accented_with_base(void **state)
@@ -139,7 +139,7 @@ void complete_accented_with_base(void **state)
 
     assert_string_equal("èâîô", result);
 
-    autocomplete_clear(ac);
+    autocomplete_free(ac);
 }
 
 void complete_both_with_accented(void **state)
@@ -153,7 +153,7 @@ void complete_both_with_accented(void **state)
 
     assert_string_equal("èâîô", result2);
 
-    autocomplete_clear(ac);
+    autocomplete_free(ac);
 }
 
 void complete_both_with_base(void **state)
@@ -167,7 +167,7 @@ void complete_both_with_base(void **state)
 
     assert_string_equal("èâîô", result2);
 
-    autocomplete_clear(ac);
+    autocomplete_free(ac);
 }
 
 void complete_ignores_case(void **state)
@@ -179,7 +179,7 @@ void complete_ignores_case(void **state)
 
     assert_string_equal("MyBuddy", result);
 
-    autocomplete_clear(ac);
+    autocomplete_free(ac);
 }
 
 void complete_previous(void **state)
@@ -196,5 +196,5 @@ void complete_previous(void **state)
 
     assert_string_equal("MyBuddy2", result4);
 
-    autocomplete_clear(ac);
+    autocomplete_free(ac);
 }
