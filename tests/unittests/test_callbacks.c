@@ -17,6 +17,7 @@ void returns_no_commands(void **state)
     assert_true(commands == NULL);
 
     callbacks_close();
+    g_list_free(commands);
 }
 
 void returns_commands(void **state)
@@ -57,6 +58,7 @@ void returns_commands(void **state)
 
     assert_true(foundCommand1 && foundCommand2 && foundCommand3);
 
+    g_list_free(names);
     //TODO: why does this make the test fail?
     //callbacks_close();
 }
