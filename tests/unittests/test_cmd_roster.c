@@ -57,8 +57,8 @@ void cmd_roster_shows_roster_when_no_args(void **state)
     gboolean result = cmd_roster(NULL, CMD_ROSTER, args);
     assert_true(result);
 
-    g_slist_free(roster);
     roster_destroy();
+    g_slist_free(roster);
 }
 
 void cmd_roster_add_shows_message_when_no_jid(void **state)
@@ -178,8 +178,8 @@ void cmd_roster_nick_sends_name_change_request(void **state)
     PContact contact = roster_get_contact(jid);
     assert_string_equal(p_contact_name(contact), nick);
 
-    g_slist_free(groups);
     roster_destroy();
+    g_slist_free(groups);
 }
 
 void cmd_roster_clearnick_shows_message_when_no_jid(void **state)
@@ -234,6 +234,6 @@ void cmd_roster_clearnick_sends_name_change_request_with_empty_nick(void **state
     PContact contact = roster_get_contact(jid);
     assert_null(p_contact_name(contact));
 
-    g_slist_free(groups);
     roster_destroy();
+    g_slist_free(groups);
 }
