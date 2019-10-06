@@ -14,6 +14,8 @@ void empty_list_when_none_added(void **state)
     roster_create();
     GSList *list = roster_get_contacts(ROSTER_ORD_NAME);
     assert_null(list);
+
+    g_slist_free(list);
     roster_destroy();
 }
 
@@ -23,6 +25,8 @@ void contains_one_element(void **state)
     roster_add("James", NULL, NULL, NULL, FALSE);
     GSList *list = roster_get_contacts(ROSTER_ORD_NAME);
     assert_int_equal(1, g_slist_length(list));
+
+    g_slist_free(list);
     roster_destroy();
 }
 
@@ -34,6 +38,8 @@ void first_element_correct(void **state)
     PContact james = list->data;
 
     assert_string_equal("James", p_contact_barejid(james));
+
+    g_slist_free(list);
     roster_destroy();
 }
 
@@ -45,6 +51,8 @@ void contains_two_elements(void **state)
     GSList *list = roster_get_contacts(ROSTER_ORD_NAME);
 
     assert_int_equal(2, g_slist_length(list));
+
+    g_slist_free(list);
     roster_destroy();
 }
 
@@ -60,6 +68,8 @@ void first_and_second_elements_correct(void **state)
 
     assert_string_equal("Dave", p_contact_barejid(first));
     assert_string_equal("James", p_contact_barejid(second));
+
+    g_slist_free(list);
     roster_destroy();
 }
 
@@ -72,6 +82,8 @@ void contains_three_elements(void **state)
     GSList *list = roster_get_contacts(ROSTER_ORD_NAME);
 
     assert_int_equal(3, g_slist_length(list));
+
+    g_slist_free(list);
     roster_destroy();
 }
 
@@ -89,6 +101,8 @@ void first_three_elements_correct(void **state)
     assert_string_equal("James", p_contact_barejid(james));
     assert_string_equal("Dave", p_contact_barejid(dave));
     assert_string_equal("Bob", p_contact_barejid(bob));
+
+    g_slist_free(list);
     roster_destroy();
 }
 
@@ -108,6 +122,8 @@ void add_twice_at_beginning_adds_once(void **state)
     assert_string_equal("Bob", p_contact_barejid(first));
     assert_string_equal("Dave", p_contact_barejid(second));
     assert_string_equal("James", p_contact_barejid(third));
+
+    g_slist_free(list);
     roster_destroy();
 }
 
@@ -127,6 +143,8 @@ void add_twice_in_middle_adds_once(void **state)
     assert_string_equal("Bob", p_contact_barejid(first));
     assert_string_equal("Dave", p_contact_barejid(second));
     assert_string_equal("James", p_contact_barejid(third));
+
+    g_slist_free(list);
     roster_destroy();
 }
 
@@ -146,6 +164,8 @@ void add_twice_at_end_adds_once(void **state)
     assert_string_equal("Bob", p_contact_barejid(first));
     assert_string_equal("Dave", p_contact_barejid(second));
     assert_string_equal("James", p_contact_barejid(third));
+
+    g_slist_free(list);
     roster_destroy();
 }
 
