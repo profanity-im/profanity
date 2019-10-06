@@ -294,10 +294,13 @@ sv_ev_room_message(ProfMessage *message)
 
     char *mynick = muc_nick(mucwin->roomjid);
 
-    if (message->enc == PROF_MSG_ENC_OMEMO) {
-        groupchat_log_omemo_msg_in(message->jid->barejid, message->jid->resourcepart, message->plain);
-    } else {
-        groupchat_log_msg_in(message->jid->barejid, message->jid->resourcepart, message->plain);
+    // only log messages from others. we log our own via mucwin_outgoing_msg()
+    if (g_strcmp0(mynick, message->jid->resourcepart) != 0) {
+        if (message->enc == PROF_MSG_ENC_OMEMO) {
+            groupchat_log_omemo_msg_in(message->jid->barejid, message->jid->resourcepart, message->plain);
+        } else {
+            groupchat_log_msg_in(message->jid->barejid, message->jid->resourcepart, message->plain);
+        }
     }
 
     char *old_plain = message->plain;
