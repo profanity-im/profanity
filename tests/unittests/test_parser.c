@@ -357,6 +357,8 @@ parse_cmd_with_third_arg_quoted_0_min_3_max(void **state)
     assert_string_equal("add", args[0]);
     assert_string_equal("friends", args[1]);
     assert_string_equal("The User", args[2]);
+
+    g_strfreev(args);
 }
 
 void
@@ -371,6 +373,8 @@ parse_cmd_with_second_arg_quoted_0_min_3_max(void **state)
     assert_string_equal("add", args[0]);
     assert_string_equal("The Group", args[1]);
     assert_string_equal("friend", args[2]);
+
+    g_strfreev(args);
 }
 
 void
