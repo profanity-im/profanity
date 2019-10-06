@@ -206,4 +206,7 @@ autocompleters_reset(void)
 void autocompleters_destroy(void)
 {
     g_hash_table_destroy(plugin_to_acs);
+    g_hash_table_destroy(plugin_to_filepath_acs);
+    plugin_to_acs = NULL;
+    plugin_to_filepath_acs = NULL;
 }
