@@ -79,7 +79,7 @@ static void _private_chat_handler(xmpp_stanza_t *const stanza);
 
 static void _handle_error(xmpp_stanza_t *const stanza);
 static void _handle_groupchat(xmpp_stanza_t *const stanza);
-static void _handel_muc_user(xmpp_stanza_t *const stanza);
+static void _handle_muc_user(xmpp_stanza_t *const stanza);
 static void _handle_conference(xmpp_stanza_t *const stanza);
 static void _handle_captcha(xmpp_stanza_t *const stanza);
 static void _handle_receipt_received(xmpp_stanza_t *const stanza);
@@ -115,7 +115,7 @@ _message_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza, void *con
 
     xmpp_stanza_t *mucuser = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_MUC_USER);
     if (mucuser) {
-        _handel_muc_user(stanza);
+        _handle_muc_user(stanza);
     }
 
     xmpp_stanza_t *conference = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_CONFERENCE);
@@ -639,7 +639,7 @@ _handle_error(xmpp_stanza_t *const stanza)
 }
 
 static void
-_handel_muc_user(xmpp_stanza_t *const stanza)
+_handle_muc_user(xmpp_stanza_t *const stanza)
 {
     xmpp_ctx_t *ctx = connection_get_ctx();
     xmpp_stanza_t *xns_muc_user = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_MUC_USER);
