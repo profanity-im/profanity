@@ -46,7 +46,7 @@ void cmd_rooms_uses_account_default_when_no_arg(void **state)
     gchar *args[] = { NULL };
 
     ProfAccount *account = account_new("testaccount", NULL, NULL, NULL, TRUE, NULL, 0, NULL, NULL, NULL,
-        0, 0, 0, 0, 0, strdup("default_conf_server"), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+        0, 0, 0, 0, 0, "default_conf_server", NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
 
     will_return(connection_get_status, JABBER_CONNECTED);
     will_return(session_get_account_name, "account_name");
@@ -83,8 +83,9 @@ void cmd_rooms_filter_arg_used_when_passed(void **state)
 {
     gchar *args[] = { "filter", "text", NULL };
 
+
     ProfAccount *account = account_new("testaccount", NULL, NULL, NULL, TRUE, NULL, 0, NULL, NULL, NULL,
-        0, 0, 0, 0, 0, strdup("default_conf_server"), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+        0, 0, 0, 0, 0, "default_conf_server", NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
 
     will_return(connection_get_status, JABBER_CONNECTED);
     will_return(session_get_account_name, "account_name");
