@@ -385,6 +385,8 @@ parse_cmd_with_second_and_third_arg_quoted_0_min_3_max(void **state)
     assert_string_equal("add", args[0]);
     assert_string_equal("The Group", args[1]);
     assert_string_equal("The User", args[2]);
+
+    g_strfreev(args);
 }
 
 void
