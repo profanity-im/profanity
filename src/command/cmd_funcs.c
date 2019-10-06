@@ -4593,6 +4593,8 @@ cmd_rooms(ProfWin *window, const char *const command, gchar **args)
         } else {
             cons_bad_cmd_usage(command);
             cons_show("");
+            g_free(service);
+            g_free(filter);
             return TRUE;
         }
     }
@@ -4620,6 +4622,7 @@ cmd_rooms(ProfWin *window, const char *const command, gchar **args)
     iq_room_list_request(service, filter);
 
     g_free(service);
+    g_free(filter);
 
     return TRUE;
 }
