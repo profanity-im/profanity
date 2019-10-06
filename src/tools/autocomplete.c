@@ -366,10 +366,17 @@ autocomplete_param_no_with_func(const char *const input, char *command, int arg_
                     result_str = g_string_new("");
                     g_string_append(result_str, start_str);
                     g_string_append(result_str, found);
+
+                    free(start_str);
+                    free(comp_str);
+
                     char *result = result_str->str;
                     g_string_free(result_str, FALSE);
+
                     return result;
                 }
+            } else {
+                free(start_str);
             }
         }
     }
