@@ -2100,7 +2100,9 @@ static struct cmd_t command_defs[] =
             "/account set me nick dennis",
             "/account set me status dnd",
             "/account set me dnd -1",
-            "/account rename me chattyme")
+            "/account rename me chattyme",
+            "/account clear me pgpkeyid"
+            )
     },
 
     { "/plugins",
