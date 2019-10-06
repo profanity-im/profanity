@@ -3656,6 +3656,11 @@ cmd_join(ProfWin *window, const char *const command, gchar **args)
     jid_destroy(room_arg);
     account_free(account);
 
+    if (account->muc_service) {
+        // then we allocated the memory ourself (see above)
+        free(room);
+    }
+
     return TRUE;
 }
 
