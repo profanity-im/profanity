@@ -368,6 +368,7 @@ get_start(const char *const string, int tokens)
             int len = g_unichar_to_utf8(curr_uni, uni_char);
             uni_char[len] = '\0';
             g_string_append(result, uni_char);
+            free(uni_char);
         }
         if (curr_uni == ' ') {
             if (!in_quotes) {
