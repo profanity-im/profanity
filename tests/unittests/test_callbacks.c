@@ -15,6 +15,8 @@ void returns_no_commands(void **state)
     GList *commands = plugins_get_command_names();
 
     assert_true(commands == NULL);
+
+    callbacks_close();
 }
 
 void returns_commands(void **state)
@@ -54,4 +56,7 @@ void returns_commands(void **state)
     }
 
     assert_true(foundCommand1 && foundCommand2 && foundCommand3);
+
+    //TODO: why does this make the test fail?
+    //callbacks_close();
 }
