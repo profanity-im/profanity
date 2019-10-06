@@ -69,8 +69,8 @@ typedef struct _muc_room_t {
 
 GHashTable *rooms = NULL;
 GHashTable *invite_passwords = NULL;
-Autocomplete invite_ac;
-Autocomplete confservers_ac;
+Autocomplete invite_ac = NULL;
+Autocomplete confservers_ac = NULL;
 
 static void _free_room(ChatRoom *room);
 static gint _compare_occupants(Occupant *a, Occupant *b);
@@ -100,6 +100,8 @@ muc_close(void)
     g_hash_table_destroy(invite_passwords);
     rooms = NULL;
     invite_passwords = NULL;
+    invite_ac = NULL;
+    confservers_ac = NULL;
 }
 
 void
