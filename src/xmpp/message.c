@@ -1089,6 +1089,10 @@ _handle_chat(xmpp_stanza_t *const stanza)
     ProfMessage *message = message_init();
     message->jid = jid;
 
+    if (mucuser) {
+        message->mucuser = TRUE;
+    }
+
     message->timestamp = stanza_get_delay(stanza);
     if (body) {
         message->body = xmpp_stanza_get_text(body);

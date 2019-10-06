@@ -56,6 +56,7 @@ typedef struct prof_message_t {
    GDateTime *timestamp;
    prof_enc_t enc;
    gboolean trusted;
+   gboolean mucuser;
 } ProfMessage;
 
 typedef int(*ProfMessageCallback)(xmpp_stanza_t *const stanza, void *const userdata);

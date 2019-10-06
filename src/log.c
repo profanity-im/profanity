@@ -90,7 +90,7 @@ static char* _get_groupchat_log_filename(const char *const room, const char *con
 static void _rotate_log_file(void);
 static char* _log_string_from_level(log_level_t level);
 static void _chat_log_chat(const char *const login, const char *const other, const gchar *const msg,
-    chat_log_direction_t direction, GDateTime *timestamp);
+    chat_log_direction_t direction, GDateTime *timestamp, const char *const resourcepart);
 static void _groupchat_log_chat(const gchar *const login, const gchar *const room, const gchar *const nick,
     const gchar *const msg);
 
@@ -272,7 +272,7 @@ chat_log_msg_out(const char *const barejid, const char *const msg)
     if (prefs_get_boolean(PREF_CHLOG)) {
         const char *jid = connection_get_fulljid();
         Jid *jidp = jid_create(jid);
-        _chat_log_chat(jidp->barejid, barejid, msg, PROF_OUT_LOG, NULL);
+        _chat_log_chat(jidp->barejid, barejid, msg, PROF_OUT_LOG, NULL, NULL);
         jid_destroy(jidp);
     }
 }
@@ -285,9 +285,9 @@ chat_log_otr_msg_out(const char *const barejid, const char *const msg)
         Jid *jidp = jid_create(jid);
         char *pref_otr_log = prefs_get_string(PREF_OTR_LOG);
         if (strcmp(pref_otr_log, "on") == 0) {
-            _chat_log_chat(jidp->barejid, barejid, msg, PROF_OUT_LOG, NULL);
+            _chat_log_chat(jidp->barejid, barejid, msg, PROF_OUT_LOG, NULL, NULL);
         } else if (strcmp(pref_otr_log, "redact") == 0) {
-            _chat_log_chat(jidp->barejid, barejid, "[redacted]", PROF_OUT_LOG, NULL);
+            _chat_log_chat(jidp->barejid, barejid, "[redacted]", PROF_OUT_LOG, NULL, NULL);
         }
         prefs_free_string(pref_otr_log);
         jid_destroy(jidp);
@@ -302,9 +302,9 @@ chat_log_pgp_msg_out(const char *const barejid, const char *const msg)
         Jid *jidp = jid_create(jid);
         char *pref_pgp_log = prefs_get_string(PREF_PGP_LOG);
         if (strcmp(pref_pgp_log, "on") == 0) {
-            _chat_log_chat(jidp->barejid, barejid, msg, PROF_OUT_LOG, NULL);
+            _chat_log_chat(jidp->barejid, barejid, msg, PROF_OUT_LOG, NULL, NULL);
         } else if (strcmp(pref_pgp_log, "redact") == 0) {
-            _chat_log_chat(jidp->barejid, barejid, "[redacted]", PROF_OUT_LOG, NULL);
+            _chat_log_chat(jidp->barejid, barejid, "[redacted]", PROF_OUT_LOG, NULL, NULL);
         }
         prefs_free_string(pref_pgp_log);
         jid_destroy(jidp);
@@ -319,9 +319,9 @@ chat_log_omemo_msg_out(const char *const barejid, const char *const msg)
         Jid *jidp = jid_create(jid);
         char *pref_omemo_log = prefs_get_string(PREF_OMEMO_LOG);
         if (strcmp(pref_omemo_log, "on") == 0) {
-            _chat_log_chat(jidp->barejid, barejid, msg, PROF_OUT_LOG, NULL);
+            _chat_log_chat(jidp->barejid, barejid, msg, PROF_OUT_LOG, NULL, NULL);
         } else if (strcmp(pref_omemo_log, "redact") == 0) {
-            _chat_log_chat(jidp->barejid, barejid, "[redacted]", PROF_OUT_LOG, NULL);
+            _chat_log_chat(jidp->barejid, barejid, "[redacted]", PROF_OUT_LOG, NULL, NULL);
         }
         prefs_free_string(pref_omemo_log);
         jid_destroy(jidp);
@@ -336,9 +336,17 @@ chat_log_otr_msg_in(ProfMessage *message)
         Jid *jidp = jid_create(jid);
         char *pref_otr_log = prefs_get_string(PREF_OTR_LOG);
         if (message->enc == PROF_MSG_ENC_PLAIN || (strcmp(pref_otr_log, "on") == 0)) {
-            _chat_log_chat(jidp->barejid, message->jid->barejid, message->plain, PROF_IN_LOG, message->timestamp);
+            if (message->mucuser) {
+                _chat_log_chat(jidp->barejid, message->jid->barejid, message->plain, PROF_IN_LOG, message->timestamp, message->jid->resourcepart);
+            } else {
+                _chat_log_chat(jidp->barejid, message->jid->barejid, message->plain, PROF_IN_LOG, message->timestamp, NULL);
+            }
         } else if (strcmp(pref_otr_log, "redact") == 0) {
-            _chat_log_chat(jidp->barejid, message->jid->barejid, "[redacted]", PROF_IN_LOG, message->timestamp);
+            if (message->mucuser) {
+                _chat_log_chat(jidp->barejid, message->jid->barejid, "[redacted]", PROF_IN_LOG, message->timestamp, message->jid->resourcepart);
+            } else {
+                _chat_log_chat(jidp->barejid, message->jid->barejid, "[redacted]", PROF_IN_LOG, message->timestamp, NULL);
+            }
         }
         prefs_free_string(pref_otr_log);
         jid_destroy(jidp);
@@ -353,9 +361,17 @@ chat_log_pgp_msg_in(ProfMessage *message)
         Jid *jidp = jid_create(jid);
         char *pref_pgp_log = prefs_get_string(PREF_PGP_LOG);
         if (strcmp(pref_pgp_log, "on") == 0) {
-            _chat_log_chat(jidp->barejid, message->jid->barejid, message->plain, PROF_IN_LOG, message->timestamp);
+            if (message->mucuser) {
+                _chat_log_chat(jidp->barejid, message->jid->barejid, message->plain, PROF_IN_LOG, message->timestamp, message->jid->resourcepart);
+            } else {
+                _chat_log_chat(jidp->barejid, message->jid->barejid, message->plain, PROF_IN_LOG, message->timestamp, NULL);
+            }
         } else if (strcmp(pref_pgp_log, "redact") == 0) {
-            _chat_log_chat(jidp->barejid, message->jid->barejid, "[redacted]", PROF_IN_LOG, message->timestamp);
+            if (message->mucuser) {
+                _chat_log_chat(jidp->barejid, message->jid->barejid, "[redacted]", PROF_IN_LOG, message->timestamp, message->jid->resourcepart);
+            } else {
+                _chat_log_chat(jidp->barejid, message->jid->barejid, "[redacted]", PROF_IN_LOG, message->timestamp, NULL);
+            }
         }
         prefs_free_string(pref_pgp_log);
         jid_destroy(jidp);
@@ -370,9 +386,17 @@ chat_log_omemo_msg_in(ProfMessage *message)
         Jid *jidp = jid_create(jid);
         char *pref_omemo_log = prefs_get_string(PREF_OMEMO_LOG);
         if (strcmp(pref_omemo_log, "on") == 0) {
-            _chat_log_chat(jidp->barejid, message->jid->barejid, message->plain, PROF_IN_LOG, message->timestamp);
+            if (message->mucuser) {
+                _chat_log_chat(jidp->barejid, message->jid->barejid, message->plain, PROF_IN_LOG, message->timestamp, message->jid->resourcepart);
+            } else {
+                _chat_log_chat(jidp->barejid, message->jid->barejid, message->plain, PROF_IN_LOG, message->timestamp, NULL);
+            }
         } else if (strcmp(pref_omemo_log, "redact") == 0) {
-            _chat_log_chat(jidp->barejid, message->jid->barejid, "[redacted]", PROF_IN_LOG, message->timestamp);
+            if (message->mucuser) {
+                _chat_log_chat(jidp->barejid, message->jid->barejid, "[redacted]", PROF_IN_LOG, message->timestamp, message->jid->resourcepart);
+            } else {
+                _chat_log_chat(jidp->barejid, message->jid->barejid, "[redacted]", PROF_IN_LOG, message->timestamp, message->jid->resourcepart);
+            }
         }
         prefs_free_string(pref_omemo_log);
         jid_destroy(jidp);
@@ -385,31 +409,53 @@ chat_log_msg_in(ProfMessage *message)
     if (prefs_get_boolean(PREF_CHLOG)) {
         const char *jid = connection_get_fulljid();
         Jid *jidp = jid_create(jid);
-        _chat_log_chat(jidp->barejid, message->jid->barejid, message->plain, PROF_IN_LOG, message->timestamp);
+
+        if (message->mucuser) {
+            _chat_log_chat(jidp->barejid, message->jid->barejid, message->plain, PROF_IN_LOG, message->timestamp, message->jid->resourcepart);
+        } else {
+            _chat_log_chat(jidp->barejid, message->jid->barejid, message->plain, PROF_IN_LOG, message->timestamp, NULL);
+        }
         jid_destroy(jidp);
     }
 }
 
 static void
 _chat_log_chat(const char *const login, const char *const other, const char *const msg,
-    chat_log_direction_t direction, GDateTime *timestamp)
+    chat_log_direction_t direction, GDateTime *timestamp, const char *const resourcepart)
 {
-    struct dated_chat_log *dated_log = g_hash_table_lookup(logs, other);
+    char *other_name;
+    GString *other_str = NULL;
+
+    if (resourcepart) {
+        other_str = g_string_new(other);
+        g_string_append(other_str, "_");
+        g_string_append(other_str, resourcepart);
+
+        other_name = other_str->str;
+    } else {
+        other_name = (char*)other;
+    }
+
+    struct dated_chat_log *dated_log = g_hash_table_lookup(logs, other_name);
 
     // no log for user
     if (dated_log == NULL) {
-        dated_log = _create_log(other, login);
-        g_hash_table_insert(logs, strdup(other), dated_log);
+        dated_log = _create_log(other_name, login);
+        g_hash_table_insert(logs, strdup(other_name), dated_log);
 
     // log entry exists but file removed
     } else if (!g_file_test(dated_log->filename, G_FILE_TEST_EXISTS)) {
-        dated_log = _create_log(other, login);
-        g_hash_table_replace(logs, strdup(other), dated_log);
+        dated_log = _create_log(other_name, login);
+        g_hash_table_replace(logs, strdup(other_name), dated_log);
 
     // log file needs rolling
     } else if (_log_roll_needed(dated_log)) {
-        dated_log = _create_log(other, login);
-        g_hash_table_replace(logs, strdup(other), dated_log);
+        dated_log = _create_log(other_name, login);
+        g_hash_table_replace(logs, strdup(other_name), dated_log);
+    }
+
+    if (resourcepart) {
+            g_string_free(other_str, TRUE);
     }
 
     if (timestamp == NULL) {
@@ -424,9 +470,17 @@ _chat_log_chat(const char *const login, const char *const other, const char *con
     if (logp) {
         if (direction == PROF_IN_LOG) {
             if (strncmp(msg, "/me ", 4) == 0) {
-                fprintf(logp, "%s - *%s %s\n", date_fmt, other, msg + 4);
+                if (resourcepart) {
+                    fprintf(logp, "%s - *%s %s\n", date_fmt, resourcepart, msg + 4);
+                } else {
+                    fprintf(logp, "%s - *%s %s\n", date_fmt, other, msg + 4);
+                }
             } else {
-                fprintf(logp, "%s - %s: %s\n", date_fmt, other, msg);
+                if (resourcepart) {
+                    fprintf(logp, "%s - %s: %s\n", date_fmt, resourcepart, msg);
+                } else {
+                    fprintf(logp, "%s - %s: %s\n", date_fmt, other, msg);
+                }
             }
         } else {
             if (strncmp(msg, "/me ", 4) == 0) {
