@@ -32,15 +32,12 @@
  *
  */
 
-#include "config.h"
-
 #include <Python.h>
+
+#include "config.h"
 #include <frameobject.h>
-
 #include <stdlib.h>
-
 #include <glib.h>
-
 #include "log.h"
 #include "plugins/api.h"
 #include "plugins/python_api.h"
