@@ -179,7 +179,6 @@ void cmd_roster_nick_sends_name_change_request(void **state)
     assert_string_equal(p_contact_name(contact), nick);
 
     roster_destroy();
-    g_slist_free(groups);
 }
 
 void cmd_roster_clearnick_shows_message_when_no_jid(void **state)
