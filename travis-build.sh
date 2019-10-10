@@ -69,6 +69,9 @@ do
     ./configure $flags
     make
     make check
+    if [ $? -eq 1 ]; then
+        cat ./test-suite.log
+    fi
     ./profanity -v
     make clean
 
