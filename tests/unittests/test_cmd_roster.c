@@ -58,7 +58,6 @@ void cmd_roster_shows_roster_when_no_args(void **state)
     assert_true(result);
 
     roster_destroy();
-    g_slist_free(roster);
 }
 
 void cmd_roster_add_shows_message_when_no_jid(void **state)
@@ -234,5 +233,4 @@ void cmd_roster_clearnick_sends_name_change_request_with_empty_nick(void **state
     assert_null(p_contact_name(contact));
 
     roster_destroy();
-    g_slist_free(groups);
 }
