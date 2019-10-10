@@ -1013,8 +1013,12 @@ cmd_account(ProfWin *window, const char *const command, gchar **args)
     }
 
     ProfAccount *account = accounts_get_account(session_get_account_name());
-    cons_show_account(account);
-    account_free(account);
+    if (account) {
+        cons_show_account(account);
+        account_free(account);
+    } else {
+        log_error("Could not get accounts");
+    }
 
     return TRUE;
 }
