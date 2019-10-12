@@ -1,5 +1,6 @@
 [colours]
 bkgnd=default
+cmd.wins.unread=yellow
 titlebar=black
 titlebar.text=default
 titlebar.brackets=default
