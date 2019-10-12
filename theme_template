@@ -79,6 +79,7 @@ roster.room.mention=
 occupants.header=
 receipt.sent=
 untrusted=
+cmd.wins.unread=
 
 [ui]
 beep=

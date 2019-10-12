@@ -137,6 +137,7 @@ typedef enum {
     THEME_MAGENTA,
     THEME_MAGENTA_BOLD,
     THEME_TEXT_HISTORY,
+    THEME_CMD_WINS_UNREAD,
 } theme_item_t;
 
 void theme_init(const char *const theme_name);

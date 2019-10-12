@@ -498,7 +498,11 @@ cons_show_wins(gboolean unread)
 
     GSList *curr = window_strings;
     while (curr) {
-        win_println(console, THEME_DEFAULT, '-', "%s", curr->data);
+        if (g_strstr_len(curr->data, strlen(curr->data), " unread") > 0) {
+            win_println(console, THEME_CMD_WINS_UNREAD, '-', "%s", curr->data);
+        } else {
+            win_println(console, THEME_DEFAULT, '-', "%s", curr->data);
+        }
         curr = g_slist_next(curr);
     }
     g_slist_free_full(window_strings, free);
