@@ -3606,7 +3606,7 @@ cmd_join(ProfWin *window, const char *const command, gchar **args)
 
     // full room jid supplied (room@server)
     if (room_arg->localpart) {
-        room = args[0];
+        room = g_strdup(args[0]);
 
     // server not supplied (room), use account preference
     } else if (account->muc_service) {
@@ -3631,6 +3631,7 @@ cmd_join(ProfWin *window, const char *const command, gchar **args)
     if (!parsed) {
         cons_bad_cmd_usage(command);
         cons_show("");
+        g_free(room);
         jid_destroy(room_arg);
         return TRUE;
     }
@@ -3657,6 +3658,7 @@ cmd_join(ProfWin *window, const char *const command, gchar **args)
         ui_switch_to_room(room);
     }
 
+    g_free(room);
     jid_destroy(room_arg);
     account_free(account);
 
