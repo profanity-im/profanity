@@ -57,6 +57,7 @@ void cmd_roster_shows_roster_when_no_args(void **state)
     gboolean result = cmd_roster(NULL, CMD_ROSTER, args);
     assert_true(result);
 
+    g_slist_free(roster);
     roster_destroy();
 }
 
