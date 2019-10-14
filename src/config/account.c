@@ -57,6 +57,7 @@ account_new(const gchar *const name, const gchar *const jid,
     const char *const theme, gchar *tls_policy)
 {
     ProfAccount *new_account = malloc(sizeof(ProfAccount));
+    memset(new_account, 0, sizeof(ProfAccount));
 
     new_account->name = strdup(name);
 
