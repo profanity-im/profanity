@@ -32,6 +32,7 @@
  *
  */
 
+#undef _XOPEN_SOURCE
 #include <Python.h>
 
 #include "config.h"
