@@ -49,6 +49,7 @@
 #include <strophe.h>
 #endif
 
+#include "common.h"
 #include "log.h"
 #include "config/files.h"
 #include "config/preferences.h"
@@ -632,11 +633,11 @@ static void _random_bytes_init()
     rndbytes = g_key_file_new();
     g_key_file_load_from_file(rndbytes, rndbytes_loc, G_KEY_FILE_KEEP_COMMENTS, NULL);
 
-    if (g_key_file_has_group(rndbytes, "instance")) {
-        random_bytes = g_key_file_get_string(rndbytes, "instance", "random_bytes", NULL);
+    if (g_key_file_has_group(rndbytes, "identifier")) {
+        random_bytes = g_key_file_get_string(rndbytes, "identifier", "random_bytes", NULL);
     } else {
-        random_bytes = g_strdup("ASDF");
-        g_key_file_set_string(rndbytes, "instance", "random_bytes", random_bytes);
+        random_bytes = get_random_string(10);
+        g_key_file_set_string(rndbytes, "identifier", "random_bytes", random_bytes);
 
         gsize g_data_size;
         gchar *g_accounts_data = g_key_file_to_data(rndbytes, &g_data_size, NULL);
