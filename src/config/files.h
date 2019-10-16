@@ -2,6 +2,7 @@
  * files.h
  *
  * Copyright (C) 2012 - 2019 James Booth <boothj5@gmail.com>
+ * Copyright (C) 2018 - 2019 Michael Vetter <jubalh@idoru.org>
  *
  * This file is part of Profanity.
  *
@@ -43,7 +44,7 @@
 #define FILE_PLUGIN_SETTINGS "plugin_settings"
 #define FILE_PLUGIN_THEMES "plugin_themes"
 #define FILE_CAPSCACHE "capscache"
-#define FILE_RND_INST_BYTES "randbytes"
+#define FILE_PROFANITY_IDENTIFIER "profident"
 
 #define DIR_THEMES "themes"
 #define DIR_ICONS "icons"

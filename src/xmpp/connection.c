@@ -2,6 +2,7 @@
  * connection.c
  *
  * Copyright (C) 2012 - 2019 James Booth <boothj5@gmail.com>
+ * Copyright (C) 2018 - 2019 Michael Vetter <jubalh@idoru.org>
  *
  * This file is part of Profanity.
  *
@@ -624,7 +625,7 @@ static void _random_bytes_init()
     char *rndbytes_loc;
     GKeyFile *rndbytes;
 
-    rndbytes_loc = files_get_data_path(FILE_RND_INST_BYTES);
+    rndbytes_loc = files_get_data_path(FILE_PROFANITY_IDENTIFIER);
 
     if (g_file_test(rndbytes_loc, G_FILE_TEST_EXISTS)) {
         g_chmod(rndbytes_loc, S_IRUSR | S_IWUSR);
