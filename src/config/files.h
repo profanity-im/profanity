@@ -43,6 +43,7 @@
 #define FILE_PLUGIN_SETTINGS "plugin_settings"
 #define FILE_PLUGIN_THEMES "plugin_themes"
 #define FILE_CAPSCACHE "capscache"
+#define FILE_RND_INST_BYTES "randbytes"
 
 #define DIR_THEMES "themes"
 #define DIR_ICONS "icons"

@@ -38,6 +38,9 @@
 #include <string.h>
 #include <assert.h>
 
+#include <glib.h>
+#include <glib/gstdio.h>
+
 #ifdef HAVE_LIBMESODE
 #include <mesode.h>
 #endif
@@ -47,6 +50,7 @@
 #endif
 
 #include "log.h"
+#include "config/files.h"
 #include "config/preferences.h"
 #include "event/server_events.h"
 #include "xmpp/connection.h"
@@ -69,6 +73,7 @@ typedef struct prof_conn_t {
 } ProfConnection;
 
 static ProfConnection conn;
+static gchar *random_bytes;
 
 static xmpp_log_t* _xmpp_get_file_logger(void);
 static void _xmpp_file_logger(void *const userdata, const xmpp_log_level_t level, const char *const area, const char *const msg);
@@ -80,6 +85,9 @@ static void _connection_handler(xmpp_conn_t *const xmpp_conn, const xmpp_conn_ev
 TLSCertificate* _xmppcert_to_profcert(xmpp_tlscert_t *xmpptlscert);
 static int _connection_certfail_cb(xmpp_tlscert_t *xmpptlscert, const char *const errormsg);
 #endif
+
+static void _random_bytes_init();
+static void _random_bytes_close();
 
 void
 connection_init(void)
@@ -95,6 +103,8 @@ connection_init(void)
     conn.features_by_jid = NULL;
     conn.available_resources = g_hash_table_new_full(g_str_hash, g_str_equal, free, (GDestroyNotify)resource_destroy);
     conn.requested_features = g_hash_table_new_full(g_str_hash, g_str_equal, free, NULL);
+
+	_random_bytes_init();
 }
 
 void
@@ -113,6 +123,8 @@ connection_shutdown(void)
 
     free(conn.xmpp_log);
     conn.xmpp_log = NULL;
+
+	_random_bytes_close();
 }
 
 jabber_conn_status_t
@@ -604,4 +616,45 @@ _xmpp_file_logger(void *const userdata, const xmpp_log_level_t xmpp_level, const
     if ((g_strcmp0(area, "xmpp") == 0) || (g_strcmp0(area, "conn")) == 0) {
         sv_ev_xmpp_stanza(msg);
     }
+}
+
+static void _random_bytes_init()
+{
+    char *rndbytes_loc;
+    GKeyFile *rndbytes;
+
+    rndbytes_loc = files_get_data_path(FILE_RND_INST_BYTES);
+
+    if (g_file_test(rndbytes_loc, G_FILE_TEST_EXISTS)) {
+        g_chmod(rndbytes_loc, S_IRUSR | S_IWUSR);
+    }
+
+    rndbytes = g_key_file_new();
+    g_key_file_load_from_file(rndbytes, rndbytes_loc, G_KEY_FILE_KEEP_COMMENTS, NULL);
+
+    if (g_key_file_has_group(rndbytes, "instance")) {
+        random_bytes = g_key_file_get_string(rndbytes, "instance", "random_bytes", NULL);
+    } else {
+        random_bytes = g_strdup("ASDF");
+        g_key_file_set_string(rndbytes, "instance", "random_bytes", random_bytes);
+
+        gsize g_data_size;
+        gchar *g_accounts_data = g_key_file_to_data(rndbytes, &g_data_size, NULL);
+
+        gchar *base = g_path_get_basename(rndbytes_loc);
+        gchar *true_loc = get_file_or_linked(rndbytes_loc, base);
+        g_file_set_contents(true_loc, g_accounts_data, g_data_size, NULL);
+
+        g_free(base);
+        free(true_loc);
+        g_free(g_accounts_data);
+    }
+
+    free(rndbytes_loc);
+    g_key_file_free(rndbytes);
+}
+
+static void _random_bytes_close()
+{
+    g_free(random_bytes);
 }
