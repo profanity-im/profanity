@@ -75,7 +75,8 @@ typedef struct prof_conn_t {
 } ProfConnection;
 
 static ProfConnection conn;
-static gchar *random_bytes;
+static gchar *random_bytes = NULL;
+static gchar *prof_identifier = NULL;
 
 static xmpp_log_t* _xmpp_get_file_logger(void);
 static void _xmpp_file_logger(void *const userdata, const xmpp_log_level_t level, const char *const area, const char *const msg);
@@ -88,8 +89,9 @@ TLSCertificate* _xmppcert_to_profcert(xmpp_tlscert_t *xmpptlscert);
 static int _connection_certfail_cb(xmpp_tlscert_t *xmpptlscert, const char *const errormsg);
 #endif
 
-static void _random_bytes_init();
-static void _random_bytes_close();
+static void _random_bytes_init(void);
+static void _random_bytes_close(void);
+static void _calculate_identifier(const char *barejid);
 
 void
 connection_init(void)
@@ -142,6 +144,8 @@ connection_connect(const char *const jid, const char *const passwd, const char *
         conn.conn_status = JABBER_DISCONNECTED;
         return conn.conn_status;
     }
+
+    _calculate_identifier(jidp->barejid);
     jid_destroy(jidp);
 
     log_info("Connecting as %s", jid);
@@ -241,6 +245,8 @@ connection_disconnect(void)
             conn.xmpp_ctx = NULL;
         }
     }
+
+    free(prof_identifier);
 }
 
 void
@@ -620,7 +626,7 @@ _xmpp_file_logger(void *const userdata, const xmpp_log_level_t xmpp_level, const
     }
 }
 
-static void _random_bytes_init()
+static void _random_bytes_init(void)
 {
     char *rndbytes_loc;
     GKeyFile *rndbytes;
@@ -656,7 +662,24 @@ static void _random_bytes_init()
     g_key_file_free(rndbytes);
 }
 
-static void _random_bytes_close()
+static void _random_bytes_close(void)
 {
     g_free(random_bytes);
+}
+
+static void _calculate_identifier(const char *barejid)
+{
+    unsigned char *digest = (unsigned char*)malloc(XMPP_SHA1_DIGEST_SIZE);
+    assert(digest != NULL);
+
+    GString *inp = g_string_new("");
+    g_string_printf(inp, "%s%s", random_bytes, barejid);
+    xmpp_sha1_digest((unsigned char*)inp->str, strlen(inp->str), digest);
+    g_string_free(inp, TRUE);
+
+    char *b64 = g_base64_encode(digest, XMPP_SHA1_DIGEST_SIZE);
+    assert(b64 != NULL);
+    free(digest);
+
+    prof_identifier = b64;
 }
