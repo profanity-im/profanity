@@ -456,7 +456,7 @@ connection_free_uuid(char *uuid)
 }
 
 char*
-connection_create_stanza_id(char *prefix)
+connection_create_stanza_id(void)
 {
     unsigned char *digest = (unsigned char*)malloc(XMPP_SHA1_DIGEST_SIZE);
     char *msgid = get_random_string(10);

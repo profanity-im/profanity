@@ -254,7 +254,7 @@ message_send_chat(const char *const barejid, const char *const msg, const char *
 
     char *state = chat_session_get_state(barejid);
     char *jid = chat_session_get_jid(barejid);
-    char *id = connection_create_stanza_id("msg");
+    char *id = connection_create_stanza_id();
 
     xmpp_stanza_t *message = xmpp_message_new(ctx, STANZA_TYPE_CHAT, jid, id);
     xmpp_message_set_body(message, msg);
@@ -285,7 +285,7 @@ message_send_chat_pgp(const char *const barejid, const char *const msg, gboolean
 
     char *state = chat_session_get_state(barejid);
     char *jid = chat_session_get_jid(barejid);
-    char *id = connection_create_stanza_id("msg");
+    char *id = connection_create_stanza_id();
 
     xmpp_stanza_t *message = NULL;
 #ifdef HAVE_LIBGPGME
@@ -344,7 +344,7 @@ message_send_chat_otr(const char *const barejid, const char *const msg, gboolean
 
     char *state = chat_session_get_state(barejid);
     char *jid = chat_session_get_jid(barejid);
-    char *id = connection_create_stanza_id("msg");
+    char *id = connection_create_stanza_id();
 
     xmpp_stanza_t *message = xmpp_message_new(ctx, STANZA_TYPE_CHAT, barejid, id);
     xmpp_message_set_body(message, msg);
@@ -381,11 +381,11 @@ message_send_chat_omemo(const char *const jid, uint32_t sid, GList *keys,
     char *id;
     xmpp_stanza_t *message;
     if (muc) {
-        id = connection_create_stanza_id("muc");
+        id = connection_create_stanza_id();
         message = xmpp_message_new(ctx, STANZA_TYPE_GROUPCHAT, jid, id);
         stanza_attach_origin_id(ctx, message, id);
     } else {
-        id = connection_create_stanza_id("msg");
+        id = connection_create_stanza_id();
         message = xmpp_message_new(ctx, STANZA_TYPE_CHAT, jid, id);
     }
 
@@ -485,7 +485,7 @@ void
 message_send_private(const char *const fulljid, const char *const msg, const char *const oob_url)
 {
     xmpp_ctx_t * const ctx = connection_get_ctx();
-    char *id = connection_create_stanza_id("prv");
+    char *id = connection_create_stanza_id();
 
     xmpp_stanza_t *message = xmpp_message_new(ctx, STANZA_TYPE_CHAT, fulljid, id);
     xmpp_message_set_body(message, msg);
@@ -504,7 +504,7 @@ char*
 message_send_groupchat(const char *const roomjid, const char *const msg, const char *const oob_url)
 {
     xmpp_ctx_t * const ctx = connection_get_ctx();
-    char *id = connection_create_stanza_id("muc");
+    char *id = connection_create_stanza_id();
 
     xmpp_stanza_t *message = xmpp_message_new(ctx, STANZA_TYPE_GROUPCHAT, roomjid, id);
     stanza_attach_origin_id(ctx, message, id);
@@ -841,7 +841,7 @@ _message_send_receipt(const char *const fulljid, const char *const message_id)
 {
     xmpp_ctx_t * const ctx = connection_get_ctx();
 
-    char *id = connection_create_stanza_id("receipt");
+    char *id = connection_create_stanza_id();
     xmpp_stanza_t *message = xmpp_message_new(ctx, NULL, fulljid, id);
     free(id);
 

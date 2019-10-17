@@ -62,6 +62,6 @@ void connection_clear_data(void);
 void connection_add_available_resource(Resource *resource);
 void connection_remove_available_resource(const char *const resource);
 
-char* connection_create_stanza_id(char *prefix);
+char* connection_create_stanza_id(void);
 
 #endif
