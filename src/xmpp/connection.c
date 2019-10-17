@@ -459,17 +459,21 @@ char*
 connection_create_stanza_id(char *prefix)
 {
     unsigned char *digest = (unsigned char*)malloc(XMPP_SHA1_DIGEST_SIZE);
-    char *uuid = connection_create_uuid();
+    char *msgid = get_random_string(10);
 
     assert(digest != NULL);
-    assert(uuid != NULL);
+    assert(msgid != NULL);
 
-    GString *tmp = g_string_new("");
-    g_string_printf(tmp, "%s%s", prof_identifier, uuid);
-    xmpp_sha1_digest((unsigned char*)tmp->str, strlen(tmp->str), digest);
-    g_string_free(tmp, TRUE);
+    GString *signature = g_string_new("");
+    g_string_printf(signature, "%s%s", prof_identifier, msgid);
+    xmpp_sha1_digest((unsigned char*)signature->str, strlen(signature->str), digest);
+    g_string_free(signature, TRUE);
 
-    char *b64 = g_base64_encode(digest, XMPP_SHA1_DIGEST_SIZE);
+    GString *id = g_string_new("");
+    g_string_printf(id, "%s%s", digest, msgid);
+
+    char *b64 = g_base64_encode((unsigned char*)id->str, XMPP_SHA1_DIGEST_SIZE);
+    g_string_free(id, TRUE);
     assert(b64 != NULL);
     free(digest);
 
