@@ -458,22 +458,22 @@ connection_free_uuid(char *uuid)
 char*
 connection_create_stanza_id(char *prefix)
 {
-    char *result = NULL;
-    GString *result_str = g_string_new("");
+    unsigned char *digest = (unsigned char*)malloc(XMPP_SHA1_DIGEST_SIZE);
     char *uuid = connection_create_uuid();
 
-    if (prefix) {
-        g_string_printf(result_str, "prof_%s_%s", prefix, uuid);
-    } else {
-        g_string_printf(result_str, "prof_%s", uuid);
-    }
+    assert(digest != NULL);
+    assert(uuid != NULL);
 
-    connection_free_uuid(uuid);
+    GString *tmp = g_string_new("");
+    g_string_printf(tmp, "%s%s", prof_identifier, uuid);
+    xmpp_sha1_digest((unsigned char*)tmp->str, strlen(tmp->str), digest);
+    g_string_free(tmp, TRUE);
 
-    result = result_str->str;
-    g_string_free(result_str, FALSE);
+    char *b64 = g_base64_encode(digest, XMPP_SHA1_DIGEST_SIZE);
+    assert(b64 != NULL);
+    free(digest);
 
-    return result;
+    return b64;
 }
 
 char*
