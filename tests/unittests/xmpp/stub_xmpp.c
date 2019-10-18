@@ -92,6 +92,10 @@ connection_supports(const char *const feature)
     return FALSE;
 }
 
+char *connection_get_profanity_identifier(void) {
+    return "profident";
+}
+
 // message functions
 char* message_send_chat(const char * const barejid, const char * const msg, const char *const oob_url,
     gboolean request_receipt)

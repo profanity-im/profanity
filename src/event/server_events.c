@@ -49,7 +49,7 @@
 #include "event/common.h"
 #include "plugins/plugins.h"
 #include "ui/window_list.h"
-#include "xmpp/connection.h"
+#include "xmpp/xmpp.h"
 #include "xmpp/muc.h"
 #include "xmpp/chat_session.h"
 #include "xmpp/roster_list.h"
