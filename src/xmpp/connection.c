@@ -462,8 +462,12 @@ connection_create_stanza_id(void)
 
     assert(msgid != NULL);
 
+    gchar *hmac = g_compute_hmac_for_string(G_CHECKSUM_SHA256,
+            (guchar*)prof_identifier, strlen(prof_identifier),
+            msgid, strlen(msgid));
+
     GString *signature = g_string_new("");
-    g_string_printf(signature, "%s%s", msgid, prof_identifier);
+    g_string_printf(signature, "%s%s", msgid, hmac);
 
     char *b64 = g_base64_encode((unsigned char*)signature->str, signature->len);
     g_string_free(signature, TRUE);
@@ -666,17 +670,13 @@ static void _random_bytes_close(void)
 
 static void _calculate_identifier(const char *barejid)
 {
-    unsigned char *digest = (unsigned char*)malloc(XMPP_SHA1_DIGEST_SIZE);
-    assert(digest != NULL);
+    gchar *hmac = g_compute_hmac_for_string(G_CHECKSUM_SHA256,
+            (guchar*)random_bytes, strlen(random_bytes),
+            barejid, strlen(barejid));
 
-    GString *inp = g_string_new("");
-    g_string_printf(inp, "%s%s", random_bytes, barejid);
-    xmpp_sha1_digest((unsigned char*)inp->str, strlen(inp->str), digest);
-    g_string_free(inp, TRUE);
-
-    char *b64 = g_base64_encode(digest, XMPP_SHA1_DIGEST_SIZE);
+    char *b64 = g_base64_encode((guchar*)hmac, XMPP_SHA1_DIGEST_SIZE);
     assert(b64 != NULL);
-    free(digest);
+    g_free(hmac);
 
     prof_identifier = b64;
 }
