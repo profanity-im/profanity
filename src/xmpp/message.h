@@ -67,5 +67,6 @@ void message_free(ProfMessage *message);
 void message_handlers_init(void);
 void message_handlers_clear(void);
 void message_pubsub_event_handler_add(const char *const node, ProfMessageCallback func, ProfMessageFreeCallback free_func, void *userdata);
+bool message_is_sent_by_us(ProfMessage *message);
 
 #endif

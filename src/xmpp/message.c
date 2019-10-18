@@ -1158,3 +1158,19 @@ _send_message_stanza(xmpp_stanza_t *const stanza)
     }
     xmpp_free(connection_get_ctx(), text);
 }
+
+bool message_is_sent_by_us(ProfMessage *message) {
+    // we check the </origin-id> for this we calculate a hash into it so we can detect
+    // whether this client sent it. See connection_create_stanza_id()
+    if (message->id != NULL) {
+        gsize tmp_len;
+        char *tmp = (char*)g_base64_decode(message->id, &tmp_len);
+
+        // our client sents at least 10 for the identifier + random message bytes
+        if ((tmp_len > 10) || (g_strcmp0(&tmp[10], connection_get_profanity_identifier()) == 0)) {
+            return TRUE;
+        }
+    }
+
+    return  FALSE;
+}

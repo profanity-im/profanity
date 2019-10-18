@@ -304,19 +304,11 @@ sv_ev_room_message(ProfMessage *message)
 
     char *mynick = muc_nick(mucwin->roomjid);
 
-    // messages from ourselves
-    if (g_strcmp0(mynick, message->jid->resourcepart) == 0 && message->id != NULL) {
-        // test if message was sent from this client
-        // we check the </origin-id> for this we calculate a hash into it so we can detect
-        // whether this client sent it. See connection_create_stanza_id()
-        gsize tmp_len;
-        char *tmp = (char*)g_base64_decode(message->id, &tmp_len);
-        // log if not from this client. our client sents at least 10 for the identifier + random message bytes
-        if ((tmp_len < 11) || (g_strcmp0(&tmp[10], connection_get_profanity_identifier()) != 0)) {
-            _log_muc(message);
-        }
-    // messages from others
+    // messages from ourselves (account and this client)
+    if (g_strcmp0(mynick, message->jid->resourcepart) == 0 && message_is_sent_by_us(message)) {
+        _log_muc(message);
     } else {
+        // messages from others
         _log_muc(message);
     }
 
