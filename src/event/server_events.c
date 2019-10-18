@@ -285,6 +285,15 @@ sv_ev_room_history(ProfMessage *message)
     }
 }
 
+static void _log_muc(ProfMessage *message)
+{
+    if (message->enc == PROF_MSG_ENC_OMEMO) {
+        groupchat_log_omemo_msg_in(message->jid->barejid, message->jid->resourcepart, message->plain);
+    } else {
+        groupchat_log_msg_in(message->jid->barejid, message->jid->resourcepart, message->plain);
+    }
+}
+
 void
 sv_ev_room_message(ProfMessage *message)
 {
@@ -302,23 +311,13 @@ sv_ev_room_message(ProfMessage *message)
         // whether this client sent it. See connection_create_stanza_id()
         gsize tmp_len;
         char *tmp = (char*)g_base64_decode(message->id, &tmp_len);
-        if (tmp_len > 10) {
-            // log if not from this client
-            if (g_strcmp0(&tmp[10], connection_get_profanity_identifier()) != 0) {
-                if (message->enc == PROF_MSG_ENC_OMEMO) {
-                    groupchat_log_omemo_msg_in(message->jid->barejid, message->jid->resourcepart, (char*)tmp);
-                } else {
-                    groupchat_log_msg_in(message->jid->barejid, message->jid->resourcepart, message->plain);
-                }
-            }
+        // log if not from this client. our client sents at least 10 for the identifier + random message bytes
+        if ((tmp_len < 11) || (g_strcmp0(&tmp[10], connection_get_profanity_identifier()) != 0)) {
+            _log_muc(message);
         }
     // messages from others
     } else {
-        if (message->enc == PROF_MSG_ENC_OMEMO) {
-            groupchat_log_omemo_msg_in(message->jid->barejid, message->jid->resourcepart, message->plain);
-        } else {
-            groupchat_log_msg_in(message->jid->barejid, message->jid->resourcepart, message->plain);
-        }
+        _log_muc(message);
     }
 
     char *old_plain = message->plain;
