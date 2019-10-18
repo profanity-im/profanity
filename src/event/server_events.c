@@ -296,7 +296,7 @@ sv_ev_room_message(ProfMessage *message)
     char *mynick = muc_nick(mucwin->roomjid);
 
     // messages from ourselves
-    if (g_strcmp0(mynick, message->jid->resourcepart) == 0) {
+    if (g_strcmp0(mynick, message->jid->resourcepart) == 0 && message->id != NULL) {
         // test if message was sent from this client
         // we check the </origin-id> for this we calculate a hash into it so we can detect
         // whether this client sent it. See connection_create_stanza_id()
