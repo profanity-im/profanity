@@ -64,4 +64,6 @@ void connection_remove_available_resource(const char *const resource);
 
 char* connection_create_stanza_id(void);
 
+char *connection_get_profanity_identifier(void);
+
 #endif

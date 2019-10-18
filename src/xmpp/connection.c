@@ -458,24 +458,17 @@ connection_free_uuid(char *uuid)
 char*
 connection_create_stanza_id(void)
 {
-    unsigned char *digest = (unsigned char*)malloc(XMPP_SHA1_DIGEST_SIZE);
     char *msgid = get_random_string(10);
 
-    assert(digest != NULL);
     assert(msgid != NULL);
 
     GString *signature = g_string_new("");
-    g_string_printf(signature, "%s%s", prof_identifier, msgid);
-    xmpp_sha1_digest((unsigned char*)signature->str, strlen(signature->str), digest);
+    g_string_printf(signature, "%s%s", msgid, prof_identifier);
+
+    char *b64 = g_base64_encode((unsigned char*)signature->str, signature->len);
     g_string_free(signature, TRUE);
 
-    GString *id = g_string_new("");
-    g_string_printf(id, "%s%s", digest, msgid);
-
-    char *b64 = g_base64_encode((unsigned char*)id->str, XMPP_SHA1_DIGEST_SIZE);
-    g_string_free(id, TRUE);
     assert(b64 != NULL);
-    free(digest);
 
     return b64;
 }
@@ -686,4 +679,8 @@ static void _calculate_identifier(const char *barejid)
     free(digest);
 
     prof_identifier = b64;
+}
+
+char *connection_get_profanity_identifier(void) {
+    return prof_identifier;
 }
