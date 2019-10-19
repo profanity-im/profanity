@@ -304,11 +304,9 @@ sv_ev_room_message(ProfMessage *message)
 
     char *mynick = muc_nick(mucwin->roomjid);
 
-    // messages from ourselves (account and this client)
-    if (g_strcmp0(mynick, message->jid->resourcepart) == 0 && message_is_sent_by_us(message)) {
-        _log_muc(message);
-    } else {
-        // messages from others
+    // only log message not coming from this client (but maybe same account, different client)
+    // our messages are logged when outgoing
+    if (!(g_strcmp0(mynick, message->jid->resourcepart) == 0 && message_is_sent_by_us(message))) {
         _log_muc(message);
     }
 
