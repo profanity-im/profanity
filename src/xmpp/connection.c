@@ -678,6 +678,9 @@ static void _calculate_identifier(const char *barejid)
     assert(b64 != NULL);
     g_free(hmac);
 
+    //in case of reconnect
+    free(prof_identifier);
+
     prof_identifier = b64;
 }
 
