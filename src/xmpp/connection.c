@@ -469,6 +469,9 @@ connection_create_stanza_id(void)
     GString *signature = g_string_new("");
     g_string_printf(signature, "%s%s", msgid, hmac);
 
+    free(msgid);
+    g_free(hmac);
+
     char *b64 = g_base64_encode((unsigned char*)signature->str, signature->len);
     g_string_free(signature, TRUE);
 

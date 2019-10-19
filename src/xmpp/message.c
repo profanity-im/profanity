@@ -1165,7 +1165,7 @@ message_is_sent_by_us(ProfMessage *message) {
 
     // we check the </origin-id> for this we calculate a hash into it so we can detect
     // whether this client sent it. See connection_create_stanza_id()
-    if (message->id != NULL) {
+    if (message && message->id != NULL) {
         gsize tmp_len;
         char *tmp = (char*)g_base64_decode(message->id, &tmp_len);
 
@@ -1178,11 +1178,12 @@ message_is_sent_by_us(ProfMessage *message) {
                     (guchar*)prof_identifier, strlen(prof_identifier),
                     msgid, strlen(msgid));
 
-            g_free(msgid);
-
             if (g_strcmp0(&tmp[10], hmac) == 0) {
                 ret = TRUE;
             }
+
+            g_free(msgid);
+            g_free(hmac);
         }
         free(tmp);
     }
