@@ -3,7 +3,6 @@
 #include <setjmp.h>
 #include <cmocka.h>
 
-#include "xmpp/message.h"
 #include "xmpp/xmpp.h"
 
 // connection functions

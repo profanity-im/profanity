@@ -116,6 +116,28 @@ typedef struct disco_item_t {
     char *name;
 } DiscoItem;
 
+typedef enum {
+    PROF_MSG_ENC_PLAIN,
+    PROF_MSG_ENC_OTR,
+    PROF_MSG_ENC_PGP,
+    PROF_MSG_ENC_OMEMO
+} prof_enc_t;
+
+typedef struct prof_message_t {
+   Jid *jid;
+   char *id;
+   /* The raw body from xmpp message, either plaintext or OTR encrypted text */
+   char *body;
+   /* The encrypted message as for PGP */
+   char *encrypted;
+   /* The message that will be printed on screen and logs */
+   char *plain;
+   GDateTime *timestamp;
+   prof_enc_t enc;
+   gboolean trusted;
+   gboolean mucuser;
+} ProfMessage;
+
 void session_init(void);
 jabber_conn_status_t session_connect_with_details(const char *const jid, const char *const passwd,
     const char *const altdomain, const int port, const char *const tls_policy);
@@ -155,6 +177,8 @@ void message_send_composing(const char *const jid);
 void message_send_paused(const char *const jid);
 void message_send_gone(const char *const jid);
 void message_send_invite(const char *const room, const char *const contact, const char *const reason);
+
+bool message_is_sent_by_us(ProfMessage *message);
 
 void presence_subscription(const char *const jid, const jabber_subscr_t action);
 GList* presence_get_subscription_requests(void);
