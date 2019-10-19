@@ -75,7 +75,7 @@ typedef struct prof_conn_t {
 } ProfConnection;
 
 static ProfConnection conn;
-static gchar *random_bytes = NULL;
+static gchar *profanity_instance_id = NULL;
 static gchar *prof_identifier = NULL;
 
 static xmpp_log_t* _xmpp_get_file_logger(void);
@@ -645,10 +645,10 @@ static void _random_bytes_init(void)
     g_key_file_load_from_file(rndbytes, rndbytes_loc, G_KEY_FILE_KEEP_COMMENTS, NULL);
 
     if (g_key_file_has_group(rndbytes, "identifier")) {
-        random_bytes = g_key_file_get_string(rndbytes, "identifier", "random_bytes", NULL);
+        profanity_instance_id = g_key_file_get_string(rndbytes, "identifier", "random_bytes", NULL);
     } else {
-        random_bytes = get_random_string(10);
-        g_key_file_set_string(rndbytes, "identifier", "random_bytes", random_bytes);
+        profanity_instance_id = get_random_string(10);
+        g_key_file_set_string(rndbytes, "identifier", "random_bytes", profanity_instance_id);
 
         gsize g_data_size;
         gchar *g_accounts_data = g_key_file_to_data(rndbytes, &g_data_size, NULL);
@@ -668,13 +668,13 @@ static void _random_bytes_init(void)
 
 static void _random_bytes_close(void)
 {
-    g_free(random_bytes);
+    g_free(profanity_instance_id);
 }
 
 static void _calculate_identifier(const char *barejid)
 {
     gchar *hmac = g_compute_hmac_for_string(G_CHECKSUM_SHA256,
-            (guchar*)random_bytes, strlen(random_bytes),
+            (guchar*)profanity_instance_id, strlen(profanity_instance_id),
             barejid, strlen(barejid));
 
     char *b64 = g_base64_encode((guchar*)hmac, XMPP_SHA1_DIGEST_SIZE);
