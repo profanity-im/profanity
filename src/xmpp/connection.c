@@ -91,7 +91,7 @@ static int _connection_certfail_cb(xmpp_tlscert_t *xmpptlscert, const char *cons
 
 static void _random_bytes_init(void);
 static void _random_bytes_close(void);
-static void _calculate_identifier(const char *barejid);
+static void _compute_identifier(const char *barejid);
 
 void
 connection_init(void)
@@ -145,7 +145,7 @@ connection_connect(const char *const jid, const char *const passwd, const char *
         return conn.conn_status;
     }
 
-    _calculate_identifier(jidp->barejid);
+    _compute_identifier(jidp->barejid);
     jid_destroy(jidp);
 
     log_info("Connecting as %s", jid);
@@ -671,7 +671,7 @@ static void _random_bytes_close(void)
     g_free(profanity_instance_id);
 }
 
-static void _calculate_identifier(const char *barejid)
+static void _compute_identifier(const char *barejid)
 {
     gchar *hmac = g_compute_hmac_for_string(G_CHECKSUM_SHA256,
             (guchar*)profanity_instance_id, strlen(profanity_instance_id),
