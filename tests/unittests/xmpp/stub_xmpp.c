@@ -92,6 +92,10 @@ connection_supports(const char *const feature)
     return FALSE;
 }
 
+char *connection_get_profanity_identifier(void) {
+    return "profident";
+}
+
 // message functions
 char* message_send_chat(const char * const barejid, const char * const msg, const char *const oob_url,
     gboolean request_receipt)
@@ -127,6 +131,10 @@ void message_send_gone(const char * const barejid) {}
 
 void message_send_invite(const char * const room, const char * const contact,
     const char * const reason) {}
+
+bool message_is_sent_by_us(ProfMessage *message) {
+    return TRUE;
+}
 
 // presence functions
 void presence_subscription(const char * const jid, const jabber_subscr_t action) {}

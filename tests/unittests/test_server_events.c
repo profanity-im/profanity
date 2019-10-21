@@ -7,6 +7,7 @@
 #include <glib.h>
 
 #include "event/server_events.h"
+#include "xmpp/xmpp.h"
 #include "xmpp/roster_list.h"
 #include "xmpp/chat_session.h"
 #include "config/preferences.h"

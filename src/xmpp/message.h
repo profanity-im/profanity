@@ -37,28 +37,6 @@
 
 #include "xmpp/xmpp.h"
 
-typedef enum {
-    PROF_MSG_ENC_PLAIN,
-    PROF_MSG_ENC_OTR,
-    PROF_MSG_ENC_PGP,
-    PROF_MSG_ENC_OMEMO
-} prof_enc_t;
-
-typedef struct prof_message_t {
-   Jid *jid;
-   char *id;
-   /* The raw body from xmpp message, either plaintext or OTR encrypted text */
-   char *body;
-   /* The encrypted message as for PGP */
-   char *encrypted;
-   /* The message that will be printed on screen and logs */
-   char *plain;
-   GDateTime *timestamp;
-   prof_enc_t enc;
-   gboolean trusted;
-   gboolean mucuser;
-} ProfMessage;
-
 typedef int(*ProfMessageCallback)(xmpp_stanza_t *const stanza, void *const userdata);
 typedef void(*ProfMessageFreeCallback)(void *userdata);
 

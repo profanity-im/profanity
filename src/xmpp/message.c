@@ -254,7 +254,7 @@ message_send_chat(const char *const barejid, const char *const msg, const char *
 
     char *state = chat_session_get_state(barejid);
     char *jid = chat_session_get_jid(barejid);
-    char *id = connection_create_stanza_id("msg");
+    char *id = connection_create_stanza_id();
 
     xmpp_stanza_t *message = xmpp_message_new(ctx, STANZA_TYPE_CHAT, jid, id);
     xmpp_message_set_body(message, msg);
@@ -285,7 +285,7 @@ message_send_chat_pgp(const char *const barejid, const char *const msg, gboolean
 
     char *state = chat_session_get_state(barejid);
     char *jid = chat_session_get_jid(barejid);
-    char *id = connection_create_stanza_id("msg");
+    char *id = connection_create_stanza_id();
 
     xmpp_stanza_t *message = NULL;
 #ifdef HAVE_LIBGPGME
@@ -344,7 +344,7 @@ message_send_chat_otr(const char *const barejid, const char *const msg, gboolean
 
     char *state = chat_session_get_state(barejid);
     char *jid = chat_session_get_jid(barejid);
-    char *id = connection_create_stanza_id("msg");
+    char *id = connection_create_stanza_id();
 
     xmpp_stanza_t *message = xmpp_message_new(ctx, STANZA_TYPE_CHAT, barejid, id);
     xmpp_message_set_body(message, msg);
@@ -381,11 +381,11 @@ message_send_chat_omemo(const char *const jid, uint32_t sid, GList *keys,
     char *id;
     xmpp_stanza_t *message;
     if (muc) {
-        id = connection_create_stanza_id("muc");
+        id = connection_create_stanza_id();
         message = xmpp_message_new(ctx, STANZA_TYPE_GROUPCHAT, jid, id);
         stanza_attach_origin_id(ctx, message, id);
     } else {
-        id = connection_create_stanza_id("msg");
+        id = connection_create_stanza_id();
         message = xmpp_message_new(ctx, STANZA_TYPE_CHAT, jid, id);
     }
 
@@ -485,7 +485,7 @@ void
 message_send_private(const char *const fulljid, const char *const msg, const char *const oob_url)
 {
     xmpp_ctx_t * const ctx = connection_get_ctx();
-    char *id = connection_create_stanza_id("prv");
+    char *id = connection_create_stanza_id();
 
     xmpp_stanza_t *message = xmpp_message_new(ctx, STANZA_TYPE_CHAT, fulljid, id);
     xmpp_message_set_body(message, msg);
@@ -504,7 +504,7 @@ char*
 message_send_groupchat(const char *const roomjid, const char *const msg, const char *const oob_url)
 {
     xmpp_ctx_t * const ctx = connection_get_ctx();
-    char *id = connection_create_stanza_id("muc");
+    char *id = connection_create_stanza_id();
 
     xmpp_stanza_t *message = xmpp_message_new(ctx, STANZA_TYPE_GROUPCHAT, roomjid, id);
     stanza_attach_origin_id(ctx, message, id);
@@ -841,7 +841,7 @@ _message_send_receipt(const char *const fulljid, const char *const message_id)
 {
     xmpp_ctx_t * const ctx = connection_get_ctx();
 
-    char *id = connection_create_stanza_id("receipt");
+    char *id = connection_create_stanza_id();
     xmpp_stanza_t *message = xmpp_message_new(ctx, NULL, fulljid, id);
     free(id);
 
@@ -1157,4 +1157,36 @@ _send_message_stanza(xmpp_stanza_t *const stanza)
         xmpp_send_raw_string(conn, "%s", text);
     }
     xmpp_free(connection_get_ctx(), text);
+}
+
+bool
+message_is_sent_by_us(ProfMessage *message) {
+    bool ret = FALSE;
+
+    // we check the </origin-id> for this we calculate a hash into it so we can detect
+    // whether this client sent it. See connection_create_stanza_id()
+    if (message && message->id != NULL) {
+        gsize tmp_len;
+        char *tmp = (char*)g_base64_decode(message->id, &tmp_len);
+
+        // our client sents at least 10 for the identifier + random message bytes
+        if (tmp_len > 10) {
+            char *msgid = g_strndup(tmp, 10);
+            char *prof_identifier = connection_get_profanity_identifier();
+
+            gchar *hmac = g_compute_hmac_for_string(G_CHECKSUM_SHA256,
+                    (guchar*)prof_identifier, strlen(prof_identifier),
+                    msgid, strlen(msgid));
+
+            if (g_strcmp0(&tmp[10], hmac) == 0) {
+                ret = TRUE;
+            }
+
+            g_free(msgid);
+            g_free(hmac);
+        }
+        free(tmp);
+    }
+
+    return  ret;
 }

@@ -2,6 +2,7 @@
  * connection.c
  *
  * Copyright (C) 2012 - 2019 James Booth <boothj5@gmail.com>
+ * Copyright (C) 2018 - 2019 Michael Vetter <jubalh@idoru.org>
  *
  * This file is part of Profanity.
  *
@@ -38,6 +39,9 @@
 #include <string.h>
 #include <assert.h>
 
+#include <glib.h>
+#include <glib/gstdio.h>
+
 #ifdef HAVE_LIBMESODE
 #include <mesode.h>
 #endif
@@ -46,7 +50,9 @@
 #include <strophe.h>
 #endif
 
+#include "common.h"
 #include "log.h"
+#include "config/files.h"
 #include "config/preferences.h"
 #include "event/server_events.h"
 #include "xmpp/connection.h"
@@ -69,6 +75,8 @@ typedef struct prof_conn_t {
 } ProfConnection;
 
 static ProfConnection conn;
+static gchar *profanity_instance_id = NULL;
+static gchar *prof_identifier = NULL;
 
 static xmpp_log_t* _xmpp_get_file_logger(void);
 static void _xmpp_file_logger(void *const userdata, const xmpp_log_level_t level, const char *const area, const char *const msg);
@@ -80,6 +88,10 @@ static void _connection_handler(xmpp_conn_t *const xmpp_conn, const xmpp_conn_ev
 TLSCertificate* _xmppcert_to_profcert(xmpp_tlscert_t *xmpptlscert);
 static int _connection_certfail_cb(xmpp_tlscert_t *xmpptlscert, const char *const errormsg);
 #endif
+
+static void _random_bytes_init(void);
+static void _random_bytes_close(void);
+static void _compute_identifier(const char *barejid);
 
 void
 connection_init(void)
@@ -95,6 +107,8 @@ connection_init(void)
     conn.features_by_jid = NULL;
     conn.available_resources = g_hash_table_new_full(g_str_hash, g_str_equal, free, (GDestroyNotify)resource_destroy);
     conn.requested_features = g_hash_table_new_full(g_str_hash, g_str_equal, free, NULL);
+
+	_random_bytes_init();
 }
 
 void
@@ -113,6 +127,8 @@ connection_shutdown(void)
 
     free(conn.xmpp_log);
     conn.xmpp_log = NULL;
+
+	_random_bytes_close();
 }
 
 jabber_conn_status_t
@@ -128,6 +144,8 @@ connection_connect(const char *const jid, const char *const passwd, const char *
         conn.conn_status = JABBER_DISCONNECTED;
         return conn.conn_status;
     }
+
+    _compute_identifier(jidp->barejid);
     jid_destroy(jidp);
 
     log_info("Connecting as %s", jid);
@@ -227,6 +245,9 @@ connection_disconnect(void)
             conn.xmpp_ctx = NULL;
         }
     }
+
+    free(prof_identifier);
+    prof_identifier = NULL;
 }
 
 void
@@ -436,24 +457,28 @@ connection_free_uuid(char *uuid)
 }
 
 char*
-connection_create_stanza_id(char *prefix)
+connection_create_stanza_id(void)
 {
-    char *result = NULL;
-    GString *result_str = g_string_new("");
-    char *uuid = connection_create_uuid();
+    char *msgid = get_random_string(10);
 
-    if (prefix) {
-        g_string_printf(result_str, "prof_%s_%s", prefix, uuid);
-    } else {
-        g_string_printf(result_str, "prof_%s", uuid);
-    }
+    assert(msgid != NULL);
 
-    connection_free_uuid(uuid);
+    gchar *hmac = g_compute_hmac_for_string(G_CHECKSUM_SHA256,
+            (guchar*)prof_identifier, strlen(prof_identifier),
+            msgid, strlen(msgid));
 
-    result = result_str->str;
-    g_string_free(result_str, FALSE);
+    GString *signature = g_string_new("");
+    g_string_printf(signature, "%s%s", msgid, hmac);
 
-    return result;
+    free(msgid);
+    g_free(hmac);
+
+    char *b64 = g_base64_encode((unsigned char*)signature->str, signature->len);
+    g_string_free(signature, TRUE);
+
+    assert(b64 != NULL);
+
+    return b64;
 }
 
 char*
@@ -604,4 +629,65 @@ _xmpp_file_logger(void *const userdata, const xmpp_log_level_t xmpp_level, const
     if ((g_strcmp0(area, "xmpp") == 0) || (g_strcmp0(area, "conn")) == 0) {
         sv_ev_xmpp_stanza(msg);
     }
+}
+
+static void _random_bytes_init(void)
+{
+    char *rndbytes_loc;
+    GKeyFile *rndbytes;
+
+    rndbytes_loc = files_get_data_path(FILE_PROFANITY_IDENTIFIER);
+
+    if (g_file_test(rndbytes_loc, G_FILE_TEST_EXISTS)) {
+        g_chmod(rndbytes_loc, S_IRUSR | S_IWUSR);
+    }
+
+    rndbytes = g_key_file_new();
+    g_key_file_load_from_file(rndbytes, rndbytes_loc, G_KEY_FILE_KEEP_COMMENTS, NULL);
+
+    if (g_key_file_has_group(rndbytes, "identifier")) {
+        profanity_instance_id = g_key_file_get_string(rndbytes, "identifier", "random_bytes", NULL);
+    } else {
+        profanity_instance_id = get_random_string(10);
+        g_key_file_set_string(rndbytes, "identifier", "random_bytes", profanity_instance_id);
+
+        gsize g_data_size;
+        gchar *g_accounts_data = g_key_file_to_data(rndbytes, &g_data_size, NULL);
+
+        gchar *base = g_path_get_basename(rndbytes_loc);
+        gchar *true_loc = get_file_or_linked(rndbytes_loc, base);
+        g_file_set_contents(true_loc, g_accounts_data, g_data_size, NULL);
+
+        g_free(base);
+        free(true_loc);
+        g_free(g_accounts_data);
+    }
+
+    free(rndbytes_loc);
+    g_key_file_free(rndbytes);
+}
+
+static void _random_bytes_close(void)
+{
+    g_free(profanity_instance_id);
+}
+
+static void _compute_identifier(const char *barejid)
+{
+    gchar *hmac = g_compute_hmac_for_string(G_CHECKSUM_SHA256,
+            (guchar*)profanity_instance_id, strlen(profanity_instance_id),
+            barejid, strlen(barejid));
+
+    char *b64 = g_base64_encode((guchar*)hmac, XMPP_SHA1_DIGEST_SIZE);
+    assert(b64 != NULL);
+    g_free(hmac);
+
+    //in case of reconnect (lost connection)
+    free(prof_identifier);
+
+    prof_identifier = b64;
+}
+
+char *connection_get_profanity_identifier(void) {
+    return prof_identifier;
 }

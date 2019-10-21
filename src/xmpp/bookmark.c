@@ -331,7 +331,7 @@ _send_bookmarks(void)
 {
     xmpp_ctx_t *ctx = connection_get_ctx();
 
-    char *id = connection_create_stanza_id("bookmarks_update");
+    char *id = connection_create_stanza_id();
     xmpp_stanza_t *iq = xmpp_iq_new(ctx, STANZA_TYPE_SET, id);
     free(id);
 

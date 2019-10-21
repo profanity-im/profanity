@@ -489,3 +489,23 @@ get_file_paths_recursive(const char *path, GSList **contents)
         entry = g_dir_read_name(directory);
     }
 }
+
+char*
+get_random_string(int length)
+{
+    GRand *prng;
+    char *rand;
+    char alphabet[] = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
+    rand = calloc(length+1, sizeof(char));
+
+    prng = g_rand_new();
+
+    int i;
+    for (i = 0; i < length; i++) {
+        rand[i] = alphabet[g_rand_int_range(prng, 0, sizeof(alphabet))];
+    }
+    g_rand_free(prng);
+
+    return rand;
+}

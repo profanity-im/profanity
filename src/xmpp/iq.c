@@ -349,7 +349,7 @@ iq_room_list_request(gchar *conferencejid, gchar *filter)
     log_debug("Rooms request not cached for: %s", conferencejid);
 
     xmpp_ctx_t * const ctx = connection_get_ctx();
-    char *id = connection_create_stanza_id("confreq");
+    char *id = connection_create_stanza_id();
     xmpp_stanza_t *iq = stanza_create_disco_items_iq(ctx, id, conferencejid, NULL);
 
     iq_id_handler_add(id, _room_list_id_handler, NULL, filter);
@@ -394,7 +394,7 @@ iq_http_upload_request(HTTPUpload *upload)
     }
 
     xmpp_ctx_t * const ctx = connection_get_ctx();
-    char *id = connection_create_stanza_id("http_upload_request");
+    char *id = connection_create_stanza_id();
     xmpp_stanza_t *iq = stanza_create_http_upload_request(ctx, id, jid, upload);
     // TODO add free func
     iq_id_handler_add(id, _http_upload_response_id_handler, NULL, upload);
@@ -410,7 +410,7 @@ void
 iq_disco_info_request(gchar *jid)
 {
     xmpp_ctx_t * const ctx = connection_get_ctx();
-    char *id = connection_create_stanza_id("disco_info");
+    char *id = connection_create_stanza_id();
     xmpp_stanza_t *iq = stanza_create_disco_info_iq(ctx, id, jid, NULL);
 
     iq_id_handler_add(id, _disco_info_response_id_handler, NULL, NULL);
@@ -425,7 +425,7 @@ void
 iq_disco_info_request_onconnect(gchar *jid)
 {
     xmpp_ctx_t * const ctx = connection_get_ctx();
-    char *id = connection_create_stanza_id("disco_info_onconnect");
+    char *id = connection_create_stanza_id();
     xmpp_stanza_t *iq = stanza_create_disco_info_iq(ctx, id, jid, NULL);
 
     iq_id_handler_add(id, _disco_info_response_id_handler_onconnect, NULL, NULL);
@@ -440,7 +440,7 @@ void
 iq_last_activity_request(gchar *jid)
 {
     xmpp_ctx_t * const ctx = connection_get_ctx();
-    char *id = connection_create_stanza_id("lastactivity");
+    char *id = connection_create_stanza_id();
     xmpp_stanza_t *iq = stanza_create_last_activity_iq(ctx, id, jid);
 
     iq_id_handler_add(id, _last_activity_response_id_handler, NULL, NULL);
@@ -455,7 +455,7 @@ void
 iq_room_info_request(const char *const room, gboolean display_result)
 {
     xmpp_ctx_t * const ctx = connection_get_ctx();
-    char *id = connection_create_stanza_id("room_disco_info");
+    char *id = connection_create_stanza_id();
     xmpp_stanza_t *iq = stanza_create_disco_info_iq(ctx, id, room, NULL);
 
     ProfRoomInfoData *cb_data = malloc(sizeof(ProfRoomInfoData));
@@ -731,7 +731,7 @@ void
 iq_command_list(const char *const target)
 {
     xmpp_ctx_t * const ctx = connection_get_ctx();
-    const char *id = connection_create_stanza_id("cmdlist");
+    const char *id = connection_create_stanza_id();
     xmpp_stanza_t *iq = stanza_create_disco_items_iq(ctx, id, target, STANZA_NS_COMMAND);
 
     iq_id_handler_add(id, _command_list_result_handler, NULL, NULL);

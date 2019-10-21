@@ -49,6 +49,7 @@
 #include "event/common.h"
 #include "plugins/plugins.h"
 #include "ui/window_list.h"
+#include "xmpp/xmpp.h"
 #include "xmpp/muc.h"
 #include "xmpp/chat_session.h"
 #include "xmpp/roster_list.h"
@@ -284,6 +285,15 @@ sv_ev_room_history(ProfMessage *message)
     }
 }
 
+static void _log_muc(ProfMessage *message)
+{
+    if (message->enc == PROF_MSG_ENC_OMEMO) {
+        groupchat_log_omemo_msg_in(message->jid->barejid, message->jid->resourcepart, message->plain);
+    } else {
+        groupchat_log_msg_in(message->jid->barejid, message->jid->resourcepart, message->plain);
+    }
+}
+
 void
 sv_ev_room_message(ProfMessage *message)
 {
@@ -294,13 +304,10 @@ sv_ev_room_message(ProfMessage *message)
 
     char *mynick = muc_nick(mucwin->roomjid);
 
-    // only log messages from others. we log our own via mucwin_outgoing_msg()
-    if (g_strcmp0(mynick, message->jid->resourcepart) != 0) {
-        if (message->enc == PROF_MSG_ENC_OMEMO) {
-            groupchat_log_omemo_msg_in(message->jid->barejid, message->jid->resourcepart, message->plain);
-        } else {
-            groupchat_log_msg_in(message->jid->barejid, message->jid->resourcepart, message->plain);
-        }
+    // only log message not coming from this client (but maybe same account, different client)
+    // our messages are logged when outgoing
+    if (!(g_strcmp0(mynick, message->jid->resourcepart) == 0 && message_is_sent_by_us(message))) {
+        _log_muc(message);
     }
 
     char *old_plain = message->plain;

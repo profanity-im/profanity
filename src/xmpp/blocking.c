@@ -73,7 +73,7 @@ blocking_request(void)
     }
     blocked_ac = autocomplete_new();
 
-    char *id = connection_create_stanza_id("blocked_list_request");
+    char *id = connection_create_stanza_id();
     iq_id_handler_add(id, _blocklist_result_handler, NULL, NULL);
 
     xmpp_ctx_t *ctx = connection_get_ctx();
@@ -115,7 +115,7 @@ blocked_add(char *jid)
 
     xmpp_ctx_t *ctx = connection_get_ctx();
 
-    char *id = connection_create_stanza_id("block");
+    char *id = connection_create_stanza_id();
     xmpp_stanza_t *iq = xmpp_iq_new(ctx, STANZA_TYPE_SET, id);
 
     xmpp_stanza_t *block = xmpp_stanza_new(ctx);
@@ -151,7 +151,7 @@ blocked_remove(char *jid)
 
     xmpp_ctx_t *ctx = connection_get_ctx();
 
-    char *id = connection_create_stanza_id("unblock");
+    char *id = connection_create_stanza_id();
     xmpp_stanza_t *iq = xmpp_iq_new(ctx, STANZA_TYPE_SET, id);
 
     xmpp_stanza_t *block = xmpp_stanza_new(ctx);

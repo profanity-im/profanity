@@ -102,6 +102,7 @@ caps_init(void)
     g_hash_table_add(prof_features, strdup(STANZA_NS_VERSION));
     g_hash_table_add(prof_features, strdup(STANZA_NS_CHATSTATES));
     g_hash_table_add(prof_features, strdup(STANZA_NS_PING));
+    g_hash_table_add(prof_features, strdup(STANZA_NS_STABLE_ID));
     if (prefs_get_boolean(PREF_RECEIPTS_SEND)) {
         g_hash_table_add(prof_features, strdup(STANZA_NS_RECEIPTS));
     }
