@@ -247,6 +247,7 @@ connection_disconnect(void)
     }
 
     free(prof_identifier);
+    prof_identifier = NULL;
 }
 
 void
@@ -681,7 +682,7 @@ static void _compute_identifier(const char *barejid)
     assert(b64 != NULL);
     g_free(hmac);
 
-    //in case of reconnect
+    //in case of reconnect (lost connection)
     free(prof_identifier);
 
     prof_identifier = b64;
