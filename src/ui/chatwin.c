@@ -467,19 +467,25 @@ _chatwin_history(ProfChatWin *chatwin, const char *const contact)
         GSList *history = chat_log_get_previous(jid->barejid, contact);
         jid_destroy(jid);
         GSList *curr = history;
+        int idd;
+        int imo;
+        int iyy;
+
         while (curr) {
             char *line = curr->data;
-            // entry
+            // entry, containing the actual entries with date followed by text
             if (line[2] == ':') {
                 char hh[3]; memcpy(hh, &line[0], 2); hh[2] = '\0'; int ihh = atoi(hh);
                 char mm[3]; memcpy(mm, &line[3], 2); mm[2] = '\0'; int imm = atoi(mm);
                 char ss[3]; memcpy(ss, &line[6], 2); ss[2] = '\0'; int iss = atoi(ss);
-                GDateTime *timestamp = g_date_time_new_local(2000, 1, 1, ihh, imm, iss);
+                GDateTime *timestamp = g_date_time_new_local(iyy, imo, idd, ihh, imm, iss);
                 win_print_history((ProfWin*)chatwin, timestamp, "%s", curr->data+11);
                 g_date_time_unref(timestamp);
-            // header
+            // header, containing the date from filename "21/10/2019:"
             } else {
-                win_println((ProfWin*)chatwin, THEME_DEFAULT, '-', "%s", curr->data);
+                char dd[3]; memcpy(dd, &line[0], 2); dd[2] = '\0'; idd = atoi(dd);
+                char mm[3]; memcpy(mm, &line[3], 2); mm[2] = '\0'; imo = atoi(mm);
+                char yy[5]; memcpy(yy, &line[6], 4); yy[4] = '\0'; iyy = atoi(yy);
             }
             curr = g_slist_next(curr);
         }

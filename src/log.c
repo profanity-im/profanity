@@ -599,7 +599,6 @@ _groupchat_log_chat(const gchar *const login, const gchar *const room, const gch
     g_date_time_unref(dt);
 }
 
-
 GSList*
 chat_log_get_previous(const gchar *const login, const gchar *const recipient)
 {
