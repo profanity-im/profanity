@@ -467,9 +467,9 @@ _chatwin_history(ProfChatWin *chatwin, const char *const contact)
         GSList *history = chat_log_get_previous(jid->barejid, contact);
         jid_destroy(jid);
         GSList *curr = history;
-        int idd;
-        int imo;
-        int iyy;
+        int idd = 0;
+        int imo = 0;
+        int iyy = 0;
 
         while (curr) {
             char *line = curr->data;
