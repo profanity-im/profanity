@@ -83,7 +83,7 @@ theme_init(const char *const theme_name)
     g_hash_table_insert(defaults, strdup("mention"),                 strdup("yellow"));
     g_hash_table_insert(defaults, strdup("trigger"),                 strdup("yellow"));
     g_hash_table_insert(defaults, strdup("input.text"),              strdup("default"));
-    g_hash_table_insert(defaults, strdup("main.time"),               strdup("white"));
+    g_hash_table_insert(defaults, strdup("main.time"),               strdup("default"));
     g_hash_table_insert(defaults, strdup("titlebar.text"),           strdup("white"));
     g_hash_table_insert(defaults, strdup("titlebar.brackets"),       strdup("cyan"));
     g_hash_table_insert(defaults, strdup("titlebar.unencrypted"),    strdup("red"));
