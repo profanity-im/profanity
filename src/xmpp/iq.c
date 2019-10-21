@@ -396,7 +396,6 @@ iq_http_upload_request(HTTPUpload *upload)
     xmpp_ctx_t * const ctx = connection_get_ctx();
     char *id = connection_create_stanza_id();
     xmpp_stanza_t *iq = stanza_create_http_upload_request(ctx, id, jid, upload);
-    // TODO add free func
     iq_id_handler_add(id, _http_upload_response_id_handler, NULL, upload);
     free(id);
 
