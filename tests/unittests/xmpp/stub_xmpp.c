@@ -92,7 +92,7 @@ connection_supports(const char *const feature)
     return FALSE;
 }
 
-char *connection_get_profanity_identifier(void) {
+const char* connection_get_profanity_identifier(void) {
     return "profident";
 }
 
