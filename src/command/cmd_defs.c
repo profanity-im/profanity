@@ -579,20 +579,6 @@ static struct cmd_t command_defs[] =
             "/join mychannel")
     },
 
-    { "/leave",
-        parse_args, 0, 0, NULL,
-        CMD_NOSUBFUNCS
-        CMD_MAINFUNC(cmd_leave)
-        CMD_TAGS(
-            CMD_TAG_GROUPCHAT)
-        CMD_SYN(
-            "/leave")
-        CMD_DESC(
-            "Leave the current chat or room.")
-        CMD_NOARGS
-        CMD_NOEXAMPLES
-    },
-
     { "/invite",
         parse_args_with_freetext, 1, 2, NULL,
         CMD_NOSUBFUNCS

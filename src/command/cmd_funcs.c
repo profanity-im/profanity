@@ -5088,19 +5088,6 @@ cmd_clear(ProfWin *window, const char *const command, gchar **args)
 }
 
 gboolean
-cmd_leave(ProfWin *window, const char *const command, gchar **args)
-{
-    if (window->type != WIN_MUC && window->type != WIN_CHAT && window->type != WIN_PRIVATE) {
-        cons_show("The /leave command is only valid in chat, or chat room windows.");
-        cons_alert();
-        return TRUE;
-    }
-
-    // use /close behaviour
-    return cmd_close(window, "/leave", args);
-}
-
-gboolean
 cmd_privileges(ProfWin *window, const char *const command, gchar **args)
 {
     _cmd_set_boolean_preference(args[0], command, "MUC privileges", PREF_MUC_PRIVILEGES);
