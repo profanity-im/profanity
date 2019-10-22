@@ -1172,7 +1172,7 @@ message_is_sent_by_us(ProfMessage *message) {
         // our client sents at least 36 (uuid) + identifier
         if (tmp_len > 36) {
             char *uuid = g_strndup(tmp, 36);
-            char *prof_identifier = connection_get_profanity_identifier();
+            const char *prof_identifier = connection_get_profanity_identifier();
 
             gchar *hmac = g_compute_hmac_for_string(G_CHECKSUM_SHA256,
                     (guchar*)prof_identifier, strlen(prof_identifier),
