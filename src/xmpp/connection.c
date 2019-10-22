@@ -459,18 +459,18 @@ connection_free_uuid(char *uuid)
 char*
 connection_create_stanza_id(void)
 {
-    char *msgid = get_random_string(10);
+    char *uuid = connection_create_uuid();
 
-    assert(msgid != NULL);
+    assert(uuid != NULL);
 
     gchar *hmac = g_compute_hmac_for_string(G_CHECKSUM_SHA256,
             (guchar*)prof_identifier, strlen(prof_identifier),
-            msgid, strlen(msgid));
+            uuid, strlen(uuid));
 
     GString *signature = g_string_new("");
-    g_string_printf(signature, "%s%s", msgid, hmac);
+    g_string_printf(signature, "%s%s", uuid, hmac);
 
-    free(msgid);
+    free(uuid);
     g_free(hmac);
 
     char *b64 = g_base64_encode((unsigned char*)signature->str, signature->len);

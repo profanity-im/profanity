@@ -1169,20 +1169,20 @@ message_is_sent_by_us(ProfMessage *message) {
         gsize tmp_len;
         char *tmp = (char*)g_base64_decode(message->id, &tmp_len);
 
-        // our client sents at least 10 for the identifier + random message bytes
-        if (tmp_len > 10) {
-            char *msgid = g_strndup(tmp, 10);
+        // our client sents at least 36 (uuid) + identifier
+        if (tmp_len > 36) {
+            char *uuid = g_strndup(tmp, 36);
             char *prof_identifier = connection_get_profanity_identifier();
 
             gchar *hmac = g_compute_hmac_for_string(G_CHECKSUM_SHA256,
                     (guchar*)prof_identifier, strlen(prof_identifier),
-                    msgid, strlen(msgid));
+                    uuid, strlen(uuid));
 
-            if (g_strcmp0(&tmp[10], hmac) == 0) {
+            if (g_strcmp0(&tmp[36], hmac) == 0) {
                 ret = TRUE;
             }
 
-            g_free(msgid);
+            g_free(uuid);
             g_free(hmac);
         }
         free(tmp);
