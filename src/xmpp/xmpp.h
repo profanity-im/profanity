@@ -162,7 +162,7 @@ GList* connection_get_available_resources(void);
 gboolean connection_supports(const char *const feature);
 char* connection_jid_for_feature(const char *const feature);
 
-char *connection_get_profanity_identifier(void);
+const char* connection_get_profanity_identifier(void);
 
 char* message_send_chat(const char *const barejid, const char *const msg, const char *const oob_url,
     gboolean request_receipt);

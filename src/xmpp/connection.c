@@ -688,6 +688,6 @@ static void _compute_identifier(const char *barejid)
     prof_identifier = b64;
 }
 
-char *connection_get_profanity_identifier(void) {
+const char* connection_get_profanity_identifier(void) {
     return prof_identifier;
 }
