@@ -72,18 +72,18 @@ theme_init(const char *const theme_name)
 
     defaults = g_hash_table_new_full(g_str_hash, g_str_equal, free, free);
 
-    g_hash_table_insert(defaults, strdup("main.text"),               strdup("white"));
-    g_hash_table_insert(defaults, strdup("main.text.history"),       strdup("white"));
-    g_hash_table_insert(defaults, strdup("main.text.me"),            strdup("white"));
-    g_hash_table_insert(defaults, strdup("main.text.them"),          strdup("white"));
+    g_hash_table_insert(defaults, strdup("main.text"),               strdup("default"));
+    g_hash_table_insert(defaults, strdup("main.text.history"),       strdup("default"));
+    g_hash_table_insert(defaults, strdup("main.text.me"),            strdup("default"));
+    g_hash_table_insert(defaults, strdup("main.text.them"),          strdup("default"));
     g_hash_table_insert(defaults, strdup("main.splash"),             strdup("cyan"));
-    g_hash_table_insert(defaults, strdup("main.help.header"),        strdup("white"));
+    g_hash_table_insert(defaults, strdup("main.help.header"),        strdup("default"));
     g_hash_table_insert(defaults, strdup("error"),                   strdup("red"));
     g_hash_table_insert(defaults, strdup("incoming"),                strdup("yellow"));
     g_hash_table_insert(defaults, strdup("mention"),                 strdup("yellow"));
     g_hash_table_insert(defaults, strdup("trigger"),                 strdup("yellow"));
-    g_hash_table_insert(defaults, strdup("input.text"),              strdup("white"));
-    g_hash_table_insert(defaults, strdup("main.time"),               strdup("white"));
+    g_hash_table_insert(defaults, strdup("input.text"),              strdup("default"));
+    g_hash_table_insert(defaults, strdup("main.time"),               strdup("default"));
     g_hash_table_insert(defaults, strdup("titlebar.text"),           strdup("white"));
     g_hash_table_insert(defaults, strdup("titlebar.brackets"),       strdup("cyan"));
     g_hash_table_insert(defaults, strdup("titlebar.unencrypted"),    strdup("red"));
@@ -150,7 +150,7 @@ theme_init(const char *const theme_name)
     g_hash_table_insert(defaults, strdup("roster.room.mention"),     strdup("green"));
     g_hash_table_insert(defaults, strdup("occupants.header"),        strdup("yellow"));
     g_hash_table_insert(defaults, strdup("untrusted"),               strdup("red"));
-    g_hash_table_insert(defaults, strdup("cmd.wins.unread"),         strdup("white"));
+    g_hash_table_insert(defaults, strdup("cmd.wins.unread"),         strdup("default"));
 
     _load_preferences();
 }
