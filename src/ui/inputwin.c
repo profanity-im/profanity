@@ -127,6 +127,7 @@ static int _inp_rl_win_pagedown_handler(int count, int key);
 static int _inp_rl_subwin_pageup_handler(int count, int key);
 static int _inp_rl_subwin_pagedown_handler(int count, int key);
 static int _inp_rl_startup_hook(void);
+static int _inp_rl_down_arrow_handler(int count, int key);
 
 void
 create_input_window(void)
@@ -476,6 +477,8 @@ _inp_rl_startup_hook(void)
     rl_bind_key('\t', _inp_rl_tab_handler);
     rl_bind_keyseq("\\e[Z", _inp_rl_shift_tab_handler);
 
+    rl_bind_keyseq("\\e[1;5B", _inp_rl_down_arrow_handler); // ctrl+arrow down
+
     // unbind unwanted mappings
     rl_bind_keyseq("\\e=", NULL);
 
@@ -812,5 +815,18 @@ _inp_rl_subwin_pagedown_handler(int count, int key)
 {
     ProfWin *current = wins_get_current();
     win_sub_page_down(current);
+    return 0;
+}
+
+static int
+_inp_rl_down_arrow_handler(int count, int key)
+{
+    add_history(rl_line_buffer);
+    //also tried: add_history(rl_copy_text(0, rl_end));
+    //also tried: add_history("Hello");
+    rl_replace_line("", 0);
+    rl_redisplay();
+    rl_end = 0; // why is this neeed? shouln't replace_line do this?
+    rl_point = 0; // why is this neeed? shouln't replace_line do this?
     return 0;
 }
