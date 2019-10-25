@@ -390,7 +390,6 @@ cmd_connect(ProfWin *window, const char *const command, gchar **args)
             cons_show("Using default account %s.", user);
         } else {
             cons_show("No default account.");
-            g_free(def);
             options_destroy(options);
             return TRUE;
         }
