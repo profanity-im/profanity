@@ -398,6 +398,7 @@ sv_ev_incoming_private_message(ProfMessage *message)
         privatewin = (ProfPrivateWin*)window;
     }
     privwin_incoming_msg(privatewin, message);
+    chat_log_msg_in(message);
 
     plugins_post_priv_message_display(message->jid->fulljid, message->plain);
 
@@ -436,7 +437,7 @@ sv_ev_outgoing_carbon(ProfMessage *message)
     chat_state_active(chatwin->state);
 
     if (message->plain) {
-        chat_log_msg_out(message->jid->barejid, message->plain);
+        chat_log_msg_out(message->jid->barejid, message->plain, NULL);
     }
 
 #ifdef HAVE_LIBGPGME
