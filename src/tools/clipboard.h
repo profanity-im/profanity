@@ -36,7 +36,6 @@
 #define UI_CLIPBOARD_H
 
 #ifdef HAVE_GTK
-void clipboard_init(int argc, char **argv);
 char *clipboard_get(void);
 #endif
 

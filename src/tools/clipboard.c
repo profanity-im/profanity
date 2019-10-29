@@ -41,9 +41,13 @@
 
 #include "log.h"
 
+/*
+For now we rely on tray_init(void)
+
 void clipboard_init(int argc, char **argv) {
     gtk_init(&argc, &argv);
 }
+*/
 
 char *clipboard_get(void) {
     gchar *clip;
