@@ -195,6 +195,12 @@ tray_set_timer(int interval)
     timer = g_timeout_add(interval * 1000, _tray_change_icon, NULL);
 }
 
+/*
+ * Create tray icon
+ *
+ * This will initialize the timer that will be called in order to change the icons
+ * and will search the icons in the defaults paths
+ */
 void
 tray_enable(void)
 {
