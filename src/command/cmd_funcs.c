@@ -93,6 +93,7 @@
 
 #ifdef HAVE_GTK
 #include "ui/tray.h"
+#include "tools/clipboard.h"
 #endif
 
 #ifdef HAVE_PYTHON
@@ -8573,5 +8574,50 @@ cmd_reload(ProfWin *window, const char *const command, gchar **args)
     log_info("Reloading preferences");
     cons_show("Reloading preferences.");
     prefs_reload();
+    return TRUE;
+}
+
+gboolean
+cmd_paste(ProfWin *window, const char *const command, gchar **args)
+{
+#ifdef HAVE_GTK
+    char *clipboard_buffer = clipboard_get();
+
+    if (clipboard_buffer) {
+        switch (window->type) {
+             case WIN_MUC:
+                {
+                    ProfMucWin *mucwin = (ProfMucWin*)window;
+                    assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
+                    cl_ev_send_muc_msg(mucwin, clipboard_buffer, NULL);
+                    break;
+                }
+            case WIN_CHAT:
+                {
+                    ProfChatWin *chatwin = (ProfChatWin*)window;
+                    assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
+                    cl_ev_send_msg(chatwin, clipboard_buffer, NULL);
+                    break;
+                }
+            case WIN_PRIVATE:
+                {
+                    ProfPrivateWin *privatewin = (ProfPrivateWin*)window;
+                    assert(privatewin->memcheck == PROFPRIVATEWIN_MEMCHECK);
+                    cl_ev_send_priv_msg(privatewin, clipboard_buffer, NULL);
+                    break;
+                }
+            case WIN_CONSOLE:
+            case WIN_XML:
+            default:
+                    cons_bad_cmd_usage(command);
+                    break;
+        }
+
+        free(clipboard_buffer);
+    }
+#else
+    cons_show("This version of Profanity has not been built with GTK support enabled. It is needed for the clipboard feature to work.");
+#endif
+
     return TRUE;
 }
