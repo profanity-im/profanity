@@ -161,7 +161,6 @@ tray_init(void)
         return;
     }
 
-    gtk_init(0, NULL);
     if (prefs_get_boolean(PREF_TRAY)) {
         log_debug("Building GTK icon");
         tray_enable();
