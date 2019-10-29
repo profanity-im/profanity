@@ -164,6 +164,10 @@ omemo_start_device_session_handle_bundle(xmpp_stanza_t *const stanza, void *cons
 
     xmpp_stanza_t *prekey;
     for (prekey = xmpp_stanza_get_children(prekeys); prekey != NULL; prekey = xmpp_stanza_get_next(prekey)) {
+        if (g_strcmp0(xmpp_stanza_get_name(prekey), "preKeyPublic") != 0) {
+            continue;
+        }
+
         omemo_key_t *key = malloc(sizeof(omemo_key_t));
         key->data = NULL;
 
@@ -378,6 +382,10 @@ _omemo_receive_devicelist(xmpp_stanza_t *const stanza, void *const userdata)
 
         xmpp_stanza_t *device;
         for (device = xmpp_stanza_get_children(list); device != NULL; device = xmpp_stanza_get_next(device)) {
+            if (g_strcmp0(xmpp_stanza_get_name(device), "device") != 0) {
+                continue;
+            }
+
             const char *id = xmpp_stanza_get_id(device);
             if (id != NULL) {
                device_list = g_list_append(device_list, GINT_TO_POINTER(strtoul(id, NULL, 10)));
