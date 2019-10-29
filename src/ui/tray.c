@@ -54,8 +54,6 @@ static gint unread_messages;
 static gboolean shutting_down;
 static guint timer;
 
-/* {{{ Privates */
-
 /*
  * Get icons from installation share folder or (if defined) .locale user's folder
  *
@@ -153,9 +151,6 @@ _tray_change_icon(gpointer data)
     return TRUE;
 }
 
-/* }}} */
-/* {{{ Public */
-
 void
 tray_init(void)
 {
@@ -222,5 +217,4 @@ tray_disable(void)
     }
 }
 
-/* }}} */
 #endif
