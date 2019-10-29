@@ -192,6 +192,7 @@ message_init(void)
     message->enc = PROF_MSG_ENC_PLAIN;
     message->timestamp = NULL;
     message->trusted = true;
+    message->mucuser = false;
 
     return message;
 }
@@ -914,6 +915,7 @@ _private_chat_handler(xmpp_stanza_t *const stanza)
 {
     // standard chat message, use jid without resource
     ProfMessage *message = message_init();
+    message->mucuser = TRUE;
 
     const gchar *from = xmpp_stanza_get_from(stanza);
     message->jid = jid_create(from);
@@ -990,6 +992,12 @@ _handle_carbons(xmpp_stanza_t *const stanza)
     }
 
     ProfMessage *message = message_init();
+
+    // check whether message was a MUC PM
+    xmpp_stanza_t *mucuser = xmpp_stanza_get_child_by_ns(message_stanza, STANZA_NS_MUC_USER);
+    if (mucuser) {
+        message->mucuser = TRUE;
+    }
 
     // check omemo encryption
 #ifdef HAVE_OMEMO
