@@ -55,10 +55,10 @@ void log_stderr_handler(void) {}
 
 void chat_log_init(void) {}
 
-void chat_log_msg_out(const char * const barejid, const char * const msg) {}
-void chat_log_otr_msg_out(const char * const barejid, const char * const msg) {}
-void chat_log_pgp_msg_out(const char * const barejid, const char * const msg) {}
-void chat_log_omemo_msg_out(const char *const barejid, const char *const msg) {}
+void chat_log_msg_out(const char * const barejid, const char * const msg, const char *const resource) {}
+void chat_log_otr_msg_out(const char * const barejid, const char * const msg, const char *const resource) {}
+void chat_log_pgp_msg_out(const char * const barejid, const char * const msg, const char *const resource) {}
+void chat_log_omemo_msg_out(const char *const barejid, const char *const msg, const char *const resource) {}
 
 void chat_log_msg_in(ProfMessage *message) {}
 void chat_log_otr_msg_in(ProfMessage *message) {}
