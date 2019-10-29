@@ -2415,6 +2415,19 @@ static struct cmd_t command_defs[] =
         CMD_NOARGS
         CMD_NOEXAMPLES
     },
+
+    { "/paste",
+        parse_args, 0, 0, NULL,
+        CMD_NOSUBFUNCS
+        CMD_MAINFUNC(cmd_paste)
+        CMD_NOTAGS
+        CMD_SYN(
+            "/paste")
+        CMD_DESC(
+            "Paste clipboard.")
+        CMD_NOARGS
+        CMD_NOEXAMPLES
+    },
 };
 
 static GHashTable *search_index;

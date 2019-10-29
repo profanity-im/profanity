@@ -228,4 +228,6 @@ gboolean cmd_omemo_clear_device_list(ProfWin *window, const char *const command,
 
 gboolean cmd_save(ProfWin *window, const char *const command, gchar **args);
 gboolean cmd_reload(ProfWin *window, const char *const command, gchar **args);
+
+gboolean cmd_paste(ProfWin *window, const char *const command, gchar **args);
 #endif

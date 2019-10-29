@@ -93,6 +93,7 @@
 
 #ifdef HAVE_GTK
 #include "ui/tray.h"
+#include "tools/clipboard.h"
 #endif
 
 #ifdef HAVE_PYTHON
@@ -8573,5 +8574,18 @@ cmd_reload(ProfWin *window, const char *const command, gchar **args)
     log_info("Reloading preferences");
     cons_show("Reloading preferences.");
     prefs_reload();
+    return TRUE;
+}
+
+gboolean
+cmd_paste(ProfWin *window, const char *const command, gchar **args)
+{
+#ifdef HAVE_GTK
+    char *buf = clipboard_get();
+    cons_show(buf);
+#else
+    cons_show("This version of Profanity has not been built with GTK support enabled. It is needed for the clipboard feature to work.");
+#endif
+
     return TRUE;
 }
