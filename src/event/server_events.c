@@ -419,6 +419,7 @@ sv_ev_delayed_private_message(ProfMessage *message)
         privatewin = (ProfPrivateWin*)window;
     }
     privwin_incoming_msg(privatewin, message);
+    chat_log_msg_in(message);
 
     plugins_post_priv_message_display(message->jid->fulljid, message->plain);
 
