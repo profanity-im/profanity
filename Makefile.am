@@ -41,6 +41,7 @@ core_sources = \
 	src/tools/http_upload.h \
 	src/tools/autocomplete.c src/tools/autocomplete.h \
 	src/tools/tinyurl.c src/tools/tinyurl.h \
+	src/tools/clipboard.c src/tools/clipboard.h \
 	src/config/files.c src/config/files.h \
 	src/config/conflists.c src/config/conflists.h \
 	src/config/accounts.c src/config/accounts.h \
@@ -81,6 +82,7 @@ unittest_sources = \
 	src/tools/parser.h \
 	src/tools/autocomplete.c src/tools/autocomplete.h \
 	src/tools/tinyurl.c src/tools/tinyurl.h \
+	src/tools/clipboard.c src/tools/clipboard.h \
 	src/config/accounts.h \
 	src/config/account.c src/config/account.h \
 	src/config/files.c src/config/files.h \
