@@ -144,7 +144,7 @@ cl_ev_send_msg(ProfChatWin *chatwin, const char *const msg, const char *const oo
 #ifndef HAVE_OMEMO
     if (chatwin->pgp_send) {
         char *id = message_send_chat_pgp(chatwin->barejid, plugin_msg, request_receipt);
-        chat_log_pgp_msg_out(chatwin->barejid, plugin_msg);
+        chat_log_pgp_msg_out(chatwin->barejid, plugin_msg, NULL);
         chatwin_outgoing_msg(chatwin, plugin_msg, id, PROF_MSG_ENC_PGP, request_receipt);
         free(id);
     } else {
@@ -189,7 +189,7 @@ cl_ev_send_msg(ProfChatWin *chatwin, const char *const msg, const char *const oo
 #ifndef HAVE_OMEMO
     if (chatwin->pgp_send) {
         char *id = message_send_chat_pgp(chatwin->barejid, plugin_msg, request_receipt);
-        chat_log_pgp_msg_out(chatwin->barejid, plugin_msg);
+        chat_log_pgp_msg_out(chatwin->barejid, plugin_msg, NULL);
         chatwin_outgoing_msg(chatwin, plugin_msg, id, PROF_MSG_ENC_PGP, request_receipt);
         free(id);
     } else {
@@ -212,7 +212,7 @@ cl_ev_send_msg(ProfChatWin *chatwin, const char *const msg, const char *const oo
 #ifdef HAVE_OMEMO
     if (chatwin->is_omemo) {
         char *id = omemo_on_message_send((ProfWin *)chatwin, plugin_msg, request_receipt, FALSE);
-        chat_log_omemo_msg_out(chatwin->barejid, plugin_msg);
+        chat_log_omemo_msg_out(chatwin->barejid, plugin_msg, NULL);
         chatwin_outgoing_msg(chatwin, plugin_msg, id, PROF_MSG_ENC_OMEMO, request_receipt);
         free(id);
     } else {
@@ -235,7 +235,7 @@ cl_ev_send_msg(ProfChatWin *chatwin, const char *const msg, const char *const oo
 #ifdef HAVE_OMEMO
     if (chatwin->is_omemo) {
         char *id = omemo_on_message_send((ProfWin *)chatwin, plugin_msg, request_receipt, FALSE);
-        chat_log_omemo_msg_out(chatwin->barejid, plugin_msg);
+        chat_log_omemo_msg_out(chatwin->barejid, plugin_msg, NULL);
         chatwin_outgoing_msg(chatwin, plugin_msg, id, PROF_MSG_ENC_OMEMO, request_receipt);
         free(id);
     } else {
@@ -261,12 +261,12 @@ cl_ev_send_msg(ProfChatWin *chatwin, const char *const msg, const char *const oo
 #ifdef HAVE_OMEMO
     if (chatwin->is_omemo) {
         char *id = omemo_on_message_send((ProfWin *)chatwin, plugin_msg, request_receipt, FALSE);
-        chat_log_omemo_msg_out(chatwin->barejid, plugin_msg);
+        chat_log_omemo_msg_out(chatwin->barejid, plugin_msg, NULL);
         chatwin_outgoing_msg(chatwin, plugin_msg, id, PROF_MSG_ENC_OMEMO, request_receipt);
         free(id);
     } else if (chatwin->pgp_send) {
         char *id = message_send_chat_pgp(chatwin->barejid, plugin_msg, request_receipt);
-        chat_log_pgp_msg_out(chatwin->barejid, plugin_msg);
+        chat_log_pgp_msg_out(chatwin->barejid, plugin_msg, NULL);
         chatwin_outgoing_msg(chatwin, plugin_msg, id, PROF_MSG_ENC_PGP, request_receipt);
         free(id);
     } else {
