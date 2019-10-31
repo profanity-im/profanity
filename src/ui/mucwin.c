@@ -527,7 +527,7 @@ mucwin_incoming_msg(ProfMucWin *mucwin, ProfMessage *message, GSList *mentions, 
     assert(mucwin != NULL);
     int flags = 0;
 
-    if (message_is_sent_by_us(message)) {
+    if (message_is_sent_by_us(message, TRUE)) {
         /* Ignore reflection messages */
         return;
     }

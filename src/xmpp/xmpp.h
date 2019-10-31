@@ -126,6 +126,8 @@ typedef enum {
 typedef struct prof_message_t {
    Jid *jid;
    char *id;
+   /* </origin-id> XEP-0359 */
+   char *originid;
    /* The raw body from xmpp message, either plaintext or OTR encrypted text */
    char *body;
    /* The encrypted message as for PGP */
@@ -178,7 +180,7 @@ void message_send_paused(const char *const jid);
 void message_send_gone(const char *const jid);
 void message_send_invite(const char *const room, const char *const contact, const char *const reason);
 
-bool message_is_sent_by_us(ProfMessage *message);
+bool message_is_sent_by_us(ProfMessage *message, bool checkOID);
 
 void presence_subscription(const char *const jid, const jabber_subscr_t action);
 GList* presence_get_subscription_requests(void);

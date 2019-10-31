@@ -132,7 +132,7 @@ void message_send_gone(const char * const barejid) {}
 void message_send_invite(const char * const room, const char * const contact,
     const char * const reason) {}
 
-bool message_is_sent_by_us(ProfMessage *message) {
+bool message_is_sent_by_us(ProfMessage *message, bool checkOID) {
     return TRUE;
 }
 

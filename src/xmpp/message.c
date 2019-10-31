@@ -186,6 +186,7 @@ message_init(void)
 
     message->jid = NULL;
     message->id = NULL;
+    message->originid = NULL;
     message->body = NULL;
     message->encrypted = NULL;
     message->plain = NULL;
@@ -207,6 +208,10 @@ message_free(ProfMessage *message)
 
     if (message->id) {
         xmpp_free(ctx, message->id);
+    }
+
+    if (message->originid) {
+        xmpp_free(ctx, message->originid);
     }
 
     if (message->body) {
@@ -748,10 +753,11 @@ _handle_groupchat(xmpp_stanza_t *const stanza)
     xmpp_ctx_t *ctx = connection_get_ctx();
 
     const char *id = xmpp_stanza_get_id(stanza);
+    char *originid = NULL;
 
     xmpp_stanza_t *origin = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_STABLE_ID);
     if (origin && g_strcmp0(xmpp_stanza_get_name(origin), STANZA_NAME_ORIGIN_ID) == 0) {
-        id = xmpp_stanza_get_attribute(origin, STANZA_ATTR_ID);
+        originid = (char*)xmpp_stanza_get_attribute(origin, STANZA_ATTR_ID);
     }
 
     const char *room_jid = xmpp_stanza_get_from(stanza);
@@ -802,6 +808,9 @@ _handle_groupchat(xmpp_stanza_t *const stanza)
     message->jid = jid;
     if (id) {
         message->id = strdup(id);
+    }
+    if (originid) {
+        message->originid = strdup(originid);
     }
 
     message->body = xmpp_message_get_body(stanza);
@@ -1167,33 +1176,46 @@ _send_message_stanza(xmpp_stanza_t *const stanza)
     xmpp_free(connection_get_ctx(), text);
 }
 
+/* ckeckOID = true: check origin-id
+ * checkOID = false: check regular id
+ */
 bool
-message_is_sent_by_us(ProfMessage *message) {
+message_is_sent_by_us(ProfMessage *message, bool checkOID) {
     bool ret = FALSE;
 
     // we check the </origin-id> for this we calculate a hash into it so we can detect
     // whether this client sent it. See connection_create_stanza_id()
-    if (message && message->id != NULL) {
-        gsize tmp_len;
-        char *tmp = (char*)g_base64_decode(message->id, &tmp_len);
+    if (message) {
+        char *tmp_id = NULL;
 
-        // our client sents at least 36 (uuid) + identifier
-        if (tmp_len > 36) {
-            char *uuid = g_strndup(tmp, 36);
-            const char *prof_identifier = connection_get_profanity_identifier();
-
-            gchar *hmac = g_compute_hmac_for_string(G_CHECKSUM_SHA256,
-                    (guchar*)prof_identifier, strlen(prof_identifier),
-                    uuid, strlen(uuid));
-
-            if (g_strcmp0(&tmp[36], hmac) == 0) {
-                ret = TRUE;
-            }
-
-            g_free(uuid);
-            g_free(hmac);
+        if (checkOID && message->originid != NULL) {
+            tmp_id = message->originid;
+        } else if (!checkOID && message->id != NULL) {
+            tmp_id = message->id;
         }
-        free(tmp);
+
+        if (tmp_id != NULL) {
+            gsize tmp_len;
+            char *tmp = (char*)g_base64_decode(tmp_id, &tmp_len);
+
+            // our client sents at least 36 (uuid) + identifier
+            if (tmp_len > 36) {
+                char *uuid = g_strndup(tmp, 36);
+                const char *prof_identifier = connection_get_profanity_identifier();
+
+                gchar *hmac = g_compute_hmac_for_string(G_CHECKSUM_SHA256,
+                        (guchar*)prof_identifier, strlen(prof_identifier),
+                        uuid, strlen(uuid));
+
+                if (g_strcmp0(&tmp[36], hmac) == 0) {
+                    ret = TRUE;
+                }
+
+                g_free(uuid);
+                g_free(hmac);
+            }
+            free(tmp);
+        }
     }
 
     return  ret;
