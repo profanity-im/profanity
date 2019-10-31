@@ -198,7 +198,6 @@ win_create_muc(const char *const roomjid)
     new_win->enctext = NULL;
     new_win->message_char = NULL;
     new_win->is_omemo = FALSE;
-    new_win->sent_messages = g_hash_table_new_full(g_str_hash, g_str_equal, free, NULL);
 
     new_win->memcheck = PROFMUCWIN_MEMCHECK;
 

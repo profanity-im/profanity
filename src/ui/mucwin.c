@@ -504,8 +504,6 @@ mucwin_outgoing_msg(ProfMucWin *mucwin, const char *const message, const char *c
 {
     assert(mucwin != NULL);
 
-    g_hash_table_insert(mucwin->sent_messages, strdup(id), NULL);
-
     ProfWin *window = (ProfWin*)mucwin;
     char *mynick = muc_nick(mucwin->roomjid);
 
@@ -529,7 +527,7 @@ mucwin_incoming_msg(ProfMucWin *mucwin, ProfMessage *message, GSList *mentions, 
     assert(mucwin != NULL);
     int flags = 0;
 
-    if (message->id && g_hash_table_remove(mucwin->sent_messages, message->id)) {
+    if (message_is_sent_by_us(message)) {
         /* Ignore reflection messages */
         return;
     }

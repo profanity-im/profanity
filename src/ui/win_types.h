@@ -172,7 +172,6 @@ typedef struct prof_muc_win_t {
     unsigned long memcheck;
     char *enctext;
     char *message_char;
-    GHashTable *sent_messages;
     GDateTime *last_msg_timestamp;
 } ProfMucWin;
 
