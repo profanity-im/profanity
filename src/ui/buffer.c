@@ -80,7 +80,7 @@ buffer_free(ProfBuff buffer)
 
 void
 buffer_append(ProfBuff buffer, const char show_char, int pad_indent, GDateTime *time,
-    int flags, theme_item_t theme_item, const char *const from, const char *const message, DeliveryReceipt *receipt)
+    int flags, theme_item_t theme_item, const char *const from, const char *const message, DeliveryReceipt *receipt, const char *const id)
 {
     ProfBuffEntry *e = malloc(sizeof(struct prof_buff_entry_t));
     e->show_char = show_char;
@@ -91,6 +91,7 @@ buffer_append(ProfBuff buffer, const char show_char, int pad_indent, GDateTime *
     e->from = from ? strdup(from) : NULL;
     e->message = strdup(message);
     e->receipt = receipt;
+    e->id = strdup(id);
 
     if (g_slist_length(buffer->entries) == BUFF_SIZE) {
         _free_entry(buffer->entries->data);
@@ -106,7 +107,7 @@ buffer_mark_received(ProfBuff buffer, const char *const id)
     GSList *entries = buffer->entries;
     while (entries) {
         ProfBuffEntry *entry = entries->data;
-        if (entry->receipt && g_strcmp0(entry->receipt->id, id) == 0) {
+        if (entry->receipt && g_strcmp0(entry->id, id) == 0) {
             if (!entry->receipt->received) {
                 entry->receipt->received = TRUE;
                 return TRUE;
@@ -131,7 +132,7 @@ buffer_get_entry_by_id(ProfBuff buffer, const char *const id)
     GSList *entries = buffer->entries;
     while (entries) {
         ProfBuffEntry *entry = entries->data;
-        if (entry->receipt && g_strcmp0(entry->receipt->id, id) == 0) {
+        if (g_strcmp0(entry->id, id) == 0) {
             return entry;
         }
         entries = g_slist_next(entries);
@@ -145,10 +146,8 @@ _free_entry(ProfBuffEntry *entry)
 {
     free(entry->message);
     free(entry->from);
+    free(entry->id);
+    free(entry->receipt);
     g_date_time_unref(entry->time);
-    if (entry->receipt) {
-        free(entry->receipt->id);
-        free(entry->receipt);
-    }
     free(entry);
 }
