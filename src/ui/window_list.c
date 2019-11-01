@@ -2,6 +2,7 @@
  * window_list.c
  *
  * Copyright (C) 2012 - 2019 James Booth <boothj5@gmail.com>
+ * Copyright (C) 2019 Michael Vetter <jubalh@iodoru.org>
  *
  * This file is part of Profanity.
  *
@@ -368,20 +369,12 @@ wins_get_by_string(const char *str)
 {
     if (g_strcmp0(str, "console") == 0) {
         ProfWin *conswin = wins_get_console();
-        if (conswin) {
-            return conswin;
-        } else {
-            return NULL;
-        }
+        return conswin;
     }
 
     if (g_strcmp0(str, "xmlconsole") == 0) {
         ProfXMLWin *xmlwin = wins_get_xmlconsole();
-        if (xmlwin) {
             return (ProfWin*)xmlwin;
-        } else {
-            return NULL;
-        }
     }
 
     ProfChatWin *chatwin = wins_get_chat(str);
