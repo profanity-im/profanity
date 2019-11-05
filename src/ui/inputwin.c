@@ -822,11 +822,8 @@ static int
 _inp_rl_down_arrow_handler(int count, int key)
 {
     add_history(rl_line_buffer);
-    //also tried: add_history(rl_copy_text(0, rl_end));
-    //also tried: add_history("Hello");
+    using_history();
     rl_replace_line("", 0);
     rl_redisplay();
-    rl_end = 0; // why is this neeed? shouln't replace_line do this?
-    rl_point = 0; // why is this neeed? shouln't replace_line do this?
     return 0;
 }
