@@ -5960,6 +5960,9 @@ cmd_titlebar_show_hide(ProfWin *window, const char *const command, gchar **args)
             } else if (g_strcmp0(args[1], "resource") == 0) {
                 cons_show("Showing resource in titlebar enabled.");
                 prefs_set_boolean(PREF_RESOURCE_TITLE , TRUE);
+            } else if (g_strcmp0(args[1], "presence") == 0) {
+                cons_show("Showing contact presence in titlebar enabled.");
+                prefs_set_boolean(PREF_PRESENCE , TRUE);
             } else {
                 cons_bad_cmd_usage(command);
             }
@@ -5974,6 +5977,9 @@ cmd_titlebar_show_hide(ProfWin *window, const char *const command, gchar **args)
             } else if (g_strcmp0(args[1], "resource") == 0) {
                 cons_show("Showing resource in titlebar disabled.");
                 prefs_set_boolean(PREF_RESOURCE_TITLE , FALSE);
+            } else if (g_strcmp0(args[1], "presence") == 0) {
+                cons_show("Showing contact presence in titlebar enabled.");
+                prefs_set_boolean(PREF_PRESENCE , FALSE);
             } else {
                 cons_bad_cmd_usage(command);
             }

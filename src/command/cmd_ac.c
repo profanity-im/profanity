@@ -777,6 +777,7 @@ cmd_ac_init(void)
     autocomplete_add(titlebar_show_ac, "tls");
     autocomplete_add(titlebar_show_ac, "encwarn");
     autocomplete_add(titlebar_show_ac, "resource");
+    autocomplete_add(titlebar_show_ac, "presence");
 
     tls_certpath_ac = autocomplete_new();
     autocomplete_add(tls_certpath_ac, "set");

@@ -1151,6 +1151,12 @@ cons_titlebar_setting(void)
     } else {
         cons_show("Resource show (/titlebar)           : OFF");
     }
+
+    if (prefs_get_boolean(PREF_PRESENCE)) {
+        cons_show("Titlebar presence (/titlebar)       : ON");
+    } else {
+        cons_show("Titlebar presence (/titlebar)       : OFF");
+    }
 }
 
 void
