@@ -427,7 +427,7 @@ void cons_roster_setting(void) {}
 void cons_presence_setting(void) {}
 void cons_wrap_setting(void) {}
 void cons_winstidy_setting(void) {}
-void cons_encwarn_setting(void) {}
+void cons_titlebar_setting(void) {}
 void cons_time_setting(void) {}
 void cons_statuses_setting(void) {}
 void cons_wintitle_setting(void) {}
