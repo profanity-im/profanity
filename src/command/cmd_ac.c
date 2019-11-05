@@ -775,6 +775,7 @@ cmd_ac_init(void)
 
     titlebar_show_ac = autocomplete_new();
     autocomplete_add(titlebar_show_ac, "tls");
+    autocomplete_add(titlebar_show_ac, "encwarn");
 
     tls_certpath_ac = autocomplete_new();
     autocomplete_add(tls_certpath_ac, "set");
@@ -1440,8 +1441,7 @@ _cmd_ac_complete_params(ProfWin *window, const char *const input, gboolean previ
 
     // autocomplete boolean settings
     gchar *boolean_choices[] = { "/beep", "/intype", "/states", "/outtype", "/flash", "/splash", "/chlog", "/grlog",
-        "/history", "/vercheck", "/privileges", "/wrap", "/carbons", "/encwarn",
-        "/lastactivity" };
+        "/history", "/vercheck", "/privileges", "/wrap", "/carbons", "/lastactivity" };
 
     for (i = 0; i < ARRAY_SIZE(boolean_choices); i++) {
         result = autocomplete_param_with_func(input, boolean_choices[i], prefs_autocomplete_boolean_choice, previous);

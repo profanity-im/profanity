@@ -5947,21 +5947,36 @@ cmd_titlebar(ProfWin *window, const char *const command, gchar **args)
 }
 
 gboolean
-cmd_titlebar_tls_show(ProfWin *window, const char *const command, gchar **args)
+cmd_titlebar_show_hide(ProfWin *window, const char *const command, gchar **args)
 {
-    if (args[1] == NULL || g_strcmp0(args[1], "tls") != 0) {
-        cons_bad_cmd_usage(command);
-    } else {
+    if (args[1] != NULL) {
         if (g_strcmp0(args[0], "show") == 0) {
-            cons_show("TLS titlebar indicator enabled.");
-            prefs_set_boolean(PREF_TLS_SHOW, TRUE);
+
+            if (g_strcmp0(args[1], "tls") == 0) {
+                cons_show("TLS titlebar indicator enabled.");
+                prefs_set_boolean(PREF_TLS_SHOW, TRUE);
+            } else if (g_strcmp0(args[1], "encwarn") == 0) {
+                cons_show("Encryption warning titlebar indicator enabled.");
+                prefs_set_boolean(PREF_ENC_WARN, TRUE);
+            } else {
+                cons_bad_cmd_usage(command);
+            }
         } else if (g_strcmp0(args[0], "hide") == 0) {
-            cons_show("TLS titlebar indicator disabled.");
-            prefs_set_boolean(PREF_TLS_SHOW, FALSE);
+
+            if (g_strcmp0(args[1], "tls") == 0) {
+                cons_show("TLS titlebar indicator disabled.");
+                prefs_set_boolean(PREF_TLS_SHOW, FALSE);
+            } else if (g_strcmp0(args[1], "encwarn") == 0) {
+                cons_show("Encryption warning titlebar indicator disabled.");
+                prefs_set_boolean(PREF_ENC_WARN, FALSE);
+            } else {
+                cons_bad_cmd_usage(command);
+            }
         } else {
             cons_bad_cmd_usage(command);
         }
     }
+
     return TRUE;
 }
 
@@ -7797,13 +7812,6 @@ cmd_otr_answer(ProfWin *window, const char *const command, gchar **args)
     cons_show("This version of Profanity has not been built with OTR support enabled");
     return TRUE;
 #endif
-}
-
-gboolean
-cmd_encwarn(ProfWin *window, const char *const command, gchar **args)
-{
-    _cmd_set_boolean_preference(args[0], command, "Encryption warning message", PREF_ENC_WARN);
-    return TRUE;
 }
 
 gboolean

@@ -1197,22 +1197,6 @@ static struct cmd_t command_defs[] =
         CMD_NOEXAMPLES
     },
 
-    { "/encwarn",
-        parse_args, 1, 1, &cons_encwarn_setting,
-        CMD_NOSUBFUNCS
-        CMD_MAINFUNC(cmd_encwarn)
-        CMD_TAGS(
-            CMD_TAG_CHAT,
-            CMD_TAG_UI)
-        CMD_SYN(
-            "/encwarn on|off")
-        CMD_DESC(
-            "Titlebar encryption warning.")
-        CMD_ARGS(
-            { "on|off", "Enable or disable the unencrypted warning message in the titlebar." })
-        CMD_NOEXAMPLES
-    },
-
     { "/presence",
         parse_args, 2, 2, &cons_presence_setting,
         CMD_NOSUBFUNCS
@@ -1324,10 +1308,10 @@ static struct cmd_t command_defs[] =
     },
 
     { "/titlebar",
-        parse_args, 1, 2, &cons_winpos_setting,
+        parse_args, 1, 2, &cons_titlebar_setting,
         CMD_SUBFUNCS(
-            { "show",  cmd_titlebar_tls_show },
-            { "hide",  cmd_titlebar_tls_show }
+            { "show",  cmd_titlebar_show_hide },
+            { "hide",  cmd_titlebar_show_hide }
             )
         CMD_MAINFUNC(cmd_titlebar)
         CMD_TAGS(
@@ -1335,15 +1319,19 @@ static struct cmd_t command_defs[] =
         CMD_SYN(
             "/titlebar up",
             "/titlebar down",
-            "/titlebar show|hide tls")
+            "/titlebar show|hide [tls|encwarn]")
         CMD_DESC(
             "Titlebar settings.")
         CMD_ARGS(
             { "up", "Move the title bar up the screen." },
             { "down", "Move the title bar down the screen." },
-            { "show", "Show or hide the TLS indicator in the titlebar." }
+            { "show tls", "Show or hide TLS indicator in the titlebar." },
+            { "show encwarn", "Enable or disable the unencrypted warning message in the titlebar." }
             )
-        CMD_NOEXAMPLES
+        CMD_EXAMPLES(
+            "/titlebar up",
+            "/titlebar show tls",
+            "/titlebar hide encwarn")
     },
 
     { "/mainwin",

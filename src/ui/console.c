@@ -1130,12 +1130,20 @@ cons_wrap_setting(void)
 }
 
 void
-cons_encwarn_setting(void)
+cons_titlebar_setting(void)
 {
-    if (prefs_get_boolean(PREF_ENC_WARN)) {
-        cons_show("Warn unencrypted (/encwarn)         : ON");
+    cons_winpos_setting();
+
+    if (prefs_get_boolean(PREF_TLS_SHOW)) {
+        cons_show("TLS show (/titlebar)                : ON");
     } else {
-        cons_show("Warn unencrypted (/encwarn)         : OFF");
+        cons_show("TLS show (/titlebar)                : OFF");
+    }
+
+    if (prefs_get_boolean(PREF_ENC_WARN)) {
+        cons_show("Warn unencrypted (/titlebar)        : ON");
+    } else {
+        cons_show("Warn unencrypted (/titlebar)        : OFF");
     }
 }
 
@@ -1153,16 +1161,6 @@ cons_console_setting(void)
     char *privsetting = prefs_get_string(PREF_CONSOLE_PRIVATE);
     cons_show("Console private messages (/console) : %s", privsetting);
     prefs_free_string(privsetting);
-}
-
-void
-cons_tlsshow_setting(void)
-{
-    if (prefs_get_boolean(PREF_TLS_SHOW)) {
-        cons_show("TLS show (/tls)                     : ON");
-    } else {
-        cons_show("TLS show (/tls)                     : OFF");
-    }
 }
 
 void
@@ -1556,10 +1554,9 @@ cons_show_ui_prefs(void)
     cons_roster_setting();
     cons_privileges_setting();
     cons_wintitle_setting();
-    cons_encwarn_setting();
     cons_presence_setting();
     cons_inpblock_setting();
-    cons_tlsshow_setting();
+    cons_titlebar_setting();
     cons_statusbar_setting();
 
     cons_alert();
