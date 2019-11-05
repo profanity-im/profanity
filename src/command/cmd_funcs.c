@@ -3660,8 +3660,6 @@ cmd_join(ProfWin *window, const char *const command, gchar **args)
 gboolean
 cmd_invite(ProfWin *window, const char *const command, gchar **args)
 {
-    char *contact = args[0];
-    char *reason = args[1];
     jabber_conn_status_t conn_status = connection_get_status();
 
     if (conn_status != JABBER_CONNECTED) {
@@ -3669,47 +3667,41 @@ cmd_invite(ProfWin *window, const char *const command, gchar **args)
         return TRUE;
     }
 
-    if (window->type != WIN_MUC) {
-        cons_show("You must be in a chat room to send an invite.");
-        return TRUE;
-    }
+    if (g_strcmp0(args[0], "send") == 0) {
+        char *contact = args[1];
+        char *reason = args[2];
 
-    char *usr_jid = roster_barejid_from_name(contact);
-    if (usr_jid == NULL) {
-        usr_jid = contact;
-    }
+        if (window->type != WIN_MUC) {
+            cons_show("You must be in a chat room to send an invite.");
+            return TRUE;
+        }
 
-    ProfMucWin *mucwin = (ProfMucWin*)window;
-    assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
-    message_send_invite(mucwin->roomjid, usr_jid, reason);
-    if (reason) {
-        cons_show("Room invite sent, contact: %s, room: %s, reason: \"%s\".",
-            contact, mucwin->roomjid, reason);
-    } else {
-        cons_show("Room invite sent, contact: %s, room: %s.",
-            contact, mucwin->roomjid);
-    }
+        char *usr_jid = roster_barejid_from_name(contact);
+        if (usr_jid == NULL) {
+            usr_jid = contact;
+        }
 
-    return TRUE;
-}
-
-gboolean
-cmd_invites(ProfWin *window, const char *const command, gchar **args)
-{
-    GList *invites = muc_invites();
-    cons_show_room_invites(invites);
-    g_list_free_full(invites, g_free);
-    return TRUE;
-}
-
-gboolean
-cmd_decline(ProfWin *window, const char *const command, gchar **args)
-{
-    if (!muc_invites_contain(args[0])) {
-        cons_show("No such invite exists.");
-    } else {
-        muc_invites_remove(args[0]);
-        cons_show("Declined invite to %s.", args[0]);
+        ProfMucWin *mucwin = (ProfMucWin*)window;
+        assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
+        message_send_invite(mucwin->roomjid, usr_jid, reason);
+        if (reason) {
+            cons_show("Room invite sent, contact: %s, room: %s, reason: \"%s\".",
+                    contact, mucwin->roomjid, reason);
+        } else {
+            cons_show("Room invite sent, contact: %s, room: %s.",
+                    contact, mucwin->roomjid);
+        }
+    } else if (g_strcmp0(args[0], "list") == 0) {
+        GList *invites = muc_invites();
+        cons_show_room_invites(invites);
+        g_list_free_full(invites, g_free);
+    } else if (g_strcmp0(args[0], "decline") == 0) {
+        if (!muc_invites_contain(args[1])) {
+            cons_show("No such invite exists.");
+        } else {
+            muc_invites_remove(args[1]);
+            cons_show("Declined invite to %s.", args[1]);
+        }
     }
 
     return TRUE;

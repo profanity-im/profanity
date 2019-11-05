@@ -108,6 +108,7 @@ static char* _presence_autocomplete(ProfWin *window, const char *const input, gb
 static char* _rooms_autocomplete(ProfWin *window, const char *const input, gboolean previous);
 static char* _statusbar_autocomplete(ProfWin *window, const char *const input, gboolean previous);
 static char* _clear_autocomplete(ProfWin *window, const char *const input, gboolean previous);
+static char* _invite_autocomplete(ProfWin *window, const char *const input, gboolean previous);
 
 static char* _script_autocomplete_func(const char *const prefix, gboolean previous);
 
@@ -222,6 +223,7 @@ static Autocomplete statusbar_chat_ac;
 static Autocomplete statusbar_room_ac;
 static Autocomplete statusbar_show_ac;
 static Autocomplete clear_ac;
+static Autocomplete invite_ac;
 
 void
 cmd_ac_init(void)
@@ -858,6 +860,11 @@ cmd_ac_init(void)
     autocomplete_add(statusbar_ac, "chat");
     autocomplete_add(statusbar_ac, "room");
 
+    invite_ac = autocomplete_new();
+    autocomplete_add(invite_ac, "send");
+    autocomplete_add(invite_ac, "list");
+    autocomplete_add(invite_ac, "decline");
+
     statusbar_self_ac = autocomplete_new();
     autocomplete_add(statusbar_self_ac, "user");
     autocomplete_add(statusbar_self_ac, "barejid");
@@ -1173,6 +1180,7 @@ cmd_ac_reset(ProfWin *window)
     autocomplete_reset(statusbar_room_ac);
     autocomplete_reset(statusbar_show_ac);
     autocomplete_reset(clear_ac);
+    autocomplete_reset(invite_ac);
 
     autocomplete_reset(script_ac);
     if (script_show_ac) {
@@ -1313,6 +1321,7 @@ cmd_ac_uninit(void)
     autocomplete_free(statusbar_room_ac);
     autocomplete_free(statusbar_show_ac);
     autocomplete_free(clear_ac);
+    autocomplete_free(invite_ac);
 }
 
 static void
@@ -1495,14 +1504,7 @@ _cmd_ac_complete_params(ProfWin *window, const char *const input, gboolean previ
         }
     }
 
-    if (conn_status == JABBER_CONNECTED) {
-        result = autocomplete_param_with_func(input, "/invite", roster_contact_autocomplete, previous);
-        if (result) {
-            return result;
-        }
-    }
-
-    gchar *invite_choices[] = { "/decline", "/join" };
+    gchar *invite_choices[] = { "/join" };
     for (i = 0; i < ARRAY_SIZE(invite_choices); i++) {
         result = autocomplete_param_with_func(input, invite_choices[i], muc_invites_find, previous);
         if (result) {
@@ -1566,6 +1568,7 @@ _cmd_ac_complete_params(ProfWin *window, const char *const input, gboolean previ
     g_hash_table_insert(ac_funcs, "/rooms",         _rooms_autocomplete);
     g_hash_table_insert(ac_funcs, "/statusbar",     _statusbar_autocomplete);
     g_hash_table_insert(ac_funcs, "/clear",         _clear_autocomplete);
+    g_hash_table_insert(ac_funcs, "/invite",        _invite_autocomplete);
 
     int len = strlen(input);
     char parsed[len+1];
@@ -3473,6 +3476,33 @@ _clear_autocomplete(ProfWin *window, const char *const input, gboolean previous)
     result = autocomplete_param_with_func(input, "/clear persist_history", prefs_autocomplete_boolean_choice, previous);
     if (result) {
         return result;
+    }
+
+    return NULL;
+}
+
+static char*
+_invite_autocomplete(ProfWin *window, const char *const input, gboolean previous)
+{
+    char *result = NULL;
+
+    result = autocomplete_param_with_ac(input, "/invite", invite_ac, TRUE, previous);
+    if (result) {
+        return result;
+    }
+
+    jabber_conn_status_t conn_status = connection_get_status();
+
+    if (conn_status == JABBER_CONNECTED) {
+        result = autocomplete_param_with_func(input, "/invite send", roster_contact_autocomplete, previous);
+        if (result) {
+            return result;
+        }
+
+        result = autocomplete_param_with_func(input, "/invite decline", muc_invites_find, previous);
+        if (result) {
+            return result;
+        }
     }
 
     return NULL;

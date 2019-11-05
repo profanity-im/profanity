@@ -577,48 +577,28 @@ static struct cmd_t command_defs[] =
     },
 
     { "/invite",
-        parse_args_with_freetext, 1, 2, NULL,
+        parse_args_with_freetext, 1, 3, NULL,
         CMD_NOSUBFUNCS
         CMD_MAINFUNC(cmd_invite)
         CMD_TAGS(
             CMD_TAG_GROUPCHAT)
         CMD_SYN(
-            "/invite <contact> [<message>]")
+            "/invite send <contact> [<message>]",
+            "/invite list",
+            "/invite decline")
         CMD_DESC(
-            "Send an invite to a contact for the current chat room.")
+            "Manage room invites. "
+            "Send an invite to a contact for the current chat room. "
+            "List received invites. "
+            "Decline them using /invite decline and accept them using /join.")
         CMD_ARGS(
-            { "<contact>", "The contact you wish to invite." },
-            { "<message>", "An optional message to send with the invite." })
-        CMD_NOEXAMPLES
-    },
-
-    { "/invites",
-        parse_args_with_freetext, 0, 0, NULL,
-        CMD_NOSUBFUNCS
-        CMD_MAINFUNC(cmd_invites)
-        CMD_TAGS(
-            CMD_TAG_GROUPCHAT)
-        CMD_SYN(
-            "/invites")
-        CMD_DESC(
-            "Show all rooms that you have been invited to, and not accepted or declined.")
-        CMD_NOARGS
-        CMD_NOEXAMPLES
-    },
-
-    { "/decline",
-        parse_args_with_freetext, 1, 1, NULL,
-        CMD_NOSUBFUNCS
-        CMD_MAINFUNC(cmd_decline)
-        CMD_TAGS(
-            CMD_TAG_GROUPCHAT)
-        CMD_SYN(
-            "/decline <room>")
-        CMD_DESC(
-            "Decline a chat room invitation.")
-        CMD_ARGS(
-            { "<room>", "The room for the invite you wish to decline." })
-        CMD_NOEXAMPLES
+            { "send <contact> [<message>]", "The contact you wish to invite. And an optional message." },
+            { "list", "Show all rooms that you have been invited to, and not accepted or declined."},
+            { "decline <room>", "Decline a chat room invitation."})
+        CMD_EXAMPLES(
+            "/invite send gustavo@pollos.tx",
+            "/invite decline profanity@rooms.dismail.de"
+            "/invite list")
     },
 
     { "/room",
