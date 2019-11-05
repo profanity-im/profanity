@@ -597,7 +597,7 @@ static struct cmd_t command_defs[] =
             { "decline <room>", "Decline a chat room invitation."})
         CMD_EXAMPLES(
             "/invite send gustavo@pollos.tx",
-            "/invite decline profanity@rooms.dismail.de"
+            "/invite decline profanity@rooms.dismail.de",
             "/invite list")
     },
 
