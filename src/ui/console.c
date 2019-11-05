@@ -1145,6 +1145,12 @@ cons_titlebar_setting(void)
     } else {
         cons_show("Warn unencrypted (/titlebar)        : OFF");
     }
+
+    if (prefs_get_boolean(PREF_RESOURCE_TITLE)) {
+        cons_show("Resource show (/titlebar)           : ON");
+    } else {
+        cons_show("Resource show (/titlebar)           : OFF");
+    }
 }
 
 void
