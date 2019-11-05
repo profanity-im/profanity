@@ -3136,7 +3136,6 @@ cmd_blocked(ProfWin *window, const char *const command, gchar **args)
     return TRUE;
 }
 
-
 gboolean
 cmd_resource(ProfWin *window, const char *const command, gchar **args)
 {
@@ -5958,6 +5957,9 @@ cmd_titlebar_show_hide(ProfWin *window, const char *const command, gchar **args)
             } else if (g_strcmp0(args[1], "encwarn") == 0) {
                 cons_show("Encryption warning titlebar indicator enabled.");
                 prefs_set_boolean(PREF_ENC_WARN, TRUE);
+            } else if (g_strcmp0(args[1], "resource") == 0) {
+                cons_show("Showing resource in titlebar enabled.");
+                prefs_set_boolean(PREF_RESOURCE_TITLE , TRUE);
             } else {
                 cons_bad_cmd_usage(command);
             }
@@ -5969,6 +5971,9 @@ cmd_titlebar_show_hide(ProfWin *window, const char *const command, gchar **args)
             } else if (g_strcmp0(args[1], "encwarn") == 0) {
                 cons_show("Encryption warning titlebar indicator disabled.");
                 prefs_set_boolean(PREF_ENC_WARN, FALSE);
+            } else if (g_strcmp0(args[1], "resource") == 0) {
+                cons_show("Showing resource in titlebar disabled.");
+                prefs_set_boolean(PREF_RESOURCE_TITLE , FALSE);
             } else {
                 cons_bad_cmd_usage(command);
             }

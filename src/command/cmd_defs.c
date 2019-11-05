@@ -1319,14 +1319,15 @@ static struct cmd_t command_defs[] =
         CMD_SYN(
             "/titlebar up",
             "/titlebar down",
-            "/titlebar show|hide [tls|encwarn]")
+            "/titlebar show|hide [encwarn|resource|tls]")
         CMD_DESC(
             "Titlebar settings.")
         CMD_ARGS(
             { "up", "Move the title bar up the screen." },
             { "down", "Move the title bar down the screen." },
             { "show tls", "Show or hide TLS indicator in the titlebar." },
-            { "show encwarn", "Enable or disable the unencrypted warning message in the titlebar." }
+            { "show encwarn", "Enable or disable the unencrypted warning message in the titlebar." },
+            { "show resource", "Show or hide the current resource in the titlebar." }
             )
         CMD_EXAMPLES(
             "/titlebar up",
