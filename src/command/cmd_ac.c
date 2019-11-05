@@ -94,6 +94,7 @@ static char* _receipts_autocomplete(ProfWin *window, const char *const input, gb
 static char* _help_autocomplete(ProfWin *window, const char *const input, gboolean previous);
 static char* _wins_autocomplete(ProfWin *window, const char *const input, gboolean previous);
 static char* _tls_autocomplete(ProfWin *window, const char *const input, gboolean previous);
+static char* _titlebar_autocomplete(ProfWin *window, const char *const input, gboolean previous);
 static char* _script_autocomplete(ProfWin *window, const char *const input, gboolean previous);
 static char* _subject_autocomplete(ProfWin *window, const char *const input, gboolean previous);
 static char* _console_autocomplete(ProfWin *window, const char *const input, gboolean previous);
@@ -196,6 +197,8 @@ static Autocomplete receipts_ac;
 static Autocomplete pgp_ac;
 static Autocomplete pgp_log_ac;
 static Autocomplete tls_ac;
+static Autocomplete titlebar_ac;
+static Autocomplete titlebar_show_ac;
 static Autocomplete tls_certpath_ac;
 static Autocomplete script_ac;
 static Autocomplete script_show_ac;
@@ -763,7 +766,15 @@ cmd_ac_init(void)
     autocomplete_add(tls_ac, "trusted");
     autocomplete_add(tls_ac, "revoke");
     autocomplete_add(tls_ac, "certpath");
-    autocomplete_add(tls_ac, "show");
+
+    titlebar_ac = autocomplete_new();
+    autocomplete_add(titlebar_ac, "up");
+    autocomplete_add(titlebar_ac, "down");
+    autocomplete_add(titlebar_ac, "show");
+    autocomplete_add(titlebar_ac, "hide");
+
+    titlebar_show_ac = autocomplete_new();
+    autocomplete_add(titlebar_show_ac, "tls");
 
     tls_certpath_ac = autocomplete_new();
     autocomplete_add(tls_certpath_ac, "set");
@@ -1140,6 +1151,8 @@ cmd_ac_reset(ProfWin *window)
     autocomplete_reset(pgp_ac);
     autocomplete_reset(pgp_log_ac);
     autocomplete_reset(tls_ac);
+    autocomplete_reset(titlebar_ac);
+    autocomplete_reset(titlebar_show_ac);
     autocomplete_reset(tls_certpath_ac);
     autocomplete_reset(console_ac);
     autocomplete_reset(console_msg_ac);
@@ -1273,6 +1286,8 @@ cmd_ac_uninit(void)
     autocomplete_free(pgp_ac);
     autocomplete_free(pgp_log_ac);
     autocomplete_free(tls_ac);
+    autocomplete_free(titlebar_ac);
+    autocomplete_free(titlebar_show_ac);
     autocomplete_free(tls_certpath_ac);
     autocomplete_free(script_ac);
     autocomplete_free(script_show_ac);
@@ -1493,8 +1508,8 @@ _cmd_ac_complete_params(ProfWin *window, const char *const input, gboolean previ
         }
     }
 
-    gchar *cmds[] = { "/prefs", "/disco", "/room", "/autoping", "/titlebar", "/mainwin", "/inputwin" };
-    Autocomplete completers[] = { prefs_ac, disco_ac, room_ac, autoping_ac, winpos_ac, winpos_ac, winpos_ac };
+    gchar *cmds[] = { "/prefs", "/disco", "/room", "/autoping", "/mainwin", "/inputwin" };
+    Autocomplete completers[] = { prefs_ac, disco_ac, room_ac, autoping_ac, winpos_ac, winpos_ac };
 
     for (i = 0; i < ARRAY_SIZE(cmds); i++) {
         result = autocomplete_param_with_ac(input, cmds[i], completers[i], TRUE, previous);
@@ -1535,6 +1550,7 @@ _cmd_ac_complete_params(ProfWin *window, const char *const input, gboolean previ
     g_hash_table_insert(ac_funcs, "/receipts",      _receipts_autocomplete);
     g_hash_table_insert(ac_funcs, "/wins",          _wins_autocomplete);
     g_hash_table_insert(ac_funcs, "/tls",           _tls_autocomplete);
+    g_hash_table_insert(ac_funcs, "/titlebar",      _titlebar_autocomplete);
     g_hash_table_insert(ac_funcs, "/script",        _script_autocomplete);
     g_hash_table_insert(ac_funcs, "/subject",       _subject_autocomplete);
     g_hash_table_insert(ac_funcs, "/console",       _console_autocomplete);
@@ -2869,12 +2885,30 @@ _tls_autocomplete(ProfWin *window, const char *const input, gboolean previous)
         return result;
     }
 
-    result = autocomplete_param_with_func(input, "/tls show", prefs_autocomplete_boolean_choice, previous);
+    result = autocomplete_param_with_ac(input, "/tls", tls_ac, TRUE, previous);
     if (result) {
         return result;
     }
 
-    result = autocomplete_param_with_ac(input, "/tls", tls_ac, TRUE, previous);
+    return result;
+}
+
+static char*
+_titlebar_autocomplete(ProfWin *window, const char *const input, gboolean previous)
+{
+    char *result = NULL;
+
+    result = autocomplete_param_with_ac(input, "/titlebar show", titlebar_show_ac, TRUE, previous);
+    if (result) {
+        return result;
+    }
+
+    result = autocomplete_param_with_ac(input, "/titlebar hide", titlebar_show_ac, TRUE, previous);
+    if (result) {
+        return result;
+    }
+
+    result = autocomplete_param_with_ac(input, "/titlebar", titlebar_ac, TRUE, previous);
     if (result) {
         return result;
     }

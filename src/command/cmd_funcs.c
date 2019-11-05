@@ -288,13 +288,6 @@ cmd_tls_revoke(ProfWin *window, const char *const command, gchar **args)
 }
 
 gboolean
-cmd_tls_show(ProfWin *window, const char *const command, gchar **args)
-{
-    _cmd_set_boolean_preference(args[1], command, "TLS titlebar indicator", PREF_TLS_SHOW);
-    return TRUE;
-}
-
-gboolean
 cmd_tls_cert(ProfWin *window, const char *const command, gchar **args)
 {
 #ifdef HAVE_LIBMESODE
@@ -5950,6 +5943,25 @@ cmd_titlebar(ProfWin *window, const char *const command, gchar **args)
 
     cons_bad_cmd_usage(command);
 
+    return TRUE;
+}
+
+gboolean
+cmd_titlebar_tls_show(ProfWin *window, const char *const command, gchar **args)
+{
+    if (args[1] == NULL || g_strcmp0(args[1], "tls") != 0) {
+        cons_bad_cmd_usage(command);
+    } else {
+        if (g_strcmp0(args[0], "show") == 0) {
+            cons_show("TLS titlebar indicator enabled.");
+            prefs_set_boolean(PREF_TLS_SHOW, TRUE);
+        } else if (g_strcmp0(args[0], "hide") == 0) {
+            cons_show("TLS titlebar indicator disabled.");
+            prefs_set_boolean(PREF_TLS_SHOW, FALSE);
+        } else {
+            cons_bad_cmd_usage(command);
+        }
+    }
     return TRUE;
 }
 

@@ -151,6 +151,7 @@ gboolean cmd_time(ProfWin *window, const char *const command, gchar **args);
 gboolean cmd_resource(ProfWin *window, const char *const command, gchar **args);
 gboolean cmd_inpblock(ProfWin *window, const char *const command, gchar **args);
 gboolean cmd_titlebar(ProfWin *window, const char *const command, gchar **args);
+gboolean cmd_titlebar_tls_show(ProfWin *window, const char *const command, gchar **args);
 gboolean cmd_mainwin(ProfWin *window, const char *const command, gchar **args);
 gboolean cmd_statusbar(ProfWin *window, const char *const command, gchar **args);
 gboolean cmd_inputwin(ProfWin *window, const char *const command, gchar **args);
@@ -190,7 +191,6 @@ gboolean cmd_tls_certpath(ProfWin *window, const char *const command, gchar **ar
 gboolean cmd_tls_trust(ProfWin *window, const char *const command, gchar **args);
 gboolean cmd_tls_trusted(ProfWin *window, const char *const command, gchar **args);
 gboolean cmd_tls_revoke(ProfWin *window, const char *const command, gchar **args);
-gboolean cmd_tls_show(ProfWin *window, const char *const command, gchar **args);
 gboolean cmd_tls_cert(ProfWin *window, const char *const command, gchar **args);
 
 gboolean cmd_otr_char(ProfWin *window, const char *const command, gchar **args);

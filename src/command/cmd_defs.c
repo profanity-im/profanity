@@ -189,7 +189,6 @@ static struct cmd_t command_defs[] =
             { "trust",      cmd_tls_trust },
             { "trusted",    cmd_tls_trusted },
             { "revoke",     cmd_tls_revoke },
-            { "show",       cmd_tls_show },
             { "cert",       cmd_tls_cert })
         CMD_NOMAINFUNC
         CMD_TAGS(
@@ -206,8 +205,7 @@ static struct cmd_t command_defs[] =
             "/tls certpath",
             "/tls certpath set <path>",
             "/tls certpath clear",
-            "/tls certpath default",
-            "/tls show on|off")
+            "/tls certpath default")
         CMD_DESC(
             "Handle TLS certificates. ")
         CMD_ARGS(
@@ -222,8 +220,7 @@ static struct cmd_t command_defs[] =
             { "certpath",             "Show the trusted certificate path." },
             { "certpath set <path>",  "Specify filesystem path containing trusted certificates." },
             { "certpath clear",       "Clear the trusted certificate path." },
-            { "certpath default",     "Use default system certificate path, if it can be found." },
-            { "show on|off",          "Show or hide the TLS indicator in the titlebar." })
+            { "certpath default",     "Use default system certificate path, if it can be found." })
         CMD_NOEXAMPLES
     },
 
@@ -1327,19 +1324,25 @@ static struct cmd_t command_defs[] =
     },
 
     { "/titlebar",
-        parse_args, 1, 1, &cons_winpos_setting,
-        CMD_NOSUBFUNCS
+        parse_args, 1, 2, &cons_winpos_setting,
+        CMD_SUBFUNCS(
+            { "show",  cmd_titlebar_tls_show },
+            { "hide",  cmd_titlebar_tls_show }
+            )
         CMD_MAINFUNC(cmd_titlebar)
         CMD_TAGS(
             CMD_TAG_UI)
         CMD_SYN(
             "/titlebar up",
-            "/titlebar down")
+            "/titlebar down",
+            "/titlebar show|hide tls")
         CMD_DESC(
-            "Move the title bar.")
+            "Titlebar settings.")
         CMD_ARGS(
             { "up", "Move the title bar up the screen." },
-            { "down", "Move the title bar down the screen." })
+            { "down", "Move the title bar down the screen." },
+            { "show", "Show or hide the TLS indicator in the titlebar." }
+            )
         CMD_NOEXAMPLES
     },
 
