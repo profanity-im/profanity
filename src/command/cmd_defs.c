@@ -507,24 +507,29 @@ static struct cmd_t command_defs[] =
     },
 
     { "/status",
-        parse_args, 0, 1, NULL,
-        CMD_NOSUBFUNCS
-        CMD_MAINFUNC(cmd_status)
+        parse_args, 2, 3, NULL,
+        CMD_SUBFUNCS(
+            { "get",   cmd_status_get },
+            { "set",   cmd_status_set })
+        CMD_NOMAINFUNC
         CMD_TAGS(
             CMD_TAG_CHAT,
             CMD_TAG_GROUPCHAT)
         CMD_SYN(
-            "/status",
-            "/status <contact>|<nick>")
+            "/status set <state> [<message>]",
+            "/status get <contact>|<nick>")
         CMD_DESC(
-            "Find out a contact, or room members presence information. "
-            "If in a chat window the parameter is not required, the current recipient will be used.")
+            "/status get: Find out a contact, or room members presence information. "
+            "/status set: set own status.")
         CMD_ARGS(
+            { "<state>",   "Own status. Possible values: chat, online, away, dnd, xa" },
+            { "<message>", "Optional message to use with the status." },
             { "<contact>", "The contact who's presence you which to see." },
             { "<nick>",    "If in a chat room, the occupant who's presence you wish to see." })
         CMD_EXAMPLES(
-            "/status buddy@server.com",
-            "/status jon")
+            "/status get buddy@server.com",
+            "/status get jon",
+            "/status set online")
     },
 
     { "/resource",
@@ -2168,91 +2173,6 @@ static struct cmd_t command_defs[] =
             "Open the XML console to view incoming and outgoing XMPP traffic.")
         CMD_NOARGS
         CMD_NOEXAMPLES
-    },
-
-    { "/away",
-        parse_args_with_freetext, 0, 1, NULL,
-        CMD_NOSUBFUNCS
-        CMD_MAINFUNC(cmd_away)
-        CMD_TAGS(
-            CMD_TAG_PRESENCE)
-        CMD_SYN(
-            "/away [<message>]")
-        CMD_DESC(
-            "Set your status to 'away'.")
-        CMD_ARGS(
-            { "<message>",  "Optional message to use with the status." })
-        CMD_EXAMPLES(
-            "/away",
-            "/away Gone for lunch")
-    },
-
-    { "/chat",
-        parse_args_with_freetext, 0, 1, NULL,
-        CMD_NOSUBFUNCS
-        CMD_MAINFUNC(cmd_chat)
-        CMD_TAGS(
-            CMD_TAG_PRESENCE)
-        CMD_SYN(
-            "/chat [<message>]")
-        CMD_DESC(
-            "Set your status to 'chat' (available for chat).")
-        CMD_ARGS(
-            { "<message>",  "Optional message to use with the status." })
-        CMD_EXAMPLES(
-            "/chat",
-            "/chat Please talk to me!")
-    },
-
-    { "/dnd",
-        parse_args_with_freetext, 0, 1, NULL,
-        CMD_NOSUBFUNCS
-        CMD_MAINFUNC(cmd_dnd)
-        CMD_TAGS(
-            CMD_TAG_PRESENCE)
-        CMD_SYN(
-            "/dnd [<message>]")
-        CMD_DESC(
-            "Set your status to 'dnd' (do not disturb).")
-        CMD_ARGS(
-            { "<message>",  "Optional message to use with the status." })
-        CMD_EXAMPLES(
-            "/dnd",
-            "/dnd I'm in the zone")
-    },
-
-    { "/online",
-        parse_args_with_freetext, 0, 1, NULL,
-        CMD_NOSUBFUNCS
-        CMD_MAINFUNC(cmd_online)
-        CMD_TAGS(
-            CMD_TAG_PRESENCE)
-        CMD_SYN(
-            "/online [<message>]")
-        CMD_DESC(
-            "Set your status to 'online'.")
-        CMD_ARGS(
-            { "<message>",  "Optional message to use with the status." })
-        CMD_EXAMPLES(
-            "/online",
-            "/online Up the Irons!")
-    },
-
-    { "/xa",
-        parse_args_with_freetext, 0, 1, NULL,
-        CMD_NOSUBFUNCS
-        CMD_MAINFUNC(cmd_xa)
-        CMD_TAGS(
-            CMD_TAG_PRESENCE)
-        CMD_SYN(
-            "/xa [<message>]")
-        CMD_DESC(
-            "Set your status to 'xa' (extended away).")
-        CMD_ARGS(
-            { "<message>",  "Optional message to use with the status." })
-        CMD_EXAMPLES(
-            "/xa",
-            "/xa This meeting is going to be a long one")
     },
 
     { "/script",

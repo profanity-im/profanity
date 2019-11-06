@@ -109,6 +109,7 @@ static char* _rooms_autocomplete(ProfWin *window, const char *const input, gbool
 static char* _statusbar_autocomplete(ProfWin *window, const char *const input, gboolean previous);
 static char* _clear_autocomplete(ProfWin *window, const char *const input, gboolean previous);
 static char* _invite_autocomplete(ProfWin *window, const char *const input, gboolean previous);
+static char* _status_autocomplete(ProfWin *window, const char *const input, gboolean previous);
 
 static char* _script_autocomplete_func(const char *const prefix, gboolean previous);
 
@@ -224,6 +225,8 @@ static Autocomplete statusbar_room_ac;
 static Autocomplete statusbar_show_ac;
 static Autocomplete clear_ac;
 static Autocomplete invite_ac;
+static Autocomplete status_ac;
+static Autocomplete status_state_ac;
 
 void
 cmd_ac_init(void)
@@ -882,6 +885,17 @@ cmd_ac_init(void)
     statusbar_show_ac = autocomplete_new();
     autocomplete_add(statusbar_show_ac, "name");
     autocomplete_add(statusbar_show_ac, "number");
+
+    status_ac = autocomplete_new();
+    autocomplete_add(status_ac, "set");
+    autocomplete_add(status_ac, "get");
+
+    status_state_ac = autocomplete_new();
+    autocomplete_add(status_state_ac, "online");
+    autocomplete_add(status_state_ac, "chat");
+    autocomplete_add(status_state_ac, "away");
+    autocomplete_add(status_state_ac, "xa");
+    autocomplete_add(status_state_ac, "dnd");
 }
 
 void
@@ -1181,6 +1195,8 @@ cmd_ac_reset(ProfWin *window)
     autocomplete_reset(statusbar_show_ac);
     autocomplete_reset(clear_ac);
     autocomplete_reset(invite_ac);
+    autocomplete_reset(status_ac);
+    autocomplete_reset(status_state_ac);
 
     autocomplete_reset(script_ac);
     if (script_show_ac) {
@@ -1322,6 +1338,8 @@ cmd_ac_uninit(void)
     autocomplete_free(statusbar_show_ac);
     autocomplete_free(clear_ac);
     autocomplete_free(invite_ac);
+    autocomplete_free(status_ac);
+    autocomplete_free(status_state_ac);
 }
 
 static void
@@ -1467,7 +1485,7 @@ _cmd_ac_complete_params(ProfWin *window, const char *const input, gboolean previ
         assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
         Autocomplete nick_ac = muc_roster_ac(mucwin->roomjid);
         if (nick_ac) {
-            gchar *nick_choices[] = { "/msg", "/info", "/caps", "/status", "/software" } ;
+            gchar *nick_choices[] = { "/msg", "/info", "/caps", "/software" } ;
 
             // Remove quote character before and after names when doing autocomplete
             char *unquoted = strip_arg_quotes(input);
@@ -1483,7 +1501,7 @@ _cmd_ac_complete_params(ProfWin *window, const char *const input, gboolean previ
 
     // otherwise autocomplete using roster
     } else if (conn_status == JABBER_CONNECTED) {
-        gchar *contact_choices[] = { "/msg", "/info", "/status" };
+        gchar *contact_choices[] = { "/msg", "/info" };
         // Remove quote character before and after names when doing autocomplete
         char *unquoted = strip_arg_quotes(input);
         for (i = 0; i < ARRAY_SIZE(contact_choices); i++) {
@@ -1569,6 +1587,7 @@ _cmd_ac_complete_params(ProfWin *window, const char *const input, gboolean previ
     g_hash_table_insert(ac_funcs, "/statusbar",     _statusbar_autocomplete);
     g_hash_table_insert(ac_funcs, "/clear",         _clear_autocomplete);
     g_hash_table_insert(ac_funcs, "/invite",        _invite_autocomplete);
+    g_hash_table_insert(ac_funcs, "/status",        _status_autocomplete);
 
     int len = strlen(input);
     char parsed[len+1];
@@ -3503,6 +3522,56 @@ _invite_autocomplete(ProfWin *window, const char *const input, gboolean previous
         if (result) {
             return result;
         }
+    }
+
+    return NULL;
+}
+
+static char*
+_status_autocomplete(ProfWin *window, const char *const input, gboolean previous)
+{
+    char *result = NULL;
+
+    result = autocomplete_param_with_ac(input, "/status", status_ac, TRUE, previous);
+    if (result) {
+        return result;
+    }
+
+    jabber_conn_status_t conn_status = connection_get_status();
+
+    if (conn_status == JABBER_CONNECTED) {
+
+        // complete with: online, away etc.
+        result = autocomplete_param_with_ac(input, "/status set", account_status_ac, TRUE, previous);
+        if (result) {
+            return result;
+        }
+
+        // Remove quote character before and after names when doing autocomplete
+        char *unquoted = strip_arg_quotes(input);
+
+        // MUC completion with nicknames
+        if (window->type == WIN_MUC) {
+            ProfMucWin *mucwin = (ProfMucWin*)window;
+            assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
+            Autocomplete nick_ac = muc_roster_ac(mucwin->roomjid);
+            if (nick_ac) {
+                result = autocomplete_param_with_ac(unquoted, "/status get", nick_ac, TRUE, previous);
+                if (result) {
+                    free(unquoted);
+                    return result;
+                }
+            }
+        // roster completion
+        } else {
+            result = autocomplete_param_with_func(unquoted, "/status get", roster_contact_autocomplete, previous);
+            if (result) {
+                free(unquoted);
+                return result;
+            }
+        }
+
+        free(unquoted);
     }
 
     return NULL;

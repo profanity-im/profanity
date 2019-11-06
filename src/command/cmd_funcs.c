@@ -3228,9 +3228,31 @@ _cmd_status_show_status(char* usr)
 }
 
 gboolean
-cmd_status(ProfWin *window, const char *const command, gchar **args)
+cmd_status_set(ProfWin *window, const char *const command, gchar **args)
 {
-    char *usr = args[0];
+    char *state = args[1];
+
+    if (g_strcmp0(state, "online") == 0) {
+        _update_presence(RESOURCE_ONLINE, "online", args);
+    } else if (g_strcmp0(state, "away") == 0) {
+        _update_presence(RESOURCE_AWAY, "away", args);
+    } else if (g_strcmp0(state, "dnd") == 0) {
+        _update_presence(RESOURCE_DND, "dnd", args);
+    } else if (g_strcmp0(state, "chat") == 0) {
+        _update_presence(RESOURCE_CHAT, "chat", args);
+    } else if (g_strcmp0(state, "xa") == 0) {
+        _update_presence(RESOURCE_XA, "xa", args);
+    } else {
+        cons_bad_cmd_usage(command);
+    }
+
+    return TRUE;
+}
+
+gboolean
+cmd_status_get(ProfWin *window, const char *const command, gchar **args)
+{
+    char *usr = args[1];
 
     jabber_conn_status_t conn_status = connection_get_status();
 
@@ -6765,41 +6787,6 @@ cmd_receipts(ProfWin *window, const char *const command, gchar **args)
 }
 
 gboolean
-cmd_away(ProfWin *window, const char *const command, gchar **args)
-{
-    _update_presence(RESOURCE_AWAY, "away", args);
-    return TRUE;
-}
-
-gboolean
-cmd_online(ProfWin *window, const char *const command, gchar **args)
-{
-    _update_presence(RESOURCE_ONLINE, "online", args);
-    return TRUE;
-}
-
-gboolean
-cmd_dnd(ProfWin *window, const char *const command, gchar **args)
-{
-    _update_presence(RESOURCE_DND, "dnd", args);
-    return TRUE;
-}
-
-gboolean
-cmd_chat(ProfWin *window, const char *const command, gchar **args)
-{
-    _update_presence(RESOURCE_CHAT, "chat", args);
-    return TRUE;
-}
-
-gboolean
-cmd_xa(ProfWin *window, const char *const command, gchar **args)
-{
-    _update_presence(RESOURCE_XA, "xa", args);
-    return TRUE;
-}
-
-gboolean
 cmd_plugins_sourcepath(ProfWin *window, const char *const command, gchar **args)
 {
     if (args[1] == NULL) {
@@ -8091,8 +8078,8 @@ _update_presence(const resource_presence_t resource_presence,
 {
     char *msg = NULL;
     int num_args = g_strv_length(args);
-    if (num_args == 1) {
-        msg = args[0];
+    if (num_args == 2) {
+        msg = args[1];
     }
 
     jabber_conn_status_t conn_status = connection_get_status();
