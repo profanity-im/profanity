@@ -516,14 +516,14 @@ static struct cmd_t command_defs[] =
             CMD_TAG_CHAT,
             CMD_TAG_GROUPCHAT)
         CMD_SYN(
-            "/status set <state> [<message>]",
+            "/status set <state> [\"<message>\"]",
             "/status get <contact>|<nick>")
         CMD_DESC(
             "/status get: Find out a contact, or room members presence information. "
             "/status set: set own status.")
         CMD_ARGS(
             { "<state>",   "Own status. Possible values: chat, online, away, dnd, xa" },
-            { "<message>", "Optional message to use with the status." },
+            { "<message>", "Optional message to use with the status. Needs quotation marks if it's more than one word." },
             { "<contact>", "The contact who's presence you which to see." },
             { "<nick>",    "If in a chat room, the occupant who's presence you wish to see." })
         CMD_EXAMPLES(

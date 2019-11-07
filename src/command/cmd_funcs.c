@@ -8078,8 +8078,12 @@ _update_presence(const resource_presence_t resource_presence,
 {
     char *msg = NULL;
     int num_args = g_strv_length(args);
+
+    // if no message, use status as message
     if (num_args == 2) {
         msg = args[1];
+    } else {
+        msg = args[2];
     }
 
     jabber_conn_status_t conn_status = connection_get_status();
