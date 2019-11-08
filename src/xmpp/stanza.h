@@ -349,4 +349,6 @@ char* stanza_text_strdup(xmpp_stanza_t *stanza);
 XMPPCaps* stanza_parse_caps(xmpp_stanza_t *const stanza);
 void stanza_free_caps(XMPPCaps *caps);
 
+xmpp_stanza_t* stanza_get_child_by_name_and_ns(xmpp_stanza_t * const stanza, const char * const name, const char * const ns);
+
 #endif

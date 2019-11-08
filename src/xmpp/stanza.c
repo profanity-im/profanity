@@ -2478,3 +2478,21 @@ _stanza_create_sha1_hash(char *str)
 
    return b64;
 }
+
+xmpp_stanza_t*
+stanza_get_child_by_name_and_ns(xmpp_stanza_t * const stanza, const char * const name, const char * const ns)
+{
+    xmpp_stanza_t *child;
+    const char *child_ns;
+
+    for (child = xmpp_stanza_get_children(stanza); child; child = xmpp_stanza_get_next(child)) {
+        if (strcmp(name, xmpp_stanza_get_name(child)) == 0) {
+            child_ns = xmpp_stanza_get_ns(child);
+            if (child_ns && strcmp(ns, child_ns) == 0) {
+                break;
+            }
+        }
+    }
+
+    return child;
+}

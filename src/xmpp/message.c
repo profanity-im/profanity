@@ -755,8 +755,8 @@ _handle_groupchat(xmpp_stanza_t *const stanza)
     const char *id = xmpp_stanza_get_id(stanza);
     char *originid = NULL;
 
-    xmpp_stanza_t *origin = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_STABLE_ID);
-    if (origin && g_strcmp0(xmpp_stanza_get_name(origin), STANZA_NAME_ORIGIN_ID) == 0) {
+    xmpp_stanza_t *origin = stanza_get_child_by_name_and_ns(stanza, STANZA_NAME_ORIGIN_ID, STANZA_NS_STABLE_ID);
+    if (origin) {
         originid = (char*)xmpp_stanza_get_attribute(origin, STANZA_ATTR_ID);
     }
 
