@@ -4329,13 +4329,6 @@ cmd_room(ProfWin *window, const char *const command, gchar **args)
         return TRUE;
     }
 
-    if ((g_strcmp0(args[0], "accept") != 0) &&
-            (g_strcmp0(args[0], "destroy") != 0) &&
-            (g_strcmp0(args[0], "config") != 0)) {
-        cons_bad_cmd_usage(command);
-        return TRUE;
-    }
-
     ProfMucWin *mucwin = (ProfMucWin*)window;
     assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
 
@@ -4350,14 +4343,10 @@ cmd_room(ProfWin *window, const char *const command, gchar **args)
             win_println(window, THEME_ROOMINFO, '!', "Room unlocked.");
             return TRUE;
         }
-    }
-
-    if (g_strcmp0(args[0], "destroy") == 0) {
+    } else if (g_strcmp0(args[0], "destroy") == 0) {
         iq_destroy_room(mucwin->roomjid);
         return TRUE;
-    }
-
-    if (g_strcmp0(args[0], "config") == 0) {
+    } else if (g_strcmp0(args[0], "config") == 0) {
         ProfConfWin *confwin = wins_get_conf(mucwin->roomjid);
 
         if (confwin) {
@@ -4366,6 +4355,8 @@ cmd_room(ProfWin *window, const char *const command, gchar **args)
             iq_request_room_config_form(mucwin->roomjid);
         }
         return TRUE;
+    } else {
+        cons_bad_cmd_usage(command);
     }
 
     return TRUE;
