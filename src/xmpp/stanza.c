@@ -2484,9 +2484,11 @@ stanza_get_child_by_name_and_ns(xmpp_stanza_t * const stanza, const char * const
 {
     xmpp_stanza_t *child;
     const char *child_ns;
+    const char *child_name;
 
     for (child = xmpp_stanza_get_children(stanza); child; child = xmpp_stanza_get_next(child)) {
-        if (strcmp(name, xmpp_stanza_get_name(child)) == 0) {
+        child_name = xmpp_stanza_get_name(child);
+        if (child_name && strcmp(name, child_name) == 0) {
             child_ns = xmpp_stanza_get_ns(child);
             if (child_ns && strcmp(ns, child_ns) == 0) {
                 break;
