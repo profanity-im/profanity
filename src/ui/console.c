@@ -1842,21 +1842,17 @@ cons_log_setting(void)
 }
 
 void
-cons_chlog_setting(void)
+cons_logging_setting(void)
 {
     if (prefs_get_boolean(PREF_CHLOG))
-        cons_show("Chat logging (/chlog)       : ON");
+        cons_show("Chat logging (/logging chat)        : ON");
     else
-        cons_show("Chat logging (/chlog)       : OFF");
-}
+        cons_show("Chat logging (/logging chat)        : OFF");
 
-void
-cons_grlog_setting(void)
-{
     if (prefs_get_boolean(PREF_GRLOG))
-        cons_show("Groupchat logging (/grlog)  : ON");
+        cons_show("Groupchat logging (/logging group)  : ON");
     else
-        cons_show("Groupchat logging (/grlog)  : OFF");
+        cons_show("Groupchat logging (/logging group)  : OFF");
 }
 
 void
@@ -1865,8 +1861,7 @@ cons_show_log_prefs(void)
     cons_show("Logging preferences:");
     cons_show("");
     cons_log_setting();
-    cons_chlog_setting();
-    cons_grlog_setting();
+    cons_logging_setting();
 
     cons_alert();
 }

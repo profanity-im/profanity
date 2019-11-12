@@ -110,6 +110,7 @@ static char* _statusbar_autocomplete(ProfWin *window, const char *const input, g
 static char* _clear_autocomplete(ProfWin *window, const char *const input, gboolean previous);
 static char* _invite_autocomplete(ProfWin *window, const char *const input, gboolean previous);
 static char* _status_autocomplete(ProfWin *window, const char *const input, gboolean previous);
+static char* _logging_autocomplete(ProfWin *window, const char *const input, gboolean previous);
 
 static char* _script_autocomplete_func(const char *const prefix, gboolean previous);
 
@@ -227,6 +228,7 @@ static Autocomplete clear_ac;
 static Autocomplete invite_ac;
 static Autocomplete status_ac;
 static Autocomplete status_state_ac;
+static Autocomplete logging_ac;
 
 void
 cmd_ac_init(void)
@@ -896,6 +898,10 @@ cmd_ac_init(void)
     autocomplete_add(status_state_ac, "away");
     autocomplete_add(status_state_ac, "xa");
     autocomplete_add(status_state_ac, "dnd");
+
+    logging_ac = autocomplete_new();
+    autocomplete_add(logging_ac, "chat");
+    autocomplete_add(logging_ac, "group");
 }
 
 void
@@ -1197,6 +1203,7 @@ cmd_ac_reset(ProfWin *window)
     autocomplete_reset(invite_ac);
     autocomplete_reset(status_ac);
     autocomplete_reset(status_state_ac);
+    autocomplete_reset(logging_ac);
 
     autocomplete_reset(script_ac);
     if (script_show_ac) {
@@ -1340,6 +1347,7 @@ cmd_ac_uninit(void)
     autocomplete_free(invite_ac);
     autocomplete_free(status_ac);
     autocomplete_free(status_state_ac);
+    autocomplete_free(logging_ac);
 }
 
 static void
@@ -1469,7 +1477,7 @@ _cmd_ac_complete_params(ProfWin *window, const char *const input, gboolean previ
     jabber_conn_status_t conn_status = connection_get_status();
 
     // autocomplete boolean settings
-    gchar *boolean_choices[] = { "/beep", "/intype", "/states", "/outtype", "/flash", "/splash", "/chlog", "/grlog",
+    gchar *boolean_choices[] = { "/beep", "/intype", "/states", "/outtype", "/flash", "/splash",
         "/history", "/vercheck", "/privileges", "/wrap", "/carbons", "/lastactivity" };
 
     for (i = 0; i < ARRAY_SIZE(boolean_choices); i++) {
@@ -1588,6 +1596,7 @@ _cmd_ac_complete_params(ProfWin *window, const char *const input, gboolean previ
     g_hash_table_insert(ac_funcs, "/clear",         _clear_autocomplete);
     g_hash_table_insert(ac_funcs, "/invite",        _invite_autocomplete);
     g_hash_table_insert(ac_funcs, "/status",        _status_autocomplete);
+    g_hash_table_insert(ac_funcs, "/logging",       _logging_autocomplete);
 
     int len = strlen(input);
     char parsed[len+1];
@@ -3572,6 +3581,29 @@ _status_autocomplete(ProfWin *window, const char *const input, gboolean previous
         }
 
         free(unquoted);
+    }
+
+    return NULL;
+}
+
+static char*
+_logging_autocomplete(ProfWin *window, const char *const input, gboolean previous)
+{
+    char *result = NULL;
+
+    result = autocomplete_param_with_ac(input, "/logging", logging_ac, TRUE, previous);
+    if (result) {
+        return result;
+    }
+
+    result = autocomplete_param_with_func(input, "/logging chat", prefs_autocomplete_boolean_choice, previous);
+    if (result) {
+        return result;
+    }
+
+    result = autocomplete_param_with_func(input, "/logging group", prefs_autocomplete_boolean_choice, previous);
+    if (result) {
+        return result;
     }
 
     return NULL;

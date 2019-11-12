@@ -1604,38 +1604,25 @@ static struct cmd_t command_defs[] =
             "/alias list")
     },
 
-    { "/chlog",
-        parse_args, 1, 1, &cons_chlog_setting,
+    { "/logging",
+        parse_args, 2, 2, &cons_logging_setting,
         CMD_NOSUBFUNCS
-        CMD_MAINFUNC(cmd_chlog)
+        CMD_MAINFUNC(cmd_logging)
         CMD_TAGS(
             CMD_TAG_CHAT)
         CMD_SYN(
-            "/chlog on|off")
+            "/logging chat|group on|off")
         CMD_DESC(
-            "Switch chat logging on or off. "
-            "This setting will be enabled if /history is set to on. "
-            "When disabling this option, /history will also be disabled. "
-            "See the /grlog setting for enabling logging of chat room (groupchat) messages.")
+            "Switch logging on or off. "
+            "Chat logging will be enabled if /history is set to on. "
+            "When disabling this option, /history will also be disabled. ")
         CMD_ARGS(
-            { "on|off", "Enable or disable chat logging." })
-        CMD_NOEXAMPLES
-    },
-
-    { "/grlog",
-        parse_args, 1, 1, &cons_grlog_setting,
-        CMD_NOSUBFUNCS
-        CMD_MAINFUNC(cmd_grlog)
-        CMD_TAGS(
-            CMD_TAG_GROUPCHAT)
-        CMD_SYN(
-            "/grlog on|off")
-        CMD_DESC(
-            "Switch chat room logging on or off. "
-            "See the /chlog setting for enabling logging of one to one chat.")
-        CMD_ARGS(
-            { "on|off", "Enable or disable chat room logging." })
-        CMD_NOEXAMPLES
+            { "chat", "Regular chat logging" },
+            { "group", "Groupchat (room) logging" },
+            { "on|off", "Enable or disable logging." })
+        CMD_EXAMPLES(
+            "/logging chat on",
+            "/logging group off" )
     },
 
     { "/states",

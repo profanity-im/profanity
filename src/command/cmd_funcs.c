@@ -6692,26 +6692,25 @@ cmd_autoconnect(ProfWin *window, const char *const command, gchar **args)
 }
 
 gboolean
-cmd_chlog(ProfWin *window, const char *const command, gchar **args)
+cmd_logging(ProfWin *window, const char *const command, gchar **args)
 {
     if (args[0] == NULL) {
-        return FALSE;
+        cons_logging_setting();
+        return TRUE;
     }
 
-    _cmd_set_boolean_preference(args[0], command, "Chat logging", PREF_CHLOG);
+    if (strcmp(args[0], "chat") == 0) {
+        _cmd_set_boolean_preference(args[1], command, "Chat logging", PREF_CHLOG);
 
-    // if set to off, disable history
-    if (strcmp(args[0], "off") == 0) {
-        prefs_set_boolean(PREF_HISTORY, FALSE);
+        // if set to off, disable history
+        if (strcmp(args[1], "off") == 0) {
+            prefs_set_boolean(PREF_HISTORY, FALSE);
+        }
+    } else if (strcmp(args[0], "group") == 0) {
+        _cmd_set_boolean_preference(args[1], command, "Groupchat logging", PREF_GRLOG);
+    } else {
+        cons_bad_cmd_usage(command);
     }
-
-    return TRUE;
-}
-
-gboolean
-cmd_grlog(ProfWin *window, const char *const command, gchar **args)
-{
-    _cmd_set_boolean_preference(args[0], command, "Groupchat logging", PREF_GRLOG);
 
     return TRUE;
 }

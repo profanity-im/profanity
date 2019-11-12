@@ -80,7 +80,7 @@ gboolean cmd_autoconnect(ProfWin *window, const char *const command, gchar **arg
 gboolean cmd_autoping(ProfWin *window, const char *const command, gchar **args);
 gboolean cmd_beep(ProfWin *window, const char *const command, gchar **args);
 gboolean cmd_caps(ProfWin *window, const char *const command, gchar **args);
-gboolean cmd_chlog(ProfWin *window, const char *const command, gchar **args);
+gboolean cmd_logging(ProfWin *window, const char *const command, gchar **args);
 gboolean cmd_clear(ProfWin *window, const char *const command, gchar **args);
 gboolean cmd_close(ProfWin *window, const char *const command, gchar **args);
 gboolean cmd_connect(ProfWin *window, const char *const command, gchar **args);
@@ -91,7 +91,6 @@ gboolean cmd_disconnect(ProfWin *window, const char *const command, gchar **args
 gboolean cmd_flash(ProfWin *window, const char *const command, gchar **args);
 gboolean cmd_tray(ProfWin *window, const char *const command, gchar **args);
 gboolean cmd_gone(ProfWin *window, const char *const command, gchar **args);
-gboolean cmd_grlog(ProfWin *window, const char *const command, gchar **args);
 gboolean cmd_group(ProfWin *window, const char *const command, gchar **args);
 gboolean cmd_help(ProfWin *window, const char *const command, gchar **args);
 gboolean cmd_history(ProfWin *window, const char *const command, gchar **args);
