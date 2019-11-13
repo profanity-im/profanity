@@ -1171,6 +1171,24 @@ stanza_create_caps_sha1_from_query(xmpp_stanza_t *const query)
     return result;
 }
 
+xmpp_stanza_t*
+stanza_get_child_by_name_and_from(xmpp_stanza_t * const stanza, const char * const name, const char * const from)
+{
+    xmpp_stanza_t *child;
+    const char *child_from;
+
+    for (child = xmpp_stanza_get_children(stanza); child; child = xmpp_stanza_get_next(child)) {
+        if (strcmp(name, xmpp_stanza_get_name(child)) == 0) {
+            child_from = xmpp_stanza_get_attribute(child, STANZA_ATTR_FROM);
+            if (child_from && strcmp(from, child_from) == 0) {
+                break;
+            }
+        }
+    }
+
+    return child;
+}
+
 GDateTime*
 stanza_get_delay(xmpp_stanza_t *const stanza)
 {
@@ -1178,11 +1196,18 @@ stanza_get_delay(xmpp_stanza_t *const stanza)
 }
 
 GDateTime*
-stanza_get_delay_from(xmpp_stanza_t *const stanza, gchar **from)
+stanza_get_delay_from(xmpp_stanza_t *const stanza, gchar *from)
 {
     GTimeVal utc_stamp;
     // first check for XEP-0203 delayed delivery
-    xmpp_stanza_t *delay = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_DELAY);
+    xmpp_stanza_t *delay;
+
+    if (from) {
+        delay = stanza_get_child_by_name_and_from(stanza, STANZA_NAME_DELAY, from);
+    } else {
+        delay = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_DELAY);
+    }
+
     if (delay) {
         const char *xmlns = xmpp_stanza_get_attribute(delay, STANZA_ATTR_XMLNS);
         if (xmlns && (strcmp(xmlns, "urn:xmpp:delay") == 0)) {
@@ -1191,9 +1216,6 @@ stanza_get_delay_from(xmpp_stanza_t *const stanza, gchar **from)
                 GDateTime *utc_datetime = g_date_time_new_from_timeval_utc(&utc_stamp);
                 GDateTime *local_datetime = g_date_time_to_local(utc_datetime);
                 g_date_time_unref(utc_datetime);
-                if (from) {
-                    *from = g_strdup(xmpp_stanza_get_attribute(delay, STANZA_ATTR_FROM));
-                }
                 return local_datetime;
             }
         }
@@ -1201,7 +1223,13 @@ stanza_get_delay_from(xmpp_stanza_t *const stanza, gchar **from)
 
     // otherwise check for XEP-0091 legacy delayed delivery
     // stanp format : CCYYMMDDThh:mm:ss
-    xmpp_stanza_t *x = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_X);
+    xmpp_stanza_t *x;
+    if (from) {
+        x = stanza_get_child_by_name_and_from(stanza, STANZA_NAME_X, from);
+    } else {
+        x = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_X);
+    }
+
     if (x) {
         const char *xmlns = xmpp_stanza_get_attribute(x, STANZA_ATTR_XMLNS);
         if (xmlns && (strcmp(xmlns, "jabber:x:delay") == 0)) {
@@ -1210,17 +1238,11 @@ stanza_get_delay_from(xmpp_stanza_t *const stanza, gchar **from)
                 GDateTime *utc_datetime = g_date_time_new_from_timeval_utc(&utc_stamp);
                 GDateTime *local_datetime = g_date_time_to_local(utc_datetime);
                 g_date_time_unref(utc_datetime);
-                if (from) {
-                    *from = g_strdup(xmpp_stanza_get_attribute(x, STANZA_ATTR_FROM));
-                }
                 return local_datetime;
             }
         }
     }
 
-    if (from) {
-        *from = NULL;
-    }
     return NULL;
 }
 
