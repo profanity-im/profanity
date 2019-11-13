@@ -1,5 +1,6 @@
 /*
  * chat_session.h
+ * vim: expandtab:ts=4:sts=4:sw=4
  *
  * Copyright (C) 2012 - 2019 James Booth <boothj5@gmail.com>
  *

@@ -1,5 +1,6 @@
 /*
  * color.c
+ * vim: expandtab:ts=4:sts=4:sw=4
  *
  * Copyright (C) 2019 Aurelien Aptel <aurelien.aptel@gmail.com>
  *
