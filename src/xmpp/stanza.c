@@ -1177,9 +1177,11 @@ stanza_get_child_by_name_and_from(xmpp_stanza_t * const stanza, const char * con
 {
     xmpp_stanza_t *child;
     const char *child_from;
+    const char *child_name;
 
     for (child = xmpp_stanza_get_children(stanza); child; child = xmpp_stanza_get_next(child)) {
-        if (strcmp(name, xmpp_stanza_get_name(child)) == 0) {
+        child_name = xmpp_stanza_get_name(child);
+        if (child_name && strcmp(name, child_name) == 0) {
             child_from = xmpp_stanza_get_attribute(child, STANZA_ATTR_FROM);
             if (child_from && strcmp(from, child_from) == 0) {
                 break;
