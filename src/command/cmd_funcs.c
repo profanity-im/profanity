@@ -2230,7 +2230,7 @@ cmd_group(ProfWin *window, const char *const command, gchar **args)
     }
 
     // list all groups
-    if (args[0] == NULL) {
+    if (args[1] == NULL) {
         GList *groups = roster_get_groups();
         GList *curr = groups;
         if (curr) {
@@ -2248,8 +2248,8 @@ cmd_group(ProfWin *window, const char *const command, gchar **args)
     }
 
     // show contacts in group
-    if (strcmp(args[0], "show") == 0) {
-        char *group = args[1];
+    if (strcmp(args[1], "show") == 0) {
+        char *group = args[2];
         if (group == NULL) {
             cons_bad_cmd_usage(command);
             return TRUE;
@@ -2261,9 +2261,9 @@ cmd_group(ProfWin *window, const char *const command, gchar **args)
     }
 
     // add contact to group
-    if (strcmp(args[0], "add") == 0) {
-        char *group = args[1];
-        char *contact = args[2];
+    if (strcmp(args[1], "add") == 0) {
+        char *group = args[2];
+        char *contact = args[3];
 
         if ((group == NULL) || (contact == NULL)) {
             cons_bad_cmd_usage(command);
@@ -2292,9 +2292,9 @@ cmd_group(ProfWin *window, const char *const command, gchar **args)
     }
 
     // remove contact from group
-    if (strcmp(args[0], "remove") == 0) {
-        char *group = args[1];
-        char *contact = args[2];
+    if (strcmp(args[1], "remove") == 0) {
+        char *group = args[2];
+        char *contact = args[3];
 
         if ((group == NULL) || (contact == NULL)) {
             cons_bad_cmd_usage(command);

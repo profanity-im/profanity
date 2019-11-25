@@ -71,7 +71,6 @@ static char* _autoconnect_autocomplete(ProfWin *window, const char *const input,
 static char* _account_autocomplete(ProfWin *window, const char *const input, gboolean previous);
 static char* _who_autocomplete(ProfWin *window, const char *const input, gboolean previous);
 static char* _roster_autocomplete(ProfWin *window, const char *const input, gboolean previous);
-static char* _group_autocomplete(ProfWin *window, const char *const input, gboolean previous);
 static char* _bookmark_autocomplete(ProfWin *window, const char *const input, gboolean previous);
 static char* _otr_autocomplete(ProfWin *window, const char *const input, gboolean previous);
 static char* _pgp_autocomplete(ProfWin *window, const char *const input, gboolean previous);
@@ -441,6 +440,7 @@ cmd_ac_init(void)
     autocomplete_add(roster_ac, "resource");
     autocomplete_add(roster_ac, "presence");
     autocomplete_add(roster_ac, "private");
+    autocomplete_add(roster_ac, "group");
 
     roster_private_ac = autocomplete_new();
     autocomplete_add(roster_private_ac, "room");
@@ -1559,7 +1559,6 @@ _cmd_ac_complete_params(ProfWin *window, const char *const input, gboolean previ
     g_hash_table_insert(ac_funcs, "/log",           _log_autocomplete);
     g_hash_table_insert(ac_funcs, "/account",       _account_autocomplete);
     g_hash_table_insert(ac_funcs, "/roster",        _roster_autocomplete);
-    g_hash_table_insert(ac_funcs, "/group",         _group_autocomplete);
     g_hash_table_insert(ac_funcs, "/bookmark",      _bookmark_autocomplete);
     g_hash_table_insert(ac_funcs, "/autoconnect",   _autoconnect_autocomplete);
     g_hash_table_insert(ac_funcs, "/otr",           _otr_autocomplete);
@@ -1788,6 +1787,27 @@ _roster_autocomplete(ProfWin *window, const char *const input, gboolean previous
         if (result) {
             return result;
         }
+
+        result = autocomplete_param_with_func(input, "/roster group show", roster_group_autocomplete, previous);
+        if (result) {
+            return result;
+        }
+        result = autocomplete_param_no_with_func(input, "/roster group add", 5, roster_contact_autocomplete, previous);
+        if (result) {
+            return result;
+        }
+        result = autocomplete_param_no_with_func(input, "/roster group remove", 5, roster_contact_autocomplete, previous);
+        if (result) {
+            return result;
+        }
+        result = autocomplete_param_with_func(input, "/roster group add", roster_group_autocomplete, previous);
+        if (result) {
+            return result;
+        }
+        result = autocomplete_param_with_func(input, "/roster group remove", roster_group_autocomplete, previous);
+        if (result) {
+            return result;
+        }
     }
 
     result = autocomplete_param_with_ac(input, "/roster remove_all", roster_remove_all_ac, TRUE, previous);
@@ -1846,45 +1866,11 @@ _roster_autocomplete(ProfWin *window, const char *const input, gboolean previous
     if (result) {
         return result;
     }
-    result = autocomplete_param_with_ac(input, "/roster", roster_ac, TRUE, previous);
+    result = autocomplete_param_with_ac(input, "/roster group", group_ac, TRUE, previous);
     if (result) {
         return result;
     }
-
-    return NULL;
-}
-
-static char*
-_group_autocomplete(ProfWin *window, const char *const input, gboolean previous)
-{
-    char *result = NULL;
-
-    jabber_conn_status_t conn_status = connection_get_status();
-
-    if (conn_status == JABBER_CONNECTED) {
-        result = autocomplete_param_with_func(input, "/group show", roster_group_autocomplete, previous);
-        if (result) {
-            return result;
-        }
-        result = autocomplete_param_no_with_func(input, "/group add", 4, roster_contact_autocomplete, previous);
-        if (result) {
-            return result;
-        }
-        result = autocomplete_param_no_with_func(input, "/group remove", 4, roster_contact_autocomplete, previous);
-        if (result) {
-            return result;
-        }
-        result = autocomplete_param_with_func(input, "/group add", roster_group_autocomplete, previous);
-        if (result) {
-            return result;
-        }
-        result = autocomplete_param_with_func(input, "/group remove", roster_group_autocomplete, previous);
-        if (result) {
-            return result;
-        }
-    }
-
-    result = autocomplete_param_with_ac(input, "/group", group_ac, TRUE, previous);
+    result = autocomplete_param_with_ac(input, "/roster", roster_ac, TRUE, previous);
     if (result) {
         return result;
     }
