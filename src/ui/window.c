@@ -1423,7 +1423,7 @@ _win_print(ProfWin *window, const char show_char, int pad_indent, GDateTime *tim
     }
 
     gchar *date_fmt = NULL;
-    if (g_strcmp0(time_pref, "off") == 0) {
+    if (g_strcmp0(time_pref, "off") == 0 || time == NULL) {
         date_fmt = g_strdup("");
     } else {
         date_fmt = g_date_time_format(time, time_pref);
