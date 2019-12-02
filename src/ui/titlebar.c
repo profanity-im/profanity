@@ -108,9 +108,10 @@ title_bar_resize(void)
     werase(win);
 
     int row = screen_titlebar_row();
-    mvwin(win, row, 0);
 
     wresize(win, 1, cols);
+    mvwin(win, row, 0);
+
     wbkgd(win, theme_attrs(THEME_TITLE_TEXT));
 
     _title_bar_draw();

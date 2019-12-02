@@ -137,8 +137,8 @@ status_bar_resize(void)
     int cols = getmaxx(stdscr);
     werase(statusbar_win);
     int row = screen_statusbar_row();
-    mvwin(statusbar_win, row, 0);
     wresize(statusbar_win, 1, cols);
+    mvwin(statusbar_win, row, 0);
 
     status_bar_draw();
 }
