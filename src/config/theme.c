@@ -671,6 +671,12 @@ theme_free_string(char *str)
 }
 
 int
+theme_hash_attrs(const char *str)
+{
+    return COLOR_PAIR(color_pair_cache_hash_str(str));
+}
+
+int
 theme_attrs(theme_item_t attrs)
 {
     int result = 0;
