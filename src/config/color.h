@@ -38,10 +38,20 @@
 
 /* to access color names */
 #define COLOR_NAME_SIZE 256
-extern const char *color_names[];
 
-/* to add or clear cache */
+#include <stdint.h>
+
+struct color_def {
+    uint16_t h; uint8_t s, l;
+    const char *name;
+};
+extern const struct color_def color_names[];
+
+/* hash string to color pair */
+int color_pair_cache_hash_str(const char *str);
+/* parse fg_bg string to color pair */
 int color_pair_cache_get(const char *pair_name);
+/* clear cache */
 void color_pair_cache_reset(void);
 
 #endif
