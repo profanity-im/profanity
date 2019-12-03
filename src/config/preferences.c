@@ -1710,6 +1710,7 @@ _get_group(preference_t pref)
         case PREF_CONSOLE_MUC:
         case PREF_CONSOLE_PRIVATE:
         case PREF_CONSOLE_CHAT:
+        case PREF_COLOR_NICK:
         case PREF_STATUSBAR_SHOW_NAME:
         case PREF_STATUSBAR_SHOW_NUMBER:
         case PREF_STATUSBAR_SELF:
@@ -1969,6 +1970,8 @@ _get_key(preference_t pref)
             return "console.private";
         case PREF_CONSOLE_CHAT:
             return "console.chat";
+        case PREF_COLOR_NICK:
+            return "color.nick";
         case PREF_BOOKMARK_INVITE:
             return "bookmark.invite";
         case PREF_PLUGINS_SOURCEPATH:
