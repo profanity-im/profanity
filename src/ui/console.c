@@ -1969,6 +1969,15 @@ cons_autoping_setting(void)
 }
 
 void
+cons_color_setting(void)
+{
+    if (prefs_get_boolean(PREF_COLOR_NICK))
+        cons_show("Consistent color generation for nicks (/color)               : ON");
+    else
+        cons_show("Consistent color generation for nicks (/color)               : OFF");
+}
+
+void
 cons_show_connection_prefs(void)
 {
     cons_show("Connection preferences:");

@@ -2294,6 +2294,21 @@ static struct cmd_t command_defs[] =
         CMD_NOARGS
         CMD_NOEXAMPLES
     },
+
+    { "/color",
+        parse_args, 1, 1, &cons_color_setting,
+        CMD_NOSUBFUNCS
+        CMD_MAINFUNC(cmd_color)
+        CMD_TAGS(
+            CMD_TAG_UI)
+        CMD_SYN(
+            "/color on|off")
+        CMD_DESC(
+            "Settings for consistent color generation for nicks (XEP-0392).")
+        CMD_ARGS(
+            { "on|off", "Enable or disable nick colorization for MUC nicks." })
+        CMD_NOEXAMPLES
+    },
 };
 
 static GHashTable *search_index;

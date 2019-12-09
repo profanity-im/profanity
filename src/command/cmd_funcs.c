@@ -8626,3 +8626,10 @@ cmd_paste(ProfWin *window, const char *const command, gchar **args)
 
     return TRUE;
 }
+
+gboolean
+cmd_color(ProfWin *window, const char *const command, gchar **args)
+{
+    _cmd_set_boolean_preference(args[0], command, "Consistent color generation for nicks", PREF_COLOR_NICK);
+    return TRUE;
+}

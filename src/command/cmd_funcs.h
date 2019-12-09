@@ -223,4 +223,6 @@ gboolean cmd_save(ProfWin *window, const char *const command, gchar **args);
 gboolean cmd_reload(ProfWin *window, const char *const command, gchar **args);
 
 gboolean cmd_paste(ProfWin *window, const char *const command, gchar **args);
+
+gboolean cmd_color(ProfWin *window, const char *const command, gchar **args);
 #endif
