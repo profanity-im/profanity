@@ -2302,12 +2302,15 @@ static struct cmd_t command_defs[] =
         CMD_TAGS(
             CMD_TAG_UI)
         CMD_SYN(
-            "/color on|off")
+            "/color on|off|redgreen|blue")
         CMD_DESC(
-            "Settings for consistent color generation for nicks (XEP-0392).")
+            "Settings for consistent color generation for nicks (XEP-0392). Including corrections for Color Vision Deficiencies")
         CMD_ARGS(
-            { "on|off", "Enable or disable nick colorization for MUC nicks." })
-        CMD_NOEXAMPLES
+            { "on|off|redgreen|blue", "Enable or disable nick colorization for MUC nicks. 'redgreen' is for people with red/green blindess and 'blue' for people with blue blindness."})
+        CMD_EXAMPLES(
+            "/color off",
+            "/color on",
+            "/color blue")
     },
 };
 

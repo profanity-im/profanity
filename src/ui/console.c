@@ -1971,10 +1971,19 @@ cons_autoping_setting(void)
 void
 cons_color_setting(void)
 {
-    if (prefs_get_boolean(PREF_COLOR_NICK))
+    char *color_pref = prefs_get_string(PREF_COLOR_NICK);
+
+    if (strcmp(color_pref, "true") == 0) {
         cons_show("Consistent color generation for nicks (/color)               : ON");
-    else
+    } else if (strcmp(color_pref, "redgreen") == 0) {
+        cons_show("Consistent color generation for nicks (/color)               : REDGREEN");
+    } else if (strcmp(color_pref, "blue") == 0) {
+        cons_show("Consistent color generation for nicks (/color)               : BLUE");
+    } else {
         cons_show("Consistent color generation for nicks (/color)               : OFF");
+    }
+
+    prefs_free_string(color_pref);
 }
 
 void

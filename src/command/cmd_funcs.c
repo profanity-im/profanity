@@ -8630,6 +8630,33 @@ cmd_paste(ProfWin *window, const char *const command, gchar **args)
 gboolean
 cmd_color(ProfWin *window, const char *const command, gchar **args)
 {
-    _cmd_set_boolean_preference(args[0], command, "Consistent color generation for nicks", PREF_COLOR_NICK);
+    if (g_strcmp0(args[0], "on") == 0) {
+            prefs_set_string(PREF_COLOR_NICK, "true");
+    } else if (g_strcmp0(args[0], "off") == 0) {
+            prefs_set_string(PREF_COLOR_NICK, "false");
+    } else if (g_strcmp0(args[0], "redgreen") == 0) {
+            prefs_set_string(PREF_COLOR_NICK, "redgreen");
+    } else if (g_strcmp0(args[0], "blue") == 0) {
+            prefs_set_string(PREF_COLOR_NICK, "blue");
+    } else {
+        cons_bad_cmd_usage(command);
+        return TRUE;
+    }
+
+    cons_show("Consistent color generation for nicks set to: %s", args[0]);
+
+    char *theme = prefs_get_string(PREF_THEME);
+    if (theme) {
+        gboolean res = theme_load(theme);
+
+        if (res) {
+            cons_show("Theme reloaded: %s", theme);
+        } else {
+            theme_load("default");
+        }
+
+        prefs_free_string(theme);
+    }
+
     return TRUE;
 }

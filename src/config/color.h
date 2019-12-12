@@ -41,6 +41,12 @@
 
 #include <stdint.h>
 
+typedef enum {
+    COLOR_PROFILE_DEFAULT,
+    COLOR_PROFILE_REDGREEN,
+    COLOR_PROFILE_BLUE,
+} color_profile;
+
 struct color_def {
     uint16_t h; uint8_t s, l;
     const char *name;
@@ -48,7 +54,7 @@ struct color_def {
 extern const struct color_def color_names[];
 
 /* hash string to color pair */
-int color_pair_cache_hash_str(const char *str);
+int color_pair_cache_hash_str(const char *str, color_profile profile);
 /* parse fg_bg string to color pair */
 int color_pair_cache_get(const char *pair_name);
 /* clear cache */

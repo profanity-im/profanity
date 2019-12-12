@@ -673,7 +673,17 @@ theme_free_string(char *str)
 int
 theme_hash_attrs(const char *str)
 {
-    return COLOR_PAIR(color_pair_cache_hash_str(str));
+    color_profile profile = COLOR_PROFILE_DEFAULT;
+
+    char *color_pref = prefs_get_string(PREF_COLOR_NICK);
+    if (strcmp(color_pref, "redgreen") == 0) {
+        profile = COLOR_PROFILE_REDGREEN;
+    } else if (strcmp(color_pref, "blue") == 0) {
+        profile = COLOR_PROFILE_BLUE;
+    }
+    prefs_free_string(color_pref);
+
+    return COLOR_PAIR(color_pair_cache_hash_str(str, profile));
 }
 
 int

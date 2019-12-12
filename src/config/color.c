@@ -38,6 +38,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdint.h>
+#include <math.h>
 #include <glib.h>
 
 #ifdef HAVE_NCURSESW_NCURSES_H
@@ -380,7 +381,7 @@ static int find_col(const char *col_name, int n)
     return COL_ERR;
 }
 
-static int color_hash(const char *str)
+static int color_hash(const char *str, color_profile profile)
 {
     GChecksum *cs = NULL;
     guint8 buf[256] = {0};
@@ -401,10 +402,14 @@ static int color_hash(const char *str)
     double h = ((buf[1] << 8) | buf[0]) / 65536. * 360.;
 
     // red/green blindness correction
-    // h = fmod(fmod(h + 90., 180) - 90., 360.);
+    if (profile == COLOR_PROFILE_REDGREEN) {
+        h = fmod(fmod(h + 90., 180) - 90., 360.);
+    }
 
     // blue blindness correction
-    // h = fmod(h, 180.);
+    if (profile == COLOR_PROFILE_BLUE) {
+        h = fmod(h, 180.);
+    }
 
     rc = find_closest_col((int)h, 100, 50);
 
@@ -487,9 +492,9 @@ static int _color_pair_cache_get(int fg, int bg)
  * hash a string into a color that will be used as fg
  * use default color as bg
  */
-int color_pair_cache_hash_str(const char *str)
+int color_pair_cache_hash_str(const char *str, color_profile profile)
 {
-    int fg = color_hash(str);
+    int fg = color_hash(str, profile);
     int bg = -1;
 
     return _color_pair_cache_get(fg, bg);

@@ -1453,9 +1453,11 @@ _win_print(ProfWin *window, const char show_char, int pad_indent, GDateTime *tim
             colour = theme_attrs(THEME_THEM);
         }
 
-        if (prefs_get_boolean(PREF_COLOR_NICK)) {
+        char *color_pref = prefs_get_string(PREF_COLOR_NICK);
+        if (color_pref != NULL && (strcmp(color_pref, "false") != 0)) {
             colour = theme_hash_attrs(from);
         }
+        prefs_free_string(color_pref);
 
         if (flags & NO_COLOUR_FROM) {
             colour = 0;
