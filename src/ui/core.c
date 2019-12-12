@@ -462,7 +462,6 @@ ui_invalid_command_usage(const char *const cmd, void (*setting_func)(void))
     if (setting_func) {
         cons_show("");
         (*setting_func)();
-        cons_show(msg->str);
     } else {
         cons_show("");
         cons_show(msg->str);
