@@ -677,9 +677,9 @@ theme_hash_attrs(const char *str)
 
     char *color_pref = prefs_get_string(PREF_COLOR_NICK);
     if (strcmp(color_pref, "redgreen") == 0) {
-        profile = COLOR_PROFILE_REDGREEN;
+        profile = COLOR_PROFILE_REDGREEN_BLINDNESS;
     } else if (strcmp(color_pref, "blue") == 0) {
-        profile = COLOR_PROFILE_BLUE;
+        profile = COLOR_PROFILE_BLUE_BLINDNESS;
     }
     prefs_free_string(color_pref);
 

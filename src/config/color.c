@@ -3,6 +3,7 @@
  * vim: expandtab:ts=4:sts=4:sw=4
  *
  * Copyright (C) 2019 Aurelien Aptel <aurelien.aptel@gmail.com>
+ * Copyright (C) 2019 Michael Vetter <jubalh@iodoru.org>
  *
  * This file is part of Profanity.
  *
@@ -401,14 +402,17 @@ static int color_hash(const char *str, color_profile profile)
 
     double h = ((buf[1] << 8) | buf[0]) / 65536. * 360.;
 
-    // red/green blindness correction
-    if (profile == COLOR_PROFILE_REDGREEN) {
-        h = fmod(fmod(h + 90., 180) - 90., 360.);
-    }
-
-    // blue blindness correction
-    if (profile == COLOR_PROFILE_BLUE) {
-        h = fmod(h, 180.);
+    switch(profile)
+    {
+        case COLOR_PROFILE_REDGREEN_BLINDNESS:
+            // red/green blindness correction
+            h = fmod(fmod(h + 90., 180) - 90., 360.);
+            break;
+        case COLOR_PROFILE_BLUE_BLINDNESS:
+            // blue blindness correction
+            h = fmod(h, 180.);
+        default:
+            break;
     }
 
     rc = find_closest_col((int)h, 100, 50);

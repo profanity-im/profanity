@@ -43,8 +43,8 @@
 
 typedef enum {
     COLOR_PROFILE_DEFAULT,
-    COLOR_PROFILE_REDGREEN,
-    COLOR_PROFILE_BLUE,
+    COLOR_PROFILE_REDGREEN_BLINDNESS,
+    COLOR_PROFILE_BLUE_BLINDNESS,
 } color_profile;
 
 struct color_def {
