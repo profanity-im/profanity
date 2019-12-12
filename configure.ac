@@ -168,6 +168,9 @@ PKG_CHECK_MODULES([gio], [gio-2.0], [],
     [AC_MSG_ERROR([libgio-2.0 from glib-2.0 is required for profanity])])
 
 ### Check for other profanity dependencies
+AC_SEARCH_LIBS([fmod], [m], [],
+   [AC_MSG_ERROR([math.h is required])], [])
+
 PKG_CHECK_MODULES([curl], [libcurl], [],
     [AC_CHECK_LIB([curl], [main], [],
         [AC_MSG_ERROR([libcurl is required for profanity])])])
