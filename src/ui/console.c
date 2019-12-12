@@ -1973,6 +1973,11 @@ cons_color_setting(void)
 {
     char *color_pref = prefs_get_string(PREF_COLOR_NICK);
 
+    if (!color_pref) {
+        cons_show("Consistent color generation for nicks (/color)               : OFF");
+        return;
+    }
+
     if (strcmp(color_pref, "true") == 0) {
         cons_show("Consistent color generation for nicks (/color)               : ON");
     } else if (strcmp(color_pref, "redgreen") == 0) {
