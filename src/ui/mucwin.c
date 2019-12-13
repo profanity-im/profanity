@@ -551,6 +551,8 @@ mucwin_incoming_msg(ProfMucWin *mucwin, ProfMessage *message, GSList *mentions, 
         ch = prefs_get_omemo_char();
     }
 
+    win_insert_last_read_position_marker((ProfWin*)mucwin, mucwin->roomjid);
+
     if (g_slist_length(mentions) > 0) {
         _mucwin_print_mention(window, message->plain, message->jid->resourcepart, mynick, mentions, &ch, flags);
     } else if (triggers) {
