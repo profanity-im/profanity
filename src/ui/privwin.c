@@ -69,6 +69,7 @@ privwin_incoming_msg(ProfPrivateWin *privatewin, ProfMessage *message)
     } else {
         status_bar_new(num, WIN_PRIVATE, privatewin->fulljid);
         cons_show_incoming_private_message(jidp->resourcepart, jidp->barejid, num, privatewin->unread);
+        win_insert_last_read_position_marker((ProfWin*)privatewin, privatewin->fulljid);
         win_print_incoming(window, jidp->resourcepart, message);
 
         privatewin->unread++;

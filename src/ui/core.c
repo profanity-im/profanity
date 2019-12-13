@@ -651,14 +651,39 @@ ui_focus_win(ProfWin *window)
     }
 
     ProfWin *old_current = wins_get_current();
+
     if (old_current->type == WIN_CONFIG) {
         ProfConfWin *confwin = (ProfConfWin*)old_current;
         cmd_ac_remove_form_fields(confwin->form);
     }
-
     if (window->type == WIN_CONFIG) {
         ProfConfWin *confwin = (ProfConfWin*)window;
         cmd_ac_add_form_fields(confwin->form);
+    }
+
+    // check for trackbar last position separator
+    switch (old_current->type)
+    {
+    case WIN_CHAT:
+    {
+        ProfChatWin *chatwin = (ProfChatWin*)old_current;
+        win_remove_entry_message(old_current, chatwin->barejid);
+        break;
+    }
+    case WIN_MUC:
+    {
+        ProfMucWin *mucwin = (ProfMucWin*)old_current;
+        win_remove_entry_message(old_current, mucwin->roomjid);
+        break;
+    }
+    case WIN_PRIVATE:
+    {
+        ProfPrivateWin *privwin = (ProfPrivateWin*)old_current;
+        win_remove_entry_message(old_current, privwin->fulljid);
+        break;
+    }
+    default:
+        break;
     }
 
     int i = wins_get_num(window);

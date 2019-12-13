@@ -90,4 +90,7 @@ void win_page_down(ProfWin *window);
 void win_sub_page_down(ProfWin *window);
 void win_sub_page_up(ProfWin *window);
 
+void win_insert_last_read_position_marker(ProfWin *window, char* id);
+void win_remove_entry_message(ProfWin *window, const char *const id);
+
 #endif
