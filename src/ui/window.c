@@ -1355,6 +1355,13 @@ win_update_entry_message(ProfWin *window, const char *const id, const char *cons
 }
 
 void
+win_remove_entry_message(ProfWin *window, const char *const id)
+{
+    buffer_remove_entry_by_id(window->layout->buffer, id);
+    win_redraw(window);
+}
+
+void
 win_newline(ProfWin *window)
 {
     win_appendln(window, THEME_DEFAULT, "");
@@ -1809,3 +1816,29 @@ win_handle_command_exec_result_note(ProfWin *window, const char *const type, con
     assert(window != NULL);
     win_println(window, THEME_DEFAULT, '!', value);
 }
+
+void
+win_print_separator(ProfWin *window)
+{
+    int cols = getmaxx(window->layout->win);
+
+    int i;
+    for (i=1; i<cols; i++) {
+        wprintw(window->layout->win, "-");
+    }
+}
+
+void
+win_insert_last_read_position_marker(ProfWin *window, char* id)
+{
+    GDateTime *time = g_date_time_new_now_local();
+
+    buffer_append(window->layout->buffer, ' ', 0, time, 0, THEME_TEXT, NULL, "-----", NULL, id);
+    // can we leave this? TODO
+    //    win_print_separator(window);
+    //_win_print(window, '-', 0, time, 0, THEME_TEXT, NULL, "---", NULL);
+    win_redraw(window);
+
+    g_date_time_unref(time);
+}
+

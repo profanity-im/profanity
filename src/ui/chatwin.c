@@ -286,6 +286,7 @@ chatwin_incoming_msg(ProfChatWin *chatwin, ProfMessage *message, gboolean win_cr
             }
         }
 
+        win_insert_last_read_position_marker((ProfWin*)chatwin, chatwin->barejid);
         win_print_incoming(window, display_name, message);
     }
 

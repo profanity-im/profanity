@@ -106,6 +106,19 @@ buffer_append(ProfBuff buffer, const char show_char, int pad_indent, GDateTime *
     buffer->entries = g_slist_append(buffer->entries, e);
 }
 
+void
+buffer_remove_entry_by_id(ProfBuff buffer, const char *const id)
+{
+    GSList *entries = buffer->entries;
+    while (entries) {
+        ProfBuffEntry *entry = entries->data;
+        if (entry->id && (g_strcmp0(entry->id, id) == 0)) {
+            buffer->entries = g_slist_delete_link(buffer->entries, entries);
+        }
+        entries = g_slist_next(entries);
+    }
+}
+
 gboolean
 buffer_mark_received(ProfBuff buffer, const char *const id)
 {

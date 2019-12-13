@@ -656,6 +656,14 @@ ui_focus_win(ProfWin *window)
         cmd_ac_remove_form_fields(confwin->form);
     }
 
+    // TODO: if old win is chatwin; and has lastreadline; then remove that line
+    if (old_current->type == WIN_CHAT) {
+        ProfChatWin *chatwin = (ProfChatWin*)old_current;
+        assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
+        //win_update_entry_message_real(old_current, chatwin->barejid, "$$$");
+        win_remove_entry_message(old_current, chatwin->barejid);
+    }
+
     if (window->type == WIN_CONFIG) {
         ProfConfWin *confwin = (ProfConfWin*)window;
         cmd_ac_add_form_fields(confwin->form);
