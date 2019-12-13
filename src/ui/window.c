@@ -1673,8 +1673,10 @@ win_redraw(ProfWin *window)
         ProfBuffEntry *e = buffer_get_entry(window->layout->buffer, i);
 
         if (e->from == NULL && e->message && e->message[0] == '-') {
+            // just an indicator to print the separator not the actual message
             win_print_separator(window);
         } else {
+            // regular thing to print
             _win_print(window, e->show_char, e->pad_indent, e->time, e->flags, e->theme_item, e->from, e->message, e->receipt);
         }
     }
@@ -1837,12 +1839,26 @@ win_handle_command_exec_result_note(ProfWin *window, const char *const type, con
 void
 win_insert_last_read_position_marker(ProfWin *window, char* id)
 {
+    int i, size;
+    size = buffer_size(window->layout->buffer);
+
+    // TODO: this is somewhat costly. We should improve this later.
+    // check if we already have a separator present
+    for (i = 0; i < size; i++) {
+        ProfBuffEntry *e = buffer_get_entry(window->layout->buffer, i);
+
+        // if yes, don't print a new one
+        if (e->id && (g_strcmp0(e->id, id) == 0)) {
+            return;
+        }
+    }
+
     GDateTime *time = g_date_time_new_now_local();
 
+    // the separator will actually be print in win_redraw().
+    // this only puts it in the buffer and win_redraw() will interpret it.
+    // so that we have the correct length even when resizing.
     buffer_append(window->layout->buffer, ' ', 0, time, 0, THEME_TEXT, NULL, "-", NULL, id);
-    // can we leave this? TODO
-    //    win_print_separator(window);
-    //_win_print(window, '-', 0, time, 0, THEME_TEXT, NULL, "---", NULL);
     win_redraw(window);
 
     g_date_time_unref(time);
