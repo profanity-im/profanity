@@ -1651,6 +1651,18 @@ _win_print_wrapped(WINDOW *win, const char *const message, size_t indent, int pa
 }
 
 void
+win_print_separator(ProfWin *window)
+{
+    int cols = getmaxx(window->layout->win);
+
+    int i;
+    for (i=1; i<cols; i++) {
+        wprintw(window->layout->win, "-");
+    }
+    wprintw(window->layout->win, "\n");
+}
+
+void
 win_redraw(ProfWin *window)
 {
     int i, size;
@@ -1659,7 +1671,12 @@ win_redraw(ProfWin *window)
 
     for (i = 0; i < size; i++) {
         ProfBuffEntry *e = buffer_get_entry(window->layout->buffer, i);
-        _win_print(window, e->show_char, e->pad_indent, e->time, e->flags, e->theme_item, e->from, e->message, e->receipt);
+
+        if (e->from == NULL && e->message && e->message[0] == '-') {
+            win_print_separator(window);
+        } else {
+            _win_print(window, e->show_char, e->pad_indent, e->time, e->flags, e->theme_item, e->from, e->message, e->receipt);
+        }
     }
 }
 
@@ -1818,22 +1835,11 @@ win_handle_command_exec_result_note(ProfWin *window, const char *const type, con
 }
 
 void
-win_print_separator(ProfWin *window)
-{
-    int cols = getmaxx(window->layout->win);
-
-    int i;
-    for (i=1; i<cols; i++) {
-        wprintw(window->layout->win, "-");
-    }
-}
-
-void
 win_insert_last_read_position_marker(ProfWin *window, char* id)
 {
     GDateTime *time = g_date_time_new_now_local();
 
-    buffer_append(window->layout->buffer, ' ', 0, time, 0, THEME_TEXT, NULL, "-----", NULL, id);
+    buffer_append(window->layout->buffer, ' ', 0, time, 0, THEME_TEXT, NULL, "-", NULL, id);
     // can we leave this? TODO
     //    win_print_separator(window);
     //_win_print(window, '-', 0, time, 0, THEME_TEXT, NULL, "---", NULL);
