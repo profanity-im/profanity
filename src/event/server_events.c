@@ -1427,19 +1427,19 @@ sv_ev_bookmark_autojoin(Bookmark *bookmark)
 }
 
 static void
+_cut(ProfMessage *message, const char *cut)
+{
+    if (strstr(message->plain, cut)) {
+        char **split = g_strsplit(message->plain, cut, -1);
+        free(message->plain);
+        message->plain = g_strjoinv("", split);
+        g_strfreev(split);
+    }
+}
+
+static void
 _clean_incoming_message(ProfMessage *message)
 {
-    if (strstr(message->plain, "\u200E")) {
-        char **split = g_strsplit(message->plain, "\u200E", -1);
-        free(message->plain);
-        message->plain = g_strjoinv("", split);
-        g_strfreev(split);
-    }
-
-    if (strstr(message->plain, "\u200F")) {
-        char **split = g_strsplit(message->plain, "\u200F", -1);
-        free(message->plain);
-        message->plain = g_strjoinv("", split);
-        g_strfreev(split);
-    }
+    _cut(message, "\u200E");
+    _cut(message, "\u200F");
 }
