@@ -2312,6 +2312,21 @@ static struct cmd_t command_defs[] =
             "/color on",
             "/color blue")
     },
+
+    { "/avatar",
+        parse_args, 1, 1, NULL,
+        CMD_NOSUBFUNCS
+        CMD_MAINFUNC(cmd_avatar)
+        CMD_TAGS(
+            CMD_TAG_CHAT)
+        CMD_SYN(
+            "/color nick")
+        CMD_DESC(
+            "Not ready")
+        CMD_ARGS(
+            { "nick", "Not ready"})
+        CMD_NOEXAMPLES
+    },
 };
 
 static GHashTable *search_index;

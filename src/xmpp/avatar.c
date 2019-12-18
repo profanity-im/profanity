@@ -41,6 +41,9 @@
 #include "xmpp/iq.h"
 #include "xmpp/message.h"
 #include "xmpp/stanza.h"
+#include "ui/ui.h"
+
+char *looking_for = NULL;
 
 static int _avatar_metadata_nofication(xmpp_stanza_t *const stanza, void *const userdata);
 
@@ -50,7 +53,15 @@ avatar_pep_subscribe(void)
     message_pubsub_event_handler_add(STANZA_NS_USER_AVATAR_METADATA, _avatar_metadata_nofication, NULL, NULL);
     message_pubsub_event_handler_add(STANZA_NS_USER_AVATAR_DATA, _avatar_metadata_nofication, NULL, NULL);
 
+    //caps_add_feature(XMPP_FEATURE_USER_AVATAR_METADATA_NOTIFY);
+}
+
+bool
+avatar_get_by_nick(const char* nick)
+{
+    looking_for = strdup(nick);
     caps_add_feature(XMPP_FEATURE_USER_AVATAR_METADATA_NOTIFY);
+    return TRUE;
 }
 
 static int
@@ -58,6 +69,14 @@ _avatar_metadata_nofication(xmpp_stanza_t *const stanza, void *const userdata)
 {
     const char *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
     from = from;
+
+    if (!(looking_for &&
+            (g_strcmp0(looking_for, from) == 0))) {
+        return 1;
+    }
+
+    free(looking_for);
+    looking_for = NULL;
 
     xmpp_stanza_t *root = NULL;
     xmpp_stanza_t *event = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_PUBSUB_EVENT);
@@ -87,7 +106,8 @@ _avatar_metadata_nofication(xmpp_stanza_t *const stanza, void *const userdata)
 
         xmpp_stanza_t *info = xmpp_stanza_get_child_by_name(metadata, "info");
         const char *id = xmpp_stanza_get_id(info);
-        id = id;
+
+        cons_show("Id for %s is: %s", from, id);
     }
 
     return 1;

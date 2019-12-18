@@ -78,6 +78,7 @@
 #include "xmpp/jid.h"
 #include "xmpp/muc.h"
 #include "xmpp/chat_session.h"
+#include "xmpp/avatar.h"
 
 #ifdef HAVE_LIBOTR
 #include "otr/otr.h"
@@ -8657,6 +8658,14 @@ cmd_color(ProfWin *window, const char *const command, gchar **args)
 
         prefs_free_string(theme);
     }
+
+    return TRUE;
+}
+
+gboolean
+cmd_avatar(ProfWin *window, const char *const command, gchar **args)
+{
+    avatar_get_by_nick(args[0]);
 
     return TRUE;
 }
