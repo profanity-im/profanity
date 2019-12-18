@@ -47,14 +47,15 @@
 #include "ui/ui.h"
 #include "config/files.h"
 
-char *looking_for = NULL;
-
 typedef struct avatar_metadata {
     char *type;
+    char *id;
 } avatar_metadata;
 
+char *looking_for = NULL;
+
 static int _avatar_metadata_nofication(xmpp_stanza_t *const stanza, void *const userdata);
-void avatar_request_item_by_id(const char *jid, const char *id, const char *type);
+void avatar_request_item_by_id(const char *jid, avatar_metadata *data);
 int avatar_request_item_handler(xmpp_stanza_t *const stanza, void *const userdata);
 
 static void
@@ -98,9 +99,6 @@ _avatar_metadata_nofication(xmpp_stanza_t *const stanza, void *const userdata)
         return 1;
     }
 
-//    free(looking_for);
-//    looking_for = NULL;
-
     xmpp_stanza_t *root = NULL;
     xmpp_stanza_t *event = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_PUBSUB_EVENT);
     if (event) {
@@ -133,23 +131,25 @@ _avatar_metadata_nofication(xmpp_stanza_t *const stanza, void *const userdata)
         const char *type = xmpp_stanza_get_attribute(info, "type");
 
         log_debug("Avatar ID for %s is: %s", from, id);
-        avatar_request_item_by_id(from, id, type);
+
+        avatar_metadata *data = malloc(sizeof(avatar_metadata));
+        data->type = strdup(type);
+        data->id = strdup(id);
+
+        avatar_request_item_by_id(from, data);
     }
 
     return 1;
 }
 
 void
-avatar_request_item_by_id(const char *jid, const char *id, const char *type)
+avatar_request_item_by_id(const char *jid, avatar_metadata *data)
 {
     caps_remove_feature(XMPP_FEATURE_USER_AVATAR_METADATA_NOTIFY);
 
     xmpp_ctx_t * const ctx = connection_get_ctx();
 
-    avatar_metadata *data = malloc(sizeof(avatar_metadata));
-    data->type = strdup(type);
-
-    xmpp_stanza_t *iq = stanza_create_avatar_retrieve_data_request(ctx, id, jid);
+    xmpp_stanza_t *iq = stanza_create_avatar_retrieve_data_request(ctx, data->id, jid);
     iq_id_handler_add("retrieve1", avatar_request_item_handler, (ProfIqFreeCallback)_free_avatar_data, data);
 
     iq_send_stanza(iq);
