@@ -196,8 +196,10 @@ avatar_request_item_handler(xmpp_stanza_t *const stanza, void *const userdata)
         }
     }
 
-    g_string_append(filename, from_attr);
+    gchar *from = str_replace(from_attr, "@", "_at_");
+    g_string_append(filename, from);
     g_string_append(filename, ".png");
+    free(from);
 
     GError *err = NULL;
     if (g_file_set_contents (filename->str, de, size, &err) == FALSE) {
