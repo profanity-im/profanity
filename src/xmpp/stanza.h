@@ -2,6 +2,7 @@
  * stanza.h
  *
  * Copyright (C) 2012 - 2019 James Booth <boothj5@gmail.com>
+ * Copyright (C) 2019 Michael Vetter <jubalh@iodoru.org>
  *
  * This file is part of Profanity.
  *
@@ -198,6 +199,8 @@
 #define STANZA_NS_OMEMO_DEVICELIST "eu.siacs.conversations.axolotl.devicelist"
 #define STANZA_NS_OMEMO_BUNDLES "eu.siacs.conversations.axolotl.bundles"
 #define STANZA_NS_STABLE_ID "urn:xmpp:sid:0"
+#define STANZA_NS_USER_AVATAR_DATA "urn:xmpp:avatar:data"
+#define STANZA_NS_USER_AVATAR_METADATA "urn:xmpp:avatar:metadata"
 
 #define STANZA_DATAFORM_SOFTWARE "urn:xmpp:dataforms:softwareinfo"
 

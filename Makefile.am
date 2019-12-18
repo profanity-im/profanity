@@ -15,6 +15,7 @@ core_sources = \
 	src/xmpp/bookmark.c src/xmpp/bookmark.h \
 	src/xmpp/blocking.c src/xmpp/blocking.h \
 	src/xmpp/form.c src/xmpp/form.h \
+	src/xmpp/avatar.c src/xmpp/avatar.h \
 	src/event/common.c src/event/common.h \
 	src/event/server_events.c src/event/server_events.h \
 	src/event/client_events.c src/event/client_events.h \
