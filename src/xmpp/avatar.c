@@ -65,9 +65,13 @@ avatar_pep_subscribe(void)
 bool
 avatar_get_by_nick(const char* nick)
 {
+    caps_remove_feature(XMPP_FEATURE_USER_AVATAR_METADATA_NOTIFY);
     free(looking_for);
+
     looking_for = strdup(nick);
+
     caps_add_feature(XMPP_FEATURE_USER_AVATAR_METADATA_NOTIFY);
+
     return TRUE;
 }
 
