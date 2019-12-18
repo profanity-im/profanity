@@ -33,7 +33,12 @@
  *
  */
 
+#ifndef XMPP_AVATAR_H
+#define XMPP_AVATAR_H
+
 #include <glib.h>
 
 void avatar_pep_subscribe(void);
 bool avatar_get_by_nick(const char* nick);
+
+#endif
