@@ -76,7 +76,7 @@ avatar_pep_subscribe(void)
     //caps_add_feature(XMPP_FEATURE_USER_AVATAR_METADATA_NOTIFY);
 }
 
-bool
+gboolean
 avatar_get_by_nick(const char* nick)
 {
     caps_remove_feature(XMPP_FEATURE_USER_AVATAR_METADATA_NOTIFY);
