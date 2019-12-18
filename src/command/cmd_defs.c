@@ -2322,7 +2322,9 @@ static struct cmd_t command_defs[] =
         CMD_SYN(
             "/avatar <barejid>")
         CMD_DESC(
-            "Download avatar for a certain contact.")
+            "Download avatar (XEP-0084) for a certain contact. "
+            "If nothing happens after using this command the user either doesn't have an avatar set at all "
+            "or doesn't use XEP-0084 to publish it.")
         CMD_ARGS(
             { "<barejid>", "JID to download avatar from."})
         CMD_NOEXAMPLES

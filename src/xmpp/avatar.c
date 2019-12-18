@@ -117,7 +117,7 @@ _avatar_metadata_nofication(xmpp_stanza_t *const stanza, void *const userdata)
         xmpp_stanza_t *info = xmpp_stanza_get_child_by_name(metadata, "info");
         const char *id = xmpp_stanza_get_id(info);
 
-        cons_show("Id for %s is: %s", from, id);
+        log_debug("Avatar ID for %s is: %s", from, id);
         avatar_request_item_by_id(from, id);
     }
 
