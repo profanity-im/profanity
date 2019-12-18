@@ -2523,3 +2523,34 @@ stanza_get_child_by_name_and_ns(xmpp_stanza_t * const stanza, const char * const
 
     return child;
 }
+
+xmpp_stanza_t*
+stanza_create_avatar_retrieve_data_request(xmpp_ctx_t *ctx, const char *const id, const char *const jid)
+{
+    xmpp_stanza_t *iq = xmpp_iq_new(ctx, STANZA_TYPE_GET, "retrieve1");
+    xmpp_stanza_set_to(iq, jid);
+
+    xmpp_stanza_t *pubsub = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(pubsub, STANZA_NAME_PUBSUB);
+    xmpp_stanza_set_ns(pubsub, STANZA_NS_PUBSUB);
+
+    xmpp_stanza_t *items = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(items, "items");
+    char *node = g_strdup_printf("%s", STANZA_NS_USER_AVATAR_DATA);
+    xmpp_stanza_set_attribute(items, STANZA_ATTR_NODE, node);
+    g_free(node);
+
+    xmpp_stanza_t *item = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(item, STANZA_NAME_ITEM);
+    xmpp_stanza_set_attribute(item, "id", id);
+
+    xmpp_stanza_add_child(items, item);
+    xmpp_stanza_add_child(pubsub, items);
+    xmpp_stanza_add_child(iq, pubsub);
+
+    xmpp_stanza_release(item);
+    xmpp_stanza_release(items);
+    xmpp_stanza_release(pubsub);
+
+    return iq;
+}

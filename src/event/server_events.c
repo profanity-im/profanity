@@ -54,6 +54,7 @@
 #include "xmpp/muc.h"
 #include "xmpp/chat_session.h"
 #include "xmpp/roster_list.h"
+#include "xmpp/avatar.h"
 
 #ifdef HAVE_LIBOTR
 #include "otr/otr.h"
@@ -89,6 +90,8 @@ sv_ev_login_account_success(char *account_name, gboolean secured)
 #ifdef HAVE_OMEMO
     omemo_on_connect(account);
 #endif
+
+    avatar_pep_subscribe();
 
     ui_handle_login_account_success(account, secured);
 

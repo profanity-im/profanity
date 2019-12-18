@@ -2,6 +2,7 @@
  * xmpp.h
  *
  * Copyright (C) 2012 - 2019 James Booth <boothj5@gmail.com>
+ * Copyright (C) 2019 Michael Vetter <jubalh@iodoru.org>
  *
  * This file is part of Profanity.
  *
@@ -66,6 +67,7 @@
 #define XMPP_FEATURE_OMEMO_DEVICELIST_NOTIFY "eu.siacs.conversations.axolotl.devicelist+notify"
 #define XMPP_FEATURE_PUBSUB "http://jabber.org/protocol/pubsub"
 #define XMPP_FEATURE_PUBSUB_PUBLISH_OPTIONS "http://jabber.org/protocol/pubsub#publish-options"
+#define XMPP_FEATURE_USER_AVATAR_METADATA_NOTIFY "urn:xmpp:avatar:metadata+notify"
 
 typedef enum {
     JABBER_CONNECTING,

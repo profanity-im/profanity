@@ -2,6 +2,7 @@
  * stanza.h
  *
  * Copyright (C) 2012 - 2019 James Booth <boothj5@gmail.com>
+ * Copyright (C) 2019 Michael Vetter <jubalh@iodoru.org>
  *
  * This file is part of Profanity.
  *
@@ -198,6 +199,8 @@
 #define STANZA_NS_OMEMO_DEVICELIST "eu.siacs.conversations.axolotl.devicelist"
 #define STANZA_NS_OMEMO_BUNDLES "eu.siacs.conversations.axolotl.bundles"
 #define STANZA_NS_STABLE_ID "urn:xmpp:sid:0"
+#define STANZA_NS_USER_AVATAR_DATA "urn:xmpp:avatar:data"
+#define STANZA_NS_USER_AVATAR_METADATA "urn:xmpp:avatar:metadata"
 
 #define STANZA_DATAFORM_SOFTWARE "urn:xmpp:dataforms:softwareinfo"
 
@@ -350,5 +353,7 @@ XMPPCaps* stanza_parse_caps(xmpp_stanza_t *const stanza);
 void stanza_free_caps(XMPPCaps *caps);
 
 xmpp_stanza_t* stanza_get_child_by_name_and_ns(xmpp_stanza_t * const stanza, const char * const name, const char * const ns);
+
+xmpp_stanza_t* stanza_create_avatar_retrieve_data_request(xmpp_ctx_t *ctx, const char *const id, const char *const jid);
 
 #endif

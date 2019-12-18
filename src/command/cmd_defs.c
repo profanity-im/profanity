@@ -2312,6 +2312,23 @@ static struct cmd_t command_defs[] =
             "/color on",
             "/color blue")
     },
+
+    { "/avatar",
+        parse_args, 1, 1, NULL,
+        CMD_NOSUBFUNCS
+        CMD_MAINFUNC(cmd_avatar)
+        CMD_TAGS(
+            CMD_TAG_CHAT)
+        CMD_SYN(
+            "/avatar <barejid>")
+        CMD_DESC(
+            "Download avatar (XEP-0084) for a certain contact. "
+            "If nothing happens after using this command the user either doesn't have an avatar set at all "
+            "or doesn't use XEP-0084 to publish it.")
+        CMD_ARGS(
+            { "<barejid>", "JID to download avatar from."})
+        CMD_NOEXAMPLES
+    },
 };
 
 static GHashTable *search_index;
