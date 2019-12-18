@@ -120,6 +120,8 @@ _avatar_metadata_nofication(xmpp_stanza_t *const stanza, void *const userdata)
 void
 avatar_request_item_by_id(const char *jid, const char *id)
 {
+    caps_remove_feature(XMPP_FEATURE_USER_AVATAR_METADATA_NOTIFY);
+
     xmpp_ctx_t * const ctx = connection_get_ctx();
     //char *id = connection_create_stanza_id();
 
@@ -182,6 +184,8 @@ avatar_request_item_handler(xmpp_stanza_t *const stanza, void *const userdata)
         log_error("Unable to save picture: %s", err->message);
         cons_show("Unable to save picture %s", err->message);
         g_error_free(err);
+    } else {
+        cons_show("Avatar saved as %s", filename->str);
     }
 
     g_string_free(filename, TRUE);
