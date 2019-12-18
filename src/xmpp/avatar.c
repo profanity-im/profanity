@@ -35,6 +35,8 @@
 
 #include <glib.h>
 #include <stdio.h>
+#include <errno.h>
+#include <sys/stat.h>
 
 #include "log.h"
 #include "xmpp/connection.h"
@@ -63,6 +65,7 @@ avatar_pep_subscribe(void)
 bool
 avatar_get_by_nick(const char* nick)
 {
+    free(looking_for);
     looking_for = strdup(nick);
     caps_add_feature(XMPP_FEATURE_USER_AVATAR_METADATA_NOTIFY);
     return TRUE;
@@ -123,14 +126,12 @@ avatar_request_item_by_id(const char *jid, const char *id)
     caps_remove_feature(XMPP_FEATURE_USER_AVATAR_METADATA_NOTIFY);
 
     xmpp_ctx_t * const ctx = connection_get_ctx();
-    //char *id = connection_create_stanza_id();
 
     xmpp_stanza_t *iq = stanza_create_avatar_retrieve_data_request(ctx, id, jid);
     iq_id_handler_add("retrieve1", avatar_request_item_handler, free, NULL);
 
     iq_send_stanza(iq);
 
-    //free(id);
     xmpp_stanza_release(iq);
 }
 
@@ -173,13 +174,28 @@ avatar_request_item_handler(xmpp_stanza_t *const stanza, void *const userdata)
     gsize size;
     gchar *de = (gchar*)g_base64_decode(buf, &size);
     free(buf);
-    GError *err = NULL;
+
     char *path = files_get_data_path("");
     GString *filename = g_string_new(path);
-    g_string_append(filename, from_attr);
-    g_string_append(filename, ".png");
     free(path);
 
+    g_string_append(filename, "avatars/");
+
+    errno = 0;
+    int res = g_mkdir_with_parents(filename->str, S_IRWXU);
+    if (res == -1) {
+        char *errmsg = strerror(errno);
+        if (errmsg) {
+            log_error("Avatar: error creating directory: %s, %s", filename->str, errmsg);
+        } else {
+            log_error("Avatar: creating directory: %s", filename->str);
+        }
+    }
+
+    g_string_append(filename, from_attr);
+    g_string_append(filename, ".png");
+
+    GError *err = NULL;
     if (g_file_set_contents (filename->str, de, size, &err) == FALSE) {
         log_error("Unable to save picture: %s", err->message);
         cons_show("Unable to save picture %s", err->message);
