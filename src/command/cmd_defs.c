@@ -2320,11 +2320,11 @@ static struct cmd_t command_defs[] =
         CMD_TAGS(
             CMD_TAG_CHAT)
         CMD_SYN(
-            "/color nick")
+            "/avatar <barejid>")
         CMD_DESC(
-            "Not ready")
+            "Download avatar for a certain contact.")
         CMD_ARGS(
-            { "nick", "Not ready"})
+            { "<barejid>", "JID to download avatar from."})
         CMD_NOEXAMPLES
     },
 };

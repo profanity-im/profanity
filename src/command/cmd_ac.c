@@ -112,6 +112,7 @@ static char* _invite_autocomplete(ProfWin *window, const char *const input, gboo
 static char* _status_autocomplete(ProfWin *window, const char *const input, gboolean previous);
 static char* _logging_autocomplete(ProfWin *window, const char *const input, gboolean previous);
 static char* _color_autocomplete(ProfWin *window, const char *const input, gboolean previous);
+static char* _avatar_autocomplete(ProfWin *window, const char *const input, gboolean previous);
 
 static char* _script_autocomplete_func(const char *const prefix, gboolean previous);
 
@@ -1608,6 +1609,7 @@ _cmd_ac_complete_params(ProfWin *window, const char *const input, gboolean previ
     g_hash_table_insert(ac_funcs, "/status",        _status_autocomplete);
     g_hash_table_insert(ac_funcs, "/logging",       _logging_autocomplete);
     g_hash_table_insert(ac_funcs, "/color",         _color_autocomplete);
+    g_hash_table_insert(ac_funcs, "/avatar",        _avatar_autocomplete);
 
     int len = strlen(input);
     char parsed[len+1];
@@ -3615,6 +3617,22 @@ _color_autocomplete(ProfWin *window, const char *const input, gboolean previous)
     result = autocomplete_param_with_ac(input, "/color", color_ac, TRUE, previous);
     if (result) {
         return result;
+    }
+
+    return NULL;
+}
+
+static char*
+_avatar_autocomplete(ProfWin *window, const char *const input, gboolean previous)
+{
+    char *result = NULL;
+
+    jabber_conn_status_t conn_status = connection_get_status();
+    if (conn_status == JABBER_CONNECTED) {
+        result = autocomplete_param_with_func(input, "/avatar", roster_barejid_autocomplete, previous);
+        if (result) {
+            return result;
+        }
     }
 
     return NULL;
