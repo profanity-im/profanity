@@ -55,8 +55,8 @@ typedef struct avatar_metadata {
 char *looking_for = NULL;
 
 static int _avatar_metadata_nofication(xmpp_stanza_t *const stanza, void *const userdata);
-void avatar_request_item_by_id(const char *jid, avatar_metadata *data);
-int avatar_request_item_handler(xmpp_stanza_t *const stanza, void *const userdata);
+static void _avatar_request_item_by_id(const char *jid, avatar_metadata *data);
+static int _avatar_request_item_handler(xmpp_stanza_t *const stanza, void *const userdata);
 
 static void
 _free_avatar_data(avatar_metadata *data)
@@ -136,29 +136,29 @@ _avatar_metadata_nofication(xmpp_stanza_t *const stanza, void *const userdata)
         data->type = strdup(type);
         data->id = strdup(id);
 
-        avatar_request_item_by_id(from, data);
+        _avatar_request_item_by_id(from, data);
     }
 
     return 1;
 }
 
-void
-avatar_request_item_by_id(const char *jid, avatar_metadata *data)
+static void
+_avatar_request_item_by_id(const char *jid, avatar_metadata *data)
 {
     caps_remove_feature(XMPP_FEATURE_USER_AVATAR_METADATA_NOTIFY);
 
     xmpp_ctx_t * const ctx = connection_get_ctx();
 
     xmpp_stanza_t *iq = stanza_create_avatar_retrieve_data_request(ctx, data->id, jid);
-    iq_id_handler_add("retrieve1", avatar_request_item_handler, (ProfIqFreeCallback)_free_avatar_data, data);
+    iq_id_handler_add("retrieve1", _avatar_request_item_handler, (ProfIqFreeCallback)_free_avatar_data, data);
 
     iq_send_stanza(iq);
 
     xmpp_stanza_release(iq);
 }
 
-int
-avatar_request_item_handler(xmpp_stanza_t *const stanza, void *const userdata)
+static int
+_avatar_request_item_handler(xmpp_stanza_t *const stanza, void *const userdata)
 {
     const char *from_attr = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
 
