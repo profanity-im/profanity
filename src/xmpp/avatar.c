@@ -49,9 +49,22 @@
 
 char *looking_for = NULL;
 
+typedef struct avatar_metadata {
+    char *type;
+} avatar_metadata;
+
 static int _avatar_metadata_nofication(xmpp_stanza_t *const stanza, void *const userdata);
-void avatar_request_item_by_id(const char *jid, const char *id);
+void avatar_request_item_by_id(const char *jid, const char *id, const char *type);
 int avatar_request_item_handler(xmpp_stanza_t *const stanza, void *const userdata);
+
+static void
+_free_avatar_data(avatar_metadata *data)
+{
+    if (data) {
+        free(data->type);
+        free(data);
+    }
+}
 
 void
 avatar_pep_subscribe(void)
@@ -81,7 +94,7 @@ _avatar_metadata_nofication(xmpp_stanza_t *const stanza, void *const userdata)
     const char *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
 
     if (!(looking_for &&
-            (g_strcmp0(looking_for, from) == 0))) {
+                (g_strcmp0(looking_for, from) == 0))) {
         return 1;
     }
 
@@ -115,24 +128,29 @@ _avatar_metadata_nofication(xmpp_stanza_t *const stanza, void *const userdata)
             return 1;
 
         xmpp_stanza_t *info = xmpp_stanza_get_child_by_name(metadata, "info");
+
         const char *id = xmpp_stanza_get_id(info);
+        const char *type = xmpp_stanza_get_attribute(info, "type");
 
         log_debug("Avatar ID for %s is: %s", from, id);
-        avatar_request_item_by_id(from, id);
+        avatar_request_item_by_id(from, id, type);
     }
 
     return 1;
 }
 
 void
-avatar_request_item_by_id(const char *jid, const char *id)
+avatar_request_item_by_id(const char *jid, const char *id, const char *type)
 {
     caps_remove_feature(XMPP_FEATURE_USER_AVATAR_METADATA_NOTIFY);
 
     xmpp_ctx_t * const ctx = connection_get_ctx();
 
+    avatar_metadata *data = malloc(sizeof(avatar_metadata));
+    data->type = strdup(type);
+
     xmpp_stanza_t *iq = stanza_create_avatar_retrieve_data_request(ctx, id, jid);
-    iq_id_handler_add("retrieve1", avatar_request_item_handler, free, NULL);
+    iq_id_handler_add("retrieve1", avatar_request_item_handler, (ProfIqFreeCallback)_free_avatar_data, data);
 
     iq_send_stanza(iq);
 
@@ -169,12 +187,12 @@ avatar_request_item_handler(xmpp_stanza_t *const stanza, void *const userdata)
         return 1;
     }
 
-    xmpp_stanza_t *data = stanza_get_child_by_name_and_ns(item, "data", STANZA_NS_USER_AVATAR_DATA);
-    if (!data) {
+    xmpp_stanza_t *st_data = stanza_get_child_by_name_and_ns(item, "data", STANZA_NS_USER_AVATAR_DATA);
+    if (!st_data) {
         return 1;
     }
 
-    char *buf = xmpp_stanza_get_text(data);
+    char *buf = xmpp_stanza_get_text(st_data);
     gsize size;
     gchar *de = (gchar*)g_base64_decode(buf, &size);
     free(buf);
@@ -198,7 +216,21 @@ avatar_request_item_handler(xmpp_stanza_t *const stanza, void *const userdata)
 
     gchar *from = str_replace(from_attr, "@", "_at_");
     g_string_append(filename, from);
-    g_string_append(filename, ".png");
+
+    avatar_metadata *data = (avatar_metadata*)userdata;
+
+    // check a few image types ourselves
+    // if none matches we won't add an extension but linux will
+    // be able to open it anyways
+    // TODO: we could use /etc/mime-types
+    if (g_strcmp0(data->type, "image/png") == 0) {
+        g_string_append(filename, ".png");
+    } else if (g_strcmp0(data->type, "image/jpeg") == 0) {
+        g_string_append(filename, ".jpeg");
+    } else if (g_strcmp0(data->type, "image/webp") == 0) {
+        g_string_append(filename, ".webp");
+    }
+
     free(from);
 
     GError *err = NULL;
