@@ -2739,6 +2739,11 @@ cmd_roster(ProfWin *window, const char *const command, gchar **args)
             return TRUE;
         }
 
+    } else if (g_strcmp0(args[0], "color") == 0) {
+        _cmd_set_boolean_preference(args[1], command, "Roster consistent colors", PREF_ROSTER_COLOR_NICK);
+        ui_show_roster();
+        return TRUE;
+
     } else if (g_strcmp0(args[0], "unread") == 0) {
         if (g_strcmp0(args[1], "before") == 0) {
             cons_show("Roster unread message count: before");

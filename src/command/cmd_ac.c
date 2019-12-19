@@ -433,6 +433,7 @@ cmd_ac_init(void)
     autocomplete_add(roster_ac, "hide");
     autocomplete_add(roster_ac, "by");
     autocomplete_add(roster_ac, "count");
+    autocomplete_add(roster_ac, "color");
     autocomplete_add(roster_ac, "order");
     autocomplete_add(roster_ac, "unread");
     autocomplete_add(roster_ac, "room");
@@ -1818,6 +1819,10 @@ _roster_autocomplete(ProfWin *window, const char *const input, gboolean previous
             return result;
         }
         result = autocomplete_param_with_func(input, "/roster group remove", roster_group_autocomplete, previous);
+        if (result) {
+            return result;
+        }
+        result = autocomplete_param_with_func(input, "/roster color", prefs_autocomplete_boolean_choice, previous);
         if (result) {
             return result;
         }

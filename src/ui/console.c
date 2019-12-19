@@ -1989,6 +1989,12 @@ cons_color_setting(void)
     }
 
     prefs_free_string(color_pref);
+
+    if (prefs_get_boolean(PREF_ROSTER_COLOR_NICK)) {
+        cons_show("Consistent color generation in roster (/roster)               : ON");
+    } else {
+        cons_show("Consistent color generation in roster (/roster)               : OFF");
+    }
 }
 
 void
