@@ -45,7 +45,7 @@ static void
 _occuptantswin_occupant(ProfLayoutSplit *layout, Occupant *occupant, gboolean showjid)
 {
     int colour;
-    theme_item_t presence_colour;
+    theme_item_t presence_colour = THEME_ROSTER_ONLINE; //init to workaround compiler warning
 
     if (prefs_get_boolean(PREF_OCCUPANTS_COLOR_NICK)) {
         colour = theme_hash_attrs(occupant->nick);
