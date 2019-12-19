@@ -8105,26 +8105,27 @@ static void
 _cmd_set_boolean_preference(gchar *arg, const char *const command,
     const char *const display, preference_t pref)
 {
-    GString *enabled = g_string_new(display);
-    g_string_append(enabled, " enabled.");
-
-    GString *disabled = g_string_new(display);
-    g_string_append(disabled, " disabled.");
-
     if (arg == NULL) {
         cons_bad_cmd_usage(command);
     } else if (strcmp(arg, "on") == 0) {
+        GString *enabled = g_string_new(display);
+        g_string_append(enabled, " enabled.");
+
         cons_show(enabled->str);
         prefs_set_boolean(pref, TRUE);
+
+        g_string_free(enabled, TRUE);
     } else if (strcmp(arg, "off") == 0) {
+        GString *disabled = g_string_new(display);
+        g_string_append(disabled, " disabled.");
+
         cons_show(disabled->str);
         prefs_set_boolean(pref, FALSE);
+
+        g_string_free(disabled, TRUE);
     } else {
         cons_bad_cmd_usage(command);
     }
-
-    g_string_free(enabled, TRUE);
-    g_string_free(disabled, TRUE);
 }
 
 gboolean
