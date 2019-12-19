@@ -367,8 +367,17 @@ _rosterwin_contact(ProfLayoutSplit *layout, PContact contact)
     }
 
     theme_item_t presence_colour = _get_roster_theme(theme_type, presence);
+    int colour;
+    if (prefs_get_boolean(PREF_ROSTER_COLOR_NICK)) {
+        colour = theme_hash_attrs(name);
+    }
 
-    wattron(layout->subwin, theme_attrs(presence_colour));
+    if (prefs_get_boolean(PREF_ROSTER_COLOR_NICK)) {
+        wattron(layout->subwin, colour);
+    } else {
+        wattron(layout->subwin, theme_attrs(presence_colour));
+    }
+
     GString *msg = g_string_new(" ");
     int indent = prefs_get_roster_contact_indent();
     int current_indent = 0;
@@ -404,7 +413,12 @@ _rosterwin_contact(ProfLayoutSplit *layout, PContact contact)
     gboolean wrap = prefs_get_boolean(PREF_ROSTER_WRAP);
     win_sub_print(layout->subwin, msg->str, FALSE, wrap, current_indent);
     g_string_free(msg, TRUE);
-    wattroff(layout->subwin, theme_attrs(presence_colour));
+
+    if (prefs_get_boolean(PREF_ROSTER_COLOR_NICK)) {
+        wattroff(layout->subwin, colour);
+    } else {
+        wattroff(layout->subwin, theme_attrs(presence_colour));
+    }
 
     if (prefs_get_boolean(PREF_ROSTER_RESOURCE)) {
         _rosterwin_resources(layout, contact, current_indent, theme_type, unread);
@@ -412,10 +426,11 @@ _rosterwin_contact(ProfLayoutSplit *layout, PContact contact)
         if (unread > 0) {
             GString *unreadmsg = g_string_new("");
             g_string_append_printf(unreadmsg, " (%d)", unread);
+
             wattron(layout->subwin, theme_attrs(presence_colour));
             win_sub_print(layout->subwin, unreadmsg->str, FALSE, wrap, current_indent);
             g_string_free(unreadmsg, TRUE);
-            wattroff(layout->subwin, theme_attrs(presence_colour));
+            wattroff(layout->subwin, theme_attrs(colour));
         }
 
         _rosterwin_presence(layout, presence, status, current_indent);
