@@ -44,9 +44,19 @@
 static void
 _occuptantswin_occupant(ProfLayoutSplit *layout, Occupant *occupant, gboolean showjid)
 {
-    const char *presence_str = string_from_resource_presence(occupant->presence);
-    theme_item_t presence_colour = theme_main_presence_attrs(presence_str);
-    wattron(layout->subwin, theme_attrs(presence_colour));
+    int colour;
+    theme_item_t presence_colour;
+
+    if (prefs_get_boolean(PREF_OCCUPANTS_COLOR_NICK)) {
+        colour = theme_hash_attrs(occupant->nick);
+
+        wattron(layout->subwin, colour);
+    } else {
+        const char *presence_str = string_from_resource_presence(occupant->presence);
+        presence_colour = theme_main_presence_attrs(presence_str);
+
+        wattron(layout->subwin, theme_attrs(presence_colour));
+    }
 
     GString *spaces = g_string_new(" ");
 
@@ -86,7 +96,11 @@ _occuptantswin_occupant(ProfLayoutSplit *layout, Occupant *occupant, gboolean sh
 
     g_string_free(spaces, TRUE);
 
-    wattroff(layout->subwin, theme_attrs(presence_colour));
+    if (prefs_get_boolean(PREF_OCCUPANTS_COLOR_NICK)) {
+        wattroff(layout->subwin, colour);
+    } else {
+        wattroff(layout->subwin, theme_attrs(presence_colour));
+    }
 }
 
 void

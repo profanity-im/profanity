@@ -714,6 +714,7 @@ static struct cmd_t command_defs[] =
         CMD_SYN(
             "/occupants show|hide [jid]",
             "/occupants char <char>|none",
+            "/occupants color on|off",
             "/occupants default show|hide [jid]",
             "/occupants size [<percent>]",
             "/occupants indent <indent>",
@@ -725,6 +726,8 @@ static struct cmd_t command_defs[] =
             { "show",                  "Show the occupants panel in current room." },
             { "char <char>",           "Prefix occupants with specified character." },
             { "char none",             "Remove occupants character prefix." },
+            { "color on",              "Enable generated color names (XEP-0392) for occupants" },
+            { "color off",             "Disable generated color names (XEP-0392) for occupants" },
             { "hide",                  "Hide the occupants panel in current room." },
             { "show jid",              "Show jid in the occupants panel in current room." },
             { "hide jid",              "Hide jid in the occupants panel in current room." },

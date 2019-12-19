@@ -1991,9 +1991,15 @@ cons_color_setting(void)
     prefs_free_string(color_pref);
 
     if (prefs_get_boolean(PREF_ROSTER_COLOR_NICK)) {
-        cons_show("Consistent color generation in roster (/roster)               : ON");
+        cons_show("Consistent color generation in roster (/roster)              : ON");
     } else {
-        cons_show("Consistent color generation in roster (/roster)               : OFF");
+        cons_show("Consistent color generation in roster (/roster)              : OFF");
+    }
+
+    if (prefs_get_boolean(PREF_OCCUPANTS_COLOR_NICK)) {
+        cons_show("Consistent color generation for occupants (/occupants)       : ON");
+    } else {
+        cons_show("Consistent color generation for occupants (/occupants)       : OFF");
     }
 }
 

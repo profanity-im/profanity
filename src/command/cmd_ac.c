@@ -708,6 +708,7 @@ cmd_ac_init(void)
     autocomplete_add(occupants_ac, "header");
     autocomplete_add(occupants_ac, "wrap");
     autocomplete_add(occupants_ac, "char");
+    autocomplete_add(occupants_ac, "color");
 
     occupants_default_ac = autocomplete_new();
     autocomplete_add(occupants_default_ac, "show");
@@ -2647,6 +2648,11 @@ _occupants_autocomplete(ProfWin *window, const char *const input, gboolean previ
     }
 
     found = autocomplete_param_with_ac(input, "/occupants char", occupants_char_ac, TRUE, previous);
+    if (found) {
+        return found;
+    }
+
+    found = autocomplete_param_with_func(input, "/occupants color", prefs_autocomplete_boolean_choice, previous);
     if (found) {
         return found;
     }
