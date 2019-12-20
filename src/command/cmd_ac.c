@@ -1787,6 +1787,10 @@ _roster_autocomplete(ProfWin *window, const char *const input, gboolean previous
     if (result) {
         return result;
     }
+    result = autocomplete_param_with_func(input, "/roster color", prefs_autocomplete_boolean_choice, previous);
+    if (result) {
+        return result;
+    }
 
     jabber_conn_status_t conn_status = connection_get_status();
     if (conn_status == JABBER_CONNECTED) {
@@ -1820,10 +1824,6 @@ _roster_autocomplete(ProfWin *window, const char *const input, gboolean previous
             return result;
         }
         result = autocomplete_param_with_func(input, "/roster group remove", roster_group_autocomplete, previous);
-        if (result) {
-            return result;
-        }
-        result = autocomplete_param_with_func(input, "/roster color", prefs_autocomplete_boolean_choice, previous);
         if (result) {
             return result;
         }
