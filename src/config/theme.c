@@ -361,8 +361,6 @@ _load_preferences(void)
             prefs_set_occupants_char(ch[0]);
             g_free(ch);
         }
-    } else {
-        prefs_clear_occupants_char();
     }
 
     if (g_key_file_has_key(theme, "ui", "occupants.indent", NULL)) {
@@ -376,8 +374,6 @@ _load_preferences(void)
             prefs_set_occupants_header_char(ch[0]);
             g_free(ch);
         }
-    } else {
-        prefs_clear_occupants_header_char();
     }
 
     if (g_key_file_has_key(theme, "ui", "roster.size", NULL)) {
@@ -391,8 +387,6 @@ _load_preferences(void)
             prefs_set_roster_header_char(ch[0]);
             g_free(ch);
         }
-    } else {
-        prefs_clear_roster_header_char();
     }
 
     if (g_key_file_has_key(theme, "ui", "roster.contact.char", NULL)) {
@@ -401,8 +395,6 @@ _load_preferences(void)
             prefs_set_roster_contact_char(ch[0]);
             g_free(ch);
         }
-    } else {
-        prefs_clear_roster_contact_char();
     }
 
     if (g_key_file_has_key(theme, "ui", "roster.resource.char", NULL)) {
@@ -421,8 +413,6 @@ _load_preferences(void)
             prefs_set_roster_room_char(ch[0]);
             g_free(ch);
         }
-    } else {
-        prefs_clear_roster_room_char();
     }
 
     if (g_key_file_has_key(theme, "ui", "roster.rooms.private.char", NULL)) {
@@ -431,8 +421,6 @@ _load_preferences(void)
             prefs_set_roster_room_private_char(ch[0]);
             g_free(ch);
         }
-    } else {
-        prefs_clear_roster_room_private_char();
     }
 
     if (g_key_file_has_key(theme, "ui", "roster.private.char", NULL)) {
@@ -441,8 +429,6 @@ _load_preferences(void)
             prefs_set_roster_private_char(ch[0]);
             g_free(ch);
         }
-    } else {
-        prefs_clear_roster_private_char();
     }
 
     if (g_key_file_has_key(theme, "ui", "roster.contact.indent", NULL)) {
