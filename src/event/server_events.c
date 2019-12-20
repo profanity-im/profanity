@@ -1199,7 +1199,7 @@ sv_ev_muc_occupant_online(const char *const room, const char *const nick, const 
 
     gboolean updated = muc_roster_add(room, nick, jid, role, affiliation, show, status);
 
-    if (affiliation != NULL) {
+    if (jid != NULL && affiliation != NULL) {
         muc_members_update(room, jid, affiliation);
     }
 
