@@ -899,7 +899,7 @@ muc_members_remove(const char *const room, const char *const jid)
 {
     ChatRoom *chat_room = g_hash_table_lookup(rooms, room);
     if (chat_room) {
-        g_hash_table_remove(chat_room->members, strdup(jid));
+        g_hash_table_remove(chat_room->members, jid);
     }
 }
 
