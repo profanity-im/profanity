@@ -54,11 +54,11 @@ typedef struct avatar_metadata {
     char *id;
 } avatar_metadata;
 
-char *looking_for = NULL;
+char *looking_for = NULL; // nick/barejid from who we want to get the avatar
 
-static int _avatar_metadata_nofication(xmpp_stanza_t *const stanza, void *const userdata);
 static void _avatar_request_item_by_id(const char *jid, avatar_metadata *data);
-static int _avatar_request_item_handler(xmpp_stanza_t *const stanza, void *const userdata);
+static int _avatar_metadata_handler(xmpp_stanza_t *const stanza, void *const userdata);
+static int _avatar_request_item_result_handler(xmpp_stanza_t *const stanza, void *const userdata);
 
 static void
 _free_avatar_data(avatar_metadata *data)
@@ -72,8 +72,8 @@ _free_avatar_data(avatar_metadata *data)
 void
 avatar_pep_subscribe(void)
 {
-    message_pubsub_event_handler_add(STANZA_NS_USER_AVATAR_METADATA, _avatar_metadata_nofication, NULL, NULL);
-    message_pubsub_event_handler_add(STANZA_NS_USER_AVATAR_DATA, _avatar_metadata_nofication, NULL, NULL);
+    message_pubsub_event_handler_add(STANZA_NS_USER_AVATAR_METADATA, _avatar_metadata_handler, NULL, NULL);
+    message_pubsub_event_handler_add(STANZA_NS_USER_AVATAR_DATA, _avatar_metadata_handler, NULL, NULL);
 
     //caps_add_feature(XMPP_FEATURE_USER_AVATAR_METADATA_NOTIFY);
 }
@@ -81,18 +81,20 @@ avatar_pep_subscribe(void)
 gboolean
 avatar_get_by_nick(const char* nick)
 {
+    // in case we set the feature, remove it
     caps_remove_feature(XMPP_FEATURE_USER_AVATAR_METADATA_NOTIFY);
     free(looking_for);
 
     looking_for = strdup(nick);
 
+    // add the feature. this will trigger the _avatar_metadata_notfication_handler handler
     caps_add_feature(XMPP_FEATURE_USER_AVATAR_METADATA_NOTIFY);
 
     return TRUE;
 }
 
 static int
-_avatar_metadata_nofication(xmpp_stanza_t *const stanza, void *const userdata)
+_avatar_metadata_handler(xmpp_stanza_t *const stanza, void *const userdata)
 {
     const char *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
 
@@ -138,6 +140,7 @@ _avatar_metadata_nofication(xmpp_stanza_t *const stanza, void *const userdata)
         data->type = strdup(type);
         data->id = strdup(id);
 
+        // request the actual (image) data
         _avatar_request_item_by_id(from, data);
     }
 
@@ -152,7 +155,7 @@ _avatar_request_item_by_id(const char *jid, avatar_metadata *data)
     xmpp_ctx_t * const ctx = connection_get_ctx();
 
     xmpp_stanza_t *iq = stanza_create_avatar_retrieve_data_request(ctx, data->id, jid);
-    iq_id_handler_add("retrieve1", _avatar_request_item_handler, (ProfIqFreeCallback)_free_avatar_data, data);
+    iq_id_handler_add("retrieve1", _avatar_request_item_result_handler, (ProfIqFreeCallback)_free_avatar_data, data);
 
     iq_send_stanza(iq);
 
@@ -160,7 +163,7 @@ _avatar_request_item_by_id(const char *jid, avatar_metadata *data)
 }
 
 static int
-_avatar_request_item_handler(xmpp_stanza_t *const stanza, void *const userdata)
+_avatar_request_item_result_handler(xmpp_stanza_t *const stanza, void *const userdata)
 {
     const char *from_attr = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
 
