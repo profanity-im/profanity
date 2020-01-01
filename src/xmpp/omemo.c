@@ -359,7 +359,9 @@ omemo_receive_message(xmpp_stanza_t *const stanza, gboolean *trusted)
 
         key->data = g_base64_decode(key_text, &key->length);
         free(key_text);
-        key->prekey = g_strcmp0(xmpp_stanza_get_attribute(key_stanza, "prekey"), "true") == 0;
+        key->prekey = 
+            g_strcmp0(xmpp_stanza_get_attribute(key_stanza, "prekey"), "true") == 0
+            || g_strcmp0(xmpp_stanza_get_attribute(key_stanza, "prekey"), "1") == 0;
         keys = g_list_append(keys, key);
         continue;
 
