@@ -2,7 +2,7 @@
  * avatar.c
  * vim: expandtab:ts=4:sts=4:sw=4
  *
- * Copyright (C) 2019 Michael Vetter <jubalh@iodoru.org>
+ * Copyright (C) 2019 - 2020 Michael Vetter <jubalh@iodoru.org>
  *
  * This file is part of Profanity.
  *
