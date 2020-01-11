@@ -3675,9 +3675,9 @@ cmd_join(ProfWin *window, const char *const command, gchar **args)
     if (!muc_active(room)) {
         presence_join_room(room, nick, passwd);
         muc_join(room, nick, passwd, FALSE);
-        iq_room_affiliation_list(room, "member");
-        iq_room_affiliation_list(room, "admin");
-        iq_room_affiliation_list(room, "owner");
+        iq_room_affiliation_list(room, "member", false);
+        iq_room_affiliation_list(room, "admin", false);
+        iq_room_affiliation_list(room, "owner", false);
     } else if (muc_roster_complete(room)) {
         ui_switch_to_room(room);
     }
@@ -4223,14 +4223,14 @@ cmd_affiliation(ProfWin *window, const char *const command, gchar **args)
 
     if (g_strcmp0(cmd, "list") == 0) {
         if (!affiliation) {
-            iq_room_affiliation_list(mucwin->roomjid, "owner");
-            iq_room_affiliation_list(mucwin->roomjid, "admin");
-            iq_room_affiliation_list(mucwin->roomjid, "member");
-            iq_room_affiliation_list(mucwin->roomjid, "outcast");
+            iq_room_affiliation_list(mucwin->roomjid, "owner", true);
+            iq_room_affiliation_list(mucwin->roomjid, "admin", true);
+            iq_room_affiliation_list(mucwin->roomjid, "member", true);
+            iq_room_affiliation_list(mucwin->roomjid, "outcast", true);
         } else if (g_strcmp0(affiliation, "none") == 0) {
             win_println(window, THEME_DEFAULT, '!', "Cannot list users with no affiliation.");
         } else {
-            iq_room_affiliation_list(mucwin->roomjid, affiliation);
+            iq_room_affiliation_list(mucwin->roomjid, affiliation, true);
         }
         return TRUE;
     }

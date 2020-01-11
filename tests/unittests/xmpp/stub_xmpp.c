@@ -206,7 +206,7 @@ void iq_send_caps_request_for_jid(const char * const to, const char * const id,
 void iq_send_caps_request_legacy(const char * const to, const char * const id,
     const char * const node, const char * const ver) {}
 void iq_room_info_request(const char * const room, gboolean display) {}
-void iq_room_affiliation_list(const char * const room, char *affiliation) {}
+void iq_room_affiliation_list(const char * const room, char *affiliation, bool show) {}
 void iq_room_affiliation_set(const char * const room, const char * const jid, char *affiliation,
     const char * const reason) {}
 void iq_room_kick_occupant(const char * const room, const char * const nick, const char * const reason) {}
