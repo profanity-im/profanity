@@ -2544,7 +2544,6 @@ cmd_roster(ProfWin *window, const char *const command, gchar **args)
             return TRUE;
         }
 
-        gboolean old = prefs_get_boolean(pref);
         gboolean val;
         if (g_strcmp0(args[0], "show") == 0) {
             val = TRUE;
@@ -2554,7 +2553,7 @@ cmd_roster(ProfWin *window, const char *const command, gchar **args)
 
         cons_show("Roster%s%s %s (was %s)", strlen(pref_str) == 0 ? "" : " ", pref_str,
                   val == TRUE ? "enabled" : "disabled",
-                  old == TRUE ? "enabled" : "disabled");
+                  prefs_get_boolean(pref) == TRUE ? "enabled" : "disabled");
         prefs_set_boolean(pref, val);
         if (conn_status == JABBER_CONNECTED) {
             if (pref == PREF_ROSTER) {
