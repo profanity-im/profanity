@@ -2506,156 +2506,67 @@ cmd_roster(ProfWin *window, const char *const command, gchar **args)
         return TRUE;
 
     // show/hide roster
-    } else if (g_strcmp0(args[0], "show") == 0) {
+    } else if ((g_strcmp0(args[0], "show") == 0) || (g_strcmp0(args[0], "hide") == 0)) {
+        preference_t pref;
+        const char *pref_str;
         if (args[1] == NULL) {
-            cons_show("Roster enabled.");
-            prefs_set_boolean(PREF_ROSTER, TRUE);
-            if (conn_status == JABBER_CONNECTED) {
-                ui_show_roster();
-            }
-            return TRUE;
+            pref = PREF_ROSTER;
+            pref_str = "";
         } else if (g_strcmp0(args[1], "offline") == 0) {
-            cons_show("Roster offline enabled");
-            prefs_set_boolean(PREF_ROSTER_OFFLINE, TRUE);
-            if (conn_status == JABBER_CONNECTED) {
-                rosterwin_roster();
-            }
-            return TRUE;
+            pref = PREF_ROSTER_OFFLINE;
+            pref_str = "offline";
         } else if (g_strcmp0(args[1], "resource") == 0) {
-            cons_show("Roster resource enabled");
-            prefs_set_boolean(PREF_ROSTER_RESOURCE, TRUE);
-            if (conn_status == JABBER_CONNECTED) {
-                rosterwin_roster();
-            }
-            return TRUE;
+            pref = PREF_ROSTER_RESOURCE;
+            pref_str = "resource";
         } else if (g_strcmp0(args[1], "presence") == 0) {
-            cons_show("Roster presence enabled");
-            prefs_set_boolean(PREF_ROSTER_PRESENCE, TRUE);
-            if (conn_status == JABBER_CONNECTED) {
-                rosterwin_roster();
-            }
-            return TRUE;
+            pref = PREF_ROSTER_PRESENCE;
+            pref_str = "presence";
         } else if (g_strcmp0(args[1], "status") == 0) {
-            cons_show("Roster status enabled");
-            prefs_set_boolean(PREF_ROSTER_STATUS, TRUE);
-            if (conn_status == JABBER_CONNECTED) {
-                rosterwin_roster();
-            }
-            return TRUE;
+            pref = PREF_ROSTER_STATUS;
+            pref_str = "status";
         } else if (g_strcmp0(args[1], "empty") == 0) {
-            cons_show("Roster empty enabled");
-            prefs_set_boolean(PREF_ROSTER_EMPTY, TRUE);
-            if (conn_status == JABBER_CONNECTED) {
-                rosterwin_roster();
-            }
-            return TRUE;
+            pref = PREF_ROSTER_EMPTY;
+            pref_str = "empty";
         } else if (g_strcmp0(args[1], "priority") == 0) {
-            cons_show("Roster priority enabled");
-            prefs_set_boolean(PREF_ROSTER_PRIORITY, TRUE);
-            if (conn_status == JABBER_CONNECTED) {
-                rosterwin_roster();
-            }
-            return TRUE;
+            pref = PREF_ROSTER_PRIORITY;
+            pref_str = "priority";
         } else if (g_strcmp0(args[1], "contacts") == 0) {
-            cons_show("Roster contacts enabled");
-            prefs_set_boolean(PREF_ROSTER_CONTACTS, TRUE);
-            if (conn_status == JABBER_CONNECTED) {
-                rosterwin_roster();
-            }
-            return TRUE;
+            pref = PREF_ROSTER_CONTACTS;
+            pref_str = "contacts";
         } else if (g_strcmp0(args[1], "rooms") == 0) {
-            cons_show("Roster rooms enabled");
-            prefs_set_boolean(PREF_ROSTER_ROOMS, TRUE);
-            if (conn_status == JABBER_CONNECTED) {
-                rosterwin_roster();
-            }
-            return TRUE;
+            pref = PREF_ROSTER_ROOMS;
+            pref_str = "rooms";
         } else if (g_strcmp0(args[1], "unsubscribed") == 0) {
-            cons_show("Roster unsubscribed enabled");
-            prefs_set_boolean(PREF_ROSTER_UNSUBSCRIBED, TRUE);
-            if (conn_status == JABBER_CONNECTED) {
-                rosterwin_roster();
-            }
-            return TRUE;
+            pref = PREF_ROSTER_UNSUBSCRIBED;
+            pref_str = "unsubscribed";
         } else {
             cons_bad_cmd_usage(command);
             return TRUE;
         }
-    } else if (g_strcmp0(args[0], "hide") == 0) {
-        if (args[1] == NULL) {
-            cons_show("Roster disabled.");
-            prefs_set_boolean(PREF_ROSTER, FALSE);
-            if (conn_status == JABBER_CONNECTED) {
-                ui_hide_roster();
-            }
-            return TRUE;
-        } else if (g_strcmp0(args[1], "offline") == 0) {
-            cons_show("Roster offline disabled");
-            prefs_set_boolean(PREF_ROSTER_OFFLINE, FALSE);
-            if (conn_status == JABBER_CONNECTED) {
-                rosterwin_roster();
-            }
-            return TRUE;
-        } else if (g_strcmp0(args[1], "resource") == 0) {
-            cons_show("Roster resource disabled");
-            prefs_set_boolean(PREF_ROSTER_RESOURCE, FALSE);
-            if (conn_status == JABBER_CONNECTED) {
-                rosterwin_roster();
-            }
-            return TRUE;
-        } else if (g_strcmp0(args[1], "presence") == 0) {
-            cons_show("Roster presence disabled");
-            prefs_set_boolean(PREF_ROSTER_PRESENCE, FALSE);
-            if (conn_status == JABBER_CONNECTED) {
-                rosterwin_roster();
-            }
-            return TRUE;
-        } else if (g_strcmp0(args[1], "status") == 0) {
-            cons_show("Roster status disabled");
-            prefs_set_boolean(PREF_ROSTER_STATUS, FALSE);
-            if (conn_status == JABBER_CONNECTED) {
-                rosterwin_roster();
-            }
-            return TRUE;
-        } else if (g_strcmp0(args[1], "empty") == 0) {
-            cons_show("Roster empty disabled");
-            prefs_set_boolean(PREF_ROSTER_EMPTY, FALSE);
-            if (conn_status == JABBER_CONNECTED) {
-                rosterwin_roster();
-            }
-            return TRUE;
-        } else if (g_strcmp0(args[1], "priority") == 0) {
-            cons_show("Roster priority disabled");
-            prefs_set_boolean(PREF_ROSTER_PRIORITY, FALSE);
-            if (conn_status == JABBER_CONNECTED) {
-                rosterwin_roster();
-            }
-            return TRUE;
-        } else if (g_strcmp0(args[1], "contacts") == 0) {
-            cons_show("Roster contacts disabled");
-            prefs_set_boolean(PREF_ROSTER_CONTACTS, FALSE);
-            if (conn_status == JABBER_CONNECTED) {
-                rosterwin_roster();
-            }
-            return TRUE;
-        } else if (g_strcmp0(args[1], "rooms") == 0) {
-            cons_show("Roster rooms disabled");
-            prefs_set_boolean(PREF_ROSTER_ROOMS, FALSE);
-            if (conn_status == JABBER_CONNECTED) {
-                rosterwin_roster();
-            }
-            return TRUE;
-        } else if (g_strcmp0(args[1], "unsubscribed") == 0) {
-            cons_show("Roster unsubscribed disabled");
-            prefs_set_boolean(PREF_ROSTER_UNSUBSCRIBED, FALSE);
-            if (conn_status == JABBER_CONNECTED) {
-                rosterwin_roster();
-            }
-            return TRUE;
-        } else {
-            cons_bad_cmd_usage(command);
-            return TRUE;
+
+        gboolean val;
+        if (g_strcmp0(args[0], "show") == 0) {
+            val = TRUE;
+        } else { // "hide"
+            val = FALSE;
         }
+
+        cons_show("Roster%s%s %s (was %s)", strlen(pref_str) == 0 ? "" : " ", pref_str,
+                  val == TRUE ? "enabled" : "disabled",
+                  prefs_get_boolean(pref) == TRUE ? "enabled" : "disabled");
+        prefs_set_boolean(pref, val);
+        if (conn_status == JABBER_CONNECTED) {
+            if (pref == PREF_ROSTER) {
+                if (val == TRUE) {
+                    ui_show_roster();
+                } else {
+                    ui_hide_roster();
+                }
+            } else {
+                rosterwin_roster();
+            }
+        }
+        return TRUE;
 
     // roster grouping
     } else if (g_strcmp0(args[0], "by") == 0) {
