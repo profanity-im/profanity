@@ -313,6 +313,11 @@ omemo_receive_message(xmpp_stanza_t *const stanza, gboolean *trusted)
 {
     char *plaintext = NULL;
     const char *type = xmpp_stanza_get_type(stanza);
+    GList *keys = NULL;
+    unsigned char *iv_raw = NULL;
+    unsigned char *payload_raw = NULL;
+    char *iv_text = NULL;
+    char *payload_text = NULL;
 
     xmpp_stanza_t *encrypted = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_OMEMO);
     if (!encrypted) {
@@ -334,12 +339,12 @@ omemo_receive_message(xmpp_stanza_t *const stanza, gboolean *trusted)
     if (!iv) {
         return NULL;
     }
-    char *iv_text = xmpp_stanza_get_text(iv);
+    iv_text = xmpp_stanza_get_text(iv);
     if (!iv_text) {
         return NULL;
     }
     size_t iv_len;
-    unsigned char *iv_raw = g_base64_decode(iv_text, &iv_len);
+    iv_raw = g_base64_decode(iv_text, &iv_len);
     if (!iv_raw) {
         goto out;
     }
@@ -348,17 +353,16 @@ omemo_receive_message(xmpp_stanza_t *const stanza, gboolean *trusted)
     if (!payload) {
         goto out;
     }
-    char *payload_text = xmpp_stanza_get_text(payload);
+    payload_text = xmpp_stanza_get_text(payload);
     if (!payload_text) {
         goto out;
     }
     size_t payload_len;
-    unsigned char *payload_raw = g_base64_decode(payload_text, &payload_len);
+    payload_raw = g_base64_decode(payload_text, &payload_len);
     if (!payload_raw) {
         goto out;
     }
 
-    GList *keys = NULL;
     xmpp_stanza_t *key_stanza;
     for (key_stanza = xmpp_stanza_get_children(header); key_stanza != NULL; key_stanza = xmpp_stanza_get_next(key_stanza)) {
         if (g_strcmp0(xmpp_stanza_get_name(key_stanza), "key") != 0) {
@@ -402,18 +406,11 @@ out:
     if (keys) {
         g_list_free_full(keys, (GDestroyNotify)omemo_key_free);
     }
-    if (iv_raw) {
-        g_free(iv_raw);
-    }
-    if (payload_raw) {
-        g_free(payload_raw);
-    }
-    if (payload_raw) {
-        g_free(iv_text);
-    }
-    if (payload_raw) {
-        g_free(payload_text);
-    }
+
+    g_free(iv_raw);
+    g_free(payload_raw);
+    g_free(iv_text);
+    g_free(payload_text);
 
     return plaintext;
 }
