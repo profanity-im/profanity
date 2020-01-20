@@ -340,7 +340,7 @@ out:
 }
 
 int
-aes128gcm_decrypt(unsigned char *plaintext, size_t *plaintext_len, const unsigned char *const ciphertext, size_t ciphertext_len, const unsigned char *const iv, const unsigned char *const key, const unsigned char *const tag)
+aes128gcm_decrypt(unsigned char *plaintext, size_t *plaintext_len, const unsigned char *const ciphertext, size_t ciphertext_len, const unsigned char *const iv, size_t iv_len, const unsigned char *const key, const unsigned char *const tag)
 {
     gcry_error_t res;
     gcry_cipher_hd_t hd;
@@ -355,7 +355,7 @@ aes128gcm_decrypt(unsigned char *plaintext, size_t *plaintext_len, const unsigne
         goto out;
     }
 
-    res = gcry_cipher_setiv(hd, iv, AES128_GCM_IV_LENGTH);
+    res = gcry_cipher_setiv(hd, iv, iv_len);
     if (res != GPG_ERR_NO_ERROR) {
         goto out;
     }

@@ -955,7 +955,7 @@ omemo_on_message_recv(const char *const from_jid, uint32_t sid,
     size_t plaintext_len = payload_len;
     plaintext = malloc(plaintext_len + 1);
     res = aes128gcm_decrypt(plaintext, &plaintext_len, payload, payload_len, iv,
-        signal_buffer_data(plaintext_key),
+        iv_len, signal_buffer_data(plaintext_key),
         signal_buffer_data(plaintext_key) + AES128_GCM_KEY_LENGTH);
     signal_buffer_free(plaintext_key);
     if (res != 0) {
