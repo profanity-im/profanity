@@ -95,7 +95,7 @@ typedef struct privilege_set_t {
 
 typedef struct affiliation_list_t {
     char *affiliation;
-    bool show;
+    bool show_ui_message;
 } ProfAffiliationList;
 
 typedef struct command_config_data_t {
@@ -643,7 +643,7 @@ iq_room_config_cancel(ProfConfWin *confwin)
 }
 
 void
-iq_room_affiliation_list(const char *const room, char *affiliation, bool show)
+iq_room_affiliation_list(const char *const room, char *affiliation, bool show_ui_message)
 {
     xmpp_ctx_t * const ctx = connection_get_ctx();
     xmpp_stanza_t *iq = stanza_create_room_affiliation_list_iq(ctx, room, affiliation);
@@ -652,7 +652,7 @@ iq_room_affiliation_list(const char *const room, char *affiliation, bool show)
 
     ProfAffiliationList *affiliation_list = malloc(sizeof(ProfAffiliationList));
     affiliation_list->affiliation = strdup(affiliation);
-    affiliation_list->show = show;
+    affiliation_list->show_ui_message = show_ui_message;
 
     iq_id_handler_add(id, _room_affiliation_list_result_id_handler, (ProfIqFreeCallback)_iq_free_affiliation_list, affiliation_list);
 
@@ -1875,7 +1875,7 @@ _room_affiliation_list_result_id_handler(xmpp_stanza_t *const stanza, void *cons
         char *error_message = stanza_get_error_message(stanza);
         log_debug("Error retrieving %s list for room %s: %s", affiliation_list->affiliation, from, error_message);
         ProfMucWin *mucwin = wins_get_muc(from);
-        if (mucwin && affiliation_list->show) {
+        if (mucwin && affiliation_list->show_ui_message) {
             mucwin_affiliation_list_error(mucwin, affiliation_list->affiliation, error_message);
         }
         free(error_message);
@@ -1905,7 +1905,7 @@ _room_affiliation_list_result_id_handler(xmpp_stanza_t *const stanza, void *cons
 
     muc_jid_autocomplete_add_all(from, jids);
     ProfMucWin *mucwin = wins_get_muc(from);
-    if (mucwin && affiliation_list->show) {
+    if (mucwin && affiliation_list->show_ui_message) {
         mucwin_handle_affiliation_list(mucwin, affiliation_list->affiliation, jids);
     }
     g_slist_free(jids);
