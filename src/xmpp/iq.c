@@ -93,6 +93,11 @@ typedef struct privilege_set_t {
     char *privilege;
 } ProfPrivilegeSet;
 
+typedef struct affiliation_list_t {
+    char *affiliation;
+    bool show_ui_message;
+} ProfAffiliationList;
+
 typedef struct command_config_data_t {
     char *sessionid;
     char *command;
@@ -135,6 +140,7 @@ static int _command_exec_response_handler(xmpp_stanza_t *const stanza, void *con
 
 static void _iq_free_room_data(ProfRoomInfoData *roominfo);
 static void _iq_free_affiliation_set(ProfPrivilegeSet *affiliation_set);
+static void _iq_free_affiliation_list(ProfAffiliationList *affiliation_list);
 static void _iq_id_handler_free(ProfIqHandler *handler);
 
 // scheduled
@@ -637,13 +643,18 @@ iq_room_config_cancel(ProfConfWin *confwin)
 }
 
 void
-iq_room_affiliation_list(const char *const room, char *affiliation)
+iq_room_affiliation_list(const char *const room, char *affiliation, bool show_ui_message)
 {
     xmpp_ctx_t * const ctx = connection_get_ctx();
     xmpp_stanza_t *iq = stanza_create_room_affiliation_list_iq(ctx, room, affiliation);
 
     const char *id = xmpp_stanza_get_id(iq);
-    iq_id_handler_add(id, _room_affiliation_list_result_id_handler, free, strdup(affiliation));
+
+    ProfAffiliationList *affiliation_list = malloc(sizeof(ProfAffiliationList));
+    affiliation_list->affiliation = strdup(affiliation);
+    affiliation_list->show_ui_message = show_ui_message;
+
+    iq_id_handler_add(id, _room_affiliation_list_result_id_handler, (ProfIqFreeCallback)_iq_free_affiliation_list, affiliation_list);
 
     iq_send_stanza(iq);
     xmpp_stanza_release(iq);
@@ -1851,7 +1862,7 @@ _room_affiliation_list_result_id_handler(xmpp_stanza_t *const stanza, void *cons
     const char *id = xmpp_stanza_get_id(stanza);
     const char *type = xmpp_stanza_get_type(stanza);
     const char *from = xmpp_stanza_get_from(stanza);
-    char *affiliation = (char *)userdata;
+    ProfAffiliationList *affiliation_list = (ProfAffiliationList *)userdata;
 
     if (id) {
         log_debug("IQ affiliation list result handler fired, id: %s.", id);
@@ -1862,10 +1873,10 @@ _room_affiliation_list_result_id_handler(xmpp_stanza_t *const stanza, void *cons
     // handle error responses
     if (g_strcmp0(type, STANZA_TYPE_ERROR) == 0) {
         char *error_message = stanza_get_error_message(stanza);
-        log_debug("Error retrieving %s list for room %s: %s", affiliation, from, error_message);
+        log_debug("Error retrieving %s list for room %s: %s", affiliation_list->affiliation, from, error_message);
         ProfMucWin *mucwin = wins_get_muc(from);
-        if (mucwin) {
-            mucwin_affiliation_list_error(mucwin, affiliation, error_message);
+        if (mucwin && affiliation_list->show_ui_message) {
+            mucwin_affiliation_list_error(mucwin, affiliation_list->affiliation, error_message);
         }
         free(error_message);
         return 0;
@@ -1880,6 +1891,11 @@ _room_affiliation_list_result_id_handler(xmpp_stanza_t *const stanza, void *cons
             if (g_strcmp0(name, "item") == 0) {
                 const char *jid = xmpp_stanza_get_attribute(child, STANZA_ATTR_JID);
                 if (jid) {
+                    if (g_strcmp0(affiliation_list->affiliation, "member") == 0
+                            || g_strcmp0(affiliation_list->affiliation, "owner") == 0
+                            || g_strcmp0(affiliation_list->affiliation, "admin") == 0) {
+                        muc_members_add(from, jid);
+                    }
                     jids = g_slist_insert_sorted(jids, (gpointer)jid, (GCompareFunc)g_strcmp0);
                 }
             }
@@ -1889,8 +1905,8 @@ _room_affiliation_list_result_id_handler(xmpp_stanza_t *const stanza, void *cons
 
     muc_jid_autocomplete_add_all(from, jids);
     ProfMucWin *mucwin = wins_get_muc(from);
-    if (mucwin) {
-        mucwin_handle_affiliation_list(mucwin, affiliation, jids);
+    if (mucwin && affiliation_list->show_ui_message) {
+        mucwin_handle_affiliation_list(mucwin, affiliation_list->affiliation, jids);
     }
     g_slist_free(jids);
 
@@ -2427,5 +2443,14 @@ _iq_free_affiliation_set(ProfPrivilegeSet *affiliation_set)
         free(affiliation_set->item);
         free(affiliation_set->privilege);
         free(affiliation_set);
+    }
+}
+
+static void
+_iq_free_affiliation_list(ProfAffiliationList *affiliation_list)
+{
+    if (affiliation_list) {
+        free(affiliation_list->affiliation);
+        free(affiliation_list);
     }
 }

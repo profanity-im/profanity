@@ -47,6 +47,10 @@
 #include "xmpp/muc.h"
 #include "xmpp/contact.h"
 
+#ifdef HAVE_OMEMO
+#include "omemo/omemo.h"
+#endif
+
 typedef struct _muc_room_t {
     char *room; // e.g. test@conference.server
     char *nick; // e.g. Some User
@@ -60,6 +64,7 @@ typedef struct _muc_room_t {
     gboolean autojoin;
     gboolean pending_nick_change;
     GHashTable *roster;
+    GHashTable *members;
     Autocomplete nick_ac;
     Autocomplete jid_ac;
     GHashTable *nick_changes;
@@ -220,6 +225,7 @@ muc_join(const char *const room, const char *const nick, const char *const passw
     new_room->pending_broadcasts = NULL;
     new_room->pending_config = FALSE;
     new_room->roster = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, (GDestroyNotify)_occupant_free);
+    new_room->members = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, NULL);
     new_room->nick_ac = autocomplete_new();
     new_room->jid_ac = autocomplete_new();
     new_room->nick_changes = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, g_free);
@@ -858,6 +864,54 @@ muc_anonymity_type(const char *const room)
     }
 }
 
+/*
+ * Return the list of jid affiliated as member in the room
+ */
+GList*
+muc_members(const char *const room)
+{
+    ChatRoom *chat_room = g_hash_table_lookup(rooms, room);
+    if (chat_room) {
+        return g_hash_table_get_keys(chat_room->members);
+    } else {
+        return NULL;
+    }
+}
+
+void
+muc_members_add(const char *const room, const char *const jid)
+{
+    ChatRoom *chat_room = g_hash_table_lookup(rooms, room);
+    if (chat_room) {
+        if (g_hash_table_insert(chat_room->members, strdup(jid), NULL)) {
+#ifdef HAVE_OMEMO
+            Jid *our_jid = jid_create(connection_get_fulljid());
+            if (strcmp(jid, our_jid->barejid) != 0) {
+                omemo_start_session(jid);
+            }
+#endif
+        }
+    }
+}
+
+void
+muc_members_remove(const char *const room, const char *const jid)
+{
+    ChatRoom *chat_room = g_hash_table_lookup(rooms, room);
+    if (chat_room) {
+        g_hash_table_remove(chat_room->members, jid);
+    }
+}
+
+void
+muc_members_update(const char *const room, const char *const jid, const char *const affiliation)
+{
+    if (strcmp(affiliation, "outcast") == 0 || strcmp(affiliation, "none") == 0) {
+        muc_members_remove(room, jid);
+    } else if (strcmp(affiliation, "member") == 0 || strcmp(affiliation, "admin") == 0 || strcmp(affiliation, "owner") == 0) {
+        muc_members_add(room, jid);
+    }
+}
 
 static void
 _free_room(ChatRoom *room)
@@ -870,6 +924,9 @@ _free_room(ChatRoom *room)
         free(room->autocomplete_prefix);
         if (room->roster) {
             g_hash_table_destroy(room->roster);
+        }
+        if (room->members) {
+            g_hash_table_destroy(room->members);
         }
         autocomplete_free(room->nick_ac);
         autocomplete_free(room->jid_ac);

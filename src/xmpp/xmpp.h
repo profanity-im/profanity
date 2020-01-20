@@ -212,7 +212,7 @@ void iq_submit_room_config(ProfConfWin *confwin);
 void iq_room_config_cancel(ProfConfWin *confwin);
 void iq_send_ping(const char *const target);
 void iq_room_info_request(const char *const room, gboolean display_result);
-void iq_room_affiliation_list(const char *const room, char *affiliation);
+void iq_room_affiliation_list(const char *const room, char *affiliation, bool show);
 void iq_room_affiliation_set(const char *const room, const char *const jid, char *affiliation,
     const char *const reason);
 void iq_room_kick_occupant(const char *const room, const char *const nick, const char *const reason);

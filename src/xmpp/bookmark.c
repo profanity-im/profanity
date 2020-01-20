@@ -185,6 +185,9 @@ bookmark_join(const char *jid)
         }
         presence_join_room(bookmark->barejid, nick, bookmark->password);
         muc_join(bookmark->barejid, nick, bookmark->password, FALSE);
+        iq_room_affiliation_list(bookmark->barejid, "member", false);
+        iq_room_affiliation_list(bookmark->barejid, "admin", false);
+        iq_room_affiliation_list(bookmark->barejid, "owner", false);
         account_free(account);
     } else if (muc_roster_complete(bookmark->barejid)) {
         ui_room_join(bookmark->barejid, TRUE);
