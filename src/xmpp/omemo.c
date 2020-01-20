@@ -209,7 +209,7 @@ omemo_start_device_session_handle_bundle(xmpp_stanza_t *const stanza, void *cons
         const char *prekey_id_text = xmpp_stanza_get_attribute(prekey, "preKeyId");
         if (!prekey_id_text) {
             omemo_key_free(key);
-            goto out;
+            continue;
         }
 
         key->id = strtoul(prekey_id_text, NULL, 10);
@@ -217,12 +217,16 @@ omemo_start_device_session_handle_bundle(xmpp_stanza_t *const stanza, void *cons
 
         if (!prekey_text) {
             omemo_key_free(key);
-            goto out;
+            continue;
         }
 
         char *prekey_b64 = xmpp_stanza_get_text(prekey_text);
         key->data = g_base64_decode(prekey_b64, &key->length);
         free(prekey_b64);
+        if (!key->data) {
+            omemo_key_free(key);
+            continue;
+        }
         key->prekey = TRUE;
         key->device_id = device_id;
 
@@ -248,6 +252,9 @@ omemo_start_device_session_handle_bundle(xmpp_stanza_t *const stanza, void *cons
     char *signed_prekey_b64 = xmpp_stanza_get_text(signed_prekey_text);
     signed_prekey_raw = g_base64_decode(signed_prekey_b64, &signed_prekey_len);
     free(signed_prekey_b64);
+    if (!signed_prekey_raw) {
+        goto out;
+    }
 
     xmpp_stanza_t *signed_prekey_signature = xmpp_stanza_get_child_by_name(bundle, "signedPreKeySignature");
     if (!signed_prekey_signature) {
@@ -261,6 +268,9 @@ omemo_start_device_session_handle_bundle(xmpp_stanza_t *const stanza, void *cons
     char *signed_prekey_signature_b64 = xmpp_stanza_get_text(signed_prekey_signature_text);
     signed_prekey_signature_raw = g_base64_decode(signed_prekey_signature_b64, &signed_prekey_signature_len);
     free(signed_prekey_signature_b64);
+    if (!signed_prekey_signature_raw) {
+        goto out;
+    }
 
     xmpp_stanza_t *identity_key = xmpp_stanza_get_child_by_name(bundle, "identityKey");
     if (!identity_key) {
@@ -274,6 +284,9 @@ omemo_start_device_session_handle_bundle(xmpp_stanza_t *const stanza, void *cons
     char *identity_key_b64 = xmpp_stanza_get_text(identity_key_text);
     unsigned char *identity_key_raw = g_base64_decode(identity_key_b64, &identity_key_len);
     free(identity_key_b64);
+    if (!identity_key_raw) {
+        goto out;
+    }
 
     omemo_start_device_session(from, device_id, prekeys_list, signed_prekey_id,
         signed_prekey_raw, signed_prekey_len, signed_prekey_signature_raw,
@@ -298,7 +311,13 @@ out:
 char *
 omemo_receive_message(xmpp_stanza_t *const stanza, gboolean *trusted)
 {
+    char *plaintext = NULL;
     const char *type = xmpp_stanza_get_type(stanza);
+    GList *keys = NULL;
+    unsigned char *iv_raw = NULL;
+    unsigned char *payload_raw = NULL;
+    char *iv_text = NULL;
+    char *payload_text = NULL;
 
     xmpp_stanza_t *encrypted = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_OMEMO);
     if (!encrypted) {
@@ -320,25 +339,30 @@ omemo_receive_message(xmpp_stanza_t *const stanza, gboolean *trusted)
     if (!iv) {
         return NULL;
     }
-    char *iv_text = xmpp_stanza_get_text(iv);
+    iv_text = xmpp_stanza_get_text(iv);
     if (!iv_text) {
         return NULL;
     }
     size_t iv_len;
-    unsigned char *iv_raw = g_base64_decode(iv_text, &iv_len);
+    iv_raw = g_base64_decode(iv_text, &iv_len);
+    if (!iv_raw) {
+        goto out;
+    }
 
     xmpp_stanza_t *payload = xmpp_stanza_get_child_by_name(encrypted, "payload");
     if (!payload) {
-        return NULL;
+        goto out;
     }
-    char *payload_text = xmpp_stanza_get_text(payload);
+    payload_text = xmpp_stanza_get_text(payload);
     if (!payload_text) {
-        return NULL;
+        goto out;
     }
     size_t payload_len;
-    unsigned char *payload_raw = g_base64_decode(payload_text, &payload_len);
+    payload_raw = g_base64_decode(payload_text, &payload_len);
+    if (!payload_raw) {
+        goto out;
+    }
 
-    GList *keys = NULL;
     xmpp_stanza_t *key_stanza;
     for (key_stanza = xmpp_stanza_get_children(header); key_stanza != NULL; key_stanza = xmpp_stanza_get_next(key_stanza)) {
         if (g_strcmp0(xmpp_stanza_get_name(key_stanza), "key") != 0) {
@@ -359,6 +383,9 @@ omemo_receive_message(xmpp_stanza_t *const stanza, gboolean *trusted)
 
         key->data = g_base64_decode(key_text, &key->length);
         free(key_text);
+        if (!key->data) {
+            goto skip;
+        }
         key->prekey = 
             g_strcmp0(xmpp_stanza_get_attribute(key_stanza, "prekey"), "true") == 0
             || g_strcmp0(xmpp_stanza_get_attribute(key_stanza, "prekey"), "1") == 0;
@@ -371,11 +398,15 @@ skip:
 
     const char *from = xmpp_stanza_get_from(stanza);
 
-    char *plaintext = omemo_on_message_recv(from, sid, iv_raw, iv_len,
+    plaintext = omemo_on_message_recv(from, sid, iv_raw, iv_len,
         keys, payload_raw, payload_len,
         g_strcmp0(type, STANZA_TYPE_GROUPCHAT) == 0, trusted);
 
-    g_list_free_full(keys, (GDestroyNotify)omemo_key_free);
+out:
+    if (keys) {
+        g_list_free_full(keys, (GDestroyNotify)omemo_key_free);
+    }
+
     g_free(iv_raw);
     g_free(payload_raw);
     g_free(iv_text);
