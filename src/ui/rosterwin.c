@@ -370,9 +370,6 @@ _rosterwin_contact(ProfLayoutSplit *layout, PContact contact)
     int colour;
     if (prefs_get_boolean(PREF_ROSTER_COLOR_NICK)) {
         colour = theme_hash_attrs(name);
-    }
-
-    if (prefs_get_boolean(PREF_ROSTER_COLOR_NICK)) {
         wattron(layout->subwin, colour);
     } else {
         wattron(layout->subwin, theme_attrs(presence_colour));
