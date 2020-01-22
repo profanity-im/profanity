@@ -54,7 +54,7 @@ typedef struct avatar_metadata {
     char *id;
 } avatar_metadata;
 
-char *looking_for = NULL; // nick/barejid from who we want to get the avatar
+GHashTable *looking_for = NULL; // contains nicks/barejids from who we want to get the avatar
 
 static void _avatar_request_item_by_id(const char *jid, avatar_metadata *data);
 static int _avatar_metadata_handler(xmpp_stanza_t *const stanza, void *const userdata);
@@ -76,6 +76,11 @@ avatar_pep_subscribe(void)
     message_pubsub_event_handler_add(STANZA_NS_USER_AVATAR_DATA, _avatar_metadata_handler, NULL, NULL);
 
     //caps_add_feature(XMPP_FEATURE_USER_AVATAR_METADATA_NOTIFY);
+
+    if (looking_for) {
+        g_hash_table_destroy(looking_for);
+    }
+    looking_for = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, NULL);
 }
 
 gboolean
@@ -83,9 +88,9 @@ avatar_get_by_nick(const char* nick)
 {
     // in case we set the feature, remove it
     caps_remove_feature(XMPP_FEATURE_USER_AVATAR_METADATA_NOTIFY);
-    free(looking_for);
 
-    looking_for = strdup(nick);
+    // save nick in list so we look for this one
+    g_hash_table_insert(looking_for, strdup(nick), NULL);
 
     // add the feature. this will trigger the _avatar_metadata_notfication_handler handler
     caps_add_feature(XMPP_FEATURE_USER_AVATAR_METADATA_NOTIFY);
@@ -98,8 +103,7 @@ _avatar_metadata_handler(xmpp_stanza_t *const stanza, void *const userdata)
 {
     const char *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
 
-    if (!(looking_for &&
-                (g_strcmp0(looking_for, from) == 0))) {
+    if (!g_hash_table_contains(looking_for, from)) {
         return 1;
     }
 
@@ -171,11 +175,10 @@ _avatar_request_item_result_handler(xmpp_stanza_t *const stanza, void *const use
         return 1;
     }
 
-    if (g_strcmp0(from_attr, looking_for) != 0) {
+    if (!g_hash_table_contains(looking_for, from_attr)) {
         return 1;
     }
-    free(looking_for);
-    looking_for = NULL;
+    g_hash_table_remove(looking_for, from_attr);
 
     xmpp_stanza_t *pubsub = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_PUBSUB);
     if (!pubsub) {
