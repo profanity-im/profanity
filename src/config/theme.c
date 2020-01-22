@@ -618,6 +618,14 @@ _theme_prep_bgnd(char *setting, char *def, GString *lookup_str)
     g_free(val);
 }
 
+/* return value needs to be freed */
+char*
+theme_get_bkgnd(void)
+{
+    char *val = g_key_file_get_string(theme, "colours", "bkgnd", NULL);
+    return val;
+}
+
 static void
 _theme_prep_fgnd(char *setting, GString *lookup_str, gboolean *bold)
 {

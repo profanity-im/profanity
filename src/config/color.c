@@ -49,6 +49,7 @@
 #endif
 
 #include "config/color.h"
+#include "config/theme.h"
 #include "log.h"
 
 static
@@ -494,12 +495,18 @@ static int _color_pair_cache_get(int fg, int bg)
  * possible given a 256 colors terminal.
  *
  * hash a string into a color that will be used as fg
- * use default color as bg
+ * check for 'bkgnd' in theme file or use default color as bg
  */
 int color_pair_cache_hash_str(const char *str, color_profile profile)
 {
     int fg = color_hash(str, profile);
     int bg = -1;
+
+    char *bkgnd = theme_get_bkgnd();
+    if (bkgnd) {
+        bg = find_col(bkgnd, strlen(bkgnd));
+        free(bkgnd);
+    }
 
     return _color_pair_cache_get(fg, bg);
 }

@@ -155,5 +155,6 @@ theme_item_t theme_main_presence_attrs(const char *const presence);
 theme_item_t theme_roster_unread_presence_attrs(const char *const presence);
 theme_item_t theme_roster_active_presence_attrs(const char *const presence);
 theme_item_t theme_roster_presence_attrs(const char *const presence);
+char* theme_get_bkgnd(void);
 
 #endif
