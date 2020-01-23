@@ -165,6 +165,7 @@ typedef struct prof_chat_win_t {
 typedef struct prof_muc_win_t {
     ProfWin window;
     char *roomjid;
+    char *room_name;
     int unread;
     gboolean unread_mentions;
     gboolean unread_triggers;

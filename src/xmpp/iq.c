@@ -2077,6 +2077,10 @@ _room_info_response_id_handler(xmpp_stanza_t *const stanza, void *const userdata
 
                     if (name) {
                         identity->name = strdup(name);
+                        ProfMucWin *mucwin = wins_get_muc(cb_data->room);
+                        if (mucwin) {
+                            mucwin->room_name = strdup(name);
+                        }
                     } else {
                         identity->name = NULL;
                     }

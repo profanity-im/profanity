@@ -493,6 +493,7 @@ win_free(ProfWin* window)
     {
         ProfMucWin *mucwin = (ProfMucWin*)window;
         free(mucwin->roomjid);
+        free(mucwin->room_name);
         free(mucwin->enctext);
         free(mucwin->message_char);
         break;
