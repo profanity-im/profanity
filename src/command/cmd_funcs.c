@@ -2861,6 +2861,25 @@ cmd_roster(ProfWin *window, const char *const command, gchar **args)
                 cons_bad_cmd_usage(command);
                 return TRUE;
             }
+        } else if (g_strcmp0(args[1], "use") == 0) {
+            if (g_strcmp0(args[2], "jid") == 0) {
+                cons_show("Roster room display jid as name.");
+                prefs_set_string(PREF_ROSTER_ROOMS_USE_AS_NAME, "jid");
+                if (conn_status == JABBER_CONNECTED) {
+                    rosterwin_roster();
+                }
+                return TRUE;
+            } else if (g_strcmp0(args[2], "name") == 0) {
+                cons_show("Roster room display room name as name.");
+                prefs_set_string(PREF_ROSTER_ROOMS_USE_AS_NAME, "name");
+                if (conn_status == JABBER_CONNECTED) {
+                    rosterwin_roster();
+                }
+                return TRUE;
+            } else {
+                cons_bad_cmd_usage(command);
+                return TRUE;
+            }
         } else {
             cons_bad_cmd_usage(command);
             return TRUE;

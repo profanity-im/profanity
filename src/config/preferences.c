@@ -1701,6 +1701,7 @@ _get_group(preference_t pref)
         case PREF_ROSTER_ROOMS_ORDER:
         case PREF_ROSTER_ROOMS_UNREAD:
         case PREF_ROSTER_ROOMS_SERVER:
+        case PREF_ROSTER_ROOMS_USE_AS_NAME:
         case PREF_ROSTER_PRIVATE:
         case PREF_RESOURCE_TITLE:
         case PREF_RESOURCE_MESSAGE:
@@ -1948,6 +1949,8 @@ _get_key(preference_t pref)
             return "roster.rooms.unread";
         case PREF_ROSTER_ROOMS_SERVER:
             return "roster.rooms.server";
+        case PREF_ROSTER_ROOMS_USE_AS_NAME:
+            return "roster.rooms.use.name";
         case PREF_ROSTER_PRIVATE:
             return "roster.private";
         case PREF_RESOURCE_TITLE:
@@ -2082,6 +2085,8 @@ _get_default_string(preference_t pref)
             return "last";
         case PREF_ROSTER_ROOMS_BY:
             return "none";
+        case PREF_ROSTER_ROOMS_USE_AS_NAME:
+            return "name";
         case PREF_ROSTER_ROOMS_ORDER:
             return "name";
         case PREF_ROSTER_ROOMS_UNREAD:

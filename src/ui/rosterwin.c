@@ -775,13 +775,29 @@ _rosterwin_room(ProfLayoutSplit *layout, ProfMucWin *mucwin)
         jid_destroy(jidp);
     } else {
         gboolean show_server = prefs_get_boolean(PREF_ROSTER_ROOMS_SERVER);
+        char *use_as_name = prefs_get_string(PREF_ROSTER_ROOMS_USE_AS_NAME);
+
         if (show_server) {
-            g_string_append(msg, mucwin->roomjid);
+            if (mucwin->room_name == NULL ||
+                    (g_strcmp0(use_as_name, "jid") == 0)) {
+                g_string_append(msg, mucwin->roomjid);
+            } else {
+                g_string_append(msg, mucwin->room_name);
+            }
         } else {
             Jid *jidp = jid_create(mucwin->roomjid);
-            g_string_append(msg, jidp->localpart);
+
+            if (mucwin->room_name == NULL ||
+                    (g_strcmp0(use_as_name, "jid") == 0)) {
+                g_string_append(msg, jidp->localpart);
+            } else {
+                g_string_append(msg, mucwin->room_name);
+            }
+
             jid_destroy(jidp);
         }
+
+        prefs_free_string(use_as_name);
     }
     prefs_free_string(roombypref);
     if ((g_strcmp0(unreadpos, "after") == 0) && mucwin->unread > 0) {

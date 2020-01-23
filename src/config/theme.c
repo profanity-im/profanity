@@ -336,6 +336,7 @@ _load_preferences(void)
     _set_string_preference("roster.rooms.by", PREF_ROSTER_ROOMS_BY);
     _set_string_preference("roster.private", PREF_ROSTER_PRIVATE);
     _set_string_preference("roster.count", PREF_ROSTER_COUNT);
+    _set_string_preference("roster.rooms.use.name", PREF_ROSTER_ROOMS_USE_AS_NAME);
     _set_string_preference("statusbar.self", PREF_STATUSBAR_SELF);
     _set_string_preference("statusbar.chat", PREF_STATUSBAR_CHAT);
     _set_string_preference("statusbar.room", PREF_STATUSBAR_ROOM);
