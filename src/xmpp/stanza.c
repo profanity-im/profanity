@@ -1225,7 +1225,7 @@ stanza_get_delay_from(xmpp_stanza_t *const stanza, gchar *from)
     }
 
     // otherwise check for XEP-0091 legacy delayed delivery
-    // stanp format : CCYYMMDDThh:mm:ss
+    // stamp format : CCYYMMDDThh:mm:ss
     xmpp_stanza_t *x;
     if (from) {
         x = stanza_get_child_by_name_and_from(stanza, STANZA_NAME_X, from);
