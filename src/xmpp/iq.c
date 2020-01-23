@@ -1564,6 +1564,10 @@ _version_get_handler(xmpp_stanza_t *const stanza)
     }
 
     if (from) {
+        if (prefs_get_boolean(PREF_ADV_NOTIFY_DISCO_OR_VERSION)) {
+            cons_show("Received IQ version request (XEP-0092) from %s", from);
+        }
+
         xmpp_stanza_t *response = xmpp_iq_new(ctx, STANZA_TYPE_RESULT, id);
         xmpp_stanza_set_to(response, from);
 
@@ -1709,6 +1713,10 @@ _disco_info_get_handler(xmpp_stanza_t *const stanza)
     }
 
     if (from) {
+        if (prefs_get_boolean(PREF_ADV_NOTIFY_DISCO_OR_VERSION)) {
+            cons_show("Received IQ disco info request (XEP-0232) from %s", from);
+        }
+
         xmpp_stanza_t *response = xmpp_iq_new(ctx, STANZA_TYPE_RESULT, xmpp_stanza_get_id(stanza));
         xmpp_stanza_set_to(response, from);
 

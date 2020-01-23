@@ -1740,6 +1740,7 @@ _get_group(preference_t pref)
         case PREF_NOTIFY_MENTION_WHOLE_WORD:
         case PREF_TRAY:
         case PREF_TRAY_READ:
+        case PREF_ADV_NOTIFY_DISCO_OR_VERSION:
             return PREF_GROUP_NOTIFICATIONS;
         case PREF_CHLOG:
         case PREF_GRLOG:
@@ -1804,6 +1805,8 @@ _get_key(preference_t pref)
             return "tray";
         case PREF_TRAY_READ:
             return "tray.read";
+        case PREF_ADV_NOTIFY_DISCO_OR_VERSION:
+            return "adv.notify.discoversion";
         case PREF_INTYPE:
             return "intype";
         case PREF_HISTORY:
