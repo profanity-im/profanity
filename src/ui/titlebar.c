@@ -175,8 +175,6 @@ title_bar_set_typing(gboolean is_typing)
     }
 
     typing = is_typing;
-
-
     _title_bar_draw();
 }
 
