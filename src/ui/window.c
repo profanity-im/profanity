@@ -188,6 +188,7 @@ win_create_muc(const char *const roomjid)
     new_win->window.layout = (ProfLayout*)layout;
 
     new_win->roomjid = strdup(roomjid);
+    new_win->room_name = NULL;
     new_win->unread = 0;
     new_win->unread_mentions = FALSE;
     new_win->unread_triggers = FALSE;
