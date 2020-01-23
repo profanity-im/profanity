@@ -1758,6 +1758,7 @@ _get_group(preference_t pref)
         case PREF_CARBONS:
         case PREF_RECEIPTS_SEND:
         case PREF_RECEIPTS_REQUEST:
+        case PREF_REVEAL_OS:
         case PREF_TLS_CERTPATH:
             return PREF_GROUP_CONNECTION;
         case PREF_OTR_LOG:
@@ -1817,6 +1818,8 @@ _get_key(preference_t pref)
             return "receipts.send";
         case PREF_RECEIPTS_REQUEST:
             return "receipts.request";
+        case PREF_REVEAL_OS:
+            return "reveal.os";
         case PREF_OCCUPANTS:
             return "occupants";
         case PREF_OCCUPANTS_JID:
@@ -2056,6 +2059,7 @@ _get_default_boolean(preference_t pref)
         case PREF_BOOKMARK_INVITE:
         case PREF_ROOM_LIST_CACHE:
         case PREF_STATUSBAR_SHOW_NUMBER:
+        case PREF_REVEAL_OS:
             return TRUE;
         default:
             return FALSE;
