@@ -291,8 +291,7 @@ static struct cmd_t command_defs[] =
             "/roster room unread before|after|off",
             "/roster room show server",
             "/roster room hide server",
-            "/roster room use name",
-            "/roster room use jid",
+            "/roster room use name|jid",
             "/roster private room|group|off",
             "/roster private char <char>|none",
             "/roster header char <char>|none",
@@ -1303,7 +1302,7 @@ static struct cmd_t command_defs[] =
             "/titlebar up",
             "/titlebar down",
             "/titlebar show|hide [encwarn|resource|tls]",
-            "/titlebar use [name|jid]"
+            "/titlebar use name|jid"
             )
         CMD_DESC(
             "Titlebar settings.")
