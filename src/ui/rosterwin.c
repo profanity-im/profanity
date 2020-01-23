@@ -68,6 +68,7 @@ static void _rosterwin_rooms(ProfLayoutSplit *layout, char *title, GList *rooms)
 static void _rosterwin_rooms_by_service(ProfLayoutSplit *layout);
 static void _rosterwin_rooms_header(ProfLayoutSplit *layout, GList *rooms, char *title);
 static void _rosterwin_room(ProfLayoutSplit *layout, ProfMucWin *mucwin);
+static void _rosterwin_print_rooms(ProfLayoutSplit *layout);
 
 static void _rosterwin_private_chats(ProfLayoutSplit *layout, GList *orphaned_privchats);
 static void _rosterwin_private_header(ProfLayoutSplit *layout, GList *privs);
@@ -97,15 +98,7 @@ rosterwin_roster(void)
 
     char *roomspos = prefs_get_string(PREF_ROSTER_ROOMS_POS);
     if (prefs_get_boolean(PREF_ROSTER_ROOMS) && (g_strcmp0(roomspos, "first") == 0)) {
-        char *roomsbypref = prefs_get_string(PREF_ROSTER_ROOMS_BY);
-        if (g_strcmp0(roomsbypref, "service") == 0) {
-            _rosterwin_rooms_by_service(layout);
-        } else {
-            GList *rooms = muc_rooms();
-            _rosterwin_rooms(layout, "Rooms", rooms);
-            g_list_free(rooms);
-        }
-        prefs_free_string(roomsbypref);
+        _rosterwin_print_rooms(layout);
 
         GList *orphaned_privchats = NULL;
         GList *privchats = wins_get_private_chats(NULL);
@@ -158,15 +151,7 @@ rosterwin_roster(void)
     }
 
     if (prefs_get_boolean(PREF_ROSTER_ROOMS) && (g_strcmp0(roomspos, "last") == 0)) {
-        char *roomsbypref = prefs_get_string(PREF_ROSTER_ROOMS_BY);
-        if (g_strcmp0(roomsbypref, "service") == 0) {
-            _rosterwin_rooms_by_service(layout);
-        } else {
-            GList *rooms = muc_rooms();
-            _rosterwin_rooms(layout, "Rooms", rooms);
-            g_list_free(rooms);
-        }
-        prefs_free_string(roomsbypref);
+        _rosterwin_print_rooms(layout);
 
         GList *orphaned_privchats = NULL;
         GList *privchats = wins_get_private_chats(NULL);
@@ -899,6 +884,20 @@ _rosterwin_room(ProfLayoutSplit *layout, ProfMucWin *mucwin)
     }
 
     prefs_free_string(privpref);
+}
+
+static void
+_rosterwin_print_rooms(ProfLayoutSplit *layout)
+{
+    char *roomsbypref = prefs_get_string(PREF_ROSTER_ROOMS_BY);
+    if (g_strcmp0(roomsbypref, "service") == 0) {
+        _rosterwin_rooms_by_service(layout);
+    } else {
+        GList *rooms = muc_rooms();
+        _rosterwin_rooms(layout, "Rooms", rooms);
+        g_list_free(rooms);
+    }
+    prefs_free_string(roomsbypref);
 }
 
 static void
