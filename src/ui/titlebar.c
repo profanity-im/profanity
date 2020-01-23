@@ -190,14 +190,26 @@ _title_bar_draw(void)
         waddch(win, ' ');
     }
 
-    char *title;
+    char *title = NULL;
     if (current && current->type == WIN_MUC) {
-        ProfMucWin *mucwin = (ProfMucWin*) current;
-        assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
-        title = strdup(mucwin->room_name);
-    } else {
+        char *use_as_name = prefs_get_string(PREF_TITLEBAR_MUC_TITLE);
+
+        if ((g_strcmp0(use_as_name, "name") == 0)) {
+            ProfMucWin *mucwin = (ProfMucWin*) current;
+            assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
+
+            if (mucwin->room_name) {
+                title = strdup(mucwin->room_name);
+            }
+        }
+
+        prefs_free_string(use_as_name);
+    }
+
+    if (title == NULL) {
         title = win_get_title(current);
     }
+
     mvwprintw(win, 0, 0, " %s", title);
     free(title);
 

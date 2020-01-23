@@ -146,6 +146,7 @@ gboolean cmd_resource(ProfWin *window, const char *const command, gchar **args);
 gboolean cmd_inpblock(ProfWin *window, const char *const command, gchar **args);
 gboolean cmd_titlebar(ProfWin *window, const char *const command, gchar **args);
 gboolean cmd_titlebar_show_hide(ProfWin *window, const char *const command, gchar **args);
+gboolean cmd_titlebar_use(ProfWin *window, const char *const command, gchar **args);
 gboolean cmd_mainwin(ProfWin *window, const char *const command, gchar **args);
 gboolean cmd_statusbar(ProfWin *window, const char *const command, gchar **args);
 gboolean cmd_inputwin(ProfWin *window, const char *const command, gchar **args);

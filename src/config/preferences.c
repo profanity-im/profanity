@@ -1719,6 +1719,7 @@ _get_group(preference_t pref)
         case PREF_STATUSBAR_SELF:
         case PREF_STATUSBAR_CHAT:
         case PREF_STATUSBAR_ROOM:
+        case PREF_TITLEBAR_MUC_TITLE:
             return PREF_GROUP_UI;
         case PREF_STATES:
         case PREF_OUTTYPE:
@@ -1961,6 +1962,8 @@ _get_key(preference_t pref)
             return "inpblock.dynamic";
         case PREF_ENC_WARN:
             return "enc.warn";
+        case PREF_TITLEBAR_MUC_TITLE:
+            return "titlebar.muc.title";
         case PREF_PGP_LOG:
             return "log";
         case PREF_TLS_CERTPATH:
@@ -2086,6 +2089,8 @@ _get_default_string(preference_t pref)
         case PREF_ROSTER_ROOMS_BY:
             return "none";
         case PREF_ROSTER_ROOMS_USE_AS_NAME:
+            return "name";
+        case PREF_TITLEBAR_MUC_TITLE:
             return "name";
         case PREF_ROSTER_ROOMS_ORDER:
             return "name";

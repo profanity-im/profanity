@@ -1158,6 +1158,10 @@ cons_titlebar_setting(void)
     } else {
         cons_show("Titlebar presence (/titlebar)       : OFF");
     }
+
+    char *muctitle = prefs_get_string(PREF_TITLEBAR_MUC_TITLE);
+    cons_show("MUC window title (/titlebar)        : %s", muctitle);
+    prefs_free_string(muctitle);
 }
 
 void
