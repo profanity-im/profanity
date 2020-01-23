@@ -1598,8 +1598,29 @@ _version_get_handler(xmpp_stanza_t *const stanza)
         xmpp_stanza_set_text(version_txt, version_str->str);
         xmpp_stanza_add_child(version, version_txt);
 
+        xmpp_stanza_t *os = xmpp_stanza_new(ctx);
+        xmpp_stanza_set_name(os, "os");
+        xmpp_stanza_t *os_txt = xmpp_stanza_new(ctx);
+#if defined(_WIN32) || defined(__CYGWIN__) || defined(PLATFORM_CYGWIN)
+        xmpp_stanza_set_text(os_txt, "Windows");
+#elif defined(__linux__)
+        xmpp_stanza_set_text(os_txt, "Linux");
+#elif defined(__APPLE__)
+        xmpp_stanza_set_text(os_txt, "Apple");
+#elif defined(__FreeBSD__)
+        xmpp_stanza_set_text(os_txt, "FreeBSD");
+#elif defined(__NetBSD__)
+        xmpp_stanza_set_text(os_txt, "__NetBSD__");
+#elif defined(__OpenBSD__)
+        xmpp_stanza_set_text(os_txt, "__OpenBSD__");
+#else
+        xmpp_stanza_set_text(os_txt, "Unknown");
+#endif
+        xmpp_stanza_add_child(os, os_txt);
+
         xmpp_stanza_add_child(query, name);
         xmpp_stanza_add_child(query, version);
+        xmpp_stanza_add_child(query, os);
         xmpp_stanza_add_child(response, query);
 
         iq_send_stanza(response);
@@ -1607,8 +1628,10 @@ _version_get_handler(xmpp_stanza_t *const stanza)
         g_string_free(version_str, TRUE);
         xmpp_stanza_release(name_txt);
         xmpp_stanza_release(version_txt);
+        xmpp_stanza_release(os_txt);
         xmpp_stanza_release(name);
         xmpp_stanza_release(version);
+        xmpp_stanza_release(os);
         xmpp_stanza_release(query);
         xmpp_stanza_release(response);
     }
