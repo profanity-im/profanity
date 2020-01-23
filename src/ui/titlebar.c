@@ -190,7 +190,14 @@ _title_bar_draw(void)
         waddch(win, ' ');
     }
 
-    char *title = win_get_title(current);
+    char *title;
+    if (current && current->type == WIN_MUC) {
+        ProfMucWin *mucwin = (ProfMucWin*) current;
+        assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
+        title = strdup(mucwin->room_name);
+    } else {
+        title = win_get_title(current);
+    }
     mvwprintw(win, 0, 0, " %s", title);
     free(title);
 
