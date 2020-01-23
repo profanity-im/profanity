@@ -159,6 +159,7 @@ static Autocomplete roster_char_ac;
 static Autocomplete roster_remove_all_ac;
 static Autocomplete roster_room_ac;
 static Autocomplete roster_room_show_ac;
+static Autocomplete roster_room_use_ac;
 static Autocomplete roster_room_position_ac;
 static Autocomplete roster_room_by_ac;
 static Autocomplete roster_room_order_ac;
@@ -510,6 +511,7 @@ cmd_ac_init(void)
     autocomplete_add(roster_room_ac, "private");
     autocomplete_add(roster_room_ac, "show");
     autocomplete_add(roster_room_ac, "hide");
+    autocomplete_add(roster_room_ac, "use");
 
     roster_room_show_ac = autocomplete_new();
     autocomplete_add(roster_room_show_ac, "server");
@@ -517,6 +519,10 @@ cmd_ac_init(void)
     roster_room_by_ac = autocomplete_new();
     autocomplete_add(roster_room_by_ac, "service");
     autocomplete_add(roster_room_by_ac, "none");
+
+    roster_room_use_ac = autocomplete_new();
+    autocomplete_add(roster_room_use_ac, "jid");
+    autocomplete_add(roster_room_use_ac, "name");
 
     roster_room_order_ac = autocomplete_new();
     autocomplete_add(roster_room_order_ac, "name");
@@ -1148,6 +1154,7 @@ cmd_ac_reset(ProfWin *window)
     autocomplete_reset(roster_order_ac);
     autocomplete_reset(roster_room_ac);
     autocomplete_reset(roster_room_show_ac);
+    autocomplete_reset(roster_room_use_ac);
     autocomplete_reset(roster_room_by_ac);
     autocomplete_reset(roster_unread_ac);
     autocomplete_reset(roster_room_position_ac);
@@ -1290,6 +1297,7 @@ cmd_ac_uninit(void)
     autocomplete_free(roster_order_ac);
     autocomplete_free(roster_room_ac);
     autocomplete_free(roster_room_show_ac);
+    autocomplete_free(roster_room_use_ac);
     autocomplete_free(roster_room_by_ac);
     autocomplete_free(roster_unread_ac);
     autocomplete_free(roster_room_position_ac);
@@ -1780,6 +1788,10 @@ _roster_autocomplete(ProfWin *window, const char *const input, gboolean previous
         return result;
     }
     result = autocomplete_param_with_ac(input, "/roster room hide", roster_room_show_ac, TRUE, previous);
+    if (result) {
+        return result;
+    }
+    result = autocomplete_param_with_ac(input, "/roster room use", roster_room_use_ac, TRUE, previous);
     if (result) {
         return result;
     }
