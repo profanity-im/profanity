@@ -451,6 +451,7 @@ void cons_inpblock_setting(void) {}
 void cons_winpos_setting(void) {}
 void cons_statusbar_setting(void) {}
 void cons_tray_setting(void) {}
+void cons_os_setting(void) {}
 
 void cons_show_contact_online(PContact contact, Resource *resource, GDateTime *last_activity)
 {
