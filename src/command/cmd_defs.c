@@ -2344,6 +2344,21 @@ static struct cmd_t command_defs[] =
             { "<barejid>", "JID to download avatar from."})
         CMD_NOEXAMPLES
     },
+
+    { "/os",
+        parse_args, 1, 1, &cons_os_setting,
+        CMD_NOSUBFUNCS
+        CMD_MAINFUNC(cmd_os)
+        CMD_TAGS(
+            CMD_TAG_DISCOVERY)
+        CMD_SYN(
+            "/os <on>|<off>")
+        CMD_DESC(
+            "Choose whether to include the OS name if a user asks for software information (XEP-0092).")
+        CMD_ARGS(
+            { "on|off", ""})
+        CMD_NOEXAMPLES
+    },
 };
 
 static GHashTable *search_index;

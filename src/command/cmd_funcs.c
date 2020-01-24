@@ -8640,3 +8640,11 @@ cmd_avatar(ProfWin *window, const char *const command, gchar **args)
 
     return TRUE;
 }
+
+gboolean
+cmd_os(ProfWin *window, const char *const command, gchar **args)
+{
+    _cmd_set_boolean_preference(args[0], command, "Revealing OS name", PREF_REVEAL_OS);
+
+    return TRUE;
+}

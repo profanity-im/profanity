@@ -2012,6 +2012,16 @@ cons_color_setting(void)
 }
 
 void
+cons_os_setting(void)
+{
+    if (prefs_get_boolean(PREF_REVEAL_OS)) {
+        cons_show("Reveal OS name when asked for software version (XEP-0092) (/os)    : ON");
+    } else {
+        cons_show("Reveal OS name when asked for software version (XEP-0092) (/os)    : OFF");
+    }
+}
+
+void
 cons_show_connection_prefs(void)
 {
     cons_show("Connection preferences:");

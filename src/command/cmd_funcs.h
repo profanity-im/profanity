@@ -226,4 +226,5 @@ gboolean cmd_reload(ProfWin *window, const char *const command, gchar **args);
 gboolean cmd_paste(ProfWin *window, const char *const command, gchar **args);
 gboolean cmd_color(ProfWin *window, const char *const command, gchar **args);
 gboolean cmd_avatar(ProfWin *window, const char *const command, gchar **args);
+gboolean cmd_os(ProfWin *window, const char *const command, gchar **args);
 #endif
