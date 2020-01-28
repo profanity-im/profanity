@@ -1,3 +1,102 @@
+0.8.0 (2020-)
+=====
+
+On 2012-02-02 the first commit to Profanity was done by @boothj5.
+7 years later, and 5 months after 0.7.0, we are happy to announce Profanity 0.8.0.
+
+This release has 295 commits since the last release.
+10 people contributed code to it: @paulfariello, @svensp, @aaptel, @aszlig, @mdosch, @pasis, @mzagozen, @quite, @weiss and @jubalh.
+
+If you like Profanity, please consider donating: https://profanity-im.github.io/donate.html
+
+- XEP-0092: Include OS name in `/software` answer.
+  See `/os on|off`
+- Add option to notify about version request via XEP-0092 and XEP-0232 via `adv.notify.discoversion`
+  setting in configuration file.
+-  Add option to display MUC name or JID in titlebar
+  * `/titlebar use [name|jid]`.
+-  Add `/roster room use` command to decide whether to display the MUC name or JID in the roster
+  * `/roster room use name` to use the name of the MUC in the roster list.
+  * `/roster room use jid` to use the jid of the MUC in the roster list.
+- Fix decryption failure for messages sent from Converse.js (@paulfariello) (#1253)
+- Fix crash when OMEMO key is misconfigured (@paulfariello) (#1239)
+- Use OMEMO for offline MUC members (@paulfariello) (#1242) 
+- Fix OMEMO 1on1 chats with psi+ (@svensp) (#1247)
+- Save occupants and roster chars (#1244)
+- Add support for downloading user avatars via XEP-0084 (#1240)
+  See `/avatar`
+- Add last read position marker trackbar (#1238)
+- Dont print error message if a valid setting function is called (#1237)
+  When printing configuration we often use the same command as setting but without any argument.
+  So far ths displayed "Invalid usage".
+- Add support for XEP-0392 consistent color generation for nicks (@aaptel and @jubalh) (#1191)
+  See `/color`, `/occupants color`, `/roster color`
+- Call ncurses resize function before move function (#1235)
+- Fix error when joining IRC via biboumi (#1230)
+- Fix stanza_get_child_by_name_and_from() strcmp (#1227)
+- Fix showing own messages twice in ejabberd mucs (#1223)
+- Allow setting of status message (which actually never worked before) (b846c49)
+  `/status set online "This is my text"`
+  `/status set away bye`
+  `/status set away`
+- Add option to store current line in history (irssi down arrow) (#200)
+- Standardize commands (#1116):
+  * `/tls show on|of -> `/titlebar show|hide tls`
+  * `/encwarn on|off` -> `/titlebar show|hide encwarn`
+  * `/titlebar show|hide resource` additionally to `/resource titlebar on`
+  * `/titlebar show|hide presence` additionally to `/presence titlebar on`
+  * `/invite <contact>` -> `/invite send <contact>
+  * `/invites` -> `/invite list`
+  * `/decline` -> `/invite decline`
+  * `/online`, `/away`, `/dnd`, `/chat`, `/xa` -> `/status set online` etc.
+  * `/status` -> `/status get`
+  * `/chlog on` -> `/logging chat on` (#1224)
+  * `/grlog on` -> `/logging group on` (#1224)
+  * `/group` -> `/roster group` (#1229)
+- Check omemo stanza names when iterating nodes (@aszlig) (#1217)
+- Add clipboard feature. See `/paste` (#1216)
+- Log MUC PM messages (#1214)
+- Improve forest theme
+- Change default text colors to default instead of white (@mdosch) (#1213) (#535)
+- Fix date display in chat history (#992)
+- Log incoming MUC messages if origin-id sais they dont come from us (#1201)
+- Support XEP-0359: Unique and Stable Stanza IDs (#1207)
+  To help us identify which MUC messages were sent by us.
+- Fix double _XOPEN_SOURCE definition (@pasis) (#1206)
+- Highlight unread messages with a different color in /wins (#895)
+  New theming option `cmd.wins.unread`
+- Improve MUC 1:1 logging (#1184)
+- Fix user messages double logged in MUC logs (#1201)
+- Fix 26 causes for memory leaks
+- Add `/clear` autocompletion and improve help (#855)
+- Allow multiple instances to write to account config via `/reaload`
+  command that reloads the config file (#627)
+- Log message carbons to log file (#1181)
+- Include PYTHON_EXTRA_LIBS in libtool config (@mzagozen) (#1200)
+- Document how to block users in MUCS (#618)
+- Keyboard switch to select the next window with unread messages (#1114)
+  (alt + a)
+- Keyboard switches (for moving to 20 windows instead of 10 (#1114)
+  (alt + 1234567890qwertyuio)
+- Detect MUC history detection with older Prosody versions (#1190)
+  See https://issues.prosody.im/1416
+- `statusbar.current` is a new theming option for currently selected tab (@quite) (#1195)
+- Code cleanup
+- Make /info more user friendly (#1194)
+- Add solarized theme (#1175, #1198, #1199) (@mdosch)
+- Set nonblocking mode for stderr (@pasis) (#1192)
+- Log alleged roster push (6cf06dc)
+- Allow colorization of history messages (#1170)
+  See `main.text.history` theming option
+- Fix crash if source jid doesn't contain the node part (@pasis) (#1153)
+- Add support for 256 colors (@aaptel and @jubalh) (#1177 and many commits)
+  We use the Xterm color names. See https://jonasjacek.github.io/colors
+- Don't render (all) delayed messages as MUC history (@weiss) (#1173)
+- Add possibility to specify alternative config file (10ca3e)
+  Use `profanity -c ~/path/to/other/config`
+- Don't print subscribed message if contact is already in roster (#1166)
+- Only save preferences when new `/save` command is issued (#1146)
+
 0.7.1 (2019-09-24)
 =====
 
