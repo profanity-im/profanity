@@ -9,6 +9,8 @@ This release has 295 commits since the last release.
 
 If you like Profanity, please consider donating: https://profanity-im.github.io/donate.html
 
+Changes:
+
 - XEP-0092: Include OS name in `/software` answer.
   See `/os on|off`
 - Add option to notify about version request via XEP-0092 and XEP-0232 via `adv.notify.discoversion`
