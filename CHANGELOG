@@ -71,7 +71,7 @@ Changes:
 - Fix user messages double logged in MUC logs (#1201)
 - Fix 26 causes for memory leaks
 - Add `/clear` autocompletion and improve help (#855)
-- Allow multiple instances to write to account config via `/reaload`
+- Allow multiple instances to write to account config via `/reload`
   command that reloads the config file (#627)
 - Log message carbons to log file (#1181)
 - Include PYTHON_EXTRA_LIBS in libtool config (@mzagozen) (#1200)
@@ -80,7 +80,7 @@ Changes:
   (alt + a)
 - Keyboard switches (for moving to 20 windows instead of 10 (#1114)
   (alt + 1234567890qwertyuio)
-- Detect MUC history detection with older Prosody versions (#1190)
+- Fix MUC history detection with older Prosody versions (#1190)
   See https://issues.prosody.im/1416
 - `statusbar.current` is a new theming option for currently selected tab (@quite) (#1195)
 - Code cleanup
