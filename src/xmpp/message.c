@@ -838,15 +838,6 @@ _handle_groupchat(xmpp_stanza_t *const stanza)
         message->timestamp = stanza_get_delay_from(stanza, jid->domainpart);
     }
 
-    // Above we check whether the timestamps come from the server. So we know it
-    // is MUC history.
-    // Now we actually save the first timestamp we can find, since this is likely
-    // the first one being added. So the time should actually be right one to display.
-    // TODO: properly compare the dates
-    if (message->timestamp) {
-        message->timestamp = stanza_get_delay(stanza);
-    }
-
     if (message->timestamp) {
         sv_ev_room_history(message);
     } else {
