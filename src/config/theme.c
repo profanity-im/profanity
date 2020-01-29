@@ -60,7 +60,7 @@ static GHashTable *bold_items;
 static GHashTable *defaults;
 
 static void _load_preferences(void);
-void _theme_list_dir(const gchar *const dir, GSList **result);
+static void _theme_list_dir(const gchar *const dir, GSList **result);
 static GString* _theme_find(const char *const theme_name);
 static gboolean _theme_load_file(const char *const theme_name);
 
@@ -73,6 +73,7 @@ theme_init(const char *const theme_name)
 
     defaults = g_hash_table_new_full(g_str_hash, g_str_equal, free, free);
 
+    // Set default colors
     g_hash_table_insert(defaults, strdup("main.text"),               strdup("default"));
     g_hash_table_insert(defaults, strdup("main.text.history"),       strdup("default"));
     g_hash_table_insert(defaults, strdup("main.text.me"),            strdup("default"));
@@ -224,11 +225,13 @@ theme_list(void)
 {
     GSList *result = NULL;
     char *themes_dir = files_get_config_path(DIR_THEMES);
+
     _theme_list_dir(themes_dir, &result);
     free(themes_dir);
 #ifdef THEMES_PATH
     _theme_list_dir(THEMES_PATH, &result);
 #endif
+
     return result;
 }
 
@@ -282,6 +285,7 @@ _set_boolean_preference(char *prefstr, preference_t pref)
 static void
 _load_preferences(void)
 {
+    // load booleans from theme and set them to prefs
     _set_boolean_preference("beep", PREF_BEEP);
     _set_boolean_preference("flash", PREF_FLASH);
     _set_boolean_preference("splash", PREF_SPLASH);
@@ -314,6 +318,7 @@ _load_preferences(void)
     _set_boolean_preference("statusbar.show.name", PREF_STATUSBAR_SHOW_NAME);
     _set_boolean_preference("statusbar.show.number", PREF_STATUSBAR_SHOW_NUMBER);
 
+    // load strings from theme and set them to prefs
     _set_string_preference("time.console", PREF_TIME_CONSOLE);
     _set_string_preference("time.chat", PREF_TIME_CHAT);
     _set_string_preference("time.muc", PREF_TIME_MUC);
@@ -342,6 +347,8 @@ _load_preferences(void)
     _set_string_preference("statusbar.chat", PREF_STATUSBAR_CHAT);
     _set_string_preference("statusbar.room", PREF_STATUSBAR_ROOM);
 
+    // load ints from theme and set them to prefs
+    // with custom set functions
     if (g_key_file_has_key(theme, "ui", "statusbar.tabs", NULL)) {
         gint tabs_size = g_key_file_get_integer(theme, "ui", "statusbar.tabs", NULL);
         prefs_set_statusbartabs(tabs_size);
@@ -357,6 +364,33 @@ _load_preferences(void)
         prefs_set_occupants_size(occupants_size);
     }
 
+    if (g_key_file_has_key(theme, "ui", "occupants.indent", NULL)) {
+        gint occupants_indent = g_key_file_get_integer(theme, "ui", "occupants.indent", NULL);
+        prefs_set_occupants_indent(occupants_indent);
+    }
+
+    if (g_key_file_has_key(theme, "ui", "roster.size", NULL)) {
+        gint roster_size = g_key_file_get_integer(theme, "ui", "roster.size", NULL);
+        prefs_set_roster_size(roster_size);
+    }
+
+    if (g_key_file_has_key(theme, "ui", "roster.contact.indent", NULL)) {
+        gint contact_indent = g_key_file_get_integer(theme, "ui", "roster.contact.indent", NULL);
+        prefs_set_roster_contact_indent(contact_indent);
+    }
+
+    if (g_key_file_has_key(theme, "ui", "roster.resource.indent", NULL)) {
+        gint resource_indent = g_key_file_get_integer(theme, "ui", "roster.resource.indent", NULL);
+        prefs_set_roster_resource_indent(resource_indent);
+    }
+
+    if (g_key_file_has_key(theme, "ui", "roster.presence.indent", NULL)) {
+        gint presence_indent = g_key_file_get_integer(theme, "ui", "roster.presence.indent", NULL);
+        prefs_set_roster_presence_indent(presence_indent);
+    }
+
+    // load chars from theme and set them to prefs
+    // with custom set functions
     if (g_key_file_has_key(theme, "ui", "occupants.char", NULL)) {
         gchar *ch = g_key_file_get_string(theme, "ui", "occupants.char", NULL);
         if (ch && strlen(ch) > 0) {
@@ -365,22 +399,12 @@ _load_preferences(void)
         }
     }
 
-    if (g_key_file_has_key(theme, "ui", "occupants.indent", NULL)) {
-        gint occupants_indent = g_key_file_get_integer(theme, "ui", "occupants.indent", NULL);
-        prefs_set_occupants_indent(occupants_indent);
-    }
-
     if (g_key_file_has_key(theme, "ui", "occupants.header.char", NULL)) {
         gchar *ch = g_key_file_get_string(theme, "ui", "occupants.header.char", NULL);
         if (ch && strlen(ch) > 0) {
             prefs_set_occupants_header_char(ch[0]);
             g_free(ch);
         }
-    }
-
-    if (g_key_file_has_key(theme, "ui", "roster.size", NULL)) {
-        gint roster_size = g_key_file_get_integer(theme, "ui", "roster.size", NULL);
-        prefs_set_roster_size(roster_size);
     }
 
     if (g_key_file_has_key(theme, "ui", "roster.header.char", NULL)) {
@@ -433,21 +457,6 @@ _load_preferences(void)
         }
     }
 
-    if (g_key_file_has_key(theme, "ui", "roster.contact.indent", NULL)) {
-        gint contact_indent = g_key_file_get_integer(theme, "ui", "roster.contact.indent", NULL);
-        prefs_set_roster_contact_indent(contact_indent);
-    }
-
-    if (g_key_file_has_key(theme, "ui", "roster.resource.indent", NULL)) {
-        gint resource_indent = g_key_file_get_integer(theme, "ui", "roster.resource.indent", NULL);
-        prefs_set_roster_resource_indent(resource_indent);
-    }
-
-    if (g_key_file_has_key(theme, "ui", "roster.presence.indent", NULL)) {
-        gint presence_indent = g_key_file_get_integer(theme, "ui", "roster.presence.indent", NULL);
-        prefs_set_roster_presence_indent(presence_indent);
-    }
-
     if (g_key_file_has_key(theme, "ui", "otr.char", NULL)) {
         gchar *ch = g_key_file_get_string(theme, "ui", "otr.char", NULL);
         if (ch && strlen(ch) > 0) {
@@ -472,21 +481,25 @@ _load_preferences(void)
         }
     }
 
+    // load window positions
     if (g_key_file_has_key(theme, "ui", "titlebar.position", NULL) &&
             g_key_file_has_key(theme, "ui", "mainwin.position", NULL) &&
             g_key_file_has_key(theme, "ui", "statusbar.position", NULL) &&
             g_key_file_has_key(theme, "ui", "inputwin.position", NULL)) {
+
         int titlebar_pos = g_key_file_get_integer(theme, "ui", "titlebar.position", NULL);
         int mainwin_pos = g_key_file_get_integer(theme, "ui", "mainwin.position", NULL);
         int statusbar_pos = g_key_file_get_integer(theme, "ui", "statusbar.position", NULL);
         int inputwin_pos = g_key_file_get_integer(theme, "ui", "inputwin.position", NULL);
+
         ProfWinPlacement *placement = prefs_create_profwin_placement(titlebar_pos, mainwin_pos, statusbar_pos, inputwin_pos);
+
         prefs_save_win_placement(placement);
         prefs_free_win_placement(placement);
     }
 }
 
-void
+static void
 _theme_list_dir(const gchar *const dir, GSList **result)
 {
     GDir *themes = g_dir_open(dir, 0, NULL);
@@ -628,6 +641,7 @@ theme_get_bkgnd(void)
     return val;
 }
 
+/* gets the foreground color from the theme. or uses the one defined in 'defaults' */
 static void
 _theme_prep_fgnd(char *setting, GString *lookup_str, gboolean *bold)
 {
@@ -682,6 +696,7 @@ theme_hash_attrs(const char *str)
     return COLOR_PAIR(color_pair_cache_hash_str(str, profile));
 }
 
+/* returns the colours (fgnd and bknd) for a certian attribute ie main.text */
 int
 theme_attrs(theme_item_t attrs)
 {
@@ -827,7 +842,9 @@ theme_attrs(theme_item_t attrs)
         log_error("Unable to load colour theme");
         result = 0;
     }
+
     g_string_free(lookup_str, TRUE);
+
     if (bold) {
         return COLOR_PAIR(result) | A_BOLD;
     } else {
