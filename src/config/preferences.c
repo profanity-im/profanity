@@ -50,7 +50,8 @@
 #include "config/files.h"
 #include "config/conflists.h"
 
-// preference groups refer to the sections in .profrc, for example [ui]
+// preference groups refer to the sections in .profrc or theme files
+// for example [ui] but not [colours] which is handled in theme.c
 #define PREF_GROUP_LOGGING "logging"
 #define PREF_GROUP_CHATSTATES "chatstates"
 #define PREF_GROUP_UI "ui"
@@ -1514,7 +1515,6 @@ prefs_statusbar_pos_down(void)
     prefs_free_win_placement(placement);
     return FALSE;
 }
-
 
 gboolean
 prefs_inputwin_pos_down(void)
