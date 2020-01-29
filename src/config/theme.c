@@ -154,7 +154,7 @@ theme_init(const char *const theme_name)
     g_hash_table_insert(defaults, strdup("untrusted"),               strdup("red"));
     g_hash_table_insert(defaults, strdup("cmd.wins.unread"),         strdup("default"));
 
-    _load_preferences();
+    //_load_preferences();
 }
 
 gboolean
@@ -174,12 +174,14 @@ theme_exists(const char *const theme_name)
 }
 
 gboolean
-theme_load(const char *const theme_name)
+theme_load(const char *const theme_name, gboolean load_theme_prefs)
 {
     color_pair_cache_reset();
 
     if (_theme_load_file(theme_name)) {
-        _load_preferences();
+        if (load_theme_prefs) {
+            _load_preferences();
+        }
         return TRUE;
     } else {
         return FALSE;

@@ -143,7 +143,7 @@ typedef enum {
 
 void theme_init(const char *const theme_name);
 void theme_init_colours(void);
-gboolean theme_load(const char *const theme_name);
+gboolean theme_load(const char *const theme_name, gboolean load_theme_prefs);
 gboolean theme_exists(const char *const theme_name);
 GSList* theme_list(void);
 void theme_close(void);

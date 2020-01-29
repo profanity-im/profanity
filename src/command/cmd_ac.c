@@ -354,6 +354,7 @@ cmd_ac_init(void)
 
     theme_ac = autocomplete_new();
     autocomplete_add(theme_ac, "load");
+    autocomplete_add(theme_ac, "full-load");
     autocomplete_add(theme_ac, "list");
     autocomplete_add(theme_ac, "colours");
     autocomplete_add(theme_ac, "properties");
@@ -2414,23 +2415,49 @@ static char*
 _theme_autocomplete(ProfWin *window, const char *const input, gboolean previous)
 {
     char *result = NULL;
+
     if (strncmp(input, "/theme load ", 12) == 0) {
         if (theme_load_ac == NULL) {
             theme_load_ac = autocomplete_new();
             GSList *themes = theme_list();
             GSList *curr = themes;
+
             while (curr) {
                 autocomplete_add(theme_load_ac, curr->data);
                 curr = g_slist_next(curr);
             }
+
             g_slist_free_full(themes, g_free);
             autocomplete_add(theme_load_ac, "default");
         }
+
         result = autocomplete_param_with_ac(input, "/theme load", theme_load_ac, TRUE, previous);
         if (result) {
             return result;
         }
     }
+
+    if (strncmp(input, "/theme full-load ", 17) == 0) {
+        if (theme_load_ac == NULL) {
+            theme_load_ac = autocomplete_new();
+            GSList *themes = theme_list();
+            GSList *curr = themes;
+
+            while (curr) {
+                autocomplete_add(theme_load_ac, curr->data);
+                curr = g_slist_next(curr);
+            }
+
+            g_slist_free_full(themes, g_free);
+            autocomplete_add(theme_load_ac, "default");
+        }
+
+        result = autocomplete_param_with_ac(input, "/theme full-load", theme_load_ac, TRUE, previous);
+        if (result) {
+            return result;
+        }
+    }
+
     result = autocomplete_param_with_ac(input, "/theme", theme_ac, TRUE, previous);
     if (result) {
         return result;

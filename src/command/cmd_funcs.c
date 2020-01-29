@@ -804,7 +804,7 @@ _account_set_theme(char *account_name, char *theme)
         ProfAccount *account = accounts_get_account(session_get_account_name());
         if (account) {
             if (g_strcmp0(account->name, account_name) == 0) {
-                theme_load(theme);
+                theme_load(theme, false);
                 ui_load_colours();
                 if (prefs_get_boolean(PREF_ROSTER)) {
                     ui_show_roster();
@@ -1234,13 +1234,13 @@ cmd_disconnect(ProfWin *window, const char *const command, gchar **args)
 
     char *theme = prefs_get_string(PREF_THEME);
     if (theme) {
-        gboolean res = theme_load(theme);
+        gboolean res = theme_load(theme, false);
         prefs_free_string(theme);
         if (!res) {
-            theme_load("default");
+            theme_load("default", false);
         }
     } else {
-        theme_load("default");
+        theme_load("default", false);
     }
     ui_load_colours();
     if (prefs_get_boolean(PREF_ROSTER)) {
@@ -1699,6 +1699,9 @@ cmd_prefs(ProfWin *window, const char *const command, gchar **args)
 gboolean
 cmd_theme(ProfWin *window, const char *const command, gchar **args)
 {
+    // 'full-load' means to load the theme including the settings (not just [colours])
+    gboolean fullload = (g_strcmp0(args[0], "full-load") == 0);
+
     // list themes
     if (g_strcmp0(args[0], "list") == 0) {
         GSList *themes = theme_list();
@@ -1706,10 +1709,10 @@ cmd_theme(ProfWin *window, const char *const command, gchar **args)
         g_slist_free_full(themes, g_free);
 
     // load a theme
-    } else if (g_strcmp0(args[0], "load") == 0) {
+    } else if (g_strcmp0(args[0], "load") == 0 || fullload) {
         if (args[1] == NULL) {
             cons_bad_cmd_usage(command);
-        } else if (theme_load(args[1])) {
+        } else if (theme_load(args[1], fullload)) {
             ui_load_colours();
             prefs_set_string(PREF_THEME, args[1]);
             if (prefs_get_boolean(PREF_ROSTER)) {
@@ -8619,12 +8622,12 @@ cmd_color(ProfWin *window, const char *const command, gchar **args)
 
     char *theme = prefs_get_string(PREF_THEME);
     if (theme) {
-        gboolean res = theme_load(theme);
+        gboolean res = theme_load(theme, false);
 
         if (res) {
             cons_show("Theme reloaded: %s", theme);
         } else {
-            theme_load("default");
+            theme_load("default", false);
         }
 
         prefs_free_string(theme);
