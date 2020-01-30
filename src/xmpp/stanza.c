@@ -1244,7 +1244,7 @@ _stanza_get_delay_timestamp_xep0091(xmpp_stanza_t *const x_stanza)
 GDateTime*
 stanza_get_delay_from(xmpp_stanza_t *const stanza, gchar *from)
 {
-    xmpp_stanza_t *delay;
+    xmpp_stanza_t *delay = NULL;
 
     // first check for XEP-0203 delayed delivery
     if (from) {
@@ -1270,6 +1270,35 @@ stanza_get_delay_from(xmpp_stanza_t *const stanza, gchar *from)
     }
 
     return NULL;
+}
+
+GDateTime*
+stanza_get_oldest_delay(xmpp_stanza_t *const stanza)
+{
+    xmpp_stanza_t *child;
+    const char *child_name;
+    GDateTime* oldest;
+
+    for (child = xmpp_stanza_get_children(stanza); child; child = xmpp_stanza_get_next(child)) {
+
+        child_name = xmpp_stanza_get_name(child);
+
+        if (child_name && strcmp(child_name, STANZA_NAME_DELAY) == 0) {
+            GDateTime *tmp = _stanza_get_delay_timestamp_xep0203(stanza);
+
+            if (!oldest || g_date_time_compare(oldest, tmp) == 1)
+                oldest = tmp;
+        }
+
+        if (child_name && strcmp(child_name, STANZA_NAME_X) == 0) {
+            GDateTime *tmp = _stanza_get_delay_timestamp_xep0091(stanza);
+
+            if (!oldest || g_date_time_compare(oldest, tmp) == 1)
+                oldest = tmp;
+        }
+    }
+
+    return oldest;
 }
 
 char*

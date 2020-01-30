@@ -831,14 +831,19 @@ _handle_groupchat(xmpp_stanza_t *const stanza)
         message->plain = strdup(message->body);
     }
 
-    // determine if the notifications happened whilst offline
+    // determine if the notifications happened whilst offline (MUC history)
     message->timestamp = stanza_get_delay_from(stanza, jid->barejid);
     if (message->timestamp == NULL) {
         // checking the domainpart is a workaround for some prosody versions (gh#1190)
         message->timestamp = stanza_get_delay_from(stanza, jid->domainpart);
     }
 
-    if (message->timestamp) {
+    bool is_muc_history = message->timestamp != NULL;
+
+    // we want to display the oldest delay
+    message->timestamp = stanza_get_oldest_delay(stanza);
+
+    if (is_muc_history) {
         sv_ev_room_history(message);
     } else {
         sv_ev_room_message(message);
