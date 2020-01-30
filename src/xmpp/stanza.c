@@ -1277,7 +1277,7 @@ stanza_get_oldest_delay(xmpp_stanza_t *const stanza)
 {
     xmpp_stanza_t *child;
     const char *child_name;
-    GDateTime* oldest;
+    GDateTime* oldest = NULL;
 
     for (child = xmpp_stanza_get_children(stanza); child; child = xmpp_stanza_get_next(child)) {
 
