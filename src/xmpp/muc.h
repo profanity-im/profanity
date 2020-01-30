@@ -126,7 +126,7 @@ char* muc_roster_nick_change_complete(const char *const room, const char *const 
 
 void muc_confserver_add(const char *const server);
 void muc_confserver_reset_ac(void);
-char* muc_confserver_find(const char *const search_str, gboolean previous);
+char* muc_confserver_find(const char *const search_str, gboolean previous, void *context);
 void muc_confserver_clear(void);
 
 void muc_invites_add(const char *const room, const char *const password);
@@ -135,7 +135,7 @@ gint muc_invites_count(void);
 GList* muc_invites(void);
 gboolean muc_invites_contain(const char *const room);
 void muc_invites_reset_ac(void);
-char* muc_invites_find(const char *const search_str, gboolean previous);
+char* muc_invites_find(const char *const search_str, gboolean previous, void *context);
 void muc_invites_clear(void);
 char* muc_invite_password(const char *const room);
 

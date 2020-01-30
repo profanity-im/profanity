@@ -151,7 +151,7 @@ gint presence_sub_request_count(void)
 
 void presence_reset_sub_request_search(void) {}
 
-char * presence_sub_request_find(const char * const search_str, gboolean previous)
+char * presence_sub_request_find(const char * const search_str, gboolean previous, void *context)
 {
     return  NULL;
 }
@@ -266,7 +266,7 @@ GList * bookmark_get_list(void)
     return mock_ptr_type(GList *);
 }
 
-char * bookmark_find(const char * const search_str, gboolean previous)
+char * bookmark_find(const char * const search_str, gboolean previous, void *context)
 {
     return NULL;
 }
@@ -314,7 +314,7 @@ gboolean blocked_remove(char *jid)
     return TRUE;
 }
 
-char* blocked_ac_find(const char *const search_str, gboolean previous)
+char* blocked_ac_find(const char *const search_str, gboolean previous, void *context)
 {
     return NULL;
 }

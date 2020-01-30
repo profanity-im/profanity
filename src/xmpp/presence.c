@@ -161,7 +161,7 @@ presence_clear_sub_requests(void)
 }
 
 char*
-presence_sub_request_find(const char *const search_str, gboolean previous)
+presence_sub_request_find(const char *const search_str, gboolean previous, void *context)
 {
     return autocomplete_complete(sub_requests_ac, search_str, TRUE, previous);
 }

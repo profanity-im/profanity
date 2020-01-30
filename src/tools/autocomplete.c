@@ -285,7 +285,7 @@ autocomplete_complete(Autocomplete ac, const gchar *search_str, gboolean quote, 
 }
 
 char*
-autocomplete_param_with_func(const char *const input, char *command, autocomplete_func func, gboolean previous)
+autocomplete_param_with_func(const char *const input, char *command, autocomplete_func func, gboolean previous, void *context)
 {
     GString *auto_msg = NULL;
     char *result = NULL;
@@ -302,7 +302,7 @@ autocomplete_param_with_func(const char *const input, char *command, autocomplet
         }
         prefix[inp_len - len] = '\0';
 
-        char *found = func(prefix, previous);
+        char *found = func(prefix, previous, context);
         if (found) {
             auto_msg = g_string_new(command_cpy);
             g_string_append(auto_msg, found);
@@ -347,7 +347,7 @@ autocomplete_param_with_ac(const char *const input, char *command, Autocomplete 
 }
 
 char*
-autocomplete_param_no_with_func(const char *const input, char *command, int arg_number, autocomplete_func func, gboolean previous)
+autocomplete_param_no_with_func(const char *const input, char *command, int arg_number, autocomplete_func func, gboolean previous, void *context)
 {
     if (strncmp(input, command, strlen(command)) == 0) {
         GString *result_str = NULL;
@@ -362,7 +362,7 @@ autocomplete_param_no_with_func(const char *const input, char *command, int arg_
 
             // autocomplete param
             if (comp_str) {
-                char *found = func(comp_str, previous);
+                char *found = func(comp_str, previous, context);
                 if (found) {
                     result_str = g_string_new("");
                     g_string_append(result_str, start_str);

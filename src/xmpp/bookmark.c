@@ -222,7 +222,7 @@ bookmark_get_list(void)
 }
 
 char*
-bookmark_find(const char *const search_str, gboolean previous)
+bookmark_find(const char *const search_str, gboolean previous, void *context)
 {
     return autocomplete_complete(bookmark_ac, search_str, TRUE, previous);
 }

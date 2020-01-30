@@ -94,9 +94,9 @@ void wins_swap(int source_win, int target_win);
 void wins_hide_subwin(ProfWin *window);
 void wins_show_subwin(ProfWin *window);
 
-char* win_autocomplete(const char *const search_str, gboolean previous);
+char* win_autocomplete(const char *const search_str, gboolean previous, void *context);
 void win_reset_search_attempts(void);
-char* win_close_autocomplete(const char *const search_str, gboolean previous);
+char* win_close_autocomplete(const char *const search_str, gboolean previous, void *context);
 void win_close_reset_search_attempts(void);
 
 #endif

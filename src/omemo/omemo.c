@@ -108,7 +108,7 @@ struct omemo_context_t {
     GHashTable *known_devices;
     GString *known_devices_filename;
     GKeyFile *known_devices_keyfile;
-    Autocomplete fingerprint_ac;
+    GHashTable *fingerprint_ac;
 };
 
 static omemo_context omemo_ctx;
@@ -125,14 +125,14 @@ omemo_init(void)
     pthread_mutexattr_settype(&omemo_ctx.attr, PTHREAD_MUTEX_RECURSIVE);
     pthread_mutex_init(&omemo_ctx.lock, &omemo_ctx.attr);
 
-    omemo_ctx.fingerprint_ac = autocomplete_new();
+    omemo_ctx.fingerprint_ac = g_hash_table_new_full(g_str_hash, g_str_equal, free, (GDestroyNotify)autocomplete_free);
 }
 
 void
 omemo_close(void)
 {
     if (omemo_ctx.fingerprint_ac) {
-        autocomplete_free(omemo_ctx.fingerprint_ac);
+        g_hash_table_destroy(omemo_ctx.fingerprint_ac);
         omemo_ctx.fingerprint_ac = NULL;
     }
 }
@@ -1300,15 +1300,27 @@ omemo_key_free(omemo_key_t *key)
 }
 
 char*
-omemo_fingerprint_autocomplete(const char *const search_str, gboolean previous)
+omemo_fingerprint_autocomplete(const char *const search_str, gboolean previous, void *context)
 {
-    return autocomplete_complete(omemo_ctx.fingerprint_ac, search_str, FALSE, previous);
+    Autocomplete ac = g_hash_table_lookup(omemo_ctx.fingerprint_ac, context);
+    if (ac != NULL) {
+        return autocomplete_complete(ac, search_str, FALSE, previous);
+    } else {
+        return NULL;
+    }
 }
 
 void
 omemo_fingerprint_autocomplete_reset(void)
 {
-    autocomplete_reset(omemo_ctx.fingerprint_ac);
+    gpointer value;
+    GHashTableIter iter;
+    g_hash_table_iter_init(&iter, omemo_ctx.fingerprint_ac);
+
+    while (g_hash_table_iter_next(&iter, NULL, &value)) {
+        Autocomplete ac = value;
+        autocomplete_reset(ac);
+    }
 }
 
 gboolean
@@ -1596,8 +1608,14 @@ _cache_device_identity(const char *const jid, uint32_t device_id, ec_public_key 
     g_free(device_id_str);
     omemo_known_devices_keyfile_save();
 
+    Autocomplete ac = g_hash_table_lookup(omemo_ctx.fingerprint_ac, jid);
+    if (ac == NULL) {
+        ac = autocomplete_new();
+        g_hash_table_insert(omemo_ctx.fingerprint_ac, strdup(jid), ac);
+    }
+
     char *formatted_fingerprint = omemo_format_fingerprint(fingerprint);
-    autocomplete_add(omemo_ctx.fingerprint_ac, formatted_fingerprint);
+    autocomplete_add(ac, formatted_fingerprint);
     free(formatted_fingerprint);
     free(fingerprint);
 }

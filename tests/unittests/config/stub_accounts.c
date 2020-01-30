@@ -14,7 +14,7 @@ char * accounts_find_all(char *prefix)
     return NULL;
 }
 
-char * accounts_find_enabled(char *prefix)
+char * accounts_find_enabled(char *prefix, void *context)
 {
     return NULL;
 }

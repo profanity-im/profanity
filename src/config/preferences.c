@@ -218,7 +218,7 @@ prefs_close(void)
 }
 
 char*
-prefs_autocomplete_boolean_choice(const char *const prefix, gboolean previous)
+prefs_autocomplete_boolean_choice(const char *const prefix, gboolean previous, void *context)
 {
     return autocomplete_complete(boolean_choice_ac, prefix, TRUE, previous);
 }
@@ -230,7 +230,7 @@ prefs_reset_boolean_choice(void)
 }
 
 char*
-prefs_autocomplete_room_trigger(const char *const prefix, gboolean previous)
+prefs_autocomplete_room_trigger(const char *const prefix, gboolean previous, void *context)
 {
     return autocomplete_complete(room_trigger_ac, prefix, TRUE, previous);
 }
