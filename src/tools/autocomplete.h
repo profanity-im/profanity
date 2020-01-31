@@ -38,7 +38,7 @@
 
 #include <glib.h>
 
-typedef char* (*autocomplete_func)(const char *const, gboolean);
+typedef char* (*autocomplete_func)(const char *const, gboolean, void *);
 typedef struct autocomplete_t *Autocomplete;
 
 // allocate new autocompleter with no items
@@ -63,13 +63,13 @@ GList* autocomplete_create_list(Autocomplete ac);
 gint autocomplete_length(Autocomplete ac);
 
 char* autocomplete_param_with_func(const char *const input, char *command,
-    autocomplete_func func, gboolean previous);
+    autocomplete_func func, gboolean previous, void *context);
 
 char* autocomplete_param_with_ac(const char *const input, char *command,
     Autocomplete ac, gboolean quote, gboolean previous);
 
 char* autocomplete_param_no_with_func(const char *const input, char *command,
-    int arg_number, autocomplete_func func, gboolean previous);
+    int arg_number, autocomplete_func func, gboolean previous, void *context);
 
 void autocomplete_reset(Autocomplete ac);
 

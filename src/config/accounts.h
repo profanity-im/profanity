@@ -44,8 +44,8 @@
 void accounts_load(void);
 void accounts_close(void);
 
-char* accounts_find_all(const char *const prefix, gboolean previous);
-char* accounts_find_enabled(const char *const prefix, gboolean previous);
+char* accounts_find_all(const char *const prefix, gboolean previous, void *context);
+char* accounts_find_enabled(const char *const prefix, gboolean previous, void *context);
 void accounts_reset_all_search(void);
 void accounts_reset_enabled_search(void);
 void accounts_add(const char *jid, const char *altdomain, const int port, const char *const tls_policy);

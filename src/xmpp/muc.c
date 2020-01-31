@@ -181,13 +181,13 @@ muc_confserver_reset_ac(void)
 }
 
 char*
-muc_invites_find(const char *const search_str, gboolean previous)
+muc_invites_find(const char *const search_str, gboolean previous, void *context)
 {
     return autocomplete_complete(invite_ac, search_str, TRUE, previous);
 }
 
 char*
-muc_confserver_find(const char *const search_str, gboolean previous)
+muc_confserver_find(const char *const search_str, gboolean previous, void *context)
 {
     return autocomplete_complete(confservers_ac, search_str, TRUE, previous);
 }

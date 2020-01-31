@@ -188,7 +188,7 @@ void presence_subscription(const char *const jid, const jabber_subscr_t action);
 GList* presence_get_subscription_requests(void);
 gint presence_sub_request_count(void);
 void presence_reset_sub_request_search(void);
-char* presence_sub_request_find(const char *const search_str, gboolean previous);
+char* presence_sub_request_find(const char *const search_str, gboolean previous, void *context);
 void presence_join_room(const char *const room, const char *const nick, const char *const passwd);
 void presence_change_room_nick(const char *const room, const char *const nick);
 void presence_leave_chat_room(const char *const room_jid);
@@ -237,7 +237,7 @@ gboolean bookmark_update(const char *jid, const char *nick, const char *password
 gboolean bookmark_remove(const char *jid);
 gboolean bookmark_join(const char *jid);
 GList* bookmark_get_list(void);
-char* bookmark_find(const char *const search_str, gboolean previous);
+char* bookmark_find(const char *const search_str, gboolean previous, void *context);
 void bookmark_autocomplete_reset(void);
 gboolean bookmark_exists(const char *const room);
 
@@ -250,7 +250,7 @@ void roster_send_remove(const char *const barejid);
 GList* blocked_list(void);
 gboolean blocked_add(char *jid);
 gboolean blocked_remove(char *jid);
-char* blocked_ac_find(const char *const search_str, gboolean previous);
+char* blocked_ac_find(const char *const search_str, gboolean previous, void *context);
 void blocked_ac_reset(void);
 
 void form_destroy(DataForm *form);

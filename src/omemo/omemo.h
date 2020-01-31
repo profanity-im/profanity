@@ -82,7 +82,7 @@ void omemo_trust(const char *const jid, const char *const fingerprint);
 void omemo_untrust(const char *const jid, const char *const fingerprint);
 GList *omemo_known_device_identities(const char *const jid);
 gboolean omemo_is_trusted_identity(const char *const jid, const char *const fingerprint);
-char *omemo_fingerprint_autocomplete(const char *const search_str, gboolean previous);
+char *omemo_fingerprint_autocomplete(const char *const search_str, gboolean previous, void *context);
 void omemo_fingerprint_autocomplete_reset(void);
 gboolean omemo_automatic_start(const char *const recipient);
 

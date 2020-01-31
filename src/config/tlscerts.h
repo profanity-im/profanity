@@ -90,7 +90,7 @@ void tlscerts_free(TLSCertificate *cert);
 
 GList* tlscerts_list(void);
 
-char* tlscerts_complete(const char *const prefix, gboolean previous);
+char* tlscerts_complete(const char *const prefix, gboolean previous, void *context);
 
 void tlscerts_reset_ac(void);
 

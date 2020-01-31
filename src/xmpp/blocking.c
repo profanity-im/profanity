@@ -93,7 +93,7 @@ blocked_list(void)
 }
 
 char*
-blocked_ac_find(const char *const search_str, gboolean previous)
+blocked_ac_find(const char *const search_str, gboolean previous, void *context)
 {
     return autocomplete_complete(blocked_ac, search_str, TRUE, previous);
 }

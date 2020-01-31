@@ -97,13 +97,13 @@ accounts_close(void)
 }
 
 char*
-accounts_find_enabled(const char *const prefix, gboolean previous)
+accounts_find_enabled(const char *const prefix, gboolean previous, void *context)
 {
     return autocomplete_complete(enabled_ac, prefix, TRUE, previous);
 }
 
 char*
-accounts_find_all(const char *const prefix, gboolean previous)
+accounts_find_all(const char *const prefix, gboolean previous, void *context)
 {
     return autocomplete_complete(all_ac, prefix, TRUE, previous);
 }

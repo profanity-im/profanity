@@ -487,7 +487,7 @@ roster_has_pending_subscriptions(void)
 }
 
 char*
-roster_contact_autocomplete(const char *const search_str, gboolean previous)
+roster_contact_autocomplete(const char *const search_str, gboolean previous, void *context)
 {
     assert(roster != NULL);
 
@@ -495,7 +495,7 @@ roster_contact_autocomplete(const char *const search_str, gboolean previous)
 }
 
 char*
-roster_fulljid_autocomplete(const char *const search_str, gboolean previous)
+roster_fulljid_autocomplete(const char *const search_str, gboolean previous, void *context)
 {
     assert(roster != NULL);
 
@@ -550,7 +550,7 @@ roster_get_groups(void)
 }
 
 char*
-roster_group_autocomplete(const char *const search_str, gboolean previous)
+roster_group_autocomplete(const char *const search_str, gboolean previous, void *context)
 {
     assert(roster != NULL);
 
@@ -558,7 +558,7 @@ roster_group_autocomplete(const char *const search_str, gboolean previous)
 }
 
 char*
-roster_barejid_autocomplete(const char *const search_str, gboolean previous)
+roster_barejid_autocomplete(const char *const search_str, gboolean previous, void *context)
 {
     assert(roster != NULL);
 

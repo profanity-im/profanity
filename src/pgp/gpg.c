@@ -753,7 +753,7 @@ p_gpg_free_decrypted(char *decrypted)
 }
 
 char*
-p_gpg_autocomplete_key(const char *const search_str, gboolean previous)
+p_gpg_autocomplete_key(const char *const search_str, gboolean previous, void *context)
 {
     return autocomplete_complete(key_ac, search_str, TRUE, previous);
 }

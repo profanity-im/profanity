@@ -56,7 +56,7 @@ void p_gpg_free_keys(GHashTable *keys) {}
 
 void p_gpg_autocomplete_key_reset(void) {}
 
-char * p_gpg_autocomplete_key(const char * const search_str, gboolean previous)
+char * p_gpg_autocomplete_key(const char * const search_str, gboolean previous, void *context)
 {
     return NULL;
 }

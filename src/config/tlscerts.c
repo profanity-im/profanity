@@ -369,7 +369,7 @@ tlscerts_get_trusted(const char * const fingerprint)
 }
 
 char*
-tlscerts_complete(const char *const prefix, gboolean previous)
+tlscerts_complete(const char *const prefix, gboolean previous, void *context)
 {
     return autocomplete_complete(certs_ac, prefix, TRUE, previous);
 }
