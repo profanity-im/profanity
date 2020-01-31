@@ -11,6 +11,11 @@ If you like Profanity, please consider donating: https://profanity-im.github.io/
 
 Changes:
 
+- Fingerprint autocompletion now considers only the given nickname (@paulfariello) (#1068)
+- Save and display oldest timestamp from delay tags (#1254)
+- Change theme handling (#1077)
+  `/theme load themename` not loads only the colours of a theme. So the users preferences don't get overwritten
+  `/theme full-load themename` loads the whole theme including preferences (like `omemo.char`)
 - Add gruvbox theme (@Misaflo) (#1259)
 - XEP-0092: Include OS name in `/software` answer.
   See `/os on|off`
