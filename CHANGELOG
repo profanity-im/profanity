@@ -1,8 +1,8 @@
-0.8.0 (2020-)
+0.8.0 (2020-02-03)
 =====
 
 On 2012-02-02 the first commit to Profanity was done by @boothj5.
-7 years later, and 5 months after 0.7.0, we are happy to announce Profanity 0.8.0.
+8 years later, and 5 months after 0.7.0, we are happy to announce Profanity 0.8.0.
 
 This release has 315 commits since the last release.
 11 people contributed code to it: @paulfariello, @svensp, @aaptel, @aszlig, @mdosch, @pasis, @mzagozen, @quite, @weiss, @Misaflo and @jubalh.
@@ -66,7 +66,7 @@ Changes:
 - Log MUC PM messages (#1214)
 - Improve forest theme
 - Change default text colors to default instead of white (@mdosch) (#1213) (#535)
-- Fix date display in chat history (#992)
+- Fix date display in chat history (#922)
 - Log incoming MUC messages if origin-id sais they dont come from us (#1201)
 - Support XEP-0359: Unique and Stable Stanza IDs (#1207)
   To help us identify which MUC messages were sent by us.
