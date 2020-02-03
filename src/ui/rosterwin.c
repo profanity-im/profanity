@@ -413,7 +413,7 @@ _rosterwin_contact(ProfLayoutSplit *layout, PContact contact)
             wattron(layout->subwin, theme_attrs(presence_colour));
             win_sub_print(layout->subwin, unreadmsg->str, FALSE, wrap, current_indent);
             g_string_free(unreadmsg, TRUE);
-            wattroff(layout->subwin, theme_attrs(colour));
+            wattroff(layout->subwin, theme_attrs(presence_colour));
         }
 
         _rosterwin_presence(layout, presence, status, current_indent);
