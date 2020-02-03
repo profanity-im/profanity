@@ -83,3 +83,6 @@ python3/
 .DS_Store
 *.bak
 breaks
+
+*.tar.*
+*.zip
