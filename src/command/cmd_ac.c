@@ -622,6 +622,7 @@ cmd_ac_init(void)
     autocomplete_add(omemo_ac, "fingerprint");
     autocomplete_add(omemo_ac, "clear_device_list");
     autocomplete_add(omemo_ac, "policy");
+    autocomplete_add(omemo_ac, "char");
 
     omemo_log_ac = autocomplete_new();
     autocomplete_add(omemo_log_ac, "on");
