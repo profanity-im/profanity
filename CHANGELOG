@@ -4,14 +4,14 @@
 On 2012-02-02 the first commit to Profanity was done by @boothj5.
 7 years later, and 5 months after 0.7.0, we are happy to announce Profanity 0.8.0.
 
-This release has 295 commits since the last release.
+This release has 315 commits since the last release.
 11 people contributed code to it: @paulfariello, @svensp, @aaptel, @aszlig, @mdosch, @pasis, @mzagozen, @quite, @weiss, @Misaflo and @jubalh.
 
 If you like Profanity, please consider donating: https://profanity-im.github.io/donate.html
 
 Changes:
 
-- Fingerprint autocompletion now considers only the given nickname (@paulfariello) (#1068)
+- OMEMO fingerprint autocompletion now considers only the contact in question (@paulfariello) (#1068)
 - Save and display oldest timestamp from delay tags (#1254)
 - Change theme handling (#1077)
   `/theme load themename` not loads only the colours of a theme. So the users preferences don't get overwritten
