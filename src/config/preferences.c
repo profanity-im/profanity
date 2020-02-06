@@ -2137,6 +2137,8 @@ _get_default_string(preference_t pref)
             return "redact";
         case PREF_OMEMO_POLICY:
             return "automatic";
+        case PREF_COLOR_NICK:
+            return "off";
         default:
             return NULL;
     }
