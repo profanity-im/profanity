@@ -1,3 +1,18 @@
+0.8.1 (2020-02-07)
+=====
+
+This is a bugfix release.
+
+If you like Profanity, please consider donating: https://profanity-im.github.io/donate.html
+
+Changes:
+
+- Fix ending ncurses colors in rosterwin
+- Fix segfault when consistent nick colors where never in config (#1236)
+- Improve `/clear` behaviour to also clear the buffer. So a redraw doesn't bring
+  the content back.
+- Use unique IDs in stanzas when requesting avatars
+
 0.8.0 (2020-02-03)
 =====
 
@@ -6,8 +21,6 @@ On 2012-02-02 the first commit to Profanity was done by @boothj5.
 
 This release has 315 commits since the last release.
 11 people contributed code to it: @paulfariello, @svensp, @aaptel, @aszlig, @mdosch, @pasis, @mzagozen, @quite, @weiss, @Misaflo and @jubalh.
-
-If you like Profanity, please consider donating: https://profanity-im.github.io/donate.html
 
 Changes:
 
