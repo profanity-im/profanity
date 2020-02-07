@@ -624,6 +624,8 @@ win_clear(ProfWin *window)
 {
     if (!prefs_get_boolean(PREF_CLEAR_PERSIST_HISTORY)) {
         werase(window->layout->win);
+        buffer_free(window->layout->buffer);
+        window->layout->buffer = buffer_create();
         return;
     }
 
