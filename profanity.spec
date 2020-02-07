@@ -1,5 +1,5 @@
 Name:		profanity
-Version:	0.8.0
+Version:	0.8.1
 Release:	2%{?dist}
 Summary:	A console based XMPP client
 
