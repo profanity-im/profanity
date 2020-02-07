@@ -355,6 +355,6 @@ void stanza_free_caps(XMPPCaps *caps);
 
 xmpp_stanza_t* stanza_get_child_by_name_and_ns(xmpp_stanza_t * const stanza, const char * const name, const char * const ns);
 
-xmpp_stanza_t* stanza_create_avatar_retrieve_data_request(xmpp_ctx_t *ctx, const char *const id, const char *const jid);
+xmpp_stanza_t* stanza_create_avatar_retrieve_data_request(xmpp_ctx_t *ctx, const char *stanza_id, const char *const item_id, const char *const jid);
 
 #endif

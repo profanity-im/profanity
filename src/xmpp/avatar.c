@@ -158,11 +158,14 @@ _avatar_request_item_by_id(const char *jid, avatar_metadata *data)
 
     xmpp_ctx_t * const ctx = connection_get_ctx();
 
-    xmpp_stanza_t *iq = stanza_create_avatar_retrieve_data_request(ctx, data->id, jid);
-    iq_id_handler_add("retrieve1", _avatar_request_item_result_handler, (ProfIqFreeCallback)_free_avatar_data, data);
+    char *uid = connection_create_stanza_id();
+
+    xmpp_stanza_t *iq = stanza_create_avatar_retrieve_data_request(ctx, uid, data->id, jid);
+    iq_id_handler_add(uid, _avatar_request_item_result_handler, (ProfIqFreeCallback)_free_avatar_data, data);
+
+    free(uid);
 
     iq_send_stanza(iq);
-
     xmpp_stanza_release(iq);
 }
 
