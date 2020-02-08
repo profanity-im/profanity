@@ -17,7 +17,7 @@ tests=()
 case $(uname | tr '[:upper:]' '[:lower:]') in
     linux*)
         tests=(
-        "--enable-notifications --enable-icons --enable-otr --enable-pgp
+        "--enable-notifications --enable-icons-and-clipboard --enable-otr --enable-pgp
         --enable-omemo --enable-plugins --enable-c-plugins
         --enable-python-plugins --with-xscreensaver"
         "--disable-notifications --disable-icons --disable-otr --disable-pgp
@@ -39,7 +39,7 @@ case $(uname | tr '[:upper:]' '[:lower:]') in
         ;;
     darwin*)
         tests=(
-        "--enable-notifications --enable-icons --enable-otr --enable-pgp
+        "--enable-notifications --enable-icons-and-clipboard --enable-otr --enable-pgp
         --enable-omemo --enable-plugins --enable-c-plugins
         --enable-python-plugins"
         "--disable-notifications --disable-icons --disable-otr --disable-pgp
