@@ -161,6 +161,7 @@ typedef enum {
     PREF_OMEMO_LOG,
     PREF_OMEMO_POLICY,
     PREF_OCCUPANTS_WRAP,
+    PREF_CORRECTION_ALLOW,
 } preference_t;
 
 typedef struct prof_alias_t {

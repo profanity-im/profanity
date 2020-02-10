@@ -1065,7 +1065,7 @@ win_correct_incoming(ProfWin *window, const char *const message, const char *con
         return;
     }
 
-    /*
+    /*TODO: set date?
     if (entry->date) {
         if (entry->date->timestamp) {
             g_date_time_unref(entry->date->timestamp);
@@ -1076,9 +1076,7 @@ win_correct_incoming(ProfWin *window, const char *const message, const char *con
     entry->date = buffer_date_new_now();
     */
 
-    // TODO: setting
-    //entry->show_char = prefs_get_correction_char();
-    entry->show_char = '+';
+    entry->show_char = prefs_get_correction_char();
 
     if (entry->message) {
         free(entry->message);

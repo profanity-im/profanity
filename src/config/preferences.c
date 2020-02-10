@@ -1786,6 +1786,7 @@ _get_group(preference_t pref)
         case PREF_RECEIPTS_REQUEST:
         case PREF_REVEAL_OS:
         case PREF_TLS_CERTPATH:
+        case PREF_CORRECTION_ALLOW:
             return PREF_GROUP_CONNECTION;
         case PREF_OTR_LOG:
         case PREF_OTR_POLICY:
@@ -2036,6 +2037,8 @@ _get_key(preference_t pref)
             return "log";
         case PREF_OMEMO_POLICY:
             return "policy";
+        case PREF_CORRECTION_ALLOW:
+            return "correction.allow";
         default:
             return NULL;
     }

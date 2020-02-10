@@ -104,14 +104,19 @@ caps_init(void)
     g_hash_table_add(prof_features, strdup(STANZA_NS_CHATSTATES));
     g_hash_table_add(prof_features, strdup(STANZA_NS_PING));
     g_hash_table_add(prof_features, strdup(STANZA_NS_STABLE_ID));
+
     if (prefs_get_boolean(PREF_RECEIPTS_SEND)) {
         g_hash_table_add(prof_features, strdup(STANZA_NS_RECEIPTS));
     }
+
     if (prefs_get_boolean(PREF_LASTACTIVITY)) {
         g_hash_table_add(prof_features, strdup(STANZA_NS_LASTACTIVITY));
     }
-    //TODO: depend on setting
-    g_hash_table_add(prof_features, strdup(STANZA_NS_LAST_MESSAGE_CORRECTION));
+
+    if (prefs_get_boolean(PREF_CORRECTION_ALLOW)) {
+        g_hash_table_add(prof_features, strdup(STANZA_NS_LAST_MESSAGE_CORRECTION));
+    }
+
     my_sha1 = NULL;
 }
 

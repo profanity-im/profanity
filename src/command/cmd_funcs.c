@@ -8657,15 +8657,17 @@ cmd_correction(ProfWin *window, const char *const command, gchar **args)
 {
     // enable/disable
     if (g_strcmp0(args[0], "on") == 0) {
-        prefs_set_boolean(PREF_BOOKMARK_INVITE, TRUE);
+        _cmd_set_boolean_preference(args[0], command, "Last Message Correction", PREF_CORRECTION_ALLOW);
+        caps_add_feature(XMPP_FEATURE_LAST_MESSAGE_CORRECTION);
         return TRUE;
     } else if (g_strcmp0(args[0], "off") == 0) {
-        prefs_set_boolean(PREF_BOOKMARK_INVITE, FALSE);
+        _cmd_set_boolean_preference(args[0], command, "Last Message Correction", PREF_CORRECTION_ALLOW);
+        caps_remove_feature(XMPP_FEATURE_LAST_MESSAGE_CORRECTION);
         return TRUE;
     }
 
     // char
-    if (g_strcmp(args[0], "char") == 0) {
+    if (g_strcmp0(args[0], "char") == 0) {
         if (args[1] == NULL) {
             cons_bad_cmd_usage(command);
         } else if (strlen(args[1]) != 1) {
