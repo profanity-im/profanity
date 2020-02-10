@@ -2365,7 +2365,7 @@ static struct cmd_t command_defs[] =
     { "/correction",
         parse_args, 1, 1, &cons_correction_setting,
         CMD_NOSUBFUNCS
-        CMD_MAINFUNC(cmd_os)
+        CMD_MAINFUNC(cmd_correction)
         CMD_TAGS(
             CMD_TAG_CHAT,
             CMD_TAG_GROUPCHAT)

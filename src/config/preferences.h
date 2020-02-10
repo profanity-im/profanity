@@ -268,6 +268,9 @@ void prefs_set_roster_presence_indent(gint value);
 gint prefs_get_occupants_indent(void);
 void prefs_set_occupants_indent(gint value);
 
+char prefs_get_correction_char(void);
+void prefs_set_correction_char(char ch);
+
 void prefs_add_login(const char *jid);
 
 void prefs_set_tray_timer(gint value);

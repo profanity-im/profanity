@@ -8651,3 +8651,30 @@ cmd_os(ProfWin *window, const char *const command, gchar **args)
 
     return TRUE;
 }
+
+gboolean
+cmd_correction(ProfWin *window, const char *const command, gchar **args)
+{
+    // enable/disable
+    if (g_strcmp0(args[0], "on") == 0) {
+        prefs_set_boolean(PREF_BOOKMARK_INVITE, TRUE);
+        return TRUE;
+    } else if (g_strcmp0(args[0], "off") == 0) {
+        prefs_set_boolean(PREF_BOOKMARK_INVITE, FALSE);
+        return TRUE;
+    }
+
+    // char
+    if (g_strcmp(args[0], "char") == 0) {
+        if (args[1] == NULL) {
+            cons_bad_cmd_usage(command);
+        } else if (strlen(args[1]) != 1) {
+            cons_bad_cmd_usage(command);
+        } else {
+            prefs_set_correction_char(args[1][0]);
+            cons_show("LMC char set to %c.", args[1][0]);
+        }
+    }
+
+    return TRUE;
+}

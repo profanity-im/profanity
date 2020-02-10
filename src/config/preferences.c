@@ -1201,6 +1201,32 @@ prefs_set_roster_presence_indent(gint value)
     g_key_file_set_integer(prefs, PREF_GROUP_UI, "roster.presence.indent", value);
 }
 
+char
+prefs_get_correction_char(void)
+{
+    char result = '+';
+
+    char *resultstr = g_key_file_get_string(prefs, PREF_GROUP_UI, "correction.char", NULL);
+    if (!resultstr) {
+        result =  '+';
+    } else {
+        result = resultstr[0];
+    }
+    free(resultstr);
+
+    return result;
+}
+
+void
+prefs_set_correction_char(char ch)
+{
+    char str[2];
+    str[0] = ch;
+    str[1] = '\0';
+
+    g_key_file_set_string(prefs, PREF_GROUP_UI, "correction.char", str);
+}
+
 gboolean
 prefs_add_room_notify_trigger(const char * const text)
 {
