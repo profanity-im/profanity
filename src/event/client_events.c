@@ -115,7 +115,7 @@ cl_ev_presence_send(const resource_presence_t presence_type, const int idle_secs
 }
 
 void
-cl_ev_send_msg(ProfChatWin *chatwin, const char *const msg, const char *const oob_url)
+cl_ev_send_msg_correct(ProfChatWin *chatwin, const char *const msg, const char *const oob_url, gboolean correct_last_msg)
 {
     chat_state_active(chatwin->state);
 
@@ -139,11 +139,17 @@ cl_ev_send_msg(ProfChatWin *chatwin, const char *const msg, const char *const oo
         return;
     }
 
+    char *replace_id = NULL;
+    if (correct_last_msg) {
+        replace_id = chatwin->last_msg_id;
+    }
+
 // OTR suported, PGP supported, OMEMO unsupported
 #ifdef HAVE_LIBOTR
 #ifdef HAVE_LIBGPGME
 #ifndef HAVE_OMEMO
     if (chatwin->pgp_send) {
+        // TODO: replace_id
         char *id = message_send_chat_pgp(chatwin->barejid, plugin_msg, request_receipt);
         chat_log_pgp_msg_out(chatwin->barejid, plugin_msg, NULL);
         chatwin_outgoing_msg(chatwin, plugin_msg, id, PROF_MSG_ENC_PGP, request_receipt);
@@ -151,7 +157,7 @@ cl_ev_send_msg(ProfChatWin *chatwin, const char *const msg, const char *const oo
     } else {
         gboolean handled = otr_on_message_send(chatwin, plugin_msg, request_receipt);
         if (!handled) {
-            char *id = message_send_chat(chatwin->barejid, plugin_msg, oob_url, request_receipt);
+            char *id = message_send_chat(chatwin->barejid, plugin_msg, oob_url, request_receipt, replace_id);
             chat_log_msg_out(chatwin->barejid, plugin_msg, NULL);
             chatwin_outgoing_msg(chatwin, plugin_msg, id, PROF_MSG_ENC_PLAIN, request_receipt);
             free(id);
@@ -171,7 +177,7 @@ cl_ev_send_msg(ProfChatWin *chatwin, const char *const msg, const char *const oo
 #ifndef HAVE_OMEMO
     gboolean handled = otr_on_message_send(chatwin, plugin_msg, request_receipt);
     if (!handled) {
-        char *id = message_send_chat(chatwin->barejid, plugin_msg, oob_url, request_receipt);
+        char *id = message_send_chat(chatwin->barejid, plugin_msg, oob_url, request_receipt, replace_id);
         chat_log_msg_out(chatwin->barejid, plugin_msg, NULL);
         chatwin_outgoing_msg(chatwin, plugin_msg, id, PROF_MSG_ENC_PLAIN, request_receipt);
         free(id);
@@ -194,7 +200,7 @@ cl_ev_send_msg(ProfChatWin *chatwin, const char *const msg, const char *const oo
         chatwin_outgoing_msg(chatwin, plugin_msg, id, PROF_MSG_ENC_PGP, request_receipt);
         free(id);
     } else {
-        char *id = message_send_chat(chatwin->barejid, plugin_msg, oob_url, request_receipt);
+        char *id = message_send_chat(chatwin->barejid, plugin_msg, oob_url, request_receipt, replace_id);
         chat_log_msg_out(chatwin->barejid, plugin_msg, NULL);
         chatwin_outgoing_msg(chatwin, plugin_msg, id, PROF_MSG_ENC_PLAIN, request_receipt);
         free(id);
@@ -217,7 +223,7 @@ cl_ev_send_msg(ProfChatWin *chatwin, const char *const msg, const char *const oo
         chatwin_outgoing_msg(chatwin, plugin_msg, id, PROF_MSG_ENC_OMEMO, request_receipt);
         free(id);
     } else {
-        char *id = message_send_chat(chatwin->barejid, plugin_msg, oob_url, request_receipt);
+        char *id = message_send_chat(chatwin->barejid, plugin_msg, oob_url, request_receipt, replace_id);
         chat_log_msg_out(chatwin->barejid, plugin_msg, NULL);
         chatwin_outgoing_msg(chatwin, plugin_msg, id, PROF_MSG_ENC_PLAIN, request_receipt);
         free(id);
@@ -242,7 +248,7 @@ cl_ev_send_msg(ProfChatWin *chatwin, const char *const msg, const char *const oo
     } else {
         gboolean handled = otr_on_message_send(chatwin, plugin_msg, request_receipt);
         if (!handled) {
-            char *id = message_send_chat(chatwin->barejid, plugin_msg, oob_url, request_receipt);
+            char *id = message_send_chat(chatwin->barejid, plugin_msg, oob_url, request_receipt, replace_id);
             chat_log_msg_out(chatwin->barejid, plugin_msg, NULL);
             chatwin_outgoing_msg(chatwin, plugin_msg, id, PROF_MSG_ENC_PLAIN, request_receipt);
             free(id);
@@ -301,7 +307,7 @@ cl_ev_send_msg(ProfChatWin *chatwin, const char *const msg, const char *const oo
     } else {
         gboolean handled = otr_on_message_send(chatwin, plugin_msg, request_receipt);
         if (!handled) {
-            char *id = message_send_chat(chatwin->barejid, plugin_msg, oob_url, request_receipt);
+            char *id = message_send_chat(chatwin->barejid, plugin_msg, oob_url, request_receipt, replace_id);
             chat_log_msg_out(chatwin->barejid, plugin_msg, NULL);
             chatwin_outgoing_msg(chatwin, plugin_msg, id, PROF_MSG_ENC_PLAIN, request_receipt);
             free(id);
@@ -330,6 +336,12 @@ cl_ev_send_msg(ProfChatWin *chatwin, const char *const msg, const char *const oo
 #endif
 #endif
 #endif
+}
+
+void
+cl_ev_send_msg(ProfChatWin *chatwin, const char *const msg, const char *const oob_url)
+{
+    cl_ev_send_msg_correct(chatwin, msg, oob_url, FALSE);
 }
 
 void

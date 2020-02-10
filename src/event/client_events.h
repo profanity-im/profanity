@@ -45,6 +45,7 @@ void cl_ev_disconnect(void);
 
 void cl_ev_presence_send(const resource_presence_t presence_type, const int idle_secs);
 
+void cl_ev_send_msg_correct(ProfChatWin *chatwin, const char *const msg, const char *const oob_url, gboolean correct_last_msg);
 void cl_ev_send_msg(ProfChatWin *chatwin, const char *const msg, const char *const oob_url);
 void cl_ev_send_muc_msg(ProfMucWin *mucwin, const char *const msg, const char *const oob_url);
 void cl_ev_send_priv_msg(ProfPrivateWin *privwin, const char *const msg, const char *const oob_url);

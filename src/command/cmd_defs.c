@@ -2367,6 +2367,7 @@ static struct cmd_t command_defs[] =
         CMD_NOSUBFUNCS
         CMD_MAINFUNC(cmd_correction)
         CMD_TAGS(
+            CMD_TAG_UI,
             CMD_TAG_CHAT,
             CMD_TAG_GROUPCHAT)
         CMD_SYN(
@@ -2377,6 +2378,22 @@ static struct cmd_t command_defs[] =
         CMD_ARGS(
             { "on|off", "Enable/Disable support for last message correction."},
             { "char",    "Set character that will prefix corrected messages. Default: +"})
+        CMD_NOEXAMPLES
+    },
+
+    { "/correct",
+        parse_args, 1, 1, NULL,
+        CMD_NOSUBFUNCS
+        CMD_MAINFUNC(cmd_correct)
+        CMD_TAGS(
+            CMD_TAG_CHAT,
+            CMD_TAG_GROUPCHAT)
+        CMD_SYN(
+            "/correct <message>")
+        CMD_DESC(
+            "Correct and resend the last message (XEP-0308).")
+        CMD_ARGS(
+            { "<message>",    "The corrected message."})
         CMD_NOEXAMPLES
     },
 };

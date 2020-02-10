@@ -8680,3 +8680,44 @@ cmd_correction(ProfWin *window, const char *const command, gchar **args)
 
     return TRUE;
 }
+
+gboolean
+cmd_correct(ProfWin *window, const char *const command, gchar **args)
+{
+    jabber_conn_status_t conn_status = connection_get_status();
+    if (conn_status != JABBER_CONNECTED) {
+        cons_show("You are currently not connected.");
+        return TRUE;
+    }
+
+    if (window->type == WIN_CHAT) {
+        ProfChatWin *chatwin = (ProfChatWin*)window;
+        assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
+
+        if (chatwin->last_msg_id == NULL || chatwin->last_message == NULL) {
+            win_println(window, THEME_DEFAULT, '!', "No last message to correct.");
+            return TRUE;
+        }
+
+        /*
+        char *session_jid = chat_session_get_jid(chatwin->barejid);
+        if (session_jid == NULL) {
+            win_println(window, THEME_DEFAULT, '!', "Cannot determine if recipeint supports last message correction.");
+            free(session_jid);
+            return TRUE;
+        }
+
+        if (caps_jid_has_feature(session_jid, XMPP_FEATURE_LAST_MESSAGE_CORRECTION) == FALSE) {
+            win_println(window, THEME_DEFAULT, '!', "Recipient does not support last message correction.");
+            free(session_jid);
+            return TRUE;
+        }
+
+        */
+        // speciel send with replace tag
+        cl_ev_send_msg_correct(chatwin, args[0], FALSE, TRUE);
+    }
+
+    win_println(window, THEME_DEFAULT, '!', "Command /correct only valid in regular chat windows.");
+    return TRUE;
+}

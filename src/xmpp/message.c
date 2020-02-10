@@ -259,8 +259,7 @@ message_pubsub_event_handler_add(const char *const node, ProfMessageCallback fun
 }
 
 char*
-message_send_chat(const char *const barejid, const char *const msg, const char *const oob_url,
-    gboolean request_receipt)
+message_send_chat(const char *const barejid, const char *const msg, const char *const oob_url, gboolean request_receipt, const char *const replace_id)
 {
     xmpp_ctx_t * const ctx = connection_get_ctx();
 
@@ -282,6 +281,10 @@ message_send_chat(const char *const barejid, const char *const msg, const char *
 
     if (request_receipt) {
         stanza_attach_receipt_request(ctx, message);
+    }
+
+    if (replace_id) {
+        stanza_attach_correction(ctx, message, replace_id);
     }
 
     _send_message_stanza(message);

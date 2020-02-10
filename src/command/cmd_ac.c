@@ -114,6 +114,7 @@ static char* _logging_autocomplete(ProfWin *window, const char *const input, gbo
 static char* _color_autocomplete(ProfWin *window, const char *const input, gboolean previous);
 static char* _avatar_autocomplete(ProfWin *window, const char *const input, gboolean previous);
 static char* _correction_autocomplete(ProfWin *window, const char *const input, gboolean previous);
+static char* _correct_autocomplete(ProfWin *window, const char *const input, gboolean previous);
 
 static char* _script_autocomplete_func(const char *const prefix, gboolean previous, void *context);
 
@@ -1640,6 +1641,7 @@ _cmd_ac_complete_params(ProfWin *window, const char *const input, gboolean previ
     g_hash_table_insert(ac_funcs, "/color",         _color_autocomplete);
     g_hash_table_insert(ac_funcs, "/avatar",        _avatar_autocomplete);
     g_hash_table_insert(ac_funcs, "/correction",    _correction_autocomplete);
+    g_hash_table_insert(ac_funcs, "/correct",       _correct_autocomplete);
 
     int len = strlen(input);
     char parsed[len+1];
@@ -3735,4 +3737,13 @@ _correction_autocomplete(ProfWin *window, const char *const input, gboolean prev
     }
 
     return NULL;
+}
+
+static char*
+_correct_autocomplete(ProfWin *window, const char *const input, gboolean previous)
+{
+    char *result = NULL;
+
+    //TODO: get last message
+    return result;
 }

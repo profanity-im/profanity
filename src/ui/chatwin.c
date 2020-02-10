@@ -56,6 +56,7 @@
 #endif
 
 static void _chatwin_history(ProfChatWin *chatwin, const char *const contact);
+static void _chatwin_set_last_message(ProfChatWin *chatwin, const char *const id, const char *const message);
 
 ProfChatWin*
 chatwin_new(const char *const barejid)
@@ -323,6 +324,11 @@ chatwin_outgoing_msg(ProfChatWin *chatwin, const char *const message, char *id, 
         enc_char = prefs_get_omemo_char();
     }
 
+    // save last id and message for LMC
+    if (id) {
+        _chatwin_set_last_message(chatwin, id, message);
+    }
+
     if (request_receipt && id) {
         win_print_with_receipt((ProfWin*)chatwin, enc_char, "me", message, id);
     } else {
@@ -495,4 +501,14 @@ _chatwin_history(ProfChatWin *chatwin, const char *const contact)
 
         g_slist_free_full(history, free);
     }
+}
+
+static void
+_chatwin_set_last_message(ProfChatWin *chatwin, const char *const id, const char *const message)
+{
+    free(chatwin->last_message);
+    chatwin->last_message = strdup(message);
+
+    free(chatwin->last_msg_id);
+    chatwin->last_msg_id = strdup(id);
 }

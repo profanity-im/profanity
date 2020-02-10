@@ -245,6 +245,7 @@ xmpp_stanza_t* stanza_attach_hints_store(xmpp_ctx_t *ctx, xmpp_stanza_t *stanza)
 xmpp_stanza_t* stanza_attach_receipt_request(xmpp_ctx_t *ctx, xmpp_stanza_t *stanza);
 xmpp_stanza_t* stanza_attach_x_oob_url(xmpp_ctx_t *ctx, xmpp_stanza_t *stanza, const char *const url);
 xmpp_stanza_t* stanza_attach_origin_id(xmpp_ctx_t *ctx, xmpp_stanza_t *stanza, const char *const id);
+xmpp_stanza_t* stanza_attach_correction(xmpp_ctx_t *ctx, xmpp_stanza_t *stanza, const char *const replace_id);
 
 xmpp_stanza_t* stanza_create_room_join_presence(xmpp_ctx_t *const ctx,
     const char *const full_room_jid, const char *const passwd);

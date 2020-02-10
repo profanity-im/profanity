@@ -152,6 +152,8 @@ win_create_chat(const char *const barejid)
     new_win->enctext = NULL;
     new_win->incoming_char = NULL;
     new_win->outgoing_char = NULL;
+    new_win->last_message = NULL;
+    new_win->last_msg_id = NULL;
 
     new_win->memcheck = PROFCHATWIN_MEMCHECK;
 
@@ -488,6 +490,8 @@ win_free(ProfWin* window)
         free(chatwin->enctext);
         free(chatwin->incoming_char);
         free(chatwin->outgoing_char);
+        free(chatwin->last_message);
+        free(chatwin->last_msg_id);
         chat_state_free(chatwin->state);
         break;
     }

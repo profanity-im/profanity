@@ -171,8 +171,7 @@ char* connection_jid_for_feature(const char *const feature);
 
 const char* connection_get_profanity_identifier(void);
 
-char* message_send_chat(const char *const barejid, const char *const msg, const char *const oob_url,
-    gboolean request_receipt);
+char* message_send_chat(const char *const barejid, const char *const msg, const char *const oob_url, gboolean request_receipt, const char *const replace_id);
 char* message_send_chat_otr(const char *const barejid, const char *const msg, gboolean request_receipt);
 char* message_send_chat_pgp(const char *const barejid, const char *const msg, gboolean request_receipt);
 char* message_send_chat_omemo(const char *const jid, uint32_t sid, GList *keys, const unsigned char *const iv, size_t iv_len, const unsigned char *const ciphertext, size_t ciphertext_len, gboolean request_receipt, gboolean muc);
