@@ -113,6 +113,7 @@ static char* _status_autocomplete(ProfWin *window, const char *const input, gboo
 static char* _logging_autocomplete(ProfWin *window, const char *const input, gboolean previous);
 static char* _color_autocomplete(ProfWin *window, const char *const input, gboolean previous);
 static char* _avatar_autocomplete(ProfWin *window, const char *const input, gboolean previous);
+static char* _correction_autocomplete(ProfWin *window, const char *const input, gboolean previous);
 
 static char* _script_autocomplete_func(const char *const prefix, gboolean previous, void *context);
 
@@ -234,6 +235,7 @@ static Autocomplete status_ac;
 static Autocomplete status_state_ac;
 static Autocomplete logging_ac;
 static Autocomplete color_ac;
+static Autocomplete correction_ac;
 
 void
 cmd_ac_init(void)
@@ -928,6 +930,11 @@ cmd_ac_init(void)
     autocomplete_add(color_ac, "off");
     autocomplete_add(color_ac, "redgreen");
     autocomplete_add(color_ac, "blue");
+
+    correction_ac = autocomplete_new();
+    autocomplete_add(correction_ac, "on");
+    autocomplete_add(correction_ac, "off");
+    autocomplete_add(correction_ac, "char");
 }
 
 void
@@ -1233,6 +1240,7 @@ cmd_ac_reset(ProfWin *window)
     autocomplete_reset(status_state_ac);
     autocomplete_reset(logging_ac);
     autocomplete_reset(color_ac);
+    autocomplete_reset(correction_ac);
 
     autocomplete_reset(script_ac);
     if (script_show_ac) {
@@ -1380,6 +1388,7 @@ cmd_ac_uninit(void)
     autocomplete_free(status_state_ac);
     autocomplete_free(logging_ac);
     autocomplete_free(color_ac);
+    autocomplete_free(correction_ac);
 }
 
 static void
@@ -1630,6 +1639,7 @@ _cmd_ac_complete_params(ProfWin *window, const char *const input, gboolean previ
     g_hash_table_insert(ac_funcs, "/logging",       _logging_autocomplete);
     g_hash_table_insert(ac_funcs, "/color",         _color_autocomplete);
     g_hash_table_insert(ac_funcs, "/avatar",        _avatar_autocomplete);
+    g_hash_table_insert(ac_funcs, "/correction",    _correction_autocomplete);
 
     int len = strlen(input);
     char parsed[len+1];
@@ -3709,6 +3719,19 @@ _avatar_autocomplete(ProfWin *window, const char *const input, gboolean previous
         if (result) {
             return result;
         }
+    }
+
+    return NULL;
+}
+
+static char*
+_correction_autocomplete(ProfWin *window, const char *const input, gboolean previous)
+{
+    char *result = NULL;
+
+    result = autocomplete_param_with_ac(input, "/correction", correction_ac, TRUE, previous);
+    if (result) {
+        return result;
     }
 
     return NULL;

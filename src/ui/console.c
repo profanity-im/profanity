@@ -2022,6 +2022,12 @@ cons_os_setting(void)
 }
 
 void
+cons_correction_setting(void)
+{
+    cons_show("TODO");
+}
+
+void
 cons_show_connection_prefs(void)
 {
     cons_show("Connection preferences:");
