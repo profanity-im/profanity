@@ -110,6 +110,8 @@ caps_init(void)
     if (prefs_get_boolean(PREF_LASTACTIVITY)) {
         g_hash_table_add(prof_features, strdup(STANZA_NS_LASTACTIVITY));
     }
+    //TODO: depend on setting
+    g_hash_table_add(prof_features, strdup(STANZA_NS_LAST_MESSAGE_CORRECTION));
     my_sha1 = NULL;
 }
 

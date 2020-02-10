@@ -68,6 +68,7 @@
 #define XMPP_FEATURE_PUBSUB "http://jabber.org/protocol/pubsub"
 #define XMPP_FEATURE_PUBSUB_PUBLISH_OPTIONS "http://jabber.org/protocol/pubsub#publish-options"
 #define XMPP_FEATURE_USER_AVATAR_METADATA_NOTIFY "urn:xmpp:avatar:metadata+notify"
+#define XMPP_FEATURE_LAST_MESSAGE_CORRECTION "urn:xmpp:message-correct:0"
 
 typedef enum {
     JABBER_CONNECTING,
@@ -130,6 +131,8 @@ typedef struct prof_message_t {
    char *id;
    /* </origin-id> XEP-0359 */
    char *originid;
+   /* <replace id> XEP-0308 LMC */
+   char *replace_id;
    /* The raw body from xmpp message, either plaintext or OTR encrypted text */
    char *body;
    /* The encrypted message as for PGP */

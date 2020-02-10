@@ -188,6 +188,7 @@ message_init(void)
     message->jid = NULL;
     message->id = NULL;
     message->originid = NULL;
+    message->replace_id = NULL;
     message->body = NULL;
     message->encrypted = NULL;
     message->plain = NULL;
@@ -213,6 +214,10 @@ message_free(ProfMessage *message)
 
     if (message->originid) {
         xmpp_free(ctx, message->originid);
+    }
+
+    if (message->replace_id) {
+        xmpp_free(ctx, message->replace_id);
     }
 
     if (message->body) {
@@ -1112,6 +1117,20 @@ _handle_chat(xmpp_stanza_t *const stanza)
     // standard chat message, use jid without resource
     ProfMessage *message = message_init();
     message->jid = jid;
+
+    // message stanza id
+    const char *id = xmpp_stanza_get_id(stanza);
+    if (id) {
+        message->id = strdup(id);
+    }
+
+    xmpp_stanza_t *replace_id_stanza = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_LAST_MESSAGE_CORRECTION);
+    if (replace_id_stanza) {
+        const char *replace_id = xmpp_stanza_get_id(replace_id_stanza);
+        if (replace_id) {
+            message->replace_id = strdup(replace_id);
+        }
+    }
 
     if (mucuser) {
         message->mucuser = TRUE;

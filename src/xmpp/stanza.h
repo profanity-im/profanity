@@ -201,6 +201,7 @@
 #define STANZA_NS_STABLE_ID "urn:xmpp:sid:0"
 #define STANZA_NS_USER_AVATAR_DATA "urn:xmpp:avatar:data"
 #define STANZA_NS_USER_AVATAR_METADATA "urn:xmpp:avatar:metadata"
+#define STANZA_NS_LAST_MESSAGE_CORRECTION "urn:xmpp:message-correct:0"
 
 #define STANZA_DATAFORM_SOFTWARE "urn:xmpp:dataforms:softwareinfo"
 
