@@ -1183,7 +1183,7 @@ win_println_me_message(ProfWin *window, char ch, const char *const me, const cha
 }
 
 void
-win_print_outgoing(ProfWin *window, const char ch, const char *const message, ...)
+win_print_outgoing(ProfWin *window, const char ch, const char *const id, const char *const replace_id, const char *const message, ...)
 {
     GDateTime *timestamp = g_date_time_new_now_local();
 
@@ -1192,9 +1192,16 @@ win_print_outgoing(ProfWin *window, const char ch, const char *const message, ..
     GString *fmt_msg = g_string_new(NULL);
     g_string_vprintf(fmt_msg, message, arg);
 
-    buffer_append(window->layout->buffer, ch, 0, timestamp, 0, THEME_TEXT_ME, "me", fmt_msg->str, NULL, NULL);
+    if (replace_id) {
+        win_correct_incoming(window, fmt_msg->str, id, replace_id);
+    } else {
+        //TODO: without this it works.
+        //buffer_append(window->layout->buffer, ch, 0, timestamp, 0, THEME_TEXT_ME, "me", fmt_msg->str, NULL, id);
 
-    _win_print(window, ch, 0, timestamp, 0, THEME_TEXT_ME, "me", fmt_msg->str, NULL);
+        //_win_print(window, ch, 0, timestamp, 0, THEME_TEXT_ME, "me", fmt_msg->str, NULL);
+        _win_printf(window, ch, 0, timestamp, 0, THEME_TEXT_THEM, "me", id, "%s", fmt_msg->str);
+    }
+
     inp_nonblocking(TRUE);
     g_date_time_unref(timestamp);
 

@@ -309,7 +309,7 @@ chatwin_incoming_msg(ProfChatWin *chatwin, ProfMessage *message, gboolean win_cr
 
 void
 chatwin_outgoing_msg(ProfChatWin *chatwin, const char *const message, char *id, prof_enc_t enc_mode,
-    gboolean request_receipt)
+    gboolean request_receipt, const char *const replace_id)
 {
     assert(chatwin != NULL);
 
@@ -324,15 +324,16 @@ chatwin_outgoing_msg(ProfChatWin *chatwin, const char *const message, char *id, 
         enc_char = prefs_get_omemo_char();
     }
 
+    if (request_receipt && id) {
+        //TODO: replace_id and id
+        win_print_with_receipt((ProfWin*)chatwin, enc_char, "me", message, id);
+    } else {
+        win_print_outgoing((ProfWin*)chatwin, enc_char, id, replace_id, "%s", message);
+    }
+
     // save last id and message for LMC
     if (id) {
         _chatwin_set_last_message(chatwin, id, message);
-    }
-
-    if (request_receipt && id) {
-        win_print_with_receipt((ProfWin*)chatwin, enc_char, "me", message, id);
-    } else {
-        win_print_outgoing((ProfWin*)chatwin, enc_char, "%s", message);
     }
 }
 
@@ -350,7 +351,8 @@ chatwin_outgoing_carbon(ProfChatWin *chatwin, ProfMessage *message)
 
     ProfWin *window = (ProfWin*)chatwin;
 
-    win_print_outgoing(window, enc_char, "%s", message->plain);
+    // TODO id set?
+    win_print_outgoing(window, enc_char, message->id, message->replace_id, "%s", message->plain);
     int num = wins_get_num(window);
     status_bar_active(num, WIN_CHAT, chatwin->barejid);
 }

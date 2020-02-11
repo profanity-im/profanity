@@ -8716,6 +8716,7 @@ cmd_correct(ProfWin *window, const char *const command, gchar **args)
         */
         // speciel send with replace tag
         cl_ev_send_msg_correct(chatwin, args[0], FALSE, TRUE);
+        return TRUE;
     }
 
     win_println(window, THEME_DEFAULT, '!', "Command /correct only valid in regular chat windows.");

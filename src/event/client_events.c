@@ -159,7 +159,7 @@ cl_ev_send_msg_correct(ProfChatWin *chatwin, const char *const msg, const char *
         if (!handled) {
             char *id = message_send_chat(chatwin->barejid, plugin_msg, oob_url, request_receipt, replace_id);
             chat_log_msg_out(chatwin->barejid, plugin_msg, NULL);
-            chatwin_outgoing_msg(chatwin, plugin_msg, id, PROF_MSG_ENC_PLAIN, request_receipt);
+            chatwin_outgoing_msg(chatwin, plugin_msg, id, PROF_MSG_ENC_PLAIN, request_receipt, replace_id);
             free(id);
         }
     }
@@ -297,19 +297,19 @@ cl_ev_send_msg_correct(ProfChatWin *chatwin, const char *const msg, const char *
     if (chatwin->is_omemo) {
         char *id = omemo_on_message_send((ProfWin *)chatwin, plugin_msg, request_receipt, FALSE);
         chat_log_omemo_msg_out(chatwin->barejid, plugin_msg, NULL);
-        chatwin_outgoing_msg(chatwin, plugin_msg, id, PROF_MSG_ENC_OMEMO, request_receipt);
+        chatwin_outgoing_msg(chatwin, plugin_msg, id, PROF_MSG_ENC_OMEMO, request_receipt, replace_id);
         free(id);
     } else if (chatwin->pgp_send) {
         char *id = message_send_chat_pgp(chatwin->barejid, plugin_msg, request_receipt);
         chat_log_pgp_msg_out(chatwin->barejid, plugin_msg, NULL);
-        chatwin_outgoing_msg(chatwin, plugin_msg, id, PROF_MSG_ENC_PGP, request_receipt);
+        chatwin_outgoing_msg(chatwin, plugin_msg, id, PROF_MSG_ENC_PGP, request_receipt, replace_id);
         free(id);
     } else {
         gboolean handled = otr_on_message_send(chatwin, plugin_msg, request_receipt);
         if (!handled) {
             char *id = message_send_chat(chatwin->barejid, plugin_msg, oob_url, request_receipt, replace_id);
             chat_log_msg_out(chatwin->barejid, plugin_msg, NULL);
-            chatwin_outgoing_msg(chatwin, plugin_msg, id, PROF_MSG_ENC_PLAIN, request_receipt);
+            chatwin_outgoing_msg(chatwin, plugin_msg, id, PROF_MSG_ENC_PLAIN, request_receipt, replace_id);
             free(id);
         }
     }
@@ -395,7 +395,8 @@ cl_ev_send_priv_msg(ProfPrivateWin *privwin, const char *const msg, const char *
 
         message_send_private(privwin->fulljid, plugin_msg, oob_url);
         chat_log_msg_out(jidp->barejid, plugin_msg, jidp->resourcepart);
-        privwin_outgoing_msg(privwin, plugin_msg);
+        // TODO replace_id
+        privwin_outgoing_msg(privwin, NULL, NULL, plugin_msg);
 
         plugins_post_priv_message_send(privwin->fulljid, plugin_msg);
 

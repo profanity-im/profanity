@@ -65,7 +65,7 @@ void win_print_them(ProfWin *window, theme_item_t theme_item, char ch, int flags
 void win_println_them_message(ProfWin *window, char ch, int flags, const char *const them, const char *const message, ...);
 void win_println_me_message(ProfWin *window, char ch, const char *const me, const char *const message, ...);
 
-void win_print_outgoing(ProfWin *window, const char ch, const char *const message, ...);
+void win_print_outgoing(ProfWin *window, const char ch, const char *const id, const char *const replace_id, const char *const message, ...);
 void win_print_incoming(ProfWin *window, const char *const from, ProfMessage *message);
 void win_print_history(ProfWin *window, GDateTime *timestamp, const char *const message, ...);
 
