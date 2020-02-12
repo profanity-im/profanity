@@ -8700,22 +8700,7 @@ cmd_correct(ProfWin *window, const char *const command, gchar **args)
             return TRUE;
         }
 
-        /*
-        char *session_jid = chat_session_get_jid(chatwin->barejid);
-        if (session_jid == NULL) {
-            win_println(window, THEME_DEFAULT, '!', "Cannot determine if recipeint supports last message correction.");
-            free(session_jid);
-            return TRUE;
-        }
-
-        if (caps_jid_has_feature(session_jid, XMPP_FEATURE_LAST_MESSAGE_CORRECTION) == FALSE) {
-            win_println(window, THEME_DEFAULT, '!', "Recipient does not support last message correction.");
-            free(session_jid);
-            return TRUE;
-        }
-
-        */
-        // speciel send with replace tag
+        // send message again, with replace flag
         cl_ev_send_msg_correct(chatwin, args[0], FALSE, TRUE);
         return TRUE;
     }
