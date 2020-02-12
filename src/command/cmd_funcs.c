@@ -8703,6 +8703,18 @@ cmd_correct(ProfWin *window, const char *const command, gchar **args)
         // send message again, with replace flag
         cl_ev_send_msg_correct(chatwin, args[0], FALSE, TRUE);
         return TRUE;
+    } else if (window->type == WIN_MUC) {
+        ProfMucWin *mucwin = (ProfMucWin*)window;
+        assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
+
+        if (mucwin->last_msg_id == NULL || mucwin->last_message == NULL) {
+            win_println(window, THEME_DEFAULT, '!', "No last message to correct.");
+            return TRUE;
+        }
+
+        // send message again, with replace flag
+        cl_ev_send_muc_msg_corrected(mucwin, args[0], FALSE, TRUE);
+        return TRUE;
     }
 
     win_println(window, THEME_DEFAULT, '!', "Command /correct only valid in regular chat windows.");

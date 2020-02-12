@@ -344,24 +344,28 @@ cl_ev_send_msg(ProfChatWin *chatwin, const char *const msg, const char *const oo
 }
 
 void
-cl_ev_send_muc_msg(ProfMucWin *mucwin, const char *const msg, const char *const oob_url)
+cl_ev_send_muc_msg_corrected(ProfMucWin *mucwin, const char *const msg, const char *const oob_url, gboolean correct_last_msg)
 {
     char *plugin_msg = plugins_pre_room_message_send(mucwin->roomjid, msg);
     if (plugin_msg == NULL) {
         return;
     }
 
+    char *replace_id = NULL;
+    if (correct_last_msg) {
+        replace_id = mucwin->last_msg_id;
+    }
+
 #ifdef HAVE_OMEMO
     if (mucwin->is_omemo) {
-        // TODO: replace_id for MUC
-        char *id = omemo_on_message_send((ProfWin *)mucwin, plugin_msg, FALSE, TRUE, NULL);
+        char *id = omemo_on_message_send((ProfWin *)mucwin, plugin_msg, FALSE, TRUE, replace_id);
         groupchat_log_omemo_msg_out(mucwin->roomjid, plugin_msg);
-        mucwin_outgoing_msg(mucwin, plugin_msg, id, PROF_MSG_ENC_OMEMO);
+        mucwin_outgoing_msg(mucwin, plugin_msg, id, PROF_MSG_ENC_OMEMO, replace_id);
         free(id);
     } else {
-        char *id = message_send_groupchat(mucwin->roomjid, plugin_msg, oob_url);
+        char *id = message_send_groupchat(mucwin->roomjid, plugin_msg, oob_url, replace_id);
         groupchat_log_msg_out(mucwin->roomjid, plugin_msg);
-        mucwin_outgoing_msg(mucwin, plugin_msg, id, PROF_MSG_ENC_PLAIN);
+        mucwin_outgoing_msg(mucwin, plugin_msg, id, PROF_MSG_ENC_PLAIN, replace_id);
         free(id);
     }
 
@@ -371,15 +375,21 @@ cl_ev_send_muc_msg(ProfMucWin *mucwin, const char *const msg, const char *const 
 #endif
 
 #ifndef HAVE_OMEMO
-    char *id = message_send_groupchat(mucwin->roomjid, plugin_msg, oob_url);
+    char *id = message_send_groupchat(mucwin->roomjid, plugin_msg, oob_url, replace_id);
     groupchat_log_msg_out(mucwin->roomjid, plugin_msg);
-    mucwin_outgoing_msg(mucwin, plugin_msg, id, PROF_MSG_ENC_PLAIN);
+    mucwin_outgoing_msg(mucwin, plugin_msg, id, PROF_MSG_ENC_PLAIN, replace_out);
     free(id);
 
     plugins_post_room_message_send(mucwin->roomjid, plugin_msg);
     free(plugin_msg);
     return;
 #endif
+}
+
+void
+cl_ev_send_muc_msg(ProfMucWin *mucwin, const char *const msg, const char *const oob_url)
+{
+    cl_ev_send_muc_msg_corrected(mucwin, msg, oob_url, FALSE);
 }
 
 void

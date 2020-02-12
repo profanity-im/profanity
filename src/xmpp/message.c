@@ -528,7 +528,7 @@ message_send_private(const char *const fulljid, const char *const msg, const cha
 }
 
 char*
-message_send_groupchat(const char *const roomjid, const char *const msg, const char *const oob_url)
+message_send_groupchat(const char *const roomjid, const char *const msg, const char *const oob_url, const char *const replace_id)
 {
     xmpp_ctx_t * const ctx = connection_get_ctx();
     char *id = connection_create_stanza_id();
@@ -539,6 +539,10 @@ message_send_groupchat(const char *const roomjid, const char *const msg, const c
 
     if (oob_url) {
         stanza_attach_x_oob_url(ctx, message, oob_url);
+    }
+
+    if (replace_id) {
+        stanza_attach_correction(ctx, message, replace_id);
     }
 
     _send_message_stanza(message);

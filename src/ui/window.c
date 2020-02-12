@@ -203,6 +203,8 @@ win_create_muc(const char *const roomjid)
     new_win->enctext = NULL;
     new_win->message_char = NULL;
     new_win->is_omemo = FALSE;
+    new_win->last_message = NULL;
+    new_win->last_msg_id = NULL;
 
     new_win->memcheck = PROFMUCWIN_MEMCHECK;
 
@@ -1169,7 +1171,7 @@ win_println_them_message(ProfWin *window, char ch, int flags, const char *const 
 }
 
 void
-win_println_me_message(ProfWin *window, char ch, const char *const me, const char *const message, ...)
+win_print_outgoing_muc_msg(ProfWin *window, char ch, const char *const me, const char *const id, const char *const replace_id, const char *const message, ...)
 {
     GDateTime *timestamp = g_date_time_new_now_local();
 
@@ -1178,8 +1180,13 @@ win_println_me_message(ProfWin *window, char ch, const char *const me, const cha
     GString *fmt_msg = g_string_new(NULL);
     g_string_vprintf(fmt_msg, message, arg);
 
-    buffer_append(window->layout->buffer, ch, 0, timestamp, 0, THEME_TEXT_ME, me, fmt_msg->str, NULL, NULL);
-    _win_print_internal(window, ch, 0, timestamp, 0, THEME_TEXT_ME, me, fmt_msg->str, NULL);
+    if (replace_id) {
+        _win_correct(window, fmt_msg->str, id, replace_id);
+    } else {
+        _win_printf(window, ch, 0, timestamp, 0, THEME_TEXT_ME, me, id, "%s", fmt_msg->str);
+    }
+//    buffer_append(window->layout->buffer, ch, 0, timestamp, 0, THEME_TEXT_ME, me, fmt_msg->str, NULL, NULL);
+//    _win_print_internal(window, ch, 0, timestamp, 0, THEME_TEXT_ME, me, fmt_msg->str, NULL);
 
     inp_nonblocking(TRUE);
     g_date_time_unref(timestamp);
