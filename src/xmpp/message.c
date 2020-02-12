@@ -76,11 +76,11 @@ typedef struct p_message_handle_t {
 } ProfMessageHandler;
 
 static int _message_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza, void *const userdata);
-static void _private_chat_handler(xmpp_stanza_t *const stanza);
 
 static void _handle_error(xmpp_stanza_t *const stanza);
 static void _handle_groupchat(xmpp_stanza_t *const stanza);
 static void _handle_muc_user(xmpp_stanza_t *const stanza);
+static void _handle_muc_private_message(xmpp_stanza_t *const stanza);
 static void _handle_conference(xmpp_stanza_t *const stanza);
 static void _handle_captcha(xmpp_stanza_t *const stanza);
 static void _handle_receipt_received(xmpp_stanza_t *const stanza);
@@ -957,7 +957,7 @@ _receipt_request_handler(xmpp_stanza_t *const stanza)
 }
 
 static void
-_private_chat_handler(xmpp_stanza_t *const stanza)
+_handle_muc_private_message(xmpp_stanza_t *const stanza)
 {
     // standard chat message, use jid without resource
     ProfMessage *message = message_init();
@@ -1140,7 +1140,7 @@ _handle_chat(xmpp_stanza_t *const stanza)
 
     // private message from chat room use full jid (room/nick)
     if (muc_active(jid->barejid)) {
-        _private_chat_handler(stanza);
+        _handle_muc_private_message(stanza);
         jid_destroy(jid);
         return;
     }
