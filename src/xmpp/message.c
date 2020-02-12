@@ -972,14 +972,6 @@ _private_chat_handler(xmpp_stanza_t *const stanza)
         message->id = strdup(id);
     }
 
-    xmpp_stanza_t *replace_id_stanza = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_LAST_MESSAGE_CORRECTION);
-    if (replace_id_stanza) {
-        const char *replace_id = xmpp_stanza_get_id(replace_id_stanza);
-        if (replace_id) {
-            message->replace_id = strdup(replace_id);
-        }
-    }
-
     // check omemo encryption
 #ifdef HAVE_OMEMO
     message->plain = omemo_receive_message(stanza, &message->trusted);

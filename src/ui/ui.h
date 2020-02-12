@@ -197,7 +197,6 @@ void mucwin_set_message_char(ProfMucWin *mucwin, const char *const ch);
 void mucwin_unset_message_char(ProfMucWin *mucwin);
 
 // MUC private chat window
-// TODO repalce_id?
 void privwin_incoming_msg(ProfPrivateWin *privatewin, ProfMessage *message);
 void privwin_outgoing_msg(ProfPrivateWin *privwin, const char *const id, const char *const replace_id, const char *const message);
 void privwin_message_occupant_offline(ProfPrivateWin *privwin);
