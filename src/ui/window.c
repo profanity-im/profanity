@@ -1122,7 +1122,7 @@ win_print_incoming(ProfWin *window, const char *const from, ProfMessage *message
                 enc_char = prefs_get_omemo_char();
             }
 
-            if (message->replace_id) {
+            if (prefs_get_boolean(PREF_CORRECTION_ALLOW) && message->replace_id) {
                 _win_correct(window, message->plain, message->id, message->replace_id);
             } else {
                 _win_printf(window, enc_char, 0, message->timestamp, flags, THEME_TEXT_THEM, from, message->id, "%s", message->plain);
@@ -1155,7 +1155,7 @@ win_println_them_message(ProfWin *window, char ch, int flags, const char *const 
     GString *fmt_msg = g_string_new(NULL);
     g_string_vprintf(fmt_msg, message, arg);
 
-    if (replace_id) {
+    if (prefs_get_boolean(PREF_CORRECTION_ALLOW) && replace_id) {
         _win_correct(window, fmt_msg->str, id, replace_id);
     } else {
         _win_printf(window, ch, 0, timestamp, flags | NO_ME, THEME_TEXT_THEM, them, id, "%s", fmt_msg->str);
@@ -1180,7 +1180,7 @@ win_print_outgoing_muc_msg(ProfWin *window, char ch, const char *const me, const
     GString *fmt_msg = g_string_new(NULL);
     g_string_vprintf(fmt_msg, message, arg);
 
-    if (replace_id) {
+    if (prefs_get_boolean(PREF_CORRECTION_ALLOW) && replace_id) {
         _win_correct(window, fmt_msg->str, id, replace_id);
     } else {
         _win_printf(window, ch, 0, timestamp, 0, THEME_TEXT_ME, me, id, "%s", fmt_msg->str);
