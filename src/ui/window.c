@@ -1060,8 +1060,8 @@ win_show_status_string(ProfWin *window, const char *const from,
     win_appendln(window, presence_colour, "");
 }
 
-void
-win_correct_incoming(ProfWin *window, const char *const message, const char *const id, const char *const replace_id)
+static void
+_win_correct(ProfWin *window, const char *const message, const char *const id, const char *const replace_id)
 {
     ProfBuffEntry *entry = buffer_get_entry_by_id(window->layout->buffer, replace_id);
     if (!entry) {
@@ -1121,7 +1121,7 @@ win_print_incoming(ProfWin *window, const char *const from, ProfMessage *message
             }
 
             if (message->replace_id) {
-                win_correct_incoming(window, message->plain, message->id, message->replace_id);
+                _win_correct(window, message->plain, message->id, message->replace_id);
             } else {
                 _win_printf(window, enc_char, 0, message->timestamp, flags, THEME_TEXT_THEM, from, message->id, "%s", message->plain);
             }
@@ -1193,7 +1193,7 @@ win_print_outgoing(ProfWin *window, const char ch, const char *const id, const c
     g_string_vprintf(fmt_msg, message, arg);
 
     if (replace_id) {
-        win_correct_incoming(window, fmt_msg->str, id, replace_id);
+        _win_correct(window, fmt_msg->str, id, replace_id);
     } else {
         //TODO: without this it works.
         //buffer_append(window->layout->buffer, ch, 0, timestamp, 0, THEME_TEXT_ME, "me", fmt_msg->str, NULL, id);
