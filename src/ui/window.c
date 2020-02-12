@@ -1143,8 +1143,9 @@ win_print_them(ProfWin *window, theme_item_t theme_item, char ch, int flags, con
 }
 
 void
-win_println_them_message(ProfWin *window, char ch, int flags, const char *const them, const char *const message, ...)
+win_println_them_message(ProfWin *window, char ch, int flags, const char *const them, const char *const id, const char *const replace_id, const char *const message, ...)
 {
+    //TODO: we always use current timestamp here. instead of the message->timestamp one if available. i think somewhere else we check whether it exists first.
     GDateTime *timestamp = g_date_time_new_now_local();
 
     va_list arg;
@@ -1152,8 +1153,13 @@ win_println_them_message(ProfWin *window, char ch, int flags, const char *const 
     GString *fmt_msg = g_string_new(NULL);
     g_string_vprintf(fmt_msg, message, arg);
 
-    buffer_append(window->layout->buffer, ch, 0, timestamp, flags | NO_ME, THEME_TEXT_THEM, them, fmt_msg->str, NULL, NULL);
-    _win_print_internal(window, ch, 0, timestamp, flags | NO_ME, THEME_TEXT_THEM, them, fmt_msg->str, NULL);
+    if (replace_id) {
+        _win_correct(window, fmt_msg->str, id, replace_id);
+    } else {
+        _win_printf(window, ch, 0, timestamp, flags | NO_ME, THEME_TEXT_THEM, them, id, "%s", fmt_msg->str);
+    }
+//    buffer_append(window->layout->buffer, ch, 0, timestamp, flags | NO_ME, THEME_TEXT_THEM, them, fmt_msg->str, NULL, NULL);
+ //   _win_print_internal(window, ch, 0, timestamp, flags | NO_ME, THEME_TEXT_THEM, them, fmt_msg->str, NULL);
 
     inp_nonblocking(TRUE);
     g_date_time_unref(timestamp);

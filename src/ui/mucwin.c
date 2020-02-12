@@ -559,7 +559,7 @@ mucwin_incoming_msg(ProfMucWin *mucwin, ProfMessage *message, GSList *mentions, 
         win_print_them(window, THEME_ROOMTRIGGER, ch, flags, message->jid->resourcepart);
         _mucwin_print_triggers(window, message->plain, triggers);
     } else {
-        win_println_them_message(window, ch, flags, message->jid->resourcepart, "%s", message->plain);
+        win_println_them_message(window, ch, flags, message->jid->resourcepart, message->id, message->replace_id, "%s", message->plain);
     }
 }
 

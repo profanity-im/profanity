@@ -827,11 +827,21 @@ _handle_groupchat(xmpp_stanza_t *const stanza)
 
     ProfMessage *message = message_init();
     message->jid = jid;
+
     if (id) {
         message->id = strdup(id);
     }
+
     if (originid) {
         message->originid = strdup(originid);
+    }
+
+    xmpp_stanza_t *replace_id_stanza = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_LAST_MESSAGE_CORRECTION);
+    if (replace_id_stanza) {
+        const char *replace_id = xmpp_stanza_get_id(replace_id_stanza);
+        if (replace_id) {
+            message->replace_id = strdup(replace_id);
+        }
     }
 
     message->body = xmpp_message_get_body(stanza);
