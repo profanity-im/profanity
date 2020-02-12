@@ -2382,7 +2382,7 @@ static struct cmd_t command_defs[] =
     },
 
     { "/correct",
-        parse_args, 1, 1, NULL,
+        parse_args, 1, -1, NULL,
         CMD_NOSUBFUNCS
         CMD_MAINFUNC(cmd_correct)
         CMD_TAGS(
@@ -2393,10 +2393,8 @@ static struct cmd_t command_defs[] =
         CMD_DESC(
             "Correct and resend the last message (XEP-0308).")
         CMD_ARGS(
-            { "\"message\"",    "The corrected message. Multiple words need quotation marks."})
-        CMD_EXAMPLES(
-            "/correct Profanity",
-            "/correct \"Profanity is the best\"")
+            { "message",    "The corrected message."})
+        CMD_NOEXAMPLES
     },
 };
 

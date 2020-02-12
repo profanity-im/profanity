@@ -8701,7 +8701,10 @@ cmd_correct(ProfWin *window, const char *const command, gchar **args)
         }
 
         // send message again, with replace flag
-        cl_ev_send_msg_correct(chatwin, args[0], FALSE, TRUE);
+        gchar *message = g_strjoinv(" ", args);
+        cl_ev_send_msg_correct(chatwin, message, FALSE, TRUE);
+
+        free(message);
         return TRUE;
     } else if (window->type == WIN_MUC) {
         ProfMucWin *mucwin = (ProfMucWin*)window;
@@ -8713,7 +8716,10 @@ cmd_correct(ProfWin *window, const char *const command, gchar **args)
         }
 
         // send message again, with replace flag
-        cl_ev_send_muc_msg_corrected(mucwin, args[0], FALSE, TRUE);
+        gchar *message = g_strjoinv(" ", args);
+        cl_ev_send_muc_msg_corrected(mucwin, message, FALSE, TRUE);
+
+        free(message);
         return TRUE;
     }
 
