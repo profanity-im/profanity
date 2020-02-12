@@ -2393,8 +2393,10 @@ static struct cmd_t command_defs[] =
         CMD_DESC(
             "Correct and resend the last message (XEP-0308).")
         CMD_ARGS(
-            { "<message>",    "The corrected message."})
-        CMD_NOEXAMPLES
+            { "\"message\"",    "The corrected message. Multiple words need quotation marks."})
+        CMD_EXAMPLES(
+            "/correct Profanity",
+            "/correct \"Profanity is the best\"")
     },
 };
 

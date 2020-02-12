@@ -54,7 +54,7 @@ typedef struct cmd_help_t {
  * cmd - The command string including leading '/'
  * parser - The function used to parse arguments
  * min_args - Minimum number of arguments
- * max_args - Maximum number of arguments
+ * max_args - Maximum number of arguments, -1 for infinite
  * setting_func - Function to display current settings to the console
  * sub_funcs - Optional list of functions mapped to the first argument
  * func - Main function to call when no arguments, or sub_funcs not implemented

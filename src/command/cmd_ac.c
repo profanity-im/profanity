@@ -3765,8 +3765,9 @@ _correct_autocomplete(ProfWin *window, const char *const input, gboolean previou
 		return NULL;
 	}
 
-	GString *result_str = g_string_new("/correct ");
+	GString *result_str = g_string_new("/correct \"");
 	g_string_append(result_str, last_message);
+	g_string_append(result_str, "\"");
 	char *result = result_str->str;
 	g_string_free(result_str, FALSE);
 
