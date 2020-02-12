@@ -294,7 +294,7 @@ message_send_chat(const char *const barejid, const char *const msg, const char *
 }
 
 char*
-message_send_chat_pgp(const char *const barejid, const char *const msg, gboolean request_receipt)
+message_send_chat_pgp(const char *const barejid, const char *const msg, gboolean request_receipt, const char *const replace_id)
 {
     xmpp_ctx_t * const ctx = connection_get_ctx();
 
@@ -346,6 +346,10 @@ message_send_chat_pgp(const char *const barejid, const char *const msg, gboolean
         stanza_attach_receipt_request(ctx, message);
     }
 
+    if (replace_id) {
+        stanza_attach_correction(ctx, message, replace_id);
+    }
+
     _send_message_stanza(message);
     xmpp_stanza_release(message);
 
@@ -353,7 +357,7 @@ message_send_chat_pgp(const char *const barejid, const char *const msg, gboolean
 }
 
 char*
-message_send_chat_otr(const char *const barejid, const char *const msg, gboolean request_receipt)
+message_send_chat_otr(const char *const barejid, const char *const msg, gboolean request_receipt, const char *const replace_id)
 {
     xmpp_ctx_t * const ctx = connection_get_ctx();
 
@@ -378,6 +382,10 @@ message_send_chat_otr(const char *const barejid, const char *const msg, gboolean
         stanza_attach_receipt_request(ctx, message);
     }
 
+    if (replace_id) {
+        stanza_attach_correction(ctx, message, replace_id);
+    }
+
     _send_message_stanza(message);
     xmpp_stanza_release(message);
 
@@ -389,7 +397,7 @@ char*
 message_send_chat_omemo(const char *const jid, uint32_t sid, GList *keys,
     const unsigned char *const iv, size_t iv_len,
     const unsigned char *const ciphertext, size_t ciphertext_len,
-    gboolean request_receipt, gboolean muc)
+    gboolean request_receipt, gboolean muc, const char *const replace_id)
 {
     char *state = chat_session_get_state(jid);
     xmpp_ctx_t * const ctx = connection_get_ctx();
@@ -487,6 +495,10 @@ message_send_chat_omemo(const char *const jid, uint32_t sid, GList *keys,
 
     if (request_receipt) {
         stanza_attach_receipt_request(ctx, message);
+    }
+
+    if (replace_id) {
+        stanza_attach_correction(ctx, message, replace_id);
     }
 
     _send_message_stanza(message);
