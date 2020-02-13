@@ -160,8 +160,7 @@ void privwin_incoming_msg(ProfPrivateWin *privatewin, ProfMessage *message) {}
 void ui_disconnected(void) {}
 void chatwin_recipient_gone(ProfChatWin *chatwin) {}
 
-void chatwin_outgoing_msg(ProfChatWin *chatwin, const char * const message, char *id, prof_enc_t enc_mode,
-    gboolean request_receipt) {}
+void chatwin_outgoing_msg(ProfChatWin *chatwin, const char *const message, char *id, prof_enc_t enc_mode, gboolean request_receipt, const char *const replace_id) {}
 void chatwin_outgoing_carbon(ProfChatWin *chatwin, ProfMessage *message) {}
 void privwin_outgoing_msg(ProfPrivateWin *privwin, const char * const message) {}
 
@@ -191,7 +190,7 @@ void mucwin_occupant_role_and_affiliation_change(ProfMucWin *mucwin, const char 
 void mucwin_roster(ProfMucWin *mucwin, GList *occupants, const char * const presence) {}
 void mucwin_history(ProfMucWin *mucwin, const char * const nick, GDateTime *timestamp, const char * const message) {}
 void mucwin_incoming_msg(ProfMucWin *mucwin, ProfMessage *message, GSList *mentions, GList *triggers) {}
-void mucwin_outgoing_msg(ProfMucWin *mucwin, const char *const message, const char *const id, prof_enc_t enc_mode) {}
+void mucwin_outgoing_msg(ProfMucWin *mucwin, const char *const message, const char *const id, prof_enc_t enc_mode, const char *const replace_id) {}
 void mucwin_subject(ProfMucWin *mucwin, const char * const nick, const char * const subject) {}
 void mucwin_requires_config(ProfMucWin *mucwin) {}
 void ui_room_destroy(const char * const roomjid) {}
