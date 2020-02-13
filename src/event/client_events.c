@@ -405,7 +405,7 @@ cl_ev_send_priv_msg(ProfPrivateWin *privwin, const char *const msg, const char *
 
         message_send_private(privwin->fulljid, plugin_msg, oob_url);
         chat_log_msg_out(jidp->barejid, plugin_msg, jidp->resourcepart);
-        privwin_outgoing_msg(privwin, NULL, NULL, plugin_msg);
+        privwin_outgoing_msg(privwin, plugin_msg);
 
         plugins_post_priv_message_send(privwin->fulljid, plugin_msg);
 

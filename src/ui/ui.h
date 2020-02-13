@@ -198,7 +198,7 @@ void mucwin_unset_message_char(ProfMucWin *mucwin);
 
 // MUC private chat window
 void privwin_incoming_msg(ProfPrivateWin *privatewin, ProfMessage *message);
-void privwin_outgoing_msg(ProfPrivateWin *privwin, const char *const id, const char *const replace_id, const char *const message);
+void privwin_outgoing_msg(ProfPrivateWin *privwin, const char *const message);
 void privwin_message_occupant_offline(ProfPrivateWin *privwin);
 
 void privwin_message_left_room(ProfPrivateWin *privwin);
