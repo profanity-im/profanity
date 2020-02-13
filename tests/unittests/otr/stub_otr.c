@@ -45,7 +45,7 @@ char* otr_on_message_recv(const char * const barejid, const char * const resourc
 {
     return NULL;
 }
-gboolean otr_on_message_send(ProfChatWin *chatwin, const char * const message, gboolean request_receipt)
+gboolean otr_on_message_send(ProfChatWin *chatwin, const char * const message, gboolean request_receipt, const char *const replace_id)
 {
     return FALSE;
 }
