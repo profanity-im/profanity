@@ -119,20 +119,7 @@ cl_ev_send_msg_correct(ProfChatWin *chatwin, const char *const msg, const char *
 {
     chat_state_active(chatwin->state);
 
-    gboolean request_receipt = FALSE;
-    if (prefs_get_boolean(PREF_RECEIPTS_REQUEST)) {
-        char *session_jid = chat_session_get_jid(chatwin->barejid);
-        if (session_jid) {
-            Jid *session_jidp = jid_create(session_jid);
-            if (session_jidp && session_jidp->resourcepart) {
-                if (caps_jid_has_feature(session_jid, XMPP_FEATURE_RECEIPTS)) {
-                    request_receipt = TRUE;
-                }
-            }
-            jid_destroy(session_jidp);
-            free(session_jid);
-        }
-    }
+    gboolean request_receipt = prefs_get_boolean(PREF_RECEIPTS_REQUEST);
 
     char *plugin_msg = plugins_pre_chat_message_send(chatwin->barejid, msg);
     if (plugin_msg == NULL) {
