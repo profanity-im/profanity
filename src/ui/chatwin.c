@@ -351,7 +351,6 @@ chatwin_outgoing_carbon(ProfChatWin *chatwin, ProfMessage *message)
 
     ProfWin *window = (ProfWin*)chatwin;
 
-    // TODO id set?
     win_print_outgoing(window, enc_char, message->id, message->replace_id, "%s", message->plain);
     int num = wins_get_num(window);
     status_bar_active(num, WIN_CHAT, chatwin->barejid);
