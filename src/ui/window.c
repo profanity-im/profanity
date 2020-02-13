@@ -1145,7 +1145,7 @@ win_print_them(ProfWin *window, theme_item_t theme_item, char ch, int flags, con
 }
 
 void
-win_println_them_message(ProfWin *window, char ch, int flags, const char *const them, const char *const id, const char *const replace_id, const char *const message, ...)
+win_println_incoming_muc_msg(ProfWin *window, char ch, int flags, const char *const them, const char *const id, const char *const replace_id, const char *const message, ...)
 {
     //TODO: we always use current timestamp here. instead of the message->timestamp one if available. i think somewhere else we check whether it exists first.
     GDateTime *timestamp = g_date_time_new_now_local();
