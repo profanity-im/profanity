@@ -1098,7 +1098,7 @@ _win_correct(ProfWin *window, const char *const message, const char *const id, c
 }
 
 void
-win_print_incoming(ProfWin *window, const char *const from, ProfMessage *message)
+win_print_incoming(ProfWin *window, const char *const display_name_from, ProfMessage *message)
 {
     char enc_char = '-';
     int flags = NO_ME;
@@ -1125,12 +1125,12 @@ win_print_incoming(ProfWin *window, const char *const from, ProfMessage *message
             if (prefs_get_boolean(PREF_CORRECTION_ALLOW) && message->replace_id) {
                 _win_correct(window, message->plain, message->id, message->replace_id);
             } else {
-                _win_printf(window, enc_char, 0, message->timestamp, flags, THEME_TEXT_THEM, from, message->id, "%s", message->plain);
+                _win_printf(window, enc_char, 0, message->timestamp, flags, THEME_TEXT_THEM, display_name_from, message->id, "%s", message->plain);
             }
             break;
         }
         case WIN_PRIVATE:
-            _win_printf(window, '-', 0, message->timestamp, flags, THEME_TEXT_THEM, from, message->id, "%s", message->plain);
+            _win_printf(window, '-', 0, message->timestamp, flags, THEME_TEXT_THEM, display_name_from, message->id, "%s", message->plain);
             break;
         default:
             assert(FALSE);
@@ -1743,12 +1743,12 @@ win_redraw(ProfWin *window)
     for (i = 0; i < size; i++) {
         ProfBuffEntry *e = buffer_get_entry(window->layout->buffer, i);
 
-        if (e->from == NULL && e->message && e->message[0] == '-') {
+        if (e->display_from == NULL && e->message && e->message[0] == '-') {
             // just an indicator to print the separator not the actual message
             win_print_separator(window);
         } else {
             // regular thing to print
-            _win_print_internal(window, e->show_char, e->pad_indent, e->time, e->flags, e->theme_item, e->from, e->message, e->receipt);
+            _win_print_internal(window, e->show_char, e->pad_indent, e->time, e->flags, e->theme_item, e->display_from, e->message, e->receipt);
         }
     }
 }
