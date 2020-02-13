@@ -1381,19 +1381,23 @@ win_appendln_highlight(ProfWin *window, theme_item_t theme_item, const char *con
 void
 win_print_http_upload(ProfWin *window, const char *const message, char *url)
 {
-    win_print_outgoing_with_receipt(window, '!', NULL, message, url);
+    win_print_outgoing_with_receipt(window, '!', NULL, message, url, NULL);
 }
 
 void
-win_print_outgoing_with_receipt(ProfWin *window, const char show_char, const char *const from, const char *const message, char *id)
+win_print_outgoing_with_receipt(ProfWin *window, const char show_char, const char *const from, const char *const message, char *id, const char *const replace_id)
 {
     GDateTime *time = g_date_time_new_now_local();
 
     DeliveryReceipt *receipt = malloc(sizeof(struct delivery_receipt_t));
     receipt->received = FALSE;
 
-    buffer_append(window->layout->buffer, show_char, 0, time, 0, THEME_TEXT_ME, from, message, receipt, id);
-    _win_print_internal(window, show_char, 0, time, 0, THEME_TEXT_ME, from, message, receipt);
+    if (replace_id) {
+        _win_correct(window, message, id, replace_id);
+    } else {
+        buffer_append(window->layout->buffer, show_char, 0, time, 0, THEME_TEXT_ME, from, message, receipt, id);
+        _win_print_internal(window, show_char, 0, time, 0, THEME_TEXT_ME, from, message, receipt);
+    }
 
     // TODO: cross-reference.. this should be replaced by a real event-based system
     inp_nonblocking(TRUE);

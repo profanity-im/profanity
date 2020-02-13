@@ -72,8 +72,7 @@ void win_print_history(ProfWin *window, GDateTime *timestamp, const char *const 
 
 void win_print_http_upload(ProfWin *window, const char *const message, char *url);
 
-void win_print_outgoing_with_receipt(ProfWin *window, const char show_char, const char *const from, const char *const message,
-    char *id);
+void win_print_outgoing_with_receipt(ProfWin *window, const char show_char, const char *const from, const char *const message, char *id, const char *const replace_id);
 
 void win_newline(ProfWin *window);
 void win_redraw(ProfWin *window);
