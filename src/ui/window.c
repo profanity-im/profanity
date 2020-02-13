@@ -1381,11 +1381,11 @@ win_appendln_highlight(ProfWin *window, theme_item_t theme_item, const char *con
 void
 win_print_http_upload(ProfWin *window, const char *const message, char *url)
 {
-    win_print_with_receipt(window, '!', NULL, message, url);
+    win_print_outgoing_with_receipt(window, '!', NULL, message, url);
 }
 
 void
-win_print_with_receipt(ProfWin *window, const char show_char, const char *const from, const char *const message, char *id)
+win_print_outgoing_with_receipt(ProfWin *window, const char show_char, const char *const from, const char *const message, char *id)
 {
     GDateTime *time = g_date_time_new_now_local();
 
