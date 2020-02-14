@@ -2374,7 +2374,8 @@ static struct cmd_t command_defs[] =
             "/correction <on>|<off>",
             "/correction char <char>")
         CMD_DESC(
-            "Settings regarding Last Message Correction (XEP-0308). Caution: We do not yet check the 'from' field. So it could happen that someone else is overwriting the actual message.")
+            "Settings regarding Last Message Correction (XEP-0308). Caution: We do not yet check the 'from' field. So it could happen that someone else is overwriting the actual message."
+            "Corrections will only work in MUC and regular chat windows. MUC PMs won't be allowed.")
         CMD_ARGS(
             { "on|off", "Enable/Disable support for last message correction."},
             { "char",    "Set character that will prefix corrected messages. Default: +"})
