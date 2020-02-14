@@ -8691,6 +8691,11 @@ cmd_correct(ProfWin *window, const char *const command, gchar **args)
         return TRUE;
     }
 
+    if (!prefs_get_boolean(PREF_CORRECTION_ALLOW)) {
+        win_println(window, THEME_DEFAULT, '!', "Corrections not enabled. See /help correction.");
+        return TRUE;
+    }
+
     if (window->type == WIN_CHAT) {
         ProfChatWin *chatwin = (ProfChatWin*)window;
         assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
