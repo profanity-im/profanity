@@ -3,6 +3,7 @@
  * vim: expandtab:ts=4:sts=4:sw=4
  *
  * Copyright (C) 2012 - 2019 James Booth <boothj5@gmail.com>
+ * Copyright (C) 2019 - 2020 Michael Vetter <jubalh@iodoru.org>
  *
  * This file is part of Profanity.
  *
@@ -56,6 +57,7 @@
 #endif
 
 static void _chatwin_history(ProfChatWin *chatwin, const char *const contact);
+static void _chatwin_set_last_message(ProfChatWin *chatwin, const char *const id, const char *const message);
 
 ProfChatWin*
 chatwin_new(const char *const barejid)
@@ -308,7 +310,7 @@ chatwin_incoming_msg(ProfChatWin *chatwin, ProfMessage *message, gboolean win_cr
 
 void
 chatwin_outgoing_msg(ProfChatWin *chatwin, const char *const message, char *id, prof_enc_t enc_mode,
-    gboolean request_receipt)
+    gboolean request_receipt, const char *const replace_id)
 {
     assert(chatwin != NULL);
 
@@ -324,9 +326,14 @@ chatwin_outgoing_msg(ProfChatWin *chatwin, const char *const message, char *id, 
     }
 
     if (request_receipt && id) {
-        win_print_with_receipt((ProfWin*)chatwin, enc_char, "me", message, id);
+        win_print_outgoing_with_receipt((ProfWin*)chatwin, enc_char, "me", message, id, replace_id);
     } else {
-        win_print_outgoing((ProfWin*)chatwin, enc_char, "%s", message);
+        win_print_outgoing((ProfWin*)chatwin, enc_char, id, replace_id, "%s", message);
+    }
+
+    // save last id and message for LMC
+    if (id) {
+        _chatwin_set_last_message(chatwin, id, message);
     }
 }
 
@@ -344,7 +351,7 @@ chatwin_outgoing_carbon(ProfChatWin *chatwin, ProfMessage *message)
 
     ProfWin *window = (ProfWin*)chatwin;
 
-    win_print_outgoing(window, enc_char, "%s", message->plain);
+    win_print_outgoing(window, enc_char, message->id, message->replace_id, "%s", message->plain);
     int num = wins_get_num(window);
     status_bar_active(num, WIN_CHAT, chatwin->barejid);
 }
@@ -495,4 +502,14 @@ _chatwin_history(ProfChatWin *chatwin, const char *const contact)
 
         g_slist_free_full(history, free);
     }
+}
+
+static void
+_chatwin_set_last_message(ProfChatWin *chatwin, const char *const id, const char *const message)
+{
+    free(chatwin->last_message);
+    chatwin->last_message = strdup(message);
+
+    free(chatwin->last_msg_id);
+    chatwin->last_msg_id = strdup(id);
 }

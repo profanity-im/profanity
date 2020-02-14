@@ -671,7 +671,7 @@ out:
 }
 
 char *
-omemo_on_message_send(ProfWin *win, const char *const message, gboolean request_receipt, gboolean muc)
+omemo_on_message_send(ProfWin *win, const char *const message, gboolean request_receipt, gboolean muc, const char *const replace_id)
 {
     char *id = NULL;
     int res;
@@ -809,11 +809,11 @@ omemo_on_message_send(ProfWin *win, const char *const message, gboolean request_
     if (muc) {
         ProfMucWin *mucwin = (ProfMucWin *)win;
         assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
-        id = message_send_chat_omemo(mucwin->roomjid, omemo_ctx.device_id, keys, iv, AES128_GCM_IV_LENGTH, ciphertext, ciphertext_len, request_receipt, TRUE);
+        id = message_send_chat_omemo(mucwin->roomjid, omemo_ctx.device_id, keys, iv, AES128_GCM_IV_LENGTH, ciphertext, ciphertext_len, request_receipt, TRUE, replace_id);
     } else {
         ProfChatWin *chatwin = (ProfChatWin *)win;
         assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
-        id = message_send_chat_omemo(chatwin->barejid, omemo_ctx.device_id, keys, iv, AES128_GCM_IV_LENGTH, ciphertext, ciphertext_len, request_receipt, FALSE);
+        id = message_send_chat_omemo(chatwin->barejid, omemo_ctx.device_id, keys, iv, AES128_GCM_IV_LENGTH, ciphertext, ciphertext_len, request_receipt, FALSE, replace_id);
     }
 
 out:

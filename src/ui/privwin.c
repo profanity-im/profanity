@@ -95,7 +95,7 @@ privwin_outgoing_msg(ProfPrivateWin *privwin, const char *const message)
 {
     assert(privwin != NULL);
 
-    win_print_outgoing((ProfWin*)privwin, '-', "%s", message);
+    win_print_outgoing((ProfWin*)privwin, '-', NULL, NULL ,"%s", message);
 }
 
 void

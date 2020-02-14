@@ -115,28 +115,20 @@ cl_ev_presence_send(const resource_presence_t presence_type, const int idle_secs
 }
 
 void
-cl_ev_send_msg(ProfChatWin *chatwin, const char *const msg, const char *const oob_url)
+cl_ev_send_msg_correct(ProfChatWin *chatwin, const char *const msg, const char *const oob_url, gboolean correct_last_msg)
 {
     chat_state_active(chatwin->state);
 
-    gboolean request_receipt = FALSE;
-    if (prefs_get_boolean(PREF_RECEIPTS_REQUEST)) {
-        char *session_jid = chat_session_get_jid(chatwin->barejid);
-        if (session_jid) {
-            Jid *session_jidp = jid_create(session_jid);
-            if (session_jidp && session_jidp->resourcepart) {
-                if (caps_jid_has_feature(session_jid, XMPP_FEATURE_RECEIPTS)) {
-                    request_receipt = TRUE;
-                }
-            }
-            jid_destroy(session_jidp);
-            free(session_jid);
-        }
-    }
+    gboolean request_receipt = prefs_get_boolean(PREF_RECEIPTS_REQUEST);
 
     char *plugin_msg = plugins_pre_chat_message_send(chatwin->barejid, msg);
     if (plugin_msg == NULL) {
         return;
+    }
+
+    char *replace_id = NULL;
+    if (correct_last_msg) {
+        replace_id = chatwin->last_msg_id;
     }
 
 // OTR suported, PGP supported, OMEMO unsupported
@@ -144,16 +136,16 @@ cl_ev_send_msg(ProfChatWin *chatwin, const char *const msg, const char *const oo
 #ifdef HAVE_LIBGPGME
 #ifndef HAVE_OMEMO
     if (chatwin->pgp_send) {
-        char *id = message_send_chat_pgp(chatwin->barejid, plugin_msg, request_receipt);
+        char *id = message_send_chat_pgp(chatwin->barejid, plugin_msg, request_receipt, replace_id);
         chat_log_pgp_msg_out(chatwin->barejid, plugin_msg, NULL);
-        chatwin_outgoing_msg(chatwin, plugin_msg, id, PROF_MSG_ENC_PGP, request_receipt);
+        chatwin_outgoing_msg(chatwin, plugin_msg, id, PROF_MSG_ENC_PGP, request_receipt, replace_id);
         free(id);
     } else {
-        gboolean handled = otr_on_message_send(chatwin, plugin_msg, request_receipt);
+        gboolean handled = otr_on_message_send(chatwin, plugin_msg, request_receipt, replace_id);
         if (!handled) {
-            char *id = message_send_chat(chatwin->barejid, plugin_msg, oob_url, request_receipt);
+            char *id = message_send_chat(chatwin->barejid, plugin_msg, oob_url, request_receipt, replace_id);
             chat_log_msg_out(chatwin->barejid, plugin_msg, NULL);
-            chatwin_outgoing_msg(chatwin, plugin_msg, id, PROF_MSG_ENC_PLAIN, request_receipt);
+            chatwin_outgoing_msg(chatwin, plugin_msg, id, PROF_MSG_ENC_PLAIN, request_receipt, replace_id);
             free(id);
         }
     }
@@ -169,9 +161,9 @@ cl_ev_send_msg(ProfChatWin *chatwin, const char *const msg, const char *const oo
 #ifdef HAVE_LIBOTR
 #ifndef HAVE_LIBGPGME
 #ifndef HAVE_OMEMO
-    gboolean handled = otr_on_message_send(chatwin, plugin_msg, request_receipt);
+    gboolean handled = otr_on_message_send(chatwin, plugin_msg, request_receipt, replace_id);
     if (!handled) {
-        char *id = message_send_chat(chatwin->barejid, plugin_msg, oob_url, request_receipt);
+        char *id = message_send_chat(chatwin->barejid, plugin_msg, oob_url, request_receipt, replace_id);
         chat_log_msg_out(chatwin->barejid, plugin_msg, NULL);
         chatwin_outgoing_msg(chatwin, plugin_msg, id, PROF_MSG_ENC_PLAIN, request_receipt);
         free(id);
@@ -189,14 +181,14 @@ cl_ev_send_msg(ProfChatWin *chatwin, const char *const msg, const char *const oo
 #ifdef HAVE_LIBGPGME
 #ifndef HAVE_OMEMO
     if (chatwin->pgp_send) {
-        char *id = message_send_chat_pgp(chatwin->barejid, plugin_msg, request_receipt);
+        char *id = message_send_chat_pgp(chatwin->barejid, plugin_msg, request_receipt, replace_id);
         chat_log_pgp_msg_out(chatwin->barejid, plugin_msg, NULL);
-        chatwin_outgoing_msg(chatwin, plugin_msg, id, PROF_MSG_ENC_PGP, request_receipt);
+        chatwin_outgoing_msg(chatwin, plugin_msg, id, PROF_MSG_ENC_PGP, request_receipt, replace_id);
         free(id);
     } else {
-        char *id = message_send_chat(chatwin->barejid, plugin_msg, oob_url, request_receipt);
+        char *id = message_send_chat(chatwin->barejid, plugin_msg, oob_url, request_receipt, replace_id);
         chat_log_msg_out(chatwin->barejid, plugin_msg, NULL);
-        chatwin_outgoing_msg(chatwin, plugin_msg, id, PROF_MSG_ENC_PLAIN, request_receipt);
+        chatwin_outgoing_msg(chatwin, plugin_msg, id, PROF_MSG_ENC_PLAIN, request_receipt, replace_id);
         free(id);
     }
 
@@ -212,14 +204,14 @@ cl_ev_send_msg(ProfChatWin *chatwin, const char *const msg, const char *const oo
 #ifndef HAVE_LIBGPGME
 #ifdef HAVE_OMEMO
     if (chatwin->is_omemo) {
-        char *id = omemo_on_message_send((ProfWin *)chatwin, plugin_msg, request_receipt, FALSE);
+        char *id = omemo_on_message_send((ProfWin *)chatwin, plugin_msg, request_receipt, FALSE, replace_id);
         chat_log_omemo_msg_out(chatwin->barejid, plugin_msg, NULL);
-        chatwin_outgoing_msg(chatwin, plugin_msg, id, PROF_MSG_ENC_OMEMO, request_receipt);
+        chatwin_outgoing_msg(chatwin, plugin_msg, id, PROF_MSG_ENC_OMEMO, request_receipt, replace_id);
         free(id);
     } else {
-        char *id = message_send_chat(chatwin->barejid, plugin_msg, oob_url, request_receipt);
+        char *id = message_send_chat(chatwin->barejid, plugin_msg, oob_url, request_receipt, replace_id);
         chat_log_msg_out(chatwin->barejid, plugin_msg, NULL);
-        chatwin_outgoing_msg(chatwin, plugin_msg, id, PROF_MSG_ENC_PLAIN, request_receipt);
+        chatwin_outgoing_msg(chatwin, plugin_msg, id, PROF_MSG_ENC_PLAIN, request_receipt, replace_id);
         free(id);
     }
 
@@ -235,16 +227,16 @@ cl_ev_send_msg(ProfChatWin *chatwin, const char *const msg, const char *const oo
 #ifndef HAVE_LIBGPGME
 #ifdef HAVE_OMEMO
     if (chatwin->is_omemo) {
-        char *id = omemo_on_message_send((ProfWin *)chatwin, plugin_msg, request_receipt, FALSE);
+        char *id = omemo_on_message_send((ProfWin *)chatwin, plugin_msg, request_receipt, FALSE, replace_id);
         chat_log_omemo_msg_out(chatwin->barejid, plugin_msg, NULL);
-        chatwin_outgoing_msg(chatwin, plugin_msg, id, PROF_MSG_ENC_OMEMO, request_receipt);
+        chatwin_outgoing_msg(chatwin, plugin_msg, id, PROF_MSG_ENC_OMEMO, request_receipt, replace_id);
         free(id);
     } else {
-        gboolean handled = otr_on_message_send(chatwin, plugin_msg, request_receipt);
+        gboolean handled = otr_on_message_send(chatwin, plugin_msg, request_receipt, replace_id);
         if (!handled) {
-            char *id = message_send_chat(chatwin->barejid, plugin_msg, oob_url, request_receipt);
+            char *id = message_send_chat(chatwin->barejid, plugin_msg, oob_url, request_receipt, replace_id);
             chat_log_msg_out(chatwin->barejid, plugin_msg, NULL);
-            chatwin_outgoing_msg(chatwin, plugin_msg, id, PROF_MSG_ENC_PLAIN, request_receipt);
+            chatwin_outgoing_msg(chatwin, plugin_msg, id, PROF_MSG_ENC_PLAIN, request_receipt, replace_id);
             free(id);
         }
     }
@@ -261,19 +253,19 @@ cl_ev_send_msg(ProfChatWin *chatwin, const char *const msg, const char *const oo
 #ifdef HAVE_LIBGPGME
 #ifdef HAVE_OMEMO
     if (chatwin->is_omemo) {
-        char *id = omemo_on_message_send((ProfWin *)chatwin, plugin_msg, request_receipt, FALSE);
+        char *id = omemo_on_message_send((ProfWin *)chatwin, plugin_msg, request_receipt, FALSE, replace_id);
         chat_log_omemo_msg_out(chatwin->barejid, plugin_msg, NULL);
-        chatwin_outgoing_msg(chatwin, plugin_msg, id, PROF_MSG_ENC_OMEMO, request_receipt);
+        chatwin_outgoing_msg(chatwin, plugin_msg, id, PROF_MSG_ENC_OMEMO, request_receipt, replace_id);
         free(id);
     } else if (chatwin->pgp_send) {
-        char *id = message_send_chat_pgp(chatwin->barejid, plugin_msg, request_receipt);
+        char *id = message_send_chat_pgp(chatwin->barejid, plugin_msg, request_receipt, replace_id);
         chat_log_pgp_msg_out(chatwin->barejid, plugin_msg, NULL);
-        chatwin_outgoing_msg(chatwin, plugin_msg, id, PROF_MSG_ENC_PGP, request_receipt);
+        chatwin_outgoing_msg(chatwin, plugin_msg, id, PROF_MSG_ENC_PGP, request_receipt, replace_id);
         free(id);
     } else {
-        char *id = message_send_chat(chatwin->barejid, plugin_msg, oob_url, request_receipt);
+        char *id = message_send_chat(chatwin->barejid, plugin_msg, oob_url, request_receipt, replace_id);
         chat_log_msg_out(chatwin->barejid, plugin_msg, NULL);
-        chatwin_outgoing_msg(chatwin, plugin_msg, id, PROF_MSG_ENC_PLAIN, request_receipt);
+        chatwin_outgoing_msg(chatwin, plugin_msg, id, PROF_MSG_ENC_PLAIN, request_receipt, replace_id);
         free(id);
     }
 
@@ -289,21 +281,21 @@ cl_ev_send_msg(ProfChatWin *chatwin, const char *const msg, const char *const oo
 #ifdef HAVE_LIBGPGME
 #ifdef HAVE_OMEMO
     if (chatwin->is_omemo) {
-        char *id = omemo_on_message_send((ProfWin *)chatwin, plugin_msg, request_receipt, FALSE);
+        char *id = omemo_on_message_send((ProfWin *)chatwin, plugin_msg, request_receipt, FALSE, replace_id);
         chat_log_omemo_msg_out(chatwin->barejid, plugin_msg, NULL);
-        chatwin_outgoing_msg(chatwin, plugin_msg, id, PROF_MSG_ENC_OMEMO, request_receipt);
+        chatwin_outgoing_msg(chatwin, plugin_msg, id, PROF_MSG_ENC_OMEMO, request_receipt, replace_id);
         free(id);
     } else if (chatwin->pgp_send) {
-        char *id = message_send_chat_pgp(chatwin->barejid, plugin_msg, request_receipt);
+        char *id = message_send_chat_pgp(chatwin->barejid, plugin_msg, request_receipt, replace_id);
         chat_log_pgp_msg_out(chatwin->barejid, plugin_msg, NULL);
-        chatwin_outgoing_msg(chatwin, plugin_msg, id, PROF_MSG_ENC_PGP, request_receipt);
+        chatwin_outgoing_msg(chatwin, plugin_msg, id, PROF_MSG_ENC_PGP, request_receipt, replace_id);
         free(id);
     } else {
-        gboolean handled = otr_on_message_send(chatwin, plugin_msg, request_receipt);
+        gboolean handled = otr_on_message_send(chatwin, plugin_msg, request_receipt, replace_id);
         if (!handled) {
-            char *id = message_send_chat(chatwin->barejid, plugin_msg, oob_url, request_receipt);
+            char *id = message_send_chat(chatwin->barejid, plugin_msg, oob_url, request_receipt, replace_id);
             chat_log_msg_out(chatwin->barejid, plugin_msg, NULL);
-            chatwin_outgoing_msg(chatwin, plugin_msg, id, PROF_MSG_ENC_PLAIN, request_receipt);
+            chatwin_outgoing_msg(chatwin, plugin_msg, id, PROF_MSG_ENC_PLAIN, request_receipt, replace_id);
             free(id);
         }
     }
@@ -319,9 +311,9 @@ cl_ev_send_msg(ProfChatWin *chatwin, const char *const msg, const char *const oo
 #ifndef HAVE_LIBOTR
 #ifndef HAVE_LIBGPGME
 #ifndef HAVE_OMEMO
-    char *id = message_send_chat(chatwin->barejid, plugin_msg, oob_url, request_receipt);
+    char *id = message_send_chat(chatwin->barejid, plugin_msg, oob_url, request_receipt, replace_id);
     chat_log_msg_out(chatwin->barejid, plugin_msg, NULL);
-    chatwin_outgoing_msg(chatwin, plugin_msg, id, PROF_MSG_ENC_PLAIN, request_receipt);
+    chatwin_outgoing_msg(chatwin, plugin_msg, id, PROF_MSG_ENC_PLAIN, request_receipt, replace_id);
     free(id);
 
     plugins_post_chat_message_send(chatwin->barejid, plugin_msg);
@@ -333,23 +325,34 @@ cl_ev_send_msg(ProfChatWin *chatwin, const char *const msg, const char *const oo
 }
 
 void
-cl_ev_send_muc_msg(ProfMucWin *mucwin, const char *const msg, const char *const oob_url)
+cl_ev_send_msg(ProfChatWin *chatwin, const char *const msg, const char *const oob_url)
+{
+    cl_ev_send_msg_correct(chatwin, msg, oob_url, FALSE);
+}
+
+void
+cl_ev_send_muc_msg_corrected(ProfMucWin *mucwin, const char *const msg, const char *const oob_url, gboolean correct_last_msg)
 {
     char *plugin_msg = plugins_pre_room_message_send(mucwin->roomjid, msg);
     if (plugin_msg == NULL) {
         return;
     }
 
+    char *replace_id = NULL;
+    if (correct_last_msg) {
+        replace_id = mucwin->last_msg_id;
+    }
+
 #ifdef HAVE_OMEMO
     if (mucwin->is_omemo) {
-        char *id = omemo_on_message_send((ProfWin *)mucwin, plugin_msg, FALSE, TRUE);
+        char *id = omemo_on_message_send((ProfWin *)mucwin, plugin_msg, FALSE, TRUE, replace_id);
         groupchat_log_omemo_msg_out(mucwin->roomjid, plugin_msg);
-        mucwin_outgoing_msg(mucwin, plugin_msg, id, PROF_MSG_ENC_OMEMO);
+        mucwin_outgoing_msg(mucwin, plugin_msg, id, PROF_MSG_ENC_OMEMO, replace_id);
         free(id);
     } else {
-        char *id = message_send_groupchat(mucwin->roomjid, plugin_msg, oob_url);
+        char *id = message_send_groupchat(mucwin->roomjid, plugin_msg, oob_url, replace_id);
         groupchat_log_msg_out(mucwin->roomjid, plugin_msg);
-        mucwin_outgoing_msg(mucwin, plugin_msg, id, PROF_MSG_ENC_PLAIN);
+        mucwin_outgoing_msg(mucwin, plugin_msg, id, PROF_MSG_ENC_PLAIN, replace_id);
         free(id);
     }
 
@@ -359,15 +362,21 @@ cl_ev_send_muc_msg(ProfMucWin *mucwin, const char *const msg, const char *const 
 #endif
 
 #ifndef HAVE_OMEMO
-    char *id = message_send_groupchat(mucwin->roomjid, plugin_msg, oob_url);
+    char *id = message_send_groupchat(mucwin->roomjid, plugin_msg, oob_url, replace_id);
     groupchat_log_msg_out(mucwin->roomjid, plugin_msg);
-    mucwin_outgoing_msg(mucwin, plugin_msg, id, PROF_MSG_ENC_PLAIN);
+    mucwin_outgoing_msg(mucwin, plugin_msg, id, PROF_MSG_ENC_PLAIN, replace_id);
     free(id);
 
     plugins_post_room_message_send(mucwin->roomjid, plugin_msg);
     free(plugin_msg);
     return;
 #endif
+}
+
+void
+cl_ev_send_muc_msg(ProfMucWin *mucwin, const char *const msg, const char *const oob_url)
+{
+    cl_ev_send_muc_msg_corrected(mucwin, msg, oob_url, FALSE);
 }
 
 void

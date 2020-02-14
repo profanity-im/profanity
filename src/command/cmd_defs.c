@@ -2361,6 +2361,41 @@ static struct cmd_t command_defs[] =
             { "on|off", ""})
         CMD_NOEXAMPLES
     },
+
+    { "/correction",
+        parse_args, 1, 2, &cons_correction_setting,
+        CMD_NOSUBFUNCS
+        CMD_MAINFUNC(cmd_correction)
+        CMD_TAGS(
+            CMD_TAG_UI,
+            CMD_TAG_CHAT,
+            CMD_TAG_GROUPCHAT)
+        CMD_SYN(
+            "/correction <on>|<off>",
+            "/correction char <char>")
+        CMD_DESC(
+            "Settings regarding Last Message Correction (XEP-0308). Caution: We do not yet check the 'from' field. So it could happen that someone else is overwriting the actual message.")
+        CMD_ARGS(
+            { "on|off", "Enable/Disable support for last message correction."},
+            { "char",    "Set character that will prefix corrected messages. Default: +"})
+        CMD_NOEXAMPLES
+    },
+
+    { "/correct",
+        parse_args, 1, -1, NULL,
+        CMD_NOSUBFUNCS
+        CMD_MAINFUNC(cmd_correct)
+        CMD_TAGS(
+            CMD_TAG_CHAT,
+            CMD_TAG_GROUPCHAT)
+        CMD_SYN(
+            "/correct <message>")
+        CMD_DESC(
+            "Correct and resend the last message (XEP-0308).")
+        CMD_ARGS(
+            { "message",    "The corrected message."})
+        CMD_NOEXAMPLES
+    },
 };
 
 static GHashTable *search_index;

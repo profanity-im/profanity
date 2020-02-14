@@ -2022,6 +2022,19 @@ cons_os_setting(void)
 }
 
 void
+cons_correction_setting(void)
+{
+    if (prefs_get_boolean(PREF_CORRECTION_ALLOW)) {
+        cons_show("Last Message Correction (XEP-0308) (/correction)                   : ON");
+    } else {
+        cons_show("Last Message Correction (XEP-0308) (/correction)                   : OFF");
+    }
+
+    char cc = prefs_get_correction_char();
+    cons_show("LMC indication char (/correction char)                             : %c", cc);
+}
+
+void
 cons_show_connection_prefs(void)
 {
     cons_show("Connection preferences:");

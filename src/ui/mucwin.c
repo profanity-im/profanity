@@ -50,6 +50,8 @@
 #include "omemo/omemo.h"
 #endif
 
+static void _mucwin_set_last_message(ProfMucWin *mucwin, const char *const id, const char *const message);
+
 ProfMucWin*
 mucwin_new(const char *const barejid)
 {
@@ -501,7 +503,7 @@ _mucwin_print_triggers(ProfWin *window, const char *const message, GList *trigge
 }
 
 void
-mucwin_outgoing_msg(ProfMucWin *mucwin, const char *const message, const char *const id, prof_enc_t enc_mode)
+mucwin_outgoing_msg(ProfMucWin *mucwin, const char *const message, const char *const id, prof_enc_t enc_mode, const char *const replace_id)
 {
     assert(mucwin != NULL);
 
@@ -519,7 +521,12 @@ mucwin_outgoing_msg(ProfMucWin *mucwin, const char *const message, const char *c
         ch = prefs_get_omemo_char();
     }
 
-    win_println_me_message(window, ch, mynick, "%s", message);
+    win_print_outgoing_muc_msg(window, ch, mynick, id, replace_id, "%s", message);
+
+    // save last id and message for LMC
+    if (id) {
+        _mucwin_set_last_message(mucwin, id, message);
+    }
 }
 
 void
@@ -559,7 +566,7 @@ mucwin_incoming_msg(ProfMucWin *mucwin, ProfMessage *message, GSList *mentions, 
         win_print_them(window, THEME_ROOMTRIGGER, ch, flags, message->jid->resourcepart);
         _mucwin_print_triggers(window, message->plain, triggers);
     } else {
-        win_println_them_message(window, ch, flags, message->jid->resourcepart, "%s", message->plain);
+        win_println_incoming_muc_msg(window, ch, flags, message->jid->resourcepart, message->id, message->replace_id, "%s", message->plain);
     }
 }
 
@@ -950,4 +957,14 @@ mucwin_unset_message_char(ProfMucWin *mucwin)
         free(mucwin->message_char);
         mucwin->message_char = NULL;
     }
+}
+
+static void
+_mucwin_set_last_message(ProfMucWin *mucwin, const char *const id, const char *const message)
+{
+    free(mucwin->last_message);
+    mucwin->last_message = strdup(message);
+
+    free(mucwin->last_msg_id);
+    mucwin->last_msg_id = strdup(id);
 }

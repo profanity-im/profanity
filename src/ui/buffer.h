@@ -3,6 +3,7 @@
  * vim: expandtab:ts=4:sts=4:sw=4
  *
  * Copyright (C) 2012 - 2019 James Booth <boothj5@gmail.com>
+ * Copyright (C) 2019 - 2020 Michael Vetter <jubalh@iodoru.org>
  *
  * This file is part of Profanity.
  *
@@ -51,7 +52,9 @@ typedef struct prof_buff_entry_t {
     GDateTime *time;
     int flags;
     theme_item_t theme_item;
-    char *from;
+    // from as it is displayed
+    // might be nick, jid..
+    char *display_from;
     char *message;
     DeliveryReceipt *receipt;
     // message id, in case we have it
@@ -63,7 +66,7 @@ typedef struct prof_buff_t *ProfBuff;
 ProfBuff buffer_create();
 void buffer_free(ProfBuff buffer);
 void buffer_append(ProfBuff buffer, const char show_char, int pad_indent, GDateTime *time,
-    int flags, theme_item_t theme_item, const char *const from, const char *const message, DeliveryReceipt *receipt, const char *const id);
+    int flags, theme_item_t theme_item, const char *const display_from, const char *const message, DeliveryReceipt *receipt, const char *const id);
 void buffer_remove_entry_by_id(ProfBuff buffer, const char *const id);
 int buffer_size(ProfBuff buffer);
 ProfBuffEntry* buffer_get_entry(ProfBuff buffer, int entry);

@@ -161,6 +161,7 @@ typedef enum {
     PREF_OMEMO_LOG,
     PREF_OMEMO_POLICY,
     PREF_OCCUPANTS_WRAP,
+    PREF_CORRECTION_ALLOW,
 } preference_t;
 
 typedef struct prof_alias_t {
@@ -267,6 +268,9 @@ gint prefs_get_roster_presence_indent(void);
 void prefs_set_roster_presence_indent(gint value);
 gint prefs_get_occupants_indent(void);
 void prefs_set_occupants_indent(gint value);
+
+char prefs_get_correction_char(void);
+void prefs_set_correction_char(char ch);
 
 void prefs_add_login(const char *jid);
 

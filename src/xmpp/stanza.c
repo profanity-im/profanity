@@ -2606,3 +2606,15 @@ stanza_create_avatar_retrieve_data_request(xmpp_ctx_t *ctx, const char *stanza_i
 
     return iq;
 }
+
+xmpp_stanza_t*
+stanza_attach_correction(xmpp_ctx_t *ctx, xmpp_stanza_t *stanza, const char *const replace_id)
+{
+    xmpp_stanza_t *replace_stanza = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(replace_stanza, "replace");
+    xmpp_stanza_set_id(replace_stanza, replace_id);
+    xmpp_stanza_set_ns(replace_stanza, STANZA_NS_LAST_MESSAGE_CORRECTION);
+    xmpp_stanza_add_child(stanza, replace_stanza);
+
+    return stanza;
+}

@@ -97,28 +97,27 @@ const char* connection_get_profanity_identifier(void) {
 }
 
 // message functions
-char* message_send_chat(const char * const barejid, const char * const msg, const char *const oob_url,
-    gboolean request_receipt)
+char* message_send_chat(const char *const barejid, const char *const msg, const char *const oob_url, gboolean request_receipt, const char *const replace_id)
 {
     check_expected(barejid);
     check_expected(msg);
     return NULL;
 }
 
-char* message_send_chat_otr(const char * const barejid, const char * const msg, gboolean request_receipt)
+char* message_send_chat_otr(const char * const barejid, const char * const msg, gboolean request_receipt, const char *const replace_id)
 {
     check_expected(barejid);
     check_expected(msg);
     return NULL;
 }
 
-char* message_send_chat_pgp(const char * const barejid, const char * const msg, gboolean request_receipt)
+char* message_send_chat_pgp(const char * const barejid, const char * const msg, gboolean request_receipt, const char *const replace_id)
 {
     return NULL;
 }
 
 void message_send_private(const char * const fulljid, const char * const msg, const char *const oob_url) {}
-char* message_send_groupchat(const char * const roomjid, const char * const msg, const char *const oob_url)
+char* message_send_groupchat(const char *const roomjid, const char *const msg, const char *const oob_url, const char *const replace_id)
 {
     return NULL;
 }

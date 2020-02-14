@@ -160,6 +160,9 @@ typedef struct prof_chat_win_t {
     char *enctext;
     char *incoming_char;
     char *outgoing_char;
+    // For LMC
+    char *last_message;
+    char *last_msg_id;
 } ProfChatWin;
 
 typedef struct prof_muc_win_t {
@@ -175,6 +178,9 @@ typedef struct prof_muc_win_t {
     char *enctext;
     char *message_char;
     GDateTime *last_msg_timestamp;
+    // For LMC
+    char *last_message;
+    char *last_msg_id;
 } ProfMucWin;
 
 typedef struct prof_conf_win_t ProfConfWin;

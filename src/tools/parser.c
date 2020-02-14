@@ -48,7 +48,7 @@
  *
  * inp - The line of input
  * min - The minimum allowed number of arguments
- * max - The maximum allowed number of arguments
+ * max - The maximum allowed number of arguments, -1 for infinite
  *
  * Returns - An NULL terminated array of strings representing the arguments
  * of the command, or NULL if the validation fails.
@@ -135,7 +135,7 @@ parse_args(const char *const inp, int min, int max, gboolean *result)
     int num = g_slist_length(tokens) - 1;
 
     // if num args not valid return NULL
-    if ((num < min) || (num > max)) {
+    if ((num < min) || ((max != -1) && (num > max))) {
         g_slist_free_full(tokens, free);
         g_free(copy);
         *result = FALSE;

@@ -7529,7 +7529,7 @@ cmd_otr_start(ProfWin *window, const char *const command, gchar **args)
 
         if (!otr_is_secure(barejid)) {
             char *otr_query_message = otr_start_query();
-            char *id = message_send_chat_otr(barejid, otr_query_message, FALSE);
+            char *id = message_send_chat_otr(barejid, otr_query_message, FALSE, NULL);
             free(id);
             return TRUE;
         }
@@ -7562,7 +7562,8 @@ cmd_otr_start(ProfWin *window, const char *const command, gchar **args)
         }
 
         char *otr_query_message = otr_start_query();
-        char *id = message_send_chat_otr(chatwin->barejid, otr_query_message, FALSE);
+        char *id = message_send_chat_otr(chatwin->barejid, otr_query_message, FALSE, NULL);
+
         free(id);
         return TRUE;
     }
@@ -8649,5 +8650,79 @@ cmd_os(ProfWin *window, const char *const command, gchar **args)
 {
     _cmd_set_boolean_preference(args[0], command, "Revealing OS name", PREF_REVEAL_OS);
 
+    return TRUE;
+}
+
+gboolean
+cmd_correction(ProfWin *window, const char *const command, gchar **args)
+{
+    // enable/disable
+    if (g_strcmp0(args[0], "on") == 0) {
+        _cmd_set_boolean_preference(args[0], command, "Last Message Correction", PREF_CORRECTION_ALLOW);
+        caps_add_feature(XMPP_FEATURE_LAST_MESSAGE_CORRECTION);
+        return TRUE;
+    } else if (g_strcmp0(args[0], "off") == 0) {
+        _cmd_set_boolean_preference(args[0], command, "Last Message Correction", PREF_CORRECTION_ALLOW);
+        caps_remove_feature(XMPP_FEATURE_LAST_MESSAGE_CORRECTION);
+        return TRUE;
+    }
+
+    // char
+    if (g_strcmp0(args[0], "char") == 0) {
+        if (args[1] == NULL) {
+            cons_bad_cmd_usage(command);
+        } else if (strlen(args[1]) != 1) {
+            cons_bad_cmd_usage(command);
+        } else {
+            prefs_set_correction_char(args[1][0]);
+            cons_show("LMC char set to %c.", args[1][0]);
+        }
+    }
+
+    return TRUE;
+}
+
+gboolean
+cmd_correct(ProfWin *window, const char *const command, gchar **args)
+{
+    jabber_conn_status_t conn_status = connection_get_status();
+    if (conn_status != JABBER_CONNECTED) {
+        cons_show("You are currently not connected.");
+        return TRUE;
+    }
+
+    if (window->type == WIN_CHAT) {
+        ProfChatWin *chatwin = (ProfChatWin*)window;
+        assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
+
+        if (chatwin->last_msg_id == NULL || chatwin->last_message == NULL) {
+            win_println(window, THEME_DEFAULT, '!', "No last message to correct.");
+            return TRUE;
+        }
+
+        // send message again, with replace flag
+        gchar *message = g_strjoinv(" ", args);
+        cl_ev_send_msg_correct(chatwin, message, FALSE, TRUE);
+
+        free(message);
+        return TRUE;
+    } else if (window->type == WIN_MUC) {
+        ProfMucWin *mucwin = (ProfMucWin*)window;
+        assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
+
+        if (mucwin->last_msg_id == NULL || mucwin->last_message == NULL) {
+            win_println(window, THEME_DEFAULT, '!', "No last message to correct.");
+            return TRUE;
+        }
+
+        // send message again, with replace flag
+        gchar *message = g_strjoinv(" ", args);
+        cl_ev_send_muc_msg_corrected(mucwin, message, FALSE, TRUE);
+
+        free(message);
+        return TRUE;
+    }
+
+    win_println(window, THEME_DEFAULT, '!', "Command /correct only valid in regular chat windows.");
     return TRUE;
 }

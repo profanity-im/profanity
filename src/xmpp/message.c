@@ -76,11 +76,11 @@ typedef struct p_message_handle_t {
 } ProfMessageHandler;
 
 static int _message_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza, void *const userdata);
-static void _private_chat_handler(xmpp_stanza_t *const stanza);
 
 static void _handle_error(xmpp_stanza_t *const stanza);
 static void _handle_groupchat(xmpp_stanza_t *const stanza);
 static void _handle_muc_user(xmpp_stanza_t *const stanza);
+static void _handle_muc_private_message(xmpp_stanza_t *const stanza);
 static void _handle_conference(xmpp_stanza_t *const stanza);
 static void _handle_captcha(xmpp_stanza_t *const stanza);
 static void _handle_receipt_received(xmpp_stanza_t *const stanza);
@@ -188,6 +188,7 @@ message_init(void)
     message->jid = NULL;
     message->id = NULL;
     message->originid = NULL;
+    message->replace_id = NULL;
     message->body = NULL;
     message->encrypted = NULL;
     message->plain = NULL;
@@ -213,6 +214,10 @@ message_free(ProfMessage *message)
 
     if (message->originid) {
         xmpp_free(ctx, message->originid);
+    }
+
+    if (message->replace_id) {
+        xmpp_free(ctx, message->replace_id);
     }
 
     if (message->body) {
@@ -254,8 +259,7 @@ message_pubsub_event_handler_add(const char *const node, ProfMessageCallback fun
 }
 
 char*
-message_send_chat(const char *const barejid, const char *const msg, const char *const oob_url,
-    gboolean request_receipt)
+message_send_chat(const char *const barejid, const char *const msg, const char *const oob_url, gboolean request_receipt, const char *const replace_id)
 {
     xmpp_ctx_t * const ctx = connection_get_ctx();
 
@@ -279,6 +283,10 @@ message_send_chat(const char *const barejid, const char *const msg, const char *
         stanza_attach_receipt_request(ctx, message);
     }
 
+    if (replace_id) {
+        stanza_attach_correction(ctx, message, replace_id);
+    }
+
     _send_message_stanza(message);
     xmpp_stanza_release(message);
 
@@ -286,7 +294,7 @@ message_send_chat(const char *const barejid, const char *const msg, const char *
 }
 
 char*
-message_send_chat_pgp(const char *const barejid, const char *const msg, gboolean request_receipt)
+message_send_chat_pgp(const char *const barejid, const char *const msg, gboolean request_receipt, const char *const replace_id)
 {
     xmpp_ctx_t * const ctx = connection_get_ctx();
 
@@ -338,6 +346,10 @@ message_send_chat_pgp(const char *const barejid, const char *const msg, gboolean
         stanza_attach_receipt_request(ctx, message);
     }
 
+    if (replace_id) {
+        stanza_attach_correction(ctx, message, replace_id);
+    }
+
     _send_message_stanza(message);
     xmpp_stanza_release(message);
 
@@ -345,7 +357,7 @@ message_send_chat_pgp(const char *const barejid, const char *const msg, gboolean
 }
 
 char*
-message_send_chat_otr(const char *const barejid, const char *const msg, gboolean request_receipt)
+message_send_chat_otr(const char *const barejid, const char *const msg, gboolean request_receipt, const char *const replace_id)
 {
     xmpp_ctx_t * const ctx = connection_get_ctx();
 
@@ -370,6 +382,10 @@ message_send_chat_otr(const char *const barejid, const char *const msg, gboolean
         stanza_attach_receipt_request(ctx, message);
     }
 
+    if (replace_id) {
+        stanza_attach_correction(ctx, message, replace_id);
+    }
+
     _send_message_stanza(message);
     xmpp_stanza_release(message);
 
@@ -381,7 +397,7 @@ char*
 message_send_chat_omemo(const char *const jid, uint32_t sid, GList *keys,
     const unsigned char *const iv, size_t iv_len,
     const unsigned char *const ciphertext, size_t ciphertext_len,
-    gboolean request_receipt, gboolean muc)
+    gboolean request_receipt, gboolean muc, const char *const replace_id)
 {
     char *state = chat_session_get_state(jid);
     xmpp_ctx_t * const ctx = connection_get_ctx();
@@ -481,6 +497,10 @@ message_send_chat_omemo(const char *const jid, uint32_t sid, GList *keys,
         stanza_attach_receipt_request(ctx, message);
     }
 
+    if (replace_id) {
+        stanza_attach_correction(ctx, message, replace_id);
+    }
+
     _send_message_stanza(message);
     xmpp_stanza_release(message);
 
@@ -508,7 +528,7 @@ message_send_private(const char *const fulljid, const char *const msg, const cha
 }
 
 char*
-message_send_groupchat(const char *const roomjid, const char *const msg, const char *const oob_url)
+message_send_groupchat(const char *const roomjid, const char *const msg, const char *const oob_url, const char *const replace_id)
 {
     xmpp_ctx_t * const ctx = connection_get_ctx();
     char *id = connection_create_stanza_id();
@@ -519,6 +539,10 @@ message_send_groupchat(const char *const roomjid, const char *const msg, const c
 
     if (oob_url) {
         stanza_attach_x_oob_url(ctx, message, oob_url);
+    }
+
+    if (replace_id) {
+        stanza_attach_correction(ctx, message, replace_id);
     }
 
     _send_message_stanza(message);
@@ -807,11 +831,21 @@ _handle_groupchat(xmpp_stanza_t *const stanza)
 
     ProfMessage *message = message_init();
     message->jid = jid;
+
     if (id) {
         message->id = strdup(id);
     }
+
     if (originid) {
         message->originid = strdup(originid);
+    }
+
+    xmpp_stanza_t *replace_id_stanza = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_LAST_MESSAGE_CORRECTION);
+    if (replace_id_stanza) {
+        const char *replace_id = xmpp_stanza_get_id(replace_id_stanza);
+        if (replace_id) {
+            message->replace_id = strdup(replace_id);
+        }
     }
 
     message->body = xmpp_message_get_body(stanza);
@@ -927,7 +961,7 @@ _receipt_request_handler(xmpp_stanza_t *const stanza)
 }
 
 static void
-_private_chat_handler(xmpp_stanza_t *const stanza)
+_handle_muc_private_message(xmpp_stanza_t *const stanza)
 {
     // standard chat message, use jid without resource
     ProfMessage *message = message_init();
@@ -935,6 +969,12 @@ _private_chat_handler(xmpp_stanza_t *const stanza)
 
     const gchar *from = xmpp_stanza_get_from(stanza);
     message->jid = jid_create(from);
+
+    // message stanza id
+    const char *id = xmpp_stanza_get_id(stanza);
+    if (id) {
+        message->id = strdup(id);
+    }
 
     // check omemo encryption
 #ifdef HAVE_OMEMO
@@ -1013,6 +1053,21 @@ _handle_carbons(xmpp_stanza_t *const stanza)
     xmpp_stanza_t *mucuser = xmpp_stanza_get_child_by_ns(message_stanza, STANZA_NS_MUC_USER);
     if (mucuser) {
         message->mucuser = TRUE;
+    }
+
+    // id
+    const char *id = xmpp_stanza_get_id(message_stanza);
+    if (id) {
+        message->id = strdup(id);
+    }
+
+    // replace id
+    xmpp_stanza_t *replace_id_stanza = xmpp_stanza_get_child_by_ns(message_stanza, STANZA_NS_LAST_MESSAGE_CORRECTION);
+    if (replace_id_stanza) {
+        const char *replace_id = xmpp_stanza_get_id(replace_id_stanza);
+        if (replace_id) {
+            message->replace_id = strdup(replace_id);
+        }
     }
 
     // check omemo encryption
@@ -1104,7 +1159,7 @@ _handle_chat(xmpp_stanza_t *const stanza)
 
     // private message from chat room use full jid (room/nick)
     if (muc_active(jid->barejid)) {
-        _private_chat_handler(stanza);
+        _handle_muc_private_message(stanza);
         jid_destroy(jid);
         return;
     }
@@ -1112,6 +1167,20 @@ _handle_chat(xmpp_stanza_t *const stanza)
     // standard chat message, use jid without resource
     ProfMessage *message = message_init();
     message->jid = jid;
+
+    // message stanza id
+    const char *id = xmpp_stanza_get_id(stanza);
+    if (id) {
+        message->id = strdup(id);
+    }
+
+    xmpp_stanza_t *replace_id_stanza = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_LAST_MESSAGE_CORRECTION);
+    if (replace_id_stanza) {
+        const char *replace_id = xmpp_stanza_get_id(replace_id_stanza);
+        if (replace_id) {
+            message->replace_id = strdup(replace_id);
+        }
+    }
 
     if (mucuser) {
         message->mucuser = TRUE;
