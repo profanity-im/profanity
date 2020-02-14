@@ -411,6 +411,7 @@ cmd_otr_start_sends_otr_query_message_to_current_recipeint(void **state)
 
     ProfWin window;
     window.type = WIN_CHAT;
+    window.layout = NULL;
     ProfChatWin chatwin;
     chatwin.window = window;
     chatwin.barejid = recipient;
