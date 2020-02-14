@@ -4796,6 +4796,16 @@ cmd_sendfile(ProfWin *window, const char *const command, gchar **args)
         free(filename);
         return TRUE;
     }
+    
+    ProfChatWin *chatwin = (ProfChatWin*)window;
+    assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
+    
+    if (chatwin->pgp_send || chatwin->is_omemo || chatwin->is_otr) {
+		cons_show_error("Uploading '%s' failed: Encrypted file uploads not yet implemented!", filename); 
+        win_println(window, THEME_ERROR, '-', "Sending encrypted files via http_upload is not possible yet.");
+        free(filename);
+        return TRUE;
+    }
 
     if (access(filename, R_OK) != 0) {
         cons_show_error("Uploading '%s' failed: File not found!", filename);
