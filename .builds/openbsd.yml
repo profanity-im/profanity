@@ -1,0 +1,40 @@
+image: openbsd/6.6
+
+packages:
+  - cmake
+  - gmake
+  - cmocka
+  - libtool
+  - automake-1.16.1
+  - pkgconf
+  - readline
+  - python-3.7.4
+  - autoconf-2.69p2
+  - autoconf-archive
+  - libmesode
+  - curl
+  - gpgme
+  - glib2
+  - gtk+2
+  - libotr
+  - libassuan
+  - libgpg-error
+  - libgcrypt
+  - libsignal-protocol-c
+
+sources:
+  - https://github.com/profanity-im/profanity
+
+environment:
+  LANG: en_US.UTF-8
+
+tasks:
+  - symlink: |
+      doas ln -sf /usr/local/bin/python3.7 /usr/local/bin/python
+      doas ln -sf /usr/local/bin/python3.7-config /usr/local/bin/python-config
+      doas ln -sf /usr/local/bin/pydoc3.7  /usr/local/bin/pydoc
+  - build: |
+      export AUTOCONF_VERSION=2.69
+      export AUTOMAKE_VERSION=1.16
+      cd profanity
+      ./ci-build.sh

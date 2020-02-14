@@ -353,7 +353,7 @@ _rosterwin_contact(ProfLayoutSplit *layout, PContact contact)
     }
 
     theme_item_t presence_colour = _get_roster_theme(theme_type, presence);
-    int colour;
+    int colour = 0;
     if (prefs_get_boolean(PREF_ROSTER_COLOR_NICK)) {
         colour = theme_hash_attrs(name);
         wattron(layout->subwin, colour);
@@ -1290,4 +1290,3 @@ _filter_contacts_with_presence(GSList *contacts, const char *const presence)
 
     return filtered_contacts;
 }
-
