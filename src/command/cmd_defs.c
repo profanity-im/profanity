@@ -2392,7 +2392,8 @@ static struct cmd_t command_defs[] =
         CMD_SYN(
             "/correct <message>")
         CMD_DESC(
-            "Correct and resend the last message (XEP-0308).")
+            "Correct and resend the last message (XEP-0308)."
+            "Use tab completion to get the last send message.")
         CMD_ARGS(
             { "message",    "The corrected message."})
         CMD_NOEXAMPLES
