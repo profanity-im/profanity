@@ -4796,17 +4796,42 @@ cmd_sendfile(ProfWin *window, const char *const command, gchar **args)
         free(filename);
         return TRUE;
     }
-    
-    ProfChatWin *chatwin = (ProfChatWin*)window;
-    assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
-    
-    if (chatwin->pgp_send || chatwin->is_omemo || chatwin->is_otr) {
-		cons_show_error("Uploading '%s' failed: Encrypted file uploads not yet implemented!", filename); 
-        win_println(window, THEME_ERROR, '-', "Sending encrypted files via http_upload is not possible yet.");
-        free(filename);
-        return TRUE;
-    }
 
+    switch (window->type) {
+        case WIN_MUC:
+        {
+            ProfMucWin *mucwin = (ProfMucWin*)window;
+            assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
+            if (mucwin->is_omemo) { //no pgp or otr available in MUCs
+				cons_show_error("Uploading '%s' failed: Encrypted file uploads not yet implemented!", filename); 
+				win_println(window, THEME_ERROR, '-', "Sending encrypted files via http_upload is not possible yet.");
+				free(filename);
+				return TRUE;
+				}
+            break;
+        }
+        case WIN_CHAT:
+        {
+            ProfChatWin *chatwin = (ProfChatWin*)window;
+            assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
+            if (chatwin->pgp_send || chatwin->is_omemo || chatwin->is_otr) {
+				cons_show_error("Uploading '%s' failed: Encrypted file uploads not yet implemented!", filename); 
+				win_println(window, THEME_ERROR, '-', "Sending encrypted files via http_upload is not possible yet.");
+				free(filename);
+				return TRUE;
+				}
+            break;
+        }
+        case WIN_PRIVATE:
+        {
+            break; //we don't support encryption in private muc windows anyway
+        }
+        default:
+			cons_show_error("Unsupported window for file transmission.");
+			free(filename);
+			return TRUE;
+        }
+        
     if (access(filename, R_OK) != 0) {
         cons_show_error("Uploading '%s' failed: File not found!", filename);
         free(filename);
