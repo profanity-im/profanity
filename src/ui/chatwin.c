@@ -328,7 +328,7 @@ chatwin_outgoing_msg(ProfChatWin *chatwin, const char *const message, char *id, 
     if (request_receipt && id) {
         win_print_outgoing_with_receipt((ProfWin*)chatwin, enc_char, "me", message, id, replace_id);
     } else {
-        win_print_outgoing((ProfWin*)chatwin, enc_char, id, replace_id, "%s", message);
+        win_print_outgoing((ProfWin*)chatwin, enc_char, id, replace_id, message);
     }
 
     // save last id and message for LMC
@@ -351,7 +351,7 @@ chatwin_outgoing_carbon(ProfChatWin *chatwin, ProfMessage *message)
 
     ProfWin *window = (ProfWin*)chatwin;
 
-    win_print_outgoing(window, enc_char, message->id, message->replace_id, "%s", message->plain);
+    win_print_outgoing(window, enc_char, message->id, message->replace_id, message->plain);
     int num = wins_get_num(window);
     status_bar_active(num, WIN_CHAT, chatwin->barejid);
 }
