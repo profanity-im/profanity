@@ -1163,28 +1163,20 @@ win_println_incoming_muc_msg(ProfWin *window, char ch, int flags, const char *co
 }
 
 void
-win_print_outgoing_muc_msg(ProfWin *window, char ch, const char *const me, const char *const id, const char *const replace_id, const char *const message, ...)
+win_print_outgoing_muc_msg(ProfWin *window, char ch, const char *const me, const char *const id, const char *const replace_id, const char *const message)
 {
     GDateTime *timestamp = g_date_time_new_now_local();
 
-    va_list arg;
-    va_start(arg, message);
-    GString *fmt_msg = g_string_new(NULL);
-    g_string_vprintf(fmt_msg, message, arg);
-
     if (prefs_get_boolean(PREF_CORRECTION_ALLOW) && replace_id) {
-        _win_correct(window, fmt_msg->str, id, replace_id);
+        _win_correct(window, message, id, replace_id);
     } else {
-        _win_printf(window, ch, 0, timestamp, 0, THEME_TEXT_ME, me, id, "%s", fmt_msg->str);
+        _win_printf(window, ch, 0, timestamp, 0, THEME_TEXT_ME, me, id, "%s", message);
     }
-//    buffer_append(window->layout->buffer, ch, 0, timestamp, 0, THEME_TEXT_ME, me, fmt_msg->str, NULL, NULL);
-//    _win_print_internal(window, ch, 0, timestamp, 0, THEME_TEXT_ME, me, fmt_msg->str, NULL);
+//    buffer_append(window->layout->buffer, ch, 0, timestamp, 0, THEME_TEXT_ME, me, message, NULL, NULL);
+//    _win_print_internal(window, ch, 0, timestamp, 0, THEME_TEXT_ME, me, message, NULL);
 
     inp_nonblocking(TRUE);
     g_date_time_unref(timestamp);
-
-    g_string_free(fmt_msg, TRUE);
-    va_end(arg);
 }
 
 void

@@ -521,7 +521,7 @@ mucwin_outgoing_msg(ProfMucWin *mucwin, const char *const message, const char *c
         ch = prefs_get_omemo_char();
     }
 
-    win_print_outgoing_muc_msg(window, ch, mynick, id, replace_id, "%s", message);
+    win_print_outgoing_muc_msg(window, ch, mynick, id, replace_id, message);
 
     // save last id and message for LMC
     if (id) {
