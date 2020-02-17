@@ -379,7 +379,7 @@ mucwin_history(ProfMucWin *mucwin, const char *const nick, GDateTime *timestamp,
         g_string_append(line, message);
     }
 
-    win_print_history(window, timestamp, "%s", line->str);
+    win_print_history(window, timestamp, line->str);
     g_string_free(line, TRUE);
 
     plugins_on_room_history_message(mucwin->roomjid, nick, message, timestamp);

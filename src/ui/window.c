@@ -1196,23 +1196,15 @@ win_print_outgoing(ProfWin *window, const char ch, const char *const id, const c
 }
 
 void
-win_print_history(ProfWin *window, GDateTime *timestamp, const char *const message, ...)
+win_print_history(ProfWin *window, GDateTime *timestamp, const char *const message)
 {
     g_date_time_ref(timestamp);
 
-    va_list arg;
-    va_start(arg, message);
-    GString *fmt_msg = g_string_new(NULL);
-    g_string_vprintf(fmt_msg, message, arg);
-
-    buffer_append(window->layout->buffer, '-', 0, timestamp, 0, THEME_TEXT_HISTORY, "", fmt_msg->str, NULL, NULL);
-    _win_print_internal(window, '-', 0, timestamp, 0, THEME_TEXT_HISTORY, "", fmt_msg->str, NULL);
+    buffer_append(window->layout->buffer, '-', 0, timestamp, 0, THEME_TEXT_HISTORY, "", message, NULL, NULL);
+    _win_print_internal(window, '-', 0, timestamp, 0, THEME_TEXT_HISTORY, "", message, NULL);
 
     inp_nonblocking(TRUE);
     g_date_time_unref(timestamp);
-
-    g_string_free(fmt_msg, TRUE);
-    va_end(arg);
 }
 
 void
