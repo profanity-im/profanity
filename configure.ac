@@ -106,13 +106,17 @@ else
     if test "x$enable_plugins" = xno; then
         AM_CONDITIONAL([BUILD_C_API], [false])
     elif test "x$enable_c_plugins" != xno; then
-        AC_CHECK_LIB([dl], [main],
-            [AM_CONDITIONAL([BUILD_C_API], [true]) LIBS="$LIBS -ldl" AC_DEFINE([HAVE_C], [1], [C support])],
-            [AS_IF(
-                [test "x$enable_c_plugins" = xyes],
-                    [AC_MSG_ERROR([dl library needed to run C plugins])],
-                [AM_CONDITIONAL([BUILD_C_API], [false])])
-            ])
+        # libdl doesn't exist as a separate library in OpenBSD/FreeBSD and is
+        # provided in the standard libraries.
+        AS_IF([test "x$PLATFORM" = xopenbsd -o "x$PLATFORM" = xfreebsd],
+            [AM_CONDITIONAL([BUILD_C_API], [true]) AC_DEFINE([HAVE_C], [1], [C support])],
+            [AC_CHECK_LIB([dl], [main],
+                [AM_CONDITIONAL([BUILD_C_API], [true]) LIBS="$LIBS -ldl" AC_DEFINE([HAVE_C], [1], [C support])],
+                [AS_IF(
+                    [test "x$enable_c_plugins" = xyes],
+                        [AC_MSG_ERROR([dl library needed to run C plugins])],
+                    [AM_CONDITIONAL([BUILD_C_API], [false])])
+                ])])
     else
         AM_CONDITIONAL([BUILD_C_API], [false])
     fi
