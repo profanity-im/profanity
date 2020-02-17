@@ -1695,7 +1695,8 @@ static struct cmd_t command_defs[] =
             { "untrust",    cmd_otr_untrust },
             { "secret",     cmd_otr_secret },
             { "question",   cmd_otr_question },
-            { "answer",     cmd_otr_answer })
+            { "answer",     cmd_otr_answer },
+            { "sendfile",   cmd_otr_sendfile })
         CMD_NOMAINFUNC
         CMD_TAGS(
             CMD_TAG_CHAT,
@@ -1712,7 +1713,8 @@ static struct cmd_t command_defs[] =
             "/otr answer <answer>",
             "/otr policy manual|opportunistic|always [<contact>]",
             "/otr log on|off|redact",
-            "/otr char <char>")
+            "/otr char <char>",
+            "/otr sendfile on|off")
         CMD_DESC(
             "Off The Record (OTR) commands to manage keys, and perform OTR encryption during chat sessions.")
         CMD_ARGS(
@@ -1734,7 +1736,8 @@ static struct cmd_t command_defs[] =
             { "policy always <contact>",        "Set the OTR policy to always for a specific contact." },
             { "log on|off",                     "Enable or disable plaintext logging of OTR encrypted messages." },
             { "log redact",                     "Log OTR encrypted messages, but replace the contents with [redacted]. This is the default." },
-            { "char <char>",                    "Set the character to be displayed next to OTR encrypted messages." })
+            { "char <char>",                    "Set the character to be displayed next to OTR encrypted messages." },
+            { "sendfile on|off",                "Allow /sendfile to send unencrypted files while in an OTR session."})
         CMD_EXAMPLES(
             "/otr log off",
             "/otr policy manual",
@@ -2266,7 +2269,7 @@ static struct cmd_t command_defs[] =
             { "policy manual",           "Set the global OMEMO policy to manual, OMEMO sessions must be started manually." },
             { "policy automatic",        "Set the global OMEMO policy to opportunistic, an OMEMO session will be attempted upon starting a conversation." },
             { "policy always",           "Set the global OMEMO policy to always, an error will be displayed if an OMEMO session cannot be initiated upon starting a conversation." },
-            { "sendfile",                "Allow /sendfile to send unencrypted files while in an OMEMO session."},
+            { "sendfile on|off",         "Allow /sendfile to send unencrypted files while in an OMEMO session."},
             { "clear_device_list",       "Clear your own device list on server side. Each client will reannounce itself when connected back."})
         CMD_EXAMPLES(
             "/omemo gen",

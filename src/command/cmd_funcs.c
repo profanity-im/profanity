@@ -4819,7 +4819,7 @@ cmd_sendfile(ProfWin *window, const char *const command, gchar **args)
 
             if ((chatwin->is_omemo && !prefs_get_boolean(PREF_OMEMO_SENDFILE))
                     || (chatwin->pgp_send)
-                    || (chatwin->is_otr)) {
+                    || (chatwin->is_otr && !prefs_get_boolean(PREF_OTR_SENDFILE))) {
                 cons_show_error("Uploading '%s' failed: Encrypted file uploads not yet implemented!", filename);
                 win_println(window, THEME_ERROR, '-', "Sending encrypted files via http_upload is not possible yet.");
                 free(filename);
@@ -4829,7 +4829,8 @@ cmd_sendfile(ProfWin *window, const char *const command, gchar **args)
         }
         case WIN_PRIVATE:
         {
-            break; //we don't support encryption in private muc windows anyway
+            //we don't support encryption in private muc windows
+            break;
         }
         default:
 			cons_show_error("Unsupported window for file transmission.");
@@ -7802,6 +7803,19 @@ cmd_otr_answer(ProfWin *window, const char *const command, gchar **args)
     }
 
     otr_smp_answer(chatwin->barejid, answer);
+    return TRUE;
+#else
+    cons_show("This version of Profanity has not been built with OTR support enabled");
+    return TRUE;
+#endif
+}
+
+gboolean
+cmd_otr_sendfile(ProfWin *window, const char *const command, gchar **args)
+{
+#ifdef HAVE_LIBOTR
+    _cmd_set_boolean_preference(args[1], command, "Sending unencrypted files in an OTR session via /sendfile", PREF_OTR_SENDFILE);
+
     return TRUE;
 #else
     cons_show("This version of Profanity has not been built with OTR support enabled");

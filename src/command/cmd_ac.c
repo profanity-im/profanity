@@ -173,6 +173,7 @@ static Autocomplete bookmark_property_ac;
 static Autocomplete otr_ac;
 static Autocomplete otr_log_ac;
 static Autocomplete otr_policy_ac;
+static Autocomplete otr_sendfile_ac;
 static Autocomplete omemo_ac;
 static Autocomplete omemo_log_ac;
 static Autocomplete omemo_policy_ac;
@@ -605,6 +606,7 @@ cmd_ac_init(void)
     autocomplete_add(otr_ac, "question");
     autocomplete_add(otr_ac, "answer");
     autocomplete_add(otr_ac, "char");
+    autocomplete_add(otr_ac, "sendfile");
 
     otr_log_ac = autocomplete_new();
     autocomplete_add(otr_log_ac, "on");
@@ -615,6 +617,10 @@ cmd_ac_init(void)
     autocomplete_add(otr_policy_ac, "manual");
     autocomplete_add(otr_policy_ac, "opportunistic");
     autocomplete_add(otr_policy_ac, "always");
+
+    otr_sendfile_ac = autocomplete_new();
+    autocomplete_add(otr_sendfile_ac, "on");
+    autocomplete_add(otr_sendfile_ac, "off");
 
     omemo_ac = autocomplete_new();
     autocomplete_add(omemo_ac, "gen");
@@ -1190,6 +1196,7 @@ cmd_ac_reset(ProfWin *window)
     autocomplete_reset(otr_ac);
     autocomplete_reset(otr_log_ac);
     autocomplete_reset(otr_policy_ac);
+    autocomplete_reset(otr_sendfile_ac);
     autocomplete_reset(omemo_ac);
     autocomplete_reset(omemo_log_ac);
     autocomplete_reset(omemo_policy_ac);
@@ -1335,6 +1342,7 @@ cmd_ac_uninit(void)
     autocomplete_free(otr_ac);
     autocomplete_free(otr_log_ac);
     autocomplete_free(otr_policy_ac);
+    autocomplete_free(otr_sendfile_ac);
     autocomplete_free(omemo_ac);
     autocomplete_free(omemo_log_ac);
     autocomplete_free(omemo_policy_ac);
@@ -2230,6 +2238,11 @@ _otr_autocomplete(ProfWin *window, const char *const input, gboolean previous)
     }
 
     found = autocomplete_param_with_ac(input, "/otr policy", otr_policy_ac, TRUE, previous);
+    if (found) {
+        return found;
+    }
+
+    found = autocomplete_param_with_ac(input, "/otr sendfile", otr_sendfile_ac, TRUE, previous);
     if (found) {
         return found;
     }

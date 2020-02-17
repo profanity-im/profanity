@@ -201,6 +201,7 @@ gboolean cmd_otr_untrust(ProfWin *window, const char *const command, gchar **arg
 gboolean cmd_otr_secret(ProfWin *window, const char *const command, gchar **args);
 gboolean cmd_otr_question(ProfWin *window, const char *const command, gchar **args);
 gboolean cmd_otr_answer(ProfWin *window, const char *const command, gchar **args);
+gboolean cmd_otr_sendfile(ProfWin *window, const char *const command, gchar **args);
 
 gboolean cmd_wins(ProfWin *window, const char *const command, gchar **args);
 gboolean cmd_wins_unread(ProfWin *window, const char *const command, gchar **args);

@@ -2070,6 +2070,12 @@ cons_show_otr_prefs(void)
     char ch = prefs_get_otr_char();
     cons_show("OTR char (/otr char)     : %c", ch);
 
+    if (prefs_get_boolean(PREF_OTR_SENDFILE)) {
+        cons_show("Allow sending unencrypted files in an OTR session via /sendfile (/otr sendfile): ON");
+    } else {
+        cons_show("Allow sending unencrypted files in an OTR session via /sendfile (/otr sendfile): OFF");
+    }
+
     cons_alert();
 }
 
