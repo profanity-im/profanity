@@ -1793,6 +1793,7 @@ _get_group(preference_t pref)
         case PREF_OTR_SENDFILE:
             return PREF_GROUP_OTR;
         case PREF_PGP_LOG:
+        case PREF_PGP_SENDFILE:
             return PREF_GROUP_PGP;
         case PREF_BOOKMARK_INVITE:
         case PREF_ROOM_LIST_CACHE:
@@ -2003,6 +2004,8 @@ _get_key(preference_t pref)
             return "titlebar.muc.title";
         case PREF_PGP_LOG:
             return "log";
+        case PREF_PGP_SENDFILE:
+            return "sendfile";
         case PREF_TLS_CERTPATH:
             return "tls.certpath";
         case PREF_TLS_SHOW:

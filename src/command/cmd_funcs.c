@@ -4818,7 +4818,7 @@ cmd_sendfile(ProfWin *window, const char *const command, gchar **args)
             assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
 
             if ((chatwin->is_omemo && !prefs_get_boolean(PREF_OMEMO_SENDFILE))
-                    || (chatwin->pgp_send)
+                    || (chatwin->pgp_send && !prefs_get_boolean(PREF_PGP_SENDFILE))
                     || (chatwin->is_otr && !prefs_get_boolean(PREF_OTR_SENDFILE))) {
                 cons_show_error("Uploading '%s' failed: Encrypted file uploads not yet implemented!", filename);
                 win_println(window, THEME_ERROR, '-', "Sending encrypted files via http_upload is not possible yet.");
@@ -7334,6 +7334,11 @@ cmd_pgp(ProfWin *window, const char *const command, gchar **args)
 
         chatwin->pgp_send = FALSE;
         win_println(window, THEME_DEFAULT, '!', "PGP encryption disabled.");
+        return TRUE;
+    }
+
+    if (g_strcmp0(args[0], "sendfile") == 0) {
+        _cmd_set_boolean_preference(args[1], command, "Sending unencrypted files using /sendfile while otherwise using PGP", PREF_PGP_SENDFILE);
         return TRUE;
     }
 

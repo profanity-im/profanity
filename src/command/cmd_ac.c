@@ -206,6 +206,7 @@ static Autocomplete inpblock_ac;
 static Autocomplete receipts_ac;
 static Autocomplete pgp_ac;
 static Autocomplete pgp_log_ac;
+static Autocomplete pgp_sendfile_ac;
 static Autocomplete tls_ac;
 static Autocomplete titlebar_ac;
 static Autocomplete titlebar_show_ac;
@@ -788,11 +789,16 @@ cmd_ac_init(void)
     autocomplete_add(pgp_ac, "end");
     autocomplete_add(pgp_ac, "log");
     autocomplete_add(pgp_ac, "char");
+    autocomplete_add(pgp_ac, "sendfile");
 
     pgp_log_ac = autocomplete_new();
     autocomplete_add(pgp_log_ac, "on");
     autocomplete_add(pgp_log_ac, "off");
     autocomplete_add(pgp_log_ac, "redact");
+
+    pgp_sendfile_ac = autocomplete_new();
+    autocomplete_add(pgp_sendfile_ac, "on");
+    autocomplete_add(pgp_sendfile_ac, "off");
 
     tls_ac = autocomplete_new();
     autocomplete_add(tls_ac, "allow");
@@ -1229,6 +1235,7 @@ cmd_ac_reset(ProfWin *window)
     autocomplete_reset(receipts_ac);
     autocomplete_reset(pgp_ac);
     autocomplete_reset(pgp_log_ac);
+    autocomplete_reset(pgp_sendfile_ac);
     autocomplete_reset(tls_ac);
     autocomplete_reset(titlebar_ac);
     autocomplete_reset(titlebar_show_ac);
@@ -1374,6 +1381,7 @@ cmd_ac_uninit(void)
     autocomplete_free(receipts_ac);
     autocomplete_free(pgp_ac);
     autocomplete_free(pgp_log_ac);
+    autocomplete_free(pgp_sendfile_ac);
     autocomplete_free(tls_ac);
     autocomplete_free(titlebar_ac);
     autocomplete_free(titlebar_show_ac);
@@ -2270,6 +2278,11 @@ _pgp_autocomplete(ProfWin *window, const char *const input, gboolean previous)
     }
 
     found = autocomplete_param_with_ac(input, "/pgp log", pgp_log_ac, TRUE, previous);
+    if (found) {
+        return found;
+    }
+
+    found = autocomplete_param_with_ac(input, "/pgp sendfile", pgp_sendfile_ac, TRUE, previous);
     if (found) {
         return found;
     }
