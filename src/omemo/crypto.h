@@ -35,7 +35,7 @@
 #include <signal/signal_protocol_types.h>
 
 #define AES128_GCM_KEY_LENGTH 16
-#define AES128_GCM_IV_LENGTH 16
+#define AES128_GCM_IV_LENGTH 12
 #define AES128_GCM_TAG_LENGTH 16
 
 int omemo_crypto_init(void);
