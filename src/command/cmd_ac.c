@@ -173,9 +173,11 @@ static Autocomplete bookmark_property_ac;
 static Autocomplete otr_ac;
 static Autocomplete otr_log_ac;
 static Autocomplete otr_policy_ac;
+static Autocomplete otr_sendfile_ac;
 static Autocomplete omemo_ac;
 static Autocomplete omemo_log_ac;
 static Autocomplete omemo_policy_ac;
+static Autocomplete omemo_sendfile_ac;
 static Autocomplete connect_property_ac;
 static Autocomplete tls_property_ac;
 static Autocomplete alias_ac;
@@ -204,6 +206,7 @@ static Autocomplete inpblock_ac;
 static Autocomplete receipts_ac;
 static Autocomplete pgp_ac;
 static Autocomplete pgp_log_ac;
+static Autocomplete pgp_sendfile_ac;
 static Autocomplete tls_ac;
 static Autocomplete titlebar_ac;
 static Autocomplete titlebar_show_ac;
@@ -604,6 +607,7 @@ cmd_ac_init(void)
     autocomplete_add(otr_ac, "question");
     autocomplete_add(otr_ac, "answer");
     autocomplete_add(otr_ac, "char");
+    autocomplete_add(otr_ac, "sendfile");
 
     otr_log_ac = autocomplete_new();
     autocomplete_add(otr_log_ac, "on");
@@ -614,6 +618,10 @@ cmd_ac_init(void)
     autocomplete_add(otr_policy_ac, "manual");
     autocomplete_add(otr_policy_ac, "opportunistic");
     autocomplete_add(otr_policy_ac, "always");
+
+    otr_sendfile_ac = autocomplete_new();
+    autocomplete_add(otr_sendfile_ac, "on");
+    autocomplete_add(otr_sendfile_ac, "off");
 
     omemo_ac = autocomplete_new();
     autocomplete_add(omemo_ac, "gen");
@@ -626,6 +634,7 @@ cmd_ac_init(void)
     autocomplete_add(omemo_ac, "clear_device_list");
     autocomplete_add(omemo_ac, "policy");
     autocomplete_add(omemo_ac, "char");
+    autocomplete_add(omemo_ac, "sendfile");
 
     omemo_log_ac = autocomplete_new();
     autocomplete_add(omemo_log_ac, "on");
@@ -636,6 +645,10 @@ cmd_ac_init(void)
     autocomplete_add(omemo_policy_ac, "manual");
     autocomplete_add(omemo_policy_ac, "automatic");
     autocomplete_add(omemo_policy_ac, "always");
+
+    omemo_sendfile_ac = autocomplete_new();
+    autocomplete_add(omemo_sendfile_ac, "on");
+    autocomplete_add(omemo_sendfile_ac, "off");
 
     connect_property_ac = autocomplete_new();
     autocomplete_add(connect_property_ac, "server");
@@ -776,11 +789,16 @@ cmd_ac_init(void)
     autocomplete_add(pgp_ac, "end");
     autocomplete_add(pgp_ac, "log");
     autocomplete_add(pgp_ac, "char");
+    autocomplete_add(pgp_ac, "sendfile");
 
     pgp_log_ac = autocomplete_new();
     autocomplete_add(pgp_log_ac, "on");
     autocomplete_add(pgp_log_ac, "off");
     autocomplete_add(pgp_log_ac, "redact");
+
+    pgp_sendfile_ac = autocomplete_new();
+    autocomplete_add(pgp_sendfile_ac, "on");
+    autocomplete_add(pgp_sendfile_ac, "off");
 
     tls_ac = autocomplete_new();
     autocomplete_add(tls_ac, "allow");
@@ -1184,9 +1202,11 @@ cmd_ac_reset(ProfWin *window)
     autocomplete_reset(otr_ac);
     autocomplete_reset(otr_log_ac);
     autocomplete_reset(otr_policy_ac);
+    autocomplete_reset(otr_sendfile_ac);
     autocomplete_reset(omemo_ac);
     autocomplete_reset(omemo_log_ac);
     autocomplete_reset(omemo_policy_ac);
+    autocomplete_reset(omemo_sendfile_ac);
     autocomplete_reset(connect_property_ac);
     autocomplete_reset(tls_property_ac);
     autocomplete_reset(alias_ac);
@@ -1215,6 +1235,7 @@ cmd_ac_reset(ProfWin *window)
     autocomplete_reset(receipts_ac);
     autocomplete_reset(pgp_ac);
     autocomplete_reset(pgp_log_ac);
+    autocomplete_reset(pgp_sendfile_ac);
     autocomplete_reset(tls_ac);
     autocomplete_reset(titlebar_ac);
     autocomplete_reset(titlebar_show_ac);
@@ -1328,9 +1349,11 @@ cmd_ac_uninit(void)
     autocomplete_free(otr_ac);
     autocomplete_free(otr_log_ac);
     autocomplete_free(otr_policy_ac);
+    autocomplete_free(otr_sendfile_ac);
     autocomplete_free(omemo_ac);
     autocomplete_free(omemo_log_ac);
     autocomplete_free(omemo_policy_ac);
+    autocomplete_free(omemo_sendfile_ac);
     autocomplete_free(connect_property_ac);
     autocomplete_free(tls_property_ac);
     autocomplete_free(alias_ac);
@@ -1358,6 +1381,7 @@ cmd_ac_uninit(void)
     autocomplete_free(receipts_ac);
     autocomplete_free(pgp_ac);
     autocomplete_free(pgp_log_ac);
+    autocomplete_free(pgp_sendfile_ac);
     autocomplete_free(tls_ac);
     autocomplete_free(titlebar_ac);
     autocomplete_free(titlebar_show_ac);
@@ -2226,6 +2250,11 @@ _otr_autocomplete(ProfWin *window, const char *const input, gboolean previous)
         return found;
     }
 
+    found = autocomplete_param_with_ac(input, "/otr sendfile", otr_sendfile_ac, TRUE, previous);
+    if (found) {
+        return found;
+    }
+
     found = autocomplete_param_with_ac(input, "/otr", otr_ac, TRUE, previous);
     if (found) {
         return found;
@@ -2249,6 +2278,11 @@ _pgp_autocomplete(ProfWin *window, const char *const input, gboolean previous)
     }
 
     found = autocomplete_param_with_ac(input, "/pgp log", pgp_log_ac, TRUE, previous);
+    if (found) {
+        return found;
+    }
+
+    found = autocomplete_param_with_ac(input, "/pgp sendfile", pgp_sendfile_ac, TRUE, previous);
     if (found) {
         return found;
     }
@@ -2303,6 +2337,11 @@ _omemo_autocomplete(ProfWin *window, const char *const input, gboolean previous)
         return found;
     }
 
+    found = autocomplete_param_with_ac(input, "/omemo sendfile", omemo_sendfile_ac, TRUE, previous);
+    if (found) {
+        return found;
+    }
+
     jabber_conn_status_t conn_status = connection_get_status();
 
     if (conn_status == JABBER_CONNECTED) {
@@ -2315,7 +2354,6 @@ _omemo_autocomplete(ProfWin *window, const char *const input, gboolean previous)
         if (found) {
             return found;
         }
-
 
 #ifdef HAVE_OMEMO
         if (window->type == WIN_CHAT) {

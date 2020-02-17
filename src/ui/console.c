@@ -2070,6 +2070,12 @@ cons_show_otr_prefs(void)
     char ch = prefs_get_otr_char();
     cons_show("OTR char (/otr char)     : %c", ch);
 
+    if (prefs_get_boolean(PREF_OTR_SENDFILE)) {
+        cons_show("Allow sending unencrypted files in an OTR session via /sendfile (/otr sendfile): ON");
+    } else {
+        cons_show("Allow sending unencrypted files in an OTR session via /sendfile (/otr sendfile): OFF");
+    }
+
     cons_alert();
 }
 
@@ -2091,6 +2097,12 @@ cons_show_pgp_prefs(void)
 
     char ch = prefs_get_pgp_char();
     cons_show("PGP char (/pgp char)     : %c", ch);
+
+    if (prefs_get_boolean(PREF_PGP_SENDFILE)) {
+        cons_show("Allow sending unencrypted files via /sendfile while otherwise using PGP (/pgp sendfile): ON");
+    } else {
+        cons_show("Allow sending unencrypted files via /sendfile while otherwise using PGP (/pgp sendfile): OFF");
+    }
 
     cons_alert();
 }
@@ -2117,6 +2129,12 @@ cons_show_omemo_prefs(void)
 
     char ch = prefs_get_omemo_char();
     cons_show("OMEMO char (/omemo char)     : %c", ch);
+
+    if (prefs_get_boolean(PREF_OMEMO_SENDFILE)) {
+        cons_show("Allow sending unencrypted files in an OMEMO session via /sendfile (/omemo sendfile): ON");
+    } else {
+        cons_show("Allow sending unencrypted files in an OMEMO session via /sendfile (/omemo sendfile): OFF");
+    }
 
     cons_alert();
 }

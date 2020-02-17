@@ -4797,6 +4797,47 @@ cmd_sendfile(ProfWin *window, const char *const command, gchar **args)
         return TRUE;
     }
 
+    switch (window->type) {
+        case WIN_MUC:
+        {
+            ProfMucWin *mucwin = (ProfMucWin*)window;
+            assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
+
+            // only omemo, no pgp/otr available in MUCs
+            if (mucwin->is_omemo && !prefs_get_boolean(PREF_OMEMO_SENDFILE)) {
+                cons_show_error("Uploading unencrypted files disabled. See /omemo sendfile, /otr sendfile, /pgp sendfile.");
+				win_println(window, THEME_ERROR, '-', "Sending encrypted files via http_upload is not possible yet.");
+				free(filename);
+				return TRUE;
+				}
+            break;
+        }
+        case WIN_CHAT:
+        {
+            ProfChatWin *chatwin = (ProfChatWin*)window;
+            assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
+
+            if ((chatwin->is_omemo && !prefs_get_boolean(PREF_OMEMO_SENDFILE))
+                    || (chatwin->pgp_send && !prefs_get_boolean(PREF_PGP_SENDFILE))
+                    || (chatwin->is_otr && !prefs_get_boolean(PREF_OTR_SENDFILE))) {
+                cons_show_error("Uploading unencrypted files disabled. See /omemo sendfile, /otr sendfile, /pgp sendfile.");
+                win_println(window, THEME_ERROR, '-', "Sending encrypted files via http_upload is not possible yet.");
+                free(filename);
+                return TRUE;
+            }
+            break;
+        }
+        case WIN_PRIVATE:
+        {
+            //we don't support encryption in private muc windows
+            break;
+        }
+        default:
+			cons_show_error("Unsupported window for file transmission.");
+			free(filename);
+			return TRUE;
+        }
+        
     if (access(filename, R_OK) != 0) {
         cons_show_error("Uploading '%s' failed: File not found!", filename);
         free(filename);
@@ -7296,6 +7337,11 @@ cmd_pgp(ProfWin *window, const char *const command, gchar **args)
         return TRUE;
     }
 
+    if (g_strcmp0(args[0], "sendfile") == 0) {
+        _cmd_set_boolean_preference(args[1], command, "Sending unencrypted files using /sendfile while otherwise using PGP", PREF_PGP_SENDFILE);
+        return TRUE;
+    }
+
     cons_bad_cmd_usage(command);
     return TRUE;
 #else
@@ -7762,6 +7808,19 @@ cmd_otr_answer(ProfWin *window, const char *const command, gchar **args)
     }
 
     otr_smp_answer(chatwin->barejid, answer);
+    return TRUE;
+#else
+    cons_show("This version of Profanity has not been built with OTR support enabled");
+    return TRUE;
+#endif
+}
+
+gboolean
+cmd_otr_sendfile(ProfWin *window, const char *const command, gchar **args)
+{
+#ifdef HAVE_LIBOTR
+    _cmd_set_boolean_preference(args[1], command, "Sending unencrypted files in an OTR session via /sendfile", PREF_OTR_SENDFILE);
+
     return TRUE;
 #else
     cons_show("This version of Profanity has not been built with OTR support enabled");
@@ -8533,6 +8592,19 @@ cmd_omemo_policy(ProfWin *window, const char *const command, gchar **args)
 
     prefs_set_string(PREF_OMEMO_POLICY, choice);
     cons_show("OMEMO policy is now set to: %s", choice);
+    return TRUE;
+#else
+    cons_show("This version of Profanity has not been built with OMEMO support enabled");
+    return TRUE;
+#endif
+}
+
+gboolean
+cmd_omemo_sendfile(ProfWin *window, const char *const command, gchar **args)
+{
+#ifdef HAVE_OMEMO
+    _cmd_set_boolean_preference(args[1], command, "Sending unencrypted files in an OMEMO session via /sendfile", PREF_OMEMO_SENDFILE);
+
     return TRUE;
 #else
     cons_show("This version of Profanity has not been built with OMEMO support enabled");

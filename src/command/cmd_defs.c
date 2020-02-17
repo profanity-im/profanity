@@ -1657,7 +1657,8 @@ static struct cmd_t command_defs[] =
             "/pgp start [<contact>]",
             "/pgp end",
             "/pgp log on|off|redact",
-            "/pgp char <char>")
+            "/pgp char <char>",
+            "/pgp sendfile on|off")
         CMD_DESC(
             "Open PGP commands to manage keys, and perform PGP encryption during chat sessions. "
             "See the /account command to set your own PGP key.")
@@ -1670,7 +1671,8 @@ static struct cmd_t command_defs[] =
             { "end",                      "End PGP encrypted chat with the current recipient." },
             { "log on|off",               "Enable or disable plaintext logging of PGP encrypted messages." },
             { "log redact",               "Log PGP encrypted messages, but replace the contents with [redacted]. This is the default." },
-            { "char <char>",              "Set the character to be displayed next to PGP encrypted messages." })
+            { "char <char>",              "Set the character to be displayed next to PGP encrypted messages." },
+            { "sendfile on|off",          "Allow /sendfile to send unencrypted files while otherwise using PGP session."})
         CMD_EXAMPLES(
             "/pgp log off",
             "/pgp setkey buddy@buddychat.org BA19CACE5A9592C5",
@@ -1695,7 +1697,8 @@ static struct cmd_t command_defs[] =
             { "untrust",    cmd_otr_untrust },
             { "secret",     cmd_otr_secret },
             { "question",   cmd_otr_question },
-            { "answer",     cmd_otr_answer })
+            { "answer",     cmd_otr_answer },
+            { "sendfile",   cmd_otr_sendfile })
         CMD_NOMAINFUNC
         CMD_TAGS(
             CMD_TAG_CHAT,
@@ -1712,7 +1715,8 @@ static struct cmd_t command_defs[] =
             "/otr answer <answer>",
             "/otr policy manual|opportunistic|always [<contact>]",
             "/otr log on|off|redact",
-            "/otr char <char>")
+            "/otr char <char>",
+            "/otr sendfile on|off")
         CMD_DESC(
             "Off The Record (OTR) commands to manage keys, and perform OTR encryption during chat sessions.")
         CMD_ARGS(
@@ -1734,7 +1738,8 @@ static struct cmd_t command_defs[] =
             { "policy always <contact>",        "Set the OTR policy to always for a specific contact." },
             { "log on|off",                     "Enable or disable plaintext logging of OTR encrypted messages." },
             { "log redact",                     "Log OTR encrypted messages, but replace the contents with [redacted]. This is the default." },
-            { "char <char>",                    "Set the character to be displayed next to OTR encrypted messages." })
+            { "char <char>",                    "Set the character to be displayed next to OTR encrypted messages." },
+            { "sendfile on|off",                "Allow /sendfile to send unencrypted files while in an OTR session."})
         CMD_EXAMPLES(
             "/otr log off",
             "/otr policy manual",
@@ -2236,7 +2241,8 @@ static struct cmd_t command_defs[] =
             { "fingerprint", cmd_omemo_fingerprint },
             { "char", cmd_omemo_char },
             { "policy", cmd_omemo_policy },
-            { "clear_device_list", cmd_omemo_clear_device_list })
+            { "clear_device_list", cmd_omemo_clear_device_list },
+            { "sendfile", cmd_omemo_sendfile} )
         CMD_NOMAINFUNC
         CMD_TAGS(
             CMD_TAG_CHAT,
@@ -2250,6 +2256,7 @@ static struct cmd_t command_defs[] =
             "/omemo fingerprint [<contact>]",
             "/omemo char <char>",
             "/omemo policy manual|automatic|always",
+            "/omemo sendfile on|off",
             "/omemo clear_device_list")
         CMD_DESC(
             "OMEMO commands to manage keys, and perform encryption during chat sessions.")
@@ -2264,6 +2271,7 @@ static struct cmd_t command_defs[] =
             { "policy manual",           "Set the global OMEMO policy to manual, OMEMO sessions must be started manually." },
             { "policy automatic",        "Set the global OMEMO policy to opportunistic, an OMEMO session will be attempted upon starting a conversation." },
             { "policy always",           "Set the global OMEMO policy to always, an error will be displayed if an OMEMO session cannot be initiated upon starting a conversation." },
+            { "sendfile on|off",         "Allow /sendfile to send unencrypted files while in an OMEMO session."},
             { "clear_device_list",       "Clear your own device list on server side. Each client will reannounce itself when connected back."})
         CMD_EXAMPLES(
             "/omemo gen",
