@@ -4805,7 +4805,7 @@ cmd_sendfile(ProfWin *window, const char *const command, gchar **args)
 
             // only omemo, no pgp/otr available in MUCs
             if (mucwin->is_omemo && !prefs_get_boolean(PREF_OMEMO_SENDFILE)) {
-				cons_show_error("Uploading '%s' failed: Encrypted file uploads not yet implemented!", filename);
+                cons_show_error("Uploading unencrypted files disabled. See /omemo sendfile, /otr sendfile, /pgp sendfile.");
 				win_println(window, THEME_ERROR, '-', "Sending encrypted files via http_upload is not possible yet.");
 				free(filename);
 				return TRUE;
@@ -4820,7 +4820,7 @@ cmd_sendfile(ProfWin *window, const char *const command, gchar **args)
             if ((chatwin->is_omemo && !prefs_get_boolean(PREF_OMEMO_SENDFILE))
                     || (chatwin->pgp_send && !prefs_get_boolean(PREF_PGP_SENDFILE))
                     || (chatwin->is_otr && !prefs_get_boolean(PREF_OTR_SENDFILE))) {
-                cons_show_error("Uploading '%s' failed: Encrypted file uploads not yet implemented!", filename);
+                cons_show_error("Uploading unencrypted files disabled. See /omemo sendfile, /otr sendfile, /pgp sendfile.");
                 win_println(window, THEME_ERROR, '-', "Sending encrypted files via http_upload is not possible yet.");
                 free(filename);
                 return TRUE;
