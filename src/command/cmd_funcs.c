@@ -4802,8 +4802,10 @@ cmd_sendfile(ProfWin *window, const char *const command, gchar **args)
         {
             ProfMucWin *mucwin = (ProfMucWin*)window;
             assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
-            if (mucwin->is_omemo) { //no pgp or otr available in MUCs
-				cons_show_error("Uploading '%s' failed: Encrypted file uploads not yet implemented!", filename); 
+
+            // only omemo, no pgp/otr available in MUCs
+            if (mucwin->is_omemo && !prefs_get_boolean(PREF_OMEMO_SENDFILE)) {
+				cons_show_error("Uploading '%s' failed: Encrypted file uploads not yet implemented!", filename);
 				win_println(window, THEME_ERROR, '-', "Sending encrypted files via http_upload is not possible yet.");
 				free(filename);
 				return TRUE;
@@ -4814,12 +4816,15 @@ cmd_sendfile(ProfWin *window, const char *const command, gchar **args)
         {
             ProfChatWin *chatwin = (ProfChatWin*)window;
             assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
-            if (chatwin->pgp_send || chatwin->is_omemo || chatwin->is_otr) {
-				cons_show_error("Uploading '%s' failed: Encrypted file uploads not yet implemented!", filename); 
-				win_println(window, THEME_ERROR, '-', "Sending encrypted files via http_upload is not possible yet.");
-				free(filename);
-				return TRUE;
-				}
+
+            if ((chatwin->is_omemo && !prefs_get_boolean(PREF_OMEMO_SENDFILE))
+                    || (chatwin->pgp_send)
+                    || (chatwin->is_otr)) {
+                cons_show_error("Uploading '%s' failed: Encrypted file uploads not yet implemented!", filename);
+                win_println(window, THEME_ERROR, '-', "Sending encrypted files via http_upload is not possible yet.");
+                free(filename);
+                return TRUE;
+            }
             break;
         }
         case WIN_PRIVATE:
@@ -8568,6 +8573,19 @@ cmd_omemo_policy(ProfWin *window, const char *const command, gchar **args)
 
     prefs_set_string(PREF_OMEMO_POLICY, choice);
     cons_show("OMEMO policy is now set to: %s", choice);
+    return TRUE;
+#else
+    cons_show("This version of Profanity has not been built with OMEMO support enabled");
+    return TRUE;
+#endif
+}
+
+gboolean
+cmd_omemo_sendfile(ProfWin *window, const char *const command, gchar **args)
+{
+#ifdef HAVE_OMEMO
+    _cmd_set_boolean_preference(args[1], command, "Sending unencrypted files in an OMEMO session via /sendfile", PREF_OMEMO_SENDFILE);
+
     return TRUE;
 #else
     cons_show("This version of Profanity has not been built with OMEMO support enabled");

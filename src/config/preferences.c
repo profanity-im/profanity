@@ -1800,6 +1800,7 @@ _get_group(preference_t pref)
             return PREF_GROUP_PLUGINS;
         case PREF_OMEMO_LOG:
         case PREF_OMEMO_POLICY:
+        case PREF_OMEMO_SENDFILE:
             return PREF_GROUP_OMEMO;
         default:
             return NULL;
@@ -2037,6 +2038,8 @@ _get_key(preference_t pref)
             return "log";
         case PREF_OMEMO_POLICY:
             return "policy";
+        case PREF_OMEMO_SENDFILE:
+            return "sendfile";
         case PREF_CORRECTION_ALLOW:
             return "correction.allow";
         default:

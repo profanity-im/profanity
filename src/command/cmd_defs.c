@@ -2236,7 +2236,8 @@ static struct cmd_t command_defs[] =
             { "fingerprint", cmd_omemo_fingerprint },
             { "char", cmd_omemo_char },
             { "policy", cmd_omemo_policy },
-            { "clear_device_list", cmd_omemo_clear_device_list })
+            { "clear_device_list", cmd_omemo_clear_device_list },
+            { "sendfile", cmd_omemo_sendfile} )
         CMD_NOMAINFUNC
         CMD_TAGS(
             CMD_TAG_CHAT,
@@ -2250,6 +2251,7 @@ static struct cmd_t command_defs[] =
             "/omemo fingerprint [<contact>]",
             "/omemo char <char>",
             "/omemo policy manual|automatic|always",
+            "/omemo sendfile on|off",
             "/omemo clear_device_list")
         CMD_DESC(
             "OMEMO commands to manage keys, and perform encryption during chat sessions.")
@@ -2264,6 +2266,7 @@ static struct cmd_t command_defs[] =
             { "policy manual",           "Set the global OMEMO policy to manual, OMEMO sessions must be started manually." },
             { "policy automatic",        "Set the global OMEMO policy to opportunistic, an OMEMO session will be attempted upon starting a conversation." },
             { "policy always",           "Set the global OMEMO policy to always, an error will be displayed if an OMEMO session cannot be initiated upon starting a conversation." },
+            { "sendfile",                "Allow /sendfile to send unencrypted files while in an OMEMO session."},
             { "clear_device_list",       "Clear your own device list on server side. Each client will reannounce itself when connected back."})
         CMD_EXAMPLES(
             "/omemo gen",

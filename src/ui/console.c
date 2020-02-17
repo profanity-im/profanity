@@ -2118,6 +2118,12 @@ cons_show_omemo_prefs(void)
     char ch = prefs_get_omemo_char();
     cons_show("OMEMO char (/omemo char)     : %c", ch);
 
+    if (prefs_get_boolean(PREF_OMEMO_SENDFILE)) {
+        cons_show("Allow sending unencrypted files in an OMEMO session via /sendfile (/omemo sendfile): ON");
+    } else {
+        cons_show("Allow sending unencrypted files in an OMEMO session via /sendfile (/omemo sendfile): OFF");
+    }
+
     cons_alert();
 }
 
