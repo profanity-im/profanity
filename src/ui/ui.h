@@ -56,7 +56,6 @@
 #define NO_COLOUR_DATE  16
 #define UNTRUSTED       32
 
-
 // core UI
 void ui_init(void);
 void ui_load_colours(void);

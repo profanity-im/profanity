@@ -1436,12 +1436,12 @@ static void
 _win_print_internal(ProfWin *window, const char show_char, int pad_indent, GDateTime *time,
     int flags, theme_item_t theme_item, const char *const from, const char *const message, DeliveryReceipt *receipt)
 {
-    // flags : 1st bit =  0/1 - me/not me
-    //         2nd bit =  0/1 - date/no date
-    //         3rd bit =  0/1 - eol/no eol
-    //         4th bit =  0/1 - color from/no color from
-    //         5th bit =  0/1 - color date/no date
-    //         6th bit =  0/1 - trusted/untrusted
+    // flags : 1st bit =  0/1 - me/not me. define: NO_ME
+    //         2nd bit =  0/1 - date/no date. define: NO_DATE
+    //         3rd bit =  0/1 - eol/no eol. define: NO_EOL
+    //         4th bit =  0/1 - color from/no color from. define: NO_COLOUR_FROM
+    //         5th bit =  0/1 - color date/no date. define: NO_COLOUR_DATE
+    //         6th bit =  0/1 - trusted/untrusted. define: UNTRUSTED
     gboolean me_message = FALSE;
     int offset = 0;
     int colour = theme_attrs(THEME_ME);
