@@ -361,28 +361,29 @@ mucwin_nick_change(ProfMucWin *mucwin, const char *const nick)
 }
 
 void
-mucwin_history(ProfMucWin *mucwin, const char *const nick, GDateTime *timestamp, const char *const message)
+mucwin_history(ProfMucWin *mucwin, const ProfMessage *const message)
 {
     assert(mucwin != NULL);
 
     ProfWin *window = (ProfWin*)mucwin;
     GString *line = g_string_new("");
+    char *nick = message->jid->resourcepart;
 
-    if (strncmp(message, "/me ", 4) == 0) {
+    if (strncmp(message->plain, "/me ", 4) == 0) {
         g_string_append(line, "*");
         g_string_append(line, nick);
         g_string_append(line, " ");
-        g_string_append(line, message + 4);
+        g_string_append(line, message->plain + 4);
     } else {
         g_string_append(line, nick);
         g_string_append(line, ": ");
-        g_string_append(line, message);
+        g_string_append(line, message->plain);
     }
 
-    win_print_history(window, timestamp, line->str);
+    win_print_history(window, message->timestamp, line->str);
     g_string_free(line, TRUE);
 
-    plugins_on_room_history_message(mucwin->roomjid, nick, message, timestamp);
+    plugins_on_room_history_message(mucwin->roomjid, nick, message->plain, message->timestamp);
 }
 
 static void

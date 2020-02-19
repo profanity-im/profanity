@@ -286,7 +286,7 @@ sv_ev_room_history(ProfMessage *message)
 
         gboolean younger = g_date_time_compare(mucwin->last_msg_timestamp, message->timestamp) < 0 ? TRUE : FALSE;
         if (ev_is_first_connect() || younger ) {
-            mucwin_history(mucwin, message->jid->resourcepart, message->timestamp, message->plain);
+            mucwin_history(mucwin, message);
         }
     }
 }
