@@ -461,24 +461,24 @@ _load_preferences(void)
 
     if (g_key_file_has_key(theme, "ui", "otr.char", NULL)) {
         gchar *ch = g_key_file_get_string(theme, "ui", "otr.char", NULL);
-        if (ch && strlen(ch) > 0) {
-            prefs_set_otr_char(ch[0]);
+        if (ch && g_utf8_strlen(ch, 4) == 1) {
+            prefs_set_otr_char(ch);
             g_free(ch);
         }
     }
 
     if (g_key_file_has_key(theme, "ui", "pgp.char", NULL)) {
         gchar *ch = g_key_file_get_string(theme, "ui", "pgp.char", NULL);
-        if (ch && strlen(ch) > 0) {
-            prefs_set_pgp_char(ch[0]);
+        if (ch && g_utf8_strlen(ch, 4) == 1) {
+            prefs_set_pgp_char(ch);
             g_free(ch);
         }
     }
 
     if (g_key_file_has_key(theme, "ui", "omemo.char", NULL)) {
         gchar *ch = g_key_file_get_string(theme, "ui", "omemo.char", NULL);
-        if (ch && strlen(ch) > 0) {
-            prefs_set_omemo_char(ch[0]);
+        if (ch && g_utf8_strlen(ch, 4) == 1) {
+            prefs_set_omemo_char(ch);
             g_free(ch);
         }
     }

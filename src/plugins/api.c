@@ -86,7 +86,7 @@ api_cons_show_themed(const char *const group, const char *const key, const char 
     char *parsed = str_replace(message, "\r\n", "\n");
     theme_item_t themeitem = plugin_themes_get(group, key, def);
     ProfWin *console = wins_get_console();
-    win_println(console, themeitem, '-', "%s", parsed);
+    win_println(console, themeitem, "-", "%s", parsed);
 
     free(parsed);
 
@@ -375,7 +375,7 @@ api_win_show(const char *tag, const char *line)
     }
 
     ProfWin *window = (ProfWin*)pluginwin;
-    win_println(window, THEME_DEFAULT, '!', "%s", line);
+    win_println(window, THEME_DEFAULT, "!", "%s", line);
 
     return 1;
 }
@@ -400,7 +400,7 @@ api_win_show_themed(const char *tag, const char *const group, const char *const 
 
     theme_item_t themeitem = plugin_themes_get(group, key, def);
     ProfWin *window = (ProfWin*)pluginwin;
-    win_println(window, themeitem, '!', "%s", line);
+    win_println(window, themeitem, "!", "%s", line);
 
     return 1;
 }
@@ -522,7 +522,7 @@ api_encryption_reset(const char *const barejid)
 #ifdef HAVE_LIBGPGME
     if (chatwin->pgp_send) {
         chatwin->pgp_send = FALSE;
-        win_println((ProfWin*)chatwin, THEME_DEFAULT, '!', "PGP encryption disabled.");
+        win_println((ProfWin*)chatwin, THEME_DEFAULT, "!", "PGP encryption disabled.");
     }
 #endif
 
@@ -784,7 +784,7 @@ api_chat_show(const char *const barejid, const char *message)
     }
 
     char *parsed = str_replace(message, "\r\n", "\n");
-    win_println((ProfWin*)chatwin, THEME_TEXT, '-', "%s", parsed);
+    win_println((ProfWin*)chatwin, THEME_TEXT, "-", "%s", parsed);
     free(parsed);
 
     return 1;
@@ -804,13 +804,13 @@ api_chat_show_themed(const char *const barejid, const char *const group, const c
         return 0;
     }
 
-    char show_ch = '-';
+    char *show_ch = "-";
     if (ch) {
-        if (strlen(ch) != 1) {
+        if (g_utf8_strlen(ch, 4) != 1) {
             log_warning("%s", "api_chat_show_themed failed, ch must be a string of length 1");
             return 0;
         } else {
-            show_ch = ch[0];
+            show_ch = (char*)ch;
         }
     }
 
@@ -849,7 +849,7 @@ api_room_show(const char *const roomjid, const char *message)
     }
 
     char *parsed = str_replace(message, "\r\n", "\n");
-    win_println((ProfWin*)mucwin, THEME_TEXT, '-', "%s", parsed);
+    win_println((ProfWin*)mucwin, THEME_TEXT, "-", "%s", parsed);
     free(parsed);
 
     return 1;
@@ -869,13 +869,13 @@ api_room_show_themed(const char *const roomjid, const char *const group, const c
         return 0;
     }
 
-    char show_ch = '-';
+    char *show_ch = "-";
     if (ch) {
-        if (strlen(ch) != 1) {
+        if (g_utf8_strlen(ch, 4) != 1) {
             log_warning("%s", "api_room_show_themed failed, ch must be a string of length 1");
             return 0;
         } else {
-            show_ch = ch[0];
+            show_ch = (char*)ch;
         }
     }
 

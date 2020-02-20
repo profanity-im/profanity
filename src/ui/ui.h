@@ -360,8 +360,8 @@ void win_show_subwin(ProfWin *window);
 void win_refresh_without_subwin(ProfWin *window);
 void win_refresh_with_subwin(ProfWin *window);
 
-void win_print(ProfWin *window, theme_item_t theme_item, const char ch, const char *const message, ...);
-void win_println(ProfWin *window, theme_item_t theme_item, const char ch, const char *const message, ...);
+void win_print(ProfWin *window, theme_item_t theme_item, const char *show_char, const char *const message, ...);
+void win_println(ProfWin *window, theme_item_t theme_item, const char *show_char, const char *const message, ...);
 void win_println_indent(ProfWin *window, int pad, const char *const message, ...);
 
 void win_append(ProfWin *window, theme_item_t theme_item, const char *const message, ...);

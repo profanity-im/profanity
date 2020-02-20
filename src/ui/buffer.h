@@ -47,7 +47,8 @@ typedef struct delivery_receipt_t {
 } DeliveryReceipt;
 
 typedef struct prof_buff_entry_t {
-    char show_char;
+    // pointer because it could be a unicode symbol as well
+    char *show_char;
     int pad_indent;
     GDateTime *time;
     int flags;
@@ -65,7 +66,7 @@ typedef struct prof_buff_t *ProfBuff;
 
 ProfBuff buffer_create();
 void buffer_free(ProfBuff buffer);
-void buffer_append(ProfBuff buffer, const char show_char, int pad_indent, GDateTime *time,
+void buffer_append(ProfBuff buffer, const char *show_char, int pad_indent, GDateTime *time,
     int flags, theme_item_t theme_item, const char *const display_from, const char *const message, DeliveryReceipt *receipt, const char *const id);
 void buffer_remove_entry_by_id(ProfBuff buffer, const char *const id);
 int buffer_size(ProfBuff buffer);

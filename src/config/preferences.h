@@ -232,12 +232,12 @@ void prefs_free_plugins(gchar **plugins);
 void prefs_add_plugin(const char *const name);
 void prefs_remove_plugin(const char *const name);
 
-char prefs_get_otr_char(void);
-void prefs_set_otr_char(char ch);
-char prefs_get_pgp_char(void);
-void prefs_set_pgp_char(char ch);
-char prefs_get_omemo_char(void);
-void prefs_set_omemo_char(char ch);
+char* prefs_get_otr_char(void);
+void prefs_set_otr_char(char *ch);
+char* prefs_get_pgp_char(void);
+void prefs_set_pgp_char(char *ch);
+char* prefs_get_omemo_char(void);
+void prefs_set_omemo_char(char *ch);
 
 char prefs_get_roster_header_char(void);
 void prefs_set_roster_header_char(char ch);
@@ -273,7 +273,7 @@ void prefs_set_roster_presence_indent(gint value);
 gint prefs_get_occupants_indent(void);
 void prefs_set_occupants_indent(gint value);
 
-char prefs_get_correction_char(void);
+char* prefs_get_correction_char(void);
 void prefs_set_correction_char(char ch);
 
 void prefs_add_login(const char *jid);

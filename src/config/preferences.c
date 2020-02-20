@@ -868,82 +868,79 @@ prefs_get_roster_size(void)
     }
 }
 
-char
+char*
 prefs_get_otr_char(void)
 {
-    char result = '~';
+    char *result = "~";
 
     char *resultstr = g_key_file_get_string(prefs, PREF_GROUP_OTR, "otr.char", NULL);
     if (!resultstr) {
-        result =  '~';
+        result = strdup("~");
     } else {
-        result = resultstr[0];
+        result = resultstr;
     }
-    free(resultstr);
 
     return result;
 }
 
 void
-prefs_set_otr_char(char ch)
+prefs_set_otr_char(char *ch)
 {
-    char str[2];
-    str[0] = ch;
-    str[1] = '\0';
-
-    g_key_file_set_string(prefs, PREF_GROUP_OTR, "otr.char", str);
+    if (g_utf8_strlen(ch, 4) == 1) {
+        g_key_file_set_string(prefs, PREF_GROUP_OTR, "otr.char", ch);
+    } else {
+        log_error("Could not set otr char: %s", ch);
+    }
 }
 
-char
+char*
 prefs_get_pgp_char(void)
 {
-    char result = '~';
+    char *result = "~";
 
     char *resultstr = g_key_file_get_string(prefs, PREF_GROUP_PGP, "pgp.char", NULL);
     if (!resultstr) {
-        result =  '~';
+        result = strdup("~");
     } else {
-        result = resultstr[0];
+        result = resultstr;
     }
-    free(resultstr);
 
     return result;
 }
 
 void
-prefs_set_pgp_char(char ch)
+prefs_set_pgp_char(char *ch)
 {
-    char str[2];
-    str[0] = ch;
-    str[1] = '\0';
-
-    g_key_file_set_string(prefs, PREF_GROUP_PGP, "pgp.char", str);
+    if (g_utf8_strlen(ch, 4) == 1) {
+        g_key_file_set_string(prefs, PREF_GROUP_PGP, "pgp.char", ch);
+    } else {
+        log_error("Could not set pgp char: %s", ch);
+    }
 }
 
-char
+char*
 prefs_get_omemo_char(void)
 {
-    char result = '~';
+    char *result = "~";
 
     char *resultstr = g_key_file_get_string(prefs, PREF_GROUP_OMEMO, "omemo.char", NULL);
     if (!resultstr) {
-        result =  '~';
+        result = strdup("~");
     } else {
-        result = resultstr[0];
+        result = resultstr;
     }
-    free(resultstr);
 
     return result;
 }
 
 void
-prefs_set_omemo_char(char ch)
+prefs_set_omemo_char(char *ch)
 {
-    char str[2];
-    str[0] = ch;
-    str[1] = '\0';
-
-    g_key_file_set_string(prefs, PREF_GROUP_OMEMO, "omemo.char", str);
+    if (g_utf8_strlen(ch, 4) == 1) {
+        g_key_file_set_string(prefs, PREF_GROUP_OMEMO, "omemo.char", ch);
+    } else {
+        log_error("Could not set omemo char: %s", ch);
+    }
 }
 
 char
@@ -1201,18 +1198,17 @@ prefs_set_roster_presence_indent(gint value)
     g_key_file_set_integer(prefs, PREF_GROUP_UI, "roster.presence.indent", value);
 }
 
-char
+char*
 prefs_get_correction_char(void)
 {
-    char result = '+';
+    char *result = "+";
 
     char *resultstr = g_key_file_get_string(prefs, PREF_GROUP_UI, "correction.char", NULL);
     if (!resultstr) {
-        result =  '+';
+        result = strdup("+");
     } else {
-        result = resultstr[0];
+        result = resultstr;
     }
-    free(resultstr);
 
     return result;
 }

@@ -532,7 +532,7 @@ void win_show_subwin(ProfWin *window) {}
 void win_refresh_without_subwin(ProfWin *window) {}
 void win_refresh_with_subwin(ProfWin *window) {}
 
-void win_println(ProfWin *window, theme_item_t theme, const char ch, const char *const message, ...)
+void win_println(ProfWin *window, theme_item_t theme, const char *ch, const char *const message, ...)
 {
     va_list args;
     va_start(args, message);
@@ -541,7 +541,7 @@ void win_println(ProfWin *window, theme_item_t theme, const char ch, const char 
     va_end(args);
 }
 
-void win_print(ProfWin *window, theme_item_t theme_item, const char ch, const char *const message, ...) {}
+void win_print(ProfWin *window, theme_item_t theme_item, const char *ch, const char *const message, ...) {}
 void win_appendln(ProfWin *window, theme_item_t theme_item, const char *const message, ...) {}
 
 char* win_get_title(ProfWin *window)
