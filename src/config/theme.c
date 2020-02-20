@@ -486,7 +486,7 @@ _load_preferences(void)
     if (g_key_file_has_key(theme, "ui", "correction.char", NULL)) {
         gchar *ch = g_key_file_get_string(theme, "ui", "correction.char", NULL);
         if (ch && strlen(ch) > 0) {
-            prefs_set_omemo_char(ch[0]);
+            prefs_set_correction_char(ch[0]);
             g_free(ch);
         }
     }
