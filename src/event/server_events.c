@@ -631,7 +631,7 @@ sv_ev_incoming_message(ProfMessage *message)
 #ifndef HAVE_OMEMO
     if (message->encrypted) {
         if (chatwin->is_otr) {
-            win_println((ProfWin*)chatwin, THEME_DEFAULT, '-', "PGP encrypted message received whilst in OTR session.");
+            win_println((ProfWin*)chatwin, THEME_DEFAULT, "-", "PGP encrypted message received whilst in OTR session.");
         } else {
             _sv_ev_incoming_pgp(chatwin, new_win, message, TRUE);
         }
