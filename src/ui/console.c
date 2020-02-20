@@ -1854,14 +1854,18 @@ void
 cons_logging_setting(void)
 {
     if (prefs_get_boolean(PREF_CHLOG))
-        cons_show("Chat logging (/logging chat)        : ON");
+        cons_show("Chat logging (/logging chat)                : ON");
     else
-        cons_show("Chat logging (/logging chat)        : OFF");
+        cons_show("Chat logging (/logging chat)                : OFF");
 
     if (prefs_get_boolean(PREF_GRLOG))
-        cons_show("Groupchat logging (/logging group)  : ON");
+        cons_show("Groupchat logging (/logging group)          : ON");
     else
-        cons_show("Groupchat logging (/logging group)  : OFF");
+        cons_show("Groupchat logging (/logging group)          : OFF");
+
+    char *pref = prefs_get_string(PREF_HISTORY_COLOR_MUC);
+    cons_show("MUC history color (/logging group color)    : %s", pref);
+    prefs_free_string(pref);
 }
 
 void

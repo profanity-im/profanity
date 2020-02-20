@@ -380,7 +380,18 @@ mucwin_history(ProfMucWin *mucwin, const ProfMessage *const message)
         g_string_append(line, message->plain);
     }
 
-    win_print_history(window, message->timestamp, line->str);
+    // 'unanimous' all in one color (like always was)
+    // 'regular' colored like new messages too
+    char *muc_history_color = prefs_get_string(PREF_HISTORY_COLOR_MUC);
+    if (g_strcmp0(muc_history_color, "unanimous") == 0) {
+        win_print_history(window, message->timestamp, line->str);
+    } else {
+        // TODO: actually should call mucwin_incoming_msg() so that mentions and triggers are highlighted too.
+        // so should put code from sv_ev_room_message() in own function. so that we get the triggers etc.
+        win_println_incoming_muc_msg(window, '-', 0, message->jid->resourcepart, message->id, message->replace_id, message->plain);
+    }
+    g_free(muc_history_color);
+
     g_string_free(line, TRUE);
 
     plugins_on_room_history_message(mucwin->roomjid, nick, message->plain, message->timestamp);

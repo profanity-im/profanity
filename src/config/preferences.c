@@ -1746,6 +1746,7 @@ _get_group(preference_t pref)
         case PREF_STATUSBAR_CHAT:
         case PREF_STATUSBAR_ROOM:
         case PREF_TITLEBAR_MUC_TITLE:
+        case PREF_HISTORY_COLOR_MUC:
             return PREF_GROUP_UI;
         case PREF_STATES:
         case PREF_OUTTYPE:
@@ -2048,6 +2049,8 @@ _get_key(preference_t pref)
             return "sendfile";
         case PREF_CORRECTION_ALLOW:
             return "correction.allow";
+        case PREF_HISTORY_COLOR_MUC:
+            return "history.muc.color";
         default:
             return NULL;
     }
@@ -2177,6 +2180,8 @@ _get_default_string(preference_t pref)
             return "automatic";
         case PREF_COLOR_NICK:
             return "false";
+        case PREF_HISTORY_COLOR_MUC:
+            return "unanimous";
         default:
             return NULL;
     }

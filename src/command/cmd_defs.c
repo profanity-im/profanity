@@ -1607,24 +1607,28 @@ static struct cmd_t command_defs[] =
     },
 
     { "/logging",
-        parse_args, 2, 2, &cons_logging_setting,
+        parse_args, 2, 3, &cons_logging_setting,
         CMD_NOSUBFUNCS
         CMD_MAINFUNC(cmd_logging)
         CMD_TAGS(
             CMD_TAG_CHAT)
         CMD_SYN(
-            "/logging chat|group on|off")
+            "/logging chat|group on|off",
+            "/logging group color unanimous|regular")
         CMD_DESC(
+            "Configure chat logging. "
             "Switch logging on or off. "
             "Chat logging will be enabled if /history is set to on. "
-            "When disabling this option, /history will also be disabled. ")
+            "When disabling this option, /history will also be disabled. "
+            "Color MUC history unanimously or like regular MUC messages.")
         CMD_ARGS(
-            { "chat", "Regular chat logging" },
-            { "group", "Groupchat (room) logging" },
-            { "on|off", "Enable or disable logging." })
+            { "chat on|off",             "Enable/Disable regular chat logging" },
+            { "group on|off",            "Enable/Disable groupchat (room) logging" },
+            { "group color unanimous|regular", "Color MUC history unanimous or like regular MUC messages." })
         CMD_EXAMPLES(
             "/logging chat on",
-            "/logging group off" )
+            "/logging group off",
+            "/logging group color regular" )
     },
 
     { "/states",

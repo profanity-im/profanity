@@ -165,6 +165,7 @@ typedef enum {
     PREF_OMEMO_SENDFILE,
     PREF_OCCUPANTS_WRAP,
     PREF_CORRECTION_ALLOW,
+    PREF_HISTORY_COLOR_MUC,
 } preference_t;
 
 typedef struct prof_alias_t {
