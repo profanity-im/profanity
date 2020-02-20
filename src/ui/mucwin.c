@@ -366,34 +366,41 @@ mucwin_history(ProfMucWin *mucwin, const ProfMessage *const message)
     assert(mucwin != NULL);
 
     ProfWin *window = (ProfWin*)mucwin;
-    GString *line = g_string_new("");
     char *nick = message->jid->resourcepart;
-
-    if (strncmp(message->plain, "/me ", 4) == 0) {
-        g_string_append(line, "*");
-        g_string_append(line, nick);
-        g_string_append(line, " ");
-        g_string_append(line, message->plain + 4);
-    } else {
-        g_string_append(line, nick);
-        g_string_append(line, ": ");
-        g_string_append(line, message->plain);
-    }
 
     // 'unanimous' all in one color (like always was)
     // 'regular' colored like new messages too
     char *muc_history_color = prefs_get_string(PREF_HISTORY_COLOR_MUC);
+
     if (g_strcmp0(muc_history_color, "unanimous") == 0) {
+        GString *line = g_string_new("");
+
+        if (strncmp(message->plain, "/me ", 4) == 0) {
+            g_string_append(line, "*");
+            g_string_append(line, nick);
+            g_string_append(line, " ");
+            g_string_append(line, message->plain + 4);
+        } else {
+            g_string_append(line, nick);
+            g_string_append(line, ": ");
+            g_string_append(line, message->plain);
+        }
+
         win_print_history(window, message->timestamp, line->str);
+
+        g_string_free(line, TRUE);
     } else {
-        // TODO: actually should call mucwin_incoming_msg() so that mentions and triggers are highlighted too.
-        // so should put code from sv_ev_room_message() in own function. so that we get the triggers etc.
-        win_println_incoming_muc_msg(window, '-', 0, message->jid->resourcepart, message->id, message->replace_id, message->plain);
+        char *mynick = muc_nick(mucwin->roomjid);
+        GSList *mentions = get_mentions(prefs_get_boolean(PREF_NOTIFY_MENTION_WHOLE_WORD), prefs_get_boolean(PREF_NOTIFY_MENTION_CASE_SENSITIVE), message->plain, mynick);
+        GList *triggers = prefs_message_get_triggers(message->plain);
+
+        mucwin_incoming_msg(mucwin, message, mentions, triggers);
+
+        g_slist_free(mentions);
+        g_list_free_full(triggers, free);
     }
+
     g_free(muc_history_color);
-
-    g_string_free(line, TRUE);
-
     plugins_on_room_history_message(mucwin->roomjid, nick, message->plain, message->timestamp);
 }
 
@@ -542,7 +549,7 @@ mucwin_outgoing_msg(ProfMucWin *mucwin, const char *const message, const char *c
 }
 
 void
-mucwin_incoming_msg(ProfMucWin *mucwin, ProfMessage *message, GSList *mentions, GList *triggers)
+mucwin_incoming_msg(ProfMucWin *mucwin, const ProfMessage *const message, GSList *mentions, GList *triggers)
 {
     assert(mucwin != NULL);
     int flags = 0;

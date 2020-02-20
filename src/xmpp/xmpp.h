@@ -184,7 +184,7 @@ void message_send_paused(const char *const jid);
 void message_send_gone(const char *const jid);
 void message_send_invite(const char *const room, const char *const contact, const char *const reason);
 
-bool message_is_sent_by_us(ProfMessage *message, bool checkOID);
+bool message_is_sent_by_us(const ProfMessage *const message, bool checkOID);
 
 void presence_subscription(const char *const jid, const jabber_subscr_t action);
 GList* presence_get_subscription_requests(void);

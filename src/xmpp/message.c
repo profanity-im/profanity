@@ -1256,7 +1256,7 @@ _send_message_stanza(xmpp_stanza_t *const stanza)
  * checkOID = false: check regular id
  */
 bool
-message_is_sent_by_us(ProfMessage *message, bool checkOID) {
+message_is_sent_by_us(const ProfMessage *const message, bool checkOID) {
     bool ret = FALSE;
 
     // we check the </origin-id> for this we calculate a hash into it so we can detect

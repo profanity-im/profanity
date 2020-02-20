@@ -3,6 +3,7 @@
  * vim: expandtab:ts=4:sts=4:sw=4
  *
  * Copyright (C) 2012 - 2019 James Booth <boothj5@gmail.com>
+ * Copyright (C) 2019 - 2020 Michael Vetter <jubalh@iodoru.org>
  *
  * This file is part of Profanity.
  *
@@ -158,7 +159,7 @@ void mucwin_occupant_role_and_affiliation_change(ProfMucWin *mucwin, const char 
 void mucwin_roster(ProfMucWin *mucwin, GList *occupants, const char *const presence);
 void mucwin_history(ProfMucWin *mucwin, const ProfMessage *const message);
 void mucwin_outgoing_msg(ProfMucWin *mucwin, const char *const message, const char *const id, prof_enc_t enc_mode, const char *const replace_id);
-void mucwin_incoming_msg(ProfMucWin *mucwin, ProfMessage *message, GSList *mentions, GList *triggers);
+void mucwin_incoming_msg(ProfMucWin *mucwin, const ProfMessage *const message, GSList *mentions, GList *triggers);
 void mucwin_subject(ProfMucWin *mucwin, const char *const nick, const char *const subject);
 void mucwin_requires_config(ProfMucWin *mucwin);
 void mucwin_info(ProfMucWin *mucwin);
