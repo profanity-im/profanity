@@ -319,17 +319,8 @@ sv_ev_room_message(ProfMessage *message)
     char *old_plain = message->plain;
     message->plain = plugins_pre_room_message_display(message->jid->barejid, message->jid->resourcepart, message->plain);
 
-    gboolean whole_word = prefs_get_boolean(PREF_NOTIFY_MENTION_WHOLE_WORD);
-    gboolean case_sensitive = prefs_get_boolean(PREF_NOTIFY_MENTION_CASE_SENSITIVE);
-    char *message_search = case_sensitive ? strdup(message->plain) : g_utf8_strdown(message->plain, -1);
-    char *mynick_search = case_sensitive ? strdup(mynick) : g_utf8_strdown(mynick, -1);
-
-    GSList *mentions = NULL;
-    mentions = prof_occurrences(mynick_search, message_search, 0, whole_word, &mentions);
+    GSList *mentions = get_mentions(prefs_get_boolean(PREF_NOTIFY_MENTION_WHOLE_WORD), prefs_get_boolean(PREF_NOTIFY_MENTION_CASE_SENSITIVE), message->plain, mynick);
     gboolean mention = g_slist_length(mentions) > 0;
-    g_free(message_search);
-    g_free(mynick_search);
-
     GList *triggers = prefs_message_get_triggers(message->plain);
 
     _clean_incoming_message(message);

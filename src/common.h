@@ -99,6 +99,7 @@ gboolean is_notify_enabled(void);
 
 GSList* prof_occurrences(const char *const needle, const char *const haystack, int offset, gboolean whole_word,
     GSList **result);
+GSList* get_mentions(gboolean whole_word, gboolean case_sensitive, const char *const message, const char *const nick);
 
 int is_regular_file(const char *path);
 int is_dir(const char *path);
