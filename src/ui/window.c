@@ -1694,7 +1694,7 @@ _win_print_wrapped(WINDOW *win, const char *const message, size_t indent, int pa
 }
 
 void
-win_print_separator(ProfWin *window)
+win_print_trackbar(ProfWin *window)
 {
     int cols = getmaxx(window->layout->win);
 
@@ -1722,8 +1722,8 @@ win_redraw(ProfWin *window)
         ProfBuffEntry *e = buffer_get_entry(window->layout->buffer, i);
 
         if (e->display_from == NULL && e->message && e->message[0] == '-') {
-            // just an indicator to print the separator not the actual message
-            win_print_separator(window);
+            // just an indicator to print the trackbar/separator not the actual message
+            win_print_trackbar(window);
         } else {
             // regular thing to print
             _win_print_internal(window, e->show_char, e->pad_indent, e->time, e->flags, e->theme_item, e->display_from, e->message, e->receipt);
@@ -1904,7 +1904,7 @@ win_insert_last_read_position_marker(ProfWin *window, char* id)
 
     GDateTime *time = g_date_time_new_now_local();
 
-    // the separator will actually be print in win_redraw().
+    // the trackbar/separator will actually be print in win_redraw().
     // this only puts it in the buffer and win_redraw() will interpret it.
     // so that we have the correct length even when resizing.
     buffer_append(window->layout->buffer, " ", 0, time, 0, THEME_TEXT, NULL, "-", NULL, id);
