@@ -1101,7 +1101,7 @@ _win_correct(ProfWin *window, const char *const message, const char *const id, c
 void
 win_print_incoming(ProfWin *window, const char *const display_name_from, ProfMessage *message)
 {
-    char *enc_char = "-";
+    char *enc_char = strdup("-");
     int flags = NO_ME;
 
     if (!message->trusted) {
