@@ -172,7 +172,7 @@ log_reinit(void)
     free(lf);
 }
 
-char*
+const char*
 get_log_file_location(void)
 {
     return mainlogfile->str;
