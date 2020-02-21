@@ -722,6 +722,7 @@ theme_attrs(theme_item_t attrs)
     case THEME_TEXT_ME:                 _theme_prep_fgnd("main.text.me",            lookup_str, &bold); break;
     case THEME_TEXT_THEM:               _theme_prep_fgnd("main.text.them",          lookup_str, &bold); break;
     case THEME_SPLASH:                  _theme_prep_fgnd("main.splash",             lookup_str, &bold); break;
+    case THEME_TRACKBAR:                _theme_prep_fgnd("main.trackbar",           lookup_str, &bold); break;
     case THEME_HELP_HEADER:             _theme_prep_fgnd("main.help.header",        lookup_str, &bold); break;
     case THEME_ERROR:                   _theme_prep_fgnd("error",                   lookup_str, &bold); break;
     case THEME_INCOMING:                _theme_prep_fgnd("incoming",                lookup_str, &bold); break;

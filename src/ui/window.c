@@ -1698,10 +1698,16 @@ win_print_separator(ProfWin *window)
 {
     int cols = getmaxx(window->layout->win);
 
+    wbkgdset(window->layout->win, theme_attrs(THEME_TRACKBAR));
+    wattron(window->layout->win, theme_attrs(THEME_TRACKBAR));
+
     int i;
     for (i=1; i<cols; i++) {
         wprintw(window->layout->win, "-");
     }
+
+    wattroff(window->layout->win, theme_attrs(THEME_TRACKBAR));
+
     wprintw(window->layout->win, "\n");
 }
 
