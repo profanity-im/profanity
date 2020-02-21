@@ -118,7 +118,7 @@ omemo_init(void)
 {
     log_info("OMEMO: initialising");
     if (omemo_crypto_init() != 0) {
-        cons_show("Error initializing OMEMO crypto");
+        cons_show("Error initializing OMEMO crypto: gcry_check_version() failed");
     }
 
     pthread_mutexattr_init(&omemo_ctx.attr);
@@ -167,7 +167,7 @@ omemo_on_connect(ProfAccount *account)
     };
 
     if (signal_context_set_crypto_provider(omemo_ctx.signal, &crypto_provider) != 0) {
-        cons_show("Error initializing OMEMO crypto");
+        cons_show("Error initializing OMEMO crypto: unable to set crypto provider");
         return;
     }
 
