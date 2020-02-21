@@ -324,7 +324,7 @@ sv_ev_room_message(ProfMessage *message)
     GList *triggers = prefs_message_get_triggers(message->plain);
 
     _clean_incoming_message(message);
-    mucwin_incoming_msg(mucwin, message, mentions, triggers);
+    mucwin_incoming_msg(mucwin, message, mentions, triggers, TRUE);
 
     g_slist_free(mentions);
 

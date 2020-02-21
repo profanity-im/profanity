@@ -394,7 +394,7 @@ mucwin_history(ProfMucWin *mucwin, const ProfMessage *const message)
         GSList *mentions = get_mentions(prefs_get_boolean(PREF_NOTIFY_MENTION_WHOLE_WORD), prefs_get_boolean(PREF_NOTIFY_MENTION_CASE_SENSITIVE), message->plain, mynick);
         GList *triggers = prefs_message_get_triggers(message->plain);
 
-        mucwin_incoming_msg(mucwin, message, mentions, triggers);
+        mucwin_incoming_msg(mucwin, message, mentions, triggers, FALSE);
 
         g_slist_free(mentions);
         g_list_free_full(triggers, free);
@@ -552,12 +552,12 @@ mucwin_outgoing_msg(ProfMucWin *mucwin, const char *const message, const char *c
 }
 
 void
-mucwin_incoming_msg(ProfMucWin *mucwin, const ProfMessage *const message, GSList *mentions, GList *triggers)
+mucwin_incoming_msg(ProfMucWin *mucwin, const ProfMessage *const message, GSList *mentions, GList *triggers, gboolean filter_reflection)
 {
     assert(mucwin != NULL);
     int flags = 0;
 
-    if (message_is_sent_by_us(message, TRUE)) {
+    if (filter_reflection && message_is_sent_by_us(message, TRUE)) {
         /* Ignore reflection messages */
         return;
     }
