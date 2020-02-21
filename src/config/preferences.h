@@ -233,11 +233,11 @@ void prefs_add_plugin(const char *const name);
 void prefs_remove_plugin(const char *const name);
 
 char* prefs_get_otr_char(void);
-void prefs_set_otr_char(char *ch);
+gboolean prefs_set_otr_char(char *ch);
 char* prefs_get_pgp_char(void);
-void prefs_set_pgp_char(char *ch);
+gboolean prefs_set_pgp_char(char *ch);
 char* prefs_get_omemo_char(void);
-void prefs_set_omemo_char(char *ch);
+gboolean prefs_set_omemo_char(char *ch);
 
 char prefs_get_roster_header_char(void);
 void prefs_set_roster_header_char(char ch);

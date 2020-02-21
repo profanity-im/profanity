@@ -7132,8 +7132,11 @@ cmd_pgp(ProfWin *window, const char *const command, gchar **args)
             cons_bad_cmd_usage(command);
             return TRUE;
         } else if (g_utf8_strlen(args[1], 4) == 1) {
-            prefs_set_pgp_char(args[1]);
-            cons_show("PGP char set to %s.", args[1]);
+            if (prefs_set_pgp_char(args[1])) {
+                cons_show("PGP char set to %s.", args[1]);
+            } else {
+                cons_show_error("Could not set PGP char: %s.", args[1]);
+            }
             return TRUE;
         }
         cons_bad_cmd_usage(command);
@@ -7369,8 +7372,11 @@ cmd_otr_char(ProfWin *window, const char *const command, gchar **args)
         cons_bad_cmd_usage(command);
         return TRUE;
     } else if (g_utf8_strlen(args[1], 4) == 1) {
-        prefs_set_otr_char(args[1]);
-        cons_show("OTR char set to %s.", args[1]);
+        if (prefs_set_otr_char(args[1])) {
+            cons_show("OTR char set to %s.", args[1]);
+        } else {
+            cons_show_error("Could not set OTR char: %s.", args[1]);
+        }
         return TRUE;
     }
     cons_bad_cmd_usage(command);
@@ -8272,8 +8278,11 @@ cmd_omemo_char(ProfWin *window, const char *const command, gchar **args)
         cons_bad_cmd_usage(command);
         return TRUE;
     } else if (g_utf8_strlen(args[1], 4) == 1) {
-        prefs_set_omemo_char(args[1]);
-        cons_show("OMEMO char set to %s.", args[1]);
+        if (prefs_set_omemo_char(args[1])) {
+            cons_show("OMEMO char set to %s.", args[1]);
+        } else {
+            cons_show_error("Could not set OMEMO char: %s.", args[1]);
+        }
         return TRUE;
     }
     cons_bad_cmd_usage(command);

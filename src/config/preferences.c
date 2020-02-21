@@ -883,14 +883,16 @@ _prefs_get_encryption_char(const char *const ch, const char *const pref_group, c
     return result;
 }
 
-static void
+static gboolean
 _prefs_set_encryption_char(const char *const ch, const char *const pref_group, const char *const key)
 {
     if (g_utf8_strlen(ch, 4) == 1) {
         g_key_file_set_string(prefs, pref_group, key, ch);
+        return TRUE;
     } else {
         log_error("Could not set %s encryption char to: %s", key, ch);
     }
+    return FALSE;
 }
 
 char*
@@ -899,10 +901,10 @@ prefs_get_otr_char(void)
     return _prefs_get_encryption_char("~", PREF_GROUP_OTR, "otr.char");
 }
 
-void
+gboolean
 prefs_set_otr_char(char *ch)
 {
-    _prefs_set_encryption_char(ch, PREF_GROUP_OTR, "otr.char");
+    return _prefs_set_encryption_char(ch, PREF_GROUP_OTR, "otr.char");
 }
 
 char*
@@ -911,10 +913,10 @@ prefs_get_pgp_char(void)
     return _prefs_get_encryption_char("~", PREF_GROUP_PGP, "pgp.char");
 }
 
-void
+gboolean
 prefs_set_pgp_char(char *ch)
 {
-    _prefs_set_encryption_char(ch, PREF_GROUP_PGP, "pgp.char");
+    return _prefs_set_encryption_char(ch, PREF_GROUP_PGP, "pgp.char");
 }
 
 char*
@@ -923,10 +925,10 @@ prefs_get_omemo_char(void)
     return _prefs_get_encryption_char("~", PREF_GROUP_OMEMO, "omemo.char");
 }
 
-void
+gboolean
 prefs_set_omemo_char(char *ch)
 {
-    _prefs_set_encryption_char(ch, PREF_GROUP_OMEMO, "omemo.char");
+    return _prefs_set_encryption_char(ch, PREF_GROUP_OMEMO, "omemo.char");
 }
 
 char
