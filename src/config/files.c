@@ -112,16 +112,26 @@ files_get_inputrc_file(void)
 }
 
 char*
-files_get_log_file(void)
+files_get_log_file(char *log_file)
 {
     gchar *xdg_data = _files_get_xdg_data_home();
     GString *logfile = g_string_new(xdg_data);
-    g_string_append(logfile, "/profanity/logs/profanity");
+
+    if (log_file) {
+        g_string_append(logfile, "/profanity/logs/");
+        g_string_append(logfile, log_file);
+    } else {
+        g_string_append(logfile, "/profanity/logs/profanity");
+    }
+
     if (!prefs_get_boolean(PREF_LOG_SHARED)) {
         g_string_append_printf(logfile, "%d", getpid());
     }
+
     g_string_append(logfile, ".log");
+
     char *result = strdup(logfile->str);
+
     free(xdg_data);
     g_string_free(logfile, TRUE);
 

@@ -53,7 +53,7 @@ typedef enum {
     PROF_OUT_LOG
 } chat_log_direction_t;
 
-void log_init(log_level_t filter);
+void log_init(log_level_t filter, char *log_file);
 log_level_t log_get_filter(void);
 void log_close(void);
 void log_reinit(void);

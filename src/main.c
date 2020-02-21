@@ -61,6 +61,7 @@
 
 static gboolean version = FALSE;
 static char *log = "INFO";
+static char *log_file = NULL;
 static char *account_name = NULL;
 static char *config_file = NULL;
 
@@ -76,8 +77,9 @@ main(int argc, char **argv)
     {
         { "version", 'v', 0, G_OPTION_ARG_NONE, &version, "Show version information", NULL },
         { "account", 'a', 0, G_OPTION_ARG_STRING, &account_name, "Auto connect to an account on startup" },
-        { "log",'l', 0, G_OPTION_ARG_STRING, &log, "Set logging levels, DEBUG, INFO (default), WARN, ERROR", "LEVEL" },
-        { "config",'c', 0, G_OPTION_ARG_STRING, &config_file, "Use an alternative configuration file", NULL },
+        { "log", 'l', 0, G_OPTION_ARG_STRING, &log, "Set logging levels, DEBUG, INFO (default), WARN, ERROR", "LEVEL" },
+        { "config", 'c', 0, G_OPTION_ARG_STRING, &config_file, "Use an alternative configuration file", NULL },
+        { "logfile", 'f', 0, G_OPTION_ARG_STRING, &log_file, "Specify log filename", NULL },
         { NULL }
     };
 
@@ -173,7 +175,7 @@ main(int argc, char **argv)
         return 0;
     }
 
-    prof_run(log, account_name, config_file);
+    prof_run(log, account_name, config_file, log_file);
 
     return 0;
 }

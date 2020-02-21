@@ -55,7 +55,7 @@
 #define PROF "prof"
 
 static FILE *logp;
-GString *mainlogfile;
+GString *mainlogfile = NULL;
 
 static GTimeZone *tz;
 static GDateTime *dt;
@@ -144,22 +144,32 @@ log_error(const char *const msg, ...)
 }
 
 void
-log_init(log_level_t filter)
+log_init(log_level_t filter, char *log_file)
 {
     level_filter = filter;
     tz = g_time_zone_new_local();
-    char *log_file = files_get_log_file();
-    logp = fopen(log_file, "a");
-    g_chmod(log_file, S_IRUSR | S_IWUSR);
-    mainlogfile = g_string_new(log_file);
-    free(log_file);
+
+    char *lf;
+    lf = files_get_log_file(log_file);
+
+    logp = fopen(lf, "a");
+    g_chmod(lf, S_IRUSR | S_IWUSR);
+    mainlogfile = g_string_new(lf);
+    free(lf);
 }
 
 void
 log_reinit(void)
 {
+    char *lf = strdup(mainlogfile->str);
+    char *start = strrchr(lf, '/') +1;
+    char *end = strstr(start, ".log");
+    *end = '\0';
+
     log_close();
-    log_init(level_filter);
+    log_init(level_filter, start);
+
+    free(lf);
 }
 
 char*
@@ -229,7 +239,7 @@ log_level_from_string(char *log_level)
 static void
 _rotate_log_file(void)
 {
-    gchar *log_file = files_get_log_file();
+    gchar *log_file = mainlogfile->str;
     size_t len = strlen(log_file);
     gchar *log_file_new = malloc(len + 4);
     int i = 1;
@@ -241,10 +251,18 @@ _rotate_log_file(void)
             break;
     }
 
-    log_close();
-    rename(log_file, log_file_new);
-    log_init(log_get_filter());
+    char *lf = strdup(mainlogfile->str);
+    char *start = strrchr(lf, '/') +1;
+    char *end = strstr(start, ".log");
+    *end = '\0';
 
+    log_close();
+
+    rename(log_file, log_file_new);
+
+    log_init(log_get_filter(), start);
+
+    free(lf);
     free(log_file_new);
     free(log_file);
     log_info("Log has been rotated");
