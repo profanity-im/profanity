@@ -189,7 +189,7 @@ void mucwin_occupant_role_and_affiliation_change(ProfMucWin *mucwin, const char 
     const char * const affiliation, const char * const actor, const char * const reason) {}
 void mucwin_roster(ProfMucWin *mucwin, GList *occupants, const char * const presence) {}
 void mucwin_history(ProfMucWin *mucwin, const ProfMessage *const message) {}
-void mucwin_incoming_msg(ProfMucWin *mucwin, const ProfMessage *const message, GSList *mentions, GList *triggers) {}
+void mucwin_incoming_msg(ProfMucWin *mucwin, const ProfMessage *const message, GSList *mentions, GList *triggers, gboolean filter_reflection) {}
 void mucwin_outgoing_msg(ProfMucWin *mucwin, const char *const message, const char *const id, prof_enc_t enc_mode, const char *const replace_id) {}
 void mucwin_subject(ProfMucWin *mucwin, const char * const nick, const char * const subject) {}
 void mucwin_requires_config(ProfMucWin *mucwin) {}
