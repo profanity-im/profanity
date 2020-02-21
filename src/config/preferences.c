@@ -868,79 +868,65 @@ prefs_get_roster_size(void)
     }
 }
 
-char*
-prefs_get_otr_char(void)
+static char*
+_prefs_get_encryption_char(const char *const ch, const char *const pref_group, const char *const key)
 {
-    char *result = "~";
+    char *result = NULL;
 
-    char *resultstr = g_key_file_get_string(prefs, PREF_GROUP_OTR, "otr.char", NULL);
+    char *resultstr = g_key_file_get_string(prefs, pref_group, key, NULL);
     if (!resultstr) {
-        result = strdup("~");
+        result = strdup(ch);
     } else {
         result = resultstr;
     }
 
     return result;
+}
+
+static void
+_prefs_set_encryption_char(const char *const ch, const char *const pref_group, const char *const key)
+{
+    if (g_utf8_strlen(ch, 4) == 1) {
+        g_key_file_set_string(prefs, pref_group, key, ch);
+    } else {
+        log_error("Could not set %s encryption char to: %s", key, ch);
+    }
+}
+
+char*
+prefs_get_otr_char(void)
+{
+    return _prefs_get_encryption_char("~", PREF_GROUP_OTR, "otr.char");
 }
 
 void
 prefs_set_otr_char(char *ch)
 {
-    if (g_utf8_strlen(ch, 4) == 1) {
-        g_key_file_set_string(prefs, PREF_GROUP_OTR, "otr.char", ch);
-    } else {
-        log_error("Could not set otr char: %s", ch);
-    }
+    _prefs_set_encryption_char(ch, PREF_GROUP_OTR, "otr.char");
 }
 
 char*
 prefs_get_pgp_char(void)
 {
-    char *result = "~";
-
-    char *resultstr = g_key_file_get_string(prefs, PREF_GROUP_PGP, "pgp.char", NULL);
-    if (!resultstr) {
-        result = strdup("~");
-    } else {
-        result = resultstr;
-    }
-
-    return result;
+    return _prefs_get_encryption_char("~", PREF_GROUP_PGP, "pgp.char");
 }
 
 void
 prefs_set_pgp_char(char *ch)
 {
-    if (g_utf8_strlen(ch, 4) == 1) {
-        g_key_file_set_string(prefs, PREF_GROUP_PGP, "pgp.char", ch);
-    } else {
-        log_error("Could not set pgp char: %s", ch);
-    }
+    _prefs_set_encryption_char(ch, PREF_GROUP_PGP, "pgp.char");
 }
 
 char*
 prefs_get_omemo_char(void)
 {
-    char *result = "~";
-
-    char *resultstr = g_key_file_get_string(prefs, PREF_GROUP_OMEMO, "omemo.char", NULL);
-    if (!resultstr) {
-        result = strdup("~");
-    } else {
-        result = resultstr;
-    }
-
-    return result;
+    return _prefs_get_encryption_char("~", PREF_GROUP_OMEMO, "omemo.char");
 }
 
 void
 prefs_set_omemo_char(char *ch)
 {
-    if (g_utf8_strlen(ch, 4) == 1) {
-        g_key_file_set_string(prefs, PREF_GROUP_OMEMO, "omemo.char", ch);
-    } else {
-        log_error("Could not set omemo char: %s", ch);
-    }
+    _prefs_set_encryption_char(ch, PREF_GROUP_OMEMO, "omemo.char");
 }
 
 char
