@@ -188,6 +188,7 @@ void
 log_close(void)
 {
     g_string_free(mainlogfile, TRUE);
+    mainlogfile = NULL;
     g_time_zone_unref(tz);
     if (logp) {
         fclose(logp);
@@ -239,7 +240,7 @@ log_level_from_string(char *log_level)
 static void
 _rotate_log_file(void)
 {
-    gchar *log_file = mainlogfile->str;
+    gchar *log_file = strdup(mainlogfile->str);
     size_t len = strlen(log_file);
     gchar *log_file_new = malloc(len + 4);
     int i = 1;
