@@ -1286,15 +1286,27 @@ stanza_get_oldest_delay(xmpp_stanza_t *const stanza)
         if (child_name && strcmp(child_name, STANZA_NAME_DELAY) == 0) {
             GDateTime *tmp = _stanza_get_delay_timestamp_xep0203(child);
 
-            if (!oldest || g_date_time_compare(oldest, tmp) == 1)
+            if (oldest == NULL) {
                 oldest = tmp;
+            } else if (g_date_time_compare(oldest, tmp) == 1) {
+                g_date_time_unref(oldest);
+                oldest = tmp;
+            } else {
+                g_date_time_unref(tmp);
+            }
         }
 
         if (child_name && strcmp(child_name, STANZA_NAME_X) == 0) {
             GDateTime *tmp = _stanza_get_delay_timestamp_xep0091(child);
 
-            if (!oldest || g_date_time_compare(oldest, tmp) == 1)
+            if (oldest == NULL) {
                 oldest = tmp;
+            } else if (g_date_time_compare(oldest, tmp) == 1) {
+                g_date_time_unref(oldest);
+                oldest = tmp;
+            } else {
+                g_date_time_unref(tmp);
+            }
         }
     }
 
