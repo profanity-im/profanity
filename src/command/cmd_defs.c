@@ -419,7 +419,7 @@ static struct cmd_t command_defs[] =
             "/blocked add [<jid>]",
             "/blocked remove <jid>")
         CMD_DESC(
-            "Manage blocked users (XEP-0191), calling with no arguments shows the current list of blocked users."
+            "Manage blocked users (XEP-0191), calling with no arguments shows the current list of blocked users. "
             "To blog a certain user in a MUC use the following as jid: room@conference.example.org/spammy-user")
         CMD_ARGS(
             { "add [<jid>]",    "Block the specified Jabber ID. If in a chat window and no jid is specified, the current recipient will be blocked." },
@@ -1021,7 +1021,7 @@ static struct cmd_t command_defs[] =
             "/who moderator|participant|visitor",
             "/who owner|admin|member")
         CMD_DESC(
-            "Show contacts or room occupants with chosen status, role or affiliation")
+            "Show contacts or room occupants with chosen status, role or affiliation.")
         CMD_ARGS(
             { "offline|away|dnd|xa|chat", "Show contacts or room occupants with specified presence." },
             { "online", "Contacts that are online, chat, away, xa, dnd." },
@@ -1083,7 +1083,7 @@ static struct cmd_t command_defs[] =
             "Clear the current window. "
             "If you set persist_history you can still access the history by pressing PAGE UP.")
         CMD_ARGS(
-            { "persist_history on|off", "Whether or not to clear the screen persistently"})
+            { "persist_history on|off", "Whether or not to clear the screen persistently."})
         CMD_EXAMPLES(
             "/clear",
             "/clear persist_history",
@@ -1358,7 +1358,7 @@ static struct cmd_t command_defs[] =
         CMD_DESC(
             "Manage statusbar display preferences.")
         CMD_ARGS(
-            { "maxtabs <value>",            "Set the maximum number of tabs to display, <value> must be between 0 and 10" },
+            { "maxtabs <value>",            "Set the maximum number of tabs to display, <value> must be between 0 and 10." },
             { "tablen <value>",             "Set the maximum number of characters to show as the tab name, 0 sets to unlimited." },
             { "show|hide name",             "Show or hide names in tabs." },
             { "show|hide number",           "Show or hide numbers in tabs." },
@@ -1496,7 +1496,7 @@ static struct cmd_t command_defs[] =
         CMD_ARGS(
             { "on|off",             "Show tray icon." },
             { "read on|off",        "Show tray icon when no unread messages." },
-            { "timer <seconds>",    "Set tray icon timer, seconds must be between 1-10" })
+            { "timer <seconds>",    "Set tray icon timer, seconds must be between 1-10." })
         CMD_NOEXAMPLES
     },
 
@@ -1622,8 +1622,8 @@ static struct cmd_t command_defs[] =
             "When disabling this option, /history will also be disabled. "
             "Color MUC history unanimously or like regular MUC messages.")
         CMD_ARGS(
-            { "chat on|off",             "Enable/Disable regular chat logging" },
-            { "group on|off",            "Enable/Disable groupchat (room) logging" },
+            { "chat on|off",             "Enable/Disable regular chat logging." },
+            { "group on|off",            "Enable/Disable groupchat (room) logging." },
             { "group color unanimous|regular", "Color MUC history unanimous or like regular MUC messages." })
         CMD_EXAMPLES(
             "/logging chat on",
@@ -1729,7 +1729,7 @@ static struct cmd_t command_defs[] =
             { "myfp",                           "Show your fingerprint." },
             { "theirfp",                        "Show contacts fingerprint." },
             { "start [<contact>]",              "Start an OTR session with contact, or current recipient if omitted." },
-            { "end",                            "End the current OTR session," },
+            { "end",                            "End the current OTR session." },
             { "trust|untrust",                  "Indicate whether or not you trust the contact's fingerprint." },
             { "secret <secret>",                "Verify a contact's identity using a shared secret." },
             { "question <question> <answer>",   "Verify a contact's identity using a question and expected answer." },
@@ -2333,7 +2333,7 @@ static struct cmd_t command_defs[] =
         CMD_SYN(
             "/color on|off|redgreen|blue")
         CMD_DESC(
-            "Settings for consistent color generation for nicks (XEP-0392). Including corrections for Color Vision Deficiencies")
+            "Settings for consistent color generation for nicks (XEP-0392). Including corrections for Color Vision Deficiencies.")
         CMD_ARGS(
             { "on|off|redgreen|blue", "Enable or disable nick colorization for MUC nicks. 'redgreen' is for people with red/green blindess and 'blue' for people with blue blindness."})
         CMD_EXAMPLES(
@@ -2386,11 +2386,11 @@ static struct cmd_t command_defs[] =
             "/correction <on>|<off>",
             "/correction char <char>")
         CMD_DESC(
-            "Settings regarding Last Message Correction (XEP-0308). Caution: We do not yet check the 'from' field. So it could happen that someone else is overwriting the actual message."
+            "Settings regarding Last Message Correction (XEP-0308). Caution: We do not yet check the 'from' field. So it could happen that someone else is overwriting the actual message. "
             "Corrections will only work in MUC and regular chat windows. MUC PMs won't be allowed.")
         CMD_ARGS(
             { "on|off", "Enable/Disable support for last message correction."},
-            { "char",    "Set character that will prefix corrected messages. Default: +"})
+            { "char",   "Set character that will prefix corrected messages. Default: '+'."})
         CMD_NOEXAMPLES
     },
 
@@ -2404,7 +2404,7 @@ static struct cmd_t command_defs[] =
         CMD_SYN(
             "/correct <message>")
         CMD_DESC(
-            "Correct and resend the last message (XEP-0308)."
+            "Correct and resend the last message (XEP-0308). "
             "Use tab completion to get the last send message.")
         CMD_ARGS(
             { "message",    "The corrected message."})
