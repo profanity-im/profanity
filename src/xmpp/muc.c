@@ -889,6 +889,7 @@ muc_members_add(const char *const room, const char *const jid)
             if (strcmp(jid, our_jid->barejid) != 0) {
                 omemo_start_session(jid);
             }
+            jid_destroy(our_jid);
 #endif
         }
     }
