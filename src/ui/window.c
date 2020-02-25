@@ -1101,7 +1101,6 @@ _win_correct(ProfWin *window, const char *const message, const char *const id, c
 void
 win_print_incoming(ProfWin *window, const char *const display_name_from, ProfMessage *message)
 {
-    char *enc_char = strdup("-");
     int flags = NO_ME;
 
     if (!message->trusted) {
@@ -1112,7 +1111,9 @@ win_print_incoming(ProfWin *window, const char *const display_name_from, ProfMes
     {
         case WIN_CHAT:
         {
+            char *enc_char;
             ProfChatWin *chatwin = (ProfChatWin*)window;
+
             if (chatwin->incoming_char) {
                 enc_char = strdup(chatwin->incoming_char);
             } else if (message->enc == PROF_MSG_ENC_OTR) {
@@ -1121,6 +1122,8 @@ win_print_incoming(ProfWin *window, const char *const display_name_from, ProfMes
                 enc_char = prefs_get_pgp_char();
             } else if (message->enc == PROF_MSG_ENC_OMEMO) {
                 enc_char = prefs_get_omemo_char();
+            } else {
+                enc_char = strdup("-");
             }
 
             if (prefs_get_boolean(PREF_CORRECTION_ALLOW) && message->replace_id) {
