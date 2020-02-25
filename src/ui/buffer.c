@@ -116,6 +116,7 @@ buffer_remove_entry_by_id(ProfBuff buffer, const char *const id)
         if (entry->id && (g_strcmp0(entry->id, id) == 0)) {
             _free_entry(entry);
             buffer->entries = g_slist_delete_link(buffer->entries, entries);
+            break;
         }
         entries = g_slist_next(entries);
     }
