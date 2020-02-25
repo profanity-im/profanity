@@ -872,7 +872,12 @@ _handle_groupchat(xmpp_stanza_t *const stanza)
         message->timestamp = stanza_get_delay_from(stanza, jid->domainpart);
     }
 
-    bool is_muc_history = message->timestamp != NULL;
+    bool is_muc_history;
+    if (message->timestamp != NULL) {
+        is_muc_history = TRUE;
+        g_date_time_unref(message->timestamp);
+        message->timestamp = NULL;
+    }
 
     // we want to display the oldest delay
     message->timestamp = stanza_get_oldest_delay(stanza);
