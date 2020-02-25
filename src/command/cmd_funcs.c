@@ -6714,7 +6714,8 @@ cmd_logging(ProfWin *window, const char *const command, gchar **args)
         return TRUE;
     }
 
-    if (strcmp(args[0], "chat") == 0) {
+
+    if (strcmp(args[0], "chat") == 0 && args[1] != NULL) {
         _cmd_set_boolean_preference(args[1], command, "Chat logging", PREF_CHLOG);
 
         // if set to off, disable history
@@ -6723,7 +6724,7 @@ cmd_logging(ProfWin *window, const char *const command, gchar **args)
         }
 
         return TRUE;
-    } else if (g_strcmp0(args[0], "group") == 0) {
+    } else if (g_strcmp0(args[0], "group") == 0 && args[1] != NULL) {
         if (g_strcmp0(args[1], "on") == 0 || g_strcmp0(args[1], "off") == 0) {
             _cmd_set_boolean_preference(args[1], command, "Groupchat logging", PREF_GRLOG);
             return TRUE;
