@@ -164,7 +164,7 @@ typedef struct prof_message_t {
 
 void session_init(void);
 jabber_conn_status_t session_connect_with_details(const char *const jid, const char *const passwd,
-    const char *const altdomain, const int port, const char *const tls_policy);
+    const char *const altdomain, const int port, const char *const tls_policy, const char *const auth_policy);
 jabber_conn_status_t session_connect_with_account(const ProfAccount *const account);
 void session_disconnect(void);
 void session_shutdown(void);

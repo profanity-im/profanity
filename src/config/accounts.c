@@ -121,7 +121,7 @@ accounts_reset_enabled_search(void)
 }
 
 void
-accounts_add(const char *account_name, const char *altdomain, const int port, const char *const tls_policy)
+accounts_add(const char *account_name, const char *altdomain, const int port, const char *const tls_policy, const char *const auth_policy)
 {
     // set account name and resource
     const char *barejid = account_name;
@@ -151,6 +151,9 @@ accounts_add(const char *account_name, const char *altdomain, const int port, co
     }
     if (tls_policy) {
         g_key_file_set_string(accounts, account_name, "tls.policy", tls_policy);
+    }
+    if (auth_policy) {
+        g_key_file_set_string(accounts, account_name, "auth.policy", auth_policy);
     }
 
     Jid *jidp = jid_create(barejid);
@@ -326,12 +329,15 @@ accounts_get_account(const char *const name)
             tls_policy = NULL;
         }
 
+        gchar *auth_policy = g_key_file_get_string(accounts, name, "auth.policy", NULL);
+
         ProfAccount *new_account = account_new(name, jid, password, eval_password, enabled,
             server, port, resource, last_presence, login_presence,
             priority_online, priority_chat, priority_away, priority_xa,
             priority_dnd, muc_service, muc_nick, otr_policy, otr_manual,
             otr_opportunistic, otr_always, omemo_policy, omemo_enabled,
-            omemo_disabled,  pgp_keyid, startscript, theme, tls_policy);
+            omemo_disabled,  pgp_keyid, startscript, theme, tls_policy,
+            auth_policy);
 
         g_free(jid);
         g_free(password);
@@ -348,6 +354,7 @@ accounts_get_account(const char *const name)
         g_free(startscript);
         g_free(theme);
         g_free(tls_policy);
+        g_free(auth_policy);
 
         return new_account;
     }
@@ -731,6 +738,15 @@ accounts_set_tls_policy(const char *const account_name, const char *const value)
 {
     if (accounts_account_exists(account_name)) {
         g_key_file_set_string(accounts, account_name, "tls.policy", value);
+        _save_accounts();
+    }
+}
+
+void
+accounts_set_auth_policy(const char *const account_name, const char *const value)
+{
+    if (accounts_account_exists(account_name)) {
+        g_key_file_set_string(accounts, account_name, "auth.policy", value);
         _save_accounts();
     }
 }

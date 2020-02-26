@@ -338,7 +338,7 @@ cmd_connect(ProfWin *window, const char *const command, gchar **args)
         return TRUE;
     }
 
-    gchar *opt_keys[] = { "server", "port", "tls", NULL };
+    gchar *opt_keys[] = { "server", "port", "tls", "auth", NULL };
     gboolean parsed;
 
     GHashTable *options = parse_options(&args[args[0] ? 1 : 0], opt_keys, &parsed);
@@ -358,6 +358,16 @@ cmd_connect(ProfWin *window, const char *const command, gchar **args)
             (g_strcmp0(tls_policy, "trust") != 0) &&
             (g_strcmp0(tls_policy, "disable") != 0) &&
             (g_strcmp0(tls_policy, "legacy") != 0)) {
+        cons_bad_cmd_usage(command);
+        cons_show("");
+        options_destroy(options);
+        return TRUE;
+    }
+
+    char *auth_policy = g_hash_table_lookup(options, "auth");
+    if (auth_policy &&
+            (g_strcmp0(auth_policy, "default") != 0) &&
+            (g_strcmp0(auth_policy, "legacy") != 0)) {
         cons_bad_cmd_usage(command);
         cons_show("");
         options_destroy(options);
@@ -406,6 +416,8 @@ cmd_connect(ProfWin *window, const char *const command, gchar **args)
             account_set_port(account, port);
         if (tls_policy != NULL)
             account_set_tls_policy(account, tls_policy);
+        if (auth_policy != NULL)
+            account_set_auth_policy(account, auth_policy);
 
         // use password if set
         if (account->password) {
@@ -441,7 +453,7 @@ cmd_connect(ProfWin *window, const char *const command, gchar **args)
     } else {
         jid = g_utf8_strdown(user, -1);
         char *passwd = ui_ask_password();
-        conn_status = cl_ev_connect_jid(jid, passwd, altdomain, port, tls_policy);
+        conn_status = cl_ev_connect_jid(jid, passwd, altdomain, port, tls_policy, auth_policy);
         free(passwd);
     }
 
@@ -497,7 +509,7 @@ cmd_account_add(ProfWin *window, const char *const command, gchar **args)
         return TRUE;
     }
 
-    accounts_add(account_name, NULL, 0, NULL);
+    accounts_add(account_name, NULL, 0, NULL, NULL);
     cons_show("Account created.");
     cons_show("");
 
@@ -844,6 +856,20 @@ _account_set_tls(char *account_name, char *policy)
 }
 
 gboolean
+_account_set_auth(char *account_name, char *policy)
+{
+    if ((g_strcmp0(policy, "default") != 0)
+            && (g_strcmp0(policy, "legacy") != 0)) {
+        cons_show("Auth policy must be either default or legacy.");
+    } else {
+        accounts_set_auth_policy(account_name, policy);
+        cons_show("Updated auth policy for account %s: %s", account_name, policy);
+        cons_show("");
+    }
+    return TRUE;
+}
+
+gboolean
 _account_set_presence_priority(char *account_name, char *presence, char *priority)
 {
     int intval;
@@ -919,6 +945,7 @@ cmd_account_set(ProfWin *window, const char *const command, gchar **args)
     if (strcmp(property, "startscript") == 0)   return _account_set_startscript(account_name, value);
     if (strcmp(property, "theme") == 0)         return _account_set_theme(account_name, value);
     if (strcmp(property, "tls") == 0)           return _account_set_tls(account_name, value);
+    if (strcmp(property, "auth") == 0)          return _account_set_auth(account_name, value);
 
     if (valid_resource_presence_string(property)) {
         return _account_set_presence_priority(account_name, property, value);

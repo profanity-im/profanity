@@ -61,10 +61,10 @@
 #endif
 
 jabber_conn_status_t
-cl_ev_connect_jid(const char *const jid, const char *const passwd, const char *const altdomain, const int port, const char *const tls_policy)
+cl_ev_connect_jid(const char *const jid, const char *const passwd, const char *const altdomain, const int port, const char *const tls_policy, const char *const auth_policy)
 {
     cons_show("Connecting as %s", jid);
-    return session_connect_with_details(jid, passwd, altdomain, port, tls_policy);
+    return session_connect_with_details(jid, passwd, altdomain, port, tls_policy, auth_policy);
 }
 
 jabber_conn_status_t

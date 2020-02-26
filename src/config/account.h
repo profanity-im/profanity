@@ -67,6 +67,7 @@ typedef struct prof_account_t {
     gchar *startscript;
     gchar *theme;
     gchar *tls_policy;
+    gchar *auth_policy;
 } ProfAccount;
 
 ProfAccount* account_new(const gchar *const name, const gchar *const jid,
@@ -78,12 +79,13 @@ ProfAccount* account_new(const gchar *const name, const gchar *const jid,
     const gchar *const otr_policy, GList *otr_manual, GList *otr_opportunistic,
     GList *otr_always, const gchar *const omemo_policy, GList *omemo_enabled,
     GList *omemo_disabled, const gchar *const pgp_keyid, const char *const startscript,
-    const char *const theme, gchar *tls_policy);
+    const char *const theme, gchar *tls_policy, gchar *auth_policy);
 char* account_create_connect_jid(ProfAccount *account);
 gboolean account_eval_password(ProfAccount *account);
 void account_free(ProfAccount *account);
 void account_set_server(ProfAccount *account, const char *server);
 void account_set_port(ProfAccount *account, int port);
 void account_set_tls_policy(ProfAccount *account, const char *tls_policy);
+void account_set_auth_policy(ProfAccount *account, const char *auth_policy);
 
 #endif

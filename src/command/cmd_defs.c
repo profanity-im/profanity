@@ -160,7 +160,7 @@ static struct cmd_t command_defs[] =
             CMD_TAG_CONNECTION)
         CMD_SYN(
             "/connect [<account>]",
-            "/connect <account> [server <server>] [port <port>] [tls force|allow|trust|legacy|disable]")
+            "/connect <account> [server <server>] [port <port>] [tls force|allow|trust|legacy|disable] [auth default|legacy]")
         CMD_DESC(
             "Login to a chat service. "
             "If no account is specified, the default is used if one is configured. "
@@ -173,7 +173,9 @@ static struct cmd_t command_defs[] =
             { "tls allow",         "Use TLS for the connection if it is available." },
             { "tls trust",         "Force TLS connection and trust server's certificate." },
             { "tls legacy",        "Use legacy TLS for the connection. It means server doesn't support STARTTLS and TLS is forced just after TCP connection is established." },
-            { "tls disable",       "Disable TLS for the connection." })
+            { "tls disable",       "Disable TLS for the connection." },
+            { "auth default",      "Default authentication process." },
+            { "auth legacy",       "Allow legacy authentication." })
         CMD_EXAMPLES(
             "/connect",
             "/connect odin@valhalla.edda",
@@ -2003,6 +2005,7 @@ static struct cmd_t command_defs[] =
             "/account set <account> pgpkeyid <pgpkeyid>",
             "/account set <account> startscript <script>",
             "/account set <account> tls force|allow|trust|legacy|disable",
+            "/account set <account> auth default|legacy",
             "/account set <account> theme <theme>",
             "/account clear <account> password",
             "/account clear <account> eval_password",
@@ -2045,6 +2048,8 @@ static struct cmd_t command_defs[] =
             { "set <account> tls trust",                "Force TLS connection and trust server's certificate." },
             { "set <account> tls legacy",               "Use legacy TLS for the connection. It means server doesn't support STARTTLS and TLS is forced just after TCP connection is established." },
             { "set <account> tls disable",              "Disable TLS for the connection." },
+            { "set <account> auth default",             "Use default authentication process." },
+            { "set <account> auth legacy",              "Allow legacy authentication." },
             { "set <account> <theme>",                  "Set the UI theme for the account." },
             { "clear <account> server",                 "Remove the server setting for this account." },
             { "clear <account> port",                   "Remove the port setting for this account." },
