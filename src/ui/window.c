@@ -167,7 +167,6 @@ win_create_muc(const char *const roomjid)
     int cols = getmaxx(stdscr);
 
     new_win->window.type = WIN_MUC;
-    new_win->window.layout = _win_create_simple_layout();
     ProfLayoutSplit *layout = malloc(sizeof(ProfLayoutSplit));
     layout->base.type = LAYOUT_SPLIT;
 
