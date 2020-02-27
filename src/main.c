@@ -178,14 +178,10 @@ main(int argc, char **argv)
     prof_run(log ? log : "INFO", account_name, config_file, log_file);
 
     /* Free resources allocated by GOptionContext */
-    if (log)
-        g_free(log);
-    if (account_name)
-        g_free(account_name);
-    if (config_file)
-        g_free(config_file);
-    if (log_file)
-        g_free(log_file);
+    g_free(log);
+    g_free(account_name);
+    g_free(config_file);
+    g_free(log_file);
 
     return 0;
 }
