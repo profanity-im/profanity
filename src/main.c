@@ -60,7 +60,7 @@
 #include "command/cmd_defs.h"
 
 static gboolean version = FALSE;
-static char *log = "INFO";
+static char *log = NULL;
 static char *log_file = NULL;
 static char *account_name = NULL;
 static char *config_file = NULL;
@@ -175,7 +175,17 @@ main(int argc, char **argv)
         return 0;
     }
 
-    prof_run(log, account_name, config_file, log_file);
+    prof_run(log ? log : "INFO", account_name, config_file, log_file);
+
+    /* Free resources allocated by GOptionContext */
+    if (log)
+        g_free(log);
+    if (account_name)
+        g_free(account_name);
+    if (config_file)
+        g_free(config_file);
+    if (log_file)
+        g_free(log_file);
 
     return 0;
 }

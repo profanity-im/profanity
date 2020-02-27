@@ -252,6 +252,7 @@ iq_handlers_clear()
 {
     if (id_handlers) {
         g_hash_table_remove_all(id_handlers);
+        g_hash_table_destroy(id_handlers);
         id_handlers = NULL;
     }
 }
@@ -340,6 +341,7 @@ iq_rooms_cache_clear(void)
 {
     if (rooms_cache) {
         g_hash_table_remove_all(rooms_cache);
+        g_hash_table_destroy(rooms_cache);
         rooms_cache = NULL;
     }
 }

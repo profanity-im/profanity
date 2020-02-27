@@ -80,7 +80,7 @@ static const char* _get_key(preference_t pref);
 static gboolean _get_default_boolean(preference_t pref);
 static char* _get_default_string(preference_t pref);
 
-void _prefs_load(void)
+static void _prefs_load(void)
 {
     GError *err = NULL;
     log_maxsize = g_key_file_get_integer(prefs, PREF_GROUP_LOGGING, "maxsize", &err);
@@ -166,9 +166,23 @@ void _prefs_load(void)
     g_strfreev(triggers);
 }
 
+/* Clean up after _prefs_load() */
+static void _prefs_close(void)
+{
+    autocomplete_free(boolean_choice_ac);
+    autocomplete_free(room_trigger_ac);
+}
+
 void
 prefs_reload(void)
 {
+    /*
+     * Current function contains copy-paste, but we wanted to avoid config_file
+     * manipulation from prefs_load/prefs_close
+     */
+
+    _prefs_close();
+
     g_key_file_free(prefs);
     prefs = NULL;
 
@@ -185,7 +199,7 @@ prefs_load(char *config_file)
     if (config_file == NULL) {
         prefs_loc = files_get_config_path(FILE_PROFRC);
     } else {
-        prefs_loc = config_file;
+        prefs_loc = strdup(config_file);
     }
 
     if (g_file_test(prefs_loc, G_FILE_TEST_EXISTS)) {
@@ -207,8 +221,7 @@ prefs_save(void)
 void
 prefs_close(void)
 {
-    autocomplete_free(boolean_choice_ac);
-    autocomplete_free(room_trigger_ac);
+    _prefs_close();
 
     g_key_file_free(prefs);
     prefs = NULL;
