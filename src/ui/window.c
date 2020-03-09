@@ -1152,19 +1152,15 @@ win_print_them(ProfWin *window, theme_item_t theme_item, const char *const show_
 void
 win_println_incoming_muc_msg(ProfWin *window, char *show_char, int flags, const ProfMessage *const message)
 {
-    //TODO: we always use current timestamp here. instead of the message->timestamp one if available. i think somewhere else we check whether it exists first.
-    GDateTime *timestamp = g_date_time_new_now_local();
-
     if (prefs_get_boolean(PREF_CORRECTION_ALLOW) && message->replace_id) {
         _win_correct(window, message->plain, message->id, message->replace_id);
     } else {
-        _win_printf(window, show_char, 0, timestamp, flags | NO_ME, THEME_TEXT_THEM, message->jid->resourcepart, message->id, "%s", message->plain);
+        _win_printf(window, show_char, 0, message->timestamp, flags | NO_ME, THEME_TEXT_THEM, message->jid->resourcepart, message->id, "%s", message->plain);
     }
 //    buffer_append(window->layout->buffer, show_char, 0, timestamp, flags | NO_ME, THEME_TEXT_THEM, them, message, NULL, NULL);
  //   _win_print_internal(window, show_char, 0, timestamp, flags | NO_ME, THEME_TEXT_THEM, them, message, NULL);
 
     inp_nonblocking(TRUE);
-    g_date_time_unref(timestamp);
 }
 
 void

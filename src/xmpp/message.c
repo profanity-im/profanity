@@ -882,6 +882,13 @@ _handle_groupchat(xmpp_stanza_t *const stanza)
     // we want to display the oldest delay
     message->timestamp = stanza_get_oldest_delay(stanza);
 
+    // now this has nothing to do with MUC history
+    // it's just setting the time to the received time so upon displaying we can use this time
+    // for example in win_println_incoming_muc_msg()
+    if (!message->timestamp) {
+        message->timestamp = g_date_time_new_now_local();
+    }
+
     if (is_muc_history) {
         sv_ev_room_history(message);
     } else {
