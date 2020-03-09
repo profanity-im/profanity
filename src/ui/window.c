@@ -1063,11 +1063,17 @@ win_show_status_string(ProfWin *window, const char *const from,
 }
 
 static void
-_win_correct(ProfWin *window, const char *const message, const char *const id, const char *const replace_id)
+_win_correct(ProfWin *window, const char *const message, const char *const id, const char *const replace_id, const char *const from_jid)
 {
     ProfBuffEntry *entry = buffer_get_entry_by_id(window->layout->buffer, replace_id);
     if (!entry) {
         log_debug("Replace ID %s could not be found in buffer. Message: %s", replace_id, message);
+        return;
+    }
+
+    if (g_strcmp0(entry->barejid, from_jid) != 0) {
+        log_debug("Illicit LMC attempt from %s for message from %s with: %s", from_jid, entry->barejid, message);
+        cons_show("Illicit LMC attempt from %s for message from %s", from_jid, entry->barejid);
         return;
     }
 
@@ -1127,7 +1133,7 @@ win_print_incoming(ProfWin *window, const char *const display_name_from, ProfMes
             }
 
             if (prefs_get_boolean(PREF_CORRECTION_ALLOW) && message->replace_id) {
-                _win_correct(window, message->plain, message->id, message->replace_id);
+                _win_correct(window, message->plain, message->id, message->replace_id, message->jid->barejid);
             } else {
                 _win_printf(window, enc_char, 0, message->timestamp, flags, THEME_TEXT_THEM, display_name_from, message->jid->barejid, message->id, "%s", message->plain);
             }
@@ -1147,7 +1153,6 @@ win_print_incoming(ProfWin *window, const char *const display_name_from, ProfMes
 void
 win_print_them(ProfWin *window, theme_item_t theme_item, const char *const show_char, int flags, const char *const them)
 {
-    // TODO: barejid
     _win_printf(window, show_char, 0, NULL, flags | NO_ME | NO_EOL, theme_item, them, NULL, NULL, "");
 }
 
@@ -1155,7 +1160,7 @@ void
 win_println_incoming_muc_msg(ProfWin *window, char *show_char, int flags, const ProfMessage *const message)
 {
     if (prefs_get_boolean(PREF_CORRECTION_ALLOW) && message->replace_id) {
-        _win_correct(window, message->plain, message->id, message->replace_id);
+        _win_correct(window, message->plain, message->id, message->replace_id, message->jid->fulljid);
     } else {
         _win_printf(window, show_char, 0, message->timestamp, flags | NO_ME, THEME_TEXT_THEM, message->jid->resourcepart, message->jid->fulljid, message->id, "%s", message->plain);
     }
@@ -1169,10 +1174,9 @@ win_print_outgoing_muc_msg(ProfWin *window, char *show_char, const char *const m
     GDateTime *timestamp = g_date_time_new_now_local();
 
     if (prefs_get_boolean(PREF_CORRECTION_ALLOW) && replace_id) {
-        _win_correct(window, message, id, replace_id);
+        _win_correct(window, message, id, replace_id, me);
     } else {
-        // TODO my jid
-        _win_printf(window, show_char, 0, timestamp, 0, THEME_TEXT_ME, me, NULL, id, "%s", message);
+        _win_printf(window, show_char, 0, timestamp, 0, THEME_TEXT_ME, me, me, id, "%s", message);
     }
 
     inp_nonblocking(TRUE);
@@ -1184,11 +1188,12 @@ win_print_outgoing(ProfWin *window, const char *show_char, const char *const id,
 {
     GDateTime *timestamp = g_date_time_new_now_local();
 
+    const char *myjid = connection_get_fulljid();
     if (replace_id) {
-        _win_correct(window, message, id, replace_id);
+        _win_correct(window, message, id, replace_id, myjid);
     } else {
         //TODO my jid
-        _win_printf(window, show_char, 0, timestamp, 0, THEME_TEXT_THEM, "me", NULL, id, "%s", message);
+        _win_printf(window, show_char, 0, timestamp, 0, THEME_TEXT_THEM, "me", myjid, id, "%s", message);
     }
 
     inp_nonblocking(TRUE);
@@ -1361,10 +1366,11 @@ win_print_outgoing_with_receipt(ProfWin *window, const char *show_char, const ch
     DeliveryReceipt *receipt = malloc(sizeof(struct delivery_receipt_t));
     receipt->received = FALSE;
 
+    const char *myjid = connection_get_fulljid();
     if (replace_id) {
-        _win_correct(window, message, id, replace_id);
+        _win_correct(window, message, id, replace_id, myjid);
     } else {
-        buffer_append(window->layout->buffer, show_char, 0, time, 0, THEME_TEXT_ME, from, NULL, message, receipt, id);
+        buffer_append(window->layout->buffer, show_char, 0, time, 0, THEME_TEXT_ME, from, myjid, message, receipt, id);
         _win_print_internal(window, show_char, 0, time, 0, THEME_TEXT_ME, from, message, receipt);
     }
 
