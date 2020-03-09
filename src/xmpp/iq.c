@@ -1619,9 +1619,9 @@ _version_get_handler(xmpp_stanza_t *const stanza)
 #elif defined(__FreeBSD__)
             xmpp_stanza_set_text(os_txt, "FreeBSD");
 #elif defined(__NetBSD__)
-            xmpp_stanza_set_text(os_txt, "__NetBSD__");
+            xmpp_stanza_set_text(os_txt, "NetBSD");
 #elif defined(__OpenBSD__)
-            xmpp_stanza_set_text(os_txt, "__OpenBSD__");
+            xmpp_stanza_set_text(os_txt, "OpenBSD");
 #else
             xmpp_stanza_set_text(os_txt, "Unknown");
 #endif
