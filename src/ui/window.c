@@ -1413,7 +1413,7 @@ win_newline(ProfWin *window)
 
 static void
 _win_printf(ProfWin *window, const char *show_char, int pad_indent, GDateTime *timestamp,
-    int flags, theme_item_t theme_item, const char *const from, const char *const message_id, const char *const message, ...)
+    int flags, theme_item_t theme_item, const char *const display_from, const char *const message_id, const char *const message, ...)
 {
     if (timestamp == NULL) {
         timestamp = g_date_time_new_now_local();
@@ -1426,9 +1426,9 @@ _win_printf(ProfWin *window, const char *show_char, int pad_indent, GDateTime *t
     GString *fmt_msg = g_string_new(NULL);
     g_string_vprintf(fmt_msg, message, arg);
 
-    buffer_append(window->layout->buffer, show_char, pad_indent, timestamp, flags, theme_item, from, fmt_msg->str, NULL, message_id);
+    buffer_append(window->layout->buffer, show_char, pad_indent, timestamp, flags, theme_item, display_from, fmt_msg->str, NULL, message_id);
 
-    _win_print_internal(window, show_char, pad_indent, timestamp, flags, theme_item, from, fmt_msg->str, NULL);
+    _win_print_internal(window, show_char, pad_indent, timestamp, flags, theme_item, display_from, fmt_msg->str, NULL);
 
     inp_nonblocking(TRUE);
     g_date_time_unref(timestamp);
