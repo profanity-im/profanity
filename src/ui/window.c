@@ -1157,8 +1157,6 @@ win_println_incoming_muc_msg(ProfWin *window, char *show_char, int flags, const 
     } else {
         _win_printf(window, show_char, 0, message->timestamp, flags | NO_ME, THEME_TEXT_THEM, message->jid->resourcepart, message->id, "%s", message->plain);
     }
-//    buffer_append(window->layout->buffer, show_char, 0, timestamp, flags | NO_ME, THEME_TEXT_THEM, them, message, NULL, NULL);
- //   _win_print_internal(window, show_char, 0, timestamp, flags | NO_ME, THEME_TEXT_THEM, them, message, NULL);
 
     inp_nonblocking(TRUE);
 }
@@ -1173,8 +1171,6 @@ win_print_outgoing_muc_msg(ProfWin *window, char *show_char, const char *const m
     } else {
         _win_printf(window, show_char, 0, timestamp, 0, THEME_TEXT_ME, me, id, "%s", message);
     }
-//    buffer_append(window->layout->buffer, show_char, 0, timestamp, 0, THEME_TEXT_ME, me, message, NULL, NULL);
-//    _win_print_internal(window, show_char, 0, timestamp, 0, THEME_TEXT_ME, me, message, NULL);
 
     inp_nonblocking(TRUE);
     g_date_time_unref(timestamp);
