@@ -81,7 +81,7 @@ buffer_free(ProfBuff buffer)
 }
 
 void
-buffer_append(ProfBuff buffer, const char *show_char, int pad_indent, GDateTime *time, int flags, theme_item_t theme_item, const char *const display_from, const char *const barejid, const char *const message, DeliveryReceipt *receipt, const char *const id)
+buffer_append(ProfBuff buffer, const char *show_char, int pad_indent, GDateTime *time, int flags, theme_item_t theme_item, const char *const display_from, const char *const from_jid, const char *const message, DeliveryReceipt *receipt, const char *const id)
 {
     ProfBuffEntry *e = malloc(sizeof(struct prof_buff_entry_t));
     e->show_char = strdup(show_char);
@@ -90,7 +90,7 @@ buffer_append(ProfBuff buffer, const char *show_char, int pad_indent, GDateTime 
     e->theme_item = theme_item;
     e->time = g_date_time_ref(time);
     e->display_from = display_from ? strdup(display_from) : NULL;
-    e->barejid = barejid ? strdup(barejid) : NULL;
+    e->from_jid = from_jid ? strdup(from_jid) : NULL;
     e->message = strdup(message);
     e->receipt = receipt;
     if (id) {
@@ -168,7 +168,7 @@ _free_entry(ProfBuffEntry *entry)
     free(entry->show_char);
     free(entry->message);
     free(entry->display_from);
-    free(entry->barejid);
+    free(entry->from_jid);
     free(entry->id);
     free(entry->receipt);
     g_date_time_unref(entry->time);

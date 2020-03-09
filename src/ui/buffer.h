@@ -56,7 +56,7 @@ typedef struct prof_buff_entry_t {
     // from as it is displayed
     // might be nick, jid..
     char *display_from;
-    char *barejid;
+    char *from_jid;
     char *message;
     DeliveryReceipt *receipt;
     // message id, in case we have it

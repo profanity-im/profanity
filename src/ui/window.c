@@ -1071,9 +1071,9 @@ _win_correct(ProfWin *window, const char *const message, const char *const id, c
         return;
     }
 
-    if (g_strcmp0(entry->barejid, from_jid) != 0) {
-        log_debug("Illicit LMC attempt from %s for message from %s with: %s", from_jid, entry->barejid, message);
-        cons_show("Illicit LMC attempt from %s for message from %s", from_jid, entry->barejid);
+    if (g_strcmp0(entry->from_jid, from_jid) != 0) {
+        log_debug("Illicit LMC attempt from %s for message from %s with: %s", from_jid, entry->from_jid, message);
+        cons_show("Illicit LMC attempt from %s for message from %s", from_jid, entry->from_jid);
         return;
     }
 
