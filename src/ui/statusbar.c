@@ -199,10 +199,14 @@ _create_tab(const int win, win_type_t wintype, char *identifier, gboolean highli
             char *pref = prefs_get_string(PREF_STATUSBAR_CHAT);
             if (g_strcmp0("user", pref) == 0) {
                 Jid *jidp = jid_create(tab->identifier);
-                tab->display_name = jidp->localpart != NULL ?
-						strdup(jidp->localpart) :
-						strdup(jidp->barejid);
-                jid_destroy(jidp);
+                if (jidp) {
+                    tab->display_name = jidp->localpart != NULL ?
+                        strdup(jidp->localpart) :
+                        strdup(jidp->barejid);
+                    jid_destroy(jidp);
+                } else {
+                    tab->display_name = strdup(tab->identifier);
+                }
             } else {
                 tab->display_name = strdup(tab->identifier);
             }
