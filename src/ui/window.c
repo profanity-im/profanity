@@ -64,7 +64,8 @@
 
 #define CEILING(X) (X-(int)(X) > 0 ? (int)(X+1) : (int)(X))
 
-static void _win_printf(ProfWin *window, const char *show_char, int pad_indent, GDateTime *timestamp, int flags, theme_item_t theme_item, const char *const from, const char *const message_id, const char *const message, ...);
+static void
+_win_printf(ProfWin *window, const char *show_char, int pad_indent, GDateTime *timestamp, int flags, theme_item_t theme_item, const char *const display_from, const char *const from_jid, const char *const message_id, const char *const message, ...);
 static void _win_print_internal(ProfWin *window, const char *show_char, int pad_indent, GDateTime *time,
     int flags, theme_item_t theme_item, const char *const from, const char *const message, DeliveryReceipt *receipt);
 static void _win_print_wrapped(WINDOW *win, const char *const message, size_t indent, int pad_indent);
@@ -1128,14 +1129,14 @@ win_print_incoming(ProfWin *window, const char *const display_name_from, ProfMes
             if (prefs_get_boolean(PREF_CORRECTION_ALLOW) && message->replace_id) {
                 _win_correct(window, message->plain, message->id, message->replace_id);
             } else {
-                _win_printf(window, enc_char, 0, message->timestamp, flags, THEME_TEXT_THEM, display_name_from, message->id, "%s", message->plain);
+                _win_printf(window, enc_char, 0, message->timestamp, flags, THEME_TEXT_THEM, display_name_from, message->jid->barejid, message->id, "%s", message->plain);
             }
 
             free(enc_char);
             break;
         }
         case WIN_PRIVATE:
-            _win_printf(window, "-", 0, message->timestamp, flags, THEME_TEXT_THEM, display_name_from, message->id, "%s", message->plain);
+            _win_printf(window, "-", 0, message->timestamp, flags, THEME_TEXT_THEM, display_name_from, message->jid->barejid, message->id, "%s", message->plain);
             break;
         default:
             assert(FALSE);
@@ -1146,7 +1147,8 @@ win_print_incoming(ProfWin *window, const char *const display_name_from, ProfMes
 void
 win_print_them(ProfWin *window, theme_item_t theme_item, const char *const show_char, int flags, const char *const them)
 {
-    _win_printf(window, show_char, 0, NULL, flags | NO_ME | NO_EOL, theme_item, them, NULL, "");
+    // TODO: barejid
+    _win_printf(window, show_char, 0, NULL, flags | NO_ME | NO_EOL, theme_item, them, NULL, NULL, "");
 }
 
 void
@@ -1155,7 +1157,7 @@ win_println_incoming_muc_msg(ProfWin *window, char *show_char, int flags, const 
     if (prefs_get_boolean(PREF_CORRECTION_ALLOW) && message->replace_id) {
         _win_correct(window, message->plain, message->id, message->replace_id);
     } else {
-        _win_printf(window, show_char, 0, message->timestamp, flags | NO_ME, THEME_TEXT_THEM, message->jid->resourcepart, message->id, "%s", message->plain);
+        _win_printf(window, show_char, 0, message->timestamp, flags | NO_ME, THEME_TEXT_THEM, message->jid->resourcepart, message->jid->fulljid, message->id, "%s", message->plain);
     }
 
     inp_nonblocking(TRUE);
@@ -1169,7 +1171,8 @@ win_print_outgoing_muc_msg(ProfWin *window, char *show_char, const char *const m
     if (prefs_get_boolean(PREF_CORRECTION_ALLOW) && replace_id) {
         _win_correct(window, message, id, replace_id);
     } else {
-        _win_printf(window, show_char, 0, timestamp, 0, THEME_TEXT_ME, me, id, "%s", message);
+        // TODO my jid
+        _win_printf(window, show_char, 0, timestamp, 0, THEME_TEXT_ME, me, NULL, id, "%s", message);
     }
 
     inp_nonblocking(TRUE);
@@ -1184,7 +1187,8 @@ win_print_outgoing(ProfWin *window, const char *show_char, const char *const id,
     if (replace_id) {
         _win_correct(window, message, id, replace_id);
     } else {
-        _win_printf(window, show_char, 0, timestamp, 0, THEME_TEXT_THEM, "me", id, "%s", message);
+        //TODO my jid
+        _win_printf(window, show_char, 0, timestamp, 0, THEME_TEXT_THEM, "me", NULL, id, "%s", message);
     }
 
     inp_nonblocking(TRUE);
@@ -1403,8 +1407,7 @@ win_newline(ProfWin *window)
 }
 
 static void
-_win_printf(ProfWin *window, const char *show_char, int pad_indent, GDateTime *timestamp,
-    int flags, theme_item_t theme_item, const char *const display_from, const char *const message_id, const char *const message, ...)
+_win_printf(ProfWin *window, const char *show_char, int pad_indent, GDateTime *timestamp, int flags, theme_item_t theme_item, const char *const display_from, const char *const from_jid, const char *const message_id, const char *const message, ...)
 {
     if (timestamp == NULL) {
         timestamp = g_date_time_new_now_local();
@@ -1417,7 +1420,7 @@ _win_printf(ProfWin *window, const char *show_char, int pad_indent, GDateTime *t
     GString *fmt_msg = g_string_new(NULL);
     g_string_vprintf(fmt_msg, message, arg);
 
-    buffer_append(window->layout->buffer, show_char, pad_indent, timestamp, flags, theme_item, display_from, NULL, fmt_msg->str, NULL, message_id);
+    buffer_append(window->layout->buffer, show_char, pad_indent, timestamp, flags, theme_item, display_from, from_jid, fmt_msg->str, NULL, message_id);
 
     _win_print_internal(window, show_char, pad_indent, timestamp, flags, theme_item, display_from, fmt_msg->str, NULL);
 
