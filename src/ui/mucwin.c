@@ -590,7 +590,7 @@ mucwin_incoming_msg(ProfMucWin *mucwin, const ProfMessage *const message, GSList
         win_print_them(window, THEME_ROOMTRIGGER, ch, flags, message->jid->resourcepart);
         _mucwin_print_triggers(window, message->plain, triggers);
     } else {
-        win_println_incoming_muc_msg(window, ch, flags, message->jid->resourcepart, message->id, message->replace_id, message->plain);
+        win_println_incoming_muc_msg(window, ch, flags, message);
     }
 
     free(ch);
