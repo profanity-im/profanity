@@ -2040,6 +2040,16 @@ cons_correction_setting(void)
 }
 
 void
+cons_avatar_setting(void)
+{
+    char *pref = prefs_get_string(PREF_AVATAR_CMD);
+
+    cons_show("Avatar command (/avatar cmd)                                       : %s", pref);
+
+    prefs_free_string(pref);
+}
+
+void
 cons_show_connection_prefs(void)
 {
     cons_show("Connection preferences:");

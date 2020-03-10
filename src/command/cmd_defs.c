@@ -2343,20 +2343,27 @@ static struct cmd_t command_defs[] =
     },
 
     { "/avatar",
-        parse_args, 1, 1, NULL,
+        parse_args, 2, 2, &cons_avatar_setting,
         CMD_NOSUBFUNCS
         CMD_MAINFUNC(cmd_avatar)
         CMD_TAGS(
             CMD_TAG_CHAT)
         CMD_SYN(
-            "/avatar <barejid>")
+            "/avatar get <barejid>",
+            "/avatar open <barejid>",
+            "/avatar cmd <command>")
         CMD_DESC(
             "Download avatar (XEP-0084) for a certain contact. "
             "If nothing happens after using this command the user either doesn't have an avatar set at all "
             "or doesn't use XEP-0084 to publish it.")
         CMD_ARGS(
-            { "<barejid>", "JID to download avatar from."})
-        CMD_NOEXAMPLES
+            { "get <barejid>", "Download the avatar. barejid is the JID to download avatar from."},
+            { "cmd <command>", "Set a command to execute with 'avatar open'. Use your favourite image viewer here."},
+            { "open <barejid>", "Download avatar and open it with command."})
+        CMD_EXAMPLES(
+            "/avatar get someone@contacts.org",
+            "/avatar cmd xdg-open",
+            "/avatar open someone@contacts.org")
     },
 
     { "/os",

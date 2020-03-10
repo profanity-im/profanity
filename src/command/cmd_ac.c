@@ -242,6 +242,7 @@ static Autocomplete logging_group_ac;
 static Autocomplete logging_group_color_ac;
 static Autocomplete color_ac;
 static Autocomplete correction_ac;
+static Autocomplete avatar_ac;
 
 void
 cmd_ac_init(void)
@@ -965,6 +966,11 @@ cmd_ac_init(void)
     autocomplete_add(correction_ac, "on");
     autocomplete_add(correction_ac, "off");
     autocomplete_add(correction_ac, "char");
+
+    avatar_ac = autocomplete_new();
+    autocomplete_add(avatar_ac, "get");
+    autocomplete_add(avatar_ac, "cmd");
+    autocomplete_add(avatar_ac, "open");
 }
 
 void
@@ -1276,6 +1282,7 @@ cmd_ac_reset(ProfWin *window)
     autocomplete_reset(logging_group_color_ac);
     autocomplete_reset(color_ac);
     autocomplete_reset(correction_ac);
+    autocomplete_reset(avatar_ac);
 
     autocomplete_reset(script_ac);
     if (script_show_ac) {
@@ -1429,6 +1436,7 @@ cmd_ac_uninit(void)
     autocomplete_free(logging_group_color_ac);
     autocomplete_free(color_ac);
     autocomplete_free(correction_ac);
+    autocomplete_free(avatar_ac);
 }
 
 static void
@@ -3773,9 +3781,19 @@ _avatar_autocomplete(ProfWin *window, const char *const input, gboolean previous
 {
     char *result = NULL;
 
+    result = autocomplete_param_with_ac(input, "/avatar", avatar_ac, TRUE, previous);
+    if (result) {
+        return result;
+    }
+
     jabber_conn_status_t conn_status = connection_get_status();
     if (conn_status == JABBER_CONNECTED) {
-        result = autocomplete_param_with_func(input, "/avatar", roster_barejid_autocomplete, previous, NULL);
+        result = autocomplete_param_with_func(input, "/avatar get", roster_barejid_autocomplete, previous, NULL);
+        if (result) {
+            return result;
+        }
+
+        result = autocomplete_param_with_func(input, "/avatar open", roster_barejid_autocomplete, previous, NULL);
         if (result) {
             return result;
         }

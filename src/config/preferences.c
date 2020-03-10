@@ -1770,6 +1770,7 @@ _get_group(preference_t pref)
         case PREF_GRLOG:
         case PREF_LOG_ROTATE:
         case PREF_LOG_SHARED:
+        case PREF_AVATAR_CMD:
             return PREF_GROUP_LOGGING;
         case PREF_AUTOAWAY_CHECK:
         case PREF_AUTOAWAY_MODE:
@@ -2048,6 +2049,8 @@ _get_key(preference_t pref)
             return "correction.allow";
         case PREF_HISTORY_COLOR_MUC:
             return "history.muc.color";
+        case PREF_AVATAR_CMD:
+            return "avatar.cmd";
         default:
             return NULL;
     }
@@ -2179,6 +2182,8 @@ _get_default_string(preference_t pref)
             return "false";
         case PREF_HISTORY_COLOR_MUC:
             return "unanimous";
+        case PREF_AVATAR_CMD:
+            return "xdg-open";
         default:
             return NULL;
     }

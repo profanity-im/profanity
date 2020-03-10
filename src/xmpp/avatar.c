@@ -48,13 +48,15 @@
 #include "xmpp/stanza.h"
 #include "ui/ui.h"
 #include "config/files.h"
+#include "config/preferences.h"
 
 typedef struct avatar_metadata {
     char *type;
     char *id;
 } avatar_metadata;
 
-GHashTable *looking_for = NULL; // contains nicks/barejids from who we want to get the avatar
+static GHashTable *looking_for = NULL; // contains nicks/barejids from who we want to get the avatar
+static GHashTable *shall_open = NULL; // contains a list of nicks that shall not just downloaded but also opened
 
 static void _avatar_request_item_by_id(const char *jid, avatar_metadata *data);
 static int _avatar_metadata_handler(xmpp_stanza_t *const stanza, void *const userdata);
@@ -81,10 +83,15 @@ avatar_pep_subscribe(void)
         g_hash_table_destroy(looking_for);
     }
     looking_for = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, NULL);
+
+    if (shall_open) {
+        g_hash_table_destroy(shall_open);
+    }
+    shall_open = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, NULL);
 }
 
 gboolean
-avatar_get_by_nick(const char* nick)
+avatar_get_by_nick(const char* nick, gboolean open)
 {
     // in case we set the feature, remove it
     caps_remove_feature(XMPP_FEATURE_USER_AVATAR_METADATA_NOTIFY);
@@ -94,6 +101,10 @@ avatar_get_by_nick(const char* nick)
 
     // add the feature. this will trigger the _avatar_metadata_notfication_handler handler
     caps_add_feature(XMPP_FEATURE_USER_AVATAR_METADATA_NOTIFY);
+
+    if (open) {
+        g_hash_table_insert(shall_open, strdup(nick), NULL);
+    }
 
     return TRUE;
 }
@@ -251,6 +262,20 @@ _avatar_request_item_result_handler(xmpp_stanza_t *const stanza, void *const use
         g_error_free(err);
     } else {
         cons_show("Avatar saved as %s", filename->str);
+    }
+
+    // if we shall open it
+    if (g_hash_table_contains(shall_open, from_attr)) {
+        GString *cmd = g_string_new("");
+
+        g_string_append_printf(cmd, "%s %s > /dev/null 2>&1", prefs_get_string(PREF_AVATAR_CMD), filename->str);
+        cons_show("Calling: %s", cmd->str);
+        FILE *stream = popen(cmd->str, "r");
+
+        pclose(stream);
+        g_string_free(cmd, TRUE);
+
+        g_hash_table_remove(shall_open, from_attr);
     }
 
     g_string_free(filename, TRUE);
