@@ -53,6 +53,7 @@
 #include "profanity.h"
 #include "common.h"
 #include "log.h"
+#include "database.h"
 #include "config/files.h"
 #include "config/tlscerts.h"
 #include "config/accounts.h"
@@ -187,6 +188,7 @@ _init(char *log_level, char *config_file, char *log_file, char *theme_name)
         log_info("Starting Profanity (%s)...", PACKAGE_VERSION);
     }
 
+    log_database_init();
     chat_log_init();
     groupchat_log_init();
     accounts_load();
@@ -255,6 +257,7 @@ _shutdown(void)
 #ifdef HAVE_OMEMO
     omemo_close();
 #endif
+    log_database_close();
     chat_log_close();
     theme_close();
     accounts_close();

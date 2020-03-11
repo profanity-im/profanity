@@ -1,5 +1,7 @@
 core_sources = \
-	src/xmpp/contact.c src/xmpp/contact.h src/log.c src/common.c \
+	src/xmpp/contact.c src/xmpp/contact.h \
+	src/log.c src/common.c \
+	src/database.h src/database.c \
 	src/log.h src/profanity.c src/common.h \
 	src/profanity.h src/xmpp/chat_session.c \
 	src/xmpp/chat_session.h src/xmpp/muc.c src/xmpp/muc.h src/xmpp/jid.h src/xmpp/jid.c \
