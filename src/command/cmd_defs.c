@@ -2333,7 +2333,8 @@ static struct cmd_t command_defs[] =
         CMD_SYN(
             "/color on|off|redgreen|blue")
         CMD_DESC(
-            "Settings for consistent color generation for nicks (XEP-0392). Including corrections for Color Vision Deficiencies.")
+            "Settings for consistent color generation for nicks (XEP-0392). Including corrections for Color Vision Deficiencies. "
+            "Your terminal needs to support 256 colors.")
         CMD_ARGS(
             { "on|off|redgreen|blue", "Enable or disable nick colorization for MUC nicks. 'redgreen' is for people with red/green blindess and 'blue' for people with blue blindness."})
         CMD_EXAMPLES(
