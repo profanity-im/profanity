@@ -2101,6 +2101,11 @@ _get_default_boolean(preference_t pref)
         case PREF_ROOM_LIST_CACHE:
         case PREF_STATUSBAR_SHOW_NUMBER:
         case PREF_REVEAL_OS:
+        case PREF_CORRECTION_ALLOW:
+        case PREF_RECEIPTS_SEND:
+        case PREF_CARBONS:
+        case PREF_STATES:
+        case PREF_OUTTYPE:
             return TRUE;
         default:
             return FALSE;
