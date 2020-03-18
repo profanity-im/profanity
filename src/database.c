@@ -36,46 +36,51 @@
 #include <sqlite3.h>
 
 #include "log.h"
+#include "config/files.h"
 
-static sqlite3 *g_log_database;
+static sqlite3 *g_chatlog_database;
 
 bool
 log_database_init(void)
 {
     int ret = sqlite3_initialize();
-    char *filename = "test";
+    char *filename = files_get_chatlog_database_path();
 
 	if (ret != SQLITE_OK) {
+        free(filename);
         log_error("Error initializing SQLite database: %d", ret);
         return FALSE;
 	}
 
-    ret = sqlite3_open(filename, &g_log_database);
+    ret = sqlite3_open(filename, &g_chatlog_database);
     if (ret != SQLITE_OK) {
-        const char *err_msg = sqlite3_errmsg(g_log_database);
+        const char *err_msg = sqlite3_errmsg(g_chatlog_database);
         log_error("Error opening SQLite database: %s", err_msg);
+        free(filename);
         return FALSE;
     }
 
     char *err_msg;
 	char *query = "CREATE TABLE IF NOT EXISTS `ChatLogs` ( `id` INTEGER PRIMARY KEY, `jid` TEXT NOT NULL, `message` TEXT, `timestamp` TEXT)";
-    if( SQLITE_OK != sqlite3_exec(g_db, query, NULL, 0, &err_msg)) {
+    if( SQLITE_OK != sqlite3_exec(g_chatlog_database, query, NULL, 0, &err_msg)) {
         if (err_msg) {
             log_error("SQLite error: %s", err_msg);
             sqlite3_free(err_msg);
         } else {
             log_error("Unknown SQLite error");
         }
+        free(filename);
         return FALSE;
     }
 
     log_debug("Initialized SQLite database: %s", filename);
+    free(filename);
     return TRUE;
 }
 
 void
 log_database_close(void)
 {
-	sqlite3_close(g_log_database);
+	sqlite3_close(g_chatlog_database);
 	sqlite3_shutdown();
 }

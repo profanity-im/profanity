@@ -3,6 +3,7 @@
  * vim: expandtab:ts=4:sts=4:sw=4
  *
  * Copyright (C) 2012 - 2019 James Booth <boothj5@gmail.com>
+ * Copyright (C) 2020 Michael Vetter <jubalh@idoru.org>
  *
  * This file is part of Profanity.
  *
@@ -129,6 +130,22 @@ files_get_log_file(char *log_file)
     }
 
     g_string_append(logfile, ".log");
+
+    char *result = strdup(logfile->str);
+
+    free(xdg_data);
+    g_string_free(logfile, TRUE);
+
+    return result;
+}
+
+char*
+files_get_chatlog_database_path(void)
+{
+    gchar *xdg_data = _files_get_xdg_data_home();
+    GString *logfile = g_string_new(xdg_data);
+
+    g_string_append(logfile, "/profanity/chatlog.db");
 
     char *result = strdup(logfile->str);
 
