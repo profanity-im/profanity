@@ -231,4 +231,5 @@ gboolean cmd_avatar(ProfWin *window, const char *const command, gchar **args);
 gboolean cmd_os(ProfWin *window, const char *const command, gchar **args);
 gboolean cmd_correction(ProfWin *window, const char *const command, gchar **args);
 gboolean cmd_correct(ProfWin *window, const char *const command, gchar **args);
+gboolean cmd_slashguard(ProfWin *window, const char *const command, gchar **args);
 #endif

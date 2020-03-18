@@ -167,6 +167,7 @@ typedef enum {
     PREF_CORRECTION_ALLOW,
     PREF_HISTORY_COLOR_MUC,
     PREF_AVATAR_CMD,
+    PREF_SLASH_GUARD,
 } preference_t;
 
 typedef struct prof_alias_t {

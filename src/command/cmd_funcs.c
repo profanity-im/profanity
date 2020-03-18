@@ -8836,3 +8836,15 @@ cmd_correct(ProfWin *window, const char *const command, gchar **args)
     win_println(window, THEME_DEFAULT, "!", "Command /correct only valid in regular chat windows.");
     return TRUE;
 }
+
+gboolean
+cmd_slashguard(ProfWin *window, const char *const command, gchar **args)
+{
+    if (args[0] == NULL) {
+        return FALSE;
+    }
+
+    _cmd_set_boolean_preference(args[0], command, "Slashguard", PREF_SLASH_GUARD);
+
+    return TRUE;
+}

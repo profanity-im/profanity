@@ -1567,7 +1567,7 @@ _cmd_ac_complete_params(ProfWin *window, const char *const input, gboolean previ
 
     // autocomplete boolean settings
     gchar *boolean_choices[] = { "/beep", "/intype", "/states", "/outtype", "/flash", "/splash",
-        "/history", "/vercheck", "/privileges", "/wrap", "/carbons", "/lastactivity", "/os"};
+        "/history", "/vercheck", "/privileges", "/wrap", "/carbons", "/lastactivity", "/os", "/slashguard"};
 
     for (i = 0; i < ARRAY_SIZE(boolean_choices); i++) {
         result = autocomplete_param_with_func(input, boolean_choices[i], prefs_autocomplete_boolean_choice, previous, NULL);

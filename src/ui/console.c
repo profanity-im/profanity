@@ -2050,6 +2050,16 @@ cons_avatar_setting(void)
 }
 
 void
+cons_slashguard_setting(void)
+{
+    if (prefs_get_boolean(PREF_SLASH_GUARD)) {
+        cons_show("Slashguard (/slashguard)       : ON");
+    } else {
+        cons_show("Slashguard (/slashguard)       : OFF");
+    }
+}
+
+void
 cons_show_connection_prefs(void)
 {
     cons_show("Connection preferences:");

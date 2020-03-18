@@ -2418,6 +2418,23 @@ static struct cmd_t command_defs[] =
             { "message",    "The corrected message."})
         CMD_NOEXAMPLES
     },
+
+    { "/slashguard",
+        parse_args, 1, 1, &cons_slashguard_setting,
+        CMD_NOSUBFUNCS
+        CMD_MAINFUNC(cmd_slashguard)
+        CMD_TAGS(
+            CMD_TAG_UI,
+            CMD_TAG_CHAT)
+        CMD_SYN(
+            "/slashguard on|off")
+        CMD_DESC(
+            "Slashguard won't accept a slash in the first 4 characters of your input field. "
+            "It tries to protect you from typing ' /quit' and similar things in chats.")
+        CMD_ARGS(
+            { "on|off", "Enable or disable slashguard." })
+        CMD_NOEXAMPLES
+    },
 };
 
 static GHashTable *search_index;
