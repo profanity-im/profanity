@@ -57,7 +57,19 @@ log_database_init(void)
         return FALSE;
     }
 
-    log_error("Initialized SQLite database: %s", filename);
+    char *err_msg;
+	char *query = "CREATE TABLE IF NOT EXISTS `ChatLogs` ( `id` INTEGER PRIMARY KEY, `jid` TEXT NOT NULL, `message` TEXT, `timestamp` TEXT)";
+    if( SQLITE_OK != sqlite3_exec(g_db, query, NULL, 0, &err_msg)) {
+        if (err_msg) {
+            log_error("SQLite error: %s", err_msg);
+            sqlite3_free(err_msg);
+        } else {
+            log_error("Unknown SQLite error");
+        }
+        return FALSE;
+    }
+
+    log_debug("Initialized SQLite database: %s", filename);
     return TRUE;
 }
 
@@ -67,4 +79,3 @@ log_database_close(void)
 	sqlite3_close(g_log_database);
 	sqlite3_shutdown();
 }
-
