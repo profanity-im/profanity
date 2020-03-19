@@ -399,7 +399,6 @@ sv_ev_incoming_private_message(ProfMessage *message)
     }
 
     _clean_incoming_message(message);
-    log_database_add(message, FALSE);
     privwin_incoming_msg(privatewin, message);
     chat_log_msg_in(message);
 
@@ -423,7 +422,6 @@ sv_ev_delayed_private_message(ProfMessage *message)
     }
 
     _clean_incoming_message(message);
-    log_database_add(message, FALSE);
     privwin_incoming_msg(privatewin, message);
     chat_log_msg_in(message);
 
