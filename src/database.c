@@ -66,7 +66,7 @@ log_database_init(void)
     }
 
     char *err_msg;
-	char *query = "CREATE TABLE IF NOT EXISTS `ChatLogs` ( `id` INTEGER PRIMARY KEY, `jid` TEXT NOT NULL, `message` TEXT, `timestamp` TEXT)";
+	char *query = "CREATE TABLE IF NOT EXISTS `ChatLogs` ( `id` INTEGER PRIMARY KEY, `jid` TEXT NOT NULL, `resource` TEXT, `message` TEXT, `timestamp` TEXT, `is_muc` INTEGER, `stanza_id` TEXT)";
     if( SQLITE_OK != sqlite3_exec(g_chatlog_database, query, NULL, 0, &err_msg)) {
         if (err_msg) {
             log_error("SQLite error: %s", err_msg);
@@ -91,14 +91,14 @@ log_database_close(void)
 }
 
 void
-log_database_add(ProfMessage *message) {
+log_database_add(ProfMessage *message, gboolean is_muc) {
     char *err_msg;
 	char *query;
 
     //gchar *date_fmt = g_date_time_format_iso8601(message->timestamp);
     gchar *date_fmt = g_date_time_format(message->timestamp, "%Y/%m/%d %H:%M:%S");
-    if (asprintf(&query, "INSERT INTO `ChatLogs` (`jid`, `message`, `timestamp`) VALUES ('%s', '%s', '%s')",
-                message->jid->barejid, message->plain, date_fmt) == -1) {
+    if (asprintf(&query, "INSERT INTO `ChatLogs` (`jid`, `resource`, `message`, `timestamp`, `is_muc`, `stanza_id`) VALUES ('%s', '%s', '%s', '%s', '%d', '%s')",
+                message->jid->barejid, message->jid->resourcepart, message->plain, date_fmt, is_muc, message->id) == -1) {
         log_error("log_database_add(): could not allocate memory");
         return;
     }

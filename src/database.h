@@ -38,7 +38,7 @@
 
 bool log_database_init(void);
 void log_database_close(void);
-void log_database_add(ProfMessage *message);
+void log_database_add(ProfMessage *message, gboolean is_muc);
 
 #endif // DATABASE_H
 
