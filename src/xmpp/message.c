@@ -1009,6 +1009,8 @@ _handle_muc_private_message(xmpp_stanza_t *const stanza)
     if (message->timestamp) {
         sv_ev_delayed_private_message(message);
     } else {
+        message->timestamp = g_date_time_new_now_local();
+
         sv_ev_incoming_private_message(message);
     }
 
@@ -1199,6 +1201,10 @@ _handle_chat(xmpp_stanza_t *const stanza)
     }
 
     message->timestamp = stanza_get_delay(stanza);
+    if (!message->timestamp) {
+        message->timestamp = g_date_time_new_now_local();
+    }
+
     if (body) {
         message->body = xmpp_stanza_get_text(body);
     }
