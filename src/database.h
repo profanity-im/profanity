@@ -38,6 +38,7 @@
 
 bool log_database_init(void);
 void log_database_close(void);
+void log_database_add(ProfMessage *message);
 
 #endif // DATABASE_H
 

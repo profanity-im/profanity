@@ -33,10 +33,15 @@
  *
  */
 
+#define _GNU_SOURCE 1
+
 #include <sqlite3.h>
+#include <stdio.h>
+#include <glib.h>
 
 #include "log.h"
 #include "config/files.h"
+#include "xmpp/xmpp.h"
 
 static sqlite3 *g_chatlog_database;
 
@@ -83,4 +88,29 @@ log_database_close(void)
 {
 	sqlite3_close(g_chatlog_database);
 	sqlite3_shutdown();
+}
+
+void
+log_database_add(ProfMessage *message) {
+    char *err_msg;
+	char *query;
+
+    //gchar *date_fmt = g_date_time_format_iso8601(message->timestamp);
+    gchar *date_fmt = g_date_time_format(message->timestamp, "%Y/%m/%d %H:%M:%S");
+    if (asprintf(&query, "INSERT INTO `ChatLogs` (`jid`, `message`, `timestamp`) VALUES ('%s', '%s', '%s')",
+                message->jid->barejid, message->plain, date_fmt) == -1) {
+        log_error("log_database_add(): could not allocate memory");
+        return;
+    }
+    g_free(date_fmt);
+
+    if( SQLITE_OK != sqlite3_exec(g_chatlog_database, query, NULL, 0, &err_msg)) {
+        if (err_msg) {
+            log_error("SQLite error: %s", err_msg);
+            sqlite3_free(err_msg);
+        } else {
+            log_error("Unknown SQLite error");
+        }
+    }
+    free(query);
 }
