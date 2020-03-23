@@ -112,6 +112,7 @@ unittest_sources = \
 	tests/unittests/xmpp/stub_message.c \
 	tests/unittests/ui/stub_ui.c tests/unittests/ui/stub_ui.h \
 	tests/unittests/log/stub_log.c \
+	tests/unittests/database/stub_database.c \
 	tests/unittests/config/stub_accounts.c \
 	tests/unittests/tools/stub_http_upload.c \
 	tests/unittests/helpers.c tests/unittests/helpers.h \
