@@ -140,22 +140,6 @@ files_get_log_file(char *log_file)
 }
 
 char*
-files_get_chatlog_database_path(void)
-{
-    gchar *xdg_data = _files_get_xdg_data_home();
-    GString *logfile = g_string_new(xdg_data);
-
-    g_string_append(logfile, "/profanity/chatlog.db");
-
-    char *result = strdup(logfile->str);
-
-    free(xdg_data);
-    g_string_free(logfile, TRUE);
-
-    return result;
-}
-
-char*
 files_get_config_path(char *config_base)
 {
     gchar *xdg_config = _files_get_xdg_config_home();

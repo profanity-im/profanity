@@ -92,6 +92,8 @@ sv_ev_login_account_success(char *account_name, gboolean secured)
     omemo_on_connect(account);
 #endif
 
+    log_database_init(account);
+
     avatar_pep_subscribe();
 
     ui_handle_login_account_success(account, secured);

@@ -35,27 +35,64 @@
 
 #define _GNU_SOURCE 1
 
+#include <sys/stat.h>
 #include <sqlite3.h>
 #include <stdio.h>
 #include <glib.h>
+#include <errno.h>
 
 #include "log.h"
 #include "config/files.h"
+#include "config/account.h"
 #include "xmpp/xmpp.h"
 
 static sqlite3 *g_chatlog_database;
 
+static char*
+_get_db_filename(ProfAccount *account)
+{
+    char *databasedir = files_get_data_path(DIR_DATABASE);
+    GString *basedir = g_string_new(databasedir);
+    free(databasedir);
+
+    g_string_append(basedir, "/");
+
+    gchar *account_dir = str_replace(account->jid, "@", "_at_");
+    g_string_append(basedir, account_dir);
+    free(account_dir);
+
+    int res = g_mkdir_with_parents(basedir->str, S_IRWXU);
+    if (res == -1) {
+        char *errmsg = strerror(errno);
+        if (errmsg) {
+            log_error("DATABASE: error creating directory: %s, %s", basedir->str, errmsg);
+        } else {
+            log_error("DATABASE: creating directory: %s", basedir->str);
+        }
+        g_string_free(basedir, TRUE);
+        return NULL;
+    }
+
+    g_string_append(basedir, "/chatlog.db");
+    char *result = strdup(basedir->str);
+    g_string_free(basedir, TRUE);
+
+    return result;
+}
+
 bool
-log_database_init(void)
+log_database_init(ProfAccount *account)
 {
     int ret = sqlite3_initialize();
-    char *filename = files_get_chatlog_database_path();
-
 	if (ret != SQLITE_OK) {
-        free(filename);
         log_error("Error initializing SQLite database: %d", ret);
         return FALSE;
 	}
+
+    char *filename = _get_db_filename(account);
+    if (!filename) {
+        return FALSE;
+    }
 
     ret = sqlite3_open(filename, &g_chatlog_database);
     if (ret != SQLITE_OK) {

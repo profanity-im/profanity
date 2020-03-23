@@ -36,7 +36,7 @@
 #ifndef DATABASE_H
 #define DATABASE_H
 
-bool log_database_init(void);
+bool log_database_init(ProfAccount *account);
 void log_database_close(void);
 void log_database_add(ProfMessage *message, gboolean is_muc);
 

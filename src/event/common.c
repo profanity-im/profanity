@@ -33,6 +33,7 @@
  *
  */
 
+#include "database.h"
 #include "config/tlscerts.h"
 #include "ui/ui.h"
 #include "xmpp/chat_session.h"
@@ -67,6 +68,7 @@ ev_disconnect_cleanup(void)
 #ifdef HAVE_OMEMO
     omemo_on_disconnect();
 #endif
+    log_database_close();
 }
 
 gboolean
