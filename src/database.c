@@ -100,7 +100,31 @@ log_database_init(ProfAccount *account)
     }
 
     char *err_msg;
-	char *query = "CREATE TABLE IF NOT EXISTS `ChatLogs` ( `id` INTEGER PRIMARY KEY, `jid` TEXT NOT NULL, `resource` TEXT, `message` TEXT, `timestamp` TEXT, `is_muc` INTEGER, `stanza_id` TEXT)";
+	char *query = "CREATE TABLE IF NOT EXISTS `ChatLogs` ( `cl_id` INTEGER PRIMARY KEY, `jid` TEXT NOT NULL, `resource` TEXT, `message` TEXT, `timestamp` TEXT, `is_muc` INTEGER, `stanza_id` TEXT)";
+    if( SQLITE_OK != sqlite3_exec(g_chatlog_database, query, NULL, 0, &err_msg)) {
+        if (err_msg) {
+            log_error("SQLite error: %s", err_msg);
+            sqlite3_free(err_msg);
+        } else {
+            log_error("Unknown SQLite error");
+        }
+        free(filename);
+        return FALSE;
+    }
+
+	query = "CREATE TABLE IF NOT EXISTS `DbVersion` ( `dv_id` INTEGER PRIMARY KEY, `version` INTEGER UNIQUE)";
+    if( SQLITE_OK != sqlite3_exec(g_chatlog_database, query, NULL, 0, &err_msg)) {
+        if (err_msg) {
+            log_error("SQLite error: %s", err_msg);
+            sqlite3_free(err_msg);
+        } else {
+            log_error("Unknown SQLite error");
+        }
+        free(filename);
+        return FALSE;
+    }
+
+	query = "INSERT OR IGNORE INTO `DbVersion` (`version`) VALUES('1')";
     if( SQLITE_OK != sqlite3_exec(g_chatlog_database, query, NULL, 0, &err_msg)) {
         if (err_msg) {
             log_error("SQLite error: %s", err_msg);
