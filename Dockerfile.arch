@@ -25,7 +25,8 @@ RUN pacman -Syu --noconfirm && pacman -S --needed --noconfirm \
   openssl \
   pkg-config \
   python \
-  wget
+  wget \
+  sqlite
 
 RUN mkdir -p /usr/src/{stabber,profanity}
 

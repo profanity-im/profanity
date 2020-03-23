@@ -21,6 +21,7 @@ packages:
   - libgpg-error
   - libgcrypt
   - libsignal-protocol-c
+  - sqlite3
 
 sources:
   - https://github.com/profanity-im/profanity
