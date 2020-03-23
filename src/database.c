@@ -123,12 +123,20 @@ log_database_init(ProfAccount *account)
 void
 log_database_close(void)
 {
-	sqlite3_close(g_chatlog_database);
-	sqlite3_shutdown();
+    if (g_chatlog_database) {
+        sqlite3_close(g_chatlog_database);
+        sqlite3_shutdown();
+        g_chatlog_database = NULL;
+    }
 }
 
 void
 log_database_add(ProfMessage *message, gboolean is_muc) {
+    if (!g_chatlog_database) {
+        log_debug("log_database_add() called but db is not initialized");
+        return;
+    }
+
     char *err_msg;
 	char *query;
 
