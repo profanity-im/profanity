@@ -33,13 +33,13 @@
  *
  */
 
-#include "database.h"
 #include "config/tlscerts.h"
 #include "ui/ui.h"
 #include "xmpp/chat_session.h"
 #include "xmpp/roster_list.h"
 #include "xmpp/muc.h"
 #include "xmpp/xmpp.h"
+#include "database.h"
 
 #ifdef HAVE_LIBGPGME
 #include "pgp/gpg.h"

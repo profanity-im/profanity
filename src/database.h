@@ -36,9 +36,13 @@
 #ifndef DATABASE_H
 #define DATABASE_H
 
-bool log_database_init(ProfAccount *account);
-void log_database_close(void);
+#include <glib.h>
+#include "config/account.h"
+#include "xmpp/xmpp.h"
+
+gboolean log_database_init(ProfAccount *account);
 void log_database_add(ProfMessage *message, gboolean is_muc);
+void log_database_close(void);
 
 #endif // DATABASE_H
 

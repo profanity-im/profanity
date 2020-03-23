@@ -38,13 +38,10 @@
 #include <sys/stat.h>
 #include <sqlite3.h>
 #include <stdio.h>
-#include <glib.h>
 #include <errno.h>
 
 #include "log.h"
 #include "config/files.h"
-#include "config/account.h"
-#include "xmpp/xmpp.h"
 
 static sqlite3 *g_chatlog_database;
 
@@ -80,7 +77,7 @@ _get_db_filename(ProfAccount *account)
     return result;
 }
 
-bool
+gboolean
 log_database_init(ProfAccount *account)
 {
     int ret = sqlite3_initialize();
