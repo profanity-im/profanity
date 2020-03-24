@@ -86,7 +86,7 @@
 #include "omemo/omemo.h"
 #endif
 
-static void _init(char *log_level, char *config_file, char *log_file);
+static void _init(char *log_level, char *config_file, char *log_file, char *theme_name);
 static void _shutdown(void);
 static void _connect_default(const char * const account);
 
@@ -94,9 +94,9 @@ static gboolean cont = TRUE;
 static gboolean force_quit = FALSE;
 
 void
-prof_run(char *log_level, char *account_name, char *config_file, char *log_file)
+prof_run(char *log_level, char *account_name, char *config_file, char *log_file, char *theme_name)
 {
-    _init(log_level, config_file, log_file);
+    _init(log_level, config_file, log_file, theme_name);
     plugins_on_start();
     _connect_default(account_name);
 
@@ -157,7 +157,7 @@ _connect_default(const char *const account)
 }
 
 static void
-_init(char *log_level, char *config_file, char *log_file)
+_init(char *log_level, char *config_file, char *log_file, char *theme_name)
 {
     setlocale(LC_ALL, "");
     // ignore SIGPIPE
@@ -169,12 +169,14 @@ _init(char *log_level, char *config_file, char *log_file)
         log_error("Mutex init failed");
         exit(1);
     }
+
     pthread_mutex_lock(&lock);
     files_create_directories();
     log_level_t prof_log_level = log_level_from_string(log_level);
     prefs_load(config_file);
     log_init(prof_log_level, log_file);
     log_stderr_init(PROF_LEVEL_ERROR);
+
     if (strcmp(PACKAGE_STATUS, "development") == 0) {
 #ifdef HAVE_GIT_VERSION
             log_info("Starting Profanity (%sdev.%s.%s)...", PACKAGE_VERSION, PROF_GIT_BRANCH, PROF_GIT_REVISION);
@@ -184,12 +186,19 @@ _init(char *log_level, char *config_file, char *log_file)
     } else {
         log_info("Starting Profanity (%s)...", PACKAGE_VERSION);
     }
+
     chat_log_init();
     groupchat_log_init();
     accounts_load();
-    char *theme = prefs_get_string(PREF_THEME);
-    theme_init(theme);
-    prefs_free_string(theme);
+
+    if (theme_name) {
+        theme_init(theme_name);
+    } else {
+        char *theme = prefs_get_string(PREF_THEME);
+        theme_init(theme);
+        prefs_free_string(theme);
+    }
+
     ui_init();
     session_init();
     cmd_init();

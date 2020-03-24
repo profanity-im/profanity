@@ -64,6 +64,7 @@ static char *log = NULL;
 static char *log_file = NULL;
 static char *account_name = NULL;
 static char *config_file = NULL;
+static char *theme_name = NULL;
 
 int
 main(int argc, char **argv)
@@ -80,6 +81,7 @@ main(int argc, char **argv)
         { "log", 'l', 0, G_OPTION_ARG_STRING, &log, "Set logging levels, DEBUG, INFO (default), WARN, ERROR", "LEVEL" },
         { "config", 'c', 0, G_OPTION_ARG_STRING, &config_file, "Use an alternative configuration file", NULL },
         { "logfile", 'f', 0, G_OPTION_ARG_STRING, &log_file, "Specify log filename", NULL },
+        { "theme", 't', 0, G_OPTION_ARG_STRING, &theme_name, "Specify theme name", NULL },
         { NULL }
     };
 
@@ -175,13 +177,14 @@ main(int argc, char **argv)
         return 0;
     }
 
-    prof_run(log ? log : "INFO", account_name, config_file, log_file);
+    prof_run(log ? log : "INFO", account_name, config_file, log_file, theme_name);
 
     /* Free resources allocated by GOptionContext */
     g_free(log);
     g_free(account_name);
     g_free(config_file);
     g_free(log_file);
+    g_free(theme_name);
 
     return 0;
 }

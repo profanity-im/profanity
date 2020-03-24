@@ -67,8 +67,12 @@ static gboolean _theme_load_file(const char *const theme_name);
 void
 theme_init(const char *const theme_name)
 {
-    if (!_theme_load_file(theme_name) && !_theme_load_file("default")) {
-        log_error("Theme initialisation failed");
+    if (!_theme_load_file(theme_name)) {
+        log_error("Loading theme %s failed.", theme_name);
+
+        if (!_theme_load_file("default")) {
+            log_error("Theme initialisation failed.");
+        }
     }
 
     defaults = g_hash_table_new_full(g_str_hash, g_str_equal, free, free);
