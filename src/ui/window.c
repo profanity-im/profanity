@@ -299,7 +299,15 @@ win_get_title(ProfWin *window)
     if (window->type == WIN_MUC) {
         ProfMucWin *mucwin = (ProfMucWin*) window;
         assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
-        return strdup(mucwin->roomjid);
+
+        char *use_as_name = prefs_get_string(PREF_TITLEBAR_MUC_TITLE);
+        if ((g_strcmp0(use_as_name, "name") == 0) && mucwin->room_name) {
+            prefs_free_string(use_as_name);
+            return strdup(mucwin->room_name);
+        } else {
+            prefs_free_string(use_as_name);
+            return strdup(mucwin->roomjid);
+        }
     }
     if (window->type == WIN_CONFIG) {
         ProfConfWin *confwin = (ProfConfWin*) window;
