@@ -5979,7 +5979,7 @@ cmd_titlebar_show_hide(ProfWin *window, const char *const command, gchar **args)
                 cons_show("Showing resource in titlebar disabled.");
                 prefs_set_boolean(PREF_RESOURCE_TITLE , FALSE);
             } else if (g_strcmp0(args[1], "presence") == 0) {
-                cons_show("Showing contact presence in titlebar enabled.");
+                cons_show("Showing contact presence in titlebar disabled.");
                 prefs_set_boolean(PREF_PRESENCE , FALSE);
             } else if (g_strcmp0(args[1], "jid") == 0) {
                 cons_show("Showing MUC JID in titlebar as title disabled.");
