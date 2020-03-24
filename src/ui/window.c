@@ -300,14 +300,21 @@ win_get_title(ProfWin *window)
         ProfMucWin *mucwin = (ProfMucWin*) window;
         assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
 
-        char *use_as_name = prefs_get_string(PREF_TITLEBAR_MUC_TITLE);
-        if ((g_strcmp0(use_as_name, "name") == 0) && mucwin->room_name) {
-            prefs_free_string(use_as_name);
-            return strdup(mucwin->room_name);
-        } else {
-            prefs_free_string(use_as_name);
-            return strdup(mucwin->roomjid);
+        gboolean show_titlebar_jid = prefs_get_boolean(PREF_TITLEBAR_MUC_TITLE_JID);
+        gboolean show_titlebar_name = prefs_get_boolean(PREF_TITLEBAR_MUC_TITLE_NAME);
+        GString *title = g_string_new("");
+
+        if (show_titlebar_name) {
+            g_string_append(title, mucwin->room_name);
+            g_string_append(title, " ");
         }
+        if (show_titlebar_jid) {
+            g_string_append(title, mucwin->roomjid);
+        }
+
+        char *title_str = title->str;
+        g_string_free(title, FALSE);
+        return title_str;
     }
     if (window->type == WIN_CONFIG) {
         ProfConfWin *confwin = (ProfConfWin*) window;

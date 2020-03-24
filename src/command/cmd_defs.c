@@ -1292,8 +1292,7 @@ static struct cmd_t command_defs[] =
         parse_args, 1, 2, &cons_titlebar_setting,
         CMD_SUBFUNCS(
             { "show",  cmd_titlebar_show_hide },
-            { "hide",  cmd_titlebar_show_hide },
-            { "use",   cmd_titlebar_use }
+            { "hide",  cmd_titlebar_show_hide }
             )
         CMD_MAINFUNC(cmd_titlebar)
         CMD_TAGS(
@@ -1301,8 +1300,7 @@ static struct cmd_t command_defs[] =
         CMD_SYN(
             "/titlebar up",
             "/titlebar down",
-            "/titlebar show|hide [encwarn|resource|tls]",
-            "/titlebar use name|jid"
+            "/titlebar show|hide [encwarn|resource|tls]"
             )
         CMD_DESC(
             "Titlebar settings.")
@@ -1312,14 +1310,13 @@ static struct cmd_t command_defs[] =
             { "show tls", "Show or hide TLS indicator in the titlebar." },
             { "show encwarn", "Enable or disable the unencrypted warning message in the titlebar." },
             { "show resource", "Show or hide the current resource in the titlebar." },
-            { "use name", "In case of a MUC. Use the MUC name as title." },
-            { "use jid", "In case of a MUC. Use the JID as title." }
+            { "show name", "In case of a MUC. Show the MUC name in the titlebar." },
+            { "show jid", "In case of a MUC. Show the JID in the titlebar." }
             )
         CMD_EXAMPLES(
             "/titlebar up",
             "/titlebar show tls",
-            "/titlebar hide encwarn",
-            "/titlebar use name")
+            "/titlebar hide encwarn")
     },
 
     { "/mainwin",

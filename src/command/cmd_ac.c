@@ -210,7 +210,6 @@ static Autocomplete pgp_sendfile_ac;
 static Autocomplete tls_ac;
 static Autocomplete titlebar_ac;
 static Autocomplete titlebar_show_ac;
-static Autocomplete titlebar_use_ac;
 static Autocomplete tls_certpath_ac;
 static Autocomplete script_ac;
 static Autocomplete script_show_ac;
@@ -825,10 +824,8 @@ cmd_ac_init(void)
     autocomplete_add(titlebar_show_ac, "encwarn");
     autocomplete_add(titlebar_show_ac, "resource");
     autocomplete_add(titlebar_show_ac, "presence");
-
-    titlebar_use_ac = autocomplete_new();
-    autocomplete_add(titlebar_use_ac, "name");
-    autocomplete_add(titlebar_use_ac, "jid");
+    autocomplete_add(titlebar_show_ac, "jid");
+    autocomplete_add(titlebar_show_ac, "name");
 
     tls_certpath_ac = autocomplete_new();
     autocomplete_add(tls_certpath_ac, "set");
@@ -1256,7 +1253,6 @@ cmd_ac_reset(ProfWin *window)
     autocomplete_reset(tls_ac);
     autocomplete_reset(titlebar_ac);
     autocomplete_reset(titlebar_show_ac);
-    autocomplete_reset(titlebar_use_ac);
     autocomplete_reset(tls_certpath_ac);
     autocomplete_reset(console_ac);
     autocomplete_reset(console_msg_ac);
@@ -1405,7 +1401,6 @@ cmd_ac_uninit(void)
     autocomplete_free(tls_ac);
     autocomplete_free(titlebar_ac);
     autocomplete_free(titlebar_show_ac);
-    autocomplete_free(titlebar_use_ac);
     autocomplete_free(tls_certpath_ac);
     autocomplete_free(script_ac);
     autocomplete_free(script_show_ac);
@@ -3081,11 +3076,6 @@ _titlebar_autocomplete(ProfWin *window, const char *const input, gboolean previo
     }
 
     result = autocomplete_param_with_ac(input, "/titlebar hide", titlebar_show_ac, TRUE, previous);
-    if (result) {
-        return result;
-    }
-
-    result = autocomplete_param_with_ac(input, "/titlebar use", titlebar_use_ac, TRUE, previous);
     if (result) {
         return result;
     }

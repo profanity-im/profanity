@@ -149,6 +149,16 @@ static void _prefs_load(void)
         g_key_file_remove_key(prefs, PREF_GROUP_UI, "titlebar.goodbye", NULL);
     }
 
+    // after 0.8.1: titlebar use jid|name -> titlebar show|hide jid|name
+    if (g_key_file_has_key(prefs, PREF_GROUP_UI, "titlebar.muc.title", NULL)) {
+        char *value = g_key_file_get_string(prefs, PREF_GROUP_UI, "titlebar.muc.title", NULL);
+        if (g_strcmp0(value, "name") == 0) {
+            g_key_file_set_boolean(prefs, PREF_GROUP_UI, "titlebar.muc.title.name", TRUE);
+        } else if (g_strcmp0(value, "jid") == 0) {
+            g_key_file_set_boolean(prefs, PREF_GROUP_UI, "titlebar.muc.title.jid", TRUE);
+        }
+    }
+
     _save_prefs();
 
     boolean_choice_ac = autocomplete_new();
@@ -1742,7 +1752,8 @@ _get_group(preference_t pref)
         case PREF_STATUSBAR_SELF:
         case PREF_STATUSBAR_CHAT:
         case PREF_STATUSBAR_ROOM:
-        case PREF_TITLEBAR_MUC_TITLE:
+        case PREF_TITLEBAR_MUC_TITLE_JID:
+        case PREF_TITLEBAR_MUC_TITLE_NAME:
         case PREF_HISTORY_COLOR_MUC:
         case PREF_SLASH_GUARD:
             return PREF_GROUP_UI;
@@ -2000,8 +2011,10 @@ _get_key(preference_t pref)
             return "inpblock.dynamic";
         case PREF_ENC_WARN:
             return "enc.warn";
-        case PREF_TITLEBAR_MUC_TITLE:
-            return "titlebar.muc.title";
+        case PREF_TITLEBAR_MUC_TITLE_JID:
+            return "titlebar.muc.title.jid";
+        case PREF_TITLEBAR_MUC_TITLE_NAME:
+            return "titlebar.muc.title.name";
         case PREF_PGP_LOG:
             return "log";
         case PREF_PGP_SENDFILE:
@@ -2109,6 +2122,7 @@ _get_default_boolean(preference_t pref)
         case PREF_CARBONS:
         case PREF_STATES:
         case PREF_OUTTYPE:
+        case PREF_TITLEBAR_MUC_TITLE_NAME:
             return TRUE;
         default:
             return FALSE;
@@ -2145,8 +2159,6 @@ _get_default_string(preference_t pref)
         case PREF_ROSTER_ROOMS_BY:
             return "none";
         case PREF_ROSTER_ROOMS_USE_AS_NAME:
-            return "name";
-        case PREF_TITLEBAR_MUC_TITLE:
             return "name";
         case PREF_ROSTER_ROOMS_ORDER:
             return "name";

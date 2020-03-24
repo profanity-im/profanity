@@ -1159,9 +1159,17 @@ cons_titlebar_setting(void)
         cons_show("Titlebar presence (/titlebar)       : OFF");
     }
 
-    char *muctitle = prefs_get_string(PREF_TITLEBAR_MUC_TITLE);
-    cons_show("MUC window title (/titlebar)        : %s", muctitle);
-    prefs_free_string(muctitle);
+    if (prefs_get_boolean(PREF_TITLEBAR_MUC_TITLE_NAME)) {
+        cons_show("Titlebar show MUC name (/titlebar)       : ON");
+    } else {
+        cons_show("Titlebar show MUC name (/titlebar)       : OFF");
+    }
+
+    if (prefs_get_boolean(PREF_TITLEBAR_MUC_TITLE_JID)) {
+        cons_show("Titlebar show MUC JID (/titlebar)       : ON");
+    } else {
+        cons_show("Titlebar show MUC JID (/titlebar)       : OFF");
+    }
 }
 
 void

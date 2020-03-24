@@ -5958,6 +5958,12 @@ cmd_titlebar_show_hide(ProfWin *window, const char *const command, gchar **args)
             } else if (g_strcmp0(args[1], "presence") == 0) {
                 cons_show("Showing contact presence in titlebar enabled.");
                 prefs_set_boolean(PREF_PRESENCE , TRUE);
+            } else if (g_strcmp0(args[1], "jid") == 0) {
+                cons_show("Showing MUC JID in titlebar as title enabled.");
+                prefs_set_boolean(PREF_TITLEBAR_MUC_TITLE_JID, TRUE);
+            } else if (g_strcmp0(args[1], "name") == 0) {
+                cons_show("Showing MUC name in titlebar as title enabled.");
+                prefs_set_boolean(PREF_TITLEBAR_MUC_TITLE_NAME, TRUE);
             } else {
                 cons_bad_cmd_usage(command);
             }
@@ -5975,37 +5981,18 @@ cmd_titlebar_show_hide(ProfWin *window, const char *const command, gchar **args)
             } else if (g_strcmp0(args[1], "presence") == 0) {
                 cons_show("Showing contact presence in titlebar enabled.");
                 prefs_set_boolean(PREF_PRESENCE , FALSE);
+            } else if (g_strcmp0(args[1], "jid") == 0) {
+                cons_show("Showing MUC JID in titlebar as title disabled.");
+                prefs_set_boolean(PREF_TITLEBAR_MUC_TITLE_JID, FALSE);
+            } else if (g_strcmp0(args[1], "name") == 0) {
+                cons_show("Showing MUC name in titlebar as title disabled.");
+                prefs_set_boolean(PREF_TITLEBAR_MUC_TITLE_NAME, FALSE);
             } else {
                 cons_bad_cmd_usage(command);
             }
         } else {
             cons_bad_cmd_usage(command);
         }
-    }
-
-    return TRUE;
-}
-
-gboolean
-cmd_titlebar_use(ProfWin *window, const char *const command, gchar **args)
-{
-    if (args[1] == NULL) {
-        cons_bad_cmd_usage(command);
-        return TRUE;
-    }
-
-    if (g_strcmp0(args[0], "use") == 0) {
-        if (g_strcmp0(args[1], "jid") == 0) {
-            cons_show("Using MUC JID in titlebar as title.");
-            prefs_set_string(PREF_TITLEBAR_MUC_TITLE, "jid");
-        } else if (g_strcmp0(args[1], "name") == 0) {
-            cons_show("Using MUC name in titlebar as title.");
-            prefs_set_string(PREF_TITLEBAR_MUC_TITLE, "name");
-        } else {
-            cons_bad_cmd_usage(command);
-        }
-    } else {
-        cons_bad_cmd_usage(command);
     }
 
     return TRUE;
