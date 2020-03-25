@@ -2322,22 +2322,25 @@ static struct cmd_t command_defs[] =
     },
 
     { "/color",
-        parse_args, 1, 1, &cons_color_setting,
+        parse_args, 1, 2, &cons_color_setting,
         CMD_NOSUBFUNCS
         CMD_MAINFUNC(cmd_color)
         CMD_TAGS(
             CMD_TAG_UI)
         CMD_SYN(
-            "/color on|off|redgreen|blue")
+            "/color on|off|redgreen|blue",
+            "/color own on|off")
         CMD_DESC(
             "Settings for consistent color generation for nicks (XEP-0392). Including corrections for Color Vision Deficiencies. "
             "Your terminal needs to support 256 colors.")
         CMD_ARGS(
-            { "on|off|redgreen|blue", "Enable or disable nick colorization for MUC nicks. 'redgreen' is for people with red/green blindess and 'blue' for people with blue blindness."})
+            { "on|off|redgreen|blue", "Enable or disable nick colorization for MUC nicks. 'redgreen' is for people with red/green blindess and 'blue' for people with blue blindness."},
+            { "own on|off", "Enable color generation for own nick. If disabled the color from the color from the theme ('me') will get used."})
         CMD_EXAMPLES(
             "/color off",
             "/color on",
-            "/color blue")
+            "/color blue",
+            "/color own off")
     },
 
     { "/avatar",

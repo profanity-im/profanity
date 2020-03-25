@@ -1522,7 +1522,9 @@ _win_print_internal(ProfWin *window, const char *show_char, int pad_indent, GDat
 
         char *color_pref = prefs_get_string(PREF_COLOR_NICK);
         if (color_pref != NULL && (strcmp(color_pref, "false") != 0)) {
-            colour = theme_hash_attrs(from);
+            if (flags & NO_ME || (!(flags & NO_ME) && prefs_get_boolean(PREF_COLOR_NICK_OWN))) {
+                colour = theme_hash_attrs(from);
+            }
         }
         prefs_free_string(color_pref);
 

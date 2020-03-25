@@ -958,6 +958,7 @@ cmd_ac_init(void)
     autocomplete_add(color_ac, "off");
     autocomplete_add(color_ac, "redgreen");
     autocomplete_add(color_ac, "blue");
+    autocomplete_add(color_ac, "own");
 
     correction_ac = autocomplete_new();
     autocomplete_add(correction_ac, "on");
@@ -3757,6 +3758,11 @@ static char*
 _color_autocomplete(ProfWin *window, const char *const input, gboolean previous)
 {
     char *result = NULL;
+
+    result = autocomplete_param_with_func(input, "/color own", prefs_autocomplete_boolean_choice, previous, NULL);
+    if (result) {
+        return result;
+    }
 
     result = autocomplete_param_with_ac(input, "/color", color_ac, TRUE, previous);
     if (result) {

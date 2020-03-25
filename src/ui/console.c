@@ -2010,6 +2010,12 @@ cons_color_setting(void)
 
     prefs_free_string(color_pref);
 
+    if (prefs_get_boolean(PREF_COLOR_NICK_OWN)) {
+        cons_show("Consistent color generation for own nick (/color own)              : ON");
+    } else {
+        cons_show("Consistent color generation for own nick (/color own)              : OFF");
+    }
+
     if (prefs_get_boolean(PREF_ROSTER_COLOR_NICK)) {
         cons_show("Consistent color generation in roster (/roster color)              : ON");
     } else {

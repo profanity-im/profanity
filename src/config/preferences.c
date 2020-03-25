@@ -1745,6 +1745,7 @@ _get_group(preference_t pref)
         case PREF_CONSOLE_PRIVATE:
         case PREF_CONSOLE_CHAT:
         case PREF_COLOR_NICK:
+        case PREF_COLOR_NICK_OWN:
         case PREF_ROSTER_COLOR_NICK:
         case PREF_OCCUPANTS_COLOR_NICK:
         case PREF_STATUSBAR_SHOW_NAME:
@@ -2033,6 +2034,8 @@ _get_key(preference_t pref)
             return "console.chat";
         case PREF_COLOR_NICK:
             return "color.nick";
+        case PREF_COLOR_NICK_OWN:
+            return "color.nick.own";
         case PREF_ROSTER_COLOR_NICK:
             return "color.roster.nick";
         case PREF_OCCUPANTS_COLOR_NICK:
@@ -2123,6 +2126,7 @@ _get_default_boolean(preference_t pref)
         case PREF_STATES:
         case PREF_OUTTYPE:
         case PREF_TITLEBAR_MUC_TITLE_NAME:
+        case PREF_COLOR_NICK_OWN:
             return TRUE;
         default:
             return FALSE;

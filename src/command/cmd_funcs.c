@@ -8694,6 +8694,10 @@ cmd_color(ProfWin *window, const char *const command, gchar **args)
             prefs_set_string(PREF_COLOR_NICK, "redgreen");
     } else if (g_strcmp0(args[0], "blue") == 0) {
             prefs_set_string(PREF_COLOR_NICK, "blue");
+    } else if (g_strcmp0(args[0], "own") == 0) {
+        if (g_strcmp0(args[1], "on") == 0) {
+            _cmd_set_boolean_preference(args[1], command, "Color generation for own nick", PREF_COLOR_NICK_OWN);
+        }
     } else {
         cons_bad_cmd_usage(command);
         return TRUE;
