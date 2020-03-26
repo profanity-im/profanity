@@ -176,9 +176,9 @@ static struct cmd_t command_defs[] =
             { "tls disable",       "Disable TLS for the connection." })
         CMD_EXAMPLES(
             "/connect",
-            "/connect myuser@gmail.com",
-            "/connect myuser@mycompany.com server talk.google.com",
-            "/connect bob@someplace port 5678",
+            "/connect odin@valhalla.edda",
+            "/connect odin@valhalla.edda server talk.google.com",
+            "/connect freyr@vanaheimr.edda port 5678",
             "/connect me@localhost.test.org server 127.0.0.1 tls disable",
             "/connect me@chatty server chatty.com port 5443")
         },
@@ -258,9 +258,9 @@ static struct cmd_t command_defs[] =
             { "<nick>",                "Open private chat window with chat room occupant." },
             { "<nick> [<message>]",    "Send a private message to a chat room occupant." })
         CMD_EXAMPLES(
-            "/msg myfriend@server.com Hey, here's a message!",
-            "/msg otherfriend@server.com",
-            "/msg Bob Here is a private message",
+            "/msg thor@valhalla.edda Hey, here's a message!",
+            "/msg heimdall@valhalla.edda",
+            "/msg Thor Here is a private message",
             "/msg \"My Friend\" Hi, how are you?")
     },
 
@@ -394,15 +394,15 @@ static struct cmd_t command_defs[] =
             { "group remove <group> <contact>", "Remove a contact from a group." })
         CMD_EXAMPLES(
             "/roster",
-            "/roster add someone@contacts.org",
-            "/roster add someone@contacts.org Buddy",
-            "/roster remove someone@contacts.org",
-            "/roster nick myfriend@chat.org \"My Friend\"",
-            "/roster clearnick kai@server.com",
+            "/roster add odin@valhalla.edda",
+            "/roster add odin@valhalla.edda Allfather",
+            "/roster remove loki@ownserver.org",
+            "/roster nick odin@valhalla.edda \"All Father\"",
+            "/roster clearnick thor@valhalla.edda",
             "/roster size 15",
             "/roster group",
             "/roster group show friends",
-            "/roster group add friends newfriend@server.org",
+            "/roster group add friends fenris@ownserver.org",
             "/roster group add family Brother",
             "/roster group remove colleagues boss@work.com")
     },
@@ -425,7 +425,7 @@ static struct cmd_t command_defs[] =
             { "add [<jid>]",    "Block the specified Jabber ID. If in a chat window and no jid is specified, the current recipient will be blocked." },
             { "remove <jid>",   "Remove the specified Jabber ID from the blocked list." })
         CMD_EXAMPLES(
-            "/blocked add spammer@spam.org",
+            "/blocked add hel@helheim.edda",
             "/blocked add profanity@rooms.dismail.de/spammy-user")
     },
 
@@ -448,8 +448,8 @@ static struct cmd_t command_defs[] =
             { "<contact>", "The contact you wish to view information about." },
             { "<nick>",    "When in a chat room, the occupant you wish to view information about." })
         CMD_EXAMPLES(
-            "/info mybuddy@chat.server.org",
-            "/info kai")
+            "/info thor@aasgard.server.org",
+            "/info heimdall")
     },
 
     { "/caps",
@@ -470,9 +470,9 @@ static struct cmd_t command_defs[] =
             { "<fulljid>", "If in the console or a chat window, the full JID for which you wish to see capabilities." },
             { "<nick>",    "If in a chat room, nickname for which you wish to see capabilities." })
         CMD_EXAMPLES(
-            "/caps mybuddy@chat.server.org/laptop",
-            "/caps mybuddy@chat.server.org/phone",
-            "/caps bruce")
+            "/caps ran@cold.sea.org/laptop",
+            "/caps ran@cold.sea.org/phone",
+            "/caps aegir")
     },
 
     { "/software",
@@ -494,9 +494,9 @@ static struct cmd_t command_defs[] =
             { "<fulljid>", "If in the console or a chat window, the full JID for which you wish to see software information." },
             { "<nick>",    "If in a chat room, nickname for which you wish to see software information." })
         CMD_EXAMPLES(
-            "/software mybuddy@chat.server.org/laptop",
-            "/software mybuddy@chat.server.org/phone",
-            "/software bruce")
+            "/software odin@valhalla.edda/laptop",
+            "/software odin@valhalla.edda/phone",
+            "/software thor")
     },
 
     { "/status",
@@ -520,7 +520,7 @@ static struct cmd_t command_defs[] =
             { "<contact>", "The contact who's presence you which to see." },
             { "<nick>",    "If in a chat room, the occupant who's presence you wish to see." })
         CMD_EXAMPLES(
-            "/status get buddy@server.com",
+            "/status get odin@valhalla.edda",
             "/status get jon",
             "/status set online")
     },
@@ -842,7 +842,7 @@ static struct cmd_t command_defs[] =
             "/disco info",
             "/disco items myserver.org",
             "/disco items conference.jabber.org",
-            "/disco info myfriend@server.com/laptop")
+            "/disco info odin@valhalla.edda/laptop")
     },
 
     { "/sendfile",
@@ -880,8 +880,8 @@ static struct cmd_t command_defs[] =
         CMD_EXAMPLES(
             "/lastactivity",
             "/lastactivity off",
-            "/lastactivity alice@securechat.org",
-            "/lastactivity alice@securechat.org/laptop",
+            "/lastactivity freyja@asgaard.edda",
+            "/lastactivity freyja@asgaard.edda/laptop",
             "/lastactivity someserver.com")
     },
 
@@ -929,10 +929,10 @@ static struct cmd_t command_defs[] =
         CMD_EXAMPLES(
             "/win console",
             "/win 4",
-            "/win friend@chat.org",
+            "/win odin@valhalla.edda",
             "/win Eddie",
             "/win bigroom@conference.chat.org",
-            "/win bigroom@conference.chat.org/bruce",
+            "/win bigroom@conference.chat.org/thor",
             "/win wikipedia")
     },
 
@@ -984,8 +984,8 @@ static struct cmd_t command_defs[] =
             { "sent",            "Show all sent subscription requests pending a response." },
             { "received",        "Show all received subscription requests awaiting your response." })
         CMD_EXAMPLES(
-            "/sub request myfriend@jabber.org",
-            "/sub allow myfriend@jabber.org",
+            "/sub request odin@valhalla.edda",
+            "/sub allow odin@valhalla.edda",
             "/sub request",
             "/sub sent")
     },
@@ -1544,7 +1544,7 @@ static struct cmd_t command_defs[] =
             { "set <account>", "Connect with account on start up." },
             { "off",           "Disable autoconnect." })
         CMD_EXAMPLES(
-            "/autoconnect set jc@stuntteam.org",
+            "/autoconnect set ulfhednar@valhalla.edda",
             "/autoconnect off")
     },
 
@@ -1676,8 +1676,8 @@ static struct cmd_t command_defs[] =
             { "sendfile on|off",          "Allow /sendfile to send unencrypted files while otherwise using PGP."})
         CMD_EXAMPLES(
             "/pgp log off",
-            "/pgp setkey buddy@buddychat.org BA19CACE5A9592C5",
-            "/pgp start buddy@buddychat.org",
+            "/pgp setkey odin@valhalla.edda BA19CACE5A9592C5",
+            "/pgp start odin@valhalla.edda",
             "/pgp end",
             "/pgp char P")
     },
@@ -1744,9 +1744,9 @@ static struct cmd_t command_defs[] =
         CMD_EXAMPLES(
             "/otr log off",
             "/otr policy manual",
-            "/otr policy opportunistic mrfriend@workchat.org",
+            "/otr policy opportunistic odin@valhalla.edda",
             "/otr gen",
-            "/otr start buddy@buddychat.org",
+            "/otr start odin@valhalla.edda",
             "/otr myfp",
             "/otr theirfp",
             "/otr question \"What is the name of my rabbit?\" fiffi",
@@ -2051,7 +2051,7 @@ static struct cmd_t command_defs[] =
             { "clear <account> muc",                    "Remove the default MUC service setting."})
         CMD_EXAMPLES(
             "/account add me",
-            "/account set me jid me@chatty",
+            "/account set me jid ulfhednar@valhalla.edda",
             "/account set me server talk.chat.com",
             "/account set me port 5111",
             "/account set me muc chatservice.mycompany.com",
@@ -2276,9 +2276,9 @@ static struct cmd_t command_defs[] =
             { "clear_device_list",       "Clear your own device list on server side. Each client will reannounce itself when connected back."})
         CMD_EXAMPLES(
             "/omemo gen",
-            "/omemo start buddy@buddychat.org",
+            "/omemo start odin@valhalla.edda",
             "/omemo trust c4f9c875-144d7a3b-0c4a05b6-ca3be51a-a037f329-0bd3ae62-07f99719-55559d2a",
-            "/omemo untrust buddy@buddychat.org c4f9c875-144d7a3b-0c4a05b6-ca3be51a-a037f329-0bd3ae62-07f99719-55559d2a",
+            "/omemo untrust loki@valhalla.edda",
             "/omemo char *")
     },
 
@@ -2362,9 +2362,9 @@ static struct cmd_t command_defs[] =
             { "cmd <command>", "Set a command to execute with 'avatar open'. Use your favourite image viewer here."},
             { "open <barejid>", "Download avatar and open it with command."})
         CMD_EXAMPLES(
-            "/avatar get someone@contacts.org",
+            "/avatar get thor@valhalla.edda",
             "/avatar cmd xdg-open",
-            "/avatar open someone@contacts.org")
+            "/avatar open freyja@vanaheimr.edda")
     },
 
     { "/os",
