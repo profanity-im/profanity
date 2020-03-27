@@ -355,7 +355,7 @@ chat_log_otr_msg_in(ProfMessage *message)
         const char *jid = connection_get_fulljid();
         Jid *jidp = jid_create(jid);
         char *pref_otr_log = prefs_get_string(PREF_OTR_LOG);
-        if (message->enc == PROF_MSG_ENC_PLAIN || (strcmp(pref_otr_log, "on") == 0)) {
+        if (message->enc == PROF_MSG_ENC_NONE || (strcmp(pref_otr_log, "on") == 0)) {
             if (message->mucuser) {
                 _chat_log_chat(jidp->barejid, message->jid->barejid, message->plain, PROF_IN_LOG, message->timestamp, message->jid->resourcepart);
             } else {

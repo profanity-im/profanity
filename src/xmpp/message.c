@@ -192,7 +192,7 @@ message_init(void)
     message->body = NULL;
     message->encrypted = NULL;
     message->plain = NULL;
-    message->enc = PROF_MSG_ENC_PLAIN;
+    message->enc = PROF_MSG_ENC_NONE;
     message->timestamp = NULL;
     message->trusted = true;
     message->mucuser = false;

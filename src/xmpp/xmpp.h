@@ -120,7 +120,7 @@ typedef struct disco_item_t {
 } DiscoItem;
 
 typedef enum {
-    PROF_MSG_ENC_PLAIN,
+    PROF_MSG_ENC_NONE,
     PROF_MSG_ENC_OTR,
     PROF_MSG_ENC_PGP,
     PROF_MSG_ENC_OMEMO
