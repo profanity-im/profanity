@@ -45,7 +45,7 @@
 
 static sqlite3 *g_chatlog_database;
 
-static void _add_incoming(ProfMessage *message, const char * const type);
+static void _add_to_db(ProfMessage *message, const char * const type, const char * const from_jid, const char * const to_jid);
 static char* _get_db_filename(ProfAccount *account);
 
 static char*
@@ -158,21 +158,56 @@ log_database_close(void)
 
 void
 log_database_add_incoming_chat(ProfMessage *message) {
-    _add_incoming(message, "chat");
+    const char *jid = connection_get_fulljid();
+    Jid *myjid = jid_create(jid);
+
+    _add_to_db(message, "chat", message->jid->barejid, myjid->barejid);
+
+    jid_destroy(myjid);
 }
 
 void
 log_database_add_incoming_muc(ProfMessage *message) {
-    _add_incoming(message, "muc");
+    const char *jid = connection_get_fulljid();
+    Jid *myjid = jid_create(jid);
+
+    _add_to_db(message, "muc", message->jid->barejid, myjid->barejid);
+
+    jid_destroy(myjid);
 }
 
 void
 log_database_add_incoming_muc_pm(ProfMessage *message) {
-    _add_incoming(message, "mucpm");
+    const char *jid = connection_get_fulljid();
+    Jid *myjid = jid_create(jid);
+
+    _add_to_db(message, "mucpm", message->jid->barejid, myjid->barejid);
+
+    jid_destroy(myjid);
+}
+
+void
+log_database_add_outgoing(const char * const id, const char * const barejid, const char * const message, const char *const replace_id)
+{
+    ProfMessage *msg = message_init();
+
+    msg->id = id ? strdup(id) : NULL;
+    msg->jid = jid_create(barejid);
+    msg->plain = message ? strdup(message) : NULL;
+    msg->replace_id = replace_id ? strdup(replace_id) : NULL;
+    msg->timestamp = g_date_time_new_now_local(); //TODO: get from outside. best to have whole ProfMessage from outside
+
+    const char *jid = connection_get_fulljid();
+    Jid *myjid = jid_create(jid);
+
+    _add_to_db(msg, "chat", myjid->barejid, msg->jid->barejid);
+
+    jid_destroy(myjid);
+    message_free(msg);
 }
 
 static void
-_add_incoming(ProfMessage *message, const char * const type)
+_add_to_db(ProfMessage *message, const char * const type, const char * const from_jid, const char * const to_jid)
 {
     if (!g_chatlog_database) {
         log_debug("log_database_add() called but db is not initialized");
@@ -182,15 +217,12 @@ _add_incoming(ProfMessage *message, const char * const type)
     char *err_msg;
     char *query;
 
-    const char *jid = connection_get_fulljid();
-    Jid *myjid = jid_create(jid);
-
     //gchar *date_fmt = g_date_time_format_iso8601(message->timestamp);
     gchar *date_fmt = g_date_time_format(message->timestamp, "%Y/%m/%d %H:%M:%S");
     if (asprintf(&query, "INSERT INTO `ChatLogs` (`from_jid`, `from_resource`, `to_jid`, `message`, `timestamp`, `stanza_id`, `replace_id`, `type`) VALUES ('%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s')",
-                message->jid->barejid,
-                message->jid->resourcepart,
-                myjid->barejid,
+                from_jid,
+                "test" /*message->jid->resourcepart*/,
+                to_jid,
                 message->plain,
                 date_fmt,
                 message->id ? message->id : "",

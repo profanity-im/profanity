@@ -40,6 +40,7 @@
 #include <glib.h>
 
 #include "log.h"
+#include "database.h"
 #include "config/preferences.h"
 #include "event/common.h"
 #include "plugins/plugins.h"
@@ -295,6 +296,7 @@ cl_ev_send_msg_correct(ProfChatWin *chatwin, const char *const msg, const char *
         if (!handled) {
             char *id = message_send_chat(chatwin->barejid, plugin_msg, oob_url, request_receipt, replace_id);
             chat_log_msg_out(chatwin->barejid, plugin_msg, NULL);
+            log_database_add_outgoing(id, chatwin->barejid, plugin_msg, replace_id);
             chatwin_outgoing_msg(chatwin, plugin_msg, id, PROF_MSG_ENC_NONE, request_receipt, replace_id);
             free(id);
         }

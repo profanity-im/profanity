@@ -44,6 +44,7 @@ gboolean log_database_init(ProfAccount *account);
 void log_database_add_incoming_chat(ProfMessage *message);
 void log_database_add_incoming_muc(ProfMessage *message);
 void log_database_add_incoming_muc_pm(ProfMessage *message);
+void log_database_add_outgoing(const char * const id, const char * const barejid, const char * const message, const char *const replace_id);
 void log_database_close(void);
 
 #endif // DATABASE_H
