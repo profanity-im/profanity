@@ -100,7 +100,7 @@ log_database_init(ProfAccount *account)
     }
 
     char *err_msg;
-	char *query = "CREATE TABLE IF NOT EXISTS `ChatLogs` ( `cl_id` INTEGER PRIMARY KEY, `jid` TEXT NOT NULL, `resource` TEXT, `message` TEXT, `timestamp` TEXT, `is_muc` INTEGER, `stanza_id` TEXT, `replace_id` TEXT)";
+	char *query = "CREATE TABLE IF NOT EXISTS `ChatLogs` ( `id` INTEGER PRIMARY KEY AUTOINCREMENT, `jid` TEXT NOT NULL, `resource` TEXT, `message` TEXT, `timestamp` TEXT, `is_muc` INTEGER, `stanza_id` TEXT, `replace_id` TEXT)";
     if( SQLITE_OK != sqlite3_exec(g_chatlog_database, query, NULL, 0, &err_msg)) {
         goto out;
     }
