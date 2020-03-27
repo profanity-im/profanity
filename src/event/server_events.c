@@ -327,7 +327,7 @@ sv_ev_room_message(ProfMessage *message)
     GList *triggers = prefs_message_get_triggers(message->plain);
 
     _clean_incoming_message(message);
-    log_database_add(message, "muc");
+    log_database_add_incoming_muc(message);
     mucwin_incoming_msg(mucwin, message, mentions, triggers, TRUE);
 
     g_slist_free(mentions);
@@ -401,7 +401,7 @@ sv_ev_incoming_private_message(ProfMessage *message)
     }
 
     _clean_incoming_message(message);
-    log_database_add(message, "mucpm");
+    log_database_add_incoming_muc_pm(message);
     privwin_incoming_msg(privatewin, message);
     chat_log_msg_in(message);
 
@@ -537,7 +537,7 @@ _sv_ev_incoming_pgp(ProfChatWin *chatwin, gboolean new_win, ProfMessage *message
     if (message->plain) {
         message->enc = PROF_MSG_ENC_PGP;
         _clean_incoming_message(message);
-        log_database_add(message, "chat");
+        log_database_add_incoming_chat(message);
         chatwin_incoming_msg(chatwin, message, new_win);
         if (logit) {
             chat_log_pgp_msg_in(message);
@@ -553,7 +553,7 @@ _sv_ev_incoming_pgp(ProfChatWin *chatwin, gboolean new_win, ProfMessage *message
         message->enc = PROF_MSG_ENC_NONE;
         message->plain = strdup(message->body);
         _clean_incoming_message(message);
-        log_database_add(message, "chat");
+        log_database_add_incoming_chat(message);
         chatwin_incoming_msg(chatwin, message, new_win);
         chat_log_msg_in(message);
         chatwin->pgp_recv = FALSE;
@@ -576,7 +576,7 @@ _sv_ev_incoming_otr(ProfChatWin *chatwin, gboolean new_win, ProfMessage *message
         }
 
         _clean_incoming_message(message);
-        log_database_add(message, "chat");
+        log_database_add_incoming_chat(message);
         chatwin_incoming_msg(chatwin, message, new_win);
 
         chat_log_otr_msg_in(message);
@@ -592,7 +592,7 @@ static void
 _sv_ev_incoming_omemo(ProfChatWin *chatwin, gboolean new_win, ProfMessage *message, gboolean logit)
 {
     _clean_incoming_message(message);
-    log_database_add(message, "chat");
+    log_database_add_incoming_chat(message);
     chatwin_incoming_msg(chatwin, message, new_win);
     if (logit) {
         chat_log_omemo_msg_in(message);
@@ -608,7 +608,7 @@ _sv_ev_incoming_plain(ProfChatWin *chatwin, gboolean new_win, ProfMessage *messa
         message->enc = PROF_MSG_ENC_NONE;
         message->plain = strdup(message->body);
         _clean_incoming_message(message);
-        log_database_add(message, "chat");
+        log_database_add_incoming_chat(message);
         chatwin_incoming_msg(chatwin, message, new_win);
         if (logit) {
             chat_log_msg_in(message);

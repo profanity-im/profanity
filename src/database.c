@@ -45,6 +45,9 @@
 
 static sqlite3 *g_chatlog_database;
 
+static void _add_incoming(ProfMessage *message, const char * const type);
+static char* _get_db_filename(ProfAccount *account);
+
 static char*
 _get_db_filename(ProfAccount *account)
 {
@@ -154,7 +157,23 @@ log_database_close(void)
 }
 
 void
-log_database_add(ProfMessage *message, const char *const type) {
+log_database_add_incoming_chat(ProfMessage *message) {
+    _add_incoming(message, "chat");
+}
+
+void
+log_database_add_incoming_muc(ProfMessage *message) {
+    _add_incoming(message, "muc");
+}
+
+void
+log_database_add_incoming_muc_pm(ProfMessage *message) {
+    _add_incoming(message, "mucpm");
+}
+
+static void
+_add_incoming(ProfMessage *message, const char * const type)
+{
     if (!g_chatlog_database) {
         log_debug("log_database_add() called but db is not initialized");
         return;

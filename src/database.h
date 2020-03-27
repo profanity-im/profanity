@@ -41,7 +41,9 @@
 #include "xmpp/xmpp.h"
 
 gboolean log_database_init(ProfAccount *account);
-void log_database_add(ProfMessage *message, const char *const type);
+void log_database_add_incoming_chat(ProfMessage *message);
+void log_database_add_incoming_muc(ProfMessage *message);
+void log_database_add_incoming_muc_pm(ProfMessage *message);
 void log_database_close(void);
 
 #endif // DATABASE_H
