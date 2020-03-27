@@ -2278,7 +2278,7 @@ static struct cmd_t command_defs[] =
             "/omemo gen",
             "/omemo start odin@valhalla.edda",
             "/omemo trust c4f9c875-144d7a3b-0c4a05b6-ca3be51a-a037f329-0bd3ae62-07f99719-55559d2a",
-            "/omemo untrust loki@valhalla.edda",
+            "/omemo untrust loki@valhalla.edda c4f9c875-144d7a3b-0c4a05b6-ca3be51a-a037f329-0bd3ae62-07f99719-55559d2a",
             "/omemo char *")
     },
 
