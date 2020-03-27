@@ -107,7 +107,7 @@ log_database_init(ProfAccount *account)
     // to_jid is the receivers resource
     // message is the message text
     // timestamp the timestamp like "2020/03/24 11:12:14"
-    // type is there to distinguish: message, MUC message, muc pm
+    // type is there to distinguish: message (chat), MUC message (muc), muc pm (mucpm)
     // stanza_id is the ID from XEP-0359: Unique and Stable Stanza IDs
     // archive_id is the ID from XEP-0313: Message Archive Management
     // replace_id is the ID from XEP-0308: Last Message Correction
@@ -154,7 +154,7 @@ log_database_close(void)
 }
 
 void
-log_database_add(ProfMessage *message, gboolean is_muc) {
+log_database_add(ProfMessage *message, const char *const type) {
     if (!g_chatlog_database) {
         log_debug("log_database_add() called but db is not initialized");
         return;
@@ -163,10 +163,20 @@ log_database_add(ProfMessage *message, gboolean is_muc) {
     char *err_msg;
     char *query;
 
+    const char *jid = connection_get_fulljid();
+    Jid *myjid = jid_create(jid);
+
     //gchar *date_fmt = g_date_time_format_iso8601(message->timestamp);
     gchar *date_fmt = g_date_time_format(message->timestamp, "%Y/%m/%d %H:%M:%S");
-    if (asprintf(&query, "INSERT INTO `ChatLogs` (`jid`, `resource`, `message`, `timestamp`, `stanza_id`, `replace_id`) VALUES ('%s', '%s', '%s', '%d', '%s', '%s')",
-                message->jid->barejid, message->jid->resourcepart, message->plain, date_fmt, is_muc, message->id ? message->id : "", message->replace_id ? message->replace_id : "") == -1) {
+    if (asprintf(&query, "INSERT INTO `ChatLogs` (`from_jid`, `from_resource`, `to_jid`, `message`, `timestamp`, `stanza_id`, `replace_id`, `type`) VALUES ('%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s')",
+                message->jid->barejid,
+                message->jid->resourcepart,
+                myjid->barejid,
+                message->plain,
+                date_fmt,
+                message->id ? message->id : "",
+                message->replace_id ? message->replace_id : "",
+                type) == -1) {
         log_error("log_database_add(): could not allocate memory");
         return;
     }
