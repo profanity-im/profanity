@@ -81,10 +81,10 @@ gboolean
 log_database_init(ProfAccount *account)
 {
     int ret = sqlite3_initialize();
-	if (ret != SQLITE_OK) {
+    if (ret != SQLITE_OK) {
         log_error("Error initializing SQLite database: %d", ret);
         return FALSE;
-	}
+    }
 
     char *filename = _get_db_filename(account);
     if (!filename) {
@@ -100,17 +100,30 @@ log_database_init(ProfAccount *account)
     }
 
     char *err_msg;
-	char *query = "CREATE TABLE IF NOT EXISTS `ChatLogs` ( `id` INTEGER PRIMARY KEY AUTOINCREMENT, `jid` TEXT NOT NULL, `resource` TEXT, `message` TEXT, `timestamp` TEXT, `is_muc` INTEGER, `stanza_id` TEXT, `replace_id` TEXT)";
+    // id is the ID of DB the entry
+    // from_jid is the senders jid
+    // to_jid is the receivers jid
+    // from_resource is the senders resource
+    // to_jid is the receivers resource
+    // message is the message text
+    // timestamp the timestamp like "2020/03/24 11:12:14"
+    // type is there to distinguish: message, MUC message, muc pm
+    // stanza_id is the ID from XEP-0359: Unique and Stable Stanza IDs
+    // archive_id is the ID from XEP-0313: Message Archive Management
+    // replace_id is the ID from XEP-0308: Last Message Correction
+    // encryption is to distinguish: none, omemo, otr, pgp
+    // marked_read is 0/1 whether a message has been marked as read via XEP-0333: Chat Markers
+    char *query = "CREATE TABLE IF NOT EXISTS `ChatLogs` ( `id` INTEGER PRIMARY KEY AUTOINCREMENT, `from_jid` TEXT NOT NULL, `to_jid` TEXT NOT NULL, `from_resource` TEXT, `to_resource` TEXT, `message` TEXT, `timestamp` TEXT, `type` TEXT, `stanza_id` TEXT, `archive_id` TEXT, `replace_id` TEXT, `encryption` TEXT, `marked_read` INTEGER)";
     if( SQLITE_OK != sqlite3_exec(g_chatlog_database, query, NULL, 0, &err_msg)) {
         goto out;
     }
 
-	query = "CREATE TABLE IF NOT EXISTS `DbVersion` ( `dv_id` INTEGER PRIMARY KEY, `version` INTEGER UNIQUE)";
+    query = "CREATE TABLE IF NOT EXISTS `DbVersion` ( `dv_id` INTEGER PRIMARY KEY, `version` INTEGER UNIQUE)";
     if( SQLITE_OK != sqlite3_exec(g_chatlog_database, query, NULL, 0, &err_msg)) {
         goto out;
     }
 
-	query = "INSERT OR IGNORE INTO `DbVersion` (`version`) VALUES('1')";
+    query = "INSERT OR IGNORE INTO `DbVersion` (`version`) VALUES('1')";
     if( SQLITE_OK != sqlite3_exec(g_chatlog_database, query, NULL, 0, &err_msg)) {
         goto out;
     }
@@ -148,11 +161,11 @@ log_database_add(ProfMessage *message, gboolean is_muc) {
     }
 
     char *err_msg;
-	char *query;
+    char *query;
 
     //gchar *date_fmt = g_date_time_format_iso8601(message->timestamp);
     gchar *date_fmt = g_date_time_format(message->timestamp, "%Y/%m/%d %H:%M:%S");
-    if (asprintf(&query, "INSERT INTO `ChatLogs` (`jid`, `resource`, `message`, `timestamp`, `is_muc`, `stanza_id`, `replace_id`) VALUES ('%s', '%s', '%s', '%s', '%d', '%s', '%s')",
+    if (asprintf(&query, "INSERT INTO `ChatLogs` (`jid`, `resource`, `message`, `timestamp`, `stanza_id`, `replace_id`) VALUES ('%s', '%s', '%s', '%d', '%s', '%s')",
                 message->jid->barejid, message->jid->resourcepart, message->plain, date_fmt, is_muc, message->id ? message->id : "", message->replace_id ? message->replace_id : "") == -1) {
         log_error("log_database_add(): could not allocate memory");
         return;
