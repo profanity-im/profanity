@@ -156,38 +156,34 @@ log_database_close(void)
     }
 }
 
-void
-log_database_add_incoming_chat(ProfMessage *message) {
+static void
+_log_database_add_incoming(ProfMessage *message, const char * const type)
+{
     const char *jid = connection_get_fulljid();
     Jid *myjid = jid_create(jid);
 
-    _add_to_db(message, "chat", message->jid->barejid, myjid->barejid);
+    _add_to_db(message, type, message->jid->barejid, myjid->barejid);
 
     jid_destroy(myjid);
+}
+
+void
+log_database_add_incoming_chat(ProfMessage *message) {
+    _log_database_add_incoming(message, "chat");
 }
 
 void
 log_database_add_incoming_muc(ProfMessage *message) {
-    const char *jid = connection_get_fulljid();
-    Jid *myjid = jid_create(jid);
-
-    _add_to_db(message, "muc", message->jid->barejid, myjid->barejid);
-
-    jid_destroy(myjid);
+    _log_database_add_incoming(message, "muc");
 }
 
 void
 log_database_add_incoming_muc_pm(ProfMessage *message) {
-    const char *jid = connection_get_fulljid();
-    Jid *myjid = jid_create(jid);
-
-    _add_to_db(message, "mucpm", message->jid->barejid, myjid->barejid);
-
-    jid_destroy(myjid);
+    _log_database_add_incoming(message, "mucpm");
 }
 
-void
-log_database_add_outgoing(const char * const id, const char * const barejid, const char * const message, const char *const replace_id)
+static void
+_log_database_add_outgoing(const char * const type, const char * const id, const char * const barejid, const char * const message, const char *const replace_id, prof_enc_t enc)
 {
     ProfMessage *msg = message_init();
 
@@ -196,14 +192,33 @@ log_database_add_outgoing(const char * const id, const char * const barejid, con
     msg->plain = message ? strdup(message) : NULL;
     msg->replace_id = replace_id ? strdup(replace_id) : NULL;
     msg->timestamp = g_date_time_new_now_local(); //TODO: get from outside. best to have whole ProfMessage from outside
+    msg->enc = enc;
 
     const char *jid = connection_get_fulljid();
     Jid *myjid = jid_create(jid);
 
-    _add_to_db(msg, "chat", myjid->barejid, msg->jid->barejid);
+    _add_to_db(msg, type, myjid->barejid, msg->jid->barejid);
 
     jid_destroy(myjid);
     message_free(msg);
+}
+
+void
+log_database_add_outgoing_chat(const char * const id, const char * const barejid, const char * const message, const char *const replace_id, prof_enc_t enc)
+{
+    _log_database_add_outgoing("chat", id, barejid, message, replace_id, enc);
+}
+
+void
+log_database_add_outgoing_muc(const char * const id, const char * const barejid, const char * const message, const char *const replace_id, prof_enc_t enc)
+{
+    _log_database_add_outgoing("muc", id, barejid, message, replace_id, enc);
+}
+
+void
+log_database_add_outgoing_muc_pm(const char * const id, const char * const barejid, const char * const message, const char *const replace_id, prof_enc_t enc)
+{
+    _log_database_add_outgoing("mucpm", id, barejid, message, replace_id, enc);
 }
 
 static void

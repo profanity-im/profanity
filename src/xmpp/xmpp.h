@@ -175,7 +175,7 @@ char* message_send_chat(const char *const barejid, const char *const msg, const 
 char* message_send_chat_otr(const char *const barejid, const char *const msg, gboolean request_receipt, const char *const replace_id);
 char* message_send_chat_pgp(const char *const barejid, const char *const msg, gboolean request_receipt, const char *const replace_id);
 char* message_send_chat_omemo(const char *const jid, uint32_t sid, GList *keys, const unsigned char *const iv, size_t iv_len, const unsigned char *const ciphertext, size_t ciphertext_len, gboolean request_receipt, gboolean muc, const char *const replace_id);
-void message_send_private(const char *const fulljid, const char *const msg, const char *const oob_url);
+char* message_send_private(const char *const fulljid, const char *const msg, const char *const oob_url);
 char* message_send_groupchat(const char *const roomjid, const char *const msg, const char *const oob_url, const char *const replace_id);
 void message_send_groupchat_subject(const char *const roomjid, const char *const subject);
 void message_send_inactive(const char *const jid);

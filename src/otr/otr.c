@@ -40,6 +40,7 @@
 #include <glib.h>
 
 #include "log.h"
+#include "database.h"
 #include "config/preferences.h"
 #include "config/files.h"
 #include "otr/otr.h"
@@ -348,6 +349,7 @@ otr_on_message_send(ProfChatWin *chatwin, const char *const message, gboolean re
         if (encrypted) {
             id = message_send_chat_otr(chatwin->barejid, encrypted, request_receipt, replace_id);
             chat_log_otr_msg_out(chatwin->barejid, message, NULL);
+            log_database_add_outgoing_chat(id, chatwin->barejid, message, replace_id, PROF_MSG_ENC_OTR);
             chatwin_outgoing_msg(chatwin, message, id, PROF_MSG_ENC_OTR, request_receipt, replace_id);
             otr_free_message(encrypted);
             free(id);
