@@ -301,6 +301,7 @@ static void _log_muc(ProfMessage *message)
     } else {
         groupchat_log_msg_in(message->jid->barejid, message->jid->resourcepart, message->plain);
     }
+    log_database_add_incoming_muc(message);
 }
 
 void
@@ -327,7 +328,6 @@ sv_ev_room_message(ProfMessage *message)
     GList *triggers = prefs_message_get_triggers(message->plain);
 
     _clean_incoming_message(message);
-    log_database_add_incoming_muc(message);
     mucwin_incoming_msg(mucwin, message, mentions, triggers, TRUE);
 
     g_slist_free(mentions);
