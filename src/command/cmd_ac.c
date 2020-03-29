@@ -817,7 +817,6 @@ cmd_ac_init(void)
     autocomplete_add(titlebar_ac, "down");
     autocomplete_add(titlebar_ac, "show");
     autocomplete_add(titlebar_ac, "hide");
-    autocomplete_add(titlebar_ac, "use");
 
     titlebar_show_ac = autocomplete_new();
     autocomplete_add(titlebar_show_ac, "tls");
