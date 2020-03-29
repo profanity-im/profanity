@@ -140,6 +140,8 @@ roster_update_presence(const char *const barejid, Resource *resource, GDateTime 
 
     PContact contact = roster_get_contact(barejid);
     if (contact == NULL) {
+        /* Don't lose resource when there is no owner. */
+        resource_destroy(resource);
         return FALSE;
     }
     if (!_datetimes_equal(p_contact_last_activity(contact), last_activity)) {
