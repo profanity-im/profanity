@@ -383,7 +383,7 @@ cl_ev_send_muc_msg_corrected(ProfMucWin *mucwin, const char *const msg, const ch
 #ifndef HAVE_OMEMO
     char *id = message_send_groupchat(mucwin->roomjid, plugin_msg, oob_url, replace_id);
     groupchat_log_msg_out(mucwin->roomjid, plugin_msg);
-    log_database_add_outgoing_muc(id, chatwin->barejid, plugin_msg, replace_id, PROF_MSG_ENC_NONE);
+    log_database_add_outgoing_muc(id, mucwin->roomjid, plugin_msg, replace_id, PROF_MSG_ENC_NONE);
     mucwin_outgoing_msg(mucwin, plugin_msg, id, PROF_MSG_ENC_NONE, replace_id);
     free(id);
 
