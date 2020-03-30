@@ -14,7 +14,7 @@ trap error_handler ERR
 ./bootstrap.sh
 
 tests=()
-MAKE="make"
+MAKE="make --quiet -j$(nproc)"
 CC="gcc"
 
 case $(uname | tr '[:upper:]' '[:lower:]') in
