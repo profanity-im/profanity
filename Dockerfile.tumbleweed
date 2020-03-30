@@ -1,5 +1,5 @@
 # Build the latest openSUSE Tumbleweed image
-FROM opensuse/tumbleweed
+FROM registry.opensuse.org/opensuse/tumbleweed:20200324
 
 # expect - for functional tests
 # libmicrohttpd - for stabber
