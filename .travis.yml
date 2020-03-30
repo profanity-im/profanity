@@ -32,12 +32,12 @@ matrix:
 
 before_install:
   - if [ "$TRAVIS_OS_NAME" = "linux" ]; then
-    docker build -f Dockerfile."$BUILD_FLAVOR" --security-opt seccomp=unconfined -t profanity .;
+    docker build -f Dockerfile."$BUILD_FLAVOR" -t profanity .;
     fi
 
 script:
   - if [ "$TRAVIS_OS_NAME" = "linux" ]; then
-    docker run -it --security-opt seccomp=unconfined profanity ./ci-build.sh;
+    docker run -it profanity ./ci-build.sh;
     fi
   - if [ "$TRAVIS_OS_NAME" = "osx" ]; then
     ./ci-build.sh;
