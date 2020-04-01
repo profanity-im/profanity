@@ -11,10 +11,21 @@ error_handler()
 
 trap error_handler ERR
 
+num_cores()
+{
+    # Check for cores, for systems with:
+    #   Line 1. Linux w/ coreutils, or...
+    #   Line 2. OpenBSD, FreeBSD, NetBSD or macOS, or...
+    #   Line 3. Fallback for Linux w/o coreutils (glibc).
+    nproc \
+        || sysctl -n hw.ncpu \
+        || getconf _NPROCESSORS_ONLN 2>/dev/null
+}
+
 ./bootstrap.sh
 
 tests=()
-MAKE="make --quiet -j$(nproc)"
+MAKE="make --quiet -j$(num_cores)"
 CC="gcc"
 
 case $(uname | tr '[:upper:]' '[:lower:]') in
