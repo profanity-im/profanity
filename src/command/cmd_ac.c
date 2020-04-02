@@ -176,10 +176,12 @@ static Autocomplete otr_ac;
 static Autocomplete otr_log_ac;
 static Autocomplete otr_policy_ac;
 static Autocomplete otr_sendfile_ac;
+#ifdef HAVE_OMEMO
 static Autocomplete omemo_ac;
 static Autocomplete omemo_log_ac;
 static Autocomplete omemo_policy_ac;
 static Autocomplete omemo_sendfile_ac;
+#endif
 static Autocomplete connect_property_ac;
 static Autocomplete tls_property_ac;
 static Autocomplete alias_ac;
@@ -276,7 +278,9 @@ cmd_ac_init(void)
     autocomplete_add(prefs_ac, "presence");
     autocomplete_add(prefs_ac, "otr");
     autocomplete_add(prefs_ac, "pgp");
+#ifdef HAVE_OMEMO
     autocomplete_add(prefs_ac, "omemo");
+#endif
 
     notify_ac = autocomplete_new();
     autocomplete_add(notify_ac, "chat");
@@ -627,6 +631,7 @@ cmd_ac_init(void)
     autocomplete_add(otr_sendfile_ac, "on");
     autocomplete_add(otr_sendfile_ac, "off");
 
+#ifdef HAVE_OMEMO
     omemo_ac = autocomplete_new();
     autocomplete_add(omemo_ac, "gen");
     autocomplete_add(omemo_ac, "log");
@@ -653,6 +658,7 @@ cmd_ac_init(void)
     omemo_sendfile_ac = autocomplete_new();
     autocomplete_add(omemo_sendfile_ac, "on");
     autocomplete_add(omemo_sendfile_ac, "off");
+#endif
 
     connect_property_ac = autocomplete_new();
     autocomplete_add(connect_property_ac, "server");
@@ -1219,10 +1225,12 @@ cmd_ac_reset(ProfWin *window)
     autocomplete_reset(otr_log_ac);
     autocomplete_reset(otr_policy_ac);
     autocomplete_reset(otr_sendfile_ac);
+#ifdef HAVE_OMEMO
     autocomplete_reset(omemo_ac);
     autocomplete_reset(omemo_log_ac);
     autocomplete_reset(omemo_policy_ac);
     autocomplete_reset(omemo_sendfile_ac);
+#endif
     autocomplete_reset(connect_property_ac);
     autocomplete_reset(tls_property_ac);
     autocomplete_reset(alias_ac);
@@ -1368,10 +1376,12 @@ cmd_ac_uninit(void)
     autocomplete_free(otr_log_ac);
     autocomplete_free(otr_policy_ac);
     autocomplete_free(otr_sendfile_ac);
+#ifdef HAVE_OMEMO
     autocomplete_free(omemo_ac);
     autocomplete_free(omemo_log_ac);
     autocomplete_free(omemo_policy_ac);
     autocomplete_free(omemo_sendfile_ac);
+#endif
     autocomplete_free(connect_property_ac);
     autocomplete_free(tls_property_ac);
     autocomplete_free(alias_ac);
