@@ -74,7 +74,9 @@ static char* _roster_autocomplete(ProfWin *window, const char *const input, gboo
 static char* _bookmark_autocomplete(ProfWin *window, const char *const input, gboolean previous);
 static char* _otr_autocomplete(ProfWin *window, const char *const input, gboolean previous);
 static char* _pgp_autocomplete(ProfWin *window, const char *const input, gboolean previous);
+#ifdef HAVE_OMEMO
 static char* _omemo_autocomplete(ProfWin *window, const char *const input, gboolean previous);
+#endif
 static char* _connect_autocomplete(ProfWin *window, const char *const input, gboolean previous);
 static char* _alias_autocomplete(ProfWin *window, const char *const input, gboolean previous);
 static char* _join_autocomplete(ProfWin *window, const char *const input, gboolean previous);
@@ -1646,7 +1648,9 @@ _cmd_ac_complete_params(ProfWin *window, const char *const input, gboolean previ
     g_hash_table_insert(ac_funcs, "/autoconnect",   _autoconnect_autocomplete);
     g_hash_table_insert(ac_funcs, "/otr",           _otr_autocomplete);
     g_hash_table_insert(ac_funcs, "/pgp",           _pgp_autocomplete);
+#ifdef HAVE_OMEMO
     g_hash_table_insert(ac_funcs, "/omemo",         _omemo_autocomplete);
+#endif
     g_hash_table_insert(ac_funcs, "/connect",       _connect_autocomplete);
     g_hash_table_insert(ac_funcs, "/alias",         _alias_autocomplete);
     g_hash_table_insert(ac_funcs, "/join",          _join_autocomplete);
@@ -2340,6 +2344,7 @@ _pgp_autocomplete(ProfWin *window, const char *const input, gboolean previous)
     return NULL;
 }
 
+#ifdef HAVE_OMEMO
 static char*
 _omemo_autocomplete(ProfWin *window, const char *const input, gboolean previous)
 {
@@ -2373,7 +2378,6 @@ _omemo_autocomplete(ProfWin *window, const char *const input, gboolean previous)
             return found;
         }
 
-#ifdef HAVE_OMEMO
         if (window->type == WIN_CHAT) {
             ProfChatWin *chatwin = (ProfChatWin*)window;
             assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
@@ -2400,7 +2404,6 @@ _omemo_autocomplete(ProfWin *window, const char *const input, gboolean previous)
                 }
             }
         }
-#endif
     }
 
     found = autocomplete_param_with_ac(input, "/omemo", omemo_ac, TRUE, previous);
@@ -2410,6 +2413,7 @@ _omemo_autocomplete(ProfWin *window, const char *const input, gboolean previous)
 
     return NULL;
 }
+#endif
 
 static char*
 _plugins_autocomplete(ProfWin *window, const char *const input, gboolean previous)
