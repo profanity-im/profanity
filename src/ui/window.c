@@ -519,6 +519,8 @@ win_free(ProfWin* window)
         free(mucwin->room_name);
         free(mucwin->enctext);
         free(mucwin->message_char);
+        free(mucwin->last_message);
+        free(mucwin->last_msg_id);
         break;
     }
     case WIN_CONFIG:
