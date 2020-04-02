@@ -73,7 +73,9 @@ static char* _who_autocomplete(ProfWin *window, const char *const input, gboolea
 static char* _roster_autocomplete(ProfWin *window, const char *const input, gboolean previous);
 static char* _bookmark_autocomplete(ProfWin *window, const char *const input, gboolean previous);
 static char* _otr_autocomplete(ProfWin *window, const char *const input, gboolean previous);
+#ifdef HAVE_LIBGPGME
 static char* _pgp_autocomplete(ProfWin *window, const char *const input, gboolean previous);
+#endif
 #ifdef HAVE_OMEMO
 static char* _omemo_autocomplete(ProfWin *window, const char *const input, gboolean previous);
 #endif
@@ -208,9 +210,11 @@ static Autocomplete time_format_ac;
 static Autocomplete resource_ac;
 static Autocomplete inpblock_ac;
 static Autocomplete receipts_ac;
+#ifdef HAVE_LIBGPGME
 static Autocomplete pgp_ac;
 static Autocomplete pgp_log_ac;
 static Autocomplete pgp_sendfile_ac;
+#endif
 static Autocomplete tls_ac;
 static Autocomplete titlebar_ac;
 static Autocomplete titlebar_show_ac;
@@ -277,7 +281,9 @@ cmd_ac_init(void)
     autocomplete_add(prefs_ac, "conn");
     autocomplete_add(prefs_ac, "presence");
     autocomplete_add(prefs_ac, "otr");
+#ifdef HAVE_LIBGPGME
     autocomplete_add(prefs_ac, "pgp");
+#endif
 #ifdef HAVE_OMEMO
     autocomplete_add(prefs_ac, "omemo");
 #endif
@@ -790,6 +796,7 @@ cmd_ac_init(void)
     autocomplete_add(receipts_ac, "send");
     autocomplete_add(receipts_ac, "request");
 
+#ifdef HAVE_LIBGPGME
     pgp_ac = autocomplete_new();
     autocomplete_add(pgp_ac, "keys");
     autocomplete_add(pgp_ac, "contacts");
@@ -809,6 +816,7 @@ cmd_ac_init(void)
     pgp_sendfile_ac = autocomplete_new();
     autocomplete_add(pgp_sendfile_ac, "on");
     autocomplete_add(pgp_sendfile_ac, "off");
+#endif
 
     tls_ac = autocomplete_new();
     autocomplete_add(tls_ac, "allow");
@@ -1257,9 +1265,11 @@ cmd_ac_reset(ProfWin *window)
     autocomplete_reset(resource_ac);
     autocomplete_reset(inpblock_ac);
     autocomplete_reset(receipts_ac);
+#ifdef HAVE_LIBGPGME
     autocomplete_reset(pgp_ac);
     autocomplete_reset(pgp_log_ac);
     autocomplete_reset(pgp_sendfile_ac);
+#endif
     autocomplete_reset(tls_ac);
     autocomplete_reset(titlebar_ac);
     autocomplete_reset(titlebar_show_ac);
@@ -1407,9 +1417,11 @@ cmd_ac_uninit(void)
     autocomplete_free(resource_ac);
     autocomplete_free(inpblock_ac);
     autocomplete_free(receipts_ac);
+#ifdef HAVE_LIBGPGME
     autocomplete_free(pgp_ac);
     autocomplete_free(pgp_log_ac);
     autocomplete_free(pgp_sendfile_ac);
+#endif
     autocomplete_free(tls_ac);
     autocomplete_free(titlebar_ac);
     autocomplete_free(titlebar_show_ac);
@@ -1657,7 +1669,9 @@ _cmd_ac_complete_params(ProfWin *window, const char *const input, gboolean previ
     g_hash_table_insert(ac_funcs, "/bookmark",      _bookmark_autocomplete);
     g_hash_table_insert(ac_funcs, "/autoconnect",   _autoconnect_autocomplete);
     g_hash_table_insert(ac_funcs, "/otr",           _otr_autocomplete);
+#ifdef HAVE_LIBGPGME
     g_hash_table_insert(ac_funcs, "/pgp",           _pgp_autocomplete);
+#endif
 #ifdef HAVE_OMEMO
     g_hash_table_insert(ac_funcs, "/omemo",         _omemo_autocomplete);
 #endif
@@ -2295,6 +2309,7 @@ _otr_autocomplete(ProfWin *window, const char *const input, gboolean previous)
     return NULL;
 }
 
+#ifdef HAVE_LIBGPGME
 static char*
 _pgp_autocomplete(ProfWin *window, const char *const input, gboolean previous)
 {
@@ -2319,7 +2334,6 @@ _pgp_autocomplete(ProfWin *window, const char *const input, gboolean previous)
         return found;
     }
 
-#ifdef HAVE_LIBGPGME
     gboolean result;
     gchar **args = parse_args(input, 2, 3, &result);
     if ((strncmp(input, "/pgp", 4) == 0) && (result == TRUE)) {
@@ -2337,7 +2351,6 @@ _pgp_autocomplete(ProfWin *window, const char *const input, gboolean previous)
         }
     }
     g_strfreev(args);
-#endif
 
     if (conn_status == JABBER_CONNECTED) {
         found = autocomplete_param_with_func(input, "/pgp setkey", roster_barejid_autocomplete, previous, NULL);
@@ -2353,6 +2366,7 @@ _pgp_autocomplete(ProfWin *window, const char *const input, gboolean previous)
 
     return NULL;
 }
+#endif
 
 #ifdef HAVE_OMEMO
 static char*
