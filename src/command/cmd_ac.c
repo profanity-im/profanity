@@ -3420,6 +3420,7 @@ _account_autocomplete(ProfWin *window, const char *const input, gboolean previou
                 return found;
             }
         }
+#ifdef HAVE_LIBOTR
         if ((num_args == 3 && space_at_end && (g_strcmp0(args[2], "otr") == 0))
                 || (num_args == 4 && (g_strcmp0(args[2], "otr") == 0) && !space_at_end))  {
             GString *beginning = g_string_new("/account");
@@ -3431,6 +3432,7 @@ _account_autocomplete(ProfWin *window, const char *const input, gboolean previou
                 return found;
             }
         }
+#endif
         if ((num_args == 3 && space_at_end && (g_strcmp0(args[2], "status") == 0))
                 || (num_args == 4 && (g_strcmp0(args[2], "status") == 0) && !space_at_end))  {
             GString *beginning = g_string_new("/account");
