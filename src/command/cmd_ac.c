@@ -72,7 +72,9 @@ static char* _account_autocomplete(ProfWin *window, const char *const input, gbo
 static char* _who_autocomplete(ProfWin *window, const char *const input, gboolean previous);
 static char* _roster_autocomplete(ProfWin *window, const char *const input, gboolean previous);
 static char* _bookmark_autocomplete(ProfWin *window, const char *const input, gboolean previous);
+#ifdef HAVE_LIBOTR
 static char* _otr_autocomplete(ProfWin *window, const char *const input, gboolean previous);
+#endif
 #ifdef HAVE_LIBGPGME
 static char* _pgp_autocomplete(ProfWin *window, const char *const input, gboolean previous);
 #endif
@@ -174,10 +176,12 @@ static Autocomplete roster_private_ac;
 static Autocomplete group_ac;
 static Autocomplete bookmark_ac;
 static Autocomplete bookmark_property_ac;
+#ifdef HAVE_LIBOTR
 static Autocomplete otr_ac;
 static Autocomplete otr_log_ac;
 static Autocomplete otr_policy_ac;
 static Autocomplete otr_sendfile_ac;
+#endif
 #ifdef HAVE_OMEMO
 static Autocomplete omemo_ac;
 static Autocomplete omemo_log_ac;
@@ -280,7 +284,9 @@ cmd_ac_init(void)
     autocomplete_add(prefs_ac, "log");
     autocomplete_add(prefs_ac, "conn");
     autocomplete_add(prefs_ac, "presence");
+#ifdef HAVE_LIBOTR
     autocomplete_add(prefs_ac, "otr");
+#endif
 #ifdef HAVE_LIBGPGME
     autocomplete_add(prefs_ac, "pgp");
 #endif
@@ -606,6 +612,7 @@ cmd_ac_init(void)
     autocomplete_add(bookmark_property_ac, "password");
     autocomplete_add(bookmark_property_ac, "autojoin");
 
+#ifdef HAVE_LIBOTR
     otr_ac = autocomplete_new();
     autocomplete_add(otr_ac, "gen");
     autocomplete_add(otr_ac, "start");
@@ -636,6 +643,7 @@ cmd_ac_init(void)
     otr_sendfile_ac = autocomplete_new();
     autocomplete_add(otr_sendfile_ac, "on");
     autocomplete_add(otr_sendfile_ac, "off");
+#endif
 
 #ifdef HAVE_OMEMO
     omemo_ac = autocomplete_new();
@@ -1229,10 +1237,12 @@ cmd_ac_reset(ProfWin *window)
     autocomplete_reset(wintitle_ac);
     autocomplete_reset(bookmark_ac);
     autocomplete_reset(bookmark_property_ac);
+#ifdef HAVE_LIBOTR
     autocomplete_reset(otr_ac);
     autocomplete_reset(otr_log_ac);
     autocomplete_reset(otr_policy_ac);
     autocomplete_reset(otr_sendfile_ac);
+#endif
 #ifdef HAVE_OMEMO
     autocomplete_reset(omemo_ac);
     autocomplete_reset(omemo_log_ac);
@@ -1382,10 +1392,12 @@ cmd_ac_uninit(void)
     autocomplete_free(group_ac);
     autocomplete_free(bookmark_ac);
     autocomplete_free(bookmark_property_ac);
+#ifdef HAVE_LIBOTR
     autocomplete_free(otr_ac);
     autocomplete_free(otr_log_ac);
     autocomplete_free(otr_policy_ac);
     autocomplete_free(otr_sendfile_ac);
+#endif
 #ifdef HAVE_OMEMO
     autocomplete_free(omemo_ac);
     autocomplete_free(omemo_log_ac);
@@ -1668,7 +1680,9 @@ _cmd_ac_complete_params(ProfWin *window, const char *const input, gboolean previ
     g_hash_table_insert(ac_funcs, "/roster",        _roster_autocomplete);
     g_hash_table_insert(ac_funcs, "/bookmark",      _bookmark_autocomplete);
     g_hash_table_insert(ac_funcs, "/autoconnect",   _autoconnect_autocomplete);
+#ifdef HAVE_LIBOTR
     g_hash_table_insert(ac_funcs, "/otr",           _otr_autocomplete);
+#endif
 #ifdef HAVE_LIBGPGME
     g_hash_table_insert(ac_funcs, "/pgp",           _pgp_autocomplete);
 #endif
@@ -2250,6 +2264,7 @@ _autoconnect_autocomplete(ProfWin *window, const char *const input, gboolean pre
     return NULL;
 }
 
+#ifdef HAVE_LIBOTR
 static char*
 _otr_autocomplete(ProfWin *window, const char *const input, gboolean previous)
 {
@@ -2308,6 +2323,7 @@ _otr_autocomplete(ProfWin *window, const char *const input, gboolean previous)
 
     return NULL;
 }
+#endif
 
 #ifdef HAVE_LIBGPGME
 static char*
