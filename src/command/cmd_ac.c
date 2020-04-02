@@ -2399,8 +2399,6 @@ _omemo_autocomplete(ProfWin *window, const char *const input, gboolean previous)
                     }
                 }
             }
-
-            return NULL;
         }
 #endif
     }
