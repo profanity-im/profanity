@@ -229,12 +229,28 @@ _add_to_db(ProfMessage *message, const char * const type, const Jid * const from
         return;
     }
 
+    char *enc;
+    switch (message->enc) {
+        case PROF_MSG_ENC_PGP:
+            enc = "pgp";
+            break;
+        case PROF_MSG_ENC_OTR:
+            enc = "otr";
+            break;
+        case PROF_MSG_ENC_OMEMO:
+            enc = "omemo";
+            break;
+        case PROF_MSG_ENC_NONE:
+        default:
+            enc = "none";
+    }
+
     char *err_msg;
     char *query;
 
     //gchar *date_fmt = g_date_time_format_iso8601(message->timestamp);
     gchar *date_fmt = g_date_time_format(message->timestamp, "%Y/%m/%d %H:%M:%S");
-    if (asprintf(&query, "INSERT INTO `ChatLogs` (`from_jid`, `from_resource`, `to_jid`, `to_resource`, `message`, `timestamp`, `stanza_id`, `replace_id`, `type`) VALUES ('%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s')",
+    if (asprintf(&query, "INSERT INTO `ChatLogs` (`from_jid`, `from_resource`, `to_jid`, `to_resource`, `message`, `timestamp`, `stanza_id`, `replace_id`, `type`, `encryption`) VALUES ('%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s')",
                 from_jid->barejid,
                 from_jid->resourcepart ? from_jid->resourcepart : "",
                 to_jid->barejid,
@@ -243,7 +259,8 @@ _add_to_db(ProfMessage *message, const char * const type, const Jid * const from
                 date_fmt,
                 message->id ? message->id : "",
                 message->replace_id ? message->replace_id : "",
-                type) == -1) {
+                type,
+                enc) == -1) {
         log_error("log_database_add(): could not allocate memory");
         return;
     }
