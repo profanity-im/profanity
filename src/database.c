@@ -45,7 +45,7 @@
 
 static sqlite3 *g_chatlog_database;
 
-static void _add_to_db(ProfMessage *message, const char * const type, const Jid * const from_jid, const char * const to_jid);
+static void _add_to_db(ProfMessage *message, const char * const type, const Jid * const from_jid, const Jid * const to_jid);
 static char* _get_db_filename(ProfAccount *account);
 
 static char*
@@ -162,7 +162,7 @@ _log_database_add_incoming(ProfMessage *message, const char * const type)
     const char *jid = connection_get_fulljid();
     Jid *myjid = jid_create(jid);
 
-    _add_to_db(message, type, message->jid, myjid->barejid);
+    _add_to_db(message, type, message->jid, myjid);
 
     jid_destroy(myjid);
 }
@@ -197,7 +197,7 @@ _log_database_add_outgoing(const char * const type, const char * const id, const
     const char *jid = connection_get_fulljid();
     Jid *myjid = jid_create(jid);
 
-    _add_to_db(msg, type, myjid, msg->jid->barejid);
+    _add_to_db(msg, type, myjid, msg->jid);
 
     jid_destroy(myjid);
     message_free(msg);
@@ -222,7 +222,7 @@ log_database_add_outgoing_muc_pm(const char * const id, const char * const barej
 }
 
 static void
-_add_to_db(ProfMessage *message, const char * const type, const Jid * const from_jid, const char * const to_jid)
+_add_to_db(ProfMessage *message, const char * const type, const Jid * const from_jid, const Jid * const to_jid)
 {
     if (!g_chatlog_database) {
         log_debug("log_database_add() called but db is not initialized");
@@ -234,11 +234,11 @@ _add_to_db(ProfMessage *message, const char * const type, const Jid * const from
 
     //gchar *date_fmt = g_date_time_format_iso8601(message->timestamp);
     gchar *date_fmt = g_date_time_format(message->timestamp, "%Y/%m/%d %H:%M:%S");
-    if (asprintf(&query, "INSERT INTO `ChatLogs` (`from_jid`, `from_resource`, `to_jid`, `message`, `timestamp`, `stanza_id`, `replace_id`, `type`) VALUES ('%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s')",
+    if (asprintf(&query, "INSERT INTO `ChatLogs` (`from_jid`, `from_resource`, `to_jid`, `to_resource`, `message`, `timestamp`, `stanza_id`, `replace_id`, `type`) VALUES ('%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s')",
                 from_jid->barejid,
-                from_jid->resourcepart,
-                //"test" /*message->jid->resourcepart*/,
-                to_jid,
+                from_jid->resourcepart ? from_jid->resourcepart : "",
+                to_jid->barejid,
+                to_jid->resourcepart ? to_jid->resourcepart : "",
                 message->plain,
                 date_fmt,
                 message->id ? message->id : "",
