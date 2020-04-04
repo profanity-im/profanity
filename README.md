@@ -13,9 +13,9 @@ See the [User Guide](https://profanity-im.github.io/userguide.html) for informat
 Links
 -----
 
-Homepage: https://profanity-im.github.io/
+Homepage: https://profanity-im.github.io/ - https://github.com/profanity-im/profanity-im.github.io
 
-Blog: https://github.com/profanity-im/blog
+Blog: https://profanity-im.github.io/blog/ - https://github.com/profanity-im/blog
 
 Mailing List: https://groups.google.com/forum/#!forum/profanitydev
 
