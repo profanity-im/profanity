@@ -15,6 +15,8 @@ Links
 
 Homepage: https://profanity-im.github.io/
 
+Blog: https://github.com/profanity-im/blog
+
 Mailing List: https://groups.google.com/forum/#!forum/profanitydev
 
 MUC: profanity@rooms.dismail.de
