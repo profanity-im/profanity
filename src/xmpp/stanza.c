@@ -2627,6 +2627,7 @@ stanza_attach_correction(xmpp_ctx_t *ctx, xmpp_stanza_t *stanza, const char *con
     xmpp_stanza_set_id(replace_stanza, replace_id);
     xmpp_stanza_set_ns(replace_stanza, STANZA_NS_LAST_MESSAGE_CORRECTION);
     xmpp_stanza_add_child(stanza, replace_stanza);
+    xmpp_stanza_release(replace_stanza);
 
     return stanza;
 }
