@@ -356,13 +356,13 @@ chat_log_otr_msg_in(ProfMessage *message)
         Jid *jidp = jid_create(jid);
         char *pref_otr_log = prefs_get_string(PREF_OTR_LOG);
         if (message->enc == PROF_MSG_ENC_NONE || (strcmp(pref_otr_log, "on") == 0)) {
-            if (message->mucuser) {
+            if (message->type == PROF_MSG_TYPE_MUCPM) {
                 _chat_log_chat(jidp->barejid, message->jid->barejid, message->plain, PROF_IN_LOG, message->timestamp, message->jid->resourcepart);
             } else {
                 _chat_log_chat(jidp->barejid, message->jid->barejid, message->plain, PROF_IN_LOG, message->timestamp, NULL);
             }
         } else if (strcmp(pref_otr_log, "redact") == 0) {
-            if (message->mucuser) {
+            if (message->type == PROF_MSG_TYPE_MUCPM) {
                 _chat_log_chat(jidp->barejid, message->jid->barejid, "[redacted]", PROF_IN_LOG, message->timestamp, message->jid->resourcepart);
             } else {
                 _chat_log_chat(jidp->barejid, message->jid->barejid, "[redacted]", PROF_IN_LOG, message->timestamp, NULL);
@@ -381,13 +381,13 @@ chat_log_pgp_msg_in(ProfMessage *message)
         Jid *jidp = jid_create(jid);
         char *pref_pgp_log = prefs_get_string(PREF_PGP_LOG);
         if (strcmp(pref_pgp_log, "on") == 0) {
-            if (message->mucuser) {
+            if (message->type == PROF_MSG_TYPE_MUCPM) {
                 _chat_log_chat(jidp->barejid, message->jid->barejid, message->plain, PROF_IN_LOG, message->timestamp, message->jid->resourcepart);
             } else {
                 _chat_log_chat(jidp->barejid, message->jid->barejid, message->plain, PROF_IN_LOG, message->timestamp, NULL);
             }
         } else if (strcmp(pref_pgp_log, "redact") == 0) {
-            if (message->mucuser) {
+            if (message->type == PROF_MSG_TYPE_MUCPM) {
                 _chat_log_chat(jidp->barejid, message->jid->barejid, "[redacted]", PROF_IN_LOG, message->timestamp, message->jid->resourcepart);
             } else {
                 _chat_log_chat(jidp->barejid, message->jid->barejid, "[redacted]", PROF_IN_LOG, message->timestamp, NULL);
@@ -406,13 +406,13 @@ chat_log_omemo_msg_in(ProfMessage *message)
         Jid *jidp = jid_create(jid);
         char *pref_omemo_log = prefs_get_string(PREF_OMEMO_LOG);
         if (strcmp(pref_omemo_log, "on") == 0) {
-            if (message->mucuser) {
+            if (message->type == PROF_MSG_TYPE_MUCPM) {
                 _chat_log_chat(jidp->barejid, message->jid->barejid, message->plain, PROF_IN_LOG, message->timestamp, message->jid->resourcepart);
             } else {
                 _chat_log_chat(jidp->barejid, message->jid->barejid, message->plain, PROF_IN_LOG, message->timestamp, NULL);
             }
         } else if (strcmp(pref_omemo_log, "redact") == 0) {
-            if (message->mucuser) {
+            if (message->type == PROF_MSG_TYPE_MUCPM) {
                 _chat_log_chat(jidp->barejid, message->jid->barejid, "[redacted]", PROF_IN_LOG, message->timestamp, message->jid->resourcepart);
             } else {
                 _chat_log_chat(jidp->barejid, message->jid->barejid, "[redacted]", PROF_IN_LOG, message->timestamp, message->jid->resourcepart);
@@ -430,7 +430,7 @@ chat_log_msg_in(ProfMessage *message)
         const char *jid = connection_get_fulljid();
         Jid *jidp = jid_create(jid);
 
-        if (message->mucuser) {
+        if (message->type == PROF_MSG_TYPE_MUCPM) {
             _chat_log_chat(jidp->barejid, message->jid->barejid, message->plain, PROF_IN_LOG, message->timestamp, message->jid->resourcepart);
         } else {
             _chat_log_chat(jidp->barejid, message->jid->barejid, message->plain, PROF_IN_LOG, message->timestamp, NULL);

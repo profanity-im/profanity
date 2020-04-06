@@ -126,7 +126,16 @@ typedef enum {
     PROF_MSG_ENC_OMEMO
 } prof_enc_t;
 
-// TODO: ProfMessage needs a 'type' field like we have in sql db. then we can know whether each message is a chat, muc, mucpm
+typedef enum {
+    PROF_MSG_TYPE_UNINITIALIZED,
+    // regular 1:1 chat
+    PROF_MSG_TYPE_CHAT,
+    // groupchats to whole group
+    PROF_MSG_TYPE_MUC,
+    // groupchat private message
+    PROF_MSG_TYPE_MUCPM
+} prof_msg_type_t;
+
 typedef struct prof_message_t {
    Jid *jid;
    char *id;
@@ -143,7 +152,7 @@ typedef struct prof_message_t {
    GDateTime *timestamp;
    prof_enc_t enc;
    gboolean trusted;
-   gboolean mucuser;
+   prof_msg_type_t type;
 } ProfMessage;
 
 void session_init(void);

@@ -445,7 +445,7 @@ sv_ev_outgoing_carbon(ProfMessage *message)
     chat_state_active(chatwin->state);
 
     if (message->plain) {
-        if (message->mucuser) {
+        if (message->type == PROF_MSG_TYPE_MUCPM) {
             // MUC PM, should have resource (nick) in filename
             chat_log_msg_out(message->jid->barejid, message->plain, message->jid->resourcepart);
         } else {
