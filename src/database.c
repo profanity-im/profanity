@@ -45,7 +45,7 @@
 
 static sqlite3 *g_chatlog_database;
 
-static void _add_to_db(ProfMessage *message, const char * const type, const Jid * const from_jid, const Jid * const to_jid);
+static void _add_to_db(ProfMessage *message, char *type, const Jid * const from_jid, const Jid * const to_jid);
 static char* _get_db_filename(ProfAccount *account);
 
 static char*
@@ -156,34 +156,19 @@ log_database_close(void)
     }
 }
 
-static void
-_log_database_add_incoming(ProfMessage *message, const char * const type)
+void
+log_database_add_incoming(ProfMessage *message)
 {
     const char *jid = connection_get_fulljid();
     Jid *myjid = jid_create(jid);
 
-    _add_to_db(message, type, message->jid, myjid);
+    _add_to_db(message, NULL, message->jid, myjid);
 
     jid_destroy(myjid);
 }
 
-void
-log_database_add_incoming_chat(ProfMessage *message) {
-    _log_database_add_incoming(message, "chat");
-}
-
-void
-log_database_add_incoming_muc(ProfMessage *message) {
-    _log_database_add_incoming(message, "muc");
-}
-
-void
-log_database_add_incoming_muc_pm(ProfMessage *message) {
-    _log_database_add_incoming(message, "mucpm");
-}
-
 static void
-_log_database_add_outgoing(const char * const type, const char * const id, const char * const barejid, const char * const message, const char *const replace_id, prof_enc_t enc)
+_log_database_add_outgoing(char *type, const char * const id, const char * const barejid, const char * const message, const char *const replace_id, prof_enc_t enc)
 {
     ProfMessage *msg = message_init();
 
@@ -219,67 +204,6 @@ void
 log_database_add_outgoing_muc_pm(const char * const id, const char * const barejid, const char * const message, const char *const replace_id, prof_enc_t enc)
 {
     _log_database_add_outgoing("mucpm", id, barejid, message, replace_id, enc);
-}
-
-static void
-_add_to_db(ProfMessage *message, const char * const type, const Jid * const from_jid, const Jid * const to_jid)
-{
-    if (!g_chatlog_database) {
-        log_debug("log_database_add() called but db is not initialized");
-        return;
-    }
-
-    char *enc;
-    switch (message->enc) {
-        case PROF_MSG_ENC_PGP:
-            enc = "pgp";
-            break;
-        case PROF_MSG_ENC_OTR:
-            enc = "otr";
-            break;
-        case PROF_MSG_ENC_OMEMO:
-            enc = "omemo";
-            break;
-        case PROF_MSG_ENC_NONE:
-        default:
-            enc = "none";
-    }
-
-    char *err_msg;
-    char *query;
-    gchar *date_fmt;
-
-    if (message->timestamp) {
-        date_fmt = g_date_time_format_iso8601(message->timestamp);
-    } else {
-        date_fmt = g_date_time_format_iso8601(g_date_time_new_now_local());
-    }
-
-    if (asprintf(&query, "INSERT INTO `ChatLogs` (`from_jid`, `from_resource`, `to_jid`, `to_resource`, `message`, `timestamp`, `stanza_id`, `replace_id`, `type`, `encryption`) VALUES ('%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s')",
-                from_jid->barejid,
-                from_jid->resourcepart ? from_jid->resourcepart : "",
-                to_jid->barejid,
-                to_jid->resourcepart ? to_jid->resourcepart : "",
-                message->plain,
-                date_fmt,
-                message->id ? message->id : "",
-                message->replace_id ? message->replace_id : "",
-                type,
-                enc) == -1) {
-        log_error("log_database_add(): SQL query. could not allocate memory");
-        return;
-    }
-    g_free(date_fmt);
-
-    if( SQLITE_OK != sqlite3_exec(g_chatlog_database, query, NULL, 0, &err_msg)) {
-        if (err_msg) {
-            log_error("SQLite error: %s", err_msg);
-            sqlite3_free(err_msg);
-        } else {
-            log_error("Unknown SQLite error");
-        }
-    }
-    free(query);
 }
 
 GSList*
@@ -318,4 +242,84 @@ log_database_get_previous_chat(const gchar *const contact_barejid)
     free(query);
 
     return history;
+}
+
+static const char* _get_message_type_str(prof_msg_type_t type) {
+    switch (type) {
+    case PROF_MSG_TYPE_CHAT:
+        return "chat";
+    case PROF_MSG_TYPE_MUC:
+        return "muc";
+    case PROF_MSG_TYPE_MUCPM:
+        return "mucpm";
+    case PROF_MSG_TYPE_UNINITIALIZED:
+        return NULL;
+    }
+    return NULL;
+}
+
+static const char* _get_message_enc_str(prof_enc_t enc) {
+    switch (enc) {
+    case PROF_MSG_ENC_PGP:
+        return "pgp";
+    case PROF_MSG_ENC_OTR:
+        return "otr";
+    case PROF_MSG_ENC_OMEMO:
+        return "omemo";
+    case PROF_MSG_ENC_NONE:
+        return "none";
+    }
+
+    return "none";
+}
+
+static void
+_add_to_db(ProfMessage *message, char *type, const Jid * const from_jid, const Jid * const to_jid)
+{
+    if (!g_chatlog_database) {
+        log_debug("log_database_add() called but db is not initialized");
+        return;
+    }
+
+    char *err_msg;
+    char *query;
+    gchar *date_fmt;
+
+    if (message->timestamp) {
+        date_fmt = g_date_time_format_iso8601(message->timestamp);
+    } else {
+        date_fmt = g_date_time_format_iso8601(g_date_time_new_now_local());
+    }
+
+    const char *enc = _get_message_enc_str(message->enc);
+
+    if (!type) {
+        type = (char*)_get_message_type_str(message->type);
+    }
+
+    if (asprintf(&query, "INSERT INTO `ChatLogs` (`from_jid`, `from_resource`, `to_jid`, `to_resource`, `message`, `timestamp`, `stanza_id`, `replace_id`, `type`, `encryption`) VALUES ('%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s')",
+                from_jid->barejid,
+                from_jid->resourcepart ? from_jid->resourcepart : "",
+                to_jid->barejid,
+                to_jid->resourcepart ? to_jid->resourcepart : "",
+                message->plain,
+                date_fmt,
+                message->id ? message->id : "",
+                message->replace_id ? message->replace_id : "",
+                type,
+                enc) == -1) {
+        log_error("log_database_add(): SQL query. could not allocate memory");
+        return;
+    }
+    g_free(date_fmt);
+
+    if( SQLITE_OK != sqlite3_exec(g_chatlog_database, query, NULL, 0, &err_msg)) {
+        if (err_msg) {
+            log_error("SQLite error: %s", err_msg);
+            sqlite3_free(err_msg);
+        } else {
+            log_error("Unknown SQLite error");
+        }
+    }
+    free(query);
 }
