@@ -172,6 +172,7 @@ rosterwin_roster(void)
             _rosterwin_private_chats(layout, orphaned_privchats);
         }
         prefs_free_string(privpref);
+        g_list_free(privchats);
         g_list_free(orphaned_privchats);
     }
 
