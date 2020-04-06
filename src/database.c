@@ -266,7 +266,7 @@ _add_to_db(ProfMessage *message, const char * const type, const Jid * const from
                 message->replace_id ? message->replace_id : "",
                 type,
                 enc) == -1) {
-        log_error("log_database_add(): could not allocate memory");
+        log_error("log_database_add(): SQL query. could not allocate memory");
         return;
     }
     g_free(date_fmt);
@@ -289,7 +289,7 @@ log_database_get_previous_chat(const gchar *const contact_barejid)
     char *query;
 
     if (asprintf(&query, "SELECT `message`, `timestamp`, `from_jid` from `ChatLogs` WHERE `from_jid` = '%s' OR `to_jid` = '%s' ORDER BY `id` ASC LIMIT 10", contact_barejid, contact_barejid) == -1) {
-        log_error("log_database_get_previous_chat(): could not allocate memory");
+        log_error("log_database_get_previous_chat(): SQL query. could not allocate memory");
         return NULL;
     }
 
