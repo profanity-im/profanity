@@ -1235,7 +1235,15 @@ win_print_history(ProfWin *window, const ProfMessage *const message, gboolean is
         }
         g_free(muc_history_color);
     } else {
-        display_name = roster_get_msg_display_name(message->jid->barejid, message->jid->resourcepart);
+        const char *jid = connection_get_fulljid();
+        Jid *jidp = jid_create(jid);
+
+        if (g_strcmp0(jidp->barejid, message->jid->barejid) == 0) {
+            display_name = strdup("me");
+        } else {
+            display_name = roster_get_msg_display_name(message->jid->barejid, message->jid->resourcepart);
+        }
+        jid_destroy(jidp);
     }
 
     buffer_append(window->layout->buffer, "-", 0, message->timestamp, flags, THEME_TEXT_HISTORY, display_name, NULL, message->plain, NULL, NULL);
