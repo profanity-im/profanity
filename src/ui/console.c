@@ -751,7 +751,7 @@ cons_show_disco_info(const char *jid, GSList *identities, GSList *features)
                 identity_str = g_string_append(identity_str, identity->category);
             }
             cons_show(identity_str->str);
-            g_string_free(identity_str, FALSE);
+            g_string_free(identity_str, TRUE);
             identities = g_slist_next(identities);
         }
 
