@@ -144,6 +144,7 @@ typedef struct prof_message_t {
    char *originid;
    /* <replace id> XEP-0308 LMC */
    char *replace_id;
+   /* for MAM we will need archive_id (also XEP-0359) (see database.c)
    /* The raw body from xmpp message, either plaintext or OTR encrypted text */
    char *body;
    /* The encrypted message as for PGP */
