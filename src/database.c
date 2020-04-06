@@ -315,6 +315,7 @@ log_database_get_previous_chat(const gchar *const contact_barejid)
         history = g_slist_append(history, msg);
 	}
 	sqlite3_finalize(stmt);
+    free(query);
 
     return history;
 }

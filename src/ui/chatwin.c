@@ -491,8 +491,7 @@ _chatwin_history(ProfChatWin *chatwin, const char *const contact_barejid)
         }
         chatwin->history_shown = TRUE;
 
-        //TODO: message_free
-        g_slist_free_full(history, free);
+        g_slist_free_full(history, (GDestroyNotify)message_free);
     }
 }
 
