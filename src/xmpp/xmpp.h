@@ -126,6 +126,7 @@ typedef enum {
     PROF_MSG_ENC_OMEMO
 } prof_enc_t;
 
+// TODO: ProfMessage needs a 'type' field like we have in sql db. then we can know whether each message is a chat, muc, mucpm
 typedef struct prof_message_t {
    Jid *jid;
    char *id;

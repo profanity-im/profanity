@@ -1218,15 +1218,33 @@ win_print_outgoing(ProfWin *window, const char *show_char, const char *const id,
 }
 
 void
-win_print_history(ProfWin *window, GDateTime *timestamp, const char *const message)
+win_print_history(ProfWin *window, const ProfMessage *const message, gboolean is_muc)
 {
-    g_date_time_ref(timestamp);
+    g_date_time_ref(message->timestamp);
 
-    buffer_append(window->layout->buffer, "-", 0, timestamp, 0, THEME_TEXT_HISTORY, "", NULL, message, NULL, NULL);
-    _win_print_internal(window, "-", 0, timestamp, 0, THEME_TEXT_HISTORY, "", message, NULL);
+    int flags = 0;
+
+    // TODO: ProfMessage needs a 'type' field like we have in sql db. then we can know whether each message is a chat, muc, mucpm
+    char *display_name;
+    if (is_muc) {
+        display_name = strdup(message->jid->resourcepart);
+
+        char *muc_history_color = prefs_get_string(PREF_HISTORY_COLOR_MUC);
+        if (g_strcmp0(muc_history_color, "unanimous") == 0) {
+            flags = NO_COLOUR_FROM;
+        }
+        g_free(muc_history_color);
+    } else {
+        display_name = roster_get_msg_display_name(message->jid->barejid, message->jid->resourcepart);
+    }
+
+    buffer_append(window->layout->buffer, "-", 0, message->timestamp, flags, THEME_TEXT_HISTORY, display_name, NULL, message->plain, NULL, NULL);
+    _win_print_internal(window, "-", 0, message->timestamp, flags, THEME_TEXT_HISTORY, display_name, message->plain, NULL);
+
+    free(display_name);
 
     inp_nonblocking(TRUE);
-    g_date_time_unref(timestamp);
+    g_date_time_unref(message->timestamp);
 }
 
 void
