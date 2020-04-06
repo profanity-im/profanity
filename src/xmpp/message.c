@@ -110,6 +110,7 @@ _message_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza, void *con
         _handle_error(stanza);
     }
 
+    // if muc
     if (g_strcmp0(type, STANZA_TYPE_GROUPCHAT) == 0) {
         _handle_groupchat(stanza);
     }
@@ -192,10 +193,10 @@ message_init(void)
     message->body = NULL;
     message->encrypted = NULL;
     message->plain = NULL;
-    message->enc = PROF_MSG_ENC_PLAIN;
+    message->enc = PROF_MSG_ENC_NONE;
     message->timestamp = NULL;
     message->trusted = true;
-    message->mucuser = false;
+    message->type = PROF_MSG_TYPE_UNINITIALIZED;
 
     return message;
 }
@@ -508,7 +509,7 @@ message_send_chat_omemo(const char *const jid, uint32_t sid, GList *keys,
 }
 #endif
 
-void
+char*
 message_send_private(const char *const fulljid, const char *const msg, const char *const oob_url)
 {
     xmpp_ctx_t * const ctx = connection_get_ctx();
@@ -517,14 +518,14 @@ message_send_private(const char *const fulljid, const char *const msg, const cha
     xmpp_stanza_t *message = xmpp_message_new(ctx, STANZA_TYPE_CHAT, fulljid, id);
     xmpp_message_set_body(message, msg);
 
-    free(id);
-
     if (oob_url) {
         stanza_attach_x_oob_url(ctx, message, oob_url);
     }
 
     _send_message_stanza(message);
     xmpp_stanza_release(message);
+
+    return id;
 }
 
 char*
@@ -831,6 +832,7 @@ _handle_groupchat(xmpp_stanza_t *const stanza)
 
     ProfMessage *message = message_init();
     message->jid = jid;
+    message->type = PROF_MSG_TYPE_MUC;
 
     if (id) {
         message->id = strdup(id);
@@ -977,7 +979,7 @@ _handle_muc_private_message(xmpp_stanza_t *const stanza)
 {
     // standard chat message, use jid without resource
     ProfMessage *message = message_init();
-    message->mucuser = TRUE;
+    message->type = PROF_MSG_TYPE_MUCPM;
 
     const gchar *from = xmpp_stanza_get_from(stanza);
     message->jid = jid_create(from);
@@ -1009,6 +1011,8 @@ _handle_muc_private_message(xmpp_stanza_t *const stanza)
     if (message->timestamp) {
         sv_ev_delayed_private_message(message);
     } else {
+        message->timestamp = g_date_time_new_now_local();
+
         sv_ev_incoming_private_message(message);
     }
 
@@ -1060,11 +1064,12 @@ _handle_carbons(xmpp_stanza_t *const stanza)
     }
 
     ProfMessage *message = message_init();
+    message->type = PROF_MSG_TYPE_CHAT;
 
     // check whether message was a MUC PM
     xmpp_stanza_t *mucuser = xmpp_stanza_get_child_by_ns(message_stanza, STANZA_NS_MUC_USER);
     if (mucuser) {
-        message->mucuser = TRUE;
+        message->type = PROF_MSG_TYPE_MUCPM;
     }
 
     // id
@@ -1179,6 +1184,7 @@ _handle_chat(xmpp_stanza_t *const stanza)
     // standard chat message, use jid without resource
     ProfMessage *message = message_init();
     message->jid = jid;
+    message->type = PROF_MSG_TYPE_CHAT;
 
     // message stanza id
     const char *id = xmpp_stanza_get_id(stanza);
@@ -1195,10 +1201,14 @@ _handle_chat(xmpp_stanza_t *const stanza)
     }
 
     if (mucuser) {
-        message->mucuser = TRUE;
+        message->type = PROF_MSG_TYPE_MUCPM;
     }
 
     message->timestamp = stanza_get_delay(stanza);
+    if (!message->timestamp) {
+        message->timestamp = g_date_time_new_now_local();
+    }
+
     if (body) {
         message->body = xmpp_stanza_get_text(body);
     }

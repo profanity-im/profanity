@@ -42,6 +42,7 @@
 
 #include "profanity.h"
 #include "log.h"
+#include "database.h"
 #include "config/preferences.h"
 #include "config/tlscerts.h"
 #include "config/account.h"
@@ -90,6 +91,8 @@ sv_ev_login_account_success(char *account_name, gboolean secured)
 #ifdef HAVE_OMEMO
     omemo_on_connect(account);
 #endif
+
+    log_database_init(account);
 
     avatar_pep_subscribe();
 
@@ -298,6 +301,7 @@ static void _log_muc(ProfMessage *message)
     } else {
         groupchat_log_msg_in(message->jid->barejid, message->jid->resourcepart, message->plain);
     }
+    log_database_add_incoming(message);
 }
 
 void
@@ -397,6 +401,7 @@ sv_ev_incoming_private_message(ProfMessage *message)
     }
 
     _clean_incoming_message(message);
+    log_database_add_incoming(message);
     privwin_incoming_msg(privatewin, message);
     chat_log_msg_in(message);
 
@@ -440,7 +445,7 @@ sv_ev_outgoing_carbon(ProfMessage *message)
     chat_state_active(chatwin->state);
 
     if (message->plain) {
-        if (message->mucuser) {
+        if (message->type == PROF_MSG_TYPE_MUCPM) {
             // MUC PM, should have resource (nick) in filename
             chat_log_msg_out(message->jid->barejid, message->plain, message->jid->resourcepart);
         } else {
@@ -460,12 +465,12 @@ sv_ev_outgoing_carbon(ProfMessage *message)
                 log_error("Couldn't decrypt GPG message and body was empty");
                 return;
             }
-            message->enc = PROF_MSG_ENC_PLAIN;
+            message->enc = PROF_MSG_ENC_NONE;
             message->plain = strdup(message->body);
             chatwin_outgoing_carbon(chatwin, message);
         }
     } else {
-        message->enc = PROF_MSG_ENC_PLAIN;
+        message->enc = PROF_MSG_ENC_NONE;
         message->plain = strdup(message->body);
         chatwin_outgoing_carbon(chatwin, message);
     }
@@ -478,7 +483,7 @@ sv_ev_outgoing_carbon(ProfMessage *message)
     if (message->enc == PROF_MSG_ENC_OMEMO) {
         chatwin_outgoing_carbon(chatwin, message);
     } else {
-        message->enc = PROF_MSG_ENC_PLAIN;
+        message->enc = PROF_MSG_ENC_NONE;
         message->plain = strdup(message->body);
         chatwin_outgoing_carbon(chatwin, message);
     }
@@ -500,12 +505,12 @@ sv_ev_outgoing_carbon(ProfMessage *message)
                 log_error("Couldn't decrypt GPG message and body was empty");
                 return;
             }
-            message->enc = PROF_MSG_ENC_PLAIN;
+            message->enc = PROF_MSG_ENC_NONE;
             message->plain = strdup(message->body);
             chatwin_outgoing_carbon(chatwin, message);
         }
     } else {
-        message->enc = PROF_MSG_ENC_PLAIN;
+        message->enc = PROF_MSG_ENC_NONE;
         message->plain = strdup(message->body);
         chatwin_outgoing_carbon(chatwin, message);
     }
@@ -516,7 +521,7 @@ sv_ev_outgoing_carbon(ProfMessage *message)
 #ifndef HAVE_LIBGPGME
 #ifndef HAVE_OMEMO
     if (message->body) {
-        message->enc = PROF_MSG_ENC_PLAIN;
+        message->enc = PROF_MSG_ENC_NONE;
         message->plain = strdup(message->body);
         chatwin_outgoing_carbon(chatwin, message);
     }
@@ -532,6 +537,7 @@ _sv_ev_incoming_pgp(ProfChatWin *chatwin, gboolean new_win, ProfMessage *message
     if (message->plain) {
         message->enc = PROF_MSG_ENC_PGP;
         _clean_incoming_message(message);
+        log_database_add_incoming(message);
         chatwin_incoming_msg(chatwin, message, new_win);
         if (logit) {
             chat_log_pgp_msg_in(message);
@@ -544,9 +550,10 @@ _sv_ev_incoming_pgp(ProfChatWin *chatwin, gboolean new_win, ProfMessage *message
             log_error("Couldn't decrypt GPG message and body was empty");
             return;
         }
-        message->enc = PROF_MSG_ENC_PLAIN;
+        message->enc = PROF_MSG_ENC_NONE;
         message->plain = strdup(message->body);
         _clean_incoming_message(message);
+        log_database_add_incoming(message);
         chatwin_incoming_msg(chatwin, message, new_win);
         chat_log_msg_in(message);
         chatwin->pgp_recv = FALSE;
@@ -565,10 +572,11 @@ _sv_ev_incoming_otr(ProfChatWin *chatwin, gboolean new_win, ProfMessage *message
             message->enc = PROF_MSG_ENC_OTR;
             chatwin->pgp_send = FALSE;
         } else {
-            message->enc = PROF_MSG_ENC_PLAIN;
+            message->enc = PROF_MSG_ENC_NONE;
         }
 
         _clean_incoming_message(message);
+        log_database_add_incoming(message);
         chatwin_incoming_msg(chatwin, message, new_win);
 
         chat_log_otr_msg_in(message);
@@ -584,6 +592,7 @@ static void
 _sv_ev_incoming_omemo(ProfChatWin *chatwin, gboolean new_win, ProfMessage *message, gboolean logit)
 {
     _clean_incoming_message(message);
+    log_database_add_incoming(message);
     chatwin_incoming_msg(chatwin, message, new_win);
     if (logit) {
         chat_log_omemo_msg_in(message);
@@ -596,9 +605,10 @@ static void
 _sv_ev_incoming_plain(ProfChatWin *chatwin, gboolean new_win, ProfMessage *message, gboolean logit)
 {
     if (message->body) {
-        message->enc = PROF_MSG_ENC_PLAIN;
+        message->enc = PROF_MSG_ENC_NONE;
         message->plain = strdup(message->body);
         _clean_incoming_message(message);
+        log_database_add_incoming(message);
         chatwin_incoming_msg(chatwin, message, new_win);
         if (logit) {
             chat_log_msg_in(message);

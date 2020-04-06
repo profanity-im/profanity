@@ -373,22 +373,7 @@ mucwin_history(ProfMucWin *mucwin, const ProfMessage *const message)
     char *muc_history_color = prefs_get_string(PREF_HISTORY_COLOR_MUC);
 
     if (g_strcmp0(muc_history_color, "unanimous") == 0) {
-        GString *line = g_string_new("");
-
-        if (strncmp(message->plain, "/me ", 4) == 0) {
-            g_string_append(line, "*");
-            g_string_append(line, nick);
-            g_string_append(line, " ");
-            g_string_append(line, message->plain + 4);
-        } else {
-            g_string_append(line, nick);
-            g_string_append(line, ": ");
-            g_string_append(line, message->plain);
-        }
-
-        win_print_history(window, message->timestamp, line->str);
-
-        g_string_free(line, TRUE);
+        win_print_history(window, message, TRUE);
     } else {
         char *mynick = muc_nick(mucwin->roomjid);
         GSList *mentions = get_mentions(prefs_get_boolean(PREF_NOTIFY_MENTION_WHOLE_WORD), prefs_get_boolean(PREF_NOTIFY_MENTION_CASE_SENSITIVE), message->plain, mynick);

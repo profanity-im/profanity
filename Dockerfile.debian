@@ -25,7 +25,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
   libxss-dev \
   make \
   pkg-config \
-  python-dev
+  python-dev \
+  libsqlite3-dev
 
 RUN mkdir -p /usr/src/{stabber,libmesode,profanity}
 WORKDIR /usr/src

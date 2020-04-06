@@ -39,6 +39,7 @@
 #include "xmpp/roster_list.h"
 #include "xmpp/muc.h"
 #include "xmpp/xmpp.h"
+#include "database.h"
 
 #ifdef HAVE_LIBGPGME
 #include "pgp/gpg.h"
@@ -67,6 +68,7 @@ ev_disconnect_cleanup(void)
 #ifdef HAVE_OMEMO
     omemo_on_disconnect();
 #endif
+    log_database_close();
 }
 
 gboolean

@@ -355,14 +355,14 @@ chat_log_otr_msg_in(ProfMessage *message)
         const char *jid = connection_get_fulljid();
         Jid *jidp = jid_create(jid);
         char *pref_otr_log = prefs_get_string(PREF_OTR_LOG);
-        if (message->enc == PROF_MSG_ENC_PLAIN || (strcmp(pref_otr_log, "on") == 0)) {
-            if (message->mucuser) {
+        if (message->enc == PROF_MSG_ENC_NONE || (strcmp(pref_otr_log, "on") == 0)) {
+            if (message->type == PROF_MSG_TYPE_MUCPM) {
                 _chat_log_chat(jidp->barejid, message->jid->barejid, message->plain, PROF_IN_LOG, message->timestamp, message->jid->resourcepart);
             } else {
                 _chat_log_chat(jidp->barejid, message->jid->barejid, message->plain, PROF_IN_LOG, message->timestamp, NULL);
             }
         } else if (strcmp(pref_otr_log, "redact") == 0) {
-            if (message->mucuser) {
+            if (message->type == PROF_MSG_TYPE_MUCPM) {
                 _chat_log_chat(jidp->barejid, message->jid->barejid, "[redacted]", PROF_IN_LOG, message->timestamp, message->jid->resourcepart);
             } else {
                 _chat_log_chat(jidp->barejid, message->jid->barejid, "[redacted]", PROF_IN_LOG, message->timestamp, NULL);
@@ -381,13 +381,13 @@ chat_log_pgp_msg_in(ProfMessage *message)
         Jid *jidp = jid_create(jid);
         char *pref_pgp_log = prefs_get_string(PREF_PGP_LOG);
         if (strcmp(pref_pgp_log, "on") == 0) {
-            if (message->mucuser) {
+            if (message->type == PROF_MSG_TYPE_MUCPM) {
                 _chat_log_chat(jidp->barejid, message->jid->barejid, message->plain, PROF_IN_LOG, message->timestamp, message->jid->resourcepart);
             } else {
                 _chat_log_chat(jidp->barejid, message->jid->barejid, message->plain, PROF_IN_LOG, message->timestamp, NULL);
             }
         } else if (strcmp(pref_pgp_log, "redact") == 0) {
-            if (message->mucuser) {
+            if (message->type == PROF_MSG_TYPE_MUCPM) {
                 _chat_log_chat(jidp->barejid, message->jid->barejid, "[redacted]", PROF_IN_LOG, message->timestamp, message->jid->resourcepart);
             } else {
                 _chat_log_chat(jidp->barejid, message->jid->barejid, "[redacted]", PROF_IN_LOG, message->timestamp, NULL);
@@ -406,13 +406,13 @@ chat_log_omemo_msg_in(ProfMessage *message)
         Jid *jidp = jid_create(jid);
         char *pref_omemo_log = prefs_get_string(PREF_OMEMO_LOG);
         if (strcmp(pref_omemo_log, "on") == 0) {
-            if (message->mucuser) {
+            if (message->type == PROF_MSG_TYPE_MUCPM) {
                 _chat_log_chat(jidp->barejid, message->jid->barejid, message->plain, PROF_IN_LOG, message->timestamp, message->jid->resourcepart);
             } else {
                 _chat_log_chat(jidp->barejid, message->jid->barejid, message->plain, PROF_IN_LOG, message->timestamp, NULL);
             }
         } else if (strcmp(pref_omemo_log, "redact") == 0) {
-            if (message->mucuser) {
+            if (message->type == PROF_MSG_TYPE_MUCPM) {
                 _chat_log_chat(jidp->barejid, message->jid->barejid, "[redacted]", PROF_IN_LOG, message->timestamp, message->jid->resourcepart);
             } else {
                 _chat_log_chat(jidp->barejid, message->jid->barejid, "[redacted]", PROF_IN_LOG, message->timestamp, message->jid->resourcepart);
@@ -430,7 +430,7 @@ chat_log_msg_in(ProfMessage *message)
         const char *jid = connection_get_fulljid();
         Jid *jidp = jid_create(jid);
 
-        if (message->mucuser) {
+        if (message->type == PROF_MSG_TYPE_MUCPM) {
             _chat_log_chat(jidp->barejid, message->jid->barejid, message->plain, PROF_IN_LOG, message->timestamp, message->jid->resourcepart);
         } else {
             _chat_log_chat(jidp->barejid, message->jid->barejid, message->plain, PROF_IN_LOG, message->timestamp, NULL);
@@ -617,54 +617,6 @@ _groupchat_log_chat(const gchar *const login, const gchar *const room, const gch
 
     g_free(date_fmt);
     g_date_time_unref(dt);
-}
-
-GSList*
-chat_log_get_previous(const gchar *const login, const gchar *const recipient)
-{
-    GSList *history = NULL;
-    GDateTime *now = g_date_time_new_now_local();
-    GDateTime *log_date = g_date_time_new(tz,
-        g_date_time_get_year(session_started),
-        g_date_time_get_month(session_started),
-        g_date_time_get_day_of_month(session_started),
-        g_date_time_get_hour(session_started),
-        g_date_time_get_minute(session_started),
-        g_date_time_get_second(session_started));
-
-    // get data from all logs from the day the session was started to today
-    while (g_date_time_compare(log_date, now) != 1) {
-        char *filename = _get_log_filename(recipient, login, log_date, FALSE);
-
-        FILE *logp = fopen(filename, "r");
-        if (logp) {
-            GString *header = g_string_new("");
-            g_string_append_printf(header, "%d/%d/%d:",
-                g_date_time_get_day_of_month(log_date),
-                g_date_time_get_month(log_date),
-                g_date_time_get_year(log_date));
-            history = g_slist_append(history, header->str);
-            g_string_free(header, FALSE);
-
-            char *line;
-            while ((line = file_getline(logp)) != NULL) {
-                history = g_slist_append(history, line);
-            }
-
-            fclose(logp);
-        }
-
-        free(filename);
-
-        GDateTime *next = g_date_time_add_days(log_date, 1);
-        g_date_time_unref(log_date);
-        log_date = next;
-    }
-
-    g_date_time_unref(log_date);
-    g_date_time_unref(now);
-
-    return history;
 }
 
 void

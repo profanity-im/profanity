@@ -1,9 +1,8 @@
 /*
- * files.h
+ * database.h
  * vim: expandtab:ts=4:sts=4:sw=4
  *
- * Copyright (C) 2012 - 2019 James Booth <boothj5@gmail.com>
- * Copyright (C) 2018 - 2019 Michael Vetter <jubalh@idoru.org>
+ * Copyright (C) 2020 Michael Vetter <jubalh@idoru.org>
  *
  * This file is part of Profanity.
  *
@@ -34,35 +33,20 @@
  *
  */
 
-#ifndef CONFIG_FILES_H
-#define CONFIG_FILES_H
+#ifndef DATABASE_H
+#define DATABASE_H
 
 #include <glib.h>
+#include "config/account.h"
+#include "xmpp/xmpp.h"
 
-#define FILE_PROFRC "profrc"
-#define FILE_ACCOUNTS "accounts"
-#define FILE_TLSCERTS "tlscerts"
-#define FILE_PLUGIN_SETTINGS "plugin_settings"
-#define FILE_PLUGIN_THEMES "plugin_themes"
-#define FILE_CAPSCACHE "capscache"
-#define FILE_PROFANITY_IDENTIFIER "profident"
+gboolean log_database_init(ProfAccount *account);
+void log_database_add_incoming(ProfMessage *message);
+void log_database_add_outgoing_chat(const char * const id, const char * const barejid, const char * const message, const char *const replace_id, prof_enc_t enc);
+void log_database_add_outgoing_muc(const char * const id, const char * const barejid, const char * const message, const char *const replace_id, prof_enc_t enc);
+void log_database_add_outgoing_muc_pm(const char * const id, const char * const barejid, const char * const message, const char *const replace_id, prof_enc_t enc);
+GSList* log_database_get_previous_chat(const gchar *const contact_barejid);
+void log_database_close(void);
 
-#define DIR_THEMES "themes"
-#define DIR_ICONS "icons"
-#define DIR_SCRIPTS "scripts"
-#define DIR_CHATLOGS "chatlogs"
-#define DIR_OTR "otr"
-#define DIR_PGP "pgp"
-#define DIR_OMEMO "omemo"
-#define DIR_PLUGINS "plugins"
-#define DIR_DATABASE "database"
+#endif // DATABASE_H
 
-void files_create_directories(void);
-
-char* files_get_config_path(char *config_base);
-char* files_get_data_path(char *data_base);
-
-char* files_get_log_file(char *log_file);
-char* files_get_inputrc_file(void);
-
-#endif

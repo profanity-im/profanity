@@ -3,6 +3,7 @@
  * vim: expandtab:ts=4:sts=4:sw=4
  *
  * Copyright (C) 2012 - 2019 James Booth <boothj5@gmail.com>
+ * Copyright (C) 2020 Michael Vetter <jubalh@idoru.org>
  *
  * This file is part of Profanity.
  *
