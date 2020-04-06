@@ -212,7 +212,7 @@ log_database_get_previous_chat(const gchar *const contact_barejid)
 	sqlite3_stmt *stmt = NULL;
     char *query;
 
-    if (asprintf(&query, "SELECT `message`, `timestamp`, `from_jid` from `ChatLogs` WHERE `from_jid` = '%s' OR `to_jid` = '%s' ORDER BY `id` ASC LIMIT 10", contact_barejid, contact_barejid) == -1) {
+    if (asprintf(&query, "SELECT `message`, `timestamp`, `from_jid` from `ChatLogs` WHERE `from_jid` = '%s' OR `to_jid` = '%s' ORDER BY `timestamp` ASC LIMIT 10", contact_barejid, contact_barejid) == -1) {
         log_error("log_database_get_previous_chat(): SQL query. could not allocate memory");
         return NULL;
     }
