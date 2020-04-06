@@ -47,6 +47,7 @@ void log_database_add_incoming_muc_pm(ProfMessage *message);
 void log_database_add_outgoing_chat(const char * const id, const char * const barejid, const char * const message, const char *const replace_id, prof_enc_t enc);
 void log_database_add_outgoing_muc(const char * const id, const char * const barejid, const char * const message, const char *const replace_id, prof_enc_t enc);
 void log_database_add_outgoing_muc_pm(const char * const id, const char * const barejid, const char * const message, const char *const replace_id, prof_enc_t enc);
+GSList* log_database_get_previous_chat(const gchar *const login, const gchar *const recipient);
 void log_database_close(void);
 
 #endif // DATABASE_H

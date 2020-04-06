@@ -44,6 +44,7 @@
 #include "window_list.h"
 #include "xmpp/roster_list.h"
 #include "log.h"
+#include "database.h"
 #include "config/preferences.h"
 #include "ui/ui.h"
 #include "ui/window.h"
@@ -481,33 +482,21 @@ _chatwin_history(ProfChatWin *chatwin, const char *const contact)
 {
     if (!chatwin->history_shown) {
         Jid *jid = jid_create(connection_get_fulljid());
-        GSList *history = chat_log_get_previous(jid->barejid, contact);
+        //GSList *history = chat_log_get_previous(jid->barejid, contact);
+        // TODO: jid not needed
+        GSList *history = log_database_get_previous_chat(jid->barejid, contact);
         jid_destroy(jid);
         GSList *curr = history;
-        int idd = 0;
-        int imo = 0;
-        int iyy = 0;
 
         while (curr) {
-            char *line = curr->data;
-            // entry, containing the actual entries with date followed by text
-            if (line[2] == ':') {
-                char hh[3]; memcpy(hh, &line[0], 2); hh[2] = '\0'; int ihh = atoi(hh);
-                char mm[3]; memcpy(mm, &line[3], 2); mm[2] = '\0'; int imm = atoi(mm);
-                char ss[3]; memcpy(ss, &line[6], 2); ss[2] = '\0'; int iss = atoi(ss);
-                GDateTime *timestamp = g_date_time_new_local(iyy, imo, idd, ihh, imm, iss);
-                win_print_history((ProfWin*)chatwin, timestamp, curr->data+11);
-                g_date_time_unref(timestamp);
-            // header, containing the date from filename "21/10/2019:"
-            } else {
-                char dd[3]; memcpy(dd, &line[0], 2); dd[2] = '\0'; idd = atoi(dd);
-                char mm[3]; memcpy(mm, &line[3], 2); mm[2] = '\0'; imo = atoi(mm);
-                char yy[5]; memcpy(yy, &line[6], 4); yy[4] = '\0'; iyy = atoi(yy);
-            }
+            ProfMessage *msg = curr->data;
+            // TODO: sender is lost right now
+            win_print_history((ProfWin*)chatwin, msg->timestamp, msg->plain);
             curr = g_slist_next(curr);
         }
         chatwin->history_shown = TRUE;
 
+        //TODO: message_free
         g_slist_free_full(history, free);
     }
 }

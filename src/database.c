@@ -247,9 +247,14 @@ _add_to_db(ProfMessage *message, const char * const type, const Jid * const from
 
     char *err_msg;
     char *query;
+    gchar *date_fmt;
 
-    //gchar *date_fmt = g_date_time_format_iso8601(message->timestamp);
-    gchar *date_fmt = g_date_time_format(message->timestamp, "%Y/%m/%d %H:%M:%S");
+    if (message->timestamp) {
+        date_fmt = g_date_time_format_iso8601(message->timestamp);
+    } else {
+        date_fmt = g_date_time_format_iso8601(g_date_time_new_now_local());
+    }
+
     if (asprintf(&query, "INSERT INTO `ChatLogs` (`from_jid`, `from_resource`, `to_jid`, `to_resource`, `message`, `timestamp`, `stanza_id`, `replace_id`, `type`, `encryption`) VALUES ('%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s')",
                 from_jid->barejid,
                 from_jid->resourcepart ? from_jid->resourcepart : "",
@@ -275,4 +280,41 @@ _add_to_db(ProfMessage *message, const char * const type, const Jid * const from
         }
     }
     free(query);
+}
+
+GSList*
+log_database_get_previous_chat(const gchar *const login, const gchar *const recipient)
+{
+	sqlite3_stmt *stmt = NULL;
+    char *query;
+
+    if (asprintf(&query, "SELECT `message`, `timestamp`, `from_jid` from `ChatLogs` WHERE `from_jid` = '%s' OR `to_jid` = '%s' ORDER BY `id` ASC LIMIT 10", recipient, recipient) == -1) {
+        log_error("log_database_get_previous_chat(): could not allocate memory");
+        return NULL;
+    }
+
+	int rc = sqlite3_prepare_v2(g_chatlog_database, query, -1, &stmt, NULL);
+	if( rc!=SQLITE_OK ) {
+        log_error("log_database_get_previous_chat(): unknown SQLite error");
+        return NULL;
+    }
+
+    GSList *history = NULL;
+
+	while( sqlite3_step(stmt) == SQLITE_ROW ) {
+		char *message = (char*)sqlite3_column_text(stmt, 0);
+		char *date = (char*)sqlite3_column_text(stmt, 1);
+		char *from = (char*)sqlite3_column_text(stmt, 2);
+
+        ProfMessage *msg = message_init();
+        msg->jid = jid_create(from);
+        msg->plain = strdup(message);
+        msg->timestamp = g_date_time_new_from_iso8601(date, NULL);
+        // TODO: later we can get more fields like 'enc'. then we can display the history like regular chats with all info the user enabled.
+
+        history = g_slist_append(history, msg);
+	}
+	sqlite3_finalize(stmt);
+
+    return history;
 }
