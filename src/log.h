@@ -82,7 +82,6 @@ void chat_log_pgp_msg_in(ProfMessage *message);
 void chat_log_omemo_msg_in(ProfMessage *message);
 
 void chat_log_close(void);
-GSList* chat_log_get_previous(const gchar *const login, const gchar *const recipient);
 
 void groupchat_log_init(void);
 

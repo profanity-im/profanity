@@ -619,54 +619,6 @@ _groupchat_log_chat(const gchar *const login, const gchar *const room, const gch
     g_date_time_unref(dt);
 }
 
-GSList*
-chat_log_get_previous(const gchar *const login, const gchar *const recipient)
-{
-    GSList *history = NULL;
-    GDateTime *now = g_date_time_new_now_local();
-    GDateTime *log_date = g_date_time_new(tz,
-        g_date_time_get_year(session_started),
-        g_date_time_get_month(session_started),
-        g_date_time_get_day_of_month(session_started),
-        g_date_time_get_hour(session_started),
-        g_date_time_get_minute(session_started),
-        g_date_time_get_second(session_started));
-
-    // get data from all logs from the day the session was started to today
-    while (g_date_time_compare(log_date, now) != 1) {
-        char *filename = _get_log_filename(recipient, login, log_date, FALSE);
-
-        FILE *logp = fopen(filename, "r");
-        if (logp) {
-            GString *header = g_string_new("");
-            g_string_append_printf(header, "%d/%d/%d:",
-                g_date_time_get_day_of_month(log_date),
-                g_date_time_get_month(log_date),
-                g_date_time_get_year(log_date));
-            history = g_slist_append(history, header->str);
-            g_string_free(header, FALSE);
-
-            char *line;
-            while ((line = file_getline(logp)) != NULL) {
-                history = g_slist_append(history, line);
-            }
-
-            fclose(logp);
-        }
-
-        free(filename);
-
-        GDateTime *next = g_date_time_add_days(log_date, 1);
-        g_date_time_unref(log_date);
-        log_date = next;
-    }
-
-    g_date_time_unref(log_date);
-    g_date_time_unref(now);
-
-    return history;
-}
-
 void
 chat_log_close(void)
 {

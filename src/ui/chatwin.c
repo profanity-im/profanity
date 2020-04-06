@@ -57,7 +57,7 @@
 #include "omemo/omemo.h"
 #endif
 
-static void _chatwin_history(ProfChatWin *chatwin, const char *const contact);
+static void _chatwin_history(ProfChatWin *chatwin, const char *const contact_barejid);
 static void _chatwin_set_last_message(ProfChatWin *chatwin, const char *const id, const char *const message);
 
 ProfChatWin*
@@ -478,14 +478,10 @@ chatwin_unset_outgoing_char(ProfChatWin *chatwin)
 }
 
 static void
-_chatwin_history(ProfChatWin *chatwin, const char *const contact)
+_chatwin_history(ProfChatWin *chatwin, const char *const contact_barejid)
 {
     if (!chatwin->history_shown) {
-        Jid *jid = jid_create(connection_get_fulljid());
-        //GSList *history = chat_log_get_previous(jid->barejid, contact);
-        // TODO: jid not needed
-        GSList *history = log_database_get_previous_chat(jid->barejid, contact);
-        jid_destroy(jid);
+        GSList *history = log_database_get_previous_chat(contact_barejid);
         GSList *curr = history;
 
         while (curr) {
