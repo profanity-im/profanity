@@ -289,9 +289,15 @@ _add_to_db(ProfMessage *message, char *type, const Jid * const from_jid, const J
     gchar *date_fmt;
 
     if (message->timestamp) {
-        date_fmt = g_date_time_format_iso8601(message->timestamp);
+        // g_date_time_format_iso8601() is only availble from glib 2.62 on.
+        // To still support Debian buster lets use g_date_time_format() for now.
+        //date_fmt = g_date_time_format_iso8601(message->timestamp);
+        date_fmt = g_date_time_format(message->timestamp,"%FT%T%:::z");
     } else {
-        date_fmt = g_date_time_format_iso8601(g_date_time_new_now_local());
+        // g_date_time_format_iso8601() is only availble from glib 2.62 on.
+        // To still support Debian buster lets use g_date_time_format() for now.
+        //date_fmt = g_date_time_format_iso8601(g_date_time_new_now_local());
+        date_fmt = g_date_time_format(g_date_time_new_now_local(), "%FT%T%:::z" );
     }
 
     const char *enc = _get_message_enc_str(message->enc);
