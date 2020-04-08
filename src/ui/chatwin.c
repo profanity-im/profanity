@@ -57,7 +57,7 @@
 #include "omemo/omemo.h"
 #endif
 
-static void _chatwin_history(ProfChatWin *chatwin, const char *const contact_barejid);
+/*static void _chatwin_history(ProfChatWin *chatwin, const char *const contact_barejid);*/
 static void _chatwin_set_last_message(ProfChatWin *chatwin, const char *const id, const char *const message);
 
 ProfChatWin*
@@ -67,7 +67,7 @@ chatwin_new(const char *const barejid)
     ProfChatWin *chatwin = (ProfChatWin *)window;
 
     if (prefs_get_boolean(PREF_CHLOG) && prefs_get_boolean(PREF_HISTORY)) {
-        _chatwin_history(chatwin, barejid);
+        //_chatwin_history(chatwin, barejid);
     }
 
     // if the contact is offline, show a message
@@ -87,6 +87,7 @@ chatwin_new(const char *const barejid)
     }
 #endif
 
+    iq_mam_request(chatwin);
     return chatwin;
 }
 
@@ -278,7 +279,7 @@ chatwin_incoming_msg(ProfChatWin *chatwin, ProfMessage *message, gboolean win_cr
         chatwin->unread++;
 
         if (prefs_get_boolean(PREF_CHLOG) && prefs_get_boolean(PREF_HISTORY)) {
-            _chatwin_history(chatwin, chatwin->barejid);
+//            _chatwin_history(chatwin, chatwin->barejid);
         }
 
         // show users status first, when receiving message via delayed delivery
@@ -477,6 +478,7 @@ chatwin_unset_outgoing_char(ProfChatWin *chatwin)
     }
 }
 
+/*
 static void
 _chatwin_history(ProfChatWin *chatwin, const char *const contact_barejid)
 {
@@ -494,6 +496,7 @@ _chatwin_history(ProfChatWin *chatwin, const char *const contact_barejid)
         g_slist_free_full(history, (GDestroyNotify)message_free);
     }
 }
+*/
 
 static void
 _chatwin_set_last_message(ProfChatWin *chatwin, const char *const id, const char *const message)
