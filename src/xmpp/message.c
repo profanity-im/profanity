@@ -99,12 +99,19 @@ _message_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza, void *con
     size_t text_size;
     xmpp_stanza_to_text(stanza, &text, &text_size);
     gboolean cont = plugins_on_message_stanza_receive(text);
-    xmpp_free(connection_get_ctx(), text);
     if (!cont) {
+        xmpp_free(connection_get_ctx(), text);
         return 1;
     }
 
     const char *type = xmpp_stanza_get_type(stanza);
+
+    if (type == NULL) {
+        log_info("Received <message> without 'type': %s", text);
+        xmpp_free(connection_get_ctx(), text);
+        return 1;
+    }
+    xmpp_free(connection_get_ctx(), text);
 
     if (g_strcmp0(type, STANZA_TYPE_ERROR) == 0) {
         _handle_error(stanza);
