@@ -50,6 +50,7 @@ static sqlite3 *g_chatlog_database;
 
 static void _add_to_db(ProfMessage *message, char *type, const Jid * const from_jid, const Jid * const to_jid);
 static char* _get_db_filename(ProfAccount *account);
+static prof_msg_type_t _get_message_type_type(const char *const type);
 
 static char*
 _get_db_filename(ProfAccount *account)
@@ -215,7 +216,7 @@ log_database_get_previous_chat(const gchar *const contact_barejid)
 	sqlite3_stmt *stmt = NULL;
     char *query;
 
-    if (asprintf(&query, "SELECT * FROM (SELECT `message`, `timestamp`, `from_jid` from `ChatLogs` WHERE `from_jid` = '%s' OR `to_jid` = '%s' ORDER BY `timestamp` DESC LIMIT 10) ORDER BY `timestamp` ASC;", contact_barejid, contact_barejid) == -1) {
+    if (asprintf(&query, "SELECT * FROM (SELECT `message`, `timestamp`, `from_jid`, `type` from `ChatLogs` WHERE `from_jid` = '%s' OR `to_jid` = '%s' ORDER BY `timestamp` DESC LIMIT 10) ORDER BY `timestamp` ASC;", contact_barejid, contact_barejid) == -1) {
         log_error("log_database_get_previous_chat(): SQL query. could not allocate memory");
         return NULL;
     }
@@ -232,11 +233,13 @@ log_database_get_previous_chat(const gchar *const contact_barejid)
 		char *message = (char*)sqlite3_column_text(stmt, 0);
 		char *date = (char*)sqlite3_column_text(stmt, 1);
 		char *from = (char*)sqlite3_column_text(stmt, 2);
+		char *type = (char*)sqlite3_column_text(stmt, 3);
 
         ProfMessage *msg = message_init();
         msg->jid = jid_create(from);
         msg->plain = strdup(message);
         msg->timestamp = g_date_time_new_from_iso8601(date, NULL);
+        msg->type = _get_message_type_type(type);
         // TODO: later we can get more fields like 'enc'. then we can display the history like regular chats with all info the user enabled.
 
         history = g_slist_append(history, msg);
@@ -259,6 +262,18 @@ static const char* _get_message_type_str(prof_msg_type_t type) {
         return NULL;
     }
     return NULL;
+}
+
+static prof_msg_type_t _get_message_type_type(const char *const type) {
+    if (g_strcmp0(type, "chat") == 0) {
+        return PROF_MSG_TYPE_CHAT;
+    } else if (g_strcmp0(type, "muc") == 0) {
+        return PROF_MSG_TYPE_MUC;
+    } else if (g_strcmp0(type, "mucpm") == 0) {
+        return PROF_MSG_TYPE_MUCPM;
+    } else {
+        return PROF_MSG_TYPE_UNINITIALIZED;
+    }
 }
 
 static const char* _get_message_enc_str(prof_enc_t enc) {

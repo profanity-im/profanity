@@ -486,7 +486,7 @@ _chatwin_history(ProfChatWin *chatwin, const char *const contact_barejid)
 
         while (curr) {
             ProfMessage *msg = curr->data;
-            win_print_history((ProfWin*)chatwin, msg, FALSE);
+            win_print_history((ProfWin*)chatwin, msg);
             curr = g_slist_next(curr);
         }
         chatwin->history_shown = TRUE;

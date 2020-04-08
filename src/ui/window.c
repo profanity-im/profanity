@@ -1218,15 +1218,14 @@ win_print_outgoing(ProfWin *window, const char *show_char, const char *const id,
 }
 
 void
-win_print_history(ProfWin *window, const ProfMessage *const message, gboolean is_muc)
+win_print_history(ProfWin *window, const ProfMessage *const message)
 {
     g_date_time_ref(message->timestamp);
 
     int flags = 0;
 
-    // TODO: ProfMessage needs a 'type' field like we have in sql db. then we can know whether each message is a chat, muc, mucpm
     char *display_name;
-    if (is_muc) {
+    if (message->type == PROF_MSG_TYPE_MUC) {
         display_name = strdup(message->jid->resourcepart);
 
         char *muc_history_color = prefs_get_string(PREF_HISTORY_COLOR_MUC);
