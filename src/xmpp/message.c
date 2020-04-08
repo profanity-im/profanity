@@ -85,6 +85,7 @@ static void _handle_conference(xmpp_stanza_t *const stanza);
 static void _handle_captcha(xmpp_stanza_t *const stanza);
 static void _handle_receipt_received(xmpp_stanza_t *const stanza);
 static void _handle_chat(xmpp_stanza_t *const stanza);
+static gboolean _handle_mam(xmpp_stanza_t *const stanza);
 
 static void _send_message_stanza(xmpp_stanza_t *const stanza);
 
@@ -107,10 +108,16 @@ _message_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza, void *con
     const char *type = xmpp_stanza_get_type(stanza);
 
     if (type == NULL) {
+        if (_handle_mam(stanza)) {
+            xmpp_free(connection_get_ctx(), text);
+            return 1;
+        }
+
         log_info("Received <message> without 'type': %s", text);
         xmpp_free(connection_get_ctx(), text);
         return 1;
     }
+
     xmpp_free(connection_get_ctx(), text);
 
     if (g_strcmp0(type, STANZA_TYPE_ERROR) == 0) {
@@ -1264,6 +1271,26 @@ _handle_chat(xmpp_stanza_t *const stanza)
     }
 
     message_free(message);
+}
+
+static gboolean
+_handle_mam(xmpp_stanza_t *const stanza)
+{
+    xmpp_stanza_t *result = stanza_get_child_by_name_and_ns(stanza, "result", STANZA_NS_MAM2);
+    if (!result) {
+        return FALSE;
+    }
+
+    xmpp_stanza_t *forwarded = xmpp_stanza_get_child_by_ns(result, STANZA_NS_FORWARD);
+    if (!forwarded) {
+        log_warning("MAM received with no forwarded element");
+        return FALSE;
+    }
+
+    xmpp_stanza_t *message_stanza = xmpp_stanza_get_child_by_ns(forwarded, "jabber:client");
+    _handle_chat(message_stanza);
+
+    return TRUE;
 }
 
 static void
