@@ -1179,6 +1179,9 @@ _handle_chat(xmpp_stanza_t *const stanza)
     }
 
     const gchar *from = xmpp_stanza_get_from(stanza);
+    if (!from) {
+        return;
+    }
     Jid *jid = jid_create(from);
 
     // private message from chat room use full jid (room/nick)
