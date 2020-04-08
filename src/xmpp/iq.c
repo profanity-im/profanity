@@ -2499,3 +2499,22 @@ _iq_free_affiliation_list(ProfAffiliationList *affiliation_list)
         free(affiliation_list);
     }
 }
+
+void
+iq_mam_request(ProfChatWin *win)
+{
+   //TODDO: check for mam feature
+   //if (connection_supports(XMPP_FEATURE_PING) == FALSE) {
+
+    xmpp_ctx_t * const ctx = connection_get_ctx();
+    char *id = connection_create_stanza_id();
+    xmpp_stanza_t *iq = stanza_create_mam_iq(ctx, win->barejid, "2020-01-06T00:00:00Z");
+
+//    iq_id_handler_add(id, _http_upload_response_id_handler, NULL, upload);
+    free(id);
+
+    iq_send_stanza(iq);
+    xmpp_stanza_release(iq);
+
+    return;
+}
