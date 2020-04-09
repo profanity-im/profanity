@@ -619,6 +619,7 @@ _rosterwin_resources(ProfLayoutSplit *layout, PContact contact, int current_inde
 
             wattron(layout->subwin, theme_attrs(presence_colour));
             win_sub_print(layout->subwin, unreadmsg->str, FALSE, wrap, current_indent);
+            g_string_free(unreadmsg, TRUE);
             wattroff(layout->subwin, theme_attrs(presence_colour));
         }
         prefs_free_string(unreadpos);
@@ -635,6 +636,7 @@ _rosterwin_resources(ProfLayoutSplit *layout, PContact contact, int current_inde
 
             wattron(layout->subwin, theme_attrs(presence_colour));
             win_sub_print(layout->subwin, unreadmsg->str, FALSE, wrap, current_indent);
+            g_string_free(unreadmsg, TRUE);
             wattroff(layout->subwin, theme_attrs(presence_colour));
         }
         prefs_free_string(unreadpos);
