@@ -1784,13 +1784,13 @@ stanza_create_caps_from_query_element(xmpp_stanza_t *query)
                 formField = field->data;
                 if (formField->values) {
                     if (strcmp(formField->var, "software") == 0) {
-                        software = formField->values->data;
+                        software = strdup(formField->values->data);
                     } else if (strcmp(formField->var, "software_version") == 0) {
-                        software_version = formField->values->data;
+                        software_version = strdup(formField->values->data);
                     } else if (strcmp(formField->var, "os") == 0) {
-                        os = formField->values->data;
+                        os = strdup(formField->values->data);
                     } else if (strcmp(formField->var, "os_version") == 0) {
-                        os_version = formField->values->data;
+                        os_version = strdup(formField->values->data);
                     }
                 }
                 field = g_slist_next(field);
@@ -1872,6 +1872,10 @@ stanza_create_caps_from_query_element(xmpp_stanza_t *query)
 
     EntityCapabilities *result = caps_create(category, type, name, software, software_version, os, os_version, features);
     g_slist_free_full(features, free);
+    free(software);
+    free(software_version);
+    free(os);
+    free(os_version);
 
     return result;
 }
