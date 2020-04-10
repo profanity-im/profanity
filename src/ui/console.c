@@ -1515,6 +1515,7 @@ cons_roster_setting(void)
     } else {
         cons_show("Roster unread (/roster)             : OFF");
     }
+    prefs_free_string(unread);
 
     if (prefs_get_boolean(PREF_ROSTER_ROOMS))
         cons_show("Roster rooms (/roster)              : show");
@@ -1529,6 +1530,7 @@ cons_roster_setting(void)
     } else {
         cons_show("Roster private (/roster)            : OFF");
     }
+    prefs_free_string(priv);
 
     char *rooms_pos = prefs_get_string(PREF_ROSTER_ROOMS_POS);
     cons_show("Roster rooms position (/roster)     : %s", rooms_pos);
@@ -1554,6 +1556,7 @@ cons_roster_setting(void)
     } else {
         cons_show("Roster rooms unread (/roster)       : OFF");
     }
+    prefs_free_string(roomsunread);
 
     int size = prefs_get_roster_size();
     cons_show("Roster size (/roster)               : %d", size);
