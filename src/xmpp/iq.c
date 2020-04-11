@@ -2503,8 +2503,11 @@ _iq_free_affiliation_list(ProfAffiliationList *affiliation_list)
 void
 iq_mam_request(ProfChatWin *win)
 {
-   //TODDO: check for mam feature
-   //if (connection_supports(XMPP_FEATURE_PING) == FALSE) {
+   if (connection_supports(XMPP_FEATURE_MAM2) == FALSE) {
+        log_warning("Server doesn't advertise %s feature.", XMPP_FEATURE_PING);
+        cons_show_error("Server doesn't support MAM.");
+        return;
+   }
 
     xmpp_ctx_t * const ctx = connection_get_ctx();
     char *id = connection_create_stanza_id();

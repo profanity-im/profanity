@@ -69,6 +69,7 @@
 #define XMPP_FEATURE_PUBSUB_PUBLISH_OPTIONS "http://jabber.org/protocol/pubsub#publish-options"
 #define XMPP_FEATURE_USER_AVATAR_METADATA_NOTIFY "urn:xmpp:avatar:metadata+notify"
 #define XMPP_FEATURE_LAST_MESSAGE_CORRECTION "urn:xmpp:message-correct:0"
+#define XMPP_FEATURE_MAM2 "urn:xmpp:mam:2"
 
 typedef enum {
     JABBER_CONNECTING,
