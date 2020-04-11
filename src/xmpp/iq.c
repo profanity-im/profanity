@@ -2508,7 +2508,13 @@ iq_mam_request(ProfChatWin *win)
 
     xmpp_ctx_t * const ctx = connection_get_ctx();
     char *id = connection_create_stanza_id();
-    xmpp_stanza_t *iq = stanza_create_mam_iq(ctx, win->barejid, "2020-01-06T00:00:00Z");
+
+    GDateTime *timestamp = g_date_time_new_now_local();
+    timestamp = g_date_time_add_days(timestamp, -1);
+    gchar *datestr = g_date_time_format(timestamp,"%FT%T%:::z");
+    xmpp_stanza_t *iq = stanza_create_mam_iq(ctx, win->barejid, datestr);
+    g_free(datestr);
+    g_date_time_unref(timestamp);
 
 //    iq_id_handler_add(id, _http_upload_response_id_handler, NULL, upload);
     free(id);
