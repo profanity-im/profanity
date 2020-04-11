@@ -84,7 +84,7 @@ static void _handle_muc_private_message(xmpp_stanza_t *const stanza);
 static void _handle_conference(xmpp_stanza_t *const stanza);
 static void _handle_captcha(xmpp_stanza_t *const stanza);
 static void _handle_receipt_received(xmpp_stanza_t *const stanza);
-static void _handle_chat(xmpp_stanza_t *const stanza);
+static void _handle_chat(xmpp_stanza_t *const stanza, gboolean is_mam);
 static gboolean _handle_mam(xmpp_stanza_t *const stanza);
 
 static void _send_message_stanza(xmpp_stanza_t *const stanza);
@@ -166,7 +166,7 @@ _message_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza, void *con
         }
     }
 
-    _handle_chat(stanza);
+    _handle_chat(stanza, FALSE);
 
     return 1;
 }
@@ -1161,7 +1161,7 @@ out:
 }
 
 static void
-_handle_chat(xmpp_stanza_t *const stanza)
+_handle_chat(xmpp_stanza_t *const stanza, gboolean is_mam)
 {
     // ignore if type not chat or absent
     const char *type = xmpp_stanza_get_type(stanza);
@@ -1206,10 +1206,15 @@ _handle_chat(xmpp_stanza_t *const stanza)
 
     // standard chat message, use jid without resource
     ProfMessage *message = message_init();
-    // TODO: safe to_jid too. also need to have the same check like in carbons. in case this is MAM.
-    // or have a is_mam and handle later. 
-    message->from_jid = jid;
     message->type = PROF_MSG_TYPE_CHAT;
+    message->from_jid = jid;
+
+    const gchar *to_text = xmpp_stanza_get_to(stanza);
+    if (to_text) {
+        message->to_jid = jid_create(to_text);
+    }
+
+    message->is_mam = is_mam;
 
     // message stanza id
     const char *id = xmpp_stanza_get_id(stanza);
@@ -1296,7 +1301,7 @@ _handle_mam(xmpp_stanza_t *const stanza)
     }
 
     xmpp_stanza_t *message_stanza = xmpp_stanza_get_child_by_ns(forwarded, "jabber:client");
-    _handle_chat(message_stanza);
+    _handle_chat(message_stanza, TRUE);
 
     return TRUE;
 }

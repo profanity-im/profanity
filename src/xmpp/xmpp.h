@@ -155,6 +155,7 @@ typedef struct prof_message_t {
    GDateTime *timestamp;
    prof_enc_t enc;
    gboolean trusted;
+   gboolean is_mam;
    prof_msg_type_t type;
 } ProfMessage;
 

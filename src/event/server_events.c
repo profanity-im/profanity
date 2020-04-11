@@ -622,16 +622,30 @@ void
 sv_ev_incoming_message(ProfMessage *message)
 {
     gboolean new_win = FALSE;
-    ProfChatWin *chatwin = wins_get_chat(message->from_jid->barejid);
+    ProfChatWin *chatwin;
+    char *looking_for_jid = message->from_jid->barejid;
+
+    if (message->is_mam) {
+        Jid *my_jid = jid_create(connection_get_fulljid());
+        if (g_strcmp0(my_jid->barejid, message->from_jid->barejid) == 0) {
+            looking_for_jid = message->to_jid->barejid;
+        }
+        jid_destroy(my_jid);
+    }
+
+    chatwin = wins_get_chat(looking_for_jid);
+
     if (!chatwin) {
-        ProfWin *window = wins_new_chat(message->from_jid->barejid);
+        ProfWin *window = wins_new_chat(looking_for_jid);
         chatwin = (ProfChatWin*)window;
         new_win = TRUE;
 
 #ifdef HAVE_OMEMO
-        if (omemo_automatic_start(message->from_jid->barejid)) {
-            omemo_start_session(message->from_jid->barejid);
-            chatwin->is_omemo = TRUE;
+        if (!message->is_mam) {
+            if (omemo_automatic_start(message->from_jid->barejid)) {
+                omemo_start_session(message->from_jid->barejid);
+                chatwin->is_omemo = TRUE;
+            }
         }
 #endif
     }
