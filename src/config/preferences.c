@@ -1799,6 +1799,7 @@ _get_group(preference_t pref)
         case PREF_REVEAL_OS:
         case PREF_TLS_CERTPATH:
         case PREF_CORRECTION_ALLOW:
+        case PREF_MAM:
             return PREF_GROUP_CONNECTION;
         case PREF_OTR_LOG:
         case PREF_OTR_POLICY:
@@ -2070,6 +2071,8 @@ _get_key(preference_t pref)
             return "avatar.cmd";
         case PREF_SLASH_GUARD:
             return "slashguard";
+        case PREF_MAM:
+            return "mam";
         default:
             return NULL;
     }

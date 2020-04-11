@@ -57,7 +57,7 @@
 #include "omemo/omemo.h"
 #endif
 
-/*static void _chatwin_history(ProfChatWin *chatwin, const char *const contact_barejid);*/
+static void _chatwin_history(ProfChatWin *chatwin, const char *const contact_barejid);
 static void _chatwin_set_last_message(ProfChatWin *chatwin, const char *const id, const char *const message);
 
 ProfChatWin*
@@ -66,8 +66,8 @@ chatwin_new(const char *const barejid)
     ProfWin *window = wins_new_chat(barejid);
     ProfChatWin *chatwin = (ProfChatWin *)window;
 
-    if (prefs_get_boolean(PREF_CHLOG) && prefs_get_boolean(PREF_HISTORY)) {
-        //_chatwin_history(chatwin, barejid);
+    if (!prefs_get_boolean(PREF_MAM) && prefs_get_boolean(PREF_CHLOG) && prefs_get_boolean(PREF_HISTORY)) {
+        _chatwin_history(chatwin, barejid);
     }
 
     // if the contact is offline, show a message
@@ -87,7 +87,9 @@ chatwin_new(const char *const barejid)
     }
 #endif
 
-    iq_mam_request(chatwin);
+    if (prefs_get_boolean(PREF_MAM)) {
+        iq_mam_request(chatwin);
+    }
     return chatwin;
 }
 
@@ -285,8 +287,13 @@ chatwin_incoming_msg(ProfChatWin *chatwin, ProfMessage *message, gboolean win_cr
 
         chatwin->unread++;
 
-        if (prefs_get_boolean(PREF_CHLOG) && prefs_get_boolean(PREF_HISTORY)) {
-//            _chatwin_history(chatwin, chatwin->barejid);
+        //TODO: so far we don't ask for MAM when incoming message occurs.
+        //Need to figure out:
+        //1) only send IQ once
+        //2) sort incoming messages on timestamp
+        //for now if experimental MAM is enabled we dont show no history from sql either
+        if (!prefs_get_boolean(PREF_MAM) && prefs_get_boolean(PREF_CHLOG) && prefs_get_boolean(PREF_HISTORY)) {
+            _chatwin_history(chatwin, chatwin->barejid);
         }
 
         // show users status first, when receiving message via delayed delivery
@@ -485,7 +492,6 @@ chatwin_unset_outgoing_char(ProfChatWin *chatwin)
     }
 }
 
-/*
 static void
 _chatwin_history(ProfChatWin *chatwin, const char *const contact_barejid)
 {
@@ -503,7 +509,6 @@ _chatwin_history(ProfChatWin *chatwin, const char *const contact_barejid)
         g_slist_free_full(history, (GDestroyNotify)message_free);
     }
 }
-*/
 
 static void
 _chatwin_set_last_message(ProfChatWin *chatwin, const char *const id, const char *const message)

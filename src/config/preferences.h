@@ -170,6 +170,7 @@ typedef enum {
     PREF_HISTORY_COLOR_MUC,
     PREF_AVATAR_CMD,
     PREF_SLASH_GUARD,
+    PREF_MAM,
 } preference_t;
 
 typedef struct prof_alias_t {
