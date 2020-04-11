@@ -166,7 +166,7 @@ log_database_add_incoming(ProfMessage *message)
     const char *jid = connection_get_fulljid();
     Jid *myjid = jid_create(jid);
 
-    _add_to_db(message, NULL, message->jid, myjid);
+    _add_to_db(message, NULL, message->from_jid, myjid);
 
     jid_destroy(myjid);
 }
@@ -177,7 +177,7 @@ _log_database_add_outgoing(char *type, const char * const id, const char * const
     ProfMessage *msg = message_init();
 
     msg->id = id ? strdup(id) : NULL;
-    msg->jid = jid_create(barejid);
+    msg->from_jid = jid_create(barejid);
     msg->plain = message ? strdup(message) : NULL;
     msg->replace_id = replace_id ? strdup(replace_id) : NULL;
     msg->timestamp = g_date_time_new_now_local(); //TODO: get from outside. best to have whole ProfMessage from outside
@@ -186,7 +186,7 @@ _log_database_add_outgoing(char *type, const char * const id, const char * const
     const char *jid = connection_get_fulljid();
     Jid *myjid = jid_create(jid);
 
-    _add_to_db(msg, type, myjid, msg->jid);
+    _add_to_db(msg, type, myjid, msg->from_jid); // TODO: myjid now in profmessage
 
     jid_destroy(myjid);
     message_free(msg);
@@ -234,13 +234,14 @@ log_database_get_previous_chat(const gchar *const contact_barejid)
     GSList *history = NULL;
 
 	while( sqlite3_step(stmt) == SQLITE_ROW ) {
+        // TODO: also save to jid. since now part of profmessage
 		char *message = (char*)sqlite3_column_text(stmt, 0);
 		char *date = (char*)sqlite3_column_text(stmt, 1);
 		char *from = (char*)sqlite3_column_text(stmt, 2);
 		char *type = (char*)sqlite3_column_text(stmt, 3);
 
         ProfMessage *msg = message_init();
-        msg->jid = jid_create(from);
+        msg->from_jid = jid_create(from);
         msg->plain = strdup(message);
         msg->timestamp = g_date_time_new_from_iso8601(date, NULL);
         msg->type = _get_message_type_type(type);

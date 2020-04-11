@@ -475,7 +475,7 @@ void
 api_incoming_message(const char *const barejid, const char *const resource, const char *const plain)
 {
     ProfMessage *message = message_init();
-    message->jid = jid_create_from_bare_and_resource(barejid, resource);
+    message->from_jid = jid_create_from_bare_and_resource(barejid, resource);
     message->plain = strdup(plain);
 
     sv_ev_incoming_message(message);

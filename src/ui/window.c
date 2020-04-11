@@ -1150,16 +1150,16 @@ win_print_incoming(ProfWin *window, const char *const display_name_from, ProfMes
             }
 
             if (prefs_get_boolean(PREF_CORRECTION_ALLOW) && message->replace_id) {
-                _win_correct(window, message->plain, message->id, message->replace_id, message->jid->barejid);
+                _win_correct(window, message->plain, message->id, message->replace_id, message->from_jid->barejid);
             } else {
-                _win_printf(window, enc_char, 0, message->timestamp, flags, THEME_TEXT_THEM, display_name_from, message->jid->barejid, message->id, "%s", message->plain);
+                _win_printf(window, enc_char, 0, message->timestamp, flags, THEME_TEXT_THEM, display_name_from, message->from_jid->barejid, message->id, "%s", message->plain);
             }
 
             free(enc_char);
             break;
         }
         case WIN_PRIVATE:
-            _win_printf(window, "-", 0, message->timestamp, flags, THEME_TEXT_THEM, display_name_from, message->jid->barejid, message->id, "%s", message->plain);
+            _win_printf(window, "-", 0, message->timestamp, flags, THEME_TEXT_THEM, display_name_from, message->from_jid->barejid, message->id, "%s", message->plain);
             break;
         default:
             assert(FALSE);
@@ -1177,9 +1177,9 @@ void
 win_println_incoming_muc_msg(ProfWin *window, char *show_char, int flags, const ProfMessage *const message)
 {
     if (prefs_get_boolean(PREF_CORRECTION_ALLOW) && message->replace_id) {
-        _win_correct(window, message->plain, message->id, message->replace_id, message->jid->fulljid);
+        _win_correct(window, message->plain, message->id, message->replace_id, message->from_jid->fulljid);
     } else {
-        _win_printf(window, show_char, 0, message->timestamp, flags | NO_ME, THEME_TEXT_THEM, message->jid->resourcepart, message->jid->fulljid, message->id, "%s", message->plain);
+        _win_printf(window, show_char, 0, message->timestamp, flags | NO_ME, THEME_TEXT_THEM, message->from_jid->resourcepart, message->from_jid->fulljid, message->id, "%s", message->plain);
     }
 
     inp_nonblocking(TRUE);
@@ -1226,7 +1226,7 @@ win_print_history(ProfWin *window, const ProfMessage *const message)
 
     char *display_name;
     if (message->type == PROF_MSG_TYPE_MUC) {
-        display_name = strdup(message->jid->resourcepart);
+        display_name = strdup(message->from_jid->resourcepart);
 
         char *muc_history_color = prefs_get_string(PREF_HISTORY_COLOR_MUC);
         if (g_strcmp0(muc_history_color, "unanimous") == 0) {
@@ -1237,10 +1237,10 @@ win_print_history(ProfWin *window, const ProfMessage *const message)
         const char *jid = connection_get_fulljid();
         Jid *jidp = jid_create(jid);
 
-        if (g_strcmp0(jidp->barejid, message->jid->barejid) == 0) {
+        if (g_strcmp0(jidp->barejid, message->from_jid->barejid) == 0) {
             display_name = strdup("me");
         } else {
-            display_name = roster_get_msg_display_name(message->jid->barejid, message->jid->resourcepart);
+            display_name = roster_get_msg_display_name(message->from_jid->barejid, message->from_jid->resourcepart);
         }
         jid_destroy(jidp);
     }

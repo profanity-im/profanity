@@ -137,7 +137,8 @@ typedef enum {
 } prof_msg_type_t;
 
 typedef struct prof_message_t {
-   Jid *jid;
+   Jid *from_jid;
+   Jid *to_jid;
    /* regular <message id=""> */
    char *id;
    /* </origin-id> XEP-0359 */

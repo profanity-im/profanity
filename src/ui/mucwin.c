@@ -366,7 +366,7 @@ mucwin_history(ProfMucWin *mucwin, const ProfMessage *const message)
     assert(mucwin != NULL);
 
     ProfWin *window = (ProfWin*)mucwin;
-    char *nick = message->jid->resourcepart;
+    char *nick = message->from_jid->resourcepart;
 
     // 'unanimous' all in one color (like always was)
     // 'regular' colored like new messages too
@@ -570,9 +570,9 @@ mucwin_incoming_msg(ProfMucWin *mucwin, const ProfMessage *const message, GSList
     win_insert_last_read_position_marker((ProfWin*)mucwin, mucwin->roomjid);
 
     if (g_slist_length(mentions) > 0) {
-        _mucwin_print_mention(window, message->plain, message->jid->resourcepart, mynick, mentions, ch, flags);
+        _mucwin_print_mention(window, message->plain, message->from_jid->resourcepart, mynick, mentions, ch, flags);
     } else if (triggers) {
-        win_print_them(window, THEME_ROOMTRIGGER, ch, flags, message->jid->resourcepart);
+        win_print_them(window, THEME_ROOMTRIGGER, ch, flags, message->from_jid->resourcepart);
         _mucwin_print_triggers(window, message->plain, triggers);
     } else {
         win_println_incoming_muc_msg(window, ch, flags, message);

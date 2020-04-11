@@ -251,12 +251,12 @@ chatwin_incoming_msg(ProfChatWin *chatwin, ProfMessage *message, gboolean win_cr
     assert(chatwin != NULL);
     char *old_plain = message->plain;
 
-    message->plain = plugins_pre_chat_message_display(chatwin->barejid, message->jid->resourcepart, message->plain);
+    message->plain = plugins_pre_chat_message_display(chatwin->barejid, message->from_jid->resourcepart, message->plain);
 
     ProfWin *window = (ProfWin*)chatwin;
     int num = wins_get_num(window);
 
-    char *display_name = roster_get_msg_display_name(chatwin->barejid, message->jid->resourcepart);
+    char *display_name = roster_get_msg_display_name(chatwin->barejid, message->from_jid->resourcepart);
 
     gboolean is_current = wins_is_current(window);
     gboolean notify = prefs_do_chat_notify(is_current);
@@ -304,7 +304,7 @@ chatwin_incoming_msg(ProfChatWin *chatwin, ProfMessage *message, gboolean win_cr
 
     free(display_name);
 
-    plugins_post_chat_message_display(chatwin->barejid, message->jid->resourcepart, message->plain);
+    plugins_post_chat_message_display(chatwin->barejid, message->from_jid->resourcepart, message->plain);
 
     free(message->plain);
     message->plain = old_plain;

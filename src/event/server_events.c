@@ -275,7 +275,7 @@ sv_ev_room_subject(const char *const room, const char *const nick, const char *c
 void
 sv_ev_room_history(ProfMessage *message)
 {
-    ProfMucWin *mucwin = wins_get_muc(message->jid->barejid);
+    ProfMucWin *mucwin = wins_get_muc(message->from_jid->barejid);
     if (mucwin) {
         // if this is the first successful connection
         if (ev_is_first_connect()) {
@@ -297,9 +297,9 @@ sv_ev_room_history(ProfMessage *message)
 static void _log_muc(ProfMessage *message)
 {
     if (message->enc == PROF_MSG_ENC_OMEMO) {
-        groupchat_log_omemo_msg_in(message->jid->barejid, message->jid->resourcepart, message->plain);
+        groupchat_log_omemo_msg_in(message->from_jid->barejid, message->from_jid->resourcepart, message->plain);
     } else {
-        groupchat_log_msg_in(message->jid->barejid, message->jid->resourcepart, message->plain);
+        groupchat_log_msg_in(message->from_jid->barejid, message->from_jid->resourcepart, message->plain);
     }
     log_database_add_incoming(message);
 }
@@ -307,7 +307,7 @@ static void _log_muc(ProfMessage *message)
 void
 sv_ev_room_message(ProfMessage *message)
 {
-    ProfMucWin *mucwin = wins_get_muc(message->jid->barejid);
+    ProfMucWin *mucwin = wins_get_muc(message->from_jid->barejid);
     if (!mucwin) {
         return;
     }
@@ -316,12 +316,12 @@ sv_ev_room_message(ProfMessage *message)
 
     // only log message not coming from this client (but maybe same account, different client)
     // our messages are logged when outgoing
-    if (!(g_strcmp0(mynick, message->jid->resourcepart) == 0 && message_is_sent_by_us(message, TRUE))) {
+    if (!(g_strcmp0(mynick, message->from_jid->resourcepart) == 0 && message_is_sent_by_us(message, TRUE))) {
         _log_muc(message);
     }
 
     char *old_plain = message->plain;
-    message->plain = plugins_pre_room_message_display(message->jid->barejid, message->jid->resourcepart, message->plain);
+    message->plain = plugins_pre_room_message_display(message->from_jid->barejid, message->from_jid->resourcepart, message->plain);
 
     GSList *mentions = get_mentions(prefs_get_boolean(PREF_NOTIFY_MENTION_WHOLE_WORD), prefs_get_boolean(PREF_NOTIFY_MENTION_CASE_SENSITIVE), message->plain, mynick);
     gboolean mention = g_slist_length(mentions) > 0;
@@ -341,7 +341,7 @@ sv_ev_room_message(ProfMessage *message)
         is_current = TRUE;
         status_bar_active(num, WIN_MUC, mucwin->roomjid);
 
-        if ((g_strcmp0(mynick, message->jid->resourcepart) != 0) && (prefs_get_boolean(PREF_BEEP))) {
+        if ((g_strcmp0(mynick, message->from_jid->resourcepart) != 0) && (prefs_get_boolean(PREF_BEEP))) {
             beep();
         }
 
@@ -349,11 +349,11 @@ sv_ev_room_message(ProfMessage *message)
     } else {
         status_bar_new(num, WIN_MUC, mucwin->roomjid);
 
-        if ((g_strcmp0(mynick, message->jid->resourcepart) != 0) && (prefs_get_boolean(PREF_FLASH))) {
+        if ((g_strcmp0(mynick, message->from_jid->resourcepart) != 0) && (prefs_get_boolean(PREF_FLASH))) {
             flash();
         }
 
-        cons_show_incoming_room_message(message->jid->resourcepart, mucwin->roomjid, num, mention, triggers, mucwin->unread);
+        cons_show_incoming_room_message(message->from_jid->resourcepart, mucwin->roomjid, num, mention, triggers, mucwin->unread);
 
         mucwin->unread++;
 
@@ -371,9 +371,9 @@ sv_ev_room_message(ProfMessage *message)
     }
     mucwin->last_msg_timestamp  = g_date_time_new_now_local();
 
-    if (prefs_do_room_notify(is_current, mucwin->roomjid, mynick, message->jid->resourcepart, message->plain, mention, triggers != NULL)) {
+    if (prefs_do_room_notify(is_current, mucwin->roomjid, mynick, message->from_jid->resourcepart, message->plain, mention, triggers != NULL)) {
         Jid *jidp = jid_create(mucwin->roomjid);
-        notify_room_message(message->jid->resourcepart, jidp->localpart, num, message->plain);
+        notify_room_message(message->from_jid->resourcepart, jidp->localpart, num, message->plain);
         jid_destroy(jidp);
     }
 
@@ -383,7 +383,7 @@ sv_ev_room_message(ProfMessage *message)
 
     rosterwin_roster();
 
-    plugins_post_room_message_display(message->jid->barejid, message->jid->resourcepart, message->plain);
+    plugins_post_room_message_display(message->from_jid->barejid, message->from_jid->resourcepart, message->plain);
     free(message->plain);
     message->plain = old_plain;
 }
@@ -392,11 +392,11 @@ void
 sv_ev_incoming_private_message(ProfMessage *message)
 {
     char *old_plain = message->plain;
-    message->plain = plugins_pre_priv_message_display(message->jid->fulljid, message->plain);
+    message->plain = plugins_pre_priv_message_display(message->from_jid->fulljid, message->plain);
 
-    ProfPrivateWin *privatewin = wins_get_private(message->jid->fulljid);
+    ProfPrivateWin *privatewin = wins_get_private(message->from_jid->fulljid);
     if (privatewin == NULL) {
-        ProfWin *window = wins_new_private(message->jid->fulljid);
+        ProfWin *window = wins_new_private(message->from_jid->fulljid);
         privatewin = (ProfPrivateWin*)window;
     }
 
@@ -405,7 +405,7 @@ sv_ev_incoming_private_message(ProfMessage *message)
     log_database_add_incoming(message);
     chat_log_msg_in(message);
 
-    plugins_post_priv_message_display(message->jid->fulljid, message->plain);
+    plugins_post_priv_message_display(message->from_jid->fulljid, message->plain);
 
     free(message->plain);
     message->plain = old_plain;
@@ -416,11 +416,11 @@ void
 sv_ev_delayed_private_message(ProfMessage *message)
 {
     char *old_plain = message->plain;
-    message->plain = plugins_pre_priv_message_display(message->jid->fulljid, message->plain);
+    message->plain = plugins_pre_priv_message_display(message->from_jid->fulljid, message->plain);
 
-    ProfPrivateWin *privatewin = wins_get_private(message->jid->fulljid);
+    ProfPrivateWin *privatewin = wins_get_private(message->from_jid->fulljid);
     if (privatewin == NULL) {
-        ProfWin *window = wins_new_private(message->jid->fulljid);
+        ProfWin *window = wins_new_private(message->from_jid->fulljid);
         privatewin = (ProfPrivateWin*)window;
     }
 
@@ -428,7 +428,7 @@ sv_ev_delayed_private_message(ProfMessage *message)
     privwin_incoming_msg(privatewin, message);
     chat_log_msg_in(message);
 
-    plugins_post_priv_message_display(message->jid->fulljid, message->plain);
+    plugins_post_priv_message_display(message->from_jid->fulljid, message->plain);
 
     free(message->plain);
     message->plain = old_plain;
@@ -437,19 +437,20 @@ sv_ev_delayed_private_message(ProfMessage *message)
 void
 sv_ev_outgoing_carbon(ProfMessage *message)
 {
-    ProfChatWin *chatwin = wins_get_chat(message->jid->barejid);
+    ProfChatWin *chatwin = wins_get_chat(message->from_jid->barejid);
     if (!chatwin) {
-        chatwin = chatwin_new(message->jid->barejid);
+        chatwin = chatwin_new(message->from_jid->barejid);
     }
 
     chat_state_active(chatwin->state);
 
+    //TODO: check whether we need to change from and to for carbon. now that we have profmessage->to_jid?
     if (message->plain) {
         if (message->type == PROF_MSG_TYPE_MUCPM) {
             // MUC PM, should have resource (nick) in filename
-            chat_log_msg_out(message->jid->barejid, message->plain, message->jid->resourcepart);
+            chat_log_msg_out(message->from_jid->barejid, message->plain, message->from_jid->resourcepart);
         } else {
-            chat_log_msg_out(message->jid->barejid, message->plain, NULL);
+            chat_log_msg_out(message->from_jid->barejid, message->plain, NULL);
         }
     }
 
@@ -566,7 +567,7 @@ static void
 _sv_ev_incoming_otr(ProfChatWin *chatwin, gboolean new_win, ProfMessage *message)
 {
     gboolean decrypted = FALSE;
-    message->plain = otr_on_message_recv(message->jid->barejid, message->jid->resourcepart, message->body, &decrypted);
+    message->plain = otr_on_message_recv(message->from_jid->barejid, message->from_jid->resourcepart, message->body, &decrypted);
     if (message->plain) {
         if (decrypted) {
             message->enc = PROF_MSG_ENC_OTR;
@@ -621,15 +622,15 @@ void
 sv_ev_incoming_message(ProfMessage *message)
 {
     gboolean new_win = FALSE;
-    ProfChatWin *chatwin = wins_get_chat(message->jid->barejid);
+    ProfChatWin *chatwin = wins_get_chat(message->from_jid->barejid);
     if (!chatwin) {
-        ProfWin *window = wins_new_chat(message->jid->barejid);
+        ProfWin *window = wins_new_chat(message->from_jid->barejid);
         chatwin = (ProfChatWin*)window;
         new_win = TRUE;
 
 #ifdef HAVE_OMEMO
-        if (omemo_automatic_start(message->jid->barejid)) {
-            omemo_start_session(message->jid->barejid);
+        if (omemo_automatic_start(message->from_jid->barejid)) {
+            omemo_start_session(message->from_jid->barejid);
             chatwin->is_omemo = TRUE;
         }
 #endif
@@ -763,16 +764,17 @@ sv_ev_incoming_message(ProfMessage *message)
 void
 sv_ev_incoming_carbon(ProfMessage *message)
 {
+    //TODO: check whether we need to change from and to for carbon. now that we have profmessage->to_jid?
     gboolean new_win = FALSE;
-    ProfChatWin *chatwin = wins_get_chat(message->jid->barejid);
+    ProfChatWin *chatwin = wins_get_chat(message->from_jid->barejid);
     if (!chatwin) {
-        ProfWin *window = wins_new_chat(message->jid->barejid);
+        ProfWin *window = wins_new_chat(message->from_jid->barejid);
         chatwin = (ProfChatWin*)window;
         new_win = TRUE;
 
 #ifdef HAVE_OMEMO
-        if (omemo_automatic_start(message->jid->barejid)) {
-            omemo_start_session(message->jid->barejid);
+        if (omemo_automatic_start(message->from_jid->barejid)) {
+            omemo_start_session(message->from_jid->barejid);
             chatwin->is_omemo = TRUE;
         }
 #endif
