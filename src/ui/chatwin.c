@@ -66,7 +66,7 @@ chatwin_new(const char *const barejid)
     ProfWin *window = wins_new_chat(barejid);
     ProfChatWin *chatwin = (ProfChatWin *)window;
 
-    if (prefs_get_boolean(PREF_CHLOG) && prefs_get_boolean(PREF_HISTORY)) {
+    if (!prefs_get_boolean(PREF_MAM) && prefs_get_boolean(PREF_CHLOG) && prefs_get_boolean(PREF_HISTORY)) {
         _chatwin_history(chatwin, barejid);
     }
 
@@ -87,6 +87,9 @@ chatwin_new(const char *const barejid)
     }
 #endif
 
+    if (prefs_get_boolean(PREF_MAM)) {
+        iq_mam_request(chatwin);
+    }
     return chatwin;
 }
 
@@ -250,12 +253,19 @@ chatwin_incoming_msg(ProfChatWin *chatwin, ProfMessage *message, gboolean win_cr
     assert(chatwin != NULL);
     char *old_plain = message->plain;
 
-    message->plain = plugins_pre_chat_message_display(chatwin->barejid, message->jid->resourcepart, message->plain);
+    message->plain = plugins_pre_chat_message_display(message->from_jid->barejid, message->from_jid->resourcepart, message->plain);
 
     ProfWin *window = (ProfWin*)chatwin;
     int num = wins_get_num(window);
 
-    char *display_name = roster_get_msg_display_name(chatwin->barejid, message->jid->resourcepart);
+    char *display_name;
+    Jid *my_jid = jid_create(connection_get_fulljid());
+    if (g_strcmp0(my_jid->barejid, message->from_jid->barejid) == 0) {
+        display_name = strdup("me");
+    } else {
+        display_name = roster_get_msg_display_name(message->from_jid->barejid, message->from_jid->resourcepart);
+    }
+    jid_destroy(my_jid);
 
     gboolean is_current = wins_is_current(window);
     gboolean notify = prefs_do_chat_notify(is_current);
@@ -277,7 +287,12 @@ chatwin_incoming_msg(ProfChatWin *chatwin, ProfMessage *message, gboolean win_cr
 
         chatwin->unread++;
 
-        if (prefs_get_boolean(PREF_CHLOG) && prefs_get_boolean(PREF_HISTORY)) {
+        //TODO: so far we don't ask for MAM when incoming message occurs.
+        //Need to figure out:
+        //1) only send IQ once
+        //2) sort incoming messages on timestamp
+        //for now if experimental MAM is enabled we dont show no history from sql either
+        if (!prefs_get_boolean(PREF_MAM) && prefs_get_boolean(PREF_CHLOG) && prefs_get_boolean(PREF_HISTORY)) {
             _chatwin_history(chatwin, chatwin->barejid);
         }
 
@@ -303,7 +318,7 @@ chatwin_incoming_msg(ProfChatWin *chatwin, ProfMessage *message, gboolean win_cr
 
     free(display_name);
 
-    plugins_post_chat_message_display(chatwin->barejid, message->jid->resourcepart, message->plain);
+    plugins_post_chat_message_display(message->from_jid->barejid, message->from_jid->resourcepart, message->plain);
 
     free(message->plain);
     message->plain = old_plain;

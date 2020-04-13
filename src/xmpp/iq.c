@@ -2499,3 +2499,32 @@ _iq_free_affiliation_list(ProfAffiliationList *affiliation_list)
         free(affiliation_list);
     }
 }
+
+void
+iq_mam_request(ProfChatWin *win)
+{
+   if (connection_supports(XMPP_FEATURE_MAM2) == FALSE) {
+        log_warning("Server doesn't advertise %s feature.", XMPP_FEATURE_PING);
+        cons_show_error("Server doesn't support MAM.");
+        return;
+   }
+
+    xmpp_ctx_t * const ctx = connection_get_ctx();
+    char *id = connection_create_stanza_id();
+
+    GDateTime *now = g_date_time_new_now_local();
+    GDateTime *timestamp = g_date_time_add_days(now, -1);
+    g_date_time_unref(now);
+    gchar *datestr = g_date_time_format(timestamp,"%FT%T%:::z");
+    xmpp_stanza_t *iq = stanza_create_mam_iq(ctx, win->barejid, datestr);
+    g_free(datestr);
+    g_date_time_unref(timestamp);
+
+//    iq_id_handler_add(id, _http_upload_response_id_handler, NULL, upload);
+    free(id);
+
+    iq_send_stanza(iq);
+    xmpp_stanza_release(iq);
+
+    return;
+}

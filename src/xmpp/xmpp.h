@@ -69,6 +69,7 @@
 #define XMPP_FEATURE_PUBSUB_PUBLISH_OPTIONS "http://jabber.org/protocol/pubsub#publish-options"
 #define XMPP_FEATURE_USER_AVATAR_METADATA_NOTIFY "urn:xmpp:avatar:metadata+notify"
 #define XMPP_FEATURE_LAST_MESSAGE_CORRECTION "urn:xmpp:message-correct:0"
+#define XMPP_FEATURE_MAM2 "urn:xmpp:mam:2"
 
 typedef enum {
     JABBER_CONNECTING,
@@ -137,7 +138,8 @@ typedef enum {
 } prof_msg_type_t;
 
 typedef struct prof_message_t {
-   Jid *jid;
+   Jid *from_jid;
+   Jid *to_jid;
    /* regular <message id=""> */
    char *id;
    /* </origin-id> XEP-0359 */
@@ -154,6 +156,7 @@ typedef struct prof_message_t {
    GDateTime *timestamp;
    prof_enc_t enc;
    gboolean trusted;
+   gboolean is_mam;
    prof_msg_type_t type;
 } ProfMessage;
 
@@ -237,6 +240,7 @@ void iq_autoping_check(void);
 void iq_http_upload_request(HTTPUpload *upload);
 void iq_command_list(const char *const target);
 void iq_command_exec(const char *const target, const char *const command);
+void iq_mam_request(ProfChatWin *win);
 
 EntityCapabilities* caps_lookup(const char *const jid);
 void caps_close(void);

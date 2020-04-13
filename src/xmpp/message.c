@@ -84,7 +84,8 @@ static void _handle_muc_private_message(xmpp_stanza_t *const stanza);
 static void _handle_conference(xmpp_stanza_t *const stanza);
 static void _handle_captcha(xmpp_stanza_t *const stanza);
 static void _handle_receipt_received(xmpp_stanza_t *const stanza);
-static void _handle_chat(xmpp_stanza_t *const stanza);
+static void _handle_chat(xmpp_stanza_t *const stanza, gboolean is_mam);
+static gboolean _handle_mam(xmpp_stanza_t *const stanza);
 
 static void _send_message_stanza(xmpp_stanza_t *const stanza);
 
@@ -99,12 +100,25 @@ _message_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza, void *con
     size_t text_size;
     xmpp_stanza_to_text(stanza, &text, &text_size);
     gboolean cont = plugins_on_message_stanza_receive(text);
-    xmpp_free(connection_get_ctx(), text);
     if (!cont) {
+        xmpp_free(connection_get_ctx(), text);
         return 1;
     }
 
     const char *type = xmpp_stanza_get_type(stanza);
+
+    if (type == NULL) {
+        if (_handle_mam(stanza)) {
+            xmpp_free(connection_get_ctx(), text);
+            return 1;
+        }
+
+        log_info("Received <message> without 'type': %s", text);
+        xmpp_free(connection_get_ctx(), text);
+        return 1;
+    }
+
+    xmpp_free(connection_get_ctx(), text);
 
     if (g_strcmp0(type, STANZA_TYPE_ERROR) == 0) {
         _handle_error(stanza);
@@ -152,7 +166,7 @@ _message_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza, void *con
         }
     }
 
-    _handle_chat(stanza);
+    _handle_chat(stanza, FALSE);
 
     return 1;
 }
@@ -186,7 +200,8 @@ message_init(void)
 {
     ProfMessage *message = malloc(sizeof(ProfMessage));
 
-    message->jid = NULL;
+    message->from_jid = NULL;
+    message->to_jid = NULL;
     message->id = NULL;
     message->originid = NULL;
     message->replace_id = NULL;
@@ -205,8 +220,12 @@ void
 message_free(ProfMessage *message)
 {
     xmpp_ctx_t *ctx = connection_get_ctx();
-    if (message->jid) {
-        jid_destroy(message->jid);
+    if (message->from_jid) {
+        jid_destroy(message->from_jid);
+    }
+
+    if (message->to_jid) {
+        jid_destroy(message->to_jid);
     }
 
     if (message->id) {
@@ -787,51 +806,51 @@ _handle_groupchat(xmpp_stanza_t *const stanza)
     }
 
     const char *room_jid = xmpp_stanza_get_from(stanza);
-    Jid *jid = jid_create(room_jid);
+    Jid *from_jid = jid_create(room_jid);
 
     // handle room subject
     xmpp_stanza_t *subject = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_SUBJECT);
     if (subject) {
         char *subject_text;
         subject_text = xmpp_stanza_get_text(subject);
-        sv_ev_room_subject(jid->barejid, jid->resourcepart, subject_text);
+        sv_ev_room_subject(from_jid->barejid, from_jid->resourcepart, subject_text);
         xmpp_free(ctx, subject_text);
 
-        jid_destroy(jid);
+        jid_destroy(from_jid);
         return;
     }
 
     // handle room broadcasts
-    if (!jid->resourcepart) {
+    if (!from_jid->resourcepart) {
         char *broadcast;
         broadcast = xmpp_message_get_body(stanza);
         if (!broadcast) {
-            jid_destroy(jid);
+            jid_destroy(from_jid);
             return;
         }
 
         sv_ev_room_broadcast(room_jid, broadcast);
         xmpp_free(ctx, broadcast);
 
-        jid_destroy(jid);
+        jid_destroy(from_jid);
         return;
     }
 
-    if (!jid_is_valid_room_form(jid)) {
-        log_error("Invalid room JID: %s", jid->str);
-        jid_destroy(jid);
+    if (!jid_is_valid_room_form(from_jid)) {
+        log_error("Invalid room JID: %s", from_jid->str);
+        jid_destroy(from_jid);
         return;
     }
 
     // room not active in profanity
-    if (!muc_active(jid->barejid)) {
-        log_error("Message received for inactive chat room: %s", jid->str);
-        jid_destroy(jid);
+    if (!muc_active(from_jid->barejid)) {
+        log_error("Message received for inactive chat room: %s", from_jid->str);
+        jid_destroy(from_jid);
         return;
     }
 
     ProfMessage *message = message_init();
-    message->jid = jid;
+    message->from_jid = from_jid;
     message->type = PROF_MSG_TYPE_MUC;
 
     if (id) {
@@ -861,17 +880,17 @@ _handle_groupchat(xmpp_stanza_t *const stanza)
 #endif
 
     if (!message->plain && !message->body) {
-        log_error("Message received without body for room: %s", jid->str);
+        log_error("Message received without body for room: %s", from_jid->str);
         goto out;
     } else if (!message->plain) {
         message->plain = strdup(message->body);
     }
 
     // determine if the notifications happened whilst offline (MUC history)
-    message->timestamp = stanza_get_delay_from(stanza, jid->barejid);
+    message->timestamp = stanza_get_delay_from(stanza, from_jid->barejid);
     if (message->timestamp == NULL) {
         // checking the domainpart is a workaround for some prosody versions (gh#1190)
-        message->timestamp = stanza_get_delay_from(stanza, jid->domainpart);
+        message->timestamp = stanza_get_delay_from(stanza, from_jid->domainpart);
     }
 
     bool is_muc_history = FALSE;
@@ -982,7 +1001,7 @@ _handle_muc_private_message(xmpp_stanza_t *const stanza)
     message->type = PROF_MSG_TYPE_MUCPM;
 
     const gchar *from = xmpp_stanza_get_from(stanza);
-    message->jid = jid_create(from);
+    message->from_jid = jid_create(from);
 
     // message stanza id
     const char *id = xmpp_stanza_get_id(stanza);
@@ -1002,7 +1021,7 @@ _handle_muc_private_message(xmpp_stanza_t *const stanza)
     message->body = xmpp_message_get_body(stanza);
 
     if (!message->plain && !message->body) {
-        log_error("Message received without body from: %s", message->jid->str);
+        log_error("Message received without body from: %s", message->from_jid->str);
         goto out;
     } else if (!message->plain) {
         message->plain = strdup(message->body);
@@ -1119,17 +1138,18 @@ _handle_carbons(xmpp_stanza_t *const stanza)
         message->encrypted = xmpp_stanza_get_text(x);
     }
 
+    //TODO: now that profmessage has from_jid AND to_jid we should save both. and maybe also add is_carbon so we can decide later on.
     if (message->plain || message->encrypted || message->body) {
         // if we are the recipient, treat as standard incoming message
         if (g_strcmp0(my_jid->barejid, jid_to->barejid) == 0) {
             jid_destroy(jid_to);
-            message->jid = jid_from;
+            message->from_jid = jid_from;
             sv_ev_incoming_carbon(message);
 
         // else treat as a sent message
         } else {
             jid_destroy(jid_from);
-            message->jid = jid_to;
+            message->from_jid = jid_to;
             sv_ev_outgoing_carbon(message);
         }
     }
@@ -1141,7 +1161,7 @@ out:
 }
 
 static void
-_handle_chat(xmpp_stanza_t *const stanza)
+_handle_chat(xmpp_stanza_t *const stanza, gboolean is_mam)
 {
     // ignore if type not chat or absent
     const char *type = xmpp_stanza_get_type(stanza);
@@ -1172,6 +1192,9 @@ _handle_chat(xmpp_stanza_t *const stanza)
     }
 
     const gchar *from = xmpp_stanza_get_from(stanza);
+    if (!from) {
+        return;
+    }
     Jid *jid = jid_create(from);
 
     // private message from chat room use full jid (room/nick)
@@ -1183,8 +1206,15 @@ _handle_chat(xmpp_stanza_t *const stanza)
 
     // standard chat message, use jid without resource
     ProfMessage *message = message_init();
-    message->jid = jid;
     message->type = PROF_MSG_TYPE_CHAT;
+    message->from_jid = jid;
+
+    const gchar *to_text = xmpp_stanza_get_to(stanza);
+    if (to_text) {
+        message->to_jid = jid_create(to_text);
+    }
+
+    message->is_mam = is_mam;
 
     // message stanza id
     const char *id = xmpp_stanza_get_id(stanza);
@@ -1254,6 +1284,26 @@ _handle_chat(xmpp_stanza_t *const stanza)
     }
 
     message_free(message);
+}
+
+static gboolean
+_handle_mam(xmpp_stanza_t *const stanza)
+{
+    xmpp_stanza_t *result = stanza_get_child_by_name_and_ns(stanza, "result", STANZA_NS_MAM2);
+    if (!result) {
+        return FALSE;
+    }
+
+    xmpp_stanza_t *forwarded = xmpp_stanza_get_child_by_ns(result, STANZA_NS_FORWARD);
+    if (!forwarded) {
+        log_warning("MAM received with no forwarded element");
+        return FALSE;
+    }
+
+    xmpp_stanza_t *message_stanza = xmpp_stanza_get_child_by_ns(forwarded, "jabber:client");
+    _handle_chat(message_stanza, TRUE);
+
+    return TRUE;
 }
 
 static void

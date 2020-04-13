@@ -202,6 +202,7 @@
 #define STANZA_NS_USER_AVATAR_DATA "urn:xmpp:avatar:data"
 #define STANZA_NS_USER_AVATAR_METADATA "urn:xmpp:avatar:metadata"
 #define STANZA_NS_LAST_MESSAGE_CORRECTION "urn:xmpp:message-correct:0"
+#define STANZA_NS_MAM2 "urn:xmpp:mam:2"
 
 #define STANZA_DATAFORM_SOFTWARE "urn:xmpp:dataforms:softwareinfo"
 
@@ -358,5 +359,7 @@ void stanza_free_caps(XMPPCaps *caps);
 xmpp_stanza_t* stanza_get_child_by_name_and_ns(xmpp_stanza_t * const stanza, const char * const name, const char * const ns);
 
 xmpp_stanza_t* stanza_create_avatar_retrieve_data_request(xmpp_ctx_t *ctx, const char *stanza_id, const char *const item_id, const char *const jid);
+
+xmpp_stanza_t* stanza_create_mam_iq(xmpp_ctx_t *ctx, const char *const jid, const char *const startdate);
 
 #endif
