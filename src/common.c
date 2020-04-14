@@ -114,6 +114,8 @@ copy_file(const char *const sourcepath, const char *const targetpath, const gboo
     GError *error = NULL;
     GFileCopyFlags flags = overwrite_existing ? G_FILE_COPY_OVERWRITE : G_FILE_COPY_NONE;
     gboolean success = g_file_copy (source, dest, flags, NULL, NULL, NULL, &error);
+    if (error != NULL)
+        g_error_free(error);
     g_object_unref(source);
     g_object_unref(dest);
     return success;
