@@ -827,14 +827,14 @@ _caps_response_id_handler(xmpp_stanza_t *const stanza, void *const userdata)
     }
 
     if (id) {
-        log_info("Capabilities response handler fired for id %s", id);
+        log_debug("Capabilities response handler fired for id %s", id);
     } else {
-        log_info("Capabilities response handler fired");
+        log_debug("Capabilities response handler fired");
     }
 
     const char *from = xmpp_stanza_get_from(stanza);
     if (!from) {
-        log_info("No from attribute");
+        log_info("_caps_response_id_handler(): No from attribute");
         return 0;
     }
 
@@ -847,13 +847,13 @@ _caps_response_id_handler(xmpp_stanza_t *const stanza, void *const userdata)
     }
 
     if (query == NULL) {
-        log_info("No query element found.");
+        log_info("_caps_response_id_handler(): No query element found.");
         return 0;
     }
 
     const char *node = xmpp_stanza_get_attribute(query, STANZA_ATTR_NODE);
     if (node == NULL) {
-        log_info("No node attribute found");
+        log_info("_caps_response_id_handler(): No node attribute found");
         return 0;
     }
 
@@ -867,12 +867,12 @@ _caps_response_id_handler(xmpp_stanza_t *const stanza, void *const userdata)
         log_warning("Generated : %s", generated_sha1);
         log_warning("Given     : %s", given_sha1);
     } else {
-        log_info("Valid SHA-1 hash found: %s", given_sha1);
+        log_debug("Valid SHA-1 hash found: %s", given_sha1);
 
         if (caps_cache_contains(given_sha1)) {
-            log_info("Capabilties already cached: %s", given_sha1);
+            log_debug("Capabilties already cached: %s", given_sha1);
         } else {
-            log_info("Capabilities not cached: %s, storing", given_sha1);
+            log_debug("Capabilities not cached: %s, storing", given_sha1);
             EntityCapabilities *capabilities = stanza_create_caps_from_query_element(query);
             caps_add_by_ver(given_sha1, capabilities);
             caps_destroy(capabilities);
@@ -901,14 +901,18 @@ _caps_response_for_jid_id_handler(xmpp_stanza_t *const stanza, void *const userd
     }
 
     if (id) {
-        log_info("Capabilities response handler fired for id %s", id);
+        log_debug("Capabilities response handler fired for id %s", id);
     } else {
-        log_info("Capabilities response handler fired");
+        log_debug("Capabilities response handler fired");
     }
 
     const char *from = xmpp_stanza_get_from(stanza);
     if (!from) {
-        log_info("No from attribute");
+        if (jid) {
+            log_info("_caps_response_for_jid_id_handler(): No from attribute for %s", jid);
+        } else {
+            log_info("_caps_response_for_jid_id_handler(): No from attribute");
+        }
         return 0;
     }
 
@@ -921,17 +925,25 @@ _caps_response_for_jid_id_handler(xmpp_stanza_t *const stanza, void *const userd
     }
 
     if (query == NULL) {
-        log_info("No query element found.");
+        if (jid) {
+            log_info("_caps_response_for_jid_id_handler(): No query element found for %s.", jid);
+        } else {
+            log_info("_caps_response_for_jid_id_handler(): No query element found.");
+        }
         return 0;
     }
 
     const char *node = xmpp_stanza_get_attribute(query, STANZA_ATTR_NODE);
     if (node == NULL) {
-        log_info("No node attribute found");
+        if (jid) {
+            log_info("_caps_response_for_jid_id_handler(): No node attribute found for %s", jid);
+        } else {
+            log_info("_caps_response_for_jid_id_handler(): No node attribute found");
+        }
         return 0;
     }
 
-    log_info("Associating capabilities with: %s", jid);
+    log_debug("Associating capabilities with: %s", jid);
     EntityCapabilities *capabilities = stanza_create_caps_from_query_element(query);
     caps_add_by_jid(jid, capabilities);
 
@@ -952,14 +964,14 @@ _caps_response_legacy_id_handler(xmpp_stanza_t *const stanza, void *const userda
     }
 
     if (id) {
-        log_info("Capabilities response handler fired for id %s", id);
+        log_debug("Capabilities response handler fired for id %s", id);
     } else {
-        log_info("Capabilities response handler fired");
+        log_debug("Capabilities response handler fired");
     }
 
     const char *from = xmpp_stanza_get_from(stanza);
     if (!from) {
-        log_info("No from attribute");
+        log_info("_caps_response_legacy_id_handler(): No from attribute");
         return 0;
     }
 
@@ -972,23 +984,23 @@ _caps_response_legacy_id_handler(xmpp_stanza_t *const stanza, void *const userda
     }
 
     if (query == NULL) {
-        log_info("No query element found.");
+        log_info("_caps_response_legacy_id_handler(): No query element found.");
         return 0;
     }
 
     const char *node = xmpp_stanza_get_attribute(query, STANZA_ATTR_NODE);
     if (node == NULL) {
-        log_info("No node attribute found");
+        log_info("_caps_response_legacy_id_handler(): No node attribute found");
         return 0;
     }
 
     // nodes match
     if (g_strcmp0(expected_node, node) == 0) {
-        log_info("Legacy capabilities, nodes match %s", node);
+        log_debug("Legacy capabilities, nodes match %s", node);
         if (caps_cache_contains(node)) {
-            log_info("Capabilties already cached: %s", node);
+            log_debug("Capabilties already cached: %s", node);
         } else {
-            log_info("Capabilities not cached: %s, storing", node);
+            log_debug("Capabilities not cached: %s, storing", node);
             EntityCapabilities *capabilities = stanza_create_caps_from_query_element(query);
             caps_add_by_ver(node, capabilities);
             caps_destroy(capabilities);
@@ -2083,7 +2095,7 @@ _room_info_response_id_handler(xmpp_stanza_t *const stanza, void *const userdata
 {
     const char *type = xmpp_stanza_get_type(stanza);
     ProfRoomInfoData *cb_data = (ProfRoomInfoData *)userdata;
-    log_info("Received disco#info response for room: %s", cb_data->room);
+    log_debug("Received disco#info response for room: %s", cb_data->room);
 
     // handle error responses
     if (g_strcmp0(type, STANZA_TYPE_ERROR) == 0) {
@@ -2226,9 +2238,9 @@ _disco_info_response_id_handler(xmpp_stanza_t *const stanza, void *const userdat
     const char *type = xmpp_stanza_get_type(stanza);
 
     if (from) {
-        log_info("Received disco#info response from: %s", from);
+        log_debug("Received disco#info response from: %s", from);
     } else {
-        log_info("Received disco#info response");
+        log_debug("Received disco#info response");
     }
 
     // handle error responses
@@ -2303,9 +2315,9 @@ _disco_info_response_id_handler_onconnect(xmpp_stanza_t *const stanza, void *con
     const char *type = xmpp_stanza_get_type(stanza);
 
     if (from) {
-        log_info("Received disco#info response from: %s", from);
+        log_debug("Received disco#info response from: %s", from);
     } else {
-        log_info("Received disco#info response");
+        log_debug("Received disco#info response");
     }
 
     // handle error responses

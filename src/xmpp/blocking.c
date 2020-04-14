@@ -273,7 +273,7 @@ _block_remove_result_handler(xmpp_stanza_t *const stanza, void *const userdata)
 static int
 _blocklist_result_handler(xmpp_stanza_t *const stanza, void *const userdata)
 {
-    log_info("Blocked list result handler fired.");
+    log_debug("Blocked list result handler fired.");
 
     const char *type = xmpp_stanza_get_type(stanza);
     if (g_strcmp0(type, "result") != 0) {
@@ -294,7 +294,7 @@ _blocklist_result_handler(xmpp_stanza_t *const stanza, void *const userdata)
 
     xmpp_stanza_t *items = xmpp_stanza_get_children(blocklist);
     if (!items) {
-        log_info("No blocked users.");
+        log_debug("No blocked users.");
         return 0;
     }
 

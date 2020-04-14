@@ -573,13 +573,13 @@ _handle_caps(const char *const jid, XMPPCaps *caps)
 {
     // hash supported, xep-0115, cache against ver
     if (g_strcmp0(caps->hash, "sha-1") == 0) {
-        log_info("Hash %s supported", caps->hash);
+        log_debug("Hash %s supported for %s", caps->hash, jid);
         if (caps->ver) {
             if (caps_cache_contains(caps->ver)) {
-                log_info("Capabilities cache hit: %s, for %s.", caps->ver, jid);
+                log_debug("Capabilities cache hit: %s, for %s.", caps->ver, jid);
                 caps_map_jid_to_ver(jid, caps->ver);
             } else {
-                log_info("Capabilities cache miss: %s, for %s, sending service discovery request", caps->ver, jid);
+                log_debug("Capabilities cache miss: %s, for %s, sending service discovery request", caps->ver, jid);
                 char *id = connection_create_stanza_id();
                 iq_send_caps_request(jid, id, caps->node, caps->ver);
                 free(id);
@@ -656,7 +656,7 @@ _available_handler(xmpp_stanza_t *const stanza)
 
     XMPPCaps *caps = stanza_parse_caps(stanza);
     if ((g_strcmp0(my_jid->fulljid, xmpp_presence->jid->fulljid) != 0) && caps) {
-        log_info("Presence contains capabilities.");
+        log_debug("Presence contains capabilities.");
         char *jid = jid_fulljid_or_barejid(xmpp_presence->jid);
         _handle_caps(jid, caps);
     }
@@ -835,7 +835,6 @@ _muc_user_occupant_handler(xmpp_stanza_t *stanza)
         // send disco info for capabilities, if not cached
         XMPPCaps *caps = stanza_parse_caps(stanza);
         if (caps) {
-            log_info("Presence contains capabilities.");
             _handle_caps(from, caps);
         }
         stanza_free_caps(caps);
