@@ -224,9 +224,10 @@ notify(const char *const message, int timeout, const char *const category)
             log_error("Error sending desktop notification:");
             log_error("  -> Message : %s", message);
             log_error("  -> Error   : %s", error->message);
+            g_error_free(error);
         } else {
-	    log_debug("Notification sent.");
-	}
+            log_debug("Notification sent.");
+        }
     } else {
         log_error("Libnotify not initialised.");
     }
