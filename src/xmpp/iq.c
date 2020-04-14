@@ -158,6 +158,7 @@ static int
 _iq_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza, void *const userdata)
 {
     log_debug("iq stanza handler fired");
+    iq_autoping_timer_cancel();
 
     char *text;
     size_t text_size;
@@ -232,6 +233,9 @@ _iq_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza, void *const us
 void
 iq_handlers_init(void)
 {
+    iq_handlers_clear();
+    id_handlers = g_hash_table_new_full(g_str_hash, g_str_equal, free, (GDestroyNotify)_iq_id_handler_free);
+
     xmpp_conn_t * const conn = connection_get_conn();
     xmpp_ctx_t * const ctx = connection_get_ctx();
     xmpp_handler_add(conn, _iq_handler, NULL, STANZA_NAME_IQ, NULL, ctx);
@@ -241,9 +245,6 @@ iq_handlers_init(void)
         xmpp_timed_handler_add(conn, _autoping_timed_send, millis, ctx);
     }
 
-    iq_handlers_clear();
-
-    id_handlers = g_hash_table_new_full(g_str_hash, g_str_equal, free, (GDestroyNotify)_iq_id_handler_free);
     rooms_cache = g_hash_table_new_full(g_str_hash, g_str_equal, free, (GDestroyNotify)xmpp_stanza_release);
 }
 
@@ -311,7 +312,7 @@ iq_autoping_check(void)
     gint timeout = prefs_get_autoping_timeout();
     if (timeout > 0 && seconds_elapsed >= timeout) {
         cons_show("Autoping response timed out after %u seconds.", timeout);
-        log_debug("Autoping check: timed out after %u seconds, disconnecting", timeout);
+        log_warning("Autoping check: timed out after %u seconds, disconnecting", timeout);
         iq_autoping_timer_cancel();
         session_autoping_fail();
     }
