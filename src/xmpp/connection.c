@@ -175,6 +175,8 @@ connection_connect(const char *const jid, const char *const passwd, const char *
     xmpp_conn_set_jid(conn.xmpp_conn, jid);
     xmpp_conn_set_pass(conn.xmpp_conn, passwd);
 
+    iq_handlers_init();
+
     if (!tls_policy || (g_strcmp0(tls_policy, "force") == 0)) {
         xmpp_conn_set_flags(conn.xmpp_conn, XMPP_CONN_FLAG_MANDATORY_TLS);
     } else if (g_strcmp0(tls_policy, "trust") == 0) {

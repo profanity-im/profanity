@@ -213,10 +213,10 @@ session_disconnect(void)
 
         accounts_set_last_activity(session_get_account_name());
 
-        iq_rooms_cache_clear();
-        iq_handlers_clear();
 
         connection_disconnect();
+        iq_rooms_cache_clear();
+        iq_handlers_clear();
         message_handlers_clear();
 
         connection_clear_data();
@@ -282,7 +282,6 @@ session_login_success(gboolean secured)
 
     message_handlers_init();
     presence_handlers_init();
-    iq_handlers_init();
 
     // logged in with account
     if (saved_account.name) {
