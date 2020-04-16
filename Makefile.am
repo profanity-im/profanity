@@ -231,7 +231,8 @@ core_sources += $(omemo_sources)
 unittest_sources += $(omemo_unittest_sources)
 endif
 
-AM_CFLAGS = @AM_CFLAGS@ -I$(srcdir)/src
+AM_CFLAGS = @AM_CFLAGS@ -fno-common -I$(srcdir)/src
+#AM_CFLAGS = @AM_CFLAGS@ -I$(srcdir)/src
 
 bin_PROGRAMS = profanity
 profanity_SOURCES = $(core_sources) $(main_source)

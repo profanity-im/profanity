@@ -1,0 +1,66 @@
+# Build the latest Fedora image
+FROM fedora:latest
+
+# expect - for functional tests
+# libmicrohttpd - for stabber
+# glibc-locale - to have en_US locale
+RUN dnf install -y \
+  autoconf \
+  autoconf-archive \
+  automake \
+  expect-devel \
+  gcc \
+  git \
+  glib2-devel \
+  glibc-all-langpacks \
+  gtk2-devel \
+  libXScrnSaver-devel \
+  libcmocka-devel \
+  libcurl-devel \
+  expat-devel \
+  libgcrypt-devel \
+  gpgme-devel \
+  libmicrohttpd-devel \
+  libnotify-devel \
+  libotr-devel \
+  libsignal-protocol-c-devel \
+  libtool \
+  libuuid-devel \
+  make \
+  ncurses-devel \
+  python \
+  python-devel \
+  python3 \
+  python3-devel \
+  readline-devel \
+  openssl-devel \
+  sqlite-devel
+
+# https://github.com/openSUSE/docker-containers-build/issues/26
+ENV LANG en_US.UTF-8
+ENV LANGUAGE en_US:en
+ENV LC_ALL en_US.UTF-8
+
+RUN mkdir -p /usr/src
+WORKDIR /usr/src
+
+RUN mkdir -p /usr/src/stabber
+RUN git clone git://github.com/boothj5/stabber.git
+WORKDIR /usr/src/stabber
+RUN ./bootstrap.sh
+RUN ./configure --prefix=/usr --disable-dependency-tracking
+RUN make
+RUN make install
+
+WORKDIR /usr/src
+RUN mkdir -p /usr/src/libmesode
+RUN git clone git://github.com/profanity-im/libmesode.git
+WORKDIR /usr/src/libmesode
+RUN ./bootstrap.sh
+RUN ./configure --prefix=/usr
+RUN make
+RUN make install
+
+RUN mkdir -p /usr/src/profanity
+WORKDIR /usr/src/profanity
+COPY . /usr/src/profanity

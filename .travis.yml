@@ -20,6 +20,8 @@ matrix:
       env: BUILD_FLAVOR=debian
     - os: linux
       env: BUILD_FLAVOR=arch
+    - os: linux
+      env: BUILD_FLAVOR=fedora
     - os: osx
       env:
         # Ensure that "keg-only" Homebrew versions are used.
