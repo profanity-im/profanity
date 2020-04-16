@@ -1,5 +1,4 @@
-Profanity
-=========
+# Profanity
 [![Build Status](https://api.travis-ci.org/profanity-im/profanity.png?branch=master)](https://travis-ci.org/profanity-im/profanity) [![builds.sr.ht status](https://builds.sr.ht/~wstrm/profanity.svg)](https://builds.sr.ht/~wstrm/profanity?) [![Chat](https://inverse.chat/badge.svg?room=profanity@rooms.dismail.de)](https://conversations.im/j/profanity@rooms.dismail.de)
 
 Profanity is a console based XMPP client inspired by [Irssi](http://www.irssi.org/).
@@ -10,8 +9,7 @@ If you like Profanity consider becoming a sponsor or [donate](https://profanity-
 
 See the [User Guide](https://profanity-im.github.io/userguide.html) for information on installing and using Profanity.
 
-Links
------
+## Links
 
 Homepage: https://profanity-im.github.io/ - https://github.com/profanity-im/profanity-im.github.io
 
