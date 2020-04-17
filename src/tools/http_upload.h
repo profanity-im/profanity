@@ -57,11 +57,12 @@ typedef struct http_upload_t {
     int cancel;
 } HTTPUpload;
 
-GSList *upload_processes;
-
 void* http_file_put(void *userdata);
 
 char* file_mime_type(const char* const file_name);
 off_t file_size(const char* const file_name);
+
+void http_upload_cancel_processes(ProfWin *window);
+void http_upload_add_upload(HTTPUpload *upload);
 
 #endif

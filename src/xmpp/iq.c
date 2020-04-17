@@ -2402,7 +2402,7 @@ _http_upload_response_id_handler(xmpp_stanza_t *const stanza, void *const userda
             if (get_url) xmpp_free(ctx, get_url);
 
             pthread_create(&(upload->worker), NULL, &http_file_put, upload);
-            upload_processes = g_slist_append(upload_processes, upload);
+            http_upload_add_upload(upload);
         } else {
             log_error("Invalid XML in HTTP Upload slot");
             return 1;

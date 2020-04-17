@@ -65,6 +65,7 @@ struct curl_data_t {
     size_t size;
 };
 
+GSList *upload_processes = NULL;
 
 static int
 _xferinfo(void *userdata, curl_off_t dltotal, curl_off_t dlnow, curl_off_t ultotal, curl_off_t ulnow)
@@ -331,4 +332,24 @@ off_t file_size(const char* const filename)
     struct stat st;
     stat(filename, &st);
     return st.st_size;
+}
+
+void
+http_upload_cancel_processes(ProfWin *window)
+{
+    GSList *upload_process = upload_processes;
+    while (upload_process) {
+        HTTPUpload *upload = upload_process->data;
+        if (upload->window == window) {
+            upload->cancel = 1;
+            break;
+        }
+        upload_process = g_slist_next(upload_process);
+    }
+}
+
+void
+http_upload_add_upload(HTTPUpload *upload)
+{
+    upload_processes = g_slist_append(upload_processes, upload);
 }
