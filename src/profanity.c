@@ -90,6 +90,7 @@ static void _init(char *log_level, char *config_file, char *log_file, char *them
 static void _shutdown(void);
 static void _connect_default(const char * const account);
 
+pthread_mutex_t lock;
 static gboolean cont = TRUE;
 static gboolean force_quit = FALSE;
 
