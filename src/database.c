@@ -44,6 +44,7 @@
 #include <errno.h>
 
 #include "log.h"
+#include "common.h"
 #include "config/files.h"
 
 static sqlite3 *g_chatlog_database;
@@ -326,12 +327,14 @@ _add_to_db(ProfMessage *message, char *type, const Jid * const from_jid, const J
         type = (char*)_get_message_type_str(message->type);
     }
 
+    char *escaped_message = str_replace(message->plain, "'", "''");
+
     if (asprintf(&query, "INSERT INTO `ChatLogs` (`from_jid`, `from_resource`, `to_jid`, `to_resource`, `message`, `timestamp`, `stanza_id`, `replace_id`, `type`, `encryption`) VALUES ('%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s')",
                 from_jid->barejid,
                 from_jid->resourcepart ? from_jid->resourcepart : "",
                 to_jid->barejid,
                 to_jid->resourcepart ? to_jid->resourcepart : "",
-                message->plain,
+                escaped_message,
                 date_fmt,
                 message->id ? message->id : "",
                 message->replace_id ? message->replace_id : "",
@@ -340,6 +343,7 @@ _add_to_db(ProfMessage *message, char *type, const Jid * const from_jid, const J
         log_error("log_database_add(): SQL query. could not allocate memory");
         return;
     }
+    free(escaped_message);
     g_free(date_fmt);
 
     if( SQLITE_OK != sqlite3_exec(g_chatlog_database, query, NULL, 0, &err_msg)) {
