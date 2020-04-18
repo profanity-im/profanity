@@ -885,11 +885,13 @@ muc_members_add(const char *const room, const char *const jid)
     if (chat_room) {
         if (g_hash_table_insert(chat_room->members, strdup(jid), NULL)) {
 #ifdef HAVE_OMEMO
-            Jid *our_jid = jid_create(connection_get_fulljid());
-            if (strcmp(jid, our_jid->barejid) != 0) {
-                omemo_start_session(jid);
+            if(chat_room->anonymity_type == MUC_ANONYMITY_TYPE_NONANONYMOUS ) {
+                Jid *our_jid = jid_create(connection_get_fulljid());
+                if (strcmp(jid, our_jid->barejid) != 0) {
+                    omemo_start_session(jid);
+                }
+                jid_destroy(our_jid);
             }
-            jid_destroy(our_jid);
 #endif
         }
     }
