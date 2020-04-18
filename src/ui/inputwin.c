@@ -324,6 +324,10 @@ _inp_write(char *line, int offset)
 static int
 _inp_edited(const wint_t ch)
 {
+    // Use own state to be thread-safe with possible pthreads. C standard
+    // guarantees that initial value of the state will be zeroed buffer.
+    static mbstate_t mbstate;
+
     // backspace
     if (ch == 127) {
         return 1;
@@ -341,7 +345,10 @@ _inp_edited(const wint_t ch)
 
     // printable
     char bytes[MB_CUR_MAX+1];
-    size_t utf_len = wcrtomb(bytes, ch, (mbstate_t*)NULL);
+    size_t utf_len = wcrtomb(bytes, ch, &mbstate);
+    if (utf_len == (size_t)-1) {
+        return 0;
+    }
     bytes[utf_len] = '\0';
     gunichar unichar = g_utf8_get_char(bytes);
 
