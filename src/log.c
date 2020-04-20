@@ -485,32 +485,32 @@ _chat_log_chat(const char *const login, const char *const other, const char *con
     }
 
     gchar *date_fmt = g_date_time_format(timestamp, "%H:%M:%S");
-    FILE *logp = fopen(dated_log->filename, "a");
+    FILE *chatlogp = fopen(dated_log->filename, "a");
     g_chmod(dated_log->filename, S_IRUSR | S_IWUSR);
-    if (logp) {
+    if (chatlogp) {
         if (direction == PROF_IN_LOG) {
             if (strncmp(msg, "/me ", 4) == 0) {
                 if (resourcepart) {
-                    fprintf(logp, "%s - *%s %s\n", date_fmt, resourcepart, msg + 4);
+                    fprintf(chatlogp, "%s - *%s %s\n", date_fmt, resourcepart, msg + 4);
                 } else {
-                    fprintf(logp, "%s - *%s %s\n", date_fmt, other, msg + 4);
+                    fprintf(chatlogp, "%s - *%s %s\n", date_fmt, other, msg + 4);
                 }
             } else {
                 if (resourcepart) {
-                    fprintf(logp, "%s - %s: %s\n", date_fmt, resourcepart, msg);
+                    fprintf(chatlogp, "%s - %s: %s\n", date_fmt, resourcepart, msg);
                 } else {
-                    fprintf(logp, "%s - %s: %s\n", date_fmt, other, msg);
+                    fprintf(chatlogp, "%s - %s: %s\n", date_fmt, other, msg);
                 }
             }
         } else {
             if (strncmp(msg, "/me ", 4) == 0) {
-                fprintf(logp, "%s - *me %s\n", date_fmt, msg + 4);
+                fprintf(chatlogp, "%s - *me %s\n", date_fmt, msg + 4);
             } else {
-                fprintf(logp, "%s - me: %s\n", date_fmt, msg);
+                fprintf(chatlogp, "%s - me: %s\n", date_fmt, msg);
             }
         }
-        fflush(logp);
-        int result = fclose(logp);
+        fflush(chatlogp);
+        int result = fclose(chatlogp);
         if (result == EOF) {
             log_error("Error closing file %s, errno = %d", dated_log->filename, errno);
         }
@@ -599,17 +599,17 @@ _groupchat_log_chat(const gchar *const login, const gchar *const room, const gch
 
     gchar *date_fmt = g_date_time_format(dt, "%H:%M:%S");
 
-    FILE *logp = fopen(dated_log->filename, "a");
+    FILE *grpchatlogp = fopen(dated_log->filename, "a");
     g_chmod(dated_log->filename, S_IRUSR | S_IWUSR);
-    if (logp) {
+    if (grpchatlogp) {
         if (strncmp(msg, "/me ", 4) == 0) {
-            fprintf(logp, "%s - *%s %s\n", date_fmt, nick, msg + 4);
+            fprintf(grpchatlogp, "%s - *%s %s\n", date_fmt, nick, msg + 4);
         } else {
-            fprintf(logp, "%s - %s: %s\n", date_fmt, nick, msg);
+            fprintf(grpchatlogp, "%s - %s: %s\n", date_fmt, nick, msg);
         }
 
-        fflush(logp);
-        int result = fclose(logp);
+        fflush(grpchatlogp);
+        int result = fclose(grpchatlogp);
         if (result == EOF) {
             log_error("Error closing file %s, errno = %d", dated_log->filename, errno);
         }
