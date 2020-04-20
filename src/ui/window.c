@@ -738,7 +738,7 @@ win_refresh_without_subwin(ProfWin *window)
 void
 win_refresh_with_subwin(ProfWin *window)
 {
-    int subwin_cols;
+    int subwin_cols = 0;
     int cols = getmaxx(stdscr);
     int row_start = screen_mainwin_row_start();
     int row_end = screen_mainwin_row_end();
