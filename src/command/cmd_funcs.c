@@ -8082,7 +8082,7 @@ static gboolean
 _cmd_execute_alias(ProfWin *window, const char *const inp, gboolean *ran)
 {
     if (inp[0] != '/') {
-        ran = FALSE;
+        *ran = FALSE;
         return TRUE;
     }
 
