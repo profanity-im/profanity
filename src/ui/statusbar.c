@@ -508,7 +508,6 @@ _destroy_tab(StatusBarTab *tab)
         }
         free(tab);
     }
-    tab = NULL;
 }
 
 static int
