@@ -1067,9 +1067,7 @@ cons_show_aliases(GList *aliases)
     }
 
     GList *curr = aliases;
-    if (curr) {
-        cons_show("Command aliases:");
-    }
+    cons_show("Command aliases:");
     while (curr) {
         ProfAlias *alias = curr->data;
         cons_show("  /%s -> %s", alias->name, alias->value);
