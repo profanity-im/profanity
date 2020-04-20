@@ -742,12 +742,11 @@ win_refresh_with_subwin(ProfWin *window)
     int cols = getmaxx(stdscr);
     int row_start = screen_mainwin_row_start();
     int row_end = screen_mainwin_row_end();
+    ProfLayoutSplit *layout = (ProfLayoutSplit*)window->layout;
 
     if (window->type == WIN_MUC) {
-        ProfLayoutSplit *layout = (ProfLayoutSplit*)window->layout;
         subwin_cols = win_occpuants_cols();
     } else if (window->type == WIN_CONSOLE) {
-        ProfLayoutSplit *layout = (ProfLayoutSplit*)window->layout;
         subwin_cols = win_roster_cols();
     }
 
