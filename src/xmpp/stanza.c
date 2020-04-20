@@ -1784,13 +1784,21 @@ stanza_create_caps_from_query_element(xmpp_stanza_t *query)
                 formField = field->data;
                 if (formField->values) {
                     if (strcmp(formField->var, "software") == 0) {
-                        software = strdup(formField->values->data);
+                        if (software == NULL) {
+                            software = strdup(formField->values->data);
+                        }
                     } else if (strcmp(formField->var, "software_version") == 0) {
-                        software_version = strdup(formField->values->data);
+                        if (software_version == NULL) {
+                            software_version = strdup(formField->values->data);
+                        }
                     } else if (strcmp(formField->var, "os") == 0) {
-                        os = strdup(formField->values->data);
+                        if (os == NULL) {
+                            os = strdup(formField->values->data);
+                        }
                     } else if (strcmp(formField->var, "os_version") == 0) {
-                        os_version = strdup(formField->values->data);
+                        if (os_version == NULL) {
+                            os_version = strdup(formField->values->data);
+                        }
                     }
                 }
                 field = g_slist_next(field);
