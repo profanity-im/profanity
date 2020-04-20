@@ -499,12 +499,6 @@ wins_get_current_num(void)
 }
 
 void
-wins_close_current(void)
-{
-    wins_close_by_num(current);
-}
-
-void
 wins_close_by_num(int i)
 {
     // console cannot be closed
