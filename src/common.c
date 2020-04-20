@@ -227,50 +227,6 @@ utf8_display_len(const char *const str)
 }
 
 char*
-file_getline(FILE *stream)
-{
-    char *buf;
-    char *result;
-    char *s = NULL;
-    size_t s_size = 1;
-    int need_exit = 0;
-
-    buf = (char *)malloc(READ_BUF_SIZE);
-
-    while (TRUE) {
-        result = fgets(buf, READ_BUF_SIZE, stream);
-        if (result == NULL)
-            break;
-        size_t buf_size = strlen(buf);
-        if (buf[buf_size - 1] == '\n') {
-            buf_size--;
-            buf[buf_size] = '\0';
-            need_exit = 1;
-        }
-
-        result = (char *)realloc(s, s_size + buf_size);
-        if (result == NULL) {
-            if (s) {
-                free(s);
-                s = NULL;
-            }
-            break;
-        }
-        s = result;
-
-        memcpy(s + s_size - 1, buf, buf_size);
-        s_size += buf_size;
-        s[s_size - 1] = '\0';
-
-        if (need_exit != 0 || feof(stream) != 0)
-            break;
-    }
-
-    free(buf);
-    return s;
-}
-
-char*
 release_get_latest(void)
 {
     char *url = "https://profanity-im.github.io/profanity_version.txt";
