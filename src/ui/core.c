@@ -810,7 +810,6 @@ ui_room_join(const char *const roomjid, gboolean focus)
         int num = wins_get_num(window);
         status_bar_active(num, WIN_MUC, mucwin->roomjid);
         ProfWin *console = wins_get_console();
-        char *nick = muc_nick(roomjid);
         win_println(console, THEME_TYPING, "!", "-> Autojoined %s as %s (%d).", roomjid, nick, num);
     }
 
