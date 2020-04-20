@@ -595,9 +595,9 @@ _groupchat_log_chat(const gchar *const login, const gchar *const room, const gch
         g_hash_table_replace(logs, strdup(room), dated_log);
     }
 
-    GDateTime *dt = g_date_time_new_now_local();
+    GDateTime *dt_tmp = g_date_time_new_now_local();
 
-    gchar *date_fmt = g_date_time_format(dt, "%H:%M:%S");
+    gchar *date_fmt = g_date_time_format(dt_tmp, "%H:%M:%S");
 
     FILE *grpchatlogp = fopen(dated_log->filename, "a");
     g_chmod(dated_log->filename, S_IRUSR | S_IWUSR);
@@ -616,7 +616,7 @@ _groupchat_log_chat(const gchar *const login, const gchar *const room, const gch
     }
 
     g_free(date_fmt);
-    g_date_time_unref(dt);
+    g_date_time_unref(dt_tmp);
 }
 
 void
