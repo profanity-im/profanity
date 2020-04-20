@@ -267,7 +267,6 @@ _iq_id_handler_free(ProfIqHandler *handler)
         handler->free_func(handler->userdata);
     }
     free(handler);
-    handler = NULL;
 }
 
 void
