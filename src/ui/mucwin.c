@@ -393,7 +393,7 @@ static void
 _mucwin_print_mention(ProfWin *window, const char *const message, const char *const from, const char *const mynick, GSList *mentions, const char *const ch, int flags)
 {
     int last_pos = 0;
-    int pos = 0;
+    int pos;
     GSList *curr = mentions;
     while (curr) {
         pos = GPOINTER_TO_INT(curr->data);
