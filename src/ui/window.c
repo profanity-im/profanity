@@ -738,22 +738,21 @@ win_refresh_without_subwin(ProfWin *window)
 void
 win_refresh_with_subwin(ProfWin *window)
 {
+    int subwin_cols;
     int cols = getmaxx(stdscr);
-    int subwin_cols = 0;
-
     int row_start = screen_mainwin_row_start();
     int row_end = screen_mainwin_row_end();
+
     if (window->type == WIN_MUC) {
         ProfLayoutSplit *layout = (ProfLayoutSplit*)window->layout;
         subwin_cols = win_occpuants_cols();
-        pnoutrefresh(layout->base.win, layout->base.y_pos, 0, row_start, 0, row_end, (cols-subwin_cols)-1);
-        pnoutrefresh(layout->subwin, layout->sub_y_pos, 0, row_start, (cols-subwin_cols), row_end, cols-1);
     } else if (window->type == WIN_CONSOLE) {
         ProfLayoutSplit *layout = (ProfLayoutSplit*)window->layout;
         subwin_cols = win_roster_cols();
-        pnoutrefresh(layout->base.win, layout->base.y_pos, 0, row_start, 0, row_end, (cols-subwin_cols)-1);
-        pnoutrefresh(layout->subwin, layout->sub_y_pos, 0, row_start, (cols-subwin_cols), row_end, cols-1);
     }
+
+    pnoutrefresh(layout->base.win, layout->base.y_pos, 0, row_start, 0, row_end, (cols-subwin_cols)-1);
+    pnoutrefresh(layout->subwin, layout->sub_y_pos, 0, row_start, (cols-subwin_cols), row_end, cols-1);
 }
 
 void
