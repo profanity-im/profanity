@@ -88,7 +88,6 @@ char* str_replace(const char *string, const char *substr, const char *replacemen
 int str_contains(const char str[], int size, char ch);
 gboolean strtoi_range(char *str, int *saveptr, int min, int max, char **err_msg);
 int utf8_display_len(const char *const str);
-char* file_getline(FILE *stream);
 
 char* release_get_latest(void);
 gboolean release_is_new(char *found_version);
