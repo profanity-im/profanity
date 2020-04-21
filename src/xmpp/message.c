@@ -1114,8 +1114,6 @@ _handle_carbons(xmpp_stanza_t *const stanza)
     }
 #endif
 
-    message->body = xmpp_message_get_body(message_stanza);
-
     const gchar *to = xmpp_stanza_get_to(message_stanza);
     const gchar *from = xmpp_stanza_get_from(message_stanza);
 
@@ -1125,8 +1123,12 @@ _handle_carbons(xmpp_stanza_t *const stanza)
     Jid *jid_from = jid_create(from);
     Jid *jid_to = jid_create(to);
 
+    message->body = xmpp_message_get_body(message_stanza);
+
     if (!message->plain && !message->body) {
         log_error("Message received without body from: %s", jid_from->fulljid);
+        jid_destroy(jid_from);
+        jid_destroy(jid_to);
         goto out;
     } else if (!message->plain) {
         message->plain = strdup(message->body);
