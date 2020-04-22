@@ -742,6 +742,12 @@ wins_show_subwin(ProfWin *window)
 {
     win_show_subwin(window);
 
+    // only mucwin and console have occupants/roster subwin
+    if (window->type != WIN_MUC ||
+            window->type != WIN_CONSOLSE) {
+        return;
+    }
+
     ProfWin *current_win = wins_get_current();
     win_refresh_with_subwin(current_win);
 }
