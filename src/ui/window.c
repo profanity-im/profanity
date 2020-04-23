@@ -748,6 +748,9 @@ win_refresh_with_subwin(ProfWin *window)
         subwin_cols = win_occpuants_cols();
     } else if (window->type == WIN_CONSOLE) {
         subwin_cols = win_roster_cols();
+    } else {
+        // Other window types don't support subwindows, we shouldn't be here
+        return;
     }
 
     pnoutrefresh(layout->base.win, layout->base.y_pos, 0, row_start, 0, row_end, (cols-subwin_cols)-1);
