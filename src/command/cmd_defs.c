@@ -2394,8 +2394,9 @@ static struct cmd_t command_defs[] =
             "/correction <on>|<off>",
             "/correction char <char>")
         CMD_DESC(
-            "Settings regarding Last Message Correction (XEP-0308)."
-            "Corrections will only work in MUC and regular chat windows. MUC PMs won't be allowed.")
+            "Settings regarding Last Message Correction (XEP-0308). "
+            "Corrections will only work in MUC and regular chat windows. MUC PMs won't be allowed. "
+            "For more information on how to correct messages, see: /help correct.")
         CMD_ARGS(
             { "on|off", "Enable/Disable support for last message correction."},
             { "char",   "Set character that will prefix corrected messages. Default: '+'."})
@@ -2413,7 +2414,8 @@ static struct cmd_t command_defs[] =
             "/correct <message>")
         CMD_DESC(
             "Correct and resend the last message (XEP-0308). "
-            "Use tab completion to get the last send message.")
+            "Use tab completion to get the last sent message. "
+            "For more information on how to configure corrections, see: /help correction.")
         CMD_ARGS(
             { "message",    "The corrected message."})
         CMD_NOEXAMPLES
