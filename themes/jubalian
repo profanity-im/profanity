@@ -83,7 +83,6 @@ receipt.sent=bold_red
 
 [ui]
 correction.char=+
-history.muc.color=regular
 color.occupants.nick=true
 beep=false
 flash=false
@@ -163,4 +162,3 @@ statusbar.tabs=10
 statusbar.tablen=7
 statusbar.show.name=true
 statusbar.show.number=true
-history.muc.color=regular

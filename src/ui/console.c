@@ -1871,10 +1871,6 @@ cons_logging_setting(void)
         cons_show("Groupchat logging (/logging group)          : ON");
     else
         cons_show("Groupchat logging (/logging group)          : OFF");
-
-    char *pref = prefs_get_string(PREF_HISTORY_COLOR_MUC);
-    cons_show("MUC history color (/logging group color)    : %s", pref);
-    prefs_free_string(pref);
 }
 
 void

@@ -1223,28 +1223,18 @@ win_print_history(ProfWin *window, const ProfMessage *const message)
 {
     g_date_time_ref(message->timestamp);
 
-    int flags = 0;
-
     char *display_name;
-    if (message->type == PROF_MSG_TYPE_MUC) {
-        display_name = strdup(message->from_jid->resourcepart);
+    int flags = 0;
+    const char *jid = connection_get_fulljid();
+    Jid *jidp = jid_create(jid);
 
-        char *muc_history_color = prefs_get_string(PREF_HISTORY_COLOR_MUC);
-        if (g_strcmp0(muc_history_color, "unanimous") == 0) {
-            flags = NO_COLOUR_FROM;
-        }
-        g_free(muc_history_color);
+    if (g_strcmp0(jidp->barejid, message->from_jid->barejid) == 0) {
+        display_name = strdup("me");
     } else {
-        const char *jid = connection_get_fulljid();
-        Jid *jidp = jid_create(jid);
-
-        if (g_strcmp0(jidp->barejid, message->from_jid->barejid) == 0) {
-            display_name = strdup("me");
-        } else {
-            display_name = roster_get_msg_display_name(message->from_jid->barejid, message->from_jid->resourcepart);
-        }
-        jid_destroy(jidp);
+        display_name = roster_get_msg_display_name(message->from_jid->barejid, message->from_jid->resourcepart);
     }
+
+    jid_destroy(jidp);
 
     buffer_append(window->layout->buffer, "-", 0, message->timestamp, flags, THEME_TEXT_HISTORY, display_name, NULL, message->plain, NULL, NULL);
     _win_print_internal(window, "-", 0, message->timestamp, flags, THEME_TEXT_HISTORY, display_name, message->plain, NULL);

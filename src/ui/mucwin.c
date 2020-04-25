@@ -365,27 +365,16 @@ mucwin_history(ProfMucWin *mucwin, const ProfMessage *const message)
 {
     assert(mucwin != NULL);
 
-    ProfWin *window = (ProfWin*)mucwin;
     char *nick = message->from_jid->resourcepart;
+    char *mynick = muc_nick(mucwin->roomjid);
+    GSList *mentions = get_mentions(prefs_get_boolean(PREF_NOTIFY_MENTION_WHOLE_WORD), prefs_get_boolean(PREF_NOTIFY_MENTION_CASE_SENSITIVE), message->plain, mynick);
+    GList *triggers = prefs_message_get_triggers(message->plain);
 
-    // 'unanimous' all in one color (like always was)
-    // 'regular' colored like new messages too
-    char *muc_history_color = prefs_get_string(PREF_HISTORY_COLOR_MUC);
+    mucwin_incoming_msg(mucwin, message, mentions, triggers, FALSE);
 
-    if (g_strcmp0(muc_history_color, "unanimous") == 0) {
-        win_print_history(window, message);
-    } else {
-        char *mynick = muc_nick(mucwin->roomjid);
-        GSList *mentions = get_mentions(prefs_get_boolean(PREF_NOTIFY_MENTION_WHOLE_WORD), prefs_get_boolean(PREF_NOTIFY_MENTION_CASE_SENSITIVE), message->plain, mynick);
-        GList *triggers = prefs_message_get_triggers(message->plain);
+    g_slist_free(mentions);
+    g_list_free_full(triggers, free);
 
-        mucwin_incoming_msg(mucwin, message, mentions, triggers, FALSE);
-
-        g_slist_free(mentions);
-        g_list_free_full(triggers, free);
-    }
-
-    g_free(muc_history_color);
     plugins_on_room_history_message(mucwin->roomjid, nick, message->plain, message->timestamp);
 }
 

@@ -6715,12 +6715,6 @@ cmd_logging(ProfWin *window, const char *const command, gchar **args)
         if (g_strcmp0(args[1], "on") == 0 || g_strcmp0(args[1], "off") == 0) {
             _cmd_set_boolean_preference(args[1], command, "Groupchat logging", PREF_GRLOG);
             return TRUE;
-        } else if (strcmp(args[1], "color") == 0 && args[2] != NULL) {
-            if (g_strcmp0(args[2], "unanimous") == 0 || g_strcmp0(args[2], "regular") == 0) {
-                prefs_set_string(PREF_HISTORY_COLOR_MUC, args[2]);
-                cons_show("Groupchat logging color set to: %s", args[2]);
-                return TRUE;
-            }
         }
     }
 
