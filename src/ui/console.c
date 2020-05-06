@@ -2046,7 +2046,7 @@ cons_correction_setting(void)
     }
 
     char *cc = prefs_get_correction_char();
-    cons_show("LMC indication char (/correction char)                             : %c", cc);
+    cons_show("LMC indication char (/correction char)                             : %s", cc);
     free(cc);
 }
 
