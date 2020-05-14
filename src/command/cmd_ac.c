@@ -121,6 +121,7 @@ static char* _color_autocomplete(ProfWin *window, const char *const input, gbool
 static char* _avatar_autocomplete(ProfWin *window, const char *const input, gboolean previous);
 static char* _correction_autocomplete(ProfWin *window, const char *const input, gboolean previous);
 static char* _correct_autocomplete(ProfWin *window, const char *const input, gboolean previous);
+static char* _software_autocomplete(ProfWin *window, const char *const input, gboolean previous);
 
 static char* _script_autocomplete_func(const char *const prefix, gboolean previous, void *context);
 
@@ -1613,7 +1614,7 @@ _cmd_ac_complete_params(ProfWin *window, const char *const input, gboolean previ
         assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
         Autocomplete nick_ac = muc_roster_ac(mucwin->roomjid);
         if (nick_ac) {
-            gchar *nick_choices[] = { "/msg", "/info", "/caps", "/software" } ;
+            gchar *nick_choices[] = { "/msg", "/info", "/caps" } ;
 
             // Remove quote character before and after names when doing autocomplete
             char *unquoted = strip_arg_quotes(input);
@@ -1641,7 +1642,7 @@ _cmd_ac_complete_params(ProfWin *window, const char *const input, gboolean previ
         }
         free(unquoted);
 
-        gchar *resource_choices[] = { "/caps", "/software", "/ping" };
+        gchar *resource_choices[] = { "/caps", "/ping" };
         for (i = 0; i < ARRAY_SIZE(resource_choices); i++) {
             result = autocomplete_param_with_func(input, resource_choices[i], roster_fulljid_autocomplete, previous, NULL);
             if (result) {
@@ -1726,6 +1727,7 @@ _cmd_ac_complete_params(ProfWin *window, const char *const input, gboolean previ
     g_hash_table_insert(ac_funcs, "/avatar",        _avatar_autocomplete);
     g_hash_table_insert(ac_funcs, "/correction",    _correction_autocomplete);
     g_hash_table_insert(ac_funcs, "/correct",       _correct_autocomplete);
+    g_hash_table_insert(ac_funcs, "/software",      _software_autocomplete);
 
     int len = strlen(input);
     char parsed[len+1];
@@ -3884,6 +3886,41 @@ _correct_autocomplete(ProfWin *window, const char *const input, gboolean previou
 	g_string_append(result_str, last_message);
 	char *result = result_str->str;
 	g_string_free(result_str, FALSE);
+
+	return result;
+}
+
+static char*
+_software_autocomplete(ProfWin *window, const char *const input, gboolean previous)
+{
+    char *result = NULL;
+
+	if (window->type == WIN_CHAT){
+        ProfChatWin *chatwin = (ProfChatWin*)window;
+        assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
+
+        GString *search_str = g_string_new("/software ");
+        g_string_append(search_str, chatwin->barejid);
+        result = autocomplete_param_with_func(search_str->str, "/software", roster_fulljid_autocomplete, previous, NULL);
+        g_string_free(search_str, TRUE);
+    } else if (window->type == WIN_MUC) {
+		ProfMucWin *mucwin = (ProfMucWin*)window;
+		assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
+
+        Autocomplete nick_ac = muc_roster_ac(mucwin->roomjid);
+
+        if (nick_ac) {
+            result = autocomplete_param_with_ac(input, "/software", nick_ac, TRUE, previous);
+            if (result) {
+                return result;
+            }
+        }
+	} else {
+        result = autocomplete_param_with_func(input, "/software", roster_fulljid_autocomplete, previous, NULL);
+        if (result) {
+            return result;
+        }
+	}
 
 	return result;
 }

@@ -3427,6 +3427,22 @@ cmd_caps(ProfWin *window, const char *const command, gchar **args)
     return TRUE;
 }
 
+static void
+_send_software_version_iq_to_fulljid(char *request)
+{
+    Jid *myJid = jid_create(connection_get_fulljid());
+    Jid *jid = jid_create(request);
+
+    if (jid == NULL || jid->fulljid == NULL) {
+        cons_show("You must provide a full jid to the /software command.");
+    } else if (g_strcmp0(jid->barejid, myJid->barejid) == 0) {
+        cons_show("Cannot request software version for yourself.");
+    } else {
+        iq_send_software_version(jid->fulljid);
+    }
+    jid_destroy(myJid);
+    jid_destroy(jid);
+}
 
 gboolean
 cmd_software(ProfWin *window, const char *const command, gchar **args)
@@ -3458,7 +3474,8 @@ cmd_software(ProfWin *window, const char *const command, gchar **args)
             break;
         case WIN_CHAT:
             if (args[0]) {
-                cons_show("No parameter needed to /software when in chat.");
+                _send_software_version_iq_to_fulljid(args[0]);
+                break;
             } else {
                 ProfChatWin *chatwin = (ProfChatWin*)window;
                 assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
@@ -3477,24 +3494,13 @@ cmd_software(ProfWin *window, const char *const command, gchar **args)
                     iq_send_software_version(fulljid->str);
                     g_string_free(fulljid, TRUE);
                 } else {
-                    win_println(window, THEME_DEFAULT, "-", "Unknown resource for /software command.");
+                    win_println(window, THEME_DEFAULT, "-", "Unknown resource for /software command. See /help resource.");
                 }
+                break;
             }
-            break;
         case WIN_CONSOLE:
             if (args[0]) {
-                Jid *myJid = jid_create(connection_get_fulljid());
-                Jid *jid = jid_create(args[0]);
-
-                if (jid == NULL || jid->fulljid == NULL) {
-                    cons_show("You must provide a full jid to the /software command.");
-                } else if (g_strcmp0(jid->barejid, myJid->barejid) == 0) {
-                    cons_show("Cannot request software version for yourself.");
-                } else {
-                    iq_send_software_version(jid->fulljid);
-                }
-                jid_destroy(myJid);
-                jid_destroy(jid);
+                _send_software_version_iq_to_fulljid(args[0]);
             } else {
                 cons_show("You must provide a jid to the /software command.");
             }
