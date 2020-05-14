@@ -1505,28 +1505,39 @@ _version_result_id_handler(xmpp_stanza_t *const stanza, void *const userdata)
     xmpp_ctx_t *ctx = xmpp_conn_get_context(conn);
 
     Jid *jidp = jid_create((char*)userdata);
+
     const char *presence = NULL;
-    if (muc_active(jidp->barejid)) {
-        Occupant *occupant = muc_roster_item(jidp->barejid, jidp->resourcepart);
-        presence = string_from_resource_presence(occupant->presence);
-    } else {
-        PContact contact = roster_get_contact(jidp->barejid);
-        if (contact) {
-            Resource *resource = p_contact_get_resource(contact, jidp->resourcepart);
-            if (!resource) {
-                ui_handle_software_version_error(jidp->fulljid, "Unknown resource");
-                if (name_str) xmpp_free(ctx, name_str);
-                if (version_str) xmpp_free(ctx, version_str);
-                if (os_str) xmpp_free(ctx, os_str);
-                return 0;
-            }
-            presence = string_from_resource_presence(resource->presence);
+
+    // if it has a fulljid it is a regular user (not server or component)
+    if (jidp->fulljid) {
+        if (muc_active(jidp->barejid)) {
+            Occupant *occupant = muc_roster_item(jidp->barejid, jidp->resourcepart);
+            presence = string_from_resource_presence(occupant->presence);
         } else {
-            presence = "offline";
+            PContact contact = roster_get_contact(jidp->barejid);
+            if (contact) {
+                Resource *resource = p_contact_get_resource(contact, jidp->resourcepart);
+                if (!resource) {
+                    ui_handle_software_version_error(jidp->fulljid, "Unknown resource");
+                    if (name_str) xmpp_free(ctx, name_str);
+                    if (version_str) xmpp_free(ctx, version_str);
+                    if (os_str) xmpp_free(ctx, os_str);
+                    return 0;
+                }
+                presence = string_from_resource_presence(resource->presence);
+            } else {
+                presence = "offline";
+            }
         }
     }
 
-    ui_show_software_version(jidp->fulljid, presence, name_str, version_str, os_str);
+    if (jidp->fulljid) {
+        // regular user
+        ui_show_software_version(jidp->fulljid, presence, name_str, version_str, os_str);
+    } else {
+        // server or component
+        ui_show_software_version(jidp->barejid, "online", name_str, version_str, os_str);
+    }
 
     jid_destroy(jidp);
 

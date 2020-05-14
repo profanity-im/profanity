@@ -3522,6 +3522,25 @@ cmd_software(ProfWin *window, const char *const command, gchar **args)
 }
 
 gboolean
+cmd_serversoftware(ProfWin *window, const char *const command, gchar **args)
+{
+    jabber_conn_status_t conn_status = connection_get_status();
+
+    if (conn_status != JABBER_CONNECTED) {
+        cons_show("You are not currently connected.");
+        return TRUE;
+    }
+
+    if (args[0]) {
+        iq_send_software_version(args[0]);
+    } else {
+        cons_show("You must provide a jid to the /serversoftware command.");
+    }
+
+    return TRUE;
+}
+
+gboolean
 cmd_join(ProfWin *window, const char *const command, gchar **args)
 {
     jabber_conn_status_t conn_status = connection_get_status();

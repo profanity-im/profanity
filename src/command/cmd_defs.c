@@ -2433,6 +2433,23 @@ static struct cmd_t command_defs[] =
             { "on|off", "Enable or disable slashguard." })
         CMD_NOEXAMPLES
     },
+
+    { "/serversoftware",
+        parse_args, 1, 1, NULL,
+        CMD_NOSUBFUNCS
+        CMD_MAINFUNC(cmd_serversoftware)
+        CMD_TAGS(
+            CMD_TAG_DISCOVERY)
+        CMD_SYN(
+            "/serversoftware <domain>")
+        CMD_DESC(
+            "Find server or component software version information.")
+        CMD_ARGS(
+            { "<domain>", "The jid of your server or component." })
+        CMD_EXAMPLES(
+            "/software valhalla.edda",
+            "/software xmpp.vanaheimr.edda")
+    }
 };
 
 static GHashTable *search_index;
