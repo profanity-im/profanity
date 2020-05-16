@@ -54,6 +54,7 @@
 #include "xmpp/muc.h"
 #include "xmpp/xmpp.h"
 #include "xmpp/roster_list.h"
+#include "ui/buffer.h"
 
 #ifdef HAVE_LIBGPGME
 #include "pgp/gpg.h"
@@ -122,6 +123,7 @@ static char* _avatar_autocomplete(ProfWin *window, const char *const input, gboo
 static char* _correction_autocomplete(ProfWin *window, const char *const input, gboolean previous);
 static char* _correct_autocomplete(ProfWin *window, const char *const input, gboolean previous);
 static char* _software_autocomplete(ProfWin *window, const char *const input, gboolean previous);
+static char* _urlopen_autocomplete(ProfWin *window, const char *const input, gboolean previous);
 
 static char* _script_autocomplete_func(const char *const prefix, gboolean previous, void *context);
 
@@ -1721,6 +1723,7 @@ _cmd_ac_complete_params(ProfWin *window, const char *const input, gboolean previ
     g_hash_table_insert(ac_funcs, "/correction",    _correction_autocomplete);
     g_hash_table_insert(ac_funcs, "/correct",       _correct_autocomplete);
     g_hash_table_insert(ac_funcs, "/software",      _software_autocomplete);
+    g_hash_table_insert(ac_funcs, "/urlopen",       _urlopen_autocomplete);
 
     int len = strlen(input);
     char parsed[len+1];
@@ -3912,3 +3915,23 @@ _software_autocomplete(ProfWin *window, const char *const input, gboolean previo
 
 	return result;
 }
+
+static char*
+_urlopen_autocomplete(ProfWin *window, const char *const input, gboolean previous)
+{
+	if (window->type == WIN_CONSOLE){
+        return NULL;
+    }
+
+    ProfBuffEntry *entry = buffer_get_url(window->layout->buffer, NULL);
+    if (entry && entry->message) {
+        GString *result_str = g_string_new("/urlopen ");
+        g_string_append(result_str, entry->message);
+        char *result = result_str->str;
+        g_string_free(result_str, FALSE);
+        return result;
+    }
+
+    return NULL;
+}
+

@@ -73,5 +73,6 @@ int buffer_size(ProfBuff buffer);
 ProfBuffEntry* buffer_get_entry(ProfBuff buffer, int entry);
 ProfBuffEntry* buffer_get_entry_by_id(ProfBuff buffer, const char *const id);
 gboolean buffer_mark_received(ProfBuff buffer, const char *const id);
+ProfBuffEntry* buffer_get_url(ProfBuff buffer, const char *const id);
 
 #endif

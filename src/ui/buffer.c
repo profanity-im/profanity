@@ -162,6 +162,21 @@ buffer_get_entry_by_id(ProfBuff buffer, const char *const id)
     return NULL;
 }
 
+ProfBuffEntry*
+buffer_get_url(ProfBuff buffer, const char *const id)
+{
+    GSList *entries = buffer->entries;
+    while (entries) {
+        ProfBuffEntry *entry = entries->data;
+        if (strstr(entry->message, "http://")) {
+            return entry;
+        }
+        entries = g_slist_next(entries);
+    }
+
+    return NULL;
+}
+
 static void
 _free_entry(ProfBuffEntry *entry)
 {
