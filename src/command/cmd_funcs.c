@@ -8858,3 +8858,23 @@ cmd_slashguard(ProfWin *window, const char *const command, gchar **args)
 
     return TRUE;
 }
+
+gboolean
+cmd_urlopen(ProfWin *window, const char *const command, gchar **args)
+{
+    if (args[0] == NULL) {
+        cons_bad_cmd_usage(command);
+        return TRUE;
+    }
+
+    //TODO: make function. see src/xmpp/avatar.c
+    GString *cmd = g_string_new("");
+
+    g_string_append_printf(cmd, "%s %s > /dev/null 2>&1", "xdg-open", args[0]);
+    cons_show("Calling: %s", cmd->str);
+    FILE *stream = popen(cmd->str, "r");
+
+    pclose(stream);
+    g_string_free(cmd, TRUE);
+    return TRUE;
+}

@@ -2449,7 +2449,23 @@ static struct cmd_t command_defs[] =
         CMD_EXAMPLES(
             "/software valhalla.edda",
             "/software xmpp.vanaheimr.edda")
-    }
+    },
+
+    { "/urlopen",
+        parse_args, 1, -1, NULL,
+        CMD_NOSUBFUNCS
+        CMD_MAINFUNC(cmd_urlopen)
+        CMD_TAGS(
+            CMD_TAG_CHAT,
+            CMD_TAG_GROUPCHAT)
+        CMD_SYN(
+            "/urlopen <url>")
+        CMD_DESC(
+            "Open the URL")
+        CMD_ARGS(
+            { "<url>",    "URL to open."})
+        CMD_NOEXAMPLES
+    },
 };
 
 static GHashTable *search_index;

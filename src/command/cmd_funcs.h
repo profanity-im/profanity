@@ -232,4 +232,6 @@ gboolean cmd_correction(ProfWin *window, const char *const command, gchar **args
 gboolean cmd_correct(ProfWin *window, const char *const command, gchar **args);
 gboolean cmd_slashguard(ProfWin *window, const char *const command, gchar **args);
 gboolean cmd_serversoftware(ProfWin *window, const char *const command, gchar **args);
+gboolean cmd_urlopen(ProfWin *window, const char *const command, gchar **args);
+
 #endif
