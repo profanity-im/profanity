@@ -251,7 +251,6 @@ static Autocomplete status_ac;
 static Autocomplete status_state_ac;
 static Autocomplete logging_ac;
 static Autocomplete logging_group_ac;
-static Autocomplete logging_group_color_ac;
 static Autocomplete color_ac;
 static Autocomplete correction_ac;
 static Autocomplete avatar_ac;
@@ -973,10 +972,6 @@ cmd_ac_init(void)
     autocomplete_add(logging_group_ac, "off");
     autocomplete_add(logging_group_ac, "color");
 
-    logging_group_color_ac = autocomplete_new();
-    autocomplete_add(logging_group_color_ac, "unanimous");
-    autocomplete_add(logging_group_color_ac, "regular");
-
     color_ac = autocomplete_new();
     autocomplete_add(color_ac, "on");
     autocomplete_add(color_ac, "off");
@@ -1306,7 +1301,6 @@ cmd_ac_reset(ProfWin *window)
     autocomplete_reset(status_state_ac);
     autocomplete_reset(logging_ac);
     autocomplete_reset(logging_group_ac);
-    autocomplete_reset(logging_group_color_ac);
     autocomplete_reset(color_ac);
     autocomplete_reset(correction_ac);
     autocomplete_reset(avatar_ac);
@@ -1465,7 +1459,6 @@ cmd_ac_uninit(void)
     autocomplete_free(status_state_ac);
     autocomplete_free(logging_ac);
     autocomplete_free(logging_group_ac);
-    autocomplete_free(logging_group_color_ac);
     autocomplete_free(color_ac);
     autocomplete_free(correction_ac);
     autocomplete_free(avatar_ac);
@@ -3787,11 +3780,6 @@ _logging_autocomplete(ProfWin *window, const char *const input, gboolean previou
     }
 
     result = autocomplete_param_with_ac(input, "/logging group", logging_group_ac, TRUE, previous);
-    if (result) {
-        return result;
-    }
-
-    result = autocomplete_param_with_ac(input, "/logging group color", logging_group_color_ac, TRUE, previous);
     if (result) {
         return result;
     }
