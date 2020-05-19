@@ -3919,19 +3919,14 @@ _software_autocomplete(ProfWin *window, const char *const input, gboolean previo
 static char*
 _urlopen_autocomplete(ProfWin *window, const char *const input, gboolean previous)
 {
-	if (window->type == WIN_CONSOLE){
-        return NULL;
-    }
+    char *result = NULL;
 
-    ProfBuffEntry *entry = buffer_get_url(window->layout->buffer, NULL);
-    if (entry && entry->message) {
-        GString *result_str = g_string_new("/urlopen ");
-        g_string_append(result_str, entry->message);
-        char *result = result_str->str;
-        g_string_free(result_str, FALSE);
+	if (window->type == WIN_CONSOLE){
         return result;
     }
 
-    return NULL;
+    result = autocomplete_param_no_with_func(input, "/urlopen", 2, buffer_get_url, previous, window->layout->buffer);
+
+    return result;
 }
 
