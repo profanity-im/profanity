@@ -266,15 +266,7 @@ _avatar_request_item_result_handler(xmpp_stanza_t *const stanza, void *const use
 
     // if we shall open it
     if (g_hash_table_contains(shall_open, from_attr)) {
-        GString *cmd = g_string_new("");
-
-        g_string_append_printf(cmd, "%s %s > /dev/null 2>&1", prefs_get_string(PREF_AVATAR_CMD), filename->str);
-        cons_show("Calling: %s", cmd->str);
-        FILE *stream = popen(cmd->str, "r");
-
-        pclose(stream);
-        g_string_free(cmd, TRUE);
-
+        call_external(prefs_get_string(PREF_AVATAR_CMD), filename->str);
         g_hash_table_remove(shall_open, from_attr);
     }
 

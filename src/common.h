@@ -106,4 +106,6 @@ void get_file_paths_recursive(const char *directory, GSList **contents);
 
 char* get_random_string(int length);
 
+void call_external(const char *const exe, const char *const param);
+
 #endif

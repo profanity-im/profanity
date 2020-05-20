@@ -483,3 +483,16 @@ get_mentions(gboolean whole_word, gboolean case_sensitive, const char *const mes
 
     return mentions;
 }
+
+void
+call_external(const char *const exe, const char *const param)
+{
+    GString *cmd = g_string_new("");
+
+    g_string_append_printf(cmd, "%s %s > /dev/null 2>&1", exe, param);
+    log_debug("Calling external: %s", cmd->str);
+    FILE *stream = popen(cmd->str, "r");
+
+    pclose(stream);
+    g_string_free(cmd, TRUE);
+}
