@@ -292,7 +292,7 @@ chatwin_incoming_msg(ProfChatWin *chatwin, ProfMessage *message, gboolean win_cr
         //1) only send IQ once
         //2) sort incoming messages on timestamp
         //for now if experimental MAM is enabled we dont show no history from sql either
-        
+
         // MUCPMs also get printed here. In their case we don't save any logs (because nick owners can change) and thus we shouldn't read logs
         // (and if we do we need to check the resourcepart)
         if (!prefs_get_boolean(PREF_MAM) && prefs_get_boolean(PREF_CHLOG) && prefs_get_boolean(PREF_HISTORY) && message->type == PROF_MSG_TYPE_CHAT) {
@@ -310,6 +310,8 @@ chatwin_incoming_msg(ProfChatWin *chatwin, ProfMessage *message, gboolean win_cr
         win_insert_last_read_position_marker((ProfWin*)chatwin, chatwin->barejid);
         win_print_incoming(window, display_name, message);
     }
+
+    wins_add_urls_ac(window, message);
 
     if (prefs_get_boolean(PREF_BEEP)) {
         beep();

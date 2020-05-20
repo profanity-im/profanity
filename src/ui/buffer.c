@@ -162,39 +162,6 @@ buffer_get_entry_by_id(ProfBuff buffer, const char *const id)
     return NULL;
 }
 
-char*
-buffer_get_url(const char *const search_str, gboolean previous, void *context)
-{
-    Autocomplete urls_ac = autocomplete_new();
-    ProfBuff buffer = (ProfBuff)context;
-    GSList *entries = buffer->entries;
-
-    while (entries) {
-        ProfBuffEntry *entry = entries->data;
-
-        GRegex *regex;
-        GMatchInfo *match_info;
-
-        regex = g_regex_new("https?://\\S+", 0, 0, NULL);
-        g_regex_match (regex, entry->message, 0, &match_info);
-        while (g_match_info_matches (match_info))
-        {
-            gchar *word = g_match_info_fetch (match_info, 0);
-
-            autocomplete_add(urls_ac, word);
-
-            g_free (word);
-            g_match_info_next (match_info, NULL);
-        }
-        g_match_info_free (match_info);
-        g_regex_unref (regex);
-
-        entries = g_slist_next(entries);
-    }
-
-    return autocomplete_complete(urls_ac, "", FALSE, previous);
-}
-
 static void
 _free_entry(ProfBuffEntry *entry)
 {

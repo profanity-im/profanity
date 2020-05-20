@@ -3921,11 +3921,11 @@ _urlopen_autocomplete(ProfWin *window, const char *const input, gboolean previou
 {
     char *result = NULL;
 
-	if (window->type == WIN_CONSOLE){
-        return result;
+	if (window->type == WIN_CHAT ||
+        window->type == WIN_MUC ||
+        window->type == WIN_PRIVATE) {
+        result = autocomplete_param_with_func(input, "/urlopen", wins_get_url, previous, window);
     }
-
-    result = autocomplete_param_no_with_func(input, "/urlopen", 2, buffer_get_url, previous, window->layout->buffer);
 
     return result;
 }

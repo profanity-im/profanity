@@ -98,4 +98,7 @@ void win_reset_search_attempts(void);
 char* win_close_autocomplete(const char *const search_str, gboolean previous, void *context);
 void win_close_reset_search_attempts(void);
 
+void wins_add_urls_ac(const ProfWin *const win, const ProfMessage *const message);
+char* wins_get_url(const char *const search_str, gboolean previous, void *context);
+
 #endif
