@@ -65,6 +65,7 @@ static void _show_self_presence(void);
 static void _show_contact_presence(ProfChatWin *chatwin);
 static void _show_privacy(ProfChatWin *chatwin);
 static void _show_muc_privacy(ProfMucWin *mucwin);
+static void _show_scrolled(ProfWin *current);
 
 void
 create_title_bar(void)
@@ -201,6 +202,7 @@ _title_bar_draw(void)
         assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
         _show_contact_presence(chatwin);
         _show_privacy(chatwin);
+        _show_scrolled(current);
 
         if (typing) {
             wprintw(win, " (typing...)");
@@ -209,12 +211,31 @@ _title_bar_draw(void)
         ProfMucWin *mucwin = (ProfMucWin*) current;
         assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
         _show_muc_privacy(mucwin);
+        _show_scrolled(current);
     }
 
     _show_self_presence();
 
     wnoutrefresh(win);
     inp_put_back();
+}
+
+static void
+_show_scrolled(ProfWin *current)
+{
+    if (current && current->layout->paged == 1) {
+        int bracket_attrs = theme_attrs(THEME_TITLE_BRACKET);
+
+        wattron(win, bracket_attrs);
+        wprintw(win, "[");
+        wattroff(win, bracket_attrs);
+
+        wprintw(win, "SCROLLED");
+
+        wattron(win, bracket_attrs);
+        wprintw(win, "]");
+        wattroff(win, bracket_attrs);
+    }
 }
 
 static void
