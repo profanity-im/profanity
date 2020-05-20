@@ -8878,3 +8878,19 @@ cmd_urlopen(ProfWin *window, const char *const command, gchar **args)
 
     return TRUE;
 }
+
+gboolean
+cmd_executable(ProfWin *window, const char *const command, gchar **args)
+{
+    if (g_strcmp0(args[0], "avatar") == 0) {
+        prefs_set_string(PREF_AVATAR_CMD, args[1]);
+        cons_show("Avatar command set to: %s", args[1]);
+    } else if (g_strcmp0(args[0], "urlopen") == 0) {
+        prefs_set_string(PREF_URL_OPEN_CMD, args[1]);
+        cons_show("urlopen command set to: %s", args[1]);
+    } else {
+        cons_bad_cmd_usage(command);
+    }
+
+    return TRUE;
+}

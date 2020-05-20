@@ -2340,26 +2340,23 @@ static struct cmd_t command_defs[] =
     },
 
     { "/avatar",
-        parse_args, 2, 2, &cons_avatar_setting,
+        parse_args, 2, 2, NULL,
         CMD_NOSUBFUNCS
         CMD_MAINFUNC(cmd_avatar)
         CMD_TAGS(
             CMD_TAG_CHAT)
         CMD_SYN(
             "/avatar get <barejid>",
-            "/avatar open <barejid>",
-            "/avatar cmd <command>")
+            "/avatar open <barejid>")
         CMD_DESC(
             "Download avatar (XEP-0084) for a certain contact. "
             "If nothing happens after using this command the user either doesn't have an avatar set at all "
             "or doesn't use XEP-0084 to publish it.")
         CMD_ARGS(
             { "get <barejid>", "Download the avatar. barejid is the JID to download avatar from."},
-            { "cmd <command>", "Set a command to execute with 'avatar open'. Use your favourite image viewer here."},
             { "open <barejid>", "Download avatar and open it with command."})
         CMD_EXAMPLES(
             "/avatar get thor@valhalla.edda",
-            "/avatar cmd xdg-open",
             "/avatar open freyja@vanaheimr.edda")
     },
 
@@ -2465,6 +2462,26 @@ static struct cmd_t command_defs[] =
         CMD_ARGS(
             { "<url>",    "URL to open."})
         CMD_NOEXAMPLES
+    },
+
+    { "/executable",
+        parse_args, 2, 2, &cons_executable_setting,
+        CMD_NOSUBFUNCS
+        CMD_MAINFUNC(cmd_executable)
+        CMD_TAGS(
+            CMD_TAG_DISCOVERY)
+        CMD_SYN(
+            "/executable avatar <cmd>",
+            "/executable urlopen <cmd>")
+        CMD_DESC(
+            "Configure executable that should be called upon a certain command."
+            "Default is xdg-open.")
+        CMD_ARGS(
+            { "avatar", "Set executable that is run in /avatar open. Use your favourite image viewer." },
+            { "urlopen", "Set executable that is run in /urlopen. Use your favourite browser." })
+        CMD_EXAMPLES(
+            "/executable avatar xdg-open",
+            "/executable urlopen firefox")
     },
 };
 

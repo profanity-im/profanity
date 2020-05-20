@@ -2051,13 +2051,15 @@ cons_correction_setting(void)
 }
 
 void
-cons_avatar_setting(void)
+cons_executable_setting(void)
 {
-    char *pref = prefs_get_string(PREF_AVATAR_CMD);
+    char *avatar = prefs_get_string(PREF_AVATAR_CMD);
+    cons_show("Avatar command (/executable avatar)                                   : %s", avatar);
+    prefs_free_string(avatar);
 
-    cons_show("Avatar command (/avatar cmd)                                       : %s", pref);
-
-    prefs_free_string(pref);
+    char *exec = prefs_get_string(PREF_URL_OPEN_CMD);
+    cons_show("urlopen command (/executable urlopen)                                 : %s", exec);
+    prefs_free_string(exec);
 }
 
 void
