@@ -8871,7 +8871,7 @@ cmd_urlopen(ProfWin *window, const char *const command, gchar **args)
             return TRUE;
         }
 
-        call_external("xdg-open", args[0]);
+        call_external(prefs_get_string(PREF_URL_OPEN_CMD), args[0]);
     } else {
         cons_show("urlopen not supported in this window");
     }

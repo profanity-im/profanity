@@ -1783,6 +1783,7 @@ _get_group(preference_t pref)
         case PREF_LOG_ROTATE:
         case PREF_LOG_SHARED:
         case PREF_AVATAR_CMD:
+        case PREF_URL_OPEN_CMD:
             return PREF_GROUP_LOGGING;
         case PREF_AUTOAWAY_CHECK:
         case PREF_AUTOAWAY_MODE:
@@ -2070,6 +2071,8 @@ _get_key(preference_t pref)
             return "slashguard";
         case PREF_MAM:
             return "mam";
+        case PREF_URL_OPEN_CMD:
+            return "urlopen.cmd";
         default:
             return NULL;
     }
@@ -2205,6 +2208,7 @@ _get_default_string(preference_t pref)
         case PREF_COLOR_NICK:
             return "false";
         case PREF_AVATAR_CMD:
+        case PREF_URL_OPEN_CMD:
             return "xdg-open";
         default:
             return NULL;
