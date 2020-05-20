@@ -54,6 +54,7 @@
 #include "xmpp/muc.h"
 #include "xmpp/xmpp.h"
 #include "xmpp/roster_list.h"
+#include "ui/buffer.h"
 
 #ifdef HAVE_LIBGPGME
 #include "pgp/gpg.h"
@@ -122,6 +123,8 @@ static char* _avatar_autocomplete(ProfWin *window, const char *const input, gboo
 static char* _correction_autocomplete(ProfWin *window, const char *const input, gboolean previous);
 static char* _correct_autocomplete(ProfWin *window, const char *const input, gboolean previous);
 static char* _software_autocomplete(ProfWin *window, const char *const input, gboolean previous);
+static char* _urlopen_autocomplete(ProfWin *window, const char *const input, gboolean previous);
+static char* _executable_autocomplete(ProfWin *window, const char *const input, gboolean previous);
 
 static char* _script_autocomplete_func(const char *const prefix, gboolean previous, void *context);
 
@@ -254,6 +257,7 @@ static Autocomplete logging_group_ac;
 static Autocomplete color_ac;
 static Autocomplete correction_ac;
 static Autocomplete avatar_ac;
+static Autocomplete executable_ac;
 
 void
 cmd_ac_init(void)
@@ -986,8 +990,11 @@ cmd_ac_init(void)
 
     avatar_ac = autocomplete_new();
     autocomplete_add(avatar_ac, "get");
-    autocomplete_add(avatar_ac, "cmd");
     autocomplete_add(avatar_ac, "open");
+
+    executable_ac = autocomplete_new();
+    autocomplete_add(executable_ac, "avatar");
+    autocomplete_add(executable_ac, "urlopen");
 }
 
 void
@@ -1304,6 +1311,7 @@ cmd_ac_reset(ProfWin *window)
     autocomplete_reset(color_ac);
     autocomplete_reset(correction_ac);
     autocomplete_reset(avatar_ac);
+    autocomplete_reset(executable_ac);
 
     autocomplete_reset(script_ac);
     if (script_show_ac) {
@@ -1462,6 +1470,7 @@ cmd_ac_uninit(void)
     autocomplete_free(color_ac);
     autocomplete_free(correction_ac);
     autocomplete_free(avatar_ac);
+    autocomplete_free(executable_ac);
 }
 
 static void
@@ -1721,6 +1730,8 @@ _cmd_ac_complete_params(ProfWin *window, const char *const input, gboolean previ
     g_hash_table_insert(ac_funcs, "/correction",    _correction_autocomplete);
     g_hash_table_insert(ac_funcs, "/correct",       _correct_autocomplete);
     g_hash_table_insert(ac_funcs, "/software",      _software_autocomplete);
+    g_hash_table_insert(ac_funcs, "/urlopen",       _urlopen_autocomplete);
+    g_hash_table_insert(ac_funcs, "/executable",    _executable_autocomplete);
 
     int len = strlen(input);
     char parsed[len+1];
@@ -3911,4 +3922,31 @@ _software_autocomplete(ProfWin *window, const char *const input, gboolean previo
 	}
 
 	return result;
+}
+
+static char*
+_urlopen_autocomplete(ProfWin *window, const char *const input, gboolean previous)
+{
+    char *result = NULL;
+
+	if (window->type == WIN_CHAT ||
+        window->type == WIN_MUC ||
+        window->type == WIN_PRIVATE) {
+        result = autocomplete_param_with_func(input, "/urlopen", wins_get_url, previous, window);
+    }
+
+    return result;
+}
+
+static char*
+_executable_autocomplete(ProfWin *window, const char *const input, gboolean previous)
+{
+    char *result = NULL;
+
+    result = autocomplete_param_with_ac(input, "/executable", executable_ac, TRUE, previous);
+    if (result) {
+        return result;
+    }
+
+    return NULL;
 }

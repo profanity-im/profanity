@@ -534,7 +534,7 @@ wins_close_by_num(int i)
                         }
                     }
                 }
-
+                autocomplete_free(window->urls_ac);
                 break;
             }
             case WIN_MUC:
@@ -546,6 +546,7 @@ wins_close_by_num(int i)
                 if (mucwin->last_msg_timestamp) {
                     g_date_time_unref(mucwin->last_msg_timestamp);
                 }
+                autocomplete_free(window->urls_ac);
                 break;
             }
             case WIN_PRIVATE:
@@ -553,6 +554,7 @@ wins_close_by_num(int i)
                 ProfPrivateWin *privwin = (ProfPrivateWin*)window;
                 autocomplete_remove(wins_ac, privwin->fulljid);
                 autocomplete_remove(wins_close_ac, privwin->fulljid);
+                autocomplete_free(window->urls_ac);
                 break;
             }
             case WIN_XML:
@@ -624,6 +626,7 @@ wins_new_chat(const char *const barejid)
             autocomplete_add(wins_close_ac, nick);
         }
     }
+    newwin->urls_ac = autocomplete_new();
 
     return newwin;
 }
@@ -638,6 +641,8 @@ wins_new_muc(const char *const roomjid)
     g_hash_table_insert(windows, GINT_TO_POINTER(result), newwin);
     autocomplete_add(wins_ac, roomjid);
     autocomplete_add(wins_close_ac, roomjid);
+    newwin->urls_ac = autocomplete_new();
+
     return newwin;
 }
 
@@ -649,6 +654,7 @@ wins_new_config(const char *const roomjid, DataForm *form, ProfConfWinCallback s
     g_list_free(keys);
     ProfWin *newwin = win_create_config(roomjid, form, submit, cancel, userdata);
     g_hash_table_insert(windows, GINT_TO_POINTER(result), newwin);
+
     return newwin;
 }
 
@@ -662,6 +668,8 @@ wins_new_private(const char *const fulljid)
     g_hash_table_insert(windows, GINT_TO_POINTER(result), newwin);
     autocomplete_add(wins_ac, fulljid);
     autocomplete_add(wins_close_ac, fulljid);
+    newwin->urls_ac = autocomplete_new();
+
     return newwin;
 }
 
@@ -1140,4 +1148,37 @@ wins_get_next_unread(void)
 
     g_list_free(values);
     return NULL;
+}
+
+void
+wins_add_urls_ac(const ProfWin *const win, const ProfMessage *const message)
+{
+    GRegex *regex;
+    GMatchInfo *match_info;
+
+    regex = g_regex_new("https?://\\S+", 0, 0, NULL);
+    g_regex_match (regex, message->plain, 0, &match_info);
+
+    while (g_match_info_matches (match_info))
+    {
+        gchar *word = g_match_info_fetch (match_info, 0);
+
+        autocomplete_add(win->urls_ac, word);
+        // for people who run profanity a long time, we don't want to waste a lot of memory
+        autocomplete_remove_older_than_max(win->urls_ac, 20);
+
+        g_free (word);
+        g_match_info_next (match_info, NULL);
+    }
+
+    g_match_info_free (match_info);
+    g_regex_unref (regex);
+}
+
+char*
+wins_get_url(const char *const search_str, gboolean previous, void *context)
+{
+    ProfWin *win = (ProfWin*)context;
+
+    return autocomplete_complete(win->urls_ac, search_str, FALSE, previous);
 }

@@ -79,6 +79,8 @@ privwin_incoming_msg(ProfPrivateWin *privatewin, ProfMessage *message)
         }
     }
 
+    wins_add_urls_ac(window, message);
+
     if (prefs_get_boolean(PREF_BEEP)) {
         beep();
     }
