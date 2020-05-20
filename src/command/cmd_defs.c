@@ -1438,7 +1438,7 @@ static struct cmd_t command_defs[] =
             { "room text on|off",               "Show message text in chat room message notifications." },
             { "room trigger add <text>",        "Notify when specified text included in all chat room messages." },
             { "room trigger remove <text>",     "Remove chat room notification trigger." },
-            { "room trigger list",              "List all chat room triggers." },
+            { "room trigger list",              "List all chat room highlight triggers." },
             { "room trigger on|off",            "Enable or disable all chat room notification triggers." },
             { "on|off",                         "Override the global message setting for the current chat room." },
             { "mention on|off",                 "Override the global 'mention' setting for the current chat room." },
