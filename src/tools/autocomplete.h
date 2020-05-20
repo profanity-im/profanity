@@ -74,4 +74,6 @@ char* autocomplete_param_no_with_func(const char *const input, char *command,
 void autocomplete_reset(Autocomplete ac);
 
 gboolean autocomplete_contains(Autocomplete ac, const char *value);
+
+void autocomplete_remove_older_than_max(Autocomplete ac, int maxsize);
 #endif

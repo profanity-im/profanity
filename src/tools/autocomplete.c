@@ -385,6 +385,18 @@ autocomplete_param_no_with_func(const char *const input, char *command, int arg_
     return NULL;
 }
 
+/* remove the first message if we have more than max */
+void
+autocomplete_remove_older_than_max(Autocomplete ac, int maxsize)
+{
+    if (autocomplete_length(ac) > maxsize) {
+        GList *first = g_list_nth(ac->items, 0);
+        if (first) {
+            ac->items = g_list_delete_link(ac->items, first);
+        }
+    }
+}
+
 static gchar*
 _search_next(Autocomplete ac, GList *curr, gboolean quote)
 {

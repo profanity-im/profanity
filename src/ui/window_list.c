@@ -1164,6 +1164,8 @@ wins_add_urls_ac(const ProfWin *const win, const ProfMessage *const message)
         gchar *word = g_match_info_fetch (match_info, 0);
 
         autocomplete_add(win->urls_ac, word);
+        // for people who run profanity a long time, we don't want to waste a lot of memory
+        autocomplete_remove_older_than_max(win->urls_ac, 20);
 
         g_free (word);
         g_match_info_next (match_info, NULL);
