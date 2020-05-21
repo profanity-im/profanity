@@ -2432,6 +2432,8 @@ cons_theme_properties(void)
     _cons_theme_bar_prop(THEME_TITLE_TEXT, "titlebar.text");
     _cons_theme_bar_prop(THEME_TITLE_BRACKET, "titlebar.brackets");
 
+    _cons_theme_bar_prop(THEME_TITLE_SCROLLED, "titlebar.scrolled");
+
     _cons_theme_bar_prop(THEME_TITLE_UNENCRYPTED, "titlebar.unencrypted");
     _cons_theme_bar_prop(THEME_TITLE_ENCRYPTED, "titlebar.encrypted");
     _cons_theme_bar_prop(THEME_TITLE_UNTRUSTED, "titlebar.untrusted");

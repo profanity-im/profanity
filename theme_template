@@ -3,6 +3,7 @@ bkgnd=
 titlebar=
 titlebar.text=
 titlebar.brackets=
+titlebar.scrolled=
 titlebar.unencrypted=
 titlebar.encrypted=
 titlebar.untrusted=

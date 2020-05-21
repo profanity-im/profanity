@@ -737,6 +737,7 @@ theme_attrs(theme_item_t attrs)
     case THEME_TIME:                    _theme_prep_fgnd("main.time",               lookup_str, &bold); break;
     case THEME_TITLE_TEXT:              _theme_prep_fgnd("titlebar.text",           lookup_str, &bold); break;
     case THEME_TITLE_BRACKET:           _theme_prep_fgnd("titlebar.brackets",       lookup_str, &bold); break;
+    case THEME_TITLE_SCROLLED:          _theme_prep_fgnd("titlebar.scrolled",       lookup_str, &bold); break;
     case THEME_TITLE_UNENCRYPTED:       _theme_prep_fgnd("titlebar.unencrypted",    lookup_str, &bold); break;
     case THEME_TITLE_ENCRYPTED:         _theme_prep_fgnd("titlebar.encrypted",      lookup_str, &bold); break;
     case THEME_TITLE_UNTRUSTED:         _theme_prep_fgnd("titlebar.untrusted",      lookup_str, &bold); break;
@@ -827,6 +828,7 @@ theme_attrs(theme_item_t attrs)
     switch (attrs) {
     case THEME_TITLE_TEXT:
     case THEME_TITLE_BRACKET:
+    case THEME_TITLE_SCROLLED:
     case THEME_TITLE_UNENCRYPTED:
     case THEME_TITLE_ENCRYPTED:
     case THEME_TITLE_UNTRUSTED:

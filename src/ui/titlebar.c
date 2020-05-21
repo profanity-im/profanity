@@ -225,12 +225,15 @@ _show_scrolled(ProfWin *current)
 {
     if (current && current->layout->paged == 1) {
         int bracket_attrs = theme_attrs(THEME_TITLE_BRACKET);
+        int scrolled_attrs = theme_attrs(THEME_TITLE_SCROLLED);
 
         wattron(win, bracket_attrs);
         wprintw(win, "[");
         wattroff(win, bracket_attrs);
 
+        wattron(win, scrolled_attrs);
         wprintw(win, "SCROLLED");
+        wattroff(win, scrolled_attrs);
 
         wattron(win, bracket_attrs);
         wprintw(win, "]");
