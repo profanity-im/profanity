@@ -1265,7 +1265,7 @@ _handle_chat(xmpp_stanza_t *const stanza, gboolean is_mam)
     }
 
     // handle chat sessions and states
-    if (!message->timestamp && jid->resourcepart) {
+    if (jid->resourcepart) {
         gboolean gone = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_GONE) != NULL;
         gboolean typing = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_COMPOSING) != NULL;
         gboolean paused = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_PAUSED) != NULL;
