@@ -1750,6 +1750,7 @@ _get_group(preference_t pref)
         case PREF_OCCUPANTS_COLOR_NICK:
         case PREF_STATUSBAR_SHOW_NAME:
         case PREF_STATUSBAR_SHOW_NUMBER:
+        case PREF_STATUSBAR_SHOW_READ:
         case PREF_STATUSBAR_SELF:
         case PREF_STATUSBAR_CHAT:
         case PREF_STATUSBAR_ROOM:
@@ -2051,6 +2052,8 @@ _get_key(preference_t pref)
             return "statusbar.show.name";
         case PREF_STATUSBAR_SHOW_NUMBER:
             return "statusbar.show.number";
+        case PREF_STATUSBAR_SHOW_READ:
+            return "statusbar.show.read";
         case PREF_STATUSBAR_SELF:
             return "statusbar.self";
         case PREF_STATUSBAR_CHAT:
@@ -2122,6 +2125,7 @@ _get_default_boolean(preference_t pref)
         case PREF_BOOKMARK_INVITE:
         case PREF_ROOM_LIST_CACHE:
         case PREF_STATUSBAR_SHOW_NUMBER:
+        case PREF_STATUSBAR_SHOW_READ:
         case PREF_REVEAL_OS:
         case PREF_CORRECTION_ALLOW:
         case PREF_RECEIPTS_SEND:

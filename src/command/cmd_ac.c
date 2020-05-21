@@ -955,6 +955,7 @@ cmd_ac_init(void)
     statusbar_show_ac = autocomplete_new();
     autocomplete_add(statusbar_show_ac, "name");
     autocomplete_add(statusbar_show_ac, "number");
+    autocomplete_add(statusbar_show_ac, "read");
 
     status_ac = autocomplete_new();
     autocomplete_add(status_ac, "set");

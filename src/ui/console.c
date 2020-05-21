@@ -1795,39 +1795,45 @@ void
 cons_statusbar_setting(void)
 {
     if (prefs_get_boolean(PREF_STATUSBAR_SHOW_NAME)) {
-        cons_show("Show tab names (/statusbar)         : ON");
+        cons_show("Show tab names (/statusbar)                 : ON");
     } else {
-        cons_show("Show tab names (/statusbar)         : OFF");
+        cons_show("Show tab names (/statusbar)                 : OFF");
     }
     if (prefs_get_boolean(PREF_STATUSBAR_SHOW_NUMBER)) {
-        cons_show("Show tab numbers (/statusbar)       : ON");
+        cons_show("Show tab numbers (/statusbar)               : ON");
     } else {
-        cons_show("Show tab numbers (/statusbar)       : OFF");
+        cons_show("Show tab numbers (/statusbar)               : OFF");
     }
 
-    cons_show("Max tabs (/statusbar)               : %d", prefs_get_statusbartabs());
+    if (prefs_get_boolean(PREF_STATUSBAR_SHOW_NUMBER)) {
+        cons_show("Show tab with no actions (/statusbar)       : ON");
+    } else {
+        cons_show("Show tab with no actions (/statusbar)       : OFF");
+    }
+
+    cons_show("Max tabs (/statusbar)                       : %d", prefs_get_statusbartabs());
 
     gint pref_len = prefs_get_statusbartablen();
     if (pref_len == 0) {
-        cons_show("Max tab length (/statusbar)         : OFF");
+        cons_show("Max tab length (/statusbar)                 : OFF");
     } else {
-        cons_show("Max tab length (/statusbar)         : %d", pref_len);
+        cons_show("Max tab length (/statusbar)                 : %d", pref_len);
     }
 
     char *pref_self = prefs_get_string(PREF_STATUSBAR_SELF);
     if (g_strcmp0(pref_self, "off") == 0) {
-        cons_show("Self statusbar display (/statusbar) : OFF");
+        cons_show("Self statusbar display (/statusbar)         : OFF");
     } else {
-        cons_show("Self statusbar display (/statusbar) : %s", pref_self);
+        cons_show("Self statusbar display (/statusbar)         : %s", pref_self);
     }
     prefs_free_string(pref_self);
 
     char *pref_chat = prefs_get_string(PREF_STATUSBAR_CHAT);
-    cons_show("Chat tab display (/statusbar)       : %s", pref_chat);
+    cons_show("Chat tab display (/statusbar)               : %s", pref_chat);
     prefs_free_string(pref_chat);
 
     char *pref_room = prefs_get_string(PREF_STATUSBAR_ROOM);
-    cons_show("Room tab display (/statusbar)       : %s", pref_room);
+    cons_show("Room tab display (/statusbar)               : %s", pref_room);
     prefs_free_string(pref_room);
 }
 

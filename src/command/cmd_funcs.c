@@ -6070,6 +6070,12 @@ cmd_statusbar(ProfWin *window, const char *const command, gchar **args)
             ui_resize();
             return TRUE;
         }
+        if (g_strcmp0(args[1], "read") == 0) {
+            prefs_set_boolean(PREF_STATUSBAR_SHOW_READ, TRUE);
+            cons_show("Enabled showing inactive tabs.");
+            ui_resize();
+            return TRUE;
+        }
         cons_bad_cmd_usage(command);
         return TRUE;
     }
@@ -6094,6 +6100,12 @@ cmd_statusbar(ProfWin *window, const char *const command, gchar **args)
             }
             prefs_set_boolean(PREF_STATUSBAR_SHOW_NUMBER, FALSE);
             cons_show("Disabled showing tab numbers.");
+            ui_resize();
+            return TRUE;
+        }
+        if (g_strcmp0(args[1], "read") == 0) {
+            prefs_set_boolean(PREF_STATUSBAR_SHOW_READ, FALSE);
+            cons_show("Disabled showing inactive tabs.");
             ui_resize();
             return TRUE;
         }

@@ -371,6 +371,11 @@ _status_bar_draw_tab(StatusBarTab *tab, int pos, int num)
 
     gboolean show_number = prefs_get_boolean(PREF_STATUSBAR_SHOW_NUMBER);
     gboolean show_name = prefs_get_boolean(PREF_STATUSBAR_SHOW_NAME);
+    gboolean show_read = prefs_get_boolean(PREF_STATUSBAR_SHOW_READ);
+
+    // dont show this
+    if (!show_read && !is_current && !tab->highlight)
+        return pos;
 
     pos = _status_bar_draw_bracket(is_current, pos, "[");
 
@@ -515,6 +520,7 @@ _tabs_width(void)
 {
     gboolean show_number = prefs_get_boolean(PREF_STATUSBAR_SHOW_NUMBER);
     gboolean show_name = prefs_get_boolean(PREF_STATUSBAR_SHOW_NAME);
+    gboolean show_read = prefs_get_boolean(PREF_STATUSBAR_SHOW_READ);
     gint max_tabs = prefs_get_statusbartabs();
 
     if (show_name && show_number) {
@@ -523,6 +529,11 @@ _tabs_width(void)
         for (i = 1; i <= max_tabs; i++) {
             StatusBarTab *tab = g_hash_table_lookup(statusbar->tabs, GINT_TO_POINTER(i));
             if (tab) {
+                gboolean is_current = i == statusbar->current_tab;
+                // dont calculate this in because not shown
+                if (!show_read && !is_current && !tab->highlight)
+                    continue;
+
                 char *display_name = _display_name(tab);
                 width += utf8_display_len(display_name);
                 width += 4;
@@ -538,6 +549,11 @@ _tabs_width(void)
         for (i = 1; i <= max_tabs; i++) {
             StatusBarTab *tab = g_hash_table_lookup(statusbar->tabs, GINT_TO_POINTER(i));
             if (tab) {
+                gboolean is_current = i == statusbar->current_tab;
+                // dont calculate this in because not shown
+                if (!show_read && !is_current && !tab->highlight)
+                    continue;
+
                 char *display_name = _display_name(tab);
                 width += utf8_display_len(display_name);
                 width += 2;

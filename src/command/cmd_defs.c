@@ -1343,8 +1343,8 @@ static struct cmd_t command_defs[] =
         CMD_TAGS(
             CMD_TAG_UI)
         CMD_SYN(
-            "/statusbar show name|number",
-            "/statusbar hide name|number",
+            "/statusbar show name|number|read",
+            "/statusbar hide name|number|read",
             "/statusbar maxtabs <value>",
             "/statusbar tablen <value>",
             "/statusbar self user|barejid|fulljid|off",
@@ -1359,6 +1359,7 @@ static struct cmd_t command_defs[] =
             { "tablen <value>",             "Set the maximum number of characters to show as the tab name, 0 sets to unlimited." },
             { "show|hide name",             "Show or hide names in tabs." },
             { "show|hide number",           "Show or hide numbers in tabs." },
+            { "show|hide read",             "Show or hide inactive tabs." },
             { "self user|barejid|fulljid",  "Show account user name, barejid, fulljid as status bar title." },
             { "self off",                   "Disable showing self as status bar title." },
             { "chat user|jid",              "Show users name, or the fulljid if no nick is present for chat tabs." },
@@ -1370,6 +1371,7 @@ static struct cmd_t command_defs[] =
             "/statusbar tablen 5",
             "/statusbar self user",
             "/statusbar chat jid",
+            "/statusbar hide read",
             "/statusbar hide name")
     },
 
