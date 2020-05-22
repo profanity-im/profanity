@@ -301,9 +301,21 @@ _bookmark_result_id_handler(xmpp_stanza_t *const stanza, void *const userdata)
         }
 
         const char *autojoin = xmpp_stanza_get_attribute(child, "autojoin");
-        gboolean autojoin_val = FALSE;;
+        gboolean autojoin_val = FALSE;
         if (autojoin && (strcmp(autojoin, "1") == 0 || strcmp(autojoin, "true") == 0)) {
             autojoin_val = TRUE;
+        }
+
+        // we save minimize, which is not standard, so that we don't remove it if it was set by gajim
+        int minimize = 0;
+        xmpp_stanza_t *minimize_st = stanza_get_child_by_name_and_ns(child, STANZA_NAME_MINIMIZE, STANZA_NS_EXT_GAJIM_BOOKMARKS);
+        if (minimize_st) {
+            char *min_str = xmpp_stanza_get_text(minimize_st);
+            if (strcmp(min_str, "true") == 0) {
+                minimize = 1;
+            } else if (strcmp(min_str, "false") == 0) {
+                minimize = 2;
+            }
         }
 
         autocomplete_add(bookmark_ac, barejid);
@@ -313,6 +325,7 @@ _bookmark_result_id_handler(xmpp_stanza_t *const stanza, void *const userdata)
         bookmark->password = password;
         bookmark->name = room_name ? strdup(room_name) : NULL;
         bookmark->autojoin = autojoin_val;
+        bookmark->ext_gajim_minimize = minimize;
         g_hash_table_insert(bookmarks, strdup(barejid), bookmark);
 
         if (autojoin_val) {
@@ -408,6 +421,26 @@ _send_bookmarks(void)
 
             xmpp_stanza_release(password_text);
             xmpp_stanza_release(password_st);
+        }
+
+        if (bookmark->ext_gajim_minimize == 1 ||
+                bookmark->ext_gajim_minimize == 2) {
+            xmpp_stanza_t *minimize_st = xmpp_stanza_new(ctx);
+            xmpp_stanza_set_name(minimize_st, STANZA_NAME_MINIMIZE);
+            xmpp_stanza_set_ns(minimize_st, STANZA_NS_EXT_GAJIM_BOOKMARKS);
+
+            xmpp_stanza_t *minimize_text = xmpp_stanza_new(ctx);
+            if (bookmark->ext_gajim_minimize == 1) {
+                xmpp_stanza_set_text(minimize_text, "true");
+            } else {
+                xmpp_stanza_set_text(minimize_text, "false");
+            }
+
+            xmpp_stanza_add_child(minimize_st, minimize_text);
+            xmpp_stanza_add_child(conference, minimize_st);
+
+            xmpp_stanza_release(minimize_text);
+            xmpp_stanza_release(minimize_st);
         }
 
         xmpp_stanza_add_child(storage, conference);

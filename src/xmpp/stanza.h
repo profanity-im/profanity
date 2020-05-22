@@ -104,6 +104,7 @@
 #define STANZA_NAME_COMMAND "command"
 #define STANZA_NAME_CONFIGURE "configure"
 #define STANZA_NAME_ORIGIN_ID "origin-id"
+#define STANZA_NAME_MINIMIZE "minimize"
 
 // error conditions
 #define STANZA_NAME_BAD_REQUEST "bad-request"
@@ -203,6 +204,7 @@
 #define STANZA_NS_USER_AVATAR_METADATA "urn:xmpp:avatar:metadata"
 #define STANZA_NS_LAST_MESSAGE_CORRECTION "urn:xmpp:message-correct:0"
 #define STANZA_NS_MAM2 "urn:xmpp:mam:2"
+#define STANZA_NS_EXT_GAJIM_BOOKMARKS "xmpp:gajim.org/bookmarks"
 
 #define STANZA_DATAFORM_SOFTWARE "urn:xmpp:dataforms:softwareinfo"
 
