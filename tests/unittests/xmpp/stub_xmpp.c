@@ -240,7 +240,7 @@ gboolean caps_jid_has_feature(const char *const jid, const char *const feature)
     return FALSE;
 }
 
-gboolean bookmark_add(const char *jid, const char *nick, const char *password, const char *autojoin_str)
+gboolean bookmark_add(const char *jid, const char *nick, const char *password, const char *autojoin_str, const char *name)
 {
     check_expected(jid);
     check_expected(nick);
@@ -249,7 +249,7 @@ gboolean bookmark_add(const char *jid, const char *nick, const char *password, c
     return mock_type(gboolean);
 }
 
-gboolean bookmark_update(const char *jid, const char *nick, const char *password, const char *autojoin_str)
+gboolean bookmark_update(const char *jid, const char *nick, const char *password, const char *autojoin_str, const char *name)
 {
     return FALSE;
 }
