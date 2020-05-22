@@ -277,6 +277,8 @@ _bookmark_result_id_handler(xmpp_stanza_t *const stanza, void *const userdata)
 
         log_debug("Handle bookmark for %s", barejid);
 
+        const char *room_name = xmpp_stanza_get_attribute(child, "name");
+
         char *nick = NULL;
         xmpp_stanza_t *nick_st = xmpp_stanza_get_child_by_name(child, "nick");
         if (nick_st) {
@@ -300,6 +302,7 @@ _bookmark_result_id_handler(xmpp_stanza_t *const stanza, void *const userdata)
         bookmark->barejid = strdup(barejid);
         bookmark->nick = nick;
         bookmark->password = password;
+        bookmark->name = room_name ? strdup(room_name) : NULL;
         bookmark->autojoin = autojoin_val;
         g_hash_table_insert(bookmarks, strdup(barejid), bookmark);
 
@@ -326,6 +329,7 @@ _bookmark_destroy(Bookmark *bookmark)
         free(bookmark->barejid);
         free(bookmark->nick);
         free(bookmark->password);
+        free(bookmark->name);
         free(bookmark);
     }
 }

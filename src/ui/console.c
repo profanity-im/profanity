@@ -696,7 +696,11 @@ cons_show_bookmarks(const GList *list)
             if (muc_active(item->barejid) && roomwin) {
                 presence_colour = THEME_ONLINE;
             }
-            win_print(console, presence_colour, "-", "  %s", item->barejid);
+            if (item->name) {
+                win_print(console, presence_colour, "-", "  %s - %s", item->name, item->barejid);
+            } else {
+                win_print(console, presence_colour, "-", "  %s", item->barejid);
+            }
             if (item->nick) {
                 win_append(console, presence_colour, "/%s", item->nick);
             }

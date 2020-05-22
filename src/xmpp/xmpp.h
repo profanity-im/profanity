@@ -93,6 +93,7 @@ typedef struct bookmark_t {
     char *barejid;
     char *nick;
     char *password;
+    char *name;
     gboolean autojoin;
 } Bookmark;
 
