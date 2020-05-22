@@ -122,9 +122,9 @@ bookmark_add(const char *jid, const char *nick, const char *password, const char
         bookmark->password = NULL;
     }
     if (name) {
-        bookmark->password = strdup(name);
+        bookmark->name = strdup(name);
     } else {
-        bookmark->password = NULL;
+        bookmark->name = NULL;
     }
 
     if (g_strcmp0(autojoin_str, "on") == 0) {
