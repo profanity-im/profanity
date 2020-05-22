@@ -452,6 +452,7 @@ sv_ev_outgoing_carbon(ProfMessage *message)
         } else {
             chat_log_msg_out(message->from_jid->barejid, message->plain, NULL);
         }
+        log_database_add_incoming(message);
     }
 
 #ifdef HAVE_LIBGPGME
