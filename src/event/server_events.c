@@ -1139,7 +1139,7 @@ sv_ev_muc_self_online(const char *const room, const char *const nick, gboolean c
 
         if (muc_invites_contain(room)) {
             if (prefs_get_boolean(PREF_BOOKMARK_INVITE) && !bookmark_exists(room)) {
-                bookmark_add(room, nick, muc_invite_password(room), "on");
+                bookmark_add(room, nick, muc_invite_password(room), "on", NULL);
             }
             muc_invites_remove(room);
         }

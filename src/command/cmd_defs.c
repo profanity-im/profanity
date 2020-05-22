@@ -802,8 +802,8 @@ static struct cmd_t command_defs[] =
         CMD_SYN(
             "/bookmark",
             "/bookmark list",
-            "/bookmark add [<room>] [nick <nick>] [password <password>] [autojoin on|off]",
-            "/bookmark update <room> [nick <nick>] [password <password>] [autojoin on|off]",
+            "/bookmark add [<room>] [nick <nick>] [password <password>] [name <roomname>] [autojoin on|off]",
+            "/bookmark update <room> [nick <nick>] [password <password>] [name <roomname>] autojoin on|off]",
             "/bookmark remove [<room>]",
             "/bookmark join <room>",
             "/bookmark invites on|off")
@@ -817,6 +817,7 @@ static struct cmd_t command_defs[] =
             { "update <room>", "Update the properties associated with a bookmark." },
             { "nick <nick>", "Nickname used in the chat room." },
             { "password <password>", "Password if required, may be stored in plaintext on your server." },
+            { "name <roomname>", "Optional name for the bookmark. By default localpart of the JID will be used." },
             { "autojoin on|off", "Whether to join the room automatically on login." },
             { "join <room>", "Join room using the properties associated with the bookmark." },
             { "invites on|off", "Whether or not to bookmark accepted room invites, defaults to 'on'."})

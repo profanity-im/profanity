@@ -4625,7 +4625,7 @@ cmd_bookmark(ProfWin *window, const char *const command, gchar **args)
         assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
         char *nick = muc_nick(mucwin->roomjid);
         char *password = muc_password(mucwin->roomjid);
-        gboolean added = bookmark_add(mucwin->roomjid, nick, password, "on");
+        gboolean added = bookmark_add(mucwin->roomjid, nick, password, "on", NULL);
         if (added) {
             win_println(window, THEME_DEFAULT, "!", "Bookmark added for %s.", mucwin->roomjid);
         } else {
@@ -4710,7 +4710,7 @@ cmd_bookmark(ProfWin *window, const char *const command, gchar **args)
         return TRUE;
     }
 
-    gchar *opt_keys[] = { "autojoin", "nick", "password", NULL };
+    gchar *opt_keys[] = { "autojoin", "nick", "password", "name", NULL };
     gboolean parsed;
 
     GHashTable *options = parse_options(&args[2], opt_keys, &parsed);
@@ -4733,9 +4733,10 @@ cmd_bookmark(ProfWin *window, const char *const command, gchar **args)
 
     char *nick = g_hash_table_lookup(options, "nick");
     char *password = g_hash_table_lookup(options, "password");
+    char *name = g_hash_table_lookup(options, "name");
 
     if (strcmp(cmd, "add") == 0) {
-        gboolean added = bookmark_add(jid, nick, password, autojoin);
+        gboolean added = bookmark_add(jid, nick, password, autojoin, name);
         if (added) {
             cons_show("Bookmark added for %s.", jid);
         } else {
@@ -4747,7 +4748,7 @@ cmd_bookmark(ProfWin *window, const char *const command, gchar **args)
     }
 
     if (strcmp(cmd, "update") == 0) {
-        gboolean updated = bookmark_update(jid, nick, password, autojoin);
+        gboolean updated = bookmark_update(jid, nick, password, autojoin, name);
         if (updated) {
             cons_show("Bookmark updated.");
         } else {

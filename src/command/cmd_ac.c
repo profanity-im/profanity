@@ -615,6 +615,7 @@ cmd_ac_init(void)
     autocomplete_add(bookmark_property_ac, "nick");
     autocomplete_add(bookmark_property_ac, "password");
     autocomplete_add(bookmark_property_ac, "autojoin");
+    autocomplete_add(bookmark_property_ac, "name");
 
 #ifdef HAVE_LIBOTR
     otr_ac = autocomplete_new();

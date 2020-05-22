@@ -251,8 +251,8 @@ void caps_add_feature(char *feature);
 void caps_remove_feature(char *feature);
 gboolean caps_jid_has_feature(const char *const jid, const char *const feature);
 
-gboolean bookmark_add(const char *jid, const char *nick, const char *password, const char *autojoin_str);
-gboolean bookmark_update(const char *jid, const char *nick, const char *password, const char *autojoin_str);
+gboolean bookmark_add(const char *jid, const char *nick, const char *password, const char *autojoin_str, const char *name);
+gboolean bookmark_update(const char *jid, const char *nick, const char *password, const char *autojoin_str, const char *name);
 gboolean bookmark_remove(const char *jid);
 gboolean bookmark_join(const char *jid);
 GList* bookmark_get_list(void);

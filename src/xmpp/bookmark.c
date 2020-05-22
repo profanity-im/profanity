@@ -95,7 +95,7 @@ bookmark_request(void)
 }
 
 gboolean
-bookmark_add(const char *jid, const char *nick, const char *password, const char *autojoin_str)
+bookmark_add(const char *jid, const char *nick, const char *password, const char *autojoin_str, const char *name)
 {
     assert(jid != NULL);
 
@@ -121,6 +121,11 @@ bookmark_add(const char *jid, const char *nick, const char *password, const char
     } else {
         bookmark->password = NULL;
     }
+    if (name) {
+        bookmark->password = strdup(name);
+    } else {
+        bookmark->password = NULL;
+    }
 
     if (g_strcmp0(autojoin_str, "on") == 0) {
         bookmark->autojoin = TRUE;
@@ -137,7 +142,7 @@ bookmark_add(const char *jid, const char *nick, const char *password, const char
 }
 
 gboolean
-bookmark_update(const char *jid, const char *nick, const char *password, const char *autojoin_str)
+bookmark_update(const char *jid, const char *nick, const char *password, const char *autojoin_str, const char *name)
 {
     assert(jid != NULL);
 
@@ -153,6 +158,10 @@ bookmark_update(const char *jid, const char *nick, const char *password, const c
     if (password) {
         free(bookmark->password);
         bookmark->password = strdup(password);
+    }
+    if (name) {
+        free(bookmark->name);
+        bookmark->name = strdup(name);
     }
     if (autojoin_str) {
         if (g_strcmp0(autojoin_str, "on") == 0) {
@@ -359,11 +368,17 @@ _send_bookmarks(void)
         xmpp_stanza_set_name(conference, STANZA_NAME_CONFERENCE);
         xmpp_stanza_set_attribute(conference, STANZA_ATTR_JID, bookmark->barejid);
 
-        Jid *jidp = jid_create(bookmark->barejid);
-        if (jidp->localpart) {
-            xmpp_stanza_set_attribute(conference, STANZA_ATTR_NAME, jidp->localpart);
+        if (bookmark->name) {
+            // use specified bookmark name
+            xmpp_stanza_set_attribute(conference, STANZA_ATTR_NAME, bookmark->name);
+        } else {
+            // use localpart of JID by if no name is specified
+            Jid *jidp = jid_create(bookmark->barejid);
+            if (jidp->localpart) {
+                xmpp_stanza_set_attribute(conference, STANZA_ATTR_NAME, jidp->localpart);
+            }
+            jid_destroy(jidp);
         }
-        jid_destroy(jidp);
 
         if (bookmark->autojoin) {
             xmpp_stanza_set_attribute(conference, STANZA_ATTR_AUTOJOIN, "true");
