@@ -61,8 +61,8 @@ static gboolean typing;
 static GTimer *typing_elapsed;
 
 static void _title_bar_draw(void);
-static void _show_self_presence(void);
-static void _show_contact_presence(ProfChatWin *chatwin);
+static int  _show_self_presence(void);
+static void _show_contact_presence(ProfChatWin *chatwin, int pos, int maxpos);
 static void _show_privacy(ProfChatWin *chatwin);
 static void _show_muc_privacy(ProfMucWin *mucwin);
 static void _show_scrolled(ProfWin *current);
@@ -183,6 +183,8 @@ title_bar_set_typing(gboolean is_typing)
 static void
 _title_bar_draw(void)
 {
+    int pos;
+    int maxrightpos;
     ProfWin *current = wins_get_current();
 
     werase(win);
@@ -196,11 +198,16 @@ _title_bar_draw(void)
 
     mvwprintw(win, 0, 0, " %s", title);
     free(title);
+    pos = strlen(title) + 1;
+
+    // presence is written from the right side
+    // calculate it first so we have a maxposition
+    maxrightpos = _show_self_presence();
 
     if (current && current->type == WIN_CHAT) {
         ProfChatWin *chatwin = (ProfChatWin*) current;
         assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
-        _show_contact_presence(chatwin);
+        _show_contact_presence(chatwin, pos, maxrightpos);
         _show_privacy(chatwin);
         _show_scrolled(current);
 
@@ -213,8 +220,6 @@ _title_bar_draw(void)
         _show_muc_privacy(mucwin);
         _show_scrolled(current);
     }
-
-    _show_self_presence();
 
     wnoutrefresh(win);
     inp_put_back();
@@ -241,7 +246,7 @@ _show_scrolled(ProfWin *current)
     }
 }
 
-static void
+static int
 _show_self_presence(void)
 {
     int presence_attrs = 0;
@@ -339,6 +344,8 @@ _show_self_presence(void)
         mvwaddch(win, 0, cols - (tls_start - 4), ']');
         wattroff(win, bracket_attrs);
     }
+
+    return tls_start - 1;
 }
 
 static void
@@ -492,7 +499,7 @@ _show_privacy(ProfChatWin *chatwin)
 }
 
 static void
-_show_contact_presence(ProfChatWin *chatwin)
+_show_contact_presence(ProfChatWin *chatwin, int pos, int maxpos)
 {
     int bracket_attrs = theme_attrs(THEME_TITLE_BRACKET);
     char *resource = NULL;
@@ -503,9 +510,13 @@ _show_contact_presence(ProfChatWin *chatwin)
     } else if (session && session->resource) {
         resource = session->resource;
     }
+
     if (resource && prefs_get_boolean(PREF_RESOURCE_TITLE)) {
-        wprintw(win, "/");
-        wprintw(win, resource);
+        int needed = strlen(resource) + 1;
+        if (pos + needed < maxpos) {
+            wprintw(win, "/");
+            wprintw(win, resource);
+        }
     }
 
     if (prefs_get_boolean(PREF_PRESENCE)) {
