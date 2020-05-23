@@ -442,7 +442,7 @@ _omemo_receive_devicelist(xmpp_stanza_t *const stanza, void *const userdata)
     }
 
     xmpp_stanza_t *item = xmpp_stanza_get_child_by_name(items, "item");
-    if (item) {
+    if (item && g_strcmp0(xmpp_stanza_get_id(item), "current") == 0 ) {
         xmpp_stanza_t *list = xmpp_stanza_get_child_by_ns(item, STANZA_NS_OMEMO);
         if (!list) {
             return 1;
@@ -462,6 +462,10 @@ _omemo_receive_devicelist(xmpp_stanza_t *const stanza, void *const userdata)
             }
         }
     }
+    if (item && g_strcmp0(xmpp_stanza_get_id(item), "current") != 0 ) {
+        log_warning("OMEMO: User %s has a non 'current' device item list: %s.", from, xmpp_stanza_get_id(item));
+    }
+
     omemo_set_device_list(from, device_list);
 
     return 1;
