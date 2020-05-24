@@ -266,7 +266,10 @@ _avatar_request_item_result_handler(xmpp_stanza_t *const stanza, void *const use
 
     // if we shall open it
     if (g_hash_table_contains(shall_open, from_attr)) {
-        call_external(prefs_get_string(PREF_AVATAR_CMD), filename->str);
+        gchar *argv[] = {prefs_get_string(PREF_AVATAR_CMD), filename->str, NULL};
+        if (!call_external(argv, NULL, NULL)) {
+          cons_show_error("Unable to display avatar: check the logs for more information.");
+        }
         g_hash_table_remove(shall_open, from_attr);
     }
 
