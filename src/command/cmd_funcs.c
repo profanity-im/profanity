@@ -4787,6 +4787,18 @@ cmd_bookmark_ignore(ProfWin *window, const char *const command, gchar **args)
         return TRUE;
     }
 
+    if (strcmp(args[1], "add") == 0 && args[2] != NULL) {
+        bookmark_ignore_add(args[2]);
+        cons_show("Autojoin for bookmark %s added to ignore list.", args[2]);
+        return TRUE;
+    }
+
+    if (strcmp(args[1], "remove") == 0 && args[2] != NULL) {
+        bookmark_ignore_remove(args[2]);
+        cons_show("Autojoin for bookmark %s removed from ignore list.", args[2]);
+        return TRUE;
+    }
+
     cons_bad_cmd_usage(command);
     return TRUE;
 }

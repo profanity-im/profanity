@@ -91,3 +91,15 @@ bookmark_ignore_list(gsize *len)
 {
     return g_key_file_get_keys(bookmark_ignore_keyfile, account_jid, len, NULL);
 }
+
+void
+bookmark_ignore_add(const char *const barejid)
+{
+    g_key_file_set_boolean(bookmark_ignore_keyfile, account_jid, barejid, TRUE);
+}
+
+void
+bookmark_ignore_remove(const char *const barejid)
+{
+    g_key_file_remove_key(bookmark_ignore_keyfile, account_jid, barejid, NULL);
+}

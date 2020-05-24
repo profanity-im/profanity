@@ -809,10 +809,13 @@ static struct cmd_t command_defs[] =
             "/bookmark remove [<room>]",
             "/bookmark join <room>",
             "/bookmark invites on|off",
-            "/bookmark ignore")
+            "/bookmark ignore",
+            "/bookmark ignore add <jid>",
+            "/bookmark ignore remove <jid>")
         CMD_DESC(
             "Manage bookmarks and join bookmarked rooms. "
-            "In a chat room, no arguments will bookmark the current room, setting autojoin to \"on\".")
+            "In a chat room, no arguments will bookmark the current room, setting autojoin to \"on\"."
+            "There is also an autojoin ignore list in case you want to autojoind in many clients but not on Profanity.")
         CMD_ARGS(
             { "list", "List all bookmarks." },
             { "add [<room>]", "Add a bookmark, passing no room will bookmark the current room, setting autojoin to \"on\"." },
@@ -823,7 +826,9 @@ static struct cmd_t command_defs[] =
             { "name <roomname>", "Optional name for the bookmark. By default localpart of the JID will be used." },
             { "autojoin on|off", "Whether to join the room automatically on login." },
             { "join <room>", "Join room using the properties associated with the bookmark." },
-            { "invites on|off", "Whether or not to bookmark accepted room invites, defaults to 'on'."})
+            { "invites on|off", "Whether or not to bookmark accepted room invites, defaults to 'on'."},
+            { "ignore add <barejid>", "Add a bookmark to the autojoin ignore list."},
+            { "ignore remove <barejid>", "Remove a bookmark from the autojoin ignore list."})
         CMD_NOEXAMPLES
     },
 
