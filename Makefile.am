@@ -42,6 +42,8 @@ core_sources = \
 	src/tools/parser.h \
 	src/tools/http_upload.c \
 	src/tools/http_upload.h \
+	src/tools/bookmark_ignore.c \
+	src/tools/bookmark_ignore.h \
 	src/tools/autocomplete.c src/tools/autocomplete.h \
 	src/tools/tinyurl.c src/tools/tinyurl.h \
 	src/tools/clipboard.c src/tools/clipboard.h \

@@ -51,6 +51,7 @@
 #include "event/common.h"
 #include "plugins/plugins.h"
 #include "ui/window_list.h"
+#include "tools/bookmark_ignore.h"
 #include "xmpp/xmpp.h"
 #include "xmpp/muc.h"
 #include "xmpp/chat_session.h"
@@ -1432,7 +1433,12 @@ sv_ev_lastactivity_response(const char *const from, const int seconds, const cha
 void
 sv_ev_bookmark_autojoin(Bookmark *bookmark)
 {
+    if (bookmark_ignored(bookmark)) {
+        return;
+    }
+
     char *nick = NULL;
+
     if (bookmark->nick) {
         nick = strdup(bookmark->nick);
     } else {

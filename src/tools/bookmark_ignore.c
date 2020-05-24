@@ -1,9 +1,8 @@
 /*
- * files.h
+ * bookmark_ignore.c
  * vim: expandtab:ts=4:sts=4:sw=4
  *
- * Copyright (C) 2012 - 2019 James Booth <boothj5@gmail.com>
- * Copyright (C) 2018 - 2019 Michael Vetter <jubalh@idoru.org>
+ * Copyright (C) 2020 Michael Vetter <jubalh@iodoru.org>
  *
  * This file is part of Profanity.
  *
@@ -34,36 +33,54 @@
  *
  */
 
-#ifndef CONFIG_FILES_H
-#define CONFIG_FILES_H
+#include "config.h"
 
 #include <glib.h>
+#include <glib/gstdio.h>
+#include <stdlib.h>
+#include "config/files.h"
+#include "config/preferences.h"
 
-#define FILE_PROFRC "profrc"
-#define FILE_ACCOUNTS "accounts"
-#define FILE_TLSCERTS "tlscerts"
-#define FILE_PLUGIN_SETTINGS "plugin_settings"
-#define FILE_PLUGIN_THEMES "plugin_themes"
-#define FILE_CAPSCACHE "capscache"
-#define FILE_PROFANITY_IDENTIFIER "profident"
-#define FILE_BOOKMARK_AUTOJOIN_IGNORE "bookmark_ignore"
+#include "log.h"
 
-#define DIR_THEMES "themes"
-#define DIR_ICONS "icons"
-#define DIR_SCRIPTS "scripts"
-#define DIR_CHATLOGS "chatlogs"
-#define DIR_OTR "otr"
-#define DIR_PGP "pgp"
-#define DIR_OMEMO "omemo"
-#define DIR_PLUGINS "plugins"
-#define DIR_DATABASE "database"
+static gchar**
+bookmark_ignore_get_list(gsize *len)
+{
+    char *bi_loc;
+    GKeyFile *bi;
 
-void files_create_directories(void);
+    bi_loc = files_get_data_path(FILE_BOOKMARK_AUTOJOIN_IGNORE);
 
-char* files_get_config_path(char *config_base);
-char* files_get_data_path(char *data_base);
+    if (g_file_test(bi_loc, G_FILE_TEST_EXISTS)) {
+        g_chmod(bi_loc, S_IRUSR | S_IWUSR);
+    }
 
-char* files_get_log_file(char *log_file);
-char* files_get_inputrc_file(void);
+    bi = g_key_file_new();
+    g_key_file_load_from_file(bi, bi_loc, G_KEY_FILE_KEEP_COMMENTS, NULL);
 
-#endif
+    if (!g_key_file_has_group(bi, "ignore")) {
+        return NULL;
+    }
+
+    gchar **keys = g_key_file_get_keys(bi, "ignore"/*PREF_GROUP_ALIAS*/, len, NULL);
+
+    return keys;
+}
+
+gboolean
+bookmark_ignored(Bookmark *bookmark)
+{
+    gsize len;
+    gchar **ignored = bookmark_ignore_get_list(&len);
+    int i;
+
+    for (i=0; i<len; i++) {
+        if (g_strcmp0(bookmark->barejid, ignored[i]) == 0) {
+            g_strfreev(ignored);
+            return TRUE;
+        }
+    }
+
+    g_strfreev(ignored);
+    return FALSE;
+}
