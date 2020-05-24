@@ -197,8 +197,9 @@ _title_bar_draw(void)
     char *title = win_get_title(current);
 
     mvwprintw(win, 0, 0, " %s", title);
-    free(title);
     pos = strlen(title) + 1;
+
+    free(title);
 
     // presence is written from the right side
     // calculate it first so we have a maxposition
