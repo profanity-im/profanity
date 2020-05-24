@@ -79,6 +79,8 @@ sv_ev_login_account_success(char *account_name, gboolean secured)
 {
     ProfAccount *account = accounts_get_account(account_name);
 
+    bookmark_ignore_on_connect(account->jid);
+
     roster_create();
 
 #ifdef HAVE_LIBOTR

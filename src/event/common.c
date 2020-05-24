@@ -40,6 +40,7 @@
 #include "xmpp/muc.h"
 #include "xmpp/xmpp.h"
 #include "database.h"
+#include "tools/bookmark_ignore.h"
 
 #ifdef HAVE_LIBGPGME
 #include "pgp/gpg.h"
@@ -69,6 +70,7 @@ ev_disconnect_cleanup(void)
     omemo_on_disconnect();
 #endif
     log_database_close();
+    bookmark_ignore_on_disconnect();
 }
 
 gboolean

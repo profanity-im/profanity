@@ -43,11 +43,13 @@
 
 #include "log.h"
 
-static gchar**
-bookmark_ignore_get_list(gsize *len)
+static GKeyFile *bookmark_ignore_keyfile = NULL;
+static char *account_jid = NULL;
+
+static void
+_bookmark_ignore_load()
 {
     char *bi_loc;
-    GKeyFile *bi;
 
     bi_loc = files_get_data_path(FILE_BOOKMARK_AUTOJOIN_IGNORE);
 
@@ -55,32 +57,31 @@ bookmark_ignore_get_list(gsize *len)
         g_chmod(bi_loc, S_IRUSR | S_IWUSR);
     }
 
-    bi = g_key_file_new();
-    g_key_file_load_from_file(bi, bi_loc, G_KEY_FILE_KEEP_COMMENTS, NULL);
+    bookmark_ignore_keyfile = g_key_file_new();
+    g_key_file_load_from_file(bookmark_ignore_keyfile, bi_loc, G_KEY_FILE_KEEP_COMMENTS, NULL);
 
-    if (!g_key_file_has_group(bi, "ignore")) {
-        return NULL;
+    free(bi_loc);
+}
+
+void
+bookmark_ignore_on_connect(const char *const barejid)
+{
+    if(bookmark_ignore_keyfile == NULL) {
+        _bookmark_ignore_load();
+        account_jid = strdup(barejid);
     }
+}
 
-    gchar **keys = g_key_file_get_keys(bi, "ignore"/*PREF_GROUP_ALIAS*/, len, NULL);
-
-    return keys;
+void
+bookmark_ignore_on_disconnect()
+{
+    g_key_file_free(bookmark_ignore_keyfile);
+    bookmark_ignore_keyfile = NULL;
+    free(account_jid);
 }
 
 gboolean
 bookmark_ignored(Bookmark *bookmark)
 {
-    gsize len;
-    gchar **ignored = bookmark_ignore_get_list(&len);
-    int i;
-
-    for (i=0; i<len; i++) {
-        if (g_strcmp0(bookmark->barejid, ignored[i]) == 0) {
-            g_strfreev(ignored);
-            return TRUE;
-        }
-    }
-
-    g_strfreev(ignored);
-    return FALSE;
+    return g_key_file_get_boolean(bookmark_ignore_keyfile, account_jid, bookmark->barejid, NULL);
 }
