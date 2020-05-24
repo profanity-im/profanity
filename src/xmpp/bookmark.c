@@ -316,6 +316,7 @@ _bookmark_result_id_handler(xmpp_stanza_t *const stanza, void *const userdata)
             } else if (strcmp(min_str, "false") == 0) {
                 minimize = 2;
             }
+            free(min_str);
         }
 
         autocomplete_add(bookmark_ac, barejid);
