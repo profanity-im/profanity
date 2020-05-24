@@ -180,6 +180,7 @@ static Autocomplete roster_private_ac;
 static Autocomplete group_ac;
 static Autocomplete bookmark_ac;
 static Autocomplete bookmark_property_ac;
+static Autocomplete bookmark_ignore_ac;
 #ifdef HAVE_LIBOTR
 static Autocomplete otr_ac;
 static Autocomplete otr_log_ac;
@@ -610,12 +611,17 @@ cmd_ac_init(void)
     autocomplete_add(bookmark_ac, "remove");
     autocomplete_add(bookmark_ac, "join");
     autocomplete_add(bookmark_ac, "invites");
+    autocomplete_add(bookmark_ac, "ignore");
 
     bookmark_property_ac = autocomplete_new();
     autocomplete_add(bookmark_property_ac, "nick");
     autocomplete_add(bookmark_property_ac, "password");
     autocomplete_add(bookmark_property_ac, "autojoin");
     autocomplete_add(bookmark_property_ac, "name");
+
+    bookmark_ignore_ac = autocomplete_new();
+    autocomplete_add(bookmark_ignore_ac, "add");
+    autocomplete_add(bookmark_ignore_ac, "remove");
 
 #ifdef HAVE_LIBOTR
     otr_ac = autocomplete_new();
@@ -1242,6 +1248,7 @@ cmd_ac_reset(ProfWin *window)
     autocomplete_reset(wintitle_ac);
     autocomplete_reset(bookmark_ac);
     autocomplete_reset(bookmark_property_ac);
+    autocomplete_reset(bookmark_ignore_ac);
 #ifdef HAVE_LIBOTR
     autocomplete_reset(otr_ac);
     autocomplete_reset(otr_log_ac);
@@ -1397,6 +1404,7 @@ cmd_ac_uninit(void)
     autocomplete_free(group_ac);
     autocomplete_free(bookmark_ac);
     autocomplete_free(bookmark_property_ac);
+    autocomplete_free(bookmark_ignore_ac);
 #ifdef HAVE_LIBOTR
     autocomplete_free(otr_ac);
     autocomplete_free(otr_log_ac);
@@ -2132,6 +2140,19 @@ _bookmark_autocomplete(ProfWin *window, const char *const input, gboolean previo
         return found;
     }
     found = autocomplete_param_with_func(input, "/bookmark invites", prefs_autocomplete_boolean_choice, previous, NULL);
+    if (found) {
+        return found;
+    }
+
+    found = autocomplete_param_with_ac(input, "/bookmark ignore", bookmark_ignore_ac, TRUE, previous);
+    if (found) {
+        return found;
+    }
+    found = autocomplete_param_with_func(input, "/bookmark ignore add", bookmark_find, previous, NULL);
+    if (found) {
+        return found;
+    }
+    found = autocomplete_param_with_func(input, "/bookmark ignore remove", bookmark_find, previous, NULL);
     if (found) {
         return found;
     }
