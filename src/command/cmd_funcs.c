@@ -68,6 +68,7 @@
 #include "tools/autocomplete.h"
 #include "tools/parser.h"
 #include "tools/tinyurl.h"
+#include "tools/bookmark_ignore.h"
 #include "plugins/plugins.h"
 #include "ui/ui.h"
 #include "ui/window_list.h"
@@ -4763,6 +4764,30 @@ cmd_bookmark(ProfWin *window, const char *const command, gchar **args)
     options_destroy(options);
     cons_alert();
 
+    return TRUE;
+}
+
+gboolean
+cmd_bookmark_ignore(ProfWin *window, const char *const command, gchar **args)
+{
+    jabber_conn_status_t conn_status = connection_get_status();
+
+    if (conn_status != JABBER_CONNECTED) {
+        cons_show("You are not currently connected.");
+        cons_alert();
+        return TRUE;
+    }
+
+    // `/bookmark ignore` lists them
+    if (args[1] == NULL) {
+        gsize len;
+        gchar **list = bookmark_ignore_list(&len);
+        cons_show_bookmarks_ignore(list, len);
+        g_strfreev(list);
+        return TRUE;
+    }
+
+    cons_bad_cmd_usage(command);
     return TRUE;
 }
 

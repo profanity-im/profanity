@@ -2683,3 +2683,18 @@ _show_roster_contacts(GSList *list, gboolean show_groups)
         curr = g_slist_next(curr);
     }
 }
+
+void
+cons_show_bookmarks_ignore(gchar **list, gsize len)
+{
+    int i;
+    ProfWin *console = wins_get_console();
+
+    cons_show("");
+    cons_show("Ignored bookmarks:");
+
+    for(i=0; i<len; i++) {
+        win_print(console, THEME_DEFAULT, "-", "  %s", list[i]);
+        win_newline(console);
+    }
+}

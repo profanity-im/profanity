@@ -85,3 +85,9 @@ bookmark_ignored(Bookmark *bookmark)
 {
     return g_key_file_get_boolean(bookmark_ignore_keyfile, account_jid, bookmark->barejid, NULL);
 }
+
+gchar **
+bookmark_ignore_list(gsize *len)
+{
+    return g_key_file_get_keys(bookmark_ignore_keyfile, account_jid, len, NULL);
+}

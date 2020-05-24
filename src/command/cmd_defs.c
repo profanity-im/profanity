@@ -795,7 +795,9 @@ static struct cmd_t command_defs[] =
 
     { "/bookmark",
         parse_args, 0, 8, NULL,
-        CMD_NOSUBFUNCS
+        CMD_SUBFUNCS(
+            { "ignore", cmd_bookmark_ignore }
+            )
         CMD_MAINFUNC(cmd_bookmark)
         CMD_TAGS(
             CMD_TAG_GROUPCHAT)
@@ -806,7 +808,8 @@ static struct cmd_t command_defs[] =
             "/bookmark update <room> [nick <nick>] [password <password>] [name <roomname>] autojoin on|off]",
             "/bookmark remove [<room>]",
             "/bookmark join <room>",
-            "/bookmark invites on|off")
+            "/bookmark invites on|off",
+            "/bookmark ignore")
         CMD_DESC(
             "Manage bookmarks and join bookmarked rooms. "
             "In a chat room, no arguments will bookmark the current room, setting autojoin to \"on\".")

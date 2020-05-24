@@ -115,6 +115,7 @@ gboolean cmd_reconnect(ProfWin *window, const char *const command, gchar **args)
 gboolean cmd_room(ProfWin *window, const char *const command, gchar **args);
 gboolean cmd_rooms(ProfWin *window, const char *const command, gchar **args);
 gboolean cmd_bookmark(ProfWin *window, const char *const command, gchar **args);
+gboolean cmd_bookmark_ignore(ProfWin *window, const char *const command, gchar **args);
 gboolean cmd_roster(ProfWin *window, const char *const command, gchar **args);
 gboolean cmd_software(ProfWin *window, const char *const command, gchar **args);
 gboolean cmd_splash(ProfWin *window, const char *const command, gchar **args);
