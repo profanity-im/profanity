@@ -88,6 +88,8 @@ unittest_sources = \
 	src/tools/autocomplete.c src/tools/autocomplete.h \
 	src/tools/tinyurl.c src/tools/tinyurl.h \
 	src/tools/clipboard.c src/tools/clipboard.h \
+	src/tools/bookmark_ignore.c \
+	src/tools/bookmark_ignore.h \
 	src/config/accounts.h \
 	src/config/account.c src/config/account.h \
 	src/config/files.c src/config/files.h \
