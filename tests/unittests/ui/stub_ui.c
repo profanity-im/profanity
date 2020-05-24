@@ -454,6 +454,7 @@ void cons_os_setting(void) {}
 void cons_correction_setting(void) {}
 void cons_executable_setting(void) {}
 void cons_slashguard_setting(void) {}
+void cons_show_bookmarks_ignore(gchar **list, gsize len) {}
 
 void cons_show_contact_online(PContact contact, Resource *resource, GDateTime *last_activity)
 {
