@@ -2687,6 +2687,12 @@ _show_roster_contacts(GSList *list, gboolean show_groups)
 void
 cons_show_bookmarks_ignore(gchar **list, gsize len)
 {
+    if (len == 0) {
+        cons_show("");
+        cons_show("No ignored bookmarks");
+        return;
+    }
+
     int i;
     ProfWin *console = wins_get_console();
 
