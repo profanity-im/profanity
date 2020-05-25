@@ -4780,7 +4780,7 @@ cmd_bookmark_ignore(ProfWin *window, const char *const command, gchar **args)
 
     // `/bookmark ignore` lists them
     if (args[1] == NULL) {
-        gsize len;
+        gsize len = 0;
         gchar **list = bookmark_ignore_list(&len);
         cons_show_bookmarks_ignore(list, len);
         g_strfreev(list);

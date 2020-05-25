@@ -63,6 +63,22 @@ _bookmark_ignore_load()
     free(bi_loc);
 }
 
+static void
+_bookmark_save()
+{
+    gsize g_data_size;
+    gchar *g_bookmark_ignore_data = g_key_file_to_data(bookmark_ignore_keyfile, &g_data_size, NULL);
+
+    char *bi_loc;
+    bi_loc = files_get_data_path(FILE_BOOKMARK_AUTOJOIN_IGNORE);
+
+    g_file_set_contents(bi_loc, g_bookmark_ignore_data, g_data_size, NULL);
+    g_chmod(bi_loc, S_IRUSR | S_IWUSR);
+
+    free(bi_loc);
+    g_free(g_bookmark_ignore_data);
+}
+
 void
 bookmark_ignore_on_connect(const char *const barejid)
 {
@@ -96,10 +112,12 @@ void
 bookmark_ignore_add(const char *const barejid)
 {
     g_key_file_set_boolean(bookmark_ignore_keyfile, account_jid, barejid, TRUE);
+    _bookmark_save();
 }
 
 void
 bookmark_ignore_remove(const char *const barejid)
 {
     g_key_file_remove_key(bookmark_ignore_keyfile, account_jid, barejid, NULL);
+    _bookmark_save();
 }
