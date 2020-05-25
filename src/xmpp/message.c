@@ -1075,9 +1075,9 @@ _handle_carbons(xmpp_stanza_t *const stanza)
         return TRUE;
     }
 
-    Jid *my_jid = jid_create(connection_get_fulljid());
+    char *mybarejid = connection_get_barejid();
     const char *const stanza_from = xmpp_stanza_get_from(stanza);
-    if (g_strcmp0(my_jid->barejid, stanza_from) != 0) {
+    if (g_strcmp0(mybarejid, stanza_from) != 0) {
         log_warning("Invalid carbon received, from: %s", stanza_from);
         return TRUE;
     }
@@ -1143,7 +1143,7 @@ _handle_carbons(xmpp_stanza_t *const stanza)
     //TODO: now that profmessage has from_jid AND to_jid we should save both. and maybe also add is_carbon so we can decide later on.
     if (message->plain || message->encrypted || message->body) {
         // if we are the recipient, treat as standard incoming message
-        if (g_strcmp0(my_jid->barejid, jid_to->barejid) == 0) {
+        if (g_strcmp0(mybarejid, jid_to->barejid) == 0) {
             jid_destroy(jid_to);
             message->from_jid = jid_from;
             sv_ev_incoming_carbon(message);
@@ -1158,7 +1158,7 @@ _handle_carbons(xmpp_stanza_t *const stanza)
 
 out:
     message_free(message);
-    jid_destroy(my_jid);
+    free(mybarejid);
     return TRUE;
 }
 

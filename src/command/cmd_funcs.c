@@ -3431,17 +3431,17 @@ cmd_caps(ProfWin *window, const char *const command, gchar **args)
 static void
 _send_software_version_iq_to_fulljid(char *request)
 {
-    Jid *myJid = jid_create(connection_get_fulljid());
+    char *mybarejid = connection_get_barejid();
     Jid *jid = jid_create(request);
 
     if (jid == NULL || jid->fulljid == NULL) {
         cons_show("You must provide a full jid to the /software command.");
-    } else if (g_strcmp0(jid->barejid, myJid->barejid) == 0) {
+    } else if (g_strcmp0(jid->barejid, mybarejid) == 0) {
         cons_show("Cannot request software version for yourself.");
     } else {
         iq_send_software_version(jid->fulljid);
     }
-    jid_destroy(myJid);
+    free(mybarejid);
     jid_destroy(jid);
 }
 

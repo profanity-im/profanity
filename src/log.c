@@ -290,10 +290,9 @@ void
 chat_log_msg_out(const char *const barejid, const char *const msg, const char *const resource)
 {
     if (prefs_get_boolean(PREF_CHLOG)) {
-        const char *jid = connection_get_fulljid();
-        Jid *jidp = jid_create(jid);
-        _chat_log_chat(jidp->barejid, barejid, msg, PROF_OUT_LOG, NULL, resource);
-        jid_destroy(jidp);
+        char *mybarejid = connection_get_barejid();
+        _chat_log_chat(mybarejid, barejid, msg, PROF_OUT_LOG, NULL, resource);
+        free(mybarejid);
     }
 }
 
@@ -301,16 +300,15 @@ void
 chat_log_otr_msg_out(const char *const barejid, const char *const msg, const char *const resource)
 {
     if (prefs_get_boolean(PREF_CHLOG)) {
-        const char *jid = connection_get_fulljid();
-        Jid *jidp = jid_create(jid);
+        char *mybarejid = connection_get_barejid();
         char *pref_otr_log = prefs_get_string(PREF_OTR_LOG);
         if (strcmp(pref_otr_log, "on") == 0) {
-            _chat_log_chat(jidp->barejid, barejid, msg, PROF_OUT_LOG, NULL, resource);
+            _chat_log_chat(mybarejid, barejid, msg, PROF_OUT_LOG, NULL, resource);
         } else if (strcmp(pref_otr_log, "redact") == 0) {
-            _chat_log_chat(jidp->barejid, barejid, "[redacted]", PROF_OUT_LOG, NULL, resource);
+            _chat_log_chat(mybarejid, barejid, "[redacted]", PROF_OUT_LOG, NULL, resource);
         }
         prefs_free_string(pref_otr_log);
-        jid_destroy(jidp);
+        free(mybarejid);
     }
 }
 
@@ -318,16 +316,15 @@ void
 chat_log_pgp_msg_out(const char *const barejid, const char *const msg, const char *const resource)
 {
     if (prefs_get_boolean(PREF_CHLOG)) {
-        const char *jid = connection_get_fulljid();
-        Jid *jidp = jid_create(jid);
+        char *mybarejid = connection_get_barejid();
         char *pref_pgp_log = prefs_get_string(PREF_PGP_LOG);
         if (strcmp(pref_pgp_log, "on") == 0) {
-            _chat_log_chat(jidp->barejid, barejid, msg, PROF_OUT_LOG, NULL, resource);
+            _chat_log_chat(mybarejid, barejid, msg, PROF_OUT_LOG, NULL, resource);
         } else if (strcmp(pref_pgp_log, "redact") == 0) {
-            _chat_log_chat(jidp->barejid, barejid, "[redacted]", PROF_OUT_LOG, NULL, resource);
+            _chat_log_chat(mybarejid, barejid, "[redacted]", PROF_OUT_LOG, NULL, resource);
         }
         prefs_free_string(pref_pgp_log);
-        jid_destroy(jidp);
+        free(mybarejid);
     }
 }
 
@@ -335,16 +332,15 @@ void
 chat_log_omemo_msg_out(const char *const barejid, const char *const msg, const char *const resource)
 {
     if (prefs_get_boolean(PREF_CHLOG)) {
-        const char *jid = connection_get_fulljid();
-        Jid *jidp = jid_create(jid);
+        char *mybarejid = connection_get_barejid();
         char *pref_omemo_log = prefs_get_string(PREF_OMEMO_LOG);
         if (strcmp(pref_omemo_log, "on") == 0) {
-            _chat_log_chat(jidp->barejid, barejid, msg, PROF_OUT_LOG, NULL, resource);
+            _chat_log_chat(mybarejid, barejid, msg, PROF_OUT_LOG, NULL, resource);
         } else if (strcmp(pref_omemo_log, "redact") == 0) {
-            _chat_log_chat(jidp->barejid, barejid, "[redacted]", PROF_OUT_LOG, NULL, resource);
+            _chat_log_chat(mybarejid, barejid, "[redacted]", PROF_OUT_LOG, NULL, resource);
         }
         prefs_free_string(pref_omemo_log);
-        jid_destroy(jidp);
+        free(mybarejid);
     }
 }
 
@@ -352,24 +348,23 @@ void
 chat_log_otr_msg_in(ProfMessage *message)
 {
     if (prefs_get_boolean(PREF_CHLOG)) {
-        const char *jid = connection_get_fulljid();
-        Jid *jidp = jid_create(jid);
+        char *mybarejid = connection_get_barejid();
         char *pref_otr_log = prefs_get_string(PREF_OTR_LOG);
         if (message->enc == PROF_MSG_ENC_NONE || (strcmp(pref_otr_log, "on") == 0)) {
             if (message->type == PROF_MSG_TYPE_MUCPM) {
-                _chat_log_chat(jidp->barejid, message->from_jid->barejid, message->plain, PROF_IN_LOG, message->timestamp, message->from_jid->resourcepart);
+                _chat_log_chat(mybarejid, message->from_jid->barejid, message->plain, PROF_IN_LOG, message->timestamp, message->from_jid->resourcepart);
             } else {
-                _chat_log_chat(jidp->barejid, message->from_jid->barejid, message->plain, PROF_IN_LOG, message->timestamp, NULL);
+                _chat_log_chat(mybarejid, message->from_jid->barejid, message->plain, PROF_IN_LOG, message->timestamp, NULL);
             }
         } else if (strcmp(pref_otr_log, "redact") == 0) {
             if (message->type == PROF_MSG_TYPE_MUCPM) {
-                _chat_log_chat(jidp->barejid, message->from_jid->barejid, "[redacted]", PROF_IN_LOG, message->timestamp, message->from_jid->resourcepart);
+                _chat_log_chat(mybarejid, message->from_jid->barejid, "[redacted]", PROF_IN_LOG, message->timestamp, message->from_jid->resourcepart);
             } else {
-                _chat_log_chat(jidp->barejid, message->from_jid->barejid, "[redacted]", PROF_IN_LOG, message->timestamp, NULL);
+                _chat_log_chat(mybarejid, message->from_jid->barejid, "[redacted]", PROF_IN_LOG, message->timestamp, NULL);
             }
         }
         prefs_free_string(pref_otr_log);
-        jid_destroy(jidp);
+        free(mybarejid);
     }
 }
 
@@ -377,24 +372,23 @@ void
 chat_log_pgp_msg_in(ProfMessage *message)
 {
     if (prefs_get_boolean(PREF_CHLOG)) {
-        const char *jid = connection_get_fulljid();
-        Jid *jidp = jid_create(jid);
+        char *mybarejid = connection_get_barejid();
         char *pref_pgp_log = prefs_get_string(PREF_PGP_LOG);
         if (strcmp(pref_pgp_log, "on") == 0) {
             if (message->type == PROF_MSG_TYPE_MUCPM) {
-                _chat_log_chat(jidp->barejid, message->from_jid->barejid, message->plain, PROF_IN_LOG, message->timestamp, message->from_jid->resourcepart);
+                _chat_log_chat(mybarejid, message->from_jid->barejid, message->plain, PROF_IN_LOG, message->timestamp, message->from_jid->resourcepart);
             } else {
-                _chat_log_chat(jidp->barejid, message->from_jid->barejid, message->plain, PROF_IN_LOG, message->timestamp, NULL);
+                _chat_log_chat(mybarejid, message->from_jid->barejid, message->plain, PROF_IN_LOG, message->timestamp, NULL);
             }
         } else if (strcmp(pref_pgp_log, "redact") == 0) {
             if (message->type == PROF_MSG_TYPE_MUCPM) {
-                _chat_log_chat(jidp->barejid, message->from_jid->barejid, "[redacted]", PROF_IN_LOG, message->timestamp, message->from_jid->resourcepart);
+                _chat_log_chat(mybarejid, message->from_jid->barejid, "[redacted]", PROF_IN_LOG, message->timestamp, message->from_jid->resourcepart);
             } else {
-                _chat_log_chat(jidp->barejid, message->from_jid->barejid, "[redacted]", PROF_IN_LOG, message->timestamp, NULL);
+                _chat_log_chat(mybarejid, message->from_jid->barejid, "[redacted]", PROF_IN_LOG, message->timestamp, NULL);
             }
         }
         prefs_free_string(pref_pgp_log);
-        jid_destroy(jidp);
+        free(mybarejid);
     }
 }
 
@@ -402,24 +396,23 @@ void
 chat_log_omemo_msg_in(ProfMessage *message)
 {
     if (prefs_get_boolean(PREF_CHLOG)) {
-        const char *jid = connection_get_fulljid();
-        Jid *jidp = jid_create(jid);
+        char *mybarejid = connection_get_barejid();
         char *pref_omemo_log = prefs_get_string(PREF_OMEMO_LOG);
         if (strcmp(pref_omemo_log, "on") == 0) {
             if (message->type == PROF_MSG_TYPE_MUCPM) {
-                _chat_log_chat(jidp->barejid, message->from_jid->barejid, message->plain, PROF_IN_LOG, message->timestamp, message->from_jid->resourcepart);
+                _chat_log_chat(mybarejid, message->from_jid->barejid, message->plain, PROF_IN_LOG, message->timestamp, message->from_jid->resourcepart);
             } else {
-                _chat_log_chat(jidp->barejid, message->from_jid->barejid, message->plain, PROF_IN_LOG, message->timestamp, NULL);
+                _chat_log_chat(mybarejid, message->from_jid->barejid, message->plain, PROF_IN_LOG, message->timestamp, NULL);
             }
         } else if (strcmp(pref_omemo_log, "redact") == 0) {
             if (message->type == PROF_MSG_TYPE_MUCPM) {
-                _chat_log_chat(jidp->barejid, message->from_jid->barejid, "[redacted]", PROF_IN_LOG, message->timestamp, message->from_jid->resourcepart);
+                _chat_log_chat(mybarejid, message->from_jid->barejid, "[redacted]", PROF_IN_LOG, message->timestamp, message->from_jid->resourcepart);
             } else {
-                _chat_log_chat(jidp->barejid, message->from_jid->barejid, "[redacted]", PROF_IN_LOG, message->timestamp, message->from_jid->resourcepart);
+                _chat_log_chat(mybarejid, message->from_jid->barejid, "[redacted]", PROF_IN_LOG, message->timestamp, message->from_jid->resourcepart);
             }
         }
         prefs_free_string(pref_omemo_log);
-        jid_destroy(jidp);
+        free(mybarejid);
     }
 }
 
@@ -427,15 +420,15 @@ void
 chat_log_msg_in(ProfMessage *message)
 {
     if (prefs_get_boolean(PREF_CHLOG)) {
-        const char *jid = connection_get_fulljid();
-        Jid *jidp = jid_create(jid);
+        char *mybarejid = connection_get_barejid();
 
         if (message->type == PROF_MSG_TYPE_MUCPM) {
-            _chat_log_chat(jidp->barejid, message->from_jid->barejid, message->plain, PROF_IN_LOG, message->timestamp, message->from_jid->resourcepart);
+            _chat_log_chat(mybarejid, message->from_jid->barejid, message->plain, PROF_IN_LOG, message->timestamp, message->from_jid->resourcepart);
         } else {
-            _chat_log_chat(jidp->barejid, message->from_jid->barejid, message->plain, PROF_IN_LOG, message->timestamp, NULL);
+            _chat_log_chat(mybarejid, message->from_jid->barejid, message->plain, PROF_IN_LOG, message->timestamp, NULL);
         }
-        jid_destroy(jidp);
+
+        free(mybarejid);
     }
 }
 
@@ -524,11 +517,10 @@ void
 groupchat_log_msg_out(const gchar *const room, const gchar *const msg)
 {
     if (prefs_get_boolean(PREF_GRLOG)) {
-        const char *jid = connection_get_fulljid();
-        Jid *jidp = jid_create(jid);
+        char *mybarejid = connection_get_barejid();
         char *mynick = muc_nick(room);
-        _groupchat_log_chat(jidp->barejid, room, mynick, msg);
-        jid_destroy(jidp);
+        _groupchat_log_chat(mybarejid, room, mynick, msg);
+        free(mybarejid);
     }
 }
 
@@ -536,10 +528,9 @@ void
 groupchat_log_msg_in(const gchar *const room, const gchar *const nick, const gchar *const msg)
 {
     if (prefs_get_boolean(PREF_GRLOG)) {
-        const char *jid = connection_get_fulljid();
-        Jid *jidp = jid_create(jid);
-        _groupchat_log_chat(jidp->barejid, room, nick, msg);
-        jid_destroy(jidp);
+        char *mybarejid = connection_get_barejid();
+        _groupchat_log_chat(mybarejid, room, nick, msg);
+        free(mybarejid);
     }
 }
 
@@ -547,17 +538,18 @@ void
 groupchat_log_omemo_msg_out(const gchar *const room, const gchar *const msg)
 {
     if (prefs_get_boolean(PREF_CHLOG)) {
-        const char *jid = connection_get_fulljid();
-        Jid *jidp = jid_create(jid);
+        char *mybarejid = connection_get_barejid();
         char *pref_omemo_log = prefs_get_string(PREF_OMEMO_LOG);
         char *mynick = muc_nick(room);
+
         if (strcmp(pref_omemo_log, "on") == 0) {
-            _groupchat_log_chat(jidp->barejid, room, mynick, msg);
+            _groupchat_log_chat(mybarejid, room, mynick, msg);
         } else if (strcmp(pref_omemo_log, "redact") == 0) {
-            _groupchat_log_chat(jidp->barejid, room, mynick, "[redacted]");
+            _groupchat_log_chat(mybarejid, room, mynick, "[redacted]");
         }
+
         prefs_free_string(pref_omemo_log);
-        jid_destroy(jidp);
+        free(mybarejid);
     }
 }
 
@@ -565,16 +557,17 @@ void
 groupchat_log_omemo_msg_in(const gchar *const room, const gchar *const nick, const gchar *const msg)
 {
     if (prefs_get_boolean(PREF_CHLOG)) {
-        const char *jid = connection_get_fulljid();
-        Jid *jidp = jid_create(jid);
+        char *mybarejid = connection_get_barejid();
         char *pref_omemo_log = prefs_get_string(PREF_OMEMO_LOG);
+
         if (strcmp(pref_omemo_log, "on") == 0) {
-            _groupchat_log_chat(jidp->barejid, room, nick, msg);
+            _groupchat_log_chat(mybarejid, room, nick, msg);
         } else if (strcmp(pref_omemo_log, "redact") == 0) {
-            _groupchat_log_chat(jidp->barejid, room, nick, "[redacted]");
+            _groupchat_log_chat(mybarejid, room, nick, "[redacted]");
         }
+
         prefs_free_string(pref_omemo_log);
-        jid_destroy(jidp);
+        free(mybarejid);
     }
 }
 

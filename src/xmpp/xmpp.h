@@ -175,6 +175,7 @@ jabber_conn_status_t connection_get_status(void);
 char *connection_get_presence_msg(void);
 void connection_set_presence_msg(const char *const message);
 const char* connection_get_fulljid(void);
+char* connection_get_barejid(void);
 char* connection_create_uuid(void);
 void connection_free_uuid(char *uuid);
 #ifdef HAVE_LIBMESODE

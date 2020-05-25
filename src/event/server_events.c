@@ -630,11 +630,11 @@ sv_ev_incoming_message(ProfMessage *message)
     char *looking_for_jid = message->from_jid->barejid;
 
     if (message->is_mam) {
-        Jid *my_jid = jid_create(connection_get_fulljid());
-        if (g_strcmp0(my_jid->barejid, message->from_jid->barejid) == 0) {
+        char *mybarejid = connection_get_barejid();
+        if (g_strcmp0(mybarejid, message->from_jid->barejid) == 0) {
             looking_for_jid = message->to_jid->barejid;
         }
-        jid_destroy(my_jid);
+        free(mybarejid);
     }
 
     chatwin = wins_get_chat(looking_for_jid);

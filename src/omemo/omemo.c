@@ -373,16 +373,16 @@ omemo_publish_crypto_materials(void)
         return;
     }
 
-    Jid *jid = jid_create(connection_get_fulljid());
+    char *barejid = connection_get_barejid();
 
     /* Ensure we get our current device list, and it gets updated with our
      * device_id */
-    g_hash_table_insert(omemo_ctx.device_list_handler, strdup(jid->barejid), _handle_own_device_list);
-    omemo_devicelist_request(jid->barejid);
+    g_hash_table_insert(omemo_ctx.device_list_handler, strdup(barejid), _handle_own_device_list);
+    omemo_devicelist_request(barejid);
 
     omemo_bundle_publish(true);
 
-    jid_destroy(jid);
+    free(barejid);
 }
 
 void

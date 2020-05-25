@@ -411,6 +411,18 @@ connection_get_fulljid(void)
     }
 }
 
+char*
+connection_get_barejid(void) {
+    const char *jid = connection_get_fulljid();
+    char *result;
+
+    Jid *jidp = jid_create(jid);
+    result = strdup(jidp->barejid);
+    jid_destroy(jidp);
+
+    return result;
+}
+
 void
 connection_features_received(const char *const jid)
 {

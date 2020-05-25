@@ -259,13 +259,13 @@ chatwin_incoming_msg(ProfChatWin *chatwin, ProfMessage *message, gboolean win_cr
     int num = wins_get_num(window);
 
     char *display_name;
-    Jid *my_jid = jid_create(connection_get_fulljid());
-    if (g_strcmp0(my_jid->barejid, message->from_jid->barejid) == 0) {
+    char *mybarejid = connection_get_barejid();
+    if (g_strcmp0(mybarejid, message->from_jid->barejid) == 0) {
         display_name = strdup("me");
     } else {
         display_name = roster_get_msg_display_name(message->from_jid->barejid, message->from_jid->resourcepart);
     }
-    jid_destroy(my_jid);
+    free(mybarejid);
 
     gboolean is_current = wins_is_current(window);
     gboolean notify = prefs_do_chat_notify(is_current);

@@ -211,14 +211,14 @@ roster_set_handler(xmpp_stanza_t *const stanza)
     }
 
     // if from attribute exists and it is not current users barejid, ignore push
-    Jid *my_jid = jid_create(connection_get_fulljid());
+    char *mybarejid = connection_get_barejid();
     const char *from = xmpp_stanza_get_from(stanza);
-    if (from && (strcmp(from, my_jid->barejid) != 0)) {
+    if (from && (strcmp(from, mybarejid) != 0)) {
         log_warning("Received alleged roster push from: %s", from);
-        jid_destroy(my_jid);
+        free(mybarejid);
         return;
     }
-    jid_destroy(my_jid);
+    free(mybarejid);
 
     const char *barejid = xmpp_stanza_get_attribute(item, STANZA_ATTR_JID);
     gchar *barejid_lower = g_utf8_strdown(barejid, -1);

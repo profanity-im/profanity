@@ -84,10 +84,9 @@ cl_ev_connect_account(ProfAccount *account)
 void
 cl_ev_disconnect(void)
 {
-    const char *jid = connection_get_fulljid();
-    Jid *jidp = jid_create(jid);
-    cons_show("%s logged out successfully.", jidp->barejid);
-    jid_destroy(jidp);
+    char *mybarejid = connection_get_barejid();
+    cons_show("%s logged out successfully.", mybarejid);
+    free(mybarejid);
 
     ui_close_all_wins();
     ev_disconnect_cleanup();
