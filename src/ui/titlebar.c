@@ -61,7 +61,8 @@ static gboolean typing;
 static GTimer *typing_elapsed;
 
 static void _title_bar_draw(void);
-static int  _show_self_presence(void);
+static void  _show_self_presence(void);
+static int  _calc_self_presence(void);
 static void _show_contact_presence(ProfChatWin *chatwin, int pos, int maxpos);
 static void _show_privacy(ProfChatWin *chatwin);
 static void _show_muc_privacy(ProfMucWin *mucwin);
@@ -203,7 +204,7 @@ _title_bar_draw(void)
 
     // presence is written from the right side
     // calculate it first so we have a maxposition
-    maxrightpos = _show_self_presence();
+    maxrightpos = _calc_self_presence();
 
     if (current && current->type == WIN_CHAT) {
         ProfChatWin *chatwin = (ProfChatWin*) current;
@@ -221,6 +222,8 @@ _title_bar_draw(void)
         _show_muc_privacy(mucwin);
         _show_scrolled(current);
     }
+
+    _show_self_presence();
 
     wnoutrefresh(win);
     inp_put_back();
@@ -248,6 +251,36 @@ _show_scrolled(ProfWin *current)
 }
 
 static int
+_calc_self_presence(void)
+{
+    int tls_start = 0;
+
+    switch (current_presence)
+    {
+        case CONTACT_ONLINE:
+            tls_start = 15;
+            break;
+        case CONTACT_AWAY:
+            tls_start = 13;
+            break;
+        case CONTACT_DND:
+            tls_start = 12;
+            break;
+        case CONTACT_CHAT:
+            tls_start = 13;
+            break;
+        case CONTACT_XA:
+            tls_start = 11;
+            break;
+        case CONTACT_OFFLINE:
+            tls_start = 16;
+            break;
+    }
+
+    return tls_start - 1;
+}
+
+static void
 _show_self_presence(void)
 {
     int presence_attrs = 0;
@@ -345,8 +378,6 @@ _show_self_presence(void)
         mvwaddch(win, 0, cols - (tls_start - 4), ']');
         wattroff(win, bracket_attrs);
     }
-
-    return tls_start - 1;
 }
 
 static void
