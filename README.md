@@ -9,6 +9,12 @@ If you like Profanity consider becoming a sponsor or [donate](https://profanity-
 
 See the [User Guide](https://profanity-im.github.io/userguide.html) for information on installing and using Profanity.
 
+## Project
+This project is about freedom, privacy and choice. We want to enable people to chat with one another in a safe way. Thus supporting encryption (OTR, PGP, OMEMO) and being decentralized, meaning everyone can run their own server. We believe [XMPP](https://xmpp.org/) is a great proven protocol with an excellent community serving this purpose well.
+
+## Installation
+Our [user guide](https://profanity-im.github.io/userguide.html) contains an [install](https://profanity-im.github.io/guide/latest/install.html) section and a section for [building](https://profanity-im.github.io/guide/latest/build.html) from source yourself.
+
 ## Donations
 We would highly appreciate it if you support us via [GitHub Sponsors](https://github.com/sponsors/jubalh/). Especially if you make feature requests or need help using Profanity.
 Sponsoring enables us to spend time on Profanity.
