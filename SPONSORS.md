@@ -14,3 +14,5 @@ Thank you very much to all of our sponsors and donors (including those that want
 [William Wennerström](https://github.com/wstrm/) for sponsoring our use of [sourcehut CI](https://builds.sr.ht/~wstrm/profanity?)
 
 [toogley](toogley) for sponsoring our [mailing list](https://lists.notraces.net/mailman/listinfo/profanity)
+
+[dismail](https://dismail.de/) for hosting our [MUC](xmpp:profanity@rooms.dismail.de?join)

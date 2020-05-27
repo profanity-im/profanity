@@ -1,5 +1,5 @@
 # Profanity
-[![Build Status](https://api.travis-ci.org/profanity-im/profanity.png?branch=master)](https://travis-ci.org/profanity-im/profanity) [![builds.sr.ht status](https://builds.sr.ht/~wstrm/profanity.svg)](https://builds.sr.ht/~wstrm/profanity?) [![Chat](https://inverse.chat/badge.svg?room=profanity@rooms.dismail.de)](https://conversations.im/j/profanity@rooms.dismail.de) [![Packaging status](https://repology.org/badge/tiny-repos/profanity.svg)](https://repology.org/project/profanity/versions)
+[![Build Status](https://api.travis-ci.org/profanity-im/profanity.png?branch=master)](https://travis-ci.org/profanity-im/profanity) [![builds.sr.ht status](https://builds.sr.ht/~wstrm/profanity.svg)](https://builds.sr.ht/~wstrm/profanity?) [![Chat](https://inverse.chat/badge.svg?room=profanity@rooms.dismail.de)](https://conversations.im/j/profanity@rooms.dismail.de) [![Packaging status](https://repology.org/badge/tiny-repos/profanity.svg)](https://repology.org/project/profanity/versions) [![GitHub contributors](https://img.shields.io/github/contributors/profanity-im/profanity.svg)](https://github.com/profanity-im/profanity/graphs/contributors/)
 
 Profanity is a console based XMPP client inspired by [Irssi](http://www.irssi.org/).
 
@@ -11,6 +11,8 @@ See the [User Guide](https://profanity-im.github.io/userguide.html) for informat
 
 ## Project
 This project is about freedom, privacy and choice. We want to enable people to chat with one another in a safe way. Thus supporting encryption (OTR, PGP, OMEMO) and being decentralized, meaning everyone can run their own server. We believe [XMPP](https://xmpp.org/) is a great proven protocol with an excellent community serving this purpose well.
+
+Feel free to follow us on [twitter](https://twitter.com/profanityim), join our [mailing list](https://lists.notraces.net/mailman/listinfo/profanity) and/or [MUC](xmpp:profanity@rooms.dismail.de?join).
 
 ## Installation
 Our [user guide](https://profanity-im.github.io/userguide.html) contains an [install](https://profanity-im.github.io/guide/latest/install.html) section and a section for [building](https://profanity-im.github.io/guide/latest/build.html) from source yourself.
@@ -41,7 +43,7 @@ Additionally you can check out our [blog](https://profanity-im.github.io/blog/) 
 ## Getting help
 To get help, first read our [User Guide](https://profanity-im.github.io/userguide.html) then check out the [FAQ](https://profanity-im.github.io/faq.html).
 If you have are having a problem then first search the [issue tracker](https://github.com/profanity-im/profanity/issues).
-If you don't find anything there either come to our [MUC](profanity@rooms.dismail.de) or create a new issue depending on what your problem is.
+If you don't find anything there either come to our [MUC](xmpp:profanity@rooms.dismail.de?join) or create a new issue depending on what your problem is.
 
 ## Links
 
