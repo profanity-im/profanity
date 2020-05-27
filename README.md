@@ -23,6 +23,8 @@ Feature requests that we consider out of scope, either because of interest or be
 Another way to sponsor us or get an issue solved is to create a [bug bounty](https://www.bountysource.com/teams/profanity/issues).
 Here one sets a bounty on a certain task and once the task is completed you send the money to the person who did the work.
 
+Tasks from our [sponsors](SPONSORS.md) will be tackled first.
+
 Thank you! <3
 
 ## How to contribute
