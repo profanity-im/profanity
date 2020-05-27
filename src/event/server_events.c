@@ -440,20 +440,19 @@ sv_ev_delayed_private_message(ProfMessage *message)
 void
 sv_ev_outgoing_carbon(ProfMessage *message)
 {
-    ProfChatWin *chatwin = wins_get_chat(message->from_jid->barejid);
+    ProfChatWin *chatwin = wins_get_chat(message->to_jid->barejid);
     if (!chatwin) {
-        chatwin = chatwin_new(message->from_jid->barejid);
+        chatwin = chatwin_new(message->to_jid->barejid);
     }
 
     chat_state_active(chatwin->state);
 
-    //TODO: check whether we need to change from and to for carbon. now that we have profmessage->to_jid?
     if (message->plain) {
         if (message->type == PROF_MSG_TYPE_MUCPM) {
             // MUC PM, should have resource (nick) in filename
-            chat_log_msg_out(message->from_jid->barejid, message->plain, message->from_jid->resourcepart);
+            chat_log_msg_out(message->to_jid->barejid, message->plain, message->from_jid->resourcepart);
         } else {
-            chat_log_msg_out(message->from_jid->barejid, message->plain, NULL);
+            chat_log_msg_out(message->to_jid->barejid, message->plain, NULL);
         }
         log_database_add_incoming(message);
     }
@@ -782,7 +781,6 @@ sv_ev_incoming_message(ProfMessage *message)
 void
 sv_ev_incoming_carbon(ProfMessage *message)
 {
-    //TODO: check whether we need to change from and to for carbon. now that we have profmessage->to_jid?
     gboolean new_win = FALSE;
     ProfChatWin *chatwin = wins_get_chat(message->from_jid->barejid);
     if (!chatwin) {

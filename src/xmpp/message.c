@@ -1118,6 +1118,7 @@ _handle_carbons(xmpp_stanza_t *const stanza)
     const gchar *from = xmpp_stanza_get_from(message_stanza);
 
     // happens when receive a carbon of a self sent message
+    // really? maybe some servers do this, but it's not required.
     if (!to) to = from;
 
     Jid *jid_from = jid_create(from);
@@ -1140,18 +1141,19 @@ _handle_carbons(xmpp_stanza_t *const stanza)
         message->encrypted = xmpp_stanza_get_text(x);
     }
 
-    //TODO: now that profmessage has from_jid AND to_jid we should save both. and maybe also add is_carbon so we can decide later on.
+    //TODO: maybe also add is_carbon maybe even an enum with outgoing/incoming
+    //could be that then we can have sv_ev_carbon no incoming/outgoing
     if (message->plain || message->encrypted || message->body) {
         // if we are the recipient, treat as standard incoming message
         if (g_strcmp0(mybarejid, jid_to->barejid) == 0) {
-            jid_destroy(jid_to);
             message->from_jid = jid_from;
+            message->to_jid = jid_to;
             sv_ev_incoming_carbon(message);
 
         // else treat as a sent message
         } else {
-            jid_destroy(jid_from);
-            message->from_jid = jid_to;
+            message->from_jid = jid_from;
+            message->to_jid = jid_to;
             sv_ev_outgoing_carbon(message);
         }
     }

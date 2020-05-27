@@ -164,12 +164,16 @@ log_database_close(void)
 void
 log_database_add_incoming(ProfMessage *message)
 {
-    const char *jid = connection_get_fulljid();
-    Jid *myjid = jid_create(jid);
+    if (message->to_jid) {
+        _add_to_db(message, NULL, message->from_jid, message->to_jid);
+    } else {
+        const char *jid = connection_get_fulljid();
+        Jid *myjid = jid_create(jid);
 
-    _add_to_db(message, NULL, message->from_jid, myjid);
+        _add_to_db(message, NULL, message->from_jid, myjid);
 
-    jid_destroy(myjid);
+        jid_destroy(myjid);
+    }
 }
 
 static void
