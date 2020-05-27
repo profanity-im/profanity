@@ -1,5 +1,5 @@
 # Profanity
-[![Build Status](https://api.travis-ci.org/profanity-im/profanity.png?branch=master)](https://travis-ci.org/profanity-im/profanity) [![builds.sr.ht status](https://builds.sr.ht/~wstrm/profanity.svg)](https://builds.sr.ht/~wstrm/profanity?) [![Chat](https://inverse.chat/badge.svg?room=profanity@rooms.dismail.de)](https://conversations.im/j/profanity@rooms.dismail.de)
+[![Build Status](https://api.travis-ci.org/profanity-im/profanity.png?branch=master)](https://travis-ci.org/profanity-im/profanity) [![builds.sr.ht status](https://builds.sr.ht/~wstrm/profanity.svg)](https://builds.sr.ht/~wstrm/profanity?) [![Chat](https://inverse.chat/badge.svg?room=profanity@rooms.dismail.de)](https://conversations.im/j/profanity@rooms.dismail.de)[![Packaging status](https://repology.org/badge/tiny-repos/profanity.svg)](https://repology.org/project/profanity/versions)
 
 Profanity is a console based XMPP client inspired by [Irssi](http://www.irssi.org/).
 
@@ -39,14 +39,17 @@ If you don't find anything there either come to our [MUC](profanity@rooms.dismai
 
 ### Website
 URL: https://profanity-im.github.io
+
 Repo: https://github.com/profanity-im/profanity-im.github.io
 
 ### Blog
 URL: https://profanity-im.github.io/blog
+
 Repo: https://github.com/profanity-im/blog
 
 ### Mailinglist 
 Mailing List: https://lists.notraces.net/mailman/listinfo/profanity
+
 Thanks to @toogley!
 
 ### Chatroom
