@@ -150,13 +150,12 @@ sv_ev_roster_received(void)
         }
         free(err_str);
 
-        // Redraw the screen after entry of the PGP secret key
+        // Redraw the screen after entry of the PGP secret key, but not init
         ProfWin *win = wins_get_current();
         char *theme = prefs_get_string(PREF_THEME);
         win_clear(win);
         theme_init(theme);
         prefs_free_string(theme);
-        ui_init();
         ui_resize();
         ui_show_roster();
     }
