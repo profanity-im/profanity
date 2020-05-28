@@ -34,6 +34,11 @@ const char * connection_get_fulljid(void)
     return mock_ptr_type(char *);
 }
 
+char* connection_get_barejid(void)
+{
+    return mock_ptr_type(char *);
+}
+
 const char * connection_get_domain(void)
 {
     return NULL;
