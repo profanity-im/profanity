@@ -407,6 +407,7 @@ autocomplete_remove_older_than_max_reverse(Autocomplete ac, int maxsize)
     if (autocomplete_length(ac) > maxsize) {
         GList *last = g_list_last(ac->items);
         if (last) {
+            free(last->data);
             ac->items = g_list_delete_link(ac->items, last);
         }
     }
