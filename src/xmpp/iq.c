@@ -159,6 +159,8 @@ _iq_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza, void *const us
 {
     log_debug("iq stanza handler fired");
 
+    iq_autoping_timer_cancel(); // reset the autoping timer
+
     char *text;
     size_t text_size;
     xmpp_stanza_to_text(stanza, &text, &text_size);
