@@ -55,6 +55,7 @@ void autocomplete_add_all(Autocomplete ac, char **items);
 void autocomplete_update(Autocomplete ac, char **items);
 void autocomplete_remove(Autocomplete ac, const char *const item);
 void autocomplete_remove_all(Autocomplete ac, char **items);
+void autocomplete_add_reverse(Autocomplete ac, const char *item);
 
 // find the next item prefixed with search string
 gchar* autocomplete_complete(Autocomplete ac, const gchar *search_str, gboolean quote, gboolean previous);
@@ -75,5 +76,5 @@ void autocomplete_reset(Autocomplete ac);
 
 gboolean autocomplete_contains(Autocomplete ac, const char *value);
 
-void autocomplete_remove_older_than_max(Autocomplete ac, int maxsize);
+void autocomplete_remove_older_than_max_reverse(Autocomplete ac, int maxsize);
 #endif

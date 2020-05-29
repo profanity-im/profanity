@@ -134,6 +134,23 @@ autocomplete_update(Autocomplete ac, char **items)
 }
 
 void
+autocomplete_add_reverse(Autocomplete ac, const char *item)
+{
+    if (ac) {
+        char *item_cpy;
+        GList *curr = g_list_find_custom(ac->items, item, (GCompareFunc)strcmp);
+
+        // if item already exists
+        if (curr) {
+            return;
+        }
+
+        item_cpy = strdup(item);
+        ac->items = g_list_prepend(ac->items, item_cpy);
+    }
+}
+
+void
 autocomplete_add(Autocomplete ac, const char *item)
 {
     if (ac) {
@@ -148,8 +165,6 @@ autocomplete_add(Autocomplete ac, const char *item)
         item_cpy = strdup(item);
         ac->items = g_list_insert_sorted(ac->items, item_cpy, (GCompareFunc)strcmp);
     }
-
-    return;
 }
 
 void
@@ -385,14 +400,14 @@ autocomplete_param_no_with_func(const char *const input, char *command, int arg_
     return NULL;
 }
 
-/* remove the first message if we have more than max */
+/* remove the last message if we have more than max */
 void
-autocomplete_remove_older_than_max(Autocomplete ac, int maxsize)
+autocomplete_remove_older_than_max_reverse(Autocomplete ac, int maxsize)
 {
     if (autocomplete_length(ac) > maxsize) {
-        GList *first = g_list_nth(ac->items, 0);
-        if (first) {
-            ac->items = g_list_delete_link(ac->items, first);
+        GList *last = g_list_last(ac->items);
+        if (last) {
+            ac->items = g_list_delete_link(ac->items, last);
         }
     }
 }
