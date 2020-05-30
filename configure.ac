@@ -180,7 +180,7 @@ PKG_CHECK_MODULES([curl], [libcurl], [],
         [AC_MSG_ERROR([libcurl is required for profanity])])])
 
 PKG_CHECK_MODULES([SQLITE], [sqlite3 >= 3.22.0], [],
-    [AC_MSG_ERROR([sqlite3 3.22.0 or higher is required for profanity profanity])])
+    [AC_MSG_ERROR([sqlite3 3.22.0 or higher is required for profanity])])
 
 AS_IF([test "x$enable_icons_and_clipboard" != xno],
     [PKG_CHECK_MODULES([GTK], [gtk+-2.0 >= 2.24.10],
