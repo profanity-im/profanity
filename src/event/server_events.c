@@ -133,11 +133,12 @@ sv_ev_login_account_success(char *account_name, gboolean secured)
 void
 sv_ev_roster_received(void)
 {
+    roster_process_pending_presence();
+
     if (prefs_get_boolean(PREF_ROSTER)) {
         ui_show_roster();
     }
 
-    roster_process_pending_presence();
     char *account_name = session_get_account_name();
 
 #ifdef HAVE_LIBGPGME
