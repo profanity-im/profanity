@@ -137,7 +137,12 @@ PKG_CHECK_MODULES([libmesode], [libmesode >= 0.9.2],
 
 AC_MSG_CHECKING([whether ${XMPP_LIB} works])
 AC_LINK_IFELSE([AC_LANG_SOURCE([[
+    #ifdef HAVE_LIBMESODE
+    #include <mesode.h>
+    #else
     #include <strophe.h>
+    #endif
+
     int main() {
         xmpp_initialize();
         return 0;
