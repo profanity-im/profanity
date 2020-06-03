@@ -251,6 +251,7 @@ test_cmd_otr_theirfp_from_wintype(win_type_t wintype)
     ProfWin window;
     window.type = wintype;
     window.layout = NULL;
+    window.urls_ac = NULL;
 
     will_return(connection_get_status, JABBER_CONNECTED);
 
@@ -283,6 +284,7 @@ void cmd_otr_theirfp_shows_message_when_non_otr_chat_window(void **state)
     ProfWin window;
     window.type = WIN_CHAT;
     window.layout = NULL;
+    window.urls_ac = NULL;
     ProfChatWin chatwin;
     chatwin.window = window;
     chatwin.memcheck = PROFCHATWIN_MEMCHECK;
@@ -310,6 +312,7 @@ void cmd_otr_theirfp_shows_fingerprint(void **state)
     ProfWin window;
     window.type = WIN_CHAT;
     window.layout = NULL;
+    window.urls_ac = NULL;
     ProfChatWin chatwin;
     chatwin.window = window;
     chatwin.barejid = recipient;
@@ -337,6 +340,7 @@ test_cmd_otr_start_from_wintype(win_type_t wintype)
     ProfWin window;
     window.type = wintype;
     window.layout = NULL;
+    window.urls_ac = NULL;
 
     will_return(connection_get_status, JABBER_CONNECTED);
 
@@ -371,6 +375,7 @@ void cmd_otr_start_shows_message_when_already_started(void **state)
     ProfWin window;
     window.type = WIN_CHAT;
     window.layout = NULL;
+    window.urls_ac = NULL;
     ProfChatWin chatwin;
     chatwin.window = window;
     chatwin.barejid = recipient;
@@ -395,6 +400,7 @@ void cmd_otr_start_shows_message_when_no_key(void **state)
     ProfWin window;
     window.type = WIN_CHAT;
     window.layout = NULL;
+    window.urls_ac = NULL;
     ProfChatWin chatwin;
     chatwin.window = window;
     chatwin.barejid = recipient;
