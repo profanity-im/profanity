@@ -194,32 +194,30 @@ account_eval_password(ProfAccount *account)
     assert(account != NULL);
     assert(account->eval_password != NULL);
 
-    // Evaluate as shell command to retrieve password
-    GString *cmd = g_string_new("");
-    g_string_append_printf(cmd, "%s 2>/dev/null", account->eval_password);
+    gchar **output = NULL;
+    gchar **argv = g_strsplit(account->eval_password, " ", 0);
 
-    FILE *stream = popen(cmd->str, "r");
-    g_string_free(cmd, TRUE);
-    if (stream) {
-        // Limit to READ_BUF_SIZE bytes to prevent overflows in the case of a poorly chosen command
-        account->password = g_malloc(READ_BUF_SIZE);
-        if (!account->password) {
-            log_error("Failed to allocate enough memory to read eval_password output");
-            return FALSE;
-        }
-        account->password = fgets(account->password, READ_BUF_SIZE, stream);
-        pclose(stream);
-        if (!account->password) {
-            log_error("No result from eval_password.");
-            return FALSE;
-        }
+    if (!call_external(argv, &output, NULL)) {
+        g_strfreev(argv);
+        argv = NULL;
+        return FALSE;
+    }
 
-        // strip trailing newline
-        if (g_str_has_suffix(account->password, "\n")) {
-            account->password[strlen(account->password)-1] = '\0';
-        }
-    } else {
-        log_error("popen failed when running eval_password.");
+    g_strfreev(argv);
+
+    if (!output || !output[0]) {
+        log_error("Failed to read eval_password output");
+        g_strfreev(output);
+        output = NULL;
+        return FALSE;
+    }
+
+    account->password = strdup(output[0]);
+    g_strfreev(output);
+    output = NULL;
+
+    if (!account->password) {
+        log_error("Failed to allocate enough memory to read eval_password output");
         return FALSE;
     }
 

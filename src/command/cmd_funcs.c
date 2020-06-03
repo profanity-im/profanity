@@ -4900,7 +4900,7 @@ cmd_sendfile(ProfWin *window, const char *const command, gchar **args)
 			free(filename);
 			return TRUE;
         }
-        
+
     if (access(filename, R_OK) != 0) {
         cons_show_error("Uploading '%s' failed: File not found!", filename);
         free(filename);
@@ -8921,9 +8921,10 @@ cmd_urlopen(ProfWin *window, const char *const command, gchar **args)
             return TRUE;
         }
 
-        gchar* cmd = prefs_get_string(PREF_URL_OPEN_CMD);
-        call_external(cmd, args[0]);
-        g_free(cmd);
+        gchar *argv[] = {prefs_get_string(PREF_URL_OPEN_CMD), args[0], NULL};
+        if (!call_external(argv, NULL, NULL)) {
+          cons_show_error("Unable to open url: check the logs for more information.");
+        }
     } else {
         cons_show("urlopen not supported in this window");
     }

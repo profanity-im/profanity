@@ -484,15 +484,90 @@ get_mentions(gboolean whole_word, gboolean case_sensitive, const char *const mes
     return mentions;
 }
 
-void
-call_external(const char *const exe, const char *const param)
+/*
+ * Take an NULL-terminated array used as the tokens of a command, and optionally
+ * pointers to the string arrays that will store each lines of the call standard
+ * output and standard error.
+ *
+ * argv - NULL-terminated string array containing the tokens of the command
+ *        line to spawn
+ * output_ptr - a pointer to the string array where to store spawned command
+ *              standard output
+ *              set to NULL to ignore the command standard output
+ * error_ptr - a pointer to the string array where to store spawned command
+ *             standard error
+ *             set to NULL to ignore the command standard error
+ *
+ * Returns:
+ * - TRUE if the command has been successfully spawned and exited normally
+ * - FALSE otherwise
+ */
+gboolean
+call_external(gchar **argv, gchar ***const output_ptr, gchar ***const error_ptr)
 {
-    GString *cmd = g_string_new("");
+    gchar *stdout_str = NULL;
+    gchar **stdout_str_ptr = &stdout_str;
+    gchar *stderr_str = NULL;
+    gchar **stderr_str_ptr = &stderr_str;
+    GSpawnFlags flags = G_SPAWN_SEARCH_PATH;
+    gint status;
+    GError *error = NULL;
+    gchar *cmd = NULL;
 
-    g_string_append_printf(cmd, "%s %s > /dev/null 2>&1", exe, param);
-    log_debug("Calling external: %s", cmd->str);
-    FILE *stream = popen(cmd->str, "r");
+    cmd = g_strjoinv(" ", argv);
+    log_debug("Calling external: %s", cmd);
 
-    pclose(stream);
-    g_string_free(cmd, TRUE);
+    if (!output_ptr) {
+        stdout_str_ptr = NULL;
+        flags |= G_SPAWN_STDOUT_TO_DEV_NULL;
+    }
+
+    if (!error_ptr) {
+        stderr_str_ptr = NULL;
+        flags |= G_SPAWN_STDERR_TO_DEV_NULL;
+    }
+
+    if (!g_spawn_sync (NULL, argv, NULL, flags, NULL, NULL, stdout_str_ptr, stderr_str_ptr, &status, &error)) {
+        log_error("Spawning '%s' failed: %s.", cmd, error->message);
+        g_error_free(error);
+        error = NULL;
+        return FALSE;
+    }
+
+    if (!g_spawn_check_exit_status(status, &error)) {
+        log_error("Calling '%s' failed: %s.", cmd, error->message);
+        g_error_free(error);
+        error = NULL;
+        g_free(cmd);
+        cmd = NULL;
+        g_free(stdout_str);
+        stdout_str = NULL;
+        stdout_str_ptr = NULL;
+        if (stderr_str && strlen(stderr_str)) {
+            log_error("Called command returned the following on stderr: %s.", stderr_str);
+        }
+        g_free(stderr_str);
+        stderr_str = NULL;
+        stderr_str_ptr = NULL;
+        return FALSE;
+    }
+
+    g_free(cmd);
+    cmd = NULL;
+
+    if (output_ptr) {
+        *output_ptr = g_strsplit(stdout_str, "\n", 0);
+        g_free(stdout_str);
+        stdout_str = NULL;
+        stdout_str_ptr = NULL;
+    }
+
+    if (error_ptr) {
+        *error_ptr = g_strsplit(stderr_str, "\n", 0);
+        g_free(stderr_str);
+        stderr_str = NULL;
+        stderr_str_ptr = NULL;
+    }
+
+    return TRUE;
 }
