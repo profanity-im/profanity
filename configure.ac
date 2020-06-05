@@ -129,11 +129,11 @@ CFLAGS="$CFLAGS $PTHREAD_CFLAGS"
 AS_IF([test "x$PTHREAD_CC" != x], [ CC="$PTHREAD_CC" ])
 
 ### Check for libmesode, fall back to libstrophe
-PKG_CHECK_MODULES([libmesode], [libmesode >= 0.9.2],
+PKG_CHECK_MODULES([libmesode], [libmesode >= 0.9.3],
     [LIBS="$libmesode_LIBS $LIBS" CFLAGS="$CFLAGS $libmesode_CFLAGS" XMPP_LIB="libmesode" AC_DEFINE([HAVE_LIBMESODE], [1], [libmesode])],
-    [PKG_CHECK_MODULES([libstrophe], [libstrophe >= 0.9.2],
+    [PKG_CHECK_MODULES([libstrophe], [libstrophe >= 0.9.3],
         [LIBS="$libstrophe_LIBS $LIBS" CFLAGS="$CFLAGS $libstrophe_CFLAGS" XMPP_LIB="libstrophe" AC_DEFINE([HAVE_LIBSTROPHE], [1], [libstrophe])],
-        [AC_MSG_ERROR([Neither libmesode or libstrophe in version >= 0.9.2 found, either is required for profanity])])])
+        [AC_MSG_ERROR([Neither libmesode or libstrophe in version >= 0.9.3 found, either is required for profanity])])])
 
 AC_MSG_CHECKING([whether ${XMPP_LIB} works])
 AC_LINK_IFELSE([AC_LANG_SOURCE([[
