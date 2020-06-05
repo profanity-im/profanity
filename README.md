@@ -5,7 +5,7 @@ Profanity is a console based XMPP client inspired by [Irssi](http://www.irssi.or
 
 If you like Profanity consider becoming a sponsor or [donate](https://profanity-im.github.io/donate.html) some money.
 
-![alt tag](https://profanity-im.github.io/images/prof-1.png)
+![alt tag](https://profanity-im.github.io/images/prof-2.png)
 
 See the [User Guide](https://profanity-im.github.io/userguide.html) for information on installing and using Profanity.
 
