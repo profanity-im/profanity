@@ -55,7 +55,7 @@ account_new(const gchar *const name, const gchar *const jid,
     const gchar *const otr_policy, GList *otr_manual, GList *otr_opportunistic,
     GList *otr_always,  const gchar *const omemo_policy, GList *omemo_enabled,
     GList *omemo_disabled, const gchar *const pgp_keyid, const char *const startscript,
-    const char *const theme, gchar *tls_policy)
+    const char *const theme, gchar *tls_policy, gchar *auth_policy)
 {
     ProfAccount *new_account = malloc(sizeof(ProfAccount));
     memset(new_account, 0, sizeof(ProfAccount));
@@ -175,6 +175,12 @@ account_new(const gchar *const name, const gchar *const jid,
         new_account->tls_policy = NULL;
     }
 
+    if (auth_policy != NULL) {
+        new_account->auth_policy = strdup(auth_policy);
+    } else {
+        new_account->auth_policy = NULL;
+    }
+
     return new_account;
 }
 
@@ -247,6 +253,7 @@ account_free(ProfAccount *account)
     free(account->startscript);
     free(account->theme);
     free(account->tls_policy);
+    free(account->auth_policy);
     g_list_free_full(account->otr_manual, g_free);
     g_list_free_full(account->otr_opportunistic, g_free);
     g_list_free_full(account->otr_always, g_free);
@@ -270,4 +277,10 @@ void account_set_tls_policy(ProfAccount *account, const char *tls_policy)
 {
     free(account->tls_policy);
     account->tls_policy = strdup(tls_policy);
+}
+
+void account_set_auth_policy(ProfAccount *account, const char *auth_policy)
+{
+    free(account->auth_policy);
+    account->auth_policy = strdup(auth_policy);
 }

@@ -43,7 +43,7 @@ void connection_shutdown(void);
 void connection_check_events(void);
 
 jabber_conn_status_t connection_connect(const char *const fulljid, const char *const passwd, const char *const altdomain, int port,
-    const char *const tls_policy);
+    const char *const tls_policy, const char *const auth_policy);
 void connection_disconnect(void);
 void connection_set_disconnected(void);
 

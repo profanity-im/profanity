@@ -134,8 +134,10 @@ connection_shutdown(void)
 
 jabber_conn_status_t
 connection_connect(const char *const jid, const char *const passwd, const char *const altdomain, int port,
-    const char *const tls_policy)
+    const char *const tls_policy, const char *const auth_policy)
 {
+    long flags;
+
     assert(jid != NULL);
     assert(passwd != NULL);
 
@@ -175,15 +177,35 @@ connection_connect(const char *const jid, const char *const passwd, const char *
     xmpp_conn_set_jid(conn.xmpp_conn, jid);
     xmpp_conn_set_pass(conn.xmpp_conn, passwd);
 
+    flags = xmpp_conn_get_flags(conn.xmpp_conn);
+
     if (!tls_policy || (g_strcmp0(tls_policy, "force") == 0)) {
-        xmpp_conn_set_flags(conn.xmpp_conn, XMPP_CONN_FLAG_MANDATORY_TLS);
+        flags |= XMPP_CONN_FLAG_MANDATORY_TLS;
     } else if (g_strcmp0(tls_policy, "trust") == 0) {
-        xmpp_conn_set_flags(conn.xmpp_conn, XMPP_CONN_FLAG_MANDATORY_TLS);
-        xmpp_conn_set_flags(conn.xmpp_conn, XMPP_CONN_FLAG_TRUST_TLS);
+        flags |= XMPP_CONN_FLAG_MANDATORY_TLS;
+        flags |= XMPP_CONN_FLAG_TRUST_TLS;
     } else if (g_strcmp0(tls_policy, "disable") == 0) {
-        xmpp_conn_set_flags(conn.xmpp_conn, XMPP_CONN_FLAG_DISABLE_TLS);
+        flags |= XMPP_CONN_FLAG_DISABLE_TLS;
     } else if (g_strcmp0(tls_policy, "legacy") == 0) {
-        xmpp_conn_set_flags(conn.xmpp_conn, XMPP_CONN_FLAG_LEGACY_SSL);
+        flags |= XMPP_CONN_FLAG_LEGACY_SSL;
+    }
+
+    if (auth_policy && (g_strcmp0(auth_policy, "legacy") == 0)) {
+        flags |= XMPP_CONN_FLAG_LEGACY_AUTH;
+    }
+
+    xmpp_conn_set_flags(conn.xmpp_conn, flags);
+
+    /* Print debug logs that can help when users share the logs */
+    if (flags != 0) {
+        log_debug("Connecting with flags (0x%lx):", flags);
+#define LOG_FLAG_IF_SET(name) if (flags & name) { log_debug("  " #name); }
+        LOG_FLAG_IF_SET(XMPP_CONN_FLAG_MANDATORY_TLS);
+        LOG_FLAG_IF_SET(XMPP_CONN_FLAG_TRUST_TLS);
+        LOG_FLAG_IF_SET(XMPP_CONN_FLAG_DISABLE_TLS);
+        LOG_FLAG_IF_SET(XMPP_CONN_FLAG_LEGACY_SSL);
+        LOG_FLAG_IF_SET(XMPP_CONN_FLAG_LEGACY_AUTH);
+#undef LOG_FLAG_IF_SET
     }
 
 #ifdef HAVE_LIBMESODE

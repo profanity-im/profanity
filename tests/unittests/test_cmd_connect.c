@@ -116,7 +116,7 @@ void cmd_connect_lowercases_argument_with_account(void **state)
 {
 gchar *args[] = { "Jabber_org", NULL };
     ProfAccount *account = account_new("Jabber_org", "me@jabber.org", "password", NULL,
-        TRUE, NULL, 0, NULL, NULL, NULL, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+        TRUE, NULL, 0, NULL, NULL, NULL, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
 
     will_return(connection_get_status, JABBER_DISCONNECTED);
 
@@ -136,7 +136,7 @@ void cmd_connect_asks_password_when_not_in_account(void **state)
 {
     gchar *args[] = { "jabber_org", NULL };
     ProfAccount *account = account_new("jabber_org", "me@jabber.org", NULL, NULL,
-        TRUE, NULL, 0, NULL, NULL, NULL, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+        TRUE, NULL, 0, NULL, NULL, NULL, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
 
     will_return(connection_get_status, JABBER_DISCONNECTED);
 
@@ -383,7 +383,7 @@ void cmd_connect_shows_message_when_connecting_with_account(void **state)
 {
     gchar *args[] = { "jabber_org", NULL };
     ProfAccount *account = account_new("jabber_org", "user@jabber.org", "password", NULL,
-        TRUE, NULL, 0, "laptop", NULL, NULL, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+        TRUE, NULL, 0, "laptop", NULL, NULL, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
 
     will_return(connection_get_status, JABBER_DISCONNECTED);
 
@@ -403,7 +403,7 @@ void cmd_connect_connects_with_account(void **state)
 {
     gchar *args[] = { "jabber_org", NULL };
     ProfAccount *account = account_new("jabber_org", "me@jabber.org", "password", NULL,
-        TRUE, NULL, 0, NULL, NULL, NULL, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+        TRUE, NULL, 0, NULL, NULL, NULL, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
 
     will_return(connection_get_status, JABBER_DISCONNECTED);
 

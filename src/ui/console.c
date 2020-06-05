@@ -908,6 +908,9 @@ cons_show_account(ProfAccount *account)
     if (account->tls_policy) {
         cons_show   ("TLS policy        : %s", account->tls_policy);
     }
+    if (account->auth_policy) {
+        cons_show   ("Auth policy       : %s", account->auth_policy);
+    }
     if (account->last_presence) {
         cons_show   ("Last presence     : %s", account->last_presence);
     }

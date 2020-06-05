@@ -128,6 +128,7 @@ void accounts_set_pgp_keyid(const char * const account_name, const char * const 
 void accounts_set_script_start(const char * const account_name, const char * const value) {}
 void accounts_set_theme(const char * const account_name, const char * const value) {}
 void accounts_set_tls_policy(const char * const account_name, const char * const value) {}
+void accounts_set_auth_policy(const char * const account_name, const char * const value) {}
 
 void accounts_set_login_presence(const char * const account_name, const char * const value)
 {

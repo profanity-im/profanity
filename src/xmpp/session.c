@@ -79,6 +79,7 @@ static struct {
     char *altdomain;
     int port;
     char *tls_policy;
+    char *auth_policy;
 } saved_details;
 
 typedef enum {
@@ -135,7 +136,8 @@ session_connect_with_account(const ProfAccount *const account)
         account->password,
         account->server,
         account->port,
-        account->tls_policy);
+        account->tls_policy,
+        account->auth_policy);
     free(jid);
 
     return result;
@@ -143,7 +145,7 @@ session_connect_with_account(const ProfAccount *const account)
 
 jabber_conn_status_t
 session_connect_with_details(const char *const jid, const char *const passwd, const char *const altdomain,
-    const int port, const char *const tls_policy)
+    const int port, const char *const tls_policy, const char *const auth_policy)
 {
     assert(jid != NULL);
     assert(passwd != NULL);
@@ -169,6 +171,11 @@ session_connect_with_details(const char *const jid, const char *const passwd, co
     } else {
         saved_details.tls_policy = NULL;
     }
+    if (auth_policy) {
+        saved_details.auth_policy = strdup(auth_policy);
+    } else {
+        saved_details.auth_policy = NULL;
+    }
 
     // use 'profanity' when no resourcepart in provided jid
     Jid *jidp = jid_create(jid);
@@ -191,7 +198,8 @@ session_connect_with_details(const char *const jid, const char *const passwd, co
         passwd,
         saved_details.altdomain,
         saved_details.port,
-        saved_details.tls_policy);
+        saved_details.tls_policy,
+        saved_details.auth_policy);
 }
 
 void
@@ -292,7 +300,7 @@ session_login_success(gboolean secured)
     // logged in without account, use details to create new account
     } else {
         log_debug("Connection handler: logged in with jid: %s", saved_details.name);
-        accounts_add(saved_details.name, saved_details.altdomain, saved_details.port, saved_details.tls_policy);
+        accounts_add(saved_details.name, saved_details.altdomain, saved_details.port, saved_details.tls_policy, saved_details.auth_policy);
         accounts_set_jid(saved_details.name, saved_details.jid);
 
         saved_account.name = strdup(saved_details.name);
@@ -511,7 +519,7 @@ _session_reconnect(void)
     }
 
     log_debug("Attempting reconnect with account %s", account->name);
-    connection_connect(jid, saved_account.passwd, account->server, account->port, account->tls_policy);
+    connection_connect(jid, saved_account.passwd, account->server, account->port, account->tls_policy, account->auth_policy);
     free(jid);
     account_free(account);
     g_timer_start(reconnect_timer);
@@ -532,5 +540,6 @@ _session_free_saved_details(void)
     FREE_SET_NULL(saved_details.passwd);
     FREE_SET_NULL(saved_details.altdomain);
     FREE_SET_NULL(saved_details.tls_policy);
+    FREE_SET_NULL(saved_details.auth_policy);
 }
 
