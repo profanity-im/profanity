@@ -1,14 +1,14 @@
-image: openbsd/6.6
+image: openbsd/6.7
 
 packages:
   - cmake
   - gmake
   - cmocka
   - libtool
-  - automake-1.16.1
+  - automake-1.16.2
   - pkgconf
   - readline
-  - python-3.7.4
+  - python-3.8.2
   - autoconf-2.69p2
   - autoconf-archive
   - libmesode
