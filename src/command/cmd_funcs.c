@@ -8939,26 +8939,26 @@ cmd_slashguard(ProfWin *window, const char *const command, gchar **args)
 gboolean
 cmd_urlopen(ProfWin *window, const char *const command, gchar **args)
 {
-	if (window->type == WIN_CHAT ||
-        window->type == WIN_MUC ||
-        window->type == WIN_PRIVATE) {
-
-        if (args[0] == NULL) {
-            cons_bad_cmd_usage(command);
-            return TRUE;
-        }
-
-        gchar* cmd = prefs_get_string(PREF_URL_OPEN_CMD);
-        gchar *argv[] = {cmd, args[0], NULL};
-
-        if (!call_external(argv, NULL, NULL)) {
-          cons_show_error("Unable to open url: check the logs for more information.");
-        }
-
-        g_free(cmd);
-    } else {
+    if (window->type != WIN_CHAT &&
+        window->type != WIN_MUC &&
+        window->type != WIN_PRIVATE) {
         cons_show("urlopen not supported in this window");
+        return TRUE;
     }
+
+    if (args[0] == NULL) {
+        cons_bad_cmd_usage(command);
+        return TRUE;
+    }
+
+    gchar* cmd = prefs_get_string(PREF_URL_OPEN_CMD);
+    gchar *argv[] = {cmd, args[0], NULL};
+
+    if (!call_external(argv, NULL, NULL)) {
+      cons_show_error("Unable to open url: check the logs for more information.");
+    }
+
+    g_free(cmd);
 
     return TRUE;
 }
