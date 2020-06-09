@@ -5,7 +5,7 @@ Four months and 347 commits after 0.8.1 we are happy to release 0.9.0.
 
 7 people contributed code to it: @pasis, @wstrm, @DebXWoody, @toogley, @pmaziere, @moppman and @jubalh.
 
-Thanks a lot to our sponsors: @mdosch and @wstrm!!
+Thanks a lot to our sponsors: @mdosch and @wstrm!
 If you want to support us too: https://profanity-im.github.io/donate.html
 
 This release depends on libstrophe >= 0.9.3, sqlite >= 3.22.0 and glib >= 2.56.0.
@@ -29,10 +29,10 @@ Changes:
 - XEP-0084: Add option to open avatars directly (#1281)
   `/avatar odin@valhalla.org` became `/avatar get odin@valhalla.org`
   New is:
-  `/avatar cmd feh`
+  `/executable avatar feh`
   `/avatar open odin@valhalla.org`
   xdg-open is used by default. So it will take your default application.
-- Enable popular featues by default.
+- Enable popular features by default.
   For a nicer out of the box experience we enable:
   * allow message correction
   * sending receipts
@@ -53,7 +53,7 @@ Changes:
 - Modify our README
 - Store logs in SQLite backend (#1282)
 - Request OMEMO device list only for non anon MUCs (#1315) (@DebXWoody)
-- Remove unanimous MUC display and colour messages like regular ones (#1261)
+- Don't display MUC history in unanimous colour, instead colour messages like regular ones (#1261)
 - Fix autocompletion for `/software` in regular chat windows (#1337)
 - XEP-0092: Make it possible to ask servers for their version (#1338)
 - Add possibility to easily open URLs (#1340, #1348)
@@ -64,8 +64,8 @@ Changes:
 - Add option to hide windows with no new messages in statusbar (#1285)
   `/statusbar show|hide read`
 - Support bookmark names (#697)
-- Preserve Gajims minimze flag in bookmarks (#1326)
-- Don't show resource in titelbar in narrow windows if it is too long (#715)
+- Preserve Gajims minimize flag in bookmarks (#1326)
+- Don't show resource in titlebar in narrow windows if it is too long (#715)
 - Improve autoping (#1333, #1315) (@DebXWoody)
 - Fix titlebar status display when using PGP (#1327) (@DebXWoody)
 - OMEMO: Only request "current" item (#1329) (@DebXWoody)
