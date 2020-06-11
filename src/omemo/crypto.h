@@ -32,11 +32,15 @@
  * source files in the program, then also delete it here.
  *
  */
+#include <stdio.h>
 #include <signal/signal_protocol_types.h>
 
 #define AES128_GCM_KEY_LENGTH 16
 #define AES128_GCM_IV_LENGTH  12
 #define AES128_GCM_TAG_LENGTH 16
+
+#define AES256_GCM_KEY_LENGTH 32
+#define AES256_GCM_NONCE_LENGTH 12
 
 int omemo_crypto_init(void);
 /**
@@ -176,7 +180,13 @@ int aes128gcm_encrypt(unsigned char* ciphertext, size_t* ciphertext_len,
                       const unsigned char* const plaintext, size_t plaintext_len,
                       const unsigned char* const iv, const unsigned char* const key);
 
-int aes128gcm_decrypt(unsigned char* plaintext,
-                      size_t* plaintext_len, const unsigned char* const ciphertext,
-                      size_t ciphertext_len, const unsigned char* const iv, size_t iv_len,
-                      const unsigned char* const key, const unsigned char* const tag);
+int aes128gcm_decrypt(unsigned char *plaintext,
+    size_t *plaintext_len, const unsigned char *const ciphertext,
+    size_t ciphertext_len, const unsigned char *const iv, size_t iv_len,
+    const unsigned char *const key, const unsigned char *const tag);
+
+int aes256gcm_encrypt_file(FILE *in, FILE *out, off_t file_size,
+    unsigned char key[], unsigned char nonce[]);
+
+int aes256gcm_decrypt_file(FILE *in, FILE *out, off_t file_size,
+    unsigned char key[], unsigned char nonce[]);

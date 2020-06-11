@@ -2401,9 +2401,9 @@ _http_upload_response_id_handler(xmpp_stanza_t* const stanza, void* const userda
     if (g_strcmp0(type, STANZA_TYPE_ERROR) == 0) {
         char* error_message = stanza_get_error_message(stanza);
         if (from) {
-            cons_show_error("Uploading '%s' failed for %s: %s", upload->filename, from, error_message);
+            cons_show_error("Uploading '%s' failed for %s: %s", upload->filepath, from, error_message);
         } else {
-            cons_show_error("Uploading '%s' failed: %s", upload->filename, error_message);
+            cons_show_error("Uploading '%s' failed: %s", upload->filepath, error_message);
         }
         free(error_message);
         return 0;

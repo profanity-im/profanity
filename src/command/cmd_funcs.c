@@ -73,6 +73,7 @@
 #include "plugins/plugins.h"
 #include "ui/ui.h"
 #include "ui/window_list.h"
+#include "omemo/crypto.h"
 #include "xmpp/xmpp.h"
 #include "xmpp/connection.h"
 #include "xmpp/contact.h"
@@ -4809,7 +4810,9 @@ gboolean
 cmd_sendfile(ProfWin* window, const char* const command, gchar** args)
 {
     jabber_conn_status_t conn_status = connection_get_status();
-    char* filename = args[0];
+    char *filename = args[0];
+    char *filepath = NULL;
+    unsigned char *key = NULL;
 
     // expand ~ to $HOME
     if (filename[0] == '~' && filename[1] == '/') {
@@ -4820,45 +4823,103 @@ cmd_sendfile(ProfWin* window, const char* const command, gchar** args)
         filename = strdup(filename);
     }
 
+    filepath = strdup(filename);
+
     if (conn_status != JABBER_CONNECTED) {
         cons_show("You are not currently connected.");
-        free(filename);
-        return TRUE;
+        goto out;
     }
 
     if (window->type != WIN_CHAT && window->type != WIN_PRIVATE && window->type != WIN_MUC) {
         cons_show_error("Unsupported window for file transmission.");
-        free(filename);
-        return TRUE;
+        goto out;
     }
 
     switch (window->type) {
-    case WIN_MUC:
-    {
-        ProfMucWin* mucwin = (ProfMucWin*)window;
-        assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
+        case WIN_MUC:
+        case WIN_CHAT:
+        {
+            ProfChatWin *chatwin = (ProfChatWin*)window;
+            assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
 
-        // only omemo, no pgp/otr available in MUCs
-        if (mucwin->is_omemo && !prefs_get_boolean(PREF_OMEMO_SENDFILE)) {
-            cons_show_error("Uploading unencrypted files disabled. See /omemo sendfile, /otr sendfile, /pgp sendfile.");
-            win_println(window, THEME_ERROR, "-", "Sending encrypted files via http_upload is not possible yet.");
-            free(filename);
-            return TRUE;
+            if (chatwin->is_omemo && !prefs_get_boolean(PREF_OMEMO_SENDFILE)) {
+                int tmpfd;
+                GError *err = NULL;
+                char *tmppath = NULL;
+
+                tmpfd = g_file_open_tmp("profanity.XXXXXX", &tmppath, &err);
+                if (err != NULL) {
+                    cons_show_error("Unable to create temporary file for encrypted transfer.");
+                    win_println(window, THEME_ERROR, "-", "Unable to create temporary file for encrypted transfer.");
+                    goto out;
+                }
+
+                struct stat tmpst;
+                if (fstat(tmpfd, &tmpst)) {
+                    cons_show_error("Cannot determine file size.");
+                    win_println(window, THEME_ERROR, "-", "Cannot determine file size.");
+                    goto out;
+                }
+
+                FILE *tmpfile = fdopen(tmpfd, "wb");
+                if (tmpfile == NULL) {
+                    cons_show_error("Unable to open temporary file.");
+                    win_println(window, THEME_ERROR, "-", "Unable to open temporary file.");
+                    goto out;
+                }
+
+                FILE *infile = fopen(filepath, "rb");
+                if (infile == NULL) {
+                    cons_show_error("Unable to open file.");
+                    win_println(window, THEME_ERROR, "-", "Unable to open file.");
+                    close(tmpfd);
+                    goto out;
+                }
+
+                int crypt_res = GPG_ERR_NO_ERROR;
+
+                // TODO(wstrm): Move these to omemo/crypto.c
+                unsigned char nonce[AES256_GCM_NONCE_LENGTH];
+                key = gcry_malloc_secure(AES256_GCM_KEY_LENGTH);
+                if (key == NULL) {
+                    cons_show_error("Cannot allocate secure memory for encryption.");
+                    win_println(window, THEME_ERROR, "-", "Cannot allocate secure memory for encryption.");
+                    goto out;
+                }
+
+                key = gcry_random_bytes_secure(AES256_GCM_KEY_LENGTH, GCRY_VERY_STRONG_RANDOM);
+                gcry_create_nonce(nonce, AES256_GCM_NONCE_LENGTH);
+
+                crypt_res = aes256gcm_encrypt_file(infile, tmpfile, tmpst.st_size, key, nonce);
+
+                if (crypt_res != 0) {
+                    cons_show_error("Failed to encrypt file.");
+                    win_println(window, THEME_ERROR, "-", "Failed to encrypt file.");
+                    goto out;
+                }
+
+                free(filepath);
+                filepath = tmppath;
+
+                break;
+            }
+
+            if ((chatwin->pgp_send && !prefs_get_boolean(PREF_PGP_SENDFILE))
+                    || (chatwin->is_otr && !prefs_get_boolean(PREF_OTR_SENDFILE))) {
+                cons_show_error("Uploading unencrypted files disabled. See /omemo sendfile, /otr sendfile, /pgp sendfile.");
+                win_println(window, THEME_ERROR, "-", "Sending encrypted files via http_upload is not possible yet.");
+                goto out;
+            }
+            break;
         }
-        break;
-    }
-    case WIN_CHAT:
-    {
-        ProfChatWin* chatwin = (ProfChatWin*)window;
-        assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
-
-        if ((chatwin->is_omemo && !prefs_get_boolean(PREF_OMEMO_SENDFILE))
-            || (chatwin->pgp_send && !prefs_get_boolean(PREF_PGP_SENDFILE))
-            || (chatwin->is_otr && !prefs_get_boolean(PREF_OTR_SENDFILE))) {
-            cons_show_error("Uploading unencrypted files disabled. See /omemo sendfile, /otr sendfile, /pgp sendfile.");
-            win_println(window, THEME_ERROR, "-", "Sending encrypted files via http_upload is not possible yet.");
-            free(filename);
-            return TRUE;
+        case WIN_PRIVATE:
+        {
+            // We don't support encryption in private MUC windows.
+            break;
+        }
+        default:
+			cons_show_error("Unsupported window for file transmission.");
+            goto out;
         }
         break;
     }
@@ -4875,14 +4936,12 @@ cmd_sendfile(ProfWin* window, const char* const command, gchar** args)
 
     if (access(filename, R_OK) != 0) {
         cons_show_error("Uploading '%s' failed: File not found!", filename);
-        free(filename);
-        return TRUE;
+        goto out;
     }
 
     if (!is_regular_file(filename)) {
         cons_show_error("Uploading '%s' failed: Not a file!", filename);
-        free(filename);
-        return TRUE;
+        goto out;
     }
 
     HTTPUpload* upload = malloc(sizeof(HTTPUpload));
@@ -4893,6 +4952,14 @@ cmd_sendfile(ProfWin* window, const char* const command, gchar** args)
     upload->mime_type = file_mime_type(filename);
 
     iq_http_upload_request(upload);
+
+out:
+    if (key != NULL)
+        gcry_free(key);
+    if (filename != NULL)
+        free(filename);
+    if (filepath != NULL)
+        free(filepath);
 
     return TRUE;
 }

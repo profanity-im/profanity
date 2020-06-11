@@ -41,6 +41,9 @@
 #include "omemo/omemo.h"
 #include "omemo/crypto.h"
 
+#define AES256_GCM_TAG_LENGTH 16
+#define AES256_GCM_BUFFER_SIZE 1024
+
 int
 omemo_crypto_init(void)
 {
@@ -372,4 +375,100 @@ aes128gcm_decrypt(unsigned char* plaintext, size_t* plaintext_len, const unsigne
 out:
     gcry_cipher_close(hd);
     return res;
+}
+
+int aes256gcm_crypt_file(FILE *in, FILE *out, off_t file_size,
+    unsigned char key[], unsigned char nonce[], bool encrypt) {
+
+    if (!gcry_control(GCRYCTL_INITIALIZATION_FINISHED_P)) {
+        fputs("libgcrypt has not been initialized\n", stderr);
+        abort();
+    }
+
+    if (!encrypt) {
+        file_size -= AES256_GCM_TAG_LENGTH;
+    }
+
+    gcry_error_t res;
+    gcry_cipher_hd_t hd;
+
+    res = gcry_cipher_open(&hd, GCRY_CIPHER_AES256, GCRY_CIPHER_MODE_GCM,
+            GCRY_CIPHER_SECURE);
+    if (res != GPG_ERR_NO_ERROR) {
+        goto out;
+    }
+
+    res = gcry_cipher_setkey(hd, key, AES256_GCM_KEY_LENGTH);
+    if (res != GPG_ERR_NO_ERROR) {
+        goto out;
+    }
+
+    res = gcry_cipher_setiv(hd, nonce, AES256_GCM_NONCE_LENGTH);
+    if (res != GPG_ERR_NO_ERROR) {
+        goto out;
+    }
+
+    unsigned char buffer[AES256_GCM_BUFFER_SIZE];
+
+    int bytes = 0;
+    off_t bytes_read = 0, bytes_available = 0, read_size = 0;
+    while (bytes_read < file_size) {
+        bytes_available = file_size - bytes_read;
+        if (!bytes_available) {
+            break;
+        }
+
+        if (bytes_available < AES256_GCM_BUFFER_SIZE) {
+            read_size = bytes_available;
+            gcry_cipher_final(hd); // Signal last round of bytes.
+        } else {
+            read_size = AES256_GCM_BUFFER_SIZE;
+        }
+
+        bytes = fread(buffer, 1, read_size, in);
+        bytes_read += bytes;
+
+        if (encrypt) {
+            res = gcry_cipher_encrypt(hd, buffer, bytes, NULL, 0);
+        } else {
+            res = gcry_cipher_decrypt(hd, buffer, bytes, NULL, 0);
+        }
+
+        if (res != GPG_ERR_NO_ERROR) {
+            goto out;
+        }
+
+        fwrite(buffer, 1, bytes, out);
+    }
+
+    unsigned char tag[AES256_GCM_TAG_LENGTH];
+
+    if (encrypt) {
+        // Append authentication tag at the end of the file.
+        res = gcry_cipher_gettag(hd, tag, AES256_GCM_TAG_LENGTH);
+        if (res != GPG_ERR_NO_ERROR) {
+            goto out;
+        }
+
+        fwrite(tag, 1, AES256_GCM_TAG_LENGTH, out);
+
+    } else {
+        // Read and verify authentication tag stored at the end of the file.
+        bytes = fread(tag, 1, AES256_GCM_TAG_LENGTH, in);
+        res = gcry_cipher_checktag(hd, tag, bytes);
+    }
+
+out:
+    gcry_cipher_close(hd);
+    return res;
+}
+
+int aes256gcm_encrypt_file(FILE *in, FILE *out, off_t file_size,
+    unsigned char key[], unsigned char nonce[]) {
+    return aes256gcm_crypt_file(in, out, file_size, key, nonce, true);
+}
+
+int aes256gcm_decrypt_file(FILE *in, FILE *out, off_t file_size,
+    unsigned char key[], unsigned char nonce[]) {
+    return aes256gcm_crypt_file(in, out, file_size, key, nonce, false);
 }

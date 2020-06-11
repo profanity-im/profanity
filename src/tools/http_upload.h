@@ -45,9 +45,9 @@
 
 #include "ui/win_types.h"
 
-typedef struct http_upload_t
-{
-    char* filename;
+typedef struct http_upload_t {
+    char *filename;
+    char *filepath;
     off_t filesize;
     curl_off_t bytes_sent;
     char* mime_type;
@@ -60,8 +60,8 @@ typedef struct http_upload_t
 
 void* http_file_put(void* userdata);
 
-char* file_mime_type(const char* const file_name);
-off_t file_size(const char* const file_name);
+char* file_mime_type(const char* const filepath);
+off_t file_size(const char* const filepath);
 
 void http_upload_cancel_processes(ProfWin* window);
 void http_upload_add_upload(HTTPUpload* upload);
