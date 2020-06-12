@@ -79,6 +79,7 @@ static const char* _get_group(preference_t pref);
 static const char* _get_key(preference_t pref);
 static gboolean _get_default_boolean(preference_t pref);
 static char* _get_default_string(preference_t pref);
+static char** _get_default_string_list(preference_t pref);
 
 static void _prefs_load(void)
 {
@@ -217,7 +218,7 @@ prefs_load(char *config_file)
     }
 
     prefs = g_key_file_new();
-    g_key_file_load_from_file(prefs, prefs_loc, G_KEY_FILE_KEEP_COMMENTS, NULL);
+    g_key_file_load_from_file(prefs, prefs_loc, G_KEY_FILE_KEEP_COMMENTS | G_KEY_FILE_KEEP_TRANSLATIONS, NULL);
 
     _prefs_load();
 }
@@ -493,6 +494,49 @@ prefs_get_string(preference_t pref)
     }
 }
 
+char*
+prefs_get_string_with_option(preference_t pref, gchar *option)
+{
+    const char *group = _get_group(pref);
+    const char *key = _get_key(pref);
+    char *def = _get_default_string(pref);
+
+    char *result = g_key_file_get_locale_string(prefs, group, key, option, NULL);
+
+    if (result == NULL) {
+        if (def) {
+            return g_strdup(def);
+        } else {
+            return NULL;
+        }
+    } else {
+        return result;
+    }
+}
+
+char**
+prefs_get_string_list_with_option(preference_t pref, gchar *option)
+{
+    const char *group = _get_group(pref);
+    const char *key = _get_key(pref);
+    char **def = _get_default_string_list(pref);
+
+    gchar **result = g_key_file_get_locale_string_list(prefs, group, key, option, NULL, NULL);
+
+    if (result == NULL) {
+        if (def) {
+            return def;
+        } else {
+            g_strfreev(def);
+            return NULL;
+        }
+    } else {
+        g_strfreev(def);
+        return result;
+    }
+}
+
+
 void
 prefs_free_string(char *pref)
 {
@@ -510,6 +554,34 @@ prefs_set_string(preference_t pref, char *value)
         g_key_file_remove_key(prefs, group, key, NULL);
     } else {
         g_key_file_set_string(prefs, group, key, value);
+    }
+}
+
+void
+prefs_set_string_with_option(preference_t pref, char *option, char *value)
+{
+    const char *group = _get_group(pref);
+    const char *key = _get_key(pref);
+    if (value == NULL) {
+        g_key_file_remove_key(prefs, group, key, NULL);
+    } else {
+        g_key_file_set_locale_string(prefs, group, key, option, value);
+    }
+}
+
+void
+prefs_set_string_list_with_option(preference_t pref, char *option, const gchar* const *values)
+{
+    const char *group = _get_group(pref);
+    const char *key = _get_key(pref);
+    if (values == NULL || *values == NULL){
+        g_key_file_set_locale_string_list(prefs, group, key, option, NULL, 0);
+    } else {
+        guint num_values = 0;
+        while(values[num_values]) {
+          num_values++;
+        }
+        g_key_file_set_locale_string_list(prefs, group, key, option, values, num_values);
     }
 }
 
@@ -2214,6 +2286,18 @@ _get_default_string(preference_t pref)
         case PREF_AVATAR_CMD:
         case PREF_URL_OPEN_CMD:
             return "xdg-open";
+        default:
+            return NULL;
+    }
+}
+
+// the default setting for a string list type preference
+// if it is not specified in .profrc
+static char**
+_get_default_string_list(preference_t pref)
+{
+    switch (pref)
+    {
         default:
             return NULL;
     }
