@@ -170,12 +170,16 @@ files_get_data_path(char *data_base)
 static char*
 _files_get_xdg_config_home(void)
 {
-    gchar *xdg_config_home = getenv("XDG_CONFIG_HOME");
-    if (xdg_config_home)
+    gchar *xdg_config_home_env = getenv("XDG_CONFIG_HOME");
+    gchar *xdg_config_home = NULL;
+
+    if (xdg_config_home_env) {
+        xdg_config_home = strdup(xdg_config_home_env);
         g_strstrip(xdg_config_home);
+    }
 
     if (xdg_config_home && (strcmp(xdg_config_home, "") != 0)) {
-        return strdup(xdg_config_home);
+        return xdg_config_home;
     } else {
         GString *default_path = g_string_new(getenv("HOME"));
         g_string_append(default_path, "/.config");
@@ -189,12 +193,16 @@ _files_get_xdg_config_home(void)
 static char*
 _files_get_xdg_data_home(void)
 {
-    gchar *xdg_data_home = getenv("XDG_DATA_HOME");
-    if (xdg_data_home)
+    gchar *xdg_data_home_env = getenv("XDG_DATA_HOME");
+    gchar *xdg_data_home = NULL;
+
+    if (xdg_data_home_env) {
+        xdg_data_home = strdup(xdg_data_home_env);
         g_strstrip(xdg_data_home);
+    }
 
     if (xdg_data_home && (strcmp(xdg_data_home, "") != 0)) {
-        return strdup(xdg_data_home);
+        return xdg_data_home;
     } else {
         GString *default_path = g_string_new(getenv("HOME"));
         g_string_append(default_path, "/.local/share");
