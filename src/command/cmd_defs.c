@@ -2464,40 +2464,49 @@ static struct cmd_t command_defs[] =
             "/software xmpp.vanaheimr.edda")
     },
 
-    { "/urlopen",
-        parse_args, 1, -1, NULL,
-        CMD_NOSUBFUNCS
-        CMD_MAINFUNC(cmd_urlopen)
-        CMD_TAGS(
-            CMD_TAG_CHAT,
-            CMD_TAG_GROUPCHAT)
-        CMD_SYN(
-            "/urlopen <url>")
-        CMD_DESC(
-            "Open the URL")
-        CMD_ARGS(
-            { "<url>",    "URL to open."})
-        CMD_NOEXAMPLES
-    },
-
     { "/executable",
-        parse_args, 2, 2, &cons_executable_setting,
+        parse_args, 2, 4, &cons_executable_setting,
         CMD_NOSUBFUNCS
         CMD_MAINFUNC(cmd_executable)
         CMD_TAGS(
             CMD_TAG_DISCOVERY)
         CMD_SYN(
             "/executable avatar <cmd>",
-            "/executable urlopen <cmd>")
+            "/executable urlopen <fileType> <require_save> <cmd>",
+            "/executable urlsave <protocol> <cmd>")
         CMD_DESC(
             "Configure executable that should be called upon a certain command."
             "Default is xdg-open.")
         CMD_ARGS(
             { "avatar", "Set executable that is run in /avatar open. Use your favourite image viewer." },
-            { "urlopen", "Set executable that is run in /urlopen. Use your favourite browser." })
+            { "urlopen", "Set executable that is run in /url open for a given file type. It may be your favorite browser or a specific viewer." },
+            { "urlsave", "Set executable that is run in /url save for a given protocol. Use your favourite downloader."})
         CMD_EXAMPLES(
             "/executable avatar xdg-open",
-            "/executable urlopen firefox")
+            "/executable urlopen html firefox %u",
+            "/executable urlsave aesgcm omut -d %u %p")
+    },
+
+    { "/url",
+        parse_args, 2, 3, NULL,
+        CMD_SUBFUNCS(
+            { "open", cmd_url_open},
+            { "save", cmd_url_save })
+        CMD_NOMAINFUNC
+        CMD_TAGS(
+            CMD_TAG_CHAT,
+            CMD_TAG_GROUPCHAT)
+        CMD_SYN(
+            "/url open <url>",
+            "/url save <url> [<path>]")
+        CMD_DESC(
+            "Deal with URLs")
+        CMD_ARGS(
+            { "open", "Open URL with predefined executable." },
+            { "save", "Save URL to optional path, default path is current directory"})
+        CMD_EXAMPLES(
+            "/url open https://profanity-im.github.io",
+            "/url save https://profanity-im.github.io/guide/latest/userguide.html /home/user/Download/")
     },
 };
 

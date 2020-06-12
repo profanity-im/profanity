@@ -44,6 +44,8 @@
 #include <errno.h>
 #include <assert.h>
 #include <glib.h>
+#include <glib/gstdio.h>
+#include <gio/gio.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <fcntl.h>
@@ -8937,28 +8939,210 @@ cmd_slashguard(ProfWin *window, const char *const command, gchar **args)
 }
 
 gboolean
-cmd_urlopen(ProfWin *window, const char *const command, gchar **args)
+cmd_url_open(ProfWin *window, const char *const command, gchar **args)
 {
     if (window->type != WIN_CHAT &&
         window->type != WIN_MUC &&
         window->type != WIN_PRIVATE) {
-        cons_show("urlopen not supported in this window");
+        cons_show("url open not supported in this window");
         return TRUE;
     }
 
-    if (args[0] == NULL) {
+    if (args[1] == NULL) {
         cons_bad_cmd_usage(command);
         return TRUE;
     }
 
-    gchar* cmd = prefs_get_string(PREF_URL_OPEN_CMD);
-    gchar *argv[] = {cmd, args[0], NULL};
+    gboolean require_save = false;
 
-    if (!call_external(argv, NULL, NULL)) {
-      cons_show_error("Unable to open url: check the logs for more information.");
+    char *suffix_cmd = NULL;
+    char *suffix = NULL;
+    gchar *fileStart = g_strrstr(args[1], "/");
+    if (fileStart == NULL) {
+        cons_show("URL '%s' is not valid.", args[1]);
+        return TRUE;
     }
 
-    g_free(cmd);
+    fileStart++;
+    if (((char*)(fileStart - 2))[0] == '/' &&
+        ((char*)(fileStart - 3))[0] == ':'
+       ){
+      // If the '/' is last character of the '://' string, there will be no suffix
+      // Therefore, it is considered that there is no file name in the URL and
+      // fileStart is set to the end of the URL.
+      fileStart = args[1] + strlen(args[1]);
+    }
+    gchar *suffixStart = g_strrstr(fileStart, ".");
+    if (suffixStart != NULL) {
+        suffixStart++;
+        gchar *suffixEnd = g_strrstr(suffixStart, "#");
+        if(suffixEnd == NULL) {
+            suffix = g_strdup(suffixStart);
+        } else {
+            suffix = g_strndup(suffixStart, suffixEnd - suffixStart);
+        }
+    }
+
+    char **suffix_cmd_pref = prefs_get_string_list_with_option(PREF_URL_OPEN_CMD, NULL);
+    if (suffix != NULL) {
+        gchar *lowercase_suffix = g_ascii_strdown(suffix, -1);
+        g_strfreev(suffix_cmd_pref);
+        suffix_cmd_pref = prefs_get_string_list_with_option(PREF_URL_OPEN_CMD, lowercase_suffix);
+        g_free(lowercase_suffix);
+        lowercase_suffix = NULL;
+        g_free(suffix);
+        suffix = NULL;
+    }
+
+    if (0 == g_strcmp0(suffix_cmd_pref[0], "true")) {
+        require_save = true;
+    }
+    suffix_cmd = g_strdup(suffix_cmd_pref[1]);
+    g_strfreev(suffix_cmd_pref);
+    suffix_cmd_pref = NULL;
+
+    gchar *scheme = g_uri_parse_scheme(args[1]);
+    if( 0 == g_strcmp0(scheme, "aesgcm")) {
+        require_save = true;
+    }
+
+    if (require_save) {
+        gchar *save_args[] = { "open", args[1], "/tmp/profanity.tmp", NULL};
+        cmd_url_save(window, command, save_args);
+    }
+
+    gchar **argv = g_strsplit(suffix_cmd, " ", 0);
+    guint num_args = 0;
+    while (argv[num_args]) {
+        if (0 == g_strcmp0(argv[num_args], "%u")) {
+            g_free(argv[num_args]);
+            if (require_save) {
+                argv[num_args] = g_strdup("/tmp/profanity.tmp");
+            } else {
+                argv[num_args] = g_strdup(args[1]);
+            }
+            break;
+        }
+        num_args++;
+    }
+
+    if (!call_external(argv, NULL, NULL)) {
+        cons_show_error("Unable to open url: check the logs for more information.");
+    }
+
+    if (require_save) {
+        g_unlink("/tmp/profanity.tmp");
+    }
+
+    g_strfreev(argv);
+    g_free(suffix_cmd);
+
+    return TRUE;
+}
+
+gboolean
+cmd_url_save(ProfWin *window, const char *const command, gchar **args)
+{
+    if (window->type != WIN_CHAT &&
+        window->type != WIN_MUC &&
+        window->type != WIN_PRIVATE) {
+        cons_show("url save not supported in this window");
+        return TRUE;
+    }
+
+    if (args[1] == NULL) {
+        cons_bad_cmd_usage(command);
+        return TRUE;
+    }
+
+    gchar *uri = args[1];
+    gchar *target_path = g_strdup(args[2]);
+
+    GFile *file = g_file_new_for_uri(uri);
+
+    gchar *target_dir = NULL;
+    gchar *base_name = NULL;
+
+    if (target_path == NULL) {
+        target_dir = g_strdup("./");
+        base_name = g_file_get_basename(file);
+        if (0 == g_strcmp0(base_name, ".")) {
+          g_free(base_name);
+          base_name = g_strdup("saved_url_content.html");
+        }
+        target_path = g_strconcat(target_dir, base_name, NULL);
+    }
+
+    if (g_file_test(target_path, G_FILE_TEST_EXISTS) &&
+        g_file_test(target_path, G_FILE_TEST_IS_DIR)
+       ) {
+        target_dir = g_strdup(target_path);
+        base_name = g_file_get_basename(file);
+        g_free(target_path);
+        target_path = g_strconcat(target_dir, "/", base_name, NULL);
+    }
+
+    g_object_unref(file);
+    file = NULL;
+
+    if (base_name == NULL) {
+        base_name = g_path_get_basename(target_path);
+        target_dir = g_path_get_dirname(target_path);
+    }
+
+    if (!g_file_test(target_dir, G_FILE_TEST_EXISTS) ||
+        !g_file_test(target_dir, G_FILE_TEST_IS_DIR)) {
+        cons_show("%s does not exist or is not a directory.", target_dir);
+        g_free(target_path);
+        g_free(target_dir);
+        g_free(base_name);
+        return TRUE;
+    }
+
+    gchar *scheme = g_uri_parse_scheme(uri);
+    if (scheme == NULL) {
+        cons_show("URL '%s' is not valid.", uri);
+        g_free(target_path);
+        g_free(target_dir);
+        g_free(base_name);
+        return TRUE;
+    }
+
+    gchar *scheme_cmd = NULL;
+
+    if (0 == g_strcmp0(scheme, "http")
+        || 0 == g_strcmp0(scheme, "https")
+        || 0 == g_strcmp0(scheme, "aesgcm")
+       ) {
+        scheme_cmd = prefs_get_string_with_option(PREF_URL_SAVE_CMD, scheme);
+    }
+
+    g_free(scheme);
+    scheme = NULL;
+
+    gchar **argv = g_strsplit(scheme_cmd, " ", 0);
+    g_free(scheme_cmd);
+    scheme_cmd = NULL;
+
+    guint num_args = 0;
+    while (argv[num_args]) {
+        if (0 == g_strcmp0(argv[num_args], "%u")) {
+            g_free(argv[num_args]);
+            argv[num_args] = g_strdup(uri);
+        } else if (0 == g_strcmp0(argv[num_args], "%p")) {
+            g_free(argv[num_args]);
+            argv[num_args] = target_path;
+        }
+        num_args++;
+    }
+
+    if (!call_external(argv, NULL, NULL)) {
+        cons_show_error("Unable to save url: check the logs for more information.");
+    }
+
+    g_free(target_dir);
+    g_free(base_name);
+    g_strfreev(argv);
 
     return TRUE;
 }
@@ -8970,8 +9154,16 @@ cmd_executable(ProfWin *window, const char *const command, gchar **args)
         prefs_set_string(PREF_AVATAR_CMD, args[1]);
         cons_show("Avatar command set to: %s", args[1]);
     } else if (g_strcmp0(args[0], "urlopen") == 0) {
-        prefs_set_string(PREF_URL_OPEN_CMD, args[1]);
-        cons_show("urlopen command set to: %s", args[1]);
+        char *str = g_strjoinv(" ", &args[3]);
+        const gchar* const list[] = {args[2], str, NULL};
+        prefs_set_string_list_with_option(PREF_URL_OPEN_CMD, args[1], list);
+        cons_show("`url open` command set to: %s for %s files", str, args[1]);
+        g_free(str);
+    } else if (g_strcmp0(args[0], "urlsave") == 0) {
+        char *str = g_strjoinv(" ", &args[2]);
+        prefs_set_string_with_option(PREF_URL_SAVE_CMD, args[1], str);
+        cons_show("`url save` command set to: %s for scheme %s", str, args[1]);
+        g_free(str);
     } else {
         cons_bad_cmd_usage(command);
     }

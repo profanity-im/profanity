@@ -172,6 +172,7 @@ typedef enum {
     PREF_SLASH_GUARD,
     PREF_MAM,
     PREF_URL_OPEN_CMD,
+    PREF_URL_SAVE_CMD,
 } preference_t;
 
 typedef struct prof_alias_t {

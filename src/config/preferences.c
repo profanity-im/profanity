@@ -64,6 +64,7 @@
 #define PREF_GROUP_OMEMO "omemo"
 #define PREF_GROUP_MUC "muc"
 #define PREF_GROUP_PLUGINS "plugins"
+#define PREF_GROUP_EXECUTABLES "executables"
 
 #define INPBLOCK_DEFAULT 1000
 
@@ -1855,9 +1856,11 @@ _get_group(preference_t pref)
         case PREF_GRLOG:
         case PREF_LOG_ROTATE:
         case PREF_LOG_SHARED:
+            return PREF_GROUP_LOGGING;
         case PREF_AVATAR_CMD:
         case PREF_URL_OPEN_CMD:
-            return PREF_GROUP_LOGGING;
+        case PREF_URL_SAVE_CMD:
+            return PREF_GROUP_EXECUTABLES;
         case PREF_AUTOAWAY_CHECK:
         case PREF_AUTOAWAY_MODE:
         case PREF_AUTOAWAY_MESSAGE:
@@ -2147,7 +2150,9 @@ _get_key(preference_t pref)
         case PREF_MAM:
             return "mam";
         case PREF_URL_OPEN_CMD:
-            return "urlopen.cmd";
+            return "url.open.cmd";
+        case PREF_URL_SAVE_CMD:
+            return "url.save.cmd";
         default:
             return NULL;
     }
@@ -2284,8 +2289,9 @@ _get_default_string(preference_t pref)
         case PREF_COLOR_NICK:
             return "false";
         case PREF_AVATAR_CMD:
-        case PREF_URL_OPEN_CMD:
             return "xdg-open";
+        case PREF_URL_SAVE_CMD:
+            return "curl -o %p %u";
         default:
             return NULL;
     }
@@ -2296,8 +2302,15 @@ _get_default_string(preference_t pref)
 static char**
 _get_default_string_list(preference_t pref)
 {
+    char **str_array = NULL;
+
     switch (pref)
     {
+        case PREF_URL_OPEN_CMD:
+            str_array = g_malloc0(3);
+            str_array[0] = g_strdup("false");
+            str_array[1] = g_strdup("xdg-open %u");
+            return str_array;
         default:
             return NULL;
     }
