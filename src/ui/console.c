@@ -2067,12 +2067,16 @@ void
 cons_executable_setting(void)
 {
     char *avatar = prefs_get_string(PREF_AVATAR_CMD);
-    cons_show("Avatar command (/executable avatar)                                   : %s", avatar);
-    prefs_free_string(avatar);
+    cons_show("'/avatar' command (/executable avatar)                                   : %s", avatar);
+    g_free(avatar);
 
-    char *exec = prefs_get_string(PREF_URL_OPEN_CMD);
-    cons_show("urlopen command (/executable urlopen)                                 : %s", exec);
-    prefs_free_string(exec);
+    char **urlopen = prefs_get_string_list_with_option(PREF_URL_OPEN_CMD, "");
+    cons_show("Default '/url open' command (/executable urlopen)                        : %s", urlopen[1]);
+    g_strfreev(urlopen);
+
+    char *urlsave = prefs_get_string(PREF_URL_SAVE_CMD);
+    cons_show("Default '/url save' command (/executable urlsave)                        : %s", urlsave);
+    g_free(urlsave);
 }
 
 void
