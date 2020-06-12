@@ -60,10 +60,10 @@
 
 void files_create_directories(void);
 
-char* files_get_config_path(char *config_base);
-char* files_get_data_path(char *data_base);
+gchar* files_get_config_path(char *config_base);
+gchar* files_get_data_path(char *data_base);
 
-char* files_get_log_file(char *log_file);
-char* files_get_inputrc_file(void);
+gchar* files_get_log_file(char *log_file);
+gchar* files_get_inputrc_file(void);
 
 #endif

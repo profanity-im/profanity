@@ -230,10 +230,11 @@ GSList*
 theme_list(void)
 {
     GSList *result = NULL;
-    char *themes_dir = files_get_config_path(DIR_THEMES);
+    gchar *themes_dir = files_get_config_path(DIR_THEMES);
 
     _theme_list_dir(themes_dir, &result);
-    free(themes_dir);
+    g_free(themes_dir);
+
 #ifdef THEMES_PATH
     _theme_list_dir(THEMES_PATH, &result);
 #endif
@@ -532,11 +533,11 @@ static GString*
 _theme_find(const char *const theme_name)
 {
     GString *path = NULL;
-    char *themes_dir = files_get_config_path(DIR_THEMES);
+    gchar *themes_dir = files_get_config_path(DIR_THEMES);
 
     if (themes_dir) {
         path = g_string_new(themes_dir);
-        free(themes_dir);
+        g_free(themes_dir);
         g_string_append(path, "/");
         g_string_append(path, theme_name);
         if (!g_file_test(path->str, G_FILE_TEST_EXISTS)) {

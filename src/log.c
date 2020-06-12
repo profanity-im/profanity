@@ -149,13 +149,13 @@ log_init(log_level_t filter, char *log_file)
     level_filter = filter;
     tz = g_time_zone_new_local();
 
-    char *lf;
+    gchar *lf;
     lf = files_get_log_file(log_file);
 
     logp = fopen(lf, "a");
     g_chmod(lf, S_IRUSR | S_IWUSR);
     mainlogfile = g_string_new(lf);
-    free(lf);
+    g_free(lf);
 }
 
 void

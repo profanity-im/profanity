@@ -91,7 +91,7 @@ files_create_directories(void)
     g_free(xdg_data);
 }
 
-char*
+gchar*
 files_get_inputrc_file(void)
 {
     gchar *xdg_config = _files_get_xdg_config_home();
@@ -101,7 +101,7 @@ files_get_inputrc_file(void)
     g_string_append(inputrc_file, "/profanity/inputrc");
 
     if (g_file_test(inputrc_file->str, G_FILE_TEST_IS_REGULAR)) {
-        char *result = strdup(inputrc_file->str);
+        gchar *result = g_strdup(inputrc_file->str);
         g_string_free(inputrc_file, TRUE);
 
         return result;
@@ -131,7 +131,7 @@ files_get_log_file(char *log_file)
 
     g_string_append(logfile, ".log");
 
-    char *result = strdup(logfile->str);
+    char *result = g_strdup(logfile->str);
 
     free(xdg_data);
     g_string_free(logfile, TRUE);
@@ -139,28 +139,28 @@ files_get_log_file(char *log_file)
     return result;
 }
 
-char*
+gchar*
 files_get_config_path(char *config_base)
 {
     gchar *xdg_config = _files_get_xdg_config_home();
     GString *file_str = g_string_new(xdg_config);
     g_string_append(file_str, "/profanity/");
     g_string_append(file_str, config_base);
-    char *result = strdup(file_str->str);
+    gchar *result = g_strdup(file_str->str);
     g_free(xdg_config);
     g_string_free(file_str, TRUE);
 
     return result;
 }
 
-char*
+gchar*
 files_get_data_path(char *data_base)
 {
     gchar *xdg_data = _files_get_xdg_data_home();
     GString *file_str = g_string_new(xdg_data);
     g_string_append(file_str, "/profanity/");
     g_string_append(file_str, data_base);
-    char *result = strdup(file_str->str);
+    gchar *result = g_strdup(file_str->str);
     g_free(xdg_data);
     g_string_free(file_str, TRUE);
 

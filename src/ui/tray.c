@@ -79,13 +79,15 @@ _get_icons(void)
 
 #endif /* ICONS_PATH */
 
-    char *icons_dir_s = files_get_config_path(DIR_ICONS);
+    gchar *icons_dir_s = files_get_config_path(DIR_ICONS);
     icons_dir = g_string_new(icons_dir_s);
-    free(icons_dir_s);
+    g_free(icons_dir_s);
     GError *err = NULL;
+
     if (!g_file_test(icons_dir->str, G_FILE_TEST_IS_DIR)) {
         return;
     }
+
     GDir *dir = g_dir_open(icons_dir->str, 0, &err);
     if (dir) {
         GString *name = g_string_new(g_dir_read_name(dir));

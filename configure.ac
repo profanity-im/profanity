@@ -354,7 +354,7 @@ AC_CHECK_HEADERS([ncursesw/ncurses.h], [], [])
 AC_CHECK_HEADERS([ncurses.h], [], [])
 
 ### Default parameters
-AM_CFLAGS="-Wall -Wno-deprecated-declarations -std=c99"
+AM_CFLAGS="-Wall -Wno-deprecated-declarations -std=c99 -D_POSIX_C_SOURCE=200809L"
 AS_IF([test "x$PACKAGE_STATUS" = xdevelopment],
     [AM_CFLAGS="$AM_CFLAGS -Wunused -Werror"])
 AS_IF([test "x$PLATFORM" = xosx],

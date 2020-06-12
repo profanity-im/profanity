@@ -503,10 +503,10 @@ _inp_rl_startup_hook(void)
     rl_variable_bind("disable-completion", "on");
 
     // check for and load ~/.config/profanity/inputrc
-    char *inputrc = files_get_inputrc_file();
+    gchar *inputrc = files_get_inputrc_file();
     if (inputrc) {
         rl_read_init_file(inputrc);
-        free(inputrc);
+        g_free(inputrc);
     }
 
     return 0;

@@ -67,7 +67,7 @@
 
 #define INPBLOCK_DEFAULT 1000
 
-static char *prefs_loc;
+static gchar *prefs_loc;
 static GKeyFile *prefs;
 gint log_maxsize = 0;
 
@@ -209,7 +209,7 @@ prefs_load(char *config_file)
     if (config_file == NULL) {
         prefs_loc = files_get_config_path(FILE_PROFRC);
     } else {
-        prefs_loc = strdup(config_file);
+        prefs_loc = g_strdup(config_file);
     }
 
     if (g_file_test(prefs_loc, G_FILE_TEST_EXISTS)) {
@@ -236,7 +236,7 @@ prefs_close(void)
     g_key_file_free(prefs);
     prefs = NULL;
 
-    free(prefs_loc);
+    g_free(prefs_loc);
     prefs_loc = NULL;
 }
 
