@@ -698,7 +698,7 @@ static void _random_bytes_init(void)
         gsize g_data_size;
         gchar *g_accounts_data = g_key_file_to_data(rndbytes, &g_data_size, NULL);
 
-        gchar *base = g_path_get_basename(rndbytes_loc);
+        gchar *base = g_path_get_dirname(rndbytes_loc);
         gchar *true_loc = get_file_or_linked(rndbytes_loc, base);
         g_file_set_contents(true_loc, g_accounts_data, g_data_size, NULL);
 

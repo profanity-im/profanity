@@ -307,6 +307,7 @@ get_file_or_linked(char *loc, char *basedir)
         // if relative, add basedir
         if (!g_str_has_prefix(true_loc, "/") && !g_str_has_prefix(true_loc, "~")) {
             GString *base_str = g_string_new(basedir);
+            g_string_append(base_str, "/");
             g_string_append(base_str, true_loc);
             free(true_loc);
             true_loc = base_str->str;

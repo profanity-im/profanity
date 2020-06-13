@@ -176,7 +176,7 @@ _save_settings(void)
     gchar *g_data = g_key_file_to_data(settings, &g_data_size, NULL);
 
     char *fileloc = files_get_data_path(FILE_PLUGIN_SETTINGS);
-    gchar *base = g_path_get_basename(fileloc);
+    gchar *base = g_path_get_dirname(fileloc);
     gchar *true_loc = get_file_or_linked(fileloc, base);
     g_free(base);
     g_file_set_contents(true_loc, g_data, g_data_size, NULL);

@@ -969,7 +969,7 @@ _save_accounts(void)
     gsize g_data_size;
     gchar *g_accounts_data = g_key_file_to_data(accounts, &g_data_size, NULL);
 
-    gchar *base = g_path_get_basename(accounts_loc);
+    gchar *base = g_path_get_dirname(accounts_loc);
     gchar *true_loc = get_file_or_linked(accounts_loc, base);
     g_file_set_contents(true_loc, g_accounts_data, g_data_size, NULL);
     g_chmod(accounts_loc, S_IRUSR | S_IWUSR);

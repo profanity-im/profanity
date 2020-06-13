@@ -1665,7 +1665,7 @@ _save_prefs(void)
 {
     gsize g_data_size;
     gchar *g_prefs_data = g_key_file_to_data(prefs, &g_data_size, NULL);
-    gchar *base = g_path_get_basename(prefs_loc);
+    gchar *base = g_path_get_dirname(prefs_loc);
     gchar *true_loc = get_file_or_linked(prefs_loc, base);
 
     g_file_set_contents(true_loc, g_prefs_data, g_data_size, NULL);
