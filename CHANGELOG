@@ -1,3 +1,11 @@
+0.9.2 (2020-06-13)
+=====
+
+Changes:
+- Dont manipulate pointer from getenv (#1357)
+- Fix reading/writing linked files (#1362)
+- Use gnu99 C standard (#1357)
+
 0.9.1 (2020-06-11)
 =====
 
