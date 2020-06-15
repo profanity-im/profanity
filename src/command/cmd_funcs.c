@@ -9138,6 +9138,8 @@ cmd_url_save(ProfWin *window, const char *const command, gchar **args)
 
     if (!call_external(argv, NULL, NULL)) {
         cons_show_error("Unable to save url: check the logs for more information.");
+    } else {
+        cons_show("URL '%s' has been saved into '%s'.", uri, target_path);
     }
 
     g_free(target_dir);
