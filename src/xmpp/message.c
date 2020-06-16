@@ -1169,7 +1169,7 @@ _handle_chat(xmpp_stanza_t *const stanza, gboolean is_mam)
 {
     // ignore if type not chat or absent
     const char *type = xmpp_stanza_get_type(stanza);
-    if (!(g_strcmp0(type, "chat") == 0 || type == NULL)) {
+    if (type == NULL || g_strcmp0(type, STANZA_TYPE_CHAT) != 0) {
         return;
     }
 
