@@ -131,181 +131,27 @@ cl_ev_send_msg_correct(ProfChatWin *chatwin, const char *const msg, const char *
         replace_id = chatwin->last_msg_id;
     }
 
-// OTR suported, PGP supported, OMEMO unsupported
-#ifdef HAVE_LIBOTR
-#ifdef HAVE_LIBGPGME
-#ifndef HAVE_OMEMO
-    if (chatwin->pgp_send) {
-        char *id = message_send_chat_pgp(chatwin->barejid, plugin_msg, request_receipt, replace_id);
-        chat_log_pgp_msg_out(chatwin->barejid, plugin_msg, NULL);
-        log_database_add_outgoing_chat(id, chatwin->barejid, plugin_msg, replace_id, PROF_MSG_ENC_PGP);
-        chatwin_outgoing_msg(chatwin, plugin_msg, id, PROF_MSG_ENC_PGP, request_receipt, replace_id);
-        free(id);
-    } else {
-        gboolean handled = otr_on_message_send(chatwin, plugin_msg, request_receipt, replace_id);
-        if (!handled) {
-            char *id = message_send_chat(chatwin->barejid, plugin_msg, oob_url, request_receipt, replace_id);
-            chat_log_msg_out(chatwin->barejid, plugin_msg, NULL);
-            log_database_add_outgoing_chat(id, chatwin->barejid, plugin_msg, replace_id, PROF_MSG_ENC_NONE);
-            chatwin_outgoing_msg(chatwin, plugin_msg, id, PROF_MSG_ENC_NONE, request_receipt, replace_id);
-            free(id);
-        }
-    }
-
-    plugins_post_chat_message_send(chatwin->barejid, plugin_msg);
-    free(plugin_msg);
-    return;
-#endif
-#endif
-#endif
-
-// OTR supported, PGP unsupported, OMEMO unsupported
-#ifdef HAVE_LIBOTR
-#ifndef HAVE_LIBGPGME
-#ifndef HAVE_OMEMO
-    gboolean handled = otr_on_message_send(chatwin, plugin_msg, request_receipt, replace_id);
-    if (!handled) {
-        char *id = message_send_chat(chatwin->barejid, plugin_msg, oob_url, request_receipt, replace_id);
-        chat_log_msg_out(chatwin->barejid, plugin_msg, NULL);
-        log_database_add_outgoing_chat(id, chatwin->barejid, plugin_msg, replace_id, PROF_MSG_ENC_NONE);
-        chatwin_outgoing_msg(chatwin, plugin_msg, id, PROF_MSG_ENC_NONE, request_receipt);
-        free(id);
-    }
-
-    plugins_post_chat_message_send(chatwin->barejid, plugin_msg);
-    free(plugin_msg);
-    return;
-#endif
-#endif
-#endif
-
-// OTR unsupported, PGP supported, OMEMO unsupported
-#ifndef HAVE_LIBOTR
-#ifdef HAVE_LIBGPGME
-#ifndef HAVE_OMEMO
-    if (chatwin->pgp_send) {
-        char *id = message_send_chat_pgp(chatwin->barejid, plugin_msg, request_receipt, replace_id);
-        chat_log_pgp_msg_out(chatwin->barejid, plugin_msg, NULL);
-        log_database_add_outgoing_chat(id, chatwin->barejid, plugin_msg, replace_id, PROF_MSG_ENC_PGP);
-        chatwin_outgoing_msg(chatwin, plugin_msg, id, PROF_MSG_ENC_PGP, request_receipt, replace_id);
-        free(id);
-    } else {
-        char *id = message_send_chat(chatwin->barejid, plugin_msg, oob_url, request_receipt, replace_id);
-        chat_log_msg_out(chatwin->barejid, plugin_msg, NULL);
-        log_database_add_outgoing_chat(id, chatwin->barejid, plugin_msg, replace_id, PROF_MSG_ENC_NONE);
-        chatwin_outgoing_msg(chatwin, plugin_msg, id, PROF_MSG_ENC_NONE, request_receipt, replace_id);
-        free(id);
-    }
-
-    plugins_post_chat_message_send(chatwin->barejid, plugin_msg);
-    free(plugin_msg);
-    return;
-#endif
-#endif
-#endif
-
-// OTR unsupported, PGP unsupported, OMEMO supported
-#ifndef HAVE_LIBOTR
-#ifndef HAVE_LIBGPGME
-#ifdef HAVE_OMEMO
     if (chatwin->is_omemo) {
+#ifdef HAVE_OMEMO
         char *id = omemo_on_message_send((ProfWin *)chatwin, plugin_msg, request_receipt, FALSE, replace_id);
         chat_log_omemo_msg_out(chatwin->barejid, plugin_msg, NULL);
         log_database_add_outgoing_chat(id, chatwin->barejid, plugin_msg, replace_id, PROF_MSG_ENC_OMEMO);
         chatwin_outgoing_msg(chatwin, plugin_msg, id, PROF_MSG_ENC_OMEMO, request_receipt, replace_id);
         free(id);
-    } else {
-        char *id = message_send_chat(chatwin->barejid, plugin_msg, oob_url, request_receipt, replace_id);
-        chat_log_msg_out(chatwin->barejid, plugin_msg, NULL);
-        log_database_add_outgoing_chat(id, chatwin->barejid, plugin_msg, replace_id, PROF_MSG_ENC_NONE);
-        chatwin_outgoing_msg(chatwin, plugin_msg, id, PROF_MSG_ENC_NONE, request_receipt, replace_id);
-        free(id);
-    }
-
-    plugins_post_chat_message_send(chatwin->barejid, plugin_msg);
-    free(plugin_msg);
-    return;
 #endif
-#endif
-#endif
-
-// OTR supported, PGP unsupported, OMEMO supported
-#ifdef HAVE_LIBOTR
-#ifndef HAVE_LIBGPGME
-#ifdef HAVE_OMEMO
-    if (chatwin->is_omemo) {
-        char *id = omemo_on_message_send((ProfWin *)chatwin, plugin_msg, request_receipt, FALSE, replace_id);
-        chat_log_omemo_msg_out(chatwin->barejid, plugin_msg, NULL);
-        log_database_add_outgoing_chat(id, chatwin->barejid, plugin_msg, replace_id, PROF_MSG_ENC_OMEMO);
-        chatwin_outgoing_msg(chatwin, plugin_msg, id, PROF_MSG_ENC_OMEMO, request_receipt, replace_id);
-        free(id);
-    } else {
-        gboolean handled = otr_on_message_send(chatwin, plugin_msg, request_receipt, replace_id);
-        if (!handled) {
-            char *id = message_send_chat(chatwin->barejid, plugin_msg, oob_url, request_receipt, replace_id);
-            chat_log_msg_out(chatwin->barejid, plugin_msg, NULL);
-            log_database_add_outgoing_chat(id, chatwin->barejid, plugin_msg, replace_id, PROF_MSG_ENC_NONE);
-            chatwin_outgoing_msg(chatwin, plugin_msg, id, PROF_MSG_ENC_NONE, request_receipt, replace_id);
-            free(id);
-        }
-    }
-
-    plugins_post_chat_message_send(chatwin->barejid, plugin_msg);
-    free(plugin_msg);
-    return;
-#endif
-#endif
-#endif
-
-// OTR unsupported, PGP supported, OMEMO supported
-#ifndef HAVE_LIBOTR
-#ifdef HAVE_LIBGPGME
-#ifdef HAVE_OMEMO
-    if (chatwin->is_omemo) {
-        char *id = omemo_on_message_send((ProfWin *)chatwin, plugin_msg, request_receipt, FALSE, replace_id);
-        chat_log_omemo_msg_out(chatwin->barejid, plugin_msg, NULL);
-        log_database_add_outgoing_chat(id, chatwin->barejid, plugin_msg, replace_id, PROF_MSG_ENC_OMEMO);
-        chatwin_outgoing_msg(chatwin, plugin_msg, id, PROF_MSG_ENC_OMEMO, request_receipt, replace_id);
-        free(id);
     } else if (chatwin->pgp_send) {
-        char *id = message_send_chat_pgp(chatwin->barejid, plugin_msg, request_receipt, replace_id);
-        chat_log_pgp_msg_out(chatwin->barejid, plugin_msg, NULL);
-        log_database_add_outgoing_chat(id, chatwin->barejid, plugin_msg, replace_id, PROF_MSG_ENC_PGP);
-        chatwin_outgoing_msg(chatwin, plugin_msg, id, PROF_MSG_ENC_PGP, request_receipt, replace_id);
-        free(id);
-    } else {
-        char *id = message_send_chat(chatwin->barejid, plugin_msg, oob_url, request_receipt, replace_id);
-        chat_log_msg_out(chatwin->barejid, plugin_msg, NULL);
-        log_database_add_outgoing_chat(id, chatwin->barejid, plugin_msg, replace_id, PROF_MSG_ENC_NONE);
-        chatwin_outgoing_msg(chatwin, plugin_msg, id, PROF_MSG_ENC_NONE, request_receipt, replace_id);
-        free(id);
-    }
-
-    plugins_post_chat_message_send(chatwin->barejid, plugin_msg);
-    free(plugin_msg);
-    return;
-#endif
-#endif
-#endif
-
-// OTR supported, PGP supported, OMEMO supported
-#ifdef HAVE_LIBOTR
 #ifdef HAVE_LIBGPGME
-#ifdef HAVE_OMEMO
-    if (chatwin->is_omemo) {
-        char *id = omemo_on_message_send((ProfWin *)chatwin, plugin_msg, request_receipt, FALSE, replace_id);
-        chat_log_omemo_msg_out(chatwin->barejid, plugin_msg, NULL);
-        log_database_add_outgoing_chat(id, chatwin->barejid, plugin_msg, replace_id, PROF_MSG_ENC_OMEMO);
-        chatwin_outgoing_msg(chatwin, plugin_msg, id, PROF_MSG_ENC_OMEMO, request_receipt, replace_id);
-        free(id);
-    } else if (chatwin->pgp_send) {
         char *id = message_send_chat_pgp(chatwin->barejid, plugin_msg, request_receipt, replace_id);
         chat_log_pgp_msg_out(chatwin->barejid, plugin_msg, NULL);
         log_database_add_outgoing_chat(id, chatwin->barejid, plugin_msg, replace_id, PROF_MSG_ENC_PGP);
         chatwin_outgoing_msg(chatwin, plugin_msg, id, PROF_MSG_ENC_PGP, request_receipt, replace_id);
         free(id);
+#endif
     } else {
-        gboolean handled = otr_on_message_send(chatwin, plugin_msg, request_receipt, replace_id);
+        gboolean handled = FALSE;
+#ifdef HAVE_LIBOTR
+         handled = otr_on_message_send(chatwin, plugin_msg, request_receipt, replace_id);
+#endif
         if (!handled) {
             char *id = message_send_chat(chatwin->barejid, plugin_msg, oob_url, request_receipt, replace_id);
             chat_log_msg_out(chatwin->barejid, plugin_msg, NULL);
@@ -318,26 +164,6 @@ cl_ev_send_msg_correct(ProfChatWin *chatwin, const char *const msg, const char *
     plugins_post_chat_message_send(chatwin->barejid, plugin_msg);
     free(plugin_msg);
     return;
-#endif
-#endif
-#endif
-
-// OTR unsupported, PGP unsupported, OMEMO unsupported
-#ifndef HAVE_LIBOTR
-#ifndef HAVE_LIBGPGME
-#ifndef HAVE_OMEMO
-    char *id = message_send_chat(chatwin->barejid, plugin_msg, oob_url, request_receipt, replace_id);
-    chat_log_msg_out(chatwin->barejid, plugin_msg, NULL);
-    log_database_add_outgoing_chat(id, chatwin->barejid, plugin_msg, replace_id, PROF_MSG_ENC_NONE);
-    chatwin_outgoing_msg(chatwin, plugin_msg, id, PROF_MSG_ENC_NONE, request_receipt, replace_id);
-    free(id);
-
-    plugins_post_chat_message_send(chatwin->barejid, plugin_msg);
-    free(plugin_msg);
-    return;
-#endif
-#endif
-#endif
 }
 
 void
