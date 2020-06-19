@@ -1,3 +1,9 @@
+0.9.3 (2020-06-19)
+=====
+
+Changes:
+- Fix expansion in eval_password (#1364)
+
 0.9.2 (2020-06-13)
 =====
 
