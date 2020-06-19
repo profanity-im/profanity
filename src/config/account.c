@@ -201,15 +201,11 @@ account_eval_password(ProfAccount *account)
     assert(account->eval_password != NULL);
 
     gchar **output = NULL;
-    gchar **argv = g_strsplit(account->eval_password, " ", 0);
 
+    gchar *argv[] = {"sh", "-c", account->eval_password};
     if (!call_external(argv, &output, NULL)) {
-        g_strfreev(argv);
-        argv = NULL;
         return FALSE;
     }
-
-    g_strfreev(argv);
 
     if (!output || !output[0]) {
         log_error("Failed to read eval_password output");
