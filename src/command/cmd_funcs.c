@@ -2187,24 +2187,13 @@ cmd_msg(ProfWin *window, const char *const command, gchar **args)
         }
         ui_focus_win((ProfWin*)chatwin);
 
-#ifdef HAVE_OMEMO
-#ifndef HAVE_LIBOTR
-        if (omemo_automatic_start(barejid)) {
-            omemo_start_session(barejid);
-            chatwin->is_omemo = TRUE;
-        }
-
-        if (msg) {
-            cl_ev_send_msg(chatwin, msg, NULL);
-        }
-
-        return TRUE;
-#endif
-#endif
-
-#ifdef HAVE_OMEMO
+        gboolean is_otr_secure = FALSE;
 #ifdef HAVE_LIBOTR
-        if (omemo_automatic_start(barejid) && otr_is_secure(barejid)) {
+        is_otr_secure = otr_is_secure(barejid);
+#endif // HAVE_LIBOTR
+
+
+        if (omemo_automatic_start(barejid) && is_otr_secure) {
             win_println(window, THEME_DEFAULT, "!", "Chat could be either OMEMO or OTR encrypted. Use '/omemo start %s' or '/otr start %s' to start a session.", usr, usr);
             return TRUE;
         } else if (omemo_automatic_start(barejid)) {
@@ -2215,39 +2204,14 @@ cmd_msg(ProfWin *window, const char *const command, gchar **args)
         if (msg) {
             cl_ev_send_msg(chatwin, msg, NULL);
         } else {
-            if (otr_is_secure(barejid)) {
-                chatwin_otr_secured(chatwin, otr_is_trusted(barejid));
-            }
-        }
-
-        return TRUE;
-#endif
-#endif
-
-#ifndef HAVE_OMEMO
 #ifdef HAVE_LIBOTR
-        if (msg) {
-            cl_ev_send_msg(chatwin, msg, NULL);
-        } else {
             if (otr_is_secure(barejid)) {
                 chatwin_otr_secured(chatwin, otr_is_trusted(barejid));
             }
+#endif // HAVE_LIBOTR
         }
 
         return TRUE;
-#endif
-#endif
-
-#ifndef HAVE_OMEMO
-#ifndef HAVE_LIBOTR
-        if (msg) {
-            cl_ev_send_msg(chatwin, msg, NULL);
-        }
-
-        return TRUE;
-#endif
-#endif
-
     }
 }
 
