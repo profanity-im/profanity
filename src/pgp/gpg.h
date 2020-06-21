@@ -72,4 +72,20 @@ char* p_gpg_autocomplete_key(const char *const search_str, gboolean previous, vo
 void p_gpg_autocomplete_key_reset(void);
 char* p_gpg_format_fp_str(char *fp);
 
+char* p_ox_gpg_signcrypt(const char* const sender_barejid, const char* const recipient_barejid , const char* const message);
+
+char* p_ox_gpg_decrypt(char* base64);
+
+/*!
+ * \brief List of public keys with xmpp-URI.
+ *
+ * @returns GHashTable* with GString* xmpp-uri and ProfPGPKey* value. Empty
+ * hash, if there is no key. NULL in case of error.
+ *
+ */
+GHashTable* ox_gpg_public_keys(void);
+
+gboolean ox_is_private_key_available(const char *const barejid);
+gboolean ox_is_public_key_available(const char *const barejid);
+
 #endif

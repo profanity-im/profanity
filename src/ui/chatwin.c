@@ -90,6 +90,9 @@ chatwin_new(const char *const barejid)
     if (prefs_get_boolean(PREF_MAM)) {
         iq_mam_request(chatwin);
     }
+    // XEP-0373: OpenPGP for XMPP
+    chatwin->is_ox = FALSE;
+
     return chatwin;
 }
 
@@ -344,6 +347,8 @@ chatwin_outgoing_msg(ProfChatWin *chatwin, const char *const message, char *id, 
         enc_char = prefs_get_pgp_char();
     } else if (enc_mode == PROF_MSG_ENC_OMEMO) {
         enc_char = prefs_get_omemo_char();
+    } else if (enc_mode == PROF_MSG_ENC_OX) {
+        enc_char = prefs_get_ox_char();
     } else {
         enc_char = strdup("-");
     }

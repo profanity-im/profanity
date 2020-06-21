@@ -244,6 +244,9 @@ char* prefs_get_pgp_char(void);
 gboolean prefs_set_pgp_char(char *ch);
 char* prefs_get_omemo_char(void);
 gboolean prefs_set_omemo_char(char *ch);
+// XEP-0373: OpenPGP for XMPP
+char* prefs_get_ox_char(void);
+gboolean prefs_set_ox_char(char *ch);
 
 char prefs_get_roster_header_char(void);
 void prefs_set_roster_header_char(char ch);
