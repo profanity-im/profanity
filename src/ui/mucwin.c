@@ -503,6 +503,7 @@ mucwin_outgoing_msg(ProfMucWin *mucwin, const char *const message, const char *c
     ProfWin *window = (ProfWin*)mucwin;
     char *mynick = muc_nick(mucwin->roomjid);
 
+    // displayed message char
     char *ch;
     if (mucwin->message_char) {
         ch = strdup(mucwin->message_char);
@@ -511,6 +512,8 @@ mucwin_outgoing_msg(ProfMucWin *mucwin, const char *const message, const char *c
     } else if (enc_mode == PROF_MSG_ENC_PGP) {
         ch = prefs_get_pgp_char();
     } else if (enc_mode == PROF_MSG_ENC_OMEMO) {
+        ch = prefs_get_omemo_char();
+    } else if (enc_mode == PROF_MSG_ENC_OX) {
         ch = prefs_get_omemo_char();
     } else {
         ch = strdup("-");

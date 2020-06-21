@@ -439,6 +439,20 @@ _show_privacy(ProfChatWin *chatwin)
         return;
     }
 
+    // XEP-0373: OpenPGP for XMPP
+    if (chatwin->is_ox) {
+        wprintw(win, " ");
+        wattron(win, bracket_attrs);
+        wprintw(win, "[");
+        wattroff(win, bracket_attrs);
+        wattron(win, encrypted_attrs);
+        wprintw(win, "OX");
+        wattroff(win, encrypted_attrs);
+        wattron(win, bracket_attrs);
+        wprintw(win, "]");
+        wattroff(win, bracket_attrs);
+    }
+
     if (chatwin->is_otr) {
         wprintw(win, " ");
         wattron(win, bracket_attrs);

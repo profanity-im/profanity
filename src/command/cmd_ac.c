@@ -78,6 +78,7 @@ static char* _otr_autocomplete(ProfWin *window, const char *const input, gboolea
 #endif
 #ifdef HAVE_LIBGPGME
 static char* _pgp_autocomplete(ProfWin *window, const char *const input, gboolean previous);
+static char* _ox_autocomplete(ProfWin *window, const char *const input, gboolean previous);
 #endif
 #ifdef HAVE_OMEMO
 static char* _omemo_autocomplete(ProfWin *window, const char *const input, gboolean previous);
@@ -224,6 +225,9 @@ static Autocomplete receipts_ac;
 static Autocomplete pgp_ac;
 static Autocomplete pgp_log_ac;
 static Autocomplete pgp_sendfile_ac;
+static Autocomplete ox_ac;
+static Autocomplete ox_log_ac;
+static Autocomplete ox_sendfile_ac;
 #endif
 static Autocomplete tls_ac;
 static Autocomplete titlebar_ac;
@@ -260,6 +264,13 @@ static Autocomplete color_ac;
 static Autocomplete correction_ac;
 static Autocomplete avatar_ac;
 static Autocomplete executable_ac;
+
+/*!
+ * \brief Initialization of auto completion for commands.
+ *
+ * This function implements the auto completion for profanity's commands.
+ *
+ */
 
 void
 cmd_ac_init(void)
@@ -842,6 +853,29 @@ cmd_ac_init(void)
     pgp_sendfile_ac = autocomplete_new();
     autocomplete_add(pgp_sendfile_ac, "on");
     autocomplete_add(pgp_sendfile_ac, "off");
+
+    // XEP-0373: OX
+    ox_ac = autocomplete_new();
+    autocomplete_add(ox_ac, "keys");
+    autocomplete_add(ox_ac, "contacts");
+    autocomplete_add(ox_ac, "start");
+    autocomplete_add(ox_ac, "end");
+    autocomplete_add(ox_ac, "log");
+    autocomplete_add(ox_ac, "char");
+    autocomplete_add(ox_ac, "sendfile");
+    autocomplete_add(ox_ac, "announce");
+    autocomplete_add(ox_ac, "discover");
+    autocomplete_add(ox_ac, "request");
+
+    pgp_log_ac = autocomplete_new();
+    autocomplete_add(ox_log_ac, "on");
+    autocomplete_add(ox_log_ac, "off");
+    autocomplete_add(ox_log_ac, "redact");
+
+    pgp_sendfile_ac = autocomplete_new();
+    autocomplete_add(ox_sendfile_ac, "on");
+    autocomplete_add(ox_sendfile_ac, "off");
+
 #endif
 
     tls_ac = autocomplete_new();
@@ -1707,6 +1741,7 @@ _cmd_ac_complete_params(ProfWin *window, const char *const input, gboolean previ
 #endif
 #ifdef HAVE_LIBGPGME
     g_hash_table_insert(ac_funcs, "/pgp",           _pgp_autocomplete);
+    g_hash_table_insert(ac_funcs, "/ox",            _ox_autocomplete);
 #endif
 #ifdef HAVE_OMEMO
     g_hash_table_insert(ac_funcs, "/omemo",         _omemo_autocomplete);
@@ -2414,6 +2449,68 @@ _pgp_autocomplete(ProfWin *window, const char *const input, gboolean previous)
     }
 
     found = autocomplete_param_with_ac(input, "/pgp", pgp_ac, TRUE, previous);
+    if (found) {
+        return found;
+    }
+
+    return NULL;
+}
+
+/*!
+ * \brief Auto completion for XEP-0373: OpenPGP for XMPP command.
+ *
+ *
+ */
+static char*
+_ox_autocomplete(ProfWin *window, const char *const input, gboolean previous)
+{
+    char *found = NULL;
+
+    jabber_conn_status_t conn_status = connection_get_status();
+
+    if (conn_status == JABBER_CONNECTED) {
+        found = autocomplete_param_with_func(input, "/ox start", roster_contact_autocomplete, previous, NULL);
+        if (found) {
+            return found;
+        }
+    }
+
+    found = autocomplete_param_with_ac(input, "/ox log", ox_log_ac, TRUE, previous);
+    if (found) {
+        return found;
+    }
+
+    found = autocomplete_param_with_ac(input, "/ox sendfile", ox_sendfile_ac, TRUE, previous);
+    if (found) {
+        return found;
+    }
+
+    gboolean result;
+    gchar **args = parse_args(input, 2, 3, &result);
+    if ((strncmp(input, "/ox", 4) == 0) && (result == TRUE)) {
+        GString *beginning = g_string_new("/ox ");
+        g_string_append(beginning, args[0]);
+        if (args[1]) {
+            g_string_append(beginning, " ");
+            g_string_append(beginning, args[1]);
+        }
+        found = autocomplete_param_with_func(input, beginning->str, p_gpg_autocomplete_key, previous, NULL);
+        g_string_free(beginning, TRUE);
+        if (found) {
+            g_strfreev(args);
+            return found;
+        }
+    }
+    g_strfreev(args);
+
+    if (conn_status == JABBER_CONNECTED) {
+        found = autocomplete_param_with_func(input, "/ox setkey", roster_barejid_autocomplete, previous, NULL);
+        if (found) {
+            return found;
+        }
+    }
+
+    found = autocomplete_param_with_ac(input, "/ox", ox_ac, TRUE, previous);
     if (found) {
         return found;
     }

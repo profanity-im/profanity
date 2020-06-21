@@ -85,9 +85,12 @@ static void _handle_conference(xmpp_stanza_t *const stanza);
 static void _handle_captcha(xmpp_stanza_t *const stanza);
 static void _handle_receipt_received(xmpp_stanza_t *const stanza);
 static void _handle_chat(xmpp_stanza_t *const stanza, gboolean is_mam);
+static void _handle_ox_chat(xmpp_stanza_t *const stanza, ProfMessage *message, gboolean is_mam);
 static gboolean _handle_mam(xmpp_stanza_t *const stanza);
 
 static void _send_message_stanza(xmpp_stanza_t *const stanza);
+
+static xmpp_stanza_t* _openpgp_signcrypt(xmpp_ctx_t* ctx, const char* const to, const char* const text);
 
 static GHashTable *pubsub_event_handlers;
 
@@ -353,6 +356,7 @@ message_send_chat_pgp(const char *const barejid, const char *const msg, gboolean
     }
     account_free(account);
 #else
+    // ?
     message = xmpp_message_new(ctx, STANZA_TYPE_CHAT, jid, id);
     xmpp_message_set_body(message, msg);
 #endif
@@ -372,6 +376,70 @@ message_send_chat_pgp(const char *const barejid, const char *const msg, gboolean
 
     _send_message_stanza(message);
     xmpp_stanza_release(message);
+
+    return id;
+}
+
+// XEP-0373: OpenPGP for XMPP
+
+char*
+message_send_chat_ox(const char *const barejid, const char *const msg, gboolean request_receipt, const char *const replace_id)
+{
+    xmpp_ctx_t * const ctx = connection_get_ctx();
+
+    char *state = chat_session_get_state(barejid);
+    char *jid = chat_session_get_jid(barejid);
+    char *id = connection_create_stanza_id();
+
+    xmpp_stanza_t *message = NULL;
+    Jid *jidp = jid_create(jid);
+
+    char *account_name = session_get_account_name();
+    ProfAccount *account = accounts_get_account(account_name);
+    
+    message = xmpp_message_new(ctx, STANZA_TYPE_CHAT, jid, id);
+    xmpp_message_set_body(message, "This message is encrypted (XEP-0373: OpenPGP for XMPP).");
+
+    xmpp_stanza_t *openpgp = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(openpgp, STANZA_NAME_OPENPGP);
+    xmpp_stanza_set_ns(openpgp, STANZA_NS_OPENPGP_0);
+    
+    xmpp_stanza_t * signcrypt = _openpgp_signcrypt(ctx, barejid, msg);
+    char* c;
+    size_t s;
+    xmpp_stanza_to_text(signcrypt, &c,&s);
+    char* signcrypt_e = p_ox_gpg_signcrypt(account->jid, barejid, c);
+    if( signcrypt_e == NULL ) {
+      log_error("Message not signcrypted.");
+      return NULL;
+    } 
+    // BASE64_OPENPGP_MESSAGE
+    xmpp_stanza_t* base64_openpgp_message = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_text(base64_openpgp_message,signcrypt_e);
+    xmpp_stanza_add_child(openpgp, base64_openpgp_message);
+    xmpp_stanza_add_child(message, openpgp);
+    
+    xmpp_stanza_to_text(message, &c,&s);
+
+    account_free(account);
+    jid_destroy(jidp);
+    free(jid);
+
+    if (state) {
+        stanza_attach_state(ctx, message, state);
+    }
+
+    if (request_receipt) {
+        stanza_attach_receipt_request(ctx, message);
+    }
+
+    if (replace_id) {
+        stanza_attach_correction(ctx, message, replace_id);
+    }
+
+    _send_message_stanza(message);
+    xmpp_stanza_release(message);
+
 
     return id;
 }
@@ -1140,6 +1208,12 @@ _handle_carbons(xmpp_stanza_t *const stanza)
     if (x) {
         message->encrypted = xmpp_stanza_get_text(x);
     }
+    // OX
+    xmpp_stanza_t *ox = xmpp_stanza_get_child_by_ns(message_stanza, STANZA_NS_OPENPGP_0);
+    if( ox ) {
+       message->enc=PROF_MSG_ENC_OX;
+      _handle_ox_chat(message_stanza,message, FALSE);
+    }
 
     //TODO: maybe also add is_carbon maybe even an enum with outgoing/incoming
     //could be that then we can have sv_ev_carbon no incoming/outgoing
@@ -1260,6 +1334,12 @@ _handle_chat(xmpp_stanza_t *const stanza, gboolean is_mam)
         message->encrypted = xmpp_stanza_get_text(encrypted);
     }
 
+    xmpp_stanza_t *ox = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_OPENPGP_0);
+    if( ox ) {
+      message->enc=PROF_MSG_ENC_OX;
+      _handle_ox_chat(stanza,message, FALSE);
+    }
+
     if (message->plain || message->body || message->encrypted) {
         sv_ev_incoming_message(message);
 
@@ -1288,6 +1368,35 @@ _handle_chat(xmpp_stanza_t *const stanza, gboolean is_mam)
     }
 
     message_free(message);
+}
+
+
+/*!
+ * @brief Handle incoming XMMP-OX chat message.
+ *
+ *
+ */
+static void _handle_ox_chat(xmpp_stanza_t *const stanza, ProfMessage *message, gboolean is_mam) {
+	xmpp_stanza_t *ox = stanza_get_child_by_name_and_ns(stanza, "openpgp", STANZA_NS_OPENPGP_0);
+	message->plain = p_ox_gpg_decrypt(xmpp_stanza_get_text(ox));
+
+    // Implementation for libstrophe 0.10.
+    /*
+    xmpp_stanza_t *x =  xmpp_stanza_new_from_string(connection_get_ctx(), message->plain);
+    xmpp_stanza_t *p =  xmpp_stanza_get_child_by_name(x, "payload");
+    xmpp_stanza_t *b =  xmpp_stanza_get_child_by_name(p, "body");
+    message->plain = xmpp_stanza_get_text(b);
+    if(message->plain == NULL ) {
+        message->plain = xmpp_stanza_get_text(stanza);
+    }
+	message->encrypted = xmpp_stanza_get_text(ox);
+    */
+    
+    if(message->plain == NULL ) {
+        message->plain = xmpp_stanza_get_text(stanza);
+    }
+	message->encrypted = xmpp_stanza_get_text(ox);
+
 }
 
 static gboolean
@@ -1372,3 +1481,64 @@ message_is_sent_by_us(const ProfMessage *const message, bool checkOID) {
 
     return  ret;
 }
+
+
+xmpp_stanza_t* _openpgp_signcrypt(xmpp_ctx_t* ctx, const char* const to, const char* const text) {
+
+  time_t now = time(NULL);
+  struct tm* tm = localtime(&now);
+  char buf[255];
+  strftime(buf, sizeof(buf), "%FT%T%z", tm);
+    int randnr = rand() % 5;
+    char rpad_data[randnr];
+    for(int i = 0; i < randnr-1; i++) {
+      rpad_data[i] = 'c';
+    }
+    rpad_data[randnr-1] = '\0';
+    
+    // signcrypt
+    xmpp_stanza_t *signcrypt = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(signcrypt, "signcrypt");
+    xmpp_stanza_set_ns(signcrypt, "urn:xmpp:openpgp:0");
+    // to
+    xmpp_stanza_t *s_to = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(s_to, "to");
+    xmpp_stanza_set_attribute(s_to, "jid", to);
+    // time
+    xmpp_stanza_t *time = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(time, "time");
+    xmpp_stanza_set_attribute(time, "stamp", buf);
+    xmpp_stanza_set_name(time, "time");
+    // rpad
+    xmpp_stanza_t *rpad = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(rpad, "rpad");
+    xmpp_stanza_t *rpad_text = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_text(rpad_text, rpad_data);
+    // payload
+    xmpp_stanza_t *payload= xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(payload, "payload");
+    // body
+    xmpp_stanza_t *body = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(body, "body");
+    xmpp_stanza_set_ns(body, "jabber:client");
+    // text
+    xmpp_stanza_t *body_text = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_text(body_text, text);
+    xmpp_stanza_add_child(signcrypt,s_to);
+    xmpp_stanza_add_child(signcrypt,time);
+    xmpp_stanza_add_child(signcrypt,rpad);
+    xmpp_stanza_add_child(rpad,rpad_text);
+    xmpp_stanza_add_child(signcrypt,payload);
+    xmpp_stanza_add_child(payload, body);
+    xmpp_stanza_add_child(body, body_text);
+
+    xmpp_stanza_release(body_text);
+    xmpp_stanza_release(body);
+    xmpp_stanza_release(rpad_text);
+    xmpp_stanza_release(rpad);
+    xmpp_stanza_release(time);
+    xmpp_stanza_release(s_to);
+
+    return signcrypt;
+}
+

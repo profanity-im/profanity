@@ -1691,6 +1691,48 @@ static struct cmd_t command_defs[] =
             "/pgp char P")
     },
 
+// XEP-0373: OpenPGP for XMPP
+#ifdef HAVE_LIBGPGME
+    { "/ox",
+        parse_args, 1, 3, NULL,
+        CMD_NOSUBFUNCS
+        CMD_MAINFUNC(cmd_ox)
+        CMD_TAGS(
+            CMD_TAG_CHAT,
+            CMD_TAG_UI)
+        CMD_SYN(
+            "/ox keys",
+            "/ox contacts",
+            "/ox start [<contact>]",
+            "/ox end",
+            "/ox log on|off|redact",
+            "/ox char <char>",
+            "/ox sendfile on|off",
+            "/ox announce <file>",
+            "/ox discover",
+            "/ox request <jid>")
+        CMD_DESC(
+            "OpenPGP (OX) commands to manage keys, and perform PGP encryption during chat sessions. ")
+        CMD_ARGS(
+            { "keys",                     "List all keys known to the system." },
+            { "contacts",                 "Show contacts with assigned public keys." },
+            { "start [<contact>]",        "Start PGP encrypted chat, current contact will be used if not specified." },
+            { "end",                      "End PGP encrypted chat with the current recipient." },
+            { "log on|off",               "Enable or disable plaintext logging of PGP encrypted messages." },
+            { "log redact",               "Log PGP encrypted messages, but replace the contents with [redacted]. This is the default." },
+            { "char <char>",              "Set the character to be displayed next to PGP encrypted messages." },
+            { "announce <file>",          "Announce a public key by pushing it on the XMPP Server"},
+            { "discover <jid>",           "Discover public keys of a jid "},
+            { "request <jid>",            "Request public keys"},
+            { "sendfile on|off",          "Allow /sendfile to send unencrypted files while otherwise using PGP."})
+        CMD_EXAMPLES(
+            "/ox log off",
+            "/ox start odin@valhalla.edda",
+            "/ox end",
+            "/ox char X")
+    },
+#endif // HAVE_LIBGPGME
+
     { "/otr",
         parse_args, 1, 3, NULL,
         CMD_SUBFUNCS(

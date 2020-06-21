@@ -1144,6 +1144,8 @@ win_print_incoming(ProfWin *window, const char *const display_name_from, ProfMes
                 enc_char = prefs_get_otr_char();
             } else if (message->enc == PROF_MSG_ENC_PGP) {
                 enc_char = prefs_get_pgp_char();
+            } else if (message->enc == PROF_MSG_ENC_OX) { // XEP-0373: OpenPGP for XMPP
+                enc_char = prefs_get_ox_char();
             } else if (message->enc == PROF_MSG_ENC_OMEMO) {
                 enc_char = prefs_get_omemo_char();
             } else {

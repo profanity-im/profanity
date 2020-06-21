@@ -141,6 +141,13 @@ cl_ev_send_msg_correct(ProfChatWin *chatwin, const char *const msg, const char *
         log_database_add_outgoing_chat(id, chatwin->barejid, plugin_msg, replace_id, PROF_MSG_ENC_PGP);
         chatwin_outgoing_msg(chatwin, plugin_msg, id, PROF_MSG_ENC_PGP, request_receipt, replace_id);
         free(id);
+    } else if (chatwin->is_ox) {
+        // XEP-0373: OpenPGP for XMPP
+        char *id = message_send_chat_ox(chatwin->barejid, plugin_msg, request_receipt, replace_id);
+        chat_log_pgp_msg_out(chatwin->barejid, plugin_msg, NULL);
+        log_database_add_outgoing_chat(id, chatwin->barejid, plugin_msg, replace_id, PROF_MSG_ENC_OX);
+        chatwin_outgoing_msg(chatwin, plugin_msg, id, PROF_MSG_ENC_OX, request_receipt, replace_id);
+        free(id);
     } else {
         gboolean handled = otr_on_message_send(chatwin, plugin_msg, request_receipt, replace_id);
         if (!handled) {
@@ -188,6 +195,13 @@ cl_ev_send_msg_correct(ProfChatWin *chatwin, const char *const msg, const char *
         chat_log_pgp_msg_out(chatwin->barejid, plugin_msg, NULL);
         log_database_add_outgoing_chat(id, chatwin->barejid, plugin_msg, replace_id, PROF_MSG_ENC_PGP);
         chatwin_outgoing_msg(chatwin, plugin_msg, id, PROF_MSG_ENC_PGP, request_receipt, replace_id);
+        free(id);
+    } else if (chatwin->is_ox) {
+        // XEP-0373: OpenPGP for XMPP
+        char *id = message_send_chat_ox(chatwin->barejid, plugin_msg, request_receipt, replace_id);
+        chat_log_pgp_msg_out(chatwin->barejid, plugin_msg, NULL);
+        log_database_add_outgoing_chat(id, chatwin->barejid, plugin_msg, replace_id, PROF_MSG_ENC_OX);
+        chatwin_outgoing_msg(chatwin, plugin_msg, id, PROF_MSG_ENC_OX, request_receipt, replace_id);
         free(id);
     } else {
         char *id = message_send_chat(chatwin->barejid, plugin_msg, oob_url, request_receipt, replace_id);
@@ -273,6 +287,13 @@ cl_ev_send_msg_correct(ProfChatWin *chatwin, const char *const msg, const char *
         log_database_add_outgoing_chat(id, chatwin->barejid, plugin_msg, replace_id, PROF_MSG_ENC_PGP);
         chatwin_outgoing_msg(chatwin, plugin_msg, id, PROF_MSG_ENC_PGP, request_receipt, replace_id);
         free(id);
+    } else if (chatwin->is_ox) {
+        // XEP-0373: OpenPGP for XMPP
+        char *id = message_send_chat_ox(chatwin->barejid, plugin_msg, request_receipt, replace_id);
+        chat_log_pgp_msg_out(chatwin->barejid, plugin_msg, NULL);
+        log_database_add_outgoing_chat(id, chatwin->barejid, plugin_msg, replace_id, PROF_MSG_ENC_OX);
+        chatwin_outgoing_msg(chatwin, plugin_msg, id, PROF_MSG_ENC_OX, request_receipt, replace_id);
+        free(id);
     } else {
         char *id = message_send_chat(chatwin->barejid, plugin_msg, oob_url, request_receipt, replace_id);
         chat_log_msg_out(chatwin->barejid, plugin_msg, NULL);
@@ -303,6 +324,13 @@ cl_ev_send_msg_correct(ProfChatWin *chatwin, const char *const msg, const char *
         chat_log_pgp_msg_out(chatwin->barejid, plugin_msg, NULL);
         log_database_add_outgoing_chat(id, chatwin->barejid, plugin_msg, replace_id, PROF_MSG_ENC_PGP);
         chatwin_outgoing_msg(chatwin, plugin_msg, id, PROF_MSG_ENC_PGP, request_receipt, replace_id);
+        free(id);
+    } else if (chatwin->is_ox) {
+        // XEP-0373: OpenPGP for XMPP
+        char *id = message_send_chat_ox(chatwin->barejid, plugin_msg, request_receipt, replace_id);
+        chat_log_pgp_msg_out(chatwin->barejid, plugin_msg, NULL);
+        log_database_add_outgoing_chat(id, chatwin->barejid, plugin_msg, replace_id, PROF_MSG_ENC_OX);
+        chatwin_outgoing_msg(chatwin, plugin_msg, id, PROF_MSG_ENC_OX, request_receipt, replace_id);
         free(id);
     } else {
         gboolean handled = otr_on_message_send(chatwin, plugin_msg, request_receipt, replace_id);

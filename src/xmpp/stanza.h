@@ -62,6 +62,8 @@
 #define STANZA_NAME_PRESENCE "presence"
 #define STANZA_NAME_PRIORITY "priority"
 #define STANZA_NAME_X "x"
+// XEP-0373: OpenPGP for XMPP
+#define STANZA_NAME_OPENPGP "openpgp"
 #define STANZA_NAME_SHOW "show"
 #define STANZA_NAME_STATUS "status"
 #define STANZA_NAME_IQ "iq"
@@ -192,6 +194,8 @@
 #define STANZA_NS_RECEIPTS "urn:xmpp:receipts"
 #define STANZA_NS_SIGNED "jabber:x:signed"
 #define STANZA_NS_ENCRYPTED "jabber:x:encrypted"
+// XEP-0373: OpenPGP for XMPP
+#define STANZA_NS_OPENPGP_0 "urn:xmpp:openpgp:0"
 #define STANZA_NS_HTTP_UPLOAD "urn:xmpp:http:upload"
 #define STANZA_NS_X_OOB "jabber:x:oob"
 #define STANZA_NS_BLOCKING "urn:xmpp:blocking"

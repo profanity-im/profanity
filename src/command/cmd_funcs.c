@@ -7448,6 +7448,169 @@ cmd_pgp(ProfWin *window, const char *const command, gchar **args)
 #endif
 }
 
+#ifdef HAVE_LIBGPGME
+
+/*!
+ * \brief Command for XEP-0373: OpenPGP for XMPP
+ *
+ */
+
+gboolean
+cmd_ox(ProfWin *window, const char *const command, gchar **args)
+{
+    if (args[0] == NULL) {
+        cons_bad_cmd_usage(command);
+        return TRUE;
+    }
+
+    // The '/ox keys' command - same like in pgp
+    // Should we move this to a common command 
+    // e.g. '/openpgp keys'?.
+    else if (g_strcmp0(args[0], "keys") == 0) {
+        GHashTable *keys = p_gpg_list_keys();
+        if (!keys || g_hash_table_size(keys) == 0) {
+            cons_show("No keys found");
+            return TRUE;
+        }
+
+        cons_show("OpenPGP keys:");
+        GList *keylist = g_hash_table_get_keys(keys);
+        GList *curr = keylist;
+        while (curr) {
+            ProfPGPKey *key = g_hash_table_lookup(keys, curr->data);
+            cons_show("  %s", key->name);
+            cons_show("    ID          : %s", key->id);
+            char *format_fp = p_gpg_format_fp_str(key->fp);
+            cons_show("    Fingerprint : %s", format_fp);
+            free(format_fp);
+            if (key->secret) {
+                cons_show("    Type        : PUBLIC, PRIVATE");
+            } else {
+                cons_show("    Type        : PUBLIC");
+            }
+            curr = g_list_next(curr);
+        }
+        g_list_free(keylist);
+        p_gpg_free_keys(keys);
+        return TRUE;
+    }
+
+    else if (g_strcmp0(args[0], "contacts") == 0) {
+        GHashTable *keys = ox_gpg_public_keys();
+        cons_show("OpenPGP keys:");
+        GList *keylist = g_hash_table_get_keys(keys);
+        GList *curr = keylist;
+
+
+        GSList *roster_list = NULL;
+        jabber_conn_status_t conn_status = connection_get_status();
+        if (conn_status != JABBER_CONNECTED) {
+            cons_show("You are not currently connected.");
+        } else {
+            roster_list = roster_get_contacts(ROSTER_ORD_NAME);
+        }
+
+        while (curr) {
+            ProfPGPKey *key = g_hash_table_lookup(keys, curr->data);
+            PContact contact = NULL;
+            if (roster_list) {
+                GSList *curr_c = roster_list;
+                while ( !contact && curr_c){
+                    contact = curr_c->data;
+                    const char *jid = p_contact_barejid(contact);
+                    GString* xmppuri = g_string_new("xmpp:");
+                    g_string_append(xmppuri, jid);
+                    if( g_strcmp0(key->name, xmppuri->str)) {
+                        contact = NULL;
+                    }
+                    curr_c = g_slist_next(curr_c);
+                }
+            }
+
+            if(contact) {
+                cons_show("%s - %s", key->fp, key->name);
+            } else {
+                cons_show("%s - %s (not in roster)", key->fp, key->name);
+            }
+            curr = g_list_next(curr);
+        }
+
+    } else if (g_strcmp0(args[0], "start") == 0) {
+        jabber_conn_status_t conn_status = connection_get_status();
+        if (conn_status != JABBER_CONNECTED) {
+            cons_show("You must be connected to start OX encrpytion.");
+            return TRUE;
+        }
+
+        if (window->type != WIN_CHAT && args[1] == NULL) {
+            cons_show("You must be in a regular chat window to start OX encrpytion.");
+            return TRUE;
+        }
+
+        ProfChatWin *chatwin = NULL;
+
+        if (args[1]) {
+            char *contact = args[1];
+            char *barejid = roster_barejid_from_name(contact);
+            if (barejid == NULL) {
+                barejid = contact;
+            }
+
+            chatwin = wins_get_chat(barejid);
+            if (!chatwin) {
+                chatwin = chatwin_new(barejid);
+            }
+            ui_focus_win((ProfWin*)chatwin);
+        } else {
+            chatwin = (ProfChatWin*)window;
+            assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
+        }
+
+        if (chatwin->is_otr) {
+            win_println(window, THEME_DEFAULT, "!", "You must end the OTR session to start OX encryption.");
+            return TRUE;
+        }
+
+        if (chatwin->pgp_send) {
+            win_println(window, THEME_DEFAULT, "!", "You must end the PGP session to start OX encryption.");
+            return TRUE;
+        }
+
+        if (chatwin->is_ox) {
+            win_println(window, THEME_DEFAULT, "!", "You have already started OX encryption.");
+            return TRUE;
+        }
+
+        ProfAccount *account = accounts_get_account(session_get_account_name());
+
+        if ( !ox_is_private_key_available(account->jid) ) {
+            win_println(window, THEME_DEFAULT, "!", "No private OpenPGP found, cannot start OX encryption.");
+            account_free(account);
+            return TRUE;
+        }
+        account_free(account);
+
+        if (!ox_is_public_key_available(chatwin->barejid)) {
+            win_println(window, THEME_DEFAULT, "!", "No OX-OpenPGP key found for %s.", chatwin->barejid);
+            return TRUE;
+        }
+
+        chatwin->is_ox = TRUE;
+        win_println(window, THEME_DEFAULT, "!", "OX encryption enabled.");
+        return TRUE;
+    } else if (g_strcmp0(args[0], "push") == 0) {
+        if( args[1] ) {
+            cons_show("Push file...%s ", args[1] );
+        } else {
+            cons_show("Filename is required");
+        }
+    } else {
+        cons_show("OX not implemented");
+    }
+    return TRUE;
+}
+#endif // HAVE_LIBGPGME
+
 gboolean
 cmd_otr_char(ProfWin *window, const char *const command, gchar **args)
 {
