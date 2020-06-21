@@ -62,6 +62,7 @@
 #define PREF_GROUP_OTR "otr"
 #define PREF_GROUP_PGP "pgp"
 #define PREF_GROUP_OMEMO "omemo"
+#define PREF_GROUP_OX "ox"
 #define PREF_GROUP_MUC "muc"
 #define PREF_GROUP_PLUGINS "plugins"
 
@@ -940,6 +941,18 @@ gboolean
 prefs_set_pgp_char(char *ch)
 {
     return _prefs_set_encryption_char(ch, PREF_GROUP_PGP, "pgp.char");
+}
+
+char*
+prefs_get_ox_char(void)
+{
+    return _prefs_get_encryption_char("%", PREF_GROUP_OX, "ox.char");
+}
+
+gboolean
+prefs_set_ox_char(char *ch)
+{
+    return _prefs_set_encryption_char(ch, PREF_GROUP_OX, "ox.char");
 }
 
 char*

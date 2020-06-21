@@ -517,6 +517,23 @@ _sv_ev_incoming_pgp(ProfChatWin *chatwin, gboolean new_win, ProfMessage *message
 }
 
 static void
+_sv_ev_incoming_ox(ProfChatWin *chatwin, gboolean new_win, ProfMessage *message, gboolean logit)
+{
+#ifdef HAVE_LIBGPGME
+        //_clean_incoming_message(message);
+        chatwin_incoming_msg(chatwin, message, new_win);
+        log_database_add_incoming(message);
+        if (logit) {
+            chat_log_pgp_msg_in(message);
+        }
+        chatwin->pgp_recv = TRUE;
+        //p_gpg_free_decrypted(message->plain);
+        message->plain = NULL;
+}
+#endif
+}
+
+static void
 _sv_ev_incoming_otr(ProfChatWin *chatwin, gboolean new_win, ProfMessage *message)
 {
 #ifdef HAVE_LIBOTR

@@ -288,6 +288,8 @@ static prof_msg_type_t _get_message_type_type(const char *const type) {
 
 static const char* _get_message_enc_str(prof_enc_t enc) {
     switch (enc) {
+    case PROF_MSG_ENC_OX:
+        return "ox";
     case PROF_MSG_ENC_PGP:
         return "pgp";
     case PROF_MSG_ENC_OTR:
@@ -298,7 +300,7 @@ static const char* _get_message_enc_str(prof_enc_t enc) {
         return "none";
     }
 
-    return "none";
+    return "none"; // do not return none - return NULL
 }
 
 static void
