@@ -202,7 +202,7 @@ account_eval_password(ProfAccount *account)
 
     gchar **output = NULL;
 
-    gchar *argv[] = {"sh", "-c", account->eval_password};
+    gchar *argv[] = {"sh", "-c", account->eval_password, NULL};
     if (!call_external(argv, &output, NULL)) {
         return FALSE;
     }
