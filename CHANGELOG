@@ -1,3 +1,11 @@
+0.9.4 (2020-06-24)
+=====
+
+Changes:
+- Fix NULL terminated list (#1367)
+- Add missing string.h (#1372) (@pasis)
+- Fix gcc warnings for cygwin (#1373) (@pasis)
+
 0.9.3 (2020-06-19)
 =====
 
