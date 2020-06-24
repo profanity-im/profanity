@@ -234,20 +234,21 @@ notify(const char *const message, int timeout, const char *const category)
 #endif
 #ifdef PLATFORM_CYGWIN
     NOTIFYICONDATA nid;
+    memset(&nid, 0, sizeof(nid));
     nid.cbSize = sizeof(NOTIFYICONDATA);
     //nid.hWnd = hWnd;
     nid.uID = 100;
     nid.uVersion = NOTIFYICON_VERSION;
     //nid.uCallbackMessage = WM_MYMESSAGE;
     nid.hIcon = LoadIcon(NULL, IDI_APPLICATION);
-    strncpy(nid.szTip, "Tray Icon", 10);
+    strcpy(nid.szTip, "Tray Icon");
     nid.uFlags = NIF_MESSAGE | NIF_ICON | NIF_TIP;
     Shell_NotifyIcon(NIM_ADD, &nid);
 
     // For a Ballon Tip
     nid.uFlags = NIF_INFO;
-    strncpy(nid.szInfoTitle, "Profanity", 10); // Title
-    strncpy(nid.szInfo, message, 256); // Copy Tip
+    strcpy(nid.szInfoTitle, "Profanity"); // Title
+    strncpy(nid.szInfo, message, sizeof(nid.szInfo) - 1); // Copy Tip
     nid.uTimeout = timeout;  // 3 Seconds
     nid.dwInfoFlags = NIIF_INFO;
 
