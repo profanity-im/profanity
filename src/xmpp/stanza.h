@@ -131,6 +131,7 @@
 #define STANZA_NAME_UNEXPECTED_REQUEST "unexpected-request"
 
 #define STANZA_TYPE_CHAT "chat"
+#define STANZA_TYPE_HEADLINE "headline"
 #define STANZA_TYPE_GROUPCHAT "groupchat"
 #define STANZA_TYPE_UNAVAILABLE "unavailable"
 #define STANZA_TYPE_SUBSCRIBE "subscribe"

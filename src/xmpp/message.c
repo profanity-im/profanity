@@ -86,7 +86,8 @@ static void _handle_captcha(xmpp_stanza_t *const stanza);
 static void _handle_receipt_received(xmpp_stanza_t *const stanza);
 static void _handle_chat(xmpp_stanza_t *const stanza, gboolean is_mam);
 static gboolean _handle_mam(xmpp_stanza_t *const stanza);
-
+static void _handle_headline(xmpp_stanza_t *const stanza);
+static void _handle_normal(xmpp_stanza_t *const stanza);
 static void _send_message_stanza(xmpp_stanza_t *const stanza);
 
 static GHashTable *pubsub_event_handlers;
@@ -122,6 +123,10 @@ _message_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza, void *con
 
     if (g_strcmp0(type, STANZA_TYPE_ERROR) == 0) {
         _handle_error(stanza);
+    }
+
+    if (g_strcmp0(type, STANZA_TYPE_HEADLINE) == 0)  {
+        _handle_headline(stanza);
     }
 
     // if muc
@@ -166,7 +171,11 @@ _message_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza, void *con
         }
     }
 
-    _handle_chat(stanza, FALSE);
+    if (g_strcmp0(type, STANZA_TYPE_CHAT) == 0)  {
+        _handle_chat(stanza, FALSE);
+    } else if (g_strcmp0(type, "normal") == 0 || type == NULL  )  {
+    _handle_normal(stanza);
+    }
 
     return 1;
 }
@@ -1372,3 +1381,43 @@ message_is_sent_by_us(const ProfMessage *const message, bool checkOID) {
 
     return  ret;
 }
+
+static void _handle_headline(xmpp_stanza_t *const stanza) {
+    char* text = NULL;
+    xmpp_stanza_t *body = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_BODY);
+    if (body) {
+        text = xmpp_stanza_get_text(body);
+        if( text ) {
+            cons_show("Headline: %s", text);
+        }
+    }
+}
+static void _handle_normal(xmpp_stanza_t *const stanza) {
+    gboolean res = _handle_carbons(stanza);
+    if (res) {
+        return;
+    }
+
+    const char *id = xmpp_stanza_get_id(stanza);
+    const gchar *from = xmpp_stanza_get_from(stanza);
+    Jid *jid = jid_create(from);
+
+    ProfMessage *message = message_init();
+    message->from_jid = jid;
+    message->type = PROF_MSG_TYPE_CHAT;
+
+    const gchar *to_text = xmpp_stanza_get_to(stanza);
+    if (to_text) {
+        message->to_jid = jid_create(to_text);
+    }
+    if (id) {
+        message->id = strdup(id);
+    }
+    xmpp_stanza_t *body = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_BODY);
+    if (body) {
+        message->body = xmpp_stanza_get_text(body);
+    }
+    sv_ev_incoming_message(message);
+    message_free(message);
+}
+
