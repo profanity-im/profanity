@@ -95,6 +95,12 @@
 #ifdef HAVE_OMEMO
 #include "omemo/omemo.h"
 #include "xmpp/omemo.h"
+
+#define AESGCM_URL_SCHEME "aesgcm"
+#define AESGCM_URL_NONCE_LEN 24
+#define AESGCM_URL_KEY_LEN 64
+#define AESGCM_URL_FRAGMENT_LEN                                                \
+  (size_t)(AESGCM_URL_NONCE_LEN + AESGCM_URL_KEY_LEN)
 #endif
 
 #ifdef HAVE_GTK
@@ -4806,6 +4812,21 @@ cmd_disco(ProfWin* window, const char* const command, gchar** args)
     return TRUE;
 }
 
+char *create_aesgcm_fragment(unsigned char *key, int key_size,
+                             unsigned char *nonce, int nonce_size) {
+    char fragment[(nonce_size+key_size)*2+1];
+
+    for (int i = 0; i < nonce_size; i++) {
+        sprintf(&(fragment[i*2]), "%02x", nonce[i]);
+    }
+
+    for (int i = 0; i < key_size; i++) {
+        sprintf(&(fragment[(i+nonce_size)*2]), "%02x", key[i]);
+    }
+
+    return strdup(fragment);
+}
+
 gboolean
 cmd_sendfile(ProfWin* window, const char* const command, gchar** args)
 {
@@ -4849,6 +4870,8 @@ cmd_sendfile(ProfWin* window, const char* const command, gchar** args)
     }
 
     FILE *fh = fdopen(fd, "rb");
+    char *alt_scheme = NULL;
+    char *alt_fragment = NULL;
 
     switch (window->type) {
         case WIN_MUC:
@@ -4898,11 +4921,16 @@ cmd_sendfile(ProfWin* window, const char* const command, gchar** args)
                 fflush(tmpfh);
                 rewind(tmpfh);
 
-                fclose(fh);
+                fclose(fh); // Also closes descriptor.
 
                 // Switch original stream with temporary encrypted stream.
                 fd = tmpfd;
                 fh = tmpfh;
+
+                alt_scheme = AESGCM_URL_SCHEME;
+                alt_fragment = create_aesgcm_fragment(
+                        key, AES256_GCM_KEY_LENGTH,
+                        nonce, AES256_GCM_NONCE_LENGTH);
 
                 break;
             }
@@ -4944,6 +4972,8 @@ cmd_sendfile(ProfWin* window, const char* const command, gchar** args)
     upload->filehandle = fh;
     upload->filesize = file_size(fd);
     upload->mime_type = file_mime_type(filename);
+    upload->alt_scheme = alt_scheme;
+    upload->alt_fragment = alt_fragment;
 
     iq_http_upload_request(upload);
 

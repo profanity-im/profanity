@@ -128,8 +128,35 @@ _data_callback(void* ptr, size_t size, size_t nmemb, void* data)
     return realsize;
 }
 
-void*
-http_file_put(void* userdata)
+int format_alt_url(char *original_url, char *new_scheme, char *new_fragment, char **new_url) {
+    int ret = 0;
+    CURLU *h = curl_url();
+
+    if ((ret = curl_url_set(h, CURLUPART_URL, original_url, 0)) != 0) {
+        goto out;
+    }
+
+    if (new_scheme != NULL) {
+        if ((ret = curl_url_set(h, CURLUPART_SCHEME, new_scheme, CURLU_NON_SUPPORT_SCHEME)) != 0) {
+            goto out;
+        }
+    }
+
+    if (new_fragment != NULL) {
+        if ((ret = curl_url_set(h, CURLUPART_FRAGMENT, new_fragment, 0)) != 0) {
+            goto out;
+        }
+    }
+
+    ret = curl_url_get(h, CURLUPART_URL, new_url, 0);
+
+out:
+    curl_url_cleanup(h);
+    return ret;
+}
+
+void *
+http_file_put(void *userdata)
 {
     HTTPUpload* upload = (HTTPUpload*)userdata;
 
@@ -256,30 +283,40 @@ http_file_put(void* userdata)
             win_mark_received(upload->window, upload->put_url);
             free(msg);
 
-            switch (upload->window->type) {
-            case WIN_CHAT:
-            {
-                ProfChatWin* chatwin = (ProfChatWin*)(upload->window);
-                assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
-                cl_ev_send_msg(chatwin, upload->get_url, upload->get_url);
-                break;
-            }
-            case WIN_PRIVATE:
-            {
-                ProfPrivateWin* privatewin = (ProfPrivateWin*)(upload->window);
-                assert(privatewin->memcheck == PROFPRIVATEWIN_MEMCHECK);
-                cl_ev_send_priv_msg(privatewin, upload->get_url, upload->get_url);
-                break;
-            }
-            case WIN_MUC:
-            {
-                ProfMucWin* mucwin = (ProfMucWin*)(upload->window);
-                assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
-                cl_ev_send_muc_msg(mucwin, upload->get_url, upload->get_url);
-                break;
-            }
-            default:
-                break;
+            char *url = NULL;
+            if (format_alt_url(upload->get_url, upload->alt_scheme, upload->alt_fragment, &url) != 0) {
+                char *msg;
+                asprintf(&msg, "Uploading '%s' failed: Bad URL ('%s')", upload->filename, upload->get_url);
+                cons_show_error(msg);
+                free(msg);
+            } else {
+                switch (upload->window->type) {
+                case WIN_CHAT:
+                {
+                    ProfChatWin *chatwin = (ProfChatWin*)(upload->window);
+                    assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
+                    cl_ev_send_msg(chatwin, url, url);
+                    break;
+                }
+                case WIN_PRIVATE:
+                {
+                    ProfPrivateWin *privatewin = (ProfPrivateWin*)(upload->window);
+                    assert(privatewin->memcheck == PROFPRIVATEWIN_MEMCHECK);
+                    cl_ev_send_priv_msg(privatewin, url, url);
+                    break;
+                }
+                case WIN_MUC:
+                {
+                    ProfMucWin *mucwin = (ProfMucWin*)(upload->window);
+                    assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
+                    cl_ev_send_muc_msg(mucwin, url, url);
+                    break;
+                }
+                default:
+                    break;
+                }
+
+                curl_free(url);
             }
         }
     }
