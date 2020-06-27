@@ -133,7 +133,7 @@ http_file_put(void* userdata)
 {
     HTTPUpload* upload = (HTTPUpload*)userdata;
 
-    FILE* fd = NULL;
+    FILE *fh = NULL;
 
     char* err = NULL;
     char* content_type_header;
@@ -146,7 +146,7 @@ http_file_put(void* userdata)
 
     pthread_mutex_lock(&lock);
     char* msg;
-    if (asprintf(&msg, "Uploading '%s': 0%%", upload->filepath) == -1) {
+    if (asprintf(&msg, "Uploading '%s': 0%%", upload->filename) == -1) {
         msg = strdup(FALLBACK_MSG);
     }
     win_print_http_upload(upload->window, msg, upload->put_url);
@@ -186,18 +186,13 @@ http_file_put(void* userdata)
 
     curl_easy_setopt(curl, CURLOPT_USERAGENT, "profanity");
 
-    if (!(fd = fopen(upload->filepath, "rb"))) {
-        if (asprintf(&err, "failed to open '%s'", upload->filepath) == -1) {
-            err = NULL;
-        }
-        goto end;
-    }
+    fh = upload->filehandle;
 
     if (cert_path) {
         curl_easy_setopt(curl, CURLOPT_CAPATH, cert_path);
     }
 
-    curl_easy_setopt(curl, CURLOPT_READDATA, fd);
+    curl_easy_setopt(curl, CURLOPT_READDATA, fh);
     curl_easy_setopt(curl, CURLOPT_INFILESIZE_LARGE, (curl_off_t)(upload->filesize));
     curl_easy_setopt(curl, CURLOPT_UPLOAD, 1L);
 
@@ -225,12 +220,11 @@ http_file_put(void* userdata)
 #endif
     }
 
-end:
     curl_easy_cleanup(curl);
     curl_global_cleanup();
     curl_slist_free_all(headers);
-    if (fd) {
-        fclose(fd);
+    if (fh) {
+        fclose(fh);
     }
     free(content_type_header);
     free(output.buffer);
@@ -294,7 +288,6 @@ end:
     pthread_mutex_unlock(&lock);
 
     free(upload->filename);
-    free(upload->filepath);
     free(upload->mime_type);
     free(upload->get_url);
     free(upload->put_url);
@@ -304,18 +297,18 @@ end:
 }
 
 char*
-file_mime_type(const char* const filepath)
+file_mime_type(const char* const filename)
 {
     char* out_mime_type;
     char file_header[FILE_HEADER_BYTES];
-    FILE *fd;
-    if (!(fd = fopen(filepath, "rb"))) {
+    FILE *fh;
+    if (!(fh = fopen(filename, "rb"))) {
         return strdup(FALLBACK_MIMETYPE);
     }
-    size_t file_header_size = fread(file_header, 1, FILE_HEADER_BYTES, fd);
-    fclose(fd);
+    size_t file_header_size = fread(file_header, 1, FILE_HEADER_BYTES, fh);
+    fclose(fh);
 
-    char *content_type = g_content_type_guess(filepath, (unsigned char*)file_header, file_header_size, NULL);
+    char *content_type = g_content_type_guess(filename, (unsigned char*)file_header, file_header_size, NULL);
     if (content_type != NULL) {
         char* mime_type = g_content_type_get_mime_type(content_type);
         out_mime_type = strdup(mime_type);
@@ -327,10 +320,10 @@ file_mime_type(const char* const filepath)
     return out_mime_type;
 }
 
-off_t file_size(const char* const filepath)
+off_t file_size(int filedes)
 {
     struct stat st;
-    stat(filepath, &st);
+    fstat(filedes, &st);
     return st.st_size;
 }
 

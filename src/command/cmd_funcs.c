@@ -4811,7 +4811,6 @@ cmd_sendfile(ProfWin* window, const char* const command, gchar** args)
 {
     jabber_conn_status_t conn_status = connection_get_status();
     char *filename = args[0];
-    char *filepath = NULL;
     unsigned char *key = NULL;
 
     // expand ~ to $HOME
@@ -4823,7 +4822,15 @@ cmd_sendfile(ProfWin* window, const char* const command, gchar** args)
         filename = strdup(filename);
     }
 
-    filepath = strdup(filename);
+    if (access(filename, R_OK) != 0) {
+        cons_show_error("Uploading '%s' failed: File not found!", filename);
+        goto out;
+    }
+
+    if (!is_regular_file(filename)) {
+        cons_show_error("Uploading '%s' failed: Not a file!", filename);
+        goto out;
+    }
 
     if (conn_status != JABBER_CONNECTED) {
         cons_show("You are not currently connected.");
@@ -4835,6 +4842,14 @@ cmd_sendfile(ProfWin* window, const char* const command, gchar** args)
         goto out;
     }
 
+    int fd;
+    if ((fd = open(filename, O_RDONLY)) == -1) {
+        cons_show_error("Unable to open file descriptor for '%s'.", filename);
+        goto out;
+    }
+
+    FILE *fh = fdopen(fd, "rb");
+
     switch (window->type) {
         case WIN_MUC:
         case WIN_CHAT:
@@ -4844,37 +4859,14 @@ cmd_sendfile(ProfWin* window, const char* const command, gchar** args)
 
             if (chatwin->is_omemo && !prefs_get_boolean(PREF_OMEMO_SENDFILE)) {
                 int tmpfd;
-                GError *err = NULL;
-                char *tmppath = NULL;
-
-                tmpfd = g_file_open_tmp("profanity.XXXXXX", &tmppath, &err);
-                if (err != NULL) {
+                if ((tmpfd = g_file_open_tmp("profanity.XXXXXX", NULL, NULL)) == -1) {
                     cons_show_error("Unable to create temporary file for encrypted transfer.");
                     win_println(window, THEME_ERROR, "-", "Unable to create temporary file for encrypted transfer.");
+                    fclose(fh);
                     goto out;
                 }
 
-                struct stat tmpst;
-                if (fstat(tmpfd, &tmpst)) {
-                    cons_show_error("Cannot determine file size.");
-                    win_println(window, THEME_ERROR, "-", "Cannot determine file size.");
-                    goto out;
-                }
-
-                FILE *tmpfile = fdopen(tmpfd, "wb");
-                if (tmpfile == NULL) {
-                    cons_show_error("Unable to open temporary file.");
-                    win_println(window, THEME_ERROR, "-", "Unable to open temporary file.");
-                    goto out;
-                }
-
-                FILE *infile = fopen(filepath, "rb");
-                if (infile == NULL) {
-                    cons_show_error("Unable to open file.");
-                    win_println(window, THEME_ERROR, "-", "Unable to open file.");
-                    close(tmpfd);
-                    goto out;
-                }
+                FILE *tmpfh = fdopen(tmpfd, "wb");
 
                 int crypt_res = GPG_ERR_NO_ERROR;
 
@@ -4884,22 +4876,33 @@ cmd_sendfile(ProfWin* window, const char* const command, gchar** args)
                 if (key == NULL) {
                     cons_show_error("Cannot allocate secure memory for encryption.");
                     win_println(window, THEME_ERROR, "-", "Cannot allocate secure memory for encryption.");
+                    fclose(fh);
+                    fclose(tmpfh);
                     goto out;
                 }
 
                 key = gcry_random_bytes_secure(AES256_GCM_KEY_LENGTH, GCRY_VERY_STRONG_RANDOM);
                 gcry_create_nonce(nonce, AES256_GCM_NONCE_LENGTH);
 
-                crypt_res = aes256gcm_encrypt_file(infile, tmpfile, tmpst.st_size, key, nonce);
+                crypt_res = aes256gcm_encrypt_file(fh, tmpfh, file_size(fd), key, nonce);
 
                 if (crypt_res != 0) {
                     cons_show_error("Failed to encrypt file.");
                     win_println(window, THEME_ERROR, "-", "Failed to encrypt file.");
+                    fclose(fh);
+                    fclose(tmpfh);
                     goto out;
                 }
 
-                free(filepath);
-                filepath = tmppath;
+                // Force flush as the upload will read from the same stream.
+                fflush(tmpfh);
+                rewind(tmpfh);
+
+                fclose(fh);
+
+                // Switch original stream with temporary encrypted stream.
+                fd = tmpfd;
+                fh = tmpfh;
 
                 break;
             }
@@ -4934,21 +4937,12 @@ cmd_sendfile(ProfWin* window, const char* const command, gchar** args)
         return TRUE;
     }
 
-    if (access(filename, R_OK) != 0) {
-        cons_show_error("Uploading '%s' failed: File not found!", filename);
-        goto out;
-    }
-
-    if (!is_regular_file(filename)) {
-        cons_show_error("Uploading '%s' failed: Not a file!", filename);
-        goto out;
-    }
-
-    HTTPUpload* upload = malloc(sizeof(HTTPUpload));
+    HTTPUpload *upload = malloc(sizeof(HTTPUpload));
     upload->window = window;
 
-    upload->filename = filename;
-    upload->filesize = file_size(filename);
+    upload->filename = strdup(filename);
+    upload->filehandle = fh;
+    upload->filesize = file_size(fd);
     upload->mime_type = file_mime_type(filename);
 
     iq_http_upload_request(upload);
@@ -4958,8 +4952,6 @@ out:
         gcry_free(key);
     if (filename != NULL)
         free(filename);
-    if (filepath != NULL)
-        free(filepath);
 
     return TRUE;
 }
