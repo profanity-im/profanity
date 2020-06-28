@@ -479,34 +479,3 @@ char *aes256gcm_create_secure_fragment(unsigned char *key, unsigned char *nonce)
 
     return fragment;
 }
-
-void aes256gcm_fragment_free(char *fragment) {
-    gcry_free(fragment);
-}
-
-char *aes256gcm_encrypt_file(FILE *in, FILE *out, off_t file_size, int *gcry_res) {
-    unsigned char *key = gcry_random_bytes_secure(
-        AES256_GCM_KEY_LENGTH,
-        GCRY_VERY_STRONG_RANDOM);
-
-    // Create nonce/IV with random bytes.
-    unsigned char nonce[AES256_GCM_NONCE_LENGTH];
-    gcry_create_nonce(nonce, AES256_GCM_NONCE_LENGTH);
-
-    char *fragment = aes256gcm_create_secure_fragment(key, nonce);
-    *gcry_res = aes256gcm_crypt_file(in, out, file_size, key, nonce, true);
-
-    if (*gcry_res != GPG_ERR_NO_ERROR) {
-        gcry_free(fragment);
-        fragment = NULL;
-    }
-
-    gcry_free(key);
-
-    return fragment;
-}
-
-//int aes256gcm_decrypt_file(FILE *in, FILE *out, off_t file_size,
-//    unsigned char key[], unsigned char nonce[]) {
-//    return aes256gcm_crypt_file(in, out, file_size, key, nonce, false);
-//}

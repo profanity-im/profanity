@@ -73,7 +73,6 @@
 #include "plugins/plugins.h"
 #include "ui/ui.h"
 #include "ui/window_list.h"
-#include "omemo/crypto.h"
 #include "xmpp/xmpp.h"
 #include "xmpp/connection.h"
 #include "xmpp/contact.h"
@@ -4873,8 +4872,8 @@ cmd_sendfile(ProfWin* window, const char* const command, gchar** args)
                 FILE *tmpfh = fdopen(tmpfd, "wb");
 
                 int crypt_res;
-                alt_scheme = AES256_GCM_URL_SCHEME;
-                alt_fragment = aes256gcm_encrypt_file(fh, tmpfh, file_size(fd), &crypt_res);
+                alt_scheme = OMEMO_AESGCM_URL_SCHEME;
+                alt_fragment = omemo_encrypt_file(fh, tmpfh, file_size(fd), &crypt_res);
                 if (crypt_res != 0) {
                     char *msg = "Failed to encrypt file.";
                     cons_show_error(msg);
@@ -4949,7 +4948,7 @@ cmd_sendfile(ProfWin* window, const char* const command, gchar** args)
 out:
 #ifdef HAVE_OMEMO
     if (alt_fragment != NULL)
-        aes256gcm_fragment_free(alt_fragment);
+        omemo_free(alt_fragment);
 #endif
     if (filename != NULL)
         free(filename);
