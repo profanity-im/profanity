@@ -95,12 +95,6 @@
 #ifdef HAVE_OMEMO
 #include "omemo/omemo.h"
 #include "xmpp/omemo.h"
-
-#define AESGCM_URL_SCHEME "aesgcm"
-#define AESGCM_URL_NONCE_LEN 24
-#define AESGCM_URL_KEY_LEN 64
-#define AESGCM_URL_FRAGMENT_LEN                                                \
-  (size_t)(AESGCM_URL_NONCE_LEN + AESGCM_URL_KEY_LEN)
 #endif
 
 #ifdef HAVE_GTK
@@ -4878,7 +4872,7 @@ cmd_sendfile(ProfWin* window, const char* const command, gchar** args)
                 FILE *tmpfh = fdopen(tmpfd, "wb");
 
                 int crypt_res = GPG_ERR_NO_ERROR;
-                alt_scheme = AESGCM_URL_SCHEME;
+                alt_scheme = AES256_GCM_URL_SCHEME;
                 alt_fragment = aes256gcm_encrypt_file(fh, tmpfh, file_size(fd), &crypt_res);
                 if (crypt_res != 0) {
                     char *msg = "Failed to encrypt file.";
