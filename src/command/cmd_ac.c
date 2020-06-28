@@ -193,7 +193,6 @@ static Autocomplete otr_sendfile_ac;
 static Autocomplete omemo_ac;
 static Autocomplete omemo_log_ac;
 static Autocomplete omemo_policy_ac;
-static Autocomplete omemo_sendfile_ac;
 #endif
 static Autocomplete connect_property_ac;
 static Autocomplete tls_property_ac;
@@ -683,7 +682,6 @@ cmd_ac_init(void)
     autocomplete_add(omemo_ac, "clear_device_list");
     autocomplete_add(omemo_ac, "policy");
     autocomplete_add(omemo_ac, "char");
-    autocomplete_add(omemo_ac, "sendfile");
 
     omemo_log_ac = autocomplete_new();
     autocomplete_add(omemo_log_ac, "on");
@@ -694,10 +692,6 @@ cmd_ac_init(void)
     autocomplete_add(omemo_policy_ac, "manual");
     autocomplete_add(omemo_policy_ac, "automatic");
     autocomplete_add(omemo_policy_ac, "always");
-
-    omemo_sendfile_ac = autocomplete_new();
-    autocomplete_add(omemo_sendfile_ac, "on");
-    autocomplete_add(omemo_sendfile_ac, "off");
 #endif
 
     connect_property_ac = autocomplete_new();
@@ -1292,7 +1286,6 @@ cmd_ac_reset(ProfWin* window)
     autocomplete_reset(omemo_ac);
     autocomplete_reset(omemo_log_ac);
     autocomplete_reset(omemo_policy_ac);
-    autocomplete_reset(omemo_sendfile_ac);
 #endif
     autocomplete_reset(connect_property_ac);
     autocomplete_reset(tls_property_ac);
@@ -1450,7 +1443,6 @@ cmd_ac_uninit(void)
     autocomplete_free(omemo_ac);
     autocomplete_free(omemo_log_ac);
     autocomplete_free(omemo_policy_ac);
-    autocomplete_free(omemo_sendfile_ac);
 #endif
     autocomplete_free(connect_property_ac);
     autocomplete_free(tls_property_ac);
@@ -2506,11 +2498,6 @@ _omemo_autocomplete(ProfWin* window, const char* const input, gboolean previous)
     }
 
     found = autocomplete_param_with_ac(input, "/omemo policy", omemo_policy_ac, TRUE, previous);
-    if (found) {
-        return found;
-    }
-
-    found = autocomplete_param_with_ac(input, "/omemo sendfile", omemo_sendfile_ac, TRUE, previous);
     if (found) {
         return found;
     }

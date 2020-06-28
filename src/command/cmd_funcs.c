@@ -4858,7 +4858,7 @@ cmd_sendfile(ProfWin* window, const char* const command, gchar** args)
             assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
 
 #ifdef HAVE_OMEMO
-            if (chatwin->is_omemo && !prefs_get_boolean(PREF_OMEMO_SENDFILE)) {
+            if (chatwin->is_omemo) {
 
                 // Create temporary file for writing ciphertext.
                 int tmpfd;
@@ -8832,20 +8832,7 @@ cmd_omemo_policy(ProfWin* window, const char* const command, gchar** args)
 }
 
 gboolean
-cmd_omemo_sendfile(ProfWin* window, const char* const command, gchar** args)
-{
-#ifdef HAVE_OMEMO
-    _cmd_set_boolean_preference(args[1], command, "Sending unencrypted files in an OMEMO session via /sendfile", PREF_OMEMO_SENDFILE);
-
-    return TRUE;
-#else
-    cons_show("This version of Profanity has not been built with OMEMO support enabled");
-    return TRUE;
-#endif
-}
-
-gboolean
-cmd_save(ProfWin* window, const char* const command, gchar** args)
+cmd_save(ProfWin *window, const char *const command, gchar **args)
 {
     log_info("Saving preferences to configuration file");
     cons_show("Saving preferences.");
