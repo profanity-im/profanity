@@ -4812,27 +4812,13 @@ cmd_disco(ProfWin* window, const char* const command, gchar** args)
     return TRUE;
 }
 
-char *create_aesgcm_fragment(unsigned char *key, int key_size,
-                             unsigned char *nonce, int nonce_size) {
-    char fragment[(nonce_size+key_size)*2+1];
-
-    for (int i = 0; i < nonce_size; i++) {
-        sprintf(&(fragment[i*2]), "%02x", nonce[i]);
-    }
-
-    for (int i = 0; i < key_size; i++) {
-        sprintf(&(fragment[(i+nonce_size)*2]), "%02x", key[i]);
-    }
-
-    return strdup(fragment);
-}
-
 gboolean
 cmd_sendfile(ProfWin* window, const char* const command, gchar** args)
 {
     jabber_conn_status_t conn_status = connection_get_status();
     char *filename = args[0];
-    unsigned char *key = NULL;
+    char *alt_scheme = NULL;
+    char *alt_fragment = NULL;
 
     // expand ~ to $HOME
     if (filename[0] == '~' && filename[1] == '/') {
@@ -4870,8 +4856,6 @@ cmd_sendfile(ProfWin* window, const char* const command, gchar** args)
     }
 
     FILE *fh = fdopen(fd, "rb");
-    char *alt_scheme = NULL;
-    char *alt_fragment = NULL;
 
     switch (window->type) {
         case WIN_MUC:
@@ -4881,37 +4865,25 @@ cmd_sendfile(ProfWin* window, const char* const command, gchar** args)
             assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
 
             if (chatwin->is_omemo && !prefs_get_boolean(PREF_OMEMO_SENDFILE)) {
+
+                // Create temporary file for writing ciphertext.
                 int tmpfd;
                 if ((tmpfd = g_file_open_tmp("profanity.XXXXXX", NULL, NULL)) == -1) {
-                    cons_show_error("Unable to create temporary file for encrypted transfer.");
-                    win_println(window, THEME_ERROR, "-", "Unable to create temporary file for encrypted transfer.");
+                    char *msg = "Unable to create temporary file for encrypted transfer.";
+                    cons_show_error(msg);
+                    win_println(window, THEME_ERROR, "-", msg);
                     fclose(fh);
                     goto out;
                 }
-
                 FILE *tmpfh = fdopen(tmpfd, "wb");
 
                 int crypt_res = GPG_ERR_NO_ERROR;
-
-                // TODO(wstrm): Move these to omemo/crypto.c
-                unsigned char nonce[AES256_GCM_NONCE_LENGTH];
-                key = gcry_malloc_secure(AES256_GCM_KEY_LENGTH);
-                if (key == NULL) {
-                    cons_show_error("Cannot allocate secure memory for encryption.");
-                    win_println(window, THEME_ERROR, "-", "Cannot allocate secure memory for encryption.");
-                    fclose(fh);
-                    fclose(tmpfh);
-                    goto out;
-                }
-
-                key = gcry_random_bytes_secure(AES256_GCM_KEY_LENGTH, GCRY_VERY_STRONG_RANDOM);
-                gcry_create_nonce(nonce, AES256_GCM_NONCE_LENGTH);
-
-                crypt_res = aes256gcm_encrypt_file(fh, tmpfh, file_size(fd), key, nonce);
-
+                alt_scheme = AESGCM_URL_SCHEME;
+                alt_fragment = aes256gcm_encrypt_file(fh, tmpfh, file_size(fd), &crypt_res);
                 if (crypt_res != 0) {
-                    cons_show_error("Failed to encrypt file.");
-                    win_println(window, THEME_ERROR, "-", "Failed to encrypt file.");
+                    char *msg = "Failed to encrypt file.";
+                    cons_show_error(msg);
+                    win_println(window, THEME_ERROR, "-", msg);
                     fclose(fh);
                     fclose(tmpfh);
                     goto out;
@@ -4927,11 +4899,6 @@ cmd_sendfile(ProfWin* window, const char* const command, gchar** args)
                 fd = tmpfd;
                 fh = tmpfh;
 
-                alt_scheme = AESGCM_URL_SCHEME;
-                alt_fragment = create_aesgcm_fragment(
-                        key, AES256_GCM_KEY_LENGTH,
-                        nonce, AES256_GCM_NONCE_LENGTH);
-
                 break;
             }
 
@@ -4943,11 +4910,7 @@ cmd_sendfile(ProfWin* window, const char* const command, gchar** args)
             }
             break;
         }
-        case WIN_PRIVATE:
-        {
-            // We don't support encryption in private MUC windows.
-            break;
-        }
+        case WIN_PRIVATE: // We don't support encryption in private MUC windows.
         default:
 			cons_show_error("Unsupported window for file transmission.");
             goto out;
@@ -4972,14 +4935,14 @@ cmd_sendfile(ProfWin* window, const char* const command, gchar** args)
     upload->filehandle = fh;
     upload->filesize = file_size(fd);
     upload->mime_type = file_mime_type(filename);
-    upload->alt_scheme = alt_scheme;
-    upload->alt_fragment = alt_fragment;
+    upload->alt_scheme = strdup(alt_scheme);
+    upload->alt_fragment = strdup(alt_fragment);
 
     iq_http_upload_request(upload);
 
 out:
-    if (key != NULL)
-        gcry_free(key);
+    if (alt_fragment != NULL)
+        aes256gcm_fragment_free(alt_fragment);
     if (filename != NULL)
         free(filename);
 

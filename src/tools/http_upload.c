@@ -328,6 +328,8 @@ http_file_put(void *userdata)
     free(upload->mime_type);
     free(upload->get_url);
     free(upload->put_url);
+    free(upload->alt_scheme);
+    free(upload->alt_fragment);
     free(upload);
 
     return NULL;

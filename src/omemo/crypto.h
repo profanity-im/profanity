@@ -185,8 +185,9 @@ int aes128gcm_decrypt(unsigned char *plaintext,
     size_t ciphertext_len, const unsigned char *const iv, size_t iv_len,
     const unsigned char *const key, const unsigned char *const tag);
 
-int aes256gcm_encrypt_file(FILE *in, FILE *out, off_t file_size,
-    unsigned char key[], unsigned char nonce[]);
+char *aes256gcm_encrypt_file(FILE *in, FILE *out, off_t file_size, int *gcry_res);
 
-int aes256gcm_decrypt_file(FILE *in, FILE *out, off_t file_size,
-    unsigned char key[], unsigned char nonce[]);
+//int aes256gcm_decrypt_file(FILE *in, FILE *out, off_t file_size,
+//    unsigned char key[], unsigned char nonce[]);
+
+void aes256gcm_fragment_free(char *fragment);
