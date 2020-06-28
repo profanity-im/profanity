@@ -4858,6 +4858,7 @@ cmd_sendfile(ProfWin* window, const char* const command, gchar** args)
             ProfChatWin *chatwin = (ProfChatWin*)window;
             assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
 
+#ifdef HAVE_OMEMO
             if (chatwin->is_omemo && !prefs_get_boolean(PREF_OMEMO_SENDFILE)) {
 
                 // Create temporary file for writing ciphertext.
@@ -4871,7 +4872,7 @@ cmd_sendfile(ProfWin* window, const char* const command, gchar** args)
                 }
                 FILE *tmpfh = fdopen(tmpfd, "wb");
 
-                int crypt_res = GPG_ERR_NO_ERROR;
+                int crypt_res;
                 alt_scheme = AES256_GCM_URL_SCHEME;
                 alt_fragment = aes256gcm_encrypt_file(fh, tmpfh, file_size(fd), &crypt_res);
                 if (crypt_res != 0) {
@@ -4895,10 +4896,11 @@ cmd_sendfile(ProfWin* window, const char* const command, gchar** args)
 
                 break;
             }
+#endif
 
             if ((chatwin->pgp_send && !prefs_get_boolean(PREF_PGP_SENDFILE))
                     || (chatwin->is_otr && !prefs_get_boolean(PREF_OTR_SENDFILE))) {
-                cons_show_error("Uploading unencrypted files disabled. See /omemo sendfile, /otr sendfile, /pgp sendfile.");
+                cons_show_error("Uploading unencrypted files disabled. See /otr sendfile or /pgp sendfile.");
                 win_println(window, THEME_ERROR, "-", "Sending encrypted files via http_upload is not possible yet.");
                 goto out;
             }
@@ -4929,14 +4931,26 @@ cmd_sendfile(ProfWin* window, const char* const command, gchar** args)
     upload->filehandle = fh;
     upload->filesize = file_size(fd);
     upload->mime_type = file_mime_type(filename);
-    upload->alt_scheme = strdup(alt_scheme);
-    upload->alt_fragment = strdup(alt_fragment);
+
+    if (alt_scheme != NULL) {
+        upload->alt_scheme = strdup(alt_scheme);
+    } else {
+        upload->alt_scheme = NULL;
+    }
+
+    if (alt_fragment != NULL) {
+        upload->alt_fragment = strdup(alt_fragment);
+    } else {
+        upload->alt_fragment = NULL;
+    }
 
     iq_http_upload_request(upload);
 
 out:
+#ifdef HAVE_OMEMO
     if (alt_fragment != NULL)
         aes256gcm_fragment_free(alt_fragment);
+#endif
     if (filename != NULL)
         free(filename);
 

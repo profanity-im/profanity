@@ -286,7 +286,9 @@ http_file_put(void *userdata)
             char *url = NULL;
             if (format_alt_url(upload->get_url, upload->alt_scheme, upload->alt_fragment, &url) != 0) {
                 char *msg;
-                asprintf(&msg, "Uploading '%s' failed: Bad URL ('%s')", upload->filename, upload->get_url);
+                if (asprintf(&msg, "Uploading '%s' failed: Bad URL ('%s')", upload->filename, upload->get_url)== -1) {
+                    msg = strdup(FALLBACK_MSG);
+                }
                 cons_show_error(msg);
                 free(msg);
             } else {
