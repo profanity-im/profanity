@@ -4862,7 +4862,8 @@ cmd_sendfile(ProfWin* window, const char* const command, gchar** args)
 
                 // Create temporary file for writing ciphertext.
                 int tmpfd;
-                if ((tmpfd = g_file_open_tmp("profanity.XXXXXX", NULL, NULL)) == -1) {
+                char *tmpname = NULL;
+                if ((tmpfd = g_file_open_tmp("profanity.XXXXXX", &tmpname, NULL)) == -1) {
                     char *msg = "Unable to create temporary file for encrypted transfer.";
                     cons_show_error(msg);
                     win_println(window, THEME_ERROR, "-", msg);
@@ -4870,6 +4871,11 @@ cmd_sendfile(ProfWin* window, const char* const command, gchar** args)
                     goto out;
                 }
                 FILE *tmpfh = fdopen(tmpfd, "wb");
+
+                // The temporary ciphertext file should be removed upon closure
+                // later.
+                remove(tmpname);
+                free(tmpname);
 
                 int crypt_res;
                 alt_scheme = OMEMO_AESGCM_URL_SCHEME;
@@ -4889,7 +4895,7 @@ cmd_sendfile(ProfWin* window, const char* const command, gchar** args)
 
                 fclose(fh); // Also closes descriptor.
 
-                // Switch original stream with temporary encrypted stream.
+                // Switch original stream with temporary ciphertext stream.
                 fd = tmpfd;
                 fh = tmpfh;
 
