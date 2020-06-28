@@ -4872,8 +4872,8 @@ cmd_sendfile(ProfWin* window, const char* const command, gchar** args)
                 }
                 FILE *tmpfh = fdopen(tmpfd, "wb");
 
-                // The temporary ciphertext file should be removed upon closure
-                // later.
+                // The temporary ciphertext file should be removed after it has
+                // been closed.
                 remove(tmpname);
                 free(tmpname);
 
