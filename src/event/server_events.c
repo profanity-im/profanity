@@ -457,49 +457,10 @@ sv_ev_outgoing_carbon(ProfMessage *message)
         log_database_add_incoming(message);
     }
 
-#ifdef HAVE_LIBGPGME
-#ifndef HAVE_OMEMO
-    if (message->encrypted) {
-        message->plain = p_gpg_decrypt(message->encrypted);
-        if (message->plain) {
-            message->enc = PROF_MSG_ENC_PGP;
-            chatwin_outgoing_carbon(chatwin, message);
-        } else {
-            if (!message->body) {
-                log_error("Couldn't decrypt GPG message and body was empty");
-                return;
-            }
-            message->enc = PROF_MSG_ENC_NONE;
-            message->plain = strdup(message->body);
-            chatwin_outgoing_carbon(chatwin, message);
-        }
-    } else {
-        message->enc = PROF_MSG_ENC_NONE;
-        message->plain = strdup(message->body);
-        chatwin_outgoing_carbon(chatwin, message);
-    }
-    return;
-#endif
-#endif
-
-#ifndef HAVE_LIBGPGME
-#ifdef HAVE_OMEMO
-    if (message->enc == PROF_MSG_ENC_OMEMO) {
-        chatwin_outgoing_carbon(chatwin, message);
-    } else {
-        message->enc = PROF_MSG_ENC_NONE;
-        message->plain = strdup(message->body);
-        chatwin_outgoing_carbon(chatwin, message);
-    }
-    return;
-#endif
-#endif
-
-#ifdef HAVE_LIBGPGME
-#ifdef HAVE_OMEMO
     if (message->enc == PROF_MSG_ENC_OMEMO) {
         chatwin_outgoing_carbon(chatwin, message);
     } else if (message->encrypted) {
+#ifdef HAVE_LIBGPGME
         message->plain = p_gpg_decrypt(message->encrypted);
         if (message->plain) {
             message->enc = PROF_MSG_ENC_PGP;
@@ -513,30 +474,20 @@ sv_ev_outgoing_carbon(ProfMessage *message)
             message->plain = strdup(message->body);
             chatwin_outgoing_carbon(chatwin, message);
         }
+#endif
     } else {
         message->enc = PROF_MSG_ENC_NONE;
         message->plain = strdup(message->body);
         chatwin_outgoing_carbon(chatwin, message);
     }
     return;
-#endif
-#endif
 
-#ifndef HAVE_LIBGPGME
-#ifndef HAVE_OMEMO
-    if (message->body) {
-        message->enc = PROF_MSG_ENC_NONE;
-        message->plain = strdup(message->body);
-        chatwin_outgoing_carbon(chatwin, message);
-    }
-#endif
-#endif
 }
 
-#ifdef HAVE_LIBGPGME
 static void
 _sv_ev_incoming_pgp(ProfChatWin *chatwin, gboolean new_win, ProfMessage *message, gboolean logit)
 {
+#ifdef HAVE_LIBGPGME
     message->plain = p_gpg_decrypt(message->encrypted);
     if (message->plain) {
         message->enc = PROF_MSG_ENC_PGP;
@@ -562,13 +513,13 @@ _sv_ev_incoming_pgp(ProfChatWin *chatwin, gboolean new_win, ProfMessage *message
         chat_log_msg_in(message);
         chatwin->pgp_recv = FALSE;
     }
-}
 #endif
+}
 
-#ifdef HAVE_LIBOTR
 static void
 _sv_ev_incoming_otr(ProfChatWin *chatwin, gboolean new_win, ProfMessage *message)
 {
+#ifdef HAVE_LIBOTR
     gboolean decrypted = FALSE;
     message->plain = otr_on_message_recv(message->from_jid->barejid, message->from_jid->resourcepart, message->body, &decrypted);
     if (message->plain) {
@@ -588,13 +539,13 @@ _sv_ev_incoming_otr(ProfChatWin *chatwin, gboolean new_win, ProfMessage *message
         message->plain = NULL;
         chatwin->pgp_recv = FALSE;
     }
-}
 #endif
+}
 
-#ifdef HAVE_OMEMO
 static void
 _sv_ev_incoming_omemo(ProfChatWin *chatwin, gboolean new_win, ProfMessage *message, gboolean logit)
 {
+#ifdef HAVE_OMEMO
     _clean_incoming_message(message);
     chatwin_incoming_msg(chatwin, message, new_win);
     log_database_add_incoming(message);
@@ -602,8 +553,8 @@ _sv_ev_incoming_omemo(ProfChatWin *chatwin, gboolean new_win, ProfMessage *messa
         chat_log_omemo_msg_in(message);
     }
     chatwin->pgp_recv = FALSE;
-}
 #endif
+}
 
 static void
 _sv_ev_incoming_plain(ProfChatWin *chatwin, gboolean new_win, ProfMessage *message, gboolean logit)
@@ -653,55 +604,6 @@ sv_ev_incoming_message(ProfMessage *message)
 #endif
     }
 
-// OTR suported, PGP supported, OMEMO unsupported
-#ifdef HAVE_LIBOTR
-#ifdef HAVE_LIBGPGME
-#ifndef HAVE_OMEMO
-    if (message->encrypted) {
-        if (chatwin->is_otr) {
-            win_println((ProfWin*)chatwin, THEME_DEFAULT, "-", "PGP encrypted message received whilst in OTR session.");
-        } else {
-            _sv_ev_incoming_pgp(chatwin, new_win, message, TRUE);
-        }
-    } else {
-        _sv_ev_incoming_otr(chatwin, new_win, message);
-    }
-    rosterwin_roster();
-    return;
-#endif
-#endif
-#endif
-
-// OTR supported, PGP unsupported, OMEMO unsupported
-#ifdef HAVE_LIBOTR
-#ifndef HAVE_LIBGPGME
-#ifndef HAVE_OMEMO
-    _sv_ev_incoming_otr(chatwin, new_win, message);
-    rosterwin_roster();
-    return;
-#endif
-#endif
-#endif
-
-// OTR unsupported, PGP supported, OMEMO unsupported
-#ifndef HAVE_LIBOTR
-#ifdef HAVE_LIBGPGME
-#ifndef HAVE_OMEMO
-    if (message->encrypted) {
-        _sv_ev_incoming_pgp(chatwin, new_win, message, TRUE);
-    } else {
-        _sv_ev_incoming_plain(chatwin, new_win, message, TRUE);
-    }
-    rosterwin_roster();
-    return;
-#endif
-#endif
-#endif
-
-// OTR suported, PGP supported, OMEMO supported
-#ifdef HAVE_LIBOTR
-#ifdef HAVE_LIBGPGME
-#ifdef HAVE_OMEMO
     if (message->encrypted) {
         if (chatwin->is_otr) {
             win_println((ProfWin*)chatwin, THEME_DEFAULT, "-", "PGP encrypted message received whilst in OTR session.");
@@ -715,67 +617,7 @@ sv_ev_incoming_message(ProfMessage *message)
     }
     rosterwin_roster();
     return;
-#endif
-#endif
-#endif
 
-// OTR supported, PGP unsupported, OMEMO supported
-#ifdef HAVE_LIBOTR
-#ifndef HAVE_LIBGPGME
-#ifdef HAVE_OMEMO
-    if (message->enc == PROF_MSG_ENC_OMEMO) {
-        _sv_ev_incoming_omemo(chatwin, new_win, message, TRUE);
-    } else {
-        _sv_ev_incoming_otr(chatwin, new_win, message);
-    }
-    rosterwin_roster();
-    return;
-#endif
-#endif
-#endif
-
-// OTR unsupported, PGP supported, OMEMO supported
-#ifndef HAVE_LIBOTR
-#ifdef HAVE_LIBGPGME
-#ifdef HAVE_OMEMO
-    if (message->encrypted) {
-        _sv_ev_incoming_pgp(chatwin, new_win, message, TRUE);
-    } else if (message->enc == PROF_MSG_ENC_OMEMO) {
-        _sv_ev_incoming_omemo(chatwin, new_win, message, TRUE);
-    } else {
-        _sv_ev_incoming_plain(chatwin, new_win, message, TRUE);
-    }
-    rosterwin_roster();
-    return;
-#endif
-#endif
-#endif
-
-// OTR unsupported, PGP unsupported, OMEMO supported
-#ifndef HAVE_LIBOTR
-#ifndef HAVE_LIBGPGME
-#ifdef HAVE_OMEMO
-    if (message->enc == PROF_MSG_ENC_OMEMO) {
-        _sv_ev_incoming_omemo(chatwin, new_win, message, TRUE);
-    } else {
-        _sv_ev_incoming_plain(chatwin, new_win, message, TRUE);
-    }
-    rosterwin_roster();
-    return;
-#endif
-#endif
-#endif
-
-// OTR unsupported, PGP unsupported, OMEMO unsupported
-#ifndef HAVE_LIBOTR
-#ifndef HAVE_LIBGPGME
-#ifndef HAVE_OMEMO
-    _sv_ev_incoming_plain(chatwin, new_win, message, TRUE);
-    rosterwin_roster();
-    return;
-#endif
-#endif
-#endif
 }
 
 void
@@ -796,20 +638,6 @@ sv_ev_incoming_carbon(ProfMessage *message)
 #endif
     }
 
-#ifdef HAVE_LIBGPGME
-#ifndef HAVE_OMEMO
-    if (message->encrypted) {
-        _sv_ev_incoming_pgp(chatwin, new_win, message, FALSE);
-    } else {
-        _sv_ev_incoming_plain(chatwin, new_win, message, FALSE);
-    }
-    rosterwin_roster();
-    return;
-#endif
-#endif
-
-#ifdef HAVE_LIBGPGME
-#ifdef HAVE_OMEMO
     if (message->encrypted) {
         _sv_ev_incoming_pgp(chatwin, new_win, message, FALSE);
     } else if (message->enc == PROF_MSG_ENC_OMEMO) {
@@ -819,28 +647,7 @@ sv_ev_incoming_carbon(ProfMessage *message)
     }
     rosterwin_roster();
     return;
-#endif
-#endif
 
-#ifndef HAVE_LIBGPGME
-#ifdef HAVE_OMEMO
-    if (message->enc == PROF_MSG_ENC_OMEMO) {
-        _sv_ev_incoming_omemo(chatwin, new_win, message, FALSE);
-    } else {
-        _sv_ev_incoming_plain(chatwin, new_win, message, FALSE);
-    }
-    rosterwin_roster();
-    return;
-#endif
-#endif
-
-#ifndef HAVE_LIBGPGME
-#ifndef HAVE_OMEMO
-    _sv_ev_incoming_plain(chatwin, new_win, message, FALSE);
-    rosterwin_roster();
-    return;
-#endif
-#endif
 }
 
 void
