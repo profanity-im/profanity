@@ -2187,12 +2187,13 @@ cmd_msg(ProfWin *window, const char *const command, gchar **args)
         }
         ui_focus_win((ProfWin*)chatwin);
 
+#ifdef HAVE_OMEMO
         gboolean is_otr_secure = FALSE;
+
 #ifdef HAVE_LIBOTR
         is_otr_secure = otr_is_secure(barejid);
 #endif // HAVE_LIBOTR
 
-#ifdef HAVE_OMEMO
         if (omemo_automatic_start(barejid) && is_otr_secure) {
             win_println(window, THEME_DEFAULT, "!", "Chat could be either OMEMO or OTR encrypted. Use '/omemo start %s' or '/otr start %s' to start a session.", usr, usr);
             return TRUE;
