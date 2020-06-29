@@ -122,6 +122,11 @@ char* message_send_chat_pgp(const char * const barejid, const char * const msg, 
     return NULL;
 }
 
+char* message_send_chat_ox(const char * const barejid, const char * const msg, gboolean request_receipt, const char *const replace_id)
+{
+    return NULL;
+}
+
 char* message_send_private(const char *const fulljid, const char *const msg, const char *const oob_url)
 {
     return NULL;
