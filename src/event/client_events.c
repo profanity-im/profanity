@@ -139,6 +139,14 @@ cl_ev_send_msg_correct(ProfChatWin *chatwin, const char *const msg, const char *
         chatwin_outgoing_msg(chatwin, plugin_msg, id, PROF_MSG_ENC_OMEMO, request_receipt, replace_id);
         free(id);
 #endif
+    } else if (chatwin->pgp_send) {
+#ifdef HAVE_LIBGPGME
+        char *id = message_send_chat_pgp(chatwin->barejid, plugin_msg, request_receipt, replace_id);
+        chat_log_pgp_msg_out(chatwin->barejid, plugin_msg, NULL);
+        log_database_add_outgoing_chat(id, chatwin->barejid, plugin_msg, replace_id, PROF_MSG_ENC_PGP);
+        chatwin_outgoing_msg(chatwin, plugin_msg, id, PROF_MSG_ENC_PGP, request_receipt, replace_id);
+        free(id);
+#endif
     } else if (chatwin->is_ox) {
 #ifdef HAVE_LIBGPGME
         // XEP-0373: OpenPGP for XMPP
@@ -146,14 +154,6 @@ cl_ev_send_msg_correct(ProfChatWin *chatwin, const char *const msg, const char *
         chat_log_pgp_msg_out(chatwin->barejid, plugin_msg, NULL);
         log_database_add_outgoing_chat(id, chatwin->barejid, plugin_msg, replace_id, PROF_MSG_ENC_OX);
         chatwin_outgoing_msg(chatwin, plugin_msg, id, PROF_MSG_ENC_OX, request_receipt, replace_id);
-        free(id);
-#endif
-    } else if (chatwin->pgp_send) {
-#ifdef HAVE_LIBGPGME
-        char *id = message_send_chat_pgp(chatwin->barejid, plugin_msg, request_receipt, replace_id);
-        chat_log_pgp_msg_out(chatwin->barejid, plugin_msg, NULL);
-        log_database_add_outgoing_chat(id, chatwin->barejid, plugin_msg, replace_id, PROF_MSG_ENC_PGP);
-        chatwin_outgoing_msg(chatwin, plugin_msg, id, PROF_MSG_ENC_PGP, request_receipt, replace_id);
         free(id);
 #endif
     } else {
@@ -173,6 +173,7 @@ cl_ev_send_msg_correct(ProfChatWin *chatwin, const char *const msg, const char *
     plugins_post_chat_message_send(chatwin->barejid, plugin_msg);
     free(plugin_msg);
     return;
+
 }
 
 void

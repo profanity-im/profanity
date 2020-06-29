@@ -529,8 +529,9 @@ _sv_ev_incoming_ox(ProfChatWin *chatwin, gboolean new_win, ProfMessage *message,
         chatwin->pgp_recv = TRUE;
         //p_gpg_free_decrypted(message->plain);
         message->plain = NULL;
-}
 #endif
+}
+
 
 static void
 _sv_ev_incoming_otr(ProfChatWin *chatwin, gboolean new_win, ProfMessage *message)
