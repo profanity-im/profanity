@@ -531,7 +531,6 @@ _sv_ev_incoming_ox(ProfChatWin *chatwin, gboolean new_win, ProfMessage *message,
         message->plain = NULL;
 }
 #endif
-}
 
 static void
 _sv_ev_incoming_otr(ProfChatWin *chatwin, gboolean new_win, ProfMessage *message)
@@ -621,7 +620,9 @@ sv_ev_incoming_message(ProfMessage *message)
 #endif
     }
 
-    if (message->encrypted) {
+    if( message->enc == PROF_MSG_ENC_OX) {
+	 _sv_ev_incoming_ox(chatwin, new_win, message, TRUE);
+    } else if (message->encrypted) {
         if (chatwin->is_otr) {
             win_println((ProfWin*)chatwin, THEME_DEFAULT, "-", "PGP encrypted message received whilst in OTR session.");
         } else {
@@ -655,7 +656,9 @@ sv_ev_incoming_carbon(ProfMessage *message)
 #endif
     }
 
-    if (message->encrypted) {
+    if (message->enc == PROF_MSG_ENC_OX) {
+        _sv_ev_incoming_ox(chatwin, new_win, message, FALSE);
+    } else if (message->encrypted) {
         _sv_ev_incoming_pgp(chatwin, new_win, message, FALSE);
     } else if (message->enc == PROF_MSG_ENC_OMEMO) {
         _sv_ev_incoming_omemo(chatwin, new_win, message, FALSE);
