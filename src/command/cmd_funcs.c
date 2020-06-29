@@ -7355,6 +7355,11 @@ cmd_pgp(ProfWin *window, const char *const command, gchar **args)
             return TRUE;
         }
 
+        if (chatwin->is_omemo) {
+            win_println(window, THEME_DEFAULT, "!", "You must disable OMEMO before starting an PGP encrypted session.");
+            return TRUE;
+        }
+
         ProfAccount *account = accounts_get_account(session_get_account_name());
         char *err_str = NULL;
         if (!p_gpg_valid_key(account->pgp_keyid, &err_str)) {
