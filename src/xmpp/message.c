@@ -76,7 +76,6 @@ typedef struct p_message_handle_t {
 } ProfMessageHandler;
 
 static int _message_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza, void *const userdata);
-
 static void _handle_error(xmpp_stanza_t *const stanza);
 static void _handle_groupchat(xmpp_stanza_t *const stanza);
 static void _handle_muc_user(xmpp_stanza_t *const stanza);
@@ -86,11 +85,12 @@ static void _handle_captcha(xmpp_stanza_t *const stanza);
 static void _handle_receipt_received(xmpp_stanza_t *const stanza);
 static void _handle_chat(xmpp_stanza_t *const stanza, gboolean is_mam);
 static void _handle_ox_chat(xmpp_stanza_t *const stanza, ProfMessage *message, gboolean is_mam);
+static void _send_message_stanza(xmpp_stanza_t *const stanza);
 static gboolean _handle_mam(xmpp_stanza_t *const stanza);
 
-static void _send_message_stanza(xmpp_stanza_t *const stanza);
-
+#ifdef HAVE_LIBGPGME
 static xmpp_stanza_t* _openpgp_signcrypt(xmpp_ctx_t* ctx, const char* const to, const char* const text);
+#endif // HAVE_LIBGPGME
 
 static GHashTable *pubsub_event_handlers;
 
@@ -381,10 +381,10 @@ message_send_chat_pgp(const char *const barejid, const char *const msg, gboolean
 }
 
 // XEP-0373: OpenPGP for XMPP
-
 char*
 message_send_chat_ox(const char *const barejid, const char *const msg, gboolean request_receipt, const char *const replace_id)
 {
+#ifdef HAVE_LIBGPGME
     xmpp_ctx_t * const ctx = connection_get_ctx();
 
     char *state = chat_session_get_state(barejid);
@@ -440,8 +440,9 @@ message_send_chat_ox(const char *const barejid, const char *const msg, gboolean 
     _send_message_stanza(message);
     xmpp_stanza_release(message);
 
-
     return id;
+#endif // HAVE_LIBGPGME
+    return NULL;
 }
 
 char*
@@ -1377,6 +1378,7 @@ _handle_chat(xmpp_stanza_t *const stanza, gboolean is_mam)
  *
  */
 static void _handle_ox_chat(xmpp_stanza_t *const stanza, ProfMessage *message, gboolean is_mam) {
+#ifdef HAVE_LIBGPGME
 	xmpp_stanza_t *ox = stanza_get_child_by_name_and_ns(stanza, "openpgp", STANZA_NS_OPENPGP_0);
 	message->plain = p_ox_gpg_decrypt(xmpp_stanza_get_text(ox));
 
@@ -1396,7 +1398,7 @@ static void _handle_ox_chat(xmpp_stanza_t *const stanza, ProfMessage *message, g
         message->plain = xmpp_stanza_get_text(stanza);
     }
 	message->encrypted = xmpp_stanza_get_text(ox);
-
+#endif // HAVE_LIBGPGME
 }
 
 static gboolean
@@ -1482,7 +1484,7 @@ message_is_sent_by_us(const ProfMessage *const message, bool checkOID) {
     return  ret;
 }
 
-
+#ifdef HAVE_LIBGPGME
 xmpp_stanza_t* _openpgp_signcrypt(xmpp_ctx_t* ctx, const char* const to, const char* const text) {
 
   time_t now = time(NULL);
@@ -1541,4 +1543,5 @@ xmpp_stanza_t* _openpgp_signcrypt(xmpp_ctx_t* ctx, const char* const to, const c
 
     return signcrypt;
 }
+#endif // HAVE_LIBGPGME
 
