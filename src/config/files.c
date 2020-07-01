@@ -154,7 +154,7 @@ files_get_config_path(char *config_base)
 }
 
 gchar*
-files_get_data_path(char *data_base)
+files_get_data_path(const char *const data_base)
 {
     gchar *xdg_data = _files_get_xdg_data_home();
     GString *file_str = g_string_new(xdg_data);
@@ -163,6 +163,24 @@ files_get_data_path(char *data_base)
     gchar *result = g_strdup(file_str->str);
     g_free(xdg_data);
     g_string_free(file_str, TRUE);
+
+    return result;
+}
+
+gchar*
+files_get_account_data_path(const char *const specific_dir, const char *const jid)
+{
+    gchar *data_dir = files_get_data_path(specific_dir);
+    GString *result_dir = g_string_new(data_dir);
+    g_free(data_dir);
+
+    gchar *account_dir = str_replace(jid, "@", "_at_");
+    g_string_append(result_dir, "/");
+    g_string_append(result_dir, account_dir);
+    g_free(account_dir);
+
+    gchar *result = g_strdup(result_dir->str);
+    g_string_free(result_dir, TRUE);
 
     return result;
 }

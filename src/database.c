@@ -56,31 +56,25 @@ static prof_msg_type_t _get_message_type_type(const char *const type);
 static char*
 _get_db_filename(ProfAccount *account)
 {
-    char *databasedir = files_get_data_path(DIR_DATABASE);
-    GString *basedir = g_string_new(databasedir);
-    free(databasedir);
+    gchar *database_dir = files_get_account_data_path(DIR_DATABASE, account->jid);
 
-    g_string_append(basedir, "/");
-
-    gchar *account_dir = str_replace(account->jid, "@", "_at_");
-    g_string_append(basedir, account_dir);
-    free(account_dir);
-
-    int res = g_mkdir_with_parents(basedir->str, S_IRWXU);
+    int res = g_mkdir_with_parents(database_dir, S_IRWXU);
     if (res == -1) {
         char *errmsg = strerror(errno);
         if (errmsg) {
-            log_error("DATABASE: error creating directory: %s, %s", basedir->str, errmsg);
+            log_error("DATABASE: error creating directory: %s, %s", database_dir, errmsg);
         } else {
-            log_error("DATABASE: creating directory: %s", basedir->str);
+            log_error("DATABASE: creating directory: %s", database_dir);
         }
-        g_string_free(basedir, TRUE);
+        g_free(database_dir);
         return NULL;
     }
 
-    g_string_append(basedir, "/chatlog.db");
-    char *result = strdup(basedir->str);
-    g_string_free(basedir, TRUE);
+    GString *chatlog_filename = g_string_new(database_dir);
+    g_string_append(chatlog_filename, "/chatlog.db");
+    gchar *result = g_strdup(chatlog_filename->str);
+    g_string_free(chatlog_filename, TRUE);
+    g_free(database_dir);
 
     return result;
 }

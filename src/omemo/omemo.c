@@ -227,37 +227,30 @@ omemo_on_connect(ProfAccount *account)
     omemo_ctx.device_list_handler = g_hash_table_new_full(g_str_hash, g_str_equal, free, NULL);
     omemo_ctx.known_devices = g_hash_table_new_full(g_str_hash, g_str_equal, free, (GDestroyNotify)_g_hash_table_free);
 
-    char *omemodir = files_get_data_path(DIR_OMEMO);
-    GString *basedir = g_string_new(omemodir);
-    free(omemodir);
-    gchar *account_dir = str_replace(account->jid, "@", "_at_");
-    g_string_append(basedir, "/");
-    g_string_append(basedir, account_dir);
-    g_string_append(basedir, "/");
-    free(account_dir);
+    gchar *omemo_dir = files_get_account_data_path(DIR_OMEMO, account->jid);
 
-    omemo_ctx.identity_filename = g_string_new(basedir->str);
-    g_string_append(omemo_ctx.identity_filename, "identity.txt");
-    omemo_ctx.trust_filename = g_string_new(basedir->str);
-    g_string_append(omemo_ctx.trust_filename, "trust.txt");
-    omemo_ctx.sessions_filename = g_string_new(basedir->str);
-    g_string_append(omemo_ctx.sessions_filename, "sessions.txt");
-    omemo_ctx.known_devices_filename = g_string_new(basedir->str);
-    g_string_append(omemo_ctx.known_devices_filename, "known_devices.txt");
+    omemo_ctx.identity_filename = g_string_new(omemo_dir);
+    g_string_append(omemo_ctx.identity_filename, "/identity.txt");
+    omemo_ctx.trust_filename = g_string_new(omemo_dir);
+    g_string_append(omemo_ctx.trust_filename, "/trust.txt");
+    omemo_ctx.sessions_filename = g_string_new(omemo_dir);
+    g_string_append(omemo_ctx.sessions_filename, "/sessions.txt");
+    omemo_ctx.known_devices_filename = g_string_new(omemo_dir);
+    g_string_append(omemo_ctx.known_devices_filename, "/known_devices.txt");
 
 
     errno = 0;
-    int res = g_mkdir_with_parents(basedir->str, S_IRWXU);
+    int res = g_mkdir_with_parents(omemo_dir, S_IRWXU);
     if (res == -1) {
         char *errmsg = strerror(errno);
         if (errmsg) {
-            log_error("OMEMO: error creating directory: %s, %s", basedir->str, errmsg);
+            log_error("OMEMO: error creating directory: %s, %s", omemo_dir, errmsg);
         } else {
-            log_error("OMEMO: creating directory: %s", basedir->str);
+            log_error("OMEMO: creating directory: %s", omemo_dir);
         }
     }
 
-    g_string_free(basedir, TRUE);
+    g_free(omemo_dir);
 
     omemo_devicelist_subscribe();
 

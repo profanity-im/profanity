@@ -61,7 +61,8 @@
 void files_create_directories(void);
 
 gchar* files_get_config_path(char *config_base);
-gchar* files_get_data_path(char *data_base);
+gchar* files_get_data_path(const char *const data_base);
+gchar* files_get_account_data_path(const char *const specific_dir, const char *const jid);
 
 gchar* files_get_log_file(char *log_file);
 gchar* files_get_inputrc_file(void);
