@@ -9156,12 +9156,22 @@ cmd_executable(ProfWin *window, const char *const command, gchar **args)
         prefs_set_string(PREF_AVATAR_CMD, args[1]);
         cons_show("Avatar command set to: %s", args[1]);
     } else if (g_strcmp0(args[0], "urlopen") == 0) {
+        if (g_strv_length(args) < 4) {
+            cons_bad_cmd_usage(command);
+            return TRUE;
+        }
+
         char *str = g_strjoinv(" ", &args[3]);
         const gchar* const list[] = {args[2], str, NULL};
         prefs_set_string_list_with_option(PREF_URL_OPEN_CMD, args[1], list);
         cons_show("`url open` command set to: %s for %s files", str, args[1]);
         g_free(str);
     } else if (g_strcmp0(args[0], "urlsave") == 0) {
+        if (g_strv_length(args) < 3) {
+            cons_bad_cmd_usage(command);
+            return TRUE;
+        }
+
         char *str = g_strjoinv(" ", &args[2]);
         prefs_set_string_with_option(PREF_URL_SAVE_CMD, args[1], str);
         cons_show("`url save` command set to: %s for scheme %s", str, args[1]);
