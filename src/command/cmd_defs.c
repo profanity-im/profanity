@@ -2483,8 +2483,8 @@ static struct cmd_t command_defs[] =
             { "urlsave", "Set executable that is run in /url save for a given protocol. Use your favourite downloader."})
         CMD_EXAMPLES(
             "/executable avatar xdg-open",
-            "/executable urlopen html firefox %u",
-            "/executable urlsave aesgcm omut -d %u %p")
+            "/executable urlopen html false \"firefox %u\"",
+            "/executable urlsave aesgcm \"omut -d %u %p\"")
     },
 
     { "/url",
