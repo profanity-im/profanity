@@ -102,6 +102,7 @@ theme_init(const char *const theme_name)
     g_hash_table_insert(defaults, strdup("titlebar.chat"),           strdup("white"));
     g_hash_table_insert(defaults, strdup("titlebar.dnd"),            strdup("white"));
     g_hash_table_insert(defaults, strdup("titlebar.xa"),             strdup("white"));
+    g_hash_table_insert(defaults, strdup("titlebar.scrolled"),       strdup("default"));
     g_hash_table_insert(defaults, strdup("statusbar.text"),          strdup("white"));
     g_hash_table_insert(defaults, strdup("statusbar.brackets"),      strdup("cyan"));
     g_hash_table_insert(defaults, strdup("statusbar.active"),        strdup("cyan"));
