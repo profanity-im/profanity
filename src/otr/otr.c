@@ -375,9 +375,7 @@ otr_keygen(ProfAccount *account)
         return;
     }
 
-    if (jid) {
-        free(jid);
-    }
+    free(jid);
     jid = strdup(account->jid);
     log_info("Generating OTR key for %s", jid);
 
