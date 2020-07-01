@@ -386,13 +386,13 @@ otr_keygen(ProfAccount *account)
     if (!mkdir_recursive(otr_dir)) {
         log_error("Could not create %s for account %s.", otr_dir, jid);
         cons_show_error("Could not create %s for account %s.", otr_dir, jid);
-        g_string_free(basedir, TRUE);
+        g_free(otr_dir);
         return;
     }
 
     gcry_error_t err = 0;
 
-    GString *keysfilename = g_string_new(basedir->str);
+    GString *keysfilename = g_string_new(otr_dir);
     g_string_append(keysfilename, "/keys.txt");
     log_debug("Generating private key file %s for %s", keysfilename->str, jid);
     cons_show("Generating private key, this may take some time.");
