@@ -113,7 +113,7 @@ files_get_inputrc_file(void)
 }
 
 char*
-files_get_log_file(char *log_file)
+files_get_log_file(const char *const log_file)
 {
     gchar *xdg_data = _files_get_xdg_data_home();
     GString *logfile = g_string_new(xdg_data);
@@ -140,7 +140,7 @@ files_get_log_file(char *log_file)
 }
 
 gchar*
-files_get_config_path(char *config_base)
+files_get_config_path(const char *const config_base)
 {
     gchar *xdg_config = _files_get_xdg_config_home();
     GString *file_str = g_string_new(xdg_config);
