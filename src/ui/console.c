@@ -2067,7 +2067,7 @@ void
 cons_executable_setting(void)
 {
     char *avatar = prefs_get_string(PREF_AVATAR_CMD);
-    cons_show("'/avatar' command (/executable avatar)                                   : %s", avatar);
+    cons_show("Default '/avatar open' command (/executable avatar)                      : %s", avatar);
     prefs_free_string(avatar);
 
     char **urlopen = prefs_get_string_list_with_option(PREF_URL_OPEN_CMD, "");
