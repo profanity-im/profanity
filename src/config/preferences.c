@@ -537,13 +537,10 @@ prefs_get_string_list_with_option(preference_t pref, gchar *option)
     }
 }
 
-
 void
 prefs_free_string(char *pref)
 {
-    if (pref) {
-        g_free(pref);
-    }
+    g_free(pref);
 }
 
 void
