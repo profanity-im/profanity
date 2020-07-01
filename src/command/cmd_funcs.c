@@ -8955,8 +8955,6 @@ cmd_url_open(ProfWin *window, const char *const command, gchar **args)
 
     gboolean require_save = false;
 
-    char *suffix_cmd = NULL;
-    char *suffix = NULL;
     gchar *fileStart = g_strrstr(args[1], "/");
     if (fileStart == NULL) {
         cons_show("URL '%s' is not valid.", args[1]);
@@ -8972,6 +8970,8 @@ cmd_url_open(ProfWin *window, const char *const command, gchar **args)
       // fileStart is set to the end of the URL.
       fileStart = args[1] + strlen(args[1]);
     }
+
+    gchar *suffix = NULL;
     gchar *suffixStart = g_strrstr(fileStart, ".");
     if (suffixStart != NULL) {
         suffixStart++;
@@ -8989,17 +8989,15 @@ cmd_url_open(ProfWin *window, const char *const command, gchar **args)
         g_strfreev(suffix_cmd_pref);
         suffix_cmd_pref = prefs_get_string_list_with_option(PREF_URL_OPEN_CMD, lowercase_suffix);
         g_free(lowercase_suffix);
-        lowercase_suffix = NULL;
         g_free(suffix);
-        suffix = NULL;
     }
 
     if (0 == g_strcmp0(suffix_cmd_pref[0], "true")) {
         require_save = true;
     }
-    suffix_cmd = g_strdup(suffix_cmd_pref[1]);
+
+    gchar *suffix_cmd = g_strdup(suffix_cmd_pref[1]);
     g_strfreev(suffix_cmd_pref);
-    suffix_cmd_pref = NULL;
 
     gchar *scheme = g_uri_parse_scheme(args[1]);
     if( 0 == g_strcmp0(scheme, "aesgcm")) {
@@ -9118,11 +9116,9 @@ cmd_url_save(ProfWin *window, const char *const command, gchar **args)
     }
 
     g_free(scheme);
-    scheme = NULL;
 
     gchar **argv = g_strsplit(scheme_cmd, " ", 0);
     g_free(scheme_cmd);
-    scheme_cmd = NULL;
 
     guint num_args = 0;
     while (argv[num_args]) {
