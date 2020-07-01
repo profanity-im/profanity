@@ -537,17 +537,22 @@ prefs_get_string_list_with_option(preference_t pref, gchar *option)
     char **def = _get_default_string_list(pref);
 
     gchar **result = g_key_file_get_locale_string_list(prefs, group, key, option, NULL, NULL);
-
-    if (result == NULL) {
-        if (def) {
-            return def;
-        } else {
-            g_strfreev(def);
-            return NULL;
-        }
-    } else {
+    if (result) {
         g_strfreev(def);
         return result;
+    }
+
+    result = g_key_file_get_string_list(prefs, group, key, NULL, NULL);
+    if (result) {
+        g_strfreev(def);
+        return result;
+    }
+
+    if (def) {
+        return def;
+    } else {
+        g_strfreev(def);
+        return NULL;
     }
 }
 
@@ -587,13 +592,21 @@ prefs_set_string_list_with_option(preference_t pref, char *option, const gchar* 
     const char *group = _get_group(pref);
     const char *key = _get_key(pref);
     if (values == NULL || *values == NULL){
-        g_key_file_set_locale_string_list(prefs, group, key, option, NULL, 0);
+        if (g_strcmp0(option, "*") == 0) {
+            g_key_file_set_string_list(prefs, group, key, NULL, 0);
+        } else {
+            g_key_file_set_locale_string_list(prefs, group, key, option, NULL, 0);
+        }
     } else {
         guint num_values = 0;
         while(values[num_values]) {
-          num_values++;
+            num_values++;
         }
-        g_key_file_set_locale_string_list(prefs, group, key, option, values, num_values);
+        if (g_strcmp0(option, "*") == 0) {
+            g_key_file_set_string_list(prefs, group, key, values, num_values);
+        } else {
+            g_key_file_set_locale_string_list(prefs, group, key, option, values, num_values);
+        }
     }
 }
 

@@ -2472,15 +2472,15 @@ static struct cmd_t command_defs[] =
             CMD_TAG_DISCOVERY)
         CMD_SYN(
             "/executable avatar <cmd>",
-            "/executable urlopen <fileType> <require_save> <cmd>",
-            "/executable urlsave <protocol> <cmd>")
+            "/executable urlopen (<fileType>|*) <require_save> <cmd>",
+            "/executable urlsave (<protocol>|*) <cmd>")
         CMD_DESC(
             "Configure executable that should be called upon a certain command."
             "Default is xdg-open.")
         CMD_ARGS(
             { "avatar", "Set executable that is run in /avatar open. Use your favourite image viewer." },
-            { "urlopen", "Set executable that is run in /url open for a given file type. It may be your favorite browser or a specific viewer." },
-            { "urlsave", "Set executable that is run in /url save for a given protocol. Use your favourite downloader."})
+            { "urlopen", "Set executable that is run in /url open for a given file type. It may be your favorite browser or a specific viewer. Use * to set default command for undefined file type." },
+            { "urlsave", "Set executable that is run in /url save for a given protocol. Use your favourite downloader. Use * to set default command for undefined protocol."})
         CMD_EXAMPLES(
             "/executable avatar xdg-open",
             "/executable urlopen html false \"firefox %u\"",
