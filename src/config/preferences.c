@@ -163,9 +163,16 @@ static void _prefs_load(void)
 
     // 0.9.0 introduced /urlopen. It was saved under "logging" section. Now we have a new "executables" section.
     if (g_key_file_has_key(prefs, PREF_GROUP_LOGGING, "urlopen.cmd", NULL)) {
-        char *value = g_key_file_get_string(prefs, PREF_GROUP_LOGGING, "urlopen.cmd", NULL);
-        g_key_file_set_string(prefs, PREF_GROUP_EXECUTABLES, "url.open.cmd", value);
+        char *val = g_key_file_get_string(prefs, PREF_GROUP_LOGGING, "urlopen.cmd", NULL);
+
+        GString *value = g_string_new("false;");
+        value = g_string_append(value, val);
+        value = g_string_append(value, " %u;");
+
+        g_key_file_set_string(prefs, PREF_GROUP_EXECUTABLES, "url.open.cmd", value->str);
         g_key_file_remove_key(prefs, PREF_GROUP_LOGGING, "urlopen.cmd", NULL);
+
+        g_string_free(value, TRUE);
     }
 
     // 0.9.0 introduced configurable /avatar. It was saved under "logging" section. Now we have a new "executables" section.
