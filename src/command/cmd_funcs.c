@@ -6377,8 +6377,7 @@ cmd_log(ProfWin *window, const char *const command, gchar **args)
     }
 
     if (strcmp(subcmd, "where") == 0) {
-        const char *logfile = get_log_file_location();
-        cons_show("Log file: %s", logfile);
+        cons_show("Log file: %s", get_log_file_location());
         return TRUE;
     }
 
