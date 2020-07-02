@@ -210,7 +210,7 @@ _create_tab(const int win, win_type_t wintype, char *identifier, gboolean highli
             } else {
                 tab->display_name = strdup(tab->identifier);
             }
-            prefs_free_string(pref);
+            g_free(pref);
         }
     }
 
@@ -430,7 +430,7 @@ _status_bar_draw_time(int pos)
 {
     char *time_pref = prefs_get_string(PREF_TIME_STATUSBAR);
     if (g_strcmp0(time_pref, "off") == 0) {
-        prefs_free_string(time_pref);
+        g_free(time_pref);
         return pos;
     }
 
@@ -461,7 +461,7 @@ _status_bar_draw_time(int pos)
     wattroff(statusbar_win, bracket_attrs);
     pos += 2;
 
-    prefs_free_string(time_pref);
+    g_free(time_pref);
 
     return pos;
 }
@@ -493,7 +493,7 @@ _status_bar_draw_maintext(int pos)
             stop = true;
         }
 
-        prefs_free_string(pref);
+        g_free(pref);
         if (stop) {
             return;
         }
@@ -594,7 +594,7 @@ _display_name(StatusBarTab *tab)
         } else {
             fullname = strdup(tab->identifier);
         }
-        prefs_free_string(pref);
+        g_free(pref);
     } else if (tab->window_type == WIN_CONFIG) {
         char *pref = prefs_get_string(PREF_STATUSBAR_ROOM);
         GString *display_str = g_string_new("");
@@ -607,7 +607,7 @@ _display_name(StatusBarTab *tab)
             g_string_append(display_str, tab->identifier);
         }
 
-        prefs_free_string(pref);
+        g_free(pref);
         g_string_append(display_str, " conf");
         char *result = strdup(display_str->str);
         g_string_free(display_str, TRUE);
@@ -627,7 +627,7 @@ _display_name(StatusBarTab *tab)
         } else {
             fullname = strdup(tab->identifier);
         }
-        prefs_free_string(pref);
+        g_free(pref);
     } else {
         fullname = strdup("window");
     }

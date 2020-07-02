@@ -700,7 +700,7 @@ otr_get_policy(const char *const recipient)
         result = PROF_OTRPOLICY_ALWAYS;
     }
 
-    prefs_free_string(pref_otr_policy);
+    g_free(pref_otr_policy);
 
     return result;
 }

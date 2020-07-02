@@ -307,7 +307,7 @@ chat_log_otr_msg_out(const char *const barejid, const char *const msg, const cha
         } else if (strcmp(pref_otr_log, "redact") == 0) {
             _chat_log_chat(mybarejid, barejid, "[redacted]", PROF_OUT_LOG, NULL, resource);
         }
-        prefs_free_string(pref_otr_log);
+        g_free(pref_otr_log);
         free(mybarejid);
     }
 }
@@ -323,7 +323,7 @@ chat_log_pgp_msg_out(const char *const barejid, const char *const msg, const cha
         } else if (strcmp(pref_pgp_log, "redact") == 0) {
             _chat_log_chat(mybarejid, barejid, "[redacted]", PROF_OUT_LOG, NULL, resource);
         }
-        prefs_free_string(pref_pgp_log);
+        g_free(pref_pgp_log);
         free(mybarejid);
     }
 }
@@ -339,7 +339,7 @@ chat_log_omemo_msg_out(const char *const barejid, const char *const msg, const c
         } else if (strcmp(pref_omemo_log, "redact") == 0) {
             _chat_log_chat(mybarejid, barejid, "[redacted]", PROF_OUT_LOG, NULL, resource);
         }
-        prefs_free_string(pref_omemo_log);
+        g_free(pref_omemo_log);
         free(mybarejid);
     }
 }
@@ -363,7 +363,7 @@ chat_log_otr_msg_in(ProfMessage *message)
                 _chat_log_chat(mybarejid, message->from_jid->barejid, "[redacted]", PROF_IN_LOG, message->timestamp, NULL);
             }
         }
-        prefs_free_string(pref_otr_log);
+        g_free(pref_otr_log);
         free(mybarejid);
     }
 }
@@ -387,7 +387,7 @@ chat_log_pgp_msg_in(ProfMessage *message)
                 _chat_log_chat(mybarejid, message->from_jid->barejid, "[redacted]", PROF_IN_LOG, message->timestamp, NULL);
             }
         }
-        prefs_free_string(pref_pgp_log);
+        g_free(pref_pgp_log);
         free(mybarejid);
     }
 }
@@ -411,7 +411,7 @@ chat_log_omemo_msg_in(ProfMessage *message)
                 _chat_log_chat(mybarejid, message->from_jid->barejid, "[redacted]", PROF_IN_LOG, message->timestamp, message->from_jid->resourcepart);
             }
         }
-        prefs_free_string(pref_omemo_log);
+        g_free(pref_omemo_log);
         free(mybarejid);
     }
 }
@@ -548,7 +548,7 @@ groupchat_log_omemo_msg_out(const gchar *const room, const gchar *const msg)
             _groupchat_log_chat(mybarejid, room, mynick, "[redacted]");
         }
 
-        prefs_free_string(pref_omemo_log);
+        g_free(pref_omemo_log);
         free(mybarejid);
     }
 }
@@ -566,7 +566,7 @@ groupchat_log_omemo_msg_in(const gchar *const room, const gchar *const nick, con
             _groupchat_log_chat(mybarejid, room, nick, "[redacted]");
         }
 
-        prefs_free_string(pref_omemo_log);
+        g_free(pref_omemo_log);
         free(mybarejid);
     }
 }

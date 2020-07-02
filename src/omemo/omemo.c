@@ -1348,7 +1348,7 @@ omemo_automatic_start(const char *const recipient)
             policy = PROF_OMEMOPOLICY_ALWAYS;
         }
 
-        prefs_free_string(pref_omemo_policy);
+        g_free(pref_omemo_policy);
     }
 
     switch (policy) {

@@ -1067,7 +1067,7 @@ win_show_status_string(ProfWin *window, const char *const from,
         gchar *date_fmt = NULL;
         char *time_pref = prefs_get_string(PREF_TIME_LASTACTIVITY);
         date_fmt = g_date_time_format(last_activity, time_pref);
-        prefs_free_string(time_pref);
+        g_free(time_pref);
         assert(date_fmt != NULL);
 
         win_append(window, presence_colour, ", last activity: %s", date_fmt);
@@ -1516,7 +1516,7 @@ _win_print_internal(ProfWin *window, const char *show_char, int pad_indent, GDat
     } else {
         date_fmt = g_date_time_format(time, time_pref);
     }
-    prefs_free_string(time_pref);
+    g_free(time_pref);
     assert(date_fmt != NULL);
 
     if(strlen(date_fmt) != 0){
@@ -1547,7 +1547,7 @@ _win_print_internal(ProfWin *window, const char *show_char, int pad_indent, GDat
                 colour = theme_hash_attrs(from);
             }
         }
-        prefs_free_string(color_pref);
+        g_free(color_pref);
 
         if (flags & NO_COLOUR_FROM) {
             colour = 0;

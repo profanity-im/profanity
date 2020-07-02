@@ -104,7 +104,7 @@ static void _prefs_load(void)
         char *message = g_key_file_get_string(prefs, PREF_GROUP_PRESENCE, "autoaway.message", NULL);
         g_key_file_set_string(prefs, PREF_GROUP_PRESENCE, "autoaway.awaymessage", message);
         g_key_file_remove_key(prefs, PREF_GROUP_PRESENCE, "autoaway.message", NULL);
-        prefs_free_string(message);
+        g_free(message);
     }
 
     // migrate pre 0.5.0 time settings
@@ -123,7 +123,7 @@ static void _prefs_load(void)
         g_key_file_set_string(prefs, PREF_GROUP_UI, "time.private", val);
         g_key_file_set_string(prefs, PREF_GROUP_UI, "time.xmlconsole", val);
         g_key_file_remove_key(prefs, PREF_GROUP_UI, "time", NULL);
-        prefs_free_string(time);
+        g_free(time);
     }
 
     // move pre 0.5.0 notify settings
@@ -137,7 +137,7 @@ static void _prefs_load(void)
             g_key_file_set_boolean(prefs, PREF_GROUP_NOTIFICATIONS, "room", FALSE);
             g_key_file_set_boolean(prefs, PREF_GROUP_NOTIFICATIONS, "room.mention", TRUE);
         }
-        prefs_free_string(value);
+        g_free(value);
     }
 
     // move pre 0.6.0 titlebar settings to wintitle
@@ -570,12 +570,6 @@ prefs_get_string_list_with_option(preference_t pref, gchar *option)
 }
 
 void
-prefs_free_string(char *pref)
-{
-    g_free(pref);
-}
-
-void
 prefs_set_string(preference_t pref, char *value)
 {
     const char *group = _get_group(pref);
@@ -632,7 +626,7 @@ prefs_get_tls_certpath(void)
     char *setting = g_key_file_get_string(prefs, group, key, NULL);
 
     if (g_strcmp0(setting, "none") == 0) {
-        prefs_free_string(setting);
+        g_free(setting);
         return NULL;
     }
 
@@ -657,7 +651,7 @@ prefs_get_tls_certpath(void)
     }
 
     char *result = strdup(setting);
-    prefs_free_string(setting);
+    g_free(setting);
 
     return result;
 }

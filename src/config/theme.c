@@ -708,7 +708,7 @@ theme_hash_attrs(const char *str)
     } else if (strcmp(color_pref, "blue") == 0) {
         profile = COLOR_PROFILE_BLUE_BLINDNESS;
     }
-    prefs_free_string(color_pref);
+    g_free(color_pref);
 
     return COLOR_PAIR(color_pair_cache_hash_str(str, profile));
 }

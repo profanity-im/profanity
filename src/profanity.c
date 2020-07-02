@@ -152,7 +152,7 @@ _connect_default(const char *const account)
         char *pref_connect_account = prefs_get_string(PREF_CONNECT_ACCOUNT);
         if (pref_connect_account) {
             cmd_execute_connect(window, pref_connect_account);
-            prefs_free_string(pref_connect_account);
+            g_free(pref_connect_account);
         }
     }
 }
@@ -197,7 +197,7 @@ _init(char *log_level, char *config_file, char *log_file, char *theme_name)
     } else {
         char *theme = prefs_get_string(PREF_THEME);
         theme_init(theme);
-        prefs_free_string(theme);
+        g_free(theme);
     }
 
     ui_init();

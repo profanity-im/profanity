@@ -1265,7 +1265,7 @@ cmd_disconnect(ProfWin *window, const char *const command, gchar **args)
     char *theme = prefs_get_string(PREF_THEME);
     if (theme) {
         gboolean res = theme_load(theme, false);
-        prefs_free_string(theme);
+        g_free(theme);
         if (!res) {
             theme_load("default", false);
         }
@@ -5280,7 +5280,7 @@ cmd_time(ProfWin *window, const char *const command, gchar **args)
         if (args[1] == NULL) {
             char *format = prefs_get_string(PREF_TIME_LASTACTIVITY);
             cons_show("Last activity time format: '%s'.", format);
-            prefs_free_string(format);
+            g_free(format);
             return TRUE;
         } else if (g_strcmp0(args[1], "set") == 0 && args[2] != NULL) {
             prefs_set_string(PREF_TIME_LASTACTIVITY, args[2]);
@@ -5299,7 +5299,7 @@ cmd_time(ProfWin *window, const char *const command, gchar **args)
         if (args[1] == NULL) {
             char *format = prefs_get_string(PREF_TIME_STATUSBAR);
             cons_show("Status bar time format: '%s'.", format);
-            prefs_free_string(format);
+            g_free(format);
             return TRUE;
         } else if (g_strcmp0(args[1], "set") == 0 && args[2] != NULL) {
             prefs_set_string(PREF_TIME_STATUSBAR, args[2]);
@@ -5319,7 +5319,7 @@ cmd_time(ProfWin *window, const char *const command, gchar **args)
         if (args[1] == NULL) {
             char *format = prefs_get_string(PREF_TIME_CONSOLE);
             cons_show("Console time format: '%s'.", format);
-            prefs_free_string(format);
+            g_free(format);
             return TRUE;
         } else if (g_strcmp0(args[1], "set") == 0 && args[2] != NULL) {
             prefs_set_string(PREF_TIME_CONSOLE, args[2]);
@@ -5339,7 +5339,7 @@ cmd_time(ProfWin *window, const char *const command, gchar **args)
         if (args[1] == NULL) {
             char *format = prefs_get_string(PREF_TIME_CHAT);
             cons_show("Chat time format: '%s'.", format);
-            prefs_free_string(format);
+            g_free(format);
             return TRUE;
         } else if (g_strcmp0(args[1], "set") == 0 && args[2] != NULL) {
             prefs_set_string(PREF_TIME_CHAT, args[2]);
@@ -5359,7 +5359,7 @@ cmd_time(ProfWin *window, const char *const command, gchar **args)
         if (args[1] == NULL) {
             char *format = prefs_get_string(PREF_TIME_MUC);
             cons_show("MUC time format: '%s'.", format);
-            prefs_free_string(format);
+            g_free(format);
             return TRUE;
         } else if (g_strcmp0(args[1], "set") == 0 && args[2] != NULL) {
             prefs_set_string(PREF_TIME_MUC, args[2]);
@@ -5379,7 +5379,7 @@ cmd_time(ProfWin *window, const char *const command, gchar **args)
         if (args[1] == NULL) {
             char *format = prefs_get_string(PREF_TIME_CONFIG);
             cons_show("config time format: '%s'.", format);
-            prefs_free_string(format);
+            g_free(format);
             return TRUE;
         } else if (g_strcmp0(args[1], "set") == 0 && args[2] != NULL) {
             prefs_set_string(PREF_TIME_CONFIG, args[2]);
@@ -5399,7 +5399,7 @@ cmd_time(ProfWin *window, const char *const command, gchar **args)
         if (args[1] == NULL) {
             char *format = prefs_get_string(PREF_TIME_PRIVATE);
             cons_show("Private chat time format: '%s'.", format);
-            prefs_free_string(format);
+            g_free(format);
             return TRUE;
         } else if (g_strcmp0(args[1], "set") == 0 && args[2] != NULL) {
             prefs_set_string(PREF_TIME_PRIVATE, args[2]);
@@ -5419,7 +5419,7 @@ cmd_time(ProfWin *window, const char *const command, gchar **args)
         if (args[1] == NULL) {
             char *format = prefs_get_string(PREF_TIME_XMLCONSOLE);
             cons_show("XML Console time format: '%s'.", format);
-            prefs_free_string(format);
+            g_free(format);
             return TRUE;
         } else if (g_strcmp0(args[1], "set") == 0 && args[2] != NULL) {
             prefs_set_string(PREF_TIME_XMLCONSOLE, args[2]);
@@ -6860,7 +6860,7 @@ cmd_plugins_sourcepath(ProfWin *window, const char *const command, gchar **args)
         char *sourcepath = prefs_get_string(PREF_PLUGINS_SOURCEPATH);
         if (sourcepath) {
             cons_show("Current plugins sourcepath: %s", sourcepath);
-            prefs_free_string(sourcepath);
+            g_free(sourcepath);
         } else {
             cons_show("Plugins sourcepath not currently set.");
         }
@@ -6913,7 +6913,7 @@ cmd_plugins_install(ProfWin *window, const char *const command, gchar **args)
         char* sourcepath = prefs_get_string(PREF_PLUGINS_SOURCEPATH);
         if (sourcepath) {
             path = strdup(sourcepath);
-            prefs_free_string(sourcepath);
+            g_free(sourcepath);
         } else {
             cons_show("Either a path must be provided or the sourcepath property must be set, see /help plugins");
             return TRUE;
@@ -6988,7 +6988,7 @@ cmd_plugins_update(ProfWin *window, const char *const command, gchar **args)
         char* sourcepath = prefs_get_string(PREF_PLUGINS_SOURCEPATH);
         if (sourcepath) {
             path = strdup(sourcepath);
-            prefs_free_string(sourcepath);
+            g_free(sourcepath);
         } else {
             cons_show("Either a path must be provided or the sourcepath property must be set, see /help plugins");
             return TRUE;
@@ -7656,7 +7656,7 @@ cmd_otr_policy(ProfWin *window, const char *const command, gchar **args)
     if (args[1] == NULL) {
         char *policy = prefs_get_string(PREF_OTR_POLICY);
         cons_show("OTR policy is now set to: %s", policy);
-        prefs_free_string(policy);
+        g_free(policy);
         return TRUE;
     }
 
@@ -8324,7 +8324,7 @@ _cmd_execute_alias(ProfWin *window, const char *const inp, gboolean *ran)
     if (value) {
         *ran = TRUE;
         gboolean result = cmd_process_input(window, value);
-        prefs_free_string(value);
+        g_free(value);
         return result;
     }
 
@@ -8818,7 +8818,7 @@ cmd_omemo_policy(ProfWin *window, const char *const command, gchar **args)
     if (args[1] == NULL) {
         char *policy = prefs_get_string(PREF_OMEMO_POLICY);
         cons_show("OMEMO policy is now set to: %s", policy);
-        prefs_free_string(policy);
+        g_free(policy);
         return TRUE;
     }
 
@@ -8947,7 +8947,7 @@ cmd_color(ProfWin *window, const char *const command, gchar **args)
             theme_load("default", false);
         }
 
-        prefs_free_string(theme);
+        g_free(theme);
     }
 
     return TRUE;

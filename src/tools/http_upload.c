@@ -236,7 +236,7 @@ end:
     free(output.buffer);
 
     pthread_mutex_lock(&lock);
-    prefs_free_string(cert_path);
+    g_free(cert_path);
 
     if (err) {
         char *msg;

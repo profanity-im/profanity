@@ -156,7 +156,7 @@ sv_ev_roster_received(void)
         char *theme = prefs_get_string(PREF_THEME);
         win_clear(win);
         theme_init(theme);
-        prefs_free_string(theme);
+        g_free(theme);
         ui_resize();
         ui_show_roster();
     }
@@ -859,7 +859,7 @@ sv_ev_room_occupant_offline(const char *const room, const char *const nick,
     if (mucwin && (g_strcmp0(muc_status_pref, "none") != 0)) {
         mucwin_occupant_offline(mucwin, nick);
     }
-    prefs_free_string(muc_status_pref);
+    g_free(muc_status_pref);
 
     Jid *jidp = jid_create_from_bare_and_resource(room, nick);
     ProfPrivateWin *privwin = wins_get_private(jidp->fulljid);
@@ -1076,7 +1076,7 @@ sv_ev_muc_occupant_online(const char *const room, const char *const nick, const 
         if (mucwin && g_strcmp0(muc_status_pref, "none") != 0) {
             mucwin_occupant_online(mucwin, nick, role, affiliation, show, status);
         }
-        prefs_free_string(muc_status_pref);
+        g_free(muc_status_pref);
 
         if (mucwin) {
             Jid *jidp = jid_create_from_bare_and_resource(mucwin->roomjid, nick);
@@ -1099,7 +1099,7 @@ sv_ev_muc_occupant_online(const char *const room, const char *const nick, const 
         if (mucwin && (g_strcmp0(muc_status_pref, "all") == 0)) {
             mucwin_occupant_presence(mucwin, nick, show, status);
         }
-        prefs_free_string(muc_status_pref);
+        g_free(muc_status_pref);
         occupantswin_occupants(room);
 
     // presence unchanged, check for role/affiliation change
@@ -1202,7 +1202,7 @@ sv_ev_lastactivity_response(const char *const from, const int seconds, const cha
     gchar *date_fmt = NULL;
     char *time_pref = prefs_get_string(PREF_TIME_LASTACTIVITY);
     date_fmt = g_date_time_format(active, time_pref);
-    prefs_free_string(time_pref);
+    g_free(time_pref);
     assert(date_fmt != NULL);
 
     // full jid - last activity

@@ -345,7 +345,7 @@ cons_show_incoming_room_message(const char *const nick, const char *const room, 
             cons_alert();
         }
     }
-    prefs_free_string(muc_show);
+    g_free(muc_show);
 }
 
 void
@@ -367,7 +367,7 @@ cons_show_incoming_message(const char *const short_from, const int win_index, in
         cons_alert();
     }
 
-    prefs_free_string(chat_show);
+    g_free(chat_show);
 }
 
 void
@@ -389,7 +389,7 @@ cons_show_incoming_private_message(const char *const nick, const char *const roo
         cons_alert();
     }
 
-    prefs_free_string(priv_show);
+    g_free(priv_show);
 }
 
 void
@@ -1092,7 +1092,7 @@ cons_theme_setting(void)
     } else {
         cons_show("Theme (/theme)                      : %s", theme);
     }
-    prefs_free_string(theme);
+    g_free(theme);
 }
 
 void
@@ -1182,15 +1182,15 @@ cons_console_setting(void)
 {
     char *chatsetting = prefs_get_string(PREF_CONSOLE_CHAT);
     cons_show("Console chat messages (/console)    : %s", chatsetting);
-    prefs_free_string(chatsetting);
+    g_free(chatsetting);
 
     char *mucsetting = prefs_get_string(PREF_CONSOLE_MUC);
     cons_show("Console MUC messages (/console)     : %s", mucsetting);
-    prefs_free_string(mucsetting);
+    g_free(mucsetting);
 
     char *privsetting = prefs_get_string(PREF_CONSOLE_PRIVATE);
     cons_show("Console private messages (/console) : %s", privsetting);
-    prefs_free_string(privsetting);
+    g_free(privsetting);
 }
 
 void
@@ -1209,9 +1209,9 @@ cons_presence_setting(void)
     cons_show("Chat presence (/presence)           : %s", chat);
     cons_show("Room presence (/presence)           : %s", room);
 
-    prefs_free_string(console);
-    prefs_free_string(chat);
-    prefs_free_string(room);
+    g_free(console);
+    g_free(chat);
+    g_free(room);
 }
 
 void
@@ -1309,7 +1309,7 @@ cons_autoconnect_setting(void)
     else
         cons_show("Autoconnect (/autoconnect)      : OFF");
 
-    prefs_free_string(pref_connect_account);
+    g_free(pref_connect_account);
 }
 
 void
@@ -1320,53 +1320,53 @@ cons_time_setting(void)
         cons_show("Time console (/time)                : OFF");
     else
         cons_show("Time console (/time)                : %s", pref_time_console);
-    prefs_free_string(pref_time_console);
+    g_free(pref_time_console);
 
     char *pref_time_chat = prefs_get_string(PREF_TIME_CHAT);
     if (g_strcmp0(pref_time_chat, "off") == 0)
         cons_show("Time chat (/time)                   : OFF");
     else
         cons_show("Time chat (/time)                   : %s", pref_time_chat);
-    prefs_free_string(pref_time_chat);
+    g_free(pref_time_chat);
 
     char *pref_time_muc = prefs_get_string(PREF_TIME_MUC);
     if (g_strcmp0(pref_time_muc, "off") == 0)
         cons_show("Time MUC (/time)                    : OFF");
     else
         cons_show("Time MUC (/time)                    : %s", pref_time_muc);
-    prefs_free_string(pref_time_muc);
+    g_free(pref_time_muc);
 
     char *pref_time_conf = prefs_get_string(PREF_TIME_CONFIG);
     if (g_strcmp0(pref_time_conf, "off") == 0)
         cons_show("Time config (/time)                 : OFF");
     else
         cons_show("Time config (/time)                 : %s", pref_time_conf);
-    prefs_free_string(pref_time_conf);
+    g_free(pref_time_conf);
 
     char *pref_time_private = prefs_get_string(PREF_TIME_PRIVATE);
     if (g_strcmp0(pref_time_private, "off") == 0)
         cons_show("Time private (/time)                : OFF");
     else
         cons_show("Time private (/time)                : %s", pref_time_private);
-    prefs_free_string(pref_time_private);
+    g_free(pref_time_private);
 
     char *pref_time_xml = prefs_get_string(PREF_TIME_XMLCONSOLE);
     if (g_strcmp0(pref_time_xml, "off") == 0)
         cons_show("Time XML Console (/time)            : OFF");
     else
         cons_show("Time XML Console (/time)            : %s", pref_time_xml);
-    prefs_free_string(pref_time_xml);
+    g_free(pref_time_xml);
 
     char *pref_time_statusbar = prefs_get_string(PREF_TIME_STATUSBAR);
     if (g_strcmp0(pref_time_statusbar, "off") == 0)
         cons_show("Time statusbar (/time)              : OFF");
     else
         cons_show("Time statusbar (/time)              : %s", pref_time_statusbar);
-    prefs_free_string(pref_time_statusbar);
+    g_free(pref_time_statusbar);
 
     char *pref_time_lastactivity = prefs_get_string(PREF_TIME_LASTACTIVITY);
     cons_show("Time last activity (/time)          : %s", pref_time_lastactivity);
-    prefs_free_string(pref_time_lastactivity);
+    g_free(pref_time_lastactivity);
 }
 
 void
@@ -1497,7 +1497,7 @@ cons_roster_setting(void)
     } else {
         cons_show("Roster count (/roster)              : %s", count);
     }
-    prefs_free_string(count);
+    g_free(count);
 
     if (prefs_get_boolean(PREF_ROSTER_COUNT_ZERO))
         cons_show("Roster count zero (/roster)         : ON");
@@ -1506,11 +1506,11 @@ cons_roster_setting(void)
 
     char *by = prefs_get_string(PREF_ROSTER_BY);
     cons_show("Roster by (/roster)                 : %s", by);
-    prefs_free_string(by);
+    g_free(by);
 
     char *order = prefs_get_string(PREF_ROSTER_ORDER);
     cons_show("Roster order (/roster)              : %s", order);
-    prefs_free_string(order);
+    g_free(order);
 
     char *unread = prefs_get_string(PREF_ROSTER_UNREAD);
     if (g_strcmp0(unread, "before") == 0) {
@@ -1520,7 +1520,7 @@ cons_roster_setting(void)
     } else {
         cons_show("Roster unread (/roster)             : OFF");
     }
-    prefs_free_string(unread);
+    g_free(unread);
 
     if (prefs_get_boolean(PREF_ROSTER_ROOMS))
         cons_show("Roster rooms (/roster)              : show");
@@ -1535,23 +1535,23 @@ cons_roster_setting(void)
     } else {
         cons_show("Roster private (/roster)            : OFF");
     }
-    prefs_free_string(priv);
+    g_free(priv);
 
     char *rooms_pos = prefs_get_string(PREF_ROSTER_ROOMS_POS);
     cons_show("Roster rooms position (/roster)     : %s", rooms_pos);
-    prefs_free_string(rooms_pos);
+    g_free(rooms_pos);
 
     char *rooms_by = prefs_get_string(PREF_ROSTER_ROOMS_BY);
     cons_show("Roster rooms by (/roster)           : %s", rooms_by);
-    prefs_free_string(rooms_by);
+    g_free(rooms_by);
 
     char *rooms_use = prefs_get_string(PREF_ROSTER_ROOMS_USE_AS_NAME);
     cons_show("Roster rooms use (/roster)          : %s", rooms_use);
-    prefs_free_string(rooms_use);
+    g_free(rooms_use);
 
     char *rooms_order = prefs_get_string(PREF_ROSTER_ROOMS_ORDER);
     cons_show("Roster rooms order (/roster)        : %s", rooms_order);
-    prefs_free_string(rooms_order);
+    g_free(rooms_order);
 
     char *roomsunread = prefs_get_string(PREF_ROSTER_ROOMS_UNREAD);
     if (g_strcmp0(roomsunread, "before") == 0) {
@@ -1561,7 +1561,7 @@ cons_roster_setting(void)
     } else {
         cons_show("Roster rooms unread (/roster)       : OFF");
     }
-    prefs_free_string(roomsunread);
+    g_free(roomsunread);
 
     int size = prefs_get_roster_size();
     cons_show("Roster size (/roster)               : %d", size);
@@ -1833,15 +1833,15 @@ cons_statusbar_setting(void)
     } else {
         cons_show("Self statusbar display (/statusbar)         : %s", pref_self);
     }
-    prefs_free_string(pref_self);
+    g_free(pref_self);
 
     char *pref_chat = prefs_get_string(PREF_STATUSBAR_CHAT);
     cons_show("Chat tab display (/statusbar)               : %s", pref_chat);
-    prefs_free_string(pref_chat);
+    g_free(pref_chat);
 
     char *pref_room = prefs_get_string(PREF_STATUSBAR_ROOM);
     cons_show("Room tab display (/statusbar)               : %s", pref_room);
-    prefs_free_string(pref_room);
+    g_free(pref_room);
 }
 
 void
@@ -1906,7 +1906,7 @@ cons_autoaway_setting(void)
     } else {
         cons_show("Autoaway (/autoaway mode)                 : %s", pref_autoaway_mode);
     }
-    prefs_free_string(pref_autoaway_mode);
+    g_free(pref_autoaway_mode);
 
     int away_time = prefs_get_autoaway_time();
     if (away_time == 1) {
@@ -1930,7 +1930,7 @@ cons_autoaway_setting(void)
     } else {
         cons_show("Autoaway away message (/autoaway message) : \"%s\"", pref_autoaway_message);
     }
-    prefs_free_string(pref_autoaway_message);
+    g_free(pref_autoaway_message);
 
     char *pref_autoxa_message = prefs_get_string(PREF_AUTOXA_MESSAGE);
     if ((pref_autoxa_message == NULL) || (strcmp(pref_autoxa_message, "") == 0)) {
@@ -1938,7 +1938,7 @@ cons_autoaway_setting(void)
     } else {
         cons_show("Autoaway xa message (/autoaway message)   : \"%s\"", pref_autoxa_message);
     }
-    prefs_free_string(pref_autoxa_message);
+    g_free(pref_autoxa_message);
 
     if (prefs_get_boolean(PREF_AUTOAWAY_CHECK)) {
         cons_show("Autoaway check (/autoaway check)          : ON");
@@ -2018,7 +2018,7 @@ cons_color_setting(void)
         cons_show("Consistent color generation for nicks (/color)                     : OFF");
     }
 
-    prefs_free_string(color_pref);
+    g_free(color_pref);
 
     if (prefs_get_boolean(PREF_COLOR_NICK_OWN)) {
         cons_show("Consistent color generation for own nick (/color own)              : ON");
@@ -2068,7 +2068,7 @@ cons_executable_setting(void)
 {
     char *avatar = prefs_get_string(PREF_AVATAR_CMD);
     cons_show("Default '/avatar open' command (/executable avatar)                      : %s", avatar);
-    prefs_free_string(avatar);
+    g_free(avatar);
 
     //TODO: there needs to be a way to get all the "locales"/schemes so we can
     //display the defualt openers for all filetypes
@@ -2112,7 +2112,7 @@ cons_show_otr_prefs(void)
 
     char *policy_value = prefs_get_string(PREF_OTR_POLICY);
     cons_show("OTR policy (/otr policy) : %s", policy_value);
-    prefs_free_string(policy_value);
+    g_free(policy_value);
 
     char *log_value = prefs_get_string(PREF_OTR_LOG);
     if (strcmp(log_value, "on") == 0) {
@@ -2122,7 +2122,7 @@ cons_show_otr_prefs(void)
     } else {
         cons_show("OTR logging (/otr log)   : Redacted");
     }
-    prefs_free_string(log_value);
+    g_free(log_value);
 
     char *ch = prefs_get_otr_char();
     cons_show("OTR char (/otr char)     : %s", ch);
@@ -2151,7 +2151,7 @@ cons_show_pgp_prefs(void)
     } else {
         cons_show("PGP logging (/pgp log)   : Redacted");
     }
-    prefs_free_string(log_value);
+    g_free(log_value);
 
     char *ch = prefs_get_pgp_char();
     cons_show("PGP char (/pgp char)     : %s", ch);
@@ -2174,7 +2174,7 @@ cons_show_omemo_prefs(void)
 
     char *policy_value = prefs_get_string(PREF_OMEMO_POLICY);
     cons_show("OMEMO policy (/omemo policy) : %s", policy_value);
-    prefs_free_string(policy_value);
+    g_free(policy_value);
 
     char *log_value = prefs_get_string(PREF_OMEMO_LOG);
     if (strcmp(log_value, "on") == 0) {
@@ -2184,7 +2184,7 @@ cons_show_omemo_prefs(void)
     } else {
         cons_show("OMEMO logging (/omemo log)   : Redacted");
     }
-    prefs_free_string(log_value);
+    g_free(log_value);
 
     char *ch = prefs_get_omemo_char();
     cons_show("OMEMO char (/omemo char)     : %s", ch);

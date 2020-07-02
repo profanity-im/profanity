@@ -320,7 +320,6 @@ void prefs_set_boolean(preference_t pref, gboolean value);
 char* prefs_get_string(preference_t pref);
 char* prefs_get_string_with_option(preference_t pref, gchar *option);
 gchar **prefs_get_string_list_with_option(preference_t pref, gchar *option);
-void prefs_free_string(char *pref);
 void prefs_set_string(preference_t pref, char *value);
 void prefs_set_string_with_option(preference_t pref, char *option, char *value);
 void prefs_set_string_list_with_option(preference_t pref, char *option, const gchar* const *values);

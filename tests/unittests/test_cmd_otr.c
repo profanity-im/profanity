@@ -59,7 +59,7 @@ void cmd_otr_log_on_enables_logging(void **state)
 
     assert_true(result);
     assert_string_equal("on", pref_otr_log);
-    prefs_free_string(pref_otr_log);
+    g_free(pref_otr_log);
 }
 
 void cmd_otr_log_on_shows_warning_when_chlog_disabled(void **state)
@@ -88,7 +88,7 @@ void cmd_otr_log_off_disables_logging(void **state)
 
     assert_true(result);
     assert_string_equal("off", pref_otr_log);
-    prefs_free_string(pref_otr_log);
+    g_free(pref_otr_log);
 }
 
 void cmd_otr_redact_redacts_logging(void **state)
@@ -104,7 +104,7 @@ void cmd_otr_redact_redacts_logging(void **state)
 
     assert_true(result);
     assert_string_equal("redact", pref_otr_log);
-    prefs_free_string(pref_otr_log);
+    g_free(pref_otr_log);
 }
 
 void cmd_otr_log_redact_shows_warning_when_chlog_disabled(void **state)

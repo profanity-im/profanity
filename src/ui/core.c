@@ -1070,8 +1070,8 @@ ui_contact_offline(char *barejid, char *resource, char *status)
         FREE_SET_NULL(chatwin->resource_override);
     }
 
-    prefs_free_string(show_console);
-    prefs_free_string(show_chat_win);
+    g_free(show_console);
+    g_free(show_chat_win);
     jid_destroy(jid);
 }
 

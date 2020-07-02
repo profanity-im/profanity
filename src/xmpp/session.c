@@ -424,7 +424,7 @@ session_check_autoaway(void)
                     } else {
                         cons_show("Idle for %d minutes, status set to away (priority %d).", away_time, pri);
                     }
-                    prefs_free_string(message);
+                    g_free(message);
 
                     title_bar_set_presence(CONTACT_AWAY);
                 }
@@ -467,7 +467,7 @@ session_check_autoaway(void)
             } else {
                 cons_show("Idle for %d minutes, status set to xa (priority %d).", xa_time, pri);
             }
-            prefs_free_string(message);
+            g_free(message);
 
             title_bar_set_presence(CONTACT_XA);
         } else if (check && (idle_ms < away_time_ms)) {
@@ -498,7 +498,7 @@ session_check_autoaway(void)
     }
 
     free(curr_status);
-    prefs_free_string(mode);
+    g_free(mode);
 }
 
 static void
