@@ -55,7 +55,7 @@
 #define PROF "prof"
 
 static FILE *logp;
-GString *mainlogfile = NULL;
+static gchar *mainlogfile = NULL;
 
 static GTimeZone *tz;
 static GDateTime *dt;
@@ -148,20 +148,19 @@ log_init(log_level_t filter, char *log_file)
 {
     level_filter = filter;
     tz = g_time_zone_new_local();
-
-    gchar *lf;
-    lf = files_get_log_file(log_file);
+    gchar *lf = files_get_log_file(log_file);
 
     logp = fopen(lf, "a");
     g_chmod(lf, S_IRUSR | S_IWUSR);
-    mainlogfile = g_string_new(lf);
+    mainlogfile = g_strdup(lf);
+
     g_free(lf);
 }
 
 void
 log_reinit(void)
 {
-    char *lf = strdup(mainlogfile->str);
+    char *lf = strdup(mainlogfile);
     char *start = strrchr(lf, '/') +1;
     char *end = strstr(start, ".log");
     *end = '\0';
@@ -175,7 +174,7 @@ log_reinit(void)
 const char*
 get_log_file_location(void)
 {
-    return mainlogfile->str;
+    return mainlogfile;
 }
 
 log_level_t
@@ -187,7 +186,7 @@ log_get_filter(void)
 void
 log_close(void)
 {
-    g_string_free(mainlogfile, TRUE);
+    g_free(mainlogfile);
     mainlogfile = NULL;
     g_time_zone_unref(tz);
     if (logp) {
@@ -240,7 +239,7 @@ log_level_from_string(char *log_level)
 static void
 _rotate_log_file(void)
 {
-    gchar *log_file = strdup(mainlogfile->str);
+    gchar *log_file = g_strdup(mainlogfile);
     size_t len = strlen(log_file);
     gchar *log_file_new = malloc(len + 4);
     int i = 1;
@@ -252,7 +251,7 @@ _rotate_log_file(void)
             break;
     }
 
-    char *lf = strdup(mainlogfile->str);
+    char *lf = strdup(mainlogfile);
     char *start = strrchr(lf, '/') +1;
     char *end = strstr(start, ".log");
     *end = '\0';
