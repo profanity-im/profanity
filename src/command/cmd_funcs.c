@@ -9003,6 +9003,7 @@ cmd_url_open(ProfWin *window, const char *const command, gchar **args)
     if( 0 == g_strcmp0(scheme, "aesgcm")) {
         require_save = true;
     }
+    g_free(scheme);
 
     if (require_save) {
         gchar *save_args[] = { "open", args[1], "/tmp/profanity.tmp", NULL};
