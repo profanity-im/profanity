@@ -1377,7 +1377,9 @@ _handle_chat(xmpp_stanza_t *const stanza, gboolean is_mam)
  *
  *
  */
-static void _handle_ox_chat(xmpp_stanza_t *const stanza, ProfMessage *message, gboolean is_mam) {
+static void
+_handle_ox_chat(xmpp_stanza_t *const stanza, ProfMessage *message, gboolean is_mam)
+{
 #ifdef HAVE_LIBGPGME
 	xmpp_stanza_t *ox = stanza_get_child_by_name_and_ns(stanza, "openpgp", STANZA_NS_OPENPGP_0);
 	message->plain = p_ox_gpg_decrypt(xmpp_stanza_get_text(ox));
@@ -1485,16 +1487,18 @@ message_is_sent_by_us(const ProfMessage *const message, bool checkOID) {
 }
 
 #ifdef HAVE_LIBGPGME
-xmpp_stanza_t* _openpgp_signcrypt(xmpp_ctx_t* ctx, const char* const to, const char* const text) {
-
-  time_t now = time(NULL);
-  struct tm* tm = localtime(&now);
-  char buf[255];
-  strftime(buf, sizeof(buf), "%FT%T%z", tm);
+xmpp_stanza_t*
+_openpgp_signcrypt(xmpp_ctx_t* ctx, const char* const to, const char* const text)
+{
+    time_t now = time(NULL);
+    struct tm* tm = localtime(&now);
+    char buf[255];
+    strftime(buf, sizeof(buf), "%FT%T%z", tm);
     int randnr = rand() % 5;
     char rpad_data[randnr];
+
     for(int i = 0; i < randnr-1; i++) {
-      rpad_data[i] = 'c';
+        rpad_data[i] = 'c';
     }
     rpad_data[randnr-1] = '\0';
 
