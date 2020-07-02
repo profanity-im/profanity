@@ -526,14 +526,19 @@ prefs_get_string_with_option(preference_t pref, gchar *option)
     char *result = g_key_file_get_locale_string(prefs, group, key, option, NULL);
 
     if (result == NULL) {
-        if (def) {
-            return g_strdup(def);
-        } else {
-            return NULL;
+        // check for user set default
+        result = g_key_file_get_locale_string(prefs, group, key, "DEF", NULL);
+        if (result == NULL) {
+            if (def) {
+                // use hardcoded profanity default
+                return g_strdup(def);
+            } else {
+                return NULL;
+            }
         }
-    } else {
-        return result;
     }
+
+    return result;
 }
 
 gchar**
