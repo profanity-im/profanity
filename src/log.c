@@ -65,15 +65,16 @@ static GHashTable *logs;
 static GHashTable *groupchat_logs;
 static GDateTime *session_started;
 
-enum {
-    STDERR_BUFSIZE = 4000,
-    STDERR_RETRY_NR = 5,
-};
 static int stderr_inited;
 static log_level_t stderr_level;
 static int stderr_pipe[2];
 static char *stderr_buf;
 static GString *stderr_msg;
+
+enum {
+    STDERR_BUFSIZE = 4000,
+    STDERR_RETRY_NR = 5,
+};
 
 struct dated_chat_log {
     gchar *filename;
@@ -679,8 +680,8 @@ _free_chat_log(struct dated_chat_log *dated_log)
     }
 }
 
-static
-gboolean _key_equals(void *key1, void *key2)
+static gboolean
+_key_equals(void *key1, void *key2)
 {
     gchar *str1 = (gchar *) key1;
     gchar *str2 = (gchar *) key2;
@@ -807,7 +808,8 @@ log_stderr_handler(void)
     }
 }
 
-static int log_stderr_nonblock_set(int fd)
+static int
+log_stderr_nonblock_set(int fd)
 {
     int rc;
 
