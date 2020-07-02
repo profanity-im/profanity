@@ -9114,8 +9114,8 @@ cmd_url_open(ProfWin* window, const char* const command, gchar** args)
     gchar* suffix_cmd = g_strdup(suffix_cmd_pref[1]);
     g_strfreev(suffix_cmd_pref);
 
-    gchar* scheme = g_uri_parse_scheme(args[1]);
-    if (0 == g_strcmp0(scheme, "aesgcm")) {
+    gchar *scheme = g_uri_parse_scheme(args[1]);
+    if( 0 == g_strcmp0(scheme, OMEMO_AESGCM_URL_SCHEME)) {
         require_save = true;
     }
     g_free(scheme);
@@ -9221,7 +9221,8 @@ cmd_url_save(ProfWin* window, const char* const command, gchar** args)
 
     if (0 == g_strcmp0(scheme, "http")
         || 0 == g_strcmp0(scheme, "https")
-        || 0 == g_strcmp0(scheme, "aesgcm")) {
+        || 0 == g_strcmp0(scheme, OMEMO_AESGCM_URL_SCHEME)
+       ) {
         scheme_cmd = prefs_get_string_with_option(PREF_URL_SAVE_CMD, scheme);
     }
 

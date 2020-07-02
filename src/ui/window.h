@@ -72,7 +72,7 @@ void win_println_incoming_muc_msg(ProfWin* window, char* show_char, int flags, c
 void win_print_outgoing_muc_msg(ProfWin* window, char* show_char, const char* const me, const char* const id, const char* const replace_id, const char* const message);
 void win_print_history(ProfWin* window, const ProfMessage* const message);
 
-void win_print_http_upload(ProfWin* window, const char* const message, char* url);
+void win_print_http_transfer(ProfWin *window, const char *const message, char *url);
 
 void win_newline(ProfWin* window);
 void win_redraw(ProfWin* window);
