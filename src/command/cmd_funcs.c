@@ -8983,7 +8983,7 @@ cmd_url_open(ProfWin *window, const char *const command, gchar **args)
         }
     }
 
-    char **suffix_cmd_pref = prefs_get_string_list_with_option(PREF_URL_OPEN_CMD, NULL);
+    gchar **suffix_cmd_pref = prefs_get_string_list_with_option(PREF_URL_OPEN_CMD, NULL);
     if (suffix != NULL) {
         gchar *lowercase_suffix = g_ascii_strdown(suffix, -1);
         g_strfreev(suffix_cmd_pref);
@@ -9158,7 +9158,7 @@ cmd_executable(ProfWin *window, const char *const command, gchar **args)
             return TRUE;
         }
 
-        char *str = g_strjoinv(" ", &args[3]);
+        gchar *str = g_strjoinv(" ", &args[3]);
         const gchar* const list[] = {args[2], str, NULL};
         prefs_set_string_list_with_option(PREF_URL_OPEN_CMD, args[1], list);
         cons_show("`url open` command set to: %s for %s files", str, args[1]);
@@ -9169,7 +9169,7 @@ cmd_executable(ProfWin *window, const char *const command, gchar **args)
             return TRUE;
         }
 
-        char *str = g_strjoinv(" ", &args[2]);
+        gchar *str = g_strjoinv(" ", &args[2]);
         prefs_set_string_with_option(PREF_URL_SAVE_CMD, args[1], str);
         cons_show("`url save` command set to: %s for scheme %s", str, args[1]);
         g_free(str);

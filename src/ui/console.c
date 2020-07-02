@@ -2070,7 +2070,7 @@ cons_executable_setting(void)
     cons_show("Default '/avatar open' command (/executable avatar)                      : %s", avatar);
     prefs_free_string(avatar);
 
-    char **urlopen = prefs_get_string_list_with_option(PREF_URL_OPEN_CMD, "");
+    gchar **urlopen = prefs_get_string_list_with_option(PREF_URL_OPEN_CMD, "");
     cons_show("Default '/url open' command (/executable urlopen)                        : %s", urlopen[1]);
     g_strfreev(urlopen);
 

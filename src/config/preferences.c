@@ -536,7 +536,7 @@ prefs_get_string_with_option(preference_t pref, gchar *option)
     }
 }
 
-char**
+gchar**
 prefs_get_string_list_with_option(preference_t pref, gchar *option)
 {
     const char *group = _get_group(pref);
