@@ -96,20 +96,27 @@ static xmpp_stanza_t* _openpgp_signcrypt(xmpp_ctx_t* ctx, const char* const to, 
 
 static GHashTable *pubsub_event_handlers;
 
+static gboolean
+_handled_by_plugin(xmpp_stanza_t *const stanza)
+{
+    char *text;
+    size_t text_size;
+
+    xmpp_stanza_to_text(stanza, &text, &text_size);
+    gboolean cont = plugins_on_message_stanza_receive(text);
+    xmpp_free(connection_get_ctx(), text);
+
+    return !cont;
+}
+
 static int
 _message_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza, void *const userdata)
 {
     log_debug("Message stanza handler fired");
 
-    char *text;
-    size_t text_size;
-    xmpp_stanza_to_text(stanza, &text, &text_size);
-    gboolean cont = plugins_on_message_stanza_receive(text);
-    if (!cont) {
-        xmpp_free(connection_get_ctx(), text);
+    if (_handled_by_plugin(stanza)) {
         return 1;
     }
-    xmpp_free(connection_get_ctx(), text);
 
     // type according to RFC 6121
     const char *type = xmpp_stanza_get_type(stanza);
