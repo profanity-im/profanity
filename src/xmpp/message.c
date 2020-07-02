@@ -109,22 +109,10 @@ _message_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza, void *con
         xmpp_free(connection_get_ctx(), text);
         return 1;
     }
+    xmpp_free(connection_get_ctx(), text);
 
     // type according to RFC 6121
     const char *type = xmpp_stanza_get_type(stanza);
-
-    if (type == NULL) {
-        if (_handle_mam(stanza)) {
-            xmpp_free(connection_get_ctx(), text);
-            return 1;
-        }
-
-        log_info("Received <message> without 'type': %s", text);
-        xmpp_free(connection_get_ctx(), text);
-        return 1;
-    }
-
-    xmpp_free(connection_get_ctx(), text);
 
     if (g_strcmp0(type, STANZA_TYPE_ERROR) == 0) {
         _handle_error(stanza);
@@ -135,6 +123,11 @@ _message_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza, void *con
         //TODO: implement headline
     } else if (type == NULL || g_strcmp0(type, STANZA_TYPE_CHAT) != 0 || g_strcmp0(type, STANZA_TYPE_NORMAL) != 0 ) {
         // type: chat, normal (==NULL)
+
+        // XEP-0313: Message Archive Management
+        if (_handle_mam(stanza)) {
+            return 1;
+        }
 
         // XEP-0045: Multi-User Chat - invites - presence
         xmpp_stanza_t *mucuser = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_MUC_USER);
@@ -172,7 +165,14 @@ _message_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza, void *con
 
         _handle_chat(stanza, FALSE);
     } else {
-        log_info("Received <message> without 'type': %s", text);
+        // none of the allowed types
+        char *text;
+        size_t text_size;
+
+        xmpp_stanza_to_text(stanza, &text, &text_size);
+        log_info("Received <message> with invalid 'type': %s", text);
+
+        xmpp_free(connection_get_ctx(), text);
     }
 
     return 1;
