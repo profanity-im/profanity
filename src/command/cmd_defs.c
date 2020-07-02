@@ -2527,7 +2527,7 @@ static struct cmd_t command_defs[] =
             "/executable avatar xdg-open",
             "/executable urlopen DEF false \"xdg-open %u\"",
             "/executable urlopen html false \"firefox %u\"",
-            "/executable urlsave aesgcm \"omut -d %u %p\"")
+            "/executable urlsave aesgcm \"omut -d -o %p %u\"")
     },
 
     { "/url",
