@@ -160,7 +160,6 @@ _message_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza, void *con
         xmpp_stanza_t *receipts = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_RECEIPTS);
         if (receipts) {
             _handle_receipt_received(stanza);
-            return 1;
         }
 
         // XEP-0060: Publish-Subscribe
