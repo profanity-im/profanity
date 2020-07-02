@@ -989,7 +989,7 @@ out:
     message_free(message);
 }
 
-void
+static void
 _message_send_receipt(const char *const fulljid, const char *const message_id)
 {
     xmpp_ctx_t * const ctx = connection_get_ctx();
@@ -1034,7 +1034,7 @@ _handle_receipt_received(xmpp_stanza_t *const stanza)
     jid_destroy(jidp);
 }
 
-void
+static void
 _receipt_request_handler(xmpp_stanza_t *const stanza)
 {
     if (!prefs_get_boolean(PREF_RECEIPTS_SEND)) {
@@ -1487,7 +1487,7 @@ message_is_sent_by_us(const ProfMessage *const message, bool checkOID) {
 }
 
 #ifdef HAVE_LIBGPGME
-xmpp_stanza_t*
+static xmpp_stanza_t*
 _openpgp_signcrypt(xmpp_ctx_t* ctx, const char* const to, const char* const text)
 {
     time_t now = time(NULL);
