@@ -474,8 +474,8 @@ GSList*
 get_mentions(gboolean whole_word, gboolean case_sensitive, const char *const message, const char *const nick)
 {
     GSList *mentions = NULL;
-    char *message_search = case_sensitive ? strdup(message) : g_utf8_strdown(message, -1);
-    char *mynick_search = case_sensitive ? strdup(nick) : g_utf8_strdown(nick, -1);
+    gchar *message_search = case_sensitive ? g_strdup(message) : g_utf8_strdown(message, -1);
+    gchar *mynick_search = case_sensitive ? g_strdup(nick) : g_utf8_strdown(nick, -1);
 
     mentions = prof_occurrences(mynick_search, message_search, 0, whole_word, &mentions);
 
