@@ -133,8 +133,8 @@ _message_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza, void *con
         _handle_groupchat(stanza);
     } else if (g_strcmp0(type, STANZA_TYPE_HEADLINE) == 0) {
         //TODO: implement headline
-    } else {
-        // type: chat, normal (default if none is set)
+    } else if (type == NULL || g_strcmp0(type, STANZA_TYPE_CHAT) != 0 || g_strcmp0(type, STANZA_TYPE_NORMAL) != 0 ) {
+        // type: chat, normal (==NULL)
 
         // XEP-0045: Multi-User Chat - invites - presence
         xmpp_stanza_t *mucuser = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_MUC_USER);
@@ -171,6 +171,8 @@ _message_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza, void *con
         }
 
         _handle_chat(stanza, FALSE);
+    } else {
+        log_info("Received <message> without 'type': %s", text);
     }
 
     return 1;
@@ -1244,12 +1246,6 @@ out:
 static void
 _handle_chat(xmpp_stanza_t *const stanza, gboolean is_mam)
 {
-    // ignore if type not chat or absent
-    const char *type = xmpp_stanza_get_type(stanza);
-    if (type == NULL || g_strcmp0(type, STANZA_TYPE_CHAT) != 0) {
-        return;
-    }
-
     // check if carbon message
     gboolean res = _handle_carbons(stanza);
     if (res) {
