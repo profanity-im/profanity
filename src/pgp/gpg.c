@@ -1114,9 +1114,9 @@ _ox_key_is_usable(gpgme_key_t key, const char *const barejid, gboolean secret)
 {
     gboolean result = TRUE;
 
-    if(key->revoked) result = FALSE;
-    if(key->expired) result = FALSE;
-    if(key->disabled) result = FALSE;
+    if(key->revoked || key->expired || key->disabled ) {
+        result = FALSE;
+    }
 
     return result;
 }
