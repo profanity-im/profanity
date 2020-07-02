@@ -1256,13 +1256,6 @@ _handle_chat(xmpp_stanza_t *const stanza, gboolean is_mam)
         return;
     }
 
-    // ignore handled namespaces
-    xmpp_stanza_t *conf = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_CONFERENCE);
-    xmpp_stanza_t *captcha = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_CAPTCHA);
-    if (conf || captcha) {
-        return;
-    }
-
     // some clients send the mucuser namespace with private messages
     // if the namespace exists, and the stanza contains a body element, assume its a private message
     // otherwise exit the handler
