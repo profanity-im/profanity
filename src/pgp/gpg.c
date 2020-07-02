@@ -792,7 +792,8 @@ p_gpg_format_fp_str(char *fp)
  * This function will look for all public key with a XMPP-URI as UID.
  *
  */
-GHashTable* ox_gpg_public_keys(void){
+GHashTable*
+ox_gpg_public_keys(void) {
     gpgme_error_t error;
     GHashTable *result = g_hash_table_new_full(g_str_hash, g_str_equal, free, (GDestroyNotify)_p_gpg_free_key);
 
@@ -872,20 +873,25 @@ GHashTable* ox_gpg_public_keys(void){
 
 }
 
-char* p_ox_gpg_signcrypt(const char* const sender_barejid, const char* const recipient_barejid , const char* const message) {
+char*
+p_ox_gpg_signcrypt(const char* const sender_barejid, const char* const recipient_barejid , const char* const message)
+{
   setlocale (LC_ALL, "");
   gpgme_check_version (NULL);
   gpgme_set_locale (NULL, LC_CTYPE, setlocale (LC_CTYPE, NULL));
   gpgme_ctx_t ctx;
+
   gpgme_error_t error = gpgme_new (&ctx);
   if(GPG_ERR_NO_ERROR != error ) {
     printf("gpgme_new: %d\n", error);
     return NULL;
   }
+
   error = gpgme_set_protocol(ctx, GPGME_PROTOCOL_OPENPGP);
   if(error != 0) {
     log_error("GpgME Error: %s", gpgme_strerror(error));
   }
+
   gpgme_set_armor(ctx,0);
   gpgme_set_textmode(ctx,0);
   gpgme_set_offline(ctx,1);
@@ -970,7 +976,9 @@ char* p_ox_gpg_signcrypt(const char* const sender_barejid, const char* const rec
 
 }
 
-gboolean ox_is_private_key_available(const char *const barejid) {
+gboolean
+ox_is_private_key_available(const char *const barejid)
+{
     g_assert(barejid);
     gboolean result = FALSE;
 
@@ -985,7 +993,9 @@ gboolean ox_is_private_key_available(const char *const barejid) {
     return result;
 }
 
-gboolean ox_is_public_key_available(const char *const barejid) {
+gboolean
+ox_is_public_key_available(const char *const barejid)
+{
     g_assert(barejid);
     gboolean result = FALSE;
     gpgme_key_t key = _ox_key_lookup(barejid, FALSE);
@@ -1050,7 +1060,9 @@ _save_pubkeys(void)
     g_free(g_pubkeys_data);
 }
 
-static gpgme_key_t _ox_key_lookup(const char *const barejid, gboolean secret_only) {
+static gpgme_key_t
+_ox_key_lookup(const char *const barejid, gboolean secret_only)
+{
     g_assert(barejid);
     log_debug("Looking for %s key: %s", secret_only == TRUE ? "Private" : "Public",   barejid);
     gpgme_key_t key = NULL;
@@ -1097,7 +1109,9 @@ static gpgme_key_t _ox_key_lookup(const char *const barejid, gboolean secret_onl
     return key;
 }
 
-static gboolean _ox_key_is_usable(gpgme_key_t key, const char *const barejid, gboolean secret) {
+static gboolean
+_ox_key_is_usable(gpgme_key_t key, const char *const barejid, gboolean secret)
+{
     gboolean result = TRUE;
 
     if(key->revoked) result = FALSE;
@@ -1116,20 +1130,25 @@ static gboolean _ox_key_is_usable(gpgme_key_t key, const char *const barejid, gb
  *
  * @result decrypt XMPP OX Message NULL terminated C-String
  */
-char* p_ox_gpg_decrypt(char* base64) {
+char*
+p_ox_gpg_decrypt(char* base64)
+{
   setlocale (LC_ALL, "");
   gpgme_check_version (NULL);
   gpgme_set_locale (NULL, LC_CTYPE, setlocale (LC_CTYPE, NULL));
   gpgme_ctx_t ctx;
   gpgme_error_t error = gpgme_new (&ctx);
+
   if(GPG_ERR_NO_ERROR != error ) {
     printf("gpgme_new: %d\n", error);
     return NULL;
   }
+
   error = gpgme_set_protocol(ctx, GPGME_PROTOCOL_OPENPGP);
   if(error != 0) {
     log_error("GpgME Error: %s", gpgme_strerror(error));
   }
+
   gpgme_set_armor(ctx,0);
   gpgme_set_textmode(ctx,0);
   gpgme_set_offline(ctx,1);
