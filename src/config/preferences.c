@@ -169,7 +169,7 @@ static void _prefs_load(void)
         value = g_string_append(value, val);
         value = g_string_append(value, " %u;");
 
-        g_key_file_set_string(prefs, PREF_GROUP_EXECUTABLES, "url.open.cmd", value->str);
+        g_key_file_set_locale_string(prefs, PREF_GROUP_EXECUTABLES, "url.open.cmd", "DEF", value->str);
         g_key_file_remove_key(prefs, PREF_GROUP_LOGGING, "urlopen.cmd", NULL);
 
         g_string_free(value, TRUE);
