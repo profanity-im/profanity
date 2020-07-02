@@ -65,6 +65,7 @@
 #define PREF_GROUP_OX "ox"
 #define PREF_GROUP_MUC "muc"
 #define PREF_GROUP_PLUGINS "plugins"
+#define PREF_GROUP_EXECUTABLES "executables"
 
 #define INPBLOCK_DEFAULT 1000
 
@@ -80,6 +81,7 @@ static const char* _get_group(preference_t pref);
 static const char* _get_key(preference_t pref);
 static gboolean _get_default_boolean(preference_t pref);
 static char* _get_default_string(preference_t pref);
+static char** _get_default_string_list(preference_t pref);
 
 static void _prefs_load(void)
 {
@@ -160,6 +162,27 @@ static void _prefs_load(void)
         }
     }
 
+    // 0.9.0 introduced /urlopen. It was saved under "logging" section. Now we have a new "executables" section.
+    if (g_key_file_has_key(prefs, PREF_GROUP_LOGGING, "urlopen.cmd", NULL)) {
+        char *val = g_key_file_get_string(prefs, PREF_GROUP_LOGGING, "urlopen.cmd", NULL);
+
+        GString *value = g_string_new("false;");
+        value = g_string_append(value, val);
+        value = g_string_append(value, " %u;");
+
+        g_key_file_set_locale_string(prefs, PREF_GROUP_EXECUTABLES, "url.open.cmd", "DEF", value->str);
+        g_key_file_remove_key(prefs, PREF_GROUP_LOGGING, "urlopen.cmd", NULL);
+
+        g_string_free(value, TRUE);
+    }
+
+    // 0.9.0 introduced configurable /avatar. It was saved under "logging" section. Now we have a new "executables" section.
+    if (g_key_file_has_key(prefs, PREF_GROUP_LOGGING, "avatar.cmd", NULL)) {
+        char *value = g_key_file_get_string(prefs, PREF_GROUP_LOGGING, "avatar.cmd", NULL);
+        g_key_file_set_string(prefs, PREF_GROUP_EXECUTABLES, "avatar.cmd", value);
+        g_key_file_remove_key(prefs, PREF_GROUP_LOGGING, "avatar.cmd", NULL);
+    }
+
     _save_prefs();
 
     boolean_choice_ac = autocomplete_new();
@@ -218,7 +241,7 @@ prefs_load(char *config_file)
     }
 
     prefs = g_key_file_new();
-    g_key_file_load_from_file(prefs, prefs_loc, G_KEY_FILE_KEEP_COMMENTS, NULL);
+    g_key_file_load_from_file(prefs, prefs_loc, G_KEY_FILE_KEEP_COMMENTS | G_KEY_FILE_KEEP_TRANSLATIONS, NULL);
 
     _prefs_load();
 }
@@ -494,12 +517,62 @@ prefs_get_string(preference_t pref)
     }
 }
 
+char*
+prefs_get_string_with_option(preference_t pref, gchar *option)
+{
+    const char *group = _get_group(pref);
+    const char *key = _get_key(pref);
+    char *def = _get_default_string(pref);
+
+    char *result = g_key_file_get_locale_string(prefs, group, key, option, NULL);
+
+    if (result == NULL) {
+        // check for user set default
+        result = g_key_file_get_locale_string(prefs, group, key, "DEF", NULL);
+        if (result == NULL) {
+            if (def) {
+                // use hardcoded profanity default
+                return g_strdup(def);
+            } else {
+                return NULL;
+            }
+        }
+    }
+
+    return result;
+}
+
+gchar**
+prefs_get_string_list_with_option(preference_t pref, gchar *option)
+{
+    const char *group = _get_group(pref);
+    const char *key = _get_key(pref);
+    char **def = _get_default_string_list(pref);
+
+    gchar **result = g_key_file_get_locale_string_list(prefs, group, key, option, NULL, NULL);
+    if (result) {
+        g_strfreev(def);
+        return result;
+    }
+
+    result = g_key_file_get_string_list(prefs, group, key, NULL, NULL);
+    if (result) {
+        g_strfreev(def);
+        return result;
+    }
+
+    if (def) {
+        return def;
+    } else {
+        g_strfreev(def);
+        return NULL;
+    }
+}
+
 void
 prefs_free_string(char *pref)
 {
-    if (pref) {
-        g_free(pref);
-    }
+    g_free(pref);
 }
 
 void
@@ -511,6 +584,42 @@ prefs_set_string(preference_t pref, char *value)
         g_key_file_remove_key(prefs, group, key, NULL);
     } else {
         g_key_file_set_string(prefs, group, key, value);
+    }
+}
+
+void
+prefs_set_string_with_option(preference_t pref, char *option, char *value)
+{
+    const char *group = _get_group(pref);
+    const char *key = _get_key(pref);
+    if (value == NULL) {
+        g_key_file_remove_key(prefs, group, key, NULL);
+    } else {
+        g_key_file_set_locale_string(prefs, group, key, option, value);
+    }
+}
+
+void
+prefs_set_string_list_with_option(preference_t pref, char *option, const gchar* const *values)
+{
+    const char *group = _get_group(pref);
+    const char *key = _get_key(pref);
+    if (values == NULL || *values == NULL){
+        if (g_strcmp0(option, "*") == 0) {
+            g_key_file_set_string_list(prefs, group, key, NULL, 0);
+        } else {
+            g_key_file_set_locale_string_list(prefs, group, key, option, NULL, 0);
+        }
+    } else {
+        guint num_values = 0;
+        while(values[num_values]) {
+            num_values++;
+        }
+        if (g_strcmp0(option, "*") == 0) {
+            g_key_file_set_string_list(prefs, group, key, values, num_values);
+        } else {
+            g_key_file_set_locale_string_list(prefs, group, key, option, values, num_values);
+        }
     }
 }
 
@@ -1796,9 +1905,11 @@ _get_group(preference_t pref)
         case PREF_GRLOG:
         case PREF_LOG_ROTATE:
         case PREF_LOG_SHARED:
+            return PREF_GROUP_LOGGING;
         case PREF_AVATAR_CMD:
         case PREF_URL_OPEN_CMD:
-            return PREF_GROUP_LOGGING;
+        case PREF_URL_SAVE_CMD:
+            return PREF_GROUP_EXECUTABLES;
         case PREF_AUTOAWAY_CHECK:
         case PREF_AUTOAWAY_MODE:
         case PREF_AUTOAWAY_MESSAGE:
@@ -2088,7 +2199,9 @@ _get_key(preference_t pref)
         case PREF_MAM:
             return "mam";
         case PREF_URL_OPEN_CMD:
-            return "urlopen.cmd";
+            return "url.open.cmd";
+        case PREF_URL_SAVE_CMD:
+            return "url.save.cmd";
         default:
             return NULL;
     }
@@ -2225,8 +2338,28 @@ _get_default_string(preference_t pref)
         case PREF_COLOR_NICK:
             return "false";
         case PREF_AVATAR_CMD:
-        case PREF_URL_OPEN_CMD:
             return "xdg-open";
+        case PREF_URL_SAVE_CMD:
+            return "curl -o %p %u";
+        default:
+            return NULL;
+    }
+}
+
+// the default setting for a string list type preference
+// if it is not specified in .profrc
+static char**
+_get_default_string_list(preference_t pref)
+{
+    char **str_array = NULL;
+
+    switch (pref)
+    {
+        case PREF_URL_OPEN_CMD:
+            str_array = g_malloc0(3);
+            str_array[0] = g_strdup("false");
+            str_array[1] = g_strdup("xdg-open %u");
+            return str_array;
         default:
             return NULL;
     }

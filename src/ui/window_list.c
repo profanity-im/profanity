@@ -1156,7 +1156,7 @@ wins_add_urls_ac(const ProfWin *const win, const ProfMessage *const message)
     GRegex *regex;
     GMatchInfo *match_info;
 
-    regex = g_regex_new("https?://\\S+", 0, 0, NULL);
+    regex = g_regex_new("(https?|aesgcm)://\\S+", 0, 0, NULL);
     g_regex_match (regex, message->plain, 0, &match_info);
 
     while (g_match_info_matches (match_info))
