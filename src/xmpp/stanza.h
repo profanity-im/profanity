@@ -134,6 +134,7 @@
 
 #define STANZA_TYPE_CHAT "chat"
 #define STANZA_TYPE_GROUPCHAT "groupchat"
+#define STANZA_TYPE_HEADLINE "headline"
 #define STANZA_TYPE_UNAVAILABLE "unavailable"
 #define STANZA_TYPE_SUBSCRIBE "subscribe"
 #define STANZA_TYPE_SUBSCRIBED "subscribed"
