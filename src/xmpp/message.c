@@ -88,6 +88,7 @@ static void _handle_chat(xmpp_stanza_t *const stanza, gboolean is_mam);
 static void _handle_ox_chat(xmpp_stanza_t *const stanza, ProfMessage *message, gboolean is_mam);
 static void _send_message_stanza(xmpp_stanza_t *const stanza);
 static gboolean _handle_mam(xmpp_stanza_t *const stanza);
+static void _handle_pubsub(xmpp_stanza_t *const stanza, xmpp_stanza_t *const event);
 
 #ifdef HAVE_LIBGPGME
 static xmpp_stanza_t* _openpgp_signcrypt(xmpp_ctx_t* ctx, const char* const to, const char* const text);
@@ -160,19 +161,7 @@ _message_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza, void *con
     // XEP-0060: Publish-Subscribe
     xmpp_stanza_t *event = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_PUBSUB_EVENT);
     if (event) {
-        xmpp_stanza_t *child = xmpp_stanza_get_children(event);
-        if (child) {
-            const char *node = xmpp_stanza_get_attribute(child, STANZA_ATTR_NODE);
-            if (node) {
-                ProfMessageHandler *handler = g_hash_table_lookup(pubsub_event_handlers, node);
-                if (handler) {
-                    int keep = handler->func(stanza, handler->userdata);
-                    if (!keep) {
-                        g_hash_table_remove(pubsub_event_handlers, node);
-                    }
-                }
-            }
-        }
+        _handle_pubsub(stanza, event);
     }
 
     _handle_chat(stanza, FALSE);
@@ -1427,6 +1416,23 @@ _handle_mam(xmpp_stanza_t *const stanza)
     _handle_chat(message_stanza, TRUE);
 
     return TRUE;
+}
+
+static void
+_handle_pubsub(xmpp_stanza_t *const stanza, xmpp_stanza_t *const event) {
+    xmpp_stanza_t *child = xmpp_stanza_get_children(event);
+    if (child) {
+        const char *node = xmpp_stanza_get_attribute(child, STANZA_ATTR_NODE);
+        if (node) {
+            ProfMessageHandler *handler = g_hash_table_lookup(pubsub_event_handlers, node);
+            if (handler) {
+                int keep = handler->func(stanza, handler->userdata);
+                if (!keep) {
+                    g_hash_table_remove(pubsub_event_handlers, node);
+                }
+            }
+        }
+    }
 }
 
 static void
