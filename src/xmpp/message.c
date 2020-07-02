@@ -128,31 +128,36 @@ _message_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza, void *con
         _handle_error(stanza);
     }
 
-    // if muc
+    // XEP-0045: Multi-User Chat
     if (g_strcmp0(type, STANZA_TYPE_GROUPCHAT) == 0) {
         _handle_groupchat(stanza);
     }
 
+    // XEP-0045: Multi-User Chat
     xmpp_stanza_t *mucuser = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_MUC_USER);
     if (mucuser) {
         _handle_muc_user(stanza);
     }
 
+    // XEP-0249: Direct MUC Invitations
     xmpp_stanza_t *conference = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_CONFERENCE);
     if (conference) {
         _handle_conference(stanza);
     }
 
+    // XEP-0158: CAPTCHA Forms
     xmpp_stanza_t *captcha = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_CAPTCHA);
     if (captcha) {
         _handle_captcha(stanza);
     }
 
+    // XEP-0184: Message Delivery Receipts
     xmpp_stanza_t *receipts = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_RECEIPTS);
     if (receipts) {
         _handle_receipt_received(stanza);
     }
 
+    // XEP-0060: Publish-Subscribe
     xmpp_stanza_t *event = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_PUBSUB_EVENT);
     if (event) {
         xmpp_stanza_t *child = xmpp_stanza_get_children(event);
