@@ -86,7 +86,7 @@ static void _handle_captcha(xmpp_stanza_t *const stanza);
 static void _handle_receipt_received(xmpp_stanza_t *const stanza);
 static void _handle_chat(xmpp_stanza_t *const stanza, gboolean is_mam, gboolean is_carbon);
 static void _handle_ox_chat(xmpp_stanza_t *const stanza, ProfMessage *message, gboolean is_mam);
-static xmpp_stanza_t* _handle_carbons(xmpp_stanza_t *const stanza, xmpp_stanza_t *const wrapping_msg_stanza);
+static xmpp_stanza_t* _handle_carbons(xmpp_stanza_t *const stanza);
 static void _send_message_stanza(xmpp_stanza_t *const stanza);
 static gboolean _handle_mam(xmpp_stanza_t *const stanza);
 static void _handle_pubsub(xmpp_stanza_t *const stanza, xmpp_stanza_t *const event);
@@ -213,9 +213,21 @@ _message_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza, void *con
         // XEP-0280: Message Carbons
         xmpp_stanza_t *carbons = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_CARBONS);
         if (carbons) {
-            is_carbon = TRUE;
-            // returns NULL if it was a carbon that was invalid, so that we dont parse later
-            msg_stanza = _handle_carbons(carbons, stanza);
+
+            // carbon must come from ourselves
+            char *mybarejid = connection_get_barejid();
+            const char *const stanza_from = xmpp_stanza_get_from(stanza);
+
+            if (g_strcmp0(mybarejid, stanza_from) != 0) {
+                log_warning("Invalid carbon received, from: %s", stanza_from);
+                msg_stanza = NULL;
+            } else {
+                is_carbon = TRUE;
+                // returns NULL if it was a carbon that was invalid, so that we dont parse later
+                msg_stanza = _handle_carbons(carbons);
+            }
+
+            free(mybarejid);
         }
 
         if (msg_stanza) {
@@ -1170,7 +1182,7 @@ out:
 }
 
 static xmpp_stanza_t*
-_handle_carbons(xmpp_stanza_t *const stanza, xmpp_stanza_t *const wrapping_msg_stanza)
+_handle_carbons(xmpp_stanza_t *const stanza)
 {
     const char *name = xmpp_stanza_get_name(stanza);
     if (!name) {
@@ -1201,16 +1213,6 @@ _handle_carbons(xmpp_stanza_t *const stanza, xmpp_stanza_t *const wrapping_msg_s
         return NULL;
     }
 
-    // carbon must come from ourselves
-    char *mybarejid = connection_get_barejid();
-    const char *const stanza_from = xmpp_stanza_get_from(wrapping_msg_stanza);
-    if (g_strcmp0(mybarejid, stanza_from) != 0) {
-        free(mybarejid);
-        log_warning("Invalid carbon received, from: %s", stanza_from);
-        return NULL;
-    }
-
-    free(mybarejid);
     return message_stanza;
 }
 
