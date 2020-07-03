@@ -1234,11 +1234,12 @@ _handle_carbons(xmpp_stanza_t *const stanza)
     if (x) {
         message->encrypted = xmpp_stanza_get_text(x);
     }
+
     // OX
     xmpp_stanza_t *ox = xmpp_stanza_get_child_by_ns(message_stanza, STANZA_NS_OPENPGP_0);
     if( ox ) {
        message->enc=PROF_MSG_ENC_OX;
-      _handle_ox_chat(message_stanza,message, FALSE);
+      _handle_ox_chat(message_stanza, message, FALSE);
     }
 
     //TODO: maybe also add is_carbon maybe even an enum with outgoing/incoming
