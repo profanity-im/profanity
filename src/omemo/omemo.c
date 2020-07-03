@@ -98,7 +98,7 @@ struct omemo_context_t {
     GHashTable *pre_key_store;
     GHashTable *signed_pre_key_store;
     identity_key_store_t identity_key_store;
-    GHashTable *device_ids;
+//    GHashTable *device_ids;
     GString *identity_filename;
     GKeyFile *identity_keyfile;
     GString *trust_filename;

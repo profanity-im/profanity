@@ -441,29 +441,48 @@ _omemo_receive_devicelist(xmpp_stanza_t *const stanza, void *const userdata)
         return 1;
     }
 
-    xmpp_stanza_t *item = xmpp_stanza_get_child_by_name(items, "item");
-    if (item) {
-        if (g_strcmp0(xmpp_stanza_get_id(item), "current") == 0 ) {
-            xmpp_stanza_t *list = xmpp_stanza_get_child_by_ns(item, STANZA_NS_OMEMO);
-            if (!list) {
-                return 1;
-            }
 
-            xmpp_stanza_t *device;
-            for (device = xmpp_stanza_get_children(list); device != NULL; device = xmpp_stanza_get_next(device)) {
-                if (g_strcmp0(xmpp_stanza_get_name(device), "device") != 0) {
-                    continue;
-                }
-
-                const char *id = xmpp_stanza_get_id(device);
-                if (id != NULL) {
-                    device_list = g_list_append(device_list, GINT_TO_POINTER(strtoul(id, NULL, 10)));
-                } else {
-                    log_error("OMEMO: received device without ID");
-                }
+    // Looking for "current" item - if there is no current, take the first item.
+    xmpp_stanza_t* first = NULL;
+    xmpp_stanza_t* current = NULL;
+    
+    xmpp_stanza_t *item = xmpp_stanza_get_children(items);
+    while ( item ) {
+        if (g_strcmp0(xmpp_stanza_get_name(item), "item") == 0) {
+            first = item;
+            if (g_strcmp0(xmpp_stanza_get_id(item), "current") == 0 ) {
+                current = item;
+                break;
             }
+        }
+        item = xmpp_stanza_get_next(item);
+    }
+
+    if(current) {
+        item = current;
+    } else if( first ) {
+        log_warning("OMEMO: User %s has a non 'current' device item list: %s.", from, xmpp_stanza_get_id(first));
+        item = first;
+    } else {
+        return 1;
+    }
+
+    xmpp_stanza_t *list = xmpp_stanza_get_child_by_ns(item, STANZA_NS_OMEMO);
+    if (!list) {
+        return 1;
+    }
+
+    xmpp_stanza_t *device;
+    for (device = xmpp_stanza_get_children(list); device != NULL; device = xmpp_stanza_get_next(device)) {
+        if (g_strcmp0(xmpp_stanza_get_name(device), "device") != 0) {
+            continue;
+        }
+
+        const char *id = xmpp_stanza_get_id(device);
+        if (id != NULL) {
+            device_list = g_list_append(device_list, GINT_TO_POINTER(strtoul(id, NULL, 10)));
         } else {
-            log_warning("OMEMO: User %s has a non 'current' device item list: %s.", from, xmpp_stanza_get_id(item));
+            log_error("OMEMO: received device without ID");
         }
     }
 
