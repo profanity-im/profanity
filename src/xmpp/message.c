@@ -109,6 +109,19 @@ _handled_by_plugin(xmpp_stanza_t *const stanza)
     return !cont;
 }
 
+static void
+_handle_headline(xmpp_stanza_t *const stanza)
+{
+    char* text = NULL;
+    xmpp_stanza_t *body = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_BODY);
+    if (body) {
+        text = xmpp_stanza_get_text(body);
+        if (text) {
+            cons_show("Headline: %s", text);
+        }
+    }
+}
+
 static int
 _message_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza, void *const userdata)
 {
@@ -127,7 +140,7 @@ _message_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza, void *con
         // XEP-0045: Multi-User Chat
         _handle_groupchat(stanza);
     } else if (g_strcmp0(type, STANZA_TYPE_HEADLINE) == 0) {
-        //TODO: implement headline
+        _handle_headline(stanza);
     } else if (type == NULL || g_strcmp0(type, STANZA_TYPE_CHAT) != 0 || g_strcmp0(type, STANZA_TYPE_NORMAL) != 0 ) {
         // type: chat, normal (==NULL)
 
