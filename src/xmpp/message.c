@@ -1264,18 +1264,15 @@ _handle_carbons(xmpp_stanza_t *const stanza)
     }
 
     //TODO: maybe also add is_carbon maybe even an enum with outgoing/incoming
-    //could be that then we can have sv_ev_carbon no incoming/outgoing
     if (message->plain || message->encrypted || message->body) {
+        message->from_jid = jid_from;
+        message->to_jid = jid_to;
+
         // if we are the recipient, treat as standard incoming message
         if (g_strcmp0(mybarejid, jid_to->barejid) == 0) {
-            message->from_jid = jid_from;
-            message->to_jid = jid_to;
             sv_ev_incoming_carbon(message);
-
         // else treat as a sent message
         } else {
-            message->from_jid = jid_from;
-            message->to_jid = jid_to;
             sv_ev_outgoing_carbon(message);
         }
     }
