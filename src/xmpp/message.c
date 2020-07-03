@@ -124,6 +124,28 @@ _handle_headline(xmpp_stanza_t *const stanza)
     }
 }
 
+static void
+_handle_chat_states(xmpp_stanza_t *const stanza, Jid *const jid)
+{
+    gboolean gone = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_GONE) != NULL;
+    gboolean typing = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_COMPOSING) != NULL;
+    gboolean paused = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_PAUSED) != NULL;
+    gboolean inactive = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_INACTIVE) != NULL;
+    if (gone) {
+        sv_ev_gone(jid->barejid, jid->resourcepart);
+    } else if (typing) {
+        sv_ev_typing(jid->barejid, jid->resourcepart);
+    } else if (paused) {
+        sv_ev_paused(jid->barejid, jid->resourcepart);
+    } else if (inactive) {
+        sv_ev_inactive(jid->barejid, jid->resourcepart);
+    } else if (stanza_contains_chat_state(stanza)) {
+        sv_ev_activity(jid->barejid, jid->resourcepart, TRUE);
+    } else {
+        sv_ev_activity(jid->barejid, jid->resourcepart, FALSE);
+    }
+}
+
 static int
 _message_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza, void *const userdata)
 {
@@ -1360,25 +1382,10 @@ _handle_chat(xmpp_stanza_t *const stanza, gboolean is_mam)
         _receipt_request_handler(stanza);
     }
 
-    // handle chat sessions and states
+    // 0085 works only with resource
     if (jid->resourcepart) {
-        gboolean gone = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_GONE) != NULL;
-        gboolean typing = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_COMPOSING) != NULL;
-        gboolean paused = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_PAUSED) != NULL;
-        gboolean inactive = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_INACTIVE) != NULL;
-        if (gone) {
-            sv_ev_gone(jid->barejid, jid->resourcepart);
-        } else if (typing) {
-            sv_ev_typing(jid->barejid, jid->resourcepart);
-        } else if (paused) {
-            sv_ev_paused(jid->barejid, jid->resourcepart);
-        } else if (inactive) {
-            sv_ev_inactive(jid->barejid, jid->resourcepart);
-        } else if (stanza_contains_chat_state(stanza)) {
-            sv_ev_activity(jid->barejid, jid->resourcepart, TRUE);
-        } else {
-            sv_ev_activity(jid->barejid, jid->resourcepart, FALSE);
-        }
+        // XEP-0085: Chat State Notifications
+        _handle_chat_states(stanza, jid);
     }
 
     message_free(message);
