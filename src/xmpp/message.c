@@ -84,8 +84,9 @@ static void _handle_muc_private_message(xmpp_stanza_t *const stanza);
 static void _handle_conference(xmpp_stanza_t *const stanza);
 static void _handle_captcha(xmpp_stanza_t *const stanza);
 static void _handle_receipt_received(xmpp_stanza_t *const stanza);
-static void _handle_chat(xmpp_stanza_t *const stanza, gboolean is_mam);
+static void _handle_chat(xmpp_stanza_t *const stanza, gboolean is_mam, gboolean is_carbon);
 static void _handle_ox_chat(xmpp_stanza_t *const stanza, ProfMessage *message, gboolean is_mam);
+static xmpp_stanza_t* _handle_carbons(xmpp_stanza_t *const stanza, xmpp_stanza_t *const wrapping_msg_stanza);
 static void _send_message_stanza(xmpp_stanza_t *const stanza);
 static gboolean _handle_mam(xmpp_stanza_t *const stanza);
 static void _handle_pubsub(xmpp_stanza_t *const stanza, xmpp_stanza_t *const event);
@@ -206,7 +207,20 @@ _message_handler(xmpp_conn_t *const conn, xmpp_stanza_t *const stanza, void *con
             return 1;
         }
 
-        _handle_chat(stanza, FALSE);
+        xmpp_stanza_t *msg_stanza = stanza;
+        gboolean is_carbon = FALSE;
+
+        // XEP-0280: Message Carbons
+        xmpp_stanza_t *carbons = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_CARBONS);
+        if (carbons) {
+            is_carbon = TRUE;
+            // returns NULL if it was a carbon that was invalid, so that we dont parse later
+            msg_stanza = _handle_carbons(carbons, stanza);
+        }
+
+        if (msg_stanza) {
+            _handle_chat(msg_stanza, FALSE, is_carbon);
+        }
     } else {
         // none of the allowed types
         char *text;
@@ -1155,143 +1169,54 @@ out:
     message_free(message);
 }
 
-static gboolean
-_handle_carbons(xmpp_stanza_t *const stanza)
+static xmpp_stanza_t*
+_handle_carbons(xmpp_stanza_t *const stanza, xmpp_stanza_t *const wrapping_msg_stanza)
 {
-    xmpp_stanza_t *carbons = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_CARBONS);
-    if (!carbons) {
-        return FALSE;
-    }
-
-    const char *name = xmpp_stanza_get_name(carbons);
+    const char *name = xmpp_stanza_get_name(stanza);
     if (!name) {
         log_error("Unable to retrieve stanza name for Carbon");
-        return TRUE;
+        return NULL;
     }
 
+    /* TODO: private shouldn't arrive at the client, should it?
     if (g_strcmp0(name, "private") == 0) {
         log_info("Carbon received with private element.");
-        return FALSE;
     }
+    */
 
     if ((g_strcmp0(name, "received") != 0) && (g_strcmp0(name, "sent") != 0)) {
         log_warning("Carbon received with unrecognised stanza name: %s", name);
-        return TRUE;
+        return NULL;
     }
 
-    xmpp_stanza_t *forwarded = xmpp_stanza_get_child_by_ns(carbons, STANZA_NS_FORWARD);
+    xmpp_stanza_t *forwarded = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_FORWARD);
     if (!forwarded) {
         log_warning("Carbon received with no forwarded element");
-        return TRUE;
+        return NULL;
     }
 
     xmpp_stanza_t *message_stanza = xmpp_stanza_get_child_by_name(forwarded, STANZA_NAME_MESSAGE);
     if (!message_stanza) {
         log_warning("Carbon received with no message element");
-        return TRUE;
+        return NULL;
     }
 
+    // carbon must come from ourselves
     char *mybarejid = connection_get_barejid();
-    const char *const stanza_from = xmpp_stanza_get_from(stanza);
+    const char *const stanza_from = xmpp_stanza_get_from(wrapping_msg_stanza);
     if (g_strcmp0(mybarejid, stanza_from) != 0) {
+        free(mybarejid);
         log_warning("Invalid carbon received, from: %s", stanza_from);
-        return TRUE;
+        return NULL;
     }
 
-    ProfMessage *message = message_init();
-    message->type = PROF_MSG_TYPE_CHAT;
-
-    // check whether message was a MUC PM
-    xmpp_stanza_t *mucuser = xmpp_stanza_get_child_by_ns(message_stanza, STANZA_NS_MUC_USER);
-    if (mucuser) {
-        message->type = PROF_MSG_TYPE_MUCPM;
-    }
-
-    // id
-    const char *id = xmpp_stanza_get_id(message_stanza);
-    if (id) {
-        message->id = strdup(id);
-    }
-
-    // replace id
-    xmpp_stanza_t *replace_id_stanza = xmpp_stanza_get_child_by_ns(message_stanza, STANZA_NS_LAST_MESSAGE_CORRECTION);
-    if (replace_id_stanza) {
-        const char *replace_id = xmpp_stanza_get_id(replace_id_stanza);
-        if (replace_id) {
-            message->replace_id = strdup(replace_id);
-        }
-    }
-
-    // check omemo encryption
-#ifdef HAVE_OMEMO
-    message->plain = omemo_receive_message(message_stanza, &message->trusted);
-    if (message->plain != NULL) {
-        message->enc = PROF_MSG_ENC_OMEMO;
-    }
-#endif
-
-    const gchar *to = xmpp_stanza_get_to(message_stanza);
-    const gchar *from = xmpp_stanza_get_from(message_stanza);
-
-    // happens when receive a carbon of a self sent message
-    // really? maybe some servers do this, but it's not required.
-    if (!to) to = from;
-
-    Jid *jid_from = jid_create(from);
-    Jid *jid_to = jid_create(to);
-
-    message->body = xmpp_message_get_body(message_stanza);
-
-    if (!message->plain && !message->body) {
-        log_error("Message received without body from: %s", jid_from->fulljid);
-        jid_destroy(jid_from);
-        jid_destroy(jid_to);
-        goto out;
-    } else if (!message->plain) {
-        message->plain = strdup(message->body);
-    }
-
-    // check for pgp encrypted message
-    xmpp_stanza_t *x = xmpp_stanza_get_child_by_ns(message_stanza, STANZA_NS_ENCRYPTED);
-    if (x) {
-        message->encrypted = xmpp_stanza_get_text(x);
-    }
-
-    // OX
-    xmpp_stanza_t *ox = xmpp_stanza_get_child_by_ns(message_stanza, STANZA_NS_OPENPGP_0);
-    if (ox) {
-        _handle_ox_chat(message_stanza, message, FALSE);
-    }
-
-    //TODO: maybe also add is_carbon maybe even an enum with outgoing/incoming
-    if (message->plain || message->encrypted || message->body) {
-        message->from_jid = jid_from;
-        message->to_jid = jid_to;
-
-        // if we are the recipient, treat as standard incoming message
-        if (g_strcmp0(mybarejid, jid_to->barejid) == 0) {
-            sv_ev_incoming_carbon(message);
-        // else treat as a sent message
-        } else {
-            sv_ev_outgoing_carbon(message);
-        }
-    }
-
-out:
-    message_free(message);
     free(mybarejid);
-    return TRUE;
+    return message_stanza;
 }
 
 static void
-_handle_chat(xmpp_stanza_t *const stanza, gboolean is_mam)
+_handle_chat(xmpp_stanza_t *const stanza, gboolean is_mam, gboolean is_carbon)
 {
-    // check if carbon message
-    gboolean res = _handle_carbons(stanza);
-    if (res) {
-        return;
-    }
-
     // some clients send the mucuser namespace with private messages
     // if the namespace exists, and the stanza contains a body element, assume its a private message
     // otherwise exit the handler
@@ -1307,17 +1232,34 @@ _handle_chat(xmpp_stanza_t *const stanza, gboolean is_mam)
     }
     Jid *jid = jid_create(from);
 
+    Jid *to_jid = NULL;
+    const gchar *to = xmpp_stanza_get_to(stanza);
+    if (to) {
+        to_jid = jid_create(to);
+    }
+
     // private message from chat room use full jid (room/nick)
     if (muc_active(jid->barejid)) {
         _handle_muc_private_message(stanza);
         jid_destroy(jid);
+        jid_destroy(to_jid);
         return;
     }
 
     // standard chat message, use jid without resource
     ProfMessage *message = message_init();
-    message->from_jid = jid;
     message->is_mam = is_mam;
+    message->from_jid = jid;
+    if (to_jid) {
+        message->to_jid = to_jid;
+    } else {
+        if (is_carbon) {
+            // happens when receive a carbon of a self sent message
+            // really? maybe some servers do this, but it's not required.
+            Jid *from_jid = jid_create(from);
+            message->to_jid = from_jid;
+        }
+    }
 
     if (mucuser) {
         message->type = PROF_MSG_TYPE_MUCPM;
@@ -1374,9 +1316,22 @@ _handle_chat(xmpp_stanza_t *const stanza, gboolean is_mam)
     }
 
     if (message->plain || message->body || message->encrypted) {
-        sv_ev_incoming_message(message);
+        if (is_carbon) {
+            char *mybarejid = connection_get_barejid();
 
-        _receipt_request_handler(stanza);
+            // if we are the recipient, treat as standard incoming message
+            if (g_strcmp0(mybarejid, to_jid->barejid) == 0) {
+                sv_ev_incoming_carbon(message);
+                // else treat as a sent message
+            } else {
+                sv_ev_outgoing_carbon(message);
+            }
+
+            free(mybarejid);
+        } else {
+            sv_ev_incoming_message(message);
+            _receipt_request_handler(stanza);
+        }
     }
 
     // 0085 works only with resource
@@ -1435,7 +1390,7 @@ _handle_mam(xmpp_stanza_t *const stanza)
     }
 
     xmpp_stanza_t *message_stanza = xmpp_stanza_get_child_by_ns(forwarded, "jabber:client");
-    _handle_chat(message_stanza, TRUE);
+    _handle_chat(message_stanza, TRUE, FALSE);
 
     return TRUE;
 }
