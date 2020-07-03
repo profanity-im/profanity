@@ -1322,7 +1322,7 @@ _handle_chat(xmpp_stanza_t *const stanza, gboolean is_mam, gboolean is_carbon)
             char *mybarejid = connection_get_barejid();
 
             // if we are the recipient, treat as standard incoming message
-            if (g_strcmp0(mybarejid, to_jid->barejid) == 0) {
+            if (g_strcmp0(mybarejid, message->to_jid->barejid) == 0) {
                 sv_ev_incoming_carbon(message);
                 // else treat as a sent message
             } else {
