@@ -112,12 +112,14 @@ _handled_by_plugin(xmpp_stanza_t *const stanza)
 static void
 _handle_headline(xmpp_stanza_t *const stanza)
 {
+    xmpp_ctx_t *ctx = connection_get_ctx();
     char* text = NULL;
     xmpp_stanza_t *body = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_BODY);
     if (body) {
         text = xmpp_stanza_get_text(body);
         if (text) {
             cons_show("Headline: %s", text);
+            xmpp_free(ctx, text);
         }
     }
 }
