@@ -1259,9 +1259,8 @@ _handle_carbons(xmpp_stanza_t *const stanza)
 
     // OX
     xmpp_stanza_t *ox = xmpp_stanza_get_child_by_ns(message_stanza, STANZA_NS_OPENPGP_0);
-    if( ox ) {
-       message->enc=PROF_MSG_ENC_OX;
-      _handle_ox_chat(message_stanza, message, FALSE);
+    if (ox) {
+        _handle_ox_chat(message_stanza, message, FALSE);
     }
 
     //TODO: maybe also add is_carbon maybe even an enum with outgoing/incoming
@@ -1320,15 +1319,19 @@ _handle_chat(xmpp_stanza_t *const stanza, gboolean is_mam)
 
     // standard chat message, use jid without resource
     ProfMessage *message = message_init();
-    message->type = PROF_MSG_TYPE_CHAT;
     message->from_jid = jid;
+    message->is_mam = is_mam;
+
+    if (mucuser) {
+        message->type = PROF_MSG_TYPE_MUCPM;
+    } else {
+        message->type = PROF_MSG_TYPE_CHAT;
+    }
 
     const gchar *to_text = xmpp_stanza_get_to(stanza);
     if (to_text) {
         message->to_jid = jid_create(to_text);
     }
-
-    message->is_mam = is_mam;
 
     // message stanza id
     const char *id = xmpp_stanza_get_id(stanza);
@@ -1336,6 +1339,7 @@ _handle_chat(xmpp_stanza_t *const stanza, gboolean is_mam)
         message->id = strdup(id);
     }
 
+    // replace id for XEP-0308: Last Message Correction
     xmpp_stanza_t *replace_id_stanza = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_LAST_MESSAGE_CORRECTION);
     if (replace_id_stanza) {
         const char *replace_id = xmpp_stanza_get_id(replace_id_stanza);
@@ -1344,10 +1348,7 @@ _handle_chat(xmpp_stanza_t *const stanza, gboolean is_mam)
         }
     }
 
-    if (mucuser) {
-        message->type = PROF_MSG_TYPE_MUCPM;
-    }
-
+    // timestamp or now
     message->timestamp = stanza_get_delay(stanza);
     if (!message->timestamp) {
         message->timestamp = g_date_time_new_now_local();
@@ -1357,8 +1358,8 @@ _handle_chat(xmpp_stanza_t *const stanza, gboolean is_mam)
         message->body = xmpp_stanza_get_text(body);
     }
 
-    // check omemo encryption
 #ifdef HAVE_OMEMO
+    // check omemo encryption
     message->plain = omemo_receive_message(stanza, &message->trusted);
     if (message->plain != NULL) {
         message->enc = PROF_MSG_ENC_OMEMO;
@@ -1371,9 +1372,8 @@ _handle_chat(xmpp_stanza_t *const stanza, gboolean is_mam)
     }
 
     xmpp_stanza_t *ox = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_OPENPGP_0);
-    if( ox ) {
-      message->enc=PROF_MSG_ENC_OX;
-      _handle_ox_chat(stanza,message, FALSE);
+    if (ox) {
+        _handle_ox_chat(stanza,message, FALSE);
     }
 
     if (message->plain || message->body || message->encrypted) {
@@ -1394,12 +1394,12 @@ _handle_chat(xmpp_stanza_t *const stanza, gboolean is_mam)
 
 /*!
  * @brief Handle incoming XMMP-OX chat message.
- *
- *
  */
 static void
 _handle_ox_chat(xmpp_stanza_t *const stanza, ProfMessage *message, gboolean is_mam)
 {
+    message->enc=PROF_MSG_ENC_OX;
+
 #ifdef HAVE_LIBGPGME
 	xmpp_stanza_t *ox = stanza_get_child_by_name_and_ns(stanza, "openpgp", STANZA_NS_OPENPGP_0);
 	message->plain = p_ox_gpg_decrypt(xmpp_stanza_get_text(ox));
