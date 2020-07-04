@@ -396,18 +396,20 @@ omemo_start_sessions(void)
 void
 omemo_start_session(const char *const barejid)
 {
-    log_info("OMEMO: start session with %s", barejid);
-    GList *device_list = g_hash_table_lookup(omemo_ctx.device_list, barejid);
-    if (!device_list) {
-        log_info("OMEMO: missing device list for %s", barejid);
-        omemo_devicelist_request(barejid);
-        g_hash_table_insert(omemo_ctx.device_list_handler, strdup(barejid), _handle_device_list_start_session);
-        return;
-    }
+    if( omemo_loaded() ) {
+        log_info("OMEMO: start session with %s", barejid);
+        GList *device_list = g_hash_table_lookup(omemo_ctx.device_list, barejid);
+        if (!device_list) {
+            log_info("OMEMO: missing device list for %s", barejid);
+            omemo_devicelist_request(barejid);
+            g_hash_table_insert(omemo_ctx.device_list_handler, strdup(barejid), _handle_device_list_start_session);
+            return;
+        }
 
-    GList *device_id;
-    for (device_id = device_list; device_id != NULL; device_id = device_id->next) {
-        omemo_bundle_request(barejid, GPOINTER_TO_INT(device_id->data), omemo_start_device_session_handle_bundle, free, strdup(barejid));
+        GList *device_id;
+        for (device_id = device_list; device_id != NULL; device_id = device_id->next) {
+            omemo_bundle_request(barejid, GPOINTER_TO_INT(device_id->data), omemo_start_device_session_handle_bundle, free, strdup(barejid));
+        }
     }
 }
 
