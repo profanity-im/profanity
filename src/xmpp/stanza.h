@@ -64,6 +64,10 @@
 #define STANZA_NAME_X "x"
 // XEP-0373: OpenPGP for XMPP
 #define STANZA_NAME_OPENPGP "openpgp"
+#define STANZA_NAME_PUPKEY "pubkey"
+#define STANZA_NAME_PUBLIC_KEYS_LIST "public-keys-list"
+#define STANZA_NAME_PUBKEY_METADATA "pubkey-metadata"
+#define STANZA_NAME_DATA "data"
 #define STANZA_NAME_SHOW "show"
 #define STANZA_NAME_STATUS "status"
 #define STANZA_NAME_IQ "iq"
@@ -167,6 +171,9 @@
 #define STANZA_ATTR_AUTOJOIN "autojoin"
 #define STANZA_ATTR_PASSWORD "password"
 #define STANZA_ATTR_STATUS "status"
+#define STANZA_ATTR_DATE "date"
+#define STANZA_ATTR_V4_FINGERPRINT "v4-fingerprint"
+
 
 #define STANZA_TEXT_AWAY "away"
 #define STANZA_TEXT_DND "dnd"
@@ -198,6 +205,7 @@
 #define STANZA_NS_ENCRYPTED "jabber:x:encrypted"
 // XEP-0373: OpenPGP for XMPP
 #define STANZA_NS_OPENPGP_0 "urn:xmpp:openpgp:0"
+#define STANZA_NS_OPENPGP_0_PUBLIC_KEYS "urn:xmpp:openpgp:0:public-keys"
 #define STANZA_NS_HTTP_UPLOAD "urn:xmpp:http:upload"
 #define STANZA_NS_X_OOB "jabber:x:oob"
 #define STANZA_NS_BLOCKING "urn:xmpp:blocking"

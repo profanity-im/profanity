@@ -1190,10 +1190,34 @@ p_ox_gpg_decrypt(char* base64)
   return result;
 }
 
+/*!
+ * \brief Read public key from file.
+ *
+ * This function is used the read a public key from a file.
+ *
+ * This function is used to read a key and push it on PEP. There are some checks
+ * in this function:
+ * 
+ * Key is not
+ * - gkey->revoked 
+ * - gkey->expired 
+ * - gkey->disabled
+ * - gkey->invalid 
+ * - gkey->secret
+ * 
+ * Only one key in the file.
+ *
+ * \param filename filname to read the file.
+ * \param key result with base64 encode key or NULL
+ * \param fp result with the fingerprint or NULL
+ *
+ */
+
 void
 p_ox_gpg_readkey(const char* const filename, char** key, char** fp){
 
-    log_info("Annonuce OpenPGP Key of OX: %s", filename);
+    log_info("Read OpenPGP Key from file %s", filename);
+
     GError* error = NULL;
     gchar* data = NULL;
     gsize size = -1;
@@ -1210,13 +1234,14 @@ p_ox_gpg_readkey(const char* const filename, char** key, char** fp){
         gpgme_error_t error = gpgme_new (&ctx);
 
         if(GPG_ERR_NO_ERROR != error ) {
-            printf("gpgme_new: %d\n", error);
-            return ;
+            log_error("Read OpenPGP key from file: gpgme_new failed: %s", gpgme_strerror(error));
+            return;
         }
 
         error = gpgme_set_protocol(ctx, GPGME_PROTOCOL_OPENPGP);
-        if(error != 0) {
-            log_error("GpgME Error: %s", gpgme_strerror(error));
+        if( error != GPG_ERR_NO_ERROR ) {
+            log_error("Read OpenPGP key from file: set GPGME_PROTOCOL_OPENPGP:  %s", gpgme_strerror(error));
+            return;
         }
 
         gpgme_set_armor(ctx,0);
@@ -1226,14 +1251,46 @@ p_ox_gpg_readkey(const char* const filename, char** key, char** fp){
 
         gpgme_data_t gpgme_data = NULL;
         error = gpgme_data_new (&gpgme_data);
+        if ( error != GPG_ERR_NO_ERROR ) {
+            log_error("Read OpenPGP key from file: gpgme_data_new %s", gpgme_strerror(error));
+            return;
+        }
+
         error = gpgme_data_new_from_mem(&gpgme_data, (char*)data, size,0);
+        if ( error != GPG_ERR_NO_ERROR ) {
+            log_error("Read OpenPGP key from file: gpgme_data_new_from_mem %s", gpgme_strerror(error));
+            return;
+        }
         error =   gpgme_op_keylist_from_data_start ( ctx, gpgme_data, 0);
+        if ( error != GPG_ERR_NO_ERROR ) {
+            log_error("Read OpenPGP key from file: gpgme_op_keylist_from_data_start %s", gpgme_strerror(error));
+            return;
+        }
         gpgme_key_t gkey;
         error = gpgme_op_keylist_next (ctx, &gkey);
+        if ( error != GPG_ERR_NO_ERROR ) {
+            log_error("Read OpenPGP key from file: gpgme_op_keylist_next %s", gpgme_strerror(error));
+            return;
+        }
+
+        gpgme_key_t end;
+        error = gpgme_op_keylist_next (ctx, &end);
+        if( error == GPG_ERR_NO_ERROR ) {
+            log_error("Read OpenPGP key from file: ambiguous key");
+            return;
+        }
+
+        if(gkey->revoked || gkey->expired || gkey->disabled || gkey->invalid || gkey->secret  ) {
+            log_error("Read OpenPGP key from file: Key is not valid");
+            return;
+        }
+
         gchar* keybase64 = g_base64_encode( (const guchar*) data, size );
         
         *key = strdup(keybase64);
         *fp = strdup(gkey->fpr);
+    } else {
+        log_error("Read OpenPGP key from file: Unable to read file: %s", error->message);
     }
 
 }
