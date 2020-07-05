@@ -43,6 +43,8 @@ core_sources = \
 	src/tools/parser.h \
 	src/tools/http_upload.c \
 	src/tools/http_upload.h \
+	src/tools/http_download.c \
+	src/tools/http_download.h \
 	src/tools/bookmark_ignore.c \
 	src/tools/bookmark_ignore.h \
 	src/tools/autocomplete.c src/tools/autocomplete.h \
@@ -89,6 +91,8 @@ unittest_sources = \
 	src/tools/clipboard.c src/tools/clipboard.h \
 	src/tools/bookmark_ignore.c \
 	src/tools/bookmark_ignore.h \
+	src/tools/http_download.c \
+	src/tools/http_download.h \
 	src/config/accounts.h \
 	src/config/account.c src/config/account.h \
 	src/config/files.c src/config/files.h \
@@ -119,6 +123,7 @@ unittest_sources = \
 	tests/unittests/database/stub_database.c \
 	tests/unittests/config/stub_accounts.c \
 	tests/unittests/tools/stub_http_upload.c \
+	tests/unittests/tools/stub_http_download.c \
 	tests/unittests/helpers.c tests/unittests/helpers.h \
 	tests/unittests/test_form.c tests/unittests/test_form.h \
 	tests/unittests/test_common.c tests/unittests/test_common.h \
@@ -145,6 +150,7 @@ unittest_sources = \
 	tests/unittests/test_cmd_disconnect.c tests/unittests/test_cmd_disconnect.h \
 	tests/unittests/test_callbacks.c tests/unittests/test_callbacks.h \
 	tests/unittests/test_plugins_disco.c tests/unittests/test_plugins_disco.h \
+	tests/unittests/test_http_download.c tests/unittests/test_http_download.h \
 	tests/unittests/unittests.c
 
 functionaltest_sources = \

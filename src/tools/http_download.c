@@ -104,12 +104,118 @@ _older_progress(void *p, double dltotal, double dlnow, double ultotal, double ul
 }
 #endif
 
+char *http_filename_from_header(char *header) {
+    const char *header_tag_cd = "Content-Disposition:";
+    const int header_tag_cd_len = strlen(header_tag_cd);
+
+    if (!header) {
+        return NULL; // Bad header.
+    }
+
+    if (strncasecmp(header, header_tag_cd, header_tag_cd_len) == 0) {
+        header += header_tag_cd_len; // Move to header content.
+    } else {
+        return NULL; // Not a CD header.
+    }
+
+    const char *filename_key = "filename=";
+    const size_t filename_key_len = strlen(filename_key);
+
+    char *value = strcasestr(header, filename_key);
+    if (!value) {
+        return NULL; // No filename key found.
+    }
+
+    value += filename_key_len; // Move to key value.
+
+    char fn[4096];
+    char *pf = fn;
+    while(*value != '\0' && *value != ';') {
+        *pf++ = *value++;
+    }
+    *pf = '\0';
+
+    if (!strlen(fn)) {
+        return NULL; // Empty tag.
+    }
+
+    return strdup(fn);
+}
+
+char *http_filename_from_url(const char *url) {
+    const char *default_name = "index.html";
+
+    GFile *file = g_file_new_for_uri(url);
+    char *filename = g_file_get_basename(file);
+    g_object_unref(file);
+
+    if (g_strcmp0(filename, ".") == 0
+            || g_strcmp0(filename, G_DIR_SEPARATOR_S) == 0) {
+        g_free(filename);
+        return strdup(default_name);
+    }
+
+    return filename;
+}
+
+static size_t _header_callback(char *data, size_t size, size_t nitems, void *userdata) {
+    char *header = (char*)data;
+
+    HTTPDownload *download = (HTTPDownload *)userdata;
+    size *= nitems;
+
+    if (download->filename != NULL) {
+        return size; // No-op.
+    }
+
+    download->filename = http_filename_from_header(header);
+
+    return size;
+}
+
+FILE *_get_filehandle(const char *directory, const char *filename) {
+    gchar *fp;
+    FILE *fh;
+
+    // Explicitly use "." as directory if no directory has been passed.
+    if (directory == NULL) {
+        fp = g_build_filename(".", filename, NULL);
+    } else {
+        fp = g_build_filename(directory, filename, NULL);
+    }
+
+    fh = fopen(fp, "wb");
+    g_free(fp);
+    return fh;
+}
+
+static size_t _write_callback(void *buffer, size_t size, size_t nmemb, void *userdata) {
+    HTTPDownload *download = (HTTPDownload *)userdata;
+    size *= nmemb;
+
+    if (download->filename == NULL) {
+        download->filename = http_filename_from_url(download->url);
+    }
+
+    if (download->filename == NULL || download->directory == NULL) {
+        return 0; // Missing file name or directory, write no data.
+    }
+
+    if (download->filehandle == NULL ) {
+        FILE *fh = _get_filehandle(download->directory, download->filename);
+        if (!fh) {
+            return 0; // Unable to open file handle.
+        }
+        download->filehandle = fh;
+    }
+
+    return fwrite(buffer, size, nmemb, userdata);
+}
+
 void *
 http_file_get(void *userdata)
 {
     HTTPDownload *download = (HTTPDownload *)userdata;
-
-    FILE *fh = NULL;
 
     char *err = NULL;
 
@@ -144,9 +250,12 @@ http_file_get(void *userdata)
     #endif
     curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0L);
 
-    fh = download->filehandle;
+    curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, _header_callback);
+    curl_easy_setopt(curl, CURLOPT_HEADERDATA, (void *)download);
 
-    curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)&fh);
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, _write_callback);
+    curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)download);
+
     curl_easy_setopt(curl, CURLOPT_USERAGENT, "profanity");
 
     if (cert_path) {
@@ -160,8 +269,8 @@ http_file_get(void *userdata)
     curl_easy_cleanup(curl);
     curl_global_cleanup();
 
-    if (fh) {
-        fclose(fh);
+    if (download->filehandle) {
+        fclose(download->filehandle);
     }
 
     pthread_mutex_lock(&lock);
@@ -188,7 +297,7 @@ http_file_get(void *userdata)
                 msg = strdup(FALLBACK_MSG);
             }
             win_update_entry_message(download->window, download->url, msg);
-            win_mark_received(download->window, download->put_url);
+            win_mark_received(download->window, download->url);
             free(msg);
         }
     }
@@ -197,6 +306,8 @@ http_file_get(void *userdata)
     pthread_mutex_unlock(&lock);
 
     free(download->url);
+    free(download->filename);
+    free(download->directory);
     free(download);
 
     return NULL;

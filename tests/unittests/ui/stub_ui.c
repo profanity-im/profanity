@@ -236,16 +236,97 @@ ui_contact_online(char* barejid, Resource* resource, GDateTime* last_activity)
     check_expected(last_activity);
 }
 
-void
-ui_contact_typing(const char* const barejid, const char* const resource)
-{
-}
-void
-chatwin_incoming_msg(ProfChatWin* chatwin, ProfMessage* message, gboolean win_created)
-{
-}
-void
-chatwin_receipt_received(ProfChatWin* chatwin, const char* const id)
+void ui_contact_typing(const char * const barejid, const char * const resource) {}
+void chatwin_incoming_msg(ProfChatWin *chatwin, ProfMessage *message, gboolean win_created) {}
+void chatwin_receipt_received(ProfChatWin *chatwin, const char * const id) {}
+
+void privwin_incoming_msg(ProfPrivateWin *privatewin, ProfMessage *message) {}
+
+void ui_disconnected(void) {}
+void chatwin_recipient_gone(ProfChatWin *chatwin) {}
+
+void chatwin_outgoing_msg(ProfChatWin *chatwin, const char *const message, char *id, prof_enc_t enc_mode, gboolean request_receipt, const char *const replace_id) {}
+void chatwin_outgoing_carbon(ProfChatWin *chatwin, ProfMessage *message) {}
+void privwin_outgoing_msg(ProfPrivateWin *privwin, const char * const message) {}
+
+void privwin_occupant_offline(ProfPrivateWin *privwin) {}
+void privwin_occupant_kicked(ProfPrivateWin *privwin, const char *const actor, const char *const reason) {}
+void privwin_occupant_banned(ProfPrivateWin *privwin, const char *const actor, const char *const reason) {}
+void privwin_occupant_online(ProfPrivateWin *privwin) {}
+void privwin_message_occupant_offline(ProfPrivateWin *privwin) {}
+
+void privwin_message_left_room(ProfPrivateWin *privwin) {}
+
+void ui_room_join(const char * const roomjid, gboolean focus) {}
+void ui_switch_to_room(const char * const roomjid) {}
+
+void mucwin_role_change(ProfMucWin *mucwin, const char * const role, const char * const actor,
+    const char * const reason) {}
+void mucwin_affiliation_change(ProfMucWin *mucwin, const char * const affiliation, const char * const actor,
+    const char * const reason) {}
+void mucwin_role_and_affiliation_change(ProfMucWin *mucwin, const char * const role,
+    const char * const affiliation, const char * const actor, const char * const reason) {}
+void mucwin_occupant_role_change(ProfMucWin *mucwin, const char * const nick, const char * const role,
+    const char * const actor, const char * const reason) {}
+void mucwin_occupant_affiliation_change(ProfMucWin *mucwin, const char * const nick, const char * const affiliation,
+    const char * const actor, const char * const reason) {}
+void mucwin_occupant_role_and_affiliation_change(ProfMucWin *mucwin, const char * const nick, const char * const role,
+    const char * const affiliation, const char * const actor, const char * const reason) {}
+void mucwin_roster(ProfMucWin *mucwin, GList *occupants, const char * const presence) {}
+void mucwin_history(ProfMucWin *mucwin, const ProfMessage *const message) {}
+void mucwin_incoming_msg(ProfMucWin *mucwin, const ProfMessage *const message, GSList *mentions, GList *triggers, gboolean filter_reflection) {}
+void mucwin_outgoing_msg(ProfMucWin *mucwin, const char *const message, const char *const id, prof_enc_t enc_mode, const char *const replace_id) {}
+void mucwin_subject(ProfMucWin *mucwin, const char * const nick, const char * const subject) {}
+void mucwin_requires_config(ProfMucWin *mucwin) {}
+void ui_room_destroy(const char * const roomjid) {}
+void mucwin_info(ProfMucWin *mucwin) {}
+void mucwin_show_role_list(ProfMucWin *mucwin, muc_role_t role) {}
+void mucwin_show_affiliation_list(ProfMucWin *mucwin, muc_affiliation_t affiliation) {}
+void mucwin_room_info_error(ProfMucWin *mucwin, const char * const error) {}
+void mucwin_room_disco_info(ProfMucWin *mucwin, GSList *identities, GSList *features) {}
+void ui_room_destroyed(const char * const roomjid, const char * const reason, const char * const new_jid,
+    const char * const password) {}
+void ui_room_kicked(const char * const roomjid, const char * const actor, const char * const reason) {}
+void mucwin_occupant_kicked(ProfMucWin *mucwin, const char * const nick, const char * const actor,
+    const char * const reason) {}
+void ui_room_banned(const char * const roomjid, const char * const actor, const char * const reason) {}
+void mucwin_occupant_banned(ProfMucWin *mucwin, const char * const nick, const char * const actor,
+    const char * const reason) {}
+void ui_leave_room(const char * const roomjid) {}
+void mucwin_broadcast(ProfMucWin *mucwin, const char * const message) {}
+void mucwin_occupant_offline(ProfMucWin *mucwin, const char * const nick) {}
+void mucwin_occupant_online(ProfMucWin *mucwin, const char * const nick, const char * const roles,
+    const char * const affiliation, const char * const show, const char * const status) {}
+void mucwin_occupant_nick_change(ProfMucWin *mucwin, const char * const old_nick, const char * const nick) {}
+void mucwin_nick_change(ProfMucWin *mucwin, const char * const nick) {}
+void mucwin_occupant_presence(ProfMucWin *mucwin, const char * const nick, const char * const show,
+    const char * const status) {}
+void mucwin_update_occupants(ProfMucWin *mucwin) {}
+void mucwin_show_occupants(ProfMucWin *mucwin) {}
+void mucwin_hide_occupants(ProfMucWin *mucwin) {}
+void mucwin_set_enctext(ProfMucWin *mucwin, const char *const enctext) {}
+void mucwin_unset_enctext(ProfMucWin *mucwin) {}
+void mucwin_set_message_char(ProfMucWin *mucwin, const char *const ch) {}
+void mucwin_unset_message_char(ProfMucWin *mucwin) {}
+
+void win_update_entry_message(ProfWin *window, const char *const id, const char *const message) {};
+void win_mark_received(ProfWin *window, const char *const id) {};
+void win_print_http_transfer(ProfWin *window, const char *const message, char *url) {};
+
+void ui_show_roster(void) {}
+void ui_hide_roster(void) {}
+void ui_roster_add(const char * const barejid, const char * const name) {}
+void ui_roster_remove(const char * const barejid) {}
+void ui_contact_already_in_group(const char * const contact, const char * const group) {}
+void ui_contact_not_in_group(const char * const contact, const char * const group) {}
+void ui_group_added(const char * const contact, const char * const group) {}
+void ui_group_removed(const char * const contact, const char * const group) {}
+void chatwin_contact_online(ProfChatWin *chatwin, Resource *resource, GDateTime *last_activity) {}
+void chatwin_contact_offline(ProfChatWin *chatwin, char *resource, char *status) {}
+
+void ui_contact_offline(char *barejid, char *resource, char *status) {}
+
+void ui_handle_recipient_error(const char * const recipient, const char * const err_msg)
 {
 }
 

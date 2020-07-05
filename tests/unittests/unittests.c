@@ -38,6 +38,7 @@
 #include "test_form.h"
 #include "test_callbacks.h"
 #include "test_plugins_disco.h"
+#include "test_http_download.h"
 
 int
 main(int argc, char* argv[])
@@ -626,6 +627,9 @@ main(int argc, char* argv[])
         unit_test(does_not_add_duplicate_feature),
         unit_test(removes_plugin_features),
         unit_test(does_not_remove_feature_when_more_than_one_reference),
+
+        unit_test(http_filename_from_url_td),
+        unit_test(http_filename_from_header_td),
     };
 
     return run_tests(all_tests);
