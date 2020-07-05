@@ -89,6 +89,7 @@
 
 #ifdef HAVE_LIBGPGME
 #include "pgp/gpg.h"
+#include "xmpp/ox.h"
 #endif
 
 #ifdef HAVE_OMEMO
@@ -7570,9 +7571,9 @@ cmd_ox(ProfWin *window, const char *const command, gchar **args)
         chatwin->is_ox = TRUE;
         win_println(window, THEME_DEFAULT, "!", "OX encryption enabled.");
         return TRUE;
-    } else if (g_strcmp0(args[0], "push") == 0) {
+    } else if (g_strcmp0(args[0], "announce") == 0) {
         if( args[1] ) {
-            cons_show("Push file...%s ", args[1] );
+            ox_announce_public_key( args[1] );
         } else {
             cons_show("Filename is required");
         }
