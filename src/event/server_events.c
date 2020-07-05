@@ -73,6 +73,7 @@
 #include "ui/ui.h"
 
 static void _clean_incoming_message(ProfMessage *message);
+static void _sv_ev_incoming_plain(ProfChatWin *chatwin, gboolean new_win, ProfMessage *message, gboolean logit);
 
 void
 sv_ev_login_account_success(char *account_name, gboolean secured)
@@ -555,6 +556,8 @@ _sv_ev_incoming_otr(ProfChatWin *chatwin, gboolean new_win, ProfMessage *message
         message->plain = NULL;
         chatwin->pgp_recv = FALSE;
     }
+#else
+        _sv_ev_incoming_plain(chatwin, new_win, message, TRUE);
 #endif
 }
 
@@ -621,18 +624,20 @@ sv_ev_incoming_message(ProfMessage *message)
     }
 
     if( message->enc == PROF_MSG_ENC_OX) {
-	 _sv_ev_incoming_ox(chatwin, new_win, message, TRUE);
-    } else if (message->encrypted) {
+        _sv_ev_incoming_ox(chatwin, new_win, message, TRUE);
+    } else  if (message->enc == PROF_MSG_ENC_OMEMO) {
+        _sv_ev_incoming_omemo(chatwin, new_win, message, TRUE);
+    }  else  if (message->encrypted) {
         if (chatwin->is_otr) {
             win_println((ProfWin*)chatwin, THEME_DEFAULT, "-", "PGP encrypted message received whilst in OTR session.");
         } else {
             _sv_ev_incoming_pgp(chatwin, new_win, message, TRUE);
         }
-    } else if (message->enc == PROF_MSG_ENC_OMEMO) {
-        _sv_ev_incoming_omemo(chatwin, new_win, message, TRUE);
     } else {
+        // otr or plain
         _sv_ev_incoming_otr(chatwin, new_win, message);
     }
+
     rosterwin_roster();
     return;
 
