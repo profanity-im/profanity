@@ -9164,46 +9164,23 @@ cmd_url_open(ProfWin* window, const char* const command, gchar** args)
 }
 
 
-void _url_save_fallback_method(ProfWin *window, const char *url, const char *directory, const char *filename) {
+void _url_save_fallback_method(ProfWin *window, const char *url, const char *filename) {
+    FILE *fh = fopen(filename, "wb");
+    if (!fh) {
+        cons_show_error("Cannot open file '%s' for writing.", filename);
+        return;
+    }
+
     HTTPDownload *download = malloc(sizeof(HTTPDownload));
     download->window = window;
     download->url = strdup(url);
-
-    if (filename) {
-        download->filename = strdup(filename);
-    } else {
-        download->filename = NULL;
-    }
-
-    if (directory) {
-        download->directory = strdup(directory);
-    } else {
-        download->directory = NULL;
-    }
+    download->filehandle = fh;
 
     pthread_create(&(download->worker), NULL, &http_file_get, download);
     http_download_add_download(download);
 }
 
-void _url_save_external_method(const char *scheme_cmd, const char *url, const char *directory, char *filename) {
-    if (!filename) {
-        filename = http_filename_from_url(url);
-    }
-
-    // Explicitly use "." as directory if no directory has been passed.
-    char *fp = NULL;
-    if (directory == NULL) {
-        fp = g_build_filename(".", filename, NULL);
-    } else {
-        fp = g_build_filename(directory, filename, NULL);
-    }
-
-    if (!g_file_test(directory, G_FILE_TEST_EXISTS) ||
-        !g_file_test(directory, G_FILE_TEST_IS_DIR)) {
-        cons_show_error("Directory '%s' does not exist or is not a directory.", directory);
-        return;
-    }
-
+void _url_save_external_method(const char *scheme_cmd, const char *url, const char *filename) {
     gchar **argv = g_strsplit(scheme_cmd, " ", 0);
 
     guint num_args = 0;
@@ -9213,7 +9190,7 @@ void _url_save_external_method(const char *scheme_cmd, const char *url, const ch
             argv[num_args] = g_strdup(url);
         } else if (0 == g_strcmp0(argv[num_args], "%p")) {
             g_free(argv[num_args]);
-            argv[num_args] = fp;
+            argv[num_args] = strdup(filename);
         }
         num_args++;
     }
@@ -9221,8 +9198,27 @@ void _url_save_external_method(const char *scheme_cmd, const char *url, const ch
     if (!call_external(argv, NULL, NULL)) {
         cons_show_error("Unable to save url: check the logs for more information.");
     } else {
-        cons_show("URL '%s' has been saved to '%s'.", url, fp);
+        cons_show("URL '%s' has been saved to '%s'.", url, filename);
     }
+}
+
+char *_make_unique_filename(const char *filename) {
+    char *unique = strdup(filename);
+
+    unsigned int i = 0;
+    while(g_file_test(unique, G_FILE_TEST_EXISTS)) {
+        free(unique);
+
+        if (i > 1000) { // Give up after 1000 attempts.
+            return NULL;
+        }
+
+        if (asprintf(&unique, "%s.%u", filename, i) < 0) {
+            return NULL;
+        }
+    }
+
+    return unique;
 }
 
 gboolean
@@ -9251,23 +9247,50 @@ cmd_url_save(ProfWin *window, const char *const command, gchar **args)
     }
 
     gchar *directory = NULL;
-    gchar *filename = NULL;
+    gchar *basename = NULL;
     if (path != NULL) {
         directory = g_path_get_dirname(path);
-        filename = g_path_get_basename(path);
+        basename = g_path_get_basename(path);
     }
+
+    if (directory == NULL) {
+        // Explicitly use "./" as directory if no directory has been passed.
+        directory = "./";
+    }
+
+    if (!g_file_test(directory, G_FILE_TEST_EXISTS | G_FILE_TEST_IS_DIR)) {
+        cons_show_error("Directory '%s' does not exist or is not a directory.", directory);
+        return TRUE;
+    }
+
+    if (!basename) {
+        basename = http_basename_from_url(url);
+    }
+
+    char *filename = NULL;
+    filename = g_build_filename(directory, basename, NULL);
+
+    char *unique_filename = _make_unique_filename(filename);
+    if (!unique_filename) {
+        cons_show_error("Failed to generate an unique filename from '%s'.", filename);
+        free(filename);
+        return TRUE;
+    }
+
+    free(filename);
+    filename = unique_filename;
 
     gchar *scheme_cmd = prefs_get_string_with_option(PREF_URL_SAVE_CMD, scheme);
     if (scheme_cmd == NULL) {
         if (g_strcmp0(scheme, "http") == 0
                 || g_strcmp0(scheme, "https") == 0
                 || g_strcmp0(scheme, OMEMO_AESGCM_URL_SCHEME) == 0) {
-            _url_save_fallback_method(window, url, directory, filename);
+            _url_save_fallback_method(window, url, filename);
         } else {
             cons_show_error("No download method defined for the scheme '%s'.", scheme);
         }
     } else {
-        _url_save_external_method(scheme_cmd, url, directory, filename);
+        _url_save_external_method(scheme_cmd, url, filename);
     }
 
     g_free(scheme_cmd);

@@ -48,8 +48,6 @@
 
 typedef struct http_download_t {
     char *url;
-    char *filename;
-    char *directory;
     FILE *filehandle;
     curl_off_t bytes_received;
     ProfWin *window;
@@ -62,7 +60,6 @@ void* http_file_get(void *userdata);
 void http_download_cancel_processes(ProfWin *window);
 void http_download_add_download(HTTPDownload *download);
 
-char *http_filename_from_url(const char *url);
-char *http_filename_from_header(char *header);
+char *http_basename_from_url(const char *url);
 
 #endif

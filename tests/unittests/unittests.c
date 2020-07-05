@@ -628,8 +628,7 @@ main(int argc, char* argv[])
         unit_test(removes_plugin_features),
         unit_test(does_not_remove_feature_when_more_than_one_reference),
 
-        unit_test(http_filename_from_url_td),
-        unit_test(http_filename_from_header_td),
+        unit_test(http_basename_from_url_td),
     };
 
     return run_tests(all_tests);
