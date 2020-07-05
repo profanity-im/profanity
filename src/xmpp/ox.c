@@ -1,0 +1,205 @@
+/*
+ * ox.c
+ * vim: expandtab:ts=4:sts=4:sw=4
+ *
+ * Copyright (C) 2020 Stefan Kropp <stefan@debxwoody.de>
+ *
+ * This file is part of Profanity.
+ *
+ * Profanity is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Profanity is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Profanity.  If not, see <https://www.gnu.org/licenses/>.
+ *
+ * In addition, as a special exception, the copyright holders give permission to
+ * link the code of portions of this program with the OpenSSL library under
+ * certain conditions as described in each individual source file, and
+ * distribute linked combinations including the two.
+ *
+ * You must obey the GNU General Public License in all respects for all of the
+ * code used other than OpenSSL. If you modify file(s) with this exception, you
+ * may extend this exception to your version of the file(s), but you are not
+ * obligated to do so. If you do not wish to do so, delete this exception
+ * statement from your version. If you delete this exception statement from all
+ * source files in the program, then also delete it here.
+ *
+ */
+
+#include <glib.h>
+#include <assert.h>
+
+#include "log.h"
+#include "ui/ui.h"
+#include "xmpp/connection.h"
+#include "xmpp/stanza.h"
+#include "pgp/gpg.h"
+
+static void _ox_metadata_node__public_key(const char* const fingerprint);
+static char* _gettimestamp();
+
+/*!
+ *
+<pre>
+<iq type='set' from='juliet@example.org/balcony' id='publish1'>
+  <pubsub xmlns='http://jabber.org/protocol/pubsub'>
+    <publish node='urn:xmpp:openpgp:0:public-keys:1357B01865B2503C18453D208CAC2A9678548E35'>
+      <item id='2020-01-21T10:46:21Z'>
+        <pubkey xmlns='urn:xmpp:openpgp:0'>
+           <data>
+             BASE64_OPENPGP_PUBLIC_KEY
+           </data>
+        </pubkey>
+      </item>
+    </publish>
+  </pubsub>
+</iq>
+</pre>
+ *
+ *
+ */
+
+gboolean 
+ox_announce_public_key(const char* const filename) {
+    assert(filename);
+    cons_show("Annonuce OpenPGP Key for OX %s ...", filename);
+    log_info("Annonuce OpenPGP Key of OX: %s", filename);
+
+    // key the key and the fingerprint via GnuPG from file
+    char* key = NULL;
+    char* fp = NULL;
+    p_ox_gpg_readkey(filename, &key, &fp);
+
+    if( !(key && fp) ) {
+        cons_show("Error during OpenPGP OX announce. See log file for more information");
+        return FALSE;
+    } else {
+        log_info("Annonuce OpenPGP Key: FP: %s", fp);
+        xmpp_ctx_t * const ctx = connection_get_ctx();
+        char *id = xmpp_uuid_gen(ctx);
+        xmpp_stanza_t* iq = xmpp_iq_new(ctx, STANZA_TYPE_SET, id);
+        xmpp_stanza_set_from(iq, xmpp_conn_get_jid(connection_get_conn()));
+
+        xmpp_stanza_t* pubsub = xmpp_stanza_new(ctx);
+        xmpp_stanza_set_name(pubsub, STANZA_NAME_PUBSUB);
+        xmpp_stanza_set_ns(pubsub, XMPP_FEATURE_PUBSUB);
+
+        GString* node_name = g_string_new("urn:xmpp:openpgp:0:public-keys:");
+        g_string_append(node_name, fp);
+        xmpp_stanza_t* publish = xmpp_stanza_new(ctx);
+        xmpp_stanza_set_name(publish, STANZA_NAME_PUBLISH); 
+        xmpp_stanza_set_attribute(publish, STANZA_ATTR_NODE, node_name->str) ;
+
+        xmpp_stanza_t* item = xmpp_stanza_new(ctx);
+        xmpp_stanza_set_name(item, STANZA_NAME_ITEM); 
+        xmpp_stanza_set_attribute(item, STANZA_ATTR_ID, _gettimestamp()) ;
+        
+        xmpp_stanza_t* pubkey = xmpp_stanza_new(ctx);
+        xmpp_stanza_set_name(pubkey, "pubkey"); 
+        xmpp_stanza_set_ns(pubkey, STANZA_NS_OPENPGP_0);
+        
+        xmpp_stanza_t* data = xmpp_stanza_new(ctx);
+        xmpp_stanza_set_name(data, "data"); 
+        xmpp_stanza_t* keydata =  xmpp_stanza_new(ctx);
+        xmpp_stanza_set_text(keydata,key);
+        
+
+        xmpp_stanza_add_child(data, keydata);
+        xmpp_stanza_add_child(pubkey, data);
+        xmpp_stanza_add_child(item, pubkey);
+        xmpp_stanza_add_child(publish, item);
+        xmpp_stanza_add_child(pubsub, publish);
+        xmpp_stanza_add_child(iq, pubsub);
+        xmpp_send (connection_get_conn(), iq);
+
+        _ox_metadata_node__public_key(fp);
+         
+    }
+    return TRUE;
+}
+
+/*!
+ *
+ *
+ *
+<pre>
+<iq type='set' from='juliet@example.org/balcony' id='publish1'>
+  <pubsub xmlns='http://jabber.org/protocol/pubsub'>
+    <publish node='urn:xmpp:openpgp:0:public-keys'>
+      <item>
+        <public-keys-list xmlns='urn:xmpp:openpgp:0'>
+          <pubkey-metadata
+            v4-fingerprint='1357B01865B2503C18453D208CAC2A9678548E35'
+            date='2018-03-01T15:26:12Z'
+            />
+          <pubkey-metadata
+            v4-fingerprint='67819B343B2AB70DED9320872C6464AF2A8E4C02'
+            date='1953-05-16T12:00:00Z'
+            />
+        </public-keys-list>
+      </item>
+    </publish>
+  </pubsub>
+</iq>    
+</pre>
+ *
+ */
+
+void 
+_ox_metadata_node__public_key(const char* const fingerprint) {
+    assert(fingerprint);
+    assert(strlen(fingerprint) == 40);
+    // iq
+    xmpp_ctx_t * const ctx = connection_get_ctx();
+    char *id = xmpp_uuid_gen(ctx);
+    xmpp_stanza_t* iq = xmpp_iq_new(ctx, STANZA_TYPE_SET, id);
+    xmpp_stanza_set_from(iq, xmpp_conn_get_jid(connection_get_conn()));
+    // pubsub
+    xmpp_stanza_t* pubsub = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(pubsub, STANZA_NAME_PUBSUB);
+    xmpp_stanza_set_ns(pubsub, XMPP_FEATURE_PUBSUB);
+    // publish
+    xmpp_stanza_t* publish = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(publish, STANZA_NAME_PUBLISH); 
+    xmpp_stanza_set_attribute(publish, STANZA_ATTR_NODE, "urn:xmpp:openpgp:0:public-keys") ;
+    // item
+    xmpp_stanza_t* item = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(item, STANZA_NAME_ITEM);
+    // public-keys-list        
+    xmpp_stanza_t* publickeyslist = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(publickeyslist, "public-keys-list"); 
+    xmpp_stanza_set_ns(publickeyslist, STANZA_NS_OPENPGP_0);
+    // pubkey-metadata
+    xmpp_stanza_t* pubkeymetadata = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(pubkeymetadata, "pubkey-metadata"); 
+    xmpp_stanza_set_attribute(pubkeymetadata, "v4-fingerprint", fingerprint);
+    xmpp_stanza_set_attribute(pubkeymetadata, "date", _gettimestamp());
+
+    xmpp_stanza_add_child(publickeyslist,pubkeymetadata );
+    xmpp_stanza_add_child(item, publickeyslist );
+    xmpp_stanza_add_child(publish,item );
+    xmpp_stanza_add_child(pubsub, publish);
+    xmpp_stanza_add_child(iq, pubsub);
+    xmpp_send (connection_get_conn(), iq);
+
+
+} 
+
+// FIXME (XEP-0082)
+char* _gettimestamp() {
+    time_t now = time(NULL);
+    struct tm* tm = localtime(&now);
+    char buf[255];
+    strftime(buf, sizeof(buf), "%FT%T", tm);
+    GString* d = g_string_new(buf);
+    g_string_append(d, "Z");
+    return strdup(d->str);
+}
+
