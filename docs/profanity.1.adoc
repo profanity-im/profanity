@@ -1,0 +1,78 @@
+PROFANITY(1)
+============
+
+NAME
+----
+profanity - a simple console based XMPP chat client.
+
+SYNOPSIS
+--------
+'profanity' [-vh] [-l 'level'] [-a 'account']
+
+DESCRIPTION
+-----------
+Profanity  is  a simple lightweight console based XMPP chat client. Its emphasis
+is on having a simple and configurable command driven UI, see the homepage at:
+
+<https://profanity-im.github.io>
+
+OPTIONS
+-------
+*-v, --version*::
+	Show version and build information.
+
+*-h, --help*::
+           Show help on command line arguments.
+
+*-a, --account* 'ACCOUNT'::
+              Auto connect to an account on startup, ACCOUNT must be an existing account.
+
+*-c, --config*::
+              Use an alternative config file.
+
+*-l, --log* 'LEVEL'::
+              Set the logging level, LEVEL may be set to DEBUG, INFO (the default), WARN or ERROR.
+
+*-f, --logfile*::
+              Specify a different logfile
+
+*-t, --theme* 'THEME'::
+              Specify which theme to use.  THEME must be one of the themes installed in $XDG_CONFIG_HOME/profanity/themes
+
+USING PROFANITY
+---------------
+The user guide can be found at <https://profanity-im.github.io/userguide.html>.
+
+SEE ALSO
+--------
+Profanity itself has a lot of built-in help. Check the /help command for more
+information.  Type "/help help" for information on how to use help itself.
+
+CONFIGURATION
+-------------
+Configuration for Profanity is stored in $XDG_CONFIG_HOME/profanity/profrc ,
+details on commands for configuring Profanity can be found at
+<https://profanity-im.github.io/reference.html>.
+
+BUGS
+----
+Bugs can either be reported by raising an issue at the Github issue tracker:
+
+       <https://github.com/profanity-im/profanity/issues>
+
+       or to the mailing list at:
+
+       <https://lists.notraces.net/mailman/listinfo/profanity>
+
+LICENSE
+-------
+Copyright (C) 2012 - 2019 James Booth <boothj5web@gmail.com>.  Copyright (C) 2019 -  2020  Michael  Vetter  <jubalh@iodoru.com>.   License
+GPLv3+:  GNU GPL version 3 or later <https://www.gnu.org/licenses/gpl.html> This is free software; you are free to change and redistribute
+it.  There is NO WARRANTY, to the extent permitted by law.
+
+AUTHORS/CREDITS
+---------------
+Profanity  was  created  by  James  Booth  <boothj5web@gmail.com>  with  many
+contributions  from  others,  see   the   full   list   at:
+<https://github.com/profanity-im/profanity/graphs/contributors>
+
