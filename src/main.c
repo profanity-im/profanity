@@ -78,7 +78,7 @@ main(int argc, char **argv)
     {
         { "version", 'v', 0, G_OPTION_ARG_NONE, &version, "Show version information", NULL },
         { "account", 'a', 0, G_OPTION_ARG_STRING, &account_name, "Auto connect to an account on startup" },
-        { "log", 'l', 0, G_OPTION_ARG_STRING, &log, "Set logging levels, DEBUG, INFO (default), WARN, ERROR", "LEVEL" },
+        { "log", 'l', 0, G_OPTION_ARG_STRING, &log, "Set logging levels, DEBUG, INFO, WARN (default), ERROR", "LEVEL" },
         { "config", 'c', 0, G_OPTION_ARG_STRING, &config_file, "Use an alternative configuration file", NULL },
         { "logfile", 'f', 0, G_OPTION_ARG_STRING, &log_file, "Specify log filename", NULL },
         { "theme", 't', 0, G_OPTION_ARG_STRING, &theme_name, "Specify theme name", NULL },
@@ -177,7 +177,8 @@ main(int argc, char **argv)
         return 0;
     }
 
-    prof_run(log ? log : "INFO", account_name, config_file, log_file, theme_name);
+    /* Default logging WARN */
+    prof_run(log ? log : "WARN", account_name, config_file, log_file, theme_name);
 
     /* Free resources allocated by GOptionContext */
     g_free(log);

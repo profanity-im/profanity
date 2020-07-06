@@ -232,8 +232,8 @@ log_level_from_string(char *log_level)
         return PROF_LEVEL_WARN;
     } else if (strcmp(log_level, "ERROR") == 0) {
         return PROF_LEVEL_ERROR;
-    } else { // default to info
-        return PROF_LEVEL_INFO;
+    } else { // default logging is warn
+        return PROF_LEVEL_WARN;
     }
 }
 
