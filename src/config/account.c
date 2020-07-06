@@ -201,9 +201,10 @@ account_eval_password(ProfAccount *account)
     assert(account->eval_password != NULL);
 
     gchar **output = NULL;
+    gchar **error = NULL;
 
     gchar *argv[] = {"sh", "-c", account->eval_password, NULL};
-    if (!call_external(argv, &output, NULL)) {
+    if (!call_external(argv, &output, &error)) {
         return FALSE;
     }
 
