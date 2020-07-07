@@ -35,48 +35,48 @@
 
 #include "config.h"
 
-#include <errno.h>
 #include <locale.h>
-#include <stdlib.h>
 #include <string.h>
+#include <stdlib.h>
+#include <errno.h>
 #include <sys/stat.h>
 
 #include <glib.h>
 #include <glib/gstdio.h>
 #include <gpgme.h>
 
-#include "common.h"
-#include "config/files.h"
 #include "log.h"
+#include "common.h"
 #include "pgp/gpg.h"
+#include "config/files.h"
 #include "tools/autocomplete.h"
 #include "ui/ui.h"
 
 #define PGP_SIGNATURE_HEADER "-----BEGIN PGP SIGNATURE-----"
 #define PGP_SIGNATURE_FOOTER "-----END PGP SIGNATURE-----"
-#define PGP_MESSAGE_HEADER   "-----BEGIN PGP MESSAGE-----"
-#define PGP_MESSAGE_FOOTER   "-----END PGP MESSAGE-----"
+#define PGP_MESSAGE_HEADER "-----BEGIN PGP MESSAGE-----"
+#define PGP_MESSAGE_FOOTER "-----END PGP MESSAGE-----"
 
-static const char* libversion = NULL;
-static GHashTable* pubkeys;
+static const char *libversion = NULL;
+static GHashTable *pubkeys;
 
-static gchar* pubsloc;
-static GKeyFile* pubkeyfile;
+static gchar *pubsloc;
+static GKeyFile *pubkeyfile;
 
-static char* passphrase;
-static char* passphrase_attempt;
+static char *passphrase;
+static char *passphrase_attempt;
 
 static Autocomplete key_ac;
 
-static char* _remove_header_footer(char* str, const char* const footer);
-static char* _add_header_footer(const char* const str, const char* const header, const char* const footer);
+static char* _remove_header_footer(char *str, const char *const footer);
+static char* _add_header_footer(const char *const str, const char *const header, const char *const footer);
 static void _save_pubkeys(void);
 
-static gpgme_key_t _ox_key_lookup(const char* const barejid, gboolean secret_only);
-static gboolean _ox_key_is_usable(gpgme_key_t key, const char* const barejid, gboolean secret);
+static gpgme_key_t _ox_key_lookup(const char *const barejid, gboolean secret_only);
+static gboolean _ox_key_is_usable(gpgme_key_t key, const char *const barejid, gboolean secret);
 
 void
-_p_gpg_free_pubkeyid(ProfPGPPubKeyId* pubkeyid)
+_p_gpg_free_pubkeyid(ProfPGPPubKeyId *pubkeyid)
 {
     if (pubkeyid) {
         free(pubkeyid->id);
@@ -85,14 +85,14 @@ _p_gpg_free_pubkeyid(ProfPGPPubKeyId* pubkeyid)
 }
 
 static gpgme_error_t*
-_p_gpg_passphrase_cb(void* hook, const char* uid_hint, const char* passphrase_info, int prev_was_bad, int fd)
+_p_gpg_passphrase_cb(void *hook, const char *uid_hint, const char *passphrase_info, int prev_was_bad, int fd)
 {
     if (passphrase) {
         gpgme_io_write(fd, passphrase, strlen(passphrase));
     } else {
-        GString* pass_term = g_string_new("");
+        GString *pass_term = g_string_new("");
 
-        char* password = ui_ask_pgp_passphrase(uid_hint, prev_was_bad);
+        char *password = ui_ask_pgp_passphrase(uid_hint, prev_was_bad);
         if (password) {
             g_string_append(pass_term, password);
             free(password);
@@ -121,7 +121,7 @@ p_gpg_init(void)
     pubkeys = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, (GDestroyNotify)_p_gpg_free_pubkeyid);
 
     key_ac = autocomplete_new();
-    GHashTable* keys = p_gpg_list_keys();
+    GHashTable *keys = p_gpg_list_keys();
     p_gpg_free_keys(keys);
 
     passphrase = NULL;
@@ -159,7 +159,7 @@ p_gpg_close(void)
 }
 
 void
-p_gpg_on_connect(const char* const barejid)
+p_gpg_on_connect(const char *const barejid)
 {
     gchar* pubsfile = files_get_account_data_path(DIR_PGP, barejid);
 
@@ -167,7 +167,7 @@ p_gpg_on_connect(const char* const barejid)
     errno = 0;
     int res = g_mkdir_with_parents(pubsfile, S_IRWXU);
     if (res == -1) {
-        char* errmsg = strerror(errno);
+        char *errmsg = strerror(errno);
         if (errmsg) {
             log_error("Error creating directory: %s, %s", pubsfile, errmsg);
         } else {
@@ -176,7 +176,7 @@ p_gpg_on_connect(const char* const barejid)
     }
 
     // create or read publickeys
-    GString* pubtmp = g_string_new(pubsfile);
+    GString *pubtmp = g_string_new(pubsfile);
     g_string_append(pubtmp, "/pubkeys");
     pubsloc = pubtmp->str;
     g_string_free(pubtmp, FALSE);
@@ -191,7 +191,7 @@ p_gpg_on_connect(const char* const barejid)
 
     // load each keyid
     gsize len = 0;
-    gchar** jids = g_key_file_get_groups(pubkeyfile, &len);
+    gchar **jids = g_key_file_get_groups(pubkeyfile, &len);
 
     gpgme_ctx_t ctx;
     gpgme_error_t error = gpgme_new(&ctx);
@@ -204,9 +204,9 @@ p_gpg_on_connect(const char* const barejid)
 
     int i = 0;
     for (i = 0; i < len; i++) {
-        GError* gerr = NULL;
-        gchar* jid = jids[i];
-        gchar* keyid = g_key_file_get_string(pubkeyfile, jid, "keyid", &gerr);
+        GError *gerr = NULL;
+        gchar *jid = jids[i];
+        gchar *keyid = g_key_file_get_string(pubkeyfile, jid, "keyid", &gerr);
         if (gerr) {
             log_error("Error loading PGP key id for %s", jid);
             g_error_free(gerr);
@@ -219,7 +219,7 @@ p_gpg_on_connect(const char* const barejid)
                 continue;
             }
 
-            ProfPGPPubKeyId* pubkeyid = malloc(sizeof(ProfPGPPubKeyId));
+            ProfPGPPubKeyId *pubkeyid = malloc(sizeof(ProfPGPPubKeyId));
             pubkeyid->id = strdup(keyid);
             pubkeyid->received = FALSE;
             g_hash_table_replace(pubkeys, strdup(jid), pubkeyid);
@@ -262,7 +262,7 @@ p_gpg_on_disconnect(void)
 }
 
 gboolean
-p_gpg_addkey(const char* const jid, const char* const keyid)
+p_gpg_addkey(const char *const jid, const char *const keyid)
 {
     gpgme_ctx_t ctx;
     gpgme_error_t error = gpgme_new(&ctx);
@@ -285,7 +285,7 @@ p_gpg_addkey(const char* const jid, const char* const keyid)
     _save_pubkeys();
 
     // update in memory pubkeys list
-    ProfPGPPubKeyId* pubkeyid = malloc(sizeof(ProfPGPPubKeyId));
+    ProfPGPPubKeyId *pubkeyid = malloc(sizeof(ProfPGPPubKeyId));
     pubkeyid->id = strdup(keyid);
     pubkeyid->received = FALSE;
     g_hash_table_replace(pubkeys, strdup(jid), pubkeyid);
@@ -297,7 +297,7 @@ p_gpg_addkey(const char* const jid, const char* const keyid)
 static ProfPGPKey*
 _p_gpg_key_new(void)
 {
-    ProfPGPKey* p_pgpkey = malloc(sizeof(ProfPGPKey));
+    ProfPGPKey *p_pgpkey = malloc(sizeof(ProfPGPKey));
     p_pgpkey->id = NULL;
     p_pgpkey->name = NULL;
     p_pgpkey->fp = NULL;
@@ -311,7 +311,7 @@ _p_gpg_key_new(void)
 }
 
 static void
-_p_gpg_free_key(ProfPGPKey* key)
+_p_gpg_free_key(ProfPGPKey *key)
 {
     if (key) {
         free(key->id);
@@ -325,7 +325,7 @@ GHashTable*
 p_gpg_list_keys(void)
 {
     gpgme_error_t error;
-    GHashTable* result = g_hash_table_new_full(g_str_hash, g_str_equal, free, (GDestroyNotify)_p_gpg_free_key);
+    GHashTable *result = g_hash_table_new_full(g_str_hash, g_str_equal, free, (GDestroyNotify)_p_gpg_free_key);
 
     gpgme_ctx_t ctx;
     error = gpgme_new(&ctx);
@@ -342,29 +342,21 @@ p_gpg_list_keys(void)
         while (!error) {
             gpgme_subkey_t sub = key->subkeys;
 
-            ProfPGPKey* p_pgpkey = _p_gpg_key_new();
+            ProfPGPKey *p_pgpkey = _p_gpg_key_new();
             p_pgpkey->id = strdup(sub->keyid);
             p_pgpkey->name = strdup(key->uids->uid);
             p_pgpkey->fp = strdup(sub->fpr);
-            if (sub->can_encrypt)
-                p_pgpkey->encrypt = TRUE;
-            if (sub->can_authenticate)
-                p_pgpkey->authenticate = TRUE;
-            if (sub->can_certify)
-                p_pgpkey->certify = TRUE;
-            if (sub->can_sign)
-                p_pgpkey->sign = TRUE;
+            if (sub->can_encrypt) p_pgpkey->encrypt = TRUE;
+            if (sub->can_authenticate) p_pgpkey->authenticate = TRUE;
+            if (sub->can_certify) p_pgpkey->certify = TRUE;
+            if (sub->can_sign) p_pgpkey->sign = TRUE;
 
             sub = sub->next;
             while (sub) {
-                if (sub->can_encrypt)
-                    p_pgpkey->encrypt = TRUE;
-                if (sub->can_authenticate)
-                    p_pgpkey->authenticate = TRUE;
-                if (sub->can_certify)
-                    p_pgpkey->certify = TRUE;
-                if (sub->can_sign)
-                    p_pgpkey->sign = TRUE;
+                if (sub->can_encrypt) p_pgpkey->encrypt = TRUE;
+                if (sub->can_authenticate) p_pgpkey->authenticate = TRUE;
+                if (sub->can_certify) p_pgpkey->certify = TRUE;
+                if (sub->can_sign) p_pgpkey->sign = TRUE;
 
                 sub = sub->next;
             }
@@ -384,7 +376,7 @@ p_gpg_list_keys(void)
             gpgme_subkey_t sub = key->subkeys;
             while (sub) {
                 if (sub->secret) {
-                    ProfPGPKey* p_pgpkey = g_hash_table_lookup(result, key->uids->uid);
+                    ProfPGPKey *p_pgpkey = g_hash_table_lookup(result, key->uids->uid);
                     if (p_pgpkey) {
                         p_pgpkey->secret = TRUE;
                     }
@@ -400,10 +392,10 @@ p_gpg_list_keys(void)
     gpgme_release(ctx);
 
     autocomplete_clear(key_ac);
-    GList* ids = g_hash_table_get_keys(result);
-    GList* curr = ids;
+    GList *ids = g_hash_table_get_keys(result);
+    GList *curr = ids;
     while (curr) {
-        ProfPGPKey* key = g_hash_table_lookup(result, curr->data);
+        ProfPGPKey *key = g_hash_table_lookup(result, curr->data);
         autocomplete_add(key_ac, key->id);
         curr = curr->next;
     }
@@ -413,10 +405,11 @@ p_gpg_list_keys(void)
 }
 
 void
-p_gpg_free_keys(GHashTable* keys)
+p_gpg_free_keys(GHashTable *keys)
 {
     g_hash_table_destroy(keys);
 }
+
 
 GHashTable*
 p_gpg_pubkeys(void)
@@ -434,7 +427,7 @@ p_gpg_libver(void)
 }
 
 gboolean
-p_gpg_valid_key(const char* const keyid, char** err_str)
+p_gpg_valid_key(const char *const keyid, char **err_str)
 {
     gpgme_ctx_t ctx;
     gpgme_error_t error = gpgme_new(&ctx);
@@ -463,17 +456,18 @@ p_gpg_valid_key(const char* const keyid, char** err_str)
     gpgme_release(ctx);
     gpgme_key_unref(key);
     return TRUE;
+
 }
 
 gboolean
-p_gpg_available(const char* const barejid)
+p_gpg_available(const char *const barejid)
 {
-    char* pubkey = g_hash_table_lookup(pubkeys, barejid);
+    char *pubkey = g_hash_table_lookup(pubkeys, barejid);
     return (pubkey != NULL);
 }
 
 void
-p_gpg_verify(const char* const barejid, const char* const sign)
+p_gpg_verify(const char *const barejid, const char *const sign)
 {
     if (!sign) {
         return;
@@ -487,7 +481,7 @@ p_gpg_verify(const char* const barejid, const char* const sign)
         return;
     }
 
-    char* sign_with_header_footer = _add_header_footer(sign, PGP_SIGNATURE_HEADER, PGP_SIGNATURE_FOOTER);
+    char *sign_with_header_footer = _add_header_footer(sign, PGP_SIGNATURE_HEADER, PGP_SIGNATURE_FOOTER);
     gpgme_data_t sign_data;
     gpgme_data_new_from_mem(&sign_data, sign_with_header_footer, strlen(sign_with_header_footer), 1);
     free(sign_with_header_footer);
@@ -514,7 +508,7 @@ p_gpg_verify(const char* const barejid, const char* const sign)
                 log_debug("Could not find PGP key with ID %s for %s", result->signatures->fpr, barejid);
             } else {
                 log_debug("Fingerprint found for %s: %s ", barejid, key->subkeys->fpr);
-                ProfPGPPubKeyId* pubkeyid = malloc(sizeof(ProfPGPPubKeyId));
+                ProfPGPPubKeyId *pubkeyid = malloc(sizeof(ProfPGPPubKeyId));
                 pubkeyid->id = strdup(key->subkeys->keyid);
                 pubkeyid->received = TRUE;
                 g_hash_table_replace(pubkeys, strdup(barejid), pubkeyid);
@@ -528,7 +522,7 @@ p_gpg_verify(const char* const barejid, const char* const sign)
 }
 
 char*
-p_gpg_sign(const char* const str, const char* const fp)
+p_gpg_sign(const char *const str, const char *const fp)
 {
     gpgme_ctx_t ctx;
     gpgme_error_t error = gpgme_new(&ctx);
@@ -558,7 +552,7 @@ p_gpg_sign(const char* const str, const char* const fp)
         return NULL;
     }
 
-    char* str_or_empty = NULL;
+    char *str_or_empty = NULL;
     if (str) {
         str_or_empty = strdup(str);
     } else {
@@ -571,7 +565,7 @@ p_gpg_sign(const char* const str, const char* const fp)
     gpgme_data_t signed_data;
     gpgme_data_new(&signed_data);
 
-    gpgme_set_armor(ctx, 1);
+    gpgme_set_armor(ctx,1);
     error = gpgme_op_sign(ctx, str_data, signed_data, GPGME_SIG_MODE_DETACH);
     gpgme_data_release(str_data);
     gpgme_release(ctx);
@@ -582,12 +576,12 @@ p_gpg_sign(const char* const str, const char* const fp)
         return NULL;
     }
 
-    char* result = NULL;
+    char *result = NULL;
 
     size_t len = 0;
-    char* signed_str = gpgme_data_release_and_get_mem(signed_data, &len);
+    char *signed_str = gpgme_data_release_and_get_mem(signed_data, &len);
     if (signed_str) {
-        GString* signed_gstr = g_string_new("");
+        GString *signed_gstr = g_string_new("");
         g_string_append_len(signed_gstr, signed_str, len);
         result = _remove_header_footer(signed_gstr->str, PGP_SIGNATURE_FOOTER);
         g_string_free(signed_gstr, TRUE);
@@ -602,9 +596,9 @@ p_gpg_sign(const char* const str, const char* const fp)
 }
 
 char*
-p_gpg_encrypt(const char* const barejid, const char* const message, const char* const fp)
+p_gpg_encrypt(const char *const barejid, const char *const message, const char *const fp)
 {
-    ProfPGPPubKeyId* pubkeyid = g_hash_table_lookup(pubkeys, barejid);
+    ProfPGPPubKeyId *pubkeyid = g_hash_table_lookup(pubkeys, barejid);
     if (!pubkeyid) {
         return NULL;
     }
@@ -662,11 +656,11 @@ p_gpg_encrypt(const char* const barejid, const char* const message, const char* 
     }
 
     size_t len;
-    char* cipher_str = gpgme_data_release_and_get_mem(cipher, &len);
+    char *cipher_str = gpgme_data_release_and_get_mem(cipher, &len);
 
-    char* result = NULL;
+    char *result = NULL;
     if (cipher_str) {
-        GString* cipher_gstr = g_string_new("");
+        GString *cipher_gstr = g_string_new("");
         g_string_append_len(cipher_gstr, cipher_str, len);
         result = _remove_header_footer(cipher_gstr->str, PGP_MESSAGE_FOOTER);
         g_string_free(cipher_gstr, TRUE);
@@ -677,7 +671,7 @@ p_gpg_encrypt(const char* const barejid, const char* const message, const char* 
 }
 
 char*
-p_gpg_decrypt(const char* const cipher)
+p_gpg_decrypt(const char *const cipher)
 {
     gpgme_ctx_t ctx;
     gpgme_error_t error = gpgme_new(&ctx);
@@ -689,7 +683,7 @@ p_gpg_decrypt(const char* const cipher)
 
     gpgme_set_passphrase_cb(ctx, (gpgme_passphrase_cb_t)_p_gpg_passphrase_cb, NULL);
 
-    char* cipher_with_headers = _add_header_footer(cipher, PGP_MESSAGE_HEADER, PGP_MESSAGE_FOOTER);
+    char *cipher_with_headers = _add_header_footer(cipher, PGP_MESSAGE_HEADER, PGP_MESSAGE_FOOTER);
     gpgme_data_t cipher_data;
     gpgme_data_new_from_mem(&cipher_data, cipher_with_headers, strlen(cipher_with_headers), 1);
     free(cipher_with_headers);
@@ -709,14 +703,14 @@ p_gpg_decrypt(const char* const cipher)
 
     gpgme_decrypt_result_t res = gpgme_op_decrypt_result(ctx);
     if (res) {
-        GString* recipients_str = g_string_new("");
+        GString *recipients_str = g_string_new("");
         gpgme_recipient_t recipient = res->recipients;
         while (recipient) {
             gpgme_key_t key;
             error = gpgme_get_key(ctx, recipient->keyid, &key, 1);
 
             if (!error && key) {
-                const char* addr = gpgme_key_get_string_attr(key, GPGME_ATTR_EMAIL, NULL, 0);
+                const char *addr = gpgme_key_get_string_attr(key, GPGME_ATTR_EMAIL, NULL, 0);
                 if (addr) {
                     g_string_append(recipients_str, addr);
                 }
@@ -736,8 +730,8 @@ p_gpg_decrypt(const char* const cipher)
     gpgme_release(ctx);
 
     size_t len = 0;
-    char* plain_str = gpgme_data_release_and_get_mem(plain_data, &len);
-    char* result = NULL;
+    char *plain_str = gpgme_data_release_and_get_mem(plain_data, &len);
+    char *result = NULL;
     if (plain_str) {
         plain_str[len] = 0;
         result = g_strdup(plain_str);
@@ -752,13 +746,13 @@ p_gpg_decrypt(const char* const cipher)
 }
 
 void
-p_gpg_free_decrypted(char* decrypted)
+p_gpg_free_decrypted(char *decrypted)
 {
     g_free(decrypted);
 }
 
 char*
-p_gpg_autocomplete_key(const char* const search_str, gboolean previous, void* context)
+p_gpg_autocomplete_key(const char *const search_str, gboolean previous, void *context)
 {
     return autocomplete_complete(key_ac, search_str, TRUE, previous);
 }
@@ -770,23 +764,23 @@ p_gpg_autocomplete_key_reset(void)
 }
 
 char*
-p_gpg_format_fp_str(char* fp)
+p_gpg_format_fp_str(char *fp)
 {
     if (!fp) {
         return NULL;
     }
 
-    GString* format = g_string_new("");
+    GString *format = g_string_new("");
     int i;
     int len = strlen(fp);
     for (i = 0; i < len; i++) {
         g_string_append_c(format, fp[i]);
-        if (((i + 1) % 4 == 0) && (i + 1 < len)) {
+        if (((i+1) % 4 == 0) && (i+1 < len)) {
             g_string_append_c(format, ' ');
         }
     }
 
-    char* result = format->str;
+    char *result = format->str;
     g_string_free(format, FALSE);
 
     return result;
@@ -799,10 +793,9 @@ p_gpg_format_fp_str(char* fp)
  *
  */
 GHashTable*
-ox_gpg_public_keys(void)
-{
+ox_gpg_public_keys(void) {
     gpgme_error_t error;
-    GHashTable* result = g_hash_table_new_full(g_str_hash, g_str_equal, free, (GDestroyNotify)_p_gpg_free_key);
+    GHashTable *result = g_hash_table_new_full(g_str_hash, g_str_equal, free, (GDestroyNotify)_p_gpg_free_key);
 
     gpgme_ctx_t ctx;
     error = gpgme_new(&ctx);
@@ -816,7 +809,7 @@ ox_gpg_public_keys(void)
     if (error == GPG_ERR_NO_ERROR) {
         gpgme_key_t key;
         error = gpgme_op_keylist_next(ctx, &key);
-        if (error != GPG_ERR_EOF && error != GPG_ERR_NO_ERROR) {
+        if ( error != GPG_ERR_EOF && error != GPG_ERR_NO_ERROR)  {
             log_error("OX: gpgme_op_keylist_next %s %s", gpgme_strsource(error), gpgme_strerror(error));
             g_hash_table_destroy(result);
             return NULL;
@@ -826,46 +819,39 @@ ox_gpg_public_keys(void)
             gpgme_user_id_t uid = key->uids;
             gpgme_user_id_t xmppid = NULL;
             while (!xmppid && uid) {
-                if (uid->name && strlen(uid->name) >= 10) {
-                    if (strstr(uid->name, "xmpp:") == uid->name) {
+                if( uid->name && strlen(uid->name) >= 10 ) {
+                    if( strstr(uid->name, "xmpp:") == uid->name ) {
                         xmppid = uid;
                     }
                 }
                 uid = uid->next;
             }
 
-            if (xmppid) {
+            if(xmppid) {
                 // Build Key information about all subkey
                 gpgme_subkey_t sub = key->subkeys;
 
-                ProfPGPKey* p_pgpkey = _p_gpg_key_new();
+                ProfPGPKey *p_pgpkey = _p_gpg_key_new();
                 p_pgpkey->id = strdup(sub->keyid);
                 p_pgpkey->name = strdup(xmppid->uid);
                 p_pgpkey->fp = strdup(sub->fpr);
-                if (sub->can_encrypt)
-                    p_pgpkey->encrypt = TRUE;
-                if (sub->can_authenticate)
-                    p_pgpkey->authenticate = TRUE;
-                if (sub->can_certify)
-                    p_pgpkey->certify = TRUE;
-                if (sub->can_sign)
-                    p_pgpkey->sign = TRUE;
+                if (sub->can_encrypt) p_pgpkey->encrypt = TRUE;
+                if (sub->can_authenticate) p_pgpkey->authenticate = TRUE;
+                if (sub->can_certify) p_pgpkey->certify = TRUE;
+                if (sub->can_sign) p_pgpkey->sign = TRUE;
 
                 sub = sub->next;
                 while (sub) {
-                    if (sub->can_encrypt)
-                        p_pgpkey->encrypt = TRUE;
-                    if (sub->can_authenticate)
-                        p_pgpkey->authenticate = TRUE;
-                    if (sub->can_certify)
-                        p_pgpkey->certify = TRUE;
-                    if (sub->can_sign)
-                        p_pgpkey->sign = TRUE;
+                    if (sub->can_encrypt) p_pgpkey->encrypt = TRUE;
+                    if (sub->can_authenticate) p_pgpkey->authenticate = TRUE;
+                    if (sub->can_certify) p_pgpkey->certify = TRUE;
+                    if (sub->can_sign) p_pgpkey->sign = TRUE;
 
                     sub = sub->next;
                 }
 
                 g_hash_table_insert(result, strdup(p_pgpkey->name), p_pgpkey);
+
             }
             gpgme_key_unref(key);
             error = gpgme_op_keylist_next(ctx, &key);
@@ -884,143 +870,147 @@ ox_gpg_public_keys(void)
     //    g_list_free(ids);
 
     return result;
+
 }
 
 char*
-p_ox_gpg_signcrypt(const char* const sender_barejid, const char* const recipient_barejid, const char* const message)
+p_ox_gpg_signcrypt(const char* const sender_barejid, const char* const recipient_barejid , const char* const message)
 {
-    setlocale(LC_ALL, "");
-    gpgme_check_version(NULL);
-    gpgme_set_locale(NULL, LC_CTYPE, setlocale(LC_CTYPE, NULL));
-    gpgme_ctx_t ctx;
+  setlocale (LC_ALL, "");
+  gpgme_check_version (NULL);
+  gpgme_set_locale (NULL, LC_CTYPE, setlocale (LC_CTYPE, NULL));
+  gpgme_ctx_t ctx;
 
-    gpgme_error_t error = gpgme_new(&ctx);
-    if (GPG_ERR_NO_ERROR != error) {
-        printf("gpgme_new: %d\n", error);
-        return NULL;
-    }
+  gpgme_error_t error = gpgme_new (&ctx);
+  if(GPG_ERR_NO_ERROR != error ) {
+    printf("gpgme_new: %d\n", error);
+    return NULL;
+  }
 
-    error = gpgme_set_protocol(ctx, GPGME_PROTOCOL_OPENPGP);
-    if (error != 0) {
-        log_error("GpgME Error: %s", gpgme_strerror(error));
-    }
+  error = gpgme_set_protocol(ctx, GPGME_PROTOCOL_OPENPGP);
+  if(error != 0) {
+    log_error("GpgME Error: %s", gpgme_strerror(error));
+  }
 
-    gpgme_set_armor(ctx, 0);
-    gpgme_set_textmode(ctx, 0);
-    gpgme_set_offline(ctx, 1);
-    gpgme_set_keylist_mode(ctx, GPGME_KEYLIST_MODE_LOCAL);
-    if (error != 0) {
-        log_error("GpgME Error: %s", gpgme_strerror(error));
-    }
+  gpgme_set_armor(ctx,0);
+  gpgme_set_textmode(ctx,0);
+  gpgme_set_offline(ctx,1);
+  gpgme_set_keylist_mode(ctx, GPGME_KEYLIST_MODE_LOCAL);
+  if(error != 0) {
+    log_error("GpgME Error: %s", gpgme_strerror(error));
+  }
 
-    gpgme_key_t recp[3];
-    recp[0] = NULL,
-    recp[1] = NULL;
+  gpgme_key_t recp[3];
+  recp[0] = NULL,
+  recp[1] = NULL;
 
-    char* xmpp_jid_me = alloca((strlen(sender_barejid) + 6) * sizeof(char));
-    char* xmpp_jid_recipient = alloca((strlen(recipient_barejid) + 6) * sizeof(char));
+  char* xmpp_jid_me = alloca( (strlen(sender_barejid)+6) * sizeof(char) );
+  char* xmpp_jid_recipient =  alloca( (strlen(recipient_barejid)+6) * sizeof(char) );
 
-    strcpy(xmpp_jid_me, "xmpp:");
-    strcpy(xmpp_jid_recipient, "xmpp:");
-    strcat(xmpp_jid_me, sender_barejid);
-    strcat(xmpp_jid_recipient, recipient_barejid);
+  strcpy(xmpp_jid_me, "xmpp:");
+  strcpy(xmpp_jid_recipient, "xmpp:");
+  strcat(xmpp_jid_me, sender_barejid);
+  strcat(xmpp_jid_recipient,recipient_barejid);
 
-    gpgme_signers_clear(ctx);
+  gpgme_signers_clear(ctx);
 
-    // lookup own key
-    recp[0] = _ox_key_lookup(sender_barejid, TRUE);
-    if (error != 0) {
-        log_error("Key not found for %s. GpgME Error: %s", xmpp_jid_me, gpgme_strerror(error));
-        return NULL;
-    }
+  // lookup own key
+  recp[0] =  _ox_key_lookup(sender_barejid, TRUE);
+  if(error != 0) {
+    log_error("Key not found for %s. GpgME Error: %s", xmpp_jid_me, gpgme_strerror(error));
+    return NULL;
+  }
 
-    error = gpgme_signers_add(ctx, recp[0]);
-    if (error != 0) {
-        log_error("gpgme_signers_add %s. GpgME Error: %s", xmpp_jid_me, gpgme_strerror(error));
-        return NULL;
-    }
+  error = gpgme_signers_add(ctx,recp[0]);
+  if(error != 0) {
+    log_error("gpgme_signers_add %s. GpgME Error: %s", xmpp_jid_me, gpgme_strerror(error));
+    return NULL;
+  }
 
-    // lookup key of recipient
-    recp[1] = _ox_key_lookup(recipient_barejid, FALSE);
-    if (error != 0) {
-        log_error("Key not found for %s. GpgME Error: %s", xmpp_jid_recipient, gpgme_strerror(error));
-        return NULL;
-    }
-    recp[2] = NULL;
-    log_debug("%s <%s>", recp[0]->uids->name, recp[0]->uids->email);
-    log_debug("%s <%s>", recp[1]->uids->name, recp[1]->uids->email);
 
-    gpgme_encrypt_flags_t flags = 0;
+  // lookup key of recipient
+  recp[1] =  _ox_key_lookup(recipient_barejid, FALSE);
+  if(error != 0) {
+    log_error("Key not found for %s. GpgME Error: %s", xmpp_jid_recipient, gpgme_strerror(error));
+    return NULL;
+  }
+  recp[2] = NULL;
+  log_debug("%s <%s>", recp[0]->uids->name, recp[0]->uids->email);
+  log_debug("%s <%s>", recp[1]->uids->name, recp[1]->uids->email);
 
-    gpgme_data_t plain;
-    gpgme_data_t cipher;
+  gpgme_encrypt_flags_t flags = 0;
 
-    error = gpgme_data_new(&plain);
-    if (error != 0) {
-        log_error("GpgME Error: %s", gpgme_strerror(error));
-        return NULL;
-    }
+  gpgme_data_t plain;
+  gpgme_data_t cipher;
 
-    error = gpgme_data_new_from_mem(&plain, message, strlen(message), 0);
-    if (error != 0) {
-        log_error("GpgME Error: %s", gpgme_strerror(error));
-        return NULL;
-    }
-    error = gpgme_data_new(&cipher);
-    if (error != 0) {
-        log_error("GpgME Error: %s", gpgme_strerror(error));
-        return NULL;
-    }
+  error = gpgme_data_new (&plain);
+  if(error != 0) {
+    log_error("GpgME Error: %s", gpgme_strerror(error));
+    return NULL;
+  }
 
-    error = gpgme_op_encrypt_sign(ctx, recp, flags, plain, cipher);
-    if (error != 0) {
-        log_error("GpgME Error: %s", gpgme_strerror(error));
-        return NULL;
-    }
+  error = gpgme_data_new_from_mem(&plain, message, strlen(message),0);
+  if(error != 0) {
+    log_error("GpgME Error: %s", gpgme_strerror(error));
+    return NULL;
+  }
+  error = gpgme_data_new (&cipher);
+  if(error != 0) {
+    log_error("GpgME Error: %s", gpgme_strerror(error));
+    return NULL;
+  }
 
-    size_t len;
-    char* cipher_str = gpgme_data_release_and_get_mem(cipher, &len);
-    char* result = g_base64_encode((unsigned char*)cipher_str, len);
-    gpgme_key_release(recp[0]);
-    gpgme_key_release(recp[1]);
-    gpgme_release(ctx);
-    return result;
+  error = gpgme_op_encrypt_sign ( ctx, recp, flags, plain, cipher);
+  if(error != 0) {
+    log_error("GpgME Error: %s", gpgme_strerror(error));
+    return NULL;
+  }
+
+  size_t len;
+  char *cipher_str = gpgme_data_release_and_get_mem(cipher, &len);
+  char* result = g_base64_encode( (unsigned char*) cipher_str,len);
+  gpgme_key_release (recp[0]);
+  gpgme_key_release (recp[1]);
+  gpgme_release (ctx);
+  return result;
+
 }
 
 gboolean
-ox_is_private_key_available(const char* const barejid)
+ox_is_private_key_available(const char *const barejid)
 {
     g_assert(barejid);
     gboolean result = FALSE;
 
     gpgme_key_t key = _ox_key_lookup(barejid, TRUE);
-    if (key) {
-        if (_ox_key_is_usable(key, barejid, TRUE)) {
+    if(key) {
+        if (_ox_key_is_usable(key, barejid, TRUE) ) {
             result = TRUE;
         }
-        gpgme_key_unref(key);
+    gpgme_key_unref(key);
     }
 
     return result;
 }
 
 gboolean
-ox_is_public_key_available(const char* const barejid)
+ox_is_public_key_available(const char *const barejid)
 {
     g_assert(barejid);
     gboolean result = FALSE;
     gpgme_key_t key = _ox_key_lookup(barejid, FALSE);
-    if (key) {
-        if (_ox_key_is_usable(key, barejid, FALSE)) {
+    if(key) {
+        if (_ox_key_is_usable(key, barejid, FALSE) ) {
             result = TRUE;
         }
-        gpgme_key_unref(key);
+    gpgme_key_unref(key);
     }
     return result;
 }
 
+
 static char*
-_remove_header_footer(char* str, const char* const footer)
+_remove_header_footer(char *str, const char *const footer)
 {
     int pos = 0;
     int newlines = 0;
@@ -1036,17 +1026,17 @@ _remove_header_footer(char* str, const char* const footer)
         }
     }
 
-    char* stripped = strdup(&str[pos]);
-    char* footer_start = g_strrstr(stripped, footer);
+    char *stripped = strdup(&str[pos]);
+    char *footer_start = g_strrstr(stripped, footer);
     footer_start[0] = '\0';
 
     return stripped;
 }
 
 static char*
-_add_header_footer(const char* const str, const char* const header, const char* const footer)
+_add_header_footer(const char *const str, const char *const header, const char *const footer)
 {
-    GString* result_str = g_string_new("");
+    GString *result_str = g_string_new("");
 
     g_string_append(result_str, header);
     g_string_append(result_str, "\n\n");
@@ -1054,7 +1044,7 @@ _add_header_footer(const char* const str, const char* const header, const char* 
     g_string_append(result_str, "\n");
     g_string_append(result_str, footer);
 
-    char* result = result_str->str;
+    char *result = result_str->str;
     g_string_free(result_str, FALSE);
 
     return result;
@@ -1064,17 +1054,17 @@ static void
 _save_pubkeys(void)
 {
     gsize g_data_size;
-    gchar* g_pubkeys_data = g_key_file_to_data(pubkeyfile, &g_data_size, NULL);
+    gchar *g_pubkeys_data = g_key_file_to_data(pubkeyfile, &g_data_size, NULL);
     g_file_set_contents(pubsloc, g_pubkeys_data, g_data_size, NULL);
     g_chmod(pubsloc, S_IRUSR | S_IWUSR);
     g_free(g_pubkeys_data);
 }
 
 static gpgme_key_t
-_ox_key_lookup(const char* const barejid, gboolean secret_only)
+_ox_key_lookup(const char *const barejid, gboolean secret_only)
 {
     g_assert(barejid);
-    log_debug("Looking for %s key: %s", secret_only == TRUE ? "Private" : "Public", barejid);
+    log_debug("Looking for %s key: %s", secret_only == TRUE ? "Private" : "Public",   barejid);
     gpgme_key_t key = NULL;
     gpgme_error_t error;
 
@@ -1089,21 +1079,21 @@ _ox_key_lookup(const char* const barejid, gboolean secret_only)
     error = gpgme_op_keylist_start(ctx, NULL, secret_only);
     if (error == GPG_ERR_NO_ERROR) {
         error = gpgme_op_keylist_next(ctx, &key);
-        if (error != GPG_ERR_EOF && error != GPG_ERR_NO_ERROR) {
+        if ( error != GPG_ERR_EOF && error != GPG_ERR_NO_ERROR)  {
             log_error("OX: gpgme_op_keylist_next %s %s", gpgme_strsource(error), gpgme_strerror(error));
             return NULL;
         }
 
         GString* xmppuri = g_string_new("xmpp:");
-        g_string_append(xmppuri, barejid);
+        g_string_append(xmppuri,barejid);
 
         while (!error) {
             // Looking for XMPP URI UID
             gpgme_user_id_t uid = key->uids;
 
-            while (uid) {
-                if (uid->name && strlen(uid->name) >= 10) {
-                    if (g_strcmp0(uid->name, xmppuri->str) == 0) {
+            while ( uid ) {
+                if( uid->name && strlen(uid->name) >= 10 ) {
+                    if( g_strcmp0(uid->name, xmppuri->str) == 0 ) {
                         gpgme_release(ctx);
                         return key;
                     }
@@ -1120,11 +1110,11 @@ _ox_key_lookup(const char* const barejid, gboolean secret_only)
 }
 
 static gboolean
-_ox_key_is_usable(gpgme_key_t key, const char* const barejid, gboolean secret)
+_ox_key_is_usable(gpgme_key_t key, const char *const barejid, gboolean secret)
 {
     gboolean result = TRUE;
 
-    if (key->revoked || key->expired || key->disabled) {
+    if(key->revoked || key->expired || key->disabled ) {
         result = FALSE;
     }
 
@@ -1143,61 +1133,61 @@ _ox_key_is_usable(gpgme_key_t key, const char* const barejid, gboolean secret)
 char*
 p_ox_gpg_decrypt(char* base64)
 {
-    setlocale(LC_ALL, "");
-    gpgme_check_version(NULL);
-    gpgme_set_locale(NULL, LC_CTYPE, setlocale(LC_CTYPE, NULL));
-    gpgme_ctx_t ctx;
-    gpgme_error_t error = gpgme_new(&ctx);
+  setlocale (LC_ALL, "");
+  gpgme_check_version (NULL);
+  gpgme_set_locale (NULL, LC_CTYPE, setlocale (LC_CTYPE, NULL));
+  gpgme_ctx_t ctx;
+  gpgme_error_t error = gpgme_new (&ctx);
 
-    if (GPG_ERR_NO_ERROR != error) {
-        printf("gpgme_new: %d\n", error);
+  if(GPG_ERR_NO_ERROR != error ) {
+    printf("gpgme_new: %d\n", error);
+    return NULL;
+  }
+
+  error = gpgme_set_protocol(ctx, GPGME_PROTOCOL_OPENPGP);
+  if(error != 0) {
+    log_error("GpgME Error: %s", gpgme_strerror(error));
+  }
+
+  gpgme_set_armor(ctx,0);
+  gpgme_set_textmode(ctx,0);
+  gpgme_set_offline(ctx,1);
+  gpgme_set_keylist_mode(ctx, GPGME_KEYLIST_MODE_LOCAL);
+  if(error != 0) {
+    log_error("GpgME Error: %s", gpgme_strerror(error));
+  }
+
+  gpgme_data_t plain = NULL;
+  gpgme_data_t cipher = NULL;
+
+  gsize s;
+  guchar* encypted = g_base64_decode(base64, &s);
+  error = gpgme_data_new_from_mem(&cipher, (char*)encypted, s,0);
+  if(error != 0) {
+    log_error("GpgME Error gpgme_data_new_from_mem: %s", gpgme_strerror(error));
+    return NULL;
+  }
+
+  error = gpgme_data_new (&plain);
+  if(error != 0) {
+    log_error("GpgME Error: %s", gpgme_strerror(error));
+    return NULL;
+  }
+
+  error = gpgme_op_decrypt_verify(ctx, cipher, plain);
+  if(error != 0) {
+    log_error("GpgME Error gpgme_op_decrypt: %s", gpgme_strerror(error));
+    error = gpgme_op_decrypt(ctx, cipher, plain);
+    if ( error  != 0 ) {
         return NULL;
     }
-
-    error = gpgme_set_protocol(ctx, GPGME_PROTOCOL_OPENPGP);
-    if (error != 0) {
-        log_error("GpgME Error: %s", gpgme_strerror(error));
-    }
-
-    gpgme_set_armor(ctx, 0);
-    gpgme_set_textmode(ctx, 0);
-    gpgme_set_offline(ctx, 1);
-    gpgme_set_keylist_mode(ctx, GPGME_KEYLIST_MODE_LOCAL);
-    if (error != 0) {
-        log_error("GpgME Error: %s", gpgme_strerror(error));
-    }
-
-    gpgme_data_t plain = NULL;
-    gpgme_data_t cipher = NULL;
-
-    gsize s;
-    guchar* encypted = g_base64_decode(base64, &s);
-    error = gpgme_data_new_from_mem(&cipher, (char*)encypted, s, 0);
-    if (error != 0) {
-        log_error("GpgME Error gpgme_data_new_from_mem: %s", gpgme_strerror(error));
-        return NULL;
-    }
-
-    error = gpgme_data_new(&plain);
-    if (error != 0) {
-        log_error("GpgME Error: %s", gpgme_strerror(error));
-        return NULL;
-    }
-
-    error = gpgme_op_decrypt_verify(ctx, cipher, plain);
-    if (error != 0) {
-        log_error("GpgME Error gpgme_op_decrypt: %s", gpgme_strerror(error));
-        error = gpgme_op_decrypt(ctx, cipher, plain);
-        if (error != 0) {
-            return NULL;
-        }
-    }
-    size_t len;
-    char* plain_str = gpgme_data_release_and_get_mem(plain, &len);
-    char* result = malloc(len + 1);
-    strcpy(result, plain_str);
-    result[len] = '\0';
-    return result;
+  }
+  size_t len;
+  char *plain_str = gpgme_data_release_and_get_mem(plain, &len);
+  char* result = malloc(len+1);
+  strcpy(result, plain_str);
+  result[len] = '\0';
+  return result;
 }
 
 /*!
@@ -1224,8 +1214,7 @@ p_ox_gpg_decrypt(char* base64)
  */
 
 void
-p_ox_gpg_readkey(const char* const filename, char** key, char** fp)
-{
+p_ox_gpg_readkey(const char* const filename, char** key, char** fp){
 
     log_info("Read OpenPGP Key from file %s", filename);
 
@@ -1233,74 +1222,75 @@ p_ox_gpg_readkey(const char* const filename, char** key, char** fp)
     gchar* data = NULL;
     gsize size = -1;
 
-    gboolean success = g_file_get_contents(filename,
-                                           &data,
-                                           &size,
-                                           &error);
-    if (success) {
-        setlocale(LC_ALL, "");
-        gpgme_check_version(NULL);
-        gpgme_set_locale(NULL, LC_CTYPE, setlocale(LC_CTYPE, NULL));
+    gboolean success = g_file_get_contents (filename,
+                     &data,
+                     &size,
+                     &error);
+    if ( success  ) {
+        setlocale (LC_ALL, "");
+        gpgme_check_version (NULL);
+        gpgme_set_locale (NULL, LC_CTYPE, setlocale (LC_CTYPE, NULL));
         gpgme_ctx_t ctx;
-        gpgme_error_t error = gpgme_new(&ctx);
+        gpgme_error_t error = gpgme_new (&ctx);
 
-        if (GPG_ERR_NO_ERROR != error) {
+        if(GPG_ERR_NO_ERROR != error ) {
             log_error("Read OpenPGP key from file: gpgme_new failed: %s", gpgme_strerror(error));
             return;
         }
 
         error = gpgme_set_protocol(ctx, GPGME_PROTOCOL_OPENPGP);
-        if (error != GPG_ERR_NO_ERROR) {
+        if( error != GPG_ERR_NO_ERROR ) {
             log_error("Read OpenPGP key from file: set GPGME_PROTOCOL_OPENPGP:  %s", gpgme_strerror(error));
             return;
         }
 
-        gpgme_set_armor(ctx, 0);
-        gpgme_set_textmode(ctx, 0);
-        gpgme_set_offline(ctx, 1);
+        gpgme_set_armor(ctx,0);
+        gpgme_set_textmode(ctx,0);
+        gpgme_set_offline(ctx,1);
         gpgme_set_keylist_mode(ctx, GPGME_KEYLIST_MODE_LOCAL);
 
         gpgme_data_t gpgme_data = NULL;
-        error = gpgme_data_new(&gpgme_data);
-        if (error != GPG_ERR_NO_ERROR) {
+        error = gpgme_data_new (&gpgme_data);
+        if ( error != GPG_ERR_NO_ERROR ) {
             log_error("Read OpenPGP key from file: gpgme_data_new %s", gpgme_strerror(error));
             return;
         }
 
-        error = gpgme_data_new_from_mem(&gpgme_data, (char*)data, size, 0);
-        if (error != GPG_ERR_NO_ERROR) {
+        error = gpgme_data_new_from_mem(&gpgme_data, (char*)data, size,0);
+        if ( error != GPG_ERR_NO_ERROR ) {
             log_error("Read OpenPGP key from file: gpgme_data_new_from_mem %s", gpgme_strerror(error));
             return;
         }
-        error = gpgme_op_keylist_from_data_start(ctx, gpgme_data, 0);
-        if (error != GPG_ERR_NO_ERROR) {
+        error =   gpgme_op_keylist_from_data_start ( ctx, gpgme_data, 0);
+        if ( error != GPG_ERR_NO_ERROR ) {
             log_error("Read OpenPGP key from file: gpgme_op_keylist_from_data_start %s", gpgme_strerror(error));
             return;
         }
         gpgme_key_t gkey;
-        error = gpgme_op_keylist_next(ctx, &gkey);
-        if (error != GPG_ERR_NO_ERROR) {
+        error = gpgme_op_keylist_next (ctx, &gkey);
+        if ( error != GPG_ERR_NO_ERROR ) {
             log_error("Read OpenPGP key from file: gpgme_op_keylist_next %s", gpgme_strerror(error));
             return;
         }
 
         gpgme_key_t end;
-        error = gpgme_op_keylist_next(ctx, &end);
-        if (error == GPG_ERR_NO_ERROR) {
+        error = gpgme_op_keylist_next (ctx, &end);
+        if( error == GPG_ERR_NO_ERROR ) {
             log_error("Read OpenPGP key from file: ambiguous key");
             return;
         }
 
-        if (gkey->revoked || gkey->expired || gkey->disabled || gkey->invalid || gkey->secret) {
+        if(gkey->revoked || gkey->expired || gkey->disabled || gkey->invalid || gkey->secret  ) {
             log_error("Read OpenPGP key from file: Key is not valid");
             return;
         }
 
-        gchar* keybase64 = g_base64_encode((const guchar*)data, size);
-
+        gchar* keybase64 = g_base64_encode( (const guchar*) data, size );
+        
         *key = strdup(keybase64);
         *fp = strdup(gkey->fpr);
     } else {
         log_error("Read OpenPGP key from file: Unable to read file: %s", error->message);
     }
+
 }

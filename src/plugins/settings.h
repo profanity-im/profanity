@@ -39,15 +39,15 @@
 void plugin_settings_init(void);
 void plugin_settings_close(void);
 
-gboolean plugin_settings_boolean_get(const char* const group, const char* const key, gboolean def);
-void plugin_settings_boolean_set(const char* const group, const char* const key, gboolean value);
-char* plugin_settings_string_get(const char* const group, const char* const key, const char* const def);
-void plugin_settings_string_set(const char* const group, const char* const key, const char* const value);
-int plugin_settings_int_get(const char* const group, const char* const key, int def);
-void plugin_settings_int_set(const char* const group, const char* const key, int value);
-char** plugin_settings_string_list_get(const char* const group, const char* const key);
-void plugin_settings_string_list_add(const char* const group, const char* const key, const char* const value);
-int plugin_settings_string_list_remove(const char* const group, const char* const key, const char* const value);
-int plugin_settings_string_list_clear(const char* const group, const char* const key);
+gboolean plugin_settings_boolean_get(const char *const group, const char *const key, gboolean def);
+void plugin_settings_boolean_set(const char *const group, const char *const key, gboolean value);
+char* plugin_settings_string_get(const char *const group, const char *const key, const char *const def);
+void plugin_settings_string_set(const char *const group, const char *const key, const char *const value);
+int plugin_settings_int_get(const char *const group, const char *const key, int def);
+void plugin_settings_int_set(const char *const group, const char *const key, int value);
+char** plugin_settings_string_list_get(const char *const group, const char *const key);
+void plugin_settings_string_list_add(const char *const group, const char *const key, const char *const value);
+int plugin_settings_string_list_remove(const char *const group, const char *const key, const char *const value);
+int plugin_settings_string_list_clear(const char *const group, const char *const key);
 
 #endif

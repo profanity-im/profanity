@@ -44,10 +44,10 @@
 
 #include "omemo/omemo.h"
 
-static int _omemo_receive_devicelist(xmpp_stanza_t* const stanza, void* const userdata);
-static int _omemo_bundle_publish_result(xmpp_stanza_t* const stanza, void* const userdata);
-static int _omemo_bundle_publish_configure(xmpp_stanza_t* const stanza, void* const userdata);
-static int _omemo_bundle_publish_configure_result(xmpp_stanza_t* const stanza, void* const userdata);
+static int _omemo_receive_devicelist(xmpp_stanza_t *const stanza, void *const userdata);
+static int _omemo_bundle_publish_result(xmpp_stanza_t *const stanza, void *const userdata);
+static int _omemo_bundle_publish_configure(xmpp_stanza_t *const stanza, void *const userdata);
+static int _omemo_bundle_publish_configure_result(xmpp_stanza_t *const stanza, void *const userdata);
 
 void
 omemo_devicelist_subscribe(void)
@@ -58,10 +58,10 @@ omemo_devicelist_subscribe(void)
 }
 
 void
-omemo_devicelist_publish(GList* device_list)
+omemo_devicelist_publish(GList *device_list)
 {
-    xmpp_ctx_t* const ctx = connection_get_ctx();
-    xmpp_stanza_t* iq = stanza_create_omemo_devicelist_publish(ctx, device_list);
+    xmpp_ctx_t * const ctx = connection_get_ctx();
+    xmpp_stanza_t *iq = stanza_create_omemo_devicelist_publish(ctx, device_list);
 
     if (connection_supports(XMPP_FEATURE_PUBSUB_PUBLISH_OPTIONS)) {
         stanza_attach_publish_options(ctx, iq, "pubsub#access_model", "open");
@@ -72,12 +72,12 @@ omemo_devicelist_publish(GList* device_list)
 }
 
 void
-omemo_devicelist_request(const char* const jid)
+omemo_devicelist_request(const char * const jid)
 {
-    xmpp_ctx_t* const ctx = connection_get_ctx();
-    char* id = connection_create_stanza_id();
+    xmpp_ctx_t * const ctx = connection_get_ctx();
+    char *id = connection_create_stanza_id();
 
-    xmpp_stanza_t* iq = stanza_create_omemo_devicelist_request(ctx, id, jid);
+    xmpp_stanza_t *iq = stanza_create_omemo_devicelist_request(ctx, id, jid);
     iq_id_handler_add(id, _omemo_receive_devicelist, NULL, NULL);
 
     iq_send_stanza(iq);
@@ -89,12 +89,12 @@ omemo_devicelist_request(const char* const jid)
 void
 omemo_bundle_publish(gboolean first)
 {
-    xmpp_ctx_t* const ctx = connection_get_ctx();
-    unsigned char* identity_key = NULL;
+    xmpp_ctx_t * const ctx = connection_get_ctx();
+    unsigned char *identity_key = NULL;
     size_t identity_key_length;
-    unsigned char* signed_prekey = NULL;
+    unsigned char *signed_prekey = NULL;
     size_t signed_prekey_length;
-    unsigned char* signed_prekey_signature = NULL;
+    unsigned char *signed_prekey_signature = NULL;
     size_t signed_prekey_signature_length;
     GList *prekeys = NULL, *ids = NULL, *lengths = NULL;
 
@@ -103,11 +103,11 @@ omemo_bundle_publish(gboolean first)
     omemo_signed_prekey_signature(&signed_prekey_signature, &signed_prekey_signature_length);
     omemo_prekeys(&prekeys, &ids, &lengths);
 
-    char* id = connection_create_stanza_id();
-    xmpp_stanza_t* iq = stanza_create_omemo_bundle_publish(ctx, id,
-                                                           omemo_device_id(), identity_key, identity_key_length, signed_prekey,
-                                                           signed_prekey_length, signed_prekey_signature,
-                                                           signed_prekey_signature_length, prekeys, ids, lengths);
+    char *id = connection_create_stanza_id();
+    xmpp_stanza_t *iq = stanza_create_omemo_bundle_publish(ctx, id,
+        omemo_device_id(), identity_key, identity_key_length, signed_prekey,
+        signed_prekey_length, signed_prekey_signature,
+        signed_prekey_signature_length, prekeys, ids, lengths);
 
     g_list_free_full(prekeys, free);
     g_list_free(lengths);
@@ -129,12 +129,12 @@ omemo_bundle_publish(gboolean first)
 }
 
 void
-omemo_bundle_request(const char* const jid, uint32_t device_id, ProfIqCallback func, ProfIqFreeCallback free_func, void* userdata)
+omemo_bundle_request(const char * const jid, uint32_t device_id, ProfIqCallback func, ProfIqFreeCallback free_func, void *userdata)
 {
-    xmpp_ctx_t* const ctx = connection_get_ctx();
-    char* id = connection_create_stanza_id();
+    xmpp_ctx_t * const ctx = connection_get_ctx();
+    char *id = connection_create_stanza_id();
 
-    xmpp_stanza_t* iq = stanza_create_omemo_bundle_request(ctx, id, jid, device_id);
+    xmpp_stanza_t *iq = stanza_create_omemo_bundle_request(ctx, id, jid, device_id);
     iq_id_handler_add(id, func, free_func, userdata);
 
     iq_send_stanza(iq);
@@ -144,17 +144,17 @@ omemo_bundle_request(const char* const jid, uint32_t device_id, ProfIqCallback f
 }
 
 int
-omemo_start_device_session_handle_bundle(xmpp_stanza_t* const stanza, void* const userdata)
+omemo_start_device_session_handle_bundle(xmpp_stanza_t *const stanza, void *const userdata)
 {
-    GList* prekeys_list = NULL;
-    unsigned char* signed_prekey_raw = NULL;
-    unsigned char* signed_prekey_signature_raw = NULL;
-    char* from = NULL;
+    GList *prekeys_list = NULL;
+    unsigned char *signed_prekey_raw = NULL;
+    unsigned char *signed_prekey_signature_raw = NULL;
+    char *from = NULL;
 
-    const char* from_attr = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
+    const char *from_attr = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
 
     if (!from_attr) {
-        Jid* jid = jid_create(connection_get_fulljid());
+        Jid *jid = jid_create(connection_get_fulljid());
         from = strdup(jid->barejid);
         jid_destroy(jid);
     } else {
@@ -165,62 +165,62 @@ omemo_start_device_session_handle_bundle(xmpp_stanza_t* const stanza, void* cons
         goto out;
     }
 
-    xmpp_stanza_t* pubsub = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_PUBSUB);
+    xmpp_stanza_t *pubsub = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_PUBSUB);
     if (!pubsub) {
         goto out;
     }
 
-    xmpp_stanza_t* items = xmpp_stanza_get_child_by_name(pubsub, "items");
+    xmpp_stanza_t *items = xmpp_stanza_get_child_by_name(pubsub, "items");
     if (!items) {
         goto out;
     }
-    const char* node = xmpp_stanza_get_attribute(items, "node");
-    char* device_id_str = strstr(node, ":");
+    const char *node = xmpp_stanza_get_attribute(items, "node");
+    char *device_id_str = strstr(node, ":");
     if (!device_id_str) {
         goto out;
     }
 
     uint32_t device_id = strtoul(++device_id_str, NULL, 10);
 
-    xmpp_stanza_t* item = xmpp_stanza_get_child_by_name(items, "item");
+    xmpp_stanza_t *item = xmpp_stanza_get_child_by_name(items, "item");
     if (!item) {
         goto out;
     }
 
-    xmpp_stanza_t* bundle = xmpp_stanza_get_child_by_ns(item, STANZA_NS_OMEMO);
+    xmpp_stanza_t *bundle = xmpp_stanza_get_child_by_ns(item, STANZA_NS_OMEMO);
     if (!bundle) {
         goto out;
     }
 
-    xmpp_stanza_t* prekeys = xmpp_stanza_get_child_by_name(bundle, "prekeys");
+    xmpp_stanza_t *prekeys = xmpp_stanza_get_child_by_name(bundle, "prekeys");
     if (!prekeys) {
         goto out;
     }
 
-    xmpp_stanza_t* prekey;
+    xmpp_stanza_t *prekey;
     for (prekey = xmpp_stanza_get_children(prekeys); prekey != NULL; prekey = xmpp_stanza_get_next(prekey)) {
         if (g_strcmp0(xmpp_stanza_get_name(prekey), "preKeyPublic") != 0) {
             continue;
         }
 
-        omemo_key_t* key = malloc(sizeof(omemo_key_t));
+        omemo_key_t *key = malloc(sizeof(omemo_key_t));
         key->data = NULL;
 
-        const char* prekey_id_text = xmpp_stanza_get_attribute(prekey, "preKeyId");
+        const char *prekey_id_text = xmpp_stanza_get_attribute(prekey, "preKeyId");
         if (!prekey_id_text) {
             omemo_key_free(key);
             continue;
         }
 
         key->id = strtoul(prekey_id_text, NULL, 10);
-        xmpp_stanza_t* prekey_text = xmpp_stanza_get_children(prekey);
+        xmpp_stanza_t *prekey_text = xmpp_stanza_get_children(prekey);
 
         if (!prekey_text) {
             omemo_key_free(key);
             continue;
         }
 
-        char* prekey_b64 = xmpp_stanza_get_text(prekey_text);
+        char *prekey_b64 = xmpp_stanza_get_text(prekey_text);
         key->data = g_base64_decode(prekey_b64, &key->length);
         free(prekey_b64);
         if (!key->data) {
@@ -233,64 +233,64 @@ omemo_start_device_session_handle_bundle(xmpp_stanza_t* const stanza, void* cons
         prekeys_list = g_list_append(prekeys_list, key);
     }
 
-    xmpp_stanza_t* signed_prekey = xmpp_stanza_get_child_by_name(bundle, "signedPreKeyPublic");
+    xmpp_stanza_t *signed_prekey = xmpp_stanza_get_child_by_name(bundle, "signedPreKeyPublic");
     if (!signed_prekey) {
         goto out;
     }
-    const char* signed_prekey_id_text = xmpp_stanza_get_attribute(signed_prekey, "signedPreKeyId");
+    const char *signed_prekey_id_text = xmpp_stanza_get_attribute(signed_prekey, "signedPreKeyId");
     if (!signed_prekey_id_text) {
         goto out;
     }
 
     uint32_t signed_prekey_id = strtoul(signed_prekey_id_text, NULL, 10);
-    xmpp_stanza_t* signed_prekey_text = xmpp_stanza_get_children(signed_prekey);
+    xmpp_stanza_t *signed_prekey_text = xmpp_stanza_get_children(signed_prekey);
     if (!signed_prekey_text) {
         goto out;
     }
 
     size_t signed_prekey_len;
-    char* signed_prekey_b64 = xmpp_stanza_get_text(signed_prekey_text);
+    char *signed_prekey_b64 = xmpp_stanza_get_text(signed_prekey_text);
     signed_prekey_raw = g_base64_decode(signed_prekey_b64, &signed_prekey_len);
     free(signed_prekey_b64);
     if (!signed_prekey_raw) {
         goto out;
     }
 
-    xmpp_stanza_t* signed_prekey_signature = xmpp_stanza_get_child_by_name(bundle, "signedPreKeySignature");
+    xmpp_stanza_t *signed_prekey_signature = xmpp_stanza_get_child_by_name(bundle, "signedPreKeySignature");
     if (!signed_prekey_signature) {
         goto out;
     }
-    xmpp_stanza_t* signed_prekey_signature_text = xmpp_stanza_get_children(signed_prekey_signature);
+    xmpp_stanza_t *signed_prekey_signature_text = xmpp_stanza_get_children(signed_prekey_signature);
     if (!signed_prekey_signature_text) {
         goto out;
     }
     size_t signed_prekey_signature_len;
-    char* signed_prekey_signature_b64 = xmpp_stanza_get_text(signed_prekey_signature_text);
+    char *signed_prekey_signature_b64 = xmpp_stanza_get_text(signed_prekey_signature_text);
     signed_prekey_signature_raw = g_base64_decode(signed_prekey_signature_b64, &signed_prekey_signature_len);
     free(signed_prekey_signature_b64);
     if (!signed_prekey_signature_raw) {
         goto out;
     }
 
-    xmpp_stanza_t* identity_key = xmpp_stanza_get_child_by_name(bundle, "identityKey");
+    xmpp_stanza_t *identity_key = xmpp_stanza_get_child_by_name(bundle, "identityKey");
     if (!identity_key) {
         goto out;
     }
-    xmpp_stanza_t* identity_key_text = xmpp_stanza_get_children(identity_key);
+    xmpp_stanza_t *identity_key_text = xmpp_stanza_get_children(identity_key);
     if (!identity_key_text) {
         goto out;
     }
     size_t identity_key_len;
-    char* identity_key_b64 = xmpp_stanza_get_text(identity_key_text);
-    unsigned char* identity_key_raw = g_base64_decode(identity_key_b64, &identity_key_len);
+    char *identity_key_b64 = xmpp_stanza_get_text(identity_key_text);
+    unsigned char *identity_key_raw = g_base64_decode(identity_key_b64, &identity_key_len);
     free(identity_key_b64);
     if (!identity_key_raw) {
         goto out;
     }
 
     omemo_start_device_session(from, device_id, prekeys_list, signed_prekey_id,
-                               signed_prekey_raw, signed_prekey_len, signed_prekey_signature_raw,
-                               signed_prekey_signature_len, identity_key_raw, identity_key_len);
+        signed_prekey_raw, signed_prekey_len, signed_prekey_signature_raw,
+        signed_prekey_signature_len, identity_key_raw, identity_key_len);
 
     g_free(identity_key_raw);
 
@@ -308,34 +308,34 @@ out:
     return 1;
 }
 
-char*
-omemo_receive_message(xmpp_stanza_t* const stanza, gboolean* trusted)
+char *
+omemo_receive_message(xmpp_stanza_t *const stanza, gboolean *trusted)
 {
-    char* plaintext = NULL;
-    const char* type = xmpp_stanza_get_type(stanza);
-    GList* keys = NULL;
-    unsigned char* iv_raw = NULL;
-    unsigned char* payload_raw = NULL;
-    char* iv_text = NULL;
-    char* payload_text = NULL;
+    char *plaintext = NULL;
+    const char *type = xmpp_stanza_get_type(stanza);
+    GList *keys = NULL;
+    unsigned char *iv_raw = NULL;
+    unsigned char *payload_raw = NULL;
+    char *iv_text = NULL;
+    char *payload_text = NULL;
 
-    xmpp_stanza_t* encrypted = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_OMEMO);
+    xmpp_stanza_t *encrypted = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_OMEMO);
     if (!encrypted) {
         return NULL;
     }
 
-    xmpp_stanza_t* header = xmpp_stanza_get_child_by_name(encrypted, "header");
+    xmpp_stanza_t *header = xmpp_stanza_get_child_by_name(encrypted, "header");
     if (!header) {
         return NULL;
     }
 
-    const char* sid_text = xmpp_stanza_get_attribute(header, "sid");
+    const char *sid_text = xmpp_stanza_get_attribute(header, "sid");
     if (!sid_text) {
         return NULL;
     }
     uint32_t sid = strtoul(sid_text, NULL, 10);
 
-    xmpp_stanza_t* iv = xmpp_stanza_get_child_by_name(header, "iv");
+    xmpp_stanza_t *iv = xmpp_stanza_get_child_by_name(header, "iv");
     if (!iv) {
         return NULL;
     }
@@ -349,7 +349,7 @@ omemo_receive_message(xmpp_stanza_t* const stanza, gboolean* trusted)
         goto out;
     }
 
-    xmpp_stanza_t* payload = xmpp_stanza_get_child_by_name(encrypted, "payload");
+    xmpp_stanza_t *payload = xmpp_stanza_get_child_by_name(encrypted, "payload");
     if (!payload) {
         goto out;
     }
@@ -363,19 +363,19 @@ omemo_receive_message(xmpp_stanza_t* const stanza, gboolean* trusted)
         goto out;
     }
 
-    xmpp_stanza_t* key_stanza;
+    xmpp_stanza_t *key_stanza;
     for (key_stanza = xmpp_stanza_get_children(header); key_stanza != NULL; key_stanza = xmpp_stanza_get_next(key_stanza)) {
         if (g_strcmp0(xmpp_stanza_get_name(key_stanza), "key") != 0) {
             continue;
         }
 
-        omemo_key_t* key = malloc(sizeof(omemo_key_t));
-        char* key_text = xmpp_stanza_get_text(key_stanza);
+        omemo_key_t *key = malloc(sizeof(omemo_key_t));
+        char *key_text = xmpp_stanza_get_text(key_stanza);
         if (!key_text) {
             goto skip;
         }
 
-        const char* rid_text = xmpp_stanza_get_attribute(key_stanza, "rid");
+        const char *rid_text = xmpp_stanza_get_attribute(key_stanza, "rid");
         key->device_id = strtoul(rid_text, NULL, 10);
         if (!key->device_id) {
             goto skip;
@@ -386,20 +386,21 @@ omemo_receive_message(xmpp_stanza_t* const stanza, gboolean* trusted)
         if (!key->data) {
             goto skip;
         }
-        key->prekey = g_strcmp0(xmpp_stanza_get_attribute(key_stanza, "prekey"), "true") == 0
-                      || g_strcmp0(xmpp_stanza_get_attribute(key_stanza, "prekey"), "1") == 0;
+        key->prekey = 
+            g_strcmp0(xmpp_stanza_get_attribute(key_stanza, "prekey"), "true") == 0
+            || g_strcmp0(xmpp_stanza_get_attribute(key_stanza, "prekey"), "1") == 0;
         keys = g_list_append(keys, key);
         continue;
 
-    skip:
+skip:
         free(key);
     }
 
-    const char* from = xmpp_stanza_get_from(stanza);
+    const char *from = xmpp_stanza_get_from(stanza);
 
     plaintext = omemo_on_message_recv(from, sid, iv_raw, iv_len,
-                                      keys, payload_raw, payload_len,
-                                      g_strcmp0(type, STANZA_TYPE_GROUPCHAT) == 0, trusted);
+        keys, payload_raw, payload_len,
+        g_strcmp0(type, STANZA_TYPE_GROUPCHAT) == 0, trusted);
 
 out:
     if (keys) {
@@ -415,18 +416,18 @@ out:
 }
 
 static int
-_omemo_receive_devicelist(xmpp_stanza_t* const stanza, void* const userdata)
+_omemo_receive_devicelist(xmpp_stanza_t *const stanza, void *const userdata)
 {
-    GList* device_list = NULL;
-    const char* from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
+    GList *device_list = NULL;
+    const char *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
 
-    xmpp_stanza_t* root = NULL;
-    xmpp_stanza_t* event = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_PUBSUB_EVENT);
+    xmpp_stanza_t *root = NULL;
+    xmpp_stanza_t *event = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_PUBSUB_EVENT);
     if (event) {
         root = event;
     }
 
-    xmpp_stanza_t* pubsub = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_PUBSUB);
+    xmpp_stanza_t *pubsub = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_PUBSUB);
     if (pubsub) {
         root = pubsub;
     }
@@ -435,20 +436,21 @@ _omemo_receive_devicelist(xmpp_stanza_t* const stanza, void* const userdata)
         return 1;
     }
 
-    xmpp_stanza_t* items = xmpp_stanza_get_child_by_name(root, "items");
+    xmpp_stanza_t *items = xmpp_stanza_get_child_by_name(root, "items");
     if (!items) {
         return 1;
     }
 
+
     // Looking for "current" item - if there is no current, take the first item.
     xmpp_stanza_t* first = NULL;
     xmpp_stanza_t* current = NULL;
-
-    xmpp_stanza_t* item = xmpp_stanza_get_children(items);
-    while (item) {
+    
+    xmpp_stanza_t *item = xmpp_stanza_get_children(items);
+    while ( item ) {
         if (g_strcmp0(xmpp_stanza_get_name(item), "item") == 0) {
             first = item;
-            if (g_strcmp0(xmpp_stanza_get_id(item), "current") == 0) {
+            if (g_strcmp0(xmpp_stanza_get_id(item), "current") == 0 ) {
                 current = item;
                 break;
             }
@@ -456,27 +458,27 @@ _omemo_receive_devicelist(xmpp_stanza_t* const stanza, void* const userdata)
         item = xmpp_stanza_get_next(item);
     }
 
-    if (current) {
+    if(current) {
         item = current;
-    } else if (first) {
+    } else if( first ) {
         log_warning("OMEMO: User %s has a non 'current' device item list: %s.", from, xmpp_stanza_get_id(first));
         item = first;
     } else {
         return 1;
     }
 
-    xmpp_stanza_t* list = xmpp_stanza_get_child_by_ns(item, STANZA_NS_OMEMO);
+    xmpp_stanza_t *list = xmpp_stanza_get_child_by_ns(item, STANZA_NS_OMEMO);
     if (!list) {
         return 1;
     }
 
-    xmpp_stanza_t* device;
+    xmpp_stanza_t *device;
     for (device = xmpp_stanza_get_children(list); device != NULL; device = xmpp_stanza_get_next(device)) {
         if (g_strcmp0(xmpp_stanza_get_name(device), "device") != 0) {
             continue;
         }
 
-        const char* id = xmpp_stanza_get_id(device);
+        const char *id = xmpp_stanza_get_id(device);
         if (id != NULL) {
             device_list = g_list_append(device_list, GINT_TO_POINTER(strtoul(id, NULL, 10)));
         } else {
@@ -490,9 +492,9 @@ _omemo_receive_devicelist(xmpp_stanza_t* const stanza, void* const userdata)
 }
 
 static int
-_omemo_bundle_publish_result(xmpp_stanza_t* const stanza, void* const userdata)
+_omemo_bundle_publish_result(xmpp_stanza_t *const stanza, void *const userdata)
 {
-    const char* type = xmpp_stanza_get_type(stanza);
+    const char *type = xmpp_stanza_get_type(stanza);
 
     if (g_strcmp0(type, STANZA_TYPE_ERROR) != 0) {
         return 0;
@@ -504,11 +506,11 @@ _omemo_bundle_publish_result(xmpp_stanza_t* const stanza, void* const userdata)
     }
 
     log_info("OMEMO: cannot publish bundle with open access model, trying to configure node");
-    xmpp_ctx_t* const ctx = connection_get_ctx();
-    Jid* jid = jid_create(connection_get_fulljid());
-    char* id = connection_create_stanza_id();
-    char* node = g_strdup_printf("%s:%d", STANZA_NS_OMEMO_BUNDLES, omemo_device_id());
-    xmpp_stanza_t* iq = stanza_create_pubsub_configure_request(ctx, id, jid->barejid, node);
+    xmpp_ctx_t * const ctx = connection_get_ctx();
+    Jid *jid = jid_create(connection_get_fulljid());
+    char *id = connection_create_stanza_id();
+    char *node = g_strdup_printf("%s:%d", STANZA_NS_OMEMO_BUNDLES, omemo_device_id());
+    xmpp_stanza_t *iq = stanza_create_pubsub_configure_request(ctx, id, jid->barejid, node);
     g_free(node);
 
     iq_id_handler_add(id, _omemo_bundle_publish_configure, NULL, userdata);
@@ -522,26 +524,26 @@ _omemo_bundle_publish_result(xmpp_stanza_t* const stanza, void* const userdata)
 }
 
 static int
-_omemo_bundle_publish_configure(xmpp_stanza_t* const stanza, void* const userdata)
+_omemo_bundle_publish_configure(xmpp_stanza_t *const stanza, void *const userdata)
 {
     /* TODO handle error */
-    xmpp_stanza_t* pubsub = xmpp_stanza_get_child_by_name(stanza, "pubsub");
-    xmpp_stanza_t* configure = xmpp_stanza_get_child_by_name(pubsub, STANZA_NAME_CONFIGURE);
-    xmpp_stanza_t* x = xmpp_stanza_get_child_by_name(configure, "x");
+    xmpp_stanza_t *pubsub = xmpp_stanza_get_child_by_name(stanza, "pubsub");
+    xmpp_stanza_t *configure = xmpp_stanza_get_child_by_name(pubsub, STANZA_NAME_CONFIGURE);
+    xmpp_stanza_t *x = xmpp_stanza_get_child_by_name(configure, "x");
 
     DataForm* form = form_create(x);
-    char* tag = g_hash_table_lookup(form->var_to_tag, "pubsub#access_model");
+    char *tag = g_hash_table_lookup(form->var_to_tag, "pubsub#access_model");
     if (!tag) {
         log_info("OMEMO: cannot configure bundle to an open access model");
         return 0;
     }
     form_set_value(form, tag, "open");
 
-    xmpp_ctx_t* const ctx = connection_get_ctx();
-    Jid* jid = jid_create(connection_get_fulljid());
-    char* id = connection_create_stanza_id();
-    char* node = g_strdup_printf("%s:%d", STANZA_NS_OMEMO_BUNDLES, omemo_device_id());
-    xmpp_stanza_t* iq = stanza_create_pubsub_configure_submit(ctx, id, jid->barejid, node, form);
+    xmpp_ctx_t * const ctx = connection_get_ctx();
+    Jid *jid = jid_create(connection_get_fulljid());
+    char *id = connection_create_stanza_id();
+    char *node = g_strdup_printf("%s:%d", STANZA_NS_OMEMO_BUNDLES, omemo_device_id());
+    xmpp_stanza_t *iq = stanza_create_pubsub_configure_submit(ctx, id, jid->barejid, node, form);
     g_free(node);
 
     iq_id_handler_add(id, _omemo_bundle_publish_configure_result, NULL, userdata);
@@ -555,9 +557,9 @@ _omemo_bundle_publish_configure(xmpp_stanza_t* const stanza, void* const userdat
 }
 
 static int
-_omemo_bundle_publish_configure_result(xmpp_stanza_t* const stanza, void* const userdata)
+_omemo_bundle_publish_configure_result(xmpp_stanza_t *const stanza, void *const userdata)
 {
-    const char* type = xmpp_stanza_get_type(stanza);
+    const char *type = xmpp_stanza_get_type(stanza);
 
     if (g_strcmp0(type, STANZA_TYPE_ERROR) == 0) {
         log_error("OMEMO: cannot configure bundle to an open access model");

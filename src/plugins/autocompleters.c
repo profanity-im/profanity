@@ -37,20 +37,20 @@
 
 #include <glib.h>
 
-#include "command/cmd_ac.h"
 #include "tools/autocomplete.h"
+#include "command/cmd_ac.h"
 
-static GHashTable* plugin_to_acs;
-static GHashTable* plugin_to_filepath_acs;
+static GHashTable *plugin_to_acs;
+static GHashTable *plugin_to_filepath_acs;
 
 static void
-_free_autocompleters(GHashTable* key_to_ac)
+_free_autocompleters(GHashTable *key_to_ac)
 {
     g_hash_table_destroy(key_to_ac);
 }
 
 static void
-_free_filepath_autocompleters(GHashTable* prefixes)
+_free_filepath_autocompleters(GHashTable *prefixes)
 {
     g_hash_table_destroy(prefixes);
 }
@@ -63,9 +63,9 @@ autocompleters_init(void)
 }
 
 void
-autocompleters_add(const char* const plugin_name, const char* key, char** items)
+autocompleters_add(const char *const plugin_name, const char *key, char **items)
 {
-    GHashTable* key_to_ac = g_hash_table_lookup(plugin_to_acs, plugin_name);
+    GHashTable *key_to_ac = g_hash_table_lookup(plugin_to_acs, plugin_name);
     if (key_to_ac) {
         if (g_hash_table_contains(key_to_ac, key)) {
             Autocomplete existing_ac = g_hash_table_lookup(key_to_ac, key);
@@ -85,9 +85,9 @@ autocompleters_add(const char* const plugin_name, const char* key, char** items)
 }
 
 void
-autocompleters_remove(const char* const plugin_name, const char* key, char** items)
+autocompleters_remove(const char *const plugin_name, const char *key, char **items)
 {
-    GHashTable* key_to_ac = g_hash_table_lookup(plugin_to_acs, plugin_name);
+    GHashTable *key_to_ac = g_hash_table_lookup(plugin_to_acs, plugin_name);
     if (!key_to_ac) {
         return;
     }
@@ -101,9 +101,9 @@ autocompleters_remove(const char* const plugin_name, const char* key, char** ite
 }
 
 void
-autocompleters_clear(const char* const plugin_name, const char* key)
+autocompleters_clear(const char *const plugin_name, const char *key)
 {
-    GHashTable* key_to_ac = g_hash_table_lookup(plugin_to_acs, plugin_name);
+    GHashTable *key_to_ac = g_hash_table_lookup(plugin_to_acs, plugin_name);
     if (!key_to_ac) {
         return;
     }
@@ -117,9 +117,9 @@ autocompleters_clear(const char* const plugin_name, const char* key)
 }
 
 void
-autocompleters_filepath_add(const char* const plugin_name, const char* prefix)
+autocompleters_filepath_add(const char *const plugin_name, const char *prefix)
 {
-    GHashTable* prefixes = g_hash_table_lookup(plugin_to_filepath_acs, plugin_name);
+    GHashTable *prefixes = g_hash_table_lookup(plugin_to_filepath_acs, plugin_name);
     if (prefixes) {
         g_hash_table_add(prefixes, strdup(prefix));
     } else {
@@ -130,17 +130,17 @@ autocompleters_filepath_add(const char* const plugin_name, const char* prefix)
 }
 
 char*
-autocompleters_complete(const char* const input, gboolean previous)
+autocompleters_complete(const char * const input, gboolean previous)
 {
-    char* result = NULL;
+    char *result = NULL;
 
-    GList* ac_hashes = g_hash_table_get_values(plugin_to_acs);
-    GList* curr_hash = ac_hashes;
+    GList *ac_hashes = g_hash_table_get_values(plugin_to_acs);
+    GList *curr_hash = ac_hashes;
     while (curr_hash) {
-        GHashTable* key_to_ac = curr_hash->data;
+        GHashTable *key_to_ac = curr_hash->data;
 
-        GList* keys = g_hash_table_get_keys(key_to_ac);
-        GList* curr = keys;
+        GList *keys = g_hash_table_get_keys(key_to_ac);
+        GList *curr = keys;
         while (curr) {
             result = autocomplete_param_with_ac(input, curr->data, g_hash_table_lookup(key_to_ac, curr->data), TRUE, previous);
             if (result) {
@@ -156,14 +156,14 @@ autocompleters_complete(const char* const input, gboolean previous)
     }
     g_list_free(ac_hashes);
 
-    GList* filepath_hashes = g_hash_table_get_values(plugin_to_filepath_acs);
+    GList *filepath_hashes = g_hash_table_get_values(plugin_to_filepath_acs);
     curr_hash = filepath_hashes;
     while (curr_hash) {
-        GHashTable* prefixes_hash = curr_hash->data;
-        GList* prefixes = g_hash_table_get_keys(prefixes_hash);
-        GList* curr_prefix = prefixes;
+        GHashTable *prefixes_hash = curr_hash->data;
+        GList *prefixes = g_hash_table_get_keys(prefixes_hash);
+        GList *curr_prefix = prefixes;
         while (curr_prefix) {
-            char* prefix = curr_prefix->data;
+            char *prefix = curr_prefix->data;
             if (g_str_has_prefix(input, prefix)) {
                 result = cmd_ac_complete_filepath(input, prefix, previous);
                 if (result) {
@@ -187,11 +187,11 @@ autocompleters_complete(const char* const input, gboolean previous)
 void
 autocompleters_reset(void)
 {
-    GList* ac_hashes = g_hash_table_get_values(plugin_to_acs);
-    GList* curr_hash = ac_hashes;
+    GList *ac_hashes = g_hash_table_get_values(plugin_to_acs);
+    GList *curr_hash = ac_hashes;
     while (curr_hash) {
-        GList* acs = g_hash_table_get_values(curr_hash->data);
-        GList* curr = acs;
+        GList *acs = g_hash_table_get_values(curr_hash->data);
+        GList *curr = acs;
         while (curr) {
             autocomplete_reset(curr->data);
             curr = g_list_next(curr);
@@ -204,8 +204,7 @@ autocompleters_reset(void)
     g_list_free(ac_hashes);
 }
 
-void
-autocompleters_destroy(void)
+void autocompleters_destroy(void)
 {
     g_hash_table_destroy(plugin_to_acs);
     g_hash_table_destroy(plugin_to_filepath_acs);

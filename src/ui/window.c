@@ -36,10 +36,10 @@
 
 #include "config.h"
 
-#include <assert.h>
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include <assert.h>
 #include <wchar.h>
 
 #include <glib.h>
@@ -50,32 +50,32 @@
 #include <ncurses.h>
 #endif
 
-#include "config/preferences.h"
-#include "config/theme.h"
 #include "log.h"
-#include "ui/screen.h"
+#include "config/theme.h"
+#include "config/preferences.h"
 #include "ui/ui.h"
 #include "ui/window.h"
-#include "xmpp/roster_list.h"
+#include "ui/screen.h"
 #include "xmpp/xmpp.h"
+#include "xmpp/roster_list.h"
 
 #define CONS_WIN_TITLE "Profanity. Type /help for help information."
-#define XML_WIN_TITLE  "XML Console"
+#define XML_WIN_TITLE "XML Console"
 
-#define CEILING(X) (X - (int)(X) > 0 ? (int)(X + 1) : (int)(X))
+#define CEILING(X) (X-(int)(X) > 0 ? (int)(X+1) : (int)(X))
 
 static void
-_win_printf(ProfWin* window, const char* show_char, int pad_indent, GDateTime* timestamp, int flags, theme_item_t theme_item, const char* const display_from, const char* const from_jid, const char* const message_id, const char* const message, ...);
-static void _win_print_internal(ProfWin* window, const char* show_char, int pad_indent, GDateTime* time,
-                                int flags, theme_item_t theme_item, const char* const from, const char* const message, DeliveryReceipt* receipt);
-static void _win_print_wrapped(WINDOW* win, const char* const message, size_t indent, int pad_indent);
+_win_printf(ProfWin *window, const char *show_char, int pad_indent, GDateTime *timestamp, int flags, theme_item_t theme_item, const char *const display_from, const char *const from_jid, const char *const message_id, const char *const message, ...);
+static void _win_print_internal(ProfWin *window, const char *show_char, int pad_indent, GDateTime *time,
+    int flags, theme_item_t theme_item, const char *const from, const char *const message, DeliveryReceipt *receipt);
+static void _win_print_wrapped(WINDOW *win, const char *const message, size_t indent, int pad_indent);
 
 int
 win_roster_cols(void)
 {
     int roster_win_percent = prefs_get_roster_size();
     int cols = getmaxx(stdscr);
-    return CEILING((((double)cols) / 100) * roster_win_percent);
+    return CEILING( (((double)cols) / 100) * roster_win_percent);
 }
 
 int
@@ -83,7 +83,7 @@ win_occpuants_cols(void)
 {
     int occupants_win_percent = prefs_get_occupants_size();
     int cols = getmaxx(stdscr);
-    return CEILING((((double)cols) / 100) * occupants_win_percent);
+    return CEILING( (((double)cols) / 100) * occupants_win_percent);
 }
 
 static ProfLayout*
@@ -91,7 +91,7 @@ _win_create_simple_layout(void)
 {
     int cols = getmaxx(stdscr);
 
-    ProfLayoutSimple* layout = malloc(sizeof(ProfLayoutSimple));
+    ProfLayoutSimple *layout = malloc(sizeof(ProfLayoutSimple));
     layout->base.type = LAYOUT_SIMPLE;
     layout->base.win = newpad(PAD_SIZE, cols);
     wbkgd(layout->base.win, theme_attrs(THEME_TEXT));
@@ -108,7 +108,7 @@ _win_create_split_layout(void)
 {
     int cols = getmaxx(stdscr);
 
-    ProfLayoutSplit* layout = malloc(sizeof(ProfLayoutSplit));
+    ProfLayoutSplit *layout = malloc(sizeof(ProfLayoutSplit));
     layout->base.type = LAYOUT_SPLIT;
     layout->base.win = newpad(PAD_SIZE, cols);
     wbkgd(layout->base.win, theme_attrs(THEME_TEXT));
@@ -126,7 +126,7 @@ _win_create_split_layout(void)
 ProfWin*
 win_create_console(void)
 {
-    ProfConsoleWin* new_win = malloc(sizeof(ProfConsoleWin));
+    ProfConsoleWin *new_win = malloc(sizeof(ProfConsoleWin));
     new_win->window.type = WIN_CONSOLE;
     new_win->window.layout = _win_create_split_layout();
 
@@ -134,9 +134,9 @@ win_create_console(void)
 }
 
 ProfWin*
-win_create_chat(const char* const barejid)
+win_create_chat(const char *const barejid)
 {
-    ProfChatWin* new_win = malloc(sizeof(ProfChatWin));
+    ProfChatWin *new_win = malloc(sizeof(ProfChatWin));
     new_win->window.type = WIN_CHAT;
     new_win->window.layout = _win_create_simple_layout();
 
@@ -163,21 +163,20 @@ win_create_chat(const char* const barejid)
 }
 
 ProfWin*
-win_create_muc(const char* const roomjid)
+win_create_muc(const char *const roomjid)
 {
-    ProfMucWin* new_win = malloc(sizeof(ProfMucWin));
+    ProfMucWin *new_win = malloc(sizeof(ProfMucWin));
     int cols = getmaxx(stdscr);
 
     new_win->window.type = WIN_MUC;
-    ProfLayoutSplit* layout = malloc(sizeof(ProfLayoutSplit));
+    ProfLayoutSplit *layout = malloc(sizeof(ProfLayoutSplit));
     layout->base.type = LAYOUT_SPLIT;
 
     if (prefs_get_boolean(PREF_OCCUPANTS)) {
         int subwin_cols = win_occpuants_cols();
         layout->base.win = newpad(PAD_SIZE, cols - subwin_cols);
         wbkgd(layout->base.win, theme_attrs(THEME_TEXT));
-        layout->subwin = newpad(PAD_SIZE, subwin_cols);
-        ;
+        layout->subwin = newpad(PAD_SIZE, subwin_cols);;
         wbkgd(layout->subwin, theme_attrs(THEME_TEXT));
     } else {
         layout->base.win = newpad(PAD_SIZE, (cols));
@@ -214,9 +213,9 @@ win_create_muc(const char* const roomjid)
 }
 
 ProfWin*
-win_create_config(const char* const roomjid, DataForm* form, ProfConfWinCallback submit, ProfConfWinCallback cancel, const void* userdata)
+win_create_config(const char *const roomjid, DataForm *form, ProfConfWinCallback submit, ProfConfWinCallback cancel, const void *userdata)
 {
-    ProfConfWin* new_win = malloc(sizeof(ProfConfWin));
+    ProfConfWin *new_win = malloc(sizeof(ProfConfWin));
     new_win->window.type = WIN_CONFIG;
     new_win->window.layout = _win_create_simple_layout();
     new_win->roomjid = strdup(roomjid);
@@ -231,9 +230,9 @@ win_create_config(const char* const roomjid, DataForm* form, ProfConfWinCallback
 }
 
 ProfWin*
-win_create_private(const char* const fulljid)
+win_create_private(const char *const fulljid)
 {
-    ProfPrivateWin* new_win = malloc(sizeof(ProfPrivateWin));
+    ProfPrivateWin *new_win = malloc(sizeof(ProfPrivateWin));
     new_win->window.type = WIN_PRIVATE;
     new_win->window.layout = _win_create_simple_layout();
     new_win->fulljid = strdup(fulljid);
@@ -249,7 +248,7 @@ win_create_private(const char* const fulljid)
 ProfWin*
 win_create_xmlconsole(void)
 {
-    ProfXMLWin* new_win = malloc(sizeof(ProfXMLWin));
+    ProfXMLWin *new_win = malloc(sizeof(ProfXMLWin));
     new_win->window.type = WIN_XML;
     new_win->window.layout = _win_create_simple_layout();
 
@@ -259,9 +258,9 @@ win_create_xmlconsole(void)
 }
 
 ProfWin*
-win_create_plugin(const char* const plugin_name, const char* const tag)
+win_create_plugin(const char *const plugin_name, const char *const tag)
 {
-    ProfPluginWin* new_win = malloc(sizeof(ProfPluginWin));
+    ProfPluginWin *new_win = malloc(sizeof(ProfPluginWin));
     new_win->window.type = WIN_PLUGIN;
     new_win->window.layout = _win_create_simple_layout();
 
@@ -274,7 +273,7 @@ win_create_plugin(const char* const plugin_name, const char* const tag)
 }
 
 char*
-win_get_title(ProfWin* window)
+win_get_title(ProfWin *window)
 {
     if (window == NULL) {
         return strdup(CONS_WIN_TITLE);
@@ -283,13 +282,13 @@ win_get_title(ProfWin* window)
         return strdup(CONS_WIN_TITLE);
     }
     if (window->type == WIN_CHAT) {
-        ProfChatWin* chatwin = (ProfChatWin*)window;
+        ProfChatWin *chatwin = (ProfChatWin*) window;
         assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
         jabber_conn_status_t conn_status = connection_get_status();
         if (conn_status == JABBER_CONNECTED) {
             PContact contact = roster_get_contact(chatwin->barejid);
             if (contact) {
-                const char* name = p_contact_name_or_jid(contact);
+                const char *name = p_contact_name_or_jid(contact);
                 return strdup(name);
             } else {
                 return strdup(chatwin->barejid);
@@ -299,12 +298,12 @@ win_get_title(ProfWin* window)
         }
     }
     if (window->type == WIN_MUC) {
-        ProfMucWin* mucwin = (ProfMucWin*)window;
+        ProfMucWin *mucwin = (ProfMucWin*) window;
         assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
 
         gboolean show_titlebar_jid = prefs_get_boolean(PREF_TITLEBAR_MUC_TITLE_JID);
         gboolean show_titlebar_name = prefs_get_boolean(PREF_TITLEBAR_MUC_TITLE_NAME);
-        GString* title = g_string_new("");
+        GString *title = g_string_new("");
 
         if (show_titlebar_name) {
             g_string_append(title, mucwin->room_name);
@@ -314,24 +313,24 @@ win_get_title(ProfWin* window)
             g_string_append(title, mucwin->roomjid);
         }
 
-        char* title_str = title->str;
+        char *title_str = title->str;
         g_string_free(title, FALSE);
         return title_str;
     }
     if (window->type == WIN_CONFIG) {
-        ProfConfWin* confwin = (ProfConfWin*)window;
+        ProfConfWin *confwin = (ProfConfWin*) window;
         assert(confwin->memcheck == PROFCONFWIN_MEMCHECK);
-        GString* title = g_string_new(confwin->roomjid);
+        GString *title = g_string_new(confwin->roomjid);
         g_string_append(title, " config");
         if (confwin->form->modified) {
             g_string_append(title, " *");
         }
-        char* title_str = title->str;
+        char *title_str = title->str;
         g_string_free(title, FALSE);
         return title_str;
     }
     if (window->type == WIN_PRIVATE) {
-        ProfPrivateWin* privatewin = (ProfPrivateWin*)window;
+        ProfPrivateWin *privatewin = (ProfPrivateWin*) window;
         assert(privatewin->memcheck == PROFPRIVATEWIN_MEMCHECK);
         return strdup(privatewin->fulljid);
     }
@@ -339,7 +338,7 @@ win_get_title(ProfWin* window)
         return strdup(XML_WIN_TITLE);
     }
     if (window->type == WIN_PLUGIN) {
-        ProfPluginWin* pluginwin = (ProfPluginWin*)window;
+        ProfPluginWin *pluginwin = (ProfPluginWin*) window;
         assert(pluginwin->memcheck == PROFPLUGINWIN_MEMCHECK);
         return strdup(pluginwin->tag);
     }
@@ -348,104 +347,104 @@ win_get_title(ProfWin* window)
 }
 
 char*
-win_get_tab_identifier(ProfWin* window)
+win_get_tab_identifier(ProfWin *window)
 {
     assert(window != NULL);
 
     switch (window->type) {
-    case WIN_CONSOLE:
-    {
-        return strdup("console");
-    }
-    case WIN_CHAT:
-    {
-        ProfChatWin* chatwin = (ProfChatWin*)window;
-        return strdup(chatwin->barejid);
-    }
-    case WIN_MUC:
-    {
-        ProfMucWin* mucwin = (ProfMucWin*)window;
-        return strdup(mucwin->roomjid);
-    }
-    case WIN_CONFIG:
-    {
-        ProfConfWin* confwin = (ProfConfWin*)window;
-        return strdup(confwin->roomjid);
-    }
-    case WIN_PRIVATE:
-    {
-        ProfPrivateWin* privwin = (ProfPrivateWin*)window;
-        return strdup(privwin->fulljid);
-    }
-    case WIN_PLUGIN:
-    {
-        ProfPluginWin* pluginwin = (ProfPluginWin*)window;
-        return strdup(pluginwin->tag);
-    }
-    case WIN_XML:
-    {
-        return strdup("xmlconsole");
-    }
-    default:
-        return strdup("UNKNOWN");
+        case WIN_CONSOLE:
+        {
+            return strdup("console");
+        }
+        case WIN_CHAT:
+        {
+            ProfChatWin *chatwin = (ProfChatWin*)window;
+            return strdup(chatwin->barejid);
+        }
+        case WIN_MUC:
+        {
+            ProfMucWin *mucwin = (ProfMucWin*)window;
+            return strdup(mucwin->roomjid);
+        }
+        case WIN_CONFIG:
+        {
+            ProfConfWin *confwin = (ProfConfWin*)window;
+            return strdup(confwin->roomjid);
+        }
+        case WIN_PRIVATE:
+        {
+            ProfPrivateWin *privwin = (ProfPrivateWin*)window;
+            return strdup(privwin->fulljid);
+        }
+        case WIN_PLUGIN:
+        {
+            ProfPluginWin *pluginwin = (ProfPluginWin*)window;
+            return strdup(pluginwin->tag);
+        }
+        case WIN_XML:
+        {
+            return strdup("xmlconsole");
+        }
+        default:
+            return strdup("UNKNOWN");
     }
 }
 
 char*
-win_to_string(ProfWin* window)
+win_to_string(ProfWin *window)
 {
     assert(window != NULL);
 
     switch (window->type) {
-    case WIN_CONSOLE:
-    {
-        ProfConsoleWin* conswin = (ProfConsoleWin*)window;
-        return cons_get_string(conswin);
-    }
-    case WIN_CHAT:
-    {
-        ProfChatWin* chatwin = (ProfChatWin*)window;
-        return chatwin_get_string(chatwin);
-    }
-    case WIN_MUC:
-    {
-        ProfMucWin* mucwin = (ProfMucWin*)window;
-        return mucwin_get_string(mucwin);
-    }
-    case WIN_CONFIG:
-    {
-        ProfConfWin* confwin = (ProfConfWin*)window;
-        return confwin_get_string(confwin);
-    }
-    case WIN_PRIVATE:
-    {
-        ProfPrivateWin* privwin = (ProfPrivateWin*)window;
-        return privwin_get_string(privwin);
-    }
-    case WIN_XML:
-    {
-        ProfXMLWin* xmlwin = (ProfXMLWin*)window;
-        return xmlwin_get_string(xmlwin);
-    }
-    case WIN_PLUGIN:
-    {
-        ProfPluginWin* pluginwin = (ProfPluginWin*)window;
-        GString* gstring = g_string_new("");
-        g_string_append_printf(gstring, "Plugin: %s", pluginwin->tag);
-        char* res = gstring->str;
-        g_string_free(gstring, FALSE);
-        return res;
-    }
-    default:
-        return NULL;
+        case WIN_CONSOLE:
+        {
+            ProfConsoleWin *conswin = (ProfConsoleWin*)window;
+            return cons_get_string(conswin);
+        }
+        case WIN_CHAT:
+        {
+            ProfChatWin *chatwin = (ProfChatWin*)window;
+            return chatwin_get_string(chatwin);
+        }
+        case WIN_MUC:
+        {
+            ProfMucWin *mucwin = (ProfMucWin*)window;
+            return mucwin_get_string(mucwin);
+        }
+        case WIN_CONFIG:
+        {
+            ProfConfWin *confwin = (ProfConfWin*)window;
+            return confwin_get_string(confwin);
+        }
+        case WIN_PRIVATE:
+        {
+            ProfPrivateWin *privwin = (ProfPrivateWin*)window;
+            return privwin_get_string(privwin);
+        }
+        case WIN_XML:
+        {
+            ProfXMLWin *xmlwin = (ProfXMLWin*)window;
+            return xmlwin_get_string(xmlwin);
+        }
+        case WIN_PLUGIN:
+        {
+            ProfPluginWin *pluginwin = (ProfPluginWin*)window;
+            GString *gstring = g_string_new("");
+            g_string_append_printf(gstring, "Plugin: %s", pluginwin->tag);
+            char *res = gstring->str;
+            g_string_free(gstring, FALSE);
+            return res;
+        }
+        default:
+            return NULL;
     }
 }
 
 void
-win_hide_subwin(ProfWin* window)
+win_hide_subwin(ProfWin *window)
 {
     if (window->layout->type == LAYOUT_SPLIT) {
-        ProfLayoutSplit* layout = (ProfLayoutSplit*)window->layout;
+        ProfLayoutSplit *layout = (ProfLayoutSplit*)window->layout;
         if (layout->subwin) {
             delwin(layout->subwin);
         }
@@ -462,7 +461,7 @@ win_hide_subwin(ProfWin* window)
 }
 
 void
-win_show_subwin(ProfWin* window)
+win_show_subwin(ProfWin *window)
 {
     int cols = getmaxx(stdscr);
     int subwin_cols = 0;
@@ -477,7 +476,7 @@ win_show_subwin(ProfWin* window)
         subwin_cols = win_roster_cols();
     }
 
-    ProfLayoutSplit* layout = (ProfLayoutSplit*)window->layout;
+    ProfLayoutSplit *layout = (ProfLayoutSplit*)window->layout;
     layout->subwin = newpad(PAD_SIZE, subwin_cols);
     wbkgd(layout->subwin, theme_attrs(THEME_TEXT));
     wresize(layout->base.win, PAD_SIZE, cols - subwin_cols);
@@ -488,7 +487,7 @@ void
 win_free(ProfWin* window)
 {
     if (window->layout->type == LAYOUT_SPLIT) {
-        ProfLayoutSplit* layout = (ProfLayoutSplit*)window->layout;
+        ProfLayoutSplit *layout = (ProfLayoutSplit*)window->layout;
         if (layout->subwin) {
             delwin(layout->subwin);
         }
@@ -503,7 +502,7 @@ win_free(ProfWin* window)
     switch (window->type) {
     case WIN_CHAT:
     {
-        ProfChatWin* chatwin = (ProfChatWin*)window;
+        ProfChatWin *chatwin = (ProfChatWin*)window;
         free(chatwin->barejid);
         free(chatwin->resource_override);
         free(chatwin->enctext);
@@ -516,7 +515,7 @@ win_free(ProfWin* window)
     }
     case WIN_MUC:
     {
-        ProfMucWin* mucwin = (ProfMucWin*)window;
+        ProfMucWin *mucwin = (ProfMucWin*)window;
         free(mucwin->roomjid);
         free(mucwin->room_name);
         free(mucwin->enctext);
@@ -527,20 +526,20 @@ win_free(ProfWin* window)
     }
     case WIN_CONFIG:
     {
-        ProfConfWin* conf = (ProfConfWin*)window;
+        ProfConfWin *conf = (ProfConfWin*)window;
         free(conf->roomjid);
         form_destroy(conf->form);
         break;
     }
     case WIN_PRIVATE:
     {
-        ProfPrivateWin* privatewin = (ProfPrivateWin*)window;
+        ProfPrivateWin *privatewin = (ProfPrivateWin*)window;
         free(privatewin->fulljid);
         break;
     }
     case WIN_PLUGIN:
     {
-        ProfPluginWin* pluginwin = (ProfPluginWin*)window;
+        ProfPluginWin *pluginwin = (ProfPluginWin*)window;
         free(pluginwin->tag);
         free(pluginwin->plugin_name);
         break;
@@ -553,12 +552,12 @@ win_free(ProfWin* window)
 }
 
 void
-win_page_up(ProfWin* window)
+win_page_up(ProfWin *window)
 {
     int rows = getmaxy(stdscr);
     int y = getcury(window->layout->win);
     int page_space = rows - 4;
-    int* page_start = &(window->layout->y_pos);
+    int *page_start = &(window->layout->y_pos);
 
     *page_start -= page_space;
 
@@ -576,12 +575,12 @@ win_page_up(ProfWin* window)
 }
 
 void
-win_page_down(ProfWin* window)
+win_page_down(ProfWin *window)
 {
     int rows = getmaxy(stdscr);
     int y = getcury(window->layout->win);
     int page_space = rows - 4;
-    int* page_start = &(window->layout->y_pos);
+    int *page_start = &(window->layout->y_pos);
 
     *page_start += page_space;
 
@@ -603,19 +602,19 @@ win_page_down(ProfWin* window)
 }
 
 void
-win_sub_page_down(ProfWin* window)
+win_sub_page_down(ProfWin *window)
 {
     if (window->layout->type == LAYOUT_SPLIT) {
         int rows = getmaxy(stdscr);
         int page_space = rows - 4;
-        ProfLayoutSplit* split_layout = (ProfLayoutSplit*)window->layout;
+        ProfLayoutSplit *split_layout = (ProfLayoutSplit*)window->layout;
         int sub_y = getcury(split_layout->subwin);
-        int* sub_y_pos = &(split_layout->sub_y_pos);
+        int *sub_y_pos = &(split_layout->sub_y_pos);
 
         *sub_y_pos += page_space;
 
         // only got half a screen, show full screen
-        if ((sub_y - (*sub_y_pos)) < page_space)
+        if ((sub_y- (*sub_y_pos)) < page_space)
             *sub_y_pos = sub_y - page_space;
 
         // went past end, show full screen
@@ -627,13 +626,13 @@ win_sub_page_down(ProfWin* window)
 }
 
 void
-win_sub_page_up(ProfWin* window)
+win_sub_page_up(ProfWin *window)
 {
     if (window->layout->type == LAYOUT_SPLIT) {
         int rows = getmaxy(stdscr);
         int page_space = rows - 4;
-        ProfLayoutSplit* split_layout = (ProfLayoutSplit*)window->layout;
-        int* sub_y_pos = &(split_layout->sub_y_pos);
+        ProfLayoutSplit *split_layout = (ProfLayoutSplit*)window->layout;
+        int *sub_y_pos = &(split_layout->sub_y_pos);
 
         *sub_y_pos -= page_space;
 
@@ -646,7 +645,7 @@ win_sub_page_up(ProfWin* window)
 }
 
 void
-win_clear(ProfWin* window)
+win_clear(ProfWin *window)
 {
     if (!prefs_get_boolean(PREF_CLEAR_PERSIST_HISTORY)) {
         werase(window->layout->win);
@@ -656,19 +655,19 @@ win_clear(ProfWin* window)
     }
 
     int y = getcury(window->layout->win);
-    int* page_start = &(window->layout->y_pos);
+    int *page_start = &(window->layout->y_pos);
     *page_start = y;
     window->layout->paged = 1;
     win_update_virtual(window);
 }
 
 void
-win_resize(ProfWin* window)
+win_resize(ProfWin *window)
 {
     int cols = getmaxx(stdscr);
 
     if (window->layout->type == LAYOUT_SPLIT) {
-        ProfLayoutSplit* layout = (ProfLayoutSplit*)window->layout;
+        ProfLayoutSplit *layout = (ProfLayoutSplit*)window->layout;
         if (layout->subwin) {
             int subwin_cols = 0;
             if (window->type == WIN_CONSOLE) {
@@ -683,7 +682,7 @@ win_resize(ProfWin* window)
             if (window->type == WIN_CONSOLE) {
                 rosterwin_roster();
             } else if (window->type == WIN_MUC) {
-                ProfMucWin* mucwin = (ProfMucWin*)window;
+                ProfMucWin *mucwin = (ProfMucWin *)window;
                 assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
                 occupantswin_occupants(mucwin->roomjid);
             }
@@ -700,14 +699,14 @@ win_resize(ProfWin* window)
 }
 
 void
-win_update_virtual(ProfWin* window)
+win_update_virtual(ProfWin *window)
 {
     int cols = getmaxx(stdscr);
 
     int row_start = screen_mainwin_row_start();
     int row_end = screen_mainwin_row_end();
     if (window->layout->type == LAYOUT_SPLIT) {
-        ProfLayoutSplit* layout = (ProfLayoutSplit*)window->layout;
+        ProfLayoutSplit *layout = (ProfLayoutSplit*)window->layout;
         if (layout->subwin) {
             int subwin_cols = 0;
             if (window->type == WIN_MUC) {
@@ -715,36 +714,36 @@ win_update_virtual(ProfWin* window)
             } else {
                 subwin_cols = win_roster_cols();
             }
-            pnoutrefresh(layout->base.win, layout->base.y_pos, 0, row_start, 0, row_end, (cols - subwin_cols) - 1);
-            pnoutrefresh(layout->subwin, layout->sub_y_pos, 0, row_start, (cols - subwin_cols), row_end, cols - 1);
+            pnoutrefresh(layout->base.win, layout->base.y_pos, 0, row_start, 0, row_end, (cols-subwin_cols)-1);
+            pnoutrefresh(layout->subwin, layout->sub_y_pos, 0, row_start, (cols-subwin_cols), row_end, cols-1);
         } else {
-            pnoutrefresh(layout->base.win, layout->base.y_pos, 0, row_start, 0, row_end, cols - 1);
+            pnoutrefresh(layout->base.win, layout->base.y_pos, 0, row_start, 0, row_end, cols-1);
         }
     } else {
-        pnoutrefresh(window->layout->win, window->layout->y_pos, 0, row_start, 0, row_end, cols - 1);
+        pnoutrefresh(window->layout->win, window->layout->y_pos, 0, row_start, 0, row_end, cols-1);
     }
 }
 
 void
-win_refresh_without_subwin(ProfWin* window)
+win_refresh_without_subwin(ProfWin *window)
 {
     int cols = getmaxx(stdscr);
 
     if ((window->type == WIN_MUC) || (window->type == WIN_CONSOLE)) {
         int row_start = screen_mainwin_row_start();
         int row_end = screen_mainwin_row_end();
-        pnoutrefresh(window->layout->win, window->layout->y_pos, 0, row_start, 0, row_end, cols - 1);
+        pnoutrefresh(window->layout->win, window->layout->y_pos, 0, row_start, 0, row_end, cols-1);
     }
 }
 
 void
-win_refresh_with_subwin(ProfWin* window)
+win_refresh_with_subwin(ProfWin *window)
 {
     int subwin_cols = 0;
     int cols = getmaxx(stdscr);
     int row_start = screen_mainwin_row_start();
     int row_end = screen_mainwin_row_end();
-    ProfLayoutSplit* layout = (ProfLayoutSplit*)window->layout;
+    ProfLayoutSplit *layout = (ProfLayoutSplit*)window->layout;
 
     if (window->type == WIN_MUC) {
         subwin_cols = win_occpuants_cols();
@@ -755,12 +754,12 @@ win_refresh_with_subwin(ProfWin* window)
         return;
     }
 
-    pnoutrefresh(layout->base.win, layout->base.y_pos, 0, row_start, 0, row_end, (cols - subwin_cols) - 1);
-    pnoutrefresh(layout->subwin, layout->sub_y_pos, 0, row_start, (cols - subwin_cols), row_end, cols - 1);
+    pnoutrefresh(layout->base.win, layout->base.y_pos, 0, row_start, 0, row_end, (cols-subwin_cols)-1);
+    pnoutrefresh(layout->subwin, layout->sub_y_pos, 0, row_start, (cols-subwin_cols), row_end, cols-1);
 }
 
 void
-win_move_to_end(ProfWin* window)
+win_move_to_end(ProfWin *window)
 {
     window->layout->paged = 0;
 
@@ -775,9 +774,9 @@ win_move_to_end(ProfWin* window)
 }
 
 void
-win_show_occupant(ProfWin* window, Occupant* occupant)
+win_show_occupant(ProfWin *window, Occupant *occupant)
 {
-    const char* presence_str = string_from_resource_presence(occupant->presence);
+    const char *presence_str = string_from_resource_presence(occupant->presence);
 
     theme_item_t presence_colour = theme_main_presence_attrs(presence_str);
 
@@ -792,13 +791,13 @@ win_show_occupant(ProfWin* window, Occupant* occupant)
 }
 
 void
-win_show_contact(ProfWin* window, PContact contact)
+win_show_contact(ProfWin *window, PContact contact)
 {
-    const char* barejid = p_contact_barejid(contact);
-    const char* name = p_contact_name(contact);
-    const char* presence = p_contact_presence(contact);
-    const char* status = p_contact_status(contact);
-    GDateTime* last_activity = p_contact_last_activity(contact);
+    const char *barejid = p_contact_barejid(contact);
+    const char *name = p_contact_name(contact);
+    const char *presence = p_contact_presence(contact);
+    const char *status = p_contact_status(contact);
+    GDateTime *last_activity = p_contact_last_activity(contact);
 
     theme_item_t presence_colour = theme_main_presence_attrs(presence);
 
@@ -811,7 +810,7 @@ win_show_contact(ProfWin* window, PContact contact)
     win_append(window, presence_colour, " is %s", presence);
 
     if (last_activity) {
-        GDateTime* now = g_date_time_new_now_local();
+        GDateTime *now = g_date_time_new_now_local();
         GTimeSpan span = g_date_time_difference(now, last_activity);
         g_date_time_unref(now);
 
@@ -836,11 +835,11 @@ win_show_contact(ProfWin* window, PContact contact)
 }
 
 void
-win_show_occupant_info(ProfWin* window, const char* const room, Occupant* occupant)
+win_show_occupant_info(ProfWin *window, const char *const room, Occupant *occupant)
 {
-    const char* presence_str = string_from_resource_presence(occupant->presence);
-    const char* occupant_affiliation = muc_occupant_affiliation_str(occupant);
-    const char* occupant_role = muc_occupant_role_str(occupant);
+    const char *presence_str = string_from_resource_presence(occupant->presence);
+    const char *occupant_affiliation = muc_occupant_affiliation_str(occupant);
+    const char *occupant_role = muc_occupant_role_str(occupant);
 
     theme_item_t presence_colour = theme_main_presence_attrs(presence_str);
 
@@ -860,14 +859,14 @@ win_show_occupant_info(ProfWin* window, const char* const room, Occupant* occupa
     win_println(window, THEME_DEFAULT, "!", "  Affiliation: %s", occupant_affiliation);
     win_println(window, THEME_DEFAULT, "!", "  Role: %s", occupant_role);
 
-    Jid* jidp = jid_create_from_bare_and_resource(room, occupant->nick);
-    EntityCapabilities* caps = caps_lookup(jidp->fulljid);
+    Jid *jidp = jid_create_from_bare_and_resource(room, occupant->nick);
+    EntityCapabilities *caps = caps_lookup(jidp->fulljid);
     jid_destroy(jidp);
 
     if (caps) {
         // show identity
         if (caps->identity) {
-            DiscoIdentity* identity = caps->identity;
+            DiscoIdentity *identity = caps->identity;
             win_print(window, THEME_DEFAULT, "!", "  Identity: ");
             if (identity->name) {
                 win_append(window, THEME_DEFAULT, "%s", identity->name);
@@ -888,7 +887,7 @@ win_show_occupant_info(ProfWin* window, const char* const room, Occupant* occupa
         }
 
         if (caps->software_version) {
-            SoftwareVersion* software_version = caps->software_version;
+            SoftwareVersion *software_version = caps->software_version;
             if (software_version->software) {
                 win_print(window, THEME_DEFAULT, "!", "  Software: %s", software_version->software);
             }
@@ -916,13 +915,13 @@ win_show_occupant_info(ProfWin* window, const char* const room, Occupant* occupa
 }
 
 void
-win_show_info(ProfWin* window, PContact contact)
+win_show_info(ProfWin *window, PContact contact)
 {
-    const char* barejid = p_contact_barejid(contact);
-    const char* name = p_contact_name(contact);
-    const char* presence = p_contact_presence(contact);
-    const char* sub = p_contact_subscription(contact);
-    GDateTime* last_activity = p_contact_last_activity(contact);
+    const char *barejid = p_contact_barejid(contact);
+    const char *name = p_contact_name(contact);
+    const char *presence = p_contact_presence(contact);
+    const char *sub = p_contact_subscription(contact);
+    GDateTime *last_activity = p_contact_last_activity(contact);
 
     theme_item_t presence_colour = theme_main_presence_attrs(presence);
 
@@ -938,7 +937,7 @@ win_show_info(ProfWin* window, PContact contact)
     }
 
     if (last_activity) {
-        GDateTime* now = g_date_time_new_now_local();
+        GDateTime *now = g_date_time_new_now_local();
         GTimeSpan span = g_date_time_difference(now, last_activity);
 
         int hours = span / G_TIME_SPAN_HOUR;
@@ -948,34 +947,35 @@ win_show_info(ProfWin* window, PContact contact)
         int seconds = span / G_TIME_SPAN_SECOND;
 
         if (hours > 0) {
-            win_println(window, THEME_DEFAULT, "-", "Last activity: %dh%dm%ds", hours, minutes, seconds);
-        } else {
-            win_println(window, THEME_DEFAULT, "-", "Last activity: %dm%ds", minutes, seconds);
+          win_println(window, THEME_DEFAULT, "-", "Last activity: %dh%dm%ds", hours, minutes, seconds);
+        }
+        else {
+          win_println(window, THEME_DEFAULT, "-", "Last activity: %dm%ds", minutes, seconds);
         }
 
         g_date_time_unref(now);
     }
 
-    GList* resources = p_contact_get_available_resources(contact);
-    GList* ordered_resources = NULL;
+    GList *resources = p_contact_get_available_resources(contact);
+    GList *ordered_resources = NULL;
     if (resources) {
         win_println(window, THEME_DEFAULT, "-", "Resources:");
 
         // sort in order of availability
-        GList* curr = resources;
+        GList *curr = resources;
         while (curr) {
-            Resource* resource = curr->data;
+            Resource *resource = curr->data;
             ordered_resources = g_list_insert_sorted(ordered_resources,
-                                                     resource, (GCompareFunc)resource_compare_availability);
+                resource, (GCompareFunc)resource_compare_availability);
             curr = g_list_next(curr);
         }
     }
     g_list_free(resources);
 
-    GList* curr = ordered_resources;
+    GList *curr = ordered_resources;
     while (curr) {
-        Resource* resource = curr->data;
-        const char* resource_presence = string_from_resource_presence(resource->presence);
+        Resource *resource = curr->data;
+        const char *resource_presence = string_from_resource_presence(resource->presence);
         theme_item_t presence_colour = theme_main_presence_attrs(resource_presence);
         win_print(window, presence_colour, "-", "  %s (%d), %s", resource->name, resource->priority, resource_presence);
         if (resource->status) {
@@ -983,14 +983,14 @@ win_show_info(ProfWin* window, PContact contact)
         }
         win_newline(window);
 
-        Jid* jidp = jid_create_from_bare_and_resource(barejid, resource->name);
-        EntityCapabilities* caps = caps_lookup(jidp->fulljid);
+        Jid *jidp = jid_create_from_bare_and_resource(barejid, resource->name);
+        EntityCapabilities *caps = caps_lookup(jidp->fulljid);
         jid_destroy(jidp);
 
         if (caps) {
             // show identity
             if (caps->identity) {
-                DiscoIdentity* identity = caps->identity;
+                DiscoIdentity *identity = caps->identity;
                 win_print(window, THEME_DEFAULT, "-", "    Identity: ");
                 if (identity->name) {
                     win_append(window, THEME_DEFAULT, "%s", identity->name);
@@ -1011,7 +1011,7 @@ win_show_info(ProfWin* window, PContact contact)
             }
 
             if (caps->software_version) {
-                SoftwareVersion* software_version = caps->software_version;
+                SoftwareVersion *software_version = caps->software_version;
                 if (software_version->software) {
                     win_print(window, THEME_DEFAULT, "-", "    Software: %s", software_version->software);
                 }
@@ -1041,10 +1041,10 @@ win_show_info(ProfWin* window, PContact contact)
 }
 
 void
-win_show_status_string(ProfWin* window, const char* const from,
-                       const char* const show, const char* const status,
-                       GDateTime* last_activity, const char* const pre,
-                       const char* const default_show)
+win_show_status_string(ProfWin *window, const char *const from,
+    const char *const show, const char *const status,
+    GDateTime *last_activity, const char *const pre,
+    const char *const default_show)
 {
     theme_item_t presence_colour;
 
@@ -1064,8 +1064,8 @@ win_show_status_string(ProfWin* window, const char* const from,
         win_append(window, presence_colour, " is %s", default_show);
 
     if (last_activity) {
-        gchar* date_fmt = NULL;
-        char* time_pref = prefs_get_string(PREF_TIME_LASTACTIVITY);
+        gchar *date_fmt = NULL;
+        char *time_pref = prefs_get_string(PREF_TIME_LASTACTIVITY);
         date_fmt = g_date_time_format(last_activity, time_pref);
         g_free(time_pref);
         assert(date_fmt != NULL);
@@ -1082,9 +1082,9 @@ win_show_status_string(ProfWin* window, const char* const from,
 }
 
 static void
-_win_correct(ProfWin* window, const char* const message, const char* const id, const char* const replace_id, const char* const from_jid)
+_win_correct(ProfWin *window, const char *const message, const char *const id, const char *const replace_id, const char *const from_jid)
 {
-    ProfBuffEntry* entry = buffer_get_entry_by_id(window->layout->buffer, replace_id);
+    ProfBuffEntry *entry = buffer_get_entry_by_id(window->layout->buffer, replace_id);
     if (!entry) {
         log_debug("Replace ID %s could not be found in buffer. Message: %s", replace_id, message);
         return;
@@ -1124,7 +1124,7 @@ _win_correct(ProfWin* window, const char* const message, const char* const id, c
 }
 
 void
-win_print_incoming(ProfWin* window, const char* const display_name_from, ProfMessage* message)
+win_print_incoming(ProfWin *window, const char *const display_name_from, ProfMessage *message)
 {
     int flags = NO_ME;
 
@@ -1132,52 +1132,53 @@ win_print_incoming(ProfWin* window, const char* const display_name_from, ProfMes
         flags |= UNTRUSTED;
     }
 
-    switch (window->type) {
-    case WIN_CHAT:
+    switch (window->type)
     {
-        char* enc_char;
-        ProfChatWin* chatwin = (ProfChatWin*)window;
+        case WIN_CHAT:
+        {
+            char *enc_char;
+            ProfChatWin *chatwin = (ProfChatWin*)window;
 
-        if (chatwin->incoming_char) {
-            enc_char = strdup(chatwin->incoming_char);
-        } else if (message->enc == PROF_MSG_ENC_OTR) {
-            enc_char = prefs_get_otr_char();
-        } else if (message->enc == PROF_MSG_ENC_PGP) {
-            enc_char = prefs_get_pgp_char();
-        } else if (message->enc == PROF_MSG_ENC_OX) { // XEP-0373: OpenPGP for XMPP
-            enc_char = prefs_get_ox_char();
-        } else if (message->enc == PROF_MSG_ENC_OMEMO) {
-            enc_char = prefs_get_omemo_char();
-        } else {
-            enc_char = strdup("-");
+            if (chatwin->incoming_char) {
+                enc_char = strdup(chatwin->incoming_char);
+            } else if (message->enc == PROF_MSG_ENC_OTR) {
+                enc_char = prefs_get_otr_char();
+            } else if (message->enc == PROF_MSG_ENC_PGP) {
+                enc_char = prefs_get_pgp_char();
+            } else if (message->enc == PROF_MSG_ENC_OX) { // XEP-0373: OpenPGP for XMPP
+                enc_char = prefs_get_ox_char();
+            } else if (message->enc == PROF_MSG_ENC_OMEMO) {
+                enc_char = prefs_get_omemo_char();
+            } else {
+                enc_char = strdup("-");
+            }
+
+            if (prefs_get_boolean(PREF_CORRECTION_ALLOW) && message->replace_id) {
+                _win_correct(window, message->plain, message->id, message->replace_id, message->from_jid->barejid);
+            } else {
+                _win_printf(window, enc_char, 0, message->timestamp, flags, THEME_TEXT_THEM, display_name_from, message->from_jid->barejid, message->id, "%s", message->plain);
+            }
+
+            free(enc_char);
+            break;
         }
-
-        if (prefs_get_boolean(PREF_CORRECTION_ALLOW) && message->replace_id) {
-            _win_correct(window, message->plain, message->id, message->replace_id, message->from_jid->barejid);
-        } else {
-            _win_printf(window, enc_char, 0, message->timestamp, flags, THEME_TEXT_THEM, display_name_from, message->from_jid->barejid, message->id, "%s", message->plain);
-        }
-
-        free(enc_char);
-        break;
-    }
-    case WIN_PRIVATE:
-        _win_printf(window, "-", 0, message->timestamp, flags, THEME_TEXT_THEM, display_name_from, message->from_jid->barejid, message->id, "%s", message->plain);
-        break;
-    default:
-        assert(FALSE);
-        break;
+        case WIN_PRIVATE:
+            _win_printf(window, "-", 0, message->timestamp, flags, THEME_TEXT_THEM, display_name_from, message->from_jid->barejid, message->id, "%s", message->plain);
+            break;
+        default:
+            assert(FALSE);
+            break;
     }
 }
 
 void
-win_print_them(ProfWin* window, theme_item_t theme_item, const char* const show_char, int flags, const char* const them)
+win_print_them(ProfWin *window, theme_item_t theme_item, const char *const show_char, int flags, const char *const them)
 {
     _win_printf(window, show_char, 0, NULL, flags | NO_ME | NO_EOL, theme_item, them, NULL, NULL, "");
 }
 
 void
-win_println_incoming_muc_msg(ProfWin* window, char* show_char, int flags, const ProfMessage* const message)
+win_println_incoming_muc_msg(ProfWin *window, char *show_char, int flags, const ProfMessage *const message)
 {
     if (prefs_get_boolean(PREF_CORRECTION_ALLOW) && message->replace_id) {
         _win_correct(window, message->plain, message->id, message->replace_id, message->from_jid->fulljid);
@@ -1189,9 +1190,9 @@ win_println_incoming_muc_msg(ProfWin* window, char* show_char, int flags, const 
 }
 
 void
-win_print_outgoing_muc_msg(ProfWin* window, char* show_char, const char* const me, const char* const id, const char* const replace_id, const char* const message)
+win_print_outgoing_muc_msg(ProfWin *window, char *show_char, const char *const me, const char *const id, const char *const replace_id, const char *const message)
 {
-    GDateTime* timestamp = g_date_time_new_now_local();
+    GDateTime *timestamp = g_date_time_new_now_local();
 
     if (prefs_get_boolean(PREF_CORRECTION_ALLOW) && replace_id) {
         _win_correct(window, message, id, replace_id, me);
@@ -1204,11 +1205,11 @@ win_print_outgoing_muc_msg(ProfWin* window, char* show_char, const char* const m
 }
 
 void
-win_print_outgoing(ProfWin* window, const char* show_char, const char* const id, const char* const replace_id, const char* const message)
+win_print_outgoing(ProfWin *window, const char *show_char, const char *const id, const char *const replace_id, const char *const message)
 {
-    GDateTime* timestamp = g_date_time_new_now_local();
+    GDateTime *timestamp = g_date_time_new_now_local();
 
-    const char* myjid = connection_get_fulljid();
+    const char *myjid = connection_get_fulljid();
     if (replace_id) {
         _win_correct(window, message, id, replace_id, myjid);
     } else {
@@ -1221,14 +1222,14 @@ win_print_outgoing(ProfWin* window, const char* show_char, const char* const id,
 }
 
 void
-win_print_history(ProfWin* window, const ProfMessage* const message)
+win_print_history(ProfWin *window, const ProfMessage *const message)
 {
     g_date_time_ref(message->timestamp);
 
-    char* display_name;
+    char *display_name;
     int flags = 0;
-    const char* jid = connection_get_fulljid();
-    Jid* jidp = jid_create(jid);
+    const char *jid = connection_get_fulljid();
+    Jid *jidp = jid_create(jid);
 
     if (g_strcmp0(jidp->barejid, message->from_jid->barejid) == 0) {
         display_name = strdup("me");
@@ -1248,13 +1249,13 @@ win_print_history(ProfWin* window, const ProfMessage* const message)
 }
 
 void
-win_print(ProfWin* window, theme_item_t theme_item, const char* show_char, const char* const message, ...)
+win_print(ProfWin *window, theme_item_t theme_item, const char *show_char, const char *const message, ...)
 {
-    GDateTime* timestamp = g_date_time_new_now_local();
+    GDateTime *timestamp = g_date_time_new_now_local();
 
     va_list arg;
     va_start(arg, message);
-    GString* fmt_msg = g_string_new(NULL);
+    GString *fmt_msg = g_string_new(NULL);
     g_string_vprintf(fmt_msg, message, arg);
 
     buffer_append(window->layout->buffer, show_char, 0, timestamp, NO_EOL, theme_item, "", NULL, fmt_msg->str, NULL, NULL);
@@ -1268,13 +1269,13 @@ win_print(ProfWin* window, theme_item_t theme_item, const char* show_char, const
 }
 
 void
-win_println(ProfWin* window, theme_item_t theme_item, const char* show_char, const char* const message, ...)
+win_println(ProfWin *window, theme_item_t theme_item, const char *show_char, const char *const message, ...)
 {
-    GDateTime* timestamp = g_date_time_new_now_local();
+    GDateTime *timestamp = g_date_time_new_now_local();
 
     va_list arg;
     va_start(arg, message);
-    GString* fmt_msg = g_string_new(NULL);
+    GString *fmt_msg = g_string_new(NULL);
     g_string_vprintf(fmt_msg, message, arg);
 
     buffer_append(window->layout->buffer, show_char, 0, timestamp, 0, theme_item, "", NULL, fmt_msg->str, NULL, NULL);
@@ -1288,13 +1289,13 @@ win_println(ProfWin* window, theme_item_t theme_item, const char* show_char, con
 }
 
 void
-win_println_indent(ProfWin* window, int pad, const char* const message, ...)
+win_println_indent(ProfWin *window, int pad, const char *const message, ...)
 {
-    GDateTime* timestamp = g_date_time_new_now_local();
+    GDateTime *timestamp = g_date_time_new_now_local();
 
     va_list arg;
     va_start(arg, message);
-    GString* fmt_msg = g_string_new(NULL);
+    GString *fmt_msg = g_string_new(NULL);
     g_string_vprintf(fmt_msg, message, arg);
 
     buffer_append(window->layout->buffer, "-", pad, timestamp, 0, THEME_DEFAULT, "", NULL, fmt_msg->str, NULL, NULL);
@@ -1308,13 +1309,13 @@ win_println_indent(ProfWin* window, int pad, const char* const message, ...)
 }
 
 void
-win_append(ProfWin* window, theme_item_t theme_item, const char* const message, ...)
+win_append(ProfWin *window, theme_item_t theme_item, const char *const message, ...)
 {
-    GDateTime* timestamp = g_date_time_new_now_local();
+    GDateTime *timestamp = g_date_time_new_now_local();
 
     va_list arg;
     va_start(arg, message);
-    GString* fmt_msg = g_string_new(NULL);
+    GString *fmt_msg = g_string_new(NULL);
     g_string_vprintf(fmt_msg, message, arg);
 
     buffer_append(window->layout->buffer, "-", 0, timestamp, NO_DATE | NO_EOL, theme_item, "", NULL, fmt_msg->str, NULL, NULL);
@@ -1328,13 +1329,13 @@ win_append(ProfWin* window, theme_item_t theme_item, const char* const message, 
 }
 
 void
-win_appendln(ProfWin* window, theme_item_t theme_item, const char* const message, ...)
+win_appendln(ProfWin *window, theme_item_t theme_item, const char *const message, ...)
 {
-    GDateTime* timestamp = g_date_time_new_now_local();
+    GDateTime *timestamp = g_date_time_new_now_local();
 
     va_list arg;
     va_start(arg, message);
-    GString* fmt_msg = g_string_new(NULL);
+    GString *fmt_msg = g_string_new(NULL);
     g_string_vprintf(fmt_msg, message, arg);
 
     buffer_append(window->layout->buffer, "-", 0, timestamp, NO_DATE, theme_item, "", NULL, fmt_msg->str, NULL, NULL);
@@ -1348,13 +1349,13 @@ win_appendln(ProfWin* window, theme_item_t theme_item, const char* const message
 }
 
 void
-win_append_highlight(ProfWin* window, theme_item_t theme_item, const char* const message, ...)
+win_append_highlight(ProfWin *window, theme_item_t theme_item, const char *const message, ...)
 {
-    GDateTime* timestamp = g_date_time_new_now_local();
+    GDateTime *timestamp = g_date_time_new_now_local();
 
     va_list arg;
     va_start(arg, message);
-    GString* fmt_msg = g_string_new(NULL);
+    GString *fmt_msg = g_string_new(NULL);
     g_string_vprintf(fmt_msg, message, arg);
 
     buffer_append(window->layout->buffer, "-", 0, timestamp, NO_DATE | NO_ME | NO_EOL, theme_item, "", NULL, fmt_msg->str, NULL, NULL);
@@ -1368,13 +1369,13 @@ win_append_highlight(ProfWin* window, theme_item_t theme_item, const char* const
 }
 
 void
-win_appendln_highlight(ProfWin* window, theme_item_t theme_item, const char* const message, ...)
+win_appendln_highlight(ProfWin *window, theme_item_t theme_item, const char *const message, ...)
 {
-    GDateTime* timestamp = g_date_time_new_now_local();
+    GDateTime *timestamp = g_date_time_new_now_local();
 
     va_list arg;
     va_start(arg, message);
-    GString* fmt_msg = g_string_new(NULL);
+    GString *fmt_msg = g_string_new(NULL);
     g_string_vprintf(fmt_msg, message, arg);
 
     buffer_append(window->layout->buffer, "-", 0, timestamp, NO_DATE | NO_ME, theme_item, "", NULL, fmt_msg->str, NULL, NULL);
@@ -1388,20 +1389,20 @@ win_appendln_highlight(ProfWin* window, theme_item_t theme_item, const char* con
 }
 
 void
-win_print_http_upload(ProfWin* window, const char* const message, char* url)
+win_print_http_upload(ProfWin *window, const char *const message, char *url)
 {
     win_print_outgoing_with_receipt(window, "!", NULL, message, url, NULL);
 }
 
 void
-win_print_outgoing_with_receipt(ProfWin* window, const char* show_char, const char* const from, const char* const message, char* id, const char* const replace_id)
+win_print_outgoing_with_receipt(ProfWin *window, const char *show_char, const char *const from, const char *const message, char *id, const char *const replace_id)
 {
-    GDateTime* time = g_date_time_new_now_local();
+    GDateTime *time = g_date_time_new_now_local();
 
-    DeliveryReceipt* receipt = malloc(sizeof(struct delivery_receipt_t));
+    DeliveryReceipt *receipt = malloc(sizeof(struct delivery_receipt_t));
     receipt->received = FALSE;
 
-    const char* myjid = connection_get_fulljid();
+    const char *myjid = connection_get_fulljid();
     if (replace_id) {
         _win_correct(window, message, id, replace_id, myjid);
     } else {
@@ -1415,7 +1416,7 @@ win_print_outgoing_with_receipt(ProfWin* window, const char* show_char, const ch
 }
 
 void
-win_mark_received(ProfWin* window, const char* const id)
+win_mark_received(ProfWin *window, const char *const id)
 {
     gboolean received = buffer_mark_received(window->layout->buffer, id);
     if (received) {
@@ -1424,9 +1425,9 @@ win_mark_received(ProfWin* window, const char* const id)
 }
 
 void
-win_update_entry_message(ProfWin* window, const char* const id, const char* const message)
+win_update_entry_message(ProfWin *window, const char *const id, const char *const message)
 {
-    ProfBuffEntry* entry = buffer_get_entry_by_id(window->layout->buffer, id);
+    ProfBuffEntry *entry = buffer_get_entry_by_id(window->layout->buffer, id);
     if (entry) {
         free(entry->message);
         entry->message = strdup(message);
@@ -1435,20 +1436,20 @@ win_update_entry_message(ProfWin* window, const char* const id, const char* cons
 }
 
 void
-win_remove_entry_message(ProfWin* window, const char* const id)
+win_remove_entry_message(ProfWin *window, const char *const id)
 {
     buffer_remove_entry_by_id(window->layout->buffer, id);
     win_redraw(window);
 }
 
 void
-win_newline(ProfWin* window)
+win_newline(ProfWin *window)
 {
     win_appendln(window, THEME_DEFAULT, "");
 }
 
 static void
-_win_printf(ProfWin* window, const char* show_char, int pad_indent, GDateTime* timestamp, int flags, theme_item_t theme_item, const char* const display_from, const char* const from_jid, const char* const message_id, const char* const message, ...)
+_win_printf(ProfWin *window, const char *show_char, int pad_indent, GDateTime *timestamp, int flags, theme_item_t theme_item, const char *const display_from, const char *const from_jid, const char *const message_id, const char *const message, ...)
 {
     if (timestamp == NULL) {
         timestamp = g_date_time_new_now_local();
@@ -1458,7 +1459,7 @@ _win_printf(ProfWin* window, const char* show_char, int pad_indent, GDateTime* t
 
     va_list arg;
     va_start(arg, message);
-    GString* fmt_msg = g_string_new(NULL);
+    GString *fmt_msg = g_string_new(NULL);
     g_string_vprintf(fmt_msg, message, arg);
 
     buffer_append(window->layout->buffer, show_char, pad_indent, timestamp, flags, theme_item, display_from, from_jid, fmt_msg->str, NULL, message_id);
@@ -1473,8 +1474,8 @@ _win_printf(ProfWin* window, const char* show_char, int pad_indent, GDateTime* t
 }
 
 static void
-_win_print_internal(ProfWin* window, const char* show_char, int pad_indent, GDateTime* time,
-                    int flags, theme_item_t theme_item, const char* const from, const char* const message, DeliveryReceipt* receipt)
+_win_print_internal(ProfWin *window, const char *show_char, int pad_indent, GDateTime *time,
+    int flags, theme_item_t theme_item, const char *const from, const char *const message, DeliveryReceipt *receipt)
 {
     // flags : 1st bit =  0/1 - me/not me. define: NO_ME
     //         2nd bit =  0/1 - date/no date. define: NO_DATE
@@ -1487,29 +1488,29 @@ _win_print_internal(ProfWin* window, const char* show_char, int pad_indent, GDat
     int colour = theme_attrs(THEME_ME);
     size_t indent = 0;
 
-    char* time_pref = NULL;
+    char *time_pref = NULL;
     switch (window->type) {
-    case WIN_CHAT:
-        time_pref = prefs_get_string(PREF_TIME_CHAT);
-        break;
-    case WIN_MUC:
-        time_pref = prefs_get_string(PREF_TIME_MUC);
-        break;
-    case WIN_CONFIG:
-        time_pref = prefs_get_string(PREF_TIME_CONFIG);
-        break;
-    case WIN_PRIVATE:
-        time_pref = prefs_get_string(PREF_TIME_PRIVATE);
-        break;
-    case WIN_XML:
-        time_pref = prefs_get_string(PREF_TIME_XMLCONSOLE);
-        break;
-    default:
-        time_pref = prefs_get_string(PREF_TIME_CONSOLE);
-        break;
+        case WIN_CHAT:
+            time_pref = prefs_get_string(PREF_TIME_CHAT);
+            break;
+        case WIN_MUC:
+            time_pref = prefs_get_string(PREF_TIME_MUC);
+            break;
+        case WIN_CONFIG:
+            time_pref = prefs_get_string(PREF_TIME_CONFIG);
+            break;
+        case WIN_PRIVATE:
+            time_pref = prefs_get_string(PREF_TIME_PRIVATE);
+            break;
+        case WIN_XML:
+            time_pref = prefs_get_string(PREF_TIME_XMLCONSOLE);
+            break;
+        default:
+            time_pref = prefs_get_string(PREF_TIME_CONSOLE);
+            break;
     }
 
-    gchar* date_fmt = NULL;
+    gchar *date_fmt = NULL;
     if (g_strcmp0(time_pref, "off") == 0 || time == NULL) {
         date_fmt = g_strdup("");
     } else {
@@ -1518,7 +1519,7 @@ _win_print_internal(ProfWin* window, const char* show_char, int pad_indent, GDat
     g_free(time_pref);
     assert(date_fmt != NULL);
 
-    if (strlen(date_fmt) != 0) {
+    if(strlen(date_fmt) != 0){
         indent = 3 + strlen(date_fmt);
     }
 
@@ -1540,7 +1541,7 @@ _win_print_internal(ProfWin* window, const char* show_char, int pad_indent, GDat
             colour = theme_attrs(THEME_THEM);
         }
 
-        char* color_pref = prefs_get_string(PREF_COLOR_NICK);
+        char *color_pref = prefs_get_string(PREF_COLOR_NICK);
         if (color_pref != NULL && (strcmp(color_pref, "false") != 0)) {
             if (flags & NO_ME || (!(flags & NO_ME) && prefs_get_boolean(PREF_COLOR_NICK_OWN))) {
                 colour = theme_hash_attrs(from);
@@ -1582,9 +1583,9 @@ _win_print_internal(ProfWin* window, const char* show_char, int pad_indent, GDat
     }
 
     if (prefs_get_boolean(PREF_WRAP)) {
-        _win_print_wrapped(window->layout->win, message + offset, indent, pad_indent);
+        _win_print_wrapped(window->layout->win, message+offset, indent, pad_indent);
     } else {
-        wprintw(window->layout->win, "%s", message + offset);
+        wprintw(window->layout->win, "%s", message+offset);
     }
 
     if ((flags & NO_EOL) == 0) {
@@ -1608,7 +1609,7 @@ _win_print_internal(ProfWin* window, const char* show_char, int pad_indent, GDat
 }
 
 static void
-_win_indent(WINDOW* win, int size)
+_win_indent(WINDOW *win, int size)
 {
     int i = 0;
     for (i = 0; i < size; i++) {
@@ -1617,13 +1618,13 @@ _win_indent(WINDOW* win, int size)
 }
 
 static void
-_win_print_wrapped(WINDOW* win, const char* const message, size_t indent, int pad_indent)
+_win_print_wrapped(WINDOW *win, const char *const message, size_t indent, int pad_indent)
 {
     int starty = getcury(win);
     int wordi = 0;
-    char* word = malloc(strlen(message) + 1);
+    char *word = malloc(strlen(message) + 1);
 
-    gchar* curr_ch = g_utf8_offset_to_pointer(message, 0);
+    gchar *curr_ch = g_utf8_offset_to_pointer(message, 0);
 
     while (*curr_ch != '\0') {
 
@@ -1632,13 +1633,13 @@ _win_print_wrapped(WINDOW* win, const char* const message, size_t indent, int pa
             waddch(win, ' ');
             curr_ch = g_utf8_next_char(curr_ch);
 
-            // handle newline
+        // handle newline
         } else if (*curr_ch == '\n') {
             waddch(win, '\n');
             _win_indent(win, indent + pad_indent);
             curr_ch = g_utf8_next_char(curr_ch);
 
-            // handle word
+        // handle word
         } else {
             wordi = 0;
             int wordlen = 0;
@@ -1667,8 +1668,8 @@ _win_print_wrapped(WINDOW* win, const char* const message, size_t indent, int pa
 
                 // word larger than line
                 if (wordlen > linelen) {
-                    gchar* word_ch = g_utf8_offset_to_pointer(word, 0);
-                    while (*word_ch != '\0') {
+                    gchar *word_ch = g_utf8_offset_to_pointer(word, 0);
+                    while(*word_ch != '\0') {
                         curx = getcurx(win);
                         cury = getcury(win);
                         gboolean firstline = cury == starty;
@@ -1680,14 +1681,14 @@ _win_print_wrapped(WINDOW* win, const char* const message, size_t indent, int pa
                             _win_indent(win, indent + pad_indent);
                         }
 
-                        gchar copy[wordi + 1];
+                        gchar copy[wordi+1];
                         g_utf8_strncpy(copy, word_ch, 1);
                         waddstr(win, copy);
 
                         word_ch = g_utf8_next_char(word_ch);
                     }
 
-                    // newline and print word
+                // newline and print word
                 } else {
                     waddch(win, '\n');
                     curx = getcurx(win);
@@ -1703,7 +1704,7 @@ _win_print_wrapped(WINDOW* win, const char* const message, size_t indent, int pa
                     waddstr(win, word);
                 }
 
-                // no wrap required
+            // no wrap required
             } else {
                 curx = getcurx(win);
                 cury = getcury(win);
@@ -1733,7 +1734,7 @@ _win_print_wrapped(WINDOW* win, const char* const message, size_t indent, int pa
 }
 
 void
-win_print_trackbar(ProfWin* window)
+win_print_trackbar(ProfWin *window)
 {
     int cols = getmaxx(window->layout->win);
 
@@ -1741,7 +1742,7 @@ win_print_trackbar(ProfWin* window)
     wattron(window->layout->win, theme_attrs(THEME_TRACKBAR));
 
     int i;
-    for (i = 1; i < cols; i++) {
+    for (i=1; i<cols; i++) {
         wprintw(window->layout->win, "-");
     }
 
@@ -1751,14 +1752,14 @@ win_print_trackbar(ProfWin* window)
 }
 
 void
-win_redraw(ProfWin* window)
+win_redraw(ProfWin *window)
 {
     int i, size;
     werase(window->layout->win);
     size = buffer_size(window->layout->buffer);
 
     for (i = 0; i < size; i++) {
-        ProfBuffEntry* e = buffer_get_entry(window->layout->buffer, i);
+        ProfBuffEntry *e = buffer_get_entry(window->layout->buffer, i);
 
         if (e->display_from == NULL && e->message && e->message[0] == '-') {
             // just an indicator to print the trackbar/separator not the actual message
@@ -1771,10 +1772,10 @@ win_redraw(ProfWin* window)
 }
 
 gboolean
-win_has_active_subwin(ProfWin* window)
+win_has_active_subwin(ProfWin *window)
 {
     if (window->layout->type == LAYOUT_SPLIT) {
-        ProfLayoutSplit* layout = (ProfLayoutSplit*)window->layout;
+        ProfLayoutSplit *layout = (ProfLayoutSplit*)window->layout;
         return (layout->subwin != NULL);
     } else {
         return FALSE;
@@ -1782,12 +1783,12 @@ win_has_active_subwin(ProfWin* window)
 }
 
 gboolean
-win_notify_remind(ProfWin* window)
+win_notify_remind(ProfWin *window)
 {
     switch (window->type) {
     case WIN_CHAT:
     {
-        ProfChatWin* chatwin = (ProfChatWin*)window;
+        ProfChatWin *chatwin = (ProfChatWin*) window;
         assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
 
         if (prefs_get_boolean(PREF_NOTIFY_CHAT) && chatwin->unread > 0) {
@@ -1798,14 +1799,14 @@ win_notify_remind(ProfWin* window)
     }
     case WIN_MUC:
     {
-        ProfMucWin* mucwin = (ProfMucWin*)window;
+        ProfMucWin *mucwin = (ProfMucWin*) window;
         assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
 
         return prefs_do_room_notify_mention(mucwin->roomjid, mucwin->unread, mucwin->unread_mentions, mucwin->unread_triggers);
     }
     case WIN_PRIVATE:
     {
-        ProfPrivateWin* privatewin = (ProfPrivateWin*)window;
+        ProfPrivateWin *privatewin = (ProfPrivateWin*) window;
         assert(privatewin->memcheck == PROFPRIVATEWIN_MEMCHECK);
 
         if (prefs_get_boolean(PREF_NOTIFY_CHAT) && privatewin->unread > 0) {
@@ -1820,18 +1821,18 @@ win_notify_remind(ProfWin* window)
 }
 
 int
-win_unread(ProfWin* window)
+win_unread(ProfWin *window)
 {
     if (window->type == WIN_CHAT) {
-        ProfChatWin* chatwin = (ProfChatWin*)window;
+        ProfChatWin *chatwin = (ProfChatWin*) window;
         assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
         return chatwin->unread;
     } else if (window->type == WIN_MUC) {
-        ProfMucWin* mucwin = (ProfMucWin*)window;
+        ProfMucWin *mucwin = (ProfMucWin*) window;
         assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
         return mucwin->unread;
     } else if (window->type == WIN_PRIVATE) {
-        ProfPrivateWin* privatewin = (ProfPrivateWin*)window;
+        ProfPrivateWin *privatewin = (ProfPrivateWin*) window;
         assert(privatewin->memcheck == PROFPRIVATEWIN_MEMCHECK);
         return privatewin->unread;
     } else {
@@ -1840,7 +1841,7 @@ win_unread(ProfWin* window)
 }
 
 void
-win_sub_print(WINDOW* win, char* msg, gboolean newline, gboolean wrap, int indent)
+win_sub_print(WINDOW *win, char *msg, gboolean newline, gboolean wrap, int indent)
 {
     int maxx = getmaxx(win);
     int curx = getcurx(win);
@@ -1853,22 +1854,22 @@ win_sub_print(WINDOW* win, char* msg, gboolean newline, gboolean wrap, int inden
     }
 
     if (newline) {
-        wmove(win, cury + 1, 0);
+        wmove(win, cury+1, 0);
     }
 }
 
 void
-win_sub_newline_lazy(WINDOW* win)
+win_sub_newline_lazy(WINDOW *win)
 {
     int curx = getcurx(win);
     if (curx > 0) {
         int cury = getcury(win);
-        wmove(win, cury + 1, 0);
+        wmove(win, cury+1, 0);
     }
 }
 
 void
-win_command_list_error(ProfWin* window, const char* const error)
+win_command_list_error(ProfWin *window, const char *const error)
 {
     assert(window != NULL);
 
@@ -1876,12 +1877,12 @@ win_command_list_error(ProfWin* window, const char* const error)
 }
 
 void
-win_command_exec_error(ProfWin* window, const char* const command, const char* const error, ...)
+win_command_exec_error(ProfWin *window, const char *const command, const char *const error, ...)
 {
     assert(window != NULL);
     va_list arg;
     va_start(arg, error);
-    GString* msg = g_string_new(NULL);
+    GString *msg = g_string_new(NULL);
     g_string_vprintf(msg, error, arg);
 
     win_println(window, THEME_ERROR, "!", "Error executing command %s: %s", command, msg->str);
@@ -1891,15 +1892,15 @@ win_command_exec_error(ProfWin* window, const char* const command, const char* c
 }
 
 void
-win_handle_command_list(ProfWin* window, GSList* cmds)
+win_handle_command_list(ProfWin *window, GSList *cmds)
 {
     assert(window != NULL);
 
     if (cmds) {
         win_println(window, THEME_DEFAULT, "!", "Ad hoc commands:");
-        GSList* curr_cmd = cmds;
+        GSList *curr_cmd = cmds;
         while (curr_cmd) {
-            const char* cmd = curr_cmd->data;
+            const char *cmd = curr_cmd->data;
             win_println(window, THEME_DEFAULT, "!", "  %s", cmd);
             curr_cmd = g_slist_next(curr_cmd);
         }
@@ -1911,21 +1912,21 @@ win_handle_command_list(ProfWin* window, GSList* cmds)
 }
 
 void
-win_handle_command_exec_status(ProfWin* window, const char* const command, const char* const value)
+win_handle_command_exec_status(ProfWin *window, const char *const command, const char *const value)
 {
     assert(window != NULL);
     win_println(window, THEME_DEFAULT, "!", "%s %s", command, value);
 }
 
 void
-win_handle_command_exec_result_note(ProfWin* window, const char* const type, const char* const value)
+win_handle_command_exec_result_note(ProfWin *window, const char *const type, const char *const value)
 {
     assert(window != NULL);
     win_println(window, THEME_DEFAULT, "!", value);
 }
 
 void
-win_insert_last_read_position_marker(ProfWin* window, char* id)
+win_insert_last_read_position_marker(ProfWin *window, char* id)
 {
     int i, size;
     size = buffer_size(window->layout->buffer);
@@ -1933,7 +1934,7 @@ win_insert_last_read_position_marker(ProfWin* window, char* id)
     // TODO: this is somewhat costly. We should improve this later.
     // check if we already have a separator present
     for (i = 0; i < size; i++) {
-        ProfBuffEntry* e = buffer_get_entry(window->layout->buffer, i);
+        ProfBuffEntry *e = buffer_get_entry(window->layout->buffer, i);
 
         // if yes, don't print a new one
         if (e->id && (g_strcmp0(e->id, id) == 0)) {
@@ -1941,7 +1942,7 @@ win_insert_last_read_position_marker(ProfWin* window, char* id)
         }
     }
 
-    GDateTime* time = g_date_time_new_now_local();
+    GDateTime *time = g_date_time_new_now_local();
 
     // the trackbar/separator will actually be print in win_redraw().
     // this only puts it in the buffer and win_redraw() will interpret it.
@@ -1951,3 +1952,4 @@ win_insert_last_read_position_marker(ProfWin* window, char* id)
 
     g_date_time_unref(time);
 }
+

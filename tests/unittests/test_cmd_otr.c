@@ -1,16 +1,16 @@
-#include <cmocka.h>
-#include <glib.h>
-#include <setjmp.h>
 #include <stdarg.h>
 #include <stddef.h>
+#include <setjmp.h>
+#include <cmocka.h>
 #include <stdlib.h>
 #include <string.h>
+#include <glib.h>
 
 #include "config.h"
 
 #ifdef HAVE_LIBOTR
-#include "otr/otr.h"
 #include <libotr/proto.h>
+#include "otr/otr.h"
 #endif
 
 #include "config/preferences.h"
@@ -20,16 +20,15 @@
 #include "ui/window_list.h"
 #include "xmpp/xmpp.h"
 
-#include "ui/stub_ui.h"
 #include "ui/ui.h"
+#include "ui/stub_ui.h"
 
 #define CMD_OTR "/otr"
 
 #ifdef HAVE_LIBOTR
-void
-cmd_otr_log_shows_usage_when_no_args(void** state)
+void cmd_otr_log_shows_usage_when_no_args(void **state)
 {
-    gchar* args[] = { "log", NULL };
+    gchar *args[] = { "log", NULL };
 
     expect_string(cons_bad_cmd_usage, cmd, CMD_OTR);
 
@@ -37,10 +36,9 @@ cmd_otr_log_shows_usage_when_no_args(void** state)
     assert_true(result);
 }
 
-void
-cmd_otr_log_shows_usage_when_invalid_subcommand(void** state)
+void cmd_otr_log_shows_usage_when_invalid_subcommand(void **state)
 {
-    gchar* args[] = { "log", "wrong", NULL };
+    gchar *args[] = { "log", "wrong", NULL };
 
     expect_string(cons_bad_cmd_usage, cmd, CMD_OTR);
 
@@ -48,27 +46,25 @@ cmd_otr_log_shows_usage_when_invalid_subcommand(void** state)
     assert_true(result);
 }
 
-void
-cmd_otr_log_on_enables_logging(void** state)
+void cmd_otr_log_on_enables_logging(void **state)
 {
-    gchar* args[] = { "log", "on", NULL };
+    gchar *args[] = { "log", "on", NULL };
     prefs_set_string(PREF_OTR_LOG, "off");
     prefs_set_boolean(PREF_CHLOG, TRUE);
 
     expect_cons_show("OTR messages will be logged as plaintext.");
 
     gboolean result = cmd_otr_log(NULL, CMD_OTR, args);
-    char* pref_otr_log = prefs_get_string(PREF_OTR_LOG);
+    char *pref_otr_log = prefs_get_string(PREF_OTR_LOG);
 
     assert_true(result);
     assert_string_equal("on", pref_otr_log);
     g_free(pref_otr_log);
 }
 
-void
-cmd_otr_log_on_shows_warning_when_chlog_disabled(void** state)
+void cmd_otr_log_on_shows_warning_when_chlog_disabled(void **state)
 {
-    gchar* args[] = { "log", "on", NULL };
+    gchar *args[] = { "log", "on", NULL };
     prefs_set_string(PREF_OTR_LOG, "off");
     prefs_set_boolean(PREF_CHLOG, FALSE);
 
@@ -79,44 +75,41 @@ cmd_otr_log_on_shows_warning_when_chlog_disabled(void** state)
     assert_true(result);
 }
 
-void
-cmd_otr_log_off_disables_logging(void** state)
+void cmd_otr_log_off_disables_logging(void **state)
 {
-    gchar* args[] = { "log", "off", NULL };
+    gchar *args[] = { "log", "off", NULL };
     prefs_set_string(PREF_OTR_LOG, "on");
     prefs_set_boolean(PREF_CHLOG, TRUE);
 
     expect_cons_show("OTR message logging disabled.");
 
     gboolean result = cmd_otr_log(NULL, CMD_OTR, args);
-    char* pref_otr_log = prefs_get_string(PREF_OTR_LOG);
+    char *pref_otr_log = prefs_get_string(PREF_OTR_LOG);
 
     assert_true(result);
     assert_string_equal("off", pref_otr_log);
     g_free(pref_otr_log);
 }
 
-void
-cmd_otr_redact_redacts_logging(void** state)
+void cmd_otr_redact_redacts_logging(void **state)
 {
-    gchar* args[] = { "log", "redact", NULL };
+    gchar *args[] = { "log", "redact", NULL };
     prefs_set_string(PREF_OTR_LOG, "on");
     prefs_set_boolean(PREF_CHLOG, TRUE);
 
     expect_cons_show("OTR messages will be logged as '[redacted]'.");
 
     gboolean result = cmd_otr_log(NULL, CMD_OTR, args);
-    char* pref_otr_log = prefs_get_string(PREF_OTR_LOG);
+    char *pref_otr_log = prefs_get_string(PREF_OTR_LOG);
 
     assert_true(result);
     assert_string_equal("redact", pref_otr_log);
     g_free(pref_otr_log);
 }
 
-void
-cmd_otr_log_redact_shows_warning_when_chlog_disabled(void** state)
+void cmd_otr_log_redact_shows_warning_when_chlog_disabled(void **state)
 {
-    gchar* args[] = { "log", "redact", NULL };
+    gchar *args[] = { "log", "redact", NULL };
     prefs_set_string(PREF_OTR_LOG, "off");
     prefs_set_boolean(PREF_CHLOG, FALSE);
 
@@ -127,12 +120,11 @@ cmd_otr_log_redact_shows_warning_when_chlog_disabled(void** state)
     assert_true(result);
 }
 
-void
-cmd_otr_libver_shows_libotr_version(void** state)
+void cmd_otr_libver_shows_libotr_version(void **state)
 {
-    gchar* args[] = { "libver", NULL };
-    char* version = "9.9.9";
-    GString* message = g_string_new("Using libotr version ");
+    gchar *args[] = { "libver", NULL };
+    char *version = "9.9.9";
+    GString *message = g_string_new("Using libotr version ");
     g_string_append(message, version);
 
     will_return(otr_libotr_version, version);
@@ -145,10 +137,9 @@ cmd_otr_libver_shows_libotr_version(void** state)
     g_string_free(message, TRUE);
 }
 
-void
-cmd_otr_gen_shows_message_when_not_connected(void** state)
+void cmd_otr_gen_shows_message_when_not_connected(void **state)
 {
-    gchar* args[] = { "gen", NULL };
+    gchar *args[] = { "gen", NULL };
 
     will_return(connection_get_status, JABBER_DISCONNECTED);
 
@@ -158,45 +149,40 @@ cmd_otr_gen_shows_message_when_not_connected(void** state)
     assert_true(result);
 }
 
-static void
-test_with_command_and_connection_status(char* command, void* cmd_func, jabber_conn_status_t status)
+static void test_with_command_and_connection_status(char *command, void *cmd_func, jabber_conn_status_t status)
 {
-    gchar* args[] = { command, NULL };
+    gchar *args[] = { command, NULL };
 
     will_return(connection_get_status, status);
 
     expect_cons_show("You must be connected with an account to load OTR information.");
 
-    gboolean (*func)(ProfWin * window, const char* const command, gchar** args) = cmd_func;
+    gboolean (*func)(ProfWin *window, const char *const command, gchar **args) = cmd_func;
     gboolean result = func(NULL, CMD_OTR, args);
     assert_true(result);
 }
 
-void
-cmd_otr_gen_shows_message_when_disconnected(void** state)
+void cmd_otr_gen_shows_message_when_disconnected(void **state)
 {
     test_with_command_and_connection_status("gen", cmd_otr_gen, JABBER_DISCONNECTED);
 }
 
-void
-cmd_otr_gen_shows_message_when_connecting(void** state)
+void cmd_otr_gen_shows_message_when_connecting(void **state)
 {
     test_with_command_and_connection_status("gen", cmd_otr_gen, JABBER_CONNECTING);
 }
 
-void
-cmd_otr_gen_shows_message_when_disconnecting(void** state)
+void cmd_otr_gen_shows_message_when_disconnecting(void **state)
 {
     test_with_command_and_connection_status("gen", cmd_otr_gen, JABBER_DISCONNECTING);
 }
 
-void
-cmd_otr_gen_generates_key_for_connected_account(void** state)
+void cmd_otr_gen_generates_key_for_connected_account(void **state)
 {
-    gchar* args[] = { "gen", NULL };
-    char* account_name = "myaccount";
-    ProfAccount* account = account_new(account_name, "me@jabber.org", NULL, NULL,
-                                       TRUE, NULL, 0, NULL, NULL, NULL, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+    gchar *args[] = { "gen", NULL };
+    char *account_name = "myaccount";
+    ProfAccount *account = account_new(account_name, "me@jabber.org", NULL, NULL,
+        TRUE, NULL, 0, NULL, NULL, NULL, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
 
     will_return(connection_get_status, JABBER_CONNECTED);
     will_return(session_get_account_name, account_name);
@@ -211,28 +197,24 @@ cmd_otr_gen_generates_key_for_connected_account(void** state)
     assert_true(result);
 }
 
-void
-cmd_otr_myfp_shows_message_when_disconnected(void** state)
+void cmd_otr_myfp_shows_message_when_disconnected(void **state)
 {
     test_with_command_and_connection_status("myfp", cmd_otr_myfp, JABBER_DISCONNECTED);
 }
 
-void
-cmd_otr_myfp_shows_message_when_connecting(void** state)
+void cmd_otr_myfp_shows_message_when_connecting(void **state)
 {
     test_with_command_and_connection_status("myfp", cmd_otr_myfp, JABBER_CONNECTING);
 }
 
-void
-cmd_otr_myfp_shows_message_when_disconnecting(void** state)
+void cmd_otr_myfp_shows_message_when_disconnecting(void **state)
 {
     test_with_command_and_connection_status("myfp", cmd_otr_myfp, JABBER_DISCONNECTING);
 }
 
-void
-cmd_otr_myfp_shows_message_when_no_key(void** state)
+void cmd_otr_myfp_shows_message_when_no_key(void **state)
 {
-    gchar* args[] = { "myfp", NULL };
+    gchar *args[] = { "myfp", NULL };
 
     will_return(connection_get_status, JABBER_CONNECTED);
     will_return(otr_key_loaded, FALSE);
@@ -243,12 +225,11 @@ cmd_otr_myfp_shows_message_when_no_key(void** state)
     assert_true(result);
 }
 
-void
-cmd_otr_myfp_shows_my_fingerprint(void** state)
+void cmd_otr_myfp_shows_my_fingerprint(void **state)
 {
-    char* fingerprint = "AAAAAAAA BBBBBBBB CCCCCCCC DDDDDDDD EEEEEEEE";
-    gchar* args[] = { "myfp", NULL };
-    GString* message = g_string_new("Your OTR fingerprint: ");
+    char *fingerprint = "AAAAAAAA BBBBBBBB CCCCCCCC DDDDDDDD EEEEEEEE";
+    gchar *args[] = { "myfp", NULL };
+    GString *message = g_string_new("Your OTR fingerprint: ");
     g_string_append(message, fingerprint);
 
     will_return(connection_get_status, JABBER_CONNECTED);
@@ -266,7 +247,7 @@ cmd_otr_myfp_shows_my_fingerprint(void** state)
 static void
 test_cmd_otr_theirfp_from_wintype(win_type_t wintype)
 {
-    gchar* args[] = { "theirfp", NULL };
+    gchar *args[] = { "theirfp", NULL };
     ProfWin window;
     window.type = wintype;
     window.layout = NULL;
@@ -281,28 +262,24 @@ test_cmd_otr_theirfp_from_wintype(win_type_t wintype)
     assert_true(result);
 }
 
-void
-cmd_otr_theirfp_shows_message_when_in_console(void** state)
+void cmd_otr_theirfp_shows_message_when_in_console(void **state)
 {
     test_cmd_otr_theirfp_from_wintype(WIN_CONSOLE);
 }
 
-void
-cmd_otr_theirfp_shows_message_when_in_muc(void** state)
+void cmd_otr_theirfp_shows_message_when_in_muc(void **state)
 {
     test_cmd_otr_theirfp_from_wintype(WIN_MUC);
 }
 
-void
-cmd_otr_theirfp_shows_message_when_in_private(void** state)
+void cmd_otr_theirfp_shows_message_when_in_private(void **state)
 {
     test_cmd_otr_theirfp_from_wintype(WIN_PRIVATE);
 }
 
-void
-cmd_otr_theirfp_shows_message_when_non_otr_chat_window(void** state)
+void cmd_otr_theirfp_shows_message_when_non_otr_chat_window(void **state)
 {
-    gchar* args[] = { "theirfp", NULL };
+    gchar *args[] = { "theirfp", NULL };
 
     ProfWin window;
     window.type = WIN_CHAT;
@@ -323,13 +300,12 @@ cmd_otr_theirfp_shows_message_when_non_otr_chat_window(void** state)
     assert_true(result);
 }
 
-void
-cmd_otr_theirfp_shows_fingerprint(void** state)
+void cmd_otr_theirfp_shows_fingerprint(void **state)
 {
-    char* recipient = "someone@chat.com";
-    char* fingerprint = "AAAAAAAA BBBBBBBB CCCCCCCC DDDDDDDD EEEEEEEE";
-    gchar* args[] = { "theirfp", NULL };
-    GString* message = g_string_new(recipient);
+    char *recipient = "someone@chat.com";
+    char *fingerprint = "AAAAAAAA BBBBBBBB CCCCCCCC DDDDDDDD EEEEEEEE";
+    gchar *args[] = { "theirfp", NULL };
+    GString *message = g_string_new(recipient);
     g_string_append(message, "'s OTR fingerprint: ");
     g_string_append(message, fingerprint);
 
@@ -360,7 +336,7 @@ cmd_otr_theirfp_shows_fingerprint(void** state)
 static void
 test_cmd_otr_start_from_wintype(win_type_t wintype)
 {
-    gchar* args[] = { "start", NULL };
+    gchar *args[] = { "start", NULL };
     ProfWin window;
     window.type = wintype;
     window.layout = NULL;
@@ -374,29 +350,25 @@ test_cmd_otr_start_from_wintype(win_type_t wintype)
     assert_true(result);
 }
 
-void
-cmd_otr_start_shows_message_when_in_console(void** state)
+void cmd_otr_start_shows_message_when_in_console(void **state)
 {
     test_cmd_otr_start_from_wintype(WIN_CONSOLE);
 }
 
-void
-cmd_otr_start_shows_message_when_in_muc(void** state)
+void cmd_otr_start_shows_message_when_in_muc(void **state)
 {
     test_cmd_otr_start_from_wintype(WIN_MUC);
 }
 
-void
-cmd_otr_start_shows_message_when_in_private(void** state)
+void cmd_otr_start_shows_message_when_in_private(void **state)
 {
     test_cmd_otr_start_from_wintype(WIN_PRIVATE);
 }
 
-void
-cmd_otr_start_shows_message_when_already_started(void** state)
+void cmd_otr_start_shows_message_when_already_started(void **state)
 {
-    char* recipient = "someone@server.org";
-    gchar* args[] = { "start", NULL };
+    char *recipient = "someone@server.org";
+    gchar *args[] = { "start", NULL };
 
     will_return(connection_get_status, JABBER_CONNECTED);
 
@@ -417,11 +389,10 @@ cmd_otr_start_shows_message_when_already_started(void** state)
     assert_true(result);
 }
 
-void
-cmd_otr_start_shows_message_when_no_key(void** state)
+void cmd_otr_start_shows_message_when_no_key(void **state)
 {
-    char* recipient = "someone@server.org";
-    gchar* args[] = { "start", NULL };
+    char *recipient = "someone@server.org";
+    gchar *args[] = { "start", NULL };
 
     will_return(connection_get_status, JABBER_CONNECTED);
     will_return(otr_key_loaded, FALSE);
@@ -444,11 +415,11 @@ cmd_otr_start_shows_message_when_no_key(void** state)
 }
 
 void
-cmd_otr_start_sends_otr_query_message_to_current_recipeint(void** state)
+cmd_otr_start_sends_otr_query_message_to_current_recipeint(void **state)
 {
-    char* recipient = "buddy@chat.com";
-    char* query_message = "?OTR?";
-    gchar* args[] = { "start", NULL };
+    char *recipient = "buddy@chat.com";
+    char *query_message = "?OTR?";
+    gchar *args[] = { "start", NULL };
 
     ProfWin window;
     window.type = WIN_CHAT;
@@ -473,10 +444,9 @@ cmd_otr_start_sends_otr_query_message_to_current_recipeint(void** state)
 }
 
 #else
-void
-cmd_otr_shows_message_when_otr_unsupported(void** state)
+void cmd_otr_shows_message_when_otr_unsupported(void **state)
 {
-    gchar* args[] = { "gen", NULL };
+    gchar *args[] = { "gen", NULL };
 
     expect_cons_show("This version of Profanity has not been built with OTR support enabled");
 

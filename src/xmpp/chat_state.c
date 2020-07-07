@@ -33,27 +33,27 @@
  *
  */
 
-#include <assert.h>
 #include <stdlib.h>
+#include <assert.h>
 
 #include <glib.h>
 
 #include "config/preferences.h"
-#include "ui/win_types.h"
 #include "ui/window_list.h"
-#include "xmpp/chat_session.h"
-#include "xmpp/chat_state.h"
+#include "ui/win_types.h"
 #include "xmpp/xmpp.h"
+#include "xmpp/chat_state.h"
+#include "xmpp/chat_session.h"
 
-#define PAUSED_TIMEOUT   10.0
+#define PAUSED_TIMEOUT 10.0
 #define INACTIVE_TIMEOUT 30.0
 
-static void _send_if_supported(const char* const barejid, void (*send_func)(const char* const));
+static void _send_if_supported(const char *const barejid, void (*send_func)(const char *const));
 
 ChatState*
 chat_state_new(void)
 {
-    ChatState* new_state = malloc(sizeof(struct prof_chat_state_t));
+    ChatState *new_state = malloc(sizeof(struct prof_chat_state_t));
     new_state->type = CHAT_STATE_GONE;
     new_state->timer = g_timer_new();
 
@@ -61,16 +61,16 @@ chat_state_new(void)
 }
 
 void
-chat_state_free(ChatState* state)
+chat_state_free(ChatState *state)
 {
-    if (state && state->timer != NULL) {
+    if (state && state->timer!= NULL) {
         g_timer_destroy(state->timer);
     }
     free(state);
 }
 
 void
-chat_state_handle_idle(const char* const barejid, ChatState* state)
+chat_state_handle_idle(const char *const barejid, ChatState *state)
 {
     gdouble elapsed = g_timer_elapsed(state->timer, NULL);
 
@@ -92,12 +92,13 @@ chat_state_handle_idle(const char* const barejid, ChatState* state)
             _send_if_supported(barejid, message_send_inactive);
         }
         return;
+
     }
 
     // INACTIVE -> GONE
     if (state->type == CHAT_STATE_INACTIVE) {
         if (prefs_get_gone() != 0 && (elapsed > (prefs_get_gone() * 60.0))) {
-            ChatSession* session = chat_session_get(barejid);
+            ChatSession *session = chat_session_get(barejid);
             if (session) {
                 // never move to GONE when resource override
                 if (!session->resource_override) {
@@ -121,7 +122,7 @@ chat_state_handle_idle(const char* const barejid, ChatState* state)
 }
 
 void
-chat_state_handle_typing(const char* const barejid, ChatState* state)
+chat_state_handle_typing(const char *const barejid, ChatState *state)
 {
     // ACTIVE|INACTIVE|PAUSED|GONE -> COMPOSING
     if (state->type != CHAT_STATE_COMPOSING) {
@@ -134,14 +135,14 @@ chat_state_handle_typing(const char* const barejid, ChatState* state)
 }
 
 void
-chat_state_active(ChatState* state)
+chat_state_active(ChatState *state)
 {
     state->type = CHAT_STATE_ACTIVE;
     g_timer_start(state->timer);
 }
 
 void
-chat_state_gone(const char* const barejid, ChatState* state)
+chat_state_gone(const char *const barejid, ChatState *state)
 {
     if (state->type != CHAT_STATE_GONE) {
         if (prefs_get_boolean(PREF_STATES)) {
@@ -157,12 +158,12 @@ chat_state_idle(void)
 {
     jabber_conn_status_t status = connection_get_status();
     if (status == JABBER_CONNECTED) {
-        GSList* recipients = wins_get_chat_recipients();
-        GSList* curr = recipients;
+        GSList *recipients = wins_get_chat_recipients();
+        GSList *curr = recipients;
 
         while (curr) {
-            char* barejid = curr->data;
-            ProfChatWin* chatwin = wins_get_chat(barejid);
+            char *barejid = curr->data;
+            ProfChatWin *chatwin = wins_get_chat(barejid);
             chat_state_handle_idle(chatwin->barejid, chatwin->state);
             curr = g_slist_next(curr);
         }
@@ -177,21 +178,21 @@ void
 chat_state_activity(void)
 {
     jabber_conn_status_t status = connection_get_status();
-    ProfWin* current = wins_get_current();
+    ProfWin *current = wins_get_current();
 
     if ((status == JABBER_CONNECTED) && (current->type == WIN_CHAT)) {
-        ProfChatWin* chatwin = (ProfChatWin*)current;
+        ProfChatWin *chatwin = (ProfChatWin*)current;
         assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
         chat_state_handle_typing(chatwin->barejid, chatwin->state);
     }
 }
 
 static void
-_send_if_supported(const char* const barejid, void (*send_func)(const char* const))
+_send_if_supported(const char *const barejid, void (*send_func)(const char *const))
 {
     gboolean send = TRUE;
-    GString* jid = g_string_new(barejid);
-    ChatSession* session = chat_session_get(barejid);
+    GString *jid = g_string_new(barejid);
+    ChatSession *session = chat_session_get(barejid);
     if (session) {
         if (session->send_states) {
             g_string_append(jid, "/");

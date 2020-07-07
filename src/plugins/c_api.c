@@ -33,9 +33,9 @@
  *
  */
 
-#include <glib.h>
 #include <stdlib.h>
 #include <string.h>
+#include <glib.h>
 
 #include "log.h"
 #include "plugins/api.h"
@@ -43,22 +43,19 @@
 #include "plugins/callbacks.h"
 #include "plugins/profapi.h"
 
-typedef struct command_wrapper_t
-{
-    void (*func)(char** args);
+typedef struct command_wrapper_t {
+    void(*func)(char **args);
 } CommandWrapper;
 
-typedef struct timed_wrapper_t
-{
-    void (*func)(void);
+typedef struct timed_wrapper_t {
+    void(*func)(void);
 } TimedWrapper;
 
-typedef struct window_wrapper_t
-{
-    void (*func)(char* tag, char* line);
+typedef struct window_wrapper_t {
+    void(*func)(char *tag, char *line);
 } WindowWrapper;
 
-static char* _c_plugin_name(const char* filename);
+static char* _c_plugin_name(const char *filename);
 
 static void
 c_api_cons_alert(void)
@@ -67,46 +64,46 @@ c_api_cons_alert(void)
 }
 
 static int
-c_api_cons_show(const char* const message)
+c_api_cons_show(const char * const message)
 {
     return api_cons_show(message);
 }
 
 static int
-c_api_cons_show_themed(const char* const group, const char* const item, const char* const def, const char* const message)
+c_api_cons_show_themed(const char *const group, const char *const item, const char *const def, const char *const message)
 {
     return api_cons_show_themed(group, item, def, message);
 }
 
 static int
-c_api_cons_bad_cmd_usage(const char* const cmd)
+c_api_cons_bad_cmd_usage(const char *const cmd)
 {
     return api_cons_bad_cmd_usage(cmd);
 }
 
 static void
-c_api_register_command(const char* filename, const char* command_name, int min_args, int max_args,
-                       char** synopsis, const char* description, char* arguments[][2], char** examples,
-                       void (*callback)(char** args))
+c_api_register_command(const char *filename, const char *command_name, int min_args, int max_args,
+    char **synopsis, const char *description, char *arguments[][2], char **examples,
+    void(*callback)(char **args))
 {
-    char* plugin_name = _c_plugin_name(filename);
+    char *plugin_name = _c_plugin_name(filename);
     log_debug("Register command %s for %s", command_name, plugin_name);
 
-    CommandWrapper* wrapper = malloc(sizeof(CommandWrapper));
+    CommandWrapper *wrapper = malloc(sizeof(CommandWrapper));
     wrapper->func = callback;
     api_register_command(plugin_name, command_name, min_args, max_args, synopsis,
-                         description, arguments, examples, wrapper, c_command_callback, free);
+        description, arguments, examples, wrapper, c_command_callback, free);
 
     free(plugin_name);
 }
 
 static void
-c_api_register_timed(const char* filename, void (*callback)(void), int interval_seconds)
+c_api_register_timed(const char *filename, void(*callback)(void), int interval_seconds)
 {
-    char* plugin_name = _c_plugin_name(filename);
+    char *plugin_name = _c_plugin_name(filename);
     log_debug("Register timed for %s", plugin_name);
 
-    TimedWrapper* wrapper = malloc(sizeof(TimedWrapper));
+    TimedWrapper *wrapper = malloc(sizeof(TimedWrapper));
     wrapper->func = callback;
     api_register_timed(plugin_name, wrapper, interval_seconds, c_timed_callback, free);
 
@@ -114,9 +111,9 @@ c_api_register_timed(const char* filename, void (*callback)(void), int interval_
 }
 
 static void
-c_api_completer_add(const char* filename, const char* key, char** items)
+c_api_completer_add(const char *filename, const char *key, char **items)
 {
-    char* plugin_name = _c_plugin_name(filename);
+    char *plugin_name = _c_plugin_name(filename);
     log_debug("Autocomplete add %s for %s", key, plugin_name);
 
     api_completer_add(plugin_name, key, items);
@@ -125,9 +122,9 @@ c_api_completer_add(const char* filename, const char* key, char** items)
 }
 
 static void
-c_api_completer_remove(const char* filename, const char* key, char** items)
+c_api_completer_remove(const char *filename, const char *key, char **items)
 {
-    char* plugin_name = _c_plugin_name(filename);
+    char *plugin_name = _c_plugin_name(filename);
     log_debug("Autocomplete remove %s for %s", key, plugin_name);
 
     api_completer_remove(plugin_name, key, items);
@@ -136,9 +133,9 @@ c_api_completer_remove(const char* filename, const char* key, char** items)
 }
 
 static void
-c_api_completer_clear(const char* filename, const char* key)
+c_api_completer_clear(const char *filename, const char *key)
 {
-    char* plugin_name = _c_plugin_name(filename);
+    char *plugin_name = _c_plugin_name(filename);
     log_debug("Autocomplete clear %s for %s", key, plugin_name);
 
     api_completer_clear(plugin_name, key);
@@ -147,9 +144,9 @@ c_api_completer_clear(const char* filename, const char* key)
 }
 
 static void
-c_api_filepath_completer_add(const char* filename, const char* prefix)
+c_api_filepath_completer_add(const char *filename, const char *prefix)
 {
-    char* plugin_name = _c_plugin_name(filename);
+    char *plugin_name = _c_plugin_name(filename);
     log_debug("Filepath autocomplete added '%s' for %s", prefix, plugin_name);
 
     api_filepath_completer_add(plugin_name, prefix);
@@ -158,24 +155,24 @@ c_api_filepath_completer_add(const char* filename, const char* prefix)
 }
 
 static void
-c_api_notify(const char* message, int timeout_ms, const char* category)
+c_api_notify(const char *message, int timeout_ms, const char *category)
 {
     api_notify(message, category, timeout_ms);
 }
 
 static void
-c_api_send_line(char* line)
+c_api_send_line(char *line)
 {
     api_send_line(line);
 }
 
-static char*
+static char *
 c_api_get_current_recipient(void)
 {
     return api_get_current_recipient();
 }
 
-static char*
+static char *
 c_api_get_current_muc(void)
 {
     return api_get_current_muc();
@@ -200,47 +197,47 @@ c_api_get_current_occupants(void)
 }
 
 static char*
-c_api_get_room_nick(const char* barejid)
+c_api_get_room_nick(const char *barejid)
 {
     return api_get_room_nick(barejid);
 }
 
 static void
-c_api_log_debug(const char* message)
+c_api_log_debug(const char *message)
 {
     api_log_debug(message);
 }
 
 static void
-c_api_log_info(const char* message)
+c_api_log_info(const char *message)
 {
     api_log_info(message);
 }
 
 static void
-c_api_log_warning(const char* message)
+c_api_log_warning(const char *message)
 {
     api_log_warning(message);
 }
 
 static void
-c_api_log_error(const char* message)
+c_api_log_error(const char *message)
 {
     api_log_error(message);
 }
 
 static int
-c_api_win_exists(char* tag)
+c_api_win_exists(char *tag)
 {
     return api_win_exists(tag);
 }
 
 static void
-c_api_win_create(const char* filename, char* tag, void (*callback)(char* tag, char* line))
+c_api_win_create(const char *filename, char *tag, void(*callback)(char *tag, char *line))
 {
-    char* plugin_name = _c_plugin_name(filename);
+    char *plugin_name = _c_plugin_name(filename);
 
-    WindowWrapper* wrapper = malloc(sizeof(WindowWrapper));
+    WindowWrapper *wrapper = malloc(sizeof(WindowWrapper));
     wrapper->func = callback;
     api_win_create(plugin_name, tag, wrapper, c_window_callback, free);
 
@@ -248,216 +245,216 @@ c_api_win_create(const char* filename, char* tag, void (*callback)(char* tag, ch
 }
 
 static int
-c_api_win_focus(char* tag)
+c_api_win_focus(char *tag)
 {
     return api_win_focus(tag);
 }
 
 static int
-c_api_win_show(char* tag, char* line)
+c_api_win_show(char *tag, char *line)
 {
     return api_win_show(tag, line);
 }
 
 static int
-c_api_win_show_themed(char* tag, char* group, char* key, char* def, char* line)
+c_api_win_show_themed(char *tag, char *group, char *key, char *def, char *line)
 {
     return api_win_show_themed(tag, group, key, def, line);
 }
 
 static int
-c_api_send_stanza(char* stanza)
+c_api_send_stanza(char *stanza)
 {
     return api_send_stanza(stanza);
 }
 
 static int
-c_api_settings_boolean_get(char* group, char* key, int def)
+c_api_settings_boolean_get(char *group, char *key, int def)
 {
     return api_settings_boolean_get(group, key, def);
 }
 
 static void
-c_api_settings_boolean_set(char* group, char* key, int value)
+c_api_settings_boolean_set(char *group, char *key, int value)
 {
     api_settings_boolean_set(group, key, value);
 }
 
 static char*
-c_api_settings_string_get(char* group, char* key, char* def)
+c_api_settings_string_get(char *group, char *key, char *def)
 {
     return api_settings_string_get(group, key, def);
 }
 
 static void
-c_api_settings_string_set(char* group, char* key, char* value)
+c_api_settings_string_set(char *group, char *key, char *value)
 {
     api_settings_string_set(group, key, value);
 }
 
 static char**
-c_api_settings_string_list_get(char* group, char* key)
+c_api_settings_string_list_get(char *group, char *key)
 {
     return api_settings_string_list_get(group, key);
 }
 
 static void
-c_api_settings_string_list_add(char* group, char* key, char* value)
+c_api_settings_string_list_add(char *group, char *key, char* value)
 {
     api_settings_string_list_add(group, key, value);
 }
 
 static int
-c_api_settings_string_list_remove(char* group, char* key, char* value)
+c_api_settings_string_list_remove(char *group, char *key, char *value)
 {
     return api_settings_string_list_remove(group, key, value);
 }
 
 static int
-c_api_settings_string_list_clear(char* group, char* key)
+c_api_settings_string_list_clear(char *group, char *key)
 {
     return api_settings_string_list_clear(group, key);
 }
 
 static int
-c_api_settings_int_get(char* group, char* key, int def)
+c_api_settings_int_get(char *group, char *key, int def)
 {
     return api_settings_int_get(group, key, def);
 }
 
 static void
-c_api_settings_int_set(char* group, char* key, int value)
+c_api_settings_int_set(char *group, char *key, int value)
 {
     api_settings_int_set(group, key, value);
 }
 
 static void
-c_api_incoming_message(char* barejid, char* resource, char* message)
+c_api_incoming_message(char *barejid, char *resource, char *message)
 {
     api_incoming_message(barejid, resource, message);
 }
 
 static void
-c_api_disco_add_feature(const char* filename, char* feature)
+c_api_disco_add_feature(const char *filename, char *feature)
 {
-    char* plugin_name = _c_plugin_name(filename);
+    char *plugin_name = _c_plugin_name(filename);
     api_disco_add_feature(plugin_name, feature);
     free(plugin_name);
 }
 
 static void
-c_api_encryption_reset(const char* barejid)
+c_api_encryption_reset(const char *barejid)
 {
     api_encryption_reset(barejid);
 }
 
 static int
-c_api_chat_set_titlebar_enctext(const char* barejid, const char* enctext)
+c_api_chat_set_titlebar_enctext(const char *barejid, const char *enctext)
 {
     return api_chat_set_titlebar_enctext(barejid, enctext);
 }
 
 static int
-c_api_chat_unset_titlebar_enctext(const char* barejid)
+c_api_chat_unset_titlebar_enctext(const char *barejid)
 {
     return api_chat_unset_titlebar_enctext(barejid);
 }
 
 static int
-c_api_chat_set_incoming_char(const char* barejid, const char* ch)
+c_api_chat_set_incoming_char(const char *barejid, const char *ch)
 {
     return api_chat_set_incoming_char(barejid, ch);
 }
 
 static int
-c_api_chat_unset_incoming_char(const char* barejid)
+c_api_chat_unset_incoming_char(const char *barejid)
 {
     return api_chat_unset_incoming_char(barejid);
 }
 
 static int
-c_api_chat_set_outgoing_char(const char* barejid, const char* ch)
+c_api_chat_set_outgoing_char(const char *barejid, const char *ch)
 {
     return api_chat_set_outgoing_char(barejid, ch);
 }
 
 static int
-c_api_chat_unset_outgoing_char(const char* barejid)
+c_api_chat_unset_outgoing_char(const char *barejid)
 {
     return api_chat_unset_outgoing_char(barejid);
 }
 
 static int
-c_api_room_set_titlebar_enctext(const char* roomjid, const char* enctext)
+c_api_room_set_titlebar_enctext(const char *roomjid, const char *enctext)
 {
     return api_room_set_titlebar_enctext(roomjid, enctext);
 }
 
 static int
-c_api_room_unset_titlebar_enctext(const char* roomjid)
+c_api_room_unset_titlebar_enctext(const char *roomjid)
 {
     return api_room_unset_titlebar_enctext(roomjid);
 }
 
 static int
-c_api_room_set_message_char(const char* roomjid, const char* ch)
+c_api_room_set_message_char(const char *roomjid, const char *ch)
 {
     return api_room_set_message_char(roomjid, ch);
 }
 
 static int
-c_api_room_unset_message_char(const char* roomjid)
+c_api_room_unset_message_char(const char *roomjid)
 {
     return api_room_unset_message_char(roomjid);
 }
 
 static int
-c_api_chat_show(const char* const barejid, const char* const message)
+c_api_chat_show(const char *const barejid, const char *const message)
 {
     return api_chat_show(barejid, message);
 }
 
 static int
-c_api_chat_show_themed(const char* const barejid, const char* const group, const char* const item, const char* const def,
-                       const char* const ch, const char* const message)
+c_api_chat_show_themed(const char *const barejid, const char *const group, const char *const item, const char *const def,
+    const char *const ch, const char *const message)
 {
     return api_chat_show_themed(barejid, group, item, def, ch, message);
 }
 
 static int
-c_api_room_show(const char* const roomjid, const char* const message)
+c_api_room_show(const char *const roomjid, const char *const message)
 {
     return api_room_show(roomjid, message);
 }
 
 static int
-c_api_room_show_themed(const char* const roomjid, const char* const group, const char* const item, const char* const def,
-                       const char* const ch, const char* const message)
+c_api_room_show_themed(const char *const roomjid, const char *const group, const char *const item, const char *const def,
+    const char *const ch, const char *const message)
 {
     return api_room_show_themed(roomjid, group, item, def, ch, message);
 }
 
 void
-c_command_callback(PluginCommand* command, gchar** args)
+c_command_callback(PluginCommand *command, gchar **args)
 {
-    CommandWrapper* wrapper = command->callback;
-    void (*f)(gchar * *args) = wrapper->func;
+    CommandWrapper *wrapper = command->callback;
+    void(*f)(gchar **args) = wrapper->func;
     f(args);
 }
 
 void
-c_timed_callback(PluginTimedFunction* timed_function)
+c_timed_callback(PluginTimedFunction *timed_function)
 {
-    TimedWrapper* wrapper = timed_function->callback;
-    void (*f)(void) = wrapper->func;
+    TimedWrapper *wrapper = timed_function->callback;
+    void(*f)(void) = wrapper->func;
     f();
 }
 
 void
-c_window_callback(PluginWindowCallback* window_callback, char* tag, char* line)
+c_window_callback(PluginWindowCallback *window_callback, char *tag, char *line)
 {
-    WindowWrapper* wrapper = window_callback->callback;
-    void (*f)(char* tag, char* line) = wrapper->func;
+    WindowWrapper *wrapper = window_callback->callback;
+    void(*f)(char *tag, char *line) = wrapper->func;
     f(tag, line);
 }
 
@@ -521,15 +518,15 @@ c_api_init(void)
     prof_room_show_themed = c_api_room_show_themed;
 }
 
-static char*
-_c_plugin_name(const char* filename)
+static char *
+_c_plugin_name(const char *filename)
 {
-    GString* plugin_name_str = g_string_new("");
-    gchar* name = g_strndup(filename, strlen(filename) - 1);
+    GString *plugin_name_str = g_string_new("");
+    gchar *name = g_strndup(filename, strlen(filename)-1);
     g_string_append(plugin_name_str, name);
     g_free(name);
     g_string_append(plugin_name_str, "so");
-    char* result = plugin_name_str->str;
+    char *result = plugin_name_str->str;
     g_string_free(plugin_name_str, FALSE);
 
     return result;

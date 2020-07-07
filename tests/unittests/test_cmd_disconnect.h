@@ -1,1 +1,1 @@
-void clears_chat_sessions(void** state);
+void clears_chat_sessions(void **state);

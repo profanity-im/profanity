@@ -41,28 +41,27 @@
 
 #include "common.h"
 #include "tools/autocomplete.h"
-#include "xmpp/contact.h"
 #include "xmpp/resource.h"
+#include "xmpp/contact.h"
 
-struct p_contact_t
-{
-    char* barejid;
-    gchar* barejid_collate_key;
-    char* name;
-    gchar* name_collate_key;
-    GSList* groups;
-    char* subscription;
-    char* offline_message;
+struct p_contact_t {
+    char *barejid;
+    gchar *barejid_collate_key;
+    char *name;
+    gchar *name_collate_key;
+    GSList *groups;
+    char *subscription;
+    char *offline_message;
     gboolean pending_out;
-    GDateTime* last_activity;
-    GHashTable* available_resources;
+    GDateTime *last_activity;
+    GHashTable *available_resources;
     Autocomplete resource_ac;
 };
 
 PContact
-p_contact_new(const char* const barejid, const char* const name,
-              GSList* groups, const char* const subscription,
-              const char* const offline_message, gboolean pending_out)
+p_contact_new(const char *const barejid, const char *const name,
+    GSList *groups, const char *const subscription,
+    const char *const offline_message, gboolean pending_out)
 {
     PContact contact = malloc(sizeof(struct p_contact_t));
     contact->barejid = strdup(barejid);
@@ -92,7 +91,7 @@ p_contact_new(const char* const barejid, const char* const name,
     contact->last_activity = NULL;
 
     contact->available_resources = g_hash_table_new_full(g_str_hash, g_str_equal, free,
-                                                         (GDestroyNotify)resource_destroy);
+        (GDestroyNotify)resource_destroy);
 
     contact->resource_ac = autocomplete_new();
 
@@ -100,7 +99,7 @@ p_contact_new(const char* const barejid, const char* const name,
 }
 
 void
-p_contact_set_name(const PContact contact, const char* const name)
+p_contact_set_name(const PContact contact, const char *const name)
 {
     FREE_SET_NULL(contact->name);
     FREE_SET_NULL(contact->name_collate_key);
@@ -111,7 +110,7 @@ p_contact_set_name(const PContact contact, const char* const name)
 }
 
 void
-p_contact_set_groups(const PContact contact, GSList* groups)
+p_contact_set_groups(const PContact contact, GSList *groups)
 {
     if (contact->groups) {
         g_slist_free_full(contact->groups, g_free);
@@ -122,9 +121,9 @@ p_contact_set_groups(const PContact contact, GSList* groups)
 }
 
 gboolean
-p_contact_in_group(const PContact contact, const char* const group)
+p_contact_in_group(const PContact contact, const char *const group)
 {
-    GSList* groups = contact->groups;
+    GSList *groups = contact->groups;
     while (groups) {
         if (strcmp(groups->data, group) == 0) {
             return TRUE;
@@ -142,7 +141,7 @@ p_contact_groups(const PContact contact)
 }
 
 gboolean
-p_contact_remove_resource(PContact contact, const char* const resource)
+p_contact_remove_resource(PContact contact, const char *const resource)
 {
     gboolean result = g_hash_table_remove(contact->available_resources, resource);
     autocomplete_remove(contact->resource_ac, resource);
@@ -210,12 +209,12 @@ p_contact_name_or_jid(const PContact contact)
 }
 
 char*
-p_contact_create_display_string(const PContact contact, const char* const resource)
+p_contact_create_display_string(const PContact contact, const char *const resource)
 {
-    GString* result_str = g_string_new("");
+    GString *result_str = g_string_new("");
 
     // use nickname if exists
-    const char* display_name = p_contact_name_or_jid(contact);
+    const char *display_name = p_contact_name_or_jid(contact);
     g_string_append(result_str, display_name);
 
     // add resource if not default provided by profanity
@@ -225,14 +224,14 @@ p_contact_create_display_string(const PContact contact, const char* const resour
         g_string_append(result_str, ")");
     }
 
-    char* result = result_str->str;
+    char *result = result_str->str;
     g_string_free(result_str, FALSE);
 
     return result;
 }
 
 static Resource*
-_highest_presence(Resource* first, Resource* second)
+_highest_presence(Resource *first, Resource *second)
 {
     if (first->presence == RESOURCE_CHAT) {
         return first;
@@ -265,10 +264,10 @@ _get_most_available_resource(PContact contact)
     //      away
     //      xa
     //      dnd
-    GList* resources = g_hash_table_get_values(contact->available_resources);
-    GList* curr = resources;
-    Resource* current = curr->data;
-    Resource* highest = current;
+    GList *resources = g_hash_table_get_values(contact->available_resources);
+    GList *curr = resources;
+    Resource *current = curr->data;
+    Resource *highest = current;
     curr = g_list_next(curr);
     while (curr) {
         current = curr->data;
@@ -277,7 +276,7 @@ _get_most_available_resource(PContact contact)
         if (current->priority == highest->priority) {
             highest = _highest_presence(highest, current);
 
-            // priority higher than current highest, set new presence
+        // priority higher than current highest, set new presence
         } else if (current->priority > highest->priority) {
             highest = current;
         }
@@ -299,7 +298,7 @@ p_contact_presence(const PContact contact)
         return "offline";
     }
 
-    Resource* resource = _get_most_available_resource(contact);
+    Resource *resource = _get_most_available_resource(contact);
 
     return string_from_resource_presence(resource->presence);
 }
@@ -314,7 +313,7 @@ p_contact_status(const PContact contact)
         return contact->offline_message;
     }
 
-    Resource* resource = _get_most_available_resource(contact);
+    Resource *resource = _get_most_available_resource(contact);
 
     return resource->status;
 }
@@ -340,7 +339,7 @@ p_contact_subscribed(const PContact contact)
 }
 
 Resource*
-p_contact_get_resource(const PContact contact, const char* const resource)
+p_contact_get_resource(const PContact contact, const char *const resource)
 {
     return g_hash_table_lookup(contact->available_resources, resource);
 }
@@ -361,12 +360,12 @@ GList*
 p_contact_get_available_resources(const PContact contact)
 {
     assert(contact != NULL);
-    GList* resources = g_hash_table_get_values(contact->available_resources);
-    GList* ordered = NULL;
+    GList *resources = g_hash_table_get_values(contact->available_resources);
+    GList *ordered = NULL;
 
-    GList* curr_resource = resources;
+    GList *curr_resource = resources;
     while (curr_resource) {
-        Resource* resource = curr_resource->data;
+        Resource *resource = curr_resource->data;
         ordered = g_list_insert_sorted(ordered, resource, (GCompareFunc)resource_compare_availability);
         curr_resource = g_list_next(curr_resource);
     }
@@ -385,8 +384,9 @@ p_contact_is_available(const PContact contact)
     }
 
     // if most available resource is CHAT or ONLINE, available
-    Resource* most_available = _get_most_available_resource(contact);
-    if ((most_available->presence == RESOURCE_ONLINE) || (most_available->presence == RESOURCE_CHAT)) {
+    Resource *most_available = _get_most_available_resource(contact);
+    if ((most_available->presence == RESOURCE_ONLINE) ||
+        (most_available->presence == RESOURCE_CHAT)) {
         return TRUE;
     } else {
         return FALSE;
@@ -400,14 +400,14 @@ p_contact_has_available_resource(const PContact contact)
 }
 
 void
-p_contact_set_presence(const PContact contact, Resource* resource)
+p_contact_set_presence(const PContact contact, Resource *resource)
 {
     g_hash_table_replace(contact->available_resources, strdup(resource->name), resource);
     autocomplete_add(contact->resource_ac, resource->name);
 }
 
 void
-p_contact_set_subscription(const PContact contact, const char* const subscription)
+p_contact_set_subscription(const PContact contact, const char *const subscription)
 {
     FREE_SET_NULL(contact->subscription);
     if (subscription) {
@@ -422,7 +422,7 @@ p_contact_set_pending_out(const PContact contact, gboolean pending_out)
 }
 
 void
-p_contact_set_last_activity(const PContact contact, GDateTime* last_activity)
+p_contact_set_last_activity(const PContact contact, GDateTime *last_activity)
 {
     if (contact->last_activity) {
         g_date_time_unref(contact->last_activity);

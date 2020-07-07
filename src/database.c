@@ -35,32 +35,32 @@
 
 #define _GNU_SOURCE 1
 
-#include <errno.h>
-#include <glib.h>
+#include <sys/stat.h>
 #include <sqlite3.h>
+#include <glib.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/stat.h>
+#include <errno.h>
 
+#include "log.h"
 #include "common.h"
 #include "config/files.h"
-#include "log.h"
 
-static sqlite3* g_chatlog_database;
+static sqlite3 *g_chatlog_database;
 
-static void _add_to_db(ProfMessage* message, char* type, const Jid* const from_jid, const Jid* const to_jid);
-static char* _get_db_filename(ProfAccount* account);
-static prof_msg_type_t _get_message_type_type(const char* const type);
+static void _add_to_db(ProfMessage *message, char *type, const Jid * const from_jid, const Jid * const to_jid);
+static char* _get_db_filename(ProfAccount *account);
+static prof_msg_type_t _get_message_type_type(const char *const type);
 
 static char*
-_get_db_filename(ProfAccount* account)
+_get_db_filename(ProfAccount *account)
 {
-    gchar* database_dir = files_get_account_data_path(DIR_DATABASE, account->jid);
+    gchar *database_dir = files_get_account_data_path(DIR_DATABASE, account->jid);
 
     int res = g_mkdir_with_parents(database_dir, S_IRWXU);
     if (res == -1) {
-        char* errmsg = strerror(errno);
+        char *errmsg = strerror(errno);
         if (errmsg) {
             log_error("DATABASE: error creating directory: %s, %s", database_dir, errmsg);
         } else {
@@ -70,9 +70,9 @@ _get_db_filename(ProfAccount* account)
         return NULL;
     }
 
-    GString* chatlog_filename = g_string_new(database_dir);
+    GString *chatlog_filename = g_string_new(database_dir);
     g_string_append(chatlog_filename, "/chatlog.db");
-    gchar* result = g_strdup(chatlog_filename->str);
+    gchar *result = g_strdup(chatlog_filename->str);
     g_string_free(chatlog_filename, TRUE);
     g_free(database_dir);
 
@@ -80,7 +80,7 @@ _get_db_filename(ProfAccount* account)
 }
 
 gboolean
-log_database_init(ProfAccount* account)
+log_database_init(ProfAccount *account)
 {
     int ret = sqlite3_initialize();
     if (ret != SQLITE_OK) {
@@ -88,20 +88,20 @@ log_database_init(ProfAccount* account)
         return FALSE;
     }
 
-    char* filename = _get_db_filename(account);
+    char *filename = _get_db_filename(account);
     if (!filename) {
         return FALSE;
     }
 
     ret = sqlite3_open(filename, &g_chatlog_database);
     if (ret != SQLITE_OK) {
-        const char* err_msg = sqlite3_errmsg(g_chatlog_database);
+        const char *err_msg = sqlite3_errmsg(g_chatlog_database);
         log_error("Error opening SQLite database: %s", err_msg);
         free(filename);
         return FALSE;
     }
 
-    char* err_msg;
+    char *err_msg;
     // id is the ID of DB the entry
     // from_jid is the senders jid
     // to_jid is the receivers jid
@@ -115,18 +115,18 @@ log_database_init(ProfAccount* account)
     // replace_id is the ID from XEP-0308: Last Message Correction
     // encryption is to distinguish: none, omemo, otr, pgp
     // marked_read is 0/1 whether a message has been marked as read via XEP-0333: Chat Markers
-    char* query = "CREATE TABLE IF NOT EXISTS `ChatLogs` ( `id` INTEGER PRIMARY KEY AUTOINCREMENT, `from_jid` TEXT NOT NULL, `to_jid` TEXT NOT NULL, `from_resource` TEXT, `to_resource` TEXT, `message` TEXT, `timestamp` TEXT, `type` TEXT, `stanza_id` TEXT, `archive_id` TEXT, `replace_id` TEXT, `encryption` TEXT, `marked_read` INTEGER)";
-    if (SQLITE_OK != sqlite3_exec(g_chatlog_database, query, NULL, 0, &err_msg)) {
+    char *query = "CREATE TABLE IF NOT EXISTS `ChatLogs` ( `id` INTEGER PRIMARY KEY AUTOINCREMENT, `from_jid` TEXT NOT NULL, `to_jid` TEXT NOT NULL, `from_resource` TEXT, `to_resource` TEXT, `message` TEXT, `timestamp` TEXT, `type` TEXT, `stanza_id` TEXT, `archive_id` TEXT, `replace_id` TEXT, `encryption` TEXT, `marked_read` INTEGER)";
+    if( SQLITE_OK != sqlite3_exec(g_chatlog_database, query, NULL, 0, &err_msg)) {
         goto out;
     }
 
     query = "CREATE TABLE IF NOT EXISTS `DbVersion` ( `dv_id` INTEGER PRIMARY KEY, `version` INTEGER UNIQUE)";
-    if (SQLITE_OK != sqlite3_exec(g_chatlog_database, query, NULL, 0, &err_msg)) {
+    if( SQLITE_OK != sqlite3_exec(g_chatlog_database, query, NULL, 0, &err_msg)) {
         goto out;
     }
 
     query = "INSERT OR IGNORE INTO `DbVersion` (`version`) VALUES('1')";
-    if (SQLITE_OK != sqlite3_exec(g_chatlog_database, query, NULL, 0, &err_msg)) {
+    if( SQLITE_OK != sqlite3_exec(g_chatlog_database, query, NULL, 0, &err_msg)) {
         goto out;
     }
 
@@ -156,13 +156,13 @@ log_database_close(void)
 }
 
 void
-log_database_add_incoming(ProfMessage* message)
+log_database_add_incoming(ProfMessage *message)
 {
     if (message->to_jid) {
         _add_to_db(message, NULL, message->from_jid, message->to_jid);
     } else {
-        const char* jid = connection_get_fulljid();
-        Jid* myjid = jid_create(jid);
+        const char *jid = connection_get_fulljid();
+        Jid *myjid = jid_create(jid);
 
         _add_to_db(message, NULL, message->from_jid, myjid);
 
@@ -171,9 +171,9 @@ log_database_add_incoming(ProfMessage* message)
 }
 
 static void
-_log_database_add_outgoing(char* type, const char* const id, const char* const barejid, const char* const message, const char* const replace_id, prof_enc_t enc)
+_log_database_add_outgoing(char *type, const char * const id, const char * const barejid, const char * const message, const char *const replace_id, prof_enc_t enc)
 {
-    ProfMessage* msg = message_init();
+    ProfMessage *msg = message_init();
 
     msg->id = id ? strdup(id) : NULL;
     msg->from_jid = jid_create(barejid);
@@ -182,8 +182,8 @@ _log_database_add_outgoing(char* type, const char* const id, const char* const b
     msg->timestamp = g_date_time_new_now_local(); //TODO: get from outside. best to have whole ProfMessage from outside
     msg->enc = enc;
 
-    const char* jid = connection_get_fulljid();
-    Jid* myjid = jid_create(jid);
+    const char *jid = connection_get_fulljid();
+    Jid *myjid = jid_create(jid);
 
     _add_to_db(msg, type, myjid, msg->from_jid); // TODO: myjid now in profmessage
 
@@ -192,30 +192,30 @@ _log_database_add_outgoing(char* type, const char* const id, const char* const b
 }
 
 void
-log_database_add_outgoing_chat(const char* const id, const char* const barejid, const char* const message, const char* const replace_id, prof_enc_t enc)
+log_database_add_outgoing_chat(const char * const id, const char * const barejid, const char * const message, const char *const replace_id, prof_enc_t enc)
 {
     _log_database_add_outgoing("chat", id, barejid, message, replace_id, enc);
 }
 
 void
-log_database_add_outgoing_muc(const char* const id, const char* const barejid, const char* const message, const char* const replace_id, prof_enc_t enc)
+log_database_add_outgoing_muc(const char * const id, const char * const barejid, const char * const message, const char *const replace_id, prof_enc_t enc)
 {
     _log_database_add_outgoing("muc", id, barejid, message, replace_id, enc);
 }
 
 void
-log_database_add_outgoing_muc_pm(const char* const id, const char* const barejid, const char* const message, const char* const replace_id, prof_enc_t enc)
+log_database_add_outgoing_muc_pm(const char * const id, const char * const barejid, const char * const message, const char *const replace_id, prof_enc_t enc)
 {
     _log_database_add_outgoing("mucpm", id, barejid, message, replace_id, enc);
 }
 
 GSList*
-log_database_get_previous_chat(const gchar* const contact_barejid)
+log_database_get_previous_chat(const gchar *const contact_barejid)
 {
-    sqlite3_stmt* stmt = NULL;
-    char* query;
-    const char* jid = connection_get_fulljid();
-    Jid* myjid = jid_create(jid);
+	sqlite3_stmt *stmt = NULL;
+    char *query;
+    const char *jid = connection_get_fulljid();
+    Jid *myjid = jid_create(jid);
 
     if (asprintf(&query, "SELECT * FROM (SELECT `message`, `timestamp`, `from_jid`, `type` from `ChatLogs` WHERE (`from_jid` = '%s' AND `to_jid` = '%s') OR (`from_jid` = '%s' AND `to_jid` = '%s') ORDER BY `timestamp` DESC LIMIT 10) ORDER BY `timestamp` ASC;", contact_barejid, myjid->barejid, myjid->barejid, contact_barejid) == -1) {
         log_error("log_database_get_previous_chat(): SQL query. could not allocate memory");
@@ -224,22 +224,22 @@ log_database_get_previous_chat(const gchar* const contact_barejid)
 
     jid_destroy(myjid);
 
-    int rc = sqlite3_prepare_v2(g_chatlog_database, query, -1, &stmt, NULL);
-    if (rc != SQLITE_OK) {
+	int rc = sqlite3_prepare_v2(g_chatlog_database, query, -1, &stmt, NULL);
+	if( rc!=SQLITE_OK ) {
         log_error("log_database_get_previous_chat(): unknown SQLite error");
         return NULL;
     }
 
-    GSList* history = NULL;
+    GSList *history = NULL;
 
-    while (sqlite3_step(stmt) == SQLITE_ROW) {
+	while( sqlite3_step(stmt) == SQLITE_ROW ) {
         // TODO: also save to jid. since now part of profmessage
-        char* message = (char*)sqlite3_column_text(stmt, 0);
-        char* date = (char*)sqlite3_column_text(stmt, 1);
-        char* from = (char*)sqlite3_column_text(stmt, 2);
-        char* type = (char*)sqlite3_column_text(stmt, 3);
+		char *message = (char*)sqlite3_column_text(stmt, 0);
+		char *date = (char*)sqlite3_column_text(stmt, 1);
+		char *from = (char*)sqlite3_column_text(stmt, 2);
+		char *type = (char*)sqlite3_column_text(stmt, 3);
 
-        ProfMessage* msg = message_init();
+        ProfMessage *msg = message_init();
         msg->from_jid = jid_create(from);
         msg->plain = strdup(message);
         msg->timestamp = g_date_time_new_from_iso8601(date, NULL);
@@ -247,16 +247,14 @@ log_database_get_previous_chat(const gchar* const contact_barejid)
         // TODO: later we can get more fields like 'enc'. then we can display the history like regular chats with all info the user enabled.
 
         history = g_slist_append(history, msg);
-    }
-    sqlite3_finalize(stmt);
+	}
+	sqlite3_finalize(stmt);
     free(query);
 
     return history;
 }
 
-static const char*
-_get_message_type_str(prof_msg_type_t type)
-{
+static const char* _get_message_type_str(prof_msg_type_t type) {
     switch (type) {
     case PROF_MSG_TYPE_CHAT:
         return "chat";
@@ -270,9 +268,7 @@ _get_message_type_str(prof_msg_type_t type)
     return NULL;
 }
 
-static prof_msg_type_t
-_get_message_type_type(const char* const type)
-{
+static prof_msg_type_t _get_message_type_type(const char *const type) {
     if (g_strcmp0(type, "chat") == 0) {
         return PROF_MSG_TYPE_CHAT;
     } else if (g_strcmp0(type, "muc") == 0) {
@@ -284,9 +280,7 @@ _get_message_type_type(const char* const type)
     }
 }
 
-static const char*
-_get_message_enc_str(prof_enc_t enc)
-{
+static const char* _get_message_enc_str(prof_enc_t enc) {
     switch (enc) {
     case PROF_MSG_ENC_OX:
         return "ox";
@@ -304,56 +298,55 @@ _get_message_enc_str(prof_enc_t enc)
 }
 
 static void
-_add_to_db(ProfMessage* message, char* type, const Jid* const from_jid, const Jid* const to_jid)
+_add_to_db(ProfMessage *message, char *type, const Jid * const from_jid, const Jid * const to_jid)
 {
     if (!g_chatlog_database) {
         log_debug("log_database_add() called but db is not initialized");
         return;
     }
 
-    char* err_msg;
-    char* query;
-    gchar* date_fmt;
+    char *err_msg;
+    char *query;
+    gchar *date_fmt;
 
     if (message->timestamp) {
         // g_date_time_format_iso8601() is only availble from glib 2.62 on.
         // To still support Debian buster lets use g_date_time_format() for now.
         //date_fmt = g_date_time_format_iso8601(message->timestamp);
-        date_fmt = g_date_time_format(message->timestamp, "%FT%T%:::z");
+        date_fmt = g_date_time_format(message->timestamp,"%FT%T%:::z");
     } else {
         // g_date_time_format_iso8601() is only availble from glib 2.62 on.
         // To still support Debian buster lets use g_date_time_format() for now.
         //date_fmt = g_date_time_format_iso8601(g_date_time_new_now_local());
-        date_fmt = g_date_time_format(g_date_time_new_now_local(), "%FT%T%:::z");
+        date_fmt = g_date_time_format(g_date_time_new_now_local(), "%FT%T%:::z" );
     }
 
-    const char* enc = _get_message_enc_str(message->enc);
+    const char *enc = _get_message_enc_str(message->enc);
 
     if (!type) {
         type = (char*)_get_message_type_str(message->type);
     }
 
-    char* escaped_message = str_replace(message->plain, "'", "''");
+    char *escaped_message = str_replace(message->plain, "'", "''");
 
     if (asprintf(&query, "INSERT INTO `ChatLogs` (`from_jid`, `from_resource`, `to_jid`, `to_resource`, `message`, `timestamp`, `stanza_id`, `replace_id`, `type`, `encryption`) VALUES ('%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s')",
-                 from_jid->barejid,
-                 from_jid->resourcepart ? from_jid->resourcepart : "",
-                 to_jid->barejid,
-                 to_jid->resourcepart ? to_jid->resourcepart : "",
-                 escaped_message,
-                 date_fmt,
-                 message->id ? message->id : "",
-                 message->replace_id ? message->replace_id : "",
-                 type,
-                 enc)
-        == -1) {
+                from_jid->barejid,
+                from_jid->resourcepart ? from_jid->resourcepart : "",
+                to_jid->barejid,
+                to_jid->resourcepart ? to_jid->resourcepart : "",
+                escaped_message,
+                date_fmt,
+                message->id ? message->id : "",
+                message->replace_id ? message->replace_id : "",
+                type,
+                enc) == -1) {
         log_error("log_database_add(): SQL query. could not allocate memory");
         return;
     }
     free(escaped_message);
     g_free(date_fmt);
 
-    if (SQLITE_OK != sqlite3_exec(g_chatlog_database, query, NULL, 0, &err_msg)) {
+    if( SQLITE_OK != sqlite3_exec(g_chatlog_database, query, NULL, 0, &err_msg)) {
         if (err_msg) {
             log_error("SQLite error: %s", err_msg);
             sqlite3_free(err_msg);

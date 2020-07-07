@@ -45,23 +45,24 @@
 #define notify_notification_new(summary, body, icon) notify_notification_new(summary, body, icon, NULL)
 #endif
 
-#define ARRAY_SIZE(x) (sizeof(x) / sizeof(x[0]))
+#define ARRAY_SIZE(x) (sizeof(x)/sizeof(x[0]))
 
 // assume malloc stores at most 8 bytes for size of allocated memory
 // and page size is at least 4KB
 #define READ_BUF_SIZE 4088
 
+
 #define FREE_SET_NULL(resource) \
-    do {                        \
-        free(resource);         \
-        resource = NULL;        \
-    } while (0)
+do { \
+    free(resource); \
+    resource = NULL; \
+} while (0)
 
 #define GFREE_SET_NULL(resource) \
-    do {                         \
-        g_free(resource);        \
-        resource = NULL;         \
-    } while (0)
+do { \
+    g_free(resource); \
+    resource = NULL; \
+} while (0)
 
 typedef enum {
     CONTACT_OFFLINE,
@@ -80,31 +81,31 @@ typedef enum {
     RESOURCE_XA
 } resource_presence_t;
 
-gboolean create_dir(char* name);
-gboolean mkdir_recursive(const char* dir);
-gboolean copy_file(const char* const src, const char* const target, const gboolean overwrite_existing);
-char* str_replace(const char* string, const char* substr, const char* replacement);
+gboolean create_dir(char *name);
+gboolean mkdir_recursive(const char *dir);
+gboolean copy_file(const char *const src, const char *const target, const gboolean overwrite_existing);
+char* str_replace(const char *string, const char *substr, const char *replacement);
 int str_contains(const char str[], int size, char ch);
-gboolean strtoi_range(char* str, int* saveptr, int min, int max, char** err_msg);
-int utf8_display_len(const char* const str);
+gboolean strtoi_range(char *str, int *saveptr, int min, int max, char **err_msg);
+int utf8_display_len(const char *const str);
 
 char* release_get_latest(void);
-gboolean release_is_new(char* found_version);
+gboolean release_is_new(char *found_version);
 
-char* get_file_or_linked(char* loc, char* basedir);
-char* strip_arg_quotes(const char* const input);
+char* get_file_or_linked(char *loc, char *basedir);
+char* strip_arg_quotes(const char *const input);
 gboolean is_notify_enabled(void);
 
-GSList* prof_occurrences(const char* const needle, const char* const haystack, int offset, gboolean whole_word,
-                         GSList** result);
-GSList* get_mentions(gboolean whole_word, gboolean case_sensitive, const char* const message, const char* const nick);
+GSList* prof_occurrences(const char *const needle, const char *const haystack, int offset, gboolean whole_word,
+    GSList **result);
+GSList* get_mentions(gboolean whole_word, gboolean case_sensitive, const char *const message, const char *const nick);
 
-int is_regular_file(const char* path);
-int is_dir(const char* path);
-void get_file_paths_recursive(const char* directory, GSList** contents);
+int is_regular_file(const char *path);
+int is_dir(const char *path);
+void get_file_paths_recursive(const char *directory, GSList **contents);
 
 char* get_random_string(int length);
 
-gboolean call_external(gchar** argv, gchar*** const output_ptr, gchar*** const error_ptr);
+gboolean call_external(gchar **argv, gchar ***const output_ptr, gchar ***const error_ptr);
 
 #endif

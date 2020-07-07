@@ -38,13 +38,13 @@
 
 #include "xmpp/xmpp.h"
 
-typedef int (*ProfMessageCallback)(xmpp_stanza_t* const stanza, void* const userdata);
-typedef void (*ProfMessageFreeCallback)(void* userdata);
+typedef int(*ProfMessageCallback)(xmpp_stanza_t *const stanza, void *const userdata);
+typedef void(*ProfMessageFreeCallback)(void *userdata);
 
-ProfMessage* message_init(void);
-void message_free(ProfMessage* message);
+ProfMessage *message_init(void);
+void message_free(ProfMessage *message);
 void message_handlers_init(void);
 void message_handlers_clear(void);
-void message_pubsub_event_handler_add(const char* const node, ProfMessageCallback func, ProfMessageFreeCallback free_func, void* userdata);
+void message_pubsub_event_handler_add(const char *const node, ProfMessageCallback func, ProfMessageFreeCallback free_func, void *userdata);
 
 #endif

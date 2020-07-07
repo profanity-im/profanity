@@ -33,22 +33,23 @@
  *
  */
 
+
+#include <string.h>
+#include <stdlib.h>
 #include <assert.h>
 #include <glib.h>
-#include <stdlib.h>
-#include <string.h>
+#include <assert.h>
 
 #include "config/preferences.h"
 #include "tools/autocomplete.h"
+#include "xmpp/roster_list.h"
+#include "xmpp/resource.h"
 #include "xmpp/contact.h"
 #include "xmpp/jid.h"
-#include "xmpp/resource.h"
-#include "xmpp/roster_list.h"
 
-typedef struct prof_roster_t
-{
+typedef struct prof_roster_t {
     // contacts, indexed on barejid
-    GHashTable* contacts;
+    GHashTable *contacts;
 
     // nicknames
     Autocomplete name_ac;
@@ -60,28 +61,27 @@ typedef struct prof_roster_t
     Autocomplete fulljid_ac;
 
     // nickname to barejid map
-    GHashTable* name_to_barejid;
+    GHashTable *name_to_barejid;
 
     // groups
     Autocomplete groups_ac;
-    GHashTable* group_count;
+    GHashTable *group_count;
 } ProfRoster;
 
-typedef struct pending_presence
-{
-    char* barejid;
-    Resource* resource;
-    GDateTime* last_activity;
+typedef struct pending_presence {
+    char *barejid;
+    Resource *resource;
+    GDateTime *last_activity;
 } ProfPendingPresence;
 
-static ProfRoster* roster = NULL;
+static ProfRoster *roster = NULL;
 static gboolean roster_received = FALSE;
-static GSList* roster_pending_presence = NULL;
+static GSList *roster_pending_presence = NULL;
 
-static gboolean _key_equals(void* key1, void* key2);
-static gboolean _datetimes_equal(GDateTime* dt1, GDateTime* dt2);
-static void _replace_name(const char* const current_name, const char* const new_name, const char* const barejid);
-static void _add_name_and_barejid(const char* const name, const char* const barejid);
+static gboolean _key_equals(void *key1, void *key2);
+static gboolean _datetimes_equal(GDateTime *dt1, GDateTime *dt2);
+static void _replace_name(const char *const current_name, const char *const new_name, const char *const barejid);
+static void _add_name_and_barejid(const char *const name, const char *const barejid);
 
 void
 roster_create(void)
@@ -119,7 +119,7 @@ roster_destroy(void)
 }
 
 gboolean
-roster_update_presence(const char* const barejid, Resource* resource, GDateTime* last_activity)
+roster_update_presence(const char *const barejid, Resource *resource, GDateTime *last_activity)
 {
     assert(roster != NULL);
 
@@ -127,7 +127,7 @@ roster_update_presence(const char* const barejid, Resource* resource, GDateTime*
     assert(resource != NULL);
 
     if (!roster_received) {
-        ProfPendingPresence* presence = malloc(sizeof(ProfPendingPresence));
+        ProfPendingPresence *presence = malloc(sizeof(ProfPendingPresence));
         presence->barejid = strdup(barejid);
         presence->resource = resource;
         presence->last_activity = last_activity;
@@ -148,7 +148,7 @@ roster_update_presence(const char* const barejid, Resource* resource, GDateTime*
         p_contact_set_last_activity(contact, last_activity);
     }
     p_contact_set_presence(contact, resource);
-    Jid* jid = jid_create_from_bare_and_resource(barejid, resource->name);
+    Jid *jid = jid_create_from_bare_and_resource(barejid, resource->name);
     autocomplete_add(roster->fulljid_ac, jid->fulljid);
     jid_destroy(jid);
 
@@ -156,11 +156,11 @@ roster_update_presence(const char* const barejid, Resource* resource, GDateTime*
 }
 
 PContact
-roster_get_contact(const char* const barejid)
+roster_get_contact(const char *const barejid)
 {
     assert(roster != NULL);
 
-    gchar* barejidlower = g_utf8_strdown(barejid, -1);
+    gchar *barejidlower = g_utf8_strdown(barejid, -1);
     PContact contact = g_hash_table_lookup(roster->contacts, barejidlower);
     g_free(barejidlower);
 
@@ -168,11 +168,11 @@ roster_get_contact(const char* const barejid)
 }
 
 char*
-roster_get_msg_display_name(const char* const barejid, const char* const resource)
+roster_get_msg_display_name(const char *const barejid, const char *const resource)
 {
     assert(roster != NULL);
 
-    GString* result = g_string_new("");
+    GString *result = g_string_new("");
 
     PContact contact = roster_get_contact(barejid);
     if (contact) {
@@ -190,14 +190,14 @@ roster_get_msg_display_name(const char* const barejid, const char* const resourc
         g_string_append(result, resource);
     }
 
-    char* result_str = result->str;
+    char *result_str = result->str;
     g_string_free(result, FALSE);
 
     return result_str;
 }
 
 gboolean
-roster_contact_offline(const char* const barejid, const char* const resource, const char* const status)
+roster_contact_offline(const char *const barejid, const char *const resource, const char *const status)
 {
     assert(roster != NULL);
 
@@ -211,7 +211,7 @@ roster_contact_offline(const char* const barejid, const char* const resource, co
     } else {
         gboolean result = p_contact_remove_resource(contact, resource);
         if (result == TRUE) {
-            Jid* jid = jid_create_from_bare_and_resource(barejid, resource);
+            Jid *jid = jid_create_from_bare_and_resource(barejid, resource);
             autocomplete_remove(roster->fulljid_ac, jid->fulljid);
             jid_destroy(jid);
         }
@@ -232,13 +232,13 @@ roster_reset_search_attempts(void)
 }
 
 void
-roster_change_name(PContact contact, const char* const new_name)
+roster_change_name(PContact contact, const char *const new_name)
 {
     assert(roster != NULL);
     assert(contact != NULL);
 
-    char* current_name = NULL;
-    const char* barejid = p_contact_barejid(contact);
+    char *current_name = NULL;
+    const char *barejid = p_contact_barejid(contact);
 
     if (p_contact_name(contact)) {
         current_name = strdup(p_contact_name(contact));
@@ -250,7 +250,7 @@ roster_change_name(PContact contact, const char* const new_name)
 }
 
 void
-roster_remove(const char* const name, const char* const barejid)
+roster_remove(const char *const name, const char *const barejid)
 {
     assert(roster != NULL);
 
@@ -261,9 +261,9 @@ roster_remove(const char* const name, const char* const barejid)
     // remove each fulljid
     PContact contact = roster_get_contact(barejid);
     if (contact) {
-        GList* resources = p_contact_get_available_resources(contact);
+        GList *resources = p_contact_get_available_resources(contact);
         while (resources) {
-            GString* fulljid = g_string_new(barejid);
+            GString *fulljid = g_string_new(barejid);
             g_string_append(fulljid, "/");
             g_string_append(fulljid, resources->data);
             autocomplete_remove(roster->fulljid_ac, fulljid->str);
@@ -272,10 +272,10 @@ roster_remove(const char* const name, const char* const barejid)
         }
         g_list_free(resources);
 
-        GSList* groups = p_contact_groups(contact);
-        GSList* curr = groups;
+        GSList *groups = p_contact_groups(contact);
+        GSList *curr = groups;
         while (curr) {
-            gchar* group = curr->data;
+            gchar *group = curr->data;
             if (g_hash_table_contains(roster->group_count, group)) {
                 int count = GPOINTER_TO_INT(g_hash_table_lookup(roster->group_count, group));
                 count--;
@@ -295,8 +295,8 @@ roster_remove(const char* const name, const char* const barejid)
 }
 
 void
-roster_update(const char* const barejid, const char* const name, GSList* groups, const char* const subscription,
-              gboolean pending_out)
+roster_update(const char *const barejid, const char *const name, GSList *groups, const char *const subscription,
+    gboolean pending_out)
 {
     assert(roster != NULL);
 
@@ -308,9 +308,9 @@ roster_update(const char* const barejid, const char* const name, GSList* groups,
 
     roster_change_name(contact, name);
 
-    GSList* curr_new_group = groups;
+    GSList *curr_new_group = groups;
     while (curr_new_group) {
-        char* new_group = curr_new_group->data;
+        char *new_group = curr_new_group->data;
 
         // contact added to group
         if (!p_contact_in_group(contact, new_group)) {
@@ -320,7 +320,7 @@ roster_update(const char* const barejid, const char* const name, GSList* groups,
                 g_hash_table_insert(roster->group_count, strdup(new_group), GINT_TO_POINTER(1));
                 autocomplete_add(roster->groups_ac, curr_new_group->data);
 
-                // increment count
+            // increment count
             } else {
                 int count = GPOINTER_TO_INT(g_hash_table_lookup(roster->group_count, new_group));
                 g_hash_table_insert(roster->group_count, strdup(new_group), GINT_TO_POINTER(count + 1));
@@ -329,10 +329,10 @@ roster_update(const char* const barejid, const char* const name, GSList* groups,
         curr_new_group = g_slist_next(curr_new_group);
     }
 
-    GSList* old_groups = p_contact_groups(contact);
-    GSList* curr_old_group = old_groups;
+    GSList *old_groups = p_contact_groups(contact);
+    GSList *curr_old_group = old_groups;
     while (curr_old_group) {
-        char* old_group = curr_old_group->data;
+        char *old_group = curr_old_group->data;
         // removed from group
         if (!g_slist_find_custom(groups, old_group, (GCompareFunc)g_strcmp0)) {
             if (g_hash_table_contains(roster->group_count, old_group)) {
@@ -354,8 +354,8 @@ roster_update(const char* const barejid, const char* const name, GSList* groups,
 }
 
 gboolean
-roster_add(const char* const barejid, const char* const name, GSList* groups, const char* const subscription,
-           gboolean pending_out)
+roster_add(const char *const barejid, const char *const name, GSList *groups, const char *const subscription,
+    gboolean pending_out)
 {
     assert(roster != NULL);
 
@@ -367,9 +367,9 @@ roster_add(const char* const barejid, const char* const name, GSList* groups, co
     contact = p_contact_new(barejid, name, groups, subscription, NULL, pending_out);
 
     // add groups
-    GSList* curr_new_group = groups;
+    GSList *curr_new_group = groups;
     while (curr_new_group) {
-        char* new_group = curr_new_group->data;
+        char *new_group = curr_new_group->data;
         if (g_hash_table_contains(roster->group_count, new_group)) {
             int count = GPOINTER_TO_INT(g_hash_table_lookup(roster->group_count, new_group));
             g_hash_table_insert(roster->group_count, strdup(new_group), GINT_TO_POINTER(count + 1));
@@ -389,7 +389,7 @@ roster_add(const char* const barejid, const char* const name, GSList* groups, co
 }
 
 char*
-roster_barejid_from_name(const char* const name)
+roster_barejid_from_name(const char *const name)
 {
     assert(roster != NULL);
 
@@ -401,11 +401,11 @@ roster_barejid_from_name(const char* const name)
 }
 
 GSList*
-roster_get_contacts_by_presence(const char* const presence)
+roster_get_contacts_by_presence(const char *const presence)
 {
     assert(roster != NULL);
 
-    GSList* result = NULL;
+    GSList *result = NULL;
     GHashTableIter iter;
     gpointer key;
     gpointer value;
@@ -427,16 +427,16 @@ roster_get_contacts(roster_ord_t order)
 {
     assert(roster != NULL);
 
-    GSList* result = NULL;
+    GSList *result = NULL;
     GHashTableIter iter;
     gpointer key;
     gpointer value;
 
     GCompareFunc cmp_func;
     if (order == ROSTER_ORD_PRESENCE) {
-        cmp_func = (GCompareFunc)roster_compare_presence;
+        cmp_func = (GCompareFunc) roster_compare_presence;
     } else {
-        cmp_func = (GCompareFunc)roster_compare_name;
+        cmp_func = (GCompareFunc) roster_compare_name;
     }
 
     g_hash_table_iter_init(&iter, roster->contacts);
@@ -453,14 +453,14 @@ roster_get_contacts_online(void)
 {
     assert(roster != NULL);
 
-    GSList* result = NULL;
+    GSList *result = NULL;
     GHashTableIter iter;
     gpointer key;
     gpointer value;
 
     g_hash_table_iter_init(&iter, roster->contacts);
     while (g_hash_table_iter_next(&iter, &key, &value)) {
-        if (strcmp(p_contact_presence(value), "offline"))
+        if(strcmp(p_contact_presence(value), "offline"))
             result = g_slist_insert_sorted(result, value, (GCompareFunc)roster_compare_name);
     }
 
@@ -479,7 +479,7 @@ roster_has_pending_subscriptions(void)
 
     g_hash_table_iter_init(&iter, roster->contacts);
     while (g_hash_table_iter_next(&iter, &key, &value)) {
-        PContact contact = (PContact)value;
+        PContact contact = (PContact) value;
         if (p_contact_pending_out(contact)) {
             return TRUE;
         }
@@ -489,7 +489,7 @@ roster_has_pending_subscriptions(void)
 }
 
 char*
-roster_contact_autocomplete(const char* const search_str, gboolean previous, void* context)
+roster_contact_autocomplete(const char *const search_str, gboolean previous, void *context)
 {
     assert(roster != NULL);
 
@@ -497,7 +497,7 @@ roster_contact_autocomplete(const char* const search_str, gboolean previous, voi
 }
 
 char*
-roster_fulljid_autocomplete(const char* const search_str, gboolean previous, void* context)
+roster_fulljid_autocomplete(const char *const search_str, gboolean previous, void *context)
 {
     assert(roster != NULL);
 
@@ -505,25 +505,25 @@ roster_fulljid_autocomplete(const char* const search_str, gboolean previous, voi
 }
 
 GSList*
-roster_get_group(const char* const group, roster_ord_t order)
+roster_get_group(const char *const group, roster_ord_t order)
 {
     assert(roster != NULL);
 
-    GSList* result = NULL;
+    GSList *result = NULL;
     GHashTableIter iter;
     gpointer key;
     gpointer value;
 
     GCompareFunc cmp_func;
     if (order == ROSTER_ORD_PRESENCE) {
-        cmp_func = (GCompareFunc)roster_compare_presence;
+        cmp_func = (GCompareFunc) roster_compare_presence;
     } else {
-        cmp_func = (GCompareFunc)roster_compare_name;
+        cmp_func = (GCompareFunc) roster_compare_name;
     }
 
     g_hash_table_iter_init(&iter, roster->contacts);
     while (g_hash_table_iter_next(&iter, &key, &value)) {
-        GSList* groups = p_contact_groups(value);
+        GSList *groups = p_contact_groups(value);
         if (group == NULL) {
             if (groups == NULL) {
                 result = g_slist_insert_sorted(result, value, cmp_func);
@@ -552,7 +552,7 @@ roster_get_groups(void)
 }
 
 char*
-roster_group_autocomplete(const char* const search_str, gboolean previous, void* context)
+roster_group_autocomplete(const char *const search_str, gboolean previous, void *context)
 {
     assert(roster != NULL);
 
@@ -560,7 +560,7 @@ roster_group_autocomplete(const char* const search_str, gboolean previous, void*
 }
 
 char*
-roster_barejid_autocomplete(const char* const search_str, gboolean previous, void* context)
+roster_barejid_autocomplete(const char *const search_str, gboolean previous, void *context)
 {
     assert(roster != NULL);
 
@@ -568,16 +568,16 @@ roster_barejid_autocomplete(const char* const search_str, gboolean previous, voi
 }
 
 static gboolean
-_key_equals(void* key1, void* key2)
+_key_equals(void *key1, void *key2)
 {
-    gchar* str1 = (gchar*)key1;
-    gchar* str2 = (gchar*)key2;
+    gchar *str1 = (gchar *) key1;
+    gchar *str2 = (gchar *) key2;
 
     return (g_strcmp0(str1, str2) == 0);
 }
 
 static gboolean
-_datetimes_equal(GDateTime* dt1, GDateTime* dt2)
+_datetimes_equal(GDateTime *dt1, GDateTime *dt2)
 {
     if ((dt1 == NULL) && (dt2 == NULL)) {
         return TRUE;
@@ -591,7 +591,7 @@ _datetimes_equal(GDateTime* dt1, GDateTime* dt2)
 }
 
 static void
-_replace_name(const char* const current_name, const char* const new_name, const char* const barejid)
+_replace_name(const char *const current_name, const char *const new_name, const char *const barejid)
 {
     assert(roster != NULL);
 
@@ -600,7 +600,7 @@ _replace_name(const char* const current_name, const char* const new_name, const 
         autocomplete_remove(roster->name_ac, current_name);
         g_hash_table_remove(roster->name_to_barejid, current_name);
         _add_name_and_barejid(new_name, barejid);
-        // no current handle
+    // no current handle
     } else if (new_name) {
         autocomplete_remove(roster->name_ac, barejid);
         g_hash_table_remove(roster->name_to_barejid, barejid);
@@ -609,7 +609,7 @@ _replace_name(const char* const current_name, const char* const new_name, const 
 }
 
 static void
-_add_name_and_barejid(const char* const name, const char* const barejid)
+_add_name_and_barejid(const char *const name, const char *const barejid)
 {
     assert(roster != NULL);
 
@@ -625,8 +625,8 @@ _add_name_and_barejid(const char* const name, const char* const barejid)
 gint
 roster_compare_name(PContact a, PContact b)
 {
-    const char* utf8_str_a = NULL;
-    const char* utf8_str_b = NULL;
+    const char * utf8_str_a = NULL;
+    const char * utf8_str_b = NULL;
 
     if (p_contact_name_collate_key(a)) {
         utf8_str_a = p_contact_name_collate_key(a);
@@ -645,7 +645,7 @@ roster_compare_name(PContact a, PContact b)
 }
 
 static gint
-_get_presence_weight(const char* presence)
+_get_presence_weight(const char *presence)
 {
     if (g_strcmp0(presence, "chat") == 0) {
         return 0;
@@ -665,8 +665,8 @@ _get_presence_weight(const char* presence)
 gint
 roster_compare_presence(PContact a, PContact b)
 {
-    const char* presence_a = p_contact_presence(a);
-    const char* presence_b = p_contact_presence(b);
+    const char *presence_a = p_contact_presence(a);
+    const char *presence_b = p_contact_presence(b);
 
     // if presence different, order by presence
     if (g_strcmp0(presence_a, presence_b) != 0) {
@@ -678,14 +678,14 @@ roster_compare_presence(PContact a, PContact b)
             return 1;
         }
 
-        // otherwise order by name
+    // otherwise order by name
     } else {
         return roster_compare_name(a, b);
     }
 }
 
 static void
-_pendingPresence_free(ProfPendingPresence* presence)
+_pendingPresence_free(ProfPendingPresence *presence)
 {
     if (!presence)
         return;
@@ -698,9 +698,9 @@ roster_process_pending_presence(void)
 {
     roster_received = TRUE;
 
-    GSList* iter;
+    GSList *iter;
     for (iter = roster_pending_presence; iter != NULL; iter = iter->next) {
-        ProfPendingPresence* presence = iter->data;
+        ProfPendingPresence *presence = iter->data;
         roster_update_presence(presence->barejid, presence->resource, presence->last_activity);
         /* seems like resource isn't free on the calling side */
         if (presence->last_activity) {
@@ -713,8 +713,7 @@ roster_process_pending_presence(void)
 }
 
 gboolean
-roster_exists(void)
-{
+roster_exists(void) {
     if (roster != NULL) {
         return TRUE;
     }

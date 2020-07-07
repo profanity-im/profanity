@@ -36,8 +36,8 @@
 
 #include "config.h"
 
-#include <glib.h>
 #include <string.h>
+#include <glib.h>
 
 #ifdef HAVE_GIT_VERSION
 #include "gitversion.h"
@@ -55,26 +55,27 @@
 #include "plugins/python_plugins.h"
 #endif
 
-#include "command/cmd_defs.h"
-#include "common.h"
 #include "profanity.h"
+#include "common.h"
+#include "command/cmd_defs.h"
 
 static gboolean version = FALSE;
-static char* log = NULL;
-static char* log_file = NULL;
-static char* account_name = NULL;
-static char* config_file = NULL;
-static char* theme_name = NULL;
+static char *log = NULL;
+static char *log_file = NULL;
+static char *account_name = NULL;
+static char *config_file = NULL;
+static char *theme_name = NULL;
 
 int
-main(int argc, char** argv)
+main(int argc, char **argv)
 {
     if (argc == 2 && g_strcmp0(argv[1], "docgen") == 0 && g_strcmp0(PACKAGE_STATUS, "development") == 0) {
         command_docgen();
         return 0;
     }
 
-    static GOptionEntry entries[] = {
+    static GOptionEntry entries[] =
+    {
         { "version", 'v', 0, G_OPTION_ARG_NONE, &version, "Show version information", NULL },
         { "account", 'a', 0, G_OPTION_ARG_STRING, &account_name, "Auto connect to an account on startup" },
         { "log", 'l', 0, G_OPTION_ARG_STRING, &log, "Set logging levels, DEBUG, INFO, WARN (default), ERROR", "LEVEL" },
@@ -84,8 +85,8 @@ main(int argc, char** argv)
         { NULL }
     };
 
-    GError* error = NULL;
-    GOptionContext* context;
+    GError *error = NULL;
+    GOptionContext *context;
 
     context = g_option_context_new(NULL);
     g_option_context_add_main_entries(context, entries, NULL);
@@ -134,14 +135,14 @@ main(int argc, char** argv)
         }
 
 #ifdef HAVE_LIBOTR
-        char* otr_version = otr_libotr_version();
+        char *otr_version = otr_libotr_version();
         g_print("OTR support: Enabled (libotr %s)\n", otr_version);
 #else
         g_print("OTR support: Disabled\n");
 #endif
 
 #ifdef HAVE_LIBGPGME
-        const char* pgp_version = p_gpg_libver();
+        const char *pgp_version = p_gpg_libver();
         g_print("PGP support: Enabled (libgpgme %s)\n", pgp_version);
 #else
         g_print("PGP support: Disabled\n");
@@ -160,7 +161,7 @@ main(int argc, char** argv)
 #endif
 
 #ifdef HAVE_PYTHON
-        gchar* python_version = python_get_version_number();
+        gchar *python_version = python_get_version_number();
         g_print("Python plugins: Enabled (%s)\n", python_version);
         g_free(python_version);
 #else

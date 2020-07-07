@@ -33,25 +33,24 @@
  *
  */
 
-#include <glib.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <glib.h>
 
 #include "common.h"
 #include "tools/autocomplete.h"
 #include "tools/parser.h"
 #include "ui/ui.h"
 
-struct autocomplete_t
-{
-    GList* items;
-    GList* last_found;
-    gchar* search_str;
+struct autocomplete_t {
+    GList *items;
+    GList *last_found;
+    gchar *search_str;
 };
 
-static gchar* _search_next(Autocomplete ac, GList* curr, gboolean quote);
-static gchar* _search_prev(Autocomplete ac, GList* curr, gboolean quote);
+static gchar* _search_next(Autocomplete ac, GList *curr, gboolean quote);
+static gchar* _search_prev(Autocomplete ac, GList *curr, gboolean quote);
 
 Autocomplete
 autocomplete_new(void)
@@ -106,10 +105,10 @@ autocomplete_length(Autocomplete ac)
 }
 
 void
-autocomplete_update(Autocomplete ac, char** items)
+autocomplete_update(Autocomplete ac, char **items)
 {
-    gchar* last_found = NULL;
-    gchar* search_str = NULL;
+    gchar *last_found = NULL;
+    gchar *search_str = NULL;
 
     if (ac->last_found) {
         last_found = strdup(ac->last_found->data);
@@ -135,11 +134,11 @@ autocomplete_update(Autocomplete ac, char** items)
 }
 
 void
-autocomplete_add_reverse(Autocomplete ac, const char* item)
+autocomplete_add_reverse(Autocomplete ac, const char *item)
 {
     if (ac) {
-        char* item_cpy;
-        GList* curr = g_list_find_custom(ac->items, item, (GCompareFunc)strcmp);
+        char *item_cpy;
+        GList *curr = g_list_find_custom(ac->items, item, (GCompareFunc)strcmp);
 
         // if item already exists
         if (curr) {
@@ -152,11 +151,11 @@ autocomplete_add_reverse(Autocomplete ac, const char* item)
 }
 
 void
-autocomplete_add(Autocomplete ac, const char* item)
+autocomplete_add(Autocomplete ac, const char *item)
 {
     if (ac) {
-        char* item_cpy;
-        GList* curr = g_list_find_custom(ac->items, item, (GCompareFunc)strcmp);
+        char *item_cpy;
+        GList *curr = g_list_find_custom(ac->items, item, (GCompareFunc)strcmp);
 
         // if item already exists
         if (curr) {
@@ -169,7 +168,7 @@ autocomplete_add(Autocomplete ac, const char* item)
 }
 
 void
-autocomplete_add_all(Autocomplete ac, char** items)
+autocomplete_add_all(Autocomplete ac, char **items)
 {
     int i = 0;
     for (i = 0; i < g_strv_length(items); i++) {
@@ -178,10 +177,10 @@ autocomplete_add_all(Autocomplete ac, char** items)
 }
 
 void
-autocomplete_remove(Autocomplete ac, const char* const item)
+autocomplete_remove(Autocomplete ac, const char *const item)
 {
     if (ac) {
-        GList* curr = g_list_find_custom(ac->items, item, (GCompareFunc)strcmp);
+        GList *curr = g_list_find_custom(ac->items, item, (GCompareFunc)strcmp);
 
         if (!curr) {
             return;
@@ -200,7 +199,7 @@ autocomplete_remove(Autocomplete ac, const char* const item)
 }
 
 void
-autocomplete_remove_all(Autocomplete ac, char** items)
+autocomplete_remove_all(Autocomplete ac, char **items)
 {
     int i = 0;
     for (i = 0; i < g_strv_length(items); i++) {
@@ -211,10 +210,10 @@ autocomplete_remove_all(Autocomplete ac, char** items)
 GList*
 autocomplete_create_list(Autocomplete ac)
 {
-    GList* copy = NULL;
-    GList* curr = ac->items;
+    GList *copy = NULL;
+    GList *curr = ac->items;
 
-    while (curr) {
+    while(curr) {
         copy = g_list_append(copy, strdup(curr->data));
         curr = g_list_next(curr);
     }
@@ -223,11 +222,11 @@ autocomplete_create_list(Autocomplete ac)
 }
 
 gboolean
-autocomplete_contains(Autocomplete ac, const char* value)
+autocomplete_contains(Autocomplete ac, const char *value)
 {
-    GList* curr = ac->items;
+    GList *curr = ac->items;
 
-    while (curr) {
+    while(curr) {
         if (strcmp(curr->data, value) == 0) {
             return TRUE;
         }
@@ -238,9 +237,9 @@ autocomplete_contains(Autocomplete ac, const char* value)
 }
 
 gchar*
-autocomplete_complete(Autocomplete ac, const gchar* search_str, gboolean quote, gboolean previous)
+autocomplete_complete(Autocomplete ac, const gchar *search_str, gboolean quote, gboolean previous)
 {
-    gchar* found = NULL;
+    gchar *found = NULL;
 
     // no autocomplete to search
     if (!ac) {
@@ -263,7 +262,7 @@ autocomplete_complete(Autocomplete ac, const gchar* search_str, gboolean quote, 
 
         return found;
 
-        // subsequent search attempt
+    // subsequent search attempt
     } else {
         if (previous) {
             // search from here-1 to beginning
@@ -301,10 +300,10 @@ autocomplete_complete(Autocomplete ac, const gchar* search_str, gboolean quote, 
 }
 
 char*
-autocomplete_param_with_func(const char* const input, char* command, autocomplete_func func, gboolean previous, void* context)
+autocomplete_param_with_func(const char *const input, char *command, autocomplete_func func, gboolean previous, void *context)
 {
-    GString* auto_msg = NULL;
-    char* result = NULL;
+    GString *auto_msg = NULL;
+    char *result = NULL;
     char command_cpy[strlen(command) + 2];
     sprintf(command_cpy, "%s ", command);
     int len = strlen(command_cpy);
@@ -313,12 +312,12 @@ autocomplete_param_with_func(const char* const input, char* command, autocomplet
         int i;
         int inp_len = strlen(input);
         char prefix[inp_len];
-        for (i = len; i < inp_len; i++) {
-            prefix[i - len] = input[i];
+        for(i = len; i < inp_len; i++) {
+            prefix[i-len] = input[i];
         }
         prefix[inp_len - len] = '\0';
 
-        char* found = func(prefix, previous, context);
+        char *found = func(prefix, previous, context);
         if (found) {
             auto_msg = g_string_new(command_cpy);
             g_string_append(auto_msg, found);
@@ -332,23 +331,23 @@ autocomplete_param_with_func(const char* const input, char* command, autocomplet
 }
 
 char*
-autocomplete_param_with_ac(const char* const input, char* command, Autocomplete ac, gboolean quote, gboolean previous)
+autocomplete_param_with_ac(const char *const input, char *command, Autocomplete ac, gboolean quote, gboolean previous)
 {
-    GString* auto_msg = NULL;
-    char* result = NULL;
-    char* command_cpy = malloc(strlen(command) + 2);
+    GString *auto_msg = NULL;
+    char *result = NULL;
+    char *command_cpy = malloc(strlen(command) + 2);
     sprintf(command_cpy, "%s ", command);
     int len = strlen(command_cpy);
     int inp_len = strlen(input);
     if (strncmp(input, command_cpy, len) == 0) {
         int i;
         char prefix[inp_len];
-        for (i = len; i < inp_len; i++) {
-            prefix[i - len] = input[i];
+        for(i = len; i < inp_len; i++) {
+            prefix[i-len] = input[i];
         }
         prefix[inp_len - len] = '\0';
 
-        char* found = autocomplete_complete(ac, prefix, quote, previous);
+        char *found = autocomplete_complete(ac, prefix, quote, previous);
         if (found) {
             auto_msg = g_string_new(command_cpy);
             g_string_append(auto_msg, found);
@@ -363,22 +362,22 @@ autocomplete_param_with_ac(const char* const input, char* command, Autocomplete 
 }
 
 char*
-autocomplete_param_no_with_func(const char* const input, char* command, int arg_number, autocomplete_func func, gboolean previous, void* context)
+autocomplete_param_no_with_func(const char *const input, char *command, int arg_number, autocomplete_func func, gboolean previous, void *context)
 {
     if (strncmp(input, command, strlen(command)) == 0) {
-        GString* result_str = NULL;
+        GString *result_str = NULL;
 
         // count tokens properly
         int num_tokens = count_tokens(input);
 
         // if correct number of tokens, then candidate for autocompletion of last param
         if (num_tokens == arg_number) {
-            gchar* start_str = get_start(input, arg_number);
-            gchar* comp_str = g_strdup(&input[strlen(start_str)]);
+            gchar *start_str = get_start(input, arg_number);
+            gchar *comp_str = g_strdup(&input[strlen(start_str)]);
 
             // autocomplete param
             if (comp_str) {
-                char* found = func(comp_str, previous, context);
+                char *found = func(comp_str, previous, context);
                 if (found) {
                     result_str = g_string_new("");
                     g_string_append(result_str, start_str);
@@ -387,7 +386,7 @@ autocomplete_param_no_with_func(const char* const input, char* command, int arg_
                     free(start_str);
                     free(comp_str);
 
-                    char* result = result_str->str;
+                    char *result = result_str->str;
                     g_string_free(result_str, FALSE);
 
                     return result;
@@ -406,7 +405,7 @@ void
 autocomplete_remove_older_than_max_reverse(Autocomplete ac, int maxsize)
 {
     if (autocomplete_length(ac) > maxsize) {
-        GList* last = g_list_last(ac->items);
+        GList *last = g_list_last(ac->items);
         if (last) {
             free(last->data);
             ac->items = g_list_delete_link(ac->items, last);
@@ -415,15 +414,15 @@ autocomplete_remove_older_than_max_reverse(Autocomplete ac, int maxsize)
 }
 
 static gchar*
-_search_next(Autocomplete ac, GList* curr, gboolean quote)
+_search_next(Autocomplete ac, GList *curr, gboolean quote)
 {
-    gchar* search_str_ascii = g_str_to_ascii(ac->search_str, NULL);
-    gchar* search_str_lower = g_ascii_strdown(search_str_ascii, -1);
+    gchar *search_str_ascii = g_str_to_ascii(ac->search_str, NULL);
+    gchar *search_str_lower = g_ascii_strdown(search_str_ascii, -1);
     g_free(search_str_ascii);
 
-    while (curr) {
-        gchar* curr_ascii = g_str_to_ascii(curr->data, NULL);
-        gchar* curr_lower = g_ascii_strdown(curr_ascii, -1);
+    while(curr) {
+        gchar *curr_ascii = g_str_to_ascii(curr->data, NULL);
+        gchar *curr_lower = g_ascii_strdown(curr_ascii, -1);
         g_free(curr_ascii);
 
         // match found
@@ -434,18 +433,18 @@ _search_next(Autocomplete ac, GList* curr, gboolean quote)
 
             // if contains space, quote before returning
             if (quote && g_strrstr(curr->data, " ")) {
-                GString* quoted = g_string_new("\"");
+                GString *quoted = g_string_new("\"");
                 g_string_append(quoted, curr->data);
                 g_string_append(quoted, "\"");
 
-                gchar* result = quoted->str;
+                gchar *result = quoted->str;
                 g_string_free(quoted, FALSE);
 
                 g_free(search_str_lower);
                 g_free(curr_lower);
                 return result;
 
-                // otherwise just return the string
+            // otherwise just return the string
             } else {
                 g_free(search_str_lower);
                 g_free(curr_lower);
@@ -462,15 +461,15 @@ _search_next(Autocomplete ac, GList* curr, gboolean quote)
 }
 
 static gchar*
-_search_prev(Autocomplete ac, GList* curr, gboolean quote)
+_search_prev(Autocomplete ac, GList *curr, gboolean quote)
 {
-    gchar* search_str_ascii = g_str_to_ascii(ac->search_str, NULL);
-    gchar* search_str_lower = g_ascii_strdown(search_str_ascii, -1);
+    gchar *search_str_ascii = g_str_to_ascii(ac->search_str, NULL);
+    gchar *search_str_lower = g_ascii_strdown(search_str_ascii, -1);
     g_free(search_str_ascii);
 
-    while (curr) {
-        gchar* curr_ascii = g_str_to_ascii(curr->data, NULL);
-        gchar* curr_lower = g_ascii_strdown(curr_ascii, -1);
+    while(curr) {
+        gchar *curr_ascii = g_str_to_ascii(curr->data, NULL);
+        gchar *curr_lower = g_ascii_strdown(curr_ascii, -1);
         g_free(curr_ascii);
 
         // match found
@@ -481,18 +480,18 @@ _search_prev(Autocomplete ac, GList* curr, gboolean quote)
 
             // if contains space, quote before returning
             if (quote && g_strrstr(curr->data, " ")) {
-                GString* quoted = g_string_new("\"");
+                GString *quoted = g_string_new("\"");
                 g_string_append(quoted, curr->data);
                 g_string_append(quoted, "\"");
 
-                gchar* result = quoted->str;
+                gchar *result = quoted->str;
                 g_string_free(quoted, FALSE);
 
                 g_free(search_str_lower);
                 g_free(curr_lower);
                 return result;
 
-                // otherwise just return the string
+            // otherwise just return the string
             } else {
                 g_free(search_str_lower);
                 g_free(curr_lower);

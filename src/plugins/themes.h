@@ -38,6 +38,6 @@
 
 void plugin_themes_init(void);
 void plugin_themes_close(void);
-theme_item_t plugin_themes_get(const char* const group, const char* const key, const char* const def);
+theme_item_t plugin_themes_get(const char *const group, const char *const key, const char *const def);
 
 #endif

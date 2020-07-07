@@ -1,16 +1,16 @@
-#include <cmocka.h>
-#include <setjmp.h>
 #include <stdarg.h>
 #include <stddef.h>
+#include <setjmp.h>
+#include <cmocka.h>
 #include <stdlib.h>
 
 #include "plugins/disco.h"
 
 void
-returns_empty_list_when_none(void** state)
+returns_empty_list_when_none(void **state)
 {
     disco_close();
-    GList* features = disco_get_features();
+    GList *features = disco_get_features();
 
     assert_int_equal(g_list_length(features), 0);
 
@@ -19,14 +19,14 @@ returns_empty_list_when_none(void** state)
 }
 
 void
-returns_added_feature(void** state)
+returns_added_feature(void **state)
 {
     disco_close();
     disco_add_feature("my_plugin", "some:feature:example");
 
-    GList* features = disco_get_features();
+    GList *features = disco_get_features();
     assert_int_equal(g_list_length(features), 1);
-    char* feature = features->data;
+    char *feature = features->data;
     assert_string_equal(feature, "some:feature:example");
 
     g_list_free(features);
@@ -34,12 +34,12 @@ returns_added_feature(void** state)
 }
 
 void
-resets_features_on_close(void** state)
+resets_features_on_close(void **state)
 {
     disco_close();
     disco_add_feature("my_plugin", "some:feature:example");
 
-    GList* features = disco_get_features();
+    GList *features = disco_get_features();
     assert_int_equal(g_list_length(features), 1);
     g_list_free(features);
 
@@ -52,7 +52,7 @@ resets_features_on_close(void** state)
 }
 
 void
-returns_all_added_features(void** state)
+returns_all_added_features(void **state)
 {
     disco_close();
     disco_add_feature("first_plugin", "first:feature");
@@ -61,7 +61,7 @@ returns_all_added_features(void** state)
     disco_add_feature("third_plugin", "fourth:feature");
     disco_add_feature("third_plugin", "fifth:feature");
 
-    GList* features = disco_get_features();
+    GList *features = disco_get_features();
 
     assert_int_equal(g_list_length(features), 5);
     assert_true(g_list_find_custom(features, "first:feature", (GCompareFunc)g_strcmp0));
@@ -75,13 +75,13 @@ returns_all_added_features(void** state)
 }
 
 void
-does_not_add_duplicate_feature(void** state)
+does_not_add_duplicate_feature(void **state)
 {
     disco_close();
     disco_add_feature("my_plugin", "my:feature");
     disco_add_feature("some_other_plugin", "my:feature");
 
-    GList* features = disco_get_features();
+    GList *features = disco_get_features();
     assert_int_equal(g_list_length(features), 1);
 
     g_list_free(features);
@@ -89,14 +89,14 @@ does_not_add_duplicate_feature(void** state)
 }
 
 void
-removes_plugin_features(void** state)
+removes_plugin_features(void **state)
 {
     disco_close();
     disco_add_feature("plugin1", "plugin1:feature1");
     disco_add_feature("plugin1", "plugin1:feature2");
     disco_add_feature("plugin2", "plugin2:feature1");
 
-    GList* features = disco_get_features();
+    GList *features = disco_get_features();
     assert_int_equal(g_list_length(features), 3);
     g_list_free(features);
 
@@ -110,14 +110,14 @@ removes_plugin_features(void** state)
 }
 
 void
-does_not_remove_feature_when_more_than_one_reference(void** state)
+does_not_remove_feature_when_more_than_one_reference(void **state)
 {
     disco_close();
     disco_add_feature("plugin1", "feature1");
     disco_add_feature("plugin1", "feature2");
     disco_add_feature("plugin2", "feature1");
 
-    GList* features = disco_get_features();
+    GList *features = disco_get_features();
     assert_int_equal(g_list_length(features), 2);
     g_list_free(features);
 

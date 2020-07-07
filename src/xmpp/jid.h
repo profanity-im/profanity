@@ -38,27 +38,26 @@
 
 #include <glib.h>
 
-struct jid_t
-{
-    char* str;
-    char* localpart;
-    char* domainpart;
-    char* resourcepart;
-    char* barejid;
-    char* fulljid;
+struct jid_t {
+    char *str;
+    char *localpart;
+    char *domainpart;
+    char *resourcepart;
+    char *barejid;
+    char *fulljid;
 };
 
 typedef struct jid_t Jid;
 
-Jid* jid_create(const gchar* const str);
-Jid* jid_create_from_bare_and_resource(const char* const barejid, const char* const resource);
-void jid_destroy(Jid* jid);
+Jid* jid_create(const gchar *const str);
+Jid* jid_create_from_bare_and_resource(const char *const barejid, const char *const resource);
+void jid_destroy(Jid *jid);
 
-gboolean jid_is_valid_room_form(Jid* jid);
-char* create_fulljid(const char* const barejid, const char* const resource);
-char* get_nick_from_full_jid(const char* const full_room_jid);
+gboolean jid_is_valid_room_form(Jid *jid);
+char* create_fulljid(const char *const barejid, const char *const resource);
+char* get_nick_from_full_jid(const char *const full_room_jid);
 
-char* jid_fulljid_or_barejid(Jid* jid);
+char* jid_fulljid_or_barejid(Jid *jid);
 char* jid_random_resource(void);
 
 #endif

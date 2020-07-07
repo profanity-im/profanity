@@ -33,37 +33,37 @@
  *
  */
 
-#include <gio/gio.h>
-#include <stdlib.h>
 #include <string.h>
+#include <stdlib.h>
+#include <gio/gio.h>
 
-#include "common.h"
+#include "log.h"
 #include "config.h"
+#include "common.h"
 #include "config/files.h"
 #include "config/preferences.h"
 #include "event/client_events.h"
-#include "log.h"
-#include "plugins/api.h"
-#include "plugins/autocompleters.h"
 #include "plugins/callbacks.h"
-#include "plugins/disco.h"
+#include "plugins/autocompleters.h"
+#include "plugins/api.h"
 #include "plugins/plugins.h"
-#include "plugins/settings.h"
 #include "plugins/themes.h"
+#include "plugins/settings.h"
+#include "plugins/disco.h"
 #include "ui/ui.h"
 #include "xmpp/xmpp.h"
 
 #ifdef HAVE_PYTHON
-#include "plugins/python_api.h"
 #include "plugins/python_plugins.h"
+#include "plugins/python_api.h"
 #endif
 
 #ifdef HAVE_C
-#include "plugins/c_api.h"
 #include "plugins/c_plugins.h"
+#include "plugins/c_api.h"
 #endif
 
-static GHashTable* plugins;
+static GHashTable *plugins;
 
 void
 plugins_init(void)
@@ -82,15 +82,16 @@ plugins_init(void)
 #endif
 
     // load plugins
-    gchar** plugins_pref = prefs_get_plugins();
+    gchar **plugins_pref = prefs_get_plugins();
     if (plugins_pref) {
         int i;
-        for (i = 0; i < g_strv_length(plugins_pref); i++) {
+        for (i = 0; i < g_strv_length(plugins_pref); i++)
+        {
             gboolean loaded = FALSE;
-            gchar* filename = plugins_pref[i];
+            gchar *filename = plugins_pref[i];
 #ifdef HAVE_PYTHON
             if (g_str_has_suffix(filename, ".py")) {
-                ProfPlugin* plugin = python_plugin_create(filename);
+                ProfPlugin *plugin = python_plugin_create(filename);
                 if (plugin) {
                     g_hash_table_insert(plugins, strdup(filename), plugin);
                     loaded = TRUE;
@@ -99,7 +100,7 @@ plugins_init(void)
 #endif
 #ifdef HAVE_C
             if (g_str_has_suffix(filename, ".so")) {
-                ProfPlugin* plugin = c_plugin_create(filename);
+                ProfPlugin *plugin = c_plugin_create(filename);
                 if (plugin) {
                     g_hash_table_insert(plugins, strdup(filename), plugin);
                     loaded = TRUE;
@@ -114,14 +115,15 @@ plugins_init(void)
         }
 
         // initialise plugins
-        GList* values = g_hash_table_get_values(plugins);
-        GList* curr = values;
+        GList *values = g_hash_table_get_values(plugins);
+        GList *curr = values;
         while (curr) {
-            ProfPlugin* plugin = curr->data;
+            ProfPlugin *plugin = curr->data;
             plugin->init_func(plugin, PACKAGE_VERSION, PACKAGE_STATUS, NULL, NULL);
             curr = g_list_next(curr);
         }
         g_list_free(values);
+
     }
 
     prefs_free_plugins(plugins_pref);
@@ -130,7 +132,7 @@ plugins_init(void)
 }
 
 void
-plugins_free_install_result(PluginsInstallResult* result)
+plugins_free_install_result(PluginsInstallResult *result)
 {
     if (!result) {
         return;
@@ -140,20 +142,20 @@ plugins_free_install_result(PluginsInstallResult* result)
 }
 
 PluginsInstallResult*
-plugins_install_all(const char* const path)
+plugins_install_all(const char *const path)
 {
-    PluginsInstallResult* result = malloc(sizeof(PluginsInstallResult));
+    PluginsInstallResult *result = malloc(sizeof(PluginsInstallResult));
     result->installed = NULL;
     result->failed = NULL;
-    GSList* contents = NULL;
+    GSList *contents = NULL;
     get_file_paths_recursive(path, &contents);
 
-    GSList* curr = contents;
-    GString* error_message = NULL;
+    GSList *curr = contents;
+    GString *error_message = NULL;
     while (curr) {
         error_message = g_string_new(NULL);
         if (g_str_has_suffix(curr->data, ".py") || g_str_has_suffix(curr->data, ".so")) {
-            gchar* plugin_name = g_path_get_basename(curr->data);
+            gchar *plugin_name = g_path_get_basename(curr->data);
             if (plugins_install(plugin_name, curr->data, error_message)) {
                 result->installed = g_slist_append(result->installed, strdup(curr->data));
             } else {
@@ -170,16 +172,16 @@ plugins_install_all(const char* const path)
 }
 
 gboolean
-plugins_uninstall(const char* const plugin_name)
+plugins_uninstall(const char *const plugin_name)
 {
     plugins_unload(plugin_name);
-    char* plugins_dir = files_get_data_path(DIR_PLUGINS);
-    GString* target_path = g_string_new(plugins_dir);
+    char *plugins_dir = files_get_data_path(DIR_PLUGINS);   
+    GString *target_path = g_string_new(plugins_dir);
     free(plugins_dir);
     g_string_append(target_path, "/");
     g_string_append(target_path, plugin_name);
-    GFile* file = g_file_new_for_path(target_path->str);
-    GError* error = NULL;
+    GFile *file = g_file_new_for_path(target_path->str);
+    GError *error = NULL;
     gboolean result = g_file_delete(file, NULL, &error);
     g_object_unref(file);
     g_error_free(error);
@@ -188,15 +190,16 @@ plugins_uninstall(const char* const plugin_name)
 }
 
 gboolean
-plugins_install(const char* const plugin_name, const char* const filename, GString* error_message)
+plugins_install(const char *const plugin_name, const char *const filename, GString *error_message)
 {
-    char* plugins_dir = files_get_data_path(DIR_PLUGINS);
-    GString* target_path = g_string_new(plugins_dir);
+    char *plugins_dir = files_get_data_path(DIR_PLUGINS);
+    GString *target_path = g_string_new(plugins_dir);
     free(plugins_dir);
     g_string_append(target_path, "/");
     g_string_append(target_path, plugin_name);
 
-    if (g_file_test(target_path->str, G_FILE_TEST_EXISTS)) {
+    if (g_file_test (target_path->str, G_FILE_TEST_EXISTS))
+    {
         log_info("Failed to install plugin: %s, file exists", plugin_name);
         g_string_assign(error_message, "File exists");
         return FALSE;
@@ -214,10 +217,10 @@ plugins_install(const char* const plugin_name, const char* const filename, GStri
 GSList*
 plugins_load_all(void)
 {
-    GSList* plugins = plugins_unloaded_list();
-    GSList* loaded = NULL;
-    GSList* curr = plugins;
-    GString* error_message = NULL;
+    GSList *plugins = plugins_unloaded_list();
+    GSList *loaded = NULL;
+    GSList *curr = plugins;
+    GString *error_message = NULL;
     while (curr) {
         error_message = g_string_new(NULL);
         if (plugins_load(curr->data, error_message)) {
@@ -232,9 +235,9 @@ plugins_load_all(void)
 }
 
 gboolean
-plugins_load(const char* const name, GString* error_message)
+plugins_load(const char *const name, GString *error_message)
 {
-    ProfPlugin* plugin = g_hash_table_lookup(plugins, name);
+    ProfPlugin *plugin = g_hash_table_lookup(plugins, name);
     if (plugin) {
         log_info("Failed to load plugin: %s, plugin already loaded", name);
         return FALSE;
@@ -258,8 +261,8 @@ plugins_load(const char* const name, GString* error_message)
     if (plugin) {
         g_hash_table_insert(plugins, strdup(name), plugin);
         if (connection_get_status() == JABBER_CONNECTED) {
-            const char* account_name = session_get_account_name();
-            const char* fulljid = connection_get_fulljid();
+            const char *account_name = session_get_account_name();
+            const char *fulljid = connection_get_fulljid();
             plugin->init_func(plugin, PACKAGE_VERSION, PACKAGE_STATUS, account_name, fulljid);
         } else {
             plugin->init_func(plugin, PACKAGE_VERSION, PACKAGE_STATUS, NULL, NULL);
@@ -277,9 +280,9 @@ gboolean
 plugins_unload_all(void)
 {
     gboolean result = TRUE;
-    GList* plugin_names = g_hash_table_get_keys(plugins);
-    GList* plugin_names_dup = NULL;
-    GList* curr = plugin_names;
+    GList *plugin_names = g_hash_table_get_keys(plugins);
+    GList *plugin_names_dup = NULL;
+    GList *curr = plugin_names;
     while (curr) {
         plugin_names_dup = g_list_append(plugin_names_dup, strdup(curr->data));
         curr = g_list_next(curr);
@@ -300,9 +303,9 @@ plugins_unload_all(void)
 }
 
 gboolean
-plugins_unload(const char* const name)
+plugins_unload(const char *const name)
 {
-    ProfPlugin* plugin = g_hash_table_lookup(plugins, name);
+    ProfPlugin *plugin = g_hash_table_lookup(plugins, name);
     if (plugin) {
         plugin->on_unload_func(plugin);
 #ifdef HAVE_PYTHON
@@ -333,16 +336,16 @@ plugins_unload(const char* const name)
 void
 plugins_reload_all(void)
 {
-    GList* plugin_names = g_hash_table_get_keys(plugins);
-    GList* plugin_names_dup = NULL;
-    GList* curr = plugin_names;
+    GList *plugin_names = g_hash_table_get_keys(plugins);
+    GList *plugin_names_dup = NULL;
+    GList *curr = plugin_names;
     while (curr) {
         plugin_names_dup = g_list_append(plugin_names_dup, strdup(curr->data));
         curr = g_list_next(curr);
     }
     g_list_free(plugin_names);
 
-    GString* error_message = NULL;
+    GString *error_message = NULL;
     curr = plugin_names_dup;
     while (curr) {
         error_message = g_string_new(NULL);
@@ -355,7 +358,7 @@ plugins_reload_all(void)
 }
 
 gboolean
-plugins_reload(const char* const name, GString* error_message)
+plugins_reload(const char *const name, GString *error_message)
 {
     gboolean res = plugins_unload(name);
     if (res) {
@@ -366,16 +369,16 @@ plugins_reload(const char* const name, GString* error_message)
 }
 
 void
-_plugins_unloaded_list_dir(const gchar* const dir, GSList** result)
+_plugins_unloaded_list_dir(const gchar *const dir, GSList **result)
 {
-    GDir* plugins_dir = g_dir_open(dir, 0, NULL);
+    GDir *plugins_dir = g_dir_open(dir, 0, NULL);
     if (plugins_dir == NULL) {
         return;
     }
 
-    const gchar* plugin = g_dir_read_name(plugins_dir);
+    const gchar *plugin = g_dir_read_name(plugins_dir);
     while (plugin) {
-        ProfPlugin* found = g_hash_table_lookup(plugins, plugin);
+        ProfPlugin *found = g_hash_table_lookup(plugins, plugin);
         if ((g_str_has_suffix(plugin, ".so") || g_str_has_suffix(plugin, ".py")) && !found) {
             *result = g_slist_append(*result, strdup(plugin));
         }
@@ -387,8 +390,8 @@ _plugins_unloaded_list_dir(const gchar* const dir, GSList** result)
 GSList*
 plugins_unloaded_list(void)
 {
-    GSList* result = NULL;
-    char* plugins_dir = files_get_data_path(DIR_PLUGINS);
+    GSList *result = NULL;
+    char *plugins_dir = files_get_data_path(DIR_PLUGINS);
     _plugins_unloaded_list_dir(plugins_dir, &result);
     free(plugins_dir);
 
@@ -401,8 +404,8 @@ plugins_loaded_list(void)
     return g_hash_table_get_keys(plugins);
 }
 
-char*
-plugins_autocomplete(const char* const input, gboolean previous)
+char *
+plugins_autocomplete(const char * const input, gboolean previous)
 {
     return autocompleters_complete(input, previous);
 }
@@ -414,16 +417,16 @@ plugins_reset_autocomplete(void)
 }
 
 void
-plugins_win_process_line(char* win, const char* const line)
+plugins_win_process_line(char *win, const char * const line)
 {
-    PluginWindowCallback* window = callbacks_get_window_handler(win);
+    PluginWindowCallback *window = callbacks_get_window_handler(win);
     if (window) {
         window->callback_exec(window, win, line);
     }
 }
 
 void
-plugins_close_win(const char* const plugin_name, const char* const tag)
+plugins_close_win(const char *const plugin_name, const char *const tag)
 {
     callbacks_remove_win(plugin_name, tag);
 }
@@ -431,10 +434,10 @@ plugins_close_win(const char* const plugin_name, const char* const tag)
 void
 plugins_on_start(void)
 {
-    GList* values = g_hash_table_get_values(plugins);
-    GList* curr = values;
+    GList *values = g_hash_table_get_values(plugins);
+    GList *curr = values;
     while (curr) {
-        ProfPlugin* plugin = curr->data;
+        ProfPlugin *plugin = curr->data;
         plugin->on_start_func(plugin);
         curr = g_list_next(curr);
     }
@@ -444,10 +447,10 @@ plugins_on_start(void)
 void
 plugins_on_shutdown(void)
 {
-    GList* values = g_hash_table_get_values(plugins);
-    GList* curr = values;
+    GList *values = g_hash_table_get_values(plugins);
+    GList *curr = values;
     while (curr) {
-        ProfPlugin* plugin = curr->data;
+        ProfPlugin *plugin = curr->data;
         plugin->on_shutdown_func(plugin);
         curr = g_list_next(curr);
     }
@@ -455,12 +458,12 @@ plugins_on_shutdown(void)
 }
 
 void
-plugins_on_connect(const char* const account_name, const char* const fulljid)
+plugins_on_connect(const char * const account_name, const char * const fulljid)
 {
-    GList* values = g_hash_table_get_values(plugins);
-    GList* curr = values;
+    GList *values = g_hash_table_get_values(plugins);
+    GList *curr = values;
     while (curr) {
-        ProfPlugin* plugin = curr->data;
+        ProfPlugin *plugin = curr->data;
         plugin->on_connect_func(plugin, account_name, fulljid);
         curr = g_list_next(curr);
     }
@@ -468,12 +471,12 @@ plugins_on_connect(const char* const account_name, const char* const fulljid)
 }
 
 void
-plugins_on_disconnect(const char* const account_name, const char* const fulljid)
+plugins_on_disconnect(const char * const account_name, const char * const fulljid)
 {
-    GList* values = g_hash_table_get_values(plugins);
-    GList* curr = values;
+    GList *values = g_hash_table_get_values(plugins);
+    GList *curr = values;
     while (curr) {
-        ProfPlugin* plugin = curr->data;
+        ProfPlugin *plugin = curr->data;
         plugin->on_disconnect_func(plugin, account_name, fulljid);
         curr = g_list_next(curr);
     }
@@ -481,15 +484,15 @@ plugins_on_disconnect(const char* const account_name, const char* const fulljid)
 }
 
 char*
-plugins_pre_chat_message_display(const char* const barejid, const char* const resource, const char* message)
+plugins_pre_chat_message_display(const char * const barejid, const char *const resource, const char *message)
 {
-    char* new_message = NULL;
-    char* curr_message = strdup(message);
+    char *new_message = NULL;
+    char *curr_message = strdup(message);
 
-    GList* values = g_hash_table_get_values(plugins);
-    GList* curr = values;
+    GList *values = g_hash_table_get_values(plugins);
+    GList *curr = values;
     while (curr) {
-        ProfPlugin* plugin = curr->data;
+        ProfPlugin *plugin = curr->data;
         new_message = plugin->pre_chat_message_display(plugin, barejid, resource, curr_message);
         if (new_message) {
             free(curr_message);
@@ -504,12 +507,12 @@ plugins_pre_chat_message_display(const char* const barejid, const char* const re
 }
 
 void
-plugins_post_chat_message_display(const char* const barejid, const char* const resource, const char* message)
+plugins_post_chat_message_display(const char * const barejid, const char *const resource, const char *message)
 {
-    GList* values = g_hash_table_get_values(plugins);
-    GList* curr = values;
+    GList *values = g_hash_table_get_values(plugins);
+    GList *curr = values;
     while (curr) {
-        ProfPlugin* plugin = curr->data;
+        ProfPlugin *plugin = curr->data;
         plugin->post_chat_message_display(plugin, barejid, resource, message);
         curr = g_list_next(curr);
     }
@@ -517,15 +520,15 @@ plugins_post_chat_message_display(const char* const barejid, const char* const r
 }
 
 char*
-plugins_pre_chat_message_send(const char* const barejid, const char* message)
+plugins_pre_chat_message_send(const char * const barejid, const char *message)
 {
-    char* new_message = NULL;
-    char* curr_message = strdup(message);
+    char *new_message = NULL;
+    char *curr_message = strdup(message);
 
-    GList* values = g_hash_table_get_values(plugins);
-    GList* curr = values;
+    GList *values = g_hash_table_get_values(plugins);
+    GList *curr = values;
     while (curr) {
-        ProfPlugin* plugin = curr->data;
+        ProfPlugin *plugin = curr->data;
         if (plugin->contains_hook(plugin, "prof_pre_chat_message_send")) {
             new_message = plugin->pre_chat_message_send(plugin, barejid, curr_message);
             if (new_message) {
@@ -547,12 +550,12 @@ plugins_pre_chat_message_send(const char* const barejid, const char* message)
 }
 
 void
-plugins_post_chat_message_send(const char* const barejid, const char* message)
+plugins_post_chat_message_send(const char * const barejid, const char *message)
 {
-    GList* values = g_hash_table_get_values(plugins);
-    GList* curr = values;
+    GList *values = g_hash_table_get_values(plugins);
+    GList *curr = values;
     while (curr) {
-        ProfPlugin* plugin = curr->data;
+        ProfPlugin *plugin = curr->data;
         plugin->post_chat_message_send(plugin, barejid, message);
         curr = g_list_next(curr);
     }
@@ -560,15 +563,15 @@ plugins_post_chat_message_send(const char* const barejid, const char* message)
 }
 
 char*
-plugins_pre_room_message_display(const char* const barejid, const char* const nick, const char* message)
+plugins_pre_room_message_display(const char * const barejid, const char * const nick, const char *message)
 {
-    char* new_message = NULL;
-    char* curr_message = strdup(message);
+    char *new_message = NULL;
+    char *curr_message = strdup(message);
 
-    GList* values = g_hash_table_get_values(plugins);
-    GList* curr = values;
+    GList *values = g_hash_table_get_values(plugins);
+    GList *curr = values;
     while (curr) {
-        ProfPlugin* plugin = curr->data;
+        ProfPlugin *plugin = curr->data;
         new_message = plugin->pre_room_message_display(plugin, barejid, nick, curr_message);
         if (new_message) {
             free(curr_message);
@@ -583,12 +586,12 @@ plugins_pre_room_message_display(const char* const barejid, const char* const ni
 }
 
 void
-plugins_post_room_message_display(const char* const barejid, const char* const nick, const char* message)
+plugins_post_room_message_display(const char * const barejid, const char * const nick, const char *message)
 {
-    GList* values = g_hash_table_get_values(plugins);
-    GList* curr = values;
+    GList *values = g_hash_table_get_values(plugins);
+    GList *curr = values;
     while (curr) {
-        ProfPlugin* plugin = curr->data;
+        ProfPlugin *plugin = curr->data;
         plugin->post_room_message_display(plugin, barejid, nick, message);
         curr = g_list_next(curr);
     }
@@ -596,15 +599,15 @@ plugins_post_room_message_display(const char* const barejid, const char* const n
 }
 
 char*
-plugins_pre_room_message_send(const char* const barejid, const char* message)
+plugins_pre_room_message_send(const char * const barejid, const char *message)
 {
-    char* new_message = NULL;
-    char* curr_message = strdup(message);
+    char *new_message = NULL;
+    char *curr_message = strdup(message);
 
-    GList* values = g_hash_table_get_values(plugins);
-    GList* curr = values;
+    GList *values = g_hash_table_get_values(plugins);
+    GList *curr = values;
     while (curr) {
-        ProfPlugin* plugin = curr->data;
+        ProfPlugin *plugin = curr->data;
         if (plugin->contains_hook(plugin, "prof_pre_room_message_send")) {
             new_message = plugin->pre_room_message_send(plugin, barejid, curr_message);
             if (new_message) {
@@ -626,12 +629,12 @@ plugins_pre_room_message_send(const char* const barejid, const char* message)
 }
 
 void
-plugins_post_room_message_send(const char* const barejid, const char* message)
+plugins_post_room_message_send(const char * const barejid, const char *message)
 {
-    GList* values = g_hash_table_get_values(plugins);
-    GList* curr = values;
+    GList *values = g_hash_table_get_values(plugins);
+    GList *curr = values;
     while (curr) {
-        ProfPlugin* plugin = curr->data;
+        ProfPlugin *plugin = curr->data;
         plugin->post_room_message_send(plugin, barejid, message);
         curr = g_list_next(curr);
     }
@@ -639,20 +642,20 @@ plugins_post_room_message_send(const char* const barejid, const char* message)
 }
 
 void
-plugins_on_room_history_message(const char* const barejid, const char* const nick, const char* const message,
-                                GDateTime* timestamp)
+plugins_on_room_history_message(const char *const barejid, const char *const nick, const char *const message,
+    GDateTime *timestamp)
 {
-    char* timestamp_str = NULL;
+    char *timestamp_str = NULL;
     GTimeVal timestamp_tv;
     gboolean res = g_date_time_to_timeval(timestamp, &timestamp_tv);
     if (res) {
         timestamp_str = g_time_val_to_iso8601(&timestamp_tv);
     }
 
-    GList* values = g_hash_table_get_values(plugins);
-    GList* curr = values;
+    GList *values = g_hash_table_get_values(plugins);
+    GList *curr = values;
     while (curr) {
-        ProfPlugin* plugin = curr->data;
+        ProfPlugin *plugin = curr->data;
         plugin->on_room_history_message(plugin, barejid, nick, message, timestamp_str);
         curr = g_list_next(curr);
     }
@@ -662,16 +665,16 @@ plugins_on_room_history_message(const char* const barejid, const char* const nic
 }
 
 char*
-plugins_pre_priv_message_display(const char* const fulljid, const char* message)
+plugins_pre_priv_message_display(const char * const fulljid, const char *message)
 {
-    Jid* jidp = jid_create(fulljid);
-    char* new_message = NULL;
-    char* curr_message = strdup(message);
+    Jid *jidp = jid_create(fulljid);
+    char *new_message = NULL;
+    char *curr_message = strdup(message);
 
-    GList* values = g_hash_table_get_values(plugins);
-    GList* curr = values;
+    GList *values = g_hash_table_get_values(plugins);
+    GList *curr = values;
     while (curr) {
-        ProfPlugin* plugin = curr->data;
+        ProfPlugin *plugin = curr->data;
         new_message = plugin->pre_priv_message_display(plugin, jidp->barejid, jidp->resourcepart, curr_message);
         if (new_message) {
             free(curr_message);
@@ -687,14 +690,14 @@ plugins_pre_priv_message_display(const char* const fulljid, const char* message)
 }
 
 void
-plugins_post_priv_message_display(const char* const fulljid, const char* message)
+plugins_post_priv_message_display(const char * const fulljid, const char *message)
 {
-    Jid* jidp = jid_create(fulljid);
+    Jid *jidp = jid_create(fulljid);
 
-    GList* values = g_hash_table_get_values(plugins);
-    GList* curr = values;
+    GList *values = g_hash_table_get_values(plugins);
+    GList *curr = values;
     while (curr) {
-        ProfPlugin* plugin = curr->data;
+        ProfPlugin *plugin = curr->data;
         plugin->post_priv_message_display(plugin, jidp->barejid, jidp->resourcepart, message);
         curr = g_list_next(curr);
     }
@@ -704,16 +707,16 @@ plugins_post_priv_message_display(const char* const fulljid, const char* message
 }
 
 char*
-plugins_pre_priv_message_send(const char* const fulljid, const char* const message)
+plugins_pre_priv_message_send(const char * const fulljid, const char * const message)
 {
-    Jid* jidp = jid_create(fulljid);
-    char* new_message = NULL;
-    char* curr_message = strdup(message);
+    Jid *jidp = jid_create(fulljid);
+    char *new_message = NULL;
+    char *curr_message = strdup(message);
 
-    GList* values = g_hash_table_get_values(plugins);
-    GList* curr = values;
+    GList *values = g_hash_table_get_values(plugins);
+    GList *curr = values;
     while (curr) {
-        ProfPlugin* plugin = curr->data;
+        ProfPlugin *plugin = curr->data;
         if (plugin->contains_hook(plugin, "prof_pre_priv_message_send")) {
             new_message = plugin->pre_priv_message_send(plugin, jidp->barejid, jidp->resourcepart, curr_message);
             if (new_message) {
@@ -737,14 +740,14 @@ plugins_pre_priv_message_send(const char* const fulljid, const char* const messa
 }
 
 void
-plugins_post_priv_message_send(const char* const fulljid, const char* const message)
+plugins_post_priv_message_send(const char * const fulljid, const char * const message)
 {
-    Jid* jidp = jid_create(fulljid);
+    Jid *jidp = jid_create(fulljid);
 
-    GList* values = g_hash_table_get_values(plugins);
-    GList* curr = values;
+    GList *values = g_hash_table_get_values(plugins);
+    GList *curr = values;
     while (curr) {
-        ProfPlugin* plugin = curr->data;
+        ProfPlugin *plugin = curr->data;
         plugin->post_priv_message_send(plugin, jidp->barejid, jidp->resourcepart, message);
         curr = g_list_next(curr);
     }
@@ -754,15 +757,15 @@ plugins_post_priv_message_send(const char* const fulljid, const char* const mess
 }
 
 char*
-plugins_on_message_stanza_send(const char* const text)
+plugins_on_message_stanza_send(const char *const text)
 {
-    char* new_stanza = NULL;
-    char* curr_stanza = strdup(text);
+    char *new_stanza = NULL;
+    char *curr_stanza = strdup(text);
 
-    GList* values = g_hash_table_get_values(plugins);
-    GList* curr = values;
+    GList *values = g_hash_table_get_values(plugins);
+    GList *curr = values;
     while (curr) {
-        ProfPlugin* plugin = curr->data;
+        ProfPlugin *plugin = curr->data;
         new_stanza = plugin->on_message_stanza_send(plugin, curr_stanza);
         if (new_stanza) {
             free(curr_stanza);
@@ -777,14 +780,14 @@ plugins_on_message_stanza_send(const char* const text)
 }
 
 gboolean
-plugins_on_message_stanza_receive(const char* const text)
+plugins_on_message_stanza_receive(const char *const text)
 {
     gboolean cont = TRUE;
 
-    GList* values = g_hash_table_get_values(plugins);
-    GList* curr = values;
+    GList *values = g_hash_table_get_values(plugins);
+    GList *curr = values;
     while (curr) {
-        ProfPlugin* plugin = curr->data;
+        ProfPlugin *plugin = curr->data;
         gboolean res = plugin->on_message_stanza_receive(plugin, text);
         if (res == FALSE) {
             cont = FALSE;
@@ -797,15 +800,15 @@ plugins_on_message_stanza_receive(const char* const text)
 }
 
 char*
-plugins_on_presence_stanza_send(const char* const text)
+plugins_on_presence_stanza_send(const char *const text)
 {
-    char* new_stanza = NULL;
-    char* curr_stanza = strdup(text);
+    char *new_stanza = NULL;
+    char *curr_stanza = strdup(text);
 
-    GList* values = g_hash_table_get_values(plugins);
-    GList* curr = values;
+    GList *values = g_hash_table_get_values(plugins);
+    GList *curr = values;
     while (curr) {
-        ProfPlugin* plugin = curr->data;
+        ProfPlugin *plugin = curr->data;
         new_stanza = plugin->on_presence_stanza_send(plugin, curr_stanza);
         if (new_stanza) {
             free(curr_stanza);
@@ -820,14 +823,14 @@ plugins_on_presence_stanza_send(const char* const text)
 }
 
 gboolean
-plugins_on_presence_stanza_receive(const char* const text)
+plugins_on_presence_stanza_receive(const char *const text)
 {
     gboolean cont = TRUE;
 
-    GList* values = g_hash_table_get_values(plugins);
-    GList* curr = values;
+    GList *values = g_hash_table_get_values(plugins);
+    GList *curr = values;
     while (curr) {
-        ProfPlugin* plugin = curr->data;
+        ProfPlugin *plugin = curr->data;
         gboolean res = plugin->on_presence_stanza_receive(plugin, text);
         if (res == FALSE) {
             cont = FALSE;
@@ -840,15 +843,15 @@ plugins_on_presence_stanza_receive(const char* const text)
 }
 
 char*
-plugins_on_iq_stanza_send(const char* const text)
+plugins_on_iq_stanza_send(const char *const text)
 {
-    char* new_stanza = NULL;
-    char* curr_stanza = strdup(text);
+    char *new_stanza = NULL;
+    char *curr_stanza = strdup(text);
 
-    GList* values = g_hash_table_get_values(plugins);
-    GList* curr = values;
+    GList *values = g_hash_table_get_values(plugins);
+    GList *curr = values;
     while (curr) {
-        ProfPlugin* plugin = curr->data;
+        ProfPlugin *plugin = curr->data;
         new_stanza = plugin->on_iq_stanza_send(plugin, curr_stanza);
         if (new_stanza) {
             free(curr_stanza);
@@ -863,14 +866,14 @@ plugins_on_iq_stanza_send(const char* const text)
 }
 
 gboolean
-plugins_on_iq_stanza_receive(const char* const text)
+plugins_on_iq_stanza_receive(const char *const text)
 {
     gboolean cont = TRUE;
 
-    GList* values = g_hash_table_get_values(plugins);
-    GList* curr = values;
+    GList *values = g_hash_table_get_values(plugins);
+    GList *curr = values;
     while (curr) {
-        ProfPlugin* plugin = curr->data;
+        ProfPlugin *plugin = curr->data;
         gboolean res = plugin->on_iq_stanza_receive(plugin, text);
         if (res == FALSE) {
             cont = FALSE;
@@ -883,12 +886,12 @@ plugins_on_iq_stanza_receive(const char* const text)
 }
 
 void
-plugins_on_contact_offline(const char* const barejid, const char* const resource, const char* const status)
+plugins_on_contact_offline(const char *const barejid, const char *const resource, const char *const status)
 {
-    GList* values = g_hash_table_get_values(plugins);
-    GList* curr = values;
+    GList *values = g_hash_table_get_values(plugins);
+    GList *curr = values;
     while (curr) {
-        ProfPlugin* plugin = curr->data;
+        ProfPlugin *plugin = curr->data;
         plugin->on_contact_offline(plugin, barejid, resource, status);
         curr = g_list_next(curr);
     }
@@ -896,12 +899,12 @@ plugins_on_contact_offline(const char* const barejid, const char* const resource
 }
 
 void
-plugins_on_contact_presence(const char* const barejid, const char* const resource, const char* const presence, const char* const status, const int priority)
+plugins_on_contact_presence(const char *const barejid, const char *const resource, const char *const presence, const char *const status, const int priority)
 {
-    GList* values = g_hash_table_get_values(plugins);
-    GList* curr = values;
+    GList *values = g_hash_table_get_values(plugins);
+    GList *curr = values;
     while (curr) {
-        ProfPlugin* plugin = curr->data;
+        ProfPlugin *plugin = curr->data;
         plugin->on_contact_presence(plugin, barejid, resource, presence, status, priority);
         curr = g_list_next(curr);
     }
@@ -909,12 +912,12 @@ plugins_on_contact_presence(const char* const barejid, const char* const resourc
 }
 
 void
-plugins_on_chat_win_focus(const char* const barejid)
+plugins_on_chat_win_focus(const char *const barejid)
 {
-    GList* values = g_hash_table_get_values(plugins);
-    GList* curr = values;
+    GList *values = g_hash_table_get_values(plugins);
+    GList *curr = values;
     while (curr) {
-        ProfPlugin* plugin = curr->data;
+        ProfPlugin *plugin = curr->data;
         plugin->on_chat_win_focus(plugin, barejid);
         curr = g_list_next(curr);
     }
@@ -922,12 +925,12 @@ plugins_on_chat_win_focus(const char* const barejid)
 }
 
 void
-plugins_on_room_win_focus(const char* const barejid)
+plugins_on_room_win_focus(const char *const barejid)
 {
-    GList* values = g_hash_table_get_values(plugins);
-    GList* curr = values;
+    GList *values = g_hash_table_get_values(plugins);
+    GList *curr = values;
     while (curr) {
-        ProfPlugin* plugin = curr->data;
+        ProfPlugin *plugin = curr->data;
         plugin->on_room_win_focus(plugin, barejid);
         curr = g_list_next(curr);
     }
@@ -943,17 +946,17 @@ plugins_get_disco_features(void)
 void
 plugins_shutdown(void)
 {
-    GList* values = g_hash_table_get_values(plugins);
-    GList* curr = values;
+    GList *values = g_hash_table_get_values(plugins);
+    GList *curr = values;
 
     while (curr) {
 #ifdef HAVE_PYTHON
-        if (((ProfPlugin*)curr->data)->lang == LANG_PYTHON) {
+        if (((ProfPlugin *)curr->data)->lang == LANG_PYTHON) {
             python_plugin_destroy(curr->data);
         }
 #endif
 #ifdef HAVE_C
-        if (((ProfPlugin*)curr->data)->lang == LANG_C) {
+        if (((ProfPlugin *)curr->data)->lang == LANG_C) {
             c_plugin_destroy(curr->data);
         }
 #endif

@@ -38,9 +38,10 @@
 
 #include <glib.h>
 
-void disco_add_feature(const char* plugin_name, char* feature);
-void disco_remove_features(const char* plugin_name);
+void disco_add_feature(const char* plugin_name, char *feature);
+void disco_remove_features(const char *plugin_name);
 GList* disco_get_features(void);
 void disco_close(void);
 
 #endif
+

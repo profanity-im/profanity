@@ -1,24 +1,23 @@
-#include <cmocka.h>
-#include <glib.h>
-#include <setjmp.h>
 #include <stdarg.h>
 #include <stddef.h>
+#include <setjmp.h>
+#include <cmocka.h>
 #include <stdlib.h>
 #include <string.h>
+#include <glib.h>
 
-#include "ui/stub_ui.h"
 #include "ui/ui.h"
+#include "ui/stub_ui.h"
 
-#include "command/cmd_funcs.h"
-#include "xmpp/roster_list.h"
 #include "xmpp/xmpp.h"
+#include "xmpp/roster_list.h"
+#include "command/cmd_funcs.h"
 
 #define CMD_ROSTER "/roster"
 
-static void
-test_with_connection_status(jabber_conn_status_t status)
+static void test_with_connection_status(jabber_conn_status_t status)
 {
-    gchar* args[] = { NULL };
+    gchar *args[] = { NULL };
 
     will_return(connection_get_status, status);
 
@@ -28,34 +27,30 @@ test_with_connection_status(jabber_conn_status_t status)
     assert_true(result);
 }
 
-void
-cmd_roster_shows_message_when_disconnecting(void** state)
+void cmd_roster_shows_message_when_disconnecting(void **state)
 {
     test_with_connection_status(JABBER_DISCONNECTING);
 }
 
-void
-cmd_roster_shows_message_when_connecting(void** state)
+void cmd_roster_shows_message_when_connecting(void **state)
 {
     test_with_connection_status(JABBER_CONNECTING);
 }
 
-void
-cmd_roster_shows_message_when_disconnected(void** state)
+void cmd_roster_shows_message_when_disconnected(void **state)
 {
     test_with_connection_status(JABBER_DISCONNECTED);
 }
 
-void
-cmd_roster_shows_roster_when_no_args(void** state)
+void cmd_roster_shows_roster_when_no_args(void **state)
 {
-    gchar* args[] = { NULL };
+    gchar *args[] = { NULL };
 
     will_return(connection_get_status, JABBER_CONNECTED);
 
     roster_create();
     roster_add("bob@server.org", "bob", NULL, "both", FALSE);
-    GSList* roster = roster_get_contacts(ROSTER_ORD_NAME);
+    GSList *roster = roster_get_contacts(ROSTER_ORD_NAME);
 
     expect_memory(cons_show_roster, list, roster, sizeof(roster));
 
@@ -66,10 +61,9 @@ cmd_roster_shows_roster_when_no_args(void** state)
     roster_destroy();
 }
 
-void
-cmd_roster_add_shows_message_when_no_jid(void** state)
+void cmd_roster_add_shows_message_when_no_jid(void **state)
 {
-    gchar* args[] = { "add", NULL };
+    gchar *args[] = { "add", NULL };
 
     will_return(connection_get_status, JABBER_CONNECTED);
 
@@ -79,12 +73,11 @@ cmd_roster_add_shows_message_when_no_jid(void** state)
     assert_true(result);
 }
 
-void
-cmd_roster_add_sends_roster_add_request(void** state)
+void cmd_roster_add_sends_roster_add_request(void **state)
 {
-    char* jid = "bob@server.org";
-    char* nick = "bob";
-    gchar* args[] = { "add", jid, nick, NULL };
+    char *jid = "bob@server.org";
+    char *nick = "bob";
+    gchar *args[] = { "add", jid, nick, NULL };
 
     will_return(connection_get_status, JABBER_CONNECTED);
 
@@ -95,10 +88,9 @@ cmd_roster_add_sends_roster_add_request(void** state)
     assert_true(result);
 }
 
-void
-cmd_roster_remove_shows_message_when_no_jid(void** state)
+void cmd_roster_remove_shows_message_when_no_jid(void **state)
 {
-    gchar* args[] = { "remove", NULL };
+    gchar *args[] = { "remove", NULL };
 
     will_return(connection_get_status, JABBER_CONNECTED);
 
@@ -108,11 +100,10 @@ cmd_roster_remove_shows_message_when_no_jid(void** state)
     assert_true(result);
 }
 
-void
-cmd_roster_remove_sends_roster_remove_request(void** state)
+void cmd_roster_remove_sends_roster_remove_request(void **state)
 {
-    char* jid = "bob@server.org";
-    gchar* args[] = { "remove", jid, NULL };
+    char *jid = "bob@server.org";
+    gchar *args[] = { "remove", jid, NULL };
 
     will_return(connection_get_status, JABBER_CONNECTED);
 
@@ -122,10 +113,9 @@ cmd_roster_remove_sends_roster_remove_request(void** state)
     assert_true(result);
 }
 
-void
-cmd_roster_nick_shows_message_when_no_jid(void** state)
+void cmd_roster_nick_shows_message_when_no_jid(void **state)
 {
-    gchar* args[] = { "nick", NULL };
+    gchar *args[] = { "nick", NULL };
 
     will_return(connection_get_status, JABBER_CONNECTED);
 
@@ -135,10 +125,9 @@ cmd_roster_nick_shows_message_when_no_jid(void** state)
     assert_true(result);
 }
 
-void
-cmd_roster_nick_shows_message_when_no_nick(void** state)
+void cmd_roster_nick_shows_message_when_no_nick(void **state)
 {
-    gchar* args[] = { "nick", "bob@server.org", NULL };
+    gchar *args[] = { "nick", "bob@server.org", NULL };
 
     will_return(connection_get_status, JABBER_CONNECTED);
 
@@ -148,10 +137,9 @@ cmd_roster_nick_shows_message_when_no_nick(void** state)
     assert_true(result);
 }
 
-void
-cmd_roster_nick_shows_message_when_no_contact_exists(void** state)
+void cmd_roster_nick_shows_message_when_no_contact_exists(void **state)
 {
-    gchar* args[] = { "nick", "bob@server.org", "bobster", NULL };
+    gchar *args[] = { "nick", "bob@server.org", "bobster", NULL };
 
     roster_create();
 
@@ -165,15 +153,14 @@ cmd_roster_nick_shows_message_when_no_contact_exists(void** state)
     roster_destroy();
 }
 
-void
-cmd_roster_nick_sends_name_change_request(void** state)
+void cmd_roster_nick_sends_name_change_request(void **state)
 {
-    char* jid = "bob@server.org";
-    char* nick = "bobster";
-    gchar* args[] = { "nick", jid, nick, NULL };
+    char *jid = "bob@server.org";
+    char *nick = "bobster";
+    gchar *args[] = { "nick", jid, nick, NULL };
 
     roster_create();
-    GSList* groups = NULL;
+    GSList *groups = NULL;
     groups = g_slist_append(groups, strdup("group1"));
     roster_add(jid, "bob", groups, "both", FALSE);
 
@@ -194,10 +181,9 @@ cmd_roster_nick_sends_name_change_request(void** state)
     roster_destroy();
 }
 
-void
-cmd_roster_clearnick_shows_message_when_no_jid(void** state)
+void cmd_roster_clearnick_shows_message_when_no_jid(void **state)
 {
-    gchar* args[] = { "clearnick", NULL };
+    gchar *args[] = { "clearnick", NULL };
 
     will_return(connection_get_status, JABBER_CONNECTED);
 
@@ -207,10 +193,9 @@ cmd_roster_clearnick_shows_message_when_no_jid(void** state)
     assert_true(result);
 }
 
-void
-cmd_roster_clearnick_shows_message_when_no_contact_exists(void** state)
+void cmd_roster_clearnick_shows_message_when_no_contact_exists(void **state)
 {
-    gchar* args[] = { "clearnick", "bob@server.org", NULL };
+    gchar *args[] = { "clearnick", "bob@server.org", NULL };
 
     roster_create();
 
@@ -224,14 +209,13 @@ cmd_roster_clearnick_shows_message_when_no_contact_exists(void** state)
     roster_destroy();
 }
 
-void
-cmd_roster_clearnick_sends_name_change_request_with_empty_nick(void** state)
+void cmd_roster_clearnick_sends_name_change_request_with_empty_nick(void **state)
 {
-    char* jid = "bob@server.org";
-    gchar* args[] = { "clearnick", jid, NULL };
+    char *jid = "bob@server.org";
+    gchar *args[] = { "clearnick", jid, NULL };
 
     roster_create();
-    GSList* groups = NULL;
+    GSList *groups = NULL;
     groups = g_slist_append(groups, strdup("group1"));
     roster_add(jid, "bob", groups, "both", FALSE);
 

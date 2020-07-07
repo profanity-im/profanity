@@ -43,6 +43,7 @@
  * https://xmpp.org/extensions/xep-0373.html
  */
 
+
 /*!
  * \brief Announcing OpenPGP public key from file to PEP.
  *
@@ -56,3 +57,5 @@
  */
 
 gboolean ox_announce_public_key(const char* const filename);
+
+

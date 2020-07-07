@@ -33,28 +33,28 @@
  *
  */
 
-#include <assert.h>
 #include <stdlib.h>
 #include <string.h>
+#include <assert.h>
 
 #include <glib.h>
 
-#include "config/preferences.h"
 #include "log.h"
-#include "xmpp/chat_session.h"
-#include "xmpp/stanza.h"
+#include "config/preferences.h"
 #include "xmpp/xmpp.h"
+#include "xmpp/stanza.h"
+#include "xmpp/chat_session.h"
 
-static GHashTable* sessions;
+static GHashTable *sessions;
 
 static void
-_chat_session_new(const char* const barejid, const char* const resource, gboolean resource_override,
-                  gboolean send_states)
+_chat_session_new(const char *const barejid, const char *const resource, gboolean resource_override,
+    gboolean send_states)
 {
     assert(barejid != NULL);
     assert(resource != NULL);
 
-    ChatSession* new_session = malloc(sizeof(struct chat_session_t));
+    ChatSession *new_session = malloc(sizeof(struct chat_session_t));
     new_session->barejid = strdup(barejid);
     new_session->resource = strdup(resource);
     new_session->resource_override = resource_override;
@@ -64,7 +64,7 @@ _chat_session_new(const char* const barejid, const char* const resource, gboolea
 }
 
 static void
-_chat_session_free(ChatSession* session)
+_chat_session_free(ChatSession *session)
 {
     if (session) {
         free(session->barejid);
@@ -91,24 +91,24 @@ chat_sessions_clear(void)
 }
 
 void
-chat_session_resource_override(const char* const barejid, const char* const resource)
+chat_session_resource_override(const char *const barejid, const char *const resource)
 {
     _chat_session_new(barejid, resource, TRUE, TRUE);
 }
 
 ChatSession*
-chat_session_get(const char* const barejid)
+chat_session_get(const char *const barejid)
 {
     return g_hash_table_lookup(sessions, barejid);
 }
 
 char*
-chat_session_get_jid(const char* const barejid)
+chat_session_get_jid(const char *const barejid)
 {
-    ChatSession* session = chat_session_get(barejid);
-    char* jid = NULL;
+    ChatSession *session = chat_session_get(barejid);
+    char *jid = NULL;
     if (session) {
-        Jid* jidp = jid_create_from_bare_and_resource(session->barejid, session->resource);
+        Jid *jidp = jid_create_from_bare_and_resource(session->barejid, session->resource);
         jid = strdup(jidp->fulljid);
         jid_destroy(jidp);
     } else {
@@ -119,10 +119,10 @@ chat_session_get_jid(const char* const barejid)
 }
 
 char*
-chat_session_get_state(const char* const barejid)
+chat_session_get_state(const char *const barejid)
 {
-    ChatSession* session = chat_session_get(barejid);
-    char* state = NULL;
+    ChatSession *session = chat_session_get(barejid);
+    char *state = NULL;
     if (session) {
         if (prefs_get_boolean(PREF_STATES) && session->send_states) {
             state = STANZA_NAME_ACTIVE;
@@ -137,12 +137,12 @@ chat_session_get_state(const char* const barejid)
 }
 
 void
-chat_session_recipient_gone(const char* const barejid, const char* const resource)
+chat_session_recipient_gone(const char *const barejid, const char *const resource)
 {
     assert(barejid != NULL);
     assert(resource != NULL);
 
-    ChatSession* session = g_hash_table_lookup(sessions, barejid);
+    ChatSession *session = g_hash_table_lookup(sessions, barejid);
     if (session && g_strcmp0(session->resource, resource) == 0) {
         if (!session->resource_override) {
             chat_session_remove(barejid);
@@ -151,48 +151,48 @@ chat_session_recipient_gone(const char* const barejid, const char* const resourc
 }
 
 void
-chat_session_recipient_typing(const char* const barejid, const char* const resource)
+chat_session_recipient_typing(const char *const barejid, const char *const resource)
 {
     chat_session_recipient_active(barejid, resource, TRUE);
 }
 
 void
-chat_session_recipient_paused(const char* const barejid, const char* const resource)
+chat_session_recipient_paused(const char *const barejid, const char *const resource)
 {
     chat_session_recipient_active(barejid, resource, TRUE);
 }
 
 void
-chat_session_recipient_inactive(const char* const barejid, const char* const resource)
+chat_session_recipient_inactive(const char *const barejid, const char *const resource)
 {
     chat_session_recipient_active(barejid, resource, TRUE);
 }
 
 void
-chat_session_recipient_active(const char* const barejid, const char* const resource,
-                              gboolean send_states)
+chat_session_recipient_active(const char *const barejid, const char *const resource,
+    gboolean send_states)
 {
     assert(barejid != NULL);
     assert(resource != NULL);
 
-    ChatSession* session = g_hash_table_lookup(sessions, barejid);
+    ChatSession *session = g_hash_table_lookup(sessions, barejid);
     if (session) {
         // session exists with resource, update chat_states
         if (g_strcmp0(session->resource, resource) == 0) {
             session->send_states = send_states;
-            // session exists with different resource and no override, replace
+        // session exists with different resource and no override, replace
         } else if (!session->resource_override) {
             _chat_session_new(barejid, resource, FALSE, send_states);
         }
 
-        // no session, create one
+    // no session, create one
     } else {
         _chat_session_new(barejid, resource, FALSE, send_states);
     }
 }
 
 void
-chat_session_remove(const char* const barejid)
+chat_session_remove(const char *const barejid)
 {
     g_hash_table_remove(sessions, barejid);
 }

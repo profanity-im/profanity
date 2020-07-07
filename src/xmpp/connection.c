@@ -36,9 +36,9 @@
 
 #include "config.h"
 
-#include <assert.h>
 #include <stdlib.h>
 #include <string.h>
+#include <assert.h>
 
 #include <glib.h>
 #include <glib/gstdio.h>
@@ -52,49 +52,48 @@
 #endif
 
 #include "common.h"
+#include "log.h"
 #include "config/files.h"
 #include "config/preferences.h"
 #include "event/server_events.h"
-#include "log.h"
-#include "ui/ui.h"
 #include "xmpp/connection.h"
-#include "xmpp/iq.h"
 #include "xmpp/session.h"
+#include "xmpp/iq.h"
+#include "ui/ui.h"
 
-typedef struct prof_conn_t
-{
-    xmpp_log_t* xmpp_log;
-    xmpp_ctx_t* xmpp_ctx;
-    xmpp_conn_t* xmpp_conn;
+typedef struct prof_conn_t {
+    xmpp_log_t *xmpp_log;
+    xmpp_ctx_t *xmpp_ctx;
+    xmpp_conn_t *xmpp_conn;
     gboolean xmpp_in_event_loop;
     jabber_conn_status_t conn_status;
     xmpp_conn_event_t conn_last_event;
-    char* presence_message;
+    char *presence_message;
     int priority;
-    char* domain;
-    GHashTable* available_resources;
-    GHashTable* features_by_jid;
-    GHashTable* requested_features;
+    char *domain;
+    GHashTable *available_resources;
+    GHashTable *features_by_jid;
+    GHashTable *requested_features;
 } ProfConnection;
 
 static ProfConnection conn;
-static gchar* profanity_instance_id = NULL;
-static gchar* prof_identifier = NULL;
+static gchar *profanity_instance_id = NULL;
+static gchar *prof_identifier = NULL;
 
 static xmpp_log_t* _xmpp_get_file_logger(void);
-static void _xmpp_file_logger(void* const userdata, const xmpp_log_level_t level, const char* const area, const char* const msg);
+static void _xmpp_file_logger(void *const userdata, const xmpp_log_level_t level, const char *const area, const char *const msg);
 
-static void _connection_handler(xmpp_conn_t* const xmpp_conn, const xmpp_conn_event_t status, const int error,
-                                xmpp_stream_error_t* const stream_error, void* const userdata);
+static void _connection_handler(xmpp_conn_t *const xmpp_conn, const xmpp_conn_event_t status, const int error,
+    xmpp_stream_error_t *const stream_error, void *const userdata);
 
 #ifdef HAVE_LIBMESODE
-TLSCertificate* _xmppcert_to_profcert(xmpp_tlscert_t* xmpptlscert);
-static int _connection_certfail_cb(xmpp_tlscert_t* xmpptlscert, const char* const errormsg);
+TLSCertificate* _xmppcert_to_profcert(xmpp_tlscert_t *xmpptlscert);
+static int _connection_certfail_cb(xmpp_tlscert_t *xmpptlscert, const char *const errormsg);
 #endif
 
 static void _random_bytes_init(void);
 static void _random_bytes_close(void);
-static void _compute_identifier(const char* barejid);
+static void _compute_identifier(const char *barejid);
 
 void
 connection_init(void)
@@ -111,7 +110,7 @@ connection_init(void)
     conn.available_resources = g_hash_table_new_full(g_str_hash, g_str_equal, free, (GDestroyNotify)resource_destroy);
     conn.requested_features = g_hash_table_new_full(g_str_hash, g_str_equal, free, NULL);
 
-    _random_bytes_init();
+	_random_bytes_init();
 }
 
 void
@@ -131,19 +130,19 @@ connection_shutdown(void)
     free(conn.xmpp_log);
     conn.xmpp_log = NULL;
 
-    _random_bytes_close();
+	_random_bytes_close();
 }
 
 jabber_conn_status_t
-connection_connect(const char* const jid, const char* const passwd, const char* const altdomain, int port,
-                   const char* const tls_policy, const char* const auth_policy)
+connection_connect(const char *const jid, const char *const passwd, const char *const altdomain, int port,
+    const char *const tls_policy, const char *const auth_policy)
 {
     long flags;
 
     assert(jid != NULL);
     assert(passwd != NULL);
 
-    Jid* jidp = jid_create(jid);
+    Jid *jidp = jid_create(jid);
     if (jidp == NULL) {
         log_error("Malformed JID not able to connect: %s", jid);
         conn.conn_status = JABBER_DISCONNECTED;
@@ -207,10 +206,7 @@ connection_connect(const char* const jid, const char* const passwd, const char* 
     /* Print debug logs that can help when users share the logs */
     if (flags != 0) {
         log_debug("Connecting with flags (0x%lx):", flags);
-#define LOG_FLAG_IF_SET(name)  \
-    if (flags & name) {        \
-        log_debug("  " #name); \
-    }
+#define LOG_FLAG_IF_SET(name) if (flags & name) { log_debug("  " #name); }
         LOG_FLAG_IF_SET(XMPP_CONN_FLAG_MANDATORY_TLS);
         LOG_FLAG_IF_SET(XMPP_CONN_FLAG_TRUST_TLS);
         LOG_FLAG_IF_SET(XMPP_CONN_FLAG_DISABLE_TLS);
@@ -222,7 +218,7 @@ connection_connect(const char* const jid, const char* const passwd, const char* 
     }
 
 #ifdef HAVE_LIBMESODE
-    char* cert_path = prefs_get_tls_certpath();
+    char *cert_path = prefs_get_tls_certpath();
     if (cert_path) {
         xmpp_conn_tlscert_path(conn.xmpp_conn, cert_path);
         free(cert_path);
@@ -315,8 +311,8 @@ connection_clear_data(void)
 TLSCertificate*
 connection_get_tls_peer_cert(void)
 {
-    xmpp_tlscert_t* xmpptlscert = xmpp_conn_tls_peer_cert(conn.xmpp_conn);
-    TLSCertificate* cert = _xmppcert_to_profcert(xmpptlscert);
+    xmpp_tlscert_t *xmpptlscert = xmpp_conn_tls_peer_cert(conn.xmpp_conn);
+    TLSCertificate *cert = _xmppcert_to_profcert(xmpptlscert);
     xmpp_conn_free_tlscert(conn.xmpp_ctx, xmpptlscert);
 
     return cert;
@@ -334,7 +330,7 @@ connection_is_secured(void)
 }
 
 gboolean
-connection_send_stanza(const char* const stanza)
+connection_send_stanza(const char *const stanza)
 {
     if (conn.conn_status != JABBER_CONNECTED) {
         return FALSE;
@@ -345,15 +341,15 @@ connection_send_stanza(const char* const stanza)
 }
 
 gboolean
-connection_supports(const char* const feature)
+connection_supports(const char *const feature)
 {
     gboolean ret = FALSE;
-    GList* jids = g_hash_table_get_keys(conn.features_by_jid);
+    GList *jids = g_hash_table_get_keys(conn.features_by_jid);
 
-    GList* curr = jids;
+    GList *curr = jids;
     while (curr) {
-        char* jid = curr->data;
-        GHashTable* features = g_hash_table_lookup(conn.features_by_jid, jid);
+        char *jid = curr->data;
+        GHashTable *features = g_hash_table_lookup(conn.features_by_jid, jid);
         if (features && g_hash_table_lookup(features, feature)) {
             ret = TRUE;
             break;
@@ -368,18 +364,18 @@ connection_supports(const char* const feature)
 }
 
 char*
-connection_jid_for_feature(const char* const feature)
+connection_jid_for_feature(const char *const feature)
 {
     if (conn.features_by_jid == NULL) {
         return NULL;
     }
 
-    GList* jids = g_hash_table_get_keys(conn.features_by_jid);
+    GList *jids = g_hash_table_get_keys(conn.features_by_jid);
 
-    GList* curr = jids;
+    GList *curr = jids;
     while (curr) {
-        char* jid = curr->data;
-        GHashTable* features = g_hash_table_lookup(conn.features_by_jid, jid);
+        char *jid = curr->data;
+        GHashTable *features = g_hash_table_lookup(conn.features_by_jid, jid);
         if (features && g_hash_table_lookup(features, feature)) {
             g_list_free(jids);
             return jid;
@@ -402,14 +398,14 @@ connection_request_features(void)
 }
 
 void
-connection_set_disco_items(GSList* items)
+connection_set_disco_items(GSList *items)
 {
-    GSList* curr = items;
+    GSList *curr = items;
     while (curr) {
-        DiscoItem* item = curr->data;
+        DiscoItem *item = curr->data;
         g_hash_table_insert(conn.requested_features, strdup(item->jid), NULL);
         g_hash_table_insert(conn.features_by_jid, strdup(item->jid),
-                            g_hash_table_new_full(g_str_hash, g_str_equal, free, NULL));
+            g_hash_table_new_full(g_str_hash, g_str_equal, free, NULL));
 
         iq_disco_info_request_onconnect(item->jid);
 
@@ -438,7 +434,7 @@ connection_get_ctx(void)
 const char*
 connection_get_fulljid(void)
 {
-    const char* jid = xmpp_conn_get_bound_jid(conn.xmpp_conn);
+    const char *jid = xmpp_conn_get_bound_jid(conn.xmpp_conn);
     if (jid) {
         return jid;
     } else {
@@ -447,12 +443,11 @@ connection_get_fulljid(void)
 }
 
 char*
-connection_get_barejid(void)
-{
-    const char* jid = connection_get_fulljid();
-    char* result;
+connection_get_barejid(void) {
+    const char *jid = connection_get_fulljid();
+    char *result;
 
-    Jid* jidp = jid_create(jid);
+    Jid *jidp = jid_create(jid);
     result = strdup(jidp->barejid);
     jid_destroy(jidp);
 
@@ -460,7 +455,7 @@ connection_get_barejid(void)
 }
 
 void
-connection_features_received(const char* const jid)
+connection_features_received(const char *const jid)
 {
     if (g_hash_table_remove(conn.requested_features, jid) && g_hash_table_size(conn.requested_features) == 0) {
         sv_ev_connection_features_received();
@@ -468,7 +463,7 @@ connection_features_received(const char* const jid)
 }
 
 GHashTable*
-connection_get_features(const char* const jid)
+connection_get_features(const char *const jid)
 {
     return g_hash_table_lookup(conn.features_by_jid, jid);
 }
@@ -480,13 +475,13 @@ connection_get_available_resources(void)
 }
 
 void
-connection_add_available_resource(Resource* resource)
+connection_add_available_resource(Resource *resource)
 {
     g_hash_table_replace(conn.available_resources, strdup(resource->name), resource);
 }
 
 void
-connection_remove_available_resource(const char* const resource)
+connection_remove_available_resource(const char *const resource)
 {
     g_hash_table_remove(conn.available_resources, resource);
 }
@@ -498,7 +493,7 @@ connection_create_uuid(void)
 }
 
 void
-connection_free_uuid(char* uuid)
+connection_free_uuid(char *uuid)
 {
     if (uuid) {
         xmpp_free(conn.xmpp_ctx, uuid);
@@ -508,21 +503,21 @@ connection_free_uuid(char* uuid)
 char*
 connection_create_stanza_id(void)
 {
-    char* uuid = connection_create_uuid();
+    char *uuid = connection_create_uuid();
 
     assert(uuid != NULL);
 
-    gchar* hmac = g_compute_hmac_for_string(G_CHECKSUM_SHA256,
-                                            (guchar*)prof_identifier, strlen(prof_identifier),
-                                            uuid, strlen(uuid));
+    gchar *hmac = g_compute_hmac_for_string(G_CHECKSUM_SHA256,
+            (guchar*)prof_identifier, strlen(prof_identifier),
+            uuid, strlen(uuid));
 
-    GString* signature = g_string_new("");
+    GString *signature = g_string_new("");
     g_string_printf(signature, "%s%s", uuid, hmac);
 
     free(uuid);
     g_free(hmac);
 
-    char* b64 = g_base64_encode((unsigned char*)signature->str, signature->len);
+    char *b64 = g_base64_encode((unsigned char*)signature->str, signature->len);
     g_string_free(signature, TRUE);
 
     assert(b64 != NULL);
@@ -543,7 +538,7 @@ connection_get_presence_msg(void)
 }
 
 void
-connection_set_presence_msg(const char* const message)
+connection_set_presence_msg(const char *const message)
 {
     FREE_SET_NULL(conn.presence_message);
     if (message) {
@@ -558,8 +553,8 @@ connection_set_priority(const int priority)
 }
 
 static void
-_connection_handler(xmpp_conn_t* const xmpp_conn, const xmpp_conn_event_t status, const int error,
-                    xmpp_stream_error_t* const stream_error, void* const userdata)
+_connection_handler(xmpp_conn_t *const xmpp_conn, const xmpp_conn_event_t status, const int error,
+    xmpp_stream_error_t *const stream_error, void *const userdata)
 {
     conn.conn_last_event = status;
 
@@ -570,7 +565,7 @@ _connection_handler(xmpp_conn_t* const xmpp_conn, const xmpp_conn_event_t status
         log_debug("Connection handler: XMPP_CONN_CONNECT");
         conn.conn_status = JABBER_CONNECTED;
 
-        Jid* my_jid = jid_create(xmpp_conn_get_jid(conn.xmpp_conn));
+        Jid *my_jid = jid_create(xmpp_conn_get_jid(conn.xmpp_conn));
         conn.domain = strdup(my_jid->domainpart);
         jid_destroy(my_jid);
 
@@ -590,7 +585,7 @@ _connection_handler(xmpp_conn_t* const xmpp_conn, const xmpp_conn_event_t status
             log_debug("Connection handler: Lost connection for unknown reason");
             session_lost_connection();
 
-            // login attempt failed
+        // login attempt failed
         } else if (conn.conn_status != JABBER_DISCONNECTING) {
             log_debug("Connection handler: Login failed");
             session_login_failed();
@@ -615,9 +610,9 @@ _connection_handler(xmpp_conn_t* const xmpp_conn, const xmpp_conn_event_t status
 
 #ifdef HAVE_LIBMESODE
 static int
-_connection_certfail_cb(xmpp_tlscert_t* xmpptlscert, const char* const errormsg)
+_connection_certfail_cb(xmpp_tlscert_t *xmpptlscert, const char *const errormsg)
 {
-    TLSCertificate* cert = _xmppcert_to_profcert(xmpptlscert);
+    TLSCertificate *cert = _xmppcert_to_profcert(xmpptlscert);
 
     int res = sv_ev_certfail(errormsg, cert);
     tlscerts_free(cert);
@@ -626,7 +621,7 @@ _connection_certfail_cb(xmpp_tlscert_t* xmpptlscert, const char* const errormsg)
 }
 
 TLSCertificate*
-_xmppcert_to_profcert(xmpp_tlscert_t* xmpptlscert)
+_xmppcert_to_profcert(xmpp_tlscert_t *xmpptlscert)
 {
     return tlscerts_new(
         xmpp_conn_tlscert_fingerprint(xmpptlscert),
@@ -648,21 +643,13 @@ _xmpp_get_file_logger(void)
     xmpp_log_level_t xmpp_level = XMPP_LEVEL_ERROR;
 
     switch (prof_level) {
-    case PROF_LEVEL_DEBUG:
-        xmpp_level = XMPP_LEVEL_DEBUG;
-        break;
-    case PROF_LEVEL_INFO:
-        xmpp_level = XMPP_LEVEL_INFO;
-        break;
-    case PROF_LEVEL_WARN:
-        xmpp_level = XMPP_LEVEL_WARN;
-        break;
-    default:
-        xmpp_level = XMPP_LEVEL_ERROR;
-        break;
+    case PROF_LEVEL_DEBUG:  xmpp_level = XMPP_LEVEL_DEBUG; break;
+    case PROF_LEVEL_INFO:   xmpp_level = XMPP_LEVEL_INFO;  break;
+    case PROF_LEVEL_WARN:   xmpp_level = XMPP_LEVEL_WARN;  break;
+    default:                xmpp_level = XMPP_LEVEL_ERROR; break;
     }
 
-    xmpp_log_t* file_log = malloc(sizeof(xmpp_log_t));
+    xmpp_log_t *file_log = malloc(sizeof(xmpp_log_t));
     file_log->handler = _xmpp_file_logger;
     file_log->userdata = &xmpp_level;
 
@@ -670,23 +657,15 @@ _xmpp_get_file_logger(void)
 }
 
 static void
-_xmpp_file_logger(void* const userdata, const xmpp_log_level_t xmpp_level, const char* const area, const char* const msg)
+_xmpp_file_logger(void *const userdata, const xmpp_log_level_t xmpp_level, const char *const area, const char *const msg)
 {
     log_level_t prof_level = PROF_LEVEL_ERROR;
 
     switch (xmpp_level) {
-    case XMPP_LEVEL_DEBUG:
-        prof_level = PROF_LEVEL_DEBUG;
-        break;
-    case XMPP_LEVEL_INFO:
-        prof_level = PROF_LEVEL_INFO;
-        break;
-    case XMPP_LEVEL_WARN:
-        prof_level = PROF_LEVEL_WARN;
-        break;
-    default:
-        prof_level = PROF_LEVEL_ERROR;
-        break;
+    case XMPP_LEVEL_DEBUG:  prof_level = PROF_LEVEL_DEBUG; break;
+    case XMPP_LEVEL_INFO:   prof_level = PROF_LEVEL_INFO;  break;
+    case XMPP_LEVEL_WARN:   prof_level = PROF_LEVEL_WARN;  break;
+    default:                prof_level = PROF_LEVEL_ERROR; break;
     }
 
     log_msg(prof_level, area, msg);
@@ -696,11 +675,10 @@ _xmpp_file_logger(void* const userdata, const xmpp_log_level_t xmpp_level, const
     }
 }
 
-static void
-_random_bytes_init(void)
+static void _random_bytes_init(void)
 {
-    char* rndbytes_loc;
-    GKeyFile* rndbytes;
+    char *rndbytes_loc;
+    GKeyFile *rndbytes;
 
     rndbytes_loc = files_get_data_path(FILE_PROFANITY_IDENTIFIER);
 
@@ -718,10 +696,10 @@ _random_bytes_init(void)
         g_key_file_set_string(rndbytes, "identifier", "random_bytes", profanity_instance_id);
 
         gsize g_data_size;
-        gchar* g_accounts_data = g_key_file_to_data(rndbytes, &g_data_size, NULL);
+        gchar *g_accounts_data = g_key_file_to_data(rndbytes, &g_data_size, NULL);
 
-        gchar* base = g_path_get_dirname(rndbytes_loc);
-        gchar* true_loc = get_file_or_linked(rndbytes_loc, base);
+        gchar *base = g_path_get_dirname(rndbytes_loc);
+        gchar *true_loc = get_file_or_linked(rndbytes_loc, base);
         g_file_set_contents(true_loc, g_accounts_data, g_data_size, NULL);
 
         g_free(base);
@@ -733,20 +711,18 @@ _random_bytes_init(void)
     g_key_file_free(rndbytes);
 }
 
-static void
-_random_bytes_close(void)
+static void _random_bytes_close(void)
 {
     g_free(profanity_instance_id);
 }
 
-static void
-_compute_identifier(const char* barejid)
+static void _compute_identifier(const char *barejid)
 {
-    gchar* hmac = g_compute_hmac_for_string(G_CHECKSUM_SHA256,
-                                            (guchar*)profanity_instance_id, strlen(profanity_instance_id),
-                                            barejid, strlen(barejid));
+    gchar *hmac = g_compute_hmac_for_string(G_CHECKSUM_SHA256,
+            (guchar*)profanity_instance_id, strlen(profanity_instance_id),
+            barejid, strlen(barejid));
 
-    char* b64 = g_base64_encode((guchar*)hmac, XMPP_SHA1_DIGEST_SIZE);
+    char *b64 = g_base64_encode((guchar*)hmac, XMPP_SHA1_DIGEST_SIZE);
     assert(b64 != NULL);
     g_free(hmac);
 
@@ -756,8 +732,6 @@ _compute_identifier(const char* barejid)
     prof_identifier = b64;
 }
 
-const char*
-connection_get_profanity_identifier(void)
-{
+const char* connection_get_profanity_identifier(void) {
     return prof_identifier;
 }

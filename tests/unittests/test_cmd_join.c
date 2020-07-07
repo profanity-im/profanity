@@ -1,15 +1,15 @@
-#include <cmocka.h>
-#include <glib.h>
-#include <setjmp.h>
 #include <stdarg.h>
 #include <stddef.h>
+#include <setjmp.h>
+#include <cmocka.h>
 #include <stdlib.h>
 #include <string.h>
+#include <glib.h>
 
 #include "xmpp/xmpp.h"
 
-#include "ui/stub_ui.h"
 #include "ui/ui.h"
+#include "ui/stub_ui.h"
 
 #include "config/accounts.h"
 
@@ -18,8 +18,7 @@
 
 #define CMD_JOIN "/join"
 
-static void
-test_with_connection_status(jabber_conn_status_t status)
+static void test_with_connection_status(jabber_conn_status_t status)
 {
     will_return(connection_get_status, status);
 
@@ -29,28 +28,24 @@ test_with_connection_status(jabber_conn_status_t status)
     assert_true(result);
 }
 
-void
-cmd_join_shows_message_when_disconnecting(void** state)
+void cmd_join_shows_message_when_disconnecting(void **state)
 {
     test_with_connection_status(JABBER_DISCONNECTING);
 }
 
-void
-cmd_join_shows_message_when_connecting(void** state)
+void cmd_join_shows_message_when_connecting(void **state)
 {
     test_with_connection_status(JABBER_CONNECTING);
 }
 
-void
-cmd_join_shows_message_when_disconnected(void** state)
+void cmd_join_shows_message_when_disconnected(void **state)
 {
     test_with_connection_status(JABBER_DISCONNECTED);
 }
 
-void
-cmd_join_shows_error_message_when_invalid_room_jid(void** state)
+void cmd_join_shows_error_message_when_invalid_room_jid(void **state)
 {
-    gchar* args[] = { "//@@/", NULL };
+    gchar *args[] = { "//@@/", NULL };
 
     will_return(connection_get_status, JABBER_CONNECTED);
 
@@ -61,17 +56,16 @@ cmd_join_shows_error_message_when_invalid_room_jid(void** state)
     assert_true(result);
 }
 
-void
-cmd_join_uses_account_mucservice_when_no_service_specified(void** state)
+void cmd_join_uses_account_mucservice_when_no_service_specified(void **state)
 {
-    char* account_name = "an_account";
-    char* room = "room";
-    char* nick = "bob";
-    char* account_service = "conference.server.org";
-    char* expected_room = "room@conference.server.org";
-    gchar* args[] = { room, "nick", nick, NULL };
-    ProfAccount* account = account_new(account_name, "user@server.org", NULL, NULL,
-                                       TRUE, NULL, 0, "laptop", NULL, NULL, 0, 0, 0, 0, 0, account_service, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+    char *account_name = "an_account";
+    char *room = "room";
+    char *nick = "bob";
+    char *account_service = "conference.server.org";
+    char *expected_room = "room@conference.server.org";
+    gchar *args[] = { room, "nick", nick, NULL };
+    ProfAccount *account = account_new(account_name, "user@server.org", NULL, NULL,
+        TRUE, NULL, 0, "laptop", NULL, NULL, 0, 0, 0, 0, 0, account_service, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
 
     muc_init();
 
@@ -91,15 +85,14 @@ cmd_join_uses_account_mucservice_when_no_service_specified(void** state)
     muc_close();
 }
 
-void
-cmd_join_uses_supplied_nick(void** state)
+void cmd_join_uses_supplied_nick(void **state)
 {
-    char* account_name = "an_account";
-    char* room = "room@conf.server.org";
-    char* nick = "bob";
-    gchar* args[] = { room, "nick", nick, NULL };
-    ProfAccount* account = account_new(account_name, "user@server.org", NULL, NULL,
-                                       TRUE, NULL, 0, "laptop", NULL, NULL, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+    char *account_name = "an_account";
+    char *room = "room@conf.server.org";
+    char *nick = "bob";
+    gchar *args[] = { room, "nick", nick, NULL };
+    ProfAccount *account = account_new(account_name, "user@server.org", NULL, NULL,
+        TRUE, NULL, 0, "laptop", NULL, NULL, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
 
     muc_init();
 
@@ -119,15 +112,14 @@ cmd_join_uses_supplied_nick(void** state)
     muc_close();
 }
 
-void
-cmd_join_uses_account_nick_when_not_supplied(void** state)
+void cmd_join_uses_account_nick_when_not_supplied(void **state)
 {
-    char* account_name = "an_account";
-    char* room = "room2@conf.server.org";
-    char* account_nick = "a_nick";
-    gchar* args[] = { room, NULL };
-    ProfAccount* account = account_new(account_name, "user@server.org", NULL, NULL,
-                                       TRUE, NULL, 0, "laptop", NULL, NULL, 0, 0, 0, 0, 0, NULL, account_nick, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+    char *account_name = "an_account";
+    char *room = "room2@conf.server.org";
+    char *account_nick = "a_nick";
+    gchar *args[] = { room, NULL };
+    ProfAccount *account = account_new(account_name, "user@server.org", NULL, NULL,
+        TRUE, NULL, 0, "laptop", NULL, NULL, 0, 0, 0, 0, 0, NULL, account_nick, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
 
     muc_init();
 
@@ -147,18 +139,17 @@ cmd_join_uses_account_nick_when_not_supplied(void** state)
     muc_close();
 }
 
-void
-cmd_join_uses_password_when_supplied(void** state)
+void cmd_join_uses_password_when_supplied(void **state)
 {
-    char* account_name = "an_account";
-    char* room = "room";
-    char* password = "a_password";
-    char* account_nick = "a_nick";
-    char* account_service = "a_service";
-    char* expected_room = "room@a_service";
-    gchar* args[] = { room, "password", password, NULL };
-    ProfAccount* account = account_new(account_name, "user@server.org", NULL, NULL,
-                                       TRUE, NULL, 0, "laptop", NULL, NULL, 0, 0, 0, 0, 0, account_service, account_nick, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+    char *account_name = "an_account";
+    char *room = "room";
+    char *password = "a_password";
+    char *account_nick = "a_nick";
+    char *account_service = "a_service";
+    char *expected_room = "room@a_service";
+    gchar *args[] = { room, "password", password, NULL };
+    ProfAccount *account = account_new(account_name, "user@server.org", NULL, NULL,
+        TRUE, NULL, 0, "laptop", NULL, NULL, 0, 0, 0, 0, 0, account_service, account_nick, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
 
     muc_init();
 

@@ -33,9 +33,9 @@
  *
  */
 
-#include <assert.h>
 #include <stdlib.h>
 #include <string.h>
+#include <assert.h>
 
 #include <glib.h>
 
@@ -43,51 +43,50 @@
 #include "tools/autocomplete.h"
 #include "ui/ui.h"
 #include "ui/window_list.h"
-#include "xmpp/contact.h"
 #include "xmpp/jid.h"
 #include "xmpp/muc.h"
+#include "xmpp/contact.h"
 
 #ifdef HAVE_OMEMO
 #include "omemo/omemo.h"
 #endif
 
-typedef struct _muc_room_t
-{
-    char* room; // e.g. test@conference.server
-    char* nick; // e.g. Some User
+typedef struct _muc_room_t {
+    char *room; // e.g. test@conference.server
+    char *nick; // e.g. Some User
     muc_role_t role;
     muc_affiliation_t affiliation;
-    char* password;
-    char* subject;
-    char* autocomplete_prefix;
+    char *password;
+    char *subject;
+    char *autocomplete_prefix;
     gboolean pending_config;
-    GList* pending_broadcasts;
+    GList *pending_broadcasts;
     gboolean autojoin;
     gboolean pending_nick_change;
-    GHashTable* roster;
-    GHashTable* members;
+    GHashTable *roster;
+    GHashTable *members;
     Autocomplete nick_ac;
     Autocomplete jid_ac;
-    GHashTable* nick_changes;
+    GHashTable *nick_changes;
     gboolean roster_received;
     muc_member_type_t member_type;
     muc_anonymity_type_t anonymity_type;
 } ChatRoom;
 
-GHashTable* rooms = NULL;
-GHashTable* invite_passwords = NULL;
+GHashTable *rooms = NULL;
+GHashTable *invite_passwords = NULL;
 Autocomplete invite_ac = NULL;
 Autocomplete confservers_ac = NULL;
 
-static void _free_room(ChatRoom* room);
-static gint _compare_occupants(Occupant* a, Occupant* b);
-static muc_role_t _role_from_string(const char* const role);
-static muc_affiliation_t _affiliation_from_string(const char* const affiliation);
+static void _free_room(ChatRoom *room);
+static gint _compare_occupants(Occupant *a, Occupant *b);
+static muc_role_t _role_from_string(const char *const role);
+static muc_affiliation_t _affiliation_from_string(const char *const affiliation);
 static char* _role_to_string(muc_role_t role);
 static char* _affiliation_to_string(muc_affiliation_t affiliation);
-static Occupant* _muc_occupant_new(const char* const nick, const char* const jid, muc_role_t role,
-                                   muc_affiliation_t affiliation, resource_presence_t presence, const char* const status);
-static void _occupant_free(Occupant* occupant);
+static Occupant* _muc_occupant_new(const char *const nick, const char *const jid, muc_role_t role,
+    muc_affiliation_t affiliation, resource_presence_t presence, const char *const status);
+static void _occupant_free(Occupant *occupant);
 
 void
 muc_init(void)
@@ -112,13 +111,13 @@ muc_close(void)
 }
 
 void
-muc_confserver_add(const char* const server)
+muc_confserver_add(const char *const server)
 {
     autocomplete_add(confservers_ac, server);
 }
 
 void
-muc_invites_add(const char* const room, const char* const password)
+muc_invites_add(const char *const room, const char *const password)
 {
     autocomplete_add(invite_ac, room);
     if (password) {
@@ -127,7 +126,7 @@ muc_invites_add(const char* const room, const char* const password)
 }
 
 void
-muc_invites_remove(const char* const room)
+muc_invites_remove(const char *const room)
 {
     autocomplete_remove(invite_ac, room);
     g_hash_table_remove(invite_passwords, room);
@@ -146,16 +145,16 @@ muc_invites(void)
 }
 
 char*
-muc_invite_password(const char* const room)
+muc_invite_password(const char *const room)
 {
     return g_hash_table_lookup(invite_passwords, room);
 }
 
 gboolean
-muc_invites_contain(const char* const room)
+muc_invites_contain(const char *const room)
 {
-    GList* invites = autocomplete_create_list(invite_ac);
-    GList* curr = invites;
+    GList *invites = autocomplete_create_list(invite_ac);
+    GList *curr = invites;
     while (curr) {
         if (strcmp(curr->data, room) == 0) {
             g_list_free_full(invites, g_free);
@@ -182,13 +181,13 @@ muc_confserver_reset_ac(void)
 }
 
 char*
-muc_invites_find(const char* const search_str, gboolean previous, void* context)
+muc_invites_find(const char *const search_str, gboolean previous, void *context)
 {
     return autocomplete_complete(invite_ac, search_str, TRUE, previous);
 }
 
 char*
-muc_confserver_find(const char* const search_str, gboolean previous, void* context)
+muc_confserver_find(const char *const search_str, gboolean previous, void *context)
 {
     return autocomplete_complete(confservers_ac, search_str, TRUE, previous);
 }
@@ -209,9 +208,9 @@ muc_confserver_clear(void)
 }
 
 void
-muc_join(const char* const room, const char* const nick, const char* const password, gboolean autojoin)
+muc_join(const char *const room, const char *const nick, const char *const password, gboolean autojoin)
 {
-    ChatRoom* new_room = malloc(sizeof(ChatRoom));
+    ChatRoom *new_room = malloc(sizeof(ChatRoom));
     new_room->room = strdup(room);
     new_room->nick = strdup(nick);
     new_room->role = MUC_ROLE_NONE;
@@ -240,35 +239,36 @@ muc_join(const char* const room, const char* const nick, const char* const passw
 }
 
 void
-muc_leave(const char* const room)
+muc_leave(const char *const room)
 {
     g_hash_table_remove(rooms, room);
 }
 
 gboolean
-muc_requires_config(const char* const room)
+muc_requires_config(const char *const room)
 {
-    ChatRoom* chat_room = g_hash_table_lookup(rooms, room);
+    ChatRoom *chat_room = g_hash_table_lookup(rooms, room);
     if (chat_room) {
         return chat_room->pending_config;
     } else {
         return FALSE;
     }
+
 }
 
 void
-muc_set_requires_config(const char* const room, gboolean val)
+muc_set_requires_config(const char *const room, gboolean val)
 {
-    ChatRoom* chat_room = g_hash_table_lookup(rooms, room);
+    ChatRoom *chat_room = g_hash_table_lookup(rooms, room);
     if (chat_room) {
         chat_room->pending_config = val;
     }
 }
 
 void
-muc_set_features(const char* const room, GSList* features)
+muc_set_features(const char *const room, GSList *features)
 {
-    ChatRoom* chat_room = g_hash_table_lookup(rooms, room);
+    ChatRoom *chat_room = g_hash_table_lookup(rooms, room);
     if (chat_room && features) {
         if (g_slist_find_custom(features, "muc_membersonly", (GCompareFunc)g_strcmp0)) {
             chat_room->member_type = MUC_MEMBER_TYPE_MEMBERS_ONLY;
@@ -289,16 +289,16 @@ muc_set_features(const char* const room, GSList* features)
  * Returns TRUE if the user is currently in the room
  */
 gboolean
-muc_active(const char* const room)
+muc_active(const char *const room)
 {
-    ChatRoom* chat_room = g_hash_table_lookup(rooms, room);
+    ChatRoom *chat_room = g_hash_table_lookup(rooms, room);
     return (chat_room != NULL);
 }
 
 gboolean
-muc_autojoin(const char* const room)
+muc_autojoin(const char *const room)
 {
-    ChatRoom* chat_room = g_hash_table_lookup(rooms, room);
+    ChatRoom *chat_room = g_hash_table_lookup(rooms, room);
     if (chat_room) {
         return chat_room->autojoin;
     } else {
@@ -307,9 +307,9 @@ muc_autojoin(const char* const room)
 }
 
 void
-muc_set_subject(const char* const room, const char* const subject)
+muc_set_subject(const char *const room, const char *const subject)
 {
-    ChatRoom* chat_room = g_hash_table_lookup(rooms, room);
+    ChatRoom *chat_room = g_hash_table_lookup(rooms, room);
     if (chat_room) {
         free(chat_room->subject);
         if (subject) {
@@ -321,9 +321,9 @@ muc_set_subject(const char* const room, const char* const subject)
 }
 
 char*
-muc_subject(const char* const room)
+muc_subject(const char *const room)
 {
-    ChatRoom* chat_room = g_hash_table_lookup(rooms, room);
+    ChatRoom *chat_room = g_hash_table_lookup(rooms, room);
     if (chat_room) {
         return chat_room->subject;
     } else {
@@ -332,18 +332,18 @@ muc_subject(const char* const room)
 }
 
 void
-muc_pending_broadcasts_add(const char* const room, const char* const message)
+muc_pending_broadcasts_add(const char *const room, const char *const message)
 {
-    ChatRoom* chat_room = g_hash_table_lookup(rooms, room);
+    ChatRoom *chat_room = g_hash_table_lookup(rooms, room);
     if (chat_room) {
         chat_room->pending_broadcasts = g_list_append(chat_room->pending_broadcasts, strdup(message));
     }
 }
 
 GList*
-muc_pending_broadcasts(const char* const room)
+muc_pending_broadcasts(const char *const room)
 {
-    ChatRoom* chat_room = g_hash_table_lookup(rooms, room);
+    ChatRoom *chat_room = g_hash_table_lookup(rooms, room);
     if (chat_room) {
         return chat_room->pending_broadcasts;
     } else {
@@ -352,9 +352,9 @@ muc_pending_broadcasts(const char* const room)
 }
 
 char*
-muc_old_nick(const char* const room, const char* const new_nick)
+muc_old_nick(const char *const room, const char *const new_nick)
 {
-    ChatRoom* chat_room = g_hash_table_lookup(rooms, room);
+    ChatRoom *chat_room = g_hash_table_lookup(rooms, room);
     if (chat_room && chat_room->pending_nick_change) {
         return g_hash_table_lookup(chat_room->nick_changes, new_nick);
     } else {
@@ -367,9 +367,9 @@ muc_old_nick(const char* const room, const char* const new_nick)
  * and is awaiting the response
  */
 void
-muc_nick_change_start(const char* const room, const char* const new_nick)
+muc_nick_change_start(const char *const room, const char *const new_nick)
 {
-    ChatRoom* chat_room = g_hash_table_lookup(rooms, room);
+    ChatRoom *chat_room = g_hash_table_lookup(rooms, room);
     if (chat_room) {
         chat_room->pending_nick_change = TRUE;
         g_hash_table_insert(chat_room->nick_changes, strdup(new_nick), strdup(chat_room->nick));
@@ -381,9 +381,9 @@ muc_nick_change_start(const char* const room, const char* const new_nick)
  * nick change
  */
 gboolean
-muc_nick_change_pending(const char* const room)
+muc_nick_change_pending(const char *const room)
 {
-    ChatRoom* chat_room = g_hash_table_lookup(rooms, room);
+    ChatRoom *chat_room = g_hash_table_lookup(rooms, room);
     if (chat_room) {
         return chat_room->pending_nick_change;
     } else {
@@ -396,9 +396,9 @@ muc_nick_change_pending(const char* const room)
  * the service has responded
  */
 void
-muc_nick_change_complete(const char* const room, const char* const nick)
+muc_nick_change_complete(const char *const room, const char *const nick)
 {
-    ChatRoom* chat_room = g_hash_table_lookup(rooms, room);
+    ChatRoom *chat_room = g_hash_table_lookup(rooms, room);
     if (chat_room) {
         g_hash_table_remove(chat_room->roster, chat_room->nick);
         autocomplete_remove(chat_room->nick_ac, chat_room->nick);
@@ -425,9 +425,9 @@ muc_rooms(void)
  * The nickname is owned by the chat room and should not be modified or freed
  */
 char*
-muc_nick(const char* const room)
+muc_nick(const char *const room)
 {
-    ChatRoom* chat_room = g_hash_table_lookup(rooms, room);
+    ChatRoom *chat_room = g_hash_table_lookup(rooms, room);
     if (chat_room) {
         return chat_room->nick;
     } else {
@@ -440,9 +440,9 @@ muc_nick(const char* const room)
  * The password is owned by the chat room and should not be modified or freed
  */
 char*
-muc_password(const char* const room)
+muc_password(const char *const room)
 {
-    ChatRoom* chat_room = g_hash_table_lookup(rooms, room);
+    ChatRoom *chat_room = g_hash_table_lookup(rooms, room);
     if (chat_room) {
         return chat_room->password;
     } else {
@@ -454,11 +454,11 @@ muc_password(const char* const room)
  * Returns TRUE if the specified nick exists in the room's roster
  */
 gboolean
-muc_roster_contains_nick(const char* const room, const char* const nick)
+muc_roster_contains_nick(const char *const room, const char *const nick)
 {
-    ChatRoom* chat_room = g_hash_table_lookup(rooms, room);
+    ChatRoom *chat_room = g_hash_table_lookup(rooms, room);
     if (chat_room) {
-        Occupant* occupant = g_hash_table_lookup(chat_room->roster, nick);
+        Occupant *occupant = g_hash_table_lookup(chat_room->roster, nick);
         return (occupant != NULL);
     } else {
         return FALSE;
@@ -469,31 +469,32 @@ muc_roster_contains_nick(const char* const room, const char* const nick)
  * Add a new chat room member to the room's roster
  */
 gboolean
-muc_roster_add(const char* const room, const char* const nick, const char* const jid, const char* const role,
-               const char* const affiliation, const char* const show, const char* const status)
+muc_roster_add(const char *const room, const char *const nick, const char *const jid, const char *const role,
+    const char *const affiliation, const char *const show, const char *const status)
 {
-    ChatRoom* chat_room = g_hash_table_lookup(rooms, room);
+    ChatRoom *chat_room = g_hash_table_lookup(rooms, room);
     gboolean updated = FALSE;
     resource_presence_t new_presence = resource_presence_from_string(show);
 
     if (chat_room) {
-        Occupant* old = g_hash_table_lookup(chat_room->roster, nick);
+        Occupant *old = g_hash_table_lookup(chat_room->roster, nick);
 
         if (!old) {
             updated = TRUE;
             autocomplete_add(chat_room->nick_ac, nick);
-        } else if (old->presence != new_presence || (g_strcmp0(old->status, status) != 0)) {
+        } else if (old->presence != new_presence ||
+                    (g_strcmp0(old->status, status) != 0)) {
             updated = TRUE;
         }
 
         resource_presence_t presence = resource_presence_from_string(show);
         muc_role_t role_t = _role_from_string(role);
         muc_affiliation_t affiliation_t = _affiliation_from_string(affiliation);
-        Occupant* occupant = _muc_occupant_new(nick, jid, role_t, affiliation_t, presence, status);
+        Occupant *occupant = _muc_occupant_new(nick, jid, role_t, affiliation_t, presence, status);
         g_hash_table_replace(chat_room->roster, strdup(nick), occupant);
 
         if (jid) {
-            Jid* jidp = jid_create(jid);
+            Jid *jidp = jid_create(jid);
             if (jidp->barejid) {
                 autocomplete_add(chat_room->jid_ac, jidp->barejid);
             }
@@ -508,9 +509,9 @@ muc_roster_add(const char* const room, const char* const nick, const char* const
  * Remove a room member from the room's roster
  */
 void
-muc_roster_remove(const char* const room, const char* const nick)
+muc_roster_remove(const char *const room, const char *const nick)
 {
-    ChatRoom* chat_room = g_hash_table_lookup(rooms, room);
+    ChatRoom *chat_room = g_hash_table_lookup(rooms, room);
     if (chat_room) {
         g_hash_table_remove(chat_room->roster, nick);
         autocomplete_remove(chat_room->nick_ac, nick);
@@ -518,11 +519,11 @@ muc_roster_remove(const char* const room, const char* const nick)
 }
 
 Occupant*
-muc_roster_item(const char* const room, const char* const nick)
+muc_roster_item(const char *const room, const char *const nick)
 {
-    ChatRoom* chat_room = g_hash_table_lookup(rooms, room);
+    ChatRoom *chat_room = g_hash_table_lookup(rooms, room);
     if (chat_room) {
-        Occupant* occupant = g_hash_table_lookup(chat_room->roster, nick);
+        Occupant *occupant = g_hash_table_lookup(chat_room->roster, nick);
         return occupant;
     } else {
         return NULL;
@@ -533,14 +534,14 @@ muc_roster_item(const char* const room, const char* const nick)
  * Return a list of PContacts representing the room members in the room's roster
  */
 GList*
-muc_roster(const char* const room)
+muc_roster(const char *const room)
 {
-    ChatRoom* chat_room = g_hash_table_lookup(rooms, room);
+    ChatRoom *chat_room = g_hash_table_lookup(rooms, room);
     if (chat_room) {
-        GList* result = NULL;
-        GList* occupants = g_hash_table_get_values(chat_room->roster);
+        GList *result = NULL;
+        GList *occupants = g_hash_table_get_values(chat_room->roster);
 
-        GList* curr = occupants;
+        GList *curr = occupants;
         while (curr) {
             result = g_list_insert_sorted(result, curr->data, (GCompareFunc)_compare_occupants);
             curr = g_list_next(curr);
@@ -558,9 +559,9 @@ muc_roster(const char* const room)
  * Return a Autocomplete representing the room member's in the roster
  */
 Autocomplete
-muc_roster_ac(const char* const room)
+muc_roster_ac(const char *const room)
 {
-    ChatRoom* chat_room = g_hash_table_lookup(rooms, room);
+    ChatRoom *chat_room = g_hash_table_lookup(rooms, room);
     if (chat_room) {
         return chat_room->nick_ac;
     } else {
@@ -569,9 +570,9 @@ muc_roster_ac(const char* const room)
 }
 
 Autocomplete
-muc_roster_jid_ac(const char* const room)
+muc_roster_jid_ac(const char *const room)
 {
-    ChatRoom* chat_room = g_hash_table_lookup(rooms, room);
+    ChatRoom *chat_room = g_hash_table_lookup(rooms, room);
     if (chat_room) {
         return chat_room->jid_ac;
     } else {
@@ -583,9 +584,9 @@ muc_roster_jid_ac(const char* const room)
  * Set to TRUE when the rooms roster has been fully received
  */
 void
-muc_roster_set_complete(const char* const room)
+muc_roster_set_complete(const char *const room)
 {
-    ChatRoom* chat_room = g_hash_table_lookup(rooms, room);
+    ChatRoom *chat_room = g_hash_table_lookup(rooms, room);
     if (chat_room) {
         chat_room->roster_received = TRUE;
     }
@@ -595,9 +596,9 @@ muc_roster_set_complete(const char* const room)
  * Returns TRUE id the rooms roster has been fully received
  */
 gboolean
-muc_roster_complete(const char* const room)
+muc_roster_complete(const char *const room)
 {
-    ChatRoom* chat_room = g_hash_table_lookup(rooms, room);
+    ChatRoom *chat_room = g_hash_table_lookup(rooms, room);
     if (chat_room) {
         return chat_room->roster_received;
     } else {
@@ -606,36 +607,36 @@ muc_roster_complete(const char* const room)
 }
 
 gboolean
-muc_occupant_available(Occupant* occupant)
+muc_occupant_available(Occupant *occupant)
 {
     return (occupant->presence == RESOURCE_ONLINE || occupant->presence == RESOURCE_CHAT);
 }
 
 const char*
-muc_occupant_affiliation_str(Occupant* occupant)
+muc_occupant_affiliation_str(Occupant *occupant)
 {
     return _affiliation_to_string(occupant->affiliation);
 }
 
 const char*
-muc_occupant_role_str(Occupant* occupant)
+muc_occupant_role_str(Occupant *occupant)
 {
     return _role_to_string(occupant->role);
 }
 
 GSList*
-muc_occupants_by_role(const char* const room, muc_role_t role)
+muc_occupants_by_role(const char *const room, muc_role_t role)
 {
-    ChatRoom* chat_room = g_hash_table_lookup(rooms, room);
+    ChatRoom *chat_room = g_hash_table_lookup(rooms, room);
     if (chat_room) {
-        GSList* result = NULL;
+        GSList *result = NULL;
         GHashTableIter iter;
         gpointer key;
         gpointer value;
 
         g_hash_table_iter_init(&iter, chat_room->roster);
         while (g_hash_table_iter_next(&iter, &key, &value)) {
-            Occupant* occupant = (Occupant*)value;
+            Occupant *occupant = (Occupant *)value;
             if (occupant->role == role) {
                 result = g_slist_insert_sorted(result, value, (GCompareFunc)_compare_occupants);
             }
@@ -647,18 +648,18 @@ muc_occupants_by_role(const char* const room, muc_role_t role)
 }
 
 GSList*
-muc_occupants_by_affiliation(const char* const room, muc_affiliation_t affiliation)
+muc_occupants_by_affiliation(const char *const room, muc_affiliation_t affiliation)
 {
-    ChatRoom* chat_room = g_hash_table_lookup(rooms, room);
+    ChatRoom *chat_room = g_hash_table_lookup(rooms, room);
     if (chat_room) {
-        GSList* result = NULL;
+        GSList *result = NULL;
         GHashTableIter iter;
         gpointer key;
         gpointer value;
 
         g_hash_table_iter_init(&iter, chat_room->roster);
         while (g_hash_table_iter_next(&iter, &key, &value)) {
-            Occupant* occupant = (Occupant*)value;
+            Occupant *occupant = (Occupant *)value;
             if (occupant->affiliation == affiliation) {
                 result = g_slist_insert_sorted(result, value, (GCompareFunc)_compare_occupants);
             }
@@ -674,9 +675,9 @@ muc_occupants_by_affiliation(const char* const room, muc_affiliation_t affiliati
  * is in progress
  */
 void
-muc_occupant_nick_change_start(const char* const room, const char* const new_nick, const char* const old_nick)
+muc_occupant_nick_change_start(const char *const room, const char *const new_nick, const char *const old_nick)
 {
-    ChatRoom* chat_room = g_hash_table_lookup(rooms, room);
+    ChatRoom *chat_room = g_hash_table_lookup(rooms, room);
     if (chat_room) {
         g_hash_table_insert(chat_room->nick_changes, strdup(new_nick), strdup(old_nick));
         muc_roster_remove(room, old_nick);
@@ -690,13 +691,13 @@ muc_occupant_nick_change_start(const char* const room, const char* const new_nic
  * the caller
  */
 char*
-muc_roster_nick_change_complete(const char* const room, const char* const nick)
+muc_roster_nick_change_complete(const char *const room, const char *const nick)
 {
-    ChatRoom* chat_room = g_hash_table_lookup(rooms, room);
+    ChatRoom *chat_room = g_hash_table_lookup(rooms, room);
     if (chat_room) {
-        char* old_nick = g_hash_table_lookup(chat_room->nick_changes, nick);
+        char *old_nick = g_hash_table_lookup(chat_room->nick_changes, nick);
         if (old_nick) {
-            char* old_nick_cpy = strdup(old_nick);
+            char *old_nick_cpy = strdup(old_nick);
             g_hash_table_remove(chat_room->nick_changes, nick);
 
             return old_nick_cpy;
@@ -707,40 +708,40 @@ muc_roster_nick_change_complete(const char* const room, const char* const nick)
 }
 
 char*
-muc_autocomplete(ProfWin* window, const char* const input, gboolean previous)
+muc_autocomplete(ProfWin *window, const char *const input, gboolean previous)
 {
     if (window->type != WIN_MUC) {
         return NULL;
     }
 
-    ProfMucWin* mucwin = (ProfMucWin*)window;
+    ProfMucWin *mucwin = (ProfMucWin*)window;
     assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
-    ChatRoom* chat_room = g_hash_table_lookup(rooms, mucwin->roomjid);
+    ChatRoom *chat_room = g_hash_table_lookup(rooms, mucwin->roomjid);
     if (chat_room == NULL || chat_room->nick_ac == NULL) {
         return NULL;
     }
 
-    const char* search_str = NULL;
+    const char * search_str = NULL;
 
-    gchar* last_space = g_strrstr(input, " ");
+    gchar *last_space = g_strrstr(input, " ");
     if (!last_space) {
         search_str = input;
         if (!chat_room->autocomplete_prefix) {
             chat_room->autocomplete_prefix = strdup("");
         }
     } else {
-        search_str = last_space + 1;
+        search_str = last_space+1;
         if (!chat_room->autocomplete_prefix) {
             chat_room->autocomplete_prefix = g_strndup(input, search_str - input);
         }
     }
 
-    char* result = autocomplete_complete(chat_room->nick_ac, search_str, FALSE, previous);
+    char *result = autocomplete_complete(chat_room->nick_ac, search_str, FALSE, previous);
     if (result == NULL) {
         return NULL;
     }
 
-    GString* replace_with = g_string_new(chat_room->autocomplete_prefix);
+    GString *replace_with = g_string_new(chat_room->autocomplete_prefix);
     g_string_append(replace_with, result);
 
     if (strlen(chat_room->autocomplete_prefix) == 0) {
@@ -753,9 +754,9 @@ muc_autocomplete(ProfWin* window, const char* const input, gboolean previous)
 }
 
 void
-muc_jid_autocomplete_reset(const char* const room)
+muc_jid_autocomplete_reset(const char *const room)
 {
-    ChatRoom* chat_room = g_hash_table_lookup(rooms, room);
+    ChatRoom *chat_room = g_hash_table_lookup(rooms, room);
     if (chat_room) {
         if (chat_room->jid_ac) {
             autocomplete_reset(chat_room->jid_ac);
@@ -764,15 +765,15 @@ muc_jid_autocomplete_reset(const char* const room)
 }
 
 void
-muc_jid_autocomplete_add_all(const char* const room, GSList* jids)
+muc_jid_autocomplete_add_all(const char *const room, GSList *jids)
 {
-    ChatRoom* chat_room = g_hash_table_lookup(rooms, room);
+    ChatRoom *chat_room = g_hash_table_lookup(rooms, room);
     if (chat_room) {
         if (chat_room->jid_ac) {
-            GSList* curr_jid = jids;
+            GSList *curr_jid = jids;
             while (curr_jid) {
-                const char* jid = curr_jid->data;
-                Jid* jidp = jid_create(jid);
+                const char *jid = curr_jid->data;
+                Jid *jidp = jid_create(jid);
                 if (jidp) {
                     if (jidp->barejid) {
                         autocomplete_add(chat_room->jid_ac, jidp->barejid);
@@ -786,9 +787,9 @@ muc_jid_autocomplete_add_all(const char* const room, GSList* jids)
 }
 
 void
-muc_autocomplete_reset(const char* const room)
+muc_autocomplete_reset(const char *const room)
 {
-    ChatRoom* chat_room = g_hash_table_lookup(rooms, room);
+    ChatRoom *chat_room = g_hash_table_lookup(rooms, room);
     if (chat_room) {
         if (chat_room->nick_ac) {
             autocomplete_reset(chat_room->nick_ac);
@@ -802,9 +803,9 @@ muc_autocomplete_reset(const char* const room)
 }
 
 char*
-muc_role_str(const char* const room)
+muc_role_str(const char *const room)
 {
-    ChatRoom* chat_room = g_hash_table_lookup(rooms, room);
+    ChatRoom *chat_room = g_hash_table_lookup(rooms, room);
     if (chat_room) {
         return _role_to_string(chat_room->role);
     } else {
@@ -813,18 +814,18 @@ muc_role_str(const char* const room)
 }
 
 void
-muc_set_role(const char* const room, const char* const role)
+muc_set_role(const char *const room, const char *const role)
 {
-    ChatRoom* chat_room = g_hash_table_lookup(rooms, room);
+    ChatRoom *chat_room = g_hash_table_lookup(rooms, room);
     if (chat_room) {
         chat_room->role = _role_from_string(role);
     }
 }
 
 char*
-muc_affiliation_str(const char* const room)
+muc_affiliation_str(const char *const room)
 {
-    ChatRoom* chat_room = g_hash_table_lookup(rooms, room);
+    ChatRoom *chat_room = g_hash_table_lookup(rooms, room);
     if (chat_room) {
         return _affiliation_to_string(chat_room->affiliation);
     } else {
@@ -833,18 +834,18 @@ muc_affiliation_str(const char* const room)
 }
 
 void
-muc_set_affiliation(const char* const room, const char* const affiliation)
+muc_set_affiliation(const char *const room, const char *const affiliation)
 {
-    ChatRoom* chat_room = g_hash_table_lookup(rooms, room);
+    ChatRoom *chat_room = g_hash_table_lookup(rooms, room);
     if (chat_room) {
         chat_room->affiliation = _affiliation_from_string(affiliation);
     }
 }
 
 muc_member_type_t
-muc_member_type(const char* const room)
+muc_member_type(const char *const room)
 {
-    ChatRoom* chat_room = g_hash_table_lookup(rooms, room);
+    ChatRoom *chat_room = g_hash_table_lookup(rooms, room);
     if (chat_room) {
         return chat_room->member_type;
     } else {
@@ -853,9 +854,9 @@ muc_member_type(const char* const room)
 }
 
 muc_anonymity_type_t
-muc_anonymity_type(const char* const room)
+muc_anonymity_type(const char *const room)
 {
-    ChatRoom* chat_room = g_hash_table_lookup(rooms, room);
+    ChatRoom *chat_room = g_hash_table_lookup(rooms, room);
     if (chat_room) {
         return chat_room->anonymity_type;
     } else {
@@ -867,9 +868,9 @@ muc_anonymity_type(const char* const room)
  * Return the list of jid affiliated as member in the room
  */
 GList*
-muc_members(const char* const room)
+muc_members(const char *const room)
 {
-    ChatRoom* chat_room = g_hash_table_lookup(rooms, room);
+    ChatRoom *chat_room = g_hash_table_lookup(rooms, room);
     if (chat_room) {
         return g_hash_table_get_keys(chat_room->members);
     } else {
@@ -878,14 +879,14 @@ muc_members(const char* const room)
 }
 
 void
-muc_members_add(const char* const room, const char* const jid)
+muc_members_add(const char *const room, const char *const jid)
 {
-    ChatRoom* chat_room = g_hash_table_lookup(rooms, room);
+    ChatRoom *chat_room = g_hash_table_lookup(rooms, room);
     if (chat_room) {
         if (g_hash_table_insert(chat_room->members, strdup(jid), NULL)) {
 #ifdef HAVE_OMEMO
-            if (chat_room->anonymity_type == MUC_ANONYMITY_TYPE_NONANONYMOUS) {
-                char* our_barejid = connection_get_barejid();
+            if(chat_room->anonymity_type == MUC_ANONYMITY_TYPE_NONANONYMOUS ) {
+                char *our_barejid = connection_get_barejid();
                 if (strcmp(jid, our_barejid) != 0) {
                     omemo_start_session(jid);
                 }
@@ -897,16 +898,16 @@ muc_members_add(const char* const room, const char* const jid)
 }
 
 void
-muc_members_remove(const char* const room, const char* const jid)
+muc_members_remove(const char *const room, const char *const jid)
 {
-    ChatRoom* chat_room = g_hash_table_lookup(rooms, room);
+    ChatRoom *chat_room = g_hash_table_lookup(rooms, room);
     if (chat_room) {
         g_hash_table_remove(chat_room->members, jid);
     }
 }
 
 void
-muc_members_update(const char* const room, const char* const jid, const char* const affiliation)
+muc_members_update(const char *const room, const char *const jid, const char *const affiliation)
 {
     if (strcmp(affiliation, "outcast") == 0 || strcmp(affiliation, "none") == 0) {
         muc_members_remove(room, jid);
@@ -916,7 +917,7 @@ muc_members_update(const char* const room, const char* const jid, const char* co
 }
 
 static void
-_free_room(ChatRoom* room)
+_free_room(ChatRoom *room)
 {
     if (room) {
         free(room->room);
@@ -943,10 +944,10 @@ _free_room(ChatRoom* room)
 }
 
 static gint
-_compare_occupants(Occupant* a, Occupant* b)
+_compare_occupants(Occupant *a, Occupant *b)
 {
-    const char* utf8_str_a = a->nick_collate_key;
-    const char* utf8_str_b = b->nick_collate_key;
+    const char * utf8_str_a = a->nick_collate_key;
+    const char * utf8_str_b = b->nick_collate_key;
 
     gint result = g_strcmp0(utf8_str_a, utf8_str_b);
 
@@ -954,7 +955,7 @@ _compare_occupants(Occupant* a, Occupant* b)
 }
 
 static muc_role_t
-_role_from_string(const char* const role)
+_role_from_string(const char *const role)
 {
     if (role) {
         if (g_strcmp0(role, "visitor") == 0) {
@@ -974,7 +975,7 @@ _role_from_string(const char* const role)
 static char*
 _role_to_string(muc_role_t role)
 {
-    char* result = NULL;
+    char *result = NULL;
 
     switch (role) {
     case MUC_ROLE_NONE:
@@ -998,7 +999,7 @@ _role_to_string(muc_role_t role)
 }
 
 static muc_affiliation_t
-_affiliation_from_string(const char* const affiliation)
+_affiliation_from_string(const char *const affiliation)
 {
     if (affiliation) {
         if (g_strcmp0(affiliation, "outcast") == 0) {
@@ -1020,7 +1021,7 @@ _affiliation_from_string(const char* const affiliation)
 static char*
 _affiliation_to_string(muc_affiliation_t affiliation)
 {
-    char* result = NULL;
+    char *result = NULL;
 
     switch (affiliation) {
     case MUC_AFFILIATION_NONE:
@@ -1047,10 +1048,10 @@ _affiliation_to_string(muc_affiliation_t affiliation)
 }
 
 static Occupant*
-_muc_occupant_new(const char* const nick, const char* const jid, muc_role_t role, muc_affiliation_t affiliation,
-                  resource_presence_t presence, const char* const status)
+_muc_occupant_new(const char *const nick, const char *const jid, muc_role_t role, muc_affiliation_t affiliation,
+    resource_presence_t presence, const char *const status)
 {
-    Occupant* occupant = malloc(sizeof(Occupant));
+    Occupant *occupant = malloc(sizeof(Occupant));
 
     if (nick) {
         occupant->nick = strdup(nick);
@@ -1081,7 +1082,7 @@ _muc_occupant_new(const char* const nick, const char* const jid, muc_role_t role
 }
 
 static void
-_occupant_free(Occupant* occupant)
+_occupant_free(Occupant *occupant)
 {
     if (occupant) {
         free(occupant->nick);

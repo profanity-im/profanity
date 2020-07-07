@@ -36,13 +36,13 @@
 
 #include "config.h"
 
-#include <glib.h>
 #include <stdlib.h>
+#include <glib.h>
 
-#include "config/preferences.h"
-#include "database.h"
-#include "event/common.h"
 #include "log.h"
+#include "database.h"
+#include "config/preferences.h"
+#include "event/common.h"
 #include "plugins/plugins.h"
 #include "ui/window_list.h"
 #include "xmpp/chat_session.h"
@@ -61,14 +61,14 @@
 #endif
 
 jabber_conn_status_t
-cl_ev_connect_jid(const char* const jid, const char* const passwd, const char* const altdomain, const int port, const char* const tls_policy, const char* const auth_policy)
+cl_ev_connect_jid(const char *const jid, const char *const passwd, const char *const altdomain, const int port, const char *const tls_policy, const char *const auth_policy)
 {
     cons_show("Connecting as %s", jid);
     return session_connect_with_details(jid, passwd, altdomain, port, tls_policy, auth_policy);
 }
 
 jabber_conn_status_t
-cl_ev_connect_account(ProfAccount* account)
+cl_ev_connect_account(ProfAccount *account)
 {
     if (account->resource) {
         cons_show("Connecting with account %s as %s/%s", account->name, account->jid, account->resource);
@@ -84,7 +84,7 @@ cl_ev_connect_account(ProfAccount* account)
 void
 cl_ev_disconnect(void)
 {
-    char* mybarejid = connection_get_barejid();
+    char *mybarejid = connection_get_barejid();
     cons_show("%s logged out successfully.", mybarejid);
     free(mybarejid);
 
@@ -97,13 +97,13 @@ cl_ev_disconnect(void)
 void
 cl_ev_presence_send(const resource_presence_t presence_type, const int idle_secs)
 {
-    char* signed_status = NULL;
+    char *signed_status = NULL;
 
 #ifdef HAVE_LIBGPGME
-    char* account_name = session_get_account_name();
-    ProfAccount* account = accounts_get_account(account_name);
+    char *account_name = session_get_account_name();
+    ProfAccount *account = accounts_get_account(account_name);
     if (account->pgp_keyid) {
-        char* msg = connection_get_presence_msg();
+        char *msg = connection_get_presence_msg();
         signed_status = p_gpg_sign(msg, account->pgp_keyid);
     }
     account_free(account);
@@ -115,25 +115,25 @@ cl_ev_presence_send(const resource_presence_t presence_type, const int idle_secs
 }
 
 void
-cl_ev_send_msg_correct(ProfChatWin* chatwin, const char* const msg, const char* const oob_url, gboolean correct_last_msg)
+cl_ev_send_msg_correct(ProfChatWin *chatwin, const char *const msg, const char *const oob_url, gboolean correct_last_msg)
 {
     chat_state_active(chatwin->state);
 
     gboolean request_receipt = prefs_get_boolean(PREF_RECEIPTS_REQUEST);
 
-    char* plugin_msg = plugins_pre_chat_message_send(chatwin->barejid, msg);
+    char *plugin_msg = plugins_pre_chat_message_send(chatwin->barejid, msg);
     if (plugin_msg == NULL) {
         return;
     }
 
-    char* replace_id = NULL;
+    char *replace_id = NULL;
     if (correct_last_msg) {
         replace_id = chatwin->last_msg_id;
     }
 
     if (chatwin->is_omemo) {
 #ifdef HAVE_OMEMO
-        char* id = omemo_on_message_send((ProfWin*)chatwin, plugin_msg, request_receipt, FALSE, replace_id);
+        char *id = omemo_on_message_send((ProfWin *)chatwin, plugin_msg, request_receipt, FALSE, replace_id);
         chat_log_omemo_msg_out(chatwin->barejid, plugin_msg, NULL);
         log_database_add_outgoing_chat(id, chatwin->barejid, plugin_msg, replace_id, PROF_MSG_ENC_OMEMO);
         chatwin_outgoing_msg(chatwin, plugin_msg, id, PROF_MSG_ENC_OMEMO, request_receipt, replace_id);
@@ -142,7 +142,7 @@ cl_ev_send_msg_correct(ProfChatWin* chatwin, const char* const msg, const char* 
     } else if (chatwin->is_ox) {
 #ifdef HAVE_LIBGPGME
         // XEP-0373: OpenPGP for XMPP
-        char* id = message_send_chat_ox(chatwin->barejid, plugin_msg, request_receipt, replace_id);
+        char *id = message_send_chat_ox(chatwin->barejid, plugin_msg, request_receipt, replace_id);
         chat_log_pgp_msg_out(chatwin->barejid, plugin_msg, NULL);
         log_database_add_outgoing_chat(id, chatwin->barejid, plugin_msg, replace_id, PROF_MSG_ENC_OX);
         chatwin_outgoing_msg(chatwin, plugin_msg, id, PROF_MSG_ENC_OX, request_receipt, replace_id);
@@ -150,7 +150,7 @@ cl_ev_send_msg_correct(ProfChatWin* chatwin, const char* const msg, const char* 
 #endif
     } else if (chatwin->pgp_send) {
 #ifdef HAVE_LIBGPGME
-        char* id = message_send_chat_pgp(chatwin->barejid, plugin_msg, request_receipt, replace_id);
+        char *id = message_send_chat_pgp(chatwin->barejid, plugin_msg, request_receipt, replace_id);
         chat_log_pgp_msg_out(chatwin->barejid, plugin_msg, NULL);
         log_database_add_outgoing_chat(id, chatwin->barejid, plugin_msg, replace_id, PROF_MSG_ENC_PGP);
         chatwin_outgoing_msg(chatwin, plugin_msg, id, PROF_MSG_ENC_PGP, request_receipt, replace_id);
@@ -159,10 +159,10 @@ cl_ev_send_msg_correct(ProfChatWin* chatwin, const char* const msg, const char* 
     } else {
         gboolean handled = FALSE;
 #ifdef HAVE_LIBOTR
-        handled = otr_on_message_send(chatwin, plugin_msg, request_receipt, replace_id);
+         handled = otr_on_message_send(chatwin, plugin_msg, request_receipt, replace_id);
 #endif
         if (!handled) {
-            char* id = message_send_chat(chatwin->barejid, plugin_msg, oob_url, request_receipt, replace_id);
+            char *id = message_send_chat(chatwin->barejid, plugin_msg, oob_url, request_receipt, replace_id);
             chat_log_msg_out(chatwin->barejid, plugin_msg, NULL);
             log_database_add_outgoing_chat(id, chatwin->barejid, plugin_msg, replace_id, PROF_MSG_ENC_NONE);
             chatwin_outgoing_msg(chatwin, plugin_msg, id, PROF_MSG_ENC_NONE, request_receipt, replace_id);
@@ -176,33 +176,33 @@ cl_ev_send_msg_correct(ProfChatWin* chatwin, const char* const msg, const char* 
 }
 
 void
-cl_ev_send_msg(ProfChatWin* chatwin, const char* const msg, const char* const oob_url)
+cl_ev_send_msg(ProfChatWin *chatwin, const char *const msg, const char *const oob_url)
 {
     cl_ev_send_msg_correct(chatwin, msg, oob_url, FALSE);
 }
 
 void
-cl_ev_send_muc_msg_corrected(ProfMucWin* mucwin, const char* const msg, const char* const oob_url, gboolean correct_last_msg)
+cl_ev_send_muc_msg_corrected(ProfMucWin *mucwin, const char *const msg, const char *const oob_url, gboolean correct_last_msg)
 {
-    char* plugin_msg = plugins_pre_room_message_send(mucwin->roomjid, msg);
+    char *plugin_msg = plugins_pre_room_message_send(mucwin->roomjid, msg);
     if (plugin_msg == NULL) {
         return;
     }
 
-    char* replace_id = NULL;
+    char *replace_id = NULL;
     if (correct_last_msg) {
         replace_id = mucwin->last_msg_id;
     }
 
 #ifdef HAVE_OMEMO
     if (mucwin->is_omemo) {
-        char* id = omemo_on_message_send((ProfWin*)mucwin, plugin_msg, FALSE, TRUE, replace_id);
+        char *id = omemo_on_message_send((ProfWin *)mucwin, plugin_msg, FALSE, TRUE, replace_id);
         groupchat_log_omemo_msg_out(mucwin->roomjid, plugin_msg);
         log_database_add_outgoing_muc(id, mucwin->roomjid, plugin_msg, replace_id, PROF_MSG_ENC_OMEMO);
         mucwin_outgoing_msg(mucwin, plugin_msg, id, PROF_MSG_ENC_OMEMO, replace_id);
         free(id);
     } else {
-        char* id = message_send_groupchat(mucwin->roomjid, plugin_msg, oob_url, replace_id);
+        char *id = message_send_groupchat(mucwin->roomjid, plugin_msg, oob_url, replace_id);
         groupchat_log_msg_out(mucwin->roomjid, plugin_msg);
         log_database_add_outgoing_muc(id, mucwin->roomjid, plugin_msg, replace_id, PROF_MSG_ENC_NONE);
         mucwin_outgoing_msg(mucwin, plugin_msg, id, PROF_MSG_ENC_NONE, replace_id);
@@ -215,7 +215,7 @@ cl_ev_send_muc_msg_corrected(ProfMucWin* mucwin, const char* const msg, const ch
 #endif
 
 #ifndef HAVE_OMEMO
-    char* id = message_send_groupchat(mucwin->roomjid, plugin_msg, oob_url, replace_id);
+    char *id = message_send_groupchat(mucwin->roomjid, plugin_msg, oob_url, replace_id);
     groupchat_log_msg_out(mucwin->roomjid, plugin_msg);
     log_database_add_outgoing_muc(id, mucwin->roomjid, plugin_msg, replace_id, PROF_MSG_ENC_NONE);
     mucwin_outgoing_msg(mucwin, plugin_msg, id, PROF_MSG_ENC_NONE, replace_id);
@@ -228,23 +228,23 @@ cl_ev_send_muc_msg_corrected(ProfMucWin* mucwin, const char* const msg, const ch
 }
 
 void
-cl_ev_send_muc_msg(ProfMucWin* mucwin, const char* const msg, const char* const oob_url)
+cl_ev_send_muc_msg(ProfMucWin *mucwin, const char *const msg, const char *const oob_url)
 {
     cl_ev_send_muc_msg_corrected(mucwin, msg, oob_url, FALSE);
 }
 
 void
-cl_ev_send_priv_msg(ProfPrivateWin* privwin, const char* const msg, const char* const oob_url)
+cl_ev_send_priv_msg(ProfPrivateWin *privwin, const char *const msg, const char *const oob_url)
 {
     if (privwin->occupant_offline) {
         privwin_message_occupant_offline(privwin);
     } else if (privwin->room_left) {
         privwin_message_left_room(privwin);
     } else {
-        char* plugin_msg = plugins_pre_priv_message_send(privwin->fulljid, msg);
-        Jid* jidp = jid_create(privwin->fulljid);
+        char *plugin_msg = plugins_pre_priv_message_send(privwin->fulljid, msg);
+        Jid *jidp = jid_create(privwin->fulljid);
 
-        char* id = message_send_private(privwin->fulljid, plugin_msg, oob_url);
+        char *id = message_send_private(privwin->fulljid, plugin_msg, oob_url);
         chat_log_msg_out(jidp->barejid, plugin_msg, jidp->resourcepart);
         log_database_add_outgoing_muc_pm(id, privwin->fulljid, plugin_msg, NULL, PROF_MSG_ENC_NONE);
         privwin_outgoing_msg(privwin, plugin_msg);

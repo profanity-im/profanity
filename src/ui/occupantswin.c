@@ -42,9 +42,9 @@
 #include "ui/window_list.h"
 
 static void
-_occuptantswin_occupant(ProfLayoutSplit* layout, Occupant* occupant, gboolean showjid)
+_occuptantswin_occupant(ProfLayoutSplit *layout, Occupant *occupant, gboolean showjid)
 {
-    int colour = 0;                                     //init to workaround compiler warning
+    int colour = 0; //init to workaround compiler warning
     theme_item_t presence_colour = THEME_ROSTER_ONLINE; //init to workaround compiler warning
 
     if (prefs_get_boolean(PREF_OCCUPANTS_COLOR_NICK)) {
@@ -52,13 +52,13 @@ _occuptantswin_occupant(ProfLayoutSplit* layout, Occupant* occupant, gboolean sh
 
         wattron(layout->subwin, colour);
     } else {
-        const char* presence_str = string_from_resource_presence(occupant->presence);
+        const char *presence_str = string_from_resource_presence(occupant->presence);
         presence_colour = theme_main_presence_attrs(presence_str);
 
         wattron(layout->subwin, theme_attrs(presence_colour));
     }
 
-    GString* spaces = g_string_new(" ");
+    GString *spaces = g_string_new(" ");
 
     int indent = prefs_get_occupants_indent();
     int current_indent = 0;
@@ -70,7 +70,7 @@ _occuptantswin_occupant(ProfLayoutSplit* layout, Occupant* occupant, gboolean sh
         }
     }
 
-    GString* msg = g_string_new(spaces->str);
+    GString *msg = g_string_new(spaces->str);
 
     char ch = prefs_get_occupants_char();
     if (ch) {
@@ -85,7 +85,7 @@ _occuptantswin_occupant(ProfLayoutSplit* layout, Occupant* occupant, gboolean sh
     g_string_free(msg, TRUE);
 
     if (showjid && occupant->jid) {
-        GString* msg = g_string_new(spaces->str);
+        GString *msg = g_string_new(spaces->str);
         g_string_append(msg, " ");
 
         g_string_append(msg, occupant->jid);
@@ -104,18 +104,18 @@ _occuptantswin_occupant(ProfLayoutSplit* layout, Occupant* occupant, gboolean sh
 }
 
 void
-occupantswin_occupants(const char* const roomjid)
+occupantswin_occupants(const char *const roomjid)
 {
-    ProfMucWin* mucwin = wins_get_muc(roomjid);
+    ProfMucWin *mucwin = wins_get_muc(roomjid);
     if (mucwin) {
-        GList* occupants = muc_roster(roomjid);
+        GList *occupants = muc_roster(roomjid);
         if (occupants) {
-            ProfLayoutSplit* layout = (ProfLayoutSplit*)mucwin->window.layout;
+            ProfLayoutSplit *layout = (ProfLayoutSplit*)mucwin->window.layout;
             assert(layout->memcheck == LAYOUT_SPLIT_MEMCHECK);
 
             werase(layout->subwin);
 
-            GString* prefix = g_string_new(" ");
+            GString *prefix = g_string_new(" ");
 
             char ch = prefs_get_occupants_header_char();
             if (ch) {
@@ -124,7 +124,7 @@ occupantswin_occupants(const char* const roomjid)
 
             if (prefs_get_boolean(PREF_MUC_PRIVILEGES)) {
 
-                GString* role = g_string_new(prefix->str);
+                GString *role = g_string_new(prefix->str);
                 g_string_append(role, "Moderators");
 
                 wattron(layout->subwin, theme_attrs(THEME_OCCUPANTS_HEADER));
@@ -132,9 +132,9 @@ occupantswin_occupants(const char* const roomjid)
                 win_sub_print(layout->subwin, role->str, TRUE, FALSE, 0);
                 wattroff(layout->subwin, theme_attrs(THEME_OCCUPANTS_HEADER));
                 g_string_free(role, TRUE);
-                GList* roster_curr = occupants;
+                GList *roster_curr = occupants;
                 while (roster_curr) {
-                    Occupant* occupant = roster_curr->data;
+                    Occupant *occupant = roster_curr->data;
                     if (occupant->role == MUC_ROLE_MODERATOR) {
                         _occuptantswin_occupant(layout, occupant, mucwin->showjid);
                     }
@@ -151,7 +151,7 @@ occupantswin_occupants(const char* const roomjid)
                 g_string_free(role, TRUE);
                 roster_curr = occupants;
                 while (roster_curr) {
-                    Occupant* occupant = roster_curr->data;
+                    Occupant *occupant = roster_curr->data;
                     if (occupant->role == MUC_ROLE_PARTICIPANT) {
                         _occuptantswin_occupant(layout, occupant, mucwin->showjid);
                     }
@@ -168,14 +168,14 @@ occupantswin_occupants(const char* const roomjid)
                 g_string_free(role, TRUE);
                 roster_curr = occupants;
                 while (roster_curr) {
-                    Occupant* occupant = roster_curr->data;
+                    Occupant *occupant = roster_curr->data;
                     if (occupant->role == MUC_ROLE_VISITOR) {
                         _occuptantswin_occupant(layout, occupant, mucwin->showjid);
                     }
                     roster_curr = g_list_next(roster_curr);
                 }
             } else {
-                GString* role = g_string_new(prefix->str);
+                GString *role = g_string_new(prefix->str);
                 g_string_append(role, "Occupants\n");
 
                 wattron(layout->subwin, theme_attrs(THEME_OCCUPANTS_HEADER));
@@ -184,9 +184,9 @@ occupantswin_occupants(const char* const roomjid)
                 wattroff(layout->subwin, theme_attrs(THEME_OCCUPANTS_HEADER));
                 g_string_free(role, TRUE);
 
-                GList* roster_curr = occupants;
+                GList *roster_curr = occupants;
                 while (roster_curr) {
-                    Occupant* occupant = roster_curr->data;
+                    Occupant *occupant = roster_curr->data;
                     _occuptantswin_occupant(layout, occupant, mucwin->showjid);
                     roster_curr = g_list_next(roster_curr);
                 }
@@ -202,12 +202,12 @@ occupantswin_occupants(const char* const roomjid)
 void
 occupantswin_occupants_all(void)
 {
-    GList* rooms = muc_rooms();
-    GList* curr = rooms;
+    GList *rooms = muc_rooms();
+    GList *curr = rooms;
 
     while (curr) {
         char* roomjid = curr->data;
-        ProfMucWin* mw = wins_get_muc(roomjid);
+        ProfMucWin *mw = wins_get_muc(roomjid);
         if (mw != NULL) {
             mucwin_update_occupants(mw);
         }

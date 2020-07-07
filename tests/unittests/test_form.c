@@ -1,14 +1,13 @@
-#include <cmocka.h>
-#include <setjmp.h>
 #include <stdarg.h>
-#include <stddef.h>
-#include <stdlib.h>
 #include <string.h>
+#include <stddef.h>
+#include <setjmp.h>
+#include <cmocka.h>
+#include <stdlib.h>
 
 #include "xmpp/form.h"
 
-xmpp_ctx_t*
-connection_get_ctx(void)
+xmpp_ctx_t* connection_get_ctx(void)
 {
     return NULL;
 }
@@ -16,7 +15,7 @@ connection_get_ctx(void)
 static DataForm*
 _new_form(void)
 {
-    DataForm* form = malloc(sizeof(DataForm));
+    DataForm *form = malloc(sizeof(DataForm));
     form->type = NULL;
     form->title = NULL;
     form->instructions = NULL;
@@ -31,7 +30,7 @@ _new_form(void)
 static FormField*
 _new_field(void)
 {
-    FormField* field = malloc(sizeof(FormField));
+    FormField *field = malloc(sizeof(FormField));
     field->label = NULL;
     field->type = NULL;
     field->description = NULL;
@@ -42,67 +41,64 @@ _new_field(void)
     field->value_ac = NULL;
 
     return field;
+
 }
 
-void
-get_form_type_field_returns_null_no_fields(void** state)
+void get_form_type_field_returns_null_no_fields(void **state)
 {
-    DataForm* form = _new_form();
+    DataForm *form = _new_form();
 
-    char* result = form_get_form_type_field(form);
+    char *result = form_get_form_type_field(form);
 
     assert_null(result);
 
     form_destroy(form);
 }
 
-void
-get_form_type_field_returns_null_when_not_present(void** state)
+void get_form_type_field_returns_null_when_not_present(void **state)
 {
-    DataForm* form = _new_form();
-    FormField* field = _new_field();
+    DataForm *form = _new_form();
+    FormField *field = _new_field();
     field->var = strdup("var1");
     field->values = g_slist_append(field->values, strdup("value1"));
     form->fields = g_slist_append(form->fields, field);
 
-    char* result = form_get_form_type_field(form);
+    char *result = form_get_form_type_field(form);
 
     assert_null(result);
 
     form_destroy(form);
 }
 
-void
-get_form_type_field_returns_value_when_present(void** state)
+void get_form_type_field_returns_value_when_present(void **state)
 {
-    DataForm* form = _new_form();
+    DataForm *form = _new_form();
 
-    FormField* field1 = _new_field();
+    FormField *field1 = _new_field();
     field1->var = strdup("var1");
     field1->values = g_slist_append(field1->values, strdup("value1"));
     form->fields = g_slist_append(form->fields, field1);
 
-    FormField* field2 = _new_field();
+    FormField *field2 = _new_field();
     field2->var = strdup("FORM_TYPE");
     field2->values = g_slist_append(field2->values, strdup("value2"));
     form->fields = g_slist_append(form->fields, field2);
 
-    FormField* field3 = _new_field();
+    FormField *field3 = _new_field();
     field3->var = strdup("var3");
     field3->values = g_slist_append(field3->values, strdup("value3"));
     form->fields = g_slist_append(form->fields, field3);
 
-    char* result = form_get_form_type_field(form);
+    char *result = form_get_form_type_field(form);
 
     assert_string_equal(result, "value2");
 
     form_destroy(form);
 }
 
-void
-get_field_type_returns_unknown_when_no_fields(void** state)
+void get_field_type_returns_unknown_when_no_fields(void **state)
 {
-    DataForm* form = _new_form();
+    DataForm *form = _new_form();
 
     form_field_type_t result = form_get_field_type(form, "tag");
 
@@ -111,20 +107,19 @@ get_field_type_returns_unknown_when_no_fields(void** state)
     form_destroy(form);
 }
 
-void
-get_field_type_returns_correct_type(void** state)
+void get_field_type_returns_correct_type(void **state)
 {
-    DataForm* form = _new_form();
+    DataForm *form = _new_form();
     g_hash_table_insert(form->tag_to_var, strdup("tag1"), strdup("var1"));
     g_hash_table_insert(form->tag_to_var, strdup("tag2"), strdup("var2"));
 
-    FormField* field1 = _new_field();
+    FormField *field1 = _new_field();
     field1->var = strdup("var1");
     field1->type_t = FIELD_TEXT_SINGLE;
     field1->values = g_slist_append(field1->values, strdup("value1"));
     form->fields = g_slist_append(form->fields, field1);
 
-    FormField* field2 = _new_field();
+    FormField *field2 = _new_field();
     field2->var = strdup("var2");
     field2->type_t = FIELD_TEXT_MULTI;
     field2->values = g_slist_append(field2->values, strdup("value2"));
@@ -137,20 +132,19 @@ get_field_type_returns_correct_type(void** state)
     form_destroy(form);
 }
 
-void
-set_value_adds_when_none(void** state)
+void set_value_adds_when_none(void **state)
 {
-    DataForm* form = _new_form();
+    DataForm *form = _new_form();
     g_hash_table_insert(form->tag_to_var, strdup("tag1"), strdup("var1"));
     g_hash_table_insert(form->tag_to_var, strdup("tag2"), strdup("var2"));
 
-    FormField* field1 = _new_field();
+    FormField *field1 = _new_field();
     field1->var = strdup("var1");
     field1->type_t = FIELD_TEXT_SINGLE;
     field1->values = g_slist_append(field1->values, strdup("value1"));
     form->fields = g_slist_append(form->fields, field1);
 
-    FormField* field2 = _new_field();
+    FormField *field2 = _new_field();
     field2->var = strdup("var2");
     field2->type_t = FIELD_LIST_SINGLE;
     form->fields = g_slist_append(form->fields, field2);
@@ -158,10 +152,10 @@ set_value_adds_when_none(void** state)
     form_set_value(form, "tag2", "a new value");
 
     int length = 0;
-    char* value = NULL;
-    GSList* curr_field = form->fields;
+    char *value = NULL;
+    GSList *curr_field = form->fields;
     while (curr_field != NULL) {
-        FormField* field = curr_field->data;
+        FormField *field = curr_field->data;
         if (g_strcmp0(field->var, "var2") == 0) {
             length = g_slist_length(field->values);
             value = field->values->data;
@@ -176,19 +170,18 @@ set_value_adds_when_none(void** state)
     form_destroy(form);
 }
 
-void
-set_value_updates_when_one(void** state)
+void set_value_updates_when_one(void **state)
 {
-    DataForm* form = _new_form();
+    DataForm *form = _new_form();
     g_hash_table_insert(form->tag_to_var, strdup("tag1"), strdup("var1"));
     g_hash_table_insert(form->tag_to_var, strdup("tag2"), strdup("var2"));
 
-    FormField* field1 = _new_field();
+    FormField *field1 = _new_field();
     field1->var = strdup("var1");
     field1->type_t = FIELD_TEXT_SINGLE;
     form->fields = g_slist_append(form->fields, field1);
 
-    FormField* field2 = _new_field();
+    FormField *field2 = _new_field();
     field2->var = strdup("var2");
     field2->type_t = FIELD_LIST_SINGLE;
     field2->values = g_slist_append(field2->values, strdup("value2"));
@@ -197,10 +190,10 @@ set_value_updates_when_one(void** state)
     form_set_value(form, "tag2", "a new value");
 
     int length = 0;
-    char* value = NULL;
-    GSList* curr_field = form->fields;
+    char *value = NULL;
+    GSList *curr_field = form->fields;
     while (curr_field != NULL) {
-        FormField* field = curr_field->data;
+        FormField *field = curr_field->data;
         if (g_strcmp0(field->var, "var2") == 0) {
             length = g_slist_length(field->values);
             value = field->values->data;
@@ -215,19 +208,18 @@ set_value_updates_when_one(void** state)
     form_destroy(form);
 }
 
-void
-add_unique_value_adds_when_none(void** state)
+void add_unique_value_adds_when_none(void **state)
 {
-    DataForm* form = _new_form();
+    DataForm *form = _new_form();
     g_hash_table_insert(form->tag_to_var, strdup("tag1"), strdup("var1"));
     g_hash_table_insert(form->tag_to_var, strdup("tag2"), strdup("var2"));
 
-    FormField* field1 = _new_field();
+    FormField *field1 = _new_field();
     field1->var = strdup("var1");
     field1->type_t = FIELD_JID_MULTI;
     form->fields = g_slist_append(form->fields, field1);
 
-    FormField* field2 = _new_field();
+    FormField *field2 = _new_field();
     field2->var = strdup("var2");
     field2->type_t = FIELD_LIST_SINGLE;
     field2->values = g_slist_append(field2->values, strdup("value2"));
@@ -236,10 +228,10 @@ add_unique_value_adds_when_none(void** state)
     gboolean ret = form_add_unique_value(form, "tag1", "me@server.com");
 
     int length = 0;
-    char* value = NULL;
-    GSList* curr_field = form->fields;
+    char *value = NULL;
+    GSList *curr_field = form->fields;
     while (curr_field != NULL) {
-        FormField* field = curr_field->data;
+        FormField *field = curr_field->data;
         if (g_strcmp0(field->var, "var1") == 0) {
             length = g_slist_length(field->values);
             value = field->values->data;
@@ -255,20 +247,19 @@ add_unique_value_adds_when_none(void** state)
     form_destroy(form);
 }
 
-void
-add_unique_value_does_nothing_when_exists(void** state)
+void add_unique_value_does_nothing_when_exists(void **state)
 {
-    DataForm* form = _new_form();
+    DataForm *form = _new_form();
     g_hash_table_insert(form->tag_to_var, strdup("tag1"), strdup("var1"));
     g_hash_table_insert(form->tag_to_var, strdup("tag2"), strdup("var2"));
 
-    FormField* field1 = _new_field();
+    FormField *field1 = _new_field();
     field1->var = strdup("var1");
     field1->type_t = FIELD_JID_MULTI;
     field1->values = g_slist_append(field1->values, strdup("me@server.com"));
     form->fields = g_slist_append(form->fields, field1);
 
-    FormField* field2 = _new_field();
+    FormField *field2 = _new_field();
     field2->var = strdup("var2");
     field2->type_t = FIELD_LIST_SINGLE;
     field2->values = g_slist_append(field2->values, strdup("value2"));
@@ -277,10 +268,10 @@ add_unique_value_does_nothing_when_exists(void** state)
     gboolean ret = form_add_unique_value(form, "tag1", "me@server.com");
 
     int length = 0;
-    char* value = NULL;
-    GSList* curr_field = form->fields;
+    char *value = NULL;
+    GSList *curr_field = form->fields;
     while (curr_field != NULL) {
-        FormField* field = curr_field->data;
+        FormField *field = curr_field->data;
         if (g_strcmp0(field->var, "var1") == 0) {
             length = g_slist_length(field->values);
             value = field->values->data;
@@ -296,14 +287,13 @@ add_unique_value_does_nothing_when_exists(void** state)
     form_destroy(form);
 }
 
-void
-add_unique_value_adds_when_doesnt_exist(void** state)
+void add_unique_value_adds_when_doesnt_exist(void **state)
 {
-    DataForm* form = _new_form();
+    DataForm *form = _new_form();
     g_hash_table_insert(form->tag_to_var, strdup("tag1"), strdup("var1"));
     g_hash_table_insert(form->tag_to_var, strdup("tag2"), strdup("var2"));
 
-    FormField* field1 = _new_field();
+    FormField *field1 = _new_field();
     field1->var = strdup("var1");
     field1->type_t = FIELD_JID_MULTI;
     field1->values = g_slist_append(field1->values, strdup("dolan@server.com"));
@@ -311,7 +301,7 @@ add_unique_value_adds_when_doesnt_exist(void** state)
     field1->values = g_slist_append(field1->values, strdup("chi@server.com"));
     form->fields = g_slist_append(form->fields, field1);
 
-    FormField* field2 = _new_field();
+    FormField *field2 = _new_field();
     field2->var = strdup("var2");
     field2->type_t = FIELD_LIST_SINGLE;
     field2->values = g_slist_append(field2->values, strdup("value2"));
@@ -321,12 +311,12 @@ add_unique_value_adds_when_doesnt_exist(void** state)
 
     int length = 0;
     int count = 0;
-    GSList* curr_field = form->fields;
+    GSList *curr_field = form->fields;
     while (curr_field != NULL) {
-        FormField* field = curr_field->data;
+        FormField *field = curr_field->data;
         if (g_strcmp0(field->var, "var1") == 0) {
             length = g_slist_length(field->values);
-            GSList* curr_value = field->values;
+            GSList *curr_value = field->values;
             while (curr_value != NULL) {
                 if (g_strcmp0(curr_value->data, "me@server.com") == 0) {
                     count++;
@@ -345,13 +335,12 @@ add_unique_value_adds_when_doesnt_exist(void** state)
     form_destroy(form);
 }
 
-void
-add_value_adds_when_none(void** state)
+void add_value_adds_when_none(void **state)
 {
-    DataForm* form = _new_form();
+    DataForm *form = _new_form();
     g_hash_table_insert(form->tag_to_var, strdup("tag1"), strdup("var1"));
 
-    FormField* field1 = _new_field();
+    FormField *field1 = _new_field();
     field1->var = strdup("var1");
     field1->type_t = FIELD_LIST_MULTI;
     form->fields = g_slist_append(form->fields, field1);
@@ -359,10 +348,10 @@ add_value_adds_when_none(void** state)
     form_add_value(form, "tag1", "somevalue");
 
     int length = 0;
-    char* value = NULL;
-    GSList* curr_field = form->fields;
+    char *value = NULL;
+    GSList *curr_field = form->fields;
     while (curr_field != NULL) {
-        FormField* field = curr_field->data;
+        FormField *field = curr_field->data;
         if (g_strcmp0(field->var, "var1") == 0) {
             length = g_slist_length(field->values);
             value = field->values->data;
@@ -377,13 +366,12 @@ add_value_adds_when_none(void** state)
     form_destroy(form);
 }
 
-void
-add_value_adds_when_some(void** state)
+void add_value_adds_when_some(void **state)
 {
-    DataForm* form = _new_form();
+    DataForm *form = _new_form();
     g_hash_table_insert(form->tag_to_var, strdup("tag1"), strdup("var1"));
 
-    FormField* field1 = _new_field();
+    FormField *field1 = _new_field();
     field1->var = strdup("var1");
     field1->type_t = FIELD_LIST_MULTI;
     field1->values = g_slist_append(field1->values, strdup("some text"));
@@ -395,11 +383,11 @@ add_value_adds_when_some(void** state)
 
     int num_values = 0;
     int new_value_count = 0;
-    GSList* curr_field = form->fields;
+    GSList *curr_field = form->fields;
     while (curr_field != NULL) {
-        FormField* field = curr_field->data;
+        FormField *field = curr_field->data;
         if (g_strcmp0(field->var, "var1") == 0) {
-            GSList* curr_value = field->values;
+            GSList *curr_value = field->values;
             while (curr_value != NULL) {
                 num_values++;
                 if (g_strcmp0(curr_value->data, "new value") == 0) {
@@ -418,13 +406,12 @@ add_value_adds_when_some(void** state)
     form_destroy(form);
 }
 
-void
-add_value_adds_when_exists(void** state)
+void add_value_adds_when_exists(void **state)
 {
-    DataForm* form = _new_form();
+    DataForm *form = _new_form();
     g_hash_table_insert(form->tag_to_var, strdup("tag1"), strdup("var1"));
 
-    FormField* field1 = _new_field();
+    FormField *field1 = _new_field();
     field1->var = strdup("var1");
     field1->type_t = FIELD_LIST_MULTI;
     field1->values = g_slist_append(field1->values, strdup("some text"));
@@ -437,11 +424,11 @@ add_value_adds_when_exists(void** state)
 
     int num_values = 0;
     int new_value_count = 0;
-    GSList* curr_field = form->fields;
+    GSList *curr_field = form->fields;
     while (curr_field != NULL) {
-        FormField* field = curr_field->data;
+        FormField *field = curr_field->data;
         if (g_strcmp0(field->var, "var1") == 0) {
-            GSList* curr_value = field->values;
+            GSList *curr_value = field->values;
             while (curr_value != NULL) {
                 num_values++;
                 if (g_strcmp0(curr_value->data, "new value") == 0) {
@@ -460,13 +447,12 @@ add_value_adds_when_exists(void** state)
     form_destroy(form);
 }
 
-void
-remove_value_does_nothing_when_none(void** state)
+void remove_value_does_nothing_when_none(void **state)
 {
-    DataForm* form = _new_form();
+    DataForm *form = _new_form();
     g_hash_table_insert(form->tag_to_var, strdup("tag1"), strdup("var1"));
 
-    FormField* field1 = _new_field();
+    FormField *field1 = _new_field();
     field1->var = strdup("var1");
     field1->type_t = FIELD_LIST_MULTI;
     form->fields = g_slist_append(form->fields, field1);
@@ -474,9 +460,9 @@ remove_value_does_nothing_when_none(void** state)
     gboolean res = form_remove_value(form, "tag1", "some value");
 
     int length = -1;
-    GSList* curr_field = form->fields;
+    GSList *curr_field = form->fields;
     while (curr_field != NULL) {
-        FormField* field = curr_field->data;
+        FormField *field = curr_field->data;
         if (g_strcmp0(field->var, "var1") == 0) {
             length = g_slist_length(field->values);
         }
@@ -489,13 +475,12 @@ remove_value_does_nothing_when_none(void** state)
     form_destroy(form);
 }
 
-void
-remove_value_does_nothing_when_doesnt_exist(void** state)
+void remove_value_does_nothing_when_doesnt_exist(void **state)
 {
-    DataForm* form = _new_form();
+    DataForm *form = _new_form();
     g_hash_table_insert(form->tag_to_var, strdup("tag1"), strdup("var1"));
 
-    FormField* field1 = _new_field();
+    FormField *field1 = _new_field();
     field1->var = strdup("var1");
     field1->type_t = FIELD_LIST_MULTI;
     field1->values = g_slist_append(field1->values, strdup("value1"));
@@ -508,12 +493,12 @@ remove_value_does_nothing_when_doesnt_exist(void** state)
 
     int length = -1;
     int value_count = 0;
-    GSList* curr_field = form->fields;
+    GSList *curr_field = form->fields;
     while (curr_field != NULL) {
-        FormField* field = curr_field->data;
+        FormField *field = curr_field->data;
         if (g_strcmp0(field->var, "var1") == 0) {
             length = g_slist_length(field->values);
-            GSList* curr_value = field->values;
+            GSList *curr_value = field->values;
             while (curr_value != NULL) {
                 if (g_strcmp0(curr_value->data, "value5") == 0) {
                     value_count++;
@@ -531,13 +516,12 @@ remove_value_does_nothing_when_doesnt_exist(void** state)
     form_destroy(form);
 }
 
-void
-remove_value_removes_when_one(void** state)
+void remove_value_removes_when_one(void **state)
 {
-    DataForm* form = _new_form();
+    DataForm *form = _new_form();
     g_hash_table_insert(form->tag_to_var, strdup("tag1"), strdup("var1"));
 
-    FormField* field1 = _new_field();
+    FormField *field1 = _new_field();
     field1->var = strdup("var1");
     field1->type_t = FIELD_LIST_MULTI;
     field1->values = g_slist_append(field1->values, strdup("value4"));
@@ -546,9 +530,9 @@ remove_value_removes_when_one(void** state)
     gboolean res = form_remove_value(form, "tag1", "value4");
 
     int length = -1;
-    GSList* curr_field = form->fields;
+    GSList *curr_field = form->fields;
     while (curr_field != NULL) {
-        FormField* field = curr_field->data;
+        FormField *field = curr_field->data;
         if (g_strcmp0(field->var, "var1") == 0) {
             length = g_slist_length(field->values);
         }
@@ -561,13 +545,12 @@ remove_value_removes_when_one(void** state)
     form_destroy(form);
 }
 
-void
-remove_value_removes_when_many(void** state)
+void remove_value_removes_when_many(void **state)
 {
-    DataForm* form = _new_form();
+    DataForm *form = _new_form();
     g_hash_table_insert(form->tag_to_var, strdup("tag1"), strdup("var1"));
 
-    FormField* field1 = _new_field();
+    FormField *field1 = _new_field();
     field1->var = strdup("var1");
     field1->type_t = FIELD_LIST_MULTI;
     field1->values = g_slist_append(field1->values, strdup("value1"));
@@ -580,12 +563,12 @@ remove_value_removes_when_many(void** state)
 
     int length = -1;
     int value_count = 0;
-    GSList* curr_field = form->fields;
+    GSList *curr_field = form->fields;
     while (curr_field != NULL) {
-        FormField* field = curr_field->data;
+        FormField *field = curr_field->data;
         if (g_strcmp0(field->var, "var1") == 0) {
             length = g_slist_length(field->values);
-            GSList* curr_value = field->values;
+            GSList *curr_value = field->values;
             while (curr_value != NULL) {
                 if (g_strcmp0(curr_value->data, "value2") == 0) {
                     value_count++;
@@ -603,13 +586,12 @@ remove_value_removes_when_many(void** state)
     form_destroy(form);
 }
 
-void
-remove_text_multi_value_does_nothing_when_none(void** state)
+void remove_text_multi_value_does_nothing_when_none(void **state)
 {
-    DataForm* form = _new_form();
+    DataForm *form = _new_form();
     g_hash_table_insert(form->tag_to_var, strdup("tag1"), strdup("var1"));
 
-    FormField* field1 = _new_field();
+    FormField *field1 = _new_field();
     field1->var = strdup("var1");
     field1->type_t = FIELD_LIST_MULTI;
     form->fields = g_slist_append(form->fields, field1);
@@ -617,9 +599,9 @@ remove_text_multi_value_does_nothing_when_none(void** state)
     gboolean res = form_remove_text_multi_value(form, "tag1", 3);
 
     int length = -1;
-    GSList* curr_field = form->fields;
+    GSList *curr_field = form->fields;
     while (curr_field != NULL) {
-        FormField* field = curr_field->data;
+        FormField *field = curr_field->data;
         if (g_strcmp0(field->var, "var1") == 0) {
             length = g_slist_length(field->values);
         }
@@ -632,13 +614,12 @@ remove_text_multi_value_does_nothing_when_none(void** state)
     form_destroy(form);
 }
 
-void
-remove_text_multi_value_does_nothing_when_doesnt_exist(void** state)
+void remove_text_multi_value_does_nothing_when_doesnt_exist(void **state)
 {
-    DataForm* form = _new_form();
+    DataForm *form = _new_form();
     g_hash_table_insert(form->tag_to_var, strdup("tag1"), strdup("var1"));
 
-    FormField* field1 = _new_field();
+    FormField *field1 = _new_field();
     field1->var = strdup("var1");
     field1->type_t = FIELD_LIST_MULTI;
     field1->values = g_slist_append(field1->values, strdup("value1"));
@@ -651,12 +632,12 @@ remove_text_multi_value_does_nothing_when_doesnt_exist(void** state)
 
     int length = -1;
     int value_count = 0;
-    GSList* curr_field = form->fields;
+    GSList *curr_field = form->fields;
     while (curr_field != NULL) {
-        FormField* field = curr_field->data;
+        FormField *field = curr_field->data;
         if (g_strcmp0(field->var, "var1") == 0) {
             length = g_slist_length(field->values);
-            GSList* curr_value = field->values;
+            GSList *curr_value = field->values;
             while (curr_value != NULL) {
                 if (g_strcmp0(curr_value->data, "value5") == 0) {
                     value_count++;
@@ -674,13 +655,12 @@ remove_text_multi_value_does_nothing_when_doesnt_exist(void** state)
     form_destroy(form);
 }
 
-void
-remove_text_multi_value_removes_when_one(void** state)
+void remove_text_multi_value_removes_when_one(void **state)
 {
-    DataForm* form = _new_form();
+    DataForm *form = _new_form();
     g_hash_table_insert(form->tag_to_var, strdup("tag1"), strdup("var1"));
 
-    FormField* field1 = _new_field();
+    FormField *field1 = _new_field();
     field1->var = strdup("var1");
     field1->type_t = FIELD_LIST_MULTI;
     field1->values = g_slist_append(field1->values, strdup("value4"));
@@ -689,9 +669,9 @@ remove_text_multi_value_removes_when_one(void** state)
     gboolean res = form_remove_text_multi_value(form, "tag1", 1);
 
     int length = -1;
-    GSList* curr_field = form->fields;
+    GSList *curr_field = form->fields;
     while (curr_field != NULL) {
-        FormField* field = curr_field->data;
+        FormField *field = curr_field->data;
         if (g_strcmp0(field->var, "var1") == 0) {
             length = g_slist_length(field->values);
         }
@@ -704,13 +684,12 @@ remove_text_multi_value_removes_when_one(void** state)
     form_destroy(form);
 }
 
-void
-remove_text_multi_value_removes_when_many(void** state)
+void remove_text_multi_value_removes_when_many(void **state)
 {
-    DataForm* form = _new_form();
+    DataForm *form = _new_form();
     g_hash_table_insert(form->tag_to_var, strdup("tag1"), strdup("var1"));
 
-    FormField* field1 = _new_field();
+    FormField *field1 = _new_field();
     field1->var = strdup("var1");
     field1->type_t = FIELD_LIST_MULTI;
     field1->values = g_slist_append(field1->values, strdup("value1"));
@@ -723,12 +702,12 @@ remove_text_multi_value_removes_when_many(void** state)
 
     int length = -1;
     int value_count = 0;
-    GSList* curr_field = form->fields;
+    GSList *curr_field = form->fields;
     while (curr_field != NULL) {
-        FormField* field = curr_field->data;
+        FormField *field = curr_field->data;
         if (g_strcmp0(field->var, "var1") == 0) {
             length = g_slist_length(field->values);
-            GSList* curr_value = field->values;
+            GSList *curr_value = field->values;
             while (curr_value != NULL) {
                 if (g_strcmp0(curr_value->data, "value2") == 0) {
                     value_count++;
@@ -745,3 +724,4 @@ remove_text_multi_value_removes_when_many(void** state)
 
     form_destroy(form);
 }
+

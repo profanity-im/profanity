@@ -47,18 +47,16 @@ typedef enum {
     COLOR_PROFILE_BLUE_BLINDNESS,
 } color_profile;
 
-struct color_def
-{
-    uint16_t h;
-    uint8_t s, l;
-    const char* name;
+struct color_def {
+    uint16_t h; uint8_t s, l;
+    const char *name;
 };
 extern const struct color_def color_names[];
 
 /* hash string to color pair */
-int color_pair_cache_hash_str(const char* str, color_profile profile);
+int color_pair_cache_hash_str(const char *str, color_profile profile);
 /* parse fg_bg string to color pair */
-int color_pair_cache_get(const char* pair_name);
+int color_pair_cache_get(const char *pair_name);
 /* clear cache */
 void color_pair_cache_reset(void);
 

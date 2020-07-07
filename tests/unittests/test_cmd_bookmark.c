@@ -1,18 +1,18 @@
-#include <cmocka.h>
-#include <glib.h>
-#include <setjmp.h>
 #include <stdarg.h>
 #include <stddef.h>
+#include <setjmp.h>
+#include <cmocka.h>
 #include <stdlib.h>
 #include <string.h>
+#include <glib.h>
 
 #include "xmpp/xmpp.h"
 
-#include "ui/stub_ui.h"
 #include "ui/ui.h"
+#include "ui/stub_ui.h"
 
-#include "common.h"
 #include "xmpp/muc.h"
+#include "common.h"
 
 #include "command/cmd_funcs.h"
 
@@ -22,8 +22,7 @@
 
 #define CMD_BOOKMARK "/bookmark"
 
-static void
-test_with_connection_status(jabber_conn_status_t status)
+static void test_with_connection_status(jabber_conn_status_t status)
 {
     ProfWin window;
     window.type = WIN_CONSOLE;
@@ -34,28 +33,24 @@ test_with_connection_status(jabber_conn_status_t status)
     assert_true(result);
 }
 
-void
-cmd_bookmark_shows_message_when_disconnected(void** state)
+void cmd_bookmark_shows_message_when_disconnected(void **state)
 {
     test_with_connection_status(JABBER_DISCONNECTED);
 }
 
-void
-cmd_bookmark_shows_message_when_disconnecting(void** state)
+void cmd_bookmark_shows_message_when_disconnecting(void **state)
 {
     test_with_connection_status(JABBER_DISCONNECTING);
 }
 
-void
-cmd_bookmark_shows_message_when_connecting(void** state)
+void cmd_bookmark_shows_message_when_connecting(void **state)
 {
     test_with_connection_status(JABBER_CONNECTING);
 }
 
-void
-cmd_bookmark_shows_usage_when_no_args(void** state)
+void cmd_bookmark_shows_usage_when_no_args(void **state)
 {
-    gchar* args[] = { NULL };
+    gchar *args[] = { NULL };
     ProfWin window;
     window.type = WIN_CONSOLE;
 
@@ -77,7 +72,7 @@ static void _free_bookmark(Bookmark *bookmark)
 */
 
 static gboolean
-_cmp_bookmark(Bookmark* bm1, Bookmark* bm2)
+_cmp_bookmark(Bookmark *bm1, Bookmark *bm2)
 {
     if (strcmp(bm1->barejid, bm2->barejid) != 0) {
         return FALSE;
@@ -92,31 +87,30 @@ _cmp_bookmark(Bookmark* bm1, Bookmark* bm2)
     return TRUE;
 }
 
-void
-cmd_bookmark_list_shows_bookmarks(void** state)
+void cmd_bookmark_list_shows_bookmarks(void **state)
 {
-    gchar* args[] = { "list", NULL };
-    GList* bookmarks = NULL;
+    gchar *args[] = { "list", NULL };
+    GList *bookmarks = NULL;
     ProfWin window;
     window.type = WIN_CONSOLE;
 
-    Bookmark* bm1 = malloc(sizeof(Bookmark));
+    Bookmark *bm1 = malloc(sizeof(Bookmark));
     bm1->barejid = strdup("room1@conf.org");
     bm1->nick = strdup("bob");
     bm1->autojoin = FALSE;
-    Bookmark* bm2 = malloc(sizeof(Bookmark));
+    Bookmark *bm2 = malloc(sizeof(Bookmark));
     bm2->barejid = strdup("room2@conf.org");
     bm2->nick = strdup("steve");
     bm2->autojoin = TRUE;
-    Bookmark* bm3 = malloc(sizeof(Bookmark));
+    Bookmark *bm3 = malloc(sizeof(Bookmark));
     bm3->barejid = strdup("room3@conf.org");
     bm3->nick = strdup("dave");
     bm3->autojoin = TRUE;
-    Bookmark* bm4 = malloc(sizeof(Bookmark));
+    Bookmark *bm4 = malloc(sizeof(Bookmark));
     bm4->barejid = strdup("room4@conf.org");
     bm4->nick = strdup("james");
     bm4->autojoin = FALSE;
-    Bookmark* bm5 = malloc(sizeof(Bookmark));
+    Bookmark *bm5 = malloc(sizeof(Bookmark));
     bm5->barejid = strdup("room5@conf.org");
     bm5->nick = strdup("mike");
     bm5->autojoin = FALSE;
@@ -154,11 +148,10 @@ cmd_bookmark_list_shows_bookmarks(void** state)
     free(bm5);
 }
 
-void
-cmd_bookmark_add_shows_message_when_invalid_jid(void** state)
+void cmd_bookmark_add_shows_message_when_invalid_jid(void **state)
 {
-    char* jid = "room";
-    gchar* args[] = { "add", jid, NULL };
+    char *jid = "room";
+    gchar *args[] = { "add", jid, NULL };
     ProfWin window;
     window.type = WIN_CONSOLE;
 
@@ -171,11 +164,10 @@ cmd_bookmark_add_shows_message_when_invalid_jid(void** state)
     assert_true(result);
 }
 
-void
-cmd_bookmark_add_adds_bookmark_with_jid(void** state)
+void cmd_bookmark_add_adds_bookmark_with_jid(void **state)
 {
-    char* jid = "room@conf.server";
-    gchar* args[] = { "add", jid, NULL };
+    char *jid = "room@conf.server";
+    gchar *args[] = { "add", jid, NULL };
     ProfWin window;
     window.type = WIN_CONSOLE;
 
@@ -193,12 +185,11 @@ cmd_bookmark_add_adds_bookmark_with_jid(void** state)
     assert_true(result);
 }
 
-void
-cmd_bookmark_uses_roomjid_in_room(void** state)
+void cmd_bookmark_uses_roomjid_in_room(void **state)
 {
     muc_init();
 
-    gchar* args[] = { NULL };
+    gchar *args[] = { NULL };
     ProfMucWin muc_win;
     muc_win.window.type = WIN_MUC;
     muc_win.memcheck = PROFMUCWIN_MEMCHECK;
@@ -220,12 +211,11 @@ cmd_bookmark_uses_roomjid_in_room(void** state)
     muc_close();
 }
 
-void
-cmd_bookmark_add_uses_roomjid_in_room(void** state)
+void cmd_bookmark_add_uses_roomjid_in_room(void **state)
 {
     muc_init();
 
-    gchar* args[] = { "add", NULL };
+    gchar *args[] = { "add", NULL };
     ProfMucWin muc_win;
     muc_win.window.type = WIN_MUC;
     muc_win.memcheck = PROFMUCWIN_MEMCHECK;
@@ -247,13 +237,12 @@ cmd_bookmark_add_uses_roomjid_in_room(void** state)
     muc_close();
 }
 
-void
-cmd_bookmark_add_uses_supplied_jid_in_room(void** state)
+void cmd_bookmark_add_uses_supplied_jid_in_room(void **state)
 {
     muc_init();
 
-    char* jid = "room1@conf.server";
-    gchar* args[] = { "add", jid, NULL };
+    char *jid = "room1@conf.server";
+    gchar *args[] = { "add", jid, NULL };
     ProfMucWin muc_win;
     muc_win.window.type = WIN_MUC;
     muc_win.memcheck = PROFMUCWIN_MEMCHECK;
@@ -275,12 +264,11 @@ cmd_bookmark_add_uses_supplied_jid_in_room(void** state)
     muc_close();
 }
 
-void
-cmd_bookmark_add_adds_bookmark_with_jid_nick(void** state)
+void cmd_bookmark_add_adds_bookmark_with_jid_nick(void **state)
 {
-    char* jid = "room@conf.server";
-    char* nick = "bob";
-    gchar* args[] = { "add", jid, "nick", nick, NULL };
+    char *jid = "room@conf.server";
+    char *nick = "bob";
+    gchar *args[] = { "add", jid, "nick", nick, NULL };
     ProfWin window;
     window.type = WIN_CONSOLE;
 
@@ -298,11 +286,10 @@ cmd_bookmark_add_adds_bookmark_with_jid_nick(void** state)
     assert_true(result);
 }
 
-void
-cmd_bookmark_add_adds_bookmark_with_jid_autojoin(void** state)
+void cmd_bookmark_add_adds_bookmark_with_jid_autojoin(void **state)
 {
-    char* jid = "room@conf.server";
-    gchar* args[] = { "add", jid, "autojoin", "on", NULL };
+    char *jid = "room@conf.server";
+    gchar *args[] = { "add", jid, "autojoin", "on", NULL };
     ProfWin window;
     window.type = WIN_CONSOLE;
 
@@ -320,12 +307,11 @@ cmd_bookmark_add_adds_bookmark_with_jid_autojoin(void** state)
     assert_true(result);
 }
 
-void
-cmd_bookmark_add_adds_bookmark_with_jid_nick_autojoin(void** state)
+void cmd_bookmark_add_adds_bookmark_with_jid_nick_autojoin(void **state)
 {
-    char* jid = "room@conf.server";
-    char* nick = "bob";
-    gchar* args[] = { "add", jid, "nick", nick, "autojoin", "on", NULL };
+    char *jid = "room@conf.server";
+    char *nick = "bob";
+    gchar *args[] = { "add", jid, "nick", nick, "autojoin", "on", NULL };
     ProfWin window;
     window.type = WIN_CONSOLE;
 
@@ -343,11 +329,10 @@ cmd_bookmark_add_adds_bookmark_with_jid_nick_autojoin(void** state)
     assert_true(result);
 }
 
-void
-cmd_bookmark_remove_removes_bookmark(void** state)
+void cmd_bookmark_remove_removes_bookmark(void **state)
 {
-    char* jid = "room@conf.server";
-    gchar* args[] = { "remove", jid, NULL };
+    char *jid = "room@conf.server";
+    gchar *args[] = { "remove", jid, NULL };
     ProfWin window;
     window.type = WIN_CONSOLE;
 
@@ -362,11 +347,10 @@ cmd_bookmark_remove_removes_bookmark(void** state)
     assert_true(result);
 }
 
-void
-cmd_bookmark_remove_shows_message_when_no_bookmark(void** state)
+void cmd_bookmark_remove_shows_message_when_no_bookmark(void **state)
 {
-    char* jid = "room@conf.server";
-    gchar* args[] = { "remove", jid, NULL };
+    char *jid = "room@conf.server";
+    gchar *args[] = { "remove", jid, NULL };
     ProfWin window;
     window.type = WIN_CONSOLE;
 
@@ -381,12 +365,11 @@ cmd_bookmark_remove_shows_message_when_no_bookmark(void** state)
     assert_true(result);
 }
 
-void
-cmd_bookmark_remove_uses_roomjid_in_room(void** state)
+void cmd_bookmark_remove_uses_roomjid_in_room(void **state)
 {
     muc_init();
 
-    gchar* args[] = { "remove", NULL };
+    gchar *args[] = { "remove", NULL };
     ProfMucWin muc_win;
     muc_win.window.type = WIN_MUC;
     muc_win.memcheck = PROFMUCWIN_MEMCHECK;
@@ -405,13 +388,12 @@ cmd_bookmark_remove_uses_roomjid_in_room(void** state)
     muc_close();
 }
 
-void
-cmd_bookmark_remove_uses_supplied_jid_in_room(void** state)
+void cmd_bookmark_remove_uses_supplied_jid_in_room(void **state)
 {
     muc_init();
 
-    char* jid = "room1@conf.server";
-    gchar* args[] = { "remove", jid, NULL };
+    char *jid = "room1@conf.server";
+    gchar *args[] = { "remove", jid, NULL };
     ProfMucWin muc_win;
     muc_win.window.type = WIN_MUC;
     muc_win.memcheck = PROFMUCWIN_MEMCHECK;

@@ -1,21 +1,20 @@
-#include <cmocka.h>
-#include <setjmp.h>
 #include <stdarg.h>
 #include <stddef.h>
+#include <setjmp.h>
+#include <cmocka.h>
 #include <stdlib.h>
 #include <string.h>
 
-#include "command/cmd_funcs.h"
 #include "xmpp/chat_session.h"
-#include "xmpp/roster_list.h"
+#include "command/cmd_funcs.h"
 #include "xmpp/xmpp.h"
+#include "xmpp/roster_list.h"
 
 #include "ui/stub_ui.h"
 
 #define CMD_DISCONNECT "/disconnect"
 
-void
-clears_chat_sessions(void** state)
+void clears_chat_sessions(void **state)
 {
     chat_sessions_init();
     roster_create();
@@ -30,8 +29,8 @@ clears_chat_sessions(void** state)
 
     assert_true(result);
 
-    ChatSession* session1 = chat_session_get("bob@server.org");
-    ChatSession* session2 = chat_session_get("mike@server.org");
+    ChatSession *session1 = chat_session_get("bob@server.org");
+    ChatSession *session2 = chat_session_get("mike@server.org");
     assert_null(session1);
     assert_null(session2);
 }

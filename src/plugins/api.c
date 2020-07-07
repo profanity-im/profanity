@@ -33,24 +33,24 @@
  *
  */
 
-#include <assert.h>
 #include <stdlib.h>
 #include <string.h>
+#include <assert.h>
 
 #include <glib.h>
 
-#include "command/cmd_defs.h"
+#include "profanity.h"
+#include "log.h"
 #include "common.h"
 #include "config/theme.h"
-#include "event/client_events.h"
+#include "command/cmd_defs.h"
 #include "event/server_events.h"
-#include "log.h"
-#include "plugins/autocompleters.h"
+#include "event/client_events.h"
 #include "plugins/callbacks.h"
-#include "plugins/disco.h"
-#include "plugins/settings.h"
+#include "plugins/autocompleters.h"
 #include "plugins/themes.h"
-#include "profanity.h"
+#include "plugins/settings.h"
+#include "plugins/disco.h"
 #include "ui/ui.h"
 #include "ui/window_list.h"
 
@@ -61,14 +61,14 @@ api_cons_alert(void)
 }
 
 int
-api_cons_show(const char* const message)
+api_cons_show(const char * const message)
 {
     if (message == NULL) {
         log_warning("%s", "prof_cons_show failed, message is NULL");
         return 0;
     }
 
-    char* parsed = str_replace(message, "\r\n", "\n");
+    char *parsed = str_replace(message, "\r\n", "\n");
     cons_show("%s", parsed);
     free(parsed);
 
@@ -76,16 +76,16 @@ api_cons_show(const char* const message)
 }
 
 int
-api_cons_show_themed(const char* const group, const char* const key, const char* const def, const char* const message)
+api_cons_show_themed(const char *const group, const char *const key, const char *const def, const char *const message)
 {
     if (message == NULL) {
         log_warning("%s", "prof_cons_show_themed failed, message is NULL");
         return 0;
     }
 
-    char* parsed = str_replace(message, "\r\n", "\n");
+    char *parsed = str_replace(message, "\r\n", "\n");
     theme_item_t themeitem = plugin_themes_get(group, key, def);
-    ProfWin* console = wins_get_console();
+    ProfWin *console = wins_get_console();
     win_println(console, themeitem, "-", "%s", parsed);
 
     free(parsed);
@@ -94,7 +94,7 @@ api_cons_show_themed(const char* const group, const char* const key, const char*
 }
 
 int
-api_cons_bad_cmd_usage(const char* const cmd)
+api_cons_bad_cmd_usage(const char *const cmd)
 {
     if (cmd == NULL) {
         log_warning("%s", "prof_cons_bad_cmd_usage failed, cmd is NULL");
@@ -107,11 +107,11 @@ api_cons_bad_cmd_usage(const char* const cmd)
 }
 
 void
-api_register_command(const char* const plugin_name, const char* command_name, int min_args, int max_args,
-                     char** synopsis, const char* description, char* arguments[][2], char** examples,
-                     void* callback, void (*callback_exec)(PluginCommand* command, gchar** args), void (*callback_destroy)(void* callback))
+api_register_command(const char *const plugin_name, const char *command_name, int min_args, int max_args,
+    char **synopsis, const char *description, char *arguments[][2], char **examples,
+    void *callback, void(*callback_exec)(PluginCommand *command, gchar **args), void(*callback_destroy)(void *callback))
 {
-    PluginCommand* command = malloc(sizeof(PluginCommand));
+    PluginCommand *command = malloc(sizeof(PluginCommand));
     command->command_name = strdup(command_name);
     command->min_args = min_args;
     command->max_args = max_args;
@@ -119,7 +119,7 @@ api_register_command(const char* const plugin_name, const char* command_name, in
     command->callback_exec = callback_exec;
     command->callback_destroy = callback_destroy;
 
-    CommandHelp* help = malloc(sizeof(CommandHelp));
+    CommandHelp *help = malloc(sizeof(CommandHelp));
 
     help->tags[0] = NULL;
 
@@ -148,10 +148,10 @@ api_register_command(const char* const plugin_name, const char* command_name, in
 }
 
 void
-api_register_timed(const char* const plugin_name, void* callback, int interval_seconds,
-                   void (*callback_exec)(PluginTimedFunction* timed_function), void (*callback_destroy)(void* callback))
+api_register_timed(const char *const plugin_name, void *callback, int interval_seconds,
+    void (*callback_exec)(PluginTimedFunction *timed_function), void(*callback_destroy)(void *callback))
 {
-    PluginTimedFunction* timed_function = malloc(sizeof(PluginTimedFunction));
+    PluginTimedFunction *timed_function = malloc(sizeof(PluginTimedFunction));
     timed_function->callback = callback;
     timed_function->callback_exec = callback_exec;
     timed_function->callback_destroy = callback_destroy;
@@ -162,48 +162,48 @@ api_register_timed(const char* const plugin_name, void* callback, int interval_s
 }
 
 void
-api_completer_add(const char* const plugin_name, const char* key, char** items)
+api_completer_add(const char *const plugin_name, const char *key, char **items)
 {
     autocompleters_add(plugin_name, key, items);
 }
 
 void
-api_completer_remove(const char* const plugin_name, const char* key, char** items)
+api_completer_remove(const char *const plugin_name, const char *key, char **items)
 {
     autocompleters_remove(plugin_name, key, items);
 }
 
 void
-api_completer_clear(const char* const plugin_name, const char* key)
+api_completer_clear(const char *const plugin_name, const char *key)
 {
     autocompleters_clear(plugin_name, key);
 }
 
 void
-api_filepath_completer_add(const char* const plugin_name, const char* prefix)
+api_filepath_completer_add(const char *const plugin_name, const char *prefix)
 {
     autocompleters_filepath_add(plugin_name, prefix);
 }
 
 void
-api_notify(const char* message, const char* category, int timeout_ms)
+api_notify(const char *message, const char *category, int timeout_ms)
 {
     notify(message, timeout_ms, category);
 }
 
 void
-api_send_line(char* line)
+api_send_line(char *line)
 {
-    ProfWin* current = wins_get_current();
+    ProfWin *current = wins_get_current();
     cmd_process_input(current, line);
 }
 
-char*
+char *
 api_get_current_recipient(void)
 {
-    ProfWin* current = wins_get_current();
+    ProfWin *current = wins_get_current();
     if (current->type == WIN_CHAT) {
-        ProfChatWin* chatwin = (ProfChatWin*)current;
+        ProfChatWin *chatwin = (ProfChatWin*)current;
         assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
         return chatwin->barejid;
     } else {
@@ -211,12 +211,12 @@ api_get_current_recipient(void)
     }
 }
 
-char*
+char *
 api_get_current_muc(void)
 {
-    ProfWin* current = wins_get_current();
+    ProfWin *current = wins_get_current();
     if (current->type == WIN_MUC) {
-        ProfMucWin* mucwin = (ProfMucWin*)current;
+        ProfMucWin *mucwin = (ProfMucWin*)current;
         assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
         return mucwin->roomjid;
     } else {
@@ -224,12 +224,12 @@ api_get_current_muc(void)
     }
 }
 
-char*
+char *
 api_get_current_nick(void)
 {
-    ProfWin* current = wins_get_current();
+    ProfWin *current = wins_get_current();
     if (current->type == WIN_MUC) {
-        ProfMucWin* mucwin = (ProfMucWin*)current;
+        ProfMucWin *mucwin = (ProfMucWin*)current;
         assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
         return muc_nick(mucwin->roomjid);
     } else {
@@ -240,16 +240,16 @@ api_get_current_nick(void)
 char**
 api_get_current_occupants(void)
 {
-    ProfWin* current = wins_get_current();
+    ProfWin *current = wins_get_current();
     if (current->type == WIN_MUC) {
-        ProfMucWin* mucwin = (ProfMucWin*)current;
+        ProfMucWin *mucwin = (ProfMucWin*)current;
         assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
-        GList* occupants_list = muc_roster(mucwin->roomjid);
-        char** result = malloc((g_list_length(occupants_list) + 1) * sizeof(char*));
-        GList* curr = occupants_list;
+        GList *occupants_list = muc_roster(mucwin->roomjid);
+        char **result = malloc((g_list_length(occupants_list) + 1) * sizeof(char*));
+        GList *curr = occupants_list;
         int i = 0;
         while (curr) {
-            Occupant* occupant = curr->data;
+            Occupant *occupant = curr->data;
             result[i++] = strdup(occupant->nick);
             curr = g_list_next(curr);
         }
@@ -263,7 +263,7 @@ api_get_current_occupants(void)
 int
 api_current_win_is_console(void)
 {
-    ProfWin* current = wins_get_current();
+    ProfWin *current = wins_get_current();
     if (current && current->type == WIN_CONSOLE) {
         return 1;
     } else {
@@ -272,48 +272,48 @@ api_current_win_is_console(void)
 }
 
 char*
-api_get_room_nick(const char* barejid)
+api_get_room_nick(const char *barejid)
 {
     return muc_nick(barejid);
 }
 
 void
-api_log_debug(const char* message)
+api_log_debug(const char *message)
 {
     log_debug("%s", message);
 }
 
 void
-api_log_info(const char* message)
+api_log_info(const char *message)
 {
     log_info("%s", message);
 }
 
 void
-api_log_warning(const char* message)
+api_log_warning(const char *message)
 {
     log_warning("%s", message);
 }
 
 void
-api_log_error(const char* message)
+api_log_error(const char *message)
 {
     log_error("%s", message);
 }
 
 int
-api_win_exists(const char* tag)
+api_win_exists(const char *tag)
 {
     return (wins_get_plugin(tag) != NULL);
 }
 
 void
 api_win_create(
-    const char* const plugin_name,
-    const char* tag,
-    void* callback,
-    void (*callback_exec)(PluginWindowCallback* window_callback, const char* tag, const char* const line),
-    void (*callback_destroy)(void* callback))
+    const char *const plugin_name,
+    const char *tag,
+    void *callback,
+    void(*callback_exec)(PluginWindowCallback *window_callback, const char *tag, const char * const line),
+    void(*callback_destroy)(void *callback))
 {
     if (callbacks_win_exists(plugin_name, tag)) {
         if (callback_destroy) {
@@ -322,7 +322,7 @@ api_win_create(
         return;
     }
 
-    PluginWindowCallback* window = malloc(sizeof(PluginWindowCallback));
+    PluginWindowCallback *window = malloc(sizeof(PluginWindowCallback));
     window->callback = callback;
     window->callback_exec = callback_exec;
     window->callback_destroy = callback_destroy;
@@ -332,20 +332,20 @@ api_win_create(
     wins_new_plugin(plugin_name, tag);
 
     // set status bar active
-    ProfPluginWin* pluginwin = wins_get_plugin(tag);
+    ProfPluginWin *pluginwin = wins_get_plugin(tag);
     int num = wins_get_num((ProfWin*)pluginwin);
     status_bar_active(num, WIN_PLUGIN, pluginwin->tag);
 }
 
 int
-api_win_focus(const char* tag)
+api_win_focus(const char *tag)
 {
     if (tag == NULL) {
         log_warning("%s", "prof_win_focus failed, tag is NULL");
         return 0;
     }
 
-    ProfPluginWin* pluginwin = wins_get_plugin(tag);
+    ProfPluginWin *pluginwin = wins_get_plugin(tag);
     if (pluginwin == NULL) {
         log_warning("prof_win_focus failed, no window with tag: %s", tag);
         return 0;
@@ -357,7 +357,7 @@ api_win_focus(const char* tag)
 }
 
 int
-api_win_show(const char* tag, const char* line)
+api_win_show(const char *tag, const char *line)
 {
     if (tag == NULL) {
         log_warning("%s", "prof_win_show failed, tag is NULL");
@@ -368,20 +368,20 @@ api_win_show(const char* tag, const char* line)
         return 0;
     }
 
-    ProfPluginWin* pluginwin = wins_get_plugin(tag);
+    ProfPluginWin *pluginwin = wins_get_plugin(tag);
     if (pluginwin == NULL) {
         log_warning("prof_win_show failed, no window with tag: %s", tag);
         return 0;
     }
 
-    ProfWin* window = (ProfWin*)pluginwin;
+    ProfWin *window = (ProfWin*)pluginwin;
     win_println(window, THEME_DEFAULT, "!", "%s", line);
 
     return 1;
 }
 
 int
-api_win_show_themed(const char* tag, const char* const group, const char* const key, const char* const def, const char* line)
+api_win_show_themed(const char *tag, const char *const group, const char *const key, const char *const def, const char *line)
 {
     if (tag == NULL) {
         log_warning("%s", "prof_win_show_themed failed, tag is NULL");
@@ -392,89 +392,89 @@ api_win_show_themed(const char* tag, const char* const group, const char* const 
         return 0;
     }
 
-    ProfPluginWin* pluginwin = wins_get_plugin(tag);
+    ProfPluginWin *pluginwin = wins_get_plugin(tag);
     if (pluginwin == NULL) {
         log_warning("prof_win_show_themed failed, no window with tag: %s", tag);
         return 0;
     }
 
     theme_item_t themeitem = plugin_themes_get(group, key, def);
-    ProfWin* window = (ProfWin*)pluginwin;
+    ProfWin *window = (ProfWin*)pluginwin;
     win_println(window, themeitem, "!", "%s", line);
 
     return 1;
 }
 
 int
-api_send_stanza(const char* const stanza)
+api_send_stanza(const char *const stanza)
 {
     return connection_send_stanza(stanza);
 }
 
 gboolean
-api_settings_boolean_get(const char* const group, const char* const key, gboolean def)
+api_settings_boolean_get(const char *const group, const char *const key, gboolean def)
 {
     return plugin_settings_boolean_get(group, key, def);
 }
 
 void
-api_settings_boolean_set(const char* const group, const char* const key, gboolean value)
+api_settings_boolean_set(const char *const group, const char *const key, gboolean value)
 {
     plugin_settings_boolean_set(group, key, value);
 }
 
 char*
-api_settings_string_get(const char* const group, const char* const key, const char* const def)
+api_settings_string_get(const char *const group, const char *const key, const char *const def)
 {
     return plugin_settings_string_get(group, key, def);
 }
 
 void
-api_settings_string_set(const char* const group, const char* const key, const char* const value)
+api_settings_string_set(const char *const group, const char *const key, const char *const value)
 {
     plugin_settings_string_set(group, key, value);
 }
 
 char**
-api_settings_string_list_get(const char* const group, const char* const key)
+api_settings_string_list_get(const char *const group, const char *const key)
 {
     return plugin_settings_string_list_get(group, key);
 }
 
 void
-api_settings_string_list_add(const char* const group, const char* const key, const char* const value)
+api_settings_string_list_add(const char *const group, const char *const key, const char *const value)
 {
     plugin_settings_string_list_add(group, key, value);
 }
 
 int
-api_settings_string_list_remove(const char* const group, const char* const key, const char* const value)
+api_settings_string_list_remove(const char *const group, const char *const key, const char *const value)
 {
     return plugin_settings_string_list_remove(group, key, value);
 }
 
 int
-api_settings_string_list_clear(const char* const group, const char* const key)
+api_settings_string_list_clear(const char *const group, const char *const key)
 {
     return plugin_settings_string_list_clear(group, key);
 }
 
 int
-api_settings_int_get(const char* const group, const char* const key, int def)
+api_settings_int_get(const char *const group, const char *const key, int def)
 {
     return plugin_settings_int_get(group, key, def);
 }
 
 void
-api_settings_int_set(const char* const group, const char* const key, int value)
+api_settings_int_set(const char *const group, const char *const key, int value)
 {
     plugin_settings_int_set(group, key, value);
 }
 
 void
-api_incoming_message(const char* const barejid, const char* const resource, const char* const plain)
+api_incoming_message(const char *const barejid, const char *const resource, const char *const plain)
 {
-    ProfMessage* message = message_init();
+    ProfMessage *message = message_init();
     message->from_jid = jid_create_from_bare_and_resource(barejid, resource);
     message->plain = strdup(plain);
 
@@ -487,7 +487,7 @@ api_incoming_message(const char* const barejid, const char* const resource, cons
 }
 
 void
-api_disco_add_feature(char* plugin_name, char* feature)
+api_disco_add_feature(char *plugin_name, char *feature)
 {
     if (feature == NULL) {
         log_warning("%s", "api_disco_add_feature failed, feature is NULL");
@@ -506,14 +506,14 @@ api_disco_add_feature(char* plugin_name, char* feature)
 }
 
 void
-api_encryption_reset(const char* const barejid)
+api_encryption_reset(const char *const barejid)
 {
     if (barejid == NULL) {
         log_warning("%s", "api_encryption_reset failed, barejid is NULL");
         return;
     }
 
-    ProfChatWin* chatwin = wins_get_chat(barejid);
+    ProfChatWin *chatwin = wins_get_chat(barejid);
     if (chatwin == NULL) {
         log_warning("%s", "api_encryption_reset failed, could not find chat window for %s", barejid);
         return;
@@ -535,7 +535,7 @@ api_encryption_reset(const char* const barejid)
 }
 
 int
-api_chat_set_titlebar_enctext(const char* const barejid, const char* const enctext)
+api_chat_set_titlebar_enctext(const char *const barejid, const char *const enctext)
 {
     if (enctext == NULL) {
         log_warning("%s", "api_chat_set_titlebar_enctext failed, enctext is NULL");
@@ -547,7 +547,7 @@ api_chat_set_titlebar_enctext(const char* const barejid, const char* const encte
         return 0;
     }
 
-    ProfChatWin* chatwin = wins_get_chat(barejid);
+    ProfChatWin *chatwin = wins_get_chat(barejid);
     if (chatwin == NULL) {
         log_warning("%s", "api_chat_set_titlebar_enctext failed, could not find chat window for %s", barejid);
         return 0;
@@ -559,14 +559,14 @@ api_chat_set_titlebar_enctext(const char* const barejid, const char* const encte
 }
 
 int
-api_chat_unset_titlebar_enctext(const char* const barejid)
+api_chat_unset_titlebar_enctext(const char *const barejid)
 {
     if (barejid == NULL) {
         log_warning("%s", "api_chat_unset_titlebar_enctext failed, barejid is NULL");
         return 0;
     }
 
-    ProfChatWin* chatwin = wins_get_chat(barejid);
+    ProfChatWin *chatwin = wins_get_chat(barejid);
     if (chatwin == NULL) {
         log_warning("%s", "api_chat_unset_titlebar_enctext failed, could not find chat window for %s", barejid);
         return 0;
@@ -578,7 +578,7 @@ api_chat_unset_titlebar_enctext(const char* const barejid)
 }
 
 int
-api_chat_set_incoming_char(const char* const barejid, const char* const ch)
+api_chat_set_incoming_char(const char *const barejid, const char *const ch)
 {
     if (ch == NULL) {
         log_warning("%s", "api_chat_set_incoming_char failed, ch is NULL");
@@ -595,7 +595,7 @@ api_chat_set_incoming_char(const char* const barejid, const char* const ch)
         return 0;
     }
 
-    ProfChatWin* chatwin = wins_get_chat(barejid);
+    ProfChatWin *chatwin = wins_get_chat(barejid);
     if (chatwin == NULL) {
         log_warning("%s", "api_chat_set_incoming_char failed, could not find chat window for %s", barejid);
         return 0;
@@ -607,14 +607,14 @@ api_chat_set_incoming_char(const char* const barejid, const char* const ch)
 }
 
 int
-api_chat_unset_incoming_char(const char* const barejid)
+api_chat_unset_incoming_char(const char *const barejid)
 {
     if (barejid == NULL) {
         log_warning("%s", "api_chat_unset_incoming_char failed, barejid is NULL");
         return 0;
     }
 
-    ProfChatWin* chatwin = wins_get_chat(barejid);
+    ProfChatWin *chatwin = wins_get_chat(barejid);
     if (chatwin == NULL) {
         log_warning("%s", "api_chat_unset_incoming_char failed, could not find chat window for %s", barejid);
         return 0;
@@ -626,7 +626,7 @@ api_chat_unset_incoming_char(const char* const barejid)
 }
 
 int
-api_chat_set_outgoing_char(const char* const barejid, const char* const ch)
+api_chat_set_outgoing_char(const char *const barejid, const char *const ch)
 {
     if (ch == NULL) {
         log_warning("%s", "api_chat_set_outgoing_char failed, ch is NULL");
@@ -643,7 +643,7 @@ api_chat_set_outgoing_char(const char* const barejid, const char* const ch)
         return 0;
     }
 
-    ProfChatWin* chatwin = wins_get_chat(barejid);
+    ProfChatWin *chatwin = wins_get_chat(barejid);
     if (chatwin == NULL) {
         log_warning("%s", "api_chat_set_outgoing_char failed, could not find chat window for %s", barejid);
         return 0;
@@ -655,14 +655,14 @@ api_chat_set_outgoing_char(const char* const barejid, const char* const ch)
 }
 
 int
-api_chat_unset_outgoing_char(const char* const barejid)
+api_chat_unset_outgoing_char(const char *const barejid)
 {
     if (barejid == NULL) {
         log_warning("%s", "api_chat_unset_outgoing_char failed, barejid is NULL");
         return 0;
     }
 
-    ProfChatWin* chatwin = wins_get_chat(barejid);
+    ProfChatWin *chatwin = wins_get_chat(barejid);
     if (chatwin == NULL) {
         log_warning("%s", "api_chat_unset_outgoing_char failed, could not find chat window for %s", barejid);
         return 0;
@@ -674,7 +674,7 @@ api_chat_unset_outgoing_char(const char* const barejid)
 }
 
 int
-api_room_set_titlebar_enctext(const char* const roomjid, const char* const enctext)
+api_room_set_titlebar_enctext(const char *const roomjid, const char *const enctext)
 {
     if (enctext == NULL) {
         log_warning("%s", "api_room_set_titlebar_enctext failed, enctext is NULL");
@@ -686,7 +686,7 @@ api_room_set_titlebar_enctext(const char* const roomjid, const char* const encte
         return 0;
     }
 
-    ProfMucWin* mucwin = wins_get_muc(roomjid);
+    ProfMucWin *mucwin = wins_get_muc(roomjid);
     if (mucwin == NULL) {
         log_warning("%s", "api_room_set_titlebar_enctext failed, coudl not find room window for %s", roomjid);
         return 0;
@@ -698,14 +698,14 @@ api_room_set_titlebar_enctext(const char* const roomjid, const char* const encte
 }
 
 int
-api_room_unset_titlebar_enctext(const char* const roomjid)
+api_room_unset_titlebar_enctext(const char *const roomjid)
 {
     if (roomjid == NULL) {
         log_warning("%s", "api_room_unset_titlebar_enctext failed, roomjid is NULL");
         return 0;
     }
 
-    ProfMucWin* mucwin = wins_get_muc(roomjid);
+    ProfMucWin *mucwin = wins_get_muc(roomjid);
     if (mucwin == NULL) {
         log_warning("%s", "api_room_unset_titlebar_enctext failed, coudl not find room window for %s", roomjid);
         return 0;
@@ -717,7 +717,7 @@ api_room_unset_titlebar_enctext(const char* const roomjid)
 }
 
 int
-api_room_set_message_char(const char* const roomjid, const char* const ch)
+api_room_set_message_char(const char *const roomjid, const char *const ch)
 {
     if (ch == NULL) {
         log_warning("%s", "api_room_set_message_char failed, ch is NULL");
@@ -734,7 +734,7 @@ api_room_set_message_char(const char* const roomjid, const char* const ch)
         return 0;
     }
 
-    ProfMucWin* mucwin = wins_get_muc(roomjid);
+    ProfMucWin *mucwin = wins_get_muc(roomjid);
     if (mucwin == NULL) {
         log_warning("%s", "api_room_set_message_char failed, could not find room window for %s", roomjid);
         return 0;
@@ -746,14 +746,14 @@ api_room_set_message_char(const char* const roomjid, const char* const ch)
 }
 
 int
-api_room_unset_message_char(const char* const roomjid)
+api_room_unset_message_char(const char *const roomjid)
 {
     if (roomjid == NULL) {
         log_warning("%s", "api_room_unset_message_char failed, roomjid is NULL");
         return 0;
     }
 
-    ProfMucWin* mucwin = wins_get_muc(roomjid);
+    ProfMucWin *mucwin = wins_get_muc(roomjid);
     if (mucwin == NULL) {
         log_warning("%s", "api_room_unset_message_char failed, could not find room window for %s", roomjid);
         return 0;
@@ -765,7 +765,7 @@ api_room_unset_message_char(const char* const roomjid)
 }
 
 int
-api_chat_show(const char* const barejid, const char* message)
+api_chat_show(const char *const barejid, const char *message)
 {
     if (message == NULL) {
         log_warning("%s", "api_chat_show failed, message is NULL");
@@ -777,13 +777,13 @@ api_chat_show(const char* const barejid, const char* message)
         return 0;
     }
 
-    ProfChatWin* chatwin = wins_get_chat(barejid);
+    ProfChatWin *chatwin = wins_get_chat(barejid);
     if (chatwin == NULL) {
         log_warning("%s", "api_chat_show failed, could not find chat window for %s", barejid);
         return 0;
     }
 
-    char* parsed = str_replace(message, "\r\n", "\n");
+    char *parsed = str_replace(message, "\r\n", "\n");
     win_println((ProfWin*)chatwin, THEME_TEXT, "-", "%s", parsed);
     free(parsed);
 
@@ -791,8 +791,8 @@ api_chat_show(const char* const barejid, const char* message)
 }
 
 int
-api_chat_show_themed(const char* const barejid, const char* const group, const char* const key, const char* const def,
-                     const char* const ch, const char* const message)
+api_chat_show_themed(const char *const barejid, const char *const group, const char *const key, const char *const def,
+    const char *const ch, const char *const message)
 {
     if (message == NULL) {
         log_warning("%s", "api_chat_show_themed failed, message is NULL");
@@ -804,7 +804,7 @@ api_chat_show_themed(const char* const barejid, const char* const group, const c
         return 0;
     }
 
-    char* show_ch = "-";
+    char *show_ch = "-";
     if (ch) {
         if (g_utf8_strlen(ch, 4) != 1) {
             log_warning("%s", "api_chat_show_themed failed, ch must be a string of length 1");
@@ -814,13 +814,13 @@ api_chat_show_themed(const char* const barejid, const char* const group, const c
         }
     }
 
-    ProfChatWin* chatwin = wins_get_chat(barejid);
+    ProfChatWin *chatwin = wins_get_chat(barejid);
     if (chatwin == NULL) {
         log_warning("%s", "api_chat_show_themed failed, could not find chat window for %s", barejid);
         return 0;
     }
 
-    char* parsed = str_replace(message, "\r\n", "\n");
+    char *parsed = str_replace(message, "\r\n", "\n");
     theme_item_t themeitem = plugin_themes_get(group, key, def);
 
     win_println((ProfWin*)chatwin, themeitem, show_ch, "%s", parsed);
@@ -830,7 +830,7 @@ api_chat_show_themed(const char* const barejid, const char* const group, const c
 }
 
 int
-api_room_show(const char* const roomjid, const char* message)
+api_room_show(const char *const roomjid, const char *message)
 {
     if (message == NULL) {
         log_warning("%s", "api_room_show failed, message is NULL");
@@ -842,13 +842,13 @@ api_room_show(const char* const roomjid, const char* message)
         return 0;
     }
 
-    ProfMucWin* mucwin = wins_get_muc(roomjid);
+    ProfMucWin *mucwin = wins_get_muc(roomjid);
     if (mucwin == NULL) {
         log_warning("%s", "api_room_show failed, could not find room window for %s", roomjid);
         return 0;
     }
 
-    char* parsed = str_replace(message, "\r\n", "\n");
+    char *parsed = str_replace(message, "\r\n", "\n");
     win_println((ProfWin*)mucwin, THEME_TEXT, "-", "%s", parsed);
     free(parsed);
 
@@ -856,8 +856,8 @@ api_room_show(const char* const roomjid, const char* message)
 }
 
 int
-api_room_show_themed(const char* const roomjid, const char* const group, const char* const key, const char* const def,
-                     const char* const ch, const char* const message)
+api_room_show_themed(const char *const roomjid, const char *const group, const char *const key, const char *const def,
+    const char *const ch, const char *const message)
 {
     if (message == NULL) {
         log_warning("%s", "api_room_show_themed failed, message is NULL");
@@ -869,7 +869,7 @@ api_room_show_themed(const char* const roomjid, const char* const group, const c
         return 0;
     }
 
-    char* show_ch = "-";
+    char *show_ch = "-";
     if (ch) {
         if (g_utf8_strlen(ch, 4) != 1) {
             log_warning("%s", "api_room_show_themed failed, ch must be a string of length 1");
@@ -879,13 +879,13 @@ api_room_show_themed(const char* const roomjid, const char* const group, const c
         }
     }
 
-    ProfMucWin* mucwin = wins_get_muc(roomjid);
+    ProfMucWin *mucwin = wins_get_muc(roomjid);
     if (mucwin == NULL) {
         log_warning("%s", "api_room_show_themed failed, could not find room window for %s", roomjid);
         return 0;
     }
 
-    char* parsed = str_replace(message, "\r\n", "\n");
+    char *parsed = str_replace(message, "\r\n", "\n");
     theme_item_t themeitem = plugin_themes_get(group, key, def);
 
     win_println((ProfWin*)mucwin, themeitem, show_ch, "%s", parsed);
