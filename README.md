@@ -39,6 +39,7 @@ Thank you! <3
 We tried to sum things up on our [helpout](https://profanity-im.github.io/helpout.html) page.
 Additionally you can check out our [blog](https://profanity-im.github.io/blog/) where we have articles like:
 [How to get a backtrace](https://profanity-im.github.io/blog/post/how-to-get-a-backtrace/) and [Contributing a Patch via GitHub](https://profanity-im.github.io/blog/post/contributing-a-patch-via-github/).
+For more technical details check out our [CONTRIBUTING.md](CONTRIBUTING.md) file.
 
 ## Getting help
 To get help, first read our [User Guide](https://profanity-im.github.io/userguide.html) then check out the [FAQ](https://profanity-im.github.io/faq.html).
