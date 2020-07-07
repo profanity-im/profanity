@@ -7,26 +7,39 @@
 // forward -> ui/win_types.h
 typedef struct prof_win_t ProfWin;
 
-typedef struct http_upload_t {
-    char *filename;
+typedef struct http_upload_t
+{
+    char* filename;
     off_t filesize;
     curl_off_t bytes_sent;
-    char *mime_type;
-    char *get_url;
-    char *put_url;
-    ProfWin *window;
+    char* mime_type;
+    char* get_url;
+    char* put_url;
+    ProfWin* window;
     pthread_t worker;
     int cancel;
 } HTTPUpload;
 
 //GSList *upload_processes;
 
-void* http_file_put(void *userdata) { return NULL; }
+void*
+http_file_put(void* userdata)
+{
+    return NULL;
+}
 
-char* file_mime_type(const char* const file_name) { return NULL; }
-off_t file_size(const char* const file_name) { return 0; }
+char*
+file_mime_type(const char* const file_name)
+{
+    return NULL;
+}
+off_t
+file_size(const char* const file_name)
+{
+    return 0;
+}
 
-void http_upload_cancel_processes() {};
-void http_upload_add_upload() {};
+void http_upload_cancel_processes(){};
+void http_upload_add_upload(){};
 
 #endif

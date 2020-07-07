@@ -1,15 +1,15 @@
+#include <cmocka.h>
+#include <glib.h>
+#include <setjmp.h>
 #include <stdarg.h>
 #include <stddef.h>
-#include <setjmp.h>
-#include <cmocka.h>
 #include <stdlib.h>
 #include <string.h>
-#include <glib.h>
 
 #include "xmpp/xmpp.h"
 
-#include "ui/ui.h"
 #include "ui/stub_ui.h"
+#include "ui/ui.h"
 
 #include "config/accounts.h"
 
@@ -17,9 +17,10 @@
 
 #define CMD_ACCOUNT "/account"
 
-void cmd_account_shows_usage_when_not_connected_and_no_args(void **state)
+void
+cmd_account_shows_usage_when_not_connected_and_no_args(void** state)
 {
-    gchar *args[] = { NULL };
+    gchar* args[] = { NULL };
 
     will_return(connection_get_status, JABBER_DISCONNECTED);
 
@@ -29,12 +30,12 @@ void cmd_account_shows_usage_when_not_connected_and_no_args(void **state)
     assert_true(result);
 }
 
-
-void cmd_account_shows_account_when_connected_and_no_args(void **state)
+void
+cmd_account_shows_account_when_connected_and_no_args(void** state)
 {
-    ProfAccount *account = account_new("jabber_org", "me@jabber.org", NULL, NULL,
-        TRUE, NULL, 0, NULL, NULL, NULL, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
-    gchar *args[] = { NULL };
+    ProfAccount* account = account_new("jabber_org", "me@jabber.org", NULL, NULL,
+                                       TRUE, NULL, 0, NULL, NULL, NULL, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+    gchar* args[] = { NULL };
 
     will_return(connection_get_status, JABBER_CONNECTED);
     will_return(session_get_account_name, "account_name");
@@ -47,11 +48,12 @@ void cmd_account_shows_account_when_connected_and_no_args(void **state)
     assert_true(result);
 }
 
-void cmd_account_list_shows_accounts(void **state)
+void
+cmd_account_list_shows_accounts(void** state)
 {
-    gchar *args[] = { "list", NULL };
+    gchar* args[] = { "list", NULL };
 
-    gchar **accounts = malloc(sizeof(gchar *) * 4);
+    gchar** accounts = malloc(sizeof(gchar*) * 4);
     accounts[0] = strdup("account1");
     accounts[1] = strdup("account2");
     accounts[2] = strdup("account3");
@@ -65,9 +67,10 @@ void cmd_account_list_shows_accounts(void **state)
     assert_true(result);
 }
 
-void cmd_account_show_shows_usage_when_no_arg(void **state)
+void
+cmd_account_show_shows_usage_when_no_arg(void** state)
 {
-    gchar *args[] = { "show", NULL };
+    gchar* args[] = { "show", NULL };
 
     expect_string(cons_bad_cmd_usage, cmd, CMD_ACCOUNT);
 
@@ -75,9 +78,10 @@ void cmd_account_show_shows_usage_when_no_arg(void **state)
     assert_true(result);
 }
 
-void cmd_account_show_shows_message_when_account_does_not_exist(void **state)
+void
+cmd_account_show_shows_message_when_account_does_not_exist(void** state)
 {
-    gchar *args[] = { "show", "account_name", NULL };
+    gchar* args[] = { "show", "account_name", NULL };
 
     expect_any(accounts_get_account, name);
     will_return(accounts_get_account, NULL);
@@ -89,11 +93,12 @@ void cmd_account_show_shows_message_when_account_does_not_exist(void **state)
     assert_true(result);
 }
 
-void cmd_account_show_shows_account_when_exists(void **state)
+void
+cmd_account_show_shows_account_when_exists(void** state)
 {
-    gchar *args[] = { "show", "account_name", NULL };
-    ProfAccount *account = account_new("jabber_org", "me@jabber.org", NULL, NULL,
-        TRUE, NULL, 0, NULL, NULL, NULL, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+    gchar* args[] = { "show", "account_name", NULL };
+    ProfAccount* account = account_new("jabber_org", "me@jabber.org", NULL, NULL,
+                                       TRUE, NULL, 0, NULL, NULL, NULL, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
 
     expect_any(accounts_get_account, name);
     will_return(accounts_get_account, account);
@@ -104,9 +109,10 @@ void cmd_account_show_shows_account_when_exists(void **state)
     assert_true(result);
 }
 
-void cmd_account_add_shows_usage_when_no_arg(void **state)
+void
+cmd_account_add_shows_usage_when_no_arg(void** state)
 {
-    gchar *args[] = { "add", NULL };
+    gchar* args[] = { "add", NULL };
 
     expect_string(cons_bad_cmd_usage, cmd, CMD_ACCOUNT);
 
@@ -114,9 +120,10 @@ void cmd_account_add_shows_usage_when_no_arg(void **state)
     assert_true(result);
 }
 
-void cmd_account_add_adds_account(void **state)
+void
+cmd_account_add_adds_account(void** state)
 {
-    gchar *args[] = { "add", "new_account", NULL };
+    gchar* args[] = { "add", "new_account", NULL };
 
     expect_string(accounts_add, jid, "new_account");
     expect_value(accounts_add, altdomain, NULL);
@@ -128,9 +135,10 @@ void cmd_account_add_adds_account(void **state)
     assert_true(result);
 }
 
-void cmd_account_enable_shows_usage_when_no_arg(void **state)
+void
+cmd_account_enable_shows_usage_when_no_arg(void** state)
 {
-    gchar *args[] = { "enable", NULL };
+    gchar* args[] = { "enable", NULL };
 
     expect_string(cons_bad_cmd_usage, cmd, CMD_ACCOUNT);
 
@@ -138,9 +146,10 @@ void cmd_account_enable_shows_usage_when_no_arg(void **state)
     assert_true(result);
 }
 
-void cmd_account_enable_enables_account(void **state)
+void
+cmd_account_enable_enables_account(void** state)
 {
-    gchar *args[] = { "enable", "account_name", NULL };
+    gchar* args[] = { "enable", "account_name", NULL };
 
     expect_string(accounts_enable, name, "account_name");
     will_return(accounts_enable, TRUE);
@@ -152,9 +161,10 @@ void cmd_account_enable_enables_account(void **state)
     assert_true(result);
 }
 
-void cmd_account_enable_shows_message_when_account_doesnt_exist(void **state)
+void
+cmd_account_enable_shows_message_when_account_doesnt_exist(void** state)
 {
-    gchar *args[] = { "enable", "account_name", NULL };
+    gchar* args[] = { "enable", "account_name", NULL };
 
     expect_any(accounts_enable, name);
     will_return(accounts_enable, FALSE);
@@ -166,9 +176,10 @@ void cmd_account_enable_shows_message_when_account_doesnt_exist(void **state)
     assert_true(result);
 }
 
-void cmd_account_disable_shows_usage_when_no_arg(void **state)
+void
+cmd_account_disable_shows_usage_when_no_arg(void** state)
 {
-    gchar *args[] = { "disable", NULL };
+    gchar* args[] = { "disable", NULL };
 
     expect_string(cons_bad_cmd_usage, cmd, CMD_ACCOUNT);
 
@@ -176,9 +187,10 @@ void cmd_account_disable_shows_usage_when_no_arg(void **state)
     assert_true(result);
 }
 
-void cmd_account_disable_disables_account(void **state)
+void
+cmd_account_disable_disables_account(void** state)
 {
-    gchar *args[] = { "disable", "account_name", NULL };
+    gchar* args[] = { "disable", "account_name", NULL };
 
     expect_string(accounts_disable, name, "account_name");
     will_return(accounts_disable, TRUE);
@@ -190,9 +202,10 @@ void cmd_account_disable_disables_account(void **state)
     assert_true(result);
 }
 
-void cmd_account_disable_shows_message_when_account_doesnt_exist(void **state)
+void
+cmd_account_disable_shows_message_when_account_doesnt_exist(void** state)
 {
-    gchar *args[] = { "disable", "account_name", NULL };
+    gchar* args[] = { "disable", "account_name", NULL };
 
     expect_any(accounts_disable, name);
     will_return(accounts_disable, FALSE);
@@ -204,9 +217,10 @@ void cmd_account_disable_shows_message_when_account_doesnt_exist(void **state)
     assert_true(result);
 }
 
-void cmd_account_rename_shows_usage_when_no_args(void **state)
+void
+cmd_account_rename_shows_usage_when_no_args(void** state)
 {
-    gchar *args[] = { "rename", NULL };
+    gchar* args[] = { "rename", NULL };
 
     expect_string(cons_bad_cmd_usage, cmd, CMD_ACCOUNT);
 
@@ -214,9 +228,10 @@ void cmd_account_rename_shows_usage_when_no_args(void **state)
     assert_true(result);
 }
 
-void cmd_account_rename_shows_usage_when_one_arg(void **state)
+void
+cmd_account_rename_shows_usage_when_one_arg(void** state)
 {
-    gchar *args[] = { "rename", "original_name", NULL };
+    gchar* args[] = { "rename", "original_name", NULL };
 
     expect_string(cons_bad_cmd_usage, cmd, CMD_ACCOUNT);
 
@@ -224,9 +239,10 @@ void cmd_account_rename_shows_usage_when_one_arg(void **state)
     assert_true(result);
 }
 
-void cmd_account_rename_renames_account(void **state)
+void
+cmd_account_rename_renames_account(void** state)
 {
-    gchar *args[] = { "rename", "original_name", "new_name", NULL };
+    gchar* args[] = { "rename", "original_name", "new_name", NULL };
 
     expect_string(accounts_rename, account_name, "original_name");
     expect_string(accounts_rename, new_name, "new_name");
@@ -239,9 +255,10 @@ void cmd_account_rename_renames_account(void **state)
     assert_true(result);
 }
 
-void cmd_account_rename_shows_message_when_not_renamed(void **state)
+void
+cmd_account_rename_shows_message_when_not_renamed(void** state)
 {
-    gchar *args[] = { "rename", "original_name", "new_name", NULL };
+    gchar* args[] = { "rename", "original_name", "new_name", NULL };
 
     expect_any(accounts_rename, account_name);
     expect_any(accounts_rename, new_name);
@@ -254,9 +271,10 @@ void cmd_account_rename_shows_message_when_not_renamed(void **state)
     assert_true(result);
 }
 
-void cmd_account_set_shows_usage_when_no_args(void **state)
+void
+cmd_account_set_shows_usage_when_no_args(void** state)
 {
-    gchar *args[] = { "set", NULL };
+    gchar* args[] = { "set", NULL };
 
     expect_string(cons_bad_cmd_usage, cmd, CMD_ACCOUNT);
 
@@ -264,9 +282,10 @@ void cmd_account_set_shows_usage_when_no_args(void **state)
     assert_true(result);
 }
 
-void cmd_account_set_shows_usage_when_one_arg(void **state)
+void
+cmd_account_set_shows_usage_when_one_arg(void** state)
 {
-    gchar *args[] = { "set", "a_account", NULL };
+    gchar* args[] = { "set", "a_account", NULL };
 
     expect_string(cons_bad_cmd_usage, cmd, CMD_ACCOUNT);
 
@@ -274,9 +293,10 @@ void cmd_account_set_shows_usage_when_one_arg(void **state)
     assert_true(result);
 }
 
-void cmd_account_set_shows_usage_when_two_args(void **state)
+void
+cmd_account_set_shows_usage_when_two_args(void** state)
 {
-    gchar *args[] = { "set", "a_account", "a_property", NULL };
+    gchar* args[] = { "set", "a_account", "a_property", NULL };
 
     expect_string(cons_bad_cmd_usage, cmd, CMD_ACCOUNT);
 
@@ -284,9 +304,10 @@ void cmd_account_set_shows_usage_when_two_args(void **state)
     assert_true(result);
 }
 
-void cmd_account_set_shows_message_when_account_doesnt_exist(void **state)
+void
+cmd_account_set_shows_message_when_account_doesnt_exist(void** state)
 {
-    gchar *args[] = { "set", "a_account", "a_property", "a_value", NULL };
+    gchar* args[] = { "set", "a_account", "a_property", "a_value", NULL };
 
     expect_string(accounts_account_exists, account_name, "a_account");
     will_return(accounts_account_exists, FALSE);
@@ -298,9 +319,10 @@ void cmd_account_set_shows_message_when_account_doesnt_exist(void **state)
     assert_true(result);
 }
 
-void cmd_account_set_jid_shows_message_for_malformed_jid(void **state)
+void
+cmd_account_set_jid_shows_message_for_malformed_jid(void** state)
 {
-    gchar *args[] = { "set", "a_account", "jid", "@malformed", NULL };
+    gchar* args[] = { "set", "a_account", "jid", "@malformed", NULL };
 
     expect_any(accounts_account_exists, account_name);
     will_return(accounts_account_exists, TRUE);
@@ -311,9 +333,10 @@ void cmd_account_set_jid_shows_message_for_malformed_jid(void **state)
     assert_true(result);
 }
 
-void cmd_account_set_jid_sets_barejid(void **state)
+void
+cmd_account_set_jid_sets_barejid(void** state)
 {
-    gchar *args[] = { "set", "a_account", "jid", "a_local@a_domain", NULL };
+    gchar* args[] = { "set", "a_account", "jid", "a_local@a_domain", NULL };
 
     expect_any(accounts_account_exists, account_name);
     will_return(accounts_account_exists, TRUE);
@@ -328,9 +351,10 @@ void cmd_account_set_jid_sets_barejid(void **state)
     assert_true(result);
 }
 
-void cmd_account_set_jid_sets_resource(void **state)
+void
+cmd_account_set_jid_sets_resource(void** state)
 {
-    gchar *args[] = { "set", "a_account", "jid", "a_local@a_domain/a_resource", NULL };
+    gchar* args[] = { "set", "a_account", "jid", "a_local@a_domain/a_resource", NULL };
 
     expect_any(accounts_account_exists, account_name);
     will_return(accounts_account_exists, TRUE);
@@ -350,9 +374,10 @@ void cmd_account_set_jid_sets_resource(void **state)
     assert_true(result);
 }
 
-void cmd_account_set_server_sets_server(void **state)
+void
+cmd_account_set_server_sets_server(void** state)
 {
-    gchar *args[] = { "set", "a_account", "server", "a_server", NULL };
+    gchar* args[] = { "set", "a_account", "server", "a_server", NULL };
 
     expect_any(accounts_account_exists, account_name);
     will_return(accounts_account_exists, TRUE);
@@ -367,9 +392,10 @@ void cmd_account_set_server_sets_server(void **state)
     assert_true(result);
 }
 
-void cmd_account_set_resource_sets_resource(void **state)
+void
+cmd_account_set_resource_sets_resource(void** state)
 {
-    gchar *args[] = { "set", "a_account", "resource", "a_resource", NULL };
+    gchar* args[] = { "set", "a_account", "resource", "a_resource", NULL };
 
     will_return(connection_get_status, JABBER_DISCONNECTED);
 
@@ -386,9 +412,10 @@ void cmd_account_set_resource_sets_resource(void **state)
     assert_true(result);
 }
 
-void cmd_account_set_resource_sets_resource_with_online_message(void **state)
+void
+cmd_account_set_resource_sets_resource_with_online_message(void** state)
 {
-    gchar *args[] = { "set", "a_account", "resource", "a_resource", NULL };
+    gchar* args[] = { "set", "a_account", "resource", "a_resource", NULL };
 
     will_return(connection_get_status, JABBER_CONNECTED);
 
@@ -405,12 +432,12 @@ void cmd_account_set_resource_sets_resource_with_online_message(void **state)
     assert_true(result);
 }
 
-void cmd_account_set_password_sets_password(void **state)
+void
+cmd_account_set_password_sets_password(void** state)
 {
-    gchar *args[] = { "set", "a_account", "password", "a_password", NULL };
-    ProfAccount *account = account_new("a_account", NULL, NULL, NULL,
-    TRUE, NULL, 0, NULL, NULL, NULL, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
-
+    gchar* args[] = { "set", "a_account", "password", "a_password", NULL };
+    ProfAccount* account = account_new("a_account", NULL, NULL, NULL,
+                                       TRUE, NULL, 0, NULL, NULL, NULL, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
 
     expect_any(accounts_account_exists, account_name);
     will_return(accounts_account_exists, TRUE);
@@ -428,11 +455,12 @@ void cmd_account_set_password_sets_password(void **state)
     assert_true(result);
 }
 
-void cmd_account_set_eval_password_sets_eval_password(void **state)
+void
+cmd_account_set_eval_password_sets_eval_password(void** state)
 {
-    gchar *args[] = { "set", "a_account", "eval_password", "a_password", NULL };
-    ProfAccount *account = account_new("a_account", NULL, NULL, NULL,
-    TRUE, NULL, 0, NULL, NULL, NULL, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+    gchar* args[] = { "set", "a_account", "eval_password", "a_password", NULL };
+    ProfAccount* account = account_new("a_account", NULL, NULL, NULL,
+                                       TRUE, NULL, 0, NULL, NULL, NULL, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
 
     expect_any(accounts_account_exists, account_name);
     will_return(accounts_account_exists, TRUE);
@@ -450,10 +478,12 @@ void cmd_account_set_eval_password_sets_eval_password(void **state)
     assert_true(result);
 }
 
-void cmd_account_set_password_when_eval_password_set(void **state) {
-    gchar *args[] = { "set", "a_account", "password", "a_password", NULL };
-    ProfAccount *account = account_new("a_account", NULL, NULL, "a_password",
-    TRUE, NULL, 0, NULL, NULL, NULL, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+void
+cmd_account_set_password_when_eval_password_set(void** state)
+{
+    gchar* args[] = { "set", "a_account", "password", "a_password", NULL };
+    ProfAccount* account = account_new("a_account", NULL, NULL, "a_password",
+                                       TRUE, NULL, 0, NULL, NULL, NULL, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
 
     expect_any(accounts_account_exists, account_name);
     will_return(accounts_account_exists, TRUE);
@@ -467,10 +497,12 @@ void cmd_account_set_password_when_eval_password_set(void **state) {
     assert_true(result);
 }
 
-void cmd_account_set_eval_password_when_password_set(void **state) {
-    gchar *args[] = { "set", "a_account", "eval_password", "a_password", NULL };
-    ProfAccount *account = account_new("a_account", NULL, "a_password", NULL,
-    TRUE, NULL, 0, NULL, NULL, NULL, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+void
+cmd_account_set_eval_password_when_password_set(void** state)
+{
+    gchar* args[] = { "set", "a_account", "eval_password", "a_password", NULL };
+    ProfAccount* account = account_new("a_account", NULL, "a_password", NULL,
+                                       TRUE, NULL, 0, NULL, NULL, NULL, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
 
     expect_any(accounts_account_exists, account_name);
     will_return(accounts_account_exists, TRUE);
@@ -484,9 +516,10 @@ void cmd_account_set_eval_password_when_password_set(void **state) {
     assert_true(result);
 }
 
-void cmd_account_set_muc_sets_muc(void **state)
+void
+cmd_account_set_muc_sets_muc(void** state)
 {
-    gchar *args[] = { "set", "a_account", "muc", "a_muc", NULL };
+    gchar* args[] = { "set", "a_account", "muc", "a_muc", NULL };
 
     expect_any(accounts_account_exists, account_name);
     will_return(accounts_account_exists, TRUE);
@@ -501,9 +534,10 @@ void cmd_account_set_muc_sets_muc(void **state)
     assert_true(result);
 }
 
-void cmd_account_set_nick_sets_nick(void **state)
+void
+cmd_account_set_nick_sets_nick(void** state)
 {
-    gchar *args[] = { "set", "a_account", "nick", "a_nick", NULL };
+    gchar* args[] = { "set", "a_account", "nick", "a_nick", NULL };
 
     expect_any(accounts_account_exists, account_name);
     will_return(accounts_account_exists, TRUE);
@@ -518,9 +552,10 @@ void cmd_account_set_nick_sets_nick(void **state)
     assert_true(result);
 }
 
-void cmd_account_show_message_for_missing_otr_policy(void **state)
+void
+cmd_account_show_message_for_missing_otr_policy(void** state)
 {
-    gchar *args[] = { "set", "a_account", "otr", NULL };
+    gchar* args[] = { "set", "a_account", "otr", NULL };
 
     expect_string(cons_bad_cmd_usage, cmd, CMD_ACCOUNT);
 
@@ -528,9 +563,10 @@ void cmd_account_show_message_for_missing_otr_policy(void **state)
     assert_true(result);
 }
 
-void cmd_account_show_message_for_invalid_otr_policy(void **state)
+void
+cmd_account_show_message_for_invalid_otr_policy(void** state)
 {
-    gchar *args[] = { "set", "a_account", "otr", "bad_otr_policy", NULL };
+    gchar* args[] = { "set", "a_account", "otr", "bad_otr_policy", NULL };
 
     expect_any(accounts_account_exists, account_name);
     will_return(accounts_account_exists, TRUE);
@@ -541,9 +577,10 @@ void cmd_account_show_message_for_invalid_otr_policy(void **state)
     assert_true(result);
 }
 
-void cmd_account_set_otr_sets_otr(void **state)
+void
+cmd_account_set_otr_sets_otr(void** state)
 {
-    gchar *args[] = { "set", "a_account", "otr", "opportunistic", NULL };
+    gchar* args[] = { "set", "a_account", "otr", "opportunistic", NULL };
 
     expect_any(accounts_account_exists, account_name);
     will_return(accounts_account_exists, TRUE);
@@ -558,9 +595,10 @@ void cmd_account_set_otr_sets_otr(void **state)
     assert_true(result);
 }
 
-void cmd_account_set_status_shows_message_when_invalid_status(void **state)
+void
+cmd_account_set_status_shows_message_when_invalid_status(void** state)
 {
-    gchar *args[] = { "set", "a_account", "status", "bad_status", NULL };
+    gchar* args[] = { "set", "a_account", "status", "bad_status", NULL };
 
     expect_any(accounts_account_exists, account_name);
     will_return(accounts_account_exists, TRUE);
@@ -572,9 +610,10 @@ void cmd_account_set_status_shows_message_when_invalid_status(void **state)
     assert_true(result);
 }
 
-void cmd_account_set_status_sets_status_when_valid(void **state)
+void
+cmd_account_set_status_sets_status_when_valid(void** state)
 {
-    gchar *args[] = { "set", "a_account", "status", "away", NULL };
+    gchar* args[] = { "set", "a_account", "status", "away", NULL };
 
     expect_any(accounts_account_exists, account_name);
     will_return(accounts_account_exists, TRUE);
@@ -589,9 +628,10 @@ void cmd_account_set_status_sets_status_when_valid(void **state)
     assert_true(result);
 }
 
-void cmd_account_set_status_sets_status_when_last(void **state)
+void
+cmd_account_set_status_sets_status_when_last(void** state)
 {
-    gchar *args[] = { "set", "a_account", "status", "last", NULL };
+    gchar* args[] = { "set", "a_account", "status", "last", NULL };
 
     expect_any(accounts_account_exists, account_name);
     will_return(accounts_account_exists, TRUE);
@@ -606,9 +646,10 @@ void cmd_account_set_status_sets_status_when_last(void **state)
     assert_true(result);
 }
 
-void cmd_account_set_invalid_presence_string_priority_shows_message(void **state)
+void
+cmd_account_set_invalid_presence_string_priority_shows_message(void** state)
 {
-    gchar *args[] = { "set", "a_account", "blah", "10", NULL };
+    gchar* args[] = { "set", "a_account", "blah", "10", NULL };
 
     expect_any(accounts_account_exists, account_name);
     will_return(accounts_account_exists, TRUE);
@@ -620,9 +661,10 @@ void cmd_account_set_invalid_presence_string_priority_shows_message(void **state
     assert_true(result);
 }
 
-void cmd_account_set_last_priority_shows_message(void **state)
+void
+cmd_account_set_last_priority_shows_message(void** state)
 {
-    gchar *args[] = { "set", "a_account", "last", "10", NULL };
+    gchar* args[] = { "set", "a_account", "last", "10", NULL };
 
     expect_any(accounts_account_exists, account_name);
     will_return(accounts_account_exists, TRUE);
@@ -634,9 +676,10 @@ void cmd_account_set_last_priority_shows_message(void **state)
     assert_true(result);
 }
 
-void cmd_account_set_online_priority_sets_preference(void **state)
+void
+cmd_account_set_online_priority_sets_preference(void** state)
 {
-    gchar *args[] = { "set", "a_account", "online", "10", NULL };
+    gchar* args[] = { "set", "a_account", "online", "10", NULL };
 
     expect_any(accounts_account_exists, account_name);
     will_return(accounts_account_exists, TRUE);
@@ -653,9 +696,10 @@ void cmd_account_set_online_priority_sets_preference(void **state)
     assert_true(result);
 }
 
-void cmd_account_set_chat_priority_sets_preference(void **state)
+void
+cmd_account_set_chat_priority_sets_preference(void** state)
 {
-    gchar *args[] = { "set", "a_account", "chat", "10", NULL };
+    gchar* args[] = { "set", "a_account", "chat", "10", NULL };
 
     expect_any(accounts_account_exists, account_name);
     will_return(accounts_account_exists, TRUE);
@@ -672,9 +716,10 @@ void cmd_account_set_chat_priority_sets_preference(void **state)
     assert_true(result);
 }
 
-void cmd_account_set_away_priority_sets_preference(void **state)
+void
+cmd_account_set_away_priority_sets_preference(void** state)
 {
-    gchar *args[] = { "set", "a_account", "away", "10", NULL };
+    gchar* args[] = { "set", "a_account", "away", "10", NULL };
 
     expect_any(accounts_account_exists, account_name);
     will_return(accounts_account_exists, TRUE);
@@ -691,9 +736,10 @@ void cmd_account_set_away_priority_sets_preference(void **state)
     assert_true(result);
 }
 
-void cmd_account_set_xa_priority_sets_preference(void **state)
+void
+cmd_account_set_xa_priority_sets_preference(void** state)
 {
-    gchar *args[] = { "set", "a_account", "xa", "10", NULL };
+    gchar* args[] = { "set", "a_account", "xa", "10", NULL };
 
     expect_any(accounts_account_exists, account_name);
     will_return(accounts_account_exists, TRUE);
@@ -710,9 +756,10 @@ void cmd_account_set_xa_priority_sets_preference(void **state)
     assert_true(result);
 }
 
-void cmd_account_set_dnd_priority_sets_preference(void **state)
+void
+cmd_account_set_dnd_priority_sets_preference(void** state)
 {
-    gchar *args[] = { "set", "a_account", "dnd", "10", NULL };
+    gchar* args[] = { "set", "a_account", "dnd", "10", NULL };
 
     expect_any(accounts_account_exists, account_name);
     will_return(accounts_account_exists, TRUE);
@@ -729,9 +776,10 @@ void cmd_account_set_dnd_priority_sets_preference(void **state)
     assert_true(result);
 }
 
-void cmd_account_set_priority_too_low_shows_message(void **state)
+void
+cmd_account_set_priority_too_low_shows_message(void** state)
 {
-    gchar *args[] = { "set", "a_account", "online", "-150", NULL };
+    gchar* args[] = { "set", "a_account", "online", "-150", NULL };
 
     expect_any(accounts_account_exists, account_name);
     will_return(accounts_account_exists, TRUE);
@@ -742,9 +790,10 @@ void cmd_account_set_priority_too_low_shows_message(void **state)
     assert_true(result);
 }
 
-void cmd_account_set_priority_too_high_shows_message(void **state)
+void
+cmd_account_set_priority_too_high_shows_message(void** state)
 {
-    gchar *args[] = { "set", "a_account", "online", "150", NULL };
+    gchar* args[] = { "set", "a_account", "online", "150", NULL };
 
     expect_any(accounts_account_exists, account_name);
     will_return(accounts_account_exists, TRUE);
@@ -755,9 +804,10 @@ void cmd_account_set_priority_too_high_shows_message(void **state)
     assert_true(result);
 }
 
-void cmd_account_set_priority_when_not_number_shows_message(void **state)
+void
+cmd_account_set_priority_when_not_number_shows_message(void** state)
 {
-    gchar *args[] = { "set", "a_account", "online", "abc", NULL };
+    gchar* args[] = { "set", "a_account", "online", "abc", NULL };
 
     expect_any(accounts_account_exists, account_name);
     will_return(accounts_account_exists, TRUE);
@@ -768,9 +818,10 @@ void cmd_account_set_priority_when_not_number_shows_message(void **state)
     assert_true(result);
 }
 
-void cmd_account_set_priority_when_empty_shows_message(void **state)
+void
+cmd_account_set_priority_when_empty_shows_message(void** state)
 {
-    gchar *args[] = { "set", "a_account", "online", "", NULL };
+    gchar* args[] = { "set", "a_account", "online", "", NULL };
 
     expect_any(accounts_account_exists, account_name);
     will_return(accounts_account_exists, TRUE);
@@ -781,9 +832,10 @@ void cmd_account_set_priority_when_empty_shows_message(void **state)
     assert_true(result);
 }
 
-void cmd_account_set_priority_updates_presence_when_account_connected_with_presence(void **state)
+void
+cmd_account_set_priority_updates_presence_when_account_connected_with_presence(void** state)
 {
-    gchar *args[] = { "set", "a_account", "online", "10", NULL };
+    gchar* args[] = { "set", "a_account", "online", "10", NULL };
 
     expect_any(accounts_account_exists, account_name);
     will_return(accounts_account_exists, TRUE);
@@ -799,8 +851,8 @@ void cmd_account_set_priority_updates_presence_when_account_connected_with_prese
     will_return(session_get_account_name, "a_account");
 
 #ifdef HAVE_LIBGPGME
-    ProfAccount *account = account_new("a_account", "a_jid", NULL, NULL, TRUE, NULL, 5222, "a_resource",
-        NULL, NULL, 10, 10, 10, 10, 10, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+    ProfAccount* account = account_new("a_account", "a_jid", NULL, NULL, TRUE, NULL, 5222, "a_resource",
+                                       NULL, NULL, 10, 10, 10, 10, 10, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
 
     will_return(session_get_account_name, "a_account");
     expect_any(accounts_get_account, name);
@@ -813,14 +865,14 @@ void cmd_account_set_priority_updates_presence_when_account_connected_with_prese
     expect_cons_show("Updated online priority for account a_account: 10");
     expect_cons_show("");
 
-
     gboolean result = cmd_account_set(NULL, CMD_ACCOUNT, args);
     assert_true(result);
 }
 
-void cmd_account_clear_shows_usage_when_no_args(void **state)
+void
+cmd_account_clear_shows_usage_when_no_args(void** state)
 {
-    gchar *args[] = { "clear", NULL };
+    gchar* args[] = { "clear", NULL };
 
     expect_string(cons_bad_cmd_usage, cmd, CMD_ACCOUNT);
 
@@ -828,9 +880,10 @@ void cmd_account_clear_shows_usage_when_no_args(void **state)
     assert_true(result);
 }
 
-void cmd_account_clear_shows_usage_when_one_arg(void **state)
+void
+cmd_account_clear_shows_usage_when_one_arg(void** state)
 {
-    gchar *args[] = { "clear", "a_account", NULL };
+    gchar* args[] = { "clear", "a_account", NULL };
 
     expect_string(cons_bad_cmd_usage, cmd, CMD_ACCOUNT);
 
@@ -838,9 +891,10 @@ void cmd_account_clear_shows_usage_when_one_arg(void **state)
     assert_true(result);
 }
 
-void cmd_account_clear_shows_message_when_account_doesnt_exist(void **state)
+void
+cmd_account_clear_shows_message_when_account_doesnt_exist(void** state)
 {
-    gchar *args[] = { "clear", "a_account", "a_property", NULL };
+    gchar* args[] = { "clear", "a_account", "a_property", NULL };
 
     expect_string(accounts_account_exists, account_name, "a_account");
     will_return(accounts_account_exists, FALSE);
@@ -852,9 +906,10 @@ void cmd_account_clear_shows_message_when_account_doesnt_exist(void **state)
     assert_true(result);
 }
 
-void cmd_account_clear_shows_message_when_invalid_property(void **state)
+void
+cmd_account_clear_shows_message_when_invalid_property(void** state)
 {
-    gchar *args[] = { "clear", "a_account", "badproperty", NULL };
+    gchar* args[] = { "clear", "a_account", "badproperty", NULL };
 
     expect_any(accounts_account_exists, account_name);
     will_return(accounts_account_exists, TRUE);

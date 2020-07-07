@@ -1,23 +1,24 @@
+#include <cmocka.h>
+#include <glib.h>
+#include <setjmp.h>
 #include <stdarg.h>
 #include <stddef.h>
-#include <setjmp.h>
-#include <cmocka.h>
 #include <stdlib.h>
 #include <string.h>
-#include <glib.h>
 
 #include "xmpp/xmpp.h"
 
-#include "ui/ui.h"
 #include "ui/stub_ui.h"
+#include "ui/ui.h"
 
 #include "command/cmd_funcs.h"
 
 #define CMD_SUB "/sub"
 
-void cmd_sub_shows_message_when_not_connected(void **state)
+void
+cmd_sub_shows_message_when_not_connected(void** state)
 {
-    gchar *args[] = { NULL };
+    gchar* args[] = { NULL };
 
     will_return(connection_get_status, JABBER_DISCONNECTED);
 
@@ -27,9 +28,10 @@ void cmd_sub_shows_message_when_not_connected(void **state)
     assert_true(result);
 }
 
-void cmd_sub_shows_usage_when_no_arg(void **state)
+void
+cmd_sub_shows_usage_when_no_arg(void** state)
 {
-    gchar *args[] = { NULL };
+    gchar* args[] = { NULL };
 
     will_return(connection_get_status, JABBER_CONNECTED);
 

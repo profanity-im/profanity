@@ -33,13 +33,13 @@
  *
  */
 #include <assert.h>
+#include <gcrypt.h>
 #include <signal/signal_protocol.h>
 #include <signal/signal_protocol_types.h>
-#include <gcrypt.h>
 
 #include "log.h"
-#include "omemo/omemo.h"
 #include "omemo/crypto.h"
+#include "omemo/omemo.h"
 
 int
 omemo_crypto_init(void)
@@ -65,14 +65,14 @@ omemo_crypto_init(void)
 }
 
 int
-omemo_random_func(uint8_t *data, size_t len, void *user_data)
+omemo_random_func(uint8_t* data, size_t len, void* user_data)
 {
     gcry_randomize(data, len, GCRY_VERY_STRONG_RANDOM);
     return 0;
 }
 
 int
-omemo_hmac_sha256_init_func(void **hmac_context, const uint8_t *key, size_t key_len, void *user_data)
+omemo_hmac_sha256_init_func(void** hmac_context, const uint8_t* key, size_t key_len, void* user_data)
 {
     gcry_error_t res;
     gcry_mac_hd_t hd;
@@ -94,7 +94,7 @@ omemo_hmac_sha256_init_func(void **hmac_context, const uint8_t *key, size_t key_
 }
 
 int
-omemo_hmac_sha256_update_func(void *hmac_context, const uint8_t *data, size_t data_len, void *user_data)
+omemo_hmac_sha256_update_func(void* hmac_context, const uint8_t* data, size_t data_len, void* user_data)
 {
     gcry_error_t res;
 
@@ -108,7 +108,7 @@ omemo_hmac_sha256_update_func(void *hmac_context, const uint8_t *data, size_t da
 }
 
 int
-omemo_hmac_sha256_final_func(void *hmac_context, signal_buffer **output, void *user_data)
+omemo_hmac_sha256_final_func(void* hmac_context, signal_buffer** output, void* user_data)
 {
     gcry_error_t res;
     size_t mac_len = 32;
@@ -125,13 +125,13 @@ omemo_hmac_sha256_final_func(void *hmac_context, signal_buffer **output, void *u
 }
 
 void
-omemo_hmac_sha256_cleanup_func(void *hmac_context, void *user_data)
+omemo_hmac_sha256_cleanup_func(void* hmac_context, void* user_data)
 {
     gcry_mac_close(hmac_context);
 }
 
 int
-omemo_sha512_digest_init_func(void **digest_context, void *user_data)
+omemo_sha512_digest_init_func(void** digest_context, void* user_data)
 {
     gcry_error_t res;
     gcry_md_hd_t hd;
@@ -148,7 +148,7 @@ omemo_sha512_digest_init_func(void **digest_context, void *user_data)
 }
 
 int
-omemo_sha512_digest_update_func(void *digest_context, const uint8_t *data, size_t data_len, void *user_data)
+omemo_sha512_digest_update_func(void* digest_context, const uint8_t* data, size_t data_len, void* user_data)
 {
     gcry_md_write(digest_context, data, data_len);
 
@@ -156,7 +156,7 @@ omemo_sha512_digest_update_func(void *digest_context, const uint8_t *data, size_
 }
 
 int
-omemo_sha512_digest_final_func(void *digest_context, signal_buffer **output, void *user_data)
+omemo_sha512_digest_final_func(void* digest_context, signal_buffer** output, void* user_data)
 {
     gcry_error_t res;
     unsigned char out[64];
@@ -172,37 +172,37 @@ omemo_sha512_digest_final_func(void *digest_context, signal_buffer **output, voi
 }
 
 void
-omemo_sha512_digest_cleanup_func(void *digest_context, void *user_data)
+omemo_sha512_digest_cleanup_func(void* digest_context, void* user_data)
 {
     gcry_md_close(digest_context);
 }
 
 int
-omemo_encrypt_func(signal_buffer **output, int cipher, const uint8_t *key, size_t key_len, const uint8_t *iv, size_t iv_len,
-    const uint8_t *plaintext, size_t plaintext_len, void *user_data)
+omemo_encrypt_func(signal_buffer** output, int cipher, const uint8_t* key, size_t key_len, const uint8_t* iv, size_t iv_len,
+                   const uint8_t* plaintext, size_t plaintext_len, void* user_data)
 {
     gcry_cipher_hd_t hd;
-    unsigned char *padded_plaintext;
-    unsigned char *ciphertext;
+    unsigned char* padded_plaintext;
+    unsigned char* ciphertext;
     size_t ciphertext_len;
     int mode;
     int algo;
     uint8_t padding = 0;
 
     switch (key_len) {
-        case 32:
-            algo = GCRY_CIPHER_AES256;
-            break;
-        default:
-            return OMEMO_ERR_UNSUPPORTED_CRYPTO;
+    case 32:
+        algo = GCRY_CIPHER_AES256;
+        break;
+    default:
+        return OMEMO_ERR_UNSUPPORTED_CRYPTO;
     }
 
     switch (cipher) {
-        case SG_CIPHER_AES_CBC_PKCS5:
-            mode = GCRY_CIPHER_MODE_CBC;
-            break;
-        default:
-            return OMEMO_ERR_UNSUPPORTED_CRYPTO;
+    case SG_CIPHER_AES_CBC_PKCS5:
+        mode = GCRY_CIPHER_MODE_CBC;
+        break;
+    default:
+        return OMEMO_ERR_UNSUPPORTED_CRYPTO;
     }
 
     gcry_cipher_open(&hd, algo, mode, GCRY_CIPHER_SECURE);
@@ -210,12 +210,12 @@ omemo_encrypt_func(signal_buffer **output, int cipher, const uint8_t *key, size_
     gcry_cipher_setkey(hd, key, key_len);
 
     switch (cipher) {
-        case SG_CIPHER_AES_CBC_PKCS5:
-            gcry_cipher_setiv(hd, iv, iv_len);
-            padding = 16 - (plaintext_len % 16);
-            break;
-        default:
-            assert(FALSE);
+    case SG_CIPHER_AES_CBC_PKCS5:
+        gcry_cipher_setiv(hd, iv, iv_len);
+        padding = 16 - (plaintext_len % 16);
+        break;
+    default:
+        assert(FALSE);
     }
 
     padded_plaintext = malloc(plaintext_len + padding);
@@ -236,31 +236,31 @@ omemo_encrypt_func(signal_buffer **output, int cipher, const uint8_t *key, size_
 }
 
 int
-omemo_decrypt_func(signal_buffer **output, int cipher, const uint8_t *key, size_t key_len, const uint8_t *iv, size_t iv_len,
-    const uint8_t *ciphertext, size_t ciphertext_len, void *user_data)
+omemo_decrypt_func(signal_buffer** output, int cipher, const uint8_t* key, size_t key_len, const uint8_t* iv, size_t iv_len,
+                   const uint8_t* ciphertext, size_t ciphertext_len, void* user_data)
 {
     int ret = SG_SUCCESS;
     gcry_cipher_hd_t hd;
-    unsigned char *plaintext;
+    unsigned char* plaintext;
     size_t plaintext_len;
     int mode;
     int algo;
     uint8_t padding = 0;
 
     switch (key_len) {
-        case 32:
-            algo = GCRY_CIPHER_AES256;
-            break;
-        default:
-            return OMEMO_ERR_UNSUPPORTED_CRYPTO;
+    case 32:
+        algo = GCRY_CIPHER_AES256;
+        break;
+    default:
+        return OMEMO_ERR_UNSUPPORTED_CRYPTO;
     }
 
     switch (cipher) {
-        case SG_CIPHER_AES_CBC_PKCS5:
-            mode = GCRY_CIPHER_MODE_CBC;
-            break;
-        default:
-            return OMEMO_ERR_UNSUPPORTED_CRYPTO;
+    case SG_CIPHER_AES_CBC_PKCS5:
+        mode = GCRY_CIPHER_MODE_CBC;
+        break;
+    default:
+        return OMEMO_ERR_UNSUPPORTED_CRYPTO;
     }
 
     gcry_cipher_open(&hd, algo, mode, GCRY_CIPHER_SECURE);
@@ -268,11 +268,11 @@ omemo_decrypt_func(signal_buffer **output, int cipher, const uint8_t *key, size_
     gcry_cipher_setkey(hd, key, key_len);
 
     switch (cipher) {
-        case SG_CIPHER_AES_CBC_PKCS5:
-            gcry_cipher_setiv(hd, iv, iv_len);
-            break;
-        default:
-            assert(FALSE);
+    case SG_CIPHER_AES_CBC_PKCS5:
+        gcry_cipher_setiv(hd, iv, iv_len);
+        break;
+    default:
+        assert(FALSE);
     }
 
     plaintext_len = ciphertext_len;
@@ -280,11 +280,11 @@ omemo_decrypt_func(signal_buffer **output, int cipher, const uint8_t *key, size_
     gcry_cipher_decrypt(hd, plaintext, plaintext_len, ciphertext, ciphertext_len);
 
     switch (cipher) {
-        case SG_CIPHER_AES_CBC_PKCS5:
-            padding = plaintext[plaintext_len - 1];
-            break;
-        default:
-            assert(FALSE);
+    case SG_CIPHER_AES_CBC_PKCS5:
+        padding = plaintext[plaintext_len - 1];
+        break;
+    default:
+        assert(FALSE);
     }
 
     int i;
@@ -306,7 +306,7 @@ out:
 }
 
 int
-aes128gcm_encrypt(unsigned char *ciphertext, size_t *ciphertext_len, unsigned char *tag, size_t *tag_len, const unsigned char *const plaintext, size_t plaintext_len, const unsigned char *const iv, const unsigned char *const key)
+aes128gcm_encrypt(unsigned char* ciphertext, size_t* ciphertext_len, unsigned char* tag, size_t* tag_len, const unsigned char* const plaintext, size_t plaintext_len, const unsigned char* const iv, const unsigned char* const key)
 {
     gcry_error_t res;
     gcry_cipher_hd_t hd;
@@ -340,7 +340,7 @@ out:
 }
 
 int
-aes128gcm_decrypt(unsigned char *plaintext, size_t *plaintext_len, const unsigned char *const ciphertext, size_t ciphertext_len, const unsigned char *const iv, size_t iv_len, const unsigned char *const key, const unsigned char *const tag)
+aes128gcm_decrypt(unsigned char* plaintext, size_t* plaintext_len, const unsigned char* const ciphertext, size_t ciphertext_len, const unsigned char* const iv, size_t iv_len, const unsigned char* const key, const unsigned char* const tag)
 {
     gcry_error_t res;
     gcry_cipher_hd_t hd;

@@ -35,7 +35,7 @@
 #include <signal/signal_protocol_types.h>
 
 #define AES128_GCM_KEY_LENGTH 16
-#define AES128_GCM_IV_LENGTH 12
+#define AES128_GCM_IV_LENGTH  12
 #define AES128_GCM_TAG_LENGTH 16
 
 int omemo_crypto_init(void);
@@ -47,7 +47,7 @@ int omemo_crypto_init(void);
 * @param len size of the output buffer
 * @return 0 on success, negative on failure
 */
-int omemo_random_func(uint8_t *data, size_t len, void *user_data);
+int omemo_random_func(uint8_t* data, size_t len, void* user_data);
 
 /**
 * Callback for an HMAC-SHA256 implementation.
@@ -58,7 +58,7 @@ int omemo_random_func(uint8_t *data, size_t len, void *user_data);
 * @param key_len length of the key
 * @return 0 on success, negative on failure
 */
-int omemo_hmac_sha256_init_func(void **hmac_context, const uint8_t *key, size_t key_len, void *user_data);
+int omemo_hmac_sha256_init_func(void** hmac_context, const uint8_t* key, size_t key_len, void* user_data);
 
 /**
 * Callback for an HMAC-SHA256 implementation.
@@ -69,7 +69,7 @@ int omemo_hmac_sha256_init_func(void **hmac_context, const uint8_t *key, size_t 
 * @param data_len length of the data
 * @return 0 on success, negative on failure
 */
-int omemo_hmac_sha256_update_func(void *hmac_context, const uint8_t *data, size_t data_len, void *user_data);
+int omemo_hmac_sha256_update_func(void* hmac_context, const uint8_t* data, size_t data_len, void* user_data);
 
 /**
 * Callback for an HMAC-SHA256 implementation.
@@ -80,7 +80,7 @@ int omemo_hmac_sha256_update_func(void *hmac_context, const uint8_t *data, size_
 * @param output buffer to be allocated and populated with the result
 * @return 0 on success, negative on failure
 */
-int omemo_hmac_sha256_final_func(void *hmac_context, signal_buffer **output, void *user_data);
+int omemo_hmac_sha256_final_func(void* hmac_context, signal_buffer** output, void* user_data);
 
 /**
 * Callback for an HMAC-SHA256 implementation.
@@ -89,7 +89,7 @@ int omemo_hmac_sha256_final_func(void *hmac_context, signal_buffer **output, voi
 *
 * @param hmac_context private HMAC context pointer
 */
-void omemo_hmac_sha256_cleanup_func(void *hmac_context, void *user_data);
+void omemo_hmac_sha256_cleanup_func(void* hmac_context, void* user_data);
 
 /**
 * Callback for a SHA512 message digest implementation.
@@ -98,7 +98,7 @@ void omemo_hmac_sha256_cleanup_func(void *hmac_context, void *user_data);
 * @param digest_context private digest context pointer
 * @return 0 on success, negative on failure
 */
-int omemo_sha512_digest_init_func(void **digest_context, void *user_data);
+int omemo_sha512_digest_init_func(void** digest_context, void* user_data);
 
 /**
 * Callback for a SHA512 message digest implementation.
@@ -109,7 +109,7 @@ int omemo_sha512_digest_init_func(void **digest_context, void *user_data);
 * @param data_len length of the data
 * @return 0 on success, negative on failure
 */
-int omemo_sha512_digest_update_func(void *digest_context, const uint8_t *data, size_t data_len, void *user_data);
+int omemo_sha512_digest_update_func(void* digest_context, const uint8_t* data, size_t data_len, void* user_data);
 
 /**
 * Callback for a SHA512 message digest implementation.
@@ -120,7 +120,7 @@ int omemo_sha512_digest_update_func(void *digest_context, const uint8_t *data, s
 * @param output buffer to be allocated and populated with the result
 * @return 0 on success, negative on failure
 */
-int omemo_sha512_digest_final_func(void *digest_context, signal_buffer **output, void *user_data);
+int omemo_sha512_digest_final_func(void* digest_context, signal_buffer** output, void* user_data);
 
 /**
 * Callback for a SHA512 message digest implementation.
@@ -129,7 +129,7 @@ int omemo_sha512_digest_final_func(void *digest_context, signal_buffer **output,
 *
 * @param digest_context private digest context pointer
 */
-void omemo_sha512_digest_cleanup_func(void *digest_context, void *user_data);
+void omemo_sha512_digest_cleanup_func(void* digest_context, void* user_data);
 
 /**
 * Callback for an AES encryption implementation.
@@ -144,12 +144,12 @@ void omemo_sha512_digest_cleanup_func(void *digest_context, void *user_data);
 * @param plaintext_len length of the plaintext
 * @return 0 on success, negative on failure
 */
-int omemo_encrypt_func(signal_buffer **output,
-    int cipher,
-    const uint8_t *key, size_t key_len,
-    const uint8_t *iv, size_t iv_len,
-    const uint8_t *plaintext, size_t plaintext_len,
-    void *user_data);
+int omemo_encrypt_func(signal_buffer** output,
+                       int cipher,
+                       const uint8_t* key, size_t key_len,
+                       const uint8_t* iv, size_t iv_len,
+                       const uint8_t* plaintext, size_t plaintext_len,
+                       void* user_data);
 
 /**
 * Callback for an AES decryption implementation.
@@ -164,19 +164,19 @@ int omemo_encrypt_func(signal_buffer **output,
 * @param ciphertext_len length of the ciphertext
 * @return 0 on success, negative on failure
 */
-int omemo_decrypt_func(signal_buffer **output,
-    int cipher,
-    const uint8_t *key, size_t key_len,
-    const uint8_t *iv, size_t iv_len,
-    const uint8_t *ciphertext, size_t ciphertext_len,
-    void *user_data);
+int omemo_decrypt_func(signal_buffer** output,
+                       int cipher,
+                       const uint8_t* key, size_t key_len,
+                       const uint8_t* iv, size_t iv_len,
+                       const uint8_t* ciphertext, size_t ciphertext_len,
+                       void* user_data);
 
-int aes128gcm_encrypt(unsigned char *ciphertext, size_t *ciphertext_len,
-    unsigned char *tag, size_t *tag_len,
-    const unsigned char *const plaintext, size_t plaintext_len,
-    const unsigned char *const iv, const unsigned char *const key);
+int aes128gcm_encrypt(unsigned char* ciphertext, size_t* ciphertext_len,
+                      unsigned char* tag, size_t* tag_len,
+                      const unsigned char* const plaintext, size_t plaintext_len,
+                      const unsigned char* const iv, const unsigned char* const key);
 
-int aes128gcm_decrypt(unsigned char *plaintext,
-    size_t *plaintext_len, const unsigned char *const ciphertext,
-    size_t ciphertext_len, const unsigned char *const iv, size_t iv_len,
-    const unsigned char *const key, const unsigned char *const tag);
+int aes128gcm_decrypt(unsigned char* plaintext,
+                      size_t* plaintext_len, const unsigned char* const ciphertext,
+                      size_t ciphertext_len, const unsigned char* const iv, size_t iv_len,
+                      const unsigned char* const key, const unsigned char* const tag);

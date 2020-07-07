@@ -175,30 +175,32 @@ typedef enum {
     PREF_URL_SAVE_CMD,
 } preference_t;
 
-typedef struct prof_alias_t {
-    gchar *name;
-    gchar *value;
+typedef struct prof_alias_t
+{
+    gchar* name;
+    gchar* value;
 } ProfAlias;
 
-typedef struct prof_winplacement_t {
+typedef struct prof_winplacement_t
+{
     int titlebar_pos;
     int mainwin_pos;
     int statusbar_pos;
     int inputwin_pos;
 } ProfWinPlacement;
 
-void prefs_load(char *config_file);
+void prefs_load(char* config_file);
 void prefs_save(void);
 void prefs_close(void);
 void prefs_reload(void);
 
-char* prefs_find_login(char *prefix);
+char* prefs_find_login(char* prefix);
 void prefs_reset_login_search(void);
 
-char* prefs_autocomplete_boolean_choice(const char *const prefix, gboolean previous, void *context);
+char* prefs_autocomplete_boolean_choice(const char* const prefix, gboolean previous, void* context);
 void prefs_reset_boolean_choice(void);
 
-char* prefs_autocomplete_room_trigger(const char *const prefix, gboolean previous, void *context);
+char* prefs_autocomplete_room_trigger(const char* const prefix, gboolean previous, void* context);
 void prefs_reset_room_trigger_ac(void);
 
 gint prefs_get_gone(void);
@@ -235,19 +237,19 @@ gint prefs_get_autoxa_time(void);
 void prefs_set_autoxa_time(gint value);
 
 gchar** prefs_get_plugins(void);
-void prefs_free_plugins(gchar **plugins);
-void prefs_add_plugin(const char *const name);
-void prefs_remove_plugin(const char *const name);
+void prefs_free_plugins(gchar** plugins);
+void prefs_add_plugin(const char* const name);
+void prefs_remove_plugin(const char* const name);
 
 char* prefs_get_otr_char(void);
-gboolean prefs_set_otr_char(char *ch);
+gboolean prefs_set_otr_char(char* ch);
 char* prefs_get_pgp_char(void);
-gboolean prefs_set_pgp_char(char *ch);
+gboolean prefs_set_pgp_char(char* ch);
 char* prefs_get_omemo_char(void);
-gboolean prefs_set_omemo_char(char *ch);
+gboolean prefs_set_omemo_char(char* ch);
 // XEP-0373: OpenPGP for XMPP
 char* prefs_get_ox_char(void);
-gboolean prefs_set_ox_char(char *ch);
+gboolean prefs_set_ox_char(char* ch);
 
 char prefs_get_roster_header_char(void);
 void prefs_set_roster_header_char(char ch);
@@ -286,23 +288,23 @@ void prefs_set_occupants_indent(gint value);
 char* prefs_get_correction_char(void);
 void prefs_set_correction_char(char ch);
 
-void prefs_add_login(const char *jid);
+void prefs_add_login(const char* jid);
 
 void prefs_set_tray_timer(gint value);
 gint prefs_get_tray_timer(void);
 
-gboolean prefs_add_alias(const char *const name, const char *const value);
-gboolean prefs_remove_alias(const char *const name);
-char* prefs_get_alias(const char *const name);
+gboolean prefs_add_alias(const char* const name, const char* const value);
+gboolean prefs_remove_alias(const char* const name);
+char* prefs_get_alias(const char* const name);
 GList* prefs_get_aliases(void);
-void prefs_free_aliases(GList *aliases);
+void prefs_free_aliases(GList* aliases);
 
-gboolean prefs_add_room_notify_trigger(const char * const text);
-gboolean prefs_remove_room_notify_trigger(const char * const text);
+gboolean prefs_add_room_notify_trigger(const char* const text);
+gboolean prefs_remove_room_notify_trigger(const char* const text);
 GList* prefs_get_room_notify_triggers(void);
 
 ProfWinPlacement* prefs_get_win_placement(void);
-void prefs_free_win_placement(ProfWinPlacement *placement);
+void prefs_free_win_placement(ProfWinPlacement* placement);
 
 gboolean prefs_titlebar_pos_up(void);
 gboolean prefs_titlebar_pos_down(void);
@@ -313,35 +315,35 @@ gboolean prefs_statusbar_pos_down(void);
 gboolean prefs_inputwin_pos_up(void);
 gboolean prefs_inputwin_pos_down(void);
 ProfWinPlacement* prefs_create_profwin_placement(int titlebar, int mainwin, int statusbar, int inputwin);
-void prefs_save_win_placement(ProfWinPlacement *placement);
+void prefs_save_win_placement(ProfWinPlacement* placement);
 
 gboolean prefs_get_boolean(preference_t pref);
 void prefs_set_boolean(preference_t pref, gboolean value);
 char* prefs_get_string(preference_t pref);
-char* prefs_get_string_with_option(preference_t pref, gchar *option);
-gchar **prefs_get_string_list_with_option(preference_t pref, gchar *option);
-void prefs_set_string(preference_t pref, char *value);
-void prefs_set_string_with_option(preference_t pref, char *option, char *value);
-void prefs_set_string_list_with_option(preference_t pref, char *option, const gchar* const *values);
+char* prefs_get_string_with_option(preference_t pref, gchar* option);
+gchar** prefs_get_string_list_with_option(preference_t pref, gchar* option);
+void prefs_set_string(preference_t pref, char* value);
+void prefs_set_string_with_option(preference_t pref, char* option, char* value);
+void prefs_set_string_list_with_option(preference_t pref, char* option, const gchar* const* values);
 
 char* prefs_get_tls_certpath(void);
 
 gboolean prefs_do_chat_notify(gboolean current_win);
-gboolean prefs_do_room_notify(gboolean current_win, const char *const roomjid, const char *const mynick,
-    const char *const theirnick, const char *const message, gboolean mention, gboolean trigger_found);
-gboolean prefs_do_room_notify_mention(const char *const roomjid, int unread, gboolean mention, gboolean trigger);
-GList* prefs_message_get_triggers(const char *const message);
+gboolean prefs_do_room_notify(gboolean current_win, const char* const roomjid, const char* const mynick,
+                              const char* const theirnick, const char* const message, gboolean mention, gboolean trigger_found);
+gboolean prefs_do_room_notify_mention(const char* const roomjid, int unread, gboolean mention, gboolean trigger);
+GList* prefs_message_get_triggers(const char* const message);
 
-void prefs_set_room_notify(const char *const roomjid, gboolean value);
-void prefs_set_room_notify_mention(const char *const roomjid, gboolean value);
-void prefs_set_room_notify_trigger(const char *const roomjid, gboolean value);
-gboolean prefs_reset_room_notify(const char *const roomjid);
-gboolean prefs_has_room_notify(const char *const roomjid);
-gboolean prefs_has_room_notify_mention(const char *const roomjid);
-gboolean prefs_has_room_notify_trigger(const char *const roomjid);
-gboolean prefs_get_room_notify(const char *const roomjid);
-gboolean prefs_get_room_notify_mention(const char *const roomjid);
-gboolean prefs_get_room_notify_trigger(const char *const roomjid);
+void prefs_set_room_notify(const char* const roomjid, gboolean value);
+void prefs_set_room_notify_mention(const char* const roomjid, gboolean value);
+void prefs_set_room_notify_trigger(const char* const roomjid, gboolean value);
+gboolean prefs_reset_room_notify(const char* const roomjid);
+gboolean prefs_has_room_notify(const char* const roomjid);
+gboolean prefs_has_room_notify_mention(const char* const roomjid);
+gboolean prefs_has_room_notify_trigger(const char* const roomjid);
+gboolean prefs_get_room_notify(const char* const roomjid);
+gboolean prefs_get_room_notify_mention(const char* const roomjid);
+gboolean prefs_get_room_notify_trigger(const char* const roomjid);
 
 gchar* prefs_get_inputrc(void);
 

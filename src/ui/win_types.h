@@ -38,8 +38,8 @@
 
 #include "config.h"
 
-#include <wchar.h>
 #include <glib.h>
+#include <wchar.h>
 
 #ifdef HAVE_NCURSESW_NCURSES_H
 #include <ncursesw/ncurses.h>
@@ -51,13 +51,13 @@
 #include "ui/buffer.h"
 #include "xmpp/chat_state.h"
 
-#define LAYOUT_SPLIT_MEMCHECK       12345671
-#define PROFCHATWIN_MEMCHECK        22374522
-#define PROFMUCWIN_MEMCHECK         52345276
-#define PROFPRIVATEWIN_MEMCHECK     77437483
-#define PROFCONFWIN_MEMCHECK        64334685
-#define PROFXMLWIN_MEMCHECK         87333463
-#define PROFPLUGINWIN_MEMCHECK      43434777
+#define LAYOUT_SPLIT_MEMCHECK   12345671
+#define PROFCHATWIN_MEMCHECK    22374522
+#define PROFMUCWIN_MEMCHECK     52345276
+#define PROFPRIVATEWIN_MEMCHECK 77437483
+#define PROFCONFWIN_MEMCHECK    64334685
+#define PROFXMLWIN_MEMCHECK     87333463
+#define PROFPLUGINWIN_MEMCHECK  43434777
 
 typedef enum {
     FIELD_HIDDEN,
@@ -73,30 +73,33 @@ typedef enum {
     FIELD_UNKNOWN
 } form_field_type_t;
 
-typedef struct form_option_t {
-    char *label;
-    char *value;
+typedef struct form_option_t
+{
+    char* label;
+    char* value;
 } FormOption;
 
-typedef struct form_field_t {
-    char *label;
-    char *type;
+typedef struct form_field_t
+{
+    char* label;
+    char* type;
     form_field_type_t type_t;
-    char *var;
-    char *description;
+    char* var;
+    char* description;
     gboolean required;
-    GSList *values;
-    GSList *options;
+    GSList* values;
+    GSList* options;
     Autocomplete value_ac;
 } FormField;
 
-typedef struct data_form_t {
-    char *type;
-    char *title;
-    char *instructions;
-    GSList *fields;
-    GHashTable *var_to_tag;
-    GHashTable *tag_to_var;
+typedef struct data_form_t
+{
+    char* type;
+    char* title;
+    char* instructions;
+    GSList* fields;
+    GHashTable* var_to_tag;
+    GHashTable* tag_to_var;
     Autocomplete tag_ac;
     gboolean modified;
 } DataForm;
@@ -106,21 +109,24 @@ typedef enum {
     LAYOUT_SPLIT
 } layout_type_t;
 
-typedef struct prof_layout_t {
+typedef struct prof_layout_t
+{
     layout_type_t type;
-    WINDOW *win;
+    WINDOW* win;
     ProfBuff buffer;
     int y_pos;
     int paged;
 } ProfLayout;
 
-typedef struct prof_layout_simple_t {
+typedef struct prof_layout_simple_t
+{
     ProfLayout base;
 } ProfLayoutSimple;
 
-typedef struct prof_layout_split_t {
+typedef struct prof_layout_split_t
+{
     ProfLayout base;
-    WINDOW *subwin;
+    WINDOW* subwin;
     int sub_y_pos;
     unsigned long memcheck;
 } ProfLayoutSplit;
@@ -135,87 +141,95 @@ typedef enum {
     WIN_PLUGIN
 } win_type_t;
 
-typedef struct prof_win_t {
+typedef struct prof_win_t
+{
     win_type_t type;
-    ProfLayout *layout;
+    ProfLayout* layout;
     Autocomplete urls_ac;
 } ProfWin;
 
-typedef struct prof_console_win_t {
+typedef struct prof_console_win_t
+{
     ProfWin window;
 } ProfConsoleWin;
 
-typedef struct prof_chat_win_t {
+typedef struct prof_chat_win_t
+{
     ProfWin window;
-    char *barejid;
+    char* barejid;
     int unread;
-    ChatState *state;
+    ChatState* state;
     gboolean is_otr;
     gboolean otr_is_trusted;
     gboolean pgp_send;
     gboolean pgp_recv;
     gboolean is_omemo;
-    gboolean is_ox;     // XEP-0373: OpenPGP for XMPP
-    char *resource_override;
+    gboolean is_ox; // XEP-0373: OpenPGP for XMPP
+    char* resource_override;
     gboolean history_shown;
     unsigned long memcheck;
-    char *enctext;
-    char *incoming_char;
-    char *outgoing_char;
+    char* enctext;
+    char* incoming_char;
+    char* outgoing_char;
     // For LMC
-    char *last_message;
-    char *last_msg_id;
+    char* last_message;
+    char* last_msg_id;
 } ProfChatWin;
 
-typedef struct prof_muc_win_t {
+typedef struct prof_muc_win_t
+{
     ProfWin window;
-    char *roomjid;
-    char *room_name;
+    char* roomjid;
+    char* room_name;
     int unread;
     gboolean unread_mentions;
     gboolean unread_triggers;
     gboolean showjid;
     gboolean is_omemo;
     unsigned long memcheck;
-    char *enctext;
-    char *message_char;
-    GDateTime *last_msg_timestamp;
+    char* enctext;
+    char* message_char;
+    GDateTime* last_msg_timestamp;
     // For LMC
-    char *last_message;
-    char *last_msg_id;
+    char* last_message;
+    char* last_msg_id;
 } ProfMucWin;
 
 typedef struct prof_conf_win_t ProfConfWin;
-typedef void (*ProfConfWinCallback)(ProfConfWin *);
+typedef void (*ProfConfWinCallback)(ProfConfWin*);
 
-struct prof_conf_win_t {
+struct prof_conf_win_t
+{
     ProfWin window;
-    char *roomjid;
-    DataForm *form;
+    char* roomjid;
+    DataForm* form;
     unsigned long memcheck;
     ProfConfWinCallback submit;
     ProfConfWinCallback cancel;
-    const void *userdata;
+    const void* userdata;
 };
 
-typedef struct prof_private_win_t {
+typedef struct prof_private_win_t
+{
     ProfWin window;
-    char *fulljid;
+    char* fulljid;
     int unread;
     unsigned long memcheck;
     gboolean occupant_offline;
     gboolean room_left;
 } ProfPrivateWin;
 
-typedef struct prof_xml_win_t {
+typedef struct prof_xml_win_t
+{
     ProfWin window;
     unsigned long memcheck;
 } ProfXMLWin;
 
-typedef struct prof_plugin_win_t {
+typedef struct prof_plugin_win_t
+{
     ProfWin window;
-    char *tag;
-    char *plugin_name;
+    char* tag;
+    char* plugin_name;
     unsigned long memcheck;
 } ProfPluginWin;
 

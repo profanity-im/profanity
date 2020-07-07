@@ -37,6 +37,6 @@
 #define XMPP_BLOCKING_H
 
 void blocking_request(void);
-int blocked_set_handler(xmpp_stanza_t *stanza);
+int blocked_set_handler(xmpp_stanza_t* stanza);
 
 #endif

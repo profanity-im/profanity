@@ -41,10 +41,10 @@
 #include "xmpp/resource.h"
 
 Resource*
-resource_new(const char *const name, resource_presence_t presence, const char *const status, const int priority)
+resource_new(const char* const name, resource_presence_t presence, const char* const status, const int priority)
 {
     assert(name != NULL);
-    Resource *new_resource = malloc(sizeof(struct resource_t));
+    Resource* new_resource = malloc(sizeof(struct resource_t));
     new_resource->name = strdup(name);
     new_resource->presence = presence;
     if (status) {
@@ -58,7 +58,7 @@ resource_new(const char *const name, resource_presence_t presence, const char *c
 }
 
 int
-resource_compare_availability(Resource *first, Resource *second)
+resource_compare_availability(Resource* first, Resource* second)
 {
     if (first->priority > second->priority) {
         return -1;
@@ -88,7 +88,7 @@ resource_compare_availability(Resource *first, Resource *second)
 }
 
 void
-resource_destroy(Resource *resource)
+resource_destroy(Resource* resource)
 {
     if (resource) {
         free(resource->name);
@@ -98,12 +98,10 @@ resource_destroy(Resource *resource)
 }
 
 gboolean
-valid_resource_presence_string(const char *const str)
+valid_resource_presence_string(const char* const str)
 {
     assert(str != NULL);
-    if ((strcmp(str, "online") == 0) || (strcmp(str, "chat") == 0) ||
-            (strcmp(str, "away") == 0) || (strcmp(str, "xa") == 0) ||
-            (strcmp(str, "dnd") == 0)) {
+    if ((strcmp(str, "online") == 0) || (strcmp(str, "chat") == 0) || (strcmp(str, "away") == 0) || (strcmp(str, "xa") == 0) || (strcmp(str, "dnd") == 0)) {
         return TRUE;
     } else {
         return FALSE;
@@ -113,23 +111,22 @@ valid_resource_presence_string(const char *const str)
 const char*
 string_from_resource_presence(resource_presence_t presence)
 {
-    switch(presence)
-    {
-        case RESOURCE_CHAT:
-            return "chat";
-        case RESOURCE_AWAY:
-            return "away";
-        case RESOURCE_XA:
-            return "xa";
-        case RESOURCE_DND:
-            return "dnd";
-        default:
-            return "online";
+    switch (presence) {
+    case RESOURCE_CHAT:
+        return "chat";
+    case RESOURCE_AWAY:
+        return "away";
+    case RESOURCE_XA:
+        return "xa";
+    case RESOURCE_DND:
+        return "dnd";
+    default:
+        return "online";
     }
 }
 
 resource_presence_t
-resource_presence_from_string(const char *const str)
+resource_presence_from_string(const char* const str)
 {
     if (str == NULL) {
         return RESOURCE_ONLINE;
@@ -151,17 +148,16 @@ resource_presence_from_string(const char *const str)
 contact_presence_t
 contact_presence_from_resource_presence(resource_presence_t resource_presence)
 {
-    switch(resource_presence)
-    {
-        case RESOURCE_CHAT:
-            return CONTACT_CHAT;
-        case RESOURCE_AWAY:
-            return CONTACT_AWAY;
-        case RESOURCE_XA:
-            return CONTACT_XA;
-        case RESOURCE_DND:
-            return CONTACT_DND;
-        default:
-            return CONTACT_ONLINE;
+    switch (resource_presence) {
+    case RESOURCE_CHAT:
+        return CONTACT_CHAT;
+    case RESOURCE_AWAY:
+        return CONTACT_AWAY;
+    case RESOURCE_XA:
+        return CONTACT_XA;
+    case RESOURCE_DND:
+        return CONTACT_DND;
+    default:
+        return CONTACT_ONLINE;
     }
 }

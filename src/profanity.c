@@ -50,29 +50,28 @@
 
 #include <glib.h>
 
-#include "profanity.h"
+#include "command/cmd_defs.h"
 #include "common.h"
-#include "log.h"
-#include "config/files.h"
-#include "config/tlscerts.h"
 #include "config/accounts.h"
+#include "config/files.h"
 #include "config/preferences.h"
+#include "config/scripts.h"
 #include "config/theme.h"
 #include "config/tlscerts.h"
-#include "config/scripts.h"
-#include "command/cmd_defs.h"
-#include "plugins/plugins.h"
 #include "event/client_events.h"
+#include "log.h"
+#include "plugins/plugins.h"
+#include "profanity.h"
 #include "ui/ui.h"
 #include "ui/window_list.h"
-#include "xmpp/resource.h"
-#include "xmpp/session.h"
-#include "xmpp/xmpp.h"
-#include "xmpp/muc.h"
 #include "xmpp/chat_session.h"
 #include "xmpp/chat_state.h"
 #include "xmpp/contact.h"
+#include "xmpp/muc.h"
+#include "xmpp/resource.h"
 #include "xmpp/roster_list.h"
+#include "xmpp/session.h"
+#include "xmpp/xmpp.h"
 
 #ifdef HAVE_LIBOTR
 #include "otr/otr.h"
@@ -86,16 +85,16 @@
 #include "omemo/omemo.h"
 #endif
 
-static void _init(char *log_level, char *config_file, char *log_file, char *theme_name);
+static void _init(char* log_level, char* config_file, char* log_file, char* theme_name);
 static void _shutdown(void);
-static void _connect_default(const char * const account);
+static void _connect_default(const char* const account);
 
 pthread_mutex_t lock;
 static gboolean cont = TRUE;
 static gboolean force_quit = FALSE;
 
 void
-prof_run(char *log_level, char *account_name, char *config_file, char *log_file, char *theme_name)
+prof_run(char* log_level, char* account_name, char* config_file, char* log_file, char* theme_name)
 {
     _init(log_level, config_file, log_file, theme_name);
     plugins_on_start();
@@ -107,14 +106,14 @@ prof_run(char *log_level, char *account_name, char *config_file, char *log_file,
 
     session_init_activity();
 
-    char *line = NULL;
-    while(cont && !force_quit) {
+    char* line = NULL;
+    while (cont && !force_quit) {
         log_stderr_handler();
         session_check_autoaway();
 
         line = inp_readline();
         if (line) {
-            ProfWin *window = wins_get_current();
+            ProfWin* window = wins_get_current();
             cont = cmd_process_input(window, line);
             free(line);
             line = NULL;
@@ -143,13 +142,13 @@ prof_set_quit(void)
 }
 
 static void
-_connect_default(const char *const account)
+_connect_default(const char* const account)
 {
-    ProfWin *window = wins_get_current();
+    ProfWin* window = wins_get_current();
     if (account) {
         cmd_execute_connect(window, account);
     } else {
-        char *pref_connect_account = prefs_get_string(PREF_CONNECT_ACCOUNT);
+        char* pref_connect_account = prefs_get_string(PREF_CONNECT_ACCOUNT);
         if (pref_connect_account) {
             cmd_execute_connect(window, pref_connect_account);
             g_free(pref_connect_account);
@@ -158,7 +157,7 @@ _connect_default(const char *const account)
 }
 
 static void
-_init(char *log_level, char *config_file, char *log_file, char *theme_name)
+_init(char* log_level, char* config_file, char* log_file, char* theme_name)
 {
     setlocale(LC_ALL, "");
     // ignore SIGPIPE
@@ -180,9 +179,9 @@ _init(char *log_level, char *config_file, char *log_file, char *theme_name)
 
     if (strcmp(PACKAGE_STATUS, "development") == 0) {
 #ifdef HAVE_GIT_VERSION
-            log_info("Starting Profanity (%sdev.%s.%s)...", PACKAGE_VERSION, PROF_GIT_BRANCH, PROF_GIT_REVISION);
+        log_info("Starting Profanity (%sdev.%s.%s)...", PACKAGE_VERSION, PROF_GIT_BRANCH, PROF_GIT_REVISION);
 #else
-            log_info("Starting Profanity (%sdev)...", PACKAGE_VERSION);
+        log_info("Starting Profanity (%sdev)...", PACKAGE_VERSION);
 #endif
     } else {
         log_info("Starting Profanity (%s)...", PACKAGE_VERSION);
@@ -195,7 +194,7 @@ _init(char *log_level, char *config_file, char *log_file, char *theme_name)
     if (theme_name) {
         theme_init(theme_name);
     } else {
-        char *theme = prefs_get_string(PREF_THEME);
+        char* theme = prefs_get_string(PREF_THEME);
         theme_init(theme);
         g_free(theme);
     }

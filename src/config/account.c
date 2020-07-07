@@ -33,31 +33,31 @@
  *
  */
 
+#include <assert.h>
 #include <stdlib.h>
 #include <string.h>
-#include <assert.h>
 
 #include <glib.h>
 
 #include "common.h"
-#include "log.h"
 #include "config/account.h"
+#include "log.h"
 #include "xmpp/jid.h"
 #include "xmpp/resource.h"
 
 ProfAccount*
-account_new(const gchar *const name, const gchar *const jid,
-    const gchar *const password, const gchar *eval_password, gboolean enabled, const gchar *const server,
-    int port, const gchar *const resource, const gchar *const last_presence,
-    const gchar *const login_presence, int priority_online, int priority_chat,
-    int priority_away, int priority_xa, int priority_dnd,
-    const gchar *const muc_service, const gchar *const muc_nick,
-    const gchar *const otr_policy, GList *otr_manual, GList *otr_opportunistic,
-    GList *otr_always,  const gchar *const omemo_policy, GList *omemo_enabled,
-    GList *omemo_disabled, const gchar *const pgp_keyid, const char *const startscript,
-    const char *const theme, gchar *tls_policy, gchar *auth_policy)
+account_new(const gchar* const name, const gchar* const jid,
+            const gchar* const password, const gchar* eval_password, gboolean enabled, const gchar* const server,
+            int port, const gchar* const resource, const gchar* const last_presence,
+            const gchar* const login_presence, int priority_online, int priority_chat,
+            int priority_away, int priority_xa, int priority_dnd,
+            const gchar* const muc_service, const gchar* const muc_nick,
+            const gchar* const otr_policy, GList* otr_manual, GList* otr_opportunistic,
+            GList* otr_always, const gchar* const omemo_policy, GList* omemo_enabled,
+            GList* omemo_disabled, const gchar* const pgp_keyid, const char* const startscript,
+            const char* const theme, gchar* tls_policy, gchar* auth_policy)
 {
-    ProfAccount *new_account = malloc(sizeof(ProfAccount));
+    ProfAccount* new_account = malloc(sizeof(ProfAccount));
     memset(new_account, 0, sizeof(ProfAccount));
 
     new_account->name = strdup(name);
@@ -125,7 +125,7 @@ account_new(const gchar *const name, const gchar *const jid,
     }
 
     if (muc_nick == NULL) {
-        Jid *jidp = jid_create(new_account->jid);
+        Jid* jidp = jid_create(new_account->jid);
         new_account->muc_nick = strdup(jidp->domainpart);
         jid_destroy(jidp);
     } else {
@@ -185,7 +185,7 @@ account_new(const gchar *const name, const gchar *const jid,
 }
 
 char*
-account_create_connect_jid(ProfAccount *account)
+account_create_connect_jid(ProfAccount* account)
 {
     if (account->resource) {
         return create_fulljid(account->jid, account->resource);
@@ -195,15 +195,15 @@ account_create_connect_jid(ProfAccount *account)
 }
 
 gboolean
-account_eval_password(ProfAccount *account)
+account_eval_password(ProfAccount* account)
 {
     assert(account != NULL);
     assert(account->eval_password != NULL);
 
-    gchar **output = NULL;
-    gchar **error = NULL;
+    gchar** output = NULL;
+    gchar** error = NULL;
 
-    gchar *argv[] = {"sh", "-c", account->eval_password, NULL};
+    gchar* argv[] = { "sh", "-c", account->eval_password, NULL };
     if (!call_external(argv, &output, &error)) {
         return FALSE;
     }
@@ -228,7 +228,7 @@ account_eval_password(ProfAccount *account)
 }
 
 void
-account_free(ProfAccount *account)
+account_free(ProfAccount* account)
 {
     if (account == NULL) {
         return;
@@ -259,24 +259,28 @@ account_free(ProfAccount *account)
     free(account);
 }
 
-void account_set_server(ProfAccount *account, const char *server)
+void
+account_set_server(ProfAccount* account, const char* server)
 {
     free(account->server);
     account->server = strdup(server);
 }
 
-void account_set_port(ProfAccount *account, int port)
+void
+account_set_port(ProfAccount* account, int port)
 {
     account->port = port;
 }
 
-void account_set_tls_policy(ProfAccount *account, const char *tls_policy)
+void
+account_set_tls_policy(ProfAccount* account, const char* tls_policy)
 {
     free(account->tls_policy);
     account->tls_policy = strdup(tls_policy);
 }
 
-void account_set_auth_policy(ProfAccount *account, const char *auth_policy)
+void
+account_set_auth_policy(ProfAccount* account, const char* auth_policy)
 {
     free(account->auth_policy);
     account->auth_policy = strdup(auth_policy);

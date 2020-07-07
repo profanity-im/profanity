@@ -36,8 +36,8 @@
 #include "config.h"
 
 #ifdef HAVE_GTK
-#include <gtk/gtk.h>
 #include <glib.h>
+#include <gtk/gtk.h>
 #include <stdlib.h>
 
 #include "log.h"
@@ -50,13 +50,15 @@ void clipboard_init(int argc, char **argv) {
 }
 */
 
-char *clipboard_get(void) {
-    gchar *clip;
+char*
+clipboard_get(void)
+{
+    gchar* clip;
 
-    GtkClipboard *cl = gtk_clipboard_get(GDK_SELECTION_CLIPBOARD);
+    GtkClipboard* cl = gtk_clipboard_get(GDK_SELECTION_CLIPBOARD);
     gtk_clipboard_clear(cl);
 
-    if(cl==NULL) {
+    if (cl == NULL) {
         log_error("Could not get clipboard");
         return NULL;
     }

@@ -35,15 +35,15 @@
  */
 #include "config.h"
 
+#include <glib.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include <glib.h>
 
 #include "common.h"
-#include "log.h"
 #include "config/files.h"
 #include "config/preferences.h"
+#include "log.h"
 
 static char* _files_get_xdg_config_home(void);
 static char* _files_get_xdg_data_home(void);
@@ -51,18 +51,18 @@ static char* _files_get_xdg_data_home(void);
 void
 files_create_directories(void)
 {
-    gchar *xdg_config = _files_get_xdg_config_home();
-    gchar *xdg_data = _files_get_xdg_data_home();
+    gchar* xdg_config = _files_get_xdg_config_home();
+    gchar* xdg_data = _files_get_xdg_data_home();
 
-    GString *themes_dir = g_string_new(xdg_config);
+    GString* themes_dir = g_string_new(xdg_config);
     g_string_append(themes_dir, "/profanity/themes");
-    GString *icons_dir = g_string_new(xdg_config);
+    GString* icons_dir = g_string_new(xdg_config);
     g_string_append(icons_dir, "/profanity/icons");
-    GString *chatlogs_dir = g_string_new(xdg_data);
+    GString* chatlogs_dir = g_string_new(xdg_data);
     g_string_append(chatlogs_dir, "/profanity/chatlogs");
-    GString *logs_dir = g_string_new(xdg_data);
+    GString* logs_dir = g_string_new(xdg_data);
     g_string_append(logs_dir, "/profanity/logs");
-    GString *plugins_dir = g_string_new(xdg_data);
+    GString* plugins_dir = g_string_new(xdg_data);
     g_string_append(plugins_dir, "/profanity/plugins");
 
     if (!mkdir_recursive(themes_dir->str)) {
@@ -94,14 +94,14 @@ files_create_directories(void)
 gchar*
 files_get_inputrc_file(void)
 {
-    gchar *xdg_config = _files_get_xdg_config_home();
-    GString *inputrc_file = g_string_new(xdg_config);
+    gchar* xdg_config = _files_get_xdg_config_home();
+    GString* inputrc_file = g_string_new(xdg_config);
     g_free(xdg_config);
 
     g_string_append(inputrc_file, "/profanity/inputrc");
 
     if (g_file_test(inputrc_file->str, G_FILE_TEST_IS_REGULAR)) {
-        gchar *result = g_strdup(inputrc_file->str);
+        gchar* result = g_strdup(inputrc_file->str);
         g_string_free(inputrc_file, TRUE);
 
         return result;
@@ -113,10 +113,10 @@ files_get_inputrc_file(void)
 }
 
 char*
-files_get_log_file(const char *const log_file)
+files_get_log_file(const char* const log_file)
 {
-    gchar *xdg_data = _files_get_xdg_data_home();
-    GString *logfile = g_string_new(xdg_data);
+    gchar* xdg_data = _files_get_xdg_data_home();
+    GString* logfile = g_string_new(xdg_data);
 
     if (log_file) {
         g_string_append(logfile, "/profanity/logs/");
@@ -131,7 +131,7 @@ files_get_log_file(const char *const log_file)
 
     g_string_append(logfile, ".log");
 
-    char *result = g_strdup(logfile->str);
+    char* result = g_strdup(logfile->str);
 
     free(xdg_data);
     g_string_free(logfile, TRUE);
@@ -140,13 +140,13 @@ files_get_log_file(const char *const log_file)
 }
 
 gchar*
-files_get_config_path(const char *const config_base)
+files_get_config_path(const char* const config_base)
 {
-    gchar *xdg_config = _files_get_xdg_config_home();
-    GString *file_str = g_string_new(xdg_config);
+    gchar* xdg_config = _files_get_xdg_config_home();
+    GString* file_str = g_string_new(xdg_config);
     g_string_append(file_str, "/profanity/");
     g_string_append(file_str, config_base);
-    gchar *result = g_strdup(file_str->str);
+    gchar* result = g_strdup(file_str->str);
     g_free(xdg_config);
     g_string_free(file_str, TRUE);
 
@@ -154,13 +154,13 @@ files_get_config_path(const char *const config_base)
 }
 
 gchar*
-files_get_data_path(const char *const data_base)
+files_get_data_path(const char* const data_base)
 {
-    gchar *xdg_data = _files_get_xdg_data_home();
-    GString *file_str = g_string_new(xdg_data);
+    gchar* xdg_data = _files_get_xdg_data_home();
+    GString* file_str = g_string_new(xdg_data);
     g_string_append(file_str, "/profanity/");
     g_string_append(file_str, data_base);
-    gchar *result = g_strdup(file_str->str);
+    gchar* result = g_strdup(file_str->str);
     g_free(xdg_data);
     g_string_free(file_str, TRUE);
 
@@ -168,18 +168,18 @@ files_get_data_path(const char *const data_base)
 }
 
 gchar*
-files_get_account_data_path(const char *const specific_dir, const char *const jid)
+files_get_account_data_path(const char* const specific_dir, const char* const jid)
 {
-    gchar *data_dir = files_get_data_path(specific_dir);
-    GString *result_dir = g_string_new(data_dir);
+    gchar* data_dir = files_get_data_path(specific_dir);
+    GString* result_dir = g_string_new(data_dir);
     g_free(data_dir);
 
-    gchar *account_dir = str_replace(jid, "@", "_at_");
+    gchar* account_dir = str_replace(jid, "@", "_at_");
     g_string_append(result_dir, "/");
     g_string_append(result_dir, account_dir);
     g_free(account_dir);
 
-    gchar *result = g_strdup(result_dir->str);
+    gchar* result = g_strdup(result_dir->str);
     g_string_free(result_dir, TRUE);
 
     return result;
@@ -188,8 +188,8 @@ files_get_account_data_path(const char *const specific_dir, const char *const ji
 static char*
 _files_get_xdg_config_home(void)
 {
-    gchar *xdg_config_home_env = getenv("XDG_CONFIG_HOME");
-    gchar *xdg_config_home = NULL;
+    gchar* xdg_config_home_env = getenv("XDG_CONFIG_HOME");
+    gchar* xdg_config_home = NULL;
 
     if (xdg_config_home_env) {
         xdg_config_home = strdup(xdg_config_home_env);
@@ -199,9 +199,9 @@ _files_get_xdg_config_home(void)
     if (xdg_config_home && (strcmp(xdg_config_home, "") != 0)) {
         return xdg_config_home;
     } else {
-        GString *default_path = g_string_new(getenv("HOME"));
+        GString* default_path = g_string_new(getenv("HOME"));
         g_string_append(default_path, "/.config");
-        char *result = strdup(default_path->str);
+        char* result = strdup(default_path->str);
         g_string_free(default_path, TRUE);
 
         return result;
@@ -211,8 +211,8 @@ _files_get_xdg_config_home(void)
 static char*
 _files_get_xdg_data_home(void)
 {
-    gchar *xdg_data_home_env = getenv("XDG_DATA_HOME");
-    gchar *xdg_data_home = NULL;
+    gchar* xdg_data_home_env = getenv("XDG_DATA_HOME");
+    gchar* xdg_data_home = NULL;
 
     if (xdg_data_home_env) {
         xdg_data_home = strdup(xdg_data_home_env);
@@ -222,9 +222,9 @@ _files_get_xdg_data_home(void)
     if (xdg_data_home && (strcmp(xdg_data_home, "") != 0)) {
         return xdg_data_home;
     } else {
-        GString *default_path = g_string_new(getenv("HOME"));
+        GString* default_path = g_string_new(getenv("HOME"));
         g_string_append(default_path, "/.local/share");
-        gchar *result = strdup(default_path->str);
+        gchar* result = strdup(default_path->str);
         g_string_free(default_path, TRUE);
 
         return result;

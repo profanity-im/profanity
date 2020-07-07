@@ -37,16 +37,16 @@
 #include <stdlib.h>
 
 #include "ui/ui.h"
-#include "ui/window.h"
 #include "ui/win_types.h"
+#include "ui/window.h"
 #include "ui/window_list.h"
 
-static void _confwin_form_field(ProfWin *window, char *tag, FormField *field);
+static void _confwin_form_field(ProfWin* window, char* tag, FormField* field);
 
 void
-confwin_show_form(ProfConfWin *confwin)
+confwin_show_form(ProfConfWin* confwin)
 {
-    ProfWin *window = (ProfWin*) confwin;
+    ProfWin* window = (ProfWin*)confwin;
     if (confwin->form->title) {
         win_print(window, THEME_DEFAULT, "-", "Form title: ");
         win_appendln(window, THEME_DEFAULT, "%s", confwin->form->title);
@@ -57,18 +57,18 @@ confwin_show_form(ProfConfWin *confwin)
 
     confwin_form_help(confwin);
 
-    GSList *fields = confwin->form->fields;
-    GSList *curr_field = fields;
+    GSList* fields = confwin->form->fields;
+    GSList* curr_field = fields;
     while (curr_field) {
-        FormField *field = curr_field->data;
+        FormField* field = curr_field->data;
 
         if ((g_strcmp0(field->type, "fixed") == 0) && field->values) {
             if (field->values) {
-                char *value = field->values->data;
+                char* value = field->values->data;
                 win_println(window, THEME_DEFAULT, "-", "%s", value);
             }
         } else if (g_strcmp0(field->type, "hidden") != 0 && field->var) {
-            char *tag = g_hash_table_lookup(confwin->form->var_to_tag, field->var);
+            char* tag = g_hash_table_lookup(confwin->form->var_to_tag, field->var);
             _confwin_form_field(window, tag, field);
         }
 
@@ -77,22 +77,22 @@ confwin_show_form(ProfConfWin *confwin)
 }
 
 void
-confwin_show_form_field(ProfConfWin *confwin, DataForm *form, char *tag)
+confwin_show_form_field(ProfConfWin* confwin, DataForm* form, char* tag)
 {
     assert(confwin != NULL);
 
-    FormField *field = form_get_field_by_tag(form, tag);
-    ProfWin *window = (ProfWin*)confwin;
+    FormField* field = form_get_field_by_tag(form, tag);
+    ProfWin* window = (ProfWin*)confwin;
     _confwin_form_field(window, tag, field);
     win_println(window, THEME_DEFAULT, "-", "");
 }
 
 void
-confwin_handle_configuration(ProfConfWin *confwin, DataForm *form)
+confwin_handle_configuration(ProfConfWin* confwin, DataForm* form)
 {
     assert(confwin != NULL);
 
-    ProfWin *window = (ProfWin*)confwin;
+    ProfWin* window = (ProfWin*)confwin;
     ui_focus_win(window);
 
     confwin_show_form(confwin);
@@ -107,12 +107,12 @@ confwin_handle_configuration(ProfConfWin *confwin, DataForm *form)
 }
 
 void
-confwin_field_help(ProfConfWin *confwin, char *tag)
+confwin_field_help(ProfConfWin* confwin, char* tag)
 {
     assert(confwin != NULL);
 
-    ProfWin *window = (ProfWin*) confwin;
-    FormField *field = form_get_field_by_tag(confwin->form, tag);
+    ProfWin* window = (ProfWin*)confwin;
+    FormField* field = form_get_field_by_tag(confwin->form, tag);
     if (field) {
         win_print(window, THEME_DEFAULT, "-", "%s", field->label);
         if (field->required) {
@@ -126,8 +126,8 @@ confwin_field_help(ProfConfWin *confwin, char *tag)
         win_println(window, THEME_DEFAULT, "-", "  Type        : %s", field->type);
 
         int num_values = 0;
-        GSList *curr_option = NULL;
-        FormOption *option = NULL;
+        GSList* curr_option = NULL;
+        FormOption* option = NULL;
 
         switch (field->type_t) {
         case FIELD_TEXT_SINGLE:
@@ -190,12 +190,12 @@ confwin_field_help(ProfConfWin *confwin, char *tag)
 }
 
 void
-confwin_form_help(ProfConfWin *confwin)
+confwin_form_help(ProfConfWin* confwin)
 {
     assert(confwin != NULL);
 
     if (confwin->form->instructions) {
-        ProfWin *window = (ProfWin*) confwin;
+        ProfWin* window = (ProfWin*)confwin;
         win_println(window, THEME_DEFAULT, "-", "Supplied instructions:");
         win_println(window, THEME_DEFAULT, "-", "%s", confwin->form->instructions);
         win_println(window, THEME_DEFAULT, "-", "");
@@ -203,7 +203,7 @@ confwin_form_help(ProfConfWin *confwin)
 }
 
 static void
-_confwin_form_field(ProfWin *window, char *tag, FormField *field)
+_confwin_form_field(ProfWin* window, char* tag, FormField* field)
 {
     win_print(window, THEME_AWAY, "-", "[%s] ", tag);
     win_append(window, THEME_DEFAULT, "%s", field->label);
@@ -213,15 +213,15 @@ _confwin_form_field(ProfWin *window, char *tag, FormField *field)
         win_append(window, THEME_DEFAULT, ": ");
     }
 
-    GSList *values = field->values;
-    GSList *curr_value = values;
+    GSList* values = field->values;
+    GSList* curr_value = values;
 
     switch (field->type_t) {
     case FIELD_HIDDEN:
         break;
     case FIELD_TEXT_SINGLE:
         if (curr_value) {
-            char *value = curr_value->data;
+            char* value = curr_value->data;
             if (value) {
                 if (g_strcmp0(field->var, "muc#roomconfig_roomsecret") == 0) {
                     win_append(window, THEME_ONLINE, "[hidden]");
@@ -234,7 +234,7 @@ _confwin_form_field(ProfWin *window, char *tag, FormField *field)
         break;
     case FIELD_TEXT_PRIVATE:
         if (curr_value) {
-            char *value = curr_value->data;
+            char* value = curr_value->data;
             if (value) {
                 win_append(window, THEME_ONLINE, "[hidden]");
             }
@@ -245,8 +245,8 @@ _confwin_form_field(ProfWin *window, char *tag, FormField *field)
         win_newline(window);
         int index = 1;
         while (curr_value) {
-            char *value = curr_value->data;
-            GString *val_tag = g_string_new("");
+            char* value = curr_value->data;
+            GString* val_tag = g_string_new("");
             g_string_printf(val_tag, "val%d", index++);
             win_println(window, THEME_ONLINE, "-", "  [%s] %s", val_tag->str, value);
             g_string_free(val_tag, TRUE);
@@ -257,7 +257,7 @@ _confwin_form_field(ProfWin *window, char *tag, FormField *field)
         if (curr_value == NULL) {
             win_appendln(window, THEME_OFFLINE, "FALSE");
         } else {
-            char *value = curr_value->data;
+            char* value = curr_value->data;
             if (value == NULL) {
                 win_appendln(window, THEME_OFFLINE, "FALSE");
             } else {
@@ -272,11 +272,11 @@ _confwin_form_field(ProfWin *window, char *tag, FormField *field)
     case FIELD_LIST_SINGLE:
         if (curr_value) {
             win_newline(window);
-            char *value = curr_value->data;
-            GSList *options = field->options;
-            GSList *curr_option = options;
+            char* value = curr_value->data;
+            GSList* options = field->options;
+            GSList* curr_option = options;
             while (curr_option) {
-                FormOption *option = curr_option->data;
+                FormOption* option = curr_option->data;
                 if (g_strcmp0(option->value, value) == 0) {
                     win_println(window, THEME_ONLINE, "-", "  [%s] %s", option->value, option->label);
                 } else {
@@ -289,10 +289,10 @@ _confwin_form_field(ProfWin *window, char *tag, FormField *field)
     case FIELD_LIST_MULTI:
         if (curr_value) {
             win_newline(window);
-            GSList *options = field->options;
-            GSList *curr_option = options;
+            GSList* options = field->options;
+            GSList* curr_option = options;
             while (curr_option) {
-                FormOption *option = curr_option->data;
+                FormOption* option = curr_option->data;
                 if (g_slist_find_custom(curr_value, option->value, (GCompareFunc)g_strcmp0)) {
                     win_println(window, THEME_ONLINE, "-", "  [%s] %s", option->value, option->label);
                 } else {
@@ -304,7 +304,7 @@ _confwin_form_field(ProfWin *window, char *tag, FormField *field)
         break;
     case FIELD_JID_SINGLE:
         if (curr_value) {
-            char *value = curr_value->data;
+            char* value = curr_value->data;
             if (value) {
                 win_append(window, THEME_ONLINE, "%s", value);
             }
@@ -314,14 +314,14 @@ _confwin_form_field(ProfWin *window, char *tag, FormField *field)
     case FIELD_JID_MULTI:
         win_newline(window);
         while (curr_value) {
-            char *value = curr_value->data;
+            char* value = curr_value->data;
             win_println(window, THEME_ONLINE, "-", "  %s", value);
             curr_value = g_slist_next(curr_value);
         }
         break;
     case FIELD_FIXED:
         if (curr_value) {
-            char *value = curr_value->data;
+            char* value = curr_value->data;
             if (value) {
                 win_append(window, THEME_DEFAULT, "%s", value);
             }
@@ -334,17 +334,17 @@ _confwin_form_field(ProfWin *window, char *tag, FormField *field)
 }
 
 char*
-confwin_get_string(ProfConfWin *confwin)
+confwin_get_string(ProfConfWin* confwin)
 {
     assert(confwin != NULL);
 
-    GString *res = g_string_new("");
+    GString* res = g_string_new("");
 
-    char *title = win_get_title((ProfWin*)confwin);
+    char* title = win_get_title((ProfWin*)confwin);
     g_string_append(res, title);
     free(title);
 
-    char *resstr = res->str;
+    char* resstr = res->str;
     g_string_free(res, FALSE);
 
     return resstr;

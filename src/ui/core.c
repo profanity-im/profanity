@@ -39,9 +39,9 @@
 #include "gitversion.h"
 #endif
 
+#include <assert.h>
 #include <stdlib.h>
 #include <string.h>
-#include <assert.h>
 #include <sys/ioctl.h>
 #include <unistd.h>
 
@@ -57,36 +57,36 @@
 #include <ncurses.h>
 #endif
 
-#include "log.h"
-#include "common.h"
-#include "command/cmd_defs.h"
 #include "command/cmd_ac.h"
+#include "command/cmd_defs.h"
+#include "common.h"
 #include "config/preferences.h"
 #include "config/theme.h"
-#include "ui/ui.h"
-#include "ui/titlebar.h"
-#include "ui/statusbar.h"
+#include "log.h"
 #include "ui/inputwin.h"
+#include "ui/statusbar.h"
+#include "ui/titlebar.h"
+#include "ui/ui.h"
 #include "ui/window.h"
 #include "ui/window_list.h"
-#include "xmpp/xmpp.h"
-#include "xmpp/muc.h"
 #include "xmpp/chat_session.h"
 #include "xmpp/contact.h"
-#include "xmpp/roster_list.h"
 #include "xmpp/jid.h"
+#include "xmpp/muc.h"
+#include "xmpp/roster_list.h"
+#include "xmpp/xmpp.h"
 
 #ifdef HAVE_LIBOTR
 #include "otr/otr.h"
 #endif
 
-static char *win_title;
+static char* win_title;
 static int inp_size;
 static gboolean perform_resize = FALSE;
-static GTimer *ui_idle_time;
+static GTimer* ui_idle_time;
 
 #ifdef HAVE_LIBXSS
-static Display *display;
+static Display* display;
 #endif
 
 static void _ui_draw_term_title(void);
@@ -114,7 +114,7 @@ ui_init(void)
 #endif
     ui_idle_time = g_timer_new();
     inp_size = 0;
-    ProfWin *window = wins_get_current();
+    ProfWin* window = wins_get_current();
     win_update_virtual(window);
 }
 
@@ -127,7 +127,7 @@ ui_sigwinch_handler(int sig)
 void
 ui_update(void)
 {
-    ProfWin *current = wins_get_current();
+    ProfWin* current = wins_get_current();
     if (current->layout->paged == 0) {
         win_move_to_end(current);
     }
@@ -155,7 +155,7 @@ ui_get_idle_time(void)
 {
 // if compiled with libxss, get the x sessions idle time
 #ifdef HAVE_LIBXSS
-    XScreenSaverInfo *info = XScreenSaverAllocInfo();
+    XScreenSaverInfo* info = XScreenSaverAllocInfo();
     if (info && display) {
         XScreenSaverQueryInfo(display, DefaultRootWindow(display), info);
         unsigned long result = info->idle;
@@ -202,7 +202,7 @@ ui_resize(void)
     wins_resize_all();
     status_bar_resize();
     inp_win_resize();
-    ProfWin *window = wins_get_current();
+    ProfWin* window = wins_get_current();
     win_update_virtual(window);
 }
 
@@ -226,10 +226,10 @@ ui_load_colours(void)
 }
 
 void
-ui_contact_online(char *barejid, Resource *resource, GDateTime *last_activity)
+ui_contact_online(char* barejid, Resource* resource, GDateTime* last_activity)
 {
-    char *show_console = prefs_get_string(PREF_STATUSES_CONSOLE);
-    char *show_chat_win = prefs_get_string(PREF_STATUSES_CHAT);
+    char* show_console = prefs_get_string(PREF_STATUSES_CONSOLE);
+    char* show_chat_win = prefs_get_string(PREF_STATUSES_CHAT);
     PContact contact = roster_get_contact(barejid);
 
     // show nothing
@@ -243,21 +243,21 @@ ui_contact_online(char *barejid, Resource *resource, GDateTime *last_activity)
     if (g_strcmp0(show_console, "all") == 0) {
         cons_show_contact_online(contact, resource, last_activity);
 
-    // show in console of "online" and presence online
+        // show in console of "online" and presence online
     } else if (g_strcmp0(show_console, "online") == 0 && resource->presence == RESOURCE_ONLINE) {
         cons_show_contact_online(contact, resource, last_activity);
     }
 
     // show in chat win if "all"
     if (g_strcmp0(show_chat_win, "all") == 0) {
-        ProfChatWin *chatwin = wins_get_chat(barejid);
+        ProfChatWin* chatwin = wins_get_chat(barejid);
         if (chatwin) {
             chatwin_contact_online(chatwin, resource, last_activity);
         }
 
-    // show in char win if "online" and presence online
+        // show in char win if "online" and presence online
     } else if (g_strcmp0(show_chat_win, "online") == 0 && resource->presence == RESOURCE_ONLINE) {
-        ProfChatWin *chatwin = wins_get_chat(barejid);
+        ProfChatWin* chatwin = wins_get_chat(barejid);
         if (chatwin) {
             chatwin_contact_online(chatwin, resource, last_activity);
         }
@@ -268,28 +268,28 @@ ui_contact_online(char *barejid, Resource *resource, GDateTime *last_activity)
 }
 
 void
-ui_contact_typing(const char *const barejid, const char *const resource)
+ui_contact_typing(const char* const barejid, const char* const resource)
 {
-    ProfChatWin *chatwin = wins_get_chat(barejid);
-    ProfWin *window = (ProfWin*) chatwin;
-    ChatSession *session = chat_session_get(barejid);
+    ProfChatWin* chatwin = wins_get_chat(barejid);
+    ProfWin* window = (ProfWin*)chatwin;
+    ChatSession* session = chat_session_get(barejid);
 
     if (prefs_get_boolean(PREF_INTYPE)) {
         // no chat window for user
         if (chatwin == NULL) {
             cons_show_typing(barejid);
 
-        // have chat window but not currently in it
+            // have chat window but not currently in it
         } else if (!wins_is_current(window)) {
             cons_show_typing(barejid);
 
-        // in chat window with user, no session or session with resource
+            // in chat window with user, no session or session with resource
         } else if (!session || (session && g_strcmp0(session->resource, resource) == 0)) {
             title_bar_set_typing(TRUE);
 
             int num = wins_get_num(window);
             status_bar_active(num, WIN_CHAT, chatwin->barejid);
-       }
+        }
     }
 
     if (prefs_get_boolean(PREF_NOTIFY_TYPING)) {
@@ -297,9 +297,9 @@ ui_contact_typing(const char *const barejid, const char *const resource)
         if (window) {
             is_current = wins_is_current(window);
         }
-        if ( !is_current || (is_current && prefs_get_boolean(PREF_NOTIFY_TYPING_CURRENT)) ) {
+        if (!is_current || (is_current && prefs_get_boolean(PREF_NOTIFY_TYPING_CURRENT))) {
             PContact contact = roster_get_contact(barejid);
-            char const *display_usr = NULL;
+            char const* display_usr = NULL;
             if (contact) {
                 if (p_contact_name(contact)) {
                     display_usr = p_contact_name(contact);
@@ -315,7 +315,7 @@ ui_contact_typing(const char *const barejid, const char *const resource)
 }
 
 void
-ui_roster_add(const char *const barejid, const char *const name)
+ui_roster_add(const char* const barejid, const char* const name)
 {
     if (name) {
         cons_show("Roster item added: %s (%s)", barejid, name);
@@ -326,42 +326,42 @@ ui_roster_add(const char *const barejid, const char *const name)
 }
 
 void
-ui_roster_remove(const char *const barejid)
+ui_roster_remove(const char* const barejid)
 {
     cons_show("Roster item removed: %s", barejid);
     rosterwin_roster();
 }
 
 void
-ui_contact_already_in_group(const char *const contact, const char *const group)
+ui_contact_already_in_group(const char* const contact, const char* const group)
 {
     cons_show("%s already in group %s", contact, group);
     rosterwin_roster();
 }
 
 void
-ui_contact_not_in_group(const char *const contact, const char *const group)
+ui_contact_not_in_group(const char* const contact, const char* const group)
 {
     cons_show("%s is not currently in group %s", contact, group);
     rosterwin_roster();
 }
 
 void
-ui_group_added(const char *const contact, const char *const group)
+ui_group_added(const char* const contact, const char* const group)
 {
     cons_show("%s added to group %s", contact, group);
     rosterwin_roster();
 }
 
 void
-ui_group_removed(const char *const contact, const char *const group)
+ui_group_removed(const char* const contact, const char* const group)
 {
     cons_show("%s removed from group %s", contact, group);
     rosterwin_roster();
 }
 
 void
-ui_handle_login_account_success(ProfAccount *account, gboolean secured)
+ui_handle_login_account_success(ProfAccount* account, gboolean secured)
 {
     if (account->theme) {
         if (theme_load(account->theme, false)) {
@@ -394,7 +394,7 @@ ui_handle_login_account_success(ProfAccount *account, gboolean secured)
 
 void
 ui_update_presence(const resource_presence_t resource_presence,
-    const char *const message, const char *const show)
+                   const char* const message, const char* const show)
 {
     contact_presence_t contact_presence = contact_presence_from_resource_presence(resource_presence);
     title_bar_set_presence(contact_presence);
@@ -407,24 +407,24 @@ ui_update_presence(const resource_presence_t resource_presence,
 }
 
 void
-ui_handle_recipient_error(const char *const recipient, const char *const err_msg)
+ui_handle_recipient_error(const char* const recipient, const char* const err_msg)
 {
     // always show in console
     cons_show_error("Error from %s: %s", recipient, err_msg);
 
-    ProfChatWin *chatwin = wins_get_chat(recipient);
+    ProfChatWin* chatwin = wins_get_chat(recipient);
     if (chatwin) {
         win_println((ProfWin*)chatwin, THEME_ERROR, "!", "Error from %s: %s", recipient, err_msg);
         return;
     }
 
-    ProfMucWin *mucwin = wins_get_muc(recipient);
+    ProfMucWin* mucwin = wins_get_muc(recipient);
     if (mucwin) {
         win_println((ProfWin*)mucwin, THEME_ERROR, "!", "Error from %s: %s", recipient, err_msg);
         return;
     }
 
-    ProfPrivateWin *privatewin = wins_get_private(recipient);
+    ProfPrivateWin* privatewin = wins_get_private(recipient);
     if (privatewin) {
         win_println((ProfWin*)privatewin, THEME_ERROR, "!", "Error from %s: %s", recipient, err_msg);
         return;
@@ -432,9 +432,9 @@ ui_handle_recipient_error(const char *const recipient, const char *const err_msg
 }
 
 void
-ui_handle_otr_error(const char *const barejid, const char *const message)
+ui_handle_otr_error(const char* const barejid, const char* const message)
 {
-    ProfChatWin *chatwin = wins_get_chat(barejid);
+    ProfChatWin* chatwin = wins_get_chat(barejid);
     if (chatwin) {
         win_println((ProfWin*)chatwin, THEME_ERROR, "!", "%s", message);
     } else {
@@ -443,9 +443,9 @@ ui_handle_otr_error(const char *const barejid, const char *const message)
 }
 
 void
-ui_handle_error(const char *const err_msg)
+ui_handle_error(const char* const err_msg)
 {
-    GString *msg = g_string_new("");
+    GString* msg = g_string_new("");
     g_string_printf(msg, "Error %s", err_msg);
 
     cons_show_error(msg->str);
@@ -454,9 +454,9 @@ ui_handle_error(const char *const err_msg)
 }
 
 void
-ui_invalid_command_usage(const char *const cmd, void (*setting_func)(void))
+ui_invalid_command_usage(const char* const cmd, void (*setting_func)(void))
 {
-    GString *msg = g_string_new("");
+    GString* msg = g_string_new("");
     g_string_printf(msg, "Invalid usage, see '/help %s' for details.", &cmd[1]);
 
     if (setting_func) {
@@ -465,7 +465,7 @@ ui_invalid_command_usage(const char *const cmd, void (*setting_func)(void))
     } else {
         cons_show("");
         cons_show(msg->str);
-        ProfWin *current = wins_get_current();
+        ProfWin* current = wins_get_current();
         if (current->type == WIN_CHAT) {
             win_println(current, THEME_DEFAULT, "-", "%s", msg->str);
         }
@@ -488,16 +488,16 @@ ui_disconnected(void)
 void
 ui_close_connected_win(int index)
 {
-    ProfWin *window = wins_get_by_num(index);
+    ProfWin* window = wins_get_by_num(index);
     if (window) {
         if (window->type == WIN_MUC) {
-            ProfMucWin *mucwin = (ProfMucWin*) window;
+            ProfMucWin* mucwin = (ProfMucWin*)window;
             assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
             presence_leave_chat_room(mucwin->roomjid);
             muc_leave(mucwin->roomjid);
             ui_leave_room(mucwin->roomjid);
         } else if (window->type == WIN_CHAT) {
-            ProfChatWin *chatwin = (ProfChatWin*) window;
+            ProfChatWin* chatwin = (ProfChatWin*)window;
             assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
 #ifdef HAVE_LIBOTR
             if (chatwin->is_otr) {
@@ -516,8 +516,8 @@ ui_close_all_wins(void)
     int count = 0;
     jabber_conn_status_t conn_status = connection_get_status();
 
-    GList *win_nums = wins_get_nums();
-    GList *curr = win_nums;
+    GList* win_nums = wins_get_nums();
+    GList* curr = win_nums;
 
     while (curr) {
         int num = GPOINTER_TO_INT(curr->data);
@@ -543,8 +543,8 @@ ui_close_read_wins(void)
     int count = 0;
     jabber_conn_status_t conn_status = connection_get_status();
 
-    GList *win_nums = wins_get_nums();
-    GList *curr = win_nums;
+    GList* win_nums = wins_get_nums();
+    GList* curr = win_nums;
 
     while (curr) {
         int num = GPOINTER_TO_INT(curr->data);
@@ -567,14 +567,14 @@ ui_close_read_wins(void)
 void
 ui_redraw_all_room_rosters(void)
 {
-    GList *win_nums = wins_get_nums();
-    GList *curr = win_nums;
+    GList* win_nums = wins_get_nums();
+    GList* curr = win_nums;
 
     while (curr) {
         int num = GPOINTER_TO_INT(curr->data);
-        ProfWin *window = wins_get_by_num(num);
+        ProfWin* window = wins_get_by_num(num);
         if (window->type == WIN_MUC && win_has_active_subwin(window)) {
-            ProfMucWin *mucwin = (ProfMucWin*)window;
+            ProfMucWin* mucwin = (ProfMucWin*)window;
             assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
             occupantswin_occupants(mucwin->roomjid);
         }
@@ -588,14 +588,14 @@ ui_redraw_all_room_rosters(void)
 void
 ui_hide_all_room_rosters(void)
 {
-    GList *win_nums = wins_get_nums();
-    GList *curr = win_nums;
+    GList* win_nums = wins_get_nums();
+    GList* curr = win_nums;
 
     while (curr) {
         int num = GPOINTER_TO_INT(curr->data);
-        ProfWin *window = wins_get_by_num(num);
+        ProfWin* window = wins_get_by_num(num);
         if (window->type == WIN_MUC && win_has_active_subwin(window)) {
-            ProfMucWin *mucwin = (ProfMucWin*)window;
+            ProfMucWin* mucwin = (ProfMucWin*)window;
             assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
             mucwin_hide_occupants(mucwin);
         }
@@ -609,14 +609,14 @@ ui_hide_all_room_rosters(void)
 void
 ui_show_all_room_rosters(void)
 {
-    GList *win_nums = wins_get_nums();
-    GList *curr = win_nums;
+    GList* win_nums = wins_get_nums();
+    GList* curr = win_nums;
 
     while (curr) {
         int num = GPOINTER_TO_INT(curr->data);
-        ProfWin *window = wins_get_by_num(num);
+        ProfWin* window = wins_get_by_num(num);
         if (window->type == WIN_MUC && !win_has_active_subwin(window)) {
-            ProfMucWin *mucwin = (ProfMucWin*)window;
+            ProfMucWin* mucwin = (ProfMucWin*)window;
             assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
             mucwin_show_occupants(mucwin);
         }
@@ -630,10 +630,10 @@ ui_show_all_room_rosters(void)
 gboolean
 ui_win_has_unsaved_form(int num)
 {
-    ProfWin *window = wins_get_by_num(num);
+    ProfWin* window = wins_get_by_num(num);
 
     if (window->type == WIN_CONFIG) {
-        ProfConfWin *confwin = (ProfConfWin*)window;
+        ProfConfWin* confwin = (ProfConfWin*)window;
         assert(confwin->memcheck == PROFCONFWIN_MEMCHECK);
         return confwin->form->modified;
     } else {
@@ -642,7 +642,7 @@ ui_win_has_unsaved_form(int num)
 }
 
 void
-ui_focus_win(ProfWin *window)
+ui_focus_win(ProfWin* window)
 {
     assert(window != NULL);
 
@@ -650,35 +650,34 @@ ui_focus_win(ProfWin *window)
         return;
     }
 
-    ProfWin *old_current = wins_get_current();
+    ProfWin* old_current = wins_get_current();
 
     if (old_current->type == WIN_CONFIG) {
-        ProfConfWin *confwin = (ProfConfWin*)old_current;
+        ProfConfWin* confwin = (ProfConfWin*)old_current;
         cmd_ac_remove_form_fields(confwin->form);
     }
     if (window->type == WIN_CONFIG) {
-        ProfConfWin *confwin = (ProfConfWin*)window;
+        ProfConfWin* confwin = (ProfConfWin*)window;
         cmd_ac_add_form_fields(confwin->form);
     }
 
     // check for trackbar last position separator
-    switch (old_current->type)
-    {
+    switch (old_current->type) {
     case WIN_CHAT:
     {
-        ProfChatWin *chatwin = (ProfChatWin*)old_current;
+        ProfChatWin* chatwin = (ProfChatWin*)old_current;
         win_remove_entry_message(old_current, chatwin->barejid);
         break;
     }
     case WIN_MUC:
     {
-        ProfMucWin *mucwin = (ProfMucWin*)old_current;
+        ProfMucWin* mucwin = (ProfMucWin*)old_current;
         win_remove_entry_message(old_current, mucwin->roomjid);
         break;
     }
     case WIN_PRIVATE:
     {
-        ProfPrivateWin *privwin = (ProfPrivateWin*)old_current;
+        ProfPrivateWin* privwin = (ProfPrivateWin*)old_current;
         win_remove_entry_message(old_current, privwin->fulljid);
         break;
     }
@@ -697,7 +696,7 @@ ui_focus_win(ProfWin *window)
     }
     status_bar_current(i);
 
-    char *identifier = win_get_tab_identifier(window);
+    char* identifier = win_get_tab_identifier(window);
     status_bar_active(i, window->type, identifier);
     free(identifier);
 }
@@ -705,9 +704,9 @@ ui_focus_win(ProfWin *window)
 void
 ui_close_win(int index)
 {
-    ProfWin *window = wins_get_by_num(index);
+    ProfWin* window = wins_get_by_num(index);
     if (window && window->type == WIN_CONFIG) {
-        ProfConfWin *confwin = (ProfConfWin*)window;
+        ProfConfWin* confwin = (ProfConfWin*)window;
         if (confwin->form) {
             cmd_ac_remove_form_fields(confwin->form);
         }
@@ -725,17 +724,17 @@ ui_prune_wins(void)
     jabber_conn_status_t conn_status = connection_get_status();
     gboolean pruned = FALSE;
 
-    GSList *wins = wins_get_prune_wins();
+    GSList* wins = wins_get_prune_wins();
     if (wins) {
         pruned = TRUE;
     }
 
-    GSList *curr = wins;
+    GSList* curr = wins;
     while (curr) {
-        ProfWin *window = curr->data;
+        ProfWin* window = curr->data;
         if (window->type == WIN_CHAT) {
             if (conn_status == JABBER_CONNECTED) {
-                ProfChatWin *chatwin = (ProfChatWin*)window;
+                ProfChatWin* chatwin = (ProfChatWin*)window;
                 chat_session_remove(chatwin->barejid);
             }
         }
@@ -759,13 +758,13 @@ ui_prune_wins(void)
 }
 
 void
-ui_print_system_msg_from_recipient(const char *const barejid, const char *message)
+ui_print_system_msg_from_recipient(const char* const barejid, const char* message)
 {
     if (barejid == NULL || message == NULL)
         return;
 
-    ProfChatWin *chatwin = wins_get_chat(barejid);
-    ProfWin *window = (ProfWin*)chatwin;
+    ProfChatWin* chatwin = wins_get_chat(barejid);
+    ProfWin* window = (ProfWin*)chatwin;
     if (window == NULL) {
         window = wins_new_chat(barejid);
         if (window) {
@@ -782,19 +781,19 @@ ui_print_system_msg_from_recipient(const char *const barejid, const char *messag
 }
 
 void
-ui_room_join(const char *const roomjid, gboolean focus)
+ui_room_join(const char* const roomjid, gboolean focus)
 {
-    ProfMucWin *mucwin = wins_get_muc(roomjid);
+    ProfMucWin* mucwin = wins_get_muc(roomjid);
     if (mucwin == NULL) {
         mucwin = mucwin_new(roomjid);
     }
-    ProfWin *window = (ProfWin*)mucwin;
+    ProfWin* window = (ProfWin*)mucwin;
 
-    char *nick = muc_nick(roomjid);
+    char* nick = muc_nick(roomjid);
     win_print(window, THEME_ROOMINFO, "!", "-> You have joined the room as %s", nick);
     if (prefs_get_boolean(PREF_MUC_PRIVILEGES)) {
-        char *role = muc_role_str(roomjid);
-        char *affiliation = muc_affiliation_str(roomjid);
+        char* role = muc_role_str(roomjid);
+        char* affiliation = muc_affiliation_str(roomjid);
         if (role) {
             win_append(window, THEME_ROOMINFO, ", role: %s", role);
         }
@@ -809,14 +808,14 @@ ui_room_join(const char *const roomjid, gboolean focus)
     } else {
         int num = wins_get_num(window);
         status_bar_active(num, WIN_MUC, mucwin->roomjid);
-        ProfWin *console = wins_get_console();
+        ProfWin* console = wins_get_console();
         win_println(console, THEME_TYPING, "!", "-> Autojoined %s as %s (%d).", roomjid, nick, num);
     }
 
-    GList *privwins = wins_get_private_chats(roomjid);
-    GList *curr = privwins;
+    GList* privwins = wins_get_private_chats(roomjid);
+    GList* curr = privwins;
     while (curr) {
-        ProfPrivateWin *privwin = curr->data;
+        ProfPrivateWin* privwin = curr->data;
         privwin_room_joined(privwin);
         curr = g_list_next(curr);
     }
@@ -824,17 +823,17 @@ ui_room_join(const char *const roomjid, gboolean focus)
 }
 
 void
-ui_switch_to_room(const char *const roomjid)
+ui_switch_to_room(const char* const roomjid)
 {
-    ProfWin *window = (ProfWin*)wins_get_muc(roomjid);
+    ProfWin* window = (ProfWin*)wins_get_muc(roomjid);
     ui_focus_win(window);
 }
 
 void
-ui_room_destroy(const char *const roomjid)
+ui_room_destroy(const char* const roomjid)
 {
-    ProfWin *window = (ProfWin*)wins_get_muc(roomjid);
-    GList *privwins = wins_get_private_chats(roomjid);
+    ProfWin* window = (ProfWin*)wins_get_muc(roomjid);
+    GList* privwins = wins_get_private_chats(roomjid);
     if (window == NULL) {
         log_error("Received room destroy result, but no window open for %s.", roomjid);
     } else {
@@ -843,9 +842,9 @@ ui_room_destroy(const char *const roomjid)
         cons_show("Room destroyed: %s", roomjid);
     }
 
-    GList *curr = privwins;
+    GList* curr = privwins;
     while (curr) {
-        ProfPrivateWin *privwin = curr->data;
+        ProfPrivateWin* privwin = curr->data;
         privwin_room_destroyed(privwin);
         curr = g_list_next(curr);
     }
@@ -853,37 +852,36 @@ ui_room_destroy(const char *const roomjid)
 }
 
 void
-ui_leave_room(const char *const roomjid)
+ui_leave_room(const char* const roomjid)
 {
-    ProfWin *window = (ProfWin*)wins_get_muc(roomjid);
-    GList *privwins = wins_get_private_chats(roomjid);
+    ProfWin* window = (ProfWin*)wins_get_muc(roomjid);
+    GList* privwins = wins_get_private_chats(roomjid);
     if (window) {
         int num = wins_get_num(window);
         ui_close_win(num);
     }
 
-    GList *curr = privwins;
+    GList* curr = privwins;
     while (curr) {
-        ProfPrivateWin *privwin = curr->data;
+        ProfPrivateWin* privwin = curr->data;
         privwin_room_left(privwin);
         curr = g_list_next(curr);
     }
     g_list_free(privwins);
-
 }
 
 void
-ui_room_destroyed(const char *const roomjid, const char *const reason, const char *const new_jid,
-    const char *const password)
+ui_room_destroyed(const char* const roomjid, const char* const reason, const char* const new_jid,
+                  const char* const password)
 {
-    ProfWin *window = (ProfWin*)wins_get_muc(roomjid);
-    GList *privwins = wins_get_private_chats(roomjid);
+    ProfWin* window = (ProfWin*)wins_get_muc(roomjid);
+    GList* privwins = wins_get_private_chats(roomjid);
     if (window == NULL) {
         log_error("Received room destroy, but no window open for %s.", roomjid);
     } else {
         int num = wins_get_num(window);
         ui_close_win(num);
-        ProfWin *console = wins_get_console();
+        ProfWin* console = wins_get_console();
 
         if (reason) {
             win_println(console, THEME_TYPING, "!", "<- Room destroyed: %s, reason: %s", roomjid, reason);
@@ -900,9 +898,9 @@ ui_room_destroyed(const char *const roomjid, const char *const reason, const cha
         }
     }
 
-    GList *curr = privwins;
+    GList* curr = privwins;
     while (curr) {
-        ProfPrivateWin *privwin = curr->data;
+        ProfPrivateWin* privwin = curr->data;
         privwin_room_destroyed(privwin);
         curr = g_list_next(curr);
     }
@@ -910,17 +908,17 @@ ui_room_destroyed(const char *const roomjid, const char *const reason, const cha
 }
 
 void
-ui_room_kicked(const char *const roomjid, const char *const actor, const char *const reason)
+ui_room_kicked(const char* const roomjid, const char* const actor, const char* const reason)
 {
-    ProfWin *window = (ProfWin*)wins_get_muc(roomjid);
-    GList *privwins = wins_get_private_chats(roomjid);
+    ProfWin* window = (ProfWin*)wins_get_muc(roomjid);
+    GList* privwins = wins_get_private_chats(roomjid);
     if (window == NULL) {
         log_error("Received kick, but no window open for %s.", roomjid);
     } else {
         int num = wins_get_num(window);
         ui_close_win(num);
 
-        GString *message = g_string_new("Kicked from ");
+        GString* message = g_string_new("Kicked from ");
         g_string_append(message, roomjid);
         if (actor) {
             g_string_append(message, " by ");
@@ -931,14 +929,14 @@ ui_room_kicked(const char *const roomjid, const char *const actor, const char *c
             g_string_append(message, reason);
         }
 
-        ProfWin *console = wins_get_console();
+        ProfWin* console = wins_get_console();
         win_println(console, THEME_TYPING, "!", "<- %s", message->str);
         g_string_free(message, TRUE);
     }
 
-    GList *curr = privwins;
+    GList* curr = privwins;
     while (curr) {
-        ProfPrivateWin *privwin = curr->data;
+        ProfPrivateWin* privwin = curr->data;
         privwin_room_kicked(privwin, actor, reason);
         curr = g_list_next(curr);
     }
@@ -946,17 +944,17 @@ ui_room_kicked(const char *const roomjid, const char *const actor, const char *c
 }
 
 void
-ui_room_banned(const char *const roomjid, const char *const actor, const char *const reason)
+ui_room_banned(const char* const roomjid, const char* const actor, const char* const reason)
 {
-    ProfWin *window = (ProfWin*)wins_get_muc(roomjid);
-    GList *privwins = wins_get_private_chats(roomjid);
+    ProfWin* window = (ProfWin*)wins_get_muc(roomjid);
+    GList* privwins = wins_get_private_chats(roomjid);
     if (window == NULL) {
         log_error("Received ban, but no window open for %s.", roomjid);
     } else {
         int num = wins_get_num(window);
         ui_close_win(num);
 
-        GString *message = g_string_new("Banned from ");
+        GString* message = g_string_new("Banned from ");
         g_string_append(message, roomjid);
         if (actor) {
             g_string_append(message, " by ");
@@ -967,14 +965,14 @@ ui_room_banned(const char *const roomjid, const char *const actor, const char *c
             g_string_append(message, reason);
         }
 
-        ProfWin *console = wins_get_console();
+        ProfWin* console = wins_get_console();
         win_println(console, THEME_TYPING, "!", "<- %s", message->str);
         g_string_free(message, TRUE);
     }
 
-    GList *curr = privwins;
+    GList* curr = privwins;
     while (curr) {
-        ProfPrivateWin *privwin = curr->data;
+        ProfPrivateWin* privwin = curr->data;
         privwin_room_banned(privwin, actor, reason);
         curr = g_list_next(curr);
     }
@@ -984,7 +982,7 @@ ui_room_banned(const char *const roomjid, const char *const actor, const char *c
 int
 ui_win_unread(int index)
 {
-    ProfWin *window = wins_get_by_num(index);
+    ProfWin* window = wins_get_by_num(index);
     if (window) {
         return win_unread(window);
     } else {
@@ -1007,9 +1005,9 @@ ui_get_line(void)
 }
 
 char*
-ui_ask_pgp_passphrase(const char *hint, int prev_fail)
+ui_ask_pgp_passphrase(const char* hint, int prev_fail)
 {
-    ProfWin *current = wins_get_current();
+    ProfWin* current = wins_get_current();
 
     win_println(current, THEME_DEFAULT, "-", "");
 
@@ -1030,11 +1028,11 @@ ui_ask_pgp_passphrase(const char *hint, int prev_fail)
 }
 
 void
-ui_contact_offline(char *barejid, char *resource, char *status)
+ui_contact_offline(char* barejid, char* resource, char* status)
 {
-    char *show_console = prefs_get_string(PREF_STATUSES_CONSOLE);
-    char *show_chat_win = prefs_get_string(PREF_STATUSES_CHAT);
-    Jid *jid = jid_create_from_bare_and_resource(barejid, resource);
+    char* show_console = prefs_get_string(PREF_STATUSES_CONSOLE);
+    char* show_chat_win = prefs_get_string(PREF_STATUSES_CHAT);
+    Jid* jid = jid_create_from_bare_and_resource(barejid, resource);
     PContact contact = roster_get_contact(barejid);
     if (p_contact_subscription(contact)) {
         if (strcmp(p_contact_subscription(contact), "none") != 0) {
@@ -1043,21 +1041,21 @@ ui_contact_offline(char *barejid, char *resource, char *status)
             if (g_strcmp0(show_console, "all") == 0) {
                 cons_show_contact_offline(contact, resource, status);
 
-            // show in console of "online"
+                // show in console of "online"
             } else if (g_strcmp0(show_console, "online") == 0) {
                 cons_show_contact_offline(contact, resource, status);
             }
 
             // show in chat win if "all"
             if (g_strcmp0(show_chat_win, "all") == 0) {
-                ProfChatWin *chatwin = wins_get_chat(barejid);
+                ProfChatWin* chatwin = wins_get_chat(barejid);
                 if (chatwin) {
                     chatwin_contact_offline(chatwin, resource, status);
                 }
 
-            // show in chat win if "online" and presence online
+                // show in chat win if "online" and presence online
             } else if (g_strcmp0(show_chat_win, "online") == 0) {
-                ProfChatWin *chatwin = wins_get_chat(barejid);
+                ProfChatWin* chatwin = wins_get_chat(barejid);
                 if (chatwin) {
                     chatwin_contact_offline(chatwin, resource, status);
                 }
@@ -1065,7 +1063,7 @@ ui_contact_offline(char *barejid, char *resource, char *status)
         }
     }
 
-    ProfChatWin *chatwin = wins_get_chat(barejid);
+    ProfChatWin* chatwin = wins_get_chat(barejid);
     if (chatwin && chatwin->resource_override && (g_strcmp0(resource, chatwin->resource_override) == 0)) {
         FREE_SET_NULL(chatwin->resource_override);
     }
@@ -1085,7 +1083,8 @@ void
 ui_goodbye_title(void)
 {
     int result = system("/bin/echo -ne \"\033]0;Thanks for using Profanity\007\"");
-    if(result == -1) log_error("Error printing title on shutdown");
+    if (result == -1)
+        log_error("Error printing title on shutdown");
 }
 
 static void
@@ -1095,21 +1094,21 @@ _ui_draw_term_title(void)
     jabber_conn_status_t status = connection_get_status();
 
     if (status == JABBER_CONNECTED) {
-        const char * const jid = connection_get_fulljid();
+        const char* const jid = connection_get_fulljid();
         gint unread = wins_get_total_unread();
 
         if (unread != 0) {
             snprintf(new_win_title, sizeof(new_win_title),
-                "/bin/echo -n \"%c]0;%s (%d) - %s%c\"", '\033', "Profanity",
-                unread, jid, '\007');
+                     "/bin/echo -n \"%c]0;%s (%d) - %s%c\"", '\033', "Profanity",
+                     unread, jid, '\007');
         } else {
             snprintf(new_win_title, sizeof(new_win_title),
-                "/bin/echo -n \"%c]0;%s - %s%c\"", '\033', "Profanity", jid,
-                '\007');
+                     "/bin/echo -n \"%c]0;%s - %s%c\"", '\033', "Profanity", jid,
+                     '\007');
         }
     } else {
         snprintf(new_win_title, sizeof(new_win_title), "/bin/echo -n \"%c]0;%s%c\"", '\033',
-            "Profanity", '\007');
+                 "Profanity", '\007');
     }
     if (g_strcmp0(win_title, new_win_title) != 0) {
         // print to x-window title bar
@@ -1125,10 +1124,10 @@ _ui_draw_term_title(void)
 }
 
 void
-ui_handle_room_configuration_form_error(const char *const roomjid, const char *const message)
+ui_handle_room_configuration_form_error(const char* const roomjid, const char* const message)
 {
-    ProfWin *window = NULL;
-    GString *message_str = g_string_new("");
+    ProfWin* window = NULL;
+    GString* message_str = g_string_new("");
 
     if (roomjid) {
         window = (ProfWin*)wins_get_muc(roomjid);
@@ -1149,15 +1148,15 @@ ui_handle_room_configuration_form_error(const char *const roomjid, const char *c
 }
 
 void
-ui_handle_room_config_submit_result(const char *const roomjid)
+ui_handle_room_config_submit_result(const char* const roomjid)
 {
     if (roomjid) {
-        ProfWin *form_window = NULL;
-        ProfWin *muc_window = (ProfWin*)wins_get_muc(roomjid);
+        ProfWin* form_window = NULL;
+        ProfWin* muc_window = (ProfWin*)wins_get_muc(roomjid);
 
-        GString *form_recipient = g_string_new(roomjid);
+        GString* form_recipient = g_string_new(roomjid);
         g_string_append(form_recipient, " config");
-        form_window = (ProfWin*) wins_get_conf(form_recipient->str);
+        form_window = (ProfWin*)wins_get_conf(form_recipient->str);
         g_string_free(form_recipient, TRUE);
 
         if (form_window) {
@@ -1169,7 +1168,7 @@ ui_handle_room_config_submit_result(const char *const roomjid)
             ui_focus_win((ProfWin*)muc_window);
             win_println(muc_window, THEME_ROOMINFO, "!", "Room configuration successful");
         } else {
-            ProfWin *console = wins_get_console();
+            ProfWin* console = wins_get_console();
             ui_focus_win(console);
             cons_show("Room configuration successful: %s", roomjid);
         }
@@ -1179,17 +1178,17 @@ ui_handle_room_config_submit_result(const char *const roomjid)
 }
 
 void
-ui_handle_room_config_submit_result_error(const char *const roomjid, const char *const message)
+ui_handle_room_config_submit_result_error(const char* const roomjid, const char* const message)
 {
-    ProfWin *console = wins_get_console();
+    ProfWin* console = wins_get_console();
     if (roomjid) {
-        ProfWin *muc_window = NULL;
-        ProfWin *form_window = NULL;
+        ProfWin* muc_window = NULL;
+        ProfWin* form_window = NULL;
         muc_window = (ProfWin*)wins_get_muc(roomjid);
 
-        GString *form_recipient = g_string_new(roomjid);
+        GString* form_recipient = g_string_new(roomjid);
         g_string_append(form_recipient, " config");
-        form_window = (ProfWin*) wins_get_conf(form_recipient->str);
+        form_window = (ProfWin*)wins_get_conf(form_recipient->str);
         g_string_free(form_recipient, TRUE);
 
         if (form_window) {
@@ -1217,7 +1216,7 @@ ui_handle_room_config_submit_result_error(const char *const roomjid, const char 
 }
 
 void
-ui_show_lines(ProfWin *window, gchar** lines)
+ui_show_lines(ProfWin* window, gchar** lines)
 {
     if (lines) {
         int i;
@@ -1230,7 +1229,7 @@ ui_show_lines(ProfWin *window, gchar** lines)
 void
 ui_show_roster(void)
 {
-    ProfWin *window = wins_get_console();
+    ProfWin* window = wins_get_console();
     if (window && !win_has_active_subwin(window)) {
         wins_show_subwin(window);
         rosterwin_roster();
@@ -1240,18 +1239,18 @@ ui_show_roster(void)
 void
 ui_hide_roster(void)
 {
-    ProfWin *window = wins_get_console();
+    ProfWin* window = wins_get_console();
     if (window && win_has_active_subwin(window)) {
         wins_hide_subwin(window);
     }
 }
 
 void
-ui_handle_software_version_error(const char *const roomjid, const char *const message)
+ui_handle_software_version_error(const char* const roomjid, const char* const message)
 {
-    GString *message_str = g_string_new("");
+    GString* message_str = g_string_new("");
 
-    ProfWin *window = wins_get_console();
+    ProfWin* window = wins_get_console();
     g_string_printf(message_str, "Could not get software version");
 
     if (message) {
@@ -1265,15 +1264,15 @@ ui_handle_software_version_error(const char *const roomjid, const char *const me
 }
 
 void
-ui_show_software_version(const char *const jid, const char *const  presence,
-    const char *const name, const char *const version, const char *const os)
+ui_show_software_version(const char* const jid, const char* const presence,
+                         const char* const name, const char* const version, const char* const os)
 {
-    Jid *jidp = jid_create(jid);
-    ProfWin *window = NULL;
-    ProfWin *chatwin = (ProfWin*)wins_get_chat(jidp->barejid);
-    ProfWin *mucwin = (ProfWin*)wins_get_muc(jidp->barejid);
-    ProfWin *privwin = (ProfWin*)wins_get_private(jidp->fulljid);
-    ProfWin *console = wins_get_console();
+    Jid* jidp = jid_create(jid);
+    ProfWin* window = NULL;
+    ProfWin* chatwin = (ProfWin*)wins_get_chat(jidp->barejid);
+    ProfWin* mucwin = (ProfWin*)wins_get_muc(jidp->barejid);
+    ProfWin* privwin = (ProfWin*)wins_get_private(jidp->fulljid);
+    ProfWin* console = wins_get_console();
     jid_destroy(jidp);
 
     if (chatwin) {

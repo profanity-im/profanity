@@ -33,25 +33,25 @@
  *
  */
 
-#include <string.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include <glib.h>
 #include <glib/gstdio.h>
 
 #include "common.h"
-#include "config/theme.h"
-#include "config/files.h"
 #include "config/conflists.h"
+#include "config/files.h"
+#include "config/theme.h"
 
-static GKeyFile *settings;
+static GKeyFile* settings;
 
 static void _save_settings(void);
 
 void
 plugin_settings_init(void)
 {
-    char *settings_file = files_get_data_path(FILE_PLUGIN_SETTINGS);
+    char* settings_file = files_get_data_path(FILE_PLUGIN_SETTINGS);
 
     if (g_file_test(settings_file, G_FILE_TEST_EXISTS)) {
         g_chmod(settings_file, S_IRUSR | S_IWUSR);
@@ -61,7 +61,7 @@ plugin_settings_init(void)
     g_key_file_load_from_file(settings, settings_file, G_KEY_FILE_KEEP_COMMENTS, NULL);
 
     gsize g_data_size;
-    gchar *g_data = g_key_file_to_data(settings, &g_data_size, NULL);
+    gchar* g_data = g_key_file_to_data(settings, &g_data_size, NULL);
     g_file_set_contents(settings_file, g_data, g_data_size, NULL);
     g_chmod(settings_file, S_IRUSR | S_IWUSR);
     g_free(g_data);
@@ -76,7 +76,7 @@ plugin_settings_close(void)
 }
 
 gboolean
-plugin_settings_boolean_get(const char *const group, const char *const key, gboolean def)
+plugin_settings_boolean_get(const char* const group, const char* const key, gboolean def)
 {
     if (group && key && g_key_file_has_key(settings, group, key, NULL)) {
         return g_key_file_get_boolean(settings, group, key, NULL);
@@ -86,14 +86,14 @@ plugin_settings_boolean_get(const char *const group, const char *const key, gboo
 }
 
 void
-plugin_settings_boolean_set(const char *const group, const char *const key, gboolean value)
+plugin_settings_boolean_set(const char* const group, const char* const key, gboolean value)
 {
     g_key_file_set_boolean(settings, group, key, value);
     _save_settings();
 }
 
 char*
-plugin_settings_string_get(const char *const group, const char *const key, const char *const def)
+plugin_settings_string_get(const char* const group, const char* const key, const char* const def)
 {
     if (group && key && g_key_file_has_key(settings, group, key, NULL)) {
         return g_key_file_get_string(settings, group, key, NULL);
@@ -105,14 +105,14 @@ plugin_settings_string_get(const char *const group, const char *const key, const
 }
 
 void
-plugin_settings_string_set(const char *const group, const char *const key, const char *const value)
+plugin_settings_string_set(const char* const group, const char* const key, const char* const value)
 {
     g_key_file_set_string(settings, group, key, value);
     _save_settings();
 }
 
 int
-plugin_settings_int_get(const char *const group, const char *const key, int def)
+plugin_settings_int_get(const char* const group, const char* const key, int def)
 {
     if (group && key && g_key_file_has_key(settings, group, key, NULL)) {
         return g_key_file_get_integer(settings, group, key, NULL);
@@ -122,14 +122,14 @@ plugin_settings_int_get(const char *const group, const char *const key, int def)
 }
 
 void
-plugin_settings_int_set(const char *const group, const char *const key, int value)
+plugin_settings_int_set(const char* const group, const char* const key, int value)
 {
     g_key_file_set_integer(settings, group, key, value);
     _save_settings();
 }
 
 gchar**
-plugin_settings_string_list_get(const char *const group, const char *const key)
+plugin_settings_string_list_get(const char* const group, const char* const key)
 {
     if (!g_key_file_has_key(settings, group, key, NULL)) {
         return NULL;
@@ -139,7 +139,7 @@ plugin_settings_string_list_get(const char *const group, const char *const key)
 }
 
 int
-plugin_settings_string_list_add(const char *const group, const char *const key, const char *const value)
+plugin_settings_string_list_add(const char* const group, const char* const key, const char* const value)
 {
     int res = conf_string_list_add(settings, group, key, value);
     _save_settings();
@@ -148,7 +148,7 @@ plugin_settings_string_list_add(const char *const group, const char *const key, 
 }
 
 int
-plugin_settings_string_list_remove(const char *const group, const char *const key, const char *const value)
+plugin_settings_string_list_remove(const char* const group, const char* const key, const char* const value)
 {
     int res = conf_string_list_remove(settings, group, key, value);
     _save_settings();
@@ -157,7 +157,7 @@ plugin_settings_string_list_remove(const char *const group, const char *const ke
 }
 
 int
-plugin_settings_string_list_clear(const char *const group, const char *const key)
+plugin_settings_string_list_clear(const char* const group, const char* const key)
 {
     if (!g_key_file_has_key(settings, group, key, NULL)) {
         return 0;
@@ -173,11 +173,11 @@ static void
 _save_settings(void)
 {
     gsize g_data_size;
-    gchar *g_data = g_key_file_to_data(settings, &g_data_size, NULL);
+    gchar* g_data = g_key_file_to_data(settings, &g_data_size, NULL);
 
-    char *fileloc = files_get_data_path(FILE_PLUGIN_SETTINGS);
-    gchar *base = g_path_get_dirname(fileloc);
-    gchar *true_loc = get_file_or_linked(fileloc, base);
+    char* fileloc = files_get_data_path(FILE_PLUGIN_SETTINGS);
+    gchar* base = g_path_get_dirname(fileloc);
+    gchar* true_loc = get_file_or_linked(fileloc, base);
     g_free(base);
     g_file_set_contents(true_loc, g_data, g_data_size, NULL);
     free(true_loc);

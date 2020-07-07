@@ -36,21 +36,21 @@
 #include "config.h"
 
 #ifdef HAVE_GTK
-#include <gtk/gtk.h>
 #include <glib.h>
 #include <glib/gstdio.h>
+#include <gtk/gtk.h>
 #include <stdlib.h>
 
-#include "log.h"
-#include "config/preferences.h"
 #include "config/files.h"
+#include "config/preferences.h"
+#include "log.h"
 #include "ui/tray.h"
 #include "ui/window_list.h"
 
 static gboolean gtk_ready = FALSE;
-static GtkStatusIcon *prof_tray = NULL;
-static GString *icon_filename = NULL;
-static GString *icon_msg_filename = NULL;
+static GtkStatusIcon* prof_tray = NULL;
+static GString* icon_filename = NULL;
+static GString* icon_msg_filename = NULL;
 static gint unread_messages;
 static gboolean shutting_down;
 static guint timer;
@@ -66,7 +66,7 @@ static guint timer;
 static void
 _get_icons(void)
 {
-    GString *icons_dir =  NULL;
+    GString* icons_dir = NULL;
 
 #ifdef ICONS_PATH
 
@@ -79,18 +79,18 @@ _get_icons(void)
 
 #endif /* ICONS_PATH */
 
-    gchar *icons_dir_s = files_get_config_path(DIR_ICONS);
+    gchar* icons_dir_s = files_get_config_path(DIR_ICONS);
     icons_dir = g_string_new(icons_dir_s);
     g_free(icons_dir_s);
-    GError *err = NULL;
+    GError* err = NULL;
 
     if (!g_file_test(icons_dir->str, G_FILE_TEST_IS_DIR)) {
         return;
     }
 
-    GDir *dir = g_dir_open(icons_dir->str, 0, &err);
+    GDir* dir = g_dir_open(icons_dir->str, 0, &err);
     if (dir) {
-        GString *name = g_string_new(g_dir_read_name(dir));
+        GString* name = g_string_new(g_dir_read_name(dir));
         while (name->len) {
             if (g_strcmp0("proIcon.png", name->str) == 0) {
                 if (icon_filename) {

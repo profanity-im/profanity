@@ -38,9 +38,9 @@
 
 void bookmark_ignore_on_connect();
 void bookmark_ignore_on_disconnect();
-gboolean bookmark_ignored(Bookmark *bookmark);
-gchar ** bookmark_ignore_list(gsize *len);
-void bookmark_ignore_add(const char *const barejid);
-void bookmark_ignore_remove(const char *const barejid);
+gboolean bookmark_ignored(Bookmark* bookmark);
+gchar** bookmark_ignore_list(gsize* len);
+void bookmark_ignore_add(const char* const barejid);
+void bookmark_ignore_remove(const char* const barejid);
 
 #endif

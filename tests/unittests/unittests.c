@@ -1,48 +1,50 @@
-#include <stdarg.h>
-#include <stdio.h>
-#include <unistd.h>
-#include <fcntl.h>
-#include <stddef.h>
-#include <setjmp.h>
 #include <cmocka.h>
-#include <sys/stat.h>
-#include <stdlib.h>
-#include <locale.h>
+#include <fcntl.h>
 #include <langinfo.h>
+#include <locale.h>
+#include <setjmp.h>
+#include <stdarg.h>
+#include <stddef.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/stat.h>
+#include <unistd.h>
 
 #include "config.h"
-#include "xmpp/chat_session.h"
 #include "helpers.h"
 #include "test_autocomplete.h"
+#include "test_callbacks.h"
 #include "test_chat_session.h"
-#include "test_common.h"
-#include "test_contact.h"
-#include "test_cmd_connect.h"
 #include "test_cmd_account.h"
-#include "test_cmd_rooms.h"
-#include "test_cmd_sub.h"
-#include "test_cmd_presence.h"
-#include "test_cmd_otr.h"
-#include "test_cmd_pgp.h"
-#include "test_jid.h"
-#include "test_parser.h"
-#include "test_roster_list.h"
-#include "test_preferences.h"
-#include "test_server_events.h"
 #include "test_cmd_alias.h"
 #include "test_cmd_bookmark.h"
-#include "test_cmd_join.h"
-#include "test_muc.h"
-#include "test_cmd_roster.h"
+#include "test_cmd_connect.h"
 #include "test_cmd_disconnect.h"
+#include "test_cmd_join.h"
+#include "test_cmd_otr.h"
+#include "test_cmd_pgp.h"
+#include "test_cmd_presence.h"
+#include "test_cmd_rooms.h"
+#include "test_cmd_roster.h"
+#include "test_cmd_sub.h"
+#include "test_common.h"
+#include "test_contact.h"
 #include "test_form.h"
-#include "test_callbacks.h"
+#include "test_jid.h"
+#include "test_muc.h"
+#include "test_parser.h"
 #include "test_plugins_disco.h"
+#include "test_preferences.h"
+#include "test_roster_list.h"
+#include "test_server_events.h"
+#include "xmpp/chat_session.h"
 
-int main(int argc, char* argv[]) {
+int
+main(int argc, char* argv[])
+{
     setlocale(LC_ALL, "en_GB.UTF-8");
-    char *codeset = nl_langinfo(CODESET);
-    char *lang = getenv("LANG");
+    char* codeset = nl_langinfo(CODESET);
+    char* lang = getenv("LANG");
 
     printf("Charset information:\n");
 
@@ -217,93 +219,93 @@ int main(int argc, char* argv[]) {
         unit_test(remove_contact_with_remaining_in_group),
 
         unit_test_setup_teardown(returns_false_when_chat_session_does_not_exist,
-            init_chat_sessions,
-            close_chat_sessions),
+                                 init_chat_sessions,
+                                 close_chat_sessions),
         unit_test_setup_teardown(creates_chat_session_on_recipient_activity,
-            init_chat_sessions,
-            close_chat_sessions),
+                                 init_chat_sessions,
+                                 close_chat_sessions),
         unit_test_setup_teardown(replaces_chat_session_on_recipient_activity_with_different_resource,
-            init_chat_sessions,
-            close_chat_sessions),
+                                 init_chat_sessions,
+                                 close_chat_sessions),
         unit_test_setup_teardown(removes_chat_session,
-            init_chat_sessions,
-            close_chat_sessions),
+                                 init_chat_sessions,
+                                 close_chat_sessions),
 
         unit_test_setup_teardown(cmd_connect_shows_message_when_disconnecting,
-            load_preferences,
-            close_preferences),
+                                 load_preferences,
+                                 close_preferences),
         unit_test_setup_teardown(cmd_connect_shows_message_when_connecting,
-            load_preferences,
-            close_preferences),
+                                 load_preferences,
+                                 close_preferences),
         unit_test_setup_teardown(cmd_connect_shows_message_when_connected,
-            load_preferences,
-            close_preferences),
+                                 load_preferences,
+                                 close_preferences),
         unit_test_setup_teardown(cmd_connect_when_no_account,
-            load_preferences,
-            close_preferences),
+                                 load_preferences,
+                                 close_preferences),
         unit_test_setup_teardown(cmd_connect_fail_message,
-            load_preferences,
-            close_preferences),
+                                 load_preferences,
+                                 close_preferences),
         unit_test_setup_teardown(cmd_connect_lowercases_argument_with_account,
-            load_preferences,
-            close_preferences),
+                                 load_preferences,
+                                 close_preferences),
         unit_test_setup_teardown(cmd_connect_lowercases_argument_with_no_account,
-            load_preferences,
-            close_preferences),
+                                 load_preferences,
+                                 close_preferences),
         unit_test_setup_teardown(cmd_connect_asks_password_when_not_in_account,
-            load_preferences,
-            close_preferences),
+                                 load_preferences,
+                                 close_preferences),
         unit_test_setup_teardown(cmd_connect_shows_usage_when_no_server_value,
-            load_preferences,
-            close_preferences),
+                                 load_preferences,
+                                 close_preferences),
         unit_test_setup_teardown(cmd_connect_shows_message_when_connecting_with_account,
-            load_preferences,
-            close_preferences),
+                                 load_preferences,
+                                 close_preferences),
         unit_test_setup_teardown(cmd_connect_connects_with_account,
-            load_preferences,
-            close_preferences),
+                                 load_preferences,
+                                 close_preferences),
         unit_test_setup_teardown(cmd_connect_shows_usage_when_server_no_port_value,
-            load_preferences,
-            close_preferences),
+                                 load_preferences,
+                                 close_preferences),
         unit_test_setup_teardown(cmd_connect_shows_usage_when_no_port_value,
-            load_preferences,
-            close_preferences),
+                                 load_preferences,
+                                 close_preferences),
         unit_test_setup_teardown(cmd_connect_shows_usage_when_port_no_server_value,
-            load_preferences,
-            close_preferences),
+                                 load_preferences,
+                                 close_preferences),
         unit_test_setup_teardown(cmd_connect_shows_message_when_port_0,
-            load_preferences,
-            close_preferences),
+                                 load_preferences,
+                                 close_preferences),
         unit_test_setup_teardown(cmd_connect_shows_message_when_port_minus1,
-            load_preferences,
-            close_preferences),
+                                 load_preferences,
+                                 close_preferences),
         unit_test_setup_teardown(cmd_connect_shows_message_when_port_65536,
-            load_preferences,
-            close_preferences),
+                                 load_preferences,
+                                 close_preferences),
         unit_test_setup_teardown(cmd_connect_shows_message_when_port_contains_chars,
-            load_preferences,
-            close_preferences),
+                                 load_preferences,
+                                 close_preferences),
         unit_test_setup_teardown(cmd_connect_with_server_when_provided,
-            load_preferences,
-            close_preferences),
+                                 load_preferences,
+                                 close_preferences),
         unit_test_setup_teardown(cmd_connect_with_port_when_provided,
-            load_preferences,
-            close_preferences),
+                                 load_preferences,
+                                 close_preferences),
         unit_test_setup_teardown(cmd_connect_with_server_and_port_when_provided,
-            load_preferences,
-            close_preferences),
+                                 load_preferences,
+                                 close_preferences),
         unit_test_setup_teardown(cmd_connect_shows_usage_when_server_provided_twice,
-            load_preferences,
-            close_preferences),
+                                 load_preferences,
+                                 close_preferences),
         unit_test_setup_teardown(cmd_connect_shows_usage_when_port_provided_twice,
-            load_preferences,
-            close_preferences),
+                                 load_preferences,
+                                 close_preferences),
         unit_test_setup_teardown(cmd_connect_shows_usage_when_invalid_first_property,
-            load_preferences,
-            close_preferences),
+                                 load_preferences,
+                                 close_preferences),
         unit_test_setup_teardown(cmd_connect_shows_usage_when_invalid_second_property,
-            load_preferences,
-            close_preferences),
+                                 load_preferences,
+                                 close_preferences),
 
         unit_test(cmd_rooms_shows_message_when_disconnected),
         unit_test(cmd_rooms_shows_message_when_disconnecting),
@@ -404,55 +406,55 @@ int main(int argc, char* argv[]) {
         unit_test(cmd_presence_shows_usage_when_bad_chat_setting),
         unit_test(cmd_presence_shows_usage_when_bad_muc_setting),
         unit_test_setup_teardown(cmd_presence_console_sets_all,
-            load_preferences,
-            close_preferences),
+                                 load_preferences,
+                                 close_preferences),
         unit_test_setup_teardown(cmd_presence_console_sets_online,
-            load_preferences,
-            close_preferences),
+                                 load_preferences,
+                                 close_preferences),
         unit_test_setup_teardown(cmd_presence_console_sets_none,
-            load_preferences,
-            close_preferences),
+                                 load_preferences,
+                                 close_preferences),
         unit_test_setup_teardown(cmd_presence_chat_sets_all,
-            load_preferences,
-            close_preferences),
+                                 load_preferences,
+                                 close_preferences),
         unit_test_setup_teardown(cmd_presence_chat_sets_online,
-            load_preferences,
-            close_preferences),
+                                 load_preferences,
+                                 close_preferences),
         unit_test_setup_teardown(cmd_presence_chat_sets_none,
-            load_preferences,
-            close_preferences),
+                                 load_preferences,
+                                 close_preferences),
         unit_test_setup_teardown(cmd_presence_room_sets_all,
-            load_preferences,
-            close_preferences),
+                                 load_preferences,
+                                 close_preferences),
         unit_test_setup_teardown(cmd_presence_room_sets_online,
-            load_preferences,
-            close_preferences),
+                                 load_preferences,
+                                 close_preferences),
         unit_test_setup_teardown(cmd_presence_room_sets_none,
-            load_preferences,
-            close_preferences),
+                                 load_preferences,
+                                 close_preferences),
 
         unit_test_setup_teardown(statuses_console_defaults_to_all,
-            load_preferences,
-            close_preferences),
+                                 load_preferences,
+                                 close_preferences),
         unit_test_setup_teardown(statuses_chat_defaults_to_all,
-            load_preferences,
-            close_preferences),
+                                 load_preferences,
+                                 close_preferences),
         unit_test_setup_teardown(statuses_muc_defaults_to_all,
-            load_preferences,
-            close_preferences),
+                                 load_preferences,
+                                 close_preferences),
 
         unit_test_setup_teardown(console_shows_online_presence_when_set_online,
-            load_preferences,
-            close_preferences),
+                                 load_preferences,
+                                 close_preferences),
         unit_test_setup_teardown(console_shows_online_presence_when_set_all,
-            load_preferences,
-            close_preferences),
+                                 load_preferences,
+                                 close_preferences),
         unit_test_setup_teardown(console_shows_dnd_presence_when_set_all,
-            load_preferences,
-            close_preferences),
+                                 load_preferences,
+                                 close_preferences),
         unit_test_setup_teardown(handle_offline_removes_chat_session,
-            load_preferences,
-            close_preferences),
+                                 load_preferences,
+                                 close_preferences),
         unit_test(lost_connection_clears_chat_sessions),
 
         unit_test(cmd_alias_add_shows_usage_when_no_args),
@@ -460,20 +462,20 @@ int main(int argc, char* argv[]) {
         unit_test(cmd_alias_remove_shows_usage_when_no_args),
         unit_test(cmd_alias_show_usage_when_invalid_subcmd),
         unit_test_setup_teardown(cmd_alias_add_adds_alias,
-            load_preferences,
-            close_preferences),
+                                 load_preferences,
+                                 close_preferences),
         unit_test_setup_teardown(cmd_alias_add_shows_message_when_exists,
-            load_preferences,
-            close_preferences),
+                                 load_preferences,
+                                 close_preferences),
         unit_test_setup_teardown(cmd_alias_remove_removes_alias,
-            load_preferences,
-            close_preferences),
+                                 load_preferences,
+                                 close_preferences),
         unit_test_setup_teardown(cmd_alias_remove_shows_message_when_no_alias,
-            load_preferences,
-            close_preferences),
+                                 load_preferences,
+                                 close_preferences),
         unit_test_setup_teardown(cmd_alias_list_shows_all_aliases,
-            load_preferences,
-            close_preferences),
+                                 load_preferences,
+                                 close_preferences),
 
         unit_test_setup_teardown(test_muc_invites_add, muc_before_test, muc_after_test),
         unit_test_setup_teardown(test_muc_remove_invite, muc_before_test, muc_after_test),
@@ -504,20 +506,20 @@ int main(int argc, char* argv[]) {
         unit_test(cmd_otr_log_shows_usage_when_no_args),
         unit_test(cmd_otr_log_shows_usage_when_invalid_subcommand),
         unit_test_setup_teardown(cmd_otr_log_on_enables_logging,
-            load_preferences,
-            close_preferences),
+                                 load_preferences,
+                                 close_preferences),
         unit_test_setup_teardown(cmd_otr_log_off_disables_logging,
-            load_preferences,
-            close_preferences),
+                                 load_preferences,
+                                 close_preferences),
         unit_test_setup_teardown(cmd_otr_redact_redacts_logging,
-            load_preferences,
-            close_preferences),
+                                 load_preferences,
+                                 close_preferences),
         unit_test_setup_teardown(cmd_otr_log_on_shows_warning_when_chlog_disabled,
-            load_preferences,
-            close_preferences),
+                                 load_preferences,
+                                 close_preferences),
         unit_test_setup_teardown(cmd_otr_log_redact_shows_warning_when_chlog_disabled,
-            load_preferences,
-            close_preferences),
+                                 load_preferences,
+                                 close_preferences),
         unit_test(cmd_otr_libver_shows_libotr_version),
         unit_test(cmd_otr_gen_shows_message_when_not_connected),
         unit_test(cmd_otr_gen_generates_key_for_connected_account),
@@ -540,8 +542,8 @@ int main(int argc, char* argv[]) {
         unit_test(cmd_otr_start_shows_message_when_already_started),
         unit_test(cmd_otr_start_shows_message_when_no_key),
         unit_test_setup_teardown(cmd_otr_start_sends_otr_query_message_to_current_recipeint,
-            load_preferences,
-            close_preferences),
+                                 load_preferences,
+                                 close_preferences),
 #else
         unit_test(cmd_otr_shows_message_when_otr_unsupported),
 #endif
@@ -608,8 +610,8 @@ int main(int argc, char* argv[]) {
         unit_test(remove_text_multi_value_removes_when_many),
 
         unit_test_setup_teardown(clears_chat_sessions,
-            load_preferences,
-            close_preferences),
+                                 load_preferences,
+                                 close_preferences),
 
         unit_test(prof_partial_occurrences_tests),
         unit_test(prof_whole_occurrences_tests),

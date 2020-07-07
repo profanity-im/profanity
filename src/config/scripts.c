@@ -33,18 +33,18 @@
  *
  */
 
-#include <stdlib.h>
 #include <errno.h>
+#include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
 
 #include <glib.h>
 #include <glib/gstdio.h>
 
-#include "common.h"
-#include "log.h"
-#include "config/files.h"
 #include "command/cmd_defs.h"
+#include "common.h"
+#include "config/files.h"
+#include "log.h"
 #include "ui/ui.h"
 #include "ui/window_list.h"
 #include "xmpp/xmpp.h"
@@ -52,13 +52,13 @@
 void
 scripts_init(void)
 {
-    char *scriptsdir = files_get_data_path(DIR_SCRIPTS);
+    char* scriptsdir = files_get_data_path(DIR_SCRIPTS);
 
     // mkdir if doesn't exist
     errno = 0;
     int res = g_mkdir_with_parents(scriptsdir, S_IRWXU);
     if (res == -1) {
-        char *errmsg = strerror(errno);
+        char* errmsg = strerror(errno);
         if (errmsg) {
             log_error("Error creating directory: %s, %s", scriptsdir, errmsg);
         } else {
@@ -72,14 +72,14 @@ scripts_init(void)
 GSList*
 scripts_list(void)
 {
-    char *scriptsdir = files_get_data_path(DIR_SCRIPTS);
+    char* scriptsdir = files_get_data_path(DIR_SCRIPTS);
 
-    GSList *result = NULL;
-    GDir *scripts = g_dir_open(scriptsdir, 0, NULL);
+    GSList* result = NULL;
+    GDir* scripts = g_dir_open(scriptsdir, 0, NULL);
     free(scriptsdir);
 
     if (scripts) {
-        const gchar *script = g_dir_read_name(scripts);
+        const gchar* script = g_dir_read_name(scripts);
         while (script) {
             result = g_slist_append(result, strdup(script));
             script = g_dir_read_name(scripts);
@@ -91,15 +91,15 @@ scripts_list(void)
 }
 
 GSList*
-scripts_read(const char *const script)
+scripts_read(const char* const script)
 {
-    char *scriptsdir = files_get_data_path(DIR_SCRIPTS);
-    GString *scriptpath = g_string_new(scriptsdir);
+    char* scriptsdir = files_get_data_path(DIR_SCRIPTS);
+    GString* scriptpath = g_string_new(scriptsdir);
     free(scriptsdir);
     g_string_append(scriptpath, "/");
     g_string_append(scriptpath, script);
 
-    FILE *scriptfile = g_fopen(scriptpath->str, "r");
+    FILE* scriptfile = g_fopen(scriptpath->str, "r");
     if (!scriptfile) {
         log_info("Script not found: %s", scriptpath->str);
         g_string_free(scriptpath, TRUE);
@@ -108,35 +108,36 @@ scripts_read(const char *const script)
 
     g_string_free(scriptpath, TRUE);
 
-    char *line = NULL;
+    char* line = NULL;
     size_t len = 0;
     ssize_t read;
-    GSList *result = NULL;
+    GSList* result = NULL;
 
     while ((read = getline(&line, &len, scriptfile)) != -1) {
         if (g_str_has_suffix(line, "\n")) {
-            result = g_slist_append(result, g_strndup(line, strlen(line) -1));
+            result = g_slist_append(result, g_strndup(line, strlen(line) - 1));
         } else {
             result = g_slist_append(result, strdup(line));
         }
     }
 
     fclose(scriptfile);
-    if (line) free(line);
+    if (line)
+        free(line);
 
     return result;
 }
 
 gboolean
-scripts_exec(const char *const script)
+scripts_exec(const char* const script)
 {
-    char *scriptsdir = files_get_data_path(DIR_SCRIPTS);
-    GString *scriptpath = g_string_new(scriptsdir);
+    char* scriptsdir = files_get_data_path(DIR_SCRIPTS);
+    GString* scriptpath = g_string_new(scriptsdir);
     free(scriptsdir);
     g_string_append(scriptpath, "/");
     g_string_append(scriptpath, script);
 
-    FILE *scriptfile = g_fopen(scriptpath->str, "r");
+    FILE* scriptfile = g_fopen(scriptpath->str, "r");
     if (!scriptfile) {
         log_info("Script not found: %s", scriptpath->str);
         g_string_free(scriptpath, TRUE);
@@ -145,20 +146,20 @@ scripts_exec(const char *const script)
 
     g_string_free(scriptpath, TRUE);
 
-    char *line = NULL;
+    char* line = NULL;
     size_t len = 0;
     ssize_t read;
 
     while ((read = getline(&line, &len, scriptfile)) != -1) {
-        ProfWin *win = wins_get_current();
+        ProfWin* win = wins_get_current();
         cmd_process_input(win, line);
         session_process_events();
         ui_update();
     }
 
     fclose(scriptfile);
-    if (line) free(line);
+    if (line)
+        free(line);
 
     return TRUE;
 }
-

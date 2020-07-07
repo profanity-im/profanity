@@ -39,15 +39,15 @@
 #include <glib/gstdio.h>
 
 #include "common.h"
-#include "config/theme.h"
 #include "config/files.h"
+#include "config/theme.h"
 
-static GKeyFile *themes;
+static GKeyFile* themes;
 
 void
 plugin_themes_init(void)
 {
-    char *themes_file = files_get_data_path(FILE_PLUGIN_THEMES);
+    char* themes_file = files_get_data_path(FILE_PLUGIN_THEMES);
 
     if (g_file_test(themes_file, G_FILE_TEST_EXISTS)) {
         g_chmod(themes_file, S_IRUSR | S_IWUSR);
@@ -57,7 +57,7 @@ plugin_themes_init(void)
     g_key_file_load_from_file(themes, themes_file, G_KEY_FILE_KEEP_COMMENTS, NULL);
 
     gsize g_data_size;
-    gchar *g_data = g_key_file_to_data(themes, &g_data_size, NULL);
+    gchar* g_data = g_key_file_to_data(themes, &g_data_size, NULL);
     g_file_set_contents(themes_file, g_data, g_data_size, NULL);
     g_chmod(themes_file, S_IRUSR | S_IWUSR);
     g_free(g_data);
@@ -72,71 +72,121 @@ plugin_themes_close(void)
 }
 
 theme_item_t
-plugin_themes_get(const char *const group, const char *const key, const char *const def)
+plugin_themes_get(const char* const group, const char* const key, const char* const def)
 {
     if (group && key && g_key_file_has_key(themes, group, key, NULL)) {
-        gchar *result = g_key_file_get_string(themes, group, key, NULL);
+        gchar* result = g_key_file_get_string(themes, group, key, NULL);
 
         theme_item_t ret;
 
-        if (g_strcmp0(result, "white") == 0)               ret = THEME_WHITE;
-        else if (g_strcmp0(result, "bold_white") == 0)     ret = THEME_WHITE_BOLD;
-        else if (g_strcmp0(result, "red") == 0)            ret = THEME_RED;
-        else if (g_strcmp0(result, "bold_red") == 0)       ret = THEME_RED_BOLD;
-        else if (g_strcmp0(result, "green") == 0)          ret = THEME_GREEN;
-        else if (g_strcmp0(result, "bold_green") == 0)     ret = THEME_GREEN_BOLD;
-        else if (g_strcmp0(result, "blue") == 0)           ret = THEME_BLUE;
-        else if (g_strcmp0(result, "bold_blue") == 0)      ret = THEME_BLUE_BOLD;
-        else if (g_strcmp0(result, "yellow") == 0)         ret = THEME_YELLOW;
-        else if (g_strcmp0(result, "bold_yellow") == 0)    ret = THEME_YELLOW_BOLD;
-        else if (g_strcmp0(result, "cyan") == 0)           ret = THEME_CYAN;
-        else if (g_strcmp0(result, "bold_cyan") == 0)      ret = THEME_CYAN_BOLD;
-        else if (g_strcmp0(result, "magenta") == 0)        ret = THEME_MAGENTA;
-        else if (g_strcmp0(result, "bold_magenta") == 0)   ret = THEME_MAGENTA_BOLD;
-        else if (g_strcmp0(result, "black") == 0)          ret = THEME_BLACK;
-        else if (g_strcmp0(result, "bold_black") == 0)     ret = THEME_BLACK_BOLD;
+        if (g_strcmp0(result, "white") == 0)
+            ret = THEME_WHITE;
+        else if (g_strcmp0(result, "bold_white") == 0)
+            ret = THEME_WHITE_BOLD;
+        else if (g_strcmp0(result, "red") == 0)
+            ret = THEME_RED;
+        else if (g_strcmp0(result, "bold_red") == 0)
+            ret = THEME_RED_BOLD;
+        else if (g_strcmp0(result, "green") == 0)
+            ret = THEME_GREEN;
+        else if (g_strcmp0(result, "bold_green") == 0)
+            ret = THEME_GREEN_BOLD;
+        else if (g_strcmp0(result, "blue") == 0)
+            ret = THEME_BLUE;
+        else if (g_strcmp0(result, "bold_blue") == 0)
+            ret = THEME_BLUE_BOLD;
+        else if (g_strcmp0(result, "yellow") == 0)
+            ret = THEME_YELLOW;
+        else if (g_strcmp0(result, "bold_yellow") == 0)
+            ret = THEME_YELLOW_BOLD;
+        else if (g_strcmp0(result, "cyan") == 0)
+            ret = THEME_CYAN;
+        else if (g_strcmp0(result, "bold_cyan") == 0)
+            ret = THEME_CYAN_BOLD;
+        else if (g_strcmp0(result, "magenta") == 0)
+            ret = THEME_MAGENTA;
+        else if (g_strcmp0(result, "bold_magenta") == 0)
+            ret = THEME_MAGENTA_BOLD;
+        else if (g_strcmp0(result, "black") == 0)
+            ret = THEME_BLACK;
+        else if (g_strcmp0(result, "bold_black") == 0)
+            ret = THEME_BLACK_BOLD;
 
-        else if (g_strcmp0(def, "white") == 0)          ret = THEME_WHITE;
-        else if (g_strcmp0(def, "bold_white") == 0)     ret = THEME_WHITE_BOLD;
-        else if (g_strcmp0(def, "red") == 0)            ret = THEME_RED;
-        else if (g_strcmp0(def, "bold_red") == 0)       ret = THEME_RED_BOLD;
-        else if (g_strcmp0(def, "green") == 0)          ret = THEME_GREEN;
-        else if (g_strcmp0(def, "bold_green") == 0)     ret = THEME_GREEN_BOLD;
-        else if (g_strcmp0(def, "blue") == 0)           ret = THEME_BLUE;
-        else if (g_strcmp0(def, "bold_blue") == 0)      ret = THEME_BLUE_BOLD;
-        else if (g_strcmp0(def, "yellow") == 0)         ret = THEME_YELLOW;
-        else if (g_strcmp0(def, "bold_yellow") == 0)    ret = THEME_YELLOW_BOLD;
-        else if (g_strcmp0(def, "cyan") == 0)           ret = THEME_CYAN;
-        else if (g_strcmp0(def, "bold_cyan") == 0)      ret = THEME_CYAN_BOLD;
-        else if (g_strcmp0(def, "magenta") == 0)        ret = THEME_MAGENTA;
-        else if (g_strcmp0(def, "bold_magenta") == 0)   ret = THEME_MAGENTA_BOLD;
-        else if (g_strcmp0(def, "black") == 0)          ret = THEME_BLACK;
-        else if (g_strcmp0(def, "bold_black") == 0)     ret = THEME_BLACK_BOLD;
+        else if (g_strcmp0(def, "white") == 0)
+            ret = THEME_WHITE;
+        else if (g_strcmp0(def, "bold_white") == 0)
+            ret = THEME_WHITE_BOLD;
+        else if (g_strcmp0(def, "red") == 0)
+            ret = THEME_RED;
+        else if (g_strcmp0(def, "bold_red") == 0)
+            ret = THEME_RED_BOLD;
+        else if (g_strcmp0(def, "green") == 0)
+            ret = THEME_GREEN;
+        else if (g_strcmp0(def, "bold_green") == 0)
+            ret = THEME_GREEN_BOLD;
+        else if (g_strcmp0(def, "blue") == 0)
+            ret = THEME_BLUE;
+        else if (g_strcmp0(def, "bold_blue") == 0)
+            ret = THEME_BLUE_BOLD;
+        else if (g_strcmp0(def, "yellow") == 0)
+            ret = THEME_YELLOW;
+        else if (g_strcmp0(def, "bold_yellow") == 0)
+            ret = THEME_YELLOW_BOLD;
+        else if (g_strcmp0(def, "cyan") == 0)
+            ret = THEME_CYAN;
+        else if (g_strcmp0(def, "bold_cyan") == 0)
+            ret = THEME_CYAN_BOLD;
+        else if (g_strcmp0(def, "magenta") == 0)
+            ret = THEME_MAGENTA;
+        else if (g_strcmp0(def, "bold_magenta") == 0)
+            ret = THEME_MAGENTA_BOLD;
+        else if (g_strcmp0(def, "black") == 0)
+            ret = THEME_BLACK;
+        else if (g_strcmp0(def, "bold_black") == 0)
+            ret = THEME_BLACK_BOLD;
 
-        else ret = THEME_TEXT;
+        else
+            ret = THEME_TEXT;
 
         g_free(result);
 
         return ret;
 
     } else {
-        if (g_strcmp0(def, "white") == 0)               return THEME_WHITE;
-        else if (g_strcmp0(def, "bold_white") == 0)     return THEME_WHITE_BOLD;
-        else if (g_strcmp0(def, "red") == 0)            return THEME_RED;
-        else if (g_strcmp0(def, "bold_red") == 0)       return THEME_RED_BOLD;
-        else if (g_strcmp0(def, "green") == 0)          return THEME_GREEN;
-        else if (g_strcmp0(def, "bold_green") == 0)     return THEME_GREEN_BOLD;
-        else if (g_strcmp0(def, "blue") == 0)           return THEME_BLUE;
-        else if (g_strcmp0(def, "bold_blue") == 0)      return THEME_BLUE_BOLD;
-        else if (g_strcmp0(def, "yellow") == 0)         return THEME_YELLOW;
-        else if (g_strcmp0(def, "bold_yellow") == 0)    return THEME_YELLOW_BOLD;
-        else if (g_strcmp0(def, "cyan") == 0)           return THEME_CYAN;
-        else if (g_strcmp0(def, "bold_cyan") == 0)      return THEME_CYAN_BOLD;
-        else if (g_strcmp0(def, "magenta") == 0)        return THEME_MAGENTA;
-        else if (g_strcmp0(def, "bold_magenta") == 0)   return THEME_MAGENTA_BOLD;
-        else if (g_strcmp0(def, "black") == 0)          return THEME_BLACK;
-        else if (g_strcmp0(def, "bold_black") == 0)     return THEME_BLACK_BOLD;
+        if (g_strcmp0(def, "white") == 0)
+            return THEME_WHITE;
+        else if (g_strcmp0(def, "bold_white") == 0)
+            return THEME_WHITE_BOLD;
+        else if (g_strcmp0(def, "red") == 0)
+            return THEME_RED;
+        else if (g_strcmp0(def, "bold_red") == 0)
+            return THEME_RED_BOLD;
+        else if (g_strcmp0(def, "green") == 0)
+            return THEME_GREEN;
+        else if (g_strcmp0(def, "bold_green") == 0)
+            return THEME_GREEN_BOLD;
+        else if (g_strcmp0(def, "blue") == 0)
+            return THEME_BLUE;
+        else if (g_strcmp0(def, "bold_blue") == 0)
+            return THEME_BLUE_BOLD;
+        else if (g_strcmp0(def, "yellow") == 0)
+            return THEME_YELLOW;
+        else if (g_strcmp0(def, "bold_yellow") == 0)
+            return THEME_YELLOW_BOLD;
+        else if (g_strcmp0(def, "cyan") == 0)
+            return THEME_CYAN;
+        else if (g_strcmp0(def, "bold_cyan") == 0)
+            return THEME_CYAN_BOLD;
+        else if (g_strcmp0(def, "magenta") == 0)
+            return THEME_MAGENTA;
+        else if (g_strcmp0(def, "bold_magenta") == 0)
+            return THEME_MAGENTA_BOLD;
+        else if (g_strcmp0(def, "black") == 0)
+            return THEME_BLACK;
+        else if (g_strcmp0(def, "bold_black") == 0)
+            return THEME_BLACK_BOLD;
 
-        else return THEME_TEXT;
+        else
+            return THEME_TEXT;
     }
 }
