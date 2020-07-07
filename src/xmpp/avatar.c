@@ -50,20 +50,21 @@
 #include "config/files.h"
 #include "config/preferences.h"
 
-typedef struct avatar_metadata {
-    char *type;
-    char *id;
+typedef struct avatar_metadata
+{
+    char* type;
+    char* id;
 } avatar_metadata;
 
-static GHashTable *looking_for = NULL; // contains nicks/barejids from who we want to get the avatar
-static GHashTable *shall_open = NULL; // contains a list of nicks that shall not just downloaded but also opened
+static GHashTable* looking_for = NULL; // contains nicks/barejids from who we want to get the avatar
+static GHashTable* shall_open = NULL;  // contains a list of nicks that shall not just downloaded but also opened
 
-static void _avatar_request_item_by_id(const char *jid, avatar_metadata *data);
-static int _avatar_metadata_handler(xmpp_stanza_t *const stanza, void *const userdata);
-static int _avatar_request_item_result_handler(xmpp_stanza_t *const stanza, void *const userdata);
+static void _avatar_request_item_by_id(const char* jid, avatar_metadata* data);
+static int _avatar_metadata_handler(xmpp_stanza_t* const stanza, void* const userdata);
+static int _avatar_request_item_result_handler(xmpp_stanza_t* const stanza, void* const userdata);
 
 static void
-_free_avatar_data(avatar_metadata *data)
+_free_avatar_data(avatar_metadata* data)
 {
     if (data) {
         free(data->type);
@@ -110,21 +111,21 @@ avatar_get_by_nick(const char* nick, gboolean open)
 }
 
 static int
-_avatar_metadata_handler(xmpp_stanza_t *const stanza, void *const userdata)
+_avatar_metadata_handler(xmpp_stanza_t* const stanza, void* const userdata)
 {
-    const char *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
+    const char* from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
 
     if (!g_hash_table_contains(looking_for, from)) {
         return 1;
     }
 
-    xmpp_stanza_t *root = NULL;
-    xmpp_stanza_t *event = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_PUBSUB_EVENT);
+    xmpp_stanza_t* root = NULL;
+    xmpp_stanza_t* event = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_PUBSUB_EVENT);
     if (event) {
         root = event;
     }
 
-    xmpp_stanza_t *pubsub = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_PUBSUB);
+    xmpp_stanza_t* pubsub = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_PUBSUB);
     if (pubsub) {
         root = pubsub;
     }
@@ -133,25 +134,25 @@ _avatar_metadata_handler(xmpp_stanza_t *const stanza, void *const userdata)
         return 1;
     }
 
-    xmpp_stanza_t *items = xmpp_stanza_get_child_by_name(root, "items");
+    xmpp_stanza_t* items = xmpp_stanza_get_child_by_name(root, "items");
     if (!items) {
         return 1;
     }
 
-    xmpp_stanza_t *item = xmpp_stanza_get_child_by_name(items, "item");
+    xmpp_stanza_t* item = xmpp_stanza_get_child_by_name(items, "item");
     if (item) {
-        xmpp_stanza_t *metadata = xmpp_stanza_get_child_by_name(item, "metadata");
+        xmpp_stanza_t* metadata = xmpp_stanza_get_child_by_name(item, "metadata");
         if (!metadata)
             return 1;
 
-        xmpp_stanza_t *info = xmpp_stanza_get_child_by_name(metadata, "info");
+        xmpp_stanza_t* info = xmpp_stanza_get_child_by_name(metadata, "info");
 
-        const char *id = xmpp_stanza_get_id(info);
-        const char *type = xmpp_stanza_get_attribute(info, "type");
+        const char* id = xmpp_stanza_get_id(info);
+        const char* type = xmpp_stanza_get_attribute(info, "type");
 
         log_debug("Avatar ID for %s is: %s", from, id);
 
-        avatar_metadata *data = malloc(sizeof(avatar_metadata));
+        avatar_metadata* data = malloc(sizeof(avatar_metadata));
         data->type = strdup(type);
         data->id = strdup(id);
 
@@ -163,15 +164,15 @@ _avatar_metadata_handler(xmpp_stanza_t *const stanza, void *const userdata)
 }
 
 static void
-_avatar_request_item_by_id(const char *jid, avatar_metadata *data)
+_avatar_request_item_by_id(const char* jid, avatar_metadata* data)
 {
     caps_remove_feature(XMPP_FEATURE_USER_AVATAR_METADATA_NOTIFY);
 
-    xmpp_ctx_t * const ctx = connection_get_ctx();
+    xmpp_ctx_t* const ctx = connection_get_ctx();
 
-    char *uid = connection_create_stanza_id();
+    char* uid = connection_create_stanza_id();
 
-    xmpp_stanza_t *iq = stanza_create_avatar_retrieve_data_request(ctx, uid, data->id, jid);
+    xmpp_stanza_t* iq = stanza_create_avatar_retrieve_data_request(ctx, uid, data->id, jid);
     iq_id_handler_add(uid, _avatar_request_item_result_handler, (ProfIqFreeCallback)_free_avatar_data, data);
 
     free(uid);
@@ -181,9 +182,9 @@ _avatar_request_item_by_id(const char *jid, avatar_metadata *data)
 }
 
 static int
-_avatar_request_item_result_handler(xmpp_stanza_t *const stanza, void *const userdata)
+_avatar_request_item_result_handler(xmpp_stanza_t* const stanza, void* const userdata)
 {
-    const char *from_attr = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
+    const char* from_attr = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
 
     if (!from_attr) {
         return 1;
@@ -194,33 +195,33 @@ _avatar_request_item_result_handler(xmpp_stanza_t *const stanza, void *const use
     }
     g_hash_table_remove(looking_for, from_attr);
 
-    xmpp_stanza_t *pubsub = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_PUBSUB);
+    xmpp_stanza_t* pubsub = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_PUBSUB);
     if (!pubsub) {
         return 1;
     }
 
-    xmpp_stanza_t *items = xmpp_stanza_get_child_by_name(pubsub, "items");
+    xmpp_stanza_t* items = xmpp_stanza_get_child_by_name(pubsub, "items");
     if (!items) {
         return 1;
     }
 
-    xmpp_stanza_t *item = xmpp_stanza_get_child_by_name(items, "item");
+    xmpp_stanza_t* item = xmpp_stanza_get_child_by_name(items, "item");
     if (!item) {
         return 1;
     }
 
-    xmpp_stanza_t *st_data = stanza_get_child_by_name_and_ns(item, "data", STANZA_NS_USER_AVATAR_DATA);
+    xmpp_stanza_t* st_data = stanza_get_child_by_name_and_ns(item, "data", STANZA_NS_USER_AVATAR_DATA);
     if (!st_data) {
         return 1;
     }
 
-    char *buf = xmpp_stanza_get_text(st_data);
+    char* buf = xmpp_stanza_get_text(st_data);
     gsize size;
-    gchar *de = (gchar*)g_base64_decode(buf, &size);
+    gchar* de = (gchar*)g_base64_decode(buf, &size);
     free(buf);
 
-    char *path = files_get_data_path("");
-    GString *filename = g_string_new(path);
+    char* path = files_get_data_path("");
+    GString* filename = g_string_new(path);
     free(path);
 
     g_string_append(filename, "avatars/");
@@ -228,7 +229,7 @@ _avatar_request_item_result_handler(xmpp_stanza_t *const stanza, void *const use
     errno = 0;
     int res = g_mkdir_with_parents(filename->str, S_IRWXU);
     if (res == -1) {
-        char *errmsg = strerror(errno);
+        char* errmsg = strerror(errno);
         if (errmsg) {
             log_error("Avatar: error creating directory: %s, %s", filename->str, errmsg);
         } else {
@@ -236,10 +237,10 @@ _avatar_request_item_result_handler(xmpp_stanza_t *const stanza, void *const use
         }
     }
 
-    gchar *from = str_replace(from_attr, "@", "_at_");
+    gchar* from = str_replace(from_attr, "@", "_at_");
     g_string_append(filename, from);
 
-    avatar_metadata *data = (avatar_metadata*)userdata;
+    avatar_metadata* data = (avatar_metadata*)userdata;
 
     // check a few image types ourselves
     // if none matches we won't add an extension but linux will
@@ -255,8 +256,8 @@ _avatar_request_item_result_handler(xmpp_stanza_t *const stanza, void *const use
 
     free(from);
 
-    GError *err = NULL;
-    if (g_file_set_contents (filename->str, de, size, &err) == FALSE) {
+    GError* err = NULL;
+    if (g_file_set_contents(filename->str, de, size, &err) == FALSE) {
         log_error("Unable to save picture: %s", err->message);
         cons_show("Unable to save picture %s", err->message);
         g_error_free(err);
@@ -266,9 +267,9 @@ _avatar_request_item_result_handler(xmpp_stanza_t *const stanza, void *const use
 
     // if we shall open it
     if (g_hash_table_contains(shall_open, from_attr)) {
-        gchar *argv[] = {prefs_get_string(PREF_AVATAR_CMD), filename->str, NULL};
+        gchar* argv[] = { prefs_get_string(PREF_AVATAR_CMD), filename->str, NULL };
         if (!call_external(argv, NULL, NULL)) {
-          cons_show_error("Unable to display avatar: check the logs for more information.");
+            cons_show_error("Unable to display avatar: check the logs for more information.");
         }
         g_hash_table_remove(shall_open, from_attr);
     }

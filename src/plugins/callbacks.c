@@ -45,12 +45,12 @@
 #include "ui/ui.h"
 #include "ui/window_list.h"
 
-static GHashTable *p_commands = NULL;
-static GHashTable *p_timed_functions = NULL;
-static GHashTable *p_window_callbacks = NULL;
+static GHashTable* p_commands = NULL;
+static GHashTable* p_timed_functions = NULL;
+static GHashTable* p_window_callbacks = NULL;
 
 static void
-_free_window_callback(PluginWindowCallback *window_callback)
+_free_window_callback(PluginWindowCallback* window_callback)
 {
     if (window_callback->callback_destroy) {
         window_callback->callback_destroy(window_callback->callback);
@@ -59,13 +59,13 @@ _free_window_callback(PluginWindowCallback *window_callback)
 }
 
 static void
-_free_window_callbacks(GHashTable *window_callbacks)
+_free_window_callbacks(GHashTable* window_callbacks)
 {
     g_hash_table_destroy(window_callbacks);
 }
 
 static void
-_free_command_help(CommandHelp *help)
+_free_command_help(CommandHelp* help)
 {
     int i = 0;
     while (help->tags[i] != NULL) {
@@ -95,7 +95,7 @@ _free_command_help(CommandHelp *help)
 }
 
 static void
-_free_command(PluginCommand *command)
+_free_command(PluginCommand* command)
 {
     if (command->callback_destroy) {
         command->callback_destroy(command->callback);
@@ -108,13 +108,13 @@ _free_command(PluginCommand *command)
 }
 
 static void
-_free_command_hash(GHashTable *command_hash)
+_free_command_hash(GHashTable* command_hash)
 {
     g_hash_table_destroy(command_hash);
 }
 
 static void
-_free_timed_function(PluginTimedFunction *timed_function)
+_free_timed_function(PluginTimedFunction* timed_function)
 {
     if (timed_function->callback_destroy) {
         timed_function->callback_destroy(timed_function->callback);
@@ -126,7 +126,7 @@ _free_timed_function(PluginTimedFunction *timed_function)
 }
 
 static void
-_free_timed_function_list(GList *timed_functions)
+_free_timed_function_list(GList* timed_functions)
 {
     g_list_free_full(timed_functions, (GDestroyNotify)_free_timed_function);
 }
@@ -140,14 +140,14 @@ callbacks_init(void)
 }
 
 void
-callbacks_remove(const char *const plugin_name)
+callbacks_remove(const char* const plugin_name)
 {
-    GHashTable *command_hash = g_hash_table_lookup(p_commands, plugin_name);
+    GHashTable* command_hash = g_hash_table_lookup(p_commands, plugin_name);
     if (command_hash) {
-        GList *commands = g_hash_table_get_keys(command_hash);
-        GList *curr = commands;
+        GList* commands = g_hash_table_get_keys(command_hash);
+        GList* curr = commands;
         while (curr) {
-            char *command = curr->data;
+            char* command = curr->data;
             cmd_ac_remove(command);
             cmd_ac_remove_help(&command[1]);
             curr = g_list_next(curr);
@@ -158,10 +158,10 @@ callbacks_remove(const char *const plugin_name)
     g_hash_table_remove(p_commands, plugin_name);
     g_hash_table_remove(p_timed_functions, plugin_name);
 
-    GHashTable *tag_to_win_cb_hash = g_hash_table_lookup(p_window_callbacks, plugin_name);
+    GHashTable* tag_to_win_cb_hash = g_hash_table_lookup(p_window_callbacks, plugin_name);
     if (tag_to_win_cb_hash) {
-        GList *tags = g_hash_table_get_keys(tag_to_win_cb_hash);
-        GList *curr = tags;
+        GList* tags = g_hash_table_get_keys(tag_to_win_cb_hash);
+        GList* curr = tags;
         while (curr) {
             wins_close_plugin(curr->data);
             curr = g_list_next(curr);
@@ -181,9 +181,9 @@ callbacks_close(void)
 }
 
 void
-callbacks_add_command(const char *const plugin_name, PluginCommand *command)
+callbacks_add_command(const char* const plugin_name, PluginCommand* command)
 {
-    GHashTable *command_hash = g_hash_table_lookup(p_commands, plugin_name);
+    GHashTable* command_hash = g_hash_table_lookup(p_commands, plugin_name);
     if (command_hash) {
         g_hash_table_insert(command_hash, strdup(command->command_name), command);
     } else {
@@ -196,9 +196,9 @@ callbacks_add_command(const char *const plugin_name, PluginCommand *command)
 }
 
 void
-callbacks_add_timed(const char *const plugin_name, PluginTimedFunction *timed_function)
+callbacks_add_timed(const char* const plugin_name, PluginTimedFunction* timed_function)
 {
-    GList *timed_function_list = g_hash_table_lookup(p_timed_functions, plugin_name);
+    GList* timed_function_list = g_hash_table_lookup(p_timed_functions, plugin_name);
     if (timed_function_list) {
         // we assign this so we dont get: -Werror=unused-result
         timed_function_list = g_list_append(timed_function_list, timed_function);
@@ -209,11 +209,11 @@ callbacks_add_timed(const char *const plugin_name, PluginTimedFunction *timed_fu
 }
 
 gboolean
-callbacks_win_exists(const char *const plugin_name, const char *tag)
+callbacks_win_exists(const char* const plugin_name, const char* tag)
 {
-    GHashTable *window_callbacks = g_hash_table_lookup(p_window_callbacks, plugin_name);
+    GHashTable* window_callbacks = g_hash_table_lookup(p_window_callbacks, plugin_name);
     if (window_callbacks) {
-        PluginWindowCallback *cb = g_hash_table_lookup(window_callbacks, tag);
+        PluginWindowCallback* cb = g_hash_table_lookup(window_callbacks, tag);
         if (cb) {
             return TRUE;
         }
@@ -223,18 +223,18 @@ callbacks_win_exists(const char *const plugin_name, const char *tag)
 }
 
 void
-callbacks_remove_win(const char *const plugin_name, const char *const tag)
+callbacks_remove_win(const char* const plugin_name, const char* const tag)
 {
-    GHashTable *window_callbacks = g_hash_table_lookup(p_window_callbacks, plugin_name);
+    GHashTable* window_callbacks = g_hash_table_lookup(p_window_callbacks, plugin_name);
     if (window_callbacks) {
         g_hash_table_remove(window_callbacks, tag);
     }
 }
 
 void
-callbacks_add_window_handler(const char *const plugin_name, const char *tag, PluginWindowCallback *window_callback)
+callbacks_add_window_handler(const char* const plugin_name, const char* tag, PluginWindowCallback* window_callback)
 {
-    GHashTable *window_callbacks = g_hash_table_lookup(p_window_callbacks, plugin_name);
+    GHashTable* window_callbacks = g_hash_table_lookup(p_window_callbacks, plugin_name);
     if (window_callbacks) {
         g_hash_table_insert(window_callbacks, strdup(tag), window_callback);
     } else {
@@ -244,15 +244,15 @@ callbacks_add_window_handler(const char *const plugin_name, const char *tag, Plu
     }
 }
 
-void *
-callbacks_get_window_handler(const char *tag)
+void*
+callbacks_get_window_handler(const char* tag)
 {
     if (p_window_callbacks) {
-        GList *window_callback_hashes = g_hash_table_get_values(p_window_callbacks);
-        GList *curr_hash = window_callback_hashes;
+        GList* window_callback_hashes = g_hash_table_get_values(p_window_callbacks);
+        GList* curr_hash = window_callback_hashes;
         while (curr_hash) {
-            GHashTable *window_callback_hash = curr_hash->data;
-            PluginWindowCallback *callback = g_hash_table_lookup(window_callback_hash, tag);
+            GHashTable* window_callback_hash = curr_hash->data;
+            PluginWindowCallback* callback = g_hash_table_lookup(window_callback_hash, tag);
             if (callback) {
                 g_list_free(window_callback_hashes);
                 return callback;
@@ -269,19 +269,19 @@ callbacks_get_window_handler(const char *tag)
 }
 
 gboolean
-plugins_run_command(const char * const input)
+plugins_run_command(const char* const input)
 {
-    gchar **split = g_strsplit(input, " ", -1);
+    gchar** split = g_strsplit(input, " ", -1);
 
-    GList *command_hashes = g_hash_table_get_values(p_commands);
-    GList *curr_hash = command_hashes;
+    GList* command_hashes = g_hash_table_get_values(p_commands);
+    GList* curr_hash = command_hashes;
     while (curr_hash) {
-        GHashTable *command_hash = curr_hash->data;
+        GHashTable* command_hash = curr_hash->data;
 
-        PluginCommand *command = g_hash_table_lookup(command_hash, split[0]);
+        PluginCommand* command = g_hash_table_lookup(command_hash, split[0]);
         if (command) {
             gboolean result;
-            gchar **args = parse_args_with_freetext(input, command->min_args, command->max_args, &result);
+            gchar** args = parse_args_with_freetext(input, command->min_args, command->max_args, &result);
             if (result == FALSE) {
                 ui_invalid_command_usage(command->command_name, NULL);
                 g_strfreev(split);
@@ -305,14 +305,14 @@ plugins_run_command(const char * const input)
 }
 
 CommandHelp*
-plugins_get_help(const char *const cmd)
+plugins_get_help(const char* const cmd)
 {
-    GList *command_hashes = g_hash_table_get_values(p_commands);
-    GList *curr_hash = command_hashes;
+    GList* command_hashes = g_hash_table_get_values(p_commands);
+    GList* curr_hash = command_hashes;
     while (curr_hash) {
-        GHashTable *command_hash = curr_hash->data;
+        GHashTable* command_hash = curr_hash->data;
 
-        PluginCommand *command = g_hash_table_lookup(command_hash, cmd);
+        PluginCommand* command = g_hash_table_lookup(command_hash, cmd);
         if (command) {
             g_list_free(command_hashes);
             return command->help;
@@ -329,14 +329,14 @@ plugins_get_help(const char *const cmd)
 void
 plugins_run_timed(void)
 {
-    GList *timed_functions_lists = g_hash_table_get_values(p_timed_functions);
+    GList* timed_functions_lists = g_hash_table_get_values(p_timed_functions);
 
-    GList *curr_list = timed_functions_lists;
+    GList* curr_list = timed_functions_lists;
     while (curr_list) {
-        GList *timed_function_list = curr_list->data;
-        GList *curr = timed_function_list;
+        GList* timed_function_list = curr_list->data;
+        GList* curr = timed_function_list;
         while (curr) {
-            PluginTimedFunction *timed_function = curr->data;
+            PluginTimedFunction* timed_function = curr->data;
 
             gdouble elapsed = g_timer_elapsed(timed_function->timer, NULL);
 
@@ -356,16 +356,16 @@ plugins_run_timed(void)
 GList*
 plugins_get_command_names(void)
 {
-    GList *result = NULL;
+    GList* result = NULL;
 
-    GList *command_hashes = g_hash_table_get_values(p_commands);
-    GList *curr_hash = command_hashes;
+    GList* command_hashes = g_hash_table_get_values(p_commands);
+    GList* curr_hash = command_hashes;
     while (curr_hash) {
-        GHashTable *command_hash = curr_hash->data;
-        GList *commands = g_hash_table_get_keys(command_hash);
-        GList *curr = commands;
+        GHashTable* command_hash = curr_hash->data;
+        GList* commands = g_hash_table_get_keys(command_hash);
+        GList* curr = commands;
         while (curr) {
-            char *command = curr->data;
+            char* command = curr->data;
             result = g_list_append(result, command);
             curr = g_list_next(curr);
         }

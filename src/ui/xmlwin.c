@@ -40,11 +40,11 @@
 #include "ui/window_list.h"
 
 void
-xmlwin_show(ProfXMLWin *xmlwin, const char *const msg)
+xmlwin_show(ProfXMLWin* xmlwin, const char* const msg)
 {
     assert(xmlwin != NULL);
 
-    ProfWin *window = (ProfWin*)xmlwin;
+    ProfWin* window = (ProfWin*)xmlwin;
     if (g_str_has_prefix(msg, "SENT:")) {
         win_println(window, THEME_DEFAULT, "-", "SENT:");
         win_println(window, THEME_ONLINE, "-", "%s", &msg[6]);
@@ -57,7 +57,7 @@ xmlwin_show(ProfXMLWin *xmlwin, const char *const msg)
 }
 
 char*
-xmlwin_get_string(ProfXMLWin *xmlwin)
+xmlwin_get_string(ProfXMLWin* xmlwin)
 {
     assert(xmlwin != NULL);
 

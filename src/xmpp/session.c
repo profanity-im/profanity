@@ -67,19 +67,21 @@
 #endif
 
 // for auto reconnect
-static struct {
-    char *name;
-    char *passwd;
+static struct
+{
+    char* name;
+    char* passwd;
 } saved_account;
 
-static struct {
-    char *name;
-    char *jid;
-    char *passwd;
-    char *altdomain;
+static struct
+{
+    char* name;
+    char* jid;
+    char* passwd;
+    char* altdomain;
     int port;
-    char *tls_policy;
-    char *auth_policy;
+    char* tls_policy;
+    char* auth_policy;
 } saved_details;
 
 typedef enum {
@@ -89,10 +91,10 @@ typedef enum {
     ACTIVITY_ST_XA,
 } activity_state_t;
 
-static GTimer *reconnect_timer;
+static GTimer* reconnect_timer;
 static activity_state_t activity_state;
 static resource_presence_t saved_presence;
-static char *saved_status;
+static char* saved_status;
 
 static void _session_reconnect(void);
 
@@ -109,7 +111,7 @@ session_init(void)
 }
 
 jabber_conn_status_t
-session_connect_with_account(const ProfAccount *const account)
+session_connect_with_account(const ProfAccount* const account)
 {
     assert(account != NULL);
 
@@ -122,9 +124,9 @@ session_connect_with_account(const ProfAccount *const account)
     saved_account.name = strdup(account->name);
     saved_account.passwd = strdup(account->password);
 
-    char *jid = NULL;
+    char* jid = NULL;
     if (account->resource) {
-        Jid *jidp = jid_create_from_bare_and_resource(account->jid, account->resource);
+        Jid* jidp = jid_create_from_bare_and_resource(account->jid, account->resource);
         jid = strdup(jidp->fulljid);
         jid_destroy(jidp);
     } else {
@@ -144,8 +146,8 @@ session_connect_with_account(const ProfAccount *const account)
 }
 
 jabber_conn_status_t
-session_connect_with_details(const char *const jid, const char *const passwd, const char *const altdomain,
-    const int port, const char *const tls_policy, const char *const auth_policy)
+session_connect_with_details(const char* const jid, const char* const passwd, const char* const altdomain,
+                             const int port, const char* const tls_policy, const char* const auth_policy)
 {
     assert(jid != NULL);
     assert(passwd != NULL);
@@ -178,10 +180,10 @@ session_connect_with_details(const char *const jid, const char *const passwd, co
     }
 
     // use 'profanity' when no resourcepart in provided jid
-    Jid *jidp = jid_create(jid);
+    Jid* jidp = jid_create(jid);
     if (jidp->resourcepart == NULL) {
         jid_destroy(jidp);
-        char *resource = jid_random_resource();
+        char* resource = jid_random_resource();
         jidp = jid_create_from_bare_and_resource(jid, resource);
         free(resource);
         saved_details.jid = strdup(jidp->fulljid);
@@ -215,8 +217,8 @@ session_disconnect(void)
     if (connection_get_status() == JABBER_CONNECTED) {
         log_info("Closing connection");
 
-        char *account_name = session_get_account_name();
-        const char *fulljid = connection_get_fulljid();
+        char* account_name = session_get_account_name();
+        const char* fulljid = connection_get_fulljid();
         plugins_on_disconnect(account_name, fulljid);
 
         accounts_set_last_activity(session_get_account_name());
@@ -256,8 +258,7 @@ session_process_events(void)
     int reconnect_sec;
 
     jabber_conn_status_t conn_status = connection_get_status();
-    switch (conn_status)
-    {
+    switch (conn_status) {
     case JABBER_CONNECTED:
     case JABBER_CONNECTING:
     case JABBER_DISCONNECTING:
@@ -297,7 +298,7 @@ session_login_success(gboolean secured)
         log_debug("Connection handler: logged in with account name: %s", saved_account.name);
         sv_ev_login_account_success(saved_account.name, secured);
 
-    // logged in without account, use details to create new account
+        // logged in without account, use details to create new account
     } else {
         log_debug("Connection handler: logged in with jid: %s", saved_details.name);
         accounts_add(saved_details.name, saved_details.altdomain, saved_details.port, saved_details.tls_policy, saved_details.auth_policy);
@@ -316,10 +317,10 @@ session_login_success(gboolean secured)
 
     // items discovery
     connection_request_features();
-    char *domain = connection_get_domain();
+    char* domain = connection_get_domain();
     iq_disco_items_request_onconnect(domain);
 
-    if (prefs_get_boolean(PREF_CARBONS)){
+    if (prefs_get_boolean(PREF_CARBONS)) {
         iq_enable_carbons();
     }
 
@@ -378,16 +379,16 @@ session_check_autoaway(void)
         return;
     }
 
-    char *mode = prefs_get_string(PREF_AUTOAWAY_MODE);
+    char* mode = prefs_get_string(PREF_AUTOAWAY_MODE);
     gboolean check = prefs_get_boolean(PREF_AUTOAWAY_CHECK);
     gint away_time = prefs_get_autoaway_time();
     gint xa_time = prefs_get_autoxa_time();
     int away_time_ms = away_time * 60000;
     int xa_time_ms = xa_time * 60000;
 
-    char *account = session_get_account_name();
+    char* account = session_get_account_name();
     resource_presence_t curr_presence = accounts_get_last_presence(account);
-    char *curr_status = accounts_get_last_status(account);
+    char* curr_status = accounts_get_last_status(account);
 
     unsigned long idle_ms = ui_get_idle_time();
 
@@ -410,7 +411,7 @@ session_check_autoaway(void)
                     }
 
                     // send away presence with last activity
-                    char *message = prefs_get_string(PREF_AUTOAWAY_MESSAGE);
+                    char* message = prefs_get_string(PREF_AUTOAWAY_MESSAGE);
                     connection_set_presence_msg(message);
                     if (prefs_get_boolean(PREF_LASTACTIVITY)) {
                         cl_ev_presence_send(RESOURCE_AWAY, idle_ms / 1000);
@@ -453,7 +454,7 @@ session_check_autoaway(void)
             activity_state = ACTIVITY_ST_XA;
 
             // send extended away presence with last activity
-            char *message = prefs_get_string(PREF_AUTOXA_MESSAGE);
+            char* message = prefs_get_string(PREF_AUTOXA_MESSAGE);
             connection_set_presence_msg(message);
             if (prefs_get_boolean(PREF_LASTACTIVITY)) {
                 cl_ev_presence_send(RESOURCE_XA, idle_ms / 1000);
@@ -505,13 +506,13 @@ static void
 _session_reconnect(void)
 {
     // reconnect with account.
-    ProfAccount *account = accounts_get_account(saved_account.name);
+    ProfAccount* account = accounts_get_account(saved_account.name);
     if (account == NULL) {
         log_error("Unable to reconnect, account no longer exists: %s", saved_account.name);
         return;
     }
 
-    char *jid = NULL;
+    char* jid = NULL;
     if (account->resource) {
         jid = create_fulljid(account->jid, account->resource);
     } else {
@@ -542,4 +543,3 @@ _session_free_saved_details(void)
     FREE_SET_NULL(saved_details.tls_policy);
     FREE_SET_NULL(saved_details.auth_policy);
 }
-

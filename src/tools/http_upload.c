@@ -55,22 +55,23 @@
 #include "ui/window.h"
 #include "common.h"
 
-#define FALLBACK_MIMETYPE "application/octet-stream"
+#define FALLBACK_MIMETYPE           "application/octet-stream"
 #define FALLBACK_CONTENTTYPE_HEADER "Content-Type: application/octet-stream"
-#define FALLBACK_MSG ""
-#define FILE_HEADER_BYTES 512
+#define FALLBACK_MSG                ""
+#define FILE_HEADER_BYTES           512
 
-struct curl_data_t {
-    char *buffer;
+struct curl_data_t
+{
+    char* buffer;
     size_t size;
 };
 
-GSList *upload_processes = NULL;
+GSList* upload_processes = NULL;
 
 static int
-_xferinfo(void *userdata, curl_off_t dltotal, curl_off_t dlnow, curl_off_t ultotal, curl_off_t ulnow)
+_xferinfo(void* userdata, curl_off_t dltotal, curl_off_t dlnow, curl_off_t ultotal, curl_off_t ulnow)
 {
-    HTTPUpload *upload = (HTTPUpload *)userdata;
+    HTTPUpload* upload = (HTTPUpload*)userdata;
 
     pthread_mutex_lock(&lock);
 
@@ -91,7 +92,7 @@ _xferinfo(void *userdata, curl_off_t dltotal, curl_off_t dlnow, curl_off_t ultot
         ulperc = (100 * ulnow) / ultotal;
     }
 
-    char *msg;
+    char* msg;
     if (asprintf(&msg, "Uploading '%s': %d%%", upload->filename, ulperc) == -1) {
         msg = strdup(FALLBACK_MSG);
     }
@@ -105,40 +106,39 @@ _xferinfo(void *userdata, curl_off_t dltotal, curl_off_t dlnow, curl_off_t ultot
 
 #if LIBCURL_VERSION_NUM < 0x072000
 static int
-_older_progress(void *p, double dltotal, double dlnow, double ultotal, double ulnow)
+_older_progress(void* p, double dltotal, double dlnow, double ultotal, double ulnow)
 {
     return _xferinfo(p, (curl_off_t)dltotal, (curl_off_t)dlnow, (curl_off_t)ultotal, (curl_off_t)ulnow);
 }
 #endif
 
 static size_t
-_data_callback(void *ptr, size_t size, size_t nmemb, void *data)
+_data_callback(void* ptr, size_t size, size_t nmemb, void* data)
 {
     size_t realsize = size * nmemb;
-    struct curl_data_t *mem = (struct curl_data_t *) data;
+    struct curl_data_t* mem = (struct curl_data_t*)data;
     mem->buffer = realloc(mem->buffer, mem->size + realsize + 1);
 
-    if (mem->buffer)
-    {
-        memcpy( &( mem->buffer[ mem->size ] ), ptr, realsize );
+    if (mem->buffer) {
+        memcpy(&(mem->buffer[mem->size]), ptr, realsize);
         mem->size += realsize;
-        mem->buffer[ mem->size ] = 0;
+        mem->buffer[mem->size] = 0;
     }
 
     return realsize;
 }
 
-void *
-http_file_put(void *userdata)
+void*
+http_file_put(void* userdata)
 {
-    HTTPUpload *upload = (HTTPUpload *)userdata;
+    HTTPUpload* upload = (HTTPUpload*)userdata;
 
-    FILE *fd = NULL;
+    FILE* fd = NULL;
 
-    char *err = NULL;
-    char *content_type_header;
+    char* err = NULL;
+    char* content_type_header;
 
-    CURL *curl;
+    CURL* curl;
     CURLcode res;
 
     upload->cancel = 0;
@@ -152,7 +152,7 @@ http_file_put(void *userdata)
     win_print_http_upload(upload->window, msg, upload->put_url);
     free(msg);
 
-    char *cert_path = prefs_get_string(PREF_TLS_CERTPATH);
+    char* cert_path = prefs_get_string(PREF_TLS_CERTPATH);
     pthread_mutex_unlock(&lock);
 
     curl_global_init(CURL_GLOBAL_ALL);
@@ -161,7 +161,7 @@ http_file_put(void *userdata)
     curl_easy_setopt(curl, CURLOPT_URL, upload->put_url);
     curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "PUT");
 
-    struct curl_slist *headers = NULL;
+    struct curl_slist* headers = NULL;
     if (asprintf(&content_type_header, "Content-Type: %s", upload->mime_type) == -1) {
         content_type_header = strdup(FALLBACK_CONTENTTYPE_HEADER);
     }
@@ -169,20 +169,20 @@ http_file_put(void *userdata)
     headers = curl_slist_append(headers, "Expect:");
     curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
 
-    #if LIBCURL_VERSION_NUM >= 0x072000
+#if LIBCURL_VERSION_NUM >= 0x072000
     curl_easy_setopt(curl, CURLOPT_XFERINFOFUNCTION, _xferinfo);
     curl_easy_setopt(curl, CURLOPT_XFERINFODATA, upload);
-    #else
+#else
     curl_easy_setopt(curl, CURLOPT_PROGRESSFUNCTION, _older_progress);
     curl_easy_setopt(curl, CURLOPT_PROGRESSDATA, upload);
-    #endif
+#endif
     curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0L);
 
     struct curl_data_t output;
     output.buffer = NULL;
     output.size = 0;
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, _data_callback);
-    curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)&output);
+    curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void*)&output);
 
     curl_easy_setopt(curl, CURLOPT_USERAGENT, "profanity");
 
@@ -218,11 +218,11 @@ http_file_put(void *userdata)
             }
         }
 
-        #if 0
+#if 0
         printf("HTTP Status: %lu\n", http_code);
         printf("%s\n", output.buffer);
         printf("%lu bytes retrieved\n", (long)output.size);
-        #endif
+#endif
     }
 
 end:
@@ -239,7 +239,7 @@ end:
     g_free(cert_path);
 
     if (err) {
-        char *msg;
+        char* msg;
         if (upload->cancel) {
             if (asprintf(&msg, "Uploading '%s' failed: Upload was canceled", upload->filename) == -1) {
                 msg = strdup(FALLBACK_MSG);
@@ -265,21 +265,21 @@ end:
             switch (upload->window->type) {
             case WIN_CHAT:
             {
-                ProfChatWin *chatwin = (ProfChatWin*)(upload->window);
+                ProfChatWin* chatwin = (ProfChatWin*)(upload->window);
                 assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
                 cl_ev_send_msg(chatwin, upload->get_url, upload->get_url);
                 break;
             }
             case WIN_PRIVATE:
             {
-                ProfPrivateWin *privatewin = (ProfPrivateWin*)(upload->window);
+                ProfPrivateWin* privatewin = (ProfPrivateWin*)(upload->window);
                 assert(privatewin->memcheck == PROFPRIVATEWIN_MEMCHECK);
                 cl_ev_send_priv_msg(privatewin, upload->get_url, upload->get_url);
                 break;
             }
             case WIN_MUC:
             {
-                ProfMucWin *mucwin = (ProfMucWin*)(upload->window);
+                ProfMucWin* mucwin = (ProfMucWin*)(upload->window);
                 assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
                 cl_ev_send_muc_msg(mucwin, upload->get_url, upload->get_url);
                 break;
@@ -305,29 +305,29 @@ end:
 char*
 file_mime_type(const char* const file_name)
 {
-    char *out_mime_type;
+    char* out_mime_type;
     char file_header[FILE_HEADER_BYTES];
-    FILE *fd;
+    FILE* fd;
     if (!(fd = fopen(file_name, "rb"))) {
         return strdup(FALLBACK_MIMETYPE);
     }
     size_t file_header_size = fread(file_header, 1, FILE_HEADER_BYTES, fd);
     fclose(fd);
 
-    char *content_type = g_content_type_guess(file_name, (unsigned char*)file_header, file_header_size, NULL);
+    char* content_type = g_content_type_guess(file_name, (unsigned char*)file_header, file_header_size, NULL);
     if (content_type != NULL) {
-        char *mime_type = g_content_type_get_mime_type(content_type);
+        char* mime_type = g_content_type_get_mime_type(content_type);
         out_mime_type = strdup(mime_type);
         g_free(mime_type);
-    }
-    else {
+    } else {
         return strdup(FALLBACK_MIMETYPE);
     }
     g_free(content_type);
     return out_mime_type;
 }
 
-off_t file_size(const char* const filename)
+off_t
+file_size(const char* const filename)
 {
     struct stat st;
     stat(filename, &st);
@@ -335,11 +335,11 @@ off_t file_size(const char* const filename)
 }
 
 void
-http_upload_cancel_processes(ProfWin *window)
+http_upload_cancel_processes(ProfWin* window)
 {
-    GSList *upload_process = upload_processes;
+    GSList* upload_process = upload_processes;
     while (upload_process) {
-        HTTPUpload *upload = upload_process->data;
+        HTTPUpload* upload = upload_process->data;
         if (upload->window == window) {
             upload->cancel = 1;
             break;
@@ -349,7 +349,7 @@ http_upload_cancel_processes(ProfWin *window)
 }
 
 void
-http_upload_add_upload(HTTPUpload *upload)
+http_upload_add_upload(HTTPUpload* upload)
 {
     upload_processes = g_slist_append(upload_processes, upload);
 }

@@ -73,7 +73,7 @@
 #include "xmpp/roster_list.h"
 #include "xmpp/chat_state.h"
 
-static WINDOW *inp_win;
+static WINDOW* inp_win;
 static int pad_start = 0;
 
 static struct timeval p_rl_timeout;
@@ -81,21 +81,21 @@ static struct timeval p_rl_timeout;
 static gint inp_timeout = 0;
 static gint no_input_count = 0;
 
-static FILE *discard;
+static FILE* discard;
 static fd_set fds;
 static int r;
-static char *inp_line = NULL;
+static char* inp_line = NULL;
 static gboolean get_password = FALSE;
 
 static void _inp_win_update_virtual(void);
 static int _inp_edited(const wint_t ch);
 static void _inp_win_handle_scroll(void);
-static int _inp_offset_to_col(char *str, int offset);
-static void _inp_write(char *line, int offset);
+static int _inp_offset_to_col(char* str, int offset);
+static void _inp_write(char* line, int offset);
 
 static void _inp_rl_addfuncs(void);
-static int _inp_rl_getc(FILE *stream);
-static void _inp_rl_linehandler(char *line);
+static int _inp_rl_getc(FILE* stream);
+static void _inp_rl_linehandler(char* line);
 static int _inp_rl_tab_handler(int count, int key);
 static int _inp_rl_shift_tab_handler(int count, int key);
 static int _inp_rl_win_clear_handler(int count, int key);
@@ -147,7 +147,8 @@ create_input_window(void)
     rl_callback_handler_install(NULL, _inp_rl_linehandler);
 
     inp_win = newpad(1, INP_WIN_MAX);
-    wbkgd(inp_win, theme_attrs(THEME_INPUT_TEXT));;
+    wbkgd(inp_win, theme_attrs(THEME_INPUT_TEXT));
+    ;
     keypad(inp_win, TRUE);
     wmove(inp_win, 0, 0);
 
@@ -169,7 +170,7 @@ inp_readline(void)
     pthread_mutex_lock(&lock);
     if (r < 0) {
         if (errno != EINTR) {
-            char *err_msg = strerror(errno);
+            char* err_msg = strerror(errno);
             log_error("Readline failed: %s", err_msg);
         }
         return NULL;
@@ -178,10 +179,7 @@ inp_readline(void)
     if (FD_ISSET(fileno(rl_instream), &fds)) {
         rl_callback_read_char();
 
-        if (rl_line_buffer &&
-                rl_line_buffer[0] != '/' &&
-                rl_line_buffer[0] != '\0' &&
-                rl_line_buffer[0] != '\n') {
+        if (rl_line_buffer && rl_line_buffer[0] != '/' && rl_line_buffer[0] != '\0' && rl_line_buffer[0] != '\n') {
             chat_state_activity();
         }
 
@@ -198,7 +196,7 @@ inp_readline(void)
     if (inp_line) {
         if (!get_password && prefs_get_boolean(PREF_SLASH_GUARD)) {
             if (strlen(inp_line) > 1) {
-                char *res = (char*) memchr (inp_line+1, '/', 3);
+                char* res = (char*)memchr(inp_line + 1, '/', 3);
                 if (res) {
                     cons_show("Your text contains a slash in the first 4 characters");
                     return NULL;
@@ -225,14 +223,15 @@ inp_win_resize(void)
         }
     }
 
-    wbkgd(inp_win, theme_attrs(THEME_INPUT_TEXT));;
+    wbkgd(inp_win, theme_attrs(THEME_INPUT_TEXT));
+    ;
     _inp_win_update_virtual();
 }
 
 void
 inp_nonblocking(gboolean reset)
 {
-    if (! prefs_get_boolean(PREF_INPBLOCK_DYNAMIC)) {
+    if (!prefs_get_boolean(PREF_INPBLOCK_DYNAMIC)) {
         inp_timeout = prefs_get_inpblock();
         return;
     }
@@ -269,7 +268,7 @@ inp_get_line(void)
     wmove(inp_win, 0, 0);
     _inp_win_update_virtual();
     doupdate();
-    char *line = NULL;
+    char* line = NULL;
     while (!line) {
         line = inp_readline();
         ui_update();
@@ -285,7 +284,7 @@ inp_get_password(void)
     wmove(inp_win, 0, 0);
     _inp_win_update_virtual();
     doupdate();
-    char *password = NULL;
+    char* password = NULL;
     get_password = TRUE;
     while (!password) {
         password = inp_readline();
@@ -307,11 +306,11 @@ _inp_win_update_virtual(void)
 {
     int wcols = getmaxx(stdscr);
     int row = screen_inputwin_row();
-    pnoutrefresh(inp_win, 0, pad_start, row, 0, row, wcols-2);
+    pnoutrefresh(inp_win, 0, pad_start, row, 0, row, wcols - 2);
 }
 
 static void
-_inp_write(char *line, int offset)
+_inp_write(char* line, int offset)
 {
     int col = _inp_offset_to_col(line, offset);
     werase(inp_win);
@@ -346,7 +345,7 @@ _inp_edited(const wint_t ch)
     }
 
     // printable
-    char bytes[MB_CUR_MAX+1];
+    char bytes[MB_CUR_MAX + 1];
     size_t utf_len = wcrtomb(bytes, ch, &mbstate);
     if (utf_len == (size_t)-1) {
         return 0;
@@ -358,7 +357,7 @@ _inp_edited(const wint_t ch)
 }
 
 static int
-_inp_offset_to_col(char *str, int offset)
+_inp_offset_to_col(char* str, int offset)
 {
     int i = 0;
     int col = 0;
@@ -384,7 +383,7 @@ _inp_win_handle_scroll(void)
 
     if (col == 0) {
         pad_start = 0;
-    } else if (col >= pad_start + (wcols -2)) {
+    } else if (col >= pad_start + (wcols - 2)) {
         pad_start = col - (wcols / 2);
         if (pad_start < 0) {
             pad_start = 0;
@@ -503,7 +502,7 @@ _inp_rl_startup_hook(void)
     rl_variable_bind("disable-completion", "on");
 
     // check for and load ~/.config/profanity/inputrc
-    gchar *inputrc = files_get_inputrc_file();
+    gchar* inputrc = files_get_inputrc_file();
     if (inputrc) {
         rl_read_init_file(inputrc);
         g_free(inputrc);
@@ -513,7 +512,7 @@ _inp_rl_startup_hook(void)
 }
 
 static void
-_inp_rl_linehandler(char *line)
+_inp_rl_linehandler(char* line)
 {
     if (line && *line) {
         if (!get_password) {
@@ -526,7 +525,7 @@ _inp_rl_linehandler(char *line)
 static gboolean shift_tab = FALSE;
 
 static int
-_inp_rl_getc(FILE *stream)
+_inp_rl_getc(FILE* stream)
 {
     int ch = rl_getc(stream);
 
@@ -545,7 +544,7 @@ _inp_rl_getc(FILE *stream)
     shift_tab = FALSE;
 
     if (_inp_edited(ch)) {
-        ProfWin *window = wins_get_current();
+        ProfWin* window = wins_get_current();
         cmd_ac_reset(window);
     }
     return ch;
@@ -554,7 +553,7 @@ _inp_rl_getc(FILE *stream)
 static int
 _inp_rl_win_clear_handler(int count, int key)
 {
-    ProfWin *win = wins_get_current();
+    ProfWin* win = wins_get_current();
     win_clear(win);
     return 0;
 }
@@ -562,7 +561,7 @@ _inp_rl_win_clear_handler(int count, int key)
 static int
 _inp_rl_win_close_handler(int count, int key)
 {
-    ProfWin *win = wins_get_current();
+    ProfWin* win = wins_get_current();
     gchar* args = 0;
     cmd_close(win, 0, &args);
     return 0;
@@ -575,17 +574,17 @@ _inp_rl_tab_handler(int count, int key)
         return 0;
     }
 
-    ProfWin *current = wins_get_current();
+    ProfWin* current = wins_get_current();
     if ((strncmp(rl_line_buffer, "/", 1) != 0) && (current->type == WIN_MUC)) {
-        char *result = muc_autocomplete(current, rl_line_buffer, FALSE);
+        char* result = muc_autocomplete(current, rl_line_buffer, FALSE);
         if (result) {
             rl_replace_line(result, 1);
             rl_point = rl_end;
             free(result);
         }
     } else if (strncmp(rl_line_buffer, "/", 1) == 0) {
-        ProfWin *window = wins_get_current();
-        char *result = cmd_ac_complete(window, rl_line_buffer, FALSE);
+        ProfWin* window = wins_get_current();
+        char* result = cmd_ac_complete(window, rl_line_buffer, FALSE);
         if (result) {
             rl_replace_line(result, 1);
             rl_point = rl_end;
@@ -603,17 +602,17 @@ _inp_rl_shift_tab_handler(int count, int key)
         return 0;
     }
 
-    ProfWin *current = wins_get_current();
+    ProfWin* current = wins_get_current();
     if ((strncmp(rl_line_buffer, "/", 1) != 0) && (current->type == WIN_MUC)) {
-        char *result = muc_autocomplete(current, rl_line_buffer, TRUE);
+        char* result = muc_autocomplete(current, rl_line_buffer, TRUE);
         if (result) {
             rl_replace_line(result, 1);
             rl_point = rl_end;
             free(result);
         }
     } else if (strncmp(rl_line_buffer, "/", 1) == 0) {
-        ProfWin *window = wins_get_current();
-        char *result = cmd_ac_complete(window, rl_line_buffer, TRUE);
+        ProfWin* window = wins_get_current();
+        char* result = cmd_ac_complete(window, rl_line_buffer, TRUE);
         if (result) {
             rl_replace_line(result, 1);
             rl_point = rl_end;
@@ -627,7 +626,7 @@ _inp_rl_shift_tab_handler(int count, int key)
 static void
 _go_to_win(int i)
 {
-    ProfWin *window = wins_get_by_num(i);
+    ProfWin* window = wins_get_by_num(i);
     if (window) {
         ui_focus_win(window);
     }
@@ -776,7 +775,7 @@ _inp_rl_win_20_handler(int count, int key)
 static int
 _inp_rl_win_prev_handler(int count, int key)
 {
-    ProfWin *window = wins_get_previous();
+    ProfWin* window = wins_get_previous();
     if (window) {
         ui_focus_win(window);
     }
@@ -786,7 +785,7 @@ _inp_rl_win_prev_handler(int count, int key)
 static int
 _inp_rl_win_next_handler(int count, int key)
 {
-    ProfWin *window = wins_get_next();
+    ProfWin* window = wins_get_next();
     if (window) {
         ui_focus_win(window);
     }
@@ -796,7 +795,7 @@ _inp_rl_win_next_handler(int count, int key)
 static int
 _inp_rl_win_next_unread_handler(int count, int key)
 {
-    ProfWin *window = wins_get_next_unread();
+    ProfWin* window = wins_get_next_unread();
     if (window) {
         ui_focus_win(window);
     }
@@ -806,7 +805,7 @@ _inp_rl_win_next_unread_handler(int count, int key)
 static int
 _inp_rl_win_pageup_handler(int count, int key)
 {
-    ProfWin *current = wins_get_current();
+    ProfWin* current = wins_get_current();
     win_page_up(current);
     return 0;
 }
@@ -814,7 +813,7 @@ _inp_rl_win_pageup_handler(int count, int key)
 static int
 _inp_rl_win_pagedown_handler(int count, int key)
 {
-    ProfWin *current = wins_get_current();
+    ProfWin* current = wins_get_current();
     win_page_down(current);
     return 0;
 }
@@ -822,7 +821,7 @@ _inp_rl_win_pagedown_handler(int count, int key)
 static int
 _inp_rl_subwin_pageup_handler(int count, int key)
 {
-    ProfWin *current = wins_get_current();
+    ProfWin* current = wins_get_current();
     win_sub_page_up(current);
     return 0;
 }
@@ -830,7 +829,7 @@ _inp_rl_subwin_pageup_handler(int count, int key)
 static int
 _inp_rl_subwin_pagedown_handler(int count, int key)
 {
-    ProfWin *current = wins_get_current();
+    ProfWin* current = wins_get_current();
     win_sub_page_down(current);
     return 0;
 }

@@ -38,21 +38,22 @@
 
 #include "common.h"
 
-typedef struct resource_t {
-    char *name;
+typedef struct resource_t
+{
+    char* name;
     resource_presence_t presence;
-    char *status;
+    char* status;
     int priority;
 } Resource;
 
-Resource* resource_new(const char *const name, resource_presence_t presence, const char *const status,
-    const int priority);
-void resource_destroy(Resource *resource);
-int resource_compare_availability(Resource *first, Resource *second);
+Resource* resource_new(const char* const name, resource_presence_t presence, const char* const status,
+                       const int priority);
+void resource_destroy(Resource* resource);
+int resource_compare_availability(Resource* first, Resource* second);
 
-gboolean valid_resource_presence_string(const char *const str);
+gboolean valid_resource_presence_string(const char* const str);
 const char* string_from_resource_presence(resource_presence_t presence);
-resource_presence_t resource_presence_from_string(const char *const str);
+resource_presence_t resource_presence_from_string(const char* const str);
 contact_presence_t contact_presence_from_resource_presence(resource_presence_t resource_presence);
 
 #endif

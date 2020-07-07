@@ -44,14 +44,14 @@
 void cmd_init(void);
 void cmd_uninit(void);
 
-Command* cmd_get(const char *const command);
-GList* cmd_get_ordered(const char *const tag);
+Command* cmd_get(const char* const command);
+GList* cmd_get_ordered(const char* const tag);
 
-gboolean cmd_valid_tag(const char *const str);
+gboolean cmd_valid_tag(const char* const str);
 
 void command_docgen(void);
 
-GList* cmd_search_index_all(char *term);
-GList* cmd_search_index_any(char *term);
+GList* cmd_search_index_all(char* term);
+GList* cmd_search_index_any(char* term);
 
 #endif

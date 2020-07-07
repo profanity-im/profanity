@@ -53,11 +53,12 @@
 
 #define BUFF_SIZE 1200
 
-struct prof_buff_t {
-    GSList *entries;
+struct prof_buff_t
+{
+    GSList* entries;
 };
 
-static void _free_entry(ProfBuffEntry *entry);
+static void _free_entry(ProfBuffEntry* entry);
 
 ProfBuff
 buffer_create(void)
@@ -81,9 +82,9 @@ buffer_free(ProfBuff buffer)
 }
 
 void
-buffer_append(ProfBuff buffer, const char *show_char, int pad_indent, GDateTime *time, int flags, theme_item_t theme_item, const char *const display_from, const char *const from_jid, const char *const message, DeliveryReceipt *receipt, const char *const id)
+buffer_append(ProfBuff buffer, const char* show_char, int pad_indent, GDateTime* time, int flags, theme_item_t theme_item, const char* const display_from, const char* const from_jid, const char* const message, DeliveryReceipt* receipt, const char* const id)
 {
-    ProfBuffEntry *e = malloc(sizeof(struct prof_buff_entry_t));
+    ProfBuffEntry* e = malloc(sizeof(struct prof_buff_entry_t));
     e->show_char = strdup(show_char);
     e->pad_indent = pad_indent;
     e->flags = flags;
@@ -108,11 +109,11 @@ buffer_append(ProfBuff buffer, const char *show_char, int pad_indent, GDateTime 
 }
 
 void
-buffer_remove_entry_by_id(ProfBuff buffer, const char *const id)
+buffer_remove_entry_by_id(ProfBuff buffer, const char* const id)
 {
-    GSList *entries = buffer->entries;
+    GSList* entries = buffer->entries;
     while (entries) {
-        ProfBuffEntry *entry = entries->data;
+        ProfBuffEntry* entry = entries->data;
         if (entry->id && (g_strcmp0(entry->id, id) == 0)) {
             _free_entry(entry);
             buffer->entries = g_slist_delete_link(buffer->entries, entries);
@@ -123,11 +124,11 @@ buffer_remove_entry_by_id(ProfBuff buffer, const char *const id)
 }
 
 gboolean
-buffer_mark_received(ProfBuff buffer, const char *const id)
+buffer_mark_received(ProfBuff buffer, const char* const id)
 {
-    GSList *entries = buffer->entries;
+    GSList* entries = buffer->entries;
     while (entries) {
-        ProfBuffEntry *entry = entries->data;
+        ProfBuffEntry* entry = entries->data;
         if (entry->receipt && g_strcmp0(entry->id, id) == 0) {
             if (!entry->receipt->received) {
                 entry->receipt->received = TRUE;
@@ -143,16 +144,16 @@ buffer_mark_received(ProfBuff buffer, const char *const id)
 ProfBuffEntry*
 buffer_get_entry(ProfBuff buffer, int entry)
 {
-    GSList *node = g_slist_nth(buffer->entries, entry);
+    GSList* node = g_slist_nth(buffer->entries, entry);
     return node->data;
 }
 
 ProfBuffEntry*
-buffer_get_entry_by_id(ProfBuff buffer, const char *const id)
+buffer_get_entry_by_id(ProfBuff buffer, const char* const id)
 {
-    GSList *entries = buffer->entries;
+    GSList* entries = buffer->entries;
     while (entries) {
-        ProfBuffEntry *entry = entries->data;
+        ProfBuffEntry* entry = entries->data;
         if (g_strcmp0(entry->id, id) == 0) {
             return entry;
         }
@@ -163,7 +164,7 @@ buffer_get_entry_by_id(ProfBuff buffer, const char *const id)
 }
 
 static void
-_free_entry(ProfBuffEntry *entry)
+_free_entry(ProfBuffEntry* entry)
 {
     free(entry->show_char);
     free(entry->message);

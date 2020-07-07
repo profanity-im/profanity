@@ -44,7 +44,7 @@
 OtrlPolicy
 otrlib_policy(void)
 {
-    return OTRL_POLICY_ALLOW_V1 | OTRL_POLICY_ALLOW_V2 ;
+    return OTRL_POLICY_ALLOW_V1 | OTRL_POLICY_ALLOW_V2;
 }
 
 void
@@ -64,30 +64,30 @@ otrlib_start_query(void)
 }
 
 static int
-cb_display_otr_message(void *opdata, const char *accountname,
-    const char *protocol, const char *username, const char *msg)
+cb_display_otr_message(void* opdata, const char* accountname,
+                       const char* protocol, const char* username, const char* msg)
 {
     cons_show_error("%s", msg);
     return 0;
 }
 
 void
-otrlib_init_ops(OtrlMessageAppOps *ops)
+otrlib_init_ops(OtrlMessageAppOps* ops)
 {
     ops->display_otr_message = cb_display_otr_message;
 }
 
 ConnContext*
-otrlib_context_find(OtrlUserState user_state, const char *const recipient, char *jid)
+otrlib_context_find(OtrlUserState user_state, const char* const recipient, char* jid)
 {
     return otrl_context_find(user_state, recipient, jid, "xmpp", 0, NULL, NULL, NULL);
 }
 
 void
-otrlib_end_session(OtrlUserState user_state, const char *const recipient, char *jid, OtrlMessageAppOps *ops)
+otrlib_end_session(OtrlUserState user_state, const char* const recipient, char* jid, OtrlMessageAppOps* ops)
 {
-    ConnContext *context = otrl_context_find(user_state, recipient, jid, "xmpp",
-        0, NULL, NULL, NULL);
+    ConnContext* context = otrl_context_find(user_state, recipient, jid, "xmpp",
+                                             0, NULL, NULL, NULL);
 
     if (context) {
         otrl_message_disconnect(user_state, ops, NULL, jid, "xmpp", recipient);
@@ -95,8 +95,8 @@ otrlib_end_session(OtrlUserState user_state, const char *const recipient, char *
 }
 
 gcry_error_t
-otrlib_encrypt_message(OtrlUserState user_state, OtrlMessageAppOps *ops, char *jid, const char *const to,
-    const char *const message, char **newmessage)
+otrlib_encrypt_message(OtrlUserState user_state, OtrlMessageAppOps* ops, char* jid, const char* const to,
+                       const char* const message, char** newmessage)
 {
     gcry_error_t err;
     err = otrl_message_sending(
@@ -116,8 +116,8 @@ otrlib_encrypt_message(OtrlUserState user_state, OtrlMessageAppOps *ops, char *j
 }
 
 int
-otrlib_decrypt_message(OtrlUserState user_state, OtrlMessageAppOps *ops, char *jid, const char *const from,
-    const char *const message, char **decrypted, OtrlTLV **tlvs)
+otrlib_decrypt_message(OtrlUserState user_state, OtrlMessageAppOps* ops, char* jid, const char* const from,
+                       const char* const message, char** decrypted, OtrlTLV** tlvs)
 {
     return otrl_message_receiving(
         user_state,
@@ -134,15 +134,15 @@ otrlib_decrypt_message(OtrlUserState user_state, OtrlMessageAppOps *ops, char *j
 }
 
 void
-otrlib_handle_tlvs(OtrlUserState user_state, OtrlMessageAppOps *ops, ConnContext *context, OtrlTLV *tlvs, GHashTable *smp_initiators)
+otrlib_handle_tlvs(OtrlUserState user_state, OtrlMessageAppOps* ops, ConnContext* context, OtrlTLV* tlvs, GHashTable* smp_initiators)
 {
     NextExpectedSMP nextMsg = context->smstate->nextExpected;
-    OtrlTLV *tlv = otrl_tlv_find(tlvs, OTRL_TLV_SMP1);
+    OtrlTLV* tlv = otrl_tlv_find(tlvs, OTRL_TLV_SMP1);
     if (tlv) {
         if (nextMsg != OTRL_SMP_EXPECT1) {
             otrl_message_abort_smp(user_state, ops, NULL, context);
         } else {
-            ProfChatWin *chatwin = wins_get_chat(context->username);
+            ProfChatWin* chatwin = wins_get_chat(context->username);
             if (chatwin) {
                 chatwin_otr_smp_event(chatwin, PROF_OTR_SMP_INIT, NULL);
             }
@@ -154,10 +154,10 @@ otrlib_handle_tlvs(OtrlUserState user_state, OtrlMessageAppOps *ops, ConnContext
         if (nextMsg != OTRL_SMP_EXPECT1) {
             otrl_message_abort_smp(user_state, ops, NULL, context);
         } else {
-            ProfChatWin *chatwin = wins_get_chat(context->username);
+            ProfChatWin* chatwin = wins_get_chat(context->username);
             if (chatwin) {
-                char *question = (char *)tlv->data;
-                char *eoq = memchr(question, '\0', tlv->len);
+                char* question = (char*)tlv->data;
+                char* eoq = memchr(question, '\0', tlv->len);
                 if (eoq) {
                     chatwin_otr_smp_event(chatwin, PROF_OTR_SMP_INIT_Q, question);
                 }
@@ -178,7 +178,7 @@ otrlib_handle_tlvs(OtrlUserState user_state, OtrlMessageAppOps *ops, ConnContext
             otrl_message_abort_smp(user_state, ops, NULL, context);
         } else {
             context->smstate->nextExpected = OTRL_SMP_EXPECT1;
-            ProfChatWin *chatwin = wins_get_chat(context->username);
+            ProfChatWin* chatwin = wins_get_chat(context->username);
             if (chatwin) {
                 if (context->smstate->received_question == 0) {
                     if (context->active_fingerprint->trust && (context->active_fingerprint->trust[0] != '\0')) {
@@ -204,7 +204,7 @@ otrlib_handle_tlvs(OtrlUserState user_state, OtrlMessageAppOps *ops, ConnContext
             otrl_message_abort_smp(user_state, ops, NULL, context);
         } else {
             context->smstate->nextExpected = OTRL_SMP_EXPECT1;
-            ProfChatWin *chatwin = wins_get_chat(context->username);
+            ProfChatWin* chatwin = wins_get_chat(context->username);
             if (chatwin) {
                 if (context->active_fingerprint->trust && (context->active_fingerprint->trust[0] != '\0')) {
                     chatwin_otr_smp_event(chatwin, PROF_OTR_SMP_SUCCESS, NULL);
@@ -219,7 +219,7 @@ otrlib_handle_tlvs(OtrlUserState user_state, OtrlMessageAppOps *ops, ConnContext
     tlv = otrl_tlv_find(tlvs, OTRL_TLV_SMP_ABORT);
     if (tlv) {
         context->smstate->nextExpected = OTRL_SMP_EXPECT1;
-        ProfChatWin *chatwin = wins_get_chat(context->username);
+        ProfChatWin* chatwin = wins_get_chat(context->username);
         if (chatwin) {
             chatwin_otr_smp_event(chatwin, PROF_OTR_SMP_ABORT, NULL);
             chatwin_otr_untrust(chatwin);

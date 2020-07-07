@@ -55,7 +55,7 @@
 #include "xmpp/xmpp.h"
 #include "xmpp/muc.h"
 
-static GTimer *remind_timer;
+static GTimer* remind_timer;
 
 void
 notifier_initialise(void)
@@ -75,7 +75,7 @@ notifier_uninit(void)
 }
 
 void
-notify_typing(const char *const name)
+notify_typing(const char* const name)
 {
     char message[strlen(name) + 1 + 11];
     sprintf(message, "%s: typing...", name);
@@ -84,9 +84,9 @@ notify_typing(const char *const name)
 }
 
 void
-notify_invite(const char *const from, const char *const room, const char *const reason)
+notify_invite(const char* const from, const char* const room, const char* const reason)
 {
-    GString *message = g_string_new("Room invite\nfrom: ");
+    GString* message = g_string_new("Room invite\nfrom: ");
     g_string_append(message, from);
     g_string_append(message, "\nto: ");
     g_string_append(message, room);
@@ -100,14 +100,14 @@ notify_invite(const char *const from, const char *const room, const char *const 
 }
 
 void
-notify_message(const char *const name, int num, const char *const text)
+notify_message(const char* const name, int num, const char* const text)
 {
     int ui_index = num;
     if (ui_index == 10) {
         ui_index = 0;
     }
 
-    GString *message = g_string_new("");
+    GString* message = g_string_new("");
     g_string_append_printf(message, "%s (win %d)", name, ui_index);
     if (text && prefs_get_boolean(PREF_NOTIFY_CHAT_TEXT)) {
         g_string_append_printf(message, "\n%s", text);
@@ -118,14 +118,14 @@ notify_message(const char *const name, int num, const char *const text)
 }
 
 void
-notify_room_message(const char *const nick, const char *const room, int num, const char *const text)
+notify_room_message(const char* const nick, const char* const room, int num, const char* const text)
 {
     int ui_index = num;
     if (ui_index == 10) {
         ui_index = 0;
     }
 
-    GString *message = g_string_new("");
+    GString* message = g_string_new("");
     g_string_append_printf(message, "%s in %s (win %d)", nick, room, ui_index);
     if (text && prefs_get_boolean(PREF_NOTIFY_ROOM_TEXT)) {
         g_string_append_printf(message, "\n%s", text);
@@ -137,9 +137,9 @@ notify_room_message(const char *const nick, const char *const room, int num, con
 }
 
 void
-notify_subscription(const char *const from)
+notify_subscription(const char* const from)
 {
-    GString *message = g_string_new("Subscription request: \n");
+    GString* message = g_string_new("Subscription request: \n");
     g_string_append(message, from);
     notify(message->str, 10000, "Incoming message");
     g_string_free(message, TRUE);
@@ -156,7 +156,7 @@ notify_remind(void)
         gint open = muc_invites_count();
         gint subs = presence_sub_request_count();
 
-        GString *text = g_string_new("");
+        GString* text = g_string_new("");
 
         if (donotify && unread > 0) {
             if (unread == 1) {
@@ -164,7 +164,6 @@ notify_remind(void)
             } else {
                 g_string_append_printf(text, "%d unread messages", unread);
             }
-
         }
         if (open > 0) {
             if (unread > 0) {
@@ -198,7 +197,7 @@ notify_remind(void)
 }
 
 void
-notify(const char *const message, int timeout, const char *const category)
+notify(const char* const message, int timeout, const char* const category)
 {
 #ifdef HAVE_LIBNOTIFY
     log_debug("Attempting notification: %s", message);
@@ -211,13 +210,13 @@ notify(const char *const message, int timeout, const char *const category)
         notify_init("Profanity");
     }
     if (notify_is_initted()) {
-        NotifyNotification *notification;
+        NotifyNotification* notification;
         notification = notify_notification_new("Profanity", message, NULL);
         notify_notification_set_timeout(notification, timeout);
         notify_notification_set_category(notification, category);
         notify_notification_set_urgency(notification, NOTIFY_URGENCY_NORMAL);
 
-        GError *error = NULL;
+        GError* error = NULL;
         gboolean notify_success = notify_notification_show(notification, &error);
 
         if (!notify_success) {
@@ -247,17 +246,17 @@ notify(const char *const message, int timeout, const char *const category)
 
     // For a Ballon Tip
     nid.uFlags = NIF_INFO;
-    strcpy(nid.szInfoTitle, "Profanity"); // Title
+    strcpy(nid.szInfoTitle, "Profanity");                 // Title
     strncpy(nid.szInfo, message, sizeof(nid.szInfo) - 1); // Copy Tip
-    nid.uTimeout = timeout;  // 3 Seconds
+    nid.uTimeout = timeout;                               // 3 Seconds
     nid.dwInfoFlags = NIIF_INFO;
 
     Shell_NotifyIcon(NIM_MODIFY, &nid);
 #endif
 #ifdef HAVE_OSXNOTIFY
-    GString *notify_command = g_string_new("terminal-notifier -title \"Profanity\" -message '");
+    GString* notify_command = g_string_new("terminal-notifier -title \"Profanity\" -message '");
 
-    char *escaped_single = str_replace(message, "'", "'\\''");
+    char* escaped_single = str_replace(message, "'", "'\\''");
 
     if (escaped_single[0] == '<') {
         g_string_append(notify_command, "\\<");
@@ -278,8 +277,8 @@ notify(const char *const message, int timeout, const char *const category)
     g_string_append(notify_command, "'");
     free(escaped_single);
 
-    char *term_name = getenv("TERM_PROGRAM");
-    char *app_id = NULL;
+    char* term_name = getenv("TERM_PROGRAM");
+    char* app_id = NULL;
     if (g_strcmp0(term_name, "Apple_Terminal") == 0) {
         app_id = "com.apple.Terminal";
     } else if (g_strcmp0(term_name, "iTerm.app") == 0) {

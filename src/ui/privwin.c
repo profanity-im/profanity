@@ -44,14 +44,14 @@
 #include "ui/window_list.h"
 
 void
-privwin_incoming_msg(ProfPrivateWin *privatewin, ProfMessage *message)
+privwin_incoming_msg(ProfPrivateWin* privatewin, ProfMessage* message)
 {
     assert(privatewin != NULL);
 
-    ProfWin *window = (ProfWin*) privatewin;
+    ProfWin* window = (ProfWin*)privatewin;
     int num = wins_get_num(window);
 
-    Jid *jidp = jid_create(privatewin->fulljid);
+    Jid* jidp = jid_create(privatewin->fulljid);
     if (jidp == NULL) {
         return;
     }
@@ -65,7 +65,7 @@ privwin_incoming_msg(ProfPrivateWin *privatewin, ProfMessage *message)
         title_bar_set_typing(FALSE);
         status_bar_active(num, WIN_PRIVATE, privatewin->fulljid);
 
-    // not currently viewing chat window with sender
+        // not currently viewing chat window with sender
     } else {
         status_bar_new(num, WIN_PRIVATE, privatewin->fulljid);
         cons_show_incoming_private_message(jidp->resourcepart, jidp->barejid, num, privatewin->unread);
@@ -93,15 +93,15 @@ privwin_incoming_msg(ProfPrivateWin *privatewin, ProfMessage *message)
 }
 
 void
-privwin_outgoing_msg(ProfPrivateWin *privwin, const char *const message)
+privwin_outgoing_msg(ProfPrivateWin* privwin, const char* const message)
 {
     assert(privwin != NULL);
 
-    win_print_outgoing((ProfWin*)privwin, "-", NULL, NULL , message);
+    win_print_outgoing((ProfWin*)privwin, "-", NULL, NULL, message);
 }
 
 void
-privwin_message_occupant_offline(ProfPrivateWin *privwin)
+privwin_message_occupant_offline(ProfPrivateWin* privwin)
 {
     assert(privwin != NULL);
 
@@ -109,7 +109,7 @@ privwin_message_occupant_offline(ProfPrivateWin *privwin)
 }
 
 void
-privwin_message_left_room(ProfPrivateWin *privwin)
+privwin_message_left_room(ProfPrivateWin* privwin)
 {
     assert(privwin != NULL);
 
@@ -117,24 +117,24 @@ privwin_message_left_room(ProfPrivateWin *privwin)
 }
 
 void
-privwin_occupant_offline(ProfPrivateWin *privwin)
+privwin_occupant_offline(ProfPrivateWin* privwin)
 {
     assert(privwin != NULL);
 
     privwin->occupant_offline = TRUE;
-    Jid *jidp = jid_create(privwin->fulljid);
+    Jid* jidp = jid_create(privwin->fulljid);
     win_println((ProfWin*)privwin, THEME_OFFLINE, "-", "<- %s has left the room.", jidp->resourcepart);
     jid_destroy(jidp);
 }
 
 void
-privwin_occupant_kicked(ProfPrivateWin *privwin, const char *const actor, const char *const reason)
+privwin_occupant_kicked(ProfPrivateWin* privwin, const char* const actor, const char* const reason)
 {
     assert(privwin != NULL);
 
     privwin->occupant_offline = TRUE;
-    Jid *jidp = jid_create(privwin->fulljid);
-    GString *message = g_string_new(jidp->resourcepart);
+    Jid* jidp = jid_create(privwin->fulljid);
+    GString* message = g_string_new(jidp->resourcepart);
     jid_destroy(jidp);
     g_string_append(message, " has been kicked from the room");
     if (actor) {
@@ -151,13 +151,13 @@ privwin_occupant_kicked(ProfPrivateWin *privwin, const char *const actor, const 
 }
 
 void
-privwin_occupant_banned(ProfPrivateWin *privwin, const char *const actor, const char *const reason)
+privwin_occupant_banned(ProfPrivateWin* privwin, const char* const actor, const char* const reason)
 {
     assert(privwin != NULL);
 
     privwin->occupant_offline = TRUE;
-    Jid *jidp = jid_create(privwin->fulljid);
-    GString *message = g_string_new(jidp->resourcepart);
+    Jid* jidp = jid_create(privwin->fulljid);
+    GString* message = g_string_new(jidp->resourcepart);
     jid_destroy(jidp);
     g_string_append(message, " has been banned from the room");
     if (actor) {
@@ -174,57 +174,57 @@ privwin_occupant_banned(ProfPrivateWin *privwin, const char *const actor, const 
 }
 
 void
-privwin_occupant_online(ProfPrivateWin *privwin)
+privwin_occupant_online(ProfPrivateWin* privwin)
 {
     assert(privwin != NULL);
 
     privwin->occupant_offline = FALSE;
-    Jid *jidp = jid_create(privwin->fulljid);
+    Jid* jidp = jid_create(privwin->fulljid);
     win_println((ProfWin*)privwin, THEME_ONLINE, "-", "-- %s has joined the room.", jidp->resourcepart);
     jid_destroy(jidp);
 }
 
 void
-privwin_room_destroyed(ProfPrivateWin *privwin)
+privwin_room_destroyed(ProfPrivateWin* privwin)
 {
     assert(privwin != NULL);
 
     privwin->room_left = TRUE;
-    Jid *jidp = jid_create(privwin->fulljid);
+    Jid* jidp = jid_create(privwin->fulljid);
     win_println((ProfWin*)privwin, THEME_OFFLINE, "!", "-- %s has been destroyed.", jidp->barejid);
     jid_destroy(jidp);
 }
 
 void
-privwin_room_joined(ProfPrivateWin *privwin)
+privwin_room_joined(ProfPrivateWin* privwin)
 {
     assert(privwin != NULL);
 
     privwin->room_left = FALSE;
-    Jid *jidp = jid_create(privwin->fulljid);
+    Jid* jidp = jid_create(privwin->fulljid);
     win_println((ProfWin*)privwin, THEME_OFFLINE, "!", "-- You have joined %s.", jidp->barejid);
     jid_destroy(jidp);
 }
 
 void
-privwin_room_left(ProfPrivateWin *privwin)
+privwin_room_left(ProfPrivateWin* privwin)
 {
     assert(privwin != NULL);
 
     privwin->room_left = TRUE;
-    Jid *jidp = jid_create(privwin->fulljid);
+    Jid* jidp = jid_create(privwin->fulljid);
     win_println((ProfWin*)privwin, THEME_OFFLINE, "!", "-- You have left %s.", jidp->barejid);
     jid_destroy(jidp);
 }
 
 void
-privwin_room_kicked(ProfPrivateWin *privwin, const char *const actor, const char *const reason)
+privwin_room_kicked(ProfPrivateWin* privwin, const char* const actor, const char* const reason)
 {
     assert(privwin != NULL);
 
     privwin->room_left = TRUE;
-    GString *message = g_string_new("Kicked from ");
-    Jid *jidp = jid_create(privwin->fulljid);
+    GString* message = g_string_new("Kicked from ");
+    Jid* jidp = jid_create(privwin->fulljid);
     g_string_append(message, jidp->barejid);
     jid_destroy(jidp);
     if (actor) {
@@ -241,13 +241,13 @@ privwin_room_kicked(ProfPrivateWin *privwin, const char *const actor, const char
 }
 
 void
-privwin_room_banned(ProfPrivateWin *privwin, const char *const actor, const char *const reason)
+privwin_room_banned(ProfPrivateWin* privwin, const char* const actor, const char* const reason)
 {
     assert(privwin != NULL);
 
     privwin->room_left = TRUE;
-    GString *message = g_string_new("Banned from ");
-    Jid *jidp = jid_create(privwin->fulljid);
+    GString* message = g_string_new("Banned from ");
+    Jid* jidp = jid_create(privwin->fulljid);
     g_string_append(message, jidp->barejid);
     jid_destroy(jidp);
     if (actor) {
@@ -264,18 +264,18 @@ privwin_room_banned(ProfPrivateWin *privwin, const char *const actor, const char
 }
 
 char*
-privwin_get_string(ProfPrivateWin *privwin)
+privwin_get_string(ProfPrivateWin* privwin)
 {
     assert(privwin != NULL);
 
-    GString *res = g_string_new("Private ");
+    GString* res = g_string_new("Private ");
     g_string_append(res, privwin->fulljid);
 
     if (privwin->unread > 0) {
         g_string_append_printf(res, ", %d unread", privwin->unread);
     }
 
-    char *resstr = res->str;
+    char* resstr = res->str;
     g_string_free(res, FALSE);
 
     return resstr;

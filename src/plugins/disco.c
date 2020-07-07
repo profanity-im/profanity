@@ -39,19 +39,19 @@
 #include <glib.h>
 
 // features to reference count map
-static GHashTable *features = NULL;
+static GHashTable* features = NULL;
 
 // plugin to feature map
-static GHashTable *plugin_to_features = NULL;
+static GHashTable* plugin_to_features = NULL;
 
 static void
-_free_features(GHashTable *features)
+_free_features(GHashTable* features)
 {
     g_hash_table_destroy(features);
 }
 
 void
-disco_add_feature(const char *plugin_name, char *feature)
+disco_add_feature(const char* plugin_name, char* feature)
 {
     if (feature == NULL || plugin_name == NULL) {
         return;
@@ -64,7 +64,7 @@ disco_add_feature(const char *plugin_name, char *feature)
         plugin_to_features = g_hash_table_new_full(g_str_hash, g_str_equal, free, (GDestroyNotify)_free_features);
     }
 
-    GHashTable *plugin_features = g_hash_table_lookup(plugin_to_features, plugin_name);
+    GHashTable* plugin_features = g_hash_table_lookup(plugin_to_features, plugin_name);
     gboolean added = FALSE;
     if (plugin_features == NULL) {
         plugin_features = g_hash_table_new_full(g_str_hash, g_str_equal, free, NULL);
@@ -83,7 +83,7 @@ disco_add_feature(const char *plugin_name, char *feature)
     if (!g_hash_table_contains(features, feature)) {
         g_hash_table_insert(features, strdup(feature), GINT_TO_POINTER(1));
     } else {
-        void *refcountp = g_hash_table_lookup(features, feature);
+        void* refcountp = g_hash_table_lookup(features, feature);
         int refcount = GPOINTER_TO_INT(refcountp);
         refcount++;
         g_hash_table_replace(features, strdup(feature), GINT_TO_POINTER(refcount));
@@ -91,7 +91,7 @@ disco_add_feature(const char *plugin_name, char *feature)
 }
 
 void
-disco_remove_features(const char *plugin_name)
+disco_remove_features(const char* plugin_name)
 {
     if (!features) {
         return;
@@ -100,17 +100,17 @@ disco_remove_features(const char *plugin_name)
         return;
     }
 
-    GHashTable *plugin_features_set = g_hash_table_lookup(plugin_to_features, plugin_name);
+    GHashTable* plugin_features_set = g_hash_table_lookup(plugin_to_features, plugin_name);
     if (!plugin_features_set) {
         return;
     }
 
-    GList *plugin_feature_list = g_hash_table_get_keys(plugin_features_set);
-    GList *curr = plugin_feature_list;
+    GList* plugin_feature_list = g_hash_table_get_keys(plugin_features_set);
+    GList* curr = plugin_feature_list;
     while (curr) {
-        char *feature = curr->data;
+        char* feature = curr->data;
         if (g_hash_table_contains(features, feature)) {
-            void *refcountp = g_hash_table_lookup(features, feature);
+            void* refcountp = g_hash_table_lookup(features, feature);
             int refcount = GPOINTER_TO_INT(refcountp);
             if (refcount == 1) {
                 g_hash_table_remove(features, feature);
@@ -123,7 +123,6 @@ disco_remove_features(const char *plugin_name)
         curr = g_list_next(curr);
     }
     g_list_free(plugin_feature_list);
-
 }
 
 GList*

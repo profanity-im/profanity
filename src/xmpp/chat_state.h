@@ -46,20 +46,21 @@ typedef enum {
     CHAT_STATE_GONE
 } chat_state_type_t;
 
-typedef struct prof_chat_state_t {
+typedef struct prof_chat_state_t
+{
     chat_state_type_t type;
-    GTimer *timer;
+    GTimer* timer;
 } ChatState;
 
 ChatState* chat_state_new(void);
-void chat_state_free(ChatState *state);
+void chat_state_free(ChatState* state);
 
 void chat_state_idle(void);
 void chat_state_activity(void);
 
-void chat_state_handle_idle(const char *const barejid, ChatState *state);
-void chat_state_handle_typing(const char *const barejid, ChatState *state);
-void chat_state_active(ChatState *state);
-void chat_state_gone(const char *const barejid, ChatState *state);
+void chat_state_handle_idle(const char* const barejid, ChatState* state);
+void chat_state_handle_typing(const char* const barejid, ChatState* state);
+void chat_state_active(ChatState* state);
+void chat_state_gone(const char* const barejid, ChatState* state);
 
 #endif

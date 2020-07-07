@@ -38,59 +38,60 @@
 
 #include <glib.h>
 
-typedef struct tls_cert_t {
+typedef struct tls_cert_t
+{
     int version;
-    char *serialnumber;
-    char *subjectname;
-    char *subject_country;
-    char *subject_state;
-    char *subject_distinguishedname;
-    char *subject_serialnumber;
-    char *subject_commonname;
-    char *subject_organisation;
-    char *subject_organisation_unit;
-    char *subject_email;
-    char *issuername;
-    char *issuer_country;
-    char *issuer_state;
-    char *issuer_distinguishedname;
-    char *issuer_serialnumber;
-    char *issuer_commonname;
-    char *issuer_organisation;
-    char *issuer_organisation_unit;
-    char *issuer_email;
-    char *notbefore;
-    char *notafter;
-    char *fingerprint;
-    char *key_alg;
-    char *signature_alg;
+    char* serialnumber;
+    char* subjectname;
+    char* subject_country;
+    char* subject_state;
+    char* subject_distinguishedname;
+    char* subject_serialnumber;
+    char* subject_commonname;
+    char* subject_organisation;
+    char* subject_organisation_unit;
+    char* subject_email;
+    char* issuername;
+    char* issuer_country;
+    char* issuer_state;
+    char* issuer_distinguishedname;
+    char* issuer_serialnumber;
+    char* issuer_commonname;
+    char* issuer_organisation;
+    char* issuer_organisation_unit;
+    char* issuer_email;
+    char* notbefore;
+    char* notafter;
+    char* fingerprint;
+    char* key_alg;
+    char* signature_alg;
 } TLSCertificate;
 
 void tlscerts_init(void);
 
-TLSCertificate* tlscerts_new(const char *const fingerprint, int version, const char *const serialnumber, const char *const subjectname,
-    const char *const issuername, const char *const notbefore, const char *const notafter,
-    const char *const key_alg, const char *const signature_alg);
+TLSCertificate* tlscerts_new(const char* const fingerprint, int version, const char* const serialnumber, const char* const subjectname,
+                             const char* const issuername, const char* const notbefore, const char* const notafter,
+                             const char* const key_alg, const char* const signature_alg);
 
-void tlscerts_set_current(const char *const fp);
+void tlscerts_set_current(const char* const fp);
 
 char* tlscerts_get_current(void);
 
 void tlscerts_clear_current(void);
 
-gboolean tlscerts_exists(const char *const fingerprint);
+gboolean tlscerts_exists(const char* const fingerprint);
 
-void tlscerts_add(TLSCertificate *cert);
+void tlscerts_add(TLSCertificate* cert);
 
-gboolean tlscerts_revoke(const char *const fingerprint);
+gboolean tlscerts_revoke(const char* const fingerprint);
 
-TLSCertificate* tlscerts_get_trusted(const char *const fingerprint);
+TLSCertificate* tlscerts_get_trusted(const char* const fingerprint);
 
-void tlscerts_free(TLSCertificate *cert);
+void tlscerts_free(TLSCertificate* cert);
 
 GList* tlscerts_list(void);
 
-char* tlscerts_complete(const char *const prefix, gboolean previous, void *context);
+char* tlscerts_complete(const char* const prefix, gboolean previous, void* context);
 
 void tlscerts_reset_ac(void);
 

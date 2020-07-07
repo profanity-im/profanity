@@ -14,7 +14,8 @@
 
 #define CMD_DISCONNECT "/disconnect"
 
-void clears_chat_sessions(void **state)
+void
+clears_chat_sessions(void** state)
 {
     chat_sessions_init();
     roster_create();
@@ -29,8 +30,8 @@ void clears_chat_sessions(void **state)
 
     assert_true(result);
 
-    ChatSession *session1 = chat_session_get("bob@server.org");
-    ChatSession *session2 = chat_session_get("mike@server.org");
+    ChatSession* session1 = chat_session_get("bob@server.org");
+    ChatSession* session2 = chat_session_get("mike@server.org");
     assert_null(session1);
     assert_null(session2);
 }

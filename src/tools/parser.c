@@ -63,7 +63,7 @@
  *
  */
 gchar**
-parse_args(const char *const inp, int min, int max, gboolean *result)
+parse_args(const char* const inp, int min, int max, gboolean* result)
 {
     if (inp == NULL) {
         *result = FALSE;
@@ -71,31 +71,31 @@ parse_args(const char *const inp, int min, int max, gboolean *result)
     }
 
     // copy and strip input of leading/trailing whitespace
-    char *copy = strdup(inp);
+    char* copy = strdup(inp);
     g_strstrip(copy);
 
     int inp_size = g_utf8_strlen(copy, -1);
     gboolean in_token = FALSE;
     gboolean in_quotes = FALSE;
-    char *token_start = &copy[0];
+    char* token_start = &copy[0];
     int token_size = 0;
-    GSList *tokens = NULL;
+    GSList* tokens = NULL;
 
     // add tokens to GSList
     int i;
     for (i = 0; i < inp_size; i++) {
-        gchar *curr_ch = g_utf8_offset_to_pointer(copy, i);
+        gchar* curr_ch = g_utf8_offset_to_pointer(copy, i);
         gunichar curr_uni = g_utf8_get_char(curr_ch);
 
         if (!in_token) {
-            if (curr_uni  == ' ') {
+            if (curr_uni == ' ') {
                 continue;
             } else {
                 in_token = TRUE;
                 if (curr_uni == '"') {
                     in_quotes = TRUE;
                     i++;
-                    gchar *next_ch = g_utf8_next_char(curr_ch);
+                    gchar* next_ch = g_utf8_next_char(curr_ch);
                     gunichar next_uni = g_utf8_get_char(next_ch);
                     token_start = next_ch;
                     token_size += g_unichar_to_utf8(next_uni, NULL);
@@ -108,7 +108,7 @@ parse_args(const char *const inp, int min, int max, gboolean *result)
             if (in_quotes) {
                 if (curr_uni == '"') {
                     tokens = g_slist_append(tokens, g_strndup(token_start,
-                        token_size));
+                                                              token_size));
                     token_size = 0;
                     in_token = FALSE;
                     in_quotes = FALSE;
@@ -118,7 +118,7 @@ parse_args(const char *const inp, int min, int max, gboolean *result)
             } else {
                 if (curr_uni == ' ') {
                     tokens = g_slist_append(tokens, g_strndup(token_start,
-                        token_size));
+                                                              token_size));
                     token_size = 0;
                     in_token = FALSE;
                 } else {
@@ -141,19 +141,19 @@ parse_args(const char *const inp, int min, int max, gboolean *result)
         *result = FALSE;
         return NULL;
 
-    // if min allowed is 0 and 0 found, return empty char* array
+        // if min allowed is 0 and 0 found, return empty char* array
     } else if (min == 0 && num == 0) {
         g_slist_free_full(tokens, free);
-        gchar **args = malloc((num + 1) * sizeof(*args));
+        gchar** args = malloc((num + 1) * sizeof(*args));
         args[0] = NULL;
         g_free(copy);
         *result = TRUE;
         return args;
 
-    // otherwise return args array
+        // otherwise return args array
     } else {
-        gchar **args = malloc((num + 1) * sizeof(*args));
-        GSList *token = tokens;
+        gchar** args = malloc((num + 1) * sizeof(*args));
+        GSList* token = tokens;
         token = g_slist_next(token);
         int arg_count = 0;
 
@@ -197,7 +197,7 @@ parse_args(const char *const inp, int min, int max, gboolean *result)
  *
  */
 gchar**
-parse_args_with_freetext(const char *const inp, int min, int max, gboolean *result)
+parse_args_with_freetext(const char* const inp, int min, int max, gboolean* result)
 {
     if (inp == NULL) {
         *result = FALSE;
@@ -205,22 +205,22 @@ parse_args_with_freetext(const char *const inp, int min, int max, gboolean *resu
     }
 
     // copy and strip input of leading/trailing whitepsace
-    char *copy = strdup(inp);
+    char* copy = strdup(inp);
     g_strstrip(copy);
 
     int inp_size = g_utf8_strlen(copy, -1);
     gboolean in_token = FALSE;
     gboolean in_freetext = FALSE;
     gboolean in_quotes = FALSE;
-    char *token_start = &copy[0];
+    char* token_start = &copy[0];
     int token_size = 0;
     int num_tokens = 0;
-    GSList *tokens = NULL;
+    GSList* tokens = NULL;
 
     // add tokens to GSList
     int i;
     for (i = 0; i < inp_size; i++) {
-        gchar *curr_ch = g_utf8_offset_to_pointer(copy, i);
+        gchar* curr_ch = g_utf8_offset_to_pointer(copy, i);
         gunichar curr_uni = g_utf8_get_char(curr_ch);
 
         if (!in_token) {
@@ -234,13 +234,13 @@ parse_args_with_freetext(const char *const inp, int min, int max, gboolean *resu
                 } else if (curr_uni == '"') {
                     in_quotes = TRUE;
                     i++;
-                    gchar *next_ch = g_utf8_next_char(curr_ch);
+                    gchar* next_ch = g_utf8_next_char(curr_ch);
                     gunichar next_uni = g_utf8_get_char(next_ch);
                     token_start = next_ch;
                     token_size += g_unichar_to_utf8(next_uni, NULL);
                 }
                 if (curr_uni == '"') {
-                    gchar *next_ch = g_utf8_next_char(curr_ch);
+                    gchar* next_ch = g_utf8_next_char(curr_ch);
                     token_start = next_ch;
                 } else {
                     token_start = curr_ch;
@@ -251,7 +251,7 @@ parse_args_with_freetext(const char *const inp, int min, int max, gboolean *resu
             if (in_quotes) {
                 if (curr_uni == '"') {
                     tokens = g_slist_append(tokens, g_strndup(token_start,
-                        token_size));
+                                                              token_size));
                     token_size = 0;
                     in_token = FALSE;
                     in_quotes = FALSE;
@@ -265,7 +265,7 @@ parse_args_with_freetext(const char *const inp, int min, int max, gboolean *resu
                     token_size += g_unichar_to_utf8(curr_uni, NULL);
                 } else if (curr_uni == ' ') {
                     tokens = g_slist_append(tokens, g_strndup(token_start,
-                        token_size));
+                                                              token_size));
                     token_size = 0;
                     in_token = FALSE;
                 } else if (curr_uni != '"') {
@@ -289,18 +289,18 @@ parse_args_with_freetext(const char *const inp, int min, int max, gboolean *resu
         *result = FALSE;
         return NULL;
 
-    // if min allowed is 0 and 0 found, return empty char* array
+        // if min allowed is 0 and 0 found, return empty char* array
     } else if (min == 0 && num == 0) {
         g_slist_free_full(tokens, free);
-        gchar **args = malloc((num + 1) * sizeof(*args));
+        gchar** args = malloc((num + 1) * sizeof(*args));
         args[0] = NULL;
         *result = TRUE;
         return args;
 
-    // otherwise return args array
+        // otherwise return args array
     } else {
-        gchar **args = malloc((num + 1) * sizeof(*args));
-        GSList *token = tokens;
+        gchar** args = malloc((num + 1) * sizeof(*args));
+        GSList* token = tokens;
         token = g_slist_next(token);
         int arg_count = 0;
 
@@ -317,7 +317,7 @@ parse_args_with_freetext(const char *const inp, int min, int max, gboolean *resu
 }
 
 int
-count_tokens(const char *const string)
+count_tokens(const char* const string)
 {
     int length = g_utf8_strlen(string, -1);
     gboolean in_quotes = FALSE;
@@ -328,7 +328,7 @@ count_tokens(const char *const string)
     num_tokens++;
 
     for (i = 0; i < length; i++) {
-        gchar *curr_ch = g_utf8_offset_to_pointer(string, i);
+        gchar* curr_ch = g_utf8_offset_to_pointer(string, i);
         gunichar curr_uni = g_utf8_get_char(curr_ch);
 
         if (curr_uni == ' ') {
@@ -348,12 +348,12 @@ count_tokens(const char *const string)
 }
 
 char*
-get_start(const char *const string, int tokens)
+get_start(const char* const string, int tokens)
 {
-    GString *result = g_string_new("");
+    GString* result = g_string_new("");
     int length = g_utf8_strlen(string, -1);
     gboolean in_quotes = FALSE;
-    char *result_str = NULL;
+    char* result_str = NULL;
     int num_tokens = 0;
     int i = 0;
 
@@ -361,11 +361,11 @@ get_start(const char *const string, int tokens)
     num_tokens++;
 
     for (i = 0; i < length; i++) {
-        gchar *curr_ch = g_utf8_offset_to_pointer(string, i);
+        gchar* curr_ch = g_utf8_offset_to_pointer(string, i);
         gunichar curr_uni = g_utf8_get_char(curr_ch);
 
         if (num_tokens < tokens) {
-            gchar *uni_char = malloc(7);
+            gchar* uni_char = malloc(7);
             int len = g_unichar_to_utf8(curr_uni, uni_char);
             uni_char[len] = '\0';
             g_string_append(result, uni_char);
@@ -391,15 +391,15 @@ get_start(const char *const string, int tokens)
 }
 
 GHashTable*
-parse_options(gchar **args, gchar **opt_keys, gboolean *res)
+parse_options(gchar** args, gchar** opt_keys, gboolean* res)
 {
-    GList *keys = NULL;
+    GList* keys = NULL;
     int i;
     for (i = 0; i < g_strv_length(opt_keys); i++) {
         keys = g_list_append(keys, opt_keys[i]);
     }
 
-    GHashTable *options = NULL;
+    GHashTable* options = NULL;
 
     // no options found, success
     if (args[0] == NULL) {
@@ -411,8 +411,8 @@ parse_options(gchar **args, gchar **opt_keys, gboolean *res)
 
     // validate options
     int curr;
-    GList *found_keys = NULL;
-    for (curr = 0; curr < g_strv_length(args); curr+= 2) {
+    GList* found_keys = NULL;
+    for (curr = 0; curr < g_strv_length(args); curr += 2) {
         // check if option valid
         if (g_list_find_custom(keys, args[curr], (GCompareFunc)g_strcmp0) == NULL) {
             *res = FALSE;
@@ -430,7 +430,7 @@ parse_options(gchar **args, gchar **opt_keys, gboolean *res)
         }
 
         // check value given
-        if (args[curr+1] == NULL) {
+        if (args[curr + 1] == NULL) {
             *res = FALSE;
             g_list_free(found_keys);
             g_list_free(keys);
@@ -445,15 +445,15 @@ parse_options(gchar **args, gchar **opt_keys, gboolean *res)
     // create map
     options = g_hash_table_new(g_str_hash, g_str_equal);
     *res = TRUE;
-    for (curr = 0; curr < g_strv_length(args); curr+=2) {
-        g_hash_table_insert(options, args[curr], args[curr+1]);
+    for (curr = 0; curr < g_strv_length(args); curr += 2) {
+        g_hash_table_insert(options, args[curr], args[curr + 1]);
     }
 
     return options;
 }
 
 void
-options_destroy(GHashTable *options)
+options_destroy(GHashTable* options)
 {
     if (options) {
         g_hash_table_destroy(options);

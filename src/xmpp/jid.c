@@ -42,12 +42,12 @@
 #include "xmpp/jid.h"
 
 Jid*
-jid_create(const gchar *const str)
+jid_create(const gchar* const str)
 {
-    Jid *result = NULL;
+    Jid* result = NULL;
 
     /* if str is NULL g_strdup returns NULL */
-    gchar *trimmed = g_strdup(str);
+    gchar* trimmed = g_strdup(str);
     if (trimmed == NULL) {
         return NULL;
     }
@@ -75,9 +75,9 @@ jid_create(const gchar *const str)
     result->barejid = NULL;
     result->fulljid = NULL;
 
-    gchar *atp = g_utf8_strchr(trimmed, -1, '@');
-    gchar *slashp = g_utf8_strchr(trimmed, -1, '/');
-    gchar *domain_start = trimmed;
+    gchar* atp = g_utf8_strchr(trimmed, -1, '@');
+    gchar* slashp = g_utf8_strchr(trimmed, -1, '/');
+    gchar* domain_start = trimmed;
 
     if (atp) {
         result->localpart = g_utf8_substring(trimmed, 0, g_utf8_pointer_to_offset(trimmed, atp));
@@ -87,7 +87,7 @@ jid_create(const gchar *const str)
     if (slashp) {
         result->resourcepart = g_strdup(slashp + 1);
         result->domainpart = g_utf8_substring(domain_start, 0, g_utf8_pointer_to_offset(domain_start, slashp));
-        char *barejidraw = g_utf8_substring(trimmed, 0, g_utf8_pointer_to_offset(trimmed, slashp));
+        char* barejidraw = g_utf8_substring(trimmed, 0, g_utf8_pointer_to_offset(trimmed, slashp));
         result->barejid = g_utf8_strdown(barejidraw, -1);
         result->fulljid = g_strdup(trimmed);
         g_free(barejidraw);
@@ -107,10 +107,10 @@ jid_create(const gchar *const str)
 }
 
 Jid*
-jid_create_from_bare_and_resource(const char *const barejid, const char *const resource)
+jid_create_from_bare_and_resource(const char* const barejid, const char* const resource)
 {
-    Jid *result;
-    char *jid = create_fulljid(barejid, resource);
+    Jid* result;
+    char* jid = create_fulljid(barejid, resource);
     result = jid_create(jid);
     free(jid);
 
@@ -118,7 +118,7 @@ jid_create_from_bare_and_resource(const char *const barejid, const char *const r
 }
 
 void
-jid_destroy(Jid *jid)
+jid_destroy(Jid* jid)
 {
     if (jid == NULL) {
         return;
@@ -134,7 +134,7 @@ jid_destroy(Jid *jid)
 }
 
 gboolean
-jid_is_valid_room_form(Jid *jid)
+jid_is_valid_room_form(Jid* jid)
 {
     return (jid->fulljid != NULL);
 }
@@ -145,15 +145,15 @@ jid_is_valid_room_form(Jid *jid)
  * Will return a newly created string that must be freed by the caller
  */
 char*
-create_fulljid(const char *const barejid, const char *const resource)
+create_fulljid(const char* const barejid, const char* const resource)
 {
-    gchar *barejidlower = g_utf8_strdown(barejid, -1);
-    GString *full_jid = g_string_new(barejidlower);
+    gchar* barejidlower = g_utf8_strdown(barejid, -1);
+    GString* full_jid = g_string_new(barejidlower);
     g_free(barejidlower);
     g_string_append(full_jid, "/");
     g_string_append(full_jid, resource);
 
-    char *result = strdup(full_jid->str);
+    char* result = strdup(full_jid->str);
 
     g_string_free(full_jid, TRUE);
 
@@ -166,10 +166,10 @@ create_fulljid(const char *const barejid, const char *const resource)
  * returns "person"
  */
 char*
-get_nick_from_full_jid(const char *const full_room_jid)
+get_nick_from_full_jid(const char* const full_room_jid)
 {
-    char **tokens = g_strsplit(full_room_jid, "/", 0);
-    char *nick_part = NULL;
+    char** tokens = g_strsplit(full_room_jid, "/", 0);
+    char* nick_part = NULL;
 
     if (tokens) {
         if (tokens[0] && tokens[1]) {
@@ -182,12 +182,11 @@ get_nick_from_full_jid(const char *const full_room_jid)
     return nick_part;
 }
 
-
 /*
  * get the fulljid, fall back to the barejid
  */
 char*
-jid_fulljid_or_barejid(Jid *jid)
+jid_fulljid_or_barejid(Jid* jid)
 {
     if (jid->fulljid) {
         return jid->fulljid;
@@ -199,9 +198,9 @@ jid_fulljid_or_barejid(Jid *jid)
 char*
 jid_random_resource(void)
 {
-    char *rand = get_random_string(4);
+    char* rand = get_random_string(4);
 
-    gchar *result = g_strdup_printf("profanity.%s", rand);
+    gchar* result = g_strdup_printf("profanity.%s", rand);
     free(rand);
 
     return result;

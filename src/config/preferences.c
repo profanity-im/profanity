@@ -52,25 +52,25 @@
 
 // preference groups refer to the sections in .profrc or theme files
 // for example [ui] but not [colours] which is handled in theme.c
-#define PREF_GROUP_LOGGING "logging"
-#define PREF_GROUP_CHATSTATES "chatstates"
-#define PREF_GROUP_UI "ui"
+#define PREF_GROUP_LOGGING       "logging"
+#define PREF_GROUP_CHATSTATES    "chatstates"
+#define PREF_GROUP_UI            "ui"
 #define PREF_GROUP_NOTIFICATIONS "notifications"
-#define PREF_GROUP_PRESENCE "presence"
-#define PREF_GROUP_CONNECTION "connection"
-#define PREF_GROUP_ALIAS "alias"
-#define PREF_GROUP_OTR "otr"
-#define PREF_GROUP_PGP "pgp"
-#define PREF_GROUP_OMEMO "omemo"
-#define PREF_GROUP_OX "ox"
-#define PREF_GROUP_MUC "muc"
-#define PREF_GROUP_PLUGINS "plugins"
-#define PREF_GROUP_EXECUTABLES "executables"
+#define PREF_GROUP_PRESENCE      "presence"
+#define PREF_GROUP_CONNECTION    "connection"
+#define PREF_GROUP_ALIAS         "alias"
+#define PREF_GROUP_OTR           "otr"
+#define PREF_GROUP_PGP           "pgp"
+#define PREF_GROUP_OMEMO         "omemo"
+#define PREF_GROUP_OX            "ox"
+#define PREF_GROUP_MUC           "muc"
+#define PREF_GROUP_PLUGINS       "plugins"
+#define PREF_GROUP_EXECUTABLES   "executables"
 
 #define INPBLOCK_DEFAULT 1000
 
-static gchar *prefs_loc;
-static GKeyFile *prefs;
+static gchar* prefs_loc;
+static GKeyFile* prefs;
 gint log_maxsize = 0;
 
 static Autocomplete boolean_choice_ac;
@@ -83,9 +83,10 @@ static gboolean _get_default_boolean(preference_t pref);
 static char* _get_default_string(preference_t pref);
 static char** _get_default_string_list(preference_t pref);
 
-static void _prefs_load(void)
+static void
+_prefs_load(void)
 {
-    GError *err = NULL;
+    GError* err = NULL;
     log_maxsize = g_key_file_get_integer(prefs, PREF_GROUP_LOGGING, "maxsize", &err);
     if (err) {
         log_maxsize = 0;
@@ -101,7 +102,7 @@ static void _prefs_load(void)
 
     // move pre 0.5.0 autoaway.message to autoaway.awaymessage
     if (g_key_file_has_key(prefs, PREF_GROUP_PRESENCE, "autoaway.message", NULL)) {
-        char *message = g_key_file_get_string(prefs, PREF_GROUP_PRESENCE, "autoaway.message", NULL);
+        char* message = g_key_file_get_string(prefs, PREF_GROUP_PRESENCE, "autoaway.message", NULL);
         g_key_file_set_string(prefs, PREF_GROUP_PRESENCE, "autoaway.awaymessage", message);
         g_key_file_remove_key(prefs, PREF_GROUP_PRESENCE, "autoaway.message", NULL);
         g_free(message);
@@ -109,8 +110,8 @@ static void _prefs_load(void)
 
     // migrate pre 0.5.0 time settings
     if (g_key_file_has_key(prefs, PREF_GROUP_UI, "time", NULL)) {
-        char *time = g_key_file_get_string(prefs, PREF_GROUP_UI, "time", NULL);
-        char *val = NULL;
+        char* time = g_key_file_get_string(prefs, PREF_GROUP_UI, "time", NULL);
+        char* val = NULL;
         if (time) {
             val = time;
         } else {
@@ -128,7 +129,7 @@ static void _prefs_load(void)
 
     // move pre 0.5.0 notify settings
     if (g_key_file_has_key(prefs, PREF_GROUP_NOTIFICATIONS, "room", NULL)) {
-        char *value = g_key_file_get_string(prefs, PREF_GROUP_NOTIFICATIONS, "room", NULL);
+        char* value = g_key_file_get_string(prefs, PREF_GROUP_NOTIFICATIONS, "room", NULL);
         if (g_strcmp0(value, "on") == 0) {
             g_key_file_set_boolean(prefs, PREF_GROUP_NOTIFICATIONS, "room", TRUE);
         } else if (g_strcmp0(value, "off") == 0) {
@@ -154,7 +155,7 @@ static void _prefs_load(void)
 
     // after 0.8.1: titlebar use jid|name -> titlebar show|hide jid|name
     if (g_key_file_has_key(prefs, PREF_GROUP_UI, "titlebar.muc.title", NULL)) {
-        char *value = g_key_file_get_string(prefs, PREF_GROUP_UI, "titlebar.muc.title", NULL);
+        char* value = g_key_file_get_string(prefs, PREF_GROUP_UI, "titlebar.muc.title", NULL);
         if (g_strcmp0(value, "name") == 0) {
             g_key_file_set_boolean(prefs, PREF_GROUP_UI, "titlebar.muc.title.name", TRUE);
         } else if (g_strcmp0(value, "jid") == 0) {
@@ -164,9 +165,9 @@ static void _prefs_load(void)
 
     // 0.9.0 introduced /urlopen. It was saved under "logging" section. Now we have a new "executables" section.
     if (g_key_file_has_key(prefs, PREF_GROUP_LOGGING, "urlopen.cmd", NULL)) {
-        char *val = g_key_file_get_string(prefs, PREF_GROUP_LOGGING, "urlopen.cmd", NULL);
+        char* val = g_key_file_get_string(prefs, PREF_GROUP_LOGGING, "urlopen.cmd", NULL);
 
-        GString *value = g_string_new("false;");
+        GString* value = g_string_new("false;");
         value = g_string_append(value, val);
         value = g_string_append(value, " %u;");
 
@@ -178,7 +179,7 @@ static void _prefs_load(void)
 
     // 0.9.0 introduced configurable /avatar. It was saved under "logging" section. Now we have a new "executables" section.
     if (g_key_file_has_key(prefs, PREF_GROUP_LOGGING, "avatar.cmd", NULL)) {
-        char *value = g_key_file_get_string(prefs, PREF_GROUP_LOGGING, "avatar.cmd", NULL);
+        char* value = g_key_file_get_string(prefs, PREF_GROUP_LOGGING, "avatar.cmd", NULL);
         g_key_file_set_string(prefs, PREF_GROUP_EXECUTABLES, "avatar.cmd", value);
         g_key_file_remove_key(prefs, PREF_GROUP_LOGGING, "avatar.cmd", NULL);
     }
@@ -191,7 +192,7 @@ static void _prefs_load(void)
 
     room_trigger_ac = autocomplete_new();
     gsize len = 0;
-    gchar **triggers = g_key_file_get_string_list(prefs, PREF_GROUP_NOTIFICATIONS, "room.trigger.list", &len, NULL);
+    gchar** triggers = g_key_file_get_string_list(prefs, PREF_GROUP_NOTIFICATIONS, "room.trigger.list", &len, NULL);
 
     int i = 0;
     for (i = 0; i < len; i++) {
@@ -201,7 +202,8 @@ static void _prefs_load(void)
 }
 
 /* Clean up after _prefs_load() */
-static void _prefs_close(void)
+static void
+_prefs_close(void)
 {
     autocomplete_free(boolean_choice_ac);
     autocomplete_free(room_trigger_ac);
@@ -227,7 +229,7 @@ prefs_reload(void)
 }
 
 void
-prefs_load(char *config_file)
+prefs_load(char* config_file)
 {
 
     if (config_file == NULL) {
@@ -265,7 +267,7 @@ prefs_close(void)
 }
 
 char*
-prefs_autocomplete_boolean_choice(const char *const prefix, gboolean previous, void *context)
+prefs_autocomplete_boolean_choice(const char* const prefix, gboolean previous, void* context)
 {
     return autocomplete_complete(boolean_choice_ac, prefix, TRUE, previous);
 }
@@ -277,7 +279,7 @@ prefs_reset_boolean_choice(void)
 }
 
 char*
-prefs_autocomplete_room_trigger(const char *const prefix, gboolean previous, void *context)
+prefs_autocomplete_room_trigger(const char* const prefix, gboolean previous, void* context)
 {
     return autocomplete_complete(room_trigger_ac, prefix, TRUE, previous);
 }
@@ -303,16 +305,16 @@ prefs_do_chat_notify(gboolean current_win)
 }
 
 GList*
-prefs_message_get_triggers(const char *const message)
+prefs_message_get_triggers(const char* const message)
 {
-    GList *result = NULL;
+    GList* result = NULL;
 
-    char *message_lower = g_utf8_strdown(message, -1);
+    char* message_lower = g_utf8_strdown(message, -1);
     gsize len = 0;
-    gchar **triggers = g_key_file_get_string_list(prefs, PREF_GROUP_NOTIFICATIONS, "room.trigger.list", &len, NULL);
+    gchar** triggers = g_key_file_get_string_list(prefs, PREF_GROUP_NOTIFICATIONS, "room.trigger.list", &len, NULL);
     int i;
     for (i = 0; i < len; i++) {
-        char *trigger_lower = g_utf8_strdown(triggers[i], -1);
+        char* trigger_lower = g_utf8_strdown(triggers[i], -1);
         if (g_strrstr(message_lower, trigger_lower)) {
             result = g_list_append(result, strdup(triggers[i]));
         }
@@ -325,8 +327,8 @@ prefs_message_get_triggers(const char *const message)
 }
 
 gboolean
-prefs_do_room_notify(gboolean current_win, const char *const roomjid, const char *const mynick,
-    const char *const theirnick, const char *const message, gboolean mention, gboolean trigger_found)
+prefs_do_room_notify(gboolean current_win, const char* const roomjid, const char* const mynick,
+                     const char* const theirnick, const char* const message, gboolean mention, gboolean trigger_found)
 {
     if (g_strcmp0(mynick, theirnick) == 0) {
         return FALSE;
@@ -334,7 +336,7 @@ prefs_do_room_notify(gboolean current_win, const char *const roomjid, const char
 
     gboolean notify_current = prefs_get_boolean(PREF_NOTIFY_ROOM_CURRENT);
     gboolean notify_window = FALSE;
-    if (!current_win || (current_win && notify_current) ) {
+    if (!current_win || (current_win && notify_current)) {
         notify_window = TRUE;
     }
     if (!notify_window) {
@@ -375,7 +377,7 @@ prefs_do_room_notify(gboolean current_win, const char *const roomjid, const char
 }
 
 gboolean
-prefs_do_room_notify_mention(const char *const roomjid, int unread, gboolean mention, gboolean trigger)
+prefs_do_room_notify_mention(const char* const roomjid, int unread, gboolean mention, gboolean trigger)
 {
     gboolean notify_room = FALSE;
     if (g_key_file_has_key(prefs, roomjid, "notify", NULL)) {
@@ -411,61 +413,61 @@ prefs_do_room_notify_mention(const char *const roomjid, int unread, gboolean men
 }
 
 void
-prefs_set_room_notify(const char *const roomjid, gboolean value)
+prefs_set_room_notify(const char* const roomjid, gboolean value)
 {
     g_key_file_set_boolean(prefs, roomjid, "notify", value);
 }
 
 void
-prefs_set_room_notify_mention(const char *const roomjid, gboolean value)
+prefs_set_room_notify_mention(const char* const roomjid, gboolean value)
 {
     g_key_file_set_boolean(prefs, roomjid, "notify.mention", value);
 }
 
 void
-prefs_set_room_notify_trigger(const char *const roomjid, gboolean value)
+prefs_set_room_notify_trigger(const char* const roomjid, gboolean value)
 {
     g_key_file_set_boolean(prefs, roomjid, "notify.trigger", value);
 }
 
 gboolean
-prefs_has_room_notify(const char *const roomjid)
+prefs_has_room_notify(const char* const roomjid)
 {
     return g_key_file_has_key(prefs, roomjid, "notify", NULL);
 }
 
 gboolean
-prefs_has_room_notify_mention(const char *const roomjid)
+prefs_has_room_notify_mention(const char* const roomjid)
 {
     return g_key_file_has_key(prefs, roomjid, "notify.mention", NULL);
 }
 
 gboolean
-prefs_has_room_notify_trigger(const char *const roomjid)
+prefs_has_room_notify_trigger(const char* const roomjid)
 {
     return g_key_file_has_key(prefs, roomjid, "notify.trigger", NULL);
 }
 
 gboolean
-prefs_get_room_notify(const char *const roomjid)
+prefs_get_room_notify(const char* const roomjid)
 {
     return g_key_file_get_boolean(prefs, roomjid, "notify", NULL);
 }
 
 gboolean
-prefs_get_room_notify_mention(const char *const roomjid)
+prefs_get_room_notify_mention(const char* const roomjid)
 {
     return g_key_file_get_boolean(prefs, roomjid, "notify.mention", NULL);
 }
 
 gboolean
-prefs_get_room_notify_trigger(const char *const roomjid)
+prefs_get_room_notify_trigger(const char* const roomjid)
 {
     return g_key_file_get_boolean(prefs, roomjid, "notify.trigger", NULL);
 }
 
 gboolean
-prefs_reset_room_notify(const char *const roomjid)
+prefs_reset_room_notify(const char* const roomjid)
 {
     if (g_key_file_has_group(prefs, roomjid)) {
         g_key_file_remove_group(prefs, roomjid, NULL);
@@ -478,8 +480,8 @@ prefs_reset_room_notify(const char *const roomjid)
 gboolean
 prefs_get_boolean(preference_t pref)
 {
-    const char *group = _get_group(pref);
-    const char *key = _get_key(pref);
+    const char* group = _get_group(pref);
+    const char* key = _get_key(pref);
     gboolean def = _get_default_boolean(pref);
 
     if (!g_key_file_has_key(prefs, group, key, NULL)) {
@@ -492,19 +494,19 @@ prefs_get_boolean(preference_t pref)
 void
 prefs_set_boolean(preference_t pref, gboolean value)
 {
-    const char *group = _get_group(pref);
-    const char *key = _get_key(pref);
+    const char* group = _get_group(pref);
+    const char* key = _get_key(pref);
     g_key_file_set_boolean(prefs, group, key, value);
 }
 
 char*
 prefs_get_string(preference_t pref)
 {
-    const char *group = _get_group(pref);
-    const char *key = _get_key(pref);
-    char *def = _get_default_string(pref);
+    const char* group = _get_group(pref);
+    const char* key = _get_key(pref);
+    char* def = _get_default_string(pref);
 
-    char *result = g_key_file_get_string(prefs, group, key, NULL);
+    char* result = g_key_file_get_string(prefs, group, key, NULL);
 
     if (result == NULL) {
         if (def) {
@@ -518,13 +520,13 @@ prefs_get_string(preference_t pref)
 }
 
 char*
-prefs_get_string_with_option(preference_t pref, gchar *option)
+prefs_get_string_with_option(preference_t pref, gchar* option)
 {
-    const char *group = _get_group(pref);
-    const char *key = _get_key(pref);
-    char *def = _get_default_string(pref);
+    const char* group = _get_group(pref);
+    const char* key = _get_key(pref);
+    char* def = _get_default_string(pref);
 
-    char *result = g_key_file_get_locale_string(prefs, group, key, option, NULL);
+    char* result = g_key_file_get_locale_string(prefs, group, key, option, NULL);
 
     if (result == NULL) {
         // check for user set default
@@ -543,13 +545,13 @@ prefs_get_string_with_option(preference_t pref, gchar *option)
 }
 
 gchar**
-prefs_get_string_list_with_option(preference_t pref, gchar *option)
+prefs_get_string_list_with_option(preference_t pref, gchar* option)
 {
-    const char *group = _get_group(pref);
-    const char *key = _get_key(pref);
-    char **def = _get_default_string_list(pref);
+    const char* group = _get_group(pref);
+    const char* key = _get_key(pref);
+    char** def = _get_default_string_list(pref);
 
-    gchar **result = g_key_file_get_locale_string_list(prefs, group, key, option, NULL, NULL);
+    gchar** result = g_key_file_get_locale_string_list(prefs, group, key, option, NULL, NULL);
     if (result) {
         g_strfreev(def);
         return result;
@@ -570,10 +572,10 @@ prefs_get_string_list_with_option(preference_t pref, gchar *option)
 }
 
 void
-prefs_set_string(preference_t pref, char *value)
+prefs_set_string(preference_t pref, char* value)
 {
-    const char *group = _get_group(pref);
-    const char *key = _get_key(pref);
+    const char* group = _get_group(pref);
+    const char* key = _get_key(pref);
     if (value == NULL) {
         g_key_file_remove_key(prefs, group, key, NULL);
     } else {
@@ -582,10 +584,10 @@ prefs_set_string(preference_t pref, char *value)
 }
 
 void
-prefs_set_string_with_option(preference_t pref, char *option, char *value)
+prefs_set_string_with_option(preference_t pref, char* option, char* value)
 {
-    const char *group = _get_group(pref);
-    const char *key = _get_key(pref);
+    const char* group = _get_group(pref);
+    const char* key = _get_key(pref);
     if (value == NULL) {
         g_key_file_remove_key(prefs, group, key, NULL);
     } else {
@@ -594,11 +596,11 @@ prefs_set_string_with_option(preference_t pref, char *option, char *value)
 }
 
 void
-prefs_set_string_list_with_option(preference_t pref, char *option, const gchar* const *values)
+prefs_set_string_list_with_option(preference_t pref, char* option, const gchar* const* values)
 {
-    const char *group = _get_group(pref);
-    const char *key = _get_key(pref);
-    if (values == NULL || *values == NULL){
+    const char* group = _get_group(pref);
+    const char* key = _get_key(pref);
+    if (values == NULL || *values == NULL) {
         if (g_strcmp0(option, "*") == 0) {
             g_key_file_set_string_list(prefs, group, key, NULL, 0);
         } else {
@@ -606,7 +608,7 @@ prefs_set_string_list_with_option(preference_t pref, char *option, const gchar* 
         }
     } else {
         guint num_values = 0;
-        while(values[num_values]) {
+        while (values[num_values]) {
             num_values++;
         }
         if (g_strcmp0(option, "*") == 0) {
@@ -620,10 +622,10 @@ prefs_set_string_list_with_option(preference_t pref, char *option, const gchar* 
 char*
 prefs_get_tls_certpath(void)
 {
-    const char *group = _get_group(PREF_TLS_CERTPATH);
-    const char *key = _get_key(PREF_TLS_CERTPATH);
+    const char* group = _get_group(PREF_TLS_CERTPATH);
+    const char* key = _get_key(PREF_TLS_CERTPATH);
 
-    char *setting = g_key_file_get_string(prefs, group, key, NULL);
+    char* setting = g_key_file_get_string(prefs, group, key, NULL);
 
     if (g_strcmp0(setting, "none") == 0) {
         g_free(setting);
@@ -631,26 +633,26 @@ prefs_get_tls_certpath(void)
     }
 
     if (setting == NULL) {
-        if (g_file_test("/etc/ssl/certs",  G_FILE_TEST_IS_DIR)) {
+        if (g_file_test("/etc/ssl/certs", G_FILE_TEST_IS_DIR)) {
             return strdup("/etc/ssl/certs");
         }
-        if (g_file_test("/etc/pki/tls/certs",  G_FILE_TEST_IS_DIR)) {
+        if (g_file_test("/etc/pki/tls/certs", G_FILE_TEST_IS_DIR)) {
             return strdup("/etc/pki/tls/certs");
         }
-        if (g_file_test("/etc/ssl",  G_FILE_TEST_IS_DIR)) {
+        if (g_file_test("/etc/ssl", G_FILE_TEST_IS_DIR)) {
             return strdup("/etc/ssl");
         }
-        if (g_file_test("/etc/pki/tls",  G_FILE_TEST_IS_DIR)) {
+        if (g_file_test("/etc/pki/tls", G_FILE_TEST_IS_DIR)) {
             return strdup("/etc/pki/tls");
         }
-        if (g_file_test("/system/etc/security/cacerts",  G_FILE_TEST_IS_DIR)) {
+        if (g_file_test("/system/etc/security/cacerts", G_FILE_TEST_IS_DIR)) {
             return strdup("/system/etc/security/cacerts");
         }
 
         return NULL;
     }
 
-    char *result = strdup(setting);
+    char* result = strdup(setting);
     g_free(setting);
 
     return result;
@@ -855,21 +857,21 @@ prefs_get_plugins(void)
 }
 
 void
-prefs_add_plugin(const char *const name)
+prefs_add_plugin(const char* const name)
 {
     conf_string_list_add(prefs, PREF_GROUP_PLUGINS, "load", name);
     _save_prefs();
 }
 
 void
-prefs_remove_plugin(const char *const name)
+prefs_remove_plugin(const char* const name)
 {
     conf_string_list_remove(prefs, PREF_GROUP_PLUGINS, "load", name);
     _save_prefs();
 }
 
 void
-prefs_free_plugins(gchar **plugins)
+prefs_free_plugins(gchar** plugins)
 {
     g_strfreev(plugins);
 }
@@ -897,9 +899,9 @@ prefs_get_occupants_char(void)
 {
     char result = 0;
 
-    char *resultstr = g_key_file_get_string(prefs, PREF_GROUP_UI, "occupants.char", NULL);
+    char* resultstr = g_key_file_get_string(prefs, PREF_GROUP_UI, "occupants.char", NULL);
     if (!resultstr) {
-        result =  0;
+        result = 0;
     } else {
         result = resultstr[0];
     }
@@ -950,9 +952,9 @@ prefs_get_occupants_header_char(void)
 {
     char result = 0;
 
-    char *resultstr = g_key_file_get_string(prefs, PREF_GROUP_UI, "occupants.header.char", NULL);
+    char* resultstr = g_key_file_get_string(prefs, PREF_GROUP_UI, "occupants.header.char", NULL);
     if (!resultstr) {
-        result =  0;
+        result = 0;
     } else {
         result = resultstr[0];
     }
@@ -996,11 +998,11 @@ prefs_get_roster_size(void)
 }
 
 static char*
-_prefs_get_encryption_char(const char *const ch, const char *const pref_group, const char *const key)
+_prefs_get_encryption_char(const char* const ch, const char* const pref_group, const char* const key)
 {
-    char *result = NULL;
+    char* result = NULL;
 
-    char *resultstr = g_key_file_get_string(prefs, pref_group, key, NULL);
+    char* resultstr = g_key_file_get_string(prefs, pref_group, key, NULL);
     if (!resultstr) {
         result = strdup(ch);
     } else {
@@ -1011,7 +1013,7 @@ _prefs_get_encryption_char(const char *const ch, const char *const pref_group, c
 }
 
 static gboolean
-_prefs_set_encryption_char(const char *const ch, const char *const pref_group, const char *const key)
+_prefs_set_encryption_char(const char* const ch, const char* const pref_group, const char* const key)
 {
     if (g_utf8_strlen(ch, 4) == 1) {
         g_key_file_set_string(prefs, pref_group, key, ch);
@@ -1029,7 +1031,7 @@ prefs_get_otr_char(void)
 }
 
 gboolean
-prefs_set_otr_char(char *ch)
+prefs_set_otr_char(char* ch)
 {
     return _prefs_set_encryption_char(ch, PREF_GROUP_OTR, "otr.char");
 }
@@ -1041,7 +1043,7 @@ prefs_get_pgp_char(void)
 }
 
 gboolean
-prefs_set_pgp_char(char *ch)
+prefs_set_pgp_char(char* ch)
 {
     return _prefs_set_encryption_char(ch, PREF_GROUP_PGP, "pgp.char");
 }
@@ -1053,7 +1055,7 @@ prefs_get_ox_char(void)
 }
 
 gboolean
-prefs_set_ox_char(char *ch)
+prefs_set_ox_char(char* ch)
 {
     return _prefs_set_encryption_char(ch, PREF_GROUP_OX, "ox.char");
 }
@@ -1065,7 +1067,7 @@ prefs_get_omemo_char(void)
 }
 
 gboolean
-prefs_set_omemo_char(char *ch)
+prefs_set_omemo_char(char* ch)
 {
     return _prefs_set_encryption_char(ch, PREF_GROUP_OMEMO, "omemo.char");
 }
@@ -1075,9 +1077,9 @@ prefs_get_roster_header_char(void)
 {
     char result = 0;
 
-    char *resultstr = g_key_file_get_string(prefs, PREF_GROUP_UI, "roster.header.char", NULL);
+    char* resultstr = g_key_file_get_string(prefs, PREF_GROUP_UI, "roster.header.char", NULL);
     if (!resultstr) {
-        result =  0;
+        result = 0;
     } else {
         result = resultstr[0];
     }
@@ -1107,9 +1109,9 @@ prefs_get_roster_contact_char(void)
 {
     char result = 0;
 
-    char *resultstr = g_key_file_get_string(prefs, PREF_GROUP_UI, "roster.contact.char", NULL);
+    char* resultstr = g_key_file_get_string(prefs, PREF_GROUP_UI, "roster.contact.char", NULL);
     if (!resultstr) {
-        result =  0;
+        result = 0;
     } else {
         result = resultstr[0];
     }
@@ -1139,9 +1141,9 @@ prefs_get_roster_resource_char(void)
 {
     char result = 0;
 
-    char *resultstr = g_key_file_get_string(prefs, PREF_GROUP_UI, "roster.resource.char", NULL);
+    char* resultstr = g_key_file_get_string(prefs, PREF_GROUP_UI, "roster.resource.char", NULL);
     if (!resultstr) {
-        result =  0;
+        result = 0;
     } else {
         result = resultstr[0];
     }
@@ -1171,9 +1173,9 @@ prefs_get_roster_private_char(void)
 {
     char result = 0;
 
-    char *resultstr = g_key_file_get_string(prefs, PREF_GROUP_UI, "roster.private.char", NULL);
+    char* resultstr = g_key_file_get_string(prefs, PREF_GROUP_UI, "roster.private.char", NULL);
     if (!resultstr) {
-        result =  0;
+        result = 0;
     } else {
         result = resultstr[0];
     }
@@ -1203,9 +1205,9 @@ prefs_get_roster_room_char(void)
 {
     char result = 0;
 
-    char *resultstr = g_key_file_get_string(prefs, PREF_GROUP_UI, "roster.rooms.char", NULL);
+    char* resultstr = g_key_file_get_string(prefs, PREF_GROUP_UI, "roster.rooms.char", NULL);
     if (!resultstr) {
-        result =  0;
+        result = 0;
     } else {
         result = resultstr[0];
     }
@@ -1235,9 +1237,9 @@ prefs_get_roster_room_private_char(void)
 {
     char result = 0;
 
-    char *resultstr = g_key_file_get_string(prefs, PREF_GROUP_UI, "roster.rooms.private.char", NULL);
+    char* resultstr = g_key_file_get_string(prefs, PREF_GROUP_UI, "roster.rooms.private.char", NULL);
     if (!resultstr) {
-        result =  0;
+        result = 0;
     } else {
         result = resultstr[0];
     }
@@ -1328,9 +1330,9 @@ prefs_set_roster_presence_indent(gint value)
 char*
 prefs_get_correction_char(void)
 {
-    char *result = "+";
+    char* result = "+";
 
-    char *resultstr = g_key_file_get_string(prefs, PREF_GROUP_UI, "correction.char", NULL);
+    char* resultstr = g_key_file_get_string(prefs, PREF_GROUP_UI, "correction.char", NULL);
     if (!resultstr) {
         result = strdup("+");
     } else {
@@ -1351,7 +1353,7 @@ prefs_set_correction_char(char ch)
 }
 
 gboolean
-prefs_add_room_notify_trigger(const char * const text)
+prefs_add_room_notify_trigger(const char* const text)
 {
     gboolean res = conf_string_list_add(prefs, PREF_GROUP_NOTIFICATIONS, "room.trigger.list", text);
 
@@ -1363,7 +1365,7 @@ prefs_add_room_notify_trigger(const char * const text)
 }
 
 gboolean
-prefs_remove_room_notify_trigger(const char * const text)
+prefs_remove_room_notify_trigger(const char* const text)
 {
     gboolean res = conf_string_list_remove(prefs, PREF_GROUP_NOTIFICATIONS, "room.trigger.list", text);
     _save_prefs();
@@ -1378,9 +1380,9 @@ prefs_remove_room_notify_trigger(const char * const text)
 GList*
 prefs_get_room_notify_triggers(void)
 {
-    GList *result = NULL;
+    GList* result = NULL;
     gsize len = 0;
-    gchar **triggers = g_key_file_get_string_list(prefs, PREF_GROUP_NOTIFICATIONS, "room.trigger.list", &len, NULL);
+    gchar** triggers = g_key_file_get_string_list(prefs, PREF_GROUP_NOTIFICATIONS, "room.trigger.list", &len, NULL);
 
     int i;
     for (i = 0; i < len; i++) {
@@ -1395,7 +1397,7 @@ prefs_get_room_notify_triggers(void)
 ProfWinPlacement*
 prefs_create_profwin_placement(int titlebar, int mainwin, int statusbar, int inputwin)
 {
-    ProfWinPlacement *placement = malloc(sizeof(ProfWinPlacement));
+    ProfWinPlacement* placement = malloc(sizeof(ProfWinPlacement));
     placement->titlebar_pos = titlebar;
     placement->mainwin_pos = mainwin;
     placement->statusbar_pos = statusbar;
@@ -1405,7 +1407,7 @@ prefs_create_profwin_placement(int titlebar, int mainwin, int statusbar, int inp
 }
 
 void
-prefs_free_win_placement(ProfWinPlacement *placement)
+prefs_free_win_placement(ProfWinPlacement* placement)
 {
     free(placement);
 }
@@ -1460,7 +1462,7 @@ prefs_get_win_placement(void)
 }
 
 void
-prefs_save_win_placement(ProfWinPlacement *placement)
+prefs_save_win_placement(ProfWinPlacement* placement)
 {
     g_key_file_set_integer(prefs, PREF_GROUP_UI, "titlebar.position", placement->titlebar_pos);
     g_key_file_set_integer(prefs, PREF_GROUP_UI, "mainwin.position", placement->mainwin_pos);
@@ -1472,18 +1474,18 @@ prefs_save_win_placement(ProfWinPlacement *placement)
 gboolean
 prefs_titlebar_pos_up(void)
 {
-    ProfWinPlacement *placement = prefs_get_win_placement();
+    ProfWinPlacement* placement = prefs_get_win_placement();
 
     int pos = 2;
-    for (pos = 2; pos<5; pos++) {
+    for (pos = 2; pos < 5; pos++) {
         if (placement->titlebar_pos == pos) {
-            placement->titlebar_pos = pos-1;
+            placement->titlebar_pos = pos - 1;
 
-            if (placement->mainwin_pos == pos-1) {
+            if (placement->mainwin_pos == pos - 1) {
                 placement->mainwin_pos = pos;
-            } else if (placement->statusbar_pos == pos-1) {
+            } else if (placement->statusbar_pos == pos - 1) {
                 placement->statusbar_pos = pos;
-            } else if (placement->inputwin_pos == pos-1) {
+            } else if (placement->inputwin_pos == pos - 1) {
                 placement->inputwin_pos = pos;
             }
 
@@ -1500,18 +1502,18 @@ prefs_titlebar_pos_up(void)
 gboolean
 prefs_mainwin_pos_up(void)
 {
-    ProfWinPlacement *placement = prefs_get_win_placement();
+    ProfWinPlacement* placement = prefs_get_win_placement();
 
     int pos = 2;
-    for (pos = 2; pos<5; pos++) {
+    for (pos = 2; pos < 5; pos++) {
         if (placement->mainwin_pos == pos) {
-            placement->mainwin_pos = pos-1;
+            placement->mainwin_pos = pos - 1;
 
-            if (placement->titlebar_pos == pos-1) {
+            if (placement->titlebar_pos == pos - 1) {
                 placement->titlebar_pos = pos;
-            } else if (placement->statusbar_pos == pos-1) {
+            } else if (placement->statusbar_pos == pos - 1) {
                 placement->statusbar_pos = pos;
-            } else if (placement->inputwin_pos == pos-1) {
+            } else if (placement->inputwin_pos == pos - 1) {
                 placement->inputwin_pos = pos;
             }
 
@@ -1528,18 +1530,18 @@ prefs_mainwin_pos_up(void)
 gboolean
 prefs_statusbar_pos_up(void)
 {
-    ProfWinPlacement *placement = prefs_get_win_placement();
+    ProfWinPlacement* placement = prefs_get_win_placement();
 
     int pos = 2;
-    for (pos = 2; pos<5; pos++) {
+    for (pos = 2; pos < 5; pos++) {
         if (placement->statusbar_pos == pos) {
-            placement->statusbar_pos = pos-1;
+            placement->statusbar_pos = pos - 1;
 
-            if (placement->titlebar_pos == pos-1) {
+            if (placement->titlebar_pos == pos - 1) {
                 placement->titlebar_pos = pos;
-            } else if (placement->mainwin_pos == pos-1) {
+            } else if (placement->mainwin_pos == pos - 1) {
                 placement->mainwin_pos = pos;
-            } else if (placement->inputwin_pos == pos-1) {
+            } else if (placement->inputwin_pos == pos - 1) {
                 placement->inputwin_pos = pos;
             }
 
@@ -1556,18 +1558,18 @@ prefs_statusbar_pos_up(void)
 gboolean
 prefs_inputwin_pos_up(void)
 {
-    ProfWinPlacement *placement = prefs_get_win_placement();
+    ProfWinPlacement* placement = prefs_get_win_placement();
 
     int pos = 2;
-    for (pos = 2; pos<5; pos++) {
+    for (pos = 2; pos < 5; pos++) {
         if (placement->inputwin_pos == pos) {
-            placement->inputwin_pos = pos-1;
+            placement->inputwin_pos = pos - 1;
 
-            if (placement->titlebar_pos == pos-1) {
+            if (placement->titlebar_pos == pos - 1) {
                 placement->titlebar_pos = pos;
-            } else if (placement->mainwin_pos == pos-1) {
+            } else if (placement->mainwin_pos == pos - 1) {
                 placement->mainwin_pos = pos;
-            } else if (placement->statusbar_pos == pos-1) {
+            } else if (placement->statusbar_pos == pos - 1) {
                 placement->statusbar_pos = pos;
             }
 
@@ -1584,18 +1586,18 @@ prefs_inputwin_pos_up(void)
 gboolean
 prefs_titlebar_pos_down(void)
 {
-    ProfWinPlacement *placement = prefs_get_win_placement();
+    ProfWinPlacement* placement = prefs_get_win_placement();
 
     int pos = 1;
-    for (pos = 1; pos<4; pos++) {
+    for (pos = 1; pos < 4; pos++) {
         if (placement->titlebar_pos == pos) {
-            placement->titlebar_pos = pos+1;
+            placement->titlebar_pos = pos + 1;
 
-            if (placement->mainwin_pos == pos+1) {
+            if (placement->mainwin_pos == pos + 1) {
                 placement->mainwin_pos = pos;
-            } else if (placement->statusbar_pos == pos+1) {
+            } else if (placement->statusbar_pos == pos + 1) {
                 placement->statusbar_pos = pos;
-            } else if (placement->inputwin_pos == pos+1) {
+            } else if (placement->inputwin_pos == pos + 1) {
                 placement->inputwin_pos = pos;
             }
 
@@ -1612,18 +1614,18 @@ prefs_titlebar_pos_down(void)
 gboolean
 prefs_mainwin_pos_down(void)
 {
-    ProfWinPlacement *placement = prefs_get_win_placement();
+    ProfWinPlacement* placement = prefs_get_win_placement();
 
     int pos = 1;
-    for (pos = 1; pos<4; pos++) {
+    for (pos = 1; pos < 4; pos++) {
         if (placement->mainwin_pos == pos) {
-            placement->mainwin_pos = pos+1;
+            placement->mainwin_pos = pos + 1;
 
-            if (placement->titlebar_pos == pos+1) {
+            if (placement->titlebar_pos == pos + 1) {
                 placement->titlebar_pos = pos;
-            } else if (placement->statusbar_pos == pos+1) {
+            } else if (placement->statusbar_pos == pos + 1) {
                 placement->statusbar_pos = pos;
-            } else if (placement->inputwin_pos == pos+1) {
+            } else if (placement->inputwin_pos == pos + 1) {
                 placement->inputwin_pos = pos;
             }
 
@@ -1640,18 +1642,18 @@ prefs_mainwin_pos_down(void)
 gboolean
 prefs_statusbar_pos_down(void)
 {
-    ProfWinPlacement *placement = prefs_get_win_placement();
+    ProfWinPlacement* placement = prefs_get_win_placement();
 
     int pos = 1;
-    for (pos = 1; pos<4; pos++) {
+    for (pos = 1; pos < 4; pos++) {
         if (placement->statusbar_pos == pos) {
-            placement->statusbar_pos = pos+1;
+            placement->statusbar_pos = pos + 1;
 
-            if (placement->titlebar_pos == pos+1) {
+            if (placement->titlebar_pos == pos + 1) {
                 placement->titlebar_pos = pos;
-            } else if (placement->mainwin_pos == pos+1) {
+            } else if (placement->mainwin_pos == pos + 1) {
                 placement->mainwin_pos = pos;
-            } else if (placement->inputwin_pos == pos+1) {
+            } else if (placement->inputwin_pos == pos + 1) {
                 placement->inputwin_pos = pos;
             }
 
@@ -1668,18 +1670,18 @@ prefs_statusbar_pos_down(void)
 gboolean
 prefs_inputwin_pos_down(void)
 {
-    ProfWinPlacement *placement = prefs_get_win_placement();
+    ProfWinPlacement* placement = prefs_get_win_placement();
 
     int pos = 1;
-    for (pos = 1; pos<4; pos++) {
+    for (pos = 1; pos < 4; pos++) {
         if (placement->inputwin_pos == pos) {
-            placement->inputwin_pos = pos+1;
+            placement->inputwin_pos = pos + 1;
 
-            if (placement->titlebar_pos == pos+1) {
+            if (placement->titlebar_pos == pos + 1) {
                 placement->titlebar_pos = pos;
-            } else if (placement->mainwin_pos == pos+1) {
+            } else if (placement->mainwin_pos == pos + 1) {
                 placement->mainwin_pos = pos;
-            } else if (placement->statusbar_pos == pos+1) {
+            } else if (placement->statusbar_pos == pos + 1) {
                 placement->statusbar_pos = pos;
             }
 
@@ -1694,7 +1696,7 @@ prefs_inputwin_pos_down(void)
 }
 
 gboolean
-prefs_add_alias(const char *const name, const char *const value)
+prefs_add_alias(const char* const name, const char* const value)
 {
     if (g_key_file_has_key(prefs, PREF_GROUP_ALIAS, name, NULL)) {
         return FALSE;
@@ -1705,14 +1707,13 @@ prefs_add_alias(const char *const name, const char *const value)
 }
 
 char*
-prefs_get_alias(const char *const name)
+prefs_get_alias(const char* const name)
 {
     return g_key_file_get_string(prefs, PREF_GROUP_ALIAS, name, NULL);
-
 }
 
 gboolean
-prefs_remove_alias(const char *const name)
+prefs_remove_alias(const char* const name)
 {
     if (!g_key_file_has_key(prefs, PREF_GROUP_ALIAS, name, NULL)) {
         return FALSE;
@@ -1723,10 +1724,10 @@ prefs_remove_alias(const char *const name)
 }
 
 static gint
-_alias_cmp(gconstpointer *p1, gconstpointer *p2)
+_alias_cmp(gconstpointer* p1, gconstpointer* p2)
 {
-    ProfAlias *alias1 = (ProfAlias*)p1;
-    ProfAlias *alias2 = (ProfAlias*)p2;
+    ProfAlias* alias1 = (ProfAlias*)p1;
+    ProfAlias* alias2 = (ProfAlias*)p2;
 
     return strcmp(alias1->name, alias2->name);
 }
@@ -1737,16 +1738,16 @@ prefs_get_aliases(void)
     if (!g_key_file_has_group(prefs, PREF_GROUP_ALIAS)) {
         return NULL;
     } else {
-        GList *result = NULL;
+        GList* result = NULL;
         gsize len;
-        gchar **keys = g_key_file_get_keys(prefs, PREF_GROUP_ALIAS, &len, NULL);
+        gchar** keys = g_key_file_get_keys(prefs, PREF_GROUP_ALIAS, &len, NULL);
         int i;
         for (i = 0; i < len; i++) {
-            char *name = keys[i];
-            char *value = g_key_file_get_string(prefs, PREF_GROUP_ALIAS, name, NULL);
+            char* name = keys[i];
+            char* value = g_key_file_get_string(prefs, PREF_GROUP_ALIAS, name, NULL);
 
             if (value) {
-                ProfAlias *alias = malloc(sizeof(struct prof_alias_t));
+                ProfAlias* alias = malloc(sizeof(struct prof_alias_t));
                 alias->name = strdup(name);
                 alias->value = strdup(value);
 
@@ -1763,7 +1764,7 @@ prefs_get_aliases(void)
 }
 
 void
-_free_alias(ProfAlias *alias)
+_free_alias(ProfAlias* alias)
 {
     FREE_SET_NULL(alias->name);
     FREE_SET_NULL(alias->value);
@@ -1771,7 +1772,7 @@ _free_alias(ProfAlias *alias)
 }
 
 void
-prefs_free_aliases(GList *aliases)
+prefs_free_aliases(GList* aliases)
 {
     g_list_free_full(aliases, (GDestroyNotify)_free_alias);
 }
@@ -1780,9 +1781,9 @@ static void
 _save_prefs(void)
 {
     gsize g_data_size;
-    gchar *g_prefs_data = g_key_file_to_data(prefs, &g_data_size, NULL);
-    gchar *base = g_path_get_dirname(prefs_loc);
-    gchar *true_loc = get_file_or_linked(prefs_loc, base);
+    gchar* g_prefs_data = g_key_file_to_data(prefs, &g_data_size, NULL);
+    gchar* base = g_path_get_dirname(prefs_loc);
+    gchar* true_loc = get_file_or_linked(prefs_loc, base);
 
     g_file_set_contents(true_loc, g_prefs_data, g_data_size, NULL);
     g_chmod(prefs_loc, S_IRUSR | S_IWUSR);
@@ -1798,146 +1799,145 @@ _save_prefs(void)
 static const char*
 _get_group(preference_t pref)
 {
-    switch (pref)
-    {
-        case PREF_CLEAR_PERSIST_HISTORY:
-        case PREF_SPLASH:
-        case PREF_BEEP:
-        case PREF_THEME:
-        case PREF_VERCHECK:
-        case PREF_WINTITLE_SHOW:
-        case PREF_WINTITLE_GOODBYE:
-        case PREF_FLASH:
-        case PREF_INTYPE:
-        case PREF_HISTORY:
-        case PREF_OCCUPANTS:
-        case PREF_OCCUPANTS_JID:
-        case PREF_OCCUPANTS_WRAP:
-        case PREF_STATUSES:
-        case PREF_STATUSES_CONSOLE:
-        case PREF_STATUSES_CHAT:
-        case PREF_STATUSES_MUC:
-        case PREF_MUC_PRIVILEGES:
-        case PREF_PRESENCE:
-        case PREF_WRAP:
-        case PREF_TIME_CONSOLE:
-        case PREF_TIME_CHAT:
-        case PREF_TIME_MUC:
-        case PREF_TIME_CONFIG:
-        case PREF_TIME_PRIVATE:
-        case PREF_TIME_XMLCONSOLE:
-        case PREF_TIME_STATUSBAR:
-        case PREF_TIME_LASTACTIVITY:
-        case PREF_ROSTER:
-        case PREF_ROSTER_OFFLINE:
-        case PREF_ROSTER_RESOURCE:
-        case PREF_ROSTER_PRESENCE:
-        case PREF_ROSTER_STATUS:
-        case PREF_ROSTER_EMPTY:
-        case PREF_ROSTER_BY:
-        case PREF_ROSTER_ORDER:
-        case PREF_ROSTER_UNREAD:
-        case PREF_ROSTER_COUNT:
-        case PREF_ROSTER_COUNT_ZERO:
-        case PREF_ROSTER_PRIORITY:
-        case PREF_ROSTER_WRAP:
-        case PREF_ROSTER_RESOURCE_JOIN:
-        case PREF_ROSTER_CONTACTS:
-        case PREF_ROSTER_UNSUBSCRIBED:
-        case PREF_ROSTER_ROOMS:
-        case PREF_ROSTER_ROOMS_POS:
-        case PREF_ROSTER_ROOMS_BY:
-        case PREF_ROSTER_ROOMS_ORDER:
-        case PREF_ROSTER_ROOMS_UNREAD:
-        case PREF_ROSTER_ROOMS_SERVER:
-        case PREF_ROSTER_ROOMS_USE_AS_NAME:
-        case PREF_ROSTER_PRIVATE:
-        case PREF_RESOURCE_TITLE:
-        case PREF_RESOURCE_MESSAGE:
-        case PREF_ENC_WARN:
-        case PREF_INPBLOCK_DYNAMIC:
-        case PREF_TLS_SHOW:
-        case PREF_CONSOLE_MUC:
-        case PREF_CONSOLE_PRIVATE:
-        case PREF_CONSOLE_CHAT:
-        case PREF_COLOR_NICK:
-        case PREF_COLOR_NICK_OWN:
-        case PREF_ROSTER_COLOR_NICK:
-        case PREF_OCCUPANTS_COLOR_NICK:
-        case PREF_STATUSBAR_SHOW_NAME:
-        case PREF_STATUSBAR_SHOW_NUMBER:
-        case PREF_STATUSBAR_SHOW_READ:
-        case PREF_STATUSBAR_SELF:
-        case PREF_STATUSBAR_CHAT:
-        case PREF_STATUSBAR_ROOM:
-        case PREF_TITLEBAR_MUC_TITLE_JID:
-        case PREF_TITLEBAR_MUC_TITLE_NAME:
-        case PREF_SLASH_GUARD:
-            return PREF_GROUP_UI;
-        case PREF_STATES:
-        case PREF_OUTTYPE:
-            return PREF_GROUP_CHATSTATES;
-        case PREF_NOTIFY_TYPING:
-        case PREF_NOTIFY_TYPING_CURRENT:
-        case PREF_NOTIFY_CHAT:
-        case PREF_NOTIFY_CHAT_CURRENT:
-        case PREF_NOTIFY_CHAT_TEXT:
-        case PREF_NOTIFY_ROOM:
-        case PREF_NOTIFY_ROOM_MENTION:
-        case PREF_NOTIFY_ROOM_TRIGGER:
-        case PREF_NOTIFY_ROOM_CURRENT:
-        case PREF_NOTIFY_ROOM_TEXT:
-        case PREF_NOTIFY_INVITE:
-        case PREF_NOTIFY_SUB:
-        case PREF_NOTIFY_MENTION_CASE_SENSITIVE:
-        case PREF_NOTIFY_MENTION_WHOLE_WORD:
-        case PREF_TRAY:
-        case PREF_TRAY_READ:
-        case PREF_ADV_NOTIFY_DISCO_OR_VERSION:
-            return PREF_GROUP_NOTIFICATIONS;
-        case PREF_CHLOG:
-        case PREF_GRLOG:
-        case PREF_LOG_ROTATE:
-        case PREF_LOG_SHARED:
-            return PREF_GROUP_LOGGING;
-        case PREF_AVATAR_CMD:
-        case PREF_URL_OPEN_CMD:
-        case PREF_URL_SAVE_CMD:
-            return PREF_GROUP_EXECUTABLES;
-        case PREF_AUTOAWAY_CHECK:
-        case PREF_AUTOAWAY_MODE:
-        case PREF_AUTOAWAY_MESSAGE:
-        case PREF_AUTOXA_MESSAGE:
-        case PREF_LASTACTIVITY:
-            return PREF_GROUP_PRESENCE;
-        case PREF_CONNECT_ACCOUNT:
-        case PREF_DEFAULT_ACCOUNT:
-        case PREF_CARBONS:
-        case PREF_RECEIPTS_SEND:
-        case PREF_RECEIPTS_REQUEST:
-        case PREF_REVEAL_OS:
-        case PREF_TLS_CERTPATH:
-        case PREF_CORRECTION_ALLOW:
-        case PREF_MAM:
-            return PREF_GROUP_CONNECTION;
-        case PREF_OTR_LOG:
-        case PREF_OTR_POLICY:
-        case PREF_OTR_SENDFILE:
-            return PREF_GROUP_OTR;
-        case PREF_PGP_LOG:
-        case PREF_PGP_SENDFILE:
-            return PREF_GROUP_PGP;
-        case PREF_BOOKMARK_INVITE:
-        case PREF_ROOM_LIST_CACHE:
-            return PREF_GROUP_MUC;
-        case PREF_PLUGINS_SOURCEPATH:
-            return PREF_GROUP_PLUGINS;
-        case PREF_OMEMO_LOG:
-        case PREF_OMEMO_POLICY:
-        case PREF_OMEMO_SENDFILE:
-            return PREF_GROUP_OMEMO;
-        default:
-            return NULL;
+    switch (pref) {
+    case PREF_CLEAR_PERSIST_HISTORY:
+    case PREF_SPLASH:
+    case PREF_BEEP:
+    case PREF_THEME:
+    case PREF_VERCHECK:
+    case PREF_WINTITLE_SHOW:
+    case PREF_WINTITLE_GOODBYE:
+    case PREF_FLASH:
+    case PREF_INTYPE:
+    case PREF_HISTORY:
+    case PREF_OCCUPANTS:
+    case PREF_OCCUPANTS_JID:
+    case PREF_OCCUPANTS_WRAP:
+    case PREF_STATUSES:
+    case PREF_STATUSES_CONSOLE:
+    case PREF_STATUSES_CHAT:
+    case PREF_STATUSES_MUC:
+    case PREF_MUC_PRIVILEGES:
+    case PREF_PRESENCE:
+    case PREF_WRAP:
+    case PREF_TIME_CONSOLE:
+    case PREF_TIME_CHAT:
+    case PREF_TIME_MUC:
+    case PREF_TIME_CONFIG:
+    case PREF_TIME_PRIVATE:
+    case PREF_TIME_XMLCONSOLE:
+    case PREF_TIME_STATUSBAR:
+    case PREF_TIME_LASTACTIVITY:
+    case PREF_ROSTER:
+    case PREF_ROSTER_OFFLINE:
+    case PREF_ROSTER_RESOURCE:
+    case PREF_ROSTER_PRESENCE:
+    case PREF_ROSTER_STATUS:
+    case PREF_ROSTER_EMPTY:
+    case PREF_ROSTER_BY:
+    case PREF_ROSTER_ORDER:
+    case PREF_ROSTER_UNREAD:
+    case PREF_ROSTER_COUNT:
+    case PREF_ROSTER_COUNT_ZERO:
+    case PREF_ROSTER_PRIORITY:
+    case PREF_ROSTER_WRAP:
+    case PREF_ROSTER_RESOURCE_JOIN:
+    case PREF_ROSTER_CONTACTS:
+    case PREF_ROSTER_UNSUBSCRIBED:
+    case PREF_ROSTER_ROOMS:
+    case PREF_ROSTER_ROOMS_POS:
+    case PREF_ROSTER_ROOMS_BY:
+    case PREF_ROSTER_ROOMS_ORDER:
+    case PREF_ROSTER_ROOMS_UNREAD:
+    case PREF_ROSTER_ROOMS_SERVER:
+    case PREF_ROSTER_ROOMS_USE_AS_NAME:
+    case PREF_ROSTER_PRIVATE:
+    case PREF_RESOURCE_TITLE:
+    case PREF_RESOURCE_MESSAGE:
+    case PREF_ENC_WARN:
+    case PREF_INPBLOCK_DYNAMIC:
+    case PREF_TLS_SHOW:
+    case PREF_CONSOLE_MUC:
+    case PREF_CONSOLE_PRIVATE:
+    case PREF_CONSOLE_CHAT:
+    case PREF_COLOR_NICK:
+    case PREF_COLOR_NICK_OWN:
+    case PREF_ROSTER_COLOR_NICK:
+    case PREF_OCCUPANTS_COLOR_NICK:
+    case PREF_STATUSBAR_SHOW_NAME:
+    case PREF_STATUSBAR_SHOW_NUMBER:
+    case PREF_STATUSBAR_SHOW_READ:
+    case PREF_STATUSBAR_SELF:
+    case PREF_STATUSBAR_CHAT:
+    case PREF_STATUSBAR_ROOM:
+    case PREF_TITLEBAR_MUC_TITLE_JID:
+    case PREF_TITLEBAR_MUC_TITLE_NAME:
+    case PREF_SLASH_GUARD:
+        return PREF_GROUP_UI;
+    case PREF_STATES:
+    case PREF_OUTTYPE:
+        return PREF_GROUP_CHATSTATES;
+    case PREF_NOTIFY_TYPING:
+    case PREF_NOTIFY_TYPING_CURRENT:
+    case PREF_NOTIFY_CHAT:
+    case PREF_NOTIFY_CHAT_CURRENT:
+    case PREF_NOTIFY_CHAT_TEXT:
+    case PREF_NOTIFY_ROOM:
+    case PREF_NOTIFY_ROOM_MENTION:
+    case PREF_NOTIFY_ROOM_TRIGGER:
+    case PREF_NOTIFY_ROOM_CURRENT:
+    case PREF_NOTIFY_ROOM_TEXT:
+    case PREF_NOTIFY_INVITE:
+    case PREF_NOTIFY_SUB:
+    case PREF_NOTIFY_MENTION_CASE_SENSITIVE:
+    case PREF_NOTIFY_MENTION_WHOLE_WORD:
+    case PREF_TRAY:
+    case PREF_TRAY_READ:
+    case PREF_ADV_NOTIFY_DISCO_OR_VERSION:
+        return PREF_GROUP_NOTIFICATIONS;
+    case PREF_CHLOG:
+    case PREF_GRLOG:
+    case PREF_LOG_ROTATE:
+    case PREF_LOG_SHARED:
+        return PREF_GROUP_LOGGING;
+    case PREF_AVATAR_CMD:
+    case PREF_URL_OPEN_CMD:
+    case PREF_URL_SAVE_CMD:
+        return PREF_GROUP_EXECUTABLES;
+    case PREF_AUTOAWAY_CHECK:
+    case PREF_AUTOAWAY_MODE:
+    case PREF_AUTOAWAY_MESSAGE:
+    case PREF_AUTOXA_MESSAGE:
+    case PREF_LASTACTIVITY:
+        return PREF_GROUP_PRESENCE;
+    case PREF_CONNECT_ACCOUNT:
+    case PREF_DEFAULT_ACCOUNT:
+    case PREF_CARBONS:
+    case PREF_RECEIPTS_SEND:
+    case PREF_RECEIPTS_REQUEST:
+    case PREF_REVEAL_OS:
+    case PREF_TLS_CERTPATH:
+    case PREF_CORRECTION_ALLOW:
+    case PREF_MAM:
+        return PREF_GROUP_CONNECTION;
+    case PREF_OTR_LOG:
+    case PREF_OTR_POLICY:
+    case PREF_OTR_SENDFILE:
+        return PREF_GROUP_OTR;
+    case PREF_PGP_LOG:
+    case PREF_PGP_SENDFILE:
+        return PREF_GROUP_PGP;
+    case PREF_BOOKMARK_INVITE:
+    case PREF_ROOM_LIST_CACHE:
+        return PREF_GROUP_MUC;
+    case PREF_PLUGINS_SOURCEPATH:
+        return PREF_GROUP_PLUGINS;
+    case PREF_OMEMO_LOG:
+    case PREF_OMEMO_POLICY:
+    case PREF_OMEMO_SENDFILE:
+        return PREF_GROUP_OMEMO;
+    default:
+        return NULL;
     }
 }
 
@@ -1946,258 +1946,257 @@ _get_group(preference_t pref)
 static const char*
 _get_key(preference_t pref)
 {
-    switch (pref)
-    {
-        case PREF_CLEAR_PERSIST_HISTORY:
-            return "clear.persist_history";
-        case PREF_SPLASH:
-            return "splash";
-        case PREF_BEEP:
-            return "beep";
-        case PREF_THEME:
-            return "theme";
-        case PREF_VERCHECK:
-            return "vercheck";
-        case PREF_WINTITLE_SHOW:
-            return "wintitle.show";
-        case PREF_WINTITLE_GOODBYE:
-            return "wintitle.goodbye";
-        case PREF_FLASH:
-            return "flash";
-        case PREF_TRAY:
-            return "tray";
-        case PREF_TRAY_READ:
-            return "tray.read";
-        case PREF_ADV_NOTIFY_DISCO_OR_VERSION:
-            return "adv.notify.discoversion";
-        case PREF_INTYPE:
-            return "intype";
-        case PREF_HISTORY:
-            return "history";
-        case PREF_CARBONS:
-            return "carbons";
-        case PREF_RECEIPTS_SEND:
-            return "receipts.send";
-        case PREF_RECEIPTS_REQUEST:
-            return "receipts.request";
-        case PREF_REVEAL_OS:
-            return "reveal.os";
-        case PREF_OCCUPANTS:
-            return "occupants";
-        case PREF_OCCUPANTS_JID:
-            return "occupants.jid";
-        case PREF_OCCUPANTS_WRAP:
-            return "occupants.wrap";
-        case PREF_MUC_PRIVILEGES:
-            return "privileges";
-        case PREF_STATUSES:
-            return "statuses";
-        case PREF_STATUSES_CONSOLE:
-            return "statuses.console";
-        case PREF_STATUSES_CHAT:
-            return "statuses.chat";
-        case PREF_STATUSES_MUC:
-            return "statuses.muc";
-        case PREF_STATES:
-            return "enabled";
-        case PREF_OUTTYPE:
-            return "outtype";
-        case PREF_NOTIFY_TYPING:
-            return "typing";
-        case PREF_NOTIFY_TYPING_CURRENT:
-            return "typing.current";
-        case PREF_NOTIFY_CHAT:
-            return "message";
-        case PREF_NOTIFY_CHAT_CURRENT:
-            return "message.current";
-        case PREF_NOTIFY_CHAT_TEXT:
-            return "message.text";
-        case PREF_NOTIFY_ROOM:
-            return "room";
-        case PREF_NOTIFY_ROOM_TRIGGER:
-            return "room.trigger";
-        case PREF_NOTIFY_ROOM_MENTION:
-            return "room.mention";
-        case PREF_NOTIFY_ROOM_CURRENT:
-            return "room.current";
-        case PREF_NOTIFY_ROOM_TEXT:
-            return "room.text";
-        case PREF_NOTIFY_INVITE:
-            return "invite";
-        case PREF_NOTIFY_SUB:
-            return "sub";
-        case PREF_NOTIFY_MENTION_CASE_SENSITIVE:
-            return "room.mention.casesensitive";
-        case PREF_NOTIFY_MENTION_WHOLE_WORD:
-            return "room.mention.wholeword";
-        case PREF_CHLOG:
-            return "chlog";
-        case PREF_GRLOG:
-            return "grlog";
-        case PREF_AUTOAWAY_CHECK:
-            return "autoaway.check";
-        case PREF_AUTOAWAY_MODE:
-            return "autoaway.mode";
-        case PREF_AUTOAWAY_MESSAGE:
-            return "autoaway.awaymessage";
-        case PREF_AUTOXA_MESSAGE:
-            return "autoaway.xamessage";
-        case PREF_CONNECT_ACCOUNT:
-            return "account";
-        case PREF_DEFAULT_ACCOUNT:
-            return "defaccount";
-        case PREF_OTR_LOG:
-            return "log";
-        case PREF_OTR_POLICY:
-            return "policy";
-        case PREF_OTR_SENDFILE:
-            return "sendfile";
-        case PREF_LOG_ROTATE:
-            return "rotate";
-        case PREF_LOG_SHARED:
-            return "shared";
-        case PREF_PRESENCE:
-            return "presence";
-        case PREF_WRAP:
-            return "wrap";
-        case PREF_TIME_CONSOLE:
-            return "time.console";
-        case PREF_TIME_CHAT:
-            return "time.chat";
-        case PREF_TIME_MUC:
-            return "time.muc";
-        case PREF_TIME_CONFIG:
-            return "time.config";
-        case PREF_TIME_PRIVATE:
-            return "time.private";
-        case PREF_TIME_XMLCONSOLE:
-            return "time.xmlconsole";
-        case PREF_TIME_STATUSBAR:
-            return "time.statusbar";
-        case PREF_TIME_LASTACTIVITY:
-            return "time.lastactivity";
-        case PREF_ROSTER:
-            return "roster";
-        case PREF_ROSTER_OFFLINE:
-            return "roster.offline";
-        case PREF_ROSTER_RESOURCE:
-            return "roster.resource";
-        case PREF_ROSTER_PRESENCE:
-            return "roster.presence";
-        case PREF_ROSTER_STATUS:
-            return "roster.status";
-        case PREF_ROSTER_EMPTY:
-            return "roster.empty";
-        case PREF_ROSTER_BY:
-            return "roster.by";
-        case PREF_ROSTER_ORDER:
-            return "roster.order";
-        case PREF_ROSTER_UNREAD:
-            return "roster.unread";
-        case PREF_ROSTER_COUNT:
-            return "roster.count";
-        case PREF_ROSTER_COUNT_ZERO:
-            return "roster.count.zero";
-        case PREF_ROSTER_PRIORITY:
-            return "roster.priority";
-        case PREF_ROSTER_WRAP:
-            return "roster.wrap";
-        case PREF_ROSTER_RESOURCE_JOIN:
-            return "roster.resource.join";
-        case PREF_ROSTER_CONTACTS:
-            return "roster.contacts";
-        case PREF_ROSTER_UNSUBSCRIBED:
-            return "roster.unsubscribed";
-        case PREF_ROSTER_ROOMS:
-            return "roster.rooms";
-        case PREF_ROSTER_ROOMS_POS:
-            return "roster.rooms.pos";
-        case PREF_ROSTER_ROOMS_BY:
-            return "roster.rooms.by";
-        case PREF_ROSTER_ROOMS_ORDER:
-            return "roster.rooms.order";
-        case PREF_ROSTER_ROOMS_UNREAD:
-            return "roster.rooms.unread";
-        case PREF_ROSTER_ROOMS_SERVER:
-            return "roster.rooms.server";
-        case PREF_ROSTER_ROOMS_USE_AS_NAME:
-            return "roster.rooms.use.name";
-        case PREF_ROSTER_PRIVATE:
-            return "roster.private";
-        case PREF_RESOURCE_TITLE:
-            return "resource.title";
-        case PREF_RESOURCE_MESSAGE:
-            return "resource.message";
-        case PREF_INPBLOCK_DYNAMIC:
-            return "inpblock.dynamic";
-        case PREF_ENC_WARN:
-            return "enc.warn";
-        case PREF_TITLEBAR_MUC_TITLE_JID:
-            return "titlebar.muc.title.jid";
-        case PREF_TITLEBAR_MUC_TITLE_NAME:
-            return "titlebar.muc.title.name";
-        case PREF_PGP_LOG:
-            return "log";
-        case PREF_PGP_SENDFILE:
-            return "sendfile";
-        case PREF_TLS_CERTPATH:
-            return "tls.certpath";
-        case PREF_TLS_SHOW:
-            return "tls.show";
-        case PREF_LASTACTIVITY:
-            return "lastactivity";
-        case PREF_CONSOLE_MUC:
-            return "console.muc";
-        case PREF_CONSOLE_PRIVATE:
-            return "console.private";
-        case PREF_CONSOLE_CHAT:
-            return "console.chat";
-        case PREF_COLOR_NICK:
-            return "color.nick";
-        case PREF_COLOR_NICK_OWN:
-            return "color.nick.own";
-        case PREF_ROSTER_COLOR_NICK:
-            return "color.roster.nick";
-        case PREF_OCCUPANTS_COLOR_NICK:
-            return "color.occupants.nick";
-        case PREF_BOOKMARK_INVITE:
-            return "bookmark.invite";
-        case PREF_PLUGINS_SOURCEPATH:
-            return "sourcepath";
-        case PREF_ROOM_LIST_CACHE:
-            return "rooms.cache";
-        case PREF_STATUSBAR_SHOW_NAME:
-            return "statusbar.show.name";
-        case PREF_STATUSBAR_SHOW_NUMBER:
-            return "statusbar.show.number";
-        case PREF_STATUSBAR_SHOW_READ:
-            return "statusbar.show.read";
-        case PREF_STATUSBAR_SELF:
-            return "statusbar.self";
-        case PREF_STATUSBAR_CHAT:
-            return "statusbar.chat";
-        case PREF_STATUSBAR_ROOM:
-            return "statusbar.room";
-        case PREF_OMEMO_LOG:
-            return "log";
-        case PREF_OMEMO_POLICY:
-            return "policy";
-        case PREF_OMEMO_SENDFILE:
-            return "sendfile";
-        case PREF_CORRECTION_ALLOW:
-            return "correction.allow";
-        case PREF_AVATAR_CMD:
-            return "avatar.cmd";
-        case PREF_SLASH_GUARD:
-            return "slashguard";
-        case PREF_MAM:
-            return "mam";
-        case PREF_URL_OPEN_CMD:
-            return "url.open.cmd";
-        case PREF_URL_SAVE_CMD:
-            return "url.save.cmd";
-        default:
-            return NULL;
+    switch (pref) {
+    case PREF_CLEAR_PERSIST_HISTORY:
+        return "clear.persist_history";
+    case PREF_SPLASH:
+        return "splash";
+    case PREF_BEEP:
+        return "beep";
+    case PREF_THEME:
+        return "theme";
+    case PREF_VERCHECK:
+        return "vercheck";
+    case PREF_WINTITLE_SHOW:
+        return "wintitle.show";
+    case PREF_WINTITLE_GOODBYE:
+        return "wintitle.goodbye";
+    case PREF_FLASH:
+        return "flash";
+    case PREF_TRAY:
+        return "tray";
+    case PREF_TRAY_READ:
+        return "tray.read";
+    case PREF_ADV_NOTIFY_DISCO_OR_VERSION:
+        return "adv.notify.discoversion";
+    case PREF_INTYPE:
+        return "intype";
+    case PREF_HISTORY:
+        return "history";
+    case PREF_CARBONS:
+        return "carbons";
+    case PREF_RECEIPTS_SEND:
+        return "receipts.send";
+    case PREF_RECEIPTS_REQUEST:
+        return "receipts.request";
+    case PREF_REVEAL_OS:
+        return "reveal.os";
+    case PREF_OCCUPANTS:
+        return "occupants";
+    case PREF_OCCUPANTS_JID:
+        return "occupants.jid";
+    case PREF_OCCUPANTS_WRAP:
+        return "occupants.wrap";
+    case PREF_MUC_PRIVILEGES:
+        return "privileges";
+    case PREF_STATUSES:
+        return "statuses";
+    case PREF_STATUSES_CONSOLE:
+        return "statuses.console";
+    case PREF_STATUSES_CHAT:
+        return "statuses.chat";
+    case PREF_STATUSES_MUC:
+        return "statuses.muc";
+    case PREF_STATES:
+        return "enabled";
+    case PREF_OUTTYPE:
+        return "outtype";
+    case PREF_NOTIFY_TYPING:
+        return "typing";
+    case PREF_NOTIFY_TYPING_CURRENT:
+        return "typing.current";
+    case PREF_NOTIFY_CHAT:
+        return "message";
+    case PREF_NOTIFY_CHAT_CURRENT:
+        return "message.current";
+    case PREF_NOTIFY_CHAT_TEXT:
+        return "message.text";
+    case PREF_NOTIFY_ROOM:
+        return "room";
+    case PREF_NOTIFY_ROOM_TRIGGER:
+        return "room.trigger";
+    case PREF_NOTIFY_ROOM_MENTION:
+        return "room.mention";
+    case PREF_NOTIFY_ROOM_CURRENT:
+        return "room.current";
+    case PREF_NOTIFY_ROOM_TEXT:
+        return "room.text";
+    case PREF_NOTIFY_INVITE:
+        return "invite";
+    case PREF_NOTIFY_SUB:
+        return "sub";
+    case PREF_NOTIFY_MENTION_CASE_SENSITIVE:
+        return "room.mention.casesensitive";
+    case PREF_NOTIFY_MENTION_WHOLE_WORD:
+        return "room.mention.wholeword";
+    case PREF_CHLOG:
+        return "chlog";
+    case PREF_GRLOG:
+        return "grlog";
+    case PREF_AUTOAWAY_CHECK:
+        return "autoaway.check";
+    case PREF_AUTOAWAY_MODE:
+        return "autoaway.mode";
+    case PREF_AUTOAWAY_MESSAGE:
+        return "autoaway.awaymessage";
+    case PREF_AUTOXA_MESSAGE:
+        return "autoaway.xamessage";
+    case PREF_CONNECT_ACCOUNT:
+        return "account";
+    case PREF_DEFAULT_ACCOUNT:
+        return "defaccount";
+    case PREF_OTR_LOG:
+        return "log";
+    case PREF_OTR_POLICY:
+        return "policy";
+    case PREF_OTR_SENDFILE:
+        return "sendfile";
+    case PREF_LOG_ROTATE:
+        return "rotate";
+    case PREF_LOG_SHARED:
+        return "shared";
+    case PREF_PRESENCE:
+        return "presence";
+    case PREF_WRAP:
+        return "wrap";
+    case PREF_TIME_CONSOLE:
+        return "time.console";
+    case PREF_TIME_CHAT:
+        return "time.chat";
+    case PREF_TIME_MUC:
+        return "time.muc";
+    case PREF_TIME_CONFIG:
+        return "time.config";
+    case PREF_TIME_PRIVATE:
+        return "time.private";
+    case PREF_TIME_XMLCONSOLE:
+        return "time.xmlconsole";
+    case PREF_TIME_STATUSBAR:
+        return "time.statusbar";
+    case PREF_TIME_LASTACTIVITY:
+        return "time.lastactivity";
+    case PREF_ROSTER:
+        return "roster";
+    case PREF_ROSTER_OFFLINE:
+        return "roster.offline";
+    case PREF_ROSTER_RESOURCE:
+        return "roster.resource";
+    case PREF_ROSTER_PRESENCE:
+        return "roster.presence";
+    case PREF_ROSTER_STATUS:
+        return "roster.status";
+    case PREF_ROSTER_EMPTY:
+        return "roster.empty";
+    case PREF_ROSTER_BY:
+        return "roster.by";
+    case PREF_ROSTER_ORDER:
+        return "roster.order";
+    case PREF_ROSTER_UNREAD:
+        return "roster.unread";
+    case PREF_ROSTER_COUNT:
+        return "roster.count";
+    case PREF_ROSTER_COUNT_ZERO:
+        return "roster.count.zero";
+    case PREF_ROSTER_PRIORITY:
+        return "roster.priority";
+    case PREF_ROSTER_WRAP:
+        return "roster.wrap";
+    case PREF_ROSTER_RESOURCE_JOIN:
+        return "roster.resource.join";
+    case PREF_ROSTER_CONTACTS:
+        return "roster.contacts";
+    case PREF_ROSTER_UNSUBSCRIBED:
+        return "roster.unsubscribed";
+    case PREF_ROSTER_ROOMS:
+        return "roster.rooms";
+    case PREF_ROSTER_ROOMS_POS:
+        return "roster.rooms.pos";
+    case PREF_ROSTER_ROOMS_BY:
+        return "roster.rooms.by";
+    case PREF_ROSTER_ROOMS_ORDER:
+        return "roster.rooms.order";
+    case PREF_ROSTER_ROOMS_UNREAD:
+        return "roster.rooms.unread";
+    case PREF_ROSTER_ROOMS_SERVER:
+        return "roster.rooms.server";
+    case PREF_ROSTER_ROOMS_USE_AS_NAME:
+        return "roster.rooms.use.name";
+    case PREF_ROSTER_PRIVATE:
+        return "roster.private";
+    case PREF_RESOURCE_TITLE:
+        return "resource.title";
+    case PREF_RESOURCE_MESSAGE:
+        return "resource.message";
+    case PREF_INPBLOCK_DYNAMIC:
+        return "inpblock.dynamic";
+    case PREF_ENC_WARN:
+        return "enc.warn";
+    case PREF_TITLEBAR_MUC_TITLE_JID:
+        return "titlebar.muc.title.jid";
+    case PREF_TITLEBAR_MUC_TITLE_NAME:
+        return "titlebar.muc.title.name";
+    case PREF_PGP_LOG:
+        return "log";
+    case PREF_PGP_SENDFILE:
+        return "sendfile";
+    case PREF_TLS_CERTPATH:
+        return "tls.certpath";
+    case PREF_TLS_SHOW:
+        return "tls.show";
+    case PREF_LASTACTIVITY:
+        return "lastactivity";
+    case PREF_CONSOLE_MUC:
+        return "console.muc";
+    case PREF_CONSOLE_PRIVATE:
+        return "console.private";
+    case PREF_CONSOLE_CHAT:
+        return "console.chat";
+    case PREF_COLOR_NICK:
+        return "color.nick";
+    case PREF_COLOR_NICK_OWN:
+        return "color.nick.own";
+    case PREF_ROSTER_COLOR_NICK:
+        return "color.roster.nick";
+    case PREF_OCCUPANTS_COLOR_NICK:
+        return "color.occupants.nick";
+    case PREF_BOOKMARK_INVITE:
+        return "bookmark.invite";
+    case PREF_PLUGINS_SOURCEPATH:
+        return "sourcepath";
+    case PREF_ROOM_LIST_CACHE:
+        return "rooms.cache";
+    case PREF_STATUSBAR_SHOW_NAME:
+        return "statusbar.show.name";
+    case PREF_STATUSBAR_SHOW_NUMBER:
+        return "statusbar.show.number";
+    case PREF_STATUSBAR_SHOW_READ:
+        return "statusbar.show.read";
+    case PREF_STATUSBAR_SELF:
+        return "statusbar.self";
+    case PREF_STATUSBAR_CHAT:
+        return "statusbar.chat";
+    case PREF_STATUSBAR_ROOM:
+        return "statusbar.room";
+    case PREF_OMEMO_LOG:
+        return "log";
+    case PREF_OMEMO_POLICY:
+        return "policy";
+    case PREF_OMEMO_SENDFILE:
+        return "sendfile";
+    case PREF_CORRECTION_ALLOW:
+        return "correction.allow";
+    case PREF_AVATAR_CMD:
+        return "avatar.cmd";
+    case PREF_SLASH_GUARD:
+        return "slashguard";
+    case PREF_MAM:
+        return "mam";
+    case PREF_URL_OPEN_CMD:
+        return "url.open.cmd";
+    case PREF_URL_SAVE_CMD:
+        return "url.save.cmd";
+    default:
+        return NULL;
     }
 }
 
@@ -2206,57 +2205,56 @@ _get_key(preference_t pref)
 static gboolean
 _get_default_boolean(preference_t pref)
 {
-    switch (pref)
-    {
-        case PREF_ENC_WARN:
-        case PREF_AUTOAWAY_CHECK:
-        case PREF_LOG_ROTATE:
-        case PREF_LOG_SHARED:
-        case PREF_NOTIFY_CHAT:
-        case PREF_NOTIFY_CHAT_CURRENT:
-        case PREF_NOTIFY_ROOM:
-        case PREF_NOTIFY_ROOM_CURRENT:
-        case PREF_NOTIFY_TYPING:
-        case PREF_NOTIFY_TYPING_CURRENT:
-        case PREF_NOTIFY_SUB:
-        case PREF_NOTIFY_INVITE:
-        case PREF_SPLASH:
-        case PREF_OCCUPANTS:
-        case PREF_MUC_PRIVILEGES:
-        case PREF_PRESENCE:
-        case PREF_WRAP:
-        case PREF_INPBLOCK_DYNAMIC:
-        case PREF_RESOURCE_TITLE:
-        case PREF_RESOURCE_MESSAGE:
-        case PREF_ROSTER:
-        case PREF_ROSTER_OFFLINE:
-        case PREF_ROSTER_EMPTY:
-        case PREF_ROSTER_COUNT_ZERO:
-        case PREF_ROSTER_PRIORITY:
-        case PREF_ROSTER_RESOURCE_JOIN:
-        case PREF_ROSTER_CONTACTS:
-        case PREF_ROSTER_UNSUBSCRIBED:
-        case PREF_ROSTER_ROOMS:
-        case PREF_ROSTER_ROOMS_SERVER:
-        case PREF_TLS_SHOW:
-        case PREF_LASTACTIVITY:
-        case PREF_NOTIFY_MENTION_WHOLE_WORD:
-        case PREF_TRAY_READ:
-        case PREF_BOOKMARK_INVITE:
-        case PREF_ROOM_LIST_CACHE:
-        case PREF_STATUSBAR_SHOW_NUMBER:
-        case PREF_STATUSBAR_SHOW_READ:
-        case PREF_REVEAL_OS:
-        case PREF_CORRECTION_ALLOW:
-        case PREF_RECEIPTS_SEND:
-        case PREF_CARBONS:
-        case PREF_STATES:
-        case PREF_OUTTYPE:
-        case PREF_TITLEBAR_MUC_TITLE_NAME:
-        case PREF_COLOR_NICK_OWN:
-            return TRUE;
-        default:
-            return FALSE;
+    switch (pref) {
+    case PREF_ENC_WARN:
+    case PREF_AUTOAWAY_CHECK:
+    case PREF_LOG_ROTATE:
+    case PREF_LOG_SHARED:
+    case PREF_NOTIFY_CHAT:
+    case PREF_NOTIFY_CHAT_CURRENT:
+    case PREF_NOTIFY_ROOM:
+    case PREF_NOTIFY_ROOM_CURRENT:
+    case PREF_NOTIFY_TYPING:
+    case PREF_NOTIFY_TYPING_CURRENT:
+    case PREF_NOTIFY_SUB:
+    case PREF_NOTIFY_INVITE:
+    case PREF_SPLASH:
+    case PREF_OCCUPANTS:
+    case PREF_MUC_PRIVILEGES:
+    case PREF_PRESENCE:
+    case PREF_WRAP:
+    case PREF_INPBLOCK_DYNAMIC:
+    case PREF_RESOURCE_TITLE:
+    case PREF_RESOURCE_MESSAGE:
+    case PREF_ROSTER:
+    case PREF_ROSTER_OFFLINE:
+    case PREF_ROSTER_EMPTY:
+    case PREF_ROSTER_COUNT_ZERO:
+    case PREF_ROSTER_PRIORITY:
+    case PREF_ROSTER_RESOURCE_JOIN:
+    case PREF_ROSTER_CONTACTS:
+    case PREF_ROSTER_UNSUBSCRIBED:
+    case PREF_ROSTER_ROOMS:
+    case PREF_ROSTER_ROOMS_SERVER:
+    case PREF_TLS_SHOW:
+    case PREF_LASTACTIVITY:
+    case PREF_NOTIFY_MENTION_WHOLE_WORD:
+    case PREF_TRAY_READ:
+    case PREF_BOOKMARK_INVITE:
+    case PREF_ROOM_LIST_CACHE:
+    case PREF_STATUSBAR_SHOW_NUMBER:
+    case PREF_STATUSBAR_SHOW_READ:
+    case PREF_REVEAL_OS:
+    case PREF_CORRECTION_ALLOW:
+    case PREF_RECEIPTS_SEND:
+    case PREF_CARBONS:
+    case PREF_STATES:
+    case PREF_OUTTYPE:
+    case PREF_TITLEBAR_MUC_TITLE_NAME:
+    case PREF_COLOR_NICK_OWN:
+        return TRUE;
+    default:
+        return FALSE;
     }
 }
 
@@ -2265,78 +2263,77 @@ _get_default_boolean(preference_t pref)
 static char*
 _get_default_string(preference_t pref)
 {
-    switch (pref)
-    {
-        case PREF_AUTOAWAY_MODE:
-            return "off";
-        case PREF_OTR_LOG:
-            return "redact";
-        case PREF_OTR_POLICY:
-            return "manual";
-        case PREF_STATUSES_CONSOLE:
-        case PREF_STATUSES_CHAT:
-        case PREF_STATUSES_MUC:
-            return "all";
-        case PREF_ROSTER_BY:
-            return "presence";
-        case PREF_ROSTER_COUNT:
-            return "unread";
-        case PREF_ROSTER_ORDER:
-            return "presence";
-        case PREF_ROSTER_UNREAD:
-            return "after";
-        case PREF_ROSTER_ROOMS_POS:
-            return "last";
-        case PREF_ROSTER_ROOMS_BY:
-            return "none";
-        case PREF_ROSTER_ROOMS_USE_AS_NAME:
-            return "name";
-        case PREF_ROSTER_ROOMS_ORDER:
-            return "name";
-        case PREF_ROSTER_ROOMS_UNREAD:
-            return "after";
-        case PREF_ROSTER_PRIVATE:
-            return "room";
-        case PREF_TIME_CONSOLE:
-            return "%H:%M:%S";
-        case PREF_TIME_CHAT:
-            return "%H:%M:%S";
-        case PREF_TIME_MUC:
-            return "%H:%M:%S";
-        case PREF_TIME_CONFIG:
-            return "%H:%M:%S";
-        case PREF_TIME_PRIVATE:
-            return "%H:%M:%S";
-        case PREF_TIME_XMLCONSOLE:
-            return "%H:%M:%S";
-        case PREF_TIME_STATUSBAR:
-            return "%H:%M";
-        case PREF_TIME_LASTACTIVITY:
-            return "%d/%m/%y %H:%M:%S";
-        case PREF_PGP_LOG:
-            return "redact";
-        case PREF_CONSOLE_MUC:
-        case PREF_CONSOLE_PRIVATE:
-        case PREF_CONSOLE_CHAT:
-            return "all";
-        case PREF_STATUSBAR_SELF:
-            return "fulljid";
-        case PREF_STATUSBAR_CHAT:
-            return "user";
-        case PREF_STATUSBAR_ROOM:
-            return "room";
-        case PREF_OMEMO_LOG:
-            return "redact";
-        case PREF_OMEMO_POLICY:
-            return "automatic";
-        case PREF_COLOR_NICK:
-            return "false";
-        case PREF_AVATAR_CMD:
-            return "xdg-open";
-        case PREF_URL_SAVE_CMD:
-            return "curl -o %p %u";
-        default:
-            return NULL;
+    switch (pref) {
+    case PREF_AUTOAWAY_MODE:
+        return "off";
+    case PREF_OTR_LOG:
+        return "redact";
+    case PREF_OTR_POLICY:
+        return "manual";
+    case PREF_STATUSES_CONSOLE:
+    case PREF_STATUSES_CHAT:
+    case PREF_STATUSES_MUC:
+        return "all";
+    case PREF_ROSTER_BY:
+        return "presence";
+    case PREF_ROSTER_COUNT:
+        return "unread";
+    case PREF_ROSTER_ORDER:
+        return "presence";
+    case PREF_ROSTER_UNREAD:
+        return "after";
+    case PREF_ROSTER_ROOMS_POS:
+        return "last";
+    case PREF_ROSTER_ROOMS_BY:
+        return "none";
+    case PREF_ROSTER_ROOMS_USE_AS_NAME:
+        return "name";
+    case PREF_ROSTER_ROOMS_ORDER:
+        return "name";
+    case PREF_ROSTER_ROOMS_UNREAD:
+        return "after";
+    case PREF_ROSTER_PRIVATE:
+        return "room";
+    case PREF_TIME_CONSOLE:
+        return "%H:%M:%S";
+    case PREF_TIME_CHAT:
+        return "%H:%M:%S";
+    case PREF_TIME_MUC:
+        return "%H:%M:%S";
+    case PREF_TIME_CONFIG:
+        return "%H:%M:%S";
+    case PREF_TIME_PRIVATE:
+        return "%H:%M:%S";
+    case PREF_TIME_XMLCONSOLE:
+        return "%H:%M:%S";
+    case PREF_TIME_STATUSBAR:
+        return "%H:%M";
+    case PREF_TIME_LASTACTIVITY:
+        return "%d/%m/%y %H:%M:%S";
+    case PREF_PGP_LOG:
+        return "redact";
+    case PREF_CONSOLE_MUC:
+    case PREF_CONSOLE_PRIVATE:
+    case PREF_CONSOLE_CHAT:
+        return "all";
+    case PREF_STATUSBAR_SELF:
+        return "fulljid";
+    case PREF_STATUSBAR_CHAT:
+        return "user";
+    case PREF_STATUSBAR_ROOM:
+        return "room";
+    case PREF_OMEMO_LOG:
+        return "redact";
+    case PREF_OMEMO_POLICY:
+        return "automatic";
+    case PREF_COLOR_NICK:
+        return "false";
+    case PREF_AVATAR_CMD:
+        return "xdg-open";
+    case PREF_URL_SAVE_CMD:
+        return "curl -o %p %u";
+    default:
+        return NULL;
     }
 }
 
@@ -2345,16 +2342,15 @@ _get_default_string(preference_t pref)
 static char**
 _get_default_string_list(preference_t pref)
 {
-    char **str_array = NULL;
+    char** str_array = NULL;
 
-    switch (pref)
-    {
-        case PREF_URL_OPEN_CMD:
-            str_array = g_malloc0(3);
-            str_array[0] = g_strdup("false");
-            str_array[1] = g_strdup("xdg-open %u");
-            return str_array;
-        default:
-            return NULL;
+    switch (pref) {
+    case PREF_URL_OPEN_CMD:
+        str_array = g_malloc0(3);
+        str_array[0] = g_strdup("false");
+        str_array[1] = g_strdup("xdg-open %u");
+        return str_array;
+    default:
+        return NULL;
     }
 }

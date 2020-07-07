@@ -45,24 +45,25 @@
 
 #include "ui/win_types.h"
 
-typedef struct http_upload_t {
-    char *filename;
+typedef struct http_upload_t
+{
+    char* filename;
     off_t filesize;
     curl_off_t bytes_sent;
-    char *mime_type;
-    char *get_url;
-    char *put_url;
-    ProfWin *window;
+    char* mime_type;
+    char* get_url;
+    char* put_url;
+    ProfWin* window;
     pthread_t worker;
     int cancel;
 } HTTPUpload;
 
-void* http_file_put(void *userdata);
+void* http_file_put(void* userdata);
 
 char* file_mime_type(const char* const file_name);
 off_t file_size(const char* const file_name);
 
-void http_upload_cancel_processes(ProfWin *window);
-void http_upload_add_upload(HTTPUpload *upload);
+void http_upload_cancel_processes(ProfWin* window);
+void http_upload_add_upload(HTTPUpload* upload);
 
 #endif

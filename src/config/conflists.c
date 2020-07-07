@@ -37,11 +37,11 @@
 #include <glib.h>
 
 gboolean
-conf_string_list_add(GKeyFile *keyfile, const char *const group, const char *const key, const char *const item)
+conf_string_list_add(GKeyFile* keyfile, const char* const group, const char* const key, const char* const item)
 {
     gsize length;
-    gchar **list = g_key_file_get_string_list(keyfile, group, key, &length, NULL);
-    GList *glist = NULL;
+    gchar** list = g_key_file_get_string_list(keyfile, group, key, &length, NULL);
+    GList* glist = NULL;
 
     // list found
     if (list) {
@@ -61,8 +61,8 @@ conf_string_list_add(GKeyFile *keyfile, const char *const group, const char *con
         glist = g_list_append(glist, strdup(item));
 
         // create the new list entry
-        const gchar* new_list[g_list_length(glist)+1];
-        GList *curr = glist;
+        const gchar* new_list[g_list_length(glist) + 1];
+        GList* curr = glist;
         i = 0;
         while (curr) {
             new_list[i++] = curr->data;
@@ -71,7 +71,7 @@ conf_string_list_add(GKeyFile *keyfile, const char *const group, const char *con
         new_list[i] = NULL;
         g_key_file_set_string_list(keyfile, group, key, new_list, g_list_length(glist));
 
-    // list not found
+        // list not found
     } else {
         const gchar* new_list[2];
         new_list[0] = item;
@@ -86,15 +86,15 @@ conf_string_list_add(GKeyFile *keyfile, const char *const group, const char *con
 }
 
 gboolean
-conf_string_list_remove(GKeyFile *keyfile, const char *const group, const char *const key, const char *const item)
+conf_string_list_remove(GKeyFile* keyfile, const char* const group, const char* const key, const char* const item)
 {
     gsize length;
-    gchar **list = g_key_file_get_string_list(keyfile, group, key, &length, NULL);
+    gchar** list = g_key_file_get_string_list(keyfile, group, key, &length, NULL);
 
     gboolean deleted = FALSE;
     if (list) {
         int i = 0;
-        GList *glist = NULL;
+        GList* glist = NULL;
 
         for (i = 0; i < length; i++) {
             // item found, mark as deleted
@@ -111,8 +111,8 @@ conf_string_list_remove(GKeyFile *keyfile, const char *const group, const char *
                 g_key_file_remove_key(keyfile, group, key, NULL);
             } else {
                 // create the new list entry
-                const gchar* new_list[g_list_length(glist)+1];
-                GList *curr = glist;
+                const gchar* new_list[g_list_length(glist) + 1];
+                GList* curr = glist;
                 i = 0;
                 while (curr) {
                     new_list[i++] = curr->data;

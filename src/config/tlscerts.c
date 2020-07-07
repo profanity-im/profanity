@@ -45,14 +45,14 @@
 #include "config/tlscerts.h"
 #include "tools/autocomplete.h"
 
-static char *tlscerts_loc;
-static GKeyFile *tlscerts;
+static char* tlscerts_loc;
+static GKeyFile* tlscerts;
 
 static void _save_tlscerts(void);
 
 static Autocomplete certs_ac;
 
-static char *current_fp;
+static char* current_fp;
 
 void
 tlscerts_init(void)
@@ -69,7 +69,7 @@ tlscerts_init(void)
 
     certs_ac = autocomplete_new();
     gsize len = 0;
-    gchar **groups = g_key_file_get_groups(tlscerts, &len);
+    gchar** groups = g_key_file_get_groups(tlscerts, &len);
 
     int i = 0;
     for (i = 0; i < g_strv_length(groups); i++) {
@@ -81,7 +81,7 @@ tlscerts_init(void)
 }
 
 void
-tlscerts_set_current(const char *const fp)
+tlscerts_set_current(const char* const fp)
 {
     if (current_fp) {
         free(current_fp);
@@ -105,7 +105,7 @@ tlscerts_clear_current(void)
 }
 
 gboolean
-tlscerts_exists(const char *const fingerprint)
+tlscerts_exists(const char* const fingerprint)
 {
     return g_key_file_has_group(tlscerts, fingerprint);
 }
@@ -113,24 +113,24 @@ tlscerts_exists(const char *const fingerprint)
 GList*
 tlscerts_list(void)
 {
-    GList *res = NULL;
+    GList* res = NULL;
     gsize len = 0;
-    gchar **groups = g_key_file_get_groups(tlscerts, &len);
+    gchar** groups = g_key_file_get_groups(tlscerts, &len);
 
     int i = 0;
     for (i = 0; i < g_strv_length(groups); i++) {
-        char *fingerprint = strdup(groups[i]);
+        char* fingerprint = strdup(groups[i]);
         int version = g_key_file_get_integer(tlscerts, fingerprint, "version", NULL);
-        char *serialnumber = g_key_file_get_string(tlscerts, fingerprint, "serialnumber", NULL);
-        char *subjectname = g_key_file_get_string(tlscerts, fingerprint, "subjectname", NULL);
-        char *issuername = g_key_file_get_string(tlscerts, fingerprint, "issuername", NULL);
-        char *notbefore = g_key_file_get_string(tlscerts, fingerprint, "start", NULL);
-        char *notafter = g_key_file_get_string(tlscerts, fingerprint, "end", NULL);
-        char *keyalg = g_key_file_get_string(tlscerts, fingerprint, "keyalg", NULL);
-        char *signaturealg = g_key_file_get_string(tlscerts, fingerprint, "signaturealg", NULL);
+        char* serialnumber = g_key_file_get_string(tlscerts, fingerprint, "serialnumber", NULL);
+        char* subjectname = g_key_file_get_string(tlscerts, fingerprint, "subjectname", NULL);
+        char* issuername = g_key_file_get_string(tlscerts, fingerprint, "issuername", NULL);
+        char* notbefore = g_key_file_get_string(tlscerts, fingerprint, "start", NULL);
+        char* notafter = g_key_file_get_string(tlscerts, fingerprint, "end", NULL);
+        char* keyalg = g_key_file_get_string(tlscerts, fingerprint, "keyalg", NULL);
+        char* signaturealg = g_key_file_get_string(tlscerts, fingerprint, "signaturealg", NULL);
 
-        TLSCertificate *cert = tlscerts_new(fingerprint, version, serialnumber, subjectname, issuername, notbefore,
-            notafter, keyalg, signaturealg);
+        TLSCertificate* cert = tlscerts_new(fingerprint, version, serialnumber, subjectname, issuername, notbefore,
+                                            notafter, keyalg, signaturealg);
 
         free(fingerprint);
         free(serialnumber);
@@ -152,11 +152,11 @@ tlscerts_list(void)
 }
 
 TLSCertificate*
-tlscerts_new(const char *const fingerprint, int version, const char *const serialnumber, const char *const subjectname,
-    const char *const issuername, const char *const notbefore, const char *const notafter,
-    const char *const key_alg, const char *const signature_alg)
+tlscerts_new(const char* const fingerprint, int version, const char* const serialnumber, const char* const subjectname,
+             const char* const issuername, const char* const notbefore, const char* const notafter,
+             const char* const key_alg, const char* const signature_alg)
 {
-    TLSCertificate *cert = malloc(sizeof(TLSCertificate));
+    TLSCertificate* cert = malloc(sizeof(TLSCertificate));
 
     if (fingerprint) {
         cert->fingerprint = strdup(fingerprint);
@@ -287,7 +287,7 @@ tlscerts_new(const char *const fingerprint, int version, const char *const seria
 }
 
 void
-tlscerts_add(TLSCertificate *cert)
+tlscerts_add(TLSCertificate* cert)
 {
     if (!cert) {
         return;
@@ -326,9 +326,9 @@ tlscerts_add(TLSCertificate *cert)
 }
 
 gboolean
-tlscerts_revoke(const char *const fingerprint)
+tlscerts_revoke(const char* const fingerprint)
 {
-    gboolean result =  g_key_file_remove_group(tlscerts, fingerprint, NULL);
+    gboolean result = g_key_file_remove_group(tlscerts, fingerprint, NULL);
     if (result) {
         autocomplete_remove(certs_ac, fingerprint);
     }
@@ -339,23 +339,23 @@ tlscerts_revoke(const char *const fingerprint)
 }
 
 TLSCertificate*
-tlscerts_get_trusted(const char * const fingerprint)
+tlscerts_get_trusted(const char* const fingerprint)
 {
     if (!g_key_file_has_group(tlscerts, fingerprint)) {
         return NULL;
     }
 
     int version = g_key_file_get_integer(tlscerts, fingerprint, "version", NULL);
-    char *serialnumber = g_key_file_get_string(tlscerts, fingerprint, "serialnumber", NULL);
-    char *subjectname = g_key_file_get_string(tlscerts, fingerprint, "subjectname", NULL);
-    char *issuername = g_key_file_get_string(tlscerts, fingerprint, "issuername", NULL);
-    char *notbefore = g_key_file_get_string(tlscerts, fingerprint, "start", NULL);
-    char *notafter = g_key_file_get_string(tlscerts, fingerprint, "end", NULL);
-    char *keyalg = g_key_file_get_string(tlscerts, fingerprint, "keyalg", NULL);
-    char *signaturealg = g_key_file_get_string(tlscerts, fingerprint, "signaturealg", NULL);
+    char* serialnumber = g_key_file_get_string(tlscerts, fingerprint, "serialnumber", NULL);
+    char* subjectname = g_key_file_get_string(tlscerts, fingerprint, "subjectname", NULL);
+    char* issuername = g_key_file_get_string(tlscerts, fingerprint, "issuername", NULL);
+    char* notbefore = g_key_file_get_string(tlscerts, fingerprint, "start", NULL);
+    char* notafter = g_key_file_get_string(tlscerts, fingerprint, "end", NULL);
+    char* keyalg = g_key_file_get_string(tlscerts, fingerprint, "keyalg", NULL);
+    char* signaturealg = g_key_file_get_string(tlscerts, fingerprint, "signaturealg", NULL);
 
-    TLSCertificate *cert = tlscerts_new(fingerprint, version, serialnumber, subjectname, issuername, notbefore,
-        notafter, keyalg, signaturealg);
+    TLSCertificate* cert = tlscerts_new(fingerprint, version, serialnumber, subjectname, issuername, notbefore,
+                                        notafter, keyalg, signaturealg);
 
     free(serialnumber);
     free(subjectname);
@@ -369,7 +369,7 @@ tlscerts_get_trusted(const char * const fingerprint)
 }
 
 char*
-tlscerts_complete(const char *const prefix, gboolean previous, void *context)
+tlscerts_complete(const char* const prefix, gboolean previous, void* context)
 {
     return autocomplete_complete(certs_ac, prefix, TRUE, previous);
 }
@@ -381,7 +381,7 @@ tlscerts_reset_ac(void)
 }
 
 void
-tlscerts_free(TLSCertificate *cert)
+tlscerts_free(TLSCertificate* cert)
 {
     if (cert) {
         free(cert->serialnumber);
@@ -433,7 +433,7 @@ static void
 _save_tlscerts(void)
 {
     gsize g_data_size;
-    gchar *g_tlscerts_data = g_key_file_to_data(tlscerts, &g_data_size, NULL);
+    gchar* g_tlscerts_data = g_key_file_to_data(tlscerts, &g_data_size, NULL);
     g_file_set_contents(tlscerts_loc, g_tlscerts_data, g_data_size, NULL);
     g_chmod(tlscerts_loc, S_IRUSR | S_IWUSR);
     g_free(g_tlscerts_data);

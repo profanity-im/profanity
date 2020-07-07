@@ -39,11 +39,11 @@
 #include <glib.h>
 
 void autocompleters_init(void);
-void autocompleters_add(const char *const plugin_name, const char *key, char **items);
-void autocompleters_remove(const char *const plugin_name, const char *key, char **items);
-void autocompleters_clear(const char *const plugin_name, const char *key);
-void autocompleters_filepath_add(const char *const plugin_name, const char *prefix);
-char* autocompleters_complete(const char * const input, gboolean previous);
+void autocompleters_add(const char* const plugin_name, const char* key, char** items);
+void autocompleters_remove(const char* const plugin_name, const char* key, char** items);
+void autocompleters_clear(const char* const plugin_name, const char* key);
+void autocompleters_filepath_add(const char* const plugin_name, const char* prefix);
+char* autocompleters_complete(const char* const input, gboolean previous);
 void autocompleters_reset(void);
 void autocompleters_destroy(void);
 

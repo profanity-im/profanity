@@ -15,9 +15,10 @@
 
 #define CMD_SUB "/sub"
 
-void cmd_sub_shows_message_when_not_connected(void **state)
+void
+cmd_sub_shows_message_when_not_connected(void** state)
 {
-    gchar *args[] = { NULL };
+    gchar* args[] = { NULL };
 
     will_return(connection_get_status, JABBER_DISCONNECTED);
 
@@ -27,9 +28,10 @@ void cmd_sub_shows_message_when_not_connected(void **state)
     assert_true(result);
 }
 
-void cmd_sub_shows_usage_when_no_arg(void **state)
+void
+cmd_sub_shows_usage_when_no_arg(void** state)
 {
-    gchar *args[] = { NULL };
+    gchar* args[] = { NULL };
 
     will_return(connection_get_status, JABBER_CONNECTED);
 

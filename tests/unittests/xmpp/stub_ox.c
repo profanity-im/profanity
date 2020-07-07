@@ -2,7 +2,7 @@
 #include <glib.h>
 #include <stdlib.h>
 
-gboolean 
+gboolean
 ox_announce_public_key(const char* const filename)
 {
     return FALSE;

@@ -64,19 +64,19 @@
 #include "xmpp/form.h"
 #include "xmpp/capabilities.h"
 
-static char *cache_loc;
-static GKeyFile *cache;
+static char* cache_loc;
+static GKeyFile* cache;
 
-static GHashTable *jid_to_ver;
-static GHashTable *jid_to_caps;
+static GHashTable* jid_to_ver;
+static GHashTable* jid_to_caps;
 
-static GHashTable *prof_features;
-static char *my_sha1;
+static GHashTable* prof_features;
+static char* my_sha1;
 
 static void _save_cache(void);
-static EntityCapabilities* _caps_by_ver(const char *const ver);
-static EntityCapabilities* _caps_by_jid(const char *const jid);
-static EntityCapabilities* _caps_copy(EntityCapabilities *caps);
+static EntityCapabilities* _caps_by_ver(const char* const ver);
+static EntityCapabilities* _caps_by_jid(const char* const jid);
+static EntityCapabilities* _caps_copy(EntityCapabilities* caps);
 
 void
 caps_init(void)
@@ -121,7 +121,7 @@ caps_init(void)
 }
 
 void
-caps_add_feature(char *feature)
+caps_add_feature(char* feature)
 {
     if (g_hash_table_contains(prof_features, feature)) {
         return;
@@ -139,7 +139,7 @@ caps_add_feature(char *feature)
 }
 
 void
-caps_remove_feature(char *feature)
+caps_remove_feature(char* feature)
 {
     if (!g_hash_table_contains(prof_features, feature)) {
         return;
@@ -159,17 +159,17 @@ caps_remove_feature(char *feature)
 GList*
 caps_get_features(void)
 {
-    GList *result = NULL;
+    GList* result = NULL;
 
-    GList *features_as_list = g_hash_table_get_keys(prof_features);
-    GList *curr = features_as_list;
+    GList* features_as_list = g_hash_table_get_keys(prof_features);
+    GList* curr = features_as_list;
     while (curr) {
         result = g_list_append(result, strdup(curr->data));
         curr = g_list_next(curr);
     }
     g_list_free(features_as_list);
 
-    GList *plugin_features = plugins_get_disco_features();
+    GList* plugin_features = plugins_get_disco_features();
     curr = plugin_features;
     while (curr) {
         result = g_list_append(result, strdup(curr->data));
@@ -182,15 +182,15 @@ caps_get_features(void)
 }
 
 EntityCapabilities*
-caps_create(const char *const category, const char *const type, const char *const name,
-    const char *const software, const char *const software_version,
-    const char *const os, const char *const os_version,
-    GSList *features)
+caps_create(const char* const category, const char* const type, const char* const name,
+            const char* const software, const char* const software_version,
+            const char* const os, const char* const os_version,
+            GSList* features)
 {
-    EntityCapabilities *result = (EntityCapabilities *)malloc(sizeof(EntityCapabilities));
+    EntityCapabilities* result = (EntityCapabilities*)malloc(sizeof(EntityCapabilities));
 
     if (category || type || name) {
-        DiscoIdentity *identity = (DiscoIdentity*)malloc(sizeof(DiscoIdentity));
+        DiscoIdentity* identity = (DiscoIdentity*)malloc(sizeof(DiscoIdentity));
         identity->category = category ? strdup(category) : NULL;
         identity->type = type ? strdup(type) : NULL;
         identity->name = name ? strdup(name) : NULL;
@@ -200,7 +200,7 @@ caps_create(const char *const category, const char *const type, const char *cons
     }
 
     if (software || software_version || os || os_version) {
-        SoftwareVersion *software_versionp = (SoftwareVersion*)malloc(sizeof(SoftwareVersion));
+        SoftwareVersion* software_versionp = (SoftwareVersion*)malloc(sizeof(SoftwareVersion));
         software_versionp->software = software ? strdup(software) : NULL;
         software_versionp->software_version = software_version ? strdup(software_version) : NULL;
         software_versionp->os = os ? strdup(os) : NULL;
@@ -211,7 +211,7 @@ caps_create(const char *const category, const char *const type, const char *cons
     }
 
     result->features = NULL;
-    GSList *curr = features;
+    GSList* curr = features;
     while (curr) {
         result->features = g_slist_append(result->features, strdup(curr->data));
         curr = g_slist_next(curr);
@@ -221,7 +221,7 @@ caps_create(const char *const category, const char *const type, const char *cons
 }
 
 void
-caps_add_by_ver(const char *const ver, EntityCapabilities *caps)
+caps_add_by_ver(const char* const ver, EntityCapabilities* caps)
 {
     if (ver == NULL || caps == NULL) {
         return;
@@ -233,7 +233,7 @@ caps_add_by_ver(const char *const ver, EntityCapabilities *caps)
     }
 
     if (caps->identity) {
-        DiscoIdentity *identity = caps->identity;
+        DiscoIdentity* identity = caps->identity;
         if (identity->name) {
             g_key_file_set_string(cache, ver, "name", identity->name);
         }
@@ -246,7 +246,7 @@ caps_add_by_ver(const char *const ver, EntityCapabilities *caps)
     }
 
     if (caps->software_version) {
-        SoftwareVersion *software_version = caps->software_version;
+        SoftwareVersion* software_version = caps->software_version;
         if (software_version->software) {
             g_key_file_set_string(cache, ver, "software", software_version->software);
         }
@@ -262,7 +262,7 @@ caps_add_by_ver(const char *const ver, EntityCapabilities *caps)
     }
 
     if (caps->features) {
-        GSList *curr_feature = caps->features;
+        GSList* curr_feature = caps->features;
         int num = g_slist_length(caps->features);
         const gchar* features_list[num];
         int curr = 0;
@@ -277,35 +277,35 @@ caps_add_by_ver(const char *const ver, EntityCapabilities *caps)
 }
 
 void
-caps_add_by_jid(const char *const jid, EntityCapabilities *caps)
+caps_add_by_jid(const char* const jid, EntityCapabilities* caps)
 {
     g_hash_table_insert(jid_to_caps, strdup(jid), caps);
 }
 
 void
-caps_map_jid_to_ver(const char *const jid, const char *const ver)
+caps_map_jid_to_ver(const char* const jid, const char* const ver)
 {
     g_hash_table_insert(jid_to_ver, strdup(jid), strdup(ver));
 }
 
 gboolean
-caps_cache_contains(const char *const ver)
+caps_cache_contains(const char* const ver)
 {
     return (g_key_file_has_group(cache, ver));
 }
 
 EntityCapabilities*
-caps_lookup(const char *const jid)
+caps_lookup(const char* const jid)
 {
-    char *ver = g_hash_table_lookup(jid_to_ver, jid);
+    char* ver = g_hash_table_lookup(jid_to_ver, jid);
     if (ver) {
-        EntityCapabilities *caps = _caps_by_ver(ver);
+        EntityCapabilities* caps = _caps_by_ver(ver);
         if (caps) {
             log_debug("Capabilities lookup %s, found by verification string %s.", jid, ver);
             return caps;
         }
     } else {
-        EntityCapabilities *caps = _caps_by_jid(jid);
+        EntityCapabilities* caps = _caps_by_jid(jid);
         if (caps) {
             log_debug("Capabilities lookup %s, found by JID.", jid);
             return _caps_copy(caps);
@@ -317,15 +317,15 @@ caps_lookup(const char *const jid)
 }
 
 gboolean
-caps_jid_has_feature(const char *const jid, const char *const feature)
+caps_jid_has_feature(const char* const jid, const char* const feature)
 {
-    EntityCapabilities *caps = caps_lookup(jid);
+    EntityCapabilities* caps = caps_lookup(jid);
 
     if (caps == NULL) {
         return FALSE;
     }
 
-    GSList *found = g_slist_find_custom(caps->features, feature, (GCompareFunc)g_strcmp0);
+    GSList* found = g_slist_find_custom(caps->features, feature, (GCompareFunc)g_strcmp0);
     gboolean result = found != NULL;
 
     caps_destroy(caps);
@@ -334,10 +334,10 @@ caps_jid_has_feature(const char *const jid, const char *const feature)
 }
 
 char*
-caps_get_my_sha1(xmpp_ctx_t *const ctx)
+caps_get_my_sha1(xmpp_ctx_t* const ctx)
 {
     if (my_sha1 == NULL) {
-        xmpp_stanza_t *query = stanza_create_caps_query_element(ctx);
+        xmpp_stanza_t* query = stanza_create_caps_query_element(ctx);
         my_sha1 = stanza_create_caps_sha1_from_query(query);
         xmpp_stanza_release(query);
     }
@@ -368,24 +368,24 @@ caps_close(void)
 }
 
 static EntityCapabilities*
-_caps_by_ver(const char *const ver)
+_caps_by_ver(const char* const ver)
 {
     if (!g_key_file_has_group(cache, ver)) {
         return NULL;
     }
 
-    char *category = g_key_file_get_string(cache, ver, "category", NULL);
-    char *type = g_key_file_get_string(cache, ver, "type", NULL);
-    char *name = g_key_file_get_string(cache, ver, "name", NULL);
+    char* category = g_key_file_get_string(cache, ver, "category", NULL);
+    char* type = g_key_file_get_string(cache, ver, "type", NULL);
+    char* name = g_key_file_get_string(cache, ver, "name", NULL);
 
-    char *software = g_key_file_get_string(cache, ver, "software", NULL);
-    char *software_version = g_key_file_get_string(cache, ver, "software_version", NULL);
-    char *os = g_key_file_get_string(cache, ver, "os", NULL);
-    char *os_version = g_key_file_get_string(cache, ver, "os_version", NULL);
+    char* software = g_key_file_get_string(cache, ver, "software", NULL);
+    char* software_version = g_key_file_get_string(cache, ver, "software_version", NULL);
+    char* os = g_key_file_get_string(cache, ver, "os", NULL);
+    char* os_version = g_key_file_get_string(cache, ver, "os_version", NULL);
 
     gsize features_len = 0;
-    gchar **features_list = g_key_file_get_string_list(cache, ver, "features", &features_len, NULL);
-    GSList *features = NULL;
+    gchar** features_list = g_key_file_get_string_list(cache, ver, "features", &features_len, NULL);
+    GSList* features = NULL;
     if (features_list && features_len > 0) {
         int i;
         for (i = 0; i < features_len; i++) {
@@ -393,7 +393,7 @@ _caps_by_ver(const char *const ver)
         }
     }
 
-    EntityCapabilities *result = caps_create(
+    EntityCapabilities* result = caps_create(
         category, type, name,
         software, software_version, os, os_version,
         features);
@@ -414,32 +414,32 @@ _caps_by_ver(const char *const ver)
 }
 
 static EntityCapabilities*
-_caps_by_jid(const char *const jid)
+_caps_by_jid(const char* const jid)
 {
     return g_hash_table_lookup(jid_to_caps, jid);
 }
 
 static EntityCapabilities*
-_caps_copy(EntityCapabilities *caps)
+_caps_copy(EntityCapabilities* caps)
 {
     if (!caps) {
         return NULL;
     }
 
-    const char *const categoty = caps->identity ? caps->identity->category : NULL;
-    const char *const type = caps->identity ? caps->identity->type : NULL;
-    const char *const name = caps->identity ? caps->identity->name : NULL;
+    const char* const categoty = caps->identity ? caps->identity->category : NULL;
+    const char* const type = caps->identity ? caps->identity->type : NULL;
+    const char* const name = caps->identity ? caps->identity->name : NULL;
 
-    const char *const software = caps->software_version ? caps->software_version->software : NULL;
-    const char *const software_version = caps->software_version ? caps->software_version->software_version : NULL;
-    const char *const os = caps->software_version ? caps->software_version->os : NULL;
-    const char *const os_version = caps->software_version ? caps->software_version->os_version : NULL;
+    const char* const software = caps->software_version ? caps->software_version->software : NULL;
+    const char* const software_version = caps->software_version ? caps->software_version->software_version : NULL;
+    const char* const os = caps->software_version ? caps->software_version->os : NULL;
+    const char* const os_version = caps->software_version ? caps->software_version->os_version : NULL;
 
     return caps_create(categoty, type, name, software, software_version, os, os_version, caps->features);
 }
 
 static void
-_disco_identity_destroy(DiscoIdentity *disco_identity)
+_disco_identity_destroy(DiscoIdentity* disco_identity)
 {
     if (disco_identity) {
         free(disco_identity->category);
@@ -450,7 +450,7 @@ _disco_identity_destroy(DiscoIdentity *disco_identity)
 }
 
 static void
-_software_version_destroy(SoftwareVersion *software_version)
+_software_version_destroy(SoftwareVersion* software_version)
 {
     if (software_version) {
         free(software_version->software);
@@ -462,7 +462,7 @@ _software_version_destroy(SoftwareVersion *software_version)
 }
 
 void
-caps_destroy(EntityCapabilities *caps)
+caps_destroy(EntityCapabilities* caps)
 {
     if (caps) {
         _disco_identity_destroy(caps->identity);
@@ -478,7 +478,7 @@ static void
 _save_cache(void)
 {
     gsize g_data_size;
-    gchar *g_cache_data = g_key_file_to_data(cache, &g_data_size, NULL);
+    gchar* g_cache_data = g_key_file_to_data(cache, &g_data_size, NULL);
     g_file_set_contents(cache_loc, g_cache_data, g_data_size, NULL);
     g_chmod(cache_loc, S_IRUSR | S_IWUSR);
     g_free(g_cache_data);

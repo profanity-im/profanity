@@ -41,43 +41,43 @@
 void wins_init(void);
 
 ProfWin* wins_new_xmlconsole(void);
-ProfWin* wins_new_chat(const char *const barejid);
-ProfWin* wins_new_muc(const char *const roomjid);
-ProfWin* wins_new_config(const char *const roomjid, DataForm *form, ProfConfWinCallback submit, ProfConfWinCallback cancel, const void *userdata);
-ProfWin* wins_new_private(const char *const fulljid);
-ProfWin* wins_new_plugin(const char *const plugin_name, const char *const tag);
+ProfWin* wins_new_chat(const char* const barejid);
+ProfWin* wins_new_muc(const char* const roomjid);
+ProfWin* wins_new_config(const char* const roomjid, DataForm* form, ProfConfWinCallback submit, ProfConfWinCallback cancel, const void* userdata);
+ProfWin* wins_new_private(const char* const fulljid);
+ProfWin* wins_new_plugin(const char* const plugin_name, const char* const tag);
 
-gboolean wins_chat_exists(const char *const barejid);
-GList* wins_get_private_chats(const char *const roomjid);
-void wins_private_nick_change(const char *const roomjid, const char *const oldnick, const char *const newnick);
-void wins_change_nick(const char *const barejid, const char *const oldnick, const char *const newnick);
-void wins_remove_nick(const char *const barejid, const char *const oldnick);
+gboolean wins_chat_exists(const char* const barejid);
+GList* wins_get_private_chats(const char* const roomjid);
+void wins_private_nick_change(const char* const roomjid, const char* const oldnick, const char* const newnick);
+void wins_change_nick(const char* const barejid, const char* const oldnick, const char* const newnick);
+void wins_remove_nick(const char* const barejid, const char* const oldnick);
 
 ProfWin* wins_get_console(void);
-ProfChatWin* wins_get_chat(const char *const barejid);
+ProfChatWin* wins_get_chat(const char* const barejid);
 GList* wins_get_chat_unsubscribed(void);
-ProfMucWin* wins_get_muc(const char *const roomjid);
-ProfConfWin* wins_get_conf(const char *const roomjid);
-ProfPrivateWin* wins_get_private(const char *const fulljid);
-ProfPluginWin* wins_get_plugin(const char *const tag);
+ProfMucWin* wins_get_muc(const char* const roomjid);
+ProfConfWin* wins_get_conf(const char* const roomjid);
+ProfPrivateWin* wins_get_private(const char* const fulljid);
+ProfPluginWin* wins_get_plugin(const char* const tag);
 ProfXMLWin* wins_get_xmlconsole(void);
 
-void wins_close_plugin(char *tag);
+void wins_close_plugin(char* tag);
 
 ProfWin* wins_get_current(void);
 
 void wins_set_current_by_num(int i);
 
 ProfWin* wins_get_by_num(int i);
-ProfWin* wins_get_by_string(const char *str);
+ProfWin* wins_get_by_string(const char* str);
 
 ProfWin* wins_get_next(void);
 ProfWin* wins_get_previous(void);
 ProfWin* wins_get_next_unread(void);
-int wins_get_num(ProfWin *window);
+int wins_get_num(ProfWin* window);
 int wins_get_current_num(void);
 void wins_close_by_num(int i);
-gboolean wins_is_current(ProfWin *window);
+gboolean wins_is_current(ProfWin* window);
 gboolean wins_do_notify_remind(void);
 int wins_get_total_unread(void);
 void wins_resize_all(void);
@@ -90,15 +90,15 @@ GSList* wins_create_summary(gboolean unread);
 void wins_destroy(void);
 GList* wins_get_nums(void);
 void wins_swap(int source_win, int target_win);
-void wins_hide_subwin(ProfWin *window);
-void wins_show_subwin(ProfWin *window);
+void wins_hide_subwin(ProfWin* window);
+void wins_show_subwin(ProfWin* window);
 
-char* win_autocomplete(const char *const search_str, gboolean previous, void *context);
+char* win_autocomplete(const char* const search_str, gboolean previous, void* context);
 void win_reset_search_attempts(void);
-char* win_close_autocomplete(const char *const search_str, gboolean previous, void *context);
+char* win_close_autocomplete(const char* const search_str, gboolean previous, void* context);
 void win_close_reset_search_attempts(void);
 
-void wins_add_urls_ac(const ProfWin *const win, const ProfMessage *const message);
-char* wins_get_url(const char *const search_str, gboolean previous, void *context);
+void wins_add_urls_ac(const ProfWin* const win, const ProfMessage* const message);
+char* wins_get_url(const char* const search_str, gboolean previous, void* context);
 
 #endif

@@ -61,14 +61,14 @@
 
 struct curl_data_t
 {
-    char *buffer;
+    char* buffer;
     size_t size;
 };
 
-static size_t _data_callback(void *ptr, size_t size, size_t nmemb, void *data);
+static size_t _data_callback(void* ptr, size_t size, size_t nmemb, void* data);
 
 gboolean
-create_dir(char *name)
+create_dir(char* name)
 {
     struct stat sb;
 
@@ -87,14 +87,14 @@ create_dir(char *name)
 }
 
 gboolean
-mkdir_recursive(const char *dir)
+mkdir_recursive(const char* dir)
 {
     int i;
     gboolean result = TRUE;
 
     for (i = 1; i <= strlen(dir); i++) {
         if (dir[i] == '/' || dir[i] == '\0') {
-            gchar *next_dir = g_strndup(dir, i);
+            gchar* next_dir = g_strndup(dir, i);
             result = create_dir(next_dir);
             g_free(next_dir);
             if (!result) {
@@ -107,13 +107,13 @@ mkdir_recursive(const char *dir)
 }
 
 gboolean
-copy_file(const char *const sourcepath, const char *const targetpath, const gboolean overwrite_existing)
+copy_file(const char* const sourcepath, const char* const targetpath, const gboolean overwrite_existing)
 {
-    GFile *source = g_file_new_for_path(sourcepath);
-    GFile *dest = g_file_new_for_path(targetpath);
-    GError *error = NULL;
+    GFile* source = g_file_new_for_path(sourcepath);
+    GFile* dest = g_file_new_for_path(targetpath);
+    GError* error = NULL;
     GFileCopyFlags flags = overwrite_existing ? G_FILE_COPY_OVERWRITE : G_FILE_COPY_NONE;
-    gboolean success = g_file_copy (source, dest, flags, NULL, NULL, NULL, &error);
+    gboolean success = g_file_copy(source, dest, flags, NULL, NULL, NULL, &error);
     if (error != NULL)
         g_error_free(error);
     g_object_unref(source);
@@ -122,44 +122,40 @@ copy_file(const char *const sourcepath, const char *const targetpath, const gboo
 }
 
 char*
-str_replace(const char *string, const char *substr,
-    const char *replacement)
+str_replace(const char* string, const char* substr,
+            const char* replacement)
 {
-    char *tok = NULL;
-    char *newstr = NULL;
-    char *head = NULL;
+    char* tok = NULL;
+    char* newstr = NULL;
+    char* head = NULL;
 
     if (string == NULL)
         return NULL;
 
-    if ( substr == NULL ||
-         replacement == NULL ||
-         (strcmp(substr, "") == 0))
-        return strdup (string);
+    if (substr == NULL || replacement == NULL || (strcmp(substr, "") == 0))
+        return strdup(string);
 
-    newstr = strdup (string);
+    newstr = strdup(string);
     head = newstr;
 
-    while ( (tok = strstr ( head, substr ))) {
-        char *oldstr = newstr;
-        newstr = malloc ( strlen ( oldstr ) - strlen ( substr ) +
-            strlen ( replacement ) + 1 );
+    while ((tok = strstr(head, substr))) {
+        char* oldstr = newstr;
+        newstr = malloc(strlen(oldstr) - strlen(substr) + strlen(replacement) + 1);
 
-        if ( newstr == NULL ) {
-            free (oldstr);
+        if (newstr == NULL) {
+            free(oldstr);
             return NULL;
         }
 
-        memcpy ( newstr, oldstr, tok - oldstr );
-        memcpy ( newstr + (tok - oldstr), replacement, strlen ( replacement ) );
-        memcpy ( newstr + (tok - oldstr) + strlen( replacement ),
-            tok + strlen ( substr ),
-            strlen ( oldstr ) - strlen ( substr ) - ( tok - oldstr ) );
-        memset ( newstr + strlen ( oldstr ) - strlen ( substr ) +
-            strlen ( replacement ) , 0, 1 );
+        memcpy(newstr, oldstr, tok - oldstr);
+        memcpy(newstr + (tok - oldstr), replacement, strlen(replacement));
+        memcpy(newstr + (tok - oldstr) + strlen(replacement),
+               tok + strlen(substr),
+               strlen(oldstr) - strlen(substr) - (tok - oldstr));
+        memset(newstr + strlen(oldstr) - strlen(substr) + strlen(replacement), 0, 1);
 
-        head = newstr + (tok - oldstr) + strlen( replacement );
-        free (oldstr);
+        head = newstr + (tok - oldstr) + strlen(replacement);
+        free(oldstr);
     }
 
     return newstr;
@@ -178,21 +174,21 @@ str_contains(const char str[], int size, char ch)
 }
 
 gboolean
-strtoi_range(char *str, int *saveptr, int min, int max, char **err_msg)
+strtoi_range(char* str, int* saveptr, int min, int max, char** err_msg)
 {
-    char *ptr;
+    char* ptr;
     int val;
 
     errno = 0;
     val = (int)strtol(str, &ptr, 0);
     if (errno != 0 || *str == '\0' || *ptr != '\0') {
-        GString *err_str = g_string_new("");
+        GString* err_str = g_string_new("");
         g_string_printf(err_str, "Could not convert \"%s\" to a number.", str);
         *err_msg = err_str->str;
         g_string_free(err_str, FALSE);
         return FALSE;
     } else if (val < min || val > max) {
-        GString *err_str = g_string_new("");
+        GString* err_str = g_string_new("");
         g_string_printf(err_str, "Value %s out of range. Must be in %d..%d.", str, min, max);
         *err_msg = err_str->str;
         g_string_free(err_str, FALSE);
@@ -205,20 +201,20 @@ strtoi_range(char *str, int *saveptr, int min, int max, char **err_msg)
 }
 
 int
-utf8_display_len(const char *const str)
+utf8_display_len(const char* const str)
 {
     if (!str) {
         return 0;
     }
 
     int len = 0;
-    gchar *curr = g_utf8_offset_to_pointer(str, 0);
+    gchar* curr = g_utf8_offset_to_pointer(str, 0);
     while (*curr != '\0') {
         gunichar curru = g_utf8_get_char(curr);
         if (g_unichar_iswide(curru)) {
             len += 2;
         } else {
-            len ++;
+            len++;
         }
         curr = g_utf8_next_char(curr);
     }
@@ -229,9 +225,9 @@ utf8_display_len(const char *const str)
 char*
 release_get_latest(void)
 {
-    char *url = "https://profanity-im.github.io/profanity_version.txt";
+    char* url = "https://profanity-im.github.io/profanity_version.txt";
 
-    CURL *handle = curl_easy_init();
+    CURL* handle = curl_easy_init();
     struct curl_data_t output;
     output.buffer = NULL;
     output.size = 0;
@@ -239,7 +235,7 @@ release_get_latest(void)
     curl_easy_setopt(handle, CURLOPT_URL, url);
     curl_easy_setopt(handle, CURLOPT_WRITEFUNCTION, _data_callback);
     curl_easy_setopt(handle, CURLOPT_TIMEOUT, 2);
-    curl_easy_setopt(handle, CURLOPT_WRITEDATA, (void *)&output);
+    curl_easy_setopt(handle, CURLOPT_WRITEDATA, (void*)&output);
 
     curl_easy_perform(handle);
     curl_easy_cleanup(handle);
@@ -253,14 +249,14 @@ release_get_latest(void)
 }
 
 gboolean
-release_is_new(char *found_version)
+release_is_new(char* found_version)
 {
     int curr_maj, curr_min, curr_patch, found_maj, found_min, found_patch;
 
     int parse_curr = sscanf(PACKAGE_VERSION, "%d.%d.%d", &curr_maj, &curr_min,
-        &curr_patch);
+                            &curr_patch);
     int parse_found = sscanf(found_version, "%d.%d.%d", &found_maj, &found_min,
-        &found_patch);
+                             &found_patch);
 
     if (parse_found == 3 && parse_curr == 3) {
         if (found_maj > curr_maj) {
@@ -268,7 +264,7 @@ release_is_new(char *found_version)
         } else if (found_maj == curr_maj && found_min > curr_min) {
             return TRUE;
         } else if (found_maj == curr_maj && found_min == curr_min
-                                        && found_patch > curr_patch) {
+                   && found_patch > curr_patch) {
             return TRUE;
         } else {
             return FALSE;
@@ -279,26 +275,25 @@ release_is_new(char *found_version)
 }
 
 static size_t
-_data_callback(void *ptr, size_t size, size_t nmemb, void *data)
+_data_callback(void* ptr, size_t size, size_t nmemb, void* data)
 {
     size_t realsize = size * nmemb;
-    struct curl_data_t *mem = (struct curl_data_t *) data;
+    struct curl_data_t* mem = (struct curl_data_t*)data;
     mem->buffer = realloc(mem->buffer, mem->size + realsize + 1);
 
-    if ( mem->buffer )
-    {
-        memcpy( &( mem->buffer[ mem->size ] ), ptr, realsize );
+    if (mem->buffer) {
+        memcpy(&(mem->buffer[mem->size]), ptr, realsize);
         mem->size += realsize;
-        mem->buffer[ mem->size ] = 0;
+        mem->buffer[mem->size] = 0;
     }
 
     return realsize;
 }
 
 char*
-get_file_or_linked(char *loc, char *basedir)
+get_file_or_linked(char* loc, char* basedir)
 {
-    char *true_loc = NULL;
+    char* true_loc = NULL;
 
     // check for symlink
     if (g_file_test(loc, G_FILE_TEST_IS_SYMLINK)) {
@@ -306,14 +301,14 @@ get_file_or_linked(char *loc, char *basedir)
 
         // if relative, add basedir
         if (!g_str_has_prefix(true_loc, "/") && !g_str_has_prefix(true_loc, "~")) {
-            GString *base_str = g_string_new(basedir);
+            GString* base_str = g_string_new(basedir);
             g_string_append(base_str, "/");
             g_string_append(base_str, true_loc);
             free(true_loc);
             true_loc = base_str->str;
             g_string_free(base_str, FALSE);
         }
-    // use given location
+        // use given location
     } else {
         true_loc = strdup(loc);
     }
@@ -322,21 +317,21 @@ get_file_or_linked(char *loc, char *basedir)
 }
 
 char*
-strip_arg_quotes(const char *const input)
+strip_arg_quotes(const char* const input)
 {
-    char *unquoted = strdup(input);
+    char* unquoted = strdup(input);
 
     // Remove starting quote if it exists
-    if(strchr(unquoted, '"')) {
-        if(strchr(unquoted, ' ') + 1 == strchr(unquoted, '"')) {
-            memmove(strchr(unquoted, '"'), strchr(unquoted, '"')+1, strchr(unquoted, '\0') - strchr(unquoted, '"'));
+    if (strchr(unquoted, '"')) {
+        if (strchr(unquoted, ' ') + 1 == strchr(unquoted, '"')) {
+            memmove(strchr(unquoted, '"'), strchr(unquoted, '"') + 1, strchr(unquoted, '\0') - strchr(unquoted, '"'));
         }
     }
 
     // Remove ending quote if it exists
-    if(strchr(unquoted, '"')) {
-        if(strchr(unquoted, '\0') - 1 == strchr(unquoted, '"')) {
-            memmove(strchr(unquoted, '"'), strchr(unquoted, '"')+1, strchr(unquoted, '\0') - strchr(unquoted, '"'));
+    if (strchr(unquoted, '"')) {
+        if (strchr(unquoted, '\0') - 1 == strchr(unquoted, '"')) {
+            memmove(strchr(unquoted, '"'), strchr(unquoted, '"') + 1, strchr(unquoted, '\0') - strchr(unquoted, '"'));
         }
     }
 
@@ -362,23 +357,23 @@ is_notify_enabled(void)
 }
 
 GSList*
-prof_occurrences(const char *const needle, const char *const haystack, int offset, gboolean whole_word, GSList **result)
+prof_occurrences(const char* const needle, const char* const haystack, int offset, gboolean whole_word, GSList** result)
 {
     if (needle == NULL || haystack == NULL) {
         return *result;
     }
 
-    gchar *haystack_curr = g_utf8_offset_to_pointer(haystack, offset);
+    gchar* haystack_curr = g_utf8_offset_to_pointer(haystack, offset);
     if (g_str_has_prefix(haystack_curr, needle)) {
         if (whole_word) {
             gunichar before = 0;
-            gchar *haystack_before_ch = g_utf8_find_prev_char(haystack, haystack_curr);
+            gchar* haystack_before_ch = g_utf8_find_prev_char(haystack, haystack_curr);
             if (haystack_before_ch) {
                 before = g_utf8_get_char(haystack_before_ch);
             }
 
             gunichar after = 0;
-            gchar *haystack_after_ch = haystack_curr + strlen(needle);
+            gchar* haystack_after_ch = haystack_curr + strlen(needle);
             if (haystack_after_ch[0] != '\0') {
                 after = g_utf8_get_char(haystack_after_ch);
             }
@@ -400,7 +395,7 @@ prof_occurrences(const char *const needle, const char *const haystack, int offse
 }
 
 int
-is_regular_file(const char *path)
+is_regular_file(const char* path)
 {
     struct stat st;
     int ret = stat(path, &st);
@@ -412,7 +407,7 @@ is_regular_file(const char *path)
 }
 
 int
-is_dir(const char *path)
+is_dir(const char* path)
 {
     struct stat st;
     int ret = stat(path, &st);
@@ -424,16 +419,16 @@ is_dir(const char *path)
 }
 
 void
-get_file_paths_recursive(const char *path, GSList **contents)
+get_file_paths_recursive(const char* path, GSList** contents)
 {
     if (!is_dir(path)) {
         return;
     }
 
     GDir* directory = g_dir_open(path, 0, NULL);
-    const gchar *entry = g_dir_read_name(directory);
+    const gchar* entry = g_dir_read_name(directory);
     while (entry) {
-        GString *full = g_string_new(path);
+        GString* full = g_string_new(path);
         if (!g_str_has_suffix(full->str, "/")) {
             g_string_append(full, "/");
         }
@@ -453,11 +448,11 @@ get_file_paths_recursive(const char *path, GSList **contents)
 char*
 get_random_string(int length)
 {
-    GRand *prng;
-    char *rand;
+    GRand* prng;
+    char* rand;
     char alphabet[] = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
-    rand = calloc(length+1, sizeof(char));
+    rand = calloc(length + 1, sizeof(char));
 
     prng = g_rand_new();
 
@@ -471,11 +466,11 @@ get_random_string(int length)
 }
 
 GSList*
-get_mentions(gboolean whole_word, gboolean case_sensitive, const char *const message, const char *const nick)
+get_mentions(gboolean whole_word, gboolean case_sensitive, const char* const message, const char* const nick)
 {
-    GSList *mentions = NULL;
-    gchar *message_search = case_sensitive ? g_strdup(message) : g_utf8_strdown(message, -1);
-    gchar *mynick_search = case_sensitive ? g_strdup(nick) : g_utf8_strdown(nick, -1);
+    GSList* mentions = NULL;
+    gchar* message_search = case_sensitive ? g_strdup(message) : g_utf8_strdown(message, -1);
+    gchar* mynick_search = case_sensitive ? g_strdup(nick) : g_utf8_strdown(nick, -1);
 
     mentions = prof_occurrences(mynick_search, message_search, 0, whole_word, &mentions);
 
@@ -504,16 +499,16 @@ get_mentions(gboolean whole_word, gboolean case_sensitive, const char *const mes
  * - FALSE otherwise
  */
 gboolean
-call_external(gchar **argv, gchar ***const output_ptr, gchar ***const error_ptr)
+call_external(gchar** argv, gchar*** const output_ptr, gchar*** const error_ptr)
 {
-    gchar *stdout_str = NULL;
-    gchar **stdout_str_ptr = &stdout_str;
-    gchar *stderr_str = NULL;
-    gchar **stderr_str_ptr = &stderr_str;
+    gchar* stdout_str = NULL;
+    gchar** stdout_str_ptr = &stdout_str;
+    gchar* stderr_str = NULL;
+    gchar** stderr_str_ptr = &stderr_str;
     GSpawnFlags flags = G_SPAWN_SEARCH_PATH;
     gint status;
-    GError *error = NULL;
-    gchar *cmd = NULL;
+    GError* error = NULL;
+    gchar* cmd = NULL;
 
     cmd = g_strjoinv(" ", argv);
     log_debug("Calling external: %s", cmd);
@@ -528,7 +523,7 @@ call_external(gchar **argv, gchar ***const output_ptr, gchar ***const error_ptr)
         flags |= G_SPAWN_STDERR_TO_DEV_NULL;
     }
 
-    if (!g_spawn_sync (NULL, argv, NULL, flags, NULL, NULL, stdout_str_ptr, stderr_str_ptr, &status, &error)) {
+    if (!g_spawn_sync(NULL, argv, NULL, flags, NULL, NULL, stdout_str_ptr, stderr_str_ptr, &status, &error)) {
         log_error("Spawning '%s' failed: %s.", cmd, error->message);
         g_error_free(error);
         error = NULL;

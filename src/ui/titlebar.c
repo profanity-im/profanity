@@ -52,21 +52,21 @@
 #include "xmpp/roster_list.h"
 #include "xmpp/chat_session.h"
 
-static WINDOW *win;
+static WINDOW* win;
 static contact_presence_t current_presence;
 static gboolean tls_secured;
 static gboolean is_connected;
 
 static gboolean typing;
-static GTimer *typing_elapsed;
+static GTimer* typing_elapsed;
 
 static void _title_bar_draw(void);
-static void  _show_self_presence(void);
-static int  _calc_self_presence(void);
-static void _show_contact_presence(ProfChatWin *chatwin, int pos, int maxpos);
-static void _show_privacy(ProfChatWin *chatwin);
-static void _show_muc_privacy(ProfMucWin *mucwin);
-static void _show_scrolled(ProfWin *current);
+static void _show_self_presence(void);
+static int _calc_self_presence(void);
+static void _show_contact_presence(ProfChatWin* chatwin, int pos, int maxpos);
+static void _show_privacy(ProfChatWin* chatwin);
+static void _show_muc_privacy(ProfMucWin* mucwin);
+static void _show_scrolled(ProfWin* current);
 
 void
 create_title_bar(void)
@@ -87,7 +87,7 @@ create_title_bar(void)
 void
 title_bar_update_virtual(void)
 {
-    ProfWin *window = wins_get_current();
+    ProfWin* window = wins_get_current();
     if (window->type != WIN_CONSOLE) {
         if (typing_elapsed) {
             gdouble seconds = g_timer_elapsed(typing_elapsed, NULL);
@@ -186,7 +186,7 @@ _title_bar_draw(void)
 {
     int pos;
     int maxrightpos;
-    ProfWin *current = wins_get_current();
+    ProfWin* current = wins_get_current();
 
     werase(win);
     wmove(win, 0, 0);
@@ -195,7 +195,7 @@ _title_bar_draw(void)
         waddch(win, ' ');
     }
 
-    char *title = win_get_title(current);
+    char* title = win_get_title(current);
 
     mvwprintw(win, 0, 0, " %s", title);
     pos = strlen(title) + 1;
@@ -207,7 +207,7 @@ _title_bar_draw(void)
     maxrightpos = _calc_self_presence();
 
     if (current && current->type == WIN_CHAT) {
-        ProfChatWin *chatwin = (ProfChatWin*) current;
+        ProfChatWin* chatwin = (ProfChatWin*)current;
         assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
         _show_contact_presence(chatwin, pos, maxrightpos);
         _show_privacy(chatwin);
@@ -217,7 +217,7 @@ _title_bar_draw(void)
             wprintw(win, " (typing...)");
         }
     } else if (current && current->type == WIN_MUC) {
-        ProfMucWin *mucwin = (ProfMucWin*) current;
+        ProfMucWin* mucwin = (ProfMucWin*)current;
         assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
         _show_muc_privacy(mucwin);
         _show_scrolled(current);
@@ -230,7 +230,7 @@ _title_bar_draw(void)
 }
 
 static void
-_show_scrolled(ProfWin *current)
+_show_scrolled(ProfWin* current)
 {
     if (current && current->layout->paged == 1) {
         int bracket_attrs = theme_attrs(THEME_TITLE_BRACKET);
@@ -255,26 +255,25 @@ _calc_self_presence(void)
 {
     int tls_start = 0;
 
-    switch (current_presence)
-    {
-        case CONTACT_ONLINE:
-            tls_start = 15;
-            break;
-        case CONTACT_AWAY:
-            tls_start = 13;
-            break;
-        case CONTACT_DND:
-            tls_start = 12;
-            break;
-        case CONTACT_CHAT:
-            tls_start = 13;
-            break;
-        case CONTACT_XA:
-            tls_start = 11;
-            break;
-        case CONTACT_OFFLINE:
-            tls_start = 16;
-            break;
+    switch (current_presence) {
+    case CONTACT_ONLINE:
+        tls_start = 15;
+        break;
+    case CONTACT_AWAY:
+        tls_start = 13;
+        break;
+    case CONTACT_DND:
+        tls_start = 12;
+        break;
+    case CONTACT_CHAT:
+        tls_start = 13;
+        break;
+    case CONTACT_XA:
+        tls_start = 11;
+        break;
+    case CONTACT_OFFLINE:
+        tls_start = 16;
+        break;
     }
 
     return tls_start - 1;
@@ -291,68 +290,67 @@ _show_self_presence(void)
 
     int tls_start = 0;
 
-    switch (current_presence)
-    {
-        case CONTACT_ONLINE:
-            presence_attrs = theme_attrs(THEME_TITLE_ONLINE);
-            wattron(win, bracket_attrs);
-            mvwaddch(win, 0, cols - 9, '[');
-            wattroff(win, bracket_attrs);
-            wattron(win, presence_attrs);
-            mvwprintw(win, 0, cols - 8, "online");
-            wattroff(win, presence_attrs);
-            tls_start = 15;
-            break;
-        case CONTACT_AWAY:
-            presence_attrs = theme_attrs(THEME_TITLE_AWAY);
-            wattron(win, bracket_attrs);
-            mvwaddch(win, 0, cols - 7, '[');
-            wattroff(win, bracket_attrs);
-            wattron(win, presence_attrs);
-            mvwprintw(win, 0, cols - 6, "away");
-            wattroff(win, presence_attrs);
-            tls_start = 13;
-            break;
-        case CONTACT_DND:
-            presence_attrs = theme_attrs(THEME_TITLE_DND);
-            wattron(win, bracket_attrs);
-            mvwaddch(win, 0, cols - 6, '[');
-            wattroff(win, bracket_attrs);
-            wattron(win, presence_attrs);
-            mvwprintw(win, 0, cols - 5, "dnd");
-            wattroff(win, presence_attrs);
-            tls_start = 12;
-            break;
-        case CONTACT_CHAT:
-            presence_attrs = theme_attrs(THEME_TITLE_CHAT);
-            wattron(win, bracket_attrs);
-            mvwaddch(win, 0, cols - 7, '[');
-            wattroff(win, bracket_attrs);
-            wattron(win, presence_attrs);
-            mvwprintw(win, 0, cols - 6, "chat");
-            wattroff(win, presence_attrs);
-            tls_start = 13;
-            break;
-        case CONTACT_XA:
-            presence_attrs = theme_attrs(THEME_TITLE_XA);
-            wattron(win, bracket_attrs);
-            mvwaddch(win, 0, cols - 5, '[');
-            wattroff(win, bracket_attrs);
-            wattron(win, presence_attrs);
-            mvwprintw(win, 0, cols - 4, "xa");
-            wattroff(win, presence_attrs);
-            tls_start = 11;
-            break;
-        case CONTACT_OFFLINE:
-            presence_attrs = theme_attrs(THEME_TITLE_OFFLINE);
-            wattron(win, bracket_attrs);
-            mvwaddch(win, 0, cols - 10, '[');
-            wattroff(win, bracket_attrs);
-            wattron(win, presence_attrs);
-            mvwprintw(win, 0, cols - 9, "offline");
-            wattroff(win, presence_attrs);
-            tls_start = 16;
-            break;
+    switch (current_presence) {
+    case CONTACT_ONLINE:
+        presence_attrs = theme_attrs(THEME_TITLE_ONLINE);
+        wattron(win, bracket_attrs);
+        mvwaddch(win, 0, cols - 9, '[');
+        wattroff(win, bracket_attrs);
+        wattron(win, presence_attrs);
+        mvwprintw(win, 0, cols - 8, "online");
+        wattroff(win, presence_attrs);
+        tls_start = 15;
+        break;
+    case CONTACT_AWAY:
+        presence_attrs = theme_attrs(THEME_TITLE_AWAY);
+        wattron(win, bracket_attrs);
+        mvwaddch(win, 0, cols - 7, '[');
+        wattroff(win, bracket_attrs);
+        wattron(win, presence_attrs);
+        mvwprintw(win, 0, cols - 6, "away");
+        wattroff(win, presence_attrs);
+        tls_start = 13;
+        break;
+    case CONTACT_DND:
+        presence_attrs = theme_attrs(THEME_TITLE_DND);
+        wattron(win, bracket_attrs);
+        mvwaddch(win, 0, cols - 6, '[');
+        wattroff(win, bracket_attrs);
+        wattron(win, presence_attrs);
+        mvwprintw(win, 0, cols - 5, "dnd");
+        wattroff(win, presence_attrs);
+        tls_start = 12;
+        break;
+    case CONTACT_CHAT:
+        presence_attrs = theme_attrs(THEME_TITLE_CHAT);
+        wattron(win, bracket_attrs);
+        mvwaddch(win, 0, cols - 7, '[');
+        wattroff(win, bracket_attrs);
+        wattron(win, presence_attrs);
+        mvwprintw(win, 0, cols - 6, "chat");
+        wattroff(win, presence_attrs);
+        tls_start = 13;
+        break;
+    case CONTACT_XA:
+        presence_attrs = theme_attrs(THEME_TITLE_XA);
+        wattron(win, bracket_attrs);
+        mvwaddch(win, 0, cols - 5, '[');
+        wattroff(win, bracket_attrs);
+        wattron(win, presence_attrs);
+        mvwprintw(win, 0, cols - 4, "xa");
+        wattroff(win, presence_attrs);
+        tls_start = 11;
+        break;
+    case CONTACT_OFFLINE:
+        presence_attrs = theme_attrs(THEME_TITLE_OFFLINE);
+        wattron(win, bracket_attrs);
+        mvwaddch(win, 0, cols - 10, '[');
+        wattroff(win, bracket_attrs);
+        wattron(win, presence_attrs);
+        mvwprintw(win, 0, cols - 9, "offline");
+        wattroff(win, presence_attrs);
+        tls_start = 16;
+        break;
     }
 
     wattron(win, bracket_attrs);
@@ -381,7 +379,7 @@ _show_self_presence(void)
 }
 
 static void
-_show_muc_privacy(ProfMucWin *mucwin)
+_show_muc_privacy(ProfMucWin* mucwin)
 {
     int bracket_attrs = theme_attrs(THEME_TITLE_BRACKET);
     int encrypted_attrs = theme_attrs(THEME_TITLE_ENCRYPTED);
@@ -417,7 +415,7 @@ _show_muc_privacy(ProfMucWin *mucwin)
 }
 
 static void
-_show_privacy(ProfChatWin *chatwin)
+_show_privacy(ProfChatWin* chatwin)
 {
     int bracket_attrs = theme_attrs(THEME_TITLE_BRACKET);
     int encrypted_attrs = theme_attrs(THEME_TITLE_ENCRYPTED);
@@ -492,7 +490,7 @@ _show_privacy(ProfChatWin *chatwin)
     }
 
     if (chatwin->pgp_send || chatwin->pgp_recv) {
-        GString *pgpmsg = g_string_new("PGP ");
+        GString* pgpmsg = g_string_new("PGP ");
         if (chatwin->pgp_send && !chatwin->pgp_recv) {
             g_string_append(pgpmsg, "send");
         } else if (!chatwin->pgp_send && chatwin->pgp_recv) {
@@ -545,12 +543,12 @@ _show_privacy(ProfChatWin *chatwin)
 }
 
 static void
-_show_contact_presence(ProfChatWin *chatwin, int pos, int maxpos)
+_show_contact_presence(ProfChatWin* chatwin, int pos, int maxpos)
 {
     int bracket_attrs = theme_attrs(THEME_TITLE_BRACKET);
-    char *resource = NULL;
+    char* resource = NULL;
 
-    ChatSession *session = chat_session_get(chatwin->barejid);
+    ChatSession* session = chat_session_get(chatwin->barejid);
     if (chatwin->resource_override) {
         resource = chatwin->resource_override;
     } else if (session && session->resource) {
@@ -567,14 +565,14 @@ _show_contact_presence(ProfChatWin *chatwin, int pos, int maxpos)
 
     if (prefs_get_boolean(PREF_PRESENCE)) {
         theme_item_t presence_colour = THEME_TITLE_OFFLINE;
-        const char *presence = "offline";
+        const char* presence = "offline";
 
         jabber_conn_status_t conn_status = connection_get_status();
         if (conn_status == JABBER_CONNECTED) {
             PContact contact = roster_get_contact(chatwin->barejid);
             if (contact) {
                 if (resource) {
-                    Resource *resourcep = p_contact_get_resource(contact, resource);
+                    Resource* resourcep = p_contact_get_resource(contact, resource);
                     if (resourcep) {
                         presence = string_from_resource_presence(resourcep->presence);
                     }

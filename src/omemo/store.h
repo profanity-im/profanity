@@ -36,26 +36,27 @@
 
 #include "config.h"
 
-#define OMEMO_STORE_GROUP_IDENTITY "identity"
-#define OMEMO_STORE_GROUP_PREKEYS "prekeys"
-#define OMEMO_STORE_GROUP_SIGNED_PREKEYS "signed_prekeys"
-#define OMEMO_STORE_KEY_DEVICE_ID "device_id"
-#define OMEMO_STORE_KEY_REGISTRATION_ID "registration_id"
-#define OMEMO_STORE_KEY_IDENTITY_KEY_PUBLIC "identity_key_public"
+#define OMEMO_STORE_GROUP_IDENTITY           "identity"
+#define OMEMO_STORE_GROUP_PREKEYS            "prekeys"
+#define OMEMO_STORE_GROUP_SIGNED_PREKEYS     "signed_prekeys"
+#define OMEMO_STORE_KEY_DEVICE_ID            "device_id"
+#define OMEMO_STORE_KEY_REGISTRATION_ID      "registration_id"
+#define OMEMO_STORE_KEY_IDENTITY_KEY_PUBLIC  "identity_key_public"
 #define OMEMO_STORE_KEY_IDENTITY_KEY_PRIVATE "identity_key_private"
 
-typedef struct {
-   signal_buffer *public;
-   signal_buffer *private;
-   uint32_t registration_id;
-   GHashTable *trusted;
-   bool recv;
+typedef struct
+{
+    signal_buffer* public;
+    signal_buffer* private;
+    uint32_t registration_id;
+    GHashTable* trusted;
+    bool recv;
 } identity_key_store_t;
 
-GHashTable * session_store_new(void);
-GHashTable * pre_key_store_new(void);
-GHashTable * signed_pre_key_store_new(void);
-void identity_key_store_new(identity_key_store_t *identity_key_store);
+GHashTable* session_store_new(void);
+GHashTable* pre_key_store_new(void);
+GHashTable* signed_pre_key_store_new(void);
+void identity_key_store_new(identity_key_store_t* identity_key_store);
 
 /**
  * Returns a copy of the serialized session record corresponding to the
@@ -68,9 +69,9 @@ void identity_key_store_new(identity_key_store_t *identity_key_store);
  * @return 1 if the session was loaded, 0 if the session was not found, negative on failure
  */
 #ifdef HAVE_LIBSIGNAL_LT_2_3_2
-int load_session(signal_buffer **record, const signal_protocol_address *address, void *user_data);
+int load_session(signal_buffer** record, const signal_protocol_address* address, void* user_data);
 #else
-int load_session(signal_buffer **record, signal_buffer **user_record, const signal_protocol_address *address, void *user_data);
+int load_session(signal_buffer** record, signal_buffer** user_record, const signal_protocol_address* address, void* user_data);
 #endif
 
 /**
@@ -81,7 +82,7 @@ int load_session(signal_buffer **record, signal_buffer **user_record, const sign
  * @param name_len the length of the name
  * @return size of the sessions array, or negative on failure
  */
-int get_sub_device_sessions(signal_int_list **sessions, const char *name, size_t name_len, void *user_data);
+int get_sub_device_sessions(signal_int_list** sessions, const char* name, size_t name_len, void* user_data);
 
 /**
  * Commit to storage the session record for a given
@@ -94,9 +95,9 @@ int get_sub_device_sessions(signal_int_list **sessions, const char *name, size_t
  * @return 0 on success, negative on failure
  */
 #ifdef HAVE_LIBSIGNAL_LT_2_3_2
-int store_session(const signal_protocol_address *address, uint8_t *record, size_t record_len, void *user_data);
+int store_session(const signal_protocol_address* address, uint8_t* record, size_t record_len, void* user_data);
 #else
-int store_session(const signal_protocol_address *address, uint8_t *record, size_t record_len, uint8_t *user_record, size_t user_record_len, void *user_data);
+int store_session(const signal_protocol_address* address, uint8_t* record, size_t record_len, uint8_t* user_record, size_t user_record_len, void* user_data);
 #endif
 
 /**
@@ -106,7 +107,7 @@ int store_session(const signal_protocol_address *address, uint8_t *record, size_
  * @param address the address of the remote client
  * @return 1 if a session record exists, 0 otherwise.
  */
-int contains_session(const signal_protocol_address *address, void *user_data);
+int contains_session(const signal_protocol_address* address, void* user_data);
 
 /**
  * Remove a session record for a recipient ID + device ID tuple.
@@ -114,7 +115,7 @@ int contains_session(const signal_protocol_address *address, void *user_data);
  * @param address the address of the remote client
  * @return 1 if a session was deleted, 0 if a session was not deleted, negative on error
  */
-int delete_session(const signal_protocol_address *address, void *user_data);
+int delete_session(const signal_protocol_address* address, void* user_data);
 
 /**
  * Remove the session records corresponding to all devices of a recipient ID.
@@ -123,7 +124,7 @@ int delete_session(const signal_protocol_address *address, void *user_data);
  * @param name_len the length of the name
  * @return the number of deleted sessions on success, negative on failure
  */
-int delete_all_sessions(const char *name, size_t name_len, void *user_data);
+int delete_all_sessions(const char* name, size_t name_len, void* user_data);
 
 /**
  * Load a local serialized PreKey record.
@@ -135,7 +136,7 @@ int delete_all_sessions(const char *name, size_t name_len, void *user_data);
  * @retval SG_SUCCESS if the key was found
  * @retval SG_ERR_INVALID_KEY_ID if the key could not be found
  */
-int load_pre_key(signal_buffer **record, uint32_t pre_key_id, void *user_data);
+int load_pre_key(signal_buffer** record, uint32_t pre_key_id, void* user_data);
 
 /**
  * Store a local serialized PreKey record.
@@ -145,7 +146,7 @@ int load_pre_key(signal_buffer **record, uint32_t pre_key_id, void *user_data);
  * @param record_len length of the serialized record
  * @return 0 on success, negative on failure
  */
-int store_pre_key(uint32_t pre_key_id, uint8_t *record, size_t record_len, void *user_data);
+int store_pre_key(uint32_t pre_key_id, uint8_t* record, size_t record_len, void* user_data);
 
 /**
  * Determine whether there is a committed PreKey record matching the
@@ -154,7 +155,7 @@ int store_pre_key(uint32_t pre_key_id, uint8_t *record, size_t record_len, void 
  * @param pre_key_id A PreKey record ID.
  * @return 1 if the store has a record for the PreKey ID, 0 otherwise
  */
-int contains_pre_key(uint32_t pre_key_id, void *user_data);
+int contains_pre_key(uint32_t pre_key_id, void* user_data);
 
 /**
  * Delete a PreKey record from local storage.
@@ -162,7 +163,7 @@ int contains_pre_key(uint32_t pre_key_id, void *user_data);
  * @param pre_key_id The ID of the PreKey record to remove.
  * @return 0 on success, negative on failure
  */
-int remove_pre_key(uint32_t pre_key_id, void *user_data);
+int remove_pre_key(uint32_t pre_key_id, void* user_data);
 
 /**
  * Load a local serialized signed PreKey record.
@@ -174,7 +175,7 @@ int remove_pre_key(uint32_t pre_key_id, void *user_data);
  * @retval SG_SUCCESS if the key was found
  * @retval SG_ERR_INVALID_KEY_ID if the key could not be found
  */
-int load_signed_pre_key(signal_buffer **record, uint32_t signed_pre_key_id, void *user_data);
+int load_signed_pre_key(signal_buffer** record, uint32_t signed_pre_key_id, void* user_data);
 
 /**
  * Store a local serialized signed PreKey record.
@@ -184,7 +185,7 @@ int load_signed_pre_key(signal_buffer **record, uint32_t signed_pre_key_id, void
  * @param record_len length of the serialized record
  * @return 0 on success, negative on failure
  */
-int store_signed_pre_key(uint32_t signed_pre_key_id, uint8_t *record, size_t record_len, void *user_data);
+int store_signed_pre_key(uint32_t signed_pre_key_id, uint8_t* record, size_t record_len, void* user_data);
 
 /**
  * Determine whether there is a committed signed PreKey record matching
@@ -193,7 +194,7 @@ int store_signed_pre_key(uint32_t signed_pre_key_id, uint8_t *record, size_t rec
  * @param signed_pre_key_id A signed PreKey record ID.
  * @return 1 if the store has a record for the signed PreKey ID, 0 otherwise
  */
-int contains_signed_pre_key(uint32_t signed_pre_key_id, void *user_data);
+int contains_signed_pre_key(uint32_t signed_pre_key_id, void* user_data);
 
 /**
  * Delete a SignedPreKeyRecord from local storage.
@@ -201,7 +202,7 @@ int contains_signed_pre_key(uint32_t signed_pre_key_id, void *user_data);
  * @param signed_pre_key_id The ID of the signed PreKey record to remove.
  * @return 0 on success, negative on failure
  */
-int remove_signed_pre_key(uint32_t signed_pre_key_id, void *user_data);
+int remove_signed_pre_key(uint32_t signed_pre_key_id, void* user_data);
 
 /**
  * Get the local client's identity key pair.
@@ -214,7 +215,7 @@ int remove_signed_pre_key(uint32_t signed_pre_key_id, void *user_data);
  *     The Signal Protocol library is responsible for freeing this buffer.
  * @return 0 on success, negative on failure
  */
-int get_identity_key_pair(signal_buffer **public_data, signal_buffer **private_data, void *user_data);
+int get_identity_key_pair(signal_buffer** public_data, signal_buffer** private_data, void* user_data);
 
 /**
  * Return the local client's registration ID.
@@ -226,7 +227,7 @@ int get_identity_key_pair(signal_buffer **public_data, signal_buffer **private_d
  *     registration ID, if it was successfully retrieved.
  * @return 0 on success, negative on failure
  */
-int get_local_registration_id(void *user_data, uint32_t *registration_id);
+int get_local_registration_id(void* user_data, uint32_t* registration_id);
 
 /**
  * Save a remote client's identity key
@@ -241,7 +242,7 @@ int get_local_registration_id(void *user_data, uint32_t *registration_id);
  * @param key_len Length of the remote client's identity key
  * @return 0 on success, negative on failure
  */
-int save_identity(const signal_protocol_address *address, uint8_t *key_data, size_t key_len, void *user_data);
+int save_identity(const signal_protocol_address* address, uint8_t* key_data, size_t key_len, void* user_data);
 
 /**
  * Verify a remote client's identity key.
@@ -259,7 +260,7 @@ int save_identity(const signal_protocol_address *address, uint8_t *key_data, siz
  * @param key_len Length of the identity key to verify
  * @return 1 if trusted, 0 if untrusted, negative on failure
  */
-int is_trusted_identity(const signal_protocol_address *address, uint8_t *key_data, size_t key_len, void *user_data);
+int is_trusted_identity(const signal_protocol_address* address, uint8_t* key_data, size_t key_len, void* user_data);
 
 /**
  * Store a serialized sender key record for a given
@@ -270,7 +271,7 @@ int is_trusted_identity(const signal_protocol_address *address, uint8_t *key_dat
  * @param record_len length of the serialized record
  * @return 0 on success, negative on failure
  */
-int store_sender_key(const signal_protocol_sender_key_name *sender_key_name, uint8_t *record, size_t record_len, uint8_t *user_record, size_t user_record_len, void *user_data);
+int store_sender_key(const signal_protocol_sender_key_name* sender_key_name, uint8_t* record, size_t record_len, uint8_t* user_record, size_t user_record_len, void* user_data);
 
 /**
  * Returns a copy of the sender key record corresponding to the
@@ -282,4 +283,4 @@ int store_sender_key(const signal_protocol_sender_key_name *sender_key_name, uin
  * @param sender_key_name the (groupId + senderId + deviceId) tuple
  * @return 1 if the record was loaded, 0 if the record was not found, negative on failure
  */
-int load_sender_key(signal_buffer **record, signal_buffer **user_record, const signal_protocol_sender_key_name *sender_key_name, void *user_data);
+int load_sender_key(signal_buffer** record, signal_buffer** user_record, const signal_protocol_sender_key_name* sender_key_name, void* user_data);

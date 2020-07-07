@@ -16,7 +16,8 @@
 
 #define CMD_CONNECT "/connect"
 
-static void test_with_connection_status(jabber_conn_status_t status)
+static void
+test_with_connection_status(jabber_conn_status_t status)
 {
     will_return(connection_get_status, status);
 
@@ -26,24 +27,28 @@ static void test_with_connection_status(jabber_conn_status_t status)
     assert_true(result);
 }
 
-void cmd_connect_shows_message_when_disconnecting(void **state)
+void
+cmd_connect_shows_message_when_disconnecting(void** state)
 {
     test_with_connection_status(JABBER_DISCONNECTING);
 }
 
-void cmd_connect_shows_message_when_connecting(void **state)
+void
+cmd_connect_shows_message_when_connecting(void** state)
 {
     test_with_connection_status(JABBER_CONNECTING);
 }
 
-void cmd_connect_shows_message_when_connected(void **state)
+void
+cmd_connect_shows_message_when_connected(void** state)
 {
     test_with_connection_status(JABBER_CONNECTED);
 }
 
-void cmd_connect_when_no_account(void **state)
+void
+cmd_connect_when_no_account(void** state)
 {
-    gchar *args[] = { "user@server.org", NULL };
+    gchar* args[] = { "user@server.org", NULL };
 
     will_return(connection_get_status, JABBER_DISCONNECTED);
 
@@ -64,9 +69,10 @@ void cmd_connect_when_no_account(void **state)
     assert_true(result);
 }
 
-void cmd_connect_fail_message(void **state)
+void
+cmd_connect_fail_message(void** state)
 {
-    gchar *args[] = { "user@server.org", NULL };
+    gchar* args[] = { "user@server.org", NULL };
 
     will_return(connection_get_status, JABBER_DISCONNECTED);
 
@@ -89,9 +95,10 @@ void cmd_connect_fail_message(void **state)
     assert_true(result);
 }
 
-void cmd_connect_lowercases_argument_with_no_account(void **state)
+void
+cmd_connect_lowercases_argument_with_no_account(void** state)
 {
-    gchar *args[] = { "USER@server.ORG", NULL };
+    gchar* args[] = { "USER@server.ORG", NULL };
 
     will_return(connection_get_status, JABBER_DISCONNECTED);
 
@@ -112,11 +119,12 @@ void cmd_connect_lowercases_argument_with_no_account(void **state)
     assert_true(result);
 }
 
-void cmd_connect_lowercases_argument_with_account(void **state)
+void
+cmd_connect_lowercases_argument_with_account(void** state)
 {
-gchar *args[] = { "Jabber_org", NULL };
-    ProfAccount *account = account_new("Jabber_org", "me@jabber.org", "password", NULL,
-        TRUE, NULL, 0, NULL, NULL, NULL, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+    gchar* args[] = { "Jabber_org", NULL };
+    ProfAccount* account = account_new("Jabber_org", "me@jabber.org", "password", NULL,
+                                       TRUE, NULL, 0, NULL, NULL, NULL, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
 
     will_return(connection_get_status, JABBER_DISCONNECTED);
 
@@ -132,11 +140,12 @@ gchar *args[] = { "Jabber_org", NULL };
     assert_true(result);
 }
 
-void cmd_connect_asks_password_when_not_in_account(void **state)
+void
+cmd_connect_asks_password_when_not_in_account(void** state)
 {
-    gchar *args[] = { "jabber_org", NULL };
-    ProfAccount *account = account_new("jabber_org", "me@jabber.org", NULL, NULL,
-        TRUE, NULL, 0, NULL, NULL, NULL, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+    gchar* args[] = { "jabber_org", NULL };
+    ProfAccount* account = account_new("jabber_org", "me@jabber.org", NULL, NULL,
+                                       TRUE, NULL, 0, NULL, NULL, NULL, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
 
     will_return(connection_get_status, JABBER_DISCONNECTED);
 
@@ -154,9 +163,10 @@ void cmd_connect_asks_password_when_not_in_account(void **state)
     assert_true(result);
 }
 
-void cmd_connect_shows_usage_when_no_server_value(void **state)
+void
+cmd_connect_shows_usage_when_no_server_value(void** state)
 {
-    gchar *args[] = { "user@server.org", "server", NULL };
+    gchar* args[] = { "user@server.org", "server", NULL };
 
     will_return(connection_get_status, JABBER_DISCONNECTED);
 
@@ -167,9 +177,10 @@ void cmd_connect_shows_usage_when_no_server_value(void **state)
     assert_true(result);
 }
 
-void cmd_connect_shows_usage_when_server_no_port_value(void **state)
+void
+cmd_connect_shows_usage_when_server_no_port_value(void** state)
 {
-    gchar *args[] = { "user@server.org", "server", "aserver", "port", NULL };
+    gchar* args[] = { "user@server.org", "server", "aserver", "port", NULL };
 
     will_return(connection_get_status, JABBER_DISCONNECTED);
 
@@ -180,9 +191,10 @@ void cmd_connect_shows_usage_when_server_no_port_value(void **state)
     assert_true(result);
 }
 
-void cmd_connect_shows_usage_when_no_port_value(void **state)
+void
+cmd_connect_shows_usage_when_no_port_value(void** state)
 {
-    gchar *args[] = { "user@server.org", "port", NULL };
+    gchar* args[] = { "user@server.org", "port", NULL };
 
     will_return(connection_get_status, JABBER_DISCONNECTED);
 
@@ -193,9 +205,10 @@ void cmd_connect_shows_usage_when_no_port_value(void **state)
     assert_true(result);
 }
 
-void cmd_connect_shows_usage_when_port_no_server_value(void **state)
+void
+cmd_connect_shows_usage_when_port_no_server_value(void** state)
 {
-    gchar *args[] = { "user@server.org", "port", "5678", "server", NULL };
+    gchar* args[] = { "user@server.org", "port", "5678", "server", NULL };
 
     will_return(connection_get_status, JABBER_DISCONNECTED);
 
@@ -206,9 +219,10 @@ void cmd_connect_shows_usage_when_port_no_server_value(void **state)
     assert_true(result);
 }
 
-void cmd_connect_shows_message_when_port_0(void **state)
+void
+cmd_connect_shows_message_when_port_0(void** state)
 {
-    gchar *args[] = { "user@server.org", "port", "0", NULL };
+    gchar* args[] = { "user@server.org", "port", "0", NULL };
 
     will_return(connection_get_status, JABBER_DISCONNECTED);
 
@@ -219,9 +233,10 @@ void cmd_connect_shows_message_when_port_0(void **state)
     assert_true(result);
 }
 
-void cmd_connect_shows_message_when_port_minus1(void **state)
+void
+cmd_connect_shows_message_when_port_minus1(void** state)
 {
-    gchar *args[] = { "user@server.org", "port", "-1", NULL };
+    gchar* args[] = { "user@server.org", "port", "-1", NULL };
 
     will_return(connection_get_status, JABBER_DISCONNECTED);
 
@@ -232,9 +247,10 @@ void cmd_connect_shows_message_when_port_minus1(void **state)
     assert_true(result);
 }
 
-void cmd_connect_shows_message_when_port_65536(void **state)
+void
+cmd_connect_shows_message_when_port_65536(void** state)
 {
-    gchar *args[] = { "user@server.org", "port", "65536", NULL };
+    gchar* args[] = { "user@server.org", "port", "65536", NULL };
 
     will_return(connection_get_status, JABBER_DISCONNECTED);
 
@@ -245,9 +261,10 @@ void cmd_connect_shows_message_when_port_65536(void **state)
     assert_true(result);
 }
 
-void cmd_connect_shows_message_when_port_contains_chars(void **state)
+void
+cmd_connect_shows_message_when_port_contains_chars(void** state)
 {
-    gchar *args[] = { "user@server.org", "port", "52f66", NULL };
+    gchar* args[] = { "user@server.org", "port", "52f66", NULL };
 
     will_return(connection_get_status, JABBER_DISCONNECTED);
 
@@ -258,9 +275,10 @@ void cmd_connect_shows_message_when_port_contains_chars(void **state)
     assert_true(result);
 }
 
-void cmd_connect_shows_usage_when_server_provided_twice(void **state)
+void
+cmd_connect_shows_usage_when_server_provided_twice(void** state)
 {
-    gchar *args[] = { "user@server.org", "server", "server1", "server", "server2", NULL };
+    gchar* args[] = { "user@server.org", "server", "server1", "server", "server2", NULL };
 
     will_return(connection_get_status, JABBER_DISCONNECTED);
 
@@ -271,9 +289,10 @@ void cmd_connect_shows_usage_when_server_provided_twice(void **state)
     assert_true(result);
 }
 
-void cmd_connect_shows_usage_when_port_provided_twice(void **state)
+void
+cmd_connect_shows_usage_when_port_provided_twice(void** state)
 {
-    gchar *args[] = { "user@server.org", "port", "1111", "port", "1111", NULL };
+    gchar* args[] = { "user@server.org", "port", "1111", "port", "1111", NULL };
 
     will_return(connection_get_status, JABBER_DISCONNECTED);
 
@@ -284,9 +303,10 @@ void cmd_connect_shows_usage_when_port_provided_twice(void **state)
     assert_true(result);
 }
 
-void cmd_connect_shows_usage_when_invalid_first_property(void **state)
+void
+cmd_connect_shows_usage_when_invalid_first_property(void** state)
 {
-    gchar *args[] = { "user@server.org", "wrong", "server", NULL };
+    gchar* args[] = { "user@server.org", "wrong", "server", NULL };
 
     will_return(connection_get_status, JABBER_DISCONNECTED);
 
@@ -297,9 +317,10 @@ void cmd_connect_shows_usage_when_invalid_first_property(void **state)
     assert_true(result);
 }
 
-void cmd_connect_shows_usage_when_invalid_second_property(void **state)
+void
+cmd_connect_shows_usage_when_invalid_second_property(void** state)
 {
-    gchar *args[] = { "user@server.org", "server", "aserver", "wrong", "1234", NULL };
+    gchar* args[] = { "user@server.org", "server", "aserver", "wrong", "1234", NULL };
 
     will_return(connection_get_status, JABBER_DISCONNECTED);
 
@@ -310,9 +331,10 @@ void cmd_connect_shows_usage_when_invalid_second_property(void **state)
     assert_true(result);
 }
 
-void cmd_connect_with_server_when_provided(void **state)
+void
+cmd_connect_with_server_when_provided(void** state)
 {
-    gchar *args[] = { "user@server.org", "server", "aserver", NULL };
+    gchar* args[] = { "user@server.org", "server", "aserver", NULL };
 
     will_return(connection_get_status, JABBER_DISCONNECTED);
 
@@ -333,9 +355,10 @@ void cmd_connect_with_server_when_provided(void **state)
     assert_true(result);
 }
 
-void cmd_connect_with_port_when_provided(void **state)
+void
+cmd_connect_with_port_when_provided(void** state)
 {
-    gchar *args[] = { "user@server.org", "port", "5432", NULL };
+    gchar* args[] = { "user@server.org", "port", "5432", NULL };
 
     will_return(connection_get_status, JABBER_DISCONNECTED);
 
@@ -356,9 +379,10 @@ void cmd_connect_with_port_when_provided(void **state)
     assert_true(result);
 }
 
-void cmd_connect_with_server_and_port_when_provided(void **state)
+void
+cmd_connect_with_server_and_port_when_provided(void** state)
 {
-    gchar *args[] = { "user@server.org", "port", "5432", "server", "aserver", NULL };
+    gchar* args[] = { "user@server.org", "port", "5432", "server", "aserver", NULL };
 
     will_return(connection_get_status, JABBER_DISCONNECTED);
 
@@ -379,11 +403,12 @@ void cmd_connect_with_server_and_port_when_provided(void **state)
     assert_true(result);
 }
 
-void cmd_connect_shows_message_when_connecting_with_account(void **state)
+void
+cmd_connect_shows_message_when_connecting_with_account(void** state)
 {
-    gchar *args[] = { "jabber_org", NULL };
-    ProfAccount *account = account_new("jabber_org", "user@jabber.org", "password", NULL,
-        TRUE, NULL, 0, "laptop", NULL, NULL, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+    gchar* args[] = { "jabber_org", NULL };
+    ProfAccount* account = account_new("jabber_org", "user@jabber.org", "password", NULL,
+                                       TRUE, NULL, 0, "laptop", NULL, NULL, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
 
     will_return(connection_get_status, JABBER_DISCONNECTED);
 
@@ -399,11 +424,12 @@ void cmd_connect_shows_message_when_connecting_with_account(void **state)
     assert_true(result);
 }
 
-void cmd_connect_connects_with_account(void **state)
+void
+cmd_connect_connects_with_account(void** state)
 {
-    gchar *args[] = { "jabber_org", NULL };
-    ProfAccount *account = account_new("jabber_org", "me@jabber.org", "password", NULL,
-        TRUE, NULL, 0, NULL, NULL, NULL, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+    gchar* args[] = { "jabber_org", NULL };
+    ProfAccount* account = account_new("jabber_org", "me@jabber.org", "password", NULL,
+                                       TRUE, NULL, 0, NULL, NULL, NULL, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
 
     will_return(connection_get_status, JABBER_DISCONNECTED);
 

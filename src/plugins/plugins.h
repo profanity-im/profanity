@@ -43,136 +43,138 @@ typedef enum {
     LANG_C
 } lang_t;
 
-typedef struct prof_plugins_install_t {
-    GSList *installed;
-    GSList *failed;
+typedef struct prof_plugins_install_t
+{
+    GSList* installed;
+    GSList* failed;
 } PluginsInstallResult;
 
-typedef struct prof_plugin_t {
-    char *name;
+typedef struct prof_plugin_t
+{
+    char* name;
     lang_t lang;
-    void *module;
-    void (*init_func)(struct prof_plugin_t* plugin, const char * const version,
-        const char * const status, const char *const account_name, const char *const fulljid);
+    void* module;
+    void (*init_func)(struct prof_plugin_t* plugin, const char* const version,
+                      const char* const status, const char* const account_name, const char* const fulljid);
 
-    gboolean (*contains_hook)(struct prof_plugin_t* plugin, const char *const hook);
+    gboolean (*contains_hook)(struct prof_plugin_t* plugin, const char* const hook);
 
     void (*on_start_func)(struct prof_plugin_t* plugin);
     void (*on_shutdown_func)(struct prof_plugin_t* plugin);
     void (*on_unload_func)(struct prof_plugin_t* plugin);
 
-    void (*on_connect_func)(struct prof_plugin_t* plugin, const char *const account_name, const char *const fulljid);
-    void (*on_disconnect_func)(struct prof_plugin_t* plugin, const char *const account_name,
-        const char *const fulljid);
+    void (*on_connect_func)(struct prof_plugin_t* plugin, const char* const account_name, const char* const fulljid);
+    void (*on_disconnect_func)(struct prof_plugin_t* plugin, const char* const account_name,
+                               const char* const fulljid);
 
-    char* (*pre_chat_message_display)(struct prof_plugin_t* plugin, const char *const barejid, const char *const resource, const char *message);
-    void (*post_chat_message_display)(struct prof_plugin_t* plugin, const char *const barejid, const char *const resource, const char *message);
-    char* (*pre_chat_message_send)(struct prof_plugin_t* plugin, const char *const barejid, const char *message);
-    void (*post_chat_message_send)(struct prof_plugin_t* plugin, const char *const barejid, const char *message);
+    char* (*pre_chat_message_display)(struct prof_plugin_t* plugin, const char* const barejid, const char* const resource, const char* message);
+    void (*post_chat_message_display)(struct prof_plugin_t* plugin, const char* const barejid, const char* const resource, const char* message);
+    char* (*pre_chat_message_send)(struct prof_plugin_t* plugin, const char* const barejid, const char* message);
+    void (*post_chat_message_send)(struct prof_plugin_t* plugin, const char* const barejid, const char* message);
 
-    char* (*pre_room_message_display)(struct prof_plugin_t* plugin, const char *const barejid, const char *const nick,
-        const char *message);
-    void (*post_room_message_display)(struct prof_plugin_t* plugin, const char *const barejid, const char *const nick,
-        const char *message);
-    char* (*pre_room_message_send)(struct prof_plugin_t* plugin, const char *const barejid, const char *message);
-    void (*post_room_message_send)(struct prof_plugin_t* plugin, const char *const barejid, const char *message);
-    void (*on_room_history_message)(struct prof_plugin_t* plugin, const char *const barejid, const char *const nick, const char *const message,
-        const char *const timestamp);
+    char* (*pre_room_message_display)(struct prof_plugin_t* plugin, const char* const barejid, const char* const nick,
+                                      const char* message);
+    void (*post_room_message_display)(struct prof_plugin_t* plugin, const char* const barejid, const char* const nick,
+                                      const char* message);
+    char* (*pre_room_message_send)(struct prof_plugin_t* plugin, const char* const barejid, const char* message);
+    void (*post_room_message_send)(struct prof_plugin_t* plugin, const char* const barejid, const char* message);
+    void (*on_room_history_message)(struct prof_plugin_t* plugin, const char* const barejid, const char* const nick, const char* const message,
+                                    const char* const timestamp);
 
-    char* (*pre_priv_message_display)(struct prof_plugin_t* plugin, const char *const barejid, const char *const nick,
-        const char *message);
-    void (*post_priv_message_display)(struct prof_plugin_t* plugin, const char *const barejid, const char *const nick,
-        const char *message);
-    char* (*pre_priv_message_send)(struct prof_plugin_t* plugin, const char *const barejid, const char *const nick,
-        const char *const message);
-    void (*post_priv_message_send)(struct prof_plugin_t* plugin, const char *const barejid, const char *const nick,
-        const char *const message);
+    char* (*pre_priv_message_display)(struct prof_plugin_t* plugin, const char* const barejid, const char* const nick,
+                                      const char* message);
+    void (*post_priv_message_display)(struct prof_plugin_t* plugin, const char* const barejid, const char* const nick,
+                                      const char* message);
+    char* (*pre_priv_message_send)(struct prof_plugin_t* plugin, const char* const barejid, const char* const nick,
+                                   const char* const message);
+    void (*post_priv_message_send)(struct prof_plugin_t* plugin, const char* const barejid, const char* const nick,
+                                   const char* const message);
 
-    char* (*on_message_stanza_send)(struct prof_plugin_t* plugin, const char *const text);
-    gboolean (*on_message_stanza_receive)(struct prof_plugin_t* plugin, const char *const text);
+    char* (*on_message_stanza_send)(struct prof_plugin_t* plugin, const char* const text);
+    gboolean (*on_message_stanza_receive)(struct prof_plugin_t* plugin, const char* const text);
 
-    char* (*on_presence_stanza_send)(struct prof_plugin_t* plugin, const char *const text);
-    gboolean (*on_presence_stanza_receive)(struct prof_plugin_t* plugin, const char *const text);
+    char* (*on_presence_stanza_send)(struct prof_plugin_t* plugin, const char* const text);
+    gboolean (*on_presence_stanza_receive)(struct prof_plugin_t* plugin, const char* const text);
 
-    char* (*on_iq_stanza_send)(struct prof_plugin_t* plugin, const char *const text);
-    gboolean (*on_iq_stanza_receive)(struct prof_plugin_t* plugin, const char *const text);
+    char* (*on_iq_stanza_send)(struct prof_plugin_t* plugin, const char* const text);
+    gboolean (*on_iq_stanza_receive)(struct prof_plugin_t* plugin, const char* const text);
 
-    void (*on_contact_offline)(struct prof_plugin_t* plugin, const char *const barejid, const char *const resource,
-        const char *const status);
-    void (*on_contact_presence)(struct prof_plugin_t* plugin, const char *const barejid, const char *const resource,
-        const char *const presence, const char *const status, const int priority);
+    void (*on_contact_offline)(struct prof_plugin_t* plugin, const char* const barejid, const char* const resource,
+                               const char* const status);
+    void (*on_contact_presence)(struct prof_plugin_t* plugin, const char* const barejid, const char* const resource,
+                                const char* const presence, const char* const status, const int priority);
 
-    void (*on_chat_win_focus)(struct prof_plugin_t* plugin, const char *const barejid);
-    void (*on_room_win_focus)(struct prof_plugin_t* plugin, const char *const barejid);
+    void (*on_chat_win_focus)(struct prof_plugin_t* plugin, const char* const barejid);
+    void (*on_room_win_focus)(struct prof_plugin_t* plugin, const char* const barejid);
 } ProfPlugin;
 
 void plugins_init(void);
-GSList *plugins_unloaded_list(void);
-GList *plugins_loaded_list(void);
-char* plugins_autocomplete(const char *const input, gboolean previous);
+GSList* plugins_unloaded_list(void);
+GList* plugins_loaded_list(void);
+char* plugins_autocomplete(const char* const input, gboolean previous);
 void plugins_reset_autocomplete(void);
 void plugins_shutdown(void);
 
-void plugins_free_install_result(PluginsInstallResult *result);
+void plugins_free_install_result(PluginsInstallResult* result);
 
-gboolean plugins_install(const char *const plugin_name, const char *const filename, GString * error_message);
-gboolean plugins_uninstall(const char *const plugin_name);
-gboolean plugins_update(const char *const plugin_name, const char *const filename, GString * error_message);
-PluginsInstallResult* plugins_install_all(const char *const path);
-gboolean plugins_load(const char *const name, GString *error_message);
+gboolean plugins_install(const char* const plugin_name, const char* const filename, GString* error_message);
+gboolean plugins_uninstall(const char* const plugin_name);
+gboolean plugins_update(const char* const plugin_name, const char* const filename, GString* error_message);
+PluginsInstallResult* plugins_install_all(const char* const path);
+gboolean plugins_load(const char* const name, GString* error_message);
 GSList* plugins_load_all(void);
-gboolean plugins_unload(const char *const name);
+gboolean plugins_unload(const char* const name);
 gboolean plugins_unload_all(void);
-gboolean plugins_reload(const char *const name, GString *error_message);
+gboolean plugins_reload(const char* const name, GString* error_message);
 void plugins_reload_all(void);
 
 void plugins_on_start(void);
 void plugins_on_shutdown(void);
 
-void plugins_on_connect(const char *const account_name, const char *const fulljid);
-void plugins_on_disconnect(const char *const account_name, const char *const fulljid);
+void plugins_on_connect(const char* const account_name, const char* const fulljid);
+void plugins_on_disconnect(const char* const account_name, const char* const fulljid);
 
-char* plugins_pre_chat_message_display(const char *const barejid, const char *const resource, const char *message);
-void plugins_post_chat_message_display(const char *const barejid, const char *const resource, const char *message);
-char* plugins_pre_chat_message_send(const char *const barejid, const char *message);
-void plugins_post_chat_message_send(const char *const barejid, const char *message);
+char* plugins_pre_chat_message_display(const char* const barejid, const char* const resource, const char* message);
+void plugins_post_chat_message_display(const char* const barejid, const char* const resource, const char* message);
+char* plugins_pre_chat_message_send(const char* const barejid, const char* message);
+void plugins_post_chat_message_send(const char* const barejid, const char* message);
 
-char* plugins_pre_room_message_display(const char *const barejid, const char *const nick, const char *message);
-void plugins_post_room_message_display(const char *const barejid, const char *const nick, const char *message);
-char* plugins_pre_room_message_send(const char *const barejid, const char *message);
-void plugins_post_room_message_send(const char *const barejid, const char *message);
-void plugins_on_room_history_message(const char *const barejid, const char *const nick, const char *const message,
-    GDateTime *timestamp);
+char* plugins_pre_room_message_display(const char* const barejid, const char* const nick, const char* message);
+void plugins_post_room_message_display(const char* const barejid, const char* const nick, const char* message);
+char* plugins_pre_room_message_send(const char* const barejid, const char* message);
+void plugins_post_room_message_send(const char* const barejid, const char* message);
+void plugins_on_room_history_message(const char* const barejid, const char* const nick, const char* const message,
+                                     GDateTime* timestamp);
 
-char* plugins_pre_priv_message_display(const char *const fulljid, const char *message);
-void plugins_post_priv_message_display(const char *const fulljid, const char *message);
-char* plugins_pre_priv_message_send(const char *const fulljid, const char *const message);
-void plugins_post_priv_message_send(const char *const fulljid, const char *const message);
+char* plugins_pre_priv_message_display(const char* const fulljid, const char* message);
+void plugins_post_priv_message_display(const char* const fulljid, const char* message);
+char* plugins_pre_priv_message_send(const char* const fulljid, const char* const message);
+void plugins_post_priv_message_send(const char* const fulljid, const char* const message);
 
-void plugins_win_process_line(char *win, const char *const line);
-void plugins_close_win(const char *const plugin_name, const char *const tag);
+void plugins_win_process_line(char* win, const char* const line);
+void plugins_close_win(const char* const plugin_name, const char* const tag);
 
-char* plugins_on_message_stanza_send(const char *const text);
-gboolean plugins_on_message_stanza_receive(const char *const text);
+char* plugins_on_message_stanza_send(const char* const text);
+gboolean plugins_on_message_stanza_receive(const char* const text);
 
-char* plugins_on_presence_stanza_send(const char *const text);
-gboolean plugins_on_presence_stanza_receive(const char *const text);
+char* plugins_on_presence_stanza_send(const char* const text);
+gboolean plugins_on_presence_stanza_receive(const char* const text);
 
-char* plugins_on_iq_stanza_send(const char *const text);
-gboolean plugins_on_iq_stanza_receive(const char *const text);
+char* plugins_on_iq_stanza_send(const char* const text);
+gboolean plugins_on_iq_stanza_receive(const char* const text);
 
-void plugins_on_contact_offline(const char *const barejid, const char *const resource, const char *const status);
-void plugins_on_contact_presence(const char *const barejid, const char *const resource, const char *const presence,
-    const char *const status, const int priority);
+void plugins_on_contact_offline(const char* const barejid, const char* const resource, const char* const status);
+void plugins_on_contact_presence(const char* const barejid, const char* const resource, const char* const presence,
+                                 const char* const status, const int priority);
 
-void plugins_on_chat_win_focus(const char *const barejid);
-void plugins_on_room_win_focus(const char *const barejid);
+void plugins_on_chat_win_focus(const char* const barejid);
+void plugins_on_room_win_focus(const char* const barejid);
 
-gboolean plugins_run_command(const char * const cmd);
+gboolean plugins_run_command(const char* const cmd);
 void plugins_run_timed(void);
 GList* plugins_get_command_names(void);
-gchar * plugins_get_dir(void);
-CommandHelp* plugins_get_help(const char *const cmd);
+gchar* plugins_get_dir(void);
+CommandHelp* plugins_get_help(const char* const cmd);
 
 GList* plugins_get_disco_features(void);
 

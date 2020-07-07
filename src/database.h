@@ -40,13 +40,12 @@
 #include "config/account.h"
 #include "xmpp/xmpp.h"
 
-gboolean log_database_init(ProfAccount *account);
-void log_database_add_incoming(ProfMessage *message);
-void log_database_add_outgoing_chat(const char * const id, const char * const barejid, const char * const message, const char *const replace_id, prof_enc_t enc);
-void log_database_add_outgoing_muc(const char * const id, const char * const barejid, const char * const message, const char *const replace_id, prof_enc_t enc);
-void log_database_add_outgoing_muc_pm(const char * const id, const char * const barejid, const char * const message, const char *const replace_id, prof_enc_t enc);
-GSList* log_database_get_previous_chat(const gchar *const contact_barejid);
+gboolean log_database_init(ProfAccount* account);
+void log_database_add_incoming(ProfMessage* message);
+void log_database_add_outgoing_chat(const char* const id, const char* const barejid, const char* const message, const char* const replace_id, prof_enc_t enc);
+void log_database_add_outgoing_muc(const char* const id, const char* const barejid, const char* const message, const char* const replace_id, prof_enc_t enc);
+void log_database_add_outgoing_muc_pm(const char* const id, const char* const barejid, const char* const message, const char* const replace_id, prof_enc_t enc);
+GSList* log_database_get_previous_chat(const gchar* const contact_barejid);
 void log_database_close(void);
 
 #endif // DATABASE_H
-
