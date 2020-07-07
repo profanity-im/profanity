@@ -12,12 +12,28 @@ It might be a good idea to add a git pre-commit hook.
 So git automatically runs clang-format before doing a commit.
 
 You can add the following snippet to `.git/hooks/pre-commit`:
-```
+```shell
 for f in $(git diff --cached --name-only)
 do
     clang-format -i $f
 done
 ```
+
+If you feel embarrassed every time the CI fails you can add the following
+snippet to `.git/hooks/pre-push`:
+
+```shell
+#!/bin/sh
+set -e
+./ci-build.sh
+```
+
+This will run the same tests that the CI runs and refuse the push if it fails.
+Note that it will run on the actual content of the repository directory and not
+what may have been staged/committed.
+
+If you're in a hurry you can add the `--no-verify` flag when issuing `git push`
+and the `pre-push` hook will be skipped.
 
 ## Pull Requests
 Before submitting a Pull Request please run valgrind and the clang static code analyzer.
