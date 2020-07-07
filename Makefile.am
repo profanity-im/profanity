@@ -237,6 +237,13 @@ core_sources += $(omemo_sources)
 unittest_sources += $(omemo_unittest_sources)
 endif
 
+all_c_sources = $(core_sources) $(unittest_sources) \
+				$(pgp_sources) $(pgp_unittest_sources) \
+				$(otr3_sources) $(otr4_sources) $(otr_unittest_sources) \
+				$(omemo_sources) $(omemo_unittest_sources) \
+				$(c_sources) $(python_sources) \
+				$(main_source)
+
 AM_CFLAGS = @AM_CFLAGS@ -I$(srcdir)/src
 
 bin_PROGRAMS = profanity
@@ -324,3 +331,6 @@ endif
 
 check-unit: tests/unittests/unittests
 	tests/unittests/unittests
+
+format: $(all_c_sources)
+	clang-format -i $(all_c_sources)

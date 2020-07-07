@@ -3,6 +3,11 @@
 ## Coding style
 Follow the style already present ;-)
 
+To make this easier for you we created a `.clang-format` file.
+You'll need to have `clang-format` installed.
+
+Then just run `make format` before you do any commit.
+
 ## Pull Requests
 Before submitting a Pull Request please run valgrind and the clang static code analyzer.
 
