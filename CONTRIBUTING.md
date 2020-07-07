@@ -12,7 +12,7 @@ It might be a good idea to add a git pre-commit hook.
 So git automatically runs clang-format before doing a commit.
 
 You can add the following snippet to `.git/hooks/pre-commit`:
-```
+```shell
 for f in $(git diff --cached --name-only)
 do
     clang-format -i $f
@@ -22,7 +22,7 @@ done
 If you feel embarrassed every time the CI fails you can add the following
 snippet to `.git/hooks/pre-push`:
 
-```
+```shell
 #!/bin/sh
 set -e
 ./ci-build.sh
