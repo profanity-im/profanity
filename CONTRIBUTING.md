@@ -8,6 +8,17 @@ You'll need to have `clang-format` installed.
 
 Then just run `make format` before you do any commit.
 
+It might be a good idea to add a git pre-commit hook.
+So git automatically runs clang-format before doing a commit.
+
+You can add the following snippet to `.git/hooks/pre-commit`:
+```
+for f in $(git diff --cached --name-only)
+do
+    clang-format -i $f
+done
+```
+
 ## Pull Requests
 Before submitting a Pull Request please run valgrind and the clang static code analyzer.
 
