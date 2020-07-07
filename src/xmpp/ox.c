@@ -42,7 +42,7 @@
 #include "xmpp/stanza.h"
 #include "pgp/gpg.h"
 
-
+#ifdef HAVE_LIBGPGME
 static void _ox_metadata_node__public_key(const char* const fingerprint);
 
 /*!
@@ -216,3 +216,4 @@ char* _gettimestamp() {
     return strdup(d->str);
 }
 
+#endif // HAVE_LIBGPGME
