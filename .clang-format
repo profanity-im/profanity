@@ -12,6 +12,7 @@ SpacesInContainerLiterals: false
 SpacesInParentheses: false
 SpacesInSquareBrackets: false
 SpaceBeforeParens: ControlStatements
+SortIncludes: false
 ColumnLimit: 0
 PointerAlignment: Left
 AlignAfterOpenBracket: Align
