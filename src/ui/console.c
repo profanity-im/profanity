@@ -62,7 +62,7 @@
 #endif
 
 static void _cons_splash_logo(void);
-void _show_roster_contacts(GSList* list, gboolean show_groups);
+static void _show_roster_contacts(GSList* list, gboolean show_groups);
 
 void
 cons_debug(const char* const msg, ...)
@@ -2615,7 +2615,7 @@ _cons_splash_logo(void)
     }
 }
 
-void
+static void
 _show_roster_contacts(GSList* list, gboolean show_groups)
 {
     ProfWin* console = wins_get_console();
