@@ -357,6 +357,21 @@ wins_set_current_by_num(int i)
             ProfPrivateWin* privatewin = (ProfPrivateWin*)window;
             privatewin->unread = 0;
         }
+
+        // if we switched to console
+        if (current == 0) {
+            // remove all alerts
+            cons_clear_alerts();
+        } else {
+            // remove alert from window where we switch to
+            cons_remove_alert(window);
+            // if there a no more alerts left
+            if (!cons_has_alerts()) {
+                // dont highlight console (no news there)
+                ProfWin* conswin = wins_get_console();
+                status_bar_active(1, conswin->type, "console");
+            }
+        }
     }
 }
 

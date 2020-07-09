@@ -275,13 +275,12 @@ void cons_show_room_invite(const char* const invitor, const char* const room, co
 void cons_check_version(gboolean not_available_msg);
 void cons_show_typing(const char* const barejid);
 void cons_show_incoming_room_message(const char* const nick, const char* const room, const int win_index,
-                                     gboolean mention, GList* triggers, int unread);
-void cons_show_incoming_message(const char* const short_from, const int win_index, int unread);
-void cons_show_incoming_private_message(const char* const nick, const char* const room, const int win_index, int unread);
+                                     gboolean mention, GList* triggers, int unread, ProfWin* const window);
+void cons_show_incoming_message(const char* const short_from, const int win_index, int unread, ProfWin* const window);
+void cons_show_incoming_private_message(const char* const nick, const char* const room, const int win_index, int unread, ProfWin* const window);
 void cons_show_room_invites(GList* invites);
 void cons_show_received_subs(void);
 void cons_show_sent_subs(void);
-void cons_alert(void);
 void cons_theme_setting(void);
 void cons_resource_setting(void);
 void cons_privileges_setting(void);
@@ -328,6 +327,11 @@ void cons_theme_properties(void);
 void cons_theme_colours(void);
 void cons_show_tlscert(TLSCertificate* cert);
 void cons_show_tlscert_summary(TLSCertificate* cert);
+
+void cons_alert(ProfWin* alert_origin_window);
+void cons_remove_alert(ProfWin* window);
+void cons_clear_alerts(void);
+gboolean cons_has_alerts(void);
 
 // title bar
 void title_bar_set_presence(contact_presence_t presence);

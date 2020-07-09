@@ -905,11 +905,11 @@ cons_show_typing(const char* const barejid)
 {
 }
 void
-cons_show_incoming_room_message(const char* const nick, const char* const room, const int win_index, gboolean mention, GList* triggers, int unread)
+cons_show_incoming_room_message(const char* const nick, const char* const room, const int win_index, gboolean mention, GList* triggers, int unread, ProfWin* const window)
 {
 }
 void
-cons_show_incoming_message(const char* const short_from, const int win_index, int unread)
+cons_show_incoming_message(const char* const short_from, const int win_index, int unread, ProfWin* const window)
 {
 }
 void
@@ -925,7 +925,7 @@ cons_show_sent_subs(void)
 {
 }
 void
-cons_alert(void)
+cons_alert(ProfWin* alert_origin_window)
 {
 }
 void
@@ -1331,4 +1331,17 @@ void
 notify(const char* const message, int timeout,
        const char* const category)
 {
+}
+void
+cons_remove_alert(ProfWin* window)
+{
+}
+void
+cons_clear_alerts(void)
+{
+}
+gboolean
+cons_has_alerts(void)
+{
+    return FALSE;
 }

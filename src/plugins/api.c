@@ -57,7 +57,7 @@
 void
 api_cons_alert(void)
 {
-    cons_alert();
+    cons_alert(NULL);
 }
 
 int
