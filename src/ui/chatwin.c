@@ -132,7 +132,7 @@ chatwin_otr_secured(ProfChatWin* chatwin, gboolean trusted)
             ui_index = 0;
         }
         cons_show("%s started an OTR session (%d).", chatwin->barejid, ui_index);
-        cons_alert();
+        cons_alert(window);
     }
 }
 

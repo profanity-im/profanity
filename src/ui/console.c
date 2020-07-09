@@ -63,6 +63,7 @@
 
 static void _cons_splash_logo(void);
 static void _show_roster_contacts(GSList* list, gboolean show_groups);
+static GList* alert_list;
 
 void
 cons_debug(const char* const msg, ...)
@@ -172,7 +173,7 @@ cons_show_error(const char* const msg, ...)
     g_string_free(fmt_msg, TRUE);
     va_end(arg);
 
-    cons_alert();
+    cons_alert(NULL);
 }
 
 void
@@ -284,7 +285,7 @@ cons_show_typing(const char* const barejid)
     }
 
     win_println(console, THEME_TYPING, "-", "!! %s is typing a message...", display_usr);
-    cons_alert();
+    cons_alert(NULL);
 }
 
 char*
@@ -311,6 +312,7 @@ cons_show_incoming_room_message(const char* const nick, const char* const room, 
 {
     ProfWin* const console = wins_get_console();
 
+    // TODO: pass window and get ui index inside so tha cons_alert() can use window
     int ui_index = win_index;
     if (ui_index == 10) {
         ui_index = 0;
@@ -328,20 +330,20 @@ cons_show_incoming_room_message(const char* const nick, const char* const room, 
         } else {
             win_println(console, THEME_INCOMING, "-", "<< room message: %s in %s (win %d)", nick, room, ui_index);
         }
-        cons_alert();
+        cons_alert(wins_get_by_num(ui_index));
 
     } else if (g_strcmp0(muc_show, "first") == 0) {
         if (mention) {
             win_println(console, THEME_MENTION, "-", "<< room mention: %s in %s (win %d)", nick, room, ui_index);
-            cons_alert();
+            cons_alert(wins_get_by_num(ui_index));
         } else if (triggers) {
             char* triggers_str = _room_triggers_to_string(triggers);
             win_println(console, THEME_TRIGGER, "-", "<< room trigger %s: %s in %s (win %d)", triggers_str, nick, room, ui_index);
             free(triggers_str);
-            cons_alert();
+            cons_alert(wins_get_by_num(ui_index));
         } else if (unread == 0) {
             win_println(console, THEME_INCOMING, "-", "<< room message: %s (win %d)", room, ui_index);
-            cons_alert();
+            cons_alert(wins_get_by_num(ui_index));
         }
     }
     g_free(muc_show);
@@ -360,10 +362,10 @@ cons_show_incoming_message(const char* const short_from, const int win_index, in
     char* chat_show = prefs_get_string(PREF_CONSOLE_CHAT);
     if (g_strcmp0(chat_show, "all") == 0) {
         win_println(console, THEME_INCOMING, "-", "<< chat message: %s (win %d)", short_from, ui_index);
-        cons_alert();
+        cons_alert(wins_get_by_num(ui_index));
     } else if ((g_strcmp0(chat_show, "first") == 0) && unread == 0) {
         win_println(console, THEME_INCOMING, "-", "<< chat message: %s (win %d)", short_from, ui_index);
-        cons_alert();
+        cons_alert(wins_get_by_num(ui_index));
     }
 
     g_free(chat_show);
@@ -382,10 +384,10 @@ cons_show_incoming_private_message(const char* const nick, const char* const roo
     char* priv_show = prefs_get_string(PREF_CONSOLE_PRIVATE);
     if (g_strcmp0(priv_show, "all") == 0) {
         win_println(console, THEME_INCOMING, "-", "<< private message: %s in %s (win %d)", nick, room, ui_index);
-        cons_alert();
+        cons_alert(wins_get_by_num(ui_index));
     } else if ((g_strcmp0(priv_show, "first") == 0) && unread == 0) {
         win_println(console, THEME_INCOMING, "-", "<< private message: %s in %s (win %d)", nick, room, ui_index);
-        cons_alert();
+        cons_alert(wins_get_by_num(ui_index));
     }
 
     g_free(priv_show);
@@ -429,7 +431,7 @@ cons_about(void)
 
     pnoutrefresh(console->layout->win, 0, 0, 1, 0, rows - 3, cols - 1);
 
-    cons_alert();
+    cons_alert(NULL);
 }
 
 void
@@ -453,7 +455,7 @@ cons_check_version(gboolean not_available_msg)
                 }
             }
 
-            cons_alert();
+            cons_alert(NULL);
         }
         free(latest_release);
     }
@@ -477,7 +479,7 @@ cons_show_login_success(ProfAccount* account, gboolean secured)
     if (!secured) {
         cons_show_error("TLS connection not established");
     }
-    cons_alert();
+    cons_alert(NULL);
 }
 
 void
@@ -507,7 +509,7 @@ cons_show_wins(gboolean unread)
     }
     g_slist_free_full(window_strings, free);
 
-    cons_alert();
+    cons_alert(NULL);
 }
 
 void
@@ -524,7 +526,7 @@ cons_show_room_invites(GList* invites)
         }
     }
 
-    cons_alert();
+    cons_alert(NULL);
 }
 
 void
@@ -533,7 +535,7 @@ cons_show_info(PContact pcontact)
     ProfWin* console = wins_get_console();
     win_show_info(console, pcontact);
 
-    cons_alert();
+    cons_alert(NULL);
 }
 
 void
@@ -608,7 +610,7 @@ cons_show_caps(const char* const fulljid, resource_presence_t presence)
         cons_show("No capabilities found for %s", fulljid);
     }
 
-    cons_alert();
+    cons_alert(NULL);
 }
 
 void
@@ -627,7 +629,7 @@ cons_show_received_subs(void)
         g_list_free_full(received, g_free);
     }
 
-    cons_alert();
+    cons_alert(NULL);
 }
 
 void
@@ -649,7 +651,7 @@ cons_show_sent_subs(void)
     } else {
         cons_show("No pending requests sent.");
     }
-    cons_alert();
+    cons_alert(NULL);
 }
 
 void
@@ -671,7 +673,7 @@ cons_show_room_list(GSList* rooms, const char* const conference_node)
         cons_show("No chat rooms at %s", conference_node);
     }
 
-    cons_alert();
+    cons_alert(NULL);
 }
 
 void
@@ -725,7 +727,7 @@ cons_show_bookmarks(const GList* list)
         cons_show("Automatic invite bookmarking (/bookmark invites): OFF");
     }
 
-    cons_alert();
+    cons_alert(NULL);
 }
 
 void
@@ -765,7 +767,7 @@ cons_show_disco_info(const char* jid, GSList* identities, GSList* features)
             features = g_slist_next(features);
         }
 
-        cons_alert();
+        cons_alert(NULL);
     }
 }
 
@@ -790,7 +792,7 @@ cons_show_disco_items(GSList* items, const char* const jid)
         cons_show("No service discovery items for %s", jid);
     }
 
-    cons_alert();
+    cons_alert(NULL);
 }
 
 void
@@ -805,7 +807,7 @@ cons_show_status(const char* const barejid)
         cons_show("No such contact \"%s\" in roster.", barejid);
     }
 
-    cons_alert();
+    cons_alert(NULL);
 }
 
 void
@@ -841,7 +843,7 @@ cons_show_room_invite(const char* const invitor, const char* const room, const c
 
     free(display_from);
 
-    cons_alert();
+    cons_alert(NULL);
 }
 
 void
@@ -867,7 +869,7 @@ cons_show_account_list(gchar** accounts)
         cons_show("");
     }
 
-    cons_alert();
+    cons_alert(NULL);
 }
 
 void
@@ -1058,7 +1060,7 @@ cons_show_account(ProfAccount* account)
         g_list_free(ordered_resources);
     }
 
-    cons_alert();
+    cons_alert(NULL);
 }
 
 void
@@ -1592,7 +1594,7 @@ cons_show_ui_prefs(void)
     cons_titlebar_setting();
     cons_statusbar_setting();
 
-    cons_alert();
+    cons_alert(NULL);
 }
 
 void
@@ -1691,7 +1693,7 @@ cons_show_desktop_prefs(void)
     cons_notify_setting();
     cons_tray_setting();
 
-    cons_alert();
+    cons_alert(NULL);
 }
 
 void
@@ -1779,7 +1781,7 @@ cons_show_chat_prefs(void)
     cons_carbons_setting();
     cons_receipts_setting();
 
-    cons_alert();
+    cons_alert(NULL);
 }
 
 void
@@ -1889,7 +1891,7 @@ cons_show_log_prefs(void)
     cons_log_setting();
     cons_logging_setting();
 
-    cons_alert();
+    cons_alert(NULL);
 }
 
 void
@@ -1955,7 +1957,7 @@ cons_show_presence_prefs(void)
         cons_show("Send last activity (/lastactivity)        : OFF");
     }
 
-    cons_alert();
+    cons_alert(NULL);
 }
 
 void
@@ -2096,7 +2098,7 @@ cons_show_connection_prefs(void)
     cons_autoconnect_setting();
     cons_rooms_cache_setting();
 
-    cons_alert();
+    cons_alert(NULL);
 }
 
 void
@@ -2129,7 +2131,7 @@ cons_show_otr_prefs(void)
         cons_show("Allow sending unencrypted files in an OTR session via /sendfile (/otr sendfile): OFF");
     }
 
-    cons_alert();
+    cons_alert(NULL);
 }
 
 void
@@ -2158,7 +2160,7 @@ cons_show_pgp_prefs(void)
         cons_show("Allow sending unencrypted files via /sendfile while otherwise using PGP (/pgp sendfile): OFF");
     }
 
-    cons_alert();
+    cons_alert(NULL);
 }
 
 void
@@ -2191,7 +2193,7 @@ cons_show_omemo_prefs(void)
         cons_show("Allow sending unencrypted files in an OMEMO session via /sendfile (/omemo sendfile): OFF");
     }
 
-    cons_alert();
+    cons_alert(NULL);
 }
 
 void
@@ -2209,7 +2211,7 @@ cons_show_themes(GSList* themes)
         }
     }
 
-    cons_alert();
+    cons_alert(NULL);
 }
 
 void
@@ -2227,7 +2229,7 @@ cons_show_scripts(GSList* scripts)
         }
     }
 
-    cons_alert();
+    cons_alert(NULL);
 }
 
 void
@@ -2245,7 +2247,7 @@ cons_show_script(const char* const script, GSList* commands)
         }
     }
 
-    cons_alert();
+    cons_alert(NULL);
 }
 
 void
@@ -2271,7 +2273,7 @@ cons_prefs(void)
     cons_show_omemo_prefs();
     cons_show("");
 
-    cons_alert();
+    cons_alert(NULL);
 }
 
 void
@@ -2295,7 +2297,7 @@ cons_help(void)
     cons_show_padded(pad, "/help navigation          : How to navigate around Profanity.");
     cons_show("");
 
-    cons_alert();
+    cons_alert(NULL);
 }
 
 void
@@ -2314,7 +2316,7 @@ cons_navigation_help(void)
     cons_show("");
     cons_show("See '/help win' for more information.");
 
-    cons_alert();
+    cons_alert(NULL);
 }
 
 void
@@ -2330,7 +2332,7 @@ cons_show_roster_group(const char* const group, GSList* list)
 
     _show_roster_contacts(list, FALSE);
 
-    cons_alert();
+    cons_alert(NULL);
 }
 
 void
@@ -2341,7 +2343,7 @@ cons_show_roster(GSList* list)
 
     _show_roster_contacts(list, TRUE);
 
-    cons_alert();
+    cons_alert(NULL);
 }
 
 void
@@ -2381,15 +2383,27 @@ cons_show_contacts(GSList* list)
         }
         curr = g_slist_next(curr);
     }
-    cons_alert();
+    cons_alert(NULL);
 }
 
 void
-cons_alert(void)
+cons_alert(ProfWin* alert_origin_window)
 {
     ProfWin* current = wins_get_current();
     if (current->type != WIN_CONSOLE) {
         status_bar_new(1, WIN_CONSOLE, "console");
+
+        char* win_name;
+        if (alert_origin_window) {
+            win_name = win_to_string(alert_origin_window);
+        } else {
+            win_name = strdup("console");
+        }
+
+        GList* item = g_list_find_custom(alert_list, win_name, (GCompareFunc)g_strcmp0);
+        if (!item) {
+            alert_list = g_list_append(alert_list, win_name);
+        }
     }
 }
 
@@ -2706,4 +2720,30 @@ cons_show_bookmarks_ignore(gchar** list, gsize len)
         win_print(console, THEME_DEFAULT, "-", "  %s", list[i]);
         win_newline(console);
     }
+}
+
+gboolean
+cons_has_alerts(void)
+{
+    if (g_list_length(alert_list) > 0) {
+        return TRUE;
+    }
+    return FALSE;
+}
+
+void
+cons_clear_alerts(void)
+{
+    g_list_free_full(alert_list, g_free);
+    alert_list = NULL;
+}
+
+void
+cons_remove_alert(ProfWin* window)
+{
+    char* win_name = win_to_string(window);
+    GList* item = g_list_find_custom(alert_list, win_name, (GCompareFunc)g_strcmp0);
+    alert_list = g_list_remove_link(alert_list, item);
+    g_list_free_full(item, g_free);
+    free(win_name);
 }

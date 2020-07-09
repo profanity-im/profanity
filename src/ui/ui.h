@@ -281,7 +281,6 @@ void cons_show_incoming_private_message(const char* const nick, const char* cons
 void cons_show_room_invites(GList* invites);
 void cons_show_received_subs(void);
 void cons_show_sent_subs(void);
-void cons_alert(void);
 void cons_theme_setting(void);
 void cons_resource_setting(void);
 void cons_privileges_setting(void);
@@ -328,6 +327,11 @@ void cons_theme_properties(void);
 void cons_theme_colours(void);
 void cons_show_tlscert(TLSCertificate* cert);
 void cons_show_tlscert_summary(TLSCertificate* cert);
+
+void cons_alert(ProfWin* alert_origin_window);
+void cons_remove_alert(ProfWin* window);
+void cons_clear_alerts(void);
+gboolean cons_has_alerts(void);
 
 // title bar
 void title_bar_set_presence(contact_presence_t presence);
