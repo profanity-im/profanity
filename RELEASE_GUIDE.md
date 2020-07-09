@@ -70,3 +70,4 @@ PACKAGE_STATUS="development"
 ## Updating website
   * Make changes to the git repo incuding uploading the new artefacts at:
         https://github.com/profanity-im/profanity-im.github.io
+  * Update profanity_version.txt
