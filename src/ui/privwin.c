@@ -68,7 +68,7 @@ privwin_incoming_msg(ProfPrivateWin* privatewin, ProfMessage* message)
         // not currently viewing chat window with sender
     } else {
         status_bar_new(num, WIN_PRIVATE, privatewin->fulljid);
-        cons_show_incoming_private_message(jidp->resourcepart, jidp->barejid, num, privatewin->unread);
+        cons_show_incoming_private_message(jidp->resourcepart, jidp->barejid, num, privatewin->unread, window);
         win_insert_last_read_position_marker((ProfWin*)privatewin, privatewin->fulljid);
         win_print_incoming(window, jidp->resourcepart, message);
 

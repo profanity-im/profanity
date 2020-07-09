@@ -275,9 +275,9 @@ void cons_show_room_invite(const char* const invitor, const char* const room, co
 void cons_check_version(gboolean not_available_msg);
 void cons_show_typing(const char* const barejid);
 void cons_show_incoming_room_message(const char* const nick, const char* const room, const int win_index,
-                                     gboolean mention, GList* triggers, int unread);
-void cons_show_incoming_message(const char* const short_from, const int win_index, int unread);
-void cons_show_incoming_private_message(const char* const nick, const char* const room, const int win_index, int unread);
+                                     gboolean mention, GList* triggers, int unread, ProfWin* const window);
+void cons_show_incoming_message(const char* const short_from, const int win_index, int unread, ProfWin* const window);
+void cons_show_incoming_private_message(const char* const nick, const char* const room, const int win_index, int unread, ProfWin* const window);
 void cons_show_room_invites(GList* invites);
 void cons_show_received_subs(void);
 void cons_show_sent_subs(void);
