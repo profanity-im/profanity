@@ -913,6 +913,7 @@ cmd_ac_init(void)
     console_msg_ac = autocomplete_new();
     autocomplete_add(console_msg_ac, "all");
     autocomplete_add(console_msg_ac, "first");
+    autocomplete_add(console_msg_ac, "mention");
     autocomplete_add(console_msg_ac, "none");
 
     autoping_ac = autocomplete_new();

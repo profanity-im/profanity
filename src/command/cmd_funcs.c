@@ -5153,15 +5153,19 @@ cmd_beep(ProfWin* window, const char* const command, gchar** args)
 gboolean
 cmd_console(ProfWin* window, const char* const command, gchar** args)
 {
-    if ((g_strcmp0(args[0], "chat") != 0) && (g_strcmp0(args[0], "muc") != 0) && (g_strcmp0(args[0], "private") != 0)) {
+    gboolean isMuc = (g_strcmp0(args[0], "muc") == 0) ;
+
+    if ((g_strcmp0(args[0], "chat") != 0) && !isMuc && (g_strcmp0(args[0], "private") != 0)) {
         cons_bad_cmd_usage(command);
         return TRUE;
     }
 
-    char* setting = args[1];
+    gchar* setting = args[1];
     if ((g_strcmp0(setting, "all") != 0) && (g_strcmp0(setting, "first") != 0) && (g_strcmp0(setting, "none") != 0)) {
-        cons_bad_cmd_usage(command);
-        return TRUE;
+        if ( !(isMuc && (g_strcmp0(setting, "mention") == 0))) {
+            cons_bad_cmd_usage(command);
+            return TRUE;
+        }
     }
 
     if (g_strcmp0(args[0], "chat") == 0) {

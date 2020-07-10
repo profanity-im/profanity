@@ -344,6 +344,11 @@ cons_show_incoming_room_message(const char* const nick, const char* const room, 
             win_println(console, THEME_INCOMING, "-", "<< room message: %s (win %d)", room, ui_index);
             cons_alert(window);
         }
+    } else if (g_strcmp0(muc_show, "mention") == 0) {
+        if (mention) {
+            win_println(console, THEME_MENTION, "-", "<< room mention: %s in %s (win %d)", nick, room, ui_index);
+            cons_alert(window);
+        }
     }
     g_free(muc_show);
 }
