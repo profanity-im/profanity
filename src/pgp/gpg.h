@@ -79,6 +79,7 @@ char* p_ox_gpg_signcrypt(const char* const sender_barejid, const char* const rec
 char* p_ox_gpg_decrypt(char* base64);
 
 void p_ox_gpg_readkey(const char* const filename, char** key, char** fp);
+gboolean p_ox_gpg_import(char* base64_public_key);
 
 /*!
  * \brief List of public keys with xmpp-URI.

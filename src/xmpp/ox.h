@@ -56,3 +56,15 @@
  */
 
 gboolean ox_announce_public_key(const char* const filename);
+
+/*!
+ * \brief Discovering Public Keys of a User.
+ *
+ * Reads the public key from a JIDs PEP.
+ *
+ * \param jid JID
+ */
+
+void ox_discover_public_key(const char* const jid);
+
+void ox_request_public_key(const char* const jid, const char* const fingerprint);

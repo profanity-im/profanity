@@ -7545,6 +7545,18 @@ cmd_ox(ProfWin* window, const char* const command, gchar** args)
         } else {
             cons_show("Filename is required");
         }
+    } else if (g_strcmp0(args[0], "discover") == 0) {
+        if (args[1]) {
+            ox_discover_public_key(args[1]);
+        } else {
+            cons_show("JID is required");
+        }
+    } else if (g_strcmp0(args[0], "request") == 0) {
+        if (args[1] && args[2]) {
+            ox_request_public_key(args[1], args[2]);
+        } else {
+            cons_show("JID and Fingerprint is required");
+        }
     } else {
         cons_show("OX not implemented");
     }

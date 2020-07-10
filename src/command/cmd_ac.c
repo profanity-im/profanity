@@ -867,16 +867,6 @@ cmd_ac_init(void)
     autocomplete_add(ox_ac, "announce");
     autocomplete_add(ox_ac, "discover");
     autocomplete_add(ox_ac, "request");
-
-    pgp_log_ac = autocomplete_new();
-    autocomplete_add(ox_log_ac, "on");
-    autocomplete_add(ox_log_ac, "off");
-    autocomplete_add(ox_log_ac, "redact");
-
-    pgp_sendfile_ac = autocomplete_new();
-    autocomplete_add(ox_sendfile_ac, "on");
-    autocomplete_add(ox_sendfile_ac, "off");
-
 #endif
 
     tls_ac = autocomplete_new();
