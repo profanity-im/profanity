@@ -263,6 +263,7 @@ omemo_on_connect(ProfAccount* account)
         }
     } else if (error->code != G_FILE_ERROR_NOENT) {
         log_warning("OMEMO: error loading identity from: %s, %s", omemo_ctx.identity_filename->str, error->message);
+        g_error_free(error);
         return;
     }
 
@@ -271,6 +272,7 @@ omemo_on_connect(ProfAccount* account)
         _load_trust();
     } else if (error->code != G_FILE_ERROR_NOENT) {
         log_warning("OMEMO: error loading trust from: %s, %s", omemo_ctx.trust_filename->str, error->message);
+        g_error_free(error);
     }
 
     error = NULL;
@@ -278,6 +280,7 @@ omemo_on_connect(ProfAccount* account)
         _load_sessions();
     } else if (error->code != G_FILE_ERROR_NOENT) {
         log_warning("OMEMO: error loading sessions from: %s, %s", omemo_ctx.sessions_filename->str, error->message);
+        g_error_free(error);
     }
 
     error = NULL;
@@ -285,6 +288,7 @@ omemo_on_connect(ProfAccount* account)
         _load_known_devices();
     } else if (error->code != G_FILE_ERROR_NOENT) {
         log_warning("OMEMO: error loading known devices from: %s, %s", omemo_ctx.known_devices_filename->str, error->message);
+        g_error_free(error);
     }
 }
 
