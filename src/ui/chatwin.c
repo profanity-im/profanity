@@ -132,7 +132,7 @@ chatwin_otr_secured(ProfChatWin* chatwin, gboolean trusted)
             ui_index = 0;
         }
         cons_show("%s started an OTR session (%d).", chatwin->barejid, ui_index);
-        cons_alert();
+        cons_alert(window);
     }
 }
 
@@ -282,7 +282,7 @@ chatwin_incoming_msg(ProfChatWin* chatwin, ProfMessage* message, gboolean win_cr
         // not currently viewing chat window with sender
     } else {
         status_bar_new(num, WIN_CHAT, chatwin->barejid);
-        cons_show_incoming_message(display_name, num, chatwin->unread);
+        cons_show_incoming_message(display_name, num, chatwin->unread, window);
 
         if (prefs_get_boolean(PREF_FLASH)) {
             flash();

@@ -182,6 +182,7 @@ void
 ui_close(void)
 {
     notifier_uninit();
+    cons_clear_alerts();
     wins_destroy();
     inp_close();
     status_bar_close();

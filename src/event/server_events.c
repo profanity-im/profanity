@@ -357,7 +357,7 @@ sv_ev_room_message(ProfMessage* message)
             flash();
         }
 
-        cons_show_incoming_room_message(message->from_jid->resourcepart, mucwin->roomjid, num, mention, triggers, mucwin->unread);
+        cons_show_incoming_room_message(message->from_jid->resourcepart, mucwin->roomjid, num, mention, triggers, mucwin->unread, window);
 
         mucwin->unread++;
 
